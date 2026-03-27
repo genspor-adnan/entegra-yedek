@@ -1,0 +1,526 @@
+unit uTablo;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Db, DBTables, ImgList, dbctrls, ADODB, UCombo, Registry, ComCtrls, CPort,
+  AppEvnts, ExtCtrls;
+
+  //SysUtils, Classes, DB, ADODB;
+
+type
+  TTablo = class(TDataModule)
+    cnn: TADOConnection;
+    TabKulhar: TADOQuery;
+    TabKullan: TADOTable;
+    DtsKARTOKU: TDataSource;
+    TabStatus: TADOQuery;
+    DtsStatus: TDataSource;
+    QTarSa: TADOQuery;
+    IniSQL: TADOQuery;
+    Query1: TADOQuery;
+    Query2: TADOQuery;
+    Query3: TADOQuery;
+    Query4: TADOQuery;
+    Query5: TADOQuery;
+    Query6: TADOQuery;
+    TabKimlik: TADOQuery;
+    TabAraSQL: TADOQuery;
+    TabMail: TADOQuery;
+    TabSirket: TADOQuery;
+    TabYemekhane: TADOQuery;
+    DtsYemekhane: TDataSource;
+    sp_KARTOKU_YEMEK: TADOStoredProc;
+    DtsKARTOKUYEMEK: TDataSource;
+    sp_KartOku: TADOQuery;
+    ApplicationEvents: TApplicationEvents;
+    tmrBaglantiYenile: TTimer;
+    Gecicicnn: TADOConnection;
+    qGeciciKartEkle: TADOQuery;
+    qGeciciKartlarAktarilmayan: TADOQuery;
+    qGeciciKartAktar: TADOQuery;
+    TabBasitIzin: TADODataSet;
+    TabBasitIzinID: TIntegerField;
+    TabBasitIzinPERKOD: TIntegerField;
+    TabBasitIzinBASTAR: TDateTimeField;
+    TabBasitIzinBITTAR: TDateTimeField;
+    TabBasitIzinGUN: TIntegerField;
+    TabBasitIzinACIKLAMA: TStringField;
+    dtsBasitIzin: TDataSource;
+    dtsizinara: TDataSource;
+    Tabizinara: TADOQuery;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure TabStatusAfterScroll(DataSet: TDataSet);
+    procedure IzinHesap;
+    procedure TabKimlikAfterScroll(DataSet: TDataSet);
+    procedure ApplicationEventsException(Sender: TObject; E: Exception);
+    procedure tmrBaglantiYenileTimer(Sender: TObject);
+    procedure cnnAfterConnect(Sender: TObject);
+    procedure GecicicnnBeforeConnect(Sender: TObject);
+    procedure TabizinaraAfterScroll(DataSet: TDataSet);
+    procedure TabStatusAfterOpen(DataSet: TDataSet);
+  private
+  public
+    function KullaniciBilgisi(Kullanici, Ekran: string): Boolean;
+    function BaudRateBul: TBaudRate;
+    function BaudRateYaz: integer;
+    procedure AktarilmayanGeciciKartlariAktar;
+    procedure GeciciKartAktar(KartID: string; TarihSaat, EklemeTarihi, AktarimTarihi: TDateTime);
+
+    procedure GeciciKartEkle(KartID: string);
+  end;
+procedure Adim(s: string);
+
+var
+  Tablo: TTablo;
+  AdimAdimGoster: Boolean;
+  Doklistesi: string[10];
+  GenotipIni: TIni;
+  KullanAdi, Kullanan, VeriTabani: string[30];
+  Sifresizler: SmallInt;
+  RgstryLC: char;
+  silinen: integer;
+  Super, Demo: Boolean;
+  bolum, BasTar, BitTar, bitsaat: string[100];
+  SifreSor, SimgeDur, HizmetBas, HaraketListe, MazeretGirisi, IzinGirisi: Boolean;
+  SGiris, SCikis, SSure, SGecersiz: string;
+  MaxVar, OkumaAra: integer;
+  SCamera: string;
+  SCameraEkran: boolean;
+  SResim: Boolean;
+  SResimYol: string;
+  SonTarih, ReaderNo, PortNe, YReaderNo, YPortNe, CevrimdisiToplam: integer;
+  Okuyucu2YedekPort, Pdks, Yemekhane: Boolean;
+  GenRegIni: TRegIni;
+  SirketKodu, IYIL, IAY: integer;
+  Reg: TRegistry;
+  BuBilgTarihi: boolean;
+  OkuyucuTur: Byte;
+  BoudRate: integer;
+
+
+
+implementation
+
+uses UAnaForm, FetaUtil, Spin, DateUtils, Math, ComObj, ADOInt;
+
+{$R *.dfm}
+
+procedure Adim(s: string);
+var
+  list: TStringList;
+begin
+  if AdimAdimGoster then
+  begin
+    try
+      list := TStringList.Create;
+      if FileExists('PersonaLog.txt') then
+        list.LoadFromFile('PersonaLog.txt');
+      list.Add(FormatDateTime('yy-mm-dd hh:nn:ss.zzz'#9, +now) + s);
+      list.SaveToFile('PersonaLog.txt');
+    finally
+      list.Free;
+    end;
+  end;
+end;
+
+function TTablo.BaudRateYaz: integer;
+var
+  BaudRate: integer;
+  baud: TBaudRate;
+begin
+  Baud := AnaForm.ComPort1.BaudRate;
+
+  if Baud = brCustom then
+    BaudRate := 0
+  else if Baud = br110 then
+    BaudRate := 110
+  else if Baud = br300 then
+    BaudRate := 300
+  else if Baud = br600 then
+    BaudRate := 600
+  else if Baud = br1200 then
+    BaudRate := 1200
+  else if Baud = br2400 then
+    BaudRate := 2400
+  else if Baud = br4800 then
+    BaudRate := 4800
+  else if Baud = br9600 then
+    BaudRate := 9600
+  else if Baud = br14400 then
+    BaudRate := 14400
+  else if Baud = br19200 then
+    BaudRate := 19200
+  else if Baud = br38400 then
+    BaudRate := 38400
+  else if Baud = br19200 then
+    BaudRate := 19200
+  else if Baud = br56000 then
+    BaudRate := 56000
+  else if Baud = br57600 then
+    BaudRate := 57600
+  else if Baud = br115200 then
+    BaudRate := 115200
+  else if Baud = br128000 then
+    BaudRate := 128000
+  else if Baud = br256000 then
+    BaudRate := 256000;
+
+  Result := BaudRate;
+end;
+
+function TTablo.BaudRateBul: TBaudRate;
+var
+  BaudRate: TBaudRate;
+  baud: integer;
+begin
+  Baud := GenotipIni.ReadInteger('PortAyar', 'BaudRate', 0);
+
+  if Baud = 0 then
+    BaudRate := brCustom
+  else if Baud = 110 then
+    BaudRate := br110
+  else if Baud = 300 then
+    BaudRate := br300
+  else if Baud = 300 then
+    BaudRate := br300
+  else if Baud = 600 then
+    BaudRate := br600
+  else if Baud = 1200 then
+    BaudRate := br1200
+  else if Baud = 2400 then
+    BaudRate := br2400
+  else if Baud = 4800 then
+    BaudRate := br4800
+  else if Baud = 9600 then
+    BaudRate := br9600
+  else if Baud = 14400 then
+    BaudRate := br14400
+  else if Baud = 19200 then
+    BaudRate := br19200
+  else if Baud = 38400 then
+    BaudRate := br38400
+  else if Baud = 19200 then
+    BaudRate := br19200
+  else if Baud = 56000 then
+    BaudRate := br56000
+  else if Baud = 57600 then
+    BaudRate := br57600
+  else if Baud = 115200 then
+    BaudRate := br115200
+  else if Baud = 128000 then
+    BaudRate := br128000
+  else if Baud = 256000 then
+    BaudRate := br256000;
+
+  Result := BaudRate;
+end;
+
+
+procedure TTablo.IzinHesap;
+begin
+//
+end;
+
+function TTablo.KullaniciBilgisi(Kullanici, Ekran: string): Boolean;
+begin
+  TabKulhar.Close;
+  TabKulhar.Parameters[0].Value := Kullanici;
+  TabKulhar.Parameters[1].Value := Ekran;
+  TabKulhar.Open;
+  if TabKulhar.RecordCount > 0 then
+    KullaniciBilgisi := True
+  else
+    KullaniciBilgisi := False;
+end;
+
+procedure TTablo.DataModuleCreate(Sender: TObject);
+{  procedure RegYoksaYaz(anahtar: string;deger:string);
+  var regAdi: string;
+  begin
+    regadi:=reg.ReadString(anahtar);
+    if regadi='' then
+      reg.WriteString(anahtar,deger);
+  end;
+}
+begin
+  Adim(' cnn Üzerinden Baglantý saðlanýyor');
+  if cnn.Connected or Gecicicnn.Connected then
+  begin
+    ShowMessage('Connection Nesnesi Açýk');
+    halt;
+  end;
+
+  Adim(' Register ayarlarý kayýt edliyor (GenRegIni := TRegIni.Create)');
+  GenRegIni := TRegIni.Create('GENPER');
+  Adim(' Þifre Kontrolu Yapýlýyor  VTSifreKontrolu(GenRegIni, cnn, False);    ');
+  VTSifreKontrolu(GenRegIni, cnn, False);
+  Adim('GenotipIni := TIni.Create');
+  GenotipIni := TIni.Create('PERSONELINI', Tablo.IniSQL);
+  Doklistesi := 'DOKTOR';
+  Adim('GenotipIni.ReadString eþittir C ise (if GenotipIni.ReadString)');
+  if GenotipIni.ReadString('GenelOpsiyon', 'Registry', 'C') = 'C' then
+    RgstryLC := 'C'
+  else
+    RgstryLC := 'L';
+  Adim('QTarSa.Open;');
+  QTarSa.Open;
+
+
+  MazeretGirisi := GenotipIni.ReadBool('OPSIYONLAR', 'MAZERETGIRISI', FALSE);
+  TabStatus.Close;
+  TabStatus.Open;
+  TabYemekhane.Open;
+  Adim('SifreSor := .Readbool');
+  SifreSor := GenotipIni.Readbool('OPSIYONLAR', 'PROGRAMSIFRE', TRUE);
+  SimgeDur := GenotipIni.ReadBool('OPSIYONLAR', 'PROGRAMSIMGE', FALSE);
+  HizmetBas := GenotipIni.ReadBool('OPSIYONLAR', 'PROGRAMHIZMET', FALSE);
+  MaxVar := GenotipIni.ReadInteger('OPSIYONLAR', 'PROGRAMMAXVAR', 16);
+  OkumaAra := GenotipIni.ReadInteger('OPSIYONLAR', 'PROGRAMOKUMA', 1);
+  SGiris := GenotipIni.ReadString('OPSIYONLAR', 'SGIRIS', '');
+  SCikis := GenotipIni.ReadString('OPSIYONLAR', 'SCIKIS', '');
+  SSure := GenotipIni.ReadString('OPSIYONLAR', 'SSURE', '');
+  SGecersiz := GenotipIni.ReadString('OPSIYONLAR', 'SGECERSIZ', '');
+  SCamera := GenotipIni.ReadString('OPSIYONLAR', 'CAMERA', '');
+  SCameraEkran := GenotipIni.ReadBool('OPSIYONLAR', 'CAMERAEKRAN', FALSE);
+  HaraketListe := GenotipIni.ReadBool('OPSIYONLAR', 'HARAKETLISTE', FALSE);
+  IzinGirisi := GenotipIni.ReadBool('OPSIYONLAR', 'IZINGIRISI', FALSE);
+  SResim := GenotipIni.ReadBool('OPSIYONLAR', 'RESIMEKRAN', false);
+  SResimYol := GenotipIni.ReadString('OPSIYONLAR', 'RESIMYOL', '');
+  OkuyucuTur := GenotipIni.ReadInteger('OPSIYONLAR', 'OKUYUCUTUR', 0);
+  Adim('reg := TRegistry.Create;');
+  reg := TRegistry.Create;
+  Reg.RootKey := HKEY_CURRENT_USER;
+  Reg.OpenKey('\SOFTWARE\GENPER\', true);
+  Adim(' ReaderNo := Reg.Readinteger');
+  ReaderNo := Reg.Readinteger('READERNO');
+  PortNe := Reg.ReadInteger('PORTNO');
+  Adim('YReaderNo := Reg.Readinteger');
+  YReaderNo := Reg.Readinteger('YREADERNO');
+  YPortNe := Reg.ReadInteger('YPORTNO');
+  Pdks := Reg.ReadBool('PDKS');
+  Yemekhane := Reg.ReadBool('YEMEKHANE');
+  BoudRate := 9600;
+  if Reg.OpenKey('ComPort1\', false) then
+  begin
+    BoudRate := strtoint(Reg.ReadString('BaudRate'));
+  end;
+  try
+    Gecicicnn.Open;
+  except
+    ShowMessage('Geçici database''i kontrol ediniz');
+  end;
+end;
+
+procedure TTablo.TabStatusAfterScroll(DataSet: TDataSet);
+var
+  DosyaAdi: string;
+begin
+  if not Assigned(AnaForm) then
+    Exit;
+  if TabStatus.FieldByName('GIRIS').AsString <> '' then
+  begin
+    DosyaAdi := SResimYol + '\GIRIS' + TabStatus.FieldByName('ID').AsString + '.jpg';
+    if FileExists(DosyaAdi) then
+    begin
+      AnaForm.IMGIRIS.Picture.LoadFromFile(DosyaAdi);
+      AnaForm.IMGIRIS.Visible := true;
+    end
+    else
+      AnaForm.IMGIRIS.Visible := false;
+  end
+  else
+    AnaForm.IMGIRIS.Visible := false;
+  if TabStatus.FieldByName('CIKIS').AsString <> '' then
+  begin
+    DosyaAdi := SResimYol + '\CIKIS' + TabStatus.FieldByName('ID').AsString + '.jpg';
+    if FileExists(DosyaAdi) then
+    begin
+      AnaForm.IMCIKIS.Picture.LoadFromFile(DosyaAdi);
+      AnaForm.IMCIKIS.Visible := true;
+    end
+    else
+      AnaForm.IMCIKIS.Visible := false;
+  end
+  else
+    AnaForm.IMCIKIS.Visible := false;
+end;
+
+procedure TTablo.TabKimlikAfterScroll(DataSet: TDataSet);
+begin
+//
+end;
+
+procedure TTablo.ApplicationEventsException(Sender: TObject; E: Exception);
+begin
+  if e is EOleException then
+  begin
+
+    case EOleException(e).ErrorCode of
+      // Baðlantý baþarýsýz oldu
+      -2147467259:
+        begin
+          AnaForm.lblMesaj.Caption := 'Baðlantý koptu yeniden baðlanýlacak.';
+          cnn.Connected := False;
+        end;
+    else
+      ShowMessage(IntToStr(EOleException(e).ErrorCode) + ' ' + EOleException(e).Source + ' ' + EOleException(e).Message);
+    end;
+  end
+  else
+  begin
+    ShowMessage(e.classname + ': ' + e.Message);
+  end;
+end;
+
+procedure TTablo.tmrBaglantiYenileTimer(Sender: TObject);
+begin
+  if not cnn.Connected then
+  begin
+    cnn.Open;
+  end;
+end;
+
+procedure TTablo.cnnAfterConnect(Sender: TObject);
+begin
+  if AnaForm <> nil then
+    AnaForm.lblMesaj.Caption := cnn.ConnectionObject.Properties['Data Source'].Value + ' server''ýnda ' + cnn.ConnectionObject.Properties['Initial Catalog'].Value + ' database''ine Baðlanýldý';
+
+  AktarilmayanGeciciKartlariAktar;
+  try
+    TabStatus.Close;
+    TabStatus.AfterOpen := nil;
+    TabStatus.Open;
+    TabStatus.AfterOpen := TabStatusAfterOpen;
+    TabStatus.Last;
+  except
+  end;
+end;
+
+procedure TTablo.AktarilmayanGeciciKartlariAktar;
+begin
+
+  with qGeciciKartlarAktarilmayan do
+  begin
+    Close;
+    Open;
+    while not eof do
+    begin
+      // Burada gerçek server'a verileri kaydedeceksin
+
+      try
+        GeciciKartAktar(
+          FieldByName('KartID').AsString,
+          FieldByName('TarihSaat').AsDateTime,
+          FieldByName('EklemeTarihi').AsDateTime,
+          FieldByName('AktarimTarihi').AsDateTime);
+
+
+        Edit;
+        FieldByName('AktarimTarihi').Value := Now;
+        Post;
+
+      except
+      end;
+
+
+      Next;
+    end;
+  end;
+end;
+
+procedure TTablo.GeciciKartEkle(KartID: string);
+begin
+  with qGeciciKartEkle do
+  begin
+    Close;
+    Parameters.ParamByName('KartID').Value := KartID;
+    try
+      AnaForm.lblMesaj.Caption := KartID + ' çevrimdýþý eklenecek';
+      ExecSQL;
+      inc(CevrimdisiToplam);
+      AnaForm.lblMesaj.Caption := KartID + ' çevrimdýþý eklendi. Eklenen toplam: ' + inttostr(CevrimdisiToplam);
+
+    except
+      on e: Exception do
+        AnaForm.lblMesaj.Caption := KartID + ' KartID Okunamadý: ' + e.Message;
+    end;
+  end;
+end;
+
+procedure TTablo.GeciciKartAktar(KartID: string; TarihSaat, EklemeTarihi,
+  AktarimTarihi: TDateTime);
+begin
+  //
+  with qGeciciKartAktar do
+  begin
+    Close;
+    Parameters.ParamByName('KartID').Value := KartID;
+    Parameters.ParamByName('TarihSaat').Value := TarihSaat;
+    Parameters.ParamByName('EklemeTarihi').Value := EklemeTarihi;
+    Parameters.ParamByName('AktarimTarihi').Value := AktarimTarihi;
+    ExecSQL;
+  end;
+end;
+
+procedure TTablo.GecicicnnBeforeConnect(Sender: TObject);
+begin
+  Gecicicnn.ConnectionString :=
+    'Provider=Microsoft.Jet.OLEDB.4.0;' +
+    'Data Source=' + ExtractFilePath(Application.ExeName) + '\Gecici\Gecici.mdb;' +
+    'Persist Security Info=False';
+end;
+
+procedure TTablo.TabizinaraAfterScroll(DataSet: TDataSet);
+begin
+  TabBasitIzin.Close;
+  TabBasitIzin.Parameters[0].Value := Tabizinara.fieldbyname('PERKOD').AsInteger;
+  TabBasitIzin.Open;
+end;
+
+procedure TTablo.TabStatusAfterOpen(DataSet: TDataSet);
+
+var mazeret: string;
+begin
+
+  if MazeretGirisi then
+  begin
+
+    while not TabStatus.Eof do
+    begin
+
+     // if (TabStatus.FieldByName('GIRIS2').AsString >TabStatus.FieldByName('VARGIRIS').AsString )
+      if (TabStatus.FieldByName('GIRFARK').AsString = 'GEÇ')
+        //and (TabStatus.FieldByName('GIRCIK').AsString = 'GÝRÝS')
+      and (TabStatus.FieldByName('GEC_MAZERET').AsString = '') then
+      begin
+
+        mazeret := InputBox('Mazeret', 'Sayýn ' + TabStatus.FieldByName('ADI').AsString + ' ' + TabStatus.FieldByName('SOYADI').AsString + ' lütfen gecikme mazeretinizi giriniz', '');
+
+
+        TabStatus.edit;
+        TabStatus.FieldByName('GEC_MAZERET').AsString := mazeret;
+        TabStatus.post;
+      end;
+      if (TabStatus.FieldByName('CIKFARK').AsString = 'ERKEN')
+        and (TabStatus.FieldByName('GIRCIK').AsString = 'ÇIKIÞ')
+        and (TabStatus.FieldByName('ERKEN_MAZERET').AsString = '') then
+      begin
+
+        mazeret := InputBox('Mazeret', 'Sayýn ' + TabStatus.FieldByName('ADI').AsString + ' ' + TabStatus.FieldByName('SOYADI').AsString + ' lütfen erken çýkma mazeretinizi giriniz', '');
+
+
+        TabStatus.edit;
+        TabStatus.FieldByName('ERKEN_MAZERET').AsString := mazeret;
+        TabStatus.post;
+      end;
+      TabStatus.Next;
+    end;
+
+  end;
+
+
+end;
+end.
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Garanti BBVA API Callback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .token {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .copy-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        .success {
+            color: #28a745;
+            margin-top: 20px;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 20px;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .debug-info h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Garanti BBVA API Callback</h1>
+        <div id="token" class="token"></div>
+        <button class="copy-button" onclick="copyToken()">Token'ı Kopyala</button>
+        <p class="success" id="copyStatus"></p>
+        <p>
+            Token'ı kopyaladıktan sonra Delphi uygulamanızı kapatıp tekrar başlatın.
+            Token otomatik olarak uygulamanıza aktarılacaktır.
+        </p>
+        <div class="debug-info">
+            <h3>URL Bilgisi:</h3>
+            <p id="fullUrl"></p>
+            <p id="params"></p>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        // URL'den token değerini al
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('access_token');
+        
+        if (token) {
+            document.getElementById('token').textContent = token;
+            
+            // Token'ı kopyalamak için
+            function copyToken() {
+                navigator.clipboard.writeText(token).then(() => {
+                    document.getElementById('copyStatus').textContent = 'Token başarıyla kopyalandı!';
+                }).catch(err => {
+                    document.getElementById('copyStatus').textContent = 'Kopyalama hatası: ' + err;
+                });
+            }
+        } else {
+            document.getElementById('token').textContent = 'Token bulunamadı.';
+            document.getElementById('error').textContent = 'Token alınamadı. Lütfen Garanti BBVA API\'ye tekrar bağlanmayı deneyin.';
+            
+            // Tüm parametreleri göster
+            const allParams = Array.from(urlParams.entries())
+                .map(([key, value]) => `${key}=${value}`)
+                .join('&');
+            document.getElementById('params').textContent = 'Parametreler: ' + allParams;
+        }
+
+        // URL bilgilerini göster
+        document.getElementById('fullUrl').textContent = 'Tam URL: ' + window.location.href;
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{72836974-D421-4A51-9C83-A732574C0F27}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Common Library\Delphi\MPCommonLibD17.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Common Library\Delphi\MPCommonLibD17D.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Delphi\EasyListviewD17.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Delphi\EasyListviewD17D.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="MPCommonLibD17">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17.dproj"/>
+    </Target>
+    <Target Name="MPCommonLibD17:Clean">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MPCommonLibD17:Make">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="MPCommonLibD17D">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17D.dproj"/>
+    </Target>
+    <Target Name="MPCommonLibD17D:Clean">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MPCommonLibD17D:Make">
+        <MSBuild Projects="Common Library\Delphi\MPCommonLibD17D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EasyListviewD17">
+        <MSBuild Projects="Delphi\EasyListviewD17.dproj"/>
+    </Target>
+    <Target Name="EasyListviewD17:Clean">
+        <MSBuild Projects="Delphi\EasyListviewD17.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EasyListviewD17:Make">
+        <MSBuild Projects="Delphi\EasyListviewD17.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EasyListviewD17D">
+        <MSBuild Projects="Delphi\EasyListviewD17D.dproj"/>
+    </Target>
+    <Target Name="EasyListviewD17D:Clean">
+        <MSBuild Projects="Delphi\EasyListviewD17D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EasyListviewD17D:Make">
+        <MSBuild Projects="Delphi\EasyListviewD17D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="MPCommonLibD17;MPCommonLibD17D;EasyListviewD17;EasyListviewD17D"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="MPCommonLibD17:Clean;MPCommonLibD17D:Clean;EasyListviewD17:Clean;EasyListviewD17D:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="MPCommonLibD17:Make;MPCommonLibD17D:Make;EasyListviewD17:Make;EasyListviewD17D:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

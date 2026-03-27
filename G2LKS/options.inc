@@ -1,0 +1,8 @@
+const
+  WM_SAVECONTENT  = WM_USER + 456;
+  WM_HIDEOPTION   = WM_USER + 457;
+  WM_SHOWOPTION   = WM_USER + 458;
+  ProjectName     : string = 'G2LKS';
+
+  WM_SHOWSOLUTION = WM_USER + 459;
+

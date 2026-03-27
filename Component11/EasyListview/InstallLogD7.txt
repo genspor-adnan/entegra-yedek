@@ -1,0 +1,357 @@
+***************************************
+BEGIN: Unregistering Component Package
+***************************************
+
+Reading Extra Paths from Setup.ini
+   D:\Projects\Component7\EasyListview\Source
+
+Cleaning Known Package Registry Entry
+
+Reading Packages:
+c:\program files\borland\delphi7\Bin\dclite70.bpl
+c:\program files\borland\delphi7\Bin\dclnet70.bpl
+$(Delphi)\Bin\dclstd70.bpl
+c:\program files\borland\delphi7\Bin\dclmcn70.bpl
+$(Delphi)\Bin\dclmid70.bpl
+$(Delphi)\Bin\dcldb70.bpl
+c:\program files\borland\delphi7\Bin\dclsoap70.bpl
+c:\program files\borland\delphi7\Bin\dclocx70.bpl
+c:\program files\borland\delphi7\Bin\dclsmp70.bpl
+c:\program files\borland\delphi7\Bin\dcldbx70.bpl
+c:\program files\borland\delphi7\Bin\dcldbxcds70.bpl
+$(Delphi)\Bin\dclbde70.bpl
+$(Delphi)\Bin\dbx70.bpl
+c:\program files\borland\delphi7\Bin\dclwbm70.bpl
+c:\program files\borland\delphi7\Bin\dclie70.bpl
+c:\program files\borland\delphi7\Bin\dclwebsnap70.bpl
+c:\program files\borland\delphi7\Bin\dclado70.bpl
+c:\program files\borland\delphi7\Bin\DCLIB70.bpl
+c:\program files\borland\delphi7\Bin\dcltee70.bpl
+c:\program files\borland\delphi7\Bin\dcldss70.bpl
+c:\program files\borland\delphi7\Bin\dclclxdb70.bpl
+$(Delphi)\Bin\dclclxstd70.bpl
+c:\program files\borland\delphi7\Bin\dclsmpedit70.bpl
+c:\program files\borland\delphi7\Bin\applet70.bpl
+c:\program files\borland\delphi7\Bin\dclemacsedit70.bpl
+c:\program files\borland\delphi7\Bin\dclact70.bpl
+c:\program files\borland\delphi7\Bin\dclmlwiz70.bpl
+c:\program files\borland\delphi7\Bin\dcl31w70.bpl
+$(SystemRoot)\system32\ibevnt70.bpl
+c:\program files\borland\delphi7\Bin\dclshlctrls70.bpl
+c:\program files\borland\delphi7\Bin\dclIntraweb_50_70.bpl
+c:\program files\borland\delphi7\bin\dclRave70.bpl
+c:\program files\borland\delphi7\Bin\dclofficexp70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\CoolTrayIcon_D6plus.bpl
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Lib\dclcxLibraryVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib\dclcxEditorsVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib\dclcxExtEditorsVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib\dclcxPageControlVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib\dclcxGridVCLD7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclusr70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\PcxIntl.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Ean7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Ean7Editors.bpl
+c:\program files\borland\delphi7\Projects\Bpl\QR4DesignD7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclIndyCore70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclIndyProtocols70.bpl
+$(ProgramFiles)\RemObjects Software\Everwood\Bin\RemObjects_Everwood_D7.bpl
+$(ProgramFiles)\RemObjects Software\Pascal Script for Delphi\Dcu\D7\PascalScript_Core_D7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\ECXMLParserD70.bpl
+$(Delphi)\Projects\Bpl\JclBaseExpert70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Package1.bpl
+c:\program files\borland\delphi7\Projects\Bpl\AH_COMP.bpl
+c:\program files\borland\delphi7\Bin\DBWEBXPRT.BPL
+D:\Projects\Component7\Rac206\Delphi7\PDEnhAviCap.bpl
+$(Delphi)\Projects\Bpl\GmXML_D7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\KWizardD6.bpl
+ 
+Stripping off path and extension
+dclite70
+dclnet70
+dclstd70
+dclmcn70
+dclmid70
+dcldb70
+dclsoap70
+dclocx70
+dclsmp70
+dcldbx70
+dcldbxcds70
+dclbde70
+dbx70
+dclwbm70
+dclie70
+dclwebsnap70
+dclado70
+DCLIB70
+dcltee70
+dcldss70
+dclclxdb70
+dclclxstd70
+dclsmpedit70
+applet70
+dclemacsedit70
+dclact70
+dclmlwiz70
+dcl31w70
+ibevnt70
+dclshlctrls70
+dclIntraweb_50_70
+dclRave70
+dclofficexp70
+CoolTrayIcon_D6plus
+dclcxLibraryVCLD7
+dclcxEditorsVCLD7
+dclcxExtEditorsVCLD7
+dclcxPageControlVCLD7
+dclcxGridVCLD7
+dclusr70
+PcxIntl
+Ean7
+Ean7Editors
+QR4DesignD7
+dclIndyCore70
+dclIndyProtocols70
+RemObjects_Everwood_D7
+PascalScript_Core_D7
+ECXMLParserD70
+JclBaseExpert70
+Package1
+AH_COMP
+DBWEBXPRT
+PDEnhAviCap
+GmXML_D7
+KWizardD6
+ 
+Reading Packages to remove
+EasyListviewD7
+EasyListviewD7D
+ 
+Stripping off path and extension
+EasyListviewD7
+EasyListviewD7D
+ 
+Scanning for previously installed packages....
+Known Package Registry Entry Cleaned
+
+Cleaning Disabled Package Registry Entry
+
+Reading Packages:
+D:\Projects\Component7\BARCODE_QR45\BarcodeDgnD7.bpl
+D:\Projects\Component7\BARCODE_QR45\QRBarcodeDgnD7.bpl
+ 
+Stripping off path and extension
+BarcodeDgnD7
+QRBarcodeDgnD7
+ 
+Reading Packages to remove
+EasyListviewD7
+EasyListviewD7D
+ 
+Stripping off path and extension
+EasyListviewD7
+EasyListviewD7D
+ 
+Scanning for previously installed packages....
+Disabled Package Registry Entry Cleaned
+
+Reading Search Path Registry Entry
+C:\Program Files\Indy 10 for Delphi 7\LibD7
+C:\Program Files\Borland\Delphi7\Lib
+C:\Program Files\Borland\Delphi7\Bin
+C:\Program Files\Borland\Delphi7\Imports
+C:\Program Files\Borland\Delphi7\Projects\Bpl
+C:\Program Files\Borland\Delphi7\Rave5\Lib
+d:\faxserver\tfax\d7
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+C:\Program Files\Borland\Delphi7\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+    
+    
+Writing Search Path Registry Entry
+Removing extra characters and blank lines
+Formatting.....
+$(ProgramFiles)\Indy 10 for Delphi 7\LibD7
+$(Delphi)\Lib
+$(Delphi)\Bin
+$(Delphi)\Imports
+$(Delphi)\Projects\Bpl
+$(Delphi)\Rave5\Lib
+d:\faxserver\tfax\d7
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+$(Delphi)\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+Writing to Key: Software\Borland\Delphi\7.0\Library  Value: Search Path
+Search Path Registry Entry written
+
+Reading Browse Path Registry Entry
+C:\Program Files\Borland\Delphi7\source\vcl
+C:\Program Files\Borland\Delphi7\Source\Rtl
+C:\Program Files\Borland\Delphi7\source\rtl\Corba45
+C:\Program Files\Borland\Delphi7\source\rtl\Sys
+C:\Program Files\Borland\Delphi7\source\rtl\Win
+C:\Program Files\Borland\Delphi7\source\rtl\common
+C:\Program Files\Borland\Delphi7\source\Internet
+C:\Program Files\Borland\Delphi7\source\clx
+C:\Program Files\Borland\Delphi7\source\websnap
+C:\Program Files\Borland\Delphi7\Source\WebMidas
+C:\Program Files\Borland\Delphi7\Source\Indy
+C:\Program Files\Borland\Delphi7\Source\IntraWeb
+C:\Program Files\Borland\Delphi7\Source\Samples
+C:\Program Files\Borland\Delphi7\Source\Soap
+C:\Program Files\Borland\Delphi7\Source\ToolsAPI
+C:\Program Files\Borland\Delphi7\Source\Xml
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\JCL_V10\source\common
+D:\Projects\JCL_V10\source\windows
+D:\Projects\JCL_V10\source\vcl
+D:\Projects\JCL_V10\source\visclx
+    
+    
+Writing Browse Path Registry Entry
+Removing extra characters and blank lines
+Formatting.....
+$(Delphi)\source\vcl
+$(Delphi)\Source\Rtl
+$(Delphi)\source\rtl\Corba45
+$(Delphi)\source\rtl\Sys
+$(Delphi)\source\rtl\Win
+$(Delphi)\source\rtl\common
+$(Delphi)\source\Internet
+$(Delphi)\source\clx
+$(Delphi)\source\websnap
+$(Delphi)\Source\WebMidas
+$(Delphi)\Source\Indy
+$(Delphi)\Source\IntraWeb
+$(Delphi)\Source\Samples
+$(Delphi)\Source\Soap
+$(Delphi)\Source\ToolsAPI
+$(Delphi)\Source\Xml
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\JCL_V10\source\common
+D:\Projects\JCL_V10\source\windows
+D:\Projects\JCL_V10\source\vcl
+D:\Projects\JCL_V10\source\visclx
+Writing to Key: Software\Borland\Delphi\7.0\Library  Value: Browsing Path
+Browse Path Registry Entry written
+
+***************************************
+END: Unregistering Component Package
+***************************************
+
+
+***************************************
+BEGIN: Compiling Component Package
+***************************************
+Validating Output Folders
+Creating temp compile folder
+Folder Created: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Config.ini -U Switch: C:\PROGRA~1\INDY10~1\LibD7;C:\PROGRA~1\Borland\Delphi7\Lib;C:\PROGRA~1\Borland\Delphi7\Bin;C:\PROGRA~1\Borland\Delphi7\Imports;C:\PROGRA~1\Borland\Delphi7\Projects\Bpl;C:\PROGRA~1\Borland\Delphi7\Rave5\Lib;d:\FAXSER~1\tfax\d7;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Sources;D:\Projects\COMPON~1\EAN45D~1\units\d7;D:\Projects\COMPON~1\colltray;D:\Hastane\Ortak;C:\PROGRA~1\Borland\Delphi7\quickrpt;D:\Projects\COMPON~1\CXINTL~1.0;d:\projects\COMPON~1\DBNAVT~1;$(Pascal Script)\Dcu\D7;$(Pascal Script)\Source;D:\Projects\COMPON~1\XMLPAR~1;D:\Projects\JCL_V10\lib\d7;D:\Projects\JCL_V10\source;d:\projects\COMPON~1\FLOATI~1;d:\projects\COMPON~1\bhd;d:\projects\COMPON~1\PIKEYP~1;d:\projects\COMPON~1\barcode;D:\Projects\COMPON~1\Rac206\Delphi7;D:\Projects\COMPON~1\kwizard;
+Config.ini -I Switch: ..\Include
+Config.ini -LE Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -LN Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -N Switch: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Compiling....
+
+Redirector Working Dir: D:\Projects\COMPON~1\EASYLI~1\Delphi
+Redirector CreateProcess command: "C:\PROGRA~1\Borland\Delphi7\Bin\DCC32.exe" EasyListviewD7.dpk
+
+
+Borland Delphi Version 15.0
+Copyright (c) 1983,2002 Borland Software Corporation
+EasyListviewD7.dpk(1) EasyListviewD7.dpk(31) EasyListviewD7.dpk(32) EasyListviewD7.dpk(32) Fatal: Required package 'MPCommonLibD7' not found
+
+
+Could not find compiled BPL file: C:\Program Files\Borland\Delphi7\Projects\Bpl\EasyListviewD7.bpl
+
+
+Config.ini -U Switch: C:\PROGRA~1\INDY10~1\LibD7;C:\PROGRA~1\Borland\Delphi7\Lib;C:\PROGRA~1\Borland\Delphi7\Bin;C:\PROGRA~1\Borland\Delphi7\Imports;C:\PROGRA~1\Borland\Delphi7\Projects\Bpl;C:\PROGRA~1\Borland\Delphi7\Rave5\Lib;d:\FAXSER~1\tfax\d7;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Sources;D:\Projects\COMPON~1\EAN45D~1\units\d7;D:\Projects\COMPON~1\colltray;D:\Hastane\Ortak;C:\PROGRA~1\Borland\Delphi7\quickrpt;D:\Projects\COMPON~1\CXINTL~1.0;d:\projects\COMPON~1\DBNAVT~1;$(Pascal Script)\Dcu\D7;$(Pascal Script)\Source;D:\Projects\COMPON~1\XMLPAR~1;D:\Projects\JCL_V10\lib\d7;D:\Projects\JCL_V10\source;d:\projects\COMPON~1\FLOATI~1;d:\projects\COMPON~1\bhd;d:\projects\COMPON~1\PIKEYP~1;d:\projects\COMPON~1\barcode;D:\Projects\COMPON~1\Rac206\Delphi7;D:\Projects\COMPON~1\kwizard;
+Config.ini -I Switch: ..\Include
+Config.ini -LE Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -LN Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -N Switch: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Compiling....
+
+Redirector Working Dir: D:\Projects\COMPON~1\EASYLI~1\Delphi
+Redirector CreateProcess command: "C:\PROGRA~1\Borland\Delphi7\Bin\DCC32.exe" EasyListviewD7D.dpk
+
+
+Borland Delphi Version 15.0
+Copyright (c) 1983,2002 Borland Software Corporation
+EasyListviewD7D.dpk(1) EasyListviewD7D.dpk(32) EasyListviewD7D.dpk(33) EasyListviewD7.dpk(1)   EasyListviewD7.dpk(31) EasyListviewD7.dpk(32) EasyListviewD7.dpk(32) Fatal: Required package 'MPCommonLibD7' not found
+
+
+Could not find compiled BPL file: C:\Program Files\Borland\Delphi7\Projects\Bpl\EasyListviewD7D.bpl
+
+
+ 
+Adding Package BPL to Registry
+***************************************
+END: Compiling Component Package
+***************************************
+

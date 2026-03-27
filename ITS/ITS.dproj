@@ -1,0 +1,318 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{6D839B93-2242-4D73-B905-B3ED81633871}</ProjectGuid>
+        <ProjectVersion>14.4</ProjectVersion>
+        <MainSource>ITS.dpr</MainSource>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <FrameworkType>VCL</FrameworkType>
+        <Base>True</Base>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <VerInfo_Locale>1055</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;Data.Win;System.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_UsePackage>rtl;localizer14;vclx;vcl;vclimg;dbrtl;Rave77VCL;bdertl;vclactnband;xmlrtl;vcldb;vcldbx;vcltouch;dsnap;dsnapcon;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapServer;DBXInterBaseDriver;DBXMySQLDriver;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;QR5RunD2010;Package1;CoolTrayIcon_D6plus;ECXMLParserD70;ExtLib_D6;OfficePopupMenuD7;cxExtEditorsD14;cxEditorsD14;cxLibraryD14;dxCoreD14;dxThemeD14;dxGDIPlusD14;cxDataD14;cxSchedulerD14;cxExportD14;SynEdit_R2009;WMPLib;AsyncPro;fkattend;ExWatcher;PackageBhd2;parmakızı3;pikey;Zeekper;asd;Barcodeqr;zkemkeeper;Jcl;JclVcl;JvCoreD14R;JvSystemD14R;JvStdCtrlsD14R;JvAppFrmD14R;JvBandsD14R;JvDBD14R;JvDlgsD14R;JvBDED14R;JvCmpD14R;JvCryptD14R;JvCtrlsD14R;JvCustomD14R;JvDockingD14R;JvDotNetCtrlsD14R;JvEDID14R;JvGlobusD14R;JvHMID14R;JvInterpreterD14R;JvJansD14R;JvManagedThreadsD14R;JvMMD14R;JvNetD14R;JvPageCompsD14R;JvPluginD14R;JvPrintPreviewD14R;JvRuntimeDesignD14R;JvTimeFrameworkD14R;JvValidatorsD14R;JvWizardD14R;JvXPCtrlsD14R;dxtrmdD14;dxmdsD14;dxFlowChartD14;dxLayoutControlcxEditAdaptersD14;dxLayoutControlD14;dxNavBarD14;dxorgcD14;cxPageControlD14;cxPivotGridChartD14;cxPivotGridD14;cxPivotGridOLAPD14;dxPSCoreD14;dxPSLnksD14;vclshlctrls;dxPsPrVwAdvD14;dxBarExtItemsD14;dxBarD14;dxPSTeeChartD14;dxPSdxOCLnkD14;dxPSdxLCLnkD14;dxPSdxFCLnkD14;dxPSdxDBTVLnkD14;dxdbtrD14;dxPSdxDBOCLnkD14;dxdborD14;dxPSDBTeeChartD14;dxPScxVGridLnkD14;cxVerticalGridD14;dxPScxCommonD14;dxPScxTL5LnkD14;cxTreeListD14;dxPScxSSLnkD14;cxSpreadSheetD14;dxPScxScheduler3LnkD14;dxPScxPivotGrid2LnkD14;dxPScxPCProdD14;cxGridD14;dxPScxGrid6LnkD14;cxTreeListdxBarPopupMenuD14;dxComnD14;dxsbD14;dcldxSkinsCoreD14;dxSkinsCoreD14;dxSkinscxPCPainterD14;dxSkinscxScheduler3PainterD14;dxSkinsdxDLPainterD14;dxSkinsdxRibbonPainterD14;dxSkinsdxBarPainterD14;dxDockingD14;dxRibbonD14;dxSkinsdxLCPainterD14;dxSkinsdxNavBar2PainterD14;dxSkinBlackD14;dxSkinBlueD14;dxSkinCoffeeD14;dxSkinDarkSideD14;dxSkinFoggyD14;dxSkinGlassOceansD14;dxSkiniMaginaryD14;dxSkinLilianD14;dxSkinLiquidSkyD14;dxSkinMcSkinD14;dxSkinMoneyTwinsD14;dxSkinOffice2007BlackD14;dxSkinOffice2007GreenD14;dxSkinOffice2007PinkD14;dxSkinOffice2007SilverD14;dxSkinPumpkinD14;dxSkinscxSchedulerPainterD14;dxSkinSevenD14;dxSkinSharpD14;dxSkinSilverD14;dxSkinSpringTimeD14;dxSkinStardustD14;dxSkinValentineD14;dxSkinXmas2008BlueD14;dxSpellCheckerD14;Gurkan;sbridge140;indy10sbridge140;GenDBNavigator;fs14;frx14;frxcs14;fsDB14;frxDB14;fsBDE14;frxBDE14;fsADO14;frxADO14;fsIBX14;frxIBX14;frxDBX14;frxe14;fsTee14;frxTee14;CPortLibD2010;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_DependencyCheckOutputName>ITS.exe</DCC_DependencyCheckOutputName>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_Platform>x86</DCC_Platform>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>ITS_Icon.ico</Icon_MainIcon>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <Icon_MainIcon>ITS_Icon.ico</Icon_MainIcon>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_DebugInformation>false</DCC_DebugInformation>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_MinorVer>16</VerInfo_MinorVer>
+        <VerInfo_MajorVer>20</VerInfo_MajorVer>
+        <VerInfo_Build>21</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=20.16.3.21;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=;LastCompiledTime=2016.03.21 11:03:05</VerInfo_Keys>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Release>3</VerInfo_Release>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="UTablo.pas">
+            <Form>Tablo</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Usifre.pas">
+            <Form>PasswordDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBekletme.pas">
+            <Form>BekletmeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UItsAraclari.pas"/>
+        <DCCReference Include="UitsBusiness.pas"/>
+        <DCCReference Include="UItsBildirim.pas">
+            <Form>ITSBildirimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBelge.pas">
+            <Form>BelgeListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUretim.pas">
+            <Form>UretimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyon.pas">
+            <Form>OpsiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USatis.pas">
+            <Form>SatisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUret.pas">
+            <Form>UretDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\PrjConst.pas"/>
+        <DCCReference Include="..\Entegra\UTouchKeyboardWindow.pas"/>
+        <DCCReference Include="..\Entegra\lisansws.pas"/>
+        <DCCReference Include="UAlim.pas">
+            <Form>MalAlimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDeAktivasyon.pas">
+            <Form>DeAktivasyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UPaketAl.pas">
+            <Form>PaketAlDlg</Form>
+        </DCCReference>
+        <DCCReference Include="KAZip.pas"/>
+        <DCCReference Include="PTSPackageReceiverWebService.pas"/>
+        <DCCReference Include="PTSPackageSenderWebService.pas">
+            <Form>$R *.res</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\AramaFrame\UDokumlerAksiyonFrame.pas">
+            <Form>DokumlerAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\AnaFrame\UGenelAnaSekmeFrame.pas">
+            <Form>GenelAnaSekmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UCombo.pas">
+            <Form>ListeAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Umesaj.pas">
+            <Form>MesajForm</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\FetaClassExtensions.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensionsConsts.pas"/>
+        <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas"/>
+        <DCCReference Include="..\Ortak\EParser.pas"/>
+        <DCCReference Include="..\Ortak\oPENsqlsERVER.pas">
+            <Form>OpenSQLServerForm</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Fetautil.pas"/>
+        <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+            <Form>GirisKutusuEx</Form>
+        </DCCReference>
+        <DCCReference Include="UTablodanDuzenle.pas">
+            <Form>TablodanDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Uliste.pas">
+            <Form>ListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UFastRap.pas">
+            <Form>FastRaporDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\URaporAraclari.pas"/>
+        <DCCReference Include="..\Ortak\UQuantGrid.pas">
+            <Form>QuantGrid</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\UGentegreFrameYonetimi.pas"/>
+        <DCCReference Include="..\Ortak\UFrameYoneticisi.pas"/>
+        <DCCReference Include="..\Ortak\UMultiCastEvent.pas"/>
+        <DCCReference Include="..\Ortak\UGenSifre.pas"/>
+        <DCCReference Include="..\Ortak\UPaylasim.pas">
+            <Form>$R *.res</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UDokum.pas">
+            <Form>DokumDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGrid.pas">
+            <Form>GridAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\uKosulDetayAra.pas">
+            <Form>KosulDetayAra</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\IcerikFrame\UDokumSart.pas">
+            <Form>DokumSartDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgConfirmReplace.pas">
+            <Form>ConfirmReplaceDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgReplaceText.pas"/>
+        <DCCReference Include="..\Ortak\dlgSearchText.pas">
+            <Form>TextSearchDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\ZLIBEX.pas"/>
+        <DCCReference Include="..\Entegra\UMultiDataSetEvent.pas"/>
+        <DCCReference Include="..\Entegra\AramaFrame\UDokumAramaFrame.pas">
+            <Form>DokumAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\GirisSayfaFrame\UDokumGirisFrame.pas">
+            <Form>DokumGirisFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UAnaForm.pas">
+            <Form>AnaFormDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTasimaBirimi.pas">
+            <Form>TasimaBirimiGirisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UPaketleme.pas">
+            <Form>PaketlemeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\GirisSayfaFrame\UGenelGirisSayfasiFrame.pas">
+            <Form>GenelGirisSayfasiFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="USiparisMalSatis.pas">
+            <Form>SiparisMalSatisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USatisIptal.pas">
+            <Form>SatisIptalDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliUrunCikis.pas">
+            <Form>HizliUrunCikisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUrunListe.pas">
+            <Form>UrunListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBildirilmisPaketler.pas">
+            <Form>BildirilmisPaketlerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UAdetEkle.pas">
+            <Form>AdetEkleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\UGENINIDuzenle.pas">
+            <Form>GENINIDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\GenUpdateWS.pas"/>
+        <DCCReference Include="..\Entegra\UVersiyonGuncelle.pas"/>
+        <RcItem Include="cxIntl_6.0_Turkish.ini">
+            <ContainerId>ResourceItem</ContainerId>
+            <ResourceType>RCData</ResourceType>
+            <ResourceId>LangTr</ResourceId>
+        </RcItem>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">ITS.dpr</Source>
+                </Source>
+                <Parameters>
+                    <Parameters Name="UseLauncher">False</Parameters>
+                    <Parameters Name="LoadAllSymbols">True</Parameters>
+                    <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+                </Parameters>
+                <VersionInfo>
+                    <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+                    <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+                    <VersionInfo Name="MajorVer">1</VersionInfo>
+                    <VersionInfo Name="MinorVer">0</VersionInfo>
+                    <VersionInfo Name="Release">0</VersionInfo>
+                    <VersionInfo Name="Build">0</VersionInfo>
+                    <VersionInfo Name="Debug">False</VersionInfo>
+                    <VersionInfo Name="PreRelease">False</VersionInfo>
+                    <VersionInfo Name="Special">False</VersionInfo>
+                    <VersionInfo Name="Private">False</VersionInfo>
+                    <VersionInfo Name="DLL">False</VersionInfo>
+                    <VersionInfo Name="Locale">1055</VersionInfo>
+                    <VersionInfo Name="CodePage">1254</VersionInfo>
+                </VersionInfo>
+                <VersionInfoKeys>
+                    <VersionInfoKeys Name="CompanyName"/>
+                    <VersionInfoKeys Name="FileDescription"/>
+                    <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="InternalName"/>
+                    <VersionInfoKeys Name="LegalCopyright"/>
+                    <VersionInfoKeys Name="LegalTrademarks"/>
+                    <VersionInfoKeys Name="OriginalFilename"/>
+                    <VersionInfoKeys Name="ProductName"/>
+                    <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="Comments"/>
+                    <VersionInfoKeys Name="LastCompiledTime">2016.03.21 11:03:00</VersionInfoKeys>
+                </VersionInfoKeys>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp170.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k170.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
+            </Delphi.Personality>
+            <ModelSupport>False</ModelSupport>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+</Project>

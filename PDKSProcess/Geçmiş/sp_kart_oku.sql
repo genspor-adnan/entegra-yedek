@@ -1,0 +1,235 @@
+USE [UNIMEDPERSONA]
+GO
+
+/****** Object:  StoredProcedure [dbo].[P_KARTOKU]    Script Date: 09/25/2010 10:59:31 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+--exec p_KARTOKU '123',0,1,1,'2010-09-24 11:30:00' 
+ALTER        PROCEDURE [dbo].[P_KARTOKU]
+@KARTID VARCHAR(1000),@SURE INT,@MAXVAR FLOAT, @OKUYUCU_NO TINYINT,@GIRISTARIH varchar(50) = null
+AS
+BEGIN
+DECLARE @CIKIS DATETIME
+DECLARE @SONGIRIS DATETIME
+DECLARE @SONUC VARCHAR(50)
+DECLARE @FARK INT
+DECLARE @ADI VARCHAR(35)
+DECLARE @SOYADI VARCHAR(35)
+DECLARE @SONDUR CHAR(5)
+DECLARE @PERKOD INT
+DECLARE @MAX_KONTROL FLOAT
+DECLARE @TARIH DATETIME
+
+SET @SONUC=NULL
+SET @FARK=NULL
+SET @ADI=NULL
+SET @SOYADI=NULL
+SET @SONDUR=NULL
+
+
+Set @TARIH = ISNULL ( CONVERT(DATETIME,@GIRISTARIH,120), getdate())
+
+SELECT 
+	DISTINCT @ADI=P.ADI,@SOYADI=P.SOYADI,@PERKOD=P.PERKOD 
+FROM 
+	PERS_KART PK
+	INNER JOIN PER_SABIT         P ON PK.PERKOD    = P.PERKOD
+	INNER JOIN PERS_OKUYUCU_IZIN I ON I.PERKOD     = P.PERKOD    AND 
+												 PK.KARTNO    = I.KARTNO    AND
+												 I.OKUYUCU_NO = @OKUYUCU_NO AND
+												 CONVERT(SMALLDATETIME,CONVERT(VARCHAR(10),@TARIH,103),103) BETWEEN 
+												 ISNULL(I.BASTAR, CONVERT(SMALLDATETIME,CONVERT(VARCHAR(10), @TARIH,103),103)) AND
+												 ISNULL(I.BITTAR, CONVERT(SMALLDATETIME,CONVERT(VARCHAR(10), @TARIH,103),103)) 
+
+WHERE 
+	PK.KARTNO=@KARTID AND PK.AKPAS=1
+	
+IF (SELECT COUNT(*) FROM PERS_PDKS WHERE PERKOD = @PERKOD AND (@TARIH = GIRIS OR @TARIH=CIKIS) )<> 0
+ BEGIN
+   SET @SONUC='MÜKERRER KAYIT'
+ SELECT @SONUC AS SONUC
+  END
+ELSE
+BEGIN
+ IF @ADI IS NOT NULL
+ BEGIN
+		SELECT 
+		TOP 1 @CIKIS= CIKIS,@SONGIRIS=GIRIS--En son giriþ çýkýþ kayýtlarý alýnýyor.
+	    FROM 
+		  PERS_PDKS 
+	   WHERE 
+		   KARTNO=@KARTID AND CONVERT(VARCHAR(10),GIRIS,120)=CONVERT(VARCHAR(10),@TARIH,120) 
+	   ORDER BY 
+		GIRIS DESC
+		--
+		IF @CIKIS IS NULL
+	    BEGIN
+		IF @SONGIRIS IS NULL	
+	     SET @SONDUR='ÇIKIÞ'
+		ELSE
+		  SET @SONDUR='GIRIS' 
+		END
+		ELSE 
+		BEGIN
+			SET @SONDUR='ÇIKIÞ'	
+		END
+		print 'En son giriþ çýkýþ kayýtlarý alýnýyor'
+		print '@CIKIS--->'+CONVERT(VARCHAR(20),ISNULL(@CIKIS,''),120)
+		print '@SONGIRIS--->'+CONVERT(VARCHAR(20),ISNULL(@SONGIRIS,''),120)
+		print '--------------'
+	IF (@CIKIS IS NOT NULL)
+	BEGIN
+		SELECT 
+			@FARK=(DATEPART(MI,(@TARIH-MAX(CIKIS)))+(DATEPART(HH,(@TARIH-MAX(CIKIS)))*60)) 
+		FROM 
+			PERS_PDKS 
+		WHERE 
+			DATEPART(M,CIKIS)=DATEPART(M,@TARIH) AND 
+			DATEPART(D,CIKIS)=DATEPART(D,@TARIH) AND 
+			DATEPART(YY,CIKIS)=DATEPART(YY,@TARIH) AND 
+			KARTNO=@KARTID 
+	    print 'Çýkýþ boþ deðil ise fark hesaplanýyor '
+		print '@FARK--->'+CONVERT(VARCHAR(20),@FARK)
+		print '--------------'
+	END
+	ELSE
+	BEGIN
+		IF (@SONGIRIS IS NOT NULL)
+		BEGIN
+			SELECT 
+				@FARK=(DATEPART(MI,(@TARIH-MAX(GIRIS)))+(DATEPART(HH,(@TARIH-MAX(GIRIS)))*60))
+			FROM 
+				PERS_PDKS 
+			WHERE 
+				DATEPART(M,GIRIS)=DATEPART(M,@TARIH) AND 
+				DATEPART(D,GIRIS)=DATEPART(D,@TARIH) AND 
+				DATEPART(YY,GIRIS)=DATEPART(YY,@TARIH) AND 
+				KARTNO=@KARTID 
+		print 'Çýkýþ boþ ise ve songiriþ boþ deðil ise fark hesaplanýyor '
+		print '@FARK--->'+CONVERT(VARCHAR(20),ISNULL(@FARK,'NULL'))
+		print '--------------'
+		END	
+		else 
+		begin
+		print 'Çýkýþ boþ ise ve songiriþ boþ ise fark hesaplanmýyor '
+		print '--------------'
+		end
+	END
+	SELECT 
+		@MAX_KONTROL = DATEDIFF(MI,MAX(GIRIS), @TARIH) / 60		
+	FROM 
+		PERS_PDKS
+	WHERE 
+		KARTNO = @KARTID
+	print 'MAX_KONTROL hesaplanýyor '
+	print '@MAX_KONTROL--> DATEDIFF(MI,MAX(GIRIS), @TARIH) / 60 -->'+ISNULL(CONVERT(VARCHAR(130),@MAX_KONTROL),'Boþ')
+	print '--------------'
+	
+	IF @FARK<@SURE 
+	BEGIN
+	SET @SONUC=@ADI + ' ' + @SOYADI + ' : SÜRE DOLMADI'
+	print '@FARK<@SURE ise süre dolmadý uyarýsý veriliyor.'
+	print '@MAX_KONTROL--> DATEDIFF(MI,MAX(GIRIS), @TARIH) / 60 -->'+ISNULL(CONVERT(VARCHAR(130),@SONUC),'Boþ')
+	print '--------------'
+	END
+	ELSE
+	BEGIN
+  		
+  		IF @SONDUR='ÇIKIÞ'
+  		BEGIN
+    			SET @SONDUR='GÝRÝÞ'
+    			SET @SONUC=@ADI + ' ' + @SOYADI + ' : GÝRÝÞ YAPTI'
+  		END
+  		ELSE	
+  		BEGIN
+			SET @SONDUR='ÇIKIÞ' 
+    		SET @SONUC=@ADI + ' ' + @SOYADI + ' : ÇIKIÞ YAPTI'
+		END
+		print '@SONDUR ÇIKIÞ  ise giriþ yapýlýyor , giriþ ise çýkýþ yapýlýyor.'
+	    print '@SONUC--> '+ISNULL(CONVERT(VARCHAR(130),@SONUC),'Boþ')
+	    print '--------------'
+		
+		--MAXÝMUM VARDÝYA SAATÝ ALINIYOR
+		IF (@MAX_KONTROL > @MAXVAR) AND (@SONDUR <> 'GÝRÝÞ') 
+		BEGIN
+			SET @SONUC=@ADI + ' ' + @SOYADI + ' : GÝRÝÞ YAPTI'
+			SET @SONDUR = 'GÝRÝÞ'
+		END
+		
+		print 'MAXÝMUM VARDÝYA SAATÝ ALINIYOR.'
+	    print '@SONUC--> '+ISNULL(CONVERT(VARCHAR(130),@SONUC),'Boþ')
+	    print '@SONDUR--> '+ISNULL(CONVERT(VARCHAR(130),@SONDUR),'Boþ')
+	    print '--------------'
+		
+		IF @SONDUR='GÝRÝÞ' 
+		BEGIN
+		INSERT INTO PERS_PDKS(
+		[PERKOD], [KARTNO], [GIRIS], [CIKIS], [VARDIYA], [VARGIRIS], [VARCIKIS], [VARCALSURE], [IGIRIS], [ICIKIS], [IVARDIYA], [IVARGIRIS], [IVARCIKIS], [IVARCALSURE]) 
+		VALUES(@PERKOD,@KARTID,@TARIH,NULL, NULL, NULL, NULL, NULL, @TARIH, NULL, NULL, NULL, NULL, NULL ) 
+		print '@SONDUR=Giriþ ise insert yapýlýyor.'
+	    print '@[PERKOD] [KARTNO] [GIRIS] [IGIRIS]--> '+ISNULL(CONVERT(VARCHAR(130),@PERKOD),'Boþ')+ISNULL(CONVERT(VARCHAR(130),@KARTID),'Boþ')+ISNULL(CONVERT(VARCHAR(130),@TARIH),'Boþ')+ISNULL(CONVERT(VARCHAR(130),@TARIH),'Boþ')
+			UPDATE PERS_PDKS 
+			SET 
+			     VARDIYA=dbo.fn_VardiyaAdi_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,VARGIRIS=dbo.fn_VardiyaGiris_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+			     ,VARCIKIS=dbo.fn_VardiyaCikis_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,VARCALSURE=dbo.fn_VardiyaCalSure_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARDIYA=dbo.fn_VardiyaAdi_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARGIRIS=dbo.fn_VardiyaGiris_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARCIKIS=dbo.fn_VardiyaCikis_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARCALSURE=dbo.fn_VardiyaCalSure_Bas_Bit(@PERKOD,GIRIS,@TARIH)
+				 
+		    WHERE 
+				PERKOD=@PERKOD AND GIRIS=@TARIH 
+		
+		END
+		ELSE 
+		BEGIN
+			UPDATE PERS_PDKS 
+			SET CIKIS=@TARIH
+			     ,VARDIYA=dbo.fn_VardiyaAdi_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,VARGIRIS=dbo.fn_VardiyaGiris_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+			     ,VARCIKIS=dbo.fn_VardiyaCikis_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,VARCALSURE=dbo.fn_VardiyaCalSure_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+			     ,ICIKIS=@TARIH
+			     ,IVARDIYA=dbo.fn_VardiyaAdi_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARGIRIS=dbo.fn_VardiyaGiris_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARCIKIS=dbo.fn_VardiyaCikis_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+				 ,IVARCALSURE=dbo.fn_VardiyaCalSure_Bas_Bit(@PERKOD,GIRIS,@TARIH) 
+			WHERE 
+				PERKOD=@PERKOD AND GIRIS=@SONGIRIS 
+				
+		print '@SONDUR=Giriþ deðil ise updatede yapýlýyor.GIRIS=@SONGIRIS þartý aranýyor.'
+	    print '@SONGIRIS--> '+ISNULL(CONVERT(VARCHAR(130),@SONGIRIS,120),'Boþ')
+   	    print '@[CIKIS] [ICIKIS]--> '+ISNULL(CONVERT(VARCHAR(130),@TARIH,120),'Boþ')
+
+
+		END
+	END
+ END
+ ELSE
+  SET @SONUC='GEÇERSÝZ KART'
+ SELECT @SONUC AS SONUC
+ END
+ 
+ END
+
+
+
+
+
+ 
+
+
+
+
+
+GO
+
+

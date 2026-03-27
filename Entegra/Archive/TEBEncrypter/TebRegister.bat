@@ -1,0 +1,1 @@
+"C:\Windows\Microsoft.NET\Framework\v4.0.30319\regtlibv12.exe" "C:\Entegra\TEBEncrypter\TEB.Encrypter.tlb"

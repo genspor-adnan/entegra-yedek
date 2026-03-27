@@ -1,0 +1,239 @@
+object TabloGirisDlg: TTabloGirisDlg
+  Left = 369
+  Top = 177
+  ActiveControl = Panel1
+  BorderIcons = [biSystemMenu]
+  Caption = 'Liste'
+  ClientHeight = 437
+  ClientWidth = 783
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Trebuchet MS'
+  Font.Style = []
+  Position = poScreenCenter
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  TextHeight = 16
+  object Panel2: TPanel
+    Left = 0
+    Top = 41
+    Width = 783
+    Height = 396
+    Align = alClient
+    BevelInner = bvLowered
+    BorderWidth = 4
+    Caption = 'Panel2'
+    TabOrder = 1
+    ExplicitWidth = 806
+    ExplicitHeight = 397
+    object GridGiris: TcxGrid
+      Left = 6
+      Top = 6
+      Width = 775
+      Height = 385
+      Align = alClient
+      TabOrder = 0
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = True
+      ExplicitWidth = 794
+      object GridGirisTV: TcxGridDBTableView
+        OnDblClick = GridGirisTVDblClick
+        Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
+        DataController.DataSource = DataSource1
+        DataController.Summary.DefaultGroupSummaryItems = <
+          item
+            Kind = skSum
+            Position = spFooter
+          end
+          item
+            Kind = skSum
+          end
+          item
+            Kind = skSum
+            Position = spFooter
+          end
+          item
+            Kind = skSum
+          end>
+        DataController.Summary.FooterSummaryItems = <
+          item
+            Kind = skSum
+          end
+          item
+            Kind = skSum
+          end>
+        DataController.Summary.SummaryGroups = <>
+        OptionsData.Deleting = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsSelection.CellSelect = False
+        OptionsView.Indicator = True
+      end
+      object GridGirisLevel1: TcxGridLevel
+        GridView = GridGirisTV
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 783
+    Height = 41
+    Align = alTop
+    TabOrder = 0
+    ExplicitWidth = 791
+    object Label1: TcxLabel
+      Left = 6
+      Top = 15
+      Caption = 'Arama :'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Trebuchet MS'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object Edit1: TEdit
+      Left = 50
+      Top = 11
+      Width = 255
+      Height = 24
+      TabOrder = 0
+      OnKeyUp = Edit1KeyUp
+    end
+    object SecTus: TcxButton
+      Left = 601
+      Top = 10
+      Width = 75
+      Height = 25
+      Caption = 'Se'#231
+      ModalResult = 1
+      TabOrder = 2
+    end
+    object cxButton1: TcxButton
+      Left = 677
+      Top = 10
+      Width = 75
+      Height = 25
+      Caption = 'Kapat'
+      ModalResult = 2
+      TabOrder = 3
+    end
+    object YeniTus: TcxButton
+      Left = 524
+      Top = 10
+      Width = 75
+      Height = 25
+      Caption = 'Yeni'
+      ModalResult = 2
+      TabOrder = 4
+      Visible = False
+    end
+    object YaziciYaz: TcxButton
+      Left = 311
+      Top = 10
+      Width = 90
+      Height = 25
+      Caption = 'Bask'#305' '#214'nizleme'
+      TabOrder = 5
+      Visible = False
+      OnClick = YaziciYazClick
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = Query1
+    Left = 332
+    Top = 105
+  end
+  object Query1: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    LockType = ltReadOnly
+    AfterOpen = Query1AfterOpen
+    BeforeEdit = Query1BeforeEdit
+    OnNewRecord = Query1NewRecord
+    Parameters = <>
+    Left = 256
+    Top = 105
+  end
+  object frxQuery1: TfrxDBDataset
+    UserName = 'Query'
+    CloseDataSource = False
+    DataSet = Query1
+    BCDToCurrency = False
+    DataSetOptions = []
+    Left = 384
+    Top = 144
+  end
+  object PopupMenuYaz: TPopupMenu
+    Left = 37
+    Top = 40
+    object BaskiOnizlemeMenu: TMenuItem
+      Caption = 'Bask'#305' '#214'nizleme'
+      ImageIndex = 0
+    end
+    object YazcyaYazdr1: TMenuItem
+      Tag = 1
+      Caption = 'Yaz'#305'c'#305'ya Yazd'#305'r'
+      ImageIndex = 1
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object Gnder1: TMenuItem
+      Caption = 'G'#246'nder'
+      ImageIndex = 15
+      object PDF1: TMenuItem
+        Tag = 2
+        Caption = 'PDF'
+        ImageIndex = 2
+      end
+      object Word1: TMenuItem
+        Tag = 3
+        Caption = 'Word'
+        ImageIndex = 3
+      end
+      object Excel2: TMenuItem
+        Tag = 4
+        Caption = 'Excel'
+        ImageIndex = 4
+      end
+      object CSV1: TMenuItem
+        Tag = 5
+        Caption = 'CSV'
+        ImageIndex = 5
+      end
+      object ext1: TMenuItem
+        Tag = 6
+        Caption = 'Text'
+        ImageIndex = 6
+      end
+      object HTML2: TMenuItem
+        Tag = 7
+        Caption = 'HTML'
+        ImageIndex = 7
+      end
+      object JPG1: TMenuItem
+        Tag = 8
+        Caption = 'JPG'
+        ImageIndex = 8
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object EMail1: TMenuItem
+        Tag = 99
+        Caption = 'E-Mail'
+        ImageIndex = 9
+      end
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+  end
+end

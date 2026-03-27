@@ -1,0 +1,489 @@
+object Tablo: TTablo
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Left = 239
+  Top = 144
+  Height = 569
+  Width = 798
+  object cnn: TADOConnection
+    ConnectionString = 
+      'Provider=SQLOLEDB.1;Persist Security Info=False;User ID=SA;Initi' +
+      'al Catalog=GENPER'
+    ConnectionTimeout = 3
+    LoginPrompt = False
+    Provider = 'SQLOLEDB.1'
+    AfterConnect = cnnAfterConnect
+    Left = 8
+    Top = 8
+  end
+  object TabKulhar: TADOQuery
+    Connection = cnn
+    Parameters = <
+      item
+        Name = 'Param1'
+        DataType = ftString
+        NumericScale = 255
+        Precision = 255
+        Size = 20
+        Value = Null
+      end
+      item
+        Name = 'Param2'
+        DataType = ftString
+        NumericScale = 255
+        Precision = 255
+        Size = 30
+        Value = Null
+      end>
+    SQL.Strings = (
+      
+        'Select * From KULHAR Where KULLANICIADI=:PKullanici and EKRAN=:P' +
+        'Ekran')
+    Left = 320
+    Top = 317
+  end
+  object TabKullan: TADOTable
+    Connection = cnn
+    IndexFieldNames = 'KULLANICIADI'
+    TableName = 'KULLAN'
+    Left = 257
+    Top = 316
+  end
+  object DtsKARTOKU: TDataSource
+    DataSet = sp_KartOku
+    Left = 232
+    Top = 160
+  end
+  object TabStatus: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterOpen = TabStatusAfterOpen
+    AfterScroll = TabStatusAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      'Select P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,'
+      'dbo.fn_GIRCIK(PK.CIKIS) AS GIRCIK,'
+      'GIRIS2=SUBSTRING(CONVERT (VARCHAR(20),PK.GIRIS),13,5),'
+      'GIRFARK=SUBSTRING(dbo.fn_GIRFARK(VARGIRIS,GIRIS),7,3),'
+      
+        'CIKFARK=SUBSTRING(dbo.fn_CIKFARK(VARGIRIS,VARCALSURE,GIRIS,CIKIS' +
+        '),7,5),'
+      'GEC_MAZERET,ERKEN_MAZERET'
+      'from PER_SABIT P,PERS_PDKS PK '
+      'where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 296
+    Top = 112
+  end
+  object DtsStatus: TDataSource
+    DataSet = TabStatus
+    Left = 296
+    Top = 160
+  end
+  object QTarSa: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'Select GetDate() AS TarSa')
+    Left = 344
+    Top = 112
+  end
+  object IniSQL: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 24
+    Top = 365
+  end
+  object Query1: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 8
+    Top = 493
+  end
+  object Query2: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 64
+    Top = 493
+  end
+  object Query3: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 128
+    Top = 493
+  end
+  object Query4: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 192
+    Top = 493
+  end
+  object Query5: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 264
+    Top = 493
+  end
+  object Query6: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 312
+    Top = 493
+  end
+  object TabKimlik: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterScroll = TabKimlikAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      
+        'Select P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,dbo.fn_GIRCIK(PK' +
+        '.CIKIS) AS GIRCIK'
+      'from PER_SABIT P,PERS_PDKS PK where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 80
+    Top = 24
+  end
+  object TabAraSQL: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterScroll = TabStatusAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      
+        'Select P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,dbo.fn_GIRCIK(PK' +
+        '.CIKIS) AS GIRCIK'
+      'from PER_SABIT P,PERS_PDKS PK where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 48
+    Top = 216
+  end
+  object TabMail: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterScroll = TabStatusAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      
+        'Select P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,dbo.fn_GIRCIK(PK' +
+        '.CIKIS) AS GIRCIK'
+      'from PER_SABIT P,PERS_PDKS PK where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 72
+    Top = 296
+  end
+  object TabSirket: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterScroll = TabStatusAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      
+        'Select P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,dbo.fn_GIRCIK(PK' +
+        '.CIKIS) AS GIRCIK'
+      'from PER_SABIT P,PERS_PDKS PK where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 112
+    Top = 136
+  end
+  object TabYemekhane: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'Select '
+      #9'P.PERKOD,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*'
+      'from '
+      #9'PER_SABIT P,PERS_YEMEKHANE PK where '
+      'PK.PERKOD=P.PERKOD and '
+      '((datepart(m,SABAH)=datepart(m,GETDATE()) and '
+      'datepart(d,SABAH)=datepart(d,GETDATE()) and '
+      'datepart(yy,SABAH)=datepart(yy,GETDATE())) '
+      ''
+      'OR '
+      '(datepart(m,OGLEN)=datepart(m,GETDATE()) and '
+      'datepart(d,OGLEN)=datepart(d,GETDATE()) and '
+      'datepart(yy,OGLEN)=datepart(yy,GETDATE()))'
+      ''
+      'OR'
+      ''
+      '(datepart(m,AKSAM)=datepart(m,GETDATE()) and '
+      'datepart(d,AKSAM)=datepart(d,GETDATE()) and '
+      'datepart(yy,AKSAM)=datepart(yy,GETDATE()))'
+      ''
+      ')'
+      ''
+      'ORDER BY SABAH,OGLEN,AKSAM')
+    Left = 488
+    Top = 112
+  end
+  object DtsYemekhane: TDataSource
+    DataSet = TabYemekhane
+    Left = 488
+    Top = 160
+  end
+  object sp_KARTOKU_YEMEK: TADOStoredProc
+    Connection = cnn
+    ProcedureName = 'P_KARTOKU_YEMEKHANE;1'
+    Parameters = <
+      item
+        Name = '@RETURN_VALUE'
+        DataType = ftInteger
+        Direction = pdReturnValue
+        Precision = 10
+        Value = Null
+      end
+      item
+        Name = '@KARTID'
+        Attributes = [paNullable]
+        DataType = ftString
+        Size = 8000
+        Value = 'DENEME'
+      end
+      item
+        Name = '@SURE'
+        Attributes = [paNullable]
+        DataType = ftInteger
+        Precision = 10
+        Value = 0
+      end
+      item
+        Name = '@MAXVAR'
+        Attributes = [paNullable]
+        DataType = ftFloat
+        Precision = 15
+        Value = 16.000000000000000000
+      end
+      item
+        Name = '@OKUYUCU_NO'
+        Attributes = [paNullable]
+        DataType = ftWord
+        Precision = 3
+        Value = 128
+      end>
+    Left = 448
+    Top = 216
+  end
+  object DtsKARTOKUYEMEK: TDataSource
+    DataSet = sp_KARTOKU_YEMEK
+    Left = 464
+    Top = 272
+  end
+  object sp_KartOku: TADOQuery
+    Connection = cnn
+    Parameters = <>
+    Left = 424
+    Top = 56
+  end
+  object ApplicationEvents: TApplicationEvents
+    OnException = ApplicationEventsException
+    Left = 584
+    Top = 40
+  end
+  object tmrBaglantiYenile: TTimer
+    Interval = 123000
+    OnTimer = tmrBaglantiYenileTimer
+    Left = 264
+    Top = 32
+  end
+  object Gecicicnn: TADOConnection
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=D:\Hastane\Personel' +
+      '\PDKSProcess\Gecici\Gecici.mdb;Persist Security Info=False'
+    LoginPrompt = False
+    Mode = cmShareDenyNone
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    BeforeConnect = GecicicnnBeforeConnect
+    Left = 568
+    Top = 360
+  end
+  object qGeciciKartEkle: TADOQuery
+    Connection = Gecicicnn
+    Parameters = <
+      item
+        Name = 'KartID'
+        Attributes = [paNullable]
+        DataType = ftWideString
+        NumericScale = 255
+        Precision = 255
+        Size = 510
+        Value = Null
+      end>
+    SQL.Strings = (
+      'insert into Kartlar(KartID)'
+      'values(:KartID)')
+    Left = 568
+    Top = 416
+  end
+  object qGeciciKartlarAktarilmayan: TADOQuery
+    Connection = Gecicicnn
+    Parameters = <>
+    SQL.Strings = (
+      
+        'SELECT Kartlar.ID, Kartlar.KartID, Kartlar.TarihSaat, Kartlar.Ek' +
+        'lemeTarihi, Kartlar.AktarimTarihi'
+      'FROM Kartlar'
+      'WHERE (((Kartlar.AktarimTarihi) Is Null));')
+    Left = 568
+    Top = 472
+  end
+  object qGeciciKartAktar: TADOQuery
+    Connection = cnn
+    Parameters = <
+      item
+        Name = 'KartID'
+        Attributes = [paNullable]
+        DataType = ftString
+        NumericScale = 255
+        Precision = 255
+        Size = 10
+        Value = Null
+      end
+      item
+        Name = 'TarihSaat'
+        Attributes = [paNullable]
+        DataType = ftDateTime
+        NumericScale = 3
+        Precision = 23
+        Size = 16
+        Value = Null
+      end
+      item
+        Name = 'EklemeTarihi'
+        Attributes = [paNullable]
+        DataType = ftDateTime
+        NumericScale = 3
+        Precision = 23
+        Size = 16
+        Value = Null
+      end
+      item
+        Name = 'AktarimTarihi'
+        Attributes = [paNullable]
+        DataType = ftDateTime
+        NumericScale = 3
+        Precision = 23
+        Size = 16
+        Value = Null
+      end>
+    SQL.Strings = (
+      
+        'SP_GECICI_KART_EKLE  :KartID,:TarihSaat, :EklemeTarihi , :Aktari' +
+        'mTarihi')
+    Left = 680
+    Top = 416
+  end
+  object TabBasitIzin: TADODataSet
+    Connection = cnn
+    CursorType = ctStatic
+    CommandText = 
+      'Select * from PERS_BASITIZIN '#13#10'where PERKOD=:PERKOD'#13#10'ORDER BY BA' +
+      'STAR,BITTAR'
+    CommandTimeout = 3000
+    IndexFieldNames = 'PERKOD'
+    MasterFields = 'PERKOD'
+    Parameters = <
+      item
+        Name = 'PERKOD'
+        Attributes = [paSigned]
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
+    Left = 714
+    Top = 144
+    object TabBasitIzinID: TIntegerField
+      FieldName = 'ID'
+    end
+    object TabBasitIzinPERKOD: TIntegerField
+      FieldName = 'PERKOD'
+    end
+    object TabBasitIzinBASTAR: TDateTimeField
+      FieldName = 'BASTAR'
+    end
+    object TabBasitIzinBITTAR: TDateTimeField
+      FieldName = 'BITTAR'
+    end
+    object TabBasitIzinGUN: TIntegerField
+      FieldKind = fkCalculated
+      FieldName = 'GUN'
+      Calculated = True
+    end
+    object TabBasitIzinACIKLAMA: TStringField
+      FieldName = 'ACIKLAMA'
+      Size = 200
+    end
+  end
+  object dtsBasitIzin: TDataSource
+    DataSet = TabBasitIzin
+    Left = 714
+    Top = 191
+  end
+  object dtsizinara: TDataSource
+    DataSet = Tabizinara
+    Left = 648
+    Top = 200
+  end
+  object Tabizinara: TADOQuery
+    Connection = cnn
+    CursorType = ctStatic
+    AfterScroll = TabizinaraAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      '')
+    Left = 648
+    Top = 144
+  end
+end

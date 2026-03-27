@@ -1,0 +1,1107 @@
+SetLength yapýlýyor. 
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 0
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 1
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 2
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 3
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 4
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 5
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 6
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 7
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 8
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 9
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 10
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 11
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 12
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 13
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 14
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 15
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 16
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 17
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 18
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 19
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 20
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 21
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 22
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 23
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 24
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 25
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 26
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 27
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 28
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 29
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 30
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 31
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 32
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 33
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 34
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 35
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 36
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 37
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 38
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 39
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 40
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 41
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 42
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 43
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 44
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 45
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 10:47:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-05 10:53:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 11:26:44
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 11:28:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-05 11:29:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-05 11:39:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:39:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:40:02
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-05 11:40:40
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-05 13:55:15
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 14:03:25
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 14:03:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 08:06:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 08:51:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 09:07:03
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 09:07:08
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 09:10:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 09:12:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-07 09:12:20
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 09:14:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 09:18:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 09:34:56
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 09:42:12
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 17:01:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 17:32:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 17:46:01
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 17:46:07
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 17:50:52
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 17:59:28
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 17:59:35
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 18:00:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 18:00:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 18:00:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 18:00:55
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-08 07:40:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-08 09:00:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-08 09:01:38
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-08 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-08 09:01:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-08 09:06:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-08 09:06:50
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-08 09:07:33
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-08 09:10:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-08 09:13:42
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-08 09:34:41
+SetLength yapýlýyor. 
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 0
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 1
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 2
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 3
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 4
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 5
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 6
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 7
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 8
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 9
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 10
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 11
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 12
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 13
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 14
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 15
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 16
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 17
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 18
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 19
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 20
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 21
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 22
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 23
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 24
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 25
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 26
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 27
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 28
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 29
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 30
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 31
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 32
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 33
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 34
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 35
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 36
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 37
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 38
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 39
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 40
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 41
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 42
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 43
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 44
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 45
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 10:47:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-05 10:53:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 11:26:44
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 11:28:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-05 11:29:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-05 11:39:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:39:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:40:02
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-05 11:40:40
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-05 13:55:15
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 14:03:25
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 14:03:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 08:06:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 08:51:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 09:07:03
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 09:07:08
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 09:10:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 09:12:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-07 09:12:20
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 09:14:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 09:18:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 09:34:56
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 09:42:12
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 17:01:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 17:32:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 17:46:01
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 17:46:07
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 17:50:52
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 17:59:28
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 17:59:35
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 18:00:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 18:00:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 18:00:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 18:00:55
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-08 07:40:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-08 09:00:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-08 09:01:38
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-08 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-08 09:01:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-08 09:06:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-08 09:06:50
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-08 09:07:33
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-08 09:10:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-08 09:13:42
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-08 09:34:41
+SetLength yapýlýyor. 
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 0
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:47:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 1
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 10:53:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 2
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:26:44
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 3
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:28:24
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 4
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:29:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 5
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 6
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:39:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 7
+LogBilgiler geçiçiye alýnýyor.Kod: 14
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:02
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 8
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 11:40:40
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 9
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 13:55:15
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 10
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:25
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 11
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 05/10/2013 14:03:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 12
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:06:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 13
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 08:51:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 14
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 15
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:03
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 16
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:07:08
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 17
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:10:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 18
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 19
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:12:20
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 20
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:14:30
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 21
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:18:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 22
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:34:56
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 23
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 09:42:12
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 24
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:01:09
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 25
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:32:19
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 26
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:01
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 27
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:46:07
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 28
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:50:52
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 29
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:28
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 30
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 17:59:35
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 31
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:04
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 32
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:10
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 33
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:16
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 34
+LogBilgiler geçiçiye alýnýyor.Kod: 20
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 07/10/2013 18:00:55
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 35
+LogBilgiler geçiçiye alýnýyor.Kod: 6
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 07:40:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 36
+LogBilgiler geçiçiye alýnýyor.Kod: 16
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:00:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 37
+LogBilgiler geçiçiye alýnýyor.Kod: 19
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:38
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 38
+LogBilgiler geçiçiye alýnýyor.Kod: 1
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:48
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 39
+LogBilgiler geçiçiye alýnýyor.Kod: 9
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:01:54
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 40
+LogBilgiler geçiçiye alýnýyor.Kod: 17
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:29
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 41
+LogBilgiler geçiçiye alýnýyor.Kod: 18
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:06:50
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 42
+LogBilgiler geçiçiye alýnýyor.Kod: 30
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:07:33
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 43
+LogBilgiler geçiçiye alýnýyor.Kod: 15
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:10:22
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 44
+LogBilgiler geçiçiye alýnýyor.Kod: 25
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:13:42
+LogBilgiler geçiçiye alýnýyor . 
+Kayýt No : 45
+LogBilgiler geçiçiye alýnýyor.Kod: 50
+Önce LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+sonra LogBilgiler geçiçiye alýnýyor.ReaderNo: 1
+Önce LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+Sonra LogBilgiler geçiçiye alýnýyor.TTarih: 08/10/2013 09:34:41
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 10:47:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-05 10:53:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 11:26:44
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 11:28:24
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-05 11:29:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-05 11:39:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:39:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 14------> 2013-10-05 11:40:02
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-05 11:40:40
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-05 13:55:15
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-05 14:03:25
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-05 14:03:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 08:06:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 08:51:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 09:07:03
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 09:07:08
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 09:10:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 09:12:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-07 09:12:20
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 09:14:30
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 09:18:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 09:34:56
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 09:42:12
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-07 17:01:09
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-07 17:32:19
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-07 17:46:01
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-07 17:46:07
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-07 17:50:52
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-07 17:59:28
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-07 17:59:35
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-07 18:00:04
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-07 18:00:10
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-07 18:00:16
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 20------> 2013-10-07 18:00:55
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 6------> 2013-10-08 07:40:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 16------> 2013-10-08 09:00:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 19------> 2013-10-08 09:01:38
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 1------> 2013-10-08 09:01:48
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 9------> 2013-10-08 09:01:54
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 17------> 2013-10-08 09:06:29
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 18------> 2013-10-08 09:06:50
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 30------> 2013-10-08 09:07:33
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 15------> 2013-10-08 09:10:22
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 25------> 2013-10-08 09:13:42
+LogBilgiler Dataya yazýlýyor alýnýyor.kod: 50------> 2013-10-08 09:34:41

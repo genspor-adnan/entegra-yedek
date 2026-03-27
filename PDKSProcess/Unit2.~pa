@@ -1,0 +1,18 @@
+unit Unit2;
+
+interface
+const
+  RFID_103_485_DLL   = 'RFID_107_485.dll';
+
+  Function OpenPort   (Prm1:LongWord):LongWord;   cdecl; External RFID_103_485_DLL name 'OpenPort';
+  Function ClosePort  (Prm1:LongWord):LongWord;   cdecl; External RFID_103_485_DLL name 'ClosePort';
+  Function CheckCard  (Prm1:LongWord;Prm2: LongWord;Prm3:LongWord):PChar; cdecl; External RFID_103_485_DLL name 'CheckCard';
+  Function CheckReader(Prm1:LongWord;Prm2: LongWord;Prm3:LongWord):Longint; cdecl; External RFID_103_485_DLL name 'CheckReader';
+  Function WriteWorkingType(Prm1:LongWord;Prm2: LongWord;Prm3:String;Prm4:LongWord):Longint; cdecl; External RFID_103_485_DLL name 'WriteWorkingType';
+  Function WriteMessage(Prm1:LongWord;Prm2: LongWord;Prm3:String;Prm4:LongWord):Longint; cdecl; External RFID_103_485_DLL name 'WriteMessage';
+  Function CardAnswer(Prm1:LongWord;Prm2: LongWord;Prm3:String;Prm4:LongWord):Longint; cdecl; External RFID_103_485_DLL name 'CardAnswer';
+
+implementation
+
+end.
+

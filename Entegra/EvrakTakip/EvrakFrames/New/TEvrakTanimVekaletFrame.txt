@@ -1,0 +1,304 @@
+inherited EvrakTanimVekaletFrame: TEvrakTanimVekaletFrame
+  Width = 849
+  Height = 362
+  ExplicitWidth = 849
+  ExplicitHeight = 362
+  object Splitter1: TSplitter [0]
+    Left = 400
+    Top = 33
+    Height = 329
+    Align = alRight
+    ExplicitLeft = 593
+    ExplicitTop = 68
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 849
+    ExplicitWidth = 849
+    inherited butttonSil: TSpeedButton
+      ExplicitLeft = 239
+      ExplicitTop = 5
+    end
+  end
+  object GridEvrakBirim: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 394
+    Height = 323
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    object ViewEvrak: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      FindPanel.ShowNextButton = False
+      FindPanel.ShowPreviousButton = False
+      FindPanel.UseDelayedFind = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewEvrakID: TcxGridDBColumn
+        DataBinding.FieldName = 'ID'
+        Visible = False
+      end
+      object ViewEvrakVEKALET_VEREN_ID: TcxGridDBColumn
+        Caption = 'Vekalet Veren'
+        DataBinding.FieldName = 'VEKALET_VEREN_ID'
+      end
+      object ViewEvrakVEKALET_ALAN_ID: TcxGridDBColumn
+        Caption = 'Vekalet Alan'
+        DataBinding.FieldName = 'VEKALET_ALAN_ID'
+      end
+      object ViewEvrakBASLANGIC_TARIHI: TcxGridDBColumn
+        Caption = 'Ba'#351'lang'#305#231' Tarihi'
+        DataBinding.FieldName = 'BASLANGIC_TARIHI'
+        Width = 110
+      end
+      object ViewEvrakBITIS_TARIHI: TcxGridDBColumn
+        Caption = 'Biti'#351'i Tarihi'
+        DataBinding.FieldName = 'BITIS_TARIHI'
+        Width = 97
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewEvrak
+    end
+  end
+  object GridPanel1: TGridPanel [3]
+    AlignWithMargins = True
+    Left = 406
+    Top = 36
+    Width = 440
+    Height = 323
+    Align = alRight
+    ColumnCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 160.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 300.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 0
+        Control = editVeklaetVeren
+        Row = 0
+      end
+      item
+        Column = 0
+        Control = Label3
+        Row = 1
+      end
+      item
+        Column = 0
+        Control = Label4
+        Row = 2
+      end
+      item
+        Column = 0
+        Control = Label5
+        Row = 3
+      end
+      item
+        Column = 1
+        Control = lookupVekaletVeren
+        Row = 0
+      end
+      item
+        Column = 1
+        Control = lookupVekaletAlan
+        Row = 1
+      end
+      item
+        Column = 1
+        Control = editBaslangicTarihi
+        Row = 2
+      end
+      item
+        Column = 1
+        Control = editBitisTarihi
+        Row = 3
+      end>
+    RowCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end>
+    TabOrder = 2
+    object editVeklaetVeren: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 69
+      Height = 22
+      Align = alLeft
+      Caption = 'Vekalet Veren'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object Label3: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 32
+      Width = 64
+      Height = 22
+      Align = alLeft
+      Caption = 'Vekalet Alan'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object Label4: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 60
+      Width = 81
+      Height = 22
+      Align = alLeft
+      Caption = 'Ba'#351'lang'#305#231' Tarihi'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object Label5: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 88
+      Width = 53
+      Height = 22
+      Align = alLeft
+      Caption = 'Biti'#351' Tarihi'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object lookupVekaletVeren: TcxDBLookupComboBox
+      AlignWithMargins = True
+      Left = 164
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'VEKALET_VEREN_ID'
+      DataBinding.DataSource = dsEvrak
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'FIRMA'
+        end>
+      Properties.ListSource = dsLookupVekalet
+      TabOrder = 0
+      Width = 189
+    end
+    object lookupVekaletAlan: TcxDBLookupComboBox
+      AlignWithMargins = True
+      Left = 164
+      Top = 32
+      Align = alLeft
+      DataBinding.DataField = 'VEKALET_ALAN_ID'
+      DataBinding.DataSource = dsEvrak
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'FIRMA'
+        end>
+      Properties.ListSource = dsLookupVekalet
+      TabOrder = 1
+      Width = 189
+    end
+    object editBaslangicTarihi: TcxDBDateEdit
+      AlignWithMargins = True
+      Left = 164
+      Top = 60
+      Align = alLeft
+      DataBinding.DataField = 'BASLANGIC_TARIHI'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 2
+      Width = 121
+    end
+    object editBitisTarihi: TcxDBDateEdit
+      AlignWithMargins = True
+      Left = 164
+      Top = 88
+      Align = alLeft
+      DataBinding.DataField = 'BITIS_TARIHI'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 3
+      Width = 121
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    Active = True
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_VEKALET')
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+  object qryLookupVekalet: TADOQuery
+    Connection = Tablo.cnn
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT ID,FIRMA FROM REHBER WHERE GRUP=335'
+      'Order by FIRMA')
+    Left = 88
+    Top = 200
+  end
+  object dsLookupVekalet: TDataSource
+    AutoEdit = False
+    DataSet = qryLookupVekalet
+    Left = 288
+    Top = 248
+  end
+end

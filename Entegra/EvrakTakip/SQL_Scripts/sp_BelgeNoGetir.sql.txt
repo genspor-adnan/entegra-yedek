@@ -1,0 +1,80 @@
+--  exec [dbo].[sp_BelgeNoGetir] 14,-1,1401, '2019-04-08 11:00'
+--  exec [dbo].[sp_BelgeNoGetir] 14,-1,25008    ,'2019-04-10 13:29' 
+
+ALTER procedure [dbo].[sp_BelgeNoGetir](@IslemTur int, @SubeID int, @Kocanno int = 0, @BTarihi DateTime='2000-01-01')
+AS
+BEGIN 
+       declare @BELGENO TABLE (KOCANNO int, BELGESERI nvarchar(5), BELGENO nvarchar(20))
+
+       declare @AKocanno int, @ABelgeseri nvarchar(5), @ABelgeno nvarchar(20), @UstTur int, @Dijitsay int, 
+          @BaslaNo nvarchar(25), @BasTarihi datetime
+       declare @sqlCommand nvarchar(100), @NextValue int
+       set @Dijitsay = 0   
+       select @UstTur = case 
+             when @IslemTur in (21,22,23,24,25,26,27,28,29,88,130,141,142) then -101
+             when @IslemTur in (31,32,33,34,35,36,37,38,98,125,131,137,140) then -102
+             when @IslemTur in (40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,132,133,134,135,136,138,139,143,144,145,146,147,148,149) then -103
+             else @IslemTur end
+
+       if @Kocanno in ( 0 , -99 ) 
+             set @AKocanno = (select top 1 KOCANNO from KOCANAYARLARI where SUBEID=@SubeID and TUR=@UstTur)
+       else 
+             set @AKocanno = @Kocanno
+
+       if @AKocanno = -3333 begin
+             set @ABelgeseri = ''
+             if @UstTur in (3, 4 ,6, 8, 10, 11, 12, 14, 15, 16, 20, 39, 110, 116, 119, 222) 
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from FATBASLIK
+             else if @UstTur in (9, 19, 101,105)
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from SIPARIS
+             else if @UstTur = 83 
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from SERVIS
+             else if @UstTur in (80,81) 
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from TEKLIF
+             else if @UstTur = 250 
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from DOKUMAN
+						 else if @UstTur = 251
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from DOKUMAN WHERE KLASOR <-999 and klasor>-3000
+             else
+                    select @ABelgeno=convert(nvarchar(20),max(ID)+1) from KASA
+       end else if @AKocanno <> 0 begin
+             select @ABelgeseri=SERINO,@BaslaNo=BASLANGICNO, @Dijitsay=len(BASLANGICNO),@BasTarihi =BASLANGICTARIHI 
+                     from KOCANAYARLARI where SUBEID=@SubeID and TUR=@UstTur and KOCANNO=@AKocanno
+
+             if @UstTur in (3, 4 ,6, 8, 10, 11, 12, 14, 15, 16, 20, 39, 110, 116, 119, 222) 
+                    set @ABelgeno = isnull((select convert(nvarchar(20),max(convert(decimal(24,0),FATURANO))+1) 
+                                  from FATBASLIK where FATURATARIH >= @BasTarihi AND TUR=@UstTur and KOCANNO=@AKocanno and isnumeric(FATURANO)=1), @BaslaNo)
+             else if @UstTur in (9, 19, 101,105)
+                    set @ABelgeno = isnull((select convert(nvarchar(20),max(convert(decimal(24,0),SIPARISNO))+1) from SIPARIS 
+                                  where SIPARISTARIH >= @BasTarihi AND KOCANNO=@AKocanno and isnumeric(SIPARISNO)=1), @BaslaNo)
+             else if @UstTur = 83 
+                    set @ABelgeno = isnull((select convert(nvarchar(20),max(convert(decimal(24,0),SERVISNO))+1) from SERVIS 
+                                  where TARIH >= @BasTarihi AND KOCANNO=@AKocanno and isnumeric(SERVISNO)=1), @BaslaNo)
+             else if @UstTur in (80,81) 
+                    set @ABelgeno = isnull((select convert(nvarchar(20),max(convert(decimal(24,0),TEKLIFNO))+1) from TEKLIF 
+                                  where TARIH >= @BasTarihi AND KOCANNO=@AKocanno and isnumeric(TEKLIFNO)=1), @BaslaNo)
+             else if @UstTur = 166 --üretim emri 
+                    set @ABelgeno = isnull((select convert(nvarchar(20),max(convert(decimal(24,0),EMIRNO))+1) from URETIMEMRI
+                                  where TALEPTARIHI >= @BasTarihi  and isnumeric(EMIRNO)=1), @BaslaNo)
+             else if @UstTur =250 
+                    set @ABelgeno= isnull((select convert(nvarchar(20),max(convert(decimal(24,0),BELGENO))+1) from DOKUMAN 
+                                  where EKLEMETARIHI >= @BasTarihi AND isnumeric(BELGENO)=1), @BaslaNo) 
+             else if @UstTur =251
+                    set @ABelgeno= isnull((select convert(nvarchar(20),max(convert(decimal(24,0),BELGENO))+1) from DOKUMAN 
+                                  where EKLEMETARIHI >= @BasTarihi AND isnumeric(BELGENO)=1 AND KLASOR <-999 AND klasor>-3000), @BaslaNo) 
+								
+             else if @UstTur in (-103,-102,-101) begin
+                    SET @sqlCommand = 'select @NextValue = NEXT VALUE FOR dbo.seq_'+convert(nvarchar(20),@AKocanno)
+                    EXECUTE sp_executesql @sqlCommand, N'@AKocanno int ,@NextValue int OUTPUT', @AKocanno = @AKocanno, @NextValue=@NextValue OUTPUT
+                    set @ABelgeno = convert(nvarchar(20),@NextValue)
+             end
+       end 
+       while len(@ABelgeno)<@Dijitsay
+             set @ABelgeno = '0' + @ABelgeno
+
+       insert into @BELGENO (KOCANNO, BELGESERI, BELGENO)
+       values(@AKocanno,@ABelgeseri,@ABelgeno)
+
+  select * from @BELGENO
+
+end

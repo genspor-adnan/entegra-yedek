@@ -1,0 +1,91 @@
+unit uCamera;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, Buttons, clipbrd, enhavicap, vfw,jpeg;
+
+type
+  TCamera = class(TForm)
+    Panel1: TPanel;
+    BTNKapat: TSpeedButton;
+    video: TEnhAVICap;
+    function OpenVideo(Driver:String):boolean;
+    procedure BTNKapatClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    function  ResimKaydet(PERKOD:integer;Tarih:TDateTime;GirisCikis:String):boolean;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Camera: TCamera;
+
+implementation
+
+uses
+  uTablo;
+
+{$R *.dfm}
+
+function TCamera.ResimKaydet(PERKOD:integer;Tarih:TDateTime;GirisCikis:String):boolean;
+var
+DosyaAdi:String;
+BMP:TImage;
+TResim:TJPEGImage;
+begin
+DosyaAdi:=SResimYol + '\' + GirisCikis + inttostr(PERKOD) +  '.jpg';
+if video.ToClipboard then
+begin
+  bmp := TImage.Create(nil);
+  TResim:=TJPEGImage.Create;
+  bmp.picture.bitmap.assign(clipboard);
+//BMP.Picture.SaveToFile(DosyaAdi);
+  TResim.assign(bmp.Picture.Bitmap);
+  TResim.SaveToFile(DosyaAdi);
+  TResim.Free;
+  BMP.Free;
+end;
+
+end;
+
+function TCamera.OpenVideo(Driver:String):boolean;
+var
+i:integer;
+BmpHead:TBitmapInfo;
+begin
+if driver<>'' then
+begin
+  result:=false;
+  for i:=0 to camera.video.CapDrivers.count-1 do
+  begin
+    if Driver<>format('%d - %s',[i,camera.video.CapDrivers.strings[i]]) then
+      continue;
+    video.OpenVideo(i);
+    if video.IsOpen then
+    begin
+      CapGetVideoFormat(video.CapWnd,@BmpHead,sizeof(BmpHead));
+      result:=true;
+//      img.picture.bitmap.width :=BmpHead.bmiHeader.biWidth ;
+//      img.picture.bitmap.height:=BmpHead.bmiHeader.biHeight;
+    end;
+  end;
+end
+else
+  result:=false;
+end;
+
+procedure TCamera.BTNKapatClick(Sender: TObject);
+begin
+Close;
+end;
+
+procedure TCamera.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+Action:=caHide;
+end;
+
+end.

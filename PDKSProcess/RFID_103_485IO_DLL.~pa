@@ -1,0 +1,43 @@
+unit	RFID_103_485IO_DLL;
+
+interface
+
+const
+  RFID_103_485IO   = 'RFID_103_485IO.dll';
+
+  Function OSearchPort   (Prm1:LongWord)                                                            :LongWord; cdecl; External RFID_103_485IO name 'SearchPort';
+  Function OCheckPort    (Prm1:LongWord)                                                            :LongWord; cdecl; External RFID_103_485IO name 'CheckPort';
+  Function OSearchReader (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'SearchReader';
+  Function OCheckReader  (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'CheckReader';
+  Function OGetCardID    (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'GetCardID';
+  Function OClearScreen  (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'ClearScreen';
+  Function OWriteText    (Prm1:LongWord; Prm2:LongWord; Prm3:String)                                :LongWord; cdecl; External RFID_103_485IO name 'WriteText';
+  Function OErrorBeep    (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'ErrorBeep';
+  Function OShowBitmap   (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord)                              :LongWord; cdecl; External RFID_103_485IO name 'ShowBitmap';
+  Function OSetBaudRate  (Prm1:LongWord)                                                            :LongWord; cdecl; External RFID_103_485IO name 'SetBaudRate';
+  Function OGetBaudRate  ()                                                                         :LongWord; cdecl; External RFID_103_485IO name 'GetBaudRate';
+  Function OSendMifare   (Prm1:LongWord; Prm2:LongWord; Prm3:String)                                :PChar;    cdecl; External RFID_103_485IO name 'SendMifare';
+  Function OOpenPort     (Prm1:LongWord)                                                            :LongWord; cdecl; External RFID_103_485IO name 'OpenPort';
+  Function OClosePort    (Prm1:LongWord)                                                            :LongWord; cdecl; External RFID_103_485IO name 'ClosePort';
+  Function ORelay        (Prm1:LongWord; Prm2:LongWord ; Prm3:LongWord)                              :LongWord; cdecl; External RFID_103_485IO name 'Relay';
+
+  Function OGetCardIDIO  (Prm1:LongWord; Prm2:LongWord)                                             :LongWord; cdecl; External RFID_103_485IO name 'GetCardIDIO';
+
+  Function OLogin        (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:String)                 :LongWord; cdecl; External RFID_103_485IO name 'Login';
+  Function OLoginChange  (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:String)                 :LongWord; cdecl; External RFID_103_485IO name 'LoginChange';
+
+  Function ORead         (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:LongWord)               :PChar;    cdecl; External RFID_103_485IO name 'Read';
+  Function OWrite        (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:LongWord; Prm5:String)  :LongWord; cdecl; External RFID_103_485IO name 'Write';
+//  Function ReadData     (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:LongWord)               :PChar;    cdecl; External RFID_103_485IO name 'ReadData';
+//  Function WriteData    (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:LongWord; Prm5:String)  :LongWord; cdecl; External RFID_103_485IO name 'WriteData';
+  Function OReadValue    (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord; Prm4:LongWord)               :PChar;    cdecl; External RFID_103_485IO name 'ReadValue';
+  Function OWriteValue   (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord;Prm4:LongWord; Prm5:LongWord):LongWord; cdecl; External RFID_103_485IO name 'WriteValue';
+
+  Function OIncrement    (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord;Prm4:LongWord; Prm5:LongWord) :LongWord; cdecl; External RFID_103_485IO name 'Increment';
+  Function ODecrement    (Prm1:LongWord; Prm2:LongWord; Prm3:LongWord;Prm4:LongWord; Prm5:LongWord) :LongWord; cdecl; External RFID_103_485IO name 'Decrement';
+
+  Function OSendText     (Prm1:LongWord; Prm2:LongWord; Prm3:String)                                :LongWord; cdecl; External RFID_103_485IO name 'SendText';
+
+implementation
+
+end.

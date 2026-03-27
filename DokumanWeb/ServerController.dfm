@@ -1,0 +1,54 @@
+object IWServerController: TIWServerController
+  OldCreateOrder = False
+  OnCreate = IWServerControllerBaseCreate
+  AuthBeforeNewSession = False
+  AllowSubFolders = False
+  AppName = 'GenDokuman'
+  CharSet = 'UTF-8'
+  CacheExpiry = 120
+  ComInitialization = ciMultiThreaded
+  Compression.Enabled = True
+  Compression.Level = 6
+  Description = 'GenDokuman WEBSERVE'
+  DebugHTML = False
+  Log = loNone
+  EnableImageToolbar = False
+  ExceptionDisplayMode = smAlert
+  ExecCmd = 'EXEC'
+  HistoryEnabled = False
+  InternalFilesURL = '/'
+  Browser32Behaviour.Netscape4As32 = True
+  Browser32Behaviour.Netscape6As32 = True
+  Browser32Behaviour.IExplorer4As32 = True
+  PageTransitions = False
+  Port = 8888
+  ReEntryOptions.AutoCreateSession = False
+  RestrictIPs = False
+  RestrictSubnet = False
+  RedirectMsgDelay = 0
+  ServerResizeTimeout = 0
+  SessionTrackingMethod = tmURL
+  ShowResyncWarning = True
+  ShowLoadingAnimation = True
+  SessionTimeout = 10
+  SupportedBrowsers = [brIE, brGecko, brOpera, brSafari, brChrome]
+  SpecialDeviceSupport = [brsIpod, brsIphone]
+  SSLOptions.NonSSLRequest = nsAccept
+  SSLOptions.Port = 0
+  SSLOptions.SSLVersion = sslv3
+  ThreadPoolSize = 32
+  UnknownBrowserAction = ubReject
+  Version = '10.0.0'
+  OnNewSession = IWServerControllerBaseNewSession
+  Height = 310
+  Width = 342
+  object Pool: TIWDataModulePool
+    OnCreateDataModule = PoolCreateDataModule
+    OnFreeDataModule = PoolFreeDataModule
+    PoolCount = 20
+    Active = False
+    Version = '2.0.0'
+    Left = 36
+    Top = 60
+  end
+end

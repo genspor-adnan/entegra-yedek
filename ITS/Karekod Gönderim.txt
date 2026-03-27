@@ -1,0 +1,124 @@
+procedure TStokGirisDlg.buttonTekBarkodYazClick(Sender: TObject);
+Var YazSay:Integer;
+    FBarkod,FStokAdi,FSeriNo,FLotno,FSKT,TempSKT:string;
+begin
+// tekli barkod yazdýrma iþlemi
+if Tablo.StokGirHar.RecordCount=0 then begin ShowMessage('Yazdýrýlacak kayýt bilgisi bulunamadý'); end;
+
+if Tablo.StokGirHar.State in [dsedit,dsinsert] then
+  Tablo.StokGirHar.Post;
+
+  YazSay:=Tablo.StokGirHar.FieldByName('YAZ').AsInteger;
+  if YazSay=0 then Exit;
+
+  if (not FileExists(KarekodSablonDosyasiYolu)) or (KarekodBaslikBarkoduYazdir and ( not FileExists(KareKodBaslikSablonDosyasiYolu))) then
+  begin
+    Application.MessageBox('Þablon dosyalarý belirtilmemiþ yada doðru dosya yolunu göstermiyor.','DÝKKAT',MB_ICONERROR);
+    abort;
+  end;
+
+  FBarkod:=Tablo.BarkodNumarasiGetir(Tablo.StokGirHar.FieldByName('STOKKOD').AsString);
+  if Length(FBarkod)=13 then
+    FBarkod:='0'+FBarkod
+  else
+  begin
+    ShowMessage('Barkod Numarasý hatalý('+Tablo.StokGirHar.FieldByName('STOKAD').AsString+')');
+    Abort;
+  end;
+
+  FStokAdi:=Tablo.StokGirHar.FieldByName('STOKAD').AsString;
+  FSeriNo:=Tablo.StokGirHar.FieldByName('SERINO').AsString;
+  FLotno:=Tablo.StokGirHar.FieldByName('LOTNO').AsString;
+  TempSKT:=FormatDateTime('YYYY/MM/DD',Tablo.StokGirHar.FieldByName('SKT').AsDateTime);
+  FSKT:=Copy(TempSKT,3,2)+Copy(TempSKT,6,2)+Copy(TempSKT,9,2);
+
+  Tablo.KareKodYazdir(FBarkod,FStokAdi,FSeriNo,FLotno,FSKT,YazSay);
+
+end;
+{------------------------------------------------------------------------------------------------------------------------}
+
+procedure TTablo.KareKodYazdir(ABarkod,AStokAdi,ASeriNo,ALotNo,ASKT:string;AMiktar:integer);
+var
+  YazMiktar:Integer;
+  TempSablon:String;
+
+function YazMiktarHesapla(AYaz,AEtiketSeritSayisi,ABasilacakMiktar:Integer):Integer;
+var TempYaz:Integer;
+    TempResult:Real;
+
+Begin
+  TempYaz:=AYaz*ABasilacakMiktar;
+  if AEtiketSeritSayisi<>0 then begin
+    TempResult:=TempYaz/AEtiketSeritSayisi;
+    if Frac(TempResult)>0 then
+      Result:=Trunc(TempResult)+1
+    else
+      Result:=Trunc(TempResult);
+  end else
+    Result:=TempYaz;
+end;
+
+
+function SablonDuzenle(AKarekodSablonDosyasiYolu:string):string;
+var  F : TextFile;
+  satiretiketsayisi,fi,etiketbitis: integer;
+  sablon,tmpStr,basilacak : String;
+  baskihizi,yuklemesuresi ,MaksEtiketSay: integer;
+  TempUrunAdi,UrunAdi1,UrunAdi2,UrunAdi3:string;
+
+begin
+    AssignFile(F,AKarekodSablonDosyasiYolu);
+    Reset(F);
+    sablon := '';
+    AStokAdi:=TurkishToEnglishCharset(AStokAdi);
+    TempUrunAdi:=AStokAdi;
+    UrunAdi1:=Copy(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+    Delete(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+    UrunAdi2:=Copy(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+    Delete(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+    UrunAdi3:=Copy(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+    Delete(TempUrunAdi,1,KareKodEtiketKarakterSayisi);
+
+    Repeat
+      Readln(F,tmpStr);
+      tmpStr := StringReplace(tmpstr,'{URUN_ADI}',AStokAdi,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_ADI1}',UrunAdi1,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_ADI2}',UrunAdi2,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_ADI3}',UrunAdi3,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_BARKOD}',ABarkod,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_SONKULTAR}',ASKT  ,[rfReplaceAll]);
+      tmpStr := StringReplace(tmpstr,'{URUN_LOT}', ALotNo ,[rfReplaceAll]);
+      sablon := sablon + tmpStr;
+    Until EOF(F);
+    CloseFile(F);
+    sablon := StringReplace(sablon,'{ETIKETBASLA}','',[rfReplaceAll]);
+    etiketbitis := Pos('{ETIKETBIT}',sablon);
+
+    repeat
+    if pos('{URUN_SIRANO}',sablon) <> 0 then
+    begin
+            Insert(ASeriNo,sablon,pos('{URUN_SIRANO}',sablon));
+            Delete(sablon,pos('{URUN_SIRANO}',sablon),13);
+    end;
+    until (pos('{URUN_SIRANO}',sablon) > etiketbitis) or (pos('{URUN_SIRANO}',sablon) = 0) ;
+    Delete(sablon,pos('{ETIKETBIT}',sablon),11);
+
+    Result:=Sablon;
+end;
+
+begin // karekod yazdýrma iþlemi
+  if (Trim(ALotNo) = '') or (Trim(ASeriNo) = '') then
+  begin
+    Application.MessageBox(' Lot No (Parti No) veya Seri No(Sýra No) alan bilgileri boþ olamaz.','DÝKKAT',MB_ICONERROR);
+    abort;
+  end;
+
+  YazMiktar:=YazMiktarHesapla(AMiktar,KareKodEtiketSeritSayisi,KareKodBasilacakEtiketSayisi);
+  while (YazMiktar>0) do Begin
+
+    TempSablon:=SablonDuzenle(KarekodSablonDosyasiYolu);
+    {Yazdýr iþlemi baþlýyor.}
+    ComPort.WriteStr(TempSablon); // Comport hatasý vermemesi için debug ederken kapatýyoruz.
+    YazMiktar:=YazMiktar-1;
+  end;
+end;

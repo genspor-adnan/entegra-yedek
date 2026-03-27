@@ -1,0 +1,345 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{361CE890-F8DA-4657-998E-7421C82486BF}</ProjectGuid>
+        <MainSource>MuhasebeGentegrasyon.dpr</MainSource>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <ProjectVersion>14.4</ProjectVersion>
+        <FrameworkType>VCL</FrameworkType>
+        <Base>True</Base>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <VerInfo_Release>9</VerInfo_Release>
+        <VerInfo_MinorVer>12</VerInfo_MinorVer>
+        <VerInfo_Locale>1055</VerInfo_Locale>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=Feta Bilgisayar Ltd. Şti.;FileDescription=Gentegre --&gt;Entegrasyon Modülü;FileVersion=20.12.9.1;InternalName=Gentegre --&gt;Entegrasyon Modülü 1.00;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=Gentegre --&gt;Entegrasyon Modülü;ProductVersion=1.0.0.0;Comments=;LastCompiledTime=02/09/2008 12:00:15</VerInfo_Keys>
+        <VerInfo_MajorVer>20</VerInfo_MajorVer>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;Bde;Data.Win;System.Win;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Build>1</VerInfo_Build>
+        <DCC_UsePackage>vclx;vcl;vclimg;dbrtl;Rave77VCL;bdertl;rtl;vclactnband;xmlrtl;vcldb;vcldbx;vcltouch;dsnap;dsnapcon;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapServer;DBXInterBaseDriver;DBXMySQLDriver;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;localizer14;dxBarDBNavD14;dxBarD14;dxCoreD14;cxBarEditItemD14;cxExtEditorsD14;cxEditorsD14;cxLibraryD14;dxBarExtDBItemsD14;dxBarExtItemsD14;dxRibbonD14;cxPageControlD14;cxGridD14;dxLayoutControlD14;dxLayoutControlcxEditAdaptersD14;cxSpreadSheetD14;cxTreeListD14;cxTreeListdxBarPopupMenuD14;cxVerticalGridD14;dxFlowChartD14;cxSchedulerD14;cxSchedulerGridD14;dxorgcD14;dxdborD14;dxmdsD14;dxdbtrD14;dxtrmdD14;dxPSCoreD14;dxPSLnksD14;vclshlctrls;dxPScxCommonD14;dxPScxExtCommonD14;dxPScxPCProdD14;dxPScxSSLnkD14;dxPScxVGridLnkD14;dxPSTeeChartD14;dxPSDBTeeChartD14;dxPSdxDBTVLnkD14;dxPSdxFCLnkD14;dxPSdxLCLnkD14;dxPSdxOCLnkD14;dxPSdxDBOCLnkD14;dxPsPrVwAdvD14;dxPScxGrid6LnkD14;cxPivotGridD14;cxPivotGridChartD14;cxPivotGridOLAPD14;dcldxSkinsCoreD14;dxSkinsCoreD14;dxSkinscxPCPainterD14;dxSkinsdxLCPainterD14;dxSkinscxScheduler3PainterD14;dxSkinsdxNavBar2PainterD14;dxNavBarD14;dxSkinsdxDLPainterD14;dxSkinsdxRibbonPainterD14;dxSkinsdxBarPainterD14;dxDockingD14;dxSkinBlackD14;dxSkinBlueD14;dxSkinSilverD14;dxSkinStardustD14;dxSkinValentineD14;dxSkinXmas2008BlueD14;dxSkinCaramelD14;dxSkinCoffeeD14;dxSkinPumpkinD14;dxSkinDarkSideD14;dxSkinGlassOceansD14;dxSkiniMaginaryD14;dxSkinLilianD14;dxSkinMcSkinD14;dxSkinLiquidSkyD14;dxSkinLondonLiquidSkyD14;dxSkinMoneyTwinsD14;dxSkinOffice2007BlackD14;dxSkinOffice2007BlueD14;dxSkinOffice2007GreenD14;dxSkinOffice2007PinkD14;dxSkinOffice2007SilverD14;dxSkinSummer2008D14;dxSkinSpringTimeD14;dxSkinSevenD14;dxSkinFoggyD14;dxSkinDarkRoomD14;dxSkinSharpD14;dxSpellCheckerD14;sbridge140;indy10sbridge140;fs14;frx14;frxcs14;fsDB14;frxDB14;fsBDE14;frxBDE14;fsADO14;frxADO14;fsIBX14;frxIBX14;frxDBX14;frxe14;fsTee14;frxTee14;SynEdit_R2009;WMPLib;JvRuntimeDesignD14R;JclVcl;Jcl;JvCoreD14R;JvTimeFrameworkD14R;JvSystemD14R;JvStdCtrlsD14R;JvAppFrmD14R;JvBandsD14R;JvDBD14R;JvDlgsD14R;JvBDED14R;JvCmpD14R;JvCryptD14R;JvCtrlsD14R;JvCustomD14R;JvDockingD14R;JvXPCtrlsD14R;JvWizardD14R;JvValidatorsD14R;JvPrintPreviewD14R;JvPluginD14R;JvPageCompsD14R;JvNetD14R;JvMMD14R;JvManagedThreadsD14R;JvJansD14R;JvInterpreterD14R;JvHMID14R;JvGlobusD14R;JvEDID14R;JvDotNetCtrlsD14R;CPortLib7;AsyncPro;fkattend;ExWatcher;PackageBhd2;parmakızı3;pikey;Zeekper;asd;Barcodeqr;fkGPRS;zkemkeeper;GraphicEx_D7;OfficePopupMenuD7;ECXMLParserD70;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_DependencyCheckOutputName>G2LKS.exe</DCC_DependencyCheckOutputName>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_Platform>x86</DCC_Platform>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>G2LKS_Icon1.ico</Icon_MainIcon>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <Icon_MainIcon>G2LKS_Icon1.ico</Icon_MainIcon>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_DebugInformation>false</DCC_DebugInformation>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_MajorVer>1</VerInfo_MajorVer>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="UAnaform.pas">
+            <Form>AnaForm</Form>
+        </DCCReference>
+        <DCCReference Include="UTablo.pas">
+            <Form>Tablo</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UOpsiyon.pas">
+            <Form>OpsiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Fetautil.pas"/>
+        <DCCReference Include="..\Ortak\UCombo.pas">
+            <Form>ListeAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Uliste.pas">
+            <Form>ListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UPrinter.pas">
+            <Form>PrinterDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UQuantGrid.pas">
+            <Form>QuantGrid</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UAnaListe.pas">
+            <Form>AnaListe</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UPaylasim.pas"/>
+        <DCCReference Include="UVersiyon.pas">
+            <Form>VersiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\uParolaTanim.pas">
+            <Form>ParolaTanim</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\uEncrypt.pas"/>
+        <DCCReference Include="GT_About.pas">
+            <Form>AboutBox</Form>
+        </DCCReference>
+        <DCCReference Include="ULogo.pas">
+            <Form>Logo</Form>
+        </DCCReference>
+        <DCCReference Include="UReferansAra.pas">
+            <Form>ReferansAraDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Opsiyonlar\UGenelAktarimAyarlari.pas">
+            <Form>aktarimAyarlariForm</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Opsiyonlar\UKurumEslestirmeleri.pas">
+            <Form>kurumEslemeForm</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Opsiyonlar\ULogoParametreleri.pas">
+            <Form>logoParametreleriForm</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UInfoForm.pas">
+            <Form>infoForm</Form>
+        </DCCReference>
+        <DCCReference Include="Opsiyonlar\UGenelParametreler.pas">
+            <Form>GenelParametrelerForm</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UHataDialog.pas">
+            <Form>ErrorDialogForm</Form>
+        </DCCReference>
+        <DCCReference Include="Dialogs\ULksVeriArama.pas">
+            <Form>AraForm</Form>
+        </DCCReference>
+        <DCCReference Include="UHataKontrol.pas">
+            <Form>HataKontrolForm</Form>
+        </DCCReference>
+        <DCCReference Include="Opsiyonlar\USenaryoDuzenleyiciFrame.pas">
+            <Form>SenaryoDuzenleyiciFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UAktarimSonAsamaForm.pas">
+            <Form>AktarimSonAsamaForm</Form>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UHizmetHataDuzeltmeFrame.pas">
+            <Form>HizmetHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UReferansHataDuzeltmeFrame.pas">
+            <Form>ReferansHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UHastaHataDuzeltmeFrame.pas">
+            <Form>HastaHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UKurumHataDuzeltmeFrame.pas">
+            <Form>KurumHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UBosHataDuzeltmeFrame.pas">
+            <Form>BosHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\USecenekHataDuzeltmeFrame.pas">
+            <Form>SecenekHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="HataDuzeltme\UKayitKabulHataDuzeltmeFrame.pas">
+            <Form>KayitKabulHataDuzeltmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKurumEslestir.pas">
+            <Form>KurumEslestirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKurumAraDlg.pas">
+            <Form>KurumAraDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTahsilatEslestirDlg.pas">
+            <Form>TahsilatEslestirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBelgeDosya.pas">
+            <Form>BelgeDosyaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\PrjConst.pas"/>
+        <DCCReference Include="..\Ortak\UKullaniciBilgisi.pas"/>
+        <DCCReference Include="..\Ortak\oPENsqlsERVER.pas">
+            <Form>OpenSQLServerForm</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensions.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensionsConsts.pas"/>
+        <DCCReference Include="..\Entegra\UGentegreFrameYonetimi.pas"/>
+        <DCCReference Include="..\Ortak\UFrameYoneticisi.pas"/>
+        <DCCReference Include="..\Ortak\UMultiCastEvent.pas"/>
+        <DCCReference Include="..\Ortak\UGrid.pas">
+            <Form>GridAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgSearchText.pas">
+            <Form>TextSearchDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgReplaceText.pas">
+            <Form>TextReplaceDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgConfirmReplace.pas">
+            <Form>ConfirmReplaceDialog</Form>
+        </DCCReference>
+        <DCCReference Include="D:\DelphiComp\Component2010\SynEdit\Source\SynEditTypes.pas"/>
+        <DCCReference Include="D:\DelphiComp\Component2010\SynEdit\Source\SynEditMiscProcs.pas"/>
+        <DCCReference Include="..\Ortak\UScriptEngine.pas"/>
+        <DCCReference Include="..\Ortak\UCustomDataManager.pas"/>
+        <DCCReference Include="..\Ortak\UTextTable.pas"/>
+        <DCCReference Include="..\Ortak\UOnayDialog.pas">
+            <Form>ConfirmDialogForm</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Uaradlg.pas">
+            <Form>AraDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\UTouchKeyboardWindow.pas"/>
+        <DCCReference Include="..\Entegra\UGENINIDuzenle.pas">
+            <Form>GENINIDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Ortak\Usifre.pas">
+            <Form>PasswordDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Ortak\UFastRap.pas">
+            <Form>FastRaporDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Ortak\UProgramSonuDialog.pas"/>
+        <DCCReference Include="..\Ortak\Compress.pas"/>
+        <DCCReference Include="..\Ortak\lisansWS.pas"/>
+        <DCCReference Include="Ortak\ULisans.pas">
+            <Form>LisansDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Ortak\UGenSifre.pas"/>
+        <DCCReference Include="MD5.pas"/>
+        <DCCReference Include="..\Entegra\URehberAramaEkrani.pas">
+            <Form>RehberAramaEkrani</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+            <Form>GirisKutusuEx</Form>
+        </DCCReference>
+        <DCCReference Include="ULKSTransformator.pas"/>
+        <DCCReference Include="Opsiyonlar\UBaglantiAyarlari.pas">
+            <Form>BaglantiAyarlariForm</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKullanimKlavuzu.pas">
+            <Form>KullanimKlavuzu</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\URaporAraclari.pas"/>
+        <DCCReference Include="Ortak\UTabloGiris.pas">
+            <Form>TabloGirisDlg</Form>
+        </DCCReference>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>VCLApplication</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">MuhasebeGentegrasyon.dpr</Source>
+                </Source>
+                <Parameters>
+                    <Parameters Name="UseLauncher">False</Parameters>
+                    <Parameters Name="LoadAllSymbols">True</Parameters>
+                    <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+                </Parameters>
+                <VersionInfo>
+                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+                    <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+                    <VersionInfo Name="MajorVer">20</VersionInfo>
+                    <VersionInfo Name="MinorVer">12</VersionInfo>
+                    <VersionInfo Name="Release">9</VersionInfo>
+                    <VersionInfo Name="Build">1</VersionInfo>
+                    <VersionInfo Name="Debug">False</VersionInfo>
+                    <VersionInfo Name="PreRelease">False</VersionInfo>
+                    <VersionInfo Name="Special">False</VersionInfo>
+                    <VersionInfo Name="Private">False</VersionInfo>
+                    <VersionInfo Name="DLL">False</VersionInfo>
+                    <VersionInfo Name="Locale">1055</VersionInfo>
+                    <VersionInfo Name="CodePage">1254</VersionInfo>
+                </VersionInfo>
+                <VersionInfoKeys>
+                    <VersionInfoKeys Name="CompanyName">Feta Bilgisayar Ltd. Şti.</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileDescription">Gentegre --&gt;Entegrasyon Modülü</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">20.12.9.1</VersionInfoKeys>
+                    <VersionInfoKeys Name="InternalName">Gentegre --&gt;Entegrasyon Modülü 1.00</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalCopyright"/>
+                    <VersionInfoKeys Name="LegalTrademarks"/>
+                    <VersionInfoKeys Name="OriginalFilename"/>
+                    <VersionInfoKeys Name="ProductName">Gentegre --&gt;Entegrasyon Modülü</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="Comments"/>
+                    <VersionInfoKeys Name="LastCompiledTime">02/09/2008 12:00:15</VersionInfoKeys>
+                </VersionInfoKeys>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k170.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp170.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+</Project>

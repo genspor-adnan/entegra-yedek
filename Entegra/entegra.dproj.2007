@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{3b8cb3c0-9e3c-44fb-925f-c490a36f2178}</ProjectGuid>
+    <MainSource>entegra.dpr</MainSource>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+    <DCC_DependencyCheckOutputName>entegra.exe</DCC_DependencyCheckOutputName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_DebugInformation>False</DCC_DebugInformation>
+    <DCC_WriteableConstants>True</DCC_WriteableConstants>
+    <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+    <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+    <DCC_Define>RELEASE</DCC_Define>
+    <DCC_UNSAFE_TYPE>True</DCC_UNSAFE_TYPE>
+    <DCC_UNSAFE_CODE>True</DCC_UNSAFE_CODE>
+    <DCC_UNSAFE_CAST>True</DCC_UNSAFE_CAST>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_WriteableConstants>True</DCC_WriteableConstants>
+    <DCC_Define>DEBUG</DCC_Define>
+    <DCC_UnitSearchPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;D:\Projects\teechart801\Sources\Compiled\Delphi11\Lib;G:\GENOTI~1\Projects\JCL_V10\jcl\lib\d11\debug;D:\Projects\JCL_V10\jcl\lib\d11\debug;D:\Gentegre\Kabul;D:\Gentegre\Ortak</DCC_UnitSearchPath>
+    <DCC_ResourcePath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;D:\Projects\teechart801\Sources\Compiled\Delphi11\Lib;G:\GENOTI~1\Projects\JCL_V10\jcl\lib\d11\debug;D:\Projects\JCL_V10\jcl\lib\d11\debug;D:\Gentegre\Kabul;D:\Gentegre\Ortak</DCC_ResourcePath>
+    <DCC_ObjPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;D:\Projects\teechart801\Sources\Compiled\Delphi11\Lib;G:\GENOTI~1\Projects\JCL_V10\jcl\lib\d11\debug;D:\Projects\JCL_V10\jcl\lib\d11\debug;D:\Gentegre\Kabul;D:\Gentegre\Ortak</DCC_ObjPath>
+    <DCC_IncludePath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;D:\Projects\teechart801\Sources\Compiled\Delphi11\Lib;G:\GENOTI~1\Projects\JCL_V10\jcl\lib\d11\debug;D:\Projects\JCL_V10\jcl\lib\d11\debug;D:\Gentegre\Kabul;D:\Gentegre\Ortak</DCC_IncludePath>
+    <DCC_TYPEINFO_IMPLICITLY_ADDED>False</DCC_TYPEINFO_IMPLICITLY_ADDED>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+  </PropertyGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Delphi.Personality</Borland.Personality>
+    <Borland.ProjectType>VCLApplication</Borland.ProjectType>
+    <BorlandProject>
+<BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><Language><Language Name="ProjectLang">$0000041F</Language></Language><VersionInfo><VersionInfo Name="IncludeVerInfo">True</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">8</VersionInfo><VersionInfo Name="MinorVer">19</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1055</VersionInfo><VersionInfo Name="CodePage">1254</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName">Feta Bilgisayar Ltd. Şti</VersionInfoKeys><VersionInfoKeys Name="FileDescription">Entegra</VersionInfoKeys><VersionInfoKeys Name="FileVersion">8.19.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName">Entegra</VersionInfoKeys><VersionInfoKeys Name="LegalCopyright">Genyazılım</VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename">Entegra.exe</VersionInfoKeys><VersionInfoKeys Name="ProductName">ENTEGRA</VersionInfoKeys><VersionInfoKeys Name="ProductVersion">8.19.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments">Entegra Cari - Kasa Programı</VersionInfoKeys><VersionInfoKeys Name="Versiyon Değişilkiği">8.19 KART AÇARKEN NOTLAR ÜZERİNDE 
+CTRL+ALT+Ö TUŞLARINA BASILARAK 
+ÖZELNOT GİREBİLME ÖZELLİĞİ  VE 
+VERGİ KISMINDA FATURA BAŞLIĞI ALANI EKLENDİ 
+BİRDE GİREN KISMINDA ÇOK ADIMLI İŞLEMLER 
+HATA ÜRETTİ GİBİ HATA MESAJLARI GİDERİLDİ 
+ARAMA KISMINA İÇİNDE GEÇEN VE BAŞLAYAN KRİTERLERİ EKLENDİ</VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">entegra.dpr</Source></Source></Delphi.Personality><ModelSupport>False</ModelSupport></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <ItemGroup>
+    <DelphiCompile Include="entegra.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <DCCReference Include="..\Ortak\FetaClassExtensions.pas" />
+    <DCCReference Include="..\Ortak\FetaClassExtensionsConsts.pas" />
+    <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas" />
+    <DCCReference Include="..\Ortak\Fetautil.pas" />
+    <DCCReference Include="..\Ortak\UCombo.pas">
+      <Form>ListeAyarlaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UCxUtils.pas">
+      <Form>cxUtils</Form>
+      <DesignClass>TDataModule</DesignClass>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UDokSart.pas">
+      <Form>DokumSartDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UDokum.pas">
+      <Form>DokumDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UFastRap.pas">
+      <Form>FastRaporDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UFrameYoneticisi.pas" />
+    <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+      <Form>GirisKutusuEx</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UGrid.pas">
+      <Form>GridAyarlaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\ULisans.pas">
+      <Form>LisansDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\Uliste.pas">
+      <Form>ListeDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\ortak\UlisteCheck.pas">
+      <Form>ListeCheckDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\Umesaj.pas">
+      <Form>MesajForm</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\uMultDsEvent.pas" />
+    <DCCReference Include="..\Ortak\UMultiCastEvent.pas" />
+    <DCCReference Include="..\Ortak\UPaylasim.pas" />
+    <DCCReference Include="..\Ortak\UPrinter.pas">
+      <Form>PrinterDlg</Form>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\UQuantGrid.pas">
+      <Form>QuantGrid</Form>
+      <DesignClass>TDataModule</DesignClass>
+    </DCCReference>
+    <DCCReference Include="..\Ortak\USMS.pas">
+      <Form>SmsDlg</Form>
+    </DCCReference>
+    <DCCReference Include="AnaFrame\UGenelAnaSekmeFrame.pas">
+      <Form>GenelAnaSekmeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UAramaYokFrame.pas">
+      <Form>AramaYokFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UBankaCekleriAramaFrame.pas">
+      <Form>BankaCekleriAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UBankaKredileriAramaFrame.pas">
+      <Form>BankaKredileriAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UBankalarAramaFrame.pas">
+      <Form>BankalarAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UCariDlgGenelAramaFrame.pas">
+      <Form>CariDlgGenelAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UCariKartAksiyonFrame.pas">
+      <Form>CariKartAksiyonFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UCekSenetAramaFrame.pas">
+      <Form>CekSenetAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UDokumAramaFrame.pas">
+      <Form>DokumAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UDokumlerAksiyonFrame.pas">
+      <Form>DokumlerAksiyonFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UFaturalarAramaFrame.pas">
+      <Form>FaturalarAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UGunlukAksiyonAramaFrame.pas">
+      <Form>GunlukAksiyonAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\URehberAramaFrame.pas">
+      <Form>RehberAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UTakvimAksiyonFrame.pas">
+      <Form>TakvimAksiyonFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UTeminatMektubuAramaFrame.pas">
+      <Form>TeminatMektubuAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="AramaFrame\UVadeliHesapAramaFrame.pas">
+      <Form>VadeliHesapAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GirisSayfaFrame\UAnaGirisSayfasiFrame.pas">
+      <Form>AnaGirisSayfasiFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GirisSayfaFrame\UDokumGirisFrame.pas">
+      <Form>DokumGirisFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GirisSayfaFrame\UGenelGirisSayfasiFrame.pas">
+      <Form>GenelGirisSayfasiFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UAksiyonlarGorevFrame.pas">
+      <Form>AksiyonlarGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UBankaGorevFrame.pas">
+      <Form>BankaGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UCariGorevFrame.pas">
+      <Form>CariGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UCekSenetGorevFrame.pas">
+      <Form>CekSenetGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UFaturaGorevFrame.pas">
+      <Form>FaturaGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GorevFrame\UKasaGorevFrame.pas">
+      <Form>KasaGorevFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="GT_RehberAbout.pas">
+      <Form>AboutBox</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UBankalar.pas">
+      <Form>BankalarDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UCari.pas">
+      <Form>CariDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UCekSenet.pas">
+      <Form>CekSenetDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UFatura.pas">
+      <Form>FaturaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UFaturalar.pas">
+      <Form>FaturalarDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UFIRMALAR.pas">
+      <Form>KurumDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UKasa.pas">
+      <Form>KasaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UKrediHesapMakinasi.pas">
+      <Form>KrediHesapMakinasi</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UKrediler.pas">
+      <Form>KredilerDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UMaasTablo.pas">
+      <Form>MaasTabloDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UReharadlg.pas">
+      <Form>RehberAraDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UTakvim.pas">
+      <Form>TakvimDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UTeminatMektubu.pas">
+      <Form>TeminatMektubuDlg</Form>
+    </DCCReference>
+    <DCCReference Include="IcerikFrame\UVadeliHesap.pas">
+      <Form>VadeliHesapDlg</Form>
+    </DCCReference>
+    <DCCReference Include="Kullanan\Kulmain.pas">
+      <Form>KullaniciDlg</Form>
+    </DCCReference>
+    <DCCReference Include="lisansws.pas" />
+    <DCCReference Include="ListeFrame\UBankaCekleriListeFrame.pas">
+      <Form>BankaCekleriListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="ListeFrame\UBankaKredileriListeFrame.pas">
+      <Form>BankaKredileriListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="ListeFrame\UCekSenetListeFrame.pas">
+      <Form>CekSenetListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="ListeFrame\UTeminatMektuplariListeFrame.pas">
+      <Form>TeminatMektuplariListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="ListeFrame\UVadeliHesaplarListeFrame.pas">
+      <Form>VadeliHesaplarListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="Notlar.pas" />
+    <DCCReference Include="UAnaForm.pas">
+      <Form>AnaForm</Form>
+    </DCCReference>
+    <DCCReference Include="UBankaCekleri.pas">
+      <Form>BankaCekleriDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UBankalarAksiyonFrame.pas">
+      <Form>BankalarAksiyonFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UBankalarListeFrame.pas">
+      <Form>BankalarListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UBankaSecimi.pas">
+      <Form>BankaSecimDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UBelgeDosya.pas">
+      <Form>BelgeDosyaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UCekListe.pas">
+      <Form>CekListeDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UCekRiskPayi.pas">
+      <Form>CekRiskPayiDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UCekSenetArama.pas">
+      <Form>CekSenetAramaDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UDBS.pas">
+      <Form>DBSDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UDBSAramaFrame.pas">
+      <Form>DBSAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UDBSListeFrame.pas">
+      <Form>DBSListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UDegerAra.pas">
+      <Form>DegerAraDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UDoviz.pas">
+      <Form>DovizDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UGentegreFrameYonetimi.pas" />
+    <DCCReference Include="UGunlukTakvim.pas">
+      <Form>GunlukTakvimDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UIslemSec.pas">
+      <Form>IslemSecDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UKasalar.pas">
+      <Form>KasalarDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UKasalarAksiyonFrame.pas">
+      <Form>KasalarAksiyonFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UKasalarAramaFrame.pas">
+      <Form>KasalarAramaFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UKasalarListeFrame.pas">
+      <Form>KasalarListeFrame</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UKasaWizard.pas">
+      <Form>KasaWizardDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UKodAgaci.pas">
+      <Form>KodAgaciDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UKrediEkle.pas">
+      <Form>KrediEkleDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UKrediNotlar.pas">
+      <Form>KrediNotlarDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UKullaniciKodYetki.pas">
+      <Form>KullaniciKodYetkiDlg</Form>
+    </DCCReference>
+    <DCCReference Include="ULOGO.PAS">
+      <Form>Logo</Form>
+    </DCCReference>
+    <DCCReference Include="UMailYaz.pas">
+      <Form>MailGonderDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UMasrafGelir.pas">
+      <Form>MasrafGelirDlg</Form>
+      <DesignClass>TFrame</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UMedulaKontrol.pas">
+      <Form>MedulaKontrolDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UMultiDataSetEvent.pas" />
+    <DCCReference Include="UOdemeBelirle.pas">
+      <Form>OdemeBelirleDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UOlaylar.pas">
+      <Form>OlaylarDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UOPSDLG.pas">
+      <Form>OpsiyonDlg</Form>
+    </DCCReference>
+    <DCCReference Include="URaporAraclari.pas" />
+    <DCCReference Include="Usifre.pas">
+      <Form>PasswordDlg</Form>
+    </DCCReference>
+    <DCCReference Include="Utablo.pas">
+      <Form>Tablo</Form>
+      <DesignClass>TDataModule</DesignClass>
+    </DCCReference>
+    <DCCReference Include="UTakvimOnay.pas">
+      <Form>TakvimOnayDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UVadesiGelmisler.pas">
+      <Form>VadesiGelmislerDlg</Form>
+    </DCCReference>
+    <DCCReference Include="UVersiyon.pas">
+      <Form>VersiyonDlg</Form>
+    </DCCReference>
+  </ItemGroup>
+</Project>

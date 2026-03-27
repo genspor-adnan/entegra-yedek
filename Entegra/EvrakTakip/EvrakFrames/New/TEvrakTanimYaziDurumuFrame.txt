@@ -1,0 +1,139 @@
+inherited EvrakTanimYaziDurumuFrame: TEvrakTanimYaziDurumuFrame
+  Width = 822
+  Height = 429
+  ExplicitWidth = 822
+  ExplicitHeight = 429
+  object Splitter1: TSplitter [0]
+    Left = 394
+    Top = 33
+    Height = 396
+    Align = alRight
+    ExplicitLeft = 362
+    ExplicitTop = -12
+    ExplicitHeight = 391
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 822
+    ExplicitWidth = 822
+    inherited buttonYazdir: TSpeedButton
+      ExplicitLeft = 563
+      ExplicitTop = 5
+    end
+  end
+  object GridEvrakYaziDurumu: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 388
+    Height = 390
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    ExplicitWidth = 497
+    object ViewYaziDurumu: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.InfoText = 'Filtre'
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewYaziDurumuID: TcxGridDBColumn
+        Caption = 'Kodu'
+        DataBinding.FieldName = 'ID'
+        DataBinding.IsNullValueType = True
+        Width = 91
+      end
+      object ViewYaziDurumuADI: TcxGridDBColumn
+        Caption = 'Ad'#305
+        DataBinding.FieldName = 'ADI'
+        DataBinding.IsNullValueType = True
+        Width = 404
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewYaziDurumu
+    end
+  end
+  object GridPanel1: TGridPanel [3]
+    AlignWithMargins = True
+    Left = 400
+    Top = 36
+    Width = 419
+    Height = 390
+    Align = alRight
+    ColumnCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 120.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 300.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 0
+        Control = Label1
+        Row = 0
+      end
+      item
+        Column = 1
+        Control = editYaziDurumuAdi
+        Row = 0
+      end>
+    RowCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end>
+    TabOrder = 2
+    object Label1: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 98
+      Height = 22
+      Align = alLeft
+      Caption = 'Yaz'#305' Durum Tan'#305'm'#305
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object editYaziDurumuAdi: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 124
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'ADI'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 0
+      Width = 149
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_YAZI_DURUMU'
+      'ORDER BY ID')
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+end

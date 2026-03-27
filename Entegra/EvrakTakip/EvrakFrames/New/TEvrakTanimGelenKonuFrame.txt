@@ -1,0 +1,206 @@
+inherited EvrakTanimGelenKonuFrame: TEvrakTanimGelenKonuFrame
+  Width = 875
+  Height = 495
+  ExplicitWidth = 875
+  ExplicitHeight = 495
+  object Splitter1: TSplitter [0]
+    Left = 450
+    Top = 33
+    Height = 462
+    Align = alRight
+    ExplicitLeft = 362
+    ExplicitTop = -12
+    ExplicitHeight = 391
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 875
+    ExplicitWidth = 875
+  end
+  object GridGelenEvrakKonu: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 444
+    Height = 456
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    object ViewGelenEvrakKonu: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.InfoText = 'Filtre'
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewGelenEvrakKonuID: TcxGridDBColumn
+        Caption = 'Kodu'
+        DataBinding.FieldName = 'ID'
+        Width = 47
+      end
+      object ViewGelenEvrakKonuKONU: TcxGridDBColumn
+        Caption = 'Konu'
+        DataBinding.FieldName = 'KONU'
+        Width = 213
+      end
+      object ViewGelenEvrakKonuBIRIM_ID: TcxGridDBColumn
+        Caption = 'Evrak Birim Kodu'
+        DataBinding.FieldName = 'BIRIM_ID'
+        PropertiesClassName = 'TcxLookupComboBoxProperties'
+        Properties.KeyFieldNames = 'ID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'BIRIM_KODU'
+          end>
+        Properties.ListSource = dsBirimKodu
+        Width = 129
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewGelenEvrakKonu
+    end
+  end
+  object GridPanel1: TGridPanel [3]
+    AlignWithMargins = True
+    Left = 456
+    Top = 36
+    Width = 416
+    Height = 456
+    Align = alRight
+    ColumnCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 120.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 300.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 0
+        Control = Label1
+        Row = 0
+      end
+      item
+        Column = 1
+        Control = editKonu
+        Row = 1
+      end
+      item
+        Column = 0
+        Control = Label2
+        Row = 1
+      end
+      item
+        Column = 1
+        Control = lookupBirimKodu
+        Row = 0
+      end>
+    RowCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end>
+    TabOrder = 2
+    object Label1: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 62
+      Height = 22
+      Align = alLeft
+      Caption = 'Evrak Birimi'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object editKonu: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 124
+      Top = 32
+      Align = alLeft
+      DataBinding.DataField = 'KONU'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 0
+      Width = 176
+    end
+    object Label2: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 32
+      Width = 28
+      Height = 22
+      Align = alLeft
+      Caption = 'Konu'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object lookupBirimKodu: TcxDBLookupComboBox
+      AlignWithMargins = True
+      Left = 124
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'BIRIM_ID'
+      DataBinding.DataSource = dsEvrak
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'BIRIM_KODU'
+        end
+        item
+          FieldName = 'BIRIM_ADI'
+        end>
+      Properties.ListSource = dsBirimKodu
+      TabOrder = 1
+      Width = 145
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    Active = True
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_GELENEVRAK_KONU Order By KONU')
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+  object dsBirimKodu: TDataSource
+    AutoEdit = False
+    DataSet = qryLookupBirimKodu
+    Left = 288
+    Top = 248
+  end
+  object qryLookupBirimKodu: TADOQuery
+    Active = True
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT ID,*'
+      'FROM EVRAK_BIRIMI'
+      'Order by BIRIM_KODU')
+    Left = 88
+    Top = 200
+  end
+end

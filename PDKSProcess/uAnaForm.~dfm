@@ -1,0 +1,1099 @@
+object AnaForm: TAnaForm
+  Left = 200
+  Top = 62
+  Width = 1032
+  Height = 746
+  Caption = 'PDKS Giri'#351'-'#199#305'k'#305#351' Kontrol (ver.2.0.0)'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  Menu = MainMenu1
+  OldCreateOrder = False
+  WindowState = wsMaximized
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
+  OnMouseMove = FormMouseMove
+  OnResize = FormResize
+  PixelsPerInch = 96
+  TextHeight = 13
+  object ComLed2: TComLed
+    Left = 88
+    Top = 0
+    Width = 25
+    Height = 25
+    LedSignal = lsConn
+    Kind = lkRedLight
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 1024
+    Height = 25
+    Align = alTop
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    object ComLed1: TComLed
+      Left = 96
+      Top = 0
+      Width = 25
+      Height = 25
+      LedSignal = lsConn
+      Kind = lkRedLight
+    end
+    object Label1: TLabel
+      Left = 128
+      Top = 6
+      Width = 113
+      Height = 13
+      Caption = 'Server Tarihi-Saati :'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LBTarSa: TLabel
+      Left = 248
+      Top = 6
+      Width = 89
+      Height = 13
+      Caption = 'Server Tarihi-Saati'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object LBHata: TLabel
+      Left = 472
+      Top = 8
+      Width = 3
+      Height = 13
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object BTNKamera: TSpeedButton
+      Left = 863
+      Top = 1
+      Width = 81
+      Height = 23
+      Caption = 'Kamera'
+      Flat = True
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000330B0000330B00000001000000010000A5520000DE73
+        0000D67B0000E77B00009C520800B55A0800CE7308009C5A10009C631000C66B
+        1000634221006B422100292929009C63290031313100524231005A4A3100634A
+        310039393900524A390039424200424242009473420039424A0042424A00424A
+        4A004A4A4A006B5A4A00525252008C73520052525A0063636300736B63008473
+        6300D69C630063636B006B6B6B006B6B73007373730073737B007B7B7B00847B
+        7B008484840084848C008C8C8C008C949400949494009C9C9C009C9CA500A5A5
+        A500ADADAD00B5B5B500B5BDBD00BDBDBD00C6C6C600CECECE00D6D6D600DEDE
+        DE00E7E7E700FF00FF002142FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF003B3B3B3B3B3B
+        0C121A1A1A1A1A123B3B3B3B3B3B0E1A1A1A1F1F3333311A1A3B3B3B121A1A2A
+        281F2828313737372F153B1F1A2F2E2E2C2F3128313737372E123B2C3131312F
+        2E313128312D2B302A123B2C333232313132312E2721161B1E153B2C33333532
+        32283226200603020F153B2C36353328322832251D09050108183B2C36283528
+        3233322421220D0007193B2C372835353535321F31130A040B193B2C37373737
+        363533262829111115153B333C3C3737363636311A1F27231A3B3B333C3C3A39
+        39363636261C1A1C153B1A2C3A35333233352E3733312E1A3B3B1A331A1A3539
+        3A3835331A1A1A3B3B3B3B1A3B3B1A1A1A1A1A1A3B3B3B3B3B3B}
+      ParentFont = False
+      OnClick = BTNKameraClick
+    end
+    object BTNResim: TSpeedButton
+      Left = 944
+      Top = 1
+      Width = 81
+      Height = 23
+      Caption = 'Resim'
+      Flat = True
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000C30E0000C30E00000001000000010000005A00000073
+        0800008C0800088410009C5A2900B5732900A5633900BD7B4A00E7944A005252
+        52005A5A5A00AD7B5A0063636300636B6B0094736B00B5946B005A6B73006B73
+        730073737300DE9C7300E7A5730000007B007B7B7B00293184009C8484006B6B
+        8C006B848C008C8C8C00AD8C8C00394A9400949494004A6B9C00949C9C000008
+        A500BDADA500739CAD00E7CEB5003139BD007B94C6008CB5C600ADB5CE00F7E7
+        D600CECEDE00D6DEDE00DEDEDE000010E700ADCEE700E7E7E700CEDEEF00EFEF
+        EF00F7F7F700FFF7F700FF00FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00343434343434
+        3434343434343434343434090909090909090909090909090934340935353535
+        35353535353535350934340A3204060505050506060404320A34340C32070507
+        07070705060413320C34340D312914080E100B07051331310D34341131353322
+        1A1F190F24333531113400122F352B191F2626273535352F123401002F322826
+        262726262F35352F1634010100352A23202E28171935352F1834030202352F2E
+        28261D151D35352C1B3402022C352825252121212635352C1B34021B2C353025
+        212121253135352C1B34341B2C353528252D25283535352C1C34341E2C2C2C2C
+        2C2C2C2C2C2C2C2C1E34341E1E1E1E1E1E1E1E1E1E1E1E1E1E34}
+      ParentFont = False
+      OnClick = BTNResimClick
+    end
+    object SpeedButton1: TSpeedButton
+      Left = 360
+      Top = 0
+      Width = 81
+      Height = 22
+      Caption = 'Yenile'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000004282
+        A5FF1879ADFF216DA5FF00000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000000000000000000319E
+        C6FF00D3F7FF08E3FFFF395D7BFF000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000000000000000000529A
+        BDFF00E3F7FF00CBF7FF00BAEFFF0886C6FF737984FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000319EC6FF00E3F7FF00CBF7FF10E7FFFF215994FF737584FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000319EC6FF00E3FFFF00BAEFFF08E3FFFF0892DEFF295194FF6B71
+        84FF000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000319EC6FF00E3FFFF00BAEFFF18EFFFFF18D7FFFF088A
+        E7FF007DE7FF214994FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000319ACEFF00E7FFFF00BAEFFF29F7FFFF4AF7
+        FFFF7BF7FFFF4AC7FFFF0855C6FF7B7984FF0000000000000000000000000000
+        000000000000000000000000000000000000319ACEFF00E3FFFF00BAEFFF29F7
+        FFFF5AFFFFFF8CFFFFFF73DFFFFF0859C6FF0000000000000000000000000000
+        0000000000000000000000000000000000005A82ADFF00D7FFFF00EFFFFF00FB
+        FFFF29F7FFFF5AFFFFFF94FFFFFF4AC7FFFF29458CFF00000000000000000000
+        00000000000000000000000000000000000018AADEFF00CBFFFF00D7FFFF00EF
+        FFFF00FBFFFF29D7FFFF31D7FFFF84FBFFFF088AF7FF00000000000000000000
+        0000000000000000000000000000000000000000000000CBF7FF00CBFFFF00D7
+        FFFF10E7FFFF636994FF4A75BDFF21DFFFFF316DC6FF00000000000000000000
+        000000000000000000000000000000000000000000005A92CEFF00CBFFFF00CB
+        FFFF00D7FFFF1865ADFF0882CEFF2975C6FF0000000000000000000000000000
+        00000000000000000000000000000000000000000000000000007B9ACEFF08AE
+        E7FF00D7FFFF00E3FFFF317DC6FF000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000528ED6FF3982C6FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000}
+      ParentFont = False
+      OnClick = SpeedButton1Click
+    end
+    object BTNAc: TButton
+      Left = 0
+      Top = 0
+      Width = 89
+      Height = 25
+      Caption = 'BA'#350'LAT'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      OnClick = BTNAcClick
+    end
+    object Edit1: TEdit
+      Left = 440
+      Top = 3
+      Width = 161
+      Height = 21
+      TabOrder = 1
+      Visible = False
+      OnKeyPress = Edit1KeyPress
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 675
+    Width = 1024
+    Height = 25
+    Align = alBottom
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+    object DBText1: TDBText
+      Left = 1
+      Top = 1
+      Width = 48
+      Height = 23
+      Align = alLeft
+      AutoSize = True
+      DataField = 'SONUC'
+      DataSource = Tablo.DtsKARTOKU
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object DBText2: TDBText
+      Left = 49
+      Top = 1
+      Width = 48
+      Height = 23
+      Align = alLeft
+      AutoSize = True
+      DataField = 'SONUC'
+      DataSource = Tablo.DtsKARTOKUYEMEK
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblMesaj: TLabel
+      Left = 1014
+      Top = 8
+      Width = 3
+      Height = 13
+      Alignment = taRightJustify
+    end
+  end
+  object ResimPanel: TPanel
+    Left = 0
+    Top = 464
+    Width = 1024
+    Height = 211
+    Align = alBottom
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    Visible = False
+    object GroupBox1: TGroupBox
+      Left = 281
+      Top = 1
+      Width = 280
+      Height = 209
+      Align = alLeft
+      Caption = #199'IKI'#350
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      object IMCIKIS: TImage
+        Left = 2
+        Top = 15
+        Width = 276
+        Height = 192
+        Align = alClient
+        Stretch = True
+      end
+    end
+    object GroupBox2: TGroupBox
+      Left = 1
+      Top = 1
+      Width = 280
+      Height = 209
+      Align = alLeft
+      Caption = 'G'#304'R'#304#350
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      object IMGIRIS: TImage
+        Left = 2
+        Top = 15
+        Width = 276
+        Height = 192
+        Align = alClient
+        Stretch = True
+      end
+    end
+    object Memo1: TMemo
+      Left = 561
+      Top = 1
+      Width = 462
+      Height = 209
+      Align = alClient
+      ScrollBars = ssVertical
+      TabOrder = 2
+    end
+  end
+  object Panel3: TPanel
+    Left = 0
+    Top = 25
+    Width = 1024
+    Height = 216
+    Align = alTop
+    TabOrder = 3
+    object cxGrid1: TcxGrid
+      Left = 1
+      Top = 1
+      Width = 1022
+      Height = 214
+      Align = alClient
+      TabOrder = 0
+      object cxGrid1DBTableView1: TcxGridDBTableView
+        DataController.DataSource = Tablo.DtsStatus
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        NavigatorButtons.ConfirmDelete = False
+        OnCustomDrawCell = cxGrid1DBTableView1CustomDrawCell
+        OptionsData.CancelOnExit = False
+        OptionsData.Deleting = False
+        OptionsData.DeletingConfirmation = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsView.NewItemRowInfoText = 'Click here to add a new row'
+        object cxGrid1DBTableView1SICILNO: TcxGridDBColumn
+          Caption = 'DOSYA NO'
+          DataBinding.FieldName = 'PERKOD'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 91
+        end
+        object cxGrid1DBTableView1ADI: TcxGridDBColumn
+          DataBinding.FieldName = 'ADI'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 116
+        end
+        object cxGrid1DBTableView1SOYADI: TcxGridDBColumn
+          DataBinding.FieldName = 'SOYADI'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 123
+        end
+        object cxGrid1DBTableView1DEPARTMAN: TcxGridDBColumn
+          DataBinding.FieldName = 'DEPARTMAN'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 101
+        end
+        object cxGrid1DBTableView1GIRIS: TcxGridDBColumn
+          Caption = 'G'#304'R'#304#350
+          DataBinding.FieldName = 'GIRIS'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+        end
+        object cxGrid1DBTableView1CIKIS: TcxGridDBColumn
+          Caption = #199'IKI'#350
+          DataBinding.FieldName = 'CIKIS'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 100
+        end
+        object cxGrid1DBTableView1VARDIYA: TcxGridDBColumn
+          Caption = 'VARD'#304'YA'
+          DataBinding.FieldName = 'VARDIYA'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 114
+        end
+        object cxGrid1DBTableView1VARGIRIS: TcxGridDBColumn
+          Caption = 'VAR.G'#304'R'#304#350
+          DataBinding.FieldName = 'VARGIRIS'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 92
+        end
+        object cxGrid1DBTableView1VARCIKIS: TcxGridDBColumn
+          Caption = 'VAR.'#199'IKI'#350
+          DataBinding.FieldName = 'VARCIKIS'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 80
+        end
+        object tvGirCik: TcxGridDBColumn
+          Caption = 'G'#304'R'#304#350'/'#199'IKI'#350
+          DataBinding.FieldName = 'GIRCIK'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 92
+        end
+      end
+      object cxGrid1Level1: TcxGridLevel
+        GridView = cxGrid1DBTableView1
+      end
+    end
+  end
+  object Panel4: TPanel
+    Left = 0
+    Top = 249
+    Width = 1024
+    Height = 207
+    Align = alClient
+    TabOrder = 4
+    object cxGrid2: TcxGrid
+      Left = 1
+      Top = 1
+      Width = 1022
+      Height = 205
+      Align = alClient
+      TabOrder = 0
+      object cxGridDBTableView1: TcxGridDBTableView
+        DataController.DataSource = Tablo.DtsYemekhane
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        NavigatorButtons.ConfirmDelete = False
+        OptionsData.CancelOnExit = False
+        OptionsData.Deleting = False
+        OptionsData.DeletingConfirmation = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsView.NewItemRowInfoText = 'Click here to add a new row'
+        object TVGirCikSICILNO: TcxGridDBColumn
+          Caption = 'DOSYA NO'
+          DataBinding.FieldName = 'PERKOD'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 91
+        end
+        object TVGirCikADI: TcxGridDBColumn
+          DataBinding.FieldName = 'ADI'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 155
+        end
+        object TVGirCikSOYADI: TcxGridDBColumn
+          DataBinding.FieldName = 'SOYADI'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 155
+        end
+        object TVGirCikDEPARTMAN: TcxGridDBColumn
+          DataBinding.FieldName = 'DEPARTMAN'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 102
+        end
+        object TVGirCikGIRIS: TcxGridDBColumn
+          DataBinding.FieldName = 'SABAH'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 162
+        end
+        object TVGirCikCIKIS: TcxGridDBColumn
+          Caption = #214#286'LE'
+          DataBinding.FieldName = 'OGLEN'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 162
+        end
+        object TVGirCikVARDIYA: TcxGridDBColumn
+          Caption = 'AK'#350'AM'
+          DataBinding.FieldName = 'AKSAM'
+          HeaderAlignmentHorz = taCenter
+          Styles.Header = cxStyle1
+          Width = 162
+        end
+      end
+      object cxGridLevel1: TcxGridLevel
+        GridView = cxGridDBTableView1
+      end
+    end
+  end
+  object cxSplitter1: TcxSplitter
+    Left = 0
+    Top = 241
+    Width = 1024
+    Height = 8
+    HotZoneClassName = 'TcxXPTaskBarStyle'
+    AlignSplitter = salTop
+    Control = Panel3
+  end
+  object cxSplitter3: TcxSplitter
+    Left = 0
+    Top = 456
+    Width = 1024
+    Height = 8
+    HotZoneClassName = 'TcxXPTaskBarStyle'
+    AlignSplitter = salBottom
+    Control = ResimPanel
+  end
+  object CZKEMYemekhane: TCZKEM
+    Left = 624
+    Top = 8
+    Width = 192
+    Height = 192
+    TabOrder = 7
+    Visible = False
+    OnHIDNum = CZKEMYemekhaneHIDNum
+    ControlData = {10070000D8130000D8130000}
+  end
+  object CZKEMPDKS: TCZKEM
+    Left = 632
+    Top = 16
+    Width = 192
+    Height = 192
+    TabOrder = 8
+    Visible = False
+    OnHIDNum = CZKEMPDKSHIDNum
+    ControlData = {10070000D8130000D8130000}
+  end
+  object PopupMenu1: TPopupMenu
+    OwnerDraw = True
+    Left = 248
+    Top = 120
+    object ProgramA1: TMenuItem
+      Caption = 'Program'#305' A'#231
+      OnClick = ProgramA1Click
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object Seaenekler1: TMenuItem
+      Caption = 'Se'#231'enekler'
+      object SeriPortAyarlar2: TMenuItem
+        Caption = 'Seri Port Ayarlar'#305
+        OnClick = SeriPortAyarlar1Click
+      end
+      object Opsiyonlar1: TMenuItem
+        Caption = 'Opsiyonlar'
+        ShortCut = 16464
+        OnClick = ProgramAyarlar1Click
+      end
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Kapat1: TMenuItem
+      Caption = 'Kapat'
+      OnClick = Kapat1Click
+    end
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 336
+    Top = 104
+  end
+  object cxIntl1: TcxIntl
+    Connected = True
+    cxLibrary.CantCreateRegistryKey = '\%s isimli registry anahtar'#305' olu'#351'turulamad'#305'.'
+    PageControl2.ImageListIndexError = '(%d) indeksi 0 ve %d aral'#305#287#305'nda olmal'#305
+    PageControl2.NoBaseImages = 'BaseImages is not assigned'
+    PageControl2.NoRegisteredStyles = 'Kay'#305'tl'#305' hi'#231'bir stil yok'
+    PageControl2.PageIndexError = 
+      '%d de'#287'er ge'#231'erli bir sayfa indeks de'#287'eri de'#287'il. Sayfa indeksi 0 ' +
+      've %d aral'#305#287#305'nda olmal'#305'.'
+    PageControl2.PainterClassError = 'PCPainterClass'#39#305' yok'
+    PageControl2.StandardStyleError = '%s stili, standart stiller taraf'#305'ndan desteklenmiyor'
+    PageControl2.StyleNameError = '%s adl'#305' stil kay'#305'tl'#305' de'#287'il'
+    PageControl2.TabCountEqualsZero = 'Tabs.Count = 0'
+    PageControl2.TabIndexError = 'Tab indeksi (%d) s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    PageControl2.TabVisibleIndexOutsOfBounds = 
+      'TabG'#246'r'#252'nme'#304'ndeksi (TabVisibleIndex) (%d), 0 ve %d de'#287'erleri aras' +
+      #305'nda olmal'#305
+    PageControl2.VisibleTabListEmpty = 'G'#246'r'#252'n'#252'r bir Tab yok'
+    QuantumGrid5.GridRecursiveLevels = 'Tekrar eden seviye olu'#351'turamazs'#305'n'#305'z.'
+    QuantumGrid5.GridDeletingConfirmationCaption = 'Onayla'
+    QuantumGrid5.GridDeletingFocusedConfirmationText = 'Kay'#305't Sil?'
+    QuantumGrid5.GridDeletingSelectedConfirmationText = 'Se'#231'ili t'#252'm kay'#305'tlar sil?'
+    QuantumGrid5.GridNoDataInfoText = '<G'#246'sterilecek herhangi bir veri bulunmuyor>'
+    QuantumGrid5.GridNewItemRowInfoText = 'Yeni bir kay'#305't eklemek i'#231'in buraya t'#305'klay'#305'n'
+    QuantumGrid5.GridFilterIsEmpty = '<S'#252'zme i'#351'lemi bo'#351'>'
+    QuantumGrid5.GridCustomizationFormCaption = #214'zelle'#351'tirme'
+    QuantumGrid5.GridCustomizationFormColumnsPageCaption = 'Kolonlar'
+    QuantumGrid5.GridGroupByBoxCaption = 
+      #304'lgili kolona g'#246're guruplama yapmak i'#231'in kolon ba'#351'l'#305#287#305'n'#305' s'#252'r'#252'kle' +
+      'yin'
+    QuantumGrid5.GridFilterCustomizeButtonCaption = #214'zelle'#351'tir...'
+    QuantumGrid5.GridColumnsQuickCustomizationHint = 'G'#246'r'#252'lebilir kolonlar'#305' g'#246'rmek i'#231'in buraya t'#305'klay'#305'n.'
+    QuantumGrid5.GridCustomizationFormBandsPageCaption = 'Bantlar'
+    QuantumGrid5.GridBandsQuickCustomizationHint = 'G'#246'r'#252'lebilir bantlar g'#246'rmek i'#231'in buraya t'#305'klay'#305'n.'
+    QuantumGrid5.GridCustomizationFormRowsPageCaption = 'Sat'#305'rlar'
+    QuantumGrid5.GridConverterIntermediaryMissing = #304'kincil bile'#351'enler yok.'#13#10'L'#252'tfen forma bir %s bile'#351'eni ekleyin.'
+    QuantumGrid5.GridConverterNotExistGrid = 'cxGrid'#39'i mevcut de'#287'il'
+    QuantumGrid5.GridConverterNotExistComponent = 'Bile'#351'en mevcut de'#287'il'
+    QuantumGrid5.ImportErrorCaption = 'Alma hatas'#305
+    QuantumGrid5.NotExistGridView = 'Grid g'#246'r'#252'n'#252'm'#252' mevcut de'#287'il'
+    QuantumGrid5.NotExistGridLevel = 'Aktif grid sevyesi mevcut de'#287'il'
+    QuantumGrid5.CantCreateExportOutputFile = 'Kaydedilecek '#231#305'kt'#305' dosyas'#305' olu'#351'turulam'#305'yor.'
+    QuantumGrid5.EditRepositoryExtLookupComboBoxItem = 
+      'ExtLookupComboBox| QuantumGrid ile kullan'#305'lan bu bile'#351'en geli'#351'mi' +
+      #351' lookup '#246'zelliklere sahiptir.'
+    Navigator.NavigatorHint_First = #304'lk Kay'#305't'
+    Navigator.NavigatorHint_Prior = #214'nceki Kay'#305't'
+    Navigator.NavigatorHint_PriorPage = #214'nceki Sayfa'
+    Navigator.NavigatorHint_Next = 'Sonraki Kay'#305't'
+    Navigator.NavigatorHint_NextPage = 'Sonraki Sayfa'
+    Navigator.NavigatorHint_Last = 'Son Kay'#305't'
+    Navigator.NavigatorHint_Insert = 'Yeni Kay'#305't Ekle'
+    Navigator.NavigatorHint_Delete = 'Kay'#305't'#305' Sil'
+    Navigator.NavigatorHint_Edit = 'Kay'#305't'#305' De'#287'i'#351'tir'
+    Navigator.NavigatorHint_Post = 'De'#287'i'#351'ikli'#287'i Kaydet'
+    Navigator.NavigatorHint_Cancel = 'De'#287'i'#351'iklikleri '#304'ptal Et'
+    Navigator.NavigatorHint_Refresh = 'Veriyi Tazele'
+    Navigator.NavigatorHint_SaveBookmark = #304#351'aretli Kay'#305't'#305' Kaydet'
+    Navigator.NavigatorHint_GotoBookmark = #304#351'aretli Kay'#305'ta Git'
+    Navigator.NavigatorHint_Filter = 'Veriyi S'#252'z'
+    Navigator.Navigator_DeleteRecordQuestion = 'Kay'#305't Sil?'
+    Editors5.EditDateConvertError = 'Tarih bilgisi '#231'evirilemedi'
+    Editors5.EditInvalidRepositoryItem = 'Depolanan '#246#287'e kabul edilemez'
+    Editors5.EditNumericValueConvertError = 'Say'#305'sal de'#287'er '#231'evrilemiyor.'
+    Editors5.EditPopupCircularReferencingError = 'Dolamba'#231'l'#305' referanslara izin verilmez.'
+    Editors5.EditPostError = 'De'#287'i'#351'iklikleri kay'#305't esnas'#305'nda hata olu'#351'tu.'
+    Editors5.EditTimeConvertError = 'Zaman '#231'evrilmesi yap'#305'lamad'#305'. '#199#305'kmak i'#231'in Escape tu'#351'unu kullan'#305'n'
+    Editors5.EditValidateErrorText = 'Ge'#231'ersiz de'#287'er. '#199#305'kmak i'#231'in Escape tu'#351'unu kullan'#305'n'
+    Editors5.EditValueOutOfBounds = 'De'#287'er s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    Editors5.EditCheckBoxChecked = 'Do'#287'ru'
+    Editors5.EditCheckBoxUnchecked = 'Yanl'#305#351
+    Editors5.TextTrue = 'Do'#287'ru'
+    Editors5.TextFalse = 'Yanl'#305#351
+    Editors5.BlobButtonOK = '&TAMAM'
+    Editors5.BlobButtonCancel = '&'#304'ptal'
+    Editors5.BlobButtonClose = '&Kapat'
+    Editors5.BlobMemo = '(MEMO)'
+    Editors5.BlobMemoEmpty = '(memo)'
+    Editors5.BlobPicture = '(RES'#304'M)'
+    Editors5.BlobPictureEmpty = '(resim)'
+    Editors5.MenuItemCaptionCut = 'K&es'
+    Editors5.MenuItemCaptionCopy = '&Kopyala'
+    Editors5.MenuItemCaptionPaste = 'Ya&p'#305#351't'#305'r'
+    Editors5.MenuItemCaptionDelete = '&Sil'
+    Editors5.MenuItemCaptionLoad = '&Y'#252'kle...'
+    Editors5.MenuItemCaptionSave = '&Farkl'#305' Kaydet...'
+    Editors5.DatePopupClear = 'Temizle'
+    Editors5.DatePopupNow = #350'imdi'
+    Editors5.DatePopupOK = 'TAMAM'
+    Editors5.DatePopupToday = 'Bug'#252'n'
+    Editors5.DateError = 'Ge'#231'ersiz Tarih'
+    Editors5.DateToday = 'bug'#252'n'
+    Editors5.DateYesterday = 'd'#252'n'
+    Editors5.DateTomorrow = 'yar'#305'n'
+    Editors5.DateSunday = 'Pazar'
+    Editors5.DateMonday = 'Pazartesi'
+    Editors5.DateTuesday = 'Sal'#305
+    Editors5.DateWednesday = #199'ar'#351'amba'
+    Editors5.DateThursday = 'Per'#351'embe'
+    Editors5.DateFriday = 'Cuma'
+    Editors5.DateSaturday = 'Cumartesi'
+    Editors5.DateFirst = 'ilk'
+    Editors5.DateSecond = 'ikinci'
+    Editors5.DateThird = #252#231#252'nc'#252
+    Editors5.DateFourth = 'd'#246'rd'#252'nc'#252
+    Editors5.DateFifth = 'be'#351'inci'
+    Editors5.DateSixth = 'alt'#305'nc'#305
+    Editors5.DateSeventh = 'yedinci'
+    Editors5.DateBOM = 'bom'
+    Editors5.DateEOM = 'eom'
+    Editors5.DateNow = #351'imdi'
+    Editors5.CalcError = 'Hata'
+    Editors5.HyperLinkPrefix = 'http://'
+    Editors5.HyperLinkDoubleSlash = '//'
+    Editors5.EditRepositoryBlobItem = 'BlobEdit|BLOB alanlar'#305' d'#252'zenlemek i'#231'in'
+    Editors5.EditRepositoryButtonItem = 'ButtonEdit|T'#252'mle'#351'ik olarak i'#231'inde buton (lar) yer al'#305'r'
+    Editors5.EditRepositoryCalcItem = 'CalcEdit|A'#231#305'lan bir pencerede hesap makinas'#305' sunar'
+    Editors5.EditRepositoryCheckBoxItem = 'CheckBox|Bir se'#231'ene'#287'i se'#231'mek i'#231'in'
+    Editors5.EditRepositoryComboBoxItem = 
+      'ComboBox|A'#231#305'lan listede bulunan birden '#231'ok de'#287'erden birini se'#231'me' +
+      'k i'#231'in'
+    Editors5.EditRepositoryCurrencyItem = 'CurrencyEdit|Parasal verileri d'#252'zenlemek i'#231'in'
+    Editors5.EditRepositoryDateItem = 'DateEdit|Tarihsel verileri d'#252'zenlemek i'#231'in edit kutusu sunar'
+    Editors5.EditRepositoryHyperLinkItem = 'HyperLink|K'#252'pr'#252' bilgilerini d'#252'zenlemek i'#231'in'
+    Editors5.EditRepositoryImageComboBoxItem = 'ImageComboBox|Verileri ili'#351'kili bir resim g'#252'stererek se'#231'mek i'#231'in'
+    Editors5.EditRepositoryImageItem = 'Image|Resimleri se'#231'mek i'#231'in'
+    Editors5.EditRepositoryLookupComboBoxItem = 'LookupComboBox|Ba'#351'ka bir tablodan verileri almak i'#231'in'
+    Editors5.EditRepositoryMaskItem = 'MaskEdit|Verileri belirli bir bi'#231'imde girmek i'#231'in'
+    Editors5.EditRepositoryMemoItem = 'Memo|Memo alanlar'#305' d'#252'zenlemek i'#231'in'
+    Editors5.EditRepositoryMRUItem = 'MRUEdit|Son girilen de'#287'erleri haf'#305'zas'#305'nda saklar'
+    Editors5.EditRepositoryPopupItem = 
+      'PopupEdit|A'#231#305'lan bir liste i'#231'inde birden '#231'ok de'#287'erden birini se'#231 +
+      'mek i'#231'in'
+    Editors5.EditRepositorySpinItem = 'SpinEdit|SpinEdit '
+    Editors5.EditRepositoryRadioGroupItem = 'RadioGroup|Se'#231'eneklerden birini se'#231'mek i'#231'in'
+    Editors5.EditRepositoryTextItem = 'TextEdit|Veri giri'#351'i i'#231'in yaz'#305' edit'#246'r'#252
+    Editors5.EditRepositoryTimeItem = 'TimeEdit|Saat de'#287'erlerini d'#252'zenlemek i'#231'in'
+    Editors5.RegExprLine = #199'izgi'
+    Editors5.RegExprChar = 'Karakter (Char)'
+    Editors5.RegExprNotAssignedSourceStream = 'Kaynak stream yok'
+    Editors5.RegExprEmptySourceStream = 'Kaynak stream bo'#351
+    Editors5.RegExprCantUsePlusQuantifier = #39'+'#39' burada uygulanamaz'
+    Editors5.RegExprCantUseStarQuantifier = #39'*'#39' burada uygulanamaz'
+    Editors5.RegExprCantCreateEmptyAlt = 'Alternatif bo'#351' olmamal'#305
+    Editors5.RegExprCantCreateEmptyBlock = 'Blok bo'#351' olmamal'#305
+    Editors5.RegExprIllegalSymbol = 'Ge'#231'ersiz '#39'%s'#39
+    Editors5.RegExprIllegalQuantifier = 'Ge'#231'ersiz belirleyici '#39'%s'#39
+    Editors5.RegExprNotSupportQuantifier = 'Parametre girdisi desteklenmiyor'
+    Editors5.RegExprIllegalIntegerValue = 'Ge'#231'ersiz say'#305'sal de'#287'er'
+    Editors5.RegExprTooBigReferenceNumber = 'Referans numaras'#305' '#231'ok b'#252'y'#252'k'
+    Editors5.RegExprCantCreateEmptyEnum = 'Bo'#351' liste olu'#351'amaz'
+    Editors5.RegExprSubrangeOrder = 
+      'Alt sevyedeki ba'#351'lang'#305#231' karakteri en sonda olacak olan karakterd' +
+      'en daha k'#252#231#252'k olmal'#305'd'#305'r.'
+    Editors5.RegExprHexNumberExpected0 = 'Hexadesimal say'#305' bekleniyor'
+    Editors5.RegExprHexNumberExpected = 'Hexadesimal say'#305' yerine '#39'%s'#39' bulundu'
+    Editors5.RegExprMissing = #39'%s'#39' yok'
+    Editors5.RegExprUnnecessary = 'Gereksiz '#39'%s'#39
+    Editors5.RegExprIncorrectSpace = #39'\'#39' karakterinden sonra bo'#351'luk karakterine izin verilmez'
+    Editors5.RegExprNotCompiled = 'Standart ifade derlenemedi'
+    Editors5.RegExprIncorrectParameterQuantifier = 'Yanl'#305#351' parametre girdisi'
+    Editors5.RegExprCantUseParameterQuantifier = 'Parametre Say'#305'c'#305's'#305' buraya uygulanamaz'
+    Editors5.MaskEditRegExprError = 'Genel ifade hatalar'#305' :'
+    Editors5.MaskEditInvalidEditValue = 'Girilen de'#287'er ge'#231'ersiz'
+    Editors5.MaskEditNoMask = 'Yok'
+    Editors5.MaskEditIllegalFileFormat = 'Ge'#231'ersiz dosya bi'#231'imi'
+    Editors5.MaskEditEmptyMaskCollectionFile = 'Mask koleksiyon dosyas'#305' bo'#351
+    Editors5.MaskEditMaskCollectionFiles = 'Mask koleksiyon dosyalar'#305
+    Editors5.SpinEditInvalidNumericValue = 'Ge'#231'ersiz say'#305'sal de'#287'er'
+    Datacontroller.DataReadError = 'Stream okuma hatas'#305
+    Datacontroller.DataWriteError = 'Veri yazma s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    Datacontroller.DataItemExistError = 'Bu veri zaten var'
+    Datacontroller.DataRecordIndexError = 'Kay'#305't indeksi hatas'#305
+    Datacontroller.DataItemIndexError = 'Veri indeksi s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    Datacontroller.DataProviderModeError = 'Bu i'#351'lem sa'#287'lay'#305'c'#305' modunda desteklenmiyor'
+    Datacontroller.DataInvalidStreamFormat = 'Ge'#231'ersiz stream bi'#231'imi'
+    Datacontroller.DataRowIndexError = 'Sat'#305'r indeksi s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    Datacontroller.DataCustomDataSourceInvalidCompare = 'Kar'#351#305'la'#351't'#305'r'#305'lacak gerekli bilgi bulunamad'#305
+    Datacontroller.DBDetailFilterControllerNotFound = 'Detay Filtre Kontrol'#252' bulunamad'#305
+    Datacontroller.DBNotInGridMode = 'Veri kontrol'#252' grid modunda de'#287'il'
+    Datacontroller.DBKeyFieldNotFound = 'Anahtar alan bulunamad'#305'.'
+    Filter.FilterOperatorEqual = 'e'#351'it'
+    Filter.FilterOperatorNotEqual = 'e'#351'it de'#287'il'
+    Filter.FilterOperatorLess = 'daha k'#252#231#252'k'
+    Filter.FilterOperatorLessEqual = 'daha k'#252#231#252'k veya e'#351'it'
+    Filter.FilterOperatorGreater = 'daha b'#252'y'#252'k'
+    Filter.FilterOperatorGreaterEqual = 'daha b'#252'y'#252'k veya e'#351'it'
+    Filter.FilterOperatorLike = 'benzer'
+    Filter.FilterOperatorNotLike = 'benzer de'#287'il'
+    Filter.FilterOperatorBetween = 'aral'#305#287#305'nda'
+    Filter.FilterOperatorNotBetween = 'aral'#305#287#305'nda de'#287'il'
+    Filter.FilterOperatorInList = 'i'#231'inde'
+    Filter.FilterOperatorNotInList = 'i'#231'inde de'#287'il'
+    Filter.FilterOperatorYesterday = 'd'#252'n'
+    Filter.FilterOperatorToday = 'bug'#252'n'
+    Filter.FilterOperatorTomorrow = 'yar'#305'n'
+    Filter.FilterOperatorLastWeek = 'son hafta'
+    Filter.FilterOperatorLastMonth = 'son ay'
+    Filter.FilterOperatorLastYear = 'son y'#305'l'
+    Filter.FilterOperatorThisWeek = 'bu hafta i'#231'inde'
+    Filter.FilterOperatorThisMonth = 'bu ay i'#231'inde'
+    Filter.FilterOperatorThisYear = 'bu y'#305'l i'#231'inde'
+    Filter.FilterOperatorNextWeek = 'bir sonraki hafta'
+    Filter.FilterOperatorNextMonth = 'bir sonraki ay'
+    Filter.FilterOperatorNextYear = 'bir sonraki y'#305'l'
+    Filter.FilterAndCaption = 've'
+    Filter.FilterOrCaption = 'veya'
+    Filter.FilterNotCaption = 'de'#287'il'
+    Filter.FilterBlankCaption = 'bo'#351
+    Filter.FilterOperatorIsNull = 'bo'#351
+    Filter.FilterOperatorIsNotNull = 'bo'#351' de'#287'il'
+    Filter.FilterOperatorBeginsWith = 'ile ba'#351'lar'
+    Filter.FilterOperatorDoesNotBeginWith = 'ile ba'#351'lamaz'
+    Filter.FilterOperatorEndsWith = 'ile sona erer'
+    Filter.FilterOperatorDoesNotEndWith = 'ile sona ermez'
+    Filter.FilterOperatorContains = 'kapsar'
+    Filter.FilterOperatorDoesNotContain = 'kapsamaz'
+    Filter.FilterBoxAllCaption = '(Hepsi)'
+    Filter.FilterBoxCustomCaption = '('#214'zelle'#351'tirme...)'
+    Filter.FilterBoxBlanksCaption = '(Bo'#351' Olanlar)'
+    Filter.FilterBoxNonBlanksCaption = '(Bo'#351' Olmayanlar)'
+    Filter.FilterBoolOperatorAnd = 'VE'
+    Filter.FilterBoolOperatorOr = 'VEYA'
+    Filter.FilterBoolOperatorNotAnd = 'VE DE'#286#304'L'
+    Filter.FilterBoolOperatorNotOr = 'VEYA DE'#286#304'L'
+    Filter.FilterRootButtonCaption = 'S'#252'zme'
+    Filter.FilterAddCondition = '&Ko'#351'ul Ekle'
+    Filter.FilterAddGroup = '&Gurup Ekle'
+    Filter.FilterRemoveRow = '&Sat'#305'r'#305' Sil'
+    Filter.FilterClearAll = '&T'#252'm'#252'n'#252' Temizle'
+    Filter.FilterFooterAddCondition = 'yeni bir ko'#351'ul eklemek i'#231'in butona t'#305'klay'#305'n'
+    Filter.FilterGroupCaption = 'a'#351'a'#287#305'da ki ko'#351'ullara uygular'
+    Filter.FilterRootGroupCaption = '<k'#246'k>'
+    Filter.FilterControlNullString = '<bo'#351'>'
+    Filter.FilterErrorBuilding = 'Kaynaktan s'#252'zme i'#351'lemi olu'#351'turam'#305'yor'
+    Filter.FilterDialogCaption = 'Al'#305#351#305'lm'#305#351' S'#252'zme'
+    Filter.FilterDialogInvalidValue = 'Ge'#231'ersiz de'#287'er'
+    Filter.FilterDialogUse = 'Kullan'
+    Filter.FilterDialogSingleCharacter = 'Herhangi tek bir karakteri temsil etmek i'#231'in'
+    Filter.FilterDialogCharactersSeries = 'Herhangi bir karakter serisini temsil etmek i'#231'in'
+    Filter.FilterDialogOperationAnd = 'VE'
+    Filter.FilterDialogOperationOr = 'VEYA'
+    Filter.FilterDialogRows = 'Sat'#305'rlar'#305'n g'#246'sterilece'#287'i konum :'
+    Filter.FilterControlDialogCaption = 'S'#252'zme Olu'#351'turucusu'
+    Filter.FilterControlDialogNewFile = 'bo'#351'.flt'
+    Filter.FilterControlDialogOpenDialogCaption = 'Halihaz'#305'rda ki bi s'#252'zmeyi kullan'
+    Filter.FilterControlDialogSaveDialogCaption = 'Kullan'#305'lmakta olan s'#252'zmeyi dosyaya kaydet'
+    Filter.FilterControlDialogActionSaveCaption = '&Farkl'#305' Kaydet...'
+    Filter.FilterControlDialogActionOpenCaption = '&A'#231'...'
+    Filter.FilterControlDialogActionApplyCaption = '&Uygula'
+    Filter.FilterControlDialogActionOkCaption = 'TAMAM'
+    Filter.FilterControlDialogActionCancelCaption = #304'ptal'
+    Filter.FilterControlDialogFileExt = 'flt'
+    Filter.FilterControlDialogFileFilter = 'S'#252'zme Dosyalar'#305' (*.flt)|*.flt'
+    GridPopupMenu.GridNone = 'Hi'#231'biri'
+    GridPopupMenu.GridSortColumnAsc = 'Artan S'#305'ralama'
+    GridPopupMenu.GridSortColumnDesc = 'Azalan S'#305'ralama'
+    GridPopupMenu.GridClearSorting = 'S'#305'ralama Kald'#305'r'
+    GridPopupMenu.GridGroupByThisField = 'Bu alana g'#246're gurupla'
+    GridPopupMenu.GridRemoveThisGroupItem = 'Guruplamadan '#231#305'kart'
+    GridPopupMenu.GridGroupByBox = 'Bu kutuya g'#246're gurupla'
+    GridPopupMenu.GridAlignmentSubMenu = 'Hizalama'
+    GridPopupMenu.GridAlignLeft = 'Sola Hizala'
+    GridPopupMenu.GridAlignRight = 'Sa'#287'a Hizala'
+    GridPopupMenu.GridAlignCenter = 'Ortaya Hizala'
+    GridPopupMenu.GridRemoveColumn = 'Bu kolonu sil'
+    GridPopupMenu.GridFieldChooser = 'Alan Se'#231'ici'
+    GridPopupMenu.GridBestFit = 'En iyi uyan'
+    GridPopupMenu.GridBestFitAllColumns = 'En iyi uyan (B'#252't'#252'n kolonlar)'
+    GridPopupMenu.GridShowFooter = #214'zet'
+    GridPopupMenu.GridShowGroupFooter = 'Gurup '#214'zetleri'
+    GridPopupMenu.GridSumMenuItem = 'Toplam'
+    GridPopupMenu.GridMinMenuItem = 'En K'#252#231#252'k'
+    GridPopupMenu.GridMaxMenuItem = 'En B'#252'y'#252'k'
+    GridPopupMenu.GridCountMenuItem = 'Say'
+    GridPopupMenu.GridAvgMenuItem = 'Ortalama'
+    GridPopupMenu.GridNoneMenuItem = 'Hi'#231'biri'
+    GridExport.UnsupportedExport = 'Desteklenmeyen g'#246'nderme tipi: %1'
+    GridExport.StyleManagerKill = 
+      'Stil y'#246'neticisi '#351'uanda ba'#351'ka biryerde kullan'#305'ld'#305#287#305' i'#231'in bu a'#351'ama' +
+      'da eri'#351'ilemez '
+    GridExport.StyleManagerCreate = 'Stil y'#246'neticisini olu'#351'turam'#305'yor'
+    GridExport.ExportToHtml = 'WEB dosyas'#305' olarak kaydet (*.html)'
+    GridExport.ExportToXml = 'XML dosyas'#305' olarak kaydet (*.xml)'
+    GridExport.ExportToText = 'Text dosyas'#305' olarak kaydet (*.txt)'
+    GridExport.EmptyExportCache = 'Export cache is empty'
+    GridExport.IncorrectUnion = 'Yanl'#305#351' h'#252'crelerin birle'#351'imi'
+    GridExport.IllegalWidth = 'Kolon geni'#351'li'#287'i ge'#231'ersiz'
+    GridExport.InvalidColumnRowCount = 'Ge'#231'ersiz kolon veya sat'#305'r say'#305's'#305
+    GridExport.IllegalHeight = 'Sat'#305'r y'#252'ksekli'#287'i ge'#231'ersiz'
+    GridExport.InvalidColumnIndex = 'Kolon indeksi %d s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    GridExport.InvalidRowIndex = 'Sat'#305'r indeksi %d s'#305'n'#305'rlar'#305'n d'#305#351#305'nda'
+    GridExport.InvalidStyleIndex = 'Ge'#231'ersiz index %d tipi'
+    GridExport.ExportToExcel = 'MS Excel dosyas'#305' olarak kaydet (*.xls)'
+    GridExport.WorkbookWrite = 'XLS dosyas'#305'na hata yaz'#305'ld'#305
+    GridExport.InvalidCellDimension = 'Ge'#231'ersiz h'#252'cre boyutu'
+    GridExport.BoolTrue = 'Do'#287'ru'
+    GridExport.BoolFalse = 'Yanl'#305#351
+    Translate.cxLibrary = True
+    Translate.PageControl2 = True
+    Translate.QuantumGrid5 = True
+    Translate.Editors5 = True
+    Translate.Datacontroller = True
+    Translate.Filter = True
+    Translate.GridPopupMenu = True
+    Translate.GridExport = True
+    Translate.Navigator = True
+    Version = '5.0'
+    Left = 433
+    Top = 104
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 432
+    Top = 136
+    object cxStyle1: TcxStyle
+      AssignedValues = [svFont]
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+    end
+  end
+  object MainMenu1: TMainMenu
+    OwnerDraw = True
+    Left = 216
+    Top = 120
+    object MNSecenek: TMenuItem
+      Caption = 'Se'#231'enekler'
+      object SeriPortAyarlar1: TMenuItem
+        Caption = 'Seri Port Ayarlar'#305
+        ShortCut = 16467
+        OnClick = SeriPortAyarlar1Click
+      end
+      object ProgramAyarlar1: TMenuItem
+        Caption = 'Opsiyonlar'
+        ShortCut = 16464
+        OnClick = ProgramAyarlar1Click
+      end
+      object MNDonemAktar: TMenuItem
+        Caption = 'MNDonemAktar'
+        Visible = False
+      end
+      object N3: TMenuItem
+        Caption = '-'
+        Visible = False
+      end
+    end
+    object izinler: TMenuItem
+      Caption = #304'zin'
+      object GenelDokumler: TMenuItem
+        Caption = #304'zin'
+        OnClick = GenelDokumlerClick
+      end
+    end
+    object Yardm1: TMenuItem
+      Caption = 'Yard'#305'm'
+      object Hakknda1: TMenuItem
+        Caption = 'Hakk'#305'nda'
+        OnClick = Hakknda1Click
+      end
+    end
+  end
+  object cxGridPopupMenu1: TcxGridPopupMenu
+    PopupMenus = <>
+    Left = 400
+    Top = 136
+  end
+  object Timer2: TTimer
+    Interval = 100
+    OnTimer = Timer2Timer
+    Left = 336
+    Top = 136
+  end
+  object XPMenu1: TXPMenu
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clMenuText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Color = clBtnFace
+    IconBackColor = clBtnFace
+    MenuBarColor = clBtnFace
+    SelectColor = clHighlight
+    SelectBorderColor = clHighlight
+    SelectFontColor = clMenuText
+    DisabledColor = clInactiveCaption
+    SeparatorColor = clBtnFace
+    CheckedColor = clHighlight
+    IconWidth = 24
+    DrawSelect = True
+    UseSystemColors = True
+    OverrideOwnerDraw = False
+    Gradient = False
+    FlatMenu = False
+    AutoDetect = False
+    Active = True
+    Left = 400
+    Top = 104
+  end
+  object Timer3: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = Timer3Timer
+    Left = 368
+    Top = 105
+  end
+  object ComPort1: TComPort
+    BaudRate = br9600
+    Port = 'COM1'
+    Parity.Bits = prNone
+    StopBits = sbOneStopBit
+    DataBits = dbEight
+    Events = [evRxChar, evTxEmpty, evRxFlag, evRing, evBreak, evCTS, evDSR, evError, evRLSD, evRx80Full]
+    FlowControl.OutCTSFlow = False
+    FlowControl.OutDSRFlow = False
+    FlowControl.ControlDTR = dtrHandshake
+    FlowControl.ControlRTS = rtsDisable
+    FlowControl.XonXoffOut = False
+    FlowControl.XonXoffIn = False
+    Timeouts.ReadInterval = 50
+    Timeouts.ReadTotalConstant = 100
+    Timeouts.WriteTotalMultiplier = 0
+    Timeouts.WriteTotalConstant = 100
+    OnRxChar = ComPort1RxChar
+    Left = 464
+    Top = 136
+  end
+  object Timer4: TTimer
+    Interval = 3000
+    OnTimer = Timer4Timer
+    Left = 368
+    Top = 137
+  end
+  object tmrSupremaTarama: TTimer
+    Enabled = False
+    OnTimer = tmrSupremaTaramaTimer
+    Left = 336
+    Top = 169
+  end
+  object tmrOkuyucu2: TTimer
+    Enabled = False
+    OnTimer = tmrOkuyucu2Timer
+    Left = 504
+    Top = 360
+  end
+end

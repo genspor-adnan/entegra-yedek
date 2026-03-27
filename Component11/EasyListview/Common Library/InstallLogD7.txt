@@ -1,0 +1,498 @@
+***************************************
+BEGIN: Unregistering Component Package
+***************************************
+
+Reading Extra Paths from Setup.ini
+   D:\Projects\Component7\EasyListview\Common Library\Source
+
+Cleaning Known Package Registry Entry
+
+Reading Packages:
+c:\program files\borland\delphi7\Bin\dclite70.bpl
+c:\program files\borland\delphi7\Bin\dclnet70.bpl
+$(Delphi)\Bin\dclstd70.bpl
+c:\program files\borland\delphi7\Bin\dclmcn70.bpl
+$(Delphi)\Bin\dclmid70.bpl
+$(Delphi)\Bin\dcldb70.bpl
+c:\program files\borland\delphi7\Bin\dclsoap70.bpl
+c:\program files\borland\delphi7\Bin\dclocx70.bpl
+c:\program files\borland\delphi7\Bin\dclsmp70.bpl
+c:\program files\borland\delphi7\Bin\dcldbx70.bpl
+c:\program files\borland\delphi7\Bin\dcldbxcds70.bpl
+$(Delphi)\Bin\dclbde70.bpl
+$(Delphi)\Bin\dbx70.bpl
+c:\program files\borland\delphi7\Bin\dclwbm70.bpl
+c:\program files\borland\delphi7\Bin\dclie70.bpl
+c:\program files\borland\delphi7\Bin\dclwebsnap70.bpl
+c:\program files\borland\delphi7\Bin\dclado70.bpl
+c:\program files\borland\delphi7\Bin\DCLIB70.bpl
+c:\program files\borland\delphi7\Bin\dcltee70.bpl
+c:\program files\borland\delphi7\Bin\dcldss70.bpl
+c:\program files\borland\delphi7\Bin\dclclxdb70.bpl
+$(Delphi)\Bin\dclclxstd70.bpl
+c:\program files\borland\delphi7\Bin\dclsmpedit70.bpl
+c:\program files\borland\delphi7\Bin\applet70.bpl
+c:\program files\borland\delphi7\Bin\dclemacsedit70.bpl
+c:\program files\borland\delphi7\Bin\dclact70.bpl
+c:\program files\borland\delphi7\Bin\dclmlwiz70.bpl
+c:\program files\borland\delphi7\Bin\dcl31w70.bpl
+$(SystemRoot)\system32\ibevnt70.bpl
+c:\program files\borland\delphi7\Bin\dclshlctrls70.bpl
+c:\program files\borland\delphi7\Bin\dclIntraweb_50_70.bpl
+c:\program files\borland\delphi7\bin\dclRave70.bpl
+c:\program files\borland\delphi7\Bin\dclofficexp70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\CoolTrayIcon_D6plus.bpl
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Lib\dclcxLibraryVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib\dclcxEditorsVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib\dclcxExtEditorsVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib\dclcxPageControlVCLD7.bpl
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib\dclcxGridVCLD7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclusr70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\PcxIntl.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Ean7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Ean7Editors.bpl
+c:\program files\borland\delphi7\Projects\Bpl\QR4DesignD7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclIndyCore70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\dclIndyProtocols70.bpl
+$(ProgramFiles)\RemObjects Software\Everwood\Bin\RemObjects_Everwood_D7.bpl
+$(ProgramFiles)\RemObjects Software\Pascal Script for Delphi\Dcu\D7\PascalScript_Core_D7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\ECXMLParserD70.bpl
+$(Delphi)\Projects\Bpl\JclBaseExpert70.bpl
+c:\program files\borland\delphi7\Projects\Bpl\Package1.bpl
+c:\program files\borland\delphi7\Projects\Bpl\AH_COMP.bpl
+c:\program files\borland\delphi7\Bin\DBWEBXPRT.BPL
+D:\Projects\Component7\Rac206\Delphi7\PDEnhAviCap.bpl
+$(Delphi)\Projects\Bpl\GmXML_D7.bpl
+c:\program files\borland\delphi7\Projects\Bpl\KWizardD6.bpl
+ 
+Stripping off path and extension
+dclite70
+dclnet70
+dclstd70
+dclmcn70
+dclmid70
+dcldb70
+dclsoap70
+dclocx70
+dclsmp70
+dcldbx70
+dcldbxcds70
+dclbde70
+dbx70
+dclwbm70
+dclie70
+dclwebsnap70
+dclado70
+DCLIB70
+dcltee70
+dcldss70
+dclclxdb70
+dclclxstd70
+dclsmpedit70
+applet70
+dclemacsedit70
+dclact70
+dclmlwiz70
+dcl31w70
+ibevnt70
+dclshlctrls70
+dclIntraweb_50_70
+dclRave70
+dclofficexp70
+CoolTrayIcon_D6plus
+dclcxLibraryVCLD7
+dclcxEditorsVCLD7
+dclcxExtEditorsVCLD7
+dclcxPageControlVCLD7
+dclcxGridVCLD7
+dclusr70
+PcxIntl
+Ean7
+Ean7Editors
+QR4DesignD7
+dclIndyCore70
+dclIndyProtocols70
+RemObjects_Everwood_D7
+PascalScript_Core_D7
+ECXMLParserD70
+JclBaseExpert70
+Package1
+AH_COMP
+DBWEBXPRT
+PDEnhAviCap
+GmXML_D7
+KWizardD6
+ 
+Reading Packages to remove
+MPCommonLibD7
+MPCommonLibD7D
+ 
+Stripping off path and extension
+MPCommonLibD7
+MPCommonLibD7D
+ 
+Scanning for previously installed packages....
+Known Package Registry Entry Cleaned
+
+Cleaning Disabled Package Registry Entry
+
+Reading Packages:
+D:\Projects\Component7\BARCODE_QR45\BarcodeDgnD7.bpl
+D:\Projects\Component7\BARCODE_QR45\QRBarcodeDgnD7.bpl
+ 
+Stripping off path and extension
+BarcodeDgnD7
+QRBarcodeDgnD7
+ 
+Reading Packages to remove
+MPCommonLibD7
+MPCommonLibD7D
+ 
+Stripping off path and extension
+MPCommonLibD7
+MPCommonLibD7D
+ 
+Scanning for previously installed packages....
+Disabled Package Registry Entry Cleaned
+
+Reading Search Path Registry Entry
+C:\Program Files\Indy 10 for Delphi 7\LibD7
+C:\Program Files\Borland\Delphi7\Lib
+C:\Program Files\Borland\Delphi7\Bin
+C:\Program Files\Borland\Delphi7\Imports
+C:\Program Files\Borland\Delphi7\Projects\Bpl
+C:\Program Files\Borland\Delphi7\Rave5\Lib
+d:\faxserver\tfax\d7
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+C:\Program Files\Borland\Delphi7\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+    
+    
+Writing Search Path Registry Entry
+Removing extra characters and blank lines
+Formatting.....
+$(ProgramFiles)\Indy 10 for Delphi 7\LibD7
+$(Delphi)\Lib
+$(Delphi)\Bin
+$(Delphi)\Imports
+$(Delphi)\Projects\Bpl
+$(Delphi)\Rave5\Lib
+d:\faxserver\tfax\d7
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+$(Delphi)\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+Writing to Key: Software\Borland\Delphi\7.0\Library  Value: Search Path
+Search Path Registry Entry written
+
+Reading Browse Path Registry Entry
+C:\Program Files\Borland\Delphi7\source\vcl
+C:\Program Files\Borland\Delphi7\Source\Rtl
+C:\Program Files\Borland\Delphi7\source\rtl\Corba45
+C:\Program Files\Borland\Delphi7\source\rtl\Sys
+C:\Program Files\Borland\Delphi7\source\rtl\Win
+C:\Program Files\Borland\Delphi7\source\rtl\common
+C:\Program Files\Borland\Delphi7\source\Internet
+C:\Program Files\Borland\Delphi7\source\clx
+C:\Program Files\Borland\Delphi7\source\websnap
+C:\Program Files\Borland\Delphi7\Source\WebMidas
+C:\Program Files\Borland\Delphi7\Source\Indy
+C:\Program Files\Borland\Delphi7\Source\IntraWeb
+C:\Program Files\Borland\Delphi7\Source\Samples
+C:\Program Files\Borland\Delphi7\Source\Soap
+C:\Program Files\Borland\Delphi7\Source\ToolsAPI
+C:\Program Files\Borland\Delphi7\Source\Xml
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\JCL_V10\source\common
+D:\Projects\JCL_V10\source\windows
+D:\Projects\JCL_V10\source\vcl
+D:\Projects\JCL_V10\source\visclx
+    
+    
+Writing Browse Path Registry Entry
+Removing extra characters and blank lines
+Formatting.....
+$(Delphi)\source\vcl
+$(Delphi)\Source\Rtl
+$(Delphi)\source\rtl\Corba45
+$(Delphi)\source\rtl\Sys
+$(Delphi)\source\rtl\Win
+$(Delphi)\source\rtl\common
+$(Delphi)\source\Internet
+$(Delphi)\source\clx
+$(Delphi)\source\websnap
+$(Delphi)\Source\WebMidas
+$(Delphi)\Source\Indy
+$(Delphi)\Source\IntraWeb
+$(Delphi)\Source\Samples
+$(Delphi)\Source\Soap
+$(Delphi)\Source\ToolsAPI
+$(Delphi)\Source\Xml
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\JCL_V10\source\common
+D:\Projects\JCL_V10\source\windows
+D:\Projects\JCL_V10\source\vcl
+D:\Projects\JCL_V10\source\visclx
+Writing to Key: Software\Borland\Delphi\7.0\Library  Value: Browsing Path
+Browse Path Registry Entry written
+
+***************************************
+END: Unregistering Component Package
+***************************************
+
+
+***************************************
+BEGIN: Compiling Component Package
+***************************************
+Validating Output Folders
+Creating temp compile folder
+Folder Created: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Config.ini -U Switch: C:\PROGRA~1\INDY10~1\LibD7;C:\PROGRA~1\Borland\Delphi7\Lib;C:\PROGRA~1\Borland\Delphi7\Bin;C:\PROGRA~1\Borland\Delphi7\Imports;C:\PROGRA~1\Borland\Delphi7\Projects\Bpl;C:\PROGRA~1\Borland\Delphi7\Rave5\Lib;d:\FAXSER~1\tfax\d7;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Sources;D:\Projects\COMPON~1\EAN45D~1\units\d7;D:\Projects\COMPON~1\colltray;D:\Hastane\Ortak;C:\PROGRA~1\Borland\Delphi7\quickrpt;D:\Projects\COMPON~1\CXINTL~1.0;d:\projects\COMPON~1\DBNAVT~1;$(Pascal Script)\Dcu\D7;$(Pascal Script)\Source;D:\Projects\COMPON~1\XMLPAR~1;D:\Projects\JCL_V10\lib\d7;D:\Projects\JCL_V10\source;d:\projects\COMPON~1\FLOATI~1;d:\projects\COMPON~1\bhd;d:\projects\COMPON~1\PIKEYP~1;d:\projects\COMPON~1\barcode;D:\Projects\COMPON~1\Rac206\Delphi7;D:\Projects\COMPON~1\kwizard;
+Config.ini -I Switch: ..\Include
+Config.ini -LE Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -LN Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -N Switch: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Compiling....
+
+Redirector Working Dir: D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Delphi
+Redirector CreateProcess command: "C:\PROGRA~1\Borland\Delphi7\Bin\DCC32.exe" MPCommonLibD7.dpk
+
+
+Borland Delphi Version 15.0
+Copyright (c) 1983,2002 Borland Software Corporation
+MPCommonLibD7.dpk(1) MPCommonLibD7.dpk(31) MPCommonLibD7.dpk(32) MPCommonLibD7.dpk(34) MPCommonLibD7.dpk(34) MPCommonLibD7.dpk(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(1) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(487)  D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(14) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\Debug.inc(7) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(91) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(501) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(1013) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(1525) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(2037) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(2549) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(3061) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellTypes.pas(3467) 
+MPCommonLibD7.dpk(41) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(1) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(450)       D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(469) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\Debug.inc(7) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(72) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(73) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(74) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(75) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(76) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(77) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(78) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(79) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(80) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(82) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(83) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(94) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(95) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(96) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(97) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(98) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(99) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPResources.pas(1)        D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(487) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\Debug.inc(7) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPResources.pas(112) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(101) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(501) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(1)     D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(487)     D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(14) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(32) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(33) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(35) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(39) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(44) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(45) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(60) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(61) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(62) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(63) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(64) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(65) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(67) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(457) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(1)      D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(485)  D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(12) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\Debug.inc(7) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(35) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(38) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(39) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(40) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(41) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(42) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(43) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(47) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(48) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(49) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(59) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(59) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(59) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(61) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(501) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(1013) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(1525) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(2037) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPDataObject.pas(2361) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(459) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(507) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(1019) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(1531) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonObjects.pas(1874) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(575) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(1013) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(1525) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(2037) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(2549) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(3061) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(3573) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(4085) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(4597) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonUtilities.pas(5068) 
+MPCommonLibD7.dpk(41) MPCommonLibD7.dpk(41) MPCommonLibD7.dpk(41) MPCommonLibD7.dpk(41) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(1) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31)         
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(438) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(457) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(53) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(54) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(55) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(56) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(57) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(58) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(59) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(60) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(61) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(62) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(63) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(64) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(65) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(66) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(67) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(1)   D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(487)     D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Options.inc(16) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(39) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(388) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(388) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(390) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(487) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(999) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(1511) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPThreadManager.pas(1543) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(68) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(69) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(77) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(80) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(82) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(84) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(507) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(1019) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(1531) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(1534) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(2043) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(2555) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(3067) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(3579) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(4091) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(4603) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(5115) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(5627) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(6139) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(6651) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(7163) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(7675) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(8187) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(8699) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPShellUtilities.pas(9177) 
+MPCommonLibD7.dpk(41) MPCommonLibD7.dpk(41) MPCommonLibD7.dpk(43) MPCommonLibD7.dpk(44) 
+29882 lines, 2.59 seconds, 186128 bytes code, 4369 bytes data.
+
+
+Found compiled BPL file: C:\Program Files\Borland\Delphi7\Projects\Bpl\MPCommonLibD7.bpl
+
+
+Config.ini -U Switch: C:\PROGRA~1\INDY10~1\LibD7;C:\PROGRA~1\Borland\Delphi7\Lib;C:\PROGRA~1\Borland\Delphi7\Bin;C:\PROGRA~1\Borland\Delphi7\Imports;C:\PROGRA~1\Borland\Delphi7\Projects\Bpl;C:\PROGRA~1\Borland\Delphi7\Rave5\Lib;d:\FAXSER~1\tfax\d7;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Lib;C:\PROGRA~1\DEVELO~1\EXPRES~2\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\XPTHEM~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\CXLIBR~1\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~3\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~4\DELPHI~1\Sources;C:\PROGRA~1\DEVELO~1\EXPRES~1\DELPHI~1\Sources;D:\Projects\COMPON~1\EAN45D~1\units\d7;D:\Projects\COMPON~1\colltray;D:\Hastane\Ortak;C:\PROGRA~1\Borland\Delphi7\quickrpt;D:\Projects\COMPON~1\CXINTL~1.0;d:\projects\COMPON~1\DBNAVT~1;$(Pascal Script)\Dcu\D7;$(Pascal Script)\Source;D:\Projects\COMPON~1\XMLPAR~1;D:\Projects\JCL_V10\lib\d7;D:\Projects\JCL_V10\source;d:\projects\COMPON~1\FLOATI~1;d:\projects\COMPON~1\bhd;d:\projects\COMPON~1\PIKEYP~1;d:\projects\COMPON~1\barcode;D:\Projects\COMPON~1\Rac206\Delphi7;D:\Projects\COMPON~1\kwizard;
+Config.ini -I Switch: ..\Include
+Config.ini -LE Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -LN Switch: C:\PROGRA~1\Borland\Delphi7\Projects\Bpl
+Config.ini -N Switch: C:\DOCUME~1\NoDoubt\LOCALS~1\Temp\ESetup
+
+Compiling....
+
+Redirector Working Dir: D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Delphi
+Redirector CreateProcess command: "C:\PROGRA~1\Borland\Delphi7\Bin\DCC32.exe" MPCommonLibD7D.dpk
+
+
+Borland Delphi Version 15.0
+Copyright (c) 1983,2002 Borland Software Corporation
+MPCommonLibD7D.dpk(1) MPCommonLibD7D.dpk(31) MPCommonLibD7D.dpk(32) MPCommonLibD7D.dpk(33) MPCommonLibD7D.dpk(34) MPCommonLibD7D.dpk(36) MPCommonLibD7D.dpk(36) MPCommonLibD7D.dpk(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(1) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(483)           D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\Compilers.inc(493) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(34) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(35) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(36) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(37) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(38) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(38) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(38) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(38) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(39) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(40) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(42) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(43) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(43) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(43) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(43) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(44) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(44) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(45) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(45) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(46) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(47) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(59) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(60) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardTemplates.pas(1) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Include\AddIns.inc(31)                
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardTemplates.pas(77) 
+D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(62) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(502) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(1014) D:\Projects\COMPON~1\EASYLI~1\COMMON~1\Source\MPCommonWizardHelpers.pas(1055) 
+MPCommonLibD7D.dpk(38) MPCommonLibD7D.dpk(38) MPCommonLibD7D.dpk(40) MPCommonLibD7D.dpk(41) 
+1728 lines, 0.61 seconds, 15548 bytes code, 161 bytes data.
+
+
+Found compiled BPL file: C:\Program Files\Borland\Delphi7\Projects\Bpl\MPCommonLibD7D.bpl
+
+
+ 
+Adding Package BPL to Registry
+Adding: $(Delphi)\Projects\Bpl\MPCommonLibD7D.bpl
+***************************************
+END: Compiling Component Package
+***************************************
+
+***************************************
+BEGIN: Registering Component Package Paths
+***************************************
+
+Reading Search Path Registry Entry
+Search Path Registry Entry Read...
+C:\Program Files\Indy 10 for Delphi 7\LibD7
+C:\Program Files\Borland\Delphi7\Lib
+C:\Program Files\Borland\Delphi7\Bin
+C:\Program Files\Borland\Delphi7\Imports
+C:\Program Files\Borland\Delphi7\Projects\Bpl
+C:\Program Files\Borland\Delphi7\Rave5\Lib
+d:\faxserver\tfax\d7
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+C:\Program Files\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\CX Library\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+C:\Program Files\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+C:\Program Files\Borland\Delphi7\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+ 
+Adding Package source path:
+   D:\Projects\Component7\EasyListview\Common Library\Source
+
+Reading Extra Paths from Setup.ini
+   D:\Projects\Component7\EasyListview\Common Library\Source
+
+    
+Writing Search Path Registry Entry
+Removing extra characters and blank lines
+Formatting.....
+$(ProgramFiles)\Indy 10 for Delphi 7\LibD7
+$(Delphi)\Lib
+$(Delphi)\Bin
+$(Delphi)\Imports
+$(Delphi)\Projects\Bpl
+$(Delphi)\Rave5\Lib
+d:\faxserver\tfax\d7
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Lib
+$(ProgramFiles)\Developer Express Inc\ExpressDataController\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\XP Theme Manager\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\CX Library\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressEditors Library 5\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressPageControl 2\Delphi 7\Sources
+$(ProgramFiles)\Developer Express Inc\ExpressQuantumGrid 5\Delphi 7\Sources
+D:\Projects\Component7\ean45delphi\units\d7
+D:\Projects\Component7\colltray
+D:\Hastane\Ortak
+$(Delphi)\quickrpt
+D:\Projects\Component7\cxIntl5.0.0
+d:\projects\component7\dbnavtoolbtn
+$(Pascal Script)\Dcu\D7
+$(Pascal Script)\Source
+D:\Projects\Component7\XML Parser
+D:\Projects\JCL_V10\lib\d7
+D:\Projects\JCL_V10\source
+d:\projects\component7\floatingwindow
+d:\projects\component7\bhd
+d:\projects\component7\pikeypass
+d:\projects\component7\barcode
+D:\Projects\Component7\Rac206\Delphi7
+D:\Projects\Component7\kwizard
+D:\Projects\Component7\EasyListview\Common Library\Source
+Writing to Key: Software\Borland\Delphi\7.0\Library  Value: Search Path
+Search Path Registry Entry written
+
+***************************************
+END: Registering Component Package Paths
+***************************************
+

@@ -1,0 +1,577 @@
+unit UCombo;
+
+interface
+
+uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls, Buttons,
+     ExtCtrls, ADODb, DBTables, Registry, Dialogs, Mask, DBCtrls,
+  cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxCalendar, cxDBEdit, ToolWin, ComCtrls;
+
+type
+  TListeAyarlaDlg = class(TForm)
+    Bevel1: TBevel;
+    ListBox1: TListBox;
+    Label1: TLabel;
+    EkleTus: TBitBtn;
+    SilTus: TBitBtn;
+    DegistirTus: TBitBtn;
+    UstTus: TSpeedButton;
+    AltTus: TSpeedButton;
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    SpeedButton1: TSpeedButton;
+    procedure FormShow(Sender: TObject);
+    procedure UstTusClick(Sender: TObject);
+    procedure AltTusClick(Sender: TObject);
+    procedure SilTusClick(Sender: TObject);
+    procedure EkleTusClick(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+  TIni = class(TObject)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    Dosya : String;
+    IniSQL: TADOQuery;
+    constructor Create(DosyaAdi:String; IniSQL1: TADOQuery);
+    destructor Destroy; override;
+    procedure WriteString(Bolum, Anahtar, Deger:String);
+    procedure WriteInteger(Bolum, Anahtar:String; Deger:Integer);
+    procedure WriteBool(Bolum, Anahtar:String; Deger:Boolean);
+    Function  ReadString(Bolum, Anahtar, Deger:String):String;
+    Function  ReadInteger(Bolum, Anahtar:String; Deger:Integer):Integer;
+    Function ReadBool(Bolum, Anahtar:String; Deger:Boolean):Boolean;
+    procedure ReadSectionValues(Bolum:String; Liste:TStrings);
+    procedure ReadSectionDeger(Bolum:String; Liste:TStrings);
+    procedure ReadSection(Bolum:String; Liste:TStrings);
+    procedure ReadSectionAnahtar(Bolum:String; Liste:TStrings);
+    procedure ReadSections(Liste:TStrings);
+    procedure EraseSection(Bolum:String);
+    function SectionExists(Bolum:String):Boolean;
+    procedure DeleteKey(Bolum, Anahtar:String);
+    procedure EkranAyar(Durum:Byte);
+  end;
+
+  TRegIni = class(TObject)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    RegKey: String;
+    constructor Create(RegKey1:String);
+    destructor Destroy; override;
+    procedure RegWriteString(Bolum, Anahtar:String;lc:Char);
+    Function RegReadString(Anahtar, Def:String;lc:Char):String;
+  end;
+
+
+var
+  ListeAyarlaDlg: TListeAyarlaDlg;
+  procedure InileriAyarlama(Ini : TIni);
+  Function ComboIniDuzenle(AnahtarKelime1:String; Ini1 : TIni):integer;
+
+implementation
+uses UListe, UTablo, UMesaj, DB, UAnaForm, uPDKSForm,
+  uBordroForm657, uDonerSermaye, uBordroForm, uMuhtasar, uSADonerSermaye,
+  remain, uBordroForm625;
+{$R *.DFM}
+var
+   j : integer;
+   AnahtarKelime : String;
+   Ini : TIni;
+
+constructor TRegIni.Create(RegKey1:String);
+begin
+   RegKey:= RegKey1;
+end;
+
+destructor  TRegIni.Destroy;
+begin
+   inherited;
+end;
+
+Function TRegIni.RegReadString(Anahtar, Def:String;lc:Char):String;
+var SystemIni : TRegistry;
+    s : string;
+begin
+   SystemIni := TRegistry.Create;
+   if lc='L' then
+      SystemIni.RootKey:= HKEY_LOCAL_MACHINE
+   else
+      SystemIni.RootKey:= HKEY_CURRENT_USER;
+
+   SystemIni.OpenKeyReadOnly('SOFTWARE\'+RegKey);
+   s := '';
+   s := SystemIni.ReadString(Anahtar);
+   if s='' then s := Def;
+   RegReadString := s;
+   SystemIni.Free;
+end;
+
+procedure TRegIni.RegWriteString(Bolum, Anahtar:String;lc:Char);
+var SystemIni : TRegistry;
+begin
+   SystemIni := TRegistry.Create;
+   if lc='L' then
+      SystemIni.RootKey:= HKEY_LOCAL_MACHINE
+   else
+      SystemIni.RootKey:= HKEY_CURRENT_USER;
+   SystemIni.OpenKey('SOFTWARE\'+RegKey, True);
+   try
+    SystemIni.WriteString(Bolum, Anahtar);
+   except
+     Showmessage(lc+' ye yazýlamadý...');
+   end;
+   SystemIni.Free;
+end;
+//GenRegIni := TRegIni.Create('GENOTIP');
+
+procedure InileriAyarlama(Ini : TIni);
+var Secilen : String;
+    Ind : SmallInt;
+begin
+  Ind := 0;
+  repeat
+   Application.CreateForm(TListeDlg, ListeDlg);
+   Ini.ReadSections(ListeDlg.ListAmac.Items);
+   ListeDlg.ListAmac.Items.Add(' *** YENÝ ***');
+   ListeDlg.ListAmac.ItemIndex := Ind;
+   ListeDlg.ShowModal;
+   Ind:= ListeDlg.ListAmac.ItemIndex;
+   If ListeDlg.ModalResult = idOK then
+      Secilen := ListeDlg.ListAmac.Items[ListeDlg.ListAmac.ItemIndex]
+   else
+      Secilen := '';
+   ListeDlg.Destroy;
+
+   if Secilen = ' *** YENÝ ***' then begin
+      Secilen := '';
+      MesajStrAl('', 'Bölüm Adýný Giriniz : ',  'E', nil,Secilen, '', 'E', nil,Secilen);
+   end;
+   if Secilen <> '' then
+      ComboIniDuzenle(Secilen, Ini);
+  until Secilen = ''
+end;
+
+Function ComboIniDuzenle(AnahtarKelime1:String; Ini1 : TIni):integer;
+Begin
+    Application.CreateForm(TListeAyarlaDlg, ListeAyarlaDlg);
+    AnahtarKelime := AnahtarKelime1;
+    Ini := Ini1;
+    ComboIniDuzenle := ListeAyarlaDlg.Showmodal;
+    ListeAyarlaDlg.Free;
+End;
+
+procedure TListeAyarlaDlg.FormShow(Sender: TObject);
+begin
+//   Ini.ReadSection(AnahtarKelime, ListBox1.Items);
+   Ini.ReadSectionValues(AnahtarKelime, ListBox1.Items);
+   ListBox1.ItemIndex := 0;
+end;
+
+procedure TListeAyarlaDlg.UstTusClick(Sender: TObject);
+begin
+   if (ListBox1.Items.Count < 2)or(ListBox1.ItemIndex = 0) then exit;
+   ListBox1.Items.Exchange(ListBox1.ItemIndex, ListBox1.ItemIndex-1) ;
+//   ListBox1.ItemIndex := ListBox1.ItemIndex - 1;
+end;
+
+procedure TListeAyarlaDlg.AltTusClick(Sender: TObject);
+begin
+   if (ListBox1.Items.Count < 2)or(ListBox1.ItemIndex = ListBox1.Items.Count-1) then exit;
+   ListBox1.Items.Exchange(ListBox1.ItemIndex, ListBox1.ItemIndex+1) ;
+//   ListBox1.ItemIndex := ListBox1.ItemIndex + 1;
+end;
+
+procedure TListeAyarlaDlg.SilTusClick(Sender: TObject);
+begin
+   if ListBox1.Items.Count = 0 then exit;
+   ListBox1.Items.Delete(ListBox1.ItemIndex) ;
+end;
+
+procedure TListeAyarlaDlg.EkleTusClick(Sender: TObject);
+var MesajOkunan : String;
+begin
+  if TBitBtn(Sender).Name = 'EkleTus' then
+     MesajOkunan := ''
+  else
+     MesajOkunan := ListBox1.Items[ListBox1.ItemIndex];
+
+  if MesajStrAl('', 'Listeye Yeni Bilgiyi Giriniz..', 'E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
+     if TBitBtn(Sender).Name = 'EkleTus' then
+        ListBox1.Items.Add(MesajOkunan)
+     else
+        ListBox1.Items.Strings[ListBox1.ItemIndex] := MesajOkunan;
+end;
+
+procedure TListeAyarlaDlg.BitBtn2Click(Sender: TObject);
+var i,yer : integer;
+begin
+   Ini.EraseSection(AnahtarKelime);
+   for i := 0 to ListBox1.Items.Count - 1  do begin
+       yer := pos('=',ListBox1.Items[i]);
+       if yer = 0 then
+          Ini.WriteString(AnahtarKelime, ListBox1.Items[i],'')
+       else
+          Ini.WriteString(AnahtarKelime, copy(ListBox1.Items[i],1,yer-1), copy(ListBox1.Items[i],yer+1, length(ListBox1.Items[i])))
+   end;
+end;
+
+constructor TIni.Create(DosyaAdi:String;  IniSQL1: TADOQuery);
+begin
+   Dosya := DosyaAdi;
+   IniSQL:= IniSQL1;
+end;
+
+destructor  TIni.Destroy;
+begin
+   inherited;
+end;
+
+procedure TIni.EkranAyar(Durum:Byte);
+var
+i:integer;
+begin
+  if Durum = 0 then
+  begin
+    IniSQL.Close;
+    IniSQL.SQL.Text:='Select *, SONDEGER = (CASE DEGER WHEN 1 THEN ''TRUE'' ELSE ''FALSE'' END) from PERSONELINI where BOLUM = ''ALANAYAR''';
+    IniSQL.Open;
+
+    while not IniSQL.Eof do
+    begin
+      for i:=0 to personelform.ComponentCount-1 do
+      begin
+        if PersonelForm.Components[i].ClassName='TDBEdit' then
+        begin
+          if (PersonelForm.Components[i] as TDBEdit).DataField=IniSQL.FieldByName('ANAHTAR').AsString then
+            (PersonelForm.Components[i] as TDBEdit).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        end
+        else if PersonelForm.Components[i].ClassName='TDBComboBox' then
+        begin
+          if (PersonelForm.Components[i] as TDBComboBox).DataField=IniSQL.FieldByName('ANAHTAR').AsString then
+            (PersonelForm.Components[i] as TDBComboBox).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        end
+        else if PersonelForm.Components[i].ClassName='TDBCheckBox' then
+        begin
+          if (PersonelForm.Components[i] as TDBCheckBox).DataField=IniSQL.FieldByName('ANAHTAR').AsString then
+            (PersonelForm.Components[i] as TDBCheckBox).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        end
+        else if PersonelForm.Components[i].ClassName='TDBMemo' then
+        begin
+          if (PersonelForm.Components[i] as TDBMemo).DataField=IniSQL.FieldByName('ANAHTAR').AsString then
+            (PersonelForm.Components[i] as TDBMemo).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        end
+        else if PersonelForm.Components[i].ClassName='TcxDBDateEdit' then
+        begin
+          if (PersonelForm.Components[i] as TcxDBDateEdit).DataBinding.DataField=IniSQL.FieldByName('ANAHTAR').AsString then
+            (PersonelForm.Components[i] as TcxDBDateEdit).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        end;
+      end;
+      if assigned(PersonelForm.FindComponent('LB' + IniSQL.FieldByName('ANAHTAR').AsString) as TLabel) then
+        (PersonelForm.FindComponent('LB' + IniSQL.FieldByName('ANAHTAR').AsString) as TLabel).Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+      if (IniSQL.FieldByName('ANAHTAR').AsString = 'FIRMA')  then
+        PersonelForm.GRBasFirma.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+      if (IniSQL.FieldByName('ANAHTAR').AsString = 'NOTU') then
+        PersonelForm.GRNotlar.Visible:=not IniSQL.FieldByName('SONDEGER').AsBoolean;
+      if IniSQL.FieldByName('ANAHTAR').AsString='RESIM' then
+      BEGIN
+        PersonelForm.DBResim.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        personelform.BTNResimSil.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        personelform.BTNYapistir.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+        personelform.BTNDosyaAl.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+      END;
+      IniSQL.Next;
+    end;
+  end
+  else if Durum=1 then
+  begin
+    IniSQL.Close;
+    IniSQL.SQL.Text:='Select *, SONDEGER = (CASE DEGER WHEN 1 THEN ''TRUE'' ELSE ''FALSE'' END) from PERSONELINI where BOLUM = ''MENUAYAR''';
+    IniSQL.Open;
+
+    while not IniSQL.Eof do
+    begin
+      for i:=0 to PersonelForm.ComponentCount-1 do
+      begin
+        if PersonelForm.Components[i].ClassName='TToolButton' then
+          if ((PersonelForm.Components[i] as ttoolbutton).caption=IniSQL.FieldByName('ANAHTAR').AsString) and ((PersonelForm.Components[i] as ttoolbutton).Visible) then
+          begin
+            if (PersonelForm.Components[i] as ttoolbutton).Down then
+              PersonelForm.TBAileBilClick((PersonelForm.Components[i] as ttoolbutton)); 
+            (PersonelForm.Components[i] as ttoolbutton).visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+          end;
+      end;
+      IniSQL.Next;
+    end;
+  end
+  else if Durum = 2 then
+  begin
+    IniSQL.Close;
+    IniSQL.SQL.Text:='Select *, SONDEGER = (CASE DEGER WHEN 1 THEN ''TRUE'' ELSE ''FALSE'' END) from PERSONELINI where BOLUM = ''SAYFAAYAR''';
+    IniSQL.Open;
+
+    while not IniSQL.Eof do
+    begin
+      for i:=0 to PersonelForm.ComponentCount-1 do
+      begin
+        if PersonelForm.Components[i].ClassName='TTabSheet' then
+          if ((PersonelForm.Components[i] as TTabSheet).caption=IniSQL.FieldByName('ANAHTAR').AsString) and ((PersonelForm.Components[i] as TTabSheet).TabVisible) then
+          begin
+            if ((PersonelForm.Components[i] as TTabSheet).Name = 'TBSIzin') then
+               TabSIzin:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+            if ((PersonelForm.Components[i] as TTabSheet).Name = 'TabIstenCikis') then
+               TabSCikis:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+            if ((PersonelForm.Components[i] as TTabSheet).Name = 'PGNakil') then
+               TabSNakil:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+            (PersonelForm.Components[i] as TTabSheet).TabVisible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+            break;
+          end;
+      end;
+      if IniSQL.FieldByName('ANAHTAR').AsString = 'EK BÝLGÝ SAYFASI' then
+        PersonelForm.TBBar.Visible:=IniSQL.FieldByName('SONDEGER').AsBoolean;
+      IniSQL.Next;
+    end;
+  end
+  else if Durum = 3 then
+  begin
+    AnaForm.RaporTus.Visible:=(GenotipIni.ReadBool('MODDEG','RAPOR MODÜLÜ',false)) and (AnaForm.RaporTus.Visible);
+    AnaForm.RaporMenu.Visible:=(GenotipIni.ReadBool('MODDEG','RAPOR MODÜLÜ',false)) and (AnaForm.RaporMenu.Visible);
+    if Assigned(RaporModul) then
+    begin
+      RaporModul.Destroy;
+      RaporModul:=nil;
+    end;
+    AnaForm.PDKSTus.Visible:=(GenotipIni.ReadBool('MODDEG','PDKS',false)) and (AnaForm.PDKSTus.Visible);
+    AnaForm.PDKSMenu.Visible:=(GenotipIni.ReadBool('MODDEG','PDKS',false)) and (AnaForm.PDKSTus.Visible);
+    if Assigned(pdksform) then
+    begin
+      PDKSForm.destroy;
+      PDKSForm:=nil;
+    end;
+    AnaForm.BordroTus.Visible:=(AnaForm.BordroTus.Visible) and (((GenotipIni.ReadBool('MODDEG','BORDRO',false) or GenotipIni.ReadBool('MODDEG','BORDRO657',false) or GenotipIni.ReadBool('MODDEG','BORDRO625',false))));
+    AnaForm.BordroMenu.Visible:=AnaForm.BordroTus.Visible;
+    if Assigned(BORDROForm) then
+    begin
+      BORDROForm.destroy;
+      BORDROForm:=nil;
+    end;
+    AnaForm.MNTopluPuantaj.Visible:=(AnaForm.MNTopluPuantaj.Visible) and ((GenotipIni.ReadBool('MODDEG','BORDRO',false)));
+    AnaForm.MNTopluBordro.Visible:=GenotipIni.ReadBool('MODDEG','BORDRO657',false) or GenotipIni.ReadBool('MODDEG','BORDRO',false);
+    if Assigned(BORDROForm657) then
+    begin
+      BORDROForm657.destroy;
+      BORDROForm657:=nil;
+    end;
+    if Assigned(BordroForm625) then
+    begin
+      BORDROForm625.destroy;
+      BORDROForm625:=nil;
+    end;
+    AnaForm.DonerSermayeTus.Visible:=(AnaForm.DonerSermayeTus.Visible) and (((GenotipIni.ReadBool('MODDEG','DÖNER SERMAYE 1. KADEME',false)) OR (GenotipIni.ReadBool('MODDEG','DÖNER SERMAYE 2. KADEME',false))));
+    AnaForm.DonerSermayeMenu.Visible:=(AnaForm.DonerSermayeMenu.Visible) and (((GenotipIni.ReadBool('MODDEG','DÖNER SERMAYE 1. KADEME',false)) OR (GenotipIni.ReadBool('MODDEG','DÖNER SERMAYE 2. KADEME',false))));
+    AnaForm.TopluOtoKidem.Visible:=GenotipIni.ReadBool('MODDEG','BORDRO657',false);
+    AnaForm.MNTopluDagit.Visible:=(AnaForm.TopluOtoKidem.Visible) or (AnaForm.MNTopluBordro.Visible) or (AnaForm.MNTopluPuantaj.Visible);
+    if Assigned(DonerSermaye) then
+    begin
+      DonerSermaye.destroy;
+      DonerSermaye:=nil;
+    end;
+    if Assigned(SADonerSermaye) then
+    begin
+      SADonerSermaye.destroy;
+      SADonerSermaye:=nil;
+    end;
+    AnaForm.MuhtasarTus.Visible:=AnaForm.MuhtasarTus.Visible and GenotipIni.ReadBool('MODDEG','MUHTASAR BEYANNAME',false);
+    AnaForm.MuhtasarMenu.Visible:=AnaForm.MuhtasarMenu.Visible and GenotipIni.ReadBool('MODDEG','MUHTASAR BEYANNAME',false);
+    if Assigned(MuhtasarForm) then
+    begin
+      MuhtasarForm.destroy;
+      MuhtasarForm:=nil;
+    end;
+  end;
+
+end;
+
+procedure TIni.WriteString(Bolum, Anahtar, Deger:String);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Delete From '+Dosya+' Where BOLUM='''+Bolum+''' and ANAHTAR='''+Anahtar+'''';
+    IniSQL.ExecSQL;
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Insert Into '+Dosya+' (BOLUM, ANAHTAR, DEGER)Values('''+Bolum+''','''+Anahtar+''','''+Deger+''')';
+    IniSQL.ExecSQL;
+end;
+
+procedure TIni.WriteInteger(Bolum, Anahtar:String; Deger:Integer);
+begin
+   WriteString(Bolum, Anahtar, IntToStr(Deger))
+end;
+
+procedure TIni.WriteBool(Bolum, Anahtar:String; Deger:Boolean);
+var s : String[1];
+begin
+   if Deger then s:='1' else s:='0';
+   WriteString(Bolum, Anahtar, s)
+end;
+
+Function TIni.ReadString(Bolum, Anahtar, Deger:String):String;
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select DEGER from '+Dosya+' Where BOLUM='''+Bolum+''' and ANAHTAR='''+Anahtar+'''';
+    IniSQL.Open;
+    IniSQL.first;
+    if not IniSQL.eof then
+       ReadString := IniSQL.Fields[0].AsString
+    else
+       ReadString := Deger;
+end;
+
+Function TIni.ReadInteger(Bolum, Anahtar:String; Deger:Integer):Integer;
+begin
+   ReadInteger := StrToInt(ReadString(Bolum, Anahtar, IntToStr(Deger)))
+end;
+
+Function TIni.ReadBool(Bolum, Anahtar:String; Deger:Boolean):Boolean;
+var s : String[1];
+begin
+   if Deger then s:='1' else s:='0';
+   ReadBool := ReadString(Bolum, Anahtar, s)='1'
+end;
+
+procedure TIni.ReadSectionValues(Bolum:String; Liste:TStrings);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select ANAHTAR, DEGER from '+Dosya+' Where BOLUM='''+Bolum+''' Order by SIRANO';
+    IniSQL.Open;
+    Liste.Clear;
+    while not IniSQL.eof do begin
+      if IniSQL.Fields[1].AsString<>'' then
+         Liste.Add(IniSQL.Fields[0].AsString+'='+IniSQL.Fields[1].AsString)
+      else
+         Liste.Add(IniSQL.Fields[0].AsString);
+      IniSQL.Next;
+    end;
+end;
+
+procedure TIni.ReadSectionDeger(Bolum:String; Liste:TStrings);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select DEGER from '+Dosya+' Where BOLUM='''+Bolum+''' Order by SIRANO';
+    IniSQL.Open;
+    Liste.Clear;
+    while not IniSQL.eof do begin
+      Liste.Add(IniSQL.Fields[0].AsString);
+      IniSQL.Next;
+    end;
+end;
+
+procedure TIni.ReadSections(Liste:TStrings);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select distinct BOLUM from '+Dosya+' Order by BOLUM';
+    IniSQL.Open;
+    Liste.Clear;
+    while not IniSQL.eof do begin
+      Liste.Add(IniSQL.Fields[0].AsString);
+      IniSQL.Next;
+    end;
+end;
+
+procedure TIni.ReadSection(Bolum:String; Liste:TStrings);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select ANAHTAR from '+Dosya+' Where BOLUM='''+Bolum+''' Order by SIRANO';
+    IniSQL.Open;
+    Liste.Clear;
+    while not IniSQL.eof do begin
+      Liste.Add(IniSQL.Fields[0].AsString);
+      IniSQL.Next;
+    end;
+end;
+
+procedure TIni.ReadSectionAnahtar(Bolum:String; Liste:TStrings);
+//birden fazla ayný adla anahtar varsa distinct yaparak getirir
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Select ANAHTAR, min(SIRANO) from '+Dosya+' Where BOLUM='''+Bolum+''' group by ANAHTAR order by 2';
+    IniSQL.Open;
+    Liste.Clear;
+    while not IniSQL.eof do begin
+      Liste.Add(IniSQL.Fields[0].AsString);
+      IniSQL.Next;
+    end;
+end;
+
+procedure TIni.EraseSection(Bolum:String);
+begin
+    IniSQL.Close;
+    IniSQL.SQL.Text := 'Delete From '+Dosya+' Where BOLUM='''+Bolum+'''';
+    IniSQL.ExecSQL;
+end;
+
+function TIni.SectionExists(Bolum:String):Boolean;
+begin
+   IniSQL.Close;
+   IniSQL.SQL.Text := 'Select BOLUM from '+Dosya+' Where BOLUM='''+Bolum+'''';
+   IniSQL.Open;
+   SectionExists := IniSQL.RecordCount > 0;
+end;
+
+procedure TIni.DeleteKey(Bolum, Anahtar:String);
+begin
+   IniSQL.Close;
+   IniSQL.SQL.Text := 'Delete From '+Dosya+' Where BOLUM='''+Bolum+''' and ANAHTAR='''+Anahtar+'''';
+   IniSQL.ExecSQL;
+end;
+
+Function RegReadString(Anahtar, Def:String;lc:Char):String;
+var SystemIni : TRegistry;
+    s : string;
+begin
+   SystemIni := TRegistry.Create;
+   if lc='L' then
+      SystemIni.RootKey:= HKEY_LOCAL_MACHINE
+   else
+      SystemIni.RootKey:= HKEY_CURRENT_USER;
+
+   SystemIni.OpenKeyReadOnly('SOFTWARE\GENPER');
+   s := '';
+   s := SystemIni.ReadString(Anahtar);
+   if s='' then s := Def;
+   RegReadString := s;
+   SystemIni.Free;
+end;
+
+procedure RegWriteString(Bolum, Anahtar:String;lc:Char);
+var SystemIni : TRegistry;
+begin
+   SystemIni := TRegistry.Create;
+   if lc='L' then
+      SystemIni.RootKey:= HKEY_LOCAL_MACHINE
+   else
+      SystemIni.RootKey:= HKEY_CURRENT_USER;
+   SystemIni.OpenKey('SOFTWARE\GENPER', True);
+   try
+    SystemIni.WriteString(Bolum, Anahtar);
+   except
+     Showmessage(lc+' ye yazýlamadý...');
+   end;
+   SystemIni.Free;
+end;
+
+procedure TListeAyarlaDlg.SpeedButton1Click(Sender: TObject);
+begin
+   ListBox1.Sorted := False;
+   ListBox1.Sorted := True;
+end;
+
+end.
+

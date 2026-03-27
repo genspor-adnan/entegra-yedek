@@ -1,0 +1,40 @@
+unit uAnvizProtokol;
+{
+  Oluþturma : Yalçýn ELMAS
+  Tarih : 20.03.2006
+  Açýklama : Anviz Parmak Ýzi Okuyucu Komutlarý
+}
+
+interface
+
+uses
+  SysUtils, CPort, StdCtrls, Dialogs, Forms, ExtCtrls;
+
+const
+  anBaslat = '(10000,sysinfo)';
+  anTarih = '(10000,setdate,';
+  anSaat = '(10000,settime,';
+
+{Public}
+function AnvizParmakOku(Okunan: string): integer;
+
+implementation
+
+function AnvizParmakOku(Okunan: string): integer; //(kqinfo,0062052118,000055,00,07,03,20,11,57,41)
+var
+  i: integer;
+begin
+  i := 0;
+  while i < 3 do
+  begin
+    i := i + 1;
+    if i = 3 then
+      okunan := copy(Okunan, 0, pos(',', Okunan) - 1)
+    else
+      okunan := copy(Okunan, pos(',', Okunan) + 1, maxint);
+  end;
+  result := strtoint(okunan);
+end;
+
+
+end.

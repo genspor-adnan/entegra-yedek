@@ -1,0 +1,90 @@
+program PersonaPROCESS;
+
+uses
+  Forms,
+  sysUtils,
+  ComObj,
+  uAnaForm in 'uAnaForm.pas' {AnaForm},
+  uTablo in 'uTablo.pas' {Tablo: TDataModule},
+  USifre in '..\..\ortak\Usifre.pas' {PasswordDlg},
+  UCombo in '..\..\ortak\UCombo.pas' {PasswordDlg},
+  uAyarForm in 'uAyarForm.pas' {AyarlarForm},
+  UVersiyon in 'UVersiyon.pas' {VersiyonDlg},
+  GT_About in 'GT_About.pas' {AboutBox},
+  uLogo in 'uLogo.pas' {LOGO},
+  RFID_103_485IO_DLL in 'RFID_103_485IO_DLL.pas',
+  uCamera in 'uCamera.pas' {Camera},
+  Unit2 in 'Unit2.pas',
+  uFingerPrint in 'uFingerPrint.pas',
+  uAnvizProtokol in 'uAnvizProtokol.pas',
+  Uizin in 'Uizin.pas' {IzinDlg};
+
+{$R *.res}
+
+begin
+  CurrencyString := ' YTL';
+  CurrencyFormat := 3;
+  NegCurrFormat := 8;
+  ThousandSeparator := ',';
+  DecimalSeparator := '.';
+  CurrencyDecimals := 2;
+  DateSeparator := '/';
+  ShortDateFormat := 'dd/MM/yyyy';
+  LongDateFormat := 'dd MMMM yyyy dddd';
+  TimeSeparator := ':';
+  TimeAMString := '';
+  TimePMString := '';
+  ShortTimeFormat := 'hh:mm';
+  LongTimeFormat := 'hh:mm:ss';
+  ListSeparator := ';';
+  if ParamCount > 0 then
+  begin
+    AdimAdimGoster := ParamStr(1) = '?';
+  end;
+  Application.Initialize;
+  Adim('Application.CreateForm(TLOGO, LOGO);');
+  Application.CreateForm(TLOGO, LOGO);
+  Application.CreateForm(TIzinDlg, IzinDlg);
+  Adim('Application.CreateForm(TCamera, Camera);');
+  Application.CreateForm(TCamera, Camera);
+  Adim(' LOGO.Show;');
+  LOGO.Show;
+  Adim(' LOGO.Update;');
+  LOGO.Update;
+  Adim(' Application.Title');
+  Application.Title := 'PERSONELPROCESS';
+  Adim(' Application.CreateForm(TTablo, Tablo);');
+  Application.CreateForm(TTablo, Tablo);
+  Adim('Tablo.TabKullan.Open;');
+  Tablo.TabKullan.Open;
+  Adim(' logo.Destroy;');
+  logo.Destroy;
+  if SifreSor then
+    PasswordEkrani('PERSONEL');
+  Adim('Application.CreateForm(TAnaForm, AnaForm);');
+  try
+    Application.CreateForm(TAnaForm, AnaForm);
+  except
+    on e: Eolesyserror do
+    begin
+      Adim('regsvr32 "<dll dosyasý>" komutuyla aþaðýdaki dllleri kaydetmelisiniz');
+      Adim('zkemkeeper.dll');
+      Adim('commpro.dll');
+      Adim('msvcr71.dll');
+      Adim('plce.dll');
+      Adim('comms.dll');
+      Adim('rscagent.dll');
+      Adim('rscomm.dll');
+      Adim('zkemsdk.dll');
+      Adim('ör: regsvr32 "c:\persona\zkemkeeper.dll"');
+    end;
+    on e: exception do
+      Adim('TAnaForm  CreateForm ' + e.Message + ' ' + e.ClassName);
+  end;
+  Adim('Camera.OpenVideo(GenotipIni.ReadString');
+  Camera.OpenVideo(GenotipIni.ReadString('OPSIYONLAR', 'CAMERA', ''));
+ 
+  Adim(' Application.Run;');
+  Application.Run;
+end.
+

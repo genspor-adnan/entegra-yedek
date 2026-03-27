@@ -1,0 +1,1178 @@
+unit uAnaForm;
+
+interface
+
+uses
+  uTablo, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, DB, ADODB, CPort, DBCtrls, Menus, ExtCtrls, CPortCtl,
+  Grids, DBGrids, ShellApi, ComCtrls, cxStyles, cxCustomData, cxGraphics,
+  cxFilter, cxData, cxDataStorage, cxEdit, cxDBData, cxGridLevel,
+  cxClasses, cxControls, cxGridCustomView, cxGridCustomTableView,
+  cxGridTableView, cxGridDBTableView, cxGrid, cxintl,
+  cxGridCustomPopupMenu, cxGridPopupMenu, XPMenu, MMSystem, Buttons, ToolWin,
+  cxSplitter, uFingerPrint, RFID_103_485IO_DLL, uAnvizProtokol, OleCtrls,
+  zkemkeeper_TLB;
+
+type
+  TAnaForm = class(TForm)
+    Panel1: TPanel;
+    BTNAc: TButton;
+    ComLed1: TComLed;
+    ComLed2: TComLed;
+    Panel2: TPanel;
+    DBText1: TDBText;
+    PopupMenu1: TPopupMenu;
+    Seaenekler1: TMenuItem;
+    SeriPortAyarlar2: TMenuItem;
+    N1: TMenuItem;
+    ProgramA1: TMenuItem;
+    N2: TMenuItem;
+    Kapat1: TMenuItem;
+    Label1: TLabel;
+    Timer1: TTimer;
+    LBTarSa: TLabel;
+    cxIntl1: TcxIntl;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    MainMenu1: TMainMenu;
+    MNSecenek: TMenuItem;
+    SeriPortAyarlar1: TMenuItem;
+    cxGridPopupMenu1: TcxGridPopupMenu;
+    Timer2: TTimer;
+    ProgramAyarlar1: TMenuItem;
+    XPMenu1: TXPMenu;
+    Opsiyonlar1: TMenuItem;
+    Yardm1: TMenuItem;
+    Hakknda1: TMenuItem;
+    LBHata: TLabel;
+    BTNKamera: TSpeedButton;
+    ResimPanel: TPanel;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    IMGIRIS: TImage;
+    IMCIKIS: TImage;
+    BTNResim: TSpeedButton;
+    izinler: TMenuItem;
+    GenelDokumler: TMenuItem;
+    MNDonemAktar: TMenuItem;
+    N3: TMenuItem;
+    Panel3: TPanel;
+    cxGrid1: TcxGrid;
+    cxGrid1DBTableView1: TcxGridDBTableView;
+    cxGrid1DBTableView1SICILNO: TcxGridDBColumn;
+    cxGrid1DBTableView1ADI: TcxGridDBColumn;
+    cxGrid1DBTableView1SOYADI: TcxGridDBColumn;
+    cxGrid1DBTableView1DEPARTMAN: TcxGridDBColumn;
+    cxGrid1DBTableView1GIRIS: TcxGridDBColumn;
+    cxGrid1DBTableView1CIKIS: TcxGridDBColumn;
+    cxGrid1DBTableView1VARDIYA: TcxGridDBColumn;
+    cxGrid1DBTableView1VARGIRIS: TcxGridDBColumn;
+    cxGrid1DBTableView1VARCIKIS: TcxGridDBColumn;
+    tvGirCik: TcxGridDBColumn;
+    cxGrid1Level1: TcxGridLevel;
+    Panel4: TPanel;
+    cxGrid2: TcxGrid;
+    cxGridDBTableView1: TcxGridDBTableView;
+    TVGirCikSICILNO: TcxGridDBColumn;
+    TVGirCikADI: TcxGridDBColumn;
+    TVGirCikSOYADI: TcxGridDBColumn;
+    TVGirCikDEPARTMAN: TcxGridDBColumn;
+    TVGirCikGIRIS: TcxGridDBColumn;
+    TVGirCikCIKIS: TcxGridDBColumn;
+    TVGirCikVARDIYA: TcxGridDBColumn;
+    cxGridLevel1: TcxGridLevel;
+    cxSplitter1: TcxSplitter;
+    DBText2: TDBText;
+    Memo1: TMemo;
+    Edit1: TEdit;
+    cxSplitter3: TcxSplitter;
+    Timer3: TTimer;
+    ComPort1: TComPort;
+    Timer4: TTimer;
+    tmrSupremaTarama: TTimer;
+    lblMesaj: TLabel;
+    tmrOkuyucu2: TTimer;
+    SpeedButton1: TSpeedButton;
+    CZKEMYemekhane: TCZKEM;
+    CZKEMPDKS: TCZKEM;
+    procedure ComPort1RxChar(Sender: TObject; Count: Integer);
+    procedure KartKontrolYemek(KARTID: string; OkuyucuNo: integer);
+    procedure KartKontrol(KARTID: string; OkuyucuNo: integer);
+    procedure FormCreate(Sender: TObject);
+    procedure BTNAcClick(Sender: TObject);
+    procedure SeriPortAyarlar1Click(Sender: TObject);
+    procedure ProgramA1Click(Sender: TObject);
+    procedure Kapat1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Timer1Timer(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure cxGrid1DBTableView1CustomDrawCell(
+      Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+      AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+    procedure Timer2Timer(Sender: TObject);
+    function GetFileVersiyon(): string;
+    procedure AddInfo(const s: string);
+    procedure TrayIpucu(s: string);
+    procedure ProgramAyarlar1Click(Sender: TObject);
+    procedure Hakknda1Click(Sender: TObject);
+    procedure BTNKameraClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure BTNResimClick(Sender: TObject);
+    procedure EkranYazClick(Sender: TObject);
+    procedure YeniDonemAlgila();
+    function KartOku(PortNo, OkuyucuNo: integer): Boolean;
+    function HataVarmi(oku1: string): string;
+    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
+    procedure Timer3Timer(Sender: TObject);
+    procedure Timer4Timer(Sender: TObject);
+    procedure tmrSupremaTaramaTimer(Sender: TObject);
+    function HIDokuyucuBaslat(czkem: TCZKEM; PortNumarasi: integer): integer;
+    procedure ReadDeviceStatus(czkem: TCZKEM);
+    procedure CZKEMPDKSHIDNum(ASender: TObject; CardNumber: Integer);
+    procedure tmrOkuyucu2Timer(Sender: TObject);
+    procedure GenelDokumlerClick(Sender: TObject);
+    procedure CZKEMYemekhaneHIDNum(ASender: TObject; CardNumber: Integer);
+    procedure SpeedButton1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    procedure Isle;
+    procedure ParmakIziMesajGonder(pkt: string);
+    procedure ParmakIziGenelMesaj(pkt: string);
+    procedure SeriPortAyarKaydet();
+    procedure portuAc;
+  end;
+
+var
+  AnaForm: TAnaForm;
+  GECSURE: integer;
+  STR: string;
+  tray: pNOTIFYICONDATAa;
+  SonOkunan: string;
+  DevID: integer;
+  Commport: integer;
+
+const
+  StatusNames: array[1..12] of string = (
+    'Tatal administrator',
+    'Tatal users',
+    'Tatal FP',
+    'Tatal Password',
+    'Tatal manage record',
+    'Tatal In and out record',
+    'Nominal FP number',
+    'Nominal user number',
+    'Nominal In and out record number',
+    'Remain FP number',
+    'Remain user number',
+    'Remain In and out record number');
+implementation
+
+uses unit2, GT_About,
+  DateUtils, uCamera, uAyarForm, Math, Uizin;
+
+
+{$R *.dfm}
+
+procedure TAnaForm.SeriPortAyarKaydet();
+var
+  BaudRate: Integer;
+  ComPort: string;
+  DataBit: integer;
+begin
+  BaudRate := Tablo.BaudRateYaz;
+  ComPort := ComPort1.Port;
+//ComLed1.ComPort.DataBits:=db;
+//DataBit:=ComLed1.
+end;
+
+procedure TAnaForm.KartKontrolYemek(KARTID: string; OkuyucuNo: integer);
+begin
+  tablo.sp_KARTOKU_YEMEK.Close;
+  tablo.sp_KARTOKU_YEMEK.Parameters.ParamByName('@SURE').Value := OkumaAra;
+  tablo.sp_KARTOKU_YEMEK.Parameters.ParamByName('@KARTID').Value := TRim(KARTID);
+  tablo.sp_KARTOKU_YEMEK.Parameters.ParamByName('@MAXVAR').Value := MaxVar;
+  tablo.sp_KARTOKU_YEMEK.Parameters.ParamByName('@OKUYUCU_NO').Value := OkuyucuNo;
+  tablo.sp_KARTOKU_YEMEK.Open;
+
+  {
+  Tablo.Query2.Close;
+  Tablo.Query2.SQL.Text:='p_KARTOKU ''' + KARTID + ''',' +inttostr(okumaara) + ',' + inttostr(MaxVar);
+  Tablo.Query2.ExecSQL;
+  }
+  tablo.TabYemekhane.Close;
+  tablo.TabYemekhane.Open;
+  tablo.TabYemekhane.Last;
+  //showmessage(str);
+  CardAnswer(PortNe, OkuyucuNo, '+3' + DBText2.Caption + '#', 1000);
+  if (pos('SÜRE DOLMADI', Tablo.sp_KARTOKU_YEMEK.Fields[0].AsString) > 0) and (SSure <> '') then
+    PlaySound(PChar(SSure), 0, SND_FILENAME + SND_ASYNC)
+  else if (pos('KAHVALTI', Tablo.sp_KARTOKU_YEMEK.Fields[0].AsString) > 0) and (SGiris <> '') then
+  begin
+    PlaySound(PChar(SGiris), 0, SND_FILENAME + SND_ASYNC);
+
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'Select TOP 1 ID from PERS_YEMEKHANE ORDER BY SABAH DESC';
+    Tablo.Query1.Open;
+//    Camera.ResimKaydet(Tablo.Query1.Fields[0].AsInteger,'SABAH' );
+  end
+  else if (pos('ÖÐLE YEMEÐÝ', Tablo.sp_KARTOKU_YEMEK.Fields[0].AsString) > 0) and (SGiris <> '') then
+  begin
+    PlaySound(PChar(SGiris), 0, SND_FILENAME + SND_ASYNC);
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'Select top 1 ID from PERS_YEMEKHANE ORDER BY OGLEN DESC';
+    Tablo.Query1.Open;
+//    Camera.ResimKaydet(Tablo.Query1.Fields[0].AsInteger,'OGLEN' );
+  end
+  else if (pos('AKÞAM YEMEÐÝ', Tablo.sp_KARTOKU_YEMEK.Fields[0].AsString) > 0) and (SGiris <> '') then
+  begin
+    PlaySound(PChar(SGiris), 0, SND_FILENAME + SND_ASYNC);
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'Select top 1 ID from PERS_YEMEKHANE ORDER BY AKSAM DESC';
+    Tablo.Query1.Open;
+//    Camera.ResimKaydet(Tablo.Query1.Fields[0].AsInteger,'AKSAM' );
+  end
+  else if (pos('GEÇERSÝZ KART', Tablo.sp_KARTOKU_YEMEK.Fields[0].AsString) > 0) and (SGecersiz <> '') then
+    PlaySound(PChar(SGecersiz), 0, SND_FILENAME + SND_ASYNC);
+
+  str := '';
+//  Tablo.TabStatusAfterScroll(Tablo.TabStatus);
+end;
+
+function HexToStrInt(): string;
+
+begin
+
+end;
+
+function TAnaForm.KartOku(PortNo, OkuyucuNo: integer): Boolean;
+var
+  Oku, oku1: string;
+  Hata: string;
+begin
+  if OkuyucuTur = 2 then
+    oku1 := CheckCard(PortNo, OkuyucuNo, 1000)
+  else
+    oku1 := inttostr(OGetCardID(PortNo, OkuyucuNo));
+  hata := HataVarmi(oku1);
+  LBHata.Caption := Hata;
+  if (Hata = '') and ((pos('x', oku1) = 1) or (OkuyucuTur = 4)) and (oku1 <> '') then
+  begin
+    if OkuyucuTur <> 4 then
+      Oku := copy(oku1, 3, length(oku1))
+    else
+      Oku := oku1;
+  end
+  else
+  begin
+    Result := False;
+    exit;
+  end;
+  Memo1.Lines.Add('okuyucu:' + IntToStr(OkuyucuNo));
+  Memo1.Lines.Add('SonOkunan:' + SonOkunan);
+  Memo1.Lines.Add('oku1:' + oku1);
+  Memo1.Lines.Add('oku:' + oku);
+  if (sonokunan <> oku) then
+  begin
+    try
+      if (OkuyucuNo = ReaderNo) or (OkuyucuNo = YReaderNo) then
+      begin
+        if OkuyucuTur <> 4 then
+          KartKontrol(FloatToStr(StrToInt64('$' + oku)), OkuyucuNo)
+        else
+          KartKontrol(oku, OkuyucuNo);
+      end
+      else
+      begin
+        KartKontrolYemek(inttostr(StrToInt('$' + oku)), OkuyucuNo);
+      end;
+      sonokunan := oku;
+      Result := True;
+    except
+      on E: Exception do LBHata.Caption := 'Hata : ' + e.Message;
+    end;
+  end
+  else
+    Result := False;
+//  SonOkunan:='';
+  Application.ProcessMessages;
+end;
+
+procedure TAnaForm.YeniDonemAlgila();
+begin
+//
+end;
+
+procedure TAnaForm.TrayIpucu(S: string);
+var
+  i: Integer;
+begin
+  for i := 0 to 63 do
+    tray.szTip[i] := #0;
+  for i := 0 to length(s) do
+    tray.szTip[i] := s[i + 1];
+end;
+
+procedure TAnaForm.AddInfo(const s: string);
+begin
+  memo1.Lines.Add(s);
+  memo1.Refresh;
+end;
+
+procedure TAnaForm.ReadDeviceStatus;
+var
+  s: widestring;
+  ErrorCode, Value, i,
+    dwYear, dwMonth, dwDay, dwHour, dwMinute, dwSecond: integer;
+begin
+  if czkem.GetFirmwareVersion(devid, s) then
+    AddInfo('Firmware Version: ' + s)
+  else
+  begin
+    czkem.GetLastError(ErrorCode);
+    AddInfo(format('! GetFirmwareVersion ErrorNo.=%d', [ErrorCode]));
+  end;
+  if czkem.GetSerialNumber(devid, s) then
+    AddInfo('Serial Number: ' + s)
+  else
+  begin
+    czkem.GetLastError(ErrorCode);
+    AddInfo(format('! GetSerialNumber ErrorNo.=%d', [ErrorCode]));
+  end;
+
+  if czkem.GetProductCode(devid, s) then
+    AddInfo('ProductCode: ' + s)
+  else
+  begin
+    czkem.GetLastError(ErrorCode);
+    AddInfo(format('! GetProductCode ErrorNo.=%d', [ErrorCode]));
+  end;
+
+  if czkem.GetDeviceTime(devid, dwYear, dwMonth, dwDay, dwHour, dwMinute, dwSecond) then
+    AddInfo(Format('DeviceTime=%d-%d-%d %d:%d:%d', [dwYear, dwMonth, dwDay, dwHour, dwMinute, dwSecond]))
+  else
+  begin
+    czkem.GetLastError(ErrorCode);
+    AddInfo(format('! GetDeviceTime ErrorNo.=%d', [ErrorCode]));
+  end;
+
+  for i := 1 to length(StatusNames) do
+    if czkem.GetDeviceStatus(devid, i, value) then
+      AddInfo(format('%s: %d', [StatusNames[i], value]))
+    else
+    begin
+      czkem.GetLastError(ErrorCode);
+      AddInfo(format('! GetDeviceStatus(%d) ErrorNo.=%d', [i, ErrorCode]));
+    end;
+end;
+
+
+function TAnaForm.HIDokuyucuBaslat(czkem: TCZKEM; PortNumarasi: integer): integer;
+var
+  ErrorCode: integer;
+  c: boolean;
+  comstr: string;
+begin
+  if BTNAc.Tag = 1 then
+  begin
+    Adim('Port Kapatýlýyor');
+    czkem.RefreshData(DevId);
+    czkem.EnableDevice(DevId, TRUE);
+    czkem.Disconnect;
+    BTNAc.Tag := 0;
+    BTNAc.Caption := 'BAÞLAT';
+    Adim('Port kapatýldý');
+  end
+  else
+  begin
+    Adim('Port Açýlýyor');
+    Adim('  devid := 1;');
+    //kastamon ugurlu bu cihazdan iki tane kullanýyor  pdks de device id 1 olmalý
+    // yemekhane için device id 2 olmasý gerekiyor yoksa device connected=0 hatasý dönüyor
+    devid := 1;
+    Adim('  czkem.SetCommPassword(0);');
+    czkem.SetCommPassword(0);
+    Adim('  comstr := ''COM' + IntToStr(PortNumarasi) + '''');
+    comstr := 'COM' + IntToStr(PortNumarasi);
+    if pos('COM', uppercase(comstr)) = 1 then
+    begin
+      Adim('  Comport ile baðlanýyor');
+      commport := PortNumarasi;
+      czkem.CommPort := commport;
+      c := czkem.Connect_Com(commport, DevID, BoudRate);
+      Adim('  Comport ile baðlanma bitti');
+    end
+    else
+    begin
+      Adim('  TCP/IP ile baðlanýyor');
+      c := czkem.Connect_net(comstr, Devid);
+      Devid := 1;
+    end;
+    if c then
+    begin
+      Adim('  AddInfo(''Device Connected.'');');
+      AddInfo('Device Connected.');
+      ReadDeviceStatus(czkem);
+      BTNAc.Tag := 1;
+      BTNAc.Caption := 'BÝTÝR';
+      Adim('    Connected bitti');
+    end
+    else
+    begin
+      Adim('  Hata Oluþtu');
+      czkem.GetLastError(ErrorCode);
+      Adim('  Hata:' + format('! ConnectDevice ErrorNo.=%d', [ErrorCode]));
+      AddInfo(format('! ConnectDevice ErrorNo.=%d', [ErrorCode]));
+    end;
+    AddInfo(' ');
+  end;
+end;
+
+function TAnaForm.GetFileVersiyon(): string;
+var
+  S: string;
+  n, Len: DWORD;
+  Buf: PChar;
+  Value: PChar;
+begin
+  S := Application.ExeName;
+  n := GetFileVersionInfoSize(PChar(S), n);
+  Buf := AllocMem(n);
+  GetFileVersionInfo(PChar(S), 0, n, Buf);
+  VerQueryValue(Buf, 'StringFileInfo\041F04E6\FileVersion', Pointer(Value), Len);
+  FreeMem(Buf, n);
+  Result := Value;
+end;
+
+procedure TAnaForm.KartKontrol(KARTID: string; OkuyucuNo: integer);
+begin
+  if Tablo.cnn.Connected then
+  begin
+    try
+      tablo.sp_KARTOKU.Close;
+      // tablo.sp_KARTOKU.Parameters.ParamByName('@SURE').Value := OkumaAra;
+      // tablo.sp_KARTOKU.Parameters.ParamByName('@KARTID').Value := KARTID;
+      // tablo.sp_KARTOKU.Parameters.ParamByName('@MAXVAR').Value := MaxVar;
+      // tablo.sp_KARTOKU.Parameters.ParamByName('@OKUYUCU_NO').Value := OkuyucuNo;
+      Tablo.sp_KartOku.SQL.Text := 'exec p_KARTOKU ''' + Trim(KARTID) + ''',' + IntToStr(OkumaAra) + ',' + IntToStr(MaxVar) + ',' + IntToStr(OkuyucuNo);
+      tablo.sp_KARTOKU.Open;
+
+    except
+
+    end;
+
+  end
+  else
+  begin
+    // Baðlantý yok demektir bu
+    Tablo.GeciciKartEkle(Trim(KARTID));
+
+  end;
+
+  {
+  Tablo.Query2.Close;
+  Tablo.Query2.SQL.Text:='p_KARTOKU ''' + KARTID + ''',' +inttostr(okumaara) + ',' + inttostr(MaxVar);
+  Tablo.Query2.ExecSQL;
+  }
+  try
+    tablo.TabStatus.Close;
+    tablo.TabStatus.Open;
+    tablo.TabStatus.Last;
+  except
+  end;
+  //showmessage(str);
+  try
+    CardAnswer(portne, OkuyucuNo, '+3' + DBText1.Caption + '#', 1000);
+    if (pos('SÜRE DOLMADI', Tablo.sp_KartOku.Fields[0].AsString) > 0) and (SSure <> '') then
+    begin
+      PlaySound(PChar(SSure), 0, SND_FILENAME + SND_ASYNC);
+    end
+    else if (pos('GÝRÝÞ YAPTI', Tablo.sp_KartOku.Fields[0].AsString) > 0) and (SGiris <> '') then
+    begin
+      PlaySound(PChar(SGiris), 0, SND_FILENAME + SND_ASYNC);
+
+      Tablo.Query1.Close;
+      Tablo.Query1.SQL.Text := 'Select TOP 1 ID from PERS_PDKS ORDER BY GIRIS DESC';
+      Tablo.Query1.Open;
+      Camera.ResimKaydet(Tablo.Query1.Fields[0].AsInteger, 'GIRIS');
+      ORelay(PortNe, OkuyucuNo, 2);
+    end
+    else if (pos('ÇIKIÞ YAPTI', Tablo.sp_KartOku.Fields[0].AsString) > 0) and (SCikis <> '') then
+    begin
+      PlaySound(PChar(SCikis), 0, SND_FILENAME + SND_ASYNC);
+      Tablo.Query1.Close;
+      Tablo.Query1.SQL.Text := 'Select top 1 ID from PERS_PDKS ORDER BY CIKIS DESC';
+      Tablo.Query1.Open;
+      Camera.ResimKaydet(Tablo.Query1.Fields[0].AsInteger, 'CIKIS');
+      ORelay(PortNe, OkuyucuNo, 2);
+    end
+    else if (pos('GEÇERSÝZ KART', Tablo.sp_KartOku.Fields[0].AsString) > 0) and (SGecersiz <> '') then
+      PlaySound(PChar(SGecersiz), 0, SND_FILENAME + SND_ASYNC);
+  except
+  end;
+  str := '';
+  try
+    Tablo.TabStatusAfterScroll(Tablo.TabStatus);
+  except
+  end;
+end;
+
+procedure TAnaForm.ComPort1RxChar(Sender: TObject; Count: Integer);
+var
+  STR1: string;
+  sonuc: string;
+  id: string;
+begin
+  ComPort1.ReadStr(str1, count);
+  str := str + str1;
+  if OkuyucuTur <> 5 then
+  begin
+    if OkuyucuTur <> 3 then
+    begin
+      if POS(#13, STR) > 0 then
+        if ReaderNo = 128 then
+          KartKontrol(copy(STR, 1, pos(#13, STR) - 1), ReaderNo)
+        else
+          KartKontrolYemek(copy(STR, 1, pos(#13, STR) - 1), ReaderNo)
+    end
+    else
+    begin
+      isle();
+    end;
+  end
+  else
+  begin //anvis parmak izi okuyucu...
+    if pos(')', str) > 0 then
+    begin
+      id := inttostr(AnvizParmakOku(STR));
+      if ReaderNo = 128 then
+        KartKontrol(id, ReaderNo)
+      else
+        KartKontrolYemek(id, ReaderNo);
+    end;
+  end;
+    //sonuc := ParmakIziOkuyucu(ComPort1, STR1);
+    {if sonuc='basla' then
+      Timer3.Enabled:=true;
+    if sonuc <> '0' then
+    begin
+      Memo1.Lines.Add(sonuc);
+      if ReaderNo = 128 then
+        KartKontrol(copy(sonuc,6,maxint), ReaderNo)
+      else
+        KartKontrolYemek(copy(sonuc,6,maxint), ReaderNo)
+    end; }
+end;
+
+procedure TAnaForm.FormCreate(Sender: TObject);
+begin
+  Adim('Caption ');
+  Caption := 'PDKS Giriþ-Çýkýþ Kontrol (ver.' + GetFileVersiyon + ')';
+  GECSURE := 1;
+  getmem(tray, 500);
+  tray.cbSize := tray.cbSize;
+  tray.uCallbackMessage := $200;
+  TrayIpucu(Caption);
+  tray.Wnd := Handle;
+  tray.uFlags := 7;
+  tray.uID := 7;
+  Adim('');
+  tray.hIcon := Application.icon.handle;
+  Shell_NotifyIcon(0, tray);
+  LBTarSa.Caption := tablo.QTarSa.fieldbyname('TarSa').AsString;
+  sonokunan := '';
+
+{  if (OkuyucuTur = 0) or (OkuyucuTur = 1) or (OkuyucuTur = 3) then
+    ComLed1.ComPort := ComPort1
+  else
+    ComLed1.ComPort := nil;}
+  Memo1.Visible := HaraketListe;
+  Adim('Anaform create bitti');
+  izinler.Visible := IzinGirisi;
+end;
+
+procedure TAnaForm.BTNAcClick(Sender: TObject);
+var
+  Okunan: string;
+  OkumaGecikme: integer;
+  HexCode: string;
+  dongu: boolean;
+  saattar: string;
+  i: integer;
+begin
+  oku := False;
+  oku1 := False;
+  okumabasla := false;
+  okubellek1 := false;
+  okubellek2 := false;
+  FPCevaplama1 := False;
+  ufingerprint.Memo := Memo1;
+  Adim('OkuyucuTur=' + IntToStr((OkuyucuTur)));
+  if BTNAc.Caption = 'BAÞLAT' then
+  begin
+    BTNAc.Caption := 'BÝTÝR';
+    ComLed1.State := lsOn;
+    if (OkuyucuTur = 0) or (OkuyucuTur = 1) or (OkuyucuTur = 3) then //ComboBox in index deðerleri...
+    begin
+      portuAc;
+      if OkuyucuTur = 3 then
+      begin
+
+        ParmakIziGenelMesaj(FPCihazAdresleri);
+
+        {
+        SendCommand(ComPort1, '');
+        oku1:=true;
+        while BTNAc.Caption <> 'BAÞLAT' do
+        begin
+          if (oku) and (ParmakIzihazir) then
+          begin
+            If not okubellek1 then
+            begin
+               ComPort1.Close;
+               portuAc;
+               HexCode:=CihazAdres + ' 04 00 00 00 00 00 00 00 00 00';
+               HexCode:= HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+               ComPort1.WriteStr(HexToStr( HexCode) );
+               dongu:=false;
+               while not dongu do
+               begin
+                 if gelen<>'' then
+                   If StrToHex( gelen[Length(gelen)] )='0A' then
+                     dongu:=true;
+                 Application.ProcessMessages;
+               end;
+               okubellek1:=true;
+               If not okubellek2 then
+               begin
+                  HexCode:=CihazAdres + ' EB 00 00 00 00 00 00 00 00 00';
+                  HexCode:= HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+                  ComPort1.WriteStr(HexToStr( HexCode) );
+                  dongu:=false;
+                  while not dongu do
+                  begin
+                    if gelen<>'' then
+                      If StrToHex( gelen[Length(gelen)] )='0A' then
+                        dongu:=true;
+                    Application.ProcessMessages;
+                  end;
+                  okubellek2:=true;
+               end;
+            end;
+            if (okubellek1) and (okubellek2) then
+            begin
+              BTNAc.Caption:='BAÞLAT';
+              tmrSupremaTarama.Enabled := True;
+              ParmakIziOkumayaBasla := True;
+            end;
+            {
+            begin
+               ComPort1.Close;
+portuAc;
+               HexCode:=CihazAdres + ' 04 00 00 00 00 00 00 00 00 00';
+               HexCode:= HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+               ComPort1.WriteStr(HexToStr( HexCode) );
+               dongu:=false;
+               gelen:='';
+               while not dongu do
+               begin
+                  if gelen<>'' then
+                    If StrToHex( gelen[Length(gelen)] )='0A' then
+                      dongu:=true;
+                  For i:=0 to 10 do
+                  begin
+                    Sleep(50);
+                    Application.ProcessMessages;
+                  end;
+               end;
+            end;
+          end;
+          Application.ProcessMessages;
+        end;
+              }
+      end;
+    end
+    else if OkuyucuTur = 2 then
+    begin
+      BTNAc.Caption := 'BÝTÝR';
+      ComLed1.State := lsOn;
+      OpenPort(PortNe);
+      OkumaGecikme := GenotipIni.ReadInteger('OPSIYONLAR', 'OKUMAGECIKME', 500);
+      Memo1.Lines.Add('okuma gecikme : ' + inttostr(OkumaGecikme));
+
+      tmrOkuyucu2.Enabled := True;
+      tmrOkuyucu2.Interval := OkumaGecikme;
+
+    end
+    else if OkuyucuTur = 4 then
+    begin
+      BTNAc.Caption := 'BÝTÝR';
+      ComLed1.State := lsOn;
+      OOpenPort(PortNe);
+      OkumaGecikme := GenotipIni.ReadInteger('OPSIYONLAR', 'OKUMAGECIKME', 500);
+      Memo1.Lines.Add('okuma gecikme : ' + inttostr(OkumaGecikme));
+      while BTNAc.Caption = 'BÝTÝR' do
+      begin
+        KartOku(PortNe, ReaderNo);
+        sleep(OkumaGecikme);
+        //KartOku(YPortNe, YReaderNo);
+        //Sleep(OkumaGecikme);
+        Application.ProcessMessages;
+        if Application.Terminated then break;
+      end;
+    end
+    else if OkuyucuTur = 5 then //anviz parmak izi okuyucu;
+    begin
+      portuAc;
+      ComLed1.State := lsOn;
+      ComPort1.WriteStr(anBaslat);
+      saattar := anTarih + copy(inttostr(yearof(now)), 3, 2) + ',' + inttostr(MonthOf(now)) + ',' + IntToStr(DayOf(now)) + ')';
+      ComPort1.WriteStr(saattar);
+      saattar := anSaat + inttostr(HourOf(now)) + ',' + inttostr(MinuteOf(now)) + ',' + IntToStr(SecondOf(now)) + ')';
+      ComPort1.WriteStr(saattar);
+      ComPort1.WriteStr(anBaslat);
+    end
+    else if (okuyucuTur = 6) then
+    begin
+      Adim('S200 PDKSVARMI-2');
+     // if GenotipIni.ReadBool('OPSIYONLAR', 'PDKSVARMI', TRUE) then
+      if   PDKS then
+      begin
+        Adim('S200 PDKSVARMI var');
+        HIDokuyucuBaslat(CZKEMPDKS, PortNe);
+        Adim('S200 HIDokuyucuBaslatPDKS çalýþtýrýldý');
+      end;
+
+      Adim('S200 YemekhaneVARMI');
+      if GenotipIni.ReadBool('OPSIYONLAR', 'YemekhaneVARMI', False) then
+    if  Yemekhane then
+      begin
+        Adim('S200 YemekhaneVARMI var');
+        HIDokuyucuBaslat(CZKEMYemekhane, YPortNe);
+        Adim('S200 HIDokuyucuBaslatYemekhane çalýþtýrýldý');
+      end;
+    end;
+  end
+  else
+  begin
+    if (OkuyucuTur = 0) or (OkuyucuTur = 1) or (OkuyucuTur = 3) or (OkuyucuTur = 5) then
+    begin
+      BTNAc.Caption := 'BAÞLAT';
+      ComLed1.State := lsOff;
+      ComPort1.Connected := false;
+      oku := false;
+    end
+    else if OkuyucuTur in [2, 4] then
+    begin
+      BTNAc.Caption := 'BAÞLAT';
+      ComLed1.State := lsOff;
+      if OkuyucuTur = 2 then
+        ClosePort(PortNe)
+      else
+        OClosePort(PortNe);
+    end
+    else if OkuyucuTur in [6] then
+    begin
+      BTNAc.Caption := 'BAÞLAT';
+      ComLed1.State := lsOff;
+      Adim('S200 PDKSVARMI-1');
+      //if GenotipIni.ReadBool('OPSIYONLAR', 'PDKSVARMI', TRUE) then
+       if   PDKS then
+      begin
+        Adim('S200 PDKSVARMI var');
+        HIDokuyucuBaslat(CZKEMPDKS, PortNe);
+        Adim('S200 HIDokuyucuBaslatPDKS çalýþtýrýldý');
+      end;
+
+      Adim('S200 YemekhaneVARMI');
+     //if GenotipIni.ReadBool('OPSIYONLAR', 'YemekhaneVARMI', False) then
+      if Yemekhane then
+      begin
+        Adim('S200 YemekhaneVARMI var');
+        HIDokuyucuBaslat(CZKEMYemekhane, YPortNe);
+        Adim('S200 HIDokuyucuBaslatYemekhane çalýþtýrýldý');
+      end;
+    end;
+    tmrSupremaTarama.Enabled := False;
+  end;
+end;
+
+procedure TAnaForm.SeriPortAyarlar1Click(Sender: TObject);
+begin
+  //comPort1.LoadSettings(stRegistry, 'software\genper\');
+  // Böyle deðil de þöyle olmasý gerekiyormuþ :D Tamamdýr bu
+  //comPort1.LoadSettings(stRegistry, '\software\genper\');
+  comPort1.LoadSettings(stRegistry, '\software\genper\');
+  ComPort1.ShowSetupDialog;
+  comPort1.StoreSettings(stRegistry, '\software\genper\');
+end;
+
+procedure TAnaForm.ProgramA1Click(Sender: TObject);
+begin
+  anaform.show;
+end;
+
+procedure TAnaForm.Kapat1Click(Sender: TObject);
+begin
+  if Application.MessageBox('Programdan çýkmak istediðinize emin misiniz ?', 'Uyarý !!!', 36) = 6 then
+  begin
+    Shell_NotifyIcon(2, tray);
+    FreeMem(tray);
+    Application.Terminate;
+  end;
+
+end;
+
+procedure TAnaForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := canone;
+  AnaForm.Hide;
+end;
+
+procedure TAnaForm.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var
+  a, b: integer;
+begin
+// $201 sol tuþ basýldý
+// $202 sol tuþ býrakýlsý
+// $203 çift týklandý
+// $204 sað tuþ basýldý
+// $205 sað tuþ býrakýldý
+// $206 sað tuþ çift týklandý
+
+  if x = $203 then AnaForm.show;
+  if x = $205 then
+  begin
+    a := mouse.CursorPos.x;
+    b := mouse.CursorPos.y;
+    PopupMenu1.Popup(a, b);
+  end;
+end;
+
+procedure TAnaForm.Timer1Timer(Sender: TObject);
+begin
+  Adim('Timer1Timer');
+  tablo.QTarSa.Close;
+  tablo.QTarSa.open;
+  LBTarSa.Caption := tablo.QTarSa.fieldbyname('TarSa').AsString;
+  Adim('Timer1Timer bitti');
+end;
+
+procedure TAnaForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+{if BTNAc.Caption='BAÞLAT' THEN
+  Exit;
+STR:=STR + key;
+if length(str)=7 then
+  KartKontrol(trim(str)); }
+end;
+
+procedure TAnaForm.cxGrid1DBTableView1CustomDrawCell(
+  Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+  AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  val: string;
+begin
+  val := VarAsType(AViewInfo.GridRecord.DisplayTexts[tvGirCik.Index], varString);
+  if val = 'GÝRÝÞ' then
+  begin
+    ACanvas.Canvas.Font.Color := clNavy;
+    ACanvas.Canvas.Brush.Color := clMoneyGreen;
+  end
+  else
+  begin
+    ACanvas.Canvas.Font.Color := clRed;
+    ACanvas.Canvas.Brush.Color := clInfoBk;
+  end;
+
+  SetBkMode(ACanvas.Canvas.Handle, TRANSPARENT);
+
+  ACanvas.DrawText(AViewInfo.GridRecord.DisplayTexts[AViewInfo.Item.Index], AViewInfo.Bounds, 0);
+end;
+
+procedure TAnaForm.Timer2Timer(Sender: TObject);
+begin
+  Adim('Timer2Timer ');
+
+  if HizmetBas then
+    BTNAcClick(BTNAc);
+
+  if SimgeDur then
+    close;
+  if SCameraEkran then
+    BTNKameraClick(BTNKamera);
+  ResimPanel.Visible := SResim;
+  timer2.Enabled := false;
+  Adim('Timer2Timer bitti');
+
+end;
+
+procedure TAnaForm.ProgramAyarlar1Click(Sender: TObject);
+begin
+  Application.CreateForm(TAyarlarForm, AyarlarForm);
+  AyarlarForm.showmodal;
+  ayarlarForm.destroy;
+end;
+
+procedure TAnaForm.Hakknda1Click(Sender: TObject);
+begin
+  application.createform(TAboutBox, AboutBox);
+  AboutBox.showmodal;
+end;
+
+procedure TAnaForm.BTNKameraClick(Sender: TObject);
+begin
+  Camera.Show;
+  if not Camera.video.IsOpen then
+    Camera.OpenVideo(GenotipIni.ReadString('OPSIYONLAR', 'CAMERA', ''));
+end;
+
+procedure TAnaForm.FormResize(Sender: TObject);
+begin
+  BTNKamera.Left := Panel1.Width - BTNKamera.Width - BTNResim.Width - 1;
+  BTNResim.Left := Panel1.Width - BTNResim.Width;
+end;
+
+procedure TAnaForm.BTNResimClick(Sender: TObject);
+begin
+  ResimPanel.Visible := not ResimPanel.Visible;
+end;
+
+procedure TAnaForm.EkranYazClick(Sender: TObject);
+begin
+//
+end;
+
+
+function TAnaForm.HataVarmi(oku1: string): string;
+var
+  Hata: string;
+begin
+
+  if oku1 = '3000' then
+    Hata := 'Genel Hata'
+  else if oku1 = '3010' then
+    Hata := 'Hatalý port parametresi'
+  else if oku1 = '3011' then
+    Hata := 'Port daha önceden açýlmýþ'
+  else if oku1 = '3012' then
+    Hata := 'Port kapatýlamadý'
+  else if oku1 = '3013' then
+    Hata := 'Aranan port makinada tanýmsýz'
+  else if oku1 = '3014' then
+    Hata := 'Port aktif deðil'
+  else if oku1 = '3020' then
+    Hata := 'Hatalý okuyucu parametresi'
+  else if oku1 = '3021' then
+    Hata := 'Aranan okuyucu bulunamadý'
+  else if oku1 = '3022' then
+    Hata := 'Okuyucu cevap vermiyor'
+  else if oku1 = '3023' then
+    Hata := 'Yanlýþ Okuyucu'
+  else if oku1 = '3030' then
+    Hata := 'Hatalý resim parametresi'
+  else if oku1 = '3031' then
+    Hata := 'Resim boyutlarý hatalý'
+  else if oku1 = '3032' then
+    Hata := 'Resim dosyasý bulunamadý'
+  else if oku1 = '3033' then
+    Hata := 'Timeout parametresi yanlýþ'
+  else if oku1 = '3040' then
+    Hata := 'Metin parametresi boyutu hatalý'
+  else if oku1 = '3050' then
+    Hata := 'Desteklenmeyen haberleþme hýzý'
+  else if oku1 = '3060' then
+    Hata := 'Hatalý parametre'
+  else if oku1 = '3061' then
+    Hata := 'Kart yok'
+  else if oku1 = '3062' then
+    Hata := 'Hatalý Kart'
+  else if oku1 = '3070' then
+    Hata := 'Röle paremetresi hatalý'
+  else if oku1 = '3080' then
+    Hata := 'Sektor parameteresi hatalý'
+  else if oku1 = '3081' then
+    Hata := 'Block parametresi hatalý'
+  else if oku1 = '3090' then
+    Hata := 'Þifre hatasý'
+  else if oku1 = '3091' then
+    Hata := 'Veri çok uzun'
+  else if oku1 = '3100' then
+    Hata := 'Kapi Açýk'
+  else if (pos('ERROR', oku1) > 0) then
+    hata := oku1
+  else
+    hata := '';
+  result := hata;
+end;
+
+procedure TAnaForm.Edit1KeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+  begin
+    KartKontrol(Edit1.Text, ReaderNo);
+    Edit1.Text := '';
+    Edit1.SetFocus;
+  end;
+end;
+
+procedure TAnaForm.Timer3Timer(Sender: TObject);
+begin
+  Adim('Timer3Timer');
+
+  Timer3.Enabled := false;
+  ComPort1.Close;
+  portuAc;
+  oku := true;
+  ParmakOku(ComPort1, True, false);
+  Adim('Timer3Timer bitti');
+end;
+
+procedure TAnaForm.Timer4Timer(Sender: TObject);
+begin
+  SonOkunan := '';
+end;
+
+procedure TAnaForm.ParmakIziMesajGonder;
+begin
+  pkt := CihazAdres + pkt;
+  pkt := pkt + ' ' + ToplamBul(PKT) + ' 0A';
+  STR := '';
+  ComPort1.WriteStr(HexToStr(pkt));
+end;
+
+procedure TAnaForm.ParmakIziGenelMesaj(pkt: string);
+begin
+  STR := '';
+  ComPort1.WriteStr(HexToStr(pkt));
+end;
+
+procedure TAnaForm.tmrSupremaTaramaTimer(Sender: TObject);
+begin
+  Adim('tmrSupremaTaramaTimer ');
+
+  ComPort1.Close;
+  portuAc;
+  ParmakIziMesajGonder(FPHazirla1);
+  tmrSupremaTarama.Enabled := False;
+  Adim('tmrSupremaTaramaTimer bitti');
+
+end;
+
+procedure TAnaForm.Isle;
+var
+  AcikPkt, pkt, pktTipi: string;
+  FPID: string;
+begin
+
+  AcikPkt := StrToHex(STR);
+
+  // Cihazlar Adreslerini Gönderiyorlar
+  if Length(str) = 4 then
+  begin
+    pkt := copy(STR, 1, 3); // Cihazýn Adresi bu 3 karakterde bulunuyor
+    if ToplamBul(StrToHex(pkt)) = StrToHex(copy(STR, 4, 1)) then
+    begin
+      CihazAdres := StrToHex(pkt);
+      ParmakIziMesajGonder(FPBasla1);
+    end;
+  end
+  else if Length(str) = 15 then // Diðer Ýletiþim Paketleri
+  begin
+
+    pkt := copy(STR, 1, 13);
+
+    if ToplamBul(StrToHex(pkt)) = StrToHex(copy(STR, 14, 1)) then
+    begin
+
+      pktTipi := StrToHex(str[4] + str[5]);
+
+      if pktTipi = FPBasla1Cevap then
+      begin
+        if FPCevaplama1 then
+          ParmakIziMesajGonder(FPHazirla2)
+        else
+        begin
+          ParmakIziMesajGonder(FPBasla2);
+          FPCevaplama1 := true;
+        end;
+      end
+      else if pktTipi = FPBasla2Cevap then
+        ParmakIziMesajGonder(FPBasla3)
+      else if pktTipi = FPBasla3Cevap then
+        ParmakIziMesajGonder(FPBasla4)
+      else if pktTipi = FPBasla4Cevap then
+        ParmakIziMesajGonder(FPHazirla1)
+      else if pktTipi = FPHazirla2Cevap then
+      begin
+        ParmakIziMesajGonder(FPSorgula);
+      end
+      else if pktTipi = FPSorgulaCevap then
+      begin
+        ParmakIziMesajGonder(FPSorgula);
+      end
+      else
+      begin
+        tmrSupremaTarama.Interval := 1000;
+        tmrSupremaTarama.Enabled := False;
+        tmrSupremaTarama.Enabled := True;
+      end;
+    end;
+  end
+  else if Length(str) = 50 then
+  begin
+    KartKontrol(inttostr((ord(STR[40]) * 255 + ord(STR[39]))), ReaderNo);
+    tmrSupremaTarama.Interval := 1000;
+    tmrSupremaTarama.Enabled := False;
+    tmrSupremaTarama.Enabled := True;
+  end;
+
+end;
+
+procedure TAnaForm.CZKEMPDKSHIDNum(ASender: TObject; CardNumber: Integer);
+begin
+  KartKontrol(inttostr(CardNumber), ReaderNo);
+end;
+
+procedure TAnaForm.portuAc;
+begin
+  ComPort1.Close;
+  try
+    comPort1.LoadSettings(stRegistry, '\software\genper\');
+    ComPort1.Open;
+  except
+    ShowMessage('Comport Açýlamadý');
+  end;
+end;
+
+procedure TAnaForm.tmrOkuyucu2Timer(Sender: TObject);
+begin
+  Okuyucu2YedekPort := not Okuyucu2YedekPort;
+  if Okuyucu2YedekPort then
+    KartOku(YPortNe, YReaderNo)
+  else
+    KartOku(PortNe, ReaderNo);
+end;
+
+procedure TAnaForm.GenelDokumlerClick(Sender: TObject);
+begin
+  IzinDlg.ShowModal;
+end;
+
+procedure TAnaForm.CZKEMYemekhaneHIDNum(ASender: TObject;
+  CardNumber: Integer);
+begin
+  KartKontrolYemek(inttostr(CardNumber), YReaderNo);
+end;
+
+procedure TAnaForm.SpeedButton1Click(Sender: TObject);
+begin
+Tablo.TabStatus.Open;
+Tablo.TabStatus.Close;
+end;
+
+end.
+

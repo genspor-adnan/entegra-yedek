@@ -1,0 +1,2258 @@
+unit UDokum;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  DBTables, ADODb, StdCtrls, Outline, DBCtrls, Grids, DBGrids, Mask, Buttons,
+  ExtCtrls, Menus, comctrls, ComObj, OleServer, Excel97,
+  ToolWin, Db, cxStyles, cxCustomData, cxGraphics, cxFilter,
+  cxData, cxDataStorage, cxEdit, cxDBData, cxGridLevel, cxClasses,
+  cxControls, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGrid, UQuantGrid, cxGridCustomPopupMenu,
+  cxGridPopupMenu, cxintl, cxContainer, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, cxCalendar, cxSpinEdit;
+
+type
+  TDokumDlg = class(TForm)
+    PopupMenu1: TPopupMenu;
+    N1: TMenuItem;
+    DokumYapisi: TMenuItem;
+    DtsDokumler: TDataSource;
+    EtiketAyarlar1: TMenuItem;
+    N2: TMenuItem;
+    OpenDialog1: TOpenDialog;
+    N3: TMenuItem;
+    DosyayaYazdr1: TMenuItem;
+    DosyaAyarlar1: TMenuItem;
+    Excel: TMenuItem;
+    EtiketSayfaAyarlar1: TMenuItem;
+    WordDosyasnaYazdr1: TMenuItem;
+    N5: TMenuItem;
+    Moduller: TMenuItem;
+    K: TMenuItem;
+    M: TMenuItem;
+    L: TMenuItem;
+    G: TMenuItem;
+    R: TMenuItem;
+    E: TMenuItem;
+    S: TMenuItem;
+    BuRapor1: TMenuItem;
+    HerkesteGrnsn1: TMenuItem;
+    KimsedeGrnmesin1: TMenuItem;
+    Panel1: TPanel;
+    GBox1: TGroupBox;
+    Panel2: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    AyarTus: TSpeedButton;
+    Label3: TLabel;
+    EditRAPORADI: TDBEdit;
+    EditGRUBU: TDBEdit;
+    Splitter1: TSplitter;
+    Panel3: TPanel;
+    Label10: TLabel;
+    ToplamSayi: TCheckBox;
+    F: TMenuItem;
+    D: TMenuItem;
+    LbToplamSayi: TLabel;
+    RaporKaydet1: TMenuItem;
+    RaporEkle2: TMenuItem;
+    N6: TMenuItem;
+    KurumaRehberdeFaturalandr1: TMenuItem;
+    Toplu1: TMenuItem;
+    Detay1: TMenuItem;
+    Gruplu1: TMenuItem;
+    ToolBar2: TToolBar;
+    KapatTus: TToolButton;
+    PopupMenu2: TPopupMenu;
+    Text1: TMenuItem;
+    HTML1: TMenuItem;
+    DokumTus: TToolButton;
+    Panel4: TPanel;
+    N4: TMenuItem;
+    KurumaveHastalaraFaturayptalEt1: TMenuItem;
+    C: TMenuItem;
+    DBTable: TcxGridDBTableView;
+    DBGrid1Level1: TcxGridLevel;
+    DBGrid1: TcxGrid;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    cxIntl1: TcxIntl;
+    XML1: TMenuItem;
+    Excel1: TMenuItem;
+    GridPopupMenu: TcxGridPopupMenu;
+    EditACIKLAMA: TDBMemo;
+    DBText1: TDBText;
+    Label4: TLabel;
+    Label5: TLabel;
+    DBText2: TDBText;
+    DBText3: TDBText;
+    Label6: TLabel;
+    procedure FormCreate(Sender: TObject);
+    function KomutOlustur: Boolean;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormShow(Sender: TObject);
+    procedure DtsDokumlerStateChange(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormDeactivate(Sender: TObject);
+    procedure TableAdListesiOlustur;
+    procedure DokumYapisiClick(Sender: TObject);
+    procedure YeniRapor1Click(Sender: TObject);
+    procedure RaporuKaydet1Click(Sender: TObject);
+    procedure EtiketAyarlar1Click(Sender: TObject);
+    procedure Label1DblClick(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure DosyayaYazdr1Click(Sender: TObject);
+    procedure DosyaAyarlar1Click(Sender: TObject);
+    procedure EtiketSayfaAyarlar1Click(Sender: TObject);
+    procedure WordDosyasnaYazdr1Click(Sender: TObject);
+    procedure KClick(Sender: TObject);
+    procedure ModullerClick(Sender: TObject);
+    procedure DtsDokumlerDataChange(Sender: TObject; Field: TField);
+    procedure HerkesteGrnsn1Click(Sender: TObject);
+    procedure KimsedeGrnmesin1Click(Sender: TObject);
+    procedure RaporKaydet1Click(Sender: TObject);
+    procedure RaporEkle2Click(Sender: TObject);
+    procedure Toplu1Click(Sender: TObject);
+    procedure DokumTusClick(Sender: TObject);
+    procedure KapatTusClick(Sender: TObject);
+    procedure Text1Click(Sender: TObject);
+    procedure HTML1Click(Sender: TObject);
+    procedure KurumaveHastalaraFaturayptalEt1Click(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure DBTableMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure XML1Click(Sender: TObject);
+    procedure Excel1Click(Sender: TObject);
+    procedure DBTableCellDblClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
+   function FieldTypeBul(FieldType: TFieldType): string;
+  private
+    { Private declarations }
+    OrderDesc: Boolean;
+     {LastOrderField, OrderField,}Siralama, SiraYonu: string;
+    function FieldListe: string;
+    procedure ComBoxDropDown(Sender: TObject);
+    procedure KosullariKaydet;
+    procedure TopluFaturaEkle(Kime, Baslik: string);
+    procedure DokumIslemi;
+    procedure DateTimePickerChange(Sender: TObject);
+    procedure ButonClick(Sender: TObject);
+    procedure Siralandir;
+  public
+    { Public declarations }
+    procedure SartlarOlustur;
+    procedure IlkSayfaYapisiOlustur;
+    procedure GenelDokumler_EkranYazici(Sender: TObject);
+    procedure ExceleYazdir(Table1: TADOQuery; Grid1: TDBGrid);
+    procedure DokumuKaydet(DokumAdi: string);
+    procedure DokumuAl(DokumAdi: string);
+    procedure InsertMenuItem;
+    procedure CreateGridFields(const tvCaption, tvFieldName, tvProperties: string; tvMerging, tvalign: boolean; tvWidth: integer);
+  end;
+
+var
+  DokumDlg: TDokumDlg;
+  FMenuItem: TMenuItem;
+  DownList: TStringList;
+  ComboNe: TComboBox;
+
+implementation
+
+uses URapSyf, UAyar, UTablo, UTabDok, UDokSart, UEtiket, Utabrap, FetaUtil,
+  UEtiAlan, UAnaForm, UListe, UGrid, UMesaj, Udoktor, uKosulDetayAra;
+var
+  St, EskiRapor, OncekiLabKodu: string[20];
+  GroupByList, TableBagList, komut, TableAdlari: TStringList;
+  kom: string[100];
+  EnBuyukKartNo, i, j, kol: smallint;
+  Label55: TLabel;
+  ComBox: TComboBox;
+  ScrollBox2: TScrollBox;
+  Tut: TComponent;
+  str, FatTar, FatNo: string;
+  DosyanoVar: Boolean;
+
+{$R *.DFM}
+
+procedure TDokumDlg.InsertMenuItem;
+var
+  I: Integer;
+  AMenu: TComponent;
+  ABuiltInMenus: TcxGridDefaultPopupMenu;
+begin
+  AMenu := nil;
+  ABuiltInMenus := GridPopupMenu.BuiltInPopupMenus;
+  for I := 0 to ABuiltInMenus.Count - 1 do
+    if ([gvhtFooter, gvhtFooterCell, gvhtGroupFooter, gvhtGroupFooterCell] *
+      ABuiltInMenus[I].HitTypes) <> [] then
+    begin
+      AMenu := ABuiltInMenus[I].PopupMenu;
+    end;
+  AMenu := ABuiltInMenus[0].PopupMenu;
+  if Assigned(AMenu) and AMenu.InheritsFrom(TPopupMenu) then
+  begin
+    FMenuItem := TMenuItem.Create(Self);
+    with FMenuItem do
+    begin
+      Caption := 'Panoya Kopyala';
+      Hint := 'Panoya Kopyala';
+ //     OnClick := miCopyToClipboardClick;
+    end;
+    TPopupMenu(AMenu).Items.Add(FMenuItem);
+    //
+    FMenuItem := TMenuItem.Create(Self);
+    FMenuItem.Caption := '-';
+    TPopupMenu(AMenu).Items.Add(FMenuItem);
+
+    FMenuItem := TMenuItem.Create(Self);
+    with FMenuItem do
+    begin
+      Caption := 'Gönder';
+      Hint := 'Gönder';
+ //     OnClick := miCopyToClipboardClick;
+    end;
+    TPopupMenu(AMenu).Items.Add(FMenuItem);
+  end;
+end;
+
+procedure TDokumDlg.FormCreate(Sender: TObject);
+begin
+//  InsertMenuItem;
+  if TabloDokum.AliasAdi = '' then
+    TabloDokum.AliasAdi := 'GENOTIP';
+
+//   TabloDokum.TabDokum.Open;
+//   TabloDokum.TabDokum2.Open;
+////////   TabloDokum.TabKosul.DatabaseName := TabloDokum.AliasAdi;
+//   TabloDokum.TabKosul2.DatabaseName:= TabloDokum.AliasAdi;
+//   TabloDokum.RaporTabloSec(TabloDokum.TabKosul, DtsDokumler, 'RAPORADI');
+//   TabloDokum.RaporTabloSec(TabloDokum.TabKosul2, DtsDokumler, 'RAPORADI');
+
+////////   TabloDokum.Table1.DatabaseName := TabloDokum.AliasAdi;
+////////   TabloDokum.Query1.DatabaseName := TabloDokum.AliasAdi;
+
+  TableAdlari := TStringList.Create;
+  GroupByList := TStringlist.Create;
+  Komut := TStringlist.Create;
+  TableBagList := TStringlist.Create;
+  EskiRapor := '';
+end;
+
+function TDokumDlg.FieldListe: string;
+var sat: string;
+  i, Ind: integer;
+  FList: TStringList;
+begin
+  TableBagList.Clear;
+  FList := TStringList.Create;
+  FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
+  Ind := 0;
+  for i := 0 to FList.Count - 1 do
+  begin
+    sat := FList.Strings[i];
+    Sat := trim(Sat);
+    if sat <> '' then
+    begin komut.add(sat + ',');
+      Ind := komut.IndexOf(sat + ',');
+    end;
+  end;
+  if Ind = 0 then
+    komut.add('*')
+  else
+  begin
+    sat := komut.Strings[Ind];
+    Delete(sat, Pos(',', sat), 1); {ilk virgülü sil}
+    komut.Strings[Ind] := sat;
+  end;
+  FList.Destroy;
+end;
+
+function komutsatiri(TabAd, FIELD, EQUAL, VALUE: string): Boolean;
+var FieldTipi: TFieldType;
+  NeTarih: string[25];
+begin
+  kom := '(';
+  if (EQUAL = 'Baþlayan') or (EQUAL = 'Ýçinde geçen') then
+    kom := kom + TabAd + '.' + FIELD + ' LIKE '
+  else if EQUAL = 'Gün/Ay' then
+    kom := kom + '(DAY(' + TabAd + '.' + FIELD + ') =' + copy(VALUE, 1, Pos('/', VALUE) - 1) +
+      ') AND (MONTH(' + TabAd + '.' + FIELD + ') =' + copy(VALUE, Pos('/', VALUE) + 1, Length(VALUE)) + ')'
+  else
+    kom := kom + TabAd + '.' + FIELD + EQUAL;
+  TabloDokum.Table1.Close;
+////////   TabloDokum.Table1.DatabaseName := 'GENOTIP';
+  TabloDokum.Table1.TableName := TabAd;
+  TabloDokum.Table1.Open;
+(*   Table.GetFieldNames(TABLE1Box(Components[ind+1]).Items);*)
+  FieldTipi := TabloDokum.Table1.FieldByName(FIELD).DataType;
+  TabloDokum.Table1.Close;
+  if (FieldTipi = FtString) or (FieldTipi = FtMemo) or (FieldTipi = FtDate) then kom := kom + '''';
+  if EQUAL = 'Ýçinde geçen' then kom := kom + '%';
+  if (FieldTipi = FtDate) or (FieldTipi = FtDateTime) then
+  begin
+{      Yils :='';
+      GunS  := Copy(VALUE, 1, Pos('/',VALUE)-1);
+      Delete(VALUE, 1, Pos('/',VALUE));
+      if Pos('/',VALUE)>0 then begin
+         AyS := Copy(VALUE, 1, Pos('/',VALUE)-1);
+         Delete(VALUE, 1, Pos('/',VALUE));
+         YilS := VALUE;
+      end
+      else AyS := VALUE;
+      VALUE := AyS + '/' + GunS + '/' + YilS;}
+
+    VALUE := FormatDateTime('mm/dd/yyyy', StrToDate(VALUE)); // VALUE := GAY2AGY(VALUE);
+    if (FieldTipi = FtDateTime) then
+      if EQUAL = '>' then
+        VALUE := '''' + VALUE + ' 23:59:00'''
+      else if EQUAL = '>=' then
+        VALUE := '''' + VALUE + ' 00:00:00'''
+      else if EQUAL = '<' then
+        VALUE := '''' + VALUE + ' 00:00:00'''
+      else if EQUAL = '<=' then
+        VALUE := '''' + VALUE + ' 23:59:00'''
+      else if EQUAL = '=' then
+      begin
+        NeTarih := copy(kom, pos('(', kom) + 1, pos('=', kom) - 2);
+        kom := '((' + NeTarih + '>=''' + VALUE + ' 00:00:00'')and(' + NeTarih + '<=''' + VALUE + ' 23:59:00'')';
+        VALUE := '';
+      end
+      else if EQUAL = 'Gün/Ay' then
+        VALUE := ''
+  end;
+  kom := kom + VALUE;
+  if (EQUAL = 'Baþlayan') or (EQUAL = 'Ýçinde geçen') then kom := kom + '%';
+  if (FieldTipi = FtString) or (FieldTipi = FtMemo) or (FieldTipi = FtDate) then kom := kom + '''';
+  kom := kom + ')';
+  komut.Add(kom);
+  komutsatiri := TRUE;
+end;
+
+procedure TDokumDlg.TableAdListesiOlustur;
+var index1, TabAd, sat: string[100];
+  i, j, k, IndexAlanSay: Integer;
+  FList, IndexList: TStringList;
+  bulundu: boolean;
+  procedure ListedeYoksaEkle(TabloAd: string);
+  begin
+    bulundu := false;
+    k := 0;
+    while (not bulundu) and (k <= TableAdlari.Count - 1) do
+      if TabloAd = TableAdlari.Strings[k] then
+        bulundu := true
+      else
+        inc(k);
+    if not bulundu then
+      TableAdlari.Add(TabloAd);
+  end;
+
+  function IndexAlanAl(TabloAd: string; IndexAlanSira: integer): string;
+  begin
+    TabloDokum.Table1.Close;
+////////      TabloDokum.Table1.DatabaseName := 'GENOTIP';
+    TabloDokum.Table1.TableName := TabloAd;
+    TabloDokum.Table1.open;
+    TabloDokum.Table1.IndexDefs.Update;
+//      index1 := TabloDokum.Table1.IndexDefs.Items[0].Fields;
+    index1 := TabloDokum.Table1.Fields[0].FieldName;
+    IndexAlanAl := index1;
+    IndexAlanSay := 0;
+    while pos(';', index1) > 0 do
+    begin //Ýndex Alan Sayýsýný belirle 'kod;sýrano'
+      inc(IndexAlanSay);
+      if IndexAlanSira = IndexAlanSay then
+        IndexAlanAl := copy(index1, 1, pos(';', index1) - 1);
+      delete(index1, 1, pos(';', index1));
+    end; //while
+  end;
+begin
+  FList := TStringList.Create;
+  IndexList := TStringList.Create;
+  TableAdlari.Clear;
+  TableBagList.Clear;
+  FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
+   {Field'lerden Table Adlarý belirlenir}
+  TabloDokum.TabKosul.First;
+  while not TabloDokum.TabKosul.eof do
+  begin
+    ListedeYoksaEkle(TabloDokum.TabKosul.FieldByName('TABLO').AsString);
+    TabloDokum.TabKosul.next;
+  end; {while}
+
+  for i := 0 to FList.Count - 1 do
+  begin
+    sat := FList.Strings[i];
+    Sat := Trim(sat);
+    while (sat <> '') and (Pos('.', sat) > 0) do
+    begin
+      TabAd := Copy(sat, 1, Pos('.', sat) - 1);
+      Delete(sat, 1, Pos('.', sat));
+      if RevPos(' ', TabAd) > 0 then Delete(TabAd, 1, RevPos(' ', TabAd));
+      if RevPos('(', TabAd) > 0 then Delete(TabAd, 1, RevPos('(', TabAd));
+      if RevPos('*', TabAd) > 0 then Delete(TabAd, 1, RevPos('*', TabAd));
+      if RevPos('-', TabAd) > 0 then Delete(TabAd, 1, RevPos('-', TabAd));
+      if RevPos('+', TabAd) > 0 then Delete(TabAd, 1, RevPos('+', TabAd));
+//          if simge <> '.' then Delete(TabAd,1,Rev_Pos(simge, TabAd));
+      Trim(TabAd);
+      ListedeYoksaEkle(TabAd);
+    end;
+  end; {for}
+
+
+  if TableAdlari.Count = 0 then {boþsa}
+    TableAdlari.Add('STOK');
+
+  if TableAdlari.Count > 1 then {Tablolar arasýndaki baðý kur}
+    for k := 1 to TableAdlari.Count - 1 do
+    begin
+      TableBagList.Add('(' + TableAdlari.Strings[0] + '.' + IndexAlanAl(TableAdlari.Strings[0], 1) + '=' +
+        TableAdlari.Strings[k] + '.' + IndexAlanAl(TableAdlari.Strings[k], 1) + ')');
+      if k < TableAdlari.Count - 1 then TableBagList.Add(' AND ');
+//    TableBagList.Add('And(Siparis.SiparisNo = '+TabAd+'.SiparisNo)');
+    end;
+
+//   if DataDosyaYolu <> '' then
+//      for i := 0 to TableAdlari.Count-1 do
+//          TableAdlari.Strings[i] := DataDosyaYolu+TableAdlari.Strings[i];
+
+  for i := 0 to TableAdlari.Count - 2 do
+    TableAdlari.Strings[i] := TableAdlari.Strings[i] + ',';
+
+  FList.Destroy;
+
+end;
+
+function TDokumDlg.KomutOlustur: Boolean;
+var komutvar: Boolean;
+  CInd, SonInd: Integer;
+  TabAd, FieldAd, EqAd, ValAd, AndOrAd: string[80];
+begin //  ANDOR1 TABLE1, FIELD1, EQUAL1, VALUE1
+  komutvar := False;
+  komut.add('Select ');
+  if TabloDokum.TabDokum.FieldByName('AYNIKAYITLAR').AsString = 'A' then
+    komut.add('distinct ');
+  if ToplamSayi.Checked then
+    komut.add(' count (*) from ')
+  else
+  begin
+    FieldListe;
+    komut.add(' from ');
+  end;
+  TableAdListesiOlustur;
+  komut.AddStrings(TableAdlari);
+
+  if TabloDokum.TabKosul.RecordCount > 0 then
+  begin {koþul var}
+    komut.add(' where ');
+    TabloDokum.TabKosul.First;
+    while not TabloDokum.TabKosul.eof do
+    begin
+      if TabloDokum.TabKosul.FieldByName('BAGLAC').AsString = 'VE' then
+        komut.add(' AND ')
+      else if TabloDokum.TabKosul.FieldByName('BAGLAC').AsString = 'VEYA' then
+        komut.add(' OR ');
+      TabAd := TabloDokum.TabKosul.FieldByName('TABLO').AsString;
+      FieldAd := TabloDokum.TabKosul.FieldByName('ALAN').AsString;
+      EqAd := TabloDokum.TabKosul.FieldByName('ESITLIK').AsString;
+      ValAd := TabloDokum.TabKosul.FieldByName('DEGER').AsString;
+      komutvar := komutsatiri(TabAd, FieldAd, EqAd, ValAd);
+      TabloDokum.TabKosul.next;
+    end;
+//      komut.Add(')');
+  end; {if}
+  if (TabloDokum.TabKosul.RecordCount = 0 {koþul yoksa}) and (TableBagList.Count > 0 {birden fazla table varsa}) then
+    komut.add(' where ')
+  else if (TabloDokum.TabKosul.RecordCount > 0 {koþul var}) and (TableBagList.Count > 0 {birden fazla table varsa}) then
+    komut.add('and');
+
+  komut.AddStrings(TableBagList);
+
+   //Ek Baðlar varsa onlar eklenir...
+  GroupByList.Assign(TabloDokum.TabDokum.FieldByName('EKBAGLIST'));
+  if GroupByList.Count > 0 then
+    for i := 0 to GroupByList.Count - 1 do
+      komut.Add('and (' + GroupByList.Strings[i] + ')');
+
+   //Group varsa onlar eklenir...
+  GroupByList.Assign(TabloDokum.TabDokum.FieldByName('GRUPBY'));
+  if GroupByList.Count > 0 then
+  begin
+    komut.add('GROUP BY');
+    for i := 0 to GroupByList.Count - 2 do
+      komut.Add(GroupByList.Strings[i] + ',');
+    komut.Add(GroupByList.Strings[GroupByList.Count - 1]);
+  end;
+
+  if (not ToplamSayi.Checked) and (TabloDokum.TabDokum.FieldByName('SIRALAMA1').AsString <> '') then
+    if TabloDokum.TabDokum.FieldByName('YON1').AsString = '-' then
+      komut.Add('ORDER BY ' + TabloDokum.TabDokum.FieldByName('SIRALAMA1').AsString + ' DESC')
+    else
+      komut.Add('ORDER BY ' + TabloDokum.TabDokum.FieldByName('SIRALAMA1').AsString + ' ASC');
+  if (not ToplamSayi.Checked) and (TabloDokum.TabDokum.FieldByName('SIRALAMA2').AsString <> '') then
+    if TabloDokum.TabDokum.FieldByName('YON1').AsString = '-' then
+      komut.Add(', ' + TabloDokum.TabDokum.FieldByName('SIRALAMA2').AsString + ' DESC')
+    else
+      komut.Add(', ' + TabloDokum.TabDokum.FieldByName('SIRALAMA2').AsString + ' ASC');
+
+  KomutOlustur := true;
+//   if Komutvar then komut.add(' AND ')
+end;
+
+procedure TDokumDlg.KosullariKaydet;
+begin
+  i := 1;
+  TabloDokum.TabKosul.First;
+  while not TabloDokum.TabKosul.eof do
+  begin
+    Tut := ScrollBox2.FindChildControl('Combo_' + IntToStr(i));
+    if (Tut <> nil) then
+    begin
+      TabloDokum.TabKosul.edit;
+      TabloDokum.TabKosul.FieldByName('DEGER').AsString := TComBoBox(Tut).Text;
+      TabloDokum.TabKosul.post;
+      TabloDokum.TabKosul.Next;
+    end;
+    inc(i, 5);
+  end;
+
+  Tablo.cnn.Execute('UPDATE DOKUMLER SET SAYAC='+inttostr(TabloDokum.TabDokum.Fieldbyname('SAYAC').ASInteger+1)+
+                    ', SONTARIH= GETDATE(), SONKULLANAN='''+Kullanan+''' WHERE RAPORADI ='''+TabloDokum.TabDokum.Fieldbyname('RAPORADI').AsString +'''');
+end;
+
+
+procedure TDokumDlg.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  DokumDlg := nil;
+  ScrollBox2 := nil;
+//   TabloDokum.TabDokum.Close;
+  TableAdlari.Free;
+  GroupByList.Free;
+  Komut.Free;
+  TableBagList.Free;
+end;
+
+procedure TDokumDlg.FormShow(Sender: TObject);
+begin
+//  TabloDokum.TabDokum.Refresh;
+//  EditRAPORADI.Enabled := False;
+end;
+
+procedure TDokumDlg.DtsDokumlerStateChange(Sender: TObject);
+begin
+  if DtsDokumler.State in [dsEdit, dsInsert] then
+    AnaForm.ToolBarNavigator.VisibleButtons := [nbPost, nbCancel]
+  else
+    AnaForm.ToolBarNavigator.VisibleButtons := [nbFirst, nbPrior, nbNext, nbLast, nbInsert, nbDelete];
+
+//  if DokumSartDlg = nil then exit;
+  try
+    if DtsDokumler.State in [dsEdit, dsInsert] then
+      if DokumSartDlg <> nil then
+        DokumSartDlg.DBNavigator.VisibleButtons := [nbPost, nbCancel]
+      else if DokumSartDlg <> nil then
+        DokumSartDlg.DBNavigator.VisibleButtons := [];
+  except
+    exit;
+  end;
+end;
+
+procedure TDokumDlg.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+//  Tablo.F_Tuslari('GenelDokumler', Key, AnaForm.ToolBarNavigator);
+  if Key = vk_Return then
+    DokumTus.Click;
+end;
+
+procedure TDokumDlg.FormDeactivate(Sender: TObject);
+begin
+  if DtsDokumler.State in [dsEdit, dsInsert] then
+    if MessageDlg('Döküm Ekraný Deðiþti !!! ' + #13#10 + 'Yapýlan Deðiþiklikler Kaydedilsin mi?',
+      mtConfirmation, [mbYes, mbNo], 0) = mrYES then
+      AnaForm.ToolBarNavigator.BtnClick(nbPost)
+    else
+      AnaForm.ToolBarNavigator.BtnClick(nbCancel);
+end;
+
+procedure TDokumDlg.IlkSayfaYapisiOlustur;
+var
+  Solyer: Real;
+  GlobBandNo, Sayac, K: Integer;
+  FList: TStringList;
+  AyarAd, RFONT, PUNTO, YANASIK, OZELLIK: string;
+
+  procedure DegerAta(AlanTuru, TabloAd, AlanAdi: string; Sol, Ust: REAL; Boy: Real);
+  begin
+    if not RapTablo.Ayarlar.active then
+    begin
+      RapTablo.Ayarlar.close;
+      RapTablo.Ayarlar.  sql.text := 'select top 1 from ayarlar ';
+      RapTablo.Ayarlar.open;
+    end;
+    RapTablo.Ayarlar.Append;
+    RapTablo.Ayarlar.FieldByName('RAPORADI').AsString := Ayarad;
+    RapTablo.Ayarlar.FieldByName('SIRANO').AsInteger := Sayac;
+    RapTablo.Ayarlar.FieldByName('ALANTURU').AsString := ALANTURU;
+    RapTablo.Ayarlar.FieldByName('TABLO').AsString := TABLOAD;
+    RapTablo.Ayarlar.FieldByName('ALANADI').AsString := ALANADI;
+    RapTablo.Ayarlar.FieldByName('FONT').AsString := RFONT;
+    RapTablo.Ayarlar.FieldByName('PUNTO').AsString := PUNTO;
+    RapTablo.Ayarlar.FieldByName('YANASIK').AsString := YANASIK;
+    RapTablo.Ayarlar.FieldByName('OZELLIK').AsString := OZELLIK;
+    RapTablo.Ayarlar.FieldByName('SOL').AsFloat := SOL;
+    RapTablo.Ayarlar.FieldByName('UST').AsFloat := UST;
+    RapTablo.Ayarlar.FieldByName('BOY').AsFloat := BOY;
+    if GlobBandNo <> 0 then
+      RapTablo.Ayarlar.FieldByName('BANDNO').AsInteger := GlobBandNo;
+    if AlanTuru = 'ÇERÇEVE' then
+    begin
+      RapTablo.Ayarlar.FieldByName('SOL').AsString := '';
+      RapTablo.Ayarlar.FieldByName('UST').AsString := '';
+      RapTablo.Ayarlar.FieldByName('BOY').AsString := '';
+      RapTablo.Ayarlar.FieldByName('EN').AsString := '1';
+    end;
+    RapTablo.Ayarlar.Post;
+    Sayac := Sayac + 5;
+
+  end;
+
+  function Noktasiz(Noktali: string): string;
+  var
+    Yer: Integer;
+  begin
+    Yer := Pos('.', Noktali);
+    if Yer > 0 then
+      Delete(Noktali, 1, Yer);
+    Noktasiz := Noktali;
+  end;
+
+begin
+  Application.CreateForm(TAyarlarDlg, AyarlarDlg);
+//   RapTablo.Ayarlar.Open;
+//   If RapTablo.Ayarlar.FindKey([TabloDokum.TabDokum.FieldByName('RAPORADI').AsString,10]) Then
+//      raise Exception.create('Þu anda rapor ayarlarý var. Yeniden oluþturmak istiyorsanýz rapor ayarlarýný silin.');
+
+  AyarAd := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString;
+  FList := TStringList.Create;
+  FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
+  FList.Text := trim(FList.Text);
+  if FList.Count = 0 then
+    FList.Assign(TabloDokum.Query1.FieldList);
+
+  GlobBandNo := 0;
+  Sayac := 1;
+  DegerAta('SAYFA', 'YAZICI', '(yazýcý ismi)', 0, 0, 0);
+  Sayac := 2;
+  DegerAta('SAYFA', 'BOYUT', 'A4', 0, 0, 0);
+
+   // Yedi tane band ekleniyor
+  Sayac := 10;
+  DegerAta('BAND', 'SAYFABAÞI', '', 0, 0, 3);
+  Sayac := 11;
+  DegerAta('BAND', 'DETAY', 'SORGU', 0, 0, 0.5);
+  Sayac := 12;
+  DegerAta('BAND', 'SAYFASONU', '', 0, 0, 2);
+
+  Sayac := 20;
+  GlobBandNo := 10;
+  RFONT := 'Tahoma';
+  PUNTO := '14';
+  OZELLIK := 'BOLD';
+  DegerAta('HESAP', '', 'D(''KURUMADI'')', 0, 0, 0);
+
+  Sayac := 21;
+  GlobBandNo := 10;
+  RFONT := 'Tahoma';
+  PUNTO := '8';
+  OZELLIK := '';
+  DegerAta('SABÝT', '', TabloDokum.TabDokum.FieldByName('RAPORADI').AsString, 0, 0.5, 0);
+
+  RFONT := '';
+  PUNTO := '';
+
+  GlobBandNo := 10;
+  SolYer := 0;
+
+  RFONT := 'Tahoma';
+  PUNTO := '8';
+  YANASIK := 'SAÐ';
+  OZELLIK := 'BOLD';
+  Sayac := 35;
+  DegerAta('SABÝT', '', 'R.Tarihi :', 15, 0, 0);
+  Sayac := 36;
+  DegerAta('SABÝT', '', 'S.No :', 15, 0.4, 0);
+  YANASIK := '';
+  OZELLIK := '';
+  Sayac := 37;
+  DegerAta('SÝSTEM', 'TARÝHSAAT', '', 16, 0, 0);
+  Sayac := 38;
+  DegerAta('SÝSTEM', 'SAYFANO', '', 16, 0.4, 0);
+  RFONT := '';
+  PUNTO := '';
+  YANASIK := '';
+  OZELLIK := '';
+
+  Sayac := 50;
+
+  for k := 0 to FList.Count - 1 do
+  begin
+    RFONT := 'Tahoma';
+    PUNTO := '10';
+    OZELLIK := 'BOLD';
+    DegerAta('SABÝT', '', Noktasiz(FList.Strings[k]), SolYer, 2, 0);
+    SolYer := SolYer + 3;
+  end;
+  GlobBandNo := 11;
+
+  if Sayac < 150 then
+    Sayac := 150
+  else
+    Sayac := Sayac + 10;
+
+  SolYer := 0;
+  for k := 0 to FList.Count - 1 do
+  begin
+    RFONT := 'Tahoma';
+    PUNTO := '10';
+    OZELLIK := '';
+    DegerAta('ALAN', 'SORGU', Noktasiz(FList.Strings[k]), Solyer, 0, 0);
+    SolYer := SolYer + 3;
+  end;
+
+  Sayac := Sayac + 10;
+  GlobBandNo := 10;
+  RFONT := '';
+  PUNTO := '';
+  OZELLIK := '';
+  DegerAta('ÇERÇEVE', '', '', 0, 0, 0);
+  FList.Destroy;
+  AyarlarDlg.Destroy;
+end;
+
+
+
+{
+procedure TDokumDlg.IlkSayfaYapisiOlustur;
+Var
+   Sayac,GlobBandNo,Solyer,K:Integer;
+   FList : TStringList;
+   AyarAd : String[40];
+
+   Procedure DegerAta(AlanTuru, TabloAd, AlanAdi:String;Sol,Ust:Integer;Boy:Real);
+   Begin
+      RapTablo.Ayarlar.Append;
+      RapTablo.Ayarlar.FieldByName('RAPORADI').AsString := Ayarad;
+      RapTablo.Ayarlar.FieldByName('SIRANO').AsInteger:= Sayac;
+      RapTablo.Ayarlar.FieldByName('ALANTURU').AsString := ALANTURU;
+      RapTablo.Ayarlar.FieldByName('TABLO').AsString := TABLOAD;
+      RapTablo.Ayarlar.FieldByName('ALANADI').AsString := ALANADI;
+      RapTablo.Ayarlar.FieldByName('SOL').AsInteger := SOL;
+      RapTablo.Ayarlar.FieldByName('UST').AsInteger := UST;
+      RapTablo.Ayarlar.FieldByName('BOY').AsFloat := BOY;
+      If GlobBandNo<>0 Then
+         RapTablo.Ayarlar.FieldByName('BANDNO').AsInteger := GlobBandNo;
+      If AlanTuru = 'ÇERÇEVE' THEN Begin
+         RapTablo.Ayarlar.FieldByName('SOL').AsString := '';
+         RapTablo.Ayarlar.FieldByName('UST').AsString := '';
+         RapTablo.Ayarlar.FieldByName('BOY').AsString := '';
+         RapTablo.Ayarlar.FieldByName('EN').AsString  := '1';
+      End;
+      RapTablo.Ayarlar.Post;
+      Inc(Sayac);
+   End;
+
+   Function Noktasiz(Noktali:String):String;
+   Var
+      Yer:Integer;
+   Begin
+      Yer:=Pos('.',Noktali);
+      If Yer>0 Then
+         Delete(Noktali,1,Yer);
+      Noktasiz:=Noktali;
+   End;
+
+Begin
+   Application.CreateForm(TAyarlarDlg, AyarlarDlg);
+//   RapTablo.Ayarlar.Open;
+//   If RapTablo.Ayarlar.FindKey([TabloDokum.TabDokum.FieldByName('RAPORADI').AsString,10]) Then
+//      raise Exception.create('Þu anda rapor ayarlarý var. Yeniden oluþturmak istiyorsanýz rapor ayarlarýný silin.');
+
+   AyarAd := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString;
+   FList := TStringList.Create;
+   FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
+   if FList.Count = 0 then
+      FList.Assign(TabloDokum.Query1.FieldList);
+
+   GlobBandNo:=0;
+   Sayac:=1;
+   DegerAta('SAYFA', 'YAZICI', '(yazýcý ismi)',0,0,0);
+   DegerAta('SAYFA', 'BOYUT', 'A4',0,0,0);
+
+   // Yedi tane band ekleniyor
+   Sayac:=10;
+   DegerAta('BAND', 'SAYFABAÞI', '',0,0,3);
+   DegerAta('BAND', 'DETAY', 'SORGU',0,0,0.5);
+   DegerAta('BAND', 'SAYFASONU', '',0,0,2);
+
+   Sayac:=20;
+   GlobBandNo:=10;
+   SolYer:=0;
+   DegerAta('SABÝT', '', 'Dr. Ad Soyad',0,0,0);
+   For k:=0 To FList.Count-1 Do Begin
+      DegerAta('SABÝT', '', Noktasiz(FList.Strings[k]),SolYer,2,0);
+      SolYer:=SolYer+3
+   End;
+   GlobBandNo:=11;
+   Sayac:=50;
+   SolYer:=0;
+   For k:=0 To FList.Count-1 Do Begin
+      DegerAta('ALAN', 'SORGU', Noktasiz(FList.Strings[k]),Solyer,0,0);
+      SolYer:=SolYer+3
+   End;
+
+   GlobBandNo:=12;
+   Sayac:=80;
+   DegerAta('SABÝT', '', 'SABÝT',0,0,0);
+   GlobBandNo:=10;
+   DegerAta('ÇERÇEVE', '', '',0,0,0);
+   FList.Destroy;
+   AyarlarDlg.Destroy;
+End;     }
+
+procedure TDokumDlg.DokumYapisiClick(Sender: TObject);
+begin
+  if not Super then raise Exception.Create('Yetkisiz iþlem...');
+  Application.CreateForm(TDokumSartDlg, DokumSartDlg);
+//  DokumSartDlg.TabDokum.FindKey([TabDokum.FieldByName('RAPORADI').AsString]);
+  DokumSartDlg.ShowModal;
+  DokumSartDlg.Destroy;
+  DokumSartDlg := nil;
+  SartlarOlustur;
+end;
+
+procedure TDokumDlg.DateTimePickerChange(Sender: TObject);
+var
+  ad: string;
+  cb: TComboBox;
+begin
+  ad := TDateTimePicker(Sender).Name;
+  delete(ad, 1, 3);
+  cb := TComboBox(combox.FindComponent('Combo_' + ad));
+  if cb <> nil then
+    cb.Text := DateToStr(TDateTimePicker(Sender).DateTime);
+end;
+
+procedure TDokumDlg.ButonClick(Sender: TObject);
+var
+  ad: string;
+  btn: TSpeedButton;
+  i: integer;
+  j: integer;
+begin
+  btn := TSpeedButton(Sender);
+  i := strtoint(copy(btn.Name, 4, pos('_', btn.Name) - 4));
+  j := strtoint(copy(btn.Name, pos('_', btn.Name) + 1, length(btn.name)));
+  ComboNe := ScrollBox2.FindChildControl('Combo_' + inttostr(j)) as TComboBox;
+  TabloDokum.TabKosul.First;
+  TabloDokum.TabKosul.Locate('SIRANO', i, [loPartialKey, loCaseInsensitive]);
+  Application.CreateForm(TKosulDetayAra, KosulDetayAra);
+  KosulDetayAra.showmodal;
+  KosulDetayAra.destroy;
+end;
+
+procedure TDokumDlg.SartlarOlustur;
+  procedure LabelCreate(Ad, Baslik: string; LeftArtis, TopArtis: Integer);
+  begin
+    with TLabel.Create(Label55) do
+    begin
+      Name := Ad;
+      Parent := ScrollBox2;
+      Caption := Baslik;
+      Left := 16 + LeftArtis;
+      Top := 10 + TopArtis;
+      Height := 10;
+      Font.Size := 8;
+      AutoSize := True;
+    end;
+  end;
+  procedure ComboCreate(Ad, Baslik, ComboIcerik: string; LeftArtis, TopArtis: Integer);
+  begin
+    with TComboBox.Create(ComBox) do
+    begin
+      Name := Ad;
+      Parent := ScrollBox2;
+      Text := Baslik;
+      Left := 16 + LeftArtis;
+      Top := 10 + TopArtis;
+      Width := 225;
+      Height := 10;
+      Font.Size := 8;
+      OnDropDown := ComBoxDropDown;
+      if (ComboIcerik = 'bu gün') or (ComboIcerik = 'BU GÜN') or (ComboIcerik = 'bugün') or (ComboIcerik = 'BUGÜN') or (ComboIcerik = 'saat') or (ComboIcerik = 'SAAT') then
+      begin
+        ComboIcerik := StringReplace(ComboIcerik, 'bu gün', DateToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        ComboIcerik := StringReplace(ComboIcerik, 'BU GÜN', DateToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        ComboIcerik := StringReplace(ComboIcerik, 'bugün', DateToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        ComboIcerik := StringReplace(ComboIcerik, 'BUGÜN', DateToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        ComboIcerik := StringReplace(ComboIcerik, 'saat', TimeToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        ComboIcerik := StringReplace(ComboIcerik, 'SAAT', TimeToStr(GenotipIni.BugunTrh), [rfReplaceAll]);
+        if ComboIcerik <> '' then
+          if pos('{', ComboIcerik) = 0 then
+            Text := ComboIcerik;
+      end;
+    end;
+  end;
+  procedure DTPCreate(Ad, Baslik: string; LeftArtis, TopArtis: Integer);
+  var
+    d: TDateTimePicker;
+  begin
+    d := TDateTimePicker.Create(ScrollBox2);
+    with d do
+    begin
+      Name := Ad;
+      Parent := ScrollBox2;
+      Text := Baslik;
+      Left := 19 + LeftArtis;
+      Top := 10 + TopArtis;
+      Width := 21;
+      Height := 21;
+      delete(ad, 1, 3);
+      OnChange := DateTimePickerChange;
+      d.DateTime := genotipini.BugunTrh;
+    end;
+  end;
+  procedure ButonCreate(Ad, Baslik: string; LeftArtis, TopArtis: Integer);
+  var
+    d: TSpeedButton;
+  begin
+    d := TSpeedButton.Create(ScrollBox2);
+    with d do
+    begin
+      Name := Ad;
+      Parent := ScrollBox2;
+      Text := Baslik;
+      Left := 16 + LeftArtis;
+      Top := 10 + TopArtis;
+      Width := 24;
+      Height := 21;
+      Font.Size := 8;
+      delete(ad, 1, 3);
+      Caption := '...';
+      OnClick := ButonClick;
+//      d.DateTime := TarihBul;
+
+    end;
+  end;
+begin
+//  if EskiRapor = TabloDokum.TabDokum.FieldByName('RAPORADI').AsString then exit;
+  EskiRapor := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString;
+
+
+  if ScrollBox2 <> nil then
+  begin
+    ScrollBox2.Free;
+//     inherited Destroy;
+    ScrollBox2 := nil;
+//     Tut := GBox1.FindChildControl('ScrollBox2');
+//     Tut.Destroy;
+  end;
+
+  ScrollBox2 := TScrollBox.Create(ScrollBox2);
+  with ScrollBox2 do
+  begin
+    Name := 'ScrollBox2';
+    Parent := GBox1;
+    Align := alClient;
+//     Left := 64;
+//     Top := 26;
+//     Width := 633;
+//     Height := 125;
+  end;
+
+{  Tut := ScrollBox2.FindChildControl('Lab1');
+  while Tut <> nil do begin
+     Tut.Free;
+     Tut := ScrollBox2.FindChildControl('Lab2');
+  end;}
+  i := 1;
+  if not assigned(DownList) then
+    DownList := TStringList.Create;
+  DownList.Clear;
+  TabloDokum.TabKosul.First;
+  while not TabloDokum.TabKosul.eof do
+  begin
+    LabelCreate('Lab' + IntToStr(i + 1), TabloDokum.TabKosul.FieldByName('BAGLAC').AsString, 0, i * 5);
+    LabelCreate('Lab' + IntToStr(i + 2), TabloDokum.TabKosul.FieldByName('TABLO').AsString, 50, i * 5);
+    LabelCreate('Lab' + IntToStr(i + 3), TabloDokum.TabKosul.FieldByName('ALAN').AsString, 150, i * 5);
+    LabelCreate('Lab' + IntToStr(i + 4), TabloDokum.TabKosul.FieldByName('ESITLIK').AsString, 300, i * 5);
+    ComboCreate('Combo_' + IntToStr(i), TabloDokum.TabKosul.FieldByName('DEGER').AsString, TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString, 420, i * 5);
+    if TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString = '' then
+      DownList.Add(' ')
+    else
+    begin
+      DownList.Add(TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString);
+      if copy(TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString, 1, 1) = '{' then
+        ButonCreate('btn' + TabloDokum.TabKosul.fieldbyname('SIRANO').AsString + '_' + inttostr(i), TabloDokum.TabKosul.FieldByName('DEGER').AsString, 644, i * 5);
+    end;
+
+    if pos('TARIH', UpStr(TabloDokum.TabKosul.FieldByName('ALAN').AsString)) > 0 then
+      DTPCreate('dtp' + IntToStr(i), TabloDokum.TabKosul.FieldByName('DEGER').AsString, 620, i * 5);
+    Inc(i, 5);
+    TabloDokum.TabKosul.Next;
+  end; {while}
+end;
+{
+   LabelBaglac.Caption :=TabloDokum.TabKosul.FieldByName('BAGLAC').AsString;
+   LabelTablo.Caption :=TabloDokum.TabKosul.FieldByName('TABLO').AsString;
+   LabelAlan.Caption :=TabloDokum.TabKosul.FieldByName('ALAN').AsString;
+   LabelEsitlik.Caption :=TabloDokum.TabKosul.FieldByName('ESITLIK').AsString;
+   ComboDeger.Text :=TabloDokum.TabKosul.FieldByName('DEGER').AsString;
+}
+
+procedure TDokumDlg.ComBoxDropDown(Sender: TObject);
+  procedure ComboYukle(Tablo, Alan, Benzer: string; Sorgu: string);
+  begin
+    TComboBox(Sender).Clear;
+    TabloDokum.Query2.Close;
+    if sorgu <> '' then
+      TabloDokum.Query2.SQL.Text := sorgu
+    else
+      TabloDokum.Query2.SQL.Text := 'Select ' + Alan + ' From ' + Tablo + ' where ' + Alan + ' like ''' + Benzer + '%'' order by ' + Alan;
+    TabloDokum.Query2.Open;
+    while not TabloDokum.Query2.eof do
+    begin
+      TComboBox(Sender).Items.Add(TabloDokum.Query2.Fields[0].AsString);
+      TabloDokum.Query2.next;
+    end;
+  end;
+
+  procedure DoktorListeleme;
+  var x: word;
+  begin
+    DoktorDlg.DBNavigator.VisibleButtons := [];
+    DoktorDlg.AramaKod.Text := '';
+    DoktorDlg.AramaAd.Text := TComboBox(Sender).Text;
+    DoktorDlg.AramaUz.Text := '';
+    DoktorDlg.TabDoktor.Close;
+    DoktorDlg.TabDoktor.LockType := ltReadOnly;
+    DoktorDlg.AramaAdKeyUp(Self, x, []);
+    DoktorDlg.ShowModal;
+    if DoktorDlg.ModalResult = mrOK then
+      TComboBox(Sender).Text := Trim(DoktorDlg.TabDoktor.Fields[1].AsString);
+    DoktorDlg.TabDoktor.Close;
+    DoktorDlg.TabDoktor.LockType := ltOptimistic;
+  end;
+var
+  SQLSt: string;
+begin
+  i := StrToInt(Copy(TComboBox(Sender).Name, 7, length(TComboBox(Sender).Name)));
+  j := 1;
+  TabloDokum.TabKosul.First;
+  while j < i do
+  begin
+    TabloDokum.TabKosul.Next;
+    inc(j, 5);
+  end;
+  if TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString <> '' then
+  begin
+    if Copy(TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString, 1, 1) = '{' then
+      SQLSt := Copy(TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString, pos('}', TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString) + 1, length(TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString))
+    else
+      SQLSt := TabloDokum.TabKosul.FieldByName('COMBOICERIK').AsString;
+    try
+      ComboYukle('', '', '', SQLSt);
+    except
+    end;
+    exit;
+  end;
+
+  if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'POLIKLINIK' then
+    ComboYukle('POLIKLNK', 'AD', '', '')
+  else if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'DOKTOR' then
+    ComboYukle('DOKTOR', 'DOKTOR', '', '')
+  else if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'DOKTORLAR' then
+  begin
+//      ComboYukle('DOKTORLAR', 'DOKTOR','')
+    DoktorListeleme;
+    Repaint;
+  end
+  else if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'REFERANS' then
+    ComboYukle('REFERANS', 'REFERANS', '', '')
+  else if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'KURUM' then
+    ComboYukle('KURUM', 'KURUM', '', '')
+  else if pos('TARIH', TabloDokum.TabKosul.FieldByName('ALAN').AsString) > 0 then
+  begin
+    TComboBox(Sender).Items.Clear;
+    TComboBox(Sender).Items.Add(DateTimeToStr(Date))
+  end
+  else if TabloDokum.TabKosul.FieldByName('ALAN').AsString = 'ISLEMADI' then
+    ComboYukle('ISLEMLER', 'ISLEMADI', TComboBox(Sender).Text, '')
+  else
+    TabloDokum.Ini.ReadSection(TabloDokum.TabKosul.FieldByName('ALAN').AsString, TComboBox(Sender).Items);
+end;
+
+procedure TDokumDlg.YeniRapor1Click(Sender: TObject);
+begin
+  TabloDokum.TabDokum.Insert;
+end;
+
+procedure TDokumDlg.RaporuKaydet1Click(Sender: TObject);
+begin
+  TabloDokum.TabDokum.Post;
+end;
+
+procedure TDokumDlg.EtiketAyarlar1Click(Sender: TObject);
+begin
+  Application.CreateForm(TEtiketAlanDlg, EtiketAlanDlg);
+  EtiketAlanDlg.ShowModal;
+  EtiketAlanDlg.Destroy;
+end;
+
+procedure TDokumDlg.GenelDokumler_EkranYazici(Sender: TObject);
+var AyarTablo, Baslik: string[20];
+begin
+  if not TabloDokum.Query1.Active then
+    raise Exception.Create('Önce sonuçlarý listeleyiniz');
+
+  if DBTable.SortedItemCount > 0 then
+     Siralandir;
+
+//   BakiyeToplam := 0; BakiyeTutar := 0;
+  TabloDokum.RaporTabloSec(RapTablo.Kosullar, DtsDokumler, 'RAPORADI');
+
+  Baslik := AnaForm.EkranYaz.Caption;
+  Delete(Baslik, Pos('&', Baslik), 1);
+  if (TabloDokum.TabDokum.FieldByName('DOKUMTIPI').AsString = 'E') or (Baslik = 'Etiket') then
+    AyarTablo := 'Etiket_'
+  else
+    AyarTablo := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString;
+
+  GlobalQuery := TabloDokum.Query1;
+  if TToolButton(Sender).Name = 'EkranYaz' then
+    RapSyf.DokumYap(0, AyarTablo)
+  else
+    RapSyf.DokumYap(1, AyarTablo);
+  RapTablo.Kosullar.Close;
+
+end;
+
+procedure TDokumDlg.Label1DblClick(Sender: TObject);
+begin
+  TabloDokum.TabDokum.Edit;
+  TabloDokum.TabDokum.FieldByName('SQL').Assign(Komut);
+  TabloDokum.TabDokum.Post;
+end;
+
+{procedure TDokumDlg.RaporEkle1Click(Sender: TObject);
+var Yol, Secilen : String;
+   procedure DeleteQuery(TabloAdi, Deger : String);
+   begin
+     Tablo.Query2.SQL.Text := 'Delete From '+TabloAdi+' Where RAPORADI  = '''+Deger+'''';
+     Tablo.Query2.ExecSQL;
+   end;
+
+begin
+   GetDir(0, str);
+   OpenDialog1.InitialDir := str;
+   if OpenDialog1.Execute then begin
+      if RevPos('\',(OpenDialog1.FileName))>0 then
+         Yol := copy(OpenDialog1.FileName,1,RevPos('\', (OpenDialog1.FileName)));
+
+      TabloDokum.Query1.Close;
+      TabloDokum.Query1.DatabaseName := Yol;
+      TabloDokum.Query1.SQL.Text := 'Select distinct RAPORADI from  DOKUMLER';// ''' + Yol+'Dokumler' +'''');
+      TabloDokum.Query1.Open;
+
+      TabloDokum.Query1.first;
+      Application.CreateForm(TListeDlg, ListeDlg);
+      while not TabloDokum.Query1.eof do begin
+        ListeDlg.ListAmac.Items.Add(TabloDokum.Query1.FieldByName('RAPORADI').AsString);
+        TabloDokum.Query1.Next;
+      end;
+      ListeDlg.ShowModal;
+      If ListeDlg.ModalResult = idOK then
+         Secilen := ListeDlg.ListAmac.Items[ListeDlg.ListAmac.ItemIndex]
+      else
+         Secilen := '';
+      ListeDlg.Destroy;
+      if Secilen = '' then begin
+         TabloDokum.Query1.Close;
+         TabloDokum.Query1.DatabaseName := 'GENOTIP';
+         exit;
+      end;
+
+      RapTablo.Kosullar.Open;
+      RapTablo.Ayarlar.Open;
+      TabloDokum.TabDokum2.SQL.Text := 'Select * From DOKUMLER Where RAPORADI = '''+Secilen+'''';
+      TabloDokum.TabDokum2.Open;
+      if TabloDokum.TabDokum2.RecordCount >0 then
+         if MessageDlg('Dökümlerde ayný adla rapor bulundu. Üzerine kaydedilsin mi?',
+                   mtConfirmation, [mbYes,mbNo], 0) <> mrYES then exit
+         else begin
+            DeleteQuery('Dokumler', Secilen);
+            DeleteQuery('Ayarlar',  Secilen);
+            DeleteQuery('Kosullar', Secilen);
+         end;
+      TabloDokum.SQLRaporEkle(TabloDokum.TabDokum2, 'DOKUMLER', Secilen);
+      TabloDokum.SQLRaporEkle(RapTablo.Kosullar, 'KOSULLAR', Secilen);
+      TabloDokum.SQLRaporEkle(RapTablo.Ayarlar, 'AYARLAR', Secilen);
+      TabloDokum.Query1.Close;
+      TabloDokum.Query1.DatabaseName := 'GENOTIP';
+      TabloDokum.TabDokum.Close;
+      TabloDokum.TabDokum.Open;
+//      TabloDokum.TabDokum.FindKey([Secilen]);
+//      SartlarOlustur;
+      TabloDokum.MenuIslemleri(AnaForm.GenelDokumler, TabloDokum.GenelRaporSecClick, 'Ekle', Secilen, '',-1);
+      ShowMessage(Secilen+' Raporu Eklendi..');
+   end;
+end; }
+
+procedure TDokumDlg.DBGrid1DblClick(Sender: TObject);
+begin
+  if not DosyanoVar then exit;
+  if Tablo.TabKimlik.State in [dsEdit, dsInsert] then
+    Tablo.TabKimlik.Cancel;
+  Tablo.TabKimlik.Close;
+//  Tablo.TabKimlik.Parameters[0].Value := TabloDokum.Query1.FieldByName('DOSYANO').AsString;
+  Tablo.TabKimlik.SQL.Text := 'select * from KIMLIK where DOSYANO='''+TabloDokum.Query1.FieldByName('DOSYANO').AsString+'''';
+  Tablo.TabKimlik.Open;
+  if (anaform.findcomponent('GelislerTus')) <> nil then
+  begin
+    if TabloDokum.Query1.FindField('GELISNO') <> nil then
+    begin
+      (anaform.findcomponent('GelislerTus') as TButton).Tag := TabloDokum.Query1.FieldByName('GELISNO').AsInteger;
+      (anaform.findcomponent('GelislerTus') as TButton).Click;
+      if (tablo.findcomponent('TabGelisler')) <> nil then
+        (tablo.findcomponent('TabGelisler') as TAdoQuery).Locate('GELISNO', TabloDokum.Query1.FieldByName('GELISNO').AsString, []);
+    end
+    else
+      AnaForm.KimlikTus.Click;
+  end;
+end;
+
+procedure TDokumDlg.DosyayaYazdr1Click(Sender: TObject);
+var
+  F: Textfile;
+  DisNo, Ekle: integer;
+  fmt, st, ss: string;
+begin
+  TabloDokum.SaveDialog1.Title := 'Kaydedilecek Dosya Adý';
+  if TabloDokum.SaveDialog1.Execute then
+  begin
+    AssignFile(F, TabloDokum.SaveDialog1.FileName);
+    if FileExists(TabloDokum.SaveDialog1.FileName) then
+      if MessageDlg(OpenDialog1.FileName + ' adlý dosya zaten var. Üzerine yazýlsýn mý?',
+        mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+        exit;
+    try
+      Rewrite(F);
+    except
+      on EInOutError do
+        MessageDlg('Dosya oluþturmada hata var!!!', mtError, [mbOk], 0);
+    end;
+
+    TabloDokum.Query1.first;
+    while not TabloDokum.Query1.eof do
+    begin
+      str := '';
+      for i := 0 to TabloDokum.Query1.FieldCount - 1 do
+      begin
+        fmt := TabloDokum.Ini.ReadString(TabloDokum.TabDokum.FieldByName('RAPORADI').AsString, TabloDokum.Query1.Fields[i].FieldName, '%-,');
+        fmt := copy(fmt, 1, pos(',', fmt) - 1);
+        st := '';
+
+        if Fmt[Length(Fmt)] = 't' then
+          St := FormatDateTime('ddmmyyyy', TabloDokum.Query1.Fields[i].AsDateTime)
+        else if Fmt[Length(Fmt)] = 'd' then
+          st := Format(fmt, [TabloDokum.Query1.Fields[i].AsInteger])
+        else if Fmt[Length(Fmt)] = 'c' then
+        begin
+          st := TabloDokum.Query1.Fields[i].AsString;
+          while pos('.', st) > 0 do
+            delete(st, pos('.', st), 1);
+          while pos(' ', st) > 0 do
+            delete(st, pos(' ', st), 1);
+        end
+        else if Fmt[Length(Fmt)] = 'þ' then
+        begin
+          ss := copy(TabloDokum.Query1.Fields[i].AsString, 1, 7);
+          DisNo := StrToInt(copy(TabloDokum.Query1.Fields[i].AsString, 9, 1));
+          if (ss = 'SAÐ ÜST') or (ss = 'Sað Üst') then
+            Ekle := 0
+          else if (ss = 'SOL ÜST') or (ss = 'Sol Üst') then
+            Ekle := 8
+          else if (ss = 'SAÐ ALT') or (ss = 'Sað Alt') then
+            Ekle := 16
+          else if (ss = 'SOL ALT') or (ss = 'Sol Alt') then
+            Ekle := 24;
+          st := '';
+          for j := 0 to Ekle + disno do
+            st := st + ' ';
+          st := st + copy(TabloDokum.Query1.Fields[i].AsString, 11, 1);
+          for j := Ekle + disno to 32 do
+            st := st + ' '
+        end
+        else if Fmt[Length(Fmt)] = 'ö' then
+        begin
+          st := TabloDokum.Query1.Fields[i].AsString;
+          if st = '0' then
+            st := '<'
+          else
+            St := St + '-';
+
+          if TabloDokum.Query1.Fields[i + 1].AsString = '0' then
+            st := st + '>'
+          else
+            st := st + TabloDokum.Query1.Fields[i + 1].AsString;
+
+          if st = '-' then
+            st := TabloDokum.Query1.Fields[i + 2].AsString;
+          Ekle := length(St);
+          for j := Ekle to 10 do
+            st := st + ' ';
+          St := Copy(St, 1, 10);
+        end
+        else if Fmt[Length(Fmt)] = 'ç' then
+        begin
+          if (TabloDokum.Query1.Fields[i].AsString = '0') or
+            (TabloDokum.Query1.Fields[i].AsString = ' ') then
+            st := Format('%-10s', [TabloDokum.Query1.Fields[i + 1].AsString])
+          else
+            st := Format('%-10s', [TabloDokum.Query1.Fields[i].AsString]);
+          St := Copy(St, 1, 10);
+        end
+        else if Fmt[Length(Fmt)] = 's' then
+          st := Format(fmt, [TabloDokum.Query1.Fields[i].AsString]);
+        str := str + st;
+//          end else
+//             s := s + TabloDokum.Query1.Fields[i].AsString;
+      end;
+      Writeln(F, str);
+      TabloDokum.Query1.next;
+    end;
+    CloseFile(F);
+    ShowMessage('Dosyaya yazma iþlemi sona erdi...');
+  end;
+end;
+
+procedure TDokumDlg.DosyaAyarlar1Click(Sender: TObject);
+begin
+  GridIniDuzenle(TabloDokum.TabDokum.FieldByName('RAPORADI').AsString, TabloDokum.Ini, 4, '', 1);
+end;
+
+
+procedure TDokumDlg.ExceleYazdir(Table1: TADOQuery; Grid1: TDBGrid);
+var v, wb, sheet: variant;
+begin
+  str := '';
+  MesajStrAl('', 'Excel Dosya Adýný Dizinli Giriniz :', 'E', nil, str, '', 'E', nil, str);
+  if str = '' then exit;
+
+  v := CreateOleObject('Excel.Application');
+  wb := v.WorkBooks.Add();
+//   v.visible := True;
+//   v.WorkBooks.Open(s+'.xls',0,False);
+  sheet := v.WorkBooks[1].WorkSheets[1];
+
+//   for j := 0 to Table1.Fields.Count -1 do
+//      Sheet.Cells[1, j+1] := Table1.Fields[j].FieldName;
+  kol := 0;
+  for i := 0 to Grid1.Columns.Count - 1 do
+    if Grid1.Columns[i].Visible then
+    begin
+      inc(kol);
+      Sheet.Cells[1, kol] := Grid1.Columns[i].FieldName;
+    end;
+
+  Table1.first; i := 1;
+  while not Table1.eof do
+  begin
+    inc(i); kol := 0;
+    for j := 0 to Grid1.Columns.Count - 1 do
+      if Grid1.Columns[j].Visible then
+      begin
+        inc(kol);
+        Sheet.Cells[i, kol] := Table1.FieldByName(Grid1.Columns[j].FieldName).AsString;
+      end;
+    Table1.next;
+  end;
+//   V.DisplayAlerts := False;
+  wb.SaveAs(str);
+  v.Quit;
+  Showmessage('Excele aktarýldý..');
+end;
+
+procedure TDokumDlg.WordDosyasnaYazdr1Click(Sender: TObject);
+var v, oDoc, oTable: variant;
+begin
+  str := '';
+  MesajStrAl('', 'Word Dosya Adýný Dizinli Giriniz :', 'E', nil, str, '', 'E', nil, str);
+  if str = '' then exit;
+
+  v := CreateOleObject('Word.Application');
+  oDoc := v.Documents.Add();
+  v.visible := True;
+
+  oDoc.Content.Font.Name := 'Arial';
+  oDoc.Content.Font.Size := 16;
+
+  oDoc.Content.InsertAfter(' the end.');
+  oTable := oDoc.Tables.Add(Range := oDoc.Range(Start := 0, end := 0), NumRows := 3, NumColumns := 4);
+i := 1;
+for i := 1 to 3 do
+  oTable.Cell(i, 1).Range.InsertAfter(IntToStr(i));
+//   oCell.Range.InsertAfter ''Cell '' & iCount
+//       iCount = iCount + 1
+//   v.InsertAfter(s);
+//   oDoc.TextToTable(ConvertFrom := 2, NumColumns := 3);
+
+ {       MsWord.AppShow;
+        MSWord.FileNew;
+        MSWord.Insert(S);
+        MSWord.LineUp(L, 1);
+        MSWord.TextToTable(ConvertFrom := 2, NumColumns := 3);
+}
+{   For Each oCell In oTable.Range.Cells
+   Next oCell}
+//   oTable.AutoFormat.Format:=wdTableFormatColorful2, _
+//   ApplyBorders:=True, ApplyFont:=True, ApplyColor:=True
+
+//   wb.printout();
+{   sheet:=v.WorkBooks[1].WorkSheets['Sayfa1'];
+
+   for j := 0 to TabloDokum.Query1.Fields.Count -1 do
+      Sheet.Cells[1, j+1] := TabloDokum.Query1.Fields[j].FieldName;
+
+   TabloDokum.Query1.first; i := 1;
+   while not TabloDokum.Query1.eof do begin
+     inc(i);
+     for j := 0 to TabloDokum.Query1.Fields.Count -1 do
+         Sheet.Cells[i, j+1] := TabloDokum.Query1.Fields[j].AsString;
+     TabloDokum.Query1.next;
+   end;}
+oDoc.SaveAs(str);
+v.Quit;
+end;
+
+procedure TDokumDlg.EtiketSayfaAyarlar1Click(Sender: TObject);
+begin
+  Application.CreateForm(TEtiket, Etiket);
+  Etiket.ShowModal;
+  Etiket.Destroy;
+end;
+
+procedure TDokumDlg.ModullerClick(Sender: TObject);
+begin
+  St := TabloDokum.TabDokum.FieldByName('MODUL').AsString;
+  K.Checked := Pos('K', St) > 0;
+  M.Checked := Pos('M', St) > 0;
+  L.Checked := Pos('L', St) > 0;
+  R.Checked := Pos('R', St) > 0;
+  G.Checked := Pos('G', St) > 0;
+  E.Checked := Pos('E', St) > 0;
+  S.Checked := Pos('S', St) > 0;
+end;
+
+procedure TDokumDlg.KClick(Sender: TObject);
+begin
+  if TMenuItem(Sender).Name = TabloDokum.Modul then Exit;
+  TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
+  St := TabloDokum.TabDokum.FieldByName('MODUL').AsString;
+  if TMenuItem(Sender).Checked then
+    St := St + TMenuItem(Sender).Name
+  else
+    Delete(St, Pos(TMenuItem(Sender).Name, St), 1);
+  TabloDokum.TabDokum.Edit;
+  TabloDokum.TabDokum.FieldByName('MODUL').AsString := St;
+  TabloDokum.TabDokum.Post;
+end;
+
+
+procedure TDokumDlg.DtsDokumlerDataChange(Sender: TObject; Field: TField);
+begin
+  TabloDokum.TabKosul.Close;
+  TabloDokum.TabKosul.Parameters[0].Value := TabloDokum.TabDokum.Fields[0].AsString;
+  TabloDokum.TabKosul.Open;
+  DokumDlg.SartlarOlustur;
+end;
+
+procedure TDokumDlg.HerkesteGrnsn1Click(Sender: TObject);
+begin
+  if Application.MessageBox('Tüm kullanýcýlar bu raporu görecektir. Onaylýyor musunuz?', 'O N A Y', mb_YESNO) <> IDYES then exit;
+  TabloDokum.Query1.Close;
+  TabloDokum.Query1.SQL.Text := 'Delete from KULHAR Where EKRAN = ''' + TabloDokum.TabDokum.FieldByName('RAPORADI').AsString + '''';
+  TabloDokum.Query1.ExecSQL;
+end;
+
+procedure TDokumDlg.KimsedeGrnmesin1Click(Sender: TObject);
+begin
+  if Application.MessageBox('Tüm kullanýcýlar bu raporu göremeyecektir. Onaylýyor musunuz?', 'O N A Y', mb_YESNO) <> IDYES then exit;
+  TabloDokum.Query1.Close;
+  TabloDokum.Query1.SQL.Text := 'Delete from KULHAR Where EKRAN = ''' + TabloDokum.TabDokum.FieldByName('RAPORADI').AsString + '''';
+  TabloDokum.Query1.ExecSQL;
+  TabloDokum.Query1.Close;
+  TabloDokum.Query1.SQL.Text := 'Select KULLANICIADI From KULLAN';
+  TabloDokum.Query1.Open;
+  while not TabloDokum.Query1.eof do
+  begin
+    if KullanAdi <> TabloDokum.Query1.Fields[0].AsString then
+    begin
+      TabloDokum.Query2.Close;
+      TabloDokum.Query2.SQL.Text := 'Insert Into KULHAR (KULLANICIADI, EKRAN, GORME, EKLEME, DEGISTIRME, SILME, BILGI)Values(''' +
+        TabloDokum.Query1.Fields[0].AsString + ''',''' + TabloDokum.TabDokum.Fields[0].AsString + ''',''0'',''0'',''0'',''0'','''')';
+      TabloDokum.Query2.ExecSQL;
+    end;
+    TabloDokum.Query1.next;
+  end;
+end;
+
+procedure TDokumDlg.DokumuKaydet(DokumAdi: string);
+var
+  F: Textfile;
+begin
+  TabloDokum.SaveDialog1.Title := 'Kaydetme';
+  TabloDokum.SaveDialog1.DefaultExt := 'sql';
+
+  if Screen.ActiveForm.Name = 'DokumDlg' then
+    DokumAdi := TabloDokum.TabDokum.Fields[0].AsString;
+
+  TabloDokum.SaveDialog1.FileName := DokumAdi + '.sql';
+
+  if Screen.ActiveForm.Name <> 'DokumDlg' then
+    DokumAdi := DokumAdi + '_';
+
+  if TabloDokum.SaveDialog1.Execute then
+  begin
+    TabloDokum.QueryRapor.Close;
+    TabloDokum.QueryRapor.SQL.Text := StringReplace(TabloDokum.Komut.SQL.Text, 'Ýþlem Sayý', DokumAdi, [rfReplaceAll]);
+    TabloDokum.QueryRapor.Open;
+    AssignFile(F, TabloDokum.SaveDialog1.FileName);
+    try
+      Rewrite(F);
+//      if MessageDlg('Kaydetme ' + OpenDialog1.FileName + '?',
+//        mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      begin
+        while not TabloDokum.QueryRapor.eof do
+        begin
+          writeln(F, TabloDokum.QueryRapor.Fields[0].AsString);
+          TabloDokum.QueryRapor.next;
+        end;
+        CloseFile(F);
+      end;
+      ShowMessage('Kaydedildi..');
+    except
+      on EInOutError do
+
+        MessageDlg('File I/O error.', mtError, [mbOk], 0);
+    end;
+  end;
+end;
+
+procedure TDokumDlg.RaporKaydet1Click(Sender: TObject);
+begin
+  DokumuKaydet(TabloDokum.TabDokum.FieldByName('RAPORADI').AsString);
+end;
+
+procedure TDokumDlg.DokumuAl(DokumAdi: string);
+var str: string;
+  Memo1: TMemo;
+
+begin
+  GetDir(0, str);
+  TabloDokum.OpenDialog1.InitialDir := str;
+  TabloDokum.OpenDialog1.Title := 'Rapor Alma/Ekleme';
+  if TabloDokum.OpenDialog1.Execute then
+  begin
+
+
+{    Memo1 := TMemo.Create(Anaform);
+    with Memo1 do begin
+      Name := 'Memo1';
+      Parent := Anaform;
+      WordWrap:=False;
+    end;        }
+
+//    Memo1.Lines.LoadFromFile(TabloDokum.OpenDialog1.FileName);
+      //Tablo.Query1.SQL.Text := Memo1.Lines.Text;
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.LoadFromFile(TabloDokum.OpenDialog1.FileName);
+//      Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, #0,' ' ,[rfReplaceAll]);
+  //  Memo1.Free;
+    Tablo.Query1.ExecSQL;
+  end;
+end;
+
+procedure TDokumDlg.RaporEkle2Click(Sender: TObject);
+var DokumAdi: string;
+begin
+  DokumuAl(DokumAdi);
+//   if  EkranYaz.Style = tbsButton then
+  TabloDokum.PopUpMenuIslemleri(TabloDokum.PopupListe, TabloDokum.RaporSecClick, 'Ekle', DokumAdi, '');
+  TabloDokum.PopUpMenuIslemleri(TabloDokum.PopupListe, TabloDokum.RaporSecClick, 'Ekle', DokumAdi, '');
+  TabloDokum.IniAyarla(DokumAdi, 'Ekle');
+  TabloDokum.EkranYaziciInit(TabloDokum.EkranYaz, TabloDokum.YaziciYaz);
+
+  Application.MessageBox('Ýþlem Tamamlandý !!!', 'Bilgi !!!', 64);
+end;
+
+procedure TDokumDlg.TopluFaturaEkle(Kime, Baslik: string);
+var Tutar: string;
+  i: smallint;
+  Eklenebilir: Boolean;
+  ss: array[0..200] of char;
+  Lotno: string;
+  function LotNoAl: string;
+  var MesajOkunan: string;
+  begin
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'Select Max(cast(LOTNO as Integer)) from FATBASLIK where isnumeric(LOTNO)=1';
+    Tablo.Query1.Open;
+    MesajOkunan := IntToStr(Tablo.Query1.Fields[0].AsInteger + 1);
+
+    if not MesajStrAl('', 'Lot No Giriniz :', 'E', nil, MesajOkunan, '', 'E', nil, MesajOkunan) then
+      exit;
+    if MesajOkunan = '' then
+      LotNoAl := '0'
+    else
+      LotNoAl := MesajOkunan;
+  end;
+begin
+  Lotno := LotNoAl;
+  Tablo.Query5.Close;
+  Tablo.Query5.SQL.Text := 'Select DOSYANO, GELISNO, isnull(SUM(TUTAR),0) AS TUTAR from( ';
+  for i := 0 to Komut.Count - 1 do
+    if (Komut.Strings[i] <> '') and (pos('ORDER', uppercase(Komut.Strings[i])) = 0) then
+      Tablo.Query5.SQL.Add(Komut.Strings[i]);
+  Tablo.Query5.SQL.Add(')AS PARA ');
+  Tablo.Query5.SQL.Add('GROUP BY DOSYANO, GELISNO');
+  Tablo.Query5.SQL.Add('ORDER BY DOSYANO, GELISNO');
+  Tablo.Query5.Open;
+
+
+  while not Tablo.Query5.eof do
+  begin
+    Tablo.Query3.Close;
+    Tablo.Query3.SQL.Text := 'Select Isnull(Max(KARTNO),0)+1 from FATBASLIK ' +
+      ' where DOSYANO = ''' + Tablo.Query5.FieldByName('DOSYANO').AsString + '''' +
+      '   and GELISNO = ' + Tablo.Query5.FieldByName('GELISNO').AsString;
+    Tablo.Query3.Open;
+
+    Eklenebilir := True;
+
+    if Tablo.Query3.Fields[0].AsInteger > 1 then
+    begin //daha önce fatura kesilmiþ mi bakalýmmmm
+      Tablo.Query4.Close;
+      Tablo.Query4.SQL.Text := 'Select FATBASLIK.DOSYANO,KARTNO, AD,SOYAD,FATURATARIH, FATURA_TUTARI from FATBASLIK,KIMLIK ' +
+        ' where FATBASLIK.DOSYANO=KIMLIK.DOSYANO and FATBASLIK.DOSYANO = ''' + Tablo.Query5.FieldByName('DOSYANO').AsString + '''' +
+        ' and GELISNO = ' + Tablo.Query5.FieldByName('GELISNO').AsString +
+        ' and KIME=''' + Kime + ''' ORDER BY KARTNO DESC';
+      Tablo.Query4.Open;
+
+      if Tablo.Query4.RecordCount > 0 then
+        StrPCopy(ss, 'Hasta:' + Tablo.Query4.FieldByName('AD').AsString + ' ' +
+          Tablo.Query4.FieldByName('SOYAD').AsString + #13#10' Fat Tarih:' +
+          copy(Tablo.Query4.FieldByName('FATURATARIH').AsString, 1, 10) + #13#10 +
+          ' Fat.Tutarý:' + Format('%-10m', [Tablo.Query4.FieldByName('FATURA_TUTARI').AsCurrency]) +
+          #13#10 + ' Eklenecek Tutar:' + Format('%-10m', [Tablo.Query5.FieldByName('TUTAR').AsCurrency]));
+
+      if Application.MessageBox(ss,
+        'Dikkat eklenmiþ fatura. Bunu da eklesin mi?',
+        mb_YESNO) <> IDYES then Eklenebilir := False;
+    end;
+
+    if Eklenebilir then
+    begin
+         ///Hastaya fatura baþlýðý
+
+      Tablo.Query1.Close;
+      Tablo.Query1.SQL.Text := 'Insert Into FATBASLIK (DOSYANO, GELISNO, KARTNO,BELGE,KIME,FATURATARIH,FATURANO,BASLIK,' +
+        ' KDVDURUM,LOTNO,KATKIYUZDE,FATURA_TUTARI,KULLANICI) values(''' + Tablo.Query5.FieldByName('DOSYANO').AsString +
+        ''',' + Tablo.Query5.FieldByName('GELISNO').AsString + ',' + Tablo.Query3.Fields[0].AsString + ',''FATURA'',''' +
+        'Sanal'',''' + FormatDateTime('MM/DD/YYYY 00:00:00', StrToDateTime(FatTar)) + ''',''' + FatNo + ''',''' + Kime +
+        ''',''Hariç'',' + Lotno + ',100,' + Tablo.Query5.FieldByName('TUTAR').AsString + ',''' + Kullanan + ''')';
+      Tablo.Query1.ExecSQL;
+
+      Tablo.Query1.Close;
+      Tablo.Query1.SQL.Text := 'update GELISLER set FATURATARIH=''' + FormatDateTime('MM/DD/YYYY 00:00:00',
+        StrToDateTime(FatTar)) + ''', FATURANO=''' + FatNo + ''' where DOSYANO=''' +
+        Tablo.Query5.FieldByName('DOSYANO').AsString + ''' and GELISNO=' + Tablo.Query5.FieldByName('GELISNO').AsString;
+      Tablo.Query1.ExecSQL;
+    end;
+    Tablo.Query5.next;
+  end;
+  showmessage('Ýþlem tamamlandý..');
+end;
+
+
+procedure TDokumDlg.KurumaveHastalaraFaturayptalEt1Click(Sender: TObject);
+begin
+  FatTar := DateTimeToStr(genotipini.BugunTrh); FatNo := '';
+  if not MesajStrAl('', 'Fatura Tarihini Giriniz :', 'D', nil, FatTar, 'Fatura No Giriniz :', 'E', nil, FatNo) then exit;
+  if Trim(FatNo) = '' then
+    raise Exception.Create('Fatura No boþ geçilemez..');
+
+
+  Tablo.Query4.Close;
+  Tablo.Query4.SQL.Text := 'Delete from FATURA  where FATURA.DOSYANO IN (select FB.DOSYANO from FATBASLIK FB where ' +
+    ' FB.DOSYANO=FATURA.DOSYANO and FB.GELISNO=FATURA.GELISNO and FB.KARTNO=FATURA.KARTNO and ' +
+    ' FB.FATURATARIH=''' + FormatDateTime('MM/DD/YYYY 00:00:00', StrToDateTime(FatTar)) + ''' and' +
+    ' FB.FATURANO=''' + FatNo + ''')';
+  Tablo.Query4.ExecSQL;
+  Tablo.Query4.Close;
+  Tablo.Query4.SQL.Text := 'Delete from FATBASLIK where FATURATARIH=''' + FormatDateTime('MM/DD/YYYY 00:00:00', StrToDateTime(FatTar)) + '''' +
+    ' and FATURANO=''' + FatNo + '''';
+  Tablo.Query4.ExecSQL;
+end;
+{
+procedure TDokumDlg.DBGrid1TitleClick(Column: TColumn);
+begin
+  if TabloDokum.Query1.findfield(Column.FieldName).fieldKind=fkCalculated then begin
+     ShowMessage('Hesaplamalý alan Sýralanamaz');
+     Exit;
+  end;
+
+  if LastOrderField=IntToStr(Column.Index+1) then begin
+     OrderDesc:=not OrderDesc;
+     if OrderDesc then
+       OrderField:=LastOrderField+' DESC'
+     else
+       OrderField:=LastOrderField+' ASC';
+  end else begin
+     OrderDesc:=FALSE;
+     LastOrderField:=IntToStr(Column.Index+1);
+     OrderField:=LastOrderField+' ASC';
+  end;
+
+  DokumIslemi;
+end;
+}
+
+procedure TDokumDlg.Siralandir;
+begin
+{   if DBGrid1.SortedColumn <> nil then begin
+      if  DBGrid1.SortedColumn.Sorted = csUp   then begin
+          Siralama := DBGrid1.SortedColumn.FieldName;     //TabFatTakipADSOYAD
+          SiraYonu := ' ASC'
+      end  else if   DBGrid1.SortedColumn.Sorted = csDown   then begin
+          Siralama := DBGrid1.SortedColumn.FieldName;
+          SiraYonu := ' desc';
+       end;
+   end;}
+//  LbToplamSayi.Caption := inttostr(DBTable.SortedItemCount);
+  if DBTable.SortedItemCount > 0 then
+  begin
+    Siralama := DBTable.SortedItems[0].Caption;
+    if DBTable.SortedItems[0].SortOrder = soAscending then
+      SiraYonu := ' ASC'
+    else
+      SiraYonu := ' DESC';
+  end;
+  DokumIslemi;
+end;
+
+procedure TDokumDlg.DokumIslemi;
+var Kosullar: array[1..10] of string[50];
+  Yeri: integer;
+  s: string;
+begin
+  Komut.Clear;
+  KosullariKaydet;
+//  TabloDokum.TabDokum.Refresh;
+//  DokumSartDlg.TabDokum.FindKey([TabDokum.FieldByName('RAPORADI').AsString]);
+  if TabloDokum.TabDokum.FieldByName('SQL').AsString <> '' then
+  begin
+    i := 0; //Koþullarý Diziye Al
+    TabloDokum.TabKosul.First;
+    while not TabloDokum.TabKosul.eof do
+    begin
+      inc(i);
+      if pos('TARIH', TabloDokum.TabKosul.FieldByName('ALAN').AsString) > 0 then
+      begin
+        if pos(':', TabloDokum.TabKosul.FieldByName('DEGER').AsString) > 0 then
+          Kosullar[i] := FormatDateTime('mm/dd/yyyy hh:nn', TabloDokum.TabKosul.FieldByName('DEGER').AsDateTime)
+        else
+          Kosullar[i] := FormatDateTime('mm/dd/yyyy', TabloDokum.TabKosul.FieldByName('DEGER').AsDateTime)
+      end
+      else
+        Kosullar[i] := TabloDokum.TabKosul.FieldByName('DEGER').AsString;
+      TabloDokum.TabKosul.next;
+    end;
+
+    Komut.Assign(TabloDokum.TabDokum.FieldByName('SQL'));
+    TabloDokum.Query1.Close;
+    TabloDokum.Query1.SQL.Clear;
+    Komut.Text := StringReplace(komut.Text, ':KAKOD', Kullanan, [rfReplaceAll]);
+    Komut.Text := StringReplace(komut.Text, ':KA', KullanAdi, [rfReplaceAll]);
+    Komut.Text := StringReplace(komut.Text, ':SIRKETID', inttostr(SirketKodu), [rfReplaceAll]);
+    TABLO.TabAraSQL.Close;
+    TABLO.TabAraSQL.SQL.Text := 'Select * from KULLAN where KULLANICI=''' + Kullanan + ''';';
+    TABLO.TabAraSQL.Open;
+    Komut.Text := StringReplace(komut.Text, ':KULLANICIADI', '''' + TABLO.TabAraSQL.fieldbyname('KULLANICIADI').AsString + '''', [rfReplaceAll]);
+    Komut.Text := StringReplace(komut.Text, ':UZMANLIK', '''' + TABLO.TabAraSQL.fieldbyname('UZMANLIK').AsString + '''', [rfReplaceAll]);
+    for i := 0 to Komut.Count - 1 do
+    begin
+      while Pos('KOSUL', Komut.Strings[i]) > 0 do
+      begin
+        Yeri := Pos('KOSUL', Komut.Strings[i]) - 1;
+        s := copy(Komut.Strings[i], 1, Yeri);
+        s := s + Kosullar[StrToInt(copy(Komut.Strings[i], Yeri + 6, 1))];
+        s := s + Copy(Komut.Strings[i], Yeri + 7, length(Komut.Strings[i]) - Yeri);
+        Komut.Strings[i] := s;
+      end;
+
+      Yeri := pos('ORDER BY', uppercase(Komut.Strings[i]));
+
+      if (Siralama > '0') and (pos('.', Siralama) = 0) and
+        (Pos('.' + Siralama, Komut.Strings[i]) > 0) then
+      begin //Siralama alanýnýn önünde tablo adý varmý DOSYANO > KIMLIK.DOSYANO
+        s := Komut.Strings[i];
+        Siralama := '.' + Siralama;
+        j := pos(Siralama, s) - 1;
+        while (s[j] in ['A'..'Z']) and (j > 0) do
+        begin
+          Siralama := s[j] + Siralama;
+          dec(j);
+        end;
+      end;
+
+      if (Siralama > '0') and (Yeri > 0) then
+      begin
+        s := copy(Komut.Strings[i], 1, Yeri + 8);
+        s := ' ' + s + ' ' + Siralama + SiraYonu;
+        Komut.Strings[i] := s;
+      end;
+{       if (OrderField>'0')and(Yeri>0) then begin
+          s := copy(Komut.Strings[i], 1, Yeri+8);
+          s := s + OrderField;
+          Komut.Strings[i] := s;
+       end;    }
+    end;
+    TabloDokum.Query1.SQL := Komut;
+    TabloDokum.Query1.open;
+  end
+  else
+  begin
+//   TabloDokum.Ini.ReadSection(TabloDokum.TabKosul.FieldByName('ALAN').AsString, TComboBox(Sender).Items);
+    if KomutOlustur then
+    begin
+      TabloDokum.Query1.Close;
+      TabloDokum.Query1.SQL.Clear;
+      TabloDokum.Query1.SQL := Komut;
+      TabloDokum.Query1.open;
+    end;
+  end;
+end;
+
+procedure TDokumDlg.CreateGridFields(const tvCaption, tvFieldName, tvProperties: string; tvMerging, tvalign: boolean; tvWidth: integer);
+begin
+  with DBTable.CreateColumn do
+  begin
+    Caption := tvCaption;
+    DataBinding.FieldName := tvFieldName;
+    DataBinding.ValueType := tvProperties;
+    HeaderAlignmentHorz := taCenter;
+    HeaderAlignmentVert := vaCenter;
+    Name := 'tv' + tvFieldName;
+    Options.CellMerging := tvMerging;
+
+    if tvProperties = 'DateTime' then
+    begin
+      PropertiesClass := TcxDateEditProperties;
+      TcxDateEditProperties(Properties).ShowTime := true;
+      if tvalign = true then
+        TcxTextEditProperties(Properties).Alignment.Horz := taCenter;
+    end;
+    if tvProperties = 'Float' then
+    begin
+      PropertiesClass := TcxSpinEditProperties;
+      TcxSpinEditProperties(Properties).ValueType:=vtFloat;
+    end;
+    //width := tvWidth;
+  end;
+end;
+
+function TDokumDlg.FieldTypeBul(FieldType: TFieldType): string;
+begin
+    case FieldType of
+    ftUnknown: Result := '';
+    ftString: Result := 'String';
+    ftSmallInt: Result := 'Float';
+    ftInteger: Result := 'Float';
+    ftWord: Result := 'Float';
+    ftBoolean: Result := 'Boolean';
+    ftFloat: Result := 'Float';
+    ftCurrency: Result := 'Float';
+    ftBCD: Result := 'Float';
+    ftDate: Result := 'DateTime';
+    ftTime: Result := 'DateTime';
+    ftDateTime: Result := 'DateTime';
+    ftBytes: Result := 'Float';
+    ftVarBytes: Result := 'Float';
+    ftBlob: Result := '';
+    ftMemo: Result := '';
+    ftGraphic: Result := '';
+    ftAutoInc: Result := '';
+    ftFmtMemo: Result := '';
+    ftParadoxOle: Result := '';
+    ftDBaseOle: Result := '';
+    ftTypedBinary: Result := '';
+    end;
+end;
+
+
+procedure TDokumDlg.DokumTusClick(Sender: TObject);
+begin
+  Siralama := '0';
+  DokumIslemi;
+
+  if (ToplamSayi.Checked) and (TabloDokum.Query1.RecordCount > 0) then
+    LbToplamSayi.Caption := inttostr(TabloDokum.Query1.RecordCount)
+  else
+    LbToplamSayi.Caption := '--';
+  dosyanovar := false;
+  DBTable.DataController.DataSource := TabloDokum.DataSource2;
+  while DBTable.ColumnCount > 0 do
+    DBTable.Columns[0].Destroy;
+
+  for i := 0 to Tablodokum.Query1.FieldCount - 1 do
+  begin
+    CreateGridFields(Tablodokum.Query1.Fields[i].FieldName,Tablodokum.Query1.Fields[i].FieldName,FieldTypeBul(Tablodokum.Query1.FieldDefList[i].DataType),false,false,0);
+
+  end;
+  DBTable.ApplyBestFit(nil);
+
+end;
+
+
+procedure TDokumDlg.Toplu1Click(Sender: TObject);
+var KrKodu, KrAdi, sablon: string;
+  Tutar: Currency;
+  FatKocanNo: string[5];
+  procedure Toplu;
+  begin
+    Tablo.Query5.Close;
+    Tablo.Query5.SQL.Text := 'Select SUM(TUTAR) AS TUTAR ' +
+      ' from( ';
+    for i := 0 to Komut.Count - 1 do
+      if (Komut.Strings[i] <> '') and (pos('ORDER', uppercase(Komut.Strings[i])) = 0) then
+        Tablo.Query5.SQL.Add(Komut.Strings[i]);
+    Tablo.Query5.SQL.Add(')AS PARA ');
+       //Tablo.Query5.SQL.Add('GROUP BY KOD, BUTCEKODU, TUR,ACIKLAMA, BIRIM,MIKTAR,ISKONTO,KDV,BIRIMFIYAT,MUHKODU');
+       //Tablo.Query5.SQL.Add('ORDER BY KOD');
+    Tablo.Query5.Open;
+
+    Tablo.Query5.First;
+    i := 1;
+    while not Tablo.Query5.eof do
+    begin
+      Tablo.Query4.Close;
+      Tablo.Query4.SQL.Text := 'Insert Into FATURA (DOSYANO, GELISNO, KARTNO, SIRANO,TARIH,' +
+        ' ACIKLAMA,ADET,BIRIMFIYAT,TUTAR,KDV,KULLANICI)VALUES(''' +
+        KrKodu + ''',1,' + Tablo.Query2.Fields[0].AsString + ',' +
+        IntToStr(i) + ',''' + FormatDateTime('MM/DD/YYYY HH:NN', genotipini.BugunTrh) + ''',''Tedavi Giderleri'',1,' +
+        Tablo.Query5.FieldByName('TUTAR').AsString +
+        ',' + Tablo.Query5.FieldByName('TUTAR').AsString + ',8,''' + Kullanan + ''')';
+      Tablo.Query4.ExecSQL;
+      inc(i);
+      Tablo.Query5.next;
+    end;
+  end;
+
+  procedure Detay;
+  begin
+    Tablo.Query5.Close;
+    Tablo.Query5.SQL.Text := 'Select KOD, BUTCEKODU, TUR,ACIKLAMA, BIRIM,MIKTAR,ISKONTO,KDV,BIRIMFIYAT,MUHKODU,' +
+      ' SUM(ADET) AS ADET, SUM(TUTAR) AS TUTAR ' +
+      ' from( ';
+    for i := 0 to Komut.Count - 1 do
+      if (Komut.Strings[i] <> '') and (pos('ORDER', uppercase(Komut.Strings[i])) = 0) then
+        Tablo.Query5.SQL.Add(Komut.Strings[i]);
+    Tablo.Query5.SQL.Add(')AS PARA ');
+    Tablo.Query5.SQL.Add('GROUP BY KOD, BUTCEKODU, TUR,ACIKLAMA, BIRIM,MIKTAR,ISKONTO,KDV,BIRIMFIYAT,MUHKODU');
+    Tablo.Query5.SQL.Add('ORDER BY KOD');
+    Tablo.Query5.Open;
+
+    Tablo.Query5.First;
+    i := 1;
+    while not Tablo.Query5.eof do
+    begin
+      Tablo.Query4.Close;
+      Tablo.Query4.SQL.Text := 'Insert Into FATURA (DOSYANO, GELISNO, KARTNO, SIRANO,TARIH,TUR,KOD,' +
+        ' ACIKLAMA,ADET,BIRIM,BIRIMFIYAT,TUTAR,ISKONTO,KDV,MUHKODU,BUTCEKODU,KULLANICI)VALUES(''' +
+        KrKodu + ''',1,' + Tablo.Query2.Fields[0].AsString + ',' +
+        IntToStr(i) + ',''' + FormatDateTime('MM/DD/YYYY HH:NN', genotipini.BugunTrh) + ''',''' + Tablo.Query5.FieldByName('TUR').AsString +
+        ''',''' + Tablo.Query5.FieldByName('KOD').AsString + ''',''' + Tablo.Query5.FieldByName('ACIKLAMA').AsString +
+        ''',' + Tablo.Query5.FieldByName('ADET').AsString + ',''' + Tablo.Query5.FieldByName('BIRIM').AsString +
+        ''',' + Tablo.Query5.FieldByName('BIRIMFIYAT').AsString +
+        ',' + Tablo.Query5.FieldByName('TUTAR').AsString + ',' + Tablo.Query5.FieldByName('ISKONTO').AsString +
+        ',' + Tablo.Query5.FieldByName('KDV').AsString + ',''' + Tablo.Query5.FieldByName('MUHKODU').AsString +
+        ''',''' + Tablo.Query5.FieldByName('BUTCEKODU').AsString + ''',''' + Kullanan + ''')';
+      Tablo.Query4.ExecSQL;
+      inc(i);
+      Tablo.Query5.next;
+    end;
+  end;
+
+  procedure Gruplu;
+  var stlist: TStringList;
+    procedure Herbirsatirekle;
+    begin
+      stlist.clear;
+      stlist.Assign(Tablo.Query3.FieldByName('GRUPKODLAR'));
+
+      Tablo.Query5.Close; //O gruplamayla ilgili toplamý bulalým
+      Tablo.Query5.SQL.Text := 'select isnull(SUM(TUTAR),0) AS TUTAR from( ';
+      for J := 0 to Komut.Count - 1 do
+        if (Komut.Strings[J] <> '') and (pos('ORDER', uppercase(Komut.Strings[J])) = 0) then
+          Tablo.Query5.SQL.Add(Komut.Strings[J]);
+      Tablo.Query5.SQL.Add(')AS PARA ');
+      Tablo.Query5.SQL.Add('where ');
+      for j := 0 to stlist.count - 1 do
+      begin
+        if j > 0 then Tablo.Query5.SQL.Add(' or ');
+        Tablo.Query5.SQL.Add('kod like ''' + stlist.Strings[j] + '%''');
+      end;
+      Tablo.Query5.Open;
+
+      Tablo.Query4.Close; //Fatura olarak ekeleyelim
+      Tablo.Query4.SQL.Text := 'Insert Into FATURA (DOSYANO, GELISNO, KARTNO, SIRANO,TARIH,KOD,' +
+        ' ACIKLAMA,ADET,BIRIMFIYAT,TUTAR,KDV,KULLANICI)VALUES(''' +
+        KrKodu + ''',1,' + Tablo.Query2.Fields[0].AsString + ',' +
+        IntToStr(i) + ',''' + FormatDateTime('MM/DD/YYYY HH:NN', genotipini.BugunTrh) + ''',' +
+        '''' + Tablo.Query3.FieldByName('KOD').AsString + ''',''' + Tablo.Query3.FieldByName('ACIKLAMA').AsString +
+        ''',1,' + Tablo.Query5.FieldByName('TUTAR').AsString +
+        ',' + Tablo.Query5.FieldByName('TUTAR').AsString +
+        ',' + Tablo.Query3.FieldByName('KDV').AsString + ',''' + Kullanan + ''')';
+      Tablo.Query4.ExecSQL;
+      inc(i);
+    end;
+  begin
+    sablon := ''; ///Önce kullanýcýya fatura þablonunu  seçtirelim
+    stlist := TStringList.Create;
+    Tablo.Query1.Close;
+    Tablo.Query1.SQL.Text := 'Select FATURAADI from FATSABLONBAS order by FATURAADI';
+    Tablo.Query1.open;
+    while not Tablo.Query1.eof do
+    begin
+      stlist.Add(Tablo.Query1.Fields[0].AsString);
+      Tablo.Query1.next;
+    end;
+
+    if not MesajStrAl('', 'Fatura Þablonunu Seçiniz :', 'C', stlist, sablon, '', 'C', nil, sablon) then exit;
+
+    Tablo.Query3.Close; //seçilmiþ olan fatura þablonundaki gruplarý getirelim
+    Tablo.Query3.SQL.Text := 'Select * from FATSABLON where  FATURAADI=''' + sablon + '''';
+    Tablo.Query3.open;
+    i := 1;
+    while not Tablo.Query3.eof do
+    begin //Her bir grubu da toplayýp ekleyelim..
+      Herbirsatirekle;
+      Tablo.Query3.next;
+    end;
+    stlist.Free;
+
+{
+       Tablo.Query5.Close;
+       Tablo.Que ry5.SQL.Text := 'Select substring(KOD,1,1) as KOD,TUR, '+
+             ' (Select ISLEMADI from ISLEMLER where ISLEMLER.KOD=substring(PARA.KOD,1,1)) as ACIKLAMA, '+
+             ' (Select isnull(KDV,0) from ISLEMLER where ISLEMLER.KOD=substring(PARA.KOD,1,1)) as KDV, '+
+             '  isnull(SUM(TUTAR),0) AS TUTAR '+
+           ' from( ';
+       for i := 0 to Komut.Count -1 do
+         if (Komut.Strings[i]<>'')and(pos('ORDER',uppercase(Komut.Strings[i]))=0) then
+             Tablo.Query5.SQL.Add(Komut.Strings[i]);
+       Tablo.Query5.SQL.Add(')AS PARA ');
+       Tablo.Query5.SQL.Add('GROUP BY substring(KOD,1,1), TUR');
+       Tablo.Query5.SQL.Add('ORDER BY KOD');
+       Tablo.Query5.Open;
+
+       Tablo.Query5.First;
+       i:=1;
+       while not Tablo.Query5.eof do begin
+         Tablo.Query4.Close;
+         Tablo.Query4.SQL.Text := 'Insert Into FATURA (DOSYANO, GELISNO, KARTNO, SIRANO,TARIH,TUR,KOD,'+
+             ' ACIKLAMA,ADET,BIRIMFIYAT,TUTAR,KDV,KULLANICI)VALUES('''+
+             KrKodu+''',1,'+Tablo.Query2.Fields[0].AsString+','+
+             IntToStr(i)+','''+FormatDateTime('MM/DD/YYYY HH:NN', tarihbul)+''','''+Tablo.Query5.FieldByName('TUR').AsString+
+             ''','''+Tablo.Query5.FieldByName('KOD').AsString+''','''+Tablo.Query5.FieldByName('ACIKLAMA').AsString+
+             ''',1,'+Tablo.Query5.FieldByName('TUTAR').AsString+
+             ','+Tablo.Query5.FieldByName('TUTAR').AsString+
+             ','+Tablo.Query5.FieldByName('KDV').AsString+','''+Kullanan+''')';
+         Tablo.Query4.ExecSQL;
+         inc(i);
+         Tablo.Query5.next;
+       end;}
+  end;
+begin
+  if not TabloDokum.Query1.Active then
+    raise Exception.Create('Önce sonuçlarý listeleyiniz');
+
+  KrKodu := '';
+  MesajStrAl('', 'Kurum Kodunu Giriniz :', 'E', nil, KrKodu, '', 'E', nil, KrKodu);
+  if KrKodu = '' then exit;
+  Tablo.Query5.Close;
+  Tablo.Query5.SQL.Text := 'select * from REHBER where KOD = ''' + KrKodu + '''';
+  Tablo.Query5.Open;
+  if Tablo.Query5.RecordCount < 1 then
+  begin
+    showmessage('Bu kodda Rehber programýna kurum girilmemiþ');
+    exit;
+  end;
+  KrAdi := Tablo.Query5.FieldByName('FIRMA').AsString;
+
+  FatTar := DateTimeToStr(genotipini.BugunTrh); FatNo := '';
+  if not MesajStrAl('', 'Fatura Tarihini Giriniz :', 'D', nil, FatTar, 'Fatura No Giriniz :', 'E', nil, FatNo) then exit;
+  if Trim(FatNo) = '' then
+    raise Exception.Create('Fatura No boþ geçilemez..');
+
+  Tablo.Query2.Close;
+  Tablo.Query2.SQL.Text := ' select isnull(max(KARTNO)+1,1) from FATBASLIK ' +
+    ' where DOSYANO=''' + KrKodu + ''' AND GELISNO=1';
+  Tablo.Query2.Open;
+
+  Tablo.Query3.Close;
+  Tablo.Query3.SQL.Text := ' select FIRMA, ADRES, ILCE, IL FROM REHBER where KOD =''' + KrKodu + '''';
+  Tablo.Query3.Open;
+
+  if Tablo.KullaniciBilgisi(KullanAdi, 'Fat-Koçaný') then
+  begin
+    if Tablo.TabKulHar.FieldByName('BILGI').AsString = '' then
+      FatKocanNo := '0'
+    else
+      FatKocanNo := Tablo.TabKulHar.FieldByName('BILGI').AsString
+  end
+  else
+    FatKocanNo := '1';
+
+  Tutar := 0;
+  Tablo.Query4.Close;
+  Tablo.Query4.SQL.Text := 'Insert Into FATBASLIK (DOSYANO, GELISNO, KARTNO, BELGE,KIME,FATURATARIH,' +
+    ' FATURANO,BASLIK,ADRES,KDVDURUM,KOCANNO, LOTNO,FATURA_TUTARI,KASA)VALUES(''' + KrKodu +
+    ''',1,' + Tablo.Query2.Fields[0].AsString + ',''FATURA'',''' + KrKodu + ''',''' +
+    FormatDateTime('MM/DD/YYYY 00:00:00', StrToDateTime(FatTar)) + ''',''' + FatNo + ''',''' + Tablo.Query3.Fields[0].AsString +
+    ''',''' + Tablo.Query3.Fields[1].AsString + ' ' + Tablo.Query3.Fields[2].AsString + ' ' + Tablo.Query3.Fields[3].AsString +
+    ''',''Dahil'',''' + FatKocanNo + ''',''0'',' + FloatToStr(Tutar) + ',0)';
+  Tablo.Query4.ExecSQL;
+
+  if TMenuItem(Sender).Name = 'Toplu1' then
+    Toplu
+  else if TMenuItem(Sender).Name = 'Gruplu1' then
+    Gruplu
+  else
+    Detay;
+
+  TopluFaturaEkle(KrKodu, KrAdi);
+end;
+
+procedure TDokumDlg.KapatTusClick(Sender: TObject);
+begin
+  GridExport(DBGrid1, 'XLS', TabloDokum.TabDokum.Fields[0].AsString);
+end;
+
+procedure TDokumDlg.Text1Click(Sender: TObject);
+begin
+  GridExport(DBGrid1, 'TXT', TabloDokum.TabDokum.Fields[0].AsString);
+end;
+
+procedure TDokumDlg.HTML1Click(Sender: TObject);
+begin
+  GridExport(DBGrid1, 'HTM', TabloDokum.TabDokum.Fields[0].AsString);
+end;
+
+procedure TDokumDlg.FormActivate(Sender: TObject);
+begin
+  DokumDlg.WindowState := wsMaximized;
+  Anaform.EkranYaz.Caption := 'Liste';
+  Anaform.YaziciYaz.Caption := 'Liste';
+  Anaform.ToolBarNavigator.DataSource := DtsDokumler;
+end;
+
+procedure TDokumDlg.DBTableMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+//  QuantGrid.dxDBGridMouseUp(SENDER,BUTTON,SHIFT,X, Y,QuantGrid.pmHeader);
+end;
+
+procedure TDokumDlg.XML1Click(Sender: TObject);
+begin
+  GridExport(DBGrid1, 'XML', TabloDokum.TabDokum.Fields[0].AsString);
+end;
+
+procedure TDokumDlg.Excel1Click(Sender: TObject);
+begin
+  GridExport(DBGrid1, 'XLS', TabloDokum.TabDokum.Fields[0].AsString);
+end;
+
+procedure TDokumDlg.DBTableCellDblClick(Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+begin
+  if TabloDokum.Query1.FindField('DOSYANO') <> nil then
+    DosyanoVar := True;
+  if not DosyanoVar then exit;
+  if Tablo.TabKimlik.State in [dsEdit, dsInsert] then
+    Tablo.TabKimlik.Cancel;
+//  Tablo.TabKimlik.Close;
+//  Tablo.TabKimlik.Parameters[0].Value := TabloDokum.Query1.FieldByName('DOSYANO').AsString;
+//  Tablo.TabKimlik.SQL.Text := 'select * from KIMLIK where DOSYANO='''+TabloDokum.Query1.FieldByName('DOSYANO').AsString+'''';
+//  Tablo.TabKimlik.Open;
+//  Tablo.TabKimlik.Locate('DOSYANO', TabloDokum.Query1.FieldByName('DOSYANO').AsString, [loCaseInsensitive]);
+  if TabloDokum.Query1.FindField('GELISNO') <> nil then
+  begin
+    AnaForm.GelislerTus.Tag := TabloDokum.Query1.FieldByName('GELISNO').AsInteger; //DBGrid1.FocusedField.AsInteger;
+    AnaForm.GelislerTus.Click;
+    Tablo.TabGelisler.Locate('GELISNO', TabloDokum.Query1.FieldByName('GELISNO').AsString, []);
+  end
+  else
+    AnaForm.KimlikTus.Click;
+
+  abort;
+end;
+
+begin
+  ComBox := TComboBox.Create(nil);
+
+
+end.
+
+{
+   TabloDokum.TabDokum2.Open;
+   TabloDokum.TabKosul2.Open;
+   TabloDokum.TabDokum2.Insert;
+   TabloDokum.TabDokum2.Fields[0].ASString := YeniEkranAdi;
+   for i := 1 to 15 do
+     TabloDokum.TabDokum2.Fields[i].AsString := TabloDokum.TabDokum.Fields[i].AsString;
+   try
+      TabloDokum.TabDokum2.Post;
+   except
+      TabloDokum.TabDokum2.Cancel;
+      showmessage('Bu adla kayýtlý rapora rastlandý!');
+      exit;
+   end;
+
+   TabloDokum.TabKosul.SetRange([TabloDokum.TabDokum.FieldByName('RAPORADI').ASString, 0],[TabloDokum.TabDokum.FieldByName('RAPORADI').ASString, 999]);
+   while not TabloDokum.TabKosul.eof do begin
+     TabloDokum.TabKosul2.Insert;
+     TabloDokum.TabKosul2.Fields[0].ASString := YeniEkranAdi;
+     for i := 1 to 6 do
+         TabloDokum.TabKosul2.Fields[i].AsString :=TabloDokum.TabKosul.Fields[i].AsString;
+     TabloDokum.TabKosul2.Post;
+     TabloDokum.TabKosul.Next;
+    end;
+
+    RapTablo.Ayarlar.SetRange([TabloDokum.TabDokum.FieldByName('RAPORADI').ASString, 0],[TabloDokum.TabDokum.FieldByName('RAPORADI').ASString, 999]);
+    while not RapTablo.Ayarlar.eof do begin
+      RapTablo.Ayarlar2.Insert;
+      RapTablo.Ayarlar2.Fields[0].ASString := YeniEkranAdi;
+      for i := 1 to 15 do
+          RapTablo.Ayarlar2.Fields[i].AsString := RapTablo.Ayarlar.Fields[i].AsString;
+      RapTablo.Ayarlar2.Post;
+      RapTablo.Ayarlar.Next;
+     end;
+end;
+}
+

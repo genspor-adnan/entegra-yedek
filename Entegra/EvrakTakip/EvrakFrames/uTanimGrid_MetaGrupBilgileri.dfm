@@ -1,0 +1,2 @@
+inherited EvrakTanimMetaGrupBilgileri: TEvrakTanimMetaGrupBilgileri
+end

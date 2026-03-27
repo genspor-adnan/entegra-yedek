@@ -1,0 +1,126 @@
+2026-03-16 13:05:00.989 | cboServersDropDown currentCount=0
+2026-03-16 13:05:00.990 | ListAvailableSQLServers start
+2026-03-16 13:05:00.998 | AddLocalSQLServers machine='DESKTOP-HL3J3AS'
+2026-03-16 13:05:01.007 | Registry 64 path SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL instances=1
+2026-03-16 13:05:01.014 | Registry 32 path not found: SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL
+2026-03-16 13:05:01.025 | After local discovery count=5
+2026-03-16 13:05:01.032 |   [0] .
+2026-03-16 13:05:01.039 |   [1] (local)
+2026-03-16 13:05:01.046 |   [2] localhost
+2026-03-16 13:05:01.053 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:05:01.060 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:05:01.071 | UDP broadcast send
+2026-03-16 13:05:01.339 | select timeout/break at attempt=1
+2026-03-16 13:05:01.339 | Final server list count=5
+2026-03-16 13:05:01.348 |   [0] .
+2026-03-16 13:05:01.355 |   [1] (local)
+2026-03-16 13:05:01.363 |   [2] localhost
+2026-03-16 13:05:01.371 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:05:01.378 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:05:01.387 | ListAvailableSQLServers end
+2026-03-16 13:05:01.394 | cboServers after dropdown load count=5
+2026-03-16 13:05:01.402 |   [0] .
+2026-03-16 13:05:01.412 |   [1] (local)
+2026-03-16 13:05:01.421 |   [2] localhost
+2026-03-16 13:05:01.428 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:05:01.437 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:05:12.707 | cboDatabasesDropDown server='DESKTOP-HL3J3AS\SQLEXPRESS'
+2026-03-16 13:05:12.708 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15
+2026-03-16 13:05:12.726 | DatabasesOnServer opening primary connection
+2026-03-16 13:05:13.049 | DatabasesOnServer query='SELECT name AS CATALOG_NAME FROM sys.databases ORDER BY name'
+2026-03-16 13:05:13.176 | DatabasesOnServer query open success
+2026-03-16 13:05:13.182 | DatabasesOnServer result count=9
+2026-03-16 13:05:13.187 |   [0] ALOImplant
+2026-03-16 13:05:13.195 |   [1] BILIM
+2026-03-16 13:05:13.204 |   [2] GENTEGRE_LOG
+2026-03-16 13:05:13.212 |   [3] Henmed
+2026-03-16 13:05:13.220 |   [4] KOSINUS
+2026-03-16 13:05:13.228 |   [5] master
+2026-03-16 13:05:13.237 |   [6] model
+2026-03-16 13:05:13.245 |   [7] msdb
+2026-03-16 13:05:13.254 |   [8] tempdb
+2026-03-16 13:05:21.448 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15
+2026-03-16 13:23:42.412 | cboServersDropDown currentCount=0
+2026-03-16 13:23:42.414 | ListAvailableSQLServers start
+2026-03-16 13:23:42.423 | AddLocalSQLServers machine='DESKTOP-HL3J3AS'
+2026-03-16 13:23:42.433 | Registry 64 path SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL instances=1
+2026-03-16 13:23:42.441 | Registry 32 path not found: SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL
+2026-03-16 13:23:42.449 | After local discovery count=5
+2026-03-16 13:23:42.460 |   [0] .
+2026-03-16 13:23:42.469 |   [1] (local)
+2026-03-16 13:23:42.477 |   [2] localhost
+2026-03-16 13:23:42.486 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:23:42.495 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:23:42.509 | UDP broadcast send
+2026-03-16 13:23:42.776 | select timeout/break at attempt=1
+2026-03-16 13:23:42.777 | Final server list count=5
+2026-03-16 13:23:42.786 |   [0] .
+2026-03-16 13:23:42.794 |   [1] (local)
+2026-03-16 13:23:42.803 |   [2] localhost
+2026-03-16 13:23:42.813 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:23:42.821 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:23:42.831 | ListAvailableSQLServers end
+2026-03-16 13:23:42.838 | cboServers after dropdown load count=5
+2026-03-16 13:23:42.847 |   [0] .
+2026-03-16 13:23:42.857 |   [1] (local)
+2026-03-16 13:23:42.867 |   [2] localhost
+2026-03-16 13:23:42.876 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:23:42.884 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:23:50.735 | cboDatabasesDropDown server='DESKTOP-HL3J3AS\SQLEXPRESS'
+2026-03-16 13:23:50.737 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15
+2026-03-16 13:23:50.745 | DatabasesOnServer opening primary connection
+2026-03-16 13:23:51.096 | DatabasesOnServer query='SELECT name AS CATALOG_NAME FROM sys.databases ORDER BY name'
+2026-03-16 13:23:51.217 | DatabasesOnServer query open success
+2026-03-16 13:23:51.224 | DatabasesOnServer result count=9
+2026-03-16 13:23:51.228 |   [0] ALOImplant
+2026-03-16 13:23:51.236 |   [1] BILIM
+2026-03-16 13:23:51.245 |   [2] GENTEGRE_LOG
+2026-03-16 13:23:51.254 |   [3] Henmed
+2026-03-16 13:23:51.263 |   [4] KOSINUS
+2026-03-16 13:23:51.272 |   [5] master
+2026-03-16 13:23:51.281 |   [6] model
+2026-03-16 13:23:51.290 |   [7] msdb
+2026-03-16 13:23:51.299 |   [8] tempdb
+2026-03-16 13:23:54.457 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15
+2026-03-16 13:28:52.772 | cboServersDropDown currentCount=0
+2026-03-16 13:28:52.773 | ListAvailableSQLServers start
+2026-03-16 13:28:52.782 | AddLocalSQLServers machine='DESKTOP-HL3J3AS'
+2026-03-16 13:28:52.794 | Registry 64 path SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL instances=1
+2026-03-16 13:28:52.803 | Registry 32 path not found: SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL
+2026-03-16 13:28:52.811 | After local discovery count=5
+2026-03-16 13:28:52.820 |   [0] .
+2026-03-16 13:28:52.829 |   [1] (local)
+2026-03-16 13:28:52.838 |   [2] localhost
+2026-03-16 13:28:52.846 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:28:52.857 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:28:52.869 | UDP broadcast send
+2026-03-16 13:28:53.129 | select timeout/break at attempt=1
+2026-03-16 13:28:53.129 | Final server list count=5
+2026-03-16 13:28:53.139 |   [0] .
+2026-03-16 13:28:53.148 |   [1] (local)
+2026-03-16 13:28:53.157 |   [2] localhost
+2026-03-16 13:28:53.166 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:28:53.175 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:28:53.186 | ListAvailableSQLServers end
+2026-03-16 13:28:53.193 | cboServers after dropdown load count=5
+2026-03-16 13:28:53.202 |   [0] .
+2026-03-16 13:28:53.210 |   [1] (local)
+2026-03-16 13:28:53.218 |   [2] localhost
+2026-03-16 13:28:53.230 |   [3] DESKTOP-HL3J3AS
+2026-03-16 13:28:53.239 |   [4] DESKTOP-HL3J3AS\SQLEXPRESS
+2026-03-16 13:29:00.088 | cboDatabasesDropDown server='DESKTOP-HL3J3AS\SQLEXPRESS'
+2026-03-16 13:29:00.089 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15
+2026-03-16 13:29:00.097 | DatabasesOnServer opening primary connection
+2026-03-16 13:29:00.411 | DatabasesOnServer query='SELECT name AS CATALOG_NAME FROM sys.databases ORDER BY name'
+2026-03-16 13:29:00.525 | DatabasesOnServer query open success
+2026-03-16 13:29:00.531 | DatabasesOnServer result count=9
+2026-03-16 13:29:00.535 |   [0] ALOImplant
+2026-03-16 13:29:00.545 |   [1] BILIM
+2026-03-16 13:29:00.554 |   [2] GENTEGRE_LOG
+2026-03-16 13:29:00.562 |   [3] Henmed
+2026-03-16 13:29:00.571 |   [4] KOSINUS
+2026-03-16 13:29:00.579 |   [5] master
+2026-03-16 13:29:00.588 |   [6] model
+2026-03-16 13:29:00.596 |   [7] msdb
+2026-03-16 13:29:00.605 |   [8] tempdb
+2026-03-16 13:29:03.288 | DatabasesOnServer server='DESKTOP-HL3J3AS\SQLEXPRESS' auth=1 timeout=15

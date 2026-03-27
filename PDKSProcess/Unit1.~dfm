@@ -1,0 +1,520 @@
+object AnaForm: TAnaForm
+  Left = -1
+  Top = 6
+  Width = 1032
+  Height = 746
+  Caption = 'PDKS Giri'#351'-'#199#305'k'#305#351' Kontrol'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  Menu = MainMenu1
+  OldCreateOrder = False
+  WindowState = wsMaximized
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnMouseMove = FormMouseMove
+  PixelsPerInch = 96
+  TextHeight = 13
+  object ComLed2: TComLed
+    Left = 88
+    Top = 0
+    Width = 25
+    Height = 25
+    ComPort = ComPort1
+    LedSignal = lsConn
+    Kind = lkRedLight
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 1024
+    Height = 25
+    Align = alTop
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    object ComLed1: TComLed
+      Left = 96
+      Top = 0
+      Width = 25
+      Height = 25
+      ComPort = ComPort1
+      LedSignal = lsConn
+      Kind = lkRedLight
+    end
+    object Label1: TLabel
+      Left = 128
+      Top = 6
+      Width = 113
+      Height = 13
+      Caption = 'Server Tarihi-Saati :'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LBTarSa: TLabel
+      Left = 248
+      Top = 6
+      Width = 89
+      Height = 13
+      Caption = 'Server Tarihi-Saati'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object BTNAc: TButton
+      Left = 0
+      Top = 0
+      Width = 89
+      Height = 25
+      Caption = 'BA'#350'LAT'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      OnClick = BTNAcClick
+    end
+  end
+  object DBGrid1: TDBGrid
+    Left = 0
+    Top = 25
+    Width = 1024
+    Height = 642
+    Align = alClient
+    DataSource = DtsStatus
+    Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+    TabOrder = 1
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'MS Sans Serif'
+    TitleFont.Style = []
+    OnDrawColumnCell = DBGrid1DrawColumnCell
+    Columns = <
+      item
+        Expanded = False
+        FieldName = 'SICILNO'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = 'S'#304'C'#304'L NO'
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 78
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'ADI'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 113
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'SOYADI'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 113
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'DEPARTMAN'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 136
+        Visible = True
+      end
+      item
+        Alignment = taCenter
+        Expanded = False
+        FieldName = 'GIRIS'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = 'G'#304'R'#304#350
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Visible = True
+      end
+      item
+        Alignment = taCenter
+        Expanded = False
+        FieldName = 'CIKIS'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = #199'IKI'#350
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'VARDIYA'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = 'VARDIYA ADI'
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 105
+        Visible = True
+      end
+      item
+        Alignment = taCenter
+        Expanded = False
+        FieldName = 'VARGIRIS'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = 'VAR. G'#304'R'#304#350
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Visible = True
+      end
+      item
+        Alignment = taCenter
+        Expanded = False
+        FieldName = 'VARCIKIS'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Title.Alignment = taCenter
+        Title.Caption = 'VAR. '#199'IKI'#350
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Visible = True
+      end
+      item
+        Alignment = taCenter
+        Expanded = False
+        FieldName = 'GIRCIK'
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ReadOnly = False
+        Title.Alignment = taCenter
+        Title.Caption = 'G'#304'R'#304#350'/'#199'IKI'#350
+        Title.Font.Charset = TURKISH_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -11
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Visible = True
+      end>
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 667
+    Width = 1024
+    Height = 25
+    Align = alBottom
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    object DBText1: TDBText
+      Left = 3
+      Top = 5
+      Width = 48
+      Height = 13
+      AutoSize = True
+      DataField = 'SONUC'
+      DataSource = DtsKARTOKU
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
+  object cnn: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=SQLOLEDB.1;Persist Security Info=False;User ID=SA;Initi' +
+      'al Catalog=GENSAGLIK'
+    LoginPrompt = False
+    Provider = 'SQLOLEDB.1'
+    Left = 16
+    Top = 152
+  end
+  object ComPort1: TComPort
+    BaudRate = br9600
+    Port = 'COM1'
+    Parity.Bits = prNone
+    StopBits = sbOneStopBit
+    DataBits = dbEight
+    DiscardNull = True
+    Events = [evRxChar, evTxEmpty, evRxFlag, evRing, evBreak, evCTS, evDSR, evError, evRLSD, evRx80Full]
+    FlowControl.OutCTSFlow = False
+    FlowControl.OutDSRFlow = False
+    FlowControl.ControlDTR = dtrEnable
+    FlowControl.ControlRTS = rtsDisable
+    FlowControl.XonXoffOut = False
+    FlowControl.XonXoffIn = False
+    OnAfterOpen = ComPort1AfterOpen
+    OnAfterClose = ComPort1AfterClose
+    OnRxChar = ComPort1RxChar
+    Left = 176
+    Top = 120
+  end
+  object DtsKARTOKU: TDataSource
+    DataSet = sp_KARTOKU
+    Left = 48
+    Top = 184
+  end
+  object MainMenu1: TMainMenu
+    Left = 216
+    Top = 120
+    object MNSecenek: TMenuItem
+      Caption = 'Se'#231'enekler'
+      object SeriPortAyarlar1: TMenuItem
+        Caption = 'Seri Port Ayarlar'#305
+        OnClick = SeriPortAyarlar1Click
+      end
+    end
+  end
+  object TabStatus: TADOQuery
+    Active = True
+    Connection = cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      
+        'Select P.SICILNO,P.ADI,P.SOYADI,P.DEPARTMAN,PK.*,dbo.fn_GIRCIK(P' +
+        'K.CIKIS) AS GIRCIK'
+      'from PER_SABIT P,PERS_PDKS PK where '
+      
+        'PK.PERKOD=P.PERKOD and ((datepart(m,GIRIS)=datepart(m,GETDATE())' +
+        ' and '
+      'datepart(d,GIRIS)=datepart(d,GETDATE()) and '
+      
+        'datepart(yy,GIRIS)=datepart(yy,GETDATE())) OR (datepart(m,CIKIS)' +
+        '=datepart(m,GETDATE()) and '
+      'datepart(d,CIKIS)=datepart(d,GETDATE()) and '
+      'datepart(yy,CIKIS)=datepart(yy,GETDATE())))'
+      'ORDER BY GIRIS,CIKIS'
+      '')
+    Left = 80
+    Top = 152
+    object TabStatusSICILNO: TStringField
+      FieldName = 'SICILNO'
+    end
+    object TabStatusADI: TStringField
+      FieldName = 'ADI'
+      Size = 35
+    end
+    object TabStatusSOYADI: TStringField
+      FieldName = 'SOYADI'
+      Size = 35
+    end
+    object TabStatusDEPARTMAN: TStringField
+      FieldName = 'DEPARTMAN'
+      Size = 40
+    end
+    object TabStatusGIRIS: TDateTimeField
+      FieldName = 'GIRIS'
+    end
+    object TabStatusCIKIS: TDateTimeField
+      FieldName = 'CIKIS'
+    end
+    object TabStatusKARTNO: TStringField
+      FieldName = 'KARTNO'
+    end
+    object TabStatusVARDIYA: TStringField
+      FieldName = 'VARDIYA'
+    end
+    object TabStatusVARGIRIS: TStringField
+      FieldName = 'VARGIRIS'
+      Size = 5
+    end
+    object TabStatusVARCIKIS: TStringField
+      FieldName = 'VARCIKIS'
+      Size = 5
+    end
+    object TabStatusIGIRIS: TDateTimeField
+      FieldName = 'IGIRIS'
+    end
+    object TabStatusICIKIS: TDateTimeField
+      FieldName = 'ICIKIS'
+    end
+    object TabStatusIVARDIYA: TStringField
+      FieldName = 'IVARDIYA'
+    end
+    object TabStatusIVARGIRIS: TStringField
+      FieldName = 'IVARGIRIS'
+      Size = 5
+    end
+    object TabStatusIVARCIKIS: TStringField
+      FieldName = 'IVARCIKIS'
+      Size = 5
+    end
+    object TabStatusGIRCIK: TStringField
+      FieldName = 'GIRCIK'
+      ReadOnly = True
+      FixedChar = True
+      Size = 5
+    end
+  end
+  object DtsStatus: TDataSource
+    DataSet = TabStatus
+    Left = 80
+    Top = 184
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 232
+    Top = 184
+    object ProgramA1: TMenuItem
+      Caption = 'Program'#305' A'#231
+      OnClick = ProgramA1Click
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object Seaenekler1: TMenuItem
+      Caption = 'Sea'#231'enekler'
+      object SeriPortAyarlar2: TMenuItem
+        Caption = 'Seri Port Ayarlar'#305
+        OnClick = SeriPortAyarlar1Click
+      end
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Kapat1: TMenuItem
+      Caption = 'Kapat'
+      OnClick = Kapat1Click
+    end
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 320
+    Top = 104
+  end
+  object QTarSa: TADOQuery
+    Active = True
+    Connection = cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'Select GetDate() AS TarSa')
+    Left = 120
+    Top = 152
+  end
+  object sp_KARTOKU: TADOStoredProc
+    Connection = cnn
+    CursorType = ctStatic
+    ProcedureName = 'p_KARTOKU;1'
+    Parameters = <
+      item
+        Name = '@RETURN_VALUE'
+        DataType = ftInteger
+        Direction = pdReturnValue
+        Precision = 10
+        Value = 0
+      end
+      item
+        Name = '@KARTID'
+        Attributes = [paNullable]
+        DataType = ftString
+        Size = 20
+        Value = Null
+      end
+      item
+        Name = '@SURE'
+        Attributes = [paNullable]
+        DataType = ftInteger
+        Precision = 10
+        Value = Null
+      end>
+    Left = 48
+    Top = 152
+  end
+end

@@ -1,0 +1,2282 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{24BE0FEB-6E4C-459D-BFE1-948723C79E2D}</ProjectGuid>
+        <MainSource>Gentegre.dpr</MainSource>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <TargetedPlatforms>3</TargetedPlatforms>
+        <AppType>Application</AppType>
+        <FrameworkType>VCL</FrameworkType>
+        <ProjectVersion>20.3</ProjectVersion>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <ProjectName Condition="'$(ProjectName)'==''">Gentegre</ProjectName>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
+        <Cfg_1_Win32>true</Cfg_1_Win32>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
+        <Cfg_1_Win64>true</Cfg_1_Win64>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+        <Cfg_2_Win64>true</Cfg_2_Win64>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <Manifest_File>None</Manifest_File>
+        <DCC_UnitSearchPath>C:\Entegra\Entegra\Bankalar;C:\Entegra\Ortak;C:\Entegra\Entegra;C:\Entegra\Entegra\AnaFrame;C:\Entegra\Entegra\AracCubuguFrame;C:\Entegra\Entegra\AramaFrame;C:\Entegra\Entegra\GirisSayfaFrame;C:\Entegra\Entegra\GorevFrame;C:\Entegra\Entegra\IcerikFrame;C:\Entegra\Entegra\ListeFrame;C:\Entegra\MailReaderMapi2;C:\Entegra\Entegra\Gcalender;C:\Entegra\Entegra\kazip;C:\Entegra\Entegra\GoogleLib\Lib;C:\Entegra\Entegra\GoogleLib;Z:\Entegra\Component11\GenYazilim;..\3Dparty;EvrakTakip\EvrakFrames;Z:\VclEnd\FastReport 2023-2\Sources\FastReport\VCL\Sources;Z:\VclEnd\FastReport 2023-2\Sources\FastScript\VCL\Sources;C:\Entegra\Ortak\ZLib;..\3Dparty\GenYazilim;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_K>false</DCC_K>
+        <VerInfo_Locale>1055</VerInfo_Locale>
+        <DCC_UNSAFE_CODE>true</DCC_UNSAFE_CODE>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_N>true</DCC_N>
+        <VerInfo_Release>6</VerInfo_Release>
+        <DCC_WriteableConstants>true</DCC_WriteableConstants>
+        <DCC_S>false</DCC_S>
+        <DCC_UNSAFE_CAST>true</DCC_UNSAFE_CAST>
+        <DCC_F>false</DCC_F>
+        <VerInfo_Keys>CompanyName=Feta Bilgisayar Ltd. Şti;FileDescription=Gentegre;FileVersion=9.0.6.0;InternalName=Gentegre;LegalCopyright=Genyazılım;LegalTrademarks=;OriginalFilename=Gentegre;ProductName=Gentegre;ProductVersion=9.0.6.0;Comments=Gentegre Cari - Kasa Programı;Versiyon Değişilkiği=;LastCompiledTime=26/09/2008 14:47:03</VerInfo_Keys>
+        <DCC_SymbolReferenceInfo>1</DCC_SymbolReferenceInfo>
+        <DCC_UNSAFE_TYPE>true</DCC_UNSAFE_TYPE>
+        <DCC_UsePackage>Vcl50;Vclx50;VclSmp50;Vcldb50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_MapFile>3</DCC_MapFile>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;Bde;Data.Win;System.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_E>false</DCC_E>
+        <VerInfo_MajorVer>9</VerInfo_MajorVer>
+        <SanitizedProjectName>Gentegre</SanitizedProjectName>
+        <DCC_ExeOutput>\bin\$(Ver)\$(Platform)\$(Config)</DCC_ExeOutput>
+        <DCC_DcuOutput>\BIN\$(Ver)\dcu\$(Platform)\$(Config)</DCC_DcuOutput>
+        <DCC_Define>3Dparty;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_Build>18</VerInfo_Build>
+        <VerInfo_MajorVer>20</VerInfo_MajorVer>
+        <VerInfo_MinorVer>14</VerInfo_MinorVer>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>Gentegre_Icon2.ico</Icon_MainIcon>
+        <VerInfo_Keys>CompanyName=;FileVersion=20.14.6.18;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;$(DCC_Namespace)</DCC_Namespace>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <Icon_MainIcon>Gentegre_Icon2.ico</Icon_MainIcon>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;$(DCC_Namespace)</DCC_Namespace>
+        <BT_BuildType>Debug</BT_BuildType>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <VerInfo_MajorVer>25</VerInfo_MajorVer>
+        <VerInfo_MinorVer>6</VerInfo_MinorVer>
+        <VerInfo_Build>1</VerInfo_Build>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileVersion=25.6.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <BT_BuildType>Debug</BT_BuildType>
+        <VerInfo_Release>1</VerInfo_Release>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_MajorVer>25</VerInfo_MajorVer>
+        <VerInfo_MinorVer>6</VerInfo_MinorVer>
+        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Build>1</VerInfo_Build>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=25.6.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_Optimize>false</DCC_Optimize>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_MajorVer>26</VerInfo_MajorVer>
+        <VerInfo_MinorVer>3</VerInfo_MinorVer>
+        <DCC_UNSAFE_CODE>false</DCC_UNSAFE_CODE>
+        <DCC_UNSAFE_CAST>false</DCC_UNSAFE_CAST>
+        <DCC_UNSAFE_TYPE>false</DCC_UNSAFE_TYPE>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.3.15.11;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <BT_BuildType>Debug</BT_BuildType>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
+        <DCC_UnitSearchPath>cxGenYazilim_RepoClasses;C:\comp\DevEx23\GenYazilimEx;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <VerInfo_Build>11</VerInfo_Build>
+        <VerInfo_Release>15</VerInfo_Release>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_MajorVer>25</VerInfo_MajorVer>
+        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=25.6.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_MinorVer>6</VerInfo_MinorVer>
+        <VerInfo_Build>1</VerInfo_Build>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="..\Ortak\Umesaj.pas">
+            <Form>MesajForm</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UDokum.pas">
+            <Form>DokumDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Fetautil.pas"/>
+        <DCCReference Include="..\Ortak\UCombo.pas">
+            <Form>ListeAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\Uliste.pas">
+            <Form>ListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGrid.pas">
+            <Form>GridAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UPrinter.pas">
+            <Form>PrinterDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UPaylasim.pas"/>
+        <DCCReference Include="..\Ortak\ULisans.pas">
+            <Form>LisansDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UKasa.pas">
+            <Form>KasaDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ULOGO.PAS">
+            <Form>LogoDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOPSDLG.pas">
+            <Form>OpsiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\ortak\UlisteCheck.pas">
+            <Form>ListeCheckDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UVersiyon.pas">
+            <Form>VersiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKrediNotlar.pas">
+            <Form>KrediNotlarDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UVadesiGelmisler.pas">
+            <Form>VadesiGelmislerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UCekSenetArama.pas">
+            <Form>CekSenetAramaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UQuantGrid.pas">
+            <Form>QuantGrid</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UDoviz.pas">
+            <Form>DovizDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\USMS.pas">
+            <Form>SmsDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMailYaz.pas">
+            <Form>MailGonderDlg</Form>
+        </DCCReference>
+        <DCCReference Include="lisansws.pas"/>
+        <DCCReference Include="..\Ortak\UCxUtils.pas">
+            <Form>cxUtils</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UCekListe.pas">
+            <Form>CekListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDegerAra.pas">
+            <Form>DegerAraDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UTakvim.pas">
+            <Form>TakvimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKrediEkle.pas">
+            <Form>KrediEkleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UGunlukTakvim.pas">
+            <Form>GunlukTakvimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOlaylar.pas">
+            <Form>OlaylarDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UMaasTablo.pas">
+            <Form>MaasTabloDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UKrediler.pas">
+            <Form>KredilerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UTeminatMektubu.pas">
+            <Form>TeminatMektubuDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UFrameYoneticisi.pas"/>
+        <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensions.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensionsConsts.pas"/>
+        <DCCReference Include="..\Ortak\UMultiCastEvent.pas"/>
+        <DCCReference Include="AnaFrame\UGenelAnaSekmeFrame.pas">
+            <Form>GenelAnaSekmeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UReharadlg.pas">
+            <Form>RehberAraDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UMultiDataSetEvent.pas"/>
+        <DCCReference Include="AramaFrame\URehberAramaFrame.pas">
+            <Form>RehberAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UAramaYokFrame.pas">
+            <Form>AramaYokFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UBankalarAramaFrame.pas">
+            <Form>BankalarAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UBankaKredileriAramaFrame.pas">
+            <Form>BankaKredileriAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UTeminatMektubuAramaFrame.pas">
+            <Form>TeminatMektubuAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UVadeliHesapAramaFrame.pas">
+            <Form>VadeliHesapAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UBankaCekleriAramaFrame.pas">
+            <Form>BankaCekleriAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UFaturalarAramaFrame.pas">
+            <Form>FaturalarAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UGunlukAksiyonAramaFrame.pas">
+            <Form>GunlukAksiyonAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GirisSayfaFrame\UGenelGirisSayfasiFrame.pas">
+            <Form>GenelGirisSayfasiFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UBankaKredileriListeFrame.pas">
+            <Form>BankaKredileriListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UTeminatMektuplariListeFrame.pas">
+            <Form>TeminatMektuplariListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UVadeliHesaplarListeFrame.pas">
+            <Form>VadeliHesaplarListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GirisSayfaFrame\UAnaGirisSayfasiFrame.pas">
+            <Form>AnaGirisSayfasiFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UFastRap.pas">
+            <Form>FastRaporDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UTakvimAksiyonFrame.pas">
+            <Form>TakvimAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GirisSayfaFrame\UDokumGirisFrame.pas">
+            <Form>DokumGirisFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UDokumlerAksiyonFrame.pas">
+            <Form>DokumlerAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UGentegreFrameYonetimi.pas"/>
+        <DCCReference Include="GorevFrame\UAksiyonlarGorevFrame.pas">
+            <Form>AksiyonlarGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UBankaGorevFrame.pas">
+            <Form>BankaGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UCariGorevFrame.pas">
+            <Form>CariGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UCekSenetGorevFrame.pas">
+            <Form>CekSenetGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UFaturaGorevFrame.pas">
+            <Form>FaturaGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UKasaGorevFrame.pas">
+            <Form>KasaGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="URaporAraclari.pas"/>
+        <DCCReference Include="UCekRiskPayi.pas">
+            <Form>CekRiskPayiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDBSListeFrame.pas">
+            <Form>DBSListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UDBSAramaFrame.pas">
+            <Form>DBSAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UDBS.pas">
+            <Form>DBSDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UBankalarListeFrame.pas">
+            <Form>BankalarListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKasalarListeFrame.pas">
+            <Form>KasalarListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKasalarAramaFrame.pas">
+            <Form>KasalarAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UMasrafGelir.pas">
+            <Form>MasrafGelirDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Notlar.pas"/>
+        <DCCReference Include="UBankaSecimi.pas">
+            <Form>BankaSecimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UAcilisKaydi.pas">
+            <Form>AcilisKaydiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UVadeliHesap.pas">
+            <Form>VadeliHesapDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GT_RehberAbout.pas">
+            <Form>AboutBox</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UDokumAramaFrame.pas">
+            <Form>DokumAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="PrjConst.pas"/>
+        <DCCReference Include="..\Ortak\UBinarySave.pas"/>
+        <DCCReference Include="UTakvimIslemleri.pas"/>
+        <DCCReference Include="UBelgeIslemleri.pas">
+            <Form>BelgeIslemleriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKasaWizard.pas">
+            <Form>KasaWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHesapPlani.pas">
+            <Form>HesapPlaniDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UResim.pas">
+            <Form>ResimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URehberAyar.pas">
+            <Form>RehberAyarDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UPOSListeFrame.pas">
+            <Form>POSListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKrediKartiListeFrame.pas">
+            <Form>KrediKartiListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKrediKarti.pas">
+            <Form>KrediKarti</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UPOS.pas">
+            <Form>POS</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGirdi.pas">
+            <Form>GirdiAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTakvimAcilisKaydi.pas">
+            <Form>frmTakvimAcilis</Form>
+        </DCCReference>
+        <DCCReference Include="UHesapKoduPicker.pas">
+            <Form>HesapKoduPicker</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UCekListeFrame.pas">
+            <Form>CekSenetListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UCekAramaFrame.pas">
+            <Form>CekAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\USenetAramaFrame.pas">
+            <Form>SenetAramaFrame</Form>
+        </DCCReference>
+        <DCCReference Include="UKullaniciYetki.pas">
+            <Form>KullaniciYetkiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UTabloGiris.pas">
+            <Form>TabloGirisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UParaDegisiklik.pas">
+            <Form>ParaDegisiklikDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UReplikasyon.pas">
+            <Form>ReplikasyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTakvimKKEkstresi.pas">
+            <Form>TakvimKKEkstresiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTakvimGenelHareket.pas">
+            <Form>TakvimGenelHareketDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonCari.pas">
+            <Form>OpsiyonCariDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UGorevListeAramaFrame.pas">
+            <Form>GorevListeAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UGorevListeDlg.pas">
+            <Form>GorevListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonAksiyon.pas">
+            <Form>OpsiyonAksiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UStokAksiyonFrame.pas">
+            <Form>StokAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UStokAramaFrame.pas">
+            <Form>StokAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UTeklifAksiyonFrame.pas">
+            <Form>TeklifAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UTeklifAramaFrame.pas">
+            <Form>TeklifAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UStokListeDlg.pas">
+            <Form>StokListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UTeklifListeDlg.pas">
+            <Form>TeklifListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UStokGorevFrame.pas">
+            <Form>StokGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UTeklifGorevFrame.pas">
+            <Form>TeklifGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UStokWizard.pas">
+            <Form>StokWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonStok.pas">
+            <Form>OpsiyonStokDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UFirsatListeAramaFrame.pas">
+            <Form>FirsatListeAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UTakvimProje.pas">
+            <Form>TakvimProje</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UTakvimProjeAramaFrame.pas">
+            <Form>TakvimProjeAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UTeklifWizard.pas">
+            <Form>TeklifWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonTeklif.pas">
+            <Form>OpsiyonTeklifDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonFatura.pas">
+            <Form>OpsiyonFaturaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URehberWizard.pas">
+            <Form>RehberWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UCariFonksiyonlar.pas"/>
+        <DCCReference Include="IcerikFrame\UFaturalar.pas">
+            <Form>FaturalarDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UFaturaWizard.pas">
+            <Form>FaturaWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTablodanDuzenle.pas">
+            <Form>TablodanDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKasaTanimWizard.pas">
+            <Form>KasaTanimWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBankaTanimWizard.pas">
+            <Form>BankaTanimWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UAlarm.pas">
+            <Form>AlarmDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UStokTalepListe.pas">
+            <Form>StokTalepListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UFatTransferWizard.pas">
+            <Form>FatTransferWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UStokTalepAramaFrame.pas">
+            <Form>StokTalepAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UComboImgDuzenle.pas">
+            <Form>ImgListeAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Usifre.pas">
+            <Form>PasswordDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKullaniciDuzenle.pas">
+            <Form>KullaniciDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UStokSayim.pas">
+            <Form>StokSayimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonCekSenet.pas">
+            <Form>OpsiyonCekSenetDlg</Form>
+        </DCCReference>
+        <DCCReference Include="EntegraActivityAutomationService1.pas"/>
+        <DCCReference Include="UCekWizard.pas">
+            <Form>CekWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMakbuzWizard.pas">
+            <Form>MakbuzWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UNakitDlg.pas">
+            <Form>NakitDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UVersiyonGuncelle.pas"/>
+        <DCCReference Include="AramaFrame\UServisAramaFrame.pas">
+            <Form>ServisAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UServisGorevFrame.pas">
+            <Form>ServisGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UServisListeDlg.pas">
+            <Form>ServisListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="USecForm.pas">
+            <Form>SecimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UServisWizard.pas">
+            <Form>ServisWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URehberAramaEkrani.pas">
+            <Form>RehberAramaEkrani</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UDemirbasAramaFrame.pas">
+            <Form>DemirbasAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UDemirbasListeDlg.pas">
+            <Form>DemirbasListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UDemirbasGorevFrame.pas">
+            <Form>DemirbasGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UDemirbasWizard.pas">
+            <Form>DemirbasWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UAnaForm.pas">
+            <Form>AnaForm</Form>
+        </DCCReference>
+        <DCCReference Include="UKrediHesapMakineDlg.pas">
+            <Form>KrediHesapMakineDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKodAgaci.pas">
+            <Form>KodAgaciDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMailDokum.pas">
+            <Form>MailDokumDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UYedekCalistir.pas">
+            <Form>YedekCalistirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBekletme.pas">
+            <Form>BekletmeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USeyirDefteri.pas">
+            <Form>SeyirDefteriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="MSS_Sender.pas"/>
+        <DCCReference Include="IcerikFrame\UDokumSart.pas">
+            <Form>DokumSartDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonBanka.pas">
+            <Form>OpsiyonBankaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USiparisWizard.pas">
+            <Form>SiparisWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKaliteParametre.pas">
+            <Form>KaliteParametreDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGiris.pas">
+            <Form>HizliGirisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisTahsilat.pas">
+            <Form>HizliGirisTahsilatDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisIsk.pas">
+            <Form>HizliGirisIsk</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisBaski.pas">
+            <Form>HizliGirisBaskiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisKKTahsilat.pas">
+            <Form>HizliGirisKKTahsilatDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisKasaSay.pas">
+            <Form>HizliGirisKasaSayDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UGiderPusulasi.pas">
+            <Form>GiderPusulasiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKullaniciGiris.pas">
+            <Form>KullaniciGirisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonKasa.pas">
+            <Form>OpsiyonKasaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKampanyalar.pas">
+            <Form>KampanyalarDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UitsBusiness.pas"/>
+        <DCCReference Include="UItsEczaDepo.pas">
+            <Form>ITSEzcaDepoDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ItsServisler\DepoMalIadeServis.pas"/>
+        <DCCReference Include="ItsServisler\DepoSatisServis.pas"/>
+        <DCCReference Include="ItsServisler\DepoSatisIptalServis.pas"/>
+        <DCCReference Include="ItsServisler\DepoUrunDogrulamaServis.pas"/>
+        <DCCReference Include="ItsServisler\DeaktivasyonBildirimServis.pas"/>
+        <DCCReference Include="ItsServisler\DepoMalAlmServis.pas"/>
+        <DCCReference Include="UHizliGirisDokumDlg.pas">
+            <Form>HizliGirisDokumDlg</Form>
+        </DCCReference>
+        <DCCReference Include="GenUpdateWCF.pas"/>
+        <DCCReference Include="UEkipmanWizard.pas">
+            <Form>EkipmanWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UEkipmanListeDlg.pas">
+            <Form>EkipmanListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="kazip\KAZip.pas"/>
+        <DCCReference Include="UServisDetayPersonel.pas">
+            <Form>ServisDetayPersonelDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UServisIslemDetaylari.pas">
+            <Form>ServisIslemDetaylariDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UServisEkipmanSec.pas">
+            <Form>ServisEkipmanSecDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonServis.pas">
+            <Form>OpsiyonServisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URehberBilgiDuzenle.pas">
+            <Form>RehberBilgiDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UGENINIDuzenle.pas">
+            <Form>GENINIDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UServisTanimListeleriAramaFrame.pas">
+            <Form>ServisTanimListeleriAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UBankaKredileriListeTanimlariFrame.pas">
+            <Form>BankaKredileriListeTanimlariFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UDokumanGorevFrame.pas">
+            <Form>DokumanGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UDokumanAramaFrame.pas">
+            <Form>DokumanAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UDokumanAksiyonFrame.pas">
+            <Form>DokumanAksiyonFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UDokumanListeFrame.pas">
+            <Form>DokumanListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UDokumanWizard.pas">
+            <Form>DokumanWizard</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+            <Form>GirisKutusuEx</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\FileAssociationDetails.pas"/>
+        <DCCReference Include="AramaFrame\UUretimAramaFrame.pas">
+            <Form>UretimAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UUretimListeDlg.pas">
+            <Form>UretimListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UUretimWizard.pas">
+            <Form>UretimWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UKaliteYonetimAramaFrame.pas">
+            <Form>KaliteYonetimAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UKYDuzelticiVeOnleyiciFaalListeDlg.pas">
+            <Form>KYDuzelticiVeOnleyiciFaalListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UAlanlar.pas">
+            <Form>AlanlarDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UStokHizmetAra.pas">
+            <Form>StokHizmetAraDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDuyuruOku.pas">
+            <Form>DuyuruOkuDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UCokluSecim.pas">
+            <Form>CokluSecimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGenNotificationUtils.pas"/>
+        <DCCReference Include="UHizliGirisFatBaslikBilgileri.pas">
+            <Form>HizliGirisFatBaslikBilgileriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UEntegrasyonEslestirme.pas">
+            <Form>EntegrasyonEslestirmeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUretimRecete.pas">
+            <Form>UretimReceteDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UFiyatSor.pas">
+            <Form>FiyatSorDlg</Form>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UUretimGorevFrame.pas">
+            <Form>UretimGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UUretimEmriListeDlg.pas">
+            <Form>UretimEmriListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UUretimEmriAramaFrame.pas">
+            <Form>UretimEmriAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UUretimEmriWizard.pas">
+            <Form>UretimEmriWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UYilSonuDevirIslemleri.pas">
+            <Form>YilSonuDevirIslemleriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBarkodYazdir.pas">
+            <Form>BarkodYazdirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="MailReaderMapi2\ADODB2010.pas"/>
+        <DCCReference Include="MailReaderMapi2\DAO2010.pas"/>
+        <DCCReference Include="MailReaderMapi2\GenOutLookInterface.pas"/>
+        <DCCReference Include="MailReaderMapi2\MAPIOLEMailreader.pas"/>
+        <DCCReference Include="MailReaderMapi2\Outlook2010.pas"/>
+        <DCCReference Include="MailReaderMapi2\Excel2010.pas"/>
+        <DCCReference Include="MailReaderMapi2\Office2010.pas"/>
+        <DCCReference Include="UTerazi.pas">
+            <Form>TeraziDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UUretimPlanlamaListeDlg.pas">
+            <Form>UretimPlanlamaListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UUretimPlanlamaAramaFrame.pas">
+            <Form>UretimPlanlamaAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisAnaMenu.pas">
+            <Form>HizliGirisAnaMenu</Form>
+        </DCCReference>
+        <DCCReference Include="UIzleme.pas">
+            <Form>IzlemeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UFaturaKapama.pas">
+            <Form>FaturaKapamaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="Utablo.pas">
+            <Form>Tablo</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKategori.pas">
+            <Form>KategoriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonKasiyer.pas">
+            <Form>OpsiyonKasiyerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\USatinAlmaListeDlg.pas">
+            <Form>SatinAlmaListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="USatinAlmaWizard.pas">
+            <Form>SatinAlmaWizard</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\USatinAlmaAramaFrame.pas">
+            <Form>SatinAlmaAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UStokDurumDetay.pas">
+            <Form>StokDurumDetayDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URaporium.pas">
+            <Form>RaporiumDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UWebServis.pas"/>
+        <DCCReference Include="ListeFrame\UMaliyetlerListeFrame.pas">
+            <Form>MaliyetlerListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UMaliyetAramaFrame.pas">
+            <Form>MaliyetAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UHizliGirisPDKS.pas">
+            <Form>HizliGirisPDKSDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonDemirbas.pas">
+            <Form>OpsiyonDemirbasDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UFislerAramaFrame.pas">
+            <Form>FislerAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UFislerListeFrame.pas">
+            <Form>FislerListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Ubelgegiris.pas">
+            <Form>belgegirisdlg</Form>
+        </DCCReference>
+        <DCCReference Include="EFaturaOIB.pas"/>
+        <DCCReference Include="Gentegre.UI.EFatura.FirmaAra.pas">
+            <Form>EFaturaFirmaAra</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\GenoTIP.Ortak.GridPivotUtils.pas"/>
+        <DCCReference Include="UMasrafAnaliz.pas">
+            <Form>MasrafAnalizDlg</Form>
+        </DCCReference>
+        <DCCReference Include="GorevFrame\UIKGorevFrame.pas">
+            <Form>IKGorevFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UIKListeDlg.pas">
+            <Form>IKListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UIKDlgGenelAramaFrame.pas">
+            <Form>IKDlgGenelAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UIKWizard.pas">
+            <Form>IKWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UPDKSListeFrame.pas">
+            <Form>PDKSListeFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UIskontoDlg.pas">
+            <Form>IskontoDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\oPENsqlsERVER.pas">
+            <Form>OpenSQLServerForm</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonIK.pas">
+            <Form>OpsiyonIKDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMaasListe.pas">
+            <Form>MaasListeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBarkod.pas">
+            <Form>BarkodDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UCallerId.pas">
+            <Form>CallerIdDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UCariEkle.pas">
+            <Form>CariEkleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliSiparisSecim.pas">
+            <Form>HizliSiparisSecim</Form>
+        </DCCReference>
+        <DCCReference Include="UBelgeZarflari.pas">
+            <Form>BelgeZarflariDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGunsonuDlg.pas">
+            <Form>HizliGunsonuDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDokumanKaydet.pas">
+            <Form>DokumanKaydetDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USonlandir.pas">
+            <Form>SonlandirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKalibrasyon.pas">
+            <Form>KalibrasyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UHizliGunsonuForm.pas">
+            <Form>HizliGunsonuForm</Form>
+        </DCCReference>
+        <DCCReference Include="GenoTIP.eFatura.NativeApi.pas"/>
+        <DCCReference Include="UMesajGrup.pas">
+            <Form>MesajGrupDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UGorevDlg.pas">
+            <Form>GorevDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonDokuman.pas">
+            <Form>OpsiyonDokumanDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UScanner.pas">
+            <Form>ScannerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UYazarKasa_Ingenico.pas"/>
+        <DCCReference Include="..\Ortak\UProgramSonuDialog.pas">
+            <Form>ProgramSonuDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgSearchText.pas">
+            <Form>TextSearchDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgReplaceText.pas">
+            <Form>TextReplaceDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\dlgConfirmReplace.pas">
+            <Form>ConfirmReplaceDialog</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\uKosulDetayAra.pas">
+            <Form>KosulDetayAra</Form>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonUretimDlg.pas">
+            <Form>OpsiyonUretimDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\USMSIslemleri.pas"/>
+        <DCCReference Include="..\Ortak\UHazirSMS.pas">
+            <Form>HazirSMSDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UServisSonlandir.pas">
+            <Form>ServisSonlandirDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUyari.pas">
+            <Form>UyariDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMailSablonDuzenle.pas">
+            <Form>MailSablonDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UDemirbasDurumDegis.pas">
+            <Form>DemirbasDurumDegisDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UKYSapmaOlayListeDlg.pas">
+            <Form>KYSapmaOlayListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UUnitTests.pas"/>
+        <DCCReference Include="UKaliteToplanti.pas">
+            <Form>KaliteToplantiDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKYToplantiListeDlg.pas">
+            <Form>KYToplantiListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKYDuzelticiVeOnleyiciFaalWizard.pas">
+            <Form>KYDuzelticiVeOnleyiciFaalWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UKYSapmaOlayWizard.pas">
+            <Form>KYSapmaOlayWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMailGonderim.pas"/>
+        <DCCReference Include="UExceldenVeriAl.pas"/>
+        <DCCReference Include="URotatifDonemFaiz.pas">
+            <Form>RotatifDonemFaizDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UProjeMaliyet.pas">
+            <Form>ProjeMaliyetDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBankaHareketleri.pas">
+            <Form>BankaHareketlerDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBankaHareketKural.pas">
+            <Form>BankaHareketKuralDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USatinAlmaWizard2.pas">
+            <Form>SatinAlmaWizard2</Form>
+        </DCCReference>
+        <DCCReference Include="UStokTalepWizard.pas">
+            <Form>StokTalepWizard</Form>
+        </DCCReference>
+        <DCCReference Include="IcerikFrame\UFaturaTransferListe.pas">
+            <Form>FatTransferListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UIsEmriPersonelZaman.pas">
+            <Form>IsEmriPersonelZamanDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UMesajlasma.pas">
+            <Form>MesajlasmaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UFirsatListeDlg.pas">
+            <Form>FirsatListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UFirsatWizard.pas">
+            <Form>FirsatWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UProjeListeDlg.pas">
+            <Form>ProjeListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UProjeListeAramaFrame.pas">
+            <Form>ProjeListeAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UProjeWizard.pas">
+            <Form>ProjeWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTS\UUTSDlg.pas">
+            <Form>UTSDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTS\ModelApi.pas"/>
+        <DCCReference Include="UTS\Models.pas"/>
+        <DCCReference Include="UTS\RestUTS.pas"/>
+        <DCCReference Include="ListeFrame\UIsListesi.pas"/>
+        <DCCReference Include="UKYEgitimListeDlg.pas">
+            <Form>KYEgitimListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UKYDenetimWizard.pas">
+            <Form>KYDenetimWizardDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UKYDenetimListeDlg.pas">
+            <Form>KYDenetimListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UServisHareketEkle.pas">
+            <Form>ServisHareketDlg</Form>
+        </DCCReference>
+        <DCCReference Include="URichEdit.pas">
+            <Form>RichEditDlg</Form>
+        </DCCReference>
+        <DCCReference Include="ListeFrame\UKYKontrolListeDlg.pas">
+            <Form>KYKontrolListeDlg</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UOpsiyonKalite.pas">
+            <Form>OpsiyonKaliteDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UYetkiKategori.pas">
+            <Form>YetkiKategoriDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UBelgeDonusum.pas">
+            <Form>BelgeDonusumDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UGoogleSifre.pas">
+            <Form>GoogleSifreDlg</Form>
+        </DCCReference>
+        <DCCReference Include="AramaFrame\UFatTransferAramaFrame.pas">
+            <Form>FatTransferAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="UMutabakat.pas">
+            <Form>MutabakatDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UTahakkukDlg.pas">
+            <Form>TahakkukDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UUTSKontrol.pas">
+            <Form>UTSKontrolDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\3dparty\uUtility_my.pas"/>
+        <DCCReference Include="Social\MetaModules\fbCommon.pas"/>
+        <DCCReference Include="Social\MetaModules\fbDatamodule.pas"/>
+        <DCCReference Include="Social\MetaModules\fbClasses.pas"/>
+        <DCCReference Include="Social\uSocialListFrame.pas">
+            <Form>SocialMediaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Social\uSocialAramaFrame.pas">
+            <Form>SocialAramaFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Social\ImapModules\dmIMAPModule.pas">
+            <Form>IMAPModule</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Social\uOrtakLog.pas"/>
+        <DCCReference Include="Social\uSocialCommon.pas"/>
+        <DCCReference Include="..\GoogleTakvim\GenGoogleCalenderService.pas"/>
+        <DCCReference Include="URehberTemsilci.pas">
+            <Form>RehberTemsilciDlg</Form>
+        </DCCReference>
+        <DCCReference Include="UInfo.pas">
+            <Form>InfoDlg</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <RcItem Include="SekmeConfig.xml">
+            <ContainerId>ResourceItem</ContainerId>
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>sekmeconfig</ResourceId>
+        </RcItem>
+        <RcItem Include="..\BlinkSesi.wav">
+            <ContainerId>ResourceItem</ContainerId>
+            <ResourceType>WAVE</ResourceType>
+            <ResourceId>Blink</ResourceId>
+        </RcItem>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">Gentegre.dpr</Source>
+                </Source>
+                <Language>
+                    <Language Name="ProjectLang">$0000041F</Language>
+                </Language>
+                <VersionInfo>
+                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+                    <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+                    <VersionInfo Name="MajorVer">9</VersionInfo>
+                    <VersionInfo Name="MinorVer">0</VersionInfo>
+                    <VersionInfo Name="Release">6</VersionInfo>
+                    <VersionInfo Name="Build">0</VersionInfo>
+                    <VersionInfo Name="Debug">False</VersionInfo>
+                    <VersionInfo Name="PreRelease">False</VersionInfo>
+                    <VersionInfo Name="Special">False</VersionInfo>
+                    <VersionInfo Name="Private">False</VersionInfo>
+                    <VersionInfo Name="DLL">False</VersionInfo>
+                    <VersionInfo Name="Locale">1055</VersionInfo>
+                    <VersionInfo Name="CodePage">65001</VersionInfo>
+                </VersionInfo>
+                <VersionInfoKeys>
+                    <VersionInfoKeys Name="CompanyName">Feta Bilgisayar Ltd. Şti</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileDescription">Gentegre</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">9.0.6.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="InternalName">Gentegre</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalCopyright">Genyazılım</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalTrademarks"/>
+                    <VersionInfoKeys Name="OriginalFilename">Gentegre</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductName">Gentegre</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductVersion">9.0.6.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="Comments">Gentegre Cari - Kasa Programı</VersionInfoKeys>
+                    <VersionInfoKeys Name="Versiyon Değişilkiği"/>
+                    <VersionInfoKeys Name="LastCompiledTime">2023/02/04 17:02:16</VersionInfoKeys>
+                </VersionInfoKeys>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\Jcl290.bpl">JEDI Code Library RTL package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvCore290.bpl">JVCL Core Components Runtime Package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvSystem290.bpl">JVCL Core Components Runtime Package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvStdCtrls290.bpl">JVCL Standard Controls Runtime Package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvControls290.bpl">JVCL Visual Controls Runtime Package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvDlgs290.bpl">JVCL Dialog Components Runtime Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">True</Platform>
+            </Platforms>
+            <Deployment Version="5">
+                <DeployFile LocalName="..\BlinkSesi.wav" Configuration="Debug" Class="ProjectFile"/>
+                <DeployFile LocalName="..\BlinkSesi.wav" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\BlinkSesi.wav" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="C:\bin\290\Win32\Debug\Gentegre.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>Gentegre.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="D:\bin\290\Win64\Debug\Gentegre.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win64">
+                        <RemoteName>Gentegre.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Gentegre.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="SekmeConfig.xml" Configuration="Debug" Class="ProjectFile"/>
+                <DeployFile LocalName="SekmeConfig.xml" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="SekmeConfig.xml" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployClass Name="AdditionalDebugSymbols">
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidFileProvider">
+                    <Platform Name="Android">
+                        <RemoteDir>res\xml</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\xml</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeArmeabiFile">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\armeabi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeArmeabiv7aFile">
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeMipsFile">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\mips</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\mips</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidServiceOutput">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\arm64-v8a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidServiceOutput_Android32">
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashImageDef">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashImageDefV21">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStyles">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV21">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV31">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV35">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v35</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-v35</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v26</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v26</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconBackground">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconForeground">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconMonochrome">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconV33">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v33</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v33</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_Colors">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_ColorsDark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-night-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-night-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_DefaultAppIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon144">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon192">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon36">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-ldpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-ldpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon48">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon72">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon96">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon24">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon36">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon48">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon72">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon96">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage426">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-small</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-small</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage470">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-normal</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-normal</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage640">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-large</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-large</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage960">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xlarge</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xlarge</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_Strings">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedNotificationIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v24</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v24</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplash">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashDark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-night-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-night-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashV31">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashV31Dark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-night-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-night-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DebugSymbols">
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DependencyFramework">
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Required="true" Name="DependencyPackage">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.bpl</Extensions>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="File">
+                    <Platform Name="Android">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectAndroidManifest">
+                    <Platform Name="Android">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXDebug">
+                    <Platform Name="OSX64">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXEntitlements">
+                    <Platform Name="OSX32">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXInfoPList">
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXResource">
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Required="true" Name="ProjectOutput">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\arm64-v8a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Linux64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSXARM64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOutput_Android32">
+                    <Platform Name="Android64">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectUWPManifest">
+                    <Platform Name="Win32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win64x">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceDebug">
+                    <Platform Name="iOSDevice32">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSEntitlements">
+                    <Platform Name="iOSDevice32">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSInfoPList">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSLaunchScreen">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen</RemoteDir>
+                        <Operation>64</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen</RemoteDir>
+                        <Operation>64</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSResource">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="UWP_DelphiLogo150">
+                    <Platform Name="Win32">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win64">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="UWP_DelphiLogo44">
+                    <Platform Name="Win32">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win64">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iOS_AppStore1024">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_AppIcon152">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_AppIcon167">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_LaunchDark2x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Notification40">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Setting58">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_SpotLight80">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_AppIcon120">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_AppIcon180">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch2x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch3x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_LaunchDark2x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_LaunchDark3x">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\LaunchScreenImage.imageset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Notification40">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Notification60">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Setting58">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Setting87">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Spotlight120">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Spotlight80">
+                    <Platform Name="iOSDevice64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimARM64">
+                        <RemoteDir>..\$(PROJECTNAME).launchscreen\Assets\AppIcon.appiconset</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="Android64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimARM64" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Linux64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="OSX64" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="OSXARM64" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="Win64x" Name="$(PROJECTNAME)"/>
+            </Deployment>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+    <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
+</Project>

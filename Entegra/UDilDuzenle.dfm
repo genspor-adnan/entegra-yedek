@@ -1,0 +1,360 @@
+object DilDuzenleDlg: TDilDuzenleDlg
+  Left = 0
+  Top = 0
+  Caption = 'Diller'
+  ClientHeight = 649
+  ClientWidth = 1110
+  Color = clBtnFace
+  Font.Charset = TURKISH_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  OnCreate = FormCreate
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object GridGenIniDiller: TcxGrid
+    Left = 0
+    Top = 24
+    Width = 1110
+    Height = 597
+    Align = alClient
+    TabOrder = 0
+    object GridGenIniDillerDBTableView1: TcxGridDBTableView
+      DragMode = dmAutomatic
+      Navigator.Buttons.CustomButtons = <>
+      DataController.DataModeController.SmartRefresh = True
+      DataController.DataSource = DtsBolumler
+      DataController.DetailKeyFieldNames = 'SIRA'
+      DataController.KeyFieldNames = 'Grup'
+      DataController.MasterKeyFieldNames = 'BOLUM'
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsBehavior.DragFocusing = dfDragDrop
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsCustomize.ColumnMoving = False
+      OptionsCustomize.ColumnSorting = False
+      OptionsData.Appending = True
+      OptionsView.GroupByBox = False
+      object GridGenIniDillerDBTableView1SIRA: TcxGridDBColumn
+        DataBinding.FieldName = 'SIRA'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView1DEGER: TcxGridDBColumn
+        DataBinding.FieldName = 'DEGER'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView1BOLUM: TcxGridDBColumn
+        DataBinding.FieldName = 'BOLUM'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView1Grup: TcxGridDBColumn
+        DataBinding.FieldName = 'GRUP'
+        Visible = False
+      end
+    end
+    object GridGenIniDillerDBTableView2: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      DataController.DataModeController.SmartRefresh = True
+      DataController.DataSource = DtsGenIniDiller
+      DataController.DetailKeyFieldNames = 'BOLUM'
+      DataController.KeyFieldNames = 'Grup'
+      DataController.MasterKeyFieldNames = 'DEGER'
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsView.GroupByBox = False
+      OptionsView.Header = False
+      object GridGenIniDillerDBTableView2SIRA: TcxGridDBColumn
+        DataBinding.FieldName = 'SIRA'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView2DEGER: TcxGridDBColumn
+        DataBinding.FieldName = 'DEGER'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView2BOLUM: TcxGridDBColumn
+        DataBinding.FieldName = 'BOLUM'
+        Visible = False
+      end
+      object GridGenIniDillerDBTableView2Grup: TcxGridDBColumn
+        DataBinding.FieldName = 'GRUP'
+        Visible = False
+      end
+    end
+    object GridGenIniDillerLevel1: TcxGridLevel
+      GridView = GridGenIniDillerDBTableView1
+      object GridGenIniDillerLevel2: TcxGridLevel
+        GridView = GridGenIniDillerDBTableView2
+      end
+    end
+  end
+  object ToolBarProblem: TToolBar
+    Left = 0
+    Top = 0
+    Width = 1110
+    Height = 24
+    Margins.Bottom = 0
+    AutoSize = True
+    ButtonWidth = 47
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DockSite = True
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    EdgeInner = esLowered
+    EdgeOuter = esNone
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    List = True
+    ParentColor = False
+    ParentFont = False
+    PopupMenu = PopYeniDil
+    ShowCaptions = True
+    TabOrder = 1
+    Transparent = True
+    object BtnKaydet: TToolButton
+      Left = 0
+      Top = 0
+      Caption = 'Kaydet'
+      ImageIndex = 2
+      OnClick = BtnKaydetClick
+    end
+    object BtnIptal: TToolButton
+      Left = 47
+      Top = 0
+      Caption = #304'ptal'
+      ImageIndex = 3
+      OnClick = BtnIptalClick
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 621
+    Width = 1110
+    Height = 28
+    Align = alBottom
+    Color = 11776947
+    ParentBackground = False
+    TabOrder = 2
+    DesignSize = (
+      1110
+      28)
+    object KaydetTus: TBitBtn
+      Left = 952
+      Top = 2
+      Width = 75
+      Height = 25
+      Anchors = [akTop, akRight]
+      Caption = 'Uygula'
+      Default = True
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000D30E0000D30E00000001000000010000008C00000094
+        0000009C000000A5000000940800009C100000AD100000AD180000AD210000B5
+        210000BD210018B5290000C62900319C310000CE310029AD390031B5420018C6
+        420000D6420052A54A0029AD4A0029CE5A006BB5630000FF63008CBD7B00A5C6
+        94005AE7A500FF00FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF001B1B1B1B1B13
+        04161B1B1B1B1B1B1B1B1B1B1B1B1B0B0A01181B1B1B1B1B1B1B1B1B1B1B160A
+        0C030D1B1B1B1B1B1B1B1B1B1B1B050E0C0601191B1B1B1B1B1B1B1B1B130E0C
+        170E02001B1B1B1B1B1B1B1B1B0B1517170A0C01181B1B1B1B1B1B1B1B111717
+        13130C030D1B1B1B1B1B1B1B1B1B08081B1B070C01191B1B1B1B1B1B1B1B1B1B
+        1B1B100C02001B1B1B1B1B1B1B1B1B1B1B1B1B090C01181B1B1B1B1B1B1B1B1B
+        1B1B1B130C0F101B1B1B1B1B1B1B1B1B1B1B1B1B141A0F181B1B1B1B1B1B1B1B
+        1B1B1B1B1012181B1B1B1B1B1B1B1B1B1B1B1B1B1B191B1B1B1B1B1B1B1B1B1B
+        1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B}
+      TabOrder = 0
+      OnClick = KaydetTusClick
+    end
+    object IptalTus: TBitBtn
+      Left = 1033
+      Top = 2
+      Width = 75
+      Height = 25
+      Anchors = [akTop, akRight]
+      Cancel = True
+      Caption = 'Kapa&t'
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000220B0000220B000000010000000100000031DE000031
+        E7000031EF000031F700FF00FF000031FF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00040404040404
+        0404040404040404000004000004040404040404040404000004040000000404
+        0404040404040000040404000000000404040404040000040404040402000000
+        0404040400000404040404040404000000040000000404040404040404040400
+        0101010004040404040404040404040401010204040404040404040404040400
+        0201020304040404040404040404030201040403030404040404040404050203
+        0404040405030404040404040303050404040404040303040404040303030404
+        0404040404040403040403030304040404040404040404040404030304040404
+        0404040404040404040404040404040404040404040404040404}
+      ModalResult = 2
+      TabOrder = 1
+      OnClick = IptalTusClick
+    end
+  end
+  object TabGenIniDiller: TFDQuery
+    Connection = Tablo.FDCnn
+    AfterScroll = TabGenIniDillerAfterScroll
+    ParamData = <>
+    SQL.Strings = (
+      '')
+    Left = 38
+    Top = 244
+  end
+  object GENINITumDiller: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      'select '
+      '  * '
+      'from '
+      '  GENINI'
+      'where '
+      'DIL<>0 '
+      '--and   BOLUM=:PBolum '
+      ' order by '
+      '  SIRA')
+    Left = 37
+    Top = 301
+  end
+  object GENINIKullanimdakiDil: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      'select '
+      '  * '
+      'from '
+      '  GENINI'
+      'where '
+      ' DIL <> 0 AND'
+      '  DIL = :PDil'
+      'order by '
+      '  SIRA')
+    Left = 36
+    Top = 352
+  end
+  object DtsGenIniDiller: TDataSource
+    DataSet = TabGenIniDiller
+    Left = 116
+    Top = 244
+  end
+  object TabKomutCalistir: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    Left = 263
+    Top = 286
+  end
+  object TabTumDillerKontrol: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      'SELECT * FROM GENINI'
+      'WHERE'
+      'DIL=-1')
+    Left = 264
+    Top = 344
+  end
+  object Query1: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    Left = 424
+    Top = 312
+  end
+  object PopYeniDil: TPopupMenu
+    Left = 536
+    Top = 72
+    object YeniDilEkle1: TMenuItem
+      Caption = 'Yeni Dil Ekle'
+      OnClick = YeniDilEkle1Click
+    end
+  end
+  object Query2: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    Left = 424
+    Top = 368
+  end
+  object TabBolumler: TFDQuery
+    Connection = Tablo.FDCnn
+    AfterScroll = TabBolumlerAfterScroll
+    ParamData = <>
+    SQL.Strings = (
+      '')
+    Left = 328
+    Top = 208
+  end
+  object DtsBolumler: TDataSource
+    DataSet = TabBolumler
+    Left = 384
+    Top = 208
+  end
+end

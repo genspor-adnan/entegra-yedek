@@ -1,0 +1,1474 @@
+object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
+  Left = 0
+  Top = 0
+  Caption = 'Belge Opsiyonlar'
+  ClientHeight = 518
+  ClientWidth = 497
+  Color = clBtnFace
+  Font.Charset = TURKISH_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnShow = FormShow
+  TextHeight = 13
+  object PageControl1: TPageControl
+    Left = 0
+    Top = 0
+    Width = 497
+    Height = 492
+    ActivePage = TabSheetGenel
+    Align = alClient
+    TabOrder = 0
+    OnChange = PageControl1Change
+    object TabSheetGenel: TTabSheet
+      Caption = 'Genel'
+      OnShow = TabSheetGenelShow
+      object Label1: TLabel
+        Left = 153
+        Top = 77
+        Width = 116
+        Height = 13
+        Caption = 'Fatura Varsay'#305'lan Klasor'
+      end
+      object Label2: TLabel
+        Left = 153
+        Top = 121
+        Width = 115
+        Height = 13
+        Caption = 'Sipari'#351' Varsay'#305'lan Klasor'
+      end
+      object CheckFaturaPlaniOlustur: TcxCheckBox
+        Left = 4
+        Top = 49
+        Caption = 'T'#252'm Faturalara '#214'deme Plan'#305' Olu'#351'turmay'#305' Zorunlu Tut.'
+        TabOrder = 0
+        Transparent = True
+      end
+      object cxGroupBox9: TcxGroupBox
+        Left = 0
+        Top = 0
+        Caption = 'Vade Kullan'#305'm'#305
+        TabOrder = 1
+        Height = 45
+        Width = 291
+        object rdSatirlaraVade: TcxRadioButton
+          Left = 7
+          Top = 18
+          Width = 113
+          Height = 17
+          Caption = 'Her sat'#305'rda kullan'
+          TabOrder = 0
+        end
+        object rdBasligaVade: TcxRadioButton
+          Left = 146
+          Top = 18
+          Width = 113
+          Height = 17
+          Caption = 'Ba'#351'l'#305'kta kullan'
+          Checked = True
+          TabOrder = 1
+          TabStop = True
+        end
+      end
+      object cxGroupBox1: TcxGroupBox
+        Left = 4
+        Top = 73
+        Caption = 'Ondal'#305'k Basamak Say'#305's'#305
+        TabOrder = 2
+        Height = 90
+        Width = 143
+        object ComboDijitBr: TcxComboBox
+          Left = 90
+          Top = 18
+          Properties.DropDownListStyle = lsFixedList
+          Properties.HideSelection = False
+          Properties.Items.Strings = (
+            '2'
+            '4'
+            '6'
+            '8')
+          Properties.ReadOnly = False
+          Properties.OnCloseUp = ComboDijitBrPropertiesCloseUp
+          Properties.OnPopup = ComboDijitBrPropertiesPopup
+          TabOrder = 0
+          Width = 46
+        end
+        object ComboDijitTut: TcxComboBox
+          Left = 90
+          Top = 39
+          Properties.DropDownListStyle = lsFixedList
+          Properties.HideSelection = False
+          Properties.Items.Strings = (
+            '2'
+            '4'
+            '6'
+            '8')
+          Properties.ReadOnly = False
+          TabOrder = 1
+          Width = 46
+        end
+        object cxLabel2: TcxLabel
+          Left = 3
+          Top = 40
+          Caption = 'Tutar :'
+        end
+        object cxLabel1: TcxLabel
+          Left = 3
+          Top = 19
+          Caption = 'Birim Fiyat :'
+        end
+        object ComboDijitMiktar: TcxComboBox
+          Left = 90
+          Top = 60
+          Properties.DropDownListStyle = lsFixedList
+          Properties.HideSelection = False
+          Properties.Items.Strings = (
+            '2'
+            '3'
+            '4'
+            '5'
+            '6')
+          Properties.ReadOnly = False
+          TabOrder = 4
+          Text = '2'
+          Width = 46
+        end
+        object cxLabel10: TcxLabel
+          Left = 3
+          Top = 62
+          Caption = 'Miktar :'
+        end
+      end
+      object VarsayilanKlasor: TcxButtonEdit
+        Left = 153
+        Top = 96
+        Properties.Buttons = <
+          item
+            Default = True
+            Kind = bkEllipsis
+          end>
+        Properties.ReadOnly = True
+        Properties.OnButtonClick = VarsayilanKlasorPropertiesButtonClick
+        TabOrder = 3
+        Text = 'VarsayilanKlasor'
+        Width = 138
+      end
+      object VarsayilanKlasorSiparis: TcxButtonEdit
+        Left = 153
+        Top = 140
+        Properties.Buttons = <
+          item
+            Default = True
+            Kind = bkEllipsis
+          end>
+        Properties.ReadOnly = True
+        Properties.OnButtonClick = VarsayilanKlasorSiparisPropertiesButtonClick
+        TabOrder = 4
+        Text = 'VarsayilanKlasor'
+        Width = 138
+      end
+      object chStkVarsKalmayanGoster: TcxCheckBox
+        Left = 2
+        Top = 169
+        Caption = 'Stok eklerken varsay'#305'lan olarak kalmayanlar'#305' da g'#246'ster.'
+        TabOrder = 5
+        Transparent = True
+      end
+      object cxGroupBox2: TcxGroupBox
+        Left = 9
+        Top = 390
+        Caption = 'Excel Kolon Bilgileri'
+        TabOrder = 6
+        Transparent = True
+        Height = 72
+        Width = 174
+        object btnExcelKolon: TcxButton
+          Left = 20
+          Top = 44
+          Width = 124
+          Height = 25
+          Caption = 'Excel Kolon Ayarla'
+          TabOrder = 0
+          OnClick = btnExcelKolonClick
+        end
+        object cxLabel4: TcxLabel
+          Left = 3
+          Top = 20
+          Caption = 'Belge Olu'#351'um '#350'ekli'
+          Properties.WordWrap = True
+          Transparent = True
+          Width = 92
+        end
+        object cbbelgeOlusturma: TcxImageComboBox
+          Left = 101
+          Top = 17
+          EditValue = 0
+          Properties.ImmediatePost = True
+          Properties.Items = <
+            item
+              Description = 'Toplu'
+              ImageIndex = 0
+              Value = 0
+            end
+            item
+              Description = 'Ayr'#305'k'
+              Value = 1
+            end>
+          TabOrder = 2
+          Width = 68
+        end
+      end
+      object BtnIskontoYetki: TcxButton
+        Left = 186
+        Top = 390
+        Width = 110
+        Height = 25
+        Caption = #304'skonto Yetkileri'
+        TabOrder = 7
+        Visible = False
+        OnClick = BtnIskontoYetkiClick
+      end
+      object CheckDovizTakibi: TcxCheckBox
+        Left = 2
+        Top = 190
+        Caption = 'Al'#305#351'/Sat'#305#351' Belgelerinde D'#246'vizli Fiyat Bilgisi Bulunsun'
+        TabOrder = 8
+        Transparent = True
+      end
+      object cxButton1: TcxButton
+        Left = 186
+        Top = 414
+        Width = 110
+        Height = 25
+        Caption = 'Mail '#350'ablonu'
+        TabOrder = 9
+        OnClick = cxButton1Click
+      end
+      object CheckDonusumGozuksun: TcxCheckBox
+        Left = 2
+        Top = 211
+        Caption = 'D'#246'n'#252#351#252'm bilgileri listelerde g'#246'z'#252'ks'#252'n'
+        TabOrder = 10
+        Transparent = True
+      end
+      object TevkifatOranlariTus: TcxButton
+        Left = 186
+        Top = 438
+        Width = 110
+        Height = 25
+        Caption = 'Tevkifat Oranlar'#305
+        TabOrder = 11
+        OnClick = TevkifatOranlariTusClick
+      end
+      object CheckKDVDahil: TcxCheckBox
+        Left = 2
+        Top = 232
+        Caption = 'Fi'#351'lerde '#252'cret girerken otomatik "KDV dahil" i'#351'aretli olsun'
+        State = cbsChecked
+        TabOrder = 12
+        Transparent = True
+      end
+      object CheckBoxEksiskontoya: TcxCheckBox
+        Left = 2
+        Top = 253
+        Caption = 'Eksi iskontoya izin ver'
+        TabOrder = 13
+        Transparent = True
+      end
+      object cxGroupBox3: TcxGroupBox
+        Left = 297
+        Top = 0
+        Caption = 'Bo'#351'luk Kontrolleri'
+        TabOrder = 14
+        Height = 163
+        Width = 185
+        object CheckBCBaslik: TcxCheckBox
+          Left = 11
+          Top = 19
+          Caption = 'Ba'#351'l'#305'k'
+          TabOrder = 0
+          Transparent = True
+        end
+        object CheckBCAdres: TcxCheckBox
+          Left = 11
+          Top = 44
+          Caption = 'Adres'
+          TabOrder = 1
+          Transparent = True
+        end
+        object CheckBCIl: TcxCheckBox
+          Left = 11
+          Top = 94
+          Caption = #304'l'
+          TabOrder = 2
+          Transparent = True
+        end
+        object CheckBCIlce: TcxCheckBox
+          Left = 11
+          Top = 69
+          Caption = #304'l'#231'e'
+          TabOrder = 3
+          Transparent = True
+        end
+        object CheckBCVNo: TcxCheckBox
+          Left = 81
+          Top = 44
+          Caption = 'Vergi No'
+          TabOrder = 4
+          Transparent = True
+        end
+        object CheckBCVD: TcxCheckBox
+          Left = 81
+          Top = 19
+          Caption = 'Vergi Dairesi'
+          TabOrder = 5
+          Transparent = True
+        end
+        object CheckBCFiyatAdi: TcxCheckBox
+          Left = 81
+          Top = 94
+          Caption = 'Fiyat Ad'#305
+          TabOrder = 6
+          Transparent = True
+        end
+        object CheckBCDepo: TcxCheckBox
+          Left = 81
+          Top = 69
+          Caption = 'Depo'
+          TabOrder = 7
+          Transparent = True
+        end
+        object chkVade: TcxCheckBox
+          Left = 11
+          Top = 118
+          Caption = 'Vade'
+          TabOrder = 8
+          Transparent = True
+        end
+      end
+      object ChkProjeGozuksun: TcxCheckBox
+        Left = 2
+        Top = 274
+        Caption = 'Proje Bilgileri Fatura ve Tahakkukda G'#246'z'#252'ks'#252'n'
+        TabOrder = 15
+        Transparent = True
+      end
+      object ChkDemirbasGozuksun: TcxCheckBox
+        Left = 2
+        Top = 293
+        Caption = 'Demirba'#351' Bilgileri Fatura ve Tahakkukda G'#246'z'#252'ks'#252'n'
+        TabOrder = 16
+        Transparent = True
+      end
+      object ComboProjeFirsatSec: TcxImageComboBox
+        Left = 112
+        Top = 362
+        EditValue = 0
+        Properties.ImmediatePost = True
+        Properties.ImmediateUpdateText = True
+        Properties.Items = <
+          item
+            Description = 'Proje'
+            ImageIndex = 0
+            Value = 11
+          end
+          item
+            Description = 'F'#305'rsat'
+            Value = 1
+          end>
+        TabOrder = 17
+        Width = 91
+      end
+      object cxLabel15: TcxLabel
+        Left = 7
+        Top = 364
+        Caption = 'Proje / F'#305'rsat Se'#231'imi'
+        Properties.WordWrap = True
+        Transparent = True
+        Width = 98
+      end
+      object CheckEnBoy: TcxCheckBox
+        Left = 3
+        Top = 313
+        Caption = 'En x Boy y'#252'zey bilgileri girilebilsin'
+        TabOrder = 19
+        Transparent = True
+      end
+      object CheckPozNo: TcxCheckBox
+        Left = 6
+        Top = 335
+        Caption = 'Poz No otomatik versin. Aral'#305'k'
+        Style.TransparentBorder = False
+        TabOrder = 20
+        Transparent = True
+      end
+      object SpinEditPozNo: TcxSpinEdit
+        Left = 172
+        Top = 335
+        TabOrder = 21
+        Value = 10
+        Width = 45
+      end
+      object CheckFaturaHastaSekmesi: TcxCheckBox
+        Left = 310
+        Top = 339
+        Caption = 'Ba'#351'l'#305'kta Hasta Bilgisi Sekmesi'
+        Style.TransparentBorder = False
+        TabOrder = 22
+        Transparent = True
+      end
+      object cxGroupBox4: TcxGroupBox
+        Left = 312
+        Top = 389
+        Caption = #214'zelkod Giri'#351' Se'#231'imi'
+        TabOrder = 23
+        Transparent = True
+        Height = 72
+        Width = 174
+        object cxLabel16: TcxLabel
+          Left = 5
+          Top = 20
+          Caption = #214'zelkod 1 '
+          Properties.WordWrap = True
+          Transparent = True
+          Width = 54
+        end
+        object ComboOzelkod1: TcxImageComboBox
+          Left = 57
+          Top = 17
+          EditValue = 0
+          Properties.ImmediatePost = True
+          Properties.Items = <
+            item
+              Description = 'Yaz'#305
+              ImageIndex = 0
+              Value = 0
+            end
+            item
+              Description = 'Liste'
+              Value = 1
+            end>
+          Properties.OnChange = ComboOzelkod1PropertiesChange
+          TabOrder = 1
+          Width = 55
+        end
+        object ComboOzelkod2: TcxImageComboBox
+          Left = 58
+          Top = 44
+          EditValue = 0
+          Properties.ImmediatePost = True
+          Properties.Items = <
+            item
+              Description = 'Yaz'#305
+              ImageIndex = 0
+              Value = 0
+            end
+            item
+              Description = 'Liste'
+              Value = 1
+            end>
+          Properties.OnChange = ComboOzelkod2PropertiesChange
+          TabOrder = 2
+          Width = 55
+        end
+        object cxLabel17: TcxLabel
+          Left = 5
+          Top = 47
+          Caption = #214'zelkod 2'
+          Properties.WordWrap = True
+          Transparent = True
+          Width = 51
+        end
+        object BtnOzelkodListe1: TcxButton
+          Left = 118
+          Top = 15
+          Width = 48
+          Height = 25
+          Caption = 'Liste Gir'
+          TabOrder = 4
+          OnClick = BtnOzelkodListe1Click
+        end
+        object BtnOzelkodListe2: TcxButton
+          Left = 119
+          Top = 42
+          Width = 48
+          Height = 25
+          Caption = 'Liste Gir'
+          TabOrder = 5
+          OnClick = BtnOzelkodListe2Click
+        end
+      end
+    end
+    object GelenFaturaPage: TTabSheet
+      Caption = 'Gelen Fatura'
+      object GBGelFatListe: TcxGroupBox
+        Left = 148
+        Top = 172
+        Caption = 'Listeleri Ayarlama'
+        TabOrder = 0
+        Height = 154
+        Width = 137
+        object cxButtonEdit1: TcxButtonEdit
+          Left = 32
+          Top = 64
+          Properties.Buttons = <
+            item
+              Default = True
+              Kind = bkEllipsis
+            end>
+          TabOrder = 0
+          Text = 'cxButtonEdit1'
+          Width = 121
+        end
+      end
+      object GBGelFatDetay: TcxGroupBox
+        Left = 147
+        Top = 3
+        Caption = 'Detay'
+        TabOrder = 1
+        Height = 158
+        Width = 137
+      end
+      object cxGroupBox5: TcxGroupBox
+        Left = 3
+        Top = 3
+        Caption = 'Gelen Fatura Ek Alanlar'#305
+        TabOrder = 2
+        Height = 159
+        Width = 134
+        object GelenFaturaDetaySablonList: TcxListBox
+          Left = 2
+          Top = 45
+          Width = 130
+          Height = 112
+          Align = alClient
+          ItemHeight = 16
+          ParentFont = False
+          Style.Font.Charset = DEFAULT_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.IsFontAssigned = True
+          TabOrder = 0
+          OnClick = GelenFaturaDetaySablonListClick
+        end
+        object ToolBar1: TToolBar
+          AlignWithMargins = True
+          Left = 5
+          Top = 21
+          Width = 124
+          Height = 24
+          Margins.Bottom = 0
+          AutoSize = True
+          Caption = 'AletCubugu'
+          Color = clTeal
+          DockSite = True
+          DrawingStyle = dsGradient
+          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+          EdgeInner = esLowered
+          EdgeOuter = esNone
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          HotTrackColor = 65408
+          List = True
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 1
+          Transparent = True
+          object GelenFaturaDetaySablonEkleTus: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'Projeye Ba'#287'la'
+            ImageIndex = 0
+            OnClick = GelenFaturaDetaySablonEkleTusClick
+          end
+          object GelenFaturaDetayDuzeltTus: TToolButton
+            Left = 23
+            Top = 0
+            Caption = 'GelenFaturaDetayDuzeltTus'
+            ImageIndex = 7
+            OnClick = GelenFaturaDetayDuzeltTusClick
+          end
+          object GelenFaturaDetaySilTus: TToolButton
+            Left = 46
+            Top = 0
+            Caption = 'ToolButton1'
+            ImageIndex = 1
+            OnClick = GelenFaturaDetaySilTusClick
+          end
+        end
+      end
+      object cxGroupBox7: TcxGroupBox
+        Left = 3
+        Top = 171
+        Caption = 'Gelen Sipari'#351' Ek Alanlar'#305
+        TabOrder = 3
+        Height = 154
+        Width = 134
+        object GelenSiparisDetaySablonList: TcxListBox
+          Left = 2
+          Top = 45
+          Width = 130
+          Height = 107
+          Align = alClient
+          ItemHeight = 16
+          ParentFont = False
+          Style.Font.Charset = DEFAULT_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.IsFontAssigned = True
+          TabOrder = 0
+          OnClick = GelenSiparisDetaySablonListClick
+        end
+        object ToolBar3: TToolBar
+          AlignWithMargins = True
+          Left = 5
+          Top = 21
+          Width = 124
+          Height = 24
+          Margins.Bottom = 0
+          AutoSize = True
+          Caption = 'AletCubugu'
+          Color = clTeal
+          DockSite = True
+          DrawingStyle = dsGradient
+          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+          EdgeInner = esLowered
+          EdgeOuter = esNone
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          HotTrackColor = 65408
+          List = True
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 1
+          Transparent = True
+          object GelenSiparisDetaySablonEkleTus: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'Projeye Ba'#287'la'
+            ImageIndex = 0
+            OnClick = GelenSiparisDetaySablonEkleTusClick
+          end
+          object GelenSiparisDetaySablonDuzenleTus: TToolButton
+            Left = 23
+            Top = 0
+            Caption = 'GelenFaturaDetayDuzeltTus'
+            ImageIndex = 7
+            OnClick = GelenSiparisDetaySablonDuzenleTusClick
+          end
+          object GelenSiparisDetaySablonSilTus: TToolButton
+            Left = 46
+            Top = 0
+            Caption = 'ToolButton1'
+            ImageIndex = 1
+            OnClick = GelenSiparisDetaySablonSilTusClick
+          end
+        end
+      end
+      object cxLabel11: TcxLabel
+        Left = 2
+        Top = 341
+        Caption = 'S.Meslek Stopaj'#305' Hesab'#305
+      end
+      object EditSerbestMeslek: TcxTextEdit
+        Left = 147
+        Top = 340
+        TabOrder = 5
+        Width = 138
+      end
+      object cxLabel3: TcxLabel
+        Left = 2
+        Top = 363
+        Caption = 'Kira Stopaj'#305' Hesab'#305
+      end
+      object EditKira: TcxTextEdit
+        Left = 147
+        Top = 362
+        TabOrder = 7
+        Width = 138
+      end
+      object cxLabel13: TcxLabel
+        Left = 2
+        Top = 385
+        Caption = 'Gider Pusulas'#305' Stopaj'#305' Hesab'#305
+      end
+      object EditGiderPusulasi: TcxTextEdit
+        Left = 148
+        Top = 384
+        TabOrder = 9
+        Width = 138
+      end
+    end
+    object GidenFaturaPage: TTabSheet
+      Caption = 'Giden Fatura'
+      ImageIndex = 1
+      object GBGidFatListe: TcxGroupBox
+        Left = 147
+        Top = 168
+        Caption = 'Listeleri Ayarlama'
+        TabOrder = 0
+        Height = 161
+        Width = 137
+        object GridListeDuzenle: TcxGrid
+          Left = 2
+          Top = 18
+          Width = 133
+          Height = 141
+          Align = alClient
+          TabOrder = 0
+          object GridListeDuzenleDBTableView1: TcxGridDBTableView
+            Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
+            OnCellDblClick = GridListeDuzenleDBTableView1CellDblClick
+            DataController.DataSource = DtsListeDuzenle
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsData.CancelOnExit = False
+            OptionsData.Deleting = False
+            OptionsData.DeletingConfirmation = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.CellSelect = False
+            OptionsSelection.InvertSelect = False
+            OptionsView.GroupByBox = False
+            object GridListeDuzenleDBTableView1ANAHTAR: TcxGridDBColumn
+              Caption = 'B'#246'l'#252'm'
+              DataBinding.FieldName = 'ANAHTAR'
+              DataBinding.IsNullValueType = True
+              Width = 130
+            end
+            object GridListeDuzenleDBTableView1DEGER: TcxGridDBColumn
+              DataBinding.FieldName = 'DEGER'
+              DataBinding.IsNullValueType = True
+              Visible = False
+            end
+          end
+          object GridListeDuzenleLevel1: TcxGridLevel
+            GridView = GridListeDuzenleDBTableView1
+          end
+        end
+      end
+      object GBGidFatDetay: TcxGroupBox
+        Left = 147
+        Top = 3
+        Caption = 'Detay'
+        TabOrder = 1
+        Height = 161
+        Width = 137
+        object GridListeDetayDuzenle: TcxGrid
+          Left = 2
+          Top = 18
+          Width = 133
+          Height = 141
+          Align = alClient
+          TabOrder = 0
+          object GridListeDetayDuzenleTableView1: TcxGridDBTableView
+            Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
+            OnCellDblClick = GridListeDetayDuzenleTableView1CellDblClick
+            DataController.DataSource = DtsTabListeDetayDuzenle
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsData.CancelOnExit = False
+            OptionsData.Deleting = False
+            OptionsData.DeletingConfirmation = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.CellSelect = False
+            OptionsSelection.InvertSelect = False
+            OptionsView.GroupByBox = False
+            object cxGridDBColumn1: TcxGridDBColumn
+              Caption = 'B'#246'l'#252'm'
+              DataBinding.FieldName = 'ANAHTAR'
+              DataBinding.IsNullValueType = True
+              Width = 130
+            end
+            object cxGridDBColumn2: TcxGridDBColumn
+              DataBinding.FieldName = 'DEGER'
+              DataBinding.IsNullValueType = True
+              Visible = False
+            end
+          end
+          object cxGridLevel1: TcxGridLevel
+            GridView = GridListeDetayDuzenleTableView1
+          end
+        end
+      end
+      object cxGroupBox6: TcxGroupBox
+        Left = 5
+        Top = 3
+        Caption = 'Giden Fatura Ek Alanlar'#305
+        TabOrder = 2
+        Height = 161
+        Width = 134
+        object GidenFaturaDetaySablonList: TcxListBox
+          Left = 2
+          Top = 45
+          Width = 130
+          Height = 114
+          Align = alClient
+          ItemHeight = 16
+          ParentFont = False
+          Style.Font.Charset = DEFAULT_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.IsFontAssigned = True
+          TabOrder = 0
+          OnClick = GidenFaturaDetaySablonListClick
+        end
+        object ToolBar2: TToolBar
+          AlignWithMargins = True
+          Left = 5
+          Top = 21
+          Width = 124
+          Height = 24
+          Margins.Bottom = 0
+          AutoSize = True
+          Caption = 'AletCubugu'
+          Color = clTeal
+          DockSite = True
+          DrawingStyle = dsGradient
+          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+          EdgeInner = esLowered
+          EdgeOuter = esNone
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          HotTrackColor = 65408
+          List = True
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 1
+          Transparent = True
+          object GidenFaturaDetayEkleTus: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'Projeye Ba'#287'la'
+            ImageIndex = 0
+            OnClick = GidenFaturaDetayEkleTusClick
+          end
+          object GidenFaturaDetayDuzeltTus: TToolButton
+            Left = 23
+            Top = 0
+            Caption = 'ToolButton4'
+            ImageIndex = 7
+            OnClick = GidenFaturaDetayDuzeltTusClick
+          end
+          object GidenFaturaDetaySilTus: TToolButton
+            Left = 46
+            Top = 0
+            Caption = 'ToolButton1'
+            ImageIndex = 1
+            OnClick = GidenFaturaDetaySilTusClick
+          end
+        end
+      end
+      object cxGroupBox8: TcxGroupBox
+        Left = 4
+        Top = 169
+        Caption = 'Giden Sipari'#351' Ek Alanlar'#305
+        TabOrder = 3
+        Height = 160
+        Width = 134
+        object GidenSiparisDetaySablonList: TcxListBox
+          Left = 2
+          Top = 45
+          Width = 130
+          Height = 113
+          Align = alClient
+          ItemHeight = 16
+          ParentFont = False
+          Style.Font.Charset = DEFAULT_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.IsFontAssigned = True
+          TabOrder = 0
+          OnClick = GidenSiparisDetaySablonListClick
+        end
+        object ToolBar4: TToolBar
+          AlignWithMargins = True
+          Left = 5
+          Top = 21
+          Width = 124
+          Height = 24
+          Margins.Bottom = 0
+          AutoSize = True
+          Caption = 'AletCubugu'
+          Color = clTeal
+          DockSite = True
+          DrawingStyle = dsGradient
+          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+          EdgeInner = esLowered
+          EdgeOuter = esNone
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          HotTrackColor = 65408
+          List = True
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 1
+          Transparent = True
+          object GidenSiparisDetaySablonEkleTus: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'Projeye Ba'#287'la'
+            ImageIndex = 0
+            OnClick = GidenSiparisDetaySablonEkleTusClick
+          end
+          object GidenSiparisDetaySablonDuzeltTus: TToolButton
+            Left = 23
+            Top = 0
+            Caption = 'ToolButton4'
+            ImageIndex = 7
+            OnClick = GidenSiparisDetaySablonDuzeltTusClick
+          end
+          object GidenSiparisDetaySablonSilTus: TToolButton
+            Left = 46
+            Top = 0
+            Caption = 'ToolButton1'
+            ImageIndex = 1
+            OnClick = GidenSiparisDetaySablonSilTusClick
+          end
+        end
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'E-Belge'
+      ImageIndex = 3
+      object GroupEFaturaBag: TcxGroupBox
+        Left = 28
+        Top = 44
+        Caption = 'Ba'#287'lant'#305
+        TabOrder = 0
+        Visible = False
+        Height = 125
+        Width = 413
+        object cxLabel5: TcxLabel
+          Left = 4
+          Top = 19
+          Caption = 'Entegrat'#246'r  '
+        end
+        object Entegrator: TcxTextEdit
+          Left = 96
+          Top = 18
+          TabOrder = 1
+          Width = 289
+        end
+        object cxLabel6: TcxLabel
+          Left = 4
+          Top = 46
+          Caption = 'Adres'
+        end
+        object Ent_Adres: TcxTextEdit
+          Left = 96
+          Top = 45
+          TabOrder = 3
+          Width = 289
+        end
+        object cxLabel7: TcxLabel
+          Left = 4
+          Top = 73
+          Caption = 'Kullan'#305'c'#305
+        end
+        object EditEnt_Kullanici: TcxTextEdit
+          Left = 96
+          Top = 72
+          TabOrder = 5
+          Width = 289
+        end
+        object cxLabel8: TcxLabel
+          Left = 4
+          Top = 100
+          Caption = #350'ifre'
+        end
+        object EditEnt_Sifre: TcxTextEdit
+          Left = 96
+          Top = 99
+          Properties.EchoMode = eemPassword
+          TabOrder = 7
+          Width = 289
+        end
+      end
+      object cxLabel9: TcxLabel
+        Left = 30
+        Top = 186
+        Caption = 'Varsay'#305'lan Senaryo'
+        FocusControl = ComboSENARYO
+        Properties.WordWrap = True
+        Transparent = True
+        Width = 96
+      end
+      object ComboSENARYO: TcxImageComboBox
+        Left = 126
+        Top = 183
+        Properties.Alignment.Horz = taLeftJustify
+        Properties.ImageAlign = iaRight
+        Properties.ImmediatePost = True
+        Properties.Items = <
+          item
+            Description = 'Temel'
+            ImageIndex = 0
+            Value = 1
+          end
+          item
+            Description = 'Ticari'
+            Value = 2
+          end
+          item
+            Description = #304'la'#231'_T'#305'bbiCihaz'
+            Value = 8
+          end>
+        Style.Color = clWhite
+        TabOrder = 2
+        Width = 197
+      end
+      object ComboFatKullanimi: TcxImageComboBox
+        Left = 126
+        Top = 13
+        Properties.Alignment.Horz = taLeftJustify
+        Properties.ImageAlign = iaRight
+        Properties.ImmediatePost = True
+        Properties.Items = <
+          item
+            Description = 'Ka'#287#305't Fatura'
+            ImageIndex = 0
+            Value = 0
+          end
+          item
+            Description = 'E-Fatura'
+            Value = 1
+          end
+          item
+            Description = 'E-Fatura + E-Ar'#351'iv'
+            Value = '11'
+          end>
+        Properties.OnChange = ComboFatKullanimiPropertiesEditValueChanged
+        Properties.OnEditValueChanged = ComboFatKullanimiPropertiesEditValueChanged
+        Style.Color = clWhite
+        TabOrder = 3
+        Width = 197
+      end
+      object cxLabel12: TcxLabel
+        Left = 30
+        Top = 16
+        Caption = 'Fatura Kullan'#305'm'#305
+        FocusControl = ComboFatKullanimi
+        Properties.WordWrap = True
+        Transparent = True
+        Width = 79
+      end
+      object cxLabel14: TcxLabel
+        Left = 34
+        Top = 219
+        Caption = 'Veri Taban'#305
+      end
+      object EFaturaDB: TcxTextEdit
+        Left = 126
+        Top = 218
+        TabOrder = 6
+        Width = 289
+      end
+      object CheckEIrsaliye: TcxCheckBox
+        Left = 28
+        Top = 285
+        Caption = 'E-'#304'rsaliye Kullan'#305'mda'
+        TabOrder = 7
+        Transparent = True
+      end
+      object CheckIhracatGonderilsin: TcxCheckBox
+        Left = 28
+        Top = 261
+        Caption = #304'hracat Faturalar'#305' da G'#246'nderilsin'
+        TabOrder = 8
+        Transparent = True
+      end
+    end
+    object SheetSiparis: TTabSheet
+      Caption = 'Sipari'#351
+      ImageIndex = 4
+      object PCSiparis: TcxPageControl
+        Left = 0
+        Top = 73
+        Width = 489
+        Height = 391
+        Align = alClient
+        TabOrder = 0
+        Properties.ActivePage = SheetAlinanSip
+        Properties.CustomButtons.Buttons = <>
+        OnPageChanging = PCSiparisPageChanging
+        ClientRectBottom = 387
+        ClientRectLeft = 4
+        ClientRectRight = 485
+        ClientRectTop = 24
+        object SheetAlinanSip: TcxTabSheet
+          Tag = 19
+          Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
+          ImageIndex = 0
+          object GridDurumBaglanti: TcxGrid
+            Left = 0
+            Top = 0
+            Width = 481
+            Height = 363
+            Align = alClient
+            PopupMenu = PopupDurumBglanti
+            TabOrder = 0
+            object GridDurumBaglantiDBTableView1: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataSource = DtsDurumBaglanti
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsView.GroupByBox = False
+              object GridDurumBaglantiDBTableView1ID: TcxGridDBColumn
+                DataBinding.FieldName = 'ID'
+                DataBinding.IsNullValueType = True
+                Visible = False
+              end
+              object GridDurumBaglantiDBTableView1AKTIF: TcxGridDBColumn
+                Caption = 'Aktif'
+                DataBinding.FieldName = 'AKTIF'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.cxEditRepository1CheckBoxItem1
+                Width = 32
+              end
+              object GridDurumBaglantiDBTableView1KAYNAKDURUM: TcxGridDBColumn
+                Caption = 'Kaynak'
+                DataBinding.FieldName = 'KAYNAKDURUM'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.repTeklifDurumu
+                Options.Editing = False
+                Options.Focusing = False
+                Width = 66
+              end
+              object GridDurumBaglantiDBTableView1HEDEFDURUM: TcxGridDBColumn
+                Caption = 'Hedef'
+                DataBinding.FieldName = 'HEDEFDURUM'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.repTeklifDurumu
+                Options.Editing = False
+                Options.Focusing = False
+                Width = 72
+              end
+              object GridDurumBaglantiDBTableView1UYARITURU: TcxGridDBColumn
+                Caption = 'Bildirim (i'#231')'
+                DataBinding.FieldName = 'UYARITURU'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.repUyariTurleri
+                Width = 67
+              end
+              object GridDurumBaglantiDBTableView1DISUYARITURU: TcxGridDBColumn
+                Caption = 'Bildirim (d'#305#351')'
+                DataBinding.FieldName = 'DISUYARITURU'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.repUyariTurleri
+              end
+              object GridDurumBaglantiDBTableView1ACILIS: TcxGridDBColumn
+                Caption = 'A'#231#305'l'#305#351
+                DataBinding.FieldName = 'ACILIS'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.cxEditRepository1CheckBoxItem1
+                Width = 51
+              end
+              object GridDurumBaglantiDBTableView1KAPANIS: TcxGridDBColumn
+                Caption = 'Kapan'#305#351
+                DataBinding.FieldName = 'KAPANIS'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.cxEditRepository1CheckBoxItem1
+                Width = 51
+              end
+              object GridDurumBaglantiDBTableView1OTOKAPAT: TcxGridDBColumn
+                Caption = 'Kaynak Kapat'
+                DataBinding.FieldName = 'OTOKAPAT'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.cxEditRepository1CheckBoxItem1
+                Width = 73
+              end
+              object GridDurumBaglantiDBTableView1TARIHIDESOR: TcxGridDBColumn
+                Caption = 'Tarihe Zorla'
+                DataBinding.FieldName = 'TARIHIDESOR'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.cxEditRepository1CheckBoxItem1
+                Width = 83
+              end
+            end
+            object GridDurumBaglantiLevel1: TcxGridLevel
+              GridView = GridDurumBaglantiDBTableView1
+            end
+          end
+        end
+        object SheetVerilenSip: TcxTabSheet
+          Tag = 9
+          Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
+          ImageIndex = 1
+        end
+      end
+      object Panel2: TPanel
+        Left = 0
+        Top = 0
+        Width = 489
+        Height = 73
+        Align = alTop
+        TabOrder = 1
+        object AlSiparisTus: TcxButton
+          Left = 292
+          Top = 11
+          Width = 165
+          Height = 25
+          Caption = 'Al'#305'nan Sipari'#351' Durumlar'
+          TabOrder = 0
+          OnClick = AlSiparisTusClick
+        end
+        object VerSiparisTus: TcxButton
+          Left = 292
+          Top = 42
+          Width = 165
+          Height = 25
+          Caption = 'Verilen Sipari'#351' Durumlar'
+          TabOrder = 1
+          OnClick = VerSiparisTusClick
+        end
+        object CheckSiparisHastaSekmesi: TcxCheckBox
+          Left = 22
+          Top = 11
+          Caption = 'Ba'#351'l'#305'kta Hasta Bilgisi Sekmesi'
+          Style.TransparentBorder = False
+          TabOrder = 2
+          Transparent = True
+        end
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 492
+    Width = 497
+    Height = 26
+    Align = alBottom
+    Alignment = taLeftJustify
+    TabOrder = 1
+    object CancelBtn: TBitBtn
+      Left = 255
+      Top = 0
+      Width = 72
+      Height = 24
+      Cancel = True
+      Caption = 'Ka&pat'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000220B0000220B000000010000000100000031DE000031
+        E7000031EF000031F700FF00FF000031FF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00040404040404
+        0404040404040404000004000004040404040404040404000004040000000404
+        0404040404040000040404000000000404040404040000040404040402000000
+        0404040400000404040404040404000000040000000404040404040404040400
+        0101010004040404040404040404040401010204040404040404040404040400
+        0201020304040404040404040404030201040403030404040404040404050203
+        0404040405030404040404040303050404040404040303040404040303030404
+        0404040404040403040403030304040404040404040404040404030304040404
+        0404040404040404040404040404040404040404040404040404}
+      Margin = 2
+      ModalResult = 2
+      ParentFont = False
+      Spacing = -1
+      TabOrder = 0
+      IsControl = True
+    end
+    object KaydetTus: TBitBtn
+      Left = 176
+      Top = 0
+      Width = 73
+      Height = 26
+      Caption = '&Kaydet'
+      Default = True
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000D30E0000D30E00000001000000010000008C00000094
+        0000009C000000A5000000940800009C100000AD100000AD180000AD210000B5
+        210000BD210018B5290000C62900319C310000CE310029AD390031B5420018C6
+        420000D6420052A54A0029AD4A0029CE5A006BB5630000FF63008CBD7B00A5C6
+        94005AE7A500FF00FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF001B1B1B1B1B13
+        04161B1B1B1B1B1B1B1B1B1B1B1B1B0B0A01181B1B1B1B1B1B1B1B1B1B1B160A
+        0C030D1B1B1B1B1B1B1B1B1B1B1B050E0C0601191B1B1B1B1B1B1B1B1B130E0C
+        170E02001B1B1B1B1B1B1B1B1B0B1517170A0C01181B1B1B1B1B1B1B1B111717
+        13130C030D1B1B1B1B1B1B1B1B1B08081B1B070C01191B1B1B1B1B1B1B1B1B1B
+        1B1B100C02001B1B1B1B1B1B1B1B1B1B1B1B1B090C01181B1B1B1B1B1B1B1B1B
+        1B1B1B130C0F101B1B1B1B1B1B1B1B1B1B1B1B1B141A0F181B1B1B1B1B1B1B1B
+        1B1B1B1B1012181B1B1B1B1B1B1B1B1B1B1B1B1B1B191B1B1B1B1B1B1B1B1B1B
+        1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B}
+      Margin = 2
+      ModalResult = 1
+      ParentFont = False
+      Spacing = -1
+      TabOrder = 1
+      OnClick = KaydetTusClick
+      IsControl = True
+    end
+  end
+  object TabListeDuzenle: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      
+        'select * from GENINI where BOLUM=0 and DIL=:PDil and LEN(ABS(DEG' +
+        'ER))=4 and DEGER like '#39'-21__'#39' and ANAHTAR like :PAnahtar+'#39'%'#39' '
+      '')
+    Left = 324
+    Top = 240
+  end
+  object DtsListeDuzenle: TDataSource
+    DataSet = TabListeDuzenle
+    Left = 452
+    Top = 141
+  end
+  object TabListeDetayDuzenle: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      
+        'select * from GENINI where BOLUM=0 and DIL=:PDil and LEN(ABS(DEG' +
+        'ER))=4 and DEGER like '#39'-21__'#39' and ANAHTAR like :PAnahtar+'#39'%'#39' '
+      '')
+    Left = 394
+    Top = 257
+  end
+  object DtsTabListeDetayDuzenle: TDataSource
+    DataSet = TabListeDetayDuzenle
+    Left = 483
+    Top = 272
+  end
+  object TabDurumBaglanti: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      
+        'select * from DURUMBAGLANTI where YERI = :PYeri and BOLUM= :PBol' +
+        'um'
+      'order by ACILIS DESC, KAYNAKDURUM,HEDEFDURUM')
+    Left = 424
+    Top = 192
+  end
+  object DtsDurumBaglanti: TDataSource
+    DataSet = TabDurumBaglanti
+    Left = 336
+    Top = 176
+  end
+  object PopupDurumBglanti: TPopupMenu
+    Left = 328
+    Top = 232
+    object ServisDurumlarnDzenle1: TMenuItem
+      Caption = 'Servis Durumlar'#305'n'#305' D'#252'zenle'
+      OnClick = ServisDurumlarnDzenle1Click
+    end
+    object BalantlarOlutur1: TMenuItem
+      Caption = 'Eksik Ba'#287'lant'#305'lar'#305' Olu'#351'tur'
+      OnClick = BalantlarOlutur1Click
+    end
+    object KopmuBalantlarTemizle1: TMenuItem
+      Caption = 'Kopmu'#351' Ba'#287'lant'#305'lar'#305' Temizle'
+      OnClick = KopmuBalantlarTemizle1Click
+    end
+  end
+end
+
+

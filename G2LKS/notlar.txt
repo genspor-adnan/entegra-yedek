@@ -1,0 +1,5 @@
+object StoredProc1: TStoredProc
+    StoredProcName = 'sp_OrkaAktarim'
+    Left = 504
+    Top = 104
+  end

@@ -1,0 +1,51 @@
+Program Personel;
+
+uses
+  Forms,
+  sysUtils,
+  uAnaForm in 'uAnaForm.pas' {AnaForm},
+  uTablo in 'uTablo.pas' {Tablo: TDataModule},
+  USifre in '..\..\Ortak\Usifre.pas' {PasswordDlg},
+  uAyar in 'uAyar.pas' {Ayarlar},
+  UVersiyon in 'UVersiyon.pas' {VersiyonDlg},
+  GT_About in 'GT_About.pas' {AboutBox},
+  uLogo in 'uLogo.pas' {LOGO},
+  RFID_103_485IO_DLL in 'RFID_103_485IO_DLL.pas',
+  uCamera in 'uCamera.pas' {Camera},
+  UCombo in '..\Personel\uCombo.pas' {ListeAyarlaDlg};
+
+{$R *.res}
+
+begin
+  CurrencyString      := ' YTL';
+  CurrencyFormat      := 3;
+  NegCurrFormat       := 8;
+  ThousandSeparator   := ',';
+  DecimalSeparator    := '.';
+  CurrencyDecimals    := 2  ;
+  DateSeparator       := '/';
+  ShortDateFormat     := 'dd/MM/yyyy';
+  LongDateFormat      := 'dd MMMM yyyy dddd';
+  TimeSeparator       := ':';
+  TimeAMString        := '' ;
+  TimePMString        := '' ;
+  ShortTimeFormat     := 'hh:mm';
+  LongTimeFormat      := 'hh:mm:ss';
+  ListSeparator       := ';';
+
+  Application.Initialize;
+  Application.CreateForm(TLOGO, LOGO);
+  Application.CreateForm(TCamera, Camera);
+  Application.CreateForm(TListeAyarlaDlg, ListeAyarlaDlg);
+  LOGO.Show;
+  LOGO.Update;
+  Application.Title := 'PERSONELPROCESS';
+  Application.CreateForm(TTablo, Tablo);
+  Tablo.TabKullan.Open;
+  logo.Destroy;
+  if SifreSor then
+    PasswordEkrani('PERSONEL');
+  Application.CreateForm(TAnaForm, AnaForm);
+  Camera.OpenVideo(GenotipIni.ReadString('OPSIYONLAR','CAMERA',''));
+  Application.Run;
+end.

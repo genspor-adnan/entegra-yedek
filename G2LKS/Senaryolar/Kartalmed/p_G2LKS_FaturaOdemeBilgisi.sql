@@ -1,0 +1,110 @@
+
+GO
+/****** Object:  StoredProcedure [dbo].[p_G2LKS_FaturaOdemeBilgisi]    Script Date: 05/14/2010 15:22:51 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/*
+Date	: 2008-10-30 13:45
+Author	: Emre Baytar
+Desc.	: Parametreleri verilen faturanýn ödeme bilgilerini getiren sorgudur.
+******
+Date	: 2008-12-26 14:15
+Author	: Emre Baytar
+Desc.	: Açýk kesilen özel hasta ve katký payý faturalarýnýn açýk hesap carisinde çalýþýlmasý için gerekli düzenleme yapýldý.
+
+*/
+CREATE procedure [dbo].[p_G2LKS_FaturaOdemeBilgisi] @DOSYANO VARCHAR(15), @GELISNO INT, @KARTNO INT, @KIME VARCHAR(100) , @TURU VARCHAR(10)
+AS 
+	BEGIN
+--- kurum faturasý ise ödeme hesabý kurum muhasebe kodundan bulunuyor.
+IF @KIME NOT IN ('ÖZEL','Katký','Özel- TTB') 
+BEGIN
+SELECT
+	FB.DOSYANO, FB.GELISNO, FB.KARTNO, ADSOYAD = K.AD+' '+K.SOYAD, G.KURUM,
+	ACIKLAMA = 'ÖDEME BÝLGÝSÝ',
+	MUHKODU = KUR.MUHASEBEKODU,
+	FB.FATURANO,
+	TUTAR = CASE WHEN FB.KDVDURUM = 'Dahil' THEN CONVERT(MONEY,SUM(FT.TUTAR)) -- CONVERT(MONEY,SUM(FT.TUTAR / ( 1+FT.KDV/100.0 ) ) )
+				ELSE
+		--	CONVERT(MONEY,SUM(FT.TUTAR * ( 1+FT.KDV/100.0 ) ) ) - CONVERT(MONEY,SUM(FT.TUTAR))
+			CONVERT(MONEY, SUM(FT.TUTAR * ( 1+FT.KDV/100.0 ) ) )
+	END
+
+FROM FATURA FT  INNER JOIN FATBASLIK FB ON FT.DOSYANO = FB.DOSYANO AND FT.GELISNO = FB.GELISNO AND FT.KARTNO = FB.KARTNO
+				INNER JOIN GELISLER G ON FB.DOSYANO = G.DOSYANO AND FB.GELISNO = G.GELISNO
+				INNER JOIN KIMLIK K ON G.DOSYANO = K.DOSYANO
+				INNER JOIN KURUM KUR ON G.KURUM = KUR.KURUM
+WHERE
+	G.DOSYANO = @DOSYANO AND
+	G.GELISNO = @GELISNO AND
+	FB.KARTNO = @KARTNO
+GROUP BY  FB.DOSYANO, FB.GELISNO, FB.KARTNO, K.AD+' '+K.SOYAD, FB.KDVDURUM, KUR.MUHASEBEKODU,FB.FATURANO, G.KURUM
+END
+/*--- özel hasta ve katký payý faturasý ise ödeme hesabý tahsilat türlerinden bulunuyor. kodundan bulunuyor.
+eðer hasta faturasý açýk fatura ise ödeme hesabý olarak açýk faturalar için belirlenen hesap koduna aktarýlýyor.
+bu hesap kodu için GENOTIPINI de G2LKS_ACIKFATURAHESAP Bolum bilgisine ilgili hesap kodu belirtilmelidir.
+*/
+ELSE IF @KIME IN ('ÖZEL','Katký','Özel- TTB') 
+BEGIN
+	IF @TURU = 'Açýk'
+      BEGIN  ------------ FATURA AÇIK KESÝLMÝÞSE AÇIK HESAP KASASINA ÝÞLENECEK-----
+ 			SELECT
+				FB.DOSYANO, FB.GELISNO, FB.KARTNO, ADSOYAD = K.AD+' '+K.SOYAD, G.KURUM,
+				ACIKLAMA = 'ÖDEME BÝLGÝSÝ',
+				MUHKODU = (SELECT ANAHTAR FROM GENOTIPINI WHERE BOLUM = 'G2LKS_ACIKFATURAHESAP' ),
+				FB.FATURANO,
+				TUTAR = CASE WHEN FB.KDVDURUM = 'Dahil' THEN CONVERT(MONEY,SUM(FT.TUTAR)) -- CONVERT(MONEY,SUM(FT.TUTAR / ( 1+FT.KDV/100.0 ) ) )
+							ELSE
+					--	CONVERT(MONEY,SUM(FT.TUTAR * ( 1+FT.KDV/100.0 ) ) ) - CONVERT(MONEY,SUM(FT.TUTAR))
+						CONVERT(MONEY, SUM(FT.TUTAR * ( 1+FT.KDV/100.0 ) ) )
+				END
+
+			FROM FATURA FT  INNER JOIN FATBASLIK FB ON FT.DOSYANO = FB.DOSYANO AND FT.GELISNO = FB.GELISNO AND FT.KARTNO = FB.KARTNO
+							INNER JOIN GELISLER G ON FB.DOSYANO = G.DOSYANO AND FB.GELISNO = G.GELISNO
+							INNER JOIN KIMLIK K ON G.DOSYANO = K.DOSYANO
+							INNER JOIN KURUM KUR ON G.KURUM = KUR.KURUM
+			WHERE
+				G.DOSYANO = @DOSYANO AND
+				G.GELISNO = @GELISNO AND
+				FB.KARTNO = @KARTNO
+			GROUP BY  FB.DOSYANO, FB.GELISNO, FB.KARTNO, K.AD+' '+K.SOYAD, FB.KDVDURUM, KUR.MUHASEBEKODU,FB.FATURANO, G.KURUM        
+      END
+	ELSE IF @TURU = 'Kapalý'
+  ---- FATURA KAPALI KESÝLMÝÞSE TAHSÝLATINA GÖRE ÝLGÝLÝ HESABA ÝÞLENECEK
+/*
+  eðer hasta faturasý kapalý fatura ise ödeme bilgisi hastanýn kartýndaki tahsilat türlerinden bulunuyor. Tahsilat türlerinin 
+eþleþtirilmesi GENOTIPINI tablosuna girilen G2LKS_TAHSILAT_ESLE anahtarý altýndaki tanýmlardan bulunuyor. Örn : NAKÝT=100.01.0001 gibi
+*/    BEGIN
+		SELECT  FB.DOSYANO,
+				FB.GELISNO,
+				FB.KARTNO,
+				ADSOYAD = K.AD+' '+K.SOYAD,
+				G.KURUM,
+				ACIKLAMA ='ÖDEME BÝLGÝSÝ',
+				MUHKODU = GT.DEGER,
+				FB.FATURANO,
+				SUM(TAHSIL) AS TUTAR
+		FROM FATBASLIK FB 
+						INNER JOIN GELISLER G ON FB.DOSYANO = G.DOSYANO AND FB.GELISNO = G.GELISNO
+						INNER JOIN TAHSILAT T ON FB.DOSYANO = T.DOSYANO AND FB.GELISNO = T.GELISNO
+						INNER JOIN KIMLIK K ON G.DOSYANO = K.DOSYANO
+						INNER JOIN KURUM KUR ON G.KURUM = KUR.KURUM
+						INNER JOIN GENOTIPINI GT ON GT.ANAHTAR = T.TUR AND GT.BOLUM='G2LKS_TAHSILAT_ESLE' 
+		WHERE 
+			G.DOSYANO = @DOSYANO AND
+			G.GELISNO = @GELISNO AND
+			FB.KARTNO = @KARTNO
+			
+		GROUP BY FB.DOSYANO, FB.GELISNO, FB.KARTNO, K.AD+' '+K.SOYAD, GT.DEGER, FB.FATURANO,G.KURUM
+     END
+	
+END
+
+
+END
+
+
+
+

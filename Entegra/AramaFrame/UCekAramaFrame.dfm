@@ -1,0 +1,253 @@
+object CekAramaFrame: TCekAramaFrame
+  Left = 0
+  Top = 0
+  Width = 552
+  Height = 402
+  Align = alClient
+  Color = clWhite
+  Font.Charset = TURKISH_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Trebuchet MS'
+  Font.Style = []
+  ParentBackground = False
+  ParentColor = False
+  ParentFont = False
+  TabOrder = 0
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 552
+    Height = 125
+    Align = alTop
+    TabOrder = 1
+    object YenileTus: TSpeedButton
+      Tag = 4
+      Left = 120
+      Top = 0
+      Width = 72
+      Height = 20
+      Caption = 'Yenile'
+      Flat = True
+      Glyph.Data = {
+        76060000424D7606000000000000360400002800000018000000180000000100
+        08000000000040020000430B0000430B00000001000000000000000000000631
+        060006730B00118F110023C023002A732A004898480058D458006AEA6A006AEA
+        73008F8484007BF48400ABFFAB00FF00FF00FFFFFF0000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000000D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D010101010D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D0102040406050D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D060204040406050D
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D020404040404020D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0603070707040406020D0D0D0D0D0D0D0D0D0D0D0D0D0D0602
+        07070707070704020D0D0D0D0D0D0D0D0D0D0D0D0D02050B090B080407070704
+        020D0D0D0D0D0D0D0D0D0D0D02070B0B0B080204040B0707020D0D0D0D0D0D0D
+        0D0D0D0D06070B0B08020D0504080B0707020D0D0D0D0D0D0D0D0D0D06040704
+        020D0D0D0504080B0704050D0D0D0D0D0D0D0D0D0D0606060D0D0D0D0D02070B
+        0B07060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D02080B0B07020D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D06080B0B07050D0D0D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D06080B0B04060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D040C0C0B04060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D040C0C0B0406
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D040C0C0B060D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D0D0D040C07060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D04060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
+        0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
+    end
+    object Label1: TcxLabel
+      Left = 0
+      Top = 16
+      Caption = 'Cari'#13#10'Kod/Ad'#305
+      Transparent = True
+    end
+    object DateVadeBas: TcxDateEdit
+      Left = 77
+      Top = 72
+      Enabled = False
+      Properties.ImmediatePost = True
+      TabOrder = 1
+      Width = 115
+    end
+    object DateVadeBit: TcxDateEdit
+      Left = 77
+      Top = 97
+      Enabled = False
+      Properties.ImmediatePost = True
+      TabOrder = 2
+      Width = 115
+    end
+    object CheckVadeGor: TcxCheckBox
+      Left = 0
+      Top = 86
+      Caption = 'Vade'
+      Properties.OnEditValueChanged = CheckVadeGorPropertiesEditValueChanged
+      TabOrder = 3
+      Transparent = True
+      OnClick = CheckVadeGorClick
+    end
+    object AraKod: TcxButtonEdit
+      Left = 77
+      Top = 22
+      ParentShowHint = False
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end
+        item
+          Caption = '-'
+          Hint = 'Temizle'
+          Kind = bkText
+        end>
+      Properties.ReadOnly = False
+      Properties.OnButtonClick = AraKodPropertiesButtonClick
+      ShowHint = True
+      TabOrder = 4
+      OnKeyDown = AraKodKeyDown
+      Width = 115
+    end
+    object AraSeriNo: TcxTextEdit
+      Left = 77
+      Top = 47
+      TabOrder = 5
+      Width = 115
+    end
+    object cxLabel1: TcxLabel
+      Left = 0
+      Top = 51
+      Caption = 'Seri No'
+      Transparent = True
+    end
+  end
+  object PCCekTurleri: TcxPageControl
+    Left = 0
+    Top = 125
+    Width = 552
+    Height = 277
+    Align = alClient
+    TabOrder = 0
+    Properties.ActivePage = SheetAlinanCekler
+    Properties.CustomButtons.Buttons = <>
+    ClientRectBottom = 273
+    ClientRectLeft = 4
+    ClientRectRight = 548
+    ClientRectTop = 27
+    object SheetAlinanCekler: TcxTabSheet
+      Caption = 'Al'#305'nan '#199'ekler'
+      ImageIndex = 0
+      object cgAlinanCekler: TcxCheckGroup
+        Left = 0
+        Top = 0
+        Align = alClient
+        EditValue = '111111111'
+        Properties.Columns = 2
+        Properties.EditValueFormat = cvfStatesString
+        Properties.ImmediatePost = True
+        Properties.Items = <
+          item
+            Caption = 'Portf'#246'yde'
+            Tag = 130
+          end
+          item
+            Caption = 'Cirolu'
+            Tag = 131
+          end
+          item
+            Caption = 'Teminatta(Cari)'
+            Tag = 132
+          end
+          item
+            Caption = 'Teminatta(Banka)'
+            Tag = 138
+          end
+          item
+            Caption = 'Takasta'
+            Tag = 133
+          end
+          item
+            Caption = #304'crada'
+            Tag = 134
+          end
+          item
+            Caption = 'Kar'#351#305'l'#305'ks'#305'z'
+            Tag = 135
+          end
+          item
+            Caption = 'Tahsil Edildi'
+            Tag = 136
+          end
+          item
+            Caption = #304'ade Edildi'
+            Tag = 137
+          end>
+        TabOrder = 0
+        Transparent = True
+        Height = 246
+        Width = 544
+      end
+    end
+    object SheetVerilenCekler: TcxTabSheet
+      Caption = 'Verilen '#199'ekler'
+      ImageIndex = 1
+      object cgVerilenCekler: TcxCheckGroup
+        Left = 0
+        Top = 0
+        Align = alClient
+        EditValue = '1111'
+        Properties.Columns = 2
+        Properties.EditValueFormat = cvfStatesString
+        Properties.ImmediatePost = True
+        Properties.Items = <
+          item
+            Caption = 'Sat'#305'c'#305'da'
+            Tag = 140
+          end
+          item
+            Caption = 'Sat'#305'c'#305'dan '#304'ade'
+            Tag = 141
+          end
+          item
+            Caption = #304'ptal'
+            Tag = 142
+          end
+          item
+            Caption = #214'dendi'
+            Tag = 143
+          end>
+        TabOrder = 0
+        Transparent = True
+        Height = 246
+        Width = 544
+      end
+    end
+  end
+end

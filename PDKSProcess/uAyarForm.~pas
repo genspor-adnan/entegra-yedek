@@ -1,0 +1,297 @@
+unit uAyarForm;
+
+interface
+
+uses
+  Registry, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ComCtrls, Buttons, Spin, ShellCtrls, ShlObj,
+  cxShellCommon, cxControls, cxContainer, cxShellTreeView,
+  cxShellBrowserDialog;
+
+type
+  TAyarlarForm = class(TForm)
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    CKSimge: TCheckBox;
+    CKHizmet: TCheckBox;
+    CKAcilis: TCheckBox;
+    GroupBox1: TGroupBox;
+    BTNKaydet: TSpeedButton;
+    BTNIptal: TSpeedButton;
+    TabSheet2: TTabSheet;
+    Label1: TLabel;
+    Label2: TLabel;
+    txtOkuma: TSpinEdit;
+    txtMaxCal: TSpinEdit;
+    Label3: TLabel;
+    txtReaderNo: TEdit;
+    Label4: TLabel;
+    txtPortNo: TEdit;
+    TabSheet3: TTabSheet;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    SpeedButton1: TSpeedButton;
+    txtSGiris: TEdit;
+    SpeedButton2: TSpeedButton;
+    txtSCikis: TEdit;
+    SpeedButton3: TSpeedButton;
+    txtSSure: TEdit;
+    SpeedButton4: TSpeedButton;
+    txtSGecersiz: TEdit;
+    DGSesAc: TOpenDialog;
+    TabSheet4: TTabSheet;
+    Label9: TLabel;
+    CBSurucu: TComboBox;
+    BTNBicim: TSpeedButton;
+    BTNKaynak: TSpeedButton;
+    BTNEkran: TSpeedButton;
+    BTNSikistir: TSpeedButton;
+    CKKamera: TCheckBox;
+    CKResim: TCheckBox;
+    Label10: TLabel;
+    txtResim: TEdit;
+    SpeedButton5: TSpeedButton;
+    Klasor: TcxShellBrowserDialog;
+    txtOkumaGecikme: TEdit;
+    Label11: TLabel;
+    Label12: TLabel;
+    CBOkuyucu: TComboBox;
+    txtYReaderNo: TEdit;
+    txtYPortNo: TEdit;
+    Button1: TButton;
+    chkHaraketListe: TCheckBox;
+    chkMazeret: TCheckBox;
+    chkizin: TCheckBox;
+    chkPDKS: TCheckBox;
+    chkYemekhane: TCheckBox;
+    procedure BTNKaydetClick(Sender: TObject);
+    procedure BTNIptalClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure txtMaxCalKeyPress(Sender: TObject; var Key: Char);
+    procedure txtReaderNoKeyPress(Sender: TObject; var Key: Char);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButton3Click(Sender: TObject);
+    procedure SpeedButton4Click(Sender: TObject);
+    procedure BTNBicimClick(Sender: TObject);
+    procedure BTNKaynakClick(Sender: TObject);
+    procedure BTNEkranClick(Sender: TObject);
+    procedure BTNSikistirClick(Sender: TObject);
+    procedure SpeedButton5Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  AyarlarForm: TAyarlarForm;
+  Reg: TRegistry;
+
+implementation
+
+uses
+  uTablo, uCamera, UCombo, uAnaForm;
+
+{$R *.dfm}
+
+procedure TAyarlarForm.BTNKaydetClick(Sender: TObject);
+begin
+  GenotipIni.WriteBool('OPSIYONLAR', 'PROGRAMHIZMET', CKHizmet.Checked);
+  GenotipIni.WriteBool('OPSIYONLAR', 'PROGRAMSIMGE', CKSimge.Checked);
+  GenotipIni.WriteBool('OPSIYONLAR', 'PROGRAMSIFRE', CKAcilis.Checked);
+  GenotipIni.WriteInteger('OPSIYONLAR', 'PROGRAMMAXVAR', txtMaxCal.Value);
+  GenotipIni.WriteInteger('OPSIYONLAR', 'PROGRAMOKUMA', txtOkuma.Value);
+//GenotipIni.WriteInteger('OPSIYONLAR','READERNO',strtoint(txtReaderNo.text) );
+//GenotipIni.WriteInteger('OPSIYONLAR','PORTNO',strtoint(txtPortNo.text) );
+  GenotipIni.WriteString('OPSIYONLAR', 'SGIRIS', txtSGiris.text);
+  GenotipIni.WriteString('OPSIYONLAR', 'SCIKIS', txtSCikis.text);
+  GenotipIni.WriteString('OPSIYONLAR', 'SSURE', txtSSure.text);
+  GenotipIni.WriteString('OPSIYONLAR', 'SGECERSIZ', txtSGecersiz.text);
+  GenotipIni.WriteString('OPSIYONLAR', 'CAMERA', CBSurucu.text);
+  GenotipIni.WriteBool('OPSIYONLAR', 'CAMERAEKRAN', CKKamera.Checked);
+  GenotipIni.WriteBool('OPSIYONLAR', 'RESIMEKRAN', CKResim.Checked);
+  //GenotipIni.WriteBool('OPSIYONLAR', 'PDKSVARMI', chkPDKS.Checked);
+//  GenotipIni.WriteBool('OPSIYONLAR', 'YemekhaneVARMI', chkYemekhane.Checked);
+  GenotipIni.WriteString('OPSIYONLAR', 'RESIMYOL', txtResim.Text);
+  GenotipIni.WriteString('OPSIYONLAR', 'OKUMAGECIKME', txtOkumaGecikme.Text);
+  GenotipIni.WriteInteger('OPSIYONLAR', 'OKUYUCUTUR', CBOkuyucu.ItemIndex);
+  GenotipIni.WriteBool('OPSIYONLAR', 'HARAKETLISTE', chkHaraketListe.Checked);
+  GenotipIni.WriteBool('OPSIYONLAR', 'MAZERETGIRISI', chkMazeret.Checked);
+  GenotipIni.WriteBool('OPSIYONLAR', 'IZINGIRISI', chkizin.Checked);
+
+  SifreSor := CKAcilis.Checked;
+  SimgeDur := CKSimge.Checked;
+  HizmetBas := CKHizmet.Checked;
+  MaxVar := txtMaxCal.Value;
+  OkumaAra := txtOkuma.Value;
+  HaraketListe := chkHaraketListe.Checked;
+  Mazeretgirisi := chkMazeret.Checked;
+
+  SGiris := txtSGiris.Text;
+  SCikis := txtSCikis.Text;
+  SSure := txtSSure.Text;
+  SGecersiz := txtSGecersiz.Text;
+
+  SCamera := CBSurucu.Text;
+  SCameraEkran := CKKamera.Checked;
+  SResim := CKResim.Checked;
+  SResimYol := txtResim.Text;
+  ReaderNo := StrToIntDef(txtReaderNo.Text, 0);
+
+  Camera.OpenVideo(CBSurucu.Text);
+  Close;
+
+  reg := TRegistry.Create;
+  Reg.RootKey := HKEY_CURRENT_USER;
+  Reg.OpenKey('\SOFTWARE\GENPER\', true);
+  Reg.WriteInteger('READERNO', strtoint(txtReaderNo.text));
+  Reg.WriteInteger('PORTNO', strtoint(txtPortNo.text));
+  Reg.WriteInteger('YREADERNO', strtoint(txtYReaderNo.text));
+  Reg.WriteInteger('YPORTNO', strtoint(txtYPortNo.text));
+  Reg.WriteBool('PDKS', chkPdks.Checked);
+  Reg.WriteBool('YEMEKHANE', chkYemekhane.Checked);
+  OkuyucuTur := CBOkuyucu.ItemIndex;
+  anaform.Memo1.Visible := HaraketListe;
+  AnaForm.izinler.Visible := IzinGirisi;
+end;
+
+procedure TAyarlarForm.BTNIptalClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TAyarlarForm.FormActivate(Sender: TObject);
+var
+  i: integer;
+begin
+  CKAcilis.Checked := SifreSor;
+  CKSimge.Checked := SimgeDur;
+  CKHizmet.Checked := HizmetBas;
+  txtMaxCal.value := MaxVar;
+  txtOkuma.Value := OkumaAra;
+//txtPortNo.Text:=GenotipIni.ReadString('OPSIYONLAR','PORTNO','');
+//txtReaderNo.Text:=GenotipIni.ReadString('OPSIYONLAR','READERNO','');
+  txtSGiris.Text := GenotipIni.ReadString('OPSIYONLAR', 'SGIRIS', '');
+  txtSCikis.Text := GenotipIni.ReadString('OPSIYONLAR', 'SCIKIS', '');
+  txtSSure.Text := GenotipIni.ReadString('OPSIYONLAR', 'SSURE', '');
+  txtSGecersiz.Text := GenotipIni.ReadString('OPSIYONLAR', 'SGECERSIZ', '');
+  CKKamera.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'CAMERAEKRAN', false);
+  CKResim.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'RESIMEKRAN', false);
+  txtResim.Text := GenotipIni.ReadString('OPSIYONLAR', 'RESIMYOL', '');
+  txtOkumaGecikme.Text := GenotipIni.ReadString('OPSIYONLAR', 'OKUMAGECIKME', '');
+  CBOkuyucu.ItemIndex := GenotipIni.ReadInteger('OPSIYONLAR', 'OKUYUCUTUR', 0);
+  chkHaraketListe.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'HARAKETLISTE', False);
+  chkMazeret.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'MAZERETGIRISI', FALSE);
+  chkizin.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'IZINGIRISI', FALSE);
+ // chkPDKS.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'PDKSVARMI', TRUE);
+ // chkYemekhane.Checked := GenotipIni.ReadBool('OPSIYONLAR', 'YemekhaneVARMI', FALSE);
+
+  CBSurucu.Clear;
+  for i := 0 to camera.video.CapDrivers.count - 1 do
+  begin
+    CBSurucu.items.add(format('%d - %s', [i, camera.video.CapDrivers.strings[i]]));
+    if format('%d - %s', [i, camera.video.CapDrivers.strings[i]]) = GenotipIni.ReadString('OPSIYONLAR', 'CAMERA', '') then
+      CBSurucu.itemindex := CBSurucu.items.Count - 1;
+  end;
+
+  reg := TRegistry.Create;
+  Reg.RootKey := HKEY_CURRENT_USER;
+  Reg.OpenKey('\SOFTWARE\GENPER\', true);
+  txtReaderNo.Text := inttostr(Reg.Readinteger('READERNO'));
+  txtPortNo.Text := inttostr(Reg.Readinteger('PORTNO'));
+  txtYReaderNo.Text := inttostr(Reg.Readinteger('YREADERNO'));
+  txtYPortNo.Text := inttostr(Reg.Readinteger('YPORTNO'));
+  chkPDKS.Checked:=Reg.ReadBool('PDKS');
+  chkYemekhane.Checked:= Reg.ReadBool('YEMEKHANE');
+
+end;
+
+procedure TAyarlarForm.txtMaxCalKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (strscan('0123456789', key) <> nil) or (key = #8) then
+  begin
+  end
+  else
+    key := #0;
+end;
+
+procedure TAyarlarForm.txtReaderNoKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (strscan('0123456789', key) <> nil) or (key = #8) then
+  begin
+  end
+  else
+    key := #0;
+
+end;
+
+procedure TAyarlarForm.SpeedButton1Click(Sender: TObject);
+begin
+  if DGSesAc.Execute then
+    txtSGiris.Text := DGSesAc.FileName;
+end;
+
+procedure TAyarlarForm.SpeedButton2Click(Sender: TObject);
+begin
+  if DGSesAc.Execute then
+    txtSCikis.Text := DGSesAc.FileName;
+end;
+
+procedure TAyarlarForm.SpeedButton3Click(Sender: TObject);
+begin
+  if DGSesAc.Execute then
+    txtSSure.Text := DGSesAc.FileName;
+end;
+
+procedure TAyarlarForm.SpeedButton4Click(Sender: TObject);
+begin
+  if DGSesAc.Execute then
+    txtSGecersiz.Text := DGSesAc.FileName;
+end;
+
+procedure TAyarlarForm.BTNBicimClick(Sender: TObject);
+begin
+  if not Camera.video.IsOpen then
+    Camera.OpenVideo(CBSurucu.Text);
+  if Camera.video.DlgFormat then MessageBeep(0);
+end;
+
+procedure TAyarlarForm.BTNKaynakClick(Sender: TObject);
+begin
+  if not Camera.video.IsOpen then
+    Camera.OpenVideo(CBSurucu.Text);
+  if Camera.video.DlgSource then MessageBeep(0);
+end;
+
+procedure TAyarlarForm.BTNEkranClick(Sender: TObject);
+begin
+  if not Camera.video.IsOpen then
+    Camera.OpenVideo(CBSurucu.Text);
+  if Camera.video.DlgDisplay then MessageBeep(0);
+end;
+
+procedure TAyarlarForm.BTNSikistirClick(Sender: TObject);
+begin
+  if not Camera.video.IsOpen then
+    Camera.OpenVideo(CBSurucu.Text);
+  if Camera.video.DlgCompression then MessageBeep(0);
+end;
+
+procedure TAyarlarForm.SpeedButton5Click(Sender: TObject);
+begin
+  Klasor.Path := txtResim.Text;
+  if Klasor.Execute then
+    txtResim.Text := Klasor.Path;
+end;
+
+procedure TAyarlarForm.Button1Click(Sender: TObject);
+begin
+  InileriAyarlama(GenotipIni);
+end;
+
+end.
+

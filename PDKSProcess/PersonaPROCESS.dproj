@@ -1,0 +1,219 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{5971E131-39F2-4AFB-BD57-3323B4CC871B}</ProjectGuid>
+        <MainSource>PersonaPROCESS.dpr</MainSource>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <ProjectVersion>14.4</ProjectVersion>
+        <FrameworkType>VCL</FrameworkType>
+        <Base>True</Base>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <VerInfo_MajorVer>2</VerInfo_MajorVer>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;System.Win;Winapi;Data.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.0.0.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Locale>1055</VerInfo_Locale>
+        <BRCC_IncludePath>D:\PERSONEL 2010\Hastane\Personel\PDKSProcess;$(BRCC_IncludePath)</BRCC_IncludePath>
+        <DCC_UnitSearchPath>D:\FETA\PDKSProcess;D:\FETA\Ortak;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_DependencyCheckOutputName>PersonaPROCESS.exe</DCC_DependencyCheckOutputName>
+        <DCC_UsePackage>vcl;rtl;vclx;vclimg;vclactnband;dbrtl;vcldb;vcldbx;bdertl;vcltouch;xmlrtl;dsnap;dsnapcon;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapServer;DBXInterBaseDriver;DBXMySQLDriver;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;dxCoreD14;cxLibraryD14;cxEditorsD14;cxExtEditorsD14;dxDockingD14;dxsbD14;dxComnD14;dxBarD14;dxBarDBNavD14;cxBarEditItemD14;dxBarExtDBItemsD14;dxBarExtItemsD14;dxRibbonD14;cxPageControlD14;cxGridD14;dxLayoutControlD14;dxLayoutControlcxEditAdaptersD14;cxSpreadSheetD14;cxTreeListD14;cxTreeListdxBarPopupMenuD14;cxVerticalGridD14;dxFlowChartD14;dxThemeD14;dxGDIPlusD14;cxDataD14;cxExportD14;cxSchedulerD14;cxSchedulerGridD14;dxorgcD14;dxdborD14;dxmdsD14;dxdbtrD14;dxtrmdD14;dxPSCoreD14;dxPSLnksD14;vclshlctrls;dxPScxCommonD14;dxPScxExtCommonD14;dxPScxPCProdD14;dxPScxSSLnkD14;dxPScxTL5LnkD14;dxPScxVGridLnkD14;dxPSTeeChartD14;dxPSDBTeeChartD14;dxPSdxDBTVLnkD14;dxPSdxFCLnkD14;dxPSdxLCLnkD14;dxPSdxOCLnkD14;dxPSdxDBOCLnkD14;dxPsPrVwAdvD14;dxPScxGrid6LnkD14;cxPivotGridD14;cxPivotGridChartD14;cxPivotGridOLAPD14;dcldxSkinsCoreD14;dxSkinsCoreD14;dxSkinscxPCPainterD14;dxSkinsdxLCPainterD14;dxSkinscxScheduler3PainterD14;dxSkinsdxNavBar2PainterD14;dxNavBarD14;dxSkinsdxDLPainterD14;dxSkinsdxRibbonPainterD14;dxSkinsdxBarPainterD14;dxSpellCheckerD14;Jcl;JclVcl;JvCoreD14R;JvSystemD14R;JvStdCtrlsD14R;JvAppFrmD14R;JvBandsD14R;JvDBD14R;JvDlgsD14R;JvBDED14R;JvCmpD14R;JvCryptD14R;JvCtrlsD14R;JvCustomD14R;JvDockingD14R;JvDotNetCtrlsD14R;JvEDID14R;JvGlobusD14R;JvHMID14R;JvInterpreterD14R;JvJansD14R;JvManagedThreadsD14R;JvNetD14R;JvPageCompsD14R;JvPluginD14R;JvPrintPreviewD14R;JvRuntimeDesignD14R;JvTimeFrameworkD14R;JvValidatorsD14R;JvWizardD14R;JvXPCtrlsD14R;OfficePopupMenuD7;localizer14;Package1;CPortLib7;SynEdit_R2009;ExWatcher;CoolTrayIcon_D6plus;WMPLib;Barcodeqr;$(DCC_UsePackage)</DCC_UsePackage>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>PersonaPROCESS_Icon.ico</Icon_MainIcon>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Debugger_RunParams>?</Debugger_RunParams>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <Icon_MainIcon>PersonaPROCESS_Icon.ico</Icon_MainIcon>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_DebugInformation>False</DCC_DebugInformation>
+        <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_UnitSearchPath>D:\Hastane2\Ortak;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_ResourcePath>D:\Hastane2\Ortak;$(DCC_ResourcePath)</DCC_ResourcePath>
+        <DCC_ObjPath>D:\Hastane2\Ortak;$(DCC_ObjPath)</DCC_ObjPath>
+        <DCC_IncludePath>D:\Hastane2\Ortak;$(DCC_IncludePath)</DCC_IncludePath>
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_ResourcePath>D:\Hastane2\Ortak;$(DCC_ResourcePath)</DCC_ResourcePath>
+        <DCC_ObjPath>D:\Hastane2\Ortak;$(DCC_ObjPath)</DCC_ObjPath>
+        <DCC_IncludePath>D:\Hastane2\Ortak;$(DCC_IncludePath)</DCC_IncludePath>
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_MajorVer>1</VerInfo_MajorVer>
+        <BRCC_IncludePath>C:\GenSoft\Delphi\Entegra\PDKSProcess;C:\GenSoft\Delphi\Entegra\Ortak</BRCC_IncludePath>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="uAnaForm.pas">
+            <Form>AnaForm</Form>
+        </DCCReference>
+        <DCCReference Include="uTablo.pas">
+            <Form>Tablo</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="uAyarForm.pas">
+            <Form>AyarlarForm</Form>
+        </DCCReference>
+        <DCCReference Include="UVersiyon.pas">
+            <Form>VersiyonDlg</Form>
+        </DCCReference>
+        <DCCReference Include="GT_About.pas">
+            <Form>AboutBox</Form>
+        </DCCReference>
+        <DCCReference Include="uLogo.pas">
+            <Form>LOGO</Form>
+        </DCCReference>
+        <DCCReference Include="RFID_103_485IO_DLL.pas"/>
+        <DCCReference Include="uCamera.pas">
+            <Form>Camera</Form>
+        </DCCReference>
+        <DCCReference Include="Unit2.pas"/>
+        <DCCReference Include="uAnvizProtokol.pas"/>
+        <DCCReference Include="Uizin.pas">
+            <Form>IzinDlg</Form>
+        </DCCReference>
+        <DCCReference Include="uFingerPrint.pas"/>
+        <DCCReference Include="AKSREADERLib_TLB.pas"/>
+        <DCCReference Include="FK203IDLib_TLB.pas"/>
+        <DCCReference Include="zkemkeeper_TLB.pas"/>
+        <DCCReference Include="ZKRFCtrl_TLB.pas"/>
+        <DCCReference Include="UVeriAl.pas">
+            <Form>FrmVeriAktarım</Form>
+        </DCCReference>
+        <DCCReference Include="FKAttendLib_TLB.pas"/>
+        <DCCReference Include="UTanim.pas"/>
+        <DCCReference Include="UCombo.pas">
+            <Form>ListeAyarlaDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+            <Form>GirisKutusuEx</Form>
+        </DCCReference>
+        <DCCReference Include="UTouchKeyboardWindow.pas"/>
+        <DCCReference Include="..\Entegra\UGENINIDuzenle.pas">
+            <Form>GENINIDuzenleDlg</Form>
+        </DCCReference>
+        <DCCReference Include="..\Entegra\UGenSifre.pas"/>
+        <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas"/>
+        <DCCReference Include="..\Ortak\FetaClassExtensions.pas"/>
+        <DCCReference Include="..\Ortak\Fetautil.pas"/>
+        <DCCReference Include="..\Entegra\PrjConst.pas"/>
+        <DCCReference Include="Usifre.pas">
+            <Form>PasswordDlg</Form>
+        </DCCReference>
+        <None Include="PersonaPROCESS.dpr"/>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>VCLApplication</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">PersonaPROCESS.dpr</Source>
+                </Source>
+                <Parameters>
+                    <Parameters Name="RunParams">?</Parameters>
+                    <Parameters Name="UseLauncher">False</Parameters>
+                    <Parameters Name="LoadAllSymbols">True</Parameters>
+                    <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+                </Parameters>
+                <VersionInfo>
+                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+                    <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+                    <VersionInfo Name="MajorVer">2</VersionInfo>
+                    <VersionInfo Name="MinorVer">0</VersionInfo>
+                    <VersionInfo Name="Release">0</VersionInfo>
+                    <VersionInfo Name="Build">2</VersionInfo>
+                    <VersionInfo Name="Debug">False</VersionInfo>
+                    <VersionInfo Name="PreRelease">False</VersionInfo>
+                    <VersionInfo Name="Special">False</VersionInfo>
+                    <VersionInfo Name="Private">False</VersionInfo>
+                    <VersionInfo Name="DLL">False</VersionInfo>
+                    <VersionInfo Name="Locale">1055</VersionInfo>
+                    <VersionInfo Name="CodePage">1254</VersionInfo>
+                </VersionInfo>
+                <VersionInfoKeys>
+                    <VersionInfoKeys Name="CompanyName"/>
+                    <VersionInfoKeys Name="FileDescription"/>
+                    <VersionInfoKeys Name="FileVersion">2.0.0.2</VersionInfoKeys>
+                    <VersionInfoKeys Name="InternalName"/>
+                    <VersionInfoKeys Name="LegalCopyright"/>
+                    <VersionInfoKeys Name="LegalTrademarks"/>
+                    <VersionInfoKeys Name="OriginalFilename"/>
+                    <VersionInfoKeys Name="ProductName"/>
+                    <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+                    <VersionInfoKeys Name="Comments"/>
+                </VersionInfoKeys>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="C:\BPLXE3\dxBarRS17.bpl">ExpressBars by Developer Express Inc.</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k170.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp170.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+</Project>

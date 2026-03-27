@@ -1,0 +1,349 @@
+object GorevListePaylasimDlg: TGorevListePaylasimDlg
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  Caption = 'Liste '#304#351'lemleri'
+  ClientHeight = 377
+  ClientWidth = 382
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  Position = poScreenCenter
+  OnShow = FormShow
+  TextHeight = 13
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 382
+    Height = 73
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 0
+    object ListeBaslik: TcxButtonEdit
+      Left = 59
+      Top = 10
+      Properties.Buttons = <>
+      TabOrder = 0
+      Width = 233
+    end
+    object cxLabel2: TcxLabel
+      Left = 4
+      Top = 11
+      Caption = 'Liste Ad'#305
+    end
+    object CheckHerkeseAcik: TcxCheckBox
+      Left = 212
+      Top = 37
+      Caption = 'Herkese A'#231#305'k'
+      TabOrder = 2
+      OnClick = CheckHerkeseAcikClick
+    end
+  end
+  object PanelAlt: TPanel
+    Left = 0
+    Top = 336
+    Width = 382
+    Height = 41
+    Align = alBottom
+    TabOrder = 1
+    object KaydetTus: TBitBtn
+      Left = 216
+      Top = 8
+      Width = 76
+      Height = 24
+      Caption = 'Kaydet'
+      Default = True
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000D30E0000D30E00000001000000010000008C00000094
+        0000009C000000A5000000940800009C100000AD100000AD180000AD210000B5
+        210000BD210018B5290000C62900319C310000CE310029AD390031B5420018C6
+        420000D6420052A54A0029AD4A0029CE5A006BB5630000FF63008CBD7B00A5C6
+        94005AE7A500FF00FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF001B1B1B1B1B13
+        04161B1B1B1B1B1B1B1B1B1B1B1B1B0B0A01181B1B1B1B1B1B1B1B1B1B1B160A
+        0C030D1B1B1B1B1B1B1B1B1B1B1B050E0C0601191B1B1B1B1B1B1B1B1B130E0C
+        170E02001B1B1B1B1B1B1B1B1B0B1517170A0C01181B1B1B1B1B1B1B1B111717
+        13130C030D1B1B1B1B1B1B1B1B1B08081B1B070C01191B1B1B1B1B1B1B1B1B1B
+        1B1B100C02001B1B1B1B1B1B1B1B1B1B1B1B1B090C01181B1B1B1B1B1B1B1B1B
+        1B1B1B130C0F101B1B1B1B1B1B1B1B1B1B1B1B1B141A0F181B1B1B1B1B1B1B1B
+        1B1B1B1B1012181B1B1B1B1B1B1B1B1B1B1B1B1B1B191B1B1B1B1B1B1B1B1B1B
+        1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B}
+      Margin = 2
+      ModalResult = 1
+      ParentFont = False
+      Spacing = -1
+      TabOrder = 0
+      OnClick = KaydetTusClick
+      IsControl = True
+    end
+    object CancelBtn: TBitBtn
+      Left = 302
+      Top = 8
+      Width = 75
+      Height = 24
+      Cancel = True
+      Caption = 'Kapat'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        08000000000000010000220B0000220B000000010000000100000031DE000031
+        E7000031EF000031F700FF00FF000031FF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00040404040404
+        0404040404040404000004000004040404040404040404000004040000000404
+        0404040404040000040404000000000404040404040000040404040402000000
+        0404040400000404040404040404000000040000000404040404040404040400
+        0101010004040404040404040404040401010204040404040404040404040400
+        0201020304040404040404040404030201040403030404040404040404050203
+        0404040405030404040404040303050404040404040303040404040303030404
+        0404040404040403040403030304040404040404040404040404030304040404
+        0404040404040404040404040404040404040404040404040404}
+      Margin = 2
+      ModalResult = 2
+      ParentFont = False
+      Spacing = -1
+      TabOrder = 1
+      OnClick = CancelBtnClick
+      IsControl = True
+    end
+  end
+  object PanelPaylasim: TPanel
+    Left = 0
+    Top = 73
+    Width = 382
+    Height = 263
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 2
+    object ToolBar3: TToolBar
+      AlignWithMargins = True
+      Left = 3
+      Top = 3
+      Width = 376
+      Height = 24
+      Margins.Bottom = 0
+      AutoSize = True
+      ButtonWidth = 48
+      Caption = 'AletCubugu'
+      Color = clTeal
+      DockSite = True
+      DrawingStyle = dsGradient
+      EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+      EdgeInner = esLowered
+      EdgeOuter = esNone
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = []
+      GradientEndColor = 11776947
+      GradientStartColor = 14540253
+      HotTrackColor = 65408
+      Images = Tablo.PNGImageList2
+      List = True
+      ParentColor = False
+      ParentFont = False
+      ShowCaptions = True
+      TabOrder = 0
+      Transparent = True
+      object KulEkleTus: TToolButton
+        Left = 0
+        Top = 0
+        Caption = 'Yeni'
+        DropdownMenu = PopupMenuPaylasilan
+        ImageIndex = 0
+        ImageName = 'PngImage0'
+      end
+      object KulSilTus: TToolButton
+        Left = 48
+        Top = 0
+        Caption = 'Sil'
+        ImageIndex = 1
+        ImageName = 'PngImage1'
+        OnClick = KulSilTusClick
+      end
+      object cxLabel4: TcxLabel
+        Left = 96
+        Top = 0
+        Align = alRight
+        Caption = '  Payla'#351#305'm Listesi'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clBlack
+        Style.Font.Height = -11
+        Style.Font.Name = 'Tahoma'
+        Style.Font.Style = [fsBold]
+        Style.IsFontAssigned = True
+        Transparent = True
+      end
+    end
+    object GridKullan: TcxGrid
+      Left = 0
+      Top = 27
+      Width = 382
+      Height = 236
+      Align = alClient
+      TabOrder = 1
+      LookAndFeel.Kind = lfStandard
+      LookAndFeel.NativeStyle = True
+      object GridKullanView: TcxGridDBTableView
+        Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
+        DataController.DataSource = DtsKullanici
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsBehavior.FocusCellOnTab = True
+        OptionsData.CancelOnExit = False
+        OptionsData.Deleting = False
+        OptionsData.DeletingConfirmation = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsSelection.CellSelect = False
+        OptionsSelection.MultiSelect = True
+        OptionsSelection.HideSelection = True
+        OptionsView.GroupByBox = False
+        OptionsView.Header = False
+        OptionsView.Indicator = True
+        object GridKullanViewKULLANICI: TcxGridDBColumn
+          Caption = 'Ad Soyad'
+          DataBinding.FieldName = 'KULLANICI'
+          Width = 322
+        end
+      end
+      object cxGridLevel2: TcxGridLevel
+        GridView = GridKullanView
+      end
+    end
+  end
+  object TabKullanici: TFDQuery
+    Connection = Tablo.FDCnn
+    ParamData = <>
+    SQL.Strings = (
+      'select '
+      '       GK.*, '
+      #9'   KULLANICI =CASE '
+      #9'   --T'#252'm'
+      #9'   WHEN TUR=5 THEN '#39'T'#252'm Kullan'#305'c'#305'lar'#39' '
+      #9'   --ki'#351'i/'#351'ube'
+      
+        #9'   WHEN TUR in (1,4) THEN (SELECT FIRMA FROM REHBER WHERE ID=GK' +
+        '.REHBERID )'
+      '       --departman'
+      
+        #9'  WHEN TUR=3 THEN  ( SELECT G.ANAHTAR from GENINI G where G.BOL' +
+        'UM=-2251 AND DEGER = GK.REHBERID AND DIL=-1 )'
+      '       --g'#246'rev'
+      
+        #9'   WHEN TUR=2 THEN  ( SELECT G.ANAHTAR from GENINI G where G.BO' +
+        'LUM=-2252 AND DEGER = GK.REHBERID AND DIL=-1 )'
+      #9'   END'
+      ''
+      'from '
+      #9'GOREVKULLANICI GK'
+      'where '
+      #9'GK.LISTGOREVID =  :PDuyuruId'
+      ' AND TUR<=5')
+    Left = 273
+    Top = 178
+  end
+  object DtsKullanici: TDataSource
+    DataSet = TabKullanici
+    Left = 274
+    Top = 124
+  end
+  object PopupMenuPaylasilan: TPopupMenu
+    Left = 106
+    Top = 142
+    object KisiMenu: TMenuItem
+      Tag = 1
+      Caption = 'Ki'#351'i'
+      OnClick = KisiMenuClick
+    end
+    object GorevMenu: TMenuItem
+      Tag = 2
+      Caption = 'G'#246'rev'
+      OnClick = KisiMenuClick
+    end
+    object DepartmanMenu: TMenuItem
+      Tag = 3
+      Caption = 'Departman'
+      OnClick = KisiMenuClick
+    end
+    object SubeMenu: TMenuItem
+      Tag = 4
+      Caption = #350'ube'
+      OnClick = KisiMenuClick
+    end
+  end
+end
+

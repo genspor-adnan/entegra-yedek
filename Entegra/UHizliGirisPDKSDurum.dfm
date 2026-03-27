@@ -1,0 +1,81 @@
+object HizliGirisPDKSDurumDlg: THizliGirisPDKSDurumDlg
+  Left = 0
+  Top = 0
+  BorderStyle = bsNone
+  Caption = 'HizliGirisPDKSDurumDlg'
+  ClientHeight = 385
+  ClientWidth = 280
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Panel2: TPanel
+    Left = 0
+    Top = 0
+    Width = 280
+    Height = 41
+    Align = alTop
+    TabOrder = 0
+    object BtnKapat: TcxButton
+      Left = 243
+      Top = 1
+      Width = 36
+      Height = 39
+      ParentCustomHint = False
+      Align = alRight
+      BiDiMode = bdLeftToRight
+      Cancel = True
+      Caption = 'X'
+      Colors.Default = clRed
+      Colors.DefaultText = clWhite
+      Colors.Normal = clRed
+      Colors.NormalText = clBlack
+      Colors.Hot = clMaroon
+      Colors.HotText = clWhite
+      Colors.Pressed = clMaroon
+      Colors.PressedText = clWhite
+      Colors.Disabled = clRed
+      Colors.DisabledText = clWhite
+      ParentBiDiMode = False
+      ParentShowHint = False
+      ShowHint = False
+      TabOrder = 0
+      TabStop = False
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWhite
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = BtnKapatClick
+    end
+    object lbKasaAcKapaBilgi: TcxLabel
+      Left = 4
+      Top = 6
+      Caption = 'Durum Se'#231'iniz'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -16
+      Style.Font.Name = 'Trebuchet MS'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+  end
+  object OrtaPanel: TPanel
+    Left = 0
+    Top = 41
+    Width = 280
+    Height = 344
+    Align = alClient
+    TabOrder = 1
+  end
+end

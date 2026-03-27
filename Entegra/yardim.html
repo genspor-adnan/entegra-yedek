@@ -1,0 +1,682 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1254">
+<title>Entegra Muhasebe Programı Sonome</title>
+</head>
+
+<body>
+
+<table align="center" width="1001" height="673">
+	<tr>
+		<td height="127" width="1001" align="center" valign="top"><b>
+		<font size="5"><a name="basa don">Entegra Muhasebe Programı<br>
+		Sonomed İçin Hazırlanan Kullanım Rehberi</a></font></b><p align="left">
+		<font size="4"><b>İçindekiler</b></font></p>
+		<p align="left"><font size="4"><b><a href="#hesap plan">1. Hesap Planı</a></b></font></p>
+		<p align="left"><font size="4"><b><a href="#kullan">2. Entegra Programının Kullanımı</a></b></font></p>
+		<p align="left"><font size="4"><b><a href="#dokum">3. Dökümlerin Kullanımı</a></b></font></td>
+	</tr>
+	<tr>
+		<td height="172" width="1001">&nbsp;<p><b><font size="4">
+		<a name="hesap plan">1. BÖLÜM : 
+		HESAP PLANI</a><br>
+		</font></b><br>
+		ALT HESAP SIRASI<br>
+		Ana hesap isimlerinden sonra alt hesap kodları açıldıysa, alt hesaplarda 
+		öncelik sırası, 01 Sonomed<br>
+		02 Sonorest<br>
+		03 Sonodent<br>
+		04 İştirakler<br>
+		Örneğin kasa hesaplarında;<br>
+		100 Kasa Kesabı<br>
+		100.01 TL Kasa Hesabı<br>
+		100.01.01 Sonomed TL Kasa Hesabı<br>
+		100.01.02 Sonorest TL Kasa Hesabı<br>
+		100.01.03 Sonodent TL Kasa Hesabı<br>
+		<br>
+		HESAP İSİMLERİ VE KODLARI<br>
+		Entegra muhasebe programında açılan hesapların isimleri ve kodları, 
+		Sonomed’in kullanmakta olduğu tek düzen hesap planındaki hesap isim ve 
+		hesap kodları ile aynıdır. <br>
+		<br>
+		KASA, BANKA, ÇEK ve KREDİ KARTI HESAP İSİMLERİ VE KODLARI<br>
+		100 KASA<br>
+		100.01 TL Kasası<br>
+		100.01.01 Sonomed TL Kasa Hesabı<br>
+		100.01.02 Sonorest TL Kasa Hesabı<br>
+		100.01.03 Sonodent TL Kasa Hesabı<br>
+		100.02 USD Kasası<br>
+		100.02.01 Sonomed USD Kasa Hesabı<br>
+		100.02.02 Sonorest USD Kasa Hesabı<br>
+		100.02.03 Sonodent USD Kasa Hesabı <br>
+		100.03 Euro Kasası<br>
+		100.03.01 Sonomed Euro Kasa Hesabı<br>
+		100.03.02 Sonorest Euro Kasa Hesabı<br>
+		100.03.03 Sonodent Euro Kasa Hesabı<br>
+		<br>
+		101 ALINAN ÇEKLER <br>
+		Alınan çekler alt hesap açılmadan toplu olarak takip ediliyor<br>
+		<br>
+		101.01 TL Çekleri<br>
+		101.02 USD Çekleri<br>
+		101.03 Euro Çekleri<br>
+		101.03.01 Ada Balıkçılıktan Alınan Çekler<br>
+		<br>
+		102 BANKA HESAPLARI<br>
+		102.01 TL Hesapları<br>
+		102.01.01 <br>
+		102.02 USD Hesapları<br>
+		102.02.01<br>
+		102.03 Euro Hesapları<br>
+		102.03.01<br>
+		<br>
+		103 VERİLEN ÇEKLER<br>
+		103.1 İş Bankası çeki<br>
+		103.2 <br>
+		103.3<br>
+		Sadece Sonomed AŞ den borç çeki veriliyor<br>
+		Alt hesapları çek hesabının kullanıldığı banka şubesine göre açılıyor<br>
+		<br>
+		108 KREDİ KARTI HESAPLARI <br>
+		108.1 Sonomed Kredi Kartı Hesapları<br>
+		108.1.01 İş Bankası Kredi Kartı Hesabı<br>
+		108.1.02 YKB Kredi Kartı Hesabı<br>
+		108.1.03 Akbank Kredi Kartı Hesabı<br>
+		108.2 Sonorest Kredi Kartı Hesapları<br>
+		108.2.01 İş Bankası Kredi Kartı Hesabı (Restoran)<br>
+		108.2.02 YKB Kredi Kartı Hesabı (Restoran)<br>
+		108.2.03 <br>
+		108.3 Sonodent Kredi Kartı Hesapları<br>
+		108.3.01<br>
+		<br>
+		Kredi kartı hesaplarındaki BORÇ sütunu kredi kartı hesabına giren 
+		miktarı, ALACAK sütunu ise bankadan tahsil edilen miktarı gösterir. 
+		İkisi arasındaki fark ise hesap BAKİYE’sinii verir.<br>
+		Kredi kartı hesaplarından iki tarih arasında yapılan tahsilat (iki tarih 
+		arasındaki alacak toplamı), iki tarih arasındaki kredi kartı geliri 
+		olarak gelir tablosunda yer alır. <br>
+		<br>
+		FİNANSAL İŞLEMLER<br>
+		110 HİSSE SENEDİ<br>
+		Sadece Sonomed AŞ hisse senedi işlemi yapıyor, bu nedenle diğer Sonomed 
+		kuruluşları adına hisse senedi hesabı açılmadı. <br>
+		Alt hesapları alım-satımın yapıldığı aracı kuruma göre açılacaktır. <br>
+		<br>
+		112 FON + REPO GELİRLERİ<br>
+		112.01 İş Bankası Fon Hesabı<br>
+		112.02 YKB Fon Hesabı<br>
+		112.03 Finansbank Fon Hesabı<br>
+		112.04 <br>
+		Sadece Sonomed AŞ fon ve repo işlemi yapıyor, bu nedenle diğer Sonomed 
+		kuruluşları adına fon + repo hesabı açılmadı. <br>
+		Alt hesapları çalışılan bankaya göre açıldı<br>
+		FF İŞLEMLERİ<br>
+		Bütün FF kayıtları 320.05.04 nolu hesapta tutulmaktadır. Bu hesabın 
+		bakiyesi alınan FF miktarını verir. FF için ödenen KDV ise 360.1.07 
+		hesaba kaydedilmektedir. FF sorugusu fazla fatura için ödenen fazla KDV 
+		yi 740.1.51 nolu hesaptan, fazla fatura miktarını ise 740.1.74 nolu 
+		hesaptan alır. <br>
+		<br>
+		120 ALICILAR <br>
+		Sonomed, Sonodent ve Sonorest’den hizmet satın alan anlaşmalı kurumlar 
+		ve şahıs alacakları bu hesaplarda takip edilir.<br>
+		<br>
+		120 ALICILAR<br>
+		120.01 Sonomed Alıcıları<br>
+		<br>
+		120.01.01 Acıbadem<br>
+		120.01.02 Aksigorta<br>
+		<br>
+		120.01.99 Sonomed Şahıs Alacakları Havuz Hesapları<br>
+		<br>
+		120.02 Sonorest Alıcıları<br>
+		120.02.01 Sonorest Anlaşmalı Kurum Alacakları (Havuz Hesabı)<br>
+		120.02.99 Sonorest Şahıs Alacakları (Havuz Hesabı)<br>
+		<br>
+		120.03 Sonodent Alıcıları<br>
+		120.03.01 TOBB Diş<br>
+		120.03.02 TBMM Diş<br>
+		<br>
+		120.03.98 Sonodent Şahıs Alacakları (Havuz Hesabı)<br>
+		<br>
+		Anlaşmalı kurum gelirleri hesap kodları ve fatura takip programı 
+		aracılığı ile entegra içine otomatik olarak aktarılır. <br>
+		Sigorta Alacakları sorgusundaki GÖNDERİLEN sütunundaki rakamlar 
+		120.01.01 Acıbadem’den itibaren anlaşmalı kurum alt hesaplarına BORÇ 
+		olarak ; sorguda TAHSİL sütunundaki rakamlar ise aynı alt hesabın ALACAK 
+		sütununa aktarılır. <br>
+		Sorguda T. O. B. B-DİŞ olan anlaşmalı kurum 120.03.01 nolu TOBB Diş alt 
+		hesabına ; TBMM-DİŞ olan anlaşmalı kurum verileri ise 120.03.02 nolu 
+		TBMM Diş alt hesabına aktarılır.<br>
+		Özel sigorta hesaplarındaki BORÇ sütunu anlaşmalı kuruma gönderilen 
+		fatura miktarını, ALACAK sütunu ise tahsil edilen parayı gösterir. İkisi 
+		arasındaki fark ise hesap BAKİYE’sinii verir.<br>
+		Anlaşmalı kurumlardan iki tarih arasında yapılan tahsilat (iki tarih 
+		arasındaki alacak toplamı), iki tarih arasındaki anlaşmalı kurum geliri 
+		olarak gelir tablosunda yer alır. <br>
+		Ay sonunda yapılan düzeltme kaydı ile anlaşmalı kurumların masraf adı 
+		altında kestikleri paralar ise 740.1.37.4 hesabına kaydedilir. 
+		740.1.37.4 hesabının toplamı anlaşmlı kurumlar tarafından kesilen masraf 
+		toplamını veya hatalı faturalandırma nedeniyle ortaya çıkan kayıpları 
+		gösterir. <br>
+		<br>
+		243 İŞTİRAKLERDEN ALACAKLAR<br>
+		Sonomed, iştirakleri olan Sononükleer ve Spektromar ortaklıklarından 
+		olan alacakları bu hesaplarda takip edilir.<br>
+		243.01 Sononükleer<br>
+		243.02 Spektromar<br>
+		<br>
+		255 DEMİRBAŞLAR<br>
+		Sadece ikinci el olarak satılması mümkün, rakamsal değeri büyük tıbbi 
+		cihazlar demirbaş olarak kaydedilir. Diğer cihazlar gider olarak 
+		kaydedilir.<br>
+		<br>
+		258 YAPILMAKTA OLAN YATIRIMLAR<br>
+		Yapılmakta olan yatırımlar 258 nolu hesaplarda, alınan demirbaşlar ise 
+		255 nolu hesaplarda takip edilmektedir. <br>
+		o Yapılmakta olan yatırımlar 258 nolu hesaplarda ;<br>
+		258.1 Sonomed yatırımları<br>
+		258.2 Sonorest yatırımları<br>
+		258.3 Sonodent yatırımları<br>
+		o Demirbaşlar ise 255 nolu hesaplarda ;<br>
+		255.1 Sonomed demirbaşları<br>
+		255.2 Sonorest demirbaşları<br>
+		255.3 Sonodent demirbaşları<br>
+		<br>
+		320 SATICILAR<br>
+		Sonomed ve Sonorest’e mal satan (SATICILAR) 320 nolu hesaplarda takip 
+		edilmektedir. Bu hesaplar alınan malın türüne göre gruplandırılmıştır ve 
+		bu grupta mal satan her bir satıcı grup altında alt hesap kodları ile 
+		takip edilmektedir. Cari hesap kartlarında her firmanın Vergi dairesi, 
+		vergi numarası, son yatırdığı KDV beyannamesi gibi bilgiler de takip 
+		edilebilecek durumdadır. Sonomed için risk taşıyan firmaların bu tür 
+		işlemleri bu kartlardan periyodik oalrak takip edilir. <br>
+		<br>
+		300 KREDİ BORÇLARI<br>
+		300.01 İş Leasing<br>
+		300.02 Garanti Bankası Kredi<br>
+		300.03 İş Bankası Kredi<br>
+		300.04 İş Bankası Kredi 2<br>
+		300.05 Ak Leasing<br>
+		300.06 İş Bankası Kredi E<br>
+		<br>
+		331 ORTAKLARA OLAN BORÇLAR<br>
+		Dağıtılan kar payları bu hesaplarda gösterilir<br>
+		<br>
+		335 PERSONELE OLAN BORÇLAR<br>
+		Personel maaşları, avansları bu hesaplarda takip edilir.<br>
+		<br>
+		360 ÖDENECEK VERGİ VE DİĞER YÜKÜMLÜLÜKLER<br>
+		360.1 Sonomed<br>
+		360.1.01 Stopaj<br>
+		360.1.02 KDV<br>
+		360.1.03 Geçici vergi<br>
+		360.1.04 Damga vergisi<br>
+		360.1.06 Diğer vergiler<br>
+		360.1.07 FF KDV<br>
+		<br>
+		360.2 Sonorest<br>
+		360.2.01 Stopaj<br>
+		360.2.02 KDV<br>
+		360.2.03 Geçici vergi<br>
+		360.2.04 Damga vergisi<br>
+		360.2.05 Diğer vergiler<br>
+		<br>
+		361 ÖDENECEK SOSYAL GÜVENLİK KESİNTİLERİ<br>
+		361.01 Sonomed SSK Ödemeleri<br>
+		361.02 Sonorest SSK Ödemeleri<br>
+		361.03 BağKur Ödemeleri<br>
+		<br>
+		372 KIDEM TAZMİNATI KARŞILIĞI<br>
+		Kıdem tazminatları için ayrılması planlanan karşılıklar bu hesaptan 
+		takip edilir.<br>
+		<br>
+		590 DÖNEM KARLARI<br>
+		590.1 Sonomed Karı<br>
+		590.2 Sonorest Karı<br>
+		<br>
+		600 SATIŞLAR<br>
+		Sonomed ve bağlı birimlerin nakit olarak tahsil edilen gelirleri bu 
+		hesaplarda takip edilir.<br>
+		<br>
+		600 Nakit satışlar<br>
+		600.1 Sonomed Nakit Geliri<br>
+		600.2 Sonorest Nakit Geliri<br>
+		600.3 Sonodent Nakit Geliri<br>
+		<br>
+		601 Diğer Nakit Gelir (Şahıs alacakları tahsilatı bu hesaptan takip 
+		edilir)<br>
+		601.1 Sonomed Şahıs Alacağı Nakit Tahsilatı<br>
+		601.2 Sonorest Şahıs Alacağı Nakit Tahsilatı<br>
+		601.3 Sonodent Şahıs Alacağı Nakit Tahsilatı<br>
+		<br>
+		602 Diğer Gelirler (Cihaz vs satış nakit geliri)<br>
+		602.1 Sonomed Diğer Gelirleri<br>
+		602.1.01 Sonomed Cihaz Sigorta Tazminat Gelirleri<br>
+		602.1.02 Sonomed Cihaz ve Hurda Satışı<br>
+		602.1.03 Sonomed Diğer Gelirleri<br>
+		602.2 Sonorest Diğer Gelirleri<br>
+		602.3 Sonodent Diğer Gelirleri<br>
+		<br>
+		640 İŞTİRAK GELİRLERİ<br>
+		640.1 Sononükleer<br>
+		640.2 Spektromar<br>
+		<br>
+		<br>
+		642 FİNANSAL GELİRLER<br>
+		642.01 Sonomed Faiz Gelirleri<br>
+		642.02 Sonorest Faiz Gelirleri<br>
+		<br>
+		740 GİDERLER<br>
+		740.1 Sonomed Giderleri<br>
+		<br>
+		740.1.01 Laboratuvar Giderleri<br>
+		740.1.01.1 Laboratuvar Personel Giderleri<br>
+		740.1.01.2 Laboratuvar Dr Giderleri<br>
+		740.1.01.3 Düzene Ödenen<br>
+		740.1.01.4 Referansa Ödenen<br>
+		740.1.01.5 Laboratuvar KİT Giderleri<br>
+		740.1.01.6 Laboratuvar Diğer Giderleri<br>
+		<br>
+		740.1.02 MR Giderleri<br>
+		740.1.02.1 MR Personel Giderleri<br>
+		740.1.02.2 MR Dr Giderleri<br>
+		740.1.02.5 MR Diğer Giderleri<br>
+		<br>
+		740.1.03 US Giderleri<br>
+		740.1.03.1 US Personel Giderleri<br>
+		740.1.03.2 US Dr Giderleri<br>
+		740.1.03.3 US Malzeme Giderleri<br>
+		<br>
+		740.1.04 BT Giderleri (Röntgen Katı)<br>
+		740.1.04.1 BT Personel Giderleri<br>
+		740.1.04.2 BT Dr Giderleri<br>
+		740.1.04.5 BT Diğer Giderleri<br>
+		<br>
+		740.1.05 Nükleer Tıp Giderleri<br>
+		740.1.05.1 Nükleer Tıp Personel Giderleri<br>
+		740.1.05.2 Nükleer Tıp Yardımcı Dr Giderleri<br>
+		740.1.05.3 Nükleer Tıp Gideri<br>
+		740.1.05.4 Nükleer Tıp Diğer Giderleri<br>
+		<br>
+		740.1.06 Koroner BT Giderleri<br>
+		740.1.06.1 KA Personel Giderleri<br>
+		740.1.06.2 KA Dr Giderleri<br>
+		740.1.06.4 Konsültan Kardiolog Gideri<br>
+		<br>
+		740.1.07 Tanıtım Giderleri<br>
+		740.1.07.1 Tanıtım Personel Giderleri<br>
+		740.1.07.2 Tanıtım Yol Giderleri<br>
+		740.1.07.3 Tanıtım Yemek Giderleri<br>
+		<br>
+		740.1.08 Ulaşım Gideri<br>
+		<br>
+		740.1.09 İletişim Giderleri<br>
+		740.1.09.1 Şirket Telefon Giderleri<br>
+		740.1.09.2 Şirket Cep Telefon Giderleri<br>
+		740.1.09.4 Metroethernet Gideri<br>
+		<br>
+		740.1.10 Cihaz Parça Bakım Onarım<br>
+		<br>
+		740.1.11 Müşavirlik<br>
+		<br>
+		740.1.12 Danışmanlık<br>
+		<br>
+		740.1.13 Kira<br>
+		740.1.13.1 Kira Gideri<br>
+		740.1.13.2 Kira Stopaj Masrafı<br>
+		<br>
+		740.1.14 Kontrast Madde Gideri<br>
+		740.1.14.1 MR Kontrast Madde<br>
+		740.1.14.2 Rönt Kontrast Madde<br>
+		<br>
+		740.1.15 Film Banyo Gideri<br>
+		<br>
+		740.1.16 Su Giderleri<br>
+		740.1.16.1 İSKİ<br>
+		740.1.16.2 İçme Suyu<br>
+		<br>
+		740.1.17 Yakıt<br>
+		<br>
+		740.1.18 Yemek Giderleri<br>
+		740.1.18.2 Personel Yemeği (Sonorestdan alınan)<br>
+		740.1.18.3 Diğer Yemek Giderleri<br>
+		<br>
+		740.1.19 Bilişim Giderleri<br>
+		740.1.19.1 Eksen Bilgisayar<br>
+		740.1.19.2 CD Giderleri<br>
+		740.1.19.3 Kartuş Dolum (Altun Kartuş)<br>
+		740.1.19.4 Diğer Bilişim Giderleri<br>
+		740.1.19.5 Banko Printer Masrafı (Bilgitaş)<br>
+		<br>
+		740.1.20 Dış Dr Anestezi<br>
+		<br>
+		740.1.21 Dış Dr E Eko<br>
+		<br>
+		740.1.22 Dış Dr P Eko<br>
+		<br>
+		740.1.23 Dış Dr HSG / Diğer<br>
+		<br>
+		740.1.24 Sigortalar<br>
+		740.1.24.1 Sağlık Sigortaları<br>
+		740.1.24.2 Cihaz Bina Sigortaları<br>
+		740.1.24.3 Araç Sigortaları<br>
+		<br>
+		740.1.25 Bina Bakım Onarım<br>
+		<br>
+		740.1.26 Temizlik Malzemesi<br>
+		<br>
+		740.1.27 Temsil Ağırlama<br>
+		740.1.27.1 Sonomed Etkinlik Gideri (Sonomedde yapılan yemekli toplantı 
+		gideri)<br>
+		740.1.27.2 Diğer Temsil Giderleri<br>
+		<br>
+		740.1.28 Patoloji Giderleri<br>
+		<br>
+		740.1.29 Kırtasiye Giderleri<br>
+		740.1.29.1 Kırtasiye Giderleri<br>
+		740.1.29.2 Matbaa Giderleri<br>
+		<br>
+		740.1.30 PRM<br>
+		<br>
+		740.1.31 Bağış<br>
+		<br>
+		740.1.32 Diğer Personel Giderleri<br>
+		<br>
+		740.1.33 YK Dr Ücretleri<br>
+		<br>
+		740.1.34 Tıbbi Sarf Malzemesi Giderleri<br>
+		<br>
+		740.1.35 Avukatlık Gideri<br>
+		<br>
+		740.1.36 Elektrik Gideri<br>
+		<br>
+		740.1.37 PTT Kurye Banka<br>
+		740.1.37.1 PTT<br>
+		740.1.37.2 Kurye<br>
+		740.1.37.3 Banka Masrafları<br>
+		740.1.37.4 Eksik Ödenen Sigorta (An kurumların Masraf adı altındaki 
+		kesintileri)<br>
+		<br>
+		740.1.40 Genel Giderler<br>
+		<br>
+		740.1.50 Sonomed Vergiler<br>
+		740.1.50.1 Kurumlar Vergisi <br>
+		740.1.50.2 KDV<br>
+		740.1.50.3 Stopaj<br>
+		740.1.50.4 Diğer Vergiler<br>
+		<br>
+		740.1.51 FF KDV<br>
+		<br>
+		740.1.74 SMS (Toplam FF Miktarını verir)<br>
+		<br>
+		740.2 Sonorest Giderleri<br>
+		<br>
+		740.2.01 Personel Giderleri<br>
+		740.2.01.1 Garson Ücretleri<br>
+		740.2.01.2 Mutfak Ücretleri<br>
+		740.2.01.3 TİP Ücretleri<br>
+		<br>
+		740.2.02 Yiyecek Giderleri<br>
+		740.2.02.1 Et Giderleri<br>
+		740.2.02.2 Tavuk Giderleri<br>
+		740.2.02.3 Balık Giderleri<br>
+		740.2.02.4 Diğer Yiyecek Giderleri<br>
+		<br>
+		740.2.03 İçki Giderleri<br>
+		740.2.03.1 Alkollü İçki Giderleri<br>
+		740.2.03.2 Meşrubat Giderleri<br>
+		<br>
+		740.2.04 Temizlik Giderleri<br>
+		<br>
+		740.2.05 Ulaşım Nakliye<br>
+		<br>
+		740.2.06 Yenilenen Demirbaş (Tabak bardak vs)<br>
+		<br>
+		740.2.07 Genel Gider<br>
+		<br>
+		740.2.08 Vergi SSK<br>
+		740.2.08.1 Kurumlar Vergisi<br>
+		740.2.08.2 KDV <br>
+		740.2.08.3 Stopaj <br>
+		<br>
+		740.2.09 Müzik Gideri<br>
+		<br>
+		740.2.10 Telefon Giderleri<br>
+		<br>
+		740.2.11 FF KDV<br>
+		<br>
+		740.3 Sonodent Giderleri<br>
+		<br>
+		740.3.01 Personel Giderleri<br>
+		740.3.01.1 Diş Yard Personel Giderleri<br>
+		740.3.01.2 Diş Dr Giderleri<br>
+		<br>
+		740.3.02 Genel Giderler<br>
+		740.3.03 Sarf Malzemeleri<br>
+		740.3.03.1 Laboratuvar Giderleri<br>
+		740.3.03.2 Malzeme Giderleri<br>
+		<br>
+		740.3.04 Temizlik Malzemesi</td>
+	</tr>
+	<tr>
+		<td height="160" width="1001"><br>
+		<br>
+		<b><font size="4"><a name="kullan">2. BÖLÜM : ENTEGRA PROGRAMININ KULLANIMI</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+		<a href="#basa don">(Başa dön)</a></b><br>
+		<br>
+		Muhasebe programı açıldığında, açıldığı günün tarihine ait kasa sayfası 
+		ekranı gelir. Bütün kayıtlar bu ekran üzerinden – kasa sayfasından - tek 
+		seferde yapılır. <br>
+		<br>
+		Kasa ekranında yeni bir kayıt alırken çıkan küçük ekrandaki BOÇ TAHAKKUK 
+		SONOMED’in alacağını (hesabın borcunu), ALACAK TAHAKKUK SONOMED’in 
+		borcunu (hesabın alacağını) gösterir.<br>
+		<br>
+		Programın mantığı 100 – 108 arası (çekler ve kredi kartları dahil) 
+		hesapalrı kasa hesabı (kullanılabilir nakit) mantığı ile görüyor. Bu 
+		nedenle kredi hesaplarına yapılan, alınan ve verilen çek hesaplarına 
+		yapılan kayıtlarda kasaya giren ve çıkan olarak kaydediliyor. 100 – 108 
+		hesaplar arası hareketler VİRMAN işlemi ile yapılıyoır. <br>
+		<br>
+		KASAYA GİREN ve KASADAN ÇIKAN kayıtları ile ALACAK TAHAKKUKU ve BORÇ 
+		TAHAKKUKU tek seferde tek kayıt ile yapılıyor. <br>
+		<br>
+		Yeni kasa ve banka hesapları Seçenekler / Kasa tür kodundan yeni kasa ve 
+		banka hesapları olarak açılıyor. Bu hesaplar açıldıktan sonra mouse sağ 
+		tuşu ile kart aç komutu verilecek ve o hesaba uygun kart açtırtılacak. 
+		Bu hesabın hareketleri bu karttan takip edilecek<br>
+		<br>
+		Kasa ekranında hesap kodu ve hesap adı boş ise tahakkuk işlemidir. 
+		Buraya bir şey yazılmaz. Hesap adı ve kodu varsa kasa ve para işlemidir.
+		<br>
+		<br>
+		Kasa ekranından giderleştirme yapılırken, önce 320 veya 335 hesaplarının 
+		altına satın almanın veya maaş ödemesinin yapıldığı kişi ya da 
+		firmaların hesaplarına kaydedilir. Kasa ekranında solda 320 veya 335 
+		nolu hesap kodları; sağda masraf merkezleri sütununda, 740 nolu 
+		hesaplarla giderleştirilir. 740 hesaplara yeniden gider yazılmaz.<br>
+		<br>
+		Verilen çekler 103 nolu hesaplarda takip ediliyor. 103 nolu verilen çek 
+		hesabının alt hesapları vardır. Çekler programa kaydedilirken mutlaka 
+		vade leri kaydedilir. Verilen çek hesabının cari kartından çekler vade 
+		sırasına göre sıralanır ve ileriye yönelik ödenecek çekler görüntülenmiş 
+		olur. Sonomedin borçları verilen çekler hesabından takip edilir. Çek 
+		verilmeden firmalara yönelik açık hesap borçların takibi yapılmaz.<br>
+		<br>
+		Verilen çeklerin kayıtlarına benzer şekilde kredi kartı hesaplarında 
+		bekleyen paranın hesaba geçme süresini ve miktarını da kontrol etmek 
+		amacıyla vade sütununa tarih kaydedilir. Hangi tarihte ne mikatar 
+		paranın kredi kartından hesaba geçeceği ileriye yönelik görülür.<br>
+		<br>
+		İleriye yönelik ödemeler otomatik tahakkuk sistemi ile kaydedilir ve 
+		ileriye yönelik iki tarih aralığında görülebilecek şekilde tarih 
+		sırasına göre listelenir.<br>
+		<br>
+		120 numaralı hesaplarda anlaşmalı kurumlara yapılan satışlar, yapılan 
+		tahsilatlar ve kalan alacaklar, Sigorta Alacak sorgusundan takip edilir.
+		<br>
+		<br>
+		Sonomed malzemeyi ve hizmeti satın aldığı zaman, ödeme için nakit veya 
+		çek verdiği zaman muhasebe programına kaydeder. Sonomedin ileriye 
+		yönelik borçları verilen çek hesabından takip edilir. Cari hesaplardan 
+		borç takibi yapılmaz. Cari hesaplar sadece satıcılar ile anlaşmazlık 
+		olduğunda veya yapılan işlem hacmini kontrol etmek için kullanılır.<br>
+		<br>
+		Düzeltme Kayıtlarının Yapılması<br>
+		Her ayın 28-30’u arası gelir gider tablosunun doğru rakamları kullanması 
+		için düzeltme kaydı yapılacak<br>
+		<br>
+		Özel sigorta tahsilatlarında bazen masraflar kesiliyor. Özel 
+		sigortaların kestikleri masraflar için ay sonunda Anlaşmalı kurumlar 
+		sorumlusu (Hülya Genç) ile Muhasebe (Bilge Başdemir) mutabakata 
+		varacaklar. Muhasebe anlaşmalı kurum alacaklarını güncelleyecek ve 
+		masrafları da 740 lı hesaplarda giderleştirecek<br>
+		<br>
+		Şahıslarda kalan alacaklarda da havuz hesabında şişme oluyor, geriye 
+		dönük indirimler nedeniyle gerçek rakamlardan uzaklaşılıyor. Her ayın 
+		sonunda Sonomed ön muhasebe ve Sonodent ön muhasebe sorumluları, Sonomed 
+		muhasebesi ile mutabakata varacaklar. Rakamlar ay sonundan önce 
+		güncellenecek<br>
+		<br>
+		Maaş ödemeleri ayın birinde ödense bile muhasebe kayıtları ayın son 
+		gününe yazılacak<br>
+		<br>
+		Prm ödemeleri de ayın son gününe yazılacak<br>
+		<br>
+&nbsp;</td>
+	</tr>
+	<tr>
+		<td height="191" width="1001"><b><font size="4"><a name="dokum">3. BÖLÜM : DÖKÜMLERİN 
+		KULLANIMI</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</font><a href="#basa don">(Başa dön)</a><br>
+		</b><br>
+		<a href="#likit">1. Likit Toplam Detay</a><br>
+		<a href="#gider">2. Giderler </a> <br>
+		<a href="#cekler">3. Verilen Çekler</a><br>
+		<a href="#cari">4. Cari Toplamlar</a><br>
+		<a href="#kasa">5. Kasa</a><br>
+		&nbsp;&nbsp;&nbsp;
+		Ent-Kasa Genel<br>
+		&nbsp;&nbsp;&nbsp;
+		Ent-Kasa Genel Net1<br>
+		&nbsp;&nbsp;&nbsp;
+		Ent-Kasa Detay<br>
+		<a href="#sigorta">6. Sigorta</a><br>
+		&nbsp;&nbsp;&nbsp;
+		Sig. Alacak Detay<br>
+		&nbsp;&nbsp;
+		Sigorta Alacakları<br>
+		<a href="#gelir">7.Gelirler</a><br>
+		&nbsp;&nbsp;
+		Gerçekleşen Gelirler<br>
+		&nbsp;&nbsp;
+		Tahakkuk Eden Gelirler<br>
+		<a href="#gelir gider">8. Gelir Gider Tablosu</a><br>
+		<a href="#km">9. KM Gelir Gider Tablosu</a><br>
+		<a href="#personel">10. Personel Giderleri</a><br>
+		<br>
+		<br>
+		Sorguların kullanım amaçları :<p><b><a name="likit">1. Likit Toplam Detay</a> :</b> Sonomed kasasında, bankalarda ve kredi kartı 
+		hesaplarında (bekleyen) paraların birimlerine ve şubelere göre 
+		dağılımını verir. Kasalar bir gün sonra yapıldığından en az bir gün 
+		önceki tarih ile sorgulanması önerilir.</p>
+		<p><b><a name="gider">2. Giderler</a> : </b>Bu sorgu iki tarih arasında yapılan masrafların masraf 
+		merkezlerine (740 hesaplardaki) dağılımlarına göre toplamlarını 
+		gösterir. Masrafların ayrıntılarını hesap kodundan o hesabın cari işlem 
+		kartına girilerek bakılır. Ayrıntılar sorguda görülmez. 740.1 
+		Görüntüleme giderlerini, 740.2 Sonorest giderlerini, 740.3 Sonodent 
+		giderlerini, 740 yazılınca üç bölümün toplu olarak giderlerini gösterir.</p>
+		<p><b><a name="cekler">3. Verilen Çekler</a> :</b> İleriye yönelik verilen çekler tarih sırasına göre 
+		listelenir. İleriye yönelik ödeme planı buradan yapılır. </p>
+		<p><b><a name="cari">4. Cari Toplamlar </a>: </b>İki tarih arasında hesap kodu girilen hesapların 
+		hareketlerini gösterir. <br>Örneğin Sonomedin alacaklarını sorgulamak için 
+		iki tarih arası girilir, hesap kodu olarak 120 yazılınca bütün alacaklar 
+		görülür. Sonomedin alacaklarını gösteren 120 numaralı hesaplarda Borçlar 
+		sütunu Sonomedin anlaşmalı kurum alacaklarını, Alacaklar sütunu ise 
+		Sonomedin dönem içi tahsilatını gösterir. <br>
+		Bu sorgudan Sonomedin banka borçları da sorgulanabilir. Hesap koduna 300 
+		yazılınca, çıkan dökümde, Borçlar Sonomedin bankalara olan borcunu, 
+		Alacaklar ise Sonomedin dönem içinde yaptığı ödemeleri, Bakiye ise son 
+		hesap bakiyesini gösterir.<p><b><a name="kasa">5. Kasa: </a></b>Bu grup altında üç tane sorgu vardır. Bu sorgular verilerini 
+		Kayıt-Kabul modülünden alır.
+		<p><b>Ent-Kasa Genel : </b>Kayıt Kabul modülünde BB-Kasa Genel Net dökümünün 
+		entegra içindeki ismidir. Günlük genel kasa hareketlerini görmek için 
+		kullanılır. Sonomed ön muhasebe ile muhasebe bölümü günlük kasalarını bu 
+		döküm üzerinden yapmaktadır. Bu dökümde en altta kasa ismine 0 yazılırsa 
+		Görüntüleme kasası; 5 yazılırsa Sonodent Kasası; 9 yazlırsa Sonorest 
+		kasası; boş bırakılırsa her üç kasa verilerine toplu olarak ulaşılır.
+		<p><b>Ent-Kasa Genel Net1: </b>Kayıt Kabul modülünde BB-Kasa Genel Net1 dökümünün 
+		entegra içindeki ismidir. Günlük genel kasa hareketlerinin ayrıntılarını 
+		görmek için kullanılır. Sonomed ön muhasebe ile muhasebe bölümü günlük 
+		kasalarını bu döküm üzerinden yapmaktadır. Bu dökümde en altta kasa 
+		ismine 0 yazılırsa Görüntüleme kasası; 5 yazılırsa Sonodent Kasası; 9 
+		yazlırsa Sonorest kasası; boş bırakılırsa her üç kasa verilerine toplu 
+		olarak ulaşılır.
+		<p><b>Ent-Kasa Detay : </b>Kayıt Kabul modülünde BB-Kasa Genel Detay Y dökümünün 
+		entegra içindeki ismidir. Sonomed kasalarında işlemleri ayrıntılı olarak 
+		gösterir. Kaslarda işlem yapan her hastanın ismi, yaptığı işlemler bu 
+		dökümden kontrol edilir. Bu dökümde en altta kasa ismine 0 yazılırsa 
+		Görüntüleme kasası; 5 yazılırsa Sonodent Kasası; 9 yazlırsa Sonorest 
+		kasası; boş bırakılırsa her üç kasa verilerine toplu olarak ulaşılır.
+		<br>
+		<br>
+		<b><a name="sigorta">6. Sigorta Alacaklar</a> : </b>İki tarih arasındaki anlaşmalı kurumlara yapılan 
+		incelemeleri, tahsilatı ve kalan alacağı gösterir.<p><b><a name="gelir">
+		7. Gelirler</a> : </b>Bu grup altında iki tane sorgu vardır. Birincisi 
+		Gerçekleşen (tahsilatı yapılmış) Gelirleri; diğer ise Tahakkuk Eden 
+		Gelirleri Gösterir. <br>
+		Gerçekleşen Gelirler : Gelir Gider tablosunda yer alan gelirler bu 
+		dökümden alınan rakamlardır. Burada yazılı olan gelirin tahsilatı 
+		yapılmıştır. Alacak veya tahakkuk etmiş gelirleri göstermez. Gelirleri 
+		beş ana grup altında ayrıntılı olarak gösterir:<br>
+		Görüntüleme Geliri Toplamı<br>
+		Sonorest Geliri Toplamı<br>
+		Sonodent Geliri Toplamı<br>
+		Diğer Gelir Toplamı<br>
+		İştirak Gelirleri<br>
+		Finansal Gelirler Toplamı<br>
+		---------------------------------------<br>
+		Toplam = Sonomed Geliri<br>
+		<br>
+		Tahakkuk Eden Gelirler : Kayıt Kabul bölümünde Z raporu olarak 
+		isimlendirilen tahakkuk eden gelirleri gösterir. Bu gelirlerin bir kısmı 
+		nakit veya kredi kartı ile tahsile dilirken, bir kısmı da şahıslar, 
+		anlaşmalı kurumlar veya kredi kartı hesaplarında alacak olarak 
+		dağılmıştır. <br>
+		<br>
+		<b><a name="gelir gider">8. Gelir Gider Tablosu </a>:</b> İki tarih arasındaki gelir ve giderleri, 
+		birimlere göre kar veya zararı, en son bir bütün olarak da Sonomed’in 
+		kar veya zararını gösterir. Burada yer alan gelirler gerçekleşen 
+		gelirleri, giderler ise gerçekleşen giderleri verir. Alacak ve borçlar 
+		bu hesaplara yansımaz. Dönemsel olarak tahsil edilen gelirlerle, ödemesi 
+		yapılan harcamaları ve arsındaki farkı verir. Gerçek muhasebe tekniği 
+		anlamında kar veya zarar değildir. <br>
+		<br>
+		<br>
+		Görüntüleme Geliri – Görüntüleme Gideri = Görüntüleme Karı/Zararı<br>
+		Sonorest Geliri – Sonorest Gideri = Sonorest Karı/Zararı<br>
+		Sonodent Geliri – Sonodent Gideri = Sonodent Karı/Zararı<br>
+		<br>
+		Diğer Gelir Toplamı<br>
+		İştirak Gelirleri<br>
+		Finansal Gelirler Toplamı<br>
+		Ortaklara Dağıtılan Kar Payı Toplamları (331 toplamı)<br>
+		-----------------------------------------------------<br>
+		Toplam = Sonomed Geliri<br>
+		<br>
+		<b><a name="km">9. KM Gelir Gider Tablosu </a>: </b>Kontrast madde gelirleri ile giderlerini 
+		gösteren bir dökümdür. <br>
+		<br>
+		<b><a name="personel">10. Personel Giderleri </a>: </b>İki tarih 
+		arasında bölümlere göre dağılmış personel giderlerini, vergi ve sosyal 
+		güvenlik kesintilerini gösterir<br>
+		<br>
+		&nbsp;</td>
+	</tr>
+</table>
+
+</body>
+
+</html>

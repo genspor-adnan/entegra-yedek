@@ -1,0 +1,26 @@
+TEvrakTanimAltBilgiFrame					uTanimGrid_AltBilgiFrame		O
+TEvrakTanimParafFrame						uTanimGrid_ParamFrame			O				
+TEvrakTanimAntetFrame						uTanimGrid_AntetFrame
+
+
+TEvrakTanimArsivKlasorleriFrame				uTanimGrid_ArsivKlasorleriFrame			*
+TEvrakTanimDTVTBirim						uTanimGrid_DTVTBirim					*
+TEvrakTanimDagitimFrame						uTanimGrid_DagitimFrame
+TEvrakTanimDinamikForm						uTanimGrid_DinamikForm					
+TEvrakTanimDosyaTasnifPlanFrame				uTanimGrid_DosyaTasnifPlanFrame			
+TEvrakTanimDosyaTasnifPlanGrupFrame			uTanimGrid_DosyaTasnifPlanGrupFrame
+TEvrakTanimDosyaTasnifPlanWITHGrupFrame		uTanimGrid_DosyaTasnifPlanWITHGrupFrame	
+TEvrakTanimEvrakBirimiFrame					uTanimGrid_EvrakBirimFrame
+TEvrakTanimEvrakCinsiFrame					uTanimGrid_EvrakCinsiFrame
+TEvrakTanimGelenKonuFrame					uTanimGrid_GelenKonuFrame 
+TEvrakTanimGelenYerFrame					uTanimGrid_GelenYerFrame
+TEvrakTanimGelisSekliFrame					uTanimGrid_GelisSekliFrame
+TEvrakTanimGidenTurFrame					uTanimGrid_GidenTurFrame
+TEvrakTanimGizlilikFrame					uTanimGrid_GizlilikFrame 
+TEvrakTanimHavaleKuralFrame					uTanimGrid_HavaleKuralFrame
+TEvrakTanimImzaYoluFrame					uTanimGrid_ImzaYoluFrame				
+TEvrakTanimMetaGrupBilgileri				uTanimGrid_MetaGrupBilgileri			
+TEvrakTanimOzelAlanFrame					uTanimGrid_OzelAlanFrame				
+TEvrakTanimPostaTurFrame					uTanimGrid_PostaTuruFrame
+TEvrakTanimVekaletFrame						uTanimGrid_VekaletFrame
+TEvrakTanimYaziDurumuFrame					uTanimGrid_YaziDurumuFrame

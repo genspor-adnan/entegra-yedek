@@ -1,0 +1,20 @@
+DBGEN_CANCEL BITMAP "Bitmap_1.bmp"
+
+DBGEN_DELETE BITMAP "Bitmap_2.bmp"
+
+DBGEN_EDIT BITMAP "Bitmap_3.bmp"
+
+DBGEN_FIRST BITMAP "Bitmap_4.bmp"
+
+DBGEN_INSERT BITMAP "Bitmap_5.bmp"
+
+DBGEN_LAST BITMAP "Bitmap_6.bmp"
+
+DBGEN_NEXT BITMAP "Bitmap_7.bmp"
+
+DBGEN_POST BITMAP "Bitmap_8.bmp"
+
+DBGEN_PRIOR BITMAP "Bitmap_9.bmp"
+
+DBGEN_REFRESH BITMAP "Bitmap_10.bmp"
+

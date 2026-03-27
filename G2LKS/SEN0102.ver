@@ -1,0 +1,41 @@
+{  Version 01.02  }
+
+procedure SqlCalistir(sql: string);
+var
+  cmd: TADOQuery;
+begin
+  cmd := TADOQuery.Create(nil);
+  try
+    cmd.Connection := SystemConnection;
+    cmd.Sql.Text := sql;    
+    cmd.ExecSql;
+  finally
+    cmd.Free;
+  end;  
+end;
+
+procedure Guncelle;
+var  
+  node : TXMLItem;
+  i    : Integer;
+begin
+  node := GetNode('LKS/ESLEMELER/REFERANS_ESLEMELERI',configuration.Root);
+  for i := 0 to node.Count - 1 do begin
+    SqlCalistir('UPDATE REHBER SET CARIKODU = ''' + node[i].Params.Values['donusmus1'] + ''', MUHKODU = ''' +
+      node[i].Params.Values['donusmus2'] + ''' WHERE KOD = ''' + node[i].Params.Values['kod'] + '''');
+  end;
+  node := GetNode('LKS/ESLEMELER/KURUM_ESLEMELERI',configuration.Root);
+  for i := 0 to node.Count - 1 do begin
+    SqlCalistir('UPDATE KURUM SET CARIKODU = ''' + node[i].Params.Values['donusmus1'] + ''', MUHASEBEKODU = ''' +
+      node[i].Params.Values['donusmus2'] + ''' WHERE KURUM = ''' + node[i].Params.Values['kod'] + '''');
+  end;
+  node := GetNode('LKS/ESLEMELER/HIZMET_ESLEMELERI',configuration.Root);
+  for i := 0 to node.Count - 1 do begin
+    SqlCalistir('UPDATE ISLEMLER SET OZELKOD = ''' + node[i].Params.Values['donusmus1'] + ''', MUHKODU = ''' +
+      node[i].Params.Values['donusmus2'] + ''' WHERE KOD = ''' + node[i].Params.Values['kod'] + '''');
+  end;  
+end;
+
+begin
+  Guncelle;
+end.

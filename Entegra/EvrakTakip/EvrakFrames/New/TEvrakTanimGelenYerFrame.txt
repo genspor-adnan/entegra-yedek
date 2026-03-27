@@ -1,0 +1,315 @@
+inherited EvrakTanimGelenYerFrame: TEvrakTanimGelenYerFrame
+  Width = 793
+  Height = 406
+  ExplicitWidth = 793
+  ExplicitHeight = 406
+  object Splitter1: TSplitter [0]
+    Left = 464
+    Top = 33
+    Height = 373
+    Align = alRight
+    ExplicitLeft = 546
+    ExplicitTop = -56
+    ExplicitHeight = 462
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 793
+    ExplicitWidth = 793
+  end
+  object GridGelenEvrakYer: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 458
+    Height = 367
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    object ViewGelenEvrakYer: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.InfoText = 'Filtre'
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewGelenEvrakYerID: TcxGridDBColumn
+        Caption = 'Kodu'
+        DataBinding.FieldName = 'ID'
+        Width = 49
+      end
+      object ViewGelenEvrakYerKONU: TcxGridDBColumn
+        Caption = 'Yer'
+        DataBinding.FieldName = 'YER'
+        Width = 123
+      end
+      object ViewGelenEvrakYerBIRIM_ID: TcxGridDBColumn
+        Caption = 'Evrak Birim Kodu'
+        DataBinding.FieldName = 'BIRIM_ID'
+        PropertiesClassName = 'TcxLookupComboBoxProperties'
+        Properties.KeyFieldNames = 'ID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'BIRIM_KODU'
+          end>
+        Properties.ListSource = dsBirimKodu
+        Width = 115
+      end
+      object ViewGelenEvrakYerYER_BIRIM_KODU: TcxGridDBColumn
+        Caption = 'Yer Birim Kodu'
+        DataBinding.FieldName = 'YER_BIRIM_KODU'
+        Width = 100
+      end
+      object ViewGelenEvrakYerYER_TUR_ID: TcxGridDBColumn
+        Caption = 'Yer T'#252'r'
+        DataBinding.FieldName = 'YER_TUR_ID'
+        PropertiesClassName = 'TcxLookupComboBoxProperties'
+        Properties.KeyFieldNames = 'ID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'TUR'
+          end>
+        Properties.ListSource = dsLookupYerTur
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewGelenEvrakYer
+    end
+  end
+  object GridPanel1: TGridPanel [3]
+    AlignWithMargins = True
+    Left = 470
+    Top = 36
+    Width = 320
+    Height = 367
+    Align = alRight
+    Color = 16768185
+    ColumnCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 120.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 300.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 0
+        Control = Label1
+        Row = 0
+      end
+      item
+        Column = 1
+        Control = editYer
+        Row = 1
+      end
+      item
+        Column = 0
+        Control = Label2
+        Row = 1
+      end
+      item
+        Column = 1
+        Control = lookupBirimKodu
+        Row = 0
+      end
+      item
+        Column = 0
+        Control = Label3
+        Row = 2
+      end
+      item
+        Column = 1
+        Control = editYerBirimKodu
+        Row = 2
+      end
+      item
+        Column = 0
+        Control = Label4
+        Row = 3
+      end
+      item
+        Column = 1
+        Control = lookupYerTur
+        Row = 3
+      end>
+    ParentBackground = False
+    RowCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end>
+    TabOrder = 2
+    StyleElements = [seFont, seBorder]
+    object Label1: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 62
+      Height = 22
+      Align = alLeft
+      Caption = 'Evrak Birimi'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object editYer: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 124
+      Top = 32
+      Align = alLeft
+      DataBinding.DataField = 'YER'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 0
+      Width = 181
+    end
+    object Label2: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 32
+      Width = 16
+      Height = 22
+      Align = alLeft
+      Caption = 'Yer'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object lookupBirimKodu: TcxDBLookupComboBox
+      AlignWithMargins = True
+      Left = 124
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'BIRIM_ID'
+      DataBinding.DataSource = dsEvrak
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'BIRIM_ADI'
+        end>
+      Properties.ListSource = dsBirimKodu
+      TabOrder = 1
+      Width = 181
+    end
+    object Label3: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 60
+      Width = 78
+      Height = 22
+      Align = alLeft
+      Caption = 'Yer Birim Kodu'
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object editYerBirimKodu: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 124
+      Top = 60
+      Align = alLeft
+      DataBinding.DataField = 'YER_BIRIM_KODU'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 2
+      Width = 181
+    end
+    object Label4: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 88
+      Width = 43
+      Height = 22
+      Align = alLeft
+      Caption = 'Yer T'#252'r'#252
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object lookupYerTur: TcxDBLookupComboBox
+      AlignWithMargins = True
+      Left = 124
+      Top = 88
+      Align = alLeft
+      DataBinding.DataField = 'YER_TUR_ID'
+      DataBinding.DataSource = dsEvrak
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'TUR'
+        end>
+      Properties.ListSource = dsLookupYerTur
+      TabOrder = 3
+      Width = 145
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    Active = True
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_GELEN_YER'
+      'Order By YER')
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+  object qryLookupBirimKodu: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT ID,*'
+      'FROM EVRAK_BIRIMI'
+      'Order by BIRIM_KODU')
+    Left = 88
+    Top = 200
+  end
+  object dsBirimKodu: TDataSource
+    AutoEdit = False
+    DataSet = qryLookupBirimKodu
+    Left = 112
+    Top = 264
+  end
+  object qryLookupYerTur: TADOQuery
+    Active = True
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT ID,TUR'
+      'FROM EVRAK_GELEN_YER_TUR'
+      'Order by TUR')
+    Left = 216
+    Top = 208
+  end
+  object dsLookupYerTur: TDataSource
+    AutoEdit = False
+    DataSet = qryLookupYerTur
+    Left = 240
+    Top = 272
+  end
+end

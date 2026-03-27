@@ -1,0 +1,443 @@
+
+// Sabitler
+
+const
+  // KurumToLogoKod Tip Sabitleri
+  RETURN_TRANSLATED_CUSTOMER_CODE = 0;
+  RETURN_TRANSLATED_ACCOUNT_CODE = 1;
+  
+  LOGO_CASH_ACCOUNT_CODE        = '0001';
+  
+var
+  config : TECXMLParser; 
+ 
+type
+  TTranslatedCode = record
+    OriginalCode : string;
+	Translated1  : string;
+	Translated2  : string;
+	Translated3  : string;
+	Translated4  : string;
+  end;  
+  
+function GetSetting(AProgram, ASettingName, ADefault: string) : string;
+var
+  ANode : TXMLItem;
+  i     : Integer;
+begin
+  if configuration.Root.IndexOfName(AProgram) > -1 then begin
+    ANode := configuration.Root.NamedItem[AProgram];
+    if (ANode.IndexOfName('AYARLAR') > -1) then begin
+      ANode := ANode.NamedItem['AYARLAR'];
+      if (ANode.IndexOfName('GENEL_AYARLAR') > -1) then begin
+        for i := 0 to ANode.Count - 1 do begin
+          if (ANode[i].Params.Values['adi'] = ASettingName) then begin
+            Result := ANode[i].Params.Values['deger'];
+            Exit;
+          end;
+        end;
+        Result := ADefault;
+      end else
+        Result := ADefault;
+    end else
+      Result := ADefault;
+  end else
+    Result := ADefault;
+end;
+  
+function TranslateCode(AProgram, ACodeType, ACode: string): TTranslatedCode;
+var
+  AItem : TXMLItem;
+  i     : Integer;
+  j     : Integer;
+begin
+  AItem := config.Root[AProgram].NamedItem['ESLEMELER'];
+  for i := 0 to AItem.Count - 1 do begin
+    if (AItem[i].Name = ACodeType) then begin
+	  for j := 0 to AItem[i].Count - 1 do begin
+	    if (AItem[i][j].Params.Values['kod'] = ACode) then begin
+		  Result.OriginalCode := ACode;
+		  Result.Translated1 := AItem[i][j].Params.Values['donusmus1'];
+		  Result.Translated2 := AItem[i][j].Params.Values['donusmus2'];
+		  Result.Translated3 := AItem[i][j].Params.Values['donusmus3'];
+		  Result.Translated4 := AItem[i][j].Params.Values['donusmus4'];
+		  Exit;
+	    end;
+	  end;	  
+    end;
+  end;  
+end;
+
+begin
+  // Ana Blok
+  // Config dosyasýný oku
+    
+  
+end.  
+  
+// Genel Deðiþkenler
+var
+  faturaBaslik    : TADOQuery;
+  faturaDetay     : TADOQuery;
+  kurum           : TADOQuery;
+  gelis           : TADOQuery; 
+  exportPath      : string;
+  _DosyaNo        : string;
+  _GelisNo        : integer;
+  _KartNo         : integer; 
+  _FaturaBrutToplami    : Double;
+  _FaturaKDVMatrahi     : Double;
+  _FaturaIskontoToplami : Double;
+  _FaturaNetToplam      : Double;
+  _FaturaKDVsi          : Double; 
+  
+  _VarsayilanHesap: string;
+  baslikXml       : TECXMLParser;
+  
+procedure ToplamlariHesapla;
+var
+  satirToplam : Double;
+  iskonto     : Double; 
+  satirKDV    : Double;
+begin
+  _FaturaBrutToplami    := 0;
+  _FaturaKDVMatrahi     := 0;
+  _FaturaIskontoToplami := 0;
+  _FaturaNetToplam      := 0;
+  _FaturaKDVsi          := 0;
+  while not faturaDetay.Eof do
+    begin
+      iskonto := 0;
+      // Satýr ham tutarýný bul
+      satirToplam := faturaDetay.FieldByName('BIRIMFIYAT').AsFloat *
+        faturaDetay.FieldByName('ADET').AsFloat;
+      // KDV dahil mi ?
+      if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Dahil') then
+        // öyleyse kdv hariç toplamý hesapla
+        satirToplam := satirToplam / (1 + (faturaDetay.FieldByName('KDV').AsFloat / 100));
+      // fatura brut toplamýna ekle
+      _FaturaBrutToplami := _FaturaBrutToplami + satirToplam;
+      // iskonto tanýmlanmýþ mý ?
+      if (faturaDetay.FieldByName('ISKONTO').AsFloat > 0) then
+        // öyleyse satýr iskontosunu hesapla
+        iskonto := (satirToplam * faturaDetay.FieldByName('ISKONTO').AsFloat) / 100;
+      // kdv matrahýna ekle
+      _FaturaKDVMatrahi := _FaturaKDVMatrahi + ( satirToplam - iskonto );
+      // satýr iskontosunu fatura iskontosuna ekle
+      _FaturaIskontoToplami := _FaturaIskontoToplami + iskonto;
+      // satýr kdvsini hesapla
+      satirKDV := ( ( satirToplam - iskonto ) * faturaDetay.FieldByName('KDV').AsFloat ) / 100;
+      // fatura kdvsine ekle  
+      _FaturaKDVsi := _FaturaKDVsi + satirKDV;      
+      faturaDetay.Next;
+    end;
+  // net toplamý hesapla
+  _FaturaNetToplam := _FaturaKDVMatrahi + _FaturaKDVsi;     
+end;
+
+function KurumToLogoKod(Kurum: string;Tip: Integer;VarsayilanKullan: Boolean): string;
+var
+  referencedInstitues : string;
+  tmp                 : string;
+  useReference        : Boolean;
+  accountCode         : string;
+begin
+  referencedInstitues := GenotipIni.ReadString('G2LKS','System.Defaults.ReferencedInstitues','');
+  useReference := False;
+  while referencedInstitues <> '' do
+    begin
+      tmp := GetDelimitedString(referencedInstitues);
+      if Kurum = tmp then
+        begin
+          useReference := True;
+          break;
+        end;        
+    end;
+    if (Tip = RETURN_TRANSLATED_CUSTOMER_CODE) then
+      begin
+        if useReference then
+          Result := faturaBaslik.FieldByName('CARIKODU').AsString
+        else
+          Result := faturaBaslik.FieldByName('KURUMKODU').AsString;
+      end
+    else
+      if (Tip = RETURN_TRANSLATED_ACCOUNT_CODE) then
+        begin
+          if (useReference) then
+            accountCode := faturaBaslik.FieldByName('REHBERMUHKOD').AsString                
+          else
+            accountCode := faturaBaslik.FieldByName('MUHASEBEKODU').AsString;
+          Result := _VarsayilanHesap;
+          if (faturaBaslik.FieldByName('TURU').AsString = 'Açýk') and (not VarsayilanKullan) then
+            begin
+              if (GenotipIni.ReadString('G2LKS',
+                'System.MatchOptions.Common.UseInvoiceDescription','1') = '1') then
+                begin
+                  tmp := accountCode;
+                  GetDelimitedString(tmp);  // eat muhasebe kodu
+                  if (tmp <> '0') then // remains 0 or 1
+                    begin
+                      // use invoice description
+                      // translate Description to account code
+                      tmp := GenotipIni.ReadString('G2LKS',
+                        'System.Matches.InvoiceDescription.' + 
+                        faturaBaslik.FieldByName('ACIKLAMA').AsString,
+                        _VarsayilanHesap + '!Nakit'); 
+                      Result := GetDelimitedStringEx(tmp,'!');  
+                    end
+                  else
+                    Result := GetDelimitedString(accountCode);                      
+                end
+              else
+                Result := GetDelimitedString(accountCode);               
+            end
+          else
+            Result := GetDelimitedString(accountCode);             
+        end;
+end;
+
+procedure TransformInvoiceDetails(Root: TXMLItem);
+var
+  //hdr   : TXMLItem;
+  det   : TXMLItem;
+  itm   : TXMLItem;
+  birimFiyat : Double;
+  tmp        : Double;
+begin
+  det := Root.New;det.Name := 'TRANSACTION';
+  itm := det.New;itm.Name := 'TYPE';
+  itm.Text := '4';
+  itm := det.New;itm.Name := 'MASTER_CODE';
+  itm.Text := faturaDetay.FieldByName('OZELKOD').AsString;
+  itm := det.New;itm.Name := 'GL_CODE1';
+  itm.Text := faturaDetay.FieldByName('MUHKODU').AsString;
+  itm := det.New;itm.Name := 'GL_CODE2';
+  if (faturaDetay.FieldByName('KDV').AsFloat = 8) then
+    itm.Text := GenotipIni.ReadString('G2LKS',
+	'System.Defaults.Tax8AccountCode','')
+  else
+    itm.Text := GenotipIni.ReadString('G2LKS',
+	'System.Defaults.Tax18AccountCode','');
+  itm := det.New;itm.Name := 'QUANTITY';
+  itm.Text := faturaDetay.FieldByName('ADET').AsString;
+  itm := det.New;itm.Name := 'PRICE';
+  if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Dahil') then
+    birimFiyat := faturaDetay.FieldByName('TUTAR').AsFloat -
+	  ((faturaDetay.FieldByName('TUTAR').AsFloat * 
+	    faturaDetay.FieldByName('KDV').AsFloat) / (100 +
+		faturaDetay.FieldByName('KDV').AsFloat))
+  else 
+    birimFiyat := faturaDetay.FieldByName('BIRIMFIYAT').AsFloat;
+  itm.Text := FloatToStr(birimFiyat);
+  itm := det.New;itm.Name := 'TOTAL';
+  itm.Text := FloatToStr(birimFiyat *
+    faturaDetay.FieldByName('ADET').AsFloat);
+  itm := det.New;itm.Name := 'RC_XRATE';
+  itm.Text := '1';
+  itm := det.New;itm.Name := 'COST_DISTR';
+  with faturaDetay do begin
+    tmp := ((((((FieldByName('BIRIMFIYAT').AsFloat
+		/(100+FieldByName('KDV').AsFloat))*100)*
+		FieldByName('ADET').AsFloat))*
+		FieldByName('ISKONTO').AsFloat)/100);
+  end;
+  itm.Text := FloatToStr(tmp);
+  itm := det.New;itm.Name := 'DISCOUNT_DISTR';
+  with faturaDetay do begin
+    tmp := ((((((FieldByName('BIRIMFIYAT').AsFloat/
+	  (100+FieldByName('KDV').AsFloat))*100)*
+	  FieldByName('ADET').AsFloat))*
+	  FieldByName('ISKONTO').AsFloat)/100);
+  end;
+  itm.Text := FloatToStr(tmp);  
+  itm := det.New;itm.Name := 'UNIT_CODE';
+  itm.Text := 'ADET';
+  itm := det.New;itm.Name := 'UNIT_CONV1';
+  itm.Text := '1';
+  itm := det.New;itm.Name := 'UNIT_CONV2';
+  itm.Text := '1';
+  itm := det.New;itm.Name := 'VAT_INCLUDED';
+  itm.Text := '0';  
+  itm := det.New;itm.Name := 'VAT_RATE';
+  itm.Text := faturaDetay.FieldByName('KDV').AsString;  
+  itm := det.New;itm.Name := 'VAT_AMOUNT';	
+  with faturaDetay do begin
+    if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Dahil') then
+      tmp := FieldByName('TUTAR').AsFloat - 
+	    (FieldByName('TUTAR').AsFloat / ((FieldByName('KDV').AsFloat
+		/ 100.00) + 1))
+	else if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Hariç') then
+	  tmp := (FieldByName('TUTAR').AsFloat*FieldByName('KDV').AsFloat) / 100
+	else
+	  tmp := 0;
+  end;
+  itm.Text := FloatToStr(tmp);
+  itm := det.New;itm.Name := 'VAT_BASE';
+  itm.Text := FloatToStr(birimFiyat);	
+  itm := det.New;itm.Name := 'BILLED';
+  itm.Text := '1';	
+  itm := det.New;itm.Name := 'DETAILS';
+  itm := det.New;itm.Name := 'EDT_CURR';
+  itm.Text := '160';
+  itm := det.New;itm.Name := 'EDT_PRICE';
+  itm.Text := faturaDetay.FieldByName('BIRIMFIYAT').AsString;  
+  itm := det.New;itm.Name := 'GENIUSFLDSLIST';
+end;
+
+procedure TransformPaymentList(Root: TXMLItem);
+var
+  hdr       : TXMLItem;
+  dtl       : TXMLItem;  
+  odemeTipi : string;
+begin
+  hdr := Root.New;hdr.Name := 'PAYMENT';
+ { if (GenotipIni.ReadString('G2LKS','System.MatchOptions.Common.UseInvoiceDescription','1') = '1') then
+    begin
+      odemeTipi := GenotipIni.ReadString('G2LKS','System.Matches.InvoiceDescription.' + 
+        faturaBaslik.FieldByName('ACIKLAMA').AsString,'1234!Nakit'); 
+      GetDelimitedStringEx(odemeTipi,'!');  
+    end
+  else
+    odemeTipi := 'Nakit';
+  if (odemeTipi = 'Nakit') then
+    begin}      
+      dtl := hdr.New;dtl.Name := 'DATE';
+      dtl.Text := FormatDateTime('dd.MM.yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+      dtl := hdr.New;dtl.Name := 'MODULENR';
+      dtl.Text := '4';
+      dtl := hdr.New;dtl.Name := 'TRCODE';
+      dtl.Text := '8';
+      dtl := hdr.New;dtl.Name := 'TOTAL';
+      dtl.Text := FloatToStr(_FaturaNetToplam);
+      dtl := hdr.New;dtl.Name := 'PROCDATE';
+      dtl.Text := FormatDateTime('dd.MM.yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+      dtl := hdr.New;dtl.Name := 'REPORTRATE';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'MODIFIED';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'DISCOUNT_DUEDATE';
+      dtl.Text := FormatDateTime('dd.MM.yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+      dtl := hdr.New;dtl.Name := 'PAY_NO';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'PAYMENT_TYPE';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'DISCTRLIST';
+      dtl := hdr.New;dtl.Name := 'DISCTRDELLIST';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'CASHACCREF';
+      dtl.Text := '1';
+      dtl := hdr.New;dtl.Name := 'CASHACC_CODE';
+      dtl.Text := LOGO_CASH_ACCOUNT_CODE;
+//    end;  
+end;
+
+procedure TransformForwardedInvoice;
+var
+  tutar : double;
+  isk   : double;
+  isktut: double; 
+  inv   : TXMLItem;
+  det   : TXMLItem;
+begin
+  baslikXml.Root.Name := 'SALES_INVOICES';
+  inv := baslikXml.Root.New;inv.Name := 'INVOICE';
+  inv.Params.Add('DBOP="INS"');
+  det := inv.New;det.Name := 'TYPE';
+  det.Text := '8';
+  det := inv.New;det.Name := 'DATE';
+  det.Text :=FormatDateTime('dd.MM.yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+  det := inv.New;det.Name := 'NUMBER';
+  det.Text := faturaBaslik.FieldByName('FATURANO').AsString;
+  det := inv.New;det.Name := 'AUXIL_CODE';
+  det.Text := GenotipIni.ReadString('G2LKS','System.Defaults.LogoSpecialCode','');
+  det := inv.New;det.Name := 'ARP_CODE';
+  det.Text := KurumToLogoKod(faturaBaslik.FieldByName('KURUM').AsString,
+    RETURN_TRANSLATED_CUSTOMER_CODE,False);
+  det := inv.New;det.Name := 'GL_CODE';
+  det.Text := KurumToLogoKod(faturaBaslik.FieldByName('KURUM').AsString,
+    RETURN_TRANSLATED_ACCOUNT_CODE,False);
+  det := inv.New;det.Name := 'POST_FLAGS';
+  det.Text := '247';
+  det := inv.New;det.Name := 'VAT_RATE';
+  det.Text := '8';
+  det := inv.New;det.Name := 'TOTAL_DISCOUNTS';
+  det.Text := FloatToStr(_FaturaIskontoToplami);
+  det := inv.New;det.Name := 'TOTAL_DISCOUNTED';
+  det.Text := FloatToStr(_FaturaKDVMatrahi);    
+  det := inv.New;det.Name := 'TOTAL_VAT';
+  det.Text := FloatToStr(_FaturaKDVsi);  
+  det := inv.New;det.Name := 'TOTAL_GROSS';
+  det.Text := FloatToStr(_FaturaBrutToplami);
+  det := inv.New;det.Name := 'TOTAL_NET';
+  det.Text := FloatToStr(_FaturaNetToplam);    
+  det := inv.New;det.Name := 'TC_NET';
+  det.Text := FloatToStr(_FaturaNetToplam);  
+  det := inv.New;det.Name := 'NOTES1';
+  det.Text := faturaBaslik.FieldByName('AD').AsString + ' ' + 
+    faturaBaslik.FieldByName('SOYAD').AsString;
+  det := inv.New;det.Name := 'NOTES2';
+  det.Text := faturaBaslik.FieldByName('SICILNO').AsString;
+  det := inv.New;det.Name := 'NOTES3';
+  det.Text := faturaBaslik.FieldByName('KARNENO').AsString;  
+  det := inv.New;det.Name := 'RC_XRATE';
+  det.Text := '1';   
+  det := inv.New;det.Name := 'RC_NET';
+  det.Text := FloatToStr(_FaturaNetToplam); 
+  det := inv.New;det.Name := 'VAT_INCLUDED_GRS';
+  det.Text := '0';  
+  det := inv.New;det.Name := 'DISPATCHES';
+  faturaDetay.First;
+  det := inv.New;det.Name := 'TRANSACTIONS';
+  while not FaturaDetay.Eof do begin
+    TransformInvoiceDetails(det);
+	faturaDetay.Next;
+  end;
+  det := inv.New;det.Name := 'PAYMENT_LIST';
+  TransformPaymentList(det); 
+end;
+
+procedure TransformInvoice(DosyaNo: string;GelisNo: Integer;KartNo: Integer);
+begin
+  _DosyaNo := DosyaNo;
+  _GelisNo := GelisNo;
+  _KartNo := KartNo;
+  
+  _VarsayilanHesap := GenotipIni.ReadString('G2LKS','System.Defaults.DefaultAccountCode','120.01.001');
+  exportPath := GenotipIni.ReadString('G2LKS','System.Defaults.ExportPath','D:\');
+  baslikXml := TECXMLParser.Create(nil);
+  faturaBaslik := query_exec(SystemConnection,
+    'SELECT FB.FATURATARIH,FB.FATURANO,FB.KDVDURUM,FB.TURU,KUR.MUHASEBEKODU,R.CARIKODU,KUR.KURUMKODU, ' +
+    'FB.ACIKLAMA,G.KURUM,G.REFERANSKOD,G.REFERANS,K.AD,K.SOYAD,K.SICILNO,R.MUHKODU AS [REHBERMUHKOD], ' +
+    'K.KARNENO FROM FATBASLIK FB INNER JOIN KIMLIK K ON FB.DOSYANO = K.DOSYANO ' +
+    'INNER JOIN GELISLER G ON FB.GELISNO = G.GELISNO ' +
+    'INNER JOIN REHBER R ON G.REFERANSKOD = R.KOD ' +
+    'INNER JOIN KURUM KUR ON G.KURUM = KUR.KURUM ' +
+    ' WHERE (FB.DOSYANO=!dosyano) and (FB.GELISNO=!gelisno) and (FB.KARTNO = !kartno)',
+    ['!dosyano','!gelisno','!kartno'],[DosyaNo,GelisNo,KartNo]);
+  faturaDetay := query_exec(SystemConnection,
+    'SELECT SIRANO, SEC, TARIH, TUR, KOD, ACIKLAMA,ADET, BIRIM, MIKTAR, ' +
+	'BIRIMFIYAT, TUTAR, ISKONTO, KDV, BUTCEKODU, KASA, ONAY, KULLANICI, '+
+	'MUHKODU=(SELECT MUHKODU FROM ISLEMLER I WHERE I.KOD=F.KOD), ' +
+	'OZELKOD=(SELECT OZELKOD FROM ISLEMLER I WHERE I.KOD=F.KOD) FROM FATURA F ' +
+  ' WHERE (DOSYANO=!dosyano) and (GELISNO=!gelisno) and (KARTNO = !kartno) ' +
+	' ORDER BY SIRANO',
+    ['!dosyano','!gelisno','!kartno'],[DosyaNo,GelisNo,KartNo]);
+  try
+    faturaBaslik.Open;
+    faturaDetay.Open;
+    WriteLn('Baþlýk Kayýt Sayýsý : ' + IntToStr(faturaBaslik.RecordCount));
+    WriteLn('Detay Kayýt Sayýsý : ' + IntToStr(faturaDetay.RecordCount));
+    ToplamlariHesapla;
+    if (faturaBaslik.FieldByName('TURU').AsString = 'Açýk') then
+      TransformForwardedInvoice;
+	  baslikXml.SaveToFile('C:\Translated.xml');
+  finally
+    faturaBaslik.Free;
+    faturaDetay.Free;
+    baslikXml.Free;
+  end;
+end;
+
+begin
+
+end.

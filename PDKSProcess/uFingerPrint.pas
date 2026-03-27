@@ -1,0 +1,414 @@
+{
+  Oluþturma : Yalçýn ELMAS
+  Tarih : 05.01.2006
+  Açýklama : Suprema UniFinger Okuyucu Komutlarý
+}
+
+unit uFingerPrint;
+
+interface
+
+uses
+  SysUtils, CPort, StdCtrls, Dialogs, Forms, ExtCtrls;
+
+const
+  FPCihazAdresleri = '41 00 00 85 00 00 00 00 F4 01 00 00 00 BB 0A';
+  FPBasla1 = ' 04 00 00 00 00 00 00 00 00 00';
+  FPBasla1Cevap = '04 30';
+  FPBasla2 = ' 03 00 00 00 00 00 00 00 00 6E';
+  FPBasla2Cevap = '03 6E';
+  FPBasla3 = ' 03 00 00 00 00 00 00 00 00 89';
+  FPBasla3Cevap = '03 89';
+  FPBasla4 = ' 03 00 00 00 00 00 00 00 00 6F';
+  FPBasla4Cevap = '03 6F';
+
+
+  FPHazirla1 = ' 04 00 00 00 00 00 00 00 00 00';
+  FPHazirla2 = ' EB 00 00 00 00 00 00 00 00 00';
+  FPHazirla2Cevap = 'EB 00';
+
+  FPSorgula = ' EC 00 00 00 00 00 10 00 00 00';
+  FPSorgulaCevap = 'EC 00';
+
+
+
+
+
+
+
+{Public}
+function SendCommand(ComPort: TComport; HexCode: string): string;
+procedure ParmakOku(ComPort: TComport; Temizle: boolean; Basla: boolean);
+function ParmakIziOkuyucu(Comport: TComport; gln: string): string;
+function Tanit(ComPort: TComPort; Gelens: string): string;
+procedure IDList(ComPort: TComPort);
+procedure ParmakSil(ComPort: TComport; ID: integer);
+procedure ParmakHepsiniSil(ComPort: TComport);
+function ToplamBul(hexcode: string): string;
+function HexToStr(HexCode: string): string;
+function StrToHex(Str: string): string;
+
+
+
+var
+  gelen: string = '';
+  say: integer;
+  CihazAdres: string = '';
+
+  Enroll1, Enroll2, Enroll3, Enroll4: string;
+  EnrollSay: integer;
+
+  //Parmak okuma
+  oku: boolean = false;
+  oku1: boolean = false;
+  okubellek1: boolean = false;
+  okubellek2: boolean = false;
+  ParmakIziHazir: boolean = false;
+  ParmakIziOkumayaBasla: boolean = false;
+  FPCevaplama1: boolean = false;
+
+  okumabasla: boolean = false;
+  BilgiGeldi: boolean = false;
+
+  //silme iþlemi
+  Silinen: string;
+
+  Memo: TMemo;
+
+
+implementation
+function CRC(s: string): Boolean; forward;
+function ParmakIzID(s: string): string; forward;
+
+{
+Dönüþ deðerleri...
+0: dönüþ yok...
+1000 : okuma...
+
+1001 : enroll iþlemi...
+1002 :
+1003 :
+1004 :
+1005 :
+
+1006 : parmak izleri idlerini cihazdan okur...
+1007 : parmak izi siler.
+1008 : parmak izlerinin tamamýný siler..
+}
+
+
+
+function ToplamBul(hexcode: string): string;
+var
+  i: integer;
+  str: string;
+  sonuc: integer;
+begin
+  str := hextostr(trim(hexcode));
+  sonuc := 0;
+  for i := 1 to length(str) do
+    sonuc := sonuc + Ord(str[i]);
+  sonuc := sonuc mod 256;
+  Result := IntToHex(sonuc, 2);
+end;
+
+procedure ParmakHepsiniSil(ComPort: TComport);
+var
+  HexCode: string;
+begin
+  gelen := '';
+  HexCode := CihazAdres + ' 17 00 00 00 00 00 00 00 00 00';
+  HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+  ComPort.WriteStr(hextostr(HexCode));
+end;
+
+procedure ParmakSil(ComPort: TComport; ID: integer);
+var
+  HexCode: string;
+begin
+  gelen := '';
+  HexCode := IntToHex(ID, 4)[3] + IntToHex(ID, 4)[4] + ' ' + IntToHex(ID, 4)[1] + IntToHex(ID, 4)[2];
+  Silinen := HexCode;
+  HexCode := CihazAdres + ' 66 ' + HexCode + ' 00 00 00 00 00 00 28';
+  HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+  ComPort.WriteStr(hextostr(HexCode));
+end;
+
+procedure ParmakOku(ComPort: TComport; Temizle: boolean; Basla: boolean);
+var
+  HexCode: string;
+begin
+  gelen := '';
+  if not Basla then
+  begin
+    if Temizle then
+    begin
+      HexCode := CihazAdres + ' 04 00 00 00 00 00 00 00 00 00';
+      HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+      ComPort.WriteStr(hextostr(HexCode))
+    end
+    else
+    begin
+      HexCode := CihazAdres + ' EC 00 00 00 00 00 10 00 00 00';
+      HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+      ComPort.WriteStr(hextostr(HexCode));
+    end;
+  end
+  else
+  begin
+    HexCode := CihazAdres + ' EB 00 00 00 00 00 00 00 00 00';
+    HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+    ComPort.WriteStr(hextostr(HexCode))
+  end;
+end;
+
+procedure IDList(ComPort: TComPort);
+var
+  s: string;
+  HexCode: string;
+begin
+  gelen := '';
+  HexCode := CihazAdres + ' 86 00 00 00 00 00 10 00 00 00';
+  HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+  s := HexToStr(HexCode);
+  ComPort.WriteStr(s);
+end;
+
+function Tanit(Comport: TComPort; Gelens: string): string;
+var
+  s: string;
+  Sonuc: string;
+  HexCode: string;
+begin
+  gelen := '';
+  if gelens = '' then
+  begin
+    Sonuc := '1002:Parmaðýnýzý gösteriniz...';
+    HexCode := CihazAdres + ' 05 00 00 00 00 00 00 00 00 79';
+    HexCode := HexCode + ' ' + ToplamBul(HexCode) + ' 0A';
+    s := HexCode;
+    ComPort.WriteStr(HexToStr(s));
+    Enroll1 := '';
+    Enroll2 := '';
+    Enroll3 := '';
+    Enroll4 := '';
+  end
+  else
+  begin
+    gelens := StrToHex(gelens);
+    if copy(gelens, length(gelens) - 7, 2) = '6C' then
+      Sonuc := '1005:Zaman aþýmý oldu...'
+    else
+    begin
+      if Enroll1 = '' then
+        Enroll1 := copy(gelens, length(gelens) - 7, 2)
+      else if Enroll2 = '' then
+        Enroll2 := copy(gelens, length(gelens) - 7, 2)
+      else if Enroll3 = '' then
+        Enroll3 := copy(gelens, length(gelens) - 7, 2)
+      else if Enroll4 = '' then
+        Enroll4 := copy(gelens, length(gelens) - 7, 2);
+      if (Enroll1 <> '') and (Enroll2 <> '') and (Enroll3 <> '') and (Enroll4 <> '') then
+        if (Enroll1 = Enroll3) and (Enroll2 = Enroll4) then
+          Sonuc := '1001:' + inttostr(strtoint('$' + StrToHex(HexToStr(Gelens)[6]) + strtohex(HexToStr(Gelens)[5])))
+        else
+          Sonuc := '1004:Tanýmlama yapýlamadý...';
+      if (Enroll1 <> '') and (Enroll2 <> '') and (Enroll3 = '') then
+        Sonuc := '1003:Parmaðýnýzý tekrar gösteriniz...';
+    end;
+  end;
+  Result := Sonuc;
+end;
+
+
+function SendCommand(ComPort: TComPort; HexCode: string): string;
+var
+  s: string;
+  HexCodes: string;
+begin
+  gelen := '';
+  if HexCode = '' then
+  begin
+    s := HexToStr('41 00 00 85 00 00 00 00 F4 01 00 00 00 BB 0A'); //Cihaz adresi almak
+  end
+  else if Length(HexCode) = 11 then
+  begin
+    CihazAdres := copy(HexCode, 0, length(HexCode) - 3);
+    //CihazAdres:='41 5F AE';
+    HexCodes := CihazAdres + ' 04 00 00 00 00 00 00 00 00 00';
+    HexCodes := HexCodes + ' ' + ToplamBul(HexCodes) + ' 0A';
+    s := HexToStr(HexCodes);
+  end
+  else if StrToHex(HexToStr(HexCode)[4]) = '04' then
+  begin
+    HexCodes := CihazAdres + ' 03 00 00 00 00 00 00 00 00 6E';
+    HexCodes := HexCodes + ' ' + ToplamBul(HexCodes) + ' 0A';
+    s := HexToStr(HexCodes);
+  end
+  else if (StrToHex(HexToStr(HexCode)[4]) = '03') and (StrToHex(HexToStr(HexCode)[5]) = '6E') then
+  begin
+    HexCodes := CihazAdres + ' 03 00 00 00 00 00 00 00 00 89';
+    HexCodes := HexCodes + ' ' + ToplamBul(HexCodes) + ' 0A';
+    s := HexToStr(HexCodes);
+  end
+  else if (StrToHex(HexToStr(HexCode)[4]) = '03') and (StrToHex(HexToStr(HexCode)[5]) = '6F') then
+  begin
+    result := 'basla';
+  end
+  else if (StrToHex(HexToStr(HexCode)[4]) = '03') and (StrToHex(HexToStr(HexCode)[5]) = '89') then
+  begin
+    HexCodes := CihazAdres + ' 03 00 00 00 00 00 00 00 00 6F';
+    HexCodes := HexCodes + ' ' + ToplamBul(HexCodes) + ' 0A';
+    s := HexToStr(HexCodes);
+  end;
+  ComPort.WriteStr(s);
+end;
+
+function HexToStr(HexCode: string): string;
+var
+  i, moddeger: Integer;
+  deger: string;
+begin
+  try
+    moddeger := 2;
+    for i := 0 to length(HexCode) do
+      if (i mod moddeger = 0) and (i > 0) then
+      begin
+        deger := deger + chr(StrToInt('$' + HexCode[i - 1] + HexCode[i]));
+        moddeger := moddeger + 3;
+      end;
+    Result := deger;
+  except
+    Result := '';
+  end;
+end;
+
+function StrToHex(Str: string): string;
+var
+  s: string;
+  i: integer;
+begin
+  s := '';
+  for i := 1 to Length(str) do
+    s := s + IntToHex(ord(str[i]), 2) + ' ';
+  result := trim(s);
+end;
+
+function ParmakIzID(s: string): string;
+var
+  Deg: string;
+  HexCode: Integer;
+  ilk, son: string;
+  Satir: string;
+begin
+  s := copy(s, 31, length(s) - 34);
+  deg := '';
+  while s <> '' do
+  begin
+    Satir := StrToHex(copy(s, 1, 16));
+    ilk := copy(satir, 4, 2);
+    son := copy(satir, 1, 2);
+    HexCode := StrToInt('$' + ilk + son);
+    deg := deg + ',' + IntToStr(HexCode);
+    s := copy(s, 17, maxint);
+  end;
+  Deg := copy(Deg, 2, MaxInt);
+  Result := Deg;
+end;
+
+function CRC(s: string): Boolean;
+var
+  HesaplananCRC,
+    PakettekiCRC,
+    HesaplananPaketBoyutu,
+    PaketinBoyutu,
+    i: integer;
+begin
+  Result := False;
+  if length(s) > 4 then
+  begin
+    if (s[length(s)] = #$0A) and (s[4] <> #$86) then
+    begin
+      HesaplananCRC := 0;
+      for i := 1 to Length(s) - 2 do
+      begin
+        HesaplananCRC := HesaplananCRC + ord(s[i]);
+      end;
+      HesaplananCRC := HesaplananCRC mod 256;
+      PakettekiCRC := ord(s[length(s) - 1]);
+      Result := (HesaplananCRC) = PakettekiCRC;
+    end
+    else if (s[4] = #$86) then
+    begin
+      HesaplananPaketBoyutu := 30 + ((ord(s[5]) div 2) * 16) + 4;
+      PaketinBoyutu := length(s);
+      Result := (HesaplananPaketBoyutu) = PaketinBoyutu;
+    end
+  end;
+end;
+
+function ParmakIziOkuyucu(Comport: TComPort; gln: string): string;
+var
+  Sonuc, Sonuc1: string;
+  StrSil: string;
+label
+  Son;
+begin
+  sonuc := '0';
+  gelen := gelen + gln;
+  gln := gelen;
+  Memo.Lines.Add(StrToHex(gln));
+  if (CRC(gelen)) or (length(gelen) = 4) or (Length(gelen) = 35) then
+  begin
+    Application.ProcessMessages;
+    if (not oku) then
+      sonuc1 := SendCommand(Comport, StrToHex(gelen));
+    if (Length(gelen) = 35) then
+    begin
+      sonuc := '1000:' + inttostr(StrToInt('$' + StrToHex(gelen[25]) + StrToHex(gelen[24])));
+      ParmakOku(Comport, true, false);
+      BilgiGeldi := false;
+      goto son;
+    end;
+    if (StrToHex(gln[Length(gln) - 2]) = '00') and (StrToHex(gln[4]) = 'EC') and (StrToHex(gln[5]) = '01') and (oku) then
+      BilgiGeldi := True;
+    if (gln[4] = #$05) and (gln[length(gln)] = #$0A) then
+    begin
+      Sonuc := Tanit(Comport, gln);
+      if Sonuc <> '' then
+        sonuc := Sonuc;
+    end;
+    if (StrToHex(gln[4]) = '03') and (StrToHex(gln[5]) = '6F') then
+    begin
+      ParmakIzihazir := true;
+      oku := oku1;
+      oku1 := false;
+      okumabasla := false;
+      showmessage('Hazir');
+    end;
+    if gln[4] = #$86 then
+    begin
+      Sonuc := '1006:' + ParmakIzID(gln);
+    end;
+    if gln[4] = #$66 then
+    begin
+      StrSil := CihazAdres + ' 16 ' + Silinen + ' 00 00 00 00 00 00 00';
+      StrSil := StrSil + ' ' + ToplamBul(StrSil) + ' 0A';
+      Comport.WriteStr(HexToStr(StrSil));
+    end;
+    if gln[4] = #$16 then
+    begin
+      Sonuc := '1007:' + inttostr(strtoint('$' + Silinen[4] + Silinen[5] + Silinen[1] + Silinen[2]));
+    end;
+    if gln[4] = #$17 then
+    begin
+      Sonuc := '1008:Parmak izlerinin tamamý silindi...';
+    end;
+  end;
+  if Sonuc = '' then
+    Sonuc := '0';
+  son:
+  Result := Sonuc;
+end;
+
+end.

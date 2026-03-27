@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{4237ACE4-82F8-45E5-93E5-2A4BF44DD7B0}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Gentegre.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Gentegre">
+        <MSBuild Projects="Gentegre.dproj"/>
+    </Target>
+    <Target Name="Gentegre:Clean">
+        <MSBuild Projects="Gentegre.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Gentegre:Make">
+        <MSBuild Projects="Gentegre.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Gentegre"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Gentegre:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Gentegre:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

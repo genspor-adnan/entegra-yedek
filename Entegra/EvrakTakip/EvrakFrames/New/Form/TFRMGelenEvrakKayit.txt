@@ -1,0 +1,565 @@
+object frmGelenEvrakKayit: TfrmGelenEvrakKayit
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'GELEN EVRAK'
+  ClientHeight = 549
+  ClientWidth = 1062
+  Color = clMoneyGreen
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Trebuchet MS'
+  Font.Style = []
+  Position = poOwnerFormCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  TextHeight = 18
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 1062
+    Height = 30
+    Align = alTop
+    ParentColor = True
+    TabOrder = 0
+    ExplicitWidth = 1066
+    object buttonKapat: TSpeedButton
+      AlignWithMargins = True
+      Left = 986
+      Top = 4
+      Width = 76
+      Height = 22
+      Action = actKapat
+      Align = alRight
+      ExplicitLeft = 504
+    end
+    object buttonBarcode: TSpeedButton
+      AlignWithMargins = True
+      Left = 954
+      Top = 4
+      Width = 26
+      Height = 22
+      Action = actBarkod
+      Align = alRight
+      Flat = True
+      ExplicitLeft = 528
+    end
+    object buttonDosyaEkle: TSpeedButton
+      AlignWithMargins = True
+      Left = 79
+      Top = 4
+      Width = 138
+      Height = 22
+      Action = actDosyaEkle
+      Align = alLeft
+      Flat = True
+      Transparent = False
+    end
+    object buttonKaydet: TSpeedButton
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 69
+      Height = 22
+      Action = actKaydet
+      Align = alLeft
+      Flat = True
+      ExplicitTop = 2
+    end
+    object checkHizliKaydet: TCheckBox
+      Left = 843
+      Top = 1
+      Width = 108
+      Height = 28
+      Align = alRight
+      Caption = 'H'#305'zl'#305' Kaydet'
+      TabOrder = 0
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 30
+    Width = 1062
+    Height = 30
+    Align = alTop
+    ParentColor = True
+    TabOrder = 1
+    ExplicitWidth = 1066
+    object Label1: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 93
+      Height = 18
+      Align = alLeft
+      Caption = 'Evrak Numaras'#305' : '
+      Layout = tlCenter
+    end
+    object Label2: TLabel
+      AlignWithMargins = True
+      Left = 281
+      Top = 4
+      Width = 74
+      Height = 18
+      Align = alLeft
+      Caption = 'Evrak Tarihi : '
+      Layout = tlCenter
+    end
+    object cxDBTextEdit1: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 103
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'BELGENO'
+      DataBinding.DataSource = dsEvrakTablo
+      Style.BorderStyle = ebsNone
+      TabOrder = 0
+      Width = 172
+    end
+    object cxDBDateEdit1: TcxDBDateEdit
+      AlignWithMargins = True
+      Left = 361
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'TARIH'
+      DataBinding.DataSource = dsEvrakTablo
+      Style.BorderStyle = ebsNone
+      TabOrder = 1
+      Width = 136
+    end
+  end
+  object PanelInput: TPanel
+    Left = 0
+    Top = 60
+    Width = 593
+    Height = 489
+    Align = alLeft
+    BevelOuter = bvNone
+    TabOrder = 2
+    ExplicitHeight = 490
+    object cxDBMemo2: TcxDBMemo
+      Left = 152
+      Top = 419
+      DataBinding.DataField = 'ACIKLAMA'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 0
+      Height = 65
+      Width = 185
+    end
+    object cxGrid1: TcxGrid
+      Left = 343
+      Top = 338
+      Width = 243
+      Height = 149
+      TabOrder = 1
+      object cxGrid1DBTableView1: TcxGridDBTableView
+        Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsView.GroupByBox = False
+      end
+      object cxGrid1Level1: TcxGridLevel
+        GridView = cxGrid1DBTableView1
+      end
+    end
+    object cxLabel1: TcxLabel
+      Left = 10
+      Top = 42
+      Caption = 'Geldi'#287'i Yer'
+    end
+    object cxLabel10: TcxLabel
+      Left = 316
+      Top = 222
+      Caption = 'Cevap S'#252'resi (g'#252'n)'
+    end
+    object cxLabel11: TcxLabel
+      Left = 10
+      Top = 252
+      Caption = #304'lgili Evrak Nuamaras'#305':'
+    end
+    object cxLabel12: TcxLabel
+      Left = 315
+      Top = 252
+      Caption = 'Evrak Adedi:'
+    end
+    object cxLabel13: TcxLabel
+      Left = 316
+      Top = 282
+      Caption = 'Dosya Numaras'#305':'
+    end
+    object cxLabel14: TcxLabel
+      Left = 316
+      Top = 312
+      Caption = 'Esas No:'
+    end
+    object cxLabel15: TcxLabel
+      Left = 10
+      Top = 282
+      Caption = 'Evrak Dosya Kodu:'
+    end
+    object cxLabel16: TcxLabel
+      Left = 10
+      Top = 312
+      Caption = 'Evrak Cinsi:'
+    end
+    object cxLabel17: TcxLabel
+      Left = 10
+      Top = 340
+      Caption = 'Evrak '#304#231'eri'#287'i:'
+    end
+    object cxLabel18: TcxLabel
+      Left = 10
+      Top = 400
+      Caption = 'A'#231#305'klama:'
+    end
+    object cxLabel3: TcxLabel
+      Left = 10
+      Top = 72
+      Caption = 'Konusu'
+    end
+    object cxLabel4: TcxLabel
+      Left = 10
+      Top = 102
+      Caption = 'Gelen Evrak Tarihi'
+    end
+    object cxLabel5: TcxLabel
+      Left = 10
+      Top = 132
+      Caption = 'Gelen Evrak'#305'n Numaras'#305':'
+    end
+    object cxLabel6: TcxLabel
+      Left = 10
+      Top = 162
+      Caption = 'Havale Edilece'#287'i Birim:'
+    end
+    object cxLabel7: TcxLabel
+      Left = 10
+      Top = 192
+      Caption = 'Geli'#351' '#350'ekli:'
+    end
+    object cxLabel8: TcxLabel
+      Left = 316
+      Top = 192
+      Caption = 'Yaz'#305' Durumu:'
+    end
+    object cxLabel9: TcxLabel
+      Left = 10
+      Top = 222
+      Caption = 'Gizlilik Derecesi :'
+    end
+    object editCevapSuresi: TcxDBTextEdit
+      Left = 426
+      Top = 218
+      DataBinding.DataField = 'CEVAP_SURESI'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 19
+      Width = 160
+    end
+    object editEsasNo: TcxDBTextEdit
+      Left = 426
+      Top = 308
+      DataBinding.DataField = 'ESAS_NO'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 20
+      Width = 160
+    end
+    object editEvrakAdedi: TcxTextEdit
+      Left = 426
+      Top = 248
+      Properties.ReadOnly = True
+      TabOrder = 21
+      Width = 160
+    end
+    object editEvrakDosyaKodu: TcxDBButtonEdit
+      Left = 152
+      Top = 278
+      DataBinding.DataField = 'EVRAK_DOSYA_KODU'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.Buttons = <
+        item
+          Default = True
+          ImageIndex = 147
+          Kind = bkGlyph
+        end>
+      Properties.Images = dmImageModule.ImageEvrak
+      TabOrder = 22
+      Width = 160
+    end
+    object editEvrakInsertDate: TcxDBDateEdit
+      Left = 152
+      Top = 98
+      DataBinding.DataField = 'EKLEMETARIHI'
+      DataBinding.DataSource = dsEvrakTablo
+      Style.BorderStyle = ebsOffice11
+      TabOrder = 23
+      Width = 118
+    end
+    object editGelenEvrakNo: TcxDBTextEdit
+      Left = 152
+      Top = 128
+      DataBinding.DataField = 'GELEN_EVRAK_NUMARASI'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 24
+      Width = 434
+    end
+    object editIlgiliEvrakNo: TcxDBButtonEdit
+      Left = 152
+      Top = 248
+      DataBinding.DataField = 'ILGILI_EVRAK_NUMARASI'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.Buttons = <
+        item
+          Default = True
+          ImageIndex = 147
+          Kind = bkGlyph
+        end>
+      Properties.Images = dmImageModule.ImageEvrak
+      TabOrder = 25
+      Width = 160
+    end
+    object editKonusu: TcxDBTextEdit
+      Left = 152
+      Top = 68
+      DataBinding.DataField = 'KONU'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 26
+      Width = 434
+    end
+    object evrakDosyaNumarasi: TcxDBTextEdit
+      Left = 426
+      Top = 278
+      DataBinding.DataField = 'DOSYA_NUMARASI'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 27
+      Width = 160
+    end
+    object lookupEvrakCinsi: TcxDBLookupComboBox
+      Left = 152
+      Top = 308
+      DataBinding.DataField = 'EVRAK_CINSI_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.ListColumns = <>
+      TabOrder = 28
+      Width = 160
+    end
+    object lookupGeldigiYer: TcxDBLookupComboBox
+      Left = 152
+      Top = 38
+      DataBinding.DataField = 'GELDIGI_YER_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.ListColumns = <>
+      TabOrder = 29
+      Width = 434
+    end
+    object lookupGeldigiYerTur: TcxDBLookupComboBox
+      Left = 152
+      Top = 8
+      DataBinding.DataField = 'GELDIGI_YER_TUR_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'TUR'
+        end>
+      Properties.ListOptions.ShowHeader = False
+      Properties.ListSource = dsImaj
+      Properties.OnEditValueChanged = lookupGeldigiYerTurPropertiesEditValueChanged
+      TabOrder = 30
+      Width = 118
+    end
+    object lookupGelisSekli: TcxDBLookupComboBox
+      Left = 152
+      Top = 188
+      DataBinding.DataField = 'GIZLILIK_DERECESI_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.ListColumns = <>
+      TabOrder = 31
+      Width = 160
+    end
+    object lookupGizlilikDerecesi: TcxDBLookupComboBox
+      Left = 152
+      Top = 218
+      DataBinding.DataField = 'GIZLILIK_DERECESI_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.ListColumns = <>
+      TabOrder = 32
+      Width = 160
+    end
+    object lookupHavaleEdilecekBirim: TcxDBLookupComboBox
+      Left = 152
+      Top = 158
+      DataBinding.DataField = 'HAVALE_EDILECEK_BIRIM_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.KeyFieldNames = 'ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'BIRIM_KODU'
+        end>
+      TabOrder = 33
+      Width = 434
+    end
+    object lookupYaziDurumu: TcxDBLookupComboBox
+      Left = 426
+      Top = 188
+      DataBinding.DataField = 'YAZI_DURUMU_REF'
+      DataBinding.DataSource = dsEvrakTablo
+      Properties.ListColumns = <>
+      TabOrder = 34
+      Width = 160
+    end
+    object memoEvrakIcerik: TcxDBMemo
+      Left = 152
+      Top = 338
+      DataBinding.DataField = 'EVRAK_ICERIGI'
+      DataBinding.DataSource = dsEvrakTablo
+      TabOrder = 35
+      Height = 78
+      Width = 185
+    end
+  end
+  object PanelDokuman: TPanel
+    Left = 593
+    Top = 60
+    Width = 469
+    Height = 489
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 3
+    ExplicitWidth = 473
+    ExplicitHeight = 490
+    object GridDosya: TcxGrid
+      AlignWithMargins = True
+      Left = 3
+      Top = 3
+      Width = 467
+      Height = 200
+      Align = alTop
+      TabOrder = 0
+      object ViewDosya: TcxGridDBTableView
+        Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
+        DataController.DataSource = dsImaj
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsView.GroupByBox = False
+        object ViewDosyaID: TcxGridDBColumn
+          DataBinding.FieldName = 'ID'
+          Visible = False
+          VisibleForCustomization = False
+          Width = 40
+        end
+        object ViewDosyaVARSAYILAN: TcxGridDBColumn
+          DataBinding.FieldName = 'VARSAYILAN'
+          Visible = False
+        end
+        object ViewDosyaYER_ID: TcxGridDBColumn
+          Caption = 'Klas'#246'r ID'
+          DataBinding.FieldName = 'YER_ID'
+        end
+        object ViewDosyaDURUM: TcxGridDBColumn
+          DataBinding.FieldName = 'DURUM'
+          Visible = False
+        end
+        object ViewDosyaBELGEADI: TcxGridDBColumn
+          DataBinding.FieldName = 'BELGEADI'
+          Width = 184
+        end
+        object ViewDosyaBELGENO: TcxGridDBColumn
+          DataBinding.FieldName = 'BELGENO'
+          Visible = False
+          VisibleForCustomization = False
+        end
+        object ViewDosyaYERI: TcxGridDBColumn
+          DataBinding.FieldName = 'YERI'
+        end
+        object ViewDosyaTUR: TcxGridDBColumn
+          DataBinding.FieldName = 'TUR'
+        end
+        object ViewDosyaBELGE: TcxGridDBColumn
+          DataBinding.FieldName = 'BELGE'
+        end
+        object ViewDosyaACIKLAMA: TcxGridDBColumn
+          DataBinding.FieldName = 'ACIKLAMA'
+          Width = 174
+        end
+        object ViewDosyaEKLEYEN: TcxGridDBColumn
+          DataBinding.FieldName = 'EKLEYEN'
+        end
+        object ViewDosyaEKLEMETARIHI: TcxGridDBColumn
+          Caption = 'Ekleme Tarihi'
+          DataBinding.FieldName = 'EKLEMETARIHI'
+        end
+        object ViewDosyaBELGETURU: TcxGridDBColumn
+          Caption = 'Ext'
+          DataBinding.FieldName = 'BELGETURU'
+          Width = 64
+        end
+        object ViewDosyaBOYUT: TcxGridDBColumn
+          DataBinding.FieldName = 'BOYUT'
+        end
+      end
+      object Level1: TcxGridLevel
+        GridView = ViewDosya
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Images = dmImageModule.ImageEvrak
+    Left = 328
+    Top = 64
+    object actKaydet: TAction
+      Caption = 'Kaydet'
+      ImageIndex = 143
+      OnExecute = actKaydetExecute
+    end
+    object actDosyaEkle: TAction
+      Caption = 'Dosya Ekle / G'#246'zat'
+      ImageIndex = 51
+      OnExecute = actDosyaEkleExecute
+    end
+    object actBarkod: TAction
+      ImageIndex = 146
+      OnExecute = actBarkodExecute
+    end
+    object actKapat: TAction
+      Caption = 'Kapat'
+      ImageIndex = 77
+      OnExecute = actKapatExecute
+    end
+  end
+  object dsEvrakTablo: TDataSource
+    DataSet = qryEvrakTablo
+    Left = 504
+    Top = 64
+  end
+  object qryEvrakTablo: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    AfterScroll = qryEvrakTabloAfterScroll
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT * FROM DOKUMAN')
+    Left = 432
+    Top = 64
+  end
+  object dsImaj: TDataSource
+    DataSet = qryImaj
+    Left = 32
+    Top = 440
+  end
+  object qryImaj: TADOQuery
+    Active = True
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT * FROM IMAJ WHERE 1=1')
+    Left = 592
+    Top = 272
+  end
+end

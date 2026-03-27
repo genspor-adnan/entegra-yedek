@@ -1,0 +1,3 @@
+Yml dosyası outtoken değiştirmek için 
+
+C:\Users\HP\AppData\Local\ngrok

@@ -1,0 +1,131 @@
+object DokumanKaydetDlg: TDokumanKaydetDlg
+  Left = 0
+  Top = 0
+  BorderIcons = []
+  Caption = 'Sonland'#305'r'
+  ClientHeight = 242
+  ClientWidth = 339
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object uygulamaAdiLabel: TLabel
+    Left = 8
+    Top = 9
+    Width = 329
+    Height = 18
+    Alignment = taCenter
+    AutoSize = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label1: TLabel
+    Left = 8
+    Top = 222
+    Width = 45
+    Height = 13
+    Caption = 'Gentegre'
+    Enabled = False
+  end
+  object Label2: TLabel
+    Left = 8
+    Top = 45
+    Width = 329
+    Height = 18
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'G'#246'rme ama'#231'l'#305' a'#231#305'lm'#305#351't'#305'r.'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 8
+    Top = 69
+    Width = 329
+    Height = 18
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'De'#287'i'#351'iklikler ge'#231'erli de'#287'ildir!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -16
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object KapatTus: TcxButton
+    Left = 10
+    Top = 159
+    Width = 321
+    Height = 57
+    Caption = 'Kapat'
+    Colors.Default = clCream
+    Colors.Hot = clWhite
+    OptionsImage.ImageIndex = 1
+    OptionsImage.Images = Tablo.cxImageList1
+    OptionsImage.Margin = 10
+    TabOrder = 0
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = KapatTusClick
+  end
+  object UstuneKaydetTus: TcxButton
+    Left = 11
+    Top = 36
+    Width = 321
+    Height = 57
+    Caption = #220'st'#252'ne Kaydet'
+    Colors.Default = clCream
+    Colors.Hot = clWhite
+    OptionsImage.ImageIndex = 34
+    OptionsImage.Images = Tablo.cxImageList1
+    OptionsImage.Margin = 10
+    TabOrder = 1
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = UstuneKaydetTusClick
+  end
+  object RevizeKaydetTus: TcxButton
+    Left = 10
+    Top = 97
+    Width = 321
+    Height = 57
+    Caption = 'Yeni S'#252'r'#252'm Kaydet'
+    Colors.Default = clCream
+    Colors.Hot = clWhite
+    OptionsImage.ImageIndex = 4
+    OptionsImage.Images = Tablo.cxImageList1
+    OptionsImage.Margin = 10
+    TabOrder = 2
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = RevizeKaydetTusClick
+  end
+end

@@ -1,0 +1,78 @@
+package Delphi11Components;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS ON}
+{$RANGECHECKS ON}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl,
+  vclimg,
+  vclwinx,
+  dbrtl,
+  vcldb,
+  Jcl,
+  JvCore,
+  JvStdCtrls,
+  JvCustom,
+  JvDB;
+
+contains
+  ATImageBox in 'GenYazilim\ATImageBox.pas',
+  Barcode in 'GenYazilim\Barcode.pas',
+  BHDInfo in 'GenYazilim\BHDInfo.pas',
+  ButtonWithDescription in 'GenYazilim\ButtonWithDescription.pas',
+  CashRegister_TLB in 'GenYazilim\CashRegister_TLB.pas',
+  CDBurner in 'GenYazilim\CDBurner.pas',
+  CollapsePanel in 'GenYazilim\CollapsePanel.pas',
+  DBNavLink in 'GenYazilim\DBNavLink.pas',
+  DBNavToolBtn in 'GenYazilim\DBNavToolBtn.pas',
+  ECXMLParser in 'GenYazilim\ECXMLParser.pas',
+  ECXMLTokenizer in 'GenYazilim\ECXMLTokenizer.pas',
+  EParser in 'GenYazilim\EParser.pas',
+  FAXCOMEXLib_TLB in 'GenYazilim\FAXCOMEXLib_TLB.pas',
+  folderBrowse in 'GenYazilim\folderBrowse.pas',
+  GenNavButton in 'GenYazilim\GenNavButton.pas',
+  IngenicoiDE280GenYazilim_TLB in 'GenYazilim\IngenicoiDE280GenYazilim_TLB.pas',
+  JvXmlMemoryData in 'GenYazilim\JvXmlMemoryData.pas',
+  mscorlib_TLB in 'GenYazilim\mscorlib_TLB.pas',
+  MSXML_TLB in 'GenYazilim\MSXML_TLB.pas',
+  OfficePopupMenu in 'GenYazilim\OfficePopupMenu.pas',
+  SynTaskDialog in 'GenYazilim\SynTaskDialog.pas',
+  TAPI3Lib_TLB in 'GenYazilim\TAPI3Lib_TLB.pas',
+  TERMMGRLib_TLB in 'GenYazilim\TERMMGRLib_TLB.pas',
+  UBilgiListesi in 'GenYazilim\UBilgiListesi.pas',
+  UGenDBNavigator in 'GenYazilim\UGenDBNavigator.pas',
+  UGenYanipSonenLabel in 'GenYazilim\UGenYanipSonenLabel.pas',
+  UPromptedTextBox in 'GenYazilim\UPromptedTextBox.pas',
+  UStarPanel in 'GenYazilim\UStarPanel.pas',
+  UUyariPanel in 'GenYazilim\UUyariPanel.pas',
+  WMPLib_TLB in 'GenYazilim\WMPLib_TLB.pas',
+  XMLColorHelpers in 'GenYazilim\XMLColorHelpers.pas',
+  XMLVisualizer in 'GenYazilim\XMLVisualizer.pas',
+  XPMenu in 'GenYazilim\XPMenu.pas';
+
+end.

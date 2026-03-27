@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{5E1EC3C2-D6E0-4F67-BD5A-CEAA3F1C1A9C}</ProjectGuid>
+    <ProjectVersion>19.3</ProjectVersion>
+    <Base>True</Base>
+    <Config Condition="'$(Config)'==''">Debug</Config>
+    <Platform Condition="'$(Platform)'==''">Win32</Platform>
+    <TargetedPlatforms>1</TargetedPlatforms>
+    <AppType>Console</AppType>
+    <FrameworkType>None</FrameworkType>
+    <MainSource>POSAktar.dpr</MainSource>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Base)'!=''">
+    <DCC_ExeOutput>$(PROJECTDIR)\bin\$(Platform)\$(Config)</DCC_ExeOutput>
+    <DCC_DcuOutput>$(PROJECTDIR)\dcu\$(Platform)\$(Config)</DCC_DcuOutput>
+    <DCC_E>false</DCC_E>
+    <DCC_N>false</DCC_N>
+    <DCC_S>false</DCC_S>
+    <DCC_F>false</DCC_F>
+    <DCC_K>false</DCC_K>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Config)'=='Debug'">
+    <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    <DCC_DebugDCUs>True</DCC_DebugDCUs>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Config)'=='Release'">
+    <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+    <DCC_DebugDCUs>False</DCC_DebugDCUs>
+    <DCC_Optimize>True</DCC_Optimize>
+    <DCC_GenerateStackFrames>False</DCC_GenerateStackFrames>
+  </PropertyGroup>
+  <ItemGroup>
+    <DelphiCompile Include="POSAktar.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <DCCReference Include="auth.pas" />
+    <DCCReference Include="pos_info.pas" />
+    <DCCReference Include="main.pas" />
+  </ItemGroup>
+  <ItemGroup>
+    <BuildConfiguration Include="Debug">
+      <Key>Cfg_1</Key>
+      <CfgParent>Base</CfgParent>
+    </BuildConfiguration>
+    <BuildConfiguration Include="Release">
+      <Key>Cfg_2</Key>
+      <CfgParent>Base</CfgParent>
+    </BuildConfiguration>
+  </ItemGroup>
+  <ProjectExtensions>
+    <BorlandProject>
+      <BorlandProjectType>Application</BorlandProjectType>
+      <Delphi.Personality>Delphi.Personality</Delphi.Personality>
+      <Version>1.0</Version>
+      <Compiler>
+        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <DCC_UsePackage>rtl;$(DCC_UsePackage)</DCC_UsePackage>
+      </Compiler>
+      <Platforms>
+        <Platform value="Win32">True</Platform>
+      </Platforms>
+      <Deployment/>
+    </BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" />
+</Project>

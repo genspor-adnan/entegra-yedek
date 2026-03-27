@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO8859-1" ?>
+<DONUSTURME_MODULLERI>
+  <LKS>
+    <AYARLAR>
+      <GENEL_AYARLAR>
+        <AYAR adi="firma_numarasi" firma="4"/>
+        <AYAR adi="sunucu_adi" sunucu="ERHAN01" veritabani="LKSDB"/>
+        <AYAR adi="logo_ozel_kod"/>
+        <AYAR adi="referansli_kurumlar">
+          <REFERANSLAR>
+            <REFERANS adi="MEMUR" kullan="1"/>
+          </REFERANSLAR>
+        </AYAR>
+        <AYAR adi="aktarim_yolu" yol="D:\gen_export\"/>
+        <AYAR adi="kasa_kodu" kasakodu="0001" kasamuhasebekodu="100.01.001"/>
+        <AYAR adi="dosyano_oneki" onek="GEN_"/>
+        <AYAR adi="hesapplani_oneki" onek="120.01"/>
+        <AYAR adi="faturalama_modeli" model="1" hasta_icin_yeni_kayit_olustur="0"/>
+        <AYAR adi="on_ekler" dosyano_onek="GEN" hesapplani_onek="120.01." on_ek_sonrasi_sifir_sayisi="4" hasta_ilk_harf_kullan="1"/>
+      </GENEL_AYARLAR>
+    </AYARLAR>
+    <ESLEMELER>
+      <KURUM_ESLEMELERI>
+        <KURUM_ESLEMESI kod="AKHAYAT" donusmus1="ZZZ00176" donusmus2="120.01.A0021"/>
+        <KURUM_ESLEMESI kod="AXA OYAK" donusmus1="ZZZ00083" donusmus2="120.01.A0011"/>
+        <KURUM_ESLEMESI kod="KOÇ ALLÝANZ" donusmus1="ZZZ00083" donusmus2="120.01.A0011"/>
+      </KURUM_ESLEMELERI>
+      <HIZMET_ESLEMELERI>
+        <HIZMET_ESLEMESI kod="A.03" donusmus1="008" donusmus2="600.02.002"/>
+        <HIZMET_ESLEMESI kod="A.03.05" donusmus1="007" donusmus2="600.01.002"/>
+        <HIZMET_ESLEMESI kod="B.01.0002" donusmus1="005" donusmus2="602.01.002"/>
+        <HIZMET_ESLEMESI kod="B.01.0010" donusmus1="004" donusmus2="602.01.001"/>
+        <HIZMET_ESLEMESI kod="B.01.0011" donusmus1="004" donusmus2="602.01.001"/>
+        <HIZMET_ESLEMESI kod="B.01.0012" donusmus1="004" donusmus2="602.01.001"/>
+        <HIZMET_ESLEMESI kod="B.01.0156" donusmus1="001" donusmus2="600.01.001"/>
+        <HIZMET_ESLEMESI kod="B.01.0169" donusmus1="002" donusmus2="600.01.099"/>
+        <HIZMET_ESLEMESI kod="C.A.14.27" donusmus1="002" donusmus2="600.01.099"/>
+      </HIZMET_ESLEMELERI>
+      <REFERANS_ESLEMELERI>
+        <REFERANS_ESLEMESI kod="120.04" donusmus1="T0000001" donusmus2="381.01.003"/>
+        <REFERANS_ESLEMESI kod="320.001.0001" donusmus1="A0000011" donusmus2="320.01.A005"/>
+      </REFERANS_ESLEMELERI>
+      <KDV_ESLEMELERI>
+        <KDV_ESLEMESI kod="8" donusmus1="391.01.002"/>
+        <KDV_ESLEMESI kod="18" donusmus1="391.01.001"/>
+      </KDV_ESLEMELERI>
+    </ESLEMELER>
+  </LKS>
+</DONUSTURME_MODULLERI>

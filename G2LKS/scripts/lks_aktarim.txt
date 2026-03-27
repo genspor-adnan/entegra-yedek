@@ -1,0 +1,856 @@
+{
+*********************************************************
+*                                                       *
+*              GenoTIP LKS Aktarým Senaryosu            *
+*                          v1.1                         *
+*                                                       *
+*           (c) Telif Hakký 2008 Feta Bilgisayar        *
+*                                                       *
+*********************************************************
+}
+const
+  FATURAMODEL_HASTA_KAYDI    = 0;
+  FATURAMODEL_GELISLER_KURUM = 1;
+  
+  musteriSorgusu  =
+    'SELECT  C.CODE,muh.CODE AS [MUHCODE] FROM LG_%firmcode%_CLCARD C (NOLOCK) ' +
+    ' RIGHT OUTER JOIN LG_%firmcode%_CRDACREF ref (NOLOCK) ON c.LOGICALREF = ref.CARDREF' +
+    ' LEFT OUTER JOIN LG_%firmcode%_EMUHACC muh (NOLOCK) ON ref.ACCOUNTREF = muh.LOGICALREF ' +
+    ' WHERE (C.ACTIVE = 0) and (C.CARDTYPE = 3) and (ref.TRCODE = 5) and (C.CODE = %musteri_kodu%) ORDER BY C.DEFINITION_'; 
+  
+var
+  // fatura sorgularý
+  faturaBaslik          : TADOQuery;
+  faturaDetay           : TADOQuery;
+  
+  // Genel fatura ilgili toplamlar.  
+  _FaturaBrutToplami    : Double;
+  _FaturaKDVMatrahi     : Double;
+  _FaturaIskontoToplami : Double;
+  _FaturaNetToplam      : Double;
+  _FaturaKDVsi          : Double;   
+  
+  //_VarsayilanHesap      : string; // kullanýlmýyor. bunun yerine olmayanlar için hata veriliyor.
+  
+  baslikXml             : TECXMLParser; // fatura için oluþturulmuþ xml i oluþturacak nesne
+  
+  // hesap oluþturma yardýmcý deðiþkenleri
+  hesapCache            : TStringList;
+  preventDuplicatesList : TStringList;
+  lastCode              : Integer;
+  
+  // Program içindeki Seçenekler
+  exportPath                : string; 
+  DosyaNoOnEki              : string;
+  HesapPlaniOnEki           : string;
+  HastaIlkHarfKullan        : Boolean;
+  FirmaNo                   : string;
+  HesapPlaniSifirSayisi     : Integer;  
+  faturalamaModeli          : Byte; 
+  logoOzelKod               : string;
+  nakitKasaKodu             : string;
+  nakitKasaMuhasebeKodu     : string;
+  musteriKodu               : string;
+  musteriMuhasebeKodu       : string;
+  hastaIcinKayitOlustur     : Boolean;
+  faturaKalemleriDonusmesin : Boolean;
+  sabitFaturaKalemiKod      : string;
+  sabitFaturaKalemiMuhKod   : string;
+  kasaIslemTipi             : string;
+  faturaTipi                : string;
+  faturaKalemTipi           : string;
+  kdvDahilKalemler          : Boolean;
+
+  // SUCCESS : Boolean --> G2LKS programý içerisinden tanýmlanmýþtýr.
+  // FaturaListesi : TADOQuery --> Program içindeki AnaListe formunda bulunan FaturaListesi tablo referansý
+  
+// Hata bildirim function ve procedure leri
+
+// Bu faturanýn Hata ekranýna düþmesini saðlar.
+procedure MakeError(Msg: string);
+begin
+  AddError(FaturaListesi.fieldbyname('DOSYANO').AsString,
+    FaturaListesi.fieldbyname('ADSOYAD').AsString,
+    FaturaListesi.fieldbyname('FATURANO').AsString,
+    FaturaListesi.fieldbyname('GELISNO').AsInteger,
+    FaturaListesi.fieldbyname('KARTNO').AsInteger,
+    Msg);
+  SUCCESS := False;
+end;
+
+// LKS ile ilgili function ve procedure ler
+// ****************************************
+
+// LKS de tanýmlanmýþ en son hesap planýný bulur
+// HastaIlkHarfKullan seçeneðinde bulunan deðere göre sorgulama deðiþir.
+function GetLastCustomerAccountCode: Integer;
+var
+  sql: string;
+  ilkharf  : string;
+begin
+  ilkharf := Copy(FaturaListesi.FieldByName('ADSOYAD').AsString, 1, 1);
+  if (HastaIlkHarfKullan) then 
+    sql := 'SELECT TOP 1 CODE,SUBSTRING(CODE,LEN('''+ HesapPlaniOnEki + ilkharf +''') + 1,500) FROM LG_' + firmaNo + '_EMUHACC WHERE CODE LIKE '''+ HesapPlaniOnEki + ilkharf +'%'' ORDER BY CODE DESC'
+  else
+    sql := 'SELECT TOP 1 CODE,SUBSTRING(CODE,LEN('''+ HesapPlaniOnEki +''') + 1,500) FROM LG_' + firmaNo + '_EMUHACC ORDER BY CODE DESC';
+  with query_exec(LKSConnection,sql,[],[]) do 
+  try
+    Open;
+    if (RecordCount > 0) then 
+      Result := StrToInt(Fields.Fields[1].AsString)
+    else       
+      if HastaIlkHarfKullan then 
+        Result := 1
+      else
+        Result := 1;
+  finally
+    Free;
+  end;
+end;
+
+// önek+dosyano döndürür
+function GetCustomerCode: string;
+begin
+  Result := DosyaNoOnEki + faturaBaslik.FieldByName('DOSYANO').AsString;
+end;
+
+// LKS de müþteri var mý yok mu kontrol eder.
+function CustomerExists(ACustomerCode: string): Boolean;
+begin  
+  with query_exec(LKSConnection,'SELECT CODE FROM LG_'+ firmaNo +'_CLCARD WHERE (ACTIVE=0) AND (CARDTYPE=3) AND CODE LIKE '''+
+    ACustomerCode +'%''',[],[]) do 
+  try
+    Open;
+    Result := RecordCount > 0;
+  finally
+    Free;
+  end;  
+end;
+
+// En son olabilecek hesap kodunu döndürür.
+function GetCustomerAccountCode: string;
+var
+  ilkHarf : string;
+begin
+  if HastaIlkHarfKullan then begin
+    ilkharf := Copy(faturaBaslik.FieldByName('AD').AsString, 1, 1);
+    if hesapCache.IndexOfName(ilkHarf) = -1 then 
+      hesapCache.Values[ilkHarf] := IntToStr(GetLastCustomerAccountCode);
+    Result := HesapPlaniOnEki + ilkHarf + LeadingZero(StrToInt(hesapCache.Values[ilkHarf]) + 1,HesapPlaniSifirSayisi);
+  end else begin
+    lastCode := lastCode + 1;
+    Result := HesapPlaniOnEki + LeadingZero(lastCode + 1,HesapPlaniSifirSayisi)    
+  end;    
+end;
+
+// LKS Tablo Id leri
+// 1854 - Kasa Ýþlemleri
+// 1739 - Satýþ Faturalarý
+// 1741 - Cari Kartlar
+// 1751 - Muhasebe Hesap Kartý
+
+function GetXmlFileName(TableId: string): string;
+begin
+  Result := 'PR00701_SI0_FN' + firmaNo + '_PN1_ID' + TableId + '_DT' + 
+    FormatDateTime('ddMMyyyy',Now) + '_TM' + FormatDateTime('hhnnzzz',Now) + '.XML';
+end;
+
+
+// Þu an ki faturanýn hastasý için muhasebe hesap kartý xml i oluþturur.
+procedure BuildCustomerAccountXml(AAccountCode: string);
+var
+  acc : TECXMLParser;
+begin
+  acc := TECXMLParser.Create(nil);
+  try
+    acc.Root.Name := 'GL_ACCOUNTS';
+    with acc.Root.New do begin
+      Name := 'GL_ACCOUNT';
+      Params.Add('DBOP=INS');
+      with New do begin Name := 'CODE'; Text := AAccountCode; end;
+      with New do begin Name := 'DESCRIPTION'; Text := faturaBaslik.FieldByName('AD').AsString + ' ' +  faturaBaslik.FieldByName('SOYAD').AsString; end;
+      with New do begin Name := 'ACCOUNT_TYPE'; Text := '1'; end;    
+    end;
+    acc.SaveToFile(exportPath + GetXmlFileName('1751'));
+  finally
+    acc.Free;
+  end;
+end;
+
+// Þu an ki faturanýn hastasý için müþteri kartý xml i oluþturur.
+procedure BuildCustomerXml;
+var
+  cust : TECXMLParser;
+  accCode : string;
+begin
+  cust := TECXMLParser.Create(nil);
+  try
+    cust.Root.Name := 'AR_APS';
+    accCode := GetCustomerAccountCode;
+    musteriKodu := GetCustomerCode;
+    musteriMuhasebeKodu := accCode;
+    with cust.Root.New do begin
+      Name := 'AR_AP';
+      Params.Add('DBOP=INS');
+      with New do begin Name := 'ACCOUNT_TYPE'; Text := '3'; end;
+      with New do begin Name := 'CODE'; Text := GetCustomerCode; end;
+      with New do begin Name := 'TITLE'; Text := faturaBaslik.FieldByName('AD').AsString + ' ' +  faturaBaslik.FieldByName('SOYAD').AsString;end;
+      with New do begin Name := 'ADDRESS1'; Text := faturaBaslik.FieldByName('ILCE').AsString + ' - ' + faturaBaslik.FieldByName('IL').AsString; end;
+      with New do begin Name := 'CORRESP_LANG'; Text := '1'; end;
+      with New do begin Name := 'CREATED_BY'; Text := '1'; end;
+      with New do begin Name := 'MODIFIED_BY'; Text := '1'; end;
+      with New do begin Name := 'CREDIT_TYPE'; Text := '1'; end;
+      with New do begin Name := 'RISKFACT_CHQ'; Text := '1'; end;
+      with New do begin Name := 'RISKFACT_PROMNT'; Text := '1'; end;
+      with New do begin Name := 'GL_CODE'; Text := accCode; end;//////////////////////
+      with New do begin Name := 'CL_ORD_FREQ'; Text := '1'; end;
+      with New do begin Name := 'INVOICE_PRNT_CNT'; Text := '1'; end;
+      with New do begin Name := 'PURCHBRWS'; Text := '1'; end;
+      with New do begin Name := 'SALESBRWS'; Text := '1'; end;
+      with New do begin Name := 'IMPBRWS'; Text := '1'; end;
+      with New do begin Name := 'EXPBRWS'; Text := '1'; end;
+      with New do begin Name := 'FINBRWS'; Text := '1'; end;    
+    end;
+    cust.SaveToFile(exportPath + GetXmlFileName('1741'));
+    BuildCustomerAccountXml(accCode);
+  finally
+    cust.Free;
+  end;
+end;
+
+
+// fatura ile ilgili toplamlarý hesaplar.  
+procedure ToplamlariHesapla;
+var
+  satirToplam : Double;
+  iskonto     : Double; 
+  satirKDV    : Double;
+begin
+  _FaturaBrutToplami    := 0;
+  _FaturaKDVMatrahi     := 0;
+  _FaturaIskontoToplami := 0;
+  _FaturaNetToplam      := 0;
+  _FaturaKDVsi          := 0;
+  while not faturaDetay.Eof do
+    begin
+      iskonto := 0;
+      // Satýr ham tutarýný bul
+      satirToplam := faturaDetay.FieldByName('BIRIMFIYAT').AsFloat *
+        faturaDetay.FieldByName('ADET').AsFloat;
+      // KDV dahil mi ?
+      if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Dahil') then
+        // öyleyse kdv hariç toplamý hesapla
+        satirToplam := satirToplam / (1 + (faturaDetay.FieldByName('KDV').AsFloat / 100));
+      // fatura brut toplamýna ekle
+      _FaturaBrutToplami := _FaturaBrutToplami + satirToplam;
+      // iskonto tanýmlanmýþ mý ?
+      if (faturaDetay.FieldByName('ISKONTO').AsFloat > 0) then
+        // öyleyse satýr iskontosunu hesapla
+        iskonto := (satirToplam * faturaDetay.FieldByName('ISKONTO').AsFloat) / 100;
+      // kdv matrahýna ekle
+      _FaturaKDVMatrahi := _FaturaKDVMatrahi + ( satirToplam - iskonto );
+      // satýr iskontosunu fatura iskontosuna ekle
+      _FaturaIskontoToplami := _FaturaIskontoToplami + iskonto;
+      // satýr kdvsini hesapla
+      satirKDV := ( ( satirToplam - iskonto ) * faturaDetay.FieldByName('KDV').AsFloat ) / 100;
+      // fatura kdvsine ekle  
+      _FaturaKDVsi := _FaturaKDVsi + satirKDV;      
+      faturaDetay.Next;
+    end;
+  // net toplamý hesapla
+  _FaturaNetToplam := _FaturaKDVMatrahi + _FaturaKDVsi;     
+end;
+
+// Fatura kalemi için iskonto bilgisi oluþturur 
+// Fatura kaleminden hemen sonra yer almasý gerekir.
+procedure TransformDiscountToTransaction(ADiscountRate,ADiscountAmount: Double;Root: TXMLItem);
+begin
+  with Root.New do begin
+    Name := 'TRANSACTION';
+    with New do begin Name := 'TYPE'; Text := '2'; end;
+    with New do begin Name := 'QUANTITY';Text := '0';end;
+    with New do begin Name := 'RC_XRATE';Text := FloatToStr(ADiscountAmount);end;
+    with New do begin Name := 'DISCOUNT_RATE';Text := FloatToStr(ADiscountRate);end;
+    with New do begin Name := 'UNIT_CODE';Text := '';end;
+    with New do begin Name := 'UNIT_CONV1';Text := '0';end;
+    with New do begin Name := 'UNIT_CONV2';Text := '0';end;
+    with New do begin Name := 'BILLED';Text := '1';end;    
+  end;
+end;
+
+// Fatura kalemleri için xml oluþturur.
+procedure TransformInvoiceDetails(Root: TXMLItem);
+var
+  det             : TXMLItem;
+  itm             : TXMLItem;
+  discountAmount  : Double;
+  node            : TXMLItem;
+  kdvNode         : TXMLItem;
+  unitPrice       : Double;
+  vatBase         : Double;
+  vatAmount       : Double;
+  totalNet        : Double;
+  vatRate         : Double;
+  lineTotal       : Double;
+  tmp             : Double;
+  stockCode       : string;
+  stockAccCode    : string;
+begin
+  if not faturaKalemleriDonusmesin then begin
+    if (Trim(faturaDetay.FieldByName('KOD').AsString) = '') then begin
+      MakeError('Fatura kaleminin iþlem kodu boþ!');
+      Exit;
+    end;
+    // hizmet eþlemesi bulunuyor....
+    stockCode := faturaDetay.FieldByName('KOD').AsString; // ana deðiþken burada geçici deðiþkenmiþ gibi kullanýlýyor
+    if (Copy(stockCode,Length(stockCode),1) = 'K') then // son harfinde K var mý ? (yani katký mý ?)
+      // evet
+      stockCode := Copy(stockCode, 1, Length(stockCode) - 1); // o zaman sonundaki K yý çýkar
+      
+    node := GetNode('LKS/ESLEMELER/HIZMET_ESLEMELERI/HIZMET_ESLEMESI?kod=' + 
+      stockCode,configuration.Root); // eþleme bilgisine bak
+    // Kontroller yapýlýyor...
+    if (Trim(node.Params.Values['donusmus1']) = '') then begin
+      MakeError('Hizmet eþlemesinde karþý kod alaný boþ ! : ' + faturaDetay.FieldByName('KOD').AsString);
+      Exit;    
+    end;
+    if (Trim(node.Params.Values['donusmus2']) = '') then begin
+      MakeError('Hizmet eþlemesinde karþý muhasebe kodu alaný boþ ! : ' + faturaDetay.FieldByName('KOD').AsString);
+      Exit;    
+    end;
+    // program buraya gelebiliyorsa þu ana kadar herhangi problem olmamýþ
+    // öylese dönüþmüþ kodlarý ana deðiþkenlere at.
+    stockCode := node.Params.Values['donusmus1']; 
+    stockAccCode := node.Params.Values['donusmus2'];    
+  end else begin
+    // eðer sabit kodlar kullanýlmasý iþaretlenmiþse
+    // o zaman parameterelerden gelen deðerleri ata
+    stockCode := sabitFaturaKalemiKod;
+    stockAccCode := sabitFaturaKalemiMuhKod;
+    // kontrol et boþ olarak gelmiþ mi?
+    if (Trim(stockCode) = '') then begin
+      MakeError('Hizmet eþlemesi için sabit kod atamasý yapýlmamýþ!');
+      Exit;
+    end;
+    if (Trim(stockAccCode) = '') then begin
+      MakeError('Hizmet eþlemesi için sabit muhasebe kod atamasý yapýlmamýþ!');
+      Exit;
+    end;
+  end;
+  // kdv eþlemesi bulunuyor...
+  kdvNode := GetNode('LKS/ESLEMELER/KDV_ESLEMELERI/KDV_ESLEMESI?kod=' + 
+    faturaDetay.FieldByName('KDV').AsString,configuration.Root);
+  // kontroller yapýlýyor...
+  if (not Assigned(kdvNode)) then begin
+    MakeError('KDV Eþlemesi bulunamadý! : ' + faturaDetay.FieldByName('KDV').AsString);
+    Exit;    
+  end;
+  if (Trim(kdvNode.Params.Values['donusmus1']) = '') then begin
+    MakeError('KDV eþlemesinde karþý muhasebe kodu boþ ! : ' + faturaDetay.FieldByName('KDV').AsString);
+    Exit;    
+  end;  
+  if (faturaDetay.FieldByName('ISKONTO').AsFloat < 0) then begin
+    MakeError('Eksi iskonto içeren faturalar aktarýlamaz! : ' + faturaDetay.FieldByName('ACIKLAMA').AsString);
+    Exit;    
+  end;
+  // bütün hesaplamalar kdv hariç olarak hesaplanacak
+  //----------------------------------------------------------------- 
+  // birim fiyat hesaplamasý
+  // bu hesaba iskonto dahil deðildir.
+  if (faturaBaslik.FieldByName('KDVDURUM').AsString = 'Dahil') then
+    // BIRIMFIYAT kdv dahil olarak hesaplanmýþtýr.Öyleyse KDV yi ayýr. birim_fiyat = BIRIMFIYAT - ( ( BIRIMFIYAT * KDV ) / (100 + KDV)
+    unitPrice := faturaDetay.FieldByName('BIRIMFIYAT').AsFloat -
+	  ((faturaDetay.FieldByName('BIRIMFIYAT').AsFloat * 
+	    faturaDetay.FieldByName('KDV').AsFloat) / (100 +
+		faturaDetay.FieldByName('KDV').AsFloat))
+  else 
+    unitPrice := faturaDetay.FieldByName('BIRIMFIYAT').AsFloat; // birim_fiyat = BIRIMFIYAT kdv hariçtir.
+  // satýr brüt toplamý
+  lineTotal := unitPrice * faturaDetay.FieldByName('ADET').AsInteger; // satýr_toplam = birim_fiyat * adet
+  // satýr toplam iskontosu iskonto hesaplamasý  
+  discountAmount := (lineTotal * faturaDetay.FieldByName('ISKONTO').AsFloat) / 100; // yapýlan_iskonto = ( satýr_toplam * ISKONTO )  / 100
+  // kdv matrahý hesaplanýyor satýr brüt toplamý - iskonto miktarý
+  vatBase := lineTotal - discountAmount; // kdv_matrahý = satýr_toplam - yapýlan_iskonto
+  // kdv'nin hesaplanmasý 
+  vatRate := faturaDetay.FieldByName('KDV').AsFloat; // kdv oraný
+  if (faturaBaslik.FieldByName('KDVDURUM').AsString <> 'Muaf') then // muaf deðilse
+    vatAmount := (vatBase * vatRate) / 100 // hesaplanan_kdv = kdv_matrahý * kdv_oraný
+  else
+    vatAmount := 0; // hesaplanan_kdv = 0  
+  // toplam net tutar hesaplanýyor ( kdv yi de içerir)
+  totalNet := vatBase + vatAmount; // satýr_toplam = kdv_matrahý + hesaplanan_kdv
+  // *********************************************
+  // xml oluþturuluyor...
+  det := Root.New;det.Name := 'TRANSACTION';
+  itm := det.New;itm.Name := 'TYPE';
+  itm.Text := faturaKalemTipi; // 0 - Malzeme 4 - Hizmet
+  itm := det.New;itm.Name := 'MASTER_CODE';
+  itm.Text := stockCode;
+  itm := det.New;itm.Name := 'GL_CODE1';
+  itm.Text := stockAccCode;
+  itm := det.New;itm.Name := 'GL_CODE2';
+  itm.Text := kdvNode.Params.Values['donusmus1'];
+  itm := det.New;itm.Name := 'QUANTITY';
+  itm.Text := faturaDetay.FieldByName('ADET').AsString;
+  if (faturaTipi = '8') or (faturaTipi = '9') then begin   // toptan ise kdv haric
+    itm := det.New;itm.Name := 'PRICE';  
+    itm.Text := FloatToStr(unitPrice); 
+    itm := det.New;itm.Name := 'TOTAL';
+    itm.Text := FloatToStr(unitPrice * faturaDetay.FieldByName('ADET').AsInteger);
+  end else if (faturaTipi = '7') then begin // perakende fatura için kdv dahil 
+    tmp := unitPrice * (1 + (vatRate / 100)); 
+    itm := det.New;itm.Name := 'PRICE';  
+    itm.Text := FloatToStr(tmp); 
+    itm := det.New;itm.Name := 'TOTAL';
+    itm.Text := FloatToStr(tmp * faturaDetay.FieldByName('ADET').AsInteger);     
+  end;
+  itm := det.New;itm.Name := 'RC_XRATE';
+  itm.Text := '1';
+  if discountAmount > 0 then begin
+    itm := det.New;itm.Name := 'COST_DISTR';  
+    itm.Text := FloatToStr(discountAmount);// iskonto tutarý
+    itm := det.New;itm.Name := 'DISCOUNT_DISTR'; 
+    itm.Text := FloatToStr(discountAmount); 
+  end;
+  itm := det.New;itm.Name := 'UNIT_CODE';
+  itm.Text := 'ADET';
+  itm := det.New;itm.Name := 'UNIT_CONV1';
+  itm.Text := '1';
+  itm := det.New;itm.Name := 'UNIT_CONV2';
+  itm.Text := '1';
+   
+  itm := det.New;itm.Name := 'VAT_INCLUDED';
+  if (faturaTipi = '8') or (faturaTipi = '9') then
+    itm.Text := '0'
+  else if (faturaTipi = '7') then 
+    itm.Text := '1';
+  itm := det.New;itm.Name := 'VAT_RATE';
+  itm.Text := faturaDetay.FieldByName('KDV').AsString;  // kdv oraný
+  itm := det.New;itm.Name := 'VAT_AMOUNT';	  
+  itm.Text := FloatToStr(vatAmount);// hesaplanan_kdv
+  itm := det.New;itm.Name := 'VAT_BASE';
+  itm.Text := FloatToStr(vatBase);// kdv matrahý  
+  itm := det.New;itm.Name := 'BILLED';
+  itm.Text := '1';	
+  itm := det.New;itm.Name := 'TOTAL_NET';
+  itm.Text := FloatToStr(vatBase);	// satýr toplam kdv hariç
+  {itm := det.New;itm.Name := 'DETAILS';
+  itm := det.New;itm.Name := 'EDT_CURR';
+  itm.Text := '160';
+  itm := det.New;itm.Name := 'EDT_PRICE';
+  itm.Text := FloatToStr(unitPrice);
+  itm := det.New;itm.Name := 'GENIUSFLDSLIST';}
+  // eðer satýr a iskonto uygulanmýþsa ayrýyetten bunu belirten bir iskonto hareketinin eklenmesi gerekiyor
+  if (discountAmount > 0) then 
+    TransformDiscountToTransaction(faturaDetay.FieldByName('ISKONTO').AsFloat,discountAmount,Root);
+end;
+
+procedure TransformPaymentList(Root: TXMLItem);
+var
+  hdr       : TXMLItem;
+  dtl       : TXMLItem;  
+begin
+  hdr := Root.New;hdr.Name := 'PAYMENT';
+  dtl := hdr.New;dtl.Name := 'DATE';
+  dtl.Text := FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+  dtl := hdr.New;dtl.Name := 'MODULENR';
+  dtl.Text := '4';
+  dtl := hdr.New;dtl.Name := 'TRCODE';
+  dtl.Text := faturaTipi;
+  dtl := hdr.New;dtl.Name := 'TOTAL';
+  dtl.Text := FloatToStr(_FaturaNetToplam);
+  dtl := hdr.New;dtl.Name := 'PROCDATE';
+  dtl.Text := FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+  dtl := hdr.New;dtl.Name := 'REPORTRATE';
+  dtl.Text := '1';
+  //dtl := hdr.New;dtl.Name := 'MODIFIED';
+  //dtl.Text := '1';
+  dtl := hdr.New;dtl.Name := 'DISCOUNT_DUEDATE';
+  dtl.Text := FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+  dtl := hdr.New;dtl.Name := 'PAY_NO';
+  dtl.Text := '1';
+  dtl := hdr.New;dtl.Name := 'PAYMENT_TYPE';
+  dtl.Text := '1';
+  dtl := hdr.New;dtl.Name := 'DISCTRLIST';
+  dtl := hdr.New;dtl.Name := 'DISCTRDELLIST';
+  dtl.Text := '0';
+  {dtl := hdr.New;dtl.Name := 'CASHACCREF';
+  dtl.Text := '';
+  dtl := hdr.New;dtl.Name := 'CASHACC_CODE';
+  dtl.Text := '';}
+end;
+
+function GetInstitueNode: TXMLItem;
+var
+  node : TXMLItem;
+begin
+  Result := nil;
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=referansli_kurumlar/REFERANSLAR/REFERANS?adi=' + 
+    faturaBaslik.FieldByName('KURUM').AsString,configuration.Root);
+  if (Trim(faturaBaslik.FieldByName('KURUM').AsString) = '') then begin
+    MakeError('Kurum alaný boþ!');
+    Exit;
+  end;
+  if node.Params.Values['kullan'] = '1' then begin
+    // bu kurum referans kullanýyor o zaman
+    // eþleme bilgisi için referanslarý kullanacaðýz.
+    if (Trim(faturaBaslik.FieldByName('REFERANSKOD').AsString) = '') then begin
+      MakeError(faturaBaslik.FieldByName('KURUM').AsString +' kurumu için referans kullanýlacak fakat Referans Belirtilmemiþ!');
+      Exit;
+    end;
+    result := GetNode('LKS/ESLEMELER/REFERANS_ESLEMELERI/REFERANS_ESLEMESI?kod=' + 
+      faturaBaslik.FieldByName('REFERANSKOD').AsString,configuration.Root);    
+  end else begin
+    // bu kurum referans kullanmýyor
+    // öyleyse kurum eþlemelerine bakacaðýz
+    result := GetNode('LKS/ESLEMELER/KURUM_ESLEMELERI/KURUM_ESLEMESI?kod=' + 
+      faturaBaslik.FieldByName('KURUM').AsString,configuration.Root);    
+  end;  
+end;
+
+// Kapalý ve Açýk faturalar için temel fatura xml i oluþturur.
+procedure BaseInvoice(ARoot: TXMLItem);
+var
+  inv   : TXMLItem;
+  det   : TXMLItem;
+begin
+  inv := ARoot.New;inv.Name := 'INVOICE';
+  inv.Params.Add('DBOP=INS');
+  det := inv.New;det.Name := 'TYPE';
+  det.Text := faturaTipi; // 7 - Parakende 8 - Toptan 9 - Verilen Hizmet Faturasý
+  det := inv.New;det.Name := 'DATE';
+  det.Text :=FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime);
+  det := inv.New;det.Name := 'DOC_NUMBER';
+  det.Text := faturaBaslik.FieldByName('FATURANO').AsString;
+  det := inv.New;det.Name := 'AUXIL_CODE';
+  det.Text := logoOzelKod;
+  det := inv.New;det.Name := 'ARP_CODE'; // cari kodu
+  det.Text := musteriKodu; 
+  det := inv.New;det.Name := 'GL_CODE'; // Muhasebe kodu
+  det.Text := musteriMuhasebeKodu;
+  det := inv.New;det.Name := 'POST_FLAGS';
+  det.Text := '247';
+  det := inv.New;det.Name := 'VAT_RATE';
+  det.Text := '8';
+  det := inv.New;det.Name := 'MODIFIED_BY';
+  det.Text := '1';
+  det := inv.New;det.Name := 'TOTAL_DISCOUNTS';
+  det.Text := FloatToStr(_FaturaIskontoToplami);
+  det := inv.New;det.Name := 'TOTAL_DISCOUNTED';
+  det.Text := FloatToStr(_FaturaKDVMatrahi);    
+  det := inv.New;det.Name := 'TOTAL_VAT';
+  det.Text := FloatToStr(_FaturaKDVsi);  
+  det := inv.New;det.Name := 'TOTAL_GROSS';
+  det.Text := FloatToStr(_FaturaBrutToplami);
+  det := inv.New;det.Name := 'TOTAL_NET';
+  det.Text := FloatToStr(_FaturaNetToplam);    
+  det := inv.New;det.Name := 'TC_NET';
+  det.Text := FloatToStr(_FaturaNetToplam);  
+  det := inv.New;det.Name := 'NOTES1';
+  det.Text := faturaBaslik.FieldByName('AD').AsString + ' ' + 
+    faturaBaslik.FieldByName('SOYAD').AsString;
+  det := inv.New;det.Name := 'NOTES2';
+  det.Text := faturaBaslik.FieldByName('SICILNO').AsString;
+  det := inv.New;det.Name := 'NOTES3';
+  det.Text := faturaBaslik.FieldByName('KARNENO').AsString;  
+  det := inv.New;det.Name := 'RC_XRATE';
+  det.Text := '1';   
+  det := inv.New;det.Name := 'RC_NET';
+  det.Text := FloatToStr(_FaturaNetToplam); 
+  //det := inv.New;det.Name := 'VAT_INCLUDED_GRS';
+  //det.Text := '0';  
+  det := inv.New;det.Name := 'DISPATCHES';
+  faturaDetay.First;
+  det := inv.New;det.Name := 'TRANSACTIONS';
+  while not FaturaDetay.Eof do begin
+    TransformInvoiceDetails(det);
+	  faturaDetay.Next;
+  end;
+  det := inv.New;det.Name := 'PAYMENT_LIST';
+  TransformPaymentList(det); 
+end;
+
+// Açýk fatura xml i oluþturur. Araçlar -> Veri aktarýmý (içeri) -> Fatura -> Satýþ Faturasý kýsmýndan alýnýr.
+procedure TransformForwardedInvoice;
+begin  
+  baslikXml.Root.Name := 'SALES_INVOICES';
+  BaseInvoice(baslikXml.Root);
+end;
+
+// Kasadan kesilmiþ nakit fatura xml i oluþturur. Araçlar -> Veri aktarýmý (içeri) -> Kasa - Kasa Ýþlemleri kýsmýndan alýnýr.
+procedure TransformCashInvoice;
+var
+  node : TXMLItem;
+begin
+  if (nakitKasaKodu = '') then begin
+    MakeError('Nakit kasa kodu atanmamýþ!');
+    Exit;
+  end;
+  if (nakitKasaMuhasebeKodu = '') then begin
+    MakeError('Nakit kasa muhasebe kodu boþ!');
+    Exit;
+  end;
+  baslikXml.Root.Name := 'SD_TRANSACTIONS';
+  with baslikXml.Root.New do begin
+    Name := 'SD_TRANSACTION';
+    Params.Add('DBOP=INS');
+    with New do begin Name := 'TYPE'; Text := kasaIslemTipi; end;
+    with New do begin Name := 'SD_CODE'; Text := nakitKasaKodu; end;
+    with New do begin Name := 'SD_CODE_CROSS';end;
+    with New do begin Name := 'SD_NUMBER_CROSS';end;
+    with New do begin Name := 'CROSS_DATA_REFERENCE';end;
+    with New do begin Name := 'GL_CODE1'; Text := musteriMuhasebeKodu; end;// cari kodu
+    with New do begin Name := 'GL_CODE2'; Text := nakitKasaMuhasebeKodu; end;// kasa muhasebe kodu
+    with New do begin Name := 'DATE'; Text := FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime); end;
+    //with New do begin Name := 'NUMBER'; Text := faturaBaslik.FieldByName('FATURANO').AsString; end;
+    with New do begin Name := 'MASTER_TITLE'; Text := faturaBaslik.FieldByName('AD').AsString + ' ' + 
+      faturaBaslik.FieldByName('SOYAD').AsString; end;
+    with New do begin Name := 'AMOUNT'; Text := FloatToStr(_FaturaNetToplam); end;
+    with New do begin Name := 'RC_XRATE'; Text := '1'; end;
+    with New do begin Name := 'RC_AMOUNT'; Text := FloatToStr(_FaturaNetToplam); end;
+    with New do begin Name := 'TC_AMOUNT'; Text := FloatToStr(_FaturaNetToplam); end;
+    with New do begin Name := 'CREATED_BY'; Text := '1'; end;
+    with New do begin Name := 'DATE_CREATED'; Text := FormatDateTime('dd/MM/yyyy',faturaBaslik.FieldByName('FATURATARIH').AsDateTime); end;
+    with New do begin Name := 'CURRSEL_TOTALS'; Text := '2'; end;
+    node := New;
+    node.Name := 'ATTACHMENT_INVOICE';
+    BaseInvoice(node);    
+  end;  
+end;
+
+// fatura üst bilgilerini kontrol eder.
+function CheckInvoice: Boolean;
+begin
+  Result := True;
+  if (Trim(faturaBaslik.FieldByName('FATURANO').AsString) = '') then begin
+    MakeError('Fatura Numarasý Boþ');
+    Result := False;
+    Exit;
+  end;
+  if (faturaBaslik.FieldByName('FATURA_TUTARI').AsFloat = 0) then begin
+    MakeError('Fatura Tutarý 0 ');
+    Result := False;
+    Exit;
+  end;
+  if (faturaDetay.RecordCount = 0) then begin
+    MakeError('Fatura detaylarý yok!');
+    Result := False;
+    Exit;
+  end;
+  if (faturaBaslik.FieldByName('KURUM').AsString = '') then begin
+    MakeError('Kurum bilgisi boþ!');
+    Result := False;
+    Exit;
+  end;
+end;
+
+// fatura xml leri oluþturulmadan önce gereken parametrelerin atanmasýný saðlar.
+procedure BeforeTransform;
+var
+  node  : TXMLItem;
+begin
+  if (faturalamaModeli = FATURAMODEL_GELISLER_KURUM) then begin
+    node := GetInstitueNode;
+    if (not Assigned(node)) then Exit;
+    if (Trim(node.Params.Values['donusmus1']) = '') then begin
+      if node.Name = 'REFERANS_ESLEMESI' then
+        MakeError('Referans eþlemesinde karþý kod alaný boþ ! : ' + faturaBaslik.FieldByName('REFERANS').AsString)
+      else
+        MakeError('Kurum eþlemesinde karþý kod alaný boþ ! : ' + faturaBaslik.FieldByName('KURUM').AsString);
+      Exit;    
+    end;
+    if (Trim(node.Params.Values['donusmus2']) = '') then begin
+      if node.Name = 'REFERANS_ESLEMESI' then
+        MakeError('Referans eþlemesinde karþý muhasebe kodu alaný boþ ! : ' + faturaBaslik.FieldByName('REFERANS').AsString)
+      else
+        MakeError('Kurum eþlemesinde karþý muhasebe kodu alaný boþ ! : ' + faturaBaslik.FieldByName('KURUM').AsString);
+      Exit;    
+    end;  
+    musteriKodu := node.Params.Values['donusmus1'];
+    musteriMuhasebeKodu := node.Params.Values['donusmus2'];
+  end else if (faturalamaModeli = FATURAMODEL_HASTA_KAYDI) then begin
+    if hastaIcinKayitOlustur then begin    
+      if CustomerExists(GetCustomerCode) then begin
+        with query_exec(LKSConnection,StringReplace(musteriSorgusu,'%firmcode%',firmaNo),['%musteri_kodu%'],[GetCustomercode]) do
+        try
+          Open;
+          if (RecordCount > 0) then begin
+            musteriKodu := Fields.Fields[0].AsString;
+            musteriMuhasebeKodu := Fields.Fields[1].AsString;
+          end else begin
+            MakeError('Müþteri kaydý bulunamadý! : ' + GetCustomerCode);
+            Exit;
+          end;          
+        finally
+          Free;      
+        end;// try
+      end else begin// if
+        if preventDuplicatesList.IndexOf(faturaListesi.FieldByName('DOSYANO').AsString) = -1 then begin
+          BuildCustomerXml;
+          preventDuplicatesList.Add(faturaListesi.FieldByName('DOSYANO').AsString);
+        end;
+      end; // else
+    end else begin // if hastaIcinKayitOlustur
+      musteriKodu := faturaBaslik.FieldByName('CARIKODU').AsString;
+      musteriMuhasebeKodu := faturaBaslik.FieldByName('MUHASEBEKODU').AsString;
+      if (Trim(musteriKodu) = '') then begin
+        MakeError('Hasta / LKS Müþteri eþleþtirilmesi yapýlmamýþ. Karþý Kodu alaný boþ.');
+        Exit;
+      end;
+      if (Trim(musteriMuhasebeKodu) = '') then begin
+        MakeError('Hasta / LKS Müþteri eþleþtirilmesi yapýlmamýþ. Karþý Muhasebe Kodu alaný boþ.');
+        Exit;
+      end;
+    end;    
+  end;// else
+  
+end;
+
+// dönüþümün baþlangýç yeri
+// procedure Main bu procedure ü çalýþtýrmak zorunda yoksa 
+// hiç birþey oluþturulmaz.
+procedure TransformInvoice;
+begin      
+  if exportPath = '' then begin
+    MakeError('Aktarým yolu tanýmlanmamýþ!');
+    Exit;
+  end;  
+  faturaBaslik := query_exec(SystemConnection,
+    'SELECT K.DOSYANO,FB.FATURATARIH,FB.FATURANO,FB.KDVDURUM,FB.TURU,FB.FATURA_TUTARI,K.CARIKODU,K.MUHASEBEKODU,' +
+    'FB.ACIKLAMA,G.KURUM,G.REFERANSKOD,G.REFERANS,K.AD,K.SOYAD,K.SICILNO,K.ADRES,K.ILCE,K.IL,K.VATANDASLIKNO,' +
+    'K.KARNENO FROM FATBASLIK FB LEFT OUTER JOIN KIMLIK K ON FB.DOSYANO = K.DOSYANO ' +
+    'LEFT OUTER JOIN GELISLER G ON (FB.DOSYANO = G.DOSYANO ) AND (FB.GELISNO = G.GELISNO) ' +
+    'LEFT OUTER JOIN REHBER R ON G.REFERANSKOD = R.KOD ' +
+    'LEFT OUTER JOIN KURUM KUR ON G.KURUM = KUR.KURUM   ' +
+    ' WHERE (FB.DOSYANO=!dosyano) and (FB.GELISNO=!gelisno) and (FB.KARTNO = !kartno)',
+    ['!dosyano','!gelisno','!kartno'],[DosyaNo,GelisNo,KartNo]);
+  faturaDetay := query_exec(SystemConnection,
+    'SELECT SIRANO, SEC, TARIH, TUR, KOD, ACIKLAMA,ADET, BIRIM, MIKTAR, ' +
+  	'BIRIMFIYAT, TUTAR, ISKONTO, KDV, BUTCEKODU, KASA, ONAY, KULLANICI '+
+  	' FROM FATURA F ' +
+    ' WHERE (DOSYANO=!dosyano) and (GELISNO=!gelisno) and (KARTNO = !kartno) ' +
+  	' ORDER BY SIRANO',
+    ['!dosyano','!gelisno','!kartno'],[DosyaNo,GelisNo,KartNo]);
+   
+  baslikXml := TECXMLParser.Create(nil);  
+  try
+    faturaBaslik.Open;
+    faturaDetay.Open;
+    BeforeTransform;
+    if (not SUCCESS) then Exit;
+    if CheckInvoice then begin 
+      ToplamlariHesapla;
+      if (Abs(_FaturaNetToplam - faturaBaslik.FieldByName('FATURA_TUTARI').AsFloat) > 3) then begin
+        MakeError('Fatura toplamý ile hesaplanan toplam arasýnda fark var! HT: ' + 
+          FloatToStr(_FaturaNetToplam) + ' FT: ' + FloatToStr(faturaBaslik.FieldByName('FATURA_TUTARI').AsFloat) +
+          ' Bu sorun genellike eksi (-) iskontolardan kaynaklanmýþ olabilir.');
+        Exit;
+      end;
+      if (faturaBaslik.FieldByName('TURU').AsString = 'Açýk') then      
+        TransformForwardedInvoice
+      else
+        TransformCashInvoice;
+      if SUCCESS then
+        if faturaBaslik.FieldByName('TURU').AsString = 'Açýk' then
+          baslikXml.SaveToFile(exportPath + GetXmlFileName('1739'))
+        else
+          baslikXml.SaveToFile(exportPath + GetXmlFileName('1854'));
+    end;
+  finally    
+    baslikXml.Free;
+    faturaBaslik.Free;
+    faturaDetay.Free;
+  end;
+end;
+
+// bir kereye mahsus olmak üzere ayarlanmýþ ayarlarý okur.
+procedure ReadSettings;
+var
+  node : TXMLItem;
+begin
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=on_ekler',configuration.Root);
+  DosyaNoOnEki := node.Params.Values['dosyano_onek'];
+  HesapPlaniOnEki := node.Params.Values['hesapplani_onek'];
+  HastaIlkHarfKullan := node.Params.Values['hasta_ilk_harf_kullan'] = '1';
+  HesapPlaniSifirSayisi := StrToIntDef(node.Params.Values['on_ek_sonrasi_sifir_sayisi'],4);
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=firma_numarasi',configuration.Root);
+  firmaNo := LeadingZero(StrToIntDef(node.Params.Values['firma'], 1), 3);  
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=faturalama_modeli'
+    ,configuration.Root);
+  faturalamaModeli := StrToIntDef(node.Params.Values['model'], 1);
+  hastaIcinKayitOlustur := StrToIntDef(node.Params.Values['hasta_icin_yeni_kayit_olustur'], 0) = 1;
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=kasa_kodu',configuration.Root);
+  nakitKasaKodu := node.Params.Values['kasakodu'];
+  nakitKasaMuhasebeKodu := node.Params.Values['kasamuhasebekodu'];
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=aktarim_yolu',configuration.Root);
+  exportPath := node.Params.Values['yol'];
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=logo_ozel_kod',configuration.Root);
+  logoOzelKod := node.Params.Values['ozelkod'];
+  {
+  faturaKalemleriDonusmesin : Boolean;
+  sabitFaturaKalemiKod      : string;
+  sabitFaturaKalemiMuhKod   : string;
+  kasaIslemTipi             : string;
+  faturaTipi                : string;
+  faturaKalemTipi  
+  }
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=fatura_kalemleri',configuration.Root);
+  faturaKalemleriDonusmesin := node.Params.Values['fatura_kalemleri_donusmesin'] = '1';
+  sabitFaturaKalemiKod := node.Params.Values['sabit_fatura_kalemi_kod'];
+  sabitFaturaKalemiMuhKod := node.Params.Values['sabit_fatura_kalemi_muh_kod'];
+  
+  node := GetNode('LKS/AYARLAR/GENEL_AYARLAR/AYAR?adi=donusum_parametereleri',configuration.Root);
+  if node.Params.Values['kasa_islem_tipi'] = '0' then 
+    kasaIslemTipi := '36' // perakende
+  else if node.Params.Values['kasa_islem_tipi'] = '1' then
+    kasaIslemTipi := '37' // toptan
+  else if node.Params.Values['kasa_islem_tipi'] = '2' then // verilen hizmet
+    kasaIslemTipi := '38'  else kasaIslemTipi := '36'; // perakende
+  //
+  if node.Params.Values['satis_fatura_tipi'] = '0' then //perakende
+    faturaTipi := '7'
+  else if node.Params.Values['satis_fatura_tipi'] = '1' then // toptan
+    faturaTipi := '8'
+  else if node.Params.Values['satis_fatura_tipi'] = '2' then // verilen hizmet
+    faturaTipi := '9' else faturaTipi := '7';
+  //
+  if node.Params.Values['fatura_kalemi_tipi'] = '0' then // malzeme
+    faturaKalemTipi := '0'
+  else if node.Params.Values['fatura_kalemi_tipi'] = '1' then // hizmet
+    faturaKalemTipi := '4'
+  else faturaKalemTipi := '0';
+    
+    
+end;
+
+// ************  G2LKS e özel olaylar *************
+
+// Faturalarýn dönüþümüne baþlamadan önce çaðrýlýr.
+procedure OnInitialize;
+begin
+  TryToConnectDatabase;
+  ReadSettings;  
+  if HastaIlkHarfKullan then 
+    hesapCache := TStringList.Create;
+  //else // TEMP
+  //  lastCode := GetLastCustomerAccountCode;    
+  if (faturalamaModeli = FATURAMODEL_HASTA_KAYDI) and (hastaIcinKayitOlustur) then 
+    preventDuplicatesList := TStringList.Create;
+  DeleteFiles(exportPath,'*.xml');
+end;
+
+// Faturalarýn dönüþümü bittiði zaman çaðrýlýr.
+procedure OnFinalize;
+begin
+  if (Assigned(hesapCache)) then
+    hesapCache.Free;
+  if (Assigned(preventDuplicatesList)) then 
+    preventDuplicatesList.Free;
+end;
+
+begin
+  // her fatura dönüþümü istediðinde scriptengine burayý çaðýrýr.
+  // öyleyse TransformInvoice þu an için doðru yerde.
+  TransformInvoice;
+  //ShowModal;
+end.

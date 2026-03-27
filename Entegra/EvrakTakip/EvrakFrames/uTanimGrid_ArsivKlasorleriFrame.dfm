@@ -1,0 +1,2 @@
+inherited EvrakTanimArsivKlasorleriFrame: TEvrakTanimArsivKlasorleriFrame
+end

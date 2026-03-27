@@ -1,0 +1,114 @@
+unit UVersiyon;
+
+interface
+
+uses
+  Windows, Messages, Classes, SysUtils, Graphics, Controls, StdCtrls, Forms,
+  Dialogs, DBGrids, Grids, ExtCtrls, CheckLst, Menus, Buttons, jpeg;
+
+type
+  TVersiyonDlg = class(TForm)
+    Panel1: TPanel;
+    PanelAlt: TPanel;
+    Memo1: TMemo;
+    PopupMenu1: TPopupMenu;
+    Komutugster1: TMenuItem;
+    CheckListBox1: TCheckListBox;
+    Panel3: TPanel;
+    BitBtn1: TBitBtn;
+    Image1: TImage;
+    Splitter1: TSplitter;
+    Ver0101: TMemo;
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure CheckListBox1Click(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure Komutugster1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Memo1KeyPress(Sender: TObject; var Key: Char);
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end;
+
+var
+  VersiyonDlg: TVersiyonDlg;
+
+implementation
+
+uses UTablo;
+
+{$R *.DFM}
+var Ver:string[10];
+    m:TMemo;
+
+procedure TVersiyonDlg.DBGrid1DblClick(Sender: TObject);
+begin
+   Memo1.Visible := True;
+end;
+
+procedure TVersiyonDlg.CheckListBox1Click(Sender: TObject);
+begin
+   Ver := copy(CheckListBox1.Items[CheckListBox1.ItemIndex],1,9);
+   Ver := copy(ver,1,3)+copy(ver,5,2)+copy(ver,8,2);
+   m := TMemo(VersiyonDlg.FindComponent(ver));
+   Memo1.Text := m.text;
+end;
+
+procedure TVersiyonDlg.BitBtn1Click(Sender: TObject);
+var kom:TStringList;
+    i:smallint;
+
+    procedure uyg;
+    begin
+      Tablo.Query1.Close;
+      Tablo.Query1.SQL.Clear;
+      Tablo.Query1.SQL.AddStrings(kom);
+      kom.clear;
+      try
+        Tablo.Query1.ExecSQL;
+      except
+        ShowMessage('Bu deðiþiklik daha önce uygulanmýþ..');
+      end;
+   end;
+begin
+   kom:=TStringList.Create;
+   for i:=0 to Memo1.Lines.Count-1 do
+      if Trim(Memo1.Lines[i])='GO' then
+         uyg
+      else
+         kom.Add(Memo1.Lines[i]);
+   if (pos('ALTER',uppercase(kom.Text))>0)or(pos('UPDATE',uppercase(kom.Text))>0)or(pos('INSERT',uppercase(kom.Text))>0) then
+       uyg;
+   Komutugster1Click(self);
+   kom.free;
+end;
+
+procedure TVersiyonDlg.Komutugster1Click(Sender: TObject);
+begin
+   GENOTIPIni.WriteBool('Versiyonlar',Ver,True);
+   CheckListBox1.Checked[CheckListBox1.ItemIndex]:=True;
+end;
+
+procedure TVersiyonDlg.FormCreate(Sender: TObject);
+var slist:TStringList;
+    i,j : Smallint;
+begin
+    slist:=TStringList.Create;
+    GENOTIPINI.ReadSectionValues('Versiyonlar',slist);
+    for i:= 0 to slist.Count-1 do begin
+        ver:=copy(slist.Strings[i],1,3)+' '+copy(slist.Strings[i],4,2)+'.'+copy(slist.Strings[i],6,2);
+        for j:=0 to CheckListBox1.Items.Count - 1 do
+            if pos(ver, CheckListBox1.Items[j])>0 then
+               CheckListBox1.Checked[j] := True;
+    end;
+    slist.free;
+end;
+
+procedure TVersiyonDlg.Memo1KeyPress(Sender: TObject; var Key: Char);
+begin
+   if (Key in ['A'..'Z'])or(Key in ['a'..'z'])then
+      raise exception.Create('Komut deðiþtirilemez..')
+end;
+
+end.

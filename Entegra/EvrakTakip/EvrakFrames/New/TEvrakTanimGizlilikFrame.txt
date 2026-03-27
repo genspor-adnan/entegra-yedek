@@ -1,0 +1,135 @@
+inherited EvrakTanimGizlilikFrame: TEvrakTanimGizlilikFrame
+  Width = 802
+  Height = 441
+  ExplicitWidth = 802
+  ExplicitHeight = 441
+  object Splitter1: TSplitter [0]
+    Left = 362
+    Top = 33
+    Height = 408
+    Align = alRight
+    ExplicitTop = -12
+    ExplicitHeight = 391
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 802
+    ExplicitWidth = 802
+  end
+  object GridEvrakGizlilik: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 356
+    Height = 402
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    ExplicitWidth = 414
+    object ViewGizlilik: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.InfoText = 'Filtre'
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewGizlilikID: TcxGridDBColumn
+        Caption = 'Kodu'
+        DataBinding.FieldName = 'ID'
+        Width = 134
+      end
+      object ViewGizlilikADI: TcxGridDBColumn
+        Caption = 'Ad'#305
+        DataBinding.FieldName = 'ADI'
+        Width = 331
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewGizlilik
+    end
+  end
+  object GridPanel1: TGridPanel [3]
+    AlignWithMargins = True
+    Left = 368
+    Top = 36
+    Width = 431
+    Height = 402
+    Align = alRight
+    ColumnCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 120.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 300.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 0
+        Control = Label1
+        Row = 0
+      end
+      item
+        Column = 1
+        Control = cxDBTextEdit2
+        Row = 0
+      end>
+    RowCollection = <
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 28.000000000000000000
+      end>
+    TabOrder = 2
+    object Label1: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 72
+      Height = 22
+      Align = alLeft
+      Caption = 'Gizlilik Tan'#305'm'#305
+      Layout = tlCenter
+      ExplicitHeight = 15
+    end
+    object cxDBTextEdit2: TcxDBTextEdit
+      AlignWithMargins = True
+      Left = 124
+      Top = 4
+      Align = alLeft
+      DataBinding.DataField = 'ADI'
+      DataBinding.DataSource = dsEvrak
+      TabOrder = 0
+      Width = 176
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    Active = True
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_GIZLILIK')
+  end
+  inherited ActionList1: TActionList
+    Top = 112
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+end

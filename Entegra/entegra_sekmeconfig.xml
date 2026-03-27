@@ -1,0 +1,282 @@
+<Gentegre>
+	<AnaSekmeler>
+		<AnaSekme Tip="TAnaGirisSayfasiFrame" Image="0" FrameYonetilebilir="hayýr" AnaSekme="evet"/>
+		<AnaSekme Adi="Aksiyonlar" Tip="TGenelAnaSekmeFrame" Image="7"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TAksiyonlarGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Rehber Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"	AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Kasa" Tip="TKasaDlg" AramaTipi="TGunlukAksiyonAramaFrame"	AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Kurum" Tip="TKurumDlg" AramaTipi="TCariKartAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
+				<IcerikSekme Adi="Takvim" Tip="TTakvimDlg" AramaTipi="TTakvimAksiyonFrame" AramaPropertyAdi="TakvimAksiyonlar"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
+				<AramaSekme Adi="Günlük Aksiyon" Tip="TGunlukAksiyonAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="CheckFat" hedefOlay="OnClick" kaynakMethod="CheckFatClick"/>
+						<OlayBagla hedefBilesen="CheckKasa" hedefOlay="OnClick" kaynakMethod="CheckKasaClick"/>
+						<OlayBagla hedefBilesen="CheckBanka" hedefOlay="OnClick" kaynakMethod="CheckBankaClick"/>
+						<OlayBagla hedefBilesen="CheckTop" hedefOlay="OnClick" kaynakMethod="CheckTopClick"/>
+						<OlayBagla hedefBilesen="CheckTop" hedefOlay="OnMouseUp" kaynakMethod="CheckTopMouseUp"/>
+						<OlayBagla hedefBilesen="CheckCekSenet" hedefOlay="OnClick" kaynakMethod="CheckCekSenetClick"/>
+						<OlayBagla hedefBilesen="CheckPlan" hedefOlay="OnClick" kaynakMethod="CheckPlanClick"/>
+						<OlayBagla hedefBilesen="ChStok" hedefOlay="OnClick" kaynakMethod="ChStokClick"/>
+						<OlayBagla hedefBilesen="Calendar1.Properties" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Günlük Aksiyon" Tip="TTakvimAksiyonFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraYetkili" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="ComboGrup.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
+						<OlayBagla hedefBilesen="rbBaslayan" hedefOlay="OnClick" kaynakMethod="rbBaslayanClick"/>
+						<OlayBagla hedefBilesen="rbIcindeGecen" hedefOlay="OnClick" kaynakMethod="rbIcindeGecenClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+			</AramaSekmeleri>
+		</AnaSekme>
+		<AnaSekme Adi="Cari" Tip="TGenelAnaSekmeFrame" Image="1"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TCariGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Kurum Bilgileri" Tip="TKurumDlg" AramaTipi="TCariKartAksiyonFrame"
+					AramaPropertyAdi="Aksiyonlar"/>
+				<IcerikSekme Adi="Cari Hareketler" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame"
+					AramaPropertyAdi="Arama"/>
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraYetkili" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="ComboGrup.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
+						<OlayBagla hedefBilesen="rbBaslayan" hedefOlay="OnClick" kaynakMethod="rbBaslayanClick"/>
+						<OlayBagla hedefBilesen="rbIcindeGecen" hedefOlay="OnClick" kaynakMethod="rbIcindeGecenClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
+				<AramaSekme Adi="Cari Hareketler" Tip="TCariDlgGenelAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="EditCARIKOD.Properties" hedefOlay="OnButtonClick" kaynakMethod="EditCARIKODPropertiesButtonClick"/>
+						<OlayBagla hedefBilesen="Calendar1" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+						<OlayBagla hedefBilesen="Calendar2" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Cari Aksiyon" Tip="TCariKartAksiyonFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="btnHesapExtresi" hedefOlay="OnClick" kaynakMethod="btnHesapExtresiClick"/>
+						<OlayBagla hedefBilesen="btnFatGir" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnFatCik" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnNakitTah" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnGelenHavale" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnAlinanCek" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnNakitOde" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnGidenHavale" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnVerilenCek" hedefOlay="OnClick" kaynakMethod="AksiyonIslem"/>
+						<OlayBagla hedefBilesen="btnAcilisKaydi" hedefOlay="OnClick" kaynakMethod="AcilisKaydiMenu"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame">
+					<OlayBaglamalar>
+					</OlayBaglamalar>
+					<PropertyBaglamalari>
+					</PropertyBaglamalari>
+				</AramaSekme>
+			</AramaSekmeleri>
+		</AnaSekme>
+		<AnaSekme Adi="Kasa" Tip="TGenelAnaSekmeFrame" Image="2"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			AracCubuguSayfaDenetimi="pcAracCubugu"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TKasaGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Kasa Hareketleri" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame"
+					AramaPropertyAdi="Arama" />
+				<IcerikSekme Adi="Maaþ Düzenleme" Tip="TMaasTabloDlg" AramaTipi="TAramaYokFrame"/>
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraYetkili" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="ComboGrup.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
+						<OlayBagla hedefBilesen="rbBaslayan" hedefOlay="OnClick" kaynakMethod="rbBaslayanClick"/>
+						<OlayBagla hedefBilesen="rbIcindeGecen" hedefOlay="OnClick" kaynakMethod="rbIcindeGecenClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Kasa Hareketleri" Tip="TCariDlgGenelAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="EditCARIKOD.Properties" hedefOlay="OnButtonClick" kaynakMethod="EditCARIKODPropertiesButtonClick"/>
+						<OlayBagla hedefBilesen="Calendar1" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+						<OlayBagla hedefBilesen="Calendar2" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame" >
+					<OlayBaglamalar>
+					</OlayBaglamalar>
+					<PropertyBaglamalari>
+					</PropertyBaglamalari>
+				</AramaSekme>
+			</AramaSekmeleri>
+			<AracCubuklari>
+			</AracCubuklari>
+		</AnaSekme>
+		<AnaSekme Adi="Fatura" Tip="TGenelAnaSekmeFrame" Image="3"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TFaturaGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Fatura" Tip="TFaturalarDlg" AramaTipi="TFaturalarAramaFrame"
+					AramaPropertyAdi="Arama" />
+				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"
+					AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Fatura Düzenleyici" Tip="TFaturaDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraYetkili" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="ComboGrup.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
+						<OlayBagla hedefBilesen="rbBaslayan" hedefOlay="OnClick" kaynakMethod="rbBaslayanClick"/>
+						<OlayBagla hedefBilesen="rbIcindeGecen" hedefOlay="OnClick" kaynakMethod="rbIcindeGecenClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame" >
+				</AramaSekme>
+				<AramaSekme Adi="Fatura Arama" Tip="TFaturalarAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+			</AramaSekmeleri>
+		</AnaSekme>
+		<AnaSekme Adi="Banka" Tip="TGenelAnaSekmeFrame" Image="4"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TBankaGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Banka Tanýmlarý" Tip="TBankalarDlg" AramaTipi="TBankalarAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Banka Hareketleri" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame"	AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Teminat Mektubu" Tip="TTeminatMektubuDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Kredi ve Leasing Hesaplama" Tip="TKrediHesapMakinasi" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Banka Kredileri" Tip="TKredilerDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Vadeli Hesap Tanýmlarý" Tip="TVadeliHesapDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Çek Koçaný" Tip="TBankaCekleriDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Banka Kredileri" Tip="TBankaKredileriListeFrame" AramaTipi="TBankaKredileriAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Teminat Mektuplarý" Tip="TTeminatMektuplariListeFrame" AramaTipi="TTeminatMektubuAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Vadeli Hesaplar" Tip="TVadeliHesaplarListeFrame" AramaTipi="TVadeliHesapAramaFrame"	AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Banka Çekleri" Tip="TBankaCekleriListeFrame" AramaTipi="TBankaCekleriAramaFrame" AramaPropertyAdi="Arama"/>
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Cari" Tip="TCariDlgGenelAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="EditCARIKOD.Properties" hedefOlay="OnButtonClick" kaynakMethod="EditCARIKODPropertiesButtonClick"/>
+						<OlayBagla hedefBilesen="Calendar1" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+						<OlayBagla hedefBilesen="Calendar2" hedefOlay="OnChange" kaynakMethod="Calendar1Change"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
+				<AramaSekme Adi="Banka Arama" Tip="TBankalarAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Banka Kredi Arama" Tip="TBankaKredileriAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Banka Arama" Tip="TTeminatMektubuAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Vadeli Hesap Arama" Tip="TVadeliHesapAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Banka Çekleri Arama" Tip="TBankaCekleriAramaFrame">
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+			</AramaSekmeleri>
+		</AnaSekme>
+		<AnaSekme Adi="Çek/Senet" Tip="TGenelAnaSekmeFrame" Image="5"
+			IcerikSayfaDenetimi="pcIcerik"
+			AramaSayfaDenetimi="pcArama"
+			GorevlerPaneli="pnlGorev"
+			GorevFrameTipi="TCekSenetGorevFrame"
+			GorevFrameFrameBilgiProperty="FrameBilgi"
+			GirisSayfasiTipi="TGenelGirisSayfasiFrame">
+			<IcerikSekmeleri>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Çek/Senet Tanýmlarý" Tip="TCekSenetDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"	AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Çek/Senet Listesi" Tip="TCekSenetListeFrame" AramaTipi="TCekSenetAramaFrame" AramaPropertyAdi="Arama" />
+			</IcerikSekmeleri>
+			<AramaSekmeleri>
+				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
+				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="AraYetkili" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
+						<OlayBagla hedefBilesen="ComboGrup.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
+						<OlayBagla hedefBilesen="rbBaslayan" hedefOlay="OnClick" kaynakMethod="rbBaslayanClick"/>
+						<OlayBagla hedefBilesen="rbIcindeGecen" hedefOlay="OnClick" kaynakMethod="rbIcindeGecenClick"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+				<AramaSekme Adi="Çek Senet Arama" Tip="TCekSenetAramaFrame" >
+					<OlayBaglamalar>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+					</OlayBaglamalar>
+				</AramaSekme>
+			</AramaSekmeleri>
+		</AnaSekme>
+	</AnaSekmeler>
+</Gentegre>

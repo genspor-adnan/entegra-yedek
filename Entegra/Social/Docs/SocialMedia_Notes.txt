@@ -1,0 +1,73 @@
+Because Page commenters can be potential customers for our CRM application
+
+
+Instagram can also provide leads for our CRM application.
+
+We aim to find potential customers through reactions to our advertisements.
+
+We want to obtain potential customers from Forms data or messages from the relevant user.
+
+8000 series
+
+
+-------------------------
+0    utNoTLSSupport,
+1    utUseImplicitTLS, // ssl iohandler req, allways tls
+2    utUseRequireTLS, // ssl iohandler req, user command only accepted when in tls
+3    utUseExplicitTLS // < user can choose to use tls
+Left	158
+Top		141
+
+Top		111
+MwBykOwQmHkjTT9b0lTDyuMhFkCCKjhm7TuovcylTKg@www.granit.com.tr
+
+TIdMessage
+	.Date			> 5.01.2024 22:48:24
+	.MsgId			> MsgId '<MwBykOwQmHkjTT9b0lTDyuMhFkCCKjhm7TuovcylTKg@www.granit.com.tr>'  (read=FMsgId write=TIdMessage.SetMsgID)
+	.Subject
+	.FromList[0]	> TIdEMailAddressList(FromList[0]).Address	= FAddress 'mail@granit.com.tr'   TIdEMailAddressList(FromList[0]).Name	= FAddress 'mail@granit.com.tr'
+	.Body			> Asıl Posta içeriği
+	.Headers.Count	
+	.Headers.Names[0]
+	.Headers.Values['ReplyTo']
+
+
+------------------
+|  SOCIAL_MEDIA  |
+------------------
+ALTER TABLE SOCIAL_MEDIA
+ ADD IMAP_Server varchar(128),
+     IMAP_User varchar(128),
+     IMAP_Passwd nvarchar(128),
+     IMAP_Port int default 143,
+     IMAP_TLS int default 1,
+     IMAP_ToMail varchar(128),
+     IMAP_RootFolder nvarchar(128) default N'INBOX'
+     ;
+
+------------------
+|  META_Collect  |
+------------------
+
+ALTER TABLE META_Collect
+ ADD IMAP_UID int;
+
+ALTER TABLE META_Collect
+  ALTER COLUMN Contact_ID varchar(64);
+
+
+---------------
+| GENINI      |
+---------------
+	
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Beğen', 1, -1, 1);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Paylaş', 2, -1, 2);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Yorum', 3, -1, 3);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Beğen+Paylaş', 4, -1, 4);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Beğen+Yorum', 5, -1, 5);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Paylaş+Yorum', 6, -1, 6);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Beğen+Yorum+Paylaş', 7, -1, 7);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Meta Forms', 8, -1, 8);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Meta Messenger', 9, -1, 9);
+INSERT INTO [] ([BOLUM], [ANAHTAR], [DEGER], [DIL], [SIRA]) VALUES (-2203, N'Web Form', 10, -1, 10);
+

@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Şablon>
+  <ŞablonBaşvuruları>
+    <Başvuru dosya="System.dll" />
+    <Başvuru dosya="System.Xml.dll" />
+    <Başvuru dosya="System.Data.dll" />
+    <Başvuru dosya="System.Core.dll" />
+  </ŞablonBaşvuruları>
+  <ŞablonKodu><![CDATA[<%@using System,System.IO,System.Collections.Generic %><%+	
+    public class TFrameGenDFM : Şablon {
+        public TFrameGenDFM(System.Text.Encoding encoding) : base(encoding) {}
+            string frameAdı;
+            string anaTablo;
+            public override void Render(params object[] args) { 
+              ÇıktıKodlaması = System.Text.Encoding.ASCII;	
+              anaTablo = (string)args[1];
+              frameAdı = (string)args[0]; %>object <%=frameAdı%>: T<%=frameAdı%>
+  Left = 0
+  Top = 0
+  Width = 202
+  Height = 257
+  Align = alClient
+  Color = clWhite
+  ParentBackground = False
+  ParentColor = False
+  TabOrder = 0  
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 765
+    Height = 25
+    Align = alTop
+    BevelOuter = bvNone
+    ParentBackground = False
+    TabOrder = 1
+    ExplicitLeft = 3
+    ExplicitTop = 3
+    ExplicitWidth = 451
+    object AletCubugu: TToolBar
+      AlignWithMargins = True
+      Left = 642
+      Top = 3
+      Width = 120
+      Height = 22
+      Margins.Bottom = 0
+      Align = alRight
+      AutoSize = True
+      ButtonWidth = 63
+      Caption = 'AletCubugu'
+      DockSite = True
+      EdgeInner = esNone
+      EdgeOuter = esNone
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = []
+      Images = AnaForm.ilMedula
+      List = True
+      ParentFont = False
+      ShowCaptions = True
+      AllowTextButtons = True
+      TabOrder = 0
+      ExplicitLeft = 328
+      ExplicitWidth = 126
+      object YeniTus: TToolButton
+        Left = 0
+        Top = 0
+        Caption = 'Yeni'
+        ImageIndex = 0
+        Style = tbsTextButton
+        OnClick = YeniTusClick
+      end
+      object DegisTus: TToolButton
+        Left = 53
+        Top = 0
+        Caption = 'De'#287'i'#351'tir'
+        ImageIndex = 1
+        Style = tbsTextButton
+        OnClick = DegisTusClick
+      end
+    end
+  end  
+  object Dts<%=anaTablo %>: TDataSource
+    DataSet = Tab<%=anaTablo %>
+    Left = 169
+    Top = 136
+  end
+  object Tab<%=anaTablo %>: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'select * from KREDILER')
+    Left = 137
+    Top = 136
+  end
+  object BeniDegistir: TPanel
+  	Align = alClient
+  	Caption = 'Tab<%=anaTablo %> nesnesindeki SQL ifadelerini degistirmeyi unutmayin.'
+  end
+end
+<%+  }}
+  
+    public class TFrameGen : Şablon {
+        string frameAdı;
+        string ekranKısaAdı;
+        string aramaFrame;	
+        string anaTablo;
+        string anaFrame;
+        string aramaFrameUnit;
+        string anaFrameUnit;
+        public TFrameGen(System.Text.Encoding encoding) : base(encoding) {}
+            public override void Render(params object[] args) { 
+                ekranKısaAdı = (string)args[1];
+                aramaFrame = (string)args[2];
+                anaFrame = (string)args[3];
+                anaTablo = (string)args[4];
+                aramaFrameUnit = (string)args[5];
+                anaFrameUnit = (string)args[6];
+                frameAdı = (string)args[0]; %>unit U<%=frameAdı %>;
+  		
+{ Bu kod Sablon Duzenleyici tarafindan uretildi }		
+{ Tarih : <%=DateTime.Now.ToString() %>}
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
+  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
+  cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
+  cxLookAndFeelPainters, cxButtons,DB, ADODB,ToolWin, ExtCtrls, 
+  <%=aramaFrameUnit %>;
+
+type
+  T<%=frameAdı%> = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)    
+    Panel1: TPanel;
+    AletCubugu: TToolBar;
+    YeniTus: TToolButton;
+    DegisTus: TToolButton;
+    Dts<%=anaTablo %>: TDataSource;
+    Tab<%=anaTablo %>: TADOQuery;    
+    BeniDegistir: TPanel;
+    procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure YeniTusClick(Sender: TObject);
+    procedure DegisTusClick(Sender: TObject);
+  private
+    { Private declarations }    
+    FFrameBilgi : TIcerikFrameBilgi;
+    FArama      : <%=aramaFrame %>;
+    procedure GorunurOlacak;
+    procedure GorunmezOlacak;
+    procedure Gorunmez;
+    procedure Gorunur;
+    function GetKapatilabilir: Boolean;
+    procedure TusAsagi(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure TusYukari(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure TusBasili(Sender: TObject; var Key: Char);
+    procedure Baslatildi;
+    procedure Kapatiliyor(var AKapansin: Boolean);
+    procedure EkranYazdir(Sender: TObject);
+    procedure YaziciYazdir(Sender: TObject);
+    procedure FareTekerlekYukari(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure FareTekerlekAsagi(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    function GetFrameBilgi : TIcerikFrameBilgi;
+    procedure SetFrameBilgi(AValue : TIcerikFrameBilgi);    
+    procedure <%=ekranKısaAdı%>KapatEylemi(Sender: TObject);
+    procedure <%=ekranKısaAdı%>EkranAc(Yeni : Boolean);
+    procedure SetArama(const Value: <%=aramaFrame %>);
+  public
+    { Public declarations }
+  published
+    property Arama      : <%=aramaFrame %> read FArama write SetArama;
+  end;
+
+implementation
+
+uses FetaKurulusSiniflari, FetaClassExtensions, <%=anaFrameUnit %>;
+
+{$R *.dfm}
+
+{ T<%=frameAdı%> }
+
+procedure T<%=frameAdı%>.Baslatildi;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.DegisTusClick(Sender: TObject);
+begin
+  <%=ekranKısaAdı%>EkranAc(False);
+end;
+
+procedure T<%=frameAdı%>.EkranYazdir(Sender: TObject);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.FareTekerlekAsagi(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.FareTekerlekYukari(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+
+end;
+
+function T<%=frameAdı%>.GetFrameBilgi: TIcerikFrameBilgi;
+begin
+  Result := FFrameBilgi;
+end;
+
+function T<%=frameAdı%>.GetKapatilabilir: Boolean;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Gorunmez;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.GorunmezOlacak;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Gorunur;
+begin
+  
+end;
+
+procedure T<%=frameAdı%>.GorunurOlacak;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Kapatiliyor(var AKapansin: Boolean);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.<%=ekranKısaAdı%>EkranAc(Yeni: Boolean);
+begin
+  with FFrameBilgi.IcerikGit(<%=anaFrame %>).Git do begin
+   with <%=anaFrame %>(Ornek) do begin
+     KapatEylemi := <%=ekranKısaAdı%>KapatEylemi;
+     <%=ekranKısaAdı%>EkranInit(IIf(Yeni, -1, IIf(Self.Tab<%=anaTablo %>.RecordCount = 0, -1, Self.Tab<%=anaTablo %>.AsInteger['ID'])));
+     if Yeni then
+       Tab<%=anaTablo %>.Append;
+   end;
+ end;
+end;
+
+procedure T<%=frameAdı%>.<%=ekranKısaAdı%>KapatEylemi(Sender: TObject);
+begin
+  FFrameBilgi.Git;  
+  Tab<%=anaTablo %>.Close;
+  Tab<%=anaTablo %>.Open;   
+end;
+
+procedure T<%=frameAdı%>.SetArama(
+  const Value: <%=aramaFrame %>);
+var k : word;
+begin
+  FArama := Value;
+  with FArama do begin
+    { Arama olay ataması }
+    { xxx.OnClick := bu.xxxClick; gibi }
+    { Bu tanımlamayı AnaForm'daki AramaFrame OlayBaglamalari tag'ında gerçekleştirebilirsiniz.  }
+    { Detaylı bilgi için AnaForm'daki örneklere bakınız. }
+  end;
+end;
+
+procedure T<%=frameAdı%>.SetFrameBilgi(AValue: TIcerikFrameBilgi);
+begin
+  FFrameBilgi := AValue;
+end;
+
+procedure T<%=frameAdı%>.TusAsagi(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.TusBasili(Sender: TObject; var Key: Char);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.TusYukari(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.YaziciYazdir(Sender: TObject);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.YeniTusClick(Sender: TObject);
+begin
+  <%=ekranKısaAdı%>EkranAc(True);
+end;
+
+initialization
+  RegisterClass(T<%=frameAdı%>);
+end.
+<%+}} %><% 
+	string _aramaFrameBase   = "POSAramaFrame"; 
+	string _frame            = "POSListeFrame"; 		/* Üretilecek frame'in ortak ismi */	
+	string _outDir           = @"C:\Emre Hastane\Entegra\U";  					/* Dosyaların aktarılacağı yer */
+	string _ekranKısaAdı     = "POS";              	/* xxxAc yönteminin başına gelecek değer */
+	string _anaFrame         = "TPOSDlg";          	/* xxxAc yönteminde açılması gereken frame (detay frame)*/
+	string _anaFrameUnit     = "UPOS";             	/* xxxAc içinde kullanılan frame'i barındıran unit*/
+	string _anaTablo         = "POS";				/* Tabxxx ve Dtsxxx bileşenlerinin ortak adı */
+	string _aramaFrame       = "T" + _aramaFrameBase;    	/* Aramada kullanılan frame */
+	string _aramaFrameUnit   = "U" + _aramaFrameBase;    	/* Arama frame'inin bulunduğu unit */
+	var ş = new TFrameGen(System.Text.Encoding.UTF8);
+	ş.Render(_frame,_ekranKısaAdı,_aramaFrame,_anaFrame,_anaTablo,_aramaFrameUnit,_anaFrameUnit);
+	ş.DosyayaYaz(_outDir + _frame + ".pas"); 
+	var dfm = new TFrameGenDFM(System.Text.Encoding.ASCII);
+	dfm.Render(_frame,_anaTablo);
+	dfm.DosyayaYaz(_outDir + _frame + ".dfm");	
+%>
+]]></ŞablonKodu>
+  <DefineŞablon></DefineŞablon>
+  <ÇıktıYeri>D:\Gentegre\Gentegre</ÇıktıYeri>
+  <ÇıktıDosyasıAdı></ÇıktıDosyasıAdı>
+</Şablon>

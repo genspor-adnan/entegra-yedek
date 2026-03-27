@@ -1,0 +1,221 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>WindowsXP CD Burning Component for Delphi, C#, VB6 (uses ICDBurn)</title>
+<style>
+<!--
+h3           { color: #000099 }
+-->
+</style>
+</head>
+
+<body>
+
+<h1>TCDBurner</h1>
+<h3>What is it?</font></h3>
+<p>The TCDBurner component allows your code to burn files to CDR/W discs on your 
+Windows XP<font SIZE="2">®/2003 </font>system.&nbsp; This component will NOT work on 
+systems other than Windows XP/2003 systems (although it gives a nice error message 
+back to your program).</p>
+<p>Essentially, it is a simple, friendly wrapper around the XP CD-Writing 
+wizard.</p>
+<p><font color="#FF0000">Or, want to burn in C# or Delphi without using the 
+Wizard?&nbsp; See </font><a href="http://www.bayden.com/delphi/XPBurn.htm">XPBurn</a>.</p>
+<p>To install for Delphi, simply copy CDBurner.pas and CDBurner.DCR to a convenient place 
+(e.g. \Delphi\LIB) and then choose the <font face="Courier New">Component | 
+Install Component</font> menu option in Delphi.</p>
+<p>Works with D4; add FileCtrl to the Uses clause</p>
+<h3>License</h3>
+<p>Free with 
+source (after registration)</font>. Registration:&nbsp;You must <a href="mailto:e_lawrence@hotmail.com">email me</a> 
+your name, your country, and what sort of program you'll be using this component 
+in.&nbsp; </p>
+<h3>Why Free?</h3>
+<p><font face="Times New Roman">I figured I'd sell&nbsp;it (and buy my partner 
+something nice for putting up with my late hours ;-) but she said that I should 
+just give it away.&nbsp; </font></p>
+<p><font face="Times New Roman">But, i</font>f you'd like to <b>donate</b> to keep things moving, it's <b>painless</b>. 
+Just click <a href="http://www.amazon.com/paypage/PRQWCSY0XUXNQ">here</a>.</p>
+<h3>How it was done</h3>
+<p>This was actually quite a pain. I started off by realizing that MS has 
+probably exposed the functionality in XP. So, I searched on Google for &quot;CD Burn 
+site:msdn.microsoft.com&quot; where I found the info about ICDBurn. <br>
+<br>
+I saw that it lived in Shell32.DLL, so I tried simply importing that from 
+Delphi. Unfortunately, the type library for it doesn't export (I'm kinda fudging 
+the technical details here) the interface, so Delphi doesn't pick it up. I was 
+banging my head against the wall, so I went back to MSDN's ICDBurn article.<br>
+<br>
+From there, I learned which header file / .idl file contained the reference (it 
+shipped with Visual Studio.NET and also is in the IE SDK). From there, I found 
+the information on the object that implements this interface. I got the CLSID of 
+the object, and instantiated it from Delphi. Success. Now, the only problem is 
+that I only had the interface in IDL, which had to be converted to Delphi (since 
+it couldn't be imported, as I mentioned above). This was a real pain, and 
+entailed lots of access violations and internet research, as I figured out how 
+each IDL parameter mapped to a Delphi parameter.<br>
+&nbsp;<br>
+Later, I wrapped the Delphi6 code into an ActiveX object for VB6.&nbsp; I 
+also figured out a much simpler way to do this using .IDL for C#.</p>
+<h3>Feedback and Future Enhancements</h3>
+<p>Depending on community interest, I will most likely improve the helper 
+functions.&nbsp; I'll also eventually write a demo app to show how the unit 
+works.</p>
+<p>Also, while XP's Wizard is nice, it might be cool to go around it and write 
+directly to the disc, eh?&nbsp; <b>Look here:</b> <a href="http://www.bayden.com/delphi/XPBurn.htm">XPBurn</a>.</p>
+<h3>Bugs</h3>
+<p>&nbsp;&nbsp;&nbsp; None known.&nbsp; <a href="mailto:e_lawrence@hotmail.com">
+Yet</a>.&nbsp; </p>
+<hr>
+<h2>Developer's Guide</h2>
+<h3>Sample Code</h3>
+<p>This example copies a folder and its subfolders to the root of the CD to be 
+created.&nbsp; Note that it does not use the <b>AddFiles</b> helper method on 
+the CDBurner object, because the <b>AddFiles</b> method does not create nested 
+folders.</p>
+<blockquote>
+<p><font size="1" face="Courier New">unit Unit1;<br>
+<br>
+interface<br>
+<br>
+uses<br>
+Windows,shellapi, Messages, SysUtils, Classes, Graphics, Controls, Forms, 
+Dialogs,<br>
+StdCtrls, CDBurner;<br>
+<br>
+type<br>
+TForm1 = class(TForm)<br>
+Button1: TButton;<br>
+CDBurner1: TCDBurner;<br>
+function CopyToCDBurner(FromDir,ToDir : string ) : boolean;<br>
+procedure Button1Click(Sender: TObject);<br>
+end;<br>
+<br>
+var<br>
+Form1: TForm1;<br>
+implementation<br>
+<br>
+{$R *.DFM}<br>
+// Perform Folder copy<br>
+function TForm1.CopyToCDBurnArea(FromDir,ToDir : string ) : boolean;<br>
+var<br>
+&nbsp;&nbsp;&nbsp; lpFileOpStruct : TSHFileOpStruct;<br>
+begin<br>
+&nbsp;&nbsp;&nbsp; lpFileOpStruct.wFunc := FO_COPY;<br>
+&nbsp;&nbsp;&nbsp; lpFileOpStruct.pFrom := Pchar(FromDir+#0);<br>
+&nbsp;&nbsp;&nbsp; lpFileOpStruct.pTo := Pchar(ToDir+#0);<br>
+&nbsp;&nbsp;&nbsp; lpFileOpStruct.fFlags := FOF_NOCONFIRMATION or 
+FOF_NOCONFIRMMKDIR or FOF_SILENT;<br>
+&nbsp;&nbsp;&nbsp; Result := not Boolean(SHFileOperation(lpFileOpStruct));<br>
+end;<br>
+<br>
+procedure TForm1.Button1Click(Sender: TObject);<br>
+begin<br>
+// Copy a folder tree to the burn area<br>
+if not CopyToCDBurnArea('C:\FolderToAdd', cdBurner1.BurnArea ) then 
+ShowMessage('Cannot find C:\FolderToAdd');<br>
+<br>
+// Start burning<br>
+CDBurner1.StartBurn;<br>
+end;<br>
+<br>
+end.</font></p>
+</blockquote>
+<h3>Component Guide</h3>
+<p><font face="Courier New" size="2">type
+TCDBurner = class(TComponent)<br>
+&nbsp;</font></p>
+<h4>Major Functions</h4>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber1">
+  <tr>
+    <td width="45%">constructor <b>Create</b>(AOwner: TComponent);</td>
+    <td width="55%">Pass a TForm in as the owner.&nbsp; If you need a non-visual 
+    version, register, and we'll talk.</td>
+  </tr>
+  <tr>
+    <td width="45%">procedure <b>StartBurn</b>;</td>
+    <td width="55%">First, copy any files specified with <b>Add File</b> or <b>
+    Add Folder</b> to the staging area.&nbsp; 
+    <p>Then&nbsp;burn the files in Windows XP's staging area to the 
+    disc.&nbsp; If you'd like to automate this even further, use SendKeys to 
+    send a &quot;NEXT&quot; command to the Wizard Window</td>
+  </tr>
+</table>
+<h4>Read Only Properties</h4>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber2">
+  <tr>
+    <td width="46%">property <b>LastError</b>: String</td>
+    <td width="54%">String containing the last error message generated by the 
+    component.</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>Equipped</b>: Boolean</td>
+    <td width="54%">TRUE if system has WindowsXP and a compatible CD burner, 
+    FALSE otherwise.</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>IsBurning</b>: Boolean</td>
+    <td width="54%">TRUE if the WindowsXP burn-wizard is currently active.</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>BurnerDrive</b>: String</td>
+    <td width="54%">CDR path to which the files are burned; e.g. &quot;D:\&quot;</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>BurnArea</b>: String</td>
+    <td width="54%">Local path of CD-burn staging area.&nbsp; Usually
+    <font face="Courier" size="2">%HOMEPATH%\Local Settings\Application 
+    Data\Microsoft\CD Burning</font><p>&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>FilesToBurn</b>: TStringList read fFiles;</td>
+    <td width="54%">String list containing the files you've added via <b>Add 
+    Files</b> and <b>Add Folders</b> method.</td>
+  </tr>
+  <tr>
+    <td width="46%">property <b>BurnSize</b>: Int64 read GetBurnSize;</td>
+    <td width="54%">Size in bytes of files waiting to be burned.&nbsp; Check 
+    this is below the size of a blank CD (650mb) before calling <b>StartBurn</b>.</td>
+  </tr>
+</table>
+<h4>Event Handler Properties</h4>
+<p><font face="Courier New" size="2">Type
+TBurnDoneEvent = procedure (iResult: Integer) of Object;</font></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber2">
+  <tr>
+    <td width="46%">property <b>OnBurnDone</b>: TBurnDoneEvent;</td>
+    <td width="54%">Assign an event handler to this
+    <p>Returns 0 if the XP Burn wizard exited normally; Non-zero otherwise.&nbsp; 
+    If nonzero, check <b>LastError</b> for more information, if available.</td>
+  </tr>
+</table>
+<h4>Helper Functions</h4>
+<p>These basic helper functions were added for those who don't want to deal with 
+the file system on their own.&nbsp; They may be updated to be more useful in 
+future versions, if I get lots of registrations. ;-)</p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber3">
+  <tr>
+    <td width="47%">function <b>AddFile</b>(Filename: String): Boolean;</td>
+    <td width="53%">Copy a file to the staging area.&nbsp; Returns TRUE if added 
+    successfully.</td>
+  </tr>
+  <tr>
+    <td width="47%">function <b>AddFolder</b>(Path: String): Boolean;</td>
+    <td width="53%">Copy all files in and beneath the given Path to the staging 
+    area.&nbsp; Returns TRUE if added successfully.</td>
+  </tr>
+  <tr>
+    <td width="47%">function <b>ClearFiles</b>:Boolean;</td>
+    <td width="53%">Delete all files in the staging area.&nbsp; Returns TRUE if 
+    all files and folders were removed successfully.<p><b>WARNING:</b>&nbsp; 
+    This method will delete all files &amp; folders in the staging area, <u><b><i>
+    including</i></b></u> those that were already there.&nbsp; Do not use this 
+    method carelessly, or you're going to have angry customers.</td>
+  </tr>
+</table>
+
+</body>
+
+</html>

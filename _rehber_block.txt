@@ -1,0 +1,8 @@
+  object REHBER: TFDQuery
+    Connection = Tablo.FDCnn
+    BeforeOpen = REHBERBeforeOpen
+    AfterOpen = REHBERAfterOpen
+    ParamData = <>
+    Left = 250
+    Top = 129
+  end

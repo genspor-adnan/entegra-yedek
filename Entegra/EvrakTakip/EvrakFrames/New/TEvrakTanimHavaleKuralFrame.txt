@@ -1,0 +1,583 @@
+inherited EvrakTanimHavaleKuralFrame: TEvrakTanimHavaleKuralFrame
+  Width = 774
+  Height = 560
+  ExplicitWidth = 774
+  ExplicitHeight = 560
+  object Splitter1: TSplitter [0]
+    Left = 205
+    Top = 33
+    Height = 527
+    Align = alRight
+    ExplicitLeft = 593
+    ExplicitTop = 68
+    ExplicitHeight = 329
+  end
+  inherited PanelTopCaption: TPanel
+    Width = 774
+    ExplicitWidth = 774
+  end
+  object GridHavaleKural: TcxGrid [2]
+    AlignWithMargins = True
+    Left = 3
+    Top = 36
+    Width = 199
+    Height = 521
+    Align = alClient
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = False
+    LookAndFeel.SkinName = ''
+    object ViewHavaleKural: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.ShowClearButton = False
+      FindPanel.ShowFindButton = False
+      FindPanel.ShowNextButton = False
+      FindPanel.ShowPreviousButton = False
+      FindPanel.UseDelayedFind = False
+      ScrollbarAnnotations.CustomAnnotations = <>
+      DataController.DataSource = dsEvrak
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.FindPanel = cxStyleHeader
+      Styles.Header = cxStyleHeader
+      object ViewHavaleKuralID: TcxGridDBColumn
+        DataBinding.FieldName = 'ID'
+        VisibleForCustomization = False
+      end
+      object ViewHavaleKuralKURAL_ADI: TcxGridDBColumn
+        Caption = 'Kural Ad'#305
+        DataBinding.FieldName = 'KURAL_ADI'
+        VisibleForCustomization = False
+        Width = 220
+      end
+      object ViewHavaleKuralEVRAK_BIRIMI_REF: TcxGridDBColumn
+        DataBinding.FieldName = 'EVRAK_BIRIMI_REF'
+        Visible = False
+        VisibleForCustomization = False
+      end
+      object ViewHavaleKuralGECERLILIK_BASLANGIC: TcxGridDBColumn
+        DataBinding.FieldName = 'GECERLILIK_BASLANGIC'
+        Visible = False
+        VisibleForCustomization = False
+      end
+      object ViewHavaleKuralGECERLILIK_SON: TcxGridDBColumn
+        DataBinding.FieldName = 'GECERLILIK_SON'
+        DataBinding.IsNullValueType = True
+        Visible = False
+        VisibleForCustomization = False
+      end
+    end
+    object Level1: TcxGridLevel
+      GridView = ViewHavaleKural
+    end
+  end
+  object PanelRight: TPanel [3]
+    Left = 208
+    Top = 33
+    Width = 566
+    Height = 527
+    Align = alRight
+    TabOrder = 2
+    object GridPanel1: TGridPanel
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 558
+      Height = 357
+      Align = alTop
+      ColumnCollection = <
+        item
+          SizeStyle = ssAbsolute
+          Value = 160.000000000000000000
+        end
+        item
+          SizeStyle = ssAbsolute
+          Value = 300.000000000000000000
+        end>
+      ControlCollection = <
+        item
+          Column = 0
+          Control = labelEvrakBiirmi
+          Row = 0
+        end
+        item
+          Column = 0
+          Control = Label3
+          Row = 1
+        end
+        item
+          Column = 0
+          Control = Label4
+          Row = 2
+        end
+        item
+          Column = 0
+          Control = Label5
+          Row = 3
+        end
+        item
+          Column = 1
+          Control = lookupEvrakBirimi
+          Row = 0
+        end
+        item
+          Column = 1
+          Control = editHavaleKuralAdi
+          Row = 1
+        end
+        item
+          Column = 1
+          Control = PanelTarih
+          Row = 2
+        end
+        item
+          Column = 0
+          Control = Label2
+          Row = 4
+        end
+        item
+          Column = 1
+          Control = PanelPersonel
+          Row = 3
+        end
+        item
+          Column = 1
+          Control = Panel1
+          Row = 4
+        end>
+      RowCollection = <
+        item
+          SizeStyle = ssAbsolute
+          Value = 28.000000000000000000
+        end
+        item
+          SizeStyle = ssAbsolute
+          Value = 28.000000000000000000
+        end
+        item
+          SizeStyle = ssAbsolute
+          Value = 28.000000000000000000
+        end
+        item
+          SizeStyle = ssAbsolute
+          Value = 130.000000000000000000
+        end
+        item
+          SizeStyle = ssAbsolute
+          Value = 130.000000000000000000
+        end>
+      TabOrder = 0
+      object labelEvrakBiirmi: TLabel
+        AlignWithMargins = True
+        Left = 4
+        Top = 4
+        Width = 68
+        Height = 22
+        Align = alLeft
+        Caption = 'Evrak Birimi :'
+        Layout = tlCenter
+        ExplicitHeight = 15
+      end
+      object Label3: TLabel
+        AlignWithMargins = True
+        Left = 4
+        Top = 32
+        Width = 90
+        Height = 22
+        Align = alLeft
+        Caption = 'Havale Kural Ad'#305':'
+        Layout = tlCenter
+        ExplicitHeight = 15
+      end
+      object Label4: TLabel
+        AlignWithMargins = True
+        Left = 4
+        Top = 60
+        Width = 79
+        Height = 22
+        Align = alLeft
+        Caption = 'Ge'#231'erlilik Tarihi'
+        Layout = tlCenter
+        ExplicitHeight = 15
+      end
+      object Label5: TLabel
+        AlignWithMargins = True
+        Left = 4
+        Top = 88
+        Width = 62
+        Height = 124
+        Align = alLeft
+        Caption = 'Gere'#287'i '#304#231'in :'
+        ExplicitHeight = 15
+      end
+      object lookupEvrakBirimi: TcxDBLookupComboBox
+        AlignWithMargins = True
+        Left = 164
+        Top = 4
+        Align = alLeft
+        DataBinding.DataField = 'EVRAK_BIRIMI_REF'
+        DataBinding.DataSource = dsEvrak
+        Properties.KeyFieldNames = 'ID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'BIRIM_ADI'
+          end>
+        Properties.ListSource = dsEvrakBirim
+        TabOrder = 0
+        Width = 253
+      end
+      object editHavaleKuralAdi: TcxDBTextEdit
+        AlignWithMargins = True
+        Left = 164
+        Top = 32
+        Align = alLeft
+        DataBinding.DataField = 'KURAL_ADI'
+        DataBinding.DataSource = dsEvrak
+        TabOrder = 1
+        Width = 253
+      end
+      object PanelTarih: TPanel
+        Left = 161
+        Top = 57
+        Width = 272
+        Height = 28
+        Align = alLeft
+        TabOrder = 2
+        object editBaslangicTarihi: TcxDBDateEdit
+          AlignWithMargins = True
+          Left = 4
+          Top = 2
+          Margins.Top = 1
+          Margins.Right = 6
+          Margins.Bottom = 1
+          Align = alLeft
+          DataBinding.DataField = 'GECERLILIK_BASLANGIC'
+          DataBinding.DataSource = dsEvrak
+          TabOrder = 0
+          Width = 121
+        end
+        object editBitisTarihi: TcxDBDateEdit
+          AlignWithMargins = True
+          Left = 134
+          Top = 2
+          Margins.Top = 1
+          Margins.Bottom = 1
+          Align = alLeft
+          DataBinding.DataField = 'GECERLILIK_BITIS'
+          DataBinding.DataSource = dsEvrak
+          TabOrder = 1
+          Width = 121
+        end
+      end
+      object Label2: TLabel
+        AlignWithMargins = True
+        Left = 4
+        Top = 218
+        Width = 51
+        Height = 124
+        Align = alLeft
+        Caption = 'Bilgi '#304#231'in :'
+        ExplicitHeight = 15
+      end
+      object PanelPersonel: TPanel
+        Left = 161
+        Top = 85
+        Width = 300
+        Height = 130
+        Align = alClient
+        TabOrder = 3
+        object Panelbutton: TPanel
+          Left = 1
+          Top = 1
+          Width = 298
+          Height = 23
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 0
+          object buttonPersonelEkle: TSpeedButton
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 126
+            Height = 17
+            Align = alLeft
+            Caption = 'Gere'#287'i i'#231'in '#304'lgili Ekle'
+            Images = dmImageModule.ImageEvrak
+          end
+        end
+        object GridGeregi: TcxGrid
+          AlignWithMargins = True
+          Left = 4
+          Top = 27
+          Width = 292
+          Height = 99
+          Align = alClient
+          TabOrder = 1
+          object ViewGeregi: TcxGridDBTableView
+            Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
+            DataController.DataSource = dsGeregi
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.GroupByBox = False
+            object ViewGeregiPERSON_REF: TcxGridDBColumn
+              Caption = #304'lgili'
+              DataBinding.FieldName = 'PERSON_REF'
+              Width = 200
+            end
+            object ViewGeregiGEREGI_VEYA_BILGI: TcxGridDBColumn
+              DataBinding.FieldName = 'GEREGI_VEYA_BILGI'
+              Visible = False
+              Options.Editing = False
+              Options.Filtering = False
+              Options.FilteringAddValueItems = False
+              Options.ExpressionEditing = False
+              Width = 23
+            end
+            object ViewGeregiHAVALE_KURAL_REF: TcxGridDBColumn
+              DataBinding.FieldName = 'HAVALE_KURAL_REF'
+              Visible = False
+              VisibleForCustomization = False
+              Width = 73
+            end
+            object ViewGeregiColumnKaldir: TcxGridDBColumn
+              DataBinding.IsNullValueType = True
+              PropertiesClassName = 'TcxButtonEditProperties'
+              Properties.Buttons = <
+                item
+                  Default = True
+                  ImageIndex = 119
+                  Glyph.SourceDPI = 96
+                  Glyph.Data = {
+                    89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF
+                    61000002AF49444154785EA5925B48545B1CC6879A3D7BF6DE7343CC4B264297
+                    635A074D6D26B538A6354E6299E6A5330E39929A8E664A8E3992860347B31823
+                    A51B68133DC8143D08611A9AE23D1CCC1B5ED2D0A2A85E7B08B3D4AFB53B5B1F
+                    82ECA105BF87FDC1FFF7B1F67F8900FC11AB6723414260042821A3094A822BC1
+                    85C0F2F9CF022A2AA5C014AD3FDFA535142F44269DEBDD17633493DC3DE490DE
+                    127634D3792021EF8B4697FE6277F831AB205B9388A292F3732FDF68FCD6D13B
+                    8477EF3FA2BDDB898A1AFB92FA485A4BF9D5FAA527ED7D7835F71A8F9F76A3E4
+                    BF9BCB3B35BA2A2250AC09B4A4B9A36F08D63A07F48536249FAD46A2A912C733
+                    2B109B5E06DD290B0EFD5B841C8B0D4D2D9D0838983241045E6B82C37AF302DF
+                    9C9C5F8D86FB0EC46759C19F89E9190C8F8E419B6A46B5AD0EA147B330393D8B
+                    105DDA57220822287F08FE3991D7DFD63588D22B76A1B10487496344623E4263
+                    4F43EFAFC6191F5F9CCC34A3F1513376046BE74D2C3B90C6320DB3419C48A48E
+                    36145FB2DD5D6AEDECC7DC9BB7686EEF4169D5EDE55DE171034591BA9567812E
+                    B06F51A13C588D2463EE8A51E5F2E18E9B1CAD5B395859AE90DF82223022F1A2
+                    26C638141697BD18AC358CF869622A49BED7B4C963FE9EB70A53FB55A8F754A0
+                    58265FE487270264B8E5CAA18C61EDBC60038115D6E3457027C885ECEF5C4EE6
+                    6C20C3536A051EF8C83119F8FFB091960ECFF84945BF7B651C21D2C2C93E3D24
+                    C3B3413238367328A099CF248F9FF98BFEB540788DBE390C3B78C74D419A3938
+                    BC388CFB33A8554A914A49465F6E93AC2B70CD63B91EFECE93C29D0BA4CCE7EB
+                    4A06E3DB695C93D328A224F67505D92CDBD6B2955BBDF308C91252296AAC860C
+                    37B951B820A16AD71348087E198CB42383963E2741004141D863108B9D7A31D5
+                    3DED2DFEED4F94085BF120D04246133C79F8EFEF6BABDB90CF7763F500000000
+                    49454E44AE426082}
+                  Hint = 'Personel '#304'li'#351'kisini Siler'
+                  Kind = bkGlyph
+                end>
+              Properties.ClickKey = 0
+              Properties.ViewStyle = vsButtonsOnly
+              Properties.OnButtonClick = ViewGeregiColumnKaldirPropertiesButtonClick
+              Options.Filtering = False
+              Options.FilteringAddValueItems = False
+              Options.ShowEditButtons = isebAlways
+              Options.ExpressionEditing = False
+              Options.Grouping = False
+              Options.Sorting = False
+              Width = 47
+              IsCaptionAssigned = True
+            end
+          end
+          object LevelGeregi: TcxGridLevel
+            GridView = ViewGeregi
+          end
+        end
+      end
+      object Panel1: TPanel
+        Left = 161
+        Top = 215
+        Width = 300
+        Height = 130
+        Align = alClient
+        TabOrder = 4
+        object Panel2: TPanel
+          Left = 1
+          Top = 1
+          Width = 298
+          Height = 23
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 0
+          object SpeedButton1: TSpeedButton
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 126
+            Height = 17
+            Align = alLeft
+            Caption = 'Bilgi i'#231'in '#304'lgili Ekle'
+            Images = dmImageModule.ImageEvrak
+          end
+        end
+        object GridBilgi: TcxGrid
+          AlignWithMargins = True
+          Left = 4
+          Top = 27
+          Width = 292
+          Height = 99
+          Align = alClient
+          TabOrder = 1
+          object ViwBilgi: TcxGridDBTableView
+            Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
+            DataController.DataSource = dsBilgi
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.GroupByBox = False
+            object ViwBilgiPERSON_REF: TcxGridDBColumn
+              Caption = #304'lgili'
+              DataBinding.FieldName = 'PERSON_REF'
+              Width = 200
+            end
+            object ViwBilgiGEREGI_VEYA_BILGI: TcxGridDBColumn
+              DataBinding.FieldName = 'GEREGI_VEYA_BILGI'
+              Visible = False
+              VisibleForCustomization = False
+            end
+            object ViwBilgiHAVALE_KURAL_REF: TcxGridDBColumn
+              DataBinding.FieldName = 'HAVALE_KURAL_REF'
+              Visible = False
+              VisibleForCustomization = False
+            end
+            object ViwBilgiColumn1: TcxGridDBColumn
+              DataBinding.IsNullValueType = True
+              PropertiesClassName = 'TcxButtonEditProperties'
+              Properties.Buttons = <
+                item
+                  Default = True
+                  Glyph.SourceDPI = 96
+                  Glyph.Data = {
+                    89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF
+                    61000002AF49444154785EA5925B48545B1CC6879A3D7BF6DE7343CC4B264297
+                    635A074D6D26B538A6354E6299E6A5330E39929A8E664A8E3992860347B31823
+                    A51B68133DC8143D08611A9AE23D1CCC1B5ED2D0A2A85E7B08B3D4AFB53B5B1F
+                    82ECA105BF87FDC1FFF7B1F67F8900FC11AB6723414260042821A3094A822BC1
+                    85C0F2F9CF022A2AA5C014AD3FDFA535142F44269DEBDD17633493DC3DE490DE
+                    127634D3792021EF8B4697FE6277F831AB205B9388A292F3732FDF68FCD6D13B
+                    8477EF3FA2BDDB898A1AFB92FA485A4BF9D5FAA527ED7D7835F71A8F9F76A3E4
+                    BF9BCB3B35BA2A2250AC09B4A4B9A36F08D63A07F48536249FAD46A2A912C733
+                    2B109B5E06DD290B0EFD5B841C8B0D4D2D9D0838983241045E6B82C37AF302DF
+                    9C9C5F8D86FB0EC46759C19F89E9190C8F8E419B6A46B5AD0EA147B330393D8B
+                    105DDA57220822287F08FE3991D7DFD63588D22B76A1B10487496344623E4263
+                    4F43EFAFC6191F5F9CCC34A3F1513376046BE74D2C3B90C6320DB3419C48A48E
+                    36145FB2DD5D6AEDECC7DC9BB7686EEF4169D5EDE55DE171034591BA9567812E
+                    B06F51A13C588D2463EE8A51E5F2E18E9B1CAD5B395859AE90DF82223022F1A2
+                    26C638141697BD18AC358CF869622A49BED7B4C963FE9EB70A53FB55A8F754A0
+                    58265FE487270264B8E5CAA18C61EDBC60038115D6E3457027C885ECEF5C4EE6
+                    6C20C3536A051EF8C83119F8FFB091960ECFF84945BF7B651C21D2C2C93E3D24
+                    C3B3413238367328A099CF248F9FF98BFEB540788DBE390C3B78C74D419A3938
+                    BC388CFB33A8554A914A49465F6E93AC2B70CD63B91EFECE93C29D0BA4CCE7EB
+                    4A06E3DB695C93D328A224F67505D92CDBD6B2955BBDF308C91252296AAC860C
+                    37B951B820A16AD71348087E198CB42383963E2741004141D863108B9D7A31D5
+                    3DED2DFEED4F94085BF120D04246133C79F8EFEF6BABDB90CF7763F500000000
+                    49454E44AE426082}
+                  Kind = bkGlyph
+                end>
+              Properties.OnButtonClick = ViwBilgiColumn1PropertiesButtonClick
+              VisibleForCustomization = False
+            end
+          end
+          object LevelBilgi: TcxGridLevel
+            GridView = ViwBilgi
+          end
+        end
+      end
+    end
+  end
+  inherited qryEvrak: TADOQuery
+    Active = True
+    AfterScroll = qryEvrakAfterScroll
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_HAVALE_KURAL ORDER BY ID')
+  end
+  inherited cxGridStyleRepo: TcxStyleRepository
+    PixelsPerInch = 96
+  end
+  object qryEvrakBirim: TADOQuery
+    Active = True
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_BIRIMI ORDER BY BIRIM_ADI')
+    Left = 128
+    Top = 272
+  end
+  object dsEvrakBirim: TDataSource
+    DataSet = qryEvrakBirim
+    Left = 128
+    Top = 336
+  end
+  object qryGeregi: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    BeforePost = qryGeregiBeforePost
+    Parameters = <
+      item
+        Name = 'Param1'
+        Attributes = [paSigned, paNullable]
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 1
+      end>
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_HAVALE_KURAL_GEREGI_BILGI'
+      'WHERE GEREGI_VEYA_BILGI='#39'G'#39' AND HAVALE_KURAL_REF=:KuralRef')
+    Left = 553
+    Top = 141
+  end
+  object dsGeregi: TDataSource
+    DataSet = qryGeregi
+    Left = 552
+    Top = 208
+  end
+  object dsBilgi: TDataSource
+    DataSet = qryBilgi
+    Left = 544
+    Top = 344
+  end
+  object qryBilgi: TADOQuery
+    Connection = Tablo.cnn
+    CursorType = ctStatic
+    BeforePost = qryBilgiBeforePost
+    Parameters = <
+      item
+        Name = 'Param1'
+        Attributes = [paSigned, paNullable]
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 0
+      end>
+    SQL.Strings = (
+      'SELECT * FROM EVRAK_HAVALE_KURAL_GEREGI_BILGI'
+      'WHERE GEREGI_VEYA_BILGI='#39'B'#39' AND HAVALE_KURAL_REF=:KuralRef')
+    Left = 545
+    Top = 277
+  end
+end

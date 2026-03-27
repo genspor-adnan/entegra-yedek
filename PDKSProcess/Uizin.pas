@@ -1,0 +1,58 @@
+unit Uizin;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, DBCtrls, Grids, DBGrids, StdCtrls, Buttons;
+
+type
+  TIzinDlg = class(TForm)
+    DBizin: TDBGrid;
+    DBNavigator1: TDBNavigator;
+    Eara: TEdit;
+    Label1: TLabel;
+    DBara: TDBGrid;
+    SpeedButton1: TSpeedButton;
+    procedure EaraChange(Sender: TObject);
+    procedure DBaraDblClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  IzinDlg: TIzinDlg;
+
+implementation
+
+ uses
+utablo  , DB;
+{$R *.dfm}
+
+procedure TIzinDlg.EaraChange(Sender: TObject);
+begin
+Tablo.Tabizinara.Close;
+Tablo.Tabizinara.sql.Text := 'Select ' +
+      'PERKOD, ADI,SOYADI,OZELGRUP ' +
+      'from PER_SABIT ' +
+      'where '+'ADI + '' '' + SOYADI LIKE  ''' + EAra.Text+ '%''  order by ADI, SOYADI';
+Tablo.Tabizinara.Open;
+end;
+
+
+procedure TIzinDlg.DBaraDblClick(Sender: TObject);
+begin
+
+  Tablo.TabBasitIzin.Append;
+  Tablo.TabBasitIzin.FieldByName('PERKOD').Value:= Tablo.Tabizinara.Fieldbyname('PERKOD').AsInteger;
+end;
+
+procedure TIzinDlg.SpeedButton1Click(Sender: TObject);
+begin
+close;
+end;
+
+end.

@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Şablon>
+  <ŞablonBaşvuruları>
+    <Başvuru dosya="System.dll" />
+    <Başvuru dosya="System.Xml.dll" />
+    <Başvuru dosya="System.Data.dll" />
+    <Başvuru dosya="System.Core.dll" />
+  </ŞablonBaşvuruları>
+  <ŞablonKodu><![CDATA[<%@using System,System.IO,System.Collections.Generic %><%+	
+    public class TFrameGenDFM : Şablon {
+        public TFrameGenDFM(System.Text.Encoding encoding) : base(encoding) {}
+            string frameAdı;
+            string anaTablo;
+            public override void Render(params object[] args) { 
+              ÇıktıKodlaması = System.Text.Encoding.ASCII;	
+              frameAdı = (string)args[0]; %>object <%=frameAdı%>: T<%=frameAdı%>
+  Left = 0
+  Top = 0
+  Width = 451
+  Height = 304
+  Align = alClient
+  Color = clWhite
+  ParentBackground = False
+  ParentColor = False
+  TabOrder = 0  
+end
+<%+  }}
+  
+    public class TFrameGen : Şablon {
+        string frameAdı;        
+        public TFrameGen(System.Text.Encoding encoding) : base(encoding) {}
+            public override void Render(params object[] args) { 
+                frameAdı = (string)args[0]; %>unit U<%=frameAdı%>;
+  		
+{ Bu kod Sablon Duzenleyici tarafindan uretildi }		
+{ Tarih : <%=DateTime.Now.ToString() %> }
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
+  Dialogs, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi;
+
+type
+  T<%=frameAdı%> = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
+  private
+    { Private declarations }
+    FFrameBilgi : TAramaFrameBilgi;
+    procedure GorunurOlacak;
+    procedure GorunmezOlacak;
+    procedure Gorunmez;
+    procedure Gorunur;
+    function GetKapatilabilir: Boolean;
+    procedure TusAsagi(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure TusYukari(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure TusBasili(Sender: TObject; var Key: Char);
+    procedure Baslatildi;
+    procedure Kapatiliyor(var AKapansin: Boolean);
+    procedure EkranYazdir(Sender: TObject);
+    procedure YaziciYazdir(Sender: TObject);
+    procedure FareTekerlekYukari(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure FareTekerlekAsagi(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    function GetFrameBilgi : TAramaFrameBilgi;
+    procedure SetFrameBilgi(AValue : TAramaFrameBilgi);
+  public
+    { Public declarations }
+  end;
+
+implementation
+
+{$R *.dfm}
+
+{ T<%=frameAdı%> }
+
+procedure T<%=frameAdı%>.Baslatildi;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.EkranYazdir(Sender: TObject);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.FareTekerlekAsagi(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.FareTekerlekYukari(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+
+end;
+
+function T<%=frameAdı%>.GetFrameBilgi: TAramaFrameBilgi;
+begin
+  Result := FFrameBilgi;
+end;
+
+function T<%=frameAdı%>.GetKapatilabilir: Boolean;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Gorunmez;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.GorunmezOlacak;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Gorunur;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.GorunurOlacak;
+begin
+
+end;
+
+procedure T<%=frameAdı%>.Kapatiliyor(var AKapansin: Boolean);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.SetFrameBilgi(AValue: TAramaFrameBilgi);
+begin
+  FFrameBilgi := AValue;
+end;
+
+procedure T<%=frameAdı%>.TusAsagi(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.TusBasili(Sender: TObject; var Key: Char);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.TusYukari(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+end;
+
+procedure T<%=frameAdı%>.YaziciYazdir(Sender: TObject);
+begin
+
+end;
+
+initialization
+  RegisterClass(T<%=frameAdı%>);
+end.
+<%+}} %><% 	
+    /* Üretilecek frame'in ortak ismi */	
+	string _frame            = "DuzenliOdemeAramaFrame"; 		
+	/* Dosyaların aktarılacağı yer */	
+	string _outDir           = @"C:\Emre Hastane\Entegra\U";  				
+	var ş = new TFrameGen(System.Text.Encoding.UTF8);
+	ş.Render(_frame);
+	ş.DosyayaYaz(_outDir + _frame + ".pas"); 
+	var dfm = new TFrameGenDFM(System.Text.Encoding.ASCII);
+	dfm.Render(_frame);
+	dfm.DosyayaYaz(_outDir + _frame + ".dfm");	
+%>]]></ŞablonKodu>
+  <DefineŞablon></DefineŞablon>
+  <ÇıktıYeri>C:\</ÇıktıYeri>
+  <ÇıktıDosyasıAdı></ÇıktıDosyasıAdı>
+</Şablon>

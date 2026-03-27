@@ -1,0 +1,27 @@
+uTanimGrid_AltBilgiFrame					TEvrakTanimAltBilgiFrame					OK
+uTanimGrid_ParafFrame,						TEvrakTanimParafFrame						OK
+uTanimGrid_AntetFrame						TEvrakTanimAntetFrame						OK
+uTanimGrid_ArsivKlasorleriFrame,			TEvrakTanimArsivKlasorleriFrame
+uTanimGrid_DagitimFrame,					TEvrakTanimDagitimFrame
+uTanimGrid_DinamikFormFrame,				TEvrakTanimDinamikFormFrame	
+uTanimGrid_DosyaTasnifPlanFrame,			TEvrakTanimDosyaTasnifPlanFrame	
+uTanimGrid_DosyaTasnifPlanGrupFrame			TEvrakTanimDosyaTasnifPlanGrupFrame
+uTanimGrid_DosyaTasnifPlanWITHGrupFrame,	TEvrakTanimDosyaTasnifPlanWITHGrupFrame
+uTanimGrid_DTVTBirim,						TEvrakTanimDTVTBirimFrame
+uTanimGrid_EvrakBirimFrame					TEvrakTanimEvrakBirimiFrame					OK  *
+uTanimGrid_EvrakCinsiFrame,					TEvrakTanimEvrakCinsiFrame					OK	*
+uTanimGrid_GelenKonuFrame ,					TEvrakTanimGelenKonuFrame					OK  *
+uTanimGrid_GelenYerFrame,					TEvrakTanimGelenYerFrame					OK	*
+uTanimGrid_GelisSekliFrame,					TEvrakTanimGelisSekliFrame					OK	*	
+uTanimGrid_GidenTurFrame,					TEvrakTanimGidenTurFrame					OK	*
+uTanimGrid_GizlilikFrame ,					TEvrakTanimGizlilikFrame					OK	*
+uTanimGrid_HavaleKuralFrame,				TEvrakTanimHavaleKuralFrame
+uTanimGrid_ImzaYoluFrame,					TEvrakTanimImzaYoluFrame
+uTanimGrid_MetaGrupBilgileri,				TEvrakTanimMetaGrupBilgileri
+uTanimGrid_MetaBilgileri					TEvrakTanimMetaBilgileriFrame
+uTanimGrid_OzelAlanFrame,					TEvrakTanimOzelAlanFrame
+
+uTanimGrid_PostaTuruFrame,					TEvrakTanimPostaTurFrame					OK
+uTanimGrid_YaziDurumuFrame					TEvrakTanimYaziDurumuFrame					OK
+
+uTanimGrid_VekaletFrame						TEvrakTanimVekaletFrame						OK
