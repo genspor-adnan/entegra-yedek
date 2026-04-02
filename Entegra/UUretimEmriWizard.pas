@@ -1398,10 +1398,10 @@ begin
     TabUretimEmriDetay.FieldByname('ADET').AsFloat := TabUretimEmriDetay.FieldByname('ADET').AsFloat * Carpan;
     TabUretimEmriDetay.FieldByname('MIKTAR').AsFloat := Tablo.StokMiktarHesapla(TabUretimEmriDetay.FieldByname('URUNID').AsInteger,TabUretimEmriDetay.FieldByname('ADET').AsFloat,TabUretimEmriDetay.FieldByname('BIRIM').AsInteger);
   end;
-  if (TabUretimEmriDetay.FieldByname('GRP').AsString = '?r?n')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat<0) then begin
+  if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'ürün')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat<0) then begin
     ShowMessage(URSifirdanKucukUyarisi);
     Abort;
-  end else if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'Bile?en')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat>0) then begin
+  end else if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'Bileþen')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat>0) then begin
     ShowMessage(URSifirdanBuyukUyarisi);
     Abort;
   end;
@@ -1973,7 +1973,7 @@ var
   Gereken : Real;
 begin
   if TabUretimOperasyon.FieldByName('MIKTAR').AsFloat - TabUretimOperasyon.FieldByName('GERCEKLESEN').AsFloat<=0.0 then begin
-     if Application.MessageBox( PChar('Operasyonun tamam? zaten ?retilmi?. Devam etmek istiyor musunuz?'), PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_NO then
+     if Application.MessageBox( PChar('Operasyonun tamamý zaten üretilmiþ. Devam etmek istiyor musunuz?'), PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_NO then
        Abort
      else
        Miktar := 1.0;
@@ -1981,7 +1981,7 @@ begin
     Miktar := TabUretimOperasyon.FieldByName('MIKTAR').AsFloat - TabUretimOperasyon.FieldByName('GERCEKLESEN').AsFloat;
   if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktari_gir, @Miktar, 4)) = mrOk then begin
     if Miktar<=0.0 then begin
-      ShowMessage('Ge?ersiz Miktar Giri?i!');
+      ShowMessage('Geçersiz Miktar Giriþi!');
       Abort;
     end;
   end else
@@ -2201,7 +2201,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+TabUretimEmri.FieldByName('REHBERID').AsString;
-      if Tablo.ListedenBilgiGetir('Adres Se?iniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
          //FATBASLIK.FieldByName('REHBERILETID').AsString:=st.Strings[0];
          //EditButtonSevkAdresi.Text := st.Strings[1];
           TabUretimEmri.FieldByName('REHBERILETID').AsString := st.Strings[0];
@@ -2633,7 +2633,7 @@ begin
      Showmessage(UROnceOperasyonEkle)
   else begin
        SonucListe := TStringList.Create;
-       if Tablo.ListedenBilgiGetir('Konu Se?imi','select UO.KONUSU, UO.ID from [dbo].[URETIMRECETEOPR] UO where UO.URETIMRECETEID = '+
+       if Tablo.ListedenBilgiGetir('Konu Seçimi','select UO.KONUSU, UO.ID from [dbo].[URETIMRECETEOPR] UO where UO.URETIMRECETEID = '+
                                     TabUretimOperasyon.FieldByName('RECETEID').AsString+' order by UO.SIRA',SonucListe,[nil, nil, nil])then
           Id := StrToIntDef(SonucListe[1],0)
        else

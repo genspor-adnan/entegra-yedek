@@ -28,7 +28,10 @@ uses
   dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint, dxCustomTileControl,
   dxTileControl, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, cxRichEdit, dxScrollbarAnnotations, dxDateRanges;
+  dxSkinVisualStudio2013Light, cxRichEdit, dxScrollbarAnnotations, dxDateRanges,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, frCoreClasses, FireDAC.Comp.DataSet;
 
 type
   TFirsatListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -717,7 +720,7 @@ var
 begin
    if FIRSATLAR.FieldByName('DURUM').AsInteger=1  then begin
        SonucListe := TStringList.Create;
-       if not Tablo.HizliGirisListedenBilgiGetir('F�rsat Sonu�','select ANAHTAR,DEGER from GENINI where BOLUM=-2113 and DIL=-1 and DEGER<0 '+
+       if not Tablo.HizliGirisListedenBilgiGetir('Fırsat Sonuç','select ANAHTAR,DEGER from GENINI where BOLUM=-2113 and DIL=-1 and DEGER<0 '+
                   ' order by 1 ',SonucListe,False,[True, False],[]) then abort;
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update PROJELER set DURUM=2, ASAMA='+ IntTostr(StrToIntDef(SonucListe[1],0))+' where ID='+FIRSATLAR.FieldByName('ID').AsString,[],[]);
        SonucListe.Free;

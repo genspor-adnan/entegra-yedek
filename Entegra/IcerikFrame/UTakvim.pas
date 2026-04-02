@@ -164,9 +164,9 @@ type
     LabelBittar: TJvDateTimePicker;
     cxImageComboBox1: TcxImageComboBox;
     Memo2: TMemo;
-    TabPivotGRUP: TStringField;
+    TabPivotGRUP: TWideStringField;
     TabPivotTUR: TWideStringField;
-    TabPivotTARIH: TDateTimeField;
+    TabPivotTARIH: TSQLTimeStampField;
     TabPivotTUTAR: TFloatField;
     Label1: TLabel;
     pivot: TcxDBPivotGrid;

@@ -418,8 +418,8 @@ object MesajlasmaDlg: TMesajlasmaDlg
       ''
       ''
       
-        'select SERVERID=isnull(K.SERVERID,0),MESAJID,M.TARIH, Liste.REHB' +
-        'ERID, R.FIRMA, R.GRUP,'
+        'select SERVERID=0,MESAJID,M.TARIH, Liste.REHBERID, R.FIRMA, R.G' +
+        'RUP,'
       
         'OKUNMAMIS=(case when (select count(*) from MESAJLOG M inner join' +
         ' MESAJLOGKULLANICI K on M.ID=K.MESAJLOGID '
@@ -525,3 +525,4 @@ object MesajlasmaDlg: TMesajlasmaDlg
     Top = 174
   end
 end
+

@@ -231,12 +231,14 @@ type
     FFrameYoneticisi: TAnaFrameYoneticisi;
     FOncekiSayfa: TcxTabSheet;
     FClosingAskedToUser : Boolean;
+    FStartupDeferredDone: Boolean;
     procedure BeforeFrameLoad(AFrameInfo: TXMLItem; Var canLoad: Boolean);
     procedure CID_olay(ASender: TObject; const DeviceID, Line,PhoneNumber, DateTime, OtherText: WideString);
 
     procedure FrameBasliklariniGuncelle;
     procedure MesajSayiYaz;
     procedure Baglan;
+    procedure RunDeferredStartup;
   public
     { Public declarations }
     FServerId: Integer;
@@ -494,7 +496,7 @@ try
       i := 0;
       while not Tablo.Query8.eof do begin
         Alarmlar[i] := TJvDesktopAlert.Create(Self);
-        Alarmlar[i].HeaderText := 'Okunmam?? Duyurunuz Var!';
+        Alarmlar[i].HeaderText := 'Okunmamýþ Duyurunuz Var!';
         Alarmlar[i].MessageText := Tablo.Query8.FieldByName('KONU').AsString;
         Alarmlar[i].Tag := Tablo.Query8.FieldByName('ID').AsInteger;
         Alarmlar[i].AlertStack := JvDesktopAlertStack1;
@@ -629,7 +631,7 @@ begin
       end;
       // daha ?nceden eklenmi? rapor mu bakal?m
       { Tablo.TablodanSorguAc(1,'select ID from DOKUMLER where RAPORADI = '''+Ad+''' ');
-        if (Tablo.Query1.recordcount > 0)and(Application.MessageBox('Bu d?k?m zaten mevcut. ?zerine yaz?ls?n m??', PChar(SGenotipOnay), MB_YESNO) = IDYES) then begin
+        if (Tablo.Query1.recordcount > 0)and(Application.MessageBox('Bu döküm zaten mevcut. üzerine yazýlsýn mý?', PChar(SGenotipOnay), MB_YESNO) = IDYES) then begin
         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
@@ -717,8 +719,6 @@ Const
 var
   i: smallint;
 begin
-  Baglan;
-  MesajSayiYaz;
   FrameBasliklariniGuncelle;
   if Assigned(ChangeWindowMessageFilter) then begin
      if not ChangeWindowMessageFilter( Handle, WM_DROPFILES, MSGFLT_ADD ,0) then
@@ -726,12 +726,13 @@ begin
      if not ChangeWindowMessageFilter( Handle, WM_COPYDATA , MSGFLT_ADD,0 ) then ShowMessage('');
      if not ChangeWindowMessageFilter( Handle, WM_COPYGLOBALDATA, MSGFLT_ADD ,0) then ShowMessage('');
   end;
+  if not FStartupDeferredDone then begin
+    Timer1.Enabled := False;
+    Timer1.Interval := 200;
+    Timer1.Enabled := True;
+  end;
 
-
-  if Tablo.Yetkivarmi(1801,YetkiTur_Gorme) then
-     KasiyerMenuClick(Self);
-
-  case Sektor of
+case Sektor of
     Sektor_ERP :  caption := 'Gentegre '+ Sektor_ERP_Ad;
     Sektor_Tekstil :  caption := 'Gentegre '+Sektor_Tekstil_Ad;
     Sektor_Gida :  caption := 'Gentegre '+Sektor_Gida_Ad;
@@ -770,9 +771,22 @@ begin
   AnaSayfaDenetimi.ActivePage := nil;
   FFrameYoneticisi.AnaSekmeyeGit;
   WindowState := wsMaximized;
+end;
 
-  //1 g?n ?nceki Perakende sat??lar? fi?e d?n??t?r?r
- if Tablo.GENINI.ReadBoolean(Ops_Kasiyer_PerakendeyeSatis,False) then
+procedure TAnaForm.RunDeferredStartup;
+begin
+  if FStartupDeferredDone then
+    Exit;
+
+  FStartupDeferredDone := True;
+  Baglan;
+  MesajSayiYaz;
+
+  if Tablo.Yetkivarmi(1801,YetkiTur_Gorme) then
+    KasiyerMenuClick(Self);
+
+  // Ilk pencereyi hizli gostermek icin agir acilis islerini bir tik erteliyoruz.
+  if Tablo.GENINI.ReadBoolean(Ops_Kasiyer_PerakendeyeSatis, False) then
     Tablo.Satis2Fatura_Olustur(1);
 end;
 
@@ -782,7 +796,7 @@ var
 begin
   for I := 0 to FFrameYoneticisi.FrameSayisi - 1 do
     begin
-      case Dize.Hangisi(FFrameYoneticisi.Frame[i].baslik, ['Cari', 'Aksiyonlar', 'Banka', 'Al??/Sat??', 'Kasa', '?ek/Senet', 'Stok','?retim','?K', 'Demirba?', 'Teklif', 'Servis', 'Dok?man']) of
+      case Dize.Hangisi(FFrameYoneticisi.Frame[i].baslik, ['Cari', 'Aksiyonlar', 'Banka', 'Alýþ/Satýþ', 'Kasa', 'çek/Senet', 'Stok','üretim','ýK', 'Demirbaþ', 'Teklif', 'Servis', 'Doküman']) of
         0:
           FFrameYoneticisi.Frame[i].baslik := LocalizedString(@Cari1);
         1:
@@ -1330,7 +1344,7 @@ begin
     AlertDuyuru.MessageText := uyarimesaj;
     AlertDuyuru.HeaderText := uyaribaslik;
     AlertDuyuru.Execute;
-  end else if uyarituru = 'Uyar?' then begin
+  end else if uyarituru = 'Uyarý' then begin
     AlertUyari.MessageText := uyarimesaj;
     AlertUyari.HeaderText := uyaribaslik;
     AlertUyari.Execute;
@@ -1352,16 +1366,16 @@ begin
 
     end;
     StokIzleme_Serino:begin
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Serino Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Serino Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_SKT:begin
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'SKT Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'SKT Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_Karekod:begin
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Karekod Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Karekod Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_Boyut: begin
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Boyut Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Boyut Durumu',SQLText,'ýzleme',False,False,False);
     end;
   end;
 end;
@@ -1378,19 +1392,19 @@ begin
     end;
     StokIzleme_Serino:begin
       SQLText :=  ' select IZLEM,ACIKLAMA  ' + SQLText;
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Serino Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Serino Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_SKT:begin
       SQLText :=  ' select SKT,ACIKLAMA,MIKTAR ' + SQLText;
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'SKT Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'SKT Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_Karekod:begin
       SQLText :=  ' select IZLEM,ACIKLAMA ' + SQLText;
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Karekod Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Karekod Durumu',SQLText,'ýzleme',False,False,False);
     end;
     StokIzleme_Boyut: begin
       SQLText :=  ' select IZLEM,ACIKLAMA,MIKTAR ' + SQLText;
-      Tablo.ListedenDuzenle(Tablo.FDCnn,'Boyut Durumu',SQLText,'?zleme',False,False,False);
+      Tablo.ListedenDuzenle(Tablo.FDCnn,'Boyut Durumu',SQLText,'ýzleme',False,False,False);
     end;
   end;
 
@@ -1449,10 +1463,10 @@ var
         Result := excel.Range[Char(96 + AColumn) + IntToStr(65536)].end[xlUp].Rows.Row;
     end;
 begin
-  Showmessage(' Excel Bilgi Format?:  s?tun1(A):T?r(c:cari,b:banka,k:kasa),s?tun2(B):kod,s?tun3(C):Ad,s?tun4(D):Tutar,s?tun5(E):Para Birimi,s?tun6(F):Tarih');
+  Showmessage(' Excel Bilgi Formatý:  sütun1(A):Tür(c:cari,b:banka,k:kasa),sütun2(B):kod,sütun3(C):Ad,sütun4(D):Tutar,sütun5(E):Para Birimi,sütun6(F):Tarih');
   excel := CreateOleObject('Excel.Application');
-  Tablo.OpenDialog1.Title := 'Excel Dosyas?n? A?';
-  Tablo.OpenDialog1.Filter := 'Excel Dosyalar? *.xls';
+  Tablo.OpenDialog1.Title := 'Excel Dosyasýný Aç';
+  Tablo.OpenDialog1.Filter := 'Excel Dosyalarý *.xls';
 
   if Tablo.OpenDialog1.Execute then begin
     book := Excel.WorkBooks.Open(Tablo.OpenDialog1.FileName);
@@ -1461,7 +1475,7 @@ begin
     try
       Screen.Cursor := crHourGlass;
       sheet := book.worksheets[1];
-      BekletmeDlg.Caption := 'Excelden veriler aktar?l?yor.Bekleyiniz...';
+      BekletmeDlg.Caption := 'Excelden veriler aktarýlýyor.Bekleyiniz...';
       BekletmeDlg.cxProgressBar1.Properties.Max := excelsonsatir(1)+1;
       BekletmeDlg.Show;
 
@@ -1528,27 +1542,27 @@ begin
   mesajekaciklama := Copy(msg, Pos('<MesajEkAciklama>', msg) + 1, Pos('</MesajEkAciklama>', msg) - (Pos('<MesajEkAciklama>', msg) + 17));
   if Pos('<YeniAktivite>', msg) > 0 then begin
     if (sorumlu = StrToInt(Kullanan)) and (atayan <> StrToInt(Kullanan)) then begin // e?er ki?i kendisi i?in g?rev giriyorsa mesajlar g?r?nmesin
-      UyariGoster('Yeni Aktivite', 'Size g?nderilen aktivite g?rev bilgisi var', 'Uyar?');
+      UyariGoster('Yeni Aktivite', 'Size gönderilen aktivite görev bilgisi var', 'Uyarý');
       // MesajFormunaYaz(aktiviteid,'AktiviteG?rev','Yeni '+mesajekaciklama+' G?rev');
     end;
   end else if Pos('<AktiviteTamamlandi>', msg) > 0 then begin
     if atayan = StrToInt(Kullanan) then begin
-      UyariGoster('Onay Bekleyen Aktivite var', IntToStr(aktiviteid) + ' numaral? ' + aktivitekonu + ' aktivite onay bekliyor', 'Uyar?');
+      UyariGoster('Onay Bekleyen Aktivite var', IntToStr(aktiviteid) + ' numaralý ' + aktivitekonu + ' aktivite onay bekliyor', 'Uyarý');
       // MesajFormunaYaz(aktiviteid,'AktiviteG?rev', IntToStr(aktiviteid)+' numaral? '+ aktivitekonu +' aktivite onay bekliyor');
     end;
   end else if Pos('<AktiviteOnaylandi>', msg) > 0 then begin
     if (sorumlu = StrToInt(Kullanan)) and (atayan <> StrToInt(Kullanan)) then  begin// e?er ki?i kendi olu?turdu?u g?revi onayl?yorsa mesajlar g?r?nmesin
-      UyariGoster('Aktivite Onayland?', IntToStr(aktiviteid) + ' numaral? ' + aktivitekonu + ' aktivite onayland?', 'Uyar?');
+      UyariGoster('Aktivite Onaylandý', IntToStr(aktiviteid) + ' numaralý ' + aktivitekonu + ' aktivite onaylandý', 'Uyarý');
       // MesajFormunaYaz(aktiviteid,'AktiviteG?rev', IntToStr(aktiviteid)+' numaral? '+ aktivitekonu +' aktivite onayland?');
     end;
   end else if Pos('<AktiviteIptal>', msg) > 0 then begin
     if (sorumlu = StrToInt(Kullanan)) and (atayan <> StrToInt(Kullanan)) then
     begin
-      if mesajekaciklama = 'Toplu ?ptal' then begin
-        UyariGoster('Aktivite ?ptal Edildi', inttostr(aktiviteid) + ' numaral? g?rev ile ili?kili tekrarl? g?revler toplu olarak iptal edildi.', 'Uyar?');
+      if mesajekaciklama = 'Toplu ýptal' then begin
+        UyariGoster('Aktivite ýptal Edildi', inttostr(aktiviteid) + ' numaralý görev ile iliþkili tekrarlý görevler toplu olarak iptal edildi.', 'Uyarý');
         // MesajFormunaYaz(aktiviteid,'AktiviteG?rev',inttostr(aktiviteid)+' aktivite ile ili?kili tekrarl? aktiviteler toplu olarak iptal edildi.');
       end else begin
-        UyariGoster('Aktivite ?ptal Edildi', inttostr(aktiviteid) + ' aktivite iptal edildi.', 'Uyar?');
+        UyariGoster('Aktivite ýptal Edildi', inttostr(aktiviteid) + ' aktivite iptal edildi.', 'Uyarý');
         // MesajFormunaYaz(aktiviteid,'AktiviteG?rev', inttostr(aktiviteid)+' aktivite iptal edildi.');
       end;
     end;
@@ -1630,21 +1644,9 @@ begin
 end;
 
 procedure TAnaForm.Timer1Timer(Sender: TObject);
-var
-  model, serialnum: string;
 begin
-   //if HizliGirisDlg=nil then
-        {
-  if not assigned(CIDnesne) then
-    exit;
-
-  model := cidnesne.Command('devicemodel');
-  serialnum := cidnesne.Command('serial');
-  if model = '' then
-    statusbar1.SimpleText := '  Cihaz ba?lant?s? bekleniyor...'
-  else
-    statusbar1.SimpleText := model + '  cihaz ba?l?.  Cihaz seri no : ' +
-      serialnum;   }
+  Timer1.Enabled := False;
+  RunDeferredStartup;
 end;
 
 procedure TAnaForm.FormCreate(Sender: TObject);
@@ -1764,7 +1766,7 @@ begin
     try
       WSocket.Listen;
     except
-      showmessage('Mesaj Dinleme Ba?lat?lamad?. ');
+      showmessage('Mesaj Dinleme Baþlatýlamadý. ');
     end;     *)
 
   end
@@ -1887,7 +1889,7 @@ begin
   MsgClient.Socket.WriteLn(KullanAdi);
   MsgClient.Socket.WriteLn(Kullanan);
   FServerId := StrToInt(MsgClient.Socket.ReadLn);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KULLANICI set SERVERID='+IntToStr(FServerId)+' where REHBERID='+ Kullanan, [], []);
+  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'if COL_LENGTH(''''KULLANICI'''',''''SERVERID'''') is not null update KULLANICI set SERVERID='+IntToStr(FServerId)+' where REHBERID='+ Kullanan, [], []);
 end;
 
 procedure TAnaForm.N9Click(Sender: TObject);
@@ -2019,7 +2021,7 @@ begin
     FormatSettings.CurrencyString := ' '; // cxGridPopupMenu1.Grid.Name
     cxExportTLToExcel(Tablo.SaveDialog1.FileName, ((Sender as TMenuitem).GetParentComponent as TPopupMenu).PopupComponent as TcxDBTreeList, True, True, False);
 
-    MessageDlg('Excel dosyas? olu?turuldu.', mtInformation, [mbOk], 0);
+    MessageDlg('Excel dosyasý oluþturuldu.', mtInformation, [mbOk], 0);
     FormatSettings.CurrencyString := curstr;
   end;
 end;
@@ -2082,7 +2084,7 @@ end;
 
 procedure TAnaForm.FirmaBilgileri1Click(Sender: TObject);
 begin
-  Tablo.ListedenDuzenle(Tablo.FDCnn,'Firma ve ?ube Bilgileri',' select ID, KOD, FIRMA FROM REHBER where ID < 0 order by 1 desc','?ubeler',True,False,True);
+  Tablo.ListedenDuzenle(Tablo.FDCnn,'Firma ve þube Bilgileri',' select ID, KOD, FIRMA FROM REHBER where ID < 0 order by 1 desc','þubeler',True,False,True);
 //  Tablo.RehberSihirbazBaslat(0, StrToIntDef(liste.Strings[0], -1),-100, -100, StrToDate('01' + FormatSettings.DateSeparator + '01' + FormatSettings.DateSeparator + '1900'));
 end;
 
@@ -2108,7 +2110,7 @@ var
   st: Tstringlist;
 begin
   st := Tstringlist.Create;
-  if Tablo.ListedenBilgiGetir('Veri Alma', 'select MODUL=''Yeni Olu?tur'',ADI='''', ID=0  union ALL ' + ' select MODUL,ADI,ID from IMPORT ', st,[]) then
+  if Tablo.ListedenBilgiGetir('Veri Alma', 'select MODUL=''Yeni Oluþtur'',ADI='''', ID=0  union ALL ' + ' select MODUL,ADI,ID from IMPORT ', st,[]) then
   begin
     Application.CreateForm(TImportDlg, ImportDlg);
     ImportDlg.ImportId := StrToInt(st.Strings[2]);
@@ -2264,6 +2266,10 @@ initialization
   dllYukle;
 
 end.
+
+
+
+
 
 
 

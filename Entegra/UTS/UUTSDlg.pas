@@ -768,7 +768,7 @@ var
 
     begin //Alma i?in kabul sorgulama
         if (EditUNO.Text='')then begin // or(EditLNO.Text='')
-            Showmessage('?r?n no ve Lotno bilgisi girin!');
+            Showmessage('ürün no ve Lotno bilgisi girin!');
             Exit;
         end;
 
@@ -791,7 +791,7 @@ var
                                       TMU, TAyrintiUrunSonuc));         //     TModel.Create
             inc(Sayfa);
             if k = nil then
-               raise Exception.Create('Okunamad?');
+               raise Exception.Create('Okunamadý');
             n := length(k.SNC);
             if n>0 then
                Tablo.Query0.SQL.Text := SQLMEMO1.text;   //her sat?r i?in kalan irsaliye kolonu g?ncellenecek
@@ -1850,7 +1850,7 @@ begin
     //
     inc(ButonSay);
     if ButonSay = 3 then
-       ButtonYap(51, 'Giri? Fi?i Olu?turma Bildirimi');
+       ButtonYap(51, 'Giriþ Fiþi Oluþturma Bildirimi');
 end;
 
 function TUTSDlg.Sorgula(Adres, Data:string):string;
@@ -2175,6 +2175,7 @@ end.
       end;
    Result := BaslikID;
    *)
+
 
 
 

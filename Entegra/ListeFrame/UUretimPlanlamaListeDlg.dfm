@@ -38,7 +38,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitWidth = 451
     object YeniPlan: TToolButton
       Left = 0
       Top = 0
@@ -62,8 +61,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitWidth = 451
-    ExplicitHeight = 220
     object GridUretimPlanView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -108,67 +105,80 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
       object GridUretimPlanViewKOD: TcxGridDBColumn
         Caption = 'Stok Kodu'
         DataBinding.FieldName = 'KOD'
+        DataBinding.IsNullValueType = True
         Width = 92
       end
       object GridUretimPlanViewSTOKADI: TcxGridDBColumn
         Caption = 'Stok Ad'#305
         DataBinding.FieldName = 'STOKADI'
+        DataBinding.IsNullValueType = True
         Width = 183
       end
       object GridUretimPlanViewGUNCELDEPO: TcxGridDBColumn
         Caption = 'G'#252'ncel Depo Durumu'
         DataBinding.FieldName = 'GUNCELDEPO'
+        DataBinding.IsNullValueType = True
         Width = 68
       end
       object GridUretimPlanViewDEPODURUMU: TcxGridDBColumn
         Caption = 'Plan Depo Durumu'
         DataBinding.FieldName = 'DEPODURUMU'
+        DataBinding.IsNullValueType = True
         Width = 56
       end
       object GridUretimPlanViewMINIMUMSTOK: TcxGridDBColumn
         Caption = 'Minimum Seviye'
         DataBinding.FieldName = 'MINIMUMSTOK'
+        DataBinding.IsNullValueType = True
         Width = 92
       end
       object GridUretimPlanViewALINANSIPARIS: TcxGridDBColumn
         Caption = 'Al'#305'nan Sipari'#351
         DataBinding.FieldName = 'ALINANSIPARIS'
+        DataBinding.IsNullValueType = True
         Width = 79
       end
       object GridUretimPlanViewVERILENSIPARIS: TcxGridDBColumn
         Caption = 'Verilen Sipari'#351
         DataBinding.FieldName = 'VERILENSIPARIS'
+        DataBinding.IsNullValueType = True
         Width = 75
       end
       object GridUretimPlanViewURETIMEMRI: TcxGridDBColumn
         Caption = #220'r. Emri Miktar'
         DataBinding.FieldName = 'URETIMEMRI'
+        DataBinding.IsNullValueType = True
         Width = 77
       end
       object GridUretimPlanViewURETIMOPERASYON: TcxGridDBColumn
         Caption = #220'r. Op. Miktar'
         DataBinding.FieldName = 'URETIMOPERASYON'
+        DataBinding.IsNullValueType = True
         Width = 78
       end
       object GridUretimPlanViewURETIMFISI: TcxGridDBColumn
         Caption = #220'r. Fi'#351'i Miktar'
         DataBinding.FieldName = 'URETIMFISI'
+        DataBinding.IsNullValueType = True
         Width = 78
       end
       object GridUretimPlanViewPLANDANKALAN: TcxGridDBColumn
         Caption = #220'r. Plan'#305' Kalan'
         DataBinding.FieldName = 'PLANDANKALAN'
+        DataBinding.IsNullValueType = True
         Visible = False
       end
       object GridUretimPlanViewKALAN: TcxGridDBColumn
         Caption = #220'r. Emri Kalan'
         DataBinding.FieldName = 'EMIRDENKALAN'
+        DataBinding.IsNullValueType = True
         Visible = False
         Width = 77
       end
       object GridUretimPlanViewOPDANKALAN: TcxGridDBColumn
         Caption = #220'r. Op. Kalan'
         DataBinding.FieldName = 'OPDANKALAN'
+        DataBinding.IsNullValueType = True
         Visible = False
       end
     end
@@ -186,8 +196,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     TabOrder = 2
     Properties.ActivePage = SheetDepoDurumu
     Properties.CustomButtons.Buttons = <>
-    ExplicitTop = 21
-    ExplicitWidth = 451
     ClientRectBottom = 279
     ClientRectLeft = 4
     ClientRectRight = 1010
@@ -195,7 +203,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     object SheetDepoDurumu: TcxTabSheet
       Caption = 'Depo Durumu'
       ImageIndex = 0
-      ExplicitWidth = 443
       object Panel2: TPanel
         Left = 0
         Top = 0
@@ -204,7 +211,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         Align = alClient
         Caption = 'Panel2'
         TabOrder = 0
-        ExplicitWidth = 443
         object GridStokDurum: TcxGrid
           AlignWithMargins = True
           Left = 2
@@ -220,7 +226,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
-          ExplicitWidth = 164
           object GridStokDurumView: TcxGridDBTableView
             OnDblClick = GridStokDurumViewDblClick
             Navigator.Buttons.CustomButtons = <>
@@ -264,37 +269,44 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
             object clmDurumDepoAdi: TcxGridDBColumn
               Caption = 'Depo Ad'#305
               DataBinding.FieldName = 'DEPOADI'
+              DataBinding.IsNullValueType = True
               Width = 156
             end
             object clmDurumSKT: TcxGridDBColumn
               DataBinding.FieldName = 'SKT'
+              DataBinding.IsNullValueType = True
               Width = 86
             end
             object clmDurumGiren: TcxGridDBColumn
               Caption = 'Giren'
               DataBinding.FieldName = 'GIREN'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyAdetGenel
             end
             object clmDurumCikan: TcxGridDBColumn
               Caption = #199#305'kan'
               DataBinding.FieldName = 'CIKAN'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyAdetGenel
             end
             object clmDurumKalan: TcxGridDBColumn
               Caption = 'Kalan'
               DataBinding.FieldName = 'KALAN'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyAdetGenel
               Width = 59
             end
             object clmKritikSeviye: TcxGridDBColumn
               Caption = 'Kritik Seviye'
               DataBinding.FieldName = 'KSEVIYE'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyAdetGenel
               Width = 71
             end
             object GridStokDurumViewSUBEID: TcxGridDBColumn
               Caption = #350'ube'
               DataBinding.FieldName = 'SUBEID'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
               Options.Editing = False
             end
@@ -317,7 +329,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           TabOrder = 1
           LevelTabs.CaptionAlignment = taLeftJustify
           LookAndFeel.ScrollbarMode = sbmClassic
-          ExplicitLeft = 168
           object cxGrid1DBTableViewDurum: TcxGridDBTableView
             Navigator.Buttons.CustomButtons = <>
             ScrollbarAnnotations.CustomAnnotations = <>
@@ -331,17 +342,20 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
             object cxGrid1DBTableViewDurumTIP: TcxGridDBColumn
               Caption = 'Tip'
               DataBinding.FieldName = 'TIP'
+              DataBinding.IsNullValueType = True
               Width = 99
             end
             object cxGrid1DBTableViewDurumADET: TcxGridDBColumn
               Caption = 'Miktar'
               DataBinding.FieldName = 'ADET'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyAdetGenel
               Width = 82
             end
             object cxGrid1DBTableViewDurumBIRIM: TcxGridDBColumn
               Caption = 'Birim'
               DataBinding.FieldName = 'BIRIM'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repStokAnaBirim
               Width = 42
             end
@@ -404,41 +418,49 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           object cxGridDBTableView1SIPARISID: TcxGridDBColumn
             Caption = 'ID'
             DataBinding.FieldName = 'SIPARISID'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object cxGridDBTableView1SIPARISNO: TcxGridDBColumn
             Caption = 'Sipari'#351' No'
             DataBinding.FieldName = 'SIPARISNO'
+            DataBinding.IsNullValueType = True
             Width = 59
           end
           object cxGridDBTableView1FIRMA: TcxGridDBColumn
             Caption = 'Cari '#220'nvan'
             DataBinding.FieldName = 'FIRMA'
+            DataBinding.IsNullValueType = True
             Width = 172
           end
           object cxGridDBTableView1SIPARISTARIH: TcxGridDBColumn
             Caption = 'Sipari'#351' Tarihi'
             DataBinding.FieldName = 'SIPARISTARIH'
+            DataBinding.IsNullValueType = True
             Width = 109
           end
           object cxGridDBTableView1TESLIMTARIHI: TcxGridDBColumn
             Caption = 'Teslim Tarihi'
             DataBinding.FieldName = 'TESLIMTARIHI'
+            DataBinding.IsNullValueType = True
             Width = 102
           end
           object cxGridDBTableView1MIKTAR: TcxGridDBColumn
             Caption = 'Miktar'
             DataBinding.FieldName = 'MIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 47
           end
           object cxGridDBTableView1SIPARISACIKLAMA: TcxGridDBColumn
             Caption = 'A'#231#305'klama1'
             DataBinding.FieldName = 'SIPARISACIKLAMA'
+            DataBinding.IsNullValueType = True
             Width = 254
           end
           object cxGridDBTableView1ACIKLAMA: TcxGridDBColumn
             Caption = 'A'#231#305'klama2'
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             Width = 253
           end
         end
@@ -498,41 +520,49 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           object cxGridDBColumn1: TcxGridDBColumn
             Caption = 'ID'
             DataBinding.FieldName = 'SIPARISID'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object cxGridDBColumn3: TcxGridDBColumn
             Caption = 'Sipari'#351' No'
             DataBinding.FieldName = 'SIPARISNO'
+            DataBinding.IsNullValueType = True
             Width = 57
           end
           object cxGridDBTableView2FIRMA: TcxGridDBColumn
             Caption = 'Cari '#220'nvan'
             DataBinding.FieldName = 'FIRMA'
+            DataBinding.IsNullValueType = True
             Width = 180
           end
           object cxGridDBColumn4: TcxGridDBColumn
             Caption = 'Sipari'#351' Tarihi'
             DataBinding.FieldName = 'SIPARISTARIH'
+            DataBinding.IsNullValueType = True
             Width = 88
           end
           object cxGridDBTableView2TESLIMTARIHI: TcxGridDBColumn
             Caption = 'Teslim Tarihi'
             DataBinding.FieldName = 'TESLIMTARIHI'
+            DataBinding.IsNullValueType = True
             Width = 89
           end
           object cxGridDBColumn5: TcxGridDBColumn
             Caption = 'Miktar'
             DataBinding.FieldName = 'MIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 52
           end
           object cxGridDBColumn6: TcxGridDBColumn
             Caption = 'A'#231#305'klama1'
             DataBinding.FieldName = 'SIPARISACIKLAMA'
+            DataBinding.IsNullValueType = True
             Width = 267
           end
           object cxGridDBColumn7: TcxGridDBColumn
             Caption = 'A'#231#305'klama2'
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             Width = 263
           end
         end
@@ -592,43 +622,51 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           object cxGridDBTableView3EKLEYEN: TcxGridDBColumn
             Caption = 'Ekleyen'
             DataBinding.FieldName = 'EKLEYEN'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repGenelPersonelListesi
             Width = 83
           end
           object cxGridDBTableView3BASTAR: TcxGridDBColumn
             Caption = 'Ba'#351'lama'
             DataBinding.FieldName = 'BASTAR'
+            DataBinding.IsNullValueType = True
             Width = 98
           end
           object cxGridDBTableView3BITTAR: TcxGridDBColumn
             Caption = 'Biti'#351
             DataBinding.FieldName = 'BITTAR'
+            DataBinding.IsNullValueType = True
             Width = 102
           end
           object cxGridDBTableView3ONAYLAYAN: TcxGridDBColumn
             Caption = 'Onaylayan'
             DataBinding.FieldName = 'ONAYLAYAN'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repGenelPersonelListesi
             Width = 85
           end
           object cxGridDBTableView3URETIMEMRIMIKTAR: TcxGridDBColumn
             Caption = #220'r. Emri Miktar'
             DataBinding.FieldName = 'URETIMEMRIMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 83
           end
           object cxGridDBTableView3URETIMOPMIKTAR: TcxGridDBColumn
             Caption = #220'r. Op. Miktar'
             DataBinding.FieldName = 'URETIMOPMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 81
           end
           object cxGridDBTableView3URETIMFISMIKTAR: TcxGridDBColumn
             Caption = #220'r. Fi'#351'i Miktar'
             DataBinding.FieldName = 'URETIMFISMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 78
           end
           object cxGridDBTableView3ACIKLAMA: TcxGridDBColumn
             Caption = 'A'#231#305'klama'
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.cxEditRepository1Label1
             Width = 386
           end
@@ -689,27 +727,32 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           object cxGridDBColumn8: TcxGridDBColumn
             Caption = 'Lokasyon'
             DataBinding.FieldName = 'LOKASYONADI'
+            DataBinding.IsNullValueType = True
             Width = 216
           end
           object cxGridDBColumn9: TcxGridDBColumn
             Caption = #304#351' Merkezi'
             DataBinding.FieldName = 'ISMERKEZIADI'
+            DataBinding.IsNullValueType = True
             Width = 330
           end
           object cxGridDBColumn10: TcxGridDBColumn
             Caption = 'Personel'
             DataBinding.FieldName = 'PERSONEL'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repGenelPersonelListesi
             Width = 162
           end
           object cxGridDBColumn12: TcxGridDBColumn
             Caption = #220'r. Op Miktar'
             DataBinding.FieldName = 'URETIMOPMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 162
           end
           object cxGridDBColumn13: TcxGridDBColumn
             Caption = #220'r Fi'#351'i Miktar'
             DataBinding.FieldName = 'URETIMFISMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 160
           end
         end
@@ -769,31 +812,37 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
           object cxGridDBTableView5URETIMTARIH: TcxGridDBColumn
             Caption = 'Tarih'
             DataBinding.FieldName = 'URETIMTARIH'
+            DataBinding.IsNullValueType = True
             Width = 122
           end
           object cxGridDBTableView5ISTASYON: TcxGridDBColumn
             Caption = #304'stasyon'
             DataBinding.FieldName = 'ISTASYON'
+            DataBinding.IsNullValueType = True
             Width = 154
           end
           object cxGridDBTableView5LOKASYONADI: TcxGridDBColumn
             Caption = 'Lokasyon'
             DataBinding.FieldName = 'LOKASYONADI'
+            DataBinding.IsNullValueType = True
             Width = 155
           end
           object cxGridDBTableView5SORUMLUADI: TcxGridDBColumn
             Caption = 'Sorumlu'
             DataBinding.FieldName = 'SORUMLUADI'
+            DataBinding.IsNullValueType = True
             Width = 161
           end
           object cxGridDBTableView5ONAYLAYANADI: TcxGridDBColumn
             Caption = 'Onaylayan'
             DataBinding.FieldName = 'ONAYLAYANADI'
+            DataBinding.IsNullValueType = True
             Width = 227
           end
           object cxGridDBTableView5URETIMFISMIKTAR: TcxGridDBColumn
             Caption = 'Miktar'
             DataBinding.FieldName = 'URETIMFISMIKTAR'
+            DataBinding.IsNullValueType = True
             Width = 245
           end
         end
@@ -810,8 +859,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     Height = 7
     AlignSplitter = salBottom
     Control = PageAlt
-    ExplicitTop = 14
-    ExplicitWidth = 451
   end
   object MemoSiparisAra: TMemo
     Left = 416
@@ -839,16 +886,8 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     Top = 130
   end
   object TabUretimPlanlama: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabUretimPlanlamaAfterScroll
-    ParamData = <
-      item
-        Name = 'PID'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 0
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select '
       #9'*, '
@@ -887,9 +926,33 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
       'order by 2')
     Left = 62
     Top = 75
+    ParamData = <
+      item
+        Name = 'PID'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 0
+      end>
   end
   object TabAlinanSiparis: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'select SD.SIPARISID,SI.SIPARISSERI,SI.SIPARISNO,SI.SIPARISTARIH,' +
+        'SD.ADET,SD.BIRIM,SD.MIKTAR,SD.MF,SD.ACIKLAMA,SIPARISACIKLAMA=SI.' +
+        'ACIKLAMA,SD.TESLIMTARIHI,R.FIRMA'
+      
+        'from SIPARISDETAY SD inner join SIPARIS SI on SD.SIPARISID=SI.ID' +
+        ' inner join REHBER R on SI.REHBERID=R.ID '
+      
+        'where SI.TUR=19 and SD.TUR=1 and SD.URUNID=:PUrunID and SD.URETI' +
+        'MPLANID=:UPID and SD.URETIMPLANDETAYID=:UPDID'
+      #9#9#9#9#9#9#9#9#9#9#9#9
+      #9#9#9#9#9#9#9#9#9#9#9
+      #9#9#9#9#9#9#9#9#9#9#9)
+    Left = 260
+    Top = 109
     ParamData = <
       item
         Name = 'PUrunID'
@@ -912,22 +975,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         Size = 4
         Value = 1
       end>
-    SQL.Strings = (
-      
-        'select SD.SIPARISID,SI.SIPARISSERI,SI.SIPARISNO,SI.SIPARISTARIH,' +
-        'SD.ADET,SD.BIRIM,SD.MIKTAR,SD.MF,SD.ACIKLAMA,SIPARISACIKLAMA=SI.' +
-        'ACIKLAMA,SD.TESLIMTARIHI,R.FIRMA'
-      
-        'from SIPARISDETAY SD inner join SIPARIS SI on SD.SIPARISID=SI.ID' +
-        ' inner join REHBER R on SI.REHBERID=R.ID '
-      
-        'where SI.TUR=19 and SD.TUR=1 and SD.URUNID=:PUrunID and SD.URETI' +
-        'MPLANID=:UPID and SD.URETIMPLANDETAYID=:UPDID'
-      #9#9#9#9#9#9#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9#9#9#9)
-    Left = 260
-    Top = 109
   end
   object DtsAlinanSiparis: TDataSource
     DataSet = TabAlinanSiparis
@@ -941,6 +988,20 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
   end
   object TabVerilenSiparis: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'select SD.SIPARISID,SI.SIPARISSERI,SI.SIPARISNO,SI.SIPARISTARIH,' +
+        'SD.ADET,SD.BIRIM,SD.MIKTAR,SD.MF,SD.ACIKLAMA,SIPARISACIKLAMA=SI.' +
+        'ACIKLAMA,SD.TESLIMTARIHI,R.FIRMA'
+      
+        'from SIPARISDETAY SD inner join SIPARIS SI on SD.SIPARISID=SI.ID' +
+        ' inner join REHBER R on SI.REHBERID=R.ID  '
+      
+        'where SI.TUR=9 and SD.TUR=1 and SD.URUNID=:PUrunID and SD.URETIM' +
+        'PLANID=:UPID and SD.URETIMPLANDETAYID=:UPDID'#9#9#9#9#9#9#9#9#9#9#9#9
+      #9#9#9#9#9#9#9#9#9#9#9)
+    Left = 324
+    Top = 93
     ParamData = <
       item
         Name = 'PUrunID'
@@ -963,20 +1024,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         Size = 4
         Value = Null
       end>
-    SQL.Strings = (
-      
-        'select SD.SIPARISID,SI.SIPARISSERI,SI.SIPARISNO,SI.SIPARISTARIH,' +
-        'SD.ADET,SD.BIRIM,SD.MIKTAR,SD.MF,SD.ACIKLAMA,SIPARISACIKLAMA=SI.' +
-        'ACIKLAMA,SD.TESLIMTARIHI,R.FIRMA'
-      
-        'from SIPARISDETAY SD inner join SIPARIS SI on SD.SIPARISID=SI.ID' +
-        ' inner join REHBER R on SI.REHBERID=R.ID  '
-      
-        'where SI.TUR=9 and SD.TUR=1 and SD.URUNID=:PUrunID and SD.URETIM' +
-        'PLANID=:UPID and SD.URETIMPLANDETAYID=:UPDID'#9#9#9#9#9#9#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9#9#9#9)
-    Left = 324
-    Top = 93
   end
   object DtsUretimEmri: TDataSource
     DataSet = TabUretimEmri
@@ -985,25 +1032,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
   end
   object TabUretimEmri: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PUrunID'
-        DataType = ftWideString
-        Size = 2
-        Value = '40'
-      end
-      item
-        Name = 'UPID'
-        DataType = ftWideString
-        Size = 1
-        Value = '4'
-      end
-      item
-        Name = 'UPDID'
-        DataType = ftWideString
-        Size = 1
-        Value = '9'
-      end>
     SQL.Strings = (
       'select UE.ID,'
       #9'UE.EKLEYEN,'
@@ -1027,6 +1055,25 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         'PLANDETAYID=:UPDID')
     Left = 364
     Top = 229
+    ParamData = <
+      item
+        Name = 'PUrunID'
+        DataType = ftWideString
+        Size = 2
+        Value = '40'
+      end
+      item
+        Name = 'UPID'
+        DataType = ftWideString
+        Size = 1
+        Value = '4'
+      end
+      item
+        Name = 'UPDID'
+        DataType = ftWideString
+        Size = 1
+        Value = '9'
+      end>
   end
   object dtsStokDurum: TDataSource
     DataSet = tabStokDurum
@@ -1035,14 +1082,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
   end
   object tabStokDurum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PSTOKID'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 0
-      end>
     SQL.Strings = (
       
         'SELECT     STOKID=S.ID, DEPOID=D.ID, D.DEPOADI, SD.GIREN, SD.CIK' +
@@ -1055,22 +1094,17 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
       '    AND D.DURUM = 1    ')
     Left = 122
     Top = 93
+    ParamData = <
+      item
+        Name = 'PSTOKID'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 0
+      end>
   end
   object TabStokDurumDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PStokID'
-        DataType = ftWideString
-        Size = 4
-        Value = '1407'
-      end
-      item
-        Name = 'PDepoID'
-        DataType = ftWideString
-        Size = 1
-        Value = '1'
-      end>
     SQL.Strings = (
       'declare @StokID int, @DepoID int,@StokAnabirim int'
       'set @StokID=:PStokID'
@@ -1149,8 +1183,21 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         #9'1=(case when @DepoID<=0 then 1 when D.DEPOID=@DepoID then 1 els' +
         'e 0 end) and '
       #9'D.STOKID=@StokID  ')
-    Left = 195
-    Top = 77
+    Left = 211
+    Top = 61
+    ParamData = <
+      item
+        Name = 'PStokID'
+        DataType = ftWideString
+        Size = 4
+        Value = '1407'
+      end
+      item
+        Name = 'PDepoID'
+        DataType = ftWideString
+        Size = 1
+        Value = '1'
+      end>
   end
   object DtsStokDurumDetay: TDataSource
     DataSet = TabStokDurumDetay
@@ -1238,27 +1285,8 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
   end
   object TabUretimOperasyon: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabUretimOperasyonAfterScroll
-    ParamData = <
-      item
-        Name = 'PUrunID'
-        DataType = ftWideString
-        Size = 2
-        Value = '40'
-      end
-      item
-        Name = 'UPID'
-        DataType = ftWideString
-        Size = 1
-        Value = '4'
-      end
-      item
-        Name = 'UPDID'#9
-        DataType = ftWideString
-        Size = 1
-        Value = '9'
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select '
       #9'LOKASYONADI=L1.ACIKLAMA,'
@@ -1282,6 +1310,25 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         'PLANDETAYID=:UPDID'#9)
     Left = 436
     Top = 221
+    ParamData = <
+      item
+        Name = 'PUrunID'
+        DataType = ftWideString
+        Size = 2
+        Value = '40'
+      end
+      item
+        Name = 'UPID'
+        DataType = ftWideString
+        Size = 1
+        Value = '4'
+      end
+      item
+        Name = 'UPDID'#9
+        DataType = ftWideString
+        Size = 1
+        Value = '9'
+      end>
   end
   object DtsUretimOperasyon: TDataSource
     DataSet = TabUretimOperasyon
@@ -1290,28 +1337,6 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
   end
   object TabUretimFis: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PUrunID'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 40
-      end
-      item
-        Name = 'UPID'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 4
-      end
-      item
-        Name = 'UPDID'#9
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 9
-      end>
     SQL.Strings = (
       'select '
       #9'URETIMTARIH=FB.FATURATARIH,'
@@ -1340,6 +1365,28 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
         'PLANDETAYID=:UPDID'#9)
     Left = 500
     Top = 237
+    ParamData = <
+      item
+        Name = 'PUrunID'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 40
+      end
+      item
+        Name = 'UPID'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 4
+      end
+      item
+        Name = 'UPDID'#9
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = 9
+      end>
   end
   object DtsUretimFis: TDataSource
     DataSet = TabUretimFis
@@ -1348,9 +1395,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
   end
   object TabUretimEmriDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 592
     Top = 224
   end
 end
-

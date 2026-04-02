@@ -100,7 +100,7 @@ end;
 
 procedure TVadeliHesaplarListeFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yï¿½kleniyor.
  // TakvimView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\VadeliHesaplarListeGridi',true,false,[gsoUseFilter],'');
   Tablo.GridAyarRestore('VadeliHesaplarListeGridi',TakvimView );
 
@@ -166,11 +166,18 @@ begin
 end;
 
 procedure TVadeliHesaplarListeFrame.VadeliHesapEkranAc(Yeni: Boolean);
+var
+  AID: Integer;
 begin
+  if Yeni or (Self.TabVadeliHesap.RecordCount = 0) then
+    AID := -1
+  else
+    AID := Self.TabVadeliHesap.AsInteger['ID'];
+
   with FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TVadeliHesapDlg).Git do begin
    with TVadeliHesapDlg(Ornek) do begin
      KapatEylemi := VadeliHesapKapatEylemi;
-     VadeliHesapEkranInit(IIf(Yeni, -1, IIf(Self.TabVadeliHesap.RecordCount = 0, -1, Self.TabVadeliHesap.AsInteger['ID'])));
+     VadeliHesapEkranInit(AID);
      if Yeni then
        TabVadeliHesap.Append;
    end;

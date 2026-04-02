@@ -16,7 +16,7 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint;
+  dxSkinWhiteprint, FireDAC.Comp.Client;
 
 type
   TYilSonuDevirIslemleriDlg = class(TForm)
@@ -74,6 +74,20 @@ var
   FatBasID, I:Integer;
   s:string;
   BekletDlg: TBekletmeDlg;
+  procedure YeniBaglantiIleKomutCalistir(const ASQL: string);
+  var
+    LConn: TFDConnection;
+  begin
+    LConn := TFDConnection.Create(nil);
+    try
+      LConn.Params.Assign(Tablo.FDCnn.Params);
+      LConn.LoginPrompt := False;
+      LConn.Connected := True;
+      Veritabani.BasitKomutÇalýþtýr(LConn, ASQL, [], []);
+    finally
+      LConn.Free;
+    end;
+  end;
   procedure DovizKuru_Guncelle(Tur:char; Doviz:String);
   begin
     s:=Float_ToStr(DovizKuruBul(IntToStr(SpinYil.Value-1)+'-12-31 00:00', Doviz, cbIsYapKur.text));
@@ -96,12 +110,12 @@ begin
     BekletDlg.cxProgressBar1.Refresh;
     BekletDlg.LabelUstTaraf.Caption := 'Cari Kayýtlar Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_Cari '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','''+cbIsYapKur.text+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+    YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_Cari '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','''+cbIsYapKur.text+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
     IniyeKaydet(CheckCari.Tag,SpinYil.Value,True,True);
     if checkKurFarki.Checked then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Cari_KurFarki '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','''+cbIsYapKur.text+''','+IntToStr(1),[],[]);
+      YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Cari_KurFarki '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','''+cbIsYapKur.text+''',1');
 
   end;
   if CheckKasa.Checked then begin
@@ -110,8 +124,8 @@ begin
     BekletDlg.cxProgressBar1.Refresh;
     BekletDlg.LabelUstTaraf.Caption := 'Kasa Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_Kasa '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+     YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_Kasa '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
      IniyeKaydet(CheckKasa.Tag,SpinYil.Value,True,True);
      for I := 0 to TcxComboBoxProperties(Tablo.cxEditRepository1ComboBoxItemKurlar.Properties).Items.Count-1 do
        if TcxComboBoxProperties(Tablo.cxEditRepository1ComboBoxItemKurlar.Properties).Items[I]<>CariDoviz then
@@ -123,8 +137,8 @@ begin
     BekletDlg.cxProgressBar1.Refresh;
     BekletDlg.LabelUstTaraf.Caption := 'Banka Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_Banka '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+     YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_Banka '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
      IniyeKaydet(CheckBanka.Tag, SpinYil.Value, True, True);
      for I := 0 to TcxComboBoxProperties(Tablo.cxEditRepository1ComboBoxItemKurlar.Properties).Items.Count-1 do
       if TcxComboBoxProperties(Tablo.cxEditRepository1ComboBoxItemKurlar.Properties).Items[I]<>CariDoviz then
@@ -136,8 +150,8 @@ begin
     BekletDlg.LabelUstTaraf.Caption := 'Kredi Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
 //     MemodanSorguCalistir(MemoKrediler);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_Kredi '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+     YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_Kredi '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
      IniyeKaydet(CheckKredi.Tag, SpinYil.Value, True, True);
   end;
   if CheckPos.Checked then begin
@@ -147,8 +161,8 @@ begin
     BekletDlg.LabelUstTaraf.Caption := 'Pos Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
 //     MemodanSorguCalistir(MemoPOS);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_POS '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+     YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_POS '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
      IniyeKaydet(CheckPos.Tag, SpinYil.Value, True, True);
   end;
    if CheckKrediKartlari.Checked then begin
@@ -158,8 +172,8 @@ begin
     BekletDlg.LabelUstTaraf.Caption := 'Kredi Kartý Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
      //MemodanSorguCalistir(MemoKrediKartlari);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC Sp_Prg_Devir_KK '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
-       ','''+CariDoviz+''','+IntToStr(Abs(StrToInt(BoolToStr(CheckDevirleriAl.Checked)))),[],[]);
+     YeniBaglantiIleKomutCalistir('EXEC Sp_Prg_Devir_KK '''+FormatDateTime('yyyy-mm-dd', DateBaslangic.EditValue)+''', '+IntToStr(SpinYil.EditValue)+
+       ','''+CariDoviz+''','+IntToStr(Ord(CheckDevirleriAl.Checked))); 
      IniyeKaydet(CheckKrediKartlari.Tag, SpinYil.Value, True, True);
   end;
 
@@ -375,6 +389,11 @@ begin
 end;
 
 end.
+
+
+
+
+
 
 
 

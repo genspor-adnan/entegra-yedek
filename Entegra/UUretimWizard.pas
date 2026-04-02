@@ -496,15 +496,15 @@ begin
   BilesenAraDlg.TabGiris:=TabUretim;
   BilesenAraDlg.KalanAdetGetir:=True;
   BilesenAraDlg.stokhizmetaracagirantur := 6;
-  BilesenAraDlg.GirisCikis:=FWCikis;//giri???k?? i?lemi yap?lmayacak..
+  BilesenAraDlg.GirisCikis:=FWCikis;//giriþ-çýkýþ iþlemi yapýlmayacak..
   BilesenAraDlg.FiyatlariGetir:=False;
   BilesenAraDlg.cbFiyatAdi.EditValue := VarsAlisFiyatID;
   BilesenAraDlg.cbFiyatAdi.Visible:=False;
   BilesenAraDlg.SheetHizmet.TabVisible:=False;
   BilesenAraDlg.cbStokDepo.EditValue:=ComboCikisDepo.EditValue;
   BilesenAraDlg.ShowModal;
-//  if TabUretim.FieldByname('SENARYO').AsInteger=1 then begin //b?t?nden par?aya
-// Bu mliyet hesab? da kapand? AO 31/1/2018
+//  if TabUretim.FieldByname('SENARYO').AsInteger=1 then begin //bütünden parçaya
+// Bu maliyet hesabý da kapandý AO 31/1/2018
 //  Tablo.UretimSatirMaliyetUpdate(TabUretim.FieldByName('ID').AsInteger);
   TabloYenile(TabUretimDetay, [TabUretim.FieldByname('ID').AsInteger]);
   //end;
@@ -544,14 +544,14 @@ begin
   Carpan := 0;
   //TabUretimDetay.AfterScroll := URETIMDetayAfterScroll;
 
-  if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //b?t?nden par?aya
-     //??kanlar?n toplam tutar?n? bulal?m
+  if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //bütünden parçaya
+     //çýkanlarýn toplam tutarýný bulalým
      Tablo.TablodanSorguAc(1, 'select abs(sum(BIRIMFIYAT*ADET)) as BIRIMFIYAT, abs(sum(TUTAR*ADET)) as TUTAR from FATURA where FATBASID='+TabUretim.Fields[0].AsString+' and ADET<0.0');
 
-     //?imdiye kadar girmi?lerin toplam adedini bulal?m
+     //þimdiye kadar girmiþlerin toplam adedini bulalým
      Tablo.TablodanSorguAc(2, 'select isnull(sum(ADET),0.0) from FATURA where FATBASID='+TabUretim.Fields[0].AsString+' and ADET>0.0');
      ToplamAdet := Float_ToStr(Tablo.Query2.Fields[0].AsFloat);
-     //toplam tutarlar? sat?rlara adetleri oran?nda da??tal?m
+     //toplam tutarlarý satýrlara adetleri oranýnda daðýtalým
      Tablo.UretimSatirMaliyetUpdate(TabUretim.FieldByName('ID').AsInteger);
      TabloYenile(TabUretimDetay, [TabUretim.FieldByname('ID').AsInteger]);
   end;
@@ -589,7 +589,7 @@ begin
    Saat := HoursBetween(TabIsZaman.FieldByName('BITIS').AsDateTime-TabIsZaman.FieldByName('MOLA').AsDateTime,
                          TabIsZaman.FieldByName('BASLAMA').AsDateTime);
    if Saat>23 then
-      ShowMessage('24 saat veya daha fazla s?re ge?ersizdir!')
+      ShowMessage('24 saat veya daha fazla süre geçersizdir!')
    else begin
          Dakika := MinutesBetween(TabIsZaman.FieldByName('BITIS').AsDateTime-TabIsZaman.FieldByName('MOLA').AsDateTime,
                              TabIsZaman.FieldByName('BASLAMA').AsDateTime);
@@ -651,9 +651,9 @@ begin
   if not BoslukKontrol(EditFatTarih.Text, KontrolFaturaTarihi) then
     Abort;
 
-  if not TarihKontrol(EditTarih.Date, '?retim Ba?lama' + KontrolTarihi) then
+  if not TarihKontrol(EditTarih.Date, 'Üretim Baþlama' + KontrolTarihi) then
      Abort;
-  if not TarihKontrol(EditFatTarih.Date, '?retim Biti?' + KontrolTarihi) then
+  if not TarihKontrol(EditFatTarih.Date, 'Üretim Bitiþ' + KontrolTarihi) then
      Abort;
 //  if not BoslukKontrol(EditFatNo.Text, 'Belge No') then Abort;
 
@@ -682,9 +682,9 @@ begin
   BDDlg.DonusumTuru := (sender as TMenuItem).Tag;
   BDDlg.GDepo := StrToIntDef(VarToStrDef(TabUretim.FieldByName('GIRISDEPO').Value,'0'),0);
   BDDlg.CDepo := StrToIntDef(VarToStrDef(TabUretim.FieldByName('CIKISDEPO').Value,'0'),0);
-  BDDlg.HedefBaslikTur := 6;  //sat?? sipari?i    TabUretim.FieldByName('TUR').AsInteger;
+  BDDlg.HedefBaslikTur := 6;  //satýþ sipariþi    TabUretim.FieldByName('TUR').AsInteger;
   BDDlg.ShowModal;
-  //Cari firma ad?n? girelim
+  //Cari firma adýný girelim
   if LabelAd.Caption='Ad' then
      LabelAd.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabUretim.FieldByName('REHBERID').AsInteger);
 
@@ -708,7 +708,7 @@ procedure TUretimWizardDlg.BtnMesajGonderClick(Sender: TObject);
 var ID : Integer;
 begin
    ID := Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName,  TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger, 0,TabYorum);
-   //e?er dosya eklendiyse konusuna stok kod ve ad?n? yazal?m
+   //eðer dosya eklendiyse konusuna stok kod ve adýný yazalým
    TabYorum.Last;
    if (ID>0)and(TabYorum.FieldByName('DOKUMANID').AsString<>'') then
        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DOKUMAN set KONU='''+TabUretim.FieldByName('KOD').AsString+' / '+TabUretim.FieldByName('STOKADI').AsString+''' where ID='+TabYorum.FieldByName('DOKUMANID').AsString,[],[]);
@@ -866,11 +866,11 @@ begin
     TabUretim.Post;
   end;
 
-  //burada eklenen tek bir ?r?n varsa ona maliyet eklemeliyiz.
-  //?imdilik kald?rd?m AO 31/1/2018 bunun yerine beforepost'ta maliyet yablosundan getiriyorum
+  //burada eklenen tek bir ürün varsa ona maliyet eklemeliyiz.
+  //þimdilik kaldýrdým AO 31/1/2018 bunun yerine beforepost'ta maliyet tablosundan getiriyorum
   //Tablo.UretimSatirMaliyetUpdate(TabUretim.FieldByname('ID').AsInteger);
 
-  if IzlemDlg3<>nil then begin   //kaydetmesi i?in destroy etmemiz laz?m
+  if IzlemDlg3<>nil then begin   //kaydetmesi için destroy etmemiz lazým
      IzlemDlg3.SatirID := TabUretimDetay.FieldByName('ID').AsInteger;
      FreeAndNil(IzlemDlg3);
   end;
@@ -1017,15 +1017,15 @@ begin
     ShowMessage(URSifirdanBuyukUyarisi);
     Abort;
   end;
-  //t?r stoksa stok kart?na ait kontroller
-  if UretimOncekiBirim <> TabUretimDetay.FieldByname('BIRIM').AsInteger then begin//stok birimi de?i?mi?se gecerli mi kontrol ediliyor
+  //tür stoksa stok kartýna ait kontroller
+  if UretimOncekiBirim <> TabUretimDetay.FieldByname('BIRIM').AsInteger then begin//stok birimi deðiþmiþse geçerli mi kontrol ediliyor
     if not(tablo.StokBirimiGecerliMi(TabUretimDetay.FieldByname('URUNID').AsInteger,TabUretimDetay.FieldByname('BIRIM').AsInteger)) then begin
       Application.MessageBox(PChar(GecerliBirimTipiDegil),PChar(Uyari), MB_OK+ MB_ICONWARNING);
       abort
     end;
   end;
 
-    //?zlem bilgisi var m? bkal?m serino vb.
+    //izlem bilgisi var mý bakalým serino vb.
   if (abs(UretimOncekiStokMiktar - TabUretimDetay.FieldByName('MIKTAR').AsFloat)>0.0001)
      and(TabUretimDetay.FieldByName('TUR').AsInteger=1)
      and(TabUretimDetay.FieldByName('IZLEME').AsInteger > 0) then begin
@@ -1114,8 +1114,8 @@ procedure TUretimWizardDlg.TabUretimDetayNewRecord(DataSet: TDataSet);
 var Mik:Real;
 begin
   Mik := 1;
-  //par?adan b?t?ne ise veya b?t?nden par?aya ama ?r?n ??k??? ise miktar sorar?z ama sarf ise 1 adet olaca?? i?in sormy?z
-  if (TabUretim.FieldByname('SENARYO').AsInteger=1)or((TabUretim.FieldByname('SENARYO').AsInteger=2)and(Carpan=1)) then //par?adan b?t?ne ?retim
+  //parçadan bütüne ise veya bütünden parçaya ama ürün çýkýþý ise miktar sorarýz ama sarf ise 1 adet olacaðý için sormayýz
+  if (TabUretim.FieldByname('SENARYO').AsInteger=1)or((TabUretim.FieldByname('SENARYO').AsInteger=2)and(Carpan=1)) then //parçadan bütüne üretim
      Mik := MiktarSor(Mik);
   if (Carpan=-1)and(Mik>0) then
     Mik:= -1*Mik
@@ -1129,7 +1129,7 @@ begin
   TabUretimDetay.FieldByname('FATBASID').AsInteger := UretimID;
   TabUretimDetay.FieldByname('REHBERID').AsInteger := 0;
   TabUretimDetay.FieldByname('EKLEYEN').AsString := Kullanan;
-  TabUretimDetay.FieldByname('EKIPMANID').AsInteger := Carpan;//1 ise ?r?n  -1 ise sarf
+  TabUretimDetay.FieldByname('EKIPMANID').AsInteger := Carpan;//1 ise ürün  -1 ise sarf
   if StrToIntDef(VarToStrDef(TabUretim.FieldByname('PROJEID').Value,'0'),0)>0 then
     TabUretimDetay.FieldByname('PROJEID').AsInteger := TabUretim.FieldByname('PROJEID').AsInteger;
 end;
@@ -1140,10 +1140,10 @@ begin
   if dtsUretim.State = dsInsert then
     tabUretim.Cancel
   else begin
-    if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K')) and (TabUretim.active) and (TabUretim.Fields[0].AsString <> '') then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
-      //if Tablo.UyariGoster(Uretim1,cxKay?t,2)=MrYes then
+    if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K')) and (TabUretim.active) and (TabUretim.Fields[0].AsString <> '') then// eðer yeni kayýtsa ve iptal edildiyse kaydedilmiþ bilgiler silinmesi lazým
+      //if Tablo.UyariGoster(Uretim1,cxKayýt,2)=MrYes then
         Tablo.FaturaSil(TabUretim, TabUretimDetay);
-    if (TabUretim.active)and(TabUretim.Fields[0].AsString <> '')and (TabUretimDetay.active)and(TabUretimDetay.IsEmpty) then // e?er hi? sat?r yok ise silinmesi gerekiyor..
+    if (TabUretim.active)and(TabUretim.Fields[0].AsString <> '')and (TabUretimDetay.active)and(TabUretimDetay.IsEmpty) then // eðer hiç satýr yok ise silinmesi gerekiyor..
        Tablo.FaturaSil(TabUretim,TabUretimDetay);
     if UretimWizardDlg<> nil then
        FreeAndNil(UretimWizardDlg);
@@ -1171,7 +1171,7 @@ end;
 
 procedure TUretimWizardDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
   LogID := 0;
   Carpan := 0;
@@ -1190,7 +1190,7 @@ Var
   ctrl  : TWinControl;
 begin
   clientPos := Self.ScreenToClient(Mouse.CursorPos);
-  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bile?en Ekle
+  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bileþen Ekle
       ctrl := FindVCLWindow(Mouse.CursorPos);
       if Assigned(ctrl) then begin
          OutputDebugString(PChar(ctrl.Name));
@@ -1198,7 +1198,7 @@ begin
          Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name), TUretimWizardDlg(Self), DtsUretim);
          Tablo.AlanOlustur(TUretimWizardDlg(Self), -1,DtsUretim);
       end;
-  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bile?en D?zenle
+  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bileþen Düzenle
       Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name), TUretimWizardDlg(Self), DtsUretim);
       Tablo.AlanOlustur(TUretimWizardDlg(Self), -1, DtsUretim);
   end;
@@ -1332,7 +1332,7 @@ end;
 procedure TUretimWizardDlg.IzlemBilgileriGorDegistirMenuClick(Sender: TObject);
 begin
     StokIzlemBilgisi( TabUretimDetay);
-    if IzlemDlg3<>nil then begin //kaydetmesi i?in destroy etmemiz laz?m
+    if IzlemDlg3<>nil then begin //kaydetmesi için destroy etmemiz lazým
        IzlemDlg3.SatirID := TabUretimDetay.FieldByName('ID').AsInteger;
        FreeAndNil(IzlemDlg3);
     end;
@@ -1341,7 +1341,7 @@ end;
 procedure TUretimWizardDlg.UretimDetayPageExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-      Ekle(TabDetay,TabNo_URETIMFISI, tabUretim.FieldByName('ID').AsInteger,'De?i?');
+      Ekle(TabDetay,TabNo_URETIMFISI, tabUretim.FieldByName('ID').AsInteger,'Deðiþ');
 end;
 
 procedure TUretimWizardDlg.UretimDetayPagePage(Sender: TObject);
@@ -1430,7 +1430,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+TabUretim.FieldByName('REHBERID').AsString;
-      if Tablo.ListedenBilgiGetir('Adres Se?iniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
          //FATBASLIK.FieldByName('REHBERILETID').AsString:=st.Strings[0];
          //EditButtonSevkAdresi.Text := st.Strings[1];
           TabUretim.FieldByName('REHBERILETID').AsString := st.Strings[0];
@@ -1494,11 +1494,11 @@ begin
     end
     else begin
        Tur := 6;//KasaTur_Uretim_Urun;
-       UretimNo:= TabUretim.FieldByName('FATURANO').AsString;// ?retimno al?n?r
+       UretimNo:= TabUretim.FieldByName('FATURANO').AsString;// üretim no alýnýr
     end;
 
     Tablo.TablodanSorguAc(1,'select MIKTARSEC from STOKLAR where ID = '+TabloDetay.FieldByName('URUNID').AsString);
-    if Tablo.Query1.Fields[0].AsString = '1' then begin //b?t?nden par?aya
+    if Tablo.Query1.Fields[0].AsString = '1' then begin //bütünden parçaya
        GerekMiktar := 1;
        Miktar := 0;
     end else begin
@@ -1520,7 +1520,7 @@ begin
        Abort;
     end;
 
-    if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //b?t?nden par?aya ?retim
+    if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //bütünden parçaya üretim
        //Miktar := MiktarSor(Miktar);
        if (Carpan=-1)and(Miktar>0) then Miktar:= -1*Miktar
        else if (Carpan=1)and(Miktar<0) then Miktar:= -1*Miktar;
@@ -1545,7 +1545,7 @@ begin
   UrunID := Tablo.Query9.Fields[1].AsInteger;
 
   //19.02.2022 AO
-  //?nce bu re?etedeki ?r?nler depoda var m? kontrol edelim
+  //önce bu reçetedeki ürünler depoda var mý kontrol edelim
 
   Tablo.Query2.SQL.text :='select URD.URUNID, URD.ADET*'+Float_ToStr(Miktar)+', S.KOD'+
                        ' from URETIMRECETEDETAY URD inner join STOKLAR S on URD.URUNID=S.ID  where URETIMRECETEID='+IntToStr(ReceteID);
@@ -1613,16 +1613,16 @@ begin
   TabUretim.FieldByName('YERI').AsInteger := TabNo_URETIMRECETE;
   TabUretim.FieldByName('YERID').AsInteger := ReceteID;
   TabUretim.Post;
-  //E?er ?retti?imiz ?r?nlerin izlemi (serino vb) varsa
+  //Eðer ürettiðimiz ürünlerin izlemi (serino vb) varsa
   // Query20.SQL.Text := ' select * from FATURA F where FATBASID='+TabUretim.FieldByName('ID').AsString+' and IZLEME  between 1 and 6 ';    ,,,
-  // 25.03.2022  AO  de?i?ti
+  // 25.03.2022  AO  deðiþti
    Query20.SQL.Text := ' select * from FATURA F where FATBASID='+TabUretim.FieldByName('ID').AsString+' and IZLEME  between 1 and 6 '+
                        ' and F.ID not in (select SATIRID from STOKIZLEME where FATBASID='+TabUretim.FieldByName('ID').AsString+')';
   ///
   Query20.Open;
   while not Query20.eof do begin
     StokIzlemBilgisi(Query20);
-    if IzlemDlg3<>nil then begin //kaydetmesi i?in destroy etmemiz laz?m
+    if IzlemDlg3<>nil then begin //kaydetmesi için destroy etmemiz lazým
        IzlemDlg3.SatirID := Query20.FieldByName('ID').AsInteger;
        FreeAndNil(IzlemDlg3);
     end;
@@ -1632,7 +1632,7 @@ end;
 
 procedure TUretimWizardDlg.RecetedenKonularEkleMenuClick(Sender: TObject);
 begin
- //  KonularEkle(0); //t?m?n?
+ //  KonularEkle(0); //tümünü
   if TabUretimDetay.IsEmpty then
      Showmessage(UROnceUretimEkle)
   else if TabUretimDetay.FieldByName('ADET').AsFloat < 0 then
@@ -1659,7 +1659,7 @@ begin
 
   if TabUretim.IsEmpty then
      TabUretim.Append;
-  ReceteID := Tablo.ReceteSihirbazBaslat(0,'S');//Se?im modunda a??l?r..
+  ReceteID := Tablo.ReceteSihirbazBaslat(0,'S');//Seçim modunda açýlýr..
   if ReceteID>0 then begin
     if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktari_gir, @Miktar, 6)) = mrOk then
        RecetedenEkle(ReceteID,Miktar,True);
@@ -1690,10 +1690,10 @@ begin
     RecAd := '';
     if TGirisKutusuEx.BilgiAlEx(BGRecete_bilgileri, TGirdiDenetimleri.Create.Edit(BGRecete_kodu_gir, @RecKod).Edit(BGRecete_adi_gir, @RecAd)) = mrOk then begin
       if (RecKod<>'')and(RecAd<>'') then begin
-        //ba?l?k bilgisini kaydedelim..
+        //baþlýk bilgisini kaydedelim..
         ReceteID := veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into URETIMRECETE(KOD,AD)values(&KOD,&AD) select SCOPE_IDENTITY()'
                                                 ,['&KOD','&AD'],[RecKod,RecAd],True);
-        //detaylarda d?nelim..
+        //detaylarda dönelim..
         TabUretimDetay.First;
         while not TabUretimDetay.eof do begin
           veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,EKLEYEN)values(&URID,&TUR,&URUNID,&ADET,&BIRIM,&MIKTAR,&EKLEYEN)'
@@ -1717,23 +1717,23 @@ begin
 {  if TabUretim.State in [dsEdit,dsInsert] then
     TabUretim.Post;
   if TabUretim.FieldByName('YERI').AsString = '' then begin
-    ShowMessage('?retilen re?eteli bir ?r?n yok veya se?ili ?r?nlerin re?ete ba?lant?s? yok!');
+    ShowMessage('Üretilen reçeteli bir ürün yok veya seçili ürünlerin reçete baðlantýsý yok!');
   end else if TabUretim.FieldByName('YERI').AsInteger = TabNo_URETIMOPERASYON then begin
     //  -----------------------------------------------------  \\
       Tablo.TablodanSorguAc(9,'select * from URETIMOPERASYON where ID='+TabUretim.FieldByName('YERID').AsString);
       if Tablo.Query9.IsEmpty then begin
-        ShowMessage('Ba?l? Operasyon bulunam?yor. L?tfen fi?i silerek tekrar olu?turun!');
+        ShowMessage('Baðlý Operasyon bulunamýyor. Lütfen fiþi silerek tekrar oluþturun!');
         Abort;
       end;
       Tablo.TablodanSorguAc(8,'select * from URETIMEMRIDETAY where ID='+Tablo.Query9.FieldByName('URETIMEMRIDETAYID').AsString);
       if Tablo.Query9.IsEmpty then begin
-        ShowMessage('Ba?l? ?retim emri bulunam?yor. L?tfen fi?i silerek tekrar olu?turun!');
+        ShowMessage('Baðlý üretim emri bulunamýyor. Lütfen fiþi silerek tekrar oluþturun!');
         Abort;
       end;
 
-      if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktar?_gir, @Miktar, 0)) = mrOk then begin
+      if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktari_gir, @Miktar, 0)) = mrOk then begin
         if Miktar<=0.0 then begin
-          ShowMessage('Ge?ersiz Miktar Giri?i!');
+          ShowMessage('Geçersiz Miktar Giriþi!');
           Abort;
         end;
 
@@ -1746,7 +1746,7 @@ begin
           UretimPlanDetayID := Tablo.Query9.FieldByName('URETIMPLANDETAYID').AsInteger
         else
           UretimPlanDetayID := 0;
-        //Re?etden Kaynak eklenir
+        //Reçeteden Kaynak eklenir
         Tablo.Query2.Close;
         Tablo.Query2.SQL.Text := 'delete from FATURA where FATBASID='+TabUretim.FieldByName('ID').AsString ;
         Tablo.Query2.ExecSQL;
@@ -1759,7 +1759,7 @@ begin
         Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID ');
         Tablo.Query2.SQL.Add(' where UE.URETIMEMRIID='+Tablo.Query9.FieldByName('URETIMEMRIID').AsString+' and KAYNAKRECETEID='+Tablo.Query9.FieldByName('RECETEID').AsString);
         Tablo.Query2.ExecSQL;
-        //Re?etden Hedefler eklenir.. - ile ?arp?larak.. ustid nin kaynak olmas? da gerekiyor..
+        //Reçeteden Hedefler eklenir.. - ile çarpýlarak.. ustid nin kaynak olmasý da gerekiyor..
         Tablo.Query2.Close;
         Tablo.Query2.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
         Tablo.Query2.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,URETIMPLANID,URETIMPLANDETAYID)  ');
@@ -1780,11 +1780,11 @@ begin
     //  -----------------------------------------------------  \\
   end else if TabUretim.FieldByName('YERI').AsInteger = TabNo_URETIMRECETE then begin
     Miktar := 1.0;
-    ReceteID := TabUretim.FieldByName('YERID').AsInteger;//Se?im modunda a??l?r..
+    ReceteID := TabUretim.FieldByName('YERID').AsInteger;//Seçim modunda açýlýr..
     if ReceteID>0 then begin
-      if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktar?_gir, @Miktar, 0)) = mrOk then begin
+      if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktari_gir, @Miktar, 0)) = mrOk then begin
         if Miktar<=0.0 then begin
-          ShowMessage('Ge?ersiz Miktar Giri?i!');
+          ShowMessage('Geçersiz Miktar Giriþi!');
           Abort;
         end;
         Tablo.Query2.Close;
@@ -1821,7 +1821,7 @@ end;
 procedure TUretimWizardDlg.SatirSilClick(Sender: TObject);
 var Silinebilir : boolean;
 begin
-           //?retimde sarf sat?r? ise kontrole alm?yoruz..
+           //üretimde sarf satýrý ise kontrole almýyoruz..
    Silinebilir := True;
    if TabUretimDetay.FieldByName('ADET').Value > 0 then begin
        if TabUretimDetay.FieldByName('IZLEME').AsInteger = 0 then begin //izlem yoksa
@@ -1829,7 +1829,7 @@ begin
              Silinebilir := False;
        end
        else begin
-          //?ts kullan?mda ve bildirim yap?lm??sa fatura silinemez
+          //üts kullanýmda ve bildirim yapýlmýþsa fatura silinemez
           if Tablo.IzlemBildirimSayisi(TabUretim.FieldByName('TUR').AsInteger, 0, TabUretimDetay.FieldByName('ID').AsInteger, TabUretim.FieldByName('FATURATARIH').AsDateTime)>0  then
              Silinebilir := False;
        end;
@@ -1864,7 +1864,7 @@ begin
   TabUretim.FieldByname('TARIH').Value := Tablo.GENINI.BugunTrhSaat;    //BASLAMA_TARIHI= TARIH
   belgeno:= SiradakiBelgeNumarasi(6,TabUretim.FieldByName('TARIH').AsDateTime);
   TabUretim.FieldByName('FATURANO').AsString := belgeno.belgeno; //UretimNoGetir;   URETIMNO=FATURANO
-  TabUretim.FieldByName('KOCANNO').AsInteger := KocannoBul(6); //KOCAN numaras?
+  TabUretim.FieldByName('KOCANNO').AsInteger := KocannoBul(6); //KOCAN numarasý
   TabUretim.FieldByname('REHBERID').AsInteger := RehberId;
   Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc');
   TabUretim.FieldByName('REHBERILETID').AsInteger := tablo.Query1.Fields[0].AsInteger;
@@ -1890,6 +1890,9 @@ initialization
   RegisterClass(TCurrencyField);
 
 end.
+
+
+
 
 
 

@@ -1011,12 +1011,12 @@ var
 begin
   Tablo.RehberEkBilgileriniGetir(TabRehberIlgili.FieldByName('ID').AsInteger,4,[RehVars_EPosta],Etiketler,Bilgiler);
   if Bilgiler[0]='' then begin
-    Tablo.UyariGoster(Uyari,'Eposta Adresi Tan?ml? De?il.');
+    Tablo.UyariGoster(Uyari,'Eposta Adresi Tanýmlý Deðil.');
     Abort;
   end;
   Tablo.TablodanSorguAc(0,'select * from MAILSABLON where MODULID=77 and ID=77');
   if Tablo.Query0.IsEmpty then begin
-    Tablo.UyariGoster(Uyari,'Eposta ?ablonu Tan?ml? De?il.');
+    Tablo.UyariGoster(Uyari,'Eposta Þablonu Tanýmlý Deðil.');
     Abort;
   end;
   //al?c? cc vs ayar?
@@ -1026,7 +1026,7 @@ begin
   TEpostaAlici.ListeyeYukle(TabRehberIlgili.FieldByName('FIRMA').AsString+','+Bilgiler[0], EPostaAlicilar);
   //konu - body ayar?
   Konu := Tablo.Query0.FieldByName('KONU').AsString;
-  Konu := StringReplace(Konu,'@@KONU@@','Genot?p Destek Giri? Bilgileri',[rfReplaceAll]);
+  Konu := StringReplace(Konu,'@@KONU@@','Genotip Destek Giriþ Bilgileri',[rfReplaceAll]);
   BodyStr := Tablo.Query0.FieldByName('ICERIK').AsString;
   BodyStr := StringReplace(BodyStr,'@@ADSOYAD@@',TabRehberIlgili.FieldByName('FIRMA').AsString,[rfReplaceAll]);
   BodyStr := StringReplace(BodyStr,'@@KULLANICI@@',Bilgiler[0],[rfReplaceAll]);
@@ -1039,7 +1039,7 @@ begin
   Body.SaveToFile(DosyaAdi);
 
   try
-    Tablo.UyariGoster(Uyari,'E Posta G?nderildi. '+
+    Tablo.UyariGoster(Uyari,'E Posta Gönderildi. '+
                       UGenNotificationUtils.EpostaGonderRapor(
                         EPostaHesapBilgileriniGetir(EpostaHesapID),
                         Konu, DosyaAdi, EkDosya, EPostaAlicilar, EPostaAlicilarCC,
@@ -1188,7 +1188,7 @@ begin
       Msg := Msg + #10 + Tablo.Query8.FieldByName('KOD').AsString +' - '+Tablo.Query8.FieldByName('FIRMA').AsString +' Ekipman:'+Tablo.Query8.FieldByName('AD').AsString  +' Serino:'+Tablo.Query8.FieldByName('SERINO').AsString + #13;
       Tablo.Query8.Next;
     end;
-    ShowMessage('Bu Ekipman Daha ?nce Kullan?lm??!'+ #13 + #10 + Msg);
+    ShowMessage('Bu Ekipman Daha Önce Kullanýlmýþ!'+ #13 + #10 + Msg);
   end;
 end;
 
@@ -1410,7 +1410,7 @@ begin
     if not Tablo.Query4.IsEmpty then TurAdi := Tablo.Query4.Fields[0].AsString
     else TurAdi := 'Sabit Vardiya';
 
-    Ctrls := TGirdiDenetimleri.Create.ComboBox('Vardiya T?r? : ',@TurAdi,
+    Ctrls := TGirdiDenetimleri.Create.ComboBox('Vardiya Türü : ',@TurAdi,
     Tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM='+IntToStr(Ops_OpsiyonCari_VardiyaTur)).items);
 
     if TGirisKutusuEx.BilgiAlEx(BGVardiya_Tur_Sec,Ctrls) <> mrOk then Abort;
@@ -1688,8 +1688,8 @@ begin
     OdemeKaynagi := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
     Tutar := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
-    .ImageComboBox('?deme kayna??',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
-    .CurrencyEdit('?denecek avans miktar?',@Tutar,2));
+    .ImageComboBox('Ödeme kaynaðý',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
+    .CurrencyEdit('Ödenecek avans miktarý',@Tutar,2));
 
     if mResult = mrOk then begin
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR, DEGISTIREN=&DEGISTIREN,'+
@@ -1701,8 +1701,8 @@ begin
     Tutar := 0;
     OdemeKaynagi := 'K';
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
-    .ImageComboBox('?deme kayna??',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
-    .CurrencyEdit('Avans tutar?',@Tutar,2));
+    .ImageComboBox('Ödeme kaynaðý',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
+    .CurrencyEdit('Avans tutarý',@Tutar,2));
 
     if mResult = mrOk then begin
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
@@ -2296,7 +2296,7 @@ var
 begin
   sqltext:='select ROOTKOD= case when CHARINDEX(''.'',KOD,1)=0 then '''' else REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))) end,KOD,ACIKLAMA,TUR,REHBERID,ID from LOKASYON where DURUM=1 and TUR='+IntToStr(Lokasyon_Genel)+'  and REHBERID='+REHBER.FieldByName('ID').AsString;
   if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,False,True,LokID,LokKod,LokAciklama,slist,[nil,nil,nil],['REHBERID','TUR'],[REHBER.FieldByName('ID').AsString,IntToStr(Lokasyon_Genel)]
-          ,['Kod','A??klama','',''],[True,True,False,False],True) then try
+          ,['Kod','Açýklama','',''],[True,True,False,False],True) then try
     TabEkipmanlar.Edit;
     TabEkipmanlar.FieldByName('LOKASYONID').Value:=LokID;
     TabEkipmanlar.Post;
@@ -2621,7 +2621,7 @@ begin
     FreeAndNil(FaturaKapamaDlg);
   Application.CreateForm(TFaturaKapamaDlg,FaturaKapamaDlg);
   FaturaKapamaDlg.RehberID := REHBER.Fields[0].AsInteger;
-  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Bor?/Alacak Kapama';
+  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Borç/Alacak Kapama';
   FaturaKapamaDlg.ShowModal;
   FreeAndNil(FaturaKapamaDlg);
 end;
@@ -3887,6 +3887,7 @@ end.
 	--LOKASYON = (select top 1 BILGI from REHBERBILGI RB inner join  REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RB.YERI=RA.YERI
 -- and RB.SIRA=RA.SIRA and RA.VARSAYILAN=88 and RB.YER_ID=RP.ID ),
 }
+
 
 
 

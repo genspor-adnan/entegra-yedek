@@ -227,6 +227,7 @@ type
     FiyatlariGetir, KalanAdetGetir,KalmayanCheckGoster: Boolean;
     TopAramaSayi, GirisCikis, KopyaStr,islemCopy: string;
     TabDetayGiris,TabGiris: TFDQuery;
+    ReceteMiktarCarpani: Integer;
 
     { Public declarations }
   end;
@@ -297,6 +298,7 @@ var
   AKDVOran,AVade,AKampnyaId,AProjeId,AMasrafId,AKDVMuaf,APersonel,PozNo : integer;
   AStokDegis, ResimGoster, MedyaEkle : Boolean;
   Tarih, TeslimTarihi : TDateTime;
+  AReceteMiktar: Variant;
 begin
   if stokhizmetaracagirantur = TabNo_DEMIRBAS then begin
     ModalResult := MrOk;
@@ -309,6 +311,19 @@ begin
           ModalResult := MrOk;
           Exit;
        end;
+       AReceteMiktar := 1;
+       if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit('Miktar Giriniz',@AReceteMiktar,Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_OndalikDijitSayMiktar,6))) <> mrOk then
+         Exit;
+       AAdet := VarAsType(AReceteMiktar, varDouble);
+       if (ReceteMiktarCarpani=-1)and(AAdet>0) then AAdet := -1*AAdet
+       else if (ReceteMiktarCarpani=1)and(AAdet<0) then AAdet := -1*AAdet;
+       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+         'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN,EKLEYEN,EKLEMETARIHI)'+
+         ' values(&RID,1,&UID,&ADET,&BIRIM,&MIKTAR,&ADETHESAP,0,&EKLEYEN,GETDATE())',
+         ['&ADETHESAP','&RID','&UID','&ADET','&BIRIM','&MIKTAR','&EKLEYEN'],
+         [AAdet,FatBasID,TabStokListe.FieldByName('ID').AsInteger,AAdet,TabStokListe.FieldByName('BIRIM').AsInteger,AAdet,StrToIntDef(Kullanan,0)]);
+       ModalResult := MrOk;
+       Exit;
   end;
   if (PageControl1.ActivePage.Name='SheetStok')and(TabStokListe.RecordCount < 1) or (PageControl1.ActivePage.Name='SheetHizmet')and(TabHizmetListe.RecordCount < 1)then
     exit;
@@ -319,9 +334,9 @@ begin
       Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=convert(nvarchar(10),STOKESDEGERID)+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
       if (Tablo.Query0.Fields[0].AsString<>'')and(Tablo.Query0.Fields[0].AsString<>TabStokListe.FieldByName('ID').AsString) then begin
         EsdegerSecilenUrunID:=TabStokListe.FieldByName('ID').AsInteger;
-        EsdegerAciklama := TabStokListe.FieldByName('KOD').AsString+' ?r?n &Yeni?r?n& ?r?n olarak de?i?mi?tir.';
+        EsdegerAciklama := TabStokListe.FieldByName('KOD').AsString+' ürün &Yeniürün& ürün olarak deðiþmiþtir.';
         TumEsdegerler:=Tablo.Query0.Fields[0].AsString;
-        LabelSonEklenen.Caption := 'E?de?er ?r?nler Listesi';
+        LabelSonEklenen.Caption := 'Eþdeðer ürünler Listesi';
         FocusDuzenle;
         EsdegerUrunlerListelendi:=True;
         //GridStokViewColumnAd.Caption := 'E?de?er ?r?n Ad?';
@@ -332,7 +347,7 @@ begin
     end else if EsdegerSecilenUrunID<>0 then begin //
       Tablo.TablodanSorguAc(9,'select * from STOKESDEGER where STOKID='+IntToStr(EsdegerSecilenUrunID)+' union all select * from STOKESDEGER where STOKESDEGERID='+IntToStr(EsdegerSecilenUrunID));
       if TabStokListe.FieldByName('ID').AsInteger <> EsdegerSecilenUrunID then begin
-        EsdegerAciklama := StringReplace(EsdegerAciklama,'&Yeni?r?n&',TabStokListe.FieldByName('KOD').AsString,[]);
+        EsdegerAciklama := StringReplace(EsdegerAciklama,'&Yeniürün&',TabStokListe.FieldByName('KOD').AsString,[]);
         Tablo.TablodanSorguAc(9,'select * from STOKESDEGER where STOKID='+IntToStr(EsdegerSecilenUrunID)+' and STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+' union all select * from STOKESDEGER where STOKESDEGERID='+IntToStr(EsdegerSecilenUrunID)+' and STOKID='+TabStokListe.FieldByName('ID').AsString);
         if Tablo.Query9.RecordCount>0 then
           EsdegerAciklama := EsdegerAciklama + '(' + Tablo.Query9.FieldByName('ACIKLAMA').AsString + ')';
@@ -346,7 +361,7 @@ begin
   end;
 
   if PageControl1.ActivePage <> SheetDagitim then begin
-     if (PageControl1.ActivePage.Name='SheetHizmet')and(cxDBTreeList1cxDBTreeListColumnTur.Value = 'Ba?l?k') then
+     if (PageControl1.ActivePage.Name='SheetHizmet')and(cxDBTreeList1cxDBTreeListColumnTur.Value = 'Baþlýk') then
         exit;
 
     BtnSec.Down:=False;
@@ -572,9 +587,9 @@ begin
 
       cbBuFirma.Visible := not (NewPage <> SheetStok);
       case NewPage.PageIndex of
-        0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Ad?';
-        1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Ad?';
-        2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Ad?';
+        0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Adý';
+        1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Adý';
+        2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Adý';
       end;
   end;
 end;
@@ -673,9 +688,9 @@ begin
   PageControl1Change(Sender);
   FocusDuzenle;
   case PageControl1.ActivePageIndex of
-    0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Ad?';
-    1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Ad?';
-    2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Ad?';
+    0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Adý';
+    1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Adý';
+    2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Adý';
   end;
     SheetStok.Visible := tablo.YetkiVarmi(248001,YetkiTur_Gorme,False);
     SheetHizmet.tabVisible := tablo.YetkiVarmi(248002,YetkiTur_Gorme,False);
@@ -749,7 +764,7 @@ var
   BirimAd,Str:string;
 begin
   BirimAd:=Tablo.inidenAnahtarGetir(IntToStr(Ops_StokKart_Anabirim),IntToStr(Birim));  //  StokKart_Anabirim
-  Str := 'Bu ?r?n daha ?nce '+FExtToStr(Adet)+' '+BirimAd+' eklenmi?, ?zerine eklensin mi?';
+  Str := 'Bu ürün daha önce '+FExtToStr(Adet)+' '+BirimAd+' eklenmiþ, üzerine eklensin mi?';
   if Application.MessageBox(PWideChar(Str),PChar(Uyari),MB_YESNO+MB_ICONQUESTION)=mrYes then begin
     UserInitiated := False;
     Result := True
@@ -1233,7 +1248,7 @@ begin
       [nil,nil,nil,Tablo.repStokAnaBirim,Tablo.RepSubelerOrtakTumSubeler],
       ['GELIRMI','BASLIK','DURUM','SUBEID'],
       [Gelirmi,False,True,SubeID],
-      ['Kod','A??klama','KDV','Birim','?ube'],
+      ['Kod','Açýklama','KDV','Birim','þube'],
       [True,True,True,True,True,False,False,False],False);
     JvTimer1Timer(Self);
   end;
@@ -1462,7 +1477,7 @@ begin
     TabHizmetListe.SQL.Add(' select ID,KOD=HESAPKODU, ');
     TabHizmetListe.SQL.Add(' ROOTKOD= case when HESAPKODU = REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1))) then ''.'' ');
     TabHizmetListe.SQL.Add(' else REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1)))end, ');
-    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Ba?l?k'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=convert(bit,0),IZLEME=convert(bit,0), BIRIM=null ');
+    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Baþlýk'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=convert(bit,0),IZLEME=convert(bit,0), BIRIM=null ');
     TabHizmetListe.SQL.Add(', STOKGRUBU=NULL,MASRAFID=NULL,OZELKOD=NULL ');
     if GirisCikis = FWGiris then
       TabHizmetListe.SQL.Add(' from HESAPPLANI where VARSAYILAN = 2 ')
@@ -1474,7 +1489,7 @@ begin
   TabHizmetListe.SQL.Add('   ROOTKOD=case when M.KOD=REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) then ''.''   ');
   TabHizmetListe.SQL.Add('   else REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) end,   ');
   TabHizmetListe.SQL.Add('   M.AD,               ');
-  TabHizmetListe.SQL.Add('   TUR=case when M.BASLIK=0 then ''Hizmet'' else ''Ba?l?k'' end,     ');
+  TabHizmetListe.SQL.Add('   TUR=case when M.BASLIK=0 then ''Hizmet'' else ''Baþlýk'' end,     ');
   TabHizmetListe.SQL.Add('   KALAN=null,         ');
   TabHizmetListe.SQL.Add(' 	 FIYAT=case when M.BASLIK=1 then null else isnull(F.FIYAT,-1) end,');
   TabHizmetListe.SQL.Add('   KUR=case when M.BASLIK=1 then null else F.KUR end,             ');
@@ -1880,6 +1895,11 @@ begin
 end;
 
 end.
+
+
+
+
+
 
 
 

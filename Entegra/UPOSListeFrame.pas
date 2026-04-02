@@ -519,7 +519,7 @@ begin
         Tablo.Query4.SQL.Text := 'Select top 1 ISLEMTARIHI From KASA Where HESAPTURU=''P'' AND HESAPID = '+ POSLAR.FieldByName('ID').AsString+' AND TUR<>1';
         Tablo.Query4.Open;
         if Tablo.Query4.RecordCount> 0 then
-          raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmi? kasa bilgisi var, silinemez...')
+          raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiþ kasa bilgisi var, silinemez...')
         else begin//yoksa a??l?? kayd?n? silelim
           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
                //kendisini sil

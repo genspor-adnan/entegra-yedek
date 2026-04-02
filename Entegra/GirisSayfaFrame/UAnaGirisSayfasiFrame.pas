@@ -1,7 +1,7 @@
-ï»¿unit UAnaGirisSayfasiFrame;
-// TUR : 1-Bilgi, 2-UyarÄ±, 3-Hata
+unit UAnaGirisSayfasiFrame;
+// TUR : 1-Bilgi, 2-Uyarý, 3-Hata
 // KAYNAK : 1 : Sistem
-// KATEGORI : 1 Cari, 2 Kasa, 3 Banka, 4 Fatura, 5 Ã‡ekSenet, 6 Stok, 7 Teklif
+// KATEGORI : 1 Cari, 2 Kasa, 3 Banka, 4 Fatura, 5 ÇekSenet, 6 Stok, 7 Teklif
 
 interface
 
@@ -321,9 +321,9 @@ type
     TabGrafik: TFDQuery;
     DsTabGrafik: TDataSource;
     TabPivot: TFDQuery;
-    TabPivotGRUP: TStringField;
+    TabPivotGRUP: TWideStringField;
     TabPivotTUR: TWideStringField;
-    TabPivotTARIH: TDateTimeField;
+    TabPivotTARIH: TSQLTimeStampField;
     TabPivotTUTAR: TFloatField;
     DtsPivot: TDataSource;
     pmPivot: TPopupMenu;
@@ -498,7 +498,7 @@ type
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure cxButton3Click(Sender: TObject);
   private
-    { IBilgiFrame Ã¼yeleri }
+    { IBilgiFrame üyeleri }
     FFrameBilgi: TAnaFrameBilgi;
     FFrameIcerikBilgi :TIcerikFrameBilgi;
     Initialized: Boolean;
@@ -703,10 +703,10 @@ procedure TAnaGirisSayfasiFrame.AraTusClick(Sender: TObject);
     begin
       s := '';
       // TabArama.SQL.Add(' SELECT Modul=''Cari'', ArananId = R.ID,Kod=R.KOD,Ad=R.FIRMA,Aranan=NULL FROM REHBER R WHERE R.FIRMA LIKE ''%'+Trim(EditAra.text)+'%'' ');
-      // Ã–nce modÃ¼le bakÄ±yoruz
+      // Önce modüle bakýyoruz
       if TrimRight(Tablo.Query5.fields[2].AsString) = 'REHBER' then
       begin
-        // ARAMA tablosundaki herbir ayrÄ± BAGI adÄ± iÃ§in ayrÄ± SQL yazÄ±yoruz
+        // ARAMA tablosundaki herbir ayrý BAGI adý için ayrý SQL yazýyoruz
         if TrimRight(Tablo.Query5.fields[4].AsString) = 'GENINI' then
           s := 'select Modul=''Cari'',' + Tablo.Query5.fields[0].AsString +', ArananId = R.ID,Kod=R.KOD,Ad=R.FIRMA,Aranan=ANAHTAR FROM REHBER R INNER JOIN GENINI G ON R.' +
           Tablo.Query5.fields[3].AsString + '=G.DEGER WHERE G.BOLUM=' + Tablo.Query5.fields[5].AsString + ' and ANAHTAR LIKE ''%' + Trim(EditAra.text) + '%'' '
@@ -727,7 +727,7 @@ procedure TAnaGirisSayfasiFrame.AraTusClick(Sender: TObject);
             ' FROM REHBER R INNER JOIN REHBERBILGI RB ON RB.YERI=2 and R.ID=RB.YER_ID WHERE RB.BILGI LIKE ''%' + Trim(EditAra.text) + '%'' '
 
         else if TrimRight(Tablo.Query5.fields[4].AsString) = 'BANKAHESAPLAR' then
-          s := 'select Modul=''Cari'',' + Tablo.Query5.fields[0].AsString + ',ArananId = R.ID,Kod = R.KOD,Ad=R.FIRMA,Aranan=BH.' + Tablo.Query5.fields[3].AsString + '+''/ Banka HesapÄ±'' FROM REHBER R INNER JOIN BANKAHESAPLAR BH on R.ID=BH.REHBERID  WHERE BH.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := 'select Modul=''Cari'',' + Tablo.Query5.fields[0].AsString + ',ArananId = R.ID,Kod = R.KOD,Ad=R.FIRMA,Aranan=BH.' + Tablo.Query5.fields[3].AsString + '+''/ Banka Hesapý'' FROM REHBER R INNER JOIN BANKAHESAPLAR BH on R.ID=BH.REHBERID  WHERE BH.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' '
         else if TrimRight(Tablo.Query5.fields[4].AsString) = 'BANKASUBELER' then
           s := 'select Modul=''Cari'',' + Tablo.Query5.fields[0].AsString + ',ArananId = R.ID,Kod = R.KOD,Ad=R.FIRMA,Aranan=BS.' + Tablo.Query5.fields[3].AsString + ' FROM REHBER R INNER JOIN BANKAHESAPLAR BH on R.ID=BH.REHBERID inner join BANKASUBELER BS on BH.BANKASUBELERID=BS.ID  WHERE BS.' +
             Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' '
@@ -743,21 +743,21 @@ procedure TAnaGirisSayfasiFrame.AraTusClick(Sender: TObject);
           s := ' select Modul=''Stok'',' + Tablo.Query5.fields[0].AsString + ', ArananId = S.ID,Kod=S.KOD,Ad=S.STOKADI,Aranan=' + Tablo.Query5.fields[3].AsString +' FROM STOKLAR S WHERE S.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' ';
       end else if TrimRight(Tablo.Query5.fields[2].AsString) = 'FATURA' then begin
         if TrimRight(Tablo.Query5.fields[4].AsString) = 'GENINI' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=(Case When FB.TUR in (9,19) then ''SipariÅŸ'' When FB.TUR in (10,14) then ''Ä°rsaliye'' When FB.TUR in (11,15) then ''Fatura'' '+
-              ' When FB.TUR in (12,16) then ''FiÅŸ'' When FB.TUR in (13,17) then ''Tahakkuk''  end),Aranan = ANAHTAR FROM FATBASLIK FB INNER JOIN GENINI G ON FB.' + Tablo.Query5.fields[3].AsString + ' = G.DEGER WHERE G.BOLUM = (Select X= (Case '+
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=(Case When FB.TUR in (9,19) then ''Sipariþ'' When FB.TUR in (10,14) then ''Ýrsaliye'' When FB.TUR in (11,15) then ''Fatura'' '+
+              ' When FB.TUR in (12,16) then ''Fiþ'' When FB.TUR in (13,17) then ''Tahakkuk''  end),Aranan = ANAHTAR FROM FATBASLIK FB INNER JOIN GENINI G ON FB.' + Tablo.Query5.fields[3].AsString + ' = G.DEGER WHERE G.BOLUM = (Select X= (Case '+
               ' When FB.TUR in (9,10,11,12,13) then -1008 When FB.TUR in (14,15,16,17,19) then -1007 end)) and ANAHTAR LIKE ''%' + Trim(EditAra.text) + '%'' '
         else if TrimRight(Tablo.Query5.fields[4].AsString) = 'PROJELER' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Proje Bilgisi'',Aranan = P.PROJEKODU FROM FATBASLIK FB INNER JOIN PROJELER P ON FB.' + Tablo.Query5.fields[3].AsString + ' = P.ID WHERE P.PROJEKODU LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Proje Bilgisi'',Aranan = P.PROJEKODU FROM FATBASLIK FB INNER JOIN PROJELER P ON FB.' + Tablo.Query5.fields[3].AsString + ' = P.ID WHERE P.PROJEKODU LIKE ''%' + Trim(EditAra.text) + '%'' '
         else if TrimRight(Tablo.Query5.fields[4].AsString) = 'AKTIVITELER' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Akitivite Bilgisi'',Aranan = A.NOTLAR FROM FATBASLIK FB  INNER JOIN AKTIVITELER A ON FB.' + Tablo.Query5.fields[3].AsString + ' = A.ID WHERE A.NOTLAR LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Akitivite Bilgisi'',Aranan = A.NOTLAR FROM FATBASLIK FB  INNER JOIN AKTIVITELER A ON FB.' + Tablo.Query5.fields[3].AsString + ' = A.ID WHERE A.NOTLAR LIKE ''%' + Trim(EditAra.text) + '%'' '
         else  if TrimRight(Tablo.Query5.fields[4].AsString) = 'REHBER' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Firma Bilgisi'',Aranan=R.FIRMA FROM FATBASLIK FB  INNER JOIN REHBER R ON FB.' + Tablo.Query5.fields[3].AsString + ' = R.ID WHERE FIRMA LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Firma Bilgisi'',Aranan=R.FIRMA FROM FATBASLIK FB  INNER JOIN REHBER R ON FB.' + Tablo.Query5.fields[3].AsString + ' = R.ID WHERE FIRMA LIKE ''%' + Trim(EditAra.text) + '%'' '
         else  if TrimRight(Tablo.Query5.fields[4].AsString) = 'MASRAFGELIR' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Masraf-Gelir'',Aranan = MG.AD FROM FATBASLIK FB INNER JOIN MASRAFGELIR MG ON FB.' + Tablo.Query5.fields[3].AsString + ' = MG.ID WHERE MG.AD LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Masraf-Gelir'',Aranan = MG.AD FROM FATBASLIK FB INNER JOIN MASRAFGELIR MG ON FB.' + Tablo.Query5.fields[3].AsString + ' = MG.ID WHERE MG.AD LIKE ''%' + Trim(EditAra.text) + '%'' '
         else  if TrimRight(Tablo.Query5.fields[4].AsString) = 'STOKLAR' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''FATURAID = '' + convert(nvarchar(10),FB.ID),Aranan = S.STOKADI FROM FATBASLIK FB INNER JOIN FATURA F on FB.ID=F.FATBASID INNER JOIN STOKLAR S ON F.' + Tablo.Query5.fields[3].AsString + ' = S.ID WHERE S.STOKADI LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''FATURAID = '' + convert(nvarchar(10),FB.ID),Aranan = S.STOKADI FROM FATBASLIK FB INNER JOIN FATURA F on FB.ID=F.FATBASID INNER JOIN STOKLAR S ON F.' + Tablo.Query5.fields[3].AsString + ' = S.ID WHERE S.STOKADI LIKE ''%' + Trim(EditAra.text) + '%'' '
         else if TrimRight(Tablo.Query5.fields[4].AsString) = '' then
-          s := ' select Modul=''AlÄ±ÅŸ/SatÄ±ÅŸ'',' + Tablo.Query5.fields[0].AsString + ', ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura BaÅŸlÄ±k Bilgisi'',Aranan=' + Tablo.Query5.fields[3].AsString +' FROM FATBASLIK FB  WHERE FB.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' ';
+          s := ' select Modul=''Alýþ/Satýþ'',' + Tablo.Query5.fields[0].AsString + ', ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Baþlýk Bilgisi'',Aranan=' + Tablo.Query5.fields[3].AsString +' FROM FATBASLIK FB  WHERE FB.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' ';
 
       end else if TrimRight(Tablo.Query5.fields[2].AsString) = 'SERVIS' then begin
 
@@ -779,17 +779,17 @@ begin
   if EditAra.text = '' then
     Abort;
 
-  // ALANTIPI 1:yazÄ±   2:tamsayÄ± 3:kesirli 4:tarih   5:mantÄ±ksal (bool)
+  // ALANTIPI 1:yazý   2:tamsayý 3:kesirli 4:tarih   5:mantýksal (bool)
   TabArama.Close;
-  // Ä°lk iÅŸ geÃ§ici tablo oluÅŸtur
+  // Ýlk iþ geçici tablo oluþtur
   TabArama.SQL.text := SQLMemoAra.text;
   TabArama.ExecSQL;
-  // sÄ±rayla arama komutlarÄ±nÄ± tablodan almak iÃ§in aÃ§
+  // sýrayla arama komutlarýný tablodan almak için aç
   Tablo.TablodanSorguAc(5,'Select ID,PUAN,dbo.fn_ncstr(TABLOADI) as TABLOADI,dbo.fn_ncstr(ALANADI) as ALANADI,dbo.fn_ncstr(BAGI) as BAGI,dbo.fn_ncstr(BILGI) as BILGI,ALANTIPI from ARAMA '   +
   ' where ALANTIPI = 1 order by PUAN desc, ID');
   while not Tablo.Query5.eof do
   begin
-    // her bir arama komutunu Ã§alÄ±ÅŸtÄ±r ve geÃ§ici tabloya ekle sonra da aÃ§
+    // her bir arama komutunu çalýþtýr ve geçici tabloya ekle sonra da aç
     KomutOlustur;
     Tablo.Query5.Next;
   end;
@@ -833,19 +833,19 @@ var GOREV_ID: String[15];
 begin
 //   case TabDuyuruListe.FieldByName('TUR').AsInteger of
    case TabDuyuruListe.FieldByName('YER').AsInteger of
-   TabNo_SERVIS : //servis onaysa servis ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_SERVIS : //servis onaysa servis ekraný açýlýr
          Tablo.ServisSihirbazBaslat(False, 'D', 0, TabDuyuruListe.FieldByName('YER_ID').AsInteger, 0);
-   TabNo_TEKLIF : //teklif onaysa teklif ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_TEKLIF : //teklif onaysa teklif ekraný açýlýr
             Tablo.TeklifSihirbazBaslat('D', 80, 0, TabDuyuruListe.FieldByName('YER_ID').AsInteger, 0,-1);
-   TabNo_SIPARIS_Gelen : //teklif onaysa teklif ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_SIPARIS_Gelen : //teklif onaysa teklif ekraný açýlýr
             Tablo.SiparisSihirbazBaslat('D',9,0,TabDuyuruListe.FieldByName('YER_ID').AsInteger, 0);
-   TabNo_SIPARIS_Giden : //teklif onaysa teklif ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_SIPARIS_Giden : //teklif onaysa teklif ekraný açýlýr
             Tablo.SiparisSihirbazBaslat('D',19,0,TabDuyuruListe.FieldByName('YER_ID').AsInteger, 0);
-   TabNo_Satinalma_Talep, TabNo_SATINALMA : //teklif onaysa teklif ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_Satinalma_Talep, TabNo_SATINALMA : //teklif onaysa teklif ekraný açýlýr
             Tablo.SatinalmaSihirbazBaslat2('D',101,0,TabDuyuruListe.FieldByName('YER_ID').AsInteger,0);
-   Tabno_URETIMOPERASYONPERSONEL : //Ä°ÅŸ emri
+   Tabno_URETIMOPERASYONPERSONEL : //Ýþ emri
             Tablo.IsEmriPersonelZamanSihirbaz('D', 2, 0, TabDuyuruListe.FieldByName('YER_ID').AsInteger,0);
-   -1,TabNo_GOREVLER : begin//GÃ¶revse gÃ¶rev ekranÄ± aÃ§Ä±lÄ±r
+   -1,TabNo_GOREVLER : begin//Görevse görev ekraný açýlýr
           if TabDuyuruListe.FieldByName('KATEGORI').AsInteger = Servis then
              Tablo.ServisSihirbazBaslat(False, 'D',0,TabDuyuruListe.Fields[0].AsInteger, TabDuyuruListe.FieldByName('REHBERID').AsInteger)
           else begin
@@ -881,21 +881,21 @@ var GOREV_ID: String[15];
     ListeId, Ekleyen, AktifListe : Integer;
     procedure Onayla(TabloAd, OnayAlan, TarihAlan:string);
     begin
-        //Ã¶nce tablodan onaylandÄ± yapalÄ±m
-        VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update '+TabloAd+' set '+OnayAlan+'='+Kullanan+', '+TarihAlan+'=GetDate(),'+
+        //önce tablodan onaylandý yapalým
+        VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update '+TabloAd+' set '+OnayAlan+'='+Kullanan+', '+TarihAlan+'=GetDate(),'+
         ' DURUM='+Tablo.GENINI.ReadString(Ops_OpsiyonTeklif_Onaylandi, '-1')+' where ID='+TabDuyuruListe.FieldByName('YER_ID').AsString,[],[]);
-        //sonra okundu iÅŸaretleyelim ki listeden silinsin
-        VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString,[],[]);
+        //sonra okundu iþaretleyelim ki listeden silinsin
+        VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString,[],[]);
    end;
 begin
    case TabDuyuruListe.FieldByName('YER').AsInteger of
-   TabNo_SERVIS :  //servis onaysa servis ekranÄ± aÃ§Ä±lÄ±r
+   TabNo_SERVIS :  //servis onaysa servis ekraný açýlýr
                   Tablo.ServisSihirbazBaslat(False, 'D', 0, TabDuyuruListe.FieldByName('YER_ID').AsInteger, 0);
    TabNo_TEKLIF : Onayla('TEKLIF','ONAYLAYAN','ONAYTARIHI');
    TabNo_SIPARIS_Gelen,TabNo_SIPARIS_Giden : Onayla('SIPARIS','ONAYLAYAN','ONAYTARIHI');
    TabNo_Satinalma_Talep : Onayla('SIPARIS','BIRIMONAYLAYAN','BIRIMONAYTARIHI');
    TabNo_SATINALMA : Onayla('SIPARIS','ONAYLAYAN','ONAYTARIHI');
-   -1 : begin//GÃ¶revse gÃ¶rev ekranÄ± aÃ§Ä±lÄ±r
+   -1 : begin//Görevse görev ekraný açýlýr
             GOREV_ID:= TabDuyuruListe.Fields[0].AsString;
             Ekleyen  := TabDuyuruListe.FieldByName('EKLEYEN').AsInteger;
             AcKapa := False;
@@ -904,22 +904,22 @@ begin
             UpdateveMail(AktifListe, ListeId, StrToInt(GOREV_ID), Ekleyen, AcKapa, False);
         end
    else
-        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set TUR=-1 where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString+' and ALICIID='+Kullanan+' and TUR=0',[],[]);
+        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set TUR=-1 where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString+' and ALICIID='+Kullanan+' and TUR=0',[],[]);
    end;
    DuyuruYenileTusClick(Self);
 end;
 
 procedure TAnaGirisSayfasiFrame.GridDuyuruDBCardViewRow7PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 begin
-   VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString,[],[]);
-//   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set TUR=-1 where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString+' and ALICIID='+Kullanan+' and TUR=0',[],[]);
+   VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString,[],[]);
+//   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set TUR=-1 where DUYURUID='+TabDuyuruListe.FieldByName('ID').AsString+' and ALICIID='+Kullanan+' and TUR=0',[],[]);
    DuyuruYenileTusClick(Self);
 end;
 
 procedure TAnaGirisSayfasiFrame.GridDuyuruDBCardViewRow7PropertiesCustomClick(
   Sender: TObject);
 begin
-   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID=&DID and ALICIID=&AID and OKUNMATARIHI IS NULL  '
+   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI=getdate() where DUYURUID=&DID and ALICIID=&AID and OKUNMATARIHI IS NULL  '
                     ,['&DID','&AID'],[TabDuyuruListe.Fields[0].AsInteger,StrToInt(Kullanan)]);
    btnAramaClick(BtnDuyuru);
 end;
@@ -951,7 +951,7 @@ procedure TAnaGirisSayfasiFrame.Baslatildi;
 var
   i : Integer;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   HomePageInstance := Self;
 
   Tablo.GridTurkcelestir;
@@ -1017,7 +1017,7 @@ begin
     BtnYonetimTeklif.Align := alClient;
   end; }
 
-//  if not Tablo.YetkiVarmi(2111, YetkiTur_Degistirme, false) then // proje deÄŸiÅŸtirme yetkisi
+//  if not Tablo.YetkiVarmi(2111, YetkiTur_Degistirme, false) then // proje deðiþtirme yetkisi
 //     tvProjeler.OnDblClick := Nil;
   TabMesajKisiler.Close;
   if TabMesajKisiler.Params.FindParam('PRID') = nil then
@@ -1104,12 +1104,12 @@ Begin
       + Kullanan + ' and isnull(MLK.OKUNDU,0)<>1 order by ML.TARIH');
   while not Tablo.Query4.eof do begin
     if TabMesajKisiler.Locate('ID', Tablo.Query4.FieldByName('GONDERENID').AsInteger, []) then begin
-      // mesajÄ± gÃ¶nderenin sayfasÄ± aÃ§Ä±k deÄŸilse tekrar oluÅŸturalÄ±m...
+      // mesajý gönderenin sayfasý açýk deðilse tekrar oluþturalým...
       cw := CreateChatWindowByUserID(Tablo.Query4.FieldByName('GONDERENID').AsInteger);
       cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
       cw.WriteToWindow(cw.UserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.Query4.FieldByName('TARIH').AsDateTime,
         Tablo.Query4.FieldByName('MESAJ').AsString);
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
         'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ALICIID=&AliciID and MESAJLOGID in(select ID from MESAJLOG where GONDERENID=&GonderenID)', ['&AliciID', '&GonderenID'], [Kullanan,cw.UserId]);
     end;
     Tablo.Query4.Next;
@@ -1212,10 +1212,10 @@ var
   fsi: TFileSendInfo;
 begin
  { if OpenDialog1.Execute then begin
-    MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+    MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
       'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
       [2, Kullanan, '<' + MsgDosyayiPaylasiyorsunuz + ':' + ExtractFileName(OpenDialog1.FileName) + '>'], true);
-    MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+    MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
       'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
       [VarToStr(MesajLogID), ActiveChatWindow.FServerId], true);
     fsi := TFileSendInfo.CreateNew(ActiveChatWindow, OpenDialog1.FileName);
@@ -1224,7 +1224,7 @@ begin
     fsi.ToServerId := ActiveChatWindow.FServerId;
     fsi.FromServerId := FServerId;
     fsi.FileSize := FileSizeByName(fsi.FileName);
-    // FSCONFIRM AliciServerId LogId LogKullanÄ±cÄ±Id ReferansId DosyaAdÄ±
+    // FSCONFIRM AliciServerId LogId LogKullanýcýId ReferansId DosyaAdý
     Msg := Format('FSCONFIRM %d %s %s %d %d %s', [ActiveChatWindow.FServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID),fsi.ReferenceId, fsi.FileSize, ExtractFileName(OpenDialog1.FileName)]);
     MsgClient.Socket.WriteLn(Msg);
     ActiveChatWindow.WriteToWindow(ActiveChatWindow.UserId, KullanAdi, Tablo.GENINI.BugunTrhSaat, '<' + MsgDosyayiPaylasiyorsunuz + ':' + ExtractFileName(OpenDialog1.FileName) + '>',fsi.ReferenceId);
@@ -1242,10 +1242,10 @@ begin
   if not Assigned(cw) then
     exit;
 
-  MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+  MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
     'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
     [1, Kullanan, MemoChat.text], true);
-  MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+  MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
     'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
     [VarToStr(MesajLogID),ActiveChatWindow.FUserId], true);
   Msg := Format('SEND %d %s %s %s', [cw.ServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), Dize.SatirSonuEncode(MemoChat.text)]);
@@ -1279,7 +1279,7 @@ var
   Key: Word;
 begin
   Application.CreateForm(TTabloGirisDlg, TabloGirisDlg);
-  TabloGirisDlg.Caption := 'Ä°leti GeÃ§miÅŸi';
+  TabloGirisDlg.Caption := 'Ýleti Geçmiþi';
   TabloGirisDlg.Komut :=
     'select TARIH=CONVERT(VARCHAR(10), TARIH, 103),SAAT=CONVERT(VARCHAR(10), TARIH, 108), KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
     #13#10 + 'from MESAJLOG ML' + #13#10 + 'inner join MESAJLOGKULLANICI MKUL on MKUL.MESAJLOGID=ML.ID' +
@@ -1368,12 +1368,12 @@ var
     end;
   end;
 begin
-  // Page Hint de dosya adÄ± yazar,
-  // Page HelpKeyword de dosya gÃ¶nderim satÄ±rÄ±na locate olabilmek iÃ§in iÃ§eriÄŸindeki text yazÄ±yor..
-  // BaÄŸlÄ± deÄŸilse buffer kontrol etmesine gerek yok Ã§Ä±ksÄ±n
+  // Page Hint de dosya adý yazar,
+  // Page HelpKeyword de dosya gönderim satýrýna locate olabilmek için içeriðindeki text yazýyor..
+  // Baðlý deðilse buffer kontrol etmesine gerek yok çýksýn
 {  if not MsgClient.Connected then
     exit;
-  // BaÄŸlÄ±ysa TCP den gelen mesajlarÄ± aldÄ±ÄŸÄ± bufferdan bilgileri alsÄ±n
+  // Baðlýysa TCP den gelen mesajlarý aldýðý bufferdan bilgileri alsýn
   if (not MsgClient.Socket.InputBufferIsEmpty) then begin
     cmd := Dize.SatirSonuDecode(MsgClient.Socket.ReadLn);
     part := Dize.SinirlandirilmisMetin(cmd, ' ');
@@ -1382,17 +1382,17 @@ begin
       AliciServerId := StrToInt(part);
       AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
       if TabMesajKisiler.Locate('ID', AliciID, []) then begin
-        // log gÃ¼ncelleyelim... 'LOGID=11 LOGKULID=9 asdas dasasd asd'
+        // log güncelleyelim... 'LOGID=11 LOGKULID=9 asdas dasasd asd'
         MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
         MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],
+        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],
           [MsgLogKulID]);
-        // mesajÄ± gÃ¶nderenin sayfasÄ± aÃ§Ä±k deÄŸilse tekrar oluÅŸturalÄ±m...
+        // mesajý gönderenin sayfasý açýk deðilse tekrar oluþturalým...
         cw := CreateChatWindow(AliciServerId, AliciID);
         cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-        // aÃ§Ä±k olan baÅŸka sayfaysa mesaj gelen sayfayÄ± highligt yapalÄ±m..
+        // açýk olan baþka sayfaysa mesaj gelen sayfayý highligt yapalým..
         if not(AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) and (Screen.ActiveForm = AnaForm) and (PageControlChat.ActivePage = cw.FTabSheet) and (PageControlOrta.ActivePage = SheetMesajlasma) then
-          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ID=&ID', ['&ID'],
+          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ID=&ID', ['&ID'],
             [MsgLogKulID])
         else begin
           cw.FTabSheet.Highlighted := true;
@@ -1415,7 +1415,7 @@ begin
           Alarmlar[0].StyleOptions.DisplayDuration := 10000;
           Alarmlar[0].Execute;
         end;
-        // iÃ§eriye mesaj yazalÄ±m
+        // içeriye mesaj yazalým
         cw.WriteToWindow(cw.UserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.GENINI.BugunTrhSaat, cmd);
       end;
     end else if part = 'USRLIST' then begin
@@ -1463,7 +1463,7 @@ begin
       i := 0;
       while not Tablo.Query8.eof do begin
         Alarmlar[i] := TJvDesktopAlert.Create(Self);
-        Alarmlar[i].HeaderText := 'OkunmamÄ±ÅŸ Duyurunuz Var!';
+        Alarmlar[i].HeaderText := 'Okunmamýþ Duyurunuz Var!';
         Alarmlar[i].MessageText := Tablo.Query8.FieldByName('KONU').AsString;
         Alarmlar[i].Tag := Tablo.Query8.FieldByName('ID').AsInteger;
         Alarmlar[i].AlertStack := JvDesktopAlertStack1;
@@ -1480,8 +1480,8 @@ begin
       fsi.ToUserId := StrToInt(Kullanan);
       if TabMesajKisiler.Locate('ID', fsi.FromUserId, []) then
       begin
-        //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],[MsgLogKulID]);
-        // mesajÄ± gÃ¶nderenin sayfasÄ± aÃ§Ä±k deÄŸilse tekrar oluÅŸturalÄ±m...
+        //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],[MsgLogKulID]);
+        // mesajý gönderenin sayfasý açýk deðilse tekrar oluþturalým...
 
         cw := CreateChatWindow(fsi.FromServerId, fsi.FromUserId);
         cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
@@ -1551,7 +1551,7 @@ begin
         fsi.FileSize := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '))
       else
         GtpLog.Log('File send reference %d was not found',[i]);
-    end else if part = 'FSABORT' then begin // alici gÃ¶nderir
+    end else if part = 'FSABORT' then begin // alici gönderir
       part := Dize.SinirlandirilmisMetin(cmd, ' ');
       AliciServerId := StrToInt(part);
 
@@ -1654,14 +1654,14 @@ var
 begin
   case TabKosul.FieldByName('ICERIKTURU').AsInteger of
     2:
-      AProperties := Tablo.cxEditRepository1SpinItem1.Properties; // rakam //cxEditRepository1CurrencyItem1.Properties; //rakam Ã‡ALIÅžMIYOR.. BUG VAR.. HEPSÄ°NÄ° YAZI YAPTIM..
+      AProperties := Tablo.cxEditRepository1SpinItem1.Properties; // rakam //cxEditRepository1CurrencyItem1.Properties; //rakam ÇALIÞMIYOR.. BUG VAR.. HEPSÝNÝ YAZI YAPTIM..
     5:
       AProperties := Tablo.cxEditRepository1DateItem1.Properties; // tarih
     7: // liste (combo)
       if TabKosul.FieldByName('COMBOICERIK').AsString <> '' then
       Begin
         s := TabKosul.FieldByName('COMBOICERIK').AsString;
-        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deÄŸilse bÃ¶lÃ¼mden getirsin
+        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deðilse bölümden getirsin
           s := 'select ANAHTAR from GENINI where BOLUM=(select DEGER from GENINI where BOLUM=0 and ANAHTAR=''' + s + ''' and DIL=' + IntToStr(Dil)
             + ') order by SIRA';
 
@@ -1687,7 +1687,7 @@ begin
       if TabKosul.FieldByName('COMBOICERIK').AsString <> '' then
       begin
         s := TabKosul.FieldByName('COMBOICERIK').AsString;
-        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deÄŸilse bÃ¶lÃ¼mden getirsin
+        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deðilse bölümden getirsin
           s := 'select ANAHTAR,DEGER from GENINI where BOLUM=(select DEGER from GENINI where BOLUM=0 and ANAHTAR=''' + s + ''' and DIL=' + IntToStr
             (Dil) + ') order by SIRA';
         Tablo.cxEditRepository1ImageComboBoxItem1.Properties.Items.Clear;
@@ -1712,7 +1712,7 @@ begin
         begin
         Tablo.cxEditRepository1CheckComboBox1.Properties.Items.Clear;
         s := TabKosul.FieldByName('COMBOICERIK').AsString;
-        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deÄŸilse bÃ¶lÃ¼mden getirsin
+        if Pos('SELECT', UpperCase(s)) = 0 then // selectli komut deðilse bölümden getirsin
         s := 'select ANAHTAR from GENINI where BOLUM=(select DEGER from GENINI where BOLUM=0 and ANAHTAR='''+s+''' and DIL='+IntToStr(Dil)+') order by SIRA';
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := s;
@@ -1736,7 +1736,7 @@ begin
         End; }
 
     else
-      AProperties := Tablo.cxEditRepository1TextItem1.Properties; // yazÄ±
+      AProperties := Tablo.cxEditRepository1TextItem1.Properties; // yazý
   end;
 end;
 
@@ -1769,10 +1769,10 @@ var
 begin
   if PageControl1.PageCount = 0 then
     exit;
-  // dÃ¶kÃ¼me konumlanÄ±r
+  // döküme konumlanýr
   TabDokum.Locate('ID', PageControl1.ActivePage.Tag, []);
 
-  if Yenile then begin // yenileme (refresh) ise her sekme iÃ§in oluÅŸturulan componentler silinir
+  if Yenile then begin // yenileme (refresh) ise her sekme için oluþturulan componentler silinir
      Tablo1 := PageControl1.ActivePage.FindComponent('Tablo' + inttostr(PageControl1.ActivePage.Tag)) as TFDQuery;
      if Tablo1 <> nil then
         Tablo1.Free;
@@ -1783,15 +1783,15 @@ begin
      if Grid <> nil then
         Grid.Free;
   end else if PageControl1.ActivePage.FindComponent('Tablo' + inttostr(PageControl1.ActivePage.Tag)) <> nil then
-     exit // componentler varsa Ã§Ä±ksÄ±n
+     exit // componentler varsa çýksýn
   else if Trim(TabDokum.FieldByName('SQL').AsString) = '' then
-     exit; // sql yoksa Ã§Ä±ksÄ±n
+     exit; // sql yoksa çýksýn
 
-  // EÄŸer grid varsa Ã§Ä±kÄ±lÄ±r
+  // Eðer grid varsa çýkýlýr
   // if (not Yenile)and(PageControl1.ActivePage.FindComponent('Tablo'+intToStr(PageControl1.ActivePage.Tag))<>nil) then
   // exit;
 
-  // ÅŸimdi tabloyu oluÅŸturup baÄŸlayalÄ±m
+  // þimdi tabloyu oluþturup baðlayalým
   Tablo1 := TFDQuery.Create(PageControl1.ActivePage);
   Tablo1.Name := 'Tablo' + inttostr(PageControl1.ActivePage.Tag);
   Tablo1.Connection := Tablo.FDCnn;
@@ -1799,20 +1799,20 @@ begin
   Datasource1 := TDataSource.Create(PageControl1.ActivePage);
   Datasource1.Name := 'Datasource' + inttostr(PageControl1.ActivePage.Tag);
   Datasource1.DataSet := Tablo1;
-  // sql komutu alÄ±r ve aÃ§arÄ±z
+  // sql komutu alýr ve açarýz
   Tablo1.Close;
   Tablo1.SQL.text := TabDokum.FieldByName('SQL').AsString;
 
   SQL := TStringList.Create;
   SQL.Assign(TabDokum.FieldByName('SQL'));
-  // GrafiÄŸin Ã¼stÃ¼ne ve altÄ±na yazÄ±lacak bilgileri alalÄ±m
-  // BunlarÄ± neden Ã¶nceden alÄ±yoruz? Ã‡Ã¼nkÃ¼ iÃ§inde koÅŸul deÄŸiÅŸkeni olabilir. Ã–rneÄŸin SQL iÃ§indeki gibi $yil$
-  // Altta koÅŸullarÄ± okudukÃ§a SQL i deÄŸiÅŸtirdiÄŸimiz gibi bunu da deÄŸiÅŸtiririz..
+  // Grafiðin üstüne ve altýna yazýlacak bilgileri alalým
+  // Bunlarý neden önceden alýyoruz? Çünkü içinde koþul deðiþkeni olabilir. Örneðin SQL içindeki gibi $yil$
+  // Altta koþullarý okudukça SQL i deðiþtirdiðimiz gibi bunu da deðiþtiririz..
   Ustyazi := TabDokum.FieldByName('ACIKLAMA').AsString; // alandan gelir
   i := SQL.IndexOf('--Altayaz');
   if i >= 0 then
-    Altyazi := Copy(SQL.Strings[i + 1], 3, 99); // alt yazÄ±
-  i := 0; // KoÅŸullarÄ± Diziye Al
+    Altyazi := Copy(SQL.Strings[i + 1], 3, 99); // alt yazý
+  i := 0; // Koþullarý Diziye Al
   TabKosul.First;
   while not TabKosul.eof do begin
     inc(i);
@@ -1828,7 +1828,7 @@ begin
   end;
 
   Tablo1.Open;
-  // ÅŸimdi gridi oluÅŸturup baÄŸlayalÄ±m
+  // þimdi gridi oluþturup baðlayalým
 
   Grid := TcxGrid.Create(PageControl1.ActivePage);
   Grid.Parent := TPanel(PageControl1.ActivePage);
@@ -1836,16 +1836,16 @@ begin
   Grid.Align := alClient;
   // Creates a Level
   Level := Grid.Levels.Add;
-  Level.Name := 'Level1';
+  Level.Name := 'Level' + inttostr(PageControl1.ActivePage.Tag);
   // Creates a View
   View := Grid.CreateView(TcxGridDBChartView) as TcxGridDBChartView;
-  View.Name := 'View1';
+  View.Name := 'View' + inttostr(PageControl1.ActivePage.Tag);
   // ... and binds it to the Level
   Level.GridView := View;
   // Hooks up the View to the data
 
   View.DataController.DataSource := Datasource1;
-  // Kategori bulalÄ±m    Ã–r: /*Kategori->AYADI*/
+  // Kategori bulalým    Ör: /*Kategori->AYADI*/
   i := SQL.IndexOf('--Kategori');
   if i >= 0 then
     View.Categories.DataBinding.FieldName := Copy(SQL.Strings[i + 1], 3, 99) // 'AYADI';
@@ -1854,16 +1854,16 @@ begin
     SQL.Free;
     Abort;
   end;
-  View.ToolBox.DiagramSelector := true; // diagram seÃ§imi
-  View.ToolBox.border := tbNone; // diagram seÃ§imi sÄ±nÄ±r Ã§izgisi olmamalÄ±
-  View.DiagramColumn.AxisValue.GridLines := true; // grid Ã§izgileri
-  View.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarÄ± gÃ¶sterir
-  View.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // Ã¼stte deÄŸerlerinin gÃ¶rÃ¼nmesini saÄŸlar
+  View.ToolBox.DiagramSelector := true; // diagram seçimi
+  View.ToolBox.border := tbNone; // diagram seçimi sýnýr çizgisi olmamalý
+  View.DiagramColumn.AxisValue.GridLines := true; // grid çizgileri
+  View.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarý gösterir
+  View.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // üstte deðerlerinin görünmesini saðlar
   // View.DiagramColumn.AxisValue.
   // ... and creates all columns
   // View.DataController.CreateAllItems;
-  // seileri ekleyelim Ã–r : --Seri:GIREN/Giren
-  // --Seri:CIKAN/Ã‡Ä±kan
+  // seileri ekleyelim Ör : --Seri:GIREN/Giren
+  // --Seri:CIKAN/Çýkan
   i := SQL.IndexOf('--Seriler');
   while i < SQL.Count do begin
     if Pos('--Seri ', SQL.Strings[i]) > 0 then begin
@@ -1875,9 +1875,9 @@ begin
     Inc(i);
   end;
 
-  // BaÅŸlÄ±k
+  // Baþlýk
   View.Title.text := Ustyazi;
-  // Alt yazÄ±
+  // Alt yazý
   if Altyazi <> '' then
     View.Categories.DisplayText := Altyazi;
   // Grafiktipi
@@ -1887,7 +1887,7 @@ begin
       View.DiagramColumn.Active := true;
     end else if SQL.Strings[i + 1] = '--Bar' then begin
       View.DiagramBar.Active := true;
-    end else if SQL.Strings[i + 1] = '--Ã‡izgi' then begin
+    end else if SQL.Strings[i + 1] = '--Çizgi' then begin
       View.DiagramLine.Active := true;
     end else if SQL.Strings[i + 1] = '--Alan' then begin
       View.DiagramArea.Active := true;
@@ -1912,7 +1912,7 @@ begin
   ACanClose := false;
   {for i := 0 to ActiveChatWindow.CardView.DataController.RecordCount - 1 do
     if StrToIntDef(VarToStrDef(ActiveChatWindow.CardView.DataController.Values[i,3],'0'),0)>0 then begin
-      ShowMessage('Aktif dosya transferi iÅŸleminiz sonlanana yada iptal edilene kadar bu sayfayÄ± kapatamazsÄ±nÄ±z!');
+      ShowMessage('Aktif dosya transferi iþleminiz sonlanana yada iptal edilene kadar bu sayfayý kapatamazsýnýz!');
       ACanClose := false;
       Exit;
     end;  }
@@ -1942,14 +1942,14 @@ var
   TabSheet: TcxTabSheet;
   I: SmallInt;
 begin
-  // Ã¶nce tablodan bu bÃ¶lÃ¼me ait dÃ¶kÃ¼mler okunur
+  // önce tablodan bu bölüme ait dökümler okunur
   TabDokum.Close;
   TabDokum.SQL.text := 'select * from DOKUMLER where MODUL=''Y'' and GRUBU=''' + Modul + ''' order by 1';
   TabDokum.Open;
-  // sonra herbir dÃ¶kÃ¼m iÃ§in sekme oluÅŸturulur
+  // sonra herbir döküm için sekme oluþturulur
   if APageControl.PageCount <> TabDokum.RecordCount then
   begin
-    // EÄŸer yeni frafik eklenmiÅŸse eski grafikleri de silip baÅŸtan oluÅŸturmak gerekir
+    // Eðer yeni frafik eklenmiþse eski grafikleri de silip baþtan oluþturmak gerekir
     try
       for I := APageControl.PageCount - 1 downto 0 do
         APageControl.Pages[I].Free;
@@ -2020,14 +2020,14 @@ var
   st: TStringList;
 begin
   {st := TStringList.Create;
-  if Tablo.ListedenBilgiGetir('Åžehir seÃ§imi yapÄ±nÄ±z.',
+  if Tablo.ListedenBilgiGetir('Þehir seçimi yapýnýz.',
     'select ID=HAVADURUMUID,Sehir=ILADI from ILLER Where ILADI like ''%<ara>%'' AND HAVADURUMUID  IS NOT NULL', st, []) then begin
     HavaIl := st.Strings[0];
     Tablo.GENINI.WriteStringuser(Ops_HavaDurumu_Il, HavaIl);
     try
       HavaDurumuGuncelle;
     except
-      lblHavaDurumu.Caption := 'Â°C';
+      lblHavaDurumu.Caption := '°C';
       HavaDurumuImage := 0;
     end;
   end;
@@ -2150,7 +2150,7 @@ begin
     // DosyaAdi := ResimOlcumleme(Tablo.OpenPictureDialog1.Files[0]);
     DosyaAdi := ResimKucult(Tablo.OpenPictureDialog1.Files[0], 130);
     if DosyaAdi <> '' then begin
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'delete from IMAJ where REHBERID=' + Kullanan + ' and YERI=13 and YER_ID=' + Kullanan, [], []);
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'delete from IMAJ where REHBERID=' + Kullanan + ' and YERI=13 and YER_ID=' + Kullanan, [], []);
       ResimEkleme(DosyaAdi, StrToInt(Kullanan), 13, StrToInt(Kullanan));
       ResimGetir(StrToInt(Kullanan), 13, StrToInt(Kullanan), ProfilResim);
     end;
@@ -2218,13 +2218,13 @@ begin
    //else
    //   TopKolonu := 4;
 
-  //Ã¶nce basÄ±lan butonla ilgili dÃ¶kÃ¼mÃ¼ aÃ§alÄ±m
+  //önce basýlan butonla ilgili dökümü açalým
    SonListelenenRapor := RaporAd;
    Tablo1.Close;
    TabDokum.Close;
    TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = '''+RaporAd+'''  ';
    TabloYenile(TabDokum, []);
-   //eÄŸer dÃ¶kÃ¼m varsa iÃ§eriÄŸi listeleyelim
+   //eðer döküm varsa içeriði listeleyelim
    if TabDokum.recordcount>0 then begin
       Tablo1.SQL.Text := TabDokum.FieldByName('SQL').AsString;
       if Tablo1.Name='TabKDR' then
@@ -2263,8 +2263,8 @@ procedure TAnaGirisSayfasiFrame.pnlBankaTanimlariMouseEnter(Sender: TObject);
 
   procedure TAnaGirisSayfasiFrame.pnlImageDblClick(Sender: TObject);
 begin
-   if Application.MessageBox(PChar('Lisans sÄ±fÄ±rlanacaktÄ±r. OnaylÄ±yor musunuz'), PChar(Uyari), MB_YESNO + MB_ICONQUESTION) = IDYES then
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-1009_'' ',[],[]);
+   if Application.MessageBox(PChar('Lisans sýfýrlanacaktýr. Onaylýyor musunuz'), PChar(Uyari), MB_YESNO + MB_ICONQUESTION) = IDYES then
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-1009_'' ',[],[]);
 end;
 
 procedure TAnaGirisSayfasiFrame.pnlImagePaint(Sender: TObject);
@@ -2295,7 +2295,7 @@ end;
 procedure TAnaGirisSayfasiFrame.SetFrameBilgi(AValue: TAnaFrameBilgi);
 begin
   FFrameBilgi := AValue;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TAnaGirisSayfasiFrame.Baglan;
@@ -2335,7 +2335,7 @@ begin
     TabDokum.Append;
   sonuc := DokumSartDlg.ShowModal;
   DokumSartDlg.Destroy;
-  if TMenuItem(Sender).Name = 'YeniDokumMenu' then // 99 silinme       yeni veya silindiyse tÃ¼m sekmeler yeniden oluÅŸmalÄ±
+  if TMenuItem(Sender).Name = 'YeniDokumMenu' then // 99 silinme       yeni veya silindiyse tüm sekmeler yeniden oluþmalý
     btnAramaClick(Self)
   else
     if PageControlOrta.ActivePage <> SheetKDR then
@@ -2354,13 +2354,13 @@ var
   end;
   begin
     // kaynakDokum := TabDokum.AsString['RAPORADI'];
-    Tablo.SaveDialog1.FileName := TabDokum.AsString['RAPORADI'] + '.frd'; // dÃ¶kÃ¼m ayarlarÄ±
+    Tablo.SaveDialog1.FileName := TabDokum.AsString['RAPORADI'] + '.frd'; // döküm ayarlarý
     Tablo.SaveDialog1.Filter := '.frd';
 
     if Tablo.SaveDialog1.Execute then
     begin
       if Pos('hepsinikaydet', Tablo.SaveDialog1.FileName) > 0 then
-      begin // bÃ¼tÃ¼n raporlar kaydedilecek
+      begin // bütün raporlar kaydedilecek
         if DirectoryExists('Raporlars') then
           RemoveDir('Raporlars');
         CreateDir('Raporlars');
@@ -2386,7 +2386,7 @@ var
     begin
       if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from KOSULLAR where DOKUMID = $PID', ['PID'], [TabDokum.fields[0].AsInteger]) then
         raise Exception.Create(AGKosul_sil);
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &ID', ['&ID'], [TabDokum.fields[0].AsInteger]);
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &ID', ['&ID'], [TabDokum.fields[0].AsInteger]);
       TabDokum.Delete;
       btnAramaClick(Self)
     end;
@@ -2404,7 +2404,7 @@ begin
   if TGirisKutusuEx.BilgiAlEx(BGDokum_Rapor_Kopyala, TGirdiDenetimleri.Create.Edit(BGYeni_ad, @dokumAdi)) = mrOk then
   begin
     if Trim(dokumAdi) = '' then
-      MessageDlg('DÃ¶kÃ¼m/Rapor adÄ± boÅŸ olamaz!', mtError, [mbOK], 0)
+      MessageDlg('Döküm/Rapor adý boþ olamaz!', mtError, [mbOK], 0)
     else
     begin
       TRaporAraclari.RaporKopyala(TabDokum.fields[0].AsInteger, dokumAdi);
@@ -2439,8 +2439,8 @@ end;
 
 procedure TAnaGirisSayfasiFrame.TabDokumNewRecord(DataSet: TDataSet);
 begin
-  TabDokum.FieldByName('STANDART').AsBoolean:= True; // YÃ¶netici
-  TabDokum.FieldByName('MODUL').AsString := 'Y'; // YÃ¶netici
+  TabDokum.FieldByName('STANDART').AsBoolean:= True; // Yönetici
+  TabDokum.FieldByName('MODUL').AsString := 'Y'; // Yönetici
   TabDokum.FieldByName('GRUBU').AsString := StringReplace(PageControlOrta.ActivePage.Caption, 'SheetYonetim', '', [rfReplaceAll]);
   EkleyenDegistiren(TabDokum);
 end;
@@ -2516,7 +2516,7 @@ begin
  { try
     HavaDurumuGuncelle;
   except
-    lblHavaDurumu.Caption := 'Â°C';
+    lblHavaDurumu.Caption := '°C';
     HavaDurumuImage := 0;
   end;}
 end;
@@ -2754,10 +2754,10 @@ begin
       begin
         for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do
           (Sender as TcxTextEdit).Properties.Buttons[i].Enabled := false;
-        MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+        MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
           'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
           [2, Kullanan, '<' + MsgDosyaPaylasiminiKabulEttiniz + ':' + FSaveDialog.FileName + '>'], true);
-        MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+        MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
           'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
           [VarToStr(MesajLogID), FUserId], true);
         EditChatMessage(FUserId,fsi.ReferenceId,'<' + MsgDosyaPaylasiminiKabulEttiniz + ':' + FSaveDialog.FileName + '>',False);
@@ -2770,10 +2770,10 @@ begin
     end else if AButtonIndex = 1 then begin
       for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do (Sender as TcxTextEdit)
         .Properties.Buttons[i].Enabled := false;
-      MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+      MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
         'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
         [2, Kullanan, '<' + MsgDosyaPaylasiminiReddettiniz + ':' + fsi.FFileName + '>'], true);
-      MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+      MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
         'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
         [VarToStr(MesajLogID), FUserId], true);
       Msg := Format('FSDECLINED %d %s %s %d', [fsi.FromServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), fsi.ReferenceId * -1]);
@@ -2798,10 +2798,10 @@ begin
   refId := FCardView.DataController.Values[FCardView.DataController.EditingRecordIndex, 3];
   fsi := FindFileSendById(refId);
 
-  MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+  MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
     'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
     [2, Kullanan, '<' + MsgDosyaPaylasiminiIptalEttiniz + ':' + fsi.FFileName + '>'], true);
-  MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+  MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
     'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
     [VarToStr(MesajLogID), FUserId], true);
   Msg := Format('FSCANCELLED %d %s %s %d', [fsi.FToServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), fsi.ReferenceId]);
@@ -2964,8 +2964,8 @@ var
   refId: Integer;
   fsi: TFileSendInfo;
 begin
-  // butonlar ve click evenlerini oluÅŸturalÄ±m..
-  // dosyayÄ± gÃ¶nderirken mesaj bizde <Dosya Transferi:C:\dosyayolu\dosyaadÄ±> ÅŸeklinde gÃ¶zÃ¼kÃ¼rken alÄ±cÄ±da <Dosya Transferi:dosyaadÄ±> ÅŸeklindedir.
+  // butonlar ve click evenlerini oluþturalým..
+  // dosyayý gönderirken mesaj bizde <Dosya Transferi:C:\dosyayolu\dosyaadý> þeklinde gözükürken alýcýda <Dosya Transferi:dosyaadý> þeklindedir.
   refId := ARecord.Values[3];
   fsi := FindFileSendById(refId);
   AProperties.Buttons.Clear;
@@ -3077,9 +3077,9 @@ begin
 
    TabKDR.Close;
    TabDokum.Close;
-   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_SONUC''  ';
+   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_SONUÇ''  ';
    TabloYenile(TabDokum, []);
-   //eÄŸer dÃ¶kÃ¼m varsa iÃ§eriÄŸi listeleyelim
+   //eðer döküm varsa içeriði listeleyelim
    if TabDokum.recordcount>0 then begin
       ToplamAktif := 0;
       ToplamPasif := 0;
@@ -3207,7 +3207,7 @@ begin
       Tablo.SiparisSihirbazBaslat('E', Sonuc,0, -1, -1)
    else if Sonuc in [10..16] then begin
       if Sonuc=11 then
-        Sonuc := 0 //0:belge giriÅŸi  1:belge Ã§Ä±kÄ±ÅŸÄ±
+        Sonuc := 0 //0:belge giriþi  1:belge çýkýþý
       else
         Sonuc := 1;
       Tablo.FaturaSihirbazBaslat('E', Sonuc,-1, -1,0)
@@ -3224,9 +3224,9 @@ var I:smallint;
 begin
    TabKDR.Close;
    TabDokum.Close;
-   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_STOK_SONUÃ‡''  ';
+   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_STOK_SONUÇ''  ';
    TabloYenile(TabDokum, []);
-   //eÄŸer dÃ¶kÃ¼m varsa iÃ§eriÄŸi listeleyelim
+   //eðer döküm varsa içeriði listeleyelim
    if TabDokum.recordcount>0 then begin
       TabKDR.SQL.Text := TabDokum.FieldByName('SQL').AsString;
       TabloYenile(TabKDR, [FormatDateTime('yyyy-mm-dd 00:00', CalendarDonemBas.Date), FormatDateTime('yyyy-mm-dd 23:59', CalendarDonemSon.Date)]);
@@ -3280,7 +3280,7 @@ begin
     if (CheckTahsilat.Checked)and(CheckOdeme.Checked) then s:=s+' (TUR=61 or TUR=71) '
     else if CheckTahsilat.Checked then s:=s+' (TUR=61) '
     else if CheckOdeme.Checked then s:=s+' (TUR=71) '
-    else s:=s+' TUR=9999 ';  // hiÃ§ iÅŸaretlenmediyse
+    else s:=s+' TUR=9999 ';  // hiç iþaretlenmediyse
     TabListe.SQL.Text := SQLListe.Text + ' PLANTARIHI <= '''+FormatDateTime('yyyy-MM-dd 23:59', DateTimeListeBitis.Date)+''' '+s+' order by 2 ';
     TabloYenile( TabListe, []);
   end;
@@ -3291,17 +3291,17 @@ var
   OlusanSQL: string;
 begin
  OlusanSQL:='';
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[0]=cbsChecked then begin  //Odeme PlanÄ±
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[0]=cbsChecked then begin  //Odeme Planý
            OlusanSQL:= ' Union All '+SqlGrafikOdemePlan.Lines.Text;
-//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[0]=cbsChecked then begin  //Tahsilat PlanÄ±
+//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[0]=cbsChecked then begin  //Tahsilat Planý
            OlusanSQL:= OlusanSQL +' Union All '+SqlGrafikTahsilatPlan.Lines.Text;
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[1]=cbsChecked then begin  //KK
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikKK.Lines.Text;
 //bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[1]=cbsChecked then begin  //POS
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikPOS.Lines.Text;
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then begin  //Ã‡ek
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then begin  //Çek
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikCekKendi.Lines.Text;
-//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then begin  //Ã‡ek
+//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then begin  //Çek
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikCekMusteri.Lines.Text;
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[3]=cbsChecked then begin  //Senet
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikSenetKendi.Lines.Text;
@@ -3313,7 +3313,7 @@ begin
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikGelir.Lines.Text;
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then begin  //Gider
             OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikGider.Lines.Text;
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then begin  //MaaÅŸ
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then begin  //Maaþ
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikMaas.Lines.Text;
   TabGrafik.Close;
   TabGrafik.SQL.Text:=StringReplace(SqlMemoGrafik.Lines.Text,'_SQLMEMO_',OlusanSQL,[rfReplaceAll]);
@@ -3322,7 +3322,7 @@ begin
          TabGrafik.SQL.Add('select * from GRAFIKPLAN_SPID ORDER by TARIH');
        end;
        2:begin
-         TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar gÃ¼nlerini listelele
+         TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar günlerini listelele
        end;
        -1,3:begin
          TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112)  from GRAFIKPLAN_SPID'+
@@ -3352,7 +3352,7 @@ end;
 
 procedure TAnaGirisSayfasiFrame.ExcelPivot1Click(Sender: TObject);
 begin
-  Tablo.SaveDialog1.FileName := 'Nakit AkÄ±ÅŸ Pivot-'+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+'.xlsx';
+  Tablo.SaveDialog1.FileName := 'Nakit Akýþ Pivot-'+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+'.xlsx';
   if Tablo.SaveDialog1.Execute then begin
     if ExportToExcelPivot(Tablo.SaveDialog1.FileName,FGrid,FGridTableView,pivot) then
       ShellExecute(0,'open',PWideChar(Tablo.SaveDialog1.FileName),nil,nil,SW_SHOW);
@@ -3499,7 +3499,7 @@ end else if PageControl.ActivePage=TabSheetPivot then begin
     case AylikHaftalikGunluk  of
       0:begin
           LabelBittar.Date := Tablo.Genini.buguntrh + 30;
-          TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot](:PSonTarih)'; //gÃ¼nlÃ¼k
+          TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot](:PSonTarih)'; //günlük
         end;
       2:begin
           LabelBittar.Date := Tablo.Genini.buguntrh + 90;
@@ -3523,7 +3523,7 @@ end else begin
          end;
        2:begin
            DateGrafikBitTar := Tablo.GENINI.BugunTrh+90;
-           TabGrafik.SQL.Text:='Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' and ';//Pazar gÃ¼nlerini listelele
+           TabGrafik.SQL.Text:='Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' and ';//Pazar günlerini listelele
          end;
        3:begin
            DateGrafikBitTar := Tablo.GENINI.BugunTrh+365;
@@ -3534,9 +3534,9 @@ end else begin
     TabGrafik.SQL.Add( '  TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+
                         FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBitTar)+'''  Order by TARIH');
     TabloYenile(TabGrafik,[]);
-    GridGrafikDBChartView.DiagramColumn.AxisValue.GridLines := true; // grid Ã§izgileri
-    GridGrafikDBChartView.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarÄ± gÃ¶sterir
-    GridGrafikDBChartView.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // Ã¼stte deÄŸerlerinin gÃ¶rÃ¼nmesini saÄŸlar
+    GridGrafikDBChartView.DiagramColumn.AxisValue.GridLines := true; // grid çizgileri
+    GridGrafikDBChartView.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarý gösterir
+    GridGrafikDBChartView.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // üstte deðerlerinin görünmesini saðlar
   end;
 end;
 
@@ -3566,21 +3566,21 @@ begin
             Ekle(MemoTakvimTahsilatPlan.Lines.Text);
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[1]=cbsChecked then //KK
             Ekle(MemoTakvimPlanKK.Lines.Text);
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then //Ã‡ekimiz
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then //Çekimiz
             Ekle(MemoTakvimCekKendi.Lines.Text);
-//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then //MÃ¼ÅŸteri Ã‡ek
+//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then //Müþteri Çek
             Ekle(MemoTakvimCekMusteri.Lines.Text);
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[3]=cbsChecked then //Senetimiz
             Ekle(MemoTakvimSenetKendi.Lines.Text);
-//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[3]=cbsChecked then //MÃ¼ÅŸteri Senet
+//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[3]=cbsChecked then //Müþteri Senet
             Ekle(MemoTakvimSenetMusteri.Lines.Text);
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then //MaaÅŸ
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then //Maaþ
             Ekle(MemoPlanMaas.Lines.Text);
 //bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[5]=cbsChecked then //Kredi
             Ekle(MemoPlanKredi.Lines.Text);
-//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then //Gider BÃ¼tÃ§e
+//bak         if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then //Gider Bütçe
             Ekle(MemoTakvimGider.Lines.Text);
-//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[4]=cbsChecked then //Gelir BÃ¼tÃ§e
+//bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[4]=cbsChecked then //Gelir Bütçe
             Ekle(MemoTakvimGelir.Lines.Text);
 //bak         if FTakvimAksiyonlar.GelirFiltreCheck.States[1]=cbsChecked then //POS
             Ekle(MemoTakvimPOS.Lines.Text);

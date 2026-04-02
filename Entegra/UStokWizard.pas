@@ -809,8 +809,8 @@ var
 begin
   Brkd := 0;
   Brm := TabStok.FieldByName('ANABIRIM').AsInteger;
-  ctrls := TGirdiDenetimleri.Create.ImageComboBox('Barkod Tipi Se?imi',@Brkd,Tablo.FDCnn,'select 0,''Kullan?c?'' union all select ID,AD from BARKODAYARLAR ')
-                                   .ImageComboBox('Birim Se?imi',@Brm,Tablo.FDCnn,'select '+TabStok.FieldByName('ANABIRIM').AsString+','''+ComboANABIRIM.Text+''' union all select '+TabStok.FieldByName('BIRIM2').AsString+','''+ComboBIRIM2.Text+'''');
+  ctrls := TGirdiDenetimleri.Create.ImageComboBox('Barkod Tipi Seçimi',@Brkd,Tablo.FDCnn,'select 0,''Kullanýcý'' union all select ID,AD from BARKODAYARLAR ')
+                                   .ImageComboBox('Birim Seçimi',@Brm,Tablo.FDCnn,'select '+TabStok.FieldByName('ANABIRIM').AsString+','''+ComboANABIRIM.Text+''' union all select '+TabStok.FieldByName('BIRIM2').AsString+','''+ComboBIRIM2.Text+'''');
   if TGirisKutusuEx.BilgiAlEx(BGBilgi,ctrls) = mrOk then begin
     if TabBarkod.IsEmpty then
       Varsayilanmi:=1
@@ -998,7 +998,7 @@ procedure TStokWizardDlg.Burayaekstralarkopyala1Click(Sender: TObject);
 var st : Tstringlist;
   sql:string;
 begin
-    sql := ' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok Ad?] FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD like ''<ara>%'' or S.STOKADI like ''<ara>%'') ';
+    sql := ' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok Adý] FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD like ''<ara>%'' or S.STOKADI like ''<ara>%'') ';
     st := Tstringlist.create;
     if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
 
@@ -1040,17 +1040,17 @@ begin
   Tablo.Query1.SQL.Add('where SB.ID='+VarToStr(CbStkBytKmbn.EditValue));
   Tablo.TablodanSorguAc(2,'select * from STOKBOYUTGRUPLARI where ID='+VarToStr(CbStkBytKmbn.EditValue));
   if (Tablo.Query2.FieldByName('BOYUT1').Value <> null)or(Tablo.Query2.FieldByName('BOYUT1').AsInteger <> 0) then begin
-    Snc1 := Tablo.ListedenCokluSecim('Boyut Se?imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT1').AsString,[],[]);
+    Snc1 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT1').AsString,[],[]);
     if Snc1.Count>0 then
       Tablo.Query1.SQL.Add(' and G1.DEGER in('+Snc1.Join(',')+') ');
   end;
   if (Tablo.Query2.FieldByName('BOYUT2').Value <> null)or(Tablo.Query2.FieldByName('BOYUT2').AsInteger <> 0) then begin
-    Snc2 := Tablo.ListedenCokluSecim('Boyut Se?imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT2').AsString,[],[]);
+    Snc2 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT2').AsString,[],[]);
     if Snc2.Count>0 then
       Tablo.Query1.SQL.Add(' and G2.DEGER in('+Snc2.Join(',')+') ');
   end;
   if (Tablo.Query2.FieldByName('BOYUT3').Value <> null)or(Tablo.Query2.FieldByName('BOYUT3').AsInteger <> 0) then begin
-    Snc3 := Tablo.ListedenCokluSecim('Boyut Se?imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT3').AsString,[],[]);
+    Snc3 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT3').AsString,[],[]);
     if Snc3.Count>0 then
       Tablo.Query1.SQL.Add(' and G3.DEGER in('+Snc3.Join(',')+') ');
   end;
@@ -1302,7 +1302,7 @@ var
   SubMenuItem:TMenuItem;
   i,j:Integer;
 begin
-  Tablo.TablodanSorguAc(4,'select distinct BA.ID,BA.AD from STOKBARKOD SB inner join (select ID=0,AD=''Kullan?c?'' union all select ID,AD from BARKODAYARLAR) BA on SB.BARKODTIPI=BA.ID where SB.STOKID='+IntToStr(STOKID));
+  Tablo.TablodanSorguAc(4,'select distinct BA.ID,BA.AD from STOKBARKOD SB inner join (select ID=0,AD=''Kullanýcý'' union all select ID,AD from BARKODAYARLAR) BA on SB.BARKODTIPI=BA.ID where SB.STOKID='+IntToStr(STOKID));
   //?retilebilinecek barkod tipleri burada ilk item alt?na doldurulur..
   for j := ret1.Count-1 downto 0 do
     ret1.Items[j].Destroy;
@@ -1611,8 +1611,8 @@ procedure TStokWizardDlg.EkleStokEsdegerClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
-  sql:=' SELECT top 100 S.ID,S.KOD as Kod,S.STOKADI as [Stok Ad?],TIPI AS [Tip],MARKA AS Marka,'+
-  ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [?zellik],IZLEME AS [?zleme] '+
+  sql:=' SELECT top 100 S.ID,S.KOD as Kod,S.STOKADI as [Stok Adý],TIPI AS [Tip],MARKA AS Marka,'+
+  ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ýzleme] '+
   ' FROM STOKLAR S '+
   ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))   '+
   ' Where S.STOKADI like ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' ';
@@ -1645,7 +1645,7 @@ procedure TStokWizardDlg.EkstraEkleTusClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
-    sql := ' select ID,TIPI=case when TUR=1 then ''Tek'' else ''?ok'' end, SECIMADI from SECIMLER where BAGID=0 and SECIMADI like ''<ara>%''  order by 2,3 ';
+    sql := ' select ID,TIPI=case when TUR=1 then ''Tek'' else ''çok'' end, SECIMADI from SECIMLER where BAGID=0 and SECIMADI like ''<ara>%''  order by 2,3 ';
     st := Tstringlist.create;
       if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
          Tablo.TablodanSorguAc(1,'Select * from STOKSECIM Where STOKID='+inttostr(StokID)+' and  SECIMID='''+st.Strings[0]+''' ');
@@ -1707,7 +1707,7 @@ end;
 
 procedure TStokWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if (Sontus='I') and ((IslemOp='E')or (IslemOp='K')) and(TabStok.Fields[0].AsString <> '') then begin
+  if (Sontus='I') and ((IslemOp='E')or (IslemOp='K')) and(TabStok.Fields[0].AsString <> '')and(TabStok.Fields[0].AsInteger > 0) then begin
     //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
     Tablo.StoksilmeIslemleri(StokID);
     //islemKopyala:='';
@@ -1730,7 +1730,7 @@ begin
      BtnBoyut.Caption := 'Renk-Beden'
   else if Sektor = Sektor_Fayans then begin
      cxLabel8.Caption := 'Seri'; //i?erik
-     Label16.Caption := '?l??'; //?zelkod
+     Label16.Caption := 'ölçü'; //özelkod
   end;
   if CokluDilVar then
      LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
@@ -1830,8 +1830,8 @@ begin
   TekUrunNo := Tablo.GENINI.ReadBoolean(Ops_CheckUrunNoTek, True);
   BtnSecimler.visible := Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest];
   if Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest] then begin
-     CheckPaket.Caption := 'Men?';
-     PaketEkr.Title.Text := 'Men? Bilgileri';
+     CheckPaket.Caption := 'Menü';
+     PaketEkr.Title.Text := 'Menü Bilgileri';
   end;
 
    if not TarayiciKullanimda then begin
@@ -2309,7 +2309,7 @@ procedure TStokWizardDlg.MenuAnaBirimDegisClick(Sender: TObject);
 var Birim:Variant;
 begin
    if TGirisKutusuEx.BilgiAlEx(TabStok.FieldByName('STOKADI').AsString ,
-      TGirdiDenetimleri.Create.ImageComboBox('Yeni Stok Birimi Se?in',@Birim,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where BOLUM = -2702 and DIL=-1 order by 2',False,nil)) <> mrOk then
+      TGirdiDenetimleri.Create.ImageComboBox('Yeni Stok Birimi Seçin',@Birim,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where BOLUM = -2702 and DIL=-1 order by 2',False,nil)) <> mrOk then
       Abort;
 
    if StrToIntDef(VarToStr(Birim),0)>0 then begin
@@ -2387,7 +2387,7 @@ procedure TStokWizardDlg.DetayKopyala1Click(Sender: TObject);
 var Sonuclar:TStringList;
 begin
   Sonuclar := TStringList.Create;
-  if Tablo.ListedenBilgiGetir('Stok Se?imi','select ID,KOD,STOKADI,DETAYBOLUMU from STOKLAR where (KOD like ''<ara>%'' or STOKADI like ''<ara>%'') and ISNULL(DETAYBOLUMU,'''')<>''''',Sonuclar,[],'') then begin
+  if Tablo.ListedenBilgiGetir('Stok Seçimi','select ID,KOD,STOKADI,DETAYBOLUMU from STOKLAR where (KOD like ''<ara>%'' or STOKADI like ''<ara>%'') and ISNULL(DETAYBOLUMU,'''')<>''''',Sonuclar,[],'') then begin
     TabStok.Edit;
     TabStok.FieldByName('DETAYBOLUMU').AsString := Sonuclar[3];
     //TabStok.Post;   kendisi post ediyor..
@@ -2589,9 +2589,9 @@ end;
 
 procedure TStokWizardDlg.TabFiyatBeforePost(DataSet: TDataSet);
 begin
-   if not BoslukKontrol(TabFiyat.FieldByName('FIYATADI').AsString, 'Fiyat ad?') then Abort;
+   if not BoslukKontrol(TabFiyat.FieldByName('FIYATADI').AsString, 'Fiyat adý') then Abort;
    if not BoslukKontrol(TabFiyat.FieldByName('BIRIM').AsString, 'Birimi') then Abort;
-   if not BoslukKontrol(TabFiyat.FieldByName('FIYAT').AsString, 'Fiyat?') then Abort;
+   if not BoslukKontrol(TabFiyat.FieldByName('FIYAT').AsString, 'Fiyatý') then Abort;
    if not BoslukKontrol(TabFiyat.FieldByName('KUR').AsString, 'Para birimi') then Abort;
    EkleyenDegistiren(DtsFiyat);
    if CheckPaket.Checked then
@@ -2717,7 +2717,7 @@ begin
   if not BoslukKontrol(EditKOD.text, KontrolStokKodu) then Abort;
 
   if EditKOD.Text='0' then begin
-     Application.MessageBox(pchar('Kod S?f?r(0) olamaz'),'U Y A R I',MB_OK);
+     Application.MessageBox(pchar('Kod Sýfýr(0) olamaz'),'U Y A R I',MB_OK);
      Abort;
   end;
 
@@ -3107,7 +3107,7 @@ begin
      DETAY.post;
 
   if EkleDetay then
-     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'De?i?');
+     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Deðiþ');
    StokID :=  TabStok.Fields[0].AsInteger;
    //islemKopyala := '';
    Sontus := 'K';//kaydet butonu

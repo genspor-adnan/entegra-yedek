@@ -659,6 +659,8 @@ type
       Shift: TShiftState);
   private
     { Private declarations }
+    FSkipDetailAfterScroll: Boolean;
+    FDeferredCalcInitDone: Boolean;
     FFrameBilgi : TIcerikFrameBilgi;
     AraDlg : TStokHizmetAraDlg;
     KuraGoreFiyatHesaplamaAlani:integer ; //faturaadetchange olayýnda kullanýlýyor bu deðiþken
@@ -749,14 +751,15 @@ begin
   AFastReport.EnabledDataSets.Clear;
   if TabSiparis.State in [dsEdit,dsInsert] then
      TabSiparis.Post;
-  TabloYenile(TabSiparis, [SiparisIdsi]);
   if TabSiparisDetay.State in [dsEdit,dsInsert] then
      TabSiparisDetay.Post;
-  TabloYenile(TabSiparisDetay, [TabSiparis.FieldByName('ID').AsInteger]);
+  TabloYenile(SIPARIS, [SiparisIdsi]);
+  TabloYenile(SIPARISDETAY, [SiparisIdsi]);
+  frxTabSiparis.DataSet := SIPARIS;
+  frxTabSiparisDetay.DataSet := SIPARISDETAY;
   if Tablo.SQL_Komutlu_Yazdirma(TForm(ToolBar1.Owner), DokumAdi, EkranAdi, frxTabSiparis) then
     AFastReport.EnabledDataSets.Add(frxTabSiparis)
   else begin
-    frxTabSiparis.DataSet := TabSiparis;
     AFastReport.EnabledDataSets.Add(frxTabSiparis);
     AFastReport.EnabledDataSets.Add(frxTabSiparisDetay);
     Tablo.TabMusteri.Close;
@@ -958,7 +961,7 @@ begin
   plandetID := TabSiparisDetay.FieldByName('URETIMPLANDETAYID').Value;
   while not TabSiparisDetay.Eof do begin
     if TabSiparisDetay.FieldByName('URETIMPLANDETAYID').Value <> plandetID then begin
-      ShowMessage('Kullanýlmýþ ya da kapatýlmýþ satýrlar mevcut, lütfen her satýr için ayrý i?lem uygulayýn.');
+      ShowMessage('Kullanýlmýþ ya da kapatýlmýþ satýrlar mevcut, lütfen her satýr için ayrý iþlem uygulayýn.');
       Exit(False);
     end;
     TabSiparisDetay.Next;
@@ -969,7 +972,7 @@ procedure TSiparisWizardDlg.BeditProjePropertiesButtonClick(Sender: TObject;  AB
 begin
   Tablo.EditButtonaPROJEIDGonder(BeditProje,TabSiparis,AButtonIndex,ProjeSecimi, TabSiparis.FieldByName('REHBERID').AsInteger);
   if TabSiparis.FieldByName('PROJEID').AsInteger > 0 then
-    if Tablo.UyariGoster('Proje Seçimi','Seçmiþ olduðunuz proje, belgenizin tüm satýrlar?na uygulansýn mý?',2)=MrYes then
+    if Tablo.UyariGoster('Proje Seçimi','Seçmiþ olduðunuz proje, belgenizin tüm satýrlarýna uygulansýn mý?',2)=MrYes then
       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARISDETAY set PROJEID=&PrjID where SIPARISID=&FatbasID',['&PrjID','&FatbasID'],[TabSiparis.FieldByName('PROJEID').AsInteger,TabSiparis.FieldByName('ID').AsInteger]);
   TabloYenile(TabSiparisDetay, [TabSiparis.FieldByName('ID').AsInteger]);
 end;
@@ -1254,6 +1257,10 @@ var
   KurDegeri : currency;
   Guncel : boolean;
 begin
+  TabSiparisDetay.AutoCalcFields := False;
+  FSkipDetailAfterScroll := True;
+  TabSiparisDetay.DisableControls;
+  try
   SiparisWizardDlg.Height:= Screen.Height- round(Screen.Height*0.1);
   EkleDetay := False;
   Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1,DtsTabSiparis);
@@ -1495,6 +1502,27 @@ begin
     Yzdeskontosu1.Visible := False;
     utarDvzHesapla1.Visible := False;
   end;
+
+  finally
+    TabSiparisDetay.EnableControls;
+    FSkipDetailAfterScroll := False;
+    TabSiparisDetayAfterScroll(TabSiparisDetay);
+  end;
+
+  if not FDeferredCalcInitDone then begin
+    FDeferredCalcInitDone := True;
+    TThread.Queue(nil,
+      procedure
+      begin
+        if csDestroying in ComponentState then
+          Exit;
+        TabSiparisDetay.AutoCalcFields := True;
+        if TabSiparisDetay.Active then
+          TabSiparisDetay.Refresh;
+      end);
+  end else
+    TabSiparisDetay.AutoCalcFields := True;
+
   if (TabSiparis.FieldByName('REHBERID').AsInteger < 0)and(TabSiparis.FieldByName('TUR').AsInteger <> 101) then
       LabelKodClick(Self);
 end;
@@ -1998,6 +2026,9 @@ end;
 
 procedure TSiparisWizardDlg.TabSiparisDetayAfterScroll(DataSet: TDataSet);
 begin
+   if FSkipDetailAfterScroll then
+      Exit;
+
    if TabSiparisDetay.Active then begin
       if not TabSiparisDetay.IsEmpty then
          Tabloyenile(TabYorum, [TabNo_SIPARISDETAY, TabSiparisDetay.FieldByName('ID').AsInteger])
@@ -2030,7 +2061,7 @@ var
   end;
 begin
   if StrToIntDef(TabSiparis.FieldByName('ONAYLAYAN').AsString,0) <> 0 then begin
-    if Tablo.UyariGoster(Uyari,'Yaptýðýnýz deðiþiklik sipari? onayýný kaldýracaktýr, devam etmek ister misiniz?',2)=mrYes then
+    if Tablo.UyariGoster(Uyari,'Yaptýðýnýz deðiþiklik sipariþ onayýný kaldýracaktýr, devam etmek ister misiniz?',2)=mrYes then
       EditOnaylayanPropertiesButtonClick(Nil,1)
     else
       Abort;
@@ -2491,7 +2522,7 @@ begin
         Bakiye := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select TUTAR=isnull((select TUTAR=sum(DOVIZ_TUTARI) from REHBER_BAKIYE where REHBERID=:PRehberID),0.0)',[':PRehberID'],[TabSiparis.FieldByName('REHBERID').AsInteger],True);
         if Kota<(Bakiye+TabSiparis.FieldByName('SIPARIS_TUTARI').AsCurrency) then
            Tablo.UyariGoster(Uyari,'Firma Risk Limiti   :'+Format('%m',[Kota])+CariDoviz+#13#10+'Firma Bakiyesi:'+Format('%m',[Bakiye])+CariDoviz+#13#10+
-                                '"Risk Limiti" a??m?. L?tfen "Risk Limiti" bilgilerini göncelleyin.',1)
+                                '"Risk Limiti" aþýmý. Lütfen "Risk Limiti" bilgilerini güncelleyin.',1)
      end;
   end;
 
@@ -2634,7 +2665,7 @@ begin
       ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
       ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
       ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
-    if Tablo.ListedenBilgiGetir('Adres Se?iniz.',SQLText,st,[],'',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
+    if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
        TabSiparis.FieldByName('REHBERILETID').AsString := st.Strings[0];
        btnSevkAdresi.Text := st.Strings[1];
       end;
@@ -2796,7 +2827,7 @@ var st : Tstringlist;
   site : TcxGridSite;
 begin
   st := Tstringlist.Create;
-  if Tablo.ListedenBilgiGetir('Se?iniz',tab.FieldByName('KAYNAK').AsString,st,[])then begin
+  if Tablo.ListedenBilgiGetir('Seçiniz',tab.FieldByName('KAYNAK').AsString,st,[])then begin
     TcxButtonEdit(Sender).EditValue := st.Strings[0];
     TcxButtonEdit(Sender).PostEditValue;
   end;
@@ -2897,6 +2928,12 @@ begin
 end;
 
 end.
+
+
+
+
+
+
 
 
 

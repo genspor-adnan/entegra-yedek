@@ -53,16 +53,16 @@
 {$WARN UNSAFE_CAST ON}
 {-------------------------------------------------------------------------------
 ************************************GENYAZILIM**********************************
-Sms iþlemleri için kullanýlan unit
+Sms iï¿½lemleri iï¿½in kullanï¿½lan unit
 ----------------------------------------------
-Deðiþiklikler
+Deï¿½iï¿½iklikler
 ----------------------------------------------
-26/10/2006 Oluþturma
-Ayhan ÇALIÞKAN- Necdet Çetinkaya
+26/10/2006 Oluï¿½turma
+Ayhan ï¿½ALIï¿½KAN- Necdet ï¿½etinkaya
 
-Ýpuçlarý
+ï¿½puï¿½larï¿½
 --------------------------------------
-Mesaj gönderilen XML dosyalarý, EXE nin bulunduðu root ta XML klasörüne kaydediliyor.
+Mesaj gï¿½nderilen XML dosyalarï¿½, EXE nin bulunduï¿½u root ta XML klasï¿½rï¿½ne kaydediliyor.
 
 -------------------------------------------------------------------------------}
 
@@ -72,7 +72,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls,
-  Dialogs, StdCtrls, IdHTTP, MSXML_TLB, UFDCompatHelpers, Ucombo, forms,XMLDoc,XMLIntf;
+  Dialogs, StdCtrls, IdHTTP, UFDCompatHelpers, Ucombo, forms, XMLDoc, XMLIntf, ComObj;
 
 type TSmsKontorSonucu = record
     KontorMiktari: string;
@@ -178,21 +178,21 @@ begin
   end;
   }
   {-------------------------------------
-  UYGUNSUZ KARAKTERLERÝN ELENMESÝ
+  UYGUNSUZ KARAKTERLERï¿½N ELENMESï¿½
   --------------------------------------}
 
-  mesaj := StringReplace(mesaj, 'Ç', 'C', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'Ð', 'G', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'Ý', 'I', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'Ö', 'O', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'Þ', 'S', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'Ü', 'U', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'ü', 'u', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'ç', 'c', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'ý', 'i', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'þ', 's', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'ð', 'g', [rfReplaceAll]);
-  mesaj := StringReplace(mesaj, 'ö', 'o', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'C', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'G', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'I', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'O', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'S', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'U', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'u', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'c', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'i', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 's', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'g', [rfReplaceAll]);
+  mesaj := StringReplace(mesaj, 'ï¿½', 'o', [rfReplaceAll]);
   Result := mesaj;
 
 end;
@@ -212,7 +212,7 @@ end;
 
 function SMSKontorSorgula: TSmsKontorSonucu;
 var
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
   XMLStructe, DonusBilgisi: TStringList;
       //DonusBilgisi:String;
   link: string;
@@ -228,52 +228,52 @@ begin
     try
       XMLStructe.Text := '<?xml version="1.0" encoding="ISO-8859-9"?>' +
         '<Main><UserName>' + SMSHesapBilgileri.SMSKullaniciAdi + '</UserName><PassWord>' + SMSHesapBilgileri.SMSSifre + '</PassWord></Main>';
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://secure.smsnext.com/developer/bulksmsv2/queryKontor.asp', False);
             //ID:1310411
       HTTPReq.send(XMLStructe.Text);
       DonusBilgisi.Text := HTTPReq.responseText;
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end;
     if copy(DonusBilgisi.Strings[0], 1, 2) = 'WP' then
     begin
-                  //Hata Oluþtu demektir bunlarý bi alalým
-                  //Dönen Hata kodlarý
-                  //WP:00  Hatalý Kullanýcý Adý yada Þifresi
-                  //WP:01  Geçersiz IP Adresi
-                  //WX:02  Kontörlu Hesap Deðil
-                  //WX:03  Kontör Hatasý
-                  //WP:90   XML Hatasý
+                  //Hata Oluï¿½tu demektir bunlarï¿½ bi alalï¿½m
+                  //Dï¿½nen Hata kodlarï¿½
+                  //WP:00  Hatalï¿½ Kullanï¿½cï¿½ Adï¿½ yada ï¿½ifresi
+                  //WP:01  Geï¿½ersiz IP Adresi
+                  //WX:02  Kontï¿½rlu Hesap Deï¿½il
+                  //WX:03  Kontï¿½r Hatasï¿½
+                  //WP:90   XML Hatasï¿½
       Donen.HataKodu := copy(DonusBilgisi.Strings[0], 4, 2);
       if Donen.HataKodu = '00' then
-        Donen.Mesaj := 'Hatalý Kullanýcý Adý yada Þifresi'
+        Donen.Mesaj := 'Hatalï¿½ Kullanï¿½cï¿½ Adï¿½ yada ï¿½ifresi'
       else if Donen.HataKodu = '01' then
-        Donen.Mesaj := 'Geçersiz IP Adresi'
+        Donen.Mesaj := 'Geï¿½ersiz IP Adresi'
       else if Donen.HataKodu = '02' then
-        Donen.Mesaj := 'Kontörlü Hesap Deðil'
+        Donen.Mesaj := 'Kontï¿½rlï¿½ Hesap Deï¿½il'
       else if Donen.HataKodu = '03' then
-        Donen.Mesaj := 'Kontör Hatasý'
+        Donen.Mesaj := 'Kontï¿½r Hatasï¿½'
       else if Donen.HataKodu = '90' then
-        Donen.Mesaj := 'XML Hatasý';
+        Donen.Mesaj := 'XML Hatasï¿½';
       Donen.KontorMiktari := '0';
     end
     else
     begin
-                  // Hata Yoksa Kontör miktarýný ve mesajýný oluþturalým
+                  // Hata Yoksa Kontï¿½r miktarï¿½nï¿½ ve mesajï¿½nï¿½ oluï¿½turalï¿½m
       Donen.HataKodu := '-1';
       Donen.KontorMiktari := DonusBilgisi.Strings[0];
-      Donen.Mesaj := 'Kontör Son kullaným tarihi :' + copy(DonusBilgisi.Strings[1], 7, 2) + '/' + copy(DonusBilgisi.Strings[1], 5, 2) + '/' + copy(DonusBilgisi.Strings[1], 1, 4);
+      Donen.Mesaj := 'Kontï¿½r Son kullanï¿½m tarihi :' + copy(DonusBilgisi.Strings[1], 7, 2) + '/' + copy(DonusBilgisi.Strings[1], 5, 2) + '/' + copy(DonusBilgisi.Strings[1], 1, 4);
     end;
   end // if SMSHesapBilgileri.SMSServisSaglayici = 'SmsNext'
 
   else if SMSHesapBilgileri.SMSServisSaglayici = 'BioTekno' then
   begin
-            //Dönen Kodlar
-            //20 Geçersiz  xml file
-            //10 Kullanýcý Kodu / Þifresi hatalý
-            //90 Sistem hatasý
+            //Dï¿½nen Kodlar
+            //20 Geï¿½ersiz  xml file
+            //10 Kullanï¿½cï¿½ Kodu / ï¿½ifresi hatalï¿½
+            //90 Sistem hatasï¿½
     InHttp := TIdHTTP.Create(nil);
             //HTTPReq:=TXMLHTTPRequest.Create(nil);
     link := 'http://biotekno.biz:8080/SMS-Web/examine?username=' + SMSHesapBilgileri.SMSKullaniciAdi + '&password=' + SMSHesapBilgileri.SMSSifre + '&type=charge';
@@ -295,7 +295,7 @@ end;
 
 function TopluSmsAt(Mesajlar: array of TSmsMesaj; Bastar, Bittar: TDateTime; Zamanli: boolean): TSmsMesajSonuc;
 var
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
   XMLStructe, DonusBilgisi: TStringList;
   i,x: Integer;
   donen: TSmsMesajSonuc;
@@ -309,7 +309,7 @@ begin
   DonusBilgisi := TStringList.Create;
   if SMSHesapBilgileri.SMSServisSaglayici = 'SmsNext' then
   begin
-          //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý
+          //Baï¿½lï¿½k Kï¿½smï¿½ standart bilgilerin hazï¿½rlanmasï¿½
     XMLStructe.Text := '<?xml version="1.0" encoding="ISO-8859-9"?>' +
       '<MainmsgBody xmlns:sql=''urn:schemas-microsoft-com:xml-sql'' xmlns:updg=''urn:schemas-microsoft-com:xml-updategram''>' +
       '<UserName>' + SMSHesapBilgileri.SMSKullaniciAdi + '</UserName>' +
@@ -318,7 +318,7 @@ begin
       '<Version>xVer.2.0</Version>' +
       '<Originator>' + SMSHesapBilgileri.SMSBaslik + '</Originator>' +
       '<Messages>';
-          //Döngü ile dizideki mesaj ve numaralarý alalým
+          //Dï¿½ngï¿½ ile dizideki mesaj ve numaralarï¿½ alalï¿½m
     for i := 0 to High(Mesajlar) do
     begin
       if Telformatla(mesajlar[i].Numara) <> '0' then
@@ -336,7 +336,7 @@ begin
       '</Messages>' +
       '</MainmsgBody>';
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://secure.smsnext.com/developer/Bulksmsv2/sendsmsmulti.asp', False);
       HTTPReq.send(StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]));
       if not DirectoryExists('XML') then
@@ -346,50 +346,50 @@ begin
       DonusBilgisi.Text := HTTPReq.responseText;
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 
     if copy(DonusBilgisi.Strings[0], 1, 2) <> 'ID' then
     begin
-              //Hata Oluþtu demektir bunlarý bi alalým
-              //Dönen Hata kodlar
-              //WP:00	Kullanýcý adý yada þifresi hatalý
-              //WP:04	Developer  Yanlýþ
-              //WP:05	Hatalý Originator
-              //WP:14	Mesaj metni girilmemiþ
-              //WP:15	GSM numarasý girilmemiþ
-              //WP:90	Xml hatasý
-              //CR:22	Aylýk limit adedi girilmemiþ
-              //CR:27	Aylýk limiti kalmamýþ
-              //CP:00	Kontör hatasý
+              //Hata Oluï¿½tu demektir bunlarï¿½ bi alalï¿½m
+              //Dï¿½nen Hata kodlar
+              //WP:00	Kullanï¿½cï¿½ adï¿½ yada ï¿½ifresi hatalï¿½
+              //WP:04	Developer  Yanlï¿½ï¿½
+              //WP:05	Hatalï¿½ Originator
+              //WP:14	Mesaj metni girilmemiï¿½
+              //WP:15	GSM numarasï¿½ girilmemiï¿½
+              //WP:90	Xml hatasï¿½
+              //CR:22	Aylï¿½k limit adedi girilmemiï¿½
+              //CR:27	Aylï¿½k limiti kalmamï¿½ï¿½
+              //CP:00	Kontï¿½r hatasï¿½
       Donen.HataKodu := copy(DonusBilgisi.Strings[0], 1, 5);
       if Donen.HataKodu = 'WP:00' then
-        Donen.Mesaj := 'Hatalý Kullanýcý Adý yada Þifresi'
+        Donen.Mesaj := 'Hatalï¿½ Kullanï¿½cï¿½ Adï¿½ yada ï¿½ifresi'
       else if Donen.HataKodu = 'WP:04' then
-        Donen.Mesaj := 'Developer Yanlýþ'
+        Donen.Mesaj := 'Developer Yanlï¿½ï¿½'
       else if Donen.HataKodu = 'WP:05' then
-        Donen.Mesaj := 'Hatalý Baþlýk'
+        Donen.Mesaj := 'Hatalï¿½ Baï¿½lï¿½k'
       else if Donen.HataKodu = 'WP:15' then
-        Donen.Mesaj := 'GSM numarasý girilmemiþ'
+        Donen.Mesaj := 'GSM numarasï¿½ girilmemiï¿½'
       else if Donen.HataKodu = 'WP:14' then
-        Donen.Mesaj := 'Mesaj metni girilmemiþ'
+        Donen.Mesaj := 'Mesaj metni girilmemiï¿½'
       else if Donen.HataKodu = 'WP:90' then
-        Donen.Mesaj := 'XML Hatasý'
+        Donen.Mesaj := 'XML Hatasï¿½'
       else if Donen.HataKodu = 'CR:22' then
-        Donen.Mesaj := 'Aylýk limit adedi girilmemiþ'
+        Donen.Mesaj := 'Aylï¿½k limit adedi girilmemiï¿½'
       else if Donen.HataKodu = 'CR:27' then
-        Donen.Mesaj := 'Aylýk limiti kalmamýþ'
+        Donen.Mesaj := 'Aylï¿½k limiti kalmamï¿½ï¿½'
       else if Donen.HataKodu = 'CP:00' then
-        Donen.Mesaj := 'Kontör hatasý'
+        Donen.Mesaj := 'Kontï¿½r hatasï¿½'
       else
-        Donen.Mesaj := 'Gönderim Baþarýsýz';
+        Donen.Mesaj := 'Gï¿½nderim Baï¿½arï¿½sï¿½z';
     end
     else
     begin
-            // Hata Yoksa mesaj referansýný  ve mesajýný oluþturalým
+            // Hata Yoksa mesaj referansï¿½nï¿½  ve mesajï¿½nï¿½ oluï¿½turalï¿½m
       Donen.HataKodu := '-1';
       donen.MesajRefNo := trim(copy(DonusBilgisi.Strings[0], 4, 100));
-      Donen.Mesaj := 'Gönderildi'    ;
+      Donen.Mesaj := 'Gï¿½nderildi'    ;
       if donen.HataKodu = '-1' then
       begin
       Tablo.Query3.Close;
@@ -411,7 +411,7 @@ begin
       Tablo.Query3.Close;
       Tablo.Query3.SQL.Text := 'UPDATE CAGRI SET ' +
         ' STATU = -1 ,' +
-        ' SONUC = ''Hatalý'' ,' +
+        ' SONUC = ''Hatalï¿½'' ,' +
         ' MSGREFERANS = '''',' +
         ' SERVIS = '''' ' +
         ' WHERE ' +
@@ -466,7 +466,7 @@ begin
   end //if SMSHesapBilgileri.SMSServisSaglayici = 'SmsNext' then
   else if SMSHesapBilgileri.SMSServisSaglayici = 'BioTekno' then
   begin
-          //Biotekno için baþlýk bilgisini ayarlýyoruz
+          //Biotekno iï¿½in baï¿½lï¿½k bilgisini ayarlï¿½yoruz
     XMLStructe.Text := '<?xml version="1.0" encoding="iso-8859-9" ?>' +
       '<message-context type="mmmgsd">' +
       '<username>' + smsHesapBilgileri.SMSKullaniciAdi + '</username>' +
@@ -479,7 +479,7 @@ begin
           //<gsmno>90532XXXYYZZ</gsmno>
           //<text>test message one</text>
           //</message>
-          //Döngü ile dizideki mesaj ve numaralarý alalým
+          //Dï¿½ngï¿½ ile dizideki mesaj ve numaralarï¿½ alalï¿½m
     for i := 0 to High(Mesajlar) do
     begin
       if Telformatla(mesajlar[i].Numara) <> '0' then
@@ -494,7 +494,7 @@ begin
     end;
     XMLStructe.Text := XMLStructe.Text + '</message-context>';
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.biotekno.biz:8080/SMS-Web/xmlsms', False);
               //ID:1310411
       HTTPReq.send(StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]));
@@ -506,29 +506,29 @@ begin
       DonusBilgisi.Text := HTTPReq.responseText;
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
-          //20 Geçersiz  xml file
-          //10 Kullanýcý Kodu / Þifresi hatalý
-          //11 Kontör Yetersiz
-          //81 Sms limiti geçildi.
-          //90 Sistem hatasý
-          //00 Baþarýlý
+          //20 Geï¿½ersiz  xml file
+          //10 Kullanï¿½cï¿½ Kodu / ï¿½ifresi hatalï¿½
+          //11 Kontï¿½r Yetersiz
+          //81 Sms limiti geï¿½ildi.
+          //90 Sistem hatasï¿½
+          //00 Baï¿½arï¿½lï¿½
     donen.HataKodu := Copy(DonusBilgisi.Text, 1, 2);
     if donen.HataKodu = '20' then
-      donen.Mesaj := 'Geçersiz  xml dosyasý'
+      donen.Mesaj := 'Geï¿½ersiz  xml dosyasï¿½'
     else if donen.HataKodu = '10' then
-      donen.Mesaj := 'Kullanýcý Kodu / Þifresi hatalý'
+      donen.Mesaj := 'Kullanï¿½cï¿½ Kodu / ï¿½ifresi hatalï¿½'
     else if donen.HataKodu = '11' then
-      donen.Mesaj := 'Kontör yetersiz'
+      donen.Mesaj := 'Kontï¿½r yetersiz'
     else if donen.HataKodu = '81' then
-      donen.Mesaj := 'SMS limiti geçildi'
+      donen.Mesaj := 'SMS limiti geï¿½ildi'
     else if donen.HataKodu = '90' then
-      donen.Mesaj := 'Sistem hatasý'
+      donen.Mesaj := 'Sistem hatasï¿½'
     else if donen.HataKodu = '00' then
     begin
       donen.HataKodu := '-1';
-      donen.Mesaj := 'Gönderildi';
+      donen.Mesaj := 'Gï¿½nderildi';
       donen.MesajRefNo := Copy(DonusBilgisi.Text, 4, length(DonusBilgisi.Text) - 5);
 
          if donen.HataKodu = '-1' then
@@ -552,7 +552,7 @@ begin
       Tablo.Query3.Close;
       Tablo.Query3.SQL.Text := 'UPDATE CAGRI SET ' +
         ' STATU = -1 ,' +
-        ' SONUC = ''Hatalý'' ,' +
+        ' SONUC = ''Hatalï¿½'' ,' +
         ' MSGREFERANS = '''',' +
         ' SERVIS = '''' ' +
         ' WHERE ' +
@@ -600,9 +600,9 @@ begin
 
     end
     else
-      donen.Mesaj := 'Gönderim baþarýsýz';
+      donen.Mesaj := 'Gï¿½nderim baï¿½arï¿½sï¿½z';
   end //else  if SMSHesapBilgileri.SMSServisSaglayici = 'BioTekno' then
-  else if SMSHesapBilgileri.SMSServisSaglayici = 'PostaGüvercini'      then
+  else if SMSHesapBilgileri.SMSServisSaglayici = 'PostaGï¿½vercini'      then
   begin
      if Zamanli  then
          ZamanEk := 'dt="'+FormatDateTime('yyyy/mm/dd hh:nn',Bastar)+'" dt2="'+FormatDateTime('yyyy/mm/dd hh:nn',Bittar)+'"'
@@ -610,12 +610,12 @@ begin
        ZamanEk:='dt="'+FormatDateTime('yyyy/mm/dd hh:nn',Now)+'"';
 
 
-     //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý
+     //Baï¿½lï¿½k Kï¿½smï¿½ standart bilgilerin hazï¿½rlanmasï¿½
     XMLStructe.Text := '<?xml version="1.0" encoding="ISO-8859-9"?>' +
       '<SMS-InsRequest>' +
       '<CLIENT user="'+SMSHesapBilgileri.SMSKullaniciAdi+'" pwd="'+SMSHesapBilgileri.SMSSifre +'"/>'  ;
 
-          //Döngü ile dizideki mesaj ve numaralarý alalým
+          //Dï¿½ngï¿½ ile dizideki mesaj ve numaralarï¿½ alalï¿½m
     for i := 0 to High(Mesajlar) do
     begin
       if Telformatla(mesajlar[i].Numara) <> '0' then
@@ -627,7 +627,7 @@ begin
     end;
     XMLStructe.Text := XMLStructe.Text +  '</SMS-InsRequest>';
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.postaguvercini.com/api_xml/Sms_insreq.asp ', False);
       XMLStructe.Text := StringReplace( XMLStructe.Text ,#13,'', [rfReplaceAll]);
       XMLStructe.Text := StringReplace( XMLStructe.Text ,#10,'', [rfReplaceAll]);
@@ -649,16 +649,16 @@ begin
 
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 
    {
-              Hata Numarasý	Açýklama
-              ERR1010	Ýstek Hatasý. Veritabaný baðlantý iþlemi yapýlamadý
-              ERR1020	Ýstek Hatasý. Veritabanýna baðlanamadý.
-              ERR1030	Ýstek Hatasý. Ýstek tarihçe kaydý tutalamadý.
-              ERR1040	Ýstek Hatasý. Ýstek tarihçe kayýt numarasý alýnamadý.
-              ERR1050	Ýstek Hatasý. Ýstek deðerlendirilemedi. (Hatalý istek formatý)
+              Hata Numarasï¿½	Aï¿½ï¿½klama
+              ERR1010	ï¿½stek Hatasï¿½. Veritabanï¿½ baï¿½lantï¿½ iï¿½lemi yapï¿½lamadï¿½
+              ERR1020	ï¿½stek Hatasï¿½. Veritabanï¿½na baï¿½lanamadï¿½.
+              ERR1030	ï¿½stek Hatasï¿½. ï¿½stek tarihï¿½e kaydï¿½ tutalamadï¿½.
+              ERR1040	ï¿½stek Hatasï¿½. ï¿½stek tarihï¿½e kayï¿½t numarasï¿½ alï¿½namadï¿½.
+              ERR1050	ï¿½stek Hatasï¿½. ï¿½stek deï¿½erlendirilemedi. (Hatalï¿½ istek formatï¿½)
                }
        if   pos ('<ERROR>',DonusBilgisi.Text) > 0   then
        begin
@@ -667,33 +667,33 @@ begin
               begin
 
                   Donen.HataKodu:='ERR1050';
-                  donen.Mesaj :='Ýstek Hatasý. Ýstek deðerlendirilemedi. (Hatalý istek formatý)';
+                  donen.Mesaj :='ï¿½stek Hatasï¿½. ï¿½stek deï¿½erlendirilemedi. (Hatalï¿½ istek formatï¿½)';
               end
               else if  pos('ERR1040',DonusBilgisi.Text) > 0 then
               begin
 
                   Donen.HataKodu:='ERR1040';
-                  donen.Mesaj :='Ýstek Hatasý. Ýstek tarihçe kayýt numarasý alýnamadý.';
+                  donen.Mesaj :='ï¿½stek Hatasï¿½. ï¿½stek tarihï¿½e kayï¿½t numarasï¿½ alï¿½namadï¿½.';
               end
               else if  pos('ERR1030',DonusBilgisi.Text) > 0 then
               begin
 
                   Donen.HataKodu:='ERR1030';
-                  donen.Mesaj :='Ýstek Hatasý. Ýstek tarihçe kaydý tutalamadý.';
+                  donen.Mesaj :='ï¿½stek Hatasï¿½. ï¿½stek tarihï¿½e kaydï¿½ tutalamadï¿½.';
               end
               else if  pos('ERR1020',DonusBilgisi.Text) > 0 then
               begin
 
                   Donen.HataKodu:='ERR1020';
-                  donen.Mesaj :='Ýstek Hatasý. Veritabanýna baðlanamadý.';
+                  donen.Mesaj :='ï¿½stek Hatasï¿½. Veritabanï¿½na baï¿½lanamadï¿½.';
               end
               else if  pos('ERR1010',DonusBilgisi.Text) > 0 then
               begin
                   Donen.HataKodu:='ERR1010';
-                  donen.Mesaj :='Ýstek Hatasý. Veritabaný baðlantý iþlemi yapýlamadý';
+                  donen.Mesaj :='ï¿½stek Hatasï¿½. Veritabanï¿½ baï¿½lantï¿½ iï¿½lemi yapï¿½lamadï¿½';
               end
               else
-                  Donen.Mesaj := 'Gönderim Baþarýsýz';
+                  Donen.Mesaj := 'Gï¿½nderim Baï¿½arï¿½sï¿½z';
        end
     else
     begin
@@ -706,17 +706,17 @@ begin
     repeat
       InsertID := ANode.Attributes['id'];
       InsertRes := ANode.Attributes['res'];
-//      ShowMessage(Inttostr(Mesajlar[x].Id)+'--'+  Mesajlar[x].Numara+ ' numara için  Id= '+ InsertID + ' '+ InsertRes);
+//      ShowMessage(Inttostr(Mesajlar[x].Id)+'--'+  Mesajlar[x].Numara+ ' numara iï¿½in  Id= '+ InsertID + ' '+ InsertRes);
       if Mesajlar[x].Id <> -1 then
         TekliMesajReferansGuncelle(Mesajlar[x].Id,Mesajlar[x].Numara,InsertID)   ;
       inc(x);
 
       ANode := ANode.NextSibling;
     until ANode = nil;
-      // Hata Yoksa mesaj referansýný  ve mesajýný oluþturalým
+      // Hata Yoksa mesaj referansï¿½nï¿½  ve mesajï¿½nï¿½ oluï¿½turalï¿½m
       Donen.HataKodu := '-1';
       donen.MesajRefNo := InsertID;
-      Donen.Mesaj := 'Gönderildi'
+      Donen.Mesaj := 'Gï¿½nderildi'
     end;
 
   end;
@@ -733,7 +733,7 @@ var link, vbNumara, vbGrupId, cevap1, satir: string;
   InHttp: TIdHTTP;
   i,sayi: integer;
   XMLStructe, DonusBilgisi: TStringList;
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
 begin
   cevap := TStringList.Create;
   XMLStructe := TStringList.create;
@@ -746,8 +746,8 @@ begin
     link := 'http://www.biotekno.biz:8080/SMS-Web/xmlreport?username=' + SMSHesapBilgileri.SMSKullaniciAdi + '&password=' + SMSHesapBilgileri.SMSSifre + '&groupid=' + MesajReferansNo + '&status=5';
     cevap.Text := InHttp.Get(link);
 //    cevap.SaveToFile('Sorgulama_' + MesajReferansNo + '.txt');
-            //Hata varmý yokmu kontrol edelim
-            //gönderdiðimiz mesaj ýd gelmiyorsa hata oluþtu demektir
+            //Hata varmï¿½ yokmu kontrol edelim
+            //gï¿½nderdiï¿½imiz mesaj ï¿½d gelmiyorsa hata oluï¿½tu demektir
     if copy(cevap.text, 1, 15) <> MesajReferansNo then
     begin
 //      ShowMessage(cevap.Text);
@@ -756,44 +756,44 @@ begin
     begin
       for i := 0 to cevap.Count - 1 do
       begin
-                  //1(baþarýlý)  gönderilen mesajlarýn sorgulamasýnda,
-                  //2(beklemede) gönderimi henüz ulaþmamýþ
-                  //3(hatalý)  hatalý telefon numarasý
-                  //4(zaman aþýmý) Artýk gönderilmeye denenmeyecek
-                  //5(hepsi) bütün statü kodlular döndürülür için kullanýlýr.
+                  //1(baï¿½arï¿½lï¿½)  gï¿½nderilen mesajlarï¿½n sorgulamasï¿½nda,
+                  //2(beklemede) gï¿½nderimi henï¿½z ulaï¿½mamï¿½ï¿½
+                  //3(hatalï¿½)  hatalï¿½ telefon numarasï¿½
+                  //4(zaman aï¿½ï¿½mï¿½) Artï¿½k gï¿½nderilmeye denenmeyecek
+                  //5(hepsi) bï¿½tï¿½n statï¿½ kodlular dï¿½ndï¿½rï¿½lï¿½r iï¿½in kullanï¿½lï¿½r.
         vbGrupId := copy(cevap.Strings[i], 1, 15);
         vbNumara := copy(cevap.Strings[i], 17, 12);
         vbStatu := copy(cevap.Strings[i], 30, 1);
 
         if vbStatu = '1' then
         begin
-                      //statuyü 9 yani gönderim baþarýlý
+                      //statuyï¿½ 9 yani gï¿½nderim baï¿½arï¿½lï¿½
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
             'STATU = 9 ,' +
-            'SONUC = ''Baþarýlý''' +
+            'SONUC = ''Baï¿½arï¿½lï¿½''' +
             'WHERE ' +
             'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
             ' TELEFON   =''' + vbNumara + '''';
           Tablo.Query1.ExecSQL;
         end else if vbStatu = '3' then
         begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
             'STATU = -1 ,' +
-            'SONUC = ''Hatalý''' +
+            'SONUC = ''Hatalï¿½''' +
             'WHERE ' +
             'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
             ' TELEFON   =''' + vbNumara + '''';
           Tablo.Query1.ExecSQL;
         end else if vbStatu = '4' then
         begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
             'STATU = -1 ,' +
-            'SONUC = ''Zaman Aþýmý''' +
+            'SONUC = ''Zaman Aï¿½ï¿½mï¿½''' +
             'WHERE ' +
             'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
             ' TELEFON   =''' + vbNumara + '''';
@@ -819,7 +819,7 @@ begin
       '<MsgID>' + MesajReferansNo + '</MsgID></MainReportRoot>';
 
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://secure.smsnext.com/developer/bulksmsv2/bulkreport.asp', False);
               //ID:1310411
       HTTPReq.send(StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]));
@@ -828,7 +828,7 @@ begin
 //      DonusBilgisi.SaveToFile('Sorgulama_' + MesajReferansNo + '.txt');
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 //    if trim(copy(DonusBilgisi.Text, 0, pos(' ', DonusBilgisi.text))) <> MesajReferansNo then
 //    begin
@@ -841,41 +841,41 @@ begin
       // (2: pending 3 : delivered 4 : bad message 5 : rejected 6 : expired )
        // showmessage(  inttostr(pos(' ',DonusBilgisi.text)) +' '+DonusBilgisi.text );
       satir := DonusBilgisi.Strings[i];
-        //GrupIdyi bulalým
+        //GrupIdyi bulalï¿½m
       vbGrupId := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
-        //Numarayý bulalým
+        //Numarayï¿½ bulalï¿½m
       vbNumara := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
-        //Statüyü bulalým
+        //Statï¿½yï¿½ bulalï¿½m
       vbStatu := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
 
       if vbStatu = '3' then
       begin
-                      //statuyü 9 yani gönderim baþarýlý
+                      //statuyï¿½ 9 yani gï¿½nderim baï¿½arï¿½lï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = 9 ,' +
-          'SONUC = ''Baþarýlý''' +
+          'SONUC = ''Baï¿½arï¿½lï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
           ' TELEFON   =''' + vbNumara + '''';
         Tablo.Query1.ExecSQL;
       end else if vbStatu = '4' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Hatalý''' +
+          'SONUC = ''Hatalï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
           ' TELEFON   =''' + vbNumara + '''';
         Tablo.Query1.ExecSQL;
       end else if vbStatu = '5' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
@@ -887,11 +887,11 @@ begin
       end
       else if vbStatu = '6' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Zaman Aþýmý''' +
+          'SONUC = ''Zaman Aï¿½ï¿½mï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + vbGrupId + ''' AND ' +
           ' TELEFON   =''' + vbNumara + '''';
@@ -902,9 +902,9 @@ begin
 
 
   end  //Servis = 'SmsNext' then
-      else if(( Servis = 'PostaGüvercini' )AND  (SMSHesapBilgileri.SMSServisSaglayici =  Servis )) then
+      else if(( Servis = 'PostaGï¿½vercini' )AND  (SMSHesapBilgileri.SMSServisSaglayici =  Servis )) then
       begin
-       //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý
+       //Baï¿½lï¿½k Kï¿½smï¿½ standart bilgilerin hazï¿½rlanmasï¿½
     XMLStructe.Text := '<?xml version="1.0" encoding="ISO-8859-9"?>' +
       '<SMS-StaRequest>' +
       '<CLIENT user="'+SMSHesapBilgileri.SMSKullaniciAdi+'" pwd="'+SMSHesapBilgileri.SMSSifre +'"/>' +
@@ -913,7 +913,7 @@ begin
 
 
         try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.postaguvercini.com/api_xml/Sms_stareq.asp ', False);
       XMLStructe.Text := StringReplace( XMLStructe.Text ,#13,'', [rfReplaceAll]);
       XMLStructe.Text := StringReplace( XMLStructe.Text ,#10,'', [rfReplaceAll]);
@@ -933,106 +933,106 @@ begin
 
     if Kontrol = '400' then
       begin
-                      //statuyü 9 yani gönderim baþarýlý
+                      //statuyï¿½ 9 yani gï¿½nderim baï¿½arï¿½lï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = 9 ,' +
-          'SONUC = ''Baþarýlý''' +
+          'SONUC = ''Baï¿½arï¿½lï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
       else if Kontrol = '402' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Alýcýya Ulaþmadý''' +
+          'SONUC = ''Alï¿½cï¿½ya Ulaï¿½madï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
       else if Kontrol = '410' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Mesaj SMSC de bulunamadý''' +
+          'SONUC = ''Mesaj SMSC de bulunamadï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
        else if Kontrol = '420' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Mesaj sunucuda bulunamadý''' +
+          'SONUC = ''Mesaj sunucuda bulunamadï¿½''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
       else if Kontrol = '-20' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Bu mesaj size a ait deðil''' +
+          'SONUC = ''Bu mesaj size a ait deï¿½il''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo  +'''';
         Tablo.Query1.ExecSQL;
       end
       else if Kontrol = '-201' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Geçersiz cep no.)''' +
+          'SONUC = ''Silindi (Geï¿½ersiz cep no.)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
        else if Kontrol = '-202' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Mesaj tekrarý)''' +
+          'SONUC = ''Silindi (Mesaj tekrarï¿½)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
          else if Kontrol = '-203' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Geçersiz son gönderim tarihi)''' +
+          'SONUC = ''Silindi (Geï¿½ersiz son gï¿½nderim tarihi)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
           else if Kontrol = '-205' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Mesaj çok uzun)''' +
+          'SONUC = ''Silindi (Mesaj ï¿½ok uzun)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo  +'''';
         Tablo.Query1.ExecSQL;
       end
           else if Kontrol = '-207' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
@@ -1043,51 +1043,51 @@ begin
       end
           else if Kontrol = '-210' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Zaman aþýmý)''' +
+          'SONUC = ''Silindi (Zaman aï¿½ï¿½mï¿½)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
              else if Kontrol = '-220' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Yetersiz kredi zaman aþýmý)''' +
+          'SONUC = ''Silindi (Yetersiz kredi zaman aï¿½ï¿½mï¿½)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
             else if Kontrol = '-222' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Abone mesajýn bloke edilmesi tercih ettiðinden)''' +
+          'SONUC = ''Silindi (Abone mesajï¿½n bloke edilmesi tercih ettiï¿½inden)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
                else if (strtoint( Kontrol) >= -201 ) and  (strtoint(kontrol)<=-299) then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
-          'SONUC = ''Silindi (Müþteri tarafýndan)''' +
+          'SONUC = ''Silindi (Mï¿½ï¿½teri tarafï¿½ndan)''' +
           'WHERE ' +
           'MSGREFERANSKOD = ''' + MesajReferansNo +'''' ;
         Tablo.Query1.ExecSQL;
       end
                else if Kontrol = '-220' then
       begin
-                      //statuyü -1 yani gönderim hatalý
+                      //statuyï¿½ -1 yani gï¿½nderim hatalï¿½
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'UPDATE SMSPOSTA SET ' +
           'STATU = -1 ,' +
@@ -1099,7 +1099,7 @@ begin
 
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 
 
@@ -1115,7 +1115,7 @@ var link, vbNumara, vbGrupId, cevap1, satir: string;
   InHttp: TIdHTTP;
   i: integer;
   XMLStructe, DonusBilgisi: TStringList;
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
 begin
   cevap := TStringList.Create;
   XMLStructe := TStringList.create;
@@ -1126,8 +1126,8 @@ begin
     link := 'http://www.biotekno.biz:8080/SMS-Web/xmlreport?username=' + SMSHesapBilgileri.SMSKullaniciAdi + '&password=' + SMSHesapBilgileri.SMSSifre + '&groupid=' + MesajReferansNo + '&status=5';
     cevap.Text := InHttp.Get(link);
 //    cevap.SaveToFile('Sorgulama_' + MesajReferansNo + '.txt');
-            //Hata varmý yokmu kontrol edelim
-            //gönderdiðimiz mesaj ýd gelmiyorsa hata oluþtu demektir
+            //Hata varmï¿½ yokmu kontrol edelim
+            //gï¿½nderdiï¿½imiz mesaj ï¿½d gelmiyorsa hata oluï¿½tu demektir
     if copy(cevap.text, 1, 15) <> MesajReferansNo then
     begin
 //      ShowMessage(cevap.Text);
@@ -1136,27 +1136,27 @@ begin
     begin
       for i := 0 to cevap.Count - 1 do
       begin
-                  //1(baþarýlý)  gönderilen mesajlarýn sorgulamasýnda,
-                  //2(beklemede) gönderimi henüz ulaþmamýþ
-                  //3(hatalý)  hatalý telefon numarasý
-                  //4(zaman aþýmý) Artýk gönderilmeye denenmeyecek
-                  //5(hepsi) bütün statü kodlular döndürülür için kullanýlýr.
+                  //1(baï¿½arï¿½lï¿½)  gï¿½nderilen mesajlarï¿½n sorgulamasï¿½nda,
+                  //2(beklemede) gï¿½nderimi henï¿½z ulaï¿½mamï¿½ï¿½
+                  //3(hatalï¿½)  hatalï¿½ telefon numarasï¿½
+                  //4(zaman aï¿½ï¿½mï¿½) Artï¿½k gï¿½nderilmeye denenmeyecek
+                  //5(hepsi) bï¿½tï¿½n statï¿½ kodlular dï¿½ndï¿½rï¿½lï¿½r iï¿½in kullanï¿½lï¿½r.
         vbGrupId := copy(cevap.Strings[i], 1, 15);
         vbNumara := copy(cevap.Strings[i], 17, 12);
         vbStatu := copy(cevap.Strings[i], 30, 1);
 
         if vbStatu = '1' then
         begin
-          Result := 'Baþarýlý';
+          Result := 'Baï¿½arï¿½lï¿½';
         end else if vbStatu = '2' then
         begin
           Result := 'Beklemede';
         end else if vbStatu = '3' then
         begin
-          Result := 'Hatalý';
+          Result := 'Hatalï¿½';
         end else if vbStatu = '4' then
         begin
-          Result := 'Zaman Aþýmý';
+          Result := 'Zaman Aï¿½ï¿½mï¿½';
         end
         else Result := '';
       end; //for end
@@ -1178,7 +1178,7 @@ begin
       '<MsgID>' + MesajReferansNo + '</MsgID></MainReportRoot>';
 
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://secure.smsnext.com/developer/bulksmsv2/bulkreport.asp', False);
               //ID:1310411
       HTTPReq.send(StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]));
@@ -1187,7 +1187,7 @@ begin
 //      DonusBilgisi.SaveToFile('Sorgulama_' + MesajReferansNo + '.txt');
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 //    if trim(copy(DonusBilgisi.Text, 0, pos(' ', DonusBilgisi.text))) <> MesajReferansNo then
 //    begin
@@ -1200,13 +1200,13 @@ begin
       // (2: pending 3 : delivered 4 : bad message 5 : rejected 6 : expired )
        // showmessage(  inttostr(pos(' ',DonusBilgisi.text)) +' '+DonusBilgisi.text );
       satir := DonusBilgisi.Strings[i];
-        //GrupIdyi bulalým
+        //GrupIdyi bulalï¿½m
       vbGrupId := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
-        //Numarayý bulalým
+        //Numarayï¿½ bulalï¿½m
       vbNumara := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
-        //Statüyü bulalým
+        //Statï¿½yï¿½ bulalï¿½m
       vbStatu := trim(copy(satir, 0, pos(' ', satir)));
       delete(satir, 1, pos(' ', satir));
 
@@ -1214,17 +1214,17 @@ begin
         Result := 'Beklemede';
       end else if vbStatu = '3' then
       begin
-        Result := 'Baþarýlý';
+        Result := 'Baï¿½arï¿½lï¿½';
       end else if vbStatu = '4' then
       begin
-        Result := 'Hatalý';
+        Result := 'Hatalï¿½';
       end else if vbStatu = '5' then
       begin
         Result := 'Reddedildi';
       end
       else if vbStatu = '6' then
       begin
-        Result := 'Zaman Aþýmý'
+        Result := 'Zaman Aï¿½ï¿½mï¿½'
       end
       else Result := '';
     end; //for end

@@ -11,10 +11,8 @@ object YilSonuDevirIslemleriDlg: TYilSonuDevirIslemleriDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -163,8 +161,8 @@ object YilSonuDevirIslemleriDlg: TYilSonuDevirIslemleriDlg
       Visible = False
     end
     object memoStokDurum: TcxMemo
-      Left = 189
-      Top = 82
+      Left = 205
+      Top = 102
       Lines.Strings = (
         
           'SELECT        STOKDEPOID, URUNID, SUM(GIREN) AS GIREN, SUM(CIKAN' +

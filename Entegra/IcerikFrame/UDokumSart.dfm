@@ -11,10 +11,8 @@ object DokumSartDlg: TDokumSartDlg
   Font.Height = -11
   Font.Name = 'Trebuchet MS'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 16
   object Panel1: TPanel
     Left = 0
@@ -375,6 +373,7 @@ object DokumSartDlg: TDokumSartDlg
           Top = 41
           Width = 1239
           Height = 332
+          Cursor = crIBeam
           DataField = 'SQL'
           DataSource = DtsDokumler
           Align = alClient
@@ -383,6 +382,7 @@ object DokumSartDlg: TDokumSartDlg
           Font.Height = -13
           Font.Name = 'Courier New'
           Font.Style = []
+          Font.Quality = fqClearTypeNatural
           ParentColor = False
           ParentFont = False
           TabOrder = 1
@@ -391,8 +391,28 @@ object DokumSartDlg: TDokumSartDlg
           Gutter.Font.Height = -11
           Gutter.Font.Name = 'Courier New'
           Gutter.Font.Style = []
+          Gutter.Font.Quality = fqClearTypeNatural
           Gutter.ShowLineNumbers = True
+          Gutter.Bands = <
+            item
+              Kind = gbkMarks
+              Width = 13
+            end
+            item
+              Kind = gbkLineNumbers
+            end
+            item
+              Kind = gbkFold
+            end
+            item
+              Kind = gbkTrackChanges
+            end
+            item
+              Kind = gbkMargin
+              Width = 3
+            end>
           Highlighter = SynSQLSyn1
+          SelectedColor.Alpha = 0.400000005960464500
           WantTabs = True
         end
         object tbMain: TToolBar
@@ -552,6 +572,7 @@ object DokumSartDlg: TDokumSartDlg
         LookAndFeel.NativeStyle = True
         object GridKosulDBTableView1: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsKosul
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -568,6 +589,7 @@ object DokumSartDlg: TDokumSartDlg
           Styles.Indicator = cxStyle2
           object GridKosulDBTableView1BAGLAC1: TcxGridDBColumn
             DataBinding.FieldName = 'BAGLAC'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxComboBoxProperties'
             Properties.Alignment.Horz = taLeftJustify
             Properties.DropDownRows = 7
@@ -581,28 +603,33 @@ object DokumSartDlg: TDokumSartDlg
           end
           object GridKosulDBTableView1TABLO1: TcxGridDBColumn
             DataBinding.FieldName = 'TABLO'
+            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Styles.Content = cxStyle4
             Width = 78
           end
           object GridKosulDBTableView1ALAN1: TcxGridDBColumn
             DataBinding.FieldName = 'ALAN'
+            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Styles.Content = cxStyle5
             Width = 84
           end
           object GridKosulDBTableView1KOD_ADI1: TcxGridDBColumn
             DataBinding.FieldName = 'KOD_ADI'
+            DataBinding.IsNullValueType = True
             Styles.Content = cxStyle6
             Width = 93
           end
           object GridKosulDBTableView1ACIKLAMA1: TcxGridDBColumn
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             Styles.Content = cxStyle7
             Width = 147
           end
           object GridKosulDBTableView1ESITLIK1: TcxGridDBColumn
             DataBinding.FieldName = 'ESITLIK'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxComboBoxProperties'
             Properties.Alignment.Horz = taLeftJustify
             Properties.DropDownRows = 10
@@ -623,6 +650,7 @@ object DokumSartDlg: TDokumSartDlg
           end
           object GridKosulDBTableView1DEGER1: TcxGridDBColumn
             DataBinding.FieldName = 'DEGER'
+            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Styles.Content = cxStyle9
             Width = 180
@@ -630,6 +658,7 @@ object DokumSartDlg: TDokumSartDlg
           object GridKosulDBTableView1ICERIKTURU: TcxGridDBColumn
             Caption = #304#199'ER'#304'K T'#220'R'#220
             DataBinding.FieldName = 'ICERIKTURU'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.DropDownRows = 20
             Properties.Items = <
@@ -678,6 +707,7 @@ object DokumSartDlg: TDokumSartDlg
           end
           object GridKosulDBTableView1COMBOICERIK1: TcxGridDBColumn
             DataBinding.FieldName = 'COMBOICERIK'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxButtonEditProperties'
             Properties.Buttons = <
               item
@@ -698,9 +728,8 @@ object DokumSartDlg: TDokumSartDlg
   end
   object TabAraSQL: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
-    Left = 148
-    Top = 181
+    Left = 236
+    Top = 173
   end
   object ActionList1: TActionList
     Left = 660
@@ -735,7 +764,7 @@ object DokumSartDlg: TDokumSartDlg
     Left = 580
     Top = 474
     Bitmap = {
-      494C01010B000D000C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010B000D00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1281,4 +1310,3 @@ object DokumSartDlg: TDokumSartDlg
     Top = 204
   end
 end
-

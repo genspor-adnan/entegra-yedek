@@ -50,7 +50,7 @@
         <VerInfo_MajorVer>8</VerInfo_MajorVer>
         <VerInfo_MinorVer>19</VerInfo_MinorVer>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
-        <DCC_UnitSearchPath>D:\Entegra\Entegra\Bankalar;D:\Entegra\Ortak;D:\Entegra\Entegra;D:\Entegra\Entegra\AnaFrame;D:\Entegra\Entegra\AracCubuguFrame;D:\Entegra\Entegra\AramaFrame;D:\Entegra\Entegra\GirisSayfaFrame;D:\Entegra\Entegra\GorevFrame;D:\Entegra\Entegra\IcerikFrame;D:\Entegra\Entegra\ListeFrame;D:\Entegra\MailReaderMapi2;D:\Entegra\Entegra\Gcalender;D:\Entegra\Entegra\kazip;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>Ortak;AnaFrame;AracCubuguFrame;AramaFrame;GirisSayfaFrame;GorevFrame;IcerikFrame;ListeFrame;MailReaderMapi2;Gcalender;kazip;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_UsePackage>Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;vcl;rtl;vclimg;dbrtl;vcldb;GenDBNavigator;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_UNSAFE_TYPE>true</DCC_UNSAFE_TYPE>
         <DCC_UNSAFE_CODE>true</DCC_UNSAFE_CODE>
@@ -99,27 +99,27 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\Ortak\Umesaj.pas">
+        <DCCReference Include="Ortak\Umesaj.pas">
             <Form>MesajForm</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UDokum.pas">
+        <DCCReference Include="Ortak\UDokum.pas">
             <Form>DokumDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\Fetautil.pas"/>
-        <DCCReference Include="..\Ortak\UCombo.pas">
+        <DCCReference Include="Ortak\Fetautil.pas"/>
+        <DCCReference Include="Ortak\UCombo.pas">
             <Form>ListeAyarlaDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\Uliste.pas">
+        <DCCReference Include="Ortak\Uliste.pas">
             <Form>ListeDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UGrid.pas">
+        <DCCReference Include="Ortak\UGrid.pas">
             <Form>GridAyarlaDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UPrinter.pas">
+        <DCCReference Include="Ortak\UPrinter.pas">
             <Form>PrinterDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UPaylasim.pas"/>
-        <DCCReference Include="..\Ortak\ULisans.pas">
+        <DCCReference Include="Ortak\UPaylasim.pas"/>
+        <DCCReference Include="Ortak\ULisans.pas">
             <Form>LisansDlg</Form>
         </DCCReference>
         <DCCReference Include="IcerikFrame\UKasa.pas">
@@ -131,7 +131,7 @@
         <DCCReference Include="UOPSDLG.pas">
             <Form>OpsiyonDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\ortak\UlisteCheck.pas">
+        <DCCReference Include="Ortak\UlisteCheck.pas">
             <Form>ListeCheckDlg</Form>
         </DCCReference>
         <DCCReference Include="UVersiyon.pas">
@@ -146,21 +146,21 @@
         <DCCReference Include="UCekSenetArama.pas">
             <Form>CekSenetAramaDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UQuantGrid.pas">
+        <DCCReference Include="Ortak\UQuantGrid.pas">
             <Form>QuantGrid</Form>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="UDoviz.pas">
             <Form>DovizDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\USMS.pas">
+        <DCCReference Include="Ortak\USMS.pas">
             <Form>SmsDlg</Form>
         </DCCReference>
         <DCCReference Include="UMailYaz.pas">
             <Form>MailGonderDlg</Form>
         </DCCReference>
         <DCCReference Include="lisansws.pas"/>
-        <DCCReference Include="..\Ortak\UCxUtils.pas">
+        <DCCReference Include="Ortak\UCxUtils.pas">
             <Form>cxUtils</Form>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
@@ -194,11 +194,11 @@
         <DCCReference Include="IcerikFrame\UTeminatMektubu.pas">
             <Form>TeminatMektubuDlg</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UFrameYoneticisi.pas"/>
-        <DCCReference Include="..\Ortak\FetaKurulusSiniflari.pas"/>
-        <DCCReference Include="..\Ortak\FetaClassExtensions.pas"/>
-        <DCCReference Include="..\Ortak\FetaClassExtensionsConsts.pas"/>
-        <DCCReference Include="..\Ortak\UMultiCastEvent.pas"/>
+        <DCCReference Include="Ortak\UFrameYoneticisi.pas"/>
+        <DCCReference Include="Ortak\FetaKurulusSiniflari.pas"/>
+        <DCCReference Include="Ortak\FetaClassExtensions.pas"/>
+        <DCCReference Include="Ortak\FetaClassExtensionsConsts.pas"/>
+        <DCCReference Include="Ortak\UMultiCastEvent.pas"/>
         <DCCReference Include="AnaFrame\UGenelAnaSekmeFrame.pas">
             <Form>GenelAnaSekmeFrame</Form>
             <DesignClass>TFrame</DesignClass>
@@ -207,7 +207,7 @@
             <Form>RehberAraDlg</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\Ortak\uMultDsEvent.pas"/>
+        <DCCReference Include="Ortak\uMultDsEvent.pas"/>
         <DCCReference Include="UMultiDataSetEvent.pas"/>
         <DCCReference Include="AramaFrame\URehberAramaFrame.pas">
             <Form>RehberAramaFrame</Form>
@@ -269,7 +269,7 @@
             <Form>AnaGirisSayfasiFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UFastRap.pas">
+        <DCCReference Include="Ortak\UFastRap.pas">
             <Form>FastRaporDlg</Form>
         </DCCReference>
         <DCCReference Include="AramaFrame\UTakvimAksiyonFrame.pas">
@@ -310,7 +310,7 @@
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="URaporAraclari.pas"/>
-        <DCCReference Include="..\Ortak\UGirisKutusuEx.pas">
+        <DCCReference Include="Ortak\UGirisKutusuEx.pas">
             <Form>GirisKutusuEx</Form>
         </DCCReference>
         <DCCReference Include="UCekRiskPayi.pas">
@@ -371,7 +371,7 @@
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="PrjConst.pas"/>
-        <DCCReference Include="..\Ortak\UBinarySave.pas"/>
+        <DCCReference Include="Ortak\UBinarySave.pas"/>
         <DCCReference Include="Bankalar\Banka_TEB.pas"/>
         <DCCReference Include="UHavaleEFT.pas">
             <Form>HavaleEFTEkrani</Form>
@@ -415,7 +415,7 @@
         <DCCReference Include="UTakvimBankaParaTransfer.pas">
             <Form>TakvimBankaParaTransferDLG</Form>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UGirdi.pas">
+        <DCCReference Include="Ortak\UGirdi.pas">
             <Form>GirdiAyarlaDlg</Form>
         </DCCReference>
         <DCCReference Include="UTakvimAcilisKaydi.pas">
@@ -446,7 +446,7 @@
             <Form>KullaniciYetkiDlg</Form>
         </DCCReference>
         <DCCReference Include="Bankalar\Banka_ING.pas"/>
-        <DCCReference Include="..\Ortak\UTabloGiris.pas">
+        <DCCReference Include="Ortak\UTabloGiris.pas">
             <Form>TabloGirisDlg</Form>
         </DCCReference>
         <DCCReference Include="UTakvimVirman.pas">
@@ -608,7 +608,7 @@
             <Form>FatTransferAramaFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\Ortak\UComboImgDuzenle.pas">
+        <DCCReference Include="Ortak\UComboImgDuzenle.pas">
             <Form>ImgListeAyarlaDlg</Form>
         </DCCReference>
         <DCCReference Include="Usifre.pas">

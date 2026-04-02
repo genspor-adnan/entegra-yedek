@@ -1684,11 +1684,11 @@ begin
    end else
       Yuzde := IntToStr(TMenuItem(Sender).Tag);
    s := Yuzde;
-   if IskTipi='?skonto1' then
+   if IskTipi='Ýskonto1' then
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=&Yuzde, '+
       ' DOVIZ_TUTARI=(100.0-isnull(ISKONTO2,0.0))*(100.0-&Yuzde)*(ADET*DOVIZ_BIRIMFIYAT)/10000.0,'+
       ' TUTAR=(100.0-isnull(ISKONTO2,0.0))*(100.0-&Yuzde)*ADET*BIRIMFIYAT/10000.0 where TEKLIFID=&id and ALTERNATIFNO=&AltNo',['&Yuzde','&id','&AltNo'],[StrToFloatDef(Trim(Yuzde),0), TabTeklif.FieldByName('ID').AsInteger, TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger])
-   else if IskTipi='?skonto2' then
+   else if IskTipi='Ýskonto2' then
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO2=&Yuzde,'+
       ' DOVIZ_TUTARI=(100.0-isnull(ISKONTO,0.0))*(100.0-&Yuzde)*(ADET*DOVIZ_BIRIMFIYAT)/10000.0,'+
       '  TUTAR=(100.0-isnull(ISKONTO,0.0))*(100.0-&Yuzde)*ADET*BIRIMFIYAT/10000.0 where TEKLIFID=&id and ALTERNATIFNO=&AltNo',['&Yuzde','&id','&AltNo'],[StrToFloatDef(Trim(Yuzde),0), TabTeklif.FieldByName('ID').AsInteger, TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
@@ -1832,7 +1832,7 @@ begin
    TeklifID := YeniTeklifID;
    btnTeklif.Tag:=TeklifID;
    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into TEKLIFHAREKET(TEKLIFID,EKLEYEN,EKLEMETARIHI,ESKIDURUM,YENIDURUM,ACIKLAMA,SUBEID ) VALUES('+
-          IntToStr(TeklifID)+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(OncekiDurum)+',5,''Revize olarak i?aretlendi.'' ,'+IntToStr(SubeId)+')',[],[]);
+          IntToStr(TeklifID)+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(OncekiDurum)+',5,''Revize olarak iþaretlendi.'' ,'+IntToStr(SubeId)+')',[],[]);
 
    TabloYenile(TabGecmisTeklifler,[RehberId]); //,-1
    TabloYenile(TabTeklif, [TeklifID]);
@@ -2235,7 +2235,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
-      if Tablo.ListedenBilgiGetir('Adres Se?iniz.',SQLText,st,[],'',TNotifyEvent(nil),Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'',TNotifyEvent(nil),Tablo.FDCnn,IletisimEkleClick) then begin
         tabTeklif.Edit;
         tabTeklif.FieldByName(sonbasilanctrl.TextHint).AsString:=st.Strings[0];
         sonbasilanctrl.Text:=st.Strings[1];
@@ -2265,7 +2265,7 @@ begin
     Tablo.Query1.Next;
   end;
   IL:=Liste.Strings[0];
-  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('?l?e',@ILCE).ComboBox(('?l'),@IL,liste);
+  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('Ýlçe',@ILCE).ComboBox(('Ýl'),@IL,liste);
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls)<> mrOK  then
   Abort;                                                            //il?e 6 ,il 8
    //eklenen yeni ileti?im ID sini al?yoruz.
@@ -2487,6 +2487,7 @@ begin
   BoslukKontrolu := False;
 end;
 end.
+
 
 
 

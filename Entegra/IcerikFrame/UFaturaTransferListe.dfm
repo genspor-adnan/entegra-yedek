@@ -475,7 +475,6 @@ object FatTransferListeDlg: TFatTransferListeDlg
   object TabFatBaslik: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 193
     Top = 117
   end
@@ -487,14 +486,6 @@ object FatTransferListeDlg: TFatTransferListeDlg
   object TabFatura: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'Select *,'
       
@@ -514,6 +505,14 @@ object FatTransferListeDlg: TFatTransferListeDlg
       ' order by ID')
     Left = 277
     Top = 292
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
     object TabFaturaID: TAutoIncField
       FieldName = 'ID'
       ReadOnly = True
@@ -644,13 +643,13 @@ object FatTransferListeDlg: TFatTransferListeDlg
     Left = 342
     Top = 109
     object BaskiOnizlemeMenu: TMenuItem
-      Caption = 'Bask'#253' '#214'nizleme'
+      Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0
       OnClick = BaskiOnizlemeMenuClick
     end
     object YazcyaYazdr1: TMenuItem
       Tag = 1
-      Caption = 'Yaz'#253'c'#253'ya Yazd'#253'r'
+      Caption = 'Yaz'#305'c'#305'ya Yazd'#305'r'
       ImageIndex = 1
       OnClick = BaskiOnizlemeMenuClick
     end
@@ -799,6 +798,13 @@ object FatTransferListeDlg: TFatTransferListeDlg
   object FatBaslik: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'SELECT *,YAZIYLATOPLAM=( dbo.fn_MoneyToText(FATURA_TUTARI,'#39'TL'#39','#39 +
+        'Kr'#39',0)) '
+      'FROM FATBASLIK WHERE ID = :Par')
+    Left = 336
+    Top = 209
     ParamData = <
       item
         Name = 'Par'
@@ -807,13 +813,6 @@ object FatTransferListeDlg: TFatTransferListeDlg
         Size = 4
         Value = 0
       end>
-    SQL.Strings = (
-      
-        'SELECT *,YAZIYLATOPLAM=( dbo.fn_MoneyToText(FATURA_TUTARI,'#39'TL'#39','#39 +
-        'Kr'#39',0)) '
-      'FROM FATBASLIK WHERE ID = :Par')
-    Left = 336
-    Top = 209
   end
   object JvTimer1: TJvTimer
     Enabled = False
@@ -832,5 +831,3 @@ object FatTransferListeDlg: TFatTransferListeDlg
     end
   end
 end
-
-

@@ -628,7 +628,7 @@ begin
   if StrToInt(cxDBLabel2.Caption) > 0 then
   begin
     str := cxDBLabel2.Caption+'-'+Sifre(cxDBLabel2.Caption);
-    InputQuery('M??teri kodu','M??teri kodu',str);
+    InputQuery('Müþteri kodu','Müþteri kodu',str);
   end;
 end;
 
@@ -1273,7 +1273,7 @@ begin
     Tablo.FDCnn, 'select ID,AD from REHBERILETISIM where REHBERID=' + IntToStr(RehberID), False, Nil);
   if TGirisKutusuEx.BilgiAlEx(RDIletisimAdresiSecimi, ctrls) = mrOK then
   begin
-    if Tablo.UyariGoster(Uyari,'Bu ki?ideki eski bilgiler silinecektir. Yine de devam etmek istiyor musunuz?',2) = mrYes then begin
+    if Tablo.UyariGoster(Uyari,'Bu kiþideki eski bilgiler silinecektir. Yine de devam etmek istiyor musunuz?',2) = mrYes then begin
       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
         'delete from REHBERBILGI where YERI=1 and YER_ID=(select top 1 RI.ID from REHBERILETISIM RI where RI.REHBERID=&YerID)', ['&YerID'],
         [TabIlgili.FieldByName('ID').AsInteger]);

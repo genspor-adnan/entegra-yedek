@@ -1,8 +1,8 @@
 object VadeliHesapDlg: TVadeliHesapDlg
   Left = 0
   Top = 0
-  Width = 451
-  Height = 304
+  Width = 696
+  Height = 429
   Align = alClient
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
@@ -14,13 +14,14 @@ object VadeliHesapDlg: TVadeliHesapDlg
   OnResize = FrameResize
   object Panel5: TPanel
     Left = 0
-    Top = 32
-    Width = 451
+    Top = 35
+    Width = 696
     Height = 70
     Align = alTop
     BevelInner = bvLowered
     BorderWidth = 4
     TabOrder = 0
+    ExplicitWidth = 451
     object Label3: TcxLabel
       Left = 820
       Top = 39
@@ -232,8 +233,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 445
-    Height = 29
+    Width = 690
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -260,6 +260,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
     ShowCaptions = True
     TabOrder = 1
     Transparent = True
+    ExplicitWidth = 445
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -310,16 +311,18 @@ object VadeliHesapDlg: TVadeliHesapDlg
   end
   object PanelAlt: TPanel
     Left = 0
-    Top = 102
-    Width = 451
-    Height = 202
+    Top = 105
+    Width = 696
+    Height = 324
     Align = alClient
     TabOrder = 2
+    ExplicitWidth = 451
+    ExplicitHeight = 199
     object ToolBar1: TToolBar
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 443
+      Width = 688
       Height = 24
       Margins.Bottom = 0
       AutoSize = True
@@ -346,6 +349,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
       ShowCaptions = True
       TabOrder = 0
       Transparent = True
+      ExplicitWidth = 443
       object VadeEkleTus: TToolButton
         Left = 0
         Top = 0
@@ -382,15 +386,17 @@ object VadeliHesapDlg: TVadeliHesapDlg
     object GridTakvim: TcxGrid
       Left = 1
       Top = 162
-      Width = 449
-      Height = 39
+      Width = 694
+      Height = 161
       Align = alClient
       TabOrder = 1
       LookAndFeel.Kind = lfStandard
       LookAndFeel.NativeStyle = True
+      ExplicitWidth = 449
       ExplicitHeight = 36
       object TakvimView: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
         DataController.DataSource = DtsHareket
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <>
@@ -404,6 +410,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
         object TakvimViewDURUM: TcxGridDBColumn
           Caption = 'Durum'
           DataBinding.FieldName = 'DURUM'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageComboBoxProperties'
           Properties.Items = <
             item
@@ -433,26 +440,31 @@ object VadeliHesapDlg: TVadeliHesapDlg
         object TakvimViewTARIH: TcxGridDBColumn
           Caption = 'Ba'#351'.Tarih'
           DataBinding.FieldName = 'BASLAMATARIHI'
+          DataBinding.IsNullValueType = True
           Width = 68
         end
         object TakvimViewSURESAY: TcxGridDBColumn
           Caption = 'S'#252're'
           DataBinding.FieldName = 'SURESAY'
+          DataBinding.IsNullValueType = True
           Width = 31
         end
         object TakvimViewSUREBIRIM: TcxGridDBColumn
           Caption = 'Birim'
           DataBinding.FieldName = 'SUREBIRIM'
+          DataBinding.IsNullValueType = True
           Width = 32
         end
         object TakvimViewBITISTARIHI: TcxGridDBColumn
           Caption = 'Bit.Tarihi'
           DataBinding.FieldName = 'BITISTARIHI'
+          DataBinding.IsNullValueType = True
           Width = 67
         end
         object TakvimViewYATANTUTAR: TcxGridDBColumn
           Caption = 'Tutar'
           DataBinding.FieldName = 'YATANTUTAR'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxCurrencyEditProperties'
           Properties.DisplayFormat = ',0.00;-,0.00'
           Width = 63
@@ -460,12 +472,14 @@ object VadeliHesapDlg: TVadeliHesapDlg
         object TakvimViewTEMDIT: TcxGridDBColumn
           Caption = 'Temdit'
           DataBinding.FieldName = 'TEMDIT'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxCheckBoxProperties'
           Width = 40
         end
         object TakvimViewEKLEYEN: TcxGridDBColumn
           Caption = 'Kul.'
           DataBinding.FieldName = 'EKLEYEN'
+          DataBinding.IsNullValueType = True
           Width = 29
         end
       end
@@ -476,10 +490,11 @@ object VadeliHesapDlg: TVadeliHesapDlg
     object Panel2: TPanel
       Left = 1
       Top = 28
-      Width = 449
+      Width = 694
       Height = 134
       Align = alTop
       TabOrder = 2
+      ExplicitWidth = 449
       object lblrisk: TcxLabel
         Left = 321
         Top = 6
@@ -876,11 +891,11 @@ object VadeliHesapDlg: TVadeliHesapDlg
     BeforeDelete = TabVadeliHesapBeforeDelete
     AfterScroll = TabVadeliHesapAfterScroll
     OnNewRecord = TabVadeliHesapNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from VADELIHESAP order by ID desc')
-    Left = 596
-    Top = 290
+    Left = 60
+    Top = 50
   end
   object PopupMenu1: TPopupMenu
     Left = 376
@@ -918,6 +933,13 @@ object VadeliHesapDlg: TVadeliHesapDlg
     AfterPost = TabHareketAfterPost
     BeforeDelete = TabHareketBeforeDelete
     OnNewRecord = TabHareketNewRecord
+    Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'select * from VADELIHESAPHAR where VADELIHSID=:PID order by ID d' +
+        'esc')
+    Left = 59
+    Top = 329
     ParamData = <
       item
         Name = 'PID'
@@ -926,12 +948,6 @@ object VadeliHesapDlg: TVadeliHesapDlg
         Size = 2
         Value = Null
       end>
-    SQL.Strings = (
-      
-        'select * from VADELIHESAPHAR where VADELIHSID=:PID order by ID d' +
-        'esc')
-    Left = 643
-    Top = 273
   end
   object DtsHareket: TDataSource
     DataSet = TabHareket
@@ -940,4 +956,3 @@ object VadeliHesapDlg: TVadeliHesapDlg
     Top = 273
   end
 end
-

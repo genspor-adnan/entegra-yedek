@@ -108,6 +108,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       658)
     object FaturaEkr: TJvWizardInteriorPage
       Tag = 1
+      AlignWithMargins = True
       Header.ParentFont = False
       Header.Title.Color = clNone
       Header.Title.Text = 'FATURA bilgileri'
@@ -133,15 +134,15 @@ object FaturaWizardDlg: TFaturaWizardDlg
       object Panel3: TPanel
         Left = 0
         Top = 277
-        Width = 1110
-        Height = 339
+        Width = 1104
+        Height = 333
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
         object PanelAlt: TPanel
           Left = 1
-          Top = 173
-          Width = 1108
+          Top = 167
+          Width = 1102
           Height = 165
           Align = alBottom
           Color = 11776947
@@ -154,10 +155,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentFont = False
           TabOrder = 2
           DesignSize = (
-            1108
+            1102
             165)
           object GridFaturaToplam: TStringGrid
-            Left = 26516
+            Left = 26372
             Top = 25
             Width = 260
             Height = 118
@@ -180,7 +181,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             TabOrder = 0
           end
           object gridFatToplam: TcxGrid
-            Left = 764
+            Left = 758
             Top = 1
             Width = 343
             Height = 163
@@ -747,8 +748,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object GridFatura: TcxGrid
           Left = 1
           Top = 25
-          Width = 1108
-          Height = 148
+          Width = 1102
+          Height = 142
           Align = alClient
           PopupMenu = PopupMenuFatura
           TabOrder = 1
@@ -1230,7 +1231,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object ToolBarAlet: TToolBar
           Left = 1
           Top = 1
-          Width = 1108
+          Width = 1102
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
@@ -1607,7 +1608,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       object PageUst: TcxPageControl
         Left = 0
         Top = 105
-        Width = 1110
+        Width = 1104
         Height = 172
         Align = alTop
         TabOrder = 7
@@ -1616,7 +1617,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         OnChange = PageUstChange
         ClientRectBottom = 168
         ClientRectLeft = 4
-        ClientRectRight = 1106
+        ClientRectRight = 1100
         ClientRectTop = 27
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
@@ -1624,7 +1625,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           object PanelUst: TPanel
             Left = 0
             Top = 0
-            Width = 1102
+            Width = 1096
             Height = 141
             Align = alClient
             BevelOuter = bvNone
@@ -1638,7 +1639,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             ParentFont = False
             TabOrder = 0
             DesignSize = (
-              1102
+              1096
               141)
             object LabelSRMMerkezi: TcxLabel
               Left = 505
@@ -2518,7 +2519,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
-            Width = 1102
+            Width = 1096
             Height = 141
             Align = alClient
             TabOrder = 0
@@ -2529,7 +2530,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         AlignWithMargins = True
         Left = 3
         Top = 73
-        Width = 1104
+        Width = 1098
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -3647,8 +3648,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATURA F'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
-    Left = 93
-    Top = 172
+    Left = 101
+    Top = 148
     ParamData = <
       item
         Name = 'Par'

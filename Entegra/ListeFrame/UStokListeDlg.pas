@@ -1476,7 +1476,7 @@ begin
    Seri:= TabSeriLotDurum.FieldByName('SERINO').AsString;
 
    if TGirisKutusuEx.BilgiAlEx(jvIzlem,TGirdiDenetimleri.Create.Edit('Seri No:',@Seri).Edit('Lot No:',@Lot)
-         .DateTimePicker('�retim Tarihi',@URT).DateTimePicker('SKT',@SKT)) <> mrOk then
+         .DateTimePicker('Üretim Tarihi',@URT).DateTimePicker('SKT',@SKT)) <> mrOk then
         Abort;
 
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKSERILOT set SERINO=&SNO, LOTNO=&LNO, URT=&URT, SKT=&SKT '+

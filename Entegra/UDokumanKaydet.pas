@@ -107,11 +107,13 @@ begin
         Tablo.TablodanSorguAc(1, 'select max(ID) from IMAJ where YERI=1 and YER_ID='+IntToStr(DokumanId)); //revizeler varsa son dokümana kayıt etsin
 
         Tablo.Query0.Close;
-        if Dokuman_Kayit_Yeri=0 then //Eğer doküman veritabanı içinde
-           Tablo.Query0.SQL.Text := 'update IMAJ set ICDIS=0, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+', BELGE=:PBelge where ID='+ Tablo.Query1.Fields[0].AsString//revizeler varsa son dokümana kayıt etsin
-        else
-           Tablo.Query0.SQL.Text := 'select ID, BELGE from IMAJ where ID='+Tablo.Query1.Fields[0].AsString; //revizeler varsa son dokümana kayıt etsin
-        KutugeYaz(Tablo.Query0, DokumanAdi);
+        if Dokuman_Kayit_Yeri=0 then begin
+           Tablo.Query0.SQL.Text := 'update IMAJ set ICDIS=0, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+', BELGE=:PBelge where ID='+ Tablo.Query1.Fields[0].AsString;
+           KutugeYaz(Tablo.Query0, DokumanAdi);
+        end else begin
+           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update IMAJ set ICDIS=1, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+' where ID='+ Tablo.Query1.Fields[0].AsString, [], []);
+           Tablo.BelgeEkleme(DokumanAdi, -99, 1, Tablo.Query1.Fields[0].AsInteger, nil);
+        end;
 //        Tablo.DokumanTarihceEkle(DokumanId,'Belge değiştirildi',5);
 //        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANGECMIS where DOKUMANID=' + IntToStr(DokumanId) + ' and TUR=0 ', [], []);
         Tablo.DokumanTarihceEkle(DokumanID,Belge_degisti, 5);

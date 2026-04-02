@@ -43,8 +43,8 @@ object KodAgaciDlg: TKodAgaciDlg
     OnDblClick = cxDBTreeList1DblClick
     OnDragOver = cxDBTreeList1DragOver
     OnMouseDown = cxDBTreeList1MouseDown
-    ExplicitWidth = 669
-    ExplicitHeight = 379
+    ExplicitTop = 55
+    ExplicitHeight = 383
     object cxDBTreeList1cxDBTreeListSEC: TcxDBTreeListColumn
       PropertiesClassName = 'TcxCheckBoxProperties'
       BestFitMaxWidth = 50
@@ -89,7 +89,7 @@ object KodAgaciDlg: TKodAgaciDlg
     ShowCaptions = True
     TabOrder = 1
     Transparent = True
-    ExplicitWidth = 663
+    ExplicitHeight = 29
     object SecTus: TToolButton
       Left = 0
       Top = 0
@@ -176,7 +176,6 @@ object KodAgaciDlg: TKodAgaciDlg
     Height = 23
     Align = alTop
     TabOrder = 2
-    ExplicitWidth = 669
     DesignSize = (
       673
       23)
@@ -193,7 +192,6 @@ object KodAgaciDlg: TKodAgaciDlg
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
       OnKeyUp = EditKodKeyUp
-      ExplicitWidth = 408
       Width = 412
     end
   end
@@ -203,13 +201,11 @@ object KodAgaciDlg: TKodAgaciDlg
     Top = 229
   end
   object TabKodAgaci: TFDQuery
-    Connection = Tablo.FDCnn
     OnNewRecord = TabKodAgaciNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       '')
     Left = 172
     Top = 179
   end
 end
-

@@ -116,6 +116,7 @@ procedure TFastRaporDlg.RaporOku(var frxReport1: TfrxReport);
 var
   TempStream: TStream;
   Stream2: TStream;
+  FlNm, DumpDir: string;
   DegiskenAdList, DegiskenDegerList : TStringList;
 
   procedure OncekiDegiskenleriKaydet;
@@ -162,19 +163,44 @@ begin
         with TStringList.Create do
         try
           LoadFromStream(TempStream);
-          Text := StringReplace(Text, 'Connected="True"', 'Connected="False"', [rfReplaceAll, rfIgnoreCase]);
           Text := StringReplace(Text, 'Active="True"', 'Active="False"', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'LoginPrompt="True"', 'LoginPrompt="False"', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'Connected="True"', 'Connected="False"', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'Active = True', 'Active = False', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'Connected = True', 'Connected = False', [rfReplaceAll, rfIgnoreCase]);
           Text := StringReplace(Text, 'Connected=True', 'Connected=False', [rfReplaceAll, rfIgnoreCase]);
           Text := StringReplace(Text, 'Active=True', 'Active=False', [rfReplaceAll, rfIgnoreCase]);
           Text := StringReplace(Text, 'LoginPrompt=True', 'LoginPrompt=False', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'Connected:=True', 'Connected:=False', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'LoginPrompt:=True', 'LoginPrompt:=False', [rfReplaceAll, rfIgnoreCase]);
+          Text := StringReplace(Text, 'LoginPrompt = True', 'LoginPrompt = False', [rfReplaceAll, rfIgnoreCase]);
           Text := StringReplace(Text, 'Connected := True', 'Connected := False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'LoginPrompt := True', 'LoginPrompt := False', [rfReplaceAll, rfIgnoreCase]);
           Text := TRegEx.Replace(Text, 'ConnectionString="[^"]*"', 'ConnectionString=""', [roIgnoreCase]);
           Text := TRegEx.Replace(Text, 'UserName="[^"]*"', 'UserName=""', [roIgnoreCase]);
           Text := TRegEx.Replace(Text, 'Password="[^"]*"', 'Password=""', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '(?im)\.Connected\s*:=\s*True', '.Connected := False', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '(?im)\.LoginPrompt\s*:=\s*True', '.LoginPrompt := False', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sPropData="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sStyle="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sFrame\.Typ="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sFont\.Style="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sFrame\.Style="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sFrame\.Width="[^"]*"', '', [roIgnoreCase]);
+          Text := TRegEx.Replace(Text, '\sFont\.Charset="[^"]*"', '', [roIgnoreCase]);
           TempStream.Size := 0;
           SaveToStream(TempStream);
+          DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';
+          ForceDirectories(DumpDir);
+          FlNm := IncludeTrailingPathDelimiter(DumpDir) + 'fr_last_load.fr3';
+          try
+            TempStream.Position := 0;
+            with TFileStream.Create(FlNm, fmCreate) do
+            try
+              CopyFrom(TempStream, 0);
+            finally
+              Free;
+            end;
+          except
+          end;
         finally
           Free;
         end;
@@ -183,8 +209,22 @@ begin
         try
           frxReport1.LoadFromStream(TempStream);
         except
-          on E: Exception do
-            raise Exception.Create('UFastRap LoadFromStream error: ' + E.Message);
+          on E: Exception do begin
+            DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';
+            ForceDirectories(DumpDir);
+            FlNm := IncludeTrailingPathDelimiter(DumpDir) + 'fr_load_invalid.fr3';
+            try
+              TempStream.Position := 0;
+              with TFileStream.Create(FlNm, fmCreate) do
+              try
+                CopyFrom(TempStream, 0);
+              finally
+                Free;
+              end;
+            except
+            end;
+            raise Exception.Create('UFastRap LoadFromStream error: ' + E.Message + ' | dump: ' + FlNm);
+          end;
         end;
       end;
     end else frxReport1.Clear;
@@ -200,7 +240,7 @@ end;
 function TFastRaporDlg.FastRapor(Prev: SmallInt; EkranAdi1, RaporAdi1 : String; PDFYol:String=''):String;
 var
   i: integer;
-  FlNm: string;
+  FlNm, DumpDir: string;
   PDFExport: TfrxPDFExport;
   RTFExport: TfrxRTFExport;
   XLSExport: TfrxXLSExport;
@@ -246,8 +286,22 @@ begin
     try
       frxReport1.PrepareReport(True);
     except
-      on E: Exception do
-        raise Exception.Create('UFastRap PrepareReport error: ' + E.Message);
+      on E: Exception do begin
+        FlNm := '';
+        try
+          DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';
+          ForceDirectories(DumpDir);
+          FlNm := IncludeTrailingPathDelimiter(DumpDir) + 'fr_invalid_' +
+            StringReplace(EkranAdi1 + '_' + RaporAdi1, ' ', '_', [rfReplaceAll]) + '.fr3';
+          frxReport1.SaveToFile(FlNm);
+        except
+          FlNm := '';
+        end;
+        if FlNm <> '' then
+          raise Exception.Create('UFastRap PrepareReport error [' + EkranAdi1 + '/' + RaporAdi1 + ']: ' + E.Message + ' | dump: ' + FlNm)
+        else
+          raise Exception.Create('UFastRap PrepareReport error [' + EkranAdi1 + '/' + RaporAdi1 + ']: ' + E.Message);
+      end;
     end;
 // yazýcý ayarlanýr
     frxReport1.PrintOptions.ShowDialog := (TabYeniAyar.FieldByName('YAZICI').AsString='')or(TabYeniAyar.FieldByName('YAZICI').AsString='Dialog');
@@ -256,7 +310,12 @@ begin
        frxReport1.SelectPrinter;
     end;
     case Prev of
-      0: frxReport1.ShowReport();
+      0: try
+           frxReport1.ShowReport();
+         except
+           on E: Exception do
+             raise Exception.Create('UFastRap ShowReport error [' + EkranAdi1 + '/' + RaporAdi1 + ']: ' + E.Message);
+         end;
       1: begin
            frxReport1.PrintOptions.Copies := StrToIntDef(TabYeniAyar.FieldByName('KOPYASAY').AsString,1);
            frxReport1.Print;
@@ -848,6 +907,7 @@ begin
 end;
 
 end.
+
 
 
 

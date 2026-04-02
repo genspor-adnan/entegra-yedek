@@ -9,7 +9,9 @@ uses
   cxInplaceContainer, cxTLData, cxDBTL, DB, FireDAC.Comp.Client, PrjConst,
   cxContainer, cxEdit, cxTextEdit, ExtCtrls, cxMaskEdit,UGirisKutusuEx,
   cxLookAndFeels, cxLookAndFeelPainters, cxCheckBox, dxSkinLiquidSky, cxFilter,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TKodAgaciDlg = class(TForm)

@@ -40,7 +40,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         ParentBackground = False
         ParentColor = False
         TabOrder = 0
-        Properties.ActivePage = SheetDuyurular
+        Properties.ActivePage = SheetNakitAkisi
         Properties.CustomButtons.Buttons = <>
         ClientRectBottom = 596
         ClientRectLeft = 4
@@ -302,6 +302,10 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         object SheetDuyurular: TcxTabSheet
           Caption = 'SheetDuyurular'
           ImageIndex = 10
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel2: TPanel
             Left = 0
             Top = 0
@@ -1817,10 +1821,6 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         object SheetNakitAkisi: TcxTabSheet
           Caption = 'Nakit Ak'#305#351#305
           ImageIndex = 9
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PageControl: TcxPageControl
             Left = 0
             Top = 33
@@ -1876,7 +1876,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Storage = SchedulerDBStorage
                 TabOrder = 0
                 OnDblClick = SchedulerDblClick
-                Selection = 105
+                Selection = 119
                 Splitters = {
                   87020000FB000000A503000000010000820200000100000087020000F8010000}
                 StoredClientBounds = {0100000001000000A5030000F8010000}
@@ -2916,8 +2916,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
               end
               object FGrid: TcxGrid
                 AlignWithMargins = True
-                Left = 2033
-                Top = 1885
+                Left = 2048
+                Top = 1900
                 Width = 443
                 Height = 128
                 Align = alCustom
@@ -2931,8 +2931,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Visible = False
                 LookAndFeel.Kind = lfOffice11
                 LookAndFeel.NativeStyle = False
-                ExplicitLeft = 2009
-                ExplicitTop = 1861
+                ExplicitLeft = 2042
+                ExplicitTop = 1894
                 object FGridTableView: TcxGridDBTableView
                   Navigator.Buttons.CustomButtons = <>
                   ScrollbarAnnotations.CustomAnnotations = <>
@@ -3634,10 +3634,6 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             object TabSheetListe: TcxTabSheet
               Caption = 'Liste'
               ImageIndex = 3
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Panel6: TPanel
                 Left = 0
                 Top = 0
@@ -12619,7 +12615,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
       'select * from [dbo].[fn_NakitAkisiPivot](:PSonTarih)')
     Left = 648
     Top = 205
-    object TabPivotGRUP: TStringField
+    object TabPivotGRUP: TWideStringField
       FieldName = 'GRUP'
       ReadOnly = True
       Size = 6
@@ -12629,7 +12625,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
       ReadOnly = True
       Size = 221
     end
-    object TabPivotTARIH: TDateTimeField
+    object TabPivotTARIH: TSQLTimeStampField
       FieldName = 'TARIH'
       ReadOnly = True
     end
@@ -12645,7 +12641,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
   end
   object pmPivot: TPopupMenu
     Left = 176
-    Top = 160
+    Top = 152
     object ExcelPivot1: TMenuItem
       Caption = 'Excel Pivot...'
       OnClick = ExcelPivot1Click

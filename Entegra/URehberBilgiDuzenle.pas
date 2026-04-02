@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage,
-  cxEdit, DB, cxDBData, cxTextEdit, cxCheckBox, FireDAC.Comp.Client, cxContainer, cxMemo,
+  cxEdit, DB, cxDBData, cxTextEdit, cxCheckBox, FireDAC.Comp.Client, FireDAC.Stan.Param, cxContainer, cxMemo,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
   cxClasses, cxControls, cxGridCustomView, cxGrid, ToolWin, ComCtrls, cxLabel,
   cxMaskEdit, cxDropDownEdit, cxDBEdit, cxLookAndFeels, cxLookAndFeelPainters,

@@ -1,0 +1,57 @@
+# Derleme cikti dosyalari
+*.dcu
+*.exe
+*.dll
+*.bpl
+*.bpi
+*.dcp
+*.obj
+*.o
+*.res
+*.map
+*.plo
+*.drc
+*.dres
+*.identcache
+*.klr
+
+# Yedek ve gecici dosyalar
+*.~*
+*.bak
+__history/
+__recovery/
+*.rar
+*.zip
+
+# 3. parti kutuphaneler
+3dparty/
+
+# Gecici script dosyalari
+tmp_*.ps1
+
+# Binary ve medya dosyalari
+*.bmp
+*.png
+*.jpg
+*.JPG
+*.ico
+*.wav
+*.pdf
+*.xls
+*.doc
+
+# DLL dosyalari
+libeay32.dll
+ssleay32.dll
+qrpdflib.dll
+qtintf70.dll
+TEB.Encrypter.dll
+TEB.Encrypter.pdb
+TEB.Encrypter.tlb
+
+# Diger
+*.log
+debug.log
+*.leo
+*.skincfg
+*.tvsconfig

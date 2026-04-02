@@ -1092,8 +1092,8 @@ object TakvimDlg: TTakvimDlg
       end
       object FGrid: TcxGrid
         AlignWithMargins = True
-        Left = 1367
-        Top = 1219
+        Left = 1385
+        Top = 1237
         Width = 443
         Height = 128
         Align = alCustom
@@ -2247,8 +2247,8 @@ object TakvimDlg: TTakvimDlg
     FieldNames.ResourceID = 'ResourceID'
     FieldNames.Start = 'Start'
     FieldNames.State = 'State'
-    Left = 264
-    Top = 112
+    Left = 280
+    Top = 120
   end
   object SchedulerDataSource: TDataSource
     DataSet = TabTakvim
@@ -2442,7 +2442,7 @@ object TakvimDlg: TTakvimDlg
       end>
   end
   object PopupMenuYaz: TPopupMenu
-    Left = 227
+    Left = 243
     Top = 191
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
@@ -2723,7 +2723,7 @@ object TakvimDlg: TTakvimDlg
         Size = -1
         Value = Null
       end>
-    object TabPivotGRUP: TStringField
+    object TabPivotGRUP: TWideStringField
       FieldName = 'GRUP'
       ReadOnly = True
       Size = 6
@@ -2733,7 +2733,7 @@ object TakvimDlg: TTakvimDlg
       ReadOnly = True
       Size = 221
     end
-    object TabPivotTARIH: TDateTimeField
+    object TabPivotTARIH: TSQLTimeStampField
       FieldName = 'TARIH'
       ReadOnly = True
     end

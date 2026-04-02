@@ -238,7 +238,7 @@ var
       try
          Tablo.Query1.ExecSQL;
       except
-         Memo1.Lines.Add(rssFeedData.BKOD+','+Trim(rssFeedData.NAME)+' aktar?lamad?..');
+         Memo1.Lines.Add(rssFeedData.BKOD+','+Trim(rssFeedData.NAME)+' aktarýlamadý..');
       end;
     end;
 
@@ -259,7 +259,7 @@ var
       try
          Tablo.Query1.ExecSQL;
       except
-         Memo1.Lines.Add(rssFeedData.BKOD+','+rssFeedData.SKOD+','+Trim(rssFeedData.NAME)+','+rssFeedData.CITY+' aktar?lamad?..');
+         Memo1.Lines.Add(rssFeedData.BKOD+','+rssFeedData.SKOD+','+Trim(rssFeedData.NAME)+','+rssFeedData.CITY+' aktarýlamadý..');
       end;
       Inc(I)
     end;
@@ -278,7 +278,7 @@ begin
   islem := XMLDocument1.DocumentElement.ChildNodes.Count;
   Application.CreateForm(TBekletmeDlg,BekletmeDlg);
   BekletmeDlg.cxProgressBar1.Properties.Max :=(islem);
-  BekletmeDlg.Caption:='G?ncelleniyor...';
+  BekletmeDlg.Caption:='Güncelleniyor...';
   BekletmeDlg.Show;
   while nd <> nil do begin
     ProcessItem();
@@ -489,11 +489,11 @@ var
   IlKodu,BankaKodu:string;
   Donus,KayitKontrol:Boolean;
 begin
-  Il:='?stanbul';
+  Il:='ýstanbul';
   Donus := True;
   while Donus do begin
     if not TabBankalar.FieldByName('BANKAKODU').IsNullOrEmpty then begin
-      Denetimler  := TGirdiDenetimleri.Create.Edit(BGSube_Kod,@SubeKodu).Edit(BGSube_Ad,@SubeAdi).ComboBox('?l *',@Il,Tablo.ComboboxInit('SELECT ILADI FROM ILLER where ILNO<100 ').Items,TComboBoxStyle.csDropDownList);
+      Denetimler  := TGirdiDenetimleri.Create.Edit(BGSube_Kod,@SubeKodu).Edit(BGSube_Ad,@SubeAdi).ComboBox('ýl *',@Il,Tablo.ComboboxInit('SELECT ILADI FROM ILLER where ILNO<100 ').Items,TComboBoxStyle.csDropDownList);
       MResult := TGirisKutusuEx.BilgiAlEx(BGYeni_sube,Denetimler);
       if MResult = mrOk then begin
         Tablo.TablodanSorguAc(1,'SELECT ILNO FROM ILLER WHERE ILNO<100 and ILADI='''+VarToStr(Il)+'''');

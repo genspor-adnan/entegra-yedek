@@ -47,8 +47,6 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
     ShowRouteMap = False
     OnFinishButtonClick = WizardKontrolFinishButtonClick
     OnCancelButtonClick = WizardKontrolCancelButtonClick
-    ExplicitWidth = 804
-    ExplicitHeight = 464
     DesignSize = (
       808
       465)
@@ -74,8 +72,6 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnExitPage = PageEkipmanKartExitPage
-      ExplicitWidth = 804
-      ExplicitHeight = 422
       object LogoResim: TcxImage
         Left = 661
         Top = 122
@@ -466,6 +462,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object tvEkipmanDetayEKIPMANID: TcxGridDBColumn
             Caption = 'Ekipman'
             DataBinding.FieldName = 'EKIPMANID'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxButtonEditProperties'
             Properties.Buttons = <
               item
@@ -480,6 +477,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object tvEkipmanDetayADET: TcxGridDBColumn
             Caption = 'Adet'
             DataBinding.FieldName = 'ADET'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxSpinEditProperties'
             Width = 78
           end
@@ -612,6 +610,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object cxGridDBColumn3: TcxGridDBColumn
             Caption = 'Etiketi'
             DataBinding.FieldName = 'ETIKET'
+            DataBinding.IsNullValueType = True
             MinWidth = 150
             Options.Editing = False
             Options.Filtering = False
@@ -631,6 +630,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object cxGridDBColumn4: TcxGridDBColumn
             Caption = 'Bilgisi'
             DataBinding.FieldName = 'BILGI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             OnGetPropertiesForEdit = cxGridDBColumn4GetPropertiesForEdit
             MinWidth = 400
@@ -650,6 +650,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           end
           object GridDetayViewColumn1: TcxGridDBColumn
             DataBinding.FieldName = 'ORJINAL'
+            DataBinding.IsNullValueType = True
             Visible = False
             MinWidth = 64
             Options.Editing = False
@@ -670,6 +671,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object GridDetayViewColumnsec: TcxGridDBColumn
             Caption = 'Zorunlu'
             DataBinding.FieldName = 'ZORUNLU'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCheckBoxProperties'
             Visible = False
           end
@@ -871,6 +873,7 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
         object GridBelgeDBTableViewImaj: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
+          DataController.DataSource = DtsBelge
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -880,21 +883,25 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
           object GridBelgeDBTableViewImajBELGEADI: TcxGridDBColumn
             Caption = 'Belge Ad'#305
             DataBinding.FieldName = 'BELGEADI'
+            DataBinding.IsNullValueType = True
             Width = 95
           end
           object GridBelgeDBTableViewImajTUR: TcxGridDBColumn
             Caption = 'T'#252'r'
             DataBinding.FieldName = 'TUR'
+            DataBinding.IsNullValueType = True
             Width = 79
           end
           object GridBelgeDBTableViewImajACIKLAMA: TcxGridDBColumn
             Caption = 'A'#231#305'klama'
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             Width = 363
           end
           object GridBelgeDBTableViewImajBELGE: TcxGridDBColumn
             Caption = 'Belge'
             DataBinding.FieldName = 'BELGE'
+            DataBinding.IsNullValueType = True
             Width = 38
           end
         end
@@ -944,7 +951,6 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
     Height = 465
     Align = alLeft
     TabOrder = 0
-    ExplicitHeight = 464
     object btnServis: TcxButton
       Left = 9
       Top = 80
@@ -998,13 +1004,12 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
     end
   end
   object TabEkipman: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabEkipmanAfterOpen
     BeforeEdit = TabEkipmanBeforeEdit
     BeforePost = TabEkipmanBeforePost
     AfterPost = TabEkipmanAfterPost
     OnNewRecord = TabEkipmanNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select E.* ,'
       'STOKKODU=(select S.KOD from STOKLAR S where S.ID=E.URUNID),'
@@ -1020,14 +1025,14 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
     Top = 30
   end
   object TabBelge: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabEkipmanBeforePost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT  *  FROM  [IMAJ]'
       'WHERE'
       'YERI = :PYeri and'
-      'YER_ID = :PYerID')
+      'YER_ID = :PYerID and'
+      'isnull(DURUM,1) <> 0')
     Left = 807
     Top = 26
   end
@@ -1043,10 +1048,9 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
   end
   object TabEkipmanDetay: TFDQuery
     AutoCalcFields = False
-    Connection = Tablo.FDCnn
     BeforePost = TabEkipmanBeforePost
     AfterPost = TabEkipmanAfterPost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from EKIPMANDETAY where USTEKIPMANID=:PID')
     Left = 737
@@ -1060,19 +1064,19 @@ object EkipmanWizardDlg: TEkipmanWizardDlg
   end
   object TabDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU '
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
-    Left = 510
+    Left = 470
     Top = 34
   end
   object DtsDetay: TDataSource
     DataSet = TabDetay
-    Left = 472
+    Left = 368
     Top = 27
   end
 end

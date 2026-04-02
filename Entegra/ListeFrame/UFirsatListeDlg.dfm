@@ -781,44 +781,52 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifViewTARIH: TcxGridDBColumn
               Caption = 'Tarih'
               DataBinding.FieldName = 'TARIH'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxDateEditProperties'
               Width = 116
             end
             object GridTeklifViewTEKLIFNO: TcxGridDBColumn
               Caption = 'Teklif No'
               DataBinding.FieldName = 'TEKLIFNO'
+              DataBinding.IsNullValueType = True
               Width = 53
             end
             object GridTeklifViewFIRMA: TcxGridDBColumn
               Caption = 'M'#252#351'teri'
               DataBinding.FieldName = 'FIRMA'
+              DataBinding.IsNullValueType = True
               Width = 120
             end
             object GridTeklifViewKONU: TcxGridDBColumn
               Caption = 'Konusu'
               DataBinding.FieldName = 'KONUSU'
+              DataBinding.IsNullValueType = True
               Width = 125
             end
             object GridTeklifViewTURU: TcxGridDBColumn
               Caption = 'T'#252'r'#252
               DataBinding.FieldName = 'TURU'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repTeklifTuru
               Width = 42
             end
             object GridTeklifViewDURUM: TcxGridDBColumn
               Caption = 'Durum'
               DataBinding.FieldName = 'DURUM'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repTeklifDurumu
               Width = 54
             end
             object GridTeklifViewHAZIRLAYAN: TcxGridDBColumn
               Caption = 'Haz'#305'rlayan'
               DataBinding.FieldName = 'HAZIRLAYANAD'
+              DataBinding.IsNullValueType = True
               Width = 113
             end
             object GridTeklifViewDOVIZ_TUTARI: TcxGridDBColumn
               Caption = 'Teklif Tutar'#305
               DataBinding.FieldName = 'TEKLIF_MATRAHI'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
               Width = 88
@@ -826,12 +834,14 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifViewKUR: TcxGridDBColumn
               Caption = 'P.Birimi'
               DataBinding.FieldName = 'KUR'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxComboBoxProperties'
               Width = 42
             end
             object GridTeklifViewSUBEID: TcxGridDBColumn
               Caption = #350'ube'
               DataBinding.FieldName = 'SUBEID'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
               Width = 90
             end
@@ -852,19 +862,23 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1KOD: TcxGridDBColumn
               Caption = 'Kod'
               DataBinding.FieldName = 'KOD'
+              DataBinding.IsNullValueType = True
               Width = 70
             end
             object GridTeklifDBTableView1AD: TcxGridDBColumn
               Caption = 'Ad'
               DataBinding.FieldName = 'AD'
+              DataBinding.IsNullValueType = True
               Width = 120
             end
             object GridTeklifDBTableView1ACIKLAMA: TcxGridDBColumn
               DataBinding.FieldName = 'A'#231#305'klama'
+              DataBinding.IsNullValueType = True
             end
             object GridTeklifDBTableView1ADET: TcxGridDBColumn
               Caption = 'Adet'
               DataBinding.FieldName = 'ADET'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 40
@@ -872,12 +886,14 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1BIRIM: TcxGridDBColumn
               Caption = 'Birim'
               DataBinding.FieldName = 'BIRIM'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repStokAnaBirim
               Width = 52
             end
             object GridTeklifDBTableView1BIRIMFIYAT: TcxGridDBColumn
               Caption = 'Birim Fiyat'
               DataBinding.FieldName = 'BIRIMFIYAT'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
               FooterAlignmentHorz = taRightJustify
@@ -887,6 +903,7 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1ISKONTO: TcxGridDBColumn
               Caption = #304'sk %'
               DataBinding.FieldName = 'ISKONTO'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 40
@@ -894,12 +911,14 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1ISKONTO2: TcxGridDBColumn
               Caption = #304'sk2 %'
               DataBinding.FieldName = 'ISKONTO2'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 40
             end
             object GridTeklifDBTableView1KDV: TcxGridDBColumn
               DataBinding.FieldName = 'KDV'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 40
@@ -907,6 +926,7 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1TUTAR: TcxGridDBColumn
               Caption = 'Tutar'
               DataBinding.FieldName = 'TUTAR'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
               FooterAlignmentHorz = taRightJustify
@@ -916,11 +936,13 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1KUR: TcxGridDBColumn
               Caption = 'P.Birimi'
               DataBinding.FieldName = 'KUR'
+              DataBinding.IsNullValueType = True
               Width = 40
             end
             object GridTeklifDBTableView1DOVIZ_BIRIMFIYAT: TcxGridDBColumn
               Caption = 'D'#246'viz Birim F.'
               DataBinding.FieldName = 'DOVIZ_BIRIMFIYAT'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
               FooterAlignmentHorz = taRightJustify
@@ -930,6 +952,7 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1DOVIZ_TUTARI: TcxGridDBColumn
               Caption = 'D'#246'viz Tutar'#305
               DataBinding.FieldName = 'DOVIZ_TUTARI'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
               FooterAlignmentHorz = taRightJustify
@@ -939,6 +962,7 @@ object FirsatListeDlg: TFirsatListeDlg
             object GridTeklifDBTableView1DOVIZ_KURU: TcxGridDBColumn
               Caption = 'D'#246'viz Birimi'
               DataBinding.FieldName = 'DOVIZ_KURU'
+              DataBinding.IsNullValueType = True
               Width = 40
             end
           end
@@ -1159,6 +1183,7 @@ object FirsatListeDlg: TFirsatListeDlg
             Styles.CardBorder = Tablo.cxStyle19
             object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
               DataBinding.FieldName = 'EKLEMETARIHI'
+              DataBinding.IsNullValueType = True
               Options.Editing = False
               Options.Focusing = False
               Options.ShowCaption = False
@@ -1167,6 +1192,7 @@ object FirsatListeDlg: TFirsatListeDlg
             end
             object GridYorumDBCardView1YAZAN: TcxGridDBCardViewRow
               DataBinding.FieldName = 'YAZAN'
+              DataBinding.IsNullValueType = True
               Options.Editing = False
               Options.Focusing = False
               Options.ShowCaption = False
@@ -1174,6 +1200,7 @@ object FirsatListeDlg: TFirsatListeDlg
             end
             object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
               DataBinding.FieldName = 'ATAC'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repFileExtensionList
               Options.Editing = False
               Options.Focusing = False
@@ -1184,6 +1211,7 @@ object FirsatListeDlg: TFirsatListeDlg
             end
             object GridYorumDBCardView1DOKUMANAD: TcxGridDBCardViewRow
               DataBinding.FieldName = 'DOKUMANAD'
+              DataBinding.IsNullValueType = True
               Options.Editing = False
               Options.Focusing = False
               Options.ShowCaption = False
@@ -1193,6 +1221,7 @@ object FirsatListeDlg: TFirsatListeDlg
             end
             object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
               DataBinding.FieldName = 'YORUM'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxRichEditProperties'
               Options.Editing = False
               Options.Focusing = False
@@ -1311,6 +1340,7 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewBASTARIHI: TcxGridDBColumn
             Caption = 'Ba'#351'lama Tarihi'
             DataBinding.FieldName = 'BASLAMATARIHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxDateEditProperties'
             Properties.ShowTime = False
             Width = 77
@@ -1318,33 +1348,39 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewPROJEKODU: TcxGridDBColumn
             Caption = 'F'#305'rsat Kodu'
             DataBinding.FieldName = 'PROJEKODU'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewFIRMA: TcxGridDBColumn
             Caption = 'M'#252#351'teri'
             DataBinding.FieldName = 'FIRMA'
+            DataBinding.IsNullValueType = True
             Width = 132
           end
           object GridFirsatViewTURU: TcxGridDBColumn
             Caption = 'T'#252'r'#252
             DataBinding.FieldName = 'TURU'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repFirsatTuru
             Width = 69
           end
           object GridFirsatViewKONU: TcxGridDBColumn
             Caption = 'Konusu'
             DataBinding.FieldName = 'KONUSU'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Width = 109
           end
           object GridFirsatViewTIPI: TcxGridDBColumn
             Caption = 'Tipi'
             DataBinding.FieldName = 'PROJETIPI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Options.Editing = False
           end
           object GridFirsatViewSATISFIYATI: TcxGridDBColumn
             Caption = 'F'#305'rsat De'#287'eri'
             DataBinding.FieldName = 'SATISFIYATI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;-,0.00'
             HeaderAlignmentHorz = taRightJustify
@@ -1353,16 +1389,19 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewPROJEKUR: TcxGridDBColumn
             Caption = 'P.Birimi'
             DataBinding.FieldName = 'SATISKUR'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewDURUM: TcxGridDBColumn
             Caption = 'Durum'
             DataBinding.FieldName = 'ASAMA'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repFirsatDurum
             Width = 51
           end
           object GridFirsatViewBelgeVar: TcxGridDBColumn
             Caption = 'Dkmn'
             DataBinding.FieldName = 'DOSYAVAR'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <
               item
@@ -1374,16 +1413,19 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewILGILI1: TcxGridDBColumn
             Caption = 'M'#252#351'teri '#304'lgili'
             DataBinding.FieldName = 'ADSOYAD'
+            DataBinding.IsNullValueType = True
             Width = 79
           end
           object GridFirsatViewNOTLAR: TcxGridDBColumn
             Caption = 'Notlar'
             DataBinding.FieldName = 'NOTLAR'
+            DataBinding.IsNullValueType = True
             Width = 228
           end
           object GridFirsatViewBITTARIHI: TcxGridDBColumn
             Caption = 'Biti'#351' Tarihi'
             DataBinding.FieldName = 'BITISTARIHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxDateEditProperties'
             Properties.ShowTime = False
             Width = 71
@@ -1391,20 +1433,24 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewSONUC: TcxGridDBColumn
             Caption = 'Sonu'#231
             DataBinding.FieldName = 'SONUC'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repFirsatSonuc
           end
           object GridFirsatViewSONUCACIKLAMA: TcxGridDBColumn
             Caption = 'Sonu'#231' Notu'
             DataBinding.FieldName = 'SONUCACIKLAMA'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewSONAKTKONUSU: TcxGridDBColumn
             Caption = 'Son '#304#351' Konusu'
             DataBinding.FieldName = 'SONAKTIVITEKONUSU'
+            DataBinding.IsNullValueType = True
             Width = 74
           end
           object GridFirsatViewSONAKTTARIHI: TcxGridDBColumn
             Caption = 'Son '#304#351' Tarihi'
             DataBinding.FieldName = 'SONAKTIVITETARIHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxDateEditProperties'
             Properties.ShowTime = False
             Width = 81
@@ -1412,6 +1458,7 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewSONSATBELGETARIHI: TcxGridDBColumn
             Caption = 'Son Sat. Belge'
             DataBinding.FieldName = 'SONSATBELGETARIHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxDateEditProperties'
             Properties.ShowTime = False
             Width = 80
@@ -1419,6 +1466,7 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewSONSATTUTARI: TcxGridDBColumn
             Caption = 'Son Sat. Tutar'#305
             DataBinding.FieldName = 'SONSATTUTARI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;'
             Width = 82
@@ -1426,11 +1474,13 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewDEGISTIRMETARIHI: TcxGridDBColumn
             Caption = 'De'#287'i'#351'tirme Tarihi'
             DataBinding.FieldName = 'DEGISTIRMETARIHI'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object GridFirsatViewDEGISTIREN: TcxGridDBColumn
             Caption = 'De'#287'i'#351'tiren'
             DataBinding.FieldName = 'DEGISTIREN'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.repGenelPersonelListesi
@@ -1439,11 +1489,13 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewEKLEMETARIHI: TcxGridDBColumn
             Caption = 'Ekleme Tarihi'
             DataBinding.FieldName = 'EKLEMETARIHI'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object GridFirsatViewEKLEYEN: TcxGridDBColumn
             Caption = 'Ekleyen'
             DataBinding.FieldName = 'EKLEYEN'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.repGenelPersonelListesi
@@ -1452,11 +1504,13 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewSUBEID: TcxGridDBColumn
             Caption = #350'ube'
             DataBinding.FieldName = 'SUBEID'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
           end
           object GridFirsatViewOLASILIK: TcxGridDBColumn
             Caption = 'Olas'#305'l'#305'k'
             DataBinding.FieldName = 'OLASILIK'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.repSeviye
@@ -1464,30 +1518,37 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewPRJ_SORUMLUSU_ID: TcxGridDBColumn
             Caption = 'Sorumlu'
             DataBinding.FieldName = 'SORUMLUAD'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewBASLAMAAY: TcxGridDBColumn
             Caption = 'Ba'#351'. Ay'
             DataBinding.FieldName = 'BASLAMAAY'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewBASLAMAYIL: TcxGridDBColumn
             Caption = 'Ba'#351'. Y'#305'l'
             DataBinding.FieldName = 'BASLAMAYIL'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewBITISAY: TcxGridDBColumn
             Caption = 'Bit. Ay'
             DataBinding.FieldName = 'BITISAY'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewBITISYIL: TcxGridDBColumn
             Caption = 'Bit. Y'#305'l'
             DataBinding.FieldName = 'BITISYIL'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewID: TcxGridDBColumn
             DataBinding.FieldName = 'ID'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object GridFirsatViewSONTEKLIFDURUMU: TcxGridDBColumn
             Caption = 'Son Teklif Durum'
             DataBinding.FieldName = 'SONTEKLIFDURUMU'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.repTeklifDurumu
@@ -1495,21 +1556,25 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewSONTEKLIFTARIHI: TcxGridDBColumn
             Caption = 'Son Teklif Tarihi'
             DataBinding.FieldName = 'SONTEKLIFTARIHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxDateEditProperties'
           end
           object GridFirsatViewSONTEKLIFTUTARI: TcxGridDBColumn
             Caption = 'Son Teklif Tutar'#305
             DataBinding.FieldName = 'SONTEKLIFTUTARI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;-,0.00'
           end
           object GridFirsatViewSONTEKLIFKUR: TcxGridDBColumn
             Caption = 'Son Teklif'
             DataBinding.FieldName = 'SONTEKLIFKUR'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewSEBEBI: TcxGridDBColumn
             Caption = 'Sebebi'
             DataBinding.FieldName = 'SEBEBI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.repFirsatSebebi
@@ -1517,10 +1582,12 @@ object FirsatListeDlg: TFirsatListeDlg
           object GridFirsatViewRAKIP: TcxGridDBColumn
             Caption = 'Rakipler'
             DataBinding.FieldName = 'RAKIP'
+            DataBinding.IsNullValueType = True
           end
           object GridFirsatViewALANRAKIP: TcxGridDBColumn
             Caption = 'Alan Rakip'
             DataBinding.FieldName = 'ALANRAKIP'
+            DataBinding.IsNullValueType = True
           end
         end
         object cxGridLevel2: TcxGridLevel
@@ -1559,20 +1626,8 @@ object FirsatListeDlg: TFirsatListeDlg
     Top = 164
   end
   object FIRSATLAR: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeOpen = FIRSATLARBeforeOpen
-    ParamData = <
-      item
-        Name = 'PKullanan'
-        DataType = ftWideString
-        Size = 1
-        Value = '0'
-      end
-      item
-        Name = '=P.ID'
-        Size = -1
-        Value = Null
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       'declare @PERSONEL int'
@@ -1653,6 +1708,18 @@ object FirsatListeDlg: TFirsatListeDlg
       '')
     Left = 239
     Top = 152
+    ParamData = <
+      item
+        Name = 'PKullanan'
+        DataType = ftWideString
+        Size = 1
+        Value = '0'
+      end
+      item
+        Name = '=P.ID'
+        Size = -1
+        Value = Null
+      end>
   end
   object PopupMenuYaz: TPopupMenu
     Left = 30
@@ -1783,14 +1850,8 @@ object FirsatListeDlg: TFirsatListeDlg
     end
   end
   object TabTeklif: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabTeklifAfterOpen
-    ParamData = <
-      item
-        Name = 'PRM'
-        Size = -1
-        Value = Null
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select T.*,'
       'P.PROJEKODU,'
@@ -1827,6 +1888,12 @@ object FirsatListeDlg: TFirsatListeDlg
       '')
     Left = 173
     Top = 335
+    ParamData = <
+      item
+        Name = 'PRM'
+        Size = -1
+        Value = Null
+      end>
   end
   object DtsTeklifler: TDataSource
     DataSet = TabTeklif
@@ -1847,12 +1914,6 @@ object FirsatListeDlg: TFirsatListeDlg
   end
   object TabTeklifDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Prm'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       'Select T.* ,'
       
@@ -1874,9 +1935,21 @@ object FirsatListeDlg: TFirsatListeDlg
       '')
     Left = 396
     Top = 428
+    ParamData = <
+      item
+        Name = 'Prm'
+        Size = -1
+        Value = Null
+      end>
   end
   object TabGorevler: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'exec sp_Prg_IsListesi_Projeler  :RehberId, :AcKapa , :GunSay, :L' +
+        'isteId')
+    Left = 229
+    Top = 309
     ParamData = <
       item
         Name = 'RehberId'
@@ -1906,12 +1979,6 @@ object FirsatListeDlg: TFirsatListeDlg
         Size = 4
         Value = Null
       end>
-    SQL.Strings = (
-      
-        'exec sp_Prg_IsListesi_Projeler  :RehberId, :AcKapa , :GunSay, :L' +
-        'isteId')
-    Left = 229
-    Top = 309
   end
   object DtsGorevler: TDataSource
     DataSet = TabGorevler
@@ -1921,22 +1988,22 @@ object FirsatListeDlg: TFirsatListeDlg
   object GorevlerMenu: TOfficePopupMenu
     OwnerDraw = True
     OfficeDesign = True
-    Appearance.Gradient1Start = 15722724
-    Appearance.Gradient1End = 14599608
-    Appearance.Gradient2Start = 14203563
-    Appearance.Gradient2End = 15722724
-    Appearance.MarginX = 4
-    Appearance.MarginY = 2
-    Appearance.SeparatorLeading = 6
-    Appearance.GutterWidth = 26
-    Appearance.SeparatorBackgroundColor = 15656925
-    Appearance.SeparatorLineColor = 12961221
-    Appearance.GutterColor = 15658729
-    Appearance.ItemBackgroundColor = 16448250
-    Appearance.ItemSelectedColor = 15128011
-    Appearance.FontColor = 7214336
-    Appearance.FontDisabledColor = 14599640
-    Style = msDefault
+    appearance.Gradient1Start = 15722724
+    appearance.Gradient1End = 14599608
+    appearance.Gradient2Start = 14203563
+    appearance.Gradient2End = 15722724
+    appearance.MarginX = 4
+    appearance.MarginY = 2
+    appearance.SeparatorLeading = 6
+    appearance.GutterWidth = 26
+    appearance.SeparatorBackgroundColor = 15656925
+    appearance.SeparatorLineColor = 12961221
+    appearance.GutterColor = 15658729
+    appearance.ItemBackgroundColor = 16448250
+    appearance.ItemSelectedColor = 15128011
+    appearance.FontColor = 7214336
+    appearance.FontDisabledColor = 14599640
+    style = msDefault
     Left = 584
     Top = 308
     object DuzenleMenu: TMenuItem
@@ -2027,21 +2094,6 @@ object FirsatListeDlg: TFirsatListeDlg
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PYer'
-        DataType = ftWord
-        Precision = 3
-        Size = 1
-        Value = Null
-      end
-      item
-        Name = 'PYerId'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -2060,6 +2112,21 @@ object FirsatListeDlg: TFirsatListeDlg
       'order by 2 DESC')
     Left = 995
     Top = 257
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object cxGridPopupYorumlar: TcxGridPopupMenu
     Grid = GridYorum
@@ -2079,22 +2146,22 @@ object FirsatListeDlg: TFirsatListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    Appearance.Gradient1Start = 15722724
-    Appearance.Gradient1End = 14599608
-    Appearance.Gradient2Start = 14203563
-    Appearance.Gradient2End = 15722724
-    Appearance.MarginX = 4
-    Appearance.MarginY = 2
-    Appearance.SeparatorLeading = 6
-    Appearance.GutterWidth = 26
-    Appearance.SeparatorBackgroundColor = 15656925
-    Appearance.SeparatorLineColor = 12961221
-    Appearance.GutterColor = 15658729
-    Appearance.ItemBackgroundColor = 16448250
-    Appearance.ItemSelectedColor = 15128011
-    Appearance.FontColor = 7214336
-    Appearance.FontDisabledColor = 14599640
-    Style = msDefault
+    appearance.Gradient1Start = 15722724
+    appearance.Gradient1End = 14599608
+    appearance.Gradient2Start = 14203563
+    appearance.Gradient2End = 15722724
+    appearance.MarginX = 4
+    appearance.MarginY = 2
+    appearance.SeparatorLeading = 6
+    appearance.GutterWidth = 26
+    appearance.SeparatorBackgroundColor = 15656925
+    appearance.SeparatorLineColor = 12961221
+    appearance.GutterColor = 15658729
+    appearance.ItemBackgroundColor = 16448250
+    appearance.ItemSelectedColor = 15128011
+    appearance.FontColor = 7214336
+    appearance.FontDisabledColor = 14599640
+    style = msDefault
     Left = 423
     Top = 276
     object MenuKlasordenEkle: TMenuItem
@@ -2111,5 +2178,3 @@ object FirsatListeDlg: TFirsatListeDlg
     end
   end
 end
-
-

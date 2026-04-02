@@ -584,7 +584,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           end
           object LabelIlgili: TcxLabel
             Left = 4
-            Top = 109
+            Top = 110
             Cursor = crHandPoint
             Caption = 'M'#252#351'teri '#304'lgili'
             ParentFont = False
@@ -1282,10 +1282,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
           object TabSheetLojistik: TcxTabSheet
             Caption = 'Lojistik'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object ToolBar2: TToolBar
               AlignWithMargins = True
               Left = 3
@@ -1490,10 +1486,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
           object TabSheetAsama: TcxTabSheet
             Caption = 'A'#351'ama'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object ToolBar5: TToolBar
               Left = 0
               Top = 0
@@ -1638,10 +1630,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
           object TabSheet1: TcxTabSheet
             Caption = 'Yorum / Medya'
             ImageIndex = 0
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             DesignSize = (
               979
               184)
@@ -1783,7 +1771,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
               Style.IsFontAssigned = True
               Properties.Alignment.Horz = taRightJustify
               Transparent = True
-              ExplicitTop = 163
               AnchorX = 979
             end
             object CheckZenginMetin: TcxCheckBox
@@ -1848,8 +1835,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
       Caption = 'Ek Detay Bilgiler'
       OnPage = ProjeEkDetayEkrPage
       OnExitPage = ProjeEkDetayEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2079,8 +2064,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = ProjebagTeklifEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2253,8 +2236,6 @@ object FirsatWizardDlg: TFirsatWizardDlg
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'ProjeTarihceEkr'
       OnPage = ProjeTarihceEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object gridAktiviteTarihce: TcxGrid
         Left = 0
         Top = 70
@@ -2408,6 +2389,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
   end
   object TabDetay: TFDQuery
     Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       
@@ -2458,8 +2440,8 @@ object FirsatWizardDlg: TFirsatWizardDlg
         'EYEN'#9
       'where P.PROJEID= :PPROJEID'
       'order by P.EKLEMETARIHI')
-    Left = 218
-    Top = 204
+    Left = 162
+    Top = 100
   end
   object TabBagTeklif: TFDQuery
     Connection = Tablo.FDCnn

@@ -1,4 +1,4 @@
-ï»¿unit UMesajlasma;
+unit UMesajlasma;
 
 interface
 
@@ -105,22 +105,22 @@ procedure TMesajlasmaDlg.MesajEkle(ID, Grup : Integer; Mesaj:string);
 var MesajLogID, MesajLogKullaniciID, Grupmu : Integer;
     MsgStr:String;
 begin
-    if Grup=99 then begin  //bakalÄ±m bu mesaj gruba mÄ±
-       Grupmu:=1;          //gruba ise tÃ¼re grup adÄ±nÄ±n rehber id sini veriyoruz.
-       Tablo.tablodanSorguAc(9, 'select ALICILAR=G.DEGER, SERVERID=ISNULL(K.SERVERID,0) from GENINI G inner join KULLANICI K on G.DEGER=K.REHBERID where G.BOLUM=99 and G.DIL='+IntToStr(ID));
+    if Grup=99 then begin  //bakalým bu mesaj gruba mý
+       Grupmu:=1;          //gruba ise türe grup adýnýn rehber id sini veriyoruz.
+       Tablo.tablodanSorguAc(9, 'select ALICILAR=G.DEGER, SERVERID=0 from GENINI G where G.BOLUM=99 and G.DIL='+IntToStr(ID));
     end else begin
-       Grupmu:=0;          // tek kiÅŸiye mesaj ise tÃ¼r 0 olur
-       Tablo.tablodanSorguAc(9, 'select ALICILAR=REHBERID, SERVERID=ISNULL(K.SERVERID,0) from KULLANICI K where K.REHBERID = '+IntToStr(ID) );
+       Grupmu:=0;          // tek kiþiye mesaj ise tür 0 olur
+       Tablo.tablodanSorguAc(9, 'select ALICILAR=REHBERID, SERVERID=0 from KULLANICI K where K.REHBERID = '+IntToStr(ID) );
     end;
 
-    //mesaj gÃ¶nderen bilgisi ve mesaj iÃ§eriÄŸi
-    MesajLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+    //mesaj gönderen bilgisi ve mesaj içeriði
+    MesajLogID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
       'insert into MESAJLOG(GONDERENID,ALANID,GRUP,MESAJ)values(&GonderenID,&AlanID,&Grup,&Mesaj) select scope_identity() ', ['&GonderenID','&AlanID','&Grup', '&Mesaj'],
       [Kullanan, ID, Grupmu, Mesaj], true);
-    //mesaj alÄ±cÄ±larÄ±  eÄŸer grupsa Ã¼yelerin hepsine
+    //mesaj alýcýlarý  eðer grupsa üyelerin hepsine
     while not Tablo.Query9.eof do begin
-      if Tablo.Query9.Fields[0].AsString <> kullanan then begin//kendisi hariÃ§ diÄŸer kiÅŸilere gitmeli
-         MesajLogKullaniciID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
+      if Tablo.Query9.Fields[0].AsString <> kullanan then begin//kendisi hariç diðer kiþilere gitmeli
+         MesajLogKullaniciID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
            'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
            [MesajLogID, Tablo.Query9.Fields[0].AsInteger], true);
          ///
@@ -214,6 +214,7 @@ begin
 end;
 
 end.
+
 
 
 

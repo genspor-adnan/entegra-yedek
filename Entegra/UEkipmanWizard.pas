@@ -1,4 +1,4 @@
-ï»¿unit UEkipmanWizard;
+unit UEkipmanWizard;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit,
   cxLabel, cxDBLabel, JvWizard, JvExControls, StdCtrls, cxButtons, ExtCtrls, DB,
-  FireDAC.Comp.Client, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData,
+  ADODB, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData,
   cxDataStorage, cxDBData, cxImageComboBox, ComCtrls, ToolWin, cxGridLevel,
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxClasses,
   cxGridCustomView, cxGrid, cxImage, cxDBEdit, cxTextEdit, cxMemo, cxMaskEdit,
@@ -15,7 +15,10 @@ uses
   cxGroupBox, cxRadioGroup, dxSkinMetropolis, dxSkinMetropolisDark,
   dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxSkinOffice2016Colorful,
   dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
+  dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
 
 type
   TEkipmanWizardDlg = class(TForm)
@@ -35,6 +38,8 @@ type
     DtsEkipman: TDataSource;
     TabBelge: TFDQuery;
     DtsBelge: TDataSource;
+    TabDetay: TFDQuery;
+    DtsDetay: TDataSource;
     LogoResim: TcxImage;
     gridEkipmanDetay: TcxGrid;
     tvEkipmanDetay: TcxGridDBTableView;
@@ -87,8 +92,6 @@ type
     GridDetayViewColumn1: TcxGridDBColumn;
     GridDetayViewColumnsec: TcxGridDBColumn;
     cxGridDetay: TcxGridLevel;
-    TabDetay: TFDQuery;
-    DtsDetay: TDataSource;
     ComboBolum: TcxDBComboBox;
     lbDetaySablon: TcxLabel;
     SQLDetay: TcxMemo;
@@ -185,7 +188,7 @@ begin
     'select ID,KOD,AD from EKIPMANLAR where DURUM=1 and EKIPMANTUR=1 and ID<>'+TabEkipman.FieldByName('ID').AsString
     +' and ID not in (select EKIPMANID from EKIPMANDETAY where USTEKIPMANID='+TabEkipman.FieldByName('ID').AsString+') '
     +' and AD like ''%<ara>%'' order by 2'
-    ,Sonuclar,[nil,nil,nil],'',TNotifyEvent(nil),Tablo.FDCnn) then try
+    ,Sonuclar,[nil,nil,nil],'',TNotifyEvent(nil),Tablo.Fdcnn) then try
     TabEkipmanDetay.Append;
     TabEkipmanDetay.FieldByName('EKIPMANID').AsInteger:=StrToInt(Sonuclar[0]);
     TabEkipmanDetay.FieldByName('USTEKIPMANID').AsInteger:=TabEkipman.FieldByName('ID').AsInteger;
@@ -214,23 +217,23 @@ begin
 end;
 
 procedure TEkipmanWizardDlg.BelgeEkleTusClick(Sender: TObject);
-var
-  str : string;
 begin
    if OpenDialog1.Execute then begin
-      Tablo.Query1.Close;
-      Str := ExtractFileName(OpenDialog1.FileName);
-      Tablo.Query1.SQL.Text:= ' INSERT INTO IMAJ (REHBERID,YERI,YER_ID,BELGEADI,BELGE,EKLEYEN,SUBEID) '+
-      ' VALUES('+IntToStr(EkipmanID)+','''+IntToStr(TabNo_EKIPMAN)+''','+IntToStr(EkipmanID)+','''+STR+''',:PBELGE,'''+Kullanan+''','+IntToStr(SubeId)+')';
-      KutugeYaz(Tablo.Query1, OpenDialog1.FileName);
-      TabBelge.Close;
-      TabBelge.Open;
+      Tablo.BelgeEkleme(OpenDialog1.FileName, EkipmanID, TabNo_EKIPMAN, EkipmanID, TabBelge);
    end;
 end;
 
 procedure TEkipmanWizardDlg.BelgeGorTusClick(Sender: TObject);
 begin
-   KutuktenOku(TabBelge,'BELGE','BELGEADI', True);
+   if TabBelge.RecordCount = 0 then Exit;
+   if TabBelge.FieldByName('ICDIS').AsString = 'True' then begin
+      Tablo.TablodanSorguAc(5, ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma '
+        + TabBelge.FieldByName('ID').AsString
+        + ' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI='''
+        + TabBelge.FieldByName('BELGEADI').AsString + '''');
+      KutuktenOku(Tablo.Query5, 'BELGE', TabBelge.FieldByName('BELGEADI').AsString, True);
+   end else
+      KutuktenOku(TabBelge, 'BELGE', 'BELGEADI', True);
 end;
 
 procedure TEkipmanWizardDlg.BelgeSilTusClick(Sender: TObject);
@@ -279,7 +282,7 @@ begin
       TabEkipman.Cancel
     end else begin
       TabEkipman.Post;
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger]);
       PageEkipmanBilgiPage(Self);
     end;
   end;
@@ -359,8 +362,8 @@ begin
 //       TabEkipman.FieldByName('MODEL').AsString := AraDlg.TabStokListe.FieldByName('MODEL').AsString;
     TabEkipman.Post;
     Tabloyenile(TabEkipman,[EkipmanID]);
-    //imajlarÄ± kopyalayalÄ±m...
-    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from IMAJ where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_EKIPMAN,EkipmanID]);
+    //imajlarý kopyalayalým...
+    Veritabani.BasitKomutçalýþtýr(Tablo.FDcnn,'delete from IMAJ where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_EKIPMAN,EkipmanID]);
     Tablo.TablodanSorguAc(9,'select ID from IMAJ where YERI=71 and YER_ID='+TabEkipman.FieldByName('URUNID').AsString);//stoktaki resimler geliyor..
     Tablo.Query9.First;
     while not Tablo.Query9.Eof do begin
@@ -414,7 +417,7 @@ end;
 
 procedure TEkipmanWizardDlg.FormCreate(Sender: TObject);
 begin
-    LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
     EkipmanID:=-1;
     Cagiran:=-1;
@@ -482,10 +485,10 @@ begin
      MarkaId:='-2727';
 
 
-    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like '''+MarkaId+'%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
-    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like '''+MarkaId+'%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
-    if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
-      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+MarkaId+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
+    Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from GENINI where BOLUM like '''+MarkaId+'%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
+    Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from GENINI where BOLUM=0  and DEGER like '''+MarkaId+'%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
+    if not Veritabani.VeriVarMi(Tablo.FDcnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+MarkaId+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -521,6 +524,18 @@ begin
   TabDetay.Params[1].Value := TabEkipman.FieldByName('ID').AsInteger;
   TabDetay.Params[2].Value := ComboBolum.Text;
   TabDetay.Open;
+
+  // Update table ve ProviderFlags ayarla
+  TabDetay.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+  // REHBERBILGI disindaki alanlari update disinda tut
+  if TabDetay.FindField('ORJINAL') <> nil then
+    TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+  if TabDetay.FindField('GIRIS') <> nil then
+    TabDetay.FieldByName('GIRIS').ProviderFlags := [];
+  if TabDetay.FindField('KAYNAK') <> nil then
+    TabDetay.FieldByName('KAYNAK').ProviderFlags := [];
+  if TabDetay.FindField('ZORUNLU') <> nil then
+    TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
 end;
 
 procedure TEkipmanWizardDlg.PageEkipmanKartExitPage(Sender: TObject;
@@ -593,7 +608,7 @@ begin
   Sonuclar := TStringList.Create;
   if Tablo.ListedenBilgiGetir(StokSecimi,
     'select ID,KOD,AD from EKIPMANLAR where DURUM=1 and AD like ''%<ara>%'' order by 2'
-    ,Sonuclar,[nil,nil,nil],'',TNotifyEvent(nil),Tablo.FDCnn) then try
+    ,Sonuclar,[nil,nil,nil],'',TNotifyEvent(nil),Tablo.FDcnn) then try
     if not (TabEkipmanDetay.State in [dsEdit,dsInsert]) then
       TabEkipmanDetay.Edit;
     TabEkipmanDetay.FieldByName('EKIPMANID').AsInteger:=StrToInt(Sonuclar[0]);
@@ -650,18 +665,13 @@ begin
   if TabDetay.State in [dsInsert, dsEdit] then
      TabDetay.post;
   if EkleDetay then
-     Ekle(TabDetay,TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger,'DeÄŸiÅŸ');
+     Ekle(TabDetay,TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger,'Deðiþ');
 
-  //EÄŸer daha Ã¶nce iÅŸaretlenmemiÅŸse stokta kipman diye iÅŸaretlenir
+  //Eðer daha önce iþaretlenmemiþse stokta kipman diye iþaretlenir
   if TabEkipman.FieldByName('URUNID').AsString<>'' then
-     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKLAR set EKIPMAN=1 where ID=&ID and isnull(EKIPMAN,0)<>1 ',['&ID'],[TabEkipman.FieldByName('URUNID').AsInteger]);
+     Veritabani.BasitKomutçalýþtýr(Tablo.FDcnn,'update STOKLAR set EKIPMAN=1 where ID=&ID and isnull(EKIPMAN,0)<>1 ',['&ID'],[TabEkipman.FieldByName('URUNID').AsInteger]);
 
   ModalResult := mrOk;
 end;
 
 end.
-
-
-
-
-

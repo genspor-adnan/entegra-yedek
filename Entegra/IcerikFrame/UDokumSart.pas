@@ -13,7 +13,11 @@ uses
   cxControls, cxGridCustomView, cxGrid, ComCtrls, SynEdit, SynDBEdit, StdCtrls,
   ToolWin, DBCtrls, ExtCtrls, cxContainer, cxTextEdit, cxDBEdit, cxMaskEdit,
   cxLookAndFeels, cxLookAndFeelPainters, cxNavigator, System.Actions,
-  cxCheckBox, dxSkinLiquidSky, cxLabel, cxDBLabel;
+  cxCheckBox, dxSkinLiquidSky, cxLabel, cxDBLabel, dxCoreGraphics, dxDateRanges,
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, System.ImageList,
+  FireDAC.Comp.DataSet;
 
 type
   TDokumSartDlg = class(TForm)
@@ -144,12 +148,19 @@ var
 implementation
 
 uses Utablo, UGirisKutusuEx, UCombo, PrjConst, URaporAraclari, FetaClassExtensions, dlgSearchText, dlgReplaceText,
-     SynEditTypes, dlgConfirmReplace, FetaKurulusSiniflari,LocOnFly;
+     SynEditTypes, dlgConfirmReplace, FetaKurulusSiniflari, LocOnFly;
 
 {$R *.dfm}
 var s, d: string[40];
   Secilen: Boolean;
 
+const
+  SynReplaceCancel = TSynReplaceAction(0);
+  SynReplaceSkip = TSynReplaceAction(1);
+  SynReplaceReplace = TSynReplaceAction(2);
+  SynReplaceReplaceAll = TSynReplaceAction(3);
+
+var
   gbSearchBackwards: boolean;
   gbSearchCaseSensitive: boolean;
   gbSearchFromCaret: boolean;
@@ -166,6 +177,25 @@ var s, d: string[40];
 //resourcestring
 //  STextNotFound = 'Metin bulunmadı';
 //  SNoSelectionAvailable = 'Arama işlemi tüm metin içerisinde yapılsın mı?';
+
+procedure EnsureFDUpdateTableName(ADataSet: TDataSet);
+var
+  LQuery: TFDQuery;
+  LSql: string;
+begin
+  if not (ADataSet is TFDQuery) then
+    Exit;
+
+  LQuery := TFDQuery(ADataSet);
+  if Trim(LQuery.UpdateOptions.UpdateTableName) <> '' then
+    Exit;
+
+  LSql := UpperCase(LQuery.SQL.Text);
+  if Pos('FROM DOKUMLER', LSql) > 0 then
+    LQuery.UpdateOptions.UpdateTableName := 'DOKUMLER'
+  else if Pos('FROM KOSULLAR', LSql) > 0 then
+    LQuery.UpdateOptions.UpdateTableName := 'KOSULLAR';
+end;
 
 procedure TDokumSartDlg.GridKosulDBTableView1COMBOICERIK1PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 var s : string;
@@ -252,6 +282,7 @@ procedure TDokumSartDlg.KaydetTusClick(Sender: TObject);
 begin
    if Trim(EditRAPORADI.Text)='' then
       raise Exception.Create('Rapor Adı Girilmemiş!');
+   EnsureFDUpdateTableName(DtsDokumler.DataSet);
    DtsDokumler.DataSet.Post;
 end;
 
@@ -267,6 +298,7 @@ end;
 
 procedure TDokumSartDlg.KosulKaydetTusClick(Sender: TObject);
 begin
+   EnsureFDUpdateTableName(DtsKosul.DataSet);
    DtsKosul.DataSet.Post;
 end;
 
@@ -414,7 +446,7 @@ var
   EditRect: TRect;
 begin
   if ASearch = AReplace then
-    Action := raSkip
+     Action := SynReplaceSkip
   else begin
     APos := SQLMemo.ClientToScreen(
       SQLMemo.RowColumnToPixels(
@@ -429,10 +461,10 @@ begin
     ConfirmReplaceDialog.PrepareShow(EditRect, APos.X, APos.Y,
       APos.Y + SQLMemo.LineHeight, ASearch);
     case ConfirmReplaceDialog.ShowModal of
-      mrYes: Action := raReplace;
-      mrYesToAll: Action := raReplaceAll;
-      mrNo: Action := raSkip;
-      else Action := raCancel;
+      mrYes: Action := SynReplaceReplace;
+      mrYesToAll: Action := SynReplaceReplaceAll;
+      mrNo: Action := SynReplaceSkip;
+      else Action := SynReplaceCancel;
     end;
   end;
 end;
@@ -520,16 +552,7 @@ begin
   PageControl1.ActivePageIndex := 0;
 //  TRaporAraclari.Ini.ReadSection('TABLEADLARI', KosulGrid.Columns[1].PickList);
   Secilen := False;
-  EditRAPORADI.Properties.ReadOnly := DtsDokumler.DataSet = Tablo.TabDokum;
-  EditGRUBU.Properties.ReadOnly := EditRAPORADI.Properties.ReadOnly;
-
-  EditYazici.Text:= DtsDokumler.DataSet.FieldByName('YAZICI').AsString;
-  LabelKopya.Caption := DtsDokumler.DataSet.FieldByName('KOPYASAY').AsString;
+  EditRAPORADI.Properties.ReadOnly := DtsDokumler.DataSet.State <> dsInsert;
 end;
 
-
-
 end.
-
-
-

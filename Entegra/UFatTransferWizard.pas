@@ -377,8 +377,8 @@ begin
   PopupMenuYaz.Images := TGenelAnaSekmeFrame(aktifFrame).ImageList1;
 
   if not SubeVarmi then begin
-    LblCikis.Caption:='??k?? Deposu';
-    LblGiris.Caption:='Giri? Deposu';
+    LblCikis.Caption:='Çýkýþ Deposu';
+    LblGiris.Caption:='Giriþ Deposu';
     ComboSubeCikis.Visible:=False;
     ComboSubeGiris.Visible:=False;
     ComboCikisDepo.Width:=160;

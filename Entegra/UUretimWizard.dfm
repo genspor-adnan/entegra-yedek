@@ -145,6 +145,7 @@ object UretimWizardDlg: TUretimWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
+          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -1837,7 +1838,7 @@ object UretimWizardDlg: TUretimWizardDlg
         'ONAYLAYANADI=(select R.FIRMA from REHBER R where R.ID=FB.ONAYLAY' +
         'AN)'
       'from FATBASLIK FB  where FB. ID=:PID and FB.TUR=6')
-    Left = 172
+    Left = 156
     Top = 234
   end
   object DtsUretim: TDataSource
@@ -2383,4 +2384,3 @@ object UretimWizardDlg: TUretimWizardDlg
     end
   end
 end
-

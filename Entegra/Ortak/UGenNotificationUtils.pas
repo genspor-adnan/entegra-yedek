@@ -1,13 +1,13 @@
-unit UGenNotificationUtils;
+ï»¿unit UGenNotificationUtils;
 
 interface
 Uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls,
-  Dialogs, StdCtrls, IdHTTP, MSXML_TLB, UFDCompatHelpers, Ucombo, forms, XMLDoc, XMLIntf,
+  Dialogs, StdCtrls, IdHTTP, UFDCompatHelpers, Ucombo, forms, XMLDoc, XMLIntf,
   IdSMTP, IdMessage,IdExplicitTLSClientServerBase, IdAttachmentFile, IdSSLOpenSSL, Prjconst,
   IdText,Generics.Collections, DB, ComObj, ComCtrls;
 
-{$REGION 'SMS Tip Tanýmlarý'}
+{$REGION 'SMS Tip TanÄ±mlarÄ±'}
 type
   TSmsHesapBigileri = record
     HesapId : Integer;
@@ -36,7 +36,7 @@ type
   end;
 {$ENDREGION}
 
-{$REGION 'Eposta Tip Tanýmlarý'}
+{$REGION 'Eposta Tip TanÄ±mlarÄ±'}
   type
     TEpostaHesapAyarlari = record
      HesapId : integer;
@@ -98,7 +98,7 @@ Uses Utablo,
      UBinarySave,
      FetaKurulusSiniflari;
 
-{$REGION 'SMS Ýþlemleri'}
+{$REGION 'SMS Ä°ÅŸlemleri'}
 function TelFormatla(Tel: string): string;
 var
   s, Gtel: string; index,i,l: Integer;
@@ -182,7 +182,7 @@ end;
 
 function SMSKontorSorgula(HesapId:integer): TSmsKontorSonucu;
 var
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
   XMLStructe, DonusBilgisi: TStringList;
   //DonusBilgisi:String;
   link: string;
@@ -205,52 +205,52 @@ begin
     try
       XMLStructe.Text := '<?xml version="1.0" encoding="ISO-8859-9"?>' +
         '<Main><UserName>' + SMSHesapBilgileri.SMSKullaniciAdi + '</UserName><PassWord>' + SMSHesapBilgileri.SMSSifre + '</PassWord></Main>';
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://secure.smsnext.com/developer/bulksmsv2/queryKontor.asp', False);
       //ID:1310411
       HTTPReq.send(XMLStructe.Text);
       DonusBilgisi.Text := HTTPReq.responseText;
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end;
     if copy(DonusBilgisi.Strings[0], 1, 2) = 'WP' then
     begin
-      //Hata Oluþtu demektir bunlarý bi alalým
-      //Dönen Hata kodlarý
-      //WP:00  Hatalý Kullanýcý Adý yada Þifresi
-      //WP:01  Geçersiz IP Adresi
-      //WX:02  Kontörlu Hesap Deðil
-      //WX:03  Kontör Hatasý
-      //WP:90   XML Hatasý
+      //Hata OluÅŸtu demektir bunlarÄ± bi alalÄ±m
+      //DÃ¶nen Hata kodlarÄ±
+      //WP:00  HatalÄ± KullanÄ±cÄ± AdÄ± yada ÅŸifresi
+      //WP:01  GeÃ§ersiz IP Adresi
+      //WX:02  KontÃ¶rlÃ¼ Hesap DeÄŸil
+      //WX:03  KontÃ¶r HatasÄ±
+      //WP:90   XML HatasÄ±
       Donen.HataKodu := copy(DonusBilgisi.Strings[0], 4, 2);
       if Donen.HataKodu = '00' then
-        Donen.Mesaj := 'Hatalý Kullanýcý Adý yada Þifresi'
+        Donen.Mesaj := 'HatalÄ± KullanÄ±cÄ± AdÄ± yada ÅŸifresi'
       else if Donen.HataKodu = '01' then
-        Donen.Mesaj := 'Geçersiz IP Adresi'
+        Donen.Mesaj := 'GeÃ§ersiz IP Adresi'
       else if Donen.HataKodu = '02' then
-        Donen.Mesaj := 'Kontörlü Hesap Deðil'
+        Donen.Mesaj := 'KontÃ¶rlÃ¼ Hesap DeÄŸil'
       else if Donen.HataKodu = '03' then
-        Donen.Mesaj := 'Kontör Hatasý'
+        Donen.Mesaj := 'KontÃ¶r HatasÄ±'
       else if Donen.HataKodu = '90' then
-        Donen.Mesaj := 'XML Hatasý';
+        Donen.Mesaj := 'XML HatasÄ±';
       Donen.KontorMiktari := '0';
     end
     else
     begin
-      // Hata Yoksa Kontör miktarýný ve mesajýný oluþturalým
+      // Hata Yoksa KontÃ¶r miktarÄ±nÄ± ve mesajÄ±nÄ± oluÅŸturalÄ±m
       Donen.HataKodu := '-1';
       Donen.KontorMiktari := DonusBilgisi.Strings[0];
-      Donen.Mesaj := 'Kontör Son kullaným tarihi :' + copy(DonusBilgisi.Strings[1], 7, 2) + '/' + copy(DonusBilgisi.Strings[1], 5, 2) + '/' + copy(DonusBilgisi.Strings[1], 1, 4);
+      Donen.Mesaj := 'KontÃ¶r Son kullanÄ±m tarihi :' + copy(DonusBilgisi.Strings[1], 7, 2) + '/' + copy(DonusBilgisi.Strings[1], 5, 2) + '/' + copy(DonusBilgisi.Strings[1], 1, 4);
     end;
   end // if SMSHesapBilgileri.SMSServisSaglayici = 'SmsNext'
 
   else if SMSHesapBilgileri.SMSServisSaglayici = SMSServis_Biotekno then
   begin
-    //Dönen Kodlar
-    //20 Geçersiz  xml file
-    //10 Kullanýcý Kodu / Þifresi hatalý
-    //90 Sistem hatasý
+    //DÃ¶nen Kodlar
+    //20 GeÃ§ersiz  xml file
+    //10 KullanÄ±cÄ± Kodu / ÅŸifresi hatalÄ±
+    //90 Sistem hatasÄ±
     InHttp := TIdHTTP.Create(nil);
     //HTTPReq:=TXMLHTTPRequest.Create(nil);
     link := 'http://biotekno.biz:8080/SMS-Web/examine?username=' + SMSHesapBilgileri.SMSKullaniciAdi + '&password=' + SMSHesapBilgileri.SMSSifre + '&type=charge';
@@ -267,7 +267,7 @@ begin
 
   else if SMSHesapBilgileri.SMSServisSaglayici = SMSServis_PostaGuvercini  then
   begin
-    { 3.2. KREDÝ
+    { 3.2. KREDÄ°
   <?xml version="1.0"?>
   <!ELEMENT CREDIT-Response (ERROR | BALANCE)>
   <!ELEMENT ERROR (#PCDATA)>
@@ -277,8 +277,8 @@ begin
   res CDATA #REQUIRED
   >
 
-  3.2.1 ÖRNEK KREDÝ CEVAP
-  CREDIT-BalRequest sonrasýnda sunucudan gelebilecek cevap aþaðýdadýr. Res deðeri mevcut kredinizi verir.
+  3.2.1 Ã¶RNEK KREDÄ° CEVAP
+  CREDIT-BalRequest sonrasÄ±nda sunucudan gelebilecek cevap aÅŸaÄŸÄ±dadÄ±r. Res deÄŸeri mevcut kredinizi verir.
 
   <CREDIT-Response>
      <BALANCE res="0" />
@@ -286,19 +286,19 @@ begin
     }
     try
 
-      //Gönderilecek xml oluþturuluyor..
+      //GÃ¶nderilecek xml oluÅŸturuluyor..
       XMLStructe.Text := //'<?xml version="1.0" encoding="ISO-8859-9"?>' +
         '<CREDIT-BalRequest>' +
         '<CLIENT user="' + SMSHesapBilgileri.SMSKullaniciAdi + '" pwd="' + SMSHesapBilgileri.SMSSifre + '"/>'+
         '<BALANCE req="1" />' ;
       XMLStructe.Text := XMLStructe.Text + '</CREDIT-BalRequest>';
 
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.postaguvercini.com/api_xml/Cre_balreq.asp ', False);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #13, '', [rfReplaceAll]);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #10, '', [rfReplaceAll]);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]);
-      //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý unicede olarak Ýsmail ACET 2010-09-16
+      //BaÅŸlÄ±k KÄ±smÄ± standart bilgilerin hazÄ±rlanmasÄ± unicede olarak Ä°smail ACET 2010-09-16
       HTTPReq.setRequestHeader('Content-Type: text/xml','<?xml version="1.0" encoding="windows-1254"?>');
       HTTPReq.send(XMLStructe.Text);
       if not DirectoryExists('XML') then
@@ -311,7 +311,7 @@ begin
       DonusBilgisi.Text := StringReplace(DonusBilgisi.Text, #13#10, '', [rfReplaceAll]);
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end;
 
     if pos('<ERROR>', DonusBilgisi.Text) > 0 then
@@ -332,7 +332,7 @@ begin
         InsertRes := ANode.Attributes['res'];
         ANode := ANode.NextSibling;
       until ANode = nil;
-      // Hata Yoksa mesaj referansýný  ve mesajýný oluþturalým
+      // Hata Yoksa mesaj referansÄ±nÄ±  ve mesajÄ±nÄ± oluÅŸturalÄ±m
       Donen.HataKodu := '-1';
       Donen.Mesaj :=  '';
       Donen.KontorMiktari :=  InsertRes ;
@@ -343,13 +343,13 @@ end;
 
 procedure PostaGuverciniDurumSorgula(SMSID, SMSHesapID: integer ;MesajReferansNo:string);
 var
-  HTTPReq: TXMLHTTPRequest;
+  HTTPReq: OleVariant;
   XMLStructe, DonusBilgisi: TStringList;
   Kontrol: string;
   SMSHesapBilgileri : TSmsHesapBigileri;
   procedure SMSDurumGuncelle(durum:Integer;durumaciklama:string);
    begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'UPDATE SMSLER SET DURUM = '+inttostr(durum)+' , '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'UPDATE SMSLER SET DURUM = '+inttostr(durum)+' , '+
                                     ' DURUMACIKLAMA ='''+durumaciklama+''' '+
                                     'WHERE ID = '+inttostr(SMSID),[],[]
                                    );
@@ -357,7 +357,7 @@ var
 begin
    SMSHesapBilgileri:= SMSHesapBilgileriGetir(SMSHesapID);
    try
-    //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý
+    //BaÅŸlÄ±k KÄ±smÄ± standart bilgilerin hazÄ±rlanmasÄ±
     XMLStructe.Text := //'<?xml version="1.0" encoding="ISO-8859-9"?>' +
       '<SMS-StaRequest>' +
       '<CLIENT user="' + SMSHesapBilgileri.SMSKullaniciAdi + '" pwd="' + SMSHesapBilgileri.SMSSifre + '"/>' +
@@ -365,12 +365,12 @@ begin
     XMLStructe.Text := XMLStructe.Text + '</SMS-StaRequest>';
 
 
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.postaguvercini.com/api_xml/Sms_stareq.asp ', False);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #13, '', [rfReplaceAll]);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #10, '', [rfReplaceAll]);
       XMLStructe.Text := StringReplace(XMLStructe.Text, #13#10, '', [rfReplaceAll]);
-      //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý unicede olarak Ýsmail ACET 2010-09-16
+      //BaÅŸlÄ±k KÄ±smÄ± standart bilgilerin hazÄ±rlanmasÄ± unicede olarak Ä°smail ACET 2010-09-16
       HTTPReq.setRequestHeader('Content-Type: text/xml','<?xml version="1.0" encoding="windows-1254"?>');
       HTTPReq.send(XMLStructe.Text);
       DonusBilgisi.Text := StringReplace(HTTPReq.responseText, #13, '', [rfReplaceAll]);
@@ -382,29 +382,29 @@ begin
 
 
       case StrToInt(Kontrol) of
-       110 : SMSDurumGuncelle(-1,'Kredi Yüklemesini Bekliyor');
-       120 : SMSDurumGuncelle(1,'Gönderilme saatini Bekliyor');
-       200 : SMSDurumGuncelle(1,'SMSC ye gönderilmek üzere');
-       300 : SMSDurumGuncelle(1,'SMSC ye gönderildi');
-       400 : SMSDurumGuncelle(9,'Baþarýlý');
-       401 : SMSDurumGuncelle(9,'Alýcýya gönderilecek');
-       402 : SMSDurumGuncelle(-1,'Alýcýya ulaþmadý');
-       403 : SMSDurumGuncelle(-1,'Alýcýya ulaþmadý(Zaman Aþýmý)');
-       404 : SMSDurumGuncelle(-1,'Alýcýya ulaþmadý(Bilinmeyen Hata)');
-       405 : SMSDurumGuncelle(-1,'Alýcýya ulaþmadý(Sistem Hatasý)');
-       406 : SMSDurumGuncelle(-1,'Alýcýya ulaþmadý(SMS Kapalý)');
-       410 : SMSDurumGuncelle(-1,'Mesaj SMSC de bulunmadý');
-       420 : SMSDurumGuncelle(-1,'Mesaj sunucuda bulunamadý');
-       -20 : SMSDurumGuncelle(-1,'Bu mesaj size ait deðil');
-      -201 : SMSDurumGuncelle(-1,'Silindi(Geçersiz Cep No)');
-      -202 : SMSDurumGuncelle(-1,'Silindi(Mesaj Tekrarý)');
-      -203 : SMSDurumGuncelle(-1,'Silindi(Geçersiz son gönderim tarihi)');
-      -205 : SMSDurumGuncelle(-1,'Silindi(Mesaj çok uzun)');
+       110 : SMSDurumGuncelle(-1,'Kredi YÃ¼klemesini Bekliyor');
+       120 : SMSDurumGuncelle(1,'GÃ¶nderilme saatini Bekliyor');
+       200 : SMSDurumGuncelle(1,'SMSC ye gÃ¶nderilmek Ã¼zere');
+       300 : SMSDurumGuncelle(1,'SMSC ye gÃ¶nderildi');
+       400 : SMSDurumGuncelle(9,'BaÅŸarÄ±lÄ±');
+       401 : SMSDurumGuncelle(9,'AlÄ±cÄ±ya gÃ¶nderilecek');
+       402 : SMSDurumGuncelle(-1,'AlÄ±cÄ±ya ulaÅŸmadÄ±');
+       403 : SMSDurumGuncelle(-1,'AlÄ±cÄ±ya ulaÅŸmadÄ±(Zaman AÅŸÄ±mÄ±)');
+       404 : SMSDurumGuncelle(-1,'AlÄ±cÄ±ya ulaÅŸmadÄ±(Bilinmeyen Hata)');
+       405 : SMSDurumGuncelle(-1,'AlÄ±cÄ±ya ulaÅŸmadÄ±(Sistem HatasÄ±)');
+       406 : SMSDurumGuncelle(-1,'AlÄ±cÄ±ya ulaÅŸmadÄ±(SMS KapalÄ±)');
+       410 : SMSDurumGuncelle(-1,'Mesaj SMSC de bulunmadÄ±');
+       420 : SMSDurumGuncelle(-1,'Mesaj sunucuda bulunamadÄ±');
+       -20 : SMSDurumGuncelle(-1,'Bu mesaj size ait deÄŸil');
+      -201 : SMSDurumGuncelle(-1,'Silindi(GeÃ§ersiz Cep No)');
+      -202 : SMSDurumGuncelle(-1,'Silindi(Mesaj TekrarÄ±)');
+      -203 : SMSDurumGuncelle(-1,'Silindi(GeÃ§ersiz son gÃ¶nderim tarihi)');
+      -205 : SMSDurumGuncelle(-1,'Silindi(Mesaj Ã§ok uzun)');
       -207 : SMSDurumGuncelle(-1,'Silindi(SMSC reddetti)');
-      -210 : SMSDurumGuncelle(-1,'Silindi(Zaman Aþýmý)');
-      -220 : SMSDurumGuncelle(-1,'Silindi(Yetersiz kredi zaman aþýmý)');
-      -222 : SMSDurumGuncelle(-1,'Silindi(Abone mesajýn bloke edilmesi tercih ettiðinden)');
-      -250 : SMSDurumGuncelle(-1,'Silindi(Müþteri tarafýndan)');
+      -210 : SMSDurumGuncelle(-1,'Silindi(Zaman AÅŸÄ±mÄ±)');
+      -220 : SMSDurumGuncelle(-1,'Silindi(Yetersiz kredi zaman aÅŸÄ±mÄ±)');
+      -222 : SMSDurumGuncelle(-1,'Silindi(Abone mesajÄ±n bloke edilmesi tercih ettiÄŸinden)');
+      -250 : SMSDurumGuncelle(-1,'Silindi(MÃ¼ÅŸteri tarafÄ±ndan)');
       -260 : SMSDurumGuncelle(-1,'Silindi(Fatura Borcu)');
       else
        if (StrToInt(Kontrol)>=-201) and (StrToInt(Kontrol)<= -299) then
@@ -414,7 +414,7 @@ begin
 
     finally
       XMLStructe.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
 end;
 
@@ -432,7 +432,7 @@ begin
        end
       else
        begin
-         Result:='SMS Kaydý Bulunamadý';
+         Result:='SMS KaydÄ± BulunamadÄ±';
        end;
 
   finally
@@ -449,7 +449,7 @@ var
  SMSHesapBilgileri : TSmsHesapBigileri;
  DonusBilgisi,XMLStructure : TStringList;
  x, SMSServis : integer;
- HTTPReq: TXMLHTTPRequest;
+ HTTPReq: OleVariant;
  donen: TSmsMesajSonuc;
  StartItemNode, ANode: IXMLNode;
  InsertID, InsertRes: widestring;
@@ -478,12 +478,12 @@ var
     else
       ZamanEk := 'dt="' + FormatDateTime('yyyy/mm/dd hh:nn', Now) + '"';
 
-    //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý
+    //BaÅŸlÄ±k KÄ±smÄ± standart bilgilerin hazÄ±rlanmasÄ±
     XMLStructure.Text := //'<?xml version="1.0" encoding="ISO-8859-9"?>' +
       '<SMS-InsRequest>' +
       '<CLIENT user="' + SMSHesapBilgileri.SMSKullaniciAdi + '" pwd="' + SMSHesapBilgileri.SMSSifre + '"/>';
 
-    // ShowMessage('Gönderim için mesajlar oluþturuluyor .');  //Döngü ile dizideki mesaj ve numaralarý alalým
+    // ShowMessage('GÃ¶nderim iÃ§in mesajlar oluÅŸturuluyor .');  //DÃ¶ngÃ¼ ile dizideki mesaj ve numaralarÄ± alalÄ±m
     for i := 0 to High(Mesajlar) do
     begin
       if Telformatla(mesajlar[i].Numara) <> '0' then
@@ -493,20 +493,20 @@ var
         XMLStructure.Text := XMLStructure.Text + '<INSERT to="' + Mesajlar[i].Numara + '" text="' + Mesajlar[i].Mesaj + '" ' + ZamanEk + '/>'
       end else
       begin
-       XMLStructure.Text := XMLStructure.Text + '<INSERT to="' + Mesajlar[i].Numara + '" text="' + 'Tel no hatalý' + '" ' + ZamanEk + '/>'
+       XMLStructure.Text := XMLStructure.Text + '<INSERT to="' + Mesajlar[i].Numara + '" text="' + 'Tel no hatalÄ±' + '" ' + ZamanEk + '/>'
 
       end;
     end;
-   // ShowMessage('Gönderim için mesajlar oluþturuluyor Bitti.') ;
+   // ShowMessage('GÃ¶nderim iÃ§in mesajlar oluÅŸturuluyor Bitti.') ;
     XMLStructure.Text := XMLStructure.Text + '</SMS-InsRequest>';
     try
     try
-      HTTPReq := TXMLHTTPRequest.Create(nil);
+      HTTPReq := CreateOleObject('MSXML2.XMLHTTP.6.0');
       HTTPReq.open('post', 'http://www.postaguvercini.com/api_xml/Sms_insreq.asp ', False);
       XMLStructure.Text := StringReplace(XMLStructure.Text, #13, '', [rfReplaceAll]);
       XMLStructure.Text := StringReplace(XMLStructure.Text, #10, '', [rfReplaceAll]);
       XMLStructure.Text := StringReplace(XMLStructure.Text, #13#10, '', [rfReplaceAll]);
-      //Baþlýk Kýsmý standart bilgilerin hazýrlanmasý unicode olarak
+      //BaÅŸlÄ±k KÄ±smÄ± standart bilgilerin hazÄ±rlanmasÄ± unicode olarak
       HTTPReq.setRequestHeader('Content-Type: text/xml','<?xml version="1.0" encoding="windows-1254"?>');
 
       HTTPReq.send(XMLStructure.Text);
@@ -522,19 +522,19 @@ var
 
     finally
       XMLStructure.free;
-      HTTPReq.free;
+      HTTPReq := Unassigned;
     end; //Try End
     except
      DonusBilgisi.Text:='XmlExcept';
     end;
-   // ShowMessage('Mesaj karþýya gönderildi.') ;  //ShowMessage(DonusBilgisi.Text);
+   // ShowMessage('Mesaj karÅŸÄ±ya gÃ¶nderildi.') ;  //ShowMessage(DonusBilgisi.Text);
     {
-               Hata Numarasý	Açýklama
-               ERR1010	Ýstek Hatasý. Veritabaný baðlantý iþlemi yapýlamadý
-               ERR1020	Ýstek Hatasý. Veritabanýna baðlanamadý.
-               ERR1030	Ýstek Hatasý. Ýstek tarihçe kaydý tutalamadý.
-               ERR1040	Ýstek Hatasý. Ýstek tarihçe kayýt numarasý alýnamadý.
-               ERR1050	Ýstek Hatasý. Ýstek deðerlendirilemedi. (Hatalý istek formatý)
+               Hata NumarasÄ±
+
+
+
+
+
                 }
     if (pos('<ERROR>', DonusBilgisi.Text) > 0) or (DonusBilgisi.Text='XmlExcept') then
     begin
@@ -543,30 +543,30 @@ var
       begin
 
         Donen.HataKodu := 'ERR1050';
-        donen.Mesaj := 'Ýstek Hatasý. Ýstek deðerlendirilemedi. (Hatalý istek formatý)';
+        donen.Mesaj := 'Ä°stek HatasÄ±. Ä°stek deÄŸerlendirilemedi. (HatalÄ± istek formatÄ±)';
       end
       else if pos('ERR1040', DonusBilgisi.Text) > 0 then
       begin
 
         Donen.HataKodu := 'ERR1040';
-        donen.Mesaj := 'Ýstek Hatasý. Ýstek tarihçe kayýt numarasý alýnamadý.';
+        donen.Mesaj := 'Ä°stek HatasÄ±. Ä°stek tarihÃ§e kayÄ±t numarasÄ± alÄ±namadÄ±.';
       end
       else if pos('ERR1030', DonusBilgisi.Text) > 0 then
       begin
 
         Donen.HataKodu := 'ERR1030';
-        donen.Mesaj := 'Ýstek Hatasý. Ýstek tarihçe kaydý tutalamadý.';
+        donen.Mesaj := 'Ä°stek HatasÄ±. Ä°stek tarihÃ§e kaydÄ± tutalamadÄ±.';
       end
       else if pos('ERR1020', DonusBilgisi.Text) > 0 then
       begin
 
         Donen.HataKodu := 'ERR1020';
-        donen.Mesaj := 'Ýstek Hatasý. Veritabanýna baðlanamadý.';
+        donen.Mesaj := 'Ä°stek HatasÄ±. VeritabanÄ±na baÄŸlanamadÄ±.';
       end
       else if pos('ERR1010', DonusBilgisi.Text) > 0 then
       begin
         Donen.HataKodu := 'ERR1010';
-        donen.Mesaj := 'Ýstek Hatasý. Veritabaný baðlantý iþlemi yapýlamadý';
+        donen.Mesaj := 'Ä°stek HatasÄ±. VeritabanÄ± baÄŸlantÄ± iÅŸlemi yapÄ±lamadÄ±';
       end
       else if pos('Program kurulumunun kaydi yapilmamis.', DonusBilgisi.Text) > 0 then
       begin
@@ -578,12 +578,12 @@ var
         Donen.Mesaj := 'XmlExcept'
       end
       else
-        Donen.Mesaj := 'Gönderim Baþarýsýz';
+        Donen.Mesaj := 'GÃ¶nderim BaÅŸarÄ±sÄ±z'
     end
     else
     begin
 
-   // ShowMessage('Gelen döküman okunuyor.');
+   // ShowMessage('Gelen dÃ¶kÃ¼man okunuyor.');
       XMLDoc:= TXMLDocument.Create(Tablo);
       XMLDoc.XML.Text:= DonusBilgisi.Text;
       //Tablo.XMLDocument1.XML.Text := DonusBilgisi.Text;
@@ -595,7 +595,7 @@ var
       repeat
         InsertID := ANode.Attributes['id'];
         InsertRes := ANode.Attributes['res'];
-        //      ShowMessage(Inttostr(Mesajlar[x].Id)+'--'+  Mesajlar[x].Numara+ ' numara için  Id= '+ InsertID + ' '+ InsertRes);
+        //      ShowMessage(Inttostr(Mesajlar[x].Id)+'--'+  Mesajlar[x].Numara+ ' numara iÃ§in  Id= '+ InsertID + ' '+ InsertRes);
         if Mesajlar[x].Id <> -1 then
          SMSTablosunaIsle(Mesajlar[x].Numara, Mesajlar[x].Mesaj,InsertID,0,'' );
           //TekliMesajReferansGuncelle(SubeID,Mesajlar[x].Id, Mesajlar[x].Numara, InsertID);
@@ -603,12 +603,12 @@ var
 
         ANode := ANode.NextSibling;
       until ANode = nil;
-      // Hata Yoksa mesaj referansýný  ve mesajýný oluþturalým
+      // Hata Yoksa mesaj referansÄ±nÄ±  ve mesajÄ±nÄ± oluÅŸturalÄ±m
       Donen.HataKodu := '-1';
       donen.MesajRefNo := InsertID;
-      Donen.Mesaj := 'Gönderildi';
+      Donen.Mesaj := 'GÃ¶nderildi';
 
-    //ShowMessage('Gelen döküman okunuyor.bitti');
+    //ShowMessage('Gelen dÃ¶kÃ¼man okunuyor.bitti');
     end;
 
    Result := Donen;
@@ -628,7 +628,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'EPosta Ýþlemleri'}
+{$REGION 'EPosta Ä°ÅŸlemleri'}
 
 class procedure TEpostaAlici.ListeyeYukle(AAlicilar: string; hedef: TList<TEpostaAlici>);
 var
@@ -637,7 +637,7 @@ var
   I, J: Integer;
   item: TEpostaAlici;
 begin
-  // alýcýlarý ayýr
+  // alÄ±cÄ±larÄ± ayÄ±r
   lst := Dize.StringListOlarak(AAlicilar, '|');
   try
     for I := 0 to lst.Count - 1 do begin
@@ -673,7 +673,7 @@ begin
   begin
     rcp[i] := liste[i].Adi + ',' + liste[i].Email;
   end;
-  AVeriSeti.AsString['AlýcýListesi'] := Dize.Birlestir('|', rcp);
+  AVeriSeti.AsString['AlÄ±cÄ±Listesi'] := Dize.Birlestir('|', rcp);
 end;
 
 function EPostaHesapBilgileriniGetir(HesapId:integer): TEpostaHesapAyarlari;
@@ -723,13 +723,13 @@ begin
 {  if EpostaHesapBilgisi.HesapId = -1 then
    begin
      Result.GonderimBasarili:=False;
-     Result.SonucMesaji:='Geçerli Bir Eposta Hesabý Seçiniz';
+     Result.SonucMesaji:='GeÃ§erli Bir Eposta HesabÄ± SeÃ§iniz';
    end
   else}
   if AliciListesi.Count=0 then
    begin
      Result.GonderimBasarili:=False;
-     Result.SonucMesaji:='Alýcý listesinde en az bir alýcý olmalýdýr.';
+     Result.SonucMesaji:='AlÄ±cÄ± listesinde en az bir alÄ±cÄ± olmalÄ±dÄ±r.';
    end
  else
   begin
@@ -740,7 +740,7 @@ begin
        end;
 
       msg := Outlook.CreateItem(olMailItem);
-      //alýcýlar
+      //alÄ±cÄ±lar
       for alici in AliciListesi do begin
           msg.Recipients.Add(alici.Email)
       end;
@@ -756,18 +756,18 @@ begin
             //TIdAttachmentFile.Create(msg.MessageParts,dosya);
             msg.Attachments.Add(dosya);
       end;
-      //þimdi gönderelim
+      //ÅŸimdi gÃ¶nderelim
       try
         try
            msg.Send;
            Result.GonderimBasarili:=True;
-          //Log(rg.Adi,'Gönderildi');
+          //Log(rg.Adi,'GÃ¶nderildi');
         except on e: Exception do
          begin
            Result.GonderimBasarili:=False;
            Result.SonucMesaji:= e.Message;
          end;
-          //Log('','Hata','Mail gönderilemedi! -> ' + e.Message);
+          //Log('','Hata','Mail gÃ¶nderilemedi! -> ' + e.Message);
         end;
       finally
          Outlook := Unassigned;
@@ -881,3 +881,5 @@ end.
 
 
 
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

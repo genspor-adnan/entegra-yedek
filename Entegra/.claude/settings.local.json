@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /c/Users/HP/entegra/entegra/Rest/*.pas)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(grep -r \"FROM.*\\\\|TABLE.*\\\\|INSERT\\\\|UPDATE\\\\|DELETE\" /c/Users/HP/entegra/entegra/*.sql)",
+      "Bash(grep -ro \"FROM [A-Z_]*\\\\|INTO [A-Z_]*\\\\|TABLE [A-Z_]*\" /c/Users/HP/entegra/entegra/*.pas)",
+      "Bash(grep -oP \"[A-Z_]+$\")",
+      "Bash(grep -r 'FROM ' /c/Users/HP/entegra/entegra/*.pas)",
+      "Bash(sed 's/FROM //')",
+      "Bash(find /c/Users/HP/entegra/entegra -name *Frame*.pas -type f)",
+      "Bash(ls /c/Users/HP/entegra/entegra/*Frame/*.pas)",
+      "Bash(xargs basename:*)",
+      "Bash(ls /c/Users/HP/entegra/entegra/Ortak/*.pas)",
+      "Bash(ls /c/Users/HP/entegra/entegra/Social/*.pas)",
+      "Bash(ls /c/Users/HP/entegra/entegra/ItsServisler/*.pas)",
+      "Bash(ls /c/Users/HP/entegra/entegra/UTS/*.pas)",
+      "Bash(wc:*)",
+      "Bash(ls /c/Users/HP/entegra/entegra/*.txt /c/Users/HP/entegra/entegra/*.doc /c/Users/HP/entegra/entegra/*.html)",
+      "Bash(ls /c/Users/HP/entegra/entegra/Kullanan/*.pas)",
+      "Bash(ls /c/Users/HP/entegra/entegra/EvrakTakip/*.pas)",
+      "Bash(find . -path */AracCubuguFrame* -type f)",
+      "Bash(find . -name *.pas -type f -exec grep -l \"clNavy\\\\|clWindowText\\\\|clBtnFace\\\\|ColorFrom\\\\|ColorTo\" {})",
+      "Bash(2)",
+      "Bash(grep -A 5 object.*Column ./Ortak/UGrid.dfm)"
+    ]
+  }
+}

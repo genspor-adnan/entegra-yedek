@@ -295,6 +295,8 @@ object StokWizardDlg: TStokWizardDlg
           ImageIndex = 0
           ParentColor = False
           PopupMenu = PopupMenuStok
+          ExplicitLeft = 5
+          ExplicitTop = 28
           object cxLabel2: TcxLabel
             Left = 420
             Top = 134
@@ -877,6 +879,7 @@ object StokWizardDlg: TStokWizardDlg
             Properties.ActivePage = TabSheerNotlar
             Properties.CustomButtons.Buttons = <>
             OnChange = PageControlAltChange
+            ExplicitLeft = 2
             ClientRectBottom = 138
             ClientRectLeft = 4
             ClientRectRight = 904
@@ -1153,10 +1156,6 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetCevrim: TcxTabSheet
               Caption = #199'evrimler'
               ImageIndex = 2
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ToolBar12: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -1335,10 +1334,6 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetYDil: TcxTabSheet
               Caption = 'Yabanc'#305' Dil'
               ImageIndex = 4
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ToolBar4: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -2285,10 +2280,6 @@ object StokWizardDlg: TStokWizardDlg
         object TabSheetMuhasebeHesaplari: TcxTabSheet
           Caption = 'Muhasebe Hesaplar'#305
           ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object v: TcxGrid
             Left = 0
             Top = 24
@@ -2476,10 +2467,6 @@ object StokWizardDlg: TStokWizardDlg
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
       end
     end
@@ -2505,8 +2492,6 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Barkod Tan'#305'mlar'#305
       OnEnterPage = BarkodEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar5: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2981,8 +2966,6 @@ object StokWizardDlg: TStokWizardDlg
       Font.Name = 'Trebuchet MS'
       Font.Style = []
       OnEnterPage = FiyatEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PnlFiyat: TPanel
         Left = 0
         Top = 70
@@ -3342,8 +3325,6 @@ object StokWizardDlg: TStokWizardDlg
       Font.Name = 'Trebuchet MS'
       Font.Style = []
       OnEnterPage = DokumanEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel6: TPanel
         Left = 0
         Top = 496
@@ -3404,7 +3385,6 @@ object StokWizardDlg: TStokWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 475
         AnchorX = 916
       end
       object GridYorum: TcxGrid
@@ -3511,8 +3491,6 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = PaketEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 469
         Top = 70
@@ -3870,8 +3848,6 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Font.Style = []
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridKurIlet: TcxGrid
         Left = 0
         Top = 97
@@ -4118,8 +4094,6 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'KotaEkr'
       OnEnterPage = KotaEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -4249,8 +4223,6 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Boyut Ekran'#305
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel5: TPanel
         Left = 0
         Top = 70
