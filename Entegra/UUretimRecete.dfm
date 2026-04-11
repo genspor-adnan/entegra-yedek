@@ -420,6 +420,10 @@ object UretimReceteDlg: TUretimReceteDlg
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridUretim: TcxGrid
           Left = 0
           Top = 0
@@ -441,7 +445,7 @@ object UretimReceteDlg: TUretimReceteDlg
             OptionsCustomize.ColumnsQuickCustomization = True
             OptionsView.GroupByBox = False
             OptionsView.Indicator = True
-            Styles.ContentOdd = Tablo.cxstSecili
+            Styles.ContentOdd = Tablo.cxStyle1
             Styles.Header = Tablo.cxStyle10
             object GridUretimDBTableView1GRP: TcxGridDBColumn
               DataBinding.FieldName = 'GRP'
@@ -454,7 +458,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1SIRA: TcxGridDBColumn
               Caption = 'S'#305'ra'
               DataBinding.FieldName = 'SIRA'
-              DataBinding.IsNullValueType = True
               Width = 20
             end
             object GridUretimDBTableView1KOD: TcxGridDBColumn
@@ -467,7 +470,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1URUNID: TcxGridDBColumn
               Caption = #220'r'#252'n ID'
               DataBinding.FieldName = 'URUNID'
-              DataBinding.IsNullValueType = True
               Width = 51
             end
             object GridUretimDBTableView1URUNNO: TcxGridDBColumn
@@ -485,7 +487,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1ADETHESAP: TcxGridDBColumn
               Caption = 'Grup Adet'
               DataBinding.FieldName = 'ADETHESAP'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DecimalPlaces = 4
               Properties.DisplayFormat = ',0.0000;-,0.0000'
@@ -493,7 +494,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1ADET: TcxGridDBColumn
               Caption = 'Birim Adet'
               DataBinding.FieldName = 'ADET'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DecimalPlaces = 4
               Properties.DisplayFormat = ',0.0000;-,0.0000'
@@ -503,7 +503,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1BIRIM: TcxGridDBColumn
               Caption = 'Birim'
               DataBinding.FieldName = 'BIRIM'
-              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.repStokAnaBirim
               Options.Editing = False
             end
@@ -575,7 +574,6 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1ACIKLAMA: TcxGridDBColumn
               Caption = 'A'#231#305'klama'
               DataBinding.FieldName = 'ACIKLAMA'
-              DataBinding.IsNullValueType = True
               Width = 288
             end
           end
@@ -766,6 +764,7 @@ object UretimReceteDlg: TUretimReceteDlg
           Height = 8
           HotZoneClassName = 'TcxMediaPlayer8Style'
           AlignSplitter = salTop
+          ExplicitWidth = 8
         end
         object PanelOprAlt: TPanel
           Left = 0
@@ -1061,14 +1060,15 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object SQLDetayStandart: TcxMemo
       Left = 54
-      Top = 202
+      Top = 234
       Lines.Strings = (
         'select ID,URETIMRECETEID,TUR,URUNID,ACIKLAMA,ADET=cast(ADET as '
         
           'float),BIRIM,MIKTAR=cast(MIKTAR as float),MASRAFID,ADETHESAP=cas' +
           't'
         '(ADETHESAP as float),MALIYETORT=cast(MALIYETORT as '
-        'float),ANAURUN,MALIYETSON,KDVDURUM,SIRA'
+        'float),ANAURUN,MALIYETSON,KDVDURUM,SIRA,'
+        'GRP = case when MIKTAR>0 then 1 else 0 end'
         'from URETIMRECETEDETAY'
         'where URETIMRECETEID = :PURID'
         'order by SIRA'
@@ -1594,8 +1594,8 @@ object UretimReceteDlg: TUretimReceteDlg
   object DtsRecete: TDataSource
     DataSet = TabRecete
     OnStateChange = DtsReceteStateChange
-    Left = 252
-    Top = 72
+    Left = 260
+    Top = 56
   end
   object RECETE: TFDQuery
     Connection = Tablo.FDCnn
@@ -1634,8 +1634,8 @@ object UretimReceteDlg: TUretimReceteDlg
       ''
       ''
       '')
-    Left = 316
-    Top = 130
+    Left = 340
+    Top = 138
   end
   object TabReceteDetay: TFDQuery
     BeforeEdit = TabReceteDetayBeforeEdit
@@ -1646,19 +1646,63 @@ object UretimReceteDlg: TUretimReceteDlg
     OnNewRecord = TabReceteDetayNewRecord
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'select *'
+      'select ID,URETIMRECETEID,TUR,URUNID,ACIKLAMA,ADET=cast(ADET as '
+      
+        'float),BIRIM,MIKTAR=cast(MIKTAR as float),MASRAFID,ADETHESAP=cas' +
+        't'
+      '(ADETHESAP as float),MALIYETORT=cast(MALIYETORT as '
+      'float),ANAURUN,MALIYETSON,KDVDURUM,SIRA,'
+      'GRP = case when MIKTAR>0 then 1 else 0 end'
       'from URETIMRECETEDETAY'
-      'where URETIMRECETEID = :PURID'
-      'order by SIRA'
-      ''
-      '')
+      'order by SIRA')
     Left = 148
     Top = 282
-    ParamData = <
-      item
-        Name = 'PURID'
-        ParamType = ptInput
-      end>
+    object TabReceteDetayID: TFDAutoIncField
+      FieldName = 'ID'
+    end
+    object TabReceteDetayURETIMRECETEID: TIntegerField
+      FieldName = 'URETIMRECETEID'
+    end
+    object TabReceteDetayTUR: TSmallintField
+      FieldName = 'TUR'
+    end
+    object TabReceteDetayURUNID: TIntegerField
+      FieldName = 'URUNID'
+    end
+    object TabReceteDetayACIKLAMA1: TWideStringField
+      FieldName = 'ACIKLAMA'
+      Size = 100
+    end
+    object TabReceteDetayADET: TFloatField
+      FieldName = 'ADET'
+    end
+    object TabReceteDetayBIRIM: TSmallintField
+      FieldName = 'BIRIM'
+    end
+    object TabReceteDetayMIKTAR: TFloatField
+      FieldName = 'MIKTAR'
+    end
+    object TabReceteDetayMASRAFID: TIntegerField
+      FieldName = 'MASRAFID'
+    end
+    object TabReceteDetayADETHESAP: TFloatField
+      FieldName = 'ADETHESAP'
+    end
+    object TabReceteDetayMALIYETORT1: TFloatField
+      FieldName = 'MALIYETORT'
+    end
+    object TabReceteDetayANAURUN: TBooleanField
+      FieldName = 'ANAURUN'
+    end
+    object TabReceteDetayMALIYETSON1: TCurrencyField
+      FieldName = 'MALIYETSON'
+    end
+    object TabReceteDetayKDVDURUM: TBooleanField
+      FieldName = 'KDVDURUM'
+    end
+    object TabReceteDetaySIRA: TIntegerField
+      FieldName = 'SIRA'
+    end
     object TabReceteDetayALISMALIYETORT: TCurrencyField
       FieldKind = fkCalculated
       FieldName = 'ALISMALIYETORT'
@@ -1700,9 +1744,7 @@ object UretimReceteDlg: TUretimReceteDlg
       Calculated = True
     end
     object TabReceteDetayGRP: TIntegerField
-      FieldKind = fkCalculated
       FieldName = 'GRP'
-      Calculated = True
     end
     object TabReceteDetayURUNKODU: TWideStringField
       FieldKind = fkCalculated
@@ -1889,8 +1931,8 @@ object UretimReceteDlg: TUretimReceteDlg
     Top = 235
   end
   object PopupHesapla: TPopupMenu
-    Left = 35
-    Top = 152
+    Left = 51
+    Top = 104
     object BuUrunMenu: TMenuItem
       Tag = 1
       Caption = 'Bu '#220'r'#252'n'#252
@@ -1906,7 +1948,7 @@ object UretimReceteDlg: TUretimReceteDlg
     end
   end
   object PopupMenuListe: TPopupMenu
-    Left = 168
+    Left = 176
     Top = 128
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'

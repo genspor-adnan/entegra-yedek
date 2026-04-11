@@ -125,6 +125,8 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         Properties.CustomButtons.Buttons = <>
         LookAndFeel.Kind = lfStandard
         OnChange = cxPageControl1Change
+        ExplicitTop = 214
+        ExplicitHeight = 329
         ClientRectBottom = 322
         ClientRectLeft = 4
         ClientRectRight = 811
@@ -132,6 +134,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Genel '#214'zellikler'
           ImageIndex = 0
+          ExplicitHeight = 298
           object Label1: TcxLabel
             Tag = 21
             Left = 323
@@ -831,6 +834,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         ShowCaptions = True
         TabOrder = 2
         Transparent = True
+        ExplicitHeight = 29
         object YaziciYaz: TToolButton
           Left = 0
           Top = 0
@@ -1485,8 +1489,8 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     end
   end
   object OpenDialog1: TOpenDialog
-    Left = 553
-    Top = 130
+    Left = 569
+    Top = 74
   end
   object PopupMenuYaz: TPopupMenu
     Left = 493
@@ -1574,8 +1578,8 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     Top = 520
   end
   object PopupMenuKopya: TPopupMenu
-    Left = 505
-    Top = 141
+    Left = 513
+    Top = 101
     object MenuButunDemirbasKopyala: TMenuItem
       Caption = 'B'#252't'#252'n Demirbasi kopyala'
       ImageIndex = 0
@@ -1589,14 +1593,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   object tabDemirbasTarihce: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'p1'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'declare @DID int'
       'set @DID=:p1'
@@ -1623,6 +1619,14 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       'order by 2 desc,3 desc ')
     Left = 58
     Top = 220
+    ParamData = <
+      item
+        Name = 'p1'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object DtsDemirbasTarihce: TDataSource
     DataSet = tabDemirbasTarihce
@@ -1652,12 +1656,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   end
   object TabDemirbasfrx: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Prm0'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       
         'SELECT    D.*, S.STOKADI, L.ACIKLAMA  As LOKASYONADI, R.FIRMA AS' +
@@ -1684,26 +1682,32 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       '')
     Left = 29
     Top = 369
+    ParamData = <
+      item
+        Name = 'Prm0'
+        Size = -1
+        Value = Null
+      end>
   end
   object TabDemirbas: TFDQuery
     AutoCalcFields = False
-    Connection = Tablo.FDCnn
     AfterOpen = TabDemirbasAfterOpen
     BeforeEdit = TabDemirbasBeforeEdit
     BeforePost = TabDemirbasBeforePost
     AfterPost = TabDemirbasAfterPost
-    ParamData = <
-      item
-        Name = 'PID'
-        Size = -1
-        Value = Null
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT  *'
       'FROM         DEMIRBAS'
       'WHERE ID=:PID')
     Left = 25
     Top = 422
+    ParamData = <
+      item
+        Name = 'PID'
+        Size = -1
+        Value = Null
+      end>
   end
   object DtsDemirbas: TDataSource
     DataSet = TabDemirbas
@@ -1713,11 +1717,15 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 510
+    Left = 430
     Top = 73
   end
   object TabAmortisman: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      'SELECT * FROM AMORTISMAN_ORAN WHERE ID=:ID')
+    Left = 352
+    Top = 420
     ParamData = <
       item
         Name = 'ID'
@@ -1725,10 +1733,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         Size = 2
         Value = Null
       end>
-    SQL.Strings = (
-      'SELECT * FROM AMORTISMAN_ORAN WHERE ID=:ID')
-    Left = 352
-    Top = 420
   end
   object DtsAmortisman: TDataSource
     DataSet = TabAmortisman
@@ -1743,14 +1747,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   object tabDemirbasMasraf: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Prm1'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select ID, KOD, AD FROM MASRAFGELIR WHERE KOD in'
       
@@ -1762,6 +1758,14 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       'order by 2 ')
     Left = 178
     Top = 436
+    ParamData = <
+      item
+        Name = 'Prm1'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
     object tabDemirbasMasrafID: TSmallintField
       FieldName = 'ID'
       ReadOnly = True
@@ -1776,21 +1780,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PYer'
-        DataType = ftWord
-        Precision = 3
-        Size = 1
-        Value = Null
-      end
-      item
-        Name = 'PYerId'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -1809,6 +1798,21 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       'order by 2 DESC')
     Left = 585
     Top = 369
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object DtsYorum: TDataSource
     DataSet = TabYorum
@@ -1877,8 +1881,8 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     appearance.FontColor = 7214336
     appearance.FontDisabledColor = 14599640
     style = msDefault
-    Left = 440
-    Top = 364
+    Left = 488
+    Top = 292
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
@@ -1893,5 +1897,3 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     end
   end
 end
-
-

@@ -661,6 +661,11 @@ type
     { Private declarations }
     FSkipDetailAfterScroll: Boolean;
     FDeferredCalcInitDone: Boolean;
+    FTabSiparisDetayUpdateSQL: TFDUpdateSQL;
+    FLocateSiparisDetayID: Integer;
+    FLastDetayCalcID: Integer;
+    FLastDetayResim: Integer;
+    FLastDetayDokuman: Integer;
     FFrameBilgi : TIcerikFrameBilgi;
     AraDlg : TStokHizmetAraDlg;
     KuraGoreFiyatHesaplamaAlani:integer ; //faturaadetchange olayýnda kullanýlýyor bu deðiþken
@@ -668,6 +673,10 @@ type
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure FaturaToplamUpdate(TabloAc:Boolean);
     procedure FirmaBilgileri;
+    procedure HazirlaSiparisDetayAlanlari;
+    procedure HazirlaSiparisDetayUpdateSQL;
+    procedure YenileSiparisDetayClone;
+    procedure OkuSiparisDetayGorselDurumu(AUrunID: Integer; out AResim, ADokuman: Integer);
     function DetaySablonTipiBul:integer;
     procedure IletisimEkleClick(Sender: TObject);
     procedure SatinAlmainsert;
@@ -1102,6 +1111,10 @@ begin
   iadefis:=False;
   IptalSecildi := true;
   LogID:=0;
+  FLocateSiparisDetayID := 0;
+  FLastDetayCalcID := 0;
+  FLastDetayResim := 0;
+  FLastDetayDokuman := 0;
   AdresDegisti := False;
 
   cbDovizCinsi.Visible:=DovizTakibi;
@@ -1127,6 +1140,8 @@ begin
      FreeAndNil(GridFaturaViewSAYI);  }
   end;
 
+  HazirlaSiparisDetayAlanlari;
+  HazirlaSiparisDetayUpdateSQL;
   KuraGoreFiyatHesaplamaAlani:=1; //1 birimfiyat 2 dövizbirimfiyat
  // cbStokDepo.Properties := Tablo.imgComboboxInit('select -1 AS ID, '''' AS DEPOADI UNION ALL SELECT ID, DEPOADI FROM DEPOLAR WHERE DURUM=1 ORDER BY 2');
   Tablo.GENINI.ReadImageSection(Ops_StokKart_Anabirim,(GridFaturaViewBIRIM1.Properties as TcxImageComboBoxProperties).Items);
@@ -1155,13 +1170,63 @@ begin
        Tumune1.Add(Item);
      end;
 
-  // TabSiparisDetay SQL sade oldugu icin griddeki bu alanlar calculated dolacak.
+
+end;
+
+procedure TSiparisWizardDlg.HazirlaSiparisDetayUpdateSQL;
+begin
+  FreeAndNil(FTabSiparisDetayUpdateSQL);
+  FTabSiparisDetayUpdateSQL := TFDUpdateSQL.Create(Self);
+  FTabSiparisDetayUpdateSQL.Connection := Tablo.FDCnn;
+  FTabSiparisDetayUpdateSQL.ModifySQL.Text :=
+    'update SIPARISDETAY set ' +
+    'SIPARISID=:NEW_SIPARISID, REHBERID=:NEW_REHBERID, SEC=:NEW_SEC, TUR=:NEW_TUR, URUNID=:NEW_URUNID, ' +
+    'ACIKLAMA=:NEW_ACIKLAMA, ADET=:NEW_ADET, BIRIM=:NEW_BIRIM, MIKTAR=:NEW_MIKTAR, BIRIMFIYAT=:NEW_BIRIMFIYAT, ' +
+    'TUTAR=:NEW_TUTAR, ISKONTO=:NEW_ISKONTO, KDV=:NEW_KDV, MASRAFID=:NEW_MASRAFID, MUHKODU=:NEW_MUHKODU, ' +
+    'KASA=:NEW_KASA, ONAY=:NEW_ONAY, KUR=:NEW_KUR, IZLEMEKODU=:NEW_IZLEMEKODU, DOVIZ_TUTARI=:NEW_DOVIZ_TUTARI, ' +
+    'DOVIZ_KURU=:NEW_DOVIZ_KURU, ISKONTO2=:NEW_ISKONTO2, IZLEME=:NEW_IZLEME, MF=:NEW_MF, IADEADET=:NEW_IADEADET, ' +
+    'IADESIPARISDETAYID=:NEW_IADESIPARISDETAYID, YERI=:NEW_YERI, YERID=:NEW_YERID, DOVIZ_BIRIMFIYAT=:NEW_DOVIZ_BIRIMFIYAT, ' +
+    'DOVIZKURDEGERI=:NEW_DOVIZKURDEGERI, EKLEYEN=:NEW_EKLEYEN, EKLEMETARIHI=:NEW_EKLEMETARIHI, DEGISTIREN=:NEW_DEGISTIREN, ' +
+    'DEGISTIRMETARIHI=:NEW_DEGISTIRMETARIHI, KAMPANYAID=:NEW_KAMPANYAID, VADE=:NEW_VADE, PROJEID=:NEW_PROJEID, ' +
+    'TESLIMTARIHI=:NEW_TESLIMTARIHI, SUBEID=:NEW_SUBEID, URETIMPLANID=:NEW_URETIMPLANID, URETIMPLANDETAYID=:NEW_URETIMPLANDETAYID, ' +
+    'MERKEZID=:NEW_MERKEZID, STOKDURUM=:NEW_STOKDURUM, EKIPMANID=:NEW_EKIPMANID, GIRISKAYNAK=:NEW_GIRISKAYNAK, ' +
+    'OTVYUZDE=:NEW_OTVYUZDE, OTVMIKTAR=:NEW_OTVMIKTAR, SATICIKODU=:NEW_SATICIKODU, OZELKOD=:NEW_OZELKOD, ' +
+    'OZELKOD2=:NEW_OZELKOD2, POZNO=:NEW_POZNO ' +
+    'where ID=:OLD_ID';
+  FTabSiparisDetayUpdateSQL.DeleteSQL.Text := 'delete from SIPARISDETAY where ID=:OLD_ID';
+  TabSiparisDetay.UpdateObject := FTabSiparisDetayUpdateSQL;
+end;
+procedure TSiparisWizardDlg.OkuSiparisDetayGorselDurumu(AUrunID: Integer; out AResim, ADokuman: Integer);
+var
+  LQry: TFDQuery;
+begin
+  AResim := 0;
+  ADokuman := 0;
+  if AUrunID <= 0 then
+    Exit;
+
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    LQry.SQL.Text :=
+      'select ' +
+      'RESIM=(select case when S.RESIM is null then 0 else 1 end from STOKLAR S where S.ID = :PID), ' +
+      'DOKUMAN=(select case when exists(select GY.ID from GOREVYORUM GY inner join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID where GY.TUR=88 and GOREVID=:PID) then 1 else 0 end)';
+    LQry.ParamByName('PID').AsInteger := AUrunID;
+    LQry.Open;
+    AResim := LQry.FieldByName('RESIM').AsInteger;
+    ADokuman := LQry.FieldByName('DOKUMAN').AsInteger;
+  finally
+    LQry.Free;
+  end;
+end;
+procedure TSiparisWizardDlg.HazirlaSiparisDetayAlanlari;
+begin
   TabSiparisDetay.AutoCalcFields := True;
-  if TabSiparisDetay.FindField('AD') <> nil then TabSiparisDetay.FieldByName('AD').FieldKind := fkCalculated;
-  if TabSiparisDetay.FindField('KOD') <> nil then TabSiparisDetay.FieldByName('KOD').FieldKind := fkCalculated;
-  if TabSiparisDetay.FindField('URUNNO') <> nil then TabSiparisDetay.FieldByName('URUNNO').FieldKind := fkCalculated;
-  if TabSiparisDetay.FindField('RESIM') <> nil then TabSiparisDetay.FieldByName('RESIM').FieldKind := fkCalculated;
-  if TabSiparisDetay.FindField('DOKUMAN') <> nil then TabSiparisDetay.FieldByName('DOKUMAN').FieldKind := fkCalculated;
+  if TabSiparisDetay.FindField('RESIM') <> nil then
+    TabSiparisDetay.FieldByName('RESIM').ProviderFlags := [];
+  if TabSiparisDetay.FindField('DOKUMAN') <> nil then
+    TabSiparisDetay.FieldByName('DOKUMAN').ProviderFlags := [];
   if TabSiparisDetay.FindField('BIRIMAD') <> nil then TabSiparisDetay.FieldByName('BIRIMAD').FieldKind := fkCalculated;
   if TabSiparisDetay.FindField('BIRIM2MIKTAR') <> nil then TabSiparisDetay.FieldByName('BIRIM2MIKTAR').FieldKind := fkCalculated;
   if TabSiparisDetay.FindField('BIRIM2AD') <> nil then TabSiparisDetay.FieldByName('BIRIM2AD').FieldKind := fkCalculated;
@@ -1172,9 +1237,30 @@ begin
   if TabSiparisDetay.FindField('EKIPMAN') <> nil then TabSiparisDetay.FieldByName('EKIPMAN').FieldKind := fkCalculated;
   if TabSiparisDetay.FindField('SERINO') <> nil then TabSiparisDetay.FieldByName('SERINO').FieldKind := fkCalculated;
 
-
+  if TabSiparisDetay.FindField('AD') <> nil then
+    TabSiparisDetay.FieldByName('AD').ProviderFlags := [];
+  if TabSiparisDetay.FindField('KOD') <> nil then
+    TabSiparisDetay.FieldByName('KOD').ProviderFlags := [];
+  if TabSiparisDetay.FindField('URUNNO') <> nil then
+    TabSiparisDetay.FieldByName('URUNNO').ProviderFlags := [];
+  TabSiparisDetay.UpdateOptions.UpdateTableName := 'SIPARISDETAY';
+  TabSiparisDetay.UpdateOptions.KeyFields := 'ID';
 end;
 
+procedure TSiparisWizardDlg.YenileSiparisDetayClone;
+begin
+  if (not SIPARISDETAY.Active) or
+     ((TabSiparisDetay.Params.FindParam('Par') <> nil) and (SIPARISDETAY.Params.FindParam('Par') <> nil) and
+      (VarToStr(SIPARISDETAY.ParamByName('Par').Value) <> VarToStr(TabSiparisDetay.ParamByName('Par').Value))) then
+  begin
+    SIPARISDETAY.Close;
+    if (TabSiparisDetay.Params.FindParam('Par') <> nil) and (SIPARISDETAY.Params.FindParam('Par') <> nil) then
+      SIPARISDETAY.ParamByName('Par').Value := TabSiparisDetay.ParamByName('Par').Value
+    else if (TabSiparis.Active) and (SIPARISDETAY.Params.FindParam('Par') <> nil) then
+      SIPARISDETAY.ParamByName('Par').Value := TabSiparis.FieldByName('ID').Value;
+    SIPARISDETAY.Open;
+  end;
+end;
 procedure TSiparisWizardDlg.SeciliSatiraSubMenuClick(Sender: TObject);
 begin
   TabSiparisDetay.Edit;
@@ -2099,9 +2185,9 @@ end;
 
 procedure TSiparisWizardDlg.TabSiparisDetayCalcFields(DataSet: TDataSet);
 const
-  CalcNames: array[0..13] of string = (
-    'AD','KOD','URUNNO','RESIM','DOKUMAN','BIRIMAD','BIRIM2MIKTAR','BIRIM2AD',
-    'PROJEKODU','SATICIADI','DONUSENMIKTAR','URETIMPLANINDAGOSTER','EKIPMAN','SERINO');
+    CalcNames: array[0..8] of string = (
+      'BIRIMAD','BIRIM2MIKTAR','BIRIM2AD','PROJEKODU','SATICIADI',
+      'DONUSENMIKTAR','URETIMPLANINDAGOSTER','EKIPMAN','SERINO');
 var
   I: Integer;
   Src, Dst: TField;
@@ -2109,7 +2195,6 @@ var
 begin
   if DataSet <> TabSiparisDetay then
     Exit;
-
   if TabSiparisDetay.State in [dsInsert, dsEdit] then
     Exit;
 
@@ -2928,6 +3013,32 @@ begin
 end;
 
 end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

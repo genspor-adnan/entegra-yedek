@@ -186,23 +186,23 @@ object RehberTemsilciDlg: TRehberTemsilciDlg
       Size = 100
       Calculated = True
     end
-    object TabTemsilciBASLAMA: TDateTimeField
+    object TabTemsilciBASLAMA: TSQLTimeStampField
       FieldName = 'BASLAMA'
     end
-    object TabTemsilciBITIS: TDateTimeField
+    object TabTemsilciBITIS: TSQLTimeStampField
       FieldName = 'BITIS'
     end
     object TabTemsilciACIKLAMA: TStringField
       FieldName = 'ACIKLAMA'
       Size = 100
     end
-    object TabTemsilciEKLEMETARIHI: TDateTimeField
+    object TabTemsilciEKLEMETARIHI: TSQLTimeStampField
       FieldName = 'EKLEMETARIHI'
     end
     object TabTemsilciEKLEYEN: TIntegerField
       FieldName = 'EKLEYEN'
     end
-    object TabTemsilciDEGISTIRMETARIHI: TDateTimeField
+    object TabTemsilciDEGISTIRMETARIHI: TSQLTimeStampField
       FieldName = 'DEGISTIRMETARIHI'
     end
     object TabTemsilciDEGISTIREN: TIntegerField
@@ -216,5 +216,6 @@ object RehberTemsilciDlg: TRehberTemsilciDlg
     end
   end
 end
+
 
 

@@ -15,7 +15,7 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   frxExportImage, dxSkinOffice2013White, dxSkinLiquidSky, dxSkinMetropolis,
   dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
-  System.ImageList, System.RegularExpressions, TypInfo, frCoreClasses, frxADOComponents,
+  System.ImageList, System.RegularExpressions, TypInfo, frCoreClasses, frxFDComponents,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet; //   frxExportImage,
@@ -163,22 +163,7 @@ begin
         with TStringList.Create do
         try
           LoadFromStream(TempStream);
-          Text := StringReplace(Text, 'Active="True"', 'Active="False"', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Connected="True"', 'Connected="False"', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Active = True', 'Active = False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Connected = True', 'Connected = False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Connected=True', 'Connected=False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Active=True', 'Active=False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'LoginPrompt=True', 'LoginPrompt=False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Connected:=True', 'Connected:=False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'LoginPrompt:=True', 'LoginPrompt:=False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'LoginPrompt = True', 'LoginPrompt = False', [rfReplaceAll, rfIgnoreCase]);
-          Text := StringReplace(Text, 'Connected := True', 'Connected := False', [rfReplaceAll, rfIgnoreCase]);
-          Text := TRegEx.Replace(Text, 'ConnectionString="[^"]*"', 'ConnectionString=""', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, 'UserName="[^"]*"', 'UserName=""', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, 'Password="[^"]*"', 'Password=""', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '(?im)\.Connected\s*:=\s*True', '.Connected := False', [roIgnoreCase]);
-          Text := TRegEx.Replace(Text, '(?im)\.LoginPrompt\s*:=\s*True', '.LoginPrompt := False', [roIgnoreCase]);
+          // FireDAC report definitions are kept as-is; only unstable visual metadata is stripped.
           Text := TRegEx.Replace(Text, '\sPropData="[^"]*"', '', [roIgnoreCase]);
           Text := TRegEx.Replace(Text, '\sStyle="[^"]*"', '', [roIgnoreCase]);
           Text := TRegEx.Replace(Text, '\sFrame\.Typ="[^"]*"', '', [roIgnoreCase]);
@@ -281,6 +266,10 @@ begin
   if TabYeniAyar.RecordCount > 0 then begin
 
     RaporOku(frxReport1);
+    try
+      frxReport1.EnabledDataSets.Add(Tablo.frxBizim);
+    except
+    end;
     DegiskenleriEkle;
     frxReport1.FileName := EkranAdi1 + '.' + RaporAdi1 + '.fr3';
     try
@@ -907,6 +896,9 @@ begin
 end;
 
 end.
+
+
+
 
 
 

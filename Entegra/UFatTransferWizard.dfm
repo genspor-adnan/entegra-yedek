@@ -165,7 +165,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
-          ButtonWidth = 47
+          ButtonWidth = 62
           Caption = 'AletCubugu'
           Color = clTeal
           DockSite = True
@@ -181,6 +181,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           GradientEndColor = 11776947
           GradientStartColor = 14540253
           HotTrackColor = 65408
+          Images = Tablo.PNGImageList2
           List = True
           ParentColor = False
           ParentFont = False
@@ -191,23 +192,23 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Left = 0
             Top = 0
             Caption = 'Kaydet'
-            ImageIndex = 10
+            ImageIndex = 2
             ImageName = 'PngImage9'
             Style = tbsTextButton
             Visible = False
             OnClick = ToolButton4Click
           end
           object IptalTus: TToolButton
-            Left = 47
+            Left = 62
             Top = 0
             Caption = #304'ptal'
-            ImageIndex = 17
+            ImageIndex = 3
             ImageName = 'PngImage16'
             Style = tbsTextButton
             Visible = False
           end
           object ToolButton8: TToolButton
-            Left = 94
+            Left = 124
             Top = 0
             Width = 8
             Caption = 'ToolButton1'
@@ -216,11 +217,11 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Style = tbsSeparator
           end
           object YaziciYaz: TToolButton
-            Left = 102
+            Left = 132
             Top = 0
             Caption = 'Yazd'#305'r'
             DropdownMenu = PopupMenuYaz
-            ImageIndex = 16
+            ImageIndex = 8
             ImageName = 'PngImage15'
             Style = tbsTextButton
           end
@@ -619,7 +620,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
-          ButtonWidth = 63
+          ButtonWidth = 78
           Caption = 'AletCubugu'
           Color = clTeal
           DockSite = True
@@ -635,6 +636,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           GradientEndColor = 11776947
           GradientStartColor = 14540253
           HotTrackColor = 65408
+          Images = Tablo.PNGImageList2
           List = True
           ParentColor = False
           ParentFont = False
@@ -650,7 +652,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             OnClick = SatirEkleClick
           end
           object SatirSil: TToolButton
-            Left = 63
+            Left = 78
             Top = 0
             Caption = 'Sil'
             ImageIndex = 1
@@ -658,7 +660,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             OnClick = SatirSilClick
           end
           object ToolButton3: TToolButton
-            Left = 126
+            Left = 156
             Top = 0
             Width = 8
             Caption = 'ToolButton3'
@@ -667,7 +669,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Style = tbsSeparator
           end
           object ToolButton1: TToolButton
-            Left = 134
+            Left = 164
             Top = 0
             Caption = 'Kaydet'
             ImageIndex = 2
@@ -675,7 +677,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             OnClick = ToolButton1Click
           end
           object ToolButton2: TToolButton
-            Left = 197
+            Left = 242
             Top = 0
             Caption = 'Iptal'
             ImageIndex = 3
@@ -683,7 +685,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             OnClick = ToolButton2Click
           end
           object ToolButton10: TToolButton
-            Left = 260
+            Left = 320
             Top = 0
             Width = 8
             Caption = 'ToolButton3'
@@ -692,7 +694,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Style = tbsSeparator
           end
           object TamEkranTus: TToolButton
-            Left = 268
+            Left = 328
             Top = 0
             Caption = 'Tam Ekran'
             ImageIndex = 6
@@ -700,7 +702,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             OnClick = TamEkranTusClick
           end
           object BtnDonustur: TToolButton
-            Left = 331
+            Left = 406
             Top = 0
             Caption = 'D'#246'n'#252#351't'#252'r'
             ImageIndex = 9

@@ -4,7 +4,7 @@ unit UVersiyonGuncelle;
 interface
 
 const
-  KomutNo = 31795;// 17733;
+  KomutNo = 31796;// 17733;
 
 var
   VersBaslNo  : SmallInt;

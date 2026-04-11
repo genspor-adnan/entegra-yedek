@@ -27,6 +27,7 @@ procedure Ekle(Table1: TFDQuery; Yeri, Yeri_Id: Integer; Logislem: string; Bolum
 var
   bilgi, orj: string;
   RehberBilgiID: Integer;
+  HedefKayitID: Integer;
   Pic: TJPEGImage;
   VLogID: Variant;
   LogTur: Integer;
@@ -79,6 +80,7 @@ begin
     bilgi := Trim(Table1.FieldByName('BILGI').AsString);
     orj := Trim(Table1.FieldByName('ORJINAL').AsString);
 
+
     if (bilgi <> orj) or (StrToIntDef(Table1.FieldByName('GIRIS').AsString, 0) in [11, 12]) then
     begin
       if Logislem = 'Silme' then
@@ -89,12 +91,32 @@ begin
       Tablo.Query1.Close;
       if (orj = '') and (bilgi <> '') then
       begin
-        Tablo.Query1.SQL.Text := ' insert into REHBERBILGI (YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,SUBEID) values (' +
-          IntToStr(Yeri) + ',' + IntToStr(Yeri_Id) + ',' + Table1.FieldByName('SIRA').AsString + ',''' +
-          Table1.FieldByName('ETIKET').AsString + ''',''' + Table1.FieldByName('BILGI').AsString + ''',''' +
-          Kullanan + ''',' + IntToStr(SubeId) + ') select scope_identity()';
+        Tablo.Query1.SQL.Text := 'select top 1 ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID';
+        Tablo.Query1.ParamByName('PYERI').AsInteger := Yeri;
+        Tablo.Query1.ParamByName('PYERID').AsInteger := Yeri_Id;
+        Tablo.Query1.ParamByName('PSIRA').AsInteger := Table1.FieldByName('SIRA').AsInteger;
+        Tablo.Query1.ParamByName('PETIKET').AsString := Table1.FieldByName('ETIKET').AsString;
         Tablo.Query1.Open;
-        RehberBilgiID := Tablo.Query1.Fields[0].AsInteger;
+        if Tablo.Query1.RecordCount > 0 then
+        begin
+          RehberBilgiID := Tablo.Query1.Fields[0].AsInteger;
+          Tablo.Query1.Close;
+          Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
+          Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PID').AsInteger := RehberBilgiID;
+          Tablo.Query1.ExecSQL;
+        end
+        else
+        begin
+          Tablo.Query1.Close;
+          Tablo.Query1.SQL.Text := ' insert into REHBERBILGI (YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,SUBEID) values (' +
+            IntToStr(Yeri) + ',' + IntToStr(Yeri_Id) + ',' + Table1.FieldByName('SIRA').AsString + ',''' +
+            Table1.FieldByName('ETIKET').AsString + ''',''' + Table1.FieldByName('BILGI').AsString + ''',''' +
+            Kullanan + ''',' + IntToStr(SubeId) + ') select scope_identity()';
+          Tablo.Query1.Open;
+          RehberBilgiID := Tablo.Query1.Fields[0].AsInteger;
+        end;
       end
       else if (orj <> '') and (bilgi = '') then
       begin
@@ -106,13 +128,49 @@ begin
       end
       else if (orj <> '') and (bilgi <> '') then
       begin
-        Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=''' + Table1.FieldByName('BILGI').AsString +
-          ''', DEGISTIREN=''' + Kullanan + ''' where YERI=' + IntToStr(Yeri) + ' and YER_ID=' +
-          IntToStr(Yeri_Id) + ' and SIRA=' + Table1.FieldByName('SIRA').AsString + ' and ETIKET=''' +
-          Table1.FieldByName('ETIKET').AsString + '''';
-        Tablo.Query1.ExecSQL;
-        if Table1.FieldList.Find('RESIM') <> nil then
+        if (Table1.FindField('RBID') <> nil) and not VarIsNull(Table1.FieldByName('RBID').Value) and
+           not VarIsEmpty(Table1.FieldByName('RBID').Value) and (Table1.FieldByName('RBID').AsInteger > 0) then
+        begin
+          Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
+          Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PID').AsInteger := Table1.FieldByName('RBID').AsInteger;
           RehberBilgiID := Table1.FieldByName('RBID').AsInteger;
+        end
+        else if (Table1.FindField('ID') <> nil) and not VarIsNull(Table1.FieldByName('ID').Value) and
+                not VarIsEmpty(Table1.FieldByName('ID').Value) and (Table1.FieldByName('ID').AsInteger > 0) then
+        begin
+          Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
+          Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PID').AsInteger := Table1.FieldByName('ID').AsInteger;
+          RehberBilgiID := Table1.FieldByName('ID').AsInteger;
+        end
+        else
+        begin
+          HedefKayitID := 0;
+          Tablo.Query1.SQL.Text := 'select top 1 ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID';
+          Tablo.Query1.ParamByName('PYERI').AsInteger := Yeri;
+          Tablo.Query1.ParamByName('PYERID').AsInteger := Yeri_Id;
+          Tablo.Query1.ParamByName('PSIRA').AsInteger := Table1.FieldByName('SIRA').AsInteger;
+          Tablo.Query1.ParamByName('PETIKET').AsString := Table1.FieldByName('ETIKET').AsString;
+          Tablo.Query1.Open;
+          if not Tablo.Query1.IsEmpty then
+            HedefKayitID := Tablo.Query1.Fields[0].AsInteger;
+          Tablo.Query1.Close;
+
+          if HedefKayitID > 0 then
+          begin
+            Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
+            Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
+            Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+            Tablo.Query1.ParamByName('PID').AsInteger := HedefKayitID;
+            RehberBilgiID := HedefKayitID;
+          end;
+        end;
+        if Pos('UPDATE REHBERBILGI', UpperCase(Tablo.Query1.SQL.Text)) > 0 then begin
+          Tablo.Query1.ExecSQL;
+        end;
       end;
     end;
 
@@ -217,3 +275,15 @@ begin
 end;
 
 end.
+
+
+
+
+
+
+
+
+
+
+
+

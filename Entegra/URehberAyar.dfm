@@ -47,7 +47,6 @@ object RehberAyarDlg: TRehberAyarDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitWidth = 1000
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -121,8 +120,6 @@ object RehberAyarDlg: TRehberAyarDlg
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
-    ExplicitWidth = 1006
-    ExplicitHeight = 589
     object GridAyarView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -137,21 +134,25 @@ object RehberAyarDlg: TRehberAyarDlg
       object GridAyarViewYERI: TcxGridDBColumn
         Caption = 'Yeri'
         DataBinding.FieldName = 'YERI'
+        DataBinding.IsNullValueType = True
         Visible = False
       end
       object GridAyarViewSIRA: TcxGridDBColumn
         Caption = 'S'#305'ra'
         DataBinding.FieldName = 'SIRA'
+        DataBinding.IsNullValueType = True
         Width = 32
       end
       object GridAyarViewETIKET: TcxGridDBColumn
         Caption = 'Etiket'
         DataBinding.FieldName = 'ETIKET'
+        DataBinding.IsNullValueType = True
         Width = 127
       end
       object GridAyarViewGIRIS: TcxGridDBColumn
         Caption = 'Giri'#351
         DataBinding.FieldName = 'GIRIS'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxImageComboBoxProperties'
         Properties.ImmediatePost = True
         Properties.Items = <
@@ -214,6 +215,7 @@ object RehberAyarDlg: TRehberAyarDlg
       object GridAyarViewKAYNAK: TcxGridDBColumn
         Caption = 'Kaynak'
         DataBinding.FieldName = 'KAYNAK'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxButtonEditProperties'
         Properties.BeepOnError = True
         Properties.Buttons = <
@@ -228,6 +230,7 @@ object RehberAyarDlg: TRehberAyarDlg
       object GridAyarViewVARSAYILAN: TcxGridDBColumn
         Caption = 'Varsay'#305'lan'
         DataBinding.FieldName = 'VARSAYILAN'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxImageComboBoxProperties'
         Properties.Items = <>
         OnGetPropertiesForEdit = GridAyarViewVARSAYILANGetPropertiesForEdit
@@ -236,29 +239,35 @@ object RehberAyarDlg: TRehberAyarDlg
       object GridAyarViewZORUNLU: TcxGridDBColumn
         Caption = 'Zorunlu'
         DataBinding.FieldName = 'ZORUNLU'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
       end
       object GridAyarViewLIMIT: TcxGridDBColumn
         Caption = 'Limit'
         DataBinding.FieldName = 'LIMIT'
+        DataBinding.IsNullValueType = True
         Width = 80
       end
       object GridAyarViewLIMITALT: TcxGridDBColumn
         Caption = 'Limit Alt'
         DataBinding.FieldName = 'LIMITALT'
+        DataBinding.IsNullValueType = True
       end
       object GridAyarViewLIMITUST: TcxGridDBColumn
         Caption = 'Limit '#220'st'
         DataBinding.FieldName = 'LIMITUST'
+        DataBinding.IsNullValueType = True
       end
       object GridAyarViewLIMITBIRIM: TcxGridDBColumn
         Caption = 'Birim'
         DataBinding.FieldName = 'LIMITBIRIM'
+        DataBinding.IsNullValueType = True
         Width = 65
       end
       object GridAyarViewLIMITNOT: TcxGridDBColumn
         Caption = 'Notlar'
         DataBinding.FieldName = 'LIMITNOT'
+        DataBinding.IsNullValueType = True
         Width = 80
       end
     end
@@ -267,26 +276,24 @@ object RehberAyarDlg: TRehberAyarDlg
     end
   end
   object TabAyar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabAyarBeforePost
     BeforeDelete = TabAyarBeforeDelete
     AfterScroll = TabAyarAfterScroll
     OnNewRecord = TabAyarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * '
       'from REHBERAYAR'
       'where YERI=:YERI  and'
       'isnull(BOLUM,'#39#39')=:Bolum'
       'order by 2   ')
-    Left = 215
-    Top = 93
+    Left = 175
+    Top = 85
   end
   object DtsAyar: TDataSource
     DataSet = TabAyar
     OnStateChange = DtsAyarStateChange
-    Left = 351
-    Top = 91
+    Left = 295
+    Top = 83
   end
 end
-

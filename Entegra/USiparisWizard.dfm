@@ -1512,10 +1512,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
           object TabSheetEkAlanlar: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelAlt: TPanel
               Left = 0
               Top = -92
@@ -2131,10 +2127,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         object cxTabSheet2: TcxTabSheet
           Caption = 'Yorum / Medya'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object labelDetayFileName: TcxLabel
             Left = 0
             Top = 115
@@ -2155,7 +2147,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
             Visible = False
-            ExplicitTop = 114
             AnchorX = 1272
           end
           object Panel5: TPanel
@@ -2303,8 +2294,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DetayEkrEnterPage
       OnPage = DetayEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2632,8 +2621,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -2694,7 +2681,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 554
         AnchorX = 1280
       end
       object GridYorum: TcxGrid
@@ -2798,8 +2784,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
     Top = 342
   end
   object PopupMenuFatura: TPopupMenu
-    Left = 34
-    Top = 284
+    Left = 26
+    Top = 228
     object utarDvzHesapla1: TMenuItem
       Caption = 'Tutar / D'#246'viz Hesapla'
       OnClick = TutarDvzHesapla1Click
@@ -3144,22 +3130,25 @@ object SiparisWizardDlg: TSiparisWizardDlg
     OnNewRecord = TabSiparisDetayNewRecord
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'Select '
-      'F.* '
-      ''
-      'from SIPARISDETAY F'
-      'Where SIPARISID = :Par ')
-    Left = 610
-    Top = 24
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftLargeint
-        Precision = 19
-        ParamType = ptInput
-        Size = 8
-        Value = 0
-      end>
+        'Select '
+        'AD = CASE WHEN F.TUR =0 THEN  (select MG.AD from MASRAFGELIR MG where MG.ID=F.URUNID) ELSE (select S.STOKADI from STOKLAR S where S.ID=F.URUNID) END,'
+        'KOD= CASE WHEN F.TUR =0 THEN  (select MG.KOD from MASRAFGELIR MG where MG.ID=F.URUNID) ELSE (select S.KOD from STOKLAR S where S.ID=F.URUNID) END,'
+        'URUNNO= CASE WHEN F.TUR =0 THEN  '''' ELSE (select S.URUNNO from STOKLAR S where S.ID=F.URUNID) END,'
+        'RESIM=CASE WHEN F.TUR =0 THEN 0 ELSE (select case when S.RESIM is null then 0 else 1 end from STOKLAR S where S.ID=F.URUNID) END,'
+        'DOKUMAN=CASE WHEN exists(select GY.ID from GOREVYORUM GY inner join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID where GY.TUR=88 and GOREVID=F.URUNID) then 1 else 0 end,'
+        'F.* '
+        ''
+        'from SIPARISDETAY F'
+        'Where SIPARISID = :Par ')
+      ParamData = <
+        item
+          Name = 'Par'
+          DataType = ftLargeint
+          Precision = 19
+          ParamType = ptInput
+          Size = 8
+          Value = 0
+        end>
     object TabSiparisDetayAD: TWideStringField
       FieldName = 'AD'
       ReadOnly = True
@@ -3498,8 +3487,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 35
-    Top = 225
+    Left = 27
+    Top = 129
   end
   object dtsTOPLAMLAR: TDataSource
     DataSet = TOPLAMLAR
@@ -3700,8 +3689,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object PopupYorumlar: TPopupMenu
     OnPopup = PopupYorumlarPopup
-    Left = 168
-    Top = 112
+    Left = 64
+    Top = 16
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       OnClick = YorumDzenle1Click
@@ -4293,3 +4282,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
     end
   end
 end
+
+
+
+
+
+
+

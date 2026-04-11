@@ -866,7 +866,7 @@ Begin
     //01/04/2022 AO   izlenen satırsa aynen devam eder
     i:=cbTur.EditValue;
     if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
-       Tablo.TablodanSorguAc(9,'select ID, KALAN from STOKIZLEME where SATIRID='+TabKaynak.FieldByName('SATIRID').AsString);
+       Tablo.TablodanSorguAc(9,'select ID, KALAN from STOKIZLEME where SATIRID='+TabKaynak.FieldByName('SATIRID').AsString+'  AND KALAN>0 ');
        while not Tablo.Query9.Eof  do begin
          ID := Tablo.SQLSatiriKopyala('STOKIZLEME', Tablo.Query9.Fields[0].AsInteger,[ 'BELGETUR', 'BASLIKID','SATIRID', 'EKLEYEN', 'DONUSID', 'ADET'],
                   [ HedefBaslikTur, HedefBaslikID, TabDetayGiris.FieldByName('ID').AsInteger, Kullanan, Tablo.Query9.Fields[0].AsString, Tablo.Query9.FieldByName('KALAN').AsInteger ]);

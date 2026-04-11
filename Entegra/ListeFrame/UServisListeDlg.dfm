@@ -43,10 +43,6 @@ object ServisListeDlg: TServisListeDlg
       Caption = 'Bilgi/A'#231#305'klama'
       ImageIndex = 0
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -425,10 +421,6 @@ object ServisListeDlg: TServisListeDlg
     object TabSheetGenel: TcxTabSheet
       Caption = 'Genel'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GenelTreeList: TcxDBTreeList
         Left = 0
         Top = 0
@@ -619,10 +611,6 @@ object ServisListeDlg: TServisListeDlg
     object cxTabSheet3: TcxTabSheet
       Caption = 'Belgeler'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGridBelgeler: TcxGrid
         Left = 0
         Top = 0
@@ -773,7 +761,7 @@ object ServisListeDlg: TServisListeDlg
     Height = 255
     Align = alClient
     TabOrder = 3
-    Properties.ActivePage = TabServis
+    Properties.ActivePage = Tabhareket
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlServisChange
     ClientRectBottom = 251
@@ -1205,10 +1193,6 @@ object ServisListeDlg: TServisListeDlg
     object Tabhareket: TcxTabSheet
       Caption = 'Hareket'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1485,9 +1469,8 @@ object ServisListeDlg: TServisListeDlg
     Top = 197
   end
   object SERVIS: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = SERVISAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from vServislistesi S')
     Left = 597
@@ -1588,7 +1571,6 @@ object ServisListeDlg: TServisListeDlg
   object TabGenel: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 149
     Top = 223
   end
@@ -1599,12 +1581,6 @@ object ServisListeDlg: TServisListeDlg
   end
   object TabSmsEPosta: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PRehID'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       'DECLARE @REHID int'
       'SET @REHID= :PRehID'
@@ -1630,6 +1606,12 @@ object ServisListeDlg: TServisListeDlg
       'REHID=@REHID')
     Left = 264
     Top = 232
+    ParamData = <
+      item
+        Name = 'PRehID'
+        Size = -1
+        Value = Null
+      end>
   end
   object DtsSmsEPosta: TDataSource
     DataSet = TabSmsEPosta
@@ -1637,8 +1619,14 @@ object ServisListeDlg: TServisListeDlg
     Top = 280
   end
   object TabHareketler: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabHareketlerAfterScroll
+    Connection = Tablo.FDCnn
+    SQL.Strings = (
+      'select *,'
+      'SURE=[dbo].[fn_TarihFarkiFormatli] (BASLAMA,BITIS)'
+      ' from SERVISHAREKET where SERVISID=:PServisID order by ID')
+    Left = 330
+    Top = 220
     ParamData = <
       item
         Name = 'PServisID'
@@ -1647,12 +1635,6 @@ object ServisListeDlg: TServisListeDlg
         Size = 4
         Value = 1
       end>
-    SQL.Strings = (
-      'select *,'
-      'SURE=[dbo].[fn_TarihFarkiFormatli] (BASLAMA,BITIS)'
-      ' from SERVISHAREKET where SERVISID=:PServisID order by ID')
-    Left = 330
-    Top = 220
   end
   object DtsHareketler: TDataSource
     DataSet = TabHareketler
@@ -1662,13 +1644,6 @@ object ServisListeDlg: TServisListeDlg
   object TabServisBelge: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PSerID'
-        DataType = ftWideString
-        Size = 4
-        Value = '1108'
-      end>
     SQL.Strings = (
       'declare @ServisID int'
       'set @ServisID=:PSerID'
@@ -1788,6 +1763,13 @@ object ServisListeDlg: TServisListeDlg
       'from FATBASLIK F where SERVISID=@ServisID')
     Left = 428
     Top = 224
+    ParamData = <
+      item
+        Name = 'PSerID'
+        DataType = ftWideString
+        Size = 4
+        Value = '1108'
+      end>
   end
   object DtsServisBelge: TDataSource
     DataSet = TabServisBelge
@@ -1856,21 +1838,6 @@ object ServisListeDlg: TServisListeDlg
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PYer'
-        DataType = ftWord
-        Precision = 3
-        Size = 1
-        Value = Null
-      end
-      item
-        Name = 'PYerId'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -1889,6 +1856,21 @@ object ServisListeDlg: TServisListeDlg
       'order by 2 DESC')
     Left = 585
     Top = 369
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object cxGridPopupYorumlar: TcxGridPopupMenu
     PopupMenus = <
@@ -1938,9 +1920,8 @@ object ServisListeDlg: TServisListeDlg
     end
   end
   object HAREKET: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = HAREKETAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select *'
       'from VServisHareket S')
@@ -1963,4 +1944,3 @@ object ServisListeDlg: TServisListeDlg
     end
   end
 end
-

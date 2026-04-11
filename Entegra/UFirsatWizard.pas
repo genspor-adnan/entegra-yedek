@@ -1498,7 +1498,7 @@ begin
    if (CheckTamam.Checked)and(ComboPRJ_DURUM.EditValue>0) then begin
        SonucListe := TStringList.Create;
        //TeklifDurum :=0; TeklifSonuc:=0;
-       if not Tablo.HizliGirisListedenBilgiGetir('F?rsat Sonu?','select ANAHTAR,DEGER from GENINI where BOLUM=-2114 and DIL=-1 and DEGER<0 '+
+       if not Tablo.HizliGirisListedenBilgiGetir('Fırsat Sonuç','select ANAHTAR,DEGER from GENINI where BOLUM=-2114 and DIL=-1 and DEGER<0 '+
                   ' order by 1 ',SonucListe,False,[True, False],[]) then abort;
        TabFirsatlar.Edit;
        TabFirsatlar.FieldByName('ASAMA').AsInteger := StrToIntDef(SonucListe[1],0);

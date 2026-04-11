@@ -403,15 +403,11 @@ object KategoriDlg: TKategoriDlg
       Caption = 'Muhasebe Kodu'
       ImageIndex = 1
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridMuhasebeKod: TcxGrid
         Left = 0
         Top = 0
-        Width = 352
-        Height = 315
+        Width = 348
+        Height = 314
         Align = alClient
         TabOrder = 0
         object GridMuhasebeKodView: TcxGridDBTableView
@@ -574,7 +570,7 @@ object KategoriDlg: TKategoriDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from KATEGORI where ID = :PID')
-    Left = 451
+    Left = 427
     Top = 53
   end
   object DtsKategori: TDataSource

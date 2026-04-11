@@ -1497,6 +1497,7 @@ resourcestring
 
   //STOK
     STUrun_var='Bu ürün daha önce eklenmiþ;' ;
+    STYeniSatir=' Yeni bir satýr daha eklemek istiyor musunuz)';
     STUzerine_ekle=' Üzerine eklemek için Evet';
     STYeni_satir_hayir=' Yeni Satýr için Hayýr';
     STIptale_tiklayin=' Ýþlemi iptal etmek için Ýptal e týklayýn' ;

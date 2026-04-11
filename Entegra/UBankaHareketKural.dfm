@@ -10,10 +10,8 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -132,23 +130,23 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
     TabOrder = 2
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
-    ClientRectBottom = 476
-    ClientRectLeft = 2
-    ClientRectRight = 1229
-    ClientRectTop = 25
+    ClientRectBottom = 474
+    ClientRectLeft = 4
+    ClientRectRight = 1227
+    ClientRectTop = 24
     object cxTabSheet1: TcxTabSheet
       Caption = 'Sabit Hesap / Masraf Aktar'#305'mlar'
       ImageIndex = 0
       object GridHareket: TcxGrid
         Left = 0
         Top = 0
-        Width = 949
-        Height = 451
+        Width = 945
+        Height = 450
         Align = alClient
         TabOrder = 0
-        ExplicitWidth = 1227
         object GridHareketView: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsKural
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -210,15 +208,13 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
         end
       end
       object Panel4: TPanel
-        Left = 949
+        Left = 945
         Top = 0
         Width = 278
-        Height = 451
+        Height = 450
         Align = alRight
         Alignment = taLeftJustify
         TabOrder = 1
-        ExplicitLeft = 1212
-        ExplicitHeight = 557
         object PanelOdemeTipi: TPanel
           Left = 1
           Top = 279
@@ -227,7 +223,6 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
           Align = alTop
           Alignment = taLeftJustify
           TabOrder = 0
-          ExplicitTop = 313
           object LabelOdemeTipi: TcxLabel
             Left = 5
             Top = 6
@@ -490,8 +485,6 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
           Align = alTop
           Alignment = taLeftJustify
           TabOrder = 5
-          ExplicitLeft = 5
-          ExplicitTop = 239
           object cxLabel2: TcxLabel
             Left = 1
             Top = 11
@@ -531,6 +524,10 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
     object TabSheetSatSut: TcxTabSheet
       Caption = 'Sat'#305'r/S'#252'tun Ayarlar'#305
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -540,6 +537,7 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
         TabOrder = 0
         object cxGridDBTableView1: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSatSut
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -553,15 +551,18 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
           object cxGridDBColumn1: TcxGridDBColumn
             Caption = 'Bilgi'
             DataBinding.FieldName = 'BILGI'
+            DataBinding.IsNullValueType = True
             Width = 186
           end
           object cxGridDBTableView1Column1: TcxGridDBColumn
             Caption = 'Sat'#305'r/S'#252'tun'
             DataBinding.FieldName = 'SATSUT'
+            DataBinding.IsNullValueType = True
           end
           object cxGridDBColumn3: TcxGridDBColumn
             Caption = 'Form'#252'l'
             DataBinding.FieldName = 'DEGER_GECEN'
+            DataBinding.IsNullValueType = True
             Width = 289
           end
         end
@@ -578,10 +579,9 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
     Top = 133
   end
   object TabKural: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabKuralAfterScroll
     OnNewRecord = TabKuralNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT * '
       'FROM BANKAKURAL'
@@ -641,7 +641,6 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
   end
   object TabSatSut: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'SELECT BANKAKODU,TUR,'
       
@@ -655,4 +654,3 @@ object BankaHareketKuralDlg: TBankaHareketKuralDlg
     Top = 252
   end
 end
-

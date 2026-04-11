@@ -325,6 +325,8 @@ procedure TKategoriDlg.TabKategoriBeforePost(DataSet: TDataSet);
 begin
    if not BoslukKontrol(EditKOD.text, 'Kod') then Abort;
    if not BoslukKontrol(EditAD.text, 'Ad') then Abort;
+   if (TabKategori.FindField('DIGITSAY') <> nil) and TabKategori.FieldByName('DIGITSAY').IsNull then
+      TabKategori.FieldByName('DIGITSAY').AsInteger := 0;
    {if TabKategori.FieldByName('MARKETSATIS').AsBoolean<>TabKategori.FieldByName('MARKETSATIS').OldValue then
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set MARKETSATIS=Abs('+BoolToStr(TabKategori.FieldByName('MARKETSATIS').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
    if TabKategori.FieldByName('RESTSATIS').AsBoolean<>TabKategori.FieldByName('RESTSATIS').OldValue then
@@ -337,6 +339,8 @@ end;
 procedure TKategoriDlg.TabKategoriNewRecord(DataSet: TDataSet);
 begin
    TabKategori.FieldByName('DURUM').AsBoolean:= True;
+   if TabKategori.FindField('DIGITSAY') <> nil then
+      TabKategori.FieldByName('DIGITSAY').AsInteger := 0;
 {   TabKategori.FieldByName('MARKETSATIS').AsBoolean:= True;
    TabKategori.FieldByName('RESTSATIS').AsBoolean:= True;
    TabKategori.FieldByName('TRANSFER').AsBoolean:= True;}
@@ -356,6 +360,7 @@ begin
 end;
 
 end.
+
 
 
 

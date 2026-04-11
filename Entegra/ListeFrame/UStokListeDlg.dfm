@@ -453,7 +453,7 @@ object StokListeDlg: TStokListeDlg
       Height = 332
       Align = alClient
       TabOrder = 0
-      Properties.ActivePage = tshFiyatlar
+      Properties.ActivePage = TabYorumMedya
       Properties.CustomButtons.Buttons = <>
       Properties.MultiLine = True
       OnPageChanging = PageControl1PageChanging

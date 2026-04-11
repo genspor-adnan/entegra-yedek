@@ -17,7 +17,10 @@ uses
   Vcl.ExtCtrls, cxCurrencyEdit, cxButtonEdit, FireDAC.Comp.Client, Vcl.Menus, Vcl.ComCtrls,
   Vcl.ToolWin, cxCheckBox, cxImageComboBox, cxSplitter, cxCalendar, cxTextEdit,
   cxContainer, JvExControls, JvNavigationPane, cxMemo, cxDropDownEdit, cxDBEdit,
-  cxMaskEdit, cxLabel;
+  cxMaskEdit, cxLabel, dxDateRanges, dxScrollbarAnnotations, dxCoreGraphics,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TBankaHareketlerDlg = class(TForm)

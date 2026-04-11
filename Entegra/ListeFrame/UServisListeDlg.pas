@@ -26,7 +26,10 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxRichEdit,
-  dxDateRanges, dxScrollbarAnnotations, frCoreClasses;
+  dxDateRanges, dxScrollbarAnnotations, frCoreClasses, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 //TODO: liste için index oluşturulacak..
 //TODO: emrenin bütün servislerinde yeni dışında aktif servisleri gözükmüyor.

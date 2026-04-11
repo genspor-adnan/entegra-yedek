@@ -1865,20 +1865,27 @@ begin
              mnFaturasiniOlustur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
            end;
       KasaTur_AlisIrsaliyesi, KasaTur_SatisIrsaliyesi: begin
-             if FATBASLIK.FieldByName('TUR').AsInteger = KasaTur_AlisIrsaliyesi then begin
-                mnSatisFisiniOlustur.Caption := 'Alýþ Fiþini Oluþtur';
-                mnSatisFisiniOlustur.Tag := 12;
-             end
-             else begin
-                mnSatisFisiniOlustur.Caption := 'Satýþ Fiþini Oluþtur';
-                mnSatisFisiniOlustur.Tag := 16;
-             end;
 
              mnIrsaliyesiniOlustur.Enabled := False;
              mnFaturasiniOlustur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
              mnSatisFisiniOlustur.Enabled := mnFaturasiniOlustur.Enabled;
            end;
     end;
+
+    case FATBASLIK.FieldByName('TUR').AsInteger of
+      KasaTur_AlisSiparisi, KasaTur_AlisIrsaliyesi : begin
+                mnSatisFisiniOlustur.Caption := 'Alýþ Fiþini Oluþtur';
+                mnIrsaliyesiniOlustur.Tag := 10;
+                mnFaturasiniOlustur.Tag := 11;
+                mnSatisFisiniOlustur.Tag := 12;
+             end;
+      KasaTur_SatisSiparisi, KasaTur_SatisIrsaliyesi : begin
+                mnSatisFisiniOlustur.Caption := 'Satýþ Fiþini Oluþtur';
+                mnIrsaliyesiniOlustur.Tag := 14;
+                mnFaturasiniOlustur.Tag := 15;
+                mnSatisFisiniOlustur.Tag := 16;
+             end;
+      end;
   end;
   KaynakBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREDEN').AsString <> '';
   HedefBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '';

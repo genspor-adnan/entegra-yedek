@@ -1045,7 +1045,8 @@ Begin
       Result := True;
   end else if ((stokhizmetaracagirantur < 99)or(stokhizmetaracagirantur in [100,101,105])) and  //100:verilen teklif
               (TabDetayGiris.Locate('URUNID;TUR;BIRIM', VarArrayOf([UrunID,1,Birim]),[])) then begin
-    usteeklecevap:= Application.MessageBox( PChar(STUrun_var+char(13)+Char(10)+STUzerine_ekle+char(13)+Char(10)+STYeni_satir_hayir+char(13)+Char(10)+STIptale_tiklayin),PChar(Uyari), MB_YESNOCANCEL+ MB_ICONQUESTION);
+     usteeklecevap:= Application.MessageBox( PChar(STUrun_var+STYeniSatir),PChar(Uyari), MB_YESNO+ MB_ICONQUESTION);
+(*    usteeklecevap:= Application.MessageBox( PChar(STUrun_var+char(13)+Char(10)+STUzerine_ekle+char(13)+Char(10)+STYeni_satir_hayir+char(13)+Char(10)+STIptale_tiklayin),PChar(Uyari), MB_YESNOCANCEL+ MB_ICONQUESTION);
     case usteeklecevap of
       ID_YES :     begin
                     TabDetayGiris.Edit;
@@ -1063,7 +1064,20 @@ Begin
                     Abort;
                   end;
       ID_NO :  goto stokeklemeyedevam;
+    end; *)
+     case usteeklecevap of
+      ID_YES : goto stokeklemeyedevam;
+
+      ID_NO  : begin
+                    Result := False;
+                    if BekletDlg<>nil then
+                      FreeAndNil(BekletDlg);
+                    TabDetayGiris.Cancel;
+                    Abort;
+               end;
     end;
+
+
   end else begin // yoksa ekleyelim..
     stokeklemeyedevam:
     DetayGirisHazirla;
@@ -1895,6 +1909,7 @@ begin
 end;
 
 end.
+
 
 
 

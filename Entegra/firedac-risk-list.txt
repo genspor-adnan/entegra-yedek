@@ -1,0 +1,54 @@
+FireDAC veri erisim risk listesi
+Tarih: 2026-04-10
+
+Yuksek olasilikli hatalar
+
+1. C:\Users\HP\Entegra\Entegra\UDokumanWizard.pas:1146
+   SELECT * FROM Dokuman WHERE KLASOR=...
+   Hemen ardindan Tablo.Query2.ExecSQL; var.
+   Sonra tekrar Open yapiliyor.
+   Bu dogrudan yanlis desen.
+
+2. C:\Users\HP\Entegra\Entegra\UDokumanWizard.pas:1162
+   SELECT * FROM Dokuman WHERE KLASOR=...
+   Hemen ardindan Tablo.Query4.ExecSQL; var.
+   Sonra tekrar Open yapiliyor.
+   Bu da ayni sinifta hata.
+
+3. C:\Users\HP\Entegra\Entegra\UDokumanYetki.pas:176
+   SELECT * FROM Dokuman WHERE KLASOR=...
+   ExecSQL ile cagriliyor.
+   Open ile calismasi gereken sorgu.
+
+4. C:\Users\HP\Entegra\Entegra\UDokumanYetki.pas:192
+   SELECT * FROM Dokuman WHERE KLASOR=...
+   ExecSQL ile cagriliyor.
+   Ayni hatanin ikinci kopyasi.
+
+Orta riskli noktalar
+
+5. C:\Users\HP\Entegra\Entegra\Utablo.pas:2197
+   EXEC SP_PRG_FaturaDipToplami + Open
+   Su an SP result set donuyorsa dogru olabilir.
+   SP degisirse Cannot open / define command hatasi uretebilir.
+
+6. C:\Users\HP\Entegra\Entegra\UAnaForm.pas:1297
+   EXEC sp_Prg_IsListesiHatirlatma + Open
+   SP sonuc dondurmeye bagli.
+
+7. C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas:727
+   EXEC sp_UTS_AyrintiliTekil_StokIrsaliye + Open
+   SP sonuc dondurmeye bagli.
+
+8. C:\Users\HP\Entegra\Entegra\UServisWizard.pas:1476
+   BasitKomutCalistir(..., 'exec sp_prg_Servis_Yeni ...', True)
+   SP sonuc veya yeni ID dondurmezse benzer hata verir.
+
+9. C:\Users\HP\Entegra\Entegra\ListeFrame\UIsListesi.pas:306
+   BasitKomutCalistir(..., 'exec sp_prg_Servis_Yeni ...', True)
+   Ayni riskin baska kopyasi.
+
+Notlar
+
+- INSERT ... SELECT SCOPE_IDENTITY() + Open olan yerler bu listeye alinmadi.
+- UPDATE/DELETE sonrasi farkli dataset refresh Open akislari sorun listesine alinmadi.

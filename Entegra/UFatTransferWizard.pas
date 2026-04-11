@@ -251,7 +251,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
-    Tur, FaturaID, RehberId: Integer;
+    Tur, FatBasId, RehberId: Integer;
     Cagiran: SmallInt;
   end;
 
@@ -280,11 +280,11 @@ begin
   AFastReport.EnabledDataSets.Clear;
 
   TabloYenile(TabFatBaslik,[TabFATBASLIK.FieldByName('ID').AsInteger]);
-  if FaturaID <= 0 then
-    FaturaID := TabFATBASLIK.FieldByName('ID').AsInteger;
+  if FatBasId <= 0 then
+    FatBasId := TabFATBASLIK.FieldByName('ID').AsInteger;
 
-  TabloYenile(FATURA,[FaturaID]);
-  TabloYenile(TabFATURA,[FaturaID]);
+  TabloYenile(FATURA,[FatBasId]);
+  TabloYenile(TabFATURA,[FatBasId]);
   AFastReport.EnabledDataSets.Add(frxFATBASLIK);
   AFastReport.EnabledDataSets.Add(frxFATURA);
   AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
@@ -305,9 +305,9 @@ begin
   end;
 
   if SatirFatBasID > 0 then
-    FaturaID := SatirFatBasID
-  else if FaturaID <= 0 then
-    FaturaID := TabFATBASLIK.FieldByName('ID').AsInteger;
+    FatBasId := SatirFatBasID
+  else if FatBasId <= 0 then
+    FatBasId := TabFATBASLIK.FieldByName('ID').AsInteger;
 
   // If updates are cached by runtime settings, flush them now.
   if TabFATURA.UpdatesPending then
@@ -317,23 +317,23 @@ begin
     Tablo.FDCnn,
     'select ID from FATURA where ID=&ID and FATBASID=&FBID',
     ['&ID','&FBID'],
-    [YeniID, FaturaID]
+    [YeniID, FatBasId]
   );
   if not KayitVar then
-    raise Exception.Create('FATURA satiri veritabanina yazilmadi. ID=' + IntToStr(YeniID) + ' FATBASID=' + IntToStr(FaturaID));
+    raise Exception.Create('FATURA satiri veritabanina yazilmadi. ID=' + IntToStr(YeniID) + ' FATBASID=' + IntToStr(FatBasId));
 
-  TabFATBASLIK.Refresh;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
+//  TabFATBASLIK.Refresh;
+ /// Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
   FaturaTutarHesapla;
 
-  TabloYenile(FATURA,[FaturaID]);
-  TabloYenile(TabFATURA,[FaturaID]);
+  TabloYenile(FATURA,[FatBasId]);
+  TabloYenile(TabFATURA,[FatBasId]);
   if YeniID > 0 then
     TabFATURA.Locate('ID', YeniID, []);
 
   TabFATURADOVIZ_BIRIMFIYAT.OnChange:= TabFATURAADETChange;
   TabFATURABIRIMFIYAT.OnChange:= TabFATURAADETChange;
-  TabFatBaslik.Refresh;
+//  TabFatBaslik.Refresh;
 end;
 
 procedure TFatTransferWizardDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -387,9 +387,9 @@ begin
     ComboGirisDepo.Left := 117;
   end;
   // Tablo.FaturaInit(Tur,ComboDURUM.Properties, TcxImageComboBoxProperties(GridFaturaViewTUR.Properties), TcxImageComboBoxProperties(GridFaturaViewBIRIM1.Properties));
-  TabloYenile(TabFatBaslik, [FaturaID]);
-  TabloYenile(FATURA, [FaturaID]);
-  TabloYenile(TabFatura, [FaturaID]);
+  TabloYenile(TabFatBaslik, [FatBasId]);
+  TabloYenile(FATURA, [FatBasId]);
+  TabloYenile(TabFatura, [FatBasId]);
   case IslemOp of
     'E':
       begin // AktiviteWizardDlg.TabFatBaslik.Append;
@@ -452,8 +452,8 @@ begin
 
   if TabFatBaslik.State = dsInsert then begin
      TabFatBaslik.Post;
-     FaturaID := TabFatBaslik.FieldByname('ID').AsInteger;
-     TabloYenile(TabFatura, [FaturaID]);
+     FatBasId := TabFatBaslik.FieldByname('ID').AsInteger;
+     TabloYenile(TabFatura, [FatBasId]);
   end;
 
   if AraDlg=nil then
@@ -507,10 +507,10 @@ var
   YeniID: Integer;
   VFatNo, VSeri: string;
 begin
-  FaturaID:= TabFatBaslik.FieldByName('ID').AsInteger;
+  FatBasId:= TabFatBaslik.FieldByName('ID').AsInteger;
 
   // FireDAC + ODBC may leave identity as -1 on posted row; recover persisted ID.
-  if FaturaID <= 0 then
+  if FatBasId <= 0 then
   begin
     VFatNo := Trim(TabFatBaslik.FieldByName('FATURANO').AsString);
     VSeri := Trim(TabFatBaslik.FieldByName('FATURASERI').AsString);
@@ -526,10 +526,10 @@ begin
       YeniID := 0;
 
     if YeniID > 0 then
-      FaturaID := YeniID;
+      FatBasId := YeniID;
   end;
 
-  TabloYenile(FATURA, [FaturaID]);
+  TabloYenile(FATURA, [FatBasId]);
 end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikBeforeDelete(DataSet: TDataSet);
@@ -577,7 +577,7 @@ end;
 procedure TFatTransferWizardDlg.FaturaTutarHesapla;
 begin
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + TabFatBaslik.Fields[0].AsString;
+  Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + IntToStr(FatBasId);
   Tablo.Query1.Open;
   TabFatBaslik.Edit;
   TabFatBaslik.FieldByname('FATURA_MATRAHI').AsCurrency := Tablo.Query1.FieldByname('ARATOPLAM').AsCurrency;
@@ -620,14 +620,14 @@ end;
 procedure TFatTransferWizardDlg.TabFaturaAfterDelete(DataSet: TDataSet);
 begin
   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
-  TabloYenile(TabFatBaslik, [FaturaID]);
-  TabloYenile(FATURA, [FaturaID]);
-  TabloYenile(TabFatura, [FaturaID]);
+  TabloYenile(TabFatBaslik, [FatBasId]);
+  TabloYenile(FATURA, [FatBasId]);
+  TabloYenile(TabFatura, [FatBasId]);
   {TabFatBaslik.Close;
-  TabFatBaslik.Params[0].Value := FaturaID;
+  TabFatBaslik.Params[0].Value := FatBasId;
   TabFatBaslik.Open;
   TabFatura.Close;
-  TabFatura.Params[0].Value := FaturaID;
+  TabFatura.Params[0].Value := FatBasId;
   TabFatura.Open; }
 end;
 
@@ -726,7 +726,7 @@ end;
 
 procedure TFatTransferWizardDlg.TabFaturaNewRecord(DataSet: TDataSet);
 begin
-  TabFatura.FieldByname('FATBASID').AsInteger :=  FaturaID;
+  TabFatura.FieldByname('FATBASID').AsInteger :=  FatBasId;
   TabFatura.FieldByname('REHBERID').AsInteger := 0;
   TabFatura.FieldByName('GIRDEPO').AsInteger := TabFatBaslik.FieldByName('GIRISDEPO').AsInteger;
   TabFatura.FieldByName('CIKDEPO').AsInteger := TabFatBaslik.FieldByName('CIKISDEPO').AsInteger;
@@ -767,13 +767,13 @@ begin
       //raise Exception.create(Urungirilmedenkadedilmez);
     TabFatBaslik.Post;
      if islemOp='D' then
-     Tablo.LogIslemleri(TabNo_TRANSFER,FaturaID, 4, TabFatBaslik);
+     Tablo.LogIslemleri(TabNo_TRANSFER,FatBasId, 4, TabFatBaslik);
   end;
   if TabFatura.State in [dsInsert, dsEdit] then begin
     TabFatura.Post;
     SayA:=0;
     if LogBelge.Count > 0 then
-     Tablo.LogIslemlerBelge(TabFatura,TabNo_TRANSFER,FaturaID,4);
+     Tablo.LogIslemlerBelge(TabFatura,TabNo_TRANSFER,FatBasId,4);
   end;
 end;
 
@@ -862,8 +862,8 @@ procedure TFatTransferWizardDlg.BtnDonusturClick(Sender: TObject);
 var
   BDDlg:TBelgeDonusumDlg;
 begin
- // if TabFatBaslik.State in [dsEdit, dsInsert] then
- //    TabFatBaslik.Post;
+  if TabFatBaslik.State in [dsEdit, dsInsert] then
+     TabFatBaslik.Post;
 
   if (TabFatura.recordCount>0)and(TabFatura.State in [dsEdit, dsInsert]) then
      TabFatura.Post;
@@ -946,8 +946,8 @@ begin
       end;
     end;
   end;
-  TabFatBaslik.Refresh;
-  TabFatura.Refresh;
+//  TabFatBaslik.Refresh;
+//  TabFatura.Refresh;
 end;
 
 procedure TFatTransferWizardDlg.DtsFatBaslikStateChange(Sender: TObject);

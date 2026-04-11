@@ -1,4 +1,4 @@
-ï»¿unit UEkipmanListeDlg;
+unit UEkipmanListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:54}
@@ -16,7 +16,10 @@ uses
   cxSplitter, cxPC, frxClass, frxDBSet, DBCtrls, dxSkinLondonLiquidSky,Utablo,
   cxCheckBox, cxTL, cxTLdxBarBuiltInMenu, cxInplaceContainer, cxDBTL, cxTLData, dxSkinBlack, dxSkinBlue, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinFoggy, dxSkinGlassOceans, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinPumpkin, dxSkinSeven, dxSkinSharp, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinsDefaultPainters, dxSkinValentine, dxSkinXmas2008Blue,
   cxLookAndFeels, dxSkinBlueprint, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinHighContrast, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, frCoreClasses,
+  FireDAC.Comp.DataSet;
 
 type
   TEkipmanListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog )
@@ -248,10 +251,10 @@ begin
     AraTarihBas.Date := StrToDateTime('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+IntToStr(CariYil));
     AraTarihBit.Date := StrToDateTime('31'+FormatSettings.DateSeparator+'12'+FormatSettings.DateSeparator+IntToStr(CariYil));
     TabloYenile(TabEkipmanlar,[]);
-    { Arama olay atamasÄ± }
+    { Arama olay atamasý }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
-    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
+    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
+    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
   end;
 end;
 
@@ -272,9 +275,9 @@ begin
        if LogGun > 0 then begin
         Tablo.OncekiLogBelirle(TabEkipmanlar);
        end;
-       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
+       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
        Tablo.LogIslemleri(TabNo_EKIPMAN,TabEkipmanlar.FieldByName('ID').AsInteger,5,TabEkipmanlar);
-       TabEkipmanlar.Delete;
+       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
        TabloYenile(TabEkipmanlar,[]);
      end else
        showmessage(EHareketli_silinemez);
@@ -315,6 +318,7 @@ end;
 initialization
   RegisterClass(TEkipmanListeDlg);
 end.
+
 
 
 

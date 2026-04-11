@@ -1,4 +1,4 @@
-ï»¿unit URehberAyar;
+unit URehberAyar;
 
 interface
 
@@ -21,7 +21,10 @@ uses
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TRehberAyarDlg = class(TForm)
@@ -76,11 +79,11 @@ type
     { Public declarations }
     Yer : SmallInt;
     Bolum : string;
-   {1 kurum iletiÅŸim
+   {1 kurum iletiþim
     2 kurum ticari
     3 personel temel
-    4 personel iletiÅŸim
-    5 personel Ã¼cret}
+    4 personel iletiþim
+    5 personel ücret}
   end;
 
 var
@@ -108,8 +111,8 @@ end;
 
 procedure TRehberAyarDlg.RehberAyarKopyala(nereden,nereye:Integer;bolum:String);
 begin
-  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and BOLUM=&Bolum AND SUBEID='+IntToStr(SubeId)+' ',['&Yeri','&Bolum'],[nereye,bolum]);
-  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERAYAR(YERI,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID) '
+  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and BOLUM=&Bolum AND SUBEID='+IntToStr(SubeId)+' ',['&Yeri','&Bolum'],[nereye,bolum]);
+  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERAYAR(YERI,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID) '
           +'select &Nereye,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID from REHBERAYAR where YERI=&Nereden and BOLUM=&Bolum'
           ,['&Nereye','&Nereden','&Bolum'],[nereye,nereden,bolum]);
 
@@ -123,7 +126,7 @@ end;
 
 procedure TRehberAyarDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Bolum:='';
 
   Tablo.GridTurkcelestir;
@@ -132,15 +135,29 @@ end;
 
 procedure TRehberAyarDlg.FormShow(Sender: TObject);
 var  i : integer;
+  LProps: TcxImageComboBoxProperties;
+  LSrcProps: TcxImageComboBoxProperties;
 begin
    i:=Yer;
-   if i=4 then //Kurum ve pers iletiÅŸim aynÄ± olacak
+   if i=4 then //Kurum ve pers iletiþim ayný olacak
       i:=1;
 
-   TcxImageComboBoxProperties(GridAyarViewVARSAYILAN.Properties).Items := Tablo.imgComboboxInit('select 0,'''' union all select NO,ADI from REHBERVARSAYILAN where YERI='+IntToStr(i)+' order by 2').Items;
+   LProps := TcxImageComboBoxProperties(GridAyarViewVARSAYILAN.Properties);
+   LSrcProps := Tablo.imgComboboxInit('select 0,'''' union all select NO,ADI from REHBERVARSAYILAN where YERI='+IntToStr(i)+' order by 2');
+   LProps.Items.BeginUpdate;
+   try
+     LProps.Items.Clear;
+     LProps.Items.Assign(LSrcProps.Items);
+   finally
+     LProps.Items.EndUpdate;
+   end;
    TabAyar.Close;
-   TabAyar.Params[0].Value := Yer;
-   TabAyar.Params[1].Value := Bolum;
+   if TabAyar.FindParam('YERI') = nil then
+     TabAyar.Params.Add.Name := 'YERI';
+   if TabAyar.FindParam('Bolum') = nil then
+     TabAyar.Params.Add.Name := 'Bolum';
+   TabAyar.ParamByName('YERI').Value := Yer;
+   TabAyar.ParamByName('Bolum').Value := Bolum;
    TabAyar.Open;
 end;
 
@@ -148,7 +165,7 @@ procedure TRehberAyarDlg.GridAyarViewGIRISPropertiesCloseUp(Sender: TObject);
 begin
   //TabAyar.FieldByName('KAYNAK').AsString:='';
   if GridAyarViewGIRIS.EditValue=10 then
-    GridAyarViewKAYNAK.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiÄŸinde yada boÅŸ olduÄŸunda hata vermesi engellendi.
+    GridAyarViewKAYNAK.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiðinde yada boþ olduðunda hata vermesi engellendi.
 end;
 
 procedure TRehberAyarDlg.GridAyarViewKAYNAKPropertiesButtonClick(
@@ -210,10 +227,10 @@ end;
 
 procedure TRehberAyarDlg.TabAyarBeforeDelete(DataSet: TDataSet);
 begin
-   //VarsayÄ±lan kÄ±smÄ± dolu ise ve data girilmiÅŸse silinemez ve SIRA ve VarsayÄ±lan kÄ±smÄ± deÄŸiÅŸtirilemez
+   //Varsayýlan kýsmý dolu ise ve data girilmiþse silinemez ve SIRA ve Varsayýlan kýsmý deðiþtirilemez
    if TabAyar.FieldByName('VARSAYILAN').AsString <> '' then begin
       Tablo.Query1.Close;    //resimleri silinir
-      if Yer=5 then //Ä°K Tahakkuk
+      if Yer=5 then //ÝK Tahakkuk
          Tablo.Query1.SQL.Text := ' select top 1 ID from PLANMAAS where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString
       else
          Tablo.Query1.SQL.Text := ' select top 1 ID from REHBERBILGI where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString;
@@ -237,7 +254,7 @@ begin
   if (TabAyar.FieldByName('GIRIS').AsInteger in [4,6,8])and(TabAyar.FieldbyName('KAYNAK').AsString = '') then
     Mesaj := Mesaj + 'KAYNAK ';
   if Mesaj <> '' then begin
-    Mesaj := Mesaj + 'AlanlarÄ± boÅŸ bÄ±rakÄ±lamaz.';
+    Mesaj := Mesaj + 'Alanlarý boþ býrakýlamaz.';
     ShowMessage(Mesaj);
     Abort;
   end;
@@ -251,6 +268,9 @@ begin
 end;
 
 end.
+
+
+
 
 
 

@@ -377,6 +377,7 @@ var
 
 implementation
 
+
 {$R *.dfm}
 
 uses
@@ -529,7 +530,9 @@ begin
     if TabAdresAd.RecordCount > 0 then
     begin
       if EkleKurIlet then // daha ?nce giri? yap?ld?ysa ?nce onu kaydedelim
+      begin
         Ekle(TabKurIlet, 1, RehberIletID, Degis);
+      end;
       RehberIletID := TabAdresAd.Fields[0].AsInteger;
 
       TabKurIlet.Close;
@@ -596,6 +599,12 @@ begin
 end;
 
 procedure TIKWizardDlg.FormCreate(Sender: TObject);
+  procedure HazirlaCacheDataSet(AQuery: TFDQuery);
+  begin
+    AQuery.CachedUpdates := True;
+    AQuery.UpdateOptions.UpdateTableName := '';
+    AQuery.UpdateOptions.KeyFields := '';
+  end;
 begin
    LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
@@ -614,14 +623,10 @@ begin
 
   Tablo.GridTurkcelestir;
 
-  TabPerIlet.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabPerIlet.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
-  TabKurIlet.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabKurIlet.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
-  TabPerOzluk.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabPerOzluk.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
-  TabPerUcret.UpdateOptions.UpdateTableName := 'dbo.PLANMAAS'; // Deðiþiklikler bu tabloya gitsin
-  TabPerUcret.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
+  HazirlaCacheDataSet(TabPerIlet);
+  HazirlaCacheDataSet(TabKurIlet);
+  HazirlaCacheDataSet(TabPerOzluk);
+  HazirlaCacheDataSet(TabPerUcret);
   cxGridDBColumn4.Options.Editing := True; // Bilgi kolonu artýk yazýlabilir
 end;
 
@@ -1847,7 +1852,9 @@ begin
         end
         else if TabRehber.State in [dsBrowse] then
         if EkleKurIlet then
+        begin
            Ekle(TabKurIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+        end;
         if EklePerOzluk then
            Ekle(TabPerOzluk, 3, RehberID, Degis);
         if EklePerIlet then
@@ -1885,7 +1892,9 @@ begin
       end;
 
     1:if EkleKurIlet then
+      begin
         Ekle(TabKurIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+      end;
     3:if EklePerOzluk then
         Ekle(TabPerOzluk, 3, RehberID, Degis); // Personel ?zl?k Ekle;
     4:if EklePerIlet then
@@ -1929,6 +1938,12 @@ begin
 end;
 
 end.
+
+
+
+
+
+
 
 
 

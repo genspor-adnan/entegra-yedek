@@ -121,6 +121,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
+          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -652,7 +653,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         Height = 382
         Align = alClient
         TabOrder = 1
-        Properties.ActivePage = SheetUretimAgaci
+        Properties.ActivePage = SheetOperasyonlar
         Properties.CustomButtons.Buttons = <>
         OnPageChanging = cxPageControl1PageChanging
         ClientRectBottom = 378
@@ -3605,8 +3606,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
   end
   object Query20: TFDQuery
     Connection = Tablo.FDCnn
-    Left = 338
-    Top = 59
+    Left = 386
+    Top = 67
   end
   object Query19: TFDQuery
     Connection = Tablo.FDCnn

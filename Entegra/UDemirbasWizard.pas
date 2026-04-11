@@ -25,7 +25,10 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxRichEdit,
-  dxDateRanges, dxScrollbarAnnotations, dxCoreGraphics, frCoreClasses;
+  dxDateRanges, dxScrollbarAnnotations, dxCoreGraphics, frCoreClasses,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TDemirbasWizardDlg = class(TForm, IPopupDialog)
@@ -297,8 +300,11 @@ end;
 procedure TDemirbasWizardDlg.BaskiOnizlemeMenuClick(Sender: TObject);
 var s:string;
 begin
-  if DtsDemirbas.State in [dsInsert,dsEdit] then
-    TabDemirbas.Post;
+  Kaydet;
+  if TabDemirbas.FieldByName('ID').AsInteger <= 0 then
+    Exit;
+  if FastRaporDlg = nil then
+    Application.CreateForm(TFastRaporDlg, FastRaporDlg);
   s := YaziciYaz.Caption;
   Delete(s, pos('&',s), 1);
   YazdirmayaHazirla(FastRaporDlg.frxReport1);
@@ -1021,6 +1027,7 @@ begin
 end;
 
 end.
+
 
 
 

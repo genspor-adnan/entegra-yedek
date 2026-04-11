@@ -18,7 +18,9 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxCalendar,
   cxMaskEdit, cxDropDownEdit, cxImageComboBox, dxDateRanges,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TIzlemeDlg = class(TForm)
@@ -395,7 +397,7 @@ begin
                     ' ) as List where DURUM > 0 '); }
   if IslemTur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi,KasaTur_Uretim,KasaTur_Uretim_Urun, KasaTur_Gelen_Konsinye] then begin
      //girişler
-     if KaynakSatirID = 0 then begin //direk giriş varsa
+     if KaynakSatirID <= 0 then begin //direk giriş varsa
         {if (IslemTur = KasaTur_Gelen_Konsinye)and(IslemTip=2) then begin //konsinye iade alınırsa
            //KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
            TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []);
@@ -422,7 +424,7 @@ begin
      end;
   //çıkışlar
   end else begin
-     if KaynakSatirID = 0 then begin //direk çıkış varsa
+     if KaynakSatirID <= 0 then begin //direk çıkış varsa
         { if DonusumKaynak then begin //dönüşmüş belge (Kons.Çıkış veya İrsaliye çıkış) ise kaynak görüntülenir.
             TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []);
             TabIzlem.ExecSQL;

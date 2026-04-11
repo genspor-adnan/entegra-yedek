@@ -39,8 +39,6 @@ object IKListeDlg: TIKListeDlg
         LookAndFeel.Kind = lfOffice11
         LookAndFeel.NativeStyle = True
         LookAndFeel.ScrollbarMode = sbmClassic
-        ExplicitTop = 32
-        ExplicitHeight = 228
         object IKGridView: TcxGridDBTableView
           OnDblClick = IKGridViewDblClick
           Navigator.Buttons.CustomButtons = <>
@@ -410,7 +408,7 @@ object IKListeDlg: TIKListeDlg
         Height = 259
         Align = alBottom
         TabOrder = 3
-        Properties.ActivePage = TabSheetIlgili
+        Properties.ActivePage = TabSheetGorev
         Properties.CustomButtons.Buttons = <>
         OnChange = PageControlSekmeChange
         ClientRectBottom = 255
@@ -3945,7 +3943,6 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 5
         Transparent = True
         Wrapable = False
-        ExplicitHeight = 29
         object YeniTus: TToolButton
           Left = 0
           Top = 0
@@ -4061,7 +4058,6 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 0
         Transparent = True
         Wrapable = False
-        ExplicitHeight = 29
         object YeniGrup: TToolButton
           Left = 0
           Top = 0

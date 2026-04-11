@@ -464,7 +464,9 @@ end;
 
 procedure TProjeWizardDlg.BtnAsamaKaydetClick(Sender: TObject);
 begin
-  TabProjeAsama.Post;
+  cxGridProjeAsamaDBTableView1.DataController.Post;
+  if TabProjeAsama.State in [dsEdit, dsInsert] then
+    TabProjeAsama.Post;
 end;
 
 procedure TProjeWizardDlg.BtnAsamaSilClick(Sender: TObject);
@@ -737,6 +739,22 @@ begin
    //DokumanTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\ProjeDokumanGridi',true,false,[gsoUseFilter],'ProjeDokumanGridi');
    Tablo.GridAyarRestore('ProjeMaliyetGridi',MaliyetGridView );
    Tablo.GridAyarRestore('cxGridProjeAsama',cxGridProjeAsamaDBTableView1 );
+   TabProjeAsama.UpdateOptions.UpdateTableName := 'PROJEASAMA';
+   TabProjeAsama.UpdateOptions.KeyFields := 'ID';
+   TabProjeAsama.UpdateOptions.UpdateChangedFields := False;
+   TabProjeButce.UpdateOptions.UpdateTableName := 'PROJEBUTCE';
+   TabProjeButce.UpdateOptions.KeyFields := 'ID';
+   TabProjeButce.UpdateOptions.UpdateChangedFields := False;
+   if TabProjeButce.FindField('ROOTKOD') <> nil then
+     TabProjeButce.FieldByName('ROOTKOD').ProviderFlags := [];
+   if TabProjeButce.FindField('KOD') <> nil then
+     TabProjeButce.FieldByName('KOD').ProviderFlags := [];
+   if TabProjeButce.FindField('AD') <> nil then
+     TabProjeButce.FieldByName('AD').ProviderFlags := [];
+   if TabProjeButce.FindField('GERCEKTAH') <> nil then
+     TabProjeButce.FieldByName('GERCEKTAH').ProviderFlags := [];
+   if TabProjeButce.FindField('GERCEKODE') <> nil then
+     TabProjeButce.FieldByName('GERCEKODE').ProviderFlags := [];
 
    //PanelAlan.Height := Tablo.GENINI.ReadInteger(Ops_ProjeOpsiyon_PanelAlan,140);
    projekoduretme := Tablo.GENINI.ReadInteger(Ops_ProjeOpsiyon_ProjeKoduUretme,1); //    ProjeOpsiyon', 'ProjeKoduUretme', 1);
@@ -973,7 +991,8 @@ end;
 
 procedure TProjeWizardDlg.ProjeAsamaEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
-if TabProjeAsama.State in [dsEdit,dsinsert] then
+  cxGridProjeAsamaDBTableView1.DataController.Post;
+  if TabProjeAsama.State in [dsEdit,dsinsert] then
      TabProjeAsama.Post;
 end;
 
@@ -1004,6 +1023,39 @@ begin
     TabDetay.Params[1].Value := ProjeID;
     TabDetay.Params[2].Value := ComboBolum.Text;
     TabDetay.Open;
+    TabDetay.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+
+    if TabDetay.Active then
+    begin
+      if TabDetay.FindField('ORJINAL') <> nil then
+        TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+      if TabDetay.FindField('GIRIS') <> nil then
+        TabDetay.FieldByName('GIRIS').ProviderFlags := [];
+      if TabDetay.FindField('KAYNAK') <> nil then
+        TabDetay.FieldByName('KAYNAK').ProviderFlags := [];
+      if TabDetay.FindField('ZORUNLU') <> nil then
+        TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
+      if TabDetay.FindField('ORJINAL') <> nil then
+        TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+
+      TabDetay.DisableControls;
+      try
+        TabDetay.First;
+        while not TabDetay.Eof do
+        begin
+          if Trim(TabDetay.FieldByName('BILGI').AsString) = '' then
+          begin
+            TabDetay.Edit;
+            TabDetay.FieldByName('BILGI').Clear;
+            TabDetay.Post;
+          end;
+          TabDetay.Next;
+        end;
+        TabDetay.First;
+      finally
+        TabDetay.EnableControls;
+      end;
+    end;
 
 end;
 
@@ -1387,6 +1439,11 @@ end;
 
 
 end.
+
+
+
+
+
 
 
 

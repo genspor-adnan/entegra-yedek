@@ -295,8 +295,6 @@ object StokWizardDlg: TStokWizardDlg
           ImageIndex = 0
           ParentColor = False
           PopupMenu = PopupMenuStok
-          ExplicitLeft = 5
-          ExplicitTop = 28
           object cxLabel2: TcxLabel
             Left = 420
             Top = 134
@@ -879,7 +877,6 @@ object StokWizardDlg: TStokWizardDlg
             Properties.ActivePage = TabSheerNotlar
             Properties.CustomButtons.Buttons = <>
             OnChange = PageControlAltChange
-            ExplicitLeft = 2
             ClientRectBottom = 138
             ClientRectLeft = 4
             ClientRectRight = 904
@@ -4042,7 +4039,7 @@ object StokWizardDlg: TStokWizardDlg
           ')'
           'INSERT INTO #DETAY_:SPID_'
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
+          'RB.SIRA,RB.ETIKET,BILGI=case when RA.GIRIS=3 and isnull(RB.BILGI,'#39#39')='#39#39' then null else RB.BILGI end,ORJINAL=case when RA.GIRIS=3 and isnull(RB.BILGI,'#39#39')='#39#39' then null else RB.BILGI end,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU,RB.ID,RR.RESIM,RR.RESIM  '
           'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON '
           'RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI left outer join '
@@ -4053,7 +4050,7 @@ object StokWizardDlg: TStokWizardDlg
           'union all'
           ''
           
-            'select  SIRA, ETIKET, BILGI='#39#39', ORJINAL='#39#39' ,GIRIS,KAYNAK,ZORUNLU' +
+            'select  SIRA, ETIKET, BILGI=case when GIRIS=3 then null else '#39#39' end, ORJINAL=case when GIRIS=3 then null else '#39#39' end ,GIRIS,KAYNAK,ZORUNLU' +
             ' '
           ',null,null,null '
           ' from REHBERAYAR  '
@@ -4839,8 +4836,8 @@ object StokWizardDlg: TStokWizardDlg
   object DtsIsOrtagi: TDataSource
     DataSet = TabIsOrtagi
     OnStateChange = DtsIsOrtagiStateChange
-    Left = 415
-    Top = 39
+    Left = 431
+    Top = 63
   end
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
@@ -5247,3 +5244,4 @@ object StokWizardDlg: TStokWizardDlg
     Top = 330
   end
 end
+

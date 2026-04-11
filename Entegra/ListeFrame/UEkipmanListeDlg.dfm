@@ -293,7 +293,6 @@ object EkipmanListeDlg: TEkipmanListeDlg
   end
   object TabEkipmanlar: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'WITH PagesList (EkipmanID,TreeID) AS'
       ''
@@ -341,12 +340,12 @@ object EkipmanListeDlg: TEkipmanListeDlg
       'inner join EKIPMANLAR E2 on E2.ID = p.EkipmanID'
       'order by 2,AD'
       '')
-    Left = 283
-    Top = 133
+    Left = 315
+    Top = 117
   end
   object DtsEkipmanlar: TDataSource
     DataSet = TabEkipmanlar
-    Left = 292
+    Left = 316
     Top = 203
   end
   object frxEkipmanlar: TfrxDBDataset
@@ -360,4 +359,3 @@ object EkipmanListeDlg: TEkipmanListeDlg
     Top = 209
   end
 end
-

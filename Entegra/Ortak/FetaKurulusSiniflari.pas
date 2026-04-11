@@ -1762,30 +1762,31 @@ class function Veritabani.BasitKomutÇalýþtýr(cnn: TFDConnection;
   AUseDataSource: TDataSource): Variant;
 var
   LSQL: string;
+  LQry: TFDQuery;
 begin
   if ASonuçDönecek then
     LSQL := ASQL
   else
     LSQL := 'SET NOCOUNT ON; ' + ASQL;
-  with SorguBaslat(cnn,LSQL,AParamAdlarý,AParamDeðerleri,AUseDataSource) do
+
+  LQry := SorguBaslat(cnn,LSQL,AParamAdlarý,AParamDeðerleri,AUseDataSource);
+
   try
     if ASonuçDönecek then
     begin
-      // Sonuç beklenen komutlar (örn. INSERT + SELECT SCOPE_IDENTITY())
-      Open;
-      if not Eof then
-        Result := Fields[0].AsVariant
+      LQry.Open;
+      if not LQry.Eof then
+        Result := LQry.Fields[0].AsVariant
       else
         Result := Null;
     end
     else
     begin
-      // UPDATE/DELETE gibi sonuç dönmeyen komutlar
-      ExecSQL;
+      LQry.ExecSQL;
       Result := Null;
     end;
   finally
-    Free;
+    LQry.Free;
   end;
 end;
 
@@ -2790,6 +2791,11 @@ begin
 end;
 
 end.
+
+
+
+
+
 
 
 

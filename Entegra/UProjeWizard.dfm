@@ -134,8 +134,6 @@ object ProjeWizardDlg: TProjeWizardDlg
       EnabledButtons = [bkBack, bkNext, bkFinish, bkCancel]
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnNextButtonClick = ProjeEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxDBLabel2: TcxDBLabel
         Left = 141
         Top = 6
@@ -688,10 +686,6 @@ object ProjeWizardDlg: TProjeWizardDlg
           object cxTabSheet1: TcxTabSheet
             Caption = 'Yorum/Medya'
             ImageIndex = 0
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object Panel4: TPanel
               Left = 0
               Top = 114
@@ -752,7 +746,6 @@ object ProjeWizardDlg: TProjeWizardDlg
               Properties.Alignment.Horz = taRightJustify
               Transparent = True
               Visible = False
-              ExplicitTop = 154
               AnchorX = 910
             end
             object GridYorum: TcxGrid
@@ -887,8 +880,6 @@ object ProjeWizardDlg: TProjeWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'ProjeAsamaEkr'
       OnExitPage = ProjeAsamaEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar5: TToolBar
         Left = 0
         Top = 70
@@ -1054,8 +1045,6 @@ object ProjeWizardDlg: TProjeWizardDlg
       Caption = 'Ek Detay Bilgiler'
       OnPage = ProjeEkDetayEkrPage
       OnExitPage = ProjeEkDetayEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1287,8 +1276,6 @@ object ProjeWizardDlg: TProjeWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'MaliyetEkr'
       OnEnterPage = MaliyetEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 70
@@ -1296,7 +1283,7 @@ object ProjeWizardDlg: TProjeWizardDlg
         Height = 373
         Align = alClient
         TabOrder = 0
-        Properties.ActivePage = TabSheetMaliyet
+        Properties.ActivePage = TabSheetButce
         Properties.CustomButtons.Buttons = <>
         ClientRectBottom = 369
         ClientRectLeft = 4
@@ -1305,10 +1292,6 @@ object ProjeWizardDlg: TProjeWizardDlg
         object TabSheetButce: TcxTabSheet
           Caption = '   B'#252't'#231'e   '
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object TreeProjeButce: TcxDBTreeList
             Left = 0
             Top = 24
@@ -1677,10 +1660,6 @@ object ProjeWizardDlg: TProjeWizardDlg
         object TabSheetMaliyet: TcxTabSheet
           Caption = '  Maliyet  '
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar6: TToolBar
             Left = 0
             Top = 0
@@ -2355,8 +2334,6 @@ object ProjeWizardDlg: TProjeWizardDlg
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'ProjeTarihceEkr'
       OnPage = ProjeTarihceEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object gridAktiviteTarihce: TcxGrid
         Left = 0
         Top = 70
@@ -2491,8 +2468,8 @@ object ProjeWizardDlg: TProjeWizardDlg
       'WHERE '
       #9'ID = :PID'
       'ORDER BY ID')
-    Left = 293
-    Top = 144
+    Left = 365
+    Top = 112
   end
   object DtsImaj: TDataSource
     Left = 646
@@ -2561,7 +2538,7 @@ object ProjeWizardDlg: TProjeWizardDlg
       'where P.PROJEID= :PPROJEID'
       'order by P.EKLEMETARIHI')
     Left = 186
-    Top = 268
+    Top = 236
   end
   object PmKopyala: TPopupMenu
     Left = 552
@@ -2585,8 +2562,8 @@ object ProjeWizardDlg: TProjeWizardDlg
       'PROJEASAMA PA'
       'where '
       'PROJEID=:PProejID')
-    Left = 442
-    Top = 20
+    Left = 498
+    Top = 28
     object TabProjeAsamaID: TAutoIncField
       FieldName = 'ID'
       ReadOnly = True

@@ -375,6 +375,7 @@ type
     procedure ComboBolumPropertiesInitPopup(Sender: TObject);
     procedure LabelSablonClick(Sender: TObject);
     procedure GridDetayViewEditChanged(Sender: TcxCustomGridTableView; AItem: TcxCustomGridTableItem);
+    procedure cxGridDBColumn2GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
     procedure DateBITISTARIHIKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure dateBASLAMATARIHIKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cxDBDateEdit5KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -595,7 +596,36 @@ var Yeri : SmallInt;
 begin
     TabDetay.Close;
     TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-    TabloYenile(TabDetay, [TabNo_SERVIS,ServisID,ComboBolum.Text])
+    TabloYenile(TabDetay, [TabNo_SERVIS,ServisID,ComboBolum.Text]);
+    TabDetay.CachedUpdates := True;
+    TabDetay.UpdateOptions.UpdateTableName := '';
+    TabDetay.UpdateOptions.KeyFields := '';
+    if TabDetay.FindField('ORJINAL') <> nil then
+      TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+    if TabDetay.FindField('GIRIS') <> nil then
+      TabDetay.FieldByName('GIRIS').ProviderFlags := [];
+    if TabDetay.FindField('KAYNAK') <> nil then
+      TabDetay.FieldByName('KAYNAK').ProviderFlags := [];
+    if TabDetay.FindField('ZORUNLU') <> nil then
+      TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
+    if TabDetay.FindField('ORJINAL') <> nil then
+      TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+    TabDetay.DisableControls;
+    try
+      TabDetay.First;
+      while not TabDetay.Eof do
+      begin
+        if Trim(TabDetay.FieldByName('BILGI').AsString) = '' then
+        begin
+          TabDetay.Edit;
+          TabDetay.FieldByName('BILGI').Clear;
+          TabDetay.Post;
+        end;
+        TabDetay.Next;
+      end;
+    finally
+      TabDetay.EnableControls;
+    end;
 end;
 
 procedure TServisWizardDlg.BtnBelgelerDuzenleClick(Sender: TObject);
@@ -1022,6 +1052,7 @@ procedure TServisWizardDlg.BtnHareketlerYeniClick(Sender: TObject);
 var
   OncekiHareketID,OncekiHareketDurumu:integer;
   TurBilgisi:string;
+  LAlanlar: TFDQuery;
 begin
   SonrakiHareketiEkle := False;
   if TabHareketler.Active then begin
@@ -1059,22 +1090,33 @@ begin
       TabHareketler.Last;
       OncekiHareketID:=TabHareketler.FieldByName('ID').AsInteger;
       OncekiHareketDurumu:=TabHareketler.FieldByName('DURUM').AsInteger;
-      TabHareketler.Append;
       MailGonderilecek := True;
-      Tablo.TablodanSorguAc(4,'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)');
-      Tablo.Query4.First;
-      while not Tablo.Query4.Eof do begin
-        if ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString) <> nil then
-          case Tablo.Query4.FieldByName('TUR').AsInteger of
-            1 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxTextEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-            3 :if TcxDateEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text <> '' then
-                  TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsDateTime := TcxDateEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Date;
-            4 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxComboBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-            5 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsBoolean := TcxCheckBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Checked;
-            7 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxButtonEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-          end;
-        Tablo.Query4.Next;
+      LAlanlar := TFDQuery.Create(nil);
+      try
+        LAlanlar.Connection := Tablo.FDCnn;
+        LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+        LAlanlar.Open;
+        TabHareketler.Append;
+        LAlanlar.First;
+        while not LAlanlar.Eof do begin
+          if ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString) <> nil then
+            case LAlanlar.FieldByName('TUR').AsInteger of
+              1 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxTextEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+              3 :if TcxDateEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text <> '' then
+                    TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsDateTime := TcxDateEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Date;
+              4 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxComboBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+              5 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsBoolean := TcxCheckBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Checked;
+              7 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxButtonEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+            end;
+          LAlanlar.Next;
+        end;
+      finally
+        LAlanlar.Free;
       end;
+
+
+      TabHareketler.FieldByName('ACILIS').AsBoolean := False;
+      TabHareketler.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
       TabHareketler.FieldByName('SERVISID').AsInteger := ServisID;
       TabHareketler.FieldByName('ACIKLAMA').AsString := ServisSonlandirDlg.Memociklama.Lines.Text;
       TabHareketler.FieldByName('BITISSEC').AsBoolean := ServisSonlandirDlg.CheckBitis.Checked;
@@ -1593,6 +1635,11 @@ begin
   EkleDetay := True;
 end;
 
+procedure TServisWizardDlg.cxGridDBColumn2GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+begin
+  Tablo.RepositorydenPropertyAl(AProperties, Sender);
+end;
+
 procedure TServisWizardDlg.GridEkEkipmanViewDblClick(Sender: TObject);
 begin
    Tablo.TablodanSorguAc(1, 'Select DETAYBOLUMU FROM EKIPMANLAR E where E.ID='+TabServis.FieldByName('EKIPMANID').AsString);
@@ -1602,25 +1649,33 @@ end;
 
 procedure TServisWizardDlg.GridHareketlerDBTableView1DblClick(Sender: TObject);
 var TurBilgisi : string;
+  LAlanlar: TFDQuery;
 begin
 //  SonrakiHareketiEkle := False;
   Application.CreateForm(TServisSonlandirDlg,ServisSonlandirDlg);
   ServisSonlandirDlg.YeniHareket := False;
   //ServisSonlandirDlg.GroupDetay.Visible := False;
   //ServisSonlandirDlg.CheckAciklama.EditValue := False;
-  Tablo.TablodanSorguAc(4,'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)');
-  Tablo.Query4.First;
-  while not Tablo.Query4.Eof do begin
-    if ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString) <> nil then
-      case Tablo.Query4.FieldByName('TUR').AsInteger of
-        1 :TcxTextEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString;
-        3 : if TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString <> '' then
-              TcxDateEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Date := TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsDateTime;
-        4 :TcxComboBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString;
-        5 :TcxCheckBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Checked := TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsBoolean;
-        7 :TcxButtonEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString;
-      end;
-    Tablo.Query4.Next;
+  LAlanlar := TFDQuery.Create(nil);
+  try
+    LAlanlar.Connection := Tablo.FDCnn;
+    LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+    LAlanlar.Open;
+    LAlanlar.First;
+    while not LAlanlar.Eof do begin
+      if ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString) <> nil then
+        case LAlanlar.FieldByName('TUR').AsInteger of
+          1 :TcxTextEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString;
+          3 : if TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString <> '' then
+                TcxDateEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Date := TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsDateTime;
+          4 :TcxComboBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString;
+          5 :TcxCheckBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Checked := TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsBoolean;
+          7 :TcxButtonEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text := TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString;
+        end;
+      LAlanlar.Next;
+    end;
+  finally
+    LAlanlar.Free;
   end;
 
   ServisSonlandirDlg.CheckBaslama.Checked := TabHareketler.FieldByName('BASLASEC').AsBoolean;
@@ -1658,19 +1713,26 @@ begin
   ServisSonlandirDlg.ShowModal;
   if ServisSonlandirDlg.ModalResult = mrOk then begin
     TabHareketler.Edit;
-    Tablo.TablodanSorguAc(4,' select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)');
-    Tablo.Query4.First;
-    while not Tablo.Query4.Eof do begin
-      if ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString) <> nil then
-        case Tablo.Query4.FieldByName('TUR').AsInteger of
-          1 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxTextEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-          3 :if TcxDateEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text <> '' then
-               TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsDateTime := TcxDateEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Date;
-          4 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxComboBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-          5 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsBoolean := TcxCheckBox(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Checked;
-          7 :TabHareketler.FieldByName(Tablo.Query4.FieldByName('ALANADI').AsString).AsString := TcxButtonEdit(ServisSonlandirDlg.FindComponent(Tablo.Query4.FieldByName('ALANADI').AsString)).Text;
-        end;
-      Tablo.Query4.Next;
+    LAlanlar := TFDQuery.Create(nil);
+    try
+      LAlanlar.Connection := Tablo.FDCnn;
+      LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+      LAlanlar.Open;
+      LAlanlar.First;
+      while not LAlanlar.Eof do begin
+        if ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString) <> nil then
+          case LAlanlar.FieldByName('TUR').AsInteger of
+            1 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxTextEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+            3 :if TcxDateEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text <> '' then
+                 TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsDateTime := TcxDateEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Date;
+            4 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxComboBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+            5 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsBoolean := TcxCheckBox(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Checked;
+            7 :TabHareketler.FieldByName(LAlanlar.FieldByName('ALANADI').AsString).AsString := TcxButtonEdit(ServisSonlandirDlg.FindComponent(LAlanlar.FieldByName('ALANADI').AsString)).Text;
+          end;
+        LAlanlar.Next;
+      end;
+    finally
+      LAlanlar.Free;
     end;
 
     TabHareketler.FieldByName('BASLASEC').AsBoolean := ServisSonlandirDlg.CheckBaslama.Checked;
@@ -2077,6 +2139,8 @@ end;
 
 procedure TServisWizardDlg.TabHareketlerAfterScroll(DataSet: TDataSet);
 begin
+  if DataSet.State in [dsEdit, dsInsert] then
+    Exit;
   TabHareketler.FetchAll;
   BtnHareketlerSil.Enabled := (DataSet.RecordCount = DataSet.RecNo) and
                               (DataSet.RecordCount > 1) and
@@ -2434,6 +2498,16 @@ begin
 end;
 
 end.
+
+
+
+
+
+
+
+
+
+
 
 
 

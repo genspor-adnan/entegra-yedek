@@ -6,7 +6,7 @@ uses
 //  FireDAC.Comp.Client, FetaClassExtensions, Menus, UMultiCastEvent, UCombo ; URaporSart,
 
 SysUtils,Windows,Classes,Messages,Dialogs,DB,Graphics,Printers,Variants,
-FireDAC.Comp.Client, FetaClassExtensions, frxClass, frxDesgn, frxADOComponents, frxDBSet,
+FireDAC.Comp.Client, FetaClassExtensions, frxClass, frxDesgn, frxFDComponents, frxDBSet,
  ECXMLParser, Generics.Collections, frxCross, frxBarcode,
 frxOLE, frxDMPClass, frxDCtrl, frxGradient, frxChBox, frxRich, frxChart, Menus, UTablo, UCombo;
 
@@ -260,5 +260,6 @@ begin
 end;
 
 end.
+
 
 

@@ -31,12 +31,12 @@ type
     TabTemsilciID: TAutoIncField;
     TabTemsilciREHBERID: TIntegerField;
     TabTemsilciTEMSILCIID: TIntegerField;
-    TabTemsilciBASLAMA: TDateTimeField;
-    TabTemsilciBITIS: TDateTimeField;
+    TabTemsilciBASLAMA: TSQLTimeStampField;
+    TabTemsilciBITIS: TSQLTimeStampField;
     TabTemsilciACIKLAMA: TStringField;
-    TabTemsilciEKLEMETARIHI: TDateTimeField;
+    TabTemsilciEKLEMETARIHI: TSQLTimeStampField;
     TabTemsilciEKLEYEN: TIntegerField;
-    TabTemsilciDEGISTIRMETARIHI: TDateTimeField;
+    TabTemsilciDEGISTIRMETARIHI: TSQLTimeStampField;
     TabTemsilciDEGISTIREN: TIntegerField;
     TabTemsilciTEMSILCIAD: TStringField;
     GridTemsilciViewTEMSILCIAD: TcxGridDBColumn;
@@ -78,4 +78,5 @@ begin
 end;
 
 end.
+
 

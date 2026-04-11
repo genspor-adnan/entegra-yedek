@@ -75,25 +75,15 @@ var
   s:string;
   BekletDlg: TBekletmeDlg;
   procedure YeniBaglantiIleKomutCalistir(const ASQL: string);
-  var
-    LConn: TFDConnection;
   begin
-    LConn := TFDConnection.Create(nil);
-    try
-      LConn.Params.Assign(Tablo.FDCnn.Params);
-      LConn.LoginPrompt := False;
-      LConn.Connected := True;
-      Veritabani.BasitKomutÇalýþtýr(LConn, ASQL, [], []);
-    finally
-      LConn.Free;
-    end;
+    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ASQL, [], [], False, nil);
   end;
   procedure DovizKuru_Guncelle(Tur:char; Doviz:String);
   begin
     s:=Float_ToStr(DovizKuruBul(IntToStr(SpinYil.Value-1)+'-12-31 00:00', Doviz, cbIsYapKur.text));
     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set DOVIZ_KURU='''+CariDoviz+''', DOVIZ_TUTARI=DOVIZ_TUTARI*'+s+
        ' where KUR='''+Doviz+''' and TUR=2 and HESAPTURU= '''+Tur+''' and '+
-       ' ISLEMTARIHI between '''+IntToStr(SpinYil.Value-1)+'-12-31'' and '''+IntToStr(SpinYil.Value)+'-01-01''',[],[]);
+       ' ISLEMTARIHI between '''+IntToStr(SpinYil.Value-1)+'-12-31'' and '''+IntToStr(SpinYil.Value)+'-01-01''',[],[],False,nil);
   end;
 begin
 
@@ -184,12 +174,12 @@ begin
     BekletDlg.LabelUstTaraf.Caption := 'Stok Kayýtlarý Oluþturuluyor.. ';
     BekletDlg.LabelUstTaraf.Update;
      //Önce Triggerlarý disable edelim
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'disable TRIGGER [dbo].[TG_StokDurumGuncelle] on [dbo].[FATURA] ',[],[]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'disable TRIGGER [dbo].[TG_StokFiyatGuncelle] on [dbo].[FATURA] ',[],[]);
+     YeniBaglantiIleKomutCalistir('disable TRIGGER [dbo].[TG_StokDurumGuncelle] on [dbo].[FATURA] ');
+     YeniBaglantiIleKomutCalistir('disable TRIGGER [dbo].[TG_StokFiyatGuncelle] on [dbo].[FATURA] ');
 
    //Önce geçen seneye göre (31/12 ye göre) stok durumlarýný alalým
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'truncate table STOKDURUM ',[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC SP_Prg_GenelStokDuruMGuncelle 0,'''+IntToStr(SpinYil.value-1)+'-01-01 00:00'','''+IntToStr(SpinYil.value-1)+'-12-31 23:59'' ',[],[]);
+   YeniBaglantiIleKomutCalistir('truncate table STOKDURUM ');
+   YeniBaglantiIleKomutCalistir('EXEC SP_Prg_GenelStokDuruMGuncelle 0,'''+IntToStr(SpinYil.value-1)+'-01-01 00:00'','''+IntToStr(SpinYil.value-1)+'-12-31 23:59'' ');
 
 
     //Tablo.TumStokDurumlariGuncelle;
@@ -239,11 +229,11 @@ begin
     BekletDlg.LabelUstTaraf.Caption := 'Ýþlem Sonlandýrýlýyor..';
     BekletDlg.LabelUstTaraf.Update;
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'truncate table STOKDURUM ',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'EXEC SP_Prg_GenelStokDuruMGuncelle 0,'''+IntToStr(SpinYil.value)+'-01-01 00:00'','''+IntToStr(SpinYil.value)+'-12-31 23:59'' ',[],[]);
+    YeniBaglantiIleKomutCalistir('truncate table STOKDURUM ');
+    YeniBaglantiIleKomutCalistir('EXEC SP_Prg_GenelStokDuruMGuncelle 0,'''+IntToStr(SpinYil.value)+'-01-01 00:00'','''+IntToStr(SpinYil.value)+'-12-31 23:59'' ');
 
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'enable TRIGGER [dbo].[TG_StokDurumGuncelle] on [dbo].[FATURA] ',[],[]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'enable TRIGGER [dbo].[TG_StokFiyatGuncelle] on [dbo].[FATURA] ',[],[]);
+     YeniBaglantiIleKomutCalistir('enable TRIGGER [dbo].[TG_StokDurumGuncelle] on [dbo].[FATURA] ');
+     YeniBaglantiIleKomutCalistir('enable TRIGGER [dbo].[TG_StokFiyatGuncelle] on [dbo].[FATURA] ');
     IniyeKaydet(CheckStok.Tag,SpinYil.Value,True,True);
   end;
   ShowMessage(Devir_gerceklesti);
@@ -389,6 +379,8 @@ begin
 end;
 
 end.
+
+
 
 
 

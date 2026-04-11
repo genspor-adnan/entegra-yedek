@@ -570,12 +570,20 @@ object IzlemeDlg: TIzlemeDlg
       ''
       ') as List where DURUM >= 0.0 '
       ''
+      ') as x ON ('
       
-        ') as x on x.SERINO = tmp.SERINO collate SQL_Latin1_General_CP125' +
-        '4_CI_AS AND X.LOTNO = TMP.LOTNO collate SQL_Latin1_General_CP125' +
-        '4_CI_AS'
-      'AND X.SKT = TMP.skt'
-      ''
+        '    X.SERINO = TMP.SERINO COLLATE SQL_Latin1_General_CP1254_CI_A' +
+        'S'
+      '    OR (X.SERINO IS NULL AND TMP.SERINO IS NULL)'
+      ')'
+      'AND ('
+      '    X.LOTNO = TMP.LOTNO COLLATE SQL_Latin1_General_CP1254_CI_AS'
+      '    OR (X.LOTNO IS NULL AND TMP.LOTNO IS NULL)'
+      ')'
+      'AND ('
+      '    X.SKT = TMP.SKT'
+      '    OR (X.SKT IS NULL AND TMP.SKT IS NULL)'
+      ')'
       ''
       ''
       '--  select * from ##TmpIzleme_52_20181231093356633'
@@ -630,11 +638,22 @@ object IzlemeDlg: TIzlemeDlg
       ' where '
       '-- SI1.BASLIKID=@BaslikID  AND'
       ' SI1.SATIRID=@SatirID '
+      ' ) as x'
+      ''
+      'ON ('
       
-        ' ) as x on x.SERINO = tmp.SERINO collate SQL_Latin1_General_CP12' +
-        '54_CI_AS AND X.LOTNO = TMP.LOTNO collate SQL_Latin1_General_CP12' +
-        '54_CI_AS'
-      'AND X.SKT = TMP.skt')
+        '    X.SERINO = TMP.SERINO COLLATE SQL_Latin1_General_CP1254_CI_A' +
+        'S'
+      '    OR (X.SERINO IS NULL AND TMP.SERINO IS NULL)'
+      ')'
+      'AND ('
+      '    X.LOTNO = TMP.LOTNO COLLATE SQL_Latin1_General_CP1254_CI_AS'
+      '    OR (X.LOTNO IS NULL AND TMP.LOTNO IS NULL)'
+      ')'
+      'AND ('
+      '    X.SKT = TMP.SKT'
+      '    OR (X.SKT IS NULL AND TMP.SKT IS NULL)'
+      ')')
     TabOrder = 8
     Visible = False
     WordWrap = False
@@ -720,7 +739,6 @@ object IzlemeDlg: TIzlemeDlg
     WordWrap = False
   end
   object TabIzlem: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabIzlemAfterOpen
     BeforeEdit = TabIzlemBeforeEdit
     BeforePost = TabIzlemBeforePost
@@ -728,7 +746,7 @@ object IzlemeDlg: TIzlemeDlg
     BeforeDelete = TabIzlemBeforeDelete
     AfterDelete = TabIzlemAfterDelete
     OnNewRecord = TabIzlemNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     Left = 40
     Top = 89
   end
@@ -754,4 +772,3 @@ object IzlemeDlg: TIzlemeDlg
     end
   end
 end
-

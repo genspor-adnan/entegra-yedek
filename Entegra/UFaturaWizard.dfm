@@ -3262,8 +3262,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 411
   end
   object OpenDialog1: TOpenDialog
-    Left = 778
-    Top = 8
+    Left = 802
+    Top = 24
   end
   object PopupMenuFatura: TPopupMenu
     OnPopup = PopupMenuFaturaPopup
@@ -3807,6 +3807,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Origin = 'EKLEYEN'
     end
     object TabFaturaEKLEMETARIHI: TSQLTimeStampField
+      AutoGenerateValue = arDefault
       FieldName = 'EKLEMETARIHI'
       Origin = 'EKLEMETARIHI'
     end

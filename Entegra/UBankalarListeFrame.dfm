@@ -45,6 +45,7 @@ object BankalarListeFrame: TBankalarListeFrame
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -96,6 +97,7 @@ object BankalarListeFrame: TBankalarListeFrame
       Caption = 'Veri Aktar'#305'm'
       ImageIndex = 17
       ImageName = 'PngImage16'
+      Visible = False
       OnClick = ExceldenAlTusClick
     end
     object AksiyonTus: TToolButton
@@ -743,9 +745,8 @@ object BankalarListeFrame: TBankalarListeFrame
     Top = 88
   end
   object BANKALAR: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = BANKALARAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select BH.ID AS ID,DURUM,KUR,TIPI,BANKAADI,SUBEKODU,BAKIYE,SUBEA' +
@@ -765,7 +766,6 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object TabCariListe1: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 351
     Top = 198
     object DateTimeField1: TDateTimeField
@@ -827,7 +827,6 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object EKSTRE: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'Select CEKID=ID,TARIH,TUR, REHBERID,  CARIKOD AS KOD, CARIUNVAN ' +
@@ -1038,7 +1037,6 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object TOPLAMLAR: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'SELECT SUM(DEVIR) AS DEVIR,SUM(ALACAK) AS BORC,SUM(BORC) AS ALAC' +

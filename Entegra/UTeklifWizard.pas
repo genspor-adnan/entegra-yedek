@@ -377,6 +377,7 @@ type
     TabFinansalID: TAutoIncField;
     TabFinansalTEKLIFID: TIntegerField;
     TabFinansalSEC: TBooleanField;
+    TabFinansalTARIH: TSQLTimeStampField;
     TabFinansalKURUMID: TIntegerField;
     TabFinansalILGILIID: TIntegerField;
     TabFinansalACIKLAMA: TWideStringField;
@@ -2487,6 +2488,7 @@ begin
   BoslukKontrolu := False;
 end;
 end.
+
 
 
 

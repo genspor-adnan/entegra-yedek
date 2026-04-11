@@ -4,17 +4,15 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Banka Hareketleri Giri'#351'i'
   ClientHeight = 557
-  ClientWidth = 1490
+  ClientWidth = 1370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object PanelSol: TPanel
     Left = 0
@@ -46,6 +44,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
       object GridImportView: TcxGridDBTableView
         PopupMenu = Menu1
         Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
         DataController.DataSource = DtsImport
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <
@@ -64,6 +63,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
         object GridImportViewEKLEMETARIHI: TcxGridDBColumn
           Caption = 'Tarih'
           DataBinding.FieldName = 'EKLEMETARIHI'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxDateEditProperties'
           Properties.DisplayFormat = 'DD/MM/YYYY HH:NN'
           Properties.ImmediateDropDownWhenActivated = True
@@ -73,12 +73,14 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
         object GridImportViewBANKAKODU: TcxGridDBColumn
           Caption = 'Hesap Ad'#305
           DataBinding.FieldName = 'HESAPADI'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
           Width = 71
         end
         object GridImportViewKUR: TcxGridDBColumn
           Caption = 'P.Birim'
           DataBinding.FieldName = 'KUR'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.ReadOnly = False
           Width = 37
@@ -86,6 +88,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
         object GridImportViewTOPSAY: TcxGridDBColumn
           Caption = 'Top.'
           DataBinding.FieldName = 'TOPLAMSAY'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.ReadOnly = True
           Width = 30
@@ -93,6 +96,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
         object GridImportViewKALANSAY: TcxGridDBColumn
           Caption = 'Kalan'
           DataBinding.FieldName = 'KALANSAY'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.ReadOnly = True
           Width = 33
@@ -134,6 +138,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
       TabOrder = 2
       Transparent = True
       Wrapable = False
+      ExplicitHeight = 29
       object ToolButton3: TToolButton
         Left = 0
         Top = 0
@@ -159,9 +164,9 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     end
   end
   object PanelSag: TPanel
-    Left = 280
+    Left = 281
     Top = 0
-    Width = 932
+    Width = 811
     Height = 557
     Align = alClient
     Alignment = taLeftJustify
@@ -169,7 +174,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     object Panel1: TPanel
       Left = 1
       Top = 1
-      Width = 930
+      Width = 809
       Height = 35
       Align = alTop
       Alignment = taLeftJustify
@@ -179,13 +184,14 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     object GridHareket: TcxGrid
       Left = 1
       Top = 71
-      Width = 930
+      Width = 809
       Height = 485
       Align = alClient
       PopupMenu = Menu1
       TabOrder = 1
       object GridHareketView: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
         OnCanFocusRecord = GridHareketViewCanFocusRecord
         DataController.DataSource = DtsHareket
         DataController.Summary.DefaultGroupSummaryItems = <>
@@ -307,7 +313,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     object Panel3: TPanel
       Left = 1
       Top = 36
-      Width = 930
+      Width = 809
       Height = 35
       Align = alTop
       Alignment = taLeftJustify
@@ -379,7 +385,7 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
       object JvNavPanelHeader2: TJvNavPanelHeader
         Left = 351
         Top = 1
-        Width = 578
+        Width = 457
         Height = 33
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
@@ -408,7 +414,6 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
           Style.IsFontAssigned = True
           TabOrder = 0
           Transparent = True
-          Width = 78
         end
         object CheckEksik: TcxCheckBox
           Tag = 1
@@ -429,7 +434,6 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
           Style.IsFontAssigned = True
           TabOrder = 1
           Transparent = True
-          Width = 62
         end
         object CheckHazir: TcxCheckBox
           Tag = 2
@@ -450,7 +454,6 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
           Style.IsFontAssigned = True
           TabOrder = 2
           Transparent = True
-          Width = 58
         end
         object CheckKayitli: TcxCheckBox
           Tag = 9
@@ -470,7 +473,6 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
           Style.IsFontAssigned = True
           TabOrder = 3
           Transparent = True
-          Width = 70
         end
       end
     end
@@ -493,13 +495,13 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
   object cxSplitter1: TcxSplitter
     Left = 273
     Top = 0
-    Width = 7
+    Width = 8
     Height = 557
     HotZoneClassName = 'TcxMediaPlayer8Style'
     Control = PanelSol
   end
   object Panel4: TPanel
-    Left = 1212
+    Left = 1092
     Top = 0
     Width = 278
     Height = 557
@@ -943,9 +945,8 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     end
   end
   object TabImport: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabImportAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT BI.*, '
       
@@ -962,10 +963,9 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     Top = 197
   end
   object TabHareket: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabHareketBeforePost
     AfterScroll = TabHareketAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from '
       'BANKAIMPORTHAREKET'
@@ -1040,4 +1040,3 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     end
   end
 end
-

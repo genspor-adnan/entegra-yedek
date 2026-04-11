@@ -2608,8 +2608,8 @@ object RehberWizardDlg: TRehberWizardDlg
       'from REHBERILETISIM'
       'where REHBERID=:PID '
       '')
-    Left = 516
-    Top = 243
+    Left = 540
+    Top = 251
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn

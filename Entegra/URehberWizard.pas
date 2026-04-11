@@ -807,12 +807,15 @@ begin
       CRMEkstreEkr.Visible := False;
    end;
 
-  TabPerIlet.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabPerIlet.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
-  TabCariIlet.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabCariIlet.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
-  TabTicari.UpdateOptions.UpdateTableName := 'dbo.REHBERBILGI'; // Deðiþiklikler bu tabloya gitsin
-  TabTicari.UpdateOptions.KeyFields := 'SIRA'; // Hangi satýrýn deðiþtiðini SIRA(veya ID) ile bulsun
+  TabPerIlet.CachedUpdates := True;
+  TabPerIlet.UpdateOptions.UpdateTableName := '';
+  TabPerIlet.UpdateOptions.KeyFields := '';
+  TabCariIlet.CachedUpdates := True;
+  TabCariIlet.UpdateOptions.UpdateTableName := '';
+  TabCariIlet.UpdateOptions.KeyFields := '';
+  TabTicari.CachedUpdates := True;
+  TabTicari.UpdateOptions.UpdateTableName := '';
+  TabTicari.UpdateOptions.KeyFields := '';
 end;
 
 procedure TRehberWizardDlg.FormKeyDown(Sender: TObject; var Key: Word;
@@ -1987,6 +1990,9 @@ begin
 end;
 
 end.
+
+
+
 
 
 

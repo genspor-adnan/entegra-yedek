@@ -404,8 +404,10 @@ var
   F: TField;
 begin
   F := ADataset.FindField(AName);
-  if (F <> nil) and (F.ClassType = AFieldClass) then
+  if (F <> nil) and (F.ClassType = AFieldClass) then begin
+    F.FieldKind := fkData;
     Exit;
+  end;
   if F <> nil then
     FreeAndNil(F);
 
@@ -414,7 +416,11 @@ begin
   if (F is TStringField) and (ASize > 0) then
     TStringField(F).Size := ASize
   else if (F is TWideStringField) and (ASize > 0) then
-    TWideStringField(F).Size := ASize;
+    TWideStringField(F).Size := ASize
+  else if (F is TBCDField) and (ASize > 0) then
+    TBCDField(F).Size := ASize
+  else if (F is TFMTBCDField) and (ASize > 0) then
+    TFMTBCDField(F).Size := ASize;
   F.FieldKind := fkData;
   F.DataSet := ADataset;
 end;
@@ -764,12 +770,29 @@ begin
   EnsureDataField(TabReceteDetay,'KDVDURUM',TBooleanField);
   EnsureDataField(TabReceteDetay,'SIRA',TIntegerField);
   EnsureCalcField(TabReceteDetay,'YUZDESON',ftFloat);
-  EnsureCalcField(TabReceteDetay,'GRP',ftInteger);
+  EnsureDataField(TabReceteDetay,'GRP',TIntegerField);
   EnsureCalcField(TabReceteDetay,'URUNKODU',ftWideString,50);
   EnsureCalcField(TabReceteDetay,'URUNNO',ftString,50);
   EnsureCalcField(TabReceteDetay,'URUNADI',ftWideString,200);
   EnsureCalcField(TabReceteDetay,'MASRAFAD',ftWideString,200);
   EnsureCalcField(TabReceteDetay,'KDV',ftFloat);
+  EnsureDataField(TabSablonDetay,'ID',TAutoIncField);
+  EnsureDataField(TabSablonDetay,'TESTID',TIntegerField);
+  EnsureDataField(TabSablonDetay,'YER',TIntegerField);
+  EnsureDataField(TabSablonDetay,'YERID',TIntegerField);
+  EnsureDataField(TabSablonDetay,'LIMITYAZI',TWideStringField,500);
+  EnsureDataField(TabSablonDetay,'LIMITALT',TWideStringField,80);
+  EnsureDataField(TabSablonDetay,'LIMITUST',TWideStringField,80);
+  EnsureDataField(TabSablonDetay,'TOLERANSTIPI',TByteField);
+  EnsureDataField(TabSablonDetay,'TOLERANSDEGERI',TBCDField,2);
+  EnsureDataField(TabSablonDetay,'MIKTAR',TBCDField,2);
+  EnsureDataField(TabSablonDetay,'BIRIM',TSmallintField);
+  EnsureDataField(TabSablonDetay,'OLCUALETI',TSmallintField);
+  EnsureDataField(TabSablonDetay,'SURE',TSQLTimeStampField);
+  EnsureDataField(TabSablonDetay,'SIRA',TSmallintField);
+  EnsureDataField(TabSablonDetay,'NOMINAL',TWideStringField,80);
+  EnsureDataField(TabSablonDetay,'GIRIS',TByteField);
+  EnsureDataField(TabSablonDetay,'KAYNAK',TWideStringField,510);
   UretimReceteID := 0;
   IslemOp := 'D';// d de?i?iklik, s se?im..
   Tablo.GridTurkcelestir;
@@ -953,7 +976,8 @@ begin
     if not CheckPasif.Checked then
        TabRecete.SQL.Add(' and TUR > 0 ');
     TabRecete.SQL.Add(' order by KOD ');
-    TabloYenile(TabRecete,[]);
+    TabRecete.Close;
+    TabRecete.Open;
     if not TabRecete.IsEmpty then begin
       if FIlkAcilisYukleniyor then begin
         FIlkAcilisYukleniyor := False;
@@ -1030,24 +1054,23 @@ end;
 procedure TUretimReceteDlg.ReceteEkleBtnClick(Sender: TObject);
 var
   RecKod,RecAd: Variant;
-  StokID, Tur:integer;
+  StokID, Tur,YeniReceteID:integer;
 begin
   Tur:=1;
   StokID := AnaForm.StokAraIdGetir(TabNo_URETIMRECETE, Tur, False);
   if StokID>0 then begin
     Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI from STOKLAR where ID='+IntToStr(StokID));
     if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
-      TabRecete.Append;
-//      TabRecete.FieldByName('AD').AsString := Tablo.Query9.FieldByName('STOKADI').AsString;
-//      TabRecete.FieldByName('KOD').AsString := Tablo.Query9.FieldByName('KOD').AsString;
-      TabRecete.FieldByName('STOKID').AsInteger := StokID;
-      TabRecete.FieldByName('TUR').AsInteger := 2;
-      TabRecete.Post;
-    end;
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      YeniReceteID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+        'insert into URETIMRECETE(KOD,AD,STOKID,TUR,EKLEYEN,SUBEID) values(&KOD,&AD,&STOKID,2,&EKLEYEN,&SUBEID) select scope_identity()',
+        ['&KOD','&AD','&STOKID','&EKLEYEN','&SUBEID'],
+        [Tablo.Query9.FieldByName('KOD').AsString,Tablo.Query9.FieldByName('STOKADI').AsString,StokID,Kullanan,SubeID],
+        True);
+      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
         'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN)select &URID,1,ID,1,ANABIRIM,1,1,1 from STOKLAR where ID=&StokID',
-        ['&URID','&StokID'],[TabRecete.FieldByName('ID').AsInteger,StokID]);
-    TabloYenile(TabRecete, []);
+        ['&URID','&StokID'],[YeniReceteID,StokID]);
+      TabloYenile(TabRecete, [], YeniReceteID);
+    end;
     TabloYenile(RECETE,[VarsSatisFiyatID]);
     TabRecete.Refresh;
     if not TabRecete.IsEmpty then
@@ -1153,14 +1176,17 @@ begin
 end;
 
 procedure TUretimReceteDlg.TabReceteCalcFields(DataSet: TDataSet);
+var
+  LKod, LAdi, LUrunNo: string;
 begin
-  if TabRecete.FieldByName('STOKID').AsInteger > 0 then begin
-    Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI,URUNNO from STOKLAR where ID='+TabRecete.FieldByName('STOKID').AsString);
-    if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
-      TabRecete.FieldByName('STOKADI').AsString := Tablo.Query9.FieldByName('STOKADI').AsString;
-      TabRecete.FieldByName('KOD').AsString := Tablo.Query9.FieldByName('KOD').AsString;
-      TabRecete.FieldByName('URUNNO').AsString := Tablo.Query9.FieldByName('URUNNO').AsString;
-    end;
+  if GetStokBilgi(TabRecete.FieldByName('STOKID').AsInteger, LKod, LAdi, LUrunNo) then begin
+    TabRecete.FieldByName('STOKADI').AsString := LAdi;
+    TabRecete.FieldByName('KOD').AsString := LKod;
+    TabRecete.FieldByName('URUNNO').AsString := LUrunNo;
+  end else begin
+    TabRecete.FieldByName('STOKADI').Clear;
+    TabRecete.FieldByName('KOD').Clear;
+    TabRecete.FieldByName('URUNNO').Clear;
   end;
 end;
 
@@ -1207,7 +1233,6 @@ begin
     if (TabReceteDetay.FieldByname('ADETHESAP').AsFloat < 0)and(TabReceteDetay.FieldByname('ADET').AsFloat > 0) then
         TabReceteDetay.FieldByname('ADETHESAP').AsFloat := TabReceteDetay.FieldByname('ADETHESAP').AsFloat * -1;
 end;
-
 
 procedure TUretimReceteDlg.TabReceteDetayCalcFields(DataSet: TDataSet);
 begin
@@ -1300,6 +1325,16 @@ begin
 end;
 
 end.
+
+
+
+
+
+
+
+
+
+
 
 
 

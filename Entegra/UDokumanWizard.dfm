@@ -74,8 +74,6 @@ object DokumanWizard: TDokumanWizard
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       WaterMark.Width = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 593
         Top = 70
@@ -173,10 +171,6 @@ object DokumanWizard: TDokumanWizard
           object cxTabSheet1: TcxTabSheet
             Caption = 'cxTabSheet1'
             ImageIndex = 0
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object GridDokuman: TcxGrid
               Left = 0
               Top = 0
@@ -1348,10 +1342,6 @@ object DokumanWizard: TDokumanWizard
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alan'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
       end
     end
@@ -1378,8 +1368,6 @@ object DokumanWizard: TDokumanWizard
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'RevizeEkr'
       OnEnterPage = RevizeEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridAktDetay: TcxGrid
         Left = 0
         Top = 97
@@ -1532,8 +1520,6 @@ object DokumanWizard: TDokumanWizard
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'YetkiEkr'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar4: TToolBar
         Left = 0
         Top = 70
@@ -1685,8 +1671,6 @@ object DokumanWizard: TDokumanWizard
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'IlgiliEkr'
       OnEnterPage = IlgiliEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1824,8 +1808,6 @@ object DokumanWizard: TDokumanWizard
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'TarihceEkr'
       OnPage = TarihceEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 70
@@ -1915,8 +1897,6 @@ object DokumanWizard: TDokumanWizard
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'BildirimEkr'
       OnEnterPage = BildirimEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGrid2: TcxGrid
         Left = 0
         Top = 97
@@ -2313,7 +2293,7 @@ object DokumanWizard: TDokumanWizard
       'WHERE'
       'DokumanID = :PID'
       'order by DG.EKLEMETARIHI desc')
-    Left = 696
+    Left = 680
     Top = 24
   end
   object DtsTarihce: TDataSource
@@ -2364,8 +2344,8 @@ object DokumanWizard: TDokumanWizard
     Top = 224
   end
   object PopupMenuYetki: TPopupMenu
-    Left = 277
-    Top = 286
+    Left = 245
+    Top = 262
     object TumKullanicilarMenu: TMenuItem
       Tag = 5
       Caption = 'T'#252'm Kullan'#305'c'#305'lar'

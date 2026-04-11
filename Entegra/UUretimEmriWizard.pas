@@ -1469,6 +1469,20 @@ begin
   SekmeIslem(Ops_UEmriEditSekme1,EkAlanlarEkr);
   SekmeIslem(Ops_UEmriEditSekme2,EkAlanlarEkr2);
   SekmeIslem(Ops_UEmriEditSekme3,EkAlanlarEkr3);
+
+  TabUretimOperasyonPersonel.UpdateOptions.UpdateTableName := 'URETIMOPERASYONPERSONEL';
+  TabUretimOperasyonPersonel.UpdateOptions.KeyFields := 'ID';
+  TabUretimOperasyonPersonel.UpdateOptions.UpdateChangedFields := False;
+  if TabUretimOperasyonPersonel.FindField('OLCUMSAY') <> nil then
+    TabUretimOperasyonPersonel.FindField('OLCUMSAY').ProviderFlags := [];
+  if TabUretimOperasyonPersonel.FindField('OLCUM') <> nil then
+    TabUretimOperasyonPersonel.FindField('OLCUM').ProviderFlags := [];
+  if TabUretimOperasyonPersonel.FindField('SORUMLUADI') <> nil then
+    TabUretimOperasyonPersonel.FindField('SORUMLUADI').ProviderFlags := [];
+  if TabUretimOperasyonPersonel.FindField('LOKASYONADI') <> nil then
+    TabUretimOperasyonPersonel.FindField('LOKASYONADI').ProviderFlags := [];
+  if TabUretimOperasyonPersonel.FindField('KAYNAKADI') <> nil then
+    TabUretimOperasyonPersonel.FindField('KAYNAKADI').ProviderFlags := [];
 end;
 
 procedure TUretimEmriWizardDlg.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2004,7 +2018,6 @@ begin
       Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
       Tablo.Query2.SQL.Add(' and UE.HEDEFRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
       Tablo.Query2.SQL.Add(' and UE.USTID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
-      Tablo.Query2.ExecSQL;
     Tablo.Query2.open;
   Yetersiz:=False;
   while not Tablo.Query2.eof do begin
@@ -2712,6 +2725,9 @@ begin
 end;
 
 end.
+
+
+
 
 
 

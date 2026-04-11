@@ -2119,6 +2119,7 @@ object ServisWizardDlg: TServisWizardDlg
               DataBinding.FieldName = 'BILGI'
               DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxTextEditProperties'
+              OnGetPropertiesForEdit = cxGridDBColumn2GetPropertiesForEdit
               MinWidth = 400
               Options.Filtering = False
               Options.IgnoreTimeForFiltering = False
@@ -2311,8 +2312,8 @@ object ServisWizardDlg: TServisWizardDlg
     Top = 290
   end
   object cxStyleRepository1: TcxStyleRepository
-    Left = 37
-    Top = 139
+    Left = 45
+    Top = 123
     PixelsPerInch = 96
     object cxStyle1: TcxStyle
       AssignedValues = [svColor, svFont, svTextColor]
@@ -2880,8 +2881,8 @@ object ServisWizardDlg: TServisWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 24
-    Top = 251
+    Left = 64
+    Top = 211
   end
   object DtsDetay: TDataSource
     Tag = 260

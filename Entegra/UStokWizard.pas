@@ -2403,6 +2403,28 @@ begin
   DETAY.Close;
   DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
   TabloYenile(DETAY, [TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, ComboBolum.Text]);
+  DETAY.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+
+  if DETAY.Active then
+  begin
+    if DETAY.FindField('ORJINAL') <> nil then
+      DETAY.FieldByName('ORJINAL').ReadOnly := True;
+    if DETAY.FindField('GIRIS') <> nil then
+      DETAY.FieldByName('GIRIS').ProviderFlags := [];
+    if DETAY.FindField('KAYNAK') <> nil then
+      DETAY.FieldByName('KAYNAK').ProviderFlags := [];
+    if DETAY.FindField('ZORUNLU') <> nil then
+      DETAY.FieldByName('ZORUNLU').ProviderFlags := [];
+    if DETAY.FindField('ORJINAL') <> nil then
+      DETAY.FieldByName('ORJINAL').ProviderFlags := [];
+    if DETAY.FindField('RBID') <> nil then
+      DETAY.FieldByName('RBID').ProviderFlags := [];
+    if DETAY.FindField('RESIM') <> nil then
+      DETAY.FieldByName('RESIM').ProviderFlags := [];
+    if DETAY.FindField('ESKIRESIM') <> nil then
+      DETAY.FieldByName('ESKIRESIM').ProviderFlags := [];
+
+  end;
 end;
 
 procedure TStokWizardDlg.DkmanGster1Click(Sender: TObject);
@@ -3142,6 +3164,11 @@ begin
 end;
 
 end.
+
+
+
+
+
 
 
 

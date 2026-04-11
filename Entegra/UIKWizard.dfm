@@ -971,13 +971,13 @@ object IKWizardDlg: TIKWizardDlg
           'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR RA ON '
-          'RB.ETIKET=RA.ETIKET AND RB.YERI=RA.YERI'
+          'RB.ETIKET=RA.ETIKET AND RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'
           'where RB.YERI= :Yeri  and YER_ID= :Yeri_Id1   '
           ''
           'union all'
           ''
           
-            'select  SIRA, ETIKET, BILGI=LEFT(ETIKET,0), ORJINAL=LEFT(ETIKET,' +
+            'select distinct SIRA, ETIKET, BILGI=LEFT(ETIKET,0), ORJINAL=LEFT(ETIKET,' +
             '0) '
           ',GIRIS,KAYNAK,ZORUNLU  '
           ' from REHBERAYAR  where  YERI=1  '
@@ -1361,7 +1361,7 @@ object IKWizardDlg: TIKWizardDlg
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR RA '
           'ON '
-          'RB.ETIKET=RA.ETIKET AND RB.YERI=RA.YERI'
+          'RB.ETIKET=RA.ETIKET AND RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'
           'where RB.YERI= :Yeri  and YER_ID= :Yeri_Id1   '
           ''
           'union all'
@@ -2388,3 +2388,4 @@ object IKWizardDlg: TIKWizardDlg
     end
   end
 end
+

@@ -237,10 +237,6 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridSeriLotHareket: TcxGrid
           Left = 0
           Top = 0

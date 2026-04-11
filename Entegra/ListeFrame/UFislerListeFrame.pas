@@ -22,7 +22,9 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxDateRanges,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TFislerListeFrame = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -265,14 +267,14 @@ end;
 procedure TFislerListeFrame.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-    Tablo.FaturaSil(TabFisler,TabFisDetay,TabFisler.FieldByName('ID').AsInteger);
-    if LogGun>0 then
-      Tablo.OncekiLogBelirle(TabFisler);
-    if Tur in [3] then
-      Tablo.LogIslemleri(TabNo_FIS_Gelen,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler)
-    else if Tur in [4] then
-      Tablo.LogIslemleri(TabNo_FIS_Giden,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler);
-    YenileTusClick(self);
+//     if LogGun>0 then
+//        Tablo.OncekiLogBelirle(TabFisler);
+     if Tur in [3] then
+        Tablo.LogIslemleri(TabNo_FIS_Gelen,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler)
+     else if Tur in [4] then
+        Tablo.LogIslemleri(TabNo_FIS_Giden,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler);
+     Tablo.FaturaSil(TabFisler,TabFisDetay,TabFisler.FieldByName('ID').AsInteger);
+     YenileTusClick(self);
   end;
 end;
 
