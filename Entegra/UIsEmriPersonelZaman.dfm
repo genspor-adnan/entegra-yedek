@@ -145,7 +145,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     Height = 475
     Align = alClient
     TabOrder = 1
-    Properties.ActivePage = TabSheetOlcum
+    Properties.ActivePage = TabSheetCalisma
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlUstChange
     ClientRectBottom = 471
@@ -1003,11 +1003,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     Top = 333
   end
   object TabUretimOperasyonPersonel: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabUretimOperasyonPersonelBeforeEdit
     BeforePost = TabUretimOperasyonPersonelBeforePost
     OnNewRecord = TabUretimOperasyonPersonelNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select '
       'UO.*,'
@@ -1024,16 +1023,18 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
       'from URETIMOPERASYONPERSONEL UO '
       'where UO.ID=:PRM1'
       '')
-    Left = 421
-    Top = 109
+    Left = 405
+    Top = 45
   end
   object TabOlcum: TFDQuery
-    Connection = Tablo.FDCnn
     AfterPost = TabOlcumAfterPost
     BeforeDelete = TabOlcumBeforeDelete
     AfterScroll = TabOlcumAfterScroll
     OnNewRecord = TabOlcumNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'URETIMOLCUM'
+    UpdateOptions.KeyFields = 'ID'
+    UpdateOptions.AutoIncFields = 'ID'
     SQL.Strings = (
       'select '
       'ALARM = (select'
@@ -1069,7 +1070,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabOlcumOPERASYONPERSONELID: TIntegerField
       FieldName = 'OPERASYONPERSONELID'
     end
-    object TabOlcumTARIH: TDateTimeField
+    object TabOlcumTARIH: TSQLTimeStampField
       FieldName = 'TARIH'
     end
     object TabOlcumKONUSU: TWideStringField
@@ -1098,27 +1099,30 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabOlcumEKLEYEN: TSmallintField
       FieldName = 'EKLEYEN'
     end
-    object TabOlcumEKLEMETARIHI: TDateTimeField
+    object TabOlcumEKLEMETARIHI: TSQLTimeStampField
       FieldName = 'EKLEMETARIHI'
     end
     object TabOlcumDEGISTIREN: TSmallintField
       FieldName = 'DEGISTIREN'
     end
-    object TabOlcumDEGISTIRMETARIHI: TDateTimeField
+    object TabOlcumDEGISTIRMETARIHI: TSQLTimeStampField
       FieldName = 'DEGISTIRMETARIHI'
     end
     object TabOlcumSORUMLUADI: TWideStringField
       FieldName = 'SORUMLUADI'
+      ProviderFlags = []
       ReadOnly = True
       Size = 120
     end
     object TabOlcumLOKASYONADI: TWideStringField
       FieldName = 'LOKASYONADI'
+      ProviderFlags = []
       ReadOnly = True
       Size = 100
     end
     object TabOlcumKAYNAKADI: TWideStringField
       FieldName = 'KAYNAKADI'
+      ProviderFlags = []
       ReadOnly = True
       Size = 100
     end
@@ -1127,6 +1131,8 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
     object TabOlcumALARM: TSmallintField
       FieldName = 'ALARM'
+      ProviderFlags = []
+      ReadOnly = True
     end
   end
   object DtsOlcum: TDataSource
@@ -1136,9 +1142,8 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     Top = 341
   end
   object TabOlcumDetay: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabOlcumDetayBeforePost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select UOD.ID,UOD.URETIMOLCUMID, UOD.KALITESABLONDETAYID, KT.ADI' +

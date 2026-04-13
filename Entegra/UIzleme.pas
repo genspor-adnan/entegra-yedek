@@ -1402,8 +1402,6 @@ begin
           if (TabIzlem.FieldByName('SEC').AsString='True')and(TabIzlem.FieldByName('KALAN').AsFloat > 0) then begin
               //ID := Insert(' where ID='+TabIzlem.Fields[0].AsString);
               ID := Insert('D', TabIzlem.Fields[0].AsInteger);
-              Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE STOKIZLEME set KALAN='+Carpan+'(abs(KALAN)-abs('+TabIzlem.FieldByName('KALAN').AsString+')) '+
-                 ' WHERE ID='+TabIzlem.FieldByName('IZLEMID').AsString,[],[]);
           end;
           TabIzlem.Next;
        end;

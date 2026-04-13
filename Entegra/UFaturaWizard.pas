@@ -3125,6 +3125,7 @@ begin
           miktar := TabFatura.FieldByName('MIKTAR').AsFloat;
           if (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_ALIS_IRS_FAT)or
              (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_SATIS_IRS_FAT)or
+             (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_SATIS_IRS_FIS)or
              (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_Gelen_Konsinye_Irsaliye)or
              (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_Gelen_Konsinye_Fatura)or
              (TabFatura.FieldByName('YERI').AsInteger = TabNo_DONUSUM_Giden_Konsinye_Fis)or

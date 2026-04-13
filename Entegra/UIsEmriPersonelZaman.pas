@@ -21,7 +21,10 @@ uses
   cxFilter, cxData, cxDataStorage, cxNavigator, dxDateRanges, cxDBData,
   Vcl.ComCtrls, Vcl.ToolWin, cxGridLevel, cxGridCustomTableView,
   cxGridTableView, cxGridDBTableView, cxClasses, cxGridCustomView, cxGrid,
-  cxCurrencyEdit, cxMemo, dxCoreGraphics, cxScrollBox;
+  cxCurrencyEdit, cxMemo, dxCoreGraphics, cxScrollBox, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 type
   TIsEmriPersonelZamanDlg = class(TForm)
@@ -72,7 +75,7 @@ type
     TabOlcumID: TAutoIncField;
     TabOlcumOPERASYONID: TIntegerField;
     TabOlcumOPERASYONPERSONELID: TIntegerField;
-    TabOlcumTARIH: TDateTimeField;
+    TabOlcumTARIH: TSQLTimeStampField;
     TabOlcumKONUSU: TWideStringField;
     TabOlcumPERSONEL: TIntegerField;
     TabOlcumLOKASYON: TIntegerField;
@@ -81,9 +84,9 @@ type
     TabOlcumBIRIM: TIntegerField;
     TabOlcumACIKLAMA: TWideStringField;
     TabOlcumEKLEYEN: TSmallintField;
-    TabOlcumEKLEMETARIHI: TDateTimeField;
+    TabOlcumEKLEMETARIHI: TSQLTimeStampField;
     TabOlcumDEGISTIREN: TSmallintField;
-    TabOlcumDEGISTIRMETARIHI: TDateTimeField;
+    TabOlcumDEGISTIRMETARIHI: TSQLTimeStampField;
     TabOlcumSORUMLUADI: TWideStringField;
     TabOlcumLOKASYONADI: TWideStringField;
     TabOlcumKAYNAKADI: TWideStringField;
@@ -513,7 +516,7 @@ procedure TIsEmriPersonelZamanDlg.PageControlUstChange(Sender: TObject);
        EkOlustu:=True;
        Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1, DtsUretimOperasyonPersonel);
 
- //AO 05.07.2025 kald�r�ld�
+ //AO 05.07.2025 kaldırıldı
       // MyClass := TComponent.Create(Self);
        try
              for i := 0 to TWinControl(EkEkr).ControlCount-1 do
@@ -531,7 +534,7 @@ begin
           Olustur(EkAlanOlustuCal, EkAlanlarCalisma);
    1 : begin
          TabloYenile(TabOlcum,[TabUretimOperasyonPersonel.FieldByName('ID').AsInteger]);
-         PanelBaslik.Caption := '�l��m Say�s� : ' + IntToStr(TabOlcum.RecordCount)
+         PanelBaslik.Caption := #214'l'#231#252'm Say'#305's'#305' : ' + IntToStr(TabOlcum.RecordCount)
        end;
    2 : if (IlkDefa)and(EkAlanOlustu=False) then
        Olustur(EkAlanOlustu, TabSheetEkAlan1);
@@ -541,7 +544,7 @@ begin
 }
    if PageControlUst.ActivePage=TabSheetOlcum then begin
       TabloYenile(TabOlcum,[TabUretimOperasyonPersonel.FieldByName('ID').AsInteger]);
-      PanelBaslik.Caption := '�l��m Say�s� : ' + IntToStr(TabOlcum.RecordCount)
+      PanelBaslik.Caption := #214'l'#231#252'm Say'#305's'#305' : ' + IntToStr(TabOlcum.RecordCount)
    end
    else if (PageControlUst.ActivePage = TabSheetCalisma)and(EkAlanOlustuCal=False)and(IlkDefa) then
        Olustur(EkAlanOlustuCal, EkAlanlarCalisma)
