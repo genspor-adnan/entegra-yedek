@@ -11,7 +11,10 @@ uses
   cxLabel, cxSpinEdit, cxGraphics, cxDropDownEdit, cxImageComboBox, cxCalendar,
   ExtCtrls, cxStyles, dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage,
   cxDBData, cxGridLevel, cxClasses, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGrid, cxCurrencyEdit, cxLookAndFeels, cxNavigator, dxSkinLiquidSky;
+  cxGridDBTableView, cxGrid, cxCurrencyEdit, cxLookAndFeels, cxNavigator, dxSkinLiquidSky,
+  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, UTablo,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TDagitimAnahtarlariDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -111,7 +114,7 @@ type
 implementation
 
 {$R *.dfm}
-uses FetaClassExtensions, PrjConst, Utablo;
+uses FetaClassExtensions, PrjConst;
 
 { TKrediKarti }
 

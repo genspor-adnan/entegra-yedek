@@ -19,7 +19,9 @@ uses
   dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, Vcl.Menus,
-  dxDateRanges, dxScrollbarAnnotations;
+  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TRehberAramaEkrani = class(TForm)
@@ -113,29 +115,47 @@ end;
 procedure TRehberAramaEkrani.LabelSonClick(Sender: TObject);
 begin
    AraQuery1.Close;
-   AraQuery1.SQL.Text := ' select top 50 R.ID,R.KOD,R.FIRMA,R.GRUP, ADSOYAD = P.FIRMA,P.ID as PERID,R.DURUM from KULLANICI_REHBER K inner join REHBER R on K.REHBERID=R.ID '+
-    ' left outer join REHBER P on P.GRUP=334 and K.REHBERID = P.BAGID and  1 = CASE WHEN isnull(P.STATU,1) = 1 THEN 1 ELSE 0 END ';
-   AraQuery1.SQL.Add(' where R.ID>0 and KULID = '+Kullanan +' and R.DURUM>0 ');
-   if (AramaGrup = 335)or(AramaGrup = 336) then  //335 personel 336 grup
-      AraQuery1.SQL.Add(' and R.GRUP='+IntToStr(AramaGrup))
-   else if AramaGrup = 337 then                  // 337 personel + grup
+   AraQuery1.SQL.Text :=
+      'select top 50 R.ID, R.KOD, R.FIRMA, R.GRUP, ADSOYAD = P.FIRMA, P.ID as PERID, R.DURUM ' +
+      'from REHBER R ' +
+      'outer apply ( ' +
+      '   select top 1 K.SAY, K.DEGISTIRMETARIHI ' +
+      '   from KULLANICI_REHBER K with (nolock) ' +
+      '   where K.REHBERID = R.ID and K.KULID = :KULID ' +
+      '   order by K.DEGISTIRMETARIHI desc ' +
+      ') K ' +
+      'outer apply ( ' +
+      '   select top 1 P.ID, P.FIRMA ' +
+      '   from REHBER P with (nolock) ' +
+      '   where P.GRUP = 334 and P.BAGID = R.ID and isnull(P.STATU,1) = 1 ' +
+      '   order by P.DEGISTIRMETARIHI desc, P.ID desc ' +
+      ') P ' +
+      'where R.ID > 0 and R.DURUM > 0 ';
+   AraQuery1.ParamByName('KULID').AsInteger := StrToIntDef(Kullanan, 0);
+   if (AramaGrup = 335) or (AramaGrup = 336) then
+   begin
+      AraQuery1.SQL.Add(' and R.GRUP = :GRUP ');
+      AraQuery1.ParamByName('GRUP').AsInteger := AramaGrup;
+   end
+   else if AramaGrup = 337 then
       AraQuery1.SQL.Add(' and R.GRUP between 335 and 336 ')
-   else begin
-      AraQuery1.SQL.Add(' and R.GRUP<>335');
+   else
+   begin
+      AraQuery1.SQL.Add(' and R.GRUP <> 335 ');
       if not Potansiyel then
          AraQuery1.SQL.Add(' and R.GRUP > 1 ');
    end;
 
-  if SubeVarmi then
-      AraQuery1.SQL.Add(' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ');
+   if SubeVarmi then
+      AraQuery1.SQL.Add(' and R.SUBEID in(' + Tablo.YetkiliSubeleriGetir(22, YetkiTur_Gorme) + ') ');
 
    if TcxLabel(Sender).Tag = 1 then
-      AraQuery1.SQL.Add( ' order by K.DEGISTIRMETARIHI desc')
+      AraQuery1.SQL.Add(' order by K.DEGISTIRMETARIHI desc ')
    else
-      AraQuery1.SQL.Add(' order by SAY desc');
+      AraQuery1.SQL.Add(' order by K.SAY desc ');
+
    AraQuery1.Open;
 end;
-
 procedure TRehberAramaEkrani.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    AramaGrup := 0
@@ -405,4 +425,7 @@ begin
 end;
 
 end.
+
+
+
 

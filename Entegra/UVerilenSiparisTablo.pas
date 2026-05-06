@@ -1,4 +1,4 @@
-ï»¿unit UVerilenSiparisTablo;
+unit UVerilenSiparisTablo;
 
 interface
 
@@ -109,7 +109,7 @@ begin
   VarsDepoID:=StrToInt(GenRegIni.RegReadString('StokOpsiyon','StokVarsayilanDepo','1','C'));
   DepoField:='[GIRISDEPO]';
   DonusTipi:=TabNo_DONUSUM_TEKLIF_ALIS_SIPARIS;
-    //Firma BaÅŸlÄ±k bilgileri
+    //Firma Baþlýk bilgileri
   Tablo.TablodanSorguAc(3,'Select REHBERILETID,FIYAT_LISTESI,TEKLIFNO from TEKLIF Where ID='+TabDetay.FieldByName('TEKLIFID').AsString+' ');
   TabloYenile(Tablo.tabCariBilgileri, [FirmaRehID,Tablo.Query3.FieldByName('REHBERILETID').AsInteger]);
   if GridSiparisTableView1.DataController.RecordCount > 0 then begin
@@ -121,13 +121,13 @@ begin
            Tablo.TablodanSorguAc(6,'Select top 1 * from SIPARISDETAY SD LEFT OUTER JOIN SIPARIS S on S.ID=SD.SIPARISID Where S.TUR='+inttoStr(Tur)+' and SD.EKLEMETARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' and SD.REHBERID='+IntToStr(RehID)+' order by SD.ID desc');
 
            if Tablo.Query6.RecordCount > 0 then  begin
-             // birbirine eÅŸit ise aynÄ± teklif noyu kullanacak.
+             // birbirine eþit ise ayný teklif noyu kullanacak.
 
-              //SipariÅŸDetay tablosuna kayÄ±t
+              //SipariþDetay tablosuna kayýt
                Tablo.Query2.Close;
               Tablo.Query2.SQL.Text:='INSERT INTO [SIPARISDETAY]([SIPARISID],[REHBERID],[TUR],[URUNID],[ADET],[BIRIM],[MIKTAR]'+
               ' ,[BIRIMFIYAT],[TUTAR],[ISKONTO],[KDV],[MASRAFID],[KUR],[DOVIZ_TUTARI],[DOVIZ_KURU],[TESLIMTARIHI],[ISKONTO2],[IZLEME],'+
-              ' [MF],[DOVIZ_BIRIMFIYAT],[YERI],[YERID],[EKLEYEN],[EKLEMETARIHI],DOVIZKURDEGERI,[SUBEID],[PROJEID])'+
+              ' [MF],[DOVIZ_BIRIMFIYAT],[YERI],[YERID],[EKLEYEN],[EKLEMETARIHI],DOVIZKURDEGERI,[SUBEID],[PROJEID],[EN],[BOY],[YUZEY],[SAYI])'+
               ' values ('+Tablo.Query6.FieldByName('SIPARISID').AsString+','+IntToStr(RehID)+',1,'+IntToStr(GetValue(Gezici,GridSTOKID.Index))+','+FloatToStr(GetValue(Gezici,GridYENISIPARISADET.Index))+','+IntToStr(GetValue(Gezici,GridBIRIM.Index))+','+FloatToStr(GetValue(Gezici,GridYENISIPARISADET.Index))+','+FloatToStr(GetValue(Gezici,GridSIPBIRIMFIYAT.Index))+','+
               ' '+FloatToStr((GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))*( 1 + GetValue(Gezici,GridKDV.Index)/100.0)) +','+
               ' 0,'+IntToStr(GetValue(Gezici,GridKDV.Index))+','+
@@ -135,17 +135,17 @@ begin
               ' '+FloatToStr((GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))*( 1 + GetValue(Gezici,GridKDV.Index)/100.0)) +','+
               ' ''TL'','''+FormatDateTime('yyyy-mm-dd hh:nn',GetValue(Gezici,GridTESLIMTARIHI.Index))+''',0,0,0,'+
               ' 1,'+IntToStr(DonusTipi)+','+IntToStr(GetValue(Gezici,GridID.Index))+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+
-              ' 1,'+IntToStr(SubeId)+',-1) '+
+              ' 1,'+IntToStr(SubeId)+',-1,0,0,0,0) '+
               ' select scope_identity() ';
               Tablo.Query2.Open;
-              //yeni satÄ±rÄ±n toplamlarÄ± yapÄ±lÄ±yor ve TEKLIF tablosu gÃ¼ncelleniyor.                                                                             isnull(SUM(SD.TUTAR*(1+SD.KDV/100)),0)
+              //yeni satýrýn toplamlarý yapýlýyor ve TEKLIF tablosu güncelleniyor.                                                                             isnull(SUM(SD.TUTAR*(1+SD.KDV/100)),0)
               Tablo.TablodanSorguAc(4,'Select SIPARIS_MATRAHI = isnull(SUM(SD.TUTAR),0) ,KDV_TUTARI = isnull(SUM(SD.KDV*(Sd.TUTAR/100.0)),0),'+
                  ' SIPARIS_TUTARI = isnull(SUM(SD.TUTAR),0) + isnull(SUM(SD.KDV*(Sd.TUTAR/100.0)),0) from SIPARISDETAY SD Where SIPARISID='+Tablo.Query6.FieldByName('SIPARISID').AsString+' ');
-              veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update SIPARIS set SIPARIS_MATRAHI='+Tablo.Query4.FieldByName('SIPARIS_MATRAHI').AsString+' ,KDV_TUTARI='+Tablo.Query4.FieldByName('KDV_TUTARI').AsString+', SIPARIS_TUTARI='+Tablo.Query4.FieldByName('SIPARIS_TUTARI').AsString+',DOVIZ_TUTARI='+Tablo.Query4.FieldByName('SIPARIS_TUTARI').AsString+' '+
+              veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update SIPARIS set SIPARIS_MATRAHI='+Tablo.Query4.FieldByName('SIPARIS_MATRAHI').AsString+' ,KDV_TUTARI='+Tablo.Query4.FieldByName('KDV_TUTARI').AsString+', SIPARIS_TUTARI='+Tablo.Query4.FieldByName('SIPARIS_TUTARI').AsString+',DOVIZ_TUTARI='+Tablo.Query4.FieldByName('SIPARIS_TUTARI').AsString+' '+
                  ' Where ID='+Tablo.Query6.FieldByName('SIPARISID').AsString+' ' ,[],[]);
 
             end else begin
-               // SipariÅŸ Tablosuna kayÄ±t
+               // Sipariþ Tablosuna kayýt
               Tablo.Query1.Close;
               Tablo.Query1.SQL.Text:='INSERT INTO [SIPARIS] ([TARIH],[TUR],[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[SIPARISTARIH],[SIPARISSERI],'+
               ' [KOCANNO],[SIPARISNO],'+DepoField+',[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[SIPARIS_MATRAHI],[KDV_TUTARI],'+
@@ -154,7 +154,7 @@ begin
               ' values ('''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(Tur)+',1,'+IntToStr(RehID)+',-1,-1,'''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','''+belgeno.Serino+''','+IntToStr(KocannoBul(Tur))+','''+belgeno.BelgeNo+''','+IntToStr(VarsDepoID)+','+
               ' '''+Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString+''', '''+Tablo.tabCariBilgileri.FieldByName('ADRES').AsString+''','+
               ' '''+Tablo.tabCariBilgileri.FieldByName('ILCE').AsString+''', '''+Tablo.tabCariBilgileri.FieldByName('IL').AsString+''', '+
-              ' '''+Tablo.tabCariBilgileri.FieldByName('VERGIDAI').AsString+''', '''+Tablo.tabCariBilgileri.FieldByName('VERGINO').AsString+''', ''HariÃ§'','+
+              ' '''+Tablo.tabCariBilgileri.FieldByName('VERGIDAI').AsString+''', '''+Tablo.tabCariBilgileri.FieldByName('VERGINO').AsString+''', ''Hariç'','+
               ' '+FloatToStr(GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))+' ,'+
               ' '+FloatToStr(GetValue(Gezici,GridKDV.Index)*(GetValue(Gezici,GridYENISIPARISADET.Index) * GetValue(Gezici,GridSIPBIRIMFIYAT.Index)/100.0))+','+       //KDV*(TUTAR/100.0)
               ' '+FloatToStr((GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))*( 1 + GetValue(Gezici,GridKDV.Index)/100.0))+' ,'+
@@ -164,11 +164,11 @@ begin
               '  select scope_identity() ';
               Tablo.Query1.Open;
 
-              //SipariÅŸDetay tablosuna kayÄ±t
+              //SipariþDetay tablosuna kayýt
               Tablo.Query2.Close;
               Tablo.Query2.SQL.Text:='INSERT INTO [SIPARISDETAY]([SIPARISID],[REHBERID],[TUR],[URUNID],[ADET],[BIRIM],[MIKTAR]'+
               ' ,[BIRIMFIYAT],[TUTAR],[ISKONTO],[KDV],[MASRAFID],[KUR],[DOVIZ_TUTARI],[DOVIZ_KURU],[TESLIMTARIHI],[ISKONTO2],[IZLEME],'+
-              ' [MF],[DOVIZ_BIRIMFIYAT],[YERI],[YERID],[EKLEYEN],[EKLEMETARIHI],DOVIZKURDEGERI,[SUBEID],[PROJEID])'+
+              ' [MF],[DOVIZ_BIRIMFIYAT],[YERI],[YERID],[EKLEYEN],[EKLEMETARIHI],DOVIZKURDEGERI,[SUBEID],[PROJEID],[EN],[BOY],[YUZEY],[SAYI])'+
               ' values ('+Tablo.Query1.fields[0].AsString+','+IntToStr(RehID)+',1,'+IntToStr(GetValue(Gezici,GridSTOKID.Index))+','+FloatToStr(GetValue(Gezici,GridYENISIPARISADET.Index))+','+IntToStr(GetValue(Gezici,GridBIRIM.Index))+','+FloatToStr(GetValue(Gezici,GridYENISIPARISADET.Index))+','+FloatToStr(GetValue(Gezici,GridSIPBIRIMFIYAT.Index))+','+
               ' '+FloatToStr((GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))*( 1 + GetValue(Gezici,GridKDV.Index)/100.0)) +','+
               ' 0,'+IntToStr(GetValue(Gezici,GridKDV.Index))+','+
@@ -176,13 +176,13 @@ begin
               ' '+FloatToStr((GetValue(Gezici,GridYENISIPARISADET.Index)* GetValue(Gezici,GridSIPBIRIMFIYAT.Index))*( 1 + GetValue(Gezici,GridKDV.Index)/100.0)) +','+
               ' ''TL'','''+FormatDateTime('yyyy-mm-dd hh:nn',GetValue(Gezici,GridTESLIMTARIHI.Index))+''',0,0,0,'+
               ' 1,'+IntToStr(DonusTipi)+','+IntToStr(GetValue(Gezici,GridID.Index))+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+
-              ' 1,'+IntToStr(SubeId)+',-1)';
+              ' 1,'+IntToStr(SubeId)+',-1,0,0,0,0)';
              // ' select scope_identity() ';
               Tablo.Query2.ExecSQL;
 
            end;
          end else
-           Application.MessageBox('Yeni SipariÅŸ ve Firma girilmiÅŸ olmalÄ±.',PChar(Uyari),MB_OK);
+           Application.MessageBox('Yeni Sipariþ ve Firma girilmiþ olmalý.',PChar(Uyari),MB_OK);
 
       end;
 
@@ -262,6 +262,7 @@ begin
 end;
 
 end.
+
 
 
 

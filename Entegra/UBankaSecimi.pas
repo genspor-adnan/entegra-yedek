@@ -39,7 +39,10 @@ uses
   dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
   dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxSkinOffice2013White,
   dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010,
-  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 type
 
@@ -418,7 +421,7 @@ begin
    cxPageControl1.ActivePageIndex := 0;
    case Cagiran of
      1: begin
-        GuncelleTus.Visible := True;
+        //GuncelleTus.Visible := True;
         SecTus.Visible := False;
      end;
      2,3, 4, 20..99: begin
@@ -466,7 +469,8 @@ end;
 
 procedure TBankaSecimDlg.SecTusClick(Sender: TObject);
 begin
-   ModalResult := mrOk;
+   if SecTus.visible then
+      ModalResult := mrOk;
 end;
 
 procedure TBankaSecimDlg.TabBankalarAfterPost(DataSet: TDataSet);

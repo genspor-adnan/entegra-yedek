@@ -1,7 +1,6 @@
 object StokWizardDlg: TStokWizardDlg
   Left = 0
   Top = 0
-  ActiveControl = PageControlUst
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Stok Kart Sihirbaz'#305
   ClientHeight = 579
@@ -216,7 +215,7 @@ object StokWizardDlg: TStokWizardDlg
     Top = 0
     Width = 916
     Height = 579
-    ActivePage = StokKartEkr
+    ActivePage = EsdegerEkr
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -2814,7 +2813,6 @@ object StokWizardDlg: TStokWizardDlg
           OptionsBehavior.FocusCellOnTab = True
           OptionsCustomize.ColumnsQuickCustomization = True
           OptionsData.Deleting = False
-          OptionsData.Editing = False
           OptionsData.Inserting = False
           OptionsSelection.HideSelection = True
           OptionsView.GroupByBox = False
@@ -2847,7 +2845,6 @@ object StokWizardDlg: TStokWizardDlg
             DataBinding.FieldName = 'ACIKLAMA'
             DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
-            Options.Editing = False
             Width = 270
           end
         end
@@ -4039,7 +4036,13 @@ object StokWizardDlg: TStokWizardDlg
           ')'
           'INSERT INTO #DETAY_:SPID_'
           'select '
-          'RB.SIRA,RB.ETIKET,BILGI=case when RA.GIRIS=3 and isnull(RB.BILGI,'#39#39')='#39#39' then null else RB.BILGI end,ORJINAL=case when RA.GIRIS=3 and isnull(RB.BILGI,'#39#39')='#39#39' then null else RB.BILGI end,RA.GIRIS,'
+          
+            'RB.SIRA,RB.ETIKET,BILGI=case when RA.GIRIS=3 and isnull(RB.BILGI' +
+            ','#39#39')='#39#39' '
+          
+            'then null else RB.BILGI end,ORJINAL=case when RA.GIRIS=3 and isn' +
+            'ull'
+          '(RB.BILGI,'#39#39')='#39#39' then null else RB.BILGI end,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU,RB.ID,RR.RESIM,RR.RESIM  '
           'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON '
           'RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI left outer join '
@@ -4050,8 +4053,11 @@ object StokWizardDlg: TStokWizardDlg
           'union all'
           ''
           
-            'select  SIRA, ETIKET, BILGI=case when GIRIS=3 then null else '#39#39' end, ORJINAL=case when GIRIS=3 then null else '#39#39' end ,GIRIS,KAYNAK,ZORUNLU' +
-            ' '
+            'select  SIRA, ETIKET, BILGI=case when GIRIS=3 then null else '#39#39' ' +
+            'end, '
+          
+            'ORJINAL=case when GIRIS=3 then null else '#39#39' end ,GIRIS,KAYNAK,ZO' +
+            'RUNLU '
           ',null,null,null '
           ' from REHBERAYAR  '
           'where  YERI=@yeri '
@@ -4752,8 +4758,8 @@ object StokWizardDlg: TStokWizardDlg
       'where'
       #9'STOKID=:PStokID '
       '')
-    Left = 334
-    Top = 199
+    Left = 310
+    Top = 167
   end
   object DtsPaketFiyatlar: TDataSource
     DataSet = TabPaketFiyatlar
@@ -4848,20 +4854,26 @@ object StokWizardDlg: TStokWizardDlg
   object TabStokEsdeger: TFDQuery
     BeforePost = TabStokEsdegerBeforePost
     Connection = Tablo.FDCnn
+    UpdateOptions.AssignedValues = [uvUpdateMode]
+    UpdateOptions.UpdateTableName = 'STOKESDEGER'
+    UpdateOptions.KeyFields = 'ID'
     SQL.Strings = (
       'Declare @PStokID int'
       'Set @PStokID=:PstokID'
-      'Select SE.*,S.KOD,S.STOKADI from STOKESDEGER SE left outer join '
-      'STOKLAR S on S.ID=SE.STOKESDEGERID Where SE.STOKID=@PStokID'
-      'union all'
-      'Select SE.*,S.KOD,S.STOKADI from STOKESDEGER SE left outer join '
-      'STOKLAR S on S.ID=SE.STOKID Where SE.STOKESDEGERID=@PStokID'
-      'and SE.TUR=1')
+      'Select SE.*, S.KOD, S.STOKADI'
+      'from STOKESDEGER SE'
+      'left outer join STOKLAR S on S.ID = case'
+      '  when SE.STOKID = @PStokID then SE.STOKESDEGERID'
+      '  else SE.STOKID'
+      'end'
+      'Where SE.STOKID = @PStokID'
+      '   or (SE.STOKESDEGERID = @PStokID and SE.TUR = 1)')
     Left = 700
     Top = 351
   end
   object DtsStokEsdeger: TDataSource
     DataSet = TabStokEsdeger
+    OnStateChange = DtsStokEsdegerStateChange
     Left = 373
     Top = 258
   end
@@ -4962,7 +4974,7 @@ object StokWizardDlg: TStokWizardDlg
   object DtsStokBoyut: TDataSource
     DataSet = TabStokBoyut
     OnStateChange = DtsStokBoyutStateChange
-    Left = 284
+    Left = 316
     Top = 26
   end
   object PmKopyala: TPopupMenu
@@ -5244,4 +5256,3 @@ object StokWizardDlg: TStokWizardDlg
     Top = 330
   end
 end
-

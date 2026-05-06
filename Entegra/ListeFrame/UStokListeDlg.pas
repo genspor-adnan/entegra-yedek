@@ -190,7 +190,6 @@ type
     cxProgressBar1: TcxProgressBar;
     cbSifirKalanGoster: TcxCheckBox;
     cbSKTsizGrupla: TcxCheckBox;
-    DurumExceleAktarBtn: TSpeedButton;
     StokHareketlerADET: TcxGridDBColumn;
     N7: TMenuItem;
     BuUrununstokdurumunugncelle1: TMenuItem;

@@ -201,6 +201,8 @@ type
     TabFaturaDEMIRBASID: TIntegerField;
     TabFaturaPOZNO: TIntegerField;
     UTSdenAdetleriKontrolEtMenu: TMenuItem;
+    EditDETAYBOLUMU: TcxDBTextEdit;
+    cxLabel11: TcxLabel;
     procedure TabFatBaslikBeforePost(DataSet: TDataSet);
     procedure FaturaEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure FormShow(Sender: TObject);
@@ -619,7 +621,6 @@ end;
 
 procedure TFatTransferWizardDlg.TabFaturaAfterDelete(DataSet: TDataSet);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
   TabloYenile(TabFatBaslik, [FatBasId]);
   TabloYenile(FATURA, [FatBasId]);
   TabloYenile(TabFatura, [FatBasId]);

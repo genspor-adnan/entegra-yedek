@@ -1,7 +1,7 @@
 object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
   Left = 0
   Top = 0
-  Width = 451
+  Width = 923
   Height = 304
   Align = alClient
   Color = clWhite
@@ -12,12 +12,11 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 445
-    Height = 29
+    Width = 917
+    Height = 24
     Margins.Bottom = 0
     AutoSize = True
-    ButtonHeight = 30
-    ButtonWidth = 69
+    ButtonWidth = 61
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -33,29 +32,31 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
     GradientEndColor = 11776947
     GradientStartColor = 14540253
     HotTrackColor = 65408
-    Images = AnaForm.PNGImageList1
+    Images = Tablo.PNGImageList2
     List = True
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitWidth = 445
+    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
       Caption = 'Yeni'
-      ImageIndex = 7
+      ImageIndex = 0
       OnClick = EkleTusClick
     end
     object SilTus: TToolButton
-      Left = 69
+      Left = 61
       Top = 0
       Caption = 'Sil'
-      ImageIndex = 8
+      ImageIndex = 1
       OnClick = SilTusClick
     end
     object ToolButton5: TToolButton
-      Left = 138
+      Left = 122
       Top = 0
       Width = 8
       Caption = 'ToolButton5'
@@ -63,43 +64,49 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
       Style = tbsSeparator
     end
     object KaydetTus: TToolButton
-      Left = 146
+      Left = 130
       Top = 0
       Caption = 'Kaydet'
-      ImageIndex = 10
+      ImageIndex = 2
       Style = tbsTextButton
       OnClick = KaydetTusClick
     end
     object IptalTus: TToolButton
-      Left = 215
+      Left = 191
       Top = 0
       Caption = #304'ptal'
-      ImageIndex = 17
+      ImageIndex = 3
       Style = tbsTextButton
       OnClick = IptalTusClick
     end
   end
   object Panel3: TPanel
     Left = 0
-    Top = 32
-    Width = 451
-    Height = 272
+    Top = 27
+    Width = 923
+    Height = 277
     Align = alClient
     TabOrder = 1
+    ExplicitTop = 25
+    ExplicitWidth = 451
+    ExplicitHeight = 279
     object ScrollBox1: TScrollBox
       Left = 209
       Top = 1
-      Width = 241
-      Height = 270
+      Width = 713
+      Height = 275
       Align = alClient
       TabOrder = 0
+      ExplicitWidth = 241
+      ExplicitHeight = 277
       object Panel1: TPanel
         Left = 0
         Top = 0
-        Width = 237
+        Width = 709
         Height = 83
         Align = alTop
         TabOrder = 0
+        ExplicitWidth = 237
         object Label2: TcxLabel
           Left = 27
           Top = 18
@@ -230,24 +237,26 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
       object Panel2: TPanel
         Left = 0
         Top = 83
-        Width = 237
-        Height = 183
+        Width = 709
+        Height = 188
         Align = alClient
         TabOrder = 1
-        ExplicitHeight = 180
+        ExplicitWidth = 237
+        ExplicitHeight = 190
         object GridDagitim: TcxGrid
           Left = 1
           Top = 28
-          Width = 780
-          Height = 444
+          Width = 707
+          Height = 159
           Align = alClient
           TabOrder = 0
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = False
           ExplicitWidth = 235
-          ExplicitHeight = 151
+          ExplicitHeight = 161
           object GridDagitimDBTableView1: TcxGridDBTableView
             Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
             DataController.DataSource = DtsTabDagitimDetay
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -262,6 +271,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
             object GridDagitimDBTVMASRAFADI: TcxGridDBColumn
               Caption = 'Masraf Merkezi'
               DataBinding.FieldName = 'MASRAF'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxButtonEditProperties'
               Properties.Buttons = <
                 item
@@ -279,6 +289,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
             object GridDagitimDBTVMERKEZADI: TcxGridDBColumn
               Caption = 'Sorumluluk Merkezi'
               DataBinding.FieldName = 'MERKEZ'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxButtonEditProperties'
               Properties.Buttons = <
                 item
@@ -296,6 +307,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
             object GridDagitimDBTVPUAN: TcxGridDBColumn
               Caption = 'Puan'
               DataBinding.FieldName = 'PUAN'
+              DataBinding.IsNullValueType = True
             end
           end
           object GridDagitimLevel1: TcxGridLevel
@@ -306,7 +318,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
           AlignWithMargins = True
           Left = 4
           Top = 4
-          Width = 774
+          Width = 701
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
@@ -326,7 +338,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
           GradientEndColor = 11776947
           GradientStartColor = 14540253
           HotTrackColor = 65408
-          Images = AnaForm.PNGImageList2
+          Images = Tablo.PNGImageList2
           List = True
           ParentColor = False
           ParentFont = False
@@ -334,7 +346,6 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
           TabOrder = 1
           Transparent = True
           ExplicitWidth = 229
-          ExplicitHeight = 46
           object SatirEkle: TToolButton
             Left = 0
             Top = 0
@@ -370,10 +381,10 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
       Left = 1
       Top = 1
       Width = 208
-      Height = 270
+      Height = 275
       Align = alLeft
       TabOrder = 1
-      ExplicitHeight = 267
+      ExplicitHeight = 277
       object cxGrid1DBTableView1: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
         Navigator.Buttons.First.Visible = True
@@ -392,6 +403,7 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
         Navigator.Buttons.SaveBookmark.Visible = True
         Navigator.Buttons.GotoBookmark.Visible = True
         Navigator.Buttons.Filter.Visible = True
+        ScrollbarAnnotations.CustomAnnotations = <>
         DataController.DataSource = DtsTabDagitim
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <>
@@ -410,10 +422,12 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
         object cxGrid1DBTableView1Column1: TcxGridDBColumn
           Caption = 'Kod'
           DataBinding.FieldName = 'KOD'
+          DataBinding.IsNullValueType = True
         end
         object cxGrid1DBTableView1Column2: TcxGridDBColumn
           Caption = 'Ad'
           DataBinding.FieldName = 'AD'
+          DataBinding.IsNullValueType = True
         end
       end
       object cxGrid1Level1: TcxGridLevel
@@ -422,11 +436,10 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
     end
   end
   object TabDagitim: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabDagitimBeforePost
     AfterScroll = TabDagitimAfterScroll
     OnNewRecord = TabDagitimNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from DAGITIM Where GELIRMI =:Par1')
     Left = 680
@@ -445,9 +458,8 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
     Top = 310
   end
   object TabDagitimDetay: TFDQuery
-    Connection = Tablo.FDCnn
     OnNewRecord = TabDagitimDetayNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select *,'
       
@@ -461,4 +473,3 @@ object DagitimAnahtarlariDlg: TDagitimAnahtarlariDlg
     Top = 278
   end
 end
-

@@ -39,6 +39,8 @@ object IKListeDlg: TIKListeDlg
         LookAndFeel.Kind = lfOffice11
         LookAndFeel.NativeStyle = True
         LookAndFeel.ScrollbarMode = sbmClassic
+        ExplicitTop = 32
+        ExplicitHeight = 228
         object IKGridView: TcxGridDBTableView
           OnDblClick = IKGridViewDblClick
           Navigator.Buttons.CustomButtons = <>
@@ -408,7 +410,7 @@ object IKListeDlg: TIKListeDlg
         Height = 259
         Align = alBottom
         TabOrder = 3
-        Properties.ActivePage = TabSheetGorev
+        Properties.ActivePage = TabSheetIlet
         Properties.CustomButtons.Buttons = <>
         OnChange = PageControlSekmeChange
         ClientRectBottom = 255
@@ -3648,7 +3650,7 @@ object IKListeDlg: TIKListeDlg
             object ToolBar11: TToolBar
               Left = 1
               Top = 1
-              Width = 146
+              Width = 100
               Height = 39
               Margins.Bottom = 0
               Align = alLeft
@@ -3671,18 +3673,8 @@ object IKListeDlg: TIKListeDlg
               ParentFont = False
               ShowCaptions = True
               TabOrder = 0
-              object EkstreEkleTus: TToolButton
-                Left = 0
-                Top = 0
-                Hint = 'Aksiyon Ekle'
-                Caption = 'Yeni'
-                ImageIndex = 0
-                ImageName = 'PngImage0'
-                ParentShowHint = False
-                ShowHint = True
-              end
               object EkstreSilTus: TToolButton
-                Left = 46
+                Left = 0
                 Top = 0
                 Hint = 'Aksiyon Sil'
                 Caption = 'Sil'
@@ -3693,7 +3685,7 @@ object IKListeDlg: TIKListeDlg
                 OnClick = Sil1Click
               end
               object EkstreDegisTus: TToolButton
-                Left = 92
+                Left = 46
                 Top = 0
                 Hint = 'Aksiyon D'#252'zenle'
                 Caption = 'D'#252'zenle'
@@ -3704,7 +3696,7 @@ object IKListeDlg: TIKListeDlg
                 OnClick = AksiyonBilgisiniGorMenuClick
               end
               object ToolButton1: TToolButton
-                Left = 138
+                Left = 92
                 Top = 0
                 Width = 8
                 Caption = 'ToolButton1'
@@ -3714,9 +3706,9 @@ object IKListeDlg: TIKListeDlg
               end
             end
             object JvNavPanelHeader4: TJvNavPanelHeader
-              Left = 147
+              Left = 101
               Top = 1
-              Width = 806
+              Width = 852
               Height = 39
               Align = alClient
               Font.Charset = DEFAULT_CHARSET
@@ -3728,6 +3720,8 @@ object IKListeDlg: TIKListeDlg
               ColorFrom = 14540253
               ColorTo = 11776947
               ImageIndex = 0
+              ExplicitLeft = 147
+              ExplicitWidth = 806
               object Label1: TcxLabel
                 Left = 3
                 Top = 8
@@ -3943,6 +3937,7 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 5
         Transparent = True
         Wrapable = False
+        ExplicitHeight = 29
         object YeniTus: TToolButton
           Left = 0
           Top = 0
@@ -4058,6 +4053,7 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 0
         Transparent = True
         Wrapable = False
+        ExplicitHeight = 29
         object YeniGrup: TToolButton
           Left = 0
           Top = 0

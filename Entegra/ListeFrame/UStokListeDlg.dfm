@@ -453,7 +453,7 @@ object StokListeDlg: TStokListeDlg
       Height = 332
       Align = alClient
       TabOrder = 0
-      Properties.ActivePage = TabYorumMedya
+      Properties.ActivePage = tshFiyatlar
       Properties.CustomButtons.Buttons = <>
       Properties.MultiLine = True
       OnPageChanging = PageControl1PageChanging
@@ -612,6 +612,10 @@ object StokListeDlg: TStokListeDlg
       object TabYorumMedya: TcxTabSheet
         Caption = 'Yorum / Medya'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Panel4: TPanel
           Left = 0
           Top = 260
@@ -672,6 +676,7 @@ object StokListeDlg: TStokListeDlg
           Properties.Alignment.Horz = taRightJustify
           Transparent = True
           Visible = False
+          ExplicitTop = 239
           AnchorX = 779
         end
         object GridYorum: TcxGrid
@@ -765,55 +770,6 @@ object StokListeDlg: TStokListeDlg
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          object DurumExceleAktarBtn: TSpeedButton
-            Left = 583
-            Top = 4
-            Width = 98
-            Height = 20
-            Caption = 'Excele Aktar'
-            Flat = True
-            Font.Charset = TURKISH_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Trebuchet MS'
-            Font.Style = []
-            Glyph.Data = {
-              36040000424D3604000000000000360000002800000010000000100000000100
-              200000000000000400000000000000000000000000000000000039724BFF3972
-              4BFF39724BFF326C46FF326C46FF326C46FF2B6541FF2B6541FF2B6541FF255C
-              37FF255C37FF255C37FF1D5230FF1D5230FF1D5230FF194C29FF39724BFF6BA6
-              7BFF65A076FF65A076FF5E9B71FF5E9B71FF57966AFF57966AFF48935EFF4893
-              5EFF48935EFF3C8C56FF3C8C56FF348C4EFF348C4EFF194C29FF407A56FF6BA6
-              7BFFEBF3EBFFE8F1E8FFE6F0E6FFE4EFE4FFE2EEE3FFDFECDFFFDEEBDEFFDCEA
-              DDFFDCEADBFFD9E8D9FFD8E7D8FFD8E7D8FF348C4EFF194C29FF407A56FF70AA
-              80FFEDF5EDFFEBF3EBFFEAF1E9FFE6F0E6FFE4EFE4FFE2EEE3FFDFECDFFFDEEB
-              DEFFDCEADBFFDCEADBFFDAE9DAFFD8E7D8FF3C8C56FF1D5230FF46805CFF75AF
-              85FFEFF6EFFFEDF5EDFFEBF3EBFFE9F2E9FFE8F1E8FFE4EFE4FF81AA8DFF2B51
-              2FFF2B512FFF2B512FFF2B512FFFDAE9DAFF3C8C56FF1D5230FF4C8761FF7BB5
-              8AFFF3F8F3FF54A459FF2B512FFF2B512FFF2B512FFF2B512FFF1C771DFF6CB6
-              74FF48935EFF4A964CFF255C37FFDCEADBFF48935EFF255C37FF548E66FF81BC
-              90FFF4F9F4FFF1F7F1FF54A459FF62B275FF54A459FF1C771DFF7BC185FF4893
-              5EFF4A964CFF255C37FF81AA8DFFDCEADDFF48935EFF255C37FF57966AFF8AB7
-              95FFF6FAF6FFF5F9F5FFF3F8F3FF54A459FF318734FF81BC90FF48935EFF4A96
-              4CFF255C37FF609963FF609963FFDFECDFFF48935EFF255C37FF5E9B71FF94C7
-              9CFFF9FBFAFFF6FAF6FFF5F9F5FF318734FF94C79CFF5BAA64FF54A459FF326C
-              46FF036803FFE6F0E6FFE2EEE3FFE1EDE1FF57966AFF2B6541FF65A076FF94C7
-              9CFFFCFDFBFFF9FBFAFF3F9346FF9DD0A7FF6CB674FF5BAA64FF418748FF54A4
-              59FF318734FF036803FFE6F0E6FFE4EFE4FF57966AFF2B6541FF6BA67BFF9DD0
-              A7FFFCFDFCFF4A964CFFAAD6B2FF72BB7BFF72BB7BFF48935EFF568259FF67B0
-              6EFF54A459FF318734FF036803FFE6F0E6FF5E9B71FF326C46FF70AA80FF9DD0
-              A7FFFEFEFEFF67B06EFF63AC68FF63AC68FF569A5DFFF6F9F6FFF3F8F3FF5682
-              59FF568259FF568259FF568259FFE9F2E9FF5E9B71FF326C46FF75AF85FFAAD6
-              B2FFFEFEFEFFFDFEFDFFFDFEFDFFFCFDFBFFF9FBFAFFF8FAF8FFF6F9F6FFF4F9
-              F4FFF1F7F1FFEFF6EFFFEDF5EDFFEBF3EBFF65A076FF39724BFF7BB58AFFAAD6
-              B2FFFFFFFFFFFFFFFFFFFEFFFEFFFDFEFDFFFCFDFBFFF9FBFAFFF8FAF8FFF6FA
-              F6FFF4F9F4FFF1F7F1FFEFF6EFFFEDF5EDFF65A076FF39724BFF7BB58AFFAAD6
-              B2FFAAD6B2FF9DD0A7FF9DD0A7FF94C79CFF94C79CFF94C79CFF8AB795FF81BC
-              90FF7BB58AFF75AF85FF70AA80FF70AA80FF6BA67BFF39724BFF81BC90FF7BB5
-              8AFF75AF85FF70AA80FF6BA67BFF65A076FF5E9B71FF57966AFF548E66FF4C87
-              61FF4C8761FF46805CFF407A56FF407A56FF39724BFF39724BFF}
-            ParentFont = False
-          end
           object cxProgressBar1: TcxProgressBar
             Left = 4
             Top = 1
@@ -972,7 +928,7 @@ object StokListeDlg: TStokListeDlg
             Height = 272
             Align = alRight
             TabOrder = 1
-            Properties.ActivePage = TabSheetSeriLot
+            Properties.ActivePage = cxTabSheet1
             Properties.CustomButtons.Buttons = <>
             ClientRectBottom = 268
             ClientRectLeft = 4
@@ -1039,6 +995,7 @@ object StokListeDlg: TStokListeDlg
                 TabOrder = 0
                 LevelTabs.CaptionAlignment = taLeftJustify
                 object GridSeriLotView: TcxGridDBTableView
+                  OnDblClick = SeriLotDuzenleClick
                   Navigator.Buttons.CustomButtons = <>
                   ScrollbarAnnotations.CustomAnnotations = <>
                   OnCanFocusRecord = GridSeriLotViewCanFocusRecord
@@ -1055,6 +1012,10 @@ object StokListeDlg: TStokListeDlg
                     end>
                   DataController.Summary.SummaryGroups = <>
                   OptionsCustomize.ColumnsQuickCustomization = True
+                  OptionsData.Deleting = False
+                  OptionsData.Inserting = False
+                  OptionsSelection.HideFocusRectOnExit = False
+                  OptionsSelection.UnselectFocusedRecordOnExit = False
                   OptionsView.Footer = True
                   OptionsView.GroupByBox = False
                   object GridSeriLotViewSTOKID: TcxGridDBColumn
@@ -1149,6 +1110,10 @@ object StokListeDlg: TStokListeDlg
       object tshHareketler: TcxTabSheet
         Caption = 'Hareketler'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridHareket: TcxGrid
           Left = 0
           Top = 0
@@ -1403,6 +1368,10 @@ object StokListeDlg: TStokListeDlg
           object cxTabSheet4: TcxTabSheet
             Caption = 'Seri / Lot'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object GridSeriLotHareket: TcxGrid
               Left = 0
               Top = 0
@@ -1473,6 +1442,10 @@ object StokListeDlg: TStokListeDlg
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -1800,7 +1773,7 @@ object StokListeDlg: TStokListeDlg
     AutoCalcFields = False
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      ' Select distinct ID, STOKID,FIYATADI,'
+      ' Select distinct ID, STOKID,FIYATADI,BIRIM,'
       
         'FIYATAD=(select top 1 case when DEGER=-2 then ANAHTAR +'#39' (Son'#39'+c' +
         'ast(PAKETID as varchar(5))+'#39')'#39
@@ -1816,18 +1789,21 @@ object StokListeDlg: TStokListeDlg
       item
         Name = 'Par1'
         DataType = ftWideString
+        ParamType = ptInput
         Size = 5
         Value = '-1007'
       end
       item
         Name = 'Par2'
         DataType = ftWideString
+        ParamType = ptInput
         Size = 2
         Value = '17'
       end
       item
         Name = 'Par3'
         DataType = ftWideString
+        ParamType = ptInput
         Size = 1
         Value = '1'
       end>
@@ -1866,8 +1842,8 @@ object StokListeDlg: TStokListeDlg
   end
   object dtsStokDurum: TDataSource
     DataSet = tabStokDurum
-    Left = 339
-    Top = 160
+    Left = 363
+    Top = 112
   end
   object pmStokDurum: TPopupMenu
     OnPopup = pmStokDurumPopup
@@ -2118,8 +2094,8 @@ object StokListeDlg: TStokListeDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from fn_StokDurumDetay(:PStokID,:PDepoID)')
-    Left = 379
-    Top = 165
+    Left = 427
+    Top = 141
     ParamData = <
       item
         Name = 'PStokID'
@@ -2340,6 +2316,10 @@ object StokListeDlg: TStokListeDlg
   end
   object TabSeriLotDurum: TFDQuery
     Connection = Tablo.FDCnn
+    UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate]
+    UpdateOptions.EnableDelete = False
+    UpdateOptions.EnableInsert = False
+    UpdateOptions.EnableUpdate = False
     SQL.Strings = (
       'select * from STOKDURUMIZLEME SD'
       'INNER JOIN [STOKSERILOT] SSL ON SD.SERILOTID=SSL.ID'

@@ -145,7 +145,6 @@ object UretimWizardDlg: TUretimWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
-          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -904,7 +903,7 @@ object UretimWizardDlg: TUretimWizardDlg
         Height = 172
         Align = alBottom
         TabOrder = 7
-        Properties.ActivePage = TabIsVeZaman
+        Properties.ActivePage = TabSheetGenel
         Properties.CustomButtons.Buttons = <>
         OnChange = PageControlAltChange
         ClientRectBottom = 168
@@ -1018,7 +1017,7 @@ object UretimWizardDlg: TUretimWizardDlg
           end
           object EditDETAYBOLUMU: TcxDBTextEdit
             Left = 982
-            Top = 9
+            Top = 11
             DataBinding.DataField = 'DETAYBOLUMU'
             DataBinding.DataSource = DtsUretim
             Enabled = False

@@ -1215,11 +1215,11 @@ begin
          Abort;
       end else if TabIzlem.FieldByName('SKT').AsDateTime<Tablo.GENINI.BugunTrh then begin
          Showmessage(SKTKucukOlamaz);
-         Abort;
+       //  Abort;
       end;
       if (TabIzlem.FieldByName('URT').AsString<>'')and(TabIzlem.FieldByName('URT').AsDateTime>Tablo.GENINI.BugunTrh) then begin
          Showmessage(URTKucukOlamaz);
-         Abort;
+      // Abort;
       end;
    end;
 

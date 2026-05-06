@@ -131,7 +131,8 @@ object DovizDlg: TDovizDlg
       object DateDovizTarihi: TcxDateEdit
         Left = 376
         Top = 1
-        Properties.OnChange = DateTimePicker1PropertiesChange
+        Properties.OnChange = DateDovizTarihiPropertiesChange
+        Properties.OnCloseUp = DateDovizTarihiPropertiesCloseUp
         TabOrder = 0
         Width = 209
       end
@@ -251,16 +252,15 @@ object DovizDlg: TDovizDlg
   object DtsDoviz: TDataSource
     DataSet = TabDoviz
     OnStateChange = DtSDovizStateChange
-    Left = 120
-    Top = 153
+    Left = 152
+    Top = 137
   end
   object TabDoviz: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabDovizBeforeEdit
     BeforePost = TabDovizBeforePost
     AfterPost = TabDovizAfterPost
     OnNewRecord = TabDovizNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from DOVIZ')
     Left = 88
@@ -348,7 +348,7 @@ object DovizDlg: TDovizDlg
     end
   end
   object PopupMenu1: TPopupMenu
-    Left = 312
+    Left = 272
     Top = 99
     object KurGetirMenu: TMenuItem
       Caption = 'Kurlar'#305' getir       '
@@ -369,17 +369,14 @@ object DovizDlg: TDovizDlg
   end
   object ADOQuery1: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 196
     Top = 245
   end
   object ADOQuery2: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select  * from DOVIZCINSLERI  where DIL=-1')
     Left = 264
     Top = 246
   end
 end
-

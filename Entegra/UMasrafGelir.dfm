@@ -235,10 +235,9 @@ object MasrafGelirDlg: TMasrafGelirDlg
         Top = 9
         DataBinding.DataField = 'RESIM'
         DataBinding.DataSource = DtsMasrafGelir
-        Properties.Caption = 'Resim i'#231'in t'#305'klay'#305'n'
+        Properties.Caption = 'Resim i'#231'in sa'#287' t'#305'klay'#305'n'
         Properties.GraphicClassName = 'TdxSmartImage'
         TabOrder = 12
-        OnClick = LogoResimClick
         Height = 97
         Width = 128
       end

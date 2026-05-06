@@ -567,7 +567,6 @@ type
     cxGrid1Level1: TcxGridLevel;
     Panel8: TPanel;
     ToolBar11: TToolBar;
-    EkstreEkleTus: TToolButton;
     EkstreSilTus: TToolButton;
     EkstreDegisTus: TToolButton;
     ToolButton1: TToolButton;

@@ -601,10 +601,10 @@ end;
 
 procedure TMasrafGelirDlg.LogoResimClick(Sender: TObject);
 begin
-   if TabMasrafGelir.State in [dsEdit, dsInsert] then
+{   if TabMasrafGelir.State in [dsEdit, dsInsert] then
       TabMasrafGelir.Post;
    Tablo.ResimSihirbazBaslat(Tabno_MasrafGelir, TabMasrafGelir.Fields[0].AsInteger);
-   TabloYenile(TabMasrafGelir,[TabMasrafGelir.Fields[0].AsInteger]);
+   TabloYenile(TabMasrafGelir,[TabMasrafGelir.Fields[0].AsInteger]); }
 end;
 
 procedure TMasrafGelirDlg.AcilisFisiGirMenuClick(Sender: TObject);

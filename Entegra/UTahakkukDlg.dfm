@@ -655,13 +655,12 @@ object TahakkukDlg: TTahakkukDlg
     end
   end
   object TabFatBaslik: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabFatBaslikAfterOpen
     BeforeEdit = TabFatBaslikBeforeEdit
     BeforePost = TabFatBaslikBeforePost
     AfterPost = TabFatBaslikAfterPost
     OnNewRecord = TabFatBaslikNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT * ,'
       'KOD= (select MG.KOD from MASRAFGELIR MG where MG.ID=F.MASRAFID),'

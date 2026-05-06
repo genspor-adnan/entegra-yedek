@@ -5783,7 +5783,7 @@ object RehberAraDlg: TRehberAraDlg
         '                      REHBER AS R ON R.ID = D.ZIMMETLIPERSONELID' +
         ' '
       'where D.ZIMMETLIPERSONELID=:P1')
-    Left = 445
+    Left = 437
     Top = 283
     ParamData = <
       item

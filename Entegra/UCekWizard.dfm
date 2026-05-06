@@ -1177,8 +1177,6 @@ object CekWizardDlg: TCekWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DokumanEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 445
@@ -1239,7 +1237,6 @@ object CekWizardDlg: TCekWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 424
         AnchorX = 962
       end
       object GridYorum: TcxGrid
@@ -1346,8 +1343,6 @@ object CekWizardDlg: TCekWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       OnEnterPage = TarihceEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGridTarihce: TcxGrid
         Left = 0
         Top = 70
@@ -1433,7 +1428,7 @@ object CekWizardDlg: TCekWizardDlg
     Top = 175
   end
   object cxStyleRepository1: TcxStyleRepository
-    Left = 592
+    Left = 552
     Top = 32
     PixelsPerInch = 96
     object cxStyle1: TcxStyle

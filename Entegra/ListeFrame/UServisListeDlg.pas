@@ -450,8 +450,8 @@ begin
     TabloYenile(TabGenel,[ServisID]);
 
     TabloYenile(TabHareketler,[ServisID]);
-
-    TabloYenile(TabServisBelge,[ServisID]);
+    if cxPageControl1.ActivePage = cxTabSheet3 then
+       TabloYenile(TabServisBelge,[ServisID]);
 end;
 
 procedure TServisListeDlg.GridHareketViewFocusedRecordChanged(
@@ -492,6 +492,8 @@ begin
    if SERVIS.active then begin
       if cxPageControl1.ActivePage=TabSheetGenel then
          TabloYenile( TabGenel, [SERVIS.Fields[0].asInteger]);
+      if cxPageControl1.ActivePage = cxTabSheet3 then
+         TabloYenile(TabServisBelge, [SERVIS.Fields[0].AsInteger]);
    end;
 
 end;

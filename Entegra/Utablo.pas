@@ -1875,12 +1875,12 @@ begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); INSERT INTO FATBASLIK (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,FATURATARIH,TARIH,KOCANNO,FATURANO, ACIKLAMA,';
     Tablo.Query1.SQL.Add('GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,FATURASERI,FIYAT_LISTESI,');
-    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
+    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,DETAYBOLUMU,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
     Tablo.Query1.SQL.Add('SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,');
     Tablo.Query1.SQL.Add('REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','); //
     Tablo.Query1.SQL.Add('ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''',');
     Tablo.Query1.SQL.Add('FIYAT_LISTESI,VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+KaynakDoviz+'KUR,REHBERILETID,SUBEID,'+IntToStr(EFaturaDurum)+','+
-         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,OZELKOD ');
+         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,DETAYBOLUMU,OZELKOD ');
     Tablo.Query1.SQL.Add('FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId)+'; SELECT ID FROM @Yeni');
     Tablo.Query1.Open;
   end;
@@ -9600,10 +9600,12 @@ begin
      TabloDetay.FieldByName('DEGISTIRMETARIHI').AsDatetime := GenIni.BugunTrhSaat;
      TabloDetay.FieldByName('POZNO').AsInteger := PozNo;
      if (EnBoyHesaplamaAktif)and (En<>0.0)and(Boy<>0.0) then begin  // and(TUR in[109,119])
+        EnBoyHesaplamaAktif:=False;
+        TabloDetay.FieldByName('SAYI').Value := Sayi;
         TabloDetay.FieldByName('EN').Value := En;
         TabloDetay.FieldByName('BOY').Value := Boy;
         TabloDetay.FieldByName('YUZEY').Value := Yuzey;
-        TabloDetay.FieldByName('SAYI').Value := Sayi;
+        EnBoyHesaplamaAktif:=True;
      end;
      if TUR = 100 then begin
         TabloDetay.FieldByName('RESIMGOSTER').AsBoolean := ResimGoster;
@@ -13719,12 +13721,12 @@ begin
   TablodanDuzenleDlg.SecTus.Visible := SecBtn;
   //TablodanDuzenleDlg.GorTus.Visible := GorBtn;
   if OzelDurum='Ýzleme' then
-    TablodanDuzenleDlg.ToolBar1.Visible := False;
+     TablodanDuzenleDlg.ToolBar1.Visible := False;
   TablodanDuzenleDlg.ShowModal;
   Result := TStringList.Create;
   if TablodanDuzenleDlg.ModalResult = mrOk then begin
-    for I := 0 to TablodanDuzenleDlg.Query1.FieldCount - 1 do
-      Result.Add(TablodanDuzenleDlg.Query1.Fields[i].AsString);
+     for I := 0 to TablodanDuzenleDlg.Query1.FieldCount - 1 do
+         Result.Add(TablodanDuzenleDlg.Query1.Fields[i].AsString);
   end;
   FreeAndNil(TablodanDuzenleDlg);
 end;

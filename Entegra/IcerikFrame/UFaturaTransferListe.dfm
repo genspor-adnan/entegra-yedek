@@ -171,6 +171,11 @@ object FatTransferListeDlg: TFatTransferListeDlg
         HeaderAlignmentHorz = taCenter
         Width = 72
       end
+      object GridFatListeTviewEMIRNO: TcxGridDBColumn
+        Caption = #220'rt.Emir No'
+        DataBinding.FieldName = 'DETAYBOLUMU'
+        DataBinding.IsNullValueType = True
+      end
       object GridFatListeTviewSUBEID: TcxGridDBColumn
         Caption = #199#305'k'#305#351' '#350'ubesi'
         DataBinding.FieldName = 'SUBEID'
@@ -450,9 +455,9 @@ object FatTransferListeDlg: TFatTransferListeDlg
     Top = 72
     Lines.Strings = (
       
-        'select FB.ID,FATURATARIH,FATURANO,FB.TUR,FB.SUBEID,CIKISDEPO,GIR' +
-        'ISDEPO,GIRISSUBE,Giris.DEPOADI GIRISDEPOSU, Cikis.DEPOADI CIKISD' +
-        'EPOSU,'
+        'select FB.ID,FATURATARIH,FATURANO,FB.TUR,FB.SUBEID,FB.DETAYBOLUM' +
+        'U,CIKISDEPO,GIRISDEPO,GIRISSUBE,Giris.DEPOADI GIRISDEPOSU, Cikis' +
+        '.DEPOADI CIKISDEPOSU,'
       
         'TESLIMALAN=R1.FIRMA,TESLIMEDEN=R2.FIRMA,FB.OZELKOD,FB.YETKIKODU,' +
         'FB.ACIKLAMA,'

@@ -5,7 +5,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Transfer Sihirbaz'#305
   ClientHeight = 499
-  ClientWidth = 845
+  ClientWidth = 1012
   Color = clBtnFace
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
@@ -20,7 +20,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
   object WizardKontrol: TJvWizard
     Left = 0
     Top = 0
-    Width = 845
+    Width = 1012
     Height = 499
     ActivePage = FaturaEkr
     ButtonBarHeight = 42
@@ -49,8 +49,9 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     ShowRouteMap = False
     OnFinishButtonClick = WizardKontrolFinishButtonClick
     OnCancelButtonClick = WizardKontrolCancelButtonClick
+    ExplicitWidth = 845
     DesignSize = (
-      845
+      1012
       499)
     object FaturaEkr: TJvWizardInteriorPage
       Header.ParentFont = False
@@ -72,11 +73,12 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitWidth = 845
       object PanelUst: TPanel
         Left = 0
         Top = 70
-        Width = 845
-        Height = 88
+        Width = 1012
+        Height = 104
         Align = alTop
         BevelOuter = bvNone
         Color = 11776947
@@ -111,7 +113,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object Label19: TcxLabel
           Left = 578
-          Top = 38
+          Top = 29
           Caption = 'Transfer Tarihi'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -123,7 +125,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object LabelFatNo: TcxLabel
           Left = 578
-          Top = 63
+          Top = 54
           Caption = 'Transfer No'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -135,7 +137,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object LblCikis: TcxLabel
           Left = 1
-          Top = 38
+          Top = 40
           Caption = #350'ube/'#199#305'k'#305#351' Deposu'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -147,7 +149,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object LblGiris: TcxLabel
           Left = 1
-          Top = 63
+          Top = 65
           Caption = #350'ube/Giri'#351' Deposu'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -161,7 +163,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           AlignWithMargins = True
           Left = 3
           Top = 3
-          Width = 839
+          Width = 1006
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
@@ -188,6 +190,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
+          ExplicitWidth = 839
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -228,7 +231,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object EditFatTarih: TcxDBDateEdit
           Left = 682
-          Top = 37
+          Top = 28
           DataBinding.DataField = 'FATURATARIH'
           DataBinding.DataSource = DtsFatBaslik
           TabOrder = 3
@@ -236,7 +239,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object EditFatNo: TcxDBTextEdit
           Left = 682
-          Top = 62
+          Top = 53
           DataBinding.DataField = 'FATURANO'
           DataBinding.DataSource = DtsFatBaslik
           TabOrder = 10
@@ -244,7 +247,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object ComboCikisDepo: TcxDBImageComboBox
           Left = 232
-          Top = 37
+          Top = 39
           DataBinding.DataField = 'CIKISDEPO'
           DataBinding.DataSource = DtsFatBaslik
           Properties.Items = <
@@ -270,7 +273,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object ComboGirisDepo: TcxDBImageComboBox
           Left = 232
-          Top = 62
+          Top = 64
           DataBinding.DataField = 'GIRISDEPO'
           DataBinding.DataSource = DtsFatBaslik
           Properties.Items = <>
@@ -279,13 +282,13 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object cxLabel2: TcxLabel
           Left = 340
-          Top = 38
+          Top = 40
           Caption = 'Teslim Eden'
         end
         object ComboTeslimlEden: TcxButtonEdit
           Tag = 1
           Left = 431
-          Top = 37
+          Top = 39
           Properties.Alignment.Horz = taLeftJustify
           Properties.Buttons = <
             item
@@ -304,13 +307,13 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object cxLabel3: TcxLabel
           Left = 340
-          Top = 63
+          Top = 65
           Caption = 'Teslim Alan'
         end
         object ComboTeslimlAlan: TcxButtonEdit
           Tag = 2
           Left = 431
-          Top = 62
+          Top = 64
           Properties.Alignment.Horz = taLeftJustify
           Properties.Buttons = <
             item
@@ -329,7 +332,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object ComboSubeCikis: TcxDBImageComboBox
           Left = 129
-          Top = 37
+          Top = 39
           DataBinding.DataField = 'SUBEID'
           DataBinding.DataSource = DtsFatBaslik
           Properties.Items = <
@@ -356,7 +359,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object ComboSubeGiris: TcxDBImageComboBox
           Left = 129
-          Top = 62
+          Top = 64
           DataBinding.DataField = 'GIRISSUBE'
           DataBinding.DataSource = DtsFatBaslik
           Properties.Items = <
@@ -383,7 +386,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         end
         object cxDBCheckBox1: TcxDBCheckBox
           Left = 795
-          Top = 37
+          Top = 28
           Caption = 'Onay'
           DataBinding.DataField = 'ONAY'
           DataBinding.DataSource = DtsFatBaslik
@@ -393,19 +396,44 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           TabOrder = 15
           Transparent = True
         end
+        object EditDETAYBOLUMU: TcxDBTextEdit
+          Left = 682
+          Top = 78
+          DataBinding.DataField = 'DETAYBOLUMU'
+          DataBinding.DataSource = DtsFatBaslik
+          Enabled = False
+          Style.ReadOnly = True
+          TabOrder = 16
+          Width = 113
+        end
+        object cxLabel11: TcxLabel
+          Left = 578
+          Top = 79
+          Caption = #220'rtetim Emir No'
+          ParentFont = False
+          Style.Font.Charset = TURKISH_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = [fsBold]
+          Style.IsFontAssigned = True
+        end
       end
       object Panel3: TPanel
         Left = 0
-        Top = 158
-        Width = 845
-        Height = 299
+        Top = 174
+        Width = 1012
+        Height = 283
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 1
+        ExplicitTop = 158
+        ExplicitWidth = 845
+        ExplicitHeight = 299
         object PanelAlt: TPanel
           Left = 1
-          Top = 241
-          Width = 843
+          Top = 225
+          Width = 1010
           Height = 57
           Align = alBottom
           Color = 11776947
@@ -417,8 +445,10 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
+          ExplicitTop = 241
+          ExplicitWidth = 843
           DesignSize = (
-            843
+            1010
             57)
           object Label9: TcxLabel
             Left = 5
@@ -445,7 +475,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Style.IsFontAssigned = True
           end
           object GridFaturaToplam: TStringGrid
-            Left = 29370
+            Left = 32767
             Top = -31
             Width = 260
             Height = 118
@@ -466,6 +496,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             ParentFont = False
             ScrollBars = ssNone
             TabOrder = 0
+            ExplicitLeft = 29370
           end
           object DBEdit10: TcxDBTextEdit
             Left = 85
@@ -522,13 +553,15 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         object GridFatura: TcxGrid
           Left = 1
           Top = 28
-          Width = 843
-          Height = 213
+          Width = 1010
+          Height = 197
           Align = alClient
           TabOrder = 1
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = False
           LookAndFeel.SkinName = 'LondonLiquidSky'
+          ExplicitWidth = 843
+          ExplicitHeight = 213
           object GridFaturaView: TcxGridDBTableView
             PopupMenu = PopupMenuFatura
             Navigator.Buttons.CustomButtons = <>
@@ -616,7 +649,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           AlignWithMargins = True
           Left = 4
           Top = 4
-          Width = 837
+          Width = 1004
           Height = 24
           Margins.Bottom = 0
           AutoSize = True
@@ -643,6 +676,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
+          ExplicitWidth = 837
           object SatirEkle: TToolButton
             Left = 0
             Top = 0

@@ -123,6 +123,7 @@ type
     TabFaturaPROJEKODU: TWideStringField;
     TabFaturaBASTAR: TSQLTimeStampField;
     TabFaturaIZLEME: TSmallintField;
+    GridFatListeTviewEMIRNO: TcxGridDBColumn;
     procedure GridFatListeTviewDblClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

@@ -579,8 +579,6 @@ object StokTalepWizard: TStokTalepWizard
           Height = 188
           Align = alClient
           TabOrder = 0
-          ExplicitTop = 215
-          ExplicitHeight = 191
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -593,7 +591,6 @@ object StokTalepWizard: TStokTalepWizard
             LookAndFeel.Kind = lfOffice11
             LookAndFeel.NativeStyle = False
             LookAndFeel.SkinName = 'LondonLiquidSky'
-            ExplicitHeight = 156
             object GridFaturaView: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
@@ -967,7 +964,6 @@ object StokTalepWizard: TStokTalepWizard
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
-          ExplicitTop = 33
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1026
@@ -1001,7 +997,7 @@ object StokTalepWizard: TStokTalepWizard
               object Bevel1: TBevel
                 Left = 412
                 Top = 5
-                Width = 400
+                Width = 388
                 Height = 143
               end
               object Label11: TcxLabel
@@ -1112,8 +1108,8 @@ object StokTalepWizard: TStokTalepWizard
                 Width = 74
               end
               object ComboSube: TcxDBImageComboBox
-                Left = 850
-                Top = 10
+                Left = 877
+                Top = 13
                 RepositoryItem = Tablo.RepSubelerKendiSubesi
                 DataBinding.DataField = 'SUBEID'
                 DataBinding.DataSource = DtsSIPARIS
@@ -1137,10 +1133,10 @@ object StokTalepWizard: TStokTalepWizard
                     Value = 9
                   end>
                 TabOrder = 3
-                Width = 147
+                Width = 132
               end
               object LblSube: TcxLabel
-                Left = 820
+                Left = 806
                 Top = 14
                 Caption = #350'ube'
                 ParentFont = False
@@ -1363,15 +1359,33 @@ object StokTalepWizard: TStokTalepWizard
                 TabOrder = 22
                 Width = 146
               end
+              object EditDETAYBOLUMU: TcxDBTextEdit
+                Left = 877
+                Top = 43
+                DataBinding.DataField = 'DETAYBOLUMU'
+                DataBinding.DataSource = DtsSIPARIS
+                Enabled = False
+                Style.ReadOnly = True
+                TabOrder = 23
+                Width = 132
+              end
+              object cxLabel11: TcxLabel
+                Left = 806
+                Top = 45
+                Caption = #220'rt.Emir No'
+                ParentFont = False
+                Style.Font.Charset = TURKISH_CHARSET
+                Style.Font.Color = clWindowText
+                Style.Font.Height = -11
+                Style.Font.Name = 'Trebuchet MS'
+                Style.Font.Style = [fsBold]
+                Style.IsFontAssigned = True
+              end
             end
           end
           object TabSheetEkAlanlar: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelAlt: TPanel
               Left = 0
               Top = -92
@@ -1423,7 +1437,6 @@ object StokTalepWizard: TStokTalepWizard
           ShowCaptions = True
           TabOrder = 2
           Transparent = True
-          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -1493,8 +1506,6 @@ object StokTalepWizard: TStokTalepWizard
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 576
@@ -1555,7 +1566,6 @@ object StokTalepWizard: TStokTalepWizard
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 555
         AnchorX = 1032
       end
       object GridYorum: TcxGrid
@@ -2029,7 +2039,7 @@ object StokTalepWizard: TStokTalepWizard
       ''
       'from SIPARISDETAY F '
       'Where SIPARISID = :Par order by F.ID')
-    Left = 946
+    Left = 810
     Top = 168
     ParamData = <
       item

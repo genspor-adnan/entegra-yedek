@@ -1,4 +1,4 @@
-ï»¿unit URehberBilgiDuzenle;
+unit URehberBilgiDuzenle;
 
 interface
 
@@ -9,7 +9,10 @@ uses
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
   cxClasses, cxControls, cxGridCustomView, cxGrid, ToolWin, ComCtrls, cxLabel,
   cxMaskEdit, cxDropDownEdit, cxDBEdit, cxLookAndFeels, cxLookAndFeelPainters,
-  dxSkinsCore, dxSkinLondonLiquidSky, dxSkinscxPCPainter, cxNavigator, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
+  dxSkinsCore, dxSkinLondonLiquidSky, dxSkinscxPCPainter, cxNavigator, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
+  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TRehberBilgiDuzenleDlg = class(TForm)
@@ -64,7 +67,7 @@ end;
 
 procedure TRehberBilgiDuzenleDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   Tablo.GridTurkcelestir;
 end;
@@ -73,6 +76,7 @@ procedure TRehberBilgiDuzenleDlg.FormShow(Sender: TObject);
 begin
   EkleDetay:=False;
   TabDetay.Close;
+  TabDetay.CachedUpdates := True;
   TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);  TabDetay.Params[0].Value := Yeri;
   TabDetay.Params[1].Value := YerID;
   TabDetay.Params[2].Value := Bolum;
@@ -86,14 +90,14 @@ var
   ctrls: TGirdiDenetimleri;
   sql: Variant;
 begin
-  if ACellViewInfo.Item.Index=0 then begin //tÄ±klanan etiket mi
+  if ACellViewInfo.Item.Index=0 then begin //týklanan etiket mi
     Qry:=(Sender as TcxGridDBTableView).DataController.DataSource.DataSet as TFDQuery;
     if Trim(Qry.FieldByName('KAYNAK').AsString)<>'' then begin
       if Pos('select',LowerCase(Qry.FieldByName('KAYNAK').AsString))>0 then begin
         sql:=Qry.FieldByName('KAYNAK').AsString;
         ctrls := TGirdiDenetimleri.Create.Memo(Qry.FieldByName('ETIKET').AsString,@sql);
         if TGirisKutusuEx.BilgiAlEx(yenisorgugirin,ctrls) = mrOk then begin
-          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
+          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
         end;
       end else if Qry.FieldByName('GIRIS').AsInteger in [4,6,8,9] then begin //combo
         Tablo.TablodanSorguAc(7,'select DEGER from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and ANAHTAR='''+qry.FieldByName('KAYNAK').AsString+'''');
@@ -115,10 +119,8 @@ end;
 
 procedure TRehberBilgiDuzenleDlg.ToolButton1Click(Sender: TObject);
 begin
-  if TabDetay.State in [dsInsert, dsEdit] then
-     TabDetay.post;
   if EkleDetay then
-     Ekle(TabDetay,Yeri,YerID,'DeÄŸiÅŸ');
+     Ekle(TabDetay,Yeri,YerID,'Deðiþ');
   ModalResult := mrOk;
 end;
 
@@ -128,6 +130,7 @@ begin
 end;
 
 end.
+
 
 
 

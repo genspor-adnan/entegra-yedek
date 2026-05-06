@@ -37,17 +37,9 @@ type
     Panel1: TPanel;
     FaturaTus: TcxButton;
     DetayTus: TcxButton;
-    PlanlaTus: TcxButton;
     WizardKontrol: TJvWizard;
     SiparisEkr: TJvWizardInteriorPage;
     DetayEkr: TJvWizardInteriorPage;
-    PlanlamaEkr: TJvWizardInteriorPage;
-    ToolBar4: TToolBar;
-    ToolButton5: TToolButton;
-    ToolButton6: TToolButton;
-    GridTicari: TcxGrid;
-    GridTicariView: TcxGridDBTableView;
-    cxGridLevel4: TcxGridLevel;
     cxImageComboBox1: TcxImageComboBox;
     dsAra: TDataSource;
     OpenDialog1: TOpenDialog;
@@ -361,6 +353,14 @@ type
     TabSiparisDetayKDVDAHILBRMFIYAT: TFMTBCDField;
     TabSiparisDetayKDVDAHILFIYAT: TFloatField;
     TabSiparisDetayPOZNO: TIntegerField;
+    TabSiparisDetayEN: TFMTBCDField;
+    TabSiparisDetayBOY: TFMTBCDField;
+    TabSiparisDetayYUZEY: TFMTBCDField;
+    TabSiparisDetaySAYI: TFMTBCDField;
+    GridFaturaViewEN: TcxGridDBColumn;
+    GridFaturaViewBOY: TcxGridDBColumn;
+    GridFaturaViewYUZEY: TcxGridDBColumn;
+    GridFaturaViewSAYI: TcxGridDBColumn;
     GridFaturaViewPOZNO: TcxGridDBColumn;
     TeslimTarihiGirMenu: TMenuItem;
     TeslimTarihiSeciliSatiraMenu: TMenuItem;
@@ -519,6 +519,12 @@ type
     WideStringField16: TWideStringField;
     WideStringField17: TWideStringField;
     IntegerField19: TIntegerField;
+    SIPARISDETAYEN: TFMTBCDField;
+    SIPARISDETAYBOY: TFMTBCDField;
+    SIPARISDETAYYUZEY: TFMTBCDField;
+    SIPARISDETAYSAYI: TFMTBCDField;
+    cxLabel22: TcxLabel;
+    cxDBLabel2: TcxDBLabel;
     procedure TabSiparisBeforePost(DataSet: TDataSet);
     procedure SiparisEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure DetayEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
@@ -576,7 +582,6 @@ type
     procedure GridFaturaViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure SiparisEkrPage(Sender: TObject);
     procedure DetayEkrPage(Sender: TObject);
-    procedure PlanlamaEkrPage(Sender: TObject);
     procedure SipariKoanAyarlar1Click(Sender: TObject);
     procedure lbDetaySablonClick(Sender: TObject);
     procedure ComboBolumPropertiesEditValueChanged(Sender: TObject);
@@ -674,7 +679,7 @@ type
     procedure FaturaToplamUpdate(TabloAc:Boolean);
     procedure FirmaBilgileri;
     procedure HazirlaSiparisDetayAlanlari;
-    procedure HazirlaSiparisDetayUpdateSQL;
+    //procedure HazirlaSiparisDetayUpdateSQL;
     procedure YenileSiparisDetayClone;
     procedure OkuSiparisDetayGorselDurumu(AUrunID: Integer; out AResim, ADokuman: Integer);
     function DetaySablonTipiBul:integer;
@@ -706,7 +711,7 @@ Uses  UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG
 var
    Belge, OncekiKDVDurumu : String[10];
    OncekiSubeID, TabloNo,   OncekiOnaylayacak :integer;
-   Kilit, EkleDetay, AdresDegisti : Boolean;
+   Kilit, EkleDetay, AdresDegisti, EkAlanOlustu : Boolean;
    tab : TFDQuery;
 
 function TSiparisWizardDlg.DetaySablonTipiBul:integer;
@@ -1033,6 +1038,16 @@ begin
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;
     TabDetay.Open;
+    if TabDetay.FindField('GIRIS') <> nil then
+      TabDetay.FieldByName('GIRIS').ProviderFlags := [];
+    if TabDetay.FindField('KAYNAK') <> nil then
+      TabDetay.FieldByName('KAYNAK').ProviderFlags := [];
+    if TabDetay.FindField('ZORUNLU') <> nil then
+      TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
+    if TabDetay.FindField('ORJINAL') <> nil then begin
+      TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+      TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+    end;
 end;
 
 procedure TSiparisWizardDlg.DetayEkrPage(Sender: TObject);
@@ -1044,6 +1059,16 @@ begin
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;
     TabDetay.Open;
+    if TabDetay.FindField('GIRIS') <> nil then
+      TabDetay.FieldByName('GIRIS').ProviderFlags := [];
+    if TabDetay.FindField('KAYNAK') <> nil then
+      TabDetay.FieldByName('KAYNAK').ProviderFlags := [];
+    if TabDetay.FindField('ZORUNLU') <> nil then
+      TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
+    if TabDetay.FindField('ORJINAL') <> nil then begin
+      TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+      TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+    end;
 end;
 
 procedure TSiparisWizardDlg.DtsSIPARISStateChange(Sender: TObject);
@@ -1116,6 +1141,7 @@ begin
   FLastDetayResim := 0;
   FLastDetayDokuman := 0;
   AdresDegisti := False;
+  EkAlanOlustu :=False;
 
   cbDovizCinsi.Visible:=DovizTakibi;
   lbDoviz.Visible:=DovizTakibi;
@@ -1129,19 +1155,27 @@ begin
     FreeAndNil(tvFatToplamlarDOVIZTUTARI);
     FreeAndNil(tvFatToplamlarDOVIZ_KURU);
   end;
-  if EnBoyHesaplamaAktif =False then begin
-  {a   FreeAndNil(TabSiparisDetayEN);
+
+  if not EnBoyHesaplamaAktif then begin
+     FreeAndNil(TabSiparisDetayEN);
      FreeAndNil(TabSiparisDetayBOY);
      FreeAndNil(TabSiparisDetayYUZEY);
      FreeAndNil(TabSiparisDetaySAYI);
+
+     FreeAndNil(SIPARISDETAYEN);
+     FreeAndNil(SIPARISDETAYBOY);
+     FreeAndNil(SIPARISDETAYYUZEY);
+     FreeAndNil(SIPARISDETAYSAYI);
+
      FreeAndNil(GridFaturaViewEN);
      FreeAndNil(GridFaturaViewBOY);
+     FreeAndNil(GridFaturaViewSAYI);
      FreeAndNil(GridFaturaViewYUZEY);
-     FreeAndNil(GridFaturaViewSAYI);  }
   end;
 
+ 
   HazirlaSiparisDetayAlanlari;
-  HazirlaSiparisDetayUpdateSQL;
+  //HazirlaSiparisDetayUpdateSQL;
   KuraGoreFiyatHesaplamaAlani:=1; //1 birimfiyat 2 dövizbirimfiyat
  // cbStokDepo.Properties := Tablo.imgComboboxInit('select -1 AS ID, '''' AS DEPOADI UNION ALL SELECT ID, DEPOADI FROM DEPOLAR WHERE DURUM=1 ORDER BY 2');
   Tablo.GENINI.ReadImageSection(Ops_StokKart_Anabirim,(GridFaturaViewBIRIM1.Properties as TcxImageComboBoxProperties).Items);
@@ -1173,7 +1207,7 @@ begin
 
 end;
 
-procedure TSiparisWizardDlg.HazirlaSiparisDetayUpdateSQL;
+{procedure TSiparisWizardDlg.HazirlaSiparisDetayUpdateSQL;
 begin
   FreeAndNil(FTabSiparisDetayUpdateSQL);
   FTabSiparisDetayUpdateSQL := TFDUpdateSQL.Create(Self);
@@ -1181,8 +1215,9 @@ begin
   FTabSiparisDetayUpdateSQL.ModifySQL.Text :=
     'update SIPARISDETAY set ' +
     'SIPARISID=:NEW_SIPARISID, REHBERID=:NEW_REHBERID, SEC=:NEW_SEC, TUR=:NEW_TUR, URUNID=:NEW_URUNID, ' +
-    'ACIKLAMA=:NEW_ACIKLAMA, ADET=:NEW_ADET, BIRIM=:NEW_BIRIM, MIKTAR=:NEW_MIKTAR, BIRIMFIYAT=:NEW_BIRIMFIYAT, ' +
-    'TUTAR=:NEW_TUTAR, ISKONTO=:NEW_ISKONTO, KDV=:NEW_KDV, MASRAFID=:NEW_MASRAFID, MUHKODU=:NEW_MUHKODU, ' +
+    'ACIKLAMA=:NEW_ACIKLAMA, ADET=:NEW_ADET, EN=:NEW_EN, BOY=:NEW_BOY, YUZEY=:NEW_YUZEY, SAYI=:NEW_SAYI, ' +
+    'BIRIM=:NEW_BIRIM, MIKTAR=:NEW_MIKTAR, BIRIMFIYAT=:NEW_BIRIMFIYAT, TUTAR=:NEW_TUTAR, ' +
+    'ISKONTO=:NEW_ISKONTO, KDV=:NEW_KDV, MASRAFID=:NEW_MASRAFID, MUHKODU=:NEW_MUHKODU, ' +
     'KASA=:NEW_KASA, ONAY=:NEW_ONAY, KUR=:NEW_KUR, IZLEMEKODU=:NEW_IZLEMEKODU, DOVIZ_TUTARI=:NEW_DOVIZ_TUTARI, ' +
     'DOVIZ_KURU=:NEW_DOVIZ_KURU, ISKONTO2=:NEW_ISKONTO2, IZLEME=:NEW_IZLEME, MF=:NEW_MF, IADEADET=:NEW_IADEADET, ' +
     'IADESIPARISDETAYID=:NEW_IADESIPARISDETAYID, YERI=:NEW_YERI, YERID=:NEW_YERID, DOVIZ_BIRIMFIYAT=:NEW_DOVIZ_BIRIMFIYAT, ' +
@@ -1195,7 +1230,7 @@ begin
     'where ID=:OLD_ID';
   FTabSiparisDetayUpdateSQL.DeleteSQL.Text := 'delete from SIPARISDETAY where ID=:OLD_ID';
   TabSiparisDetay.UpdateObject := FTabSiparisDetayUpdateSQL;
-end;
+end;   }
 procedure TSiparisWizardDlg.OkuSiparisDetayGorselDurumu(AUrunID: Integer; out AResim, ADokuman: Integer);
 var
   LQry: TFDQuery;
@@ -1330,6 +1365,8 @@ begin
     end;
   end;
 
+  if (TabSiparis.Active=False)or(TabSiparis.Fields[0].AsString='') then
+      TabloYenile(TabSiparis, [SiparisIDsi]);
 end;
 
 procedure TSiparisWizardDlg.FormShow(Sender: TObject);
@@ -1349,7 +1386,12 @@ begin
   try
   SiparisWizardDlg.Height:= Screen.Height- round(Screen.Height*0.1);
   EkleDetay := False;
-  Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1,DtsTabSiparis);
+  if not EkAlanOlustu then begin
+     Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1,DtsTabSiparis);
+     EkAlanOlustu:=True;
+     PageUst.ActivePageIndex := 0;
+  end;
+
   PageControlAlt.ActivePageIndex := 0;
    if not TarayiciKullanimda then begin
       BtnDosyaGonder.Kind := cxbkStandard;
@@ -1383,7 +1425,6 @@ begin
   end;
   if IslemOp in ['E','K'] then begin
      DetayTus.Enabled := False;
-     PlanlaTus.Enabled := False;
      cbStokDepo.RepositoryItem:=Tablo.RepStokDepolarAktif;  //Yeni faturada sadece aktif depolar olmalý
   end else
     cbStokDepo.RepositoryItem:=Tablo.RepStokDepolarTumu;  //Eski faturada pasif depolar da olabilir
@@ -1444,8 +1485,6 @@ begin
   LabelAktivite.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
   BeditProje.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
   BeditBagliGorev.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
-  PlanlaTus.Visible := Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme);//Modul.Kasa;
-  PlanlamaEkr.Enabled := Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme);
   DetayEkr.EnableButton(bkNext,Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme));
   TabloYenile(TabSiparis, [SiparisIdsi]);
   Kilit := False;
@@ -1896,12 +1935,9 @@ begin
       EditDoktor.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabSiparis.FieldByName('REHBERID_DOKTOR').AsInteger);
       EditReferans.Text :=  Tablo.GENINI.AnahtarGetir(-25002,  TabSiparis.FieldByName('REFERANSID').AsInteger,-1,'');
       EditGonderen.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabSiparis.FieldByName('REHBERID_GONDEREN').AsInteger);
-   end;
-end;
-
-procedure TSiparisWizardDlg.PlanlamaEkrPage(Sender: TObject);
-begin
-  ButtonDuzenle;
+   end
+   else if (EkAlanOlustu)and(PageUst.Pages[PageUst.ActivePageIndex].Name = 'TabSheetEkAlanlar')and(TabSiparis.FieldByName('ID').AsInteger < 1) then
+           TabSiparis.post;
 end;
 
 procedure TSiparisWizardDlg.PopupYorumDetayMenuPopup(Sender: TObject);
@@ -1997,7 +2033,6 @@ procedure TSiparisWizardDlg.TabSiparisAfterPost(DataSet: TDataSet);
 begin
    SiparisIdsi := TabSiparis.Fields[0].AsInteger;
    DetayTus.Enabled := True;
-   PlanlaTus.Enabled := True;
    TabloYenile(TOPLAMLAR,[SiparisIdsi]);
    Tablo.TablodanSorguAc(3,'select 1 from SIPARIS where REHBERID='+TabSiparis.FieldByName('REHBERID').AsString
                                                       +' and TUR='+TabSiparis.FieldByName('TUR').AsString
@@ -2266,25 +2301,16 @@ begin
 end;
 
 procedure TSiparisWizardDlg.TabSiparisDetayENChange(Sender: TField);
-var
-  FEN, FBOY, FYUZEY, FSAYI, FADET: TField;
 begin
   // EN/BOY/YUZEY/SAYI alanlari su an devre disi; alan yoksa hesaplama yapma.
   if not EnBoyHesaplamaAktif then
     Exit;
 
-  FEN := TabSiparisDetay.FindField('EN');
-  FBOY := TabSiparisDetay.FindField('BOY');
-  FYUZEY := TabSiparisDetay.FindField('YUZEY');
-  FSAYI := TabSiparisDetay.FindField('SAYI');
-  FADET := TabSiparisDetay.FindField('ADET');
-  if (FEN = nil) or (FBOY = nil) or (FYUZEY = nil) or (FSAYI = nil) or (FADET = nil) then
-    Exit;
-
-  if (Trim(FEN.AsString) <> '') and (Trim(FBOY.AsString) <> '') then
+  if (Trim(TabSiparisDetay.FieldByName('EN').AsString) <> '') and (Trim(TabSiparisDetay.FieldByName('BOY').AsString) <> '')
+     and (Trim(TabSiparisDetay.FieldByName('SAYI').AsString) <> '')then
   begin
-    FYUZEY.AsFloat := (FEN.AsFloat * FBOY.AsFloat) / 1000000;
-    FADET.AsFloat := FYUZEY.AsFloat * FSAYI.AsFloat;
+    TabSiparisDetay.FieldByName('YUZEY').AsFloat := (TabSiparisDetay.FieldByName('EN').AsFloat * TabSiparisDetay.FieldByName('BOY').AsFloat) / 1000000;
+    TabSiparisDetay.FieldByName('ADET').AsFloat := TabSiparisDetay.FieldByName('YUZEY').AsFloat * TabSiparisDetay.FieldByName('SAYI').AsFloat;
   end;
 end;
 
@@ -3003,7 +3029,6 @@ procedure TSiparisWizardDlg.ButtonDuzenle;
 begin
   FaturaTus.Enabled := FaturaTus.tag <> WizardKontrol.ActivePageIndex;
   DetayTus.Enabled := DetayTus.tag <> WizardKontrol.ActivePageIndex;
-  PlanlaTus.Enabled := PlanlaTus.tag <> WizardKontrol.ActivePageIndex;
   DokumanTus.Enabled := DokumanTus.tag <> WizardKontrol.ActivePageIndex;
 end;
 
@@ -3013,6 +3038,18 @@ begin
 end;
 
 end.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

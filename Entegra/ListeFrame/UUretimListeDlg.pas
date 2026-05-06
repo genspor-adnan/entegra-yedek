@@ -23,7 +23,9 @@ uses
   dxSkinWhiteprint, cxGridCustomPopupMenu, cxGridPopupMenu,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxDateRanges,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TUretimListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)

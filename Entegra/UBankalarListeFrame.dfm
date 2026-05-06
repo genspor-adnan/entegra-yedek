@@ -256,7 +256,7 @@ object BankalarListeFrame: TBankalarListeFrame
     Height = 308
     Align = alBottom
     TabOrder = 4
-    Properties.ActivePage = TabSheetEkstre
+    Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlSekmeChange
     ClientRectBottom = 304
@@ -629,6 +629,7 @@ object BankalarListeFrame: TBankalarListeFrame
             Caption = 'Excelden Al'
             ImageIndex = 17
             ImageName = 'PngImage16'
+            Visible = False
           end
         end
         object JvNavPanelHeader2: TJvNavPanelHeader

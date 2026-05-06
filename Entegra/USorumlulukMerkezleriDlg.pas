@@ -13,7 +13,10 @@ uses
   cxFilter, cxData, cxDataStorage, cxDBData, cxGridCustomTableView, cxGraphics,
   cxGridTableView, cxGridDBTableView, cxGridLevel, cxClasses, cxGridCustomView,
   cxGrid, cxMemo, cxCalendar, cxImageComboBox, cxProgressBar,
-  dxSkinLondonLiquidSky, cxPC, cxLookAndFeels, dxSkinsDefaultPainters, cxNavigator;
+  dxSkinLondonLiquidSky, cxPC, cxLookAndFeels, dxSkinsDefaultPainters, cxNavigator,
+  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TSorumlulukMerkezListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -84,7 +87,10 @@ end;
 
 procedure TSorumlulukMerkezListeDlg.AramaYap(Sender: TObject);
 begin
-  TabloYenile(TabSRMMerkezListe,[GELIRMI]);
+  TabSRMMerkezListe.Close;
+  TabSRMMerkezListe.ParamByName('Par1').DataType := ftInteger;
+  TabSRMMerkezListe.ParamByName('Par1').AsInteger := Ord(GELIRMI);
+  TabSRMMerkezListe.Open;
 end;
 
 procedure TSorumlulukMerkezListeDlg.FareTekerlekAsagi(Sender: TObject;

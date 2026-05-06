@@ -362,19 +362,11 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Caption = 'Toplamlar'
       ImageIndex = 7
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object TabSheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
       ImageIndex = 6
       OnShow = TabSheetEkstreShow
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 44
@@ -811,10 +803,6 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     object TabSheetCekKocan: TcxTabSheet
       Caption = #199'ek Ko'#231'an'#305' Listesi'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -982,10 +970,6 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Caption = 'Rotatif'
       ImageIndex = 2
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelDurum: TPanel
         Left = 0
         Top = 132
@@ -1475,10 +1459,6 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel7: TPanel
         Left = 0
         Top = 233
@@ -1539,7 +1519,6 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 273
         AnchorX = 866
       end
       object GridYorum: TcxGrid
@@ -1647,7 +1626,6 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Left = 1
       Top = 1
       Width = 571
-      Height = 29
       Margins.Bottom = 0
       Align = alLeft
       AutoSize = True

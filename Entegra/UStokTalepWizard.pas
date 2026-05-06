@@ -247,6 +247,8 @@ type
     MenuDegisTeslimTarihi: TMenuItem;
     cxLabel9: TcxLabel;
     LabelAnaKaynak: TcxLabel;
+    EditDETAYBOLUMU: TcxDBTextEdit;
+    cxLabel11: TcxLabel;
     procedure SIPARISBeforePost(DataSet: TDataSet);
     procedure SiparisEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure FormCreate(Sender: TObject);

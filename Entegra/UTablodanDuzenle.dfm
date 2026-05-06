@@ -26,8 +26,7 @@ object TablodanDuzenleDlg: TTablodanDuzenleDlg
     Caption = 'Panel2'
     TabOrder = 1
     ExplicitTop = 32
-    ExplicitWidth = 635
-    ExplicitHeight = 435
+    ExplicitHeight = 436
     object DBGrid1: TcxGrid
       Left = 6
       Top = 6
@@ -36,8 +35,7 @@ object TablodanDuzenleDlg: TTablodanDuzenleDlg
       Align = alClient
       TabOrder = 0
       LookAndFeel.Kind = lfOffice11
-      ExplicitWidth = 623
-      ExplicitHeight = 423
+      ExplicitHeight = 424
       object DBGrid1DBTableView1: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
         ScrollbarAnnotations.CustomAnnotations = <>
@@ -79,6 +77,7 @@ object TablodanDuzenleDlg: TTablodanDuzenleDlg
         OptionsView.GroupByBox = False
         OptionsView.Indicator = True
         object DBGrid1DBTableView1Column1: TcxGridDBColumn
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
         end
       end
@@ -118,7 +117,6 @@ object TablodanDuzenleDlg: TTablodanDuzenleDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitWidth = 629
     ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
@@ -197,9 +195,7 @@ object TablodanDuzenleDlg: TTablodanDuzenleDlg
   object Query1: TFDQuery
     AfterOpen = Query1AfterOpen
     OnNewRecord = Query1NewRecord
-    ParamData = <>
-    Left = 261
+    Left = 197
     Top = 105
   end
 end
-

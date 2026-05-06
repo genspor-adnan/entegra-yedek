@@ -11,11 +11,9 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object ToolBar1: TToolBar
     Left = 0
@@ -88,6 +86,7 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
     LookAndFeel.NativeStyle = True
     object GridDetayView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
+      ScrollbarAnnotations.CustomAnnotations = <>
       OnCellClick = GridDetayViewCellClick
       OnEditChanged = GridDetayViewEditChanged
       DataController.DataModeController.SmartRefresh = True
@@ -95,22 +94,24 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
+      OptionsData.Editing = True
       OptionsData.DeletingConfirmation = False
       OptionsView.GroupByBox = False
       Styles.Content = AnaForm.cxStyle1
       object cxGridDBColumn3: TcxGridDBColumn
         Caption = 'Etiketi'
         DataBinding.FieldName = 'ETIKET'
+        DataBinding.IsNullValueType = True
         MinWidth = 150
         Options.Editing = False
         Options.Filtering = False
+        Options.Focusing = False
+        Options.IgnoreTimeForFiltering = False
+        Options.IncSearch = False
         Options.FilteringFilteredItemsList = False
         Options.FilteringMRUItemsList = False
         Options.FilteringPopup = False
         Options.FilteringPopupMultiSelect = False
-        Options.Focusing = False
-        Options.IgnoreTimeForFiltering = False
-        Options.IncSearch = False
         Options.GroupFooters = False
         Options.Grouping = False
         Options.HorzSizing = False
@@ -120,16 +121,17 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
       object cxGridDBColumn4: TcxGridDBColumn
         Caption = 'Bilgisi'
         DataBinding.FieldName = 'BILGI'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxTextEditProperties'
         OnGetPropertiesForEdit = cxGridDBColumn4GetPropertiesForEdit
         MinWidth = 400
         Options.Filtering = False
+        Options.IgnoreTimeForFiltering = False
+        Options.IncSearch = False
         Options.FilteringFilteredItemsList = False
         Options.FilteringMRUItemsList = False
         Options.FilteringPopup = False
         Options.FilteringPopupMultiSelect = False
-        Options.IgnoreTimeForFiltering = False
-        Options.IncSearch = False
         Options.GroupFooters = False
         Options.Grouping = False
         Options.HorzSizing = False
@@ -139,17 +141,18 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
       end
       object GridDetayViewColumn1: TcxGridDBColumn
         DataBinding.FieldName = 'ORJINAL'
+        DataBinding.IsNullValueType = True
         Visible = False
         MinWidth = 64
         Options.Editing = False
         Options.Filtering = False
+        Options.Focusing = False
+        Options.IgnoreTimeForFiltering = False
+        Options.IncSearch = False
         Options.FilteringFilteredItemsList = False
         Options.FilteringMRUItemsList = False
         Options.FilteringPopup = False
         Options.FilteringPopupMultiSelect = False
-        Options.Focusing = False
-        Options.IgnoreTimeForFiltering = False
-        Options.IncSearch = False
         Options.GroupFooters = False
         Options.Grouping = False
         Options.HorzSizing = False
@@ -159,6 +162,7 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
       object GridDetayViewColumnsec: TcxGridDBColumn
         Caption = 'Zorunlu'
         DataBinding.FieldName = 'ZORUNLU'
+        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
         Visible = False
       end
@@ -226,7 +230,7 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
   end
   object TabDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU '
@@ -242,4 +246,3 @@ object RehberBilgiDuzenleDlg: TRehberBilgiDuzenleDlg
     Top = 129
   end
 end
-

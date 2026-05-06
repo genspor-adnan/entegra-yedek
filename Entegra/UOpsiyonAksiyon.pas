@@ -20,7 +20,9 @@ uses
   dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxCustomListBox, dxCheckGroupBox, dxBarBuiltInMenu, cxPC,
-  cxCalc, cxSpinEdit, dxCoreGraphics;
+  cxCalc, cxSpinEdit, dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TOpsiyonAksiyonDlg = class(TForm)
@@ -251,7 +253,7 @@ begin
   dxSocialGroupBox.CheckBox.Checked := Tablo.GENINI.ReadBoolean(Ops_SocialMedia_Meta, False);//
   //m.y. 10.01.2024
   dxSocialIMAPGroupBox.CheckBox.Checked := Tablo.GENINI.ReadBoolean(Ops_SocialMedia_IMAP, False);//
-
+  shSocial.TabVisible := False;
 end;
 
 procedure TOpsiyonAksiyonDlg.FormShow(Sender: TObject);

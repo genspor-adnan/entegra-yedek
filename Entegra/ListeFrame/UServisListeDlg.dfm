@@ -761,7 +761,7 @@ object ServisListeDlg: TServisListeDlg
     Height = 255
     Align = alClient
     TabOrder = 3
-    Properties.ActivePage = Tabhareket
+    Properties.ActivePage = TabServis
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlServisChange
     ClientRectBottom = 251
@@ -1935,7 +1935,7 @@ object ServisListeDlg: TServisListeDlg
   end
   object PopupMenuHareket: TPopupMenu
     OnPopup = PopupMenuHareketPopup
-    Left = 135
+    Left = 151
     Top = 69
     object MenuItem1: TMenuItem
       Tag = 102648

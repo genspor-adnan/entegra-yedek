@@ -304,6 +304,7 @@ type
     FStokBilgiCache: TDictionary<Integer, string>;
     FIlkAcilisYukleniyor: Boolean;
     FDetayYukleBekliyor: Boolean;
+    FReceteYukleniyor: Boolean;
     function EkranAdiAl: string;
     procedure HesaplaClick;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -784,8 +785,8 @@ begin
   EnsureDataField(TabSablonDetay,'LIMITALT',TWideStringField,80);
   EnsureDataField(TabSablonDetay,'LIMITUST',TWideStringField,80);
   EnsureDataField(TabSablonDetay,'TOLERANSTIPI',TByteField);
-  EnsureDataField(TabSablonDetay,'TOLERANSDEGERI',TBCDField,2);
-  EnsureDataField(TabSablonDetay,'MIKTAR',TBCDField,2);
+  EnsureDataField(TabSablonDetay,'TOLERANSDEGERI',TBCDField,4);
+  EnsureDataField(TabSablonDetay,'MIKTAR',TBCDField,4);
   EnsureDataField(TabSablonDetay,'BIRIM',TSmallintField);
   EnsureDataField(TabSablonDetay,'OLCUALETI',TSmallintField);
   EnsureDataField(TabSablonDetay,'SURE',TSQLTimeStampField);
@@ -977,7 +978,14 @@ begin
        TabRecete.SQL.Add(' and TUR > 0 ');
     TabRecete.SQL.Add(' order by KOD ');
     TabRecete.Close;
-    TabRecete.Open;
+    FReceteYukleniyor := True;
+    TabRecete.DisableControls;
+    try
+      TabRecete.Open;
+    finally
+      TabRecete.EnableControls;
+      FReceteYukleniyor := False;
+    end;
     if not TabRecete.IsEmpty then begin
       if FIlkAcilisYukleniyor then begin
         FIlkAcilisYukleniyor := False;
@@ -1144,6 +1152,8 @@ end;
 
 procedure TUretimReceteDlg.TabReceteAfterScroll(DataSet: TDataSet);
 begin
+  if FReceteYukleniyor then
+    Exit;
   if (not TabRecete.Active) or TabRecete.IsEmpty then
     Exit;
   if DateGecmis.Visible then Begin
@@ -1325,25 +1335,6 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

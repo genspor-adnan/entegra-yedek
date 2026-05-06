@@ -119,6 +119,7 @@ type
     cxGridKaynakDBTableView1DETAY_OZELKOD: TcxGridDBColumn;
     cxGridKaynakDBTableView1DETAY_OZELKOD2: TcxGridDBColumn;
     cxGridKaynakDBTableView1OZELKOD2: TcxGridDBColumn;
+    cxGridKaynakDBTableView1EMIRNO: TcxGridDBColumn;
     procedure FormShow(Sender: TObject);
     procedure AramaYap;
     procedure TurCombosunuDoldur;
@@ -307,7 +308,7 @@ begin
     10:begin  //alış irsaliyesi
       cbTur.Properties.items := Tablo.imgComboboxInit( 'select DEGER ,ANAHTAR from GENINI WHERE BOLUM=-1005 AND DEGER in(9,109) AND DIL='+IntToStr(Dil)+' ORDER BY 2 ').items;
     end;
-    11:begin  //alış faturası
+    11,12:begin  //alış faturası  ve alış fişi
        // önce giriş depoya bakarız
         Tablo.TablodanSorguAc(1, 'select VARSAYILAN from DEPOLAR where ID='+IntToStr(GDepo));
        //eğer kons giriş depoysa listeye sadece gelen konsinyeler listelenir, ana depoysa gelen konsinye harici listelenir
@@ -334,7 +335,7 @@ begin
 
         if cbTurler = '' then begin
             if HedefBaslikTur in [14,16] then  //hedef irsaliye veya fiş ise
-                    cbTurler := '6,19'
+                    cbTurler := '6,14,19'
             else if HedefBaslikTur=15 then begin
                     if not (Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest]) then
                        cbTurler := '6,14,19'
@@ -455,7 +456,7 @@ begin
   FYS.AKDV := KDV;
   FYS.ComboKDV.EditValue := KDV;
   FYS.EditAciklama.Text := Aciklama;
-  if EnBoyHesaplamaAktif then begin
+  if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER) then begin
      FYS.EditEn.Value := En;
      FYS.EditBoy.Value := Boy;
      FYS.EditYuzey.Value := Yuzey;
@@ -510,7 +511,7 @@ begin
     Isk1 := FYS.EditIsk1.EditValue;
     Isk2 := FYS.EditIsk2.EditValue;
     Aciklama := FYS.EditAciklama.Text;
-    if EnBoyHesaplamaAktif then begin
+    if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then begin
       En := FYS.EditEn.Value;
       Boy := FYS.EditBoy.Value;
       Yuzey := FYS.EditYuzey.Value;
@@ -555,6 +556,16 @@ begin
       else
         DonusumTuru := 0;
     end;
+    12:begin  //alış fişi
+      if cbTur.EditValue = 9 then
+        DonusumTuru := TabNo_DONUSUM_ALIS_SIPARIS_FIS
+      else if cbTur.EditValue = 10 then
+        DonusumTuru := TabNo_DONUSUM_ALIS_IRS_FIS
+      //else if cbTur.EditValue = 109 then
+      //  DonusumTuru := TabNo_DONUSUM_Gelen_Konsinye_Fis
+      else
+        DonusumTuru := 0;
+    end;
     14:begin  //satış irsaliyesi
       if cbTur.EditValue = 19 then
         DonusumTuru := TabNo_DONUSUM_SATIS_SIPARIS_IRS
@@ -578,9 +589,9 @@ begin
         DonusumTuru := 0;
     end;
     16:begin  //satış fişi
-//      if cbTur.EditValue = 14 then
-//        DonusumTuru := TabNo_DONUSUM_SATIS_IRS_FIS
-      if cbTur.EditValue = 19 then
+      if cbTur.EditValue = 14 then
+        DonusumTuru := TabNo_DONUSUM_SATIS_IRS_FIS
+      else if cbTur.EditValue = 19 then
         DonusumTuru := TabNo_DONUSUM_SATIS_SIPARIS_FIS
       else if cbTur.EditValue = 110 then
         DonusumTuru := TabNo_DONUSUM_ADISYON_FIS
@@ -714,7 +725,7 @@ Begin
   AAciklama := TabKaynak.FieldByName('ACIKLAMA').AsString;
   UrnTur := 1;
 
-  if (EnBoyHesaplamaAktif)then begin  // and(TUR in[109,119])
+  if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER) then begin  // and(TUR in[109,119])
      if TabKaynak.FieldByName('EN').Value<>null then
         En := TabKaynak.FieldByName('EN').Value;
      if TabKaynak.FieldByName('BOY').Value<>null then
@@ -760,7 +771,7 @@ Begin
       inc(i);
     end;
 
-     if (EnBoyHesaplamaAktif)then begin  // and(TUR in[109,119])
+     if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER) then begin  // and(TUR in[109,119])
         TabDetayGiris.FieldByName('EN').Value := En;
         TabDetayGiris.FieldByName('BOY').Value := Boy;
         TabDetayGiris.FieldByName('YUZEY').Value := Yuzey;
@@ -927,7 +938,7 @@ begin
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
       TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID) ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=99 and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
-      if EnBoyHesaplamaAktif then
+      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
          TabKaynak.SQL.Add(',SD.EN,SD.BOY,SD.YUZEY,SD.SAYI, SD.POZNO, SD.ACIKLAMA');
       TabKaynak.SQL.Add(' from TEKLIF S inner join TEKLIFDETAY SD on S.ID=SD.TEKLIFID inner join');
       TabKaynak.SQL.Add(' STOKLAR ST on SD.TUR=1 and SD.URUNID=ST.ID inner join REHBER R on R.ID=S.REHBERID');
@@ -986,11 +997,11 @@ begin
                         ' + ABS(isnull((select sum(F1.ADET) from '+HedefTablo+' F1 where F1.URUNID=SD.URUNID and F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0)))');
       TabKaynak.SQL.Add(' ,SD.TESLIMTARIHI, S.REHBERILETID, SEVK = (SELECT AD FROM  REHBERILETISIM WHERE ID=S.REHBERILETID) ');
       TabKaynak.SQL.Add(' ,SATICI=S.SATICIKODU, S.GIRISDEPO, S.CIKISDEPO  ');
-      TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO ');
+      TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO, S.DETAYBOLUMU ');
       TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID) ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=S.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
-      if EnBoyHesaplamaAktif then
+      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
          TabKaynak.SQL.Add(',SD.EN,SD.BOY,SD.YUZEY,SD.SAYI,SD.POZNO, SD.ACIKLAMA');
       TabKaynak.SQL.Add(' from SIPARIS S inner join SIPARISDETAY SD on S.ID=SD.SIPARISID inner join');
       TabKaynak.SQL.Add(' STOKLAR ST on SD.TUR=1 and SD.URUNID=ST.ID inner join REHBER R on R.ID=S.REHBERID');
@@ -1051,11 +1062,11 @@ begin
       TabKaynak.SQL.Add(' -isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI=416 and F1.YERID=F.ID ),0.0)');//İADE ÇIKARILIR
       TabKaynak.SQL.Add(' ,TESLIMTARIHI=FB.FATURATARIH ');
       TabKaynak.SQL.Add(' ,SATICI=FB.SATICIKODU, FB.GIRISDEPO, FB.CIKISDEPO ');
-      TabKaynak.SQL.Add(' ,F.PROJEID, F.POZNO, ST.URUNNO ');
+      TabKaynak.SQL.Add(' ,F.PROJEID, F.POZNO, ST.URUNNO, FB.DETAYBOLUMU ');
       TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID) ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=FB.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=F.ID) then 1 else 0 end ');
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD=F.OZELKOD, DETAY_OZELKOD2=F.OZELKOD2 ');
-      if EnBoyHesaplamaAktif then
+      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
          TabKaynak.SQL.Add(',F.EN,F.BOY,F.YUZEY,F.SAYI, F.POZNO, F.ACIKLAMA');
       TabKaynak.SQL.Add(' from FATBASLIK FB inner join FATURA F on FB.ID=F.FATBASID inner join');
       TabKaynak.SQL.Add(' STOKLAR ST on F.TUR=1 and F.URUNID=ST.ID inner join REHBER R on R.ID=FB.REHBERID');

@@ -1136,6 +1136,10 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 19
           Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridDurumBaglanti: TcxGrid
             Left = 0
             Top = 0
@@ -1233,6 +1237,10 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 9
           Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
       object Panel2: TPanel
@@ -1407,7 +1415,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object TabListeDuzenle: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from GENINI where BOLUM=0 and DIL=:PDil and LEN(ABS(DEG' +
@@ -1423,7 +1430,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object TabListeDetayDuzenle: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from GENINI where BOLUM=0 and DIL=:PDil and LEN(ABS(DEG' +
@@ -1439,7 +1445,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object TabDurumBaglanti: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from DURUMBAGLANTI where YERI = :PYeri and BOLUM= :PBol' +
@@ -1470,5 +1475,3 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     end
   end
 end
-
-

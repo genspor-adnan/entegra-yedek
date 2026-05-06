@@ -36,17 +36,9 @@ type
     Panel1: TPanel;
     FaturaTus: TcxButton;
     DetayTus: TcxButton;
-    PlanlaTus: TcxButton;
     WizardKontrol: TJvWizard;
     SiparisEkr: TJvWizardInteriorPage;
     DetayEkr: TJvWizardInteriorPage;
-    PlanlamaEkr: TJvWizardInteriorPage;
-    ToolBar4: TToolBar;
-    ToolButton5: TToolButton;
-    ToolButton6: TToolButton;
-    GridTicari: TcxGrid;
-    GridTicariView: TcxGridDBTableView;
-    cxGridLevel4: TcxGridLevel;
     cxImageComboBox1: TcxImageComboBox;
     dsAra: TDataSource;
     OpenDialog1: TOpenDialog;
@@ -929,8 +921,6 @@ begin
   LabelAktivite.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
   BeditProje.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
   BeditBagliGorev.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
-  PlanlaTus.Visible := Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme);//Modul.Kasa;
-  PlanlamaEkr.Enabled := Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme);
   DetayEkr.EnableButton(bkNext,Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme));
   FirmaBilgileri;
   TabloYenile(SIPARIS, [SiparisIdsi]);
@@ -1356,7 +1346,6 @@ procedure TSatinAlmaWizard2.SIPARISAfterPost(DataSet: TDataSet);
 begin
    SiparisIdsi := SIPARIS.Fields[0].AsInteger;
    DetayTus.Enabled := True;
-   PlanlaTus.Enabled := True;
    TabloYenile(TOPLAMLAR,[SiparisIdsi]);
    Tablo.TablodanSorguAc(3,'select 1 from SIPARIS where REHBERID='+SIPARIS.FieldByName('REHBERID').AsString
                                                       +' and TUR='+SIPARIS.FieldByName('TUR').AsString
@@ -2137,7 +2126,6 @@ procedure TSatinAlmaWizard2.ButtonDuzenle;
 begin
   FaturaTus.Enabled := FaturaTus.tag <> WizardKontrol.ActivePageIndex;
   DetayTus.Enabled := DetayTus.tag <> WizardKontrol.ActivePageIndex;
-  PlanlaTus.Enabled := PlanlaTus.tag <> WizardKontrol.ActivePageIndex;
   DokumanTus.Enabled := DokumanTus.tag <> WizardKontrol.ActivePageIndex;
 end;
 

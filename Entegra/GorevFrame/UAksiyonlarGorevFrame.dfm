@@ -105,6 +105,7 @@ object AksiyonlarGorevFrame: TAksiyonlarGorevFrame
     HotTrackFont.Name = 'Trebuchet MS'
     HotTrackFont.Style = [fsBold]
     ParentFont = False
+    Visible = False
     WordWrap = True
     Colors.ButtonColorFrom = 15395562
     Colors.ButtonColorTo = 12566463

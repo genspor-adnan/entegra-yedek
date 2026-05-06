@@ -23,8 +23,6 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     Align = alBottom
     Alignment = taLeftJustify
     TabOrder = 0
-    ExplicitTop = 482
-    ExplicitWidth = 576
     object CancelBtn: TBitBtn
       Left = 256
       Top = 6
@@ -156,12 +154,10 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     Top = 0
     Width = 580
     Height = 483
-    ActivePage = GorevPage
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 1
     OnChange = PageControl1Change
-    ExplicitWidth = 576
-    ExplicitHeight = 482
     object TabSheet1: TTabSheet
       Caption = 'Genel'
       object BitBtn2: TBitBtn
@@ -1193,7 +1189,6 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
   end
   object tabSocial: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'SELECT TOP 1 * FROM SOCIAL_MEDIA')
     Left = 543
@@ -1205,5 +1200,3 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     Top = 318
   end
 end
-
-

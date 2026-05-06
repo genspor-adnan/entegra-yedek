@@ -1412,12 +1412,11 @@ end;
 procedure TIKWizardDlg.SilPerTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO)= IDYES then begin
-      CariIlgiliSil(TabRehber.Fields[0].AsInteger, TabIlgili.Fields[0].AsInteger,TabIlgili.FieldByName('VARSAYILAN').AsBoolean);
+      CariIlgiliSil(TabRehber.Fields[0].AsInteger, TabIlgili.Fields[0].AsInteger,TabIlgili.FieldByName('STATU').AsBoolean);
       TabIlgili.Close;
-      TabIlgili.SQL.text := 'select * from REHBERPERSONEL where REHBERID=' +
-        IntToStr(RehberID) + ' order by VARSAYILAN  desc';
+      TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ' order by STATU desc';
   //    TabIlgili.Open;
-      Tabloyenile(TabIlgili,[]);
+      TabloYenile(TabIlgili,[]);
       GridPersonellerViewSelectionChanged(nil);
   end;
 end;
@@ -1506,7 +1505,7 @@ begin
   else
   if TabRehber.FieldByName('SINIF').AsInteger<>OncekiSinif then
      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update KULLANICI set ROLID=&snf '+
-       ' where REHBERID='+TabRehber.Fields[0].AsString,['&snf'],[TabRehber.FieldByName('SINIF').NewValue]);
+       ' where REHBERID='+TabRehber.Fields[0].AsString,['&snf'],[TabRehber.FieldByName('SINIF').AsInteger]);
 
 
   YeniEklenenKayit := False;
@@ -1938,6 +1937,7 @@ begin
 end;
 
 end.
+
 
 
 

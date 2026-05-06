@@ -286,6 +286,7 @@ object AnaForm: TAnaForm
       end
       object EntegrasyonMenu: TMenuItem
         Caption = 'Replikasyon'
+        Visible = False
         OnClick = EntegrasyonMenuClick
       end
       object tslemleri1: TMenuItem

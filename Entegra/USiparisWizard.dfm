@@ -48,17 +48,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       TabOrder = 1
       OnClick = FaturaTusClick
     end
-    object PlanlaTus: TcxButton
-      Tag = 2
-      Left = 3
-      Top = 138
-      Width = 80
-      Height = 29
-      Caption = 'Planla'
-      Enabled = False
-      TabOrder = 2
-      OnClick = FaturaTusClick
-    end
     object DokumanTus: TcxButton
       Tag = 3
       Left = 3
@@ -67,7 +56,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
       Height = 29
       Caption = 'Yorum/Medya'
       Enabled = False
-      TabOrder = 3
+      TabOrder = 2
       OnClick = FaturaTusClick
     end
   end
@@ -318,6 +307,31 @@ object SiparisWizardDlg: TSiparisWizardDlg
                 Caption = #220'r'#252'n No'
                 DataBinding.FieldName = 'URUNNO'
                 Width = 80
+              end
+              object GridFaturaViewEN: TcxGridDBColumn
+                Caption = 'En'
+                DataBinding.FieldName = 'EN'
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 60
+              end
+              object GridFaturaViewBOY: TcxGridDBColumn
+                Caption = 'Boy'
+                DataBinding.FieldName = 'BOY'
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 60
+              end
+              object GridFaturaViewYUZEY: TcxGridDBColumn
+                Caption = 'Yuzey'
+                DataBinding.FieldName = 'YUZEY'
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Options.Editing = False
+                Width = 70
+              end
+              object GridFaturaViewSAYI: TcxGridDBColumn
+                Caption = 'Sayi'
+                DataBinding.FieldName = 'SAYI'
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 55
               end
               object GridFaturaViewKOD1: TcxGridDBColumn
                 Caption = 'Kod'
@@ -2271,6 +2285,22 @@ object SiparisWizardDlg: TSiparisWizardDlg
           end
         end
       end
+      object cxLabel22: TcxLabel
+        Left = 6
+        Top = 45
+        Caption = 'ID'
+        ParentFont = False
+        Transparent = True
+      end
+      object cxDBLabel2: TcxDBLabel
+        Left = 19
+        Top = 45
+        DataBinding.DataField = 'ID'
+        DataBinding.DataSource = DtsTabSiparis
+        Transparent = True
+        Height = 21
+        Width = 58
+      end
     end
     object DetayEkr: TJvWizardInteriorPage
       Tag = 1
@@ -2477,7 +2507,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
           ')'
           'INSERT INTO #DETAY_:SPID_'
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
+          'RB.SIRA,RB.ETIKET,NULLIF(RB.BILGI,'#39#39'),ORJINAL=RB.BILGI,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON '
           'RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'
@@ -2487,8 +2517,9 @@ object SiparisWizardDlg: TSiparisWizardDlg
           'union all'
           ''
           
-            'select  SIRA, ETIKET, BILGI='#39#39', ORJINAL='#39#39' ,GIRIS,KAYNAK,ZORUNLU' +
-            '  '
+            'select  SIRA, ETIKET, BILGI=cast(null as nvarchar(1000)), ORJINA' +
+            'L='#39#39' '
+          ',GIRIS,KAYNAK,ZORUNLU  '
           ' from REHBERAYAR  '
           'where  YERI=@yeri '
           'and isnull(BOLUM,'#39#39')=@Bolum  '
@@ -2503,101 +2534,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         Visible = False
         Height = 264
         Width = 387
-      end
-    end
-    object PlanlamaEkr: TJvWizardInteriorPage
-      Tag = 2
-      Header.ParentFont = False
-      Header.Title.Color = clNone
-      Header.Title.Text = 'Plan'
-      Header.Title.Anchors = [akLeft, akTop, akRight]
-      Header.Title.Font.Charset = TURKISH_CHARSET
-      Header.Title.Font.Color = clWindowText
-      Header.Title.Font.Height = -16
-      Header.Title.Font.Name = 'Trebuchet MS'
-      Header.Title.Font.Style = [fsBold]
-      Header.Subtitle.Color = clNone
-      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
-      Header.Subtitle.Font.Charset = TURKISH_CHARSET
-      Header.Subtitle.Font.Color = clWindowText
-      Header.Subtitle.Font.Height = -11
-      Header.Subtitle.Font.Name = 'Trebuchet MS'
-      Header.Subtitle.Font.Style = []
-      Header.Subtitle.Text = ''
-      VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
-      OnPage = PlanlamaEkrPage
-      object ToolBar4: TToolBar
-        AlignWithMargins = True
-        Left = 3
-        Top = 73
-        Width = 1274
-        Height = 24
-        Margins.Bottom = 0
-        AutoSize = True
-        ButtonWidth = 75
-        Caption = 'AletCubugu'
-        Color = clTeal
-        DockSite = True
-        DrawingStyle = dsGradient
-        EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-        EdgeInner = esLowered
-        EdgeOuter = esNone
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        GradientEndColor = 11776947
-        GradientStartColor = 14540253
-        HotTrackColor = 65408
-        Images = Tablo.PNGImageList2
-        List = True
-        ParentColor = False
-        ParentFont = False
-        ShowCaptions = True
-        TabOrder = 0
-        Transparent = True
-        object ToolButton5: TToolButton
-          Left = 0
-          Top = 0
-          Caption = 'Yeni Proje'
-          ImageIndex = 0
-          ImageName = 'PngImage0'
-        end
-        object ToolButton6: TToolButton
-          Left = 75
-          Top = 0
-          Caption = 'Sil'
-          ImageIndex = 1
-          ImageName = 'PngImage1'
-        end
-      end
-      object GridTicari: TcxGrid
-        Left = 0
-        Top = 97
-        Width = 1280
-        Height = 519
-        Align = alClient
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        TabOrder = 1
-        LookAndFeel.Kind = lfStandard
-        LookAndFeel.NativeStyle = True
-        object GridTicariView: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsCustomize.ColumnsQuickCustomization = True
-          OptionsData.DeletingConfirmation = False
-          OptionsSelection.CellSelect = False
-          OptionsView.GroupByBox = False
-        end
-        object cxGridLevel4: TcxGridLevel
-          GridView = GridTicariView
-        end
       end
     end
     object DokumanEkr: TJvWizardInteriorPage
@@ -3130,25 +3066,41 @@ object SiparisWizardDlg: TSiparisWizardDlg
     OnNewRecord = TabSiparisDetayNewRecord
     Connection = Tablo.FDCnn
     SQL.Strings = (
-        'Select '
-        'AD = CASE WHEN F.TUR =0 THEN  (select MG.AD from MASRAFGELIR MG where MG.ID=F.URUNID) ELSE (select S.STOKADI from STOKLAR S where S.ID=F.URUNID) END,'
-        'KOD= CASE WHEN F.TUR =0 THEN  (select MG.KOD from MASRAFGELIR MG where MG.ID=F.URUNID) ELSE (select S.KOD from STOKLAR S where S.ID=F.URUNID) END,'
-        'URUNNO= CASE WHEN F.TUR =0 THEN  '''' ELSE (select S.URUNNO from STOKLAR S where S.ID=F.URUNID) END,'
-        'RESIM=CASE WHEN F.TUR =0 THEN 0 ELSE (select case when S.RESIM is null then 0 else 1 end from STOKLAR S where S.ID=F.URUNID) END,'
-        'DOKUMAN=CASE WHEN exists(select GY.ID from GOREVYORUM GY inner join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID where GY.TUR=88 and GOREVID=F.URUNID) then 1 else 0 end,'
-        'F.* '
-        ''
-        'from SIPARISDETAY F'
-        'Where SIPARISID = :Par ')
-      ParamData = <
-        item
-          Name = 'Par'
-          DataType = ftLargeint
-          Precision = 19
-          ParamType = ptInput
-          Size = 8
-          Value = 0
-        end>
+      'Select '
+      
+        'AD = CASE WHEN F.TUR =0 THEN  (select MG.AD from MASRAFGELIR MG ' +
+        'where MG.ID=F.URUNID) ELSE (select S.STOKADI from STOKLAR S wher' +
+        'e S.ID=F.URUNID) END,'
+      
+        'KOD= CASE WHEN F.TUR =0 THEN  (select MG.KOD from MASRAFGELIR MG' +
+        ' where MG.ID=F.URUNID) ELSE (select S.KOD from STOKLAR S where S' +
+        '.ID=F.URUNID) END,'
+      
+        'URUNNO= CASE WHEN F.TUR =0 THEN  '#39#39' ELSE (select S.URUNNO from S' +
+        'TOKLAR S where S.ID=F.URUNID) END,'
+      
+        'RESIM=CASE WHEN F.TUR =0 THEN 0 ELSE (select case when S.RESIM i' +
+        's null then 0 else 1 end from STOKLAR S where S.ID=F.URUNID) END' +
+        ','
+      
+        'DOKUMAN=CASE WHEN exists(select GY.ID from GOREVYORUM GY inner j' +
+        'oin DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID where GY.TUR=88' +
+        ' and GOREVID=F.URUNID) then 1 else 0 end,'
+      'F.* '
+      ''
+      'from SIPARISDETAY F'
+      'Where SIPARISID = :Par ')
+    Left = 32
+    Top = 96
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftLargeint
+        Precision = 19
+        ParamType = ptInput
+        Size = 8
+        Value = 0
+      end>
     object TabSiparisDetayAD: TWideStringField
       FieldName = 'AD'
       ReadOnly = True
@@ -3242,6 +3194,29 @@ object SiparisWizardDlg: TSiparisWizardDlg
     object TabSiparisDetayADET: TFMTBCDField
       FieldName = 'ADET'
       Precision = 24
+      Size = 6
+    end
+    object TabSiparisDetayEN: TFMTBCDField
+      FieldName = 'EN'
+      OnChange = TabSiparisDetayENChange
+      Precision = 12
+      Size = 6
+    end
+    object TabSiparisDetayBOY: TFMTBCDField
+      FieldName = 'BOY'
+      OnChange = TabSiparisDetayENChange
+      Precision = 12
+      Size = 6
+    end
+    object TabSiparisDetayYUZEY: TFMTBCDField
+      FieldName = 'YUZEY'
+      Precision = 24
+      Size = 6
+    end
+    object TabSiparisDetaySAYI: TFMTBCDField
+      FieldName = 'SAYI'
+      OnChange = TabSiparisDetayENChange
+      Precision = 12
       Size = 6
     end
     object TabSiparisDetayBIRIM: TSmallintField
@@ -3455,6 +3430,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object TabDetay: TFDQuery
     Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU '
@@ -3487,8 +3463,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 27
-    Top = 129
+    Left = 43
+    Top = 201
   end
   object dtsTOPLAMLAR: TDataSource
     DataSet = TOPLAMLAR
@@ -3689,8 +3665,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object PopupYorumlar: TPopupMenu
     OnPopup = PopupYorumlarPopup
-    Left = 64
-    Top = 16
+    Left = 16
+    Top = 8
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       OnClick = YorumDzenle1Click
@@ -4280,12 +4256,25 @@ object SiparisWizardDlg: TSiparisWizardDlg
     object IntegerField19: TIntegerField
       FieldName = 'POZNO'
     end
+    object SIPARISDETAYEN: TFMTBCDField
+      FieldName = 'EN'
+      Precision = 12
+      Size = 6
+    end
+    object SIPARISDETAYBOY: TFMTBCDField
+      FieldName = 'BOY'
+      Precision = 12
+      Size = 6
+    end
+    object SIPARISDETAYYUZEY: TFMTBCDField
+      FieldName = 'YUZEY'
+      Precision = 24
+      Size = 6
+    end
+    object SIPARISDETAYSAYI: TFMTBCDField
+      FieldName = 'SAYI'
+      Precision = 12
+      Size = 6
+    end
   end
 end
-
-
-
-
-
-
-

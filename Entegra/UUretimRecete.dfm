@@ -420,10 +420,6 @@ object UretimReceteDlg: TUretimReceteDlg
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridUretim: TcxGrid
           Left = 0
           Top = 0
@@ -764,7 +760,6 @@ object UretimReceteDlg: TUretimReceteDlg
           Height = 8
           HotZoneClassName = 'TcxMediaPlayer8Style'
           AlignSplitter = salTop
-          ExplicitWidth = 8
         end
         object PanelOprAlt: TPanel
           Left = 0
@@ -1481,7 +1476,7 @@ object UretimReceteDlg: TUretimReceteDlg
       'where 1=1'
       ''
       '')
-    Left = 164
+    Left = 188
     Top = 194
     object TabReceteMALIYETSON: TCurrencyField
       FieldKind = fkCalculated
@@ -1948,8 +1943,8 @@ object UretimReceteDlg: TUretimReceteDlg
     end
   end
   object PopupMenuListe: TPopupMenu
-    Left = 176
-    Top = 128
+    Left = 200
+    Top = 120
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
       OnClick = Kopyala1Click
@@ -2021,7 +2016,7 @@ object UretimReceteDlg: TUretimReceteDlg
     Enabled = False
     Threaded = False
     OnTimer = JvTimer1Timer
-    Left = 71
+    Left = 55
     Top = 268
   end
   object PopupMenuTest: TPopupMenu

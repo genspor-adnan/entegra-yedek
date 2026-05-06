@@ -18,7 +18,10 @@ uses
   dxSkinWhiteprint, Vcl.ComCtrls, Vcl.ToolWin, Vcl.Menus, frxClass, frxDBSet,
   UFastRap, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxCoreGraphics, frCoreClasses;
+  dxSkinVisualStudio2013Light, dxCoreGraphics, frCoreClasses, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 type
   TTahakkukDlg = class(TForm, IPopupDialog)
     UstPanel: TJvPanel;
@@ -308,6 +311,7 @@ begin
   TabFatBaslik.FieldByName('DOVIZ_CINSI').AsString := CariDoviz;
   TabFatBaslik.FieldByName('EKLEYEN').AsString := Kullanan;
   ComboSube.EditValue := SubeID;
+
   ////Masraf açıklama
   if MasrafMerkezi > 0 then
      TabFatBaslik.FieldByName('MASRAFID').AsInteger := MasrafMerkezi
@@ -463,6 +467,7 @@ Var
   aktifFrame: TGenelAnaSekmeFrame;
 begin
 
+
   IlkAcilis:=True;
   EditProje.Visible := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_ProjeGozuksun, True);
   LabelProje.Visible := EditProje.Visible;
@@ -507,6 +512,7 @@ begin
         TabFatBaslik.Close;
         TabFatBaslik.Open;
      end;
+     ComboSube.EditValue := TabFatBaslik.FieldByName('SUBEID').AsInteger;
      //de�i�iklik i�in gelen tutar kuru tl de�ilse alttaki
      if (ComboKur.EditValue<>CariDoviz)and(PanelKarsilik.Visible = False) then
         //ComboKurPropertiesCloseUp(Self);
