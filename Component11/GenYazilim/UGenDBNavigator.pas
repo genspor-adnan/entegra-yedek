@@ -272,7 +272,7 @@ begin
   {$ELSE}
     Btn := TNavButton.Create (Self);
     Btn.Flat := Flat;
-    Btn.Index := I;
+    Btn.Index := Ord(I);
     Btn.Visible := I in FVisibleButtons;
     Btn.Enabled := True;
     Btn.SetBounds (X, 0, MinBtnSize.X, MinBtnSize.Y);
@@ -472,7 +472,7 @@ end;
 
 procedure TGenDBNavigator.ClickHandler(Sender: TObject);
 begin
-  BtnClick (TNavButton (Sender).Index);
+  BtnClick (TNavigateBtn (TNavButton (Sender).Index));
 end;
 
 procedure TGenDBNavigator.BtnMouseDown(Sender: TObject; Button: TMouseButton;
@@ -481,7 +481,7 @@ var
   OldFocus: TNavigateBtn;
 begin
   OldFocus := FocusedButton;
-  FocusedButton := TNavButton (Sender).Index;
+  FocusedButton := TNavigateBtn (TNavButton (Sender).Index);
   if TabStop and (GetFocus <> Handle) and CanFocus then
   begin
     SetFocus;

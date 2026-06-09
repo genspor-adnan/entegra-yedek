@@ -353,8 +353,8 @@ object RehberAramaEkrani: TRehberAramaEkrani
     end
     object ToolBar1: TToolBar
       AlignWithMargins = True
-      Left = 19947
-      Top = 19384
+      Left = 20019
+      Top = 19456
       Width = 60
       Height = 33
       Margins.Bottom = 0
@@ -383,8 +383,8 @@ object RehberAramaEkrani: TRehberAramaEkrani
       ShowCaptions = True
       TabOrder = 8
       Transparent = True
-      ExplicitLeft = 19941
-      ExplicitTop = 19378
+      ExplicitLeft = 19989
+      ExplicitTop = 19426
     end
     object LabelSon: TcxLabel
       Tag = 1
@@ -448,9 +448,8 @@ object RehberAramaEkrani: TRehberAramaEkrani
     end
   end
   object AraQuery1: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = AraQuery1AfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     Left = 160
     Top = 205
   end
@@ -475,4 +474,3 @@ object RehberAramaEkrani: TRehberAramaEkrani
     end
   end
 end
-

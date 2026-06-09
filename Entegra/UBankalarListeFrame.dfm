@@ -55,7 +55,7 @@ object BankalarListeFrame: TBankalarListeFrame
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
-      Left = 96
+      Left = 115
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
@@ -64,7 +64,7 @@ object BankalarListeFrame: TBankalarListeFrame
       OnClick = SilTusClick
     end
     object ToolButton2: TToolButton
-      Left = 192
+      Left = 230
       Top = 0
       Width = 8
       Caption = 'ToolButton2'
@@ -73,7 +73,7 @@ object BankalarListeFrame: TBankalarListeFrame
       Style = tbsSeparator
     end
     object DegisTus: TToolButton
-      Left = 200
+      Left = 238
       Top = 0
       Caption = 'D'#252'zenle'
       ImageIndex = 9
@@ -83,7 +83,7 @@ object BankalarListeFrame: TBankalarListeFrame
       OnClick = DegisTusClick
     end
     object ToolButton1: TToolButton
-      Left = 296
+      Left = 353
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -92,7 +92,7 @@ object BankalarListeFrame: TBankalarListeFrame
       Style = tbsSeparator
     end
     object ExceldenAlTus: TToolButton
-      Left = 304
+      Left = 361
       Top = 0
       Caption = 'Veri Aktar'#305'm'
       ImageIndex = 17
@@ -101,7 +101,7 @@ object BankalarListeFrame: TBankalarListeFrame
       OnClick = ExceldenAlTusClick
     end
     object AksiyonTus: TToolButton
-      Left = 400
+      Left = 476
       Top = 0
       Caption = 'Aksiyonlar'
       ImageIndex = 1
@@ -109,13 +109,21 @@ object BankalarListeFrame: TBankalarListeFrame
       OnClick = AksiyonTusClick
     end
     object ToolButton3: TToolButton
-      Left = 496
+      Left = 591
       Top = 0
       Width = 8
       Caption = 'ToolButton3'
       ImageIndex = 2
       ImageName = 'PngImage3'
       Style = tbsSeparator
+    end
+    object BankaHizliGirisTus: TToolButton
+      Left = 599
+      Top = 0
+      Caption = 'Banka H'#305'zl'#305' Giri'#351
+      ImageIndex = 1
+      Style = tbsTextButton
+      OnClick = BankaHizliGirisTusClick
     end
   end
   object cxGrid: TcxGrid
@@ -256,7 +264,7 @@ object BankalarListeFrame: TBankalarListeFrame
     Height = 308
     Align = alBottom
     TabOrder = 4
-    Properties.ActivePage = TabSheetEkstre
+    Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlSekmeChange
     ClientRectBottom = 304
@@ -629,6 +637,7 @@ object BankalarListeFrame: TBankalarListeFrame
             Caption = 'Excelden Al'
             ImageIndex = 17
             ImageName = 'PngImage16'
+            Visible = False
           end
         end
         object JvNavPanelHeader2: TJvNavPanelHeader
@@ -741,8 +750,8 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object DtsBankalar: TDataSource
     DataSet = BANKALAR
-    Left = 145
-    Top = 88
+    Left = 161
+    Top = 80
   end
   object BANKALAR: TFDQuery
     AfterOpen = BANKALARAfterOpen
@@ -982,6 +991,7 @@ object BankalarListeFrame: TBankalarListeFrame
     object ExceleAktar1: TMenuItem
       Caption = 'Excel'#39'e Ver'
       ImageIndex = 3
+      OnClick = ExceleAktar1Click
     end
     object MenuItem3: TMenuItem
       Caption = '-'

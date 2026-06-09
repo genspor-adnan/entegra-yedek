@@ -48,8 +48,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
     ShowRouteMap = False
     OnFinishButtonClick = WizardKontrolFinishButtonClick
     OnCancelButtonClick = WizardKontrolCancelButtonClick
-    ExplicitWidth = 932
-    ExplicitHeight = 591
     DesignSize = (
       936
       592)
@@ -73,8 +71,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
       Header.Subtitle.Text = ''
       EnabledButtons = [bkBack, bkNext, bkFinish, bkCancel]
       VisibleButtons = [bkNext, bkFinish, bkCancel]
-      ExplicitWidth = 932
-      ExplicitHeight = 549
       object Panel2: TPanel
         Left = 0
         Top = 70
@@ -82,8 +78,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
         Height = 480
         Align = alClient
         TabOrder = 0
-        ExplicitWidth = 932
-        ExplicitHeight = 479
         object Panel3: TPanel
           Left = 1
           Top = 1
@@ -91,7 +85,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
           Height = 96
           Align = alTop
           TabOrder = 0
-          ExplicitWidth = 930
           object cxDBLabel1: TcxDBLabel
             Left = 294
             Top = 4
@@ -316,8 +309,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
           Height = 382
           Align = alClient
           TabOrder = 1
-          ExplicitWidth = 930
-          ExplicitHeight = 381
           object GridSADetay: TcxGrid
             Left = 1
             Top = 25
@@ -325,8 +316,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
             Height = 356
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 928
-            ExplicitHeight = 355
             object GridSADetayView: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
@@ -339,24 +328,28 @@ object SatinAlmaWizard: TSatinAlmaWizard
               OptionsView.GroupByBox = False
               object GridSADetayViewID: TcxGridDBColumn
                 DataBinding.FieldName = 'ID'
+                DataBinding.IsNullValueType = True
                 Visible = False
                 Width = 24
               end
               object GridSADetayViewKOD: TcxGridDBColumn
                 Caption = 'Kod'
                 DataBinding.FieldName = 'KOD'
+                DataBinding.IsNullValueType = True
                 Options.Editing = False
                 Width = 126
               end
               object GridSADetayViewACIKLAMA: TcxGridDBColumn
                 Caption = 'A'#231#305'klama'
                 DataBinding.FieldName = 'STOKADI'
+                DataBinding.IsNullValueType = True
                 Options.Editing = False
                 Width = 198
               end
               object GridSADetayViewBIRIM: TcxGridDBColumn
                 Caption = 'Birim'
                 DataBinding.FieldName = 'BIRIM'
+                DataBinding.IsNullValueType = True
                 RepositoryItem = Tablo.repStokAnaBirim
                 Options.Editing = False
                 Width = 53
@@ -364,21 +357,25 @@ object SatinAlmaWizard: TSatinAlmaWizard
               object GridSADetayViewADET: TcxGridDBColumn
                 Caption = 'Adet'
                 DataBinding.FieldName = 'ADET'
+                DataBinding.IsNullValueType = True
                 Width = 107
               end
               object GridSADetayViewONAY: TcxGridDBColumn
                 Caption = 'Onay'
                 DataBinding.FieldName = 'ONAY'
+                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCheckBoxProperties'
               end
               object GridSADetayViewONAYADET: TcxGridDBColumn
                 Caption = 'Onaylanan Adet'
                 DataBinding.FieldName = 'ONAYADET'
+                DataBinding.IsNullValueType = True
                 Width = 87
               end
               object GridSADetayViewPROJEID: TcxGridDBColumn
                 Caption = 'Proje'
                 DataBinding.FieldName = 'PROJEKODU'
+                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxButtonEditProperties'
                 Properties.Buttons = <
                   item
@@ -400,6 +397,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
               object GridSADetayViewTESLIMTARIHI: TcxGridDBColumn
                 Caption = 'Teslim Tarihi'
                 DataBinding.FieldName = 'TESLIMTARIHI'
+                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxDateEditProperties'
                 Properties.ImmediatePost = True
                 Width = 97
@@ -438,7 +436,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
             ShowCaptions = True
             TabOrder = 1
             Transparent = True
-            ExplicitWidth = 928
             object SatirEkle: TToolButton
               Left = 0
               Top = 0
@@ -524,18 +521,21 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object GridTekliflerViewEKLEMETARIHI: TcxGridDBColumn
             Caption = 'Tarih'
             DataBinding.FieldName = 'EKLEMETARIHI'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Width = 137
           end
           object GridTekliflerViewFIRMA: TcxGridDBColumn
             Caption = 'Firma'
             DataBinding.FieldName = 'FIRMA'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Width = 329
           end
           object GridTekliflerViewTEKLIF_MATRAHI: TcxGridDBColumn
             Caption = 'Toplam'
             DataBinding.FieldName = 'TEKLIF_MATRAHI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;'
             RepositoryItem = Tablo.RepCurrencyBF
@@ -545,6 +545,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object GridTekliflerViewKDV_TUTARI: TcxGridDBColumn
             Caption = 'KDV'
             DataBinding.FieldName = 'KDV_TUTARI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;'
             RepositoryItem = Tablo.RepCurrencyBF
@@ -554,6 +555,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object GridTekliflerViewDOVIZ_TUTARI: TcxGridDBColumn
             Caption = 'Genel Toplam'
             DataBinding.FieldName = 'DOVIZ_TUTARI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;'
             RepositoryItem = Tablo.RepCurrencyBF
@@ -562,6 +564,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           end
           object GridTekliflerViewEPOSTA_GONDER: TcxGridDBColumn
             Caption = 'E-Posta G'#246'nder'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repEpostaGonder
           end
         end
@@ -788,12 +791,14 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object GridSiparislerViewEKLEMETARIHI: TcxGridDBColumn
             Caption = 'Tarih'
             DataBinding.FieldName = 'EKLEMETARIHI'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Width = 157
           end
           object GridSiparislerViewFIRMA: TcxGridDBColumn
             Caption = 'Firma'
             DataBinding.FieldName = 'FIRMA'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Width = 306
           end
@@ -1032,30 +1037,36 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewTip: TcxGridDBColumn
             Caption = 'Tip'
             DataBinding.FieldName = 'TIP'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repDokumanTip
           end
           object DokumanTviewEXT: TcxGridDBColumn
             Caption = 'T'#252'r'
             DataBinding.FieldName = 'EXT'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxHyperLinkEditProperties'
             RepositoryItem = Tablo.repFileExtensionList
             Width = 52
           end
           object DokumanTviewID: TcxGridDBColumn
             DataBinding.FieldName = 'ID'
+            DataBinding.IsNullValueType = True
             Visible = False
           end
           object DokumanTviewTARIH: TcxGridDBColumn
             Caption = 'Tarih'
             DataBinding.FieldName = 'TARIH'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewBELGENO: TcxGridDBColumn
             Caption = 'Belge No'
             DataBinding.FieldName = 'BELGENO'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewDURUM: TcxGridDBColumn
             Caption = 'Durum'
             DataBinding.FieldName = 'DURUM'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.RepAktifPasif
@@ -1063,6 +1074,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewYON: TcxGridDBColumn
             Caption = 'Y'#246'n'
             DataBinding.FieldName = 'YON'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.RepDokumanYonu
@@ -1070,6 +1082,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewMODUL: TcxGridDBColumn
             Caption = 'Mod'#252'l'
             DataBinding.FieldName = 'MODUL'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.RepDokumanModul
@@ -1077,25 +1090,30 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewKATEGORI: TcxGridDBColumn
             Caption = 'Kategori'
             DataBinding.FieldName = 'KATEGORI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxComboBoxProperties'
           end
           object DokumanTviewAD: TcxGridDBColumn
             Caption = 'D'#246'k'#252'man Ad'#305
             DataBinding.FieldName = 'AD'
+            DataBinding.IsNullValueType = True
             Width = 124
           end
           object DokumanTviewSURUM: TcxGridDBColumn
             Caption = 'S'#252'r'#252'm'
             DataBinding.FieldName = 'SURUM'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewKONU: TcxGridDBColumn
             Caption = 'Konusu'
             DataBinding.FieldName = 'KONU'
+            DataBinding.IsNullValueType = True
             Width = 119
           end
           object DokumanTviewTUR: TcxGridDBColumn
             Caption = 'T'#252'r'
             DataBinding.FieldName = 'TUR'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.RepBelge_Turu
@@ -1103,6 +1121,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewBOLUM: TcxGridDBColumn
             Caption = 'B'#246'l'#252'm'
             DataBinding.FieldName = 'BOLUM'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             Width = 119
@@ -1110,32 +1129,39 @@ object SatinAlmaWizard: TSatinAlmaWizard
           object DokumanTviewKURUM: TcxGridDBColumn
             Caption = 'Kurum'
             DataBinding.FieldName = 'KURUM'
+            DataBinding.IsNullValueType = True
             Width = 200
           end
           object DokumanTviewILGILI: TcxGridDBColumn
             Caption = #304'lgili'
             DataBinding.FieldName = 'ILGILI'
+            DataBinding.IsNullValueType = True
             Width = 88
           end
           object DokumanTviewSORUMLUAD: TcxGridDBColumn
             Caption = 'Sorumlu'
             DataBinding.FieldName = 'SORUMLUAD'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewBOYUT: TcxGridDBColumn
             Caption = 'Boyut'
             DataBinding.FieldName = 'BOYUT'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewLOKASYONAD: TcxGridDBColumn
             Caption = 'Lokasyon'
             DataBinding.FieldName = 'LOKASYONAD'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewGECERLILIK_TARIHI: TcxGridDBColumn
             Caption = 'Ge'#231'erlilik Tarihi'
             DataBinding.FieldName = 'GECERLILIK_TARIHI'
+            DataBinding.IsNullValueType = True
           end
           object DokumanTviewKLASOR: TcxGridDBColumn
             Caption = 'Klas'#246'r'
             DataBinding.FieldName = 'KLASOR'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repDokumanKlasor
             Width = 74
           end
@@ -1157,6 +1183,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           OptionsView.RowCaptionAutoHeight = True
           object GridDokumanDBCardView1EXT: TcxGridDBCardViewRow
             DataBinding.FieldName = 'EXT'
+            DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repFileExtensionList
             Options.Editing = False
             Options.ShowCaption = False
@@ -1165,6 +1192,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
           end
           object GridDokumanDBCardView1AD: TcxGridDBCardViewRow
             DataBinding.FieldName = 'AD'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Options.ShowCaption = False
             Position.BeginsLayer = True
@@ -1189,7 +1217,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
     Height = 592
     Align = alLeft
     TabOrder = 1
-    ExplicitHeight = 591
     object btnTalep: TcxButton
       Left = 0
       Top = 93
@@ -1236,12 +1263,11 @@ object SatinAlmaWizard: TSatinAlmaWizard
     Top = 288
   end
   object TabSatinAlma: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabSatinAlmaBeforeEdit
     BeforePost = TabSatinAlmaBeforePost
     AfterPost = TabSatinAlmaAfterPost
     OnNewRecord = TabSatinAlmaNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'Select *,R.FIRMA from SATINALMA SA left outer join REHBER R on R' +
@@ -1256,11 +1282,10 @@ object SatinAlmaWizard: TSatinAlmaWizard
     Top = 16
   end
   object TabSatinAlmaDetay: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabSatinAlmaDetayBeforeEdit
     BeforePost = TabSatinAlmaDetayBeforePost
     OnNewRecord = TabSatinAlmaDetayNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'Select *,'
       
@@ -1281,7 +1306,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
   end
   object TabTeklifler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'Select T.ID,T.REHBERID,CARIKOD=R.KOD, R.FIRMA,T.EKLEMETARIHI,T.T' +
@@ -1301,7 +1325,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
   end
   object TabSiparisler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'Select S.ID,S.REHBERID,R.FIRMA,S.EKLEMETARIHI from SIPARISDETAY ' +
@@ -1319,7 +1342,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
   end
   object TabDegerlendirme: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       ''
       

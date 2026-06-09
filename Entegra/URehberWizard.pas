@@ -953,7 +953,7 @@ begin
   PersonelIletisimEkr.Enabled := (Cagiran in [0, 4, 34]); //and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme))  ;
   DokumanEkr.Enabled :=(Cagiran in [0, RehAyarYeri_Dokuman]); // and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme))  ;
   CRMEkstreEkr.Enabled := (Cagiran in [0, RehAyarYeri_CRM]); // and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme)) ;
-
+  panel2.Visible :=  Cagiran <> RehAyarYeri_CRM;
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im, 2 Personel ?zl?k, 3 Personel ileti?im, 4 Ticari i?in ileti?im bilgileri , 5  Personel Ucret ,8 CRM
@@ -1259,7 +1259,7 @@ begin
 
 //  TabIlgili.Close;
 //  TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' +TabRehber.Fields[0].AsString +'order by STATU  desc';
-  TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, '%']);
+  TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, 0]);
 
   GridPersonellerViewSelectionChanged(nil);
 
@@ -1312,7 +1312,7 @@ begin
 //    TabIlgili.Close;
 //    TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' +TabRehber.Fields[0].AsString;
 //    TabIlgili.SQL.Add(' order by STATU  desc');
-    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, '%']);
+    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, 0]);
 
     GridPersonellerViewSelectionChanged(nil);
   end;
@@ -1331,7 +1331,7 @@ begin
 //    TabIlgili.Close;
 //    TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' + TabRehber.Fields[0].AsString;
 //    TabIlgili.SQL.Add(' order by STATU  desc');
-    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, '%']);
+    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, 0]);
 
     GridPersonellerViewSelectionChanged(nil);
   end;
@@ -1381,10 +1381,10 @@ begin
     if RehberPerID > 0 then
       // e?er bir ilgili ?zerinde ?ift t?k yap?p de?i?iklik olacaksa
       //TabIlgili.SQL.Add(' and ID=' + IntToStr(RehberPerID));
-       TabloYenile(TabIlgili,[RehberID, ''+IntToStr(RehberPerID)+''])
+       TabloYenile(TabIlgili,[RehberID, RehberPerID])
     else
 //    TabIlgili.SQL.Add(' order by STATU  desc');
-       TabloYenile(TabIlgili,[RehberID, '%']);
+       TabloYenile(TabIlgili,[RehberID, 0]);
     GridIlet.Visible := TabIlgili.RecordCount > 0;
     if (RehberPerID = -1) and (Cagiran = 4) then
     // yeni tu?una bas?lm?? demektir
@@ -1420,7 +1420,7 @@ begin
       CariIlgiliSil(TabRehber.Fields[0].AsInteger, TabIlgili.Fields[0].AsInteger,TabIlgili.FieldByName('STATU').AsBoolean);
 //      TabIlgili.Close;
 //      TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ' order by STATU  desc';
-      TabloYenile(TabIlgili,[RehberID, '%']);
+      TabloYenile(TabIlgili,[RehberID, 0]);
       GridPersonellerViewSelectionChanged(nil);
   end;
 end;
@@ -1729,7 +1729,7 @@ begin
       CariIlgiliSil(TabRehber.Fields[0].AsInteger, TabIlgili.Fields[0].AsInteger,TabIlgili.FieldByName('VARSAYILAN').AsBoolean);
       //TabIlgili.Close;
       //TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ' order by STATU  desc';
-      TabloYenile(TabIlgili,[RehberID, '%']);
+      TabloYenile(TabIlgili,[RehberID, 0]);
       GridPersonellerViewSelectionChanged(nil);
   end;
 end;
@@ -1864,7 +1864,7 @@ begin
 //    TabIlgili.Close;
 //    TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' +TabRehber.Fields[0].AsString;
 //    TabIlgili.SQL.Add(' order by STATU  desc');
-    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, '%']);
+    TabloYenile(TabIlgili,[TabRehber.Fields[0].AsInteger, 0]);
 
     GridPersonellerViewSelectionChanged(nil);
   end;
@@ -1990,6 +1990,7 @@ begin
 end;
 
 end.
+
 
 
 

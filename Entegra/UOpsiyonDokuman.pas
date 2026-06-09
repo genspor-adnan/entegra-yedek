@@ -104,11 +104,11 @@ begin
    if DokumanOrtami.ItemIndex=0 then begin
       LabelDizin.Caption := TVeritabaniAdi;
       DokumanDizin.Text := '.';
-      KlasorVTAktarTus.Caption := 'Klas�r --> VT Aktar';
+      KlasorVTAktarTus.Caption := 'Klasör --> VT Aktar';
    end else begin
       LabelDizin.Caption := TDizinAdi;
       DokumanDizin.Text :=  Tablo.GENINI.ReadString(Ops_Dokuman_Dizin,'c:\GenDokuman\'); // Dokuman Dizin
-      KlasorVTAktarTus.Caption := 'VT --> Klas�r Aktar';
+      KlasorVTAktarTus.Caption := 'VT --> Klasör Aktar';
    end;
 
 end;

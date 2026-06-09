@@ -7,7 +7,7 @@
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>
-        <ProjectVersion>20.3</ProjectVersion>
+        <ProjectVersion>20.4</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">Gentegre</ProjectName>
     </PropertyGroup>
@@ -84,6 +84,8 @@
         <DCC_ExeOutput>\bin\$(Ver)\$(Platform)\$(Config)</DCC_ExeOutput>
         <DCC_DcuOutput>\BIN\$(Ver)\dcu\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_Define>3Dparty;$(DCC_Define)</DCC_Define>
+        <DCC_Hints>false</DCC_Hints>
+        <DCC_DefaultCodePage>1254</DCC_DefaultCodePage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <VerInfo_Build>18</VerInfo_Build>
@@ -141,19 +143,19 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <VerInfo_MajorVer>26</VerInfo_MajorVer>
-        <VerInfo_MinorVer>3</VerInfo_MinorVer>
+        <VerInfo_MinorVer>6</VerInfo_MinorVer>
         <DCC_UNSAFE_CODE>false</DCC_UNSAFE_CODE>
         <DCC_UNSAFE_CAST>false</DCC_UNSAFE_CAST>
         <DCC_UNSAFE_TYPE>false</DCC_UNSAFE_TYPE>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.3.17.32;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.6.9.1;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <DCC_UnitSearchPath>cxGenYazilim_RepoClasses;C:\comp\DevEx23\GenYazilimEx;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <VerInfo_Build>32</VerInfo_Build>
-        <VerInfo_Release>17</VerInfo_Release>
+        <VerInfo_Build>1</VerInfo_Build>
+        <VerInfo_Release>9</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -1205,6 +1207,10 @@
             <Form>InfoDlg</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="UBankaHesapGiris.pas">
+            <Form>bankaHesapGirisdlg</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <RcItem Include="SekmeConfig.xml">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
@@ -1268,14 +1274,8 @@
                     <VersionInfoKeys Name="LastCompiledTime">2023/02/04 17:02:16</VersionInfoKeys>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\Jcl290.bpl">JEDI Code Library RTL package</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvCore290.bpl">JVCL Core Components Runtime Package</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvSystem290.bpl">JVCL Core Components Runtime Package</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvStdCtrls290.bpl">JVCL Standard Controls Runtime Package</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvControls290.bpl">JVCL Visual Controls Runtime Package</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\JvDlgs290.bpl">JVCL Dialog Components Runtime Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k370.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp370.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
@@ -1296,7 +1296,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\bin\290\Win32\Debug\Gentegre.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="C:\bin\370\Win32\Debug\Gentegre.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>Gentegre.exe</RemoteName>
                         <Overwrite>true</Overwrite>
@@ -1979,6 +1979,9 @@
                     <Platform Name="Win64x">
                         <Operation>1</Operation>
                     </Platform>
+                    <Platform Name="WinARM64EC">
+                        <Operation>1</Operation>
+                    </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectiOSDeviceDebug">
                     <Platform Name="iOSDevice32">
@@ -2049,6 +2052,10 @@
                         <RemoteDir>Assets</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
+                    <Platform Name="WinARM64EC">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
                 </DeployClass>
                 <DeployClass Name="UWP_DelphiLogo44">
                     <Platform Name="Win32">
@@ -2056,6 +2063,10 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="Win64">
+                        <RemoteDir>Assets</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="WinARM64EC">
                         <RemoteDir>Assets</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
@@ -2272,6 +2283,7 @@
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win64x" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="WinARM64EC" Name="$(PROJECTNAME)"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

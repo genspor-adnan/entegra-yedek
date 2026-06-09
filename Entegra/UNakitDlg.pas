@@ -254,6 +254,10 @@ end;
 
 procedure TNakitDlg.TabKasaBeforePost(DataSet: TDataSet);
 begin
+  // KASA tarih alanlarını saniye hassasiyetinde tut — millisaniyeleri at
+  TabKasa.FieldByName('ISLEMTARIHI').AsDateTime := RecodeMillisecond(TabKasa.FieldByName('ISLEMTARIHI').AsDateTime, 0);
+  TabKasa.FieldByName('PLANTARIHI').AsDateTime  := RecodeMillisecond(TabKasa.FieldByName('PLANTARIHI').AsDateTime, 0);
+
   {if (YearOf(TabKasa.FieldByName('ISLEMTARIHI').AsDateTime) <> YearOf(TabKasa.FieldByName('PLANTARIHI').AsDateTime)) then begin
 //    Application.MessageBox(Pchar(FWKayitBelgeYilindanFarkliOlamaz),pchar(Uyari),MB_OK);
 //    exit;

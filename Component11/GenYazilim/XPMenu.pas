@@ -198,7 +198,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('XP', [TXPMenu]);
+  RegisterComponents('GenYazilim', [TXPMenu]);
 end;
 
 { TXPMenue }

@@ -37,6 +37,9 @@ object UTSDlg: TUTSDlg
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet5: TcxTabSheet
       Caption = 'Hatal'#305'lar'
@@ -47,10 +50,16 @@ object UTSDlg: TUTSDlg
       Font.Style = [fsBold]
       ImageIndex = 3
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet1: TcxTabSheet
       Caption = #304'ptaller'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
   end
   object PanelKategori: TJvNavPaneToolPanel
@@ -227,6 +236,10 @@ object UTSDlg: TUTSDlg
       object TabSheetBildirim: TcxTabSheet
         Caption = 'Bildirim Listesi'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridUTS: TcxGrid
           Left = 0
           Top = 0
@@ -903,7 +916,6 @@ object UTSDlg: TUTSDlg
   end
   object TabSorgu: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'sp_UTS_Kullanim  '#39'2018-12-01 00:00'#39','#39'2018-12-31 23:59'#39)
     Left = 896
@@ -911,7 +923,6 @@ object UTSDlg: TUTSDlg
   end
   object TabBildirimTur: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from UTS_BILDIRIM_TUR '
       'where AKTIF=1'
@@ -926,7 +937,6 @@ object UTSDlg: TUTSDlg
   end
   object TabBildirim: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from UTSBILDIRIM U left join UTSBILDIRIMMESAJ UM on U.I' +
@@ -1006,7 +1016,6 @@ object UTSDlg: TUTSDlg
   end
   object TabHata: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from UTSBILDIRIM U inner join UTSBILDIRIMMESAJ UM on U.' +
@@ -1022,7 +1031,6 @@ object UTSDlg: TUTSDlg
   end
   object TabBasari: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select top 50 U.*, UM.*, FIRMA=R.FIRMA,STOKADI=S.STOKADI  from U' +
@@ -1092,7 +1100,6 @@ object UTSDlg: TUTSDlg
   end
   object TabIptal: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from UTSBILDIRIM U inner join UTSBILDIRIMMESAJ UM on U.' +
@@ -1117,7 +1124,6 @@ object UTSDlg: TUTSDlg
   object TabDepo: TFDQuery
     Active = True
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from DEPOLAR where DURUM=1 order by DEPOADI')
     Left = 232
@@ -1129,4 +1135,3 @@ object UTSDlg: TUTSDlg
     Top = 152
   end
 end
-

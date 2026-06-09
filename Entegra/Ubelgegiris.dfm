@@ -27,8 +27,6 @@ object belgegirisdlg: Tbelgegirisdlg
     Height = 373
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1327
-    ExplicitHeight = 372
     object cxGrid1DBTableView1: TcxGridDBTableView
       PopupMenu = PopupMenu1
       Navigator.Buttons.CustomButtons = <>
@@ -172,7 +170,6 @@ object belgegirisdlg: Tbelgegirisdlg
     Height = 35
     Align = alTop
     TabOrder = 1
-    ExplicitWidth = 1327
     object cxButton2: TcxButton
       Left = 1
       Top = 1
@@ -191,7 +188,6 @@ object belgegirisdlg: Tbelgegirisdlg
     Height = 45
     Align = alTop
     TabOrder = 2
-    ExplicitWidth = 1327
     object Panel16: TPanel
       Left = 1
       Top = 1
@@ -303,6 +299,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.Kind = lfFlat
         StyleFocused.LookAndFeel.Kind = lfFlat
         StyleHot.LookAndFeel.Kind = lfFlat
+        StyleReadOnly.LookAndFeel.Kind = lfFlat
         TabOrder = 1
         Width = 135
       end
@@ -366,6 +363,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.Kind = lfFlat
         StyleFocused.LookAndFeel.Kind = lfFlat
         StyleHot.LookAndFeel.Kind = lfFlat
+        StyleReadOnly.LookAndFeel.Kind = lfFlat
         TabOrder = 1
         Width = 70
       end
@@ -578,6 +576,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.Kind = lfFlat
         StyleFocused.LookAndFeel.Kind = lfFlat
         StyleHot.LookAndFeel.Kind = lfFlat
+        StyleReadOnly.LookAndFeel.Kind = lfFlat
         TabOrder = 1
         Width = 130
       end
@@ -641,6 +640,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.Kind = lfFlat
         StyleFocused.LookAndFeel.Kind = lfFlat
         StyleHot.LookAndFeel.Kind = lfFlat
+        StyleReadOnly.LookAndFeel.Kind = lfFlat
         TabOrder = 1
         Width = 110
       end
@@ -1008,6 +1008,8 @@ object belgegirisdlg: Tbelgegirisdlg
       StyleFocused.LookAndFeel.NativeStyle = False
       StyleHot.LookAndFeel.Kind = lfStandard
       StyleHot.LookAndFeel.NativeStyle = False
+      StyleReadOnly.LookAndFeel.Kind = lfStandard
+      StyleReadOnly.LookAndFeel.NativeStyle = False
       TabOrder = 14
       Width = 165
     end
@@ -1020,8 +1022,6 @@ object belgegirisdlg: Tbelgegirisdlg
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 3
-    ExplicitTop = 452
-    ExplicitWidth = 1327
     object Panel29: TPanel
       Left = 1151
       Top = 0
@@ -1030,7 +1030,6 @@ object belgegirisdlg: Tbelgegirisdlg
       Align = alRight
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitLeft = 1147
       object cxLabel23: TcxLabel
         Left = 0
         Top = 0
@@ -1127,7 +1126,6 @@ object belgegirisdlg: Tbelgegirisdlg
       Align = alRight
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitLeft = 1217
       object cxCurrencyEdit9: TcxCurrencyEdit
         Left = 0
         Top = 0
@@ -1149,6 +1147,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.NativeStyle = True
         StyleFocused.LookAndFeel.NativeStyle = True
         StyleHot.LookAndFeel.NativeStyle = True
+        StyleReadOnly.LookAndFeel.NativeStyle = True
         TabOrder = 0
         BiDiMode = bdRightToLeft
         ParentBiDiMode = False
@@ -1175,6 +1174,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.NativeStyle = True
         StyleFocused.LookAndFeel.NativeStyle = True
         StyleHot.LookAndFeel.NativeStyle = True
+        StyleReadOnly.LookAndFeel.NativeStyle = True
         TabOrder = 1
         Visible = False
         BiDiMode = bdRightToLeft
@@ -1202,6 +1202,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.NativeStyle = True
         StyleFocused.LookAndFeel.NativeStyle = True
         StyleHot.LookAndFeel.NativeStyle = True
+        StyleReadOnly.LookAndFeel.NativeStyle = True
         TabOrder = 2
         Visible = False
         BiDiMode = bdRightToLeft
@@ -1229,6 +1230,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.NativeStyle = True
         StyleFocused.LookAndFeel.NativeStyle = True
         StyleHot.LookAndFeel.NativeStyle = True
+        StyleReadOnly.LookAndFeel.NativeStyle = True
         TabOrder = 3
         BiDiMode = bdRightToLeft
         ParentBiDiMode = False
@@ -1255,6 +1257,7 @@ object belgegirisdlg: Tbelgegirisdlg
         StyleDisabled.LookAndFeel.NativeStyle = True
         StyleFocused.LookAndFeel.NativeStyle = True
         StyleHot.LookAndFeel.NativeStyle = True
+        StyleReadOnly.LookAndFeel.NativeStyle = True
         TabOrder = 4
         BiDiMode = bdRightToLeft
         ParentBiDiMode = False
@@ -1269,7 +1272,6 @@ object belgegirisdlg: Tbelgegirisdlg
       Align = alRight
       BevelOuter = bvNone
       TabOrder = 2
-      ExplicitLeft = 1297
     end
     object cxTextEdit1: TcxTextEdit
       Left = 760
@@ -1678,7 +1680,6 @@ object belgegirisdlg: Tbelgegirisdlg
   end
   object ftbaslik: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from FATBASLIK'
       'where ID =-1')
@@ -1687,7 +1688,6 @@ object belgegirisdlg: Tbelgegirisdlg
   end
   object fisno: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select max(ID) as ID from FATBASLIK')
     Left = 488
@@ -1699,7 +1699,6 @@ object belgegirisdlg: Tbelgegirisdlg
   end
   object ftdetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from FATURA')
     Left = 352
@@ -1728,7 +1727,6 @@ object belgegirisdlg: Tbelgegirisdlg
   end
   object kasakayit: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from KASA where ID=0')
     Left = 632
@@ -1740,4 +1738,3 @@ object belgegirisdlg: Tbelgegirisdlg
     Top = 256
   end
 end
-

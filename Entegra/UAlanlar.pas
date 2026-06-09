@@ -16,7 +16,10 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 type
   TAlanlarDlg = class(TForm)
@@ -174,7 +177,7 @@ begin
     1,4,7,9,10 :  s:=' nvarchar(100) ';
     2,6 :  s:=' int ';
     3 :  s:=' datetime ';
-    5 :  s:=' bool ';
+    5 :  s:=' bit ';
     8 :  s:=' decimal(12,4) ';
     13 :  s:=' image ';
   end;

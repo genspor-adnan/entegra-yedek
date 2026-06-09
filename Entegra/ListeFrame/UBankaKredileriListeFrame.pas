@@ -1121,7 +1121,7 @@ procedure TBankaKredileriListeFrame.KrediSilTusClick(Sender: TObject);
 begin
   if Veritabani.VeriVarMi(Tablo.FDCnn,'select * from KASA where  TUR=59 and KREDIID='+KREDILER.FieldByName('ID').AsString ,[],[]) or
      Veritabani.VeriVarMi(Tablo.FDCnn,'select * from KASA where  TUR=55 and KREDIID='+KREDILER.FieldByName('ID').AsString ,[],[]) then
-     Showmessage('Hareket g?rm??, silinemez!')
+     Showmessage('Hareket görmüþ, silinemez!')
   else begin
      if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]);

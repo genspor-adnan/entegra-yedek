@@ -190,7 +190,6 @@ type
     cxProgressBar1: TcxProgressBar;
     cbSifirKalanGoster: TcxCheckBox;
     cbSKTsizGrupla: TcxCheckBox;
-    DurumExceleAktarBtn: TSpeedButton;
     StokHareketlerADET: TcxGridDBColumn;
     N7: TMenuItem;
     BuUrununstokdurumunugncelle1: TMenuItem;
@@ -872,7 +871,7 @@ begin
         TGirdiDenetimleri.Create.DateTimePicker(BGBaslama_tarih+':', @Tarih,dtkDate))= mrOk)  then begin
 //        Trh := StringReplace( VarToStr(Tarih),'.', FormatSettings.DateSeparator,[rfReplaceAll]);
 //        Trh := StringReplace( VarToStr(Trh),'/', FormatSettings.DateSeparator,[rfReplaceAll]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'P_StokMaliyetGuncelleORT '+STOKLAR.FieldByName('ID').AsString+','+IntToStr(ComboDepo.EditValue)+','''+FormatDateTime('yyyy-dd-mm 00:00', TDateTime(Tarih))+''' ',[],[]);
+        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' exec P_StokMaliyetGuncelleORT '+STOKLAR.FieldByName('ID').AsString+','+IntToStr(ComboDepo.EditValue)+','''+FormatDateTime('yyyy-dd-mm 00:00', TDateTime(Tarih))+''' ',[],[]);
         ShowMessage(Guncellendi);
         DateHarBasPropertiesEditValueChanged(Self);
    end;

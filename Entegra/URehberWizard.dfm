@@ -812,6 +812,10 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -849,6 +853,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1161,6 +1167,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = TicariEkrEnterPage
       OnPage = TicariEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1358,6 +1366,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1663,6 +1673,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 491
@@ -1723,6 +1735,7 @@ object RehberWizardDlg: TRehberWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 470
         AnchorX = 755
       end
       object GridYorum: TcxGrid
@@ -1832,6 +1845,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'CRMEkstreEkr'
       OnEnterPage = CRMEkstreEkrEnterPage
       OnPage = CRMEkstreEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar7: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2447,7 +2462,7 @@ object RehberWizardDlg: TRehberWizardDlg
         'ID)'
       ')'
       ' from REHBER R where R.GRUP=334 and BAGID=:PID '
-      ' and R.ID like :PID2'
+      ' and (:PID2=0 or R.ID=:PID2)'
       'order by R.STATU  desc')
     Left = 450
     Top = 247
@@ -2520,7 +2535,7 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object PopupIlgili: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 97
+    Left = 65
     Top = 15
     object lgiliKurumdanAyrld1: TMenuItem
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak '

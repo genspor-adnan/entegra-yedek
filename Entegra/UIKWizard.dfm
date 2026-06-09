@@ -1,7 +1,7 @@
 object IKWizardDlg: TIKWizardDlg
   Left = 0
   Top = 0
-  ActiveControl = WizardKontrol
+  ActiveControl = EditVKNO
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Cari Kart Sihirbaz'#305
   ClientHeight = 556
@@ -24,7 +24,7 @@ object IKWizardDlg: TIKWizardDlg
     Top = 0
     Width = 938
     Height = 556
-    ActivePage = PersonelIletisimEkr
+    ActivePage = GirisEkr
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -722,7 +722,7 @@ object IKWizardDlg: TIKWizardDlg
         Top = 33
         DataBinding.DataField = 'RESIM'
         DataBinding.DataSource = DtsRehber
-        Properties.Caption = 'Resim i'#231'in t'#305'klay'#305'n'
+        Properties.Caption = 'Resim i'#231'in sa'#287' t'#305'klay'#305'n'
         Properties.FitMode = ifmProportionalStretch
         Properties.GraphicClassName = 'TdxSmartImage'
         TabOrder = 2
@@ -976,9 +976,8 @@ object IKWizardDlg: TIKWizardDlg
           ''
           'union all'
           ''
-          
-            'select distinct SIRA, ETIKET, BILGI=LEFT(ETIKET,0), ORJINAL=LEFT(ETIKET,' +
-            '0) '
+          'select distinct SIRA, ETIKET, BILGI=LEFT(ETIKET,0), ORJINAL=LEFT'
+          '(ETIKET,0) '
           ',GIRIS,KAYNAK,ZORUNLU  '
           ' from REHBERAYAR  where  YERI=1  '
           'and ETIKET not in (select ETIKET from REHBERBILGI '
@@ -1324,7 +1323,7 @@ object IKWizardDlg: TIKWizardDlg
           end
           object PersonelVARSAYILAN: TcxGridDBColumn
             Caption = 'Var.'
-            DataBinding.FieldName = 'VARSAYILAN'
+            DataBinding.FieldName = 'STATU'
             DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.ReadOnly = True
@@ -1361,7 +1360,8 @@ object IKWizardDlg: TIKWizardDlg
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR RA '
           'ON '
-          'RB.ETIKET=RA.ETIKET AND RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'
+          'RB.ETIKET=RA.ETIKET AND RB.SIRA=RA.SIRA AND '
+          'RB.YERI=RA.YERI'
           'where RB.YERI= :Yeri  and YER_ID= :Yeri_Id1   '
           ''
           'union all'
@@ -2070,8 +2070,8 @@ object IKWizardDlg: TIKWizardDlg
         'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU ' +
         'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA ' +
         'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   order by  1')
-    Left = 43
-    Top = 12
+    Left = 67
+    Top = 4
   end
   object DtsKurIlet: TDataSource
     DataSet = TabKurIlet
@@ -2173,8 +2173,8 @@ object IKWizardDlg: TIKWizardDlg
     SQL.Strings = (
       ''
       
-        'select * from REHBERPERSONEL where REHBERID=:PID Order by VARSAY' +
-        'ILAN  desc')
+        'select * from REHBER where GRUP=334 and BAGID=:PID Order by STAT' +
+        'U desc')
     Left = 418
     Top = 287
   end
@@ -2388,4 +2388,3 @@ object IKWizardDlg: TIKWizardDlg
     end
   end
 end
-

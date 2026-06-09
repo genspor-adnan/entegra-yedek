@@ -161,82 +161,108 @@ object StokTalepListeDlg: TStokTalepListeDlg
       OptionsView.Indicator = True
       object GridStokTalepTviewID: TcxGridDBColumn
         DataBinding.FieldName = 'ID'
+        DataBinding.IsNullValueType = True
         Visible = False
       end
       object GridStokTalepTviewFATURATARIH: TcxGridDBColumn
         Caption = 'Talep Tarihi'
         DataBinding.FieldName = 'TALEPTARIH'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 95
       end
       object GridStokTalepTviewFATURANO: TcxGridDBColumn
         Caption = 'Talep No'
         DataBinding.FieldName = 'TALEPNO'
+        DataBinding.IsNullValueType = True
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.ReadOnly = True
         HeaderAlignmentHorz = taCenter
         Width = 72
+      end
+      object GridStokTalepTviewEMIRNO: TcxGridDBColumn
+        Caption = #220'rt.Emir No'
+        DataBinding.FieldName = 'DETAYBOLUMU'
+        DataBinding.IsNullValueType = True
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.ReadOnly = True
+        Width = 69
       end
       object GridStokTalepTviewTALEPEDENAD: TcxGridDBColumn
         Caption = 'Talep Eden Ki'#351'i'
         DataBinding.FieldName = 'TALEPEDENAD'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 97
       end
       object GridStokTalepTviewTALEPEDENBIRIM: TcxGridDBColumn
         Caption = 'Talep Eden Birim'
         DataBinding.FieldName = 'TALEPEDENBIRIM'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 113
       end
       object GridStokTalepTviewGIRISDEPOSU: TcxGridDBColumn
         Caption = 'Giri'#351' Depo'
         DataBinding.FieldName = 'GIRISDEPOSU'
+        DataBinding.IsNullValueType = True
       end
       object GridStokTalepTviewBIRIMONAYLAYACAKAD: TcxGridDBColumn
         Caption = 'Birim Onaylayacak'
         DataBinding.FieldName = 'BIRIMONAYLAYACAKAD'
+        DataBinding.IsNullValueType = True
         Width = 100
       end
       object GridStokTalepTviewBIRIMONAYLAYANAD: TcxGridDBColumn
         Caption = 'Birim Onaylayan'
         DataBinding.FieldName = 'BIRIMONAYLAYANAD'
+        DataBinding.IsNullValueType = True
         Width = 100
       end
       object GridStokTalepTviewPROJEKOD: TcxGridDBColumn
         Caption = 'Proje Kodu'
         DataBinding.FieldName = 'PROJEKOD'
+        DataBinding.IsNullValueType = True
         Width = 150
       end
       object GridStokTalepTviewTALEPONAYLAYACAKAD: TcxGridDBColumn
         Caption = 'Talep Onaylayacak'
         DataBinding.FieldName = 'TALEPONAYLAYACAKAD'
+        DataBinding.IsNullValueType = True
         Width = 120
       end
       object GridStokTalepTviewTALEPONAYLAYANAD: TcxGridDBColumn
         Caption = 'Talep Onaylayan'
         DataBinding.FieldName = 'TALEPONAYLAYANAD'
+        DataBinding.IsNullValueType = True
         Width = 120
       end
       object GridStokTalepTviewKAYNAK: TcxGridDBColumn
         Caption = 'Kaynak'
         DataBinding.FieldName = 'KAYNAK'
+        DataBinding.IsNullValueType = True
       end
       object GridStokTalepTviewHEDEF: TcxGridDBColumn
         Caption = 'Hedef'
         DataBinding.FieldName = 'HEDEF'
+        DataBinding.IsNullValueType = True
       end
       object GridStokTalepTviewACIKLAMA: TcxGridDBColumn
         Caption = 'Notlar'
         DataBinding.FieldName = 'ACIKLAMA'
+        DataBinding.IsNullValueType = True
         Width = 120
       end
       object GridStokTalepTviewOZELKOD: TcxGridDBColumn
         Caption = #214'zel Kod'
         DataBinding.FieldName = 'OZELKOD'
+        DataBinding.IsNullValueType = True
         Width = 100
       end
       object GridStokTalepTviewDURUM: TcxGridDBColumn
         Caption = 'Durum'
         DataBinding.FieldName = 'DURUM'
+        DataBinding.IsNullValueType = True
         RepositoryItem = Tablo.RepSatinalmaAsama
       end
     end
@@ -367,6 +393,7 @@ object StokTalepListeDlg: TStokTalepListeDlg
           object GridDetayViewTUR: TcxGridDBColumn
             Caption = 'T'#252'r'
             DataBinding.FieldName = 'TUR'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             RepositoryItem = Tablo.RepFatDetayTur
@@ -375,6 +402,7 @@ object StokTalepListeDlg: TStokTalepListeDlg
           object GridDetayViewKOD1: TcxGridDBColumn
             Caption = 'Kod'
             DataBinding.FieldName = 'KOD'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxButtonEditProperties'
             Properties.Alignment.Horz = taLeftJustify
             Properties.Buttons = <
@@ -389,11 +417,13 @@ object StokTalepListeDlg: TStokTalepListeDlg
           object GridDetayViewSTOKADI: TcxGridDBColumn
             Caption = 'Stok Ad'#305
             DataBinding.FieldName = 'STOKADI'
+            DataBinding.IsNullValueType = True
             Width = 155
           end
           object GridDetayViewADET1: TcxGridDBColumn
             Caption = 'Adet'
             DataBinding.FieldName = 'ADET'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Properties.Alignment.Horz = taRightJustify
             Properties.ReadOnly = False
@@ -403,6 +433,7 @@ object StokTalepListeDlg: TStokTalepListeDlg
           object GridDetayViewBIRIM1: TcxGridDBColumn
             Caption = 'Birim'
             DataBinding.FieldName = 'BIRIM'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.Items = <>
             HeaderAlignmentHorz = taCenter
@@ -411,16 +442,19 @@ object StokTalepListeDlg: TStokTalepListeDlg
           object GridDetayViewColumn1: TcxGridDBColumn
             Caption = 'Proje Kodu'
             DataBinding.FieldName = 'PROJEKODU'
+            DataBinding.IsNullValueType = True
             Width = 92
           end
           object GridDetayViewTESLIMTARIHI: TcxGridDBColumn
             Caption = 'Teslim Tarihi'
             DataBinding.FieldName = 'TESLIMTARIHI'
+            DataBinding.IsNullValueType = True
             Width = 83
           end
           object GridDetayViewACIKLAMA1: TcxGridDBColumn
             Caption = 'A'#231#305'klama'
             DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Width = 228
           end
@@ -446,6 +480,7 @@ object StokTalepListeDlg: TStokTalepListeDlg
       'SELECT '
       'distinct S.ID,S.DURUM,'
       'TALEPTARIH=SIPARISTARIH, TALEPNO=SIPARISNO,'
+      'DETAYBOLUMU,'
       
         'TALEPEDENAD=(SELECT FIRMA FROM REHBER R WHERE S.SATICIKODU = R.I' +
         'D),'
@@ -502,11 +537,11 @@ object StokTalepListeDlg: TStokTalepListeDlg
   object TabStokTalep: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'SELECT '
       'distinct S.ID,S.DURUM,'
       'TALEPTARIH=SIPARISTARIH, TALEPNO=SIPARISNO,'
+      'DETAYBOLUMU,'
       
         'TALEPEDENAD=(SELECT FIRMA FROM REHBER R WHERE S.SATICIKODU = R.I' +
         'D),'
@@ -554,14 +589,6 @@ object StokTalepListeDlg: TStokTalepListeDlg
   object TabTalepDetay: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'Select SD.* , ST.*,'
       
@@ -603,6 +630,14 @@ object StokTalepListeDlg: TStokTalepListeDlg
       'WHERE SD.SIPARISID = :Par')
     Left = 277
     Top = 268
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object DtsTalepDetay: TDataSource
     DataSet = TabTalepDetay
@@ -768,14 +803,6 @@ object StokTalepListeDlg: TStokTalepListeDlg
   object StokTalep: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = 0
-      end>
     SQL.Strings = (
       
         'SELECT *,YAZIYLATOPLAM=( dbo.fn_MoneyToText(FATURA_TUTARI,'#39'TL'#39','#39 +
@@ -783,6 +810,15 @@ object StokTalepListeDlg: TStokTalepListeDlg
       'FROM FATBASLIK WHERE ID = :Par')
     Left = 336
     Top = 209
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftInteger
+        Precision = 10
+        ParamType = ptInput
+        Size = 4
+        Value = 0
+      end>
   end
   object JvTimer1: TJvTimer
     Enabled = False
@@ -801,4 +837,3 @@ object StokTalepListeDlg: TStokTalepListeDlg
     end
   end
 end
-

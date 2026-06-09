@@ -223,7 +223,7 @@ end;
 
 procedure Register;
 begin
-  RegisterComponents('Additional',[TUyariPanel]);
+  RegisterComponents('GenYazilim',[TUyariPanel]);
 end;
 
 procedure TUyariPanel.SetMetinXMargin(const Value: integer);

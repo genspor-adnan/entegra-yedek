@@ -14,7 +14,10 @@ uses
   xmldom, XMLIntf, msxmldom, XMLDoc, WINInet, cxLookAndFeels,
   cxLookAndFeelPainters, cxNavigator, dxCore, cxDateUtils, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
-  dxSkinOffice2013LightGray, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinOffice2013LightGray, dxDateRanges, dxScrollbarAnnotations,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
                         //  555   238 46 78
 type
   TDovizDlg = class(TForm)
@@ -75,10 +78,11 @@ type
     procedure SilTusClick(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure IptalTusClick(Sender: TObject);
-    procedure DateTimePicker1PropertiesChange(Sender: TObject);
     procedure ChangeCalistir;
     function GetInetFile (const fileURL, FileName: String): boolean;
     procedure XMLDovizGuncelle;
+    procedure DateDovizTarihiPropertiesChange(Sender: TObject);
+    procedure DateDovizTarihiPropertiesCloseUp(Sender: TObject);
   private
     { private declarations }
   public
@@ -101,7 +105,7 @@ var
 
 implementation
 
-uses UTablo, UCombo,PrjConst,LocOnFly;
+uses UTablo, UCombo, PrjConst, LocOnFly, FetaKurulusSiniflari;
 
 {$R *.DFM}
 var
@@ -114,7 +118,7 @@ begin
   //ADOQuery2.Close;
   //ADOQuery2.Open;
   DateDovizTarihi.Date := Tablo.GENINI.BugunTrh;
- Tablo.GENINI.ReadSection(Ops_KURLAR,ComboKur.Properties);
+ Tablo.GENINI.ReadSection(Ops_KURLAR, ComboKur.Properties, True);
  ComboKurPropertiesChange(Self);
 
  Tablo.GridTurkcelestir;
@@ -343,6 +347,27 @@ end;
 procedure TDovizDlg.TabDovizBeforePost(DataSet: TDataSet);
 begin
   EkleyenDegistiren(DtsDoviz);
+
+  if TabDoviz.FieldByName('CINSI').IsNull or TabDoviz.FieldByName('TARIH').IsNull then
+    Exit;
+
+
+    if SameText(Trim(TabDoviz.FieldByName('CINSI').OldValue), Trim(TabDoviz.FieldByName('CINSI').AsString)) and
+       (Trunc(TabDoviz.FieldByName('TARIH').OldValue) = Trunc(TabDoviz.FieldByName('TARIH').AsDateTime)) then
+      Exit;
+
+    if Veritabani.VeriVarMi(
+      Tablo.FDCnn,
+      'select top 1 1 from DOVIZ where CINSI = &CINSI and cast(TARIH as date) = &TARIH',
+      ['&CINSI', '&TARIH*datetime*'],
+      [Trim(TabDoviz.FieldByName('CINSI').AsString), TabDoviz.FieldByName('TARIH').AsDateTime]
+    ) then
+    begin
+      MessageBox(0, PChar('Bu tarih ve döviz cinsinde kayıt zaten var!'), PChar(Onay), MB_OK or MB_ICONWARNING);
+      Abort;
+    end;
+
+ 
 end;
 
 procedure TDovizDlg.TabDovizAfterPost(DataSet: TDataSet);
@@ -353,9 +378,16 @@ begin
    end;
 end;
 
-procedure TDovizDlg.DateTimePicker1PropertiesChange(Sender: TObject);
+procedure TDovizDlg.DateDovizTarihiPropertiesCloseUp(Sender: TObject);
 begin
-ChangeCalistir;
+     DateDovizTarihi.PostEditValue;
+     ChangeCalistir;
+end;
+
+procedure TDovizDlg.DateDovizTarihiPropertiesChange(Sender: TObject);
+begin
+     DateDovizTarihi.PostEditValue;
+     ChangeCalistir;
 end;
 
 procedure TDovizDlg.DBNavigator1BeforeAction(Sender: TObject;

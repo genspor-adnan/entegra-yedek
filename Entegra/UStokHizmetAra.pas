@@ -1112,6 +1112,7 @@ Begin
     if stokhizmetaracagirantur in[3,4,10,11,12,14,15,16] then begin
       TabDetayGiris.FieldByName('YERI').AsInteger := Yeri;
       TabDetayGiris.FieldByName('YERID').AsInteger :=YerID;
+      TabDetayGiris.FieldByName('STOKDURUMDEGIS').AsBoolean := True;
     end;
     if (stokhizmetaracagirantur in[3,4,9,10,11,12,14,15,16,19]) and (MasrafID<>0) then
         TabDetayGiris.FieldByName('MASRAFID').AsInteger := MasrafID;

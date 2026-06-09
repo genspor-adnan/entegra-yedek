@@ -30,7 +30,8 @@ uses Windows, DB, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSky, dxSkinsDef
   FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
   FireDAC.Phys, FireDAC.VCLUI.Wait, FireDAC.Comp.Client, FireDAC.Phys.MSSQLDef,
   FireDAC.Phys.ODBCBase, FireDAC.Phys.MSSQL, FireDAC.Stan.Param, FireDAC.DatS,
-  FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet, UFDCompatHelpers;
+  FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet, UFDCompatHelpers,
+  IdCTypes, IdSSLOpenSSLHeaders;
 
   type
   TArrayOfString =  array of string;
@@ -998,6 +999,7 @@ const
   Windows_Kasiyer_Gunici=2;
   Windows_Donusum=3;
   Windows_Otomatik=4;
+  Windows_HizliGiris=5;
   Windows_Kasiyer_Gunsonu=6;
   Windows_Hareket_Giris=7;
   Windows_Excelden=8;
@@ -1331,6 +1333,7 @@ const
   TabNo_ITSBildirim = 423;
   TabNo_DONUSUM_URETIM_IRSALIYE = 425;
   TabNo_DONUSUM_URETIM_FATURA = 426;
+  TabNo_DONUSUM_URETIM_FIS = 431;
   TabNo_DONUSUM_SATINALMATALEP_SIPARIS = 428;
   TabNo_DONUSUM_SATIS_SIPARIS_KON = 429;
   TabNo_SERVISDETAYPERSONEL = 430;
@@ -1875,12 +1878,12 @@ begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); INSERT INTO FATBASLIK (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,FATURATARIH,TARIH,KOCANNO,FATURANO, ACIKLAMA,';
     Tablo.Query1.SQL.Add('GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,FATURASERI,FIYAT_LISTESI,');
-    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
+    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,DETAYBOLUMU,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
     Tablo.Query1.SQL.Add('SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,');
     Tablo.Query1.SQL.Add('REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','); //
     Tablo.Query1.SQL.Add('ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''',');
     Tablo.Query1.SQL.Add('FIYAT_LISTESI,VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+KaynakDoviz+'KUR,REHBERILETID,SUBEID,'+IntToStr(EFaturaDurum)+','+
-         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,OZELKOD ');
+         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,DETAYBOLUMU,OZELKOD ');
     Tablo.Query1.SQL.Add('FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId)+'; SELECT ID FROM @Yeni');
     Tablo.Query1.Open;
   end;
@@ -5465,7 +5468,7 @@ begin
     'Insert Into KASA (TUR, PLANTARIHI, ISLEMTARIHI, REHBERID, HESAPTURU,  ACIKLAMA, HESAPID, '  +
     '  BORC, ALACAK, DOVIZ_TUTARI, KUR, DOVIZ_KURU, MASRAFID,  DURUM,FATURAID, KREDIID,CEKSENETID,GERIDONUSID, KASA, EKLEYEN, YERI, YERID, BELGENO,SUBEID, GIRISKAYNAK, R, EKSTREDEKULLAN )' +
     '  values( :TUR,:PLANTARIHI,:ISLEMTARIHI,:REHBERID,:HESAPTURU, :ACIKLAMA,:HESAPID, :BORC,:ALACAK,:DOVIZ_TUTARI,:KUR,:DOVIZ_KURU,:MASRAFID,' +
-    ' :DURUM, :FATURAID, :KREDIID, :CEKSENETID, :GERIDONUSID, :KASA, :EKLEYEN, :YER, :YER_ID, :BELGENO, :SUBEID, :GIRISKAYNAK, :R, :EKSTREDEKULLAN )  select scope_identity() ';
+     ' :DURUM, :FATURAID, :KREDIID, :CEKSENETID, :GERIDONUSID, :KASA, :EKLEYEN, :YER, :YER_ID, :BELGENO, :SUBEID, :GIRISKAYNAK, :R, :EKSTREDEKULLAN )  select scope_identity() ';
   // açýlýþ ekranýndan gelen türler 1001:firma açýlýþ 1002:firma devir//2001:kasa açýlýþ 2002:kasa devir//3001:banka açýlýþ 3002:banka devir
   case Tur of
     21, 27, 31, 37, 2001, 2002, 40, 45, 46, 91:
@@ -9600,10 +9603,12 @@ begin
      TabloDetay.FieldByName('DEGISTIRMETARIHI').AsDatetime := GenIni.BugunTrhSaat;
      TabloDetay.FieldByName('POZNO').AsInteger := PozNo;
      if (EnBoyHesaplamaAktif)and (En<>0.0)and(Boy<>0.0) then begin  // and(TUR in[109,119])
+        EnBoyHesaplamaAktif:=False;
+        TabloDetay.FieldByName('SAYI').Value := Sayi;
         TabloDetay.FieldByName('EN').Value := En;
         TabloDetay.FieldByName('BOY').Value := Boy;
         TabloDetay.FieldByName('YUZEY').Value := Yuzey;
-        TabloDetay.FieldByName('SAYI').Value := Sayi;
+        EnBoyHesaplamaAktif:=True;
      end;
      if TUR = 100 then begin
         TabloDetay.FieldByName('RESIMGOSTER').AsBoolean := ResimGoster;
@@ -13719,12 +13724,12 @@ begin
   TablodanDuzenleDlg.SecTus.Visible := SecBtn;
   //TablodanDuzenleDlg.GorTus.Visible := GorBtn;
   if OzelDurum='Ýzleme' then
-    TablodanDuzenleDlg.ToolBar1.Visible := False;
+     TablodanDuzenleDlg.ToolBar1.Visible := False;
   TablodanDuzenleDlg.ShowModal;
   Result := TStringList.Create;
   if TablodanDuzenleDlg.ModalResult = mrOk then begin
-    for I := 0 to TablodanDuzenleDlg.Query1.FieldCount - 1 do
-      Result.Add(TablodanDuzenleDlg.Query1.Fields[i].AsString);
+     for I := 0 to TablodanDuzenleDlg.Query1.FieldCount - 1 do
+         Result.Add(TablodanDuzenleDlg.Query1.Fields[i].AsString);
   end;
   FreeAndNil(TablodanDuzenleDlg);
 end;

@@ -648,7 +648,7 @@ end;
 
 procedure Register;
 begin
-  RegisterComponents('Win32', [TOfficePopupMenu]);
+  RegisterComponents('GenYazilim', [TOfficePopupMenu]);
 end;
 
 procedure TOfficePopupMenu.DrawCheckedItem(FMenuItem: TMenuItem; Selected,

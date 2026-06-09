@@ -904,7 +904,7 @@ object UretimWizardDlg: TUretimWizardDlg
         Height = 172
         Align = alBottom
         TabOrder = 7
-        Properties.ActivePage = TabIsVeZaman
+        Properties.ActivePage = TabSheetGenel
         Properties.CustomButtons.Buttons = <>
         OnChange = PageControlAltChange
         ClientRectBottom = 168
@@ -1018,7 +1018,7 @@ object UretimWizardDlg: TUretimWizardDlg
           end
           object EditDETAYBOLUMU: TcxDBTextEdit
             Left = 982
-            Top = 9
+            Top = 11
             DataBinding.DataField = 'DETAYBOLUMU'
             DataBinding.DataSource = DtsUretim
             Enabled = False
@@ -1474,6 +1474,7 @@ object UretimWizardDlg: TUretimWizardDlg
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           OnEditChanged = GridDetayViewEditChanged
+          OnInitEdit = GridDetayViewInitEdit
           DataController.DataModeController.SmartRefresh = True
           DataController.DataSource = DtsDetay
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
@@ -1508,6 +1509,7 @@ object UretimWizardDlg: TUretimWizardDlg
             DataBinding.FieldName = 'BILGI'
             DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
+            OnGetPropertiesForEdit = cxGridDBColumn4GetPropertiesForEdit
             MinWidth = 400
             Options.Filtering = False
             Options.IgnoreTimeForFiltering = False
@@ -1838,7 +1840,7 @@ object UretimWizardDlg: TUretimWizardDlg
         'ONAYLAYANADI=(select R.FIRMA from REHBER R where R.ID=FB.ONAYLAY' +
         'AN)'
       'from FATBASLIK FB  where FB. ID=:PID and FB.TUR=6')
-    Left = 156
+    Left = 100
     Top = 234
   end
   object DtsUretim: TDataSource
@@ -1897,7 +1899,7 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 285
   end
   object PopupMenuYaz: TPopupMenu
-    Left = 307
+    Left = 355
     Top = 224
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
@@ -2042,8 +2044,8 @@ object UretimWizardDlg: TUretimWizardDlg
         'N=KDV_TUTARI, MALIYETORT=DOVIZ_TUTARI,'
       'BIRIM=SAYFA,YERI,YERID, DOVIZKUR, DOVIZ_CINSI, DOVIZ_TUTARI'
       'from FATBASLIK FB  where FB. ID=:PID and FB.TUR=6')
-    Left = 236
-    Top = 242
+    Left = 220
+    Top = 226
   end
   object URETIMDETAY: TFDQuery
     Connection = Tablo.FDCnn
@@ -2112,7 +2114,9 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 317
   end
   object TabDetay: TFDQuery
+    CachedUpdates = True
     Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       
@@ -2202,22 +2206,22 @@ object UretimWizardDlg: TUretimWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 456
     Top = 444
     object MenuKlasordenEkle: TMenuItem
@@ -2235,7 +2239,7 @@ object UretimWizardDlg: TUretimWizardDlg
   end
   object Query20: TFDQuery
     Connection = Tablo.FDCnn
-    Left = 34
+    Left = 18
     Top = 243
   end
   object TabIsZaman: TFDQuery

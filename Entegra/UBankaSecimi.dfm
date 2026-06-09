@@ -46,13 +46,13 @@ object BankaSecimDlg: TBankaSecimDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitWidth = 965
     object GuncelleTus: TToolButton
       Left = 0
       Top = 0
       Caption = 'TCMB'#39'den G'#252'ncelle'
       ImageIndex = 10
       ImageName = 'PngImage9'
+      Visible = False
       OnClick = GuncelleTusClick
     end
     object SecTus: TToolButton
@@ -106,7 +106,6 @@ object BankaSecimDlg: TBankaSecimDlg
     Height = 416
     Align = alLeft
     TabOrder = 1
-    ExplicitHeight = 415
     object Panel2: TPanel
       Left = 1
       Top = 1
@@ -154,7 +153,6 @@ object BankaSecimDlg: TBankaSecimDlg
       LookAndFeel.Kind = lfOffice11
       LookAndFeel.NativeStyle = True
       LookAndFeel.ScrollbarMode = sbmClassic
-      ExplicitHeight = 372
       object GridViewBanka: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
         ScrollbarAnnotations.CustomAnnotations = <>
@@ -175,6 +173,7 @@ object BankaSecimDlg: TBankaSecimDlg
         object GridViewBankaSEC: TcxGridDBColumn
           Caption = 'S'#305'k K.'
           DataBinding.FieldName = 'SEC'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxCheckBoxProperties'
           Properties.ImmediatePost = True
           Properties.NullStyle = nssUnchecked
@@ -183,6 +182,7 @@ object BankaSecimDlg: TBankaSecimDlg
         object GridViewBankaLOGO: TcxGridDBColumn
           Caption = 'Banka'
           DataBinding.FieldName = 'LOGO'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageProperties'
           Properties.FitMode = ifmNormal
           Properties.GraphicClassName = 'TdxPNGImage'
@@ -190,15 +190,18 @@ object BankaSecimDlg: TBankaSecimDlg
         end
         object GridViewBankaBANKAKODU: TcxGridDBColumn
           DataBinding.FieldName = 'BANKAKODU'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object GridViewBankaBANKAADI: TcxGridDBColumn
           Caption = 'Banka Ad'#305
           DataBinding.FieldName = 'BANKAADI'
+          DataBinding.IsNullValueType = True
           Options.Editing = False
           Width = 169
         end
         object GridViewBankaColumn1: TcxGridDBColumn
+          DataBinding.IsNullValueType = True
         end
       end
       object cxGridLevel3: TcxGridLevel
@@ -213,8 +216,6 @@ object BankaSecimDlg: TBankaSecimDlg
     Height = 416
     Align = alClient
     TabOrder = 2
-    ExplicitWidth = 659
-    ExplicitHeight = 415
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -222,7 +223,6 @@ object BankaSecimDlg: TBankaSecimDlg
       Height = 41
       Align = alTop
       TabOrder = 0
-      ExplicitWidth = 657
       object cxLabel2: TcxLabel
         Left = 6
         Top = 8
@@ -251,8 +251,6 @@ object BankaSecimDlg: TBankaSecimDlg
       Align = alClient
       TabOrder = 1
       Properties.CustomButtons.Buttons = <>
-      ExplicitWidth = 657
-      ExplicitHeight = 372
       ClientRectBottom = 369
       ClientRectLeft = 4
       ClientRectRight = 657
@@ -277,8 +275,6 @@ object BankaSecimDlg: TBankaSecimDlg
       LookAndFeel.Kind = lfOffice11
       LookAndFeel.NativeStyle = True
       LookAndFeel.ScrollbarMode = sbmClassic
-      ExplicitWidth = 657
-      ExplicitHeight = 372
       object cxGridDBTableView1: TcxGridDBTableView
         OnDblClick = SecTusClick
         Navigator.Buttons.CustomButtons = <>
@@ -300,54 +296,65 @@ object BankaSecimDlg: TBankaSecimDlg
         object cxGridDBTableView1BANKAADI: TcxGridDBColumn
           Caption = 'Banka'
           DataBinding.FieldName = 'BANKAADI'
+          DataBinding.IsNullValueType = True
           Width = 79
         end
         object cxGridDBTableView1BANKAKODU: TcxGridDBColumn
           DataBinding.FieldName = 'BANKAKODU'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object cxGridDBTableView1SUBEKODU: TcxGridDBColumn
           Caption = #350'ube Kodu'
           DataBinding.FieldName = 'SUBEKODU'
+          DataBinding.IsNullValueType = True
           Width = 77
         end
         object cxGridDBTableView1SUBEADI: TcxGridDBColumn
           Caption = #350'ube Ad'#305
           DataBinding.FieldName = 'SUBEADI'
+          DataBinding.IsNullValueType = True
           Width = 154
         end
         object cxGridDBTableView1ILNO: TcxGridDBColumn
           Caption = #304'li'
           DataBinding.FieldName = 'ILNO'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxTextEditProperties'
           Visible = False
         end
         object cxGridDBTableView1ILADI: TcxGridDBColumn
           Caption = #304'li'
           DataBinding.FieldName = 'ILADI'
+          DataBinding.IsNullValueType = True
           Width = 78
         end
         object cxGridDBTableView1Column2: TcxGridDBColumn
           Caption = 'Para Birimi'
           DataBinding.FieldName = 'KUR'
+          DataBinding.IsNullValueType = True
         end
         object cxGridDBTableView1HESAPKODU1: TcxGridDBColumn
           Caption = 'Hesap Kodu'
           DataBinding.FieldName = 'HESAPKODU'
+          DataBinding.IsNullValueType = True
           Width = 81
         end
         object cxGridDBTableView1HESAPADI: TcxGridDBColumn
           Caption = 'Hesap Ad'#305
           DataBinding.FieldName = 'HESAPADI'
+          DataBinding.IsNullValueType = True
           Width = 100
         end
         object cxGridDBTableView1HESAPNO1: TcxGridDBColumn
           Caption = 'Hesap No'
           DataBinding.FieldName = 'HESAPNO'
+          DataBinding.IsNullValueType = True
           Width = 79
         end
         object cxGridDBTableView1Column1: TcxGridDBColumn
           DataBinding.FieldName = 'BHID'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
       end
@@ -367,11 +374,10 @@ object BankaSecimDlg: TBankaSecimDlg
     Top = 191
   end
   object TabBankalar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabBankalarBeforeEdit
     AfterPost = TabBankalarAfterPost
     AfterCancel = TabBankalarAfterPost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from BANKALAR where SEC=:PSEC order by BANKAADI')
     Left = 459
@@ -384,7 +390,6 @@ object BankaSecimDlg: TBankaSecimDlg
   end
   object TabSubeler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       ' SELECT  BANKAKODU,SUBEKODU,SUBEADI,BS.ILNO,ILADI,BH.ID as BHID,'
       ' BH.HESAPKODU,BH.HESAPNO,BH.HESAPADI,BH.KUR'
@@ -421,4 +426,3 @@ object BankaSecimDlg: TBankaSecimDlg
     end
   end
 end
-

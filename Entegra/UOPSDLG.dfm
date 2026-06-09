@@ -29,7 +29,7 @@ object OpsiyonDlg: TOpsiyonDlg
     Top = 0
     Width = 706
     Height = 540
-    ActivePage = shtKocanAyarlari
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     OnChange = PageControl1Change
@@ -2443,14 +2443,10 @@ object OpsiyonDlg: TOpsiyonDlg
           Tag = 1
           Caption = 'Yeni Kay'#305't Giri'#351'i'
           ImageIndex = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
         end
         object TabSheetGuncel: TcxTabSheet
           Caption = 'G'#252'ncelleme (De'#287'i'#351'iklik,Silme)'
           ImageIndex = 1
-          ExplicitTop = 0
-          ExplicitWidth = 0
         end
       end
       object SQLKilitGuncel: TMemo

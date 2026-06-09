@@ -20,7 +20,10 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinWhiteprint, dxDateRanges, dxScrollbarAnnotations, dxCoreGraphics,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   Tbelgegirisdlg = class(TForm)

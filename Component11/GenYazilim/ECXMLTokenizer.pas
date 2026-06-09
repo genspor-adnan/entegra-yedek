@@ -62,6 +62,8 @@ implementation
 const
   ParseBufSize = 4096;
 
+
+{$IFNDEF WIN64}
 procedure BinToHex(Buffer, Text: PAnsiChar; BufSize: Integer); assembler;
 asm
         PUSH    ESI
@@ -127,6 +129,7 @@ asm
         POP     EDI
         POP     ESI
 end;
+{$ENDIF}
 
 constructor TXMLTokenizer.Create(Stream: TStream);
 begin

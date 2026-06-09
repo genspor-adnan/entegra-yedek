@@ -745,9 +745,8 @@ object KasaDlg: TKasaDlg
     Top = 278
   end
   object KASA: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = KASAAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT TOP 1 K.*, OZELKOD='#39#39' FROM KASA K')
     Left = 114
@@ -1006,19 +1005,8 @@ object KasaDlg: TKasaDlg
     Top = 104
   end
   object TabToplam: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabToplamAfterOpen
-    ParamData = <
-      item
-        Name = 'PTarih0'
-        Size = -1
-        Value = Null
-      end
-      item
-        Name = 'PTarih1'
-        Size = -1
-        Value = Null
-      end>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'DECLARE '
       '@TARIH0 DATETIME,'
@@ -1258,6 +1246,17 @@ object KasaDlg: TKasaDlg
       'ORDER BY 2')
     Left = 101
     Top = 388
+    ParamData = <
+      item
+        Name = 'PTarih0'
+        Size = -1
+        Value = Null
+      end
+      item
+        Name = 'PTarih1'
+        Size = -1
+        Value = Null
+      end>
   end
   object PopupMenuYeni: TPopupMenu
     OwnerDraw = True
@@ -1511,4 +1510,3 @@ object KasaDlg: TKasaDlg
     Top = 21
   end
 end
-

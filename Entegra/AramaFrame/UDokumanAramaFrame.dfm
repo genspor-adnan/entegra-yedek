@@ -41,8 +41,8 @@ object DokumanAramaFrame: TDokumanAramaFrame
           item
           end>
         DataController.DataSource = DtsKlasorler
-        DataController.ImageIndexField = 'RESIM'
-        DataController.ParentField = 'USTID'
+        DataController.ImageIndexField = 'RESIM_INDEX'
+        DataController.ParentField = 'USTID_PARENT'
         DataController.KeyField = 'ID'
         DragCursor = crDrag
         Images = Tablo.KlasorResimleri
@@ -554,13 +554,14 @@ object DokumanAramaFrame: TDokumanAramaFrame
     end
   end
   object TabKlasorler: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeOpen = TabKlasorlerBeforeOpen
     AfterOpen = TabKlasorlerAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
-      'select * from DOKUMANKLASOR order by USTID,AD')
-    Left = 259
+      
+        'select *, isnull(USTID,-1) as USTID_PARENT, isnull(RESIM,0) as R' +
+        'ESIM_INDEX from DOKUMANKLASOR order by USTID,AD')
+    Left = 227
     Top = 76
   end
   object DtsKlasorler: TDataSource
@@ -840,8 +841,8 @@ object DokumanAramaFrame: TDokumanAramaFrame
           676C0276B747D26B8FC21E9D9D8E080B1AAAA8A848FDAB91FE257E0025190920
           E68D36880000000049454E44AE426082}
       end>
-    Left = 368
-    Top = 100
+    Left = 400
+    Top = 84
   end
   object PopupCopKutusuIslemleri: TPopupMenu
     Images = PNGImageList1
@@ -922,6 +923,3 @@ object DokumanAramaFrame: TDokumanAramaFrame
     end
   end
 end
-
-
-

@@ -11,7 +11,7 @@ uses
   WinApi.Messages,
   Vcl.Dialogs,
   FireDAC.Comp.Client,
-  Umesaj  in 'Ortak\Umesaj.pas' {MesajForm},
+  Umesaj in 'Ortak\Umesaj.pas' {MesajForm},
   UDokum in 'Ortak\UDokum.pas' {DokumDlg},
   Fetautil in 'Ortak\Fetautil.pas',
   UCombo in 'Ortak\UCombo.pas' {ListeAyarlaDlg},
@@ -360,7 +360,8 @@ uses
   uSocialCommon in 'Social\uSocialCommon.pas',
   GenGoogleCalenderService in '..\GoogleTakvim\GenGoogleCalenderService.pas',
   URehberTemsilci in 'URehberTemsilci.pas' {RehberTemsilciDlg},
-  UInfo in 'UInfo.pas' {InfoDlg};
+  UInfo in 'UInfo.pas' {InfoDlg},
+  UBankaHesapGiris in 'UBankaHesapGiris.pas' {bankaHesapGirisdlg};
 
 {$R Gentegre.KLR}
 
@@ -395,7 +396,6 @@ begin
      cxFormatController.UseDelphiDateTimeFormats := True;
 
      Application.CreateForm(TTablo, Tablo);
-
   if (not ProgKapat)and(PasswordEkrani('Gentegre')) then begin
        LogoDlg := TLogoDlg.Create(Application);
 

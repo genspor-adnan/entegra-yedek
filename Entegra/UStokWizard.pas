@@ -698,6 +698,7 @@ type
     procedure YDilIptalClick(Sender: TObject);
     procedure DtsYDilStateChange(Sender: TObject);
     procedure TabYDilBeforePost(DataSet: TDataSet);
+    procedure DtsStokEsdegerStateChange(Sender: TObject);
   private
     AdetBirimi:Integer;
     BekletDlg: TBekletmeDlg;
@@ -1386,6 +1387,7 @@ end;
 procedure TStokWizardDlg.btnEsdegerUrunClick(Sender: TObject);
 begin
    WizardKontrol.ActivePage := EsdegerEkr;
+   TabloYenile(TabStokEsdeger,[StokID]);
 end;
 
 procedure TStokWizardDlg.BtnKotaClick(Sender: TObject);
@@ -1525,6 +1527,11 @@ begin
   BtnStkKtgrSil.Visible := DtsStokBoyut.State = dsBrowse;
   BtnStkKtgrKaydet.Visible := DtsStokBoyut.State in [DsEdit,DsInsert];
   BtnStkKtgrIptal.Visible := DtsStokBoyut.State in [DsEdit,DsInsert];
+end;
+
+procedure TStokWizardDlg.DtsStokEsdegerStateChange(Sender: TObject);
+begin
+   Tablo.NavTusGoruntule(DtsStokEsdeger, EkleStokEsdeger, SilStokEsdeger, KaydetStokEsdeger, iptalStokEsdeger);
 end;
 
 procedure TStokWizardDlg.DtsStokMuhasebeStateChange(Sender: TObject);

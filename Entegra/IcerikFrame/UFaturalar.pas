@@ -2023,7 +2023,7 @@ begin
   else
     Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
     Tablo.Query1.SQL.Add(' from FATURA F ');
-    Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on F.ID=F2.YERID and F2.YERI in (408,411,461,462,468) ');
+    Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on F.ID=F2.YERID and F2.YERI in (408,411,461,424,427,462,468) ');
     Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
     Tablo.Query1.SQL.Add(' where F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
   end;
@@ -2079,8 +2079,10 @@ begin
   Tablo.Query1.SQL.Add(' 	when YERI =83 then 83   ');
   Tablo.Query1.SQL.Add(' 	when YERI in (406,407) then 9   ');
   Tablo.Query1.SQL.Add(' 	when YERI = 408 then 10         ');
+  Tablo.Query1.SQL.Add(' 	when YERI = 424 then 14         ');
   Tablo.Query1.SQL.Add(' 	when YERI = 425 then 6         ');
   Tablo.Query1.SQL.Add(' 	when YERI = 411 then 14         ');
+  Tablo.Query1.SQL.Add(' 	when YERI = 427 then 10        ');
   Tablo.Query1.SQL.Add(' 	when YERI = 428 then 101        ');
   Tablo.Query1.SQL.Add(' 	when YERI = 461 then 109        ');
   Tablo.Query1.SQL.Add(' 	when YERI in (409,410,473) then 19  ');
@@ -2093,13 +2095,13 @@ begin
   Tablo.Query1.SQL.Add(' KAYNAKBELGENO=case ');
   Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISNO from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID)) ');
   Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410,428,429,473) then (select SIPARISNO from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,425,461,462,468) then (select FATURANO from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID))               ');
+  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,424,425,427,461,462,468) then (select FATURANO from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID))               ');
   Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (select TEKLIFNO from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))             ');
   Tablo.Query1.SQL.Add(' end, ');
   Tablo.Query1.SQL.Add(' KAYNAKID=case      ');
   Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISID from SERVISDETAY where ID=F.YERID ) ');
   Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410,428,429,473) then (select SIPARISID from SIPARISDETAY where ID=F.YERID ) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,425,461,462,468) then (select FATBASID from FATURA where ID=F.YERID )                ');
+  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,424,425,427,461,462,468) then (select FATBASID from FATURA where ID=F.YERID )                ');
   Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID )           ');
   Tablo.Query1.SQL.Add(' end, ');
 
@@ -2107,7 +2109,7 @@ begin
   Tablo.Query1.SQL.Add(' KAYNAKFIRMA=(select FIRMA from REHBER where ID=(case   ');
   Tablo.Query1.SQL.Add(' when YERI = 83 then (select REHBERID from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID))  ');
   Tablo.Query1.SQL.Add(' when YERI in (406,407,409,410,428,429,473) then (select REHBERID from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' when YERI in (408,411,425,461,462,468) then (select REHBERID from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID)) ');
+  Tablo.Query1.SQL.Add(' when YERI in (408,411,424,425,427,461,462,468) then (select REHBERID from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID)) ');
   Tablo.Query1.SQL.Add(' when YERI in (412,413) then (select REHBERID from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ');
   Tablo.Query1.SQL.Add(' end ))  ');
 
@@ -2121,7 +2123,7 @@ begin
   else
     Tablo.Query1.SQL.Add(' from FATURA F  ');
     Tablo.Query1.SQL.Add(' where FATBASID='+FATBASLIK.FieldByName('ID').AsString+' and ');
-    Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,425,429,461,462,468,473) ');
+    Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,424,425,427,429,461,462,468,473) ');
   end;
   Tablo.Query1.Open;
   case Tablo.Query1.RecordCount of

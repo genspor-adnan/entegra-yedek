@@ -250,8 +250,6 @@ object TeklifWizardDlg: TTeklifWizardDlg
             Align = alClient
             Caption = 'PanelDetay'
             TabOrder = 0
-            ExplicitTop = 184
-            ExplicitHeight = 355
             object GridTeklif: TcxGrid
               Left = 1
               Top = 28
@@ -264,7 +262,6 @@ object TeklifWizardDlg: TTeklifWizardDlg
               LookAndFeel.NativeStyle = True
               LookAndFeel.ScrollbarMode = sbmClassic
               LookAndFeel.SkinName = 'LondonLiquidSky'
-              ExplicitHeight = 173
               object GridTeklifWizardDetayView: TcxGridDBTableView
                 Navigator.Buttons.CustomButtons = <>
                 ScrollbarAnnotations.CustomAnnotations = <>
@@ -709,7 +706,6 @@ object TeklifWizardDlg: TTeklifWizardDlg
               ParentBackground = False
               ParentFont = False
               TabOrder = 2
-              ExplicitTop = 201
               DesignSize = (
                 1128
                 153)
@@ -1010,7 +1006,12 @@ object TeklifWizardDlg: TTeklifWizardDlg
                       Properties.Buttons = <
                         item
                           Default = True
-                          Kind = bkGlyph
+                          Kind = bkEllipsis
+                        end
+                        item
+                          Caption = '-'
+                          Hint = 'Temizle'
+                          Kind = bkText
                         end>
                       Properties.ReadOnly = True
                       Properties.OnButtonClick = EditOnaylayanPropertiesButtonClick
@@ -1207,7 +1208,6 @@ object TeklifWizardDlg: TTeklifWizardDlg
             TabOrder = 1
             Properties.ActivePage = cxTabSheet1
             Properties.CustomButtons.Buttons = <>
-            ExplicitTop = 32
             ClientRectBottom = 148
             ClientRectLeft = 4
             ClientRectRight = 1126
@@ -1959,7 +1959,6 @@ object TeklifWizardDlg: TTeklifWizardDlg
             ShowCaptions = True
             TabOrder = 2
             Transparent = True
-            ExplicitHeight = 29
             object btnKaydetTus: TToolButton
               Left = 0
               Top = 0

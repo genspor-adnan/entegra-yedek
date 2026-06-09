@@ -163,6 +163,7 @@ object FaturalarDlg: TFaturalarDlg
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 51
     object GridFatListeTview: TcxGridDBTableView
       OnDblClick = GridFatListeTviewDblClick
       Navigator.Buttons.CustomButtons = <>
@@ -1608,66 +1609,228 @@ object FaturalarDlg: TFaturalarDlg
   object frxSIPARISDETAY: TfrxDBDataset
     UserName = 'SIPARISDETAY'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'SIPARISID=SIPARISID'
-      'REHBERID=REHBERID'
-      'SEC=SEC'
-      'TUR=TUR'
-      'URUNID=URUNID'
-      'ACIKLAMA=ACIKLAMA'
-      'ADET=ADET'
-      'BIRIM=BIRIM'
-      'MIKTAR=MIKTAR'
-      'BIRIMFIYAT=BIRIMFIYAT'
-      'TUTAR=TUTAR'
-      'ISKONTO=ISKONTO'
-      'KDV=KDV'
-      'MASRAFID=MASRAFID'
-      'OZELKOD=OZELKOD'
-      'MUHKODU=MUHKODU'
-      'KASA=KASA'
-      'ONAY=ONAY'
-      'KUR=KUR'
-      'IZLEMEKODU=IZLEMEKODU'
-      'DOVIZ_TUTARI=DOVIZ_TUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'ISKONTO2=ISKONTO2'
-      'IZLEME=IZLEME'
-      'MF=MF'
-      'IADEADET=IADEADET'
-      'IADESIPARISDETAYID=IADESIPARISDETAYID'
-      'YERI=YERI'
-      'YERID=YERID'
-      'DOVIZ_BIRIMFIYAT=DOVIZ_BIRIMFIYAT'
-      'DOVIZKURDEGERI=DOVIZKURDEGERI'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'KAMPANYAID=KAMPANYAID'
-      'VADE=VADE'
-      'PROJEID=PROJEID'
-      'TESLIMTARIHI=TESLIMTARIHI'
-      'SUBEID=SUBEID'
-      'URETIMPLANID=URETIMPLANID'
-      'URETIMPLANDETAYID=URETIMPLANDETAYID'
-      'MERKEZID=MERKEZID'
-      'STOKDURUM=STOKDURUM'
-      'EKIPMANID=EKIPMANID'
-      'MASRAFKOD=MASRAFKOD'
-      'MASRAFAD=MASRAFAD'
-      'AD=AD'
-      'KOD=KOD'
-      'BIRIMAD=BIRIMAD'
-      'PROJEKODU=PROJEKODU'
-      'EKIPMAN=EKIPMAN'
-      'SERINO=SERINO')
     DataSet = SIPARISDETAY
     BCDToCurrency = False
     DataSetOptions = []
     Left = 323
     Top = 294
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'SIPARISID'
+        FieldAlias = 'SIPARISID'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'SEC'
+        FieldAlias = 'SEC'
+      end
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'URUNID'
+        FieldAlias = 'URUNID'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'ADET'
+        FieldAlias = 'ADET'
+      end
+      item
+        FieldName = 'BIRIM'
+        FieldAlias = 'BIRIM'
+      end
+      item
+        FieldName = 'MIKTAR'
+        FieldAlias = 'MIKTAR'
+      end
+      item
+        FieldName = 'BIRIMFIYAT'
+        FieldAlias = 'BIRIMFIYAT'
+      end
+      item
+        FieldName = 'TUTAR'
+        FieldAlias = 'TUTAR'
+      end
+      item
+        FieldName = 'ISKONTO'
+        FieldAlias = 'ISKONTO'
+      end
+      item
+        FieldName = 'KDV'
+        FieldAlias = 'KDV'
+      end
+      item
+        FieldName = 'MASRAFID'
+        FieldAlias = 'MASRAFID'
+      end
+      item
+        FieldName = 'OZELKOD'
+        FieldAlias = 'OZELKOD'
+      end
+      item
+        FieldName = 'MUHKODU'
+        FieldAlias = 'MUHKODU'
+      end
+      item
+        FieldName = 'KASA'
+        FieldAlias = 'KASA'
+      end
+      item
+        FieldName = 'ONAY'
+        FieldAlias = 'ONAY'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'IZLEMEKODU'
+        FieldAlias = 'IZLEMEKODU'
+      end
+      item
+        FieldName = 'DOVIZ_TUTARI'
+        FieldAlias = 'DOVIZ_TUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'ISKONTO2'
+        FieldAlias = 'ISKONTO2'
+      end
+      item
+        FieldName = 'IZLEME'
+        FieldAlias = 'IZLEME'
+      end
+      item
+        FieldName = 'MF'
+        FieldAlias = 'MF'
+      end
+      item
+        FieldName = 'IADEADET'
+        FieldAlias = 'IADEADET'
+      end
+      item
+        FieldName = 'IADESIPARISDETAYID'
+        FieldAlias = 'IADESIPARISDETAYID'
+      end
+      item
+        FieldName = 'YERI'
+        FieldAlias = 'YERI'
+      end
+      item
+        FieldName = 'YERID'
+        FieldAlias = 'YERID'
+      end
+      item
+        FieldName = 'DOVIZ_BIRIMFIYAT'
+        FieldAlias = 'DOVIZ_BIRIMFIYAT'
+      end
+      item
+        FieldName = 'DOVIZKURDEGERI'
+        FieldAlias = 'DOVIZKURDEGERI'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'KAMPANYAID'
+        FieldAlias = 'KAMPANYAID'
+      end
+      item
+        FieldName = 'VADE'
+        FieldAlias = 'VADE'
+      end
+      item
+        FieldName = 'PROJEID'
+        FieldAlias = 'PROJEID'
+      end
+      item
+        FieldName = 'TESLIMTARIHI'
+        FieldAlias = 'TESLIMTARIHI'
+      end
+      item
+        FieldName = 'SUBEID'
+        FieldAlias = 'SUBEID'
+      end
+      item
+        FieldName = 'URETIMPLANID'
+        FieldAlias = 'URETIMPLANID'
+      end
+      item
+        FieldName = 'URETIMPLANDETAYID'
+        FieldAlias = 'URETIMPLANDETAYID'
+      end
+      item
+        FieldName = 'MERKEZID'
+        FieldAlias = 'MERKEZID'
+      end
+      item
+        FieldName = 'STOKDURUM'
+        FieldAlias = 'STOKDURUM'
+      end
+      item
+        FieldName = 'EKIPMANID'
+        FieldAlias = 'EKIPMANID'
+      end
+      item
+        FieldName = 'MASRAFKOD'
+        FieldAlias = 'MASRAFKOD'
+      end
+      item
+        FieldName = 'MASRAFAD'
+        FieldAlias = 'MASRAFAD'
+      end
+      item
+        FieldName = 'AD'
+        FieldAlias = 'AD'
+      end
+      item
+        FieldName = 'KOD'
+        FieldAlias = 'KOD'
+      end
+      item
+        FieldName = 'BIRIMAD'
+        FieldAlias = 'BIRIMAD'
+      end
+      item
+        FieldName = 'PROJEKODU'
+        FieldAlias = 'PROJEKODU'
+      end
+      item
+        FieldName = 'EKIPMAN'
+        FieldAlias = 'EKIPMAN'
+      end
+      item
+        FieldName = 'SERINO'
+        FieldAlias = 'SERINO'
+      end>
   end
   object SIPARIS: TFDQuery
     AutoCalcFields = False
@@ -1922,29 +2085,29 @@ object FaturalarDlg: TFaturalarDlg
       end>
     UseBuiltInPopupMenus = False
     AlwaysFireOnPopup = True
-    Left = 768
-    Top = 400
+    Left = 680
+    Top = 352
   end
   object YorumAtacMenu: TOfficePopupMenu
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 880
     Top = 404
     object MenuKlasordenEkle: TMenuItem

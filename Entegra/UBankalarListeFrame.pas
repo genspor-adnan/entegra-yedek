@@ -26,7 +26,7 @@ uses
   dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
   frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, cxGridExportLink;
 
 type
   TBankalarListeFrame = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -159,6 +159,7 @@ type
     ExceldenAlTus2: TToolButton;
     ExceldenAlTus: TToolButton;
     ToolButton3: TToolButton;
+    BankaHizliGirisTus: TToolButton;
     ExceldenHareketVerisiAlMenu: TMenuItem;
     N4: TMenuItem;
     ExceldenVeriAlmKurallarMenu: TMenuItem;
@@ -180,6 +181,7 @@ type
     procedure TabSheetEkstreShow(Sender: TObject);
     procedure YenileClick;
     procedure AksiyonTusClick(Sender: TObject);
+    procedure BankaHizliGirisTusClick(Sender: TObject);
     procedure Ekle1Click(Sender: TObject);
     procedure AksiyonBilgisiniGorMenuClick(Sender: TObject);
     procedure KopyalaMenuClick(Sender: TObject);
@@ -196,6 +198,7 @@ type
     procedure ExceldenAlTusClick(Sender: TObject);
     procedure ExceldenVeriAlmKurallarMenuClick(Sender: TObject);
     procedure HesapBakiyesiniGuncelleMenuClick(Sender: TObject);
+    procedure ExceleAktar1Click(Sender: TObject);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
   private
     { Private declarations }
@@ -233,7 +236,8 @@ type
 implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
-      UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketKural, UBankaHareketleri;
+      UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketKural, UBankaHareketleri,
+      UBankaHesapGiris;
 
 {$R *.dfm}
 
@@ -716,6 +720,33 @@ begin
         AraKodKeyUp(Self, Key, []);
    end else
      raise Exception.Create(Yetkisiz_Islem);
+end;
+
+procedure TBankalarListeFrame.BankaHizliGirisTusClick(Sender: TObject);
+begin
+   if not Assigned(bankaHesapGirisdlg) then
+      bankaHesapGirisdlg := TbankaHesapGirisdlg.Create(Application);
+   bankaHesapGirisdlg.Show;
+end;
+
+procedure TBankalarListeFrame.ExceleAktar1Click(Sender: TObject);
+var
+  Sd: TSaveDialog;
+begin
+  Sd := TSaveDialog.Create(Self);
+  try
+    Sd.Title    := 'Banka Ekstresini Excel''e Aktar';
+    Sd.Filter   := 'Excel|*.xls';
+    Sd.DefaultExt := 'xls';
+    Sd.FileName := 'BankaEkstre';
+    Sd.Options  := Sd.Options + [ofOverwritePrompt];
+    if Sd.Execute then begin
+      ExportGridToExcel(Sd.FileName, GridBankaEkstre, True, True, True, 'xls');
+      ShowMessage('Veriler Excel''e aktarıldı.');
+    end;
+  finally
+    Sd.Free;
+  end;
 end;
 
 initialization

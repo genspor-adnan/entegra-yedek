@@ -420,10 +420,6 @@ object UretimReceteDlg: TUretimReceteDlg
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridUretim: TcxGrid
           Left = 0
           Top = 0
@@ -458,6 +454,7 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1SIRA: TcxGridDBColumn
               Caption = 'S'#305'ra'
               DataBinding.FieldName = 'SIRA'
+              Options.Editing = False
               Width = 20
             end
             object GridUretimDBTableView1KOD: TcxGridDBColumn
@@ -470,6 +467,7 @@ object UretimReceteDlg: TUretimReceteDlg
             object GridUretimDBTableView1URUNID: TcxGridDBColumn
               Caption = #220'r'#252'n ID'
               DataBinding.FieldName = 'URUNID'
+              Options.Editing = False
               Width = 51
             end
             object GridUretimDBTableView1URUNNO: TcxGridDBColumn
@@ -729,6 +727,7 @@ object UretimReceteDlg: TUretimReceteDlg
                     Default = True
                     Kind = bkEllipsis
                   end>
+                Properties.ReadOnly = True
                 Properties.OnButtonClick = GridIsZamanViewKAYNAKPropertiesButtonClick
               end
               object GridIsZamanViewKAYNAKADI: TcxGridDBColumn
@@ -764,7 +763,6 @@ object UretimReceteDlg: TUretimReceteDlg
           Height = 8
           HotZoneClassName = 'TcxMediaPlayer8Style'
           AlignSplitter = salTop
-          ExplicitWidth = 8
         end
         object PanelOprAlt: TPanel
           Left = 0
@@ -1481,7 +1479,7 @@ object UretimReceteDlg: TUretimReceteDlg
       'where 1=1'
       ''
       '')
-    Left = 164
+    Left = 188
     Top = 194
     object TabReceteMALIYETSON: TCurrencyField
       FieldKind = fkCalculated
@@ -1594,8 +1592,8 @@ object UretimReceteDlg: TUretimReceteDlg
   object DtsRecete: TDataSource
     DataSet = TabRecete
     OnStateChange = DtsReceteStateChange
-    Left = 260
-    Top = 56
+    Left = 244
+    Top = 48
   end
   object RECETE: TFDQuery
     Connection = Tablo.FDCnn
@@ -1634,8 +1632,8 @@ object UretimReceteDlg: TUretimReceteDlg
       ''
       ''
       '')
-    Left = 340
-    Top = 138
+    Left = 356
+    Top = 114
   end
   object TabReceteDetay: TFDQuery
     BeforeEdit = TabReceteDetayBeforeEdit
@@ -1745,6 +1743,7 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object TabReceteDetayGRP: TIntegerField
       FieldName = 'GRP'
+      ProviderFlags = []
     end
     object TabReceteDetayURUNKODU: TWideStringField
       FieldKind = fkCalculated
@@ -1780,7 +1779,7 @@ object UretimReceteDlg: TUretimReceteDlg
     DataSet = TabReceteDetay
     OnStateChange = DtsReceteDetayStateChange
     Left = 356
-    Top = 278
+    Top = 302
   end
   object RECETEDETAY: TFDQuery
     Connection = Tablo.FDCnn
@@ -1919,7 +1918,7 @@ object UretimReceteDlg: TUretimReceteDlg
     BCDToCurrency = False
     DataSetOptions = []
     Left = 460
-    Top = 252
+    Top = 220
   end
   object frxReceteDetay: TfrxDBDataset
     UserName = 'ReceteDetay'
@@ -1931,7 +1930,7 @@ object UretimReceteDlg: TUretimReceteDlg
     Top = 235
   end
   object PopupHesapla: TPopupMenu
-    Left = 51
+    Left = 75
     Top = 104
     object BuUrunMenu: TMenuItem
       Tag = 1
@@ -1948,8 +1947,8 @@ object UretimReceteDlg: TUretimReceteDlg
     end
   end
   object PopupMenuListe: TPopupMenu
-    Left = 176
-    Top = 128
+    Left = 240
+    Top = 136
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
       OnClick = Kopyala1Click
@@ -2021,8 +2020,8 @@ object UretimReceteDlg: TUretimReceteDlg
     Enabled = False
     Threaded = False
     OnTimer = JvTimer1Timer
-    Left = 71
-    Top = 268
+    Left = 55
+    Top = 284
   end
   object PopupMenuTest: TPopupMenu
     OnPopup = PopupMenuTestPopup

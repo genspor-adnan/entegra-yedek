@@ -81,8 +81,6 @@ object KasaWizardDlg: TKasaWizardDlg
       VisibleButtons = [bkNext, bkCancel]
       OnEnterPage = MenuEkrEnterPage
       OnNextButtonClick = MenuEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label3: TcxLabel
         Left = 494
         Top = 36
@@ -296,8 +294,6 @@ object KasaWizardDlg: TKasaWizardDlg
       OnEnterPage = FaturaPlanSecEkrEnterPage
       OnPage = FaturaPlanSecEkrPage
       OnNextButtonClick = FaturaPlanSecEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridTakvimPlan: TcxGrid
         Left = 0
         Top = 277
@@ -584,8 +580,6 @@ object KasaWizardDlg: TKasaWizardDlg
       OnEnterPage = CekSenetKrediAraEkrEnterPage
       OnPage = CekSenetKrediAraEkrPage
       OnExitPage = CekSenetKrediAraEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridCekSenetKrediAra: TcxGrid
         Left = 0
         Top = 104
@@ -894,8 +888,6 @@ object KasaWizardDlg: TKasaWizardDlg
       OnEnterPage = PlanlamaEkrEnterPage
       OnPage = PlanlamaEkrPage
       OnNextButtonClick = PlanlamaEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelTaksit: TPanel
         Left = 0
         Top = 70
@@ -1394,11 +1386,12 @@ object KasaWizardDlg: TKasaWizardDlg
               'BEGIN                                                           ' +
               '                         '
             
-              '  INSERT INTO #GECICIODEME_:SPID_ (SOZID, TARIH, TUTAR, KUR, ACIKLAMA, UYAR, UYARIGUN)' +
-              '                         '
+              '  INSERT INTO #GECICIODEME_:SPID_ (SOZID, TARIH, TUTAR, KUR, ACI' +
+              'KLAMA, UYAR, UYARIGUN)                         '
             
-              '  VALUES (1,[dbo].[fn_GT_UygunTarihBul](DATEADD(month, @I-1, @BASLANGIC), @ONCESONRA),' +
-              ' ROUND(@TUTAR/@TAKSIT,2), @KUR, @ACIKLAMA,@UYAR,@UYARIGUN)  '
+              '  VALUES (1,[dbo].[fn_GT_UygunTarihBul](DATEADD(month, @I-1, @BA' +
+              'SLANGIC), @ONCESONRA), ROUND(@TUTAR/@TAKSIT,2), @KUR, '
+            '@ACIKLAMA,@UYAR,@UYARIGUN)  '
             
               '  SET @I=@I+1                                                   ' +
               '                         '
@@ -1538,8 +1531,6 @@ object KasaWizardDlg: TKasaWizardDlg
       OnEnterPage = TahsilatEkrEnterPage
       OnPage = TahsilatEkrPage
       OnNextButtonClick = TahsilatEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel5: TPanel
         Left = 0
         Top = 70
@@ -1842,8 +1833,6 @@ object KasaWizardDlg: TKasaWizardDlg
       OnEnterPage = KasaSecimEkrEnterPage
       OnPage = KasaSecimEkrPage
       OnExitPage = KasaSecimEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object KasaGrid: TcxGrid
         Left = 0
         Top = 70

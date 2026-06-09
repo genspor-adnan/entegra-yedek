@@ -739,7 +739,7 @@ begin
             [ 0, Kullanan, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
       CekID := YeniCekIDsi;
       TabCekler.Close;
-      TabCekler.Params[0].Value := CekID;
+      TabCekler.ParamByName('PID').AsInteger := CekID;
       TabCekler.Open;
       EditCekSERINO.Text := '';
       TabloYenile(TabBankalar, [TabCekler.FieldByName('BANKASUBELERID').AsInteger]);
@@ -910,8 +910,11 @@ end;
 
 procedure TCekWizardDlg.TarihceEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
+   if (not TabCekler.Active) or TabCekler.FieldByName('ID').IsNull or (TabCekler.FieldByName('ID').AsInteger <= 0) then
+      Exit;
    TabCekHareketler.Close;
-   TabCekHareketler.Params[0].Value:=TabCekler.FieldByName('ID').AsInteger;
+   if TabCekHareketler.Params.Count = 0 then Exit;
+   TabCekHareketler.ParamByName('PCSID').AsInteger := TabCekler.FieldByName('ID').AsInteger;
    TabCekHareketler.Open;
 end;
 
@@ -1188,6 +1191,8 @@ begin
 end;
 
 end.
+
+
 
 
 

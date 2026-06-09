@@ -827,7 +827,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
             OptionsData.Appending = True
             OptionsData.Deleting = False
             OptionsData.DeletingConfirmation = False
-            OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.HideFocusRectOnExit = False
             OptionsSelection.InvertSelect = False
@@ -866,6 +865,11 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Properties.OnButtonClick = GridFaturaViewKOD1PropertiesButtonClick
               Options.Editing = False
               Width = 53
+            end
+            object GridFaturaViewURUNNO: TcxGridDBColumn
+              Caption = #220'r'#252'n No'
+              DataBinding.FieldName = 'URUNNO'
+              Width = 80
             end
             object GridFaturaViewAD: TcxGridDBColumn
               Caption = 'Ad'
@@ -947,6 +951,9 @@ object FaturaWizardDlg: TFaturaWizardDlg
             object GridFaturaViewOTVMIKTAR: TcxGridDBColumn
               Caption = #214'TV'
               DataBinding.FieldName = 'OTVMIKTAR'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
+              Properties.DisplayFormat = ',0.00;-,0.00'
+              Properties.ReadOnly = False
               RepositoryItem = Tablo.RepCurrencyGenel
               Width = 38
             end
@@ -1195,30 +1202,30 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Caption = 'Personel'
               DataBinding.FieldName = 'SATICIADI'
             end
-            object GridFaturaViewURUNNO: TcxGridDBColumn
-              Caption = #220'r'#252'n No'
-              DataBinding.FieldName = 'URUNNO'
-              Visible = False
-            end
             object GridFaturaViewEN: TcxGridDBColumn
-              DataBinding.FieldName = 'URUNNO'
+              Caption = 'En'
+              DataBinding.FieldName = 'EN'
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DecimalPlaces = 0
               Properties.DisplayFormat = ',0;-,0'
             end
             object GridFaturaViewBOY: TcxGridDBColumn
-              DataBinding.FieldName = 'URUNNO'
+              Caption = 'Boy'
+              DataBinding.FieldName = 'BOY'
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DecimalPlaces = 0
               Properties.DisplayFormat = ',0;-,0'
             end
             object GridFaturaViewYUZEY: TcxGridDBColumn
-              DataBinding.FieldName = 'URUNNO'
+              Caption = 'Yuzey'
+              DataBinding.FieldName = 'YUZEY'
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
+              Options.Editing = False
             end
             object GridFaturaViewSAYI: TcxGridDBColumn
-              DataBinding.FieldName = 'URUNNO'
+              Caption = 'Sayi'
+              DataBinding.FieldName = 'SAYI'
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DecimalPlaces = 0
               Properties.DisplayFormat = ',0;-,0'
@@ -1557,7 +1564,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       end
       object Label6: TcxLabel
         Left = 6
-        Top = 47
+        Top = 45
         Caption = 'ID'
         ParentFont = False
         Transparent = True
@@ -2862,7 +2869,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ')'
           'INSERT INTO #DETAY_:SPID_'
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
+          'RB.SIRA,RB.ETIKET,NULLIF(RB.BILGI,'#39#39'),ORJINAL=RB.BILGI,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON '
           'RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'
@@ -2872,8 +2879,9 @@ object FaturaWizardDlg: TFaturaWizardDlg
           'union all'
           ''
           
-            'select  SIRA, ETIKET, BILGI='#39#39', ORJINAL='#39#39' ,GIRIS,KAYNAK,ZORUNLU' +
-            '  '
+            'select  SIRA, ETIKET, BILGI=cast(null as nvarchar(1000)), ORJINA' +
+            'L='#39#39' '
+          ',GIRIS,KAYNAK,ZORUNLU  '
           ' from REHBERAYAR  '
           'where  YERI=@yeri '
           'and isnull(BOLUM,'#39#39')=@Bolum  '
@@ -3532,7 +3540,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 329
   end
   object PopupMenuYaz: TPopupMenu
-    Left = 421
+    Left = 397
     Top = 42
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
@@ -3648,8 +3656,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATURA F'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
-    Left = 101
-    Top = 148
+    Left = 29
+    Top = 36
     ParamData = <
       item
         Name = 'Par'
@@ -3697,6 +3705,29 @@ object FaturaWizardDlg: TFaturaWizardDlg
       FieldName = 'ADET'
       Origin = 'ADET'
       Precision = 24
+      Size = 6
+    end
+    object TabFaturaEN: TFMTBCDField
+      FieldName = 'EN'
+      OnChange = TabFaturaENChange
+      Precision = 12
+      Size = 6
+    end
+    object TabFaturaBOY: TFMTBCDField
+      FieldName = 'BOY'
+      OnChange = TabFaturaENChange
+      Precision = 12
+      Size = 6
+    end
+    object TabFaturaYUZEY: TFMTBCDField
+      FieldName = 'YUZEY'
+      Precision = 24
+      Size = 6
+    end
+    object TabFaturaSAYI: TFMTBCDField
+      FieldName = 'SAYI'
+      OnChange = TabFaturaENChange
+      Precision = 12
       Size = 6
     end
     object TabFaturaMF: TFMTBCDField
@@ -4093,6 +4124,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object DETAY: TFDQuery
     Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'REHBERBILGI'
     SQL.Strings = (
       ''
       'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU '
@@ -4125,7 +4157,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 182
+    Left = 230
     Top = 38
   end
   object TabPlan: TFDQuery
@@ -4135,7 +4167,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       ''
       'select * from KASA where FATURAID=:FaturaID')
     Left = 220
-    Top = 283
+    Top = 243
     ParamData = <
       item
         Name = 'FaturaID'
@@ -4207,19 +4239,40 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object frxTOPLAMLAR: TfrxDBDataset
     UserName = 'TOPLAMLAR'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'DEGER=DEGER'
-      'DOVIZTUTARI=DOVIZTUTARI'
-      'KUR=KUR'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'KDVMUHAFIYETI=KDVMUHAFIYETI')
     DataSet = TOPLAMLAR
     BCDToCurrency = False
     DataSetOptions = []
     Left = 777
     Top = 419
+    FieldDefs = <
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'DEGER'
+        FieldAlias = 'DEGER'
+      end
+      item
+        FieldName = 'DOVIZTUTARI'
+        FieldAlias = 'DOVIZTUTARI'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'KDVMUHAFIYETI'
+        FieldAlias = 'KDVMUHAFIYETI'
+      end>
   end
   object frxDETAY: TfrxDBDataset
     UserName = 'DETAY'
@@ -4533,22 +4586,22 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 424
     Top = 372
     object MenuKlasordenEkle: TMenuItem

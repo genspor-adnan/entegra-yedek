@@ -633,6 +633,95 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
       end
     end
   end
+  object cxMemo1: TcxMemo
+    Left = 32
+    Top = 224
+    Lines.Strings = (
+      '  DECLARE @RolID int, @ModulID nvarchar(20)'
+      '  SET @RolID = :PRM1'
+      '  SET @ModulID = :PRM2'
+      ''
+      '  DELETE FROM YETKI'
+      '  WHERE ROLID = @RolID'
+      '    AND MODULID LIKE @ModulID + '#39'%'#39
+      ''
+      '  INSERT INTO YETKI (ROLID, MODULID, HAK, TUR)'
+      '  SELECT DISTINCT ROLID, MODULID, HAK, TUR'
+      '  FROM ('
+      '      SELECT @RolID AS ROLID, MODULID, 1 AS HAK, 1 AS TUR'
+      '      FROM MODUL M'
+      '      WHERE MODULID LIKE @ModulID + '#39'%'#39
+      '        AND M.TUR IN (1,2,3,4,6,7,8,9,16,17,18,19)'
+      ''
+      '      UNION ALL'
+      ''
+      '      SELECT @RolID, MODULID, 1, 2'
+      '      FROM MODUL M'
+      '      WHERE MODULID LIKE @ModulID + '#39'%'#39
+      '        AND M.TUR IN (2,4,7,9,17,19)'
+      ''
+      '      UNION ALL'
+      ''
+      '      SELECT @RolID, MODULID, 1, 3'
+      '      FROM MODUL M'
+      '      WHERE MODULID LIKE @ModulID + '#39'%'#39
+      '        AND M.TUR IN (3,4,8,9,18,19)'
+      ''
+      '      UNION ALL'
+      ''
+      
+        '      SELECT @RolID, CONVERT(int, CONVERT(nvarchar(4), M.MODULID' +
+        ') + CONVERT(nvarchar(10), D.ID)), 1, 1'
+      '      FROM MODUL M'
+      '      INNER JOIN DOKUMLER D ON M.DOKUMTUR = D.MODUL'
+      '      WHERE LEN(M.MODULID) = 4'
+      '        AND M.MODULID LIKE '#39'__99'#39
+      '        AND MODULID LIKE @ModulID + '#39'%'#39
+      ''
+      '      UNION ALL'
+      ''
+      
+        '      SELECT @RolID, CONVERT(bigint, CONVERT(varchar(4), M.MODUL' +
+        'ID) + CONVERT(varchar(10), -R.ID)), 1, 1'
+      '      FROM MODUL M'
+      '      INNER JOIN REHBER R ON R.ID < 0 AND R.DURUM > 0'
+      '      WHERE LEN(M.MODULID) = 4'
+      '        AND M.MODULID LIKE '#39'__98'#39
+      '        AND MODULID LIKE @ModulID + '#39'%'#39
+      ''
+      '      UNION ALL'
+      ''
+      
+        '      SELECT @RolID, CONVERT(bigint, CONVERT(varchar(4), M.MODUL' +
+        'ID) + CONVERT(varchar(10), '#39'0'#39')), 1, 1'
+      '      FROM MODUL M'
+      '      WHERE LEN(M.MODULID) = 4'
+      '        AND M.MODULID LIKE '#39'__98'#39
+      '        AND MODULID LIKE @ModulID + '#39'%'#39
+      ''
+      '      UNION ALL'
+      ''
+      
+        '      SELECT @RolID, CONVERT(int, CONVERT(nvarchar(4), M.MODULID' +
+        ') + CONVERT(nvarchar(10), D.ID)), 1, 1'
+      '      FROM MODUL M'
+      '      INNER JOIN DEPOLAR D ON D.DURUM > 0'
+      '      WHERE LEN(M.MODULID) = 4'
+      '        AND MODULID LIKE @ModulID + '#39'%'#39
+      '  ) X'
+      '  WHERE NOT EXISTS ('
+      '      SELECT 1'
+      '      FROM YETKI Y'
+      '      WHERE Y.ROLID = X.ROLID'
+      '        AND Y.MODULID = X.MODULID'
+      '        AND Y.HAK = X.HAK'
+      '        AND Y.TUR = X.TUR'
+      '  );')
+    TabOrder = 5
+    Visible = False
+    Height = 89
+    Width = 593
+  end
   object TabRol: TFDQuery
     BeforePost = TabRolBeforePost
     BeforeDelete = TabRolBeforeDelete

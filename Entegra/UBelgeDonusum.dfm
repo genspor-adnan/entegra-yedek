@@ -145,6 +145,11 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
           DataBinding.FieldName = 'KUR'
           DataBinding.IsNullValueType = True
         end
+        object cxGridKaynakDBTableView1DEPOAD: TcxGridDBColumn
+          Caption = 'Depo'
+          DataBinding.FieldName = 'DEPOAD'
+          DataBinding.IsNullValueType = True
+        end
         object cxGridKaynakDBTableView1SEVK: TcxGridDBColumn
           Caption = 'Sevk'
           DataBinding.FieldName = 'SEVK'
@@ -179,6 +184,11 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
         object cxGridKaynakDBTableView1URUNNO: TcxGridDBColumn
           Caption = #220'r'#252'n No'
           DataBinding.FieldName = 'URUNNO'
+          DataBinding.IsNullValueType = True
+        end
+        object cxGridKaynakDBTableView1EMIRNO: TcxGridDBColumn
+          Caption = #220'rt.Emir No'
+          DataBinding.FieldName = 'DETAYBOLUMU'
           DataBinding.IsNullValueType = True
         end
         object cxGridKaynakDBTableView1OZELKOD: TcxGridDBColumn
@@ -691,8 +701,8 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
         'I=411 and F1.YERID=F.ID ),0.0),'
       
         #9'ALAN=ADET-isnull((select sum(F1.ADET) from FATURA F1 where F1.Y' +
-        'ERI=411 and F1.YERID=F.ID ),0.0)'
-      #9',TESLIMTARIHI=FB.FATURATARIH,'
+        'ERI=411 and F1.YERID=F.ID ),0.0),'
+      #9'DETAYBOLUMU,TESLIMTARIHI=FB.FATURATARIH,'
       
         '    SEVK = (SELECT AD FROM  REHBERILETISIM WHERE ID=FB.REHBERILE' +
         'TID),'

@@ -1,4 +1,4 @@
-unit UUretimRecete;
+﻿unit UUretimRecete;
 
 interface
 
@@ -302,8 +302,10 @@ type
   private
     Carpan : Integer;
     FStokBilgiCache: TDictionary<Integer, string>;
+    FAfterPostRefreshAtla: Boolean;   // sadece kullanıcı-giriş alanları değişti → AfterPost refresh atlanır
     FIlkAcilisYukleniyor: Boolean;
     FDetayYukleBekliyor: Boolean;
+    FReceteYukleniyor: Boolean;
     function EkranAdiAl: string;
     procedure HesaplaClick;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -346,7 +348,7 @@ begin
   PanelSagUst.Visible := False;
   ToolBarSol.Visible := True;
   ToolBarSag.Visible := True;
-  LabelGecmis.Caption := 'Ge�mi� re�ete g�ster';
+  LabelGecmis.Caption := 'Geçmiş reçete göster';
   TabReceteDetay.SQL.Text := SQLDetayStandart.Text;
   TabloYenile(RECETEDETAY,[TabRecete.FieldByname('ID').AsInteger]);
   TabloYenile(TabReceteDetay,[TabRecete.FieldByname('ID').AsInteger]);
@@ -361,11 +363,11 @@ begin
     ToolBarSag.Visible := not DateGecmis.Visible;
     if DateGecmis.Visible then begin
        DateGecmis.Date := Tablo.GENINI.BugunTrh;
-       LabelGecmis.Caption := 'Ge�mi�i Gizle';
+       LabelGecmis.Caption := 'Geçmişi Gizle';
 //       TabRecete.LockType := ltReadOnly;
 //       TabReceteDetay.LockType := ltReadOnly;
     end else begin
-       LabelGecmis.Caption:='Ge�mi� re�ete g�ster';
+       LabelGecmis.Caption:='Geçmiş reçete göster';
 //       TabRecete.LockType := ltOptimistic;
 //       TabReceteDetay.LockType := ltOptimistic;
     end;
@@ -558,16 +560,61 @@ begin
 end;
 
 procedure TUretimReceteDlg.CheckKDVClick(Sender: TObject);
+var
+  YeniDeger: Integer;
+  YeniBool: Boolean;
+  Bm: TBookmark;
+  EskiBefore: TDataSetNotifyEvent;
+  EskiAfter:  TDataSetNotifyEvent;
 begin
-    Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
-        'update URETIMRECETEDETAY set KDVDURUM='+ IntToStr(Abs(StrToInt(BoolToStr(CheckKDV.checked))))+
-          ' where URETIMRECETEID=&URID',['&URID'],[TabRecete.FieldByName('ID').AsInteger]);
-    TabloYenile(TabReceteDetay, []);
+    YeniBool := CheckKDV.Checked;
+    YeniDeger := Abs(StrToInt(BoolToStr(YeniBool)));
+
+    // 1) DB'de tek seferde UPDATE — trigger geçici olarak kapatılıyor (satır başına ateşlenmesin)
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'DISABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY', [], []);
+    try
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'update URETIMRECETEDETAY set KDVDURUM=' + IntToStr(YeniDeger) +
+        ' where URETIMRECETEID=&URID', ['&URID'], [TabRecete.FieldByName('ID').AsInteger]);
+    finally
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'ENABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY', [], []);
+    end;
+
+    // 2) In-memory senkron — TabReceteDetay'i kapatıp re-fetch yerine sadece
+    //    KDVDURUM alanını yerinde günceller (yüzlerce satırlı reçetelerde anında).
+    //    BeforePost/AfterPost handler'ları bu süre boyunca devredışı.
+    if not TabReceteDetay.Active then Exit;
+    TabReceteDetay.DisableControls;
+    EskiBefore := TabReceteDetay.BeforePost;
+    EskiAfter  := TabReceteDetay.AfterPost;
+    TabReceteDetay.BeforePost := nil;
+    TabReceteDetay.AfterPost  := nil;
+    Bm := TabReceteDetay.GetBookmark;
+    try
+      TabReceteDetay.First;
+      while not TabReceteDetay.Eof do begin
+        if TabReceteDetay.FieldByName('KDVDURUM').AsBoolean <> YeniBool then begin
+          TabReceteDetay.Edit;
+          TabReceteDetay.FieldByName('KDVDURUM').AsBoolean := YeniBool;
+          TabReceteDetay.Post;
+        end;
+        TabReceteDetay.Next;
+      end;
+      if Assigned(Bm) and TabReceteDetay.BookmarkValid(Bm) then
+        TabReceteDetay.GotoBookmark(Bm);
+    finally
+      TabReceteDetay.FreeBookmark(Bm);
+      TabReceteDetay.BeforePost := EskiBefore;
+      TabReceteDetay.AfterPost  := EskiAfter;
+      TabReceteDetay.EnableControls;
+    end;
 end;
 
 procedure TUretimReceteDlg.CheckKDVPropertiesEditValueChanged(Sender: TObject);
 begin
-   if not TabReceteDetay.Active then exit;
+(*   if not TabReceteDetay.Active then exit;
 
    if CheckKDV.Checked then
       CheckKDV.Caption := KontrolKDVDahil
@@ -575,7 +622,7 @@ begin
       CheckKDV.Caption := KontrolKDVHaric;
  //  Tablo.GENINI.WriteBoolean(Ops_Uretim_Recete_KDV_Durum,CheckKDV.Checked);
 //   TabReceteAfterScroll(TabRecete);
-   HesaplaClick;
+   HesaplaClick;*)
 end;
 
 procedure TUretimReceteDlg.CheckPasifClick(Sender: TObject);
@@ -589,7 +636,7 @@ procedure TUretimReceteDlg.UretimListeGridDBTableView1CanFocusRecord(
 begin
   AnaForm.cxGridPopupMenu1.Grid:=UretimListeGrid;
   AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=UretimListeGridDBTableView1;
-  AnaForm.pmGridStil.Tags.Values[UretimListeGrid.Name]:='�retimRe�eteAraGridi';
+  AnaForm.pmGridStil.Tags.Values[UretimListeGrid.Name]:='ÜretimReçeteAraGridi';
 end;
 
 procedure TUretimReceteDlg.UretimListeGridDBTableView1StylesGetContentStyle(
@@ -784,8 +831,8 @@ begin
   EnsureDataField(TabSablonDetay,'LIMITALT',TWideStringField,80);
   EnsureDataField(TabSablonDetay,'LIMITUST',TWideStringField,80);
   EnsureDataField(TabSablonDetay,'TOLERANSTIPI',TByteField);
-  EnsureDataField(TabSablonDetay,'TOLERANSDEGERI',TBCDField,2);
-  EnsureDataField(TabSablonDetay,'MIKTAR',TBCDField,2);
+  EnsureDataField(TabSablonDetay,'TOLERANSDEGERI',TBCDField,4);
+  EnsureDataField(TabSablonDetay,'MIKTAR',TBCDField,4);
   EnsureDataField(TabSablonDetay,'BIRIM',TSmallintField);
   EnsureDataField(TabSablonDetay,'OLCUALETI',TSmallintField);
   EnsureDataField(TabSablonDetay,'SURE',TSQLTimeStampField);
@@ -817,8 +864,8 @@ var
   aktifFrame : TGenelAnaSekmeFrame;
 begin
   PageControlOpr.ActivePageIndex:=0;
-  Tablo.GridAyarRestore('�retimRe�eteAraGridi',UretimListeGridDBTableView1 );
-  Tablo.GridAyarRestore('�retimRe�eteDetayGridi',GridUretimDBTableView1 );
+  Tablo.GridAyarRestore('ÜretimReçeteAraGridi',UretimListeGridDBTableView1 );
+  Tablo.GridAyarRestore('ÜretimReçeteDetayGridi',GridUretimDBTableView1 );
 
   aktifFrame := TGenelAnaSekmeFrame(UTablo.AnaFrameYoneticisi.AktifFrame.Ornek);
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz, ra, aktifFrame.RaporSecClick);
@@ -884,7 +931,7 @@ begin
             Tamam := False;
          end;
          if Tamam then begin
-            ID:=Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'INSERT INTO KALITETEST ([ADI],[EKLEYEN]) values('''+Bilgi+''','''+Kullanan+''') select SCOPE_IDENTITY() ', [],[], True);
+            ID:=Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'INSERT INTO KALITETEST ([ADI],[EKLEYEN]) values('''+Bilgi+''','''+Kullanan+''') select SCOPE_IDENTITY() ', [],[], True);
             TabSablonDetay.FieldByName('TESTID').AsInteger := ID;
          end;
      end
@@ -928,7 +975,7 @@ procedure TUretimReceteDlg.GridUretimDBTableView1CanFocusRecord(
 begin
   AnaForm.cxGridPopupMenu1.Grid:=GridUretim;
   AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridUretimDBTableView1;
-  AnaForm.pmGridStil.Tags.Values[GridUretim.Name]:='�retimRe�eteDetayGridi';
+  AnaForm.pmGridStil.Tags.Values[GridUretim.Name]:='ÜretimReçeteDetayGridi';
 end;
 
 procedure TUretimReceteDlg.HesaplaClick;
@@ -977,7 +1024,14 @@ begin
        TabRecete.SQL.Add(' and TUR > 0 ');
     TabRecete.SQL.Add(' order by KOD ');
     TabRecete.Close;
-    TabRecete.Open;
+    FReceteYukleniyor := True;
+    TabRecete.DisableControls;
+    try
+      TabRecete.Open;
+    finally
+      TabRecete.EnableControls;
+      FReceteYukleniyor := False;
+    end;
     if not TabRecete.IsEmpty then begin
       if FIlkAcilisYukleniyor then begin
         FIlkAcilisYukleniyor := False;
@@ -1017,7 +1071,7 @@ begin
   RecKod := Tablo.AciklamaGetir('STOKLAR', 'KOD', StokID);
   RecAd := Tablo.AciklamaGetir('STOKLAR', 'STOKADI', StokID);
   ////
-  veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'DISABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY',[],[]);
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DISABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY',[],[]);
   eskiReceteID := TabRecete.FieldByName('ID').AsInteger;
 //  yeniReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETE',eskiReceteID,['STOKID','KOD','AD','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],
 //      [StokID,RecKod,RecAd,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
@@ -1027,10 +1081,10 @@ begin
   while not TabReceteDetay.Eof do begin
     DetayReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETEDETAY',TabReceteDetay.FieldByName('ID').AsInteger,['URETIMRECETEID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniReceteId,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
     if TabReceteDetay.FieldByName('ADET').AsInteger>0 then //?RET?LECEK ?R?N ?SE KOPYALANAN ?LE DE????R
-       veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update URETIMRECETEDETAY set URUNID='+IntToStr(StokID)+' where ID='+IntToStr(DetayReceteId),[],[]);
+       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update URETIMRECETEDETAY set URUNID='+IntToStr(StokID)+' where ID='+IntToStr(DetayReceteId),[],[]);
     TabReceteDetay.Next;
   end;
-  veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'ENABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY',[],[]);
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'ENABLE TRIGGER TG_Uretim_StokFiyatGuncelle ON URETIMRECETEDETAY',[],[]);
   TabloYenile(TabRecete, [],yeniReceteId);
 end;
 
@@ -1043,7 +1097,7 @@ begin
                  TabRecete.FieldByname('ID').AsString+' and ID<>'+TabUretimReceteOpr.FieldByname('ID').AsString+' and KALITE=1 order by UO.SIRA, UO.ID','Testler',False,False,True);
 
    if lst.count>0 then
-      Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'insert into KALITESABLONDETAY (TESTID, YER, YERID,LIMITYAZI, LIMITALT, LIMITUST, TOLERANSTIPI, TOLERANSDEGERI, MIKTAR, BIRIM, OLCUALETI, SURE, NOMINAL,SIRA,GIRIS)'+
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into KALITESABLONDETAY (TESTID, YER, YERID,LIMITYAZI, LIMITALT, LIMITUST, TOLERANSTIPI, TOLERANSDEGERI, MIKTAR, BIRIM, OLCUALETI, SURE, NOMINAL,SIRA,GIRIS)'+
      ' select TESTID, YER, YERID='+TabUretimReceteOpr.FieldByname('ID').AsString+',LIMITYAZI, LIMITALT, LIMITUST, TOLERANSTIPI, TOLERANSDEGERI, MIKTAR, BIRIM, OLCUALETI, SURE, NOMINAL,SIRA,GIRIS from KALITESABLONDETAY KSD'+
      ' where YER=20 and KSD.YERID='+lst[1]+'  order by KSD.ID',[],[]);
 
@@ -1061,12 +1115,12 @@ begin
   if StokID>0 then begin
     Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI from STOKLAR where ID='+IntToStr(StokID));
     if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
-      YeniReceteID := Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+      YeniReceteID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'insert into URETIMRECETE(KOD,AD,STOKID,TUR,EKLEYEN,SUBEID) values(&KOD,&AD,&STOKID,2,&EKLEYEN,&SUBEID) select scope_identity()',
         ['&KOD','&AD','&STOKID','&EKLEYEN','&SUBEID'],
         [Tablo.Query9.FieldByName('KOD').AsString,Tablo.Query9.FieldByName('STOKADI').AsString,StokID,Kullanan,SubeID],
         True);
-      Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN)select &URID,1,ID,1,ANABIRIM,1,1,1 from STOKLAR where ID=&StokID',
         ['&URID','&StokID'],[YeniReceteID,StokID]);
       TabloYenile(TabRecete, [], YeniReceteID);
@@ -1102,9 +1156,9 @@ begin
      else if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMEMRI where RECETEID=&UEID',['&UEID'],[TabRecete.FieldByName('ID').AsInteger]) then
         ShowMessage(URKayitSilinemez)
      else if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMRECETEDETAY where URETIMRECETEID=&UEID and ANAURUN=0',['&UEID'],[TabRecete.FieldByName('ID').AsInteger]) then
-        ShowMessage('�nce Re�ete detay�n� silin!')
+        ShowMessage('Önce Reçete detayını silin!')
      else
-        Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'delete from URETIMRECETE where ID=&ID', ['&ID'], [TabRecete.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from URETIMRECETE where ID=&ID', ['&ID'], [TabRecete.FieldByName('ID').AsInteger]);
     TabloYenile(TabRecete, []);
   end;
 end;
@@ -1115,7 +1169,7 @@ var
 begin
   UrnID := TabReceteDetay.FieldByName('URUNID').AsInteger;
   RecID := TabRecete.FieldByname('ID').AsInteger;
-  VeriTabani.BasitKomut�al��t�r(Tablo.FDCnn,'update URETIMRECETEDETAY set  '
+  VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'update URETIMRECETEDETAY set  '
                                          +'ANAURUN=case when URUNID=&UrunID then 1 else 0 end, '
                                          +'ADET=case when URUNID=&UrunID then 1.0 else ADET end, '
                                          +'MIKTAR=case when URUNID=&UrunID then 1.0 else MIKTAR end '
@@ -1144,6 +1198,8 @@ end;
 
 procedure TUretimReceteDlg.TabReceteAfterScroll(DataSet: TDataSet);
 begin
+  if FReceteYukleniyor then
+    Exit;
   if (not TabRecete.Active) or TabRecete.IsEmpty then
     Exit;
   if DateGecmis.Visible then Begin
@@ -1193,8 +1249,14 @@ end;
 procedure TUretimReceteDlg.TabReceteDetayAfterPost(DataSet: TDataSet);
 var MalSon,MalOrt:real;
 begin
+   // Sadece kullanıcı giriş alanları değiştiyse ağır parent refresh'i atla
+   if FAfterPostRefreshAtla then begin
+      FAfterPostRefreshAtla := False;
+      Exit;
+   end;
+
    if (OncekiAdetHesap>0)and(OncekiAdetHesap <> TabReceteDetay.FieldByname('ADETHESAP').AsFloat) then
-       ShowMessage('"Hesapla" tu�una basarak yeniden hesaplay�n..');
+       ShowMessage('"Hesapla" tuşuna basarak yeniden hesaplayın..');
    if HesaplaBasildi = False then begin
       TabloYenile(TabRecete,[]);
       TabloYenile(RECETE,[VarsSatisFiyatID]);
@@ -1227,24 +1289,44 @@ begin
 end;
 
 procedure TUretimReceteDlg.TabReceteDetayBeforePost(DataSet: TDataSet);
+var
+  i: Integer;
+  F: TField;
 begin
     if (TabReceteDetay.FieldByname('ADETHESAP').AsFloat > 0)and(TabReceteDetay.FieldByname('ADET').AsFloat < 0) then
         TabReceteDetay.FieldByname('ADETHESAP').AsFloat := TabReceteDetay.FieldByname('ADETHESAP').AsFloat * -1;
     if (TabReceteDetay.FieldByname('ADETHESAP').AsFloat < 0)and(TabReceteDetay.FieldByname('ADET').AsFloat > 0) then
         TabReceteDetay.FieldByname('ADETHESAP').AsFloat := TabReceteDetay.FieldByname('ADETHESAP').AsFloat * -1;
+
+    // Sadece kullanıcı giriş alanları (ACIKLAMA/ADETHESAP/ADET/BIRIM) değişmişse
+    // AfterPost'taki ağır parent-refresh atlanır. Hesapla butonu ile recalc kullanıcı
+    // tarafından tetikleniyor; refresh sadece kozmetik kalıyor.
+    FAfterPostRefreshAtla := DataSet.State = dsEdit;   // insert ise zaten false bırak
+    if FAfterPostRefreshAtla then begin
+      for i := 0 to DataSet.FieldCount - 1 do begin
+        F := DataSet.Fields[i];
+        if F.FieldKind <> fkData then Continue;       // calculated/lookup atla
+        if (F.FieldName = 'ACIKLAMA') or (F.FieldName = 'ADETHESAP') or
+           (F.FieldName = 'ADET')     or (F.FieldName = 'BIRIM') then Continue;
+        if VarToStr(F.OldValue) <> VarToStr(F.NewValue) then begin
+          FAfterPostRefreshAtla := False;
+          Break;
+        end;
+      end;
+    end;
 end;
 
 procedure TUretimReceteDlg.TabReceteDetayCalcFields(DataSet: TDataSet);
+var
+  Kod, Adi, UrunNo: string;
 begin
-  if TabReceteDetay.FieldByName('URUNID').AsInteger > 0 then begin
-    Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI,URUNNO from STOKLAR where ID='+TabReceteDetay.FieldByName('URUNID').AsString);
-    if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
-      TabReceteDetay.FieldByName('URUNADI').AsString := Tablo.Query9.FieldByName('STOKADI').AsString;
-      TabReceteDetay.FieldByName('URUNKODU').AsString := Tablo.Query9.FieldByName('KOD').AsString;
-      TabReceteDetay.FieldByName('URUNNO').AsString := Tablo.Query9.FieldByName('URUNNO').AsString;
-    end;
+  // Cache'li STOK lookup — her satır için STOKLAR query atılmaz, aynı URUNID tekrar
+  // kullanıldığında bellekten okunur (CheckKDV gibi toplu refresh'lerde büyük hızlanma).
+  if GetStokBilgi(TabReceteDetay.FieldByName('URUNID').AsInteger, Kod, Adi, UrunNo) then begin
+    TabReceteDetay.FieldByName('URUNADI').AsString  := Adi;
+    TabReceteDetay.FieldByName('URUNKODU').AsString := Kod;
+    TabReceteDetay.FieldByName('URUNNO').AsString   := UrunNo;
   end;
-
 end;
 
 procedure TUretimReceteDlg.TabReceteDetayNewRecord(DataSet: TDataSet);
@@ -1325,25 +1407,6 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

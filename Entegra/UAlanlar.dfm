@@ -270,11 +270,10 @@ object AlanlarDlg: TAlanlarDlg
     end
   end
   object TabAlanlar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabAlanlarBeforePost
     AfterPost = TabAlanlarAfterPost
     OnNewRecord = TabAlanlarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'Select * from ALANLAR'
       ' Where EKRANADI=:Par1 ')
@@ -297,13 +296,11 @@ object AlanlarDlg: TAlanlarDlg
     Top = 208
   end
   object TabLabel: TFDQuery
-    Connection = Tablo.FDCnn
     OnNewRecord = TabLabelNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'Select * from ALANLAR')
     Left = 24
     Top = 176
   end
 end
-

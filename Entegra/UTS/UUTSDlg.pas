@@ -25,7 +25,9 @@ uses
   dxmdaset, Models, Vcl.ToolWin, cxImageComboBox, Vcl.Menus, cxButtonEdit,
   cxSpinEdit, JvExExtCtrls, JvNavigationPane, cxMemo, dxDateRanges, cxCheckListBox,
   dxScrollbarAnnotations, dxCoreGraphics, cxCustomListBox, cxListBox, cxDBEdit, System.JSON,
-  cxCheckComboBox, REST.Json;
+  cxCheckComboBox, REST.Json, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TUTSDlg = class(TForm)
@@ -1369,17 +1371,17 @@ var
     SonucListe : TStringList;
 begin
 
-    {if TabBildirimTur.fields[0].asInteger = 1 then begin//alma bildirimi ise irs fat soralým
+    if TabBildirimTur.fields[0].asInteger = 1 then begin//alma bildirimi ise irs fat soralým
         SonucListe := TStringList.Create;
         if not Tablo.HizliGirisListedenBilgiGetir('Kayýt Ýçin Belge Seçimi','select 10,''ÝRSALÝYE'' UNION select 11,''FATURA''',SonucListe,False,[False, True],[]) then
            exit;
-         BaslikTur := StrToIntDef(SonucListe[0],0);
+         BaslikTur := StrToIntDef(SonucListe[0],11);
          SonucListe.Free;
-    end;
-    if CheckIrsaliye.Checked then
-       BaslikTur := 10
-    else}
-    BaslikTur := 11;
+    end
+//    if CheckIrsaliye.Checked then
+//       BaslikTur := 10
+    else
+       BaslikTur := 11;
     SayBasari:=0; SayHata:=0;
 
 

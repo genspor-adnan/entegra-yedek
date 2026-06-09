@@ -49,17 +49,6 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       TabOrder = 1
       OnClick = FaturaTusClick
     end
-    object PlanlaTus: TcxButton
-      Tag = 2
-      Left = 3
-      Top = 138
-      Width = 80
-      Height = 29
-      Caption = 'Planla'
-      Enabled = False
-      TabOrder = 2
-      OnClick = FaturaTusClick
-    end
     object DokumanTus: TcxButton
       Tag = 3
       Left = 0
@@ -68,7 +57,7 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       Height = 29
       Caption = 'Yorum/Medya'
       Enabled = False
-      TabOrder = 3
+      TabOrder = 2
       OnClick = FaturaTusClick
     end
   end
@@ -1864,101 +1853,6 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
         Visible = False
         Height = 264
         Width = 387
-      end
-    end
-    object PlanlamaEkr: TJvWizardInteriorPage
-      Tag = 2
-      Header.ParentFont = False
-      Header.Title.Color = clNone
-      Header.Title.Text = 'Plan'
-      Header.Title.Anchors = [akLeft, akTop, akRight]
-      Header.Title.Font.Charset = TURKISH_CHARSET
-      Header.Title.Font.Color = clWindowText
-      Header.Title.Font.Height = -16
-      Header.Title.Font.Name = 'Trebuchet MS'
-      Header.Title.Font.Style = [fsBold]
-      Header.Subtitle.Color = clNone
-      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
-      Header.Subtitle.Font.Charset = TURKISH_CHARSET
-      Header.Subtitle.Font.Color = clWindowText
-      Header.Subtitle.Font.Height = -11
-      Header.Subtitle.Font.Name = 'Trebuchet MS'
-      Header.Subtitle.Font.Style = []
-      Header.Subtitle.Text = ''
-      VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
-      OnPage = PlanlamaEkrPage
-      object ToolBar4: TToolBar
-        AlignWithMargins = True
-        Left = 3
-        Top = 73
-        Width = 1026
-        Height = 24
-        Margins.Bottom = 0
-        AutoSize = True
-        ButtonWidth = 75
-        Caption = 'AletCubugu'
-        Color = clTeal
-        DockSite = True
-        DrawingStyle = dsGradient
-        EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-        EdgeInner = esLowered
-        EdgeOuter = esNone
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        GradientEndColor = 11776947
-        GradientStartColor = 14540253
-        HotTrackColor = 65408
-        Images = Tablo.PNGImageList2
-        List = True
-        ParentColor = False
-        ParentFont = False
-        ShowCaptions = True
-        TabOrder = 0
-        Transparent = True
-        object ToolButton5: TToolButton
-          Left = 0
-          Top = 0
-          Caption = 'Yeni Proje'
-          ImageIndex = 0
-          ImageName = 'PngImage0'
-        end
-        object ToolButton6: TToolButton
-          Left = 75
-          Top = 0
-          Caption = 'Sil'
-          ImageIndex = 1
-          ImageName = 'PngImage1'
-        end
-      end
-      object GridTicari: TcxGrid
-        Left = 0
-        Top = 97
-        Width = 1032
-        Height = 520
-        Align = alClient
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        TabOrder = 1
-        LookAndFeel.Kind = lfStandard
-        LookAndFeel.NativeStyle = True
-        object GridTicariView: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsCustomize.ColumnsQuickCustomization = True
-          OptionsData.DeletingConfirmation = False
-          OptionsSelection.CellSelect = False
-          OptionsView.GroupByBox = False
-        end
-        object cxGridLevel4: TcxGridLevel
-          GridView = GridTicariView
-        end
       end
     end
     object DokumanEkr: TJvWizardInteriorPage

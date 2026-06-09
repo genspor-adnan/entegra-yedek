@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils, Classes, Controls, ExtCtrls, JvExExtCtrls, JvExtComponent,
-  JvPanel, Graphics, pngimage, DBCtrls,Gdipapi,Gdipobj;
+  JvPanel, Graphics, pngimage, DBCtrls, Buttons, Gdipapi, Gdipobj;
 
 type
   TGenNavButton = class(TJvPanel)

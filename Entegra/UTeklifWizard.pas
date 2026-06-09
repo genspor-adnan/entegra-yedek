@@ -1410,14 +1410,17 @@ end;
 procedure TTeklifWizardDlg.Aman_Kilitle_Ac(AcKapa:Boolean);
 begin
         Kilit := not AcKapa;
-        TabTeklif.Close;
+{        TabTeklif.Close;
         if AcKapa then
         else
         TabTeklif.Open;
+
         TabTeklifDetay.Close;
+
         if AcKapa then
         else
-        TabTeklifDetay.Open;
+        TabTeklifDetay.Open; }
+
         RevizeTus.Enabled := AcKapa;
         ToolBar5.Enabled := AcKapa;
         PanelUst.Enabled := AcKapa;

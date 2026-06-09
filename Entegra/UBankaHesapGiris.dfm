@@ -1,0 +1,525 @@
+object bankaHesapGirisdlg: TbankaHesapGirisdlg
+  Left = 0
+  Top = 0
+  Caption = 'Banka Hesap H'#305'zl'#305' Giri'#351
+  ClientHeight = 600
+  ClientWidth = 1180
+  Color = clBtnFace
+  Font.Charset = TURKISH_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  Position = poMainFormCenter
+  WindowState = wsMaximized
+  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  TextHeight = 13
+  object PanelUst: TPanel
+    Left = 0
+    Top = 0
+    Width = 1180
+    Height = 50
+    Align = alTop
+    BevelOuter = bvNone
+    Color = clSkyBlue
+    ParentBackground = False
+    TabOrder = 0
+    object btnHesapSec: TcxButton
+      Left = 8
+      Top = 11
+      Width = 130
+      Height = 28
+      Caption = 'Hesap Se'#231
+      TabOrder = 0
+      OnClick = btnHesapSecClick
+    end
+    object lblBanka: TcxLabel
+      Left = 170
+      Top = 4
+      Caption = 'Banka : -'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -13
+      Style.Font.Name = 'Tahoma'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lblSube: TcxLabel
+      Left = 170
+      Top = 24
+      Caption = #350'ube   : -'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -13
+      Style.Font.Name = 'Tahoma'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lblHesap: TcxLabel
+      Left = 580
+      Top = 4
+      Caption = 'Hesap : -'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -13
+      Style.Font.Name = 'Tahoma'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lblHesapDoviz: TcxLabel
+      Left = 580
+      Top = 24
+      Caption = 'P.Birimi : -'
+      ParentFont = False
+      Style.Font.Charset = TURKISH_CHARSET
+      Style.Font.Color = clBlack
+      Style.Font.Height = -13
+      Style.Font.Name = 'Tahoma'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+  end
+  object PanelGiris: TPanel
+    Left = 0
+    Top = 50
+    Width = 1180
+    Height = 97
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 1
+    object lbl_Tarih: TcxLabel
+      Left = 8
+      Top = 4
+      Caption = 'Tarih'
+    end
+    object cxDateEdit1: TcxDateEdit
+      Left = 8
+      Top = 22
+      EditValue = 0d
+      Properties.Kind = ckDateTime
+      TabOrder = 0
+      Width = 145
+    end
+    object lbl_Tur: TcxLabel
+      Left = 160
+      Top = 4
+      Caption = 'T'#252'r'
+    end
+    object cbTur: TcxImageComboBox
+      Left = 160
+      Top = 22
+      Properties.Items = <>
+      Properties.OnChange = cbTurPropertiesChange
+      TabOrder = 1
+      Width = 200
+    end
+    object lbl_Secim: TcxLabel
+      Left = 366
+      Top = 4
+      Caption = 'Se'#231'im'
+    end
+    object beSecim: TcxButtonEdit
+      Left = 366
+      Top = 22
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end>
+      Properties.OnButtonClick = beSecimPropertiesButtonClick
+      TabOrder = 2
+      Width = 250
+    end
+    object lbl_Tutar: TcxLabel
+      Left = 622
+      Top = 4
+      Caption = 'Tutar'
+    end
+    object ceTutar: TcxCurrencyEdit
+      Left = 622
+      Top = 22
+      Properties.DecimalPlaces = 2
+      Properties.DisplayFormat = '#,##0.00'
+      Properties.OnChange = ceTutarPropertiesChange
+      TabOrder = 3
+      Width = 90
+    end
+    object lbl_Masraf: TcxLabel
+      Left = 718
+      Top = 4
+      Caption = 'Banka Komisyonu'
+    end
+    object ceKomisyon: TcxCurrencyEdit
+      Left = 718
+      Top = 22
+      Properties.DecimalPlaces = 2
+      Properties.DisplayFormat = '#,##0.00'
+      TabOrder = 4
+      Width = 93
+    end
+    object lbl_Aciklama: TcxLabel
+      Left = 8
+      Top = 48
+      Caption = 'A'#231#305'klama'
+    end
+    object teAciklama: TcxTextEdit
+      Left = 8
+      Top = 66
+      TabOrder = 5
+      Width = 240
+    end
+    object lbl_MasrafKalemi: TcxLabel
+      Left = 254
+      Top = 48
+      Caption = 'Masraf Kalemi'
+      Visible = False
+    end
+    object beMasrafKalemi: TcxButtonEdit
+      Left = 254
+      Top = 66
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end>
+      Properties.OnButtonClick = beMasrafKalemiPropertiesButtonClick
+      TabOrder = 17
+      Visible = False
+      Width = 150
+    end
+    object lbl_BelgeNo: TcxLabel
+      Left = 414
+      Top = 48
+      Caption = 'Belge No'
+    end
+    object teBelgeNo: TcxTextEdit
+      Left = 414
+      Top = 66
+      TabOrder = 16
+      Width = 200
+    end
+    object chkKarsiligi: TcxCheckBox
+      Left = 817
+      Top = 22
+      Caption = 'Kar'#351#305'l'#305#287#305
+      Properties.OnChange = chkKarsiligiClick
+      TabOrder = 6
+    end
+    object chkEkstrede: TcxCheckBox
+      Left = 622
+      Top = 66
+      Caption = 'Ekstrede Kullan'
+      TabOrder = 7
+    end
+    object PanelKarsiligiSag: TPanel
+      Left = 880
+      Top = 0
+      Width = 300
+      Height = 97
+      Align = alRight
+      BevelOuter = bvNone
+      Color = clMoneyGreen
+      ParentBackground = False
+      TabOrder = 8
+      Visible = False
+      object lbl_DovizTipi: TcxLabel
+        Left = 8
+        Top = 4
+        Caption = 'D'#246'viz Tipi'
+      end
+      object cbDovizTipi: TcxImageComboBox
+        Left = 8
+        Top = 22
+        Properties.Items = <>
+        Properties.OnChange = cbDovizTipiPropertiesChange
+        TabOrder = 0
+        Width = 49
+      end
+      object lbl_Kur: TcxLabel
+        Left = 63
+        Top = 5
+        Caption = 'Kur'
+      end
+      object ceKur: TcxCurrencyEdit
+        Left = 63
+        Top = 23
+        Properties.DecimalPlaces = 4
+        Properties.DisplayFormat = '#,##0.0000'
+        Properties.OnChange = ceKurPropertiesChange
+        TabOrder = 1
+        Width = 66
+      end
+      object lbl_DovizTutar: TcxLabel
+        Left = 8
+        Top = 50
+        Caption = 'D'#246'viz Tutar'
+      end
+      object ceDovizTutar: TcxCurrencyEdit
+        Left = 8
+        Top = 68
+        Properties.DecimalPlaces = 2
+        Properties.DisplayFormat = '#,##0.00'
+        Properties.ReadOnly = True
+        Style.Color = clBtnFace
+        TabOrder = 2
+        Width = 121
+      end
+    end
+  end
+  object cxGrid1: TcxGrid
+    Left = 0
+    Top = 147
+    Width = 1180
+    Height = 408
+    Align = alClient
+    TabOrder = 3
+    object cxGrid1DBTableView1: TcxGridDBTableView
+      PopupMenu = PopupMenu1
+      Navigator.Buttons.CustomButtons = <>
+      ScrollbarAnnotations.CustomAnnotations = <>
+      OnCellClick = cxGrid1DBTableView1CellClick
+      OnFocusedRecordChanged = cxGrid1DBTableView1FocusedRecordChanged
+      DataController.DataSource = DataSource1
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      Filtering.ColumnAddValueItems = False
+      Filtering.ColumnMRUItemsList = False
+      OptionsCustomize.ColumnsQuickCustomization = True
+      OptionsData.Deleting = False
+      OptionsData.Inserting = False
+      OptionsView.GroupByBox = False
+      object cxGrid1DBTableView1TARIH: TcxGridDBColumn
+        Caption = 'Tarih'
+        DataBinding.FieldName = 'TARIH'
+        PropertiesClassName = 'TcxDateEditProperties'
+        Properties.Kind = ckDateTime
+        Options.Editing = False
+        Width = 120
+      end
+      object cxGrid1DBTableView1TURID: TcxGridDBColumn
+        Caption = 'T'#252'r Id'
+        DataBinding.FieldName = 'TURID'
+        Visible = False
+        Options.Editing = False
+        Width = 50
+      end
+      object cxGrid1DBTableView1TUR: TcxGridDBColumn
+        Caption = 'T'#252'r'
+        DataBinding.FieldName = 'TUR'
+        Options.Editing = False
+        Width = 130
+      end
+      object cxGrid1DBTableView1SECIMID: TcxGridDBColumn
+        Caption = 'Se'#231'im Id'
+        DataBinding.FieldName = 'SECIMID'
+        Visible = False
+        Options.Editing = False
+        Width = 60
+      end
+      object cxGrid1DBTableView1SECIM: TcxGridDBColumn
+        Caption = 'Se'#231'im'
+        DataBinding.FieldName = 'SECIM'
+        Options.Editing = False
+        Width = 170
+      end
+      object cxGrid1DBTableView1TUTAR: TcxGridDBColumn
+        Caption = 'Tutar'
+        DataBinding.FieldName = 'TUTAR'
+        Options.Editing = False
+        Width = 90
+      end
+      object cxGrid1DBTableView1PBIRIMI: TcxGridDBColumn
+        Caption = 'P.Birimi'
+        DataBinding.FieldName = 'PBIRIMI'
+        Options.Editing = False
+        Width = 55
+      end
+      object cxGrid1DBTableView1KOMISYON: TcxGridDBColumn
+        Caption = 'Banka Komisyonu'
+        DataBinding.FieldName = 'KOMISYON'
+        Options.Editing = False
+        Width = 70
+      end
+      object cxGrid1DBTableView1ACIKLAMA: TcxGridDBColumn
+        Caption = 'A'#231#305'klama'
+        DataBinding.FieldName = 'ACIKLAMA'
+        Options.Editing = False
+        Width = 180
+      end
+      object cxGrid1DBTableView1BELGENO: TcxGridDBColumn
+        Caption = 'Belge No'
+        DataBinding.FieldName = 'BELGENO'
+        Options.Editing = False
+        Width = 100
+      end
+      object cxGrid1DBTableView1KARSILIGI: TcxGridDBColumn
+        Caption = 'Kar'#351#305'l'#305#287#305
+        DataBinding.FieldName = 'KARSILIGI'
+        Options.Editing = False
+        Width = 60
+      end
+      object cxGrid1DBTableView1DOVIZ_TUTARI: TcxGridDBColumn
+        Caption = 'D'#246'viz Tutar'#305
+        DataBinding.FieldName = 'DOVIZ_TUTARI'
+        Options.Editing = False
+        Width = 90
+      end
+      object cxGrid1DBTableView1DOVIZ_TIPI: TcxGridDBColumn
+        Caption = 'D'#246'viz Tipi'
+        DataBinding.FieldName = 'DOVIZ_TIPI'
+        Options.Editing = False
+        Width = 60
+      end
+      object cxGrid1DBTableView1KUR: TcxGridDBColumn
+        Caption = 'Kur'
+        DataBinding.FieldName = 'KUR'
+        Options.Editing = False
+        Width = 70
+      end
+      object cxGrid1DBTableView1EKSTREDE_KULLAN: TcxGridDBColumn
+        Caption = 'Ekstrede Kullan'
+        DataBinding.FieldName = 'EKSTREDE_KULLAN'
+        Options.Editing = False
+        Width = 95
+      end
+      object cxGrid1DBTableView1MASRAFID: TcxGridDBColumn
+        Caption = 'Masraf/Gelir Id'
+        DataBinding.FieldName = 'MASRAFID'
+        Visible = False
+        Options.Editing = False
+        Width = 80
+      end
+      object cxGrid1DBTableView1MASRAFKALEMI: TcxGridDBColumn
+        Caption = 'Masraf/Gelir Kalemi'
+        DataBinding.FieldName = 'MASRAFKALEMI'
+        Options.Editing = False
+        Width = 160
+      end
+    end
+    object cxGrid1Level1: TcxGridLevel
+      GridView = cxGrid1DBTableView1
+    end
+  end
+  object PanelAlt: TPanel
+    Left = 0
+    Top = 555
+    Width = 1180
+    Height = 45
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+    object btnF5Kaydet: TcxButton
+      Left = 8
+      Top = 6
+      Width = 160
+      Height = 33
+      Caption = 'F5 Kaydet'
+      TabOrder = 0
+      OnClick = btnF5KaydetClick
+    end
+    object btnF8Devam: TcxButton
+      Left = 174
+      Top = 6
+      Width = 160
+      Height = 33
+      Caption = 'F8 Giri'#351' Devam'
+      TabOrder = 1
+      OnClick = btnF8DevamClick
+    end
+  end
+  object dxMemData1: TdxMemData
+    Indexes = <>
+    SortOptions = []
+    Left = 64
+    Top = 240
+    object dxMemData1TARIH: TDateTimeField
+      FieldName = 'TARIH'
+    end
+    object dxMemData1TURID: TSmallintField
+      FieldName = 'TURID'
+    end
+    object dxMemData1TUR: TStringField
+      FieldName = 'TUR'
+      Size = 50
+    end
+    object dxMemData1SECIMID: TIntegerField
+      FieldName = 'SECIMID'
+    end
+    object dxMemData1SECIM: TStringField
+      FieldName = 'SECIM'
+      Size = 150
+    end
+    object dxMemData1TUTAR: TCurrencyField
+      FieldName = 'TUTAR'
+      DisplayFormat = '#,##0.00'
+    end
+    object dxMemData1PBIRIMI: TStringField
+      FieldName = 'PBIRIMI'
+      Size = 5
+    end
+    object dxMemData1KOMISYON: TCurrencyField
+      FieldName = 'KOMISYON'
+      DisplayFormat = '#,##0.00'
+    end
+    object dxMemData1ACIKLAMA: TStringField
+      FieldName = 'ACIKLAMA'
+      Size = 150
+    end
+    object dxMemData1BELGENO: TStringField
+      FieldName = 'BELGENO'
+      Size = 30
+    end
+    object dxMemData1KARSILIGI: TBooleanField
+      FieldName = 'KARSILIGI'
+    end
+    object dxMemData1DOVIZ_TUTARI: TCurrencyField
+      FieldName = 'DOVIZ_TUTARI'
+      DisplayFormat = '#,##0.00'
+    end
+    object dxMemData1DOVIZ_TIPI: TStringField
+      FieldName = 'DOVIZ_TIPI'
+      Size = 5
+    end
+    object dxMemData1KUR: TCurrencyField
+      FieldName = 'KUR'
+      DisplayFormat = '#,##0.0000'
+    end
+    object dxMemData1EKSTREDE_KULLAN: TBooleanField
+      FieldName = 'EKSTREDE_KULLAN'
+    end
+    object dxMemData1MASRAFID: TIntegerField
+      FieldName = 'MASRAFID'
+    end
+    object dxMemData1MASRAFKALEMI: TStringField
+      FieldName = 'MASRAFKALEMI'
+      Size = 150
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = dxMemData1
+    Left = 216
+    Top = 208
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 392
+    Top = 240
+    object miSatirSil: TMenuItem
+      Caption = 'Sat'#305'r Sil'
+      OnClick = miSatirSilClick
+    end
+  end
+end

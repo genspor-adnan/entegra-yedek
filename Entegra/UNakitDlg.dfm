@@ -185,13 +185,13 @@ object NakitDlg: TNakitDlg
   end
   object Panel1: TPanel
     Left = 0
-    Top = 109
+    Top = 112
     Width = 580
-    Height = 293
+    Height = 290
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 112
-    ExplicitHeight = 290
+    ExplicitTop = 109
+    ExplicitHeight = 293
     object Label15: TcxLabel
       Left = 3
       Top = 68
@@ -772,7 +772,6 @@ object NakitDlg: TNakitDlg
     Left = 0
     Top = 80
     Width = 580
-    Height = 29
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -802,6 +801,7 @@ object NakitDlg: TNakitDlg
     ShowCaptions = True
     TabOrder = 3
     Transparent = True
+    ExplicitHeight = 29
     object YaziciYaz: TToolButton
       Left = 0
       Top = 0
@@ -950,7 +950,7 @@ object NakitDlg: TNakitDlg
         'and BOLUM=-1005)'
       'FROM KASA K'
       'WHERE K.ID = :PID ')
-    Left = 195
-    Top = 284
+    Left = 219
+    Top = 268
   end
 end

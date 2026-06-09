@@ -13,7 +13,6 @@ object UretimListeDlg: TUretimListeDlg
     Left = 3
     Top = 3
     Width = 1021
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -40,6 +39,7 @@ object UretimListeDlg: TUretimListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -84,16 +84,14 @@ object UretimListeDlg: TUretimListeDlg
   end
   object GridUretim: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 1027
-    Height = 261
+    Height = 258
     Align = alClient
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 35
-    ExplicitHeight = 258
     object GridUretimView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -397,10 +395,6 @@ object UretimListeDlg: TUretimListeDlg
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridUretimDetay: TcxGrid
         Left = 0
         Top = 0
@@ -561,11 +555,10 @@ object UretimListeDlg: TUretimListeDlg
     Top = 130
   end
   object TabUretimListe: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabUretimListeAfterOpen
     AfterClose = TabUretimListeAfterClose
     AfterScroll = TabUretimListeAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select FB.ID,FB.TUR,[TARIH],[FATURATARIH],[FATURANO],FB.REHBERID' +
@@ -627,13 +620,6 @@ object UretimListeDlg: TUretimListeDlg
   end
   object TabUretimDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PFatbasID'
-        DataType = ftWideString
-        Size = 4
-        Value = '1183'
-      end>
     SQL.Strings = (
       'select'
       ' * ,'
@@ -653,6 +639,13 @@ object UretimListeDlg: TUretimListeDlg
       '')
     Left = 148
     Top = 177
+    ParamData = <
+      item
+        Name = 'PFatbasID'
+        DataType = ftWideString
+        Size = 4
+        Value = '1183'
+      end>
   end
   object DtsUretimDetay: TDataSource
     DataSet = TabUretimDetay
@@ -710,4 +703,3 @@ object UretimListeDlg: TUretimListeDlg
     Top = 248
   end
 end
-

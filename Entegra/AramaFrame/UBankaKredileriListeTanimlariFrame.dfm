@@ -1,8 +1,8 @@
 object BankaKredileriListeTanimlariFrame: TBankaKredileriListeTanimlariFrame
   Left = 0
   Top = 0
-  Width = 451
-  Height = 304
+  Width = 884
+  Height = 424
   Align = alClient
   Color = clWhite
   Font.Charset = TURKISH_CHARSET
@@ -17,7 +17,7 @@ object BankaKredileriListeTanimlariFrame: TBankaKredileriListeTanimlariFrame
   object KredilerMenu: TCategoryButtons
     Left = 0
     Top = 0
-    Width = 451
+    Width = 884
     Height = 304
     Align = alTop
     ButtonFlow = cbfVertical
@@ -72,5 +72,6 @@ object BankaKredileriListeTanimlariFrame: TBankaKredileriListeTanimlariFrame
     RegularButtonColor = clSilver
     SelectedButtonColor = 12303291
     TabOrder = 0
+    ExplicitWidth = 451
   end
 end

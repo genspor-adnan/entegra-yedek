@@ -2589,12 +2589,12 @@ begin
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text:= 'INSERT INTO SIPARIS (TARIH,SIPARISTARIH, SIPARISSERI, SIPARISNO,KOCANNO,TUR,TIPI,REHBERID,GIRISDEPO,CIKISDEPO';
       Tablo.Query1.SQL.Add(' ,SIPARIS_MATRAHI,KDV_TUTARI,EKVERGI,SIPARIS_TUTARI,KUR,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR');
-      Tablo.Query1.SQL.Add(' ,ACIKLAMA,EKLEYEN,KDVDURUM,SUBEID,YERI,YERID, PROJEID, SATICIKODU, BOLUM, DURUM, OZELKOD, ANAKAYITID ) ');
+      Tablo.Query1.SQL.Add(' ,ACIKLAMA,EKLEYEN,KDVDURUM,SUBEID,YERI,YERID, PROJEID, SATICIKODU, BOLUM, DURUM, DETAYBOLUMU, ANAKAYITID ) ');
       Tablo.Query1.SQL.Add(' VALUES(Getdate(), Getdate(), '''+belgeno.serino+''', '''+belgeno.belgeno+''', '''+BelgeNo.KocanNo+''','+IntToStr(TMenuItem(Sender).Tag)+',1,-1,-99,'+IntToStr(VarsDepo)+',');
       Tablo.Query1.SQL.Add(' 0.0,0.0,0.0,0.0,'''+CariDoviz+''',0.0,'''+CariDoviz+''',1.0,');
       Tablo.Query1.SQL.Add(' '''+TabUretimEmri.FieldByName('STOKKOD').AsString+'   '+TabUretimEmri.FieldByName('STOKADI').AsString+''','+Kullanan+',''Muaf'','+IntToStr(SubeId)+','+
                                IntToStr(TabNo_URETIMEMRI)+','+TabUretimEmri.FieldByName('ID').AsString+','+IntToStr(ProjeId)+
-                               ','+Kullanan+','+RolID+',1,'+TabUretimEmri.FieldByName('EMIRNO').AsString+','+IntToStr(TabUretimEmri.FieldByName('ANAKAYNAK').AsInteger)+') SELECT SCOPE_IDENTITY()');
+                               ','+Kullanan+','+RolID+',1,'''+TabUretimEmri.FieldByName('EMIRNO').AsString+''','+IntToStr(TabUretimEmri.FieldByName('ANAKAYNAK').AsInteger)+') SELECT SCOPE_IDENTITY()');
       Tablo.Query1.Open;
 
       TabPlanlama.First;
