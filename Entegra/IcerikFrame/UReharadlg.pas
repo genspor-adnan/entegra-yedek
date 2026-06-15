@@ -169,32 +169,6 @@ type
     ResimDuzenleTus: TcxButton;
     Resim: TcxImage;
     TabSheetTicari: TcxTabSheet;
-    GroupBanka: TcxGroupBox;
-    GridBanka: TcxGrid;
-    GridBankaDBTableView1: TcxGridDBTableView;
-    GridBankaDBTableView1VARSAYILAN: TcxGridDBColumn;
-    GridBankaDBTableView1BANKAADI: TcxGridDBColumn;
-    GridBankaDBTableView1SUBEKODU: TcxGridDBColumn;
-    GridBankaDBTableView1SUBEADI: TcxGridDBColumn;
-    GridBankaDBTableView1HESAPNO1: TcxGridDBColumn;
-    GridBankaDBTableView1KUR: TcxGridDBColumn;
-    GridBankaDBTableView1HESAPTIPI1: TcxGridDBColumn;
-    GridBankaDBTableView1IBAN1: TcxGridDBColumn;
-    GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn;
-    GridBankaLevel1: TcxGridLevel;
-    ToolBar3: TToolBar;
-    BankaEkleTus: TToolButton;
-    BankaSilTus: TToolButton;
-    ToolButton10: TToolButton;
-    BankaDuzenleTus: TToolButton;
-    GroupTicari: TcxGroupBox;
-    ToolBar7: TToolBar;
-    TicariDuzenleTus: TToolButton;
-    GridTicari: TcxGrid;
-    GridTicariView: TcxGridDBTableView;
-    cxGridDBColumn3: TcxGridDBColumn;
-    cxGridDBColumn4: TcxGridDBColumn;
-    cxGridLevel5: TcxGridLevel;
     TabSheetProje: TcxTabSheet;
     GridCariProjeler: TcxGrid;
     GridCariProjelerView: TcxGridDBTableView;
@@ -248,8 +222,6 @@ type
     CariGridViewKUR: TcxGridDBColumn;
     GridCariEkstreViewMASRAFKOD: TcxGridDBColumn;
     GridCariEkstreViewMASRAFAD: TcxGridDBColumn;
-    BtnKaydetBH: TToolButton;
-    BtnIptalBH: TToolButton;
     MemoProjeler: TMemo;
     CariGridViewSONAKTIVITEKONUSU: TcxGridDBColumn;
     CariGridViewSONAKTIVITETARIHI: TcxGridDBColumn;
@@ -401,8 +373,6 @@ type
     GridCariEkstreViewADET: TcxGridDBColumn;
     GridCariEkstreViewBIRIM: TcxGridDBColumn;
     GridCariEkstreViewBIRIMFIYAT: TcxGridDBColumn;
-    ToolButton5: TToolButton;
-    IskontoTus: TToolButton;
     GridCariProjelerViewPROJEADI: TcxGridDBColumn;
     GridCariEkstreViewYERELTUTAR: TcxGridDBColumn;
     GridCariEkstreViewYERELBAKIYE: TcxGridDBColumn;
@@ -619,7 +589,6 @@ type
     JvNavPanelHeader1: TJvNavPanelHeader;
     CheckTamamlanan: TcxCheckBox;
     ComboTamamlanan: TcxImageComboBox;
-    BtnKota: TToolButton;
     MusteriListesineEkleMenu: TMenuItem;
     TabSheetFirsat: TcxTabSheet;
     Panel7: TPanel;
@@ -668,6 +637,60 @@ type
     CariGridViewIRSALIYE: TcxGridDBColumn;
     info1: TMenuItem;
     N11: TMenuItem;
+    cxPageControl1: TcxPageControl;
+    cxTabSheet1: TcxTabSheet;
+    ToolBar7: TToolBar;
+    TicariDuzenleTus: TToolButton;
+    ToolButton5: TToolButton;
+    IskontoTus: TToolButton;
+    BtnKota: TToolButton;
+    GridTicari: TcxGrid;
+    GridTicariView: TcxGridDBTableView;
+    cxGridDBColumn3: TcxGridDBColumn;
+    cxGridDBColumn4: TcxGridDBColumn;
+    cxGridLevel5: TcxGridLevel;
+    cxTabSheet3: TcxTabSheet;
+    ToolBar3: TToolBar;
+    BankaEkleTus: TToolButton;
+    BankaSilTus: TToolButton;
+    ToolButton10: TToolButton;
+    BankaDuzenleTus: TToolButton;
+    BtnKaydetBH: TToolButton;
+    BtnIptalBH: TToolButton;
+    GridBanka: TcxGrid;
+    GridBankaDBTableView1: TcxGridDBTableView;
+    GridBankaDBTableView1VARSAYILAN: TcxGridDBColumn;
+    GridBankaDBTableView1BANKAADI: TcxGridDBColumn;
+    GridBankaDBTableView1SUBEKODU: TcxGridDBColumn;
+    GridBankaDBTableView1SUBEADI: TcxGridDBColumn;
+    GridBankaDBTableView1HESAPNO1: TcxGridDBColumn;
+    GridBankaDBTableView1KUR: TcxGridDBColumn;
+    GridBankaDBTableView1HESAPTIPI1: TcxGridDBColumn;
+    GridBankaDBTableView1IBAN1: TcxGridDBColumn;
+    GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn;
+    GridBankaLevel1: TcxGridLevel;
+    cxTabSheet4: TcxTabSheet;
+    ToolBar13: TToolBar;
+    ToolButton17: TToolButton;
+    ToolButton19: TToolButton;
+    ToolButton20: TToolButton;
+    ToolButton21: TToolButton;
+    ToolButton22: TToolButton;
+    ToolButton23: TToolButton;
+    GridAlias: TcxGrid;
+    GridAliasView: TcxGridDBTableView;
+    cxGridLevel4: TcxGridLevel;
+    TabAlias: TFDQuery;
+    DtsAlias: TDataSource;
+    GridAliasViewID: TcxGridDBColumn;
+    GridAliasViewREHBERID: TcxGridDBColumn;
+    GridAliasViewBELGETURU: TcxGridDBColumn;
+    GridAliasViewALIAS: TcxGridDBColumn;
+    GridAliasViewVARSAYILAN: TcxGridDBColumn;
+    GridAliasViewAKTIF: TcxGridDBColumn;
+    GridAliasViewILKKAYITTARIHI: TcxGridDBColumn;
+    GridAliasViewSONKONTROLTARIHI: TcxGridDBColumn;
+    GridAliasViewPASIFTARIHI: TcxGridDBColumn;
 //    N7: TMenuItem;
     procedure LabelSonArananlarClick(Sender: TObject);
     procedure LabelTumKayitlarClick(Sender: TObject);
@@ -734,6 +757,14 @@ type
     procedure BtnIptalBHClick(Sender: TObject);
     procedure BtnKaydetBHClick(Sender: TObject);
     procedure TabBankaHesaplarAfterPost(DataSet: TDataSet);
+    // Alias sekmesi handler'larÄ±
+    procedure AliasYeniTusClick(Sender: TObject);
+    procedure AliasSilTusClick(Sender: TObject);
+    procedure AliasDuzenleTusClick(Sender: TObject);
+    procedure AliasKaydetTusClick(Sender: TObject);
+    procedure AliasIptalTusClick(Sender: TObject);
+    procedure TabAliasNewRecord(DataSet: TDataSet);
+    procedure AliasToolbarDurumuGuncelle(DuzenlemeKipinde: Boolean);
     procedure checkKapaliGosterPropertiesEditValueChanged(Sender: TObject);
     procedure RBDevirliClick(Sender: TObject);
     procedure lgiliyiKopyala1Click(Sender: TObject);
@@ -1011,12 +1042,12 @@ var
 begin
   Tablo.RehberEkBilgileriniGetir(TabRehberIlgili.FieldByName('ID').AsInteger,4,[RehVars_EPosta],Etiketler,Bilgiler);
   if Bilgiler[0]='' then begin
-    Tablo.UyariGoster(Uyari,'Eposta Adresi Tanýmlý Deðil.');
+    Tablo.UyariGoster(Uyari,'Eposta Adresi Tanï¿½mlï¿½ Deï¿½il.');
     Abort;
   end;
   Tablo.TablodanSorguAc(0,'select * from MAILSABLON where MODULID=77 and ID=77');
   if Tablo.Query0.IsEmpty then begin
-    Tablo.UyariGoster(Uyari,'Eposta Þablonu Tanýmlý Deðil.');
+    Tablo.UyariGoster(Uyari,'Eposta ï¿½ablonu Tanï¿½mlï¿½ Deï¿½il.');
     Abort;
   end;
   //al?c? cc vs ayar?
@@ -1026,7 +1057,7 @@ begin
   TEpostaAlici.ListeyeYukle(TabRehberIlgili.FieldByName('FIRMA').AsString+','+Bilgiler[0], EPostaAlicilar);
   //konu - body ayar?
   Konu := Tablo.Query0.FieldByName('KONU').AsString;
-  Konu := StringReplace(Konu,'@@KONU@@','Genotip Destek Giriþ Bilgileri',[rfReplaceAll]);
+  Konu := StringReplace(Konu,'@@KONU@@','Genotip Destek Giriï¿½ Bilgileri',[rfReplaceAll]);
   BodyStr := Tablo.Query0.FieldByName('ICERIK').AsString;
   BodyStr := StringReplace(BodyStr,'@@ADSOYAD@@',TabRehberIlgili.FieldByName('FIRMA').AsString,[rfReplaceAll]);
   BodyStr := StringReplace(BodyStr,'@@KULLANICI@@',Bilgiler[0],[rfReplaceAll]);
@@ -1039,7 +1070,7 @@ begin
   Body.SaveToFile(DosyaAdi);
 
   try
-    Tablo.UyariGoster(Uyari,'E Posta Gönderildi. '+
+    Tablo.UyariGoster(Uyari,'E Posta Gï¿½nderildi. '+
                       UGenNotificationUtils.EpostaGonderRapor(
                         EPostaHesapBilgileriniGetir(EpostaHesapID),
                         Konu, DosyaAdi, EkDosya, EPostaAlicilar, EPostaAlicilarCC,
@@ -1188,7 +1219,7 @@ begin
       Msg := Msg + #10 + Tablo.Query8.FieldByName('KOD').AsString +' - '+Tablo.Query8.FieldByName('FIRMA').AsString +' Ekipman:'+Tablo.Query8.FieldByName('AD').AsString  +' Serino:'+Tablo.Query8.FieldByName('SERINO').AsString + #13;
       Tablo.Query8.Next;
     end;
-    ShowMessage('Bu Ekipman Daha Önce Kullanýlmýþ!'+ #13 + #10 + Msg);
+    ShowMessage('Bu Ekipman Daha ï¿½nce Kullanï¿½lmï¿½ï¿½!'+ #13 + #10 + Msg);
   end;
 end;
 
@@ -1410,7 +1441,7 @@ begin
     if not Tablo.Query4.IsEmpty then TurAdi := Tablo.Query4.Fields[0].AsString
     else TurAdi := 'Sabit Vardiya';
 
-    Ctrls := TGirdiDenetimleri.Create.ComboBox('Vardiya Türü : ',@TurAdi,
+    Ctrls := TGirdiDenetimleri.Create.ComboBox('Vardiya Tï¿½rï¿½ : ',@TurAdi,
     Tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM='+IntToStr(Ops_OpsiyonCari_VardiyaTur)).items);
 
     if TGirisKutusuEx.BilgiAlEx(BGVardiya_Tur_Sec,Ctrls) <> mrOk then Abort;
@@ -1688,8 +1719,8 @@ begin
     OdemeKaynagi := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
     Tutar := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
-    .ImageComboBox('Ödeme kaynaðý',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
-    .CurrencyEdit('Ödenecek avans miktarý',@Tutar,2));
+    .ImageComboBox('ï¿½deme kaynaï¿½ï¿½',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
+    .CurrencyEdit('ï¿½denecek avans miktarï¿½',@Tutar,2));
 
     if mResult = mrOk then begin
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR, DEGISTIREN=&DEGISTIREN,'+
@@ -1701,8 +1732,8 @@ begin
     Tutar := 0;
     OdemeKaynagi := 'K';
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
-    .ImageComboBox('Ödeme kaynaðý',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
-    .CurrencyEdit('Avans tutarý',@Tutar,2));
+    .ImageComboBox('ï¿½deme kaynaï¿½ï¿½',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
+    .CurrencyEdit('Avans tutarï¿½',@Tutar,2));
 
     if mResult = mrOk then begin
       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
@@ -1951,6 +1982,85 @@ begin
   end;
 end;
 
+{ ---------- Alias sekmesi (REHBERALIAS) ---------- }
+
+procedure TRehberAraDlg.AliasToolbarDurumuGuncelle(DuzenlemeKipinde: Boolean);
+// Yeni/Sil/DÃ¼zenle butonlarÄ± normal modda gÃ¶rÃ¼nÃ¼r; Kaydet/Ä°ptal Edit/Insert modunda.
+begin
+  ToolButton17.Visible := not DuzenlemeKipinde;   // Yeni
+  ToolButton19.Visible := not DuzenlemeKipinde;   // Sil
+  ToolButton21.Visible := not DuzenlemeKipinde;   // DÃ¼zenle
+  ToolButton22.Visible := DuzenlemeKipinde;       // Kaydet
+  ToolButton23.Visible := DuzenlemeKipinde;       // Ä°ptal
+end;
+
+procedure TRehberAraDlg.TabAliasNewRecord(DataSet: TDataSet);
+// Yeni alias satÄ±rÄ±nda zorunlu kolonlarÄ±n varsayÄ±lan deÄŸerlerini set et.
+begin
+  if (REHBER = nil) or REHBER.IsEmpty then Exit;
+  DataSet.FieldByName('REHBERID').AsInteger        := REHBER.Fields[0].AsInteger;
+  DataSet.FieldByName('BELGETURU').AsInteger       := 0;
+  DataSet.FieldByName('ALIAS').AsString            := '';
+  DataSet.FieldByName('VARSAYILAN').AsBoolean      := False;
+  DataSet.FieldByName('AKTIF').AsBoolean           := True;
+  DataSet.FieldByName('ILKKAYITTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+  DataSet.FieldByName('SONKONTROLTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+end;
+
+procedure TRehberAraDlg.AliasYeniTusClick(Sender: TObject);
+begin
+  if (REHBER = nil) or REHBER.IsEmpty then Exit;
+  if not TabAlias.Active then begin
+    TabAlias.Close;
+    TabAlias.SQL.Text := 'SELECT * FROM REHBERALIAS WHERE REHBERID = ' +
+                         IntToStr(REHBER.Fields[0].AsInteger);
+    TabAlias.Open;
+  end;
+  TabAlias.Append;
+  AliasToolbarDurumuGuncelle(True);
+end;
+
+procedure TRehberAraDlg.AliasDuzenleTusClick(Sender: TObject);
+begin
+  if (not TabAlias.Active) or TabAlias.IsEmpty then Exit;
+  TabAlias.Edit;
+  AliasToolbarDurumuGuncelle(True);
+end;
+
+procedure TRehberAraDlg.AliasSilTusClick(Sender: TObject);
+begin
+  if (not TabAlias.Active) or TabAlias.IsEmpty then Exit;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
+    TabAlias.Delete;
+    AliasToolbarDurumuGuncelle(False);
+  end;
+end;
+
+procedure TRehberAraDlg.AliasKaydetTusClick(Sender: TObject);
+begin
+  if not TabAlias.Active then Exit;
+  if TabAlias.State in [dsEdit, dsInsert] then begin
+    // ALIAS boÅŸsa kaydetmeye izin verme
+    if Trim(TabAlias.FieldByName('ALIAS').AsString) = '' then begin
+      Application.MessageBox('Alias deÄŸeri boÅŸ olamaz.', PChar(SGenotipOnay),
+                             MB_ICONWARNING + MB_OK);
+      Exit;
+    end;
+    // DÃ¼zenlemede son kontrol tarihini gÃ¼ncelle
+    if TabAlias.State = dsEdit then
+      TabAlias.FieldByName('SONKONTROLTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+    TabAlias.Post;
+  end;
+  AliasToolbarDurumuGuncelle(False);
+end;
+
+procedure TRehberAraDlg.AliasIptalTusClick(Sender: TObject);
+begin
+  if TabAlias.State in [dsEdit, dsInsert] then
+    TabAlias.Cancel;
+  AliasToolbarDurumuGuncelle(False);
+end;
+
 procedure TRehberAraDlg.BaskiOnizlemeMenuClick(Sender: TObject);
 var s:string;
 begin
@@ -1966,7 +2076,7 @@ procedure TRehberAraDlg.Baslatildi;
 var ra : string;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
-   CariGridViewSUBEID.Visible := SubeVarmi;
+    CariGridViewSUBEID.Visible := SubeVarmi;
    TabSheetYaslandirma.TabVisible := False;
    Tablo.GridAyarRestore('RehberProjelerGridi',GridCariProjelerView );
    Tablo.GridAyarRestore('RehberTicariBilGridi',GridBankaDBTableView1 );
@@ -2253,6 +2363,19 @@ constructor TRehberAraDlg.Create(AOwner: TComponent);
 begin
   inherited;
   FArama := nil;
+  // Alias sekmesi baÄŸlantÄ±larÄ± runtime'da kurulur
+  // (DFM'de yapÄ±lan deÄŸiÅŸiklikler "invalid property value" hatasÄ±na yol aÃ§tÄ±ÄŸÄ±ndan programatik baÄŸlanÄ±yor)
+  TabAlias.OnNewRecord     := TabAliasNewRecord;
+  ToolButton17.OnClick     := AliasYeniTusClick;       // Yeni
+  ToolButton19.OnClick     := AliasSilTusClick;        // Sil
+  ToolButton21.OnClick     := AliasDuzenleTusClick;    // DÃ¼zenle
+  ToolButton22.OnClick     := AliasKaydetTusClick;     // Kaydet
+  ToolButton23.OnClick     := AliasIptalTusClick;      // Ä°ptal
+  GridAliasView.OnDblClick := AliasDuzenleTusClick;
+  GridAliasView.OnCanFocusRecord := nil;               // Banka handler'Ä± dezaktif et
+  // ALIAS kolonu yazÄ±labilir olsun
+  if GridAliasViewALIAS.Properties is TcxTextEditProperties then
+    TcxTextEditProperties(GridAliasViewALIAS.Properties).ReadOnly := False;
 end;
 
 procedure TRehberAraDlg.cxDBTreeList1cxDBTreeListColumn2PropertiesButtonClick(
@@ -2296,7 +2419,7 @@ var
 begin
   sqltext:='select ROOTKOD= case when CHARINDEX(''.'',KOD,1)=0 then '''' else REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))) end,KOD,ACIKLAMA,TUR,REHBERID,ID from LOKASYON where DURUM=1 and TUR='+IntToStr(Lokasyon_Genel)+'  and REHBERID='+REHBER.FieldByName('ID').AsString;
   if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,False,True,LokID,LokKod,LokAciklama,slist,[nil,nil,nil],['REHBERID','TUR'],[REHBER.FieldByName('ID').AsString,IntToStr(Lokasyon_Genel)]
-          ,['Kod','Açýklama','',''],[True,True,False,False],True) then try
+          ,['Kod','Aï¿½ï¿½klama','',''],[True,True,False,False],True) then try
     TabEkipmanlar.Edit;
     TabEkipmanlar.FieldByName('LOKASYONID').Value:=LokID;
     TabEkipmanlar.Post;
@@ -2621,7 +2744,7 @@ begin
     FreeAndNil(FaturaKapamaDlg);
   Application.CreateForm(TFaturaKapamaDlg,FaturaKapamaDlg);
   FaturaKapamaDlg.RehberID := REHBER.Fields[0].AsInteger;
-  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Borç/Alacak Kapama';
+  FaturaKapamaDlg.Caption := REHBER.FieldByName('FIRMA').Asstring + ' Borï¿½/Alacak Kapama';
   FaturaKapamaDlg.ShowModal;
   FreeAndNil(FaturaKapamaDlg);
 end;
@@ -3696,6 +3819,12 @@ begin
   else if PageControlSekme.ActivePage=TabSheetTicari then begin
      TabloYenile(TabTicari,[REHBER.Fields[0].AsInteger]);
      TabloYenile(TabBankaHesaplar,[REHBER.Fields[0].AsInteger]);
+  end else if PageControlSekme.ActivePage = cxTabSheet4 then begin   // Alias Bilgileri
+     TabAlias.Close;
+     TabAlias.SQL.Text := 'SELECT * FROM REHBERALIAS WHERE REHBERID = ' +
+                          IntToStr(REHBER.Fields[0].AsInteger);
+     TabAlias.Open;
+     AliasToolbarDurumuGuncelle(False);
   end  else if PageControlSekme.ActivePage=TabSheetFirsat then begin
       TabFirsat.Close;
       TabFirsat.SQL.Text:= MemoFirsat.Text;

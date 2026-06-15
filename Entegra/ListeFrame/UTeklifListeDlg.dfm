@@ -2066,6 +2066,7 @@ object TeklifListeDlg: TTeklifListeDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem

@@ -2314,6 +2314,7 @@ object IKWizardDlg: TIKWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    OnPopup = PopupYorumlarPopup
     Left = 608
     Top = 104
     object YorumDzenle1: TMenuItem

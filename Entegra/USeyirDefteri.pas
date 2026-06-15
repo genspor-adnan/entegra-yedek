@@ -279,8 +279,12 @@ begin
 
      Tablo.TablodanSorguAc(2,'select EKLEYEN, EKLEMETARIHI from '+s+' where ID='+IntToStr(SatirId));
      //
-     s := StringReplace(SQLMemoEkleme.Text, '@@TARIH',FormatDateTime('yyyy-mm-dd hh:nn', Tablo.Query2.FieldByName('EKLEMETARIHI').AsDateTime), []);
-     s := StringReplace(s, '@@EKLEYEN', Tablo.Query2.FieldByName('EKLEYEN').AsString, []);
+     s := '';
+     if not Tablo.Query2.IsEmpty and
+        not Tablo.Query2.FieldByName('EKLEYEN').IsNull then begin
+       s := StringReplace(SQLMemoEkleme.Text, '@@TARIH',FormatDateTime('yyyy-mm-dd hh:nn', Tablo.Query2.FieldByName('EKLEMETARIHI').AsDateTime), []);
+       s := StringReplace(s, '@@EKLEYEN', Tablo.Query2.FieldByName('EKLEYEN').AsString, []);
+     end;
      TabLog.SQL.Text := s+SQLMemo.Text+' where TABLOID='+IntToStr(TabloId)+' and SATIRID='+IntToStr(SatirId)
   end else begin
       TabLog.SQL.Text:=SQLMemo.Text;

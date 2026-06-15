@@ -160,9 +160,6 @@ type
     ExceldenAlTus: TToolButton;
     ToolButton3: TToolButton;
     BankaHizliGirisTus: TToolButton;
-    ExceldenHareketVerisiAlMenu: TMenuItem;
-    N4: TMenuItem;
-    ExceldenVeriAlmKurallarMenu: TMenuItem;
     HesapBakiyesiniGuncelleMenu: TMenuItem;
     N10: TMenuItem;
     procedure YenileTusClick(Sender: TObject);
@@ -196,7 +193,6 @@ type
       ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem;
       var AStyle: TcxStyle);
     procedure ExceldenAlTusClick(Sender: TObject);
-    procedure ExceldenVeriAlmKurallarMenuClick(Sender: TObject);
     procedure HesapBakiyesiniGuncelleMenuClick(Sender: TObject);
     procedure ExceleAktar1Click(Sender: TObject);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
@@ -236,7 +232,7 @@ type
 implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
-      UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketKural, UBankaHareketleri,
+      UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketleri,
       UBankaHesapGiris;
 
 {$R *.dfm}
@@ -443,14 +439,6 @@ begin
    Application.CreateForm(TBankaHareketlerDlg, BankaHareketlerDlg);
    BankaHareketlerDlg.ShowModal;
    BankaHareketlerDlg.Destroy;
-end;
-
-procedure TBankalarListeFrame.ExceldenVeriAlmKurallarMenuClick(Sender: TObject);
-begin
-   Application.CreateForm(TBankaHareketKuralDlg, BankaHareketKuralDlg);
-   BankaHareketKuralDlg.BankaKodu := BANKALAR.FieldByname('BANKAKODU').AsInteger;
-   BankaHareketKuralDlg.ShowModal;
-   BankaHareketKuralDlg.Destroy;
 end;
 
 procedure TBankalarListeFrame.FareTekerlekAsagi(Sender: TObject;

@@ -1844,6 +1844,7 @@ object FaturalarDlg: TFaturalarDlg
     Top = 468
   end
   object PopupYorumlar: TPopupMenu
+    OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem

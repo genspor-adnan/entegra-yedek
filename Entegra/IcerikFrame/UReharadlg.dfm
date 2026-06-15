@@ -1277,382 +1277,576 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetTicari: TcxTabSheet
       Caption = 'Ticari Bilgiler'
       ImageIndex = 9
-      object GroupBanka: TcxGroupBox
-        Left = 395
-        Top = 0
-        Align = alClient
-        Caption = 'Banka Hesaplar'#305
-        TabOrder = 1
-        Height = 228
-        Width = 641
-        object GridBanka: TcxGrid
-          Left = 2
-          Top = 65
-          Width = 637
-          Height = 161
-          Align = alClient
-          TabOrder = 1
-          LookAndFeel.Kind = lfOffice11
-          LookAndFeel.NativeStyle = True
-          LookAndFeel.ScrollbarMode = sbmClassic
-          object GridBankaDBTableView1: TcxGridDBTableView
-            OnDblClick = BankaDuzenleTusClick
-            Navigator.Buttons.CustomButtons = <>
-            ScrollbarAnnotations.CustomAnnotations = <>
-            OnCanFocusRecord = GridBankaDBTableView1CanFocusRecord
-            DataController.DataSource = DtsBankaHesaplar
-            DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
-            OptionsBehavior.FocusCellOnTab = True
-            OptionsCustomize.ColumnsQuickCustomization = True
-            OptionsData.CancelOnExit = False
-            OptionsData.Deleting = False
-            OptionsData.DeletingConfirmation = False
-            OptionsData.Inserting = False
-            OptionsView.GroupByBox = False
-            OptionsView.Indicator = True
-            Styles.Content = cxStyle1
-            Styles.Header = cxStyle2
-            Styles.Indicator = cxStyle2
-            object GridBankaDBTableView1VARSAYILAN: TcxGridDBColumn
-              Caption = 'Var.'
-              DataBinding.FieldName = 'VARSAYILAN'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxCheckBoxProperties'
-              Width = 29
-            end
-            object GridBankaDBTableView1BANKAADI: TcxGridDBColumn
-              Caption = 'Banka'
-              DataBinding.FieldName = 'BANKAADI'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxButtonEditProperties'
-              Properties.Buttons = <
-                item
-                  Default = True
-                  Kind = bkEllipsis
-                end>
-              Properties.ReadOnly = True
-              Options.Editing = False
-              Width = 80
-            end
-            object GridBankaDBTableView1SUBEKODU: TcxGridDBColumn
-              Caption = #350'ube No'
-              DataBinding.FieldName = 'SUBEKODU'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxButtonEditProperties'
-              Properties.Buttons = <
-                item
-                  Default = True
-                  Kind = bkEllipsis
-                end>
-              Properties.ReadOnly = True
-              Options.Editing = False
-              Width = 54
-            end
-            object GridBankaDBTableView1SUBEADI: TcxGridDBColumn
-              Caption = #350'ube'
-              DataBinding.FieldName = 'SUBEADI'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxTextEditProperties'
-              Properties.ReadOnly = True
-              Options.Editing = False
-              Width = 71
-            end
-            object GridBankaDBTableView1HESAPNO1: TcxGridDBColumn
-              Caption = 'Hesap No'
-              DataBinding.FieldName = 'HESAPNO'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxTextEditProperties'
-              Properties.ReadOnly = True
-              Width = 72
-            end
-            object GridBankaDBTableView1KUR: TcxGridDBColumn
-              Caption = 'P.Birimi'
-              DataBinding.FieldName = 'KUR'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxComboBoxProperties'
-              Properties.DropDownListStyle = lsFixedList
-              Properties.ReadOnly = True
-              Width = 41
-            end
-            object GridBankaDBTableView1HESAPTIPI1: TcxGridDBColumn
-              Caption = 'Hesap Tipi'
-              DataBinding.FieldName = 'TIPI'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxImageComboBoxProperties'
-              Properties.Items = <
-                item
-                  Description = 'Kurumsal'
-                  ImageIndex = 0
-                  Value = 0
-                end
-                item
-                  Description = 'Bireysel'
-                  Value = 1
-                end>
-              Properties.ReadOnly = True
-              Width = 67
-            end
-            object GridBankaDBTableView1IBAN1: TcxGridDBColumn
-              DataBinding.FieldName = 'IBAN'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxTextEditProperties'
-              Properties.ReadOnly = True
-              Width = 132
-            end
-            object GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn
-              Caption = 'A'#231#305'klama'
-              DataBinding.FieldName = 'ACIKLAMA'
-              DataBinding.IsNullValueType = True
-              Width = 86
-            end
-          end
-          object GridBankaLevel1: TcxGridLevel
-            GridView = GridBankaDBTableView1
-          end
-        end
-        object ToolBar3: TToolBar
-          AlignWithMargins = True
-          Left = 5
-          Top = 24
-          Width = 631
-          Height = 41
-          Margins.Bottom = 0
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
-          Caption = 'AletCubugu'
-          Color = clTeal
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-          EdgeInner = esLowered
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          HotTrackColor = 65408
-          Images = Tablo.PNGImageList2
-          ParentColor = False
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          Transparent = True
-          object BankaEkleTus: TToolButton
-            Left = 0
-            Top = 0
-            Caption = 'Yeni'
-            ImageIndex = 0
-            ImageName = 'PngImage0'
-            OnClick = BankaEkleTusClick
-          end
-          object BankaSilTus: TToolButton
-            Left = 46
-            Top = 0
-            Caption = 'Sil'
-            ImageIndex = 1
-            ImageName = 'PngImage1'
-            OnClick = BankaSilTusClick
-          end
-          object ToolButton10: TToolButton
-            Left = 92
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton10'
-            ImageIndex = 4
-            ImageName = 'PngImage4'
-            Style = tbsSeparator
-          end
-          object BankaDuzenleTus: TToolButton
-            Left = 100
-            Top = 0
-            Caption = 'D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            Style = tbsTextButton
-            OnClick = BankaDuzenleTusClick
-          end
-          object BtnKaydetBH: TToolButton
-            Left = 146
-            Top = 0
-            Caption = 'Kaydet'
-            ImageIndex = 2
-            ImageName = 'PngImage2'
-            Visible = False
-            OnClick = BtnKaydetBHClick
-          end
-          object BtnIptalBH: TToolButton
-            Left = 192
-            Top = 0
-            Caption = #304'ptal'
-            ImageIndex = 3
-            ImageName = 'PngImage3'
-            Visible = False
-            OnClick = BtnIptalBHClick
-          end
-        end
-      end
-      object GroupTicari: TcxGroupBox
+      object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
-        Align = alLeft
-        Caption = 'Temel Bilgiler'
-        TabOrder = 0
+        Width = 1036
         Height = 228
-        Width = 395
-        object ToolBar7: TToolBar
-          AlignWithMargins = True
-          Left = 5
-          Top = 24
-          Width = 385
-          Height = 41
-          Margins.Bottom = 0
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 79
-          Caption = 'AletCubugu'
-          Color = clTeal
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-          EdgeInner = esLowered
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          HotTrackColor = 65408
-          Images = Tablo.PNGImageList2
-          ParentColor = False
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          Transparent = True
-          object TicariDuzenleTus: TToolButton
+        Align = alClient
+        TabOrder = 0
+        Properties.ActivePage = cxTabSheet1
+        Properties.CustomButtons.Buttons = <>
+        Properties.Style = 10
+        ClientRectBottom = 228
+        ClientRectRight = 1036
+        ClientRectTop = 22
+        object cxTabSheet1: TcxTabSheet
+          Caption = 'Temel Bilgiler'
+          ImageIndex = 0
+          object ToolBar7: TToolBar
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 1030
+            Height = 41
+            Margins.Bottom = 0
+            AutoSize = True
+            ButtonHeight = 39
+            ButtonWidth = 79
+            Caption = 'AletCubugu'
+            Color = clTeal
+            DockSite = True
+            DrawingStyle = dsGradient
+            EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+            EdgeInner = esLowered
+            EdgeOuter = esNone
+            Font.Charset = TURKISH_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Trebuchet MS'
+            Font.Style = []
+            GradientEndColor = 11776947
+            GradientStartColor = 14540253
+            HotTrackColor = 65408
+            Images = Tablo.PNGImageList2
+            ParentColor = False
+            ParentFont = False
+            ShowCaptions = True
+            TabOrder = 0
+            Transparent = True
+            object TicariDuzenleTus: TToolButton
+              Left = 0
+              Top = 0
+              Caption = 'Yeni / D'#252'zenle'
+              ImageIndex = 7
+              ImageName = 'PngImage7'
+              Style = tbsTextButton
+              OnClick = TicariDuzenleTusClick
+            end
+            object ToolButton5: TToolButton
+              Left = 79
+              Top = 0
+              Width = 8
+              Caption = 'ToolButton5'
+              ImageIndex = 8
+              ImageName = 'PngImage15'
+              Style = tbsSeparator
+            end
+            object IskontoTus: TToolButton
+              Left = 87
+              Top = 0
+              Caption = #304'skonto'
+              ImageIndex = 20
+              ImageName = 'PngImage20'
+              OnClick = IskontoTusClick
+            end
+            object BtnKota: TToolButton
+              Left = 166
+              Top = 0
+              Caption = 'Risk Limiti'
+              ImageIndex = 29
+              ImageName = 'PngImage29'
+              OnClick = BtnKotaClick
+            end
+          end
+          object GridTicari: TcxGrid
             Left = 0
-            Top = 0
-            Caption = 'Yeni / D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            Style = tbsTextButton
-            OnClick = TicariDuzenleTusClick
-          end
-          object ToolButton5: TToolButton
-            Left = 79
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton5'
-            ImageIndex = 8
-            ImageName = 'PngImage15'
-            Style = tbsSeparator
-          end
-          object IskontoTus: TToolButton
-            Left = 87
-            Top = 0
-            Caption = #304'skonto'
-            ImageIndex = 20
-            ImageName = 'PngImage20'
-            OnClick = IskontoTusClick
-          end
-          object BtnKota: TToolButton
-            Left = 166
-            Top = 0
-            Caption = 'Risk Limiti'
-            ImageIndex = 29
-            ImageName = 'PngImage29'
-            OnClick = BtnKotaClick
+            Top = 44
+            Width = 1036
+            Height = 162
+            Align = alClient
+            BevelEdges = []
+            BevelInner = bvNone
+            BevelOuter = bvNone
+            TabOrder = 1
+            LookAndFeel.Kind = lfOffice11
+            LookAndFeel.NativeStyle = True
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridTicariView: TcxGridDBTableView
+              OnDblClick = TicariDuzenleTusClick
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataSource = DtsTicari
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.CancelOnExit = False
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsView.ColumnAutoWidth = True
+              OptionsView.GridLines = glNone
+              OptionsView.GroupByBox = False
+              OptionsView.Header = False
+              Styles.Background = cxStyle2
+              Styles.Content = cxStyle2
+              Styles.Header = cxStyle2
+              Styles.Inactive = cxStyle2
+              object cxGridDBColumn3: TcxGridDBColumn
+                Caption = 'T'#252'r'#252
+                DataBinding.FieldName = 'ETIKET'
+                DataBinding.IsNullValueType = True
+                MinWidth = 150
+                Options.Editing = False
+                Options.Filtering = False
+                Options.Focusing = False
+                Options.IgnoreTimeForFiltering = False
+                Options.IncSearch = False
+                Options.FilteringFilteredItemsList = False
+                Options.FilteringMRUItemsList = False
+                Options.FilteringPopup = False
+                Options.FilteringPopupMultiSelect = False
+                Options.GroupFooters = False
+                Options.Grouping = False
+                Options.HorzSizing = False
+                Options.Moving = False
+                Options.ShowCaption = False
+                Options.Sorting = False
+                Width = 150
+              end
+              object cxGridDBColumn4: TcxGridDBColumn
+                Caption = 'Bilgisi'
+                DataBinding.FieldName = 'BILGI'
+                DataBinding.IsNullValueType = True
+                MinWidth = 250
+                Options.Editing = False
+                Options.Filtering = False
+                Options.Focusing = False
+                Options.IgnoreTimeForFiltering = False
+                Options.IncSearch = False
+                Options.FilteringFilteredItemsList = False
+                Options.FilteringMRUItemsList = False
+                Options.FilteringPopup = False
+                Options.FilteringPopupMultiSelect = False
+                Options.GroupFooters = False
+                Options.Grouping = False
+                Options.HorzSizing = False
+                Options.Moving = False
+                Options.ShowCaption = False
+                Options.Sorting = False
+                Width = 250
+              end
+            end
+            object cxGridLevel5: TcxGridLevel
+              GridView = GridTicariView
+            end
           end
         end
-        object GridTicari: TcxGrid
-          Left = 2
-          Top = 65
-          Width = 391
-          Height = 161
-          Align = alClient
-          BevelEdges = []
-          BevelInner = bvNone
-          BevelOuter = bvNone
-          TabOrder = 1
-          LookAndFeel.Kind = lfOffice11
-          LookAndFeel.NativeStyle = True
-          LookAndFeel.ScrollbarMode = sbmClassic
-          object GridTicariView: TcxGridDBTableView
-            OnDblClick = TicariDuzenleTusClick
-            Navigator.Buttons.CustomButtons = <>
-            ScrollbarAnnotations.CustomAnnotations = <>
-            DataController.DataSource = DtsTicari
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
-            OptionsData.CancelOnExit = False
-            OptionsData.Deleting = False
-            OptionsData.DeletingConfirmation = False
-            OptionsData.Editing = False
-            OptionsData.Inserting = False
-            OptionsView.ColumnAutoWidth = True
-            OptionsView.GridLines = glNone
-            OptionsView.GroupByBox = False
-            OptionsView.Header = False
-            Styles.Background = cxStyle2
-            Styles.Content = cxStyle2
-            Styles.Header = cxStyle2
-            Styles.Inactive = cxStyle2
-            object cxGridDBColumn3: TcxGridDBColumn
-              Caption = 'T'#252'r'#252
-              DataBinding.FieldName = 'ETIKET'
-              DataBinding.IsNullValueType = True
-              MinWidth = 150
-              Options.Editing = False
-              Options.Filtering = False
-              Options.Focusing = False
-              Options.IgnoreTimeForFiltering = False
-              Options.IncSearch = False
-              Options.FilteringFilteredItemsList = False
-              Options.FilteringMRUItemsList = False
-              Options.FilteringPopup = False
-              Options.FilteringPopupMultiSelect = False
-              Options.GroupFooters = False
-              Options.Grouping = False
-              Options.HorzSizing = False
-              Options.Moving = False
-              Options.ShowCaption = False
-              Options.Sorting = False
-              Width = 150
+        object cxTabSheet4: TcxTabSheet
+          Caption = 'Alias Bilgileri'
+          ImageIndex = 2
+          object ToolBar13: TToolBar
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 1030
+            Height = 41
+            Margins.Bottom = 0
+            AutoSize = True
+            ButtonHeight = 39
+            ButtonWidth = 46
+            Caption = 'AletCubugu'
+            Color = clTeal
+            DockSite = True
+            DrawingStyle = dsGradient
+            EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+            EdgeInner = esLowered
+            EdgeOuter = esNone
+            Font.Charset = TURKISH_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Trebuchet MS'
+            Font.Style = []
+            GradientEndColor = 11776947
+            GradientStartColor = 14540253
+            HotTrackColor = 65408
+            Images = Tablo.PNGImageList2
+            ParentColor = False
+            ParentFont = False
+            ShowCaptions = True
+            TabOrder = 0
+            Transparent = True
+            object ToolButton17: TToolButton
+              Left = 0
+              Top = 0
+              Caption = 'Yeni'
+              ImageIndex = 0
+              ImageName = 'PngImage0'
+              OnClick = BankaEkleTusClick
             end
-            object cxGridDBColumn4: TcxGridDBColumn
-              Caption = 'Bilgisi'
-              DataBinding.FieldName = 'BILGI'
-              DataBinding.IsNullValueType = True
-              MinWidth = 250
-              Options.Editing = False
-              Options.Filtering = False
-              Options.Focusing = False
-              Options.IgnoreTimeForFiltering = False
-              Options.IncSearch = False
-              Options.FilteringFilteredItemsList = False
-              Options.FilteringMRUItemsList = False
-              Options.FilteringPopup = False
-              Options.FilteringPopupMultiSelect = False
-              Options.GroupFooters = False
-              Options.Grouping = False
-              Options.HorzSizing = False
-              Options.Moving = False
-              Options.ShowCaption = False
-              Options.Sorting = False
-              Width = 250
+            object ToolButton19: TToolButton
+              Left = 46
+              Top = 0
+              Caption = 'Sil'
+              ImageIndex = 1
+              ImageName = 'PngImage1'
+              OnClick = BankaSilTusClick
+            end
+            object ToolButton20: TToolButton
+              Left = 92
+              Top = 0
+              Width = 8
+              Caption = 'ToolButton10'
+              ImageIndex = 4
+              ImageName = 'PngImage4'
+              Style = tbsSeparator
+            end
+            object ToolButton21: TToolButton
+              Left = 100
+              Top = 0
+              Caption = 'D'#252'zenle'
+              ImageIndex = 7
+              ImageName = 'PngImage7'
+              Style = tbsTextButton
+              OnClick = BankaDuzenleTusClick
+            end
+            object ToolButton22: TToolButton
+              Left = 146
+              Top = 0
+              Caption = 'Kaydet'
+              ImageIndex = 2
+              ImageName = 'PngImage2'
+              Visible = False
+              OnClick = BtnKaydetBHClick
+            end
+            object ToolButton23: TToolButton
+              Left = 192
+              Top = 0
+              Caption = #304'ptal'
+              ImageIndex = 3
+              ImageName = 'PngImage3'
+              Visible = False
+              OnClick = BtnIptalBHClick
             end
           end
-          object cxGridLevel5: TcxGridLevel
-            GridView = GridTicariView
+          object GridAlias: TcxGrid
+            Left = 0
+            Top = 44
+            Width = 1036
+            Height = 162
+            Align = alClient
+            TabOrder = 1
+            LookAndFeel.Kind = lfOffice11
+            LookAndFeel.NativeStyle = True
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridAliasView: TcxGridDBTableView
+              OnDblClick = BankaDuzenleTusClick
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              OnCanFocusRecord = GridBankaDBTableView1CanFocusRecord
+              DataController.DataSource = DtsAlias
+              DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsBehavior.FocusCellOnTab = True
+              OptionsCustomize.ColumnsQuickCustomization = True
+              OptionsData.CancelOnExit = False
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Inserting = False
+              OptionsView.GroupByBox = False
+              OptionsView.Indicator = True
+              Styles.Content = cxStyle1
+              Styles.Header = cxStyle2
+              Styles.Indicator = cxStyle2
+              object GridAliasViewID: TcxGridDBColumn
+                DataBinding.FieldName = 'ID'
+                PropertiesClassName = 'TcxTextEditProperties'
+              end
+              object GridAliasViewREHBERID: TcxGridDBColumn
+                DataBinding.FieldName = 'REHBERID'
+                Visible = False
+              end
+              object GridAliasViewBELGETURU: TcxGridDBColumn
+                Caption = 'Belge'
+                DataBinding.FieldName = 'BELGETURU'
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'E-'#304'rsaliye G'#304'B'
+                    ImageIndex = 0
+                    Value = 140
+                  end
+                  item
+                    Description = 'E-'#304'rsaliye Kendi'
+                    Value = 141
+                  end
+                  item
+                    Description = 'E-Ar'#351'iv Fatura'
+                    Value = 150
+                  end
+                  item
+                    Description = 'E-Fatura'
+                    Value = 151
+                  end>
+              end
+              object GridAliasViewALIAS: TcxGridDBColumn
+                Caption = 'Alias'
+                DataBinding.FieldName = 'ALIAS'
+                PropertiesClassName = 'TcxTextEditProperties'
+                Width = 250
+              end
+              object GridAliasViewVARSAYILAN: TcxGridDBColumn
+                Caption = 'Varsay'#305'lan'
+                DataBinding.FieldName = 'VARSAYILAN'
+              end
+              object GridAliasViewAKTIF: TcxGridDBColumn
+                Caption = 'Aktif'
+                DataBinding.FieldName = 'AKTIF'
+              end
+              object GridAliasViewILKKAYITTARIHI: TcxGridDBColumn
+                Caption = #304'lk Kay'#305't'
+                DataBinding.FieldName = 'ILKKAYITTARIHI'
+                PropertiesClassName = 'TcxDateEditProperties'
+                Properties.ReadOnly = True
+                Width = 125
+              end
+              object GridAliasViewSONKONTROLTARIHI: TcxGridDBColumn
+                Caption = 'Son Kontrol'
+                DataBinding.FieldName = 'SONKONTROLTARIHI'
+                PropertiesClassName = 'TcxDateEditProperties'
+                Properties.ReadOnly = True
+                Width = 121
+              end
+              object GridAliasViewPASIFTARIHI: TcxGridDBColumn
+                Caption = 'Pasif'
+                DataBinding.FieldName = 'PASIFTARIHI'
+                PropertiesClassName = 'TcxDateEditProperties'
+                Properties.ReadOnly = True
+                Width = 128
+              end
+            end
+            object cxGridLevel4: TcxGridLevel
+              GridView = GridAliasView
+            end
+          end
+        end
+        object cxTabSheet3: TcxTabSheet
+          Caption = 'Banka Bilgileri'
+          ImageIndex = 1
+          object ToolBar3: TToolBar
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 1030
+            Height = 41
+            Margins.Bottom = 0
+            AutoSize = True
+            ButtonHeight = 39
+            ButtonWidth = 46
+            Caption = 'AletCubugu'
+            Color = clTeal
+            DockSite = True
+            DrawingStyle = dsGradient
+            EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+            EdgeInner = esLowered
+            EdgeOuter = esNone
+            Font.Charset = TURKISH_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Trebuchet MS'
+            Font.Style = []
+            GradientEndColor = 11776947
+            GradientStartColor = 14540253
+            HotTrackColor = 65408
+            Images = Tablo.PNGImageList2
+            ParentColor = False
+            ParentFont = False
+            ShowCaptions = True
+            TabOrder = 0
+            Transparent = True
+            object BankaEkleTus: TToolButton
+              Left = 0
+              Top = 0
+              Caption = 'Yeni'
+              ImageIndex = 0
+              ImageName = 'PngImage0'
+              OnClick = BankaEkleTusClick
+            end
+            object BankaSilTus: TToolButton
+              Left = 46
+              Top = 0
+              Caption = 'Sil'
+              ImageIndex = 1
+              ImageName = 'PngImage1'
+              OnClick = BankaSilTusClick
+            end
+            object ToolButton10: TToolButton
+              Left = 92
+              Top = 0
+              Width = 8
+              Caption = 'ToolButton10'
+              ImageIndex = 4
+              ImageName = 'PngImage4'
+              Style = tbsSeparator
+            end
+            object BankaDuzenleTus: TToolButton
+              Left = 100
+              Top = 0
+              Caption = 'D'#252'zenle'
+              ImageIndex = 7
+              ImageName = 'PngImage7'
+              Style = tbsTextButton
+              OnClick = BankaDuzenleTusClick
+            end
+            object BtnKaydetBH: TToolButton
+              Left = 146
+              Top = 0
+              Caption = 'Kaydet'
+              ImageIndex = 2
+              ImageName = 'PngImage2'
+              Visible = False
+              OnClick = BtnKaydetBHClick
+            end
+            object BtnIptalBH: TToolButton
+              Left = 192
+              Top = 0
+              Caption = #304'ptal'
+              ImageIndex = 3
+              ImageName = 'PngImage3'
+              Visible = False
+              OnClick = BtnIptalBHClick
+            end
+          end
+          object GridBanka: TcxGrid
+            Left = 0
+            Top = 44
+            Width = 1036
+            Height = 162
+            Align = alClient
+            TabOrder = 1
+            LookAndFeel.Kind = lfOffice11
+            LookAndFeel.NativeStyle = True
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridBankaDBTableView1: TcxGridDBTableView
+              OnDblClick = BankaDuzenleTusClick
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              OnCanFocusRecord = GridBankaDBTableView1CanFocusRecord
+              DataController.DataSource = DtsBankaHesaplar
+              DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsBehavior.FocusCellOnTab = True
+              OptionsCustomize.ColumnsQuickCustomization = True
+              OptionsData.CancelOnExit = False
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Inserting = False
+              OptionsView.GroupByBox = False
+              OptionsView.Indicator = True
+              Styles.Content = cxStyle1
+              Styles.Header = cxStyle2
+              Styles.Indicator = cxStyle2
+              object GridBankaDBTableView1VARSAYILAN: TcxGridDBColumn
+                Caption = 'Var.'
+                DataBinding.FieldName = 'VARSAYILAN'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCheckBoxProperties'
+                Width = 29
+              end
+              object GridBankaDBTableView1BANKAADI: TcxGridDBColumn
+                Caption = 'Banka'
+                DataBinding.FieldName = 'BANKAADI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxButtonEditProperties'
+                Properties.Buttons = <
+                  item
+                    Default = True
+                    Kind = bkEllipsis
+                  end>
+                Properties.ReadOnly = True
+                Options.Editing = False
+                Width = 80
+              end
+              object GridBankaDBTableView1SUBEKODU: TcxGridDBColumn
+                Caption = #350'ube No'
+                DataBinding.FieldName = 'SUBEKODU'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxButtonEditProperties'
+                Properties.Buttons = <
+                  item
+                    Default = True
+                    Kind = bkEllipsis
+                  end>
+                Properties.ReadOnly = True
+                Options.Editing = False
+                Width = 54
+              end
+              object GridBankaDBTableView1SUBEADI: TcxGridDBColumn
+                Caption = #350'ube'
+                DataBinding.FieldName = 'SUBEADI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Properties.ReadOnly = True
+                Options.Editing = False
+                Width = 71
+              end
+              object GridBankaDBTableView1HESAPNO1: TcxGridDBColumn
+                Caption = 'Hesap No'
+                DataBinding.FieldName = 'HESAPNO'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Properties.ReadOnly = True
+                Width = 72
+              end
+              object GridBankaDBTableView1KUR: TcxGridDBColumn
+                Caption = 'P.Birimi'
+                DataBinding.FieldName = 'KUR'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxComboBoxProperties'
+                Properties.DropDownListStyle = lsFixedList
+                Properties.ReadOnly = True
+                Width = 41
+              end
+              object GridBankaDBTableView1HESAPTIPI1: TcxGridDBColumn
+                Caption = 'Hesap Tipi'
+                DataBinding.FieldName = 'TIPI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'Kurumsal'
+                    ImageIndex = 0
+                    Value = 0
+                  end
+                  item
+                    Description = 'Bireysel'
+                    Value = 1
+                  end>
+                Properties.ReadOnly = True
+                Width = 67
+              end
+              object GridBankaDBTableView1IBAN1: TcxGridDBColumn
+                DataBinding.FieldName = 'IBAN'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Properties.ReadOnly = True
+                Width = 132
+              end
+              object GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn
+                Caption = 'A'#231#305'klama'
+                DataBinding.FieldName = 'ACIKLAMA'
+                DataBinding.IsNullValueType = True
+                Width = 86
+              end
+            end
+            object GridBankaLevel1: TcxGridLevel
+              GridView = GridBankaDBTableView1
+            end
           end
         end
       end
@@ -4833,7 +5027,7 @@ object RehberAraDlg: TRehberAraDlg
     Top = 121
   end
   object cxStyleRepository1: TcxStyleRepository
-    Left = 106
+    Left = 122
     Top = 141
     PixelsPerInch = 96
     object cxStyle1: TcxStyle
@@ -5048,8 +5242,8 @@ object RehberAraDlg: TRehberAraDlg
         'where YERI= 1  and YER_ID=(select top 1 ID from REHBERILETISIM w' +
         'here REHBERID =  :UstId)   '
       'order by 1   ')
-    Left = 243
-    Top = 275
+    Left = 251
+    Top = 243
     ParamData = <
       item
         Name = 'UstId'
@@ -5344,18 +5538,18 @@ object RehberAraDlg: TRehberAraDlg
       
         'select * from dbo.fn_Cari_Detayli_Ekstre(1,getdate()-100.0,getda' +
         'te())')
-    Left = 724
-    Top = 223
+    Left = 628
+    Top = 199
   end
   object DtsCariListe: TDataSource
     DataSet = TabCariListe
-    Left = 717
-    Top = 278
+    Left = 621
+    Top = 254
   end
   object PopupMenuREHBER: TPopupMenu
     OwnerDraw = True
     OnPopup = PopupMenuREHBERPopup
-    Left = 97
+    Left = 73
     Top = 66
     object info1: TMenuItem
       Caption = 'info'
@@ -5797,12 +5991,12 @@ object RehberAraDlg: TRehberAraDlg
   object DtsDemirbasBilgi: TDataSource
     DataSet = TabDemirbasBilgi
     Left = 623
-    Top = 363
+    Top = 323
   end
   object PMAksiyonlarMenu: TPopupMenu
     OnPopup = PMAksiyonlarMenuPopup
-    Left = 339
-    Top = 364
+    Left = 307
+    Top = 316
     object Sil1: TMenuItem
       Caption = 'Aksiyon Sil'
       OnClick = Sil1Click
@@ -5971,8 +6165,8 @@ object RehberAraDlg: TRehberAraDlg
       'WHERE'
       'DURUM>0 AND'
       'REHBERID=:PRehberID')
-    Left = 652
-    Top = 394
+    Left = 636
+    Top = 410
     ParamData = <
       item
         Name = 'PRehberID'
@@ -5982,8 +6176,8 @@ object RehberAraDlg: TRehberAraDlg
   end
   object DtsImaj: TDataSource
     DataSet = TabImaj
-    Left = 688
-    Top = 369
+    Left = 704
+    Top = 337
   end
   object OpenDialog1: TOpenDialog
     Left = 647
@@ -6275,22 +6469,22 @@ object RehberAraDlg: TRehberAraDlg
   object GorevlerMenu: TOfficePopupMenu
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 328
     Top = 296
     object DuzenleMenu: TMenuItem
@@ -6430,8 +6624,8 @@ object RehberAraDlg: TRehberAraDlg
       ' GY.TUR=:PYer'
       'and GOREVID=:PYerId '
       'order by 2 DESC')
-    Left = 403
-    Top = 401
+    Left = 331
+    Top = 433
     ParamData = <
       item
         Name = 'PYer'
@@ -6452,22 +6646,22 @@ object RehberAraDlg: TRehberAraDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 383
     Top = 308
     object MenuKlasordenEkle: TMenuItem
@@ -6536,8 +6730,8 @@ object RehberAraDlg: TRehberAraDlg
         'or (GY.TUR=70 and GOREVID in (select ID from PROJELER where REHB' +
         'ERID=@RID)) '
       'order by 2 DESC')
-    Left = 475
-    Top = 377
+    Left = 507
+    Top = 313
     ParamData = <
       item
         Name = 'YerID'
@@ -6632,5 +6826,18 @@ object RehberAraDlg: TRehberAraDlg
     DataSet = TabFirsat
     Left = 777
     Top = 284
+  end
+  object TabAlias: TFDQuery
+    Active = True
+    Connection = Tablo.FDCnn
+    SQL.Strings = (
+      'SELECT * FROM REHBERALIAS')
+    Left = 180
+    Top = 415
+  end
+  object DtsAlias: TDataSource
+    DataSet = TabAlias
+    Left = 173
+    Top = 470
   end
 end

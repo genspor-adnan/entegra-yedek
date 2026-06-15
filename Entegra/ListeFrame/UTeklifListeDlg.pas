@@ -225,6 +225,7 @@ type
     procedure TabTeklifAfterScroll(DataSet: TDataSet);
     procedure BtnMesajGonderClick(Sender: TObject);
     procedure YorumDzenle1Click(Sender: TObject);
+    procedure PopupYorumlarPopup(Sender: TObject);
     procedure PopupYorumuSilClick(Sender: TObject);
     procedure DkmanGster1Click(Sender: TObject);
     procedure DokumanFormunuA1Click(Sender: TObject);
@@ -920,6 +921,13 @@ end;
 procedure TTeklifListeDlg.YorumDzenle1Click(Sender: TObject);
 begin
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Teklif);
+end;
+
+procedure TTeklifListeDlg.PopupYorumlarPopup(Sender: TObject);
+begin
+  DkmanGster1.Visible := TabYorum.FieldByName('DOKUMANID').AsString <> '';
+  DokumanFormunuA1.Visible := DkmanGster1.Visible;
+  DkmanSil1.Visible := DkmanGster1.Visible;
 end;
 
 initialization

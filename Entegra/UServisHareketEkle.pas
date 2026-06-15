@@ -148,6 +148,7 @@ type
     procedure MenuKlasordenEkleClick(Sender: TObject);
     procedure MenuTarayacidanEkleClick(Sender: TObject);
     procedure YorumDzenle1Click(Sender: TObject);
+    procedure PopupYorumlarPopup(Sender: TObject);
     procedure DkmanGster1Click(Sender: TObject);
     procedure DkmanSil1Click(Sender: TObject);
     procedure PopupYorumuSilClick(Sender: TObject);
@@ -656,6 +657,13 @@ begin
    //Tabloyenile(TabYorum,[TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger]);
    //TabHareketlerAfterScroll( TabHareketler);
    Tabloyenile(TabYorum,[TabNo_SERVISHAREKET, HareketId]);
+end;
+
+procedure TServisHareketDlg.PopupYorumlarPopup(Sender: TObject);
+begin
+  DkmanGster1.Visible := TabYorum.FieldByName('DOKUMANID').AsString <> '';
+  DokumanFormunuA1.Visible := DkmanGster1.Visible;
+  DkmanSil1.Visible := DkmanGster1.Visible;
 end;
 
 procedure TServisHareketDlg.YorumEkleTusClick(Sender: TObject);

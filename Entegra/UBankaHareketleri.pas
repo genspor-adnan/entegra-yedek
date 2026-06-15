@@ -174,7 +174,7 @@ implementation
 
 {$R *.dfm}
 
-uses UTablo, UExceldenVeriAl, PrjConst, UBankaHareketKural, UGirisKutusuEx, FetaKurulusSiniflari, UAnaForm;
+uses UTablo, UExceldenVeriAl, PrjConst, UGirisKutusuEx, FetaKurulusSiniflari, UAnaForm;
 
 var
    KuralUygulaniyor : Boolean;
@@ -229,7 +229,7 @@ end;
 
 procedure TBankaHareketlerDlg.EditHesapKodPropertiesButtonClick(Sender: TObject;  AButtonIndex: Integer);
 begin
-   HesapListele(TabHareket, AButtonIndex, BankaKur, EditHesapKod,EditMasrafKodu, EditMasrafAd, EditHesapAd);
+  // UBankaHareketKural birimi projeden Ã§Ä±karÄ±ldÄ± â€” HesapListele kullanÄ±lamÄ±yor.
 end;
 
 procedure TBankaHareketlerDlg.EditMasrafKoduPropertiesButtonClick( Sender: TObject; AButtonIndex: Integer);
@@ -274,7 +274,7 @@ var s1,s2:variant;
 begin
    s1:=TabHareket.FieldByName('GELENISLEMTIPI').AsString;
    s2:=TabHareket.FieldByName('ACIKLAMA').AsString;
-   TGirisKutusuEx.BilgiAlEx('', TGirdiDenetimleri.Create.Edit('Ýþlem Tipi', @s1).Memo('Açýklama', @s2));
+   TGirisKutusuEx.BilgiAlEx('', TGirdiDenetimleri.Create.Edit('ï¿½ï¿½lem Tipi', @s1).Memo('Aï¿½ï¿½klama', @s2));
 end;
 
 procedure TBankaHareketlerDlg.GridHareketViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
@@ -298,12 +298,12 @@ begin
    if TabHareket.State in [dsEdit, dsInsert] then
       TabHareket.Post;
    if TabHareket.FieldByName('PRGISLEMTIPI').AsInteger<1 then
-      ShowMessage('Prg.Ýþlem Tipi dolu olmalýdýr!')
+      ShowMessage('Prg.ï¿½ï¿½lem Tipi dolu olmalï¿½dï¿½r!')
    else if (TabHareket.FieldByName('PRGISLEMTIPI').AsInteger<1)or((TabHareket.FieldByName('HESAPID').AsInteger<1)and(TabHareket.FieldByName('MASRAFID').AsInteger<1)) then
-       ShowMessage('Hesap Kod veya Masraf Koddan biri dolu olmalýdýr!')
+       ShowMessage('Hesap Kod veya Masraf Koddan biri dolu olmalï¿½dï¿½r!')
    else begin
        ACIKLAMA := TabHareket.FieldByName(TMenuItem(Sender).Hint).AsString;
-       if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Memo('Ýçinde geçecek kelimeler:', @ACIKLAMA)) <> mrOk then
+       if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Memo('ï¿½ï¿½inde geï¿½ecek kelimeler:', @ACIKLAMA)) <> mrOk then
           Abort;
        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values(0,1,'+
        TabHareket.FieldByName('PRGISLEMTIPI').AsString+',2,'+IntToStr(TMenuItem(Sender).Tag)+','''+VarToStr(ACIKLAMA)+''','+TabHareket.FieldByName('HESAPID').AsString+','+TabHareket.FieldByName('MASRAFID').AsString+')',[],[]);
@@ -319,15 +319,15 @@ var s,s2 : string;
        DovizDegeri:Currency;
    begin
       KurDegeri := 1;
-      if BankaKur<>CariDoviz then //döviz hareketi ise TL deðerini de yazalým
+      if BankaKur<>CariDoviz then //dï¿½viz hareketi ise TL deï¿½erini de yazalï¿½m
          KurDegeri:=TabHareket.FieldByName('KURDEGERI').AsFloat;
 
       ID := Tablo.KasaKaydet(Tur, TabHareket.FieldByName('Tarih').AsDateTime, TabHareket.FieldByName('Tarih').AsDateTime,RehberId,
              TabHareket.FieldByName('ACIKLAMA').AsString, TabImport.FieldByName('BANKAHESAPID').AsInteger,BankaKur,CariDoviz,0,
              Borc, Alacak,Abs(Borc-Alacak)*KurDegeri,0,FaturaId,KrediId,0,0,SubeId,'B', Yer,YerId, TabHareket.FieldByName('No').AsString,Windows_Excelden);
       if CiftSatir then begin
-         if Tur in[47,48] then begin//eðer döviz alýþ/satýþ ise döviz kur deðerine bölmek gerek
-            if BankaKur=CariDoviz then begin //TL ise bölünür
+         if Tur in[47,48] then begin//eï¿½er dï¿½viz alï¿½ï¿½/satï¿½ï¿½ ise dï¿½viz kur deï¿½erine bï¿½lmek gerek
+            if BankaKur=CariDoviz then begin //TL ise bï¿½lï¿½nï¿½r
                Borc := Borc/TabHareket.FieldByName('KURDEGERI').AsFloat;
                Alacak := Alacak/TabHareket.FieldByName('KURDEGERI').AsFloat;
             end else begin
@@ -337,7 +337,7 @@ var s,s2 : string;
          end;
 
           KurDegeri := 1;
-          if Kur<>CariDoviz then //döviz hareketi ise TL deðerini de yazalým
+          if Kur<>CariDoviz then //dï¿½viz hareketi ise TL deï¿½erini de yazalï¿½m
              KurDegeri:=TabHareket.FieldByName('KURDEGERI').AsFloat;
           ID2 := Tablo.KasaKaydet(Tur, TabHareket.FieldByName('Tarih').AsDateTime, TabHareket.FieldByName('Tarih').AsDateTime,0,
                  TabHareket.FieldByName('ACIKLAMA').AsString, TabHareket.FieldByName('HESAPID').AsInteger,Kur,CariDoviz,0,
@@ -346,7 +346,7 @@ var s,s2 : string;
           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID)+' where ID = '+IntToStr(ID2),[],[]);
       end;
       TabHareket.Edit;
-      TabHareket.FieldByName('DURUM').AsInteger := 9;  //durum kayýtlý yapýlýr
+      TabHareket.FieldByName('DURUM').AsInteger := 9;  //durum kayï¿½tlï¿½ yapï¿½lï¿½r
       //Otomatik Kural ekleme
 {      if (TabHareket.FieldByName('EKLEME').AsInteger = 1)then
           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values('+
@@ -362,15 +362,15 @@ begin
    while not TabHareket.eof do begin
     if (TabHareket.FieldByName('Sec').AsBoolean = True)and(TabHareket.FieldByName('DURUM').AsInteger = 2) then begin
         if (TabHareket.FieldByName('HESAPID').AsInteger<1)and(TabHareket.FieldByName('MASRAFID').AsInteger<1) then
-           showmessage('Hesap Kod veya Masraf Kodundan biri dolu olmalý')
+           showmessage('Hesap Kod veya Masraf Kodundan biri dolu olmalï¿½')
         else
            case Tur of
-                32,335,532: begin  //havale veya personel maaþ, DBS
+                32,335,532: begin  //havale veya personel maaï¿½, DBS
                     if TabHareket.FieldByName('Tutar').AsCurrency<0 then
                        Kasa_Islemleri(False, 32,TabHareket.FieldByName('HESAPID').AsInteger, 'B',BankaKur, Abs(TabHareket.FieldByName('Tutar').AsCurrency), 0)
                     else
                        Kasa_Islemleri(False, 22,TabHareket.FieldByName('HESAPID').AsInteger, 'B',BankaKur, 0, Abs(TabHareket.FieldByName('Tutar').AsCurrency));
-                    //eft yaptýðýmýz bir carinin excelde IBANý varsa ve cari kaydýnda yoksa onu carinin kaydýna ekleyelim
+                    //eft yaptï¿½ï¿½ï¿½mï¿½z bir carinin excelde IBANï¿½ varsa ve cari kaydï¿½nda yoksa onu carinin kaydï¿½na ekleyelim
                     if (Tur=32)and(TabHareket.FieldByName('EKLEME').AsInteger = 2)then begin
                         s := copy(TabHareket.FieldByName('ACIKLAMA').AsString, pos('EKLE@', TabHareket.FieldByName('ACIKLAMA').AsString)+5, 100);
                         if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT * FROM BANKAHESAPLAR where IBAN='''+s+''' ',[],[])=False then
@@ -385,20 +385,20 @@ begin
                    end;
                 end;
                 41:Kasa_Islemleri(True, 41,0,'K',BankaKur,0,Abs(TabHareket.FieldByName('Tutar').AsCurrency)); //Bankaya Yatan
-                42:Kasa_Islemleri(True, 42,0,'K',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency), 0); //Bankadan Çekilen
+                42:Kasa_Islemleri(True, 42,0,'K',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency), 0); //Bankadan ï¿½ekilen
                 43:if TabHareket.FieldByName('Tutar').AsCurrency > 0 then
-                      Kasa_Islemleri(True, 43,0,'B',BankaKur,0,Abs(TabHareket.FieldByName('Tutar').AsCurrency)) //Banka Virmaný Gelen
+                      Kasa_Islemleri(True, 43,0,'B',BankaKur,0,Abs(TabHareket.FieldByName('Tutar').AsCurrency)) //Banka Virmanï¿½ Gelen
                    else
-                      Kasa_Islemleri(True, 43,0,'B',BankaKur, Abs(TabHareket.FieldByName('Tutar').AsCurrency), 0); //Banka Virmaný Giden
+                      Kasa_Islemleri(True, 43,0,'B',BankaKur, Abs(TabHareket.FieldByName('Tutar').AsCurrency), 0); //Banka Virmanï¿½ Giden
                 44:Kasa_Islemleri(True, 44,0, 'P',BankaKur, 0, Abs(TabHareket.FieldByName('Tutar').AsCurrency)); //pos AKTARIMI
                 47,48:
-                   if ((Tur=47)and(BankaKur=CariDoviz))or      //Bankadan döviz alýþ  ve hesap TL ise
-                      ((Tur=48)and(BankaKur<>CariDoviz)) then // Bankadan döviz satýþ  ve hesap TL deðil ise
+                   if ((Tur=47)and(BankaKur=CariDoviz))or      //Bankadan dï¿½viz alï¿½ï¿½  ve hesap TL ise
+                      ((Tur=48)and(BankaKur<>CariDoviz)) then // Bankadan dï¿½viz satï¿½ï¿½  ve hesap TL deï¿½il ise
                        Kasa_Islemleri(True, Tur,0, 'B',TabHareket.FieldByName('KUR').AsString, Abs(TabHareket.FieldByName('Tutar').AsCurrency),0)
                    else
-                       Kasa_Islemleri(True, Tur,0, 'B',TabHareket.FieldByName('KUR').AsString, 0, Abs(TabHareket.FieldByName('Tutar').AsCurrency)); //Bankadan döviz satýþ
-                51:Kasa_Islemleri(False, 51,0,'B',BankaKur,0,Abs(TabHareket.FieldByName('Tutar').AsCurrency));   //Çekin Tahsilatý
-                53:Kasa_Islemleri(False, 53,0,'B',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency),0);    //Çekin Ödenmesi
+                       Kasa_Islemleri(True, Tur,0, 'B',TabHareket.FieldByName('KUR').AsString, 0, Abs(TabHareket.FieldByName('Tutar').AsCurrency)); //Bankadan dï¿½viz satï¿½ï¿½
+                51:Kasa_Islemleri(False, 51,0,'B',BankaKur,0,Abs(TabHareket.FieldByName('Tutar').AsCurrency));   //ï¿½ekin Tahsilatï¿½
+                53:Kasa_Islemleri(False, 53,0,'B',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency),0);    //ï¿½ekin ï¿½denmesi
                 57:Kasa_Islemleri(True, 57,0,'V',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency),0);//KK
                 58:Kasa_Islemleri(True, 58,0,'R',BankaKur,Abs(TabHareket.FieldByName('Tutar').AsCurrency),0,TabHareket.FieldByName('HESAPID').AsInteger,
                        TabHareket.FieldByName('HESAPID').AsInteger,TabNo_PLANKREDI,TabHareket.FieldByName('HESAPID').AsInteger);//Kredi
@@ -408,7 +408,7 @@ begin
     TabHareket.Next;
    end;
    TabHareket.EnableControls;
-   //kalaný güncelle
+   //kalanï¿½ gï¿½ncelle
    Tablo.TablodanSorguAc(1, 'select count(ID) from BANKAIMPORTHAREKET  where BANKAIMPORTID='+TabImport.Fields[0].AsString+' and DURUM=9');
    TabImport.Edit;
    TabImport.FieldByName('KALANSAY').AsInteger := TabImport.FieldByName('TOPLAMSAY').AsInteger-Tablo.Query1.Fields[0].AsInteger;
@@ -450,7 +450,7 @@ var bulundu : boolean;
     var j : Smallint;
         Aciklama2 : string;
     begin
-      //ÖNCE GEREKSÝZ ATILACAK KELÝMELERÝ ATALIM
+      //ï¿½NCE GEREKSï¿½Z ATILACAK KELï¿½MELERï¿½ ATALIM
       Aciklama2:=ACIKLAMA;
       if AtilacaklariAt then
          for j := 0 to Tablo.RepAtilacakListe.Properties.Items.Count-1 do
@@ -459,7 +459,7 @@ var bulundu : boolean;
       Liste.clear;
       while Aciklama2<>'' do begin
          Kelime := KelimeGetir(Aciklama2);
-         if (Kelime<>'')and((Kelime[1]='T')and(Kelime[2]='R')and(Kelime[3] in ['0'..'9']))and(Kelime<>BankaIBAN) then //eðer IBAN varsa ve þu anki ise geçersizdir. baþka IBAN bulmamýz lazým
+         if (Kelime<>'')and((Kelime[1]='T')and(Kelime[2]='R')and(Kelime[3] in ['0'..'9']))and(Kelime<>BankaIBAN) then //eï¿½er IBAN varsa ve ï¿½u anki ise geï¿½ersizdir. baï¿½ka IBAN bulmamï¿½z lazï¿½m
             Result := Kelime;
          HarfRakamSay(Kelime);
          if (Kelime<>'')and(Harf <= MaxHarf)and(Rakam<MaxRakam) then
@@ -467,7 +467,7 @@ var bulundu : boolean;
       end;
     end;
 
-   function RehberIDBul:Integer; //Açýklamada geçen isimden Id bulur
+   function RehberIDBul:Integer; //Aï¿½ï¿½klamada geï¿½en isimden Id bulur
       function YeniCiftKelime : string;
       begin
          Result:='';
@@ -480,40 +480,40 @@ var bulundu : boolean;
       end;
    begin
       Result:=0;
-      IBAN:=Listeyi_Doldur(100,3, True); //Hem liste oluþtursun hem de bu arada IBAN varsa onu alalým ki IBAN a göre iþlem yapalým
+      IBAN:=Listeyi_Doldur(100,3, True); //Hem liste oluï¿½tursun hem de bu arada IBAN varsa onu alalï¿½m ki IBAN a gï¿½re iï¿½lem yapalï¿½m
       if IBAN<>'' then begin //IBAN varsa
          Tablo.TablodanSorguAc(1,'select ID, REHBERID,KUR from BANKAHESAPLAR where IBAN='''+IBAN+''' ');
          Tablo.Query1.FetchAll;
          if not Tablo.Query1.IsEmpty then begin
-            if Tablo.Query1.FieldByName('REHBERID').AsInteger < 0 then begin//bizim  demek ki virman..  iþlem tipini virman yapýp hesapId ise bu banka hesap ID yi çakalým
+            if Tablo.Query1.FieldByName('REHBERID').AsInteger < 0 then begin//bizim  demek ki virman..  iï¿½lem tipini virman yapï¿½p hesapId ise bu banka hesap ID yi ï¿½akalï¿½m
                TabHareket.FieldByName('PRGISLEMTIPI').AsInteger:=43;
                Result := Tablo.Query1.FieldByName('ID').AsInteger;
             end else
-               Result := Tablo.Query1.FieldByName('REHBERID').AsInteger;  //müþteriyse cari ID yi bulup dönelim
+               Result := Tablo.Query1.FieldByName('REHBERID').AsInteger;  //mï¿½ï¿½teriyse cari ID yi bulup dï¿½nelim
          end
-         else if TabHareket.FieldByName('EKLEME').AsInteger = 0 then begin//BU IBANDAN bir kayýt yoksa eklemek için Açýklamanýn sonuna koyalým ayrýca EKLEME alanýný true yapalým ki bunu ekleyeceðimizi bilelim
+         else if TabHareket.FieldByName('EKLEME').AsInteger = 0 then begin//BU IBANDAN bir kayï¿½t yoksa eklemek iï¿½in Aï¿½ï¿½klamanï¿½n sonuna koyalï¿½m ayrï¿½ca EKLEME alanï¿½nï¿½ true yapalï¿½m ki bunu ekleyeceï¿½imizi bilelim
               TabHareket.FieldByName('ACIKLAMA').AsString := TabHareket.FieldByName('ACIKLAMA').AsString+' EKLE@'+IBAN;
               TabHareket.FieldByName('EKLEME').AsInteger := 2;
          end;
       end;
 
-      if Result=0 then begin // IBAN yoksa veya sonuç çýkmadýysa
-          ind:=0;                   //açýklamadan 2 kelime alarak rehber tablosunda aramaya baþlýyoruz..
+      if Result=0 then begin // IBAN yoksa veya sonuï¿½ ï¿½ï¿½kmadï¿½ysa
+          ind:=0;                   //aï¿½ï¿½klamadan 2 kelime alarak rehber tablosunda aramaya baï¿½lï¿½yoruz..
           CariAd := YeniCiftKelime;
           while (Result=0)and(ind<=Liste.Count-1) do begin
-             Tablo.TablodanSorguAc(1, 'select top 2 ID from REHBER where ID>0 and GRUP in (120,320) and FIRMA like '''+CariAd+'%'''); //sadece alýcý ve satýcýlara bakar
+             Tablo.TablodanSorguAc(1, 'select top 2 ID from REHBER where ID>0 and GRUP in (120,320) and FIRMA like '''+CariAd+'%'''); //sadece alï¿½cï¿½ ve satï¿½cï¿½lara bakar
              Tablo.Query1.FetchAll;
              case Tablo.query1.RecordCount of
                  0 : CariAd := YeniCiftKelime;
                  1 : Result := Tablo.Query1.Fields[0].AsInteger;
-                else begin inc(ind); //bu iki kelimeyle çok deðer döndü bir kelime daha ekleyelim. Ör. "Asya Nakliyat" çok dönmüþse "Asya Nakliyat Taþýma"
+                else begin inc(ind); //bu iki kelimeyle ï¿½ok deï¿½er dï¿½ndï¿½ bir kelime daha ekleyelim. ï¿½r. "Asya Nakliyat" ï¿½ok dï¿½nmï¿½ï¿½se "Asya Nakliyat Taï¿½ï¿½ma"
                            CariAd := CariAd+' '+Liste.Strings[ind];
                      end;
              end;
           end;
       end;
    end;
-   function RehberIDBul2:Integer;//Açýklamada DBS geçerse ödenen fatura no dan Cari Id bulur
+   function RehberIDBul2:Integer;//Aï¿½ï¿½klamada DBS geï¿½erse ï¿½denen fatura no dan Cari Id bulur
    begin            //DBS ODM/5068924/A17100804
       Listeyi_Doldur(100,100, True);
 
@@ -524,7 +524,7 @@ var bulundu : boolean;
          case Tablo.query7.RecordCount of
              0 : inc(ind);
              1 : Result := Tablo.Query7.Fields[0].AsInteger;
-            else begin //BÝRDEN FAZLA DÖNMÜÞSE tutara bakalým
+            else begin //Bï¿½RDEN FAZLA Dï¿½NMï¿½ï¿½SE tutara bakalï¿½m
                   Result := Tablo.Query7.Fields[0].AsInteger;
                  end;
          end;
@@ -542,7 +542,7 @@ var bulundu : boolean;
          case Tablo.query7.RecordCount of
              0 : inc(ind);
              1 : Result := Tablo.Query7.Fields[0].AsInteger;
-            else begin //BÝRDEN FAZLA DÖNMÜÞSE tutara bakalým
+            else begin //Bï¿½RDEN FAZLA Dï¿½NMï¿½ï¿½SE tutara bakalï¿½m
                   Result := Tablo.Query7.Fields[0].AsInteger;
                  end;
          end;
@@ -559,7 +559,7 @@ var bulundu : boolean;
          case Tablo.query1.RecordCount of
              0 : inc(ind);
              1 : Result := Tablo.Query1.Fields[0].AsInteger;
-            else begin //BÝRDEN FAZLA DÖNMÜÞSE tutara bakalým
+            else begin //Bï¿½RDEN FAZLA Dï¿½NMï¿½ï¿½SE tutara bakalï¿½m
                   Result := Tablo.Query1.Fields[0].AsInteger;
                  end;
          end;
@@ -576,7 +576,7 @@ var bulundu : boolean;
          case Tablo.query1.RecordCount of
              0 : inc(ind);
              1 : Result := Tablo.Query1.Fields[0].AsInteger;
-            else begin //BÝRDEN FAZLA DÖNMÜÞSE tutara bakalým
+            else begin //Bï¿½RDEN FAZLA Dï¿½NMï¿½ï¿½SE tutara bakalï¿½m
                   Result := Tablo.Query1.Fields[0].AsInteger;
                  end;
          end;
@@ -593,16 +593,16 @@ var bulundu : boolean;
              case Tablo.query1.RecordCount of
                  0 : inc(ind);
                  1 : Result := Tablo.Query1.Fields[0].AsInteger;
-                else begin //BÝRDEN FAZLA DÖNMÜÞSE tutara bakalým
+                else begin //Bï¿½RDEN FAZLA Dï¿½NMï¿½ï¿½SE tutara bakalï¿½m
                       Result := Tablo.Query1.Fields[0].AsInteger;
                      end;
              end;
           end;
        end;
    begin
-      Listeyi_Doldur(100, 100, False); //TAKSITLI-011029415-00000019-00001  açýklama böyle  önce tireleri atmadan deneyelim
+      Listeyi_Doldur(100, 100, False); //TAKSITLI-011029415-00000019-00001  aï¿½ï¿½klama bï¿½yle  ï¿½nce tireleri atmadan deneyelim
       Result := Tara;
-      if Result=0 then  //þayet bulamazsak atýlacaklarý atýp öyle tekrar deneyelim
+      if Result=0 then  //ï¿½ayet bulamazsak atï¿½lacaklarï¿½ atï¿½p ï¿½yle tekrar deneyelim
          Listeyi_Doldur(100, 100, True);
          Result := Tara;
    end;
@@ -631,10 +631,10 @@ var bulundu : boolean;
 
    end;
 begin
-          //önce bakalým hareketteki excel_iþlem TÝPÝNE GÖRE BAKALIM
+          //ï¿½nce bakalï¿½m hareketteki excel_iï¿½lem Tï¿½Pï¿½NE Gï¿½RE BAKALIM
 //          IcindeGeceneBak(1,'GELENISLEMTIPI');
           IcindeGeceneBak;
-//          if not bulundu then  //iþlem tipinde yoksa açýklamaya bakalým tekrar
+//          if not bulundu then  //iï¿½lem tipinde yoksa aï¿½ï¿½klamaya bakalï¿½m tekrar
 //             IcindeGeceneBak(2,'ACIKLAMA');
 
           if bulundu then begin
@@ -658,7 +658,7 @@ begin
                          //Hesap_Masraf('MASRAFID','MasrafKod','MasrafAd','MASRAFGELIR','KOD','AD');
                        end;
                 51,53: begin
-                         //HesapId := CekIdBul;  //ÇEK
+                         //HesapId := CekIdBul;  //ï¿½EK
                          //Hesap_Masraf('HESAPID','HesapKod','HesapAd','REHBER','KOD','FIRMA');
                          if HesapId=0 then
                             TabHareket.FieldByName('HESAPID').AsInteger := CekIdBul;;
@@ -680,7 +680,7 @@ begin
                          //Hesap_Masraf('HESAPID','HESAPKOD','HESAPAD','KREDIKARTI','KODU','ADI');
                    end;
                 58:begin
-                         if HesapId=0 then //HesapId := KrediIdBul;  //KREDÝ
+                         if HesapId=0 then //HesapId := KrediIdBul;  //KREDï¿½
                             TabHareket.FieldByName('HESAPID').AsInteger := KrediIdBul;  //KK
                          //Hesap_Masraf('HESAPID','HESAPKOD','HESAPAD','KREDILER','KREDIKODU','ADI');
                    end;
@@ -731,10 +731,7 @@ end;
 
 procedure TBankaHareketlerDlg.KuralListesiniAcMenuClick(Sender: TObject);
 begin
-   Application.CreateForm(TBankaHareketKuralDlg, BankaHareketKuralDlg);
-   BankaHareketKuralDlg.BankaKodu := BankaKodu;
-   BankaHareketKuralDlg.ShowModal;
-   BankaHareketKuralDlg.Destroy;
+  // UBankaHareketKural birimi projeden Ã§Ä±karÄ±ldÄ± â€” kural yÃ¶netimi devre dÄ±ÅŸÄ±.
 end;
 
 procedure TBankaHareketlerDlg.SilTusClick(Sender: TObject);
@@ -800,7 +797,7 @@ begin
                   TabHareket.FieldByName('DURUM').AsInteger := 2
                else
                   TabHareket.FieldByName('DURUM').AsInteger := 1;
-         47,48: //döviz alýþ satýþ ise 3 alan da dolu olmalý
+         47,48: //dï¿½viz alï¿½ï¿½ satï¿½ï¿½ ise 3 alan da dolu olmalï¿½
                if (TabHareket.FieldByName('HESAPID').AsInteger>0)and(TabHareket.FieldByName('KURDEGERI').AsString<>'')and
                   (TabHareket.FieldByName('KUR').AsString<>'') then
                   TabHareket.FieldByName('DURUM').AsInteger := 2
@@ -812,7 +809,7 @@ begin
                else
                   TabHareket.FieldByName('DURUM').AsInteger := 1;
        end;
-      //eðer önceden hazýr deðilse ve þimdi hazýr olmuþsa bunu kurallara ekleyelim
+      //eï¿½er ï¿½nceden hazï¿½r deï¿½ilse ve ï¿½imdi hazï¿½r olmuï¿½sa bunu kurallara ekleyelim
       if (KuralUygulaniyor=False)and(OncekiDurum < 2)and( TabHareket.FieldByName('DURUM').AsInteger=2) then
           TabHareket.FieldByName('EKLEME').AsInteger := 1;
 
@@ -840,9 +837,9 @@ var s:string;
 begin
     case TMenuItem(Sender).Tag of
      0,1: s:=IntToStr(TMenuItem(Sender).Tag);
-     2 :  s:='1-SEC';//seçililer ters
-     3 :  s:='case when DURUM < 2 then 1 else 0 end ';        //"Tanýmsýz" ve "Eksikleri" Seç
-     4 :  s:='case when DURUM = 2 then 1 else 0 end '        //"Hazýr" Seç
+     2 :  s:='1-SEC';//seï¿½ililer ters
+     3 :  s:='case when DURUM < 2 then 1 else 0 end ';        //"Tanï¿½msï¿½z" ve "Eksikleri" Seï¿½
+     4 :  s:='case when DURUM = 2 then 1 else 0 end '        //"Hazï¿½r" Seï¿½
     end;
     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update BANKAIMPORTHAREKET set SEC='+s+' where BANKAIMPORTID='+TabImport.Fields[0].AsString, [],[]);
     TabloAc;
@@ -851,7 +848,7 @@ end;
 procedure TBankaHareketlerDlg.YeniExcelTusClick(Sender: TObject);
 begin
    Excel2BankaHareket(TabImport, TabHareket); //okunan excelden BankaKodu, HesapId,  BankaKur bilgileri gelir..
-   //Kuralý Uygulayalým
+   //Kuralï¿½ Uygulayalï¿½m
    KurallarUygulaMenu.Click;
    TabloYenile(TabImport, []);
 end;

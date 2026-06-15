@@ -30,6 +30,10 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     Color = clSkyBlue
     ParentBackground = False
     TabOrder = 0
+    OnDblClick = PanelUstDblClick
+    DesignSize = (
+      1180
+      50)
     object btnHesapSec: TcxButton
       Left = 8
       Top = 11
@@ -38,6 +42,16 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       Caption = 'Hesap Se'#231
       TabOrder = 0
       OnClick = btnHesapSecClick
+    end
+    object btnMT940Al: TcxButton
+      Left = 1042
+      Top = 11
+      Width = 130
+      Height = 28
+      Anchors = [akTop, akRight]
+      Caption = 'MT940 '#304#231'eri Al'
+      TabOrder = 1
+      OnClick = btnMT940AlClick
     end
     object lblBanka: TcxLabel
       Left = 170
@@ -121,6 +135,7 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     object cbTur: TcxImageComboBox
       Left = 160
       Top = 22
+      Properties.DropDownRows = 16
       Properties.Items = <>
       Properties.OnChange = cbTurPropertiesChange
       TabOrder = 1
@@ -291,6 +306,7 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
       OnCellClick = cxGrid1DBTableView1CellClick
+      OnEditing = cxGrid1DBTableView1Editing
       OnFocusedRecordChanged = cxGrid1DBTableView1FocusedRecordChanged
       DataController.DataSource = DataSource1
       DataController.Summary.DefaultGroupSummaryItems = <>
@@ -302,6 +318,17 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       OptionsData.Deleting = False
       OptionsData.Inserting = False
       OptionsView.GroupByBox = False
+      Styles.OnGetContentStyle = cxGrid1DBTableView1StylesGetContentStyle
+      object cxGrid1DBTableView1ONAY: TcxGridDBColumn
+        Caption = 'Onay'
+        DataBinding.FieldName = 'ONAY'
+        PropertiesClassName = 'TcxCheckBoxProperties'
+        Properties.DisplayChecked = ' '
+        Properties.DisplayUnchecked = ' '
+        Properties.DisplayGrayed = ' '
+        Visible = False
+        Width = 50
+      end
       object cxGrid1DBTableView1TARIH: TcxGridDBColumn
         Caption = 'Tarih'
         DataBinding.FieldName = 'TARIH'
@@ -311,15 +338,17 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
         Width = 120
       end
       object cxGrid1DBTableView1TURID: TcxGridDBColumn
-        Caption = 'T'#252'r Id'
+        Caption = 'T'#252'r'
         DataBinding.FieldName = 'TURID'
-        Visible = False
-        Options.Editing = False
-        Width = 50
+        PropertiesClassName = 'TcxImageComboBoxProperties'
+        Properties.Items = <>
+        Properties.OnChange = cxGrid1DBTableView1TURIDPropertiesChange
+        Width = 160
       end
       object cxGrid1DBTableView1TUR: TcxGridDBColumn
-        Caption = 'T'#252'r'
+        Caption = 'T'#252'r Ad'#305
         DataBinding.FieldName = 'TUR'
+        Visible = False
         Options.Editing = False
         Width = 130
       end
@@ -333,7 +362,13 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       object cxGrid1DBTableView1SECIM: TcxGridDBColumn
         Caption = 'Se'#231'im'
         DataBinding.FieldName = 'SECIM'
-        Options.Editing = False
+        PropertiesClassName = 'TcxButtonEditProperties'
+        Properties.Buttons = <
+          item
+            Default = True
+            Kind = bkEllipsis
+          end>
+        Properties.OnButtonClick = cxGrid1DBTableView1SECIMPropertiesButtonClick
         Width = 170
       end
       object cxGrid1DBTableView1TUTAR: TcxGridDBColumn
@@ -409,6 +444,13 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
         Options.Editing = False
         Width = 160
       end
+      object cxGrid1DBTableView1CONFIDENCE: TcxGridDBColumn
+        Caption = 'G'#252'ven'
+        DataBinding.FieldName = 'CONFIDENCE'
+        Visible = False
+        Options.Editing = False
+        Width = 50
+      end
     end
     object cxGrid1Level1: TcxGridLevel
       GridView = cxGrid1DBTableView1
@@ -444,8 +486,8 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
   object dxMemData1: TdxMemData
     Indexes = <>
     SortOptions = []
-    Left = 64
-    Top = 240
+    Left = 40
+    Top = 184
     object dxMemData1TARIH: TDateTimeField
       FieldName = 'TARIH'
     end
@@ -508,18 +550,60 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       FieldName = 'MASRAFKALEMI'
       Size = 150
     end
+    object dxMemData1CONFIDENCE: TIntegerField
+      FieldName = 'CONFIDENCE'
+    end
+    object dxMemData1ONAY: TBooleanField
+      FieldName = 'ONAY'
+    end
+    object dxMemData1KREDIDETAYID: TIntegerField
+      FieldName = 'KREDIDETAYID'
+    end
   end
   object DataSource1: TDataSource
     DataSet = dxMemData1
-    Left = 216
-    Top = 208
+    Left = 168
+    Top = 176
   end
   object PopupMenu1: TPopupMenu
-    Left = 392
-    Top = 240
+    Left = 320
+    Top = 184
     object miSatirSil: TMenuItem
       Caption = 'Sat'#305'r Sil'
       OnClick = miSatirSilClick
+    end
+    object miBenzerlerineUygula: TMenuItem
+      Caption = 'Benzerlerine Uygula'
+      OnClick = miBenzerlerineUygulaClick
+    end
+  end
+  object Od1: TOpenDialog
+    DefaultExt = 'csv'
+    Filter = 
+      'Banka Hareketleri (*.csv;*.xls)|*.csv;*.xls|CSV (*.csv)|*.csv|Ex' +
+      'cel 97-2003 (*.xls)|*.xls'
+    Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
+    Left = 544
+    Top = 192
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 528
+    Top = 304
+    PixelsPerInch = 96
+    object StyleYesil: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 13369292
+      TextColor = clBlack
+    end
+    object StyleSari: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 11531519
+      TextColor = clBlack
+    end
+    object StyleKirmizi: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 13556476
+      TextColor = clBlack
     end
   end
 end

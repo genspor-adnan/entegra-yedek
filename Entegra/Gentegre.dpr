@@ -317,7 +317,6 @@ uses
   URotatifDonemFaiz in 'URotatifDonemFaiz.pas' {RotatifDonemFaizDlg},
   UProjeMaliyet in 'UProjeMaliyet.pas' {ProjeMaliyetDlg},
   UBankaHareketleri in 'UBankaHareketleri.pas' {BankaHareketlerDlg},
-  UBankaHareketKural in 'UBankaHareketKural.pas' {BankaHareketKuralDlg},
   USatinAlmaWizard2 in 'USatinAlmaWizard2.pas' {SatinAlmaWizard2},
   UStokTalepWizard in 'UStokTalepWizard.pas' {StokTalepWizard},
   UFaturaTransferListe in 'IcerikFrame\UFaturaTransferListe.pas' {FatTransferListeDlg: TFrame},

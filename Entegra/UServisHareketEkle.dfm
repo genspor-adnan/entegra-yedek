@@ -1460,6 +1460,7 @@ object ServisHareketDlg: TServisHareketDlg
     Top = 216
   end
   object PopupYorumlar: TPopupMenu
+    OnPopup = PopupYorumlarPopup
     Left = 189
     Top = 16
     object YorumDzenle1: TMenuItem

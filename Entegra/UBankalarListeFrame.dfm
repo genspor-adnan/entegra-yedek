@@ -750,8 +750,8 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object DtsBankalar: TDataSource
     DataSet = BANKALAR
-    Left = 161
-    Top = 80
+    Left = 169
+    Top = 72
   end
   object BANKALAR: TFDQuery
     AfterOpen = BANKALARAfterOpen
@@ -775,7 +775,7 @@ object BankalarListeFrame: TBankalarListeFrame
   end
   object TabCariListe1: TFDQuery
     Connection = Tablo.FDCnn
-    Left = 351
+    Left = 399
     Top = 198
     object DateTimeField1: TDateTimeField
       FieldName = 'TARIH'
@@ -931,21 +931,11 @@ object BankalarListeFrame: TBankalarListeFrame
     end
   end
   object BankaListeMenu1: TPopupMenu
-    Left = 214
+    Left = 254
     Top = 129
     object HesaplararasTransferYap1: TMenuItem
       Caption = 'Aksiyonlar'
       OnClick = AksiyonTusClick
-    end
-    object N4: TMenuItem
-      Caption = '-'
-    end
-    object ExceldenHareketVerisiAlMenu: TMenuItem
-      Caption = 'Excelden Hareket Verisi Al'
-    end
-    object ExceldenVeriAlmKurallarMenu: TMenuItem
-      Caption = 'Excelden Veri Al'#305'm Kurallar'#305
-      OnClick = ExceldenVeriAlmKurallarMenuClick
     end
     object N5: TMenuItem
       Caption = '-'

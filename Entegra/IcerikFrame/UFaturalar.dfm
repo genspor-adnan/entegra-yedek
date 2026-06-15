@@ -163,7 +163,6 @@ object FaturalarDlg: TFaturalarDlg
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 51
     object GridFatListeTview: TcxGridDBTableView
       OnDblClick = GridFatListeTviewDblClick
       Navigator.Buttons.CustomButtons = <>
@@ -624,6 +623,18 @@ object FaturalarDlg: TFaturalarDlg
         DataBinding.FieldName = 'ONAYLAYAN'
         DataBinding.IsNullValueType = True
         RepositoryItem = Tablo.repGenelPersonelListesi
+      end
+      object GridFatListeTviewEFATURADURUM: TcxGridDBColumn
+        Caption = 'E-Fatura Durumu'
+        DataBinding.FieldName = 'EFATURADURUM'
+        DataBinding.IsNullValueType = True
+        RepositoryItem = Tablo.repEFaturaDurum
+      end
+      object GridFatListeTviewEFATURASONUC: TcxGridDBColumn
+        Caption = 'E-Fatura Sonu'#231
+        DataBinding.FieldName = 'EFATURASONUC'
+        DataBinding.IsNullValueType = True
+        RepositoryItem = Tablo.repEFaturaSonuc
       end
     end
     object GridFatListeLevel1: TcxGridLevel
@@ -1120,10 +1131,7 @@ object FaturalarDlg: TFaturalarDlg
           object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
             DataBinding.FieldName = 'YORUM'
             DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxMemoProperties'
-            Properties.MaxLength = 0
-            Properties.ReadOnly = True
-            Properties.ScrollBars = ssVertical
+            PropertiesClassName = 'TcxRichEditProperties'
             Options.Editing = False
             Options.Focusing = False
             Options.ShowCaption = False
@@ -1184,8 +1192,8 @@ object FaturalarDlg: TFaturalarDlg
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 195
-    Top = 116
+    Left = 187
+    Top = 84
     ParamData = <
       item
         Name = 'Par'
@@ -1197,8 +1205,8 @@ object FaturalarDlg: TFaturalarDlg
   end
   object DtsFatBaslik: TDataSource
     DataSet = FATBASLIK
-    Left = 264
-    Top = 119
+    Left = 200
+    Top = 159
   end
   object FATURA: TFDQuery
     AutoCalcFields = False
@@ -1420,11 +1428,50 @@ object FaturalarDlg: TFaturalarDlg
   end
   object pmBelgeDonustur: TPopupMenu
     OnPopup = pmBelgeDonusturPopup
-    Left = 77
-    Top = 102
+    Left = 45
+    Top = 78
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick
+    end
+    object N14: TMenuItem
+      Caption = '-'
+    end
+    object eFatura1: TMenuItem
+      Caption = 'e-Fatura'
+      object MenuOlustur: TMenuItem
+        Caption = 'Olu'#351'tur'
+        OnClick = MenuOlusturClick
+      end
+      object MenuOnizle: TMenuItem
+        Caption = #214'nizle'
+        OnClick = MenuOnizleClick
+      end
+      object MenuGonder: TMenuItem
+        Caption = 'G'#246'nder'
+        OnClick = MenuGonderClick
+      end
+      object N15: TMenuItem
+        Caption = '-'
+      end
+      object MenuHTMLKaydet: TMenuItem
+        Caption = 'HTML Kaydet'
+        OnClick = MenuHTMLKaydetClick
+      end
+      object MenuPDFKaydet: TMenuItem
+        Caption = 'PDF Kaydet'
+        OnClick = MenuPDFKaydetClick
+      end
+      object N16: TMenuItem
+        Caption = '-'
+      end
+      object MenuSeriDegistir: TMenuItem
+        Caption = 'Seri De'#287'i'#351'tir'
+      end
+      object MenuIptalEt: TMenuItem
+        Caption = #304'ptal Et'
+        OnClick = MenuIptalEtClick
+      end
     end
     object N13: TMenuItem
       Caption = '-'
@@ -1603,8 +1650,8 @@ object FaturalarDlg: TFaturalarDlg
     Enabled = False
     Threaded = False
     OnTimer = JvTimer1Timer
-    Left = 681
-    Top = 192
+    Left = 697
+    Top = 184
   end
   object frxSIPARISDETAY: TfrxDBDataset
     UserName = 'SIPARISDETAY'
@@ -2048,6 +2095,7 @@ object FaturalarDlg: TFaturalarDlg
     Top = 468
   end
   object PopupYorumlar: TPopupMenu
+    OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem

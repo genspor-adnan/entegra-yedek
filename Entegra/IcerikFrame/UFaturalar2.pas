@@ -289,6 +289,7 @@ type
     procedure BtnMesajGonderClick(Sender: TObject);
     procedure MenuKlasordenEkleClick(Sender: TObject);
     procedure YorumDzenle1Click(Sender: TObject);
+    procedure PopupYorumlarPopup(Sender: TObject);
     procedure PopupYorumuSilClick(Sender: TObject);
     procedure DkmanGster1Click(Sender: TObject);
     procedure DokumanFormunuA1Click(Sender: TObject);
@@ -404,13 +405,13 @@ begin
      end;
   End;
   if gf.FMenuTur = 0 then begin //Giren faturalar g?r?necek
-    Caption := 'Alýþ Belgeleri Listesi';
-    TahsilOdemeMenu.Caption := 'ödeme Yap';
+    Caption := 'Alï¿½ï¿½ Belgeleri Listesi';
+    TahsilOdemeMenu.Caption := 'ï¿½deme Yap';
     TahsilOdemeMenu.tag := 10;
     KrediKartiMenu.Visible:=True;
     //GridFatListeTviewDURUM.Caption := '?deme Durumu';
   end else begin
-    Caption := 'Satýþ Belgeleri Listesi';
+    Caption := 'Satï¿½ï¿½ Belgeleri Listesi';
     TahsilOdemeMenu.Caption := 'Tahsil Et';
     TahsilOdemeMenu.tag := 0;
     KrediKartiMenu.Visible:=False;
@@ -631,18 +632,18 @@ begin
         ' F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU,F.DETAYBOLUMU, SATICIADI = SATICIBILGI.FIRMA,F.VADE, VADETARIH=FATURATARIH + F.VADE,  ';
     if Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DonusumGozuksun, True) then begin
       SQLPart1 := SQLPart1 + ' DURUMNEREDEN = case  '+
-          '   when exists(select F2.ID from SIPARISDETAY F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (406,407,409,410,429,473) and F1.FATBASID=F.ID)) then ''Sipariþten''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (408,410,411) and F1.FATBASID=F.ID)) then ''ýrsaliyeden''  '+
+          '   when exists(select F2.ID from SIPARISDETAY F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (406,407,409,410,429,473) and F1.FATBASID=F.ID)) then ''Sipariï¿½ten''  '+
+          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (408,410,411) and F1.FATBASID=F.ID)) then ''ï¿½rsaliyeden''  '+
           '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (461,462,464,468) and F1.FATBASID=F.ID)) then ''Konsinyeden''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (425,426) and F1.FATBASID=F.ID)) then ''üretimden''  '+
+          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (425,426) and F1.FATBASID=F.ID)) then ''ï¿½retimden''  '+
           '   else '''' end,  '+
           ' DURUMNEREYE = case '+
           '   when (F.TUR=10)and(408 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=14)and(411 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=109)and(461 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=119)and(462 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=119)and(468 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''ýrsaliyeye''   '+
-          '   when (F.TUR=119)and(473 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Satýþ Fiþine''   '+
+          '   when (F.TUR=119)and(468 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''ï¿½rsaliyeye''   '+
+          '   when (F.TUR=119)and(473 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Satï¿½ï¿½ Fiï¿½ine''   '+
           '   else '''' end,    ';
     end else begin
       SQLPart1 := SQLPart1 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
@@ -684,18 +685,18 @@ begin
           '   when (F.TUR=9)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden''  '+
           '   when (F.TUR=19)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden'' '+
           '   when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten'' '+
-          '   when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''üretimden'' '+
+          '   when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''ï¿½retimden'' '+
           '   else '''' end,  '+
           ' DURUMNEREYE = case '+
           ' 	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    '+
-          ' 	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ýrsaliyeye''  '+
-          ' 	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Sipariþe''  '+
+          ' 	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ï¿½rsaliyeye''  '+
+          ' 	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Sipariï¿½e''  '+
           ' 	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''   '+
-          ' 	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ýrsaliyeye'' '+
+          ' 	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ï¿½rsaliyeye'' '+
           ' 	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye'' '+
-          ' 	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''üretim Fiþine'' '+
-          ' 	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''üretim Fiþine'' '+
-          '   when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Satýþ Fiþine''  '+
+          ' 	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ï¿½retim Fiï¿½ine'' '+
+          ' 	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''ï¿½retim Fiï¿½ine'' '+
+          '   when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Satï¿½ï¿½ Fiï¿½ine''  '+
           ' 	else '''' end,    ';
     end else begin
       SQLPart2 := SQLPart2 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
@@ -814,10 +815,10 @@ begin
     end;
 
     if gf.FMenuTur=1  then begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Adý';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Adï¿½';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Gelir Kodu';
     end else begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Adý';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Adï¿½';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Masraf Kodu';
     end;
   end;
@@ -1062,7 +1063,7 @@ begin
       GridFatListeTviewOZELKOD.Caption := 'Masa';
       GridFatListeTviewZARF.DataBinding.FieldName := 'ZARFID';
       GridFatListeTviewZARF.Visible := True;
-      GridFatListeTviewZARF.Caption := 'Kiþi';
+      GridFatListeTviewZARF.Caption := 'Kiï¿½i';
    end;
 
   YaziciYaz.Caption := ra;
@@ -1818,7 +1819,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Hedef Seï¿½imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -1905,7 +1906,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Kaynak Seï¿½imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -1940,7 +1941,7 @@ begin
   if not (FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101]) then begin //sipari? ise kontrole gerek yok
       Tablo.TablodanSorguAc(1,'select * from FATURA F where F.IZLEME <> 0 and F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
       if Tablo.Query1.RecordCount > 0 then begin
-          Tablo.UyariGoster(Uyari,'Belge içeriðinde izlem bilgisi aktif ürünler var, bu iþlem gerçekleþtirilemez.');
+          Tablo.UyariGoster(Uyari,'Belge iï¿½eriï¿½inde izlem bilgisi aktif ï¿½rï¿½nler var, bu iï¿½lem gerï¿½ekleï¿½tirilemez.');
           Exit;
       end;
   end;
@@ -2168,6 +2169,13 @@ end;
 procedure TFaturalarDlg.YorumDzenle1Click(Sender: TObject);
 begin
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
+end;
+
+procedure TFaturalarDlg.PopupYorumlarPopup(Sender: TObject);
+begin
+  DkmanGster1.Visible := TabYorum.FieldByName('DOKUMANID').AsString <> '';
+  DokumanFormunuA1.Visible := DkmanGster1.Visible;
+  DkmanSil1.Visible := DkmanGster1.Visible;
 end;
 
 procedure TFaturalarDlg.ExceldenBelgeEkleClick(Sender: TObject);

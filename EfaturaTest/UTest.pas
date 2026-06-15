@@ -14,7 +14,9 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
   dxSkinWhiteprint, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit,
-  cxDropDownEdit;
+  cxDropDownEdit, dxSkinBasic, dxSkinOffice2019Black, dxSkinOffice2019Colorful,
+  dxSkinOffice2019DarkGray, dxSkinOffice2019White, dxSkinTheBezier, dxSkinWXI,
+  cxMemo;
 
 type
   TTablo = class(TForm)
@@ -24,6 +26,9 @@ type
     Ent_Sifre1: TcxTextEdit;
     Ent_Kullanici1: TcxTextEdit;
     Ent_Addr1: TcxTextEdit;
+    aliasfatura: TcxMemo;
+    aliasirsaliye: TcxMemo;
+    bilgiler: TcxMemo;
     procedure cxButton1Click(Sender: TObject);
   private
     { Private declarations }
@@ -40,16 +45,87 @@ implementation
 
 {$R *.dfm}
 
-uses Gentegre.UI.EFatura.FirmaAra;
+uses Gentegre.UI.EFatura.FirmaAra, EFaturaOIB;
 
 procedure TTablo.cxButton1Click(Sender: TObject);
-var sonuc : integer;
+var
+  FirmaAra: TEFaturaFirmaAra;
+  Firmalar: CheckUserResponse;
+  FaturaAliaslari, IrsaliyeAliaslari: TStringList;
+  VergiNo, Alias: string;
+  I: Integer;
 begin
-   Ent_Kullanici := Ent_Kullanici1.Text;
-   Ent_Sifre := Ent_Sifre1.Text;
-   Ent_Addr := Ent_Addr1.Text;
-   sonuc := EFaturami(1,true, cxTextEdit1.text);
-   showmessage(IntToStr(sonuc));
+  aliasfatura.Clear;
+  aliasirsaliye.Clear;
+  bilgiler.Clear;
+
+  VergiNo := StringReplace(Trim(cxTextEdit1.Text), ' ', '', [rfReplaceAll]);
+  if not (Length(VergiNo) in [10, 11]) then begin
+    ShowMessage('Geçerli bir vergi veya T.C. kimlik numarasý giriniz.');
+    Exit;
+  end;
+
+  Ent_Kullanici := Ent_Kullanici1.Text;
+  Ent_Sifre := Ent_Sifre1.Text;
+  Ent_Addr := Ent_Addr1.Text;
+  FAddr := Ent_Addr;
+  SetLength(Firmalar, 0);
+
+  try
+    FirmaAra := TEFaturaFirmaAra.Create(nil);
+    try
+      FirmaAra.KullaniciAdi := Ent_Kullanici;
+      FirmaAra.Sifre := Ent_Sifre;
+      FaturaAliaslari := TStringList.Create;
+      IrsaliyeAliaslari := TStringList.Create;
+      try
+        FaturaAliaslari.Sorted := True;
+        FaturaAliaslari.Duplicates := dupIgnore;
+        IrsaliyeAliaslari.Sorted := True;
+        IrsaliyeAliaslari.Duplicates := dupIgnore;
+
+        Firmalar := FirmaAra.FirmaBul(VergiNo);
+        bilgiler.Lines.BeginUpdate;
+        try
+          bilgiler.Lines.Add('Bulunan kayýt sayýsý: ' + IntToStr(Length(Firmalar)));
+          for I := 0 to Length(Firmalar) - 1 do begin
+            Alias := Trim(Firmalar[I].ALIAS);
+            if Pos('IRSALIYE', UpperCase(Alias)) > 0 then begin
+              IrsaliyeAliaslari.Add(Alias);
+              bilgiler.Lines.Add('Belge türü: E-Ýrsaliye');
+            end else begin
+              if Alias <> '' then
+                FaturaAliaslari.Add(Alias);
+              bilgiler.Lines.Add('Belge türü: E-Fatura');
+            end;
+
+            bilgiler.Lines.Add('Vergi/T.C. no: ' + Firmalar[I].IDENTIFIER);
+            bilgiler.Lines.Add('Unvan: ' + Firmalar[I].TITLE);
+            bilgiler.Lines.Add('Alias: ' + Firmalar[I].ALIAS);
+            bilgiler.Lines.Add('Tür: ' + Firmalar[I].TYPE_);
+            bilgiler.Lines.Add('Birim: ' + Firmalar[I].UNIT_);
+            bilgiler.Lines.Add('Kayýt tarihi: ' + Firmalar[I].REGISTER_TIME);
+            if I < Length(Firmalar) - 1 then
+              bilgiler.Lines.Add('----------------------------------------');
+          end;
+        finally
+          bilgiler.Lines.EndUpdate;
+        end;
+
+        aliasfatura.Lines.Assign(FaturaAliaslari);
+        aliasirsaliye.Lines.Assign(IrsaliyeAliaslari);
+      finally
+        FirmaAra.FirmalariTemizle(Firmalar);
+        IrsaliyeAliaslari.Free;
+        FaturaAliaslari.Free;
+      end;
+    finally
+      FirmaAra.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('Ýzibiz firma alias sorgusu baþarýsýz: ' + E.Message);
+  end;
 end;
 
 

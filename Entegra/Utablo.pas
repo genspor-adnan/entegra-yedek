@@ -1074,9 +1074,12 @@ var
   DovizKurDegeri : Currency;
 
   CekIdTut: TStringList;
-  count, SayA, EFaturaKullanimda: integer;
+  count, SayA, EFaturaKullanimda, VarsayilanEFaturaXSLT,
+  VarsayilanEArsivFaturaXSLT, VarsayilanESMMXSLT,
+  VarsayilanEIrsaliyeXSLT: integer;
   CiroMakbuzNo, islemKopyala: string;
-  CiroGirisMi, TurSecildi, CiroYeniCilck, EIrsaliyeKullanimda, EFaturaIhracat, EnBoyHesaplamaAktif : Boolean;
+  CiroGirisMi, TurSecildi, CiroYeniCilck, EIrsaliyeKullanimda, EFaturaIhracat,
+  EnBoyHesaplamaAktif, EBelgeTestAktif : Boolean;
   CiroMakbuzTarih: TDateTime;
   ActiveLang: string;
   EImza: MSS_SenderSoap;
@@ -1088,7 +1091,9 @@ var
   HTTPRioGoogleSync : THTTPRIO;
  // GoogleSynServis: IGenGoogleSyncService;
 
-  Entegrator, Ent_Adres, Ent_Kullanici, Ent_Sifre : String;
+  Entegrator, Ent_Adres, Ent_Kullanici, Ent_Sifre, EFaturaSerileri,
+  EArsivFaturaSerileri, ESMMSerileri, EIrsaliyeSerileri, EFaturaServisURL,
+  EArsivFaturaServisURL, ESMMServisURL, EIrsaliyeServisURL : String;
   //Görev opsiyonlarý , deðiþkenleri
   //AktiviteSMSAktif, AktiviteEpostaAktif, amirtakipcigetir,
   //amiribilgilendirilecekgetir, okunmayanaktivite, gorevaciklamasor,
@@ -12284,12 +12289,32 @@ begin
 
   EIrsaliyeKullanimda := Tablo.GENINI.ReadBoolean(Ops_OpsiyonEIrsaliye, False);
   EFaturaIhracat := Tablo.GENINI.ReadBoolean(Ops_OpsiyonIhracatGonder, True);
-  EFaturaKullanimda := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_E_FaturaKullanimda, 0);
+  EFaturaKullanimda := Ord(Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_E_FaturaKullanimda, 0) <> 0);
   if EFaturaKullanimda > 0 then begin
      Entegrator := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Entegrator,'');
      Ent_Adres := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Ent_Adres,'');
      Ent_Kullanici := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Ent_Kullanici,'');
      Ent_Sifre := UGenSifre.DeSifre(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Ent_Sifre,''));
+     VarsayilanEFaturaXSLT := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EFaturaXSLT, 0);
+     VarsayilanEArsivFaturaXSLT := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EArsivFaturaXSLT, 0);
+     VarsayilanESMMXSLT := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_ESMMXSLT, 0);
+     VarsayilanEIrsaliyeXSLT := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EIrsaliyeXSLT, 0);
+     EFaturaSerileri := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaSeriler, '');
+     EArsivFaturaSerileri := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaSeriler, '');
+     ESMMSerileri := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMSeriler, '');
+     EIrsaliyeSerileri := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeSeriler, '');
+     EBelgeTestAktif := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_EBelgeTestAktif, True);
+     if EBelgeTestAktif then begin
+       EFaturaServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaTestURL, '');
+       EArsivFaturaServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaTestURL, '');
+       ESMMServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMTestURL, '');
+       EIrsaliyeServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeTestURL, '');
+     end else begin
+       EFaturaServisURL := Ent_Adres;
+       EArsivFaturaServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaUretimURL, '');
+       ESMMServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMUretimURL, '');
+       EIrsaliyeServisURL := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeUretimURL, '');
+     end;
   end;
 
   Tablo.TablodanSorguAc(1,'select DEGER from GENINI WHERE BOLUM=-21050');

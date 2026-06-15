@@ -2570,10 +2570,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
           object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
             DataBinding.FieldName = 'YORUM'
             DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxMemoProperties'
-            Properties.MaxLength = 0
-            Properties.ReadOnly = True
-            Properties.ScrollBars = ssVertical
+            PropertiesClassName = 'TcxRichEditProperties'
             Options.Editing = False
             Options.Focusing = False
             Options.ShowCaption = False
