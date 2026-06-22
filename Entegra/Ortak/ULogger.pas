@@ -1,4 +1,4 @@
-unit ULogger;
+ï»¿unit ULogger;
 
 interface
 uses
@@ -59,23 +59,23 @@ type
     function FindTableByName(ATableName: string): TTableLog;
     //--
     function GetTempLogTable(ATableName: string): TDataSet;
-    //-- logId döndürür
+    //-- logId dÃ¶ndÃ¼rÃ¼r
     function LogOperation(ATableName, AOperation: string): Integer;
 
   public
-    // After Open da çağırılmalı
+    // After Open da Ã§aÄŸÄ±rÄ±lmalÄ±
     procedure RegisterTable(ATableName: string;ATargetTable : TDataset);
-    // After Close da sonra çağrılmalı
+    // After Close da sonra Ã§aÄŸrÄ±lmalÄ±
     procedure UnRegisterTable(ATableName: string);overload;
     procedure UnRegisterTable(ATable: TDataSet);overload;
 
-    // State = dsInsert LogAsAppended çağrılır
+    // State = dsInsert LogAsAppended Ã§aÄŸrÄ±lÄ±r
     // State = dsEdit LogAsModified
     procedure BeforePost(ATable: TDataSet);
-    // Tüm Tablonun alanlarını saklar Bloblar hariç
-    // LogAsDeleted çağrılır
+    // TÃ¼m Tablonun alanlarÄ±nÄ± saklar Bloblar hariÃ§
+    // LogAsDeleted Ã§aÄŸrÄ±lÄ±r
     procedure BeforeDelete(ATable: TDataSet);
-    // CancelAllChanges çağrılır
+    // CancelAllChanges Ã§aÄŸrÄ±lÄ±r
     procedure BeforeCancel(ATable: TDataSet);
 
     constructor Create(AConnection: TADOConnection);virtual;
@@ -97,7 +97,7 @@ begin
   table := FindTableByInstance(ATable);
   if Assigned(table) then begin
     table.CancelAllChanges;
-  end else raise EInvalidOperation.Create('Tablo kayıtlı değil! : ' + ATable.Name);
+  end else raise EInvalidOperation.Create('Tablo kayÄ±tlÄ± deÄŸil! : ' + ATable.Name);
 end;
 
 procedure TLogger.BeforeDelete(ATable: TDataSet);
@@ -115,7 +115,7 @@ begin
     finally
       tempTable.Free;
     end;
-  end else raise EInvalidOperation.Create('Tablo kayıtlı değil! : ' + ATable.Name);
+  end else raise EInvalidOperation.Create('Tablo kayÄ±tlÄ± deÄŸil! : ' + ATable.Name);
 end;
 
 procedure TLogger.BeforePost(ATable: TDataSet);
@@ -127,7 +127,7 @@ begin
   table := FindTableByInstance(ATable);
   if Assigned(table) then begin
     if (ATable.State in [dsEdit]) then begin
-      logId := LogOperation(table.TableName,'Değiştirme');
+      logId := LogOperation(table.TableName,'DeÄŸiÅŸtirme');
       tempTable := GetTempLogTable('IVFLOGDETAY');
       try
         table.LogAsModified(tempTable, logId)
@@ -142,8 +142,8 @@ begin
       finally
         tempTable.Free;
       end;
-    end else raise EInvalidOperation.Create('Tablo dsEdit veya dsInsert durumunda olmalıydı.');
-  end else raise EInvalidOperation.Create('Tablo kayıtlı değil! : ' + ATable.Name);
+    end else raise EInvalidOperation.Create('Tablo dsEdit veya dsInsert durumunda olmalÄ±ydÄ±.');
+  end else raise EInvalidOperation.Create('Tablo kayÄ±tlÄ± deÄŸil! : ' + ATable.Name);
 end;
 
 constructor TLogger.Create(AConnection: TADOConnection);
@@ -246,15 +246,15 @@ var
   i     : Integer;
 begin
   if (ATableName = '') then
-    raise EInvalidOperation.Create('ATableName boş geldi.');
+    raise EInvalidOperation.Create('ATableName boÅŸ geldi.');
   table := FindTableByName(ATableName);
   if (not Assigned(table)) then
-    raise EInvalidOperation.Create('Kayıttan çıkarma başarısız. Tablo bulunamadı : ' + ATableName);
+    raise EInvalidOperation.Create('KayÄ±ttan Ã§Ä±karma baÅŸarÄ±sÄ±z. Tablo bulunamadÄ± : ' + ATableName);
   i := FTableLogs.IndexOf(table);
   if i > -1 then begin
     FTableLogs.Extract(table);
     table.Free;
-  end else raise Exception.Create('Kayıttan çıkarma başarısız. İç hata : Tablo listede bulunamadı');
+  end else raise Exception.Create('KayÄ±ttan Ã§Ä±karma baÅŸarÄ±sÄ±z. Ä°Ã§ hata : Tablo listede bulunamadÄ±');
 end;
 
 procedure TLogger.UnRegisterTable(ATable: TDataSet);
@@ -266,12 +266,12 @@ begin
     raise EInvalidOperation.Create('ATable nil olarak geldi.');
   table := FindTableByInstance(ATable);
   if (not Assigned(table)) then
-    raise EInvalidOperation.Create('Kayıttan çıkarma başarısız. Tablo bulunamadı : ' + ATable.Name);
+    raise EInvalidOperation.Create('KayÄ±ttan Ã§Ä±karma baÅŸarÄ±sÄ±z. Tablo bulunamadÄ± : ' + ATable.Name);
   i := FTableLogs.IndexOf(table);
   if i > -1 then begin
     FTableLogs.Extract(table);
     table.Free;
-  end else raise Exception.Create('Kayıttan çıkarma başarısız. İç hata : Tablo listede bulunamadı');
+  end else raise Exception.Create('KayÄ±ttan Ã§Ä±karma baÅŸarÄ±sÄ±z. Ä°Ã§ hata : Tablo listede bulunamadÄ±');
 end;
 
 { TTableLog }

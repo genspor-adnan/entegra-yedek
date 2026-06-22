@@ -1,4 +1,4 @@
-unit UFiyatSor;
+ï»¿unit UFiyatSor;
 
 interface
 
@@ -482,7 +482,7 @@ begin
   else
     Gelirmi := 1;
   st := Tstringlist.create;
-  if Tablo.ListedenBilgiGetir('Sorumluluk Merkezi seçiniz','SELECT ID,MERKEZKODU,MERKEZADI FROM SRMMERKEZI where GELIRMI='+inttoStr(Gelirmi)+' and MERKEZADI like ''%<ara>%'' ',  st, []) then begin
+  if Tablo.ListedenBilgiGetir('Sorumluluk Merkezi seÃ§iniz','SELECT ID,MERKEZKODU,MERKEZADI FROM SRMMERKEZI where GELIRMI='+inttoStr(Gelirmi)+' and MERKEZADI like ''%<ara>%'' ',  st, []) then begin
     EditMasrafMerkezi.Tag := StrToInt(st.Strings[0]);
     EditMasrafMerkezi.Text := st.Strings[2];
   end;
@@ -495,7 +495,7 @@ var
   Gelirmi :Smallint;
 begin
   if AButtonIndex = 0 then begin
-    //eðer proje seçilmiþse ve o projeye girilmiþ bütçe var ise o bütçe kalemlerinden masraf kalemi seçilir
+    //eÄŸer proje seÃ§ilmiÅŸse ve o projeye girilmiÅŸ bÃ¼tÃ§e var ise o bÃ¼tÃ§e kalemlerinden masraf kalemi seÃ§ilir
      if (EditProje.Tag > 0)and
         (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM PROJEBUTCE WHERE PROJEID='+IntToStr(EditProje.Tag),[],[])) then
         SqlText := SqlMemoMasrafKalemi.Text+ ' and PROJEID='+IntToStr( EditProje.Tag )
@@ -566,12 +566,12 @@ begin
       CanClose := False;
   end;
   if (ModalResult=mrOk)and(EditBirimFiyat.Value=0)and(TUR<>20)and(TUR<>101)and(TUR<>105) then
-      CanClose := Application.MessageBox('Fiyat sýfýr olarak eklenecektir. Onaylýyor musunuz?',PChar(Uyari),MB_YESNO+MB_ICONQUESTION)=mrYes;
+      CanClose := Application.MessageBox('Fiyat sÄ±fÄ±r olarak eklenecektir. OnaylÄ±yor musunuz?',PChar(Uyari),MB_YESNO+MB_ICONQUESTION)=mrYes;
 end;
 
 procedure TFiyatSorDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   cxPageControl1.ActivePage := SheetFiyatlandirma;
   FormatDuzenle(EditDovizBirimFiyat.Properties,Tablo.RepCurrencyBF.Properties.DecimalPlaces);
   FormatDuzenle(EditBirimFiyat.Properties,Tablo.RepCurrencyBF.Properties.DecimalPlaces);
@@ -595,7 +595,7 @@ begin
   //LabelCoklu.Visible := BelgeGiderKalemi > 3;
   if EditBirimFiyat.EditValue < 0 then
      EditBirimFiyat.EditValue := 0;
-  if (Tur in [12,16]) then  //ilk defa fiþ giriliyorsa kdv iþaretli olsun, deðiþimde iþaretsiz olsun
+  if (Tur in [12,16]) then  //ilk defa fiÅŸ giriliyorsa kdv iÅŸaretli olsun, deÄŸiÅŸimde iÅŸaretsiz olsun
       CheckKDV.Checked := (KDVDahil_Isaretli)and(EditBirimFiyat.EditValue=0); //
   cxGrid1LevelDepoDurumu.Visible := (UrunTur=1) and (tablo.YetkiVarmi(24801001,YetkiTur_Gorme,False));
   cxGrid1LevelSonAlislar.Visible := (tablo.YetkiVarmi(24801002,YetkiTur_Gorme,False));
@@ -627,7 +627,7 @@ begin
 
 
   PanelUst.Visible := DovizTakibi;
-  if(TUR in [20,101,105])or(not Tablo.YetkiVarmi(2431,1,False)) then begin  //stoktalebi veya satýnalma talebi veya tutarlar gözükmesin denirse;
+  if(TUR in [20,101,105])or(not Tablo.YetkiVarmi(2431,1,False)) then begin  //stoktalebi veya satÄ±nalma talebi veya tutarlar gÃ¶zÃ¼kmesin denirse;
     PanelUst.Visible := False;
     PanelBirimFiyat.Visible := False;
     PanelIskonto.Visible := False;

@@ -1,4 +1,4 @@
-unit UOpsiyonKasa;
+ï»¿unit UOpsiyonKasa;
 
 interface
 
@@ -109,7 +109,7 @@ procedure TOpsiyonKasaDlg.FormCreate(Sender: TObject);
 var
   i, j: Integer;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   EditKDV.Value := KDVOrani;
   RadioBakiye.ItemIndex := KasaBakiyeKurali;
 
@@ -136,8 +136,8 @@ begin
   KDVOrani := EditKDV.Value;
   Tablo.GENINI.WriteInteger(Ops_KasaOpsiyon_KDVOrani,KDVOrani);   // KasaOpsiyon   KDVOrani
 
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_BilgilendirmeMail,ComboBilgiEposta.EditValue);//  Opsiyon ödeme Planý E-Posta Ýle Bilgilendirme
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_BilgilendirmeSms,ComboBilgiSms.EditValue);//  Opsiyon Ödeme Plani Sms Ýle Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_BilgilendirmeMail,ComboBilgiEposta.EditValue);//  Opsiyon Ã¶deme PlanÄ± E-Posta Ä°le Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_BilgilendirmeSms,ComboBilgiSms.EditValue);//  Opsiyon Ã–deme Plani Sms Ä°le Bilgilendirme
 
   Tablo.GENINI.WriteInteger(Ops_KasaOpsiyon_BakiyeKurali,RadioBakiye.ItemIndex); //  KasaOpsiyon  BakiyeKurali
   KasaBakiyeKurali := RadioBakiye.ItemIndex;

@@ -1,4 +1,4 @@
-unit UFrameYoneticisi;
+ï»¿unit UFrameYoneticisi;
 
 interface
 uses ECXMLParser, Classes, Controls, Forms, Contnrs, cxPC, Dialogs,
@@ -185,8 +185,8 @@ begin
   if Assigned(AnaSekme) then
     AnaSekme.Git
   else
-    MessageDlg('Sekme yapýlandýrma dosyasý hatalar içeriyor!. '+
-      'Sekmeler arasýnda hiç Ana sekme bulunmuyor!',mtError,[mbOK],0);
+    MessageDlg('Sekme yapÄ±landÄ±rma dosyasÄ± hatalar iÃ§eriyor!. '+
+      'Sekmeler arasÄ±nda hiÃ§ Ana sekme bulunmuyor!',mtError,[mbOK],0);
 end;
 
 
@@ -438,7 +438,7 @@ begin
   if not Supports(FOrnek,IBilgiFrame,FIBilgi) then
     FIBilgi := nil;
   FrameOrnekBaslatildi;
-  { Tab Sekmesini Baþlatma }
+  { Tab Sekmesini BaÅŸlatma }
 
   FSekmeSayfasi := TcxTabSheet.Create(FSayfaDenetimi.Owner);
   //FSekmeSayfasi.Tag := Integer(Self); //my.15.05.2025 --> NativeInt
@@ -446,15 +446,15 @@ begin
   FSekmeSayfasi.OnShow := OnFrameShow;
   FSekmeSayfasi.OnHide := OnFrameHide;
   FSekmeSayfasi.ImageIndex := FImageIndex;
-  { OnFrameShow için örneði bu olay tetkiklenmeden önce baþlatmamýz gerekiyor  }
-  { Aksi takdirde OnAramaFrameAktifOldu,OnAramaFrameOrnekAtandi olaylarý ilk   }
-  { baþlatma sýrasýnda baþarýsýz oluyor                                        }
-  { Frame birden fazla yumurtlanýnca Name istisnasýna neden oluyordu. }
+  { OnFrameShow iÃ§in Ã¶rneÄŸi bu olay tetkiklenmeden Ã¶nce baÅŸlatmamÄ±z gerekiyor  }
+  { Aksi takdirde OnAramaFrameAktifOldu,OnAramaFrameOrnekAtandi olaylarÄ± ilk   }
+  { baÅŸlatma sÄ±rasÄ±nda baÅŸarÄ±sÄ±z oluyor                                        }
+  { Frame birden fazla yumurtlanÄ±nca Name istisnasÄ±na neden oluyordu. }
   GeciciOwner := FSayfaDenetimi.Owner;
   IsUniqueGlobalComponentNameProc := @YumurtlananFrameIcinAdDegistirici;
   FOrnek.Create(FSekmeSayfasi.Owner);
   IsUniqueGlobalComponentNameProc := nil;
-  { Eðer bu ilk sekme ise OnFrameShow olayý tetkiklenecektir }
+  { EÄŸer bu ilk sekme ise OnFrameShow olayÄ± tetkiklenecektir }
   FSekmeSayfasi.PageControl := FSayfaDenetimi;
   FSekmeSayfasi.Parent := FSayfaDenetimi;
   FSekmeSayfasi.Caption := FBaslik;

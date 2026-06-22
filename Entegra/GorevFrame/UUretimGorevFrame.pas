@@ -1,4 +1,4 @@
-unit UUretimGorevFrame;
+﻿unit UUretimGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -146,7 +146,7 @@ end;
 procedure TUretimGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);
   FIlkBaslatma := True;
 

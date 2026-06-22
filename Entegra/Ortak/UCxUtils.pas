@@ -1,8 +1,8 @@
-unit UCxUtils;
+ï»¿unit UCxUtils;
 
 (*
-  cx component setine ait ortak kullanýlan objeler ve procedure leri içerir
-  Hakan Arslantaþ
+  cx component setine ait ortak kullanÄ±lan objeler ve procedure leri iÃ§erir
+  Hakan ArslantaÅŸ
   24-01-2008
 *)
 
@@ -215,7 +215,7 @@ var
 
   procedure AddAdditionalMenus;
   begin
-    AddBuiltinPopupMenus('Ön deðerlere dön', ApplyDefaultValues);
+    AddBuiltinPopupMenus('Ã–n deÄŸerlere dÃ¶n', ApplyDefaultValues);
     AddBuiltinPopupMenus('Excel''e Aktar', ExportToExcel);
   end;
 
@@ -300,11 +300,11 @@ begin
   begin
     //Dizin := copy(SaveDialog.FileName, 1, Pos('\', SaveDialog.FileName));
     if FileExists(SaveDialog.FileName) then
-      if MessageDlg(SaveDialog.FileName + ' adlý dosya zaten var! Üzerine yazýlsýn mý?',
+      if MessageDlg(SaveDialog.FileName + ' adlÄ± dosya zaten var! Ãœzerine yazÄ±lsÄ±n mÄ±?',
         mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
         exit;
     ExportGridToExcel(SaveDialog.FileName, cxBuildinMenu.Grid, True, True);
-    Showmessage('Veriler Excel''e aktarýldý.');
+    Showmessage('Veriler Excel''e aktarÄ±ldÄ±.');
   end;
 end;
 

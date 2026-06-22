@@ -1,4 +1,4 @@
-unit UInfo;
+﻿unit UInfo;
 
 interface
 

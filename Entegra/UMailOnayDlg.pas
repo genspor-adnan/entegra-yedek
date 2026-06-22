@@ -1,4 +1,4 @@
-unit UMailOnayDlg;
+﻿unit UMailOnayDlg;
 
 // e-Arsiv akisinda alicinin email adres(ler)ini onayina sunan modal dialog.
 // Mevcut email gosterilir, kullanici onayla veya degistirebilir.

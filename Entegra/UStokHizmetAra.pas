@@ -1,4 +1,4 @@
-unit UStokHizmetAra;
+ï»¿unit UStokHizmetAra;
 
 interface
 
@@ -317,7 +317,7 @@ begin
        AAdet := VarAsType(AReceteMiktar, varDouble);
        if (ReceteMiktarCarpani=-1)and(AAdet>0) then AAdet := -1*AAdet
        else if (ReceteMiktarCarpani=1)and(AAdet<0) then AAdet := -1*AAdet;
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
          'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN,EKLEYEN,EKLEMETARIHI)'+
          ' values(&RID,1,&UID,&ADET,&BIRIM,&MIKTAR,&ADETHESAP,0,&EKLEYEN,GETDATE())',
          ['&ADETHESAP','&RID','&UID','&ADET','&BIRIM','&MIKTAR','&EKLEYEN'],
@@ -334,9 +334,9 @@ begin
       Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=convert(nvarchar(10),STOKESDEGERID)+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
       if (Tablo.Query0.Fields[0].AsString<>'')and(Tablo.Query0.Fields[0].AsString<>TabStokListe.FieldByName('ID').AsString) then begin
         EsdegerSecilenUrunID:=TabStokListe.FieldByName('ID').AsInteger;
-        EsdegerAciklama := TabStokListe.FieldByName('KOD').AsString+' ürün &Yeniürün& ürün olarak deðiþmiþtir.';
+        EsdegerAciklama := TabStokListe.FieldByName('KOD').AsString+' Ã¼rÃ¼n &YeniÃ¼rÃ¼n& Ã¼rÃ¼n olarak deÄŸiÅŸmiÅŸtir.';
         TumEsdegerler:=Tablo.Query0.Fields[0].AsString;
-        LabelSonEklenen.Caption := 'Eþdeðer ürünler Listesi';
+        LabelSonEklenen.Caption := 'EÅŸdeÄŸer Ã¼rÃ¼nler Listesi';
         FocusDuzenle;
         EsdegerUrunlerListelendi:=True;
         //GridStokViewColumnAd.Caption := 'E?de?er ?r?n Ad?';
@@ -347,7 +347,7 @@ begin
     end else if EsdegerSecilenUrunID<>0 then begin //
       Tablo.TablodanSorguAc(9,'select * from STOKESDEGER where STOKID='+IntToStr(EsdegerSecilenUrunID)+' union all select * from STOKESDEGER where STOKESDEGERID='+IntToStr(EsdegerSecilenUrunID));
       if TabStokListe.FieldByName('ID').AsInteger <> EsdegerSecilenUrunID then begin
-        EsdegerAciklama := StringReplace(EsdegerAciklama,'&Yeniürün&',TabStokListe.FieldByName('KOD').AsString,[]);
+        EsdegerAciklama := StringReplace(EsdegerAciklama,'&YeniÃ¼rÃ¼n&',TabStokListe.FieldByName('KOD').AsString,[]);
         Tablo.TablodanSorguAc(9,'select * from STOKESDEGER where STOKID='+IntToStr(EsdegerSecilenUrunID)+' and STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+' union all select * from STOKESDEGER where STOKESDEGERID='+IntToStr(EsdegerSecilenUrunID)+' and STOKID='+TabStokListe.FieldByName('ID').AsString);
         if Tablo.Query9.RecordCount>0 then
           EsdegerAciklama := EsdegerAciklama + '(' + Tablo.Query9.FieldByName('ACIKLAMA').AsString + ')';
@@ -361,7 +361,7 @@ begin
   end;
 
   if PageControl1.ActivePage <> SheetDagitim then begin
-     if (PageControl1.ActivePage.Name='SheetHizmet')and(cxDBTreeList1cxDBTreeListColumnTur.Value = 'Baþlýk') then
+     if (PageControl1.ActivePage.Name='SheetHizmet')and(cxDBTreeList1cxDBTreeListColumnTur.Value = 'BaÅŸlÄ±k') then
         exit;
 
     BtnSec.Down:=False;
@@ -587,9 +587,9 @@ begin
 
       cbBuFirma.Visible := not (NewPage <> SheetStok);
       case NewPage.PageIndex of
-        0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Adý';
-        1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Adý';
-        2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Adý';
+        0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok AdÄ±';
+        1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet AdÄ±';
+        2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket AdÄ±';
       end;
   end;
 end;
@@ -688,9 +688,9 @@ begin
   PageControl1Change(Sender);
   FocusDuzenle;
   case PageControl1.ActivePageIndex of
-    0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok Adý';
-    1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet Adý';
-    2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket Adý';
+    0:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Stok AdÄ±';
+    1:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Hizmet AdÄ±';
+    2:cxDBTreeList1cxDBTreeListColumnAd.Caption.Text := 'Paket AdÄ±';
   end;
     SheetStok.Visible := tablo.YetkiVarmi(248001,YetkiTur_Gorme,False);
     SheetHizmet.tabVisible := tablo.YetkiVarmi(248002,YetkiTur_Gorme,False);
@@ -764,7 +764,7 @@ var
   BirimAd,Str:string;
 begin
   BirimAd:=Tablo.inidenAnahtarGetir(IntToStr(Ops_StokKart_Anabirim),IntToStr(Birim));  //  StokKart_Anabirim
-  Str := 'Bu ürün daha önce '+FExtToStr(Adet)+' '+BirimAd+' eklenmiþ, üzerine eklensin mi?';
+  Str := 'Bu Ã¼rÃ¼n daha Ã¶nce '+FExtToStr(Adet)+' '+BirimAd+' eklenmiÅŸ, Ã¼zerine eklensin mi?';
   if Application.MessageBox(PWideChar(Str),PChar(Uyari),MB_YESNO+MB_ICONQUESTION)=mrYes then begin
     UserInitiated := False;
     Result := True
@@ -1263,7 +1263,7 @@ begin
       [nil,nil,nil,Tablo.repStokAnaBirim,Tablo.RepSubelerOrtakTumSubeler],
       ['GELIRMI','BASLIK','DURUM','SUBEID'],
       [Gelirmi,False,True,SubeID],
-      ['Kod','Açýklama','KDV','Birim','þube'],
+      ['Kod','AÃ§Ä±klama','KDV','Birim','ÅŸube'],
       [True,True,True,True,True,False,False,False],False);
     JvTimer1Timer(Self);
   end;
@@ -1492,7 +1492,7 @@ begin
     TabHizmetListe.SQL.Add(' select ID,KOD=HESAPKODU, ');
     TabHizmetListe.SQL.Add(' ROOTKOD= case when HESAPKODU = REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1))) then ''.'' ');
     TabHizmetListe.SQL.Add(' else REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1)))end, ');
-    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Baþlýk'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=convert(bit,0),IZLEME=convert(bit,0), BIRIM=null ');
+    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''BaÅŸlÄ±k'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=convert(bit,0),IZLEME=convert(bit,0), BIRIM=null ');
     TabHizmetListe.SQL.Add(', STOKGRUBU=NULL,MASRAFID=NULL,OZELKOD=NULL ');
     if GirisCikis = FWGiris then
       TabHizmetListe.SQL.Add(' from HESAPPLANI where VARSAYILAN = 2 ')
@@ -1504,7 +1504,7 @@ begin
   TabHizmetListe.SQL.Add('   ROOTKOD=case when M.KOD=REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) then ''.''   ');
   TabHizmetListe.SQL.Add('   else REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) end,   ');
   TabHizmetListe.SQL.Add('   M.AD,               ');
-  TabHizmetListe.SQL.Add('   TUR=case when M.BASLIK=0 then ''Hizmet'' else ''Baþlýk'' end,     ');
+  TabHizmetListe.SQL.Add('   TUR=case when M.BASLIK=0 then ''Hizmet'' else ''BaÅŸlÄ±k'' end,     ');
   TabHizmetListe.SQL.Add('   KALAN=null,         ');
   TabHizmetListe.SQL.Add(' 	 FIYAT=case when M.BASLIK=1 then null else isnull(F.FIYAT,-1) end,');
   TabHizmetListe.SQL.Add('   KUR=case when M.BASLIK=1 then null else F.KUR end,             ');
@@ -1634,19 +1634,19 @@ Begin
               TabStokListe.FieldByName('OZELKOD').AsString,
               TabStokListe.FieldByName('KOD').AsString,
               TabNo_ITSPaket,StrToInt(RootKod));
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKID set CIKISTURU='+TabGiris.FieldByName('TUR').AsString+' ,CIKFATBASID=&FatBasID, CIKFATURAID=&FaturaID where PAKETID=&PaketID and LOTNO=&LotNo'
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKID set CIKISTURU='+TabGiris.FieldByName('TUR').AsString+' ,CIKFATBASID=&FatBasID, CIKFATURAID=&FaturaID where PAKETID=&PaketID and LOTNO=&LotNo'
                                     ,['&FatBasID','&FaturaID','&PaketID','&LotNo']
                                     ,[TabGiris.FieldByName('ID').AsInteger,TabDetayGiris.FieldByName('ID').AsInteger,PaketID,TabStokListe.FieldByName('KOD').AsString]);
 
     end else if (TabStokListe.FieldByName('KOD').AsString=RootKod) and (GirisCikis =FWCikis) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ITS_PAKET set BELGENO=&BelgeNo,FATBASID=&BelgeBasID,BELGETURU=&BelgeTuru where ID=&ITSPaketID'
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ITS_PAKET set BELGENO=&BelgeNo,FATBASID=&BelgeBasID,BELGETURU=&BelgeTuru where ID=&ITSPaketID'
                                     ,['&BelgeNo','&BelgeBasID','&BelgeTuru','&ITSPaketID']
                                     ,[TabGiris.FieldByName('FATURANO').Value,TabGiris.FieldByName('ID').Value,TabGiris.FieldByName('TUR').Value,PaketID]);
     end;
 
     if GirisCikis =FWCikis then
     begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update KAREKOD set MALSATILANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update KAREKOD set MALSATILANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
                                    +'where STOKIDID in (select ID from STOKID where CIKFATBASID=&CikFatBasID)'
                                   ,['&RehberID','&CikFatBasID'],[TabGiris.FieldByName('REHBERID').AsInteger,TabGiris.FieldByName('ID').AsInteger]);
     EditAdet.Text:='1';
@@ -1676,7 +1676,7 @@ Begin
 
 
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ITS_PTS_GELEN_URUN set STOKID = '''+TabDetayGiris.FieldByName('URUNID').AsString+''',GIRISTURU='+TabDetayGiris.FieldByName('TUR').AsString+' ,GIRFATBASID=&FatBasID, GIRFATURAID=&FaturaID where PTS_GELEN_PAKET_ID=&PaketID and LOTNUMARASI=&LotNo'
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ITS_PTS_GELEN_URUN set STOKID = '''+TabDetayGiris.FieldByName('URUNID').AsString+''',GIRISTURU='+TabDetayGiris.FieldByName('TUR').AsString+' ,GIRFATBASID=&FatBasID, GIRFATURAID=&FaturaID where PTS_GELEN_PAKET_ID=&PaketID and LOTNUMARASI=&LotNo'
                                     ,['&FatBasID','&FaturaID','&PaketID','&LotNo']
                                     ,[TabGiris.FieldByName('ID').AsInteger,TabDetayGiris.FieldByName('ID').AsInteger,PaketID,TabStokListe.FieldByName('KOD').AsString]);
 
@@ -1707,13 +1707,13 @@ Begin
     Tablo.Query4.ExecSQL;
 
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set IZLEME = 3 where FATBASID=&FatBasID and ID=&FaturaID '
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set IZLEME = 3 where FATBASID=&FatBasID and ID=&FaturaID '
                                     ,['&FatBasID','&FaturaID']
                                     ,[TabGiris.FieldByName('ID').AsInteger,TabDetayGiris.FieldByName('ID').AsInteger]);
 
 
     end else if (TabStokListe.FieldByName('KOD').AsString=RootKod) and (GirisCikis =FWGiris) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ITS_PTS_GELEN_PAKET set FATBASID=&BelgeBasID,BELGETURU=&BelgeTuru where ID=&ITSPaketID'
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ITS_PTS_GELEN_PAKET set FATBASID=&BelgeBasID,BELGETURU=&BelgeTuru where ID=&ITSPaketID'
                                     ,['&BelgeBasID','&BelgeTuru','&ITSPaketID']
                                     ,[TabGiris.FieldByName('ID').Value,TabGiris.FieldByName('TUR').Value,PaketID]);
     end;
@@ -1723,7 +1723,7 @@ Begin
 
       if GirisCikis = FWCikis then
     begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update KAREKOD set MALSATILANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update KAREKOD set MALSATILANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
                                    +'where STOKIDID in (select ID from STOKID where CIKFATBASID=&CikFatBasID)'
                                   ,['&RehberID','&CikFatBasID'],[TabGiris.FieldByName('REHBERID').AsInteger,TabGiris.FieldByName('ID').AsInteger]);
     EditAdet.Text:='1';
@@ -1731,7 +1731,7 @@ Begin
 
     if GirisCikis = FWGiris then
     begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update KAREKOD set MALALINANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update KAREKOD set MALALINANGLN=(select top 1 BILGI from REHBERBILGI RB inner join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RA.VARSAYILAN=81 and RB.YER_ID=&RehberID and RB.YERI=2) '
                                    +'where STOKIDID in (select ID from STOKID where GIRFATBASID=&GirFatBasID)'
                                   ,['&RehberID','&GirFatBasID'],[TabGiris.FieldByName('REHBERID').AsInteger,TabGiris.FieldByName('ID').AsInteger]);
     EditAdet.Text:='1';

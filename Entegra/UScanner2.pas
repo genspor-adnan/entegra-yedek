@@ -1,4 +1,4 @@
-unit UScanner;
+ï»¿unit UScanner;
 
 interface
 
@@ -189,7 +189,7 @@ begin
      2 :iresult := PDFKaydet;
    end;
 
-   if iresult then //geçici olarak c ye yazýlan dosyayý buraya alalým
+   if iresult then //geÃ§ici olarak c ye yazÄ±lan dosyayÄ± buraya alalÄ±m
       ModalResult := mrOk
    else
       ShowMessage('Kaydedilemedi..');
@@ -232,17 +232,17 @@ procedure TScannerDlg.FormActivate(Sender: TObject);
  iCount: Integer;
  i : Integer;
 begin
-    cbodpi.Items.Add('Ekran görünümü 96dpi');
+    cbodpi.Items.Add('Ekran gÃ¶rÃ¼nÃ¼mÃ¼ 96dpi');
     cbodpi.Items.Add('Fax 200dpi');
     cbodpi.Items.Add('OCR Text 300dpi');
-    cbodpi.Items.Add('Lazer Yazýcý kaliteli 600dpi');
+    cbodpi.Items.Add('Lazer YazÄ±cÄ± kaliteli 600dpi');
     cbodpi.ItemIndex:=0;
 
 
-    cbopixeltype.Items.Add('Varsayýlan');
+    cbopixeltype.Items.Add('VarsayÄ±lan');
     cbopixeltype.Items.Add('Gri Tonlama');
     cbopixeltype.Items.Add('Siyah & Beyaz');
-    cbopixeltype.Items.Add('Gerçek Renkler');
+    cbopixeltype.Items.Add('GerÃ§ek Renkler');
     cbopixeltype.ItemIndex:=0;
 
     cbotifcompression.Items.Add('LZW');

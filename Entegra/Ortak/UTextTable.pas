@@ -1,4 +1,4 @@
-unit UTextTable;
+﻿unit UTextTable;
 
 interface
 uses

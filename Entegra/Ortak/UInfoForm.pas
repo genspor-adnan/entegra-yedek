@@ -1,4 +1,4 @@
-unit UInfoForm;
+﻿unit UInfoForm;
 
 interface
 

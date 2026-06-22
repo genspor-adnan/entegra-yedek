@@ -1,4 +1,4 @@
-unit UStokAramaFrame;
+﻿unit UStokAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:46:01 }
@@ -92,7 +92,7 @@ UStokListeDlg,LocOnFly, UKategori;
 
 procedure TStokAramaFrame.Baslatildi;
 begin
- if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+ if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
  ComboAnaliz.Visible := Tablo.YetkiVarmi(270118,YetkiTur_Gorme); //Stok Analizi yetkisi
  LabelAnaliz.Visible := ComboAnaliz.Visible;
 end;

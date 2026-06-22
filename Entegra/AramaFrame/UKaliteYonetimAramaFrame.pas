@@ -1,4 +1,4 @@
-unit UKaliteYonetimAramaFrame;
+﻿unit UKaliteYonetimAramaFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 07/12/2010 10:47:20 }
@@ -68,7 +68,7 @@ var
    i:Integer;
   st:string;
 begin
-    LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
     Tablo.FBtnIndex := -1;
 
     TumTusResimleriniDegistir(KaliteYonetimMenu,9);

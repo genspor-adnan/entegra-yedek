@@ -1,4 +1,4 @@
-unit USeyirDefteri;
+ï»¿unit USeyirDefteri;
 
 interface
 
@@ -114,7 +114,7 @@ var
   List: TStringList;
 begin
   List := TStringList.Create;
-  Tablo.ListedenBilgiGetir('Ýþlem Yapaný Seçiniz','SELECT	DISTINCT R.ID, R.FIRMA AS [Ýþlem Yapan]	 FROM	'+
+  Tablo.ListedenBilgiGetir('Ä°ÅŸlem YapanÄ± SeÃ§iniz','SELECT	DISTINCT R.ID, R.FIRMA AS [Ä°ÅŸlem Yapan]	 FROM	'+
   'LOG L	INNER JOIN REHBER R ON R.ID=L.EKLEYEN',List,[]);
   if (List.Count > 0) then begin
     ID := List[0];
@@ -140,7 +140,7 @@ end;
 
 procedure TSeyirDefteriDlg.DBGrid1DBTableView1DblClick(Sender: TObject);
 begin
-   if (TabLog.FieldByName('TABLOID').AsInteger=43)and(TabLog.FieldByName('TUR').AsInteger=4) then begin//tablo kasa ve deðiþme ise
+   if (TabLog.FieldByName('TABLOID').AsInteger=43)and(TabLog.FieldByName('TUR').AsInteger=4) then begin//tablo kasa ve deÄŸiÅŸme ise
        Tablo.TablodanSorguAc(1, 'select ID, TARIH=ISLEMTARIHI, TUR, REHBERID, BELGENO from KASA where ID = '+TabLog.FieldByName('SATIRID').AsString);
        AnaForm.GormeDialogCagir(Tablo.Query1.FieldByName('ID').AsInteger, Tablo.Query1.FieldByName('TUR').AsInteger,
            Tablo.Query1.FieldByName('REHBERID').AsInteger, 1, Tablo.Query1.FieldByName('TARIH').AsDateTime, Tablo.Query1.FieldByName('BELGENO').AsString);
@@ -160,7 +160,7 @@ end;
 
 procedure TSeyirDefteriDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 end;
 
@@ -216,7 +216,7 @@ begin
   if Trim(txtTablo.Text) <> '' then begin
     TabloID := TabLog.FieldByName('TABLOID').AsInteger;
     List := TStringList.Create;
-    Tablo.ListedenBilgiGetir('Ýþlem Yapaný Seçiniz','SELECT DISTINCT G.DEGER AS ID,G.ANAHTAR AS TABLOADI,LH.TABLOALANADI AS ALANADI FROM LOG L'+
+    Tablo.ListedenBilgiGetir('Ä°ÅŸlem YapanÄ± SeÃ§iniz','SELECT DISTINCT G.DEGER AS ID,G.ANAHTAR AS TABLOADI,LH.TABLOALANADI AS ALANADI FROM LOG L'+
     ' INNER JOIN dbo.GENINI G ON G.DEGER=L.TABLOID INNER JOIN dbo.LOGHAR LH ON LH.LOGID=L.ID WHERE G.BOLUM=-1012 AND L.TABLOID='+IntToStr(TabloID),List,[]);
     if (List.Count > 0) then begin
       txtAlan.Text := List[2];
@@ -241,7 +241,7 @@ var
   List: TStringList;
 begin
   List := TStringList.Create;
-  Tablo.ListedenBilgiGetir('Ýþlem Yapaný Seçiniz','SELECT DISTINCT G.DEGER AS ID, G.ANAHTAR AS TABLOADI FROM '+
+  Tablo.ListedenBilgiGetir('Ä°ÅŸlem YapanÄ± SeÃ§iniz','SELECT DISTINCT G.DEGER AS ID, G.ANAHTAR AS TABLOADI FROM '+
 	'LOG L INNER JOIN dbo.GENINI G ON G.DEGER=L.TABLOID WHERE	G.BOLUM=-1012',List,[]);
   if (List.Count > 0) and (List[1] <> '') then begin
     txtTablo.Text := List[1];
@@ -270,8 +270,8 @@ var
   s:string;
 begin
   TabLog.Close;
-  if TabloId>0 then begin  //belli bir satir görünecekse
-     //önce tablodan ekleyen vekleme tar. bulalým
+  if TabloId>0 then begin  //belli bir satir gÃ¶rÃ¼necekse
+     //Ã¶nce tablodan ekleyen vekleme tar. bulalÄ±m
      Tablo.TablodanSorguAc(1,'select ANAHTAR from GENINI where BOLUM=-1012 and DEGER='+IntToStr(TabloId));
      s:=Tablo.Query1.Fields[0].asString;
      s:=stringreplace(s, '_Gelen','',[]);

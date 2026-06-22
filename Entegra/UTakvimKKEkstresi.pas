@@ -1,4 +1,4 @@
-unit UTakvimKKEkstresi;
+ï»¿unit UTakvimKKEkstresi;
 
 interface
 
@@ -42,7 +42,7 @@ type
 var
   TakvimKKEkstresiDlg: TTakvimKKEkstresiDlg;
 //Resourcestring
-//  dekstiresi=' Dönemi Ekstre Bilgileri.';
+//  dekstiresi=' DÃ¶nemi Ekstre Bilgileri.';
 
 implementation
 uses
@@ -52,7 +52,7 @@ PrjConst,LocOnFly;
 
 procedure TTakvimKKEkstresiDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
   Tablo.GridTurkcelestir;
 end;
@@ -61,7 +61,7 @@ procedure TTakvimKKEkstresiDlg.FormShow(Sender: TObject);
 Var
   Tarih:TDateTime;
 begin
-//id yi bölümlerine ayýralým..
+//id yi bÃ¶lÃ¼mlerine ayÄ±ralÄ±m..
   ay:=StrToInt(copy(inttostr(TamID),1,2));
   yil:=StrToInt(copy(inttostr(TamID),3,4));
   ID:=StrToInt(copy(inttostr(TamID),7,length(inttostr(TamID))));

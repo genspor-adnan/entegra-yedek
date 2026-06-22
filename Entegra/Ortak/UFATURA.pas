@@ -1,4 +1,4 @@
-unit UFatura;
+ï»¿unit UFatura;
 
 interface
 
@@ -70,9 +70,9 @@ Procedure TEtiket.DegerAtama(SiraNo:integer; AlanTuru, Tablo, AlanAdi:String;Ban
       RapTablo.Ayarlar.FieldByName('ALANADI').AsString := ALANADI;
       RapTablo.Ayarlar.FieldByName('SOL').AsFloat := SOL;
       RapTablo.Ayarlar.FieldByName('UST').AsFloat := UST;
-      If (En  <> 0)and(TABLO<>'BOÞLUK') Then
+      If (En  <> 0)and(TABLO<>'BOÅžLUK') Then
          RapTablo.Ayarlar.FieldByName('EN').AsFloat := En;
-      If (Boy <> 0)and(TABLO<>'BOÞLUK') Then
+      If (Boy <> 0)and(TABLO<>'BOÅžLUK') Then
          RapTablo.Ayarlar.FieldByName('BOY').AsFloat := BOY;
       RapTablo.Ayarlar.FieldByName('FONT').AsString := Font;
       If Punto <> 0 Then
@@ -89,7 +89,7 @@ var
       S    : TStringList;
 begin
    if StrToInt(YanSay.Text) > 20 then begin
-      ShowMessage('Yanyana etiket sayýsý 20 yi aþýyor!!!');
+      ShowMessage('Yanyana etiket sayÄ±sÄ± 20 yi aÅŸÄ±yor!!!');
       ModalResult := mrNone;
    end
    else begin
@@ -131,11 +131,11 @@ begin
      SayfaGen := SSolBosluk + YanYanaSay*Gen + (YanYanaSay-1)*YBos + SSagBosluk;
      SayfaYuk := SUstBosluk + Yuk;
      DegerAtama(1,'SAYFA', 'BOYUT', EtiketTuru, 0,0,0,SayfaGen, SayfaYuk,'',0);
-//     DegerAtama(3,'SAYFA', 'BOÞLUK', '',0,0,0,0,0,'',0);
-     DegerAtama(3,'SAYFA', 'BOÞLUK', '',0,SSolBosluk,SUstBosluk,SSagBosluk,0,'',0);
+//     DegerAtama(3,'SAYFA', 'BOÅžLUK', '',0,0,0,0,0,'',0);
+     DegerAtama(3,'SAYFA', 'BOÅžLUK', '',0,SSolBosluk,SUstBosluk,SSagBosluk,0,'',0);
      DegerAtama(5,'SAYFA', 'KOLON', '',YanYanaSay,0,0,0,0,'',0);
 //     if SUstBosluk > 0 then
-//        DegerAtama(10,'BAND', 'SAYFABAÞI', '',0,0,0,0,SUstBosluk,'',0);
+//        DegerAtama(10,'BAND', 'SAYFABAÅžI', '',0,0,0,0,SUstBosluk,'',0);
      DegerAtama(12,'BAND', 'DETAY', 'SORGU',0,0,0,0,Yuk+ABos,'',0);
 
      S := TStringList.Create;

@@ -1,4 +1,4 @@
-unit UHizliGirisIsk;
+ï»¿unit UHizliGirisIsk;
 
 interface
 
@@ -84,7 +84,7 @@ type
     { Private declarations }
   public
     { Public declarations }
-    Cagiran,UrunId,Anabirim,KDVOrani :Integer; //1:Ýskonto  2:Adet
+    Cagiran,UrunId,Anabirim,KDVOrani :Integer; //1:Ä°skonto  2:Adet
     Stokmu,YazilacakKDVDurum:Boolean;
   end;
 
@@ -104,7 +104,7 @@ begin
     HizliGirisIsk.Cagiran := 0;
     HizliGirisIsk.Editadet.Text := Miktar;
     HizliGirisIsk.UrunId:= UrunId;
-    HizliGirisIsk.Anabirim := Anabirim;//Anabirim ör:adet için 51 yazýlýr procedurede adet diye baþlýðayazýlýr
+    HizliGirisIsk.Anabirim := Anabirim;//Anabirim Ã¶r:adet iÃ§in 51 yazÄ±lÄ±r procedurede adet diye baÅŸlÄ±ÄŸayazÄ±lÄ±r
     HizliGirisIsk.Stokmu := Stokmu;
     HizliGirisIsk.ShowModal;
     if (HizliGirisIsk.ModalResult = mrOk)and(HizliGirisIsk.Editadet.Text<>'') then
@@ -121,7 +121,7 @@ begin
       ModalResult := mrOk
   else if not TusBasili then begin
     //(Sender as TJvNavPanelButton).Down := True;
-    if (Sender as TJvNavPanelButton).Tag=55 then begin //geri tuþu
+    if (Sender as TJvNavPanelButton).Tag=55 then begin //geri tuÅŸu
       if EditYuzde.Focused then
         if EditYuzde.SelLength>0 then
           EditYuzde.ClearSelection
@@ -210,7 +210,7 @@ end;
 procedure THizliGirisIsk.cxCurrencyEdit1PropertiesEditValueChanged(Sender: TObject);
 begin
   if YazilacakKDVDurum then
-    LabelKdvsiz.Caption := 'KDV Hariç '+FCurrToStr(EditFiyat.EditValue*(100/(100+KDVOrani)))
+    LabelKdvsiz.Caption := 'KDV HariÃ§ '+FCurrToStr(EditFiyat.EditValue*(100/(100+KDVOrani)))
   else begin
     LabelKdvsiz.Caption := 'KDV Dahil '+FCurrToStr(EditFiyat.EditValue*((100+KDVOrani)/100));
     LabelKdvsiz.Visible := True;
@@ -260,7 +260,7 @@ end;
 
 procedure THizliGirisIsk.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   BtnNumComma.Caption:=FormatSettings.Decimalseparator;
   LabelKur.Caption := CariDoviz;
   LabelPBirimi.Caption := CariDoviz;
@@ -274,7 +274,7 @@ begin
        Editadet.setFocus;
        Editadet.SelectAll;
     end;
-    1 : begin  //Ýsk / Tutar sekmesi
+    1 : begin  //Ä°sk / Tutar sekmesi
        EditTutar.SetFocus;
        EditTutar.SelectAll;
     end;
@@ -319,7 +319,7 @@ procedure THizliGirisIsk.TutarIskontoHesapla;
 begin
   EditYuzde.Properties.OnEditValueChanged := nil;
   if (EditTutar.EditValue>(EditIskontosuz.EditValue+0.01)) and (HizliGirisDlg.FazlaIskontoYapabilir=False) then
-   begin //round edilince küsüratlar patladýðý için 0.01 eklenerek kontrol ediliyor!!
+   begin //round edilince kÃ¼sÃ¼ratlar patladÄ±ÄŸÄ± iÃ§in 0.01 eklenerek kontrol ediliyor!!
      Application.MessageBox(PChar(HGSatistan_Buyuk_iskonto_yapilamaz), PChar(HataPrj), MB_OK+ MB_ICONWARNING);
      EditTutar.EditValue:= EditIskontosuz.EditValue;
      Abort;

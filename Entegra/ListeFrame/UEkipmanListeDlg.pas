@@ -1,4 +1,4 @@
-unit UEkipmanListeDlg;
+ï»¿unit UEkipmanListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:54}
@@ -251,10 +251,10 @@ begin
     AraTarihBas.Date := StrToDateTime('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+IntToStr(CariYil));
     AraTarihBit.Date := StrToDateTime('31'+FormatSettings.DateSeparator+'12'+FormatSettings.DateSeparator+IntToStr(CariYil));
     TabloYenile(TabEkipmanlar,[]);
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 
@@ -275,9 +275,9 @@ begin
        if LogGun > 0 then begin
         Tablo.OncekiLogBelirle(TabEkipmanlar);
        end;
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
        Tablo.LogIslemleri(TabNo_EKIPMAN,TabEkipmanlar.FieldByName('ID').AsInteger,5,TabEkipmanlar);
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
        TabloYenile(TabEkipmanlar,[]);
      end else
        showmessage(EHareketli_silinemez);

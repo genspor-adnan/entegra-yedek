@@ -1,4 +1,4 @@
-unit UTeminatMektubuAramaFrame;
+﻿unit UTeminatMektubuAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:21:48}
@@ -51,7 +51,7 @@ implementation
 
 procedure TTeminatMektubuAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TTeminatMektubuAramaFrame.btnSilClick(Sender: TObject);

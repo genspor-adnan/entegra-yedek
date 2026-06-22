@@ -1,4 +1,4 @@
-unit UFaturaGorevFrame;
+ï»¿unit UFaturaGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -60,7 +60,7 @@ type
     procedure SetFrameBilgi(const Value: TAnaFrameBilgi);
     procedure TumKucukResimleriDuzenle;
   public
-    FMenuTur : SmallInt; //Tur: Giren:0,Çýkan:1  AltTur: sipariþ:0,irsaliye:1,Fat:2,fiþ:3,Tahakkuk:4,Tümü:-1
+    FMenuTur : SmallInt; //Tur: Giren:0,Ã‡Ä±kan:1  AltTur: sipariÅŸ:0,irsaliye:1,Fat:2,fiÅŸ:3,Tahakkuk:4,TÃ¼mÃ¼:-1
     FAltTur : SmallInt;
     { Public declarations }
   published
@@ -82,10 +82,10 @@ uses JvJVCLUtils, UFaturalar, FetaKurulusSiniflari, UGenelGirisSayfasiFrame,
 
 procedure TFaturaGorevFrame.btnAlisFaturalariClick(Sender: TObject);
 begin
-//kapalý boy 54
-//açýk boy 222
+//kapalÄ± boy 54
+//aÃ§Ä±k boy 222
 //her bir buton 24
-  //baþlangýçta panel boyutlarý 54 olmalýdýr!!
+  //baÅŸlangÄ±Ã§ta panel boyutlarÄ± 54 olmalÄ±dÄ±r!!
 
   TumKucukResimleriDuzenle;
   if (sender as TJvNavPanelButton).tag = 2 then begin
@@ -186,7 +186,7 @@ begin
             FMenuTur := 0
           else
             FMenuTur := 1;
-          SQLEk := ' and F.TUR ='+IntToStr((sender as TcxButton).Tag); //arama buna göre yapýlacak..
+          SQLEk := ' and F.TUR ='+IntToStr((sender as TcxButton).Tag); //arama buna gÃ¶re yapÄ±lacak..
           InitIslemler;
         end;
       end;
@@ -198,12 +198,12 @@ var
   VisibleCount:integer;
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   PanelAlisBelgeleri.Visible := Tablo.YetkiVarmi(2401,YetkiTur_Gorme);
   PanelSatisBelgeleri.Visible := Tablo.YetkiVarmi(2411,YetkiTur_Gorme);
   Panel3.Visible := Tablo.YetkiVarmi(2499,YetkiTur_Gorme);
 
-  //alýþ belgeleri
+  //alÄ±ÅŸ belgeleri
   VisibleCount := 0;
   btnSatinalmaTalepleri.visible := Tablo.YetkiVarmi(240111,YetkiTur_Gorme);
   if btnSatinalmaTalepleri.visible then
@@ -229,12 +229,12 @@ begin
   btnKonsinyeler.visible := Tablo.YetkiVarmi(240171,YetkiTur_Gorme); //eklenecek
   if btnKonsinyeler.visible then
      VisibleCount:=VisibleCount+1;
-  btnGirisFisi.visible := False;//Tablo.YetkiVarmi(2712,YetkiTur_Gorme); //giriþ fiþi
+  btnGirisFisi.visible := False;//Tablo.YetkiVarmi(2712,YetkiTur_Gorme); //giriÅŸ fiÅŸi
   if btnGirisFisi.visible then
      VisibleCount:=VisibleCount+1;
   PanelAlisBelgeleri.Tag := VisibleCount;
   VisibleCount := 0;
-  //satýþ belgeleri
+  //satÄ±ÅŸ belgeleri
   btAlinanSiparisler.visible := Tablo.YetkiVarmi(241111,YetkiTur_Gorme);
   if btAlinanSiparisler.visible then
      VisibleCount:=VisibleCount+1;

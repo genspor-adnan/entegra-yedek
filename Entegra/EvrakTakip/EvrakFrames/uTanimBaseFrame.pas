@@ -1,4 +1,4 @@
-unit uTanimBaseFrame;
+ï»¿unit uTanimBaseFrame;
 
 interface
 
@@ -45,7 +45,7 @@ implementation
 {$R *.dfm}
 
 { TEvrakTanimBaseFrame }
-// Baþlangýç eylemleri
+// BaÅŸlangÄ±Ã§ eylemleri
 constructor TEvrakTanimBaseFrame.Create(AOwner: TComponent);
 begin
   inherited;
@@ -55,8 +55,8 @@ end;
 
 procedure TEvrakTanimBaseFrame.FocusIlkControl( _scanGrid : TGridPanel);
 begin
-   {Yapacak bir þey yok, burda Grid yok, Grid içinde Control yok}
-   { uTanimGridFrame.TEvrakTanimGridFrame.FocusIlkControl çaðýlýmalý}
+   {Yapacak bir ÅŸey yok, burda Grid yok, Grid iÃ§inde Control yok}
+   { uTanimGridFrame.TEvrakTanimGridFrame.FocusIlkControl Ã§aÄŸÄ±lÄ±malÄ±}
    inherited;
 end;
 
@@ -80,7 +80,7 @@ end;
 
 procedure TEvrakTanimBaseFrame.Startup;
 begin
-  {Yapacak bir þey yok}
+  {Yapacak bir ÅŸey yok}
   inherited;
 end;
 

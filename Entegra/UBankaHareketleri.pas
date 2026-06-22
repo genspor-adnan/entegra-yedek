@@ -1,4 +1,4 @@
-unit UBankaHareketleri;
+﻿unit UBankaHareketleri;
 
 interface
 
@@ -229,7 +229,7 @@ end;
 
 procedure TBankaHareketlerDlg.EditHesapKodPropertiesButtonClick(Sender: TObject;  AButtonIndex: Integer);
 begin
-  // UBankaHareketKural birimi projeden çıkarıldı — HesapListele kullanılamıyor.
+  // UBankaHareketKural birimi projeden Ã§Ä±karÄ±ldÄ± â€” HesapListele kullanÄ±lamÄ±yor.
 end;
 
 procedure TBankaHareketlerDlg.EditMasrafKoduPropertiesButtonClick( Sender: TObject; AButtonIndex: Integer);
@@ -305,7 +305,7 @@ begin
        ACIKLAMA := TabHareket.FieldByName(TMenuItem(Sender).Hint).AsString;
        if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Memo('��inde ge�ecek kelimeler:', @ACIKLAMA)) <> mrOk then
           Abort;
-       Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values(0,1,'+
+       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values(0,1,'+
        TabHareket.FieldByName('PRGISLEMTIPI').AsString+',2,'+IntToStr(TMenuItem(Sender).Tag)+','''+VarToStr(ACIKLAMA)+''','+TabHareket.FieldByName('HESAPID').AsString+','+TabHareket.FieldByName('MASRAFID').AsString+')',[],[]);
    end;
 end;
@@ -342,14 +342,14 @@ var s,s2 : string;
           ID2 := Tablo.KasaKaydet(Tur, TabHareket.FieldByName('Tarih').AsDateTime, TabHareket.FieldByName('Tarih').AsDateTime,0,
                  TabHareket.FieldByName('ACIKLAMA').AsString, TabHareket.FieldByName('HESAPID').AsInteger,Kur,CariDoviz,0,
                  Alacak,Borc,Abs(Borc-Alacak)*KurDegeri,0,FaturaId,KrediId,0,0,SubeId, HesapTur, Yer,YerId, TabHareket.FieldByName('No').AsString,Windows_Excelden);
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID)+' where ID = '+IntToStr(ID2),[],[]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID)+' where ID = '+IntToStr(ID2),[],[]);
       end;
       TabHareket.Edit;
       TabHareket.FieldByName('DURUM').AsInteger := 9;  //durum kay�tl� yap�l�r
       //Otomatik Kural ekleme
 {      if (TabHareket.FieldByName('EKLEME').AsInteger = 1)then
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values('+
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [BANKAKURAL]([BANKAKODU],KULLANICI,PRGISLEMTIPI,[TUR],TARAMA_KOLONU,[DEGER_GECEN],[HESAPID],[MASRAFID])values('+
           '0,1,'+TabHareket.FieldByName('PRGISLEMTIPI').AsString+',2,2,'''+TabHareket.FieldByName('ACIKLAMA').AsString+''','+TabHareket.FieldByName('HESAPID').AsString+','+TabHareket.FieldByName('MASRAFID').AsString+')',[],[]);}
       TabHareket.Post;
    end;
@@ -379,7 +379,7 @@ begin
                               s2:=Tablo.Query1.Fields[0].AsString
                            else
                               s2:='0';
-                           Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'insert into BANKAHESAPLAR(BANKASUBELERID,REHBERID,IBAN,HESAPKODU,HESAPNO,EKLEYEN,KUR,DURUM,TIPI,VARSAYILAN,CEKHESABI,KREDILIHESAP,'+
+                           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into BANKAHESAPLAR(BANKASUBELERID,REHBERID,IBAN,HESAPKODU,HESAPNO,EKLEYEN,KUR,DURUM,TIPI,VARSAYILAN,CEKHESABI,KREDILIHESAP,'+
                               'KREDIKARTI,MAASHESABI,GUNLUKAKSIYONDAGOSTER)values('+s2+','+TabHareket.FieldByName('HESAPID').AsString+','''+s+''',0,'+copy(s,11,100)+','+Kullanan+','''+
                               TabHareket.FieldByName('KUR').AsString+''',1,0,0,0,0,0,0,0)',[],[]);
                    end;
@@ -731,13 +731,13 @@ end;
 
 procedure TBankaHareketlerDlg.KuralListesiniAcMenuClick(Sender: TObject);
 begin
-  // UBankaHareketKural birimi projeden çıkarıldı — kural yönetimi devre dışı.
+  // UBankaHareketKural birimi projeden Ã§Ä±karÄ±ldÄ± â€” kural yÃ¶netimi devre dÄ±ÅŸÄ±.
 end;
 
 procedure TBankaHareketlerDlg.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SeciliSatirSil), PChar(Onay),    MB_YESNO + MB_ICONQUESTION) = ID_YES then begin
-     Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'delete from BANKAIMPORTHAREKET where BANKAIMPORTID='+TabImport.FieldByName('ID').AsString,[], []);
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from BANKAIMPORTHAREKET where BANKAIMPORTID='+TabImport.FieldByName('ID').AsString,[], []);
      TabImport.Delete;
   end;
 end;
@@ -841,7 +841,7 @@ begin
      3 :  s:='case when DURUM < 2 then 1 else 0 end ';        //"Tan�ms�z" ve "Eksikleri" Se�
      4 :  s:='case when DURUM = 2 then 1 else 0 end '        //"Haz�r" Se�
     end;
-    Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update BANKAIMPORTHAREKET set SEC='+s+' where BANKAIMPORTID='+TabImport.Fields[0].AsString, [],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update BANKAIMPORTHAREKET set SEC='+s+' where BANKAIMPORTID='+TabImport.Fields[0].AsString, [],[]);
     TabloAc;
 end;
 

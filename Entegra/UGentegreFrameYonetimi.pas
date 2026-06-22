@@ -1,4 +1,4 @@
-unit UGentegreFrameYonetimi;
+ï»¿unit UGentegreFrameYonetimi;
 
 interface
 
@@ -35,7 +35,7 @@ type
     function GetFrameBilgi : TAnaFrameBilgi;
     procedure SetFrameBilgi(AValue: TAnaFrameBilgi);
     procedure IcerikFrameAktifOlacak(Sender: TIcerikFrameBilgi);
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property FrameBilgi : TAnaFrameBilgi read GetFrameBilgi write SetFrameBilgi;
     {$ENDREGION}
   end;
@@ -44,7 +44,7 @@ type
     ['{3653296C-DC42-4404-9F18-AEBD9C87E504}']
     function GetFrameBilgi : TIcerikFrameBilgi;
     procedure SetFrameBilgi(AValue: TIcerikFrameBilgi);
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property FrameBilgi : TIcerikFrameBilgi read GetFrameBilgi write SetFrameBilgi;
     {$ENDREGION}
   end;
@@ -53,7 +53,7 @@ type
     ['{B4793DA9-6D3B-4ED7-92E7-E9207C451155}']
     function GetFrameBilgi : TAramaFrameBilgi;
     procedure SetFrameBilgi(AValue: TAramaFrameBilgi);
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property FrameBilgi : TAramaFrameBilgi read GetFrameBilgi write SetFrameBilgi;
     {$ENDREGION}
   end;
@@ -71,7 +71,7 @@ type
 //    ['{0C088E8E-CEC3-4E39-BA87-6FD60A370457}']
 //    function GetFrameBilgi : TAracCubuguFrameBilgi;
 //    procedure SetFrameBilgi(AValue: TAracCubuguFrameBilgi);
-//    {$REGION 'Özellikler'}
+//    {$REGION 'Ã–zellikler'}
 //    property FrameBilgi : TAracCubuguFrameBilgi read GetFrameBilgi write SetFrameBilgi;
 //    {$ENDREGION}
 //  end;
@@ -90,7 +90,7 @@ type
     function FrameBul(AFrameTipi : TFrameClass): TAnaFrameBilgi;reintroduce;overload;
     function FrameBul(AFrameOrnek : TFrame): TAnaFrameBilgi;reintroduce;overload;
     function FrameBulYumurtlanan(AFrameOrnek : TFrame): TAnaFrameBilgi;reintroduce;
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property AktifFrame : TAnaFrameBilgi read GetAktifFrame;
     property OnBeforeFrameLoad : TBeforeFrameLoadEvent read FOnBeforeFrameLoad write FOnBeforeFrameLoad;
     {$ENDREGION}
@@ -190,7 +190,7 @@ type
     function FrameBul(AFrameTipi : TFrameClass): TIcerikFrameBilgi;reintroduce;overload;
     function FrameBul(AFrameOrnek : TFrame): TIcerikFrameBilgi;reintroduce;overload;
     function FrameBulYumurtlanan(AFrameOrnek : TFrame): TIcerikFrameBilgi;reintroduce;
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property AktifFrame : TIcerikFrameBilgi read GetAktifFrame;
     property AnaFrameYoneticisi : TAnaFrameYoneticisi read GetAnaFrameYoneticisi;
     property AnaFrameBilgi : TAnaFrameBilgi read FAnaFrameBilgi;
@@ -253,7 +253,7 @@ type
     function FrameBul(AFrameTipi : TFrameClass): TAramaFrameBilgi;reintroduce;overload;
     function FrameBul(AFrameOrnek : TFrame): TAramaFrameBilgi;reintroduce;overload;
     function FrameBulYumurtlanan(AFrameOrnek : TFrame): TAramaFrameBilgi;reintroduce;
-    {$REGION 'Özellikler'}
+    {$REGION 'Ã–zellikler'}
     property AktifFrame : TAramaFrameBilgi read GetAktifFrame;
     property AnaFrameYoneticisi : TAnaFrameYoneticisi read GetAnaFrameYoneticisi;
     property AnaFrameBilgi : TAnaFrameBilgi read FAnaFrameBilgi;
@@ -499,7 +499,7 @@ begin
     afb := FAramaFrameYoneticisi.FrameBul(TFrameClass(GetClass(ifb.AramaFrameTipi)));
     if afb.Baslatildi then afb.Git;
   end;
-  { Gezinme paneli yönetimi }
+  { Gezinme paneli yÃ¶netimi }
   if Assigned(FGezinmePaneli) then begin
     if Assigned(ifb.AracCubuguDestegi) then begin
       hicGorunmesin := True;
@@ -510,7 +510,7 @@ begin
           hicGorunmesin := False;
         end else begin
           FNavigator.Visible := False;
-          FNavigator.Tag := 100; // pencere açýlýrsa bile görünmesin
+          FNavigator.Tag := 100; // pencere aÃ§Ä±lÄ±rsa bile gÃ¶rÃ¼nmesin
         end;
       end;
       if Assigned(FEkranYaz) then begin
@@ -529,7 +529,7 @@ begin
         end;
       end;
       FGezinmePaneli.Visible := not hicGorunmesin;
-      { burada yazdýrma ile ilgili kýsýmlar gerçekleþecek }
+      { burada yazdÄ±rma ile ilgili kÄ±sÄ±mlar gerÃ§ekleÅŸecek }
     end else FGezinmePaneli.Visible := False;
   end;
   FIAnaBilgiFrame.IcerikFrameAktifOlacak(ifb); 
@@ -591,27 +591,27 @@ begin
   FGezinmePaneliAdi := ABilgi.Params.Values['GezinmePaneliAdi'];
   FFrameYonetilebilir := ABilgi.Params.Values['FrameYonetilebilir'] <> 'hayir';
   if FFrameYonetilebilir then begin
-    { Ýçerik,Arama ve Araç çubuðu yöneticileri için ana sekmenin baþlatýlmýþ olmasý gerekiyor }
-    { Baslatilmamýþsa baþlat }
+    { Ä°Ã§erik,Arama ve AraÃ§ Ã§ubuÄŸu yÃ¶neticileri iÃ§in ana sekmenin baÅŸlatÄ±lmÄ±ÅŸ olmasÄ± gerekiyor }
+    { BaslatilmamÄ±ÅŸsa baÅŸlat }
     if not Baslatildi then
       Baslat;
-    { Arama Frame Yöneticisini Baþlatma }
+    { Arama Frame YÃ¶neticisini BaÅŸlatma }
     ctrl := FOrnek.FindComponent(FAramaSayfaDenetimAdi);
     if not Assigned(ctrl) then
-      raise Exception.Create('Denetim bulunamadý -> ' + FAramaSayfaDenetimAdi);
+      raise Exception.Create('Denetim bulunamadÄ± -> ' + FAramaSayfaDenetimAdi);
     FAramaSayfaDenetimi := TcxPageControl(ctrl);
     FAramaFrameYoneticisi := TAramaFrameYoneticisi.
       Create(Self,FAramaSayfaDenetimi,ABilgi.NamedItem['AramaSekmeleri']);
-    { Ýçerik Frame Yöneticisini Baþlatma }
+    { Ä°Ã§erik Frame YÃ¶neticisini BaÅŸlatma }
     ctrl := FOrnek.FindComponent(FIcerikSayfaDenetimAdi);
     if not Assigned(ctrl) then
-      raise Exception.Create('Denetim bulunamadý -> ' + FIcerikSayfaDenetimAdi);
+      raise Exception.Create('Denetim bulunamadÄ± -> ' + FIcerikSayfaDenetimAdi);
     FIcerikSayfaDenetimi := TcxPageControl(ctrl);
     FIcerikFrameYoneticisi := TIcerikFrameYoneticisi.
       Create(Self,FIcerikSayfaDenetimi,ABilgi.NamedItem['IcerikSekmeleri']);
     FIcerikFrameYoneticisi.OnFrameHenuzBaslatildi.Add(IcerikFrameHenuzBaslatildi);
     FIcerikFrameYoneticisi.OnFrameAktifOlacak.Add(IcerikFrameAktifOlacak);    
-    { Gezinme ve Yazdýrma }
+    { Gezinme ve YazdÄ±rma }
     if FEkranYazAdi <> '' then
       FEkranYaz := TcxButton(FOrnek.FindComponent(FEkranYazAdi));
     if FYaziciYazAdi <> '' then
@@ -620,16 +620,16 @@ begin
       FNavigator := TDBNavigator(FOrnek.FindComponent(FNavigatorAdi));
     if FGezinmePaneliAdi <> '' then
       FGezinmePaneli := TWinControl(FOrnek.FindComponent(FGezinmePaneliAdi));
-    { Görev Frame'i yükleme }
+    { GÃ¶rev Frame'i yÃ¼kleme }
     if (FGorevlerPanelAdi <> '') and (FGorevFrameTipi <> '') then begin
       ctrl := FOrnek.FindComponent(FGorevlerPanelAdi);
       if not Assigned(ctrl) then
-        raise Exception.Create('Görev paneli denetimi bulunamadý -> ' + FGorevlerPanelAdi);
+        raise Exception.Create('GÃ¶rev paneli denetimi bulunamadÄ± -> ' + FGorevlerPanelAdi);
       if FGorevPanelBoyu <> '' then begin
         TWinControl(ctrl).Height := StrToIntDef(FGorevPanelBoyu, 145);
       end;
       FGorevFrameOrnek := TFrame(GetClass(FGorevFrameTipi).NewInstance);
-      { Ad ile ilgili istisnayý engellemek için }
+      { Ad ile ilgili istisnayÄ± engellemek iÃ§in }
       GeciciOwner := FSekmeSayfasi.Owner;
       IsUniqueGlobalComponentNameProc := @FrameIcinAdDegistirici;
       FGorevFrameOrnek.Create(FOrnek);
@@ -703,7 +703,7 @@ begin
     if not FBaslatildi then
       Baslat;
     FFrameYoneticisi.AdaGoreAktifEt(FBaslik);
-    LogEvent('%s - Ýçerik Frame Git:%s; Class:%s',[FAnaFrameBilgi.FBaslik, FBaslik,FOrnekClass.ClassName]);
+    LogEvent('%s - Ä°Ã§erik Frame Git:%s; Class:%s',[FAnaFrameBilgi.FBaslik, FBaslik,FOrnekClass.ClassName]);
   end;
 end;
 
@@ -1101,13 +1101,13 @@ procedure TFrameOlayBaglamaBilgisi.Bagla(AHedefOrnek, AKaynakOrnek: TFrame);
       c := Dize.SinirlandirilmisMetinEx(ABilesenAdi,'.');
       p := TComponent(GetObjectProp(AOrnek, c));
       if not Assigned(p) then
-        raise Exception.Create('Bileþen nil -> ' + c);
+        raise Exception.Create('BileÅŸen nil -> ' + c);
       YontemAta(p,ABilesenAdi,AOlay,AAtanacak);
     end else begin
       if ABilesenAdi <> '' then begin
         p := TComponent(GetObjectProp(AOrnek, ABilesenAdi));
         if not Assigned(p) then
-          raise Exception.Create('Bileþen nil -> ' + ABilesenAdi);
+          raise Exception.Create('BileÅŸen nil -> ' + ABilesenAdi);
         SetMethodProp(p,AOlay,AAtanacak);
       end else
         SetMethodProp(AOrnek,AOlay,AAtanacak);
@@ -1121,7 +1121,7 @@ var
 begin
   mt.Code := AKaynakOrnek.MethodAddress(FKaynakMethod);
   if not Assigned(mt.Code) then
-    raise Exception.Create('Kaynak örnekte bu yöntem bulunamýyor -> ' + FKaynakMethod);
+    raise Exception.Create('Kaynak Ã¶rnekte bu yÃ¶ntem bulunamÄ±yor -> ' + FKaynakMethod);
   mt.Data := AKaynakOrnek;
   ba := FHedefBilesen;
   hcba := Dize.SinirlandirilmisMetinEx(ba,'.');
@@ -1151,13 +1151,13 @@ procedure TFramePropertyBaglamaBilgisi.Bagla(AHedefOrnek, AKaynakOrnek: TFrame);
       c := Dize.SinirlandirilmisMetinEx(ABilesenAdi,'.');
       p := TComponent(GetObjectProp(AOrnek, c));
       if not Assigned(p) then
-        raise Exception.Create('Bileþen bulunamadý -> ' + c);
+        raise Exception.Create('BileÅŸen bulunamadÄ± -> ' + c);
       ObjectPropertyAta(p,ABilesenAdi,AHedefProperty,AKaynakBilesen);
     end else begin
       if ABilesenAdi <> '' then begin
         p := TComponent(GetObjectProp(AOrnek, ABilesenAdi));
         if not Assigned(p) then
-          raise Exception.Create('Bileþen nil -> ' + ABilesenAdi);
+          raise Exception.Create('BileÅŸen nil -> ' + ABilesenAdi);
         SetObjectProp(p,AHedefProperty,AKaynakBilesen);
       end else
       SetObjectProp(AOrnek,AHedefProperty,AKaynakBilesen);

@@ -1,4 +1,4 @@
-unit UMsjlar2;
+ï»¿unit UMsjlar2;
 
 interface
 
@@ -80,7 +80,7 @@ end;
 procedure TMesajDlg.ComboKimeDropDown(Sender: TObject);
 begin
    ComboKime.Clear;
-   ComboKime.Items.Add('*Tüm Kullanýcýlar*');
+   ComboKime.Items.Add('*TÃ¼m KullanÄ±cÄ±lar*');
    Tablo.TabKullan.Close;
    Tablo.TabKullan.Open;
    Tablo.TabKullan.first;
@@ -107,7 +107,7 @@ begin
      1 : begin
            DBCheckBox1.Visible := False;
            Label2.Caption := 'Kime';
-           TabMesajlar.SQL.Text := 'Select * From MESAJLAR Where KIMIN = "'+KullanAdi+'" and GIREN_CIKAN="Ç" order by TARIH desc';
+           TabMesajlar.SQL.Text := 'Select * From MESAJLAR Where KIMIN = "'+KullanAdi+'" and GIREN_CIKAN="Ã‡" order by TARIH desc';
          end;
 //     2 : Tablo.TabMesajlar.SQL.Text := 'Select * From Mesajlar Where KIMIN = "'+KullanAdi+'" and GIREN_CIKAN="G" and OKUNDU = 0 order by TARIH desc';
    end;
@@ -129,7 +129,7 @@ var i : integer;
       LD.Params[0].AsString := kime;
       LD.Params[1].AsDateTime := now;
       LD.Params[2].AsString := KullanAdi; //kimdenkime
-      LD.Params[3].AsString := 'G';   //gýren/cýkan
+      LD.Params[3].AsString := 'G';   //gÄ±ren/cÄ±kan
       LD.Params[4].AsString:='0';   //okundu
       LD.Params[5].AsMemo := DBMemo1.Text;
       LD.ExecSQL;
@@ -140,7 +140,7 @@ begin
       DBCheckBox1.Visible := False;
       Label2.Caption := 'Kime';
    end else if Button = nbPost then begin
-      if ComboKime.Text = '*Tüm Kullanýcýlar*' then
+      if ComboKime.Text = '*TÃ¼m KullanÄ±cÄ±lar*' then
          for i := 1 to ComboKime.Items.count-1 do
              gonder(ComboKime.Items[i])
       else gonder(ComboKime.Text);
@@ -151,7 +151,7 @@ procedure TMesajDlg.TabMesajlarNewRecord(DataSet: TDataSet);
 begin
    TabMesajlar.FieldByName('KIMIN').AsString := KullanAdi;
    TabMesajlar.FieldByName('TARIH').AsDateTime := Now;
-   TabMesajlar.FieldByName('GIREN_CIKAN').AsString := 'Ç';
+   TabMesajlar.FieldByName('GIREN_CIKAN').AsString := 'Ã‡';
    TabMesajlar.FieldByName('OKUNDU').AsString:='0';
 end;
 

@@ -1,4 +1,4 @@
-unit UEkipmanWizard;
+ï»¿unit UEkipmanWizard;
 
 interface
 
@@ -282,7 +282,7 @@ begin
       TabEkipman.Cancel
     end else begin
       TabEkipman.Post;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDcnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger]);
       PageEkipmanBilgiPage(Self);
     end;
   end;
@@ -362,8 +362,8 @@ begin
 //       TabEkipman.FieldByName('MODEL').AsString := AraDlg.TabStokListe.FieldByName('MODEL').AsString;
     TabEkipman.Post;
     Tabloyenile(TabEkipman,[EkipmanID]);
-    //imajlarý kopyalayalým...
-    Veritabani.BasitKomutçalýþtýr(Tablo.FDcnn,'delete from IMAJ where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_EKIPMAN,EkipmanID]);
+    //imajlarÄ± kopyalayalÄ±m...
+    Veritabani.BasitKomutÃ§alÄ±ÅŸtÄ±r(Tablo.FDcnn,'delete from IMAJ where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_EKIPMAN,EkipmanID]);
     Tablo.TablodanSorguAc(9,'select ID from IMAJ where YERI=71 and YER_ID='+TabEkipman.FieldByName('URUNID').AsString);//stoktaki resimler geliyor..
     Tablo.Query9.First;
     while not Tablo.Query9.Eof do begin
@@ -417,7 +417,7 @@ end;
 
 procedure TEkipmanWizardDlg.FormCreate(Sender: TObject);
 begin
-    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+    LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
     EkipmanID:=-1;
     Cagiran:=-1;
@@ -485,10 +485,10 @@ begin
      MarkaId:='-2727';
 
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from GENINI where BOLUM like '''+MarkaId+'%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'delete from GENINI where BOLUM=0  and DEGER like '''+MarkaId+'%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDcnn,'delete from GENINI where BOLUM like '''+MarkaId+'%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDcnn,'delete from GENINI where BOLUM=0  and DEGER like '''+MarkaId+'%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select '''+MarkaId+'''+convert(varchar(30),DEGER) from GENINI where BOLUM='+MarkaId+')',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDcnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDcnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+MarkaId+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDcnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+MarkaId+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -665,11 +665,11 @@ begin
   if TabDetay.State in [dsInsert, dsEdit] then
      TabDetay.post;
   if EkleDetay then
-     Ekle(TabDetay,TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger,'Deðiþ');
+     Ekle(TabDetay,TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger,'DeÄŸiÅŸ');
 
-  //Eðer daha önce iþaretlenmemiþse stokta kipman diye iþaretlenir
+  //EÄŸer daha Ã¶nce iÅŸaretlenmemiÅŸse stokta kipman diye iÅŸaretlenir
   if TabEkipman.FieldByName('URUNID').AsString<>'' then
-     Veritabani.BasitKomutçalýþtýr(Tablo.FDcnn,'update STOKLAR set EKIPMAN=1 where ID=&ID and isnull(EKIPMAN,0)<>1 ',['&ID'],[TabEkipman.FieldByName('URUNID').AsInteger]);
+     Veritabani.BasitKomutÃ§alÄ±ÅŸtÄ±r(Tablo.FDcnn,'update STOKLAR set EKIPMAN=1 where ID=&ID and isnull(EKIPMAN,0)<>1 ',['&ID'],[TabEkipman.FieldByName('URUNID').AsInteger]);
 
   ModalResult := mrOk;
 end;

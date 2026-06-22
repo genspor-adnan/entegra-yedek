@@ -1,4 +1,4 @@
-unit UOpsiyonUretimDlg;
+﻿unit UOpsiyonUretimDlg;
 
 interface
 
@@ -59,7 +59,7 @@ uses UTablo, prjconst, LocOnFly;
 
 procedure TOpsiyonUretimDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    CBSenaryo.EditValue := Tablo.GENINI.ReadInteger(Ops_Uretim_Senaryo, 1);
    CheckCariSor.Checked := Tablo.GENINI.ReadBoolean(Ops_CheckCariSor, False);
    EditSekme1.Text := Tablo.GENINI.ReadString(Ops_UEmriEditSekme1, '');

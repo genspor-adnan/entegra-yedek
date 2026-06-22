@@ -1,4 +1,4 @@
-unit USerinoTakip;
+ï»¿unit USerinoTakip;
 
 interface
 
@@ -74,12 +74,12 @@ type
 
 var
   SeriNoDlg: TSeriNoDlg;
-  //cagirantur : demirbaş tutanağı olabilir, fatura türleri olabilir
-  //cagiranbaslikid : ana tablodaki kayıt id si
-  //cagiransatirId : detay tablodaki id değeri
+  //cagirantur : demirbaÅŸ tutanaÄŸÄ± olabilir, fatura tÃ¼rleri olabilir
+  //cagiranbaslikid : ana tablodaki kayÄ±t id si
+  //cagiransatirId : detay tablodaki id deÄŸeri
   SeriTakipSeriNosayisi, SeriTakipCagiranBaslikId, SeriTakipCagiranSatirId, SeriTakipCagiranTur,
   SeriTakipCagiranUrunId : Integer;
-  SeriTakipislemturu : string;     // G : giriş, C: Çıkış, D: Düzelt , S:Sil  , GD: GirişDüzel, CD : Çıkış Düzelt
+  SeriTakipislemturu : string;     // G : giriÅŸ, C: Ã‡Ä±kÄ±ÅŸ, D: DÃ¼zelt , S:Sil  , GD: GiriÅŸDÃ¼zel, CD : Ã‡Ä±kÄ±ÅŸ DÃ¼zelt
 
 implementation
   Uses Utablo;//,LocOnFly;
@@ -106,7 +106,7 @@ function YeterliSeriNoSecildi:Boolean;
       Result:=True;
       if lblKayitSayisi.Caption<>lblGerekliSayi.Caption then
        begin
-         HataliSeriNoMemoyaEkle('','Seçilen Seri Numarası Sayısı gereken sayıdan farklı, lütfen kontrol ediniz');
+         HataliSeriNoMemoyaEkle('','SeÃ§ilen Seri NumarasÄ± SayÄ±sÄ± gereken sayÄ±dan farklÄ±, lÃ¼tfen kontrol ediniz');
          Result:=False;
        end;
  end;  //Eklendi
@@ -120,7 +120,7 @@ var
         if StringReplace( memoSeriNolar.Lines[i],' ','',[rfReplaceAll]) = '' then
          begin
           Result:=True;
-          lblHataMesaj.Caption:= 'Seri No Listesinde Boş Satır var, Lütfen Kontrol ediniz.';
+          lblHataMesaj.Caption:= 'Seri No Listesinde BoÅŸ SatÄ±r var, LÃ¼tfen Kontrol ediniz.';
           abort;
          end;
       end;
@@ -136,7 +136,7 @@ var
            if  (memoSeriNolar.Lines.IndexOf(memoSeriNolar.Lines[i])>=0) and (memoSeriNolar.Lines.IndexOf(memoSeriNolar.Lines[i])<>i) then
               begin
                 Result:=True;
-                HataliSeriNoMemoyaEkle(memoSeriNolar.Lines[i],'Seri Numarası Listesinde tekrar eden seri numaraları var, Lütfen kontrol ediniz');
+                HataliSeriNoMemoyaEkle(memoSeriNolar.Lines[i],'Seri NumarasÄ± Listesinde tekrar eden seri numaralarÄ± var, LÃ¼tfen kontrol ediniz');
 //                abort;
               end;
         end;
@@ -156,7 +156,7 @@ begin
       if Tablo.Query5.RecordCount>=1 then
        begin
          Result:=True;
-         HataliSeriNoMemoyaEkle(memoSeriNolar.Lines[i],'Aynı ürün için listedeki seri numaraları daha önce kullanılmıştır. Lütfen kontrol ediniz');
+         HataliSeriNoMemoyaEkle(memoSeriNolar.Lines[i],'AynÄ± Ã¼rÃ¼n iÃ§in listedeki seri numaralarÄ± daha Ã¶nce kullanÄ±lmÄ±ÅŸtÄ±r. LÃ¼tfen kontrol ediniz');
        end;
    end;
 end;   //Eklendi
@@ -164,7 +164,7 @@ end;   //Eklendi
   var
    i : integer;
   begin
-     //fatura id si yeni kayıt sırasında oluşmamış olduğu için diziye atıyoruz, after post ta dizinden giriş kayıtları oluşuyor
+     //fatura id si yeni kayÄ±t sÄ±rasÄ±nda oluÅŸmamÄ±ÅŸ olduÄŸu iÃ§in diziye atÄ±yoruz, after post ta dizinden giriÅŸ kayÄ±tlarÄ± oluÅŸuyor
      faturaurungarantisuresi:= edGarantiSure.Value;
      for i := 0 to memoSeriNolar.Lines.Count - 1 do
         faturaurunserinolar[i]:= memoSeriNolar.Lines[i];
@@ -201,7 +201,7 @@ begin
   lblHataMesaj.Caption:='';
 
   if (SeriTakipislemturu ='GD') or (SeriTakipislemturu ='CD')  then
-     clmSeriNo.Editing:= True // sadece düzeltme parametresi ile çağırılırsa ilgili kayıt düzeltilebilir.
+     clmSeriNo.Editing:= True // sadece dÃ¼zeltme parametresi ile Ã§aÄŸÄ±rÄ±lÄ±rsa ilgili kayÄ±t dÃ¼zeltilebilir.
   else
    clmSeriNo.Editing:= False;
 
@@ -209,26 +209,26 @@ begin
    edGarantiSure.Visible:= SeriTakipislemturu='G';
    lblGarantiSure.Visible:= edGarantiSure.Visible;
 
-{$REGION 'SeriNoGiriş'}
+{$REGION 'SeriNoGiriÅŸ'}
   if SeriTakipislemturu= 'G' then
-   begin // Yeni Seri No Girişi
+   begin // Yeni Seri No GiriÅŸi
       if memoSeriNolar.Lines.Count <> SeriTakipSeriNosayisi then
        begin
-         HataliSeriNoMemoyaEkle('','Listedeki Seri Numarası sayısı gereken sayıdan farklı, lütfen kontrol ediniz');
+         HataliSeriNoMemoyaEkle('','Listedeki Seri NumarasÄ± sayÄ±sÄ± gereken sayÄ±dan farklÄ±, lÃ¼tfen kontrol ediniz');
          abort;
        end;
       if BosSatirVar then abort;
       if AyniSeriNoVar then Abort;
       if SeriNoDahaOnceGirilmismi then abort;
 
-      //tüm kontrolleri geciyorsa seri no girişi yapılabilir
+      //tÃ¼m kontrolleri geciyorsa seri no giriÅŸi yapÄ±labilir
       SeriNolariGir;
       ModalResult:=mrOk;
 
    end    //Eklendi
 {$ENDREGION}
  else
-{$REGION 'SeriNoÇıkış'}
+{$REGION 'SeriNoÃ‡Ä±kÄ±ÅŸ'}
  if SeriTakipislemturu = 'C' then
    begin
       if not (YeterliSeriNoSecildi) then abort;
@@ -236,7 +236,7 @@ begin
       ModalResult:=mrOk;
    end
 {$ENDREGION}
-{$REGION 'Giriş-Çıkış Düzeltme'}
+{$REGION 'GiriÅŸ-Ã‡Ä±kÄ±ÅŸ DÃ¼zeltme'}
  else if (SeriTakipislemturu = 'GD') or (SeriTakipislemturu = 'CD') then
     begin
       if not (YeterliSeriNoSecildi) then abort;
@@ -268,7 +268,7 @@ begin
      (tabSeriNoListesi.FieldByName('CIKFATURAID').AsInteger>0) and
      (clmSeriNoSec.EditValue='True') then
    begin
-        Application.MessageBox('Bu ürünün çıkışı yapılmış, Değişiklik yapılamaz','H A T A',MB_ICONERROR+MB_OK);
+        Application.MessageBox('Bu Ã¼rÃ¼nÃ¼n Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmÄ±ÅŸ, DeÄŸiÅŸiklik yapÄ±lamaz','H A T A',MB_ICONERROR+MB_OK);
         clmSeriNoSec.EditValue:='False';
         Abort;
    end;
@@ -310,11 +310,11 @@ begin
       tabSeriNoListesi.Close;
       tabSeriNoListesi.SQL.Text:= 'SELECT * FROM SERINO WHERE STOKID = '+ IntToStr(SeriTakipCagiranUrunId)+' '+
                               ' AND SERINO LIKE '''+editSeriNo.Text+'%'' ';
-      if SeriTakipislemturu = 'C' then // çıkışı yapılmamış seri numaraları
+      if SeriTakipislemturu = 'C' then // Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmamÄ±ÅŸ seri numaralarÄ±
        tabSeriNoListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) = 0 AND ISNULL(CIKFATURAID,0) = 0')
-      else if (SeriTakipislemturu = 'CD') and ( SeriTakipCagiranTur in [14, 15, 16] ) then // çıkılan seri nolar üzerinde düzeltme yapılacaksa
+      else if (SeriTakipislemturu = 'CD') and ( SeriTakipCagiranTur in [14, 15, 16] ) then // Ã§Ä±kÄ±lan seri nolar Ã¼zerinde dÃ¼zeltme yapÄ±lacaksa
        tabSeriNoListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) > 0 AND ISNULL(CIKFATURAID,0) = '+inttostr(SeriTakipCagiranSatirId))
-      else if (SeriTakipislemturu = 'GD') and ( SeriTakipCagiranTur in [7, 10, 11, 12] ) then // Girilen seri nolar üzerinde düzeltme yapılacaksa
+      else if (SeriTakipislemturu = 'GD') and ( SeriTakipCagiranTur in [7, 10, 11, 12] ) then // Girilen seri nolar Ã¼zerinde dÃ¼zeltme yapÄ±lacaksa
        tabSeriNoListesi.SQL.Add(' AND ISNULL(GIRISTURU,0) > 0 AND ISNULL(GIRFATURAID,0) = '+inttostr(SeriTakipCagiranSatirId));
       tabSeriNoListesi.Open;
    end;
@@ -322,7 +322,7 @@ end;    //Eklendi
 
 procedure TSeriNoDlg.FormCreate(Sender: TObject);
 begin
- // LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+ // LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   lblHataMesaj.Caption:='';
 end;   //eklendi
 
@@ -334,13 +334,13 @@ begin
 {
   if (SeriTakipislemturu = 'GD') or (SeriTakipislemturu = 'CD') then
    begin
-     btnSerinoKaydet.Caption:='Seçilen Numaraları Çıkar';
+     btnSerinoKaydet.Caption:='SeÃ§ilen NumaralarÄ± Ã‡Ä±kar';
      editSeriNoKeyUp(Self,k,[]);
    end
   else
-   btnSerinoKaydet.Caption:='Seri Numaralarını Kaydet';
+   btnSerinoKaydet.Caption:='Seri NumaralarÄ±nÄ± Kaydet';
 }
-  //seritakipsayısı 0 gönderilirse sadece grid üzerinden seri no düzeltme işlemi yapılabilir.
+  //seritakipsayÄ±sÄ± 0 gÃ¶nderilirse sadece grid Ã¼zerinden seri no dÃ¼zeltme iÅŸlemi yapÄ±labilir.
    Tablo.Query6.Close;
    Tablo.Query6.SQL.Text:= 'SELECT GARANTISURESI FROM STOKLAR WHERE ID='+inttostr(SeriTakipCagiranUrunId)+' ';
    Tablo.Query6.Open;
@@ -370,7 +370,7 @@ begin
    begin
      if (SeriTakipCagiranTur in [7, 10, 11, 12]) and (tabSeriNoListesi.FieldByName('CIKFATURAID').AsInteger>0 ) then
       begin
-        Application.MessageBox('Bu ürünün çıkışı yapılmış, Seri Numarası değiştirilemez','H A T A',MB_ICONERROR+MB_OK);
+        Application.MessageBox('Bu Ã¼rÃ¼nÃ¼n Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmÄ±ÅŸ, Seri NumarasÄ± deÄŸiÅŸtirilemez','H A T A',MB_ICONERROR+MB_OK);
         Abort;
       end;
       Tablo.Query5.Close;
@@ -380,7 +380,7 @@ begin
       Tablo.Query5.Open;
      if Tablo.Query5.RecordCount>0 then
       begin
-         Application.MessageBox(PChar(tabSeriNoListesi.FieldByName('SERINO').AsString+' seri numarası bu ürün için daha önce kullanılmış, tekrar girilemez') ,'H A T A',MB_ICONERROR+ MB_OK);
+         Application.MessageBox(PChar(tabSeriNoListesi.FieldByName('SERINO').AsString+' seri numarasÄ± bu Ã¼rÃ¼n iÃ§in daha Ã¶nce kullanÄ±lmÄ±ÅŸ, tekrar girilemez') ,'H A T A',MB_ICONERROR+ MB_OK);
          Abort;
       end;
    end;

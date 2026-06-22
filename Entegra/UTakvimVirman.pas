@@ -1,4 +1,4 @@
-unit UTakvimVirman;
+ï»¿unit UTakvimVirman;
 
 interface
 
@@ -113,33 +113,33 @@ var
  {
 Resourcestring
 //Errors
-  BozukKayit= 'Açmaya çalýþtýðýnýz kaydýn içeriði bozulmuþtur lütfen silip tekrar oluþturunuz.';
+  BozukKayit= 'AÃ§maya Ã§alÄ±ÅŸtÄ±ÄŸÄ±nÄ±z kaydÄ±n iÃ§eriÄŸi bozulmuÅŸtur lÃ¼tfen silip tekrar oluÅŸturunuz.';
 //captions
   islem41= 'Kasadan bankaya para transferi'; //41
   islem42= 'Bankadan kasaya  para transferi'; //42
-  islem43= 'Bankadaki hesaplar arasý para transferi'; //43
-  islem45= 'Kasadaki nakit paranýn bir kýsmýyla döviz alma'; //45
-  islem46= 'Döviz kasasýndaki paranýn bir kýsmýný bozdurma'; //46
-  islem47= 'Bankadaki nakit paranýn bir kýsmýyla döviz alma'; //47
-  islem48= 'Döviz hesabýndaki paranýn bir kýsmýný bozdurma'; //48
-  islem51= 'Elimzde bulunan çeki bankadan tahsil etme';  //51
+  islem43= 'Bankadaki hesaplar arasÄ± para transferi'; //43
+  islem45= 'Kasadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alma'; //45
+  islem46= 'DÃ¶viz kasasÄ±ndaki paranÄ±n bir kÄ±smÄ±nÄ± bozdurma'; //46
+  islem47= 'Bankadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alma'; //47
+  islem48= 'DÃ¶viz hesabÄ±ndaki paranÄ±n bir kÄ±smÄ±nÄ± bozdurma'; //48
+  islem51= 'Elimzde bulunan Ã§eki bankadan tahsil etme';  //51
   islem52= 'Elimzde bulunan senedi bankadan tahsil etme'; //52
-  islem53= 'Verdiðimiz çek karþýlýðý bankadan ödeme';  //53
-  islem54= 'Verdiðimiz senet karþýlýðý bankadan ödeme'; //54
-  islem58= 'Alýnmýþ olan kredi taksitlerinin ödemesi'; //58
-  islem95= 'Bankoda tahsil edilmiþ olan kredi kartlarýnýn giriþi';  //95
-  islem91= 'Bankoda tahsil edilmiþ olan nakit ödemelerin giriþi';  //91
+  islem53= 'VerdiÄŸimiz Ã§ek karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶deme';  //53
+  islem54= 'VerdiÄŸimiz senet karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶deme'; //54
+  islem58= 'AlÄ±nmÄ±ÅŸ olan kredi taksitlerinin Ã¶demesi'; //58
+  islem95= 'Bankoda tahsil edilmiÅŸ olan kredi kartlarÄ±nÄ±n giriÅŸi';  //95
+  islem91= 'Bankoda tahsil edilmiÅŸ olan nakit Ã¶demelerin giriÅŸi';  //91
 //Panels
   Tutar123='Tutar:  ';
   banka11='Banka:  ';
   sube11='Sube:  ';
   hesap11='Hesap:  ';
-  kasaadi11='Kasa Adý:  ';
+  kasaadi11='Kasa AdÄ±:  ';
   kasakodu11='Kasa Kodu:  ';
   kasakur11='  ';
-  posadi='Pos Adý:  ';
+  posadi='Pos AdÄ±:  ';
   poskodu='Pos Kodu:  ';
-  posbankasi='Bankasý:  ';
+  posbankasi='BankasÄ±:  ';
 
                 }
 
@@ -216,7 +216,7 @@ begin
        GonImg.Visible:=False;//KASA
        ImageGonBanka.Visible:=False;//Banka
     end;
-    4: begin  //Çek
+    4: begin  //Ã‡ek
        PanelGonBanka.Caption:='';
        PanelGonSube.Caption:='';
        PanelGonHesap.Caption:='';
@@ -285,7 +285,7 @@ begin
        PanelAlSube.Caption:='';
        PanelAlHesap.Caption:='';
     end;
-    4: begin  //Çek
+    4: begin  //Ã‡ek
        PanelAlBanka.Caption:='';
        PanelAlSube.Caption:='';
        PanelAlHesap.Caption:='';
@@ -332,13 +332,13 @@ procedure TTakvimVirmanDlg.TablariAc;
 Var
   kontrol:Integer;
 begin
-   //giren ve çýkan hesabýn belirlenmesi;
+   //giren ve Ã§Ä±kan hesabÄ±n belirlenmesi;
    kontrol := 0;
    tablo.query1.Close;
    tablo.query1.SQL.text:='SELECT * FROM KASA WHERE ID = '+ IntToStr(ID);
    tablo.query1.Open;
-   //kayýt kontrolü ve querylerin açýlmasý
-   if tablo.query1.FieldByName('BORC').AsCurrency > 0.1 Then Begin  //borçlu
+   //kayÄ±t kontrolÃ¼ ve querylerin aÃ§Ä±lmasÄ±
+   if tablo.query1.FieldByName('BORC').AsCurrency > 0.1 Then Begin  //borÃ§lu
      Inc(kontrol);
      TabBorcluKasa.Close;
      TabBorcluKasa.Params[0].Value:=ID;
@@ -347,7 +347,7 @@ begin
      TabAlacakliKasa.Params[0].Value:=Tablo.Query1.FieldByName('GERIDONUSID').AsInteger;;
      TabAlacakliKasa.Open;
    End;
-   if tablo.query1.FieldByName('ALACAK').AsInteger > 0 then Begin   //alacaklý
+   if tablo.query1.FieldByName('ALACAK').AsInteger > 0 then Begin   //alacaklÄ±
      Inc(kontrol);
      TabBorcluKasa.Close;
      TabBorcluKasa.Params[0].Value:=Tablo.Query1.FieldByName('GERIDONUSID').AsInteger;
@@ -398,7 +398,7 @@ Begin
        BorcluDuzenle(2);
        AlacakliDuzenle(1);
      end;  {
-     51: begin //çek-banka
+     51: begin //Ã§ek-banka
        TakvimVirmanDlg.Caption := islem51;
        BorcluDuzenle(1);
        AlacakliDuzenle(1);
@@ -408,7 +408,7 @@ Begin
        BorcluDuzenle(1);
        AlacakliDuzenle(1);
      end;
-     53: begin  //banka-çek
+     53: begin  //banka-Ã§ek
        TakvimVirmanDlg.Caption := islem53;
        BorcluDuzenle(1);
        AlacakliDuzenle(1);
@@ -487,12 +487,12 @@ begin
    eskiad := TcxDBLabel(Sender).Caption;
    tab := (TcxDBLabel(Sender).DataBinding.DataSource.DataSet as TFDQuery);
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1,3 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);  //1 alacakli,3borclu ise
-      //date bilgi giriþi
+      //edit bilgi giriÅŸi
+      1,3 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);  //1 alacakli,3borclu ise
+      //date bilgi giriÅŸi
       2 : begin
             if eskiad='' then eskiad :=Tablo.GENINI.BugunTrh;
-            ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
+            ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
           end;
    end;
    if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls) = mrOK then begin

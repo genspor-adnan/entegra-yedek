@@ -1,4 +1,4 @@
-unit UCekListe;
+ï»¿unit UCekListe;
 
 interface
 
@@ -85,17 +85,17 @@ begin
     1 : begin
          GrupCekDurum.Enabled:= True;
          GrupCekDurum.Items.Clear;
-         GrupCekDurum.Items.Add('Tümü');
-         GrupCekDurum.Items.Add('Ödenmiþ');
-         GrupCekDurum.Items.Add('Ödenmemiþ');
+         GrupCekDurum.Items.Add('TÃ¼mÃ¼');
+         GrupCekDurum.Items.Add('Ã–denmiÅŸ');
+         GrupCekDurum.Items.Add('Ã–denmemiÅŸ');
          GrupCekDurum.ItemIndex:=0;
          end;
     2 : begin
          GrupCekDurum.Enabled:= True;
          GrupCekDurum.Items.Clear;
-         GrupCekDurum.Items.Add('Tümü');
-         GrupCekDurum.Items.Add('Tahsil Edilmiþ');
-         GrupCekDurum.Items.Add('Tahsil Edilmemiþ');
+         GrupCekDurum.Items.Add('TÃ¼mÃ¼');
+         GrupCekDurum.Items.Add('Tahsil EdilmiÅŸ');
+         GrupCekDurum.Items.Add('Tahsil EdilmemiÅŸ');
          GrupCekDurum.ItemIndex:=0;
         end;
    end;
@@ -104,136 +104,136 @@ end;
 procedure TCekListeDlg.BtnListeleClick(Sender: TObject);
 begin
    case GrupCekTuru.ItemIndex of
-   0 : begin   // Tüm cekleri göster seçili ise
+   0 : begin   // TÃ¼m cekleri gÃ¶ster seÃ§ili ise
           TabCekListesi.Close;
           TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                    ' ,SIRANO, ODEMETARIH = ( SELECT top 1 TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )  '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''101%'' OR HESAPKODU LIKE ''103%'' ) AND '+
-                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND '+
+                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND '+
                                    ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' order BY HESAPKODU,VADE ';
          TabCekListesi.Open;
-         LabelSayi.Caption:= 'Toplam Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-         cekturu:='Bütün Çekler';
+         LabelSayi.Caption:= 'Toplam Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+         cekturu:='BÃ¼tÃ¼n Ã‡ekler';
        end;
 
    1 : begin
-         case GrupCekDurum.ItemIndex of // Verilen Çekleri göster seçili ise
-          0: begin      // VERÝLEN ÇEKLERÝN TÜMÜ GÖRÜNSÜN
+         case GrupCekDurum.ItemIndex of // Verilen Ã‡ekleri gÃ¶ster seÃ§ili ise
+          0: begin      // VERÄ°LEN Ã‡EKLERÄ°N TÃœMÃœ GÃ–RÃœNSÃœN
                  TabCekListesi.Close;
                  TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                    ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )    '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' HESAPKODU LIKE ''103%'' AND '+
-                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND '+
+                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND '+
                                    ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' order BY HESAPKODU,VADE ';
                  TabCekListesi.Open;
-                 LabelSayi.Caption:= 'Toplam Verilen Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-                 cekturu:='Verilen Çekler';
-                 cekdurum:='Tümü';
+                 LabelSayi.Caption:= 'Toplam Verilen Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+                 cekturu:='Verilen Ã‡ekler';
+                 cekdurum:='TÃ¼mÃ¼';
              end;
-          1: begin     // VERÝLEN ÇEKLERÝN ÖDENMÝÞLERÝ GÖRÜNSÜN
+          1: begin     // VERÄ°LEN Ã‡EKLERÄ°N Ã–DENMÄ°ÅžLERÄ° GÃ–RÃœNSÃœN
           TabCekListesi.Close;
           TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                    ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )     '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''103%'' ) AND '+
-                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND '+
+                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND '+
                                    ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO  IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
          TabCekListesi.Open;
-         LabelSayi.Caption:= 'Ödenmiþ Verilen Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-         cekdurum:= 'Ödenmiþ';
-         cekturu:= 'Verilen Çekler';
+         LabelSayi.Caption:= 'Ã–denmiÅŸ Verilen Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+         cekdurum:= 'Ã–denmiÅŸ';
+         cekturu:= 'Verilen Ã‡ekler';
              end;
-          2: begin     // VERÝLEN CEKLERÝN ÖDENMEMÝÞLERÝ GÖRÜNSÜN
+          2: begin     // VERÄ°LEN CEKLERÄ°N Ã–DENMEMÄ°ÅžLERÄ° GÃ–RÃœNSÃœN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                    ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )    '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''103%'' ) AND '+
-                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND'+
+                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND'+
                                    ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO  NOT IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
               TabCekListesi.Open;
-              LabelSayi.Caption:= 'Ödenmemiþ Verilen Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-              cekdurum:= 'Ödenmemiþ';
-              cekturu:= 'Verilen Çekler';
+              LabelSayi.Caption:= 'Ã–denmemiÅŸ Verilen Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+              cekdurum:= 'Ã–denmemiÅŸ';
+              cekturu:= 'Verilen Ã‡ekler';
              end;
 
          end;
        end;
-   2 : begin            // ALINAN ÇEKLERÝ GÖRÜNTÜLEME
+   2 : begin            // ALINAN Ã‡EKLERÄ° GÃ–RÃœNTÃœLEME
          case GrupCekDurum.ItemIndex of
-          0: begin    // ALINAN ÇEKLERÝN TÜMÜ GÖRÜNSÜN
+          0: begin    // ALINAN Ã‡EKLERÄ°N TÃœMÃœ GÃ–RÃœNSÃœN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                          ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )      '+
                                          ' FROM KASA K'+
                                          ' WHERE '+
                                          ' (HESAPKODU LIKE ''101%'' ) AND '+
-                                         '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'')  AND'+
+                                         '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'')  AND'+
                                          ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                          ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                          ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                          ' order BY HESAPKODU,VADE ';
                TabCekListesi.Open;
-               LabelSayi.Caption:= 'Alýnan Toplam Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-               cekturu:='Alýnan Çekler';
-               cekdurum:='Tümü'
+               LabelSayi.Caption:= 'AlÄ±nan Toplam Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+               cekturu:='AlÄ±nan Ã‡ekler';
+               cekdurum:='TÃ¼mÃ¼'
 
              end;
-          1: begin          // ALINAN ÇEKLERÝN TAHSÝL EDÝLMÝÞLERÝ GÖRÜNSÜN
+          1: begin          // ALINAN Ã‡EKLERÄ°N TAHSÄ°L EDÄ°LMÄ°ÅžLERÄ° GÃ–RÃœNSÃœN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                          ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )     '+
                                          ' FROM KASA K'+
                                          ' WHERE '+
                                          ' (HESAPKODU LIKE ''101%'' ) AND '+
-                                         '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND '+
+                                         '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND '+
                                          ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                          ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                          ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                          ' AND SIRANO IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                          ' order BY HESAPKODU,VADE ';
                TabCekListesi.Open;
-               LabelSayi.Caption:= 'Tahsil Edilmiþ Alýnan Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-               cekdurum:= 'Tahsil Edilmiþ';
-               cekturu:='Alýnan Çekler';
+               LabelSayi.Caption:= 'Tahsil EdilmiÅŸ AlÄ±nan Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+               cekdurum:= 'Tahsil EdilmiÅŸ';
+               cekturu:='AlÄ±nan Ã‡ekler';
              end;
-          2: begin     // ALINAN CEKLERÝN TAHSÝL EDÝLMEMÝÞLERÝ GÖRÜNSÜN.
+          2: begin     // ALINAN CEKLERÄ°N TAHSÄ°L EDÄ°LMEMÄ°ÅžLERÄ° GÃ–RÃœNSÃœN.
               TabCekListesi.Close;
               TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
                                    ' ,SIRANO, ODEMETARIH = ( SELECT  top 1 TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )       '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''101%'' ) AND '+
-                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÝRMAN'') AND '+
+                                   '  ISNULL(CARIKOD,'''') NOT IN (''KASA'',''VÄ°RMAN'') AND '+
                                    ' ISNULL(HESAPKODU,'''') LIKE '''+ EditHesapKod.Text+'%'' AND '+
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO NOT IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
               TabCekListesi.Open;
-              LabelSayi.Caption:= 'Tahsil Edilmemiþ Alýnan Çek Sayýsý : '+ inttostr(TabCekListesi.RecordCount);
-              cekdurum:= 'Tahsil Edilmemiþ';
-              cekturu:='Alýnan Çekler';
+              LabelSayi.Caption:= 'Tahsil EdilmemiÅŸ AlÄ±nan Ã‡ek SayÄ±sÄ± : '+ inttostr(TabCekListesi.RecordCount);
+              cekdurum:= 'Tahsil EdilmemiÅŸ';
+              cekturu:='AlÄ±nan Ã‡ekler';
              end;
 
          end;
@@ -277,7 +277,7 @@ end;
 
 procedure TCekListeDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
   DateBaslangic.DateTime:= now;
   DateBitis.DateTime:= now+30;

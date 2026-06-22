@@ -1,4 +1,4 @@
-unit UCokluSecim;
+﻿unit UCokluSecim;
 
 interface
 
@@ -47,7 +47,7 @@ implementation
 
 procedure TCokluSecimDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.GridTurkcelestir;
 end;
 

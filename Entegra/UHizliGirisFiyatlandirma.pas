@@ -1,4 +1,4 @@
-unit UHizliGirisFiyatlandirma;
+ï»¿unit UHizliGirisFiyatlandirma;
 
 interface
 
@@ -94,12 +94,12 @@ end;
 procedure THizliGirisFiyatlandirmaDlg.EditTutarPropertiesEditValueChanged(
   Sender: TObject);
 begin
-  LabelKdvsiz.Caption := 'KDV Hariç '+FCurrToStr(EditTutar.EditValue*(100/(100+KDVOrani)));
+  LabelKdvsiz.Caption := 'KDV HariÃ§ '+FCurrToStr(EditTutar.EditValue*(100/(100+KDVOrani)));
 end;
 
 procedure THizliGirisFiyatlandirmaDlg.FormCreate(Sender: TObject);
 begin
-//LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+//LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure THizliGirisFiyatlandirmaDlg.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

@@ -1,4 +1,4 @@
-unit UDuzenliOdeme;
+ï»¿unit UDuzenliOdeme;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/06/2010 17:11:49}
@@ -246,7 +246,7 @@ end;
 procedure TDuzenliOdeme.EkstreTusClick(Sender: TObject);
 begin
   if (TabDetay.Eof)or(TabDetay.FieldByName('REHBERID').AsString='') then
-      raise Exception.Create('Önce sözleþme yapýlan kurumu ekleyin');
+      raise Exception.Create('Ã–nce sÃ¶zleÅŸme yapÄ±lan kurumu ekleyin');
   with TCariDlg(FFrameBilgi.IcerikGit(TCariDlg).Ornek) do begin
       KapatEylemi := EkstreKapatEylemi;
       KapatGorunsun := True;
@@ -329,7 +329,7 @@ procedure TDuzenliOdeme.PlanTusClick(Sender: TObject);
 var TN : TTreeNode;
 begin
    if EditBORCLUKOD.Text = '' then
-      raise Exception.Create('Önce kurum seçin');
+      raise Exception.Create('Ã–nce kurum seÃ§in');
    if TabDetay.State in [dsEdit, dsInsert] then
       TabDetay.Post;
 
@@ -342,7 +342,7 @@ begin
 
    KasaWizardDlg.PanelSag.Visible := False;
    KasaWizardDlg.MenuMusTree.Items.clear;
-   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil, 'Ödeme Planý');
+   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil, 'Ã–deme PlanÄ±');
    TN.selectedIndex := 71;
    KasaWizardDlg.WizardKontrol.SelectNextPage;
 
@@ -398,8 +398,8 @@ end;
 procedure TDuzenliOdeme.TabDetayBeforePost(DataSet: TDataSet);
 begin
    if not BoslukKontrol(SOZLESMEREHBERID.Text, 'Kurum bilgisi') then begin EditBORCLUKOD.SetFocus; Abort; end;
-   if not BoslukKontrol(DateSOZLESME_TARIHI.Text, 'Baþlama tarihi') then begin DateSOZLESME_TARIHI.SetFocus; Abort; end;
-   if not BoslukKontrol(DateBITIS_TARIHI.Text, 'Bitiþ tarihi') then begin DateBITIS_TARIHI.SetFocus; Abort; end;
+   if not BoslukKontrol(DateSOZLESME_TARIHI.Text, 'BaÅŸlama tarihi') then begin DateSOZLESME_TARIHI.SetFocus; Abort; end;
+   if not BoslukKontrol(DateBITIS_TARIHI.Text, 'BitiÅŸ tarihi') then begin DateBITIS_TARIHI.SetFocus; Abort; end;
 end;
 
 procedure TDuzenliOdeme.TabDetayCalcFields(DataSet: TDataSet);
@@ -442,7 +442,7 @@ end;
 
 procedure TDuzenliOdeme.TabDuzenliOdemeBeforeDelete(DataSet: TDataSet);
 begin
-   Tablo.SilmeKontrolu('DUZENLIODEMEDETAY ', 'DUZID', TabDuzenliOdeme.Fields[0].AsString, 'Sözleþme');
+   Tablo.SilmeKontrolu('DUZENLIODEMEDETAY ', 'DUZID', TabDuzenliOdeme.Fields[0].AsString, 'SÃ¶zleÅŸme');
 end;
 
 procedure TDuzenliOdeme.TabDuzenliOdemeNewRecord(DataSet: TDataSet);

@@ -1,4 +1,4 @@
-unit UTablo;
+ï»¿unit UTablo;
 
 interface
 
@@ -260,8 +260,8 @@ begin
 
 //      showmessage('G?nderim verisi bulunamad?. Ya daha ?nce g?nderilmi?, ya da g?nderim listesinde yok!')
    //yazd?rmadan (mutfaktan) sonra update ile durumu (IZLEME) 2 yap?l?r. Renk i?in
-   //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ' + AktifFatTabloAdi +' set IZLEME=2' ,[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set IZLEME=2 where FATBASID='+IntToStr(FatBasId),[],[]);// EskiSiparisID
+   //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ' + AktifFatTabloAdi +' set IZLEME=2' ,[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set IZLEME=2 where FATBASID='+IntToStr(FatBasId),[],[]);// EskiSiparisID
 end;
 
 procedure TTablo.Dilislemleri;

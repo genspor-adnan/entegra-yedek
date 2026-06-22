@@ -1,4 +1,4 @@
-unit Lib.OpenSSL.API;
+﻿unit Lib.OpenSSL.API;
 
 { Provides an interface to OpenSSL }
 

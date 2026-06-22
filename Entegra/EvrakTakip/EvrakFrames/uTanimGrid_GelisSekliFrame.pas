@@ -1,4 +1,4 @@
-unit uTanimGrid_GelisSekliFrame;
+﻿unit uTanimGrid_GelisSekliFrame;
 
 interface
 

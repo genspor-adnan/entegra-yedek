@@ -1,4 +1,4 @@
-unit fbDatamodule;
+ï»¿unit fbDatamodule;
 {
   https://developers.facebook.com/docs/facebook-login/guides/access-tokens/
 }
@@ -1177,8 +1177,8 @@ begin
                     firstStr := jVData_message.Value;
                         firstStr := StringReplace(firstStr,#10#10,#10,[rfReplaceAll]);
                         firstStr := StringReplace(firstStr,#13#10,#10,[rfReplaceAll]);
-                        firstStr := StringReplace(firstStr,'Ad ve soyadý'#10,'Ad ve soyadý:',[rfReplaceAll]);
-                        firstStr := StringReplace(firstStr,'Telefon numarasý'#10,'Telefon numarasý:',[rfReplaceAll]);
+                        firstStr := StringReplace(firstStr,'Ad ve soyadÄ±'#10,'Ad ve soyadÄ±:',[rfReplaceAll]);
+                        firstStr := StringReplace(firstStr,'Telefon numarasÄ±'#10,'Telefon numarasÄ±:',[rfReplaceAll]);
                         firstStr := StringReplace(firstStr,'E-posta'#10,'E-posta:',[rfReplaceAll]);
 
                         Result.message := firstStr;
@@ -1191,14 +1191,14 @@ begin
                        else
                      begin
 
-                        Result.message_UserName  := ParseByTag('Ad ve soyadý:',firstStr);
-                        Result.message_Phone  := ParseByTag('Telefon numarasý:',firstStr);
+                        Result.message_UserName  := ParseByTag('Ad ve soyadÄ±:',firstStr);
+                        Result.message_Phone  := ParseByTag('Telefon numarasÄ±:',firstStr);
                         Result.message_email    := ParseByTag('E-posta:',firstStr);
                         Result.PageName :=  ParseFirst( firstStr);
                         Result.Title := ParseFirst( firstStr);
                       end;
                   end;
-                  // Sað/Sol boþluklar temizlenmeli
+                  // SaÄŸ/Sol boÅŸluklar temizlenmeli
                   Result.from_id := TrimLeft(TrimRight(Result.from_id));
                   Result.message_UserName := TrimLeft(TrimRight(Result.message_UserName));
 
@@ -1317,7 +1317,7 @@ begin
   //https://graph.facebook.com/v18.0/1569153207222534?fields=organic_leads_count,name,id,page,created_time,status,leads{id},expired_leads_count
 {
   "organic_leads_count": 3,
-  "name": "Granit'(n)in 2 Aralýk 2023 Cumartesi 14:31 tarihinde oluþturduðu form",
+  "name": "Granit'(n)in 2 AralÄ±k 2023 Cumartesi 14:31 tarihinde oluÅŸturduÄŸu form",
   "id": "1569153207222534",
   "page": {
     "name": "Granit",
@@ -1460,14 +1460,14 @@ begin
                        if GetArraySize(jaVal)>0 then
                          tempVal := (GetArrayItem(jaVal, 0) as TJSONValue).Value
                        else tempVal := '';
-                       if (tempName = 'FULL_NAME') or(tempName='adý_soyadý') then Result.FULL_NAME := tempVal; //'adý_soyadý'
+                       if (tempName = 'FULL_NAME') or(tempName='adÄ±_soyadÄ±') then Result.FULL_NAME := tempVal; //'adÄ±_soyadÄ±'
                        if (tempName = 'EMAIL') or(tempName='e-posta') then Result.EMAIL := tempVal; //'e-posta'
-                       if (tempName = 'PHONE') or(tempName='telefon_numarasý') then Result.PHONE := tempVal; //'telefon_numarasý'
-                       if (tempName='diger_telefon_numarasý') then Result.PHONE2 := tempVal; //'telefon_numarasý' , 'diger_telefon_numarasý'
+                       if (tempName = 'PHONE') or(tempName='telefon_numarasÄ±') then Result.PHONE := tempVal; //'telefon_numarasÄ±'
+                       if (tempName='diger_telefon_numarasÄ±') then Result.PHONE2 := tempVal; //'telefon_numarasÄ±' , 'diger_telefon_numarasÄ±'
                        if (tempName = 'STREET_ADDRESS') or(tempName='adres') then Result.STREET_ADDRESS := tempVal;  //'adres'
                        if (tempName = 'GENDER') or(tempName='cinsiyet') then Result.GENDER := tempVal; //'cinsiyet'
-                       if (tempName = 'CITY') or(tempName='þehir') then Result.CITY:= tempVal;     //'þehir'
-                       if (tempName = 'COUNTRY') or(tempName='ülke') then Result.COUNTRY := tempVal;     //'ülke'
+                       if (tempName = 'CITY') or(tempName='ÅŸehir') then Result.CITY:= tempVal;     //'ÅŸehir'
+                       if (tempName = 'COUNTRY') or(tempName='Ã¼lke') then Result.COUNTRY := tempVal;     //'Ã¼lke'
                        if (tempName = 'NOT1')  then Result.NOT1 := Result.NOT1 + tempVal;
                        //if tempName = 'NOT2' then Result.NOTES := Result.NOTES +#13#10+ tempVal;
                        //if tempName = 'S1' then Result.NOTES := Result.NOTES +#13#10+ tempVal;
@@ -1478,7 +1478,7 @@ begin
                            if (UpperCase(Result.GENDER[1])='F') or (UpperCase( Result.GENDER[1])='K') then
                              Result.GENDER := 'K';
                         end;
-                       //NOT için eklenecek Ek Soru !
+                       //NOT iÃ§in eklenecek Ek Soru !
                      end;
                      end;
                   end;
@@ -1503,8 +1503,8 @@ end;
 
 (*
 
-Kalýcý User Acess Token     EAAJFC5NMtMcBO3ittBKkTLDZC5XgqevELoeMnEk5zReNvScIpP6xuf1ZAaiPXCInrVaqFZCqxEmHwgvKCly4ZAoc3TxSNYtZBEfZCUoiicSj3Y3OnurJVV01iDIbvBLeateM0oj0ljEVlhoEkeIqRro2JZAZC5Mc6lw9hVz4RfD8zG82dIaEPI6TuMxJBoS6ZCLmwtRBIzv5M
-Kalýcý Page Acess Token     EAAJFC5NMtMcBOZCpHHvfn7L0YSCjuk1C1GjUE4TDV9MXeZCZCZCYKZBu78w2bWqHZA8nHu8Np67DNweEpK4zPKOwn12UBn4vqdwK9DKQ4HxZCHaSxudTHNvIZCtTp8jlm88wgTk8LCVlppjP0Lmawz1ww7ALRwkZCI1h1E1eW0XIKsouZCjiPyvdsE1g7fyUHGOu9dHNad3kLglZACu82kZD
+KalÄ±cÄ± User Acess Token     EAAJFC5NMtMcBO3ittBKkTLDZC5XgqevELoeMnEk5zReNvScIpP6xuf1ZAaiPXCInrVaqFZCqxEmHwgvKCly4ZAoc3TxSNYtZBEfZCUoiicSj3Y3OnurJVV01iDIbvBLeateM0oj0ljEVlhoEkeIqRro2JZAZC5Mc6lw9hVz4RfD8zG82dIaEPI6TuMxJBoS6ZCLmwtRBIzv5M
+KalÄ±cÄ± Page Acess Token     EAAJFC5NMtMcBOZCpHHvfn7L0YSCjuk1C1GjUE4TDV9MXeZCZCZCYKZBu78w2bWqHZA8nHu8Np67DNweEpK4zPKOwn12UBn4vqdwK9DKQ4HxZCHaSxudTHNvIZCtTp8jlm88wgTk8LCVlppjP0Lmawz1ww7ALRwkZCI1h1E1eW0XIKsouZCjiPyvdsE1g7fyUHGOu9dHNad3kLglZACu82kZD
 
 *)
 
@@ -1519,7 +1519,7 @@ params >>
 grant_type         fb_exchange_token
 client_id          638865971655879
 client_secret      a868dd95e19c7137315ec9d0c5658769
-                   Kalýcý UserAcessToken
+                   KalÄ±cÄ± UserAcessToken
 fb_exchange_token  EAAJFC5NMtMcBO3ittBKkTLDZC5XgqevELoeMnEk5zReNvScIpP6xuf1ZAaiPXCInrVaqFZCqxEmHwgvKCly4ZAoc3TxSNYtZBEfZCUoiicSj3Y3OnurJVV01iDIbvBLeateM0oj0ljEVlhoEkeIqRro2JZAZC5Mc6lw9hVz4RfD8zG82dIaEPI6TuMxJBoS6ZCLmwtRBIzv5M
 
 

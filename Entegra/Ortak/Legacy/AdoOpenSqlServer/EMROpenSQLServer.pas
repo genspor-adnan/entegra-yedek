@@ -1,4 +1,4 @@
-unit OpenSQLServer;
+ï»¿unit OpenSQLServer;
 
 {
 
@@ -250,12 +250,12 @@ begin
 
       if (sc.ServerName = '') or (sc.DatabaseName = '') then
       begin
-         MessageDlg('Sunucu ve veritabanı seçin!', mtWarning, [mbOK], 0);
+         MessageDlg('Sunucu ve veritabanÄ± seÃ§in!', mtWarning, [mbOK], 0);
          Exit;
       end;
       if ledUserName.Text='' Then
        begin
-         MessageDlg('Kullanıcı Adını Giriniz',mtWarning,[mbOk],0);
+         MessageDlg('KullanÄ±cÄ± AdÄ±nÄ± Giriniz',mtWarning,[mbOk],0);
          exit;
        end;
 
@@ -263,7 +263,7 @@ begin
          dbc.Open;
          dbc.Close;
          if (Sender as TBitBtn).Name = 'TestConButton' then
-            MessageDlg('Bağlantı başarılı!', mtInformation, [mbOK], 0);
+            MessageDlg('BaÄŸlantÄ± baÅŸarÄ±lÄ±!', mtInformation, [mbOK], 0);
       except
          on e: exception do
             MessageDlg(e.Message, mtError, [mbOK], 0);

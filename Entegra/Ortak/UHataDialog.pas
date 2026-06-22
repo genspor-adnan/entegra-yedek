@@ -1,4 +1,4 @@
-unit UHataDialog;
+ï»¿unit UHataDialog;
 
 interface
 
@@ -85,12 +85,12 @@ begin
   if (Value) then
     begin
       Height := 423;
-      moreButton.Caption := 'Ayrýntý Gizle';
+      moreButton.Caption := 'AyrÄ±ntÄ± Gizle';
       Panel1.Height := 218;
     end
   else
     begin
-      moreButton.Caption := 'Ayrýntý Göster';
+      moreButton.Caption := 'AyrÄ±ntÄ± GÃ¶ster';
       Height := 187;
     end;
 end;

@@ -1,4 +1,4 @@
-unit UOpsiyonKasiyer;
+ï»¿unit UOpsiyonKasiyer;
 
 interface
 
@@ -413,7 +413,7 @@ procedure TOpsiyonKasiyerDlg.cxImageComboBox1PropertiesEditValueChanged(Sender: 
 var I, j : integer;
     s:string[10];
 begin
-  //Þube
+  //Åžube
   s:=IntToStr(abs(StrToInt(ComboSube.Editvalue)));
   if Length(s)=1 then s:='0'+s;
   BeditHGMusteri.Tag := Tablo.GenIni.ReadInteger(StrToInt('-77'+s+'01'), 0);
@@ -465,7 +465,7 @@ procedure TOpsiyonKasiyerDlg.EditNakliyePropertiesButtonClick(Sender: TObject;  
 var Sonuclar: TStringList;
 begin
    Sonuclar:= TStringList.Create;
-   if Tablo.ListedenBilgiGetir('Nakliye Kodunu Seçin', 'select ID,KOD,AD from MASRAFGELIR where GELIRMI=1 and AD like''%<ara>%'' order by KOD', Sonuclar,  [nil, nil, nil, nil]) then begin
+   if Tablo.ListedenBilgiGetir('Nakliye Kodunu SeÃ§in', 'select ID,KOD,AD from MASRAFGELIR where GELIRMI=1 and AD like''%<ara>%'' order by KOD', Sonuclar,  [nil, nil, nil, nil]) then begin
       EditNakliye.Tag := StrToIntDef(Sonuclar[0], 0);
       EditNakliye.Text := Sonuclar[1];
    end;
@@ -476,7 +476,7 @@ procedure TOpsiyonKasiyerDlg.EditServisKodPropertiesButtonClick(Sender: TObject;
 var Sonuclar: TStringList;
 begin
    Sonuclar := TStringList.Create;
-   if Tablo.ListedenBilgiGetir('Servis Kodunu Seçin', 'select ID,KOD,AD from MASRAFGELIR where GELIRMI=1 and AD like''%<ara>%'' order by KOD', Sonuclar,  [nil, nil, nil, nil]) then begin
+   if Tablo.ListedenBilgiGetir('Servis Kodunu SeÃ§in', 'select ID,KOD,AD from MASRAFGELIR where GELIRMI=1 and AD like''%<ara>%'' order by KOD', Sonuclar,  [nil, nil, nil, nil]) then begin
       EditServisKod.Tag := StrToIntDef(Sonuclar[0], 0);
       EditServisKod.Text := Sonuclar[1];
    end;
@@ -489,7 +489,7 @@ var
 begin
   TabSheetCafe.TabVisible := (Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest]);
 
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
   ComboSube.EditValue:=SubeId;
   LabelSube.Visible := SubeVarmi;
@@ -520,7 +520,7 @@ begin
   CheckFaturaBilgisiSor.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_FaturaBilgisiSor,False); //  HizliGiris', 'FaturaBilgisiSor
   checkBelgenoSor.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_BaskiBelgeNoSor,False); //   HizliGiris', 'BaskiBelgeNoSor
   checkIskontodaAciklamaSor.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_IskontodaAciklamaSor,False); //   HizliGiris', 'IskontodaAciklamaSor
-  CheckBoxSiparis.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_SiparisYonu,False); //   HizliGiris', Sipariþ
+  CheckBoxSiparis.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_SiparisYonu,False); //   HizliGiris', SipariÅŸ
   CheckBoxBarkod.Checked := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_BarkodVar,False); //   HizliGiris', Barkod
   CheckTransferKaydetYaz.Checked :=  Tablo.GENINI.ReadBoolean(Ops_CheckTransferKaydetYaz, False); //   HizliGiris', Barkod
 
@@ -550,11 +550,11 @@ begin
   ComboTerazi.EditValue:=  GenRegIni.RegReadString('StokHizliGiris', 'VarsayilanTerazi', '1', 'C');
   //Yazarkasa
   CbYazarkasaModel.EditValue:=  GenRegIni.RegReadString('YazarKasa', 'YazarkasaModel', '', 'C');
-  CbKasaNumarasi.EditValue:= GenRegIni.RegReadString('YazarKasa', 'KasaNumarasý', '', 'C');
-  CbKasiyerNumarasi.EditValue :=  GenRegIni.RegReadString('YazarKasa', 'KasiyerNumarasý', '', 'C');
+  CbKasaNumarasi.EditValue:= GenRegIni.RegReadString('YazarKasa', 'KasaNumarasÄ±', '', 'C');
+  CbKasiyerNumarasi.EditValue :=  GenRegIni.RegReadString('YazarKasa', 'KasiyerNumarasÄ±', '', 'C');
 
   CbBarkodPortNo.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodPortNo', '', 'C');
-  CbBarkodBekleme.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodBeklemeZamaný', '', 'C');
+  CbBarkodBekleme.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodBeklemeZamanÄ±', '', 'C');
   CbBarkodBaundRate.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodBaundRate', '', 'C');
   CbBarkodDataBit.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodDataBit', '', 'C');
   CbBarkodStopBit.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodStopBit','', 'C');
@@ -582,7 +582,7 @@ begin
   CbPcParity.EditValue := GenRegIni.RegReadString('YazarKasa', 'PcParity', '', 'C');
   CbPcFlowControl.EditValue := GenRegIni.RegReadString('YazarKasa', 'PcFlowControl', '', 'C');
 
-  ChkYazarkasaKullan.Checked  :=StrToBool(GenRegIni.RegReadString('Yazarkasa','YazarkasaKullaným','0','C'));
+  ChkYazarkasaKullan.Checked  :=StrToBool(GenRegIni.RegReadString('Yazarkasa','YazarkasaKullanÄ±m','0','C'));
   if ChkYazarkasaKullan.Checked then begin
     GrpAyar.Enabled:= True;
     GrpBarkod.Enabled:= True;
@@ -594,7 +594,7 @@ begin
   end;
   CheckTahTurNakit.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurNakit,True); //   StokHizliGiris TahTurNakit
   CheckTahTurPOS.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurPOS,True); //  StokHizliGiris  TahTurPOS
-  CheckTahTurAcikHesap.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurAcikHesap,True); //  StokHizliGiris  TahTur Açýk hesap
+  CheckTahTurAcikHesap.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurAcikHesap,True); //  StokHizliGiris  TahTur AÃ§Ä±k hesap
   CheckTahTurHC.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurHC,True); //    StokHizliGiris   'TahTurHC
   CheckTahTurIC.Checked := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurIC,True); //    StokHizliGiris TahTurIC
   checkTahTurKupon.Checked:= Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurKupon,True); //   StokHizliGiris TahTurKupon
@@ -628,13 +628,13 @@ begin
 
   EditFiyatBasamak.Value := Tablo.GENINI.ReadInteger(Ops_HizliGiris_FiyatBasamak, 4);
 
-  KategoriEn.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriEn, 150);//  Opsiyon Resim Düzeni
-  KategoriBoy.EditValue := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriBoy,8);//  Opsiyon Resim Düzeni
-  UrunKartEn.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartEn, 150);//  Opsiyon Resim Düzeni
-  UrunKartBoy.EditValue := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartBoy,8);//  Opsiyon Resim Düzeni
-  ResimPixel.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_ResimPixel, 128);//  Opsiyon Resim Düzeni
-  spinAciklamaSatir.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_AciklamaSatir, 1);//  Açýklama satýr sayýsý
-  CerceveBoyut.Checked  := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim Düzeni
+  KategoriEn.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriEn, 150);//  Opsiyon Resim DÃ¼zeni
+  KategoriBoy.EditValue := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriBoy,8);//  Opsiyon Resim DÃ¼zeni
+  UrunKartEn.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartEn, 150);//  Opsiyon Resim DÃ¼zeni
+  UrunKartBoy.EditValue := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartBoy,8);//  Opsiyon Resim DÃ¼zeni
+  ResimPixel.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_ResimPixel, 128);//  Opsiyon Resim DÃ¼zeni
+  spinAciklamaSatir.EditValue  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_AciklamaSatir, 1);//  AÃ§Ä±klama satÄ±r sayÄ±sÄ±
+  CerceveBoyut.Checked  := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim DÃ¼zeni
 
   ComboSiparisYeni.EditValue := Tablo.GENINI.ReadInteger(Ops_Adisyon_SiparisYeni, 0);
   ComboSiparisYaz.EditValue := Tablo.GENINI.ReadInteger(Ops_Adisyon_SiparisYaz, 0);
@@ -654,7 +654,7 @@ begin
 
   Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurNakit,CheckTahTurNakit.Checked);   // StokHizliGiris   TahTurNakit
   Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurPOS,CheckTahTurPOS.Checked);   // StokHizliGiris   TahTurPOS
-  Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurAcikHesap,CheckTahTurAcikHesap.Checked); //  StokHizliGiris  TahTur Açýk hesap
+  Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurAcikHesap,CheckTahTurAcikHesap.Checked); //  StokHizliGiris  TahTur AÃ§Ä±k hesap
   Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurHC,CheckTahTurHC.Checked);   // StokHizliGiris   TahTurHC
   Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurIC,CheckTahTurIC.Checked);   // StokHizliGiris   TahTurIC
   Tablo.GENINI.WriteBoolean(Ops_StokHizliGiris_TahTurKupon,checkTahTurKupon.Checked);   // StokHizliGiris   TahTurKupon
@@ -717,7 +717,7 @@ begin
 
   GenRegIni.RegWriteString('StokHizliGiris', 'VarsayilanTerazi', inttoStr(ComboTerazi.EditValue), 'C');
 //// Terazi GENINI
-   Tablo.GENINI.WriteString(StrToInt(inttoStr(Ops_HizliGiris_TeraziPort)+ ComboTerazi.EditValue),TeraziPort.Text);      ///Bolum+Terazi Deðeri eklenir
+   Tablo.GENINI.WriteString(StrToInt(inttoStr(Ops_HizliGiris_TeraziPort)+ ComboTerazi.EditValue),TeraziPort.Text);      ///Bolum+Terazi DeÄŸeri eklenir
    Tablo.GENINI.WriteString(StrToInt(inttoStr(Ops_HizliGiris_TeraziBoudRare)+ ComboTerazi.EditValue),TeraziBoudRate.Text);
    Tablo.GENINI.WriteString(StrToInt(inttoStr(Ops_HizliGiris_TeraziDataBits)+ ComboTerazi.EditValue),TeraziDataBits.Text);
    Tablo.GENINI.WriteString(StrToInt(inttoStr(Ops_HizliGiris_TeraziStopBits)+ ComboTerazi.EditValue),TeraziStopBits.Text);
@@ -728,13 +728,13 @@ begin
   Tablo.GENINI.WriteBoolean(Ops_Kasiyer_UrunBirimleriniTopla,CheckUrunBirimleriniTopla.Checked);
   Tablo.GENINI.WriteString(Ops_Kasiyer_UrunBirimleriniToplamaID,VarToStrDef(ComboUrunBirimleriniTopla.EditValue,'0'));
 
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_KategoriEn,KategoriEn.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_KategoriBoy,KategoriBoy.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_UrunKartEn,UrunKartEn.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_UrunKartBoy,UrunKartBoy.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_ResimPixel,ResimPixel.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_AciklamaSatir,spinAciklamaSatir.EditValue);//  Opsiyon Resim Düzeni
-  Tablo.GENINI.WriteBoolean(Ops_OpsiyonKasa_ResimCerceve, CerceveBoyut.Checked);//  Opsiyon Resim Düzeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_KategoriEn,KategoriEn.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_KategoriBoy,KategoriBoy.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_UrunKartEn,UrunKartEn.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_UrunKartBoy,UrunKartBoy.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_ResimPixel,ResimPixel.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKasa_AciklamaSatir,spinAciklamaSatir.EditValue);//  Opsiyon Resim DÃ¼zeni
+  Tablo.GENINI.WriteBoolean(Ops_OpsiyonKasa_ResimCerceve, CerceveBoyut.Checked);//  Opsiyon Resim DÃ¼zeni
 
   Tablo.GENINI.WriteInteger(Ops_Adisyon_SiparisYeni, ComboSiparisYeni.EditValue);
   Tablo.GENINI.WriteInteger(Ops_Adisyon_SiparisYaz, ComboSiparisYaz.EditValue);
@@ -751,7 +751,7 @@ begin
   Tablo.GENINI.WriteBoolean(Ops_HizliGiris_BaskiBelgeNoSor,checkBelgenoSor.Checked);   // HizliGiris   BaskiBelgeNoSor
   Tablo.GENINI.WriteBoolean(Ops_HizliGiris_FazlaIskontoYapabilir,checkFazlaIskontoIzin.Checked);   // HizliGiris   FazlaIskontoYapabilir
   Tablo.GENINI.WriteBoolean(Ops_HizliGiris_FaturaBilgisiSor,CheckFaturaBilgisiSor.Checked);   // HizliGiris   FaturaBilgisiSor
-  Tablo.GENINI.WriteBoolean(Ops_HizliGiris_SiparisYonu, CheckBoxSiparis.Checked); //   HizliGiris', Sipariþ
+  Tablo.GENINI.WriteBoolean(Ops_HizliGiris_SiparisYonu, CheckBoxSiparis.Checked); //   HizliGiris', SipariÅŸ
   Tablo.GENINI.WriteBoolean(Ops_HizliGiris_BarkodVar, CheckBoxBarkod.Checked); //   HizliGiris', Barkod
   Tablo.GENINI.WriteBoolean(Ops_CheckTransferKaydetYaz, CheckTransferKaydetYaz.Checked); //   HizliGiris', Barkod
 
@@ -763,13 +763,13 @@ begin
   Tablo.GENINI.WriteString(Ops_HizliGiris_ColorComboBirles, ColorToString(ColorComboBirles.ColorValue)); //
 
   LabelKaydetClick(self);
-  //Yazarkasa Ayarlarý
+  //Yazarkasa AyarlarÄ±
   GenRegIni.RegWriteString('YazarKasa', 'YazarkasaModel', CbYazarkasaModel.EditValue, 'C');
-  GenRegIni.RegWriteString('YazarKasa', 'KasaNumarasý', CbKasaNumarasi.EditValue, 'C');
-  GenRegIni.RegWriteString('YazarKasa', 'KasiyerNumarasý', CbKasiyerNumarasi.EditValue, 'C');
+  GenRegIni.RegWriteString('YazarKasa', 'KasaNumarasÄ±', CbKasaNumarasi.EditValue, 'C');
+  GenRegIni.RegWriteString('YazarKasa', 'KasiyerNumarasÄ±', CbKasiyerNumarasi.EditValue, 'C');
 
   GenRegIni.RegWriteString('YazarKasa', 'BarkodPortNo', CbBarkodPortNo.EditValue, 'C');
-  GenRegIni.RegWriteString('YazarKasa', 'BarkodBeklemeZamaný', CbBarkodBekleme.EditValue, 'C');
+  GenRegIni.RegWriteString('YazarKasa', 'BarkodBeklemeZamanÄ±', CbBarkodBekleme.EditValue, 'C');
   GenRegIni.RegWriteString('YazarKasa', 'BarkodBaundRate', CbBarkodBaundRate.EditValue, 'C');
   GenRegIni.RegWriteString('YazarKasa', 'BarkodDataBit', CbBarkodDataBit.EditValue, 'C');
   GenRegIni.RegWriteString('YazarKasa', 'BarkodStopBit', CbBarkodStopBit.EditValue, 'C');
@@ -783,8 +783,8 @@ begin
   GenRegIni.RegWriteString('YazarKasa', 'PcStopBit', CbPcStopBit.EditValue, 'C');
   GenRegIni.RegWriteString('YazarKasa', 'PcParity', CbPcParity.EditValue, 'C');
   GenRegIni.RegWriteString('YazarKasa', 'PcFlowControl', CbPcFlowControl.EditValue, 'C');
-  GenRegIni.RegWriteString('Yazarkasa','YazarkasaKullaným',BoolToStr(ChkYazarkasaKullan.Checked),'C');
-  //Terazi Ayarlarý
+  GenRegIni.RegWriteString('Yazarkasa','YazarkasaKullanÄ±m',BoolToStr(ChkYazarkasaKullan.Checked),'C');
+  //Terazi AyarlarÄ±
   Tablo.GENINI.WriteBoolean(Ops_HizliGiris_Terazi_Kg_Cevir, Check_Gr_Kg_Cevir.Checked);
 
   VarsayilanDegerleriAl;
@@ -801,7 +801,7 @@ var s,deger:string[10];
         result:=inttoStr(EdValue);
   end;
 begin
-  //Þube
+  //Åžube
   s:=IntToStr(abs(StrToInt(ComboSube.EditValue)));
   if Length(s) = 1 then s:='0'+s;
 

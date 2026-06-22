@@ -1,4 +1,4 @@
-unit UPaylasim;
+ï»¿unit UPaylasim;
 
 interface
 uses Windows, SysUtils;
@@ -71,10 +71,10 @@ end;
 constructor TPay.Create(isim: Pchar);
 begin
   fhnd:=CreateFileMapping($FFFFFFFF,nil,PAGE_READWRITE+SEC_COMMIT,0,4096,isim);
-  if(fhnd=0)then raise Exception.Create('Paylaþým alaný oluþturulamadý');
+  if(fhnd=0)then raise Exception.Create('PaylaÅŸÄ±m alanÄ± oluÅŸturulamadÄ±');
   if((fhnd<>0)and(GetLastError()=ERROR_ALREADY_EXISTS))then ZatenVar:=true;
   fadr:=MapViewOfFile(fhnd,FILE_MAP_WRITE+FILE_MAP_READ,0,0,4096);
-  if(fadr=nil)then raise Exception.Create('Paylaþým alaný haritalanamadý');
+  if(fadr=nil)then raise Exception.Create('PaylaÅŸÄ±m alanÄ± haritalanamadÄ±');
 //  if ZatenVar then showmessage('ZatenVar');
 end;
 

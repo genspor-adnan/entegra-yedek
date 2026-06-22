@@ -1,4 +1,4 @@
-unit URehberWizard;
+ï»¿unit URehberWizard;
 
 interface
 
@@ -244,7 +244,6 @@ type
       (Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     Function BosZorunluAlanSay(DTS: TDataSource; Alan: string): Integer;
-    Function ZorunluAlanSay(Yeri: SmallInt): Integer;
     procedure WizardKontrolNextButtonClick(Sender: TObject);
     procedure TabPerIletNewRecord(DataSet: TDataSet);
     procedure TabCariIletNewRecord(DataSet: TDataSet);
@@ -416,10 +415,10 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO)
     = IDYES then
   begin
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       'delete from REHBERBILGI where YERI=1 and YER_ID=' +
       TabRehberIletisim.FieldByName('ID').AsString, [], []);
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       'delete from REHBERILETISIM where ID=' + TabRehberIletisim.FieldByName('ID')
       .AsString, [], []);
     TabloYenile(TabRehberIletisim, []);
@@ -628,7 +627,7 @@ begin
   if StrToInt(cxDBLabel2.Caption) > 0 then
   begin
     str := cxDBLabel2.Caption+'-'+Sifre(cxDBLabel2.Caption);
-    InputQuery('Müþteri kodu','Müþteri kodu',str);
+    InputQuery('MÃ¼ÅŸteri kodu','MÃ¼ÅŸteri kodu',str);
   end;
 end;
 
@@ -852,23 +851,6 @@ begin
   end;
 end;
 
-Function TRehberWizardDlg.ZorunluAlanSay(Yeri: SmallInt): Integer;
-Begin
-  { 1 : IletisimEkr
-    3 : PersonelOzlukEkr
-    4 : PersonelIletisimEkr
-    5 : PersonelUcretEkr }
-  { Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text :=  'SELECT * FROM REHBERAYAR WHERE YERI = '+inttostr(Yeri);
-    Tablo.Query1.Open;
-    while not Tablo.Query1.eof do begin
-    if Tablo.Query1.FieldByName('ZORUNLU').AsBoolean then begin
-    Inc(Result);
-    end;
-    Tablo.Query1.Next;
-    end; }
-End;
-
 procedure TRehberWizardDlg.FormShow(Sender: TObject);
 var
   s: string;
@@ -973,11 +955,6 @@ begin
 
   Tabloyenile(TabNotlar,[RehberID]);
 
-  // sayfalardaki zorunlu alanlar?n say?lar?n? hesapl?yal?m..
-  KurIletZorunlu := ZorunluAlanSay(1);
-  TicariZorunlu := ZorunluAlanSay(2);
-  PerIletZorunlu := ZorunluAlanSay(4);
-
   CheckPersonel.Checked := (TabRehber.FieldByName('BAGID').AsString <> '')and(TabRehber.FieldByName('BAGID').AsString <> '0');
   EditTEMSILCI.enabled := ModulYetki_TekSubeTum.Cari <> 1;
 
@@ -1016,7 +993,7 @@ begin    //se?im i?in combo i?ini dolduran kodlar
         ctrls := TGirdiDenetimleri.Create.Memo(Qry.FieldByName('ETIKET').AsString, @SQL);
         if TGirisKutusuEx.BilgiAlEx(yenisorgugirin, ctrls) = mrOK then
         begin
-          veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+          veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
             'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',
             ['&Sql', '&Etiket', '&Giris'],
             [SQL, Qry.FieldByName('ETIKET').AsString, Qry.FieldByName('GIRIS').AsInteger]);
@@ -1139,7 +1116,7 @@ begin
   // ?leti?im Adres Bilgilerine Default 'Merkez' ekleniyor.
   tablo.TablodanSorguAc(1, 'Select ID from REHBERILETISIM Where REHBERID=' + IntToStr(RehberID) + ' ');
   if (Cagiran = 0) and (tablo.Query1.RecordCount = 0) then begin //
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
       + IntToStr(RehberID) + ',''Merkez'',1,1,' + IntToStr(SubeID) + ')', [], []);
   end;
 
@@ -1211,10 +1188,10 @@ begin
       Application.MessageBox(PChar(STMarka_sec),PChar(HataPrj),MB_OK+ MB_ICONERROR);
       abort;
   end else begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2210%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2210%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2210%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2210%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboAltBolge.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_CariKart_Bolge)+' and DEGER='+VarToStr(ComboBolge.EditValue),[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_CariKart_Bolge)+' and DEGER='+VarToStr(ComboBolge.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -1255,7 +1232,7 @@ end;
 
 procedure TRehberWizardDlg.lgiliKurumdanAyrld1Click(Sender: TObject);
 begin
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update REHBER set DURUM=0 where ID=&ID', ['&ID'], [TabIlgili.FieldByName('ID').AsInteger]);
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update REHBER set DURUM=0 where ID=&ID', ['&ID'], [TabIlgili.FieldByName('ID').AsInteger]);
 
 //  TabIlgili.Close;
 //  TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' +TabRehber.Fields[0].AsString +'order by STATU  desc';
@@ -1276,11 +1253,11 @@ begin
     Tablo.FDCnn, 'select ID,AD from REHBERILETISIM where REHBERID=' + IntToStr(RehberID), False, Nil);
   if TGirisKutusuEx.BilgiAlEx(RDIletisimAdresiSecimi, ctrls) = mrOK then
   begin
-    if Tablo.UyariGoster(Uyari,'Bu kiþideki eski bilgiler silinecektir. Yine de devam etmek istiyor musunuz?',2) = mrYes then begin
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    if Tablo.UyariGoster(Uyari,'Bu kiÅŸideki eski bilgiler silinecektir. Yine de devam etmek istiyor musunuz?',2) = mrYes then begin
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         'delete from REHBERBILGI where YERI=1 and YER_ID=(select top 1 RI.ID from REHBERILETISIM RI where RI.REHBERID=&YerID)', ['&YerID'],
         [TabIlgili.FieldByName('ID').AsInteger]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI) ' +
         'select 1, YER_ID=(select top 1 ID from REHBERILETISIM where REHBERID = &RehPersID), SIRA, ETIKET, BILGI from REHBERBILGI RB ' +
         'where RB.YERI=1 AND RB.YER_ID=&RehIletID', ['&RehPersID', '&RehIletID'],
@@ -1304,7 +1281,7 @@ begin
       + TabRehber.FieldByName('ID').AsString + ',''' + Bilgi + ''',0,''' +
       TabIlgili.FieldByName('NOTLAR').AsString + ''',1,' + IntToStr(SubeID) +
       ') select scope_identity() '));
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) select 4,&Yer_ID,SIRA,ETIKET,BILGI,SUBEID from REHBERBILGI where YERI=4 and YER_ID=&YerID2',
       ['&Yer_ID', '&YerID2'], [tablo.Query3.Fields[0].AsInteger,
       TabIlgili.FieldByName('ID').AsInteger]);
@@ -1323,9 +1300,9 @@ begin
   if TabIlgili.FieldByName('NEREDE').AsInteger = 1 then
   begin
 
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       'Update REHBER Set STATU=0 Where DURUM>0 and GRUP=334 and BAGID=&RehID',['&RehID'], [TabRehber.FieldByName('ID').AsInteger]);
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       'Update REHBERPERSONEL Set STATU=1 Where DURUM>0 and GRUP=334 and BAGID=&RehID and ID=&PersID',
       ['&RehID', '&PersID'], [TabRehber.FieldByName('ID').AsInteger,TabIlgili.FieldByName('ID').AsInteger]);
 //    TabIlgili.Close;
@@ -1347,10 +1324,10 @@ end;
 
 procedure TRehberWizardDlg.MenuItem7Click(Sender: TObject);
 begin
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
     'Update REHBERILETISIM Set VARSAYILAN=0 Where AKTIF=1 and REHBERID=&RehID',
     ['&RehID'], [TabRehber.FieldByName('ID').AsInteger]);
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
     'Update REHBERILETISIM Set VARSAYILAN=1 Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',
     ['&RehID', '&IletID'], [TabRehber.FieldByName('ID').AsInteger,
     TabRehberIletisim.FieldByName('ID').AsInteger]);
@@ -1474,7 +1451,7 @@ begin
     TabIlgili.FieldByName('STATU').AsBoolean := TabIlgili.RecordCount < 1;
     TabIlgili.Post;
     // Sonra Rehber ?leti?im tablosuna  'Merkez' ekleniyor.
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
       + TabIlgili.FieldByName('ID').AsString  + ',''Merkez'',1,1,' + IntToStr(SubeID) + ')', [], []);
     TabloYenile(TabPerIletisim, [TabIlgili.FieldByName('ID').AsInteger]);
 
@@ -1537,7 +1514,7 @@ end;
 
 procedure TRehberWizardDlg.TabIlgiliAfterPost(DataSet: TDataSet);
 begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBER Set KOD=CONVERT(varchar(15), ID) Where ID=&ID',['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBER Set KOD=CONVERT(varchar(15), ID) Where ID=&ID',['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
 end;
 
 procedure TRehberWizardDlg.TabIlgiliAfterScroll(DataSet: TDataSet);
@@ -1587,7 +1564,7 @@ begin
   if YeniEklenenKayit then
   begin
     if KNo<>'' then //Kimlik no varsa kaydedelim
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
        ' SUBEID) SELECT YERI=2,YER_ID='+TabRehber.Fields[0].AsString+',SIRA,ETIKET,BILGI='''+KNo+''', EKLEYEN='+Kullanan+
        ', SUBEID='+IntToStr(SubeId)+' FROM REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO and RV.NO=22 ',[], []);
     //tablo.LogIslemleri(TabNo_REHBER, TabRehber.Fields[0].AsInteger, Degis, TabRehber);
@@ -1596,10 +1573,10 @@ begin
   //temsilci de?i?irse ge?mi?e ekleme yapal?m..
   if OncekiTemsilciId <> TabRehber.FieldByName('TEMSILCI').AsInteger  then begin
      if TabRehber.FieldByName('TEMSILCI').AsInteger > 0  then
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into REHBERTEMSILCI (REHBERID, TEMSILCIID, BASLAMA, BITIS, ACIKLAMA, EKLEYEN) '+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into REHBERTEMSILCI (REHBERID, TEMSILCIID, BASLAMA, BITIS, ACIKLAMA, EKLEYEN) '+
           ' Values ('+TabRehber.FieldByName('ID').AsString+','+TabRehber.FieldByName('TEMSILCI').AsString+','''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+''',''2099-01-01'','''','+Kullanan+') ',[],[]);
 
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update REHBERTEMSILCI set BITIS   = '''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update REHBERTEMSILCI set BITIS   = '''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+
         ''', ACIKLAMA = '''', DEGISTIREN = '+Kullanan+', DEGISTIRMETARIHI=getdate() where REHBERID= '+ TabRehber.FieldByName('ID').AsString+'  and TEMSILCIID='+IntToStr(OncekiTemsilciId)+ ' and BITIS = ''2099-01-01''',[],[]);
   end;
 
@@ -1649,28 +1626,7 @@ begin
   else
      TabRehber.FieldByName('GRUP').AsInteger := 0;
   TabRehber.FieldByName('KOD').AsString :='';
-  {if SubeVarmi then
-  begin
-    case tablo.GENINI.ReadInteger(Ops_OpsiyonCari_GorunecekSubeler, 0) of
-      0:
-        ComboSube.RepositoryItem := tablo.RepSubelerOrtak;
-      1:
-        ComboSube.RepositoryItem := tablo.RepSubelerKendiSubesi;
-      2:
-        ComboSube.RepositoryItem := tablo.RepSubelerOrtakKendiSubesi;
-      3:
-        ComboSube.RepositoryItem := tablo.RepSubelerOrtakTumSubeler;
-    end;
-
-    case tablo.GENINI.ReadInteger(Ops_OpsiyonCari_GorunecekSubeler, 0) of
-      0, 2, 3:
-        TabRehber.FieldByName('SUBEID').AsInteger := 0;
-      1:
-        TabRehber.FieldByName('SUBEID').AsInteger := SubeID;
-    end
-  end
-  else
-    TabRehber.FieldByName('SUBEID').AsInteger := -1; }
+  
   TabRehber.FieldByName('SUBEID').AsInteger := SubeId;
   YeniEklenenKayit := true;
   YeniKayit := true;
@@ -1860,7 +1816,7 @@ procedure TRehberWizardDlg.DurumuSfrla1Click(Sender: TObject);
 begin
   if TabIlgili.FieldByName('DURUM').AsInteger = 0 then
   begin
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBER set DURUM=1 where ID=&ID', ['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBER set DURUM=1 where ID=&ID', ['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
 //    TabIlgili.Close;
 //    TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' +TabRehber.Fields[0].AsString;
 //    TabIlgili.SQL.Add(' order by STATU  desc');
@@ -1873,13 +1829,13 @@ end;
 procedure TRehberWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   if (Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. Onun i?in kayd? silece?iz
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERILETISIM RI WHERE RI.ID=REHBERBILGI.YER_ID AND RI.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=1 )',[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBERILETISIM where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERPERSONEL RP WHERE RP.ID=REHBERBILGI.YER_ID AND RP.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=4 )',[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBERPERSONEL where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERILETISIM RI WHERE RI.ID=REHBERBILGI.YER_ID AND RI.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=1 )',[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBERILETISIM where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERPERSONEL RP WHERE RP.ID=REHBERBILGI.YER_ID AND RP.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=4 )',[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBERPERSONEL where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
   end;
   Close;
 end;
@@ -1906,7 +1862,7 @@ var
 begin
   GenotipaEkle := False;
   //e?er daha ?nce kodu bo? olarak kaydedilmi? varsa kodunu Id yaps?n
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE REHBER SET KOD=CONVERT(NVARCHAR(20), ID) WHERE KOD=''''',[],[]);
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE REHBER SET KOD=CONVERT(NVARCHAR(20), ID) WHERE KOD=''''',[],[]);
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im,  2 Ticari, 3 Personel ?zl?k, 4 Personel ileti?im, i?in ileti?im bilgileri
@@ -1936,7 +1892,7 @@ begin
            Ekle(TabPerIlet, 1, RehberPerID, Degis);
         tablo.TablodanSorguAc(1, 'Select ID from REHBERILETISIM Where REHBERID=' + IntToStr(RehberID) + ' ');
         if (tablo.Query1.RecordCount = 0) then begin
-            veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+            veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
                'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
                + IntToStr(RehberID) + ',''Merkez'',1,1,' + IntToStr(SubeID) +')', [], []);
         end;

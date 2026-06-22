@@ -1,4 +1,4 @@
-unit URicEdit;
+ï»¿unit URicEdit;
 
 interface
 
@@ -7,7 +7,7 @@ uses forms, Classes, Controls, comctrls, db, dbtables, WinTypes, SysUtils, Graph
      // DBCtrls, Menus, entinit, ToolWin, Mask, ExtCtrls, Buttons, Dialogs, WinProcs;
 
 
-// Rich Edit Ýþlemlerini açan kapatan nesneler
+// Rich Edit Ä°ÅŸlemlerini aÃ§an kapatan nesneler
      procedure RichEditAc(RchEdt:TDBRichEdit;mRicDts:TDataSource);
      procedure RichEditKapa;
 

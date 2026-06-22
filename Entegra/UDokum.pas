@@ -1,4 +1,4 @@
-unit UDilDuzenle;
+ï»¿unit UDilDuzenle;
 
 interface
 
@@ -96,7 +96,7 @@ end;
 
 procedure TDilDuzenleDlg.FormCreate(Sender: TObject);
 begin
-//LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+//LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TDilDuzenleDlg.FormShow(Sender: TObject);
@@ -194,7 +194,7 @@ begin
     TabGenIniDiller.Post;
 
 Query1.SQL.Text:='delete from GENINI where DIL<>0 and BOLUM <> -1013';
-   for I := 0 to TabGenIniDiller.FieldCount - 4 do begin//son iki field anahtar deðil.. onlara gitmeye gerek yok!!
+   for I := 0 to TabGenIniDiller.FieldCount - 4 do begin//son iki field anahtar deÄŸil.. onlara gitmeye gerek yok!!
       Query1.SQL.Add('insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)'
                 +' select '
                 +'BOLUM'+',['
@@ -231,7 +231,7 @@ var
 i: Integer;
 begin
    for I := 0 to Length(DillerCeviri) - 1 do
-    if DillerCeviri[i] <> -1 then // türkçe haricinde dillerin kontrolu yapýlýyor boþ içerik dolduruluyor
+    if DillerCeviri[i] <> -1 then // tÃ¼rkÃ§e haricinde dillerin kontrolu yapÄ±lÄ±yor boÅŸ iÃ§erik dolduruluyor
      begin
       TabKomutCalistir.SQL.Text:='INSERT INTO GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) '+
                                   'select    BOLUM,ANAHTAR,DEGER,'+inttostr(DillerCeviri[i])+',SIRA  from GENINI G '+

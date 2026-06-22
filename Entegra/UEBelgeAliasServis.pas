@@ -1,4 +1,4 @@
-unit UEBelgeAliasServis;
+ï»¿unit UEBelgeAliasServis;
 
 interface
 
@@ -338,7 +338,7 @@ begin
   if LOwnTransaction then
     AConnection.StartTransaction;
   try
-    Veritabani.BasitKomutÇalýþtýr(AConnection,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
         'update REHBERALIAS set AKTIF=0, VARSAYILAN=0, ' +
         'PASIFTARIHI=sysdatetime(), SONKONTROLTARIHI=sysdatetime() ' +
         'where REHBERID=&REHBERID',
@@ -352,12 +352,12 @@ begin
         QuotedStr(LAliaslar[I].Alias));
       if Tablo.Query1.RecordCount > 0 then begin
         LAliasID := Tablo.Query1.Fields[0].AsInteger;
-        Veritabani.BasitKomutÇalýþtýr(AConnection,
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
           'update REHBERALIAS set AKTIF=1, VARSAYILAN=0, PASIFTARIHI=null, ' +
           'SONKONTROLTARIHI=sysdatetime() where ID=&ID',
           ['&ID'], [LAliasID]);
       end else
-        Veritabani.BasitKomutÇalýþtýr(AConnection,
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
           'insert into REHBERALIAS(REHBERID,BELGETURU,ALIAS,VARSAYILAN,AKTIF) ' +
           'values(&REHBERID,&BELGETURU,&ALIAS,0,1)',
           ['&REHBERID', '&BELGETURU', '&ALIAS'],
@@ -370,7 +370,7 @@ begin
         IntToStr(ARehberID) + ' and BELGETURU=' + IntToStr(LBelgeTuru) +
         ' and AKTIF=1 order by ID');
       if Tablo.Query1.RecordCount > 0 then
-        Veritabani.BasitKomutÇalýþtýr(AConnection,
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
           'update REHBERALIAS set VARSAYILAN=1 where ID=&ID',
           ['&ID'], [Tablo.Query1.Fields[0].AsInteger]);
     end;
@@ -414,23 +414,23 @@ begin
 
   if LExistingID > 0 then begin
     // Reactivate, varsayilan yap; diger ayni (rehber,belgeturu) varsayilanlarini sifirla
-    Veritabani.BasitKomutÇalýþtýr(AConnection,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
       'UPDATE REHBERALIAS SET VARSAYILAN=0 WHERE REHBERID=&R AND BELGETURU=&B AND ID<>&I',
       ['&R', '&B', '&I'], [ARehberID, ABelgeTuru, LExistingID]);
-    Veritabani.BasitKomutÇalýþtýr(AConnection,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
       'UPDATE REHBERALIAS SET AKTIF=1, VARSAYILAN=1, PASIFTARIHI=NULL, ' +
       'SONKONTROLTARIHI=GETDATE() WHERE ID=&ID',
       ['&ID'], [LExistingID]);
   end else begin
     if AEskiID > 0 then
-      Veritabani.BasitKomutÇalýþtýr(AConnection,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
         'UPDATE REHBERALIAS SET AKTIF=0, VARSAYILAN=0, PASIFTARIHI=GETDATE() WHERE ID=&ID',
         ['&ID'], [AEskiID]);
     // Ayrica ayni (rehber,belgeturu)'deki diger varsayilanlari sifirla (UX_VARSAYILAN icin)
-    Veritabani.BasitKomutÇalýþtýr(AConnection,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
       'UPDATE REHBERALIAS SET VARSAYILAN=0 WHERE REHBERID=&R AND BELGETURU=&B',
       ['&R', '&B'], [ARehberID, ABelgeTuru]);
-    Veritabani.BasitKomutÇalýþtýr(AConnection,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
       'INSERT INTO REHBERALIAS(REHBERID,BELGETURU,ALIAS,VARSAYILAN,AKTIF,ILKKAYITTARIHI,SONKONTROLTARIHI) ' +
       'VALUES(&RID, &BT, &AL, 1, 1, GETDATE(), GETDATE())',
       ['&RID', '&BT', '&AL'], [ARehberID, ABelgeTuru, AAlias]);
@@ -582,7 +582,7 @@ begin
     // Mukellef ï¿½ LKodMukellef (151/141) ekle/reactivate
     if LVar and (LMevcutBelgeTuru = LKodMukellef) and
        SameText(LMevcutAlias, LIzibizAlias) then begin
-      Veritabani.BasitKomutÇalýþtýr(AConnection,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(AConnection,
         'UPDATE REHBERALIAS SET SONKONTROLTARIHI = GETDATE() WHERE ID = &ID',
         ['&ID'], [LMevcutID]);
       Result.Mesaj := 'Alias degismedi ï¿½ tarih guncellendi';

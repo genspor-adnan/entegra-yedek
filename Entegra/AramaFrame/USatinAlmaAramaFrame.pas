@@ -1,4 +1,4 @@
-unit USatinAlmaAramaFrame;
+﻿unit USatinAlmaAramaFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:20 }
@@ -171,7 +171,7 @@ end;
 procedure TSatinAlmaAramaFrame.SetFrameBilgi(AValue: TAramaFrameBilgi);
 begin
   FFrameBilgi := AValue;
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TSatinAlmaAramaFrame.TusAsagi(Sender: TObject; var Key: Word;

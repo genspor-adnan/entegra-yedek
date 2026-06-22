@@ -1,4 +1,4 @@
-unit UGoogleSyncBus;
+ï»¿unit UGoogleSyncBus;
 
 interface
 uses InvokeRegistry, Rio,UTablo, SOAPHTTPClient,XSBuiltIns,DateUtils,SysUtils,
@@ -62,7 +62,7 @@ end;
 ////Login := CalendarLogin.Create;
 ////Olay  := CalendarEvent.Create;
 ////Login.CalendarID := TakvimID;
-////Login.ServiceAccountMailAddress := 'adnan odabaþý';//KullaniciAdi;
+////Login.ServiceAccountMailAddress := 'adnan odabaÅŸÄ±';//KullaniciAdi;
 ////Login.UserPassword := 'odabasi';//Sifre;
 ////
 ////Olay.Title := Baslik;

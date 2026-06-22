@@ -1,4 +1,4 @@
-unit UUretimPlanlamaAramaFrame;
+﻿unit UUretimPlanlamaAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:46:01 }
@@ -63,7 +63,7 @@ procedure TUretimPlanlamaAramaFrame.Baslatildi;
 begin
 
   Tablo.GridTurkcelestir;
-   LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   cbDepo.EditValue := StrToIntDef(GenRegIni.RegReadString('StokOpsiyon', 'StokVarsayilanDepo', '1', 'C'), 1);
   //cbDepo.EditValue := Tablo.RepStokDepolarAktif.Properties.Items[0].Value;
   cbDepo.PostEditValue;

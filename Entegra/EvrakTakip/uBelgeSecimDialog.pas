@@ -1,4 +1,4 @@
-unit uBelgeSecimDialog;
+ï»¿unit uBelgeSecimDialog;
 
 interface
 
@@ -48,13 +48,13 @@ end;
 procedure TfrmBelgeTuru.buttonDosyadanClicked(Sender: TObject);
 
 begin
-    ModalResult := 1001; // bize göre 1.seçenek
+    ModalResult := 1001; // bize gÃ¶re 1.seÃ§enek
 end;
 
 procedure TfrmBelgeTuru.buttonTarayicidanClicked(
   Sender: TObject);
 begin
-    ModalResult := 1002; // bize göre 2.seçenek
+    ModalResult := 1002; // bize gÃ¶re 2.seÃ§enek
 end;
 
 procedure TfrmBelgeTuru.FormCreate(Sender: TObject);

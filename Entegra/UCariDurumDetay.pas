@@ -1,4 +1,4 @@
-unit UCariDurumDetay;
+﻿unit UCariDurumDetay;
 
 interface
 
@@ -361,7 +361,7 @@ var
 begin
 
   TabloYenile(TabRehber,[RehID]);
-  //ileti�imler..
+  //iletişimler..
   TabloYenile(TabRehberIlet,[RehID]);
   TabloYenile(TabIlgili,[RehID]);
   TabloYenile(TabTicari,[RehID]);

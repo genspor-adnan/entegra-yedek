@@ -1,4 +1,4 @@
-unit uParolaTanim;
+ï»¿unit uParolaTanim;
 
 interface
 
@@ -48,13 +48,13 @@ begin
     end
     else
     begin
-      Application.MessageBox('Yeni þifreniz ile tekrar edilen þifre ayný deðil...', 'Uyarý !!!', 64);
+      Application.MessageBox('Yeni ÅŸifreniz ile tekrar edilen ÅŸifre aynÄ± deÄŸil...', 'UyarÄ± !!!', 64);
       txtYeni.SetFocus;
     end;
   end
   else
   begin
-    Application.MessageBox('Eski þifrenizi yanlýþ girdiniz...', 'Uyarý !!!', 64);
+    Application.MessageBox('Eski ÅŸifrenizi yanlÄ±ÅŸ girdiniz...', 'UyarÄ± !!!', 64);
     txtEski.SetFocus;
   end;
 

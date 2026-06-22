@@ -1,4 +1,4 @@
-unit UKuyruk;
+ï»¿unit UKuyruk;
 
 interface
 
@@ -213,7 +213,7 @@ end;
 
 procedure TKuyrukDlg.KuyruktanSil1Click(Sender: TObject);
 begin
-   if Application.MessageBox(PChar(TabKuyruk.FieldByName('ADSOYAD').AsString+' adlý hasta kuyruktan silinecektir. Onaylýyor musunuz?'), 'Silme Onayý', MB_OKCANCEL)<> IDOK then exit;
+   if Application.MessageBox(PChar(TabKuyruk.FieldByName('ADSOYAD').AsString+' adlÄ± hasta kuyruktan silinecektir. OnaylÄ±yor musunuz?'), 'Silme OnayÄ±', MB_OKCANCEL)<> IDOK then exit;
    Tablo.Query1.Close;
    Tablo.Query1.SQL.Text := 'Delete From KUYRUK Where DOSYANO = '''+TabKuyruk.FieldByName('DOSYANO').AsString+'''';
    Tablo.Query1.ExecSQL;
@@ -307,7 +307,7 @@ begin
    Tablo.Query1.Close;
    Tablo.Query1.SQL.Text := 'Select min(TARIH) From KUYRUK';
    Tablo.Query1.Open;
-   if Tablo.Query1.RecordCount < 1 then raise exception.Create('Kuyruk Boþ...');
+   if Tablo.Query1.RecordCount < 1 then raise exception.Create('Kuyruk BoÅŸ...');
    Tarih := Tablo.Query1.Fields[0].AsDateTime;
    KuyrukTarih;
 end;
@@ -316,7 +316,7 @@ procedure TKuyrukDlg.KuyrukSecClick(Sender: TObject);
 begin
    s := TMenuItem(Sender).Caption;
    Delete(s, Pos('&',s),1);
-   if s='Kayýt Kabul' then s := '';
+   if s='KayÄ±t Kabul' then s := '';
    KuyrukAdi := s;
    KuyrukDr :='' ;
    KuyrukTarih;
@@ -346,7 +346,7 @@ begin
         TDateTimeField(KuyrukGridDBTableView1.Columns[i].DataBinding.Field).DisplayFormat := 'HH:NN'
   end;
 }
-   TabloDokum.MenuIslemleri(KurukDegisMenu, KuyrukSecClick, 'Ekle', 'Kayýt Kabul', '',-1);
+   TabloDokum.MenuIslemleri(KurukDegisMenu, KuyrukSecClick, 'Ekle', 'KayÄ±t Kabul', '',-1);
    TabloDokum.MenuIslemleri(KurukDegisMenu, KuyrukSecClick, 'Ekle', 'Lab', '',-1);
    TabloDokum.MenuIslemleri(KurukDegisMenu, KuyrukSecClick, 'Ekle', 'Radyoloji', '',-1);
    TabloDokum.MenuIslemleri(KurukDegisMenu, KuyrukSecClick, 'Ekle', '-', '',-1);
@@ -367,7 +367,7 @@ begin
             AraAd.Caption:='';
             KuyrukTarih;
    end
-   else if (key in ['A'..'Z'])or(key in ['a'..'z'])or(key in ['ý','Ý','ð','Ð','þ','Þ','ü','Ü','ç','Ç','ö','Ö']) then begin
+   else if (key in ['A'..'Z'])or(key in ['a'..'z'])or(key in ['Ä±','Ä°','ÄŸ','Äž','ÅŸ','Åž','Ã¼','Ãœ','Ã§','Ã‡','Ã¶','Ã–']) then begin
             AraAd.Caption:=AraAd.Caption+key;
             KuyrukTarih;
    end;
@@ -412,7 +412,7 @@ begin
    s := GenRegIni.RegReadString('Kuyruk','SIRAPORTNO', '01','C');
    Winexec(pCHAR('C:\Psign.exe ['+s+'][UNBOLD]'+TabKuyruk.FieldByName('ADSOYAD').AsString+'[BEEP][STOP]'), SW_HIDE);
 //   Winexec(pCHAR('C:\Psign.exe [06]'+TabKuyruk.FieldByName('ADSOYAD').AsString+'[STOP]'), SW_HIDE	);
-//   C:\Psign.exe [1][UNBOLD]ADNAN ODABAÞI[BEEP][STOP]
+//   C:\Psign.exe [1][UNBOLD]ADNAN ODABAÅžI[BEEP][STOP]
 end;
 
 procedure TKuyrukDlg.GeldiOlarakIsaretleMenuClick(Sender: TObject);

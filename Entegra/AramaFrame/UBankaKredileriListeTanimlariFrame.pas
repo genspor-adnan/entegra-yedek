@@ -1,4 +1,4 @@
-unit UBankaKredileriListeTanimlariFrame;
+ï»¿unit UBankaKredileriListeTanimlariFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:06:08}
@@ -62,7 +62,7 @@ uses UBankaKredileriListeFrame, UTeminatMektuplariListeFrame,UPOSListeFrame, UKr
 
 procedure TBankaKredileriListeTanimlariFrame.Baslatildi;
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TBankaKredileriListeTanimlariFrame.EkranYazdir(Sender: TObject);
@@ -136,8 +136,8 @@ begin
 
    end;
 
-//             <IcerikSekme Adi="POS Tanýmlarý" Tip="TPOS" AramaTipi="TAramaYokFrame"/>
-//		  <IcerikSekme Adi="POS Tanýmlarý Liste" Tip="TPOSListeFrame" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+//             <IcerikSekme Adi="POS TanÄ±mlarÄ±" Tip="TPOS" AramaTipi="TAramaYokFrame"/>
+//		  <IcerikSekme Adi="POS TanÄ±mlarÄ± Liste" Tip="TPOSListeFrame" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 end;
 
 procedure TBankaKredileriListeTanimlariFrame.KredilerMenuCategories1Items1Click(Sender: TObject);
@@ -193,11 +193,11 @@ begin
   if not Tablo.YetkiVarmi(253130,YetkiTur_Gorme) then
      Sil(0, '253130');
   if not Tablo.YetkiVarmi(253140,YetkiTur_Gorme) then
-     Sil(0, '253140');//Çek Koçaný
+     Sil(0, '253140');//Ã‡ek KoÃ§anÄ±
   if not Tablo.YetkiVarmi(253150,YetkiTur_Gorme) then
      Sil(0, '253150');  //Teminat Mektubu
   if not Tablo.YetkiVarmi(253160,YetkiTur_Gorme) then
-     Sil(0, '253160'); //doðrudan borçlanma
+     Sil(0, '253160'); //doÄŸrudan borÃ§lanma
 
   if not Tablo.YetkiVarmi(2541,YetkiTur_Gorme) then
      Sil(0, '2541');    //Vadeli Hesap

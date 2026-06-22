@@ -1,4 +1,4 @@
-unit UWebServis;
+ï»¿unit UWebServis;
 
 interface
 
@@ -14,7 +14,7 @@ function MemoryStreamToString(M: TMemoryStream): String;
 
 var
   KurumKodu: string;
-  GönderilecekVeri : TMemoryStream;
+  GÃ¶nderilecekVeri : TMemoryStream;
   PostData : TMemoryStream;
   IdHTTP1 : THTTPRIO;
   XmlListe : TECXMLParser;
@@ -60,7 +60,7 @@ begin
 
 
     XMLString :=
-     // '<?xml version=“1.0” encoding=“utf-8” ?>                  '+
+     // '<?xml version=â€œ1.0â€ encoding=â€œutf-8â€ ?>                  '+
       ' <SqlCommit> '+
       '  <SQL>'+Komut+'</SQL>'+
       ' <TURU>'+IntToStr(islemNo)+'</TURU> '+

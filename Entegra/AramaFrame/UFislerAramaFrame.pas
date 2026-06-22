@@ -1,4 +1,4 @@
-unit UFislerAramaFrame;
+﻿unit UFislerAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 11:09:52}
@@ -66,7 +66,7 @@ implementation
 
 procedure TFislerAramaFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TFislerAramaFrame.EkranYazdir(Sender: TObject);

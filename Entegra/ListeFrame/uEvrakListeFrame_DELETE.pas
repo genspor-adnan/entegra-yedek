@@ -1,4 +1,4 @@
-unit uEvrakListeFrame;
+ï»¿unit uEvrakListeFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 06/01/2010 13:51:10 }
@@ -446,13 +446,13 @@ type
     Procedure ActMenuAyarla( _Tag : integer; _Visible : boolean);
     procedure ActSayfaAyarla( _KlasorID : integer);
   public
-    SecDokID: array of Integer; // soniþlem:kes=1,kopyala=2,Yapýþtýr=0;
+    SecDokID: array of Integer; // soniÅŸlem:kes=1,kopyala=2,YapÄ±ÅŸtÄ±r=0;
     SonIslem: Integer;
     EvrakTuru : integer;
     procedure ListeDragDrop(Sender: TObject; Pos: TPoint; Value: TStrings);
     { Public declarations }
 
-    Constructor Create(AOwner : TComponent); override;                 {m.y Özel iþlerimiz olacaktýr}
+    Constructor Create(AOwner : TComponent); override;                 {m.y Ã–zel iÅŸlerimiz olacaktÄ±r}
   published
     property Arama: TEvrakAramaFrame read FArama write SetArama;
   end;
@@ -520,37 +520,37 @@ procedure InitGENINI_EvrakTanimlari();
 begin
   {
     GENINI doldurulacak
-    PrjConst constEvrak**** "BOLUM" sabitlere göre doldurulacak
+    PrjConst constEvrak**** "BOLUM" sabitlere gÃ¶re doldurulacak
   }
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},1,'Genel'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},2,'Hizmete Özel'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},3,'Özel'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},4,'Gizli'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},5,'Çok Gizli'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},1,'Genel'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},2,'Hizmete Ã–zel'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},3,'Ã–zel'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},4,'Gizli'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( Ops_Dokuman_Gizlilik{-3206},5,'Ã‡ok Gizli'),[],[]);
 
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakCinsi{-4002},1,'Resmi Evrak'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakCinsi{-4002},2,'Kurum Ýçi'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakCinsi{-4002},1,'Resmi Evrak'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakCinsi{-4002},2,'Kurum Ä°Ã§i'),[],[]);
 
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},1,'Beklemede'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},2,'Ýnceleniyor'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},3,'Gönderildi'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},1,'Beklemede'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},2,'Ä°nceleniyor'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakYaziDurumu{-4003},3,'GÃ¶nderildi'),[],[]);
 
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},1,'Kurum Ýçi'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},2,'Kamu'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},3,'Özel'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},4,'Tüzel'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},1,'Kurum Ä°Ã§i'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},2,'Kamu'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},3,'Ã–zel'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelenYerTur{-4004},4,'TÃ¼zel'),[],[]);
 
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},1,'Posta'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},2,'Elden'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},3,'Faks'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},4,'e-Posta'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},5,'Telgraf ile'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},1,'Posta'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},2,'Elden'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},3,'Faks'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},4,'e-Posta'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakGelisSekli{-4005},5,'Telgraf ile'),[],[]);
 
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},1,'Elden'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},2,'Adi Posta'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},3,'Ýadeli Taahhütlü'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},4,'Taahüttlü'),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},5,'APS'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},1,'Elden'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},2,'Adi Posta'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},3,'Ä°adeli TaahhÃ¼tlÃ¼'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},4,'TaahÃ¼ttlÃ¼'),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,SQlOlustur( constEvrakPostaTuru{-4006},5,'APS'),[],[]);
 end;
 
 function GetEvrakTurGelenGiden(_EvrakKlasorTur : integer) : integer;
@@ -638,13 +638,13 @@ begin
   if KodAgaciKlasorDlg = nil then
      Application.CreateForm(TKodAgaciDlg, KodAgaciKlasorDlg);
   if Tablo.KodAgacindanSec(KodAgaciKlasorDlg, sqltext, True, True, True, True, KID, KKod, KAciklama, slist,[], [], [], [], []) then
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into DOKUMANKISAYOL(DOKUMANID, YER, YER_ID,SUBEID) values(' + DOKUMAN.Fields[0].AsString + ',' + IntToStr(TabNo_DOKUMAN)+','+
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into DOKUMANKISAYOL(DOKUMANID, YER, YER_ID,SUBEID) values(' + DOKUMAN.Fields[0].AsString + ',' + IntToStr(TabNo_DOKUMAN)+','+
           IntToStr(KID) + ',' + inttoStr(SubeId) + ')', [], []);
 end;
 
 procedure TEvrakListeFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   if TamYetkili=False then
       TabRevize.LockType := ltReadOnly;
   FArama.PageArama.ActivePage := FArama.TabSheetKlasor;
@@ -732,23 +732,23 @@ end;
 
 
 
-{ KLASOR ID deðeri
+{ KLASOR ID deÄŸeri
    Gelen                          -1001
-     Bütün Evraklar               -1101
-     Üzerinde Çalýþtýklarým       -1102
-     Teslim Almadýklarým          -1103
+     BÃ¼tÃ¼n Evraklar               -1101
+     Ãœzerinde Ã‡alÄ±ÅŸtÄ±klarÄ±m       -1102
+     Teslim AlmadÄ±klarÄ±m          -1103
      Havale Ettiklerim            -1104
-     Dosyaya Kaldýrdýklarým       -1105
-     Ýptal Ettiklerim             -1106
+     Dosyaya KaldÄ±rdÄ±klarÄ±m       -1105
+     Ä°ptal Ettiklerim             -1106
    Giden                          -2001
-     Bütün Evraklar               -2101
-     Üzerinde Çalýþtýklarým       -2102
-     Gönderilen Ýþler             -2103
-     Ýmzada Bekleyenler           -2104
+     BÃ¼tÃ¼n Evraklar               -2101
+     Ãœzerinde Ã‡alÄ±ÅŸtÄ±klarÄ±m       -2102
+     GÃ¶nderilen Ä°ÅŸler             -2103
+     Ä°mzada Bekleyenler           -2104
      Havale Ettiklerim            -2105
-     Dosyaya Kaldýrdýklarým       -2106
-     Ýptal Ettiklerim             -2107
-   Kiþisel                        -3001
+     Dosyaya KaldÄ±rdÄ±klarÄ±m       -2106
+     Ä°ptal Ettiklerim             -2107
+   KiÅŸisel                        -3001
    Kurumsal                       -4001
 }
 
@@ -925,7 +925,7 @@ begin
     2 : // Giden Sekmeleri
       begin
          ActMenuAyarla( (_KlasorID mod 1000) - 100 -1 + 6, True);
-         OutputDebugString(PWideChar('GÝDEN KalsorID='+_KlasorID.ToString+' _Tag = '+((_KlasorID mod 1000) - 100 -1 + 6).ToString));
+         OutputDebugString(PWideChar('GÄ°DEN KalsorID='+_KlasorID.ToString+' _Tag = '+((_KlasorID mod 1000) - 100 -1 + 6).ToString));
       end;
   end;
 end;
@@ -953,15 +953,15 @@ var
    whereKlasor : string;
    //whereYERID : string;
 begin
-   // "Evrak" KlasorID deðeri -1000 .. -4999 arasý deðer olacaðýndan
-   // iç yordamlarýn buna göre davranacaðý, gelen deðerin pozitif deðeri üzerinden
-   // "DIV" ve "MOD" ile kýyaslanacaðý varsayldý
+   // "Evrak" KlasorID deÄŸeri -1000 .. -4999 arasÄ± deÄŸer olacaÄŸÄ±ndan
+   // iÃ§ yordamlarÄ±n buna gÃ¶re davranacaÄŸÄ±, gelen deÄŸerin pozitif deÄŸeri Ã¼zerinden
+   // "DIV" ve "MOD" ile kÄ±yaslanacaÄŸÄ± varsayldÄ±
   {-----------}
     {}   EvrakTuru := -1 * KlasorId;
   {----------}
 
-  { "DOKUMAN" Sorgu "Bütün Evraklar" gibi klasörlerde, yalnýzca "KLASOR" ID alanýna göre yeniden þekillenecek}
-  { Bakýnýz KLASOR ID deðeri}
+  { "DOKUMAN" Sorgu "BÃ¼tÃ¼n Evraklar" gibi klasÃ¶rlerde, yalnÄ±zca "KLASOR" ID alanÄ±na gÃ¶re yeniden ÅŸekillenecek}
+  { BakÄ±nÄ±z KLASOR ID deÄŸeri}
   if (EvrakTuru<1000) or (EvrakTuru>4999) then
     Exit;
 
@@ -1003,13 +1003,13 @@ begin
     end
       else
   if (EvrakTuru div 1000=3) then
-  // Kiþisel Evrak Arþivi
+  // KiÅŸisel Evrak ArÅŸivi
     begin
 
     end
       else
   if (EvrakTuru div 1000=4) then
-  // Kurumsal Evrak Arþivi
+  // Kurumsal Evrak ArÅŸivi
     begin
 
     end;
@@ -1045,7 +1045,7 @@ begin
 
   TabloYenile(DOKUMAN,[]);
   EvrakBandedView.ViewData.Expand(True);
-  { Header olunca çok çirkin görünüyor.}
+  { Header olunca Ã§ok Ã§irkin gÃ¶rÃ¼nÃ¼yor.}
   EvrakBandedView.OptionsView.GroupByBox := False;
   EvrakBandedView.OptionsView.Header := False;
   //EvrakTView.ViewData.Expand(True);
@@ -1081,9 +1081,9 @@ begin
 //  if FArama.Tasiniyor then
 //    Exit;
   JvTimer1.Enabled := False;
-  SetLength(bilgiler,1);  //Kullanýcý gizlilik derecesi Kontrol Ediliyor
+  SetLength(bilgiler,1);  //KullanÄ±cÄ± gizlilik derecesi Kontrol Ediliyor
   SetLength(etiketler,1);
-  Tablo.TablodanSorguAc(4, 'select * from kullanýcý where REHBERID = ' + Kullanan);
+  Tablo.TablodanSorguAc(4, 'select * from kullanÄ±cÄ± where REHBERID = ' + Kullanan);
   Tablo.RehberEkBilgileriniGetir(Tablo.Query4.FieldByName('REHBERID').AsInteger,3,[79],etiketler,bilgiler);
 
   s := ' where 1=1 '; // D.KLASOR > 0
@@ -1155,8 +1155,8 @@ var
   DYetkisonucTutulanKalsor: DokumanYetkiSonuc;
   node: TcxTreeListNode;
 begin
-  // TutulanYer: 1=Klasör, 2=Belge
-     { TODO 1 -oMücahit Yaðmur -cEvrak Bilgi : Evrak TView DragOver yazýlmalý mý ? }
+  // TutulanYer: 1=KlasÃ¶r, 2=Belge
+     { TODO 1 -oMÃ¼cahit YaÄŸmur -cEvrak Bilgi : Evrak TView DragOver yazÄ±lmalÄ± mÄ± ? }
   (*
   if State = dsDragEnter then begin
     if Sender.Classname = 'TcxGridSite' then begin
@@ -1172,7 +1172,7 @@ begin
       TreeHitTest := (Sender as TcxDBTreeList).HitTest;
       // .HitState = echc_Empty
       if TreeHitTest.HitAtNode then begin
-        // Klasör Tutuldu
+        // KlasÃ¶r Tutuldu
         TutulanYer := 2;
         TutulanKisayol := 0;
         TutulanID := FArama.TabKlasorler.FieldByName('ID').AsInteger;
@@ -1185,7 +1185,7 @@ begin
     if (State = dsDragLeave) and (Sender.Classname = 'TcxGridSite') and (TutulanYer <> 0) and (TutulanID <> 0) then begin
       GridHitTest := (Sender as TcxGridSite).GridView.ViewInfo.GetHitTest(X, Y);
       if GridHitTest is TcxGridRecordCellHitTest then begin
-        // belgeye býrakýldý
+        // belgeye bÄ±rakÄ±ldÄ±
         TutulanYer := 0;
         TutulanID := 0;
         Accept := True;
@@ -1195,7 +1195,7 @@ begin
       if Assigned(node) then begin
         DYetkisonuc := Tablo.DokumanYetkiKontrol(322, node.Values[0]);
         DYetkisonucTutulanKalsor := Tablo.DokumanYetkiKontrol(322, FArama.TabKlasorler.FieldByName('ID').AsInteger);
-        if TutulanYer = 2 then begin// tutulan klasor mu kontrol yapýlýyor
+        if TutulanYer = 2 then begin// tutulan klasor mu kontrol yapÄ±lÄ±yor
           if (DYetkisonuc.Ekle = True) and (DYetkisonucTutulanKalsor.Degistir = True) then begin
             TreeHitTest := (Sender as TcxDBTreeList).HitTest;
 
@@ -1206,24 +1206,24 @@ begin
         end else begin
           if DYetkisonuc.Ekle = True then begin
             TreeHitTest := (Sender as TcxDBTreeList).HitTest;
-            // Klasöre Býrakýldý
+            // KlasÃ¶re BÄ±rakÄ±ldÄ±
           end else begin
             ShowMessage(Yetkisiz_Islem);
             Abort;
           end;
         end;
         if (TutulanYer = 1) and (TreeHitTest.HitAtNode) then begin
-          if TutulanKisayol > 0 then // kisayol taþýnýyor
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMANKISAYOL set YER_ID=&KlasorID where ID=&KisayolID', ['&KlasorID', '&KisayolID'], [(Sender as TcxDBTreeList).GetNodeAt(X, Y).Values[0], TutulanKisayol])
-          else // dokuman taþýnýyor
+          if TutulanKisayol > 0 then // kisayol taÅŸÄ±nÄ±yor
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMANKISAYOL set YER_ID=&KlasorID where ID=&KisayolID', ['&KlasorID', '&KisayolID'], [(Sender as TcxDBTreeList).GetNodeAt(X, Y).Values[0], TutulanKisayol])
+          else // dokuman taÅŸÄ±nÄ±yor
             DYetkisonuc := Tablo.DokumanYetkiKontrol(321, DOKUMAN.FieldByName('ID').AsInteger);
-          if DYetkisonuc.Degistir = True then begin // DOKuman Yetki Kontrolu Yapýlýyor.
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMAN set YER_ID=&KlasorID where ID=&DokumanID', ['&KlasorID', '&DokumanID'], [(Sender as TcxDBTreeList).GetNodeAt(X, Y).Values[0], TutulanID]);
+          if DYetkisonuc.Degistir = True then begin // DOKuman Yetki Kontrolu YapÄ±lÄ±yor.
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMAN set YER_ID=&KlasorID where ID=&DokumanID', ['&KlasorID', '&DokumanID'], [(Sender as TcxDBTreeList).GetNodeAt(X, Y).Values[0], TutulanID]);
             TabKlasorlerAfterScroll(FArama.TabKlasorler);
           end else
             ShowMessage(Yetkisiz_Islem);
-        end else if (TutulanYer = 2) and (TreeHitTest.HitAtBackground) then begin // Klasor Taþýma iþlemi yapýlýyor
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMANKLASOR set USTID=0 where ID=&ID', ['&ID'], [TutulanID]);
+        end else if (TutulanYer = 2) and (TreeHitTest.HitAtBackground) then begin // Klasor TaÅŸÄ±ma iÅŸlemi yapÄ±lÄ±yor
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMANKLASOR set USTID=0 where ID=&ID', ['&ID'], [TutulanID]);
           TabloYenile(FArama.TabKlasorler, []);
         end else
           Accept := True;
@@ -1233,8 +1233,8 @@ begin
           TutulanYer := 0;
           TutulanID := 0;
         end;
-      end else begin  // Klasor Kök dizine taþýnýyor.
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMANKLASOR set USTID=0 where ID=&ID', ['&ID'], [TutulanID]);
+      end else begin  // Klasor KÃ¶k dizine taÅŸÄ±nÄ±yor.
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMANKLASOR set USTID=0 where ID=&ID', ['&ID'], [TutulanID]);
           FArama.TabKlasorler.Refresh;
       end;
     end;
@@ -1286,7 +1286,7 @@ begin
     if DYetkisonuc.Gor = True then begin
       if EvrakTview.Controller.SelectedRecordCount > 0 then begin
         srid := EvrakTview.DataController.FocusedRecordIndex;
-        // Evrak Türüne göre Gelen / Giden formu açýlacak
+        // Evrak TÃ¼rÃ¼ne gÃ¶re Gelen / Giden formu aÃ§Ä±lacak
         if GetEvrakTurGelenGiden(EvrakTuru) = cGelenEvrak then
           begin
 
@@ -1324,7 +1324,7 @@ var
   IlkTarih: Variant;
 begin
   IlkTarih := Tablo.GENINI.BugunTrh;
-  if TGirisKutusuEx.BilgiAlEx(BGBaslama_tarih, TGirdiDenetimleri.Create.DateTimePicker(BGBaslangýc_tarih_gir, @IlkTarih)) = mrOk then
+  if TGirisKutusuEx.BilgiAlEx(BGBaslama_tarih, TGirdiDenetimleri.Create.DateTimePicker(BGBaslangÄ±c_tarih_gir, @IlkTarih)) = mrOk then
     Tablo.EPostaAlimIslemleri('', TDateTime(IlkTarih));
 end;
 
@@ -1341,10 +1341,10 @@ begin
 
      Tablo.OrtakEPostaGonder(MODUL_Dokuman, DOKUMAN, Ad, '', '');
 
-     Tablo.DokumanTarihceEkle(ID,'E-Posta gönderildi',6);
+     Tablo.DokumanTarihceEkle(ID,'E-Posta gÃ¶nderildi',6);
      //   Tablo.DokumanBildirimDuyuruAc(6,ID,Ad);
      Tablo.TablodanSorguAc(9,'SELECT REHBERID FROM DOKUMANBILDIRIM WHERE DOKUMANID='+inttostr(ID));
-     Tablo.DuyuruYayinla(Tablo.Query9, 'Doküman E-Posta / '+Ad, '"'+Ad+'" dokümaný üzerinde '+ DateTimeToStr ( Tablo.GENINI.BugunTrhSaat) + ' tarihinde "'+KullanAdi+'" kullanýcýsý tarafýndan E-Posta iþlemi gerçekleþtirilmiþtir.');
+     Tablo.DuyuruYayinla(Tablo.Query9, 'DokÃ¼man E-Posta / '+Ad, '"'+Ad+'" dokÃ¼manÄ± Ã¼zerinde '+ DateTimeToStr ( Tablo.GENINI.BugunTrhSaat) + ' tarihinde "'+KullanAdi+'" kullanÄ±cÄ±sÄ± tarafÄ±ndan E-Posta iÅŸlemi gerÃ§ekleÅŸtirilmiÅŸtir.');
   end
   else
      Tablo.UyariGoster(Uyari,Yetkisiz_Islem,1);
@@ -1389,12 +1389,12 @@ begin
     for I := 0 to EvrakTview.Controller.SelectedRowCount - 1 do
     begin
       id := EvrakTview.Controller.SelectedRecords[i].Values[EvrakTviewID.Index];
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM IMAJ  WHERE YERI= 1 AND YER_ID =&ID ', ['&ID'], [IntToStr(id)]); // IN (SELECT ID FROM DOKUMAN D WHERE D.ID= YER_ID AND D.KLASOR = -1)',[], []);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMANKISAYOL WHERE YER_ID=-1 AND DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMAN WHERE KLASOR= -1 AND ID=&ID ', ['&ID'], [IntToStr(id)]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM ANAHTAR_KELIME WHERE  DOK_ID=&ID ', ['&ID'], [IntToStr(id)]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMANYETKI WHERE  YERID=&ID ', ['&ID'], [IntToStr(id)]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMANGECMIS WHERE  DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM IMAJ  WHERE YERI= 1 AND YER_ID =&ID ', ['&ID'], [IntToStr(id)]); // IN (SELECT ID FROM DOKUMAN D WHERE D.ID= YER_ID AND D.KLASOR = -1)',[], []);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMANKISAYOL WHERE YER_ID=-1 AND DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMAN WHERE KLASOR= -1 AND ID=&ID ', ['&ID'], [IntToStr(id)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM ANAHTAR_KELIME WHERE  DOK_ID=&ID ', ['&ID'], [IntToStr(id)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMANYETKI WHERE  YERID=&ID ', ['&ID'], [IntToStr(id)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMANGECMIS WHERE  DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
     end;
   end;
 
@@ -1406,14 +1406,14 @@ end;
 
 procedure TEvrakListeFrame.GeriYkle1Click(Sender: TObject);
 begin
-  if DOKUMAN.FieldByName('TIP').AsInteger = 1 then  // Dosya Geri Yükleniyor.
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DOKUMAN set KLASOR=ESKIKLASOR , ESKIKLASOR=NULL  where KLASOR=-1  and ID=&DokID', ['&DokID'], [DOKUMAN.FieldByName('ID').AsInteger]);
+  if DOKUMAN.FieldByName('TIP').AsInteger = 1 then  // Dosya Geri YÃ¼kleniyor.
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DOKUMAN set KLASOR=ESKIKLASOR , ESKIKLASOR=NULL  where KLASOR=-1  and ID=&DokID', ['&DokID'], [DOKUMAN.FieldByName('ID').AsInteger]);
 
-  if DOKUMAN.FieldByName('TIP').AsInteger = 0 then // KIsayol Geri geri yükleniyor
-    if Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'select d.klasor from dokuman d inner join DOKUMANKISAYOL DK  on d.ID=dk.DOKUMANID where d.KLASOR=-1 AND dk.ID=&ID', ['&ID'], [DOKUMAN.FieldByName('KISAYOLID').AsInteger]) = -1 then
-      ShowMessage(PChar(KýsayolUyarý))
+  if DOKUMAN.FieldByName('TIP').AsInteger = 0 then // KIsayol Geri geri yÃ¼kleniyor
+    if Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'select d.klasor from dokuman d inner join DOKUMANKISAYOL DK  on d.ID=dk.DOKUMANID where d.KLASOR=-1 AND dk.ID=&ID', ['&ID'], [DOKUMAN.FieldByName('KISAYOLID').AsInteger]) = -1 then
+      ShowMessage(PChar(KÄ±sayolUyarÄ±))
     else
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMANKISAYOL set YER_ID=ESKIKLASOR , ESKIKLASOR=NULL  where YER_ID=-1 AND ID=&ID', ['&ID'], [DOKUMAN.FieldByName('KISAYOLID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMANKISAYOL set YER_ID=ESKIKLASOR , ESKIKLASOR=NULL  where YER_ID=-1 AND ID=&ID', ['&ID'], [DOKUMAN.FieldByName('KISAYOLID').AsInteger]);
 
   if FArama.PageArama.ActivePage = FArama.TabSheetKlasor then
     YenileKlasorClick(FArama.TabKlasorler.FieldByName('ID').AsInteger)
@@ -1458,7 +1458,7 @@ procedure TEvrakListeFrame.ListeDragDrop(Sender: TObject; Pos: TPoint; Value: TS
 }
 begin
 {
-//AO 21.04.2020 klasör yetkilendirme durduruldu
+//AO 21.04.2020 klasÃ¶r yetkilendirme durduruldu
 //  DYetkisonuc := Tablo.DokumanYetkiKontrol(322, FArama.TabKlasorler.FieldByName('ID').AsInteger);
 //  if DYetkisonuc.Ekle = True then
 //  begin
@@ -1489,7 +1489,7 @@ begin
   DYetkisonuc := Tablo.DokumanYetkiKontrol(321, DOKUMAN.FieldByName('ID').AsInteger);
   if DYetkisonuc.Degistir = True then
   begin
-    // KesID,KopyalaID,SonIslem:Integer;//soniþlem:kes=1,kopyala=2,Yapýþtýr=0;
+    // KesID,KopyalaID,SonIslem:Integer;//soniÅŸlem:kes=1,kopyala=2,YapÄ±ÅŸtÄ±r=0;
     SonIslem := 1;
     SetLength(SecDokID, EvrakTview.Controller.SelectedRecordCount);
     for i := 0 to EvrakTview.Controller.SelectedRecordCount - 1 do
@@ -1511,7 +1511,7 @@ begin
   if DYetkisonuc.Degistir = True then
   begin
 
-    // KesID,KopyalaID,SonIslem:Integer;//soniþlem:kes=1,kopyala=2,Yapýþtýr=0;
+    // KesID,KopyalaID,SonIslem:Integer;//soniÅŸlem:kes=1,kopyala=2,YapÄ±ÅŸtÄ±r=0;
     SonIslem := 2;
     SetLength(SecDokID, EvrakTview.Controller.SelectedRecordCount);
     for i := 0 to EvrakTview.Controller.SelectedRecordCount - 1 do
@@ -1528,13 +1528,13 @@ procedure TEvrakListeFrame.BurayaKisayololusturMenuClick(Sender: TObject);
   st: TStringList;
   sqltext: string;}
 begin
-  // önce kýsayol oluþturulacak dosyayý bulalým
+  // Ã¶nce kÄ±sayol oluÅŸturulacak dosyayÄ± bulalÄ±m
   (*
   st := TStringList.Create;
   sqltext := ' select D.AD, K.AD, D.ID from DOKUMAN D inner join DOKUMANKLASOR K on D.KLASOR = K.ID where ' + ' K.ID>0 and D.KLASOR<>' + FArama.TabKlasorler.FieldByName('ID').AsString + ' and D.DURUM>0 and D.AD like ''%<ara>%'' order by 1';
-  if Tablo.ListedenBilgiGetir('Doküman Listesi', sqltext, st, []) then
+  if Tablo.ListedenBilgiGetir('DokÃ¼man Listesi', sqltext, st, []) then
   begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into DOKUMANKISAYOL(DOKUMANID, YER, YER_ID, SUBEID) values(' + st.Strings[2] + ',' + IntToStr(TabNo_DOKUMAN)+','+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into DOKUMANKISAYOL(DOKUMANID, YER, YER_ID, SUBEID) values(' + st.Strings[2] + ',' + IntToStr(TabNo_DOKUMAN)+','+
                FArama.TabKlasorler.FieldByName('ID').AsString + ',' + inttoStr(SubeId) + ')', [], []);
 
     if FArama.PageArama.ActivePage = FArama.TabSheetKlasor then
@@ -1586,20 +1586,20 @@ begin
       //if EvrakTview.Controller.SelectedRecords[i].Values[EvrakTviewTIP.Index] = 1 then
       begin
         ID := EvrakTview.Controller.SelectedRecords[i].Values[EvrakTviewID.Index];
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from DOKUMAN where ID=&DokID', ['&DokID'], [ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID=&DokID', ['&DokID'], [ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from DOKUMANKISAYOL where DOKUMANID=&DokID', ['&DokID'], [ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM ANAHTAR_KELIME WHERE  DOK_ID=&ID ', ['&ID'], [ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMANYETKI WHERE  YERID=&ID ', ['&ID'], [ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE  FROM DOKUMANGECMIS WHERE  DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from DOKUMAN where ID=&DokID', ['&DokID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID=&DokID', ['&DokID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from DOKUMANKISAYOL where DOKUMANID=&DokID', ['&DokID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM ANAHTAR_KELIME WHERE  DOK_ID=&ID ', ['&ID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMANYETKI WHERE  YERID=&ID ', ['&ID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE  FROM DOKUMANGECMIS WHERE  DOKUMANID=&ID ', ['&ID'], [IntToStr(id)]);
 
       end;
       {
-      // Tablo.cxEditRepository2.repDokumanTip Index 0 = Kýsayol
+      // Tablo.cxEditRepository2.repDokumanTip Index 0 = KÄ±sayol
       if EvrakTview.Controller.SelectedRecords[i].Values[EvrakTviewTIP.Index] = 0 then
       begin
         ID := EvrakTview.Controller.SelectedRecords[i].Values[EvrakTviewKISAYOLID.Index];
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'delete from DOKUMANKISAYOL where  ID=&DokID', ['&DokID'], [ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'delete from DOKUMANKISAYOL where  ID=&DokID', ['&DokID'], [ID]);
       end;
       }
     end;
@@ -1619,14 +1619,14 @@ begin
    Cop := False;
       case FArama.PageArama.ActivePageIndex of
         0:
-          begin // klasör sayfasý açýk
+          begin // klasÃ¶r sayfasÄ± aÃ§Ä±k
             TNode := FArama.TreeKlasorler.FocusedNode;
             while TNode.Parent.Classname <> 'TcxTreeListRootNode' do
                   TNode := TNode.Parent;
             Cop := VarToStrDef(TNode.Values[0], '0') = '-1';
           end;
         1:
-          Cop := false; // arama sayfasý açýk
+          Cop := false; // arama sayfasÄ± aÃ§Ä±k
       end;
 
       if Tablo.DokumanSilmeBaslat(321, EvrakTview, Cop) then begin
@@ -1641,7 +1641,7 @@ procedure TEvrakListeFrame.PageControlDoldur;
 begin
   // Dokuman Genel Bilgiler Dolduruluyor.
 
-    { TODO 1 -oMücahit Yaðmur -cEvrak Bilgi : Evrak Bilgi Paneli yeniden yazýlacak }
+    { TODO 1 -oMÃ¼cahit YaÄŸmur -cEvrak Bilgi : Evrak Bilgi Paneli yeniden yazÄ±lacak }
  if PageDokuman.ActivePage = TabSheetGenel then begin
     {
 
@@ -1661,9 +1661,9 @@ begin
     LblBoyut.Caption := DOKUMAN.FieldByName('BOYUT').AsString;
     LblArsiv.Caption := DOKUMAN.FieldByName('ARSIVSURESI').AsString;
     case DOKUMAN.FieldByName('ARSIVSURETIPI').AsInteger of
-       1 : LblArsiv.Caption := LblArsiv.Caption + ' gün';
+       1 : LblArsiv.Caption := LblArsiv.Caption + ' gÃ¼n';
        30 : LblArsiv.Caption := LblArsiv.Caption + ' ay';
-       365 : LblArsiv.Caption := LblArsiv.Caption + ' yýl';
+       365 : LblArsiv.Caption := LblArsiv.Caption + ' yÄ±l';
     end;
     }
  end else if PageDokuman.ActivePage = TabSheetRevize then begin
@@ -1673,7 +1673,7 @@ begin
     // Yetkilendirme Dolduruluyor.
     TabloYenile(TabYetki, [321, DOKUMAN.FieldByName('ID').AsInteger]);
  end else if PageDokuman.ActivePage = TabSheetIlgili then begin
-    // Ýlgili Dolduruluyor.
+    // Ä°lgili Dolduruluyor.
     TabloYenile(TabIlgili, [DOKUMAN.FieldByName('ID').AsInteger]);
  end;
 end;
@@ -1740,12 +1740,12 @@ procedure TEvrakListeFrame.YapistirMenuClick(Sender: TObject);
   i : Integer;
   }
 begin
-  // KesID,KopyalaID,SonIslem:Integer;//soniþlem:kes=1,kopyala=2,Yapýþtýr=0;
+  // KesID,KopyalaID,SonIslem:Integer;//soniÅŸlem:kes=1,kopyala=2,YapÄ±ÅŸtÄ±r=0;
   {
   if SonIslem = 1 then
     for i := 0 to Length(SecDokID) - 1 do
     begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update DOKUMAN set KLASOR=&Klasor where ID=&ID', ['&Klasor', '&ID'], [FArama.TabKlasorler.FieldByName('ID').AsInteger, SecDokID[i]]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update DOKUMAN set KLASOR=&Klasor where ID=&ID', ['&Klasor', '&ID'], [FArama.TabKlasorler.FieldByName('ID').AsInteger, SecDokID[i]]);
       if FArama.PageArama.ActivePage = FArama.TabSheetKlasor then
         YenileKlasorClick(FArama.TabKlasorler.FieldByName('ID').AsInteger)
       else
@@ -1777,7 +1777,7 @@ procedure TEvrakListeFrame.YeniTusClick(Sender: TObject);
 var
   ID: Integer;
 begin
-//AO 28.04/2020 klasör yetkisi kaldýrýldý
+//AO 28.04/2020 klasÃ¶r yetkisi kaldÄ±rÄ±ldÄ±
 //  DYetkisonuc := Tablo.DokumanYetkiKontrol(322, FArama.TabKlasorler.FieldByName('ID').AsInteger);
 //  if DYetkisonuc.Ekle = True then begin
      if Tablo.OpenDialog1.Execute then begin

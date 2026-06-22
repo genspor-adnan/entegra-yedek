@@ -1,4 +1,4 @@
-// ************************************************************************ //
+﻿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
 // WSDL     : http://94.55.151.106/MSS_Service/MSS_Sender.asmx?wsdl

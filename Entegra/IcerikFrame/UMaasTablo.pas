@@ -1,28 +1,28 @@
-unit UMaasTablo;
-{PLANMAAS tablosunda YER alaný
- 0: YERID=PersId Cari kartta tanýmlanan Tahakkuklarý
- 1: YERID=PersId Cari kartta tanýmlanan Kesintileri
- 91: YERID=PersId Cari kartta tanýmlanan Ek Kesintileri
+ï»¿unit UMaasTablo;
+{PLANMAAS tablosunda YER alanÄ±
+ 0: YERID=PersId Cari kartta tanÄ±mlanan TahakkuklarÄ±
+ 1: YERID=PersId Cari kartta tanÄ±mlanan Kesintileri
+ 91: YERID=PersId Cari kartta tanÄ±mlanan Ek Kesintileri
 
- 11: YERID=PersId O ayki Tahakkuklarý
+ 11: YERID=PersId O ayki TahakkuklarÄ±
  21: YERID=PersId O ayki Kesintileri
- 51: YERID=PersId TUTAR alaný Standart Bankadan Ödenen Miktarý
- 61: YERID=PersId TUTAR alaný Standart Bankadan Ödenen Avansý
- 62: YERID=PersId TUTAR alaný Standart Kasadan Ödenen Avansý
- 100: YERID=-1 SIRA alaný Standart Maas gününü
- 101: YERID=-1 SIRA alaný Standart Avans gününü
- gösterir
+ 51: YERID=PersId TUTAR alanÄ± Standart Bankadan Ã–denen MiktarÄ±
+ 61: YERID=PersId TUTAR alanÄ± Standart Bankadan Ã–denen AvansÄ±
+ 62: YERID=PersId TUTAR alanÄ± Standart Kasadan Ã–denen AvansÄ±
+ 100: YERID=-1 SIRA alanÄ± Standart Maas gÃ¼nÃ¼nÃ¼
+ 101: YERID=-1 SIRA alanÄ± Standart Avans gÃ¼nÃ¼nÃ¼
+ gÃ¶sterir
 
- Maaþ Avansý verildiði zaman þu iþlemler yapýlýr:
- KASA tablosuna 100 kasadan çýkýþ eklenir
- KASA tablosuna 196 kasasýna giriþ eklenir Burada KREDIID alanýnda taksit sayýsý yazýlýr
- PLANMAAS tablosunda YER:1 YERID:RehberId ve DURUM:üstteki 196 kasasýna eklenen KASA.Id yazýlýr (Taksit sayýsý kadar bu satýr eklenir)
- Silmede de bunlarý silmek gerekir..
+ MaaÅŸ AvansÄ± verildiÄŸi zaman ÅŸu iÅŸlemler yapÄ±lÄ±r:
+ KASA tablosuna 100 kasadan Ã§Ä±kÄ±ÅŸ eklenir
+ KASA tablosuna 196 kasasÄ±na giriÅŸ eklenir Burada KREDIID alanÄ±nda taksit sayÄ±sÄ± yazÄ±lÄ±r
+ PLANMAAS tablosunda YER:1 YERID:RehberId ve DURUM:Ã¼stteki 196 kasasÄ±na eklenen KASA.Id yazÄ±lÄ±r (Taksit sayÄ±sÄ± kadar bu satÄ±r eklenir)
+ Silmede de bunlarÄ± silmek gerekir..
 
 
- Ýþ Avansý verildiði zaman þu iþlemler yapýlýr:
- KASA tablosuna 100 kasadan çýkýþ eklenir
- KASA tablosuna 195.01 Personelin iþ avansý kasasýna giriþ eklenir
+ Ä°ÅŸ AvansÄ± verildiÄŸi zaman ÅŸu iÅŸlemler yapÄ±lÄ±r:
+ KASA tablosuna 100 kasadan Ã§Ä±kÄ±ÅŸ eklenir
+ KASA tablosuna 195.01 Personelin iÅŸ avansÄ± kasasÄ±na giriÅŸ eklenir
 }
 
 
@@ -338,7 +338,7 @@ begin
       YerID := PLANMTABLO.FieldByName('ID').AsString;
       PlanMTabloID := TabTahakkuk.FieldByName('ID').AsString;
       Sira := TabTahakkuk.FieldByName('SIRA').AsString;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR WHERE ID=&ID',['&TUTAR','&ID'],[Tutar,PlanMTabloID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR WHERE ID=&ID',['&TUTAR','&ID'],[Tutar,PlanMTabloID]);
       PlanMTabloGuncelle;
       TabloYenile(PLANMTABLO,[BasTarihi,BitTarihi, ComboOdemeTuru.ItemIndex]);
       TabloYenile(TabTahakkuk,[YerID]);
@@ -349,17 +349,17 @@ end;
 procedure TMaasTabloDlg.PlanMTabloGuncelle();
 begin
   Tablo.Query4.Close;
-  Tablo.Query4.SQL.Text := StringReplace(SQLUpdPlanMTablo.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-  Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
-  if ComboOdemeTuru.ItemIndex = 2  then //'Ýþten çýkýþ'
+  Tablo.Query4.SQL.Text := StringReplace(SQLUpdPlanMTablo.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+  Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+  if ComboOdemeTuru.ItemIndex = 2  then //'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
      Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, '--REHBERID', ' and REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
   Tablo.Query4.Params[0].Value:=ComboOdemeTuru.ItemIndex;
   Tablo.Query4.ExecSQL;
-  //tahakkuklarýn ikinci aþamasýný yapýyoruz. Prim ya da maaþ çalýþan varsa ya prime ya da maaþa göre tahakkuk update ediliyor
+  //tahakkuklarÄ±n ikinci aÅŸamasÄ±nÄ± yapÄ±yoruz. Prim ya da maaÅŸ Ã§alÄ±ÅŸan varsa ya prime ya da maaÅŸa gÃ¶re tahakkuk update ediliyor
   Tablo.Query4.Close;
-  Tablo.Query4.SQL.Text := StringReplace(SQLUpdPlanMTablo2Adim.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-  Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
-  if ComboOdemeTuru.ItemIndex = 2  then //'Ýþten çýkýþ'
+  Tablo.Query4.SQL.Text := StringReplace(SQLUpdPlanMTablo2Adim.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+  Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+  if ComboOdemeTuru.ItemIndex = 2  then //'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
      Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, '--REHBERID', ' and REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
   Tablo.Query4.Params[0].Value:=ComboOdemeTuru.ItemIndex;
   Tablo.Query4.ExecSQL;
@@ -368,11 +368,11 @@ end;
 procedure TMaasTabloDlg.AlacaklibankaataMenuClick(Sender: TObject);
 var HESAPID, HESAPNO,HESAPKODU, HESAPADI, KUR : String;
 begin
-  //Önce borçlu banka Id si alalým
+  //Ã–nce borÃ§lu banka Id si alalÄ±m
   HESAPID := PLANMTABLO.FieldByName('REHBERID').AsString;
   if not Tablo.BankaHesapEkrani(41,HESAPID, HESAPKODU,HESAPNO, HESAPADI, KUR) then
     exit;
-  // deðiþtir
+  // deÄŸiÅŸtir
   PLANMTABLO.Edit;
   PLANMTABLO.FieldByName('ALACAKLIBNK').AsInteger := StrToIntDef(HESAPID,0);
   PLANMTABLO.Post;
@@ -403,7 +403,7 @@ var Excel, kitap, sayfa: variant;
            result := i = 999;
          end;
     begin
-         // burada excelde ad soyad maaþ gibi bilgilrerin yazýlacaðý satýrý buluruz
+         // burada excelde ad soyad maaÅŸ gibi bilgilrerin yazÄ±lacaÄŸÄ± satÄ±rÄ± buluruz
          for sat := 1 to 15 do begin
            say := 0;
            for sut := 1 to 10 do begin
@@ -447,9 +447,9 @@ var Excel, kitap, sayfa: variant;
     begin
        if OpenDialog1.Execute then begin
           Excel := CreateOleObject('Excel.Application');
-         //Excel kitabý ekranda görülmesin Excel.visible:=false;
+         //Excel kitabÄ± ekranda gÃ¶rÃ¼lmesin Excel.visible:=false;
           kitap:=Excel.Workbooks.Open(OpenDialog1.FileName);
-         //birinci sayfayý seç
+         //birinci sayfayÄ± seÃ§
          sayfa:= kitap.worksheets[1];
          Result := True;
        end else
@@ -479,7 +479,7 @@ var Excel, kitap, sayfa: variant;
        if Maas=-1 then Maas := KolonBul('MAA');
        if Maas=-1 then raise Exception.Create(MTTutarSutunuBulunamadi);
 
-       Subeno := KolonBul('ÞUBE');
+       Subeno := KolonBul('ÅžUBE');
 
 
        PLANMTABLO.First;
@@ -496,7 +496,7 @@ var Excel, kitap, sayfa: variant;
                    sayfa.Cells[Satir, Maas].Value := PLANMTABLO.FieldByName('ODEBANKA').AsString;
                    if Subeno > -1 then
                       sayfa.Cells[Satir, Subeno].Value := Tablo.Query1.FieldByName('SUBENO').AsString;
-                   //Excele iþlendi olarak iþaretle
+                   //Excele iÅŸlendi olarak iÅŸaretle
                    PLANMTABLO.Edit;
                    PLANMTABLO.FieldByName('EXCELISLENDI').AsBoolean := True;
                    PLANMTABLO.Post;
@@ -507,7 +507,7 @@ var Excel, kitap, sayfa: variant;
           PLANMTABLO.Next;
        end;
 
-       //burada excelde altta satýrlar kalmýþsa onlar silinir
+       //burada excelde altta satÄ±rlar kalmÄ±ÅŸsa onlar silinir
        Inc(Satir);
        tut := sayfa.Cells[Satir, Adsoyad].Value;
        while tut<>'' do begin
@@ -523,20 +523,20 @@ var Excel, kitap, sayfa: variant;
 
     procedure ExcelDosyasiKapat;
     begin
-        // Excel dosyasý kapatýlýyor.
+        // Excel dosyasÄ± kapatÄ±lÄ±yor.
        if not VarIsEmpty(Excel) then begin
            Excel.DisplayAlerts:= False;
            Excel.Save;
-           //Excel mesajlarýný görünteleme
+           //Excel mesajlarÄ±nÄ± gÃ¶rÃ¼nteleme
            Excel.Quit;
            Excel := Unassigned;
        end;
     end;
 begin
-   // banka hesabý kontrolü
+   // banka hesabÄ± kontrolÃ¼
    if PersonelEksikHesapBilgisi('(BORCLUBNK is null or BORCLUBNK = '''' ) AND T.DURUM=1', MTBorcluBankaHesapNoEksik) then exit;
    if PersonelEksikHesapBilgisi('(ALACAKLIBNK is null or ALACAKLIBNK='''') AND T.DURUM=1', MTAlacakliBankaHesapNoEksik) then exit;
-   //Hangi excel tablosu açýlacak ona bakalým
+   //Hangi excel tablosu aÃ§Ä±lacak ona bakalÄ±m
    Tablo.Query5.Close;
    Tablo.Query5.SQL.Text := ' select distinct BORCLUBNK from PLANMTABLO where TARIH >=:T1 and TARIH<:T2 AND SEC=1 AND DURUM=1';
    Tablo.Query5.Params[0].Value := BasTarihi;
@@ -544,7 +544,7 @@ begin
    Tablo.Query5.Open;
    if Tablo.Query5.RecordCount < 1 then
       ShowMessage(MTHicSecimYapilmamis)
-   else  //her banka için ayrý excel tablosu açýlýp içine atýlacak
+   else  //her banka iÃ§in ayrÄ± excel tablosu aÃ§Ä±lÄ±p iÃ§ine atÄ±lacak
       while not Tablo.Query5.Eof do begin
          ShowMessage(Banka_Adi(Tablo.Query5.Fields[0].AsString)+MTExcelTablosunuSecin );
          if not ExcelDosyasiAc then exit;
@@ -607,7 +607,7 @@ var
   ra: string;
   aktifFrame : TGenelAnaSekmeFrame;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 
   Yazdiriliyor:=False;
@@ -640,11 +640,11 @@ end;
 procedure TMaasTabloDlg.BorcluBankaAtaMenuClick(Sender: TObject);
 var HESAPID, HESAPNO,HESAPKODU, HESAPADI, KUR : String;
 begin
-  //Önce borçlu banka Id si alalým
+  //Ã–nce borÃ§lu banka Id si alalÄ±m
   HESAPID := '-1';
   if not Tablo.BankaHesapEkrani(39,HESAPID, HESAPKODU,HESAPNO, HESAPADI, KUR) then
     exit;
-  // deðiþtir
+  // deÄŸiÅŸtir
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' update PLANMTABLO set BORCLUBNK='+HESAPID+
         ' where SEC=1 and BANKAISLENDI = 0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
@@ -680,7 +680,7 @@ begin
    LabelMaasAralik.Caption:=FormatDateTime('dd'+FormatSettings.DateSeparator+'mm',BasTarihi)+' - '+FormatDateTime('dd'+FormatSettings.DateSeparator+'mm',BitTarihi-1);
 
    PLANMTABLO.close;
-   if ComboOdemeTuru.Text = 'Avans Ödemesi' then
+   if ComboOdemeTuru.Text = 'Avans Ã–demesi' then
       PLANMTABLO.SQL.Text := AvansOdemeMemo.Text
    else
       PLANMTABLO.SQL.Text := MaasOdemeMemo.Text;
@@ -782,17 +782,17 @@ var   Excel, kitap, sayfa: variant;
        if Tablo.Query2.RecordCount < 1 then
           ShowMessage(TCNo+MTPersonelListesindeBulunamadi)
        else begin
-           //Bu ay tabloda var mý
+           //Bu ay tabloda var mÄ±
            Tablo.TablodanSorguAc(3,'select ID from PLANMTABLO where REHBERID='+Tablo.Query2.Fields[0].AsString+' and MONTH(TARIH)= '+IntToStr(ComboAy.ItemIndex+1));
            if Tablo.Query3.RecordCount < 1 then
               ShowMessage(TCNo+MTPersonelListesindeBulunamadi)
            else begin
-               //prim bu ay için dahaönce eklendiyse update edilir
+               //prim bu ay iÃ§in dahaÃ¶nce eklendiyse update edilir
                Tablo.TablodanSorguAc(6,'select ID from PLANMAAS where YERID='+Tablo.Query3.Fields[0].AsString+' and YER=11 and SIRA=13');
                if Tablo.Query6.RecordCount < 1 then
-                  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into PLANMAAS(YER,YERID,SIRA,ETIKET,TUTAR,KUR,EKLEYEN)values(11,'+Tablo.Query3.Fields[0].AsString+','+PrimNo+','''+PrimAd+''','+Kontrol(TutarSutunu)+','''+CariDoviz+''','+Kullanan+')',[],[])
+                  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into PLANMAAS(YER,YERID,SIRA,ETIKET,TUTAR,KUR,EKLEYEN)values(11,'+Tablo.Query3.Fields[0].AsString+','+PrimNo+','''+PrimAd+''','+Kontrol(TutarSutunu)+','''+CariDoviz+''','+Kullanan+')',[],[])
                else
-                  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update PLANMAAS set TUTAR = '+Kontrol(TutarSutunu)+' where ID='+Tablo.Query6.Fields[0].AsString,[],[]);
+                  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update PLANMAAS set TUTAR = '+Kontrol(TutarSutunu)+' where ID='+Tablo.Query6.Fields[0].AsString,[],[]);
            end;
        end;
     end;
@@ -800,29 +800,29 @@ begin
 
   ShowMessage(MTAktarimkosullari);
 
-    //Excel nesnesi oluþtur
+    //Excel nesnesi oluÅŸtur
    if OpenDialog1.Execute then begin
-        //Ekleyeceðimizprim bilgilerini alalým;
+        //EkleyeceÄŸimizprim bilgilerini alalÄ±m;
         Tablo.TablodanSorguAc(1,'select ADI,NO from REHBERVARSAYILAN where YERI=5 and NO=13');
         PrimNo := Tablo.Query1.Fields[1].AsString;
         PrimAd := Tablo.Query1.Fields[0].AsString;
         Excel := CreateOleObject('Excel.Application');
-        //Excel kitabý ekranda görülmesin Excel.visible:=false;
+        //Excel kitabÄ± ekranda gÃ¶rÃ¼lmesin Excel.visible:=false;
         kitap:=Excel.Workbooks.Open(OpenDialog1.FileName);
-        //birinci sayfayý seç
+        //birinci sayfayÄ± seÃ§
         sayfa:= kitap.worksheets[1];
         Sat:=2;
-        //Verilen aralýktaki tüm hücrelere bakmak için döngü
+        //Verilen aralÄ±ktaki tÃ¼m hÃ¼crelere bakmak iÃ§in dÃ¶ngÃ¼
         tut := sayfa.Cells[Sat, TcKimNoSutunu].Value;
         while tut <> '' do begin
            TahakkukTablosunaEkle(sayfa.Cells[Sat, TcKimNoSutunu].Value);
            Inc(Sat);
            tut := sayfa.Cells[Sat, TcKimNoSutunu].Value;
         end;
-        // Excel dosyasý kapatýlýyor.
+        // Excel dosyasÄ± kapatÄ±lÄ±yor.
         if not VarIsEmpty(Excel) then begin
            Excel.DisplayAlerts:= False;
-           //Excel mesajlarýný görünteleme
+           //Excel mesajlarÄ±nÄ± gÃ¶rÃ¼nteleme
            Excel.Quit;
            Excel := Unassigned;
         end;
@@ -849,7 +849,7 @@ var Excel, kitap, sayfa: variant;
        AvKasa :=Tablo.GENINI.ReadInteger(Ops_ExcelMaasEsles_AvKasa,-1);
        OdeBanka := Tablo.GENINI.ReadInteger(Ops_ExcelMaasEsles_OdeBanka,-1);
        OdeKasa :=Tablo.GENINI.ReadInteger(Ops_ExcelMaasEsles_OdeKasa,-1);
-       bulundu := False; //altta hangi satýrdan itibaren veri var ona bakalým
+       bulundu := False; //altta hangi satÄ±rdan itibaren veri var ona bakalÄ±m
        Sat := 1;
        repeat
          tut := sayfa.Cells[Sat, TcKimNo].Value;
@@ -897,14 +897,14 @@ var Excel, kitap, sayfa: variant;
        end;
     end;
 begin
-    //Excel nesnesi oluþtur
+    //Excel nesnesi oluÅŸtur
   if OpenDialog1.Execute then begin
     Excel := CreateOleObject('Excel.Application');
-    //Excel kitabý ekranda görülmesin Excel.visible:=false;
+    //Excel kitabÄ± ekranda gÃ¶rÃ¼lmesin Excel.visible:=false;
     kitap:=Excel.Workbooks.Open(OpenDialog1.FileName);
-    //birinci sayfayý seç
+    //birinci sayfayÄ± seÃ§
     sayfa:= kitap.worksheets[1];
-    //Verilen aralýktaki tüm hücrelere bakmak için döngü
+    //Verilen aralÄ±ktaki tÃ¼m hÃ¼crelere bakmak iÃ§in dÃ¶ngÃ¼
     SutunlariOku;
     tut := sayfa.Cells[Sat, TcKimNo].Value;
     while tut <> '' do begin
@@ -912,10 +912,10 @@ begin
       Inc(Sat);
       tut := sayfa.Cells[Sat, TcKimNo].Value;
     end;
-    // Excel dosyasý kapatýlýyor.
+    // Excel dosyasÄ± kapatÄ±lÄ±yor.
     if not VarIsEmpty(Excel) then begin
       Excel.DisplayAlerts:= False;
-      //Excel mesajlarýný görünteleme
+      //Excel mesajlarÄ±nÄ± gÃ¶rÃ¼nteleme
       Excel.Quit;
       Excel := Unassigned;
     end;
@@ -1035,7 +1035,7 @@ begin
     if mResult = mrOk then begin
       YerID := PLANMTABLO.FieldByName('ID').AsString;
       PlanMTabloID := TabKesinti.FieldByName('ID').AsString;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR WHERE ID=&ID',['&TUTAR','&ID'],[Tutar,PlanMTabloID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR WHERE ID=&ID',['&TUTAR','&ID'],[Tutar,PlanMTabloID]);
       PlanMTabloGuncelle;
       TabloYenile(PLANMTABLO,[BasTarihi,BitTarihi, ComboOdemeTuru.ItemIndex]);
       TabloYenile(TabKesinti,[YerID]);
@@ -1059,14 +1059,14 @@ begin
      ComboYil.Visible := True;
   end;
   PLANMTABLO.close;
-  //Eðer ComboOdemeTuru seçili index'i 0 ise avans ödemesi 1 ise maaþ ödemesidir
+  //EÄŸer ComboOdemeTuru seÃ§ili index'i 0 ise avans Ã¶demesi 1 ise maaÅŸ Ã¶demesidir
   case ComboOdemeTuru.ItemIndex of
     0:begin
       PLANMTABLO.SQL.Text := AvansOdemeMemo.Text;
       PLANMTABLO.Params[0].Value := BasTarihi;
       PLANMTABLO.Params[1].Value := BitTarihi;
       PLANMTABLO.Params[2].Value := ComboOdemeTuru.ItemIndex;
-      //Avans ödemesinde Banka(dahil) kolonundan Toplammaas(dahil) kolonuna kadar olan kolonlarý gizle
+      //Avans Ã¶demesinde Banka(dahil) kolonundan Toplammaas(dahil) kolonuna kadar olan kolonlarÄ± gizle
       for I := (MaasTakvimViewBANKA.Index) to (MaasTakvimViewTOPLAMMAAS.Index) do
          MaasTakvimView.Columns[I].Visible := False;
       PanelAlt.Visible := False;
@@ -1076,7 +1076,7 @@ begin
       PLANMTABLO.Params[0].Value := BasTarihi;
       PLANMTABLO.Params[1].Value := BitTarihi;
       PLANMTABLO.Params[2].Value := ComboOdemeTuru.ItemIndex;
-      //Maaþ ödemesinde Banka(dahil) kolonundan Toplammaas(dahil) kolonuna kadar olan kolonlarý göster
+      //MaaÅŸ Ã¶demesinde Banka(dahil) kolonundan Toplammaas(dahil) kolonuna kadar olan kolonlarÄ± gÃ¶ster
       for I := (MaasTakvimViewBANKA.Index) to (MaasTakvimViewTOPLAMMAAS.Index) do
          MaasTakvimView.Columns[I].Visible := True;
       PanelAlt.Visible := True;
@@ -1094,7 +1094,7 @@ end;
 procedure TMaasTabloDlg.PopupMenu1Popup(Sender: TObject);
 begin
 //   if PLANMTABLO.RecordCount<1 then
-//      raise Exception.Create('Önce listeyi oluþturun!');
+//      raise Exception.Create('Ã–nce listeyi oluÅŸturun!');
 end;
 
 procedure TMaasTabloDlg.PopupMenuKesintiPopup(Sender: TObject);
@@ -1132,10 +1132,10 @@ end;
 procedure TMaasTabloDlg.SeililereborluKasaata1Click(Sender: TObject);
 var  st : Tstringlist;
 begin
-  //Önce borçlu kasa Id si alalým
+  //Ã–nce borÃ§lu kasa Id si alalÄ±m
   st := Tstringlist.create;
   if Tablo.ListedenBilgiGetir(KasaListesi, 'select KASAKODU,KASAADI,ID from KASALAR where KASAADI like ''%<ara>%'' and DURUM = '+IntToStr(ComboOdemeTuru.ItemIndex)+' order by 1',st,[]) then begin
-    // deðiþtir
+    // deÄŸiÅŸtir
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := ' update PLANMTABLO set BORCLUKASA='+st.Strings[2]+
           ' where SEC=1 and KASAISLENDI = 0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
@@ -1159,14 +1159,14 @@ end;
 procedure TMaasTabloDlg.SeilileriBankadandemeolarakile1Click(Sender: TObject);
 var Tarih, BilgiGir:Variant;
 begin
-   //banka hesabý kontrolü
+   //banka hesabÄ± kontrolÃ¼
    if PersonelEksikHesapBilgisi('(BORCLUBNK is null or BORCLUBNK = '''') AND T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.ODEBANKA>0', MTBorcluBankaHesapNoEksik) then exit;
    //if PersonelEksikHesapBilgisi('(ALACAKLIBNK is null or ALACAKLIBNK='''')', MTAlacakliBankaHesapNoEksik) then exit;
-   //banka ödeme
+   //banka Ã¶deme
   //Tarihi al
 
   Tarih := (Tablo.GENINI.BugunTrhSaat);
-  BilgiGir := 'Maaþ Ödeme';
+  BilgiGir := 'MaaÅŸ Ã–deme';
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,TGirdiDenetimleri.Create.DateTimePicker(BGIslem_tarih_gir,@Tarih,dtkDate,'dd/MM/yyyy HH:mm:ss').Edit(BGAciklama_gir, @BilgiGir)) <> mrOk then
     Abort;
   Tablo.Query1.Close;
@@ -1179,7 +1179,7 @@ begin
         ' from PLANMTABLO T inner join REHBER R on R.ID=T.REHBERID'+
         ' where SEC=1 and ODEBANKA>0 and BANKAISLENDI=0 AND T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
   Tablo.Query1.ExecSQL;
-  //durumunu deðiþtir
+  //durumunu deÄŸiÅŸtir
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' update PLANMTABLO set BANKAISLENDI=1'+
         ' where SEC=1 and BANKAISLENDI=0 AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND ODEBANKA>0.1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
@@ -1192,22 +1192,22 @@ var
   GeriDonusID1,GeriDonusID2,I:Integer;
   PlanID:string;
 begin
-  //Personel bilgisinde KUR bilgisi varsa ve Durum=0(Avans Ödemesiyse) ODEBANKA ve ODEKASA toplamý 0'dam büyükse iþleme izin veriliyor.
+  //Personel bilgisinde KUR bilgisi varsa ve Durum=0(Avans Ã–demesiyse) ODEBANKA ve ODEKASA toplamÄ± 0'dam bÃ¼yÃ¼kse iÅŸleme izin veriliyor.
   if PersonelEksikHesapBilgisi('(KUR is null or KUR = '''' ) AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA)>0', MTParaBirimiEksik) then exit;
-  //Avans iþle
+  //Avans iÅŸle
   PLANMTABLO.First;
   for I := 0 to MaasTakvimView.DataController.RecordCount-1 do
   begin
-    //Odekasa, OdeBanka bilgileri 0'dan büyükse ve seçilmiþ satýrsa iþlem yapýlacak
+    //Odekasa, OdeBanka bilgileri 0'dan bÃ¼yÃ¼kse ve seÃ§ilmiÅŸ satÄ±rsa iÅŸlem yapÄ±lacak
     if ((PLANMTABLO.FieldByName('ODEKASA').AsCurrency > 0.1) or (PLANMTABLO.FieldByName('ODEBANKA').AsCurrency > 0.1)) and (PLANMTABLO.FieldByName('SEC').AsBoolean) then begin
       PlanID := MaasTakvimView.DataController.GetValue(I,MaasTakvimViewID.Index);
 
-      //Avans iþlemi için kasa'ya borç kaydý açýlýyor.
+      //Avans iÅŸlemi iÃ§in kasa'ya borÃ§ kaydÄ± aÃ§Ä±lÄ±yor.
       Tablo.Query3.Close;
       Tablo.Query3.SQL.Text := 'INSERT INTO KASA(DOVIZ_TUTARI, DOVIZ_KURU, TUR, ISLEMTARIHI, PLANTARIHI, REHBERID, ACIKLAMA, HESAPTURU, HESAPID, BORC, ALACAK, KUR,'+
       ' FATURAID,KREDIID,CEKSENETID,KASA,EKLEYEN,SUBEID,GERIDONUSID,YERI,YERID)'+
       ' SELECT 0, ''TL'', 40, ISLEMTARIHI=T.TARIH, PLANTARIHI=T.TARIH, T.REHBERID, ACIKLAMA='''+FormatdateTime('mmmm yyyy', BasTarihi)+' ''+ (SELECT CASE TUR WHEN ''B'' THEN ''Bankadan'' WHEN ''K'' THEN ''Kasadan'' '+
-      ' END FROM dbo.PLANMAAS P WHERE P.YERID=T.REHBERID AND YER=61) + '' Avans Ödeme'',HESAPTURU=(SELECT TUR FROM dbo.PLANMAAS P WHERE P.YERID=T.REHBERID AND YER=61), HESAPID=(SELECT CASE TUR WHEN ''B'' THEN T.BORCLUBNK WHEN ''K'' THEN T.BORCLUKASA END '+
+      ' END FROM dbo.PLANMAAS P WHERE P.YERID=T.REHBERID AND YER=61) + '' Avans Ã–deme'',HESAPTURU=(SELECT TUR FROM dbo.PLANMAAS P WHERE P.YERID=T.REHBERID AND YER=61), HESAPID=(SELECT CASE TUR WHEN ''B'' THEN T.BORCLUBNK WHEN ''K'' THEN T.BORCLUKASA END '+
       ' FROM dbo.PLANMAAS P WHERE YER=61 AND P.YERID=T.REHBERID), BORC=(T.ODEBANKA+T.ODEKASA), ALACAK=0,'+
       ' T.KUR, FATURAID=-1, KREDIID=-1, CEKSENETID=-1,'+IntToStr(Kasa)+','''+ Kullanan + ''',' +IntToStr(SubeId)+',0,'+IntToStr(TabNo_PLANMTABLO)+',T.ID'+
       ' FROM PLANMTABLO T WHERE T.ID='+PlanID+' AND SEC=1 AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA) > 0 AND (T.BANKAISLENDI=0 AND T.KASAISLENDI=0) AND'+
@@ -1215,29 +1215,29 @@ begin
       ' SELECT SCOPE_IDENTITY()';
       Tablo.Query3.Open;
 
-      //Insert'in id'si alýnýp geni dönüþ id olarak kullanýlacak.
+      //Insert'in id'si alÄ±nÄ±p geni dÃ¶nÃ¼ÅŸ id olarak kullanÄ±lacak.
       GeriDonusID1 := Tablo.Query3.Fields[0].AsInteger;
 
-      //Avans iþlemi için kasa'ya alacak kaydý açýlýyor.
+      //Avans iÅŸlemi iÃ§in kasa'ya alacak kaydÄ± aÃ§Ä±lÄ±yor.
       Tablo.Query3.Close;
       Tablo.Query3.SQL.Text := 'INSERT INTO KASA(DOVIZ_TUTARI,DOVIZ_KURU,TUR,ISLEMTARIHI, PLANTARIHI, REHBERID, ACIKLAMA, HESAPTURU, HESAPID, BORC, ALACAK, KUR,'+
       ' FATURAID,KREDIID,CEKSENETID,KASA,EKLEYEN,SUBEID,GERIDONUSID,YERI,YERID)'+
       ' SELECT 0, ''TL'', 40, ISLEMTARIHI=T.TARIH, PLANTARIHI=T.TARIH, T.REHBERID, ACIKLAMA='''+FormatdateTime('mmmm yyyy', BasTarihi)+' ''+'+
       ' (SELECT CASE TUR WHEN ''B'' THEN ''Bankadan'' WHEN ''K'' THEN ''Kasadan'' END FROM dbo.PLANMAAS P '+
-      ' WHERE P.YERID=T.REHBERID AND YER=61) + '' Avans Ödeme'',''K'',(SELECT ID FROM KASALAR WHERE KASATUR=196 AND KUR=''TL''),'+
+      ' WHERE P.YERID=T.REHBERID AND YER=61) + '' Avans Ã–deme'',''K'',(SELECT ID FROM KASALAR WHERE KASATUR=196 AND KUR=''TL''),'+
       ' BORC=0, ALACAK=(T.ODEBANKA+T.ODEKASA), T.KUR, FATURAID=-1, KREDIID=-1, CEKSENETID=-1,'+IntToStr(Kasa)+','''+ Kullanan + ''',' +IntToStr(SubeId)+','+IntToStr(GeriDonusID1)+','+IntToStr(TabNo_PLANMTABLO)+',T.ID'+
       ' FROM PLANMTABLO T WHERE T.ID='+PlanID+' AND SEC=1 AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA) > 0 AND '+
       ' (T.BANKAISLENDI=0 AND T.KASAISLENDI=0) AND TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''''+
       ' SELECT SCOPE_IDENTITY()';
       Tablo.Query3.Open;
 
-      //Insert'in id'si alýnýp geri dönüþ id olarak kullanýlacak.
+      //Insert'in id'si alÄ±nÄ±p geri dÃ¶nÃ¼ÅŸ id olarak kullanÄ±lacak.
       GeriDonusID2 := Tablo.Query3.Fields[0].AsInteger;
-      //Ýlk insert'ün Geridönüþ id'si güncelleniyor
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE KASA SET GERIDONUSID=&GERIDONUSID WHERE ID=&ID',['&GERIDONUSID','&ID'],[GeriDonusID2,GeriDonusID1]);
+      //Ä°lk insert'Ã¼n GeridÃ¶nÃ¼ÅŸ id'si gÃ¼ncelleniyor
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE KASA SET GERIDONUSID=&GERIDONUSID WHERE ID=&ID',['&GERIDONUSID','&ID'],[GeriDonusID2,GeriDonusID1]);
 
-     //Etiket := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT ETIKET FROM REHBERAYAR WHERE YERI=5 AND VARSAYILAN=31 AND SIRA=&SIRA',['&SIRA'],[Sira],True);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (ETIKET,SIRA,TUTAR,TARIH, YERID, EKLEYEN, EKLEMETARIHI, TUR, YER, KUR, ACIKLAMA,DURUM) '+
+     //Etiket := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'SELECT ETIKET FROM REHBERAYAR WHERE YERI=5 AND VARSAYILAN=31 AND SIRA=&SIRA',['&SIRA'],[Sira],True);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO PLANMAAS (ETIKET,SIRA,TUTAR,TARIH, YERID, EKLEYEN, EKLEMETARIHI, TUR, YER, KUR, ACIKLAMA,DURUM) '+
        ' SELECT ETIKET=''Avans'',SIRA=0,TUTAR=(T.ODEBANKA+T.ODEKASA),T.TARIH, YERID=T.REHBERID, '+
        ' EKLEYEN='+Kullanan+', EKLEMETARIHI=getdate(), TUR=case when ODEBANKA>0 then ''B'' else ''K'' end, YER=1, T.KUR, ACIKLAMA='''',DURUM='+IntToStr(GeriDonusID2)+
        ' FROM PLANMTABLO T WHERE T.ID='+PlanID+' AND SEC=1 AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA) > 0 AND '+
@@ -1246,19 +1246,19 @@ begin
     PLANMTABLO.Next;
   end;
 
-  //Secili olan avanslardan kasa ise kasa islendi banka ise bankaislendi yapýlýyor.
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE T SET KASAISLENDI=(CASE P.TUR WHEN ''K'' THEN 1 ELSE 0 END),'+
+  //Secili olan avanslardan kasa ise kasa islendi banka ise bankaislendi yapÄ±lÄ±yor.
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE T SET KASAISLENDI=(CASE P.TUR WHEN ''K'' THEN 1 ELSE 0 END),'+
 	'	BANKAISLENDI=(CASE P.TUR WHEN ''B'' THEN 1 ELSE 0 END) FROM dbo.PLANMTABLO T'+
   ' INNER JOIN PLANMAAS P ON P.YERID=T.REHBERID WHERE T.SEC=1 AND P.YER=61 AND T.KASAISLENDI=0'+
   ' AND T.BANKAISLENDI=0 AND T.TARIH >='''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' AND'+
   ' T.TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND (T.ODEKASA>0 OR T.ODEBANKA>0)',[],[]);
 
   ComboAyPropertiesChange(Self);
-  ///  Önemli bilgiler
-  ///  Durum=2 iþten çýkýþ; 1'e maaþ ödemesi 0 ise avans ödemesidir.
-  ///  KasaTur=196 avans kasasýdýr
-  ///  YER=61 Standart avans ödemesidir
-  ///  YER=51 Bankadan maaþ ödemesidir
+  ///  Ã–nemli bilgiler
+  ///  Durum=2 iÅŸten Ã§Ä±kÄ±ÅŸ; 1'e maaÅŸ Ã¶demesi 0 ise avans Ã¶demesidir.
+  ///  KasaTur=196 avans kasasÄ±dÄ±r
+  ///  YER=61 Standart avans Ã¶demesidir
+  ///  YER=51 Bankadan maaÅŸ Ã¶demesidir
 end;
 
 procedure TMaasTabloDlg.SeilileriKasadandemeolarakile1Click(Sender: TObject);
@@ -1275,10 +1275,10 @@ var Tarih, BilgiGir : Variant;
 begin
   if PersonelEksikHesapBilgisi('(BORCLUKASA is null or BORCLUKASA = '''' ) AND T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.ODEKASA>0.1', MTBorcluKasaBilgisiEksik) then
      exit;
-   // kasa ödeme
+   // kasa Ã¶deme
   //Tarihi al
   Tarih := Tablo.GENINI.BugunTrhSaat;
-  BilgiGir := 'Maaþ Ödeme';
+  BilgiGir := 'MaaÅŸ Ã–deme';
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,TGirdiDenetimleri.Create.DateTimePicker(BGIslem_tarih_gir,@Tarih,dtkDate,'dd/MM/yyyy HH:mm:ss').Edit(BGAciklama_gir, @BilgiGir)) <> mrOk then
   Abort;
    Tablo.TablodanSorguAc(2,' select ID from MASRAFGELIR where VARSAYILAN=3 ');
@@ -1308,7 +1308,7 @@ begin
          Tablo.Query1.SQL.Add(' and SEC=1 and ODEKASA>0.1 and KASAISLENDI=0'+
                       ' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ');
          Tablo.Query1.ExecSQL;
-        //durumunu deðiþtir
+        //durumunu deÄŸiÅŸtir
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text := ' update PLANMTABLO set KASAISLENDI=1'+
             ' where SEC = 1 and ODEKASA>0.1 AND KASAISLENDI=0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
@@ -1328,11 +1328,11 @@ procedure TMaasTabloDlg.SeilileriTahakkukolarakile1Click(Sender: TObject);
   if PersonelEksikHesapBilgisi('(KUR is null or KUR = '''' ) AND T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.TAHAKKUK>0', MTParaBirimiEksik) then exit;
   //Tarih sor
   Tarih := (Tablo.GENINI.BugunTrhSaat);
-  BilgiGir := 'Maaþ Tahakkuk';
+  BilgiGir := 'MaaÅŸ Tahakkuk';
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,TGirdiDenetimleri.Create.DateTimePicker(BGIslem_tarih_gir,@Tarih,dtkDate,'dd/MM/yyyy HH:mm:ss').Edit(BGAciklama_gir, @BilgiGir)) <> mrOk then
     Abort;
-  //Tahakkuk iþle
-  Tablo.Query1.Close;                                   //gelmediði günleri çýkaralaým
+  //Tahakkuk iÅŸle
+  Tablo.Query1.Close;                                   //gelmediÄŸi gÃ¼nleri Ã§Ä±karalaÄ±m
   Tablo.Query1.SQL.Text := 'Insert Into FATBASLIK (TUR,TARIH,FATURATARIH,REHBERID,ACIKLAMA,FATURA_TUTARI,KUR, '
     +'TIPI,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR,EKSTREDEKULLAN,RAPORDOVIZ, '
     +'MASRAFID,DURUM,KASA,YERI,YERID,EKLEYEN,SUBEID) '
@@ -1345,11 +1345,11 @@ procedure TMaasTabloDlg.SeilileriTahakkukolarakile1Click(Sender: TObject);
     +'from PLANMTABLO T inner join REHBER R on R.ID=T.REHBERID   '
     +'where T.SEC=1 and TAHAKKUKISLENDI=0 and T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.TAHAKKUK>0 AND TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
     Tablo.Query1.ExecSQL;
-  //durumunu deðiþtir
-  //Burada alýnmýþ olan avanslar maaþtan düþülür.
+  //durumunu deÄŸiÅŸtir
+  //Burada alÄ±nmÄ±ÅŸ olan avanslar maaÅŸtan dÃ¼ÅŸÃ¼lÃ¼r.
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := StringReplace(AvansMaasIsle.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-  Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+  Tablo.Query1.SQL.Text := StringReplace(AvansMaasIsle.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+  Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
   Tablo.Query1.ExecSQL;
 
 
@@ -1383,7 +1383,7 @@ begin
   if (ComboOdemeTuru.ItemIndex<2)and(PLANMTABLO.RecordCount>0) then
      raise Exception.Create(MTOnceMaasTablosunuBosalt);
 
-  if ComboOdemeTuru.ItemIndex=2 then begin//iþten çýkýþ  ise personel seç, çýkýþ tarihi al
+  if ComboOdemeTuru.ItemIndex=2 then begin//iÅŸten Ã§Ä±kÄ±ÅŸ  ise personel seÃ§, Ã§Ä±kÄ±ÅŸ tarihi al
      PersonelID := Tablo.RehberAra_IDGetir(335);
      if PersonelID < 1 then Abort;
      Tarih := Tablo.GENINI.BugunTrh;
@@ -1394,65 +1394,65 @@ begin
      if MaasGunu>Gun then
         Dec(Ay);
      BasTarihi := StrToDate(IntToStr(MaasGunu)+FormatSettings.DateSeparator+IntToStr(Ay)+FormatSettings.DateSeparator+IntToStr(Yil)+''); // 15/02/2016
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PLANMTABLO set SEC=0 where SEC=1',[],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PLANMTABLO set SEC=0 where SEC=1',[],[]);
   end;
 
 
   Tablo.Query1.Close;
-  if ComboOdemeTuru.ItemIndex>0  then begin //  'Maaþ Ödemesi' veya 'Ýþten çýkýþ'
+  if ComboOdemeTuru.ItemIndex>0  then begin //  'MaaÅŸ Ã–demesi' veya 'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
 //     Tablo.Query1.SQL.Text := StringReplace(SQLInsert.Text, ':PTRH', FormatDateTime('yyyy-mm-dd', StrToDateDef(IntToStr(MaasGunu)+FormatSettings.DateSeparator+
-     Tablo.Query1.SQL.Text := StringReplace(SQLInsert.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-     Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
-     if ComboOdemeTuru.ItemIndex = 2  then //'Ýþten çýkýþ'
+     Tablo.Query1.SQL.Text := StringReplace(SQLInsert.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+     Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+     if ComboOdemeTuru.ItemIndex = 2  then //'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--R.ID', ' and R.ID='+IntToStr(PersonelID), [rfReplaceAll]);
      Tablo.Query1.Params[0].Value:=ComboOdemeTuru.ItemIndex;
      Tablo.Query1.ExecSQL;
-    //Burada personelin sayfasýndaki tahakkuklarý getiririz.
+    //Burada personelin sayfasÄ±ndaki tahakkuklarÄ± getiririz.
      Tablo.Query1.Close;
-     Tablo.Query1.SQL.Text := StringReplace(SQLTahakkukInsert.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-     Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
-     if ComboOdemeTuru.ItemIndex = 2  then //'Ýþten çýkýþ'
+     Tablo.Query1.SQL.Text := StringReplace(SQLTahakkukInsert.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+     Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+     if ComboOdemeTuru.ItemIndex = 2  then //'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--M.YERID', ' and M.YERID='+IntToStr(PersonelID), [rfReplaceAll]);
      Tablo.Query1.Params[0].Value:=11;
      Tablo.Query1.Params[1].Value:=0;
      Tablo.Query1.ExecSQL;
-     //Burada ek olarak girilmiþ kesintileri getiririz
+     //Burada ek olarak girilmiÅŸ kesintileri getiririz
      Tablo.Query1.Close;
      Tablo.Query1.Params[0].Value:=21;
      Tablo.Query1.Params[1].Value:=91;
      Tablo.Query1.ExecSQL;
-    //Eðer ayarlarda "Mesai" varsa pdks'den bakýlarak onlar da eklenir
+    //EÄŸer ayarlarda "Mesai" varsa pdks'den bakÄ±larak onlar da eklenir
      Tablo.TablodanSorguAc(1, 'select * from REHBERAYAR where YERI=5 and VARSAYILAN=17');
      if Tablo.Query1.RecordCount>0 then begin
         Tablo.Query1.Close;
-        Tablo.Query1.SQL.Text := StringReplace(SQLMesaiGetir.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(SQLMesaiGetir.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
         Tablo.Query1.ExecSQL;
      end;
      PlanMTabloGuncelle;
-    //Burada personelin sayfasýndaki devreden kesintileri getiririz.
+    //Burada personelin sayfasÄ±ndaki devreden kesintileri getiririz.
     if Tablo.GENINI.ReadBoolean(Ops_IK_CheckMaasDevir, True) then begin
         Tablo.Query1.Close;
-        Tablo.Query1.SQL.Text := StringReplace(SQLKesDevir.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(SQLKesDevir.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
         Tablo.Query1.ExecSQL;
     end;
-    //Burada personelin sayfasýndaki kesintileri getiririz. Eðer ayarlarda "Gelmediði gün" varsa pdks'den bakýlarak onlar da eklenir
+    //Burada personelin sayfasÄ±ndaki kesintileri getiririz. EÄŸer ayarlarda "GelmediÄŸi gÃ¼n" varsa pdks'den bakÄ±larak onlar da eklenir
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := StringReplace(SQLKesInsert.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-    Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
-    if ComboOdemeTuru.ItemIndex = 2  then //'Ýþten çýkýþ'
+    Tablo.Query1.SQL.Text := StringReplace(SQLKesInsert.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+    Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+    if ComboOdemeTuru.ItemIndex = 2  then //'Ä°ÅŸten Ã§Ä±kÄ±ÅŸ'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--T.REHBERID', ' and T.REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
     Tablo.Query1.ExecSQL;
     Tablo.TablodanSorguAc(1, 'select * from REHBERAYAR where YERI=6 and VARSAYILAN=35');
     if Tablo.Query1.RecordCount>0 then begin
         Tablo.Query1.Close;
-        Tablo.Query1.SQL.Text := StringReplace(SQLDevamsizlikGetir.Text, 'BAÞLANGIÇTARÝHÝ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
-        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÝTÝÞTARÝHÝ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(SQLDevamsizlikGetir.Text, 'BAÅžLANGIÃ‡TARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
+        Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BÄ°TÄ°ÅžTARÄ°HÄ°', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
         Tablo.Query1.ExecSQL;
     end;
     PlanMTabloGuncelle;
-   {//Burada banka ödemesi girilmemiþ olanlarýn banka tutarýný alýrýz
+   {//Burada banka Ã¶demesi girilmemiÅŸ olanlarÄ±n banka tutarÄ±nÄ± alÄ±rÄ±z
     Tablo.Query3.Close;
     Tablo.Query3.SQL.Text := 'select R.ID,R.FIRMA,R.KOD,BELGENO='''','+
     ' BANKA=(SELECT ISNULL(SUM(TUTAR),0) FROM dbo.PLANMAAS PM WHERE PM.YER=51 AND PM.YERID=R.ID)'+
@@ -1469,7 +1469,7 @@ begin
         .CurrencyEdit('Tutar',@Tutar,2));
 
         if mResult = mrOk then begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,EKLEYEN,EKLEMETARIHI)'+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,EKLEYEN,EKLEMETARIHI)'+
             ' VALUES(&TUTAR,51,&YERID,&KUR,&EKLEYEN,GETDATE())',
             ['&TUTAR','&YERID','&KUR','&EKLEYEN'], [Tutar,YerID,CariDoviz,Kullanan]);
         end;
@@ -1481,7 +1481,7 @@ begin
       PlanMTabloGuncelle;
     end; }
 
-  end else if ComboOdemeTuru.Text = 'Avans Ödemesi' then begin
+  end else if ComboOdemeTuru.Text = 'Avans Ã–demesi' then begin
     Tablo.Query1.SQL.Text := StringReplace(AvansInsert.Text, ':PTRH', FormatDateTime('yyyy-mm-dd', StrToDateDef(IntToStr(AvansGunu)+FormatSettings.DateSeparator+
               IntToStr(ComboAy.ItemIndex+1)+FormatSettings.DateSeparator+ComboYil.Text,Tablo.GENINI.BugunTrh )), [rfReplaceAll]);
     Tablo.Query1.ExecSQL;
@@ -1500,10 +1500,10 @@ begin
         AvansTutari := 0;
         OdemeKaynagi := 'K';
         mResult := TGirisKutusuEx.BilgiAlEx(FirmaAdi+BGAvans_miktari,TGirdiDenetimleri.Create
-        .ImageComboBox('Ödeme kaynaðý',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
-        .CurrencyEdit('Avans tutarý',@AvansTutari,2));
+        .ImageComboBox('Ã–deme kaynaÄŸÄ±',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
+        .CurrencyEdit('Avans tutarÄ±',@AvansTutari,2));
         if mResult = mrOk then begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
           ' VALUES(&TUTAR,61,&YERID,&KUR,&TUR,&EKLEYEN,GETDATE())',
           ['&TUTAR','&YERID','&KUR','&TUR','&EKLEYEN'], [AvansTutari,YerID,CariDoviz,OdemeKaynagi,Kullanan]);
         end;
@@ -1519,10 +1519,10 @@ end;
 procedure TMaasTabloDlg.TabloyuOlusturPopup(Sender: TObject);
 var i : SmallInt;
 begin
-  if ComboOdemeTuru.Text = 'Maaþ Ödemesi' then begin
+  if ComboOdemeTuru.Text = 'MaaÅŸ Ã–demesi' then begin
     KasayagiderolarakIsleMenu.Visible := True;
     KasayaAvansOlarakIsle.Visible := False;
-  end else if ComboOdemeTuru.Text = 'Avans Ödemesi' then begin
+  end else if ComboOdemeTuru.Text = 'Avans Ã–demesi' then begin
     KasayagiderolarakIsleMenu.Visible := False;
     KasayaAvansOlarakIsle.Visible := True;
   end;
@@ -1549,25 +1549,25 @@ var
     Result := id;
   end;
 begin
-  if ComboOdemeTuru.ItemIndex >= 1 then begin  //MAAÞ VE ÇIKIÞ
-   //Öncelikle kasa ve fatbaslýk'dan ilgili kayýtlar siliniyor
+  if ComboOdemeTuru.ItemIndex >= 1 then begin  //MAAÅž VE Ã‡IKIÅž
+   //Ã–ncelikle kasa ve fatbaslÄ±k'dan ilgili kayÄ±tlar siliniyor
    id := IDGetir('SELECT ID FROM PLANMTABLO T WHERE SEC=1 AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.TARIH >='''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and T.TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+'''');
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM KASA WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM FATBASLIK WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM KASA WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM FATBASLIK WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
    //tahakkuk ve kesintileri silelim
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE M from  PLANMAAS M inner join PLANMTABLO T on YER in (11,21) and M.YERID=T.ID '+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE M from  PLANMAAS M inner join PLANMTABLO T on YER in (11,21) and M.YERID=T.ID '+
          ' where  YER in (11,21) and T.SEC=1 and T.TARIH >='''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and T.TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+'''  ',[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE from PLANMTABLO where SEC=1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex),[],[]);
-  end else begin //'Avans Ödemesi'
-   //Öncelikle kasa ve fatbaslýk'dan ilgili kayýtlar siliniyor
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE from PLANMTABLO where SEC=1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex),[],[]);
+  end else begin //'Avans Ã–demesi'
+   //Ã–ncelikle kasa ve fatbaslÄ±k'dan ilgili kayÄ±tlar siliniyor
    id := IDGetir('SELECT ID FROM PLANMTABLO T WHERE SEC=1 AND DURUM=0 AND T.TARIH >='''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and T.TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+'''');
-   //Önce  PLANMAAS tablosundaki
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from PLANMAAS where YER=1 and DURUM in (select ID from KASA where YERI='+IntToStr(TabNo_PLANMTABLO)+' and '+
+   //Ã–nce  PLANMAAS tablosundaki
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from PLANMAAS where YER=1 and DURUM in (select ID from KASA where YERI='+IntToStr(TabNo_PLANMTABLO)+' and '+
      ' YERID IN ('+id+') and ALACAK>0.0)',[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM KASA WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
-   //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM FATBASLIK WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
-   //Avans kayýtlarý siliniyor
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE from PLANMTABLO where SEC=1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND DURUM=0',[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM KASA WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
+   //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM FATBASLIK WHERE YERID IN ('+id+') AND YERI='+IntToStr(TabNo_PLANMTABLO),[],[]);
+   //Avans kayÄ±tlarÄ± siliniyor
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE from PLANMTABLO where SEC=1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND DURUM=0',[],[]);
   end;
   ComboAyPropertiesChange(Self);
 end;

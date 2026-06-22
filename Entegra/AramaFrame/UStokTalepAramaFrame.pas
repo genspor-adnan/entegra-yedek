@@ -1,4 +1,4 @@
-unit UStokTalepAramaFrame;
+﻿unit UStokTalepAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 10:00:42}
@@ -65,7 +65,7 @@ implementation
 
 procedure TStokTalepAramaFrame.Baslatildi;
 begin
-     LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+     LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TStokTalepAramaFrame.btnSilClick(Sender: TObject);

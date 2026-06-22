@@ -1,4 +1,4 @@
-unit UTakvimGidenFatura;
+ï»¿unit UTakvimGidenFatura;
 
 
 interface
@@ -145,11 +145,11 @@ begin
    TabKasa.Params[0].Value := ID;
    TabKasa.Open;
    //Logo.Picture.Assign(Tabkasa.FieldByName('LOGO'));
-   if TabKasa.FieldByName('TUR').AsInteger=11 then begin //11 gelen fatura veya 12 gelen fiþ
+   if TabKasa.FieldByName('TUR').AsInteger=11 then begin //11 gelen fatura veya 12 gelen fiÅŸ
        Caption := SGelenFaturaBilgileri ;
        LabelFaturaTarihi.Caption := SFaturaTarihi;
        cxLabel3.Caption := SFaturaNo;
-   end else begin //Fiþ
+   end else begin //FiÅŸ
        Caption := SGelenFisBilgileri ;
        LabelFaturaTarihi.Caption := SFisTarihi;
        cxLabel3.Caption := SFisNo;
@@ -177,14 +177,14 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      //date bilgi giriþi
-      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
+      //edit bilgi giriÅŸi
+      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      //date bilgi giriÅŸi
+      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
    end;
    if TGirisKutusuEx.BilgiAlEx('Yeni bilgiyi girin',ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin
-        MessageDlg(('Yeni '+alanAdi+' Deðeri Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Yeni '+alanAdi+' DeÄŸeri BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit; End
       else begin
         TabKasa.Edit;

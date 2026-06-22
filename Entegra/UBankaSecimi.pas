@@ -1,4 +1,4 @@
-unit UBankaSecimi;
+ï»¿unit UBankaSecimi;
 { Bu ekran? 4 ama?la kullanmaktay?z
 1. Cagiran 1..20 aras? kullan?l?r
    T?m banka ve onlar?n ?ubelerini g?rmek i?in.
@@ -175,7 +175,7 @@ begin
               if not Tablo.Query1.IsEmpty then begin
                  MResult := Application.MessageBox(PChar(VarToStr(BankaKodu)+BBanka_kodu+Tablo.Query1.FieldByName(BBanka_adi).AsString+BBanka_ismi_degistirilsinmi),PChar(PrjConst.Onay),MB_YESNO+MB_ICONINFORMATION);
                  if MResult = mrYes then
-                    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE BANKALAR SET BankaADI=&BankaADI '+
+                    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE BANKALAR SET BankaADI=&BankaADI '+
                       ' WHERE BANKAKODU=&BANKAKODU',['&BankaADI','&BANKAKODU'],[BankaAdi,BankaKodu]);
               end else begin
                   Tablo.OpenPictureDialog1.Execute;
@@ -204,7 +204,7 @@ begin
    if not Tablo.Query1.IsEmpty then
       raise Exception.Create(BSube_var_silinemez)
    else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'delete from BANKALAR where BANKAKODU= ' + TabBankalar.FieldByName('BANKAKODU').AsString,[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'delete from BANKALAR where BANKAKODU= ' + TabBankalar.FieldByName('BANKAKODU').AsString,[],[]);
       TabloYenile(TabBankalar,[]);
    end;
 end;
@@ -241,7 +241,7 @@ var
       try
          Tablo.Query1.ExecSQL;
       except
-         Memo1.Lines.Add(rssFeedData.BKOD+','+Trim(rssFeedData.NAME)+' aktarýlamadý..');
+         Memo1.Lines.Add(rssFeedData.BKOD+','+Trim(rssFeedData.NAME)+' aktarÄ±lamadÄ±..');
       end;
     end;
 
@@ -262,7 +262,7 @@ var
       try
          Tablo.Query1.ExecSQL;
       except
-         Memo1.Lines.Add(rssFeedData.BKOD+','+rssFeedData.SKOD+','+Trim(rssFeedData.NAME)+','+rssFeedData.CITY+' aktarýlamadý..');
+         Memo1.Lines.Add(rssFeedData.BKOD+','+rssFeedData.SKOD+','+Trim(rssFeedData.NAME)+','+rssFeedData.CITY+' aktarÄ±lamadÄ±..');
       end;
       Inc(I)
     end;
@@ -281,7 +281,7 @@ begin
   islem := XMLDocument1.DocumentElement.ChildNodes.Count;
   Application.CreateForm(TBekletmeDlg,BekletmeDlg);
   BekletmeDlg.cxProgressBar1.Properties.Max :=(islem);
-  BekletmeDlg.Caption:='Güncelleniyor...';
+  BekletmeDlg.Caption:='GÃ¼ncelleniyor...';
   BekletmeDlg.Show;
   while nd <> nil do begin
     ProcessItem();
@@ -493,11 +493,11 @@ var
   IlKodu,BankaKodu:string;
   Donus,KayitKontrol:Boolean;
 begin
-  Il:='ýstanbul';
+  Il:='Ä±stanbul';
   Donus := True;
   while Donus do begin
     if not TabBankalar.FieldByName('BANKAKODU').IsNullOrEmpty then begin
-      Denetimler  := TGirdiDenetimleri.Create.Edit(BGSube_Kod,@SubeKodu).Edit(BGSube_Ad,@SubeAdi).ComboBox('ýl *',@Il,Tablo.ComboboxInit('SELECT ILADI FROM ILLER where ILNO<100 ').Items,TComboBoxStyle.csDropDownList);
+      Denetimler  := TGirdiDenetimleri.Create.Edit(BGSube_Kod,@SubeKodu).Edit(BGSube_Ad,@SubeAdi).ComboBox('Ä±l *',@Il,Tablo.ComboboxInit('SELECT ILADI FROM ILLER where ILNO<100 ').Items,TComboBoxStyle.csDropDownList);
       MResult := TGirisKutusuEx.BilgiAlEx(BGYeni_sube,Denetimler);
       if MResult = mrOk then begin
         Tablo.TablodanSorguAc(1,'SELECT ILNO FROM ILLER WHERE ILNO<100 and ILADI='''+VarToStr(Il)+'''');
@@ -508,12 +508,12 @@ begin
           if KayitKontrol then begin
             MResult := Application.MessageBox(PChar(VarToStr(SubeKodu)+BSube_kodu+Tablo.Query2.FieldByName(BSube_adi).AsString+BSube_adi_degistirilsinmi),PChar(PrjConst.Onay),MB_YESNO+MB_ICONINFORMATION);
             if MResult = mrYes then begin
-              Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE BANKASUBELER SET SUBEADI=&SUBEADI '+
+              Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE BANKASUBELER SET SUBEADI=&SUBEADI '+
               ' WHERE SUBEKODU=&SUBEKODU AND BANKAKODU=&BANKAKODU',['&SUBEADI','&SUBEKODU','&BANKAKODU'],[SubeAdi,SubeKodu,BankaKodu]);
               Donus := False;
             end else Donus := False;
           end else begin
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO BANKASUBELER(SUBEADI,SUBEKODU,BANKAKODU,ILNO) '+
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO BANKASUBELER(SUBEADI,SUBEKODU,BANKAKODU,ILNO) '+
             ' VALUES(&SUBEADI,&SUBEKODU,&BANKAKODU,&ILNO)',['&SUBEADI','&SUBEKODU','&BANKAKODU','&ILNO'],[SubeAdi,SubeKodu,BankaKodu,Tablo.Query1.FieldByName('ILNO').AsString]);
             Donus := False;
           end;

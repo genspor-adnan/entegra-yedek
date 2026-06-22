@@ -1,4 +1,4 @@
-unit UListe;
+﻿unit UListe;
 
 interface
 
@@ -45,7 +45,7 @@ end;
 
 procedure TListeDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TListeDlg.FormShow(Sender: TObject);

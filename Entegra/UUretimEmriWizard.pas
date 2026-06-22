@@ -1,4 +1,4 @@
-unit UUretimEmriWizard;
+ï»¿unit UUretimEmriWizard;
 
 interface
 
@@ -864,7 +864,7 @@ var
         //    else
         //       Crpn := 1;
 
-           Result := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'INSERT INTO URETIMEMRIDETAY(URETIMEMRIID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,EKLEYEN,YERI,YERID,SEVIYE,USTID,KAYNAKRECETEID,KAYNAKRECETEDETAYID, HEDEFRECETEID, HEDEFRECETEDETAYID)'+
+           Result := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'INSERT INTO URETIMEMRIDETAY(URETIMEMRIID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,EKLEYEN,YERI,YERID,SEVIYE,USTID,KAYNAKRECETEID,KAYNAKRECETEDETAYID, HEDEFRECETEID, HEDEFRECETEDETAYID)'+
             ' select '+TabUretimEmri.FieldByName('ID').AsString+',URD.TUR,URD.URUNID,URD.ACIKLAMA,'+
                           StringReplace(FormatFloat('#########0.000000',Abs(Adet*Crpn)),',','.',[])+  //Istenen
             ',URD.BIRIM,'+StringReplace(FormatFloat('#########0.000000',Abs(Miktar*Crpn)),',','.',[])+ // Istenen
@@ -928,7 +928,7 @@ begin
   if ReceteID = 0 then
      exit;
 
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&UEID',['&UEID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&UEID',['&UEID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
   if ReceteID > 0 then begin
     Tablo.TablodanSorguAc(1,'select * from URETIMRECETE where ID='+IntToStr(ReceteID));
     StokID := Tablo.Query1.FieldByName('STOKID').AsInteger;
@@ -1050,7 +1050,7 @@ begin
   if ReceteID = 0 then
      exit;
 
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&UEID',['&UEID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&UEID',['&UEID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
   if ReceteID > 0 then begin
     Tablo.TablodanSorguAc(1,'select * from URETIMRECETE where ID='+IntToStr(ReceteID));
     StokID := Tablo.Query1.FieldByName('STOKID').AsInteger;
@@ -1398,10 +1398,10 @@ begin
     TabUretimEmriDetay.FieldByname('ADET').AsFloat := TabUretimEmriDetay.FieldByname('ADET').AsFloat * Carpan;
     TabUretimEmriDetay.FieldByname('MIKTAR').AsFloat := Tablo.StokMiktarHesapla(TabUretimEmriDetay.FieldByname('URUNID').AsInteger,TabUretimEmriDetay.FieldByname('ADET').AsFloat,TabUretimEmriDetay.FieldByname('BIRIM').AsInteger);
   end;
-  if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'ürün')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat<0) then begin
+  if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'Ã¼rÃ¼n')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat<0) then begin
     ShowMessage(URSifirdanKucukUyarisi);
     Abort;
-  end else if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'Bileþen')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat>0) then begin
+  end else if (TabUretimEmriDetay.FieldByname('GRP').AsString = 'BileÅŸen')and(TabUretimEmriDetay.FieldByname('ADET').AsFloat>0) then begin
     ShowMessage(URSifirdanBuyukUyarisi);
     Abort;
   end;
@@ -1560,7 +1560,7 @@ procedure TUretimEmriWizardDlg.OperasyonSilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
     if OperasyonSilinebilir(TabUretimOperasyon.FieldByName('ID').AsInteger) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMOPERASYON where ID=&UOID ',['&UOID'],[TabUretimOperasyon.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMOPERASYON where ID=&UOID ',['&UOID'],[TabUretimOperasyon.FieldByName('ID').AsInteger]);
       TabloYenile(TabUretimOperasyon,[TabUretimEmri.FieldByName('ID').AsInteger]);
     end;
   end;
@@ -1987,7 +1987,7 @@ var
   Gereken : Real;
 begin
   if TabUretimOperasyon.FieldByName('MIKTAR').AsFloat - TabUretimOperasyon.FieldByName('GERCEKLESEN').AsFloat<=0.0 then begin
-     if Application.MessageBox( PChar('Operasyonun tamamý zaten üretilmiþ. Devam etmek istiyor musunuz?'), PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_NO then
+     if Application.MessageBox( PChar('Operasyonun tamamÄ± zaten Ã¼retilmiÅŸ. Devam etmek istiyor musunuz?'), PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_NO then
        Abort
      else
        Miktar := 1.0;
@@ -1995,7 +1995,7 @@ begin
     Miktar := TabUretimOperasyon.FieldByName('MIKTAR').AsFloat - TabUretimOperasyon.FieldByName('GERCEKLESEN').AsFloat;
   if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.CurrencyEdit(BGUretim_miktari_gir, @Miktar, 4)) = mrOk then begin
     if Miktar<=0.0 then begin
-      ShowMessage('Geçersiz Miktar Giriþi!');
+      ShowMessage('GeÃ§ersiz Miktar GiriÅŸi!');
       Abort;
     end;
   end else
@@ -2214,7 +2214,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+TabUretimEmri.FieldByName('REHBERID').AsString;
-      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres SeÃ§iniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
          //FATBASLIK.FieldByName('REHBERILETID').AsString:=st.Strings[0];
          //EditButtonSevkAdresi.Text := st.Strings[1];
           TabUretimEmri.FieldByName('REHBERILETID').AsString := st.Strings[0];
@@ -2257,7 +2257,7 @@ begin
      Tablo.TablodanSorguAc(3,'select ACIKLAMA from LOKASYON where DURUM=1 and TUR=8 and REHBERID=-1 order by KOD ');
      Bugun := Tablo.GENINI.BugunTrh;
      while not Tablo.Query3.eof do begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into URETIMOPERASYONPERSONEL (OPERASYONID, TARIH, BASLAMA, BITIS, MOLA, DURUM,KONUSU, EKLEYEN, YER )values('+TabUretimOperasyon.FieldByName('ID').AsString+','''+
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into URETIMOPERASYONPERSONEL (OPERASYONID, TARIH, BASLAMA, BITIS, MOLA, DURUM,KONUSU, EKLEYEN, YER )values('+TabUretimOperasyon.FieldByName('ID').AsString+','''+
          FormatDateTime('yyyy-mm-dd hh:nn', Bugun)+''','''+FormatDateTime('yyyy-mm-dd hh:nn',Bugun)+''','''+
          FormatDateTime('yyyy-mm-dd hh:nn', Bugun)+''','''+FormatDateTime('1899-12-30 00:00', now)+''','+
          '0,'''+Tablo.Query3.Fields[0].AsString+''','+Kullanan+',155)', [], []);
@@ -2342,7 +2342,7 @@ var Kaynak : String[10];
           Kaynak := Tablo.Query3.Fields[1].AsString;
 
 
-      Result := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into URETIMOPERASYONPERSONEL (OPERASYONID, TARIH, PLANSURE, BASLAMA, BITIS, MOLA, DURUM, KONUSU, KAYNAK, EKLEYEN, SIRA,YER, YERID, PERSONEL)values('+TabUretimOperasyon.FieldByName('ID').AsString+','''+
+      Result := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into URETIMOPERASYONPERSONEL (OPERASYONID, TARIH, PLANSURE, BASLAMA, BITIS, MOLA, DURUM, KONUSU, KAYNAK, EKLEYEN, SIRA,YER, YERID, PERSONEL)values('+TabUretimOperasyon.FieldByName('ID').AsString+','''+
          FormatDateTime('yyyy-mm-dd hh:nn', Bugun)+''','''+FormatDateTime('yyyy-mm-dd hh:nn', Tablo.Query3.FieldByName('SURE').AsDateTime)+''','''+
          FormatDateTime('yyyy-mm-dd hh:nn', Bugun)+''','''+
          FormatDateTime('yyyy-mm-dd hh:nn', Bugun)+''','''+FormatDateTime('1899-12-30 00:00', now)+''','+
@@ -2381,7 +2381,7 @@ begin
    if not TabUretimOperasyon.IsEmpty then
       raise Exception.Create(UROnceOperasyonlariSil);
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
       TabloYenile(TabUretimEmriDetay,[TabUretimEmri.FieldByName('ID').AsInteger]);
    end;
 end;
@@ -2646,7 +2646,7 @@ begin
      Showmessage(UROnceOperasyonEkle)
   else begin
        SonucListe := TStringList.Create;
-       if Tablo.ListedenBilgiGetir('Konu Seçimi','select UO.KONUSU, UO.ID from [dbo].[URETIMRECETEOPR] UO where UO.URETIMRECETEID = '+
+       if Tablo.ListedenBilgiGetir('Konu SeÃ§imi','select UO.KONUSU, UO.ID from [dbo].[URETIMRECETEOPR] UO where UO.URETIMRECETEID = '+
                                     TabUretimOperasyon.FieldByName('RECETEID').AsString+' order by UO.SIRA',SonucListe,[nil, nil, nil])then
           Id := StrToIntDef(SonucListe[1],0)
        else

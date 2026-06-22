@@ -1,4 +1,4 @@
-unit UScriptEngine;
+ï»¿unit UScriptEngine;
 
 interface
 
@@ -118,8 +118,8 @@ procedure TScriptEngine.AddFormComponents(ARoot: TComponent);
 var
   i : integer;
 begin
-  // DevExpress componentleri ortalýðý karýþtýrýyor
-  // Bundan dolayýda eðer böyle bir component denk gelirse çýkýlýyor
+  // DevExpress componentleri ortalÄ±ÄŸÄ± karÄ±ÅŸtÄ±rÄ±yor
+  // Bundan dolayÄ±da eÄŸer bÃ¶yle bir component denk gelirse Ã§Ä±kÄ±lÄ±yor
   if Copy(ARoot.ClassName,1,3) = 'Tcx' then Exit;
   if (not ARoot.InheritsFrom(TForm)) then begin
     if RegisteredClasses.IndexOf(ARoot.ClassName) > -1 then
@@ -545,10 +545,10 @@ begin
       begin 
 //        StringToFile('C:\disss.txt',GetDisassembledCode);
         if (not Engine.Execute) then begin
-            MessageDlg('Kod çalýþtýrýlamadý.'#13#10 +
+            MessageDlg('Kod Ã§alÄ±ÅŸtÄ±rÄ±lamadÄ±.'#13#10 +
               'Hata : ' + Engine.ExecErrorToString + #13#10 +
-              'Satýr : ' + IntToStr(Engine.ExecErrorRow) +
-              '  Sütun : ' + IntToStr(Engine.ExecErrorCol),mtError,[mbOK],0);
+              'SatÄ±r : ' + IntToStr(Engine.ExecErrorRow) +
+              '  SÃ¼tun : ' + IntToStr(Engine.ExecErrorCol),mtError,[mbOK],0);
         end;
       end
     else
@@ -558,7 +558,7 @@ begin
           begin
             s := s + Engine.CompilerMessages[i].MessageToString + #13#10;
           end;
-        MessageDlg('Derleme hatasý'#13#10 + s,mtError,[mbOK],0);
+        MessageDlg('Derleme hatasÄ±'#13#10 + s,mtError,[mbOK],0);
       end;
   finally
     DestroyComponents;
@@ -590,7 +590,7 @@ function TScriptEngine.ControlToString(AControl: TComponent): string;
 
   function ParseHint(s: string): string;
   begin
-    //Öykü : @  #
+    //Ã–ykÃ¼ : @  #
     Result := Trim(Copy(s, 3, Pos('@', s) - 3));
   end;
 
@@ -616,7 +616,7 @@ begin
   else if AControl is TMemo and (TMemo(AControl).Lines.Text <> '') then
     Result := Result + GetTitle + TMemo(AControl).Lines.Text + ' '
   else if (AControl is TCheckBox) and (TCheckBox(AControl).Checked) then
-    Result := Result + TurkishUppercaseString(TCheckBox(AControl).Caption) + ' => ' + IIf(TCheckBox(AControl).Checked,'Evet ','Hayýr ')
+    Result := Result + TurkishUppercaseString(TCheckBox(AControl).Caption) + ' => ' + IIf(TCheckBox(AControl).Checked,'Evet ','HayÄ±r ')
   else if (AControl is TRadioButton) then
     Result := Result + IIf(TRadioButton(AControl).Checked,TurkishUppercaseString(TRadioButton(AControl).Caption) + ' => ','') + ' ';
   if AControl is TWinControl then

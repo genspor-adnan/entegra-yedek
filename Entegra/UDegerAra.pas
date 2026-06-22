@@ -1,4 +1,4 @@
-unit UDegerAra;
+﻿unit UDegerAra;
 
 interface
 
@@ -44,7 +44,7 @@ end;
 
 procedure TDegerAraDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 end.

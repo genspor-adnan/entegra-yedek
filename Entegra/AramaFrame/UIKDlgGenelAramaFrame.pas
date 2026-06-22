@@ -1,4 +1,4 @@
-unit UIKDlgGenelAramaFrame;
+﻿unit UIKDlgGenelAramaFrame;
 
 interface
 
@@ -99,7 +99,7 @@ uses Utablo,LocOnFly,PrjConst;
 
 procedure TIKDlgGenelAramaFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   SpinKayitSayisi.text := GenRegIni.RegReadString('CariOpsiyon', 'ListeKayitSayisi', '200', 'C');
 end;
 

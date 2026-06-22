@@ -1,49 +1,49 @@
-{***************************************************************************
-Unit Adý        : UQuantGrid
-Tanýmlama       : Quantum gridle ilgili yapýlan ayarlamalar
+ï»¿{***************************************************************************
+Unit AdÄ±        : UQuantGrid
+TanÄ±mlama       : Quantum gridle ilgili yapÄ±lan ayarlamalar
 
-Ýpuçlarý        : Quantum gridi kullanýrken
-                 Kullandýðýnýz formun create Olayýna
+Ä°puÃ§larÄ±        : Quantum gridi kullanÄ±rken
+                 KullandÄ±ÄŸÄ±nÄ±z formun create OlayÄ±na
                  ----------------------------------------------------------------
                  QuantGrid.RegistryPath := '\Software\GenoTIP\Grid\Doktorlar\';
-                 QuantGrid.Form1 := Formadi; (Kullandýðýmýz form);
-                 QuantGrid.dxDBGrid := dxDBGrid1 ; (Kullandýðýmýz Db Grid)
+                 QuantGrid.Form1 := Formadi; (KullandÄ±ÄŸÄ±mÄ±z form);
+                 QuantGrid.dxDBGrid := dxDBGrid1 ; (KullandÄ±ÄŸÄ±mÄ±z Db Grid)
                  ReadGroupGridInfo(QuantGrid.RegistryPath, dxDBGrid1); ()
 
-                  Kullandýðýnýz formun Destroy Olayýna
+                  KullandÄ±ÄŸÄ±nÄ±z formun Destroy OlayÄ±na
                  ---------------------------------------
                  WriteGroupGridInfo(QuantGrid.RegistryPath, dxDBGrid1);
-                 Kullandýðýmýz Db Gridin OnMouseUp Olayýna
+                 KullandÄ±ÄŸÄ±mÄ±z Db Gridin OnMouseUp OlayÄ±na
                  ---------------------------------------
                   QuantGrid.dxDBGridMouseUp(Sender, Button, Shift, X, Y,nil);
-                  son parametre popup menunün olup olmayacaðýný belirtir
+                  son parametre popup menunÃ¼n olup olmayacaÄŸÄ±nÄ± belirtir
 
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-Deðiþiklikler
+DeÄŸiÅŸiklikler
 -------------------------------------------
-Deðiþtirme Tarihi       : 18/10/2004
-Deðiþtiren              : Adnan Odabaþý
-Açýklama                : Oluþturma
+DeÄŸiÅŸtirme Tarihi       : 18/10/2004
+DeÄŸiÅŸtiren              : Adnan OdabaÅŸÄ±
+AÃ§Ä±klama                : OluÅŸturma
 -------------------------------------------
-Deðiþtirme Tarihi       : 29/10/2004
-Deðiþtiren              : Necdet Çetinkaya
-Açýklama                :1-) Export Menüsünün header popupuna alýnmasý
-                         2-) Font Ayarýnýn yapýlabilmesi ve registrye yazýlmasý
+DeÄŸiÅŸtirme Tarihi       : 29/10/2004
+DeÄŸiÅŸtiren              : Necdet Ã‡etinkaya
+AÃ§Ä±klama                :1-) Export MenÃ¼sÃ¼nÃ¼n header popupuna alÄ±nmasÄ±
+                         2-) Font AyarÄ±nÄ±n yapÄ±labilmesi ve registrye yazÄ±lmasÄ±
 -------------------------------------------
-Deðiþtirme Tarihi       : 01/11/2004
-Deðiþtiren              : Adnan Odabaþý
-Açýklama                : 1-) Export Menüsünün deðiþiklikleri (grid ismi alýnmasý)
+DeÄŸiÅŸtirme Tarihi       : 01/11/2004
+DeÄŸiÅŸtiren              : Adnan OdabaÅŸÄ±
+AÃ§Ä±klama                : 1-) Export MenÃ¼sÃ¼nÃ¼n deÄŸiÅŸiklikleri (grid ismi alÄ±nmasÄ±)
 -------------------------------------------
-Deðiþtirme Tarihi       : 02/12/2004
-Deðiþtiren              : Adnan Odabaþý
-Açýklama                : Birden fazla grid desteði eklendi
-Kullanýmý               :
-  Diyalog oluþturmadan önce Gridi create etmek gerekir.
+DeÄŸiÅŸtirme Tarihi       : 02/12/2004
+DeÄŸiÅŸtiren              : Adnan OdabaÅŸÄ±
+AÃ§Ä±klama                : Birden fazla grid desteÄŸi eklendi
+KullanÄ±mÄ±               :
+  Diyalog oluÅŸturmadan Ã¶nce Gridi create etmek gerekir.
     QuantKasa := TQuantGrid.Create(Application);
     Application.CreateForm(TKasaDlg, KasaDlg);
 
   UTablo ' ya da
-    var QuantKasa : TQuantGrid; þeklinde tanýmlamak lazým
+    var QuantKasa : TQuantGrid; ÅŸeklinde tanÄ±mlamak lazÄ±m
 ***************************************************************************}
 
 unit UQuantGrid;
@@ -170,8 +170,8 @@ implementation
 procedure GridExport(dxDBGrid1: TcxGrid; Nereye, DosyaAdi: string);
 const
   aExt: array[0..3] of string = ('htm', 'xls', 'txt', 'xml');
-  aFilter: array[0..3] of string = ('HTML Dosyasý (*.htm; *.html)|*.htm',
-    'Microsoft Excel Sayfasý (*.xls)|*.xls', 'Text Dosyasý (*.txt)|*.txt', 'XML Dosyasý (*.xml)|*.xml');
+  aFilter: array[0..3] of string = ('HTML DosyasÄ± (*.htm; *.html)|*.htm',
+    'Microsoft Excel SayfasÄ± (*.xls)|*.xls', 'Text DosyasÄ± (*.txt)|*.txt', 'XML DosyasÄ± (*.xml)|*.xml');
 begin
   if QuantGrid = nil then
     Application.CreateForm(TQuantGrid, QuantGrid);
@@ -487,8 +487,8 @@ begin
 //    if ReadInteger(APath, 'Version', VerDemo + 1) = VerDemo then
 
    ----------------------------------------------
-   Fontlarýn eklenmesi
-   29/10/2004 Necdet Çetinkaya
+   FontlarÄ±n eklenmesi
+   29/10/2004 Necdet Ã‡etinkaya
    ----------------------------------------------
    FontName:= ReadString (APath,'Font','Tahoma');
    fontsize := ReadInteger (APath,'FontSize',10);
@@ -498,7 +498,7 @@ begin
    AGroupGrid.Font.Color:= FontColor;
    AGroupGrid.HeaderFont :=AGroupGrid.Font;
 
-   if ReadInteger(APath, 'Çarsaf', 2)=1 then
+   if ReadInteger(APath, 'Ã‡arsaf', 2)=1 then
     begin
       AGroupGrid.BeginUpdate;
       AGroupGrid.BeginGrouping;
@@ -550,7 +550,7 @@ begin
   reg := TRegIniFile.Create(APath);
   with reg do
   begin
-    WriteInteger(APath, 'Çarsaf', 1);
+    WriteInteger(APath, 'Ã‡arsaf', 1);
     WriteBool(APath, 'ShowGroupPanel', AGroupGrid.ShowGroupPanel);
     if AGroupGrid.LookAndFeel = lfFlat then
       WriteBool(APath, 'FlatStyle', True)
@@ -619,7 +619,7 @@ begin
   begin
     if (FocusedNode <> nil) and (SelectedCount = 1) and
        FocusedNode.HasChildren then Exit;
-    if (MessageBox(Handle, 'Seçili kayýtlar silinecektir.Emin misiniz?',
+    if (MessageBox(Handle, 'SeÃ§ili kayÄ±tlar silinecektir.Emin misiniz?',
         'Onay', MB_ICONWARNING or MB_YESNOCANCEL) = ID_YES) then
     if SelectedCount > 1 then DeleteSelection
     else

@@ -1,4 +1,4 @@
-unit fbClasses;
+ï»¿unit fbClasses;
 
 interface
 
@@ -24,8 +24,8 @@ type
     published
       /// TFbItemType
       ///  fbMessage : Mesaj iletisi
-      ///  fbComment : Yorum içeriði
-      ///  fbLike    : Beðeni
+      ///  fbComment : Yorum iÃ§eriÄŸi
+      ///  fbLike    : BeÄŸeni
       property ItemType : TfbItemType read fItemType write fItemType;
       property Text : string read fText write fText;
       property ItemId : string read fItemID write fItemId;

@@ -138,10 +138,12 @@ BEGIN
     INNER JOIN dbo.REHBER R ON R.ID = FB.REHBERID
     OUTER APPLY
     (
+        -- EBELGE.BELGETURU RAlias kodu tutar (140/141/150/151), FB.TUR ise 14/15
+        -- gibi belge turu kodlari -- iki alan ayni deger uzayinda olmadigi icin
+        -- filtre konulmaz; YON=1 (giden) ve son kayit yeterli.
         SELECT TOP (1) E.*
         FROM dbo.EBELGE E
         WHERE E.FATBASLIKID = FB.ID
-          AND E.BELGETURU = FB.TUR
           AND E.YON = 1
         ORDER BY E.ID DESC
     ) EB
@@ -153,7 +155,7 @@ BEGIN
             H.SERVISKODU,
             H.HATAKODU,
             H.HATAMESAJI
-        FROM dbo.EBELGEHAREKET H
+        FROM dbo.EBELGEMESAJ H
         WHERE H.EBELGEID = EB.ID
         ORDER BY H.ID DESC
     ) EH

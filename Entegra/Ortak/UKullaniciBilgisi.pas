@@ -1,4 +1,4 @@
-unit UKullaniciBilgisi;
+ï»¿unit UKullaniciBilgisi;
 
 interface
 uses
@@ -67,7 +67,7 @@ destructor TKullaniciBilgisi.Destroy;
 begin
   YetkiBilgileriniTemizle;
   FKullaniciYetkiBilgisi.Free;
-  { Erişim indexi zaten daha önceden yüklenen öğeler için olduğu için sadece içeriğini siliyoruz }
+  { EriÅŸim indexi zaten daha Ã¶nceden yÃ¼klenen Ã¶ÄŸeler iÃ§in olduÄŸu iÃ§in sadece iÃ§eriÄŸini siliyoruz }
   FErisimIndexi.Clear;
   FErisimIndexi.Free;
   inherited;
@@ -80,7 +80,7 @@ var
   item : PKullaniciYetkiBilgisi;
 begin
   Result := nil;
-  {İlk önce Erişim indexi üzerinde arıyoruz }
+  {Ä°lk Ã¶nce EriÅŸim indexi Ã¼zerinde arÄ±yoruz }
   for i := 0 to FErisimIndexi.Count - 1 do begin
     item := FErisimIndexi[i];
     if item.Ekran = Dize.BuyukHarfTurkce(AEkran) then begin
@@ -88,13 +88,13 @@ begin
       Exit;
     end;
   end;
-  { Erişim indexi üzerinde bulunamadı ise normal liste üzerinde arıyoruz }
+  { EriÅŸim indexi Ã¼zerinde bulunamadÄ± ise normal liste Ã¼zerinde arÄ±yoruz }
   for i := 0 to FKullaniciYetkiBilgisi.Count - 1 do begin
     item := FKullaniciYetkiBilgisi[i];
     if item.Ekran = Dize.BuyukHarfTurkce(AEkran) then begin
       Result := item;
-      { Erişim indexine ekliyoruz.Böylelikle tekrar erişilmek istendiğinde
-        program daha hızlı yanıt verecektir. }
+      { EriÅŸim indexine ekliyoruz.BÃ¶ylelikle tekrar eriÅŸilmek istendiÄŸinde
+        program daha hÄ±zlÄ± yanÄ±t verecektir. }
       Indexle(item);
       Exit;
     end;

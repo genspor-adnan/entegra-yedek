@@ -1,4 +1,4 @@
-unit UTakvimOnay;
+ï»¿unit UTakvimOnay;
 
 interface
 
@@ -179,7 +179,7 @@ end;
 
 procedure TTakvimOnayDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TTakvimOnayDlg.InitIslemler;
@@ -195,7 +195,7 @@ procedure TTakvimOnayDlg.InitIslemler;
      end;
 begin
    TabKasa.Close;
-   if not(TUR  in [61, 71]) then begin   //plan giren / çýkan
+   if not(TUR  in [61, 71]) then begin   //plan giren / Ã§Ä±kan
       KaydetTus.Visible := False;
       //TabKasa.LockType := ltReadOnly;
     end else begin
@@ -208,7 +208,7 @@ begin
    else
       EditTutar.DataBinding.DataField := 'ALACAK';
 
-   if not (TUR in [71,72]) then begin //Ödeme planý deðilse müþteri hesap bilgileri görünmesin
+   if not (TUR in [71,72]) then begin //Ã–deme planÄ± deÄŸilse mÃ¼ÅŸteri hesap bilgileri gÃ¶rÃ¼nmesin
       TakvimOnayDlg.Height := TakvimOnayDlg.Height -  PanelMusBankaHesap.Height;
       PanelMusBankaHesap.visible := False;
    end;
@@ -240,8 +240,8 @@ end;
 procedure TTakvimOnayDlg.NakitTusClick(Sender: TObject);
 begin
    case TUR of
-    71 :  TakvimOnayDlg.Tag := 21; //gelir planý --> nakit tahsilat
-    72 :  TakvimOnayDlg.Tag := 31; //gider planý --> nakit ödeme
+    71 :  TakvimOnayDlg.Tag := 21; //gelir planÄ± --> nakit tahsilat
+    72 :  TakvimOnayDlg.Tag := 31; //gider planÄ± --> nakit Ã¶deme
     else TakvimOnayDlg.Tag  := 0;
    end;
    close;
@@ -268,7 +268,7 @@ end;
 
 procedure TTakvimOnayDlg.TabKasaAfterOpen(DataSet: TDataSet);
 begin
-  //Ýþlem bölümü
+  //Ä°ÅŸlem bÃ¶lÃ¼mÃ¼
    if TabKasa.FieldByName('MASRAFID').AsString<>'' then begin
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select KOD, AD from MASRAFGELIR where ID= '+TabKasa.FieldByName('MASRAFID').AsString;
@@ -276,8 +276,8 @@ begin
        EditMasrafKod.Text := Tablo.Query1.Fields[0].AsString;
        LabelMasrafAd.Caption := Tablo.Query1.Fields[1].AsString;
    end;
-  //Müþteri bölümü
-   //RehberId den kod ve adý bulup getirelim
+  //MÃ¼ÅŸteri bÃ¶lÃ¼mÃ¼
+   //RehberId den kod ve adÄ± bulup getirelim
    if TabKasa.FieldByName('REHBERID').AsString<>'' then begin
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select KOD, FIRMA from REHBER where ID= '+TabKasa.FieldByName('REHBERID').AsString;
@@ -296,8 +296,8 @@ begin
        EditMusHesapKodu.Text := Tablo.Query1.Fields[0].AsString;
        EditMusHesapAdi.Text := Tablo.Query1.Fields[1].AsString;
    end;
-  //Bizim bölümümüz
-   //HesapId den kod ve adý bulup getirelim
+  //Bizim bÃ¶lÃ¼mÃ¼mÃ¼z
+   //HesapId den kod ve adÄ± bulup getirelim
    if (TabKasa.FieldByName('HESAPTURU').AsString<>'')and(TabKasa.FieldByName('HESAPID').AsString<>'') then begin
        Tablo.Query1.Close;
        case TabKasa.FieldByName('HESAPTURU').AsString[1] of

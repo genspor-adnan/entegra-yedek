@@ -1,4 +1,4 @@
-unit FetaClassExtensionsConsts;
+﻿unit FetaClassExtensionsConsts;
 
 interface
 type

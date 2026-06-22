@@ -1,4 +1,4 @@
-unit UDokum;
+ï»¿unit UDokum;
 
 interface
 
@@ -117,7 +117,7 @@ begin
   if Ind = 0 then komut.add('*')
   else begin
          sat := komut.Strings[Ind];
-         Delete(sat, Pos(',', sat), 1); {ilk virgülü sil}
+         Delete(sat, Pos(',', sat), 1); {ilk virgÃ¼lÃ¼ sil}
          komut.Strings[Ind] := sat;
        end;
    FList.Destroy;
@@ -128,9 +128,9 @@ var FieldTipi : TFieldType;
     YilS, AyS, GunS, NeTarih : String[25];
 begin
    kom := '(';
-   if(EQUAL = 'Baþlayan') Or (EQUAL = 'Ýçinde geçen') then
+   if(EQUAL = 'BaÅŸlayan') Or (EQUAL = 'Ä°Ã§inde geÃ§en') then
         kom := kom + TabAd + '.' + FIELD + ' LIKE '
-   else if EQUAL = 'Gün/Ay' then
+   else if EQUAL = 'GÃ¼n/Ay' then
         kom := kom + 'EXTRACT(DAY FROM ' + TabAd + '.' + FIELD + ') ='+copy(VALUE,1,Pos('/',VALUE)-1)+
                 ' AND EXTRACT(MONTH FROM ' + TabAd + '.' + FIELD + ') ='+copy(VALUE,Pos('/',VALUE)+1,Length(VALUE))
    else
@@ -142,7 +142,7 @@ begin
    FieldTipi := TabloDokum.Table1.FieldByName(FIELD).DataType;
    TabloDokum.Table1.Close;
    if  (FieldTipi = FtString) Or (FieldTipi = FtMemo) Or (FieldTipi = FtDate)then kom := kom + '"';
-   if EQUAL  = 'Ýçinde geçen' then  kom := kom + '%';
+   if EQUAL  = 'Ä°Ã§inde geÃ§en' then  kom := kom + '%';
    if (FieldTipi = FtDate)or(FieldTipi = FtDateTime) then  begin
       Yils :='';
       GunS  := Copy(VALUE, 1, Pos('/',VALUE)-1);
@@ -164,10 +164,10 @@ begin
            kom := '(('+NeTarih+'>="'+VALUE + ', 00:00:00")and('+NeTarih+'<="'+VALUE + ', 23:59:00")';
            VALUE := '';
         end
-        else if EQUAL = 'Gün/Ay' then VALUE := ''
+        else if EQUAL = 'GÃ¼n/Ay' then VALUE := ''
    end;
    kom := kom + VALUE;
-   if (EQUAL  = 'Baþlayan') Or (EQUAL = 'Ýçinde geçen') then kom := kom + '%';
+   if (EQUAL  = 'BaÅŸlayan') Or (EQUAL = 'Ä°Ã§inde geÃ§en') then kom := kom + '%';
    if  (FieldTipi = FtString) Or (FieldTipi = FtMemo) Or (FieldTipi = FtDate)then kom := kom + '"';
    kom := kom + ')';
    komut.Add(kom);
@@ -202,7 +202,7 @@ var index1, TabAd, sat : String[100];
       index1 := TabloDokum.Table1.IndexDefs.Items[0].Fields;
       IndexAlanAl := index1;
       IndexAlanSay := 0;
-      while pos(';', index1) > 0 do begin //Ýndex Alan Sayýsýný belirle 'kod;sýrano'
+      while pos(';', index1) > 0 do begin //Ä°ndex Alan SayÄ±sÄ±nÄ± belirle 'kod;sÄ±rano'
          inc(IndexAlanSay);
          if IndexAlanSira = IndexAlanSay then
             IndexAlanAl := copy(index1, 1, pos(';', index1)-1);
@@ -215,7 +215,7 @@ begin
    TableAdlari.Clear;
    TableBagList.Clear;
    FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
-   {Field'lerden Table Adlarý belirlenir}
+   {Field'lerden Table AdlarÄ± belirlenir}
    TabloDokum.TabKosul.First;
    while not TabloDokum.TabKosul.eof do begin
       ListedeYoksaEkle(TabloDokum.TabKosul.FieldByName('TABLO').AsString);
@@ -239,10 +239,10 @@ begin
    end;{for}
 
 
-   if TableAdlari.Count = 0 then {boþsa}
+   if TableAdlari.Count = 0 then {boÅŸsa}
       TableAdlari.Add('STOK');
 
-   if TableAdlari.Count > 1 then {Tablolar arasýndaki baðý kur}
+   if TableAdlari.Count > 1 then {Tablolar arasÄ±ndaki baÄŸÄ± kur}
       for k := 1 to TableAdlari.Count-1 do begin
           TableBagList.Add('('+TableAdlari.Strings[0]+'.'+IndexAlanAl(TableAdlari.Strings[0]+'.db', 1)+'='+
           TableAdlari.Strings[k]+'.'+IndexAlanAl(TableAdlari.Strings[k]+'.db', 1)+')');
@@ -279,7 +279,7 @@ begin //  ANDOR1 TABLE1, FIELD1, EQUAL1, VALUE1
    TableAdListesiOlustur;
    komut.AddStrings(TableAdlari);
 
-   if TabloDokum.TabKosul.RecordCount > 0 then begin {koþul var}
+   if TabloDokum.TabKosul.RecordCount > 0 then begin {koÅŸul var}
       komut.add(' where ');
       TabloDokum.TabKosul.First;
       while not TabloDokum.TabKosul.eof do begin
@@ -296,9 +296,9 @@ begin //  ANDOR1 TABLE1, FIELD1, EQUAL1, VALUE1
       end;
 //      komut.Add(')');
    end;{if}
-   if (TabloDokum.TabKosul.RecordCount = 0{koþul yoksa})and(TableBagList.Count > 0{birden fazla table varsa})then
+   if (TabloDokum.TabKosul.RecordCount = 0{koÅŸul yoksa})and(TableBagList.Count > 0{birden fazla table varsa})then
        komut.add(' where ')
-   else if (TabloDokum.TabKosul.RecordCount > 0{koþul var})and(TableBagList.Count > 0{birden fazla table varsa})then
+   else if (TabloDokum.TabKosul.RecordCount > 0{koÅŸul var})and(TableBagList.Count > 0{birden fazla table varsa})then
        komut.add('and');
 
    komut.AddStrings(TableBagList);
@@ -406,7 +406,7 @@ end;
 procedure TDokumDlg.FormDeactivate(Sender: TObject);
 begin
    if DtsDokumler.State in [dsEdit, dsInsert] then
-        if MessageDlg('Döküm Ekraný Deðiþti !!! '+#13#10+'Yapýlan Deðiþiklikler Kaydedilsin mi?',
+        if MessageDlg('DÃ¶kÃ¼m EkranÄ± DeÄŸiÅŸti !!! '+#13#10+'YapÄ±lan DeÄŸiÅŸiklikler Kaydedilsin mi?',
                       mtConfirmation, [mbYes,mbNo], 0) = mrYES then
            AnaForm.ToolBarNavigator.BtnClick(nbPost)
         else
@@ -432,7 +432,7 @@ Var
       RapTablo.Ayarlar.FieldByName('BOY').AsFloat := BOY;
       If GlobBandNo<>0 Then
          RapTablo.Ayarlar.FieldByName('BANDNO').AsInteger := GlobBandNo;
-      If AlanTuru = 'ÇERÇEVE' THEN Begin
+      If AlanTuru = 'Ã‡ERÃ‡EVE' THEN Begin
          RapTablo.Ayarlar.FieldByName('SOL').AsString := '';
          RapTablo.Ayarlar.FieldByName('UST').AsString := '';
          RapTablo.Ayarlar.FieldByName('BOY').AsString := '';
@@ -456,28 +456,28 @@ Begin
    Application.CreateForm(TAyarlarDlg, AyarlarDlg);
 //   RapTablo.Ayarlar.Open;
 //   If RapTablo.Ayarlar.FindKey([TabloDokum.TabDokum.FieldByName('RAPORADI').AsString,10]) Then
-//      raise hata.create('Þu anda rapor ayarlarý var. Yeniden oluþturmak istiyorsanýz rapor ayarlarýný silin.');
+//      raise hata.create('Åžu anda rapor ayarlarÄ± var. Yeniden oluÅŸturmak istiyorsanÄ±z rapor ayarlarÄ±nÄ± silin.');
 
    AyarAd := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString;
    FList := TStringList.Create;
    FList.Assign(TabloDokum.TabDokum.FieldByName('FIELDLIST'));
    GlobBandNo:=0;
    Sayac:=1;
-   DegerAta('SAYFA', 'YAZICI', '(yazýcý ismi)',0,0,0);
+   DegerAta('SAYFA', 'YAZICI', '(yazÄ±cÄ± ismi)',0,0,0);
    DegerAta('SAYFA', 'BOYUT', 'A4',0,0,0);
 
    // Yedi tane band ekleniyor
    Sayac:=10;
-   DegerAta('BAND', 'SAYFABAÞI', '',0,0,3);
+   DegerAta('BAND', 'SAYFABAÅžI', '',0,0,3);
    DegerAta('BAND', 'DETAY', 'SORGU',0,0,0.5);
    DegerAta('BAND', 'SAYFASONU', '',0,0,2);
 
    Sayac:=20;
    GlobBandNo:=10;
    SolYer:=0;
-   DegerAta('SABÝT', '', 'Dr. Ad Soyad',0,0,0);
+   DegerAta('SABÄ°T', '', 'Dr. Ad Soyad',0,0,0);
    For k:=0 To FList.Count-1 Do Begin
-      DegerAta('SABÝT', '', Noktasiz(FList.Strings[k]),SolYer,2,0);
+      DegerAta('SABÄ°T', '', Noktasiz(FList.Strings[k]),SolYer,2,0);
       SolYer:=SolYer+3
    End;
    GlobBandNo:=11;
@@ -490,9 +490,9 @@ Begin
 
    GlobBandNo:=12;
    Sayac:=80;
-   DegerAta('SABÝT', '', 'SABÝT',0,0,0);
+   DegerAta('SABÄ°T', '', 'SABÄ°T',0,0,0);
    GlobBandNo:=10;
-   DegerAta('ÇERÇEVE', '', '',0,0,0);
+   DegerAta('Ã‡ERÃ‡EVE', '', '',0,0,0);
    FList.Destroy;
    AyarlarDlg.Destroy;
 End;
@@ -620,7 +620,7 @@ procedure TDokumDlg.GenelDokumler_EkranYazici(Sender : TObject);
 var AyarTablo : string[20];
 begin
    If not TabloDokum.Query1.Active Then
-      raise Hata.Create('Önce sonuçlarý listeleyiniz');
+      raise Hata.Create('Ã–nce sonuÃ§larÄ± listeleyiniz');
 
    TabloDokum.RaporTabloSec(RapTablo.Kosullar, DtsDokumler, 'RAPORADI');
 
@@ -663,7 +663,7 @@ End.
       TabloDokum.TabDokum2.Post;
    except
       TabloDokum.TabDokum2.Cancel;
-      showmessage('Bu adla kayýtlý rapora rastlandý!');
+      showmessage('Bu adla kayÄ±tlÄ± rapora rastlandÄ±!');
       exit;
    end;
 

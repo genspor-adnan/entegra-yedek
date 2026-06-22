@@ -1,4 +1,4 @@
-unit Lib.Bson.IO;
+﻿unit Lib.Bson.IO;
 (*< JSON and BSON reading and writing.
 
   @bold(Quick Start)

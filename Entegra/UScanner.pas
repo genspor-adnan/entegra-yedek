@@ -1,4 +1,4 @@
-unit UScanner;
+ï»¿unit UScanner;
 
 interface
 
@@ -213,7 +213,7 @@ begin
 
    Tur := 'pdf';
 
-   //ekrandan dosya adý sorup o adla kaydederiz
+   //ekrandan dosya adÄ± sorup o adla kaydederiz
    if TGirisKutusuEx.BilgiAlEx(DosyaAdiniGirin,TGirdiDenetimleri.Create.Edit(Tur+' '+DosyaAdiniGirin, @Ad)) = mrOk  then begin
       DosyaAdi := GetEnvironmentVariable('Temp');
       DosyaAdi:=DosyaAdi+'\'+VarToStr(Ad);
@@ -332,7 +332,7 @@ begin
 
 
    Tur := 'TIF';
-   //ekrandan dosya adý sorup o adla kaydederiz
+   //ekrandan dosya adÄ± sorup o adla kaydederiz
    if TGirisKutusuEx.BilgiAlEx(DosyaAdiniGirin,TGirdiDenetimleri.Create.Edit(Tur+' '+DosyaAdiniGirin, @Ad)) = mrOk  then begin
       DosyaAdi := GetEnvironmentVariable('Temp');
       DosyaAdi:=DosyaAdi+'\'+VarToStr(Ad);

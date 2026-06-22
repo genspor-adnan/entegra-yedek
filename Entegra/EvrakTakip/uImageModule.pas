@@ -1,4 +1,4 @@
-unit uImageModule;
+﻿unit uImageModule;
 
 interface
 

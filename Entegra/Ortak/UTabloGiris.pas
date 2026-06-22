@@ -1,4 +1,4 @@
-unit UTabloGiris;
+﻿unit UTabloGiris;
 
 interface
 
@@ -195,7 +195,7 @@ end;
 procedure TTabloGirisDlg.FormCreate(Sender: TObject);
 begin
   Tablo.GridTurkcelestir;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   JvTimer1.Enabled := False;
 end;
 

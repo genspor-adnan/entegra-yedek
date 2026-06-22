@@ -1,4 +1,4 @@
-unit Ulogo;
+﻿unit Ulogo;
 
 interface
 
@@ -55,7 +55,7 @@ end;
 
 procedure TLogoDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   if Sektor in [Sektor_Cafe, Sektor_Rest] then begin
      LabelAdres.Caption := 'www.GenoRes.com';
      LabelAdres.top:=320;

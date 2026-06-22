@@ -1,4 +1,4 @@
-unit GenOutLookInterface;
+ï»¿unit GenOutLookInterface;
 interface
 uses
     windows,Messages, SysUtils, Variants, Classes,forms,
@@ -21,21 +21,21 @@ const
   GenPublicFoldersAllPublicFolders         = olPublicFoldersAllPublicFolders  ;
 
 type
-    //email importance type          e-postanın önemi tipi
+    //email importance type          e-postanÄ±n Ã¶nemi tipi
     tImportance                   = ( miImportanceLow    =0,
                                       miImportanceNormal =1,
                                       miImportanceHigh   =2);
-    //email Sensitivity              e-postanın Hassasiyet tipi
+    //email Sensitivity              e-postanÄ±n Hassasiyet tipi
     tSensitivity                  = ( msNormal           =0,
                                       msPersonal         =1,
                                       msPrivate          =2,
                                       msConfidential     =3);
-    //email body type                e-postanın gövde tipi
+    //email body type                e-postanÄ±n gÃ¶vde tipi
     tBodyFormat                   = ( bfFormatUnspecified=0,
                                       bfFormatPlain      =1,
                                       bfFormatHTML       =2,
                                       bfFormatRichText   =3);
-    //email's header type e-postanın başlık tipi
+    //email's header type e-postanÄ±n baÅŸlÄ±k tipi
     tGenMailHeader                =  record
          MailID                   : Widestring;
          FolderID                 : Widestring;
@@ -57,33 +57,33 @@ type
          MessageClass             : widestring;
          BodyFormat               : tBodyFormat;
     end;
-    //container array type for email headers     e-posta başlıklarını için konteyner dizi türü
+    //container array type for email headers     e-posta baÅŸlÄ±klarÄ±nÄ± iÃ§in konteyner dizi tÃ¼rÃ¼
     tGenMailHeaderaddray          = array of tGenMailHeader;
 
 TSearchFunction = function (Rec:tGenMailHeader):boolean;
-//initiate Outlook interface Outlook arabirimi başlatır
+//initiate Outlook interface Outlook arabirimi baÅŸlatÄ±r
 function Init_OutLookInterface(Owner:TComponent):boolean;
-//deinitiate Outlook interface Outlook arabirimi başlatır
+//deinitiate Outlook interface Outlook arabirimi baÅŸlatÄ±r
 function DeInit_OutLookInterface:boolean;
-//Retrieves folders tree   Bu klasörlerin ağaç alır
+//Retrieves folders tree   Bu klasÃ¶rlerin aÄŸaÃ§ alÄ±r
 function RetrieveFolderTree:TStringList;
-// saves an email in specified location in MSG format MSG formatında belirtilen konuma bir e-posta kaydeder
+// saves an email in specified location in MSG format MSG formatÄ±nda belirtilen konuma bir e-posta kaydeder
 function SaveMailAs(MailId:widestring;FolderId:OleVariant;FileName:widestring):boolean;
 
 {
-//retrieves emails headers from default inbox folder    varsayılan gelen kutusu klasöründen e-posta başlıklarını alır
+//retrieves emails headers from default inbox folder    varsayÄ±lan gelen kutusu klasÃ¶rÃ¼nden e-posta baÅŸlÄ±klarÄ±nÄ± alÄ±r
 function RetrieveMailHeadersFromDefInBox(var HeadersArray:tGenMailHeaderaddray):boolean;
 
-// for debug purposes, DON'T USE it   hata ayıklama amaçları için, KULLANMAYIN
+// for debug purposes, DON'T USE it   hata ayÄ±klama amaÃ§larÄ± iÃ§in, KULLANMAYIN
 procedure dumpa(var H:tGenMailHeaderaddray;fl:widestring);
 
 
 //retrieves emails headers from  default inbox folder  which received after a specific date
-// belirli bir tarihten sonra alınan e-postalerin başlıklarını varsayılan gelen kutusu klasöründen alır
+// belirli bir tarihten sonra alÄ±nan e-postalerin baÅŸlÄ±klarÄ±nÄ± varsayÄ±lan gelen kutusu klasÃ¶rÃ¼nden alÄ±r
 function RetrieveMailHeadersFromDefInBox_AfterDate(var HeadersArray:tGenMailHeaderaddray;After:TDateTime):boolean;
 
 //retrieves emails headers from  default inbox folder  which received from specific company
-//e-posta başlıklarını belirli bir şirkden alınan varsayılan gelen kutusu klasöründen alır
+//e-posta baÅŸlÄ±klarÄ±nÄ± belirli bir ÅŸirkden alÄ±nan varsayÄ±lan gelen kutusu klasÃ¶rÃ¼nden alÄ±r
 function RetrieveMailHeadersFromDefInBox_NewCompany(var HeadersArray:tGenMailHeaderaddray;CompanyDomain:widestring):boolean;
 
 function RetrieveMailHeadersFromDefInBox_NewCompany_AfterDate(var HeadersArray:tGenMailHeaderaddray;CompanyDomain:widestring;After:TDateTime):boolean;

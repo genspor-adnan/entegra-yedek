@@ -1,4 +1,4 @@
-unit GenoTIP.eFatura.NativeApi;
+ï»¿unit GenoTIP.eFatura.NativeApi;
 
 interface
 uses
@@ -66,7 +66,7 @@ begin
   begin
     P := GetProcAddress(NativeDllHandle, PChar(ProcName));
     if not Assigned(P) then
-      raise Exception.CreateFmt('Procedure bulunamadý %s', [ProcName]);
+      raise Exception.CreateFmt('Procedure bulunamadÄ± %s', [ProcName]);
   end;
 end;
 
@@ -154,7 +154,7 @@ begin
   if NativeDllHandle = 0 then begin
     NativeDllHandle := SafeLoadLibrary(NativeDll);
     if NativeDllHandle = 0 then
-       raise Exception.Create('Dll yüklenemedi!');
+       raise Exception.Create('Dll yÃ¼klenemedi!');
   end;
   Result := False;
   try
@@ -172,7 +172,7 @@ end;
 function ShowInvoicePreview(AOpenedInvoiceId: Integer): Boolean;
 begin
   if SessionInstance = 0 then
-    raise Exception.Create('Api baþlatýlmamýþ!');
+    raise Exception.Create('Api baÅŸlatÄ±lmamÄ±ÅŸ!');
   Result := NativeApiCheck(
     ApiShowInvoicePreview(SessionInstance,AOpenedInvoiceId));
 end;
@@ -180,7 +180,7 @@ end;
 function SendInvoice(AOpenedInvoiceId: Integer): Boolean;
 begin
   if SessionInstance = 0 then
-    raise Exception.Create('Api baþlatýlmamýþ!');
+    raise Exception.Create('Api baÅŸlatÄ±lmamÄ±ÅŸ!');
   Result := NativeApiCheck(
     ApiSendInvoice(SessionInstance,AOpenedInvoiceId));
 end;
@@ -188,7 +188,7 @@ end;
 function OpenInvoice(AInvoiceId: String;var AOpenedInvoiceId: Integer): Boolean;
 begin
   if SessionInstance = 0 then
-    raise Exception.Create('Api baþlatýlmamýþ!');
+    raise Exception.Create('Api baÅŸlatÄ±lmamÄ±ÅŸ!');
   Result := NativeApiCheck(
     ApiOpenInvoice(SessionInstance,AInvoiceId,AOpenedInvoiceId));
 end;
@@ -196,7 +196,7 @@ end;
 function CloseInvoice(AOpenedInvoiceId: Integer): Boolean;
 begin
   if SessionInstance = 0 then
-    raise Exception.Create('Api baþlatýlmamýþ!');
+    raise Exception.Create('Api baÅŸlatÄ±lmamÄ±ÅŸ!');
   Result := NativeApiCheck(
     ApiCloseInvoice(SessionInstance,AOpenedInvoiceId));
 end;
@@ -204,7 +204,7 @@ end;
 function GetInvoiceStatus(AOpenedInvoiceId: Integer;var AStatus: Integer): Boolean;
 begin
   if SessionInstance = 0 then
-    raise Exception.Create('Api baþlatýlmamýþ!');
+    raise Exception.Create('Api baÅŸlatÄ±lmamÄ±ÅŸ!');
   Result := NativeApiCheck(
     ApiGetInvoiceStatus(SessionInstance,AOpenedInvoiceId,AStatus));
 end;

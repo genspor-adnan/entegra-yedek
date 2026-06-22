@@ -1,4 +1,4 @@
-unit Fetautil;
+ï»¿unit Fetautil;
 interface
 uses Forms, SysUtils, WinTypes, WinProcs, Messages, DBTables, Classes, Graphics, DBGrids,
   Printers, comctrls, StdCtrls, UFDCompatHelpers, UCombo, math, UMesaj, comobj;
@@ -88,7 +88,7 @@ begin
   if (i > 0) and (j >= 3) and (j <= 6) then
     inc(i);
 
-  Gun := Gun + i * 2; //Kaç haftasonu varsa ekliyorum
+  Gun := Gun + i * 2; //KaÃ§ haftasonu varsa ekliyorum
   j := DayOfWeek(Tarih + Gun);
   if i > 0 then begin //arada haftasonu varsa
     if j = 1 then //pazar
@@ -117,12 +117,12 @@ var cst, Ser_Name, DB_Name, DB_Pass, s2: string;
   tut: Boolean;
   procedure bilgial;
   begin
-    if not MesajStrAl('', 'Server Adýný Giriniz :', 'E', nil, Ser_Name, 'Veri Tabaný Adýný', 'E', nil, DB_Name) then halt;
+    if not MesajStrAl('', 'Server AdÄ±nÄ± Giriniz :', 'E', nil, Ser_Name, 'Veri TabanÄ± AdÄ±nÄ±', 'E', nil, DB_Name) then halt;
     if (Ser_Name = '') or (DB_Name = '') then begin
-      showmessage('Adýný boþ girdiniz. Kapatýlýyor..');
+      showmessage('AdÄ±nÄ± boÅŸ girdiniz. KapatÄ±lÄ±yor..');
       halt;
     end;
-    if not MesajStrAl('', 'Veri Tabaný Þifresini Giriniz :', 'E', nil, DB_Pass, '', 'E', nil, DB_Pass) then halt;
+    if not MesajStrAl('', 'Veri TabanÄ± Åžifresini Giriniz :', 'E', nil, DB_Pass, '', 'E', nil, DB_Pass) then halt;
     if cnn.Connected then cnn.Connected := False;
     cnn.ConnectionString := 'Provider=SQLOLEDB.1;Password=' + DB_Pass + ';Persist Security Info=False;Packet Size=8192;User ID=sa;Initial Catalog=' +
       DB_Name + ';Data Source=' + Ser_Name;
@@ -166,7 +166,7 @@ var s, s2: string[20];
   i: smallint;
   x: real;
 begin
-   //Katký yüzdenin . dan sonraki 2 rakamý alýnýr
+   //KatkÄ± yÃ¼zdenin . dan sonraki 2 rakamÄ± alÄ±nÄ±r
 {   s := FloatToStr(R);
    i:=pos('.',s);
    if i>0 then begin         //34.4576 -->  4576  al --> 45.76 yap
@@ -190,7 +190,7 @@ function Duyarlilik_Float(R: Real): Real;
 var s, s2: string[20];
   i: smallint;
 begin
-   //Katký yüzdenin . dan sonraki 2 rakamý alýnýr
+   //KatkÄ± yÃ¼zdenin . dan sonraki 2 rakamÄ± alÄ±nÄ±r
   s := FloatToStr(R);
   i := pos('.', s);
   if i > 0 then begin //34.4576 -->  4576  al --> 45.76 yap
@@ -219,7 +219,7 @@ begin
   Virgulle := t + nok;
 end;
 
-{Þifreleme ile ilgili yordamlar}
+{Åžifreleme ile ilgili yordamlar}
 
 function FetaSetSize(FileName: string; Sz: Integer): Boolean;
 var
@@ -438,7 +438,7 @@ var AnMuProc: TFarProc;
 begin
   AnMuProc := MakeProcInstance(YordamAd, Handel);
   if DialogBox(Handel, DialogAd, BabaDialog, AnMuProc) = -1 then
-    Messagebox(0, 'Dialog Box oluþturulamadý..', DialogAd, mb_OK);
+    Messagebox(0, 'Dialog Box oluÅŸturulamadÄ±..', DialogAd, mb_OK);
   FreeProcInstance(AnMuProc);
 end;
 
@@ -547,13 +547,13 @@ begin
   if St <> '' then
     for i := 0 to Length(CSt) do
       case CSt[i] of
-        'ç': CSt[i] := 'Ç';
-        'ü': CSt[i] := 'Ü';
-        'ð': CSt[i] := 'Ð';
-        'þ': CSt[i] := 'Þ';
-        'ö': CSt[i] := 'Ö';
-        'ý': CSt[i] := 'I';
-        'i': CSt[i] := 'Ý';
+        'Ã§': CSt[i] := 'Ã‡';
+        'Ã¼': CSt[i] := 'Ãœ';
+        'ÄŸ': CSt[i] := 'Äž';
+        'ÅŸ': CSt[i] := 'Åž';
+        'Ã¶': CSt[i] := 'Ã–';
+        'Ä±': CSt[i] := 'I';
+        'i': CSt[i] := 'Ä°';
 //     else if CSt[i] in ['a'..'z'] then CSt[i] := UpperCase(StrPCopy(CSt[i]));
       end;
   UpStr := UpperCase(Cst);
@@ -698,7 +698,7 @@ begin
       Dec(YAy);
     end;
   if (YYil = 0) and (YAy = 0) then
-    YasHesapla := IntToStr(YGun) + 'Gün'
+    YasHesapla := IntToStr(YGun) + 'GÃ¼n'
   else if YYil = 0 then
     YasHesapla := IntToStr(YAy) + 'Ay' //+IntToStr(YGun)+'g'
   else if YYil > 0 then
@@ -720,12 +720,12 @@ begin
   tb := 0;
 
   for i := 1 to length(giren) do begin
-    if (giren[i] = 'Ü') or (giren[i] = 'U') or
-      (giren[i] = 'Þ') or (giren[i] = 'S') or
-      (giren[i] = 'Ç') or (giren[i] = 'C') or
-      (giren[i] = 'Ý') or (giren[i] = 'I') or
-      (giren[i] = 'Ö') or (giren[i] = 'O') or
-      (giren[i] = 'Ð') or (giren[i] = 'G') then
+    if (giren[i] = 'Ãœ') or (giren[i] = 'U') or
+      (giren[i] = 'Åž') or (giren[i] = 'S') or
+      (giren[i] = 'Ã‡') or (giren[i] = 'C') or
+      (giren[i] = 'Ä°') or (giren[i] = 'I') or
+      (giren[i] = 'Ã–') or (giren[i] = 'O') or
+      (giren[i] = 'Äž') or (giren[i] = 'G') then
     begin
       tb := tb + 1;
       yer[tb] := i;
@@ -751,18 +751,18 @@ begin
         dg := temp[yer[i]];
         ydg := '?';
         case dg of
-          'Ý': ydg := 'I';
-          'I': ydg := 'Ý';
-          'Þ': ydg := 'S';
-          'S': ydg := 'Þ';
-          'Ö': ydg := 'O';
-          'O': ydg := 'Ö';
-          'Ü': ydg := 'U';
-          'U': ydg := 'Ü';
-          'Ð': ydg := 'G';
-          'G': ydg := 'Ð';
-          'Ç': ydg := 'C';
-          'C': ydg := 'Ç';
+          'Ä°': ydg := 'I';
+          'I': ydg := 'Ä°';
+          'Åž': ydg := 'S';
+          'S': ydg := 'Åž';
+          'Ã–': ydg := 'O';
+          'O': ydg := 'Ã–';
+          'Ãœ': ydg := 'U';
+          'U': ydg := 'Ãœ';
+          'Äž': ydg := 'G';
+          'G': ydg := 'Äž';
+          'Ã‡': ydg := 'C';
+          'C': ydg := 'Ã‡';
         end;
         temp[yer[i]] := ydg;
         Result.Strings[k - 1] := temp;
@@ -816,7 +816,7 @@ Begin
     hDriver:=LoadLibrary(szDP);
     If hDriver<32 Then
        Begin Str(hdriver,s);
-             StrCat(s,' : Hdriver Hatasý');
+             StrCat(s,' : Hdriver HatasÄ±');
              MessageBox(0,s,'GENOTIP',mb_OK);
        End;
     PAdr:=GetProcAddress(hDriver,'ExtDeviceMode');
@@ -825,13 +825,13 @@ Begin
        DMOutp:=Nil;
        Cb := TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMOutp,PChar(0),0);
        hT1 := LocalAlloc (LHND,cb);
-       If ht1=0 Then Messagebox(0,'Local Alloc Hatasý','GetprinterDC',mb_OK);
+       If ht1=0 Then Messagebox(0,'Local Alloc HatasÄ±','GetprinterDC',mb_OK);
        DMInp := LocalLock (hT1);
-       If DMInp=nil Then Messagebox(0,'Local Lock Hatasý','GetprinterDC',mb_OK);
+       If DMInp=nil Then Messagebox(0,'Local Lock HatasÄ±','GetprinterDC',mb_OK);
        hT2 := LocalAlloc (LHND,cb);
-       If ht2=0 Then Messagebox(0,'Local Alloc Hatasý','GetprinterDC',mb_OK);
+       If ht2=0 Then Messagebox(0,'Local Alloc HatasÄ±','GetprinterDC',mb_OK);
        DMOutp := LocalLock (hT2);
-       If DMOutp=nil Then Messagebox(0,'Local Lock Hatasý','GetprinterDC',mb_OK);
+       If DMOutp=nil Then Messagebox(0,'Local Lock HatasÄ±','GetprinterDC',mb_OK);
        TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMOutp,PChar(0),DM_COPY);
        {Header Information}
        StrCopy(DMInp^.dmDeviceName,szD);
@@ -854,9 +854,9 @@ Begin
        End;
       { DMInp^.dmPaperSize:=dmPaper_B5 DMPAPER_A5};
        If TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMInp,PChar(0),DM_MODIFY Or DM_COPY)<0 Then
-          MessageBox(0,'Ext Device Mode Hatasý','GENOTIP',mb_OK);
+          MessageBox(0,'Ext Device Mode HatasÄ±','GENOTIP',mb_OK);
        IF TExtDevMode(Padr)(0,hDriver,DMOutp,szD,szPP,DMInp,PChar(0),DM_COPY Or DM_MODIFY)<0 Then
-          MessageBox(0,'Ext Device Mode Hatasý-2','GENOTIP',mb_OK);
+          MessageBox(0,'Ext Device Mode HatasÄ±-2','GENOTIP',mb_OK);
        GetPrinterDC:=CreateDC(szDP,szD,szPP,DMOutp);
   {     GetPrinterDC:=CreateDC(szDP,szD,szPP,PChar(0));}
        LocalUnlock(hT2);

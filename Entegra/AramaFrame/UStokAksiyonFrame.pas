@@ -1,4 +1,4 @@
-unit UStokAksiyonFrame;
+﻿unit UStokAksiyonFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:51:36 }
@@ -44,7 +44,7 @@ implementation
 
 procedure TStokAksiyonFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TStokAksiyonFrame.EkranYazdir(Sender: TObject);

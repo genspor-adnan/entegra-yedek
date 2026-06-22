@@ -1,4 +1,4 @@
-unit UVadeliHesaplarListeFrame;
+﻿unit UVadeliHesaplarListeFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 06/01/2010 13:19:58}

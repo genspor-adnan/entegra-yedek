@@ -1,4 +1,4 @@
-unit uSocialListFrame;
+ï»¿unit uSocialListFrame;
 
 interface
 
@@ -192,20 +192,20 @@ type
     function MetaZamanUygunmu : boolean;
   public
     { Public declarations }
-    constructor Create(AOwner : TComponent); override;                 {m.y Özel iþlerimiz olacaktýr}
+    constructor Create(AOwner : TComponent); override;                 {m.y Ã–zel iÅŸlerimiz olacaktÄ±r}
     destructor Destroy; override;
 
     procedure SetupMeta(_AppID, _AppSecret, _AppName, _PageID, _PageToken : string; _UpdatePeriod : integer);
     procedure SetupIMAP(_IServer, _IUsername, _IPassword, _IRoot, _IToMail : string; _IPort : word; _ITLSS : integer);
     property Initialized : boolean read fInitialized write fInitialized;
-    // Meta üyeleri
+    // Meta Ã¼yeleri
     property AppID : string read fAppID write fAppID;
     property AppName : string read fAppName write fAppName;
     property AppSecret : string read fAppSecret write fAppSecret;
     property PageID : string read fPageID write fPageID;
     property PageToken : string read fPageToken write fPageToken;
     property MetaUpdatePeriod : integer read fMetaUpdatePeriod write fMetaUpdatePeriod;
-    //IMAP üyeleri
+    //IMAP Ã¼yeleri
     property IServer   : string    read fIServer    write fIServer;
     property IUsername : string    read fIUsername  write fIUsername;
     property IPassword : string    read fIPassword  write fIPassword;
@@ -237,7 +237,7 @@ uses
   ;
 
 const
-  constActInfo : array [False..True] of string= ('','Güncelleniyor');
+  constActInfo : array [False..True] of string= ('','GÃ¼ncelleniyor');
 
 
 
@@ -279,14 +279,14 @@ end;
 
 procedure TSocialMediaFrame.actIceriAlExecute(Sender: TObject);
 begin
-   // Ýçeri Al
+   // Ä°Ã§eri Al
     DoWorkIceriAktar;
 end;
 
 procedure TSocialMediaFrame.actIceriAlUpdate(Sender: TObject);
 var i : integer;
 begin
-   // Kayýt Alýndý mý ALýnmadý mý
+   // KayÄ±t AlÄ±ndÄ± mÄ± ALÄ±nmadÄ± mÄ±
    //TAction(Sender).Enabled := {(MetaView.Controller.SelectedRowCount>0) and} (MetaView.Datacontroller.FocusedDataRowIndex>-1);
    {//UNUTMA
    for i := 0 to MetaView.Controller.SelectedRowCount-1 do
@@ -352,7 +352,7 @@ end;
 
 procedure TSocialMediaFrame.AdoToMem;
 begin
-  // qryMetaCollect ADO dataset'ten dxMemCollect Memory dataset'e aktarým.
+  // qryMetaCollect ADO dataset'ten dxMemCollect Memory dataset'e aktarÄ±m.
   raise Exception.Create('Buraya girmemeliydi');
   (*
   dxMemCollect.DisableControls;
@@ -363,7 +363,7 @@ begin
            dxMemCollect.Delete;
         qryMetaCollect.Open;
         dxMemCollect.LoadFromDataSet(qryMetaCollect);
-        {$IFDEF 3Dparty} _LogEkle('ADOTOMEM', qryMetaCollect.RecordCount.ToString+ ' Kayýt Aktarýldý'); {$endif}
+        {$IFDEF 3Dparty} _LogEkle('ADOTOMEM', qryMetaCollect.RecordCount.ToString+ ' KayÄ±t AktarÄ±ldÄ±'); {$endif}
 
     except
         on ExAdoToMem001 : Exception do
@@ -381,9 +381,9 @@ end;
 procedure TSocialMediaFrame.AktarilmislariEslestir;
 begin
    {
-     META_Collect Contact_RehberID eþleþtirilmiþ, fakat zaman içinde "REHBER" tablosundan silinmiþ olabilir.
-     Dolayýsýyla Ýçeri alýnmýþ gibi görünmeye devam edecektir.
-     Form baþlatýlýdðýnda veya "Yenileme" sonrasinda mutlaka güncellenmeli
+     META_Collect Contact_RehberID eÅŸleÅŸtirilmiÅŸ, fakat zaman iÃ§inde "REHBER" tablosundan silinmiÅŸ olabilir.
+     DolayÄ±sÄ±yla Ä°Ã§eri alÄ±nmÄ±ÅŸ gibi gÃ¶rÃ¼nmeye devam edecektir.
+     Form baÅŸlatÄ±lÄ±dÄŸÄ±nda veya "Yenileme" sonrasinda mutlaka gÃ¼ncellenmeli
    }
 
    Tablo.FDCnn.ExecSQL('UPDATE META_Collect SET Contact_RehberID = (SELECT ID FROM REHBER WHERE ID= Contact_RehberID)');
@@ -441,11 +441,11 @@ begin
    if FArama.AraFirma.Text<>'' then
       Filter_Unvan := ' Contact_Name LIKE '+QS(FArama.AraFirma.Text+'%');
 
-   {Þehir Filtresi}
+   {Åžehir Filtresi}
    if FArama.AraSehir.Text<>'' then
       Filter_Sehir := ' Contact_City LIKE '+QS(FArama.AraSehir.Text+'%');
 
-   {Ülke Filtresi}
+   {Ãœlke Filtresi}
    if FArama.AraUlke.Text<>'' then
       Filter_Ulke := ' Contact_Country LIKE '+QS(FArama.AraUlke.Text+'%');
 
@@ -462,7 +462,7 @@ begin
      if endStr <> '' then
        Filter_Date := ' Last_Update <= '+ endStr;
 
-   {Filtrelerden Filtre Oluþtur}
+   {Filtrelerden Filtre OluÅŸtur}
    if Filter_Unvan<>'' then
     filterText := filterText + ' AND '+Filter_Unvan;
 
@@ -491,7 +491,7 @@ end;
 
 procedure TSocialMediaFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
   AktarilmislariEslestir;
   if qryMetaCollect.State in [dsInActive] then
@@ -518,7 +518,7 @@ begin
   fPasifKayitGoster := False;
   fLoggToFile := False;
   {$IFDEF 3Dparty}fLoggToFile := True;{$ENDIF}
-  FacebookLoggerMethod := LogSocialMedia; // her hangi bir method eþitlenebilir.
+  FacebookLoggerMethod := LogSocialMedia; // her hangi bir method eÅŸitlenebilir.
   IMAPLoggerMethod := LogSocialMedia;
   Initialized := False;
   tabSocialConfig.Open;
@@ -608,7 +608,7 @@ var
   RehberID : integer;
   gridRow : TcxCustomGridRow;
 begin
-   // Ýçeri Al
+   // Ä°Ã§eri Al
    {$ifdef 3Dparty}
    for donguSecim := 0 to MetaView.Controller.SelectedRowCount-1 do
     begin
@@ -652,7 +652,7 @@ begin
       AddParam(Rehber_Potansiyel_Proc.Params, '@YORUM',          ftWideString, 1073741823);
       AddParam(Rehber_Potansiyel_Proc.Params, '@ResultID',       ftInteger,    10, ptOutput);
 
-       {Selected kayýtlar için dönecek}
+       {Selected kayÄ±tlar iÃ§in dÃ¶necek}
 
        qryKayitSorgula.Connection := Tablo.FDCnn;
        qryKayitUpdate := TFDQuery.Create(Self);
@@ -664,7 +664,7 @@ begin
          for donguSecim := 0 to MetaView.Controller.SelectedRowCount-1 do
           begin
              gridRow := MetaView.Controller.SelectedRows[donguSecim];
-             // Daha önce aktarýlmýþlar tekrar aktarýlmýyor!
+             // Daha Ã¶nce aktarÄ±lmÄ±ÅŸlar tekrar aktarÄ±lmÄ±yor!
              if Not gridRow.Values[MetaViewImported.Index] then
               if (VarToString( gridRow.Values[MetaViewContact_Name.Index] )<>'') then
               begin
@@ -683,8 +683,8 @@ begin
                 NotYorum := VarToString( gridRow.Values[MetaViewNOT1.Index] );
                 if Not TryStrToInt(Kullanan, Ekleyen) then
                   Ekleyen := -1;
-                //Ekleyen := KullananID; //-1; //Ekleyen Kullanýcý Uygulamayý Açan kiþi olmalý
-                Temsilci := -1; // Henüz atanmýþ kimse yok
+                //Ekleyen := KullananID; //-1; //Ekleyen KullanÄ±cÄ± UygulamayÄ± AÃ§an kiÅŸi olmalÄ±
+                Temsilci := -1; // HenÃ¼z atanmÄ±ÅŸ kimse yok
                 Sinif := 0;
                 if VarToInt( gridRow.Values[MetaViewMeta_Class.Index]) = 1 then // Meta_Class > Messenger
                    Sinif := 9 // GENINI Bolum = -2203, Deger = 9, ANAHTAR = Meta Messenger
@@ -717,8 +717,8 @@ begin
                 Rehber_Potansiyel_Proc.ExecProc;
                 RehberID := Rehber_Potansiyel_Proc.Params.ParamByName('@ResultID').Value;
 
-                { Memory Dataset verilerinden "Rehber_Potansiyel_Proc" çalýþtýrldý
-                  "META_Collect". RehberID ve Import_Date güncellenmeli
+                { Memory Dataset verilerinden "Rehber_Potansiyel_Proc" Ã§alÄ±ÅŸtÄ±rldÄ±
+                  "META_Collect". RehberID ve Import_Date gÃ¼ncellenmeli
                 }
                 qryKayitUpdate.SQL.Text := 'SELECT * FROM META_Collect WHERE Contact_ID='+
                                                QS( VarToString( gridRow.Values[MetaViewContact_ID.Index] ) );
@@ -768,7 +768,7 @@ var
   //storeItem     : TIdIMAP4StoreDataItem;
 begin
   //
-  labelInfo.Caption := 'Mails Modül oluþturuluyor.';
+  labelInfo.Caption := 'Mails ModÃ¼l oluÅŸturuluyor.';
   if Not Assigned(ImapModule) then
     ImapModule := TImapModule.Create(Self);
   {$IFDEF 3DParty} LogSocialMedia('* Entry..DoWorkImapMails','SOCIAL_IMAP'); {$ENDIF}
@@ -779,9 +779,9 @@ begin
   ImapModule.Port := IPort;
   ImapModule.TLSSupport :=  TIdUseTLS(ITLSS);
 
-  { MulitThread yordamlar ADO baðlantýsý için ayrý bir kopyasýyla çalýþacaktýr
-    MainThread içinde kullanýdýðýmýz ADOconnection beklenmeyen sonuçlara ve programýn donmasýna neden olur
-    Geçici olarak yeni bir ADOconnection ile çalýþýlacaktýr.
+  { MulitThread yordamlar ADO baÄŸlantÄ±sÄ± iÃ§in ayrÄ± bir kopyasÄ±yla Ã§alÄ±ÅŸacaktÄ±r
+    MainThread iÃ§inde kullanÄ±dÄ±ÄŸÄ±mÄ±z ADOconnection beklenmeyen sonuÃ§lara ve programÄ±n donmasÄ±na neden olur
+    GeÃ§ici olarak yeni bir ADOconnection ile Ã§alÄ±ÅŸÄ±lacaktÄ±r.
   }
 
   CoInitialize(nil);
@@ -791,17 +791,17 @@ begin
     tempConn.Params.Assign(Tablo.FDCnn.Params);
     tempConn.LoginPrompt := False;
     tempConn.Connected := True;
-    labelInfo.Caption := 'Mails sorgusu hazýrlanýyor';
+    labelInfo.Caption := 'Mails sorgusu hazÄ±rlanÄ±yor';
     qryData:= TFDQuery.Create(Self);
-    //IMAP_UID max deðeri alýnýyor
+    //IMAP_UID max deÄŸeri alÄ±nÄ±yor
     qryDATA.SQL.Text := 'SELECT ISNULL(MAX(IMAP_UID), 0) from META_Collect';
     {$IFDEF 3DParty}LogSocialMedia('* qryDATA.SQL.Text = '+qryDATA.SQL.Text,'SOCIAL_IMAP');{$ENDIF}
     qryData.Connection := tempConn;
     qryDATA.Open;
     sonUID := qryData.Fields[0].AsInteger;
     qryData.Close;
-    {Hiç kaydedilmiþ IMAP_UID deðeri yoksa "0" gelecektir, bu koþulda ilk IMAP_UID deðeri en az "1" olmalý
-     Aksi durumda Son Kaydedilmiþ IMAP_UID deðerinden devam etmeli }
+    {HiÃ§ kaydedilmiÅŸ IMAP_UID deÄŸeri yoksa "0" gelecektir, bu koÅŸulda ilk IMAP_UID deÄŸeri en az "1" olmalÄ±
+     Aksi durumda Son KaydedilmiÅŸ IMAP_UID deÄŸerinden devam etmeli }
     if (sonUID = 0) then
       sonUID := sonUID + 1;
     List := TStringList.Create;
@@ -812,34 +812,34 @@ begin
     if ImapModule.Connected then
      begin
        {$IFDEF 3DParty} LogSocialMedia('* IMAP..Connected','SOCIAL_IMAP'); {$ENDIF}
-       labelInfo.Caption := 'Mails IMAP4 yeni postalar sorgulanýyor';
+       labelInfo.Caption := 'Mails IMAP4 yeni postalar sorgulanÄ±yor';
        qryData.SQL.Text := 'SELECT * FROM META_Collect';
        qryData.Open;
 
        SearchStr := 'UID SEARCH ';
        if IToMail<>'' then
          SearchStr := SearchStr + '(FROM "'+IToMail+'") ';
-      {UID numarasýndan önce "UID" deyimi çok önemli!
-       UID SEARCH 267:* yazýlmasý halinde Sequence numarasýndan baþlar
-       UID SEARCH UID 267:* yazýlmasý UID numarasýndan baþlar. istenen þey!
+      {UID numarasÄ±ndan Ã¶nce "UID" deyimi Ã§ok Ã¶nemli!
+       UID SEARCH 267:* yazÄ±lmasÄ± halinde Sequence numarasÄ±ndan baÅŸlar
+       UID SEARCH UID 267:* yazÄ±lmasÄ± UID numarasÄ±ndan baÅŸlar. istenen ÅŸey!
       }
        SearchStr := SearchStr + 'UID '+sonUID.ToString+':*';
        {$IFDEF 3DParty} LogSocialMedia('SEARCH STR = '+SearchStr,'SOCIAL_IMAP'); {$ENDIF}
        {
         UID SEARCH UID 267:*
-        Arama kriterlerine uygun Liste oluþtu
+        Arama kriterlerine uygun Liste oluÅŸtu
        }
        ImapModule.SearchExt(SearchStr, SearchList);
        ClearEmptyLines(SearchList);
-       { Arama Listesi kadar döngü kurulup
+       { Arama Listesi kadar dÃ¶ngÃ¼ kurulup
          Postalar UID ile FETCH edilmeli
-         Tüm Listeyi tek seferde FETCH etmek te mümkün. FAKAT!!!!
-         Tüm postalarýn toplu halde gelmesi durumunda Uzun bir string dönebilir!!
+         TÃ¼m Listeyi tek seferde FETCH etmek te mÃ¼mkÃ¼n. FAKAT!!!!
+         TÃ¼m postalarÄ±n toplu halde gelmesi durumunda Uzun bir string dÃ¶nebilir!!
        }
        {$IFDEF 3DParty} LogSocialMedia('Search Result >> '+ StringReplace( SearchList.Text,#13#10,', ',[rfReplaceAll] ), 'SOCIAL_IMAP'); {$ENDIF}
        for i := 0 to SearchList.Count-1 do
          begin
-           labelInfo.Caption := 'Mails ('+SearchList[i]+') ePosta Verisi alýnýyor';
+           labelInfo.Caption := 'Mails ('+SearchList[i]+') ePosta Verisi alÄ±nÄ±yor';
            msg := ImapModule.GetMail(SearchList[i]);
            ImapModule.IdIMAP4.UIDStoreFlags([SearchList[i]], sdReplace, [mfSeen] );
            {$IFDEF 3DParty} LogSocialMedia(i.ToString+' Mail ['+SearchList[i]+'] ID = '+msg.MsgId+' ('+msg.Subject+')  UID ['+msg.UID+'] ' +msg.Body.Text, 'SOCIAL_IMAP'); {$ENDIF}
@@ -892,12 +892,12 @@ begin
      end // if ImapModule.Connected then
        else
        begin
-         labelInfo.Caption := 'IMAP ePosta baðlantýsý saðlanamadý!';
-         raise Exception.Create('IMAP ePosta baðlantýsý saðlanamadý!');
+         labelInfo.Caption := 'IMAP ePosta baÄŸlantÄ±sÄ± saÄŸlanamadÄ±!';
+         raise Exception.Create('IMAP ePosta baÄŸlantÄ±sÄ± saÄŸlanamadÄ±!');
        end;
 
   finally
-    labelInfo.Caption := 'Posta iþleme tamamlandý';
+    labelInfo.Caption := 'Posta iÅŸleme tamamlandÄ±';
     if Assigned(ImapModule) then
      begin
        if ImapModule.Connected then
@@ -927,11 +927,11 @@ var
 begin
 
   if PageID='' then
-    raise Exception.Create('Sayfa ID tanýmsýz doðru bilgileri tanýmlayýnýz');
+    raise Exception.Create('Sayfa ID tanÄ±msÄ±z doÄŸru bilgileri tanÄ±mlayÄ±nÄ±z');
 
-  { MulitThread yordamlar ADO baðlantýsý için ayrý bir kopyasýyla çalýþacaktýr
-    MainThread içinde kullanýdýðýmýz ADOconnection beklenmeyen sonuçlara ve programýn donmasýna neden olur
-    Geçici olarak yeni bir ADOconnection ile çalýþýlacaktýr.
+  { MulitThread yordamlar ADO baÄŸlantÄ±sÄ± iÃ§in ayrÄ± bir kopyasÄ±yla Ã§alÄ±ÅŸacaktÄ±r
+    MainThread iÃ§inde kullanÄ±dÄ±ÄŸÄ±mÄ±z ADOconnection beklenmeyen sonuÃ§lara ve programÄ±n donmasÄ±na neden olur
+    GeÃ§ici olarak yeni bir ADOconnection ile Ã§alÄ±ÅŸÄ±lacaktÄ±r.
   }
   tempConn := TFDConnection.Create(Nil);
 
@@ -950,16 +950,16 @@ begin
     LongLiveToken := GetLongLiveUserAccesToken(AppID, AppSecret, PageToken);
     if Pos('ERROR',LongLiveToken)=0 then
     begin
-    {$IFDEF 3DParty}LogSocialMedia('1.LongLiveToken alýndý'); {$ENDIF}
+    {$IFDEF 3DParty}LogSocialMedia('1.LongLiveToken alÄ±ndÄ±'); {$ENDIF}
 
     {$REGION 'Conversations'}
     Conversations.Clear;
-    labelInfo.Caption := 'Messenger verileri alnýyor';
+    labelInfo.Caption := 'Messenger verileri alnÄ±yor';
     GetConversationsList(PageID,'MESSENGER',LongLiveToken, Conversations);
-    {$IFDEF 3DParty}LogSocialMedia('2.GetConversationsList MESSENGER Sonrasý');{$ENDIF}
-    labelInfo.Caption := 'Instagram verileri alnýyor';
+    {$IFDEF 3DParty}LogSocialMedia('2.GetConversationsList MESSENGER SonrasÄ±');{$ENDIF}
+    labelInfo.Caption := 'Instagram verileri alnÄ±yor';
     GetConversationsList(PageID,'INSTAGRAM',LongLiveToken, Conversations);
-      {$IFDEF 3DParty}LogSocialMedia('3.GetConversationsList INSTAGRAM Sonrasý');{$ENDIF}
+      {$IFDEF 3DParty}LogSocialMedia('3.GetConversationsList INSTAGRAM SonrasÄ±');{$ENDIF}
 
     qryMeta.SQL.Text := 'SELECT * FROM META_Collect';
     qryMeta.Open;
@@ -972,12 +972,12 @@ begin
          {$IFDEF 3DParty}LogSocialMedia(' 5.['+i.ToString+']. GetMessagesList');{$ENDIF}
          for y := 0 to Messages.Count-1 do
             begin
-              labelInfo.Caption := 'Messenger/Instagram verileri iþleniyor ('+i.ToString+')';
+              labelInfo.Caption := 'Messenger/Instagram verileri iÅŸleniyor ('+i.ToString+')';
               aMessageData := GetMessageData(Messages[y].ItemId,'id,created_time,from,to,message', Messages[y].Platform, LongLiveToken);
               {$IFDEF 3DParty}LogSocialMedia('  6.['+i.ToString+'].['+y.ToString+'] GetMessageData');{$ENDIF}
               if (aMessageData.message_UserName<>'') and (aMessageData.from_id<>'') then
               begin
-                // Contact_ID benzeri kayýt olmamalý
+                // Contact_ID benzeri kayÄ±t olmamalÄ±
                 if qryMeta.Locate('Contact_ID', aMessageData.from_id, []) then
                     qryMeta.Edit
                 else
@@ -1016,7 +1016,7 @@ begin
       {$IFDEF 3DParty}LogSocialMedia('META FormLeads Section');{$ENDIF}
 
       {$REGION 'FormLeads'}
-      labelInfo.Caption := 'Forms Listesi alýnýyor verileri alnýyor';
+      labelInfo.Caption := 'Forms Listesi alÄ±nÄ±yor verileri alnÄ±yor';
       if PageForms.Count<1 then
         GetFormsByPage( PageID, LongLiveToken, PageForms);
 
@@ -1029,7 +1029,7 @@ begin
         if PageForms[i].Status then
         begin
           FormLeads.Clear;
-          labelInfo.Caption := 'Forms('+i.ToString+') '+PageForms[i].Text+' locale : '+PageForms[i].Locale+' Etkileþim alýnýyor...';
+          labelInfo.Caption := 'Forms('+i.ToString+') '+PageForms[i].Text+' locale : '+PageForms[i].Locale+' EtkileÅŸim alÄ±nÄ±yor...';
           GetLeadsByForm(PageForms[i].ItemId, LongLiveToken, FormLeads);
           {$IFDEF 3DParty}LogSocialMedia(' 7.GetLeadsByForm['+i.ToString+'] ItemId = '+PageForms[i].ItemId);{$ENDIF}
 
@@ -1037,10 +1037,10 @@ begin
            begin
             //if FormLeads[y].Status = true then
             // begin
-               labelInfo.Caption := 'Forms('+i.ToString+') '+PageForms[i].Text+' Etkileþim : ('+y.ToString+') Verisi alýnýyor';
+               labelInfo.Caption := 'Forms('+i.ToString+') '+PageForms[i].Text+' EtkileÅŸim : ('+y.ToString+') Verisi alÄ±nÄ±yor';
                aLeadData := GetLeadData(FormLeads[y].ItemId, LongLiveToken);
                {$IFDEF 3DParty}LogSocialMedia(' 7.'+i.ToString+'.'+y.ToString+'.GetLeadData['+y.ToString+'] ItemId = '+FormLeads[y].ItemId);{$ENDIF}
-               // Contact_ID benzeri kayýt olmamalý
+               // Contact_ID benzeri kayÄ±t olmamalÄ±
                if aLeadData.id<>'' then
                 begin
                   if qryMeta.Locate('Contact_ID', aLeadData.id, []) then
@@ -1087,8 +1087,8 @@ begin
     CoUninitialize();
     labelInfo.Caption := '';
     Tablo.GENINI.WriteDateTime(Ops_SocialMedia_MetaGuncelleme, Now);
-    {}       // META_Collect ADO Veritabaný dxMemCollect Memory tabloya aktarýlacak !
-    //AdoToMem; Bunu Thread bitiminde çaðýr
+    {}       // META_Collect ADO VeritabanÄ± dxMemCollect Memory tabloya aktarÄ±lacak !
+    //AdoToMem; Bunu Thread bitiminde Ã§aÄŸÄ±r
     {}
   end;
 end;
@@ -1217,11 +1217,11 @@ begin
    }
    FillChar(SosyalEklentiler, 10 , True);
   {
-    Meta Verileri sürekli sorgulanmasýn , OPT/CRM Meta sekmesinde parametrik bir deðere baðlý olarak,
-    Zaman aralýðýna uygun davransýn (15, 30, 120 dakika vs)
+    Meta Verileri sÃ¼rekli sorgulanmasÄ±n , OPT/CRM Meta sekmesinde parametrik bir deÄŸere baÄŸlÄ± olarak,
+    Zaman aralÄ±ÄŸÄ±na uygun davransÄ±n (15, 30, 120 dakika vs)
 
-    GENINI "Ops_SocialMedia_MetaGuncelleme" anahtarý ile kaydedilen Dakika aralýðýna uygunluðu gözetlenecektir.
-    Uygun Zaman gelmemiþ ise boþuna META verilerini çekmesin
+    GENINI "Ops_SocialMedia_MetaGuncelleme" anahtarÄ± ile kaydedilen Dakika aralÄ±ÄŸÄ±na uygunluÄŸu gÃ¶zetlenecektir.
+    Uygun Zaman gelmemiÅŸ ise boÅŸuna META verilerini Ã§ekmesin
   }
   MetaGuncellemeUygunmu := MetaZamanUygunmu;
 
@@ -1234,9 +1234,9 @@ begin
 
   SetControlsStatus( True );
 
-  // UNUTMA remark kaldýrýlacak
+  // UNUTMA remark kaldÄ±rÄ±lacak
 
-  //(1) Meta iþleri yapýlacak
+  //(1) Meta iÅŸleri yapÄ±lacak
    if Tablo.GENINI.ReadBoolean(Ops_SocialMedia_Meta, False) and Initialized and SosyalEklentiler[1] then
     begin
       try
@@ -1265,12 +1265,12 @@ begin
         FBThreadEvent := Nil;
         Trd := Nil;
        end;
-      labelInfo.Caption := 'Meta Güncelleme Tamamlandý';
+      labelInfo.Caption := 'Meta GÃ¼ncelleme TamamlandÄ±';
 
     end;
 
     if Not MetaZamanUygunmu then
-      labelInfo.Caption := 'Güncelleme zaman kýstasý uygulandý';
+      labelInfo.Caption := 'GÃ¼ncelleme zaman kÄ±stasÄ± uygulandÄ±';
     Sleep(1000);
 
 
@@ -1301,7 +1301,7 @@ begin
         FBThreadEvent := Nil;
         Trd := Nil;
        end;
-      labelInfo.Caption := '"Web Form" IMAP Güncelleme Tamamlandý';
+      labelInfo.Caption := '"Web Form" IMAP GÃ¼ncelleme TamamlandÄ±';
       Sleep(1000);
     end;
 
@@ -1316,8 +1316,8 @@ end;
 
 procedure TSocialMediaFrame.ThreadBitti(Sender: TObject);
 begin
-  {$IFDEF 3DParty}LogSocialMedia('Thread Sonlandý');{$ENDIF}
-  labelInfo.Caption := 'Güncelleme Tamamlandý';
+  {$IFDEF 3DParty}LogSocialMedia('Thread SonlandÄ±');{$ENDIF}
+  labelInfo.Caption := 'GÃ¼ncelleme TamamlandÄ±';
 end;
 
 procedure TSocialMediaFrame.MetaSELECTPropertiesChange(Sender: TObject);
@@ -1339,7 +1339,7 @@ begin
   if (dxMemCollect.FieldByName('Imported').AsBoolean) {or (dxMemCollect.FieldByName('Import_Date').AsString<>'')} then
      begin
         Error := True;
-        ErrorText := 'Daha önce içeri alýnmýþ bir kayýt Seçilemez';
+        ErrorText := 'Daha Ã¶nce iÃ§eri alÄ±nmÄ±ÅŸ bir kayÄ±t SeÃ§ilemez';
         dxMemCollect.Cancel;
      end;
   *)
@@ -1370,11 +1370,11 @@ end;
 procedure TSocialMediaFrame.MetaViewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
   AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
-   {Gruplama yapýldýðýnda hata olmasýn, çünkü Gruplama anýna Grup Satýrý için AItem NULL gelecetir}
+   {Gruplama yapÄ±ldÄ±ÄŸÄ±nda hata olmasÄ±n, Ã§Ã¼nkÃ¼ Gruplama anÄ±na Grup SatÄ±rÄ± iÃ§in AItem NULL gelecetir}
    if Not Assigned(AItem) then
      Exit;
 
-   // Imported = Ýçeri aktarýlmýþ ise
+   // Imported = Ä°Ã§eri aktarÄ±lmÄ±ÅŸ ise
    //if VarToBool(ARecord.Values[1])=True then
    if VarToBool(ARecord.Values[MetaViewImported.Index])=True then
      AStyle := cxStyle_Aktarilmis
@@ -1398,7 +1398,7 @@ begin
    if INITarih = 0 then
     begin
       Result := True;
-      {$IFDEF 3DParty}LogSocialMedia('INI Tanýmý olmadýðýndan Varsayýlan TRUE');{$ENDIF}
+      {$IFDEF 3DParty}LogSocialMedia('INI TanÄ±mÄ± olmadÄ±ÄŸÄ±ndan VarsayÄ±lan TRUE');{$ENDIF}
     end
     else
      begin
@@ -1476,7 +1476,7 @@ begin
     MetaUpdatePeriod := 10;
 
   if (AppId='') or (AppSecret='') or (PageID='') or (PageToken='') then
-    raise Exception.Create('Parametreler boþ olamaz!');
+    raise Exception.Create('Parametreler boÅŸ olamaz!');
    if AppName='' then
      AppName := 'DefaultApp';
    {

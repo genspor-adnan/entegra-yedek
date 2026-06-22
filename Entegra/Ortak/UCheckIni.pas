@@ -1,4 +1,4 @@
-unit UCheckIni;
+﻿unit UCheckIni;
 
 interface
 

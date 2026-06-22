@@ -1,4 +1,4 @@
-// ************************************************************************ //
+﻿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
 // WSDL     : http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalIadeReceiver.wsdl

@@ -1,4 +1,4 @@
-unit uSocialCommon;
+ï»¿unit uSocialCommon;
 
 interface
 
@@ -13,7 +13,7 @@ type
      PHONE2,
      STREET_ADDRESS,
      CITY,
-     TOWN,    // Kasaba/Ýlçe
+     TOWN,    // Kasaba/Ä°lÃ§e
      COUNTRY,
      GENDER : string;
    end;

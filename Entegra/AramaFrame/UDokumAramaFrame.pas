@@ -1,4 +1,4 @@
-unit UDokumAramaFrame;
+ï»¿unit UDokumAramaFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 18/01/2010 14:17:46}
@@ -66,7 +66,7 @@ type
 
 procedure TDokumAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 constructor TDokumAramaFrame.Create(AOwner: TComponent);
@@ -180,7 +180,7 @@ begin
         end;
       end;
     Qry.Open;
-    if Qry.Eof then   //Eðer tablo boþsa sayfayý direk açsýn
+    if Qry.Eof then   //EÄŸer tablo boÅŸsa sayfayÄ± direk aÃ§sÄ±n
        with FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TDokumDlg).Git.Ornek as TDokumDlg do
          DtsDokumler.DataSet := TabDokum
     else begin

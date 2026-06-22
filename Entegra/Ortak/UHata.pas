@@ -1,8 +1,8 @@
-{-------------------------------------------------------------------------------
+ï»¿{-------------------------------------------------------------------------------
 Hata Kontrol unit
 -----------------------------
-29/09/2005 Necdet ÇETÝNKAYA
-           Oluþturma
+29/09/2005 Necdet Ã‡ETÄ°NKAYA
+           OluÅŸturma
 
 
 -------------------------------------------------------------------------------}
@@ -54,19 +54,19 @@ begin
    Writeln(hataDos,'----------------------------------------------------------');
    Writeln(hataDos,FormatDateTime('dd/mm/yyyy hh:mm:ss',now) ) ;
    Writeln(hataDos,'');
-   Writeln(hataDos,'Hatayý Gönderen Modül');
+   Writeln(hataDos,'HatayÄ± GÃ¶nderen ModÃ¼l');
    Writeln(hataDos,'----------------------------------------------------------');
    Writeln(hataDos,edHataModul.text);
    Writeln(hataDos,'');
-   Writeln(hataDos,'Hata Kaynaðý');
+   Writeln(hataDos,'Hata KaynaÄŸÄ±');
    Writeln(hataDos,'----------------------------------------------------------');
    Writeln(hataDos,edHataSinifi.text);
    Writeln(hataDos,'');
-   Writeln(hataDos,'Hata Mesajý');
+   Writeln(hataDos,'Hata MesajÄ±');
    Writeln(hataDos,'----------------------------------------------------------');
    Writeln(hataDos,mHataMesaj.text);
    Writeln(hataDos,'');
-   Writeln(hataDos,'Hata Ayrýntý');
+   Writeln(hataDos,'Hata AyrÄ±ntÄ±');
    Writeln(hataDos,'----------------------------------------------------------');
    Writeln(hataDos,mHataAyrinti.text);
    Writeln(hataDos,'');

@@ -1,4 +1,4 @@
-unit UCekRiskPayi;
+﻿unit UCekRiskPayi;
 
 interface
 
@@ -67,7 +67,7 @@ end;
 
 procedure TCekRiskPayiDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   TabCekRiskPayi.Open;
 
   Tablo.GridTurkcelestir;

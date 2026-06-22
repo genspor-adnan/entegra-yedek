@@ -1,4 +1,4 @@
-unit uTanimGrid_MetaGrupBilgileri;
+﻿unit uTanimGrid_MetaGrupBilgileri;
 
 interface
 

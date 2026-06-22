@@ -1,8 +1,8 @@
-// (c) Alex Konshin    mailto:alexk@mtgroup.ru      30 jul 2000
+я╗┐// (c) Alex Konshin    mailto:alexk@mtgroup.ru      30 jul 2000
 
 // devoted to my cat Maska
-// Посвящается моему любимому коту Маське, погибшему от туполобости и
-// непрофессионализма врачей.
+// ┬П┬о├б┬в├п├й┬а┬е├в├б├п ┬м┬о┬е┬м├г ┬л├о┬б┬и┬м┬о┬м├г ┬к┬о├в├г ┼Т┬а├б├м┬к┬е, ┬п┬о┬г┬и┬б├и┬е┬м├г ┬о├в ├в├г┬п┬о┬л┬о┬б┬о├б├в┬и ┬и
+// ┬н┬е┬п├а┬о├д┬е├б├б┬и┬о┬н┬а┬л┬и┬з┬м┬а ┬в├а┬а├з┬е┬й.
 
 unit Kontrol;
 
@@ -59,7 +59,7 @@ xtemp := xtemp +'Firmware rev: '+ szOutBuffer +#13;
     SystemIni.Free;
 {    Demo := False;
     if Trim(Seri) <> s then
-       if MessageDlg('Kullan¤c¤ bilgisi bulunamad¤ !!! '+#13#10+'Demo olarak чal¤■mas¤n¤ istermisiniz?',
+       if MessageDlg('Kullan─▒c─▒ bilgisi bulunamad─▒ !!! '+#13#10+'Demo olarak ├зal─▒┼Яmas─▒n─▒ istermisiniz?',
                       mtConfirmation, [mbYes,mbNo], 0) = mrYES then
           Demo := True
        else

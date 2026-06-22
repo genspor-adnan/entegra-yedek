@@ -1,4 +1,4 @@
-unit UVersiyonGuncelle;
+ï»¿unit UVersiyonGuncelle;
    //  genupdate.genyazilim.com/genupdate/guncelleme.aspx
    // 6  135
 interface
@@ -37,7 +37,7 @@ begin
       Inc(yapilmayanKomut);
       Tablo.OlaylarIslemleri(3,10,101,-1,0,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA, 'null');
     end else
-      Tablo.OlaylarIslemleri(1,10,101,-1,1,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA,'null');//TUR : 1-Bilgi, 2-Uyarý, 3-Hata
+      Tablo.OlaylarIslemleri(1,10,101,-1,1,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA,'null');//TUR : 1-Bilgi, 2-UyarÄ±, 3-Hata
 
     Tablo.Query2.Close;
     Tablo.Query2.SQL.Text:= 'UPDATE GENINI SET DEGER='+IntToStr(GResult[i].VERSIYONNO)+' where BOLUM= '+IntToStr(Ops_GenelOpsiyon_VersiyonNo);
@@ -48,7 +48,7 @@ begin
 
   if ToplamHataSay>0 then
      ToplamGuncellemeHata:= ToplamHataSay;
-  //    ShowMessage( IntToStr(yapilmayanKomut)+' adet güncellemeye ait '+IntToStr(ToplamHataSay)+' adet alt sorgu yapýlamamýþtýr.'+#13+#10+'Güncellemeler sayfasýndan kontrol ediniz.');
+  //    ShowMessage( IntToStr(yapilmayanKomut)+' adet gÃ¼ncellemeye ait '+IntToStr(ToplamHataSay)+' adet alt sorgu yapÄ±lamamÄ±ÅŸtÄ±r.'+#13+#10+'GÃ¼ncellemeler sayfasÄ±ndan kontrol ediniz.');
 
 end;
 

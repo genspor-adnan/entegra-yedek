@@ -1,4 +1,4 @@
-unit UDokSart;
+ï»¿unit UDokSart;
 
 interface
 
@@ -179,8 +179,8 @@ var s, d: string[40];
   gsReplaceTextHistory: string;
 
 resourcestring
-  STextNotFound = 'Metin bulunmadý';
-  SNoSelectionAvailable = 'Arama iþlemi tüm metin içerisinde yapýlsýn mý?';
+  STextNotFound = 'Metin bulunmadÄ±';
+  SNoSelectionAvailable = 'Arama iÅŸlemi tÃ¼m metin iÃ§erisinde yapÄ±lsÄ±n mÄ±?';
 
 
 function TDokumSartDlg.GetFrameBilgi: TIcerikFrameBilgi;
@@ -205,8 +205,8 @@ end;
 
 procedure TDokumSartDlg.Gorunur;
 begin
-  { Panel1.Caption arka tarafta olduðu için yazýlan yazýda görünmüyor ve çirkin bir görüntü meydana getiriyor }
-//  Panel1.Caption := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString + ' Döküm Ayarlarý';
+  { Panel1.Caption arka tarafta olduÄŸu iÃ§in yazÄ±lan yazÄ±da gÃ¶rÃ¼nmÃ¼yor ve Ã§irkin bir gÃ¶rÃ¼ntÃ¼ meydana getiriyor }
+//  Panel1.Caption := TabloDokum.TabDokum.FieldByName('RAPORADI').AsString + ' DÃ¶kÃ¼m AyarlarÄ±';
 //  TabloDokum.TabDokum.Refresh;
   PageControl1.ActivePageIndex := 0;
 //  TRaporAraclari.Ini.ReadSection('TABLEADLARI', KosulGrid.Columns[1].PickList);
@@ -290,7 +290,7 @@ end;
 procedure TDokumSartDlg.KaydetTusClick(Sender: TObject);
 begin
    if Trim(EditRAPORADI.Text)='' then
-      raise Exception.Create('Rapor Adý Girilmemiþ!');
+      raise Exception.Create('Rapor AdÄ± GirilmemiÅŸ!');
    DtsDokumler.DataSet.Post;
 end;
 
@@ -334,7 +334,7 @@ end;
 procedure TDokumSartDlg.KosulSilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
-     //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBERINI where BOLUM=''&kod''',['&kod'],
+     //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBERINI where BOLUM=''&kod''',['&kod'],
      //    ['Dokum_'+DtsKosul.DataSet.FieldByName('KOD_ADI').AsString+DtsKosul.DataSet.FieldByName('ID').AsString]);
      DtsKosul.DataSet.Delete;
 end;
@@ -618,7 +618,7 @@ procedure TDokumSartDlg.btnKapatClick(Sender: TObject);
 begin
   if (TDokumDlg(FDuzenlenenDokum).DtsDokumler.State in [dsEdit, dsInsert])
      or (DtsKosul.State in [dsEdit, dsInsert])  then
-    if MessageDlg('Döküm Ekraný Deðiþti !!! ' + #13#10 + 'Yapýlan Deðiþiklikler Kaydedilsin mi?',
+    if MessageDlg('DÃ¶kÃ¼m EkranÄ± DeÄŸiÅŸti !!! ' + #13#10 + 'YapÄ±lan DeÄŸiÅŸiklikler Kaydedilsin mi?',
       mtConfirmation, [mbYes, mbNo], 0) = mrYES then begin
       KaydetTus.Click;
       KosulKaydetTus.Click;

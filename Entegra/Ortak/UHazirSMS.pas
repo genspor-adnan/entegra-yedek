@@ -1,4 +1,4 @@
-unit UHazirSMS;
+ï»¿unit UHazirSMS;
 
 interface
 
@@ -54,7 +54,7 @@ end;
 
 procedure THazirSMSDlg.TabHazirSMSBeforeDelete(DataSet: TDataSet);
 begin
-  if Application.MessageBox('Mesaj þablonu silinecektir. Onaylýyor musunuz?', 'O N A Y', mb_YESNO) <> IDYES then Abort;
+  if Application.MessageBox('Mesaj ÅŸablonu silinecektir. OnaylÄ±yor musunuz?', 'O N A Y', mb_YESNO) <> IDYES then Abort;
 
 end;
 
@@ -84,7 +84,7 @@ end;
 procedure THazirSMSDlg.TabHazirSMSBeforePost(DataSet: TDataSet);
 begin
   if (TabHazirSMS.FieldByName('BASLIK').AsString='') or (TabHazirSMS.FieldByName('BASLIK').IsNull) THEN
-    raise Exception.Create('Mesaj baþlýðý boþ býrakýlamaz.');
+    raise Exception.Create('Mesaj baÅŸlÄ±ÄŸÄ± boÅŸ bÄ±rakÄ±lamaz.');
 end;
 
 procedure THazirSMSDlg.BitBtn1Click(Sender: TObject);

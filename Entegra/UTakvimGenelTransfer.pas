@@ -1,4 +1,4 @@
-unit UTakvimGenelTransfer;
+﻿unit UTakvimGenelTransfer;
 
 interface
 

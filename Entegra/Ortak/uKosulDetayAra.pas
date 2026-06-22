@@ -1,4 +1,4 @@
-unit uKosulDetayAra;
+ï»¿unit uKosulDetayAra;
 
 interface
 
@@ -84,15 +84,15 @@ begin
   
   if TabAra.Connection = nil then
     TabAra.Connection := Tablo.FDCnn;
-//2 türlü olabilir 1:select KOD,AD from MASRAFGELIR  veya 2: {KOD, AD} þeklinde
+//2 tÃ¼rlÃ¼ olabilir 1:select KOD,AD from MASRAFGELIR  veya 2: {KOD, AD} ÅŸeklinde
 //  FieldStr := TDokumDlg(FDokumDlgInstance).TabKosul.fieldbyname('COMBOICERIK').AsString;
    FieldStr := FTabKosulInstance.fieldbyname('COMBOICERIK').AsString;
-  //önce türüne bakalým
+  //Ã¶nce tÃ¼rÃ¼ne bakalÄ±m
   if pos('{', FieldStr)>0 then begin
      FieldStr := copy(FieldStr,2,pos('}',FieldStr)-2);
      AraSorgu:= 'Select DISTINCT ' + FieldStr + ' from ' + FTabKosulInstance.fieldbyname('TABLO').AsString;
   end else begin
-    // if Pos('ORDER', UpperCase(FieldStr))>0  then //varsa order by atalým
+    // if Pos('ORDER', UpperCase(FieldStr))>0  then //varsa order by atalÄ±m
     //    FieldStr := Copy(FieldStr, 1, Pos('ORDER', UpperCase(FieldStr)));
      AraSorgu := FieldStr;
   end;

@@ -1,4 +1,4 @@
-unit UMailDokum;
+ï»¿unit UMailDokum;
 
 interface
 
@@ -60,7 +60,7 @@ begin
       Mail := TStringList.Create;
       try
         Mail.values['to'] := 'idris.85@hotmail.com';
-        Mail.values['subject'] := 'Teklif mail gönderme sistemi';
+        Mail.values['subject'] := 'Teklif mail gÃ¶nderme sistemi';
         Mail.values['body'] := 'Teklif metniniz ektedir!';
         Mail.values['attachment0'] := 'D:\PersonaLog.txt';
          // mail.values['attachment1']:='D:\PersonaLog.txt';
@@ -73,7 +73,7 @@ end;
 
 procedure TMailDokumDlg.FormCreate(Sender: TObject);
 begin
- LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+ LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
  Tablo.GridTurkcelestir;
 end;
 

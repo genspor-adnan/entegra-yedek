@@ -1,9 +1,8 @@
-object FaturalarDlg: TFaturalarDlg
+﻿object FaturalarDlg: TFaturalarDlg
   Left = 0
   Top = 0
   Width = 1231
   Height = 530
-  Align = alClient
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -19,7 +18,7 @@ object FaturalarDlg: TFaturalarDlg
     Height = 46
     Margins.Bottom = 0
     ButtonHeight = 47
-    ButtonWidth = 77
+    ButtonWidth = 95
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -53,7 +52,7 @@ object FaturalarDlg: TFaturalarDlg
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
-      Left = 77
+      Left = 95
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
@@ -62,7 +61,7 @@ object FaturalarDlg: TFaturalarDlg
       OnClick = SilTusClick
     end
     object ToolButton1: TToolButton
-      Left = 154
+      Left = 190
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -71,7 +70,7 @@ object FaturalarDlg: TFaturalarDlg
       Style = tbsSeparator
     end
     object DegisTus: TToolButton
-      Left = 162
+      Left = 198
       Top = 0
       Caption = 'D'#252'zenle'
       ImageIndex = 9
@@ -80,7 +79,7 @@ object FaturalarDlg: TFaturalarDlg
       OnClick = GridFatListeTviewDblClick
     end
     object ToolButton3: TToolButton
-      Left = 239
+      Left = 293
       Top = 0
       Width = 8
       Caption = 'ToolButton3'
@@ -89,7 +88,7 @@ object FaturalarDlg: TFaturalarDlg
       Style = tbsSeparator
     end
     object BtnBelgeZarfi: TToolButton
-      Left = 247
+      Left = 301
       Top = 0
       Caption = 'Belge Zarflar'#305
       ImageIndex = 42
@@ -97,8 +96,16 @@ object FaturalarDlg: TFaturalarDlg
       Style = tbsTextButton
       OnClick = BtnBelgeZarfiClick
     end
+    object BtnEFaturaGuncelle: TToolButton
+      Left = 396
+      Top = 0
+      Caption = 'E-Fatura G'#252'ncelle'
+      ImageIndex = 33
+      Style = tbsTextButton
+      OnClick = BtnEFaturaGuncelleClick
+    end
     object BtnDonusum: TToolButton
-      Left = 324
+      Left = 491
       Top = 0
       Caption = 'D'#246'n'#252#351#252'm'
       ImageIndex = 39
@@ -107,7 +114,7 @@ object FaturalarDlg: TFaturalarDlg
       OnClick = BtnDonusumClick
     end
     object HizliGirisTus: TToolButton
-      Left = 401
+      Left = 586
       Top = 0
       Caption = 'H'#305'zl'#305' Giri'#351
       ImageIndex = 42
@@ -115,16 +122,8 @@ object FaturalarDlg: TFaturalarDlg
       Style = tbsTextButton
       OnClick = HizliGirisTusClick
     end
-    object EFaturaAktarBtn: TToolButton
-      Left = 478
-      Top = 0
-      Caption = 'EFatura Aktar'
-      ImageIndex = 33
-      ImageName = 'PngImage33'
-      Style = tbsTextButton
-    end
     object ToolButton2: TToolButton
-      Left = 555
+      Left = 681
       Top = 0
       Width = 8
       Caption = 'ToolButton2'
@@ -133,7 +132,7 @@ object FaturalarDlg: TFaturalarDlg
       Style = tbsSeparator
     end
     object YaziciYaz: TToolButton
-      Left = 563
+      Left = 689
       Top = 0
       Caption = 'Yazd'#305'r'
       DropdownMenu = PopupMenuYaz
@@ -141,7 +140,7 @@ object FaturalarDlg: TFaturalarDlg
       ImageName = 'PngImage15'
     end
     object ToolButton4: TToolButton
-      Left = 640
+      Left = 784
       Top = 0
       Width = 8
       Caption = 'ToolButton4'
@@ -152,9 +151,9 @@ object FaturalarDlg: TFaturalarDlg
   end
   object GridFatListe: TcxGrid
     Left = 0
-    Top = 49
+    Top = 73
     Width = 1231
-    Height = 228
+    Height = 184
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -162,7 +161,7 @@ object FaturalarDlg: TFaturalarDlg
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
-    LookAndFeel.ScrollbarMode = sbmClassic
+    LookAndFeel.ScrollbarMode = sbmDefault
     object GridFatListeTview: TcxGridDBTableView
       OnDblClick = GridFatListeTviewDblClick
       Navigator.Buttons.CustomButtons = <>
@@ -191,6 +190,11 @@ object FaturalarDlg: TFaturalarDlg
           Column = GridFatListeTviewFATURA_TUTARI
         end>
       DataController.Summary.FooterSummaryItems = <
+        item
+          Format = '"Kay'#305't: "#,##0'
+          Kind = skCount
+          Column = GridFatListeTviewFATURATARIH
+        end
         item
           Format = ',0.00;-,0.00'
           Kind = skSum
@@ -853,11 +857,12 @@ object FaturalarDlg: TFaturalarDlg
         LookAndFeel.NativeStyle = True
         LookAndFeel.ScrollbarMode = sbmClassic
         LookAndFeel.SkinName = 'LondonLiquidSky'
-        object GridFatDBTableView1: TcxGridDBTableView
+        object GridFatView: TcxGridDBTableView
           PopupMenu = pmBelgeDonustur
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
-          OnCanFocusRecord = GridFatDBTableView1CanFocusRecord
+          OnCanFocusRecord = GridFatViewCanFocusRecord
+          OnCellClick = GridFatViewCellClick
           DataController.DataSource = DtsDetay
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -874,7 +879,7 @@ object FaturalarDlg: TFaturalarDlg
           OptionsSelection.HideSelection = True
           OptionsView.GroupByBox = False
           OptionsView.Indicator = True
-          object GridFatDBTableView1TUR: TcxGridDBColumn
+          object GridFatViewTUR: TcxGridDBColumn
             Caption = 'T'#252'r'
             DataBinding.FieldName = 'TUR'
             DataBinding.IsNullValueType = True
@@ -883,52 +888,60 @@ object FaturalarDlg: TFaturalarDlg
             RepositoryItem = Tablo.RepFatDetayTur
             Width = 56
           end
-          object GridFatDBTableView1TESLIMTARIHI: TcxGridDBColumn
+          object GridFatViewTESLIMTARIHI: TcxGridDBColumn
             Caption = 'Teslim Tarihi'
             DataBinding.FieldName = 'TESLIMTARIHI'
             DataBinding.IsNullValueType = True
             Width = 105
           end
-          object GridFatDBTableView1URUNNO: TcxGridDBColumn
+          object GridFatViewURUNNO: TcxGridDBColumn
             Caption = #220'r'#252'n No'
             DataBinding.FieldName = 'URUNNO'
             DataBinding.IsNullValueType = True
           end
-          object GridFatDBTableView1SUTKODU: TcxGridDBColumn
+          object GridFatViewSUTKODU: TcxGridDBColumn
             Caption = 'SUT Kodu '
             DataBinding.FieldName = 'SUTKODU'
             DataBinding.IsNullValueType = True
           end
-          object GridFatDBTableView1KOD: TcxGridDBColumn
+          object GridFatViewKOD: TcxGridDBColumn
             Caption = 'Kod'
             DataBinding.FieldName = 'KOD'
             DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxButtonEditProperties'
+            Properties.Buttons = <
+              item
+                Default = True
+                Kind = bkEllipsis
+              end>
+            Properties.ReadOnly = True
+            Options.Editing = False
             Width = 61
           end
-          object GridFatDBTableView1AD: TcxGridDBColumn
+          object GridFatViewAD: TcxGridDBColumn
             Caption = 'Ad'
             DataBinding.FieldName = 'AD'
             DataBinding.IsNullValueType = True
             Width = 141
           end
-          object GridFatDBTableView1POZNO: TcxGridDBColumn
+          object GridFatViewPOZNO: TcxGridDBColumn
             Caption = 'Poz No'
             DataBinding.FieldName = 'POZNO'
             DataBinding.IsNullValueType = True
           end
-          object GridFatDBTableView1SATICIKODU: TcxGridDBColumn
+          object GridFatViewSATICIKODU: TcxGridDBColumn
             Caption = 'Personel'
             DataBinding.FieldName = 'SATICIKODU'
             DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.repGenelPersonelListesiHerkes
           end
-          object GridFatDBTableView1ADET: TcxGridDBColumn
+          object GridFatViewADET: TcxGridDBColumn
             Caption = 'Adet'
             DataBinding.FieldName = 'ADET'
             DataBinding.IsNullValueType = True
             Width = 37
           end
-          object GridFatDBTableView1BIRIM: TcxGridDBColumn
+          object GridFatViewBIRIM: TcxGridDBColumn
             Caption = 'Birim'
             DataBinding.FieldName = 'BIRIM'
             DataBinding.IsNullValueType = True
@@ -936,59 +949,59 @@ object FaturalarDlg: TFaturalarDlg
             Properties.Items = <>
             Width = 44
           end
-          object GridFatDBTableView1BIRIMFIYAT: TcxGridDBColumn
+          object GridFatViewBIRIMFIYAT: TcxGridDBColumn
             Caption = 'Birim Fiyat'
             DataBinding.FieldName = 'BIRIMFIYAT'
             DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.RepCurrencyBF
             Width = 92
           end
-          object GridFatDBTableView1ISKONTO: TcxGridDBColumn
+          object GridFatViewISKONTO: TcxGridDBColumn
             Caption = #304'sk1'
             DataBinding.FieldName = 'ISKONTO'
             DataBinding.IsNullValueType = True
             Width = 28
           end
-          object GridFatDBTableView1ISKONTO2: TcxGridDBColumn
+          object GridFatViewISKONTO2: TcxGridDBColumn
             Caption = #304'sk2'
             DataBinding.FieldName = 'ISKONTO2'
             DataBinding.IsNullValueType = True
             Width = 28
           end
-          object GridFatDBTableView1KDV: TcxGridDBColumn
+          object GridFatViewKDV: TcxGridDBColumn
             DataBinding.FieldName = 'KDV'
             DataBinding.IsNullValueType = True
             Width = 29
           end
-          object GridFatDBTableView1TUTAR: TcxGridDBColumn
+          object GridFatViewTUTAR: TcxGridDBColumn
             Caption = 'Tutar'
             DataBinding.FieldName = 'TUTAR'
             DataBinding.IsNullValueType = True
             RepositoryItem = Tablo.RepCurrencyGenel
             Width = 79
           end
-          object GridFatDBTableView1MASRAFKOD: TcxGridDBColumn
+          object GridFatViewMASRAFKOD: TcxGridDBColumn
             Caption = 'Masraf Kod'
             DataBinding.FieldName = 'MASRAFKOD'
             DataBinding.IsNullValueType = True
             Width = 91
           end
-          object GridFatDBTableView1MASRAFAD: TcxGridDBColumn
+          object GridFatViewMASRAFAD: TcxGridDBColumn
             Caption = 'Gelir Ad'
             DataBinding.FieldName = 'MASRAFAD'
             DataBinding.IsNullValueType = True
             Width = 128
           end
-          object GridFatDBTableView1PROJEKODU: TcxGridDBColumn
+          object GridFatViewPROJEKODU: TcxGridDBColumn
             Caption = 'Proje Kodu'
             DataBinding.FieldName = 'PROJEKODU'
             DataBinding.IsNullValueType = True
           end
-          object GridFatDBTableView1KUR: TcxGridDBColumn
+          object GridFatViewKUR: TcxGridDBColumn
             DataBinding.FieldName = 'KUR'
             DataBinding.IsNullValueType = True
           end
-          object GridFatDBTableView1ACIKLAMA: TcxGridDBColumn
+          object GridFatViewACIKLAMA: TcxGridDBColumn
             Caption = 'Notlar'
             DataBinding.FieldName = 'ACIKLAMA'
             DataBinding.IsNullValueType = True
@@ -996,7 +1009,7 @@ object FaturalarDlg: TFaturalarDlg
           end
         end
         object GridFatLevel1: TcxGridLevel
-          GridView = GridFatDBTableView1
+          GridView = GridFatView
         end
       end
     end
@@ -1155,6 +1168,22 @@ object FaturalarDlg: TFaturalarDlg
     AlignSplitter = salBottom
     Control = cxPageControl1
   end
+  object PanelKayitSayisi: TPanel
+    Left = 0
+    Top = 257
+    Width = 1231
+    Height = 20
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 6
+    object LabelKayitSayisi: TLabel
+      Left = 8
+      Top = 3
+      Width = 70
+      Height = 16
+      Caption = 'Kay'#305't Say'#305's'#305': 0'
+    end
+  end
   object SQLExcel: TMemo
     Left = 755
     Top = 112
@@ -1178,6 +1207,24 @@ object FaturalarDlg: TFaturalarDlg
     TabOrder = 2
     Visible = False
   end
+  object PageControlTur: TcxPageControl
+    Left = 0
+    Top = 49
+    Width = 1231
+    Height = 24
+    Align = alTop
+    TabOrder = 5
+    Properties.ActivePage = TabSheetTumu
+    Properties.CustomButtons.Buttons = <>
+    Properties.Style = 10
+    OnChange = PageControlTurChange
+    ClientRectRight = 0
+    ClientRectTop = 0
+    object TabSheetTumu: TcxTabSheet
+      Caption = 'T'#252'm'#252
+      ImageIndex = 0
+    end
+  end
   object FATBASLIK: TFDQuery
     AutoCalcFields = False
     AfterOpen = FATBASLIKAfterOpen
@@ -1192,8 +1239,8 @@ object FaturalarDlg: TFaturalarDlg
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 187
-    Top = 84
+    Left = 307
+    Top = 60
     ParamData = <
       item
         Name = 'Par'
@@ -1258,8 +1305,8 @@ object FaturalarDlg: TFaturalarDlg
     Top = 262
   end
   object PopupMenuYaz: TPopupMenu
-    Left = 326
-    Top = 96
+    Left = 478
+    Top = 104
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0
@@ -1427,9 +1474,10 @@ object FaturalarDlg: TFaturalarDlg
     Top = 213
   end
   object pmBelgeDonustur: TPopupMenu
+    Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 45
-    Top = 78
+    Left = 53
+    Top = 94
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick
@@ -1437,40 +1485,115 @@ object FaturalarDlg: TFaturalarDlg
     object N14: TMenuItem
       Caption = '-'
     end
-    object eFatura1: TMenuItem
+    object MenueFatura: TMenuItem
       Caption = 'e-Fatura'
+      ImageIndex = 30
+      object MenuCariKaydıOlustur: TMenuItem
+        Tag = 2
+        Caption = 'Cari Kayd'#305' Olu'#351'tur'
+        ImageIndex = 44
+        OnClick = MenuCariKaydiOlusturClick
+      end
+      object N17: TMenuItem
+        Tag = 2
+        Caption = '-'
+      end
       object MenuOlustur: TMenuItem
+        Tag = 1
         Caption = 'Olu'#351'tur'
+        ImageIndex = 1
         OnClick = MenuOlusturClick
       end
       object MenuOnizle: TMenuItem
         Caption = #214'nizle'
+        GroupIndex = 1
+        ImageIndex = 46
         OnClick = MenuOnizleClick
       end
       object MenuGonder: TMenuItem
+        Tag = 1
         Caption = 'G'#246'nder'
+        GroupIndex = 1
+        ImageIndex = 12
         OnClick = MenuGonderClick
+      end
+      object MenuCevapVer: TMenuItem
+        Tag = 2
+        Caption = 'Cevap Ver'
+        GroupIndex = 1
+        object MenuKabulEt: TMenuItem
+          Tag = 2
+          Caption = 'Kabul Et'
+        end
+        object MenuRedEt: TMenuItem
+          Tag = 2
+          Caption = 'Red Et'
+        end
       end
       object N15: TMenuItem
         Caption = '-'
-      end
-      object MenuHTMLKaydet: TMenuItem
-        Caption = 'HTML Kaydet'
-        OnClick = MenuHTMLKaydetClick
+        GroupIndex = 1
       end
       object MenuPDFKaydet: TMenuItem
         Caption = 'PDF Kaydet'
+        GroupIndex = 1
+        ImageIndex = 10
         OnClick = MenuPDFKaydetClick
+      end
+      object MenuHTMLKaydet: TMenuItem
+        Caption = 'HTML Kaydet'
+        GroupIndex = 1
+        ImageIndex = 10
+        OnClick = MenuHTMLKaydetClick
+      end
+      object MenuXMLKaydet: TMenuItem
+        Caption = 'XML Kaydet'
+        GroupIndex = 1
+        ImageIndex = 10
+        OnClick = MenuXMLKaydetClick
       end
       object N16: TMenuItem
         Caption = '-'
+        GroupIndex = 1
       end
       object MenuSeriDegistir: TMenuItem
+        Tag = 1
         Caption = 'Seri De'#287'i'#351'tir'
+        GroupIndex = 1
+        ImageIndex = 14
+        OnClick = MenuSeriDegistirClick
       end
       object MenuIptalEt: TMenuItem
+        Tag = 1
         Caption = #304'ptal Et'
+        GroupIndex = 1
+        ImageIndex = 31
         OnClick = MenuIptalEtClick
+      end
+      object N19: TMenuItem
+        Caption = '-'
+        GroupIndex = 1
+      end
+      object rnEletirme1: TMenuItem
+        Tag = 2
+        Caption = #220'r'#252'n E'#351'le'#351'tirme'
+        GroupIndex = 1
+        object MenuUrunEslestir: TMenuItem
+          Tag = 2
+          Caption = #220'r'#252'n E'#351'le'#351'tir'
+          OnClick = MenuUrunEslestirClick
+        end
+        object MenuEslesmeTablosunuAc: TMenuItem
+          Tag = 2
+          Caption = 'E'#351'le'#351'me Tablosunu A'#231
+          OnClick = MenuEslesmeTablosunuAcClick
+        end
+      end
+      object MenuMesajlarGoster: TMenuItem
+        Caption = 'Mesaj Ge'#231'mi'#351'ini G'#246'ster'
+        GroupIndex = 1
+        ImageIndex = 43
+        OnClick = MenuMesajlarGosterClick
       end
     end
     object N13: TMenuItem
@@ -1659,8 +1782,8 @@ object FaturalarDlg: TFaturalarDlg
     DataSet = SIPARISDETAY
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 323
-    Top = 294
+    Left = 355
+    Top = 262
     FieldDefs = <
       item
         FieldName = 'ID'

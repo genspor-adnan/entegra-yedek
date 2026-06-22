@@ -1,4 +1,4 @@
-unit uPreview;
+ï»¿unit uPreview;
 
 interface
 
@@ -242,9 +242,9 @@ begin
     IndyMail.Disconnect;
   {for i:=umailgonder.MinN to umailgonder.MaxN do
     DeleteFile(ExtractFilePath(Application.ExeName) + '\MailRoot\' + Raporadi + '-' + inttostr(i) + '.jpg');}
-    Application.MessageBox('Mail baþarý ile gönderildi...', 'Uyarý !!!', 64);
+    Application.MessageBox('Mail baÅŸarÄ± ile gÃ¶nderildi...', 'UyarÄ± !!!', 64);
   except
-    Application.MessageBox('Mail gönderilemedi', 'Uyarý !!!', MB_ICONSTOP)
+    Application.MessageBox('Mail gÃ¶nderilemedi', 'UyarÄ± !!!', MB_ICONSTOP)
   end;
 
 end;

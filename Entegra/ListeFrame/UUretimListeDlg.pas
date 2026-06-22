@@ -1,4 +1,4 @@
-unit UUretimListeDlg;
+ï»¿unit UUretimListeDlg;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 04/12/2010 11:54:17}
@@ -168,7 +168,7 @@ uses FetaKurulusSiniflari, FetaClassExtensions, Utablo, PrjConst,LocOnFly,
 
 procedure TUretimListeDlg.Baslatildi;
 begin
-    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+    LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
     Tablo.GridTurkcelestir;
 
     Tablo.GridAyarRestore('UretimFisiGridi', GridUretimView);
@@ -241,7 +241,7 @@ var
    bilgiler, etiketler : TArrayofString;
    CariUnvan:String;
 begin
-  Tablo.UyariGoster(Uyari,'Belge, Maliyet fiyatý üzerinden oluþturulacaktýr.');
+  Tablo.UyariGoster(Uyari,'Belge, Maliyet fiyatÄ± Ã¼zerinden oluÅŸturulacaktÄ±r.');
   yeniid := 0;
   belgetipi:= (Sender as TMenuItem).Tag;
   donustipi:= Tablo.BelgeDonustur_DonusTipiBul(TabUretimListe.FieldByName('TUR').AsInteger,belgetipi);
@@ -321,7 +321,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Kaynak SeÃ§imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -383,7 +383,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Hedef SeÃ§imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -435,10 +435,10 @@ procedure TUretimListeDlg.SetArama( const Value: TUretimAramaFrame);
 begin
   FArama := Value;
   with FArama do begin
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 
@@ -450,7 +450,7 @@ end;
 procedure TUretimListeDlg.SilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-      //yarý mamül mamüle dönüþtüyse silinmemeli
+      //yarÄ± mamÃ¼l mamÃ¼le dÃ¶nÃ¼ÅŸtÃ¼yse silinmemeli
       if Veritabani.VeriVarMi(Tablo.FDCnn,' SELECT SI.*,SDI.KALAN FROM STOKIZLEME SI '+
 		        ' INNER JOIN FATBASLIK FB ON FB.ID = SI.BASLIKID AND FB.TUR = SI.BELGETUR '+
             ' INNER JOIN STOKDURUMIZLEME SDI ON SDI.STOKID = SI.STOKID AND SDI.DEPOID = FB.GIRISDEPO AND SDI.SERILOTID = SI.SERILOTID '+

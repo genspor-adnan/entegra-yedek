@@ -1,4 +1,4 @@
-unit UTerazi;
+ï»¿unit UTerazi;
 
 interface
 
@@ -69,13 +69,13 @@ var
   c:char;
   i, p, bas:integer;
   Buffer: PChar;
-begin       //ST,GS- 64.680,kg      dönen deðer
+begin       //ST,GS- 64.680,kg      dÃ¶nen deÄŸer
                //     s 64.680
-               //ST,GS 15    iki satýr halinde geliyor
+               //ST,GS 15    iki satÄ±r halinde geliyor
                //4.020,kg
   ComPort.ReadStr(s, 25);
   //Memo1.Lines.Add(IntToStr(Count)+'s>' + s);
-  Okunan := Okunan+s;   //2 satýr halinde okuduðu için sonu kg olana kadar topluyoruz
+  Okunan := Okunan+s;   //2 satÄ±r halinde okuduÄŸu iÃ§in sonu kg olana kadar topluyoruz
   if Length(Okunan)>14 then begin
   //if Pos('kg', Okunan)>0 then begin
       //Memo1.Lines.Add('Oku>' + Okunan);
@@ -107,7 +107,7 @@ end;
 
 procedure TTeraziDlg.FormCreate(Sender: TObject);
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TTeraziDlg.FormShow(Sender: TObject);
@@ -128,7 +128,7 @@ begin
     if DaraKodList.Items.Count = 0 then
        raise Exception.Create(DaraKodGirilmemis);
 
- // Terazi varmý
+ // Terazi varmÄ±
   if GenRegIni.RegReadString('StokHizliGiris', 'VarsayilanTerazi', '', 'C') <> '' then begin
 
      ComPort.Port := Tablo.GENINI.ReadString(StrToInt(IntToStr(Ops_HizliGiris_TeraziPort) + GenRegIni.RegReadString('StokHizliGiris', 'VarsayilanTerazi', '', 'C')),'COM1');
@@ -205,17 +205,17 @@ var s : string;
     Adet : Real;
     SonucListe: TStringList;
 begin
-  //dara kodlarýndan liste için sql oluþturulur
+  //dara kodlarÄ±ndan liste iÃ§in sql oluÅŸturulur
   s:='';
   for i := 0 to DaraKodList.Items.Count - 1 do begin
     if i > 0 then s:=s+'or';
     s := s + ('(KOD like '''+DaraKodList.Items[i]+'.%'' )');
   end;
   SonucListe := TStringList.Create;
-  if Tablo.HizliGirisListedenBilgiGetir('Dara (Boþ Aðýrlýk) Seçimi','select ID, STOKADI,BIRIM2MIKTAR from STOKLAR where '+s+' union all select ID=-1, STOKADI=''Elle Giriþ'',BIRIM2MIKTAR=null',SonucListe,False,[False, True, True],[])then begin
+  if Tablo.HizliGirisListedenBilgiGetir('Dara (BoÅŸ AÄŸÄ±rlÄ±k) SeÃ§imi','select ID, STOKADI,BIRIM2MIKTAR from STOKLAR where '+s+' union all select ID=-1, STOKADI=''Elle GiriÅŸ'',BIRIM2MIKTAR=null',SonucListe,False,[False, True, True],[])then begin
      Adet:=AdetGetir('Adet giriniz','1',0, 0, False);
-     if SonucListe[0]='-1' then //elle giriþ
-        s:=FloatToStr(AdetGetir('Dara (Boþ Aðýrlýk) Giriniz', '100', 0, 0, False))
+     if SonucListe[0]='-1' then //elle giriÅŸ
+        s:=FloatToStr(AdetGetir('Dara (BoÅŸ AÄŸÄ±rlÄ±k) Giriniz', '100', 0, 0, False))
      else
         s:= SonucListe[2];
      ListBoxDara.Items.Add(FloatToStr(Adet)+' X '+s);

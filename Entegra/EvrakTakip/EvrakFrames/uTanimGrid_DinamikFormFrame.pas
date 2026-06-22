@@ -1,4 +1,4 @@
-unit uTanimGrid_DinamikFormFrame;
+﻿unit uTanimGrid_DinamikFormFrame;
 
 interface
 

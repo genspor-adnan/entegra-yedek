@@ -1,4 +1,4 @@
-unit UHizliGirisOdemeTuru;
+﻿unit UHizliGirisOdemeTuru;
 
 interface
 
@@ -63,7 +63,7 @@ end;
 
 procedure THizliGirisOdemeTipiDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   BtnNakit.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_OdeTurNakit,True);  //RehberIni.ReadBool('StokHizliGiris', 'OdeTurNakit', True);
   // BtnIC.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_OdeTurHC,True);  //:= RehberIni.ReadBool('StokHizliGiris', 'OdeTurHC', True);
   BtnKK.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_OdeTurPOS,True);  //RehberIni.ReadBool('StokHizliGiris', 'OdeTurPOS', True);

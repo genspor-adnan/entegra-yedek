@@ -1,4 +1,4 @@
-unit Models;
+ï»¿unit Models;
 
 interface
 
@@ -23,7 +23,7 @@ type
 
     TM_Alma = Class(TModel)
     public
-        BID : String; //veri BID olarak gelir, aktarým olduktan sonra BID -> VBI olrak deðiþtirilir ve öyle Alma bildirimine gönderilir.
+        BID : String; //veri BID olarak gelir, aktarÄ±m olduktan sonra BID -> VBI olrak deÄŸiÅŸtirilir ve Ã¶yle Alma bildirimine gÃ¶nderilir.
         ADT : integer;
     end;
 
@@ -194,19 +194,19 @@ type
    TUrunSorgulaSonucItem = class(TModel)
     public
         [LMax(20)]  UTP :   String; //    TIBBI_CIHAZ / KOZMETIK_URUN
-        [LMax(23)]  UNO :   String; // Ürün No.
+        [LMax(23)]  UNO :   String; // ÃœrÃ¼n No.
         [LMax(20)]  LNO :   String; // Lot/Batch No.
-        [LMax(20)]  SNO :   String; // Seri/Sýra No.
+        [LMax(20)]  SNO :   String; // Seri/SÄ±ra No.
                     ADT :   Integer;// Adet
-        [LMax(23)]  URT :   String; // ÜRT
+        [LMax(23)]  URT :   String; // ÃœRT
         [LMax(23)]  SKT :   String; // SKT
-        [LMax(23)]  ITT :   String; // Ýth trh
-		    [LMax(23)]  UIK :   String; // Tekil ürünü üreten/ithal eden kurumun numarasýdýr.
+        [LMax(23)]  ITT :   String; // Ä°th trh
+		    [LMax(23)]  UIK :   String; // Tekil Ã¼rÃ¼nÃ¼ Ã¼reten/ithal eden kurumun numarasÄ±dÄ±r.
 		    [LMax(16)]	UAK :   String; // Tekil / Lot
-		    [LMax(16)]	SKG :   String; // Satarken Kimlik Numarasý Gerekli Mi? True / False
-		    [LMax(16)]	KKG :   String; // Kullanýrken Kimlik Numarasý Gerekli Mi? True / False
-		    [LMax(64)]	UDI :   String; // Eþsiz kimlik
-		    [LMax(128)]	MME :   String; // Marka Model Etiket adý
+		    [LMax(16)]	SKG :   String; // Satarken Kimlik NumarasÄ± Gerekli Mi? True / False
+		    [LMax(16)]	KKG :   String; // KullanÄ±rken Kimlik NumarasÄ± Gerekli Mi? True / False
+		    [LMax(64)]	UDI :   String; // EÅŸsiz kimlik
+		    [LMax(128)]	MME :   String; // Marka Model Etiket adÄ±
 	 end;
 	 TUrunSonuc = class(TModel)
     public
@@ -217,8 +217,8 @@ type
    TAyrintiUrunSorgulaSonucItem = class(TModel)
     public
         [LMax(20)] sahibi  :   String; //    Sahibi / KOZMETIK_URUN
-        [LMax(23)] urunNumarasi  :   String; // Ürün No.
-        [LMax(20)] seriNumarasi  :   String; // Seri/Sýra No.
+        [LMax(23)] urunNumarasi  :   String; // ÃœrÃ¼n No.
+        [LMax(20)] seriNumarasi  :   String; // Seri/SÄ±ra No.
         [LMax(20)] lotBatchNumarasi  :   String; // Lot/Batch No.
                    adet  :   Integer;// Adet
         [LMax(23)] kullanilabilirAdet  :   Integer;
@@ -228,19 +228,19 @@ type
         [LMax(23)] uretimTarihiString  :   String;
         [LMax(23)] sonKullanmaTarihiString  :   String;
 
-        [LMax(64)] essizKimlik	 :   String; // Eþsiz kimlik
+        [LMax(64)] essizKimlik	 :   String; // EÅŸsiz kimlik
 
-       // [LMax(23)] olusturulmaTarihi  :   String; // Oluþturma tarihi
-        [LMax(100)]	sahibiUnvan :   String; // Sahibi Ünvan
+       // [LMax(23)] olusturulmaTarihi  :   String; // OluÅŸturma tarihi
+        [LMax(100)]	sahibiUnvan :   String; // Sahibi Ãœnvan
 
       //  [LMax(23)] sonKullanmaTarihi  :   String; // SKT
-        [LMax(23)] ureticiIthalatciKurumNo  :   String; // Tekil ürünü üreten/ithal eden kurumun numarasýdýr.  //  ureticiIthalatciKurumNo
-      //  [LMax(23)] uretimTarihi  :   String; // ÜRT
-        [LMax(100)] urunTanimi :   String; // Ürün Tanýmý
+        [LMax(23)] ureticiIthalatciKurumNo  :   String; // Tekil Ã¼rÃ¼nÃ¼ Ã¼reten/ithal eden kurumun numarasÄ±dÄ±r.  //  ureticiIthalatciKurumNo
+      //  [LMax(23)] uretimTarihi  :   String; // ÃœRT
+        [LMax(100)] urunTanimi :   String; // ÃœrÃ¼n TanÄ±mÄ±
 
-      //  [LMax(23)] urunBilgileri  :   String; // ÜRT     "sonKullanmaTarihiString": null,
-      //  [LMax(23)] essizKimlikForExcel  :   String; // ÜRT     "olusturulmaTarihiString": "2020-01-10",
-      //  [LMax(23)] ureticiIthalatciKurumNoForExcel  :   String; // ÜRT     "uretimTarihiString": "2019-12-30"
+      //  [LMax(23)] urunBilgileri  :   String; // ÃœRT     "sonKullanmaTarihiString": null,
+      //  [LMax(23)] essizKimlikForExcel  :   String; // ÃœRT     "olusturulmaTarihiString": "2020-01-10",
+      //  [LMax(23)] ureticiIthalatciKurumNoForExcel  :   String; // ÃœRT     "uretimTarihiString": "2019-12-30"
 //        [LMax(23)] kullanilabilirAdetForExcel  :   String;
 //        [LMax(23)] kullanilabilirAdet  :   String;
 //        [LMax(23)] olusturulmaTarihiString  :   String;
@@ -258,17 +258,17 @@ type
    TAskiSorgulaSonucItem = class(TModel)
     public
         //[LMax(20)]  UTP :   String; //    TIBBI_CIHAZ / KOZMETIK_URUN
-        [LMax(23)]  UNO :   String; // Ürün No.
+        [LMax(23)]  UNO :   String; // ÃœrÃ¼n No.
         [LMax(20)]  LNO :   String; // Lot/Batch No.
-        [LMax(20)]  SNO :   String; // Seri/Sýra No.
-		    [LMax(50)]	BNO	:	String; // Fatura/Ýrsaliye No.
-		    [LMax(16)]	KUN :   String; // Gönderen Kurum Kodu.
+        [LMax(20)]  SNO :   String; // Seri/SÄ±ra No.
+		    [LMax(50)]	BNO	:	String; // Fatura/Ä°rsaliye No.
+		    [LMax(16)]	KUN :   String; // GÃ¶nderen Kurum Kodu.
                     ADT :   Integer;// Adet
         [LMax(36)]  BID :   String; // Bildirim Kodu.
 		    [LMax(64)]	BTI :   String; // Bildirim Tipi.
-		    [LMax(19)]	BZA	:	String;	// Bildirim Zamaný. YYYY-AA-GG SS:DD:ss
-		    [LMax(164)]	AKU :   String; // Verilen Kurumun adý.
-		    [LMax(128)]	MME :   String; // Marka Model Etiket adý
+		    [LMax(19)]	BZA	:	String;	// Bildirim ZamanÄ±. YYYY-AA-GG SS:DD:ss
+		    [LMax(164)]	AKU :   String; // Verilen Kurumun adÄ±.
+		    [LMax(128)]	MME :   String; // Marka Model Etiket adÄ±
 	 end;
 
 	 TAskiSNC = class(TModel)
@@ -288,21 +288,21 @@ type
     public
         //[LMax(20)]  UTP :   String; //    TIBBI_CIHAZ / KOZMETIK_URUN
 		    [LMax(64)]	BTI :   String; // Bildirim Tipi.
-        [LMax(23)]  UNO :   String; // Ürün No.
+        [LMax(23)]  UNO :   String; // ÃœrÃ¼n No.
         [LMax(20)]  LNO :   String; // Lot/Batch No.
-        [LMax(20)]  SNO :   String; // Seri/Sýra No.
+        [LMax(20)]  SNO :   String; // Seri/SÄ±ra No.
                     ADT :   Integer;// Adet
-		    [LMax(50)]	BNO	:	String; // Fatura/Ýrsaliye No.
+		    [LMax(50)]	BNO	:	String; // Fatura/Ä°rsaliye No.
 		    [LMax(36)]	BDR :   String; //
         [LMax(40)]  BID :   String; // Bildirim Kodu.
-		    [LMax(19)]	BZA	:	String;	// Bildirim Zamaný. YYYY-AA-GG SS:DD:ss
-		    [LMax(16)]	GKK :   String; // Gönderen Kurum Kodu.
-		    [LMax(16)]	KUN :   String; // Gönderen Kurum Kodu.
+		    [LMax(19)]	BZA	:	String;	// Bildirim ZamanÄ±. YYYY-AA-GG SS:DD:ss
+		    [LMax(16)]	GKK :   String; // GÃ¶nderen Kurum Kodu.
+		    [LMax(16)]	KUN :   String; // GÃ¶nderen Kurum Kodu.
         [LMax(5)]   BEN : String;
-		    [LMax(23)]  UIK :   String; // Tekil ürünü üreten/ithal eden kurumun numarasýdýr.
-		    [LMax(10)]	GIT	:	String;	// Bildirim Zamaný. YYYY-AA-GG SS:DD:ss
-		    [LMax(164)]	BKU :   String; // Verilen Kurumun adý.
-		    [LMax(164)]	DKU :   String; // Marka Model Etiket adý
+		    [LMax(23)]  UIK :   String; // Tekil Ã¼rÃ¼nÃ¼ Ã¼reten/ithal eden kurumun numarasÄ±dÄ±r.
+		    [LMax(10)]	GIT	:	String;	// Bildirim ZamanÄ±. YYYY-AA-GG SS:DD:ss
+		    [LMax(164)]	BKU :   String; // Verilen Kurumun adÄ±.
+		    [LMax(164)]	DKU :   String; // Marka Model Etiket adÄ±
                     AAD :   Integer;// Adet
         [LMax(40)]  OFF :   String; // Bildirim Kodu.
 	 end;
@@ -365,18 +365,18 @@ type
 
    TKabulSonucItem = class(TModel)
     public
-        [LMax(23)]  UNO :   String; // Ürün No.
+        [LMax(23)]  UNO :   String; // ÃœrÃ¼n No.
         [LMax(20)]  LNO :   String; // Lot/Batch No.
-        [LMax(20)]  SNO :   String; // Seri/Sýra No.
+        [LMax(20)]  SNO :   String; // Seri/SÄ±ra No.
                     ADT :   Integer;// Adet
         [LMax(40)]  VBI :   String; // Bildirim Kodu.     BID
-		    [LMax(128)]	MME :   String; // Marka Model Etiket adý
-		    [LMax(16)]	GKK :   String; // Gönderen Kurum Kodu.
-		    [LMax(50)]	BNO	:	String; // Fatura/Ýrsaliye No.
-		    [LMax(19)]	BZA	:	String;	// Bildirim Zamaný. YYYY-AA-GG SS:DD:ss
+		    [LMax(128)]	MME :   String; // Marka Model Etiket adÄ±
+		    [LMax(16)]	GKK :   String; // GÃ¶nderen Kurum Kodu.
+		    [LMax(50)]	BNO	:	String; // Fatura/Ä°rsaliye No.
+		    [LMax(19)]	BZA	:	String;	// Bildirim ZamanÄ±. YYYY-AA-GG SS:DD:ss
 		    [LMax(64)]	BTI :   String; // Bildirim Tipi.
-		    [LMax(16)]	UIK :   String; // Üreten/ithal eden kurum kodu.
-        [LMax(64)]	GKU :   String;	// Gönderen Kurum ünvaný
+		    [LMax(16)]	UIK :   String; // Ãœreten/ithal eden kurum kodu.
+        [LMax(64)]	GKU :   String;	// GÃ¶nderen Kurum Ã¼nvanÄ±
 		    [LMax(64)]	UDI :   String; // Bildirim Tipi.
 
 		    [LMax(40)]	BID :   String; // Bildirim Tipi.

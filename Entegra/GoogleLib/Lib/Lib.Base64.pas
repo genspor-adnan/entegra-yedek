@@ -1,4 +1,4 @@
-unit Lib.Base64;
+﻿unit Lib.Base64;
 
 { Binary encoding algorithms, such as Base64 }
 

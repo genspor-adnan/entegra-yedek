@@ -1,4 +1,4 @@
-unit UServisAramaFrame;
+ï»¿unit UServisAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:20 }
@@ -115,21 +115,21 @@ procedure TServisAramaFrame.Baslatildi;
       cbListe.Properties.Items[Idx].Description := Aciklama;
    end;
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    if Sektor = Sektor_OtomotivServis then
       LabelSeriNo.Caption := 'Plaka No';
 
-   // 1:sadece kendi  5:departman 10:þube --100:tüm
+   // 1:sadece kendi  5:departman 10:ÅŸube --100:tÃ¼m
    Tablo.TablodanSorguAc(2, 'select isnull((select BILGI from YETKIEK Y inner join ROLLER R on R.ID=Y.ROLID inner join KULLANICI K on R.ID=K.ROLID '+
                             ' WHERE Y.MODULID = 3001 and K.REHBERID='+Kullanan+'),0)');
    Ekle(0, 1, 'Aktif Servislerim');
-   Ekle(1, 2, 'Ýlgili Olduklarým');
+   Ekle(1, 2, 'Ä°lgili OlduklarÄ±m');
    if (TamYetkili)or(Tablo.Query2.Fields[0].AsInteger>1) then
       Ekle(2, 5, 'Depertman Servisleri');
    if (TamYetkili)or(Tablo.Query2.Fields[0].AsInteger>5) then
-      Ekle(3, 8, 'Þube Servisleri');
+      Ekle(3, 8, 'Åžube Servisleri');
    if (TamYetkili)or(Tablo.Query2.Fields[0].AsInteger>10) then
-      Ekle(4, 9, 'Bütün Servisler');
+      Ekle(4, 9, 'BÃ¼tÃ¼n Servisler');
 
 
    //EditSorumlu.Tag := StrToIntDef(GenRegIni.RegReadString('ServisOpsiyon', 'EditSorumluTag', '0', 'C'), 0);

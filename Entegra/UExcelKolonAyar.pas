@@ -1,4 +1,4 @@
-unit UExcelKolonAyar;
+﻿unit UExcelKolonAyar;
 
 interface
 

@@ -1,4 +1,4 @@
-unit ULisans;
+ï»¿unit ULisans;
 
 interface
 
@@ -74,7 +74,7 @@ begin
   sifre := txtS1.Text + txtS2.Text + txtS3.Text + txtS4.Text;
   if Sifre <> str4 then
   begin
-//   Application.MessageBox('Aktivasyon kodunu yanlýþ girdiniz.', 'Uyarý !!!', 64);
+//   Application.MessageBox('Aktivasyon kodunu yanlÄ±ÅŸ girdiniz.', 'UyarÄ± !!!', 64);
     Result:=False;
     txtS1.SetFocus;
   end
@@ -187,7 +187,7 @@ begin
   begin
     Cik:
     result := false;
-//    Application.MessageBox('Bu ürün active edilmemiþtir.' + chr(10) + chr(13) + 'Lütfen ELMAS Tasarým ve Yazýlým ile Temasa Geçiniz. ' + chr(10) + chr(13) + '( GSM : 0537 456 60 74 - 0505 524 72 39,40)', 'Uyarý !!!', 64);
+//    Application.MessageBox('Bu Ã¼rÃ¼n active edilmemiÅŸtir.' + chr(10) + chr(13) + 'LÃ¼tfen ELMAS TasarÄ±m ve YazÄ±lÄ±m ile Temasa GeÃ§iniz. ' + chr(10) + chr(13) + '( GSM : 0537 456 60 74 - 0505 524 72 39,40)', 'UyarÄ± !!!', 64);
 //    Application.Terminate;
   end;
 
@@ -198,7 +198,7 @@ begin
 {  LisansNo := GenRegIni.RegReadString('', 'LisansNo7', 'xxx', RgstryLC);
   LisansTar := GenRegIni.RegReadString('', 'LisansTarih7', '01' + DATESEPARATOR + '01' + DATESEPARATOR + '2000 00:00:00', RgstryLC);
   if LisansTar = '' then LisansTar := FormatDateTime('dd/mm/yyyy hh:mm:ss', tarihbul);
-  if pos(DATESEPARATOR, LisansTar) = 0 then //farklýysa
+  if pos(DATESEPARATOR, LisansTar) = 0 then //farklÄ±ysa
     LisansTar := copy(LisansTar, 1, 2) + DATESEPARATOR + copy(LisansTar, 4, 2) + DATESEPARATOR + copy(LisansTar, 7, 20);}
   Application.CreateForm(TLisansDlg, LisansDlg);
 
@@ -280,7 +280,7 @@ begin
   then
   begin
     Kapat := False;
-    Showmessage('Geçersiz Lisans...');
+    Showmessage('GeÃ§ersiz Lisans...');
   end
   else
   begin

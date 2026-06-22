@@ -1,5 +1,5 @@
-unit UParaDegisiklik;
-  //giren tutar bizim kullandýðýmýz para birimi olup çýkan tutar onun döviz karþýlýðýdýr..
+ï»¿unit UParaDegisiklik;
+  //giren tutar bizim kullandÄ±ÄŸÄ±mÄ±z para birimi olup Ã§Ä±kan tutar onun dÃ¶viz karÅŸÄ±lÄ±ÄŸÄ±dÄ±r..
 interface
 
 uses
@@ -169,7 +169,7 @@ Begin
     Tablo.Query2.Open;
   if Tablo.Query1.RecordCount=0 then  Begin
     if Tablo.Query2.RecordCount=0 then  Begin
-      //raise Exception.Create('Ýþleminize devam edebilmek için lütfen bir kur seçiniz!');
+      //raise Exception.Create('Ä°ÅŸleminize devam edebilmek iÃ§in lÃ¼tfen bir kur seÃ§iniz!');
     End Else if Tablo.Query2.RecordCount=1 then begin
       cxRadioGroup1.Caption:='1'+Tablo.Query2.FieldByName('CINSI').AsString+' = ...TL' ;
       alis:= Tablo.Query2.FieldByName('ALIS').AsFloat ;
@@ -228,7 +228,7 @@ begin
   ComboDovKur.Text := CikanKur;
   EditDovTutar.EditValue := CikanTutar;
   EditDovTutar.PostEditValue;
-  //daha önce döviz girilmiþse göster...
+  //daha Ã¶nce dÃ¶viz girilmiÅŸse gÃ¶ster...
   //if CikanTutar > 0 then begin
      LabelDovizTuru.Tag:=0;
      LabelDovizTuruClick(Self);

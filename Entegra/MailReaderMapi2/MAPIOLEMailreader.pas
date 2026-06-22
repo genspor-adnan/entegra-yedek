@@ -1,4 +1,4 @@
-unit MAPIOLEMailreader;
+﻿unit MAPIOLEMailreader;
 
 interface
 

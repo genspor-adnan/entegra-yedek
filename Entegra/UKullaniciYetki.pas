@@ -1,4 +1,4 @@
-unit UKullaniciYetki;
+ï»¿unit UKullaniciYetki;
 
 interface
 {
@@ -398,7 +398,7 @@ begin
              ImageComboBox(BGSube_Ad,@Subesi,Tablo.FDCnn,'SELECT ID,FIRMA FROM REHBER WHERE ID<0 order by 1 desc',False,nil).
              ImageComboBox(BGYeni_Departman_adi,@Departman,Tablo.FDCnn,'SELECT DEGER,ANAHTAR FROM GENINI WHERE bolum=-2251',False,nil).
              ImageComboBox(AGS_Gorevler,@Gorev,Tablo.FDCnn,'SELECT DEGER,ANAHTAR FROM GENINI WHERE bolum=-2252',False,nil).
-             ImageComboBox(BGYetki_durumu,@TamYetki,Tablo.FDCnn,'select ID=0,AD=''Kullanýcý Yetkili'' union all select 1,''Tam Yetkili''',False,nil);
+             ImageComboBox(BGYetki_durumu,@TamYetki,Tablo.FDCnn,'select ID=0,AD=''KullanÄ±cÄ± Yetkili'' union all select 1,''Tam Yetkili''',False,nil);
    if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls) = mrOK then begin
      if (Trim(VarToStr(Departman))= '-1')or(Trim(VarToStr(Gorev)) = '') then begin
         MessageDlg((BGYeni_rol_adi_gir),mtError,[mbOK],0);
@@ -522,7 +522,7 @@ end;
 
 procedure TKullaniciYetkiDlg.mGurubuKaldr1Click(Sender: TObject);
 begin
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'declare @RolID int, @ModulID nvarchar(20) '+
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'declare @RolID int, @ModulID nvarchar(20) '+
                           'set @RolID='+TabRol.FieldByName('ID').AsString+' '+
                           'set @ModulID='''+TabModul.FieldByName('MODULID').AsString+''' '+
                           'delete from YETKI where ROLID = @RolID and MODULID like @ModulID+''%'' ',[],[]);
@@ -543,7 +543,7 @@ procedure TKullaniciYetkiDlg.BakaBirRoldenYetkiKopyala1Click(Sender: TObject);
 var st : Tstringlist;
 begin
   st := Tstringlist.create;
-  if Tablo.ListedenBilgiGetir('Kaynak Rol Seçimi','select ID,ROL from ROLLER where DURUM=1 and ID <>'+TabRol.FieldByName('ID').AsString,st,[]) then begin
+  if Tablo.ListedenBilgiGetir('Kaynak Rol SeÃ§imi','select ID,ROL from ROLLER where DURUM=1 and ID <>'+TabRol.FieldByName('ID').AsString,st,[]) then begin
     Tablo.Query3.Close;
     Tablo.Query3.SQL.Text := 'declare @KaynakRolID int, @HedefRolID int ';
     Tablo.Query3.SQL.Add('set @KaynakRolID='+st[0]+' ');
@@ -596,7 +596,7 @@ end;
 
 procedure TKullaniciYetkiDlg.TabRolBeforeDelete(DataSet: TDataSet);
 begin
-  if TabRol.FieldByName('ROL').AsString='Yönetici'Then
+  if TabRol.FieldByName('ROL').AsString='YÃ¶netici'Then
     raise Exception.Create(KUYonetici_silinemez);
 
     if Application.MessageBox(PChar(KURol_sil +TabRol.FieldByName('ROL').AsString), PChar('Siliniyor'), MB_YESNO) = IDYES then  begin

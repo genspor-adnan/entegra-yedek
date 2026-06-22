@@ -1,4 +1,4 @@
-unit UDokumlerAksiyonFrame;
+﻿unit UDokumlerAksiyonFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 19/01/2010 14:31:05}
@@ -46,7 +46,7 @@ implementation
 
 procedure TDokumlerAksiyonFrame.Baslatildi;
 begin
-    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TDokumlerAksiyonFrame.EkranYazdir(Sender: TObject);

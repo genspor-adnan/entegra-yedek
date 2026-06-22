@@ -1,4 +1,4 @@
-unit UStokDlg;
+Ôªøunit UStokDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:46:38}
@@ -246,7 +246,7 @@ begin
 //    else
   TabStok.SQL.Text := 'SELECT *   FROM STOKLAR WHERE ID = :ID';
   TabStok.Params.ParamByName('ID').AsInteger := AStokId;
-//  end else { Yani -1 -> Bo˛ «ek senet ekran˝ iÁin bo˛ bir query }
+//  end else { Yani -1 -> Bo≈ü √áek senet ekranƒ± i√ßin bo≈ü bir query }
 //    TabRehber.InitSql('SELECT TOP 0  * FROM REHBER ',[],[]);
   TabStok.Open;
 end;

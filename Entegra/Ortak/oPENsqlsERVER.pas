@@ -1,4 +1,4 @@
-unit OpenSQLServer;
+ï»¿unit OpenSQLServer;
 
 {
 
@@ -110,7 +110,7 @@ type
    public
       class function Execute: widestring;
    //   public
-    //class function Edit(ABağlantıDizesi: TBağlantıDizesi): Boolean;
+    //class function Edit(ABaÄŸlantÄ±Dizesi: TBaÄŸlantÄ±Dizesi): Boolean;
 
        end;
 
@@ -673,18 +673,18 @@ begin
       LLoginTimeout := StrToIntDef(EditTimeOut.Text, 0);
       ApplyFDConnectionString(dbc, LConnStr, LLoginTimeout);
       if (sc.ServerName = '') or (sc.DatabaseName = '') then begin
-         MessageDlg('Sunucu ve veritabanı seçin!', mtWarning, [mbOK], 0);
+         MessageDlg('Sunucu ve veritabanÄ± seÃ§in!', mtWarning, [mbOK], 0);
          Exit;
       end;
       if ledUserName.Text='' Then begin
-         MessageDlg('Kullanıcı Adını Giriniz',mtWarning,[mbOk],0);
+         MessageDlg('KullanÄ±cÄ± AdÄ±nÄ± Giriniz',mtWarning,[mbOk],0);
          exit;
       end;
       try
          dbc.Open;
          dbc.Close;
          if ((Sender as TBitBtn).Name = 'TestConButton') or ((Sender as TBitBtn).Name = 'TestRemoteCon') then
-            MessageDlg('Bağlantı başarılı!', mtInformation, [mbOK], 0);
+            MessageDlg('BaÄŸlantÄ± baÅŸarÄ±lÄ±!', mtInformation, [mbOK], 0);
       except
          on e: exception do begin
             Baglandi := False;
@@ -718,18 +718,18 @@ begin
         LLoginTimeout);
       ApplyFDConnectionString(dbc, LConnStr, LLoginTimeout);
       if (EditRemoteServer.Text = '') or (cboDatabases.Text = '') then begin
-         MessageDlg('Sunucu va veritabanı adı seçin!', mtWarning, [mbOK], 0);
+         MessageDlg('Sunucu va veritabanÄ± adÄ± seÃ§in!', mtWarning, [mbOK], 0);
          Exit;
       end;
       if ledUserName.Text='' Then begin
-         MessageDlg('Kullanıcı Adını Giriniz',mtWarning,[mbOk],0);
+         MessageDlg('KullanÄ±cÄ± AdÄ±nÄ± Giriniz',mtWarning,[mbOk],0);
          exit;
       end;
       try
          dbc.Open;
          dbc.Close;
          if (Sender as TBitBtn).Name = 'TestRemoteCon' then
-            MessageDlg('Bağlantı başarılı!', mtInformation, [mbOK], 0);
+            MessageDlg('BaÄŸlantÄ± baÅŸarÄ±lÄ±!', mtInformation, [mbOK], 0);
       except
          on e: exception do begin
             MessageDlg(e.Message, mtError, [mbOK], 0);
@@ -802,32 +802,32 @@ begin
 end;
 
 {class function TOpenSQLServerForm.Edit(
-  ABağlantıDizesi: TBağlantıDizesi): Boolean;
+  ABaÄŸlantÄ±Dizesi: TBaÄŸlantÄ±Dizesi): Boolean;
 begin
   with TOpenSQLServerForm.Create(Application) do
   try
     btnOk.Enabled := False;
-    yetkilendirmeComboBox.ItemIndex := strtoint(IIf(ABağlantıDizesi.TümleşikGüvenlik,inttostr(0),inttostr(1)));
+    yetkilendirmeComboBox.ItemIndex := strtoint(IIf(ABaÄŸlantÄ±Dizesi.TÃ¼mleÅŸikGÃ¼venlik,inttostr(0),inttostr(1)));
     yetkilendirmeComboBoxChange(nil);
-    cboServers.Text := ABağlantıDizesi.SunucuAdı;
-    cboDatabases.Text := ABağlantıDizesi.Veritabanı;
-    ledUserName.Text := ABağlantıDizesi.KullanıcıId;
-    ledPassword.Text := ABağlantıDizesi.Şifre;
-    saglayiciComboBox.ItemIndex := Dize.Hangisi(ABağlantıDizesi.Sağlayıcı,['SQLOLEDB.1', 'SQLNCLI.1', 'SQLNCLI10.1']);
-    EditTimeOut.Text := IntToStr(ABağlantıDizesi.ZamanAşımı);
+    cboServers.Text := ABaÄŸlantÄ±Dizesi.SunucuAdÄ±;
+    cboDatabases.Text := ABaÄŸlantÄ±Dizesi.VeritabanÄ±;
+    ledUserName.Text := ABaÄŸlantÄ±Dizesi.KullanÄ±cÄ±Id;
+    ledPassword.Text := ABaÄŸlantÄ±Dizesi.Åifre;
+    saglayiciComboBox.ItemIndex := Dize.Hangisi(ABaÄŸlantÄ±Dizesi.SaÄŸlayÄ±cÄ±,['SQLOLEDB.1', 'SQLNCLI.1', 'SQLNCLI10.1']);
+    EditTimeOut.Text := IntToStr(ABaÄŸlantÄ±Dizesi.ZamanAÅŸÄ±mÄ±);
     LocalAsyncCallEx(@SearchForServers,Integer(cboServers.Items));
 
     if ShowModal = mrCancel then
       Result := False
     else begin
-      ABağlantıDizesi.SunucuAdı := cboServers.Text;
-      ABağlantıDizesi.Veritabanı := cboDatabases.Text;
-      ABağlantıDizesi.TümleşikGüvenlik := yetkilendirmeComboBox.ItemIndex = 0;
-      ABağlantıDizesi.Sağlayıcı := Dize.Sec(saglayiciComboBox.ItemIndex,
+      ABaÄŸlantÄ±Dizesi.SunucuAdÄ± := cboServers.Text;
+      ABaÄŸlantÄ±Dizesi.VeritabanÄ± := cboDatabases.Text;
+      ABaÄŸlantÄ±Dizesi.TÃ¼mleÅŸikGÃ¼venlik := yetkilendirmeComboBox.ItemIndex = 0;
+      ABaÄŸlantÄ±Dizesi.SaÄŸlayÄ±cÄ± := Dize.Sec(saglayiciComboBox.ItemIndex,
         ['SQLOLEDB.1', 'SQLNCLI.1', 'SQLNCLI10.1']);
-      ABağlantıDizesi.KullanıcıId := ledUserName.Text;
-      ABağlantıDizesi.Şifre := ledPassword.Text;
-      ABağlantıDizesi.ZamanAşımı := StrToIntDef(EditTimeOut.Text,15);
+      ABaÄŸlantÄ±Dizesi.KullanÄ±cÄ±Id := ledUserName.Text;
+      ABaÄŸlantÄ±Dizesi.Åifre := ledPassword.Text;
+      ABaÄŸlantÄ±Dizesi.ZamanAÅŸÄ±mÄ± := StrToIntDef(EditTimeOut.Text,15);
       Result := True;
     end;
   finally
@@ -974,8 +974,8 @@ begin
   else begin
     yetkilendirmeComboBox.ItemIndex := 1;
     yetkilendirmeComboBoxChange(nil);
-    { şifre OnChange olayında Clear methodu ile siliniyor }
-    { Bunu engellemek için programsal olarak eşitlendi. }
+    { ÅŸifre OnChange olayÄ±nda Clear methodu ile siliniyor }
+    { Bunu engellemek iÃ§in programsal olarak eÅŸitlendi. }
     ledPassword.Text := pass;
   end;
 

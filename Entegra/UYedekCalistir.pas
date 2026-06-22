@@ -1,4 +1,4 @@
-unit UYedekCalistir;
+ï»¿unit UYedekCalistir;
 
 interface
 
@@ -150,7 +150,7 @@ var
              DokumanYol := copy(DokumanYol,1,length(DokumanYol)-1);
 
           WRar := '"'+WinrarExeDizin+'"  a -ep1 -r ' +Yol+GENYEDEK+'_dok.zip '+DokumanYol;      // -pasd^ad  C:\Program Files\WinRAR\Rar.exe
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'EXEC MASTER..xp_cmdshell '''+WRar+''' ',[],[]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'EXEC MASTER..xp_cmdshell '''+WRar+''' ',[],[]);
 
 {            Zipfile := TFileStream.Create(Yol+'GenDokuman.zip',fmCreate);        // 'D:\Deneme\idris.rar'
 
@@ -191,7 +191,7 @@ begin
     inc(i);
    end;
      try
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'BACKUP DATABASE [' + trim(copy(ServerAdi,pos('/', ServerAdi)+1,50)) + '] TO DISK =''' + Yol+ GENYEDEK+'.BAK' + ''' WITH RETAINDAYS=1', [], []);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'BACKUP DATABASE [' + trim(copy(ServerAdi,pos('/', ServerAdi)+1,50)) + '] TO DISK =''' + Yol+ GENYEDEK+'.BAK' + ''' WITH RETAINDAYS=1', [], []);
     Except
       Hatalar := '1';
       BekletmeDlg.Destroy;
@@ -199,7 +199,7 @@ begin
     end;
                                          //  -pasd^ad
     WRar := '"'+WinrarExeDizin+'"  a -ep1 -df ' +Yol+GENYEDEK+'.zip '+ Yol+ GENYEDEK+'.BAK' ;      //  C:\Program Files\WinRAR\Rar.exe
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'EXEC MASTER..xp_cmdshell '''+WRar+''' ',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'EXEC MASTER..xp_cmdshell '''+WRar+''' ',[],[]);
 
 
 

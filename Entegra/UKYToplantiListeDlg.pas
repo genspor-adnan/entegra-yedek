@@ -1,4 +1,4 @@
-unit UKYToplantiListeDlg;
+ï»¿unit UKYToplantiListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:54}
@@ -293,10 +293,10 @@ begin
     AraTarihBas.Date := StrToDateTime('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+IntToStr(CariYil));
     AraTarihBit.Date := StrToDateTime('31'+FormatSettings.DateSeparator+'12'+FormatSettings.DateSeparator+IntToStr(CariYil));
     TabloYenile(TabToplanti,[]);
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 

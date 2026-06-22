@@ -1,12 +1,12 @@
-unit UHavaleEFT;
+ï»¿unit UHavaleEFT;
 
 (*
-  Değişiklikler
+  DeÄŸiÅŸiklikler
   2010-05-17
-  1 - ilk açılışta en üstteki bankanın ve bu bankaya gönderilecek havale/eftlerin tümünün seçili gelmesi sağlandı.
-  2 - banka seçimi değiştirildiğinde yeni  bankaya gönderilecek havale/eftlerin tümünün seçili gelmesi sağlandı.
-  3 - Talimat önizleme sayfasının tam ekran gelmesi sağlandı.
-  4 - Seçili havale olmaması durumuna hata mesajı eklendi "secimyokhata"
+  1 - ilk aÃ§Ä±lÄ±ÅŸta en Ã¼stteki bankanÄ±n ve bu bankaya gÃ¶nderilecek havale/eftlerin tÃ¼mÃ¼nÃ¼n seÃ§ili gelmesi saÄŸlandÄ±.
+  2 - banka seÃ§imi deÄŸiÅŸtirildiÄŸinde yeni  bankaya gÃ¶nderilecek havale/eftlerin tÃ¼mÃ¼nÃ¼n seÃ§ili gelmesi saÄŸlandÄ±.
+  3 - Talimat Ã¶nizleme sayfasÄ±nÄ±n tam ekran gelmesi saÄŸlandÄ±.
+  4 - SeÃ§ili havale olmamasÄ± durumuna hata mesajÄ± eklendi "secimyokhata"
   *)
 interface
 
@@ -182,14 +182,14 @@ type
   end;
 
 //Resourcestring
-//  Logayazamadihata = 'Dosya imza log veritabanına kaydedilemedi.';
-//  yanlistelnohata = 'Geçerli bir telefon numarası giriniz.';
-//  yanlisoperatorhata = 'Elektronik imza türkcell ve avea için kullanılmaktadır, operatör seçiminizi yapınız.';
-//  eimzahata = 'Elektronik imza başarısız.';
-//  secimyokhata = 'En az bir Havale/EFT seçmelisiniz.';
-//  bankadanodemeyokhata = 'Seçtiğiniz tarihte banka üzerinden ödemeniz bulunmamaktadır. Başka bir tarih seçin yada ödeme türünüzü düzeltin.';
-//  Dosyaturuhata = 'Yanlış türde bir dosya oluşturuldu.';
-//  Eminmisin = 'Havale/Eft Sihirbazından çıkmak istediğinize emin misiniz?';
+//  Logayazamadihata = 'Dosya imza log veritabanÄ±na kaydedilemedi.';
+//  yanlistelnohata = 'GeÃ§erli bir telefon numarasÄ± giriniz.';
+//  yanlisoperatorhata = 'Elektronik imza tÃ¼rkcell ve avea iÃ§in kullanÄ±lmaktadÄ±r, operatÃ¶r seÃ§iminizi yapÄ±nÄ±z.';
+//  eimzahata = 'Elektronik imza baÅŸarÄ±sÄ±z.';
+//  secimyokhata = 'En az bir Havale/EFT seÃ§melisiniz.';
+//  bankadanodemeyokhata = 'SeÃ§tiÄŸiniz tarihte banka Ã¼zerinden Ã¶demeniz bulunmamaktadÄ±r. BaÅŸka bir tarih seÃ§in yada Ã¶deme tÃ¼rÃ¼nÃ¼zÃ¼ dÃ¼zeltin.';
+//  Dosyaturuhata = 'YanlÄ±ÅŸ tÃ¼rde bir dosya oluÅŸturuldu.';
+//  Eminmisin = 'Havale/Eft SihirbazÄ±ndan Ã§Ä±kmak istediÄŸinize emin misiniz?';
 
 const
   IMZA_ADIM_DOSYATURU = 0;
@@ -225,7 +225,7 @@ uses PrjConst,Banka_TEB, Banka_Garanti, Banka_YKB,Banka_Finans, Banka_Deniz, Ban
 function LeadingZero(ANumber: string;ADigit: Integer): string;
 begin
   Result := ANumber;
-  while Length(Result) < ADigit do   //hesapno 123 gibiyse 8 karakter olana kadar önüne 0 konmalı
+  while Length(Result) < ADigit do   //hesapno 123 gibiyse 8 karakter olana kadar Ã¶nÃ¼ne 0 konmalÄ±
     Result := '0' + Result;
 end;
 procedure ImzalamaIslemleri(DosyaAdi:String); // (Tablo1:TFDQuery; AlanAdi, DosyaAdi:string);
@@ -255,7 +255,7 @@ var
     Tablo.Query1.Close;
     Tablo.Query1.SQL.text := 'Insert into IMZALOG (TARIH,EK,SUBEID) values(:Tarih, :Dosya,'+IntToStr(SubeId)+')';
     Tablo.Query1.Params[0].Value := now;
-    // dosyayı zipleyip kaydedelim
+    // dosyayÄ± zipleyip kaydedelim
     CompressedStream_ := TMemoryStream.Create;
     CompressedStream_.Clear;
     CompressedStream_.Position := 0;
@@ -275,31 +275,31 @@ begin
   HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_DOSYATURU] := ' ' ;
   DosyaTuru := ExtractFileExt(Dosyaadi);
   if DosyaTuru = '.pdf' then begin
-     HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_DOSYATURU] := 'PDF dosya onay için hazırlanıyor...' ;
+     HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_DOSYATURU] := 'PDF dosya onay iÃ§in hazÄ±rlanÄ±yor...' ;
      fs.loadfromfile('PDFDosya\'+DosyaAdi);
      tmpdosyaadi := 'PDFDosyaOK\'
   End else if DosyaTuru = '.txt' then begin
-     HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_DOSYATURU] := 'Text dosya onay için hazırlanıyor...' ;
+     HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_DOSYATURU] := 'Text dosya onay iÃ§in hazÄ±rlanÄ±yor...' ;
      fs.loadfromfile('TextDosya\'+DosyaAdi);
      tmpdosyaadi := 'TextDosyaOK\'
   End Else
      raise exception.Create(Dosyaturuhata);
   HavaleEFTEkrani.AdimDegistir(HavaleEFTEkrani.JvInstallLabel1,IMZA_ADIM_BAGLANTI_KUR,IMZA_ADIM_DOSYATURU);
-  /// / web servis bizden imzalanacak olan datayı TByteDynArray tipinde istiyor. Onun için fs içindeki datayı buna çeviririz
+  /// / web servis bizden imzalanacak olan datayÄ± TByteDynArray tipinde istiyor. Onun iÃ§in fs iÃ§indeki datayÄ± buna Ã§eviririz
   // TMemoryStream --> TByteDynArray;
   fs.Position := 0;
   SetLength(byt, fs.Size);
   pTemp := @byt[0];
   fs.Position := 0;
   fs.Read(pTemp^, fs.Size);
-  // Artık burada E-İmza firmasına dosyayı gönderebiliriz..
+  // ArtÄ±k burada E-Ä°mza firmasÄ±na dosyayÄ± gÃ¶nderebiliriz..
 
   if Length(HavaleEFTEkrani.EditTelefon.text) = 11 then
     telno := HavaleEFTEkrani.EditTelefon.text
   else
     raise exception.Create(yanlistelnohata);
 
-  if HavaleEFTEkrani.ComboOperator.text = 'TürkCell' then
+  if HavaleEFTEkrani.ComboOperator.text = 'TÃ¼rkCell' then
     gsmop := 1
   Else if HavaleEFTEkrani.ComboOperator.text = 'Avea' then
     gsmop := 2
@@ -314,23 +314,23 @@ begin
   // byt:benim pdf dosyam,yani talimat;;; 1 : Turkcell 2:Avea
   if HResult.ResultCode = 0 then
   begin
-    // Gelen parmakizini ekranda gösterelim, Aynı parmakizi cep telefonunda da görünecek
-    //HavaleEFTEkrani.LabelParmakIzi.Caption := '   Parmak İzi : ' + HResult.Parmakizi;
+    // Gelen parmakizini ekranda gÃ¶sterelim, AynÄ± parmakizi cep telefonunda da gÃ¶rÃ¼necek
+    //HavaleEFTEkrani.LabelParmakIzi.Caption := '   Parmak Ä°zi : ' + HResult.Parmakizi;
     SR := EImza.GetSignatureByte('E-imza mesaji', HResult.ApTransId);
-    // Burda bekleniyor.  telefona mesaj gidiyor ve alttakiler dönüyor
+    // Burda bekleniyor.  telefona mesaj gidiyor ve alttakiler dÃ¶nÃ¼yor
     case SR.ResultCode of
-      0:  mes := 'Başarılı';
-      1:  mes := 'Turkcell e gönderilemedi';
-      2:  mes := 'İşlem zamanaşımına uğradı';
-      3:  mes := 'Cevap geldi ancak imza geçersiz';
+      0:  mes := 'BaÅŸarÄ±lÄ±';
+      1:  mes := 'Turkcell e gÃ¶nderilemedi';
+      2:  mes := 'Ä°ÅŸlem zamanaÅŸÄ±mÄ±na uÄŸradÄ±';
+      3:  mes := 'Cevap geldi ancak imza geÃ§ersiz';
       9:  mes := 'Genel Hata';
     end;
     HavaleEFTEkrani.AdimDegistir(HavaleEFTEkrani.JvInstallLabel1,IMZA_ADIM_IMZALAYAN,IMZA_ADIM_PARMAK_IZI);
-    HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_IMZALAYAN] := SR.SignerName + ' Tarafından İmzalandı.';
-    // showmessage(SR.Message_); //Doğrulama logu (hata olduğunda EGA ya bildireceğiz
-    //ShowMessage(SR.SignerName); // İmzalanmış data
-    // SR.FSignedData;    //gelen Data  base 64   (  xxx.P7B olarak kaydedersem içini görmüş olurum)
-    // datayı çevirip kaydedelim
+    HavaleEFTEkrani.JvInstallLabel1.Lines[IMZA_ADIM_IMZALAYAN] := SR.SignerName + ' TarafÄ±ndan Ä°mzalandÄ±.';
+    // showmessage(SR.Message_); //DoÄŸrulama logu (hata olduÄŸunda EGA ya bildireceÄŸiz
+    //ShowMessage(SR.SignerName); // Ä°mzalanmÄ±ÅŸ data
+    // SR.FSignedData;    //gelen Data  base 64   (  xxx.P7B olarak kaydedersem iÃ§ini gÃ¶rmÃ¼ÅŸ olurum)
+    // datayÄ± Ã§evirip kaydedelim
     fs2 := TMemoryStream.Create;
     CopyToStream(SR.SignedData, fs2);
 
@@ -338,12 +338,12 @@ begin
   else
     raise exception.Create(eimzahata); // h.result.message_
   fs2.Position := 0;
-  // İmzalı dosya olarak kaydedelim
+  // Ä°mzalÄ± dosya olarak kaydedelim
   //  tmpdosyaadi := GetEnvironmentVariable('Temp') + '\' + FormatDateTime('ddmmyyhhnnss_', now);
 
   tempfile := TFileStream.Create(tmpdosyaadi+DosyaAdi, fmCreate);
   tempfile.CopyFrom(fs2, fs2.Size);
-  // İmzalı dosyayı loga yazalım
+  // Ä°mzalÄ± dosyayÄ± loga yazalÄ±m
   LogaYaz;
   tempfile.free;
   fs.free;
@@ -420,7 +420,7 @@ begin
     clmsec.EditValue := False
   else
     clmsec.EditValue := True;
-  // sağ tarafta banka işaretlendiğinde içerikteki tüm havalelerin seçili gelmesi sağlandı.
+  // saÄŸ tarafta banka iÅŸaretlendiÄŸinde iÃ§erikteki tÃ¼m havalelerin seÃ§ili gelmesi saÄŸlandÄ±.
   cxGridDBTableView1.DataController.SelectAll;
 
 end;
@@ -463,7 +463,7 @@ procedure THavaleEFTEkrani.FormCreate(Sender: TObject);
 Var
   ra: string;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   TRaporAraclari.RaporPopupMenuHazirla('HavaleEFTEkrani',PopupMenuYaz,ra,FastRaporDlg.RaporSecClick);
   YaziciYaz.Caption := ra;
 
@@ -481,7 +481,7 @@ begin
   TabGonderen.Params[0].Value := Tarih;
   TabGonderen.Open;
   TabGonderen.EnableControls;
-  // ilk bankanın seçili gelmesi ve o banka hareketlerinin sağ tarafta gözükmesi..
+  // ilk bankanÄ±n seÃ§ili gelmesi ve o banka hareketlerinin saÄŸ tarafta gÃ¶zÃ¼kmesi..
   TabGonderen.first;
   Hesap:= TabGonderen.FieldByName('HESAPID').AsString;
   if not TabGonderen.ControlsDisabled then
@@ -501,7 +501,7 @@ end;
 
 procedure THavaleEFTEkrani.frxTalimatNext(Sender: TObject);
 begin
-  //tıklı olmayan satırlar preview da gözükmesin.
+  //tÄ±klÄ± olmayan satÄ±rlar preview da gÃ¶zÃ¼kmesin.
   if cxGridDBTableView1SEC.EditValue <> True then  begin
      Tabalici.next;
   end;
@@ -529,7 +529,7 @@ end;
 procedure THavaleEFTEkrani.HavaleWizardCancelButtonClick(Sender: TObject);
 begin
   if MessageDlg(Eminmisin, mtInformation, [mbYes, mbNo], 0) = mrYes then
-     //Application.MessageBox('MB_OKCANCEL+MB_ICONSTOP','başlık',MB_OKCANCEL+MB_ICONINFORMATION);
+     //Application.MessageBox('MB_OKCANCEL+MB_ICONSTOP','baÅŸlÄ±k',MB_OKCANCEL+MB_ICONINFORMATION);
      Close
   else
     ModalResult:= mrNone;
@@ -542,16 +542,16 @@ end;
 
 function YeniDesenDosyasiOlustur(BankaKodu : Integer):String;
 begin
- { // İşaretlilerden Text oluşturalım
+ { // Ä°ÅŸaretlilerden Text oluÅŸturalÄ±m
   case BankaKodu of
    10:   Result := TEB_Dosya_Olustur; // TC ZIRAAT BANK A.S.
    12:   Result := TEB_Dosya_Olustur; // HALK BANKASI
    15:   Result := TEB_Dosya_Olustur; // T.VAKIFLAR BANKASI T.A.O.
-   32:   Result := TEB_Dosya_Olustur; // T.EKONOMİ BANKASI A.S.
+   32:   Result := TEB_Dosya_Olustur; // T.EKONOMÄ° BANKASI A.S.
    46:   Result := Ak_Dosya_Olustur ;// AKBANK T.A.S.
-   59:   Result := TEB_Dosya_Olustur; // ŞEKERBANK T.A.S.
-   62:   Result := Garanti_Dosya_Olustur; // T.GARANTİ BANKASI A.S.
-   64:   Result := TEB_Dosya_Olustur; // T.IŞ BANKASI A.S.
+   59:   Result := TEB_Dosya_Olustur; // ÅEKERBANK T.A.S.
+   62:   Result := Garanti_Dosya_Olustur; // T.GARANTÄ° BANKASI A.S.
+   64:   Result := TEB_Dosya_Olustur; // T.IÅ BANKASI A.S.
    67:   Result := YKB_Dosya_Olustur; // YAPI VE KREDI BANKASI A.S.
    71:   Result := TEB_Dosya_Olustur; // FORTIS BANK A.S.
    92:   Result := TEB_Dosya_Olustur; // CITIBANK A.S.
@@ -641,8 +641,8 @@ end;
 
 Function SSH_HataGoster(ErrorCode:integer):string;
 Begin
-//SFTP toolunun gönderdiği hata kodu
-//EScSFTPError.ErrorCode ile gelen hata kodunun açıklaması
+//SFTP toolunun gÃ¶nderdiÄŸi hata kodu
+//EScSFTPError.ErrorCode ile gelen hata kodunun aÃ§Ä±klamasÄ±
   Case ErrorCode of
      0:	  Result :=	'SSH_FX_OK '	;
      1:	  Result :=	'SSH_FX_EOF '	;
@@ -686,7 +686,7 @@ var
  // SSHStream : TScSSHStream;
 begin
   GFTPDosyaAdi := FTPDosyaAdi;
-  //ftp ye gönderilmeyecekse bu sayfayı geçmesi gerekiyor..
+  //ftp ye gÃ¶nderilmeyecekse bu sayfayÄ± geÃ§mesi gerekiyor..
   GuvenlikTuru := TabBankaAyar.FieldByName('FTP_GUVENLIK_TURU').AsString;
   AdimDegistir(JvInstallLabel2,FTP_ADIM_CONNECTING,-1);
   if GuvenlikTuru='Yok' then
@@ -708,7 +708,7 @@ begin
         try
           IdFTP1.Connect;
         Except
-          raise exception.Create('Bağlantıda Hata');
+          raise exception.Create('BaÄŸlantÄ±da Hata');
         end;
         FTPDosyaAdi:=Destination+FTPDosyaAdi;
         IdFTP1.Put(FTPDosya,FTPDosyaAdi,False);
@@ -748,14 +748,14 @@ begin
         try
           ScSSHClient1.Connect;
         Except
-          raise exception.Create('Bağlantıda Hata');
+          raise exception.Create('BaÄŸlantÄ±da Hata');
         end;
         ScSFTPClient1.Initialize;
         try
           ScSFTPClient1.UploadFile(FTPDosyaYeri,Destination+FTPDosyaAdi,False);
         Except
           //raise exception.Create(SSH_HataGoster(EScSFTPError.ErrorCode));
-          raise exception.Create('Bağlantıda Hata');
+          raise exception.Create('BaÄŸlantÄ±da Hata');
         end;
         ScSFTPClient1.Disconnect;
         ScSSHClient1.Disconnect;
@@ -763,7 +763,7 @@ begin
       End;
 
     2:Begin
-        raise exception.Create('Bağlantıda Hata');
+        raise exception.Create('BaÄŸlantÄ±da Hata');
       End;
   End ;
     HavaleEFTEkrani.AdimDegistir(JvInstallLabel2,-1,FTP_ADIM_FINISH); //11
@@ -773,14 +773,14 @@ end;
 procedure THavaleEFTEkrani.SayfaDurumGoruntule5Page(Sender: TObject);
 begin
   if TabBankaAyar.FieldByName('TALIMAT_GONDER').AsInteger > 0 then Begin
-     if TabBankaAyar.FieldByName('TALIMAT_IMZALA').AsBoolean = false then Begin //doğru dosyayı bulalım..
+     if TabBankaAyar.FieldByName('TALIMAT_IMZALA').AsBoolean = false then Begin //doÄŸru dosyayÄ± bulalÄ±m..
         FTPDosya := TFileStream.Create('PDFDosya\'+PDFDosyaAdi,fmOpenRead);
         FTPDosyaYeri := 'PDFDosya\'+PDFDosyaAdi
      End else if TabBankaAyar.FieldByName('TALIMAT_IMZALA').AsBoolean = True then Begin
         FTPDosya := TFileStream.Create('PDFDosyaOK\'+PDFDosyaAdi,fmOpenRead);
         FTPDosyaYeri := 'PDFDosyaOK\'+PDFDosyaAdi
      End;
-     FTPyeGonder(FTPDosya,FTPDosyaYeri,PDFDosyaAdi); //dosya ve dosyaadı ile
+     FTPyeGonder(FTPDosya,FTPDosyaYeri,PDFDosyaAdi); //dosya ve dosyaadÄ± ile
   End;
 
   if TabBankaAyar.FieldByName('TEXT_GONDER').AsInteger > 0then Begin
@@ -791,7 +791,7 @@ begin
         FTPDosya := TFileStream.Create('TextDosyaOK\'+TextDosyaAdi,fmOpenRead);
         FTPDosyaYeri := 'TextDosyaOK\'+TextDosyaAdi
      End;
-     FTPyeGonder(FTPDosya,FTPDosyaYeri,TextDosyaAdi); //dosya ve dosyaadı ile
+     FTPyeGonder(FTPDosya,FTPDosyaYeri,TextDosyaAdi); //dosya ve dosyaadÄ± ile
   End;
 
 end;
@@ -801,7 +801,7 @@ procedure THavaleEFTEkrani.SayfaGiris1NextButtonClick
 var
   say: Integer;
 begin
-  // işaretli varmı kontrolü
+  // iÅŸaretli varmÄ± kontrolÃ¼
   say := 0;
   TabAlici.First;
 
@@ -859,15 +859,15 @@ begin
       FastRaporDlg.TabYeniAyar.SQL.text :=
         'SELECT * FROM AYARLARYENI WHERE GRUBU=''HavaleEFTEkrani'' and MODUL = ''Talimat'' ';
       FastRaporDlg.TabYeniAyar.Open;
-      // Baskı önizlee ekranımız zaten mevcut. Bu önizlemeyi PDF olarak kaydederiz,
+      // BaskÄ± Ã¶nizlee ekranÄ±mÄ±z zaten mevcut. Bu Ã¶nizlemeyi PDF olarak kaydederiz,
       frxPDFExport1.DefaultPath := 'PDFDosya\';
       PDFDosyaAdi:= Trim(TabGonderen.FieldByName('BANKAADI').AsString)+FormatDateTime('yyyymmddhhnnss', Tablo.GENINI.BuguntrhSaat)+'.pdf';
       frxPDFExport1.FileName := PDFDosyaAdi;
       FastRaporDlg.RaporOku(frxReport1);
-      //raporu almak için hazırlarız,
+      //raporu almak iÃ§in hazÄ±rlarÄ±z,
       //frxReport1.PrepareReport;
       frxReport1.Export(frxPDFExport1);
-      // ve göstermek için tekrar hazırlarız.(aksi taktirde patlıyor..)
+      // ve gÃ¶stermek iÃ§in tekrar hazÄ±rlarÄ±z.(aksi taktirde patlÄ±yor..)
       frxReport1.PrepareReport;
       LabelPDFTamam.Visible:=True;
       HavaleWizard.ActivePage := SayfaTalimat3;

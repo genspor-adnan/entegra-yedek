@@ -1,4 +1,4 @@
-unit UHizliGiris;
+ï»¿unit UHizliGiris;
 
 interface
 
@@ -314,7 +314,7 @@ type
     procedure Yazdir(Baslik:string; BaskiTipi:SmallInt);
     procedure DetayTabloAc(St:String; Prm:Integer);
   public
-    Cagiran: Integer; //1:Satýþ 2:Sipariþ 3:Transfer  7:yemek butonu
+    Cagiran: Integer; //1:SatÄ±ÅŸ 2:SipariÅŸ 3:Transfer  7:yemek butonu
     MasaId, FatTur, KisiSay  : integer;
     AktifFatTabloAdi,EnSonSecilenKategoriKodu,  MasaNo, KullanKod: string;
     PosListesi: Array of Integer;
@@ -359,7 +359,7 @@ begin
           BelgeyeYaz(AdisyonNo,belgeno, EditRehAd.Caption,'','','','','','', False) ;
        end
        else
-          raise Exception.Create('Seçilmiþ ürünler var. Ýþlem yarým kalmýþ. Kapatýlamaz..');
+          raise Exception.Create('SeÃ§ilmiÅŸ Ã¼rÃ¼nler var. Ä°ÅŸlem yarÄ±m kalmÄ±ÅŸ. KapatÄ±lamaz..');
    end;
    TempTablolariYokEt(AktifFatTabloAdi);
    Close;
@@ -367,7 +367,7 @@ end;
 
 procedure THizliGirisDlg.DetayDegistir(ID:Integer);
 begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set ADET='+StringReplace(TabDetay.FieldByName('ADET').AsString,',','.',[])+',MIKTAR='+StringReplace(TabDetay.FieldByName('MIKTAR').AsString,',','.',[])+',BIRIMFIYAT='+StringReplace(TabDetay.FieldByName('BIRIMFIYAT').AsString,',','.',[])+',ISKONTO='+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set ADET='+StringReplace(TabDetay.FieldByName('ADET').AsString,',','.',[])+',MIKTAR='+StringReplace(TabDetay.FieldByName('MIKTAR').AsString,',','.',[])+',BIRIMFIYAT='+StringReplace(TabDetay.FieldByName('BIRIMFIYAT').AsString,',','.',[])+',ISKONTO='+
         StringReplace(FloatToStr(TabDetay.FieldByName('ISKONTO').AsFloat),',','.',[])+', TUTAR='+StringReplace(TabDetay.FieldByName('TUTAR').AsString,',','.',[])+' where ID='+IntToStr(ID), [], []);
 end;
 
@@ -387,7 +387,7 @@ begin
     TabDetay.FieldByName('TUTAR').Value := TabDetay.FieldByName('BIRIMFIYAT').Value * Adet;
     TabDetay.FieldByName('DOVIZ_TUTARI').Value := TabDetay.FieldByName('TUTAR').Value * (100 / (100 + TabDetay.FieldByName('KDV').Value));
     TabDetay.Post;
-    if TabDetay.FieldByName('IZLEME').Value > 0  then //eðer cafe ve kaydedilmiþ ise tutar deðiþti diye iþaretleyeceðiz ve daha sonra update edeceðiz..
+    if TabDetay.FieldByName('IZLEME').Value > 0  then //eÄŸer cafe ve kaydedilmiÅŸ ise tutar deÄŸiÅŸti diye iÅŸaretleyeceÄŸiz ve daha sonra update edeceÄŸiz..
        DetayDegistir(TabDetay.FieldByName('FID').AsInteger);       
 end;
 
@@ -403,7 +403,7 @@ procedure THizliGirisDlg.BtnBarkodGirisClick(Sender: TObject);
 begin
   JvTimer1.Enabled :=False;
   if (TabKartlar.Active)and(TabKartlar.RecordCount=1) then begin
-    //eðer 1 tane seçilmiþse burdan eklensin
+    //eÄŸer 1 tane seÃ§ilmiÅŸse burdan eklensin
     EklemeBaslat;
     StokAra.SetFocus;
     StokAra.SelectAll;
@@ -430,7 +430,7 @@ begin
   if not TabDetay.Active then
      EkranTemizleYeniKayitAc
   else begin if (TabDetay.RecordCount>0) then
-    if Application.MessageBox('Girilmiþ kayýtlar var, iptal edilecektir, devam etmek istiyor musunuz?','O N A Y',MB_YESNO + MB_ICONINFORMATION)<>ID_YES then
+    if Application.MessageBox('GirilmiÅŸ kayÄ±tlar var, iptal edilecektir, devam etmek istiyor musunuz?','O N A Y',MB_YESNO + MB_ICONINFORMATION)<>ID_YES then
       Exit
     else
       EkranTemizleYeniKayitAc;
@@ -438,7 +438,7 @@ begin
   SonucListe := TStringList.Create;
   if Tablo.HizliGirisListedenBilgiGetir('Tekliflerim','select S.ID,S.REHBERID,TEKLIFALAN=R1.FIRMA,TARIH,S.DURUM,S.SUBEID, TEKLIFSUBE=R2.FIRMA, HAZIRLAYAN '+
              ' from TEKLIF S inner join REHBER R1 on R1.ID=S.REHBERID inner join REHBER R2 on R2.ID=S.SUBEID '+
-             ' where S.DURUM=1 and S.HAZIRLAYAN='+Kullanan+   //durumu oluþturma dakileri göstericez.. //sadece kendi tekliflerini deðiþtirebilecekler, diðerlerini sadece görebilecekler..
+             ' where S.DURUM=1 and S.HAZIRLAYAN='+Kullanan+   //durumu oluÅŸturma dakileri gÃ¶stericez.. //sadece kendi tekliflerini deÄŸiÅŸtirebilecekler, diÄŸerlerini sadece gÃ¶rebilecekler..
              ' order by 5 desc ',SonucListe,False,[False,False,True,True,True,False,True,True],[nil,nil,nil,nil,tablo.repTeklifDurumu,nil,nil,tablo.repGenelPersonelListesi]) then begin
     EskiSiparisID := StrToInt(SonucListe[0]);
     EditRehID.Text:= SonucListe[1];
@@ -451,11 +451,11 @@ begin
     if TabFatBasDetay.FieldByName('ODEME').AsString <> '' then
        LabelTahsilat.caption := Tablo.inidenAnahtarGetir(IntToStr(Ops_Teklif_Odeme), TabFatBasDetay.FieldByName('ODEME').AsString);
     TabFatBasDetay.Post;
-  end else begin //eski sipariþ listesinden seçim yapýlmamýþsa
+  end else begin //eski sipariÅŸ listesinden seÃ§im yapÄ±lmamÄ±ÅŸsa
     SonucListe.Free;
     Exit;
   end;
-   //ürünleri ekleyelim
+   //Ã¼rÃ¼nleri ekleyelim
   DetayTabloAc(MemoTeklifDetaySQL.Text, EskiSiparisID);
   TabDetayAfterPost(TabDetay);
    {Tablo.TablodanSorguAc(8, 'select URUNID,ADET from TEKLIFDETAY where TEKLIFID='+IntToStr(EskiSiparisID));
@@ -471,7 +471,7 @@ procedure THizliGirisDlg.BtnTeraziClick(Sender: TObject);
 var Adet : Real;
 begin
     if TabDetay.RecordCount<1 then
-       raise Exception.Create('Önce ürün seçilmeli!');
+       raise Exception.Create('Ã–nce Ã¼rÃ¼n seÃ§ilmeli!');
     Application.CreateForm(TTeraziDlg, TeraziDlg);
     TeraziDlg.ShowModal;
     if TeraziDlg.ModalResult = mrOk then begin
@@ -490,7 +490,7 @@ begin
     HizliGirisIsk.Cagiran := 0;
     HizliGirisIsk.Editadet.Text := Miktar;
     HizliGirisIsk.UrunId:= UrunId;
-    HizliGirisIsk.Anabirim := Anabirim;//Anabirim ör:adet için 51 yazýlýr procedurede adet diye baþlýðayazýlýr
+    HizliGirisIsk.Anabirim := Anabirim;//Anabirim Ã¶r:adet iÃ§in 51 yazÄ±lÄ±r procedurede adet diye baÅŸlÄ±ÄŸayazÄ±lÄ±r
     HizliGirisIsk.Stokmu := Stokmu;
     HizliGirisIsk.ShowModal;
     if (HizliGirisIsk.ModalResult = mrOk)and(HizliGirisIsk.Editadet.Text<>'') then
@@ -515,7 +515,7 @@ end;
 procedure THizliGirisDlg.BtnIkramClick(Sender: TObject);
 begin
    TabDetay.Edit;
-   if TabDetay.FieldByName('TUTAR').Value = 0 then begin //daha önce ikram yapýlmýþ
+   if TabDetay.FieldByName('TUTAR').Value = 0 then begin //daha Ã¶nce ikram yapÄ±lmÄ±ÅŸ
        TabDetay.FieldByName('TUTAR').Value := TabDetay.FieldByName('BIRIMFIYAT').Value*TabDetay.FieldByName('ADET').Value;
           TabDetay.FieldByName('DOVIZ_TUTARI').Value := TabDetay.FieldByName('TUTAR').Value;
        TabDetay.FieldByName('ISKONTO').Value := 0;
@@ -524,9 +524,9 @@ begin
        TabDetay.FieldByName('TUTAR').Value := 0;
           TabDetay.FieldByName('DOVIZ_TUTARI').Value := 0;
        TabDetay.FieldByName('ISKONTO').Value := 100;
-       TabDetay.FieldByName('ACIKLAMA').Value := 'Ýkram';
+       TabDetay.FieldByName('ACIKLAMA').Value := 'Ä°kram';
    end;
-   if TabDetay.FieldByName('IZLEME').Value > 0  then //eðer cafe ve kaydedilmiþ ise tutar deðiþti diye iþaretleyeceðiz ve daha sonra update edeceðiz..
+   if TabDetay.FieldByName('IZLEME').Value > 0  then //eÄŸer cafe ve kaydedilmiÅŸ ise tutar deÄŸiÅŸti diye iÅŸaretleyeceÄŸiz ve daha sonra update edeceÄŸiz..
       DetayDegistir(TabDetay.FieldByName('FID').AsInteger);
    TabDetay.Post;
 end;
@@ -614,7 +614,7 @@ end;
 procedure THizliGirisDlg.AksiyonTusClick(Sender: TObject);
 begin
    case AksiyonTus.Tag of
-    1: begin Gratis:=0; //Gratis deðil
+    1: begin Gratis:=0; //Gratis deÄŸil
              EditRehAd.Caption :=copy(EditRehAd.Caption, 1, pos('(', EditRehAd.Caption)-1);
              AksiyonTus.Visible := False;
        end;
@@ -666,11 +666,11 @@ end;
 procedure THizliGirisDlg.TempTablolariYokEt(TabloAdi:string);
 begin
   try
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll])+''') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]),[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'KAS'') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'KAS',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'FATBAS'') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'FATBAS',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll])+''') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]),[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'KAS'') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'KAS',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'IF OBJECT_ID(''tempdb..'+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'FATBAS'') IS NOT NULL Drop Table '+StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'FATBAS',[],[]);
   Except
-    ShowMessage('Tablo düþürme iþlemi baþarýsýz oldu.');
+    ShowMessage('Tablo dÃ¼ÅŸÃ¼rme iÅŸlemi baÅŸarÄ±sÄ±z oldu.');
     ModalResult:=mrCancel;
   end;
 end;
@@ -682,7 +682,7 @@ var belgeno :  Tbelgeno;
     var SonucListe:TStringList;
     begin
        SonucListe := TStringList.Create;
-       if Tablo.HizliGirisListedenBilgiGetir('Sipariþlerim','select ANAHTAR, DEGER from GENINI where BOLUM = -2904 and DIL=-1 '+
+       if Tablo.HizliGirisListedenBilgiGetir('SipariÅŸlerim','select ANAHTAR, DEGER from GENINI where BOLUM = -2904 and DIL=-1 '+
            ' order by 1 ',SonucListe,False,[True, False],[]) then
        LabelTahsilat.Caption :='Tahsilat: '+ SonucListe[0];
        TabFatBasDetay.Edit;
@@ -692,14 +692,14 @@ var belgeno :  Tbelgeno;
     end;
     procedure ParcaliOdemeIslemleri;
     begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update '+AktifFatTabloAdi+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update '+AktifFatTabloAdi+
            ' set MF=(MF+ADET)-isnull((select isnull(ADET,0) from '+HizliGirisTahsilatDlg.GeciciTablo+' where ID='+AktifFatTabloAdi+'.ID),0)'+
            '  ,ADET=(MF+ADET)-((MF+ADET)-isnull((select isnull(ADET,0) from '+HizliGirisTahsilatDlg.GeciciTablo+' where ID='+AktifFatTabloAdi+'.ID),0))'+
            ' ,TUTAR=BIRIMFIYAT*((MF+ADET)-((MF+ADET)-isnull((select isnull(ADET,0) from '+HizliGirisTahsilatDlg.GeciciTablo+' where ID='+AktifFatTabloAdi+'.ID),0))) ', [],[]);
         Tabloyenile(TabDetay,[]);
         TabDetayAfterPost(TabDetay);
-        if AdisyonNo>0 then //eðer adisyon iþlenmiþse onlarda da ödenenleri düþelim
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATURA '+
+        if AdisyonNo>0 then //eÄŸer adisyon iÅŸlenmiÅŸse onlarda da Ã¶denenleri dÃ¼ÅŸelim
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATURA '+
            ' set MF=isnull((select isnull(MF,0) from '+AktifFatTabloAdi+' where FATURA.ID='+AktifFatTabloAdi+'.FID),0)'+
            ' ,ADET=isnull((select isnull(ADET,0) from '+AktifFatTabloAdi+' where FATURA.ID='+AktifFatTabloAdi+'.FID),0)'+
            ' ,TUTAR=isnull((select isnull(ADET,0) from '+AktifFatTabloAdi+' where FATURA.ID='+AktifFatTabloAdi+'.FID),0)*BIRIMFIYAT where FATBASID='+IntToStr(AdisyonNo), [],[]);
@@ -708,9 +708,9 @@ begin
   if TabDetay.RecordCount=0 then Exit;
 
   if (Gratis > 0.1)and(EditToplamTutar.Value > Gratis) then
-        raise Exception.Create('Tutar ücretsiz miktardan büyük olamaz!');
+        raise Exception.Create('Tutar Ã¼cretsiz miktardan bÃ¼yÃ¼k olamaz!');
 
-  if Cagiran in [4,5] then begin//teklif veya sipaiþ ise
+  if Cagiran in [4,5] then begin//teklif veya sipaiÅŸ ise
      TahsilBilgisiAl;
      exit;
   end;
@@ -723,22 +723,22 @@ begin
       HizliGirisTahsilatDlg.ShowModal;
       MResult :=  HizliGirisTahsilatDlg.ModalResult;
       if MResult = mrOk then begin
-         if Cagiran = 7 then begin //cafe ise fiþ ya da fat yazmadan önce adisyonu kaydedelim
-            //Parçalý ödeme mi? Evetse ödeme yapýlanlarý MF ye atmamýz lazým
+         if Cagiran = 7 then begin //cafe ise fiÅŸ ya da fat yazmadan Ã¶nce adisyonu kaydedelim
+            //ParÃ§alÄ± Ã¶deme mi? Evetse Ã¶deme yapÄ±lanlarÄ± MF ye atmamÄ±z lazÄ±m
             if (HizliGirisTahsilatDlg.PanelHesapAyir.Visible)and(HizliGirisTahsilatDlg.TabDetay.RecordCount>0) then begin
                ParcaliOdemeIslemleri;
                KapatTusClick(self);
                exit;
             end;
-            //daha önce parçalý ödeme olmuþsa, ADETleri normal haline getirelim
+            //daha Ã¶nce parÃ§alÄ± Ã¶deme olmuÅŸsa, ADETleri normal haline getirelim
             //belgeno.belgeno := TransferNoGetir;
             if TabFatBasDetay.FieldByName('FATURANO').AsString = '' then
                BelgeNoIslemleri;
             BelgeyeYaz(AdisyonNo,belgeno, EditRehAd.Caption,'','','','','','', False) ;
             if  AdisyonNo < 1 then
-                AdisyonNo := HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').Value;//cafe yeni sipariþ aldýk, anýnda fiþ verilecekse önce adisyon oluþur sonra fiþ kesili ve adisyon kapatýlýr. Adisyon kapatmak için bu bilgiyi alýyoruz
-//Trigger            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set DURUM=1,ACIKLAMA=''belgeye dönüþtü.'' where ID='+IntToStr(AdisyonNo),[],[]);
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATURA set ADET=ADET+MF, MF=0, TUTAR=(ADET+MF)*BIRIMFIYAT where FATBASID='+IntToStr(AdisyonNo), [],[]);
+                AdisyonNo := HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').Value;//cafe yeni sipariÅŸ aldÄ±k, anÄ±nda fiÅŸ verilecekse Ã¶nce adisyon oluÅŸur sonra fiÅŸ kesili ve adisyon kapatÄ±lÄ±r. Adisyon kapatmak iÃ§in bu bilgiyi alÄ±yoruz
+//Trigger            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set DURUM=1,ACIKLAMA=''belgeye dÃ¶nÃ¼ÅŸtÃ¼.'' where ID='+IntToStr(AdisyonNo),[],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATURA set ADET=ADET+MF, MF=0, TUTAR=(ADET+MF)*BIRIMFIYAT where FATBASID='+IntToStr(AdisyonNo), [],[]);
          end;
          FaturaOlustur;
 
@@ -747,8 +747,8 @@ begin
          EkranTemizleYeniKayitAc;
       end;
   end;
-  if (Cagiran = 7)and(MResult=mrOk) then begin //boþ masa haline getirilir
-     //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0 where MASANO='''+MasaNo+'''',[],[]);
+  if (Cagiran = 7)and(MResult=mrOk) then begin //boÅŸ masa haline getirilir
+     //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0 where MASANO='''+MasaNo+'''',[],[]);
      Close;
   end;
   TabKartlar.Close;
@@ -774,7 +774,7 @@ procedure THizliGirisDlg.TahsilatInsert;
         if TabTahDetay.FieldByName('TUR').AsInteger=26 then //kupon ile tahsilat..
           HizliGirisAnaMenu.TabKasa.FieldByName('CEKSENETID').Value := TabTahDetay.FieldByName('CEKSENETID').AsInteger;
         HizliGirisAnaMenu.TabKasa.FieldByName('MASRAFID').Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('MASRAFID').Value;
-        HizliGirisAnaMenu.TabKasa.FieldByName('ACIKLAMA').Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('FATURANO').AsString + ' Nolu ' + Tablo.RepKasaTurleri.Properties.FindItemByValue(FatTur).Description + ' Tahsilatý.';
+        HizliGirisAnaMenu.TabKasa.FieldByName('ACIKLAMA').Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('FATURANO').AsString + ' Nolu ' + Tablo.RepKasaTurleri.Properties.FindItemByValue(FatTur).Description + ' TahsilatÄ±.';
         HizliGirisAnaMenu.TabKasa.FieldByName('FATURAID').Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').Value;
         HizliGirisAnaMenu.TabKasa.FieldByName('EKLEYEN').Value := Kullanan;
         HizliGirisAnaMenu.TabKasa.FieldByName('YERI').AsInteger := TabNo_KASATAKIP;
@@ -788,15 +788,15 @@ Begin // alacak 21nakit 25pos
   HizliGirisAnaMenu.TabKasa.SQL.Text := 'Select * from KASA where 1=2';
   HizliGirisAnaMenu.TabKasa.Open;
 
-  //10 tl 20 tl gibi nakitler seçilerek toplamnakit oluþturulur ve bunun 1 satýr olarak kaydedilmesi gerekir;
+  //10 tl 20 tl gibi nakitler seÃ§ilerek toplamnakit oluÅŸturulur ve bunun 1 satÄ±r olarak kaydedilmesi gerekir;
   if HizliGirisTahsilatDlg.ToplamNakit > 0 then
      KasaKaydet('K',HizliGirisTahsilatDlg.ToplamNakit-HizliGirisTahsilatDlg.EditParaUstu.EditValue);
-  //Nakit dýþýndakilerin kasaya kaydý
+  //Nakit dÄ±ÅŸÄ±ndakilerin kasaya kaydÄ±
   TabTahDetay.First;
   while not TabTahDetay.Eof do begin
-    if TabTahDetay.FieldByName('TUR').AsInteger>0 then begin //Açýk hesap  deðilse eklenecek
+    if TabTahDetay.FieldByName('TUR').AsInteger>0 then begin //AÃ§Ä±k hesap  deÄŸilse eklenecek
         case TabTahDetay.FieldByName('TUR').AsInteger of
-          21:;//üstte kaydedilmiþti.
+          21:;//Ã¼stte kaydedilmiÅŸti.
           25: KasaKaydet('P',TabTahDetay.FieldByName('TUTAR').AsCurrency);
           26,28, 29, 2600..9000: KasaKaydet('H',TabTahDetay.FieldByName('TUTAR').AsCurrency);
         end;
@@ -819,7 +819,7 @@ begin
   ASQL := 'select ID,AD from MASRAFGELIR where KOD like (select KOD from MASRAFGELIR where ID='+IntToStr(NakliyeID)+')+''%'' ';
   ctrls:= TGirdiDenetimleri.Create
           .ImageComboBox('Nakliye Tipi',@ANakliyeID,Tablo.FDCnn,ASQL,False,nil)
-          .CurrencyEdit('Nakliye Tutarý',@ATutar,2);
+          .CurrencyEdit('Nakliye TutarÄ±',@ATutar,2);
   if TGirisKutusuEx.BilgiAlEx('Nakliye Bilgileri', ctrls) = mrOk then begin
     NakliyeTutari := ATutar;
     NakliyeID := ANakliyeID;
@@ -830,7 +830,7 @@ begin
    {ToplamKilo:=0;
    TabDetay.First;
    while not TabDetay.eof do begin
-     //Önce tanýmlý kilosuna bakalým
+     //Ã–nce tanÄ±mlÄ± kilosuna bakalÄ±m
      Tablo.TablodanSorguAc(1, 'SELECT isnull(ADET2,0.0) FROM STOKCEVRIM SC INNER JOIN STOKLAR S ON SC.STOKID=S.ID  AND SC.BIRIM1=S.BIRIM2 AND SC.BIRIM2=S.ANABIRIM '+
                 ' WHERE STOKID='+TabDetay.FieldByName('URUNID').AsString);
      if (Tablo.Query1.RecordCount<1)or(Tablo.Query1.Fields[0].AsFloat=0) then begin
@@ -847,7 +847,7 @@ begin
    end;
 
    SonucListe := TStringList.Create;
-   if Tablo.HizliGirisListedenBilgiGetir('Ýller','select ILNO, ILADI from ILLER order by 2 ',SonucListe,False,[False, True],[])then begin
+   if Tablo.HizliGirisListedenBilgiGetir('Ä°ller','select ILNO, ILADI from ILLER order by 2 ',SonucListe,False,[False, True],[])then begin
       ID := StrToInt(SonucListe[0]);
       SonucListe.Clear;
       if Tablo.HizliGirisListedenBilgiGetir('Semtler','select SEMTNO, SEMTADI, UZAKLIK from ILSEMT where ILNO='+IntToStr(ID)+' order by 2 ',SonucListe,False,[False, True, True],[])then begin
@@ -868,7 +868,7 @@ begin
   if (Sender as TJvNavPanelButton).Caption = 'Ent' then
     BtnBarkodGirisClick(Self);
   if not TusBasili then begin
-    if (Sender as TJvNavPanelButton).Tag = 55 then //geri tuþu '  ‹'
+    if (Sender as TJvNavPanelButton).Tag = 55 then //geri tuÅŸu '  â€¹'
       if StokAra.SelLength > 0 then
         StokAra.ClearSelection
       else
@@ -907,7 +907,7 @@ end;
 procedure THizliGirisDlg.BtnParktanAlClick(Sender: TObject);
 begin
    if TabDetay.RecordCount>0 then
-      raise Exception.Create('Seçilmiþ ürünler var. Ýþlem yarým kalmýþ.');
+      raise Exception.Create('SeÃ§ilmiÅŸ Ã¼rÃ¼nler var. Ä°ÅŸlem yarÄ±m kalmÄ±ÅŸ.');
 
   PopupBekletilenler.popup(mouse.CursorPos.x, mouse.CursorPos.y);
 end;
@@ -935,10 +935,10 @@ begin
   end;
 
   StokIsk := Tablo.RehberIskontoVarMi(RehID,-3,-1);
-  StatusBar1.Panels[4].Text := 'Stok Ýsk%:'+CurrtoStr(StokIsk);
+  StatusBar1.Panels[4].Text := 'Stok Ä°sk%:'+CurrtoStr(StokIsk);
 
   HizmetIsk := Tablo.RehberIskontoVarMi(RehID,-13,-11);
-  StatusBar1.Panels[5].Text := 'Hizmet Ýsk%:'+CurrtoStr(HizmetIsk);
+  StatusBar1.Panels[5].Text := 'Hizmet Ä°sk%:'+CurrtoStr(HizmetIsk);
 
   if (FatbaslikOlustursun)and(TabFatBasDetay.Active) then
      FatbaslikOlustur;
@@ -947,7 +947,7 @@ end;
 procedure THizliGirisDlg.EditKisiClick(Sender: TObject);
 var Adet : Real;
 begin
-   Adet := AdetGetir('Kiþi sayýsýný giriniz','1',0,0,False);
+   Adet := AdetGetir('KiÅŸi sayÄ±sÄ±nÄ± giriniz','1',0,0,False);
    if Adet<>-9999 then
       KisiSay :=Round( Adet)
    else
@@ -963,12 +963,12 @@ var
       Yil, Ay, Gun : Word;
   begin
      Tablo.TablodanSorguAc(1, ' select isnull(BILGI,0) from REHBERBILGI B inner join  REHBERAYAR A on A.SIRA=B.SIRA and A.VARSAYILAN=101 '+
-                              '  where B.YERI=2 and B.YER_ID='+IntToStr(RehberID)); // ticari bilgilerde gratis varsayýlanda kayýtlý
+                              '  where B.YERI=2 and B.YER_ID='+IntToStr(RehberID)); // ticari bilgilerde gratis varsayÄ±landa kayÄ±tlÄ±
      if Tablo.Query1.RecordCount > 0 then
         Gratis := Tablo.Query1.Fields[0].AsCurrency
      else
         Gratis := 0;
-     //yapýlan harcamaya bakalým
+     //yapÄ±lan harcamaya bakalÄ±m
      if Gratis > 0.1 then begin
         Tarih := Tablo.GenINI.BugunTrh;
         DecodeDate(Tarih, Yil, Ay, Gun);
@@ -981,14 +981,14 @@ var
         EditRehAd.Caption := EditRehAd.Caption + '('+Format('%7.2f', [Gratis])+' TL)';
         AksiyonTus.visible := True;
         AksiyonTus.left:=100;
-        AksiyonTus.Caption := 'Ücretli';
+        AksiyonTus.Caption := 'Ãœcretli';
         AksiyonTus.Tag:=1;
      end;
   end;
 begin
   Case Button of
   mbLeft: begin
-            if Cagiran in [1,4,5,7] then begin//Satýþ ise müþteri seçimi
+            if Cagiran in [1,4,5,7] then begin//SatÄ±ÅŸ ise mÃ¼ÅŸteri seÃ§imi
               RehberID := Tablo.RehberAra_IDGetir(0);
               if RehberID > 0 then begin
                   MusteriDegistir(RehberID, True);
@@ -1011,21 +1011,21 @@ var
 begin
   if (Sender as TJvNavPanelButton) = BtnSecimeIskonto then begin
     if (TabDetay.FieldByName('TUR').AsInteger=1)and(Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from STOKLAR where ID=&SID and ISKONTOSUZ=1',['&SID'],[TabDetay.FieldByName('URUNID').AsInteger])) then begin
-      ShowMessage('Bu Ürüne Ýskonto Yapýlamaz!');
+      ShowMessage('Bu ÃœrÃ¼ne Ä°skonto YapÄ±lamaz!');
       Abort;
     end;
   end else if (Sender as TJvNavPanelButton) = BtnTumuneIskonto then begin
     TabDetay.First;
     while not TabDetay.Eof do begin
       if (TabDetay.FieldByName('TUR').AsInteger=1)and(Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from STOKLAR where ID=&SID and ISKONTOSUZ=1',['&SID'],[TabDetay.FieldByName('URUNID').AsInteger])) then begin
-        ShowMessage('Bu Ürüne Ýskonto Yapýlamaz!');
+        ShowMessage('Bu ÃœrÃ¼ne Ä°skonto YapÄ±lamaz!');
         Abort;
       end;
       TabDetay.Next;
     end;
   end;
   Application.CreateForm(THizliGirisIsk, HizliGirisIsk);
-  HizliGirisIsk.Caption := 'Ýskonto giriþi';
+  HizliGirisIsk.Caption := 'Ä°skonto giriÅŸi';
   HizliGirisIsk.Cagiran := 1;
   if (Sender as TJvNavPanelButton) = BtnSecimeIskonto then begin
     HizliGirisIsk.EditIskontosuz.EditValue := TabDetay.FieldByName('BIRIMFIYAT').Value * TabDetay.FieldByName('MIKTAR').Value;
@@ -1053,8 +1053,8 @@ begin
   HizliGirisIsk.ShowModal;
   if HizliGirisIsk.ModalResult = mrOk then begin
     if   Tablo.GENINI.ReadBoolean(Ops_HizliGiris_IskontodaAciklamaSor,False) then begin  //  HizliGiris   IskontodaAciklamaSor'
-      ctrls:= TGirdiDenetimleri.Create.Edit('Açýklama:',@IskontoAciklama);
-      if TGirisKutusuEx.BilgiAlEx('Ýskonto Açýklamasý', ctrls) <> mrOk then
+      ctrls:= TGirdiDenetimleri.Create.Edit('AÃ§Ä±klama:',@IskontoAciklama);
+      if TGirisKutusuEx.BilgiAlEx('Ä°skonto AÃ§Ä±klamasÄ±', ctrls) <> mrOk then
         abort;
     end;
     if (Sender as TJvNavPanelButton) = BtnSecimeIskonto then begin
@@ -1072,7 +1072,7 @@ begin
              TabDetay.FieldByName('DOVIZ_TUTARI').Value := TabDetay.FieldByName('TUTAR').Value * (100 / (100 + TabDetay.FieldByName('KDV').Value));
           TabDetay.FieldByName('ISKONTO').Value := 0;
        end;
-       if TabDetay.FieldByName('IZLEME').Value > 0  then //eðer cafe ve kaydedilmiþ ise tutar deðiþti diye iþaretleyeceðiz ve daha sonra update edeceðiz..
+       if TabDetay.FieldByName('IZLEME').Value > 0  then //eÄŸer cafe ve kaydedilmiÅŸ ise tutar deÄŸiÅŸti diye iÅŸaretleyeceÄŸiz ve daha sonra update edeceÄŸiz..
           DetayDegistir(TabDetay.FieldByName('FID').AsInteger);
       TabDetay.FieldByName('ACIKLAMA').Value := IskontoAciklama;
       TabDetay.Post;
@@ -1089,7 +1089,7 @@ begin
            TabDetay.FieldByName('TUTAR').Value := TabDetay.FieldByName('MIKTAR').Value*TabDetay.FieldByName('BIRIMFIYAT').Value * ((100 - HizliGirisIsk.EditYuzde.EditValue) / 100);
               TabDetay.FieldByName('DOVIZ_TUTARI').Value := TabDetay.FieldByName('MIKTAR').Value*TabDetay.FieldByName('DOVIZ_TUTARI').Value * ((100 - HizliGirisIsk.EditYuzde.EditValue) / 100) * (100 / (100 - TabDetay.FieldByName('ISKONTO').Value));
         end;
-        if TabDetay.FieldByName('IZLEME').Value > 0  then //eðer cafe ve kaydedilmiþ ise tutar deðiþti diye iþaretleyeceðiz ve daha sonra update edeceðiz..
+        if TabDetay.FieldByName('IZLEME').Value > 0  then //eÄŸer cafe ve kaydedilmiÅŸ ise tutar deÄŸiÅŸti diye iÅŸaretleyeceÄŸiz ve daha sonra update edeceÄŸiz..
            DetayDegistir(TabDetay.FieldByName('FID').AsInteger);
         TabDetay.FieldByName('ISKONTO').Value := HizliGirisIsk.EditYuzde.EditValue;
         TabDetay.Post;
@@ -1112,40 +1112,40 @@ var Adet:Real;
     ID:Integer;
 begin
   if (TabDetay.Active)and(TabDetay.RecordCount > 0 ) then begin
-      if Cagiran = 7 then begin    //cafe ekranýnda
+      if Cagiran = 7 then begin    //cafe ekranÄ±nda
          case TabDetay.FieldByName('IZLEME').Value of
            0: TabDetay.Delete;
-           1: begin   //daha önce kayýtlýolanlar varsa burdan silinince tablodan da silinmeli
-                 Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'delete from FATURA where ID='+TabDetay.FieldByName('FID').AsString,[],[]);
+           1: begin   //daha Ã¶nce kayÄ±tlÄ±olanlar varsa burdan silinince tablodan da silinmeli
+                 Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'delete from FATURA where ID='+TabDetay.FieldByName('FID').AsString,[],[]);
                  TabDetay.Delete;
               end;
-           2: begin  // sipariþ verilmiþse silinmez ancak iptal edilir
-                 ShowMessage('Sipariþ edilmiþ, silinemez, iptal edilebilir!');
-                 Adet := AdetGetir('Ýptal miktarýný girin',TabDetay.FieldByName('ADET').Value,0,0,False);
+           2: begin  // sipariÅŸ verilmiÅŸse silinmez ancak iptal edilir
+                 ShowMessage('SipariÅŸ edilmiÅŸ, silinemez, iptal edilebilir!');
+                 Adet := AdetGetir('Ä°ptal miktarÄ±nÄ± girin',TabDetay.FieldByName('ADET').Value,0,0,False);
                  if Adet=-9999 then
                     Abort;
-                 if TabDetay.FieldByName('ADET').Value = Adet then begin //iptal edilecek miktar girilene eþitse direk iptal edilir
-                       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set ADET=0, BIRIMFIYAT=0,TUTAR=0, ISKONTO=0, IADEADET='+FloatToStr(Adet)+',ACIKLAMA=''**ÝPTAL** '+FloatToStr(Adet)+' Adet'',IZLEME=1 where ID='+TabDetay.FieldByName('FID').AsString,[],[]);
+                 if TabDetay.FieldByName('ADET').Value = Adet then begin //iptal edilecek miktar girilene eÅŸitse direk iptal edilir
+                       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set ADET=0, BIRIMFIYAT=0,TUTAR=0, ISKONTO=0, IADEADET='+FloatToStr(Adet)+',ACIKLAMA=''**Ä°PTAL** '+FloatToStr(Adet)+' Adet'',IZLEME=1 where ID='+TabDetay.FieldByName('FID').AsString,[],[]);
 //                       DetayDegistir(TabDetay.FieldByName('FID').AsString);
                        DetayTabloAc(MemoAdisyonSatir.Text, EskiSiparisID);
                  end
                  else if TabDetay.FieldByName('ADET').Value < Adet then
-                         raise Exception.Create('Ýptal edilecek miktar daha büyük olamaz!')
-                 else begin //iptal edilecek kýsým daha az ise iptaledilen satýr olarak eklenir     
+                         raise Exception.Create('Ä°ptal edilecek miktar daha bÃ¼yÃ¼k olamaz!')
+                 else begin //iptal edilecek kÄ±sÄ±m daha az ise iptaledilen satÄ±r olarak eklenir     
                        TabDetay.Edit;
                        TabDetay.FieldByName('ADET').Value := TabDetay.FieldByName('ADET').Value-Adet;
                        TabDetay.FieldByName('MIKTAR').Value := TabDetay.FieldByName('ADET').Value;
                        TabDetay.FieldByName('TUTAR').Value := TabDetay.FieldByName('BIRIMFIYAT').Value*TabDetay.FieldByName('ADET').Value;
                        TabDetay.Post;
                        DetayDegistir(TabDetay.FieldByName('FID').AsInteger);
-                       //iptal edeceðimiz adet için yeni satýr oluþturalým
+                       //iptal edeceÄŸimiz adet iÃ§in yeni satÄ±r oluÅŸturalÄ±m
                        ID := Tablo.SatirKopyala('FATURA',TabDetay.FieldByName('FID').AsInteger);
                        //ID := Tablo.SatirKopyala(AktifFatTabloAdi,TabDetay.FieldByName('ID').AsInteger);
-                       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set ADET=0,BIRIMFIYAT=0,TUTAR=0, ISKONTO=0,IADEADET='+FloatToStr(Adet)+', ACIKLAMA=''**ÝPTAL** '+FloatToStr(Adet)+' Adet'',IZLEME=1 where ID='+IntToStr(ID),[],[]);
+                       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set ADET=0,BIRIMFIYAT=0,TUTAR=0, ISKONTO=0,IADEADET='+FloatToStr(Adet)+', ACIKLAMA=''**Ä°PTAL** '+FloatToStr(Adet)+' Adet'',IZLEME=1 where ID='+IntToStr(ID),[],[]);
                        DetayTabloAc(MemoAdisyonSatir.Text, AdisyonNo);
                  end;
            end;
-           -1 : raise Exception.Create('Ýptal edilen silinemez!');
+           -1 : raise Exception.Create('Ä°ptal edilen silinemez!');
          end;
       end else
          TabDetay.Delete;
@@ -1162,21 +1162,21 @@ begin
     if not TabDetay.Active then
        EkranTemizleYeniKayitAc
     else begin if (TabDetay.RecordCount>0) then
-       if Application.MessageBox('Girilmiþ kayýtlar var, iptal edilecektir, devam etmek istiyor musunuz?','O N A Y',MB_YESNO + MB_ICONINFORMATION)<>ID_YES then
+       if Application.MessageBox('GirilmiÅŸ kayÄ±tlar var, iptal edilecektir, devam etmek istiyor musunuz?','O N A Y',MB_YESNO + MB_ICONINFORMATION)<>ID_YES then
           Exit
        else
           EkranTemizleYeniKayitAc;
     end;
     SonucListe := TStringList.Create;
-    case Cagiran of  //Sipariþ  eskilerden seçilir  verilen teklif
-     2 : begin //Verilen sipariþte o þubenin verdiðisipariþler gelir
-          Sonuc:= Tablo.HizliGirisListedenBilgiGetir('Sipariþlerim','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
+    case Cagiran of  //SipariÅŸ  eskilerden seÃ§ilir  verilen teklif
+     2 : begin //Verilen sipariÅŸte o ÅŸubenin verdiÄŸisipariÅŸler gelir
+          Sonuc:= Tablo.HizliGirisListedenBilgiGetir('SipariÅŸlerim','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
            ' SIPARISALAN=R2.FIRMA from SIPARIS S inner join REHBER R1 on R1.ID=S.REHBERID inner join REHBER R2 on R2.ID=S.SUBEID '+
            ' where REHBERID='+IntToStr(SubeId)+
            ' order by 5 desc ',SonucListe,False,[False, False, False,False,  True, True, False, True],[]);
          end;
-     4 : begin //alýnan sip
-              Sonuc:= Tablo.HizliGirisListedenBilgiGetir('Sipariþlerim','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
+     4 : begin //alÄ±nan sip
+              Sonuc:= Tablo.HizliGirisListedenBilgiGetir('SipariÅŸlerim','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
                ' SIPARISALAN=R2.FIRMA from SIPARIS S inner join REHBER R1 on R1.ID=S.REHBERID inner join REHBER R2 on R2.ID=S.SUBEID '+
                ' order by 5 desc ',SonucListe,False,[False, False, True,False,  True, True, False, True],[])
          end;
@@ -1195,32 +1195,32 @@ begin
             TabFatBasDetay.FieldByName('REHBERID').Value := SonucListe[1];
             TabFatBasDetay.Post;
          end
-     end else begin //eski sipariþ listesinden seçim yapýlmamýþsa
+     end else begin //eski sipariÅŸ listesinden seÃ§im yapÄ±lmamÄ±ÅŸsa
           SonucListe.Free;
           Exit;
      end;
-       //ürünleri ekleyelim
+       //Ã¼rÃ¼nleri ekleyelim
     DetayTabloAc(MemoSiparisDetay.Text, EskiSiparisID);
 
         //EvTus.Click;
     if Cagiran=3 then begin//Transfer
-       if Tablo.HizliGirisListedenBilgiGetir('Gelen Sipariþler','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
+       if Tablo.HizliGirisListedenBilgiGetir('Gelen SipariÅŸler','select S.ID, S.REHBERID, SIPARISVEREN=R1.FIRMA, CIKISDEPO, SIPARISTARIH, S.DURUM, S.SUBEID,'+
          ' SIPARISALAN=R2.FIRMA from SIPARIS S inner join REHBER R1 on R1.ID=S.REHBERID inner join REHBER R2 on R2.ID=S.SUBEID '+
          ' where GETDATE()-SIPARISTARIH<4 and R2.ID='+IntToStr(SubeId)+' order by 5 desc ',SonucListe,False,[False, False, True,False,  True, True, False, False],[])then begin
           EskiSiparisID := StrToInt(SonucListe[0]);
           EditRehID.Text:= SonucListe[1];
           EditRehAd.Caption := SonucListe[2];
           TabFatBasDetay.Edit;
-          TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariþi veren þube kodu alýnýr
-          TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariþ verilen þube kodu
-          TabFatBasDetay.FieldByName('BASLIK').Value := EditRehAd.Caption;  //  sipariþi veren þube adý alýnýr
+          TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariÅŸi veren ÅŸube kodu alÄ±nÄ±r
+          TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariÅŸ verilen ÅŸube kodu
+          TabFatBasDetay.FieldByName('BASLIK').Value := EditRehAd.Caption;  //  sipariÅŸi veren ÅŸube adÄ± alÄ±nÄ±r
           TabFatBasDetay.Post;
-          //transfer þubenin hangi deposuna olacak? depo 1 taneyse direk onu alalým birden fazlaysa soralým
+          //transfer ÅŸubenin hangi deposuna olacak? depo 1 taneyse direk onu alalÄ±m birden fazlaysa soralÄ±m
           Tablo.TablodanSorguAc(3, 'select ID from DEPOLAR where SUBEID='+EditRehID.Text);
            case Tablo.Query3.RecordCount of
               1 : GirisDepoId := Tablo.Query3.Fields[0].AsInteger;
               2..9999 : begin SonucListe.Clear;
-                          if Tablo.HizliGirisListedenBilgiGetir('Depo Seçin','select ID,DEPOADI from DEPOLAR where DURUM=1 and'+
+                          if Tablo.HizliGirisListedenBilgiGetir('Depo SeÃ§in','select ID,DEPOADI from DEPOLAR where DURUM=1 and'+
                              ' SUBEID='+EditRehID.Text+' order by 2',SonucListe,False,[False, True],[])then
                              GirisDepoId:= StrToInt(SonucListe[0]);
                         end;
@@ -1230,7 +1230,7 @@ begin
            TabKartlar.Close;
           //             TabKartlar.SQL.Text := 'select S.ID,SIPID=D.ID,KOD,STOKADI,MARKA,MODEL,ADET, RESIM  from STOKLAR S '+
           //                    ' inner join SIPARISDETAY D on S.ID=D.URUNID where SIPARISID=:D1';
-         //daha önce yapýlmýþ sevkler varsa düþürülerek kalan sipariþ adetleri görülür
+         //daha Ã¶nce yapÄ±lmÄ±ÅŸ sevkler varsa dÃ¼ÅŸÃ¼rÃ¼lerek kalan sipariÅŸ adetleri gÃ¶rÃ¼lÃ¼r
          TabKartlar.SQL.Text := 'select x.*, S2.RESIM from('+
                  ' select S.ID,SIPARISID=SD.ID,KOD,STOKADI,MARKA,MODEL,ADET=SD.ADET-isnull(SUM(F.ADET),0), B.BARKOD  from STOKLAR S '+
                  ' inner join SIPARISDETAY SD on S.ID = SD.URUNID'+
@@ -1250,7 +1250,7 @@ begin
     KaydetTus.Visible := True;
     KaydetTus.Left :=KapatTus.Left - KapatTus.Width;
     SonucListe.Free;
-    //þube adýný yazalým
+    //ÅŸube adÄ±nÄ± yazalÄ±m
 //    if EditRehID.Text='' then
 //       SubeSecim;
     if not TabDetay.Active then
@@ -1275,7 +1275,7 @@ procedure THizliGirisDlg.BtnSiparisYazClick(Sender: TObject);
 var belgeno: TBelgeNo;
     i : smallint;
 begin
-   //yazdýrmadan önce kaydedilip durumu (IZLEME) 1 yapýlýr
+   //yazdÄ±rmadan Ã¶nce kaydedilip durumu (IZLEME) 1 yapÄ±lÄ±r
    //belgeno.belgeno := TransferNoGetir;
    if TabFatBasDetay.FieldByName('FATURANO').AsString = '' then
       BelgeNoIslemleri;
@@ -1283,7 +1283,7 @@ begin
 
    DtsDetay.Dataset := TabDetayYaz;
 
-   //sýrayla tüm yazýcýlara bakalým  mutfak, bar,fastfood gibi
+   //sÄ±rayla tÃ¼m yazÄ±cÄ±lara bakalÄ±m  mutfak, bar,fastfood gibi
    for i := 0 to SiparisYazdirList.Items.Count - 1 do begin
        TabDetayYaz.close;
 //       TabDetayYaz.SQL.Text:= 'select * from '+StringReplace(AktifFatTabloAdi, '&', '', [rfReplaceAll]) + '  where IZLEME < 2 and CAST(KATEGORI AS VARCHAR(10))  in ('+
@@ -1300,10 +1300,10 @@ begin
            Yazdir(SiparisYazdirList.Items[i], 1);
    end;
 
-//      showmessage('Gönderim verisi bulunamadý. Ya daha önce gönderilmiþ, ya da gönderim listesinde yok!')
-   //yazdýrmadan (mutfaktan) sonra update ile durumu (IZLEME) 2 yapýlýr. Renk için
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ' + AktifFatTabloAdi +' set IZLEME=2' ,[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set IZLEME=2 where FATBASID='+IntToStr(AdisyonNo),[],[]);// EskiSiparisID
+//      showmessage('GÃ¶nderim verisi bulunamadÄ±. Ya daha Ã¶nce gÃ¶nderilmiÅŸ, ya da gÃ¶nderim listesinde yok!')
+   //yazdÄ±rmadan (mutfaktan) sonra update ile durumu (IZLEME) 2 yapÄ±lÄ±r. Renk iÃ§in
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ' + AktifFatTabloAdi +' set IZLEME=2' ,[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set IZLEME=2 where FATBASID='+IntToStr(AdisyonNo),[],[]);// EskiSiparisID
    DtsDetay.Dataset := TabDetay;
    TabDetay.Close;
    TabDetay.Open;
@@ -1328,8 +1328,8 @@ begin
       else
          Sablon := Kasiyer_Cafe_Hesap_Sablon;
 
-      ctrls := TGirdiDenetimleri.Create.Edit('Yazdýrma Þablon Adý',@Sablon);
-      if TGirisKutusuEx.BilgiAlEx('Yazdýrma Þablon Adý', ctrls) = mrOk then begin
+      ctrls := TGirdiDenetimleri.Create.Edit('YazdÄ±rma Åžablon AdÄ±',@Sablon);
+      if TGirisKutusuEx.BilgiAlEx('YazdÄ±rma Åžablon AdÄ±', ctrls) = mrOk then begin
          if TJvNavPanelButton(Sender).Name='BtnSiparisYaz' then begin
             Kasiyer_Cafe_Sip_Sablon := Sablon;
             Tablo.GENINI.WriteString(Ops_Kasiyer_Cafe_Sip_Sablon, Sablon)
@@ -1345,7 +1345,7 @@ procedure THizliGirisDlg.BtnTSilClick(Sender: TObject);
 begin
    Tablo.TablodanSorguAc(1,'select count(*) from  ' + AktifFatTabloAdi+' where IZLEME=2');
    if Tablo.Query1.fields[0].Asinteger>0 then
-      raise exception.Create('Sipariþ edilmiþ ürünler var silinemez!');
+      raise exception.Create('SipariÅŸ edilmiÅŸ Ã¼rÃ¼nler var silinemez!');
 
    if Application.MessageBox(PChar(GDonusumSorusu), PChar(SGenotipOnay),MB_YESNO) = IDYES then begin
       while not Tabdetay.Eof do
@@ -1370,11 +1370,11 @@ var
   BarkodAyari, GramajKisim : string[35];
 begin
      StokAra.Text := Trim(StokAra.Text);
-     if (Cagiran=2)and(HizliGirisAnaMenu.SiparisSadeceMerkeze)and(EditRehID.Text = '') then begin //sipariþte merkez dýþýndaki yerlere de sipariþ veriliyorsa ve Þube seçilmemiþse
+     if (Cagiran=2)and(HizliGirisAnaMenu.SiparisSadeceMerkeze)and(EditRehID.Text = '') then begin //sipariÅŸte merkez dÄ±ÅŸÄ±ndaki yerlere de sipariÅŸ veriliyorsa ve Åžube seÃ§ilmemiÅŸse
          EditRehID.Text := '-1';
          EditRehAd.Caption := Tablo.TabBizim.FieldByName('FIRMA').AsString;
      end;
-     if EditRehID.Text = '' then //transfer ve Þube seçilmemiþse
+     if EditRehID.Text = '' then //transfer ve Åžube seÃ§ilmemiÅŸse
         SubeSecim;
      if not TabDetay.Active then
         EkranTemizleYeniKayitAc;
@@ -1382,29 +1382,29 @@ begin
         Adt := TabKartlar.FieldByName('ADET').AsFloat
      else
         Adt := 1;
-     if Pos('*', StokAra.Text) > 0 then // adeti hesaplayalým...
+     if Pos('*', StokAra.Text) > 0 then // adeti hesaplayalÄ±m...
         Adet1 := StrToFloatDef(Copy(StokAra.Text, 1, Pos('*', StokAra.Text) - 1), 1)
      else
         Adet1 := 1;
-     //Gramaj/Kg var mý
+     //Gramaj/Kg var mÄ±
      if (Pos('#', DtsKartlar.DataSet.FieldByName('BARKOD').AsString) > 0)and(Length(StokAra.Text)=13) then begin
              BarkodAyari := DtsKartlar.DataSet.FieldByName('BARKOD').AsString;
              GramajKisim := '';
              for i := 0 to Length(BarkodAyari) - 1 do
-                if Copy(BarkodAyari,i+1,1)='#' then  //gram bölümündeyiz..
+                if Copy(BarkodAyari,i+1,1)='#' then  //gram bÃ¶lÃ¼mÃ¼ndeyiz..
                    GramajKisim := GramajKisim + Copy(StokAra.Text, i+1, 1);
             Adet1 := Adet1 * StrToIntDef(GramajKisim,0)/1000
      end;
-     //Adet/miktar var mý
+     //Adet/miktar var mÄ±
      if (Pos('$', DtsKartlar.DataSet.FieldByName('BARKOD').AsString) > 0)and(Length(StokAra.Text)=13) then begin
              BarkodAyari := DtsKartlar.DataSet.FieldByName('BARKOD').AsString;
              GramajKisim := '';
              for i := 0 to Length(BarkodAyari) - 1 do
-                if Copy(BarkodAyari,i+1,1)='$' then  //gram bölümündeyiz..
+                if Copy(BarkodAyari,i+1,1)='$' then  //gram bÃ¶lÃ¼mÃ¼ndeyiz..
                    GramajKisim := GramajKisim + Copy(StokAra.Text, i+1, 1);
             Adet1 := Adet1 * StrToIntDef(GramajKisim,0)
      end;
-     if (Adet1 = 1)and(HizliGirisAnaMenu.SatistaMiktarSor) then begin//sipariþ veya transfer ise ve adet seçilmemiþse adet sorsun
+     if (Adet1 = 1)and(HizliGirisAnaMenu.SatistaMiktarSor) then begin//sipariÅŸ veya transfer ise ve adet seÃ§ilmemiÅŸse adet sorsun
          Adet1 := AdetGetir('Miktar giriniz', FloatToStr(Adt),DtsKartlar.DataSet.FieldByName('ID').AsInteger,DtsKartlar.DataSet.FieldByName('ANABIRIM').AsInteger, True);
          if Adet1=-9999 then
             Exit;
@@ -1412,7 +1412,7 @@ begin
      //StokAra.Text := '';
      YerID1 := DtsKartlar.DataSet.FieldByName('ID').AsInteger;
      Stokmu := True;
- //    if Cagiran = 3 then //Eðer transfer yapýlýyorsa ve sipariþ seçildiyse
+ //    if Cagiran = 3 then //EÄŸer transfer yapÄ±lÄ±yorsa ve sipariÅŸ seÃ§ildiyse
  //       SiparisDetayId :=
 //     else
  //       SiparisDetayId := -1;
@@ -1428,7 +1428,7 @@ var Param1,Param2 : string;
     begin
       TabKategori.Close;
       TabKategori.SQL.Text := 'select KOD, AD, RESIM, ID from KATEGORI where '+SubeString+' DURUM=1 ';
-      if TJvNavPanelButton(Sender).Tag=0 then begin//en baþtan istenen kodlar gelecek Ör 150 ve 152 ile baþlayanlar
+      if TJvNavPanelButton(Sender).Tag=0 then begin//en baÅŸtan istenen kodlar gelecek Ã–r 150 ve 152 ile baÅŸlayanlar
         if KategoriBasKodList.Items.Count>0 then begin
           TabKategori.SQL.Add(' and ( ');
           for i := 0 to KategoriBasKodList.Items.Count - 1 do begin
@@ -1440,7 +1440,7 @@ var Param1,Param2 : string;
         end else
          TabKategori.SQL.Add(' and  KOD not like ''%.%'' ');
       end
-      else //ilk seçimden sonraki kod
+      else //ilk seÃ§imden sonraki kod
             TabKategori.SQL.Add(' and (KOD like '''+TJvNavPanelButton(Sender).Hint+'.%'' and KOD not like '''+TJvNavPanelButton(Sender).Hint+'.%.%'')');
       TabKategori.SQL.Add(' order by 2 ');
     end;
@@ -1455,7 +1455,7 @@ begin
   SQLYaz;
   //TabloYenile(TabKategori, [TJvNavPanelButton(Sender).Hint+'.%', TJvNavPanelButton(Sender).Hint+'.%.%']);
   TabloYenile(TabKategori, []);
-  //evin yanýndaki kategori listesi temizlenir
+  //evin yanÄ±ndaki kategori listesi temizlenir
   for i :=KategoriList.Count-1 downto TJvNavPanelButton(Sender).Tag   do begin
     c := FindComponent(KategoriList.Strings[i]);
     if c <> nil then
@@ -1526,7 +1526,7 @@ begin
    Kod := TabKategori.Fields[0].AsString;
    if (Kod = '')or(Kod=EnSonSecilenKategoriKodu) then exit;
 
-   //Önce kontrol ediyoruz alt kategori var mý diye
+   //Ã–nce kontrol ediyoruz alt kategori var mÄ± diye
    if Veritabani.VeriVarMi( Tablo.FDCnn,' select ID from KATEGORI where KOD like &Prm1 and KOD not like &Prm2 ' ,['&Prm1', '&Prm2'], [Kod+'.%', Kod+'.%.%']) then begin
       KategoriAd := TabKategori.FieldByName('AD').AsString+'  >  ';
       EskiKod := TabKategori.FieldByName('KOD').AsString;
@@ -1583,11 +1583,11 @@ var
            Konusu := HizliGirisAnaMenu.TabFatbaslik.FieldByName('KONUSU').Value;
            TeslimSekli := HizliGirisAnaMenu.TabFatbaslik.FieldByName('TESLIM_SEKLI').Value;
            if TGirisKutusuEx.BilgiAlEx('Teklif Bilgileri',TGirdiDenetimleri.Create
-                                        .ImageComboBox('Türü',@Turu,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where DIL=-1 and BOLUM='+IntToStr(Ops_Teklif_Türü)+' order by ANAHTAR ',False,nil)
+                                        .ImageComboBox('TÃ¼rÃ¼',@Turu,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where DIL=-1 and BOLUM='+IntToStr(Ops_Teklif_TÃ¼rÃ¼)+' order by ANAHTAR ',False,nil)
                                         .ImageComboBox('Konusu',@Konusu,Tablo.FDCnn,'select DEGER=ANAHTAR,ANAHTAR from GENINI where DIL=-1 and BOLUM='+IntToStr(Ops_Teklif_Konusu)+' order by ANAHTAR',False,nil)
                                         .ImageComboBox('Sevk Adresi',@SevkAdr,Tablo.FDCnn,'select ID,AD from REHBERILETISIM where REHBERID='+TabFatBasDetay.FieldByName('REHBERID').AsString,False,nil)
-                                        .ImageComboBox('Teslim Þekli',@TeslimSekli,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where DIL=-1 and BOLUM='+IntToStr(Ops_Teklif_Teslim_Sekli)+' order by ANAHTAR',False,nil)
-                                        .Memo('Açýklama',@Aciklama) ) <> mrOk then
+                                        .ImageComboBox('Teslim Åžekli',@TeslimSekli,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where DIL=-1 and BOLUM='+IntToStr(Ops_Teklif_Teslim_Sekli)+' order by ANAHTAR',False,nil)
+                                        .Memo('AÃ§Ä±klama',@Aciklama) ) <> mrOk then
              Abort;
 
            HizliGirisAnaMenu.TabFatbaslik.FieldByName('TARIH').Value := TabFatBasDetay.FieldByName('FATURATARIH').Value;
@@ -1648,7 +1648,7 @@ var
         else
           HizliGirisAnaMenu.TabFatbaslik.FieldByName('ACIKLAMA').Value := FBAciklama + ' ' + TabFatBasDetay.FieldByName('ACIKLAMA').Value;
         HizliGirisAnaMenu.TabFatbaslik.FieldByName('MASRAFID').Value := TabFatBasDetay.FieldByName('MASRAFID').Value;
-        if Cagiran in [1,3] then //sipariþ deðilse
+        if Cagiran in [1,3] then //sipariÅŸ deÄŸilse
            HizliGirisAnaMenu.TabFatbaslik.FieldByName('KASATAKIPID').AsInteger := HizliGirisAnaMenu.KasaTakipIDBilgisi;
         HizliGirisAnaMenu.TabFatbaslik.FieldByName(s+'_MATRAHI').Value := 0.0;
         HizliGirisAnaMenu.TabFatbaslik.FieldByName('KDV_TUTARI').Value := 0.0;
@@ -1669,13 +1669,13 @@ var
         HizliGirisAnaMenu.TabFatura.Append;
         HizliGirisAnaMenu.TabFatura.FieldByName(s2).Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').Value;
         HizliGirisAnaMenu.TabFatura.FieldByName('REHBERID').Value := HizliGirisAnaMenu.TabFatbaslik.FieldByName('REHBERID').Value;
-        HizliGirisAnaMenu.TabFatura.FieldByName('TUR').Value := TabDetay.FieldByName('TUR').Value; // hizmetse 0, stoksa karttaki TUR deðeri
+        HizliGirisAnaMenu.TabFatura.FieldByName('TUR').Value := TabDetay.FieldByName('TUR').Value; // hizmetse 0, stoksa karttaki TUR deÄŸeri
         HizliGirisAnaMenu.TabFatura.FieldByName('URUNID').Value := TabDetay.FieldByName('URUNID').Value;
         HizliGirisAnaMenu.TabFatura.FieldByName('ADET').Value := TabDetay.FieldByName('ADET').Value;
         HizliGirisAnaMenu.TabFatura.FieldByName('MF').Value := TabDetay.FieldByName('MF').Value;
         HizliGirisAnaMenu.TabFatura.FieldByName('BIRIM').Value := TabDetay.FieldByName('BIRIM').Value;
         HizliGirisAnaMenu.TabFatura.FieldByName('MIKTAR').Value := TabDetay.FieldByName('MIKTAR').Value;
-        if Gratis > 0.1 then begin //gratisli satýþlar %100 iskontoludur
+        if Gratis > 0.1 then begin //gratisli satÄ±ÅŸlar %100 iskontoludur
            HizliGirisAnaMenu.TabFatura.FieldByName('BIRIMFIYAT').Value := (100.0-TabDetay.FieldByName('ISKONTO').Value)*TabDetay.FieldByName('BIRIMFIYAT').Value/100.0;
            HizliGirisAnaMenu.TabFatura.FieldByName('DOVIZ_BIRIMFIYAT').Value := (100.0-TabDetay.FieldByName('ISKONTO').Value)*TabDetay.FieldByName('BIRIMFIYAT').Value/100.0;
            HizliGirisAnaMenu.TabFatura.FieldByName('ISKONTO').Value := 100.0;
@@ -1699,13 +1699,13 @@ var
         HizliGirisAnaMenu.TabFatura.FieldByName('DOVIZ_KURU').Value := CariDoviz;
         if Cagiran=7 then begin //cafe
           if TabDetay.FieldByName('IZLEME').Value < 1 then
-            HizliGirisAnaMenu.TabFatura.FieldByName('IZLEME').Value := 1; //cafede adisyon satýr durumu izleme 0:yeni; 1:kaydedildi; 2:mutfaða sipariþ verildi; -1:iptal
-          if FatTur <> 110 then begin //adisyon deðilse (fiþ ya da faturaysa), önce adisyonda düþüldüðü için fiþ ya da faturada bir daha stoktan düþmemesi lazým
+            HizliGirisAnaMenu.TabFatura.FieldByName('IZLEME').Value := 1; //cafede adisyon satÄ±r durumu izleme 0:yeni; 1:kaydedildi; 2:mutfaÄŸa sipariÅŸ verildi; -1:iptal
+          if FatTur <> 110 then begin //adisyon deÄŸilse (fiÅŸ ya da faturaysa), Ã¶nce adisyonda dÃ¼ÅŸÃ¼ldÃ¼ÄŸÃ¼ iÃ§in fiÅŸ ya da faturada bir daha stoktan dÃ¼ÅŸmemesi lazÄ±m
             HizliGirisAnaMenu.TabFatura.FieldByName('STOKDURUMDEGIS').Value := 0;
             if FatTur = 15 then
-               HizliGirisAnaMenu.TabFatura.FieldByName('YERI').Value := TabNo_DONUSUM_ADISYON_FATURA //adisyon baðlantý bilgisi
+               HizliGirisAnaMenu.TabFatura.FieldByName('YERI').Value := TabNo_DONUSUM_ADISYON_FATURA //adisyon baÄŸlantÄ± bilgisi
             else
-               HizliGirisAnaMenu.TabFatura.FieldByName('YERI').Value := TabNo_DONUSUM_ADISYON_FIS ;  //adisyon baðlantý bilgisi
+               HizliGirisAnaMenu.TabFatura.FieldByName('YERI').Value := TabNo_DONUSUM_ADISYON_FIS ;  //adisyon baÄŸlantÄ± bilgisi
             HizliGirisAnaMenu.TabFatura.FieldByName('YERID').Value := TabDetay.FieldByName('YERID').Value;
           end
         end else if Cagiran in [1,2,4] then begin
@@ -1723,19 +1723,19 @@ var
            HizliGirisAnaMenu.TabFatura.FieldByName('ALTERNATIFNO').Value := 1;
 
         HizliGirisAnaMenu.TabFatura.Post;
-        {if (Cagiran=7)and(FatTur = 110)  then begin //cafede adisyon kaydedildikten sonra ID'si alýnýr daha sonra fiþ ya da faturanýn YERID sine yazýlýr ki bað kurulsun
+        {if (Cagiran=7)and(FatTur = 110)  then begin //cafede adisyon kaydedildikten sonra ID'si alÄ±nÄ±r daha sonra fiÅŸ ya da faturanÄ±n YERID sine yazÄ±lÄ±r ki baÄŸ kurulsun
            TabDetay.edit;
            TabDetay.FieldByName('YERID').Value := HizliGirisAnaMenu.TabFatura.FieldByName('ID').Value;
            TabDetay.Post;
         end; }
-        if (Cagiran in [1,3])and(HizliGirisAnaMenu.TabFatura.FieldByName('TUR').Value=1) then begin //sipariþ ise ürün depodan düþmez
+        if (Cagiran in [1,3])and(HizliGirisAnaMenu.TabFatura.FieldByName('TUR').Value=1) then begin //sipariÅŸ ise Ã¼rÃ¼n depodan dÃ¼ÅŸmez
           case HizliGirisAnaMenu.TabFatura.FieldByName('IZLEME').AsInteger of
             StokIzleme_Yok : ;
             StokIzleme_Serino : ;
             StokIzleme_SKT : ;
             StokIzleme_Karekod : ;
             StokIzleme_Boyut : begin
-              Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+              Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
               'insert into STOKBOYUTHAREKET(STOKID,TUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,STOKBOYUTKOMBINASYONID,MIKTAR,SUBEID)'+
               'values(&P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9)',
               ['&P1','&P2','&P3','&P4','&P5','&P6','&P7','&P8','&P9'],
@@ -1754,17 +1754,17 @@ var
      end;
 begin
   HizliGirisAnaMenu.TabFatbaslik.Close;
-  if cagiran in [2,4]  then begin  //cafe moduda iken SipID = 0 ise cafe için ilk sipariþ alýnýor; >0 ise daha önceki sipariþe ek yapýlýyor; -1 ise hesap alýndý belge kaydediliyor demektir
-     if SipId > 0 then s:= ' ID='+IntToStr(SipId)//eðer daha önceki sipariþ düzeltmesi yapýlacaksa
+  if cagiran in [2,4]  then begin  //cafe moduda iken SipID = 0 ise cafe iÃ§in ilk sipariÅŸ alÄ±nÄ±or; >0 ise daha Ã¶nceki sipariÅŸe ek yapÄ±lÄ±yor; -1 ise hesap alÄ±ndÄ± belge kaydediliyor demektir
+     if SipId > 0 then s:= ' ID='+IntToStr(SipId)//eÄŸer daha Ã¶nceki sipariÅŸ dÃ¼zeltmesi yapÄ±lacaksa
      else s:= '1=2';
      HizliGirisAnaMenu.TabFatbaslik.SQL.Text := 'select * from SIPARIS where '+s
-  end else if cagiran = 5  then begin  //VERÝLEN TEKLÝF
-     if SipId > 0 then s:= ' ID='+IntToStr(SipId)//eðer daha önceki sipariþ düzeltmesi yapýlacaksa
+  end else if cagiran = 5  then begin  //VERÄ°LEN TEKLÄ°F
+     if SipId > 0 then s:= ' ID='+IntToStr(SipId)//eÄŸer daha Ã¶nceki sipariÅŸ dÃ¼zeltmesi yapÄ±lacaksa
      else s:= '1=2';
      HizliGirisAnaMenu.TabFatbaslik.SQL.Text := 'select * from TEKLIF where '+s
   end else begin
     if (cagiran = 7)and(SipId>0) then
-       s:= ' ID='+IntToStr(SipId)//eðer daha önceki adisyon düzeltmesi yapýlacaksa
+       s:= ' ID='+IntToStr(SipId)//eÄŸer daha Ã¶nceki adisyon dÃ¼zeltmesi yapÄ±lacaksa
        else s:= '1=2';
     HizliGirisAnaMenu.TabFatbaslik.SQL.Text := 'select * from FATBASLIK where '+s;
   end;
@@ -1793,12 +1793,12 @@ begin
   HizliGirisAnaMenu.TabFatura.Open;
   TabDetay.First;
   while not TabDetay.Eof do begin
-    if (FatTur<>110)or((FatTur=110)and(TabDetay.FieldByName('IZLEME').Value = 0)) then //adisyon deðilse eklesin; eðer adisyonsa ve durum 0 ise eklesin
+    if (FatTur<>110)or((FatTur=110)and(TabDetay.FieldByName('IZLEME').Value = 0)) then //adisyon deÄŸilse eklesin; eÄŸer adisyonsa ve durum 0 ise eklesin
        DetayEkle;
     TabDetay.Next;
   end;
   Tablo.Query1.Close;
-  if KdvDurumu = 'Hariç' then
+  if KdvDurumu = 'HariÃ§' then
      Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(BIRIMFIYAT*ADET,2)),0.0) AS ARATOPLAM, isnull(ROUND(SUM(TUTAR*(KDV/100.0)),2),0.0) AS KDVTOPLAM, '+
        ' isnull(SUM(ROUND(TUTAR,2)),0.0) AS NETTOPLAM from '+s3+' where '+s2+'=' + HizliGirisAnaMenu.TabFatbaslik.Fields[0].AsString
   else
@@ -1808,7 +1808,7 @@ begin
   HizliGirisAnaMenu.TabFatbaslik.Edit;
   HizliGirisAnaMenu.TabFatbaslik.FieldByName(s+'_MATRAHI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency;
   HizliGirisAnaMenu.TabFatbaslik.FieldByName('KDV_TUTARI').Value := Tablo.Query1.FieldByName('KDVTOPLAM').Value;
-  if KdvDurumu = 'Hariç' then
+  if KdvDurumu = 'HariÃ§' then
     HizliGirisAnaMenu.TabFatbaslik.FieldByName(s+'_TUTARI').AsCurrency := Tablo.Query1.FieldByName('NETTOPLAM').AsCurrency + Tablo.Query1.FieldByName('KDVTOPLAM').AsCurrency
   else
     HizliGirisAnaMenu.TabFatbaslik.FieldByName(s+'_TUTARI').AsCurrency := Tablo.Query1.FieldByName('NETTOPLAM').AsCurrency;
@@ -1832,7 +1832,7 @@ var
   Tutar,Doviztutari:Currency;
 begin
   Tablo.Query1.Close;
-  if KDVDurum = False then  //kdv hesaplarken round etmeden ayrý ayrý satýrlar hesaplanýr toplandýktan sonra round edilir..
+  if KDVDurum = False then  //kdv hesaplarken round etmeden ayrÄ± ayrÄ± satÄ±rlar hesaplanÄ±r toplandÄ±ktan sonra round edilir..
     Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(DOVIZ_BIRIMFIYAT*ADET,2)),0) AS BIRIMTOPLAM '+
                               ' ,isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' +
                               ' isnull(SUM(ROUND(DOVIZ_TUTARI,2)),0) AS DOVIZARATOPLAM,' +
@@ -1883,14 +1883,14 @@ begin
    if Gratis>0.1 then begin
       FatTur := 16;
       R := True;
-      //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update ' + StringReplace(AktifFatTabloAdi, '&', '', [rfReplaceAll]) +' set ISKONTO=100.0, TUTAR=0.0', [], []);
+      //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update ' + StringReplace(AktifFatTabloAdi, '&', '', [rfReplaceAll]) +' set ISKONTO=100.0, TUTAR=0.0', [], []);
       TabDetay.Close;
       TabDetay.Open;
    end
    else begin
-      //Kaydedilecek belge türünü belirleme
+      //Kaydedilecek belge tÃ¼rÃ¼nÃ¼ belirleme
       Application.CreateForm(THizliGirisBaskiDlg, HizliGirisBaskiDlg);
-      if HizliGirisBaskiDlg.Say = 1 then begin //eðer tek bir tane baský seçeneði varsa bu ekraný açmaya gerek yok direk oraya baský yaparýz
+      if HizliGirisBaskiDlg.Say = 1 then begin //eÄŸer tek bir tane baskÄ± seÃ§eneÄŸi varsa bu ekranÄ± aÃ§maya gerek yok direk oraya baskÄ± yaparÄ±z
           PrintEdilecek := True;
           R:=False;
           if HizliGirisBaskiDlg.BtnFaturaDok.visible  then
@@ -1905,7 +1905,7 @@ begin
              FatTur := 16
       end else begin
           HizliGirisBaskiDlg.ShowModal;
-          if HizliGirisBaskiDlg.ModalResult = mrOk then begin // fiþ
+          if HizliGirisBaskiDlg.ModalResult = mrOk then begin // fiÅŸ
              FatTur := HizliGirisBaskiDlg.BelgeTuru;
              R := HizliGirisBaskiDlg.R;
           end else if HizliGirisBaskiDlg.ModalResult = mrCancel then begin
@@ -1916,7 +1916,7 @@ begin
       end;
       FreeAndNil(HizliGirisBaskiDlg);
    end;
-  // koçan no iþleri...
+  // koÃ§an no iÅŸleri...
  // faturanobul :
  // belgeno := SiradakiBelgeNumarasi(FatTur, Tablo.GENINI.BugunTrhSaat);
  // siradakino := belgeno.belgeno;
@@ -1926,14 +1926,14 @@ begin
   k:= Length(siradakino);
   faturanobul :
   if (BaskiBelgenoSor) and (R = False) then
-  begin // baský sýrasýnda belgeno sorma opsyionu aktifse doðrulatmak için siradaki no yu ekranda gösterelim
-    ctrls := TGirdiDenetimleri.Create.Edit('Belge Numarasý', @siradakino);
-    if TGirisKutusuEx.BilgiAlEx('Sýradaki Belge Numarasý:', ctrls) = mrOk then
+  begin // baskÄ± sÄ±rasÄ±nda belgeno sorma opsyionu aktifse doÄŸrulatmak iÃ§in siradaki no yu ekranda gÃ¶sterelim
+    ctrls := TGirdiDenetimleri.Create.Edit('Belge NumarasÄ±', @siradakino);
+    if TGirisKutusuEx.BilgiAlEx('SÄ±radaki Belge NumarasÄ±:', ctrls) = mrOk then
       if siradakino <> '' then
         belgeno.belgeno := siradakino
   end;
   if Length(belgeno.BelgeNo)> k then begin
-     Application.MessageBox('Belge Numarasý fazla uzun, lütfen kontrol ediniz.','H A T A',MB_OK+ MB_ICONERROR);
+     Application.MessageBox('Belge NumarasÄ± fazla uzun, lÃ¼tfen kontrol ediniz.','H A T A',MB_OK+ MB_ICONERROR);
      goto faturanobul;
   end;
   if  k >Length(belgeno.BelgeNo) then begin
@@ -1954,7 +1954,7 @@ begin
   //TabFatbaslik.Edit;
   //TabFatbaslik.FieldByName('DOVIZ_TUTARI').AsCurrency := TabFatbaslik.FieldByName('FATURA_TUTARI').AsCurrency;
   //TabFatbaslik.Post;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATBASLIK set DOVIZ_TUTARI=FATURA_TUTARI where ID='+HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').AsString,[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATBASLIK set DOVIZ_TUTARI=FATURA_TUTARI where ID='+HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').AsString,[],[]);
   if PrintEdilecek then
     Tablo.FaturaSihirbazBaslat('P',HizliGirisAnaMenu.TabFatbaslik.FieldByName('TUR').AsInteger,0,HizliGirisAnaMenu.TabFatbaslik.FieldByName('ID').AsInteger,HizliGirisAnaMenu.TabFatbaslik.FieldByName('REHBERID').AsInteger,0);
 end;
@@ -2013,7 +2013,7 @@ procedure THizliGirisDlg.SeiliStouksayolmensndenkaldr1Click(Sender: TObject);
 var
   EskiSayfa: TcxTabSheet;
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update STOKLAR set KISAYOLGRUBU = &KisayolGrubu where ID= &StokID ', ['&StokID', '&KisayolGrubu'], [TabKartlar.FieldByName('ID').AsInteger, 0]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update STOKLAR set KISAYOLGRUBU = &KisayolGrubu where ID= &StokID ', ['&StokID', '&KisayolGrubu'], [TabKartlar.FieldByName('ID').AsInteger, 0]);
 end;
 
 procedure THizliGirisDlg.StokAraKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2053,7 +2053,7 @@ var
   i:Integer;
 begin
   KategoriList := TStringList.Create;
-  //LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  //LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   if SubeVarmi then
      SubeString := ' SUBEID in (0,'+IntToStr(SubeId)+') and '
   else
@@ -2067,7 +2067,7 @@ begin
   if KDVDurum then
     KdvDurumu := 'Dahil'
   else
-    KdvDurumu := 'Hariç';
+    KdvDurumu := 'HariÃ§';
 
   SatisKodDahil := Tablo.GENINI.ReadBoolean(Ops_Kasiyer_CheckSatisKodDahil,False);
   SiparisKodDahil := Tablo.GENINI.ReadBoolean(Ops_Kasiyer_CheckSiparisKodDahil,False);
@@ -2077,7 +2077,7 @@ begin
  {Yetkiler
   BtnNakitOdeme.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurNakit,True); //    'StokHizliGiris', 'TahTurNakit
   BtnKKOdeme.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurPOS,True); //     StokHizliGiris', 'TahTurPOS'
-  MenuAcikHesap.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurAcikHesap,True); //  StokHizliGiris  TahTur Açýk hesap
+  MenuAcikHesap.Visible := Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurAcikHesap,True); //  StokHizliGiris  TahTur AÃ§Ä±k hesap
   CizgiMenu1.Visible := MenuAcikHesap.Visible;
   MenuItemHediyeCeki.Visible :=Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurHC,True); //   StokHizliGiris', 'TahTurHC'
   MenuItemIadeCeki.Visible :=Tablo.GENINI.ReadBoolean(Ops_StokHizliGiris_TahTurIC,True); //    StokHizliGiris', 'TahTurIC'
@@ -2086,23 +2086,23 @@ begin
   SadeceFaturaKes := StrToBoolDef(GenRegIni.RegReadString('StokHizliGiris','SadeceFatKaydet','0','C'),False);
 
   DovizTuru := Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'); //   GenelOpsiyon', 'VarsayilanDoviz', 'ALIS');
-  //Düzen
-  cxGridDBCardViewKategori.OptionsView.CardWidth  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriEn, 150);//  Opsiyon Resim Düzeni
-  cxGridDBCardViewResim.Position.LineCount := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriBoy,8);//  Opsiyon Resim Düzeni
-  TcxImageProperties(cxGridDBCardViewResim.Properties).Stretch := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim Düzeni
-  cxGridDBCardViewKartlar.OptionsView.CardWidth  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartEn, 150);//  Opsiyon Resim Düzeni
-  cxGridDBCardViewKartlarRESIM.Position.LineCount  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartBoy,8);//  Opsiyon Resim Düzeni
-  TcxImageProperties(cxGridDBCardViewKartlarRESIM.Properties).Stretch := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim Düzeni
+  //DÃ¼zen
+  cxGridDBCardViewKategori.OptionsView.CardWidth  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriEn, 150);//  Opsiyon Resim DÃ¼zeni
+  cxGridDBCardViewResim.Position.LineCount := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_KategoriBoy,8);//  Opsiyon Resim DÃ¼zeni
+  TcxImageProperties(cxGridDBCardViewResim.Properties).Stretch := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim DÃ¼zeni
+  cxGridDBCardViewKartlar.OptionsView.CardWidth  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartEn, 150);//  Opsiyon Resim DÃ¼zeni
+  cxGridDBCardViewKartlarRESIM.Position.LineCount  := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_UrunKartBoy,8);//  Opsiyon Resim DÃ¼zeni
+  TcxImageProperties(cxGridDBCardViewKartlarRESIM.Properties).Stretch := Tablo.GENINI.ReadBoolean(Ops_OpsiyonKasa_ResimCerceve, True);//  Opsiyon Resim DÃ¼zeni
   cxGridDBCardViewKartlarSTOKADI.Position.LineCount := Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_AciklamaSatir, 1);
-  //müþteri bilgilirei gelsin
+  //mÃ¼ÅŸteri bilgilirei gelsin
   MusteriDegistir(HizliGirisAnaMenu.VarsMusteri, True);
 
   BtnNumComma.Caption := FormatSettings.Decimalseparator;
   TusBasili := False;
-  Tablo.TablodanSorguAc(5, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE())');
+  Tablo.TablodanSorguAc(5, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''â‚¬'' order by datediff(DAY,TARIH,GETDATE())');
   Tablo.TablodanSorguAc(6, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE())');
 
-  StatusBar1.Panels[1].Text := '$ : '+Tablo.Query6.Fields[0].AsString+'  € : '+Tablo.Query5.Fields[0].AsString;
+  StatusBar1.Panels[1].Text := '$ : '+Tablo.Query6.Fields[0].AsString+'  â‚¬ : '+Tablo.Query5.Fields[0].AsString;
   StatusBar1.Panels[2].Text := HizliGirisAnaMenu.VarsKasaAdi;
 
   BaskiBelgenoSor := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_BaskiBelgeNoSor,False);  //  HizliGiris', 'BaskiBelgeNoSor', False);
@@ -2114,8 +2114,8 @@ procedure THizliGirisDlg.YeniSablonSiparisOlusturMenuClick(Sender: TObject);
 var ctrls :TGirdiDenetimleri;
     SablonAdi:Variant;
 begin
-  ctrls := TGirdiDenetimleri.Create.Edit('Þablon Adý Giriniz', @SablonAdi);
-  if TGirisKutusuEx.BilgiAlEx('Þablon Adý ', ctrls) = mrOk then
+  ctrls := TGirdiDenetimleri.Create.Edit('Åžablon AdÄ± Giriniz', @SablonAdi);
+  if TGirisKutusuEx.BilgiAlEx('Åžablon AdÄ± ', ctrls) = mrOk then
     if SablonAdi<> '' then begin
        EditRehID.Text := '-99';
        EditRehKod.Text := '';
@@ -2179,16 +2179,16 @@ procedure THizliGirisDlg.SubeSecim;
 var SonucListe : TStringList;
 begin
   SonucListe := TStringList.Create;
-  if Tablo.HizliGirisListedenBilgiGetir('Þube Seçimi','select R.ID, R.KOD, R.FIRMA,D.DEPOADI, D.ID from REHBER R inner join DEPOLAR D '+
+  if Tablo.HizliGirisListedenBilgiGetir('Åžube SeÃ§imi','select R.ID, R.KOD, R.FIRMA,D.DEPOADI, D.ID from REHBER R inner join DEPOLAR D '+
         ' on R.ID = D.SUBEID where R.ID < 0 and R.ID <> '+IntToStr(SubeId)+' order by 3 ',SonucListe,False,[False, False, True,True,False],[])then begin
      EditRehID.Text := SonucListe[0];
      EditRehKod.Text := '-1';
      EditRehAd.Caption :=  SonucListe[2];
      GirisDepoId := StrToInt(SonucListe[4]);
      TabFatBasDetay.Edit;
-     TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariþi veren þube kodu alýnýr
-     TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariþ verilen þube kodu
-     TabFatBasDetay.FieldByName('BASLIK').Value := EditRehAd.Caption;  //  sipariþi veren þube adý alýnýr
+     TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariÅŸi veren ÅŸube kodu alÄ±nÄ±r
+     TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariÅŸ verilen ÅŸube kodu
+     TabFatBasDetay.FieldByName('BASLIK').Value := EditRehAd.Caption;  //  sipariÅŸi veren ÅŸube adÄ± alÄ±nÄ±r
      TabFatBasDetay.Post;
   end;
   SonucListe.Free;
@@ -2210,7 +2210,7 @@ var ra : string;
       BtnNakliye.Visible := (Cagiran in [1,4,5])and(Tablo.GENINI.ReadBoolean(Ops_Kasiyer_CheckNakliye, False));
       BtnSiparisTablosu.Visible := Cagiran in [2,3];
       BtnTerazi.Visible := Cagiran in [2,3];
-      BtnSiparisYaz.Visible := Cagiran=7;//sadece sipariþte görüünür
+      BtnSiparisYaz.Visible := Cagiran=7;//sadece sipariÅŸte gÃ¶rÃ¼Ã¼nÃ¼r
       BtnHesapYaz.Visible := Cagiran=7;
       BtnIkram.Visible := (Cagiran=7)and(Tablo.YetkiVarmi(18020612,YetkiTur_Gorme,False));
       BtnMesaj.Visible := Cagiran=7;
@@ -2258,7 +2258,7 @@ var ra : string;
 begin
   BorderStyle := bsNone;
   WindowState := wsMaximized;
-  //Yazýcý tuþu için
+  //YazÄ±cÄ± tuÅŸu iÃ§in
   //aktifFrame := TGenelAnaSekmeFrame(UTablo.AnaFrameYoneticisi.AktifFrame.Ornek);
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz, ra, aktifFrame.JVRaporSecClick);
   YaziciYaz.Caption := ra;
@@ -2280,10 +2280,10 @@ begin
   TabloYenile(TabCokKullanilan, [i]);
 
   //LabelKur.Caption := CariDoviz;
-  //Satýþ butonlarý hangi kodlardan oluþacak?   Ör:150  160
+  //SatÄ±ÅŸ butonlarÄ± hangi kodlardan oluÅŸacak?   Ã–r:150  160
   //KategoriBasKodList := TStringList.Create;
 
-  //Kaydet butonu satýþta deðil transfer ve sipariþte görünecek
+  //Kaydet butonu satÄ±ÅŸta deÄŸil transfer ve sipariÅŸte gÃ¶rÃ¼necek
   NakliyeTutari := -1;
   EskiSiparisID := -1;
   AdisyonNo:=0;
@@ -2294,27 +2294,27 @@ begin
 
   Buton_Gorunecekler;
   case Cagiran of
-    1,4,5 : begin //satýþ        Alýnan Sipariþ  Verilen Teklif
+    1,4,5 : begin //satÄ±ÅŸ        AlÄ±nan SipariÅŸ  Verilen Teklif
           Tablo.GENINI.ReadSection(Ops_HizliSatisSatisKod, KategoriBasKodList);   // , , DaraKodDahil
           if not SatisKodDahil then
              for i := 0 to KategoriBasKodList.Items.Count - 1 do
                 KategoriBasKodList.Items[i] := KategoriBasKodList.Items[i]+'.';
           BtnSecimeIskonto.Visible := Tablo.YetkiVarmi(18020602,YetkiTur_Gorme,False);//isk
-          BtnTumuneIskonto.Visible := Tablo.YetkiVarmi(18020604,YetkiTur_Gorme,False);//Tümüne isk
+          BtnTumuneIskonto.Visible := Tablo.YetkiVarmi(18020604,YetkiTur_Gorme,False);//TÃ¼mÃ¼ne isk
           BtnSecimiSil.Visible := Tablo.YetkiVarmi(18020606,YetkiTur_Gorme,False);//Sil
-          BtnTSil.Visible := Tablo.YetkiVarmi(18020608,YetkiTur_Gorme,False);//Tümünü Sil
-          BtnTahsilat.Visible := (BtnTahsilat.Visible)and(Tablo.YetkiVarmi(18020610,YetkiTur_Gorme,False));//sipariþte tahsilat görünmesin
+          BtnTSil.Visible := Tablo.YetkiVarmi(18020608,YetkiTur_Gorme,False);//TÃ¼mÃ¼nÃ¼ Sil
+          BtnTahsilat.Visible := (BtnTahsilat.Visible)and(Tablo.YetkiVarmi(18020610,YetkiTur_Gorme,False));//sipariÅŸte tahsilat gÃ¶rÃ¼nmesin
           if Cagiran=4 then
-             FatTur := 19  //Verilen  Sipariþ
+             FatTur := 19  //Verilen  SipariÅŸ
           else if Cagiran=5 then
              FatTur := 80;  //Verilen  teklif
         end;
     2 : begin
-          FatTur := 19;  //Verilen  Sipariþ
+          FatTur := 19;  //Verilen  SipariÅŸ
           Tablo.GENINI.ReadSection(Ops_HizliSatisSiparisKod, KategoriBasKodList);
           EditRehID.Text:='';
           EditRehAd.Caption:='';
-          BtnSiparisler.Caption := 'Sipariþlerim';
+          BtnSiparisler.Caption := 'SipariÅŸlerim';
           if not SiparisKodDahil then
              for i := 0 to KategoriBasKodList.Items.Count - 1 do
                 KategoriBasKodList.Items[i] := KategoriBasKodList.Items[i]+'.';
@@ -2324,7 +2324,7 @@ begin
           Tablo.GENINI.ReadSection(Ops_HizliSatisTransferKod, KategoriBasKodList);
           EditRehID.Text:='';
           EditRehAd.Caption:='';
-          BtnSiparisler.Caption := 'Gelen Sipariþler';
+          BtnSiparisler.Caption := 'Gelen SipariÅŸler';
           if not TransferKodDahil then
              for i := 0 to KategoriBasKodList.Items.Count - 1 do
                  KategoriBasKodList.Items[i] := KategoriBasKodList.Items[i]+'.';
@@ -2332,7 +2332,7 @@ begin
     7 : begin //kafe
           EditMasa.Caption := MasaNo;
           EditKisi.Caption := IntToStr(KisiSay);
-          FatTur := 110;  //Verilen - Alýnan Sipariþ
+          FatTur := 110;  //Verilen - AlÄ±nan SipariÅŸ
           Tablo.GENINI.ReadSection(Ops_HizliSatisCafeKod, KategoriBasKodList);
 
           SiparisYazdirList := TcxCustomComboBoxProperties.Create(nil);
@@ -2344,11 +2344,11 @@ begin
           if not SatisKodDahil then
              for i := 0 to KategoriBasKodList.Items.Count - 1 do
                 KategoriBasKodList.Items[i] := KategoriBasKodList.Items[i]+'.';
-         //varsa daha önceki ürünleri ekleyelim
+         //varsa daha Ã¶nceki Ã¼rÃ¼nleri ekleyelim
           EkranTemizleYeniKayitAc;
-          //ÖNCE BAKALIM AÇILMIÞ ADÝSYON VAR MI
+          //Ã–NCE BAKALIM AÃ‡ILMIÅž ADÄ°SYON VAR MI
           Tablo.TablodanSorguAc(8, 'select top 1 FB.ID, FB.REHBERID, FB.FATURATARIH, FB.FATURANO,  FB.FATURASERI, FB.KOCANNO, MASANO=FB.OZELKOD, KISISAY=FB.ZARFID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM=0 order by 1 desc ');
-          if Tablo.Query8.RecordCount > 0 then begin //açýlmýþ adisyon var listeleyelim
+          if Tablo.Query8.RecordCount > 0 then begin //aÃ§Ä±lmÄ±ÅŸ adisyon var listeleyelim
               AdisyonNo := Tablo.Query8.Fields[0].AsInteger;
               TabFatBasDetay.Edit;
               TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime := Tablo.Query8.FieldByName('FATURATARIH').AsDateTime;
@@ -2373,9 +2373,9 @@ begin
              AdisyonNo := 0;
           end;
           BtnSecimeIskonto.Visible := Tablo.YetkiVarmi(18021602,YetkiTur_Gorme,False);//isk
-          BtnTumuneIskonto.Visible := Tablo.YetkiVarmi(18021604,YetkiTur_Gorme,False);//Tümüne isk
+          BtnTumuneIskonto.Visible := Tablo.YetkiVarmi(18021604,YetkiTur_Gorme,False);//TÃ¼mÃ¼ne isk
           BtnSecimiSil.Visible := Tablo.YetkiVarmi(18021606,YetkiTur_Gorme,False);//Sil
-          BtnTSil.Visible := Tablo.YetkiVarmi(18021608,YetkiTur_Gorme,False);//Tümünü Sil
+          BtnTSil.Visible := Tablo.YetkiVarmi(18021608,YetkiTur_Gorme,False);//TÃ¼mÃ¼nÃ¼ Sil
           BtnTahsilat.Visible := Tablo.YetkiVarmi(18021610,YetkiTur_Gorme,False);//Tahsil
           Panel_Gorunecekler;
           exit;
@@ -2391,7 +2391,7 @@ var i : SmallInt;
 begin
    TabKartlar.SQL.Text := 'select S.ID,S.KOD,S.STOKADI,MARKA,MODEL,SIPARISID=-1, BARKOD , S.RESIM from STOKLAR S ';
    TabKartlar.SQL.add(' inner join KATEGORI K on K.ID=S.KATEGORI left outer join STOKBARKOD B on S.ID=B.STOKID and B.VARSAYILAN=1 and S.ANABIRIM=B.BARKODBIRIMI  where DURUM = 1 and (');
-   //BURADA hangi kod listes belirtilmiþse onun içinde arama yapýlýr
+   //BURADA hangi kod listes belirtilmiÅŸse onun iÃ§inde arama yapÄ±lÄ±r
    for i := 0 to KategoriBasKodList.Items.Count - 1 do begin
        if i > 0 then
           TabKartlar.SQL.Add('or');
@@ -2404,7 +2404,7 @@ end;
 Function THizliGirisDlg.TempTabloOlustur: String;
 var
   TmpTabAd: string;
-begin // DROP EDÝLMEYECEK!!!!!
+begin // DROP EDÄ°LMEYECEK!!!!!
   Result := '##Fat_' + IntToStr(SPID) + '_' + FormatDateTime('YYYYMMDDHHNNSSZZ', Tablo.GENINI.BugunTrhSaat);
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' CREATE TABLE ' + Result + '(ID int identity(1,1),FID int,REHBERID int,TUR smallint,DURUM smallint,URUNID int,KOD nvarchar(25),AD nvarchar(200),  ';
@@ -2444,16 +2444,16 @@ var  SonucListe: TStringList;
      Stokmu: Boolean;
 begin
     SonucListe := TStringList.Create;
-    if Tablo.HizliGirisListedenBilgiGetir('Sipariþ','select ID,  BASLIK from SIPARIS where REHBERID=-99 order by 2 ',SonucListe,False,[False, True],[])then
+    if Tablo.HizliGirisListedenBilgiGetir('SipariÅŸ','select ID,  BASLIK from SIPARIS where REHBERID=-99 order by 2 ',SonucListe,False,[False, True],[])then
        SiparisID := StrToInt(SonucListe[0]);
     SonucListe.Free;
-    //þube adýný yazalým
+    //ÅŸube adÄ±nÄ± yazalÄ±m
     if EditRehID.Text = '' then
        SubeSecim;
     if not TabDetay.Active then
        EkranTemizleYeniKayitAc;
 
-    //ürünleri ekleyelim
+    //Ã¼rÃ¼nleri ekleyelim
     Tablo.TablodanSorguAc(8, 'select URUNID,ADET from SIPARISDETAY where SIPARISID='+IntToStr(SiparisID));
     Stokmu := True;
     while not Tablo.Query8.Eof do begin
@@ -2470,7 +2470,7 @@ var
   i,j:Double;
 begin
   if TabDetay.RecordCount > 0 then begin
-    lbUrunSayisi.Caption := 'Ürün: ' + inttostr(TabDetay.RecordCount);
+    lbUrunSayisi.Caption := 'ÃœrÃ¼n: ' + inttostr(TabDetay.RecordCount);
     lbUrunSayisi.Visible := True;
   end else
     lbUrunSayisi.Visible := False;
@@ -2501,11 +2501,11 @@ begin
   if TabDetay.FieldByName('ACIKLAMA2').AsString <> ''  then
     Aciklama := TabDetay.FieldByName('ACIKLAMA2').AsString+#13#10;
   if TabDetay.FieldByName('MIKTAR').AsFloat <> 1.0  then
-    Aciklama := Aciklama+TabDetay.FieldByName('MIKTAR').AsString+ TabDetay.FieldByName('BIRIMAD').AsString+'  Birim Fiyatý :'+TabDetay.FieldByName('BIRIMFIYAT').AsString+#13#10;
+    Aciklama := Aciklama+TabDetay.FieldByName('MIKTAR').AsString+ TabDetay.FieldByName('BIRIMAD').AsString+'  Birim FiyatÄ± :'+TabDetay.FieldByName('BIRIMFIYAT').AsString+#13#10;
   if TabDetay.FieldByName('ISKONTO').AsFloat <> 0.0  then
-    Aciklama := Aciklama+'%'+TabDetay.FieldByName('ISKONTO').AsString+' Ýskonto'+#13#10;
+    Aciklama := Aciklama+'%'+TabDetay.FieldByName('ISKONTO').AsString+' Ä°skonto'+#13#10;
   if TabDetay.FieldByName('ISKONTO2').AsFloat <> 0.0  then
-    Aciklama := Aciklama+'%'+TabDetay.FieldByName('ISKONTO2').AsString+' 2.Ýskonto'+#13#10;
+    Aciklama := Aciklama+'%'+TabDetay.FieldByName('ISKONTO2').AsString+' 2.Ä°skonto'+#13#10;
   TabDetay.FieldByName('ACIKLAMA').AsString := Aciklama;
 end;
 
@@ -2545,7 +2545,7 @@ begin
     belgeno := SiradakiBelgeNumarasi(FatTur,TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime);
     TabFatBasDetay.FieldByName('FATURASERI').AsString := belgeno.SeriNo; // seri
     TabFatBasDetay.FieldByName('FATURANO').AsString := belgeno.belgeno; // FatNo;
-    TabFatBasDetay.FieldByName('KOCANNO').AsInteger := KocannoBul(FatTur); // KOCAN numarasý
+    TabFatBasDetay.FieldByName('KOCANNO').AsInteger := KocannoBul(FatTur); // KOCAN numarasÄ±
     TabFatBasDetay.post;
 end;
 
@@ -2555,7 +2555,7 @@ var
   digitsay : SmallInt;
   i : Integer;
 begin
-  if Cagiran = 2 then //sipariþ
+  if Cagiran = 2 then //sipariÅŸ
      Tablo.TablodanSorguAc(1, ' select  TOP 1 MAX(CONVERT(INT,SIPARISNO)) SIPARISNO from SIPARIS where TUR=20 and SIPARISTARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' ')
   else begin             //transfer
      Tablo.TablodanSorguAc(1, ' select  TOP 1 MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=20 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' ');
@@ -2565,7 +2565,7 @@ begin
   if Tablo.Query1.Fields[0].AsString <> '0' then begin
     i := StrToIntDef(Tablo.Query1.Fields[0].AsString, 0);
     Inc(i);
-    FatNo := IntToStr(i);       //00125  - 126    5-3=2 tane sýfýr eklenmeli baþa
+    FatNo := IntToStr(i);       //00125  - 126    5-3=2 tane sÄ±fÄ±r eklenmeli baÅŸa
     digitsay := Length(Tablo.Query1.Fields[0].AsString)-Length(FatNo);
     for i := 1 to digitsay do
         FatNo := '0' + FatNo;
@@ -2585,36 +2585,36 @@ var  belgeno: TBelgeNo;
           s:='TEKLIF'
        else
           s:='SIPARIS';
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from '+s+'DETAY where '+s+'ID='+IntTostr(EskiSiparisID),[],[],False);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from '+s+'DETAY where '+s+'ID='+IntTostr(EskiSiparisID),[],[],False);
        if Cagiran=2 then begin
-          TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariþi veren þube kodu alýnýr
-          TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariþ verilen þube kodu
+          TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariÅŸi veren ÅŸube kodu alÄ±nÄ±r
+          TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariÅŸ verilen ÅŸube kodu
        end;
        if TabFatBasDetay.State in [dsEdit, dsInsert] then
           TabFatBasDetay.Post;
        BelgeyeYaz(EskiSiparisID,belgeno, EditRehAd.Caption,'','','','','','', False) ;
     end;
 begin
-   //transfer ve sipariþ kaydetme yeri
-   //teslim alan seçtirelim
+   //transfer ve sipariÅŸ kaydetme yeri
+   //teslim alan seÃ§tirelim
    TabFatBasDetay.edit;
-   if cagiran in [2,4, 5] then begin//alýnan / verilen sipariþ /verilen teklif
-      if EskiSiparisID>0 then begin//eski sipariþ seçilmiþ silip üzerine yazalým
+   if cagiran in [2,4, 5] then begin//alÄ±nan / verilen sipariÅŸ /verilen teklif
+      if EskiSiparisID>0 then begin//eski sipariÅŸ seÃ§ilmiÅŸ silip Ã¼zerine yazalÄ±m
          EskiSiparisDuzenlendiKaydetveKapat;
          EditRehID.Text := '';
          EditRehAd.Caption:= '';
          EkranTemizleYeniKayitAc;
          exit;
       end;
-      if EditRehID.Text='-99' then begin//þablon sipariþ giriþi
+      if EditRehID.Text='-99' then begin//ÅŸablon sipariÅŸ giriÅŸi
          TabFatBasDetay.FieldByName('REHBERID').Value := -99;
 
       end else begin
-         if cagiran in [4,5] then //alýnan sipariþ
-            TabFatBasDetay.FieldByName('SUBEID').Value := SubeId  // sipariþ verilen þube kodu
+         if cagiran in [4,5] then //alÄ±nan sipariÅŸ
+            TabFatBasDetay.FieldByName('SUBEID').Value := SubeId  // sipariÅŸ verilen ÅŸube kodu
          else begin
-            TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariþi veren þube kodu alýnýr
-            TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariþ verilen þube kodu
+            TabFatBasDetay.FieldByName('REHBERID').Value := SubeId;  //  sipariÅŸi veren ÅŸube kodu alÄ±nÄ±r
+            TabFatBasDetay.FieldByName('SUBEID').Value := StrToInt(EditRehID.Text);  // sipariÅŸ verilen ÅŸube kodu
          end;
       end;
    end else begin //transfer
@@ -2622,7 +2622,7 @@ begin
       TabFatBasDetay.FieldByName('SUBEID').Value := SubeId;
    end;
    TabFatBasDetay.Post;
-   if EditRehID.Text<>'-99' then //þablon sipariþ giriþi deðilse
+   if EditRehID.Text<>'-99' then //ÅŸablon sipariÅŸ giriÅŸi deÄŸilse
       //belgeno.belgeno := TransferNoGetir;
       if TabFatBasDetay.FieldByName('FATURANO').AsString = '' then
          BelgeNoIslemleri;
@@ -2751,7 +2751,7 @@ begin
       TabDetay.FieldByName('IZLEME').Value := izleme;
       TabDetay.FieldByName('IZLEMEYERI').Value := izlemeYeri;
       TabDetay.FieldByName('IZLEMEYERID').Value := izlemeYerID;
-      TabDetay.FieldByName('ACIKLAMA2').Value := SatirAciklama; //renkbeden kombinasyonunu açýklamaya yazalým.. yada serino..
+      TabDetay.FieldByName('ACIKLAMA2').Value := SatirAciklama; //renkbeden kombinasyonunu aÃ§Ä±klamaya yazalÄ±m.. yada serino..
     end;
 
     TabDetay.FieldByName('REHBERID').Value := StrToInt(EditRehID.Text);
@@ -2779,8 +2779,8 @@ begin
 //        TabDetay.FieldByName('TUTAR').Value := Tablo.Query3.FieldByName('TUTAR').Value * ((Tablo.Query3.FieldByName('KDV').Value + 100) / 100);
          TabDetay.FieldByName('DOVIZ_TUTARI').Value := RoundN(Tablo.Query3.FieldByName('DOVIZ_TUTARI').Value * ((Tablo.Query3.FieldByName('KDV').Value + 100) / 100), FiyatBasamak);
       end;
-    end else begin // fiyatlarda KDV Hariç
-      if Tablo.Query3.FieldByName('URUNKDVDURUM').AsBoolean = True then begin // ürün fiyatý kdv dahilse
+    end else begin // fiyatlarda KDV HariÃ§
+      if Tablo.Query3.FieldByName('URUNKDVDURUM').AsBoolean = True then begin // Ã¼rÃ¼n fiyatÄ± kdv dahilse
          TabDetay.FieldByName('BIRIMFIYAT').Value := RoundN(Tablo.Query3.FieldByName('BIRIMFIYAT').Value / ((Tablo.Query3.FieldByName('KDV').Value + 100) / 100), FiyatBasamak);
 //        TabDetay.FieldByName('TUTAR').Value := Tablo.Query3.FieldByName('TUTAR').Value / ((Tablo.Query3.FieldByName('KDV').Value + 100) / 100);
          TabDetay.FieldByName('DOVIZ_TUTARI').Value := RoundN(Tablo.Query3.FieldByName('DOVIZ_TUTARI').Value / ((Tablo.Query3.FieldByName('KDV').Value + 100) / 100), FiyatBasamak);
@@ -2799,14 +2799,14 @@ begin
     TabDetay.FieldByName('YERID').Value := SiparisDetayId;
     TabDetay.FieldByName('URETICIID').Value := Tablo.Query3.FieldByName('URETICIID').Value;
     TabDetay.FieldByName('OZELKOD').Value := Tablo.Query3.FieldByName('OZELKOD').Value;
-    // resim iþleri...
+    // resim iÅŸleri...
     //Tablo.TablodanSorguAc(4, 'select BELGE from IMAJ where YERI=71 and YER_ID=' + IntToStr(StrToIntDef(Tablo.Query3.FieldByName('ID').AsString,0)));
     //TabDetay.FieldByName('IMAJ').Value := Tablo.Query4.Fields[0].Value;
     TabDetay.FieldByName('BARKOD').Value := DtsKartlar.DataSet.FieldByName('BARKOD').Value;
     // if Tablo.Query3.FieldByName('TUTAR').AsCurrency<0 then
     // FiyatSor;
     if TabDetay.FieldByName('TUTAR').Value < 0.0 then begin
-       if cagiran in [1,4,5] then begin //satýþ ise
+       if cagiran in [1,4,5] then begin //satÄ±ÅŸ ise
           if NakliyeTutari>=0 then begin
             TabDetay.FieldByName('BIRIMFIYAT').Value := NakliyeTutari;
             TabDetay.FieldByName('TUTAR').Value := NakliyeTutari;
@@ -2864,8 +2864,8 @@ var
   end;
   function BoyutAdiGetir(Bolum:String):string;
   begin
-    Result := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select ANAHTAR from GENINI where BOLUM=0 and DEGER='+Bolum+' and DIL='+IntToStr(Dil)+'',[],[],True);
-    Result := Result + ' Seçimi';
+    Result := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select ANAHTAR from GENINI where BOLUM=0 and DEGER='+Bolum+' and DIL='+IntToStr(Dil)+'',[],[],True);
+    Result := Result + ' SeÃ§imi';
   end;
 begin
   Sonlandir := False;
@@ -2878,13 +2878,13 @@ begin
       Exit(True);
     end;
     StokIzleme_Serino,StokIzleme_Karekod : begin
-      if Barkod = '' then begin //bu durumda serino/karekod seçtiricez..
+      if Barkod = '' then begin //bu durumda serino/karekod seÃ§tiricez..
         SonucListe := TStringList.Create;
         SQLTxt := 'select distinct SI.IZLEM from STOKIZLEME SI ';
         SQLTxt := SQLTxt + 'where SI.IZLEMTUR in (1,3) and SI.STOKID='+IntToStr(StokID)+' and SI.GIRISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and ';
         SQLTxt := SQLTxt + '(select count(*) from STOKIZLEME SI2 where SI2.STOKID=SI.STOKID and SI2.IZLEMTUR=SI.IZLEMTUR and SI2.GIRISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and SI2.IZLEM=SI.IZLEM)';
         SQLTxt := SQLTxt + '>(select count(*) from STOKIZLEME SI2 where SI2.STOKID=SI.STOKID and SI2.IZLEMTUR=SI.IZLEMTUR and SI2.CIKISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and SI2.IZLEM=SI.IZLEM)';
-        if Tablo.HizliGirisListedenBilgiGetir('Ýzleme Bilgisi',SQLTxt,SonucListe,False,[True],[nil])then begin
+        if Tablo.HizliGirisListedenBilgiGetir('Ä°zleme Bilgisi',SQLTxt,SonucListe,False,[True],[nil])then begin
           izlemeYerID := 0;
           Aciklama := SonucListe[0];
           Sonlandir := False;
@@ -2900,13 +2900,13 @@ begin
         Exit(True);
       end;
     end;
-    StokIzleme_SKT : begin//bu SKT seçtiricez..
+    StokIzleme_SKT : begin//bu SKT seÃ§tiricez..
       SonucListe := TStringList.Create;
       SQLTxt := 'select distinct SI.IZLEM from STOKIZLEME SI ';
       SQLTxt := SQLTxt + 'where SI.IZLEMTUR = 2 and SI.STOKID='+IntToStr(StokID)+' and SI.GIRISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and ';
       SQLTxt := SQLTxt + '(select count(*) from STOKIZLEME SI2 where SI2.STOKID=SI.STOKID and SI2.IZLEMTUR=SI.IZLEMTUR and SI2.GIRISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and SI2.IZLEM=SI.IZLEM)';
       SQLTxt := SQLTxt + '>(select count(*) from STOKIZLEME SI2 where SI2.STOKID=SI.STOKID and SI2.IZLEMTUR=SI.IZLEMTUR and SI2.CIKISDEPO='+TabFatBasDetay.FieldByName('CIKISDEPO').AsString+' and SI2.IZLEM=SI.IZLEM)';
-      if Tablo.HizliGirisListedenBilgiGetir('Ýzleme Bilgisi',SQLTxt,SonucListe,False,[True],[nil])then begin
+      if Tablo.HizliGirisListedenBilgiGetir('Ä°zleme Bilgisi',SQLTxt,SonucListe,False,[True],[nil])then begin
         izlemeYerID := 0;
         Aciklama := SonucListe[0];
         Sonlandir := False;
@@ -2917,7 +2917,7 @@ begin
       end;
     end;
     StokIzleme_Boyut : begin
-      if Barkod = '' then begin //bu durumda sora sora boyutlarýný öðrenicez..
+      if Barkod = '' then begin //bu durumda sora sora boyutlarÄ±nÄ± Ã¶ÄŸrenicez..
         Tablo.TablodanSorguAc(8,'select * from STOKBOYUTKOMBINASYON where STOKID='+IntToStr(StokID));
         if Tablo.Query8.RecordCount>0 then begin
            if Tablo.Query8.FieldByName('BOLUM1').Value <> null then begin //1. boyut var
@@ -2932,7 +2932,7 @@ begin
               end;
               FreeAndNil(SonucListe);
            end else begin
-              ShowMessage('Bu stok için boyut tanýmlamalarýnýz eksik veya hatalýdýr.');
+              ShowMessage('Bu stok iÃ§in boyut tanÄ±mlamalarÄ±nÄ±z eksik veya hatalÄ±dÄ±r.');
               Sonlandir := True;
               Exit(True);
            end;
@@ -2948,7 +2948,7 @@ begin
               end;
               FreeAndNil(SonucListe);
            end else begin
-              izlemeYerID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1',['&SID','&B1','&D1'],[StokID,Bolum1,Deger1],True);
+              izlemeYerID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1',['&SID','&B1','&D1'],[StokID,Bolum1,Deger1],True);
            end;
            if Tablo.Query8.FieldByName('BOLUM3').Value <> null then begin //3. boyut var
               SonucListe := TStringList.Create;
@@ -2961,18 +2961,18 @@ begin
                   Exit(True);
               end;
               FreeAndNil(SonucListe);
-              izlemeYerID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1 and BOLUM2=&B2 and DEGER2=&D2 and BOLUM3=&B3 and DEGER3=&D3',['&SID','&B1','&D1','&B2','&D2','&B3','&D3'],[StokID,Bolum1,Deger1,Bolum2,Deger2,Bolum3,Deger3],True);
+              izlemeYerID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1 and BOLUM2=&B2 and DEGER2=&D2 and BOLUM3=&B3 and DEGER3=&D3',['&SID','&B1','&D1','&B2','&D2','&B3','&D3'],[StokID,Bolum1,Deger1,Bolum2,Deger2,Bolum3,Deger3],True);
            end else begin
-              izlemeYerID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1 and BOLUM2=&B2 and DEGER2=&D2',['&SID','&B1','&D1','&B2','&D2'],[StokID,Bolum1,Deger1,Bolum2,Deger2],True);
+              izlemeYerID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Select ID from STOKBOYUTKOMBINASYON where STOKID=&SID and BOLUM1=&B1 and DEGER1=&D1 and BOLUM2=&B2 and DEGER2=&D2',['&SID','&B1','&D1','&B2','&D2'],[StokID,Bolum1,Deger1,Bolum2,Deger2],True);
            end
         end else begin
-          ShowMessage('Bu stok için boyut tanýmlamalarýnýz eksik veya hatalýdýr.');
+          ShowMessage('Bu stok iÃ§in boyut tanÄ±mlamalarÄ±nÄ±z eksik veya hatalÄ±dÄ±r.');
           Sonlandir := True;
           Exit(True);
         end;
       end else if Barkod <> '' then begin
         try
-          izlemeYerID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Select YERID from STOKBARKOD where STOKID=&SID and YERI=342 and BARKOD=&Barkod ',['&SID','&Barkod'],[StokID,Barkod],True);
+          izlemeYerID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Select YERID from STOKBARKOD where STOKID=&SID and YERI=342 and BARKOD=&Barkod ',['&SID','&Barkod'],[StokID,Barkod],True);
           Tablo.Query8.Close;
           Tablo.Query8.SQL.Text := 'select ACIKLAMA=isnull(G1.ANAHTAR,'''')+'' ''+isnull(G2.ANAHTAR,'''')+'' ''+isnull(G3.ANAHTAR,'''')';
           Tablo.Query8.SQL.Add('from STOKBOYUTKOMBINASYON S left outer join');
@@ -2983,7 +2983,7 @@ begin
           Tablo.Query8.Open;
           Aciklama := Tablo.Query8.Fields[0].AsString;
         except
-          ShowMessage('Boyutlara göre yapýlan barkod tanýmlamalarýnýz hatalý.');
+          ShowMessage('Boyutlara gÃ¶re yapÄ±lan barkod tanÄ±mlamalarÄ±nÄ±z hatalÄ±.');
           Sonlandir := True;
           Exit(True);
         end;
@@ -3028,11 +3028,11 @@ begin
        else
          TabKartlar.SQL.add(' where (S.KOD like '''+Ara+'%'' OR S.STOKADI like ''%'+Ara+'%'' ');
        TabKartlar.SQL.add(' or ( LEN('''+Ara+'%'')=14 and substring('''+Ara+'%'',1,12) like replace(replace(substring(BARKOD,1,12),''#'',''_''),''$'',''_'')) or (replace(replace(BARKOD,''#'',''_''),''$'',''_'') like '''+Ara+'%'' )' );
-       TabKartlar.SQL.add(' or ( '''+Ara+''' like replace(replace(replace(BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') ) '); //boyut barkodlarý
+       TabKartlar.SQL.add(' or ( '''+Ara+''' like replace(replace(replace(BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') ) '); //boyut barkodlarÄ±
 
        //TabKartlar.SQL.add(' or B.BARKOD like '''+Ara+'%'' ');
        TabKartlar.SQL.add(')and S.DURUM = 1 ');
-       //BURADA hangi kod listes belirtilmiþse onun içinde arama yapýlýr
+       //BURADA hangi kod listes belirtilmiÅŸse onun iÃ§inde arama yapÄ±lÄ±r
        if KategoriBasKodList.Items.Count > 0 then begin
            TabKartlar.SQL.add(' and (');
            for i := 0 to KategoriBasKodList.Items.Count - 1 do begin
@@ -3054,11 +3054,11 @@ var
 begin
   { BarkotCom := TComPort.Create();
     CbYazarkasaModel.EditValue:=  GenRegIni.RegReadString('YazarKasa', 'YazarkasaModel', '', 'C');
-    CbKasaNumarasi.EditValue:= GenRegIni.RegReadString('YazarKasa', 'KasaNumarasý', '', 'C');
-    CbKasiyerNumarasi.EditValue :=  GenRegIni.RegReadString('YazarKasa', 'KasiyerNumarasý', '', 'C');
+    CbKasaNumarasi.EditValue:= GenRegIni.RegReadString('YazarKasa', 'KasaNumarasÄ±', '', 'C');
+    CbKasiyerNumarasi.EditValue :=  GenRegIni.RegReadString('YazarKasa', 'KasiyerNumarasÄ±', '', 'C');
 
 
-    CbBarkodBekleme.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodBeklemeZamaný', '', 'C');
+    CbBarkodBekleme.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodBeklemeZamanÄ±', '', 'C');
 
     CbBarkodDataBit.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodDataBit', '', 'C');
     CbBarkodStopBit.EditValue := GenRegIni.RegReadString('YazarKasa', 'BarkodStopBit','', 'C');

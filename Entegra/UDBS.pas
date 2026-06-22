@@ -1,4 +1,4 @@
-unit UDBS;
+Ôªøunit UDBS;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 18/02/2010 17:47:07}
@@ -144,7 +144,7 @@ uses  FetaClassExtensions, URehAraDlg,PrjConst,LocOnFly;
 
 procedure TDBSDlg.Baslatildi;
 begin
-    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y¸kleniyor.
+    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y√ºkleniyor.
 end;
 
 procedure TDBSDlg.DBSEkranInit(ADBSId: Integer);
@@ -161,7 +161,7 @@ begin
       TabDBS.SQL.Text := 'SELECT * FROM DBS WHERE ID = :ID';
       TabDBS.Params.ParamByName('ID').AsInteger := ADBSId;
     end;
-  end else { Yani -1 -> Bo˛ «ek senet ekran˝ iÁin bo˛ bir query }
+  end else { Yani -1 -> Bo≈ü √áek senet ekranƒ± i√ßin bo≈ü bir query }
     TabDBS.SQL.Text := 'SELECT TOP 0 * FROM DBS ';
   TabDBS.Open;
 end;

@@ -1,4 +1,4 @@
-unit UTakvimSenet;
+ï»¿unit UTakvimSenet;
 
 interface
 
@@ -114,7 +114,7 @@ end;
 
 procedure TTakvimSenetDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TTakvimSenetDlg.FormShow(Sender: TObject);
@@ -122,23 +122,23 @@ begin
   TabSenetler.Close;
   case Tur of
     24:begin //giren
-      //ödeyecek tarafýn bilgileri
+      //Ã¶deyecek tarafÄ±n bilgileri
       LabelOdeIsim.DataBinding.DataSource:=DtsSenetler;
       LabelOdeAdres.DataBinding.DataSource:=DtsSenetler;
       LabelOdeIlce.DataBinding.DataSource:=DtsSenetler;
       LabelOdeIl.DataBinding.DataSource:=DtsSenetler;
       LabelOdeVD.DataBinding.DataSource:=DtsSenetler;
-      //ödenecek tarafýn bilgileri
+      //Ã¶denecek tarafÄ±n bilgileri
       LabelAlFirma.DataBinding.DataSource:=Tablo.DtsBizim;
     End;
-    34:Begin//çýkan
-      //ödeyecek tarafýn bilgileri
+    34:Begin//Ã§Ä±kan
+      //Ã¶deyecek tarafÄ±n bilgileri
       LabelOdeIsim.DataBinding.DataSource:=Tablo.DtsBizim;
       LabelOdeAdres.DataBinding.DataSource:=Tablo.DtsBizim;
       LabelOdeIlce.DataBinding.DataSource:=Tablo.DtsBizim;
       LabelOdeIl.DataBinding.DataSource:=Tablo.DtsBizim;
       LabelOdeVD.DataBinding.DataSource:=Tablo.DtsBizim;
-      //ödenecek tarafýn bilgileri
+      //Ã¶denecek tarafÄ±n bilgileri
       LabelAlFirma.DataBinding.DataSource:=DtsSenetler;
     End;
   end;
@@ -156,10 +156,10 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    tab := (TcxDBLabel(Sender).DataBinding.DataSource.DataSet as TFDQuery);
-      //edit bilgi giriþi
+      //edit bilgi giriÅŸi
    case TcxDBLabel(Sender).Tag of
-      0:ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);  //1 alacakli,3borclu ise
-      1:ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad)
+      0:ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);  //1 alacakli,3borclu ise
+      1:ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad)
    end;
    if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin

@@ -1,4 +1,4 @@
-unit UKasalarAramaFrame;
+﻿unit UKasalarAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 02/03/2010 16:37:08 }
@@ -53,7 +53,7 @@ uses UTablo,LocOnFly;
 
 procedure TKasalarAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    ComboSube.Visible := SubeVarmi;
    LabelSube.Visible := ComboSube.Visible;
    if ComboSube.Visible then begin

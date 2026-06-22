@@ -1,4 +1,4 @@
-unit UKarekodTakip;
+ï»¿unit UKarekodTakip;
 
 interface
 
@@ -13,10 +13,10 @@ uses
 
  type
     TKareKodType = record
-      UrunNumarasý : string;
-      UrunSeriNumarasý : string;
+      UrunNumarasÄ± : string;
+      UrunSeriNumarasÄ± : string;
       Lotno : string;
-      SonKullaným : string;
+      SonKullanÄ±m : string;
     end;
 type
   TKareKodDlg = class(TForm)
@@ -115,9 +115,9 @@ type
 
 var
   KareKodDlg: TKareKodDlg;
-  //cagirantur : demirbaþ tutanaðý olabilir, fatura türleri olabilir
-  //cagiranbaslikid : ana tablodaki kayýt id si
-  //cagiransatirId : detay tablodaki id deðeri
+  //cagirantur : demirbaÅŸ tutanaÄŸÄ± olabilir, fatura tÃ¼rleri olabilir
+  //cagiranbaslikid : ana tablodaki kayÄ±t id si
+  //cagiransatirId : detay tablodaki id deÄŸeri
   KareKodTakipKAreKodsayisi,
   KareKodTakipCagiranBaslikId,
   KarekodTakipCagiranSatirId,
@@ -128,7 +128,7 @@ var
   KareKodTakipislemturu : string;
   KareKodlar : array of TKareKodType;
   _Hata : string;
-   //Ýþlem Türleri  = G : giriþ, C: Çýkýþ, D: Düzelt , S:Sil  , GD: GiriþDüzel, CD : Çýkýþ Düzelt
+   //Ä°ÅŸlem TÃ¼rleri  = G : giriÅŸ, C: Ã‡Ä±kÄ±ÅŸ, D: DÃ¼zelt , S:Sil  , GD: GiriÅŸDÃ¼zel, CD : Ã‡Ä±kÄ±ÅŸ DÃ¼zelt
 implementation
  Uses Utablo,PrjConst,UItsAraclari,UitsBusiness;//,LocOnFly;
 
@@ -148,7 +148,7 @@ if (Serino<>'') and (UrunKodu<>'') then
 begin
 Tablo.Query6.close;
 Tablo.Query6.SQL.Text:= '';
-Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+convert(varchar(20),FB.TARIH,120)+'' tarihli alýnan faturada ''+AD+'' isimli ürün ayný karekod a sahipdir.'' as MESAJ FROM ');
+Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+convert(varchar(20),FB.TARIH,120)+'' tarihli alÄ±nan faturada ''+AD+'' isimli Ã¼rÃ¼n aynÄ± karekod a sahipdir.'' as MESAJ FROM ');
 Tablo.Query6.SQL.add(' (SELECT * FROM KAREKOD KK WHERE KK.SERINO = '''+SeriNo+''' AND KK.URUNKOD = '''+UrunKodu+''' ) AS DD ');
 Tablo.Query6.SQL.add(' ,FATURA F,FATBASLIK FB ,REHBER R WHERE DD.GIRFATURAID = F.ID AND FB.ID=DD.GIRFATBASID AND FB.ID=F.FATBASID AND R.ID=FB.REHBERID ');
 tablo.Query6.Open;
@@ -168,7 +168,7 @@ if ( KareKodTakipislemturu = 'GD' ) and
      (tabKareKodListesi.FieldByName('CIKFATURAID').AsInteger>0) and
      (clmSeriNoSec.EditValue='True') then
    begin
-        Application.MessageBox('Bu ürünün çýkýþý yapýlmýþ, Deðiþiklik yapýlamaz','H A T A',MB_ICONERROR+MB_OK);
+        Application.MessageBox('Bu Ã¼rÃ¼nÃ¼n Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmÄ±ÅŸ, DeÄŸiÅŸiklik yapÄ±lamaz','H A T A',MB_ICONERROR+MB_OK);
         clmSeriNoSec.EditValue:='False';
         clmSeriNo.Editing:=False;
         Abort;
@@ -223,7 +223,7 @@ var
      //begin
      // ChildNode := TreeListKareKod.AddChild(NewNode, nil);
      // ChildNode.Expand(False);
-     // ChildNode.Texts[0] := 'KareKod Tekrarý';
+     // ChildNode.Texts[0] := 'KareKod TekrarÄ±';
      //end;
     end;
    end
@@ -246,18 +246,18 @@ begin
       tabKareKodListesi.Close;
       tabKareKodListesi.SQL.Text:= 'SELECT * FROM KAREKOD WHERE STOKID = '+ IntToStr(KareKodTakipCagiranUrunId)+' '+
                               ' AND SERINO LIKE '''+editKareKod.Text+'%'' ';
-      if KareKodTakipislemturu = 'C' then // çýkýþý yapýlmamýþ seri numaralarý
+      if KareKodTakipislemturu = 'C' then // Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmamÄ±ÅŸ seri numaralarÄ±
        tabKareKodListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) = 0 AND ISNULL(CIKFATURAID,0) = 0')
-      else if (KareKodTakipislemturu = 'CD') and ( KareKodTakipCagiranTur in [14, 15, 16] ) then // çýkýlan KareKodlar üzerinde düzeltme yapýlacaksa
+      else if (KareKodTakipislemturu = 'CD') and ( KareKodTakipCagiranTur in [14, 15, 16] ) then // Ã§Ä±kÄ±lan KareKodlar Ã¼zerinde dÃ¼zeltme yapÄ±lacaksa
        tabKareKodListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) > 0 AND ISNULL(CIKFATURAID,0) = '+inttostr(KarekodTakipCagiranSatirId))
-      else if (KareKodTakipislemturu = 'GD') and ( KareKodTakipCagiranTur in [10, 11, 12] ) then // Girilen KareKodlar üzerinde düzeltme yapýlacaksa
+      else if (KareKodTakipislemturu = 'GD') and ( KareKodTakipCagiranTur in [10, 11, 12] ) then // Girilen KareKodlar Ã¼zerinde dÃ¼zeltme yapÄ±lacaksa
        tabKareKodListesi.SQL.Add(' AND ISNULL(GIRISTURU,0) > 0 AND ISNULL(GIRFATURAID,0) = '+inttostr(KarekodTakipCagiranSatirId));
       tabKareKodListesi.Open;
    end;
 end;  //Eklendi
 procedure TKareKodDlg.FormCreate(Sender: TObject);
 begin
-//LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+//LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 lblHataMesaj.Caption:='';
 end; //Eklendi
 procedure TKareKodDlg.FormShow(Sender: TObject);
@@ -267,20 +267,20 @@ begin
   lblGerekliSayi.Caption:= IntToStr(KareKodTakipKAreKodsayisi);
   if (KareKodTakipislemturu = 'GD') or (KareKodTakipislemturu = 'CD') then
    begin
-     btnKaydet.Caption:='Seçilen Numaralarý Çýkar';
+     btnKaydet.Caption:='SeÃ§ilen NumaralarÄ± Ã‡Ä±kar';
      editKareKodKeyUp(Self,k,[]);
    end
   else
   if (KareKodTakipislemturu='C') then
   begin
-      btnKaydet.Caption:='Seçilen Numaralarý Çýkar';
+      btnKaydet.Caption:='SeÃ§ilen NumaralarÄ± Ã‡Ä±kar';
      editKareKodKeyUp(Self,k,[]);
   end else
   begin
-  btnKaydet.Caption:='Seri Numaralarýný Kaydet';
+  btnKaydet.Caption:='Seri NumaralarÄ±nÄ± Kaydet';
   EdtAdet.Text:= IntToStr(KareKodTakipKAreKodsayisi);
   end;
-  //seritakipsayýsý 0 gönderilirse sadece grid üzerinden seri no düzeltme iþlemi yapýlabilir.
+  //seritakipsayÄ±sÄ± 0 gÃ¶nderilirse sadece grid Ã¼zerinden seri no dÃ¼zeltme iÅŸlemi yapÄ±labilir.
   // Tablo.Query6.Close;
   // Tablo.Query6.SQL.Text:= 'SELECT GARANTISURESI FROM STOKLAR WHERE ID='+inttostr(SeriTakipCagiranUrunId)+' ';
   // Tablo.Query6.Open;
@@ -311,7 +311,7 @@ function YeterliKareKodSecildi:Boolean;
       Result:=True;
       if lblKayitSayisi.Caption<>lblGerekliSayi.Caption then
        begin
-         HataliKareKodMemoyaEkle('','Seçilen Seri Numarasý Sayýsý gereken sayýdan farklý, lütfen kontrol ediniz');
+         HataliKareKodMemoyaEkle('','SeÃ§ilen Seri NumarasÄ± SayÄ±sÄ± gereken sayÄ±dan farklÄ±, lÃ¼tfen kontrol ediniz');
          Result:=False;
        end;
  end;
@@ -325,7 +325,7 @@ var
         if StringReplace( memoKareKodlar.Lines[i],' ','',[rfReplaceAll]) = '' then
          begin
           Result:=True;
-          lblHataMesaj.Caption:= 'Seri No Listesinde Boþ Satýr var, Lütfen Kontrol ediniz.';
+          lblHataMesaj.Caption:= 'Seri No Listesinde BoÅŸ SatÄ±r var, LÃ¼tfen Kontrol ediniz.';
           abort;
          end;
       end;
@@ -342,7 +342,7 @@ var
            if  (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])>=0) and (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])<>i) then
               begin
                 Result:=True;
-                HataliKareKodMemoyaEkle(TreeListKareKod.Items[i].Texts[1],'Seri Numarasý Listesinde tekrar eden seri numaralarý var, Lütfen kontrol ediniz');
+                HataliKareKodMemoyaEkle(TreeListKareKod.Items[i].Texts[1],'Seri NumarasÄ± Listesinde tekrar eden seri numaralarÄ± var, LÃ¼tfen kontrol ediniz');
 //                abort;
               end;
         end;
@@ -360,7 +360,7 @@ begin
       if Tablo.Query5.RecordCount>=1 then
        begin
          Result:=True;
-         HataliKareKodMemoyaEkle(TreeListKareKod.Items[i].Texts[1],'Ayný ürün için listedeki seri numaralarý daha önce kullanýlmýþtýr. Lütfen kontrol ediniz');
+         HataliKareKodMemoyaEkle(TreeListKareKod.Items[i].Texts[1],'AynÄ± Ã¼rÃ¼n iÃ§in listedeki seri numaralarÄ± daha Ã¶nce kullanÄ±lmÄ±ÅŸtÄ±r. LÃ¼tfen kontrol ediniz');
        end;
    end;
 end;
@@ -368,13 +368,13 @@ end;
   var
    i : integer;
   begin
-     //fatura id si yeni kayýt sýrasýnda oluþmamýþ olduðu için diziye atýyoruz, after post ta dizinden giriþ kayýtlarý oluþuyor
+     //fatura id si yeni kayÄ±t sÄ±rasÄ±nda oluÅŸmamÄ±ÅŸ olduÄŸu iÃ§in diziye atÄ±yoruz, after post ta dizinden giriÅŸ kayÄ±tlarÄ± oluÅŸuyor
      for i := 0 to TreeListKareKod.Count - 1 do
      begin
-      FaturaUrunKareKodlar[i].UrunSeriNumarasý:= TreeListKareKod.Items[i].Texts[1];
-      FaturaUrunKareKodlar[i].UrunNumarasý:= TreeListKareKod.Items[i].Texts[0];
+      FaturaUrunKareKodlar[i].UrunSeriNumarasÄ±:= TreeListKareKod.Items[i].Texts[1];
+      FaturaUrunKareKodlar[i].UrunNumarasÄ±:= TreeListKareKod.Items[i].Texts[0];
       FaturaUrunKareKodlar[i].Lotno:= TreeListKareKod.Items[i].Texts[2];
-      FaturaUrunKareKodlar[i].SonKullaným:= TreeListKareKod.Items[i].Texts[3];
+      FaturaUrunKareKodlar[i].SonKullanÄ±m:= TreeListKareKod.Items[i].Texts[3];
      end;
   end;
  procedure SeriNolariCik;
@@ -389,10 +389,10 @@ end;
      begin
        if clmSeriNoSec.EditValue='True' then
         begin
-         //FaturaUrunKareKodlar[i].UrunSeriNumarasý:= tabKareKodListesi.FieldByName('SERINO').AsString;
-          FaturaUrunKareKodlar[i].UrunSeriNumarasý := tabKareKodListesi.FieldByName('SERINO').AsString;
+         //FaturaUrunKareKodlar[i].UrunSeriNumarasÄ±:= tabKareKodListesi.FieldByName('SERINO').AsString;
+          FaturaUrunKareKodlar[i].UrunSeriNumarasÄ± := tabKareKodListesi.FieldByName('SERINO').AsString;
          //FaturaUrunKareKodlar[i].Lotno:= tabKareKodListesi.FieldByName('SERINO').AsString;
-         //FaturaUrunKareKodlar[i].SonKullaným:= tabKareKodListesi.FieldByName('SERINO').AsString;
+         //FaturaUrunKareKodlar[i].SonKullanÄ±m:= tabKareKodListesi.FieldByName('SERINO').AsString;
         i:=i+1;
         {Tablo.KareKodCikis(KareKodTakipCagiranTur,KareKodTakipCagiranUrunId, KareKodTakipCagiranBaslikId, KareKodTakipCagiranSatirId,KareKodCikSeriNo,KareKodTakipCagiranSatilanGln);
         }
@@ -409,30 +409,30 @@ begin
 
   lblHataMesaj.Caption:='';
   if (KareKodTakipislemturu ='GD') or (KareKodTakipislemturu ='CD')  then
-     clmSeriNo.Editing:= True // sadece düzeltme parametresi ile çaðýrýlýrsa ilgili kayýt düzeltilebilir.
+     clmSeriNo.Editing:= True // sadece dÃ¼zeltme parametresi ile Ã§aÄŸÄ±rÄ±lÄ±rsa ilgili kayÄ±t dÃ¼zeltilebilir.
   else
    clmSeriNo.Editing:= False;
   // clmLotno.Editing:= clmSeriNo.Editing;
-{$REGION 'KareKodGiriþ'}
+{$REGION 'KareKodGiriÅŸ'}
   if KareKodTakipislemturu= 'G' then
-   begin // Yeni Seri No Giriþi
+   begin // Yeni Seri No GiriÅŸi
       if StrToInt(lblKayitSayisi.Caption) <> KareKodTakipKareKodsayisi then
        begin
-         HataliKareKodMemoyaEkle('','Listedeki Seri Numarasý sayýsý gereken sayýdan farklý, lütfen kontrol ediniz');
+         HataliKareKodMemoyaEkle('','Listedeki Seri NumarasÄ± sayÄ±sÄ± gereken sayÄ±dan farklÄ±, lÃ¼tfen kontrol ediniz');
          abort;
        end;
       if BosSatirVar then abort;
       if AyniSeriNoVar then Abort;
       if SeriNoDahaOnceGirilmismi then abort;
 
-      //tüm kontrolleri geciyorsa seri no giriþi yapýlabilir
+      //tÃ¼m kontrolleri geciyorsa seri no giriÅŸi yapÄ±labilir
       SeriNolariGir;
       ModalResult:=mrOk;
 
    end
 {$ENDREGION}
  else
-{$REGION 'KareKodÇýkýþ'}
+{$REGION 'KareKodÃ‡Ä±kÄ±ÅŸ'}
  if KareKodTakipislemturu = 'C' then
    begin
       if not (YeterliKareKodSecildi) then abort;
@@ -440,7 +440,7 @@ begin
       ModalResult:=mrOk;
     end
 {$ENDREGION}
-{$REGION 'Giriþ-Çýkýþ Düzeltme'}
+{$REGION 'GiriÅŸ-Ã‡Ä±kÄ±ÅŸ DÃ¼zeltme'}
  else if (KareKodTakipislemturu = 'GD') or (KareKodTakipislemturu = 'CD') then
     begin
  
@@ -470,7 +470,7 @@ function TKareKodDlg.KareKodParcala(KareKod: string) : TKareKodType;
       Break;
      end
      else begin
-          TopPos:=TopPos+pos17+1;// 17 yi aradan çýkaracaðýmýz için 7 hiç hesaplanmadýðýndan pozisyonu 1 arttýrýyoruz.
+          TopPos:=TopPos+pos17+1;// 17 yi aradan Ã§Ä±karacaÄŸÄ±mÄ±z iÃ§in 7 hiÃ§ hesaplanmadÄ±ÄŸÄ±ndan pozisyonu 1 arttÄ±rÄ±yoruz.
           Astr:=Copy(AStr,pos17+2,1000);
      end;
     end
@@ -488,24 +488,24 @@ begin
     else
       strGen:='';
     strEan:= Copy(strGen,4,13);
-    Result.UrunNumarasý := strEan;
+    Result.UrunNumarasÄ± := strEan;
     strSN:=Copy(strGen,19,PosSpecialChrSKT-19 );//Pos( Char(119),strGen)
-    Result.UrunSeriNumarasý := Trim(strSN);
+    Result.UrunSeriNumarasÄ± := Trim(strSN);
     str17:=Copy(strGen,PosSpecialChrSKT+2,6 );
     if str17<>'' then
-     Result.SonKullaným:=Copy(str17,5,2)+'/'+Copy(str17,3,2)+'/'+'20'+Copy(str17,1,2)
+     Result.SonKullanÄ±m:=Copy(str17,5,2)+'/'+Copy(str17,3,2)+'/'+'20'+Copy(str17,1,2)
     else
-     Result.SonKullaným:='';
+     Result.SonKullanÄ±m:='';
     str10:=Copy(strGen,PosSpecialChrSKT+10,length(strGen)-1);
     Result.Lotno:= trim(str10);
     strGen := '';
   end
   else
   begin
-    result.UrunNumarasý := '';
-    result.UrunSeriNumarasý := '';
+    result.UrunNumarasÄ± := '';
+    result.UrunSeriNumarasÄ± := '';
     result.Lotno := '';
-    result.SonKullaným := '';
+    result.SonKullanÄ±m := '';
   end;
 end;  //Eklendi
 
@@ -524,15 +524,15 @@ begin
      lblKayitSayisi.Caption:= IntToStr( strtoint(lblKayitSayisi.Caption)+1 );
       KareKodlar[i] := KareKodParcala(memoKareKodlar.Lines[i]);
       NewNode := TreeListKareKod.Add;
-      NewNode.Texts[0] := KareKodlar[i].UrunNumarasý;
-      NewNode.Texts[1] := KareKodlar[i].UrunSeriNumarasý;
+      NewNode.Texts[0] := KareKodlar[i].UrunNumarasÄ±;
+      NewNode.Texts[1] := KareKodlar[i].UrunSeriNumarasÄ±;
       NewNode.Texts[2] := KareKodlar[i].Lotno;
-      NewNode.Texts[3] := KareKodlar[i].SonKullaným;
+      NewNode.Texts[3] := KareKodlar[i].SonKullanÄ±m;
 
      if  (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])>=0) and (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])<>i) then
      begin
       ChildNode := TreeListKareKod.AddChild(NewNode, nil);
-      ChildNode.Texts[0] := 'KareKod Listesinde tekrar eden seri numaralarý var, Lütfen kontrol ediniz';
+      ChildNode.Texts[0] := 'KareKod Listesinde tekrar eden seri numaralarÄ± var, LÃ¼tfen kontrol ediniz';
      end;
      end;
    end;
@@ -553,15 +553,15 @@ begin
       lblKayitSayisi.Caption:= IntToStr( strtoint(lblKayitSayisi.Caption)+1 );
       KareKodlar[i] := KareKodParcala(memoKareKodlar.Lines[i]);
       NewNode := TreeListKareKod.Add;
-      NewNode.Texts[0] := KareKodlar[i].UrunNumarasý;
-      NewNode.Texts[1] := KareKodlar[i].UrunSeriNumarasý;
+      NewNode.Texts[0] := KareKodlar[i].UrunNumarasÄ±;
+      NewNode.Texts[1] := KareKodlar[i].UrunSeriNumarasÄ±;
       NewNode.Texts[2] := KareKodlar[i].Lotno;
-      NewNode.Texts[3] := KareKodlar[i].SonKullaným;
+      NewNode.Texts[3] := KareKodlar[i].SonKullanÄ±m;
      if  (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])>=0) and (memoKareKodlar.Lines.IndexOf(memoKareKodlar.Lines[i])<>i) then
      begin
       ChildNode := TreeListKareKod.AddChild(NewNode, nil);
       ChildNode.Expand(False);
-      ChildNode.Texts[0] := 'KareKod Tekrarý';
+      ChildNode.Texts[0] := 'KareKod TekrarÄ±';
      end;
      end;
    end;
@@ -625,12 +625,12 @@ begin
   begin
    Tablo.Query5.Close;
    Tablo.Query5.sql.Clear;
-   Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE ALIM_DURUM = ''00000-Doðru Bildirim.'' ');
+   Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE ALIM_DURUM = ''00000-DoÄŸru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND URUNKOD = '''+oncekiUrunKod+''' AND SERINO = '''+oncekiKareKod+''' ');
    Tablo.Query5.Open;
    if Tablo.Query5.RecordCount>0 then
     begin
-    Application.MessageBox('Ürünün alým bildirimi yapýlmýþ.Deðiþtirmek için alýmý iptal etmeniz gerekmektedir.','H A T A',MB_ICONERROR+MB_OK);
+    Application.MessageBox('ÃœrÃ¼nÃ¼n alÄ±m bildirimi yapÄ±lmÄ±ÅŸ.DeÄŸiÅŸtirmek iÃ§in alÄ±mÄ± iptal etmeniz gerekmektedir.','H A T A',MB_ICONERROR+MB_OK);
     Abort;
     end;
   end;
@@ -638,12 +638,12 @@ begin
   begin
    Tablo.Query5.Close;
    Tablo.Query5.sql.Clear;
-   Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE SATIS_DURUM = ''00000-Doðru Bildirim.'' ');
+   Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE SATIS_DURUM = ''00000-DoÄŸru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND URUNKOD = '''+oncekiUrunKod+''' AND SERINO = '''+oncekiKareKod+''' ');
    Tablo.Query5.Open;
    if Tablo.Query5.RecordCount>0 then
     begin
-    Application.MessageBox('Ürünün satýþ bildirimi yapýlmýþ.Deðiþtirmek için satýþý iptal etmeniz gerekmektedir.','H A T A',MB_ICONERROR+MB_OK);
+    Application.MessageBox('ÃœrÃ¼nÃ¼n satÄ±ÅŸ bildirimi yapÄ±lmÄ±ÅŸ.DeÄŸiÅŸtirmek iÃ§in satÄ±ÅŸÄ± iptal etmeniz gerekmektedir.','H A T A',MB_ICONERROR+MB_OK);
     Abort;
     end;
   end;
@@ -651,7 +651,7 @@ begin
    begin
      if (KareKodTakipCagiranTur in [10, 11, 12]) and (tabKareKodListesi.FieldByName('CIKFATURAID').AsInteger>0 ) then
       begin
-        Application.MessageBox('Bu ürünün çýkýþý yapýlmýþ deðiþtirilemez','H A T A',MB_ICONERROR+MB_OK);
+        Application.MessageBox('Bu Ã¼rÃ¼nÃ¼n Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmÄ±ÅŸ deÄŸiÅŸtirilemez','H A T A',MB_ICONERROR+MB_OK);
         Abort;
       end;
       Tablo.Query5.Close;
@@ -662,7 +662,7 @@ begin
       Tablo.Query5.Open;
      if Tablo.Query5.RecordCount>0 then
       begin
-         Application.MessageBox(PChar(tabKareKodListesi.FieldByName('URUNKOD').AsString+' numaralý bu ürün için daha önce kullanýlmýþ, tekrar girilemez') ,'H A T A',MB_ICONERROR+ MB_OK);
+         Application.MessageBox(PChar(tabKareKodListesi.FieldByName('URUNKOD').AsString+' numaralÄ± bu Ã¼rÃ¼n iÃ§in daha Ã¶nce kullanÄ±lmÄ±ÅŸ, tekrar girilemez') ,'H A T A',MB_ICONERROR+ MB_OK);
          Abort;
       end;
    end;
@@ -691,10 +691,10 @@ TreeListKareKod.Clear;
   for I := 0 to Length(Urunler) do
     begin
     NewNode := TreeListKareKod.Add;
-    NewNode.Texts[0] := Urunler[I].UrunNumarasý;
-    NewNode.Texts[1] := Urunler[I].UrunSeriNumarasý;
+    NewNode.Texts[0] := Urunler[I].UrunNumarasÄ±;
+    NewNode.Texts[1] := Urunler[I].UrunSeriNumarasÄ±;
     NewNode.Texts[2] := Urunler[I].Lotno;
-    NewNode.Texts[3] := Urunler[I].SonKullaným;
+    NewNode.Texts[3] := Urunler[I].SonKullanÄ±m;
     end;
     for I := 1 to  Length(Urunler)  do
     begin
@@ -702,7 +702,7 @@ TreeListKareKod.Clear;
       begin
       ChildNode := TreeListKareKod.AddChild(TreeListKareKod.Items[I], nil);
       ChildNode.Expand(True);
-      ChildNode.Texts[0] := 'KareKod Tekrarý';
+      ChildNode.Texts[0] := 'KareKod TekrarÄ±';
       end;
     end;
 end;   //Eklendi

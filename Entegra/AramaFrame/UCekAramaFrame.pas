@@ -1,4 +1,4 @@
-unit UCekAramaFrame;
+ï»¿unit UCekAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 11:09:52}
@@ -86,7 +86,7 @@ end;
 procedure TCekAramaFrame.Baslatildi;
 var i : smallint;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
                                              {
    for i := 0 to cgAlinanCekler.Properties.Items.Count-1 do
       if GenRegIni.RegReadString('CekOpsiyon', IntToStr(cgAlinanCekler.Properties.Items[i].Tag), 'True', 'C')='True' then
@@ -94,7 +94,7 @@ begin
 {
      if cgAlinanCekler.States[i] = cbsChecked then
          Result := Result + ',' + IntToStr(cgAlinanCekler.Properties.Items[i].Tag);
-    SpinKayitSayisi.text := GenRegIni.RegReadString('CekOpsiyon', 'Portföyde', '200', 'C');}
+    SpinKayitSayisi.text := GenRegIni.RegReadString('CekOpsiyon', 'PortfÃ¶yde', '200', 'C');}
 end;
 
 procedure TCekAramaFrame.btnSilClick(Sender: TObject);

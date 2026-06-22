@@ -1,4 +1,4 @@
-unit Lib.JsonParser;
+﻿unit Lib.JsonParser;
 
 interface
 

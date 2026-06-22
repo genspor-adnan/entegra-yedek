@@ -1,4 +1,4 @@
-unit UUretimEmriListeDlg;
+ï»¿unit UUretimEmriListeDlg;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 04/12/2010 11:54:17}
@@ -185,7 +185,7 @@ var
 
 procedure TUretimEmriListeDlg.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   AramaYap(nil);
   Tablo.GridTurkcelestir;
   Tablo.GridAyarRestore('UretimEmriGridi', GridUretimEmriView);
@@ -374,10 +374,10 @@ procedure TUretimEmriListeDlg.SetArama( const Value: TUretimEmriAramaFrame);
 begin
   FArama := Value;
   with FArama do begin
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 

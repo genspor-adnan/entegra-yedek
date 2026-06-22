@@ -1,23 +1,23 @@
-unit UGenSifre;
+ï»¿unit UGenSifre;
 (**************************************************** )
-15 Haziran 2007 Cuma Gürkan DİRİCE
-Şifreleme Uniti
-Şifreleme aşağıdaki şekilde kurgulanmıştır
+15 Haziran 2007 Cuma GÃ¼rkan DÄ°RÄ°CE
+Åifreleme Uniti
+Åifreleme aÅŸaÄŸÄ±daki ÅŸekilde kurgulanmÄ±ÅŸtÄ±r
 
---Şifrelenecek metin
-Gürkan
+--Åifrelenecek metin
+GÃ¼rkan
 
---Şifrelenmek için tüm karaktrlerin sayısal değerlerin XOR yapılıyor
-G^ü^r^k^a^n = X
+--Åifrelenmek iÃ§in tÃ¼m karaktrlerin sayÄ±sal deÄŸerlerin XOR yapÄ±lÄ±yor
+G^Ã¼^r^k^a^n = X
 
-    G  ü  r  k  a  n    -- Metin
+    G  Ã¼  r  k  a  n    -- Metin
     X  X  X  X  X  X    -- X ve
-+   1  2  3  4  5  6    -- Dizinin indisiyle toplanıyor
---------------------    -- Her bir karakter için 2 bytelık alan oluyor.
-   2f R4 G3 2T 4R 3E    -- Çıkan sonuç
-^   X  X  X  X  X  X    -- X ile XOR yapılıyor
++   1  2  3  4  5  6    -- Dizinin indisiyle toplanÄ±yor
+--------------------    -- Her bir karakter iÃ§in 2 bytelÄ±k alan oluyor.
+   2f R4 G3 2T 4R 3E    -- Ã‡Ä±kan sonuÃ§
+^   X  X  X  X  X  X    -- X ile XOR yapÄ±lÄ±yor
 ---------------------
-   Re RF HJ JK tV FC (X^170)  -- Çıkan bilginin sonuna X'in 170 ile XOR yapılmış hali yerleştiriliyor
+   Re RF HJ JK tV FC (X^170)  -- Ã‡Ä±kan bilginin sonuna X'in 170 ile XOR yapÄ±lmÄ±ÅŸ hali yerleÅŸtiriliyor
 
 (*****************************************************)
 
@@ -37,16 +37,16 @@ begin
   X := 0;
   for i := 1 to Length(s) do
   begin
-    // Tüm karakterler için XOR değeri belirleniyor.
+    // TÃ¼m karakterler iÃ§in XOR deÄŸeri belirleniyor.
     X := X xor Ord(s[i]);
   end;
   for i := 1 to Length(s) do
   begin
-    // Her bir karakterin sayısal karşılığına X ve dizi indisi ekleniyor ve
-    // X ile XOR yapılıyor
+    // Her bir karakterin sayÄ±sal karÅŸÄ±lÄ±ÄŸÄ±na X ve dizi indisi ekleniyor ve
+    // X ile XOR yapÄ±lÄ±yor
     r := r + IntToHex((Ord(s[i]) + (X + i)) xor X, 4)
   end;
-  // Şifreli Metinin sonuna X 170 ile XOR yapılarak Ekleniyor.
+  // Åifreli Metinin sonuna X 170 ile XOR yapÄ±larak Ekleniyor.
   Result := r + IntToHex(X xor 170, 2);
 end;
 
@@ -59,20 +59,20 @@ begin
   try
     if s = '' then exit;
     r := '';
-    // Şifrelenmiş metinin sonundaki X değeri Alınıyor
+    // ÅifrelenmiÅŸ metinin sonundaki X deÄŸeri AlÄ±nÄ±yor
     X := StrToInt('$' + Copy(s, length(s) - 1, 2));
-    // Şifrelenmiş metinin sonuna 170 ile XOR yapılarak eklendiği için XOR ile
-    // yeniden açılıyor.
+    // ÅifrelenmiÅŸ metinin sonuna 170 ile XOR yapÄ±larak eklendiÄŸi iÃ§in XOR ile
+    // yeniden aÃ§Ä±lÄ±yor.
     X := X xor 170;
-    // Şifrelenmiş metnin sonundaki X bilgisi siliniyor.
+    // ÅifrelenmiÅŸ metnin sonundaki X bilgisi siliniyor.
     Delete(s, length(s) - 1, 2);
-    // Her bir 4 karaktekter 1 karaktere karşılık geliyor. Bu yüzden döngüde
-    // karakter sayısı/4 kadar çevrim oluyor
+    // Her bir 4 karaktekter 1 karaktere karÅŸÄ±lÄ±k geliyor. Bu yÃ¼zden dÃ¶ngÃ¼de
+    // karakter sayÄ±sÄ±/4 kadar Ã§evrim oluyor
     for i := 1 to Length(s) div 4 do
     begin
-      // 4'er karakter alınarak tamsayıya çeviriliyor ardından X ile XOR
-      // yapılarak X ve dizinin indisi çıkarılıyor. Sonucunda kalan karakter
-      // deşifre metine ekleniyor.
+      // 4'er karakter alÄ±narak tamsayÄ±ya Ã§eviriliyor ardÄ±ndan X ile XOR
+      // yapÄ±larak X ve dizinin indisi Ã§Ä±karÄ±lÄ±yor. Sonucunda kalan karakter
+      // deÅŸifre metine ekleniyor.
       r := r + chr((StrToInt('$' + copy(s, (4 * (i - 1) + 1), 4)) xor X) - (X + i));
     end;
   finally
@@ -89,15 +89,15 @@ begin
   X := 0;
   for i := 1 to Length(s) do
   begin
-    // Tüm karakterler için XOR değeri belirleniyor.
+    // TÃ¼m karakterler iÃ§in XOR deÄŸeri belirleniyor.
     X := X xor Ord(s[i]);
   end;
   for i := 1 to Length(s) do
   begin
-    // Her bir karakterin sayısal karşılığına X ve dizi indisi ekleniyor ve  // X ile XOR yapılıyor
+    // Her bir karakterin sayÄ±sal karÅŸÄ±lÄ±ÄŸÄ±na X ve dizi indisi ekleniyor ve  // X ile XOR yapÄ±lÄ±yor
     r := r + IntToHex((Ord(s[i]) + (X + i)) xor X, 4)
   end;
-  // Şifreli Metinin sonuna X 170 ile XOR yapılarak Ekleniyor.
+  // Åifreli Metinin sonuna X 170 ile XOR yapÄ±larak Ekleniyor.
   Result := r + IntToHex(X xor 170, 2);
 end;
 
@@ -111,17 +111,17 @@ begin
     if s = '' then
       exit;
     r := '';
-    // Şifrelenmiş metinin sonundaki X değeri Alınıyor
+    // ÅifrelenmiÅŸ metinin sonundaki X deÄŸeri AlÄ±nÄ±yor
     X := StrToInt('$' + Copy(s, length(s) - 1, 2));
-    // Şifrelenmiş metinin sonuna 170 ile XOR yapılarak eklendiği için XOR ile // yeniden açılıyor.
+    // ÅifrelenmiÅŸ metinin sonuna 170 ile XOR yapÄ±larak eklendiÄŸi iÃ§in XOR ile // yeniden aÃ§Ä±lÄ±yor.
     X := X xor 170;
-    // Şifrelenmiş metnin sonundaki X bilgisi siliniyor.
+    // ÅifrelenmiÅŸ metnin sonundaki X bilgisi siliniyor.
     Delete(s, length(s) - 1, 2);
-    // Her bir 4 karaktekter 1 karaktere karşılık geliyor. Bu yüzden döngüde // karakter sayısı/4 kadar çevrim oluyor
+    // Her bir 4 karaktekter 1 karaktere karÅŸÄ±lÄ±k geliyor. Bu yÃ¼zden dÃ¶ngÃ¼de // karakter sayÄ±sÄ±/4 kadar Ã§evrim oluyor
     for i := 1 to Length(s) div 4 do
     begin
-      // 4'er karakter alınarak tamsayıya çeviriliyor ardından X ile XOR  // yapılarak X ve dizinin indisi çıkarılıyor. Sonucunda kalan karakter
-      // deşifre metine ekleniyor.
+      // 4'er karakter alÄ±narak tamsayÄ±ya Ã§eviriliyor ardÄ±ndan X ile XOR  // yapÄ±larak X ve dizinin indisi Ã§Ä±karÄ±lÄ±yor. Sonucunda kalan karakter
+      // deÅŸifre metine ekleniyor.
       r := r + chr((StrToInt('$' + copy(s, (4 * (i - 1) + 1), 4)) xor X) - (X + i));
     end;
   finally

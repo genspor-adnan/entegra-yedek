@@ -1,4 +1,4 @@
-unit UFaturalar;
+ï»¿unit UFaturalar;
 
 interface
 
@@ -550,7 +550,7 @@ begin
     begin
       if TGirisKutusuEx.BilgiAlEx(BGMail_adres_gir,TGirdiDenetimleri.Create.Edit(BGMail_adresi,@MailAdresi)) = mrOk then
       begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
         'VALUES  (1,(SELECT ID FROM REHBERILETISIM WHERE REHBERID=&REHBERID),'+
         '(SELECT SIRA FROM dbo.REHBERAYAR WHERE YERI=1 AND ETIKET=&ETIKET),'+
         '(SELECT ETIKET FROM dbo.REHBERAYAR WHERE ETIKET=&ETIKET AND YERI=1),'+
@@ -1216,17 +1216,17 @@ function TFaturalarDlg.BelgeIptalEt(Tur,ID:Integer):Boolean;
 Begin
   case Tur of
     9,19,101:begin
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARIS set DURUM=6,SIPARIS_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,SIPARIS_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SIPARIS set DURUM=6,SIPARIS_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,SIPARIS_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
                 ,['&Tur','&ID'],[Tur,ID]);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARISDETAY set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,ADET=0,MIKTAR=0 where SIPARISID=&Siparisid'
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SIPARISDETAY set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,ADET=0,MIKTAR=0 where SIPARISID=&Siparisid'
                 ,['&Siparisid'],[ID]);
     end;
   else
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATBASLIK set DURUM=6,FATURA_MALIYETI_ORT=0,FATURA_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,FATURA_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATBASLIK set DURUM=6,FATURA_MALIYETI_ORT=0,FATURA_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,FATURA_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
               ,['&Tur','&ID'],[Tur,ID]);
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATURA set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,STOKDURUMDEGIS=0,ADET=0,MIKTAR=0,YERI=0,YERID=0 where FATBASID=&Fatbasid'
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATURA set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,STOKDURUMDEGIS=0,ADET=0,MIKTAR=0,YERI=0,YERID=0 where FATBASID=&Fatbasid'
               ,['&Fatbasid'],[ID]);
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and BASLIKID=&Fatbasid'
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and BASLIKID=&Fatbasid'
               ,['&Tur','&Fatbasid'],[Tur,ID]);
   end;
 End;
@@ -1341,7 +1341,7 @@ begin//durum:6 iptal
         //e?er e-fat mod?l?nde varsa silelim
         Tablo.TablodanSorguAc(1,'SELECT ID FROM '+EFaturaDB+'.dbo.INVOICE WHERE OrgInvoiceNo = '''+FATBASLIK.FieldByName('ID').AsString+''' AND Status  = 1');
         if Tablo.Query1.Recordcount>0 then
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec '+EFaturaDB+'.dbo.p_EFaturaSil '+Tablo.Query1.Fields[0].AsString,[],[])
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'exec '+EFaturaDB+'.dbo.p_EFaturaSil '+Tablo.Query1.Fields[0].AsString,[],[])
     end;
   end;
   TarihDegisti;
@@ -1403,7 +1403,7 @@ begin
      if donustipi = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN then begin //sat?? sipari?i ?retim fi?ine d?n??t?yse ba?l??a ?r?n id ve adet yazal?m
         Tablo.TablodanSorguAc(3,'select top 1 URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID));
         if Tablo.Query1.RecordCount > 0 then
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+Tablo.Query3.Fields[1].AsString+
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+Tablo.Query3.Fields[1].AsString+
                                                     ' where ID='+IntToStr(yeniid), [],[])
      end;
 
@@ -1413,14 +1413,14 @@ begin
        9,19 :{if Tablo.Query1.FieldByName('REHBERID').AsInteger<0 then begin
                 i := Tablo.RehberAra_IDGetir(-1);
                 if i > 0 then begin
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update SIPARIS set REHBERID='+IntToStr(i)+' where ID='+IntToStr(yeniid),[],[]);
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update SIPARIS set REHBERID='+IntToStr(i)+' where ID='+IntToStr(yeniid),[],[]);
                    Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, i);
                end;
              end else }
                  Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger);
        10,14://e?er al?? veya sat?? irsaliyesi faturaya d?n???yorsa, faturada irsaliye no ve tarihi de g?r?nmeli
              begin
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
                 Tablo.FaturaSihirbazBaslat('E', Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger, 1,False,-1);
              end
        else
@@ -2071,11 +2071,11 @@ begin
                //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye g?re d?zenlenecek
             end;
                 //Silme i?leminden ?nce faturayla ili?kili d?k?manlar varsa silinsin.
-            //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_FATBASLIK_DOKUMAN, ResultID]);
+            //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_FATBASLIK_DOKUMAN, ResultID]);
           end else if TUR in [9,19,101] then begin
             Tablo.SiparisSil(ResultID, TUR);
                 //Silme i?leminden ?nce faturayla ili?kili d?k?manlar varsa silinsin.
-           // Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, ResultID]);
+           // Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, ResultID]);
           end else begin
             Application.MessageBox(PChar(Hareketgormussilinemez + IntToStr(ResultID)),PChar(Uyari),MB_OK+MB_ICONWARNING);
           end;

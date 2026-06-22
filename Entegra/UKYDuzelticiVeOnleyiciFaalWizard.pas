@@ -1,4 +1,4 @@
-unit UKYDuzelticiVeOnleyiciFaalWizard;
+ï»¿unit UKYDuzelticiVeOnleyiciFaalWizard;
 
 interface
 
@@ -433,12 +433,12 @@ procedure TKYDuzelticiVeOnleyiciFaalWizardDlg.WizardKontrolFinishButtonClick(Sen
 begin
   if not BoslukKontrol(ComboFaaliyet.text, 'Tipi') then Abort;
   //if not BoslukKontrol(ComboBolum.text, 'Birim') then Abort;
-  if not BoslukKontrol(EditDOFAcan.text, 'DÖF Açan') then Abort;
+  if not BoslukKontrol(EditDOFAcan.text, 'DÃ–F AÃ§an') then Abort;
   if not BoslukKontrol(ComboDURUM.text, 'Durum') then Abort;
-  if not BoslukKontrol(ComboHataKaynagi.text, 'Tespit Kaynaðý') then Abort;
-  if (ComboHataKaynagi.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'Müþteri')) then Abort;
-  if not BoslukKontrol(EditDOFSorumlu.text, 'DÖF Sorumlusu') then Abort;
-  if not BoslukKontrol(MemDofNeden.text, 'Uygunsuzluðun Tanýmý') then Abort;
+  if not BoslukKontrol(ComboHataKaynagi.text, 'Tespit KaynaÄŸÄ±') then Abort;
+  if (ComboHataKaynagi.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'MÃ¼ÅŸteri')) then Abort;
+  if not BoslukKontrol(EditDOFSorumlu.text, 'DÃ–F Sorumlusu') then Abort;
+  if not BoslukKontrol(MemDofNeden.text, 'UygunsuzluÄŸun TanÄ±mÄ±') then Abort;
 
   Kaydet;
 

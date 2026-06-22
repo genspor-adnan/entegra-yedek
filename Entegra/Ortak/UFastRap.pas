@@ -1,4 +1,4 @@
-unit UFastRap;
+ï»¿unit UFastRap;
 
 interface
 
@@ -143,7 +143,7 @@ var
      DegiskenDegerList.Destroy;
   end;
 begin
- //A if frxReport1.Variables.Count>0 then //Lokal deðiþkenler varsa diziye alýnýz
+ //A if frxReport1.Variables.Count>0 then //Lokal deÄŸiÅŸkenler varsa diziye alÄ±nÄ±z
  //A    OncekiDegiskenleriKaydet;
 
 
@@ -219,7 +219,7 @@ begin
   end;
 //  if (frxReport1.Variables.Count>0) and (Assigned(DegiskenAdList)) and (DegiskenAdList <> nil) and (DegiskenAdList.Count>0) then
 //A  if (DegiskenAdList <> nil) and (DegiskenAdList.Count>0) then
-//A     OncekiDegiskenleriYukle;  //Lokal deðiþkenler tekrar yüklenir
+//A     OncekiDegiskenleriYukle;  //Lokal deÄŸiÅŸkenler tekrar yÃ¼klenir
 end;
 
 function TFastRaporDlg.FastRapor(Prev: SmallInt; EkranAdi1, RaporAdi1 : String; PDFYol:String=''):String;
@@ -236,7 +236,7 @@ var
   procedure YeniRapor;
   var YeniDokId : Integer;
   begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       ' insert into DOKUMLER(RAPORADI,MODUL,GRUBU,SAYAC,EKLEYEN ) '+
       ' Values (&RaporAdi1, ''-'', &EkranAdi1,0,&Ekleyen)', ['&RaporAdi1','&EkranAdi1','&Ekleyen'],[RaporAdi1,EkranAdi1,Kullanan]);
       Tablo.Query1.Close;
@@ -244,7 +244,7 @@ var
       Tablo.Query1.Open;
       YeniDokId := Tablo.Query1.Fields[0].AsInteger;
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
       ' insert into AYARLARYENI (DOKUMID,EKLEYEN ) '+
       ' Values (&YeniDokId, &Ekleyen)',['&YeniDokId','&Ekleyen'],[YeniDokId, Kullanan]);
   end;
@@ -292,7 +292,7 @@ begin
           raise Exception.Create('UFastRap PrepareReport error [' + EkranAdi1 + '/' + RaporAdi1 + ']: ' + E.Message);
       end;
     end;
-// yazýcý ayarlanýr
+// yazÄ±cÄ± ayarlanÄ±r
     frxReport1.PrintOptions.ShowDialog := (TabYeniAyar.FieldByName('YAZICI').AsString='')or(TabYeniAyar.FieldByName('YAZICI').AsString='Dialog');
     if (TabYeniAyar.FieldByName('YAZICI').AsString<>'')and(TabYeniAyar.FieldByName('YAZICI').AsString<>'Dialog')and(TabYeniAyar.FieldByName('YAZICI').AsString<>'Default') then begin
        frxReport1.PrintOptions.Printer := TabYeniAyar.FieldByName('YAZICI').AsString;
@@ -443,7 +443,7 @@ begin
        end;
     end;
 
-  end else if MessageDlg('Döküm/Rapor ayarlarý bulunamadý. Oluþturulsun mu?', mtConfirmation, [mbYes, mbNo], 0) = mrYES then begin
+  end else if MessageDlg('DÃ¶kÃ¼m/Rapor ayarlarÄ± bulunamadÄ±. OluÅŸturulsun mu?', mtConfirmation, [mbYes, mbNo], 0) = mrYES then begin
       YeniRapor;
       AyarTablosunuAc;
       frxReport1.FileName := EkranAdi1 + '.' + RaporAdi1 + '.fr3';
@@ -459,15 +459,15 @@ begin
     Frx:=frxReport1;
 
   Frx.Variables.Clear;
-  Frx.Variables[' Döküm Deðiþkenleri'] := '';
-  // Klasöre deðiþkenleri tanýmla
-  Frx.Variables.AddVariable('Döküm Deðiþkenleri','Kullanýcý Kodu',Kullanan + #13#10);
-  Frx.Variables.AddVariable('Döküm Deðiþkenleri','Kullanýcý Adý',KullanAdi + #13#10);
-  Frx.Variables.AddVariable('Döküm Deðiþkenleri','Entegra','Gen Entegre Ýþletme Bilgi Yönetim Sistemleri'#13#10);
-  Frx.Variables.AddVariable('Döküm Deðiþkenleri','Kurum Adý', Tablo.TabBizim.FieldByName('FIRMA').AsString + #13#10);
-  Frx.Variables.AddVariable('Döküm Deðiþkenleri','Rapor Adý',RaporAdi + #13#10);
-  for i := 0 to DokumDegiskenListesi.Count-1 do  //sýrayla dökümdeki koþullarý da ekleyelim
-    Frx.Variables.AddVariable('Döküm Deðiþkenleri', copy(DokumDegiskenListesi.Strings[i], 1, Pos('$@$', DokumDegiskenListesi.Strings[i])-1),copy(DokumDegiskenListesi.Strings[i], Pos('$@$', DokumDegiskenListesi.Strings[i])+3, 255)+ #13#10);
+  Frx.Variables[' DÃ¶kÃ¼m DeÄŸiÅŸkenleri'] := '';
+  // KlasÃ¶re deÄŸiÅŸkenleri tanÄ±mla
+  Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri','KullanÄ±cÄ± Kodu',Kullanan + #13#10);
+  Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri','KullanÄ±cÄ± AdÄ±',KullanAdi + #13#10);
+  Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri','Entegra','Gen Entegre Ä°ÅŸletme Bilgi YÃ¶netim Sistemleri'#13#10);
+  Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri','Kurum AdÄ±', Tablo.TabBizim.FieldByName('FIRMA').AsString + #13#10);
+  Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri','Rapor AdÄ±',RaporAdi + #13#10);
+  for i := 0 to DokumDegiskenListesi.Count-1 do  //sÄ±rayla dÃ¶kÃ¼mdeki koÅŸullarÄ± da ekleyelim
+    Frx.Variables.AddVariable('DÃ¶kÃ¼m DeÄŸiÅŸkenleri', copy(DokumDegiskenListesi.Strings[i], 1, Pos('$@$', DokumDegiskenListesi.Strings[i])-1),copy(DokumDegiskenListesi.Strings[i], Pos('$@$', DokumDegiskenListesi.Strings[i])+3, 255)+ #13#10);
   DokumDegiskenListesi.Clear;
 end;
 
@@ -480,10 +480,10 @@ begin
   TabYeniAyar.Close;
   TabYeniAyar.SQL.Text := 'SELECT * FROM AYARLARYENI WHERE DOKUMID='+IntToStr(DokumId);//EKRAN='''+EkranAdi+''' and RAPORADI = '''+RaporAdi+''' ';
   TabYeniAyar.Open;
-  RaporOku(frxReport1); //Ayarlar okunduðunda deðiþkenler sýfýrlanýr
+  RaporOku(frxReport1); //Ayarlar okunduÄŸunda deÄŸiÅŸkenler sÄ±fÄ±rlanÄ±r
 
   Frx.FileName := EkranAdi1 + '.' + RaporAdi1 + '.fr3';
-  Frx.Tag := DokumId; //DokumId'yi burda tutalým ki ayarlarý save ettiðimizde yeni kayýtsa dokumýd'ye girelim
+  Frx.Tag := DokumId; //DokumId'yi burda tutalÄ±m ki ayarlarÄ± save ettiÄŸimizde yeni kayÄ±tsa dokumÄ±d'ye girelim
   Frx.ReportOptions.VersionRelease := Ver;
 
   DegiskenleriEkle(Frx);
@@ -511,7 +511,7 @@ begin
    end;
    RaporKaydet(frxReport1);
    TabYeniAyar.Post;
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DOKUMLER set VERSIYON='''+VersiyonGetir(frxReport1.ReportOptions.VersionRelease)+'''  where ID=&id ',['&id'],[frxReport1.Tag]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DOKUMLER set VERSIYON='''+VersiyonGetir(frxReport1.ReportOptions.VersionRelease)+'''  where ID=&id ',['&id'],[frxReport1.Tag]);
 end;
 
 procedure TFastRaporDlg.mnuAdDegistirClick(Sender: TObject);
@@ -523,10 +523,10 @@ var
 Begin
     Dlg := pmDokumAyarlar.PopUpComponent.Owner;
     dokumAdi := TToolButton(Dlg.FindComponent('YaziciYaz')).Caption;
-    if TGirisKutusuEx.BilgiAlEx('Döküm/Rapor Ad Deðiþtir',
-       TGirdiDenetimleri.Create.Edit('Yeni Adý',@dokumAdi)) = mrOk then begin
+    if TGirisKutusuEx.BilgiAlEx('DÃ¶kÃ¼m/Rapor Ad DeÄŸiÅŸtir',
+       TGirdiDenetimleri.Create.Edit('Yeni AdÄ±',@dokumAdi)) = mrOk then begin
        if Trim(dokumAdi) = '' then
-        MessageDlg('Döküm/Rapor adý boþ olamaz!',mtError,[mbOK],0)
+        MessageDlg('DÃ¶kÃ¼m/Rapor adÄ± boÅŸ olamaz!',mtError,[mbOK],0)
        else begin { Normal Rapor }
         EkranAdi:=TForm(Dlg).Name;
         YeniRaporAdi:= Trim(dokumAdi);
@@ -568,11 +568,11 @@ begin
      a := Fxml.Root.NamedItem[TabloAdi + IntToStr(Say)];
      if a.Count > 0 then begin
          if (TabloAdi = 'DOKUMLER')and(DokumId>0) then
-             Tablo.Query9.edit //daha önceden varsa güncelleme
+             Tablo.Query9.edit //daha Ã¶nceden varsa gÃ¼ncelleme
          else
              Tablo.Query9.Append;
          if TabloAdi = 'DOKUMLER' then begin
-            //Tablo.Query9.FieldByName('RAPORADI').AsString := RaporAdi   //sadece dokumde raporadý var
+            //Tablo.Query9.FieldByName('RAPORADI').AsString := RaporAdi   //sadece dokumde raporadÄ± var
             //a := Fxml.Root.NamedItem['DOKUMLER1'];
             if a[0].Name = 'RAPORADI' then begin
                Tablo.Query9.FieldByName('RAPORADI').AsString := a[0].Text;
@@ -581,7 +581,7 @@ begin
             else if a[1].Name = 'RAPORADI' then
                Tablo.Query9.FieldByName('RAPORADI').AsString := a[1].Text;
          end else
-            Tablo.Query9.FieldByName('DOKUMID').AsInteger := DokumId;  // ayarlar ve koþullar dökümlere baðlý; buraya önce eklenmiþ olan dokumid si veririz
+            Tablo.Query9.FieldByName('DOKUMID').AsInteger := DokumId;  // ayarlar ve koÅŸullar dÃ¶kÃ¼mlere baÄŸlÄ±; buraya Ã¶nce eklenmiÅŸ olan dokumid si veririz
          for i := 0 to a.Count - 1 do begin
              fld := Tablo.Query9.FieldByName(a[i].Name);
              if fld.FieldName = 'RAPORADI' then Continue;
@@ -603,7 +603,7 @@ begin
                 stream.Free;
               end;
              end else if (fld.DataType = ftDateTime) then begin
-               if Pos(FormatSettings.DateSeparator, a[i].text)<1 then //eðer bilgisayarda tarih ayracý / ama gelen datada . ise
+               if Pos(FormatSettings.DateSeparator, a[i].text)<1 then //eÄŸer bilgisayarda tarih ayracÄ± / ama gelen datada . ise
                   if FormatSettings.DateSeparator='.' then
                      a[i].text := StringReplace(a[i].text,'/','.',[rfReplaceAll])
                   else
@@ -618,7 +618,7 @@ begin
      else
        Break;
  end;
- if TabloAdi = 'DOKUMLER' then  //döküm tablosuna eklendikten sonra ID döndürelerek
+ if TabloAdi = 'DOKUMLER' then  //dÃ¶kÃ¼m tablosuna eklendikten sonra ID dÃ¶ndÃ¼relerek
     result := Tablo.Query9.FieldByName('ID').AsInteger;
  //Tablo1.Close;
 end;
@@ -626,7 +626,7 @@ end;
 procedure XML2Rapor(FXml : TECXMLParser; DokumId : Integer);
 var xmlstream : TStringStream;
 begin
-      //DokumId Onceden belli ise yani sýfýrdan büyükse döküm üzerinde update yapýyoruz
+      //DokumId Onceden belli ise yani sÄ±fÄ±rdan bÃ¼yÃ¼kse dÃ¶kÃ¼m Ã¼zerinde update yapÄ±yoruz
       DokumId := XMLBolum(FXml, DokumId,'DOKUMLER');
       XMLBolum(FXml, DokumId,'AYARLARYENI');
       XMLBolum(FXml, DokumId,'KOSULLAR');
@@ -639,25 +639,25 @@ var DokumId : Integer;
     a : TXMLItem;
      function DahaOncedenVarMi : Boolean;
      var Ad, Grubu : string[50];
-     begin    //döküm alýyoruz ama daha önceden kayýtlý mý kontrol edelim
+     begin    //dÃ¶kÃ¼m alÄ±yoruz ama daha Ã¶nceden kayÄ±tlÄ± mÄ± kontrol edelim
           a := xml.Root.NamedItem['DOKUMLER1'];
           if a.Count < 1 then begin
-             showmessage(DosyaAdi+' Geçersiz rapor formatý!');
+             showmessage(DosyaAdi+' GeÃ§ersiz rapor formatÄ±!');
              Result := False;
           end;
 
           if a[1].Name = 'RAPORADI' then
              Ad := a[1].Text;
-          if a[2].Name = 'GRUBU' then //bu varsa ekran dökümü
+          if a[2].Name = 'GRUBU' then //bu varsa ekran dÃ¶kÃ¼mÃ¼
              Grubu := a[2].Text
-          else if a[2].Name = 'MODUL' then //bu varsa genel dökümdür
+          else if a[2].Name = 'MODUL' then //bu varsa genel dÃ¶kÃ¼mdÃ¼r
              Grubu := '';
           Tablo.TablodanSorguAc(1,'select ID from DOKUMLER where RAPORADI = '''+Ad+''' and isnull(GRUBU,'''')='''+Grubu+'''');
           if Tablo.Query1.recordcount > 0 then begin
-             if Application.MessageBox('Bu döküm zaten mevcut. Üzerine yazýlsýn mý?', 'Onay', MB_YESNO) = IDYES then begin
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+             if Application.MessageBox('Bu dÃ¶kÃ¼m zaten mevcut. Ãœzerine yazÄ±lsÄ±n mÄ±?', 'Onay', MB_YESNO) = IDYES then begin
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
                 Result := True
              end
              else
@@ -740,9 +740,9 @@ begin
 
   kaynakDokum := TToolButton(Dlg.FindComponent('YaziciYaz')).Caption;
   dokumAdi := kaynakDokum + '1';
-  if TGirisKutusuEx.BilgiAlEx('Döküm/Rapor Kopyalama', TGirdiDenetimleri.Create.Edit('Yeni Döküm Adý',@dokumAdi)) = mrOk then begin
+  if TGirisKutusuEx.BilgiAlEx('DÃ¶kÃ¼m/Rapor Kopyalama', TGirdiDenetimleri.Create.Edit('Yeni DÃ¶kÃ¼m AdÄ±',@dokumAdi)) = mrOk then begin
     if Trim(dokumAdi) = '' then
-      MessageDlg('Döküm/Rapor adý boþ olamaz!',mtError,[mbOK],0)
+      MessageDlg('DÃ¶kÃ¼m/Rapor adÄ± boÅŸ olamaz!',mtError,[mbOK],0)
     else begin
       { Normal Rapor }
       TRaporAraclari.RaporKopyala( 0,dokumAdi); //  TForm(Dlg).Name, kaynakDokum,
@@ -764,11 +764,11 @@ begin
   //if not FFrameBilgi.AktifIcerikYazdirmaDestekli then Exit;
   Dlg := pmDokumAyarlar.PopUpComponent.Owner;
   PM := TPopupMenu(dlg.FindComponent('PopupMenuYaz'));
-  if MessageDlg('Geçerli dökümü/raporu silmek istiyor musunuz?', mtConfirmation,[mbYes,mbNo],0) = mrNo then Exit
+  if MessageDlg('GeÃ§erli dÃ¶kÃ¼mÃ¼/raporu silmek istiyor musunuz?', mtConfirmation,[mbYes,mbNo],0) = mrNo then Exit
   else begin
      raporadi:= TToolButton(Dlg.FindComponent('YaziciYaz')).Caption ;
      EkranAdi := TForm(Dlg).Name;
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE AYARLARYENI WHERE EKRAN=&ekran AND RAPORADI = &raporadi',['&raporadi','&ekran'],[raporAdi,EkranAdi]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE AYARLARYENI WHERE EKRAN=&ekran AND RAPORADI = &raporadi',['&raporadi','&ekran'],[raporAdi,EkranAdi]);
   end;
   if pm.Items.Count>4 then begin
      TToolButton(Dlg.FindComponent('YaziciYaz')).Caption := PM.Items[5].Caption;
@@ -801,11 +801,11 @@ begin
   dokumAdi := 'YeniRapor';
   Dlg := pmDokumAyarlar.PopUpComponent.Owner;
   if  TGirisKutusuEx.BilgiAlEx('Yeni Rapor',
-      TGirdiDenetimleri.Create.Edit('Yeni Rapor Adý',@dokumAdi)) = mrOk then begin
+      TGirdiDenetimleri.Create.Edit('Yeni Rapor AdÄ±',@dokumAdi)) = mrOk then begin
       TRaporAraclari.YeniRapor(TForm(Dlg).Name,dokumAdi);
       //YazdirmaBilgileriniYenile(FFrameBilgi.AktifIcerik);
       //FFrameBilgi.AktifIcerik.AktifRaporAdi := dokumAdi;
-      //Önce eski dökümü aþaðý menüye indirelim
+      //Ã–nce eski dÃ¶kÃ¼mÃ¼ aÅŸaÄŸÄ± menÃ¼ye indirelim
       TB := TToolButton(TForm(Dlg));
       TPopupMenu(TForm(Dlg)).Items.ItemOperation(moAdd, TB.Caption, RaporSecClick);
       TB.Caption := dokumAdi;
@@ -836,7 +836,7 @@ procedure TFastRaporDlg.FastReportTextKaydet( DosyaAdi : String; DokumId:Integer
              end; }
 
              a := xml.Root.NamedItem[TabloAdi+IntToStr(Say)];
-             for i := BaslAlani to Tablo.Query1.FieldCount-1 do     //ID ve DOKUMID alanlarýný almamak için BASLID kullanýyoruz
+             for i := BaslAlani to Tablo.Query1.FieldCount-1 do     //ID ve DOKUMID alanlarÄ±nÄ± almamak iÃ§in BASLID kullanÄ±yoruz
                 if Tablo.Query1.Fields[i].AsString <> '' then
                     with a.New do begin
                       Name := Tablo.Query1.Fields[i].FieldName;
@@ -883,13 +883,13 @@ begin
   TabYeniAyar.SQL.Text := 'SELECT * FROM AYARLARYENI WHERE EKRAN='''+EkranAdi+''' and RAPORADI = '''+RaporAdi+''' ';
   TabYeniAyar.Open;
   if TabYeniAyar.recordcount > 0 then
-    raise exception.create('Ayný isimde rapor zaten var!');
+    raise exception.create('AynÄ± isimde rapor zaten var!');
   frxReport1.LoadFromFile(DosyaAdi);
   frxDesigner1SaveReport(frxReport1, False);
 end;
 procedure TFastRaporDlg.FormCreate(Sender: TObject);
 begin
-   //LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   //LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    TabYeniAyar.Connection := Tablo.FDCnn;
    Tablo1.Connection := Tablo.FDCnn;
    frxReport1.EngineOptions.UseGlobalDataSetList := False;

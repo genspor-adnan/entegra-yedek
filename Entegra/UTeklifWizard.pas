@@ -1,4 +1,4 @@
-unit UTeklifWizard;
+ï»¿unit UTeklifWizard;
 
 interface
 
@@ -834,7 +834,7 @@ begin
      Tablo.OrtakEPostaGonder(MODUL_Teklif, TabTeklif, Yol, 'TEKLIFDETAY', ' MEDYAVAR=1 and TEKLIFID')
   end else
      FastRaporDlg.FastRapor(TMenuItem(Sender).Tag, EkranAdiAl, s);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIF set YAZDIRILDI=1 where ID='+TabTeklif.FieldByName('ID').AsString,[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIF set YAZDIRILDI=1 where ID='+TabTeklif.FieldByName('ID').AsString,[],[]);
 end;
 
 procedure TTeklifWizardDlg.BeditProjeKodDblClick(Sender: TObject);
@@ -987,7 +987,7 @@ end;
 
 procedure TTeklifWizardDlg.BtnYenileClick(Sender: TObject);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIFDETAY set STOKDURUM = (select isnull(SUM(isnull(KALAN,0.0)),0.0) from STOKDURUM where STOKID=TEKLIFDETAY.URUNID) where TUR=1 and TEKLIFID=&TID'
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIFDETAY set STOKDURUM = (select isnull(SUM(isnull(KALAN,0.0)),0.0) from STOKDURUM where STOKID=TEKLIFDETAY.URUNID) where TUR=1 and TEKLIFID=&TID'
                                 ,['&TID'],[TabTeklif.FieldByName('ID').AsInteger]);
   TabTeklifDetay.Close;
   TabTeklifDetay.Open;
@@ -1023,8 +1023,8 @@ procedure TTeklifWizardDlg.MenuUsteTasiClick(Sender: TObject);
 var seciliID, seciliSIRA : integer;
   procedure Tasi(ID1, SIRA1, ID2, SIRA2 : integer);
   begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA2)+' Where ID = '+IntToStr(ID1), [],[]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA1)+' Where ID = '+IntToStr(ID2), [],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA2)+' Where ID = '+IntToStr(ID1), [],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA1)+' Where ID = '+IntToStr(ID2), [],[]);
        TabloYenile(TabTeklifDetay, [TabTeklif.Fields[0].AsInteger, AlternatifNo]);;
      TabTeklifDetay.Locate('ID', ID1, []);
   end;
@@ -1179,7 +1179,7 @@ begin
   Aman_Kilitle_Ac(TabTeklif.FieldByName('ONAYLAYAN').AsInteger < 1);
 
   // okundu i?aretleyelim ki panodaki listeden silinsin
-  VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI='+s+' where DUYURUID in (select ID from DUYURU where YER='+IntToStr(Tabno_TEKLIF)+' and YER_ID='+TabTeklif.FieldByName('ID').AsString+')',[],[]);
+  VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DUYURUKULLANICI set OKUNMATARIHI='+s+' where DUYURUID in (select ID from DUYURU where YER='+IntToStr(Tabno_TEKLIF)+' and YER_ID='+TabTeklif.FieldByName('ID').AsString+')',[],[]);
  end;
 
 procedure TTeklifWizardDlg.FinIptalTusClick(Sender: TObject);
@@ -1229,12 +1229,12 @@ begin
    if (IptalSecildi) and ((IslemOp='E')or(IslemOp='K')) then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabTeklif.active)and(TabTeklif.Fields[0].AsString <> '')  then begin
       //varsa dokumanlar?n silinmeli
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[Yeri, TabTeklif.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[Yeri, TabTeklif.FieldByName('ID').AsInteger]);
       //varsa proje ba?lant?lar? silinmeli
 
       //sonra kendi silinir
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIF where ID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIF where ID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
       end;
    end else if (IslemOp='D')and(TabTeklifDetay.IsEmpty) then begin
             raise Exception.Create(UrungirilmedenKaydedilemez);
@@ -1371,9 +1371,9 @@ begin
      if ctrl.Name <> '' then begin
        Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG,TABLO from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+' and TUR not in (11,19) ');
        if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+PCHAR(TWSilinsinmi)),PCHAR(Uyari),MB_YESNO)=mrYes then  begin
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
          try
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Alter table '+Tablo.Query1.FieldByName('TABLO').AsString+' drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Alter table '+Tablo.Query1.FieldByName('TABLO').AsString+' drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
          except
          end;
            ctrl.Visible := False;
@@ -1482,7 +1482,7 @@ begin
             //Buraya SablonID eklencek.
             //Tablo.TablodanSorguAc(5,' Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and VARSAYILAN = 1 ');  Tablo.Query5.Fields[0].AsString
             if TabTeklif.FieldByName('SABLONID').AsString <> '' then begin
-               Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update DOKUMLER set VARSAYILAN = 0 Where GRUBU='''+EkranAdiAl+'''  Update DOKUMLER set VARSAYILAN = 1 Where GRUBU='''+EkranAdiAl+''' and ID = '+TabTeklif.FieldByName('SABLONID').AsString+' ',[],[]);
+               Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update DOKUMLER set VARSAYILAN = 0 Where GRUBU='''+EkranAdiAl+'''  Update DOKUMLER set VARSAYILAN = 1 Where GRUBU='''+EkranAdiAl+''' and ID = '+TabTeklif.FieldByName('SABLONID').AsString+' ',[],[]);
 
                if not RevizeGrideTiklandi then  begin
                  TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz, ra, aktifFrame.RaporSecClick);
@@ -1647,7 +1647,7 @@ begin
       Abort;
    Tutar:=StringReplace(Tutar,',',FormatSettings.Decimalseparator,[rfReplaceAll]);
    Tutar:=StringReplace(Tutar,'.',FormatSettings.Decimalseparator,[rfReplaceAll]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=0.0, ISKONTO2=0.0,  TUTAR=ADET*BIRIMFIYAT,DOVIZ_TUTARI=ADET*DOVIZ_BIRIMFIYAT where TEKLIFID=&id and ALTERNATIFNO=&AltNo ',['&id','&AltNo'],[TabTeklif.FieldByName('ID').AsInteger,TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=0.0, ISKONTO2=0.0,  TUTAR=ADET*BIRIMFIYAT,DOVIZ_TUTARI=ADET*DOVIZ_BIRIMFIYAT where TEKLIFID=&id and ALTERNATIFNO=&AltNo ',['&id','&AltNo'],[TabTeklif.FieldByName('ID').AsInteger,TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
    TabloYenile(TabTeklifDetay,[TabTeklif.FieldByName('ID').AsInteger, AlternatifNo]);
    TeklifTutarHesapla;
    if TMenuItem(Sender).Tag = 0 then
@@ -1665,7 +1665,7 @@ begin
     showmessage(BGEksiIskontoGirilemez)
   else begin
     Yuzde := StringReplace(Yuzde, ',', '.', []);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=100.00-'+Yuzde+',ISKONTO2=0.0, TUTAR='+Yuzde+'*ADET*BIRIMFIYAT/100.0, DOVIZ_TUTARI='+Yuzde+'*ADET*DOVIZ_BIRIMFIYAT/100.0 where TEKLIFID=&id and ALTERNATIFNO=&ALTERNATIFNO ',['&id','&ALTERNATIFNO'],[TabTeklif.FieldByName('ID').AsInteger,TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=100.00-'+Yuzde+',ISKONTO2=0.0, TUTAR='+Yuzde+'*ADET*BIRIMFIYAT/100.0, DOVIZ_TUTARI='+Yuzde+'*ADET*DOVIZ_BIRIMFIYAT/100.0 where TEKLIFID=&id and ALTERNATIFNO=&ALTERNATIFNO ',['&id','&ALTERNATIFNO'],[TabTeklif.FieldByName('ID').AsInteger,TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
   end;
    TeklifTutarHesapla;
    TabloYenile(TabTeklifDetay,[TabTeklif.FieldByName('ID').AsInteger, AlternatifNo]);
@@ -1688,12 +1688,12 @@ begin
    end else
       Yuzde := IntToStr(TMenuItem(Sender).Tag);
    s := Yuzde;
-   if IskTipi='Ýskonto1' then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=&Yuzde, '+
+   if IskTipi='Ä°skonto1' then
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO=&Yuzde, '+
       ' DOVIZ_TUTARI=(100.0-isnull(ISKONTO2,0.0))*(100.0-&Yuzde)*(ADET*DOVIZ_BIRIMFIYAT)/10000.0,'+
       ' TUTAR=(100.0-isnull(ISKONTO2,0.0))*(100.0-&Yuzde)*ADET*BIRIMFIYAT/10000.0 where TEKLIFID=&id and ALTERNATIFNO=&AltNo',['&Yuzde','&id','&AltNo'],[StrToFloatDef(Trim(Yuzde),0), TabTeklif.FieldByName('ID').AsInteger, TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger])
-   else if IskTipi='Ýskonto2' then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO2=&Yuzde,'+
+   else if IskTipi='Ä°skonto2' then
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIFDETAY set ISKONTO2=&Yuzde,'+
       ' DOVIZ_TUTARI=(100.0-isnull(ISKONTO,0.0))*(100.0-&Yuzde)*(ADET*DOVIZ_BIRIMFIYAT)/10000.0,'+
       '  TUTAR=(100.0-isnull(ISKONTO,0.0))*(100.0-&Yuzde)*ADET*BIRIMFIYAT/10000.0 where TEKLIFID=&id and ALTERNATIFNO=&AltNo',['&Yuzde','&id','&AltNo'],[StrToFloatDef(Trim(Yuzde),0), TabTeklif.FieldByName('ID').AsInteger, TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger]);
       TeklifTutarHesapla;
@@ -1748,7 +1748,7 @@ begin
   end else begin
     s:=YaziciYaz.Caption;
     Delete(s, pos('&',s), 1);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIF Set SABLONID = (Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ) Where ID='+TabTeklif.Fields[0].AsString+' ',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIF Set SABLONID = (Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ) Where ID='+TabTeklif.Fields[0].AsString+' ',[],[]);
   end;
 
    if TabTeklifDetay.State in [dsInsert, dsEdit] then begin
@@ -1774,7 +1774,7 @@ begin
       TabTeklifDetay.Next;
    end;
    //Kopyalanm?? sat?rlar?n stok durumunu g?ncelleyelim
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update TEKLIFDETAY set STOKDURUM = (select top 1 isnull(KALAN,0) from STOKDURUM where STOKDURUM.STOKID=TEKLIFDETAY.URUNID)'+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update TEKLIFDETAY set STOKDURUM = (select top 1 isnull(KALAN,0) from STOKDURUM where STOKDURUM.STOKID=TEKLIFDETAY.URUNID)'+
       ' where TEKLIFID='+IntToStr(ID)+' and TUR>0',[],[]);
 end;
 
@@ -1820,23 +1820,23 @@ begin
    if Sender.ClassType = TToolButton then begin //e?er revize ise kopyalanan? revize diye i?aretle
        RevID := StrToIntDef(VarToStrDef(TabTeklif.FieldByName('REVIZEID').Value,'1'),1);
        //Teklifin ?nceki durumun "Revize" yapal?m
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIF set DURUM=5 where Id=&id ',['&id'],[TeklifID]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIF set DURUM=5 where Id=&id ',['&id'],[TeklifID]);
        //Teklifin ?imdiki durumunu "Olu?turma", tarihi ?imdi ve haz?rlayan? da giren ki?i yapal?m
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIF set DURUM=1, REVIZEID='+IntToStr(RevID+1)+', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',HAZIRLAYAN='+Kullanan+' where Id=&id ',['&id'],[YeniTeklifID]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIF set DURUM=1, REVIZEID='+IntToStr(RevID+1)+', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',HAZIRLAYAN='+Kullanan+' where Id=&id ',['&id'],[YeniTeklifID]);
    end else begin //Kopyalama
        belgeno := SiradakiBelgeNumarasi(80,TabTeklif.FieldByName('TARIH').AsDateTime);
-       RehIletID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select top 1 ID from REHBERILETISIM where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc ',[],[],true);
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIF set REHBERID=&RID, REHBERILETID=&RIlet, TEKLIFNO=&TNo , TEKLIFSERI=&TSeri, KOCANNO=&KcnNo, TARIH='''+Formatdatetime('yyyy-mm-dd hh:mm:nn.zzz', Tablo.GENINI.BugunTrhSaat)+''',DURUM=&Drm,REVIZEID=&Rvz,HAZIRLAYAN=&Hzr where Id=&id '
+       RehIletID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select top 1 ID from REHBERILETISIM where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc ',[],[],true);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIF set REHBERID=&RID, REHBERILETID=&RIlet, TEKLIFNO=&TNo , TEKLIFSERI=&TSeri, KOCANNO=&KcnNo, TARIH='''+Formatdatetime('yyyy-mm-dd hh:mm:nn.zzz', Tablo.GENINI.BugunTrhSaat)+''',DURUM=&Drm,REVIZEID=&Rvz,HAZIRLAYAN=&Hzr where Id=&id '
                                   ,['&RID','&RIlet','&TNo','&TSeri','&KcnNo','&Drm','&Rvz','&Hzr','&id']
                                   ,[RehberId,RehIletID,belgeno.belgeno,belgeno.SeriNo,KocannoBul(80),1,1,Kullanan, YeniTeklifID]);
        if (Sender.ClassType = TMenuItem)and( TMenuItem(Sender).Name = 'BaskaMusteriyeKopyala') then
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update TEKLIF set MUS_ILGILI=&MusIlgi  where Id=&id ',['&MusIlgi','&id'],[0,YeniTeklifID]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update TEKLIF set MUS_ILGILI=&MusIlgi  where Id=&id ',['&MusIlgi','&id'],[0,YeniTeklifID]);
    end;
    DetayKopyala(YeniTeklifID);
    TeklifID := YeniTeklifID;
    btnTeklif.Tag:=TeklifID;
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into TEKLIFHAREKET(TEKLIFID,EKLEYEN,EKLEMETARIHI,ESKIDURUM,YENIDURUM,ACIKLAMA,SUBEID ) VALUES('+
-          IntToStr(TeklifID)+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(OncekiDurum)+',5,''Revize olarak iþaretlendi.'' ,'+IntToStr(SubeId)+')',[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into TEKLIFHAREKET(TEKLIFID,EKLEYEN,EKLEMETARIHI,ESKIDURUM,YENIDURUM,ACIKLAMA,SUBEID ) VALUES('+
+          IntToStr(TeklifID)+','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(OncekiDurum)+',5,''Revize olarak iÅŸaretlendi.'' ,'+IntToStr(SubeId)+')',[],[]);
 
    TabloYenile(TabGecmisTeklifler,[RehberId]); //,-1
    TabloYenile(TabTeklif, [TeklifID]);
@@ -2020,7 +2020,7 @@ begin
     TabTeklif.FieldByName('DOVIZ_KURU').Value := TabTeklif.FieldByName('KUR').Value;
 
   if TabTeklif.FieldByName('SUBEID').OldValue <> TabTeklif.FieldByName('SUBEID').NewValue then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIFDETAY set SUBEID='+TabTeklif.FieldByName('SUBEID').AsString+' Where TEKLIFID ='+IntToStr(TeklifID)+' ',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIFDETAY set SUBEID='+TabTeklif.FieldByName('SUBEID').AsString+' Where TEKLIFID ='+IntToStr(TeklifID)+' ',[],[]);
   end;
 
 end;
@@ -2239,7 +2239,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
-      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'',TNotifyEvent(nil),Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres SeÃ§iniz.',SQLText,st,[],'',TNotifyEvent(nil),Tablo.FDCnn,IletisimEkleClick) then begin
         tabTeklif.Edit;
         tabTeklif.FieldByName(sonbasilanctrl.TextHint).AsString:=st.Strings[0];
         sonbasilanctrl.Text:=st.Strings[1];
@@ -2269,23 +2269,23 @@ begin
     Tablo.Query1.Next;
   end;
   IL:=Liste.Strings[0];
-  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('Ýlçe',@ILCE).ComboBox(('Ýl'),@IL,liste);
+  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('Ä°lÃ§e',@ILCE).ComboBox(('Ä°l'),@IL,liste);
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls)<> mrOK  then
   Abort;                                                            //il?e 6 ,il 8
    //eklenen yeni ileti?im ID sini al?yoruz.
   Tablo.TablodanSorguAc(1,'INSERT INTO REHBERILETISIM (REHBERID,AD,VARSAYILAN ,AKTIF,SUBEID) values('+IntToStr(RehberId)+','''+AD+''',0,1,'+IntToStr(SubeId)+' )  Select SCOPE_IDENTITY() ');
   //Adres i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'''+ADRES+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )  ',[],[]);
 
   //?l?e i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'''+ILCE+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
   //?l i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'''+IL+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
@@ -2327,10 +2327,10 @@ begin
        Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
 
        Tablo.TablodanSorguAc(1,'insert into TEKLIF(TARIH,REHBERID,TEKLIFNO,DURUM,HAZIRLAYAN,KDVDURUM,KUR,TEKLIFTUR,TEKLIFSERI,KOCANNO,REHBERILETID,SUBEID)'+
-        ' values('''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(RehberId)+','''+belgeno.BelgeNo+''',1,'+Kullanan+',''Hariç'',''TL'',81,'''+
+        ' values('''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(RehberId)+','''+belgeno.BelgeNo+''',1,'+Kullanan+',''HariÃ§'',''TL'',81,'''+
         belgeno.Serino+''','''+inttoStr(KocannoBul(81))+''','+inttoStr(REHBERILETID)+','+IntToStr(SubeId)+') select scope_identity() ');
 
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into TEKLIFDETAY(TEKLIFID,ALTERNATIFNO,REHBERID,URUNID,TUR,ADET,BIRIM,MIKTAR,'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into TEKLIFDETAY(TEKLIFID,ALTERNATIFNO,REHBERID,URUNID,TUR,ADET,BIRIM,MIKTAR,'+
       ' BIRIMFIYAT,ISKONTO,KDV,TUTAR,KUR,DOVIZ_TUTARI,DOVIZ_KURU,ISKONTO2,YERI,YERID,SUBEID,ONAY) '+
       ' Select '+Tablo.Query1.Fields[0].AsString+',1,'+IntToStr(RehberId)+',STOKID,1,ADET,BIRIM,ADET,0,0,KDV,0,''TL'',0,''TL'', '+
       ' 0,'+IntToStr(TabNo_SATINALMA)+',SATINALMAID,SAD.SUBEID,0 from SATINALMADETAY SAD inner join STOKLAR S on SAD.STOKID=S.ID Where SAD.SATINALMAID = '+inttoStr(SatinAlmaID)+' ',[],[]);
@@ -2390,7 +2390,7 @@ begin
   TabTeklif.FieldByName('ACIKLAMA').AsString := '';
   TabTeklif.FieldByName('DOVIZ_TUTARI').AsFloat := 0;
   TabTeklif.FieldByName('EKLEYEN').AsString := Kullanan;
-  TabTeklif.FieldByName('KDVDURUM').AsString := 'Hariç';
+  TabTeklif.FieldByName('KDVDURUM').AsString := 'HariÃ§';
   TabTeklif.FieldByName('KUR').AsString := CariDoviz;
   if TabTeklif.FieldByName('KUR').AsString<>CariDoviz then
      ComboKurPropertiesEditValueChanged(Self)
@@ -2452,7 +2452,7 @@ begin
   Tablo.TablodanSorguAc(1,' Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ');
   //TabTeklif.Edit;     //buras? hata veriyor o y?zden de?i?ti..
   //TabTeklif.FieldByName('SABLONID').AsInteger := Tablo.Query1.FieldByName('ID').AsInteger;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIF set SABLONID='+IntToStr(Tablo.Query1.FieldByName('ID').AsInteger)+' where ID='+TabTeklif.FieldByName('ID').AsString,[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIF set SABLONID='+IntToStr(Tablo.Query1.FieldByName('ID').AsInteger)+' where ID='+TabTeklif.FieldByName('ID').AsString,[],[]);
 
 
 

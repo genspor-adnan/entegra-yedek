@@ -1,4 +1,4 @@
-unit UKrediKarti;
+ï»¿unit UKrediKarti;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 01/07/2010 22:53:13}
@@ -179,7 +179,7 @@ end;
 procedure TKrediKarti.Baslatildi;
 begin
   if CokluDilVar then
-     LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+     LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   ComboKur.Enabled := DovizTakibi;
 end;
 
@@ -324,7 +324,7 @@ procedure TKrediKarti.TabKKAfterPost(DataSet: TDataSet);
 begin
 
     if islemOp='E' then begin
-      Tablo.KasaKaydet(4001, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açýlýþ Fiþi',
+      Tablo.KasaKaydet(4001, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'AÃ§Ä±lÄ±ÅŸ FiÅŸi',
               TabKK.FieldByName('ID').AsInteger, ComboKur.Text,'', 0,0,0,0,-1, -1,-1,-1,-1, SubeId,'V');
     end;
 end;
@@ -345,10 +345,10 @@ end;
 procedure TKrediKarti.TabKKBeforePost(DataSet: TDataSet);
 begin
   if not BoslukKontrol(EditKODU.Text,'Kodu') then Abort;
-  if not BoslukKontrol(EditADI.Text,'Adý') then Abort;
-  if not BoslukKontrol(EditUzerindekiisim.Text,'Üzerindeki isim') then Abort;
+  if not BoslukKontrol(EditADI.Text,'AdÄ±') then Abort;
+  if not BoslukKontrol(EditUzerindekiisim.Text,'Ãœzerindeki isim') then Abort;
   if not BoslukKontrol(EditHesapKesim.Text,'Hesap kesim') then Abort;
-  if not BoslukKontrol(EditOdemeGun.Text,'Ödeme Gün') then Abort;
+  if not BoslukKontrol(EditOdemeGun.Text,'Ã–deme GÃ¼n') then Abort;
   if TabKK.State=dsInsert then
     islemOp:='E'
   else if TabKK.State=dsEdit then

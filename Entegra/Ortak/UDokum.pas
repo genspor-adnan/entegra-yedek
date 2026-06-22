@@ -1,17 +1,17 @@
-unit UDokum;
-{Y:Yönetici Dökümleri (Panodaki)
+ï»¿unit UDokum;
+{Y:YÃ¶netici DÃ¶kÃ¼mleri (Panodaki)
 B:Banka
 C:Cari
-Ç:Çek
+Ã‡:Ã‡ek
 E:Servis
 F:Fatura
 K:Kasa
-P:ÝK
-D:Demirbaþ
+P:Ä°K
+D:DemirbaÅŸ
 R:CRM
 S:Stok
 T:Teklif
-O:Doküman
+O:DokÃ¼man
 U:Uretim
 }
 interface
@@ -241,7 +241,7 @@ type
 
 
 
-    { Gezinme ve yazdýrma desteði }
+    { Gezinme ve yazdÄ±rma desteÄŸi }
     procedure YazdirmayaHazirla(AFastReport : TfrxReport);
     function EkranAdiAl : string;
   public
@@ -315,8 +315,8 @@ begin
     FMenuItem := TMenuItem.Create(Self);
     with FMenuItem do
     begin
-      Caption := 'Gönder';
-      Hint := 'Gönder';
+      Caption := 'GÃ¶nder';
+      Hint := 'GÃ¶nder';
  //     OnClick := miCopyToClipboardClick;
     end;
     TPopupMenu(AMenu).Items.Add(FMenuItem);
@@ -341,9 +341,9 @@ var FieldTipi: TFieldType;
   kom : string;
 begin
   kom := '(';
-  if (EQUAL = 'Baþlayan') or (EQUAL = 'Ýçinde geçen') then
+  if (EQUAL = 'BaÅŸlayan') or (EQUAL = 'Ä°Ã§inde geÃ§en') then
     kom := kom + TabAd + '.' + FIELD + ' LIKE '
-  else if EQUAL = 'Gün/Ay' then
+  else if EQUAL = 'GÃ¼n/Ay' then
     kom := kom + '(DAY(' + TabAd + '.' + FIELD + ') =' + copy(VALUE, 1, Pos('/', VALUE) - 1) +
       ') AND (MONTH(' + TabAd + '.' + FIELD + ') =' + copy(VALUE, Pos('/', VALUE) + 1, Length(VALUE)) + ')'
   else
@@ -355,7 +355,7 @@ begin
     Free;
   end;
   if (FieldTipi = FtString) or (FieldTipi = FtMemo) or (FieldTipi = FtDate) then kom := kom + '''';
-  if EQUAL = 'Ýçinde geçen' then kom := kom + '%';
+  if EQUAL = 'Ä°Ã§inde geÃ§en' then kom := kom + '%';
   if (FieldTipi = FtDate) or (FieldTipi = FtDateTime) then
   begin
 {      Yils :='';
@@ -385,11 +385,11 @@ begin
         kom := '((' + NeTarih + '>=''' + VALUE + ' 00:00:00'')and(' + NeTarih + '<=''' + VALUE + ' 23:59:00'')';
         VALUE := '';
       end
-      else if EQUAL = 'Gün/Ay' then
+      else if EQUAL = 'GÃ¼n/Ay' then
         VALUE := ''
   end;
   kom := kom + VALUE;
-  if (EQUAL = 'Baþlayan') or (EQUAL = 'Ýçinde geçen') then kom := kom + '%';
+  if (EQUAL = 'BaÅŸlayan') or (EQUAL = 'Ä°Ã§inde geÃ§en') then kom := kom + '%';
   if (FieldTipi = FtString) or (FieldTipi = FtMemo) or (FieldTipi = FtDate) then kom := kom + '''';
   kom := kom + ')';
   komut.Add(kom);
@@ -454,7 +454,7 @@ procedure TDokumDlg.TabDokumBeforePost(DataSet: TDataSet);
   end;
 begin
   if TabDokum.AsString['RAPORADI'] = '' then
-    raise Exception.Create('Rapor Adý Dolu Olmalý!');
+    raise Exception.Create('Rapor AdÄ± Dolu OlmalÄ±!');
   TabDokum.FieldByName('SQL').AsString := trim(TabDokum.FieldByName('SQL').AsString);
   TabDokum.FieldByName('DEGISTIREN').AsString := Kullanan;
   TabDokum.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
@@ -493,9 +493,9 @@ end;
 
 procedure TDokumDlg.TabKosulBeforePost(DataSet: TDataSet);
 begin
-   if not BoslukKontrol(TabKosul.AsString['KOD_ADI'], 'Kod Adý') then Abort;
-   if not BoslukKontrol(TabKosul.AsString['ACIKLAMA'], 'Açýklama') then Abort;
-   if not BoslukKontrol(TabKosul.AsString['ICERIKTURU'], 'Ýçerik Türü') then Abort;
+   if not BoslukKontrol(TabKosul.AsString['KOD_ADI'], 'Kod AdÄ±') then Abort;
+   if not BoslukKontrol(TabKosul.AsString['ACIKLAMA'], 'AÃ§Ä±klama') then Abort;
+   if not BoslukKontrol(TabKosul.AsString['ICERIKTURU'], 'Ä°Ã§erik TÃ¼rÃ¼') then Abort;
 end;
 
 procedure TDokumDlg.TabKosulNewRecord(DataSet: TDataSet);
@@ -534,7 +534,7 @@ var index1, TabAd, sat: string[100];
     IndexAlanAl := index1;
     IndexAlanSay := 0;
     while pos(';', index1) > 0 do
-    begin //Ýndex Alan Sayýsýný belirle 'kod;sýrano'
+    begin //Ä°ndex Alan SayÄ±sÄ±nÄ± belirle 'kod;sÄ±rano'
       inc(IndexAlanSay);
       if IndexAlanSira = IndexAlanSay then
         IndexAlanAl := copy(index1, 1, pos(';', index1) - 1);
@@ -547,7 +547,7 @@ begin
   TableAdlari.Clear;
   TableBagList.Clear;
   FList.Assign(TabDokum.FieldByName('FIELDLIST'));
-   {Field'lerden Table Adlarý belirlenir}
+   {Field'lerden Table AdlarÄ± belirlenir}
   TabKosul.First;
   while not TabKosul.eof do
   begin
@@ -575,10 +575,10 @@ begin
   end; {for}
 
 
-  if TableAdlari.Count = 0 then {boþsa}
+  if TableAdlari.Count = 0 then {boÅŸsa}
     TableAdlari.Add('STOK');
 
-  if TableAdlari.Count > 1 then {Tablolar arasýndaki baðý kur}
+  if TableAdlari.Count > 1 then {Tablolar arasÄ±ndaki baÄŸÄ± kur}
     for k := 1 to TableAdlari.Count - 1 do
     begin
       TableBagList.Add('(' + TableAdlari.Strings[0] + '.' + IndexAlanAl(TableAdlari.Strings[0], 1) + '=' +
@@ -635,10 +635,10 @@ end;
 
 procedure TDokumDlg.Label6DblClick(Sender: TObject);
 begin
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from DOKUMLER  where MODUL>''-'' and  STANDART=0 AND DOKUMLER.RAPORADI in ('+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from DOKUMLER  where MODUL>''-'' and  STANDART=0 AND DOKUMLER.RAPORADI in ('+
                  ' select D2.RAPORADI from DOKUMLER D2 where   D2.STANDART=1)',[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from [AYARLARYENI] where DOKUMID not in (select ID from DOKUMLER) ',[],[]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from [KOSULLAR] where DOKUMID not in (select ID from DOKUMLER) ',[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from [AYARLARYENI] where DOKUMID not in (select ID from DOKUMLER) ',[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from [KOSULLAR] where DOKUMID not in (select ID from DOKUMLER) ',[],[]);
 end;
 
 {procedure TDokumDlg.ApplicationEvents1Message(var Msg: tagMSG; var Handled: Boolean);
@@ -683,7 +683,7 @@ end;}
 
 procedure TDokumDlg.BaskiOnizlemeMenuClick(Sender: TObject);
 begin
-   // Analist Deðiþkenleri Klasörünü ekle
+   // Analist DeÄŸiÅŸkenleri KlasÃ¶rÃ¼nÃ¼ ekle
 
    YazdirmayaHazirla(FastRaporDlg.frxReport1);
    qryListe.DisableControls;
@@ -693,9 +693,9 @@ end;
 
 procedure TDokumDlg.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
-  if not Tablo.Yetkivarmi(110103,YetkiTur_Gorme) then begin//Excel Aktarýmý
+  if not Tablo.Yetkivarmi(110103,YetkiTur_Gorme) then begin//Excel AktarÄ±mÄ±
      Excel1.Visible := False;
      Excel2.Visible := False;
      CSV1.Visible := False;
@@ -706,18 +706,18 @@ procedure TDokumDlg.BuDkmzelBlmeKopyala1Click(Sender: TObject);
 var DID, AID:Integer;
 begin
    DID := Tablo.SatirKopyala('DOKUMLER', TabDokum.FieldByName('ID').AsInteger);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE DOKUMLER SET STANDART=0,SAYAC=0,RAPORNO=0,EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(DID)]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE DOKUMLER SET STANDART=0,SAYAC=0,RAPORNO=0,EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(DID)]);
 
    Tablo.TablodanSorguAc(3,'select ID from AYARLARYENI WHERE DOKUMID = '+TabDokum.Fields[0].AsString);
    if Tablo.Query3.RecordCount>0 then begin
       AID := Tablo.SatirKopyala('AYARLARYENI',Tablo.Query3.Fields[0].AsInteger);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE AYARLARYENI SET DOKUMID='+IntToStr(DID)+', EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(AID)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE AYARLARYENI SET DOKUMID='+IntToStr(DID)+', EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(AID)]);
    end;
 
    Tablo.TablodanSorguAc(3,'select ID from KOSULLAR WHERE DOKUMID = '+TabDokum.Fields[0].AsString);
    while not Tablo.Query3.eof do begin
      AID := Tablo.SatirKopyala('KOSULLAR', Tablo.Query3.Fields[0].AsInteger);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE KOSULLAR SET DOKUMID='+IntToStr(DID)+', EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(AID)]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE KOSULLAR SET DOKUMID='+IntToStr(DID)+', EKLEYEN='+Kullanan+',EKLEMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI='''+FormatDateTime('mm/dd/yyyy hh:nn',Tablo.GENINI.BugunTrhSaat)+''' WHERE ID = &ID', ['&ID'],[IntToStr(AID)]);
      Tablo.Query3.next;
    end;
    Showmessage(DDokum_gormek_icin_yetki);
@@ -812,7 +812,7 @@ class procedure TDokumDlg.SartlarOlustur;
       Width := 121;
       Height := 21;
 //      delete(ad, 1, 3);
-      if (ComboIcerik = 'bu gün') or (ComboIcerik = 'BU GÜN') or (ComboIcerik = 'bugün') or (ComboIcerik = 'BUGÜN')  then
+      if (ComboIcerik = 'bu gÃ¼n') or (ComboIcerik = 'BU GÃœN') or (ComboIcerik = 'bugÃ¼n') or (ComboIcerik = 'BUGÃœN')  then
          d.Date := Tablo.GENINI.BugunTrh
       else
          d.Date := StrToDateDef(Baslik, Tablo.GENINI.BugunTrh);
@@ -836,7 +836,7 @@ class procedure TDokumDlg.SartlarOlustur;
       Height := 21;
       delete(ad, 1, 3);
 
-      if ( UpperCase(ComboIcerik) = 'SAAT') or (ComboIcerik = 'ÞÝMDÝ') or (ComboIcerik = 'Þimdi') or (ComboIcerik = 'þimdi')  then
+      if ( UpperCase(ComboIcerik) = 'SAAT') or (ComboIcerik = 'ÅžÄ°MDÄ°') or (ComboIcerik = 'Åžimdi') or (ComboIcerik = 'ÅŸimdi')  then
          d.Time := Tablo.GENINI.BugunTrhSaat
        else
          d.Time := StrToDateDef(Baslik, Tablo.GENINI.BugunTrhSaat);
@@ -934,7 +934,7 @@ begin
       LabelCreate('Lab' + IntToStr(i + 5), ATabKosul.FieldByName('ESITLIK').AsString, 100, i * 5);
       case ATabKosul.FieldByName('ICERIKTURU').AsInteger of
         1,3 : EditCreate('Edit_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString, 220, i * 5);
-        2 : SpinCreate('Spin_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString, 220, i * 5);  //tamsayý
+        2 : SpinCreate('Spin_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString, 220, i * 5);  //tamsayÄ±
         4 : MoneyCreate('Money_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString, 220, i * 5);
         5 : DateCreate('Date_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString,ATabKosul.FieldByName('COMBOICERIK').AsString, 220, i * 5);
         6 : TimeCreate('Time_' + ATabKosul.FieldByName('ID').AsString, ATabKosul.FieldByName('DEGER').AsString,ATabKosul.FieldByName('COMBOICERIK').AsString, 220, i * 5);
@@ -958,7 +958,7 @@ end;
 procedure TDokumDlg.SetFrameBilgi(AValue: TIcerikFrameBilgi);
 begin
   FFrameBilgi := AValue;
-  AValue.Etiketler.AsBoolean['DökümEkraný'] := True;
+  AValue.Etiketler.AsBoolean['DÃ¶kÃ¼mEkranÄ±'] := True;
 end;
 
 
@@ -1063,7 +1063,7 @@ procedure TDokumDlg.GenelDokumler_EkranYazici(Sender: TObject);
 var AyarTablo, Baslik: string;
 begin                       {
   if not qryListe.Active then
-    raise Exception.Create('Önce sonuçlarý listeleyiniz');
+    raise Exception.Create('Ã–nce sonuÃ§larÄ± listeleyiniz');
 
   //RaporTabloSec(RapTablo.Kosullar, DtsDokumler, 'RAPORADI');
 
@@ -1170,7 +1170,7 @@ begin
       TabDokum2.SQL.Text := 'Select * From DOKUMLER Where RAPORADI = '''+Secilen+'''';
       TabDokum2.Open;
       if TabDokum2.RecordCount >0 then
-         if MessageDlg('Dökümlerde ayný adla rapor bulundu. Üzerine kaydedilsin mi?',
+         if MessageDlg('DÃ¶kÃ¼mlerde aynÄ± adla rapor bulundu. Ãœzerine kaydedilsin mi?',
                    mtConfirmation, [mbYes,mbNo], 0) <> mrYES then exit
          else begin
             DeleteQuery('Dokumler', Secilen);
@@ -1199,19 +1199,19 @@ var
   i : Integer;
   j : Integer;
 begin
-  SaveDialog1.Title := 'Kaydedilecek Dosya Adý';
+  SaveDialog1.Title := 'Kaydedilecek Dosya AdÄ±';
   if SaveDialog1.Execute then
   begin
     AssignFile(F, SaveDialog1.FileName);
     if FileExists(SaveDialog1.FileName) then
-      if MessageDlg(OpenDialog1.FileName + ' adlý dosya zaten var. Üzerine yazýlsýn mý?',
+      if MessageDlg(OpenDialog1.FileName + ' adlÄ± dosya zaten var. Ãœzerine yazÄ±lsÄ±n mÄ±?',
         mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
         exit;
     try
       Rewrite(F);
     except
       on EInOutError do
-        MessageDlg('Dosya oluþturmada hata var!!!', mtError, [mbOk], 0);
+        MessageDlg('Dosya oluÅŸturmada hata var!!!', mtError, [mbOk], 0);
     end;
 
     qryListe.first;
@@ -1236,15 +1236,15 @@ begin
           while pos(' ', st) > 0 do
             delete(st, pos(' ', st), 1);
         end
-        else if Fmt[Length(Fmt)] = 'þ' then
+        else if Fmt[Length(Fmt)] = 'ÅŸ' then
         begin
           ss := copy(qryListe.Fields[i].AsString, 1, 7);
           DisNo := StrToInt(copy(qryListe.Fields[i].AsString, 9, 1));
-          if (ss = 'SAÐ ÜST') or (ss = 'Sað Üst') then
+          if (ss = 'SAÄž ÃœST') or (ss = 'SaÄŸ Ãœst') then
             Ekle := 0
-          else if (ss = 'SOL ÜST') or (ss = 'Sol Üst') then
+          else if (ss = 'SOL ÃœST') or (ss = 'Sol Ãœst') then
             Ekle := 8
-          else if (ss = 'SAÐ ALT') or (ss = 'Sað Alt') then
+          else if (ss = 'SAÄž ALT') or (ss = 'SaÄŸ Alt') then
             Ekle := 16
           else if (ss = 'SOL ALT') or (ss = 'Sol Alt') then
             Ekle := 24;
@@ -1255,7 +1255,7 @@ begin
           for j := Ekle + disno to 32 do
             st := st + ' '
         end
-        else if Fmt[Length(Fmt)] = 'ö' then
+        else if Fmt[Length(Fmt)] = 'Ã¶' then
         begin
           st := qryListe.Fields[i].AsString;
           if st = '0' then
@@ -1275,7 +1275,7 @@ begin
             st := st + ' ';
           St := Copy(St, 1, 10);
         end
-        else if Fmt[Length(Fmt)] = 'ç' then
+        else if Fmt[Length(Fmt)] = 'Ã§' then
         begin
           if (qryListe.Fields[i].AsString = '0') or
             (qryListe.Fields[i].AsString = ' ') then
@@ -1311,7 +1311,7 @@ var v, wb, sheet: variant;
     j : Integer;
 begin
   str := '';
-  MesajStrAl('', 'Excel Dosya Adýný Dizinli Giriniz :', 'E', nil, str, '', 'E', nil, str);
+  MesajStrAl('', 'Excel Dosya AdÄ±nÄ± Dizinli Giriniz :', 'E', nil, str, '', 'E', nil, str);
   if str = '' then exit;
 
   v := CreateOleObject('Excel.Application');
@@ -1377,7 +1377,7 @@ begin
     excel.visible := true;
     sheet := book.worksheets[1];
   except
-     raise exception.Create('Excel Açýlamadý..');
+     raise exception.Create('Excel AÃ§Ä±lamadÄ±..');
   end;
   try
 
@@ -1429,7 +1429,7 @@ end;
 procedure TDokumDlg.HerkesteGrnsn1Click(Sender: TObject);
 begin
   if Application.MessageBox(PChar(DRapor_gorulecek_onayi),PChar(Onay), mb_YESNO) <> IDYES then exit;
- { Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from KULHAR '+
+ { Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from KULHAR '+
     'Where EKRAN = &ekran',['&ekran'],[
     TabDokum.AsString['RAPORADI']]); }
 end;
@@ -1437,7 +1437,7 @@ end;
 procedure TDokumDlg.KimsedeGrnmesin1Click(Sender: TObject);
 begin
   if Application.MessageBox(PChar(DRapor_gorulmeyecek_onayi),PChar(Onay), mb_YESNO) <> IDYES then exit;
-  {Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from KULHAR '+
+  {Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from KULHAR '+
     'Where EKRAN = &ekran',['&ekran'],[TabDokum.AsString['RAPORADI']]);  }
   with Veritabani.SorguBaslat(Tablo.FDCnn,'Select KULLANICI From KULLANICI',[],[]) do
   try
@@ -1445,7 +1445,7 @@ begin
     while not Eof do begin
       if KullanAdi <> AsString[0] then
       begin
-       { Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+       { Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
           'Insert Into KULHAR (KULLANICIADI, EKRAN, GORME, EKLEME, DEGISTIRME, SILME, BILGI)Values(&kadi,&dadi,' +
           '''0'',''0'',''0'',''0'','''')',['&kadi','&dadi'],[
             AsString[0],TabDokum.AsString['RAPORADI']]);   }
@@ -1475,7 +1475,7 @@ begin
 
   if SaveDialog1.Execute then
   begin
-    with Veritabani.SorguBaslat(Tablo.FDCnn, StringReplace(TabKomut.SQL.Text, 'Ýþlem Sayý', DokumAdi, [rfReplaceAll]),[],[]) do
+    with Veritabani.SorguBaslat(Tablo.FDCnn, StringReplace(TabKomut.SQL.Text, 'Ä°ÅŸlem SayÄ±', DokumAdi, [rfReplaceAll]),[],[]) do
     try
       Open;
       AssignFile(F, SaveDialog1.FileName);
@@ -1563,7 +1563,7 @@ begin
 
     Eklenebilir := True;
 
-    if Tablo.Query3.Fields[0].AsInteger > 1 then begin //daha önce fatura kesilmiþ mi bakalýmmmm
+    if Tablo.Query3.Fields[0].AsInteger > 1 then begin //daha Ã¶nce fatura kesilmiÅŸ mi bakalÄ±mmmm
       Tablo.Query4.Close;
       Tablo.Query4.SQL.Text := 'Select FATBASLIK.DOSYANO,KARTNO, AD,SOYAD,FATURATARIH, FATURA_TUTARI from FATBASLIK,KIMLIK ' +
         ' where FATBASLIK.DOSYANO=KIMLIK.DOSYANO and FATBASLIK.DOSYANO = ''' + Tablo.Query5.FieldByName('DOSYANO').AsString + '''' +
@@ -1575,21 +1575,21 @@ begin
         StrPCopy(ss, 'Hasta:' + Tablo.Query4.FieldByName('AD').AsString + ' ' +
           Tablo.Query4.FieldByName('SOYAD').AsString + #13#10' Fat Tarih:' +
           copy(Tablo.Query4.FieldByName('FATURATARIH').AsString, 1, 10) + #13#10 +
-          ' Fat.Tutarý:' + Format('%-10m', [Tablo.Query4.FieldByName('FATURA_TUTARI').AsCurrency]) +
+          ' Fat.TutarÄ±:' + Format('%-10m', [Tablo.Query4.FieldByName('FATURA_TUTARI').AsCurrency]) +
           #13#10 + ' Eklenecek Tutar:' + Format('%-10m', [Tablo.Query5.FieldByName('TUTAR').AsCurrency]));
 
       if Application.MessageBox(ss, PChar(DEklenmis_fat_tekrar_eklensinmi),  mb_YESNO) <> IDYES then Eklenebilir := False;
     end;
 
     if Eklenebilir then begin
-         ///Hastaya fatura baþlýðý
+         ///Hastaya fatura baÅŸlÄ±ÄŸÄ±
 
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := 'Insert Into FATBASLIK (DOSYANO, GELISNO, KARTNO,BELGE,KIME,FATURATARIH,FATURANO,BASLIK,' +
         ' KDVDURUM,LOTNO,KATKIYUZDE,FATURA_TUTARI,KULLANICI,SUBEID) values(''' + Tablo.Query5.FieldByName('DOSYANO').AsString +
         ''',' + Tablo.Query5.FieldByName('GELISNO').AsString + ',' + Tablo.Query3.Fields[0].AsString + ',''FATURA'',''' +
         'Sanal'',''' + FormatDateTime('yyyy-mm-dd 00:00:00', StrToDateTime(FatTar)) + ''',''' + FatNo + ''',''' + Kime +
-        ''',''Hariç'',' + Lotno + ',100,' + Tablo.Query5.FieldByName('TUTAR').AsString + ',''' + Kullanan + ''','+IntToStr(SubeId)+')';
+        ''',''HariÃ§'',' + Lotno + ',100,' + Tablo.Query5.FieldByName('TUTAR').AsString + ',''' + Kullanan + ''','+IntToStr(SubeId)+')';
       Tablo.Query1.ExecSQL;
 
       Tablo.Query1.Close;
@@ -1634,9 +1634,9 @@ procedure TDokumDlg.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
       if Veritabani.VeriVarMi(Tablo.FDCnn,'select ID from KOSULLAR where DOKUMID = $PID', ['PID'], [TabDokum.Fields[0].AsInteger]) then
-         raise exception.Create('Önce Koþullarý Silmelisiniz...');
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM AYARLARYENI WHERE DOKUMID = &ID', ['&ID'],[TabDokum.Fields[0].AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM DOKUMLER WHERE ID = &ID', ['&ID'],[TabDokum.Fields[0].AsInteger]);
+         raise exception.Create('Ã–nce KoÅŸullarÄ± Silmelisiniz...');
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM AYARLARYENI WHERE DOKUMID = &ID', ['&ID'],[TabDokum.Fields[0].AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM DOKUMLER WHERE ID = &ID', ['&ID'],[TabDokum.Fields[0].AsInteger]);
       EkranDegisveKonumlan(0);
   end;
 end;
@@ -1655,10 +1655,10 @@ begin
 //  DokumSartDlg.TabDokum.FindKey([TabDokum.FieldByName('RAPORADI').AsString]);
   if TabDokum.FieldByName('SQL').AsString <> '' then begin
     Komut.Assign(TabDokum.FieldByName('SQL'));
-    komut.Text := StringReplace(komut.Text,'%KullanýcýKodu%',Kullanan,[rfReplaceAll]);
-    komut.Text := StringReplace(komut.Text,'%KullanýcýAdý%',KullanAdi,[rfReplaceAll]);
+    komut.Text := StringReplace(komut.Text,'%KullanÄ±cÄ±Kodu%',Kullanan,[rfReplaceAll]);
+    komut.Text := StringReplace(komut.Text,'%KullanÄ±cÄ±AdÄ±%',KullanAdi,[rfReplaceAll]);
 
-    i := 0; //Koþullarý Diziye Al
+    i := 0; //KoÅŸullarÄ± Diziye Al
     TabKosul.First;
     while not TabKosul.eof do
     begin
@@ -1784,24 +1784,24 @@ begin
   DBTable.DataController.Summary.FooterSummaryItems.Add(DBTable.Columns[0],spFooter,skCount);
   DBTable.ApplyBestFit(nil);
   Tablo.GridAyarRestore('Dokum-'+TabDokum.Fields[0].AsString, DBTable );
-  // 23.09.2025  Grid'deki tüm sütunlarda döngü yap
+  // 23.09.2025  Grid'deki tÃ¼m sÃ¼tunlarda dÃ¶ngÃ¼ yap
   for i := 0 to DBTable.ColumnCount - 1 do
   begin
     AItem := DBTable.columns[i];
 
-    // Eðer sütun bir veritabaný alanýna baðlýysa ve veri tipi kontrol edilebilir durumdaysa
+    // EÄŸer sÃ¼tun bir veritabanÄ± alanÄ±na baÄŸlÄ±ysa ve veri tipi kontrol edilebilir durumdaysa
     if Assigned(AItem.DataBinding.Field) then begin
       // Veri tipini kontrol et
       case AItem.DataBinding.Field.DataType of
         ftFloat, ftCurrency, ftBCD, ftFMTBcd:
         begin
-          // Sütunun özelliklerini para birimi düzenleme özelliklerine dönüþtür
+          // SÃ¼tunun Ã¶zelliklerini para birimi dÃ¼zenleme Ã¶zelliklerine dÃ¶nÃ¼ÅŸtÃ¼r
           AItem.PropertiesClassName := 'TcxCurrencyEditProperties';
 
-          // Gerekirse biçimlendirme ayarlarýný yap
-          // TcxCurrencyEditProperties(AItem.Properties).DisplayFormat := 'c'; // Windows ayarlarýný kullanýr
+          // Gerekirse biÃ§imlendirme ayarlarÄ±nÄ± yap
+          // TcxCurrencyEditProperties(AItem.Properties).DisplayFormat := 'c'; // Windows ayarlarÄ±nÄ± kullanÄ±r
 
-          // Ýsteðe baðlý olarak, farklý bir format belirleyebilirsiniz
+          // Ä°steÄŸe baÄŸlÄ± olarak, farklÄ± bir format belirleyebilirsiniz
           TcxCurrencyEditProperties(AItem.Properties).DisplayFormat := '#,##0.00';
         end;
       end;
@@ -1820,7 +1820,7 @@ begin
 
   end;   *)
   // 26.05.25 AO alt toplamlar
-{AO 06.06.2025 bazý raporlarda  hata verdiði için çýkardým
+{AO 06.06.2025 bazÄ± raporlarda  hata verdiÄŸi iÃ§in Ã§Ä±kardÄ±m
   for I := 0 to qryListe.fieldcount-1 do
      if qryListe.fields[I].datatype in [ftfloat,ftCurrency, ftBCD, ftFMTBcd] then begin
         //showmessage(qryListe.fields[I].FieldName);

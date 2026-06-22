@@ -1,4 +1,4 @@
-unit UFiyDeg;
+ï»¿unit UFiyDeg;
 interface
 uses SysUtils, dbtables, Dialogs, classes, menus, DB, Controls;
 
@@ -48,15 +48,15 @@ begin
    Tablo.Query1.SQL.Text := 'Update FIYATLAR  Set CARPAN = NULL'+
                             ' Where FIYATADI = ''' + FiyatAdi+ '''';
    Tablo.Query1.ExecSQL;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure NormaldenKatsayiyaDonusturSec(Table1:TDataset);
 var A,B : String;
 begin
    A := ''; B:= '';
-   MesajStrAl('','Muayene Katsayýsýný KDV Dahil Giriniz :', 'E', nil,A,
-                 'Tetkik Katsayýsýný KDV Dahil Giriniz :', 'E', nil,B);
+   MesajStrAl('','Muayene KatsayÄ±sÄ±nÄ± KDV Dahil Giriniz :', 'E', nil,A,
+                 'Tetkik KatsayÄ±sÄ±nÄ± KDV Dahil Giriniz :', 'E', nil,B);
    if (A = '')OR(B = '') then exit;
 
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
@@ -73,7 +73,7 @@ begin
    Tablo.Query1.SQL.Text := 'Update FIYATLAR  Set KATSAYI = KATSAYI / CARPAN'+
                             ' Where SEC <> NULL AND KATSAYI>0 AND FIYATADI = ''' + FiyatAdi+ '''';
    Tablo.Query1.ExecSQL;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure FiyatSilSec(Table1:TDataset; TabloAdi:String);
@@ -84,7 +84,7 @@ begin
    Tablo.Query1.ExecSQL;
    Table1.Close;
    Table1.Open;
-   ShowMessage('Silme Ýþlemi Sona Erdi....');
+   ShowMessage('Silme Ä°ÅŸlemi Sona Erdi....');
 end;
 
 {procedure IniyeEkle(AnaBaslik, Eklenen : String);
@@ -112,8 +112,8 @@ var s, AltFiyat, UstFiyat : String;
     UstFiyat1, UstFiyat2, UstFiyat3 : String[25];
 begin
    AltFiyat := ''; UstFiyat := '';
-   MesajStrAl('','Alta Yuvarlanacak Miktar (Ör:49000) :', 'E', nil,AltFiyat,
-                 'Üste Yuvarlama Kriteri (Ör:51000-99000>100000', 'E', nil,UstFiyat);
+   MesajStrAl('','Alta Yuvarlanacak Miktar (Ã–r:49000) :', 'E', nil,AltFiyat,
+                 'Ãœste Yuvarlama Kriteri (Ã–r:51000-99000>100000', 'E', nil,UstFiyat);
    if (AltFiyat = '')and(UstFiyat = '') then exit;
 
    Tablo.Query1.Close;
@@ -149,13 +149,13 @@ begin
       end;
       Tablo.Query1.next;
    end;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure YeniFiyatOlusturSec(Table1:TDataSet; AnaTabloAdi:String);
 begin
    YeniFiyatAdi := '';
-   MesajStrAl('','Yeni Fiyat Adýný Giriniz :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi);
+   MesajStrAl('','Yeni Fiyat AdÄ±nÄ± Giriniz :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi);
    if YeniFiyatAdi = '' then exit;
 
    Tablo.Query1.Close;
@@ -178,7 +178,7 @@ begin
    end;
    Table1.cLOSE;
    Table1.Open;
-   ShowMessage(YeniFiyatAdi+' Fiyatý Oluþturuldu..');
+   ShowMessage(YeniFiyatAdi+' FiyatÄ± OluÅŸturuldu..');
 end;
 
 procedure FiyatKopyalaSec(Table1:TDataSet; TabloAdi:String);
@@ -186,7 +186,7 @@ var crp, kts : String;
 begin
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
    YeniFiyatAdi := '';
-   MesajStrAl('','Yeni Fiyat Adýný Giriniz :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi);
+   MesajStrAl('','Yeni Fiyat AdÄ±nÄ± Giriniz :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi);
    if YeniFiyatAdi = '' then exit;
 
    Tablo.Query1.Close;
@@ -222,7 +222,7 @@ procedure FiyatAdiniDegistirSec(Table1:TDataSet; TabloAdi:String);
 begin
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
    YeniFiyatAdi := '';
-   MesajStrAl('','Yeni Fiyat Adýný Giriniz :', 'E', nil,YeniFiyatAdi, '','E', nil,YeniFiyatAdi);
+   MesajStrAl('','Yeni Fiyat AdÄ±nÄ± Giriniz :', 'E', nil,YeniFiyatAdi, '','E', nil,YeniFiyatAdi);
    if YeniFiyatAdi = '' then exit;
 
    Tablo.Query1.Close;
@@ -231,7 +231,7 @@ begin
    Tablo.Query1.ExecSQL;
    Table1.cLOSE;
    Table1.Open;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure MiktarArtmaSec(ArtAzal : String; Table1:TDataset);
@@ -239,7 +239,7 @@ begin
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
 
    YeniFiyatAdi := '0';
-   if MesajStrAl('','Katsayý/Fiyatýn '+ArtAzal+' Miktarý :', 'E', nil,YeniFiyatAdi, 'Baþlayan Kod? (Hepsi için boþ geçiniz)', 'E', nil,Kod) then
+   if MesajStrAl('','KatsayÄ±/FiyatÄ±n '+ArtAzal+' MiktarÄ± :', 'E', nil,YeniFiyatAdi, 'BaÅŸlayan Kod? (Hepsi iÃ§in boÅŸ geÃ§iniz)', 'E', nil,Kod) then
       YeniOran := StrToFloat(YeniFiyatAdi)
    else
       YeniOran := 0;
@@ -255,7 +255,7 @@ begin
    Tablo.Query1.SQL.Text :=Tablo.Query1.SQL.Text+FloatToStr(YeniOran)+
                             ' Where FIYATADI = ''' + FiyatAdi+ ''' and KOD LIKE '''+Kod+'%''';
    Tablo.Query1.ExecSQL;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure YuzdeArtmaSec(ArtAzal : String; Table1:TDataset; TabloAdi:String);
@@ -264,7 +264,7 @@ begin
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
 
    YeniFiyatAdi := '20';
-   if MesajStrAl('','Katsayý/Fiyatýn '+ArtAzal+' Oraný % :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi) then
+   if MesajStrAl('','KatsayÄ±/FiyatÄ±n '+ArtAzal+' OranÄ± % :', 'E', nil,YeniFiyatAdi, '', 'E', nil,YeniFiyatAdi) then
       YeniOran := StrToFloat(YeniFiyatAdi)
    else
       YeniOran := 0;
@@ -276,7 +276,7 @@ begin
       YeniOran := 100 - YeniOran;
 
    Kod:=''; islemadi:='';
-   if not MesajStrAl('','Baþlayan Kod? (Hepsi için boþ geçiniz)', 'E', nil,Kod, 'Ýþlem adýnýn içinde geçen (Hepsi için boþ geçiniz)', 'E', nil, islemadi) then exit;
+   if not MesajStrAl('','BaÅŸlayan Kod? (Hepsi iÃ§in boÅŸ geÃ§iniz)', 'E', nil,Kod, 'Ä°ÅŸlem adÄ±nÄ±n iÃ§inde geÃ§en (Hepsi iÃ§in boÅŸ geÃ§iniz)', 'E', nil, islemadi) then exit;
 
    Tablo.Query1.Close;
    if TabloAdi = 'STOKFIYAT' then
@@ -290,7 +290,7 @@ begin
                                ' and KOD=(SELECT KOD FROM ISLEMLER WHERE ISLEMLER.KOD=FIYATLAR.KOD '+
                                ' and ISLEMADI like ''%'+islemadi+'%'')';
    Tablo.Query1.ExecSQL;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure YeniCarpanGirmeSec;
@@ -299,14 +299,14 @@ begin
    FiyatAdi := Table1.FieldByName('FIYATADI').AsString;
    Sec      := Table1.FieldByName('SEC').AsString;
    YeniFiyatAdi := ''; Kod:='';
-   MesajStrAl('','Yeni Çarpaný Giriniz :', 'E', nil,YeniFiyatAdi,  'Baþlayan Kod? (Hepsi için boþ geçiniz)', 'E', nil,Kod);
+   MesajStrAl('','Yeni Ã‡arpanÄ± Giriniz :', 'E', nil,YeniFiyatAdi,  'BaÅŸlayan Kod? (Hepsi iÃ§in boÅŸ geÃ§iniz)', 'E', nil,Kod);
    if YeniFiyatAdi = '' then exit;
 
 {   if FiyatAdi = 'TTB' then begin
       Tablo.Query1.SQL.Text := 'Select * from FIYATLAR where SEC is null or SEC='''' or SEC='' ''';
       Tablo.Query1.Open;
       if Tablo.Query1.RecordCount > 0 then
-         if MessageDlg('SEC alaný boþ kayýtlara rastlandý. Devam edilsin mi?', mtConfirmation, [mbYes,mbNo], 0) <> mrYES then exit;
+         if MessageDlg('SEC alanÄ± boÅŸ kayÄ±tlara rastlandÄ±. Devam edilsin mi?', mtConfirmation, [mbYes,mbNo], 0) <> mrYES then exit;
    end;  }
 
    Tablo.Query1.SQL.Clear;
@@ -318,7 +318,7 @@ begin
       Tablo.Query1.SQL.Add(' and SEC = ''' + Sec + '''');
 }
    Tablo.Query1.ExecSQL;
-   ShowMessage('Ýþlem Sona Erdi....');
+   ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure IslemAdlariBUYUK;
@@ -326,13 +326,13 @@ procedure IslemAdlariBUYUK;
    begin
       for i := 1 to length(s) do
        case s[i] of
-        'ç' : s[i] := 'Ç';
-        'ü' : s[i] := 'Ü';
-        'þ' : s[i] := 'Þ';
-        'ð' : s[i] := 'Ð';
-        'ö' : s[i] := 'Ö';
-        'i' : s[i] := 'Ý';
-        'ý' : s[i] := 'I';
+        'Ã§' : s[i] := 'Ã‡';
+        'Ã¼' : s[i] := 'Ãœ';
+        'ÅŸ' : s[i] := 'Åž';
+        'ÄŸ' : s[i] := 'Äž';
+        'Ã¶' : s[i] := 'Ã–';
+        'i' : s[i] := 'Ä°';
+        'Ä±' : s[i] := 'I';
         else s[i] := UpCase(s[i]);
        end;
       cevir := s;
@@ -366,13 +366,13 @@ begin
      Tablo.Query2.ExecSQL;
      Tablo.Query1.next;
    end;
-   ShowMessage('Çevirme Ýþlemi Tamamlandý...');
+   ShowMessage('Ã‡evirme Ä°ÅŸlemi TamamlandÄ±...');
 {   DEG('000000', '025000');
    DEG('025000', '050000');
    DEG('050000', '075000');
    DEG('075000', '100000');
    DEG('100000', '150000');
-   ShowMessage('Çevirme Ýþlemi Tamamlandý...');}
+   ShowMessage('Ã‡evirme Ä°ÅŸlemi TamamlandÄ±...');}
 
 end;
 

@@ -1,4 +1,4 @@
-unit UUcrAra;
+ï»¿unit UUcrAra;
 
 interface
 
@@ -214,7 +214,7 @@ begin
    TabHesapla.Parameters[0].Value:= Kullanan;
    TabHesapla.Open;
 
-   FiyatGoster := GenotipIni.ReadBool('GenelOpsiyon', 'FIYATGÖR', False);
+   FiyatGoster := GenotipIni.ReadBool('GenelOpsiyon', 'FIYATGÃ–R', False);
    if FiyatGoster then begin
       DBGrid1.Columns[7].Visible := True;
       DBGrid1.Columns[7].Width:= 40;
@@ -228,7 +228,7 @@ begin
 
    ComboKurum.ItemIndex := ComboKurum.Items.IndexOf(VarsayKurum);
 
-   RadioButton1.Checked := GenotipIni.ReadBool('GenelOpsiyon', 'UcretAdSeçimi', True);
+   RadioButton1.Checked := GenotipIni.ReadBool('GenelOpsiyon', 'UcretAdSeÃ§imi', True);
 
    DoktorSor := GenotipIni.ReadBool('GenelOpsiyon', 'DoktorSor', False);
    FisBilgisiAl := GenotipIni.ReadBool('GenelOpsiyon', 'FisBilgisiSor', False);
@@ -256,7 +256,7 @@ begin
       if not Tablo.Query4.IsEmpty then begin
          Tablo.Query5.Close;
          Tablo.Query5.SQL.Text:= 'SELECT DEPO FROM STOKKULLANICIDEPO WHERE KULLANICIID='+Tablo.Query4.Fields[0].AsString+' AND '+
-                               '  TUR = ''Çýkýþ'' and ISNULL(CIKISLISTE,'''')=''T'' ORDER BY 1 ';
+                               '  TUR = ''Ã‡Ä±kÄ±ÅŸ'' and ISNULL(CIKISLISTE,'''')=''T'' ORDER BY 1 ';
          Tablo.Query5.Open;
          if not Tablo.Query5.IsEmpty then
            while not Tablo.Query5.eof do begin
@@ -308,7 +308,7 @@ begin
            'CAST('''' AS VARCHAR(8)) as ANABIRIM'+FiyatG+' From ISLEMLER,FIYATLAR'+
            ' where FIYATLAR.KOD='+TabloAdi+'.KOD and'+
            ' (FIYATLAR.FIYATADI = '''+FiyatAdTut+'''';
-   if KurumIskeBak then QueryIslem.SQL.Add(' or  FIYATLAR.FIYATADI =( select top 1 FIYAT from KURUMISK where KURUM='''+ //Kastamonu için eklendi...
+   if KurumIskeBak then QueryIslem.SQL.Add(' or  FIYATLAR.FIYATADI =( select top 1 FIYAT from KURUMISK where KURUM='''+ //Kastamonu iÃ§in eklendi...
                                  Tablo.TabGelisler.FieldByName('KURUM').AsString+''' and charindex(KURUMISK.KOD,ISLEMLER.KOD)=1) ');
    QueryIslem.SQL.Add(' ) ');
 
@@ -433,7 +433,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
     //        Tablo.TabParaYER.Value := ComboDepo.Text; //
       Table1.FieldByName('ADET').AsFloat := StrToFloat(Adet.Text);
       Table1.FieldByName('TUR').AsString := Turu;
-      if ((StokVar)or(EczaneVar))and(Table1 = Tablo.TabPara)and((Turu='STOK')or(Turu='ECZ')or(Turu='STBAÐ')) then begin
+      if ((StokVar)or(EczaneVar))and(Table1 = Tablo.TabPara)and((Turu='STOK')or(Turu='ECZ')or(Turu='STBAÄž')) then begin
          Table1.FieldByName('SKT').AsString := DBGrid1.Fields[4].AsString;
          Table1.FieldByName('BIRIM').AsString := ComboBirim.Items[ComboBirim.ItemIndex];
          Table1.FieldByName('YER').AsString := ComboYer.Items[ComboYer.ItemIndex];
@@ -462,7 +462,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
           end;
       end;
 
-      if (PaketNO>-1) then begin //paket iþlemse
+      if (PaketNO>-1) then begin //paket iÅŸlemse
          if Iskon>-2 then
             if PaketYuzde then
                Table1.FieldByName('BIRIMFIYAT').AsFloat := (100.0-Iskon)*Table1.FieldByName('BIRIMFIYAT').AsFloat/100.0
@@ -522,7 +522,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
        Tablo.Query5.SQL.Text := 'Select * From OPRBIRIM Where FIYATADI='''+Fiyat+''' and ALTBIRIM <= '+FloatToStr(Birim)+' Order By ALTBIRIM';
        Tablo.Query5.Open;
        Tablo.Query5.Last;
-       ///Opr Birimleri girilmiþse
+       ///Opr Birimleri girilmiÅŸse
        if Tablo.Query5.RecordCount>0 then begin
             Tablo.TabPara.Edit;
             Tablo.TabPara.FieldByName('BIRIMFIYAT').AsCurrency :=0.0;
@@ -531,14 +531,14 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
        else
          exit;
 
-       ParaEkle(Kod+'.01','OPR.DR.ÜCRETÝ',FloatToStr(birim),Birim*Carpan);
+       ParaEkle(Kod+'.01','OPR.DR.ÃœCRETÄ°',FloatToStr(birim),Birim*Carpan);
        for i:= 4 to 12 do
            if Tablo.Query5.Fields[i].AsCurrency > 0 then begin
               Birim := Tablo.Query5.Fields[i].AsFloat;
               if Birim>10000 then begin
                  Fiy  := Birim;
                  Br := 0.0;
-              end else if Birim<1 then begin  //demekki yüzde...
+              end else if Birim<1 then begin  //demekki yÃ¼zde...
                  Fiy:= Birim*Tablo.Query4.FieldByName('BIRIM').AsFloat*Carpan;
                  Br := Birim*Tablo.Query4.FieldByName('BIRIM').AsFloat;
               end else begin
@@ -557,11 +557,11 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
          Isk:Real;
          i,KDV:smallint;
 
-         function Ameliyat_Turunu_Getir : String; //Genel/lokal anestezimi, müdahale mi?
+         function Ameliyat_Turunu_Getir : String; //Genel/lokal anestezimi, mÃ¼dahale mi?
          begin
             Application.CreateForm(TListeDlg, ListeDlg);
-            ListeDlg.Label1.Caption := 'Ameliyat Tipini Seçin';
-            GenotipIni.ReadSection('Ameliyat_Türleri',ListeDlg.ListAmac.Items);
+            ListeDlg.Label1.Caption := 'Ameliyat Tipini SeÃ§in';
+            GenotipIni.ReadSection('Ameliyat_TÃ¼rleri',ListeDlg.ListAmac.Items);
             ListeDlg.ListAmac.ItemIndex := 0;
             if ListeDlg.ListAmac.Items.count > 1 then
                ListeDlg.ShowModal;
@@ -599,7 +599,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
             Tablo.Query5.Open;
          end;
 
-         if Tablo.Query5.RecordCount>0 then begin //Tek ameliyat fiyatý yok daðýlým var onuniçin üstteki fayatý sýfýrlýyoruz..
+         if Tablo.Query5.RecordCount>0 then begin //Tek ameliyat fiyatÄ± yok daÄŸÄ±lÄ±m var onuniÃ§in Ã¼stteki fayatÄ± sÄ±fÄ±rlÄ±yoruz..
             Table1.Edit;
             if Table1 <> TabHesapla then begin
                KDV := Table1.FieldByName('KDV').AsInteger;
@@ -607,7 +607,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
             end;
             Table1.FieldByName('BIRIMFIYAT').AsCurrency :=0.0;
             Table1.Post;
-            ///Türünü ekliyoruz Ör : (Genel Anestezi)
+            ///TÃ¼rÃ¼nÃ¼ ekliyoruz Ã–r : (Genel Anestezi)
             Table1.Append;
             Table1.FieldByName('KOD').AsString := Kodu+'.00';
             Table1.FieldByName('TUR').AsString := 'OPR';
@@ -707,7 +707,7 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
          if Fiyatadi<>'TTB' then
             AMELIYAT_TURU := Ameliyat_Turunu_Getir;
 
-         //Daha önceden girilmiþ ameliyat var mý???
+         //Daha Ã¶nceden girilmiÅŸ ameliyat var mÄ±???
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text := 'select * from PARA '+
                              ' WHERE DOSYANO = '''+Tablo.TabGelisler.Fields[0].AsString+''''+
@@ -719,8 +719,8 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
              Paket_Kontrolu(AMELIYAT_TURU);
          end;
 
-         //Eðer paketse ve Resmi kurumsa diðer iþlemlerin fiyatý ödenmeyeceði için ücreti sýfýrlanacak
-         if (pos('P', QueryIslem.FieldByName('BUTCEKODU').AsString)=1)and(not Tablo.TabPara.IsEmpty)and(FiyatAdi='Bütçe') then begin
+         //EÄŸer paketse ve Resmi kurumsa diÄŸer iÅŸlemlerin fiyatÄ± Ã¶denmeyeceÄŸi iÃ§in Ã¼creti sÄ±fÄ±rlanacak
+         if (pos('P', QueryIslem.FieldByName('BUTCEKODU').AsString)=1)and(not Tablo.TabPara.IsEmpty)and(FiyatAdi='BÃ¼tÃ§e') then begin
             if Paket_Kontrolu(AMELIYAT_TURU) = False then
                exit;
          end;
@@ -728,14 +728,14 @@ procedure TUcretAraDlg.UcretEkleme(Table1 : tdataset; Kodu, Turu,DoktorKodu : St
             Tablo.TabPara.Append;
          PaketNO := Tablo.TabPara.FieldByName('SIRANO').AsInteger;
          Iskon:=-2;
-         Ekleme;  //Adýný ekliyor sadece
+         Ekleme;  //AdÄ±nÄ± ekliyor sadece
          Tablo.Query5.Close;
          Tablo.Query5.SQL.Text := 'Select * From AMELIYATFIYAT Where '+  // KOD, ISLEMKODU, ISLEMADI, BIRIM, BIRIMFIYAT
            'KOD = '''+Kodu+''' and FIYATADI = '''+Fiyatadi+''' and TURU='''+AMELIYAT_TURU+'''';///// and isnull(GRUP,'''')='''' order by SIRANO';
          Tablo.Query5.Open;
 
          if (Tablo.Query5.IsEmpty)and(Fiyatadi='TTB') then begin
-            ///Daha önce ameliyat kartý oluþturulmamýþsa
+            ///Daha Ã¶nce ameliyat kartÄ± oluÅŸturulmamÄ±ÅŸsa
             Tablo.Query4.Close;
             Tablo.Query4.SQL.Text := 'Select * From ISLEMLER where ISLEMLER.KOD = '''+Kodu+'''';
             Tablo.Query4.Open;
@@ -767,9 +767,9 @@ begin
      while not QueryPaket.eof do begin
         Kodu := QueryPaket.Fields[0].AsString;
         if QueryPaket.Fields[1].AsString='' then
-           Iskon:= -2 //aynen orjinal fiyatý al
+           Iskon:= -2 //aynen orjinal fiyatÄ± al
         else
-          if pos('%',QueryPaket.Fields[1].AsString)>0 then begin //yüzdeli
+          if pos('%',QueryPaket.Fields[1].AsString)>0 then begin //yÃ¼zdeli
              PaketYuzde := True;
              s:= QueryPaket.Fields[1].AsString;
              Delete(s, pos('%',s), 1);
@@ -782,7 +782,7 @@ begin
         Turu := QueryPaket.Fields[2].AsString;
         OzKodu :=  QueryPaket.Fields[3].AsString;
         Ekleme;
-        if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //Katký payý var mý?
+        if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //KatkÄ± payÄ± var mÄ±?
            KatkiPayiEkle(Tablo.TabPara);
         QueryPaket.next;
      end;
@@ -797,9 +797,9 @@ begin
         Kodu := QueryPaket.Fields[0].AsString;
         PaketNO:=0;
         if QueryPaket.Fields[1].AsString='' then
-           Iskon:= -2 //aynen orjinal fiyatý al
+           Iskon:= -2 //aynen orjinal fiyatÄ± al
         else
-          if pos('%',QueryPaket.Fields[1].AsString)>0 then begin //yüzdeli
+          if pos('%',QueryPaket.Fields[1].AsString)>0 then begin //yÃ¼zdeli
              PaketYuzde := True;
              s:= QueryPaket.Fields[1].AsString;
              Delete(s, pos('%',s), 1);
@@ -812,7 +812,7 @@ begin
         Turu := QueryPaket.Fields[2].AsString;
         OzKodu :=  QueryPaket.Fields[3].AsString;
         Ekleme;
-        if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //Katký payý var mý?
+        if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //KatkÄ± payÄ± var mÄ±?
            KatkiPayiEkle(Tablo.TabPara);
         QueryPaket.next;
      end;
@@ -821,7 +821,7 @@ begin
      OperasyonEkle
   else begin
      Ekleme;
-     if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //Katký payý var mý?
+     if (KatkiAdi<>'')and(Table1.FieldByName('ACIKLAMA').AsString<>'KATKI PAYI') then //KatkÄ± payÄ± var mÄ±?
         case Cagiran of
           1 : HesaplaKatkiPayiEkle;
           0 : KatkiPayiEkle(Tablo.TabPara);
@@ -834,7 +834,7 @@ function TUcretAraDlg.Paket_Kontrolu(OprTuru:String): Boolean;
 var Bulundu : Boolean;
     i : smallint;
 begin
-   if Application.MessageBox('Paket iþlem ekleniyor. Bu iþlemden önce eklenenlerin fiyatý sýfýrlanacak!! Eklemeyi onaylýyor musunuz?', 'O N A Y', MB_YESNO)=IDYES then begin
+   if Application.MessageBox('Paket iÅŸlem ekleniyor. Bu iÅŸlemden Ã¶nce eklenenlerin fiyatÄ± sÄ±fÄ±rlanacak!! Eklemeyi onaylÄ±yor musunuz?', 'O N A Y', MB_YESNO)=IDYES then begin
       Tablo.Query4.Close;
       Tablo.Query4.SQL.Text := ' Select ANAHTAR AS ISLEMADI, SUBSTRING(DEGER,1,CHARINDEX('','', DEGER)-1) AS GRUP, '+
                                ' CAST(SUBSTRING(DEGER,CHARINDEX('','', DEGER)+1,20) AS FLOAT) AS YUZDE '+
@@ -850,7 +850,7 @@ begin
       j:=0;
       if not Tablo.Query4.IsEmpty then
          Tablo.Query6.SQL.Add(' and (  ');
-      while not Tablo.Query4.eof do begin  //gruplarý al F-H   veya B
+      while not Tablo.Query4.eof do begin  //gruplarÄ± al F-H   veya B
          if j > 0 then Tablo.Query6.SQL.Add(' or ');
          inc(j);
          if pos('-', Tablo.Query4.FieldByName('GRUP').AsString)>0 then begin
@@ -872,7 +872,7 @@ begin
 
       if (Tablo.Query6.Fields[0].AsString<>''){and(pos('P', QueryIslem.FieldByName('BUTCEKODU').AsString)=1)} then begin
          Tablodokum.Query1.Close;
-         Tablodokum.Query1.SQL.Text := 'update TAHSILAT  set TAHSIL=TAHSIL-'+Tablo.Query6.Fields[0].AsString+ //Tahsilattan da kamu düþelim
+         Tablodokum.Query1.SQL.Text := 'update TAHSILAT  set TAHSIL=TAHSIL-'+Tablo.Query6.Fields[0].AsString+ //Tahsilattan da kamu dÃ¼ÅŸelim
                             '  where DOSYANO='''+Tablo.TabGelisler.Fields[0].AsString+
                             ''' AND GELISNO='+Tablo.TabGelisler.Fields[1].AsString+' and TUR=''KAMU'' '+
                             '  AND SIRANO=(SELECT MAX(SIRANO) FROM TAHSILAT '+
@@ -922,18 +922,18 @@ begin
   else Noktasiz := Kod;
 
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := 'Select * from #ISLEM_UYARI where (KOD like '''+Noktasiz+'%'' or KOD=''*TÜM*'') and (KURUM='''+Tablo.TabGelisler.FieldByName('KURUM').AsString+''' OR KURUM=''*TÜM*'')  order by KOD desc';
+  Tablo.Query1.SQL.Text := 'Select * from #ISLEM_UYARI where (KOD like '''+Noktasiz+'%'' or KOD=''*TÃœM*'') and (KURUM='''+Tablo.TabGelisler.FieldByName('KURUM').AsString+''' OR KURUM=''*TÃœM*'')  order by KOD desc';
   Tablo.Query1.Open;
   while not Tablo.Query1.eof do begin
-    if (pos(Noktasiz, Tablo.Query1.fields[0].AsString)>0)or(Tablo.Query1.fields[0].AsString = '*TÜM*') then
+    if (pos(Noktasiz, Tablo.Query1.fields[0].AsString)>0)or(Tablo.Query1.fields[0].AsString = '*TÃœM*') then
        Islem(Kod);
     Tablo.Query1.next;
  end;
  if Bulundu then begin
     if Tablo.Query1.fields[4].AsString='U' then
-       DahaOnceEklenmediKontrolu := Application.MessageBox(PChar('Bu iþlem daha önce '+Tablo.Query3.Fields[0].AsString+'. geliþte eklenmiþ!! Eklemeyi onaylýyor musunuz?'), 'O N A Y', MB_YESNO)=IDYES
+       DahaOnceEklenmediKontrolu := Application.MessageBox(PChar('Bu iÅŸlem daha Ã¶nce '+Tablo.Query3.Fields[0].AsString+'. geliÅŸte eklenmiÅŸ!! Eklemeyi onaylÄ±yor musunuz?'), 'O N A Y', MB_YESNO)=IDYES
     else begin
-       ShowMessage(PChar('Bu iþlem daha önce '+Tablo.Query3.Fields[0].AsString+'. geliþte eklenmiþ!!' ));
+       ShowMessage(PChar('Bu iÅŸlem daha Ã¶nce '+Tablo.Query3.Fields[0].AsString+'. geliÅŸte eklenmiÅŸ!!' ));
        DahaOnceEklenmediKontrolu := False;
     end
  end
@@ -975,7 +975,7 @@ begin
          if UcretAraDlg.Visible then TutAranan.Setfocus;
          AlinanFiyat:=-1;
        end;
-   1 : begin     //Hesaplama için çaðýrma
+   1 : begin     //Hesaplama iÃ§in Ã§aÄŸÄ±rma
          if AgacTus.Down then begin
             AraStokAdi.Text := TreeMua.Selected.Text;
             AraKodKeyUp(Self, Key, [ssShift]);
@@ -1112,9 +1112,9 @@ end;
 function TUcretAraDlg.FisBilgisi : Boolean;
 begin
       stlist := Tstringlist.Create;
-      GenotipIni.ReadSection('FIS_TÜRÜ', stlist);
+      GenotipIni.ReadSection('FIS_TÃœRÃœ', stlist);
       FisNo := '';
-      if not MesajStrAl('','Fiþ Türünü Girin :','C', stlist, FisTuru, 'Numarasý : ', 'E', nil, FisNo) then
+      if not MesajStrAl('','FiÅŸ TÃ¼rÃ¼nÃ¼ Girin :','C', stlist, FisTuru, 'NumarasÄ± : ', 'E', nil, FisNo) then
          FisNo := '';
       stlist.free;
       FisBilgisi := FisNo<>'';
@@ -1144,7 +1144,7 @@ begin
    UcrTutar := 0;
    FiyatDegistir;
 
-   if pos('<>', FiyatAdi)>0 then //Poliklinik-TTB iki fiyat var; düþük olaný seçilecek
+   if pos('<>', FiyatAdi)>0 then //Poliklinik-TTB iki fiyat var; dÃ¼ÅŸÃ¼k olanÄ± seÃ§ilecek
       FiyatAdTut := copy(FiyatAdi,1,pos('<>', FiyatAdi)-1)
    else
       FiyatAdTut := FiyatAdi;
@@ -1211,7 +1211,7 @@ begin
       Tablo.Query1.SQL.Add(' from HESAPLA ');
       Tablo.Query1.SQL.Add(' Where KULLANICI = '''+Kullanan+'''');
       Tablo.Query1.Open;
-      LabelKatkiToplam.Caption := format('Katký : %-10m',[Tablo.Query1.Fields[0].AsCurrency]);
+      LabelKatkiToplam.Caption := format('KatkÄ± : %-10m',[Tablo.Query1.Fields[0].AsCurrency]);
       LabelBirimToplam.Caption := format('Kurum : %-10m',[Tablo.Query1.Fields[1].AsCurrency]);
    end
    else
@@ -1378,7 +1378,7 @@ begin
       Yuzde :=  copy(TMenuItem(Sender).Name,2,2);
    if TMenuItem(Sender).Name = 'Ozel' then begin
       MesajOkunan := '';
-      if MesajStrAl('','Ýndirim Yüzdesini Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
+      if MesajStrAl('','Ä°ndirim YÃ¼zdesini Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
          Yuzde := MesajOkunan
       else
          Yuzde := '-1';
@@ -1395,7 +1395,7 @@ begin
    Tablo.Query1.SQL.Add('Update HESAPLA Set ISKONTO ='+Yuzde);
    Tablo.Query1.SQL.Add('Where KULLANICI ='''+Kullanan+'''');
 
-   Tablo.Query3.First; //Ýskontosu 0 olanlarý ekle
+   Tablo.Query3.First; //Ä°skontosu 0 olanlarÄ± ekle
    while not Tablo.Query3.eof do begin
      Tablo.Query1.SQL.Add('and not KOD LIKE '''+Tablo.Query3.Fields[0].AsString+'%''');
      Tablo.Query3.Next;
@@ -1407,7 +1407,7 @@ begin
    Tablo.Query1.SQL.Clear;
    Tablo.Query1.SQL.Add('Update HESAPLA Set TUTAR = ADET*BIRIMFIYAT*(100-ISKONTO)/100');
    Tablo.Query1.SQL.Add(' Where KULLANICI ='''+Kullanan+'''');
-   Tablo.Query3.First; //Ýskontosu 0 olanlarý ekle
+   Tablo.Query3.First; //Ä°skontosu 0 olanlarÄ± ekle
    while not Tablo.Query3.eof do begin
      Tablo.Query1.SQL.Add('and not KOD LIKE '''+Tablo.Query3.Fields[0].AsString+'''');
      Tablo.Query3.Next;
@@ -1467,7 +1467,7 @@ end;
 procedure TUcretAraDlg.ComboPolExit(Sender: TObject);
 begin
    Tablo.Query3.Close;
-   Tablo.Query3.SQL.Text := 'Select DOKTOR From DOKTOR Where UZMANLIK='''+ComboPOL.Text+''' AND DURUM<>''PASÝF''';
+   Tablo.Query3.SQL.Text := 'Select DOKTOR From DOKTOR Where UZMANLIK='''+ComboPOL.Text+''' AND DURUM<>''PASÄ°F''';
    Tablo.Query3.Open;
    ComboDOKTOR.Text:= Tablo.Query3.Fields[0].AsString;
 end;
@@ -1532,7 +1532,7 @@ begin
       TabloDokum.Ekran_Yazici_Islemi(Sender);
    end
    else
-      AyarlarDlgEkran('Ücr._');
+      AyarlarDlgEkran('Ãœcr._');
 
 end;
 
@@ -1561,14 +1561,14 @@ end;
 procedure TUcretAraDlg.RadioButton1Click(Sender: TObject);
 begin
    AraBul('ISLEMLER', 'KOD', 'ISLEMADI', 'GRUP');
-   GenotipIni.WriteBool('GenelOpsiyon', 'UcretAdSeçimi', UcretAraDlg.RadioButton1.Checked);
+   GenotipIni.WriteBool('GenelOpsiyon', 'UcretAdSeÃ§imi', UcretAraDlg.RadioButton1.Checked);
 end;
 
 procedure TUcretAraDlg.IsleminUcretiniSorMenuClick(Sender: TObject);
 var MesajOkunan : String;
 begin
    MesajOkunan := '';
-   if MesajStrAl('','Ücreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then begin
+   if MesajStrAl('','Ãœcreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then begin
       MesajOkunan := Trim(MesajOkunan);
       if MesajOkunan='' then
          AlinanFiyat := 0.0

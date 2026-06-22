@@ -1,4 +1,4 @@
-unit URapSyf;
+ï»¿unit URapSyf;
 {$H+}
 interface
 
@@ -193,8 +193,8 @@ begin
   Bitmap.Height:=0;
   Bitmap.Width := round( 420 * oran );
   Bitmap.Height:= round( 300 * oran )+20;
-  (* Burasý hertetkik için farklý olan bir iþ olan aþaðýdaki sayýlarýn *)
-  (* yazýlmasý iþlemi yapýlýyor.                                       *)
+  (* BurasÄ± hertetkik iÃ§in farklÄ± olan bir iÅŸ olan aÅŸaÄŸÄ±daki sayÄ±larÄ±n *)
+  (* yazÄ±lmasÄ± iÅŸlemi yapÄ±lÄ±yor.                                       *)
 
   if Tetkik= 'WBC' THEN
   begin
@@ -207,14 +207,14 @@ begin
 
   if Tetkik = 'RBC' THEN
   begin
-    Sayiyaz(1.68* 30*oran,300*oran+2, '30',Bitmap); // 1.68 Özel Bir Hesaplama Sonucu bulundu ... Þöyleki
-    Sayiyaz(1.68*100*oran,300*oran+2,'100',Bitmap); // Scan ettiðim rapordan oranlama ile bulunduç
+    Sayiyaz(1.68* 30*oran,300*oran+2, '30',Bitmap); // 1.68 Ã–zel Bir Hesaplama Sonucu bulundu ... ÅžÃ¶yleki
+    Sayiyaz(1.68*100*oran,300*oran+2,'100',Bitmap); // Scan ettiÄŸim rapordan oranlama ile bulunduÃ§
     Sayiyaz(1.68*200*oran,300*oran+2,'200',Bitmap);
   end;
 
   if Tetkik = 'PLT' THEN
   begin
-    Sayiyaz(13.5*  2*oran,300*oran+2,  '2',Bitmap); // 13.5 yukarýdaki usul ile bulundu.
+    Sayiyaz(13.5*  2*oran,300*oran+2,  '2',Bitmap); // 13.5 yukarÄ±daki usul ile bulundu.
     Sayiyaz(13.5*  5*oran,300*oran+2,  '5',Bitmap);
     Sayiyaz(13.5* 10*oran,300*oran+2, '10',Bitmap);
     Sayiyaz(13.5* 20*oran,300*oran+2, '20',Bitmap);
@@ -224,18 +224,18 @@ begin
 
   mmGrafik:=TStringList.Create;
   mmEsikler:=TStringList.Create;
-  mmGrafik.CommaText:=  st.Values['GRAFÝK' ];
-  mmEsikler.CommaText:= st.Values['EÞÝKLER'];
+  mmGrafik.CommaText:=  st.Values['GRAFÄ°K' ];
+  mmEsikler.CommaText:= st.Values['EÅžÄ°KLER'];
 
-  (* Aþaðýda Grafiðin çizgileri çizdiriliyor.*)
+  (* AÅŸaÄŸÄ±da GrafiÄŸin Ã§izgileri Ã§izdiriliyor.*)
   Bitmap.Canvas.moveTo(round(420*oran),round(300*oran+2 ));
   Bitmap.Canvas.LineTo(1,round(300*oran+2));
   Bitmap.Canvas.moveTo(1,round(300*oran+2));
   Bitmap.Canvas.LineTo(1,1 );
   (******************************************)
 
-  (* Aþaðýda eþikler çizdiriliyor.*)
-  Bitmap.Canvas.Pen.Style:=psDash;  // Çizgi çizgi yapýlýyor.
+  (* AÅŸaÄŸÄ±da eÅŸikler Ã§izdiriliyor.*)
+  Bitmap.Canvas.Pen.Style:=psDash;  // Ã‡izgi Ã§izgi yapÄ±lÄ±yor.
   for i := 0 to mmEsikler.Count-1 do
   begin
     Bitmap.Canvas.moveTo( round(yy * StrToInt(mmEsikler[i])) ,round(300*oran+2) );
@@ -243,13 +243,13 @@ begin
   end;
   (*******************************)
 
-  (* Aþaðýda grafik çizdiriliyor.*)
-  Bitmap.Canvas.Pen.Style:=psSolid; // Kalem düz yapýlýyor.
-  Bitmap.Canvas.moveTo(1,round(300*oran) );     // Baþlangýç koordinatýna konumlanýlýyor.
+  (* AÅŸaÄŸÄ±da grafik Ã§izdiriliyor.*)
+  Bitmap.Canvas.Pen.Style:=psSolid; // Kalem dÃ¼z yapÄ±lÄ±yor.
+  Bitmap.Canvas.moveTo(1,round(300*oran) );     // BaÅŸlangÄ±Ã§ koordinatÄ±na konumlanÄ±lÄ±yor.
   for i := 0 to mmGrafik.Count-1 do
   begin
     Bitmap.Canvas.LineTo(
-                              round(yy*i) +1,   // Yatay uzaklýk yy katsayýsýyla çarpýlýyor.
+                              round(yy*i) +1,   // Yatay uzaklÄ±k yy katsayÄ±sÄ±yla Ã§arpÄ±lÄ±yor.
      round(300*oran-dy*StrToInt(mmGrafik[i])));
   end;
   (*******************************)
@@ -326,7 +326,7 @@ var
       With QCntrl Do Begin
          AutoSize := True;
          Name := 'B'+RapTabAYAR.FieldByName('SIRANO').AsString;
-         If RapTabAYAR.FieldByName('YANASIK').AsString = 'SAÐ' Then
+         If RapTabAYAR.FieldByName('YANASIK').AsString = 'SAÄž' Then
             Alignment := taRightJustify
          Else If RapTabAYAR.FieldByName('YANASIK').AsString = 'ORT' Then
             Alignment := taCenter
@@ -446,7 +446,7 @@ var
             RapSyf.RaporSyf.PrinterSettings.Copies:=RapTabAYAR.FieldByName('BANDNO').AsInteger;
 
       End
-      Else If RapTabAYAR.FieldByName('TABLO').AsString='BOÞLUK' Then Begin
+      Else If RapTabAYAR.FieldByName('TABLO').AsString='BOÅžLUK' Then Begin
          RaporSyf.Page.LeftMargin := RapTabAYAR.FieldByName('SOL').AsFloat*10;
          RaporSyf.Page.TopMargin := RapTabAYAR.FieldByName('UST').AsFloat*10;
          RaporSyf.Page.RightMargin := RapTabAYAR.FieldByName('BOY').AsFloat*10;
@@ -458,7 +458,7 @@ var
       End
       Else If RapTabAYAR.FieldByName('TABLO').AsString='YAZICI' Then Begin
          printeradi := RapTabAYAR.FieldByName('ALANADI').AsString;
-         if (mPrevmi=1)and(Uppercase(RapTabAYAR.FieldByName('OZELLIK').AsString) = 'EKRAN') then begin //Print Dialog çaðrýlýyor mu?
+         if (mPrevmi=1)and(Uppercase(RapTabAYAR.FieldByName('OZELLIK').AsString) = 'EKRAN') then begin //Print Dialog Ã§aÄŸrÄ±lÄ±yor mu?
              RapSyf.RaporSyf.PrinterSetup;
              if RapSyf.RaporSyf.PrinterSettings.PrinterIndex < 0 then abort;
          end;
@@ -469,7 +469,7 @@ var
                  PrinterDlg.ListBox1.ItemIndex := i;
 
             PrinterDlg.ShowModal;
-            KopyaSay := StrToInt(PrinterDlg.Kopya.Text); //Kopyasayýsý
+            KopyaSay := StrToInt(PrinterDlg.Kopya.Text); //KopyasayÄ±sÄ±
             printeradi := PrinterDlg.ListBox1.Items[PrinterDlg.ListBox1.ItemIndex];
 
             Yer := Pos(' on ',printeradi);
@@ -556,7 +556,7 @@ var
             QRBnd[Bandsay]:=Gr2;
          End;
       End
-      Else If RapTabAYAR.FieldByName('TABLO').AsString='ÇOCUK' Then Begin
+      Else If RapTabAYAR.FieldByName('TABLO').AsString='Ã‡OCUK' Then Begin
          Gr3 := TQRChildBand.Create(RapSyf);
          Gr3.Name := 'B'+RapTabAYAR.FieldByName('SIRANO').AsString;
          Gr3.Parent := RapSyf.RaporSyf;
@@ -576,11 +576,11 @@ var
          End;
       End
       Else Begin
-         If RapTabAYAR.FieldByName('TABLO').AsString='GRUPBAÞI' Then
+         If RapTabAYAR.FieldByName('TABLO').AsString='GRUPBAÅžI' Then
             Tur := RbGroupHeader
          Else If RapTabAYAR.FieldByName('TABLO').AsString='GRUPSONU' Then
             Tur := RbGroupFooter
-         Else If RapTabAYAR.FieldByName('TABLO').AsString='SAYFABAÞI' Then Begin
+         Else If RapTabAYAR.FieldByName('TABLO').AsString='SAYFABAÅžI' Then Begin
              Tur := RbPageHeader;
             if RapTabAYAR.FieldByName('FORMAT').AsString='' Then
                RapSyf.RaporSyf.Options := RapSyf.RaporSyf.Options + [FirstPageHeader];
@@ -596,11 +596,11 @@ var
             If BulTable <> Nil Then
                RapSyf.RaporSyf.Dataset:=TDataset(BulTable);
          End
-         Else If RapTabAYAR.FieldByName('TABLO').AsString='RAPORBAÞI' Then Begin
+         Else If RapTabAYAR.FieldByName('TABLO').AsString='RAPORBAÅžI' Then Begin
             Tur := RbTitle;
             RapSyf.RaporSyf.Options:=RapSyf.RaporSyf.Options-[FirstPageHeader];
          End
-         Else If RapTabAYAR.FieldByName('TABLO').AsString='KOLONBAÞI' Then
+         Else If RapTabAYAR.FieldByName('TABLO').AsString='KOLONBAÅžI' Then
             Tur := RbColumnHeader
          Else If RapTabAYAR.FieldByName('TABLO').AsString='RAPORSONU' Then
             Tur := RbSummary
@@ -634,7 +634,7 @@ var
                If (Bnd Is TQRSubDetail) Then
                    TQRSubDetail(Bnd).FooterBand := TQRBand(QRBnd[BandSay]);
             End;
-            If RapTabAYAR.FieldByName('TABLO').AsString='GRUPBAÞI' Then Begin
+            If RapTabAYAR.FieldByName('TABLO').AsString='GRUPBAÅžI' Then Begin
                Bnd:=BandBul(RapTabAYAR.FieldByName('BANDNO').AsString);
                If (Bnd Is TQRSubDetail) Then
                    TQRSubDetail(Bnd).HeaderBand := TQRBand(QRBnd[BandSay]);
@@ -870,17 +870,17 @@ var
             SetCntrl(QCntrl);
 {}
             Dt:=qrsPageNumber;
-            If RapTabAYAR.FieldByName('TABLO').AsString='TARÝH' Then
+            If RapTabAYAR.FieldByName('TABLO').AsString='TARÄ°H' Then
                Dt:=qrsDate
             Else If RapTabAYAR.FieldByName('TABLO').AsString='SAAT' Then
                Dt:=qrsTime
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='TARÝHSAAT' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='TARÄ°HSAAT' Then
                Dt:=qrsDateTime
             Else If RapTabAYAR.FieldByName('TABLO').AsString='DETAYSAYI' Then
                Dt:=qrsDetailCount
             Else If RapTabAYAR.FieldByName('TABLO').AsString='DETAYNO' Then
                Dt:=qrsDetailNo
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='BAÞLIK' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='BAÅžLIK' Then
                Dt:=qrsReportTitle
             Else If RapTabAYAR.FieldByName('TABLO').AsString='SAYFANO' Then
                Dt:=qrsPageNumber
@@ -1036,13 +1036,13 @@ var
 
    Function StringToStyle(St:String):TPenStyle;
    Begin
-      If St='DÜZ' Then
+      If St='DÃœZ' Then
          StringToStyle:=psSolid
-      else If St='KESÝKLÝ' Then
+      else If St='KESÄ°KLÄ°' Then
          StringToStyle:=psDash
       else If St='NOKTALI' Then
          StringToStyle:=psDot
-      else If St='KESÝKLÝNOKTALI' Then
+      else If St='KESÄ°KLÄ°NOKTALI' Then
          StringToStyle:=psDashDot
       else
          StringToStyle:=psSolid
@@ -1060,17 +1060,17 @@ var
          QCntrl:=TQRShape(Bnd.AddPrintable(QCntrlType));
          With QCntrl Do Begin
             Name := 'B'+RapTabAYAR.FieldByName('SIRANO').AsString;
-            If RapTabAYAR.FieldByName('TABLO').AsString='DÝKDÖRTGEN' Then
+            If RapTabAYAR.FieldByName('TABLO').AsString='DÄ°KDÃ–RTGEN' Then
                Shape := qrsRectangle
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='DAÝRE' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='DAÄ°RE' Then
                Shape := qrsCircle
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='DÝKÇÝZGÝ' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='DÄ°KÃ‡Ä°ZGÄ°' Then
                Shape := qrsVertLine
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='YATAYÇÝZGÝ' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='YATAYÃ‡Ä°ZGÄ°' Then
                Shape := qrsHorLine
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='ÜSTALT' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='ÃœSTALT' Then
                Shape := qrsTopAndBottom
-            Else If RapTabAYAR.FieldByName('TABLO').AsString='SAÐSOL' Then
+            Else If RapTabAYAR.FieldByName('TABLO').AsString='SAÄžSOL' Then
                Shape := qrsRightAndLeft;
             Size.Left := Round(RapTabAYAR.FieldByName('SOL').AsFloat*10);
             Size.Top := Round(RapTabAYAR.FieldByName('UST').AsFloat*10);
@@ -1146,7 +1146,7 @@ try
       RapSyf.RaporSyf.Free;
       dokuluyor := false;
       Screen.Cursor := crDefault;
-      ShowMessage('Döküm ayarlarý tablosu bulunamadý...');
+      ShowMessage('DÃ¶kÃ¼m ayarlarÄ± tablosu bulunamadÄ±...');
       Exit;
    End;
    RapTabAYAR.Open;
@@ -1161,11 +1161,11 @@ try
       QRBndSay[k]:=0;
    While Not RapTabAYAR.Eof Do Begin
       If (RapTabAYAR.FieldByName('ALANTURU').AsString='SAYFA') Or
-         (RapTabAYAR.FieldByName('ALANTURU').AsString='KAÐIT') Then
+         (RapTabAYAR.FieldByName('ALANTURU').AsString='KAÄžIT') Then
          SayfaAyarlar
       Else If RapTabAYAR.FieldByName('ALANTURU').AsString='BAND' Then
          BandAyarlar
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='SABÝT' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='SABÄ°T' Then
          SabitAyarlar
       Else If RapTabAYAR.FieldByName('ALANTURU').AsString='ALAN' Then
          AlanAyarlar
@@ -1173,19 +1173,19 @@ try
          YaziAyarlar
       Else If RapTabAYAR.FieldByName('ALANTURU').AsString='HESAP' Then
          HesapAyarlar(False)
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='HESAPSÝL' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='HESAPSÄ°L' Then
          HesapAyarlar(True)
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='SÝSTEM' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='SÄ°STEM' Then
          SistemAyarlar
       Else If RapTabAYAR.FieldByName('ALANTURU').AsString='LOGO' Then
          LogoAyarlar
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='GRAFÝK' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='GRAFÄ°K' Then
          GrafikAyarlar
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='ÇÝZÝM' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='Ã‡Ä°ZÄ°M' Then
          CizimAyarlar
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='RESÝM' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='RESÄ°M' Then
          ResimAyarlar
-      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='ÇERÇEVE' Then
+      Else If RapTabAYAR.FieldByName('ALANTURU').AsString='Ã‡ERÃ‡EVE' Then
          CerceveAyarlar
       Else If RapTabAYAR.FieldByName('ALANTURU').AsString='BARKOD' Then
          BarkodAyarlar
@@ -1242,7 +1242,7 @@ except On E:Exception Do Begin
    dokuluyor := false;
    Screen.Cursor := crDefault;
    if pos('abort', E.Message)>0 then
-      ShowMessage('Ýþlem iptal edildi..')
+      ShowMessage('Ä°ÅŸlem iptal edildi..')
    else
       ShowMessage(E.Message);
    End;

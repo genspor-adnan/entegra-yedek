@@ -1,4 +1,4 @@
-unit uTanimGrid_GelenYerFrame;
+嚜簑nit uTanimGrid_GelenYerFrame;
 
 interface
 
@@ -56,7 +56,7 @@ begin
   inherited;
   {
   qryEvrak.Open;
-  burada a踦lm�yor. Base Frame'de zaten a踦l�yor
+  burada a癟覺lm覺yor. Base Frame'de zaten a癟覺l覺yor
   }
   qryLookupBirimKodu.Open;
   qryLookupYerTur.Open;

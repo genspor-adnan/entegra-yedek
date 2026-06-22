@@ -1,4 +1,4 @@
-unit UHesapPlani;
+ï»¿unit UHesapPlani;
 
 interface
 
@@ -108,7 +108,7 @@ type
     { Public declarations }
   end;
 //  Resourcestring
-//  YanlisTabHata = 'Kartlar üzerinde düzenleme yapamazsýnýz, sadece hesap planýný deðiþtirebilirsiniz. Lütfen Sað Tuþ menüsünden "Görünüm \ Sadece Plan" ý seçiniz.';
+//  YanlisTabHata = 'Kartlar Ã¼zerinde dÃ¼zenleme yapamazsÄ±nÄ±z, sadece hesap planÄ±nÄ± deÄŸiÅŸtirebilirsiniz. LÃ¼tfen SaÄŸ TuÅŸ menÃ¼sÃ¼nden "GÃ¶rÃ¼nÃ¼m \ Sadece Plan" Ä± seÃ§iniz.';
 
 var
   HesapPlaniDlg: THesapPlaniDlg;
@@ -241,8 +241,8 @@ var
 begin
 
   excel := CreateOleObject('Excel.Application');
-  Tablo.OpenDialog1.Title := 'Excel Dosyasýný Aç';
-  Tablo.OpenDialog1.Filter := 'Excel Dosyalarý *.xls';
+  Tablo.OpenDialog1.Title := 'Excel DosyasÄ±nÄ± AÃ§';
+  Tablo.OpenDialog1.Filter := 'Excel DosyalarÄ± *.xls';
 
   if Tablo.OpenDialog1.Execute then begin
     book := Excel.WorkBooks.Open(Tablo.OpenDialog1.FileName);
@@ -251,7 +251,7 @@ begin
     try
       Screen.Cursor := crHourGlass;
       sheet := book.worksheets[1];
-      BekletmeDlg.Caption := 'Excelden veriler aktarýlýyor.Bekleyiniz...';
+      BekletmeDlg.Caption := 'Excelden veriler aktarÄ±lÄ±yor.Bekleyiniz...';
       BekletmeDlg.cxProgressBar1.Properties.Max := excelsonsatir(1)+1;
       BekletmeDlg.Show;
 
@@ -282,7 +282,7 @@ end;
 
 procedure THesapPlaniDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    TabloYenile(TabPlan, []);
 end;
 
@@ -349,7 +349,7 @@ end;
 
 procedure THesapPlaniDlg.PopupMenu1Popup(Sender: TObject);
 begin
-   //Varsayýlan stoksa resimgirme  menüsü görünecek
+   //VarsayÄ±lan stoksa resimgirme  menÃ¼sÃ¼ gÃ¶rÃ¼necek
    ResimGirMenu.Visible := TabPlan.FieldByName('VARSAYILAN').AsString = '1';
 end;
 
@@ -415,7 +415,7 @@ end;
 
 procedure THesapPlaniDlg.ExceleGnder1Click(Sender: TObject);
 begin
-  Tablo.saveDialog1.Title := 'Excel Kayýt';
+  Tablo.saveDialog1.Title := 'Excel KayÄ±t';
   Tablo.saveDialog1.InitialDir := GetCurrentDir;
   Tablo.saveDialog1.Filter := 'Excel|*.xls';
   Tablo.saveDialog1.DefaultExt := 'xls';

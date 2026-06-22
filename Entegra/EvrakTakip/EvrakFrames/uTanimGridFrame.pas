@@ -1,4 +1,4 @@
-unit uTanimGridFrame;
+ï»¿unit uTanimGridFrame;
 
 interface
 
@@ -79,7 +79,7 @@ end;
 
 procedure TEvrakTanimGridFrame.actYazdirExecute(Sender: TObject);
 begin
-  Application.MessageBox('Yazdırılacak Bilgi bulunamadı!','Bilgilendirme', MB_ICONEXCLAMATION or MB_OK);
+  Application.MessageBox('YazdÄ±rÄ±lacak Bilgi bulunamadÄ±!','Bilgilendirme', MB_ICONEXCLAMATION or MB_OK);
 
 end;
 
@@ -88,10 +88,10 @@ procedure TEvrakTanimGridFrame.actYeniKayitExecute(Sender: TObject);
 begin
   qryEvrak.Append;
   {
-   Kayıt eklemeden sonra, GridPanel ilk sütun ilk Satır EditControl ise FOCUS olmalı,
-   Değilse, ikinci sütun ilk satır,
-   değilse ilk sütun ikinci satır... vs EditoControl türevi bir bileşen bulana kadar ilerle,
-   Yoksa yoktur, varsa Focus olmalı
+   KayÄ±t eklemeden sonra, GridPanel ilk sÃ¼tun ilk SatÄ±r EditControl ise FOCUS olmalÄ±,
+   DeÄŸilse, ikinci sÃ¼tun ilk satÄ±r,
+   deÄŸilse ilk sÃ¼tun ikinci satÄ±r... vs EditoControl tÃ¼revi bir bileÅŸen bulana kadar ilerle,
+   Yoksa yoktur, varsa Focus olmalÄ±
   }
 
   //FocusIlkControl(GridPanel1);

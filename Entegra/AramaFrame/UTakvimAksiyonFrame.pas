@@ -1,4 +1,4 @@
-unit UTakvimAksiyonFrame;
+﻿unit UTakvimAksiyonFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 16/01/2010 13:09:48}
@@ -59,7 +59,7 @@ implementation
 
 procedure TTakvimAksiyonFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TTakvimAksiyonFrame.EkranYazdir(Sender: TObject);

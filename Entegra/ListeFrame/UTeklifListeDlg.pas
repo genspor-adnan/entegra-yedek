@@ -1,4 +1,4 @@
-unit UTeklifListeDlg;
+ï»¿unit UTeklifListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:54}
@@ -295,10 +295,10 @@ begin
       //bu teklifte onaylama varsa onun yay?n? vard?r onu da silmek gerekir, bunun ii?in ?imdi onaylayacak k?sma s?f?r koyar?z..
       Tablo.OnayYayinIslemleri('TEKLIF',TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger, 1, 0, -18);
       //varsa dokumanlar?n silinmeli
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
                                      [80, TabTeklif.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       if LogGun>0 then begin
           Tablo.OncekiLogBelirle(TabTeklif);
           Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.FieldByName('ID').AsInteger, 5, TabTeklif);
@@ -325,7 +325,7 @@ begin
   end;
   DonusTipi := Tablo.BelgeDonustur_DonusTipiBul(80,TMenuItem(Sender).Tag);
   SipID := Tablo.TeklifiSipariseDonustur(DonusTipi,TabTeklif.FieldByName('ID').AsInteger);
-  RehID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'select REHBERID from SIPARIS where ID='+Inttostr(SipID),[],[],True);
+  RehID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'select REHBERID from SIPARIS where ID='+Inttostr(SipID),[],[],True);
   Tablo.SiparisSihirbazBaslat('D',TMenuItem(Sender).Tag,TMenuItem(Sender).Tag,SipID,RehID);
   JvTimer1Timer(JvTimer1);
 end;
@@ -789,7 +789,7 @@ begin
      if GidecekMail='' then begin
         if Application.MessageBox(PChar(Mailbulunamadiadresekle),PWideChar(PrjConst.Onay),MB_ICONQUESTION+MB_YESNO) = IDYES then begin
                if TGirisKutusuEx.BilgiAlEx(BGMail_adres_gir,TGirdiDenetimleri.Create.Edit(BGMail_adresi,@MailAdresi)) = mrOk then begin
-                  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
+                  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
                   'VALUES  (1,(SELECT ID FROM REHBERILETISIM WHERE REHBERID=&REHBERID),'+
                   '(SELECT SIRA FROM dbo.REHBERAYAR WHERE YERI=1 AND ETIKET=&ETIKET),'+
                   '(SELECT ETIKET FROM dbo.REHBERAYAR WHERE ETIKET=&ETIKET AND YERI=1),'+

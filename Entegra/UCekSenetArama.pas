@@ -1,4 +1,4 @@
-unit UCekSenetArama;
+﻿unit UCekSenetArama;
 
 interface
 
@@ -147,7 +147,7 @@ end;
 
 procedure TCekSenetAramaDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   Tablo.GridTurkcelestir;
 end;

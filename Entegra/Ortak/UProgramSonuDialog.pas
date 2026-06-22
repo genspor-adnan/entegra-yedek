@@ -1,4 +1,4 @@
-unit UProgramSonuDialog;
+ï»¿unit UProgramSonuDialog;
 
 interface
 
@@ -66,7 +66,7 @@ procedure TProgramSonuDialog.programdanCikButtonClicked(Sender: TObject);
 begin
   if (Tablo.GetOnlineStatus) then begin  // R Yedekleme-'+kullanan,'Kapanirken', False)
     try
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
       if Tablo.GENINI.ReadBoolean(Ops_Yedekleme_Kapanirken, False) then
          YedekAl;
     except
@@ -81,7 +81,7 @@ end;
 procedure TProgramSonuDialog.ProgramRestartBtnClick(Sender: TObject);
 begin
   try
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
   finally
     RestartProgram := True;
     RestartParameters := '/Kullanici:'+IntToStr(KullaniciID)+' /Sifre:'+SifreliSifre;
@@ -93,7 +93,7 @@ procedure TProgramSonuDialog.baskaKullaniciyaGecButtonClicked(
   Sender: TObject);
 begin
   try
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
   finally
     RestartProgram := True;
     ModalResult := mrOK;

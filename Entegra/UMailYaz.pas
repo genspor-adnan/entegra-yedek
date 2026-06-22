@@ -1,4 +1,4 @@
-unit UMailYaz;
+ï»¿unit UMailYaz;
 
 interface
 
@@ -64,7 +64,7 @@ implementation
 
 procedure TMailGonderDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.Query2.Close;
   Tablo.Query2.SQL.Text:='SELECT KULLANICIADI FROM KULLAN ORDER BY 1';
   Tablo.Query2.Open;
@@ -77,7 +77,7 @@ begin
 
 //  LabelTesisKodu.Caption:= ReherIni.ReadString('MEDULA','TesisKodu','');
 //  LabelTesisAdi.Caption := ReherIni.ReadString('GenelOpsiyon','KURUMADI','');
-//  LabelIstekNo.Caption:= IntToStr( ReherIni.ReadInteger('GenelOpsiyon','MailÝstekNo',1));
+//  LabelIstekNo.Caption:= IntToStr( ReherIni.ReadInteger('GenelOpsiyon','MailÄ°stekNo',1));
 //
 //  ReherIni.ReadSectionValues('GenoTIPPersonel',ComboKime.Items);
   ComboGonderen.ItemIndex:= ComboGonderen.Items.IndexOf(KullanAdi);
@@ -127,14 +127,14 @@ begin
 
     try
      {
-       gönderim iþlemi için gerekli kod buraya
+       gÃ¶nderim iÅŸlemi iÃ§in gerekli kod buraya
       }
      webservis := GetLisansServiceSoap(false, '', HTTPRIOLisans);
      Istekno:=LabelIstekNo.Caption;
      webservis.MesajKaydet( '' , Istekno, '', ComboGonderen.Text, ComboMesajTipi.Text, EditKonu.Text, MemoSorunlar.Lines.Text, ComboOncelik.Text, ComboSube.Text , ComboKime.Text );
 
-      // gönderimden sonra istek numarasýnýn arttýrýlmasý
-  //   ReherIni.Writeinteger('GenelOpsiyon','MailÝstekNo',strtoint(LabelIstekNo.Caption)+1);
+      // gÃ¶nderimden sonra istek numarasÄ±nÄ±n arttÄ±rÄ±lmasÄ±
+  //   ReherIni.Writeinteger('GenelOpsiyon','MailÄ°stekNo',strtoint(LabelIstekNo.Caption)+1);
 
       Application.MessageBox(PChar(Gonderildi),PChar(Bilgi),MB_OK+ MB_ICONINFORMATION);
 

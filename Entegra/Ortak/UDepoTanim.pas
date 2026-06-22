@@ -1,4 +1,4 @@
-unit UDepoTanim;
+ï»¿unit UDepoTanim;
 
 interface
 
@@ -94,7 +94,7 @@ begin
 
    if Tablo.Query1.RecordCount>=1 then
     begin
-       Application.MessageBox('Bu depoda hareket görmüþ ürünler vardýr. Silinemez. Lütfen depo yu pasif yapýnýz.','H A T A', MB_OK+ MB_ICONERROR);
+       Application.MessageBox('Bu depoda hareket gÃ¶rmÃ¼ÅŸ Ã¼rÃ¼nler vardÄ±r. Silinemez. LÃ¼tfen depo yu pasif yapÄ±nÄ±z.','H A T A', MB_OK+ MB_ICONERROR);
        Abort;
     end;
     
@@ -110,11 +110,11 @@ procedure TDepoTanimDlg.TabDepolarPostError(DataSet: TDataSet;
   E: EDatabaseError; var Action: TDataAction);
 begin
   if Pos('Cannot insert the value NULL into column ''DEPOKODU''',E.Message) >0 then
-    ShowMessage('Depo Kodu Boþ olamaz.')
+    ShowMessage('Depo Kodu BoÅŸ olamaz.')
   else if Pos('Violation of UNIQUE KEY constraint ''IX_DEPOLAR_DEPOKOD''',E.Message)>0 then
-    ShowMessage('Bu depo kodu daha önce baþka bir depo için kullanýlmýþ. Lütfen baþka bir depo kodu tanýmlayýnýz.')
+    ShowMessage('Bu depo kodu daha Ã¶nce baÅŸka bir depo iÃ§in kullanÄ±lmÄ±ÅŸ. LÃ¼tfen baÅŸka bir depo kodu tanÄ±mlayÄ±nÄ±z.')
   else if Pos('Violation of UNIQUE KEY constraint ''IX_DEPOLAR_DEPOADI''',E.Message)>0 then
-    ShowMessage('Bu depo adý daha önce baþka bir depo için kullanýlmýþ. Lütfen baþka bir depo adý tanýmlayýnýz.');
+    ShowMessage('Bu depo adÄ± daha Ã¶nce baÅŸka bir depo iÃ§in kullanÄ±lmÄ±ÅŸ. LÃ¼tfen baÅŸka bir depo adÄ± tanÄ±mlayÄ±nÄ±z.');
  
 
 end;
@@ -123,12 +123,12 @@ procedure TDepoTanimDlg.TabDepolarBeforePost(DataSet: TDataSet);
 begin
   if TabDepolar.FieldByName('DEPOKODU').AsString='' then
     begin
-       Application.MessageBox('Depo Kodu Boþ Olamaz','U Y A R I', MB_OK+ MB_ICONWARNING);
+       Application.MessageBox('Depo Kodu BoÅŸ Olamaz','U Y A R I', MB_OK+ MB_ICONWARNING);
        abort;
     end;
   if TabDepolar.FieldByName('DEPOADI').AsString='' then
     begin
-       Application.MessageBox('Depo Adý Boþ Olamaz','U Y A R I', MB_OK+ MB_ICONWARNING);
+       Application.MessageBox('Depo AdÄ± BoÅŸ Olamaz','U Y A R I', MB_OK+ MB_ICONWARNING);
        abort;
 
     end;

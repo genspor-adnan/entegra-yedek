@@ -1,4 +1,4 @@
-unit UTabDok;
+ï»¿unit UTabDok;
 
 //{$I genyazilim.inc}
 
@@ -93,10 +93,10 @@ type
     procedure SQLRaporEkle(Target: TDataSet; Source, RaporAdi: string);
     procedure EkranYaziciInit(EkranYaz1, YaziciYaz1: TToolButton);
     /// <summary>
-    ///   Belirtilen form adýna göre EkranYaz1 ve YaziciYaz1 araç butonlarýn ayarlar.
-    ///  <param name="FormAdi">Ýstenilen form adý</param>
-    ///  <param name="EkranYaz1">Ön izleme butonunun örneði</param>
-    ///  <param name="YaziciYaz1">Yazdýrma butonunun örneði</param>
+    ///   Belirtilen form adÄ±na gÃ¶re EkranYaz1 ve YaziciYaz1 araÃ§ butonlarÄ±n ayarlar.
+    ///  <param name="FormAdi">Ä°stenilen form adÄ±</param>
+    ///  <param name="EkranYaz1">Ã–n izleme butonunun Ã¶rneÄŸi</param>
+    ///  <param name="YaziciYaz1">YazdÄ±rma butonunun Ã¶rneÄŸi</param>
     /// </summary>
     procedure EkranYaziciInitEx(FormAdi: string;EkranYaz1, YaziciYaz1: TToolButton);
     function PopUpMenuIslemleri(Menu1: TMenu; RaporSecClick: TNotifyEvent; IslemTuru, Baslik1, Baslik2: string): TMenuItem;
@@ -153,8 +153,8 @@ var
   Satir, S: string;
   FList: TStringList;
   YeniKayit: Boolean;
-  // buton Tag deðeri 100 olduðu zaman PopupListePopup bu deðere bakar deðilse Screen.ActiveForm.Name e bakar
-  // Ayrýca EkranYaziciInitEx kullanýlmalý
+  // buton Tag deÄŸeri 100 olduÄŸu zaman PopupListePopup bu deÄŸere bakar deÄŸilse Screen.ActiveForm.Name e bakar
+  // AyrÄ±ca EkranYaziciInitEx kullanÄ±lmalÄ±
   OzelFormAdi : string;
 
 
@@ -394,7 +394,7 @@ end;
 procedure TTabloDokum.TabDokumBeforePost(DataSet: TDataSet);
 begin
   if TabDokum.FieldByName('RAPORADI').AsString = '' then
-    raise Exception.Create('Rapor Adý Dolu Olmalý!');
+    raise Exception.Create('Rapor AdÄ± Dolu OlmalÄ±!');
   if assigned(DokumSartDlg) then
     TabDokum.fieldbyname('SQL').AsString := DokumSartDlg.SQLMemo.Text;
 end;
@@ -437,7 +437,7 @@ begin
   Query1.SQL.Text := 'Select RAPORADI From KOSULLAR where RAPORADI = ''' + TabDokum.FieldByName('RAPORADI').AsString + '''';
   Query1.Open;
   if not Query1.IsEmpty then
-    raise exception.Create('Önce Koþullarý Silmelisiniz...');
+    raise exception.Create('Ã–nce KoÅŸullarÄ± Silmelisiniz...');
   Query1.Close;
   Query1.SQL.Text := 'Delete From AYARLAR where RAPORADI = ''' + TabDokum.FieldByName('RAPORADI').AsString + '''';
   Query1.ExecSQL;
@@ -472,7 +472,7 @@ begin
     (TabKosul.FieldByName('TABLO').AsString = '') or
     (TabKosul.FieldByName('ALAN').AsString = '') or
     (TabKosul.FieldByName('ESITLIK').AsString = '') then
-    raise Exception.Create('BAGLAC, TABLO, ALAN, ESITLIK Dolu Olmalý!');
+    raise Exception.Create('BAGLAC, TABLO, ALAN, ESITLIK Dolu OlmalÄ±!');
 end;
 
 procedure TTabloDokum.PopupSagTusMenuPopup(Sender: TObject);
@@ -491,7 +491,7 @@ if (Tablo.KullaniciBilgisi(KullanAdi, s)) and
 {$ELSE}
   if (Tablo.KullaniciBilgisi(KullanAdi, s)) and  (not (KullaniciBilgi.Gorme[''] = '1')) then
 {$ENDIF}
-    raise exception.Create('Ayarlarý deðiþtirmeye yetkili deðilsiniz!!');
+    raise exception.Create('AyarlarÄ± deÄŸiÅŸtirmeye yetkili deÄŸilsiniz!!');
   s := EkranYaz.Caption;
    Delete(s, pos('&', s), 1);
   if FormAdiGetir = 'DokumDlg' then begin
@@ -502,13 +502,13 @@ if (Tablo.KullaniciBilgisi(KullanAdi, s)) and
   end
   else //TToolButton((TPopUpMenu
     s := TButton(PopupSagTusMenu.PopupComponent).Caption;
-  PopupSagTusMenu.Items[0].Caption := s + ' Döküm Ayarlarý';
-  PopupSagTusMenu.Items[1].Caption := s + ' Döküm Word Ayarlarý';
-  PopupSagTusMenu.Items[2].Caption := s + ' Varsayýlan Yap';
-  PopupSagTusMenu.Items[4].Caption := s + ' Dökümünü Kopyala';
-  PopupSagTusMenu.Items[5].Caption := s + ' Döküm Adýný Deðiþtir';
-  PopupSagTusMenu.Items[6].Caption := s + ' Dökümünü Sil';
-//   PopupSagTusMenu.Items[7].Caption := s + ' Dökümü kaydet (Text)';
+  PopupSagTusMenu.Items[0].Caption := s + ' DÃ¶kÃ¼m AyarlarÄ±';
+  PopupSagTusMenu.Items[1].Caption := s + ' DÃ¶kÃ¼m Word AyarlarÄ±';
+  PopupSagTusMenu.Items[2].Caption := s + ' VarsayÄ±lan Yap';
+  PopupSagTusMenu.Items[4].Caption := s + ' DÃ¶kÃ¼mÃ¼nÃ¼ Kopyala';
+  PopupSagTusMenu.Items[5].Caption := s + ' DÃ¶kÃ¼m AdÄ±nÄ± DeÄŸiÅŸtir';
+  PopupSagTusMenu.Items[6].Caption := s + ' DÃ¶kÃ¼mÃ¼nÃ¼ Sil';
+//   PopupSagTusMenu.Items[7].Caption := s + ' DÃ¶kÃ¼mÃ¼ kaydet (Text)';
 end;
 
 procedure TTabloDokum.IniAyarla(Baslik, Islem: string);
@@ -544,7 +544,7 @@ begin
   s := EkranYaz.Caption;
   Delete(s, pos('&', s), 1);
   YeniEkranAdi := s;
-  MesajStrAl('', 'Yeni Döküm Adýný Giriniz :', 'E', nil, YeniEkranAdi, '', 'E', nil, YeniEkranAdi);
+  MesajStrAl('', 'Yeni DÃ¶kÃ¼m AdÄ±nÄ± Giriniz :', 'E', nil, YeniEkranAdi, '', 'E', nil, YeniEkranAdi);
   if YeniEkranAdi = '' then exit;
 
   if FormAdiGetir = 'DokumDlg' then begin
@@ -552,7 +552,7 @@ begin
     TabDokum2.SQL.Text := 'Select * From DOKUMLER Where RAPORADI = ''' + YeniEkranAdi + '''';
     TabDokum2.Open;
     if not TabloDokum.TabDokum2.IsEmpty then
-      raise Exception.Create('Bu adla kayýtlý döküm var!!!');
+      raise Exception.Create('Bu adla kayÄ±tlÄ± dÃ¶kÃ¼m var!!!');
     EskiEkranAdi := TabDokum.FieldByName('RAPORADI').ASString;
     Tasima('DOKUMLER', EskiEkranAdi, YeniEkranAdi, TabDokum);
     TabDokum.Close; TabDokum.Open;
@@ -578,7 +578,7 @@ begin
     TabloDokum.PopUpMenuIslemleri(PopupListe, RaporSecClick, 'Ekle', YeniEkranAdi, '');
     EkranYaziciInit(EkranYaz, YaziciYaz);
   end;
-  MessageDlg('Döküm baþarýyla kopyalandý',mtInformation,[mbOK],0);
+  MessageDlg('DÃ¶kÃ¼m baÅŸarÄ±yla kopyalandÄ±',mtInformation,[mbOK],0);
 end;
 
 procedure TTabloDokum.AdDegistirClick(Sender: TObject);
@@ -587,7 +587,7 @@ begin
   s := EkranYaz.Caption;
   Delete(s, pos('&', s), 1);
   YeniEkranAdi := s;
-  MesajStrAl('', 'Yeni Döküm Adýný Giriniz :', 'E', nil, YeniEkranAdi, '', 'E', nil, YeniEkranAdi);
+  MesajStrAl('', 'Yeni DÃ¶kÃ¼m AdÄ±nÄ± Giriniz :', 'E', nil, YeniEkranAdi, '', 'E', nil, YeniEkranAdi);
   if YeniEkranAdi = '' then exit;
 
   if FormAdiGetir = 'DokumDlg' then begin
@@ -606,12 +606,12 @@ begin
     IniAyarla(YeniEkranAdi, 'Ekle');
     IniAyarla(s, 'Sil');
   end;
-  //ShowMessage('Ýþlem Sona Erdi....');
+  //ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure TTabloDokum.Sil1Click(Sender: TObject);
 begin
-  if MessageDlg(EkranYaz.Caption + ' Dökümünü silmek istediðinizden emin misiniz?',
+  if MessageDlg(EkranYaz.Caption + ' DÃ¶kÃ¼mÃ¼nÃ¼ silmek istediÄŸinizden emin misiniz?',
     mtConfirmation, [mbYes, mbNo], 0) <> mrYES then exit;
 
   if FormAdiGetir = 'DokumDlg' then
@@ -628,7 +628,7 @@ begin
       RaporSecClick(PopupListe.Items[0]);
     EkranYaziciInit(EkranYaz, YaziciYaz);
   end;
-  ShowMessage('Ýþlem Sona Erdi....');
+  ShowMessage('Ä°ÅŸlem Sona Erdi....');
 end;
 
 procedure TTabloDokum.Ayarlar1Click(Sender: TObject);
@@ -646,7 +646,7 @@ begin
     RapTablo.Ayarlar.SQL.Text := 'select * from AYARLAR where RAPORADI =''' + s + '''';
     RapTablo.Ayarlar.Open;
     if RapTablo.Ayarlar.IsEmpty then
-      if MessageDlg('Döküm ayarlarý bulunamadý. Oluþturulsun mu?',
+      if MessageDlg('DÃ¶kÃ¼m ayarlarÄ± bulunamadÄ±. OluÅŸturulsun mu?',
         mtConfirmation, [mbYes, mbNo], 0) = mrYES then
         DokumDlg.IlkSayfaYapisiOlustur
   end
@@ -737,8 +737,8 @@ begin
   if TabloDokum.AliasAdi = '' then
     TabloDokum.AliasAdi := 'GENOTIP';
   EnSonSecilenDokum := nil;
-  RegisterQRFunction(TQREvEtiAdresFunction, 'EtiAdres', 'EtiAdres(RAPORADI)|' + 'Kart Adrese Göre Adres Dönderir', 'FETA Bilgisayar', '7NNNNN');
-  RegisterQRFunction(TQREvKosulFunction, 'Kosul', 'Kosul(KosulNo)|' + 'Kart Adrese Göre Adres Dönderir', 'FETA Bilgisayar', '7NNNNN');
+  RegisterQRFunction(TQREvEtiAdresFunction, 'EtiAdres', 'EtiAdres(RAPORADI)|' + 'Kart Adrese GÃ¶re Adres DÃ¶nderir', 'FETA Bilgisayar', '7NNNNN');
+  RegisterQRFunction(TQREvKosulFunction, 'Kosul', 'Kosul(KosulNo)|' + 'Kart Adrese GÃ¶re Adres DÃ¶nderir', 'FETA Bilgisayar', '7NNNNN');
 end;
 
 procedure TTabloDokum.PopupListePopup(Sender: TObject);
@@ -756,7 +756,7 @@ begin
     for i := 0 to stlist.count - 1 do
       if stlist.strings[i] <> 'VARSAYILAN' then begin
         item := PopUpMenuIslemleri(PopUpListe, TabloDokum.RaporSecClick, 'Ekle', stlist.strings[i], '');
-        item.Hint := 'Kullanýcý Tanýmlý Belge';
+        item.Hint := 'KullanÄ±cÄ± TanÄ±mlÄ± Belge';
         item.ImageIndex := 9;
       end;
   stlist.Free;
@@ -768,7 +768,7 @@ begin
     (TabKosul3.FieldByName('TABLO').AsString = '') or
     (TabKosul3.FieldByName('ALAN').AsString = '') or
     (TabKosul3.FieldByName('ESITLIK').AsString = '') then
-    raise Exception.Create('BAGLAC, TABLO, ALAN, ESITLIK Dolu Olmalý!');
+    raise Exception.Create('BAGLAC, TABLO, ALAN, ESITLIK Dolu OlmalÄ±!');
 end;
 
 procedure TTabloDokum.TabKosul3BeforeInsert(DataSet: TDataSet);
@@ -873,7 +873,7 @@ begin
   Query2.SQL.Text := 'Select GELISNO, TARIH, TUR, TAHSIL, VADE From TAHSILAT Where DOSYANO = ''' + Dosyano + '''' +
     ' and GELISNO = ' + GelisNo;
   Query2.Open;
-  if Query2.IsEmpty then begin // Hiç tahsilat bilgisi yoksa
+  if Query2.IsEmpty then begin // HiÃ§ tahsilat bilgisi yoksa
 
     BorcRengi := $008080FF;
     exit;
@@ -882,12 +882,12 @@ begin
   Query2.Close;
   Query2.SQL.Text := 'Select GELISNO, TARIH, TUR, TAHSIL, VADE From TAHSILAT Where DOSYANO = ''' + Dosyano + '''' +
     ' and GELISNO = ' + GelisNo +
-    ' and KALAN>1 and (TUR = ''SENET'' or TUR = ''ÇEK'' or TUR = ''TAKST'' or TUR = ''AÇIK'')';
+    ' and KALAN>1 and (TUR = ''SENET'' or TUR = ''Ã‡EK'' or TUR = ''TAKST'' or TUR = ''AÃ‡IK'')';
   Query2.Open;
   if not Query2.IsEmpty then begin
 //    while not Query2.eof do begin
     if (Query2.Fields[4].AsString <> '') then begin
-      if Query2.Fields[4].AsDateTime < Date then //vadesi dolmuþsa
+      if Query2.Fields[4].AsDateTime < Date then //vadesi dolmuÅŸsa
         BorcRengi := $008080FF;
     end
     else begin
@@ -902,7 +902,7 @@ procedure TTabloDokum.DataSource2DataChange(Sender: TObject; Field: TField);
 begin
   DokumDlg.lbToplamSayi.Caption := '';
   if DokumDlg.ToplamSayi.Checked then
-    DokumDlg.lbToplamSayi.Caption := 'Toplam kayýt sayýsý : ' + INTTOSTR(TabloDokum.DataSource2.DataSet.RecordCount);
+    DokumDlg.lbToplamSayi.Caption := 'Toplam kayÄ±t sayÄ±sÄ± : ' + INTTOSTR(TabloDokum.DataSource2.DataSet.RecordCount);
 end;
 
 procedure TTabloDokum.Dkmkaydet1Click(Sender: TObject);
@@ -997,7 +997,7 @@ procedure TTabloDokum.yeniDokumMenuItemClick(Sender: TObject);
 var
   s : string;
 begin
-  MesajStrAl('', 'Yeni Dökümün Adýný Girin : ', 'E', nil, s, '', 'E', nil, s);
+  MesajStrAl('', 'Yeni DÃ¶kÃ¼mÃ¼n AdÄ±nÄ± Girin : ', 'E', nil, s, '', 'E', nil, s);
   if s <> '' then IniAyarla(s, 'Ekle');
   EkranYaziciInit(EkranYaz,YaziciYaz);
   

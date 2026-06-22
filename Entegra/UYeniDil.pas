@@ -1,4 +1,4 @@
-unit UYeniDil;
+ï»¿unit UYeniDil;
 
 interface
 
@@ -57,7 +57,7 @@ uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,UDilDuzenle,UOpsDlg,Prj
 
 procedure TYeniDilDlg.FormCreate(Sender: TObject);
 begin
-  //LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  //LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   TabloYenile(GENINITumDiller,[]);
   TabloYenile(GENINIKullanimdakiDil,[Dil]);
   DillerKontrolu;
@@ -76,7 +76,7 @@ begin
     TabDiller.Post;
 
 Query2.SQL.Text:='delete from GENINI where BOLUM = -1';
-   for I := 0 to TabDiller.FieldCount - 4 do begin//son iki field anahtar deðil.. onlara gitmeye gerek yok!!
+   for I := 0 to TabDiller.FieldCount - 4 do begin//son iki field anahtar deÄŸil.. onlara gitmeye gerek yok!!
       Query2.SQL.Add('insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)'
                 +' select '
                 +'BOLUM'+',['
@@ -108,7 +108,7 @@ YDeger,Ysira,I:integer;
 st:TStringList;
 begin
 st:=TStringList.Create;
- if Tablo.ListedenBilgiGetir('Dil seçimi yapýnýz.','select ANAHTAR,DEGER,DIL,SIRA from GENINI Where ANAHTAR like ''%<ara>%'' AND BOLUM = '+inttostr(Ops_Desteklenen_Diller),st,[]) = False then begin
+ if Tablo.ListedenBilgiGetir('Dil seÃ§imi yapÄ±nÄ±z.','select ANAHTAR,DEGER,DIL,SIRA from GENINI Where ANAHTAR like ''%<ara>%'' AND BOLUM = '+inttostr(Ops_Desteklenen_Diller),st,[]) = False then begin
   Result:= false;
   Exit;
  end;
@@ -117,7 +117,7 @@ st:=TStringList.Create;
     YSira:=strtoint(st.Strings[3]);
     tablo.TablodanSorguAc(9,'SELECT * FROM GENINI WHERE BOLUM = -1 AND DEGER='+st.Strings[2]+' AND DIL= '+st.Strings[2]);
     if Tablo.Query9.FieldByName('SIRA').AsInteger <> 0 then begin
-      ShowMessage(YDil+' Dili önce eklendi.');
+      ShowMessage(YDil+' Dili Ã¶nce eklendi.');
       Result:= false;
       Exit;
     end;
@@ -145,10 +145,10 @@ Var
 I:integer;
 begin
 for I := 0 to GridGenIniYeniDilDBTableView1.ColumnCount - 1 do
-    if not BoslukKontrol(GridGenIniYeniDilDBTableView1.Columns[i].EditValue,'Bölüm '+GridGenIniYeniDilDBTableView1.Columns[i].Caption) then
+    if not BoslukKontrol(GridGenIniYeniDilDBTableView1.Columns[i].EditValue,'BÃ¶lÃ¼m '+GridGenIniYeniDilDBTableView1.Columns[i].Caption) then
       Abort;
   for I := 0 to GridGenIniYeniDilDBTableView1.ColumnCount - 3 do
-    if not BoslukKontrol(GridGenIniYeniDilDBTableView1.Columns[i].EditValue,'Deðer '+GridGenIniYeniDilDBTableView1.Columns[i].Caption) then
+    if not BoslukKontrol(GridGenIniYeniDilDBTableView1.Columns[i].EditValue,'DeÄŸer '+GridGenIniYeniDilDBTableView1.Columns[i].Caption) then
       Abort;
     DilKaydet;
 end;
@@ -159,19 +159,19 @@ SDil,m:string;
 st:TStringList;
 begin
 st:=TStringList.Create;
- if Tablo.ListedenBilgiGetir('Silinecek dil seçimini yapýnýz.','select ANAHTAR,DEGER,DIL,SIRA from GENINI Where ANAHTAR like ''%<ara>%''  AND BOLUM = '+inttostr(Ops_Desteklenen_Diller),st,[]) = False then begin
+ if Tablo.ListedenBilgiGetir('Silinecek dil seÃ§imini yapÄ±nÄ±z.','select ANAHTAR,DEGER,DIL,SIRA from GENINI Where ANAHTAR like ''%<ara>%''  AND BOLUM = '+inttostr(Ops_Desteklenen_Diller),st,[]) = False then begin
   Exit;
  end;
 //Sdil:=GridGenIniYeniDilDBTableView1.DataController.GetItemFieldName(GridGenIniYeniDilDBTableView1.Controller.FocusedColumnIndex);
 Sdil:=st.Strings[0];
-m:=Sdil+' Dil seçeneðini silmek istediðiinizden emin misiniz?';
+m:=Sdil+' Dil seÃ§eneÄŸini silmek istediÄŸiinizden emin misiniz?';
   tablo.TablodanSorguAc(9,'SELECT * FROM GENINI WHERE BOLUM = -1 AND DEGER='+st.Strings[2]+' AND DIL= '+st.Strings[2]);
     if Tablo.Query9.FieldByName('SIRA').AsInteger = 0 then begin
-      ShowMessage(Sdil+' Dili daha önce silindi.');
+      ShowMessage(Sdil+' Dili daha Ã¶nce silindi.');
       Exit;
     end;
 
-if Application.MessageBox(PChar(m),'Dil Ekraný', MB_YESNO+ MB_ICONQUESTION) = ID_NO then Abort
+if Application.MessageBox(PChar(m),'Dil EkranÄ±', MB_YESNO+ MB_ICONQUESTION) = ID_NO then Abort
  else
  begin
   tablo.TablodanSorguAc(8,'SELECT DIL FROM GENINI WHERE  BOLUM= -1 AND ANAHTAR = '+''''+ Sdil+'''');

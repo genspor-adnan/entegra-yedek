@@ -1,4 +1,4 @@
-unit URaporAraclari;
+ï»¿unit URaporAraclari;
 
 interface
 uses
@@ -19,7 +19,7 @@ type
 
   public
 
-    {$REGION 'Döküm ve Rapor Ýþlemleri'}
+    {$REGION 'DÃ¶kÃ¼m ve Rapor Ä°ÅŸlemleri'}
     class procedure DokumKopyala(AKaynakDokumAdi,AHedefDokumAdi : string; AHedefTablo: TDataSet);
     class procedure RaporKopyala(EskiDokId : Integer; AHedefRaporAdi : string);
     class procedure RaporAdDegistir(AEkranAdi, AEskiRaporAdi,AYeniRaporAdi: string);
@@ -34,7 +34,7 @@ type
     class procedure RaporPopupMenuHazirla(AEkranAdi: string;APopup: TPopupMenu;
       var ASeciliRapor: string;ASecOlayi : TNotifyEvent);
 
-    {$REGION 'Sabit Özellikler'}
+    {$REGION 'Sabit Ã–zellikler'}
     class property Modul : string read FModul write FModul;
     class property Ini : TIni read FIni write FIni;
     {$ENDREGION}
@@ -109,8 +109,8 @@ class procedure TRaporAraclari.DokumKopyala(AKaynakDokumAdi,
   AHedefDokumAdi: string;AHedefTablo: TDataSet);
 begin
   if DokumVarMi(AHedefDokumAdi) then
-    raise Exception.Create('Bu adla kayýtlý döküm var!!!');
-  { Ýlk önce alt tablolar kopyalanýyor }
+    raise Exception.Create('Bu adla kayÄ±tlÄ± dÃ¶kÃ¼m var!!!');
+  { Ä°lk Ã¶nce alt tablolar kopyalanÄ±yor }
   with NewFDQuery('SELECT TOP 0 * FROM KOSULLAR',[],[]) do
   try
     Open;
@@ -125,7 +125,7 @@ begin
   finally
     Free;
   end;
-  { En son olarak ana tablo kopyalanýyor }
+  { En son olarak ana tablo kopyalanÄ±yor }
   Tasi('DOKUMLER', 'RAPORADI',AKaynakDokumAdi, AHedefDokumAdi, AHedefTablo);
 end;
 
@@ -189,9 +189,9 @@ end;
 
 class procedure TRaporAraclari.RaporVarsayilanYap(AEkranAdi, ARaporAdi: string);
 begin
-  //önce bu ekrandakilerin hepsi sýfýrlanýr
+  //Ã¶nce bu ekrandakilerin hepsi sÄ±fÄ±rlanÄ±r
   ExecFD('UPDATE DOKUMLER SET VARSAYILAN = 0  WHERE GRUBU =&ekran',['&ekran'],[AEkranAdi]);
-  // sonra bu varsayýlan yapýlýr
+  // sonra bu varsayÄ±lan yapÄ±lÄ±r
   ExecFD('UPDATE DOKUMLER SET VARSAYILAN = 1  WHERE GRUBU=&ekran '+ 'AND RAPORADI = &raporadi',['&raporadi','&ekran'],[ARaporAdi,AEkranAdi]);
 end;
 

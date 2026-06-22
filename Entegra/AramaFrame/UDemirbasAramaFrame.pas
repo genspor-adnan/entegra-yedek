@@ -1,4 +1,4 @@
-unit UDemirbasAramaFrame;
+ï»¿unit UDemirbasAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:20 }
@@ -119,9 +119,9 @@ LokKod,LokAciklama,sqltext:string;
 begin
   if AButtonIndex = 0 then begin
 //    sqltext:='select ROOTKOD= case when CHARINDEX(''.'',KOD,1)=0 then '''' else REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))) end,KOD,ACIKLAMA,TUR,ID from LOKASYON where DURUM=1 and TUR='+IntToStr(Lokasyon_Genel)+' and REHBERID=-1' ;
-//    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,[],['TUR'],[IntToStr(Lokasyon_Genel)],['Kod','Açýklama',''],[True,True,False]) then begin
+//    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,[],['TUR'],[IntToStr(Lokasyon_Genel)],['Kod','AÃ§Ä±klama',''],[True,True,False]) then begin
     sqltext:='select ROOTKOD= case when CHARINDEX(''.'',KOD,1)=0 then '''' else REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))) end,KOD,ACIKLAMA,TUR,ID,YERI,YERID from LOKASYON where DURUM=1 and YERI='+IntToStr(TabNo_DEMIRBAS)+' and YERID=0'; //and TUR='+IntToStr(Lokasyon_Genel)+' and REHBERID=-1' ;
-    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[],['TUR','YERI','YERID'],[IntToStr(Lokasyon_Demirbas),TabNo_DEMIRBAS,0],['Kod','Açýklama',''],[True,True,False,False,False]) then begin
+    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[],['TUR','YERI','YERID'],[IntToStr(Lokasyon_Demirbas),TabNo_DEMIRBAS,0],['Kod','AÃ§Ä±klama',''],[True,True,False,False,False]) then begin
       AraLokasyonbtne.Tag:=LokID;
       AraLokasyonbtne.Text:=LokAciklama;
     end;
@@ -158,7 +158,7 @@ end;
 
 procedure TDemirbasAramaFrame.Baslatildi;
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TDemirbasAramaFrame.cxLabel7Click(Sender: TObject);

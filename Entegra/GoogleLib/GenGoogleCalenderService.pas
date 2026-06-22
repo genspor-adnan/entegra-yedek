@@ -1,4 +1,4 @@
-unit GenGoogleCalenderService;
+ï»¿unit GenGoogleCalenderService;
 
 interface
 
@@ -98,8 +98,8 @@ begin
   Credential.OAuthScope :=  'https://www.googleapis.com/auth/calendar';
   if Assigned(GoogleCalenderLoginInfo) then
   begin
-    {Özel hesap }
-    FreeAndNil(CalendarService); //Daha önce kullanýdýysa temizle
+    {Ã–zel hesap }
+    FreeAndNil(CalendarService); //Daha Ã¶nce kullanÄ±dÄ±ysa temizle
     Credential.ServiceAccount := GoogleCalenderLoginInfo.ServiceAccount;
     Credential.P12CertData := GoogleCalenderLoginInfo.P12PrimaryKeyData;
     GoogleCalenderLoginInfo.Free;
@@ -132,7 +132,7 @@ begin
   event := TEvent.Create;
   event.Summary := AEvent.Hasta;
   event.Location := AEvent.Konum;
-//  event.Description := Format('Açýklama: %1:s%0:s%0:sHasta Telefonu: %2:s%0:sBolum Id: %3:s',
+//  event.Description := Format('AÃ§Ä±klama: %1:s%0:s%0:sHasta Telefonu: %2:s%0:sBolum Id: %3:s',
 //    [sLineBreak, AEvent.aciklama, AEvent.Tel, AEvent.BolumId]);
   event.Description := Aevent.aciklama;
 

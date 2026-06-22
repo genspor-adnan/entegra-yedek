@@ -1,4 +1,4 @@
-unit UHizliGirisPDKSDurum;
+﻿unit UHizliGirisPDKSDurum;
 
 interface
 

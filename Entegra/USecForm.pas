@@ -1,4 +1,4 @@
-unit USecForm;
+﻿unit USecForm;
 
 interface
 
@@ -69,7 +69,7 @@ end;
 
 procedure TSecimDlg.FormCreate(Sender: TObject);
 begin
-LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TSecimDlg.FormShow(Sender: TObject);

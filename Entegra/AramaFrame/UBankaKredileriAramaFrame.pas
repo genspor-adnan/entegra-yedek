@@ -1,4 +1,4 @@
-unit UBankaKredileriAramaFrame;
+﻿unit UBankaKredileriAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:06:08}
@@ -53,7 +53,7 @@ implementation
 
 procedure TBankaKredileriAramaFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TBankaKredileriAramaFrame.btnSilClick(Sender: TObject);

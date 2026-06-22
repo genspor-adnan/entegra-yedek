@@ -1,4 +1,4 @@
-unit GoogleApis.Persister;
+﻿unit GoogleApis.Persister;
 
 interface
 

@@ -1,4 +1,4 @@
-unit UTeklifGorevFrame;
+ï»¿unit UTeklifGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -37,7 +37,7 @@ type
 
   public
     { Public declarations }
-      FAltTur : SmallInt;    //Tur: Verilen:80,SatýnALma:81
+      FAltTur : SmallInt;    //Tur: Verilen:80,SatÄ±nALma:81
 
   published
     property FrameBilgi : TAnaFrameBilgi read FFrameBilgi write SetFrameBilgi;
@@ -125,7 +125,7 @@ end;
 procedure TTeklifGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   btnVerilenTeklif.Visible := Tablo.YetkiVarmi(2901,YetkiTur_Gorme);
  // btnSatinAlmaTeklif.Visible := Tablo.YetkiVarmi(2911,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(2999,YetkiTur_Gorme);

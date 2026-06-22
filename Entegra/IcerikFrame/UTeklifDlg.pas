@@ -1,4 +1,4 @@
-unit UTeklifDlg;
+﻿unit UTeklifDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:10}

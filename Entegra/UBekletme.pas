@@ -1,4 +1,4 @@
-
+ï»¿
 unit UBekletme;
 
 interface
@@ -27,7 +27,7 @@ type
     function BaslikDegis(baslik: string): boolean;
     function KonumDegis(miktar: integer): boolean;
     function EtiketDegis(etiket: string): boolean;
-    function KonumArtýr(miktar: integer): boolean;
+    function KonumArtÄ±r(miktar: integer): boolean;
   end;
 
 var
@@ -50,7 +50,7 @@ end;
 
 procedure TBekletmeDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
 
  { cxProgressBar1.Properties.Min := 0;
@@ -63,7 +63,7 @@ begin
 
 end;
 
-function TBekletmeDlg.KonumArtýr(miktar: integer): boolean;
+function TBekletmeDlg.KonumArtÄ±r(miktar: integer): boolean;
 begin
   cxProgressBar1.Position := cxProgressBar1.Position + miktar;
   Result := True;

@@ -1,4 +1,4 @@
-unit FetaFile;
+ï»¿unit FetaFile;
 
 interface
 
@@ -40,10 +40,10 @@ begin
   GetMem(CopyBuffer, ChunkSize); { allocate the buffer }
   try
     Source := FileOpen(FileName, fmShareDenyWrite); { open source file }
-    if Source < 0 then raise EFOpenError.Create('Kurulum Hatasý 1');
+    if Source < 0 then raise EFOpenError.Create('Kurulum HatasÄ± 1');
     try
       Dest := FileCreate(Destination); { create output file; overwrite existing }
-      if Dest < 0 then raise EFCreateError.Create('Kurulum Hatasý 2');
+      if Dest < 0 then raise EFCreateError.Create('Kurulum HatasÄ± 2');
       try
         repeat
           BytesCopied := FileRead(Source, CopyBuffer^, ChunkSize); { read chunk }

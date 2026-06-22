@@ -1,4 +1,4 @@
-unit UVardiyaTanimlariDlg;
+ï»¿unit UVardiyaTanimlariDlg;
 
 interface
 
@@ -111,7 +111,7 @@ end;
 procedure TVardiyaTanimlariDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if TabVardiya.State in [dsInsert, dsEdit] then begin
-     if  Application.MessageBox('Vardiya tanýmlarý kayýt edilsin mi?',PChar(Uyari),MB_YESNO )= mrNo then
+     if  Application.MessageBox('Vardiya tanÄ±mlarÄ± kayÄ±t edilsin mi?',PChar(Uyari),MB_YESNO )= mrNo then
        exit
      else
        TabVardiya.Post;
@@ -136,7 +136,7 @@ begin
     ComboYil.EditText := intToStr(YearOf(Date));
     VardiyaTanimTVGUN.Visible:=True;
   end;
-  Caption:= Tablo.AciklamaGetir('REHBER', 'FIRMA', RehberId) +'  Vardiya Tanýmlarý' ;
+  Caption:= Tablo.AciklamaGetir('REHBER', 'FIRMA', RehberId) +'  Vardiya TanÄ±mlarÄ±' ;
 
   TabVardiya.Close;
   TabVardiya.SQL.Text := ' Select * from PERS_VARDIYATANIM Where REHBERID='+IntToStr(RehberId)+' '+VardiyaTuruS+' ';
@@ -161,9 +161,9 @@ begin
           TabVardiya.FieldByName('CIKIS').Value := '1900-01-01 18:00:00';
           case i of
             2: TabVardiya.FieldByName('GUNADI').AsString:='Pazartesi';
-            3: TabVardiya.FieldByName('GUNADI').AsString:='Salý';
-            4: TabVardiya.FieldByName('GUNADI').AsString:='Çarþamba';
-            5: TabVardiya.FieldByName('GUNADI').AsString:='Perþembe';
+            3: TabVardiya.FieldByName('GUNADI').AsString:='SalÄ±';
+            4: TabVardiya.FieldByName('GUNADI').AsString:='Ã‡arÅŸamba';
+            5: TabVardiya.FieldByName('GUNADI').AsString:='PerÅŸembe';
             6: TabVardiya.FieldByName('GUNADI').AsString:='Cuma';
             7: TabVardiya.FieldByName('GUNADI').AsString:='Cumartesi';
             1: TabVardiya.FieldByName('GUNADI').AsString:='Pazar';

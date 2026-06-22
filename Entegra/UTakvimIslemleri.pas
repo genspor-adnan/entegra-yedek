@@ -1,4 +1,4 @@
-unit UTakvimIslemleri;
+ï»¿unit UTakvimIslemleri;
 interface
 
 uses cxButtonEdit, cxTextEdit, cxLabel,cxDBEdit,cxImage, Data.DB, SysUtils, Forms, WinTypes, Classes;
@@ -26,8 +26,8 @@ procedure DurumListele(var ComboDURUM:TcxDBImageComboBox; List : TstringList);
 
 procedure RehberBilgileri(RehberId : String; var LabelCariKod : TcxLabel; LabelCariAd : TcxLabel);
 begin
-  //Müþteri bölümü
-   //RehberId den kod ve adý bulup getirelim
+  //MÃ¼ÅŸteri bÃ¶lÃ¼mÃ¼
+   //RehberId den kod ve adÄ± bulup getirelim
    if RehberId<>'' then begin
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select KOD, FIRMA from REHBER where ID= '+RehberId;
@@ -40,7 +40,7 @@ end;
 
 procedure MasrafBilgileri(MasrafId : String; var LabelMasrafKod : TcxLabel; LabelMasrafAd : TcxLabel);
 begin
-  //Ýþlem bölümü
+  //Ä°ÅŸlem bÃ¶lÃ¼mÃ¼
    if MasrafId<>'' then begin
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select KOD, AD from MASRAFGELIR where ID= '+MasrafId;

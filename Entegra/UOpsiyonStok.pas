@@ -1,4 +1,4 @@
-unit UOpsiyonStok;
+ï»¿unit UOpsiyonStok;
 
 interface
 
@@ -487,11 +487,11 @@ procedure TOpsiyonStokDlg.RadioStokMaliyetPropertiesEditValueChanged(Sender: TOb
 begin
 //triggerlar? kapat?p a??caz..  0/1/2
   if RadioStokMaliyet.itemindex=1 then begin//ortalama maliyet
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'alter table FATBASLIK enable trigger TG_MaliyetGuncelle',[],[]);
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'alter table FATURA enable trigger TG_StokFiyatGuncelle',[],[]);
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'alter table FATBASLIK enable trigger TG_MaliyetGuncelle',[],[]);
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'alter table FATURA enable trigger TG_StokFiyatGuncelle',[],[]);
   end else begin
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'alter table FATBASLIK disable trigger TG_MaliyetGuncelle',[],[]);
-       veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'alter table FATURA disable trigger TG_StokFiyatGuncelle',[],[]);
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'alter table FATBASLIK disable trigger TG_MaliyetGuncelle',[],[]);
+       veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'alter table FATURA disable trigger TG_StokFiyatGuncelle',[],[]);
   end;
 end;
 
@@ -510,7 +510,7 @@ begin
     tabDepolar.Open;
   end;
   if RadioStokMaliyet.ItemIndex = 2 then
-     veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'TRUNCATE TABLE STOK_ORT_MALIYET',[],[]);
+     veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'TRUNCATE TABLE STOK_ORT_MALIYET',[],[]);
   Tablo.TablodanSorguAc(0,'select ID from STOKLAR where DURUM = 1');
 
   if BekletDlg <> nil then
@@ -526,9 +526,9 @@ begin
     while not tabDepolar.Eof do begin
 
       if RadioStokMaliyet.ItemIndex = 2 then
-         veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'exec P_StokMaliyetGuncelleFIFO '+Tablo.Query0.Fields[0].AsString+','+tabDepolar.FieldByName('ID').AsString+',''2000-01-01 00:00'' ',[],[])
+         veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'exec P_StokMaliyetGuncelleFIFO '+Tablo.Query0.Fields[0].AsString+','+tabDepolar.FieldByName('ID').AsString+',''2000-01-01 00:00'' ',[],[])
       else if RadioStokMaliyet.ItemIndex = 1 then
-        veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'exec P_StokMaliyetGuncelleORT '+Tablo.Query0.Fields[0].AsString+','+tabDepolar.FieldByName('ID').AsString+',''2000-01-01 00:00'' ',[],[]);
+        veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'exec P_StokMaliyetGuncelleORT '+Tablo.Query0.Fields[0].AsString+','+tabDepolar.FieldByName('ID').AsString+',''2000-01-01 00:00'' ',[],[]);
       tabDepolar.Next;
     end;
     Tablo.Query0.Next;
@@ -676,10 +676,10 @@ begin
   if TGirisKutusuEx.BilgiAlEx(BGBoyut_tanimi, TGirdiDenetimleri.Create.Edit(BGBoyut_adi, @BAd)) = mrOk then begin
     Tablo.TablodanSorguAc(9,'select convert(nvarchar(9),(isnull(min(DEGER),-27990000)-1)) from GENINI where BOLUM = 0 and DEGER like ''-2799____''');
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL)values(0,'''+BAd+''','+Tablo.Query9.Fields[0].AsString+','+IntToStr(Dil)+')  ',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL)values(0,'''+BAd+''','+Tablo.Query9.Fields[0].AsString+','+IntToStr(Dil)+')  ',[],[]);
     if not Tablo.GeniniBaslat(Tablo.Query9.Fields[0].asInteger) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM='+Tablo.Query9.Fields[0].AsString,[],[]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER='+Tablo.Query9.Fields[0].AsString,[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM='+Tablo.Query9.Fields[0].AsString,[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER='+Tablo.Query9.Fields[0].AsString,[],[]);
     end else begin
       TabloYenile(TabStokBoyutlar,[Dil]);
       Tablo.RepStokBoyutlar.Properties.Items := tablo.imgComboboxInit('select DEGER,ANAHTAR from GENINI where BOLUM=0 and DEGER like ''-2799____'' and DIL='+IntToStr(Dil)).Items;
@@ -690,8 +690,8 @@ end;
 procedure TOpsiyonStokDlg.ToolButton3Click(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM='+TabStokBoyutlar.FieldByName('DEGER').AsString,[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER='+TabStokBoyutlar.FieldByName('DEGER').AsString,[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM='+TabStokBoyutlar.FieldByName('DEGER').AsString,[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER='+TabStokBoyutlar.FieldByName('DEGER').AsString,[],[]);
     TabloYenile(TabStokBoyutlar,[Dil]);
     Tablo.RepStokBoyutlar.Properties.Items := tablo.imgComboboxInit('select DEGER,ANAHTAR from GENINI where BOLUM=0 and DEGER like ''-2799____'' and DIL='+IntToStr(Dil)).Items;
   end;

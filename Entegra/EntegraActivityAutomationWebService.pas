@@ -1,4 +1,4 @@
-// ************************************************************************ //
+﻿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
 // WSDL     : http://78.187.231.166:1111/es/EntegraActivityAutomationWebService.asmx?WSDL

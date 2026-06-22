@@ -1,4 +1,4 @@
-unit UProjeListeAramaFrame;
+ï»¿unit UProjeListeAramaFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 04/12/2010 13:46:20 }
@@ -123,7 +123,7 @@ begin
     SQL :=' and REHBERID='+inttostr(AraFirma.Tag)+' ORDER BY 1'
   else
     SQL := ' ';
-  if Tablo.ListedenBilgiGetir('Ýlgili seçimi yapýnýz.','select ID,ADSOYAD from REHBERPERSONEL Where ADSOYAD like ''%<ara>%'' '+SQL,st,[]) then begin
+  if Tablo.ListedenBilgiGetir('Ä°lgili seÃ§imi yapÄ±nÄ±z.','select ID,ADSOYAD from REHBERPERSONEL Where ADSOYAD like ''%<ara>%'' '+SQL,st,[]) then begin
     AraYetkili.Tag:=StrToInt(st.Strings[0]);
     AraYetkili.Text:=st.Strings[1];
   end;
@@ -135,7 +135,7 @@ end;
 
 procedure TProjeListeAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    YenileTus.Click;
 end;
 

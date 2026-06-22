@@ -1,4 +1,4 @@
-unit UAlanlar;
+ï»¿unit UAlanlar;
 
 interface
 
@@ -111,9 +111,9 @@ end;
 
 procedure TAlanlarDlg.btnSilTusClick(Sender: TObject);
 begin
- if Application.MessageBox(PChar(TabAlanlar.FieldByName('CAPTION').AsString+' alanýný silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
+ if Application.MessageBox(PChar(TabAlanlar.FieldByName('CAPTION').AsString+' alanÄ±nÄ± silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
    try
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' Alter table '+TabAlanlar.FieldByName('TABLO').AsString+' drop column '+TabAlanlar.FieldByName('ALANADI').AsString+' ',[],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' Alter table '+TabAlanlar.FieldByName('TABLO').AsString+' drop column '+TabAlanlar.FieldByName('ALANADI').AsString+' ',[],[]);
    except
    end;
    TabAlanlar.delete;
@@ -135,7 +135,7 @@ end;
 
 procedure TAlanlarDlg.FormCreate(Sender: TObject);
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    Tablo.GridTurkcelestir;
 end;
 
@@ -150,7 +150,7 @@ begin
           DataType := ftString;
           ParamType := ptInput;
         end;
-      TabAlanlar.ParamByName('Par1').AsString := 'EklemeYapýlýyor.'; // Liste bos gorunsun diye olmayan ekran adini yaziyoruz.
+      TabAlanlar.ParamByName('Par1').AsString := 'EklemeYapÄ±lÄ±yor.'; // Liste bos gorunsun diye olmayan ekran adini yaziyoruz.
       TabAlanlar.Open;
       Tablo.TablodanSorguAc(2,'Select max(isnull(TAG,0))+1 as TAG from ALANLAR');
       TagGetir := Tablo.Query2.FieldByName('TAG').AsInteger;
@@ -186,7 +186,7 @@ begin
 
   try
     if not(TabAlanlar.FieldByName('TUR').AsInteger in [11,12])  then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'if not exists(select * from sys.columns where object_id=object_id('''+TabAlanlar.FieldByName('TABLO').AsString+''') and name='''+TabAlanlar.FieldByName('ALANADI').AsString+''' ) begin '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'if not exists(select * from sys.columns where object_id=object_id('''+TabAlanlar.FieldByName('TABLO').AsString+''') and name='''+TabAlanlar.FieldByName('ALANADI').AsString+''' ) begin '+
        ' Alter Table '+TabAlanlar.FieldByName('TABLO').AsString+' ADD '+TabAlanlar.FieldByName('ALANADI').AsString+s+' end ',[],[]);
 
   except
@@ -265,7 +265,7 @@ procedure TAlanlarDlg.TvAlanIcerikPropertiesButtonClick(Sender: TObject; AButton
 begin
   if TabAlanlar.FieldByName('TUR').AsInteger in [4,6,8,9] then begin
      if Trim(TabAlanlar.FieldByName('CAPTION').AsString) = '' then
-        showmessage('Etiket alanýna Liste adýný yazýn..')
+        showmessage('Etiket alanÄ±na Liste adÄ±nÄ± yazÄ±n..')
      else begin
         Tablo.TablodanSorguAc(7,'select DEGER from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and ANAHTAR='''+TabAlanlar.FieldByName('CAPTION').AsString+'''');
         Tablo.GeniniBaslat(Tablo.Query7.Fields[0].AsInteger, TabAlanlar.FieldByName('CAPTION').AsString);
@@ -277,7 +277,7 @@ procedure TAlanlarDlg.TvAlanTuruPropertiesCloseUp(Sender: TObject);
 begin
   //TabAyar.FieldByName('KAYNAK').AsString:='';
   if TvAlanTuru.EditValue=10 then
-    TvAlanIcerik.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiðinde yada boþ olduðunda hata vermesi engellendi.
+    TvAlanIcerik.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiÄŸinde yada boÅŸ olduÄŸunda hata vermesi engellendi.
 end;
 
 end.

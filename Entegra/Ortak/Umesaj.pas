@@ -1,4 +1,4 @@
-unit UMesaj;
+﻿unit UMesaj;
 
 interface
 
@@ -154,7 +154,7 @@ end;
 
 procedure TMesajForm.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TMesajForm.FormShow(Sender: TObject);

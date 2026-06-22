@@ -1,10 +1,10 @@
-unit USabitler;
+ï»¿unit USabitler;
 
 {
 
   21-01-2008
-  Proje içinde kullanacaðýmýz sabitle bu modulde tanýmlanmýþtýr
-  Hakan Arslantaþ
+  Proje iÃ§inde kullanacaÄŸÄ±mÄ±z sabitle bu modulde tanÄ±mlanmÄ±ÅŸtÄ±r
+  Hakan ArslantaÅŸ
 
 }
 
@@ -19,7 +19,7 @@ const
   Modul2 = 'Ameliyat';
   Modul3 = 'Anket';
   Modul4 = 'Diyaliz';
-  Modul5 = 'DoðanBebek';
+  Modul5 = 'DoÄŸanBebek';
   Modul6 = 'Evrak Defteri';
   Modul7 = 'Evrak Takip';
   Modul8 = 'Fatura Takip';
@@ -31,12 +31,12 @@ const
   Modul14 = 'Genspor';
   Modul15 = 'Gentegre';
   Modul16 = 'Giykimbil';
-  Modul17 = 'Hýzlý Giriþ';
+  Modul17 = 'HÄ±zlÄ± GiriÅŸ';
   Modul18 = 'KamuLab';
-  Modul19 = 'Kayýtkabul';
+  Modul19 = 'KayÄ±tkabul';
   Modul20 = 'Kullanan';
   Modul21 = 'Lab';
-  Modul22 = 'LIS - Cihaz baðlantýsý';
+  Modul22 = 'LIS - Cihaz baÄŸlantÄ±sÄ±';
   Modul23 = 'LISNET';
   Modul24 = 'Medula Entegrasyon';
   Modul25 = 'Muayene';
@@ -45,13 +45,13 @@ const
   Modul28 = 'Randevu';
   Modul29 = 'Servis';
   Modul30 = 'Stok';
-  Modul31 = 'Sýramatik';
-  Modul32 = 'Tüp Bebek';
-  Modul33 = 'Yönlendirme';
-  Modul34 = 'Ýþyeri Hekimliði';
+  Modul31 = 'SÄ±ramatik';
+  Modul32 = 'TÃ¼p Bebek';
+  Modul33 = 'YÃ¶nlendirme';
+  Modul34 = 'Ä°ÅŸyeri HekimliÄŸi';
   Modul35 = 'Magic SAS';
   Modul36 = 'Muhasebe Entegrasyonu';
-  Modul37 = 'Satýnalma';
+  Modul37 = 'SatÄ±nalma';
   (* -END- MODUL KOD Listesi*)
 
   DBInfo = 'DBInfo';

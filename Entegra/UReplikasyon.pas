@@ -1,4 +1,4 @@
-unit UReplikasyon;
+ï»¿unit UReplikasyon;
 
 interface
 uses FireDAC.Comp.Client, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
@@ -92,7 +92,7 @@ uses PrjConst, LocOnFly;
 
 procedure TReplikasyonDlg.BtnEntCnnClick(Sender: TObject);
 begin
-   //baðlantý oluþturulacak ve baðlanýrsa;
+   //baÄŸlantÄ± oluÅŸturulacak ve baÄŸlanÄ±rsa;
    CNNEntegra.ConnectionString:=Tablo.FDCnn.ConnectionString;
    CNNEntegra.Connected:=True;
    if CNNGenotip.Connected And CNNEntegra.Connected then
@@ -103,7 +103,7 @@ end;
 
 procedure TReplikasyonDlg.BtnGenCnnClick(Sender: TObject);
 begin
-   //baðlantý oluþturulacak ve baðlanýrsa;
+   //baÄŸlantÄ± oluÅŸturulacak ve baÄŸlanÄ±rsa;
    Tablo.DBConnect(CNNGenotip);
    if CNNGenotip.Connected And CNNEntegra.Connected then
      cxGroupBox3.Enabled:=True
@@ -140,9 +140,9 @@ begin
   i:=0;
   if cxImageComboBox1.Text = RGenotipdanRehberAl then  begin
     TabAktarilacak.first;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       try
         if cxGrid1DBTableView1NAME.EditValue=True then begin
           if RehberSatiriniAl(TabAktarilacak.FieldByName('KOD').AsString,CnnStrGenotip,CnnStrEntegra) then
@@ -157,9 +157,9 @@ begin
   end
   else if cxImageComboBox1.Text = RGenotipeRehberVer then  begin
     TabAktarilacak.first;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       try
         if cxGrid1DBTableView1NAME.EditValue=True then begin
           if RehberSatiriniVer(TabAktarilacak.FieldByName('KOD').AsString,CnnStrGenotip,CnnStrEntegra) then
@@ -174,9 +174,9 @@ begin
   end
   else if cxImageComboBox1.Text = RGenotipdanStokFaturasiAl then  begin
     TabAktarilacak.first;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       try
         if cxGrid1DBTableView1NAME.EditValue=True then begin
           if StokFaturasiAl(TabAktarilacak.FieldByName('GIRNO').AsInteger,True,True,CnnStrGenotip,CnnStrEntegra) then
@@ -191,12 +191,12 @@ begin
   end
   else if cxImageComboBox1.Text =RGentegreDevirCariBankaKasa then  begin
     TabAktarilacak.first;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       try
         if cxGrid1DBTableView1NAME.EditValue=True then begin
-        //kod ve kur a göre
+        //kod ve kur a gÃ¶re
           if DevirBankaKasaCari(TabAktarilacak.FieldByName('KOD').AsString,TabAktarilacak.FieldByName('KUR').AsString,True,True,CnnStrGenotip,CnnStrEntegra) then
              cxGrid1DBTableView1NAME.EditValue:=True
           Else
@@ -209,9 +209,9 @@ begin
   end
   else if cxImageComboBox1.Text = RGentegreDevirCekSenet then  begin
     TabAktarilacak.first;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       try
         if cxGrid1DBTableView1NAME.EditValue=True then begin
           if DevirBankaCekSenet(TabAktarilacak.FieldByName('ANAHTAR').AsInteger,True,True,CnnStrGenotip,CnnStrEntegra) then
@@ -224,7 +224,7 @@ begin
       end;
     End;
   end
-  else if cxImageComboBox1.Text = RGentegreDevirCariYýlDetay then begin
+  else if cxImageComboBox1.Text = RGentegreDevirCariYÄ±lDetay then begin
     Tablo.Query1.Close;
     Tablo.Query1.Connection:=Tablo.FDCnn;
     Tablo.Query1.SQL.Text:=' select VirmanDurum=reverse(substring(REVERSE(ACIKLAMA),1,3)),  '
@@ -232,7 +232,7 @@ begin
               +' CARIKOD=isnull(CARIKOD,''''),CARIAD, '
               +' HESAPKODU=isnull(HESAPKODU,''''),HESAPADI, '
               +' BORC,CIKAN,KUR,MASRAFKOD,MASRAFAD,KURDEF=isnull(KUR,''TL'') '
-              +' from KASA where  year(TARIH)=Year(GetDate()) AND ACIKLAMA <>''DEVÝR'' ';
+              +' from KASA where  year(TARIH)=Year(GetDate()) AND ACIKLAMA <>''DEVÄ°R'' ';
     Tablo.Query1.Open;
     Tablo.Query1.First;
     while not Tablo.Query1.Eof do begin
@@ -287,10 +287,10 @@ Begin
       Except
         masrafid:=0
       end;
-      //iþlem türünü bulalým..;
-      if Tablo.Query1.FieldByName('VirmanDurum').AsString = '<--' then begin    //çýkan virmandaki
+      //iÅŸlem tÃ¼rÃ¼nÃ¼ bulalÄ±m..;
+      if Tablo.Query1.FieldByName('VirmanDurum').AsString = '<--' then begin    //Ã§Ä±kan virmandaki
         tur:=0;
-        //virman durumlarý
+        //virman durumlarÄ±
         if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='100' then begin //kasadan
            Tablo.Query4.Close;
            Tablo.Query4.Connection:=Tablo.FDCnn;
@@ -298,11 +298,11 @@ Begin
            Tablo.Query4.Open;
            if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='100' then begin //kasadan kasaya
              tur:=40;
-             //kur deðiþtirme durumlarýnda;
+             //kur deÄŸiÅŸtirme durumlarÄ±nda;
              if Tablo.Query1.FieldByName('KURDEF').AsString <> Tablo.Query4.FieldByName('KURDEF').AsString then begin
-               if Tablo.Query1.FieldByName('KURDEF').AsString='TL' then begin  // TL ile döviz alýnmýþ
+               if Tablo.Query1.FieldByName('KURDEF').AsString='TL' then begin  // TL ile dÃ¶viz alÄ±nmÄ±ÅŸ
                  tur:= 45;
-               end Else begin  // döviz bozdurulmuþ
+               end Else begin  // dÃ¶viz bozdurulmuÅŸ
                  tur:= 46;
                end;
              end;
@@ -318,30 +318,30 @@ Begin
              tur:=42;
            end else if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='102' then begin //bankadan bankaya
              tur:=43;
-             //kur deðiþtirme durumlarýnda;
+             //kur deÄŸiÅŸtirme durumlarÄ±nda;
              if Tablo.Query1.FieldByName('KURDEF').AsString <> Tablo.Query4.FieldByName('KURDEF').AsString then begin
-               if Tablo.Query1.FieldByName('KURDEF').AsString='TL' then begin // TL ile döviz alýnmýþ
+               if Tablo.Query1.FieldByName('KURDEF').AsString='TL' then begin // TL ile dÃ¶viz alÄ±nmÄ±ÅŸ
                  tur:= 47;
-               end Else begin  // döviz bozdurulmuþ
+               end Else begin  // dÃ¶viz bozdurulmuÅŸ
                  tur:= 48;
                end;
              end;
            end;
         end;
       end Else if Tablo.Query1.FieldByName('VirmanDurum').AsString = '-->' then begin   //BORC virmandaki
-        // virmandaki ikinci satýr bu bölüm birþey yapýlmadan geçilir.. iþlem zaten üst tarafta yapýldý..
+        // virmandaki ikinci satÄ±r bu bÃ¶lÃ¼m birÅŸey yapÄ±lmadan geÃ§ilir.. iÅŸlem zaten Ã¼st tarafta yapÄ±ldÄ±..
         exit;
-      end Else begin   // virman deðil ise;
+      end Else begin   // virman deÄŸil ise;
         if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='100' then begin //kasadan
-           if Tablo.Query1.FieldByName('BORC').AsInteger>0 then begin //kasaya para giriþi
+           if Tablo.Query1.FieldByName('BORC').AsInteger>0 then begin //kasaya para giriÅŸi
              tur:=21
-           end Else if Tablo.Query1.FieldByName('ALACAK').AsInteger>0 then begin //kasadan para çýkýþý
+           end Else if Tablo.Query1.FieldByName('ALACAK').AsInteger>0 then begin //kasadan para Ã§Ä±kÄ±ÅŸÄ±
              tur:=31
            end;
-        end Else if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='102' then begin //bankadan   (BORC yada çýkan)
-           if Tablo.Query1.FieldByName('BORC').AsInteger>0 then begin //kasaya para giriþi
+        end Else if Copy(Tablo.Query1.FieldByName('HESAPKODU').AsString,0,3)='102' then begin //bankadan   (BORC yada Ã§Ä±kan)
+           if Tablo.Query1.FieldByName('BORC').AsInteger>0 then begin //kasaya para giriÅŸi
              tur:=22
-           end Else if Tablo.Query1.FieldByName('ALACAK').AsInteger>0 then begin //kasadan para çýkýþý
+           end Else if Tablo.Query1.FieldByName('ALACAK').AsInteger>0 then begin //kasadan para Ã§Ä±kÄ±ÅŸÄ±
              tur:=32
            end;
         end;
@@ -360,7 +360,7 @@ Begin
                              +Tablo.Query1.FieldByName('ACIKLAMA').AsString+''','+IntToStr(SubeId)+',0,''TL'')'
                              +' select SCOPE_IDENTITY()';
       Tablo.Query2.Open;
-      if tur in [40..48] then begin //virmanlar için ikinci satýr insert
+      if tur in [40..48] then begin //virmanlar iÃ§in ikinci satÄ±r insert
         Tablo.Query5.Close;
         Tablo.Query5.Connection:=Tablo.FDCnn;
         Tablo.Query5.SQL.Text := 'INSERT INTO KASA (TUR,ISLEMTARIHI,REHBERID,HESAPID,MASRAFID,BORC,ALACAK,KUR,ACIKLAMA,GERIDONUSID,SUBEID,DOVIZ_TUTARI,DOVIZ_KURU) VALUES ( '
@@ -478,7 +478,7 @@ Begin
       end;
     end Else begin
         Result := true;
-//        ShowMessage('Faturanýn Entegra kaydý bulunamadý.');
+//        ShowMessage('FaturanÄ±n Entegra kaydÄ± bulunamadÄ±.');
     end;
   Except
     ShowMessage(REntegraFaturaSilmeHatasi);
@@ -508,7 +508,7 @@ Begin
   try
     HizliConnection(GenoCnn,EntegCnn);
     if True then begin
-      if Copy((Kod),0,3)  ='100' then begin  //kasa kayýtlarý
+      if Copy((Kod),0,3)  ='100' then begin  //kasa kayÄ±tlarÄ±
         try
           Tablo.Query2.Close;
           Tablo.Query2.Connection:=Tablo.FDCnn;
@@ -516,7 +516,7 @@ Begin
                 +TabAktarilacak.FieldByName('KOD').AsString+''','''
                 +TabAktarilacak.FieldByName('AD').AsString+''','''
                 +TabAktarilacak.FieldByName('KUR').AsString+''','''
-                +'Gentegre Aktarýmý'',1,'+IntToStr(SubeId)+') '
+                +'Gentegre AktarÄ±mÄ±'',1,'+IntToStr(SubeId)+') '
                 +' select SCOPE_IDENTITY()';
           Tablo.Query2.Open;
         Except
@@ -531,10 +531,10 @@ Begin
               +Tablo.Query2.Fields[0].AsString+','
               +TabAktarilacak.FieldByName('BORC').AsString+','
               +TabAktarilacak.FieldByName('ALACAK').AsString+','''
-              +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''Açýlýþ Fiþi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
+              +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''AÃ§Ä±lÄ±ÅŸ FiÅŸi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
               +' select SCOPE_IDENTITY()';
         Tablo.Query3.Open;
-      end else if Copy((Kod),0,3)='102' then begin  //banka hesaplarý
+      end else if Copy((Kod),0,3)='102' then begin  //banka hesaplarÄ±
         try
           Tablo.Query2.Close;
           Tablo.Query2.Connection:=Tablo.FDCnn;
@@ -557,7 +557,7 @@ Begin
               +'0'+','
               +TabAktarilacak.FieldByName('BORC').AsString+','
               +TabAktarilacak.FieldByName('ALACAK').AsString+','''
-              +TabAktarilacak.FieldByName('KUR').AsString+''',''B'',-1,''Açýlýþ Fiþi'',1,0,-1,-1,-1,-1,0,'''','+IntToStr(SubeId)+')'
+              +TabAktarilacak.FieldByName('KUR').AsString+''',''B'',-1,''AÃ§Ä±lÄ±ÅŸ FiÅŸi'',1,0,-1,-1,-1,-1,0,'''','+IntToStr(SubeId)+')'
               +' select SCOPE_IDENTITY()';
         Tablo.Query3.Open;
       end else if Copy((Kod),0,3)='120' then begin
@@ -574,7 +574,7 @@ Begin
               +'0'+','
               +TabAktarilacak.FieldByName('BORC').AsString+','
               +TabAktarilacak.FieldByName('ALACAK').AsString+','''
-              +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''Açýlýþ Fiþi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
+              +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''AÃ§Ä±lÄ±ÅŸ FiÅŸi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
               +' select SCOPE_IDENTITY()';
           Tablo.Query3.Open;
         End;
@@ -592,7 +592,7 @@ Begin
                 +Tablo.Query2.Fields[0].AsString+','
                 +TabAktarilacak.FieldByName('BORC').AsString+','
                 +TabAktarilacak.FieldByName('ALACAK').AsString+','''
-                +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''Açýlýþ Fiþi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
+                +TabAktarilacak.FieldByName('KUR').AsString+''',''K'',-1,''AÃ§Ä±lÄ±ÅŸ FiÅŸi'',1,0,'+IntToStr(SubeId)+',0,''TL'')'
                 +' select SCOPE_IDENTITY()';
           Tablo.Query3.Open;
         End;
@@ -648,7 +648,7 @@ Begin
        Tablo.Query1.Open;
        Tablo.Query1.FetchAll;
        if Tablo.Query1.RecordCount<>1 then
-          raise Exception.Create(inttostr(Tablo.Query1.RecordCount)+' tane kayýt var!!!');
+          raise Exception.Create(inttostr(Tablo.Query1.RecordCount)+' tane kayÄ±t var!!!');
        if Tablo.Query1.FieldByName('YERI').AsString<>'' then begin
          Tablo.Query3.Close;
          Tablo.Query3.Connection:=Tablo.FDCnn;
@@ -701,7 +701,7 @@ Begin
        Tablo.Query2.ParamByName('PKOD').Value            := StokKod;
        Tablo.Query2.ParamByName('PSTOKADI').Value        := Tablo.Query1.FieldByName('STOKADI').AsString;
        Tablo.Query2.ParamByName('PGRUBU').Value          := GeninidenAnahtarGetir(Ops_StokKart_Grubu,Tablo.Query1.FieldByName('GRUBU').AsInteger);  // StokKart_Grubu
-       Tablo.Query2.ParamByName('POZELLIK').Value        := GeninidenAnahtarGetir(Ops_StokKart_Ozellik,Tablo.Query1.FieldByName('OZELLIK').AsInteger);   //  StokKart_Özellik
+       Tablo.Query2.ParamByName('POZELLIK').Value        := GeninidenAnahtarGetir(Ops_StokKart_Ozellik,Tablo.Query1.FieldByName('OZELLIK').AsInteger);   //  StokKart_Ã–zellik
        Tablo.Query2.ParamByName('POZELKOD').Value        := Tablo.Query1.FieldByName('OZELKOD').AsString;
        Tablo.Query2.ParamByName('PBUTCEKODU').Value      := '';
        Tablo.Query2.ParamByName('PMUHKODU').Value        := Tablo.Query1.FieldByName('MUHKODU').AsString;
@@ -742,7 +742,7 @@ Begin
     Tablo.Query1.SQL.Text:='select * from STOKKART where KOD='''+StokKod+'';
     Tablo.Query1.Open;
      if Tablo.Query1.RecordCount<>1 then
-        raise Exception.Create(inttostr(Tablo.Query1.RecordCount)+' tane kayýt var!!!');
+        raise Exception.Create(inttostr(Tablo.Query1.RecordCount)+' tane kayÄ±t var!!!');
      if Tablo.Query1.FieldByName('YERI').AsString<>'' then begin
        Tablo.Query3.Close;
        Tablo.Query3.Connection:=Tablo.FDCnn;
@@ -814,7 +814,7 @@ Begin
       Tablo.Query1.sql.text:= 'select KURDEF= case when ISNULL(KUR,'''')='''' then ''TL'' ELSE KUR END,* from KASA '
           +' where SIRANO = '+inttostr(GirNo);
       Tablo.Query1.Open;
-      //rehberid sini bulalým
+      //rehberid sini bulalÄ±m
       Tablo.Query3.Close;
       Tablo.Query3.Connection:=Tablo.FDCnn;
       Tablo.Query3.sql.text:= 'select ID from REHBER '
@@ -890,7 +890,7 @@ begin
     if True then begin
      HizliConnection(GenoCnn,EntegCnn);
      //****************************************************
-     (*                     Fatbaþlýk                    *)
+     (*                     FatbaÅŸlÄ±k                    *)
      //****************************************************
       Tablo.Query1.Close;
       Tablo.Query1.Connection:=Tablo.FDCnn;
@@ -930,7 +930,7 @@ begin
                             +',:PMASRAFID,:PACIKLAMA,:PDURUM,:PODEMEPLANI '
                             +',:PEKLEYEN,:OZELKOD,:SUBEID) select SCOPE_IDENTITY() ';
       Tablo.Query2.Params[0].Value := FormatDateTime('yyyy-mm-dd hh:nn',Bugun);  //tarih
-      Tablo.Query2.Params[1].Value := 11;                                                          // tür
+      Tablo.Query2.Params[1].Value := 11;                                                          // tÃ¼r
       Tablo.Query2.Params[2].Value := RehID;                                                       //rehberid
       Tablo.Query2.Params[3].Value := FormatDateTime('yyyy-mm-dd hh:nn',Tablo.Query1.FieldByName('BELGETARIH').AsDateTime); //fattarih
       Tablo.Query2.Params[4].Value := Tablo.Query1.FieldByName('BELGENO').AsInteger;
@@ -949,13 +949,13 @@ begin
         Vergino:=TabBizim.FieldByName('VERGINO').AsInteger;
       Tablo.Query2.Params[10].Value := Vergino;
       Tablo.Query2.Params[11].Value := 0;         //kdv
-      Tablo.Query2.Params[12].Value := Tablo.Query1.FieldByName('TUTAR').AsCurrency;  //top tutar, diðerleri satýrlarda hesaplanýcak..
+      Tablo.Query2.Params[12].Value := Tablo.Query1.FieldByName('TUTAR').AsCurrency;  //top tutar, diÄŸerleri satÄ±rlarda hesaplanÄ±cak..
       Tablo.Query2.Params[13].Value := Tablo.Query1.FieldByName('DOVIZTIPI').AsString ; //kur
-      Tablo.Query2.Params[14].Value := 0.00;  //döv tutarý
+      Tablo.Query2.Params[14].Value := 0.00;  //dÃ¶v tutarÄ±
       Tablo.Query2.Params[15].Value := 0; //kasa
-      Tablo.Query2.Params[16].Value := Tablo.Query1.FieldByName('KULLANICI').AsString ; //genotýp kullanýcýsý
+      Tablo.Query2.Params[16].Value := Tablo.Query1.FieldByName('KULLANICI').AsString ; //genotÄ±p kullanÄ±cÄ±sÄ±
       Tablo.Query2.Params[17].Value := MasrafID;
-      Tablo.Query2.Params[18].Value := 'Genotýp Stok Notlarý: '+Tablo.Query1.FieldByName('NOTLAR').AsString ;
+      Tablo.Query2.Params[18].Value := 'GenotÄ±p Stok NotlarÄ±: '+Tablo.Query1.FieldByName('NOTLAR').AsString ;
       Tablo.Query2.Params[19].Value := 0;
       Tablo.Query2.Params[20].Value := Plan;
       Tablo.Query2.Params[21].Value := Kullanan ;
@@ -965,7 +965,7 @@ begin
       Tablo.Query2.Open;
       FBID:=Tablo.Query2.Fields[0].AsInteger;
      //****************************************************
-     (*                  Fatura Satýrlarý                *)
+     (*                  Fatura SatÄ±rlarÄ±                *)
      //****************************************************
      KDVTutari:=0.0;
      FaturaMatrahi:=0.0;
@@ -984,7 +984,7 @@ begin
              +'VALUES(:PFATBASID,:PREHBERID,:PKOD,:PACIKLAMA,:PMASRAFID,:PADET,:PBIRIM,:PMIKTAR,:PBIRIMFIYAT '
              +',:PTUTAR,:PISKONTO,:PKDV,:PKULLANICI,:PEKLEYEN,:PSUBEID ) ';
         while Not Tablo.Query3.Eof do begin
-           //masrafmerkezkod varsa id sini bulalým
+           //masrafmerkezkod varsa id sini bulalÄ±m
           Tablo.Query5.Close;
           Tablo.Query5.Connection:=Tablo.FDCnn;
           Tablo.Query5.SQL.Text:='SELECT ID FROM MASRAFGELIR WHERE KOD = '''+Tablo.Query3.FieldByName('MASRAFMERKEZKOD').AsString+'''';
@@ -1015,7 +1015,7 @@ begin
      end;
 
      //****************************************************
-     (*        fatura toplam alanlarý güncelle           *)
+     (*        fatura toplam alanlarÄ± gÃ¼ncelle           *)
      //****************************************************
       Tablo.Query5.Close;
       Tablo.Query5.Connection:=Tablo.FDCnn;
@@ -1030,7 +1030,7 @@ begin
      if plan and PlanEkle then
       if FatOdemeTarihi>0 then
      begin
-        //hesapkodunu idye çevirelim
+        //hesapkodunu idye Ã§evirelim
         Tablo.Query5.Close;
         Tablo.Query5.Connection:=Tablo.FDCnn;
         Tablo.Query5.SQL.Text:= 'SELECT ID FROM KASALAR WHERE KASAKODU = '''+Tablo.Query1.FieldByName('HESAPKODU').AsString+'''';
@@ -1047,7 +1047,7 @@ begin
              +inttostr(0)+', '
              +Tablo.Query1.FieldByName('TUTAR').AsString+','''
              +Tablo.Query1.FieldByName('DOVIZTIPI').AsString+''','''
-             +'Genotýp Stok Aktarýmý.'+''','
+             +'GenotÄ±p Stok AktarÄ±mÄ±.'+''','
              +inttostr(FBID)+','''
              +Kullanan+''','+IntToStr(SubeId)+',0,''TL'')';
 
@@ -1086,7 +1086,7 @@ Begin
     Tablo.Query1.Connection:=Tablo.FDCnn;
     Tablo.Query1.SQL.Text:='SELECT KOD FROM REHBER';
     Tablo.Query1.Open;
-    //ayný kaydýn bizde olup olmadýðý koduna bakýlarak kontrol edilir..  //
+    //aynÄ± kaydÄ±n bizde olup olmadÄ±ÄŸÄ± koduna bakÄ±larak kontrol edilir..  //
     if not Tablo.Query1.Locate('KOD',Kod,[]) then begin
        if TabAktarilacak.State = dsInactive then begin
           TabAktarilacak.Close;
@@ -1157,7 +1157,7 @@ Begin
     Tablo.Query1.Connection:=Tablo.FDCnn;
     Tablo.Query1.SQL.Text:='SELECT KOD FROM REHBER';
     Tablo.Query1.Open;
-    //ayný kaydýn bizde olup olmadýðý koduna bakýlarak kontrol edilir..  //
+    //aynÄ± kaydÄ±n bizde olup olmadÄ±ÄŸÄ± koduna bakÄ±larak kontrol edilir..  //
     if not Tablo.Query1.Locate('KOD',TabAktarilacak.FieldByName('KOD').AsString,[]) then begin
        if TabAktarilacak.FieldByName('ARAMADACIKSIN').AsString='H' then
           aramadaciksin:='0'
@@ -1176,13 +1176,13 @@ Begin
              TabAktarilacak.FieldByName('NOTLAR').AsString+''','+aramadaciksin+','+
              '1,1,1,1,'''+Kullanan+''','+IntToStr(SubeId)+' )';
        Tablo.Query2.ExecSQL;
-       //eklediðimiz satýrý açýp aldýðý ID yi bulalým
+       //eklediÄŸimiz satÄ±rÄ± aÃ§Ä±p aldÄ±ÄŸÄ± ID yi bulalÄ±m
        Tablo.Query3.Close;
        Tablo.Query3.Connection:=Tablo.FDCnn;
        Tablo.Query3.SQL.Text:='select * from REHBER where KOD = '''+TabAktarilacak.FieldByName('KOD').AsString+'''';
        Tablo.Query3.Open;
        RehID := Tablo.Query3.FieldByName('ID').AsInteger;
-       // eklenecek alanlarý bulalým(varsayýlaný dolu olanlar..
+       // eklenecek alanlarÄ± bulalÄ±m(varsayÄ±lanÄ± dolu olanlar..
        Tablo.Query4.Close;
        Tablo.Query4.Connection:=Tablo.FDCnn;
        Tablo.Query4.SQL.Text:='select DISTINCT VARSAYILAN, YERI, ETIKET,SIRA from REHBERAYAR where isnull(VARSAYILAN,'''')<>'''' ';
@@ -1196,7 +1196,7 @@ Begin
                   4:	SQLParam := 'EVPK';//  Adres PK
                   6:	SQLParam := 'EVILCE';//  Adres ILCE
                   8:	SQLParam := 'EVIL';//  Adres IL
-                  40: SQLParam := 'ISTEL';//  Ýþ Tel
+                  40: SQLParam := 'ISTEL';//  Ä°ÅŸ Tel
                   42: SQLParam := 'CEP';//	Cep Tel
                   44: SQLParam := 'EVTEL';//	Ev Tel
                   46: SQLParam := 'EMAIL';//	E-Posta
@@ -1205,7 +1205,7 @@ Begin
            end;
            2: begin
                case Tablo.Query4.FieldByName('VARSAYILAN').AsInteger of
-                  10: SQLParam := 'FATURABASLIK';//	Fatura Baþlýðý
+                  10: SQLParam := 'FATURABASLIK';//	Fatura BaÅŸlÄ±ÄŸÄ±
                   20: SQLParam := 'VERGIDAI';//	Vergi Dairesi
                   22: SQLParam := 'VERGINO';//	Vergi No
                end;
@@ -1219,7 +1219,7 @@ Begin
                              Tablo.Query4.FieldbyName('ETIKET').AsString+''','''+TabAktarilacak.FieldByName(SQLParam).AsString+''','''+Kullanan+''','+IntToStr(SubeId)+')' ;
            Tablo.Query5.ExecSQL;
          end;
-         // ilgili satýr insert edilir..
+         // ilgili satÄ±r insert edilir..
          Tablo.Query4.Next;
        end;
        Result := True;
@@ -1245,22 +1245,22 @@ Begin
      cxRichEdit1.Lines.Add(RAdresBilgileri2);
   end else  if cxImageComboBox1.Text = RGenotipdanStokFaturasiAl then begin
      cxRichEdit1.Lines.Add(RBuBolumeGecmedenOnce);
-     cxRichEdit1.Lines.Add(RRehberAktarýmýnýTamamla);
-     cxRichEdit1.Lines.Add(REntegradaTanýmlýOlmasýGerek);
+     cxRichEdit1.Lines.Add(RRehberAktarÄ±mÄ±nÄ±Tamamla);
+     cxRichEdit1.Lines.Add(REntegradaTanÄ±mlÄ±OlmasÄ±Gerek);
      cxRichEdit1.Lines.Add(RRehberAktariminiziTamamla);
      cxRichEdit1.Lines.Add(RBirlikteAktarilacaktir);
   end else if cxImageComboBox1.Text = RGentegreDevirCariBankaKasa then begin
      cxRichEdit1.Lines.Add(RBuBolumeGecmedenOnce);
-     cxRichEdit1.Lines.Add(RRehberAktarýmýnýTamamla);
+     cxRichEdit1.Lines.Add(RRehberAktarÄ±mÄ±nÄ±Tamamla);
      cxRichEdit1.Lines.Add(RCariDevirKayitlariAktarilmayacak);
      cxRichEdit1.Lines.Add(RBankaTanimlamalariYenidenDuzenle);
      cxRichEdit1.Lines.Add(RLogayaTiklayarakYap);
   end else if cxImageComboBox1.Text = RGentegreDevirCekSenet then begin
      cxRichEdit1.Lines.Add(RBuBolumeGecmedenOnce);
-     cxRichEdit1.Lines.Add(RRehberAktarýmýnýTamamla);
+     cxRichEdit1.Lines.Add(RRehberAktarÄ±mÄ±nÄ±Tamamla);
      cxRichEdit1.Lines.Add(RCekVeSenetlericerisinden);
      cxRichEdit1.Lines.Add(RTumVerilerAktarilacaktir);
-  end else if cxImageComboBox1.Text = RGentegreDevirCariYýlDetay then begin
+  end else if cxImageComboBox1.Text = RGentegreDevirCariYÄ±lDetay then begin
      cxRichEdit1.Lines.Add(RBuBolumeGecmedenOnce);
      cxRichEdit1.Lines.Add(RDuzenlemeleriTamamlamisOlmali);
      cxRichEdit1.Lines.Add(RKayitlarSistemUzerineEklenebilir);
@@ -1276,7 +1276,7 @@ begin
   Try
     if cxImageComboBox1.Text = RGenotipdanRehberAl then  begin
       cxGrid1DBTableView1.DataController.KeyFieldNames := 'KOD';
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1287,7 +1287,7 @@ begin
       TabAktarilacak.SQL.Text:='select * from REHBER WHERE KOD LIKE ''120.%'' OR KOD LIKE ''320.%'' OR KOD LIKE ''335.%'' ';
       TabAktarilacak.Open;
       cxButton2.Enabled:=True;
-      //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+      //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
       for i := 0 to TabAktarilacak.FieldCount-1 do begin
         cxGrid1DBTableView1.CreateColumn;
         with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -1299,7 +1299,7 @@ begin
       end;
     end else  if cxImageComboBox1.Text = RGenotipeRehberVer then  begin
       cxGrid1DBTableView1.DataController.KeyFieldNames := 'KOD';
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1325,7 +1325,7 @@ begin
       Tablo.Query1.Connection:=Tablo.FDCnn;
       Tablo.Query1.SQL.Text:='select * from REHBER';
       Tablo.Query1.Open;
-      //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+      //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
       for i := 0 to TabAktarilacak.FieldCount-1 do begin
         cxGrid1DBTableView1.CreateColumn;
         with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -1337,7 +1337,7 @@ begin
       cxButton2.Enabled:=True;
     end else  if cxImageComboBox1.Text = RGenotipdanStokFaturasiAl then begin
       cxGrid1DBTableView1.DataController.KeyFieldNames := 'GIRNO';
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1348,7 +1348,7 @@ begin
       TabAktarilacak.SQL.Text:='select * from STOKGIRIS where BELGETIPI =''FATURA''';
       TabAktarilacak.Open;
       cxButton2.Enabled:=True;
-      //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+      //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
       for i := 0 to TabAktarilacak.FieldCount-1 do begin
         cxGrid1DBTableView1.CreateColumn;
         with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -1360,7 +1360,7 @@ begin
       end;
     end else if cxImageComboBox1.Text = RGentegreDevirCariBankaKasa then begin
       cxGrid1DBTableView1.DataController.KeyFieldNames := 'ANAHTAR';
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1374,7 +1374,7 @@ begin
           +'  KUR=CASE WHEN ISNULL(KUR,'''')='''' THEN ''TL'' ELSE KUR END, '
           +'  ANAHTAR= R.KOD+KUR '
           +'from KASA K INNER JOIN REHBER R ON K.HESAPKODU=R.KOD '
-          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÝR''  '
+          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÄ°R''  '
           +'group by R.KOD,R.FIRMA,KUR  '
           +'having (ISNULL(R.KOD,'''') LIKE ''100.%'' or ISNULL(R.KOD,'''') LIKE ''102.%'') '
           +'AND ISNULL(R.FIRMA,'''')<>'''' '
@@ -1384,15 +1384,15 @@ begin
           +'  KUR=CASE WHEN ISNULL(KUR,'''')='''' THEN ''TL'' ELSE KUR END,  '
           +'  ANAHTAR= R.KOD+KUR '
           +'from KASA K INNER JOIN REHBER R ON K.CARIKOD=R.KOD '
-          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÝR'' '
+          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÄ°R'' '
           +'group by R.KOD,R.FIRMA,KUR '
           +'having (ISNULL(R.KOD,'''') LIKE ''120.%'' or ISNULL(R.KOD,'''') LIKE ''320.%'') '
-          +'and (ISNULL(R.KOD,'''')NOT IN ('''',''VÝRMAN'') AND ISNULL(R.FIRMA,'''')NOT IN ('''',''VÝRMAN'')) '
+          +'and (ISNULL(R.KOD,'''')NOT IN ('''',''VÄ°RMAN'') AND ISNULL(R.FIRMA,'''')NOT IN ('''',''VÄ°RMAN'')) '
           +'order by 1 ';
 
       TabAktarilacak.Open;
       cxButton2.Enabled:=True;
-      //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+      //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
       for i := 0 to TabAktarilacak.FieldCount-1 do begin
         cxGrid1DBTableView1.CreateColumn;
         with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -1404,7 +1404,7 @@ begin
       end;
     end else if cxImageComboBox1.Text = RGentegreDevirCekSenet then begin
       cxGrid1DBTableView1.DataController.KeyFieldNames := 'ANAHTAR';
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1413,14 +1413,14 @@ begin
       TabAktarilacak.Connection:=Tablo.FDCnn;
       //CNNGenotip.ConnectionString;
       TabAktarilacak.SQL.Text:=
-           'select KOD=HESAPKODU,AD=''ÇEK-''+CARIAD,BORC,ALACAK,VADE, '
+           'select KOD=HESAPKODU,AD=''Ã‡EK-''+CARIAD,BORC,ALACAK,VADE, '
           +'KUR=CASE WHEN ISNULL(KUR,'''')='''' THEN ''TL'' ELSE KUR END,  '
           +'ANAHTAR=SIRANO '
           +'from KASA '
-          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÝR'' AND isnull(VADE,''1900-01-01 00:00'')<>''1900-01-01 00:00'' and '
+          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÄ°R'' AND isnull(VADE,''1900-01-01 00:00'')<>''1900-01-01 00:00'' and '
           +'(ISNULL(HESAPKODU,'''') LIKE ''101%'' OR ISNULL(HESAPKODU,'''') LIKE ''103%'' ) AND '
-          +'(BORC<>0 OR ALACAK<>0) AND CARIAD<>''VÝRMAN'' AND '
-          +'ACIKLAMA <> ''DEVÝR'' AND ISNULL(CEKSENETID,0)=0 AND ISNULL(DURUM,0)=0 '
+          +'(BORC<>0 OR ALACAK<>0) AND CARIAD<>''VÄ°RMAN'' AND '
+          +'ACIKLAMA <> ''DEVÄ°R'' AND ISNULL(CEKSENETID,0)=0 AND ISNULL(DURUM,0)=0 '
 
           +'union all '
 
@@ -1428,14 +1428,14 @@ begin
           +'KUR=CASE WHEN ISNULL(KUR,'''')='''' THEN ''TL'' ELSE KUR END,  '
           +'ANAHTAR=SIRANO '
           +'from KASA '
-          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÝR'' AND isnull(VADE,''1900-01-01 00:00'')<>''1900-01-01 00:00'' and '
+          +'where ISNULL(ACIKLAMA,'''')<> ''DEVÄ°R'' AND isnull(VADE,''1900-01-01 00:00'')<>''1900-01-01 00:00'' and '
           +'(ISNULL(HESAPKODU,'''') LIKE ''121%'' OR ISNULL(HESAPKODU,'''') LIKE ''321%'' ) AND '
-          +'(BORC<>0 OR ALACAK<>0) AND CARIAD<>''VÝRMAN'' AND '
-          +'ACIKLAMA <> ''DEVÝR'' AND ISNULL(CEKSENETID,0)=0 AND ISNULL(DURUM,0)=0 '
+          +'(BORC<>0 OR ALACAK<>0) AND CARIAD<>''VÄ°RMAN'' AND '
+          +'ACIKLAMA <> ''DEVÄ°R'' AND ISNULL(CEKSENETID,0)=0 AND ISNULL(DURUM,0)=0 '
           +' ORDER BY 1';
       TabAktarilacak.Open;
       cxButton2.Enabled:=True;
-      //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+      //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
       for i := 0 to TabAktarilacak.FieldCount-1 do begin
         cxGrid1DBTableView1.CreateColumn;
         with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -1445,9 +1445,9 @@ begin
           //Properties.ReadOnly:=True;
         end;
       end;
-    end else if cxImageComboBox1.Text = RGentegreDevirCariYýlDetay then begin
+    end else if cxImageComboBox1.Text = RGentegreDevirCariYÄ±lDetay then begin
       TabAktarilacak.Close;
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1455,7 +1455,7 @@ begin
       cxButton2.Enabled:=True;
     end else if cxImageComboBox1.Text = RGenotipdanStokKartAl then begin
       TabAktarilacak.Close;
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1467,7 +1467,7 @@ begin
       cxButton2.Enabled:=True;
     end else if cxImageComboBox1.Text = RGenotipaStokKartVer then begin
       TabAktarilacak.Close;
-      //bir önce açýlmýþ olan tabloyu sileriz,
+      //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
       if cxGrid1DBTableView1.ColumnCount > 1 then begin
          for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
              cxGrid1DBTableView1.Columns[-i].Free;
@@ -1511,13 +1511,13 @@ Begin
                      ',DEGISTIRMETARIHI = '''+FormatDateTime('yyyy-mm-dd hh:nn',Bugun)+''''+
                      ' WHERE KOD = '''+KOD+'''';
    Tablo.Query2.ExecSQL;
-   //deðiþtirdiðimiz satýrý açýp aldýðý ID yi bulalým
+   //deÄŸiÅŸtirdiÄŸimiz satÄ±rÄ± aÃ§Ä±p aldÄ±ÄŸÄ± ID yi bulalÄ±m
    Tablo.Query3.Close;
    Tablo.Query3.Connection:=Tablo.FDCnn;
    Tablo.Query3.SQL.Text:='select * from REHBER where KOD = '''+TabAktarilacak.FieldByName('KOD').AsString+'''';
    Tablo.Query3.Open;
    RehID := Tablo.Query3.FieldByName('ID').AsInteger;
-   // deðiþtirilecek alanlarý bulalým(varsayýlaný dolu olanlar)..
+   // deÄŸiÅŸtirilecek alanlarÄ± bulalÄ±m(varsayÄ±lanÄ± dolu olanlar)..
    Tablo.Query4.Close;
    Tablo.Query4.Connection:=Tablo.FDCnn;
    Tablo.Query4.SQL.Text:='select  RA.VARSAYILAN, RB.YERI, RB.ETIKET,RB.BILGI '+
@@ -1530,7 +1530,7 @@ Begin
         4:	SQLParam := 'EVPK';//  Adres PK
         6:	SQLParam := 'EVILCE';//  Adres ILCE
         8:	SQLParam := 'EVIL';//  Adres IL
-        10: SQLParam := 'FATURABASLIK';//	Fatura Baþlýðý
+        10: SQLParam := 'FATURABASLIK';//	Fatura BaÅŸlÄ±ÄŸÄ±
         12: SQLParam := 'EVADRES';//	Fatura Adresi
         14: SQLParam := 'EVPK';//	Fatura Adresi PK
         16: SQLParam := 'EVILCE';//	Fatura Adresi ILCE
@@ -1540,7 +1540,7 @@ Begin
        // 32: SQLParam := '';//	Masraf Merkezi
        // 34: SQLParam := '';//	Gelir Merkezi
        // 36: SQLParam := '';//	Tahakkuk
-        40: SQLParam := 'ISTEL';//  Ýþ Tel
+        40: SQLParam := 'ISTEL';//  Ä°ÅŸ Tel
         42: SQLParam := 'CEP';//	Cep Tel
         44: SQLParam := 'EVTEL';//	Ev Tel
         46: SQLParam := 'EMAIL';//	E-Posta
@@ -1548,7 +1548,7 @@ Begin
        //50: SQLParam := '';//	T.C.Kimlik No
        //52: SQLParam := '';//	Baba Ad
      end;
-     // ilgili satýr update edilir..
+     // ilgili satÄ±r update edilir..
      Tablo.Query5.Close;
      Tablo.Query5.Connection:=Tablo.FDCnn;
      Tablo.Query5.SQL.Text := 'UPDATE REHBERBILGI SET BILGI = '''+TabAktarilacak.FieldByName(SQLParam).AsString+''',DEGISTIREN = '''+
@@ -1643,7 +1643,7 @@ end;
 
 procedure TReplikasyonDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   ReplikasyonDlg.HizliConnection('','');
   Bugun := Tablo.GENINI.BugunTrhSaat;
 

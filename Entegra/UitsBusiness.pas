@@ -1,15 +1,15 @@
-// ************************************************************************ //
-// İş       : İts WebServislerinin Kullanımı
-// Başlangıc Tarihi :İsmail ACET 07-10-2011
+ï»¿// ************************************************************************ //
+// Ä°ÅŸ       : Ä°ts WebServislerinin KullanÄ±mÄ±
+// BaÅŸlangÄ±c Tarihi :Ä°smail ACET 07-10-2011
 // Encoding : UTF-8
 // Codegen  : SOAP
 // Version  : 1.1
-// Ecza Depoları ve Hastaneler için uygulama geliştirenler testler için
-// aşağıdaki GLN numaralarını kullanabilirler
-// Firma GLN Numalaraları : 8680002800017, 8680016600016
-// Depo GLN Numaraları    : 8680007800012, 8680007900019
-// Hastane GLN Numaraları : 8680024500018, 8680018600014
-// Eczane GLN Numaraları  : 8680001000001, 8680001000002
+// Ecza DepolarÄ± ve Hastaneler iÃ§in uygulama geliÅŸtirenler testler iÃ§in
+// aÅŸaÄŸÄ±daki GLN numaralarÄ±nÄ± kullanabilirler
+// Firma GLN NumalaralarÄ± : 8680002800017, 8680016600016
+// Depo GLN NumaralarÄ±    : 8680007800012, 8680007900019
+// Hastane GLN NumaralarÄ± : 8680024500018, 8680018600014
+// Eczane GLN NumaralarÄ±  : 8680001000001, 8680001000002
 //
 // ************************************************************************ //
 unit UitsBusiness;
@@ -42,50 +42,50 @@ const EzcaDepoSatisBildirimiEnpointDemo      = 'http://212.174.130.240/DepoSatis
 const EzcaDepoSatisiptalBildirimiEnpointDemo = 'http://212.174.130.240/DepoSatisIptal/DepoSatisIptalReceiverService';
 const DeAktivasyonBildirimiEnpointDemo ='http://212.174.130.240/DeaktivasyonBildirim/DeaktivasyonBildirimReceiverService';
 
-const {<DT>} EzcaDepoBildirimTipi = 'V';//Bu alan tek karakterlik veri içerir. İçerdiği değer “V” (Doğrulama) olacaktır. Bu alan bu mesajın Doğrulama bildirimi olduğunu belirler.
-const {<DT>} EzcaDepoMalAlimBildirimTip = 'A'; //Bu alan tek karakterlik veri içerir. İçerdiği değer “A” (Alım) olacaktır. Bu alan bu mesajın Mal Alım Bildirimi olduğunu belirler.
-const {<DT>} EzcaDepoMalIadeBildirimTipi = 'F'; //Bu alan tek karakterlik veri içerir. İçerdiği değer “F” (İade) olacaktır. Bu alan bu mesajın Mal Alım Bildirimi olduğunu belirler.
-const {<DT>} EzcaDepoSatisBildirimTipi = 'S';//Bu alan tek karakterlik veri içerir. İçerdiği değer “S” (Satış) olacaktır. Bu alan bu mesajın Satış Bildirimi olduğunu belirler.
-const {<DT>} EzcaDepoSatisIptalBildirimTipi = 'C';//Bu alan tek karakterlik veri içerir. İçerdiği değer “C” (Satış İptal) olacaktır. Bu alan bu mesajın Satış İptal Bildirimi olduğunu belirler.
-const {<DT>} DeAktivasyonBildirimTipi = 'D';//Bu alan tek karakterlik veri içerir. İçerdiği değer D (Deaktivasyon) olacaktır. Bu alan bu mesajın Deaktivasyon bildirimi olduğunu belirler.
+const {<DT>} EzcaDepoBildirimTipi = 'V';//Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer â€œVâ€ (DoÄŸrulama) olacaktÄ±r. Bu alan bu mesajÄ±n DoÄŸrulama bildirimi olduÄŸunu belirler.
+const {<DT>} EzcaDepoMalAlimBildirimTip = 'A'; //Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer â€œAâ€ (AlÄ±m) olacaktÄ±r. Bu alan bu mesajÄ±n Mal AlÄ±m Bildirimi olduÄŸunu belirler.
+const {<DT>} EzcaDepoMalIadeBildirimTipi = 'F'; //Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer â€œFâ€ (Ä°ade) olacaktÄ±r. Bu alan bu mesajÄ±n Mal AlÄ±m Bildirimi olduÄŸunu belirler.
+const {<DT>} EzcaDepoSatisBildirimTipi = 'S';//Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer â€œSâ€ (SatÄ±ÅŸ) olacaktÄ±r. Bu alan bu mesajÄ±n SatÄ±ÅŸ Bildirimi olduÄŸunu belirler.
+const {<DT>} EzcaDepoSatisIptalBildirimTipi = 'C';//Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer â€œCâ€ (SatÄ±ÅŸ Ä°ptal) olacaktÄ±r. Bu alan bu mesajÄ±n SatÄ±ÅŸ Ä°ptal Bildirimi olduÄŸunu belirler.
+const {<DT>} DeAktivasyonBildirimTipi = 'D';//Bu alan tek karakterlik veri iÃ§erir. Ä°Ã§erdiÄŸi deÄŸer D (Deaktivasyon) olacaktÄ±r. Bu alan bu mesajÄ±n Deaktivasyon bildirimi olduÄŸunu belirler.
 
 const FirmaGLNDeneme   = '8680002800017';
 const DepoGLNDeneme    = '8680007800012';
 const HastaneGLNDeneme = '8680024500018';
 const EczaneGLNDeneme  = '8680001000001';
 
-const DEAKTIVASYONSISTEMDENCIKARMA = '10' ;//   DeAktivasyon (<DS>) Sistemden Çıkarma
-const DEAKTIVASYONFIRE             = '20' ;//   DeAktivasyon (<DS>) Üretim Fireleri
-const DEAKTIVASYONGERICEKME        = '30' ;//   DeAktivasyon (<DS>) Geri Çekme Sebebiyle İmha
-const DEAKTIVASYONMIAT             = '40' ;//   DeAktivasyon (<DS>) Miat Sebebiyle İmha
+const DEAKTIVASYONSISTEMDENCIKARMA = '10' ;//   DeAktivasyon (<DS>) Sistemden Ã‡Ä±karma
+const DEAKTIVASYONFIRE             = '20' ;//   DeAktivasyon (<DS>) Ãœretim Fireleri
+const DEAKTIVASYONGERICEKME        = '30' ;//   DeAktivasyon (<DS>) Geri Ã‡ekme Sebebiyle Ä°mha
+const DEAKTIVASYONMIAT             = '40' ;//   DeAktivasyon (<DS>) Miat Sebebiyle Ä°mha
 const DEAKTIVASYONREVIZYON         = '50' ;//   DeAktivasyon (<DS>) Revizyon
 const DEAKTIVASYONSARF             = '60' ;//   DeAktivasyon (<DS>) Sarf
 
 const
   Errors : array[1..23] of UCType = (
-( Code:'11032';Msg:'Sıra Numarası Formatı Geçersiz'),
-( Code:'11035';Msg:'Ürüne Ait Son Kullanım Tarihi (XD) Formatı Uyumsuz'),
-( Code:'10036';Msg:'Ürüne Ait Parti Numarası (BN) Formatı Uyumsuz'),
-( Code:'11037';Msg:'Ürüne ait GTIN numarası Formatı Uyumsuz'),
-( Code:'10007';Msg:'Bu Sıra Numarası Zaten Kayıtlı!'),
-( Code:'10008';Msg:'Tanımlanmamıs Kayıt Hatası.'),
-( Code:'10201';Msg:'Belirtilen Ürün Sistemimizde Kayıtlı Değildir.'),
-( Code:'10202';Msg:'Ürünün Son Kullanma Tarihi Geçmistir. (Hastaya verilemez.)'),
-( Code:'10203';Msg:'Ürün Bilgileri Tutarsız.'),
-( Code:'10204';Msg:'Belirtilen Ürün Önceden Satılmıstır.'),
-( Code:'10205';Msg:'Bu Ürünün Satısı Yasaklanmıstır.'),
-( Code:'10206';Msg:'Veritabanı Kayıt Hatası.'),
-( Code:'10207';Msg:'Bu Ürün Önceden ihraç Edilmistir.'),
-( Code:'10209';Msg:'Ürün Su Anda Baska Bir Eczane Stokunda Görünüyor.'),
-( Code:'10210';Msg:'Ürün Stokunuzda Görünüyor.'),
-( Code:'10211';Msg:'Ürün Stokunuzda Görünmüyor!'),
-( Code:'10219';Msg:'Belirtilen Ürün Tarafınızdan Satılmamıstır'),
-( Code:'10220';Msg:'Ürün Geri Ödeme Kurumuna Satılmıstır. Satısın Reçete Bazlı iptal Edilmesi Gerekir'),
-( Code:'10221';Msg:'Ürünün Satısı iptal Edilemez.'),
-( Code:'10222';Msg:'Ürün Üzerinize Kayıtlı Değil'),
-( Code:'10223';Msg:'Ürün Üzerinize Kayıtlı Görünüyor'),
-( Code:'10224';Msg:'Ürün Eczane Tarafından Satılmıstır.'),
-( Code:'00000';Msg:'Doğru Bildirim.'));
+( Code:'11032';Msg:'SÄ±ra NumarasÄ± FormatÄ± GeÃ§ersiz'),
+( Code:'11035';Msg:'ÃœrÃ¼ne Ait Son KullanÄ±m Tarihi (XD) FormatÄ± Uyumsuz'),
+( Code:'10036';Msg:'ÃœrÃ¼ne Ait Parti NumarasÄ± (BN) FormatÄ± Uyumsuz'),
+( Code:'11037';Msg:'ÃœrÃ¼ne ait GTIN numarasÄ± FormatÄ± Uyumsuz'),
+( Code:'10007';Msg:'Bu SÄ±ra NumarasÄ± Zaten KayÄ±tlÄ±!'),
+( Code:'10008';Msg:'TanÄ±mlanmamÄ±s KayÄ±t HatasÄ±.'),
+( Code:'10201';Msg:'Belirtilen ÃœrÃ¼n Sistemimizde KayÄ±tlÄ± DeÄŸildir.'),
+( Code:'10202';Msg:'ÃœrÃ¼nÃ¼n Son Kullanma Tarihi GeÃ§mistir. (Hastaya verilemez.)'),
+( Code:'10203';Msg:'ÃœrÃ¼n Bilgileri TutarsÄ±z.'),
+( Code:'10204';Msg:'Belirtilen ÃœrÃ¼n Ã–nceden SatÄ±lmÄ±stÄ±r.'),
+( Code:'10205';Msg:'Bu ÃœrÃ¼nÃ¼n SatÄ±sÄ± YasaklanmÄ±stÄ±r.'),
+( Code:'10206';Msg:'VeritabanÄ± KayÄ±t HatasÄ±.'),
+( Code:'10207';Msg:'Bu ÃœrÃ¼n Ã–nceden ihraÃ§ Edilmistir.'),
+( Code:'10209';Msg:'ÃœrÃ¼n Su Anda Baska Bir Eczane Stokunda GÃ¶rÃ¼nÃ¼yor.'),
+( Code:'10210';Msg:'ÃœrÃ¼n Stokunuzda GÃ¶rÃ¼nÃ¼yor.'),
+( Code:'10211';Msg:'ÃœrÃ¼n Stokunuzda GÃ¶rÃ¼nmÃ¼yor!'),
+( Code:'10219';Msg:'Belirtilen ÃœrÃ¼n TarafÄ±nÄ±zdan SatÄ±lmamÄ±stÄ±r'),
+( Code:'10220';Msg:'ÃœrÃ¼n Geri Ã–deme Kurumuna SatÄ±lmÄ±stÄ±r. SatÄ±sÄ±n ReÃ§ete BazlÄ± iptal Edilmesi Gerekir'),
+( Code:'10221';Msg:'ÃœrÃ¼nÃ¼n SatÄ±sÄ± iptal Edilemez.'),
+( Code:'10222';Msg:'ÃœrÃ¼n Ãœzerinize KayÄ±tlÄ± DeÄŸil'),
+( Code:'10223';Msg:'ÃœrÃ¼n Ãœzerinize KayÄ±tlÄ± GÃ¶rÃ¼nÃ¼yor'),
+( Code:'10224';Msg:'ÃœrÃ¼n Eczane TarafÄ±ndan SatÄ±lmÄ±stÄ±r.'),
+( Code:'00000';Msg:'DoÄŸru Bildirim.'));
 
 
 
@@ -97,41 +97,41 @@ const SatimDurumOnceden ='10204';
 
 
 {$ENDREGION}
-{$REGION 'Ortak Tipler' Açıklama amaçlı yapılmıştır kullanımı yoktur }
+{$REGION 'Ortak Tipler' AÃ§Ä±klama amaÃ§lÄ± yapÄ±lmÄ±ÅŸtÄ±r kullanÄ±mÄ± yoktur }
 
 Type ItsBelgeFetaType = record
   DD : TXSDate ; //Belge Tarihi ;
-  DN : string  ; //Belge Açıklaması;
+  DN : string  ; //Belge AÃ§Ä±klamasÄ±;
 end;
 Type ItsUrunFetaType = record
-  GTIN :  string; //Bildirilen ürüne ait (Global Trade Item Number) Küresel Ticari Ürün Numarası veya “barkod numarası”dır
-  XD   : TXSDate;   { Bildirilen Ürünün Son Kullanma Tarihi bu alanda bulunur. XML-Date tipindedir.
-  Son Kullanım Tarihi Bildirimin yapıldığı tarihten önceki bir tarih olamaz. }
-  BN   :  string[20]; {Ürünün Parti Numarasını içerir. En fazla 20 Karakter uzunluğundadır.
-  Karekoda basılan parti numarası ile aynı olmak zorundadır.
-  ‘0’ ve Boşluk gibi doldurma karakterleri eklenmeyecektir.  }
-  SN   :  string[20]; { Bildirime konu ürününün Sıra Numarası bu alan ile bildirilir.
-  En fazla 20 karakter uzunluktadır. Ürünün karekodundaki sıra numarası ile birebir aynı olmalıdır.
-  Doldurma karakterleri içermemelidir.}
+  GTIN :  string; //Bildirilen Ã¼rÃ¼ne ait (Global Trade Item Number) KÃ¼resel Ticari ÃœrÃ¼n NumarasÄ± veya â€œbarkod numarasÄ±â€dÄ±r
+  XD   : TXSDate;   { Bildirilen ÃœrÃ¼nÃ¼n Son Kullanma Tarihi bu alanda bulunur. XML-Date tipindedir.
+  Son KullanÄ±m Tarihi Bildirimin yapÄ±ldÄ±ÄŸÄ± tarihten Ã¶nceki bir tarih olamaz. }
+  BN   :  string[20]; {ÃœrÃ¼nÃ¼n Parti NumarasÄ±nÄ± iÃ§erir. En fazla 20 Karakter uzunluÄŸundadÄ±r.
+  Karekoda basÄ±lan parti numarasÄ± ile aynÄ± olmak zorundadÄ±r.
+  â€˜0â€™ ve BoÅŸluk gibi doldurma karakterleri eklenmeyecektir.  }
+  SN   :  string[20]; { Bildirime konu Ã¼rÃ¼nÃ¼nÃ¼n SÄ±ra NumarasÄ± bu alan ile bildirilir.
+  En fazla 20 karakter uzunluktadÄ±r. ÃœrÃ¼nÃ¼n karekodundaki sÄ±ra numarasÄ± ile birebir aynÄ± olmalÄ±dÄ±r.
+  Doldurma karakterleri iÃ§ermemelidir.}
 end;
 Type ItsUrunCevapFetatype = record
-  URUNDURUM : string ;//Ürünlere ait bilgileri ve sistem tarafından işlendikten sonra verilen uyarı kodunu geri döndürür.
-  GTIN :  string; //Bildirilen ürüne ait (Global Trade Item Number) Küresel Ticari Ürün Numarası veya “barkod numarası”dır
-  SN   :  string[20]; { Bildirime konu ürününün Sıra Numarası bu alan ile bildirilir.
-  En fazla 20 karakter uzunluktadır. Ürünün karekodundaki sıra numarası ile birebir aynı olmalıdır.
-  Doldurma karakterleri içermemelidir.}
-  UC   :  string[5];  //Bu alan Ürünün tekil bilgileri kaydedildikten sonra dönen uyarı kodunu barındırır.
-  {Beş karakter uzunluktadır. Bu Uyarı Kodları Sistem tarafından duyurulmaktadır.
-  Test süreçleri sonunda yapılacak değerlendirmeler sonrasında bu uyarı kodları değişebilir.
-  Bu yüzden uygulama geliştiricilerin uyarı kodlarını işleyen mekanizmayı parametrik olacak şekilde geliştirmeleri önerilir.}
+  URUNDURUM : string ;//ÃœrÃ¼nlere ait bilgileri ve sistem tarafÄ±ndan iÅŸlendikten sonra verilen uyarÄ± kodunu geri dÃ¶ndÃ¼rÃ¼r.
+  GTIN :  string; //Bildirilen Ã¼rÃ¼ne ait (Global Trade Item Number) KÃ¼resel Ticari ÃœrÃ¼n NumarasÄ± veya â€œbarkod numarasÄ±â€dÄ±r
+  SN   :  string[20]; { Bildirime konu Ã¼rÃ¼nÃ¼nÃ¼n SÄ±ra NumarasÄ± bu alan ile bildirilir.
+  En fazla 20 karakter uzunluktadÄ±r. ÃœrÃ¼nÃ¼n karekodundaki sÄ±ra numarasÄ± ile birebir aynÄ± olmalÄ±dÄ±r.
+  Doldurma karakterleri iÃ§ermemelidir.}
+  UC   :  string[5];  //Bu alan ÃœrÃ¼nÃ¼n tekil bilgileri kaydedildikten sonra dÃ¶nen uyarÄ± kodunu barÄ±ndÄ±rÄ±r.
+  {BeÅŸ karakter uzunluktadÄ±r. Bu UyarÄ± KodlarÄ± Sistem tarafÄ±ndan duyurulmaktadÄ±r.
+  Test sÃ¼reÃ§leri sonunda yapÄ±lacak deÄŸerlendirmeler sonrasÄ±nda bu uyarÄ± kodlarÄ± deÄŸiÅŸebilir.
+  Bu yÃ¼zden uygulama geliÅŸtiricilerin uyarÄ± kodlarÄ±nÄ± iÅŸleyen mekanizmayÄ± parametrik olacak ÅŸekilde geliÅŸtirmeleri Ã¶nerilir.}
   HataKodu   : string;
   HataBaslik : string;
 
 end;
 Type ItsCevapFetaType = record
- BILDIRIMID : string[20];{Sisteme başarılı olarak ulaşmış her bildirime sistem tarafından atanan tekil bir numaradır.
- İstemcilerin verilen bu numarayı kendi sistemlerine kaydetmeleri önerilir.
- Şema tarafından kısıtlanmamış bu alan için 20 karakterlik bir alfanümerik alan ayırmaları gerekmektedir.}
+ BILDIRIMID : string[20];{Sisteme baÅŸarÄ±lÄ± olarak ulaÅŸmÄ±ÅŸ her bildirime sistem tarafÄ±ndan atanan tekil bir numaradÄ±r.
+ Ä°stemcilerin verilen bu numarayÄ± kendi sistemlerine kaydetmeleri Ã¶nerilir.
+ Åema tarafÄ±ndan kÄ±sÄ±tlanmamÄ±ÅŸ bu alan iÃ§in 20 karakterlik bir alfanÃ¼merik alan ayÄ±rmalarÄ± gerekmektedir.}
  URUNLER : array of ItsUrunCevapFetatype;
 end;
 type BildirimHataType = record
@@ -144,33 +144,33 @@ end;
 
 {$ENDREGION}
 function HataToMsg(Kod : string):string;
-{$REGION 'ECZA DEPOLARI TARAFINDAN KULLANILACAK WEB SERVİSLERİ.........'}
-{$REGION 'Hakkında'}
-{Ecza Depoları Tarafından Kullanılacak Web Servisleri
-Her ne kadar Ecza Depolarının sisteme girişleri ertelenmiş olsa da isteyen ecza depolarının
-sisteme dâhil olabilmelerini sağlamak için gerekli web servisleri hazırlanmıştır. Ecza depolarının
-kullanabilecekleri web servisleri şunlardır:
-• Depo Ürün Doğrulama
-• Depo Mal Alım Bildirimi
-• Depo Mal İade Bildirimi
-• Depo Satış Bildirimi
-• Depo Satış İptal Bildirimi
-• Deaktivasyon Bildirimi
-• İhracat Bildirimi
-İlk aşamada Bu servislerden Ürün Doğrulama, Deaktivasyon, ve İhracat Bildirimi Depolar için önemlidir.
- Eczanelere yapacakları satışlarda sorun yaşamamaları için Üreticilerden almış oldukları ürünlerin sistemde
- kayıtlı olup olmadığını, eczane tarafından iade edilen ürünlerin ise satılabilir durumda olup olmadığını kontrol
- etmeleri için “Ürün Doğrulama” servisini kullanmak zorundadırlar. Aynı zamanda çalınan, bozulan ürünleri sistemden
- çıkarmak için Deaktivasyon bildirimine, ihracat yapıyorlarsa da İhracat bildirimine ihtiyaç duyacaklardır.
-Diğer bildirimler ise ileride zorunlu hale getirileceğinden şimdiden gerekli hazırlıkları yapmaları gerekmektedir.
-Alım, İade, Satış ve Satış İptal bildirimleri birbirleri ile alakalı bildirimlerdir. Bu yüzden herhangi birini kullanmak istediklerinde
-diğerlerini de kullanmak zorundadırlar.
-Not: Üreticilerden alınan ürünler yüksek miktarda olduğu için ürünlerin tek tek okutulması zor
-olacağı düşünülmektedir. Bu yüzden koli barkodları devreye girene kadar üreticiler ve depolar
-arasında sevkiyat sırasında kullanılmak üzere standart bir veri iletim formatı üzerinde çalışılmaktadır.
-Deponun kendisine gelecek standart formattaki belge içerisindeki karekodları kontrol ederek
-sisteme bildirebileceği bir yapı tasarlanmalıdır. Bu belgenin aynı zamanda diğer depo, hastane
-ve eczanelere yapılacak sevkiyatlarda da düzenlenmesiyle alıcının işlemini kolaylaştıracaktır.}
+{$REGION 'ECZA DEPOLARI TARAFINDAN KULLANILACAK WEB SERVÄ°SLERÄ°.........'}
+{$REGION 'HakkÄ±nda'}
+{Ecza DepolarÄ± TarafÄ±ndan KullanÄ±lacak Web Servisleri
+Her ne kadar Ecza DepolarÄ±nÄ±n sisteme giriÅŸleri ertelenmiÅŸ olsa da isteyen ecza depolarÄ±nÄ±n
+sisteme dÃ¢hil olabilmelerini saÄŸlamak iÃ§in gerekli web servisleri hazÄ±rlanmÄ±ÅŸtÄ±r. Ecza depolarÄ±nÄ±n
+kullanabilecekleri web servisleri ÅŸunlardÄ±r:
+â€¢ Depo ÃœrÃ¼n DoÄŸrulama
+â€¢ Depo Mal AlÄ±m Bildirimi
+â€¢ Depo Mal Ä°ade Bildirimi
+â€¢ Depo SatÄ±ÅŸ Bildirimi
+â€¢ Depo SatÄ±ÅŸ Ä°ptal Bildirimi
+â€¢ Deaktivasyon Bildirimi
+â€¢ Ä°hracat Bildirimi
+Ä°lk aÅŸamada Bu servislerden ÃœrÃ¼n DoÄŸrulama, Deaktivasyon, ve Ä°hracat Bildirimi Depolar iÃ§in Ã¶nemlidir.
+ Eczanelere yapacaklarÄ± satÄ±ÅŸlarda sorun yaÅŸamamalarÄ± iÃ§in Ãœreticilerden almÄ±ÅŸ olduklarÄ± Ã¼rÃ¼nlerin sistemde
+ kayÄ±tlÄ± olup olmadÄ±ÄŸÄ±nÄ±, eczane tarafÄ±ndan iade edilen Ã¼rÃ¼nlerin ise satÄ±labilir durumda olup olmadÄ±ÄŸÄ±nÄ± kontrol
+ etmeleri iÃ§in â€œÃœrÃ¼n DoÄŸrulamaâ€ servisini kullanmak zorundadÄ±rlar. AynÄ± zamanda Ã§alÄ±nan, bozulan Ã¼rÃ¼nleri sistemden
+ Ã§Ä±karmak iÃ§in Deaktivasyon bildirimine, ihracat yapÄ±yorlarsa da Ä°hracat bildirimine ihtiyaÃ§ duyacaklardÄ±r.
+DiÄŸer bildirimler ise ileride zorunlu hale getirileceÄŸinden ÅŸimdiden gerekli hazÄ±rlÄ±klarÄ± yapmalarÄ± gerekmektedir.
+AlÄ±m, Ä°ade, SatÄ±ÅŸ ve SatÄ±ÅŸ Ä°ptal bildirimleri birbirleri ile alakalÄ± bildirimlerdir. Bu yÃ¼zden herhangi birini kullanmak istediklerinde
+diÄŸerlerini de kullanmak zorundadÄ±rlar.
+Not: Ãœreticilerden alÄ±nan Ã¼rÃ¼nler yÃ¼ksek miktarda olduÄŸu iÃ§in Ã¼rÃ¼nlerin tek tek okutulmasÄ± zor
+olacaÄŸÄ± dÃ¼ÅŸÃ¼nÃ¼lmektedir. Bu yÃ¼zden koli barkodlarÄ± devreye girene kadar Ã¼reticiler ve depolar
+arasÄ±nda sevkiyat sÄ±rasÄ±nda kullanÄ±lmak Ã¼zere standart bir veri iletim formatÄ± Ã¼zerinde Ã§alÄ±ÅŸÄ±lmaktadÄ±r.
+Deponun kendisine gelecek standart formattaki belge iÃ§erisindeki karekodlarÄ± kontrol ederek
+sisteme bildirebileceÄŸi bir yapÄ± tasarlanmalÄ±dÄ±r. Bu belgenin aynÄ± zamanda diÄŸer depo, hastane
+ve eczanelere yapÄ±lacak sevkiyatlarda da dÃ¼zenlenmesiyle alÄ±cÄ±nÄ±n iÅŸlemini kolaylaÅŸtÄ±racaktÄ±r.}
 {$ENDREGION}
   function XMLGonder(AIstek : TSoapIstek):TGenelYanit;
   function XMLGelenIsle (GelenYanit : TGenelYanit;GidenUrunler : TObjectList<TUrun>):string;
@@ -181,11 +181,11 @@ ve eczanelere yapılacak sevkiyatlarda da düzenlenmesiyle alıcının işlemini kolay
 {$ENDREGION}
 
 var
- {<FR>} EczaDepoGLN  :string[13] = '8680052900019'; //Doğrulamayı yapan Ecza Deposunun GLN kodunu barındırır.Bu alan 13 karakter uzunluktadır ve sadece rakamlardan oluşur.
- {--------Mal Alım Servisi için FR ürünün alındığı depo veya üretici to ise alan depodur
- {<FR>}  MalUretenGLN :string[13] = '8680007200010'; //Bu alan, ürünün alındığı depo veya üreticinin GLN numarasını barındırır.
- {<TO_>} MaliAlanEczaDepoGLN :string = '8680052900019' ; //Bu alan ürünü alan deponun GLN kodunu içerir.
- //GLN Kodu ile ilgili detaylı bilgiler İTS İşletme Kılavuzunda bulunur.
+ {<FR>} EczaDepoGLN  :string[13] = '8680052900019'; //DoÄŸrulamayÄ± yapan Ecza Deposunun GLN kodunu barÄ±ndÄ±rÄ±r.Bu alan 13 karakter uzunluktadÄ±r ve sadece rakamlardan oluÅŸur.
+ {--------Mal AlÄ±m Servisi iÃ§in FR Ã¼rÃ¼nÃ¼n alÄ±ndÄ±ÄŸÄ± depo veya Ã¼retici to ise alan depodur
+ {<FR>}  MalUretenGLN :string[13] = '8680007200010'; //Bu alan, Ã¼rÃ¼nÃ¼n alÄ±ndÄ±ÄŸÄ± depo veya Ã¼reticinin GLN numarasÄ±nÄ± barÄ±ndÄ±rÄ±r.
+ {<TO_>} MaliAlanEczaDepoGLN :string = '8680052900019' ; //Bu alan Ã¼rÃ¼nÃ¼ alan deponun GLN kodunu iÃ§erir.
+ //GLN Kodu ile ilgili detaylÄ± bilgiler Ä°TS Ä°ÅŸletme KÄ±lavuzunda bulunur.
  {---------}
  EczaDepolariKullaniciAdi   :string ='genotip';//'panates';// 'genotip';
  EczaDepolariKullaniciSifre :string ='genotip001';//'panates123';// 'genotip001';
@@ -405,49 +405,49 @@ uses FetaKurulusSiniflari;
    end;
 
 
-{$REGION 'Depo Doğrulama Bildirimi Web Servisi İslemleri'}
-{Depo Ürün Doğrulama Bildirimi, Depolar tarafından ürünün kontrolü için kullanılabilecek bir web servisidir.
-{Ürünün sistemde bulunup bulunmadığı, karekod bilgilerinin tutarlı olup olmadığı, ürünün daha önceden satılıp
-satılmadığı gibi kontrolleri yapabilecekleri bir bildirimdir.
-Kontrol işlemi ürünler için tek tek yapılabileceği gibi toplu halde de yapılabilir.
-Ancak doğrulama işlemini toplu halde yapmak hem sunucularımızın hem de istemci uygulamanın
-performansını artıracak ve zamandan büyük tasarruf sağlayacaktır.
-Uygulama geliştiricilerin doğrulama işlemini toplu halde yapılmasını sağlamaları önemlidir.
-Depolar doğrulama sonucu olumlu olmayan ürünleri satın almamalıdırlar.}
+{$REGION 'Depo DoÄŸrulama Bildirimi Web Servisi Ä°slemleri'}
+{Depo ÃœrÃ¼n DoÄŸrulama Bildirimi, Depolar tarafÄ±ndan Ã¼rÃ¼nÃ¼n kontrolÃ¼ iÃ§in kullanÄ±labilecek bir web servisidir.
+{ÃœrÃ¼nÃ¼n sistemde bulunup bulunmadÄ±ÄŸÄ±, karekod bilgilerinin tutarlÄ± olup olmadÄ±ÄŸÄ±, Ã¼rÃ¼nÃ¼n daha Ã¶nceden satÄ±lÄ±p
+satÄ±lmadÄ±ÄŸÄ± gibi kontrolleri yapabilecekleri bir bildirimdir.
+Kontrol iÅŸlemi Ã¼rÃ¼nler iÃ§in tek tek yapÄ±labileceÄŸi gibi toplu halde de yapÄ±labilir.
+Ancak doÄŸrulama iÅŸlemini toplu halde yapmak hem sunucularÄ±mÄ±zÄ±n hem de istemci uygulamanÄ±n
+performansÄ±nÄ± artÄ±racak ve zamandan bÃ¼yÃ¼k tasarruf saÄŸlayacaktÄ±r.
+Uygulama geliÅŸtiricilerin doÄŸrulama iÅŸlemini toplu halde yapÄ±lmasÄ±nÄ± saÄŸlamalarÄ± Ã¶nemlidir.
+Depolar doÄŸrulama sonucu olumlu olmayan Ã¼rÃ¼nleri satÄ±n almamalÄ±dÄ±rlar.}
 {$ENDREGION}
-{$REGION 'Depo Mal-Alım Bildirimi Web Servisi İslemleri'}
-{Depo Mal Alım Bildirimi, üreticiden veya başka bir depodan gelen ürünün kabulü sırasında
-yapılması gereken bir bildirimdir. Gelen her ürün bu bildirim aracılığı ile depo stokuna eklenir.
-Alım bildirimi yapılmış bir ürün başka bir yerde herhangi bir harekete konu olamaz.
-Bu yüzden alım bildirimi yapılan ürünlerin satış bildirimleri de yapılabilmelidir.
-Mal Alım Bildirimi Doğrulama Bildirimi ile aynı kontrollerden geçer ve doğrulama aşaması
-için aynı uyarı kodlarını döndürür. Bu sebeple Eczaneye ulaşan ürünün doğrulaması yapılmadan
-da alım bildirimi yapılabilir.}
+{$REGION 'Depo Mal-AlÄ±m Bildirimi Web Servisi Ä°slemleri'}
+{Depo Mal AlÄ±m Bildirimi, Ã¼reticiden veya baÅŸka bir depodan gelen Ã¼rÃ¼nÃ¼n kabulÃ¼ sÄ±rasÄ±nda
+yapÄ±lmasÄ± gereken bir bildirimdir. Gelen her Ã¼rÃ¼n bu bildirim aracÄ±lÄ±ÄŸÄ± ile depo stokuna eklenir.
+AlÄ±m bildirimi yapÄ±lmÄ±ÅŸ bir Ã¼rÃ¼n baÅŸka bir yerde herhangi bir harekete konu olamaz.
+Bu yÃ¼zden alÄ±m bildirimi yapÄ±lan Ã¼rÃ¼nlerin satÄ±ÅŸ bildirimleri de yapÄ±labilmelidir.
+Mal AlÄ±m Bildirimi DoÄŸrulama Bildirimi ile aynÄ± kontrollerden geÃ§er ve doÄŸrulama aÅŸamasÄ±
+iÃ§in aynÄ± uyarÄ± kodlarÄ±nÄ± dÃ¶ndÃ¼rÃ¼r. Bu sebeple Eczaneye ulaÅŸan Ã¼rÃ¼nÃ¼n doÄŸrulamasÄ± yapÄ±lmadan
+da alÄ±m bildirimi yapÄ±labilir.}
 {$ENDREGION}
-{$REGION 'Depo Mal-İade Bildirimi Web Servisi İslemleri'}
-{Depo Mal İade Bildirimi, üreticiden veya başka bir depodan gelen
- ve alım bildirimi yapılmış bir ürünün iadesi durumunda yapılması gereken bir bildirimdir.}
+{$REGION 'Depo Mal-Ä°ade Bildirimi Web Servisi Ä°slemleri'}
+{Depo Mal Ä°ade Bildirimi, Ã¼reticiden veya baÅŸka bir depodan gelen
+ ve alÄ±m bildirimi yapÄ±lmÄ±ÅŸ bir Ã¼rÃ¼nÃ¼n iadesi durumunda yapÄ±lmasÄ± gereken bir bildirimdir.}
 {$ENDREGION}
-{$REGION 'Depo Mal-Satış Bildirimi Web Servisi İslemleri'}
-{Depo Satış Bildirimi, Alım bildirimi yapılmış ürünlerin başka bir ecza deposu,
-hastane veya eczaneye satışı için kullanılacak web servisidir. Satış bildirimlerinin
-genel yapısı itibariyle satış bildirimi yapılmış bir ürün satış yapılan birimin üzerine
- geçmez. Ürünün bildirimi yapan depodan çıktığını belirtir.
-Alıcı aldığı ürünleri üzerine kaydettirmek isterse mal alım bildirimi yapmalıdır.}
+{$REGION 'Depo Mal-SatÄ±ÅŸ Bildirimi Web Servisi Ä°slemleri'}
+{Depo SatÄ±ÅŸ Bildirimi, AlÄ±m bildirimi yapÄ±lmÄ±ÅŸ Ã¼rÃ¼nlerin baÅŸka bir ecza deposu,
+hastane veya eczaneye satÄ±ÅŸÄ± iÃ§in kullanÄ±lacak web servisidir. SatÄ±ÅŸ bildirimlerinin
+genel yapÄ±sÄ± itibariyle satÄ±ÅŸ bildirimi yapÄ±lmÄ±ÅŸ bir Ã¼rÃ¼n satÄ±ÅŸ yapÄ±lan birimin Ã¼zerine
+ geÃ§mez. ÃœrÃ¼nÃ¼n bildirimi yapan depodan Ã§Ä±ktÄ±ÄŸÄ±nÄ± belirtir.
+AlÄ±cÄ± aldÄ±ÄŸÄ± Ã¼rÃ¼nleri Ã¼zerine kaydettirmek isterse mal alÄ±m bildirimi yapmalÄ±dÄ±r.}
 {$ENDREGION}
-{$REGION 'Depo Mal-Satış-İade Bildirimi Web Servisi İslemleri'}
-{Depo Satış İptal Bildirimi, Satış bildirimi yapılmış ürünlerin satışının iptal edilmesi
- için kullanılır. Bu bildirim sonucunda Satış bildirimi ile sahipliği kaybedilmiş ürün
- tekrar deponun üzerine kaydedilir. Deponun satışı iptal edebilmesi için ya alıcının mal
- alım bildirimi yapmamış olması, eğer yapmışsa Mal İade bildirimini yapmış olması gerekir.}
+{$REGION 'Depo Mal-SatÄ±ÅŸ-Ä°ade Bildirimi Web Servisi Ä°slemleri'}
+{Depo SatÄ±ÅŸ Ä°ptal Bildirimi, SatÄ±ÅŸ bildirimi yapÄ±lmÄ±ÅŸ Ã¼rÃ¼nlerin satÄ±ÅŸÄ±nÄ±n iptal edilmesi
+ iÃ§in kullanÄ±lÄ±r. Bu bildirim sonucunda SatÄ±ÅŸ bildirimi ile sahipliÄŸi kaybedilmiÅŸ Ã¼rÃ¼n
+ tekrar deponun Ã¼zerine kaydedilir. Deponun satÄ±ÅŸÄ± iptal edebilmesi iÃ§in ya alÄ±cÄ±nÄ±n mal
+ alÄ±m bildirimi yapmamÄ±ÅŸ olmasÄ±, eÄŸer yapmÄ±ÅŸsa Mal Ä°ade bildirimini yapmÄ±ÅŸ olmasÄ± gerekir.}
 {$ENDREGION}
-{$REGION 'DeAktivasyon Bildirimi Web Servisi İslemleri'}
-{Çeşitli sebeplerle sistemdeki kaydının çıkarılması söz konusu ürünler için yapılan
-bildirimdir. Deaktivasyon Bildirimi. Üreticiler, Depolar, Eczaneler, Hastaneler ve
-Sistem tarafından yapılabilir. Deaktivasyon Sebebine ait kodlar için İlaç Takip Sistemi
-İşletme Kılavuzu’na bakınız ya da web sayfamızı kontrol ediniz.Dikkat! Deaktivasyon
-bildiriminin iptal süreci sistem tarafından tanımlanmamıştır. Bu sebeple deaktivasyon
-bildiriminin dikkatli yapılması gerekmektedir.}
+{$REGION 'DeAktivasyon Bildirimi Web Servisi Ä°slemleri'}
+{Ã‡eÅŸitli sebeplerle sistemdeki kaydÄ±nÄ±n Ã§Ä±karÄ±lmasÄ± sÃ¶z konusu Ã¼rÃ¼nler iÃ§in yapÄ±lan
+bildirimdir. Deaktivasyon Bildirimi. Ãœreticiler, Depolar, Eczaneler, Hastaneler ve
+Sistem tarafÄ±ndan yapÄ±labilir. Deaktivasyon Sebebine ait kodlar iÃ§in Ä°laÃ§ Takip Sistemi
+Ä°ÅŸletme KÄ±lavuzuâ€™na bakÄ±nÄ±z ya da web sayfamÄ±zÄ± kontrol ediniz.Dikkat! Deaktivasyon
+bildiriminin iptal sÃ¼reci sistem tarafÄ±ndan tanÄ±mlanmamÄ±ÅŸtÄ±r. Bu sebeple deaktivasyon
+bildiriminin dikkatli yapÄ±lmasÄ± gerekmektedir.}
 {$ENDREGION}
 
 

@@ -1,4 +1,4 @@
-unit UDBSAramaFrame;
+﻿unit UDBSAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 18/02/2010 17:28:23 }
@@ -51,7 +51,7 @@ implementation
 
 procedure TDBSAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TDBSAramaFrame.btnSilClick(Sender: TObject);

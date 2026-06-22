@@ -1,4 +1,4 @@
-unit UAramaYokFrame;
+﻿unit UAramaYokFrame;
 
 interface
 
@@ -43,7 +43,7 @@ implementation
 
 procedure TAramaYokFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TAramaYokFrame.EkranYazdir(Sender: TObject);

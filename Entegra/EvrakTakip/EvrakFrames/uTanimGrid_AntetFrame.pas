@@ -1,4 +1,4 @@
-unit uTanimGrid_AntetFrame;
+ï»¿unit uTanimGrid_AntetFrame;
 
 interface
 
@@ -84,7 +84,7 @@ begin
    finally
      Pic.Free;
      { Graphic nesnesi burada Free edilmesin,
-       bu yordamý çaðýran "BlobEklendi" DosyaStream Free edilecek!
+       bu yordamÄ± Ã§aÄŸÄ±ran "BlobEklendi" DosyaStream Free edilecek!
      //if Assigned(Graphic) then
      //  Graphic.Free;
      }
@@ -107,7 +107,7 @@ begin
        Result := True;
        end
      else
-       Application.MessageBox(PWideChar('Resim boyutu Geçersiz'#13#10+_Gen.ToString+' piksel Geniþlik, '+_Yuk.ToString+' piksel Yükseklik ile sýnýrlýdýr'), PWideChar('Uyarý'),  MB_OK + MB_ICONASTERISK);
+       Application.MessageBox(PWideChar('Resim boyutu GeÃ§ersiz'#13#10+_Gen.ToString+' piksel GeniÅŸlik, '+_Yuk.ToString+' piksel YÃ¼kseklik ile sÄ±nÄ±rlÄ±dÄ±r'), PWideChar('UyarÄ±'),  MB_OK + MB_ICONASTERISK);
    finally
         DosyaStream.Free;
    end;

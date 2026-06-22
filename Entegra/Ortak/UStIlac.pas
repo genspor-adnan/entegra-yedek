@@ -1,4 +1,4 @@
-unit UStIlac;
+ï»¿unit UStIlac;
 interface
 uses dbtables, SysUtils, DB;
 
@@ -34,9 +34,9 @@ begin
       GirCikAdet := GirCikAdet * TabKart.FieldByName('BIRIM2MIKTAR').AsFloat
    else if TabHareket.FieldByName('BIRIM').AsString = TabKart.FieldByName('BIRIM3').AsString then
       GirCikAdet := GirCikAdet * TabKart.FieldByName('BIRIM3MIKTAR').AsFloat
-   else raise Exception.Create('Birimler uyuþmuyor. Stok kartýndan düzeltiniz..');
+   else raise Exception.Create('Birimler uyuÅŸmuyor. Stok kartÄ±ndan dÃ¼zeltiniz..');
   except
-     raise Exception.Create('Birimler de adetler belirtilmemiþ. Stok kartýndan düzeltiniz..');
+     raise Exception.Create('Birimler de adetler belirtilmemiÅŸ. Stok kartÄ±ndan dÃ¼zeltiniz..');
   end;
   TabHareket.FieldByName('MIKTAR').AsFloat := GirCikAdet;
   GirisCikisHesaplandi := True;
@@ -57,23 +57,23 @@ begin
    if TabDurum.FindKey([TabHareket.FieldByName('KOD').AsString]) then begin
       TabDurum.Edit;
 
-      if GirCik = 'Giriþ' then begin
+      if GirCik = 'GiriÅŸ' then begin
          if GirisCikisHesaplandi(TabHareket, TabStKart, TabIlacKart) then
             TabDurum.FieldByName('GIREN').AsFloat := TabDurum.FieldByName('GIREN').AsFloat + TabHareket.FieldByName('MIKTAR').AsFloat
       end
-      else if GirCik = 'GiriþSilme' then
+      else if GirCik = 'GiriÅŸSilme' then
           TabDurum.FieldByName('GIREN').AsFloat := TabDurum.FieldByName('GIREN').AsFloat - TabHareket.FieldByName('MIKTAR').AsFloat
-      else if GirCik = 'GiriþDeðiþ' then begin
+      else if GirCik = 'GiriÅŸDeÄŸiÅŸ' then begin
             if GirisCikisHesaplandi(TabHareket, TabStKart, TabIlacKart) then
               TabDurum.FieldByName('GIREN').AsFloat := TabDurum.FieldByName('GIREN').AsFloat + TabHareket.FieldByName('MIKTAR').AsFloat-OncekiGIRCIKAdet
          end
-      else if GirCik = 'Çýkýþ' then begin
+      else if GirCik = 'Ã‡Ä±kÄ±ÅŸ' then begin
             if GirisCikisHesaplandi(TabHareket, TabStKart, TabIlacKart) then
                TabDurum.FieldByName('CIKAN').AsFloat := TabDurum.FieldByName('CIKAN').AsFloat + TabHareket.FieldByName('MIKTAR').AsFloat
           end
-      else if GirCik = 'ÇýkýþSilme' then
+      else if GirCik = 'Ã‡Ä±kÄ±ÅŸSilme' then
           TabDurum.FieldByName('CIKAN').AsFloat := TabDurum.FieldByName('CIKAN').AsFloat - TabHareket.FieldByName('MIKTAR').AsFloat
-      else if GirCik = 'ÇýkýþDeðiþ' then begin
+      else if GirCik = 'Ã‡Ä±kÄ±ÅŸDeÄŸiÅŸ' then begin
              if GirisCikisHesaplandi(TabHareket, TabStKart, TabIlacKart) then
             TabDurum.FieldByName('CIKAN').AsFloat := TabDurum.FieldByName('CIKAN').AsFloat + TabHareket.FieldByName('MIKTAR').AsFloat-OncekiGIRCIKAdet;
          end;

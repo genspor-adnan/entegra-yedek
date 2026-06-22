@@ -1,4 +1,4 @@
-unit URehberAyar;
+ï»¿unit URehberAyar;
 
 interface
 
@@ -79,11 +79,11 @@ type
     { Public declarations }
     Yer : SmallInt;
     Bolum : string;
-   {1 kurum iletiþim
+   {1 kurum iletiÅŸim
     2 kurum ticari
     3 personel temel
-    4 personel iletiþim
-    5 personel ücret}
+    4 personel iletiÅŸim
+    5 personel Ã¼cret}
   end;
 
 var
@@ -111,8 +111,8 @@ end;
 
 procedure TRehberAyarDlg.RehberAyarKopyala(nereden,nereye:Integer;bolum:String);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and BOLUM=&Bolum AND SUBEID='+IntToStr(SubeId)+' ',['&Yeri','&Bolum'],[nereye,bolum]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERAYAR(YERI,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID) '
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and BOLUM=&Bolum AND SUBEID='+IntToStr(SubeId)+' ',['&Yeri','&Bolum'],[nereye,bolum]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERAYAR(YERI,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID) '
           +'select &Nereye,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID from REHBERAYAR where YERI=&Nereden and BOLUM=&Bolum'
           ,['&Nereye','&Nereden','&Bolum'],[nereye,nereden,bolum]);
 
@@ -126,7 +126,7 @@ end;
 
 procedure TRehberAyarDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Bolum:='';
 
   Tablo.GridTurkcelestir;
@@ -139,7 +139,7 @@ var  i : integer;
   LSrcProps: TcxImageComboBoxProperties;
 begin
    i:=Yer;
-   if i=4 then //Kurum ve pers iletiþim ayný olacak
+   if i=4 then //Kurum ve pers iletiÅŸim aynÄ± olacak
       i:=1;
 
    LProps := TcxImageComboBoxProperties(GridAyarViewVARSAYILAN.Properties);
@@ -165,7 +165,7 @@ procedure TRehberAyarDlg.GridAyarViewGIRISPropertiesCloseUp(Sender: TObject);
 begin
   //TabAyar.FieldByName('KAYNAK').AsString:='';
   if GridAyarViewGIRIS.EditValue=10 then
-    GridAyarViewKAYNAK.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiðinde yada boþ olduðunda hata vermesi engellendi.
+    GridAyarViewKAYNAK.EditValue:='9\(999\)999 99 99';//'0\(000\)000 00 00' --Eksik no girildiÄŸinde yada boÅŸ olduÄŸunda hata vermesi engellendi.
 end;
 
 procedure TRehberAyarDlg.GridAyarViewKAYNAKPropertiesButtonClick(
@@ -227,10 +227,10 @@ end;
 
 procedure TRehberAyarDlg.TabAyarBeforeDelete(DataSet: TDataSet);
 begin
-   //Varsayýlan kýsmý dolu ise ve data girilmiþse silinemez ve SIRA ve Varsayýlan kýsmý deðiþtirilemez
+   //VarsayÄ±lan kÄ±smÄ± dolu ise ve data girilmiÅŸse silinemez ve SIRA ve VarsayÄ±lan kÄ±smÄ± deÄŸiÅŸtirilemez
    if TabAyar.FieldByName('VARSAYILAN').AsString <> '' then begin
       Tablo.Query1.Close;    //resimleri silinir
-      if Yer=5 then //ÝK Tahakkuk
+      if Yer=5 then //Ä°K Tahakkuk
          Tablo.Query1.SQL.Text := ' select top 1 ID from PLANMAAS where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString
       else
          Tablo.Query1.SQL.Text := ' select top 1 ID from REHBERBILGI where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString;
@@ -254,7 +254,7 @@ begin
   if (TabAyar.FieldByName('GIRIS').AsInteger in [4,6,8])and(TabAyar.FieldbyName('KAYNAK').AsString = '') then
     Mesaj := Mesaj + 'KAYNAK ';
   if Mesaj <> '' then begin
-    Mesaj := Mesaj + 'Alanlarý boþ býrakýlamaz.';
+    Mesaj := Mesaj + 'AlanlarÄ± boÅŸ bÄ±rakÄ±lamaz.';
     ShowMessage(Mesaj);
     Abort;
   end;

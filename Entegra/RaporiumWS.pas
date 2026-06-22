@@ -1,4 +1,4 @@
-// ************************************************************************ //
+﻿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
 // WSDL     : http://genlisans.genyazilim.com/Raporium/DataServices/RaporiumWS.svc?wsdl

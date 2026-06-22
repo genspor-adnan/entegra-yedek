@@ -1,4 +1,4 @@
-unit UGirisKutusuEx;
+ï»¿unit UGirisKutusuEx;
 
 interface
 
@@ -19,7 +19,7 @@ type
 
   TGirdiDenetimleri = class;
 
-  TDenetimTürü = (dtBilinmeyen,dtEdit,dtMemo,dtRichEdit, dtComboBox,dtDateTimePicker,dtImageComboBox, dtCurrencyEdit);
+  TDenetimTÃ¼rÃ¼ = (dtBilinmeyen,dtEdit,dtMemo,dtRichEdit, dtComboBox,dtDateTimePicker,dtImageComboBox, dtCurrencyEdit);
 
   TGirisKutusuEx = class(TForm)
     GridPaneli: TGridPanel;
@@ -45,58 +45,58 @@ type
     FDenetimSay : Integer;
   public
     { Public declarations }
-    class function BilgiAl(ABaşlık: string;AGirdiler: TGirdiDenetimleri): TGirisKutusuEx;
-    class function BilgiAlEx(ABaşlık: string;AGirdiler: TGirdiDenetimleri): TModalResult;
+    class function BilgiAl(ABaÅŸlÄ±k: string;AGirdiler: TGirdiDenetimleri): TGirisKutusuEx;
+    class function BilgiAlEx(ABaÅŸlÄ±k: string;AGirdiler: TGirdiDenetimleri): TModalResult;
   end;
 
   TGirdiDenetimi = class(TObject)
   private
-    FBaşlık: string;
-    FDenetimTürü: TDenetimTürü;
+    FBaÅŸlÄ±k: string;
+    FDenetimTÃ¼rÃ¼: TDenetimTÃ¼rÃ¼;
     FVariant : PVariant;
-    FGirdiBileşeni : TWinControl;
+    FGirdiBileÅŸeni : TWinControl;
     FLabel : TLabel;
     FSatirYuksekligi : Integer;
-    procedure SetBaşlık(const Value: string);
+    procedure SetBaÅŸlÄ±k(const Value: string);
   protected
   public
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant);virtual;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant);virtual;
     destructor Destroy;override;
-    function Hazırla(AGirisKutusu: TGirisKutusuEx;AEvSahibi : TGridPanel): TGirdiDenetimi;virtual;
-    procedure HazırlamaBitti;Virtual;
-    procedure DeğişkeneAktar;virtual;abstract;
-    property Başlık: string read FBaşlık write SetBaşlık;
-    property DenetimTürü : TDenetimTürü read FDenetimTürü;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx;AEvSahibi : TGridPanel): TGirdiDenetimi;virtual;
+    procedure HazÄ±rlamaBitti;Virtual;
+    procedure DeÄŸiÅŸkeneAktar;virtual;abstract;
+    property BaÅŸlÄ±k: string read FBaÅŸlÄ±k write SetBaÅŸlÄ±k;
+    property DenetimTÃ¼rÃ¼ : TDenetimTÃ¼rÃ¼ read FDenetimTÃ¼rÃ¼;
   end;
 
   TEditDenetimi = class(TGirdiDenetimi)
   public
-    function Hazırla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant);override;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant);override;
   end;
 
   TCurrencyEditDenetimi = class(TGirdiDenetimi)
   private
     FOndalikBasamakSay: SmallInt;
   public
-    function Hazırla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant; AOndalikBasamakSay:SmallInt);reintroduce;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant; AOndalikBasamakSay:SmallInt);reintroduce;
   end;
 
   TMemoDenetimi = class(TGirdiDenetimi)
   public
-    function Hazırla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant);override;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant);override;
   end;
 
   TRichEditDenetimi = class(TGirdiDenetimi)
   public
-    function Hazırla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant);override;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi; override;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant);override;
   end;
 
   TComboBoxDenetimi = class(TGirdiDenetimi)
@@ -108,34 +108,34 @@ type
     procedure SetComboBoxStyle(const Value: TComboBoxStyle);
     procedure OnComboSelectionChanged(Sender: TObject);
   public
-    function Hazırla(AGirisKutusu: TGirisKutusuEx;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
       AEvSahibi: TGridPanel): TGirdiDenetimi; override;
 
-    procedure DeğişkeneAktar; override;
-    constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
-      AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    constructor Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant;
+      AListe : TStrings = nil; AComboÅekli : TComboBoxStyle = csDropDown;
       AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil);reintroduce;
-    procedure HazırlamaBitti; override;
-    property ComboŞekli : TComboBoxStyle read FComboBoxStyle write SetComboBoxStyle;
+    procedure HazÄ±rlamaBitti; override;
+    property ComboÅekli : TComboBoxStyle read FComboBoxStyle write SetComboBoxStyle;
     property ComboItemIndexKullan: Boolean read FComboItemIndexKullan write FComboItemIndexKullan;
     property Liste : TStrings read FListe write FListe;
   end;
 
   TDateTimePickerDenetimi = class(TGirdiDenetimi)
   private
-    FDateTimeTürü: TDateTimeKind;
-    FDateTimeBiçimi: string;
-    procedure SetDateTimeBiçimi(const Value: string);
-    procedure SetDateTimeTürü(const Value: TDateTimeKind);
+    FDateTimeTÃ¼rÃ¼: TDateTimeKind;
+    FDateTimeBiÃ§imi: string;
+    procedure SetDateTimeBiÃ§imi(const Value: string);
+    procedure SetDateTimeTÃ¼rÃ¼(const Value: TDateTimeKind);
     procedure cxDateEdit1PropertiesEditValueChanged(Sender: TObject);
   public
-    constructor Create(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-      ADateTimeTürü : TDateTimeKind = dtkDate; ADateTimeBiçimi : string = '');reintroduce;
-    function Hazırla(AGirisKutusu: TGirisKutusuEx;
+    constructor Create(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+      ADateTimeTÃ¼rÃ¼ : TDateTimeKind = dtkDate; ADateTimeBiÃ§imi : string = '');reintroduce;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
       AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
-    property DateTimeTürü : TDateTimeKind read FDateTimeTürü write SetDateTimeTürü;
-    property DateTimeBiçimi : string read FDateTimeBiçimi write SetDateTimeBiçimi;
+    procedure DeÄŸiÅŸkeneAktar; override;
+    property DateTimeTÃ¼rÃ¼ : TDateTimeKind read FDateTimeTÃ¼rÃ¼ write SetDateTimeTÃ¼rÃ¼;
+    property DateTimeBiÃ§imi : string read FDateTimeBiÃ§imi write SetDateTimeBiÃ§imi;
   end;
 
   TImageComboBoxDenetimi = class(TGirdiDenetimi)
@@ -143,16 +143,16 @@ type
     FListeSQL: string;
     FImageList: TCustomImageList;
     FIndexiKullan: Boolean;
-    FBağlantı : TFDConnection;
+    FBaÄŸlantÄ± : TFDConnection;
     procedure SetImageList(const Value: TCustomImageList);
     procedure SetListeSQL(const Value: string);
   public
-    constructor Create(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-      ABağlantı: TFDConnection;
+    constructor Create(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+      ABaÄŸlantÄ±: TFDConnection;
       AListeSql: string;AIndexiKullan: Boolean = False;AImageList: TCustomImageList = nil);reintroduce;
-    function Hazırla(AGirisKutusu: TGirisKutusuEx;
+    function HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
       AEvSahibi: TGridPanel): TGirdiDenetimi; override;
-    procedure DeğişkeneAktar; override;
+    procedure DeÄŸiÅŸkeneAktar; override;
     property ImageList : TCustomImageList read FImageList write SetImageList;
     property ListeSQL : string read FListeSQL write SetListeSQL;
     property IndexiKullan : Boolean read FIndexiKullan write FIndexiKullan;
@@ -164,18 +164,18 @@ type
   public
     constructor Create;
     destructor Destroy;override;
-    function Edit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TGirdiDenetimleri;
-    function CurrencyEdit(ABaşlık: string; ABaşlangıçDeğeri : PVariant; OndalikBasamakSay:SmallInt): TGirdiDenetimleri;
-    function Memo(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TGirdiDenetimleri;
-    function RichEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TGirdiDenetimleri;
-    function ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
-        AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
+    function Edit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TGirdiDenetimleri;
+    function CurrencyEdit(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant; OndalikBasamakSay:SmallInt): TGirdiDenetimleri;
+    function Memo(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TGirdiDenetimleri;
+    function RichEdit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TGirdiDenetimleri;
+    function ComboBox(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant;
+        AListe : TStrings = nil; AComboÅekli : TComboBoxStyle = csDropDown;
         AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TGirdiDenetimleri;
-    function DateTimePicker(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-        ADateTimeTürü : TDateTimeKind = dtkDate; ADateTimeBiçimi : string = '') :
+    function DateTimePicker(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+        ADateTimeTÃ¼rÃ¼ : TDateTimeKind = dtkDate; ADateTimeBiÃ§imi : string = '') :
         TGirdiDenetimleri;
-    function ImageComboBox(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-        ABağlantı: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
+    function ImageComboBox(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+        ABaÄŸlantÄ±: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
         AImageList: TCustomImageList = nil) : TGirdiDenetimleri;
     property GirdiDenetimleri : TObjectList read FGirdiDenetimleri;
   end;
@@ -183,56 +183,56 @@ type
 var
   GirisKutusuEx: TGirisKutusuEx;
 
-  { Denetim işlevleri }
+  { Denetim iÅŸlevleri }
 
   /// <summary>
   /// Standard Edit nesnesi ekler
   /// </summary>
-  /// <param name="ABaşlık">Bileşenin kenarında görünecek olan başlık</param>
-  /// <param name="ABaşlangıçDeğeri">Bileşen için gerekli olan ve ekran kapandıktan sonra bileşenin değerinin aktarılacağı variant pointer</param>
-  /// <exception cref="EAccessViolation"><param name="ABaşlangıçDeğeri"/> parametresi nil olduğunda bu istisna fırlatılır</exception>
+  /// <param name="ABaÅŸlÄ±k">BileÅŸenin kenarÄ±nda gÃ¶rÃ¼necek olan baÅŸlÄ±k</param>
+  /// <param name="ABaÅŸlangÄ±Ã§DeÄŸeri">BileÅŸen iÃ§in gerekli olan ve ekran kapandÄ±ktan sonra bileÅŸenin deÄŸerinin aktarÄ±lacaÄŸÄ± variant pointer</param>
+  /// <exception cref="EAccessViolation"><param name="ABaÅŸlangÄ±Ã§DeÄŸeri"/> parametresi nil olduÄŸunda bu istisna fÄ±rlatÄ±lÄ±r</exception>
   /// <returns>TEditDenetimi</returns>
-  function __Edit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TEditDenetimi;
-  function __CurrencyEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant; OndalikBasamakSay:SmallInt): TCurrencyEditDenetimi;
-  function __Memo(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TMemoDenetimi;
-  function __RichEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TRichEditDenetimi;
+  function __Edit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TEditDenetimi;
+  function __CurrencyEdit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant; OndalikBasamakSay:SmallInt): TCurrencyEditDenetimi;
+  function __Memo(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TMemoDenetimi;
+  function __RichEdit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TRichEditDenetimi;
   /// <summary>
   /// Standard ComboBox nesnesi ekler
   /// </summary>
-  /// <param name="ABaşlık">Bileşenin kenarında görünecek olan başlık</param>
-  /// <param name="ABaşlangıçDeğeri">Bileşen için gerekli olan ve ekran kapandıktan sonra bileşenin değerinin aktarılacağı variant pointer</param>
-  /// <param name="AListe">ComboBox nesnesini doldurmak için kullanılacak TStrings den türetilmiş liste örneği</param>
-  /// <param name="AComboŞekli">ComboBox'ın nasıl davranacağını belirleyen parametre</param>
-  /// <param name="AComboBoxItemIndexKullan">Dönüş değeri için ItemIndex mi yoksa Text özelliği mi kullanılacağını belirten parametre</param>
-  /// <exception cref="EAccessViolation"><param name="ABaşlangıçDeğeri"/> parametresi nil olduğunda bu istisna fırlatılır</exception>
+  /// <param name="ABaÅŸlÄ±k">BileÅŸenin kenarÄ±nda gÃ¶rÃ¼necek olan baÅŸlÄ±k</param>
+  /// <param name="ABaÅŸlangÄ±Ã§DeÄŸeri">BileÅŸen iÃ§in gerekli olan ve ekran kapandÄ±ktan sonra bileÅŸenin deÄŸerinin aktarÄ±lacaÄŸÄ± variant pointer</param>
+  /// <param name="AListe">ComboBox nesnesini doldurmak iÃ§in kullanÄ±lacak TStrings den tÃ¼retilmiÅŸ liste Ã¶rneÄŸi</param>
+  /// <param name="AComboÅekli">ComboBox'Ä±n nasÄ±l davranacaÄŸÄ±nÄ± belirleyen parametre</param>
+  /// <param name="AComboBoxItemIndexKullan">DÃ¶nÃ¼ÅŸ deÄŸeri iÃ§in ItemIndex mi yoksa Text Ã¶zelliÄŸi mi kullanÄ±lacaÄŸÄ±nÄ± belirten parametre</param>
+  /// <exception cref="EAccessViolation"><param name="ABaÅŸlangÄ±Ã§DeÄŸeri"/> parametresi nil olduÄŸunda bu istisna fÄ±rlatÄ±lÄ±r</exception>
   /// <returns>TComboBoxDenetimi</returns>
-  function __ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
-        AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
+  function __ComboBox(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant;
+        AListe : TStrings = nil; AComboÅekli : TComboBoxStyle = csDropDown;
         AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TComboBoxDenetimi;
   /// <summary>
   /// Standard DateTimePicker nesnesi ekler
   /// </summary>
-  /// <param name="ABaşlık">Bileşenin kenarında görünecek olan başlık</param>
-  /// <param name="ABaşlangıçDeğeri">Bileşen için gerekli olan ve ekran kapandıktan sonra bileşenin değerinin aktarılacağı variant pointer</param>
-  /// <param name="ADateTimeTürü">Zaman mı yoksa tarih mi düzenlenecek onu belirten parametre</param>
-  /// <param name="ADateTimeBiçimi">dtkCustom seçildiğinde istenen biçimin belirtileceği parametre</param>
-  /// <exception cref="EAccessViolation"><param name="ABaşlangıçDeğeri"/> parametresi nil olduğunda bu istisna fırlatılır</exception>
+  /// <param name="ABaÅŸlÄ±k">BileÅŸenin kenarÄ±nda gÃ¶rÃ¼necek olan baÅŸlÄ±k</param>
+  /// <param name="ABaÅŸlangÄ±Ã§DeÄŸeri">BileÅŸen iÃ§in gerekli olan ve ekran kapandÄ±ktan sonra bileÅŸenin deÄŸerinin aktarÄ±lacaÄŸÄ± variant pointer</param>
+  /// <param name="ADateTimeTÃ¼rÃ¼">Zaman mÄ± yoksa tarih mi dÃ¼zenlenecek onu belirten parametre</param>
+  /// <param name="ADateTimeBiÃ§imi">dtkCustom seÃ§ildiÄŸinde istenen biÃ§imin belirtileceÄŸi parametre</param>
+  /// <exception cref="EAccessViolation"><param name="ABaÅŸlangÄ±Ã§DeÄŸeri"/> parametresi nil olduÄŸunda bu istisna fÄ±rlatÄ±lÄ±r</exception>
   /// <returns></returns>
-  function __DateTimePicker(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-        ADateTimeTürü : TDateTimeKind = dtkDate; ADateTimeBiçimi : string = '') :
+  function __DateTimePicker(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+        ADateTimeTÃ¼rÃ¼ : TDateTimeKind = dtkDate; ADateTimeBiÃ§imi : string = '') :
         TDateTimePickerDenetimi;
   /// <summary>
-  /// DevExpress firmasının TcxImageComboBox bileşenini ekler
+  /// DevExpress firmasÄ±nÄ±n TcxImageComboBox bileÅŸenini ekler
   /// </summary>
-  /// <param name="ABaşlık">Bileşenin kenarında görünecek olan başlık</param>
-  /// <param name="ABaşlangıçDeğeri">Bileşen için gerekli olan ve ekran kapandıktan sonra bileşenin değerinin aktarılacağı variant pointer</param>
-  /// <param name="ABağlantı"><see cref="AListeSql"/> parametresinin çalıştırılacağı bağlantı örneği</param>
-  /// <param name="AListeSql">Properties.Items özelliğini doldurmak için kullanılacak sql ifadesi</param>
-  /// <param name="AIndexiKullan">Dönüş değeri için ItemIndex mi yoksa Properties.Items[x].Value değeri mi kullanılacağını belirten parametre</param>
-  /// <param name="AImageList">Listelenirken kullanılacak TCustomImageList bileşeni.Bunun için sql sorgusunda 3 ncü bir alan dönmesi gerekir.</param>
+  /// <param name="ABaÅŸlÄ±k">BileÅŸenin kenarÄ±nda gÃ¶rÃ¼necek olan baÅŸlÄ±k</param>
+  /// <param name="ABaÅŸlangÄ±Ã§DeÄŸeri">BileÅŸen iÃ§in gerekli olan ve ekran kapandÄ±ktan sonra bileÅŸenin deÄŸerinin aktarÄ±lacaÄŸÄ± variant pointer</param>
+  /// <param name="ABaÄŸlantÄ±"><see cref="AListeSql"/> parametresinin Ã§alÄ±ÅŸtÄ±rÄ±lacaÄŸÄ± baÄŸlantÄ± Ã¶rneÄŸi</param>
+  /// <param name="AListeSql">Properties.Items Ã¶zelliÄŸini doldurmak iÃ§in kullanÄ±lacak sql ifadesi</param>
+  /// <param name="AIndexiKullan">DÃ¶nÃ¼ÅŸ deÄŸeri iÃ§in ItemIndex mi yoksa Properties.Items[x].Value deÄŸeri mi kullanÄ±lacaÄŸÄ±nÄ± belirten parametre</param>
+  /// <param name="AImageList">Listelenirken kullanÄ±lacak TCustomImageList bileÅŸeni.Bunun iÃ§in sql sorgusunda 3 ncÃ¼ bir alan dÃ¶nmesi gerekir.</param>
   /// <returns>TDateTimePickerDenetimi</returns>
-  function __ImageComboBox(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-        ABağlantı: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
+  function __ImageComboBox(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+        ABaÄŸlantÄ±: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
         AImageList: TCustomImageList = nil) : TImageComboBoxDenetimi;
 
 implementation
@@ -241,56 +241,56 @@ uses FetaKurulusSiniflari, FetaClassExtensions, Fetautil,LocOnFly,PrjConst;
 
 {$R *.dfm}
 
-function __Edit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TEditDenetimi;
+function __Edit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TEditDenetimi;
 begin
-  Result := TEditDenetimi.Create(ABaşlık,ABaşlangıçDeğeri);
+  Result := TEditDenetimi.Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
 end;
 
-function __CurrencyEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant; OndalikBasamakSay:SmallInt): TCurrencyEditDenetimi;
+function __CurrencyEdit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant; OndalikBasamakSay:SmallInt): TCurrencyEditDenetimi;
 begin
-  Result := TCurrencyEditDenetimi.Create(ABaşlık, ABaşlangıçDeğeri, OndalikBasamakSay);
+  Result := TCurrencyEditDenetimi.Create(ABaÅŸlÄ±k, ABaÅŸlangÄ±Ã§DeÄŸeri, OndalikBasamakSay);
 end;
 
-function __Memo(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TMemoDenetimi;
+function __Memo(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TMemoDenetimi;
 begin
-  Result := TMemoDenetimi.Create(ABaşlık,ABaşlangıçDeğeri);
+  Result := TMemoDenetimi.Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
 end;
 
-function __RichEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TRichEditDenetimi;
+function __RichEdit(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant): TRichEditDenetimi;
 begin
-  Result := TRichEditDenetimi.Create(ABaşlık,ABaşlangıçDeğeri);
+  Result := TRichEditDenetimi.Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
 end;
 
-function __ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
-      AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
+function __ComboBox(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant;
+      AListe : TStrings = nil; AComboÅekli : TComboBoxStyle = csDropDown;
       AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TComboBoxDenetimi;
 begin
-  Result := TComboBoxDenetimi.Create(ABaşlık,ABaşlangıçDeğeri,AListe, AComboŞekli,AComboBoxItemIndexKullan, ASelectionChanged);
+  Result := TComboBoxDenetimi.Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,AListe, AComboÅekli,AComboBoxItemIndexKullan, ASelectionChanged);
 end;
 
 
-function __DateTimePicker(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-      ADateTimeTürü : TDateTimeKind = dtkDate; ADateTimeBiçimi : string = '') :
+function __DateTimePicker(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+      ADateTimeTÃ¼rÃ¼ : TDateTimeKind = dtkDate; ADateTimeBiÃ§imi : string = '') :
       TDateTimePickerDenetimi;
 begin
-    Result := TDateTimePickerDenetimi.Create(ABaşlık, ABaşlangıçDeğeri, ADateTimeTürü, ADateTimeBiçimi);
+    Result := TDateTimePickerDenetimi.Create(ABaÅŸlÄ±k, ABaÅŸlangÄ±Ã§DeÄŸeri, ADateTimeTÃ¼rÃ¼, ADateTimeBiÃ§imi);
 end;
 
-function __ImageComboBox(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
-      ABağlantı: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
+function __ImageComboBox(ABaÅŸlÄ±k: string;ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant;
+      ABaÄŸlantÄ±: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
       AImageList: TCustomImageList = nil) : TImageComboBoxDenetimi;
 begin
-  Result := TImageComboBoxDenetimi.Create(ABaşlık,ABaşlangıçDeğeri,ABağlantı, AListeSQL, AIndexiKullan,AImageList);
+  Result := TImageComboBoxDenetimi.Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,ABaÄŸlantÄ±, AListeSQL, AIndexiKullan,AImageList);
 end;                          
 
 
 { TGirdiDenetimi }
 
-constructor TGirdiDenetimi.Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant);
+constructor TGirdiDenetimi.Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant);
 begin
-  FVariant := ABaşlangıçDeğeri;
-  FBaşlık := ABaşlık;
-  FDenetimTürü := dtBilinmeyen;
+  FVariant := ABaÅŸlangÄ±Ã§DeÄŸeri;
+  FBaÅŸlÄ±k := ABaÅŸlÄ±k;
+  FDenetimTÃ¼rÃ¼ := dtBilinmeyen;
   FSatirYuksekligi := 20;
 end;
 
@@ -299,7 +299,7 @@ begin
   inherited;
 end;
 
-function TGirdiDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;AEvSahibi : TGridPanel): TGirdiDenetimi;
+function TGirdiDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;AEvSahibi : TGridPanel): TGirdiDenetimi;
 var
   idx : Integer;
 begin
@@ -313,42 +313,42 @@ begin
   end;
   FLabel := TLabel.Create(AGirisKutusu);
   FLabel.Parent := AEvSahibi;
-  FLabel.Caption := FBaşlık;
+  FLabel.Caption := FBaÅŸlÄ±k;
   FLabel.Align := alLeft;
   FLabel.Width:=600;
   AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 2] := FLabel;
 end;
 
-procedure TGirdiDenetimi.HazırlamaBitti;
+procedure TGirdiDenetimi.HazÄ±rlamaBitti;
 begin
 
 end;
 
-procedure TGirdiDenetimi.SetBaşlık(const Value: string);
+procedure TGirdiDenetimi.SetBaÅŸlÄ±k(const Value: string);
 begin
-  FBaşlık := Value;
+  FBaÅŸlÄ±k := Value;
 end;
 
-class function TGirisKutusuEx.BilgiAl(ABaşlık: string; AGirdiler: TGirdiDenetimleri): TGirisKutusuEx;
+class function TGirisKutusuEx.BilgiAl(ABaÅŸlÄ±k: string; AGirdiler: TGirdiDenetimleri): TGirisKutusuEx;
 var
   denetim : Pointer;
 begin
   Result := TGirisKutusuEx.Create(Application);
   Result.FGirdiDenetimleri := AGirdiler;
   for denetim in Result.FGirdiDenetimleri.GirdiDenetimleri  do begin
-    TGirdiDenetimi(denetim).Hazırla(Result,Result.GridPaneli);
+    TGirdiDenetimi(denetim).HazÄ±rla(Result,Result.GridPaneli);
   end;
   for denetim in Result.FGirdiDenetimleri.GirdiDenetimleri  do begin
-    TGirdiDenetimi(denetim).HazırlamaBitti;
+    TGirdiDenetimi(denetim).HazÄ±rlamaBitti;
   end;
-  Result.BaslikLabel.Caption := ABaşlık;
-  Result.Caption := ABaşlık;
+  Result.BaslikLabel.Caption := ABaÅŸlÄ±k;
+  Result.Caption := ABaÅŸlÄ±k;
 end;
 
-class function TGirisKutusuEx.BilgiAlEx(ABaşlık: string;
+class function TGirisKutusuEx.BilgiAlEx(ABaÅŸlÄ±k: string;
   AGirdiler: TGirdiDenetimleri): TModalResult;
 begin
-  with BilgiAl(ABaşlık,AGirdiler) do
+  with BilgiAl(ABaÅŸlÄ±k,AGirdiler) do
   try
     Result := ShowModal;
   finally
@@ -364,7 +364,7 @@ end;
 
 procedure TGirisKutusuEx.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TGirisKutusuEx.FormDestroy(Sender: TObject);
@@ -417,31 +417,31 @@ begin
   //
   for I := 0 to FGirdiDenetimleri.GirdiDenetimleri.Count - 1 do begin
     denetim := TGirdiDenetimi(FGirdiDenetimleri.GirdiDenetimleri[i]);
-    denetim.DeğişkeneAktar;
+    denetim.DeÄŸiÅŸkeneAktar;
   end;
   ModalResult := mrOK;
 end;
 
 { TEditDenetimi }
 
-constructor TEditDenetimi.Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant);
+constructor TEditDenetimi.Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
-  FDenetimTürü := dtEdit;
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtEdit;
 end;
 
-procedure TEditDenetimi.DeğişkeneAktar;
+procedure TEditDenetimi.DeÄŸiÅŸkeneAktar;
 begin
-  FVariant^ := TcxTextEdit(FGirdiBileşeni).Text;
+  FVariant^ := TcxTextEdit(FGirdiBileÅŸeni).Text;
 end;
 
-function TEditDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TEditDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 begin
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TcxTextEdit.Create(AGirisKutusu);
-  with TcxTextEdit(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TcxTextEdit.Create(AGirisKutusu);
+  with TcxTextEdit(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Width := 210;
@@ -450,31 +450,31 @@ begin
     if Assigned(FVariant) then
       Text := VarToStr(FVariant^);
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
 
 { TCurrencyEditDenetimi }
 
-constructor TCurrencyEditDenetimi.Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant; AOndalikBasamakSay:SmallInt);
+constructor TCurrencyEditDenetimi.Create(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; AOndalikBasamakSay:SmallInt);
 begin
-  inherited Create(ABaşlık, ABaşlangıçDeğeri);
-  FDenetimTürü := dtCurrencyEdit;
+  inherited Create(ABaÅŸlÄ±k, ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtCurrencyEdit;
   FOndalikBasamakSay := AOndalikBasamakSay;
 end;
 
-procedure TCurrencyEditDenetimi.DeğişkeneAktar;
+procedure TCurrencyEditDenetimi.DeÄŸiÅŸkeneAktar;
 begin
-  FVariant^ := TcxCurrencyEdit(FGirdiBileşeni).Value;
+  FVariant^ := TcxCurrencyEdit(FGirdiBileÅŸeni).Value;
 end;
 
-function TCurrencyEditDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi;
+function TCurrencyEditDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx; AEvSahibi: TGridPanel): TGirdiDenetimi;
 begin
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TcxCurrencyEdit.Create(AGirisKutusu);
-  with TcxCurrencyEdit(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TcxCurrencyEdit.Create(AGirisKutusu);
+  with TcxCurrencyEdit(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Width := 210;
@@ -485,7 +485,7 @@ begin
        Value := FVariant^;
       //Text := VarToStr(FVariant^);
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
@@ -493,26 +493,26 @@ end;
 { TMemoDenetimi }
 
 
-constructor TMemoDenetimi.Create(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant);
+constructor TMemoDenetimi.Create(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
-  FDenetimTürü := dtMemo;
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtMemo;
 end;
 
-procedure TMemoDenetimi.DeğişkeneAktar;
+procedure TMemoDenetimi.DeÄŸiÅŸkeneAktar;
 begin
-  FVariant^ := TMemo(FGirdiBileşeni).Text;
+  FVariant^ := TMemo(FGirdiBileÅŸeni).Text;
 end;
 
-function TMemoDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TMemoDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 begin
   FSatirYuksekligi := 210;
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TMemo.Create(AGirisKutusu);
-  with TMemo(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TMemo.Create(AGirisKutusu);
+  with TMemo(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Height := 230;
@@ -522,21 +522,21 @@ begin
     if Assigned(FVariant) then
       Text := VarToStr(FVariant^);
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
 
 { TRichEditDenetimi }
 
-constructor TRichEditDenetimi.Create(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant);
+constructor TRichEditDenetimi.Create(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
-  FDenetimTürü := dtRichEdit;
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtRichEdit;
 end;
 
-procedure TRichEditDenetimi.DeğişkeneAktar;
+procedure TRichEditDenetimi.DeÄŸiÅŸkeneAktar;
 var
   memStream: TMemoryStream;
   strList: TStringList;
@@ -547,7 +547,7 @@ begin
   strList := TStringList.Create;
 
   try
-    TRichEdit(FGirdiBileşeni).Lines.SaveToStream(memStream );
+    TRichEdit(FGirdiBileÅŸeni).Lines.SaveToStream(memStream );
     memStream.Position := 0;
     strList.LoadFromStream(memStream);
     for j := 0 to strList.count - 1 do
@@ -560,14 +560,14 @@ begin
   end;
 end;
 
-function TRichEditDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TRichEditDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 begin
   FSatirYuksekligi := 210;
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TRichEdit.Create(AGirisKutusu);
-  with TRichEdit(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TRichEdit.Create(AGirisKutusu);
+  with TRichEdit(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     PlainText := False;
@@ -578,45 +578,45 @@ begin
     if Assigned(FVariant) then
       Text := VarToStr(FVariant^);
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
 
 { TComboBoxDenetimi }
 
-constructor TComboBoxDenetimi.Create(ABaşlık: string;
-  ABaşlangıçDeğeri : PVariant;AListe : TStrings = nil;
-  AComboŞekli : TComboBoxStyle = csDropDown;
+constructor TComboBoxDenetimi.Create(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri : PVariant;AListe : TStrings = nil;
+  AComboÅekli : TComboBoxStyle = csDropDown;
   AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
-  FDenetimTürü := dtComboBox;
-  FComboBoxStyle := AComboŞekli;
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtComboBox;
+  FComboBoxStyle := AComboÅekli;
   FComboItemIndexKullan := AComboBoxItemIndexKullan;
   FListe := AListe;
   FOnSelectionChanged := ASelectionChanged;
 end;
 
-procedure TComboBoxDenetimi.DeğişkeneAktar;
+procedure TComboBoxDenetimi.DeÄŸiÅŸkeneAktar;
 begin
   if FComboItemIndexKullan then
-    FVariant^ := TComboBox(FGirdiBileşeni).ItemIndex
+    FVariant^ := TComboBox(FGirdiBileÅŸeni).ItemIndex
   else
-    FVariant^ := TComboBox(FGirdiBileşeni).Text;
+    FVariant^ := TComboBox(FGirdiBileÅŸeni).Text;
 end;
 
-function TComboBoxDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TComboBoxDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 var
   i : Integer;
   idx : Integer;
   selTxt: string;
 begin
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TComboBox.Create(AGirisKutusu);
-  with TComboBox(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TComboBox.Create(AGirisKutusu);
+  with TComboBox(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Width := 210;
@@ -641,12 +641,12 @@ begin
     Name := 'Denetim' + IntToStr(AGirisKutusu.FDenetimSay);
     AGirisKutusu.FDenetimSay := AGirisKutusu.FDenetimSay + 1;
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
 
-procedure TComboBoxDenetimi.HazırlamaBitti;
+procedure TComboBoxDenetimi.HazÄ±rlamaBitti;
 begin
   inherited;
   OnComboSelectionChanged(nil);
@@ -655,30 +655,30 @@ end;
 procedure TComboBoxDenetimi.OnComboSelectionChanged(Sender: TObject);
 begin
   if Assigned(FOnSelectionChanged) then
-    FOnSelectionChanged(TForm(TComboBox(FGirdiBileşeni).Owner));
+    FOnSelectionChanged(TForm(TComboBox(FGirdiBileÅŸeni).Owner));
 end;
 
 procedure TComboBoxDenetimi.SetComboBoxStyle(const Value: TComboBoxStyle);
 begin
   FComboBoxStyle := Value;
-  TComboBox(FGirdiBileşeni).Style := Value;
+  TComboBox(FGirdiBileÅŸeni).Style := Value;
 end;
 
 { TDateTimePickerDenetimi }
 
-constructor TDateTimePickerDenetimi.Create(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant; ADateTimeTürü: TDateTimeKind;
-  ADateTimeBiçimi: string);
+constructor TDateTimePickerDenetimi.Create(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; ADateTimeTÃ¼rÃ¼: TDateTimeKind;
+  ADateTimeBiÃ§imi: string);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
-  FDenetimTürü := dtDateTimePicker;
-  FDateTimeBiçimi := ADateTimeBiçimi;
-  FDateTimeTürü := ADateTimeTürü;
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
+  FDenetimTÃ¼rÃ¼ := dtDateTimePicker;
+  FDateTimeBiÃ§imi := ADateTimeBiÃ§imi;
+  FDateTimeTÃ¼rÃ¼ := ADateTimeTÃ¼rÃ¼;
 end;
 
-procedure TDateTimePickerDenetimi.DeğişkeneAktar;
+procedure TDateTimePickerDenetimi.DeÄŸiÅŸkeneAktar;
 begin
-  FVariant^ := TcxDateEdit(FGirdiBileşeni).EditValue;
+  FVariant^ := TcxDateEdit(FGirdiBileÅŸeni).EditValue;
 end;
 
 procedure TDateTimePickerDenetimi.cxDateEdit1PropertiesEditValueChanged(Sender: TObject);
@@ -686,18 +686,18 @@ begin
   (Sender as TcxDateEdit).PostEditValue;
 end;
 
-function TDateTimePickerDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TDateTimePickerDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 begin
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TcxDateEdit.Create(AGirisKutusu);
-  with TcxDateEdit(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TcxDateEdit.Create(AGirisKutusu);
+  with TcxDateEdit(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Width := 210;
-    Properties.DisplayFormat := FDateTimeBiçimi;
-    Properties.EditFormat := FDateTimeBiçimi;
+    Properties.DisplayFormat := FDateTimeBiÃ§imi;
+    Properties.EditFormat := FDateTimeBiÃ§imi;
     Properties.AssignedValues.DisplayFormat := True;
     Properties.AssignedValues.EditFormat := True;
     Properties.ImmediatePost := True;
@@ -710,61 +710,61 @@ begin
     AGirisKutusu.FDenetimSay := AGirisKutusu.FDenetimSay + 1;
   end;
 
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate;
 end;
 
-procedure TDateTimePickerDenetimi.SetDateTimeBiçimi(const Value: string);
+procedure TDateTimePickerDenetimi.SetDateTimeBiÃ§imi(const Value: string);
 begin
-  FDateTimeBiçimi := Value;
-  TDateTimePicker(FGirdiBileşeni).Format := Value;
+  FDateTimeBiÃ§imi := Value;
+  TDateTimePicker(FGirdiBileÅŸeni).Format := Value;
 end;
 
-procedure TDateTimePickerDenetimi.SetDateTimeTürü(const Value: TDateTimeKind);
+procedure TDateTimePickerDenetimi.SetDateTimeTÃ¼rÃ¼(const Value: TDateTimeKind);
 begin
-  FDateTimeTürü := Value;
-  TDateTimePicker(FGirdiBileşeni).Kind := Value;
+  FDateTimeTÃ¼rÃ¼ := Value;
+  TDateTimePicker(FGirdiBileÅŸeni).Kind := Value;
 end;
 
 { TImageComboBox }
 
-constructor TImageComboBoxDenetimi.Create(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant; ABağlantı: TFDConnection;
+constructor TImageComboBoxDenetimi.Create(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; ABaÄŸlantÄ±: TFDConnection;
   AListeSql: string;AIndexiKullan: Boolean;
   AImageList: TCustomImageList);
 begin
-  inherited Create(ABaşlık,ABaşlangıçDeğeri);
+  inherited Create(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri);
   FListeSQL := AListeSQL;
   FImageList := AImageList;
   FIndexiKullan := AIndexiKullan;
-  FDenetimTürü := dtImageComboBox;
-  FBağlantı := ABağlantı;
+  FDenetimTÃ¼rÃ¼ := dtImageComboBox;
+  FBaÄŸlantÄ± := ABaÄŸlantÄ±;
 end;
 
-procedure TImageComboBoxDenetimi.DeğişkeneAktar;
+procedure TImageComboBoxDenetimi.DeÄŸiÅŸkeneAktar;
 var
   idx : Integer;
 begin
-  idx := TcxImageComboBox(FGirdiBileşeni).ItemIndex;
+  idx := TcxImageComboBox(FGirdiBileÅŸeni).ItemIndex;
   if FIndexiKullan then
     FVariant^ := idx
   else if idx > -1 then
-    FVariant^ := TcxImageComboBox(FGirdiBileşeni).Properties.Items[idx].Value
+    FVariant^ := TcxImageComboBox(FGirdiBileÅŸeni).Properties.Items[idx].Value
   else
     FVariant^ := idx;
 end;
 
-function TImageComboBoxDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+function TImageComboBoxDenetimi.HazÄ±rla(AGirisKutusu: TGirisKutusuEx;
   AEvSahibi: TGridPanel): TGirdiDenetimi;
 var
   lst : TcxImageComboBoxItems;
   qry : TADOQuery;
 begin
-  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  inherited HazÄ±rla(AGirisKutusu,AEvSahibi);
   Result := Self;
-  FGirdiBileşeni := TcxImageComboBox.Create(AGirisKutusu);
-  with TcxImageComboBox(FGirdiBileşeni) do begin
+  FGirdiBileÅŸeni := TcxImageComboBox.Create(AGirisKutusu);
+  with TcxImageComboBox(FGirdiBileÅŸeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
     Width := 210;
@@ -773,7 +773,7 @@ begin
     lst := Properties.Items;
     Name := 'Denetim' + IntToStr(AGirisKutusu.FDenetimSay);
     AGirisKutusu.FDenetimSay := AGirisKutusu.FDenetimSay + 1;
-    with FetaKurulusSiniflari.Veritabani.SorguBaslat(FBağlantı,FListeSQL,[],[]) do
+    with FetaKurulusSiniflari.Veritabani.SorguBaslat(FBaÄŸlantÄ±,FListeSQL,[],[]) do
     try
       Open;
       qry := CurrentInstance as TADOQuery;
@@ -790,7 +790,7 @@ begin
     EditValue := FVariant^;
     PostEditValue;
   end;
-  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileÅŸeni;
   AEvSahibi.Realign;
   AEvSahibi.Invalidate; 
 end;
@@ -798,7 +798,7 @@ end;
 procedure TImageComboBoxDenetimi.SetImageList(const Value: TCustomImageList);
 begin
   FImageList := Value;
-  TcxImageComboBox(FGirdiBileşeni).Properties.Images := Value;
+  TcxImageComboBox(FGirdiBileÅŸeni).Properties.Images := Value;
 end;
 
 procedure TImageComboBoxDenetimi.SetListeSQL(const Value: string);
@@ -807,10 +807,10 @@ var
   qry : TADOQuery;
 begin
   FListeSQL := Value;
-  with TcxImageComboBox(FGirdiBileşeni) do begin
+  with TcxImageComboBox(FGirdiBileÅŸeni) do begin
     Properties.Items.Clear;
     lst := Properties.Items;
-    with FetaKurulusSiniflari.Veritabani.SorguBaslat(FBağlantı,FListeSQL,[],[]) do
+    with FetaKurulusSiniflari.Veritabani.SorguBaslat(FBaÄŸlantÄ±,FListeSQL,[],[]) do
     try
       Open;
       qry := CurrentInstance as TADOQuery;
@@ -833,14 +833,14 @@ end;
 
 { TGirdiDenetimleri }
 
-function TGirdiDenetimleri.ComboBox(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant; AListe: TStrings;
-  AComboŞekli: TComboBoxStyle;
+function TGirdiDenetimleri.ComboBox(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; AListe: TStrings;
+  AComboÅekli: TComboBoxStyle;
   AComboBoxItemIndexKullan: Boolean;ASelectionChanged : TComboSelectionChanged): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__ComboBox(ABaşlık,ABaşlangıçDeğeri,
-    AListe,AComboŞekli,AComboBoxItemIndexKullan,ASelectionChanged));
+  FGirdiDenetimleri.Add(__ComboBox(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,
+    AListe,AComboÅekli,AComboBoxItemIndexKullan,ASelectionChanged));
 end;
 
 constructor TGirdiDenetimleri.Create;
@@ -848,13 +848,13 @@ begin
   FGirdiDenetimleri := TObjectList.Create;
 end;
 
-function TGirdiDenetimleri.DateTimePicker(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant; ADateTimeTürü: TDateTimeKind;
-  ADateTimeBiçimi: string): TGirdiDenetimleri;
+function TGirdiDenetimleri.DateTimePicker(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; ADateTimeTÃ¼rÃ¼: TDateTimeKind;
+  ADateTimeBiÃ§imi: string): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__DateTimePicker(ABaşlık,ABaşlangıçDeğeri,
-    ADateTimeTürü, ADateTimeBiçimi));
+  FGirdiDenetimleri.Add(__DateTimePicker(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,
+    ADateTimeTÃ¼rÃ¼, ADateTimeBiÃ§imi));
 end;
 
 
@@ -863,41 +863,41 @@ begin
   FGirdiDenetimleri.Free;
   inherited;
 end;
-function TGirdiDenetimleri.Edit(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant): TGirdiDenetimleri;
+function TGirdiDenetimleri.Edit(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__Edit(ABaşlık,ABaşlangıçDeğeri));
+  FGirdiDenetimleri.Add(__Edit(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri));
 end;
 
-function TGirdiDenetimleri.CurrencyEdit(ABaşlık: string; ABaşlangıçDeğeri: PVariant; OndalikBasamakSay:SmallInt): TGirdiDenetimleri;
+function TGirdiDenetimleri.CurrencyEdit(ABaÅŸlÄ±k: string; ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; OndalikBasamakSay:SmallInt): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__CurrencyEdit(ABaşlık,ABaşlangıçDeğeri,OndalikBasamakSay));
+  FGirdiDenetimleri.Add(__CurrencyEdit(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,OndalikBasamakSay));
 end;
 
-function TGirdiDenetimleri.Memo(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant): TGirdiDenetimleri;
+function TGirdiDenetimleri.Memo(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__Memo(ABaşlık,ABaşlangıçDeğeri));
+  FGirdiDenetimleri.Add(__Memo(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri));
 end;
 
-function TGirdiDenetimleri.RichEdit(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant): TGirdiDenetimleri;
+function TGirdiDenetimleri.RichEdit(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__RichEdit(ABaşlık,ABaşlangıçDeğeri));
+  FGirdiDenetimleri.Add(__RichEdit(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri));
 end;
 
-function TGirdiDenetimleri.ImageComboBox(ABaşlık: string;
-  ABaşlangıçDeğeri: PVariant; ABağlantı: TFDConnection;
+function TGirdiDenetimleri.ImageComboBox(ABaÅŸlÄ±k: string;
+  ABaÅŸlangÄ±Ã§DeÄŸeri: PVariant; ABaÄŸlantÄ±: TFDConnection;
   AListeSql: string; AIndexiKullan: Boolean;
   AImageList: TCustomImageList): TGirdiDenetimleri;
 begin
   Result := Self;
-  FGirdiDenetimleri.Add(__ImageComboBox(ABaşlık,ABaşlangıçDeğeri,
-    ABağlantı, AListeSql, AIndexiKullan, AImageList));
+  FGirdiDenetimleri.Add(__ImageComboBox(ABaÅŸlÄ±k,ABaÅŸlangÄ±Ã§DeÄŸeri,
+    ABaÄŸlantÄ±, AListeSql, AIndexiKullan, AImageList));
 end;
 
 end.

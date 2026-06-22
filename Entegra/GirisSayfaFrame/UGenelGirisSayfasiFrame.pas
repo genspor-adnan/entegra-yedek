@@ -1,4 +1,4 @@
-unit UGenelGirisSayfasiFrame;
+﻿unit UGenelGirisSayfasiFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 11:19:20}
@@ -54,7 +54,7 @@ uses   LocOnFly,PrjConst,Utablo,
 
 procedure TGenelGirisSayfasiFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TGenelGirisSayfasiFrame.EkranYazdir(Sender: TObject);

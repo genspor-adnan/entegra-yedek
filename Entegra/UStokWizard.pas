@@ -1,4 +1,4 @@
-unit UStokWizard;
+ï»¿unit UStokWizard;
 
 interface
 
@@ -792,8 +792,8 @@ begin
   AraDlg.BtnSec.OnClick := AraDlg.SadeceTurVeUrunIDGonder;
   AraDlg.ShowModal;
   if AraDlg.ModalResult=MrOk then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKCEVRIM where STOKID='+TabStok.FieldByName('ID').AsString,[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKCEVRIM(STOKID,ADET1,BIRIM1,ADET2,BIRIM2)select '+TabStok.FieldByName('ID').AsString+',ADET1,BIRIM1,ADET2,BIRIM2 from STOKCEVRIM where STOKID='+Tablo.Query8.FieldByName('URUNID').AsString,[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKCEVRIM where STOKID='+TabStok.FieldByName('ID').AsString,[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKCEVRIM(STOKID,ADET1,BIRIM1,ADET2,BIRIM2)select '+TabStok.FieldByName('ID').AsString+',ADET1,BIRIM1,ADET2,BIRIM2 from STOKCEVRIM where STOKID='+Tablo.Query8.FieldByName('URUNID').AsString,[],[]);
     TabCevrim.Close;
     TabCevrim.Open;
   end;
@@ -810,15 +810,15 @@ var
 begin
   Brkd := 0;
   Brm := TabStok.FieldByName('ANABIRIM').AsInteger;
-  ctrls := TGirdiDenetimleri.Create.ImageComboBox('Barkod Tipi Seçimi',@Brkd,Tablo.FDCnn,'select 0,''Kullanýcý'' union all select ID,AD from BARKODAYARLAR ')
-                                   .ImageComboBox('Birim Seçimi',@Brm,Tablo.FDCnn,'select '+TabStok.FieldByName('ANABIRIM').AsString+','''+ComboANABIRIM.Text+''' union all select '+TabStok.FieldByName('BIRIM2').AsString+','''+ComboBIRIM2.Text+'''');
+  ctrls := TGirdiDenetimleri.Create.ImageComboBox('Barkod Tipi SeÃ§imi',@Brkd,Tablo.FDCnn,'select 0,''KullanÄ±cÄ±'' union all select ID,AD from BARKODAYARLAR ')
+                                   .ImageComboBox('Birim SeÃ§imi',@Brm,Tablo.FDCnn,'select '+TabStok.FieldByName('ANABIRIM').AsString+','''+ComboANABIRIM.Text+''' union all select '+TabStok.FieldByName('BIRIM2').AsString+','''+ComboBIRIM2.Text+'''');
   if TGirisKutusuEx.BilgiAlEx(BGBilgi,ctrls) = mrOk then begin
     if TabBarkod.IsEmpty then
       Varsayilanmi:=1
     else
       Varsayilanmi:=0;
     Barkodlar := Tablo.BarkodUret(Brkd,1);
-    VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,EKLEYEN)'+
+    VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,EKLEYEN)'+
                'values('''+Barkodlar[0]+''','+IntToStr(StokID)+','+VarToStr(Brkd)+','+VarToStr(Brm)+','+IntToStr(Varsayilanmi)+','+Kullanan+')',[],[]);
     TabloYenile(TabBarkod,[StokID]);
 
@@ -901,8 +901,8 @@ end;
 procedure TStokWizardDlg.BtnSilPaketKartClick(Sender: TObject);
 begin
   if (TabPaketKartlar.RecordCount>1) and (TabPaketKartlar.FieldbyName('URUNID').AsInteger<>TabStok.FieldbyName('ID').AsInteger)then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM PAKETDETAY WHERE PAKETID=&StokID and URUNID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM STOKFIYAT WHERE PAKETID=&StokID and STOKID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM PAKETDETAY WHERE PAKETID=&StokID and URUNID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM STOKFIYAT WHERE PAKETID=&StokID and STOKID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
     TabloYenile(TabPaketKartlar, [StokID])
   end;
 end;
@@ -981,7 +981,7 @@ begin
       Tablo.Query4.First;
       for i := 1 to Tablo.Query4.RecordCount do
       begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO STOKMUHASEBE (STOKID,MUHASEBEID,HESAPID,MASRAFID,EKLEYEN,EKLEMETARIHI) ' +
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO STOKMUHASEBE (STOKID,MUHASEBEID,HESAPID,MASRAFID,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&STOKID,&MUHASEBEID,&HESAPID,&MASRAFID,&EKLEYEN,&EKLEMETARIHI)',['&STOKID','&MUHASEBEID','&HESAPID','&MASRAFID','&EKLEYEN',
         '&EKLEMETARIHI'],[Tablo.Query3.FieldByName('ID').AsInteger,Tablo.Query4.FieldByName('MUHASEBEID').AsString,
         Tablo.Query4.FieldByName('HESAPID').AsString,Tablo.Query4.FieldByName('MASRAFID').AsString,Kullanan,
@@ -999,7 +999,7 @@ procedure TStokWizardDlg.Burayaekstralarkopyala1Click(Sender: TObject);
 var st : Tstringlist;
   sql:string;
 begin
-    sql := ' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok Adý] FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD like ''<ara>%'' or S.STOKADI like ''<ara>%'') ';
+    sql := ' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok AdÄ±] FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD like ''<ara>%'' or S.STOKADI like ''<ara>%'') ';
     st := Tstringlist.create;
     if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
 
@@ -1041,17 +1041,17 @@ begin
   Tablo.Query1.SQL.Add('where SB.ID='+VarToStr(CbStkBytKmbn.EditValue));
   Tablo.TablodanSorguAc(2,'select * from STOKBOYUTGRUPLARI where ID='+VarToStr(CbStkBytKmbn.EditValue));
   if (Tablo.Query2.FieldByName('BOYUT1').Value <> null)or(Tablo.Query2.FieldByName('BOYUT1').AsInteger <> 0) then begin
-    Snc1 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT1').AsString,[],[]);
+    Snc1 := Tablo.ListedenCokluSecim('Boyut SeÃ§imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT1').AsString,[],[]);
     if Snc1.Count>0 then
       Tablo.Query1.SQL.Add(' and G1.DEGER in('+Snc1.Join(',')+') ');
   end;
   if (Tablo.Query2.FieldByName('BOYUT2').Value <> null)or(Tablo.Query2.FieldByName('BOYUT2').AsInteger <> 0) then begin
-    Snc2 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT2').AsString,[],[]);
+    Snc2 := Tablo.ListedenCokluSecim('Boyut SeÃ§imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT2').AsString,[],[]);
     if Snc2.Count>0 then
       Tablo.Query1.SQL.Add(' and G2.DEGER in('+Snc2.Join(',')+') ');
   end;
   if (Tablo.Query2.FieldByName('BOYUT3').Value <> null)or(Tablo.Query2.FieldByName('BOYUT3').AsInteger <> 0) then begin
-    Snc3 := Tablo.ListedenCokluSecim('Boyut Seçimi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT3').AsString,[],[]);
+    Snc3 := Tablo.ListedenCokluSecim('Boyut SeÃ§imi.','select ID=DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' and BOLUM='+Tablo.Query2.FieldByName('BOYUT3').AsString,[],[]);
     if Snc3.Count>0 then
       Tablo.Query1.SQL.Add(' and G3.DEGER in('+Snc3.Join(',')+') ');
   end;
@@ -1091,7 +1091,7 @@ begin
     if DtsStok.State <> dsBrowse then begin
 
       Tablo.TablodanSorguAc(1,'delete from PAKETDETAY where PAKETID='+IntToStr(StokID)+' and URUNID='+IntToStr(StokID)+' insert into PAKETDETAY(PAKETID,URUNID,BIRIM,ADET,STOK,SUBEID) values('+IntToStr(StokID)+','+IntToStr(StokID)+','+TabStok.FieldByName('ANABIRIM').AsString+',1,1,'+IntToStr(SubeId)+') select scope_identity()');
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE STOKFIYAT SET PAKETID=STOKID WHERE STOKID=&StokID',['&StokID'],[StokID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE STOKFIYAT SET PAKETID=STOKID WHERE STOKID=&StokID',['&StokID'],[StokID]);
     end;
   end else begin
     PaketEkr.Enabled := False;
@@ -1100,9 +1100,9 @@ begin
     BtnFiyat.Visible := True;
     DokumanEkr.VisibleButtons := [bkBack,bkFinish,bkCancel];
     if DtsStok.State <> dsBrowse then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM PAKETDETAY WHERE PAKETID=&StokID',['&StokID'],[StokID]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DELETE FROM STOKFIYAT WHERE PAKETID=&StokID and STOKID<>PAKETID',['&StokID'],[StokID]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE STOKFIYAT SET PAKETID=0 WHERE PAKETID=&StokID',['&StokID'],[StokID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM PAKETDETAY WHERE PAKETID=&StokID',['&StokID'],[StokID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DELETE FROM STOKFIYAT WHERE PAKETID=&StokID and STOKID<>PAKETID',['&StokID'],[StokID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE STOKFIYAT SET PAKETID=0 WHERE PAKETID=&StokID',['&StokID'],[StokID]);
     end;
   end;
   if TabStok.State in [dsInsert,dsEdit] then
@@ -1159,7 +1159,7 @@ begin
     end else begin
       if dtsStok.State in [dsEdit,dsInsert] then
         TabStok.Post;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger]);
       //DetayEkrPage(Self);
       DetayTablosuAc
     end;
@@ -1239,7 +1239,7 @@ begin
     Tablo.Query7.FetchAll;
     Tablo.Query7.First;
     while not Tablo.Query7.Eof do begin
-      VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,YERI,YERID)'+
+      VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,YERI,YERID)'+
                                   'values('''+Barkodlar[Tablo.Query7.RecNo-1]+''','+IntToStr(StokID)+','+IntToStr((Sender as TMenuItem).Tag)+','+TabStok.FieldByName('ANABIRIM').AsString+
                                   ',0,'+IntToStr(TabNo_STOKBOYUTKOMBINASYON)+','+Tablo.Query7.FieldByName('ID').AsString+')',[],[]);
       Tablo.Query7.Next;
@@ -1269,7 +1269,7 @@ begin
 
       Tablo.Query8.First;
       while not Tablo.Query8.Eof do begin
-        VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,YERI,YERID)'+
+        VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,YERI,YERID)'+
                                     'values('''+Tablo.Query8.FieldByName('BARKOD').AsString+''','+IntToStr(StokID)+',0,'+TabStok.FieldByName('ANABIRIM').AsString+
                                     ',0,'+IntToStr(TabNo_STOKBOYUTKOMBINASYON)+','+Tablo.Query8.FieldByName('ID').AsString+')',[],[]);
         Tablo.Query8.Next;
@@ -1293,8 +1293,8 @@ end;
 
 procedure TStokWizardDlg.BtnVarsayilanYap(Sender: TObject);
 begin
-  VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKBARKOD set VARSAYILAN=0 where STOKID='+IntToStr(StokID),[],[]);
-  VeriTabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKBARKOD set VARSAYILAN=1 where STOKID='+IntToStr(StokID)+' and BARKODTIPI='+IntToStr((Sender as TMenuItem).Tag),[],[]);
+  VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKBARKOD set VARSAYILAN=0 where STOKID='+IntToStr(StokID),[],[]);
+  VeriTabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKBARKOD set VARSAYILAN=1 where STOKID='+IntToStr(StokID)+' and BARKODTIPI='+IntToStr((Sender as TMenuItem).Tag),[],[]);
   TabStokBoyutAfterScroll(TabStokBoyut);
 end;
 
@@ -1303,7 +1303,7 @@ var
   SubMenuItem:TMenuItem;
   i,j:Integer;
 begin
-  Tablo.TablodanSorguAc(4,'select distinct BA.ID,BA.AD from STOKBARKOD SB inner join (select ID=0,AD=''Kullanýcý'' union all select ID,AD from BARKODAYARLAR) BA on SB.BARKODTIPI=BA.ID where SB.STOKID='+IntToStr(STOKID));
+  Tablo.TablodanSorguAc(4,'select distinct BA.ID,BA.AD from STOKBARKOD SB inner join (select ID=0,AD=''KullanÄ±cÄ±'' union all select ID,AD from BARKODAYARLAR) BA on SB.BARKODTIPI=BA.ID where SB.STOKID='+IntToStr(STOKID));
   //?retilebilinecek barkod tipleri burada ilk item alt?na doldurulur..
   for j := ret1.Count-1 downto 0 do
     ret1.Items[j].Destroy;
@@ -1371,7 +1371,7 @@ begin
    //e?er dosya eklendiyse konusuna stok kod ve ad?n? yazal?m
    TabYorum.Last;
    if (ID>0)and(TabYorum.FieldByName('DOKUMANID').AsString<>'') then
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update DOKUMAN set KONU='''+TabStok.FieldByName('KOD').AsString+' / '+TabStok.FieldByName('STOKADI').AsString+''' where ID='+TabYorum.FieldByName('DOKUMANID').AsString,[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update DOKUMAN set KONU='''+TabStok.FieldByName('KOD').AsString+' / '+TabStok.FieldByName('STOKADI').AsString+''' where ID='+TabYorum.FieldByName('DOKUMANID').AsString,[],[]);
 end;
 
 procedure TStokWizardDlg.BtnSecimlerClick(Sender: TObject);
@@ -1417,7 +1417,7 @@ begin
             Model := '0'
          else
             Model := IntToStr(ComboModel.EditValue);
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'if not exists (select * from EKIPMANLAR where URUNID ='+LabelID.Caption+') begin '+
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'if not exists (select * from EKIPMANLAR where URUNID ='+LabelID.Caption+') begin '+
            'insert into EKIPMANLAR ([URUNID],[EKIPMANTUR],[KOD],[AD],[EKLEYEN],[SAHIP],[DURUM],MARKA,MODEL)values('+
             LabelID.Caption+',0,'''+EditKOD.Text+''','''+EditSTOKADI.Text+''','+Kullanan+',1,1,'+Marka+','+Model+') end',[],[]);
          exit;
@@ -1435,7 +1435,7 @@ begin
                showmessage(EHareketli_silinemez);
                CheckEKIPMAN.Checked := True;
             end else
-               Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from EKIPMANLAR where URUNID ='+LabelID.Caption, [], [])
+               Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from EKIPMANLAR where URUNID ='+LabelID.Caption, [], [])
       end else begin
          CheckEKIPMAN.OnClick := nil;
          CheckEKIPMAN.Checked := True;
@@ -1618,8 +1618,8 @@ procedure TStokWizardDlg.EkleStokEsdegerClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
-  sql:=' SELECT top 100 S.ID,S.KOD as Kod,S.STOKADI as [Stok Adý],TIPI AS [Tip],MARKA AS Marka,'+
-  ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ýzleme] '+
+  sql:=' SELECT top 100 S.ID,S.KOD as Kod,S.STOKADI as [Stok AdÄ±],TIPI AS [Tip],MARKA AS Marka,'+
+  ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [Ã¶zellik],IZLEME AS [Ä±zleme] '+
   ' FROM STOKLAR S '+
   ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))   '+
   ' Where S.STOKADI like ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' ';
@@ -1628,7 +1628,7 @@ begin
     if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[nil,nil,Tablo.repStokTipi,Tablo.repStokMarka,nil,Tablo.repStokGrubu,Tablo.repStokOzellik,Tablo.RepStokIzleme]) then begin
       Tablo.TablodanSorguAc(1,'Select * from STOKESDEGER Where STOKID='+inttostr(StokID)+' and  STOKESDEGERID='''+st.Strings[0]+''' ');
       if Tablo.Query1.IsEmpty then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKESDEGER(STOKID,STOKESDEGERID,TUR,EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI) values('+IntToStr(StokID)+','+st.Strings[0]+',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''' ) ',[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKESDEGER(STOKID,STOKESDEGERID,TUR,EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI) values('+IntToStr(StokID)+','+st.Strings[0]+',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''' ) ',[],[]);
         TabloYenile(TabStokEsdeger,[StokID]);
       end else begin
         Application.MessageBox(PChar(STUrun_var),PChar(Uyari),MB_OK);
@@ -1652,7 +1652,7 @@ procedure TStokWizardDlg.EkstraEkleTusClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
-    sql := ' select ID,TIPI=case when TUR=1 then ''Tek'' else ''çok'' end, SECIMADI from SECIMLER where BAGID=0 and SECIMADI like ''<ara>%''  order by 2,3 ';
+    sql := ' select ID,TIPI=case when TUR=1 then ''Tek'' else ''Ã§ok'' end, SECIMADI from SECIMLER where BAGID=0 and SECIMADI like ''<ara>%''  order by 2,3 ';
     st := Tstringlist.create;
       if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
          Tablo.TablodanSorguAc(1,'Select * from STOKSECIM Where STOKID='+inttostr(StokID)+' and  SECIMID='''+st.Strings[0]+''' ');
@@ -1685,7 +1685,7 @@ procedure TStokWizardDlg.EkstraSilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) <> ID_OK then
      Abort;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKSECIM where STOKID=&ID and SECIMID=&SECIMID',['&ID','&SECIMID'],[StokId, TabSecim.FieldByName('SECIMID').AsInteger]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKSECIM where STOKID=&ID and SECIMID=&SECIMID',['&ID','&SECIMID'],[StokId, TabSecim.FieldByName('SECIMID').AsInteger]);
   Tabloyenile(TabSecim,[StokID])
 end;
 
@@ -1737,7 +1737,7 @@ begin
      BtnBoyut.Caption := 'Renk-Beden'
   else if Sektor = Sektor_Fayans then begin
      cxLabel8.Caption := 'Seri'; //i?erik
-     Label16.Caption := 'ölçü'; //özelkod
+     Label16.Caption := 'Ã¶lÃ§Ã¼'; //Ã¶zelkod
   end;
   if CokluDilVar then
      LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
@@ -1837,8 +1837,8 @@ begin
   TekUrunNo := Tablo.GENINI.ReadBoolean(Ops_CheckUrunNoTek, True);
   BtnSecimler.visible := Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest];
   if Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest] then begin
-     CheckPaket.Caption := 'Menü';
-     PaketEkr.Title.Text := 'Menü Bilgileri';
+     CheckPaket.Caption := 'MenÃ¼';
+     PaketEkr.Title.Text := 'MenÃ¼ Bilgileri';
   end;
 
    if not TarayiciKullanimda then begin
@@ -1900,7 +1900,7 @@ begin
 
            if (Veritabani.VeriVarMi(Tablo.FDCnn,'select ID from REHBERBILGI where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_Stoklar,StokID]))
               and (Application.MessageBox( PChar(SDStokDetayKopyalansinMi), PChar(Onay), MB_YESNO+ MB_ICONQUESTION) <> ID_NO) then
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
                           'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) '+
                           'select YERI,&YeniYerIDsi,SIRA,ETIKET,BILGI,SUBEID from REHBERBILGI '+
                           'where YERI=&Yeri and YER_ID=&Yer_ID'
@@ -1995,7 +1995,7 @@ begin
         sql:=Qry.FieldByName('KAYNAK').AsString;
         ctrls := TGirdiDenetimleri.Create.Memo(Qry.FieldByName('ETIKET').AsString,@sql);
         if TGirisKutusuEx.BilgiAlEx(yenisorgugirin,ctrls) = mrOk then begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
         end;
       end else if Qry.FieldByName('GIRIS').AsInteger in [4,6,8,9] then begin //combo
         Tablo.TablodanSorguAc(7,'select DEGER from GENINI where DIL='+IntToStr(Dil)+'  AND BOLUM=0 and ANAHTAR='''+qry.FieldByName('KAYNAK').AsString+'''');
@@ -2091,7 +2091,7 @@ begin
    Adet := TabPaketKartlar.FieldByName('ADET').AsFloat;
    if TGirisKutusuEx.BilgiAlEx(Adet, TGirdiDenetimleri.Create.Edit(Adet, @Adet)) <> mrOk then
       Abort;
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PAKETDETAY set ADET = '+StringReplace(VarToStr(Adet), ',', '.', [])+' where ID='+TabPaketKartlar.FieldByName('ID').ASString,[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PAKETDETAY set ADET = '+StringReplace(VarToStr(Adet), ',', '.', [])+' where ID='+TabPaketKartlar.FieldByName('ID').ASString,[],[]);
    TabloYenile(TabPaketKartlar, [StokID]);
 end;
 
@@ -2116,8 +2116,8 @@ begin
       IMALATCI:=StringReplace(IMALATCI,',','.',[rfReplaceAll]);
       DEPOCU:=StringReplace(DEPOCU,',','.',[rfReplaceAll]);
 
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+IMALATCI+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Imalatci,31))+' and SATIS=1 ',[],[]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+DEPOCU+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Depocu,32))+' and SATIS=1 ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+IMALATCI+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Imalatci,31))+' and SATIS=1 ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+DEPOCU+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Depocu,32))+' and SATIS=1 ',[],[]);
 
       TabFiyat.Refresh;
     end;
@@ -2160,7 +2160,7 @@ begin
   ' and ID not in ( select ID=KAMPANYAID from KAMPANYAURUN KU where KU.TUR=1 and KU.URUNID='+IntToStr(StokID)+') ';
   st := Tstringlist.create;
     if Tablo.ListedenBilgiGetir(KampanyaSecimi, sql,st,[]) then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into KAMPANYAURUN(KAMPANYAID,TUR,URUNID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into KAMPANYAURUN(KAMPANYAID,TUR,URUNID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID) '+
         ' values('+st.Strings[0]+',1,'+IntToStr(StokID)+',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+') ',[],[]);
         TabloYenile(TabKampanya,[StokID]);
 
@@ -2179,7 +2179,7 @@ end;
 
 procedure TStokWizardDlg.KampanyaSilClick(Sender: TObject);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from KAMPANYAURUN Where KAMPANYAID='+TabKampanya.FieldByName('ID').AsString+' and URUNID='+IntToStr(StokID)+' ',[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from KAMPANYAURUN Where KAMPANYAID='+TabKampanya.FieldByName('ID').AsString+' and URUNID='+IntToStr(StokID)+' ',[],[]);
   TabloYenile(TabKampanya,[StokID]);
 end;
 
@@ -2259,10 +2259,10 @@ begin
       Application.MessageBox(PChar(STMarka_sec),PChar(HataPrj),MB_OK+ MB_ICONERROR);
       abort;
   end else begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2701%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2701%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2701%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2701%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_StokKart_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_StokKart_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -2306,7 +2306,7 @@ begin
    Mesaj := TabStokEsdeger.FieldByName('ACIKLAMA').Value;
    ctrls:= TGirdiDenetimleri.Create.Edit('Mesaj:',@Mesaj);
    if TGirisKutusuEx.BilgiAlEx(BGAciklama, ctrls) = mrOk then begin
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKESDEGER set ACIKLAMA='''+Mesaj+''', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=GETDATE()  where ID='+
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKESDEGER set ACIKLAMA='''+Mesaj+''', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=GETDATE()  where ID='+
         TabStokEsdeger.FieldByName('ID').AsString,[],[]);
       TabloYenile(TabStokEsdeger,[]);
    end;
@@ -2316,13 +2316,13 @@ procedure TStokWizardDlg.MenuAnaBirimDegisClick(Sender: TObject);
 var Birim:Variant;
 begin
    if TGirisKutusuEx.BilgiAlEx(TabStok.FieldByName('STOKADI').AsString ,
-      TGirdiDenetimleri.Create.ImageComboBox('Yeni Stok Birimi Seçin',@Birim,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where BOLUM = -2702 and DIL=-1 order by 2',False,nil)) <> mrOk then
+      TGirdiDenetimleri.Create.ImageComboBox('Yeni Stok Birimi SeÃ§in',@Birim,Tablo.FDCnn,'select DEGER,ANAHTAR from GENINI where BOLUM = -2702 and DIL=-1 order by 2',False,nil)) <> mrOk then
       Abort;
 
    if StrToIntDef(VarToStr(Birim),0)>0 then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'DISABLE TRIGGER ALL ON FATURA',[],[]);
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' EXEC [dbo].[sp_prg_StokBirimDuzelt] '+TabStok.FieldByName('ID').AsString+','+Birim,[],[]);
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'ENABLE TRIGGER ALL ON FATURA',[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'DISABLE TRIGGER ALL ON FATURA',[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' EXEC [dbo].[sp_prg_StokBirimDuzelt] '+TabStok.FieldByName('ID').AsString+','+Birim,[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'ENABLE TRIGGER ALL ON FATURA',[],[]);
        TabloYenile(TabStok,[TabStok.FieldByName('ID').AsInteger]);
    end;
 end;
@@ -2340,17 +2340,17 @@ begin
    YeniBirim := eskiad;
    Tablo.TablodanSorguAc(1,'select top 1 DEGER from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_Anabirim)+' and ANAHTAR= '''+YeniBirim+''' ');
    YeniBirim := Tablo.Query1.Fields[0].AsString;
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKLAR set ANABIRIM='+YeniBirim+',BIRIM2='+YeniBirim+'  where ID='+TabStok.FieldByName('ID').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKFIYAT set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATURA set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update TEKLIFDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARISDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SERVISDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SATINALMADETAY set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update URETIMRECETEDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update URETIMEMRI set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update URETIMOPERASYON set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update URETIMEMRIDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKLAR set ANABIRIM='+YeniBirim+',BIRIM2='+YeniBirim+'  where ID='+TabStok.FieldByName('ID').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKFIYAT set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATURA set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update TEKLIFDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SIPARISDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SERVISDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SATINALMADETAY set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update URETIMRECETEDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update URETIMEMRI set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update URETIMOPERASYON set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update URETIMEMRIDETAY set BIRIM='+YeniBirim+' where URUNID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
    tabloyenile(TabStok,[TabStok.FieldByName('ID').AsString]);
 end;
 
@@ -2373,7 +2373,7 @@ begin
    ctrls := TGirdiDenetimleri.Create.ComboBox((BGYeni_tur),@eskiad,tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_EsdegerTur)+' ').items); //Anabirim listesi
    if TGirisKutusuEx.BilgiAlEx(BGYeni_tur_gir,ctrls)= mrOk then begin
       Mesaj := Tablo.inidenDegerGetir(IntToStr(Ops_StokKart_EsdegerTur), eskiad);
-      veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKESDEGER set TUR='+Mesaj+', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=GETDATE()  where ID='+
+      veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKESDEGER set TUR='+Mesaj+', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=GETDATE()  where ID='+
         TabStokEsdeger.FieldByName('ID').AsString,[],[]);
       TabloYenile(TabStokEsdeger,[]);
    end;
@@ -2394,12 +2394,12 @@ procedure TStokWizardDlg.DetayKopyala1Click(Sender: TObject);
 var Sonuclar:TStringList;
 begin
   Sonuclar := TStringList.Create;
-  if Tablo.ListedenBilgiGetir('Stok Seçimi','select ID,KOD,STOKADI,DETAYBOLUMU from STOKLAR where (KOD like ''<ara>%'' or STOKADI like ''<ara>%'') and ISNULL(DETAYBOLUMU,'''')<>''''',Sonuclar,[],'') then begin
+  if Tablo.ListedenBilgiGetir('Stok SeÃ§imi','select ID,KOD,STOKADI,DETAYBOLUMU from STOKLAR where (KOD like ''<ara>%'' or STOKADI like ''<ara>%'') and ISNULL(DETAYBOLUMU,'''')<>''''',Sonuclar,[],'') then begin
     TabStok.Edit;
     TabStok.FieldByName('DETAYBOLUMU').AsString := Sonuclar[3];
     //TabStok.Post;   kendisi post ediyor..
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERBILGI where YERI=88 and YER_ID='+TabStok.FieldByName('ID').AsString,[],[]);
-    veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI) select YERI,'+TabStok.FieldByName('ID').AsString+',SIRA,ETIKET,BILGI from REHBERBILGI where YERI=88 and YER_ID='+Sonuclar[0],[],[]);
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERBILGI where YERI=88 and YER_ID='+TabStok.FieldByName('ID').AsString,[],[]);
+    veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI) select YERI,'+TabStok.FieldByName('ID').AsString+',SIRA,ETIKET,BILGI from REHBERBILGI where YERI=88 and YER_ID='+Sonuclar[0],[],[]);
     TabloYenile(DETAY,[]);
   end;
   freeandnil(Sonuclar);
@@ -2467,7 +2467,7 @@ end;
 procedure TStokWizardDlg.SilStokEsdegerClick(Sender: TObject);
 begin
   //TabStokEsdeger.Delete;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from STOKESDEGER Where STOKESDEGERID='+TabStokEsdeger.FieldByName('STOKESDEGERID').AsString+' ',[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from STOKESDEGER Where STOKESDEGERID='+TabStokEsdeger.FieldByName('STOKESDEGERID').AsString+' ',[],[]);
   TabloYenile(TabStokEsdeger,[StokID]);
 end;
 
@@ -2491,7 +2491,7 @@ procedure TStokWizardDlg.TabBarkodAfterPost(DataSet: TDataSet);
 begin
   if TabBarkod.FieldByName('VARSAYILAN').AsBoolean then
    begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKBARKOD SET VARSAYILAN=0 WHERE STOKID='+TabStok.FieldByName('ID').AsString+' and ID <> '+TabBarkod.FieldByName('ID').AsString+'',[],[] );
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKBARKOD SET VARSAYILAN=0 WHERE STOKID='+TabStok.FieldByName('ID').AsString+' and ID <> '+TabBarkod.FieldByName('ID').AsString+'',[],[] );
      TabloYenile(TabBarkod,[TabStok.FieldByName('ID').AsInteger]);
    end;
 
@@ -2618,9 +2618,9 @@ end;
 
 procedure TStokWizardDlg.TabFiyatBeforePost(DataSet: TDataSet);
 begin
-   if not BoslukKontrol(TabFiyat.FieldByName('FIYATADI').AsString, 'Fiyat adý') then Abort;
+   if not BoslukKontrol(TabFiyat.FieldByName('FIYATADI').AsString, 'Fiyat adÄ±') then Abort;
    if not BoslukKontrol(TabFiyat.FieldByName('BIRIM').AsString, 'Birimi') then Abort;
-   if not BoslukKontrol(TabFiyat.FieldByName('FIYAT').AsString, 'Fiyatý') then Abort;
+   if not BoslukKontrol(TabFiyat.FieldByName('FIYAT').AsString, 'FiyatÄ±') then Abort;
    if not BoslukKontrol(TabFiyat.FieldByName('KUR').AsString, 'Para birimi') then Abort;
    EkleyenDegistiren(DtsFiyat);
    if CheckPaket.Checked then
@@ -2704,7 +2704,7 @@ procedure TStokWizardDlg.TabStokAfterOpen(DataSet: TDataSet);
 begin
   StokId := TabStok.FieldByName('ID').AsInteger;
   CheckPaketPropertiesEditValueChanged(self);
-  KotaEkr.Hint := VarToStr(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select isnull(sum(KALAN),0) from STOKDURUM where STOKID=&StkID ',['&StkID'],[StokID],True));
+  KotaEkr.Hint := VarToStr(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select isnull(sum(KALAN),0) from STOKDURUM where STOKID=&StkID ',['&StkID'],[StokID],True));
   KotaEkr.Subtitle.Text := 'Depo Miktar : '+KotaEkr.Hint;
   CheckPaket.Properties.OnEditValueChanged := CheckPaketPropertiesEditValueChanged;
   //cbIzleme.Properties.OnEditValueChanged :=  cbIzlemePropertiesEditValueChanged;
@@ -2722,7 +2722,7 @@ begin
   StokId := TabStok.FieldByName('ID').AsInteger;
   TabloYenile(TabFiyat,[StokId,ComboSatis.ItemIndex]);
  { if (IslemOp='E')and( not TabFiyat.Active) then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into STOKFIYAT (STOKID,FIYATADI,BIRIM,FIYAT,KUR,EKLEYEN)values'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into STOKFIYAT (STOKID,FIYATADI,BIRIM,FIYAT,KUR,EKLEYEN)values'+
       '(&stok_id, &fadi, &birim, &fiyat, &kur,&ekleyen) ',['&stok_id', '&fadi', '&birim', '&fiyat', '&kur', '&ekleyen'],
        [StokId, TcxImageComboBoxProperties(GridFiyatViewFIYATADI.RepositoryItem.properties).Items[0].Value,TabStok.FieldByName('ANABIRIM').AsInteger,-1, CariDoviz, Kullanan]);
            }
@@ -2746,7 +2746,7 @@ begin
   if not BoslukKontrol(EditKOD.text, KontrolStokKodu) then Abort;
 
   if EditKOD.Text='0' then begin
-     Application.MessageBox(pchar('Kod Sýfýr(0) olamaz'),'U Y A R I',MB_OK);
+     Application.MessageBox(pchar('Kod SÄ±fÄ±r(0) olamaz'),'U Y A R I',MB_OK);
      Abort;
   end;
 
@@ -2800,7 +2800,7 @@ begin
   if PageControlUst.ActivePage=TabSheetMuhasebeHesaplari then begin
     TabloYenile(TabStokMuhasebe, [TabStok.FieldByName('ID').AsInteger]);
     if TabStokMuhasebe.IsEmpty then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
        ' YER=88, YER_ID=&STOKID,MUHASEBEID=DEGER,EKLEYEN=&EKLEYEN FROM GENINI WHERE'+
        ' BOLUM=-2755',['&STOKID','&EKLEYEN'],[TabStok.FieldByName('ID').AsInteger,Kullanan]);
        TabloYenile(TabStokMuhasebe, [TabStok.FieldByName('ID').AsInteger]);
@@ -3028,7 +3028,7 @@ begin
     ' values('''+KKodi+''','''+KAdi+''',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+') Select scope_identity()';
   Tablo.Query1.Open;
 
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into KAMPANYAURUN(KAMPANYAID,TUR,URUNID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into KAMPANYAURUN(KAMPANYAID,TUR,URUNID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID) '+
     ' values('+Tablo.Query1.Fields[0].AsString+',1,'+IntToStr(StokID)+',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+') ',[],[]);
 
   Application.CreateForm(TKampanyalarDlg,KampanyalarDlg);
@@ -3136,7 +3136,7 @@ begin
      DETAY.post;
 
   if EkleDetay then
-     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Deðiþ');
+     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'DeÄŸiÅŸ');
    StokID :=  TabStok.Fields[0].AsInteger;
    //islemKopyala := '';
    Sontus := 'K';//kaydet butonu

@@ -1,4 +1,4 @@
-unit UMaliyetlerListeFrame;
+ï»¿unit UMaliyetlerListeFrame;
 
 interface
 
@@ -85,7 +85,7 @@ uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,Prjconst,LocOnFly;
 
 procedure TMaliyetlerListeFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   AramaYap(nil);
   DBPivotGridMaliyet.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\MaliyetlerListeGridi1',true,false);
 end;
@@ -106,7 +106,7 @@ end;
 procedure TMaliyetlerListeFrame.AramaYap(Sender: TObject);
 begin
   if (FArama.cbHesaplamaYontemi.ItemIndex > 0) and (FArama.cbDepo.ItemIndex > 0) then begin
-    if StokMaliyetHesapYontemi=1 then  //TODO burada ort yada fifoya bakýp sql i deiþicez.. StokMaliyetHesapYontemi
+    if StokMaliyetHesapYontemi=1 then  //TODO burada ort yada fifoya bakÄ±p sql i deiÅŸicez.. StokMaliyetHesapYontemi
 
       TabloYenile(TabMaliyet,[FArama.cbDepo.EditValue,FormatDateTime('yyyy-MM-dd 23:59:59',FArama.AraBitis.Date)]);
 
@@ -124,7 +124,7 @@ begin
     cxExportPivotGridToExcel(ExcelSaveDlg.FileName,DBPivotGridMaliyet,True,True,'xls');
     //cxExportPivotGridToXLSX(ExcelSaveDlg.FileName,DBPivotGridMaliyet,True,True,'xls');
 //    ExportGridToExcel(SaveDialog1.FileName, (((Sender as TMenuitem).GetParentComponent as TPopupMenu).PopupComponent as TcxGridDBTableView).GetParentComponent as TcxGrid, True, True, True, 'xls');
-    MessageDlg('Excel dosyasý oluþturuldu.', mtInformation, [mbOk], 0);
+    MessageDlg('Excel dosyasÄ± oluÅŸturuldu.', mtInformation, [mbOk], 0);
   end;
 end;
 

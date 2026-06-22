@@ -1,4 +1,4 @@
-unit UTakvimGenelHareket;
+﻿unit UTakvimGenelHareket;
 
 interface
 

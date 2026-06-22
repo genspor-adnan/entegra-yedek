@@ -1,4 +1,4 @@
-unit UKodAgaci;
+ï»¿unit UKodAgaci;
 
 interface
 
@@ -205,7 +205,7 @@ procedure TKodAgaciDlg.FormCreate(Sender: TObject);
 var
   I : Integer;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Sonuc_ID:=-99;
   Sonuc_Kod:='';
   Sonuc_Aciklama:='';
@@ -221,9 +221,9 @@ var
   Col : TcxTreeListColumn;
 begin
 //  cxDBTreeList1cxDBTreeListSEC.visible := CokluSecim;
-  if CokluSecim then begin//çoklu seçimse baþýna seçme koyalým
+  if CokluSecim then begin//Ã§oklu seÃ§imse baÅŸÄ±na seÃ§me koyalÄ±m
      Col := cxDBTreeList1.CreateColumn();
-     Col.Caption.Text := 'Seç';
+     Col.Caption.Text := 'SeÃ§';
      col.Options.Editing := False;
      Col.PropertiesClass := TcxCheckBoxProperties;
      Basla:=1
@@ -252,7 +252,7 @@ begin
     if not FullExp then
       cxDBTreeList1.FullCollapse;
   end;
-  //repository bilgilerini yerleþtirelim...
+  //repository bilgilerini yerleÅŸtirelim...
 
   if (cxDBTreeList1.ColumnCount>0)and(Length(RepList) <> 0) then
     for I := Basla to Length(RepList) - 1 do
@@ -261,11 +261,11 @@ begin
       except
         cxDBTreeList1.Columns[i].RepositoryItem:=nil;
       end;
-  //column baþlýklarý
+  //column baÅŸlÄ±klarÄ±
   if (cxDBTreeList1.ColumnCount>0) and (Length(ColBasliklar) <> 0) then
     for I := Basla to Length(ColBasliklar) - 1 do
        cxDBTreeList1.Columns[i].Caption.Text:=ColBasliklar[i];
-  //column görünür,görünmez...
+  //column gÃ¶rÃ¼nÃ¼r,gÃ¶rÃ¼nmez...
   if (cxDBTreeList1.ColumnCount>0) and (Length(ColVisibility) <> 0) then
     for I := Basla to Length(ColVisibility) - 1 do
        cxDBTreeList1.Columns[i].Visible:=ColVisibility[i];
@@ -314,7 +314,7 @@ begin
     for I := 0 to Length(VarsAlanlar) - 1 do begin
       TabKodAgaci.FieldByName(VarsAlanlar[i]).Value := VarsDegerler[i];
     end;
-{  //varsayýlan alaný deðeri falan varsa oraya dokundurtmayalým...
+{  //varsayÄ±lan alanÄ± deÄŸeri falan varsa oraya dokundurtmayalÄ±m...
   if (cxDBTreeList1.ColumnCount>0)and(Length(VarsAlanlar) <> 0)and(Length(VarsDegerler) <> 0)and(Length(VarsDegerler)=Length(VarsAlanlar)) then
     for I := 0 to Length(VarsAlanlar) - 1 do
       for j := 0 to cxDBTreeList1.ColumnCount - 1 do begin

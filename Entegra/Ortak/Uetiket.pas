@@ -1,4 +1,4 @@
-unit Uetiket;
+ï»¿unit Uetiket;
 
 interface
 
@@ -66,7 +66,7 @@ uses UAyar, UTablo, UMesaj;
 var
   EtiketTuru, EtiketYon: string[20];
 
-{ Radyoloji Vers. 8.1.3.8 7/9/2008 de Adnan tarafýndan yapýldý..
+{ Radyoloji Vers. 8.1.3.8 7/9/2008 de Adnan tarafÄ±ndan yapÄ±ldÄ±..
 
 [EtiketListesi]
 HP=
@@ -92,9 +92,9 @@ begin
   RapTablo.Ayarlar.FieldByName('ALANADI').AsString := ALANADI;
   RapTablo.Ayarlar.FieldByName('SOL').AsFloat := SOL;
   RapTablo.Ayarlar.FieldByName('UST').AsFloat := UST;
-  if (En <> 0) and (TABLO <> 'BOÞLUK') then
+  if (En <> 0) and (TABLO <> 'BOÅžLUK') then
     RapTablo.Ayarlar.FieldByName('EN').AsFloat := En;
-  if (Boy <> 0) and (TABLO <> 'BOÞLUK') then
+  if (Boy <> 0) and (TABLO <> 'BOÅžLUK') then
     RapTablo.Ayarlar.FieldByName('BOY').AsFloat := BOY;
   RapTablo.Ayarlar.FieldByName('FONT').AsString := Font;
   if Punto <> 0 then
@@ -111,10 +111,10 @@ var
   S: TStringList;
 begin
   if ListBox1.Count<1 then
-     raise Exception.Create('Tanýmlý etiket bulunamadý. Yeni tuþuyla tanýmlayýn!');
+     raise Exception.Create('TanÄ±mlÄ± etiket bulunamadÄ±. Yeni tuÅŸuyla tanÄ±mlayÄ±n!');
 
   if StrToInt(YanSay.Text) > 20 then begin
-    ShowMessage('Yanyana etiket sayýsý 20 yi aþýyor!!!');
+    ShowMessage('Yanyana etiket sayÄ±sÄ± 20 yi aÅŸÄ±yor!!!');
     ModalResult := mrNone;
   end
   else begin
@@ -160,11 +160,11 @@ begin
     SayfaGen := SSolBosluk + YanYanaSay * Gen + (YanYanaSay - 1) * YBos + SSagBosluk;
     SayfaYuk := SUstBosluk + Yuk;
     DegerAtama(1, 'SAYFA', 'BOYUT', EtiketTuru, 0, 0, 0, SayfaGen, SayfaYuk, '', 0);
-//     DegerAtama(3,'SAYFA', 'BOÞLUK', '',0,0,0,0,0,'',0);
-    DegerAtama(3, 'SAYFA', 'BOÞLUK', '', 0, SSolBosluk, SUstBosluk, SSagBosluk, 0, '', 0);
+//     DegerAtama(3,'SAYFA', 'BOÅžLUK', '',0,0,0,0,0,'',0);
+    DegerAtama(3, 'SAYFA', 'BOÅžLUK', '', 0, SSolBosluk, SUstBosluk, SSagBosluk, 0, '', 0);
     DegerAtama(5, 'SAYFA', 'KOLON', '', YanYanaSay, 0, 0, 0, 0, '', 0);
 //     if SUstBosluk > 0 then
-//        DegerAtama(10,'BAND', 'SAYFABAÞI', '',0,0,0,0,SUstBosluk,'',0);
+//        DegerAtama(10,'BAND', 'SAYFABAÅžI', '',0,0,0,0,SUstBosluk,'',0);
     DegerAtama(12, 'BAND', 'DETAY', 'SORGU', 0, 0, 0, 0, Yuk + ABos, '', 0);
 
     S := TStringList.Create;        //'ETIKET'
@@ -210,7 +210,7 @@ procedure TEtiket.FormShow(Sender: TObject);
 begin
    //GenotipIni.ReadSectionValues('EtiketListesi', ListBox1.Items);
     if ListBox1.Count<1 then
-     raise Exception.Create('Tanýmlý etiket bulunamadý. Yeni tuþuyla tanýmlayýn!');
+     raise Exception.Create('TanÄ±mlÄ± etiket bulunamadÄ±. Yeni tuÅŸuyla tanÄ±mlayÄ±n!');
    ListBox1.Itemindex := 0;
    ListBox1Click(Self);
 end;
@@ -237,7 +237,7 @@ procedure TEtiket.YeniClick(Sender: TObject);
 var Ad : String;
 begin
   Ad := '';
-  if not MesajStrAl('', 'Etiket Adýný Giriniz :', 'E', nil, Ad, '', 'E', nil, Ad) then exit;
+  if not MesajStrAl('', 'Etiket AdÄ±nÄ± Giriniz :', 'E', nil, Ad, '', 'E', nil, Ad) then exit;
   ListBox1.Items.Add(Ad);
  // GenotipIni.WriteString('EtiketListesi', Ad,'');
   ListBox1.Itemindex := ListBox1.Items.IndexOf(Ad);
@@ -249,16 +249,16 @@ procedure TEtiket.DegisClick(Sender: TObject);
 var EskiAd, Ad : String;
 begin
   if ListBox1.Count<1 then
-     raise Exception.Create('Tanýmlý etiket bulunamadý. Yeni tuþuyla tanýmlayýn!');
+     raise Exception.Create('TanÄ±mlÄ± etiket bulunamadÄ±. Yeni tuÅŸuyla tanÄ±mlayÄ±n!');
 
   EskiAd := ListBox1.Items[ListBox1.Itemindex];
   Ad:=EskiAd;
-  if not MesajStrAl('', 'Etiket Adýný Giriniz :', 'E', nil, Ad, '', 'E', nil, Ad) then exit;
+  if not MesajStrAl('', 'Etiket AdÄ±nÄ± Giriniz :', 'E', nil, Ad, '', 'E', nil, Ad) then exit;
   ListBox1.Items[ListBox1.Itemindex] := Ad;
-  //Soldakini deðiþtirelim
+  //Soldakini deÄŸiÅŸtirelim
 //  GenotipIni.DeleteKey('EtiketListesi', EskiAd);
 //  GenotipIni.WriteString('EtiketListesi', Ad,'');
-//  //Saðdakini deðiþtirelim
+//  //SaÄŸdakini deÄŸiÅŸtirelim
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text :='update GENOTIPINI set BOLUM=''Etkt_'+Ad+''' where BOLUM=''Etkt_'+EskiAd+''' ';
   Tablo.Query1.ExecSQL;
@@ -272,9 +272,9 @@ end;
 procedure TEtiket.SilClick(Sender: TObject);
 begin
   if ListBox1.Count<1 then
-     raise Exception.Create('Tanýmlý etiket bulunamadý. Yeni tuþuyla tanýmlayýn!');
+     raise Exception.Create('TanÄ±mlÄ± etiket bulunamadÄ±. Yeni tuÅŸuyla tanÄ±mlayÄ±n!');
 
-  if Application.MessageBox('Bu etiket silinecektir. Onaylýyor musunuz?', 'O N A Y', MB_YESNO) <> IDYES then exit;
+  if Application.MessageBox('Bu etiket silinecektir. OnaylÄ±yor musunuz?', 'O N A Y', MB_YESNO) <> IDYES then exit;
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'Delete From Ayarlar Where RAPORADI = ''Etkt_'+ListBox1.Items[ListBox1.Itemindex]+''' ';    ///Etiket_''';
   Tablo.Query1.ExecSQL;

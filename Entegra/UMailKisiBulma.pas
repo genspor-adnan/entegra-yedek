@@ -1,4 +1,4 @@
-unit UMailKisiBulma;
+ï»¿unit UMailKisiBulma;
 
 interface
 
@@ -88,7 +88,7 @@ sontus:=2;
     //dizi:=dizi+1;
   end  else begin
     if pos(QueryMail.FieldByName('BILGI').AsString,Kontrolb) > 0  then
-      ShowMessage('Mail adres tekrarý!')
+      ShowMessage('Mail adres tekrarÄ±!')
     else  begin
       BilgiEdit.Text :=BilgiEdit.Text + QueryMail.FieldByName('BILGI').AsString+';';
       //Mailler[dizi].bilgi:=(QueryMail.FieldByName('BILGI').AsString);
@@ -119,7 +119,7 @@ end;
 
 procedure TMailKisiEkleme.FormCreate(Sender: TObject);
 begin
-  //LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  //LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   sontus:=1;
   dizi:=0;
   dizi2:=0;
@@ -160,7 +160,7 @@ procedure TMailKisiEkleme.KimeTusClick(Sender: TObject);begin
     //dizi2:=dizi2+1;
   end else begin
     if pos(QueryMail.FieldByName('BILGI').AsString,Kontrol) > 0  then                                                  //(sonuc = 0) or (sonuc < 0)  then
-      ShowMessage('Mail adres tekrarý!')
+      ShowMessage('Mail adres tekrarÄ±!')
     else begin
       KimeEdit.Text :=KimeEdit.Text + QueryMail.FieldByName('BILGI').AsString+';';
       //mailler[dizi2].kime:=(QueryMail.FieldByName('BILGI').AsString);
@@ -189,11 +189,11 @@ begin
     KimeEdit.Text:=KimeEdit.Text+';';
  dizi2 := 1;
  dizi := 1;
- while Length(KimeEdit.Text) > 0 do  //Kime Kýsýmýný Diziye Gönderiyor
+ while Length(KimeEdit.Text) > 0 do  //Kime KÄ±sÄ±mÄ±nÄ± Diziye GÃ¶nderiyor
  begin
    kim:=KimeEdit.Text ;
    yeri := pos(';',kim);
-   if yeri=0 then   //; ile deðil boþlukla ayrýlmýþ
+   if yeri=0 then   //; ile deÄŸil boÅŸlukla ayrÄ±lmÄ±ÅŸ
       yeri := pos(' ',kim);
    if yeri>3 then
       mailler[dizi2].kime:=Copy(kim,0,yeri-1);
@@ -202,7 +202,7 @@ begin
    KimeEdit.Text:=trim(kim);
  end;
 
- while Length(BilgiEdit.Text) > 0 do      //Bilgi Kýsýmýný Diziye Gönderiyor
+ while Length(BilgiEdit.Text) > 0 do      //Bilgi KÄ±sÄ±mÄ±nÄ± Diziye GÃ¶nderiyor
  begin
    bil:=BilgiEdit.Text ;
    mailler[dizi2].bilgi:=Copy(bil,0,pos(';',bil)-1);

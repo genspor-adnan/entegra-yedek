@@ -1,4 +1,4 @@
-unit UHizliGirisKasaSay;
+ï»¿unit UHizliGirisKasaSay;
 
 interface
 
@@ -180,7 +180,7 @@ implementation
 
 procedure THizliGirisKasaSayDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   //tvKasaTakipListe.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\KasaTakipListeGridi',true,false,[gsoUseFilter],'KasaTakipListeGridi');
   Tablo.GridAyarRestore('KasaTakipListeGridi',tvKasaTakipListe );
 
@@ -241,7 +241,7 @@ procedure THizliGirisKasaSayDlg.BtnNum0Click(Sender: TObject);
 begin
   if not TusBasili then begin
     (Sender as TJvNavPanelButton).Down := True;
-    if (Sender as TJvNavPanelButton).Caption= '  ‹' then
+    if (Sender as TJvNavPanelButton).Caption= '  â€¹' then
       if ActiveEdit.SelLength>0 then
         ActiveEdit.ClearSelection
       else
@@ -283,10 +283,10 @@ var
  procedure FazlaEksikKontrol(nesne:TcxCurrencyEdit);
   begin
      if nesne.Value < 0 then
-        st := 'eksiği var'
+        st := 'eksiÄŸi var'
      else if nesne.Value > 0 then
-        st := 'fazlası var';
-     //eğer fark varsa kayıt için onay alalım
+        st := 'fazlasÄ± var';
+     //eÄŸer fark varsa kayÄ±t iÃ§in onay alalÄ±m
      if (nesne.Value <> 0)and(Application.MessageBox(PChar(nesne.text+' '+nesne.Hint+' '+st+HGfarki_onayliyormusun),PChar(Onay),MB_YESNO + MB_ICONINFORMATION)<>ID_YES) then Abort;
 
   end;
@@ -294,10 +294,10 @@ begin
   if (tabKasaTakip.FieldByName('KAPANISTARIHI').IsNull) then begin
      if not BoslukKontrol(edSistemdekiNakit.Text,'Sistemdeki Nakit') then abort;
      if not BoslukKontrol(edSistemdekiKK.Text,'Sistemdeki KK') then abort;
-     if not BoslukKontrol(edKapanis.Text,'Eldeki Kapanış Tutarı') then abort;
+     if not BoslukKontrol(edKapanis.Text,'Eldeki KapanÄ±ÅŸ TutarÄ±') then abort;
      if not BoslukKontrol(edYazarKasaNakit.Text,'Yazarkasadaki Nakit') then abort;
      if not BoslukKontrol(edYazarKasaKK.Text,'Yazarkasadaki KK') then abort;
-     if not BoslukKontrol(edPosToplam.Text,'Pos Toplamı') then abort;
+     if not BoslukKontrol(edPosToplam.Text,'Pos ToplamÄ±') then abort;
 
      FazlaEksikKontrol(TcxCurrencyEdit(EditFiiliNakitFark));
      FazlaEksikKontrol(TcxCurrencyEdit(editxRaporuNakitFark));
@@ -319,13 +319,13 @@ end;
 procedure THizliGirisKasaSayDlg.KaydetTusClick(Sender: TObject);
 begin
   if tabKasaTakip.State in [dsEdit, dsInsert] then
-    if edSistemdekiNakit.Text <> '' then begin //eğer kapatma için kaydediliyorsa hepsi dolu olmalı
+    if edSistemdekiNakit.Text <> '' then begin //eÄŸer kapatma iÃ§in kaydediliyorsa hepsi dolu olmalÄ±
       if not BoslukKontrol(edSistemdekiNakit.Text,'Sistemdeki Nakit') then abort;
       if not BoslukKontrol(edSistemdekiKK.Text,'Sistemdeki KK') then abort;
-      if not BoslukKontrol(edKapanis.Text,'Eldeki Kapanış Tutarı') then abort;
+      if not BoslukKontrol(edKapanis.Text,'Eldeki KapanÄ±ÅŸ TutarÄ±') then abort;
       if not BoslukKontrol(edYazarKasaNakit.Text,'Yazarkasadaki Nakit') then abort;
       if not BoslukKontrol(edYazarKasaKK.Text,'Yazarkasadaki KK') then abort;
-      if not BoslukKontrol(edPosToplam.Text,'Pos Toplamı') then abort;
+      if not BoslukKontrol(edPosToplam.Text,'Pos ToplamÄ±') then abort;
     end;
     tabKasaTakip.Post;
 end;
@@ -356,11 +356,11 @@ begin
    if tabKasaTakip.FieldByName('SISTEMDEKI_NAKIT').AsCurrency<> tabKasaTakip.FieldByName('KAPANISTUTARI').AsCurrency then
    begin
      if tabKasaTakip.FieldByName('SISTEMDEKI_NAKIT').AsCurrency > tabKasaTakip.FieldByName('KAPANISTUTARI').AsCurrency then
-         Result:= Tablo.KasaKaydet(37, tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime,tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime , 0, 'Kasa Kapanış',
+         Result:= Tablo.KasaKaydet(37, tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime,tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime , 0, 'Kasa KapanÄ±ÅŸ',
              VarsKasa ,CariDoviz  ,'',0, tabKasaTakip.FieldByName('SISTEMDEKI_NAKIT').AsCurrency - tabKasaTakip.FieldByName('KAPANISTUTARI').AsCurrency
               ,0.0,0.0,1,-1,-1,-1,-1, SubeId,' ',TabNo_KASATAKIP, HizliGirisAnaMenu.KasaTakipIdBilgisi )
      else
-         Result:= Tablo.KasaKaydet(27, tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime,tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime , 0, 'Kasa Kapanış',
+         Result:= Tablo.KasaKaydet(27, tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime,tabKasaTakip.FieldByName('KAPANISTARIHI').AsDateTime , 0, 'Kasa KapanÄ±ÅŸ',
              VarsKasa ,CariDoviz  ,'',0,0.0, tabKasaTakip.FieldByName('KAPANISTUTARI').AsCurrency-tabKasaTakip.FieldByName('SISTEMDEKI_NAKIT').AsCurrency
               ,0.0,1,-1,-1,-1,-1, SubeId,' ',TabNo_KASATAKIP, HizliGirisAnaMenu.KasaTakipIdBilgisi )
    end;
@@ -369,7 +369,7 @@ end;
 procedure THizliGirisKasaSayDlg.KasaTakipYenile;
 var s:string[10];
 begin
-   //Yetkisi varsa son 30 gün kasa takip kaydı üzerinde oynama yapabilir..
+   //Yetkisi varsa son 30 gÃ¼n kasa takip kaydÄ± Ã¼zerinde oynama yapabilir..
    if Tablo.YetkiVarmi(180212,YetkiTur_Degistirme) then begin
       if HizliGirisKasaSayDlg=nil then
          s:='10'
@@ -379,7 +379,7 @@ begin
       tabKasaTakip.SQL.Text:= ' SELECT * FROM KASATAKIP  WHERE HESAPID = '+inttostr(VarsKasa)+' '+
                           ' AND ACILISTARIHI > GETDATE()-' + s + ' AND TUR = 1 ORDER BY ACILISTARIHI DESC';
       tabKasaTakip.Open;
-   end else begin //yetki yoksa son kasa kaydını getiriyoruz.
+   end else begin //yetki yoksa son kasa kaydÄ±nÄ± getiriyoruz.
       tabKasaTakip.Close;
       tabKasaTakip.SQL.Text:=' SELECT TOP 1 * FROM KASATAKIP WHERE HESAPID = '+inttostr(VarsKasa)+' '+
                              '  AND ACILISTARIHI < '''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''' '+
@@ -454,7 +454,7 @@ begin
                             '    K.YERI = 401 AND K.YERID = '+ InttoStr(tabKasaTakip.FieldByName('ID').AsInteger)+ ' '+
                             '    and ISNULL(FB.FATURASERI,'''') <>''*'' ';
      Tablo.Query6.Open;
-       // HESAPLAMA da nakit i sorguya dahil etmiyoruz cünkü gentegredeki nakit in içinde o günkü nakit tahsilatları var
+       // HESAPLAMA da nakit i sorguya dahil etmiyoruz cÃ¼nkÃ¼ gentegredeki nakit in iÃ§inde o gÃ¼nkÃ¼ nakit tahsilatlarÄ± var
       // Tablo.TablodanSorguAc(6,'SELECT SUM(ISNULL(ALACAK,0.0)) FROM KASA WHERE TUR IN (26,28,29) AND YERI = 401 AND YERID ='+ IntToStr(tabKasaTakip.FieldByName('ID').AsInteger) );
      tabKasaTakip.FieldByName('xNakitFark').AsCurrency := edYazarKasaNakit.Value -(Tablo.Query6.Fields[0].AsCurrency);  //editxRaporuNakitFark
   end else
@@ -475,10 +475,10 @@ end;
 
 procedure THizliGirisKasaSayDlg.BakiyeGetirBtnClick(Sender: TObject);
 begin
- //eğer açık durumdaki kasatakip kaydından farklı bir kasatakip kaydındaysa değişiklik yapılmasın
+ //eÄŸer aÃ§Ä±k durumdaki kasatakip kaydÄ±ndan farklÄ± bir kasatakip kaydÄ±ndaysa deÄŸiÅŸiklik yapÄ±lmasÄ±n
  if tabKasaTakip.FieldByName('ID').AsInteger<> KasatakipIdsi then
    Abort;
- // kasa kapanmışsa değişiklik yapılmasın
+ // kasa kapanmÄ±ÅŸsa deÄŸiÅŸiklik yapÄ±lmasÄ±n
  if not(tabKasaTakip.FieldByName('KAPANISTARIHI').IsNull) then
    abort;
   tabKasaTakip.Edit;
@@ -492,7 +492,7 @@ procedure THizliGirisKasaSayDlg.TablariAyarla;
 begin
   gridKasaTakipListesi.Visible:= Tablo.YetkiVarmi(180212,YetkiTur_Degistirme);
   edAcilis.Enabled := gridKasaTakipListesi.Visible;
-  //eğer yetkili kullanıcı giriyorsa iki tab da görünecek , yetkisiz kullanıcıda kasanın durumuna göre açılış veya kapanış sekmesi gelecek
+  //eÄŸer yetkili kullanÄ±cÄ± giriyorsa iki tab da gÃ¶rÃ¼necek , yetkisiz kullanÄ±cÄ±da kasanÄ±n durumuna gÃ¶re aÃ§Ä±lÄ±ÅŸ veya kapanÄ±ÅŸ sekmesi gelecek
   if KasaAcilisKapanis then begin
     pnlAcilis.Visible:=True;
     pnlKapanis.Visible:=True;
@@ -513,15 +513,15 @@ begin
   YaziciYaz.Caption := ra;
   YaziciYaz.PopupMenu := aktifFrame.pmDokumAyarlar;
   TablariAyarla;
-  KasaTakipYenile; //Tabloyu aç
-  if tabKasaTakip.RecordCount>0 then begin    //aktif bir kasa kaydımız varsa ekran kasa kapatmak için çağırılır  // kasa acıksa
-    lbKasaAcKapaBilgi.Caption:= ' Kasa Kapanışı ('+VarsKasaAdi+')';
+  KasaTakipYenile; //Tabloyu aÃ§
+  if tabKasaTakip.RecordCount>0 then begin    //aktif bir kasa kaydÄ±mÄ±z varsa ekran kasa kapatmak iÃ§in Ã§aÄŸÄ±rÄ±lÄ±r  // kasa acÄ±ksa
+    lbKasaAcKapaBilgi.Caption:= ' Kasa KapanÄ±ÅŸÄ± ('+VarsKasaAdi+')';
     //edAcilis.Enabled:=False;
     edKapanis.Enabled:=True;
     KasaKapatTus.Enabled:=True;
     edKapanis.SetFocus;
   end else begin
-    lbKasaAcKapaBilgi.Caption:= 'Kasa Açılışı ('+VarsKasaAdi+')';
+    lbKasaAcKapaBilgi.Caption:= 'Kasa AÃ§Ä±lÄ±ÅŸÄ± ('+VarsKasaAdi+')';
     KasaKapatTus.Enabled:=False;
     //edAcilis.Enabled:=True;
     KasatakipIdsi:=0;

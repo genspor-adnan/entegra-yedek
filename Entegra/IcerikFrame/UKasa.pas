@@ -1,4 +1,4 @@
-unit UKasa;
+ï»¿unit UKasa;
 //tcxintl not found cxintl1
 interface
 
@@ -221,7 +221,7 @@ type
   private
     { private declarations }
     SonKaydedilenSiraNo :Integer;
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TGunlukAksiyonAramaFrame;
     procedure GorunurOlacak;
@@ -374,9 +374,9 @@ begin
     10,11,12,14,15,16 : Tablo.FaturaSihirbazBaslat('E', Sonuc,-1,-1,0);
     13,17 : Tablo.TahakkukSihirbaziBaslat('E', Sonuc, 1, -1, -1, Tarih);
     20..39: Tablo.MakbuzSihirbazBaslat('E', Sonuc,1, -1, -1, Tarih, '');
-    113,117 : begin //Önce kasa eçimi yapýp sonratahakkuk ekranýný çaðýralým
+    113,117 : begin //Ã–nce kasa eÃ§imi yapÄ±p sonratahakkuk ekranÄ±nÄ± Ã§aÄŸÄ±ralÄ±m
        SonucListe := TStringList.Create;
-       if Tablo.ListedenBilgiGetir('Kasa Seçimi','select ID, KASAKODU, KASAADI, KUR FROM KASALAR where DURUM=1 and (KASAKODU like ''%<ara>%'' or KASAADI like ''%<ara>%'')',SonucListe,[nil, nil, nil])then
+       if Tablo.ListedenBilgiGetir('Kasa SeÃ§imi','select ID, KASAKODU, KASAADI, KUR FROM KASALAR where DURUM=1 and (KASAKODU like ''%<ara>%'' or KASAADI like ''%<ara>%'')',SonucListe,[nil, nil, nil])then
           KasaId := StrToIntDef(SonucListe[0],0)
        else
           KasaId := 0;
@@ -385,7 +385,7 @@ begin
           Tablo.TahakkukSihirbaziBaslat('E', Sonuc-100, 3, KasaId, -1*KasaId, Tarih);
      end;
     121,131,122,132,135 : begin
-       // masrafta cari seçilmez yani rehberid sýfýrdýr
+       // masrafta cari seÃ§ilmez yani rehberid sÄ±fÄ±rdÄ±r
        if Sonuc in [121,131] then HesapTuru := 'K'
        else if Sonuc in [135] then HesapTuru := 'V'
        else HesapTuru := 'B';
@@ -445,7 +445,7 @@ end;
 procedure TKasaDlg.MasrafNakitMenuClick(Sender: TObject);
 var HesapTuru : char;
 begin
-   // masrafta cari seçilmez yani rehberid sýfýrdýr
+   // masrafta cari seÃ§ilmez yani rehberid sÄ±fÄ±rdÄ±r
    case TMenuItem(Sender).Tag of
      21,31 : HesapTuru := 'K';
      22,32 : HesapTuru := 'B';
@@ -489,7 +489,7 @@ begin
        NakitDlg.IslemOp := 'E';
        NakitDlg.RehberId := KASA.FieldByName('REHBERID').AsInteger;
 
-       NakitDlg.LabelTarih.Visible := True; // menüden kýsayol olduðu için tarih girilebilir
+       NakitDlg.LabelTarih.Visible := True; // menÃ¼den kÄ±sayol olduÄŸu iÃ§in tarih girilebilir
        NakitDlg.EditTarih.Visible := True;
 
 
@@ -507,7 +507,7 @@ begin
 
        if KASA.FieldByName('FATURAID').AsInteger>0 then begin
           NakitDlg.KasaFatBasId:= KASA.FieldByName('FATURAID').AsInteger;
-          NakitDlg.Aciklama := KASA.FieldByName('BELGENO').AsString + ' nolu satýþ tahsilatý';
+          NakitDlg.Aciklama := KASA.FieldByName('BELGENO').AsString + ' nolu satÄ±ÅŸ tahsilatÄ±';
        end
        else
           NakitDlg.Aciklama := KASA.FieldByName('ACIKLAMA').AsString;
@@ -766,7 +766,7 @@ end;
 
 procedure TKasaDlg.CheckCekSenetClick(Sender: TObject);
 begin
-  Tablo.GENINI.WriteBoolean(Ops_KasaEkran_CekveSenet,FArama.CheckCekSenet.Checked);       // KasaEkran', 'ÇekveSenet'
+  Tablo.GENINI.WriteBoolean(Ops_KasaEkran_CekveSenet,FArama.CheckCekSenet.Checked);       // KasaEkran', 'Ã‡ekveSenet'
   Calendar1Change(Self);
 end;
 
@@ -824,7 +824,7 @@ begin
 
        end;
     end;
-   // kasa eksiði veya fazlasý fiþi ise bu ekrandan müdahale edilmesin
+   // kasa eksiÄŸi veya fazlasÄ± fiÅŸi ise bu ekrandan mÃ¼dahale edilmesin
   if (KASA.FieldByName('TUR').AsInteger= 27) or (KASA.FieldByName('TUR').AsInteger= 37) then
     begin
       Application.MessageBox(PChar(KBu_ekrandan_silinemez_Hizli_Satistan),PChar(Uyari),MB_OK+MB_ICONWARNING);
@@ -833,7 +833,7 @@ begin
    if Application.MessageBox(PChar(KAksiyon_silinsinmi),PChar(Onay), MB_YESNO) = IDYES then begin
       Tablo.KasaSilmeIslemleri(KASA.FieldByName('ID').AsInteger, KASA.FieldByName('TUR').AsInteger);
       Calendar1Change(Self);
-      /// SQL2005 TE hataya neden olduðu için delete olayýný kendimiz yapýyoruz
+      /// SQL2005 TE hataya neden olduÄŸu iÃ§in delete olayÄ±nÄ± kendimiz yapÄ±yoruz
       Abort;
    end;
 end;
@@ -922,7 +922,7 @@ end;
 
 procedure TKasaDlg.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   FormCreate(nil);
   KasaGridSUBEID.Visible := SubeVarmi;
   //KasaGrid.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\KasalarGridi',true,false,[gsoUseFilter],'KasalarGridi');
@@ -935,13 +935,13 @@ begin
 
   GelenBelge1.Visible := Tablo.YetkiVarmi(2401,YetkiTur_Gorme);
   Satbelgesi1.Visible := Tablo.YetkiVarmi(2411,YetkiTur_Gorme);
-  if GelenBelge1.Visible then begin //2401 detaylarý
+  if GelenBelge1.Visible then begin //2401 detaylarÄ±
      Fatura1.Visible := Tablo.YetkiVarmi(240131,YetkiTur_Gorme);
      Fi1.Visible := Tablo.YetkiVarmi(240141,YetkiTur_Gorme);
      rsaliye1.Visible := Tablo.YetkiVarmi(240121,YetkiTur_Gorme);
      AlacakTahakkuku.Visible := Tablo.YetkiVarmi(240151,YetkiTur_Gorme);
   end;
-  if Satbelgesi1.Visible then begin //2411 detaylarý
+  if Satbelgesi1.Visible then begin //2411 detaylarÄ±
      Fatura2.Visible := Tablo.YetkiVarmi(241131,YetkiTur_Gorme);
      Fi2.Visible := Tablo.YetkiVarmi(241141,YetkiTur_Gorme);
      rsaliye2.Visible := Tablo.YetkiVarmi(241121,YetkiTur_Gorme);
@@ -993,7 +993,7 @@ begin
   if KasaGrid.Controller.SelectedRecordCount > 0 then
   begin
 
-   // kasa eksiði veya fazlasý fiþi ise bu ekrandan müdahale edilmesin
+   // kasa eksiÄŸi veya fazlasÄ± fiÅŸi ise bu ekrandan mÃ¼dahale edilmesin
   if (KASA.FieldByName('TUR').AsInteger= 27) or (KASA.FieldByName('TUR').AsInteger= 37) then
     begin
       Application.MessageBox(PChar(KBu_ekrandan_silinemez_Hizli_Satistan),PChar(Uyari),MB_OK+MB_ICONWARNING);
@@ -1025,7 +1025,7 @@ procedure TKasaDlg.Gorunur;
 begin
 
   FormActivate(nil);
- // ReherIni.ReadImageSection('Kasa Türleri', TcxImageComboBoxProperties(KasaGridTUR.Properties));
+ // ReherIni.ReadImageSection('Kasa TÃ¼rleri', TcxImageComboBoxProperties(KasaGridTUR.Properties));
 end;
 
 procedure TKasaDlg.GorunurOlacak;
@@ -1061,11 +1061,11 @@ initialization
 end.
 
 {
-Emre: stoktaki iade çýkýþ bölümü var firmalara iade faturalarýnýn kesildiði bölüm, bu faturalarý da gentegre de görmek istiyor malatya
+Emre: stoktaki iade Ã§Ä±kÄ±ÅŸ bÃ¶lÃ¼mÃ¼ var firmalara iade faturalarÄ±nÄ±n kesildiÄŸi bÃ¶lÃ¼m, bu faturalarÄ± da gentegre de gÃ¶rmek istiyor malatya
 
 
 Emre Baytar is online.
-Emre: giriþ faturalarý firma carisine yansýyor ama iadeler yapýlmamýþ þimdi denedik de  }
+Emre: giriÅŸ faturalarÄ± firma carisine yansÄ±yor ama iadeler yapÄ±lmamÄ±ÅŸ ÅŸimdi denedik de  }
 
 
 

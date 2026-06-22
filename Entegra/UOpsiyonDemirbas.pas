@@ -1,4 +1,4 @@
-unit UOpsiyonDemirbas;
+ï»¿unit UOpsiyonDemirbas;
 
 interface
 
@@ -121,7 +121,7 @@ end;
 
 procedure TOpsiyonDemirbasDlg.BtnAmortismanClick(Sender: TObject);
 begin
-  Tablo.ListedenDuzenle(Tablo.FDCnn,'Amortisman Oranlarý','SELECT KOD,ACIKLAMA,YIL,ORAN,TEBLIG FROM AMORTISMAN_ORAN','Amortisman',True,False,True);
+  Tablo.ListedenDuzenle(Tablo.FDCnn,'Amortisman OranlarÄ±','SELECT KOD,ACIKLAMA,YIL,ORAN,TEBLIG FROM AMORTISMAN_ORAN','Amortisman',True,False,True);
 end;
 
 procedure TOpsiyonDemirbasDlg.BtnTakipTurleriClick(Sender: TObject);
@@ -148,9 +148,9 @@ end;
 
 procedure TOpsiyonDemirbasDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   checkDemirbasStok.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonDemirbas_Stoktan,False);// StokOpsiyon','OnayliSayimDegistirme'
-  //Demirbas Dokuman Ýçin
+  //Demirbas Dokuman Ä°Ã§in
   tablo.TablodanSorguAc(8,'SELECT ID FROM DOKUMANKLASOR  WHERE AD = '+'''Belgelerim''');
   VarsayilanKlasor.tag:=Tablo.GENINI.ReadInteger(Ops_OpsiyonDemirbas_VarsayilanKlasor,tablo.Query8.FieldByName('ID').AsInteger);
   VarsayilanKlasor.text:= TABLO.AciklamaGetir('DOKUMANKLASOR','AD',VarsayilanKlasor.tag);
@@ -173,7 +173,7 @@ begin
   if DtsAksiyonDurum.State=dsEdit then
      TabAksiyonDurum.Post;
    Tablo.GENINI.WriteBoolean(Ops_OpsiyonDemirbas_Stoktan,checkDemirbasStok.Checked);// StokOpsiyon','OnayliSayimDegistirme
-   Tablo.GENINI.WriteInteger(Ops_OpsiyonDemirbas_VarsayilanKlasor,VarsayilanKlasor.Tag);//  OpsiyonDemirbaþ  VarsayilanKlasor Dokuman için
+   Tablo.GENINI.WriteInteger(Ops_OpsiyonDemirbas_VarsayilanKlasor,VarsayilanKlasor.Tag);//  OpsiyonDemirbaÅŸ  VarsayilanKlasor Dokuman iÃ§in
    Tablo.GENINI.WriteInteger(Ops_DemirbasOpsiyon_DemirbasKodGirisi,cbDemirbasKodGirisi.EditValue);
    Tablo.GENINI.WriteInteger(Ops_OpsiyonDemirbas_ServisDurumu,cbDemirbasServisDurumu.EditValue);
 
@@ -209,7 +209,7 @@ begin
   if AButtonIndex = 0 then begin
     Application.CreateForm(TKodAgaciDlg,KodAgaciLokasyonDlg);
     sqltext:='select ID,ROOTKOD=USTID, KOD=ID,ACIKLAMA=AD FROM DOKUMANKLASOR WHERE ID >0 ORDER BY USTID ' ;
-    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[Tablo.repDokumanKlasor,nil],[],[],['Klasor','Açýklama'],[true,False]) then begin
+    if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[Tablo.repDokumanKlasor,nil],[],[],['Klasor','AÃ§Ä±klama'],[true,False]) then begin
       VarsayilanKlasor.Text:=LokAciklama;
       VarsayilanKlasor.Tag:=LokID;
     end;

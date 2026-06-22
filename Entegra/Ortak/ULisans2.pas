@@ -1,11 +1,11 @@
-{
+ï»¿{
 #### MODUL KOD Listesi ####
 
 Modul1	Ajanda
 Modul2	Ameliyat
 Modul3	Anket
 Modul4	Diyaliz
-Modul5	DoğanBebek
+Modul5	DoÄŸanBebek
 Modul6	Evrak Defteri
 Modul7	Evrak Takip
 Modul8	Fatura Takip
@@ -17,12 +17,12 @@ Modul13	GenScan
 Modul14	Genspor
 Modul15	Gentegre
 Modul16	Giykimbil
-Modul17	Hızlı Giriş
+Modul17	HÄ±zlÄ± GiriÅŸ
 Modul18	KamuLab
-Modul19	Kayıtkabul
+Modul19	KayÄ±tkabul
 Modul20	Kullanan
 Modul21	Lab
-Modul22	LIS - Cihaz bağlantısı
+Modul22	LIS - Cihaz baÄŸlantÄ±sÄ±
 Modul23	LISNET
 Modul24	Medula Entegrasyon
 Modul25	Muayene
@@ -31,10 +31,10 @@ Modul27	Radyoloji
 Modul28	Randevu
 Modul29	Servis
 Modul30	Stok
-Modul31	Sıramatik
-Modul32	Tüp Bebek
-Modul33	Yönlendirme
-Modul34	İşyeri Hekimliği
+Modul31	SÄ±ramatik
+Modul32	TÃ¼p Bebek
+Modul33	YÃ¶nlendirme
+Modul34	Ä°ÅŸyeri HekimliÄŸi
 Modul35	Magic SAS
 Modul36	Muhasebe Entegrasyonu
 
@@ -129,18 +129,18 @@ begin
     Tablo.Query2.SQL.Text := 'select * from sysobjects where name = ''GENOTIP''';
     Tablo.Query2.Open;
     if Tablo.Query2.RecordCount=0 then
-       raise Exception.Create('Öncelikle Lisanslama Modülünü çalıştırmalısınız..');
+       raise Exception.Create('Ã–ncelikle Lisanslama ModÃ¼lÃ¼nÃ¼ Ã§alÄ±ÅŸtÄ±rmalÄ±sÄ±nÄ±z..');
 
-  // Makinenin MAC i Şirkete ait Bir MAC olarak kayıtlı mı?
+  // Makinenin MAC i Åirkete ait Bir MAC olarak kayÄ±tlÄ± mÄ±?
   Tablo.Query3.Close;
   Tablo.Query3.SQL.Text := 'select * from GENOTIP WHERE CONVERT(INT,SABIT) >= ''10000'' AND convert(varchar(2000),DEGER) = ''' + Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])) + '''';
   Tablo.Query3.Open;
 
-  // Şirkete ait herhangi bir MAC adresi mi?
+  // Åirkete ait herhangi bir MAC adresi mi?
   if (Tablo.Query3.RecordCount = 0) then
   begin
 
-  // Sistemdeki SonLisansTarihi Alınıyor...
+  // Sistemdeki SonLisansTarihi AlÄ±nÄ±yor...
     Tablo.Query5.Close;
     Tablo.Query5.SQL.Text := 'Select * from GENOTIP WHERE SABIT = ''55''';
     Tablo.Query5.Open;
@@ -148,12 +148,12 @@ begin
 
   //SonLisansTarihi := StrToDate(DeSifre(Tablo.Query5.FieldByName('DEGER').AsString));
 
-  // Sistemde var olan Açık Lisans Bilgisi alınıyor.
+  // Sistemde var olan AÃ§Ä±k Lisans Bilgisi alÄ±nÄ±yor.
     Tablo.Query3.Close;
     Tablo.Query3.SQL.Text := 'select *, convert(datetime,convert(varchar(10),GETDATE(),103),103) as BUGUN from GENOTIP WHERE SABIT = ''50''';
     Tablo.Query3.Open;
 
-  // Sistemde var olan Açık Lisans Bilgisi alınıyor.
+  // Sistemde var olan AÃ§Ä±k Lisans Bilgisi alÄ±nÄ±yor.
     s := DeSifre(Tablo.Query3.FieldByName('DEGER').AsString);
 
     lisansMac := copy(s, 1, 12);
@@ -164,7 +164,7 @@ begin
 
 
 
-  // Sistemde var olan Kapalı Lisans Bilgisi alınıyor.
+  // Sistemde var olan KapalÄ± Lisans Bilgisi alÄ±nÄ±yor.
     Tablo.Query2.Close;
     Tablo.Query2.SQL.Text := 'select * from GENOTIP WHERE SABIT = ''51''';
     Tablo.Query2.Open;
@@ -175,7 +175,7 @@ begin
 
     lisansSayisi := StrToInt(Items.Values['LisansSayisi']);
 
-  //  Sistemin çalışması için izin var mı?
+  //  Sistemin Ã§alÄ±ÅŸmasÄ± iÃ§in izin var mÄ±?
     if Items.Values['YazilimCalissin'] = '1' then
     begin
       Tablo.Query4.Close;
@@ -183,21 +183,21 @@ begin
       Tablo.Query4.Open;
       Tablo.Query4.First;
 
-      // Terminal kayıtlı mı?
+      // Terminal kayÄ±tlÄ± mÄ±?
       if Tablo.Query4.RecordCount <> 0 then
       begin
-        // Modul Yetkisi Var mı?
+        // Modul Yetkisi Var mÄ±?
         if Items.Values[LisansModul] = '1' then
         begin
-          // Lisans Web Service'ten tekrar alınması gerekiyor mu?
+          // Lisans Web Service'ten tekrar alÄ±nmasÄ± gerekiyor mu?
 //          if (GunTarihi > StrToDate(DeSifre(Tablo.Query5.FieldByName('DEGER').AsString))) and (LisansModul = 'Modul19') then
           if ((DaysBetween(GunTarihi, StrToDate(DeSifre(Tablo.Query5.FieldByName('DEGER').AsString)))) >= StrToInt(Items.Values['LisansSorgulamaSuresi'])) and (LisansModul = 'Modul19') then
           begin
             try
-              // Web service'ten dönen değer ile Lisans Güncellenecek...
+              // Web service'ten dÃ¶nen deÄŸer ile Lisans GÃ¼ncellenecek...
               AcikLisans := Lisanssrv.AcikLisans(StrToInt(Items.Values['KurumKod1']), StrToInt(Items.Values['KurumKod2']), lisansMac);
 
-              // Sistemdeki KapalıLisans'taki Server MAC ile Merkezden alınan AçıkLisans'tak, MAC ler tutuyormu?
+              // Sistemdeki KapalÄ±Lisans'taki Server MAC ile Merkezden alÄ±nan AÃ§Ä±kLisans'tak, MAC ler tutuyormu?
               if copy(AcikLisans, 1, 12) = copy(s2, 1, 12) then
               begin
                 lws := 1;
@@ -216,111 +216,111 @@ begin
             except
               lws := 1;
             end;
-          end; // Lisans Web Service'ten tekrar alınması gerekiyor mu?
+          end; // Lisans Web Service'ten tekrar alÄ±nmasÄ± gerekiyor mu?
 
-          // Web serviceten dönen değer veya hiç sorgulamadan durum lisans kontrolü yapmaya müsait olduğunu belirtirse...
+          // Web serviceten dÃ¶nen deÄŸer veya hiÃ§ sorgulamadan durum lisans kontrolÃ¼ yapmaya mÃ¼sait olduÄŸunu belirtirse...
           if lws = 1 then
           begin
             if Items.Values['SatisTipi'] = '2' then
             begin
               if GunTarihi - StrToDateTime(Items.Values['LisansTarihi']) <= StrToInt(Items.Values['LisansSuresi']) then
-              begin // Demo Süresi içerisinde ise.
+              begin // Demo SÃ¼resi iÃ§erisinde ise.
                 lisansHata := 1;
-                lisansMesaj := 'Demo süresinin dolmasına '; //+ StrToInt(Items.Values['LisansSuresi']) - (GunTarihi-StrToDateTime(Items.Values['LisansTarihi'])) + ' gün kalmıştır.';
+                lisansMesaj := 'Demo sÃ¼resinin dolmasÄ±na '; //+ StrToInt(Items.Values['LisansSuresi']) - (GunTarihi-StrToDateTime(Items.Values['LisansTarihi'])) + ' gÃ¼n kalmÄ±ÅŸtÄ±r.';
                 lisansDevam := 1;
                 lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                 lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
               end
-              else // Demo süresi dolmuş ise....
+              else // Demo sÃ¼resi dolmuÅŸ ise....
               begin
                 lisansHata := 1;
-                lisansMesaj := 'Demo süresi dolmuştur.';
+                lisansMesaj := 'Demo sÃ¼resi dolmuÅŸtur.';
                 lisansDevam := 0;
                 lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                 lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
               end;
             end
-            else // Satış Türü "KİRA" ise...
+            else // SatÄ±ÅŸ TÃ¼rÃ¼ "KÄ°RA" ise...
               if Items.Values['SatisTipi'] = '1' then
               begin
                 if GunTarihi - StrToDateTime(Items.Values['LisansTarihi']) <= StrToInt(Items.Values['LisansSuresi']) then
-                begin // Kira süresi içerisinde ise
+                begin // Kira sÃ¼resi iÃ§erisinde ise
                   if StrToInt(Items.Values['LisansSuresi']) - (GunTarihi - StrToDateTime(Items.Values['LisansTarihi'])) >= StrToInt(Items.Values['UyariGunSayisi']) then
-                  begin //  Kira Uyarı Opsiyon Günü süresi içersine girilmemiş ise...
+                  begin //  Kira UyarÄ± Opsiyon GÃ¼nÃ¼ sÃ¼resi iÃ§ersine girilmemiÅŸ ise...
                     lisansHata := 0;
-                    lisansMesaj := 'Geçerli süre içerisinde.';
+                    lisansMesaj := 'GeÃ§erli sÃ¼re iÃ§erisinde.';
                     lisansDevam := 1;
                     lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                     lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
                   end
-                  else //  Kira Uyarı Opsiyon Günü süresi içersine gelinmiş ise...
+                  else //  Kira UyarÄ± Opsiyon GÃ¼nÃ¼ sÃ¼resi iÃ§ersine gelinmiÅŸ ise...
                   begin
                     lisansHata := 1;
-                    lisansMesaj := 'Lisans süresinin dolmasına ' + IntToStr(StrToInt(Items.Values['LisansSuresi']) - trunc((GunTarihi - StrToDateTime(Items.Values['LisansTarihi'])))) + ' gün kalmıştır.';
+                    lisansMesaj := 'Lisans sÃ¼resinin dolmasÄ±na ' + IntToStr(StrToInt(Items.Values['LisansSuresi']) - trunc((GunTarihi - StrToDateTime(Items.Values['LisansTarihi'])))) + ' gÃ¼n kalmÄ±ÅŸtÄ±r.';
                     lisansDevam := 1;
                     lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                     lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
                   end;
                 end
-                else // Kira süresi dolmuş ise
+                else // Kira sÃ¼resi dolmuÅŸ ise
                 begin
                   lisansHata := 1;
-                  lisansMesaj := 'Lisans süresi dolmuştur.';
+                  lisansMesaj := 'Lisans sÃ¼resi dolmuÅŸtur.';
                   lisansDevam := 0;
                   lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                   lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
                 end;
               end
               else
-                if Items.Values['SatisTipi'] = '0' then // Satış Türü "SATIŞ" ise...
+                if Items.Values['SatisTipi'] = '0' then // SatÄ±ÅŸ TÃ¼rÃ¼ "SATIÅ" ise...
                 begin
                   lisansHata := 0;
-                  lisansMesaj := 'Satış';
+                  lisansMesaj := 'SatÄ±ÅŸ';
                   lisansDevam := 1;
                   lisansTerminal := DeSifre(Tablo.Query4.fieldByName('SABITTEXT').AsString);
                   lisansKey := Tablo.Query4.fieldByName('DEGER').AsString;
                 end;
           end
-          else // WEB Service ten dönen değerler çalışma iznini 0 yapmış. Sistem Server'ı ile GEnSERVER daki MAC ler farklı...
+          else // WEB Service ten dÃ¶nen deÄŸerler Ã§alÄ±ÅŸma iznini 0 yapmÄ±ÅŸ. Sistem Server'Ä± ile GEnSERVER daki MAC ler farklÄ±...
           begin
             lisansHata := 1;
-            lisansMesaj := 'Server ayarlarınız değişmiş. Lütfen GenoTIP ile görüşünüz.' + #13 + #10 + 'Yeni bir lisans almanız gerekebilir.';
+            lisansMesaj := 'Server ayarlarÄ±nÄ±z deÄŸiÅŸmiÅŸ. LÃ¼tfen GenoTIP ile gÃ¶rÃ¼ÅŸÃ¼nÃ¼z.' + #13 + #10 + 'Yeni bir lisans almanÄ±z gerekebilir.';
             lisansDevam := -2;
             lisansTerminal := BilgisayarAdi;//'---';
             lisansKey := '---';
           end;
         end
-        else  //  Modul kullanma için izin var mı? Yoksa......
+        else  //  Modul kullanma iÃ§in izin var mÄ±? Yoksa......
         begin
           lisansHata := 1;
-          lisansMesaj := 'Bu modülü kullanma lisansınız yoktur.';
+          lisansMesaj := 'Bu modÃ¼lÃ¼ kullanma lisansÄ±nÄ±z yoktur.';
           lisansDevam := -2;
           lisansTerminal := BilgisayarAdi;//'---';
           lisansKey := Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll]));
         end;
       end
-      else // Terminal sisteme tanımlı değil ise...
+      else // Terminal sisteme tanÄ±mlÄ± deÄŸil ise...
       begin
         lisansHata := 1;
-        lisansMesaj := 'Bu terminal sistemde kayıtlı değil.';
+        lisansMesaj := 'Bu terminal sistemde kayÄ±tlÄ± deÄŸil.';
         lisansDevam := -1;
         lisansTerminal := BilgisayarAdi;//'---';
         lisansKey := Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])); ;
       end;
     end
-    else // Lisans Bilgilerinde YAzılım Çalışma izni kapalı olarak kayıtlı....
+    else // Lisans Bilgilerinde YAzÄ±lÄ±m Ã‡alÄ±ÅŸma izni kapalÄ± olarak kayÄ±tlÄ±....
     begin
       lisansHata := 1;
-      lisansMesaj := 'Sistemin çalışma izni yok. GenoTIP ile irtibata geçmeniz gerekmektedir.' + #13 + #10 + 'Lisans MAC : ' + lisansMac;
+      lisansMesaj := 'Sistemin Ã§alÄ±ÅŸma izni yok. GenoTIP ile irtibata geÃ§meniz gerekmektedir.' + #13 + #10 + 'Lisans MAC : ' + lisansMac;
       lisansDevam := -2;
       lisansTerminal := BilgisayarAdi;//'---';
       lisansKey := '---';
     end;
   end
-  else // Şirkete ait herhangi bir MAC adresi bağlanmaya çalışırsa direk devam edecek...
+  else // Åirkete ait herhangi bir MAC adresi baÄŸlanmaya Ã§alÄ±ÅŸÄ±rsa direk devam edecek...
   begin
     lisansHata := 0;
-    lisansMesaj := 'MAC Adresi Şirkete ait olarak tanımlı.';
+    lisansMesaj := 'MAC Adresi Åirkete ait olarak tanÄ±mlÄ±.';
     lisansDevam := 1;
     lisansTerminal := BilgisayarAdi;//'---';
     lisansKey := '---';
@@ -397,7 +397,7 @@ begin
       LblLisans.Visible := False;
     end;
   end;
- {////////////// Yeni lisans için kapatıyorum
+ {////////////// Yeni lisans iÃ§in kapatÄ±yorum
 
    bhdinfo1.Execute;
    s1:=trim(bhdinfo1.SerialNumber);
@@ -497,7 +497,7 @@ begin
     begin
       lisansDevam := 0;
       LblLisansMsg.Width := 250;
-      LblLisansMsg.Caption := 'Bu isimde kayıtlı terminal var.';
+      LblLisansMsg.Caption := 'Bu isimde kayÄ±tlÄ± terminal var.';
       BtnLisans.Visible := True;
       TxtTerminal.Enabled := True;
     end

@@ -1,4 +1,4 @@
-unit UAksiyonlarGorevFrame;
+﻿unit UAksiyonlarGorevFrame;
 
 interface
 
@@ -167,7 +167,7 @@ procedure TAksiyonlarGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 var i:smallint;
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 //haklar ve hukuklar
   PanelIsListesi.Visible := CRMGorevListe;
   //PanelAktiviteler.Visible := CRMAktivite;

@@ -1,4 +1,4 @@
-unit uTanimGrid_ParafFrame;
+﻿unit uTanimGrid_ParafFrame;
 
 interface
 
@@ -105,7 +105,7 @@ end;
 procedure TEvrakTanimParafFrame.ViewPersColumnKaldirPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 begin
   inherited;
-  if Application.MessageBox(PChar(cxKay�t), PChar(SGenotipOnay), MB_YESNO) = IDYES then
+  if Application.MessageBox(PChar(cxKayıt), PChar(SGenotipOnay), MB_YESNO) = IDYES then
     qryPersonelList.Delete;
 end;
 

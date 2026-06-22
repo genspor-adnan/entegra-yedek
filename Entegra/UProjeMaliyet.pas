@@ -1,4 +1,4 @@
-unit UProjeMaliyet;
+ï»¿unit UProjeMaliyet;
 
 interface
 
@@ -124,7 +124,7 @@ begin
      else
         i := 0;
 
-    //eðer proje seçilmiþse ve o projeye girilmiþ bütçe var ise o bütçe kalemlerinden masraf kalemi seçilir
+    //eÄŸer proje seÃ§ilmiÅŸse ve o projeye girilmiÅŸ bÃ¼tÃ§e var ise o bÃ¼tÃ§e kalemlerinden masraf kalemi seÃ§ilir
     if (TabMaliyet.FieldByName('PROJEID').AsString<>'')and
        (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM PROJEBUTCE WHERE PROJEID='+TabMaliyet.FieldByName('PROJEID').AsString,[],[])) then
         SqlText := SqlMemoMasrafKalemi.Text+ ' and PROJEID='+TabMaliyet.FieldByName('PROJEID').AsString

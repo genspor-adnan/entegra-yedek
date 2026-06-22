@@ -1,4 +1,4 @@
-unit UResimOlcumleme;
+ï»¿unit UResimOlcumleme;
 
 interface
 
@@ -39,7 +39,7 @@ implementation
 {$R *.dfm}
 uses Fetautil, IdGlobalProtocols;
 
-//Alttaki küçültme fonksiyonu verilen resmi, istenen büyüklüğe dönüştürür
+//Alttaki kÃ¼Ã§Ã¼ltme fonksiyonu verilen resmi, istenen bÃ¼yÃ¼klÃ¼ÄŸe dÃ¶nÃ¼ÅŸtÃ¼rÃ¼r
 function ResimKucult(Dosya:string; IstenenSize:Integer):String;
 var Resim : TJpegImage;
     Yuzde : Integer;

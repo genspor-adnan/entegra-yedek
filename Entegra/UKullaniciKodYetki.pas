@@ -1,4 +1,4 @@
-unit UKullaniciKodYetki;
+ï»¿unit UKullaniciKodYetki;
 
 interface
 
@@ -63,7 +63,7 @@ begin
 
   if Tablo.Query2.RecordCount <=0 then
    begin
-     Application.MessageBox('Girilen kod deðeri ile baþlayan kart bilgisi bulunamadý.','B Ý L G Ý',MB_OK+MB_ICONINFORMATION);
+     Application.MessageBox('Girilen kod deÄŸeri ile baÅŸlayan kart bilgisi bulunamadÄ±.','B Ä° L G Ä°',MB_OK+MB_ICONINFORMATION);
      abort;
    end
   else
@@ -92,7 +92,7 @@ begin
     if TabKullanicilar.RecordCount<=0 then abort;
     if TabKodYetki.RecordCount<=0 then abort;
 
-    if (Application.MessageBox('Seçili kayýt silinecektir. Onaylýyor musunuz?','O N A Y',MB_YESNO+MB_ICONQUESTION))= ID_YES then
+    if (Application.MessageBox('SeÃ§ili kayÄ±t silinecektir. OnaylÄ±yor musunuz?','O N A Y',MB_YESNO+MB_ICONQUESTION))= ID_YES then
      begin
        Tablo.Query4.Close;
        Tablo.Query4.SQL.Text:= ' DELETE FROM KULHAR WHERE KULLANICIADI = '''+TabKullanicilar.Fields[0].AsString+''' '+

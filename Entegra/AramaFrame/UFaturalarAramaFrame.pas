@@ -1,4 +1,4 @@
-unit UFaturalarAramaFrame;
+﻿unit UFaturalarAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 10:00:42}
@@ -90,7 +90,7 @@ end;
 
 procedure TFaturalarAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    SpinKayitSayisi.text := GenRegIni.RegReadString('AlisSatisOpsiyon', 'BelgeListeKayitSayisi', '200', 'C');
 end;
 

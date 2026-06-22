@@ -1,4 +1,4 @@
-unit UYetkiKategori;
+﻿unit UYetkiKategori;
 
 interface
 
@@ -106,7 +106,7 @@ begin
          TabYetkiEk.FieldByName('BILGI').AsString := kategoriler[I];
          //stringgrid1.Cells[1,StringGrid1.RowCount-1] := Tablo.AciklamaGetir('REHBER', 'FIRMA', ID);
          TabYetkiEk.post;
-    end;  //Tablo.ListedenDuzenle(Tablo.FDCnn,'Demirba� Kategorileri',' select ID, AD from DEMIRBAS_KATEGORI order by 2 ','Kategori',False,True,True);
+    end;  //Tablo.ListedenDuzenle(Tablo.FDCnn,'Demirbaş Kategorileri',' select ID, AD from DEMIRBAS_KATEGORI order by 2 ','Kategori',False,True,True);
     kategoriler.Free;
 end;
 

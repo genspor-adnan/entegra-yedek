@@ -1,4 +1,4 @@
-unit FileAssociationDetails;
+﻿unit FileAssociationDetails;
 
 
 interface

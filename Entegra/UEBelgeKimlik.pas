@@ -1,4 +1,4 @@
-unit UEBelgeKimlik;
+﻿unit UEBelgeKimlik;
 
 // E-Belge gonderim/alias akislarinda kullanilan ortak kimlik cache.
 // TEST veya URETIM moduna gore GENINI'den bir kez okunur, ardindan tum

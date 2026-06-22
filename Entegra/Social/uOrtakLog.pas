@@ -1,4 +1,4 @@
-unit uOrtakLog;
+﻿unit uOrtakLog;
 
 interface
 uses

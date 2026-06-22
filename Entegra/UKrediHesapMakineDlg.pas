@@ -1,4 +1,4 @@
-unit UKrediHesapMakineDlg;
+ï»¿unit UKrediHesapMakineDlg;
 
 interface
 
@@ -167,7 +167,7 @@ var FaizOrani, bol : Real;
   Bilgi: Variant;
   ctrls: TGirdiDenetimleri;
 begin
-   //Efektif faiz oraný bulma formülü :  r = [ (1+i/n)^n ] - 1,  i:nominalfaiz  n:period
+   //Efektif faiz oranÄ± bulma formÃ¼lÃ¼ :  r = [ (1+i/n)^n ] - 1,  i:nominalfaiz  n:period
   if TcxButton(Sender).Name = 'FaizOraniAy' then
      Bilgi := FaizOraniAy.Value
   else
@@ -244,7 +244,7 @@ end;
 
 procedure TKrediHesapMakineDlg.FormCreate(Sender: TObject);
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    Tablo.GridTurkcelestir;
    cxPageControl1.ActivePageIndex := 0;
    ComboKurFat.ItemIndex := (ComboKurFat.RepositoryItem.Properties as TcxComboBoxProperties).Items.IndexOf(CariDoviz);
@@ -313,8 +313,8 @@ var s: string;
         ' SET @KUR= '''+ComboKurFat.Text+''''+
         ' SET @FAIZORANI = '+ Float_ToStr(FaizOraniAy.Value*12.0) +
         ' SET @KDV = '+ StringReplace(Float_ToStr(EditKDV.Value), ',', '.', [])+
-        ' SET @ONCESONRA = '+ IntToStr(i)+               //  -1 : onceki günlere gider, 1: sonraki günlere gider
-        ' SET @DONEM = '+ IntToStr(RadioGroupDonem.ItemIndex)+               //  0 : dönembaþý, 1: dönem sonu
+        ' SET @ONCESONRA = '+ IntToStr(i)+               //  -1 : onceki gÃ¼nlere gider, 1: sonraki gÃ¼nlere gider
+        ' SET @DONEM = '+ IntToStr(RadioGroupDonem.ItemIndex)+               //  0 : dÃ¶nembaÅŸÄ±, 1: dÃ¶nem sonu
         ' SET @SATIS = '+StringReplace(Float_ToStr(EditSatis.Value), ',', '.', []);
 
        TabOdemeTakvimi.SQL.Text:= STRingreplace(MemoSQLLeasing.text,'SQLKOMUT',s, []);
@@ -323,7 +323,7 @@ var s: string;
        PlanTview.ApplyBestFit(nil);
    end;
 begin
-   //sqlde hata çýkýyor virgülü nokta yapalým
+   //sqlde hata Ã§Ä±kÄ±yor virgÃ¼lÃ¼ nokta yapalÄ±m
   // StringReplace(TutarStr, ',', '.', []);
    if cxPageControl1.ActivePageIndex = 1 then   //  'Leasing'
       Leasing

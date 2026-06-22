@@ -1,4 +1,4 @@
-unit UAraDlg;
+ï»¿unit UAraDlg;
 
 interface
 
@@ -120,11 +120,11 @@ begin
    end;
 
 
-//   ComboBox1.Text := GenotipIni.ReadString('AramaEkraný','ComboBox1', '');
-//   ComboBox2.Text := GenotipIni.ReadString('AramaEkraný','ComboBox2', '');
-//   ComboBox3.Text := GenotipIni.ReadString('AramaEkraný','ComboBox3', '');
-//   ComboBox4.Text := GenotipIni.ReadString('AramaEkraný','ComboBox4', '');
-//   LabelEk.Caption := GenotipIni.ReadString('AramaEkraný',TabloDokum.Modul, '---');
+//   ComboBox1.Text := GenotipIni.ReadString('AramaEkranÄ±','ComboBox1', '');
+//   ComboBox2.Text := GenotipIni.ReadString('AramaEkranÄ±','ComboBox2', '');
+//   ComboBox3.Text := GenotipIni.ReadString('AramaEkranÄ±','ComboBox3', '');
+//   ComboBox4.Text := GenotipIni.ReadString('AramaEkranÄ±','ComboBox4', '');
+//   LabelEk.Caption := GenotipIni.ReadString('AramaEkranÄ±',TabloDokum.Modul, '---');
    if LabelEk.Caption <> '---' then begin
       LabelEk.Hint:= copy(LabelEk.Caption,1,pos('.',LabelEk.Caption)-1);
       LabelEk.Caption := copy(LabelEk.Caption,pos('.',LabelEk.Caption)+1,length(LabelEk.Caption)-pos('.',LabelEk.Caption));
@@ -204,7 +204,7 @@ procedure TAraDlg.ParcaAraTusClick(Sender: TObject);
   begin
       ust:=False;
       s := 'where '+CB1+'.'+CB2;
-      if (CB3='Baþlayan')or(CB3='Ýçinde geçen') then
+      if (CB3='BaÅŸlayan')or(CB3='Ä°Ã§inde geÃ§en') then
          s := s + ' LIKE '
       else
          s := s + CB3;
@@ -216,12 +216,12 @@ procedure TAraDlg.ParcaAraTusClick(Sender: TObject);
       FieldTipi := Tablo.Query1.FieldByName(CB2).DataType;
       if  (FieldTipi = FtString) Or (FieldTipi = FtMemo) Or (FieldTipi = FtDate)or(FieldTipi = FtDateTime)then
           s := s + '''';
-      if CB3 = 'Ýçinde geçen' then  s := s + '%';
+      if CB3 = 'Ä°Ã§inde geÃ§en' then  s := s + '%';
       if (FieldTipi = FtDate)or(FieldTipi = FtDateTime) then
          s := s+ FormatDateTime('mm/dd/yyyy',StrToDate(CB4)) // VALUE := GAY2AGY(VALUE);
       else
          s := s + CB4;
-      if (CB3='Baþlayan')or(CB3='Ýçinde geçen') then
+      if (CB3='BaÅŸlayan')or(CB3='Ä°Ã§inde geÃ§en') then
          s := s + '%';
       if  (FieldTipi = FtString) Or (FieldTipi = FtMemo) Or (FieldTipi = FtDate)or(FieldTipi = FtDateTime)then
          s := s + '''';
@@ -377,10 +377,10 @@ end;
 
 procedure TAraDlg.ComboBox4Exit(Sender: TObject);
 begin
-//   GenotipIni.WriteString('AramaEkraný','ComboBox1', ComboBox1.Text);
-//   GenotipIni.WriteString('AramaEkraný','ComboBox2', ComboBox2.Text);
-//   GenotipIni.WriteString('AramaEkraný','ComboBox3', ComboBox3.Text);
-//   GenotipIni.WriteString('AramaEkraný','ComboBox4', ComboBox4.Text);
+//   GenotipIni.WriteString('AramaEkranÄ±','ComboBox1', ComboBox1.Text);
+//   GenotipIni.WriteString('AramaEkranÄ±','ComboBox2', ComboBox2.Text);
+//   GenotipIni.WriteString('AramaEkranÄ±','ComboBox3', ComboBox3.Text);
+//   GenotipIni.WriteString('AramaEkranÄ±','ComboBox4', ComboBox4.Text);
 end;
 
 procedure TAraDlg.Label4DblClick(Sender: TObject);
@@ -392,15 +392,15 @@ var adsoyad, AnaDosyano: string;
     {procedure GelisnoYok;
     begin
        Tablo.Query3.Close;
-       Tablo.Query3.SQL.Text := 'Select max(DOSYANO) From '+stlist.strings[i]+' where'; //bu dosyanolar içinde en yüksek hangi dosyanoda bilgi var
+       Tablo.Query3.SQL.Text := 'Select max(DOSYANO) From '+stlist.strings[i]+' where'; //bu dosyanolar iÃ§inde en yÃ¼ksek hangi dosyanoda bilgi var
        for j := 0 to Dosyanolist.Count - 1 do begin
            if j>0 then Tablo.Query3.SQL.Add(' or ');
            Tablo.Query3.SQL.Add(' DOSYANO='''+Dosyanolist.strings[j]+'''');
        end;
        Tablo.Query3.Open;
-       if Tablo.Query3.Fields[0].AsString <>'' then begin//eðer varsa
+       if Tablo.Query3.Fields[0].AsString <>'' then begin//eÄŸer varsa
           Tablo.Query5.Close;
-          Tablo.Query5.SQL.Text := 'Delete From '+stlist.strings[i]+' where'; //diðerlerini sil
+          Tablo.Query5.SQL.Text := 'Delete From '+stlist.strings[i]+' where'; //diÄŸerlerini sil
           for j := 0 to Dosyanolist.Count - 1 do
                 if Dosyanolist.strings[j]<>Tablo.Query3.Fields[0].AsString then begin
                    if Tablo.Query5.SQL.Count>1 then Tablo.Query5.SQL.Add(' or ');
@@ -423,10 +423,10 @@ var adsoyad, AnaDosyano: string;
        end;
     begin
        inc(Gelno);
-       //geliþler için uygulayalým
+       //geliÅŸler iÃ§in uygulayalÄ±m
        Tablo.Query1.first;
        while not Tablo.Query1.eof do begin
-       //o geliþe baðlý tüm dosyalar için
+       //o geliÅŸe baÄŸlÄ± tÃ¼m dosyalar iÃ§in
          Tablo.Query2.first;
          while not Tablo.Query2.eof do begin
             uppp(Tablo.Query2.Fields[0].AsString);
@@ -438,7 +438,7 @@ var adsoyad, AnaDosyano: string;
     end;
     {procedure kimlikleri_Birlestir;
     begin
-       //kimlikleri birleþtir
+       //kimlikleri birleÅŸtir
        for i := 0 to Dosyanolist.Count - 1 do
            if Dosyanolist.strings[i]<>AnaDosyano then begin
              Tablo.Query4.Close;
@@ -460,14 +460,14 @@ var adsoyad, AnaDosyano: string;
            end;
     end;}
 begin
-   Showmessage(' Kayýt birleþtirme yeniden yapýlandýrýlýyor.');
+   Showmessage(' KayÄ±t birleÅŸtirme yeniden yapÄ±landÄ±rÄ±lÄ±yor.');
    Exit;
 
    if not Super then begin
-      Showmessage(' Yetkili kullanýcý deðilsiniz..');
+      Showmessage(' Yetkili kullanÄ±cÄ± deÄŸilsiniz..');
       exit;
    end;
-   //Ad ve soyadlarý ayný mý bakalým..
+   //Ad ve soyadlarÄ± aynÄ± mÄ± bakalÄ±m..
    if DBGrid1.SelectedRows.Count<2 then exit;
 
 //   DosyanoList := TStringList.Create;
@@ -489,7 +489,7 @@ begin
       end;
 
    if farkli then
-      raise exception.Create('Dosyalarýn ad veya soyadlarý ayný deðil..');
+      raise exception.Create('DosyalarÄ±n ad veya soyadlarÄ± aynÄ± deÄŸil..');
 
 //   stlist := TStringList.Create;
 //   GenotipIni.ReadSection('HASTADOSYALARI', stlist);
@@ -497,7 +497,7 @@ begin
    Tablo.Query1.SQL.Add('order by GIRISTARIH');
    Tablo.Query1.Open;
    AnaDosyano := Tablo.Query1.Fields[0].AsString;
-   //Anadosya nodaki tablo gelisnolarýný artýralým yoksa üzerine yazýlýr
+   //Anadosya nodaki tablo gelisnolarÄ±nÄ± artÄ±ralÄ±m yoksa Ã¼zerine yazÄ±lÄ±r
    Tablo.Query2.Close;
    Tablo.Query2.SQL.Text := 'SELECT O.NAME,o.xtype FROM syscolumns C inner join sysobjectS o on o.id = c.id '+
                             ' where c.name= ''GELISNO'' and o.type =''U'' and O.NAME<>''GELISLER'' order by 1 ';
@@ -520,10 +520,10 @@ begin
    end;
    Tablo.Query3.SQL.Text := 'Update GELISLER set GELISNO=GELISNO+100 where DOSYANO='''+AnaDosyano+'''';
    Tablo.Query3.ExecSQL;
-   //Ana dosyadaki geliþlere 100 eklendi terar refresh edelim
+   //Ana dosyadaki geliÅŸlere 100 eklendi terar refresh edelim
    Tablo.Query1.Close;
    Tablo.Query1.Open;
-   //þimdi sýrayla birleþtirelim
+   //ÅŸimdi sÄ±rayla birleÅŸtirelim
    Gelno:=0;
    while not Tablo.Query1.eof do begin
      Birlestir;
@@ -532,7 +532,7 @@ begin
    //kimlikleri_Birlestir;
    //stlist.free;
    //DosyanoList.Free;
-   ShowMessage('Ýþlem tamamlandý..');
+   ShowMessage('Ä°ÅŸlem tamamlandÄ±..');
 
 (*
 
@@ -544,13 +544,13 @@ begin
    end;
 
    DNo1 := ''; DNo2 := '';
-   if not MesajStrAl('','Hastanýn 1.DOSYANO giriniz :','E', nil,DNo1, 'Hastanýn 2.DOSYANO giriniz : (Eklenip silinececek)', 'E', nil,DNo2) then exit;
+   if not MesajStrAl('','HastanÄ±n 1.DOSYANO giriniz :','E', nil,DNo1, 'HastanÄ±n 2.DOSYANO giriniz : (Eklenip silinececek)', 'E', nil,DNo2) then exit;
    Tablo.Query1.SQL.Text := 'Select AD, SOYAD from KIMLIK where DOSYANO='''+DNo1+'''';
    Tablo.Query1.Open;
    Tablo.Query2.SQL.Text := 'Select AD, SOYAD from KIMLIK where DOSYANO='''+DNo2+'''';
    Tablo.Query2.Open;
    if (Tablo.Query1.Fields[0].AsString<>Tablo.Query2.Fields[0].AsString)or(Tablo.Query1.Fields[1].AsString<>Tablo.Query2.Fields[1].AsString)then
-      raise exception.Create('Dosyalarýn ad veya soyadlarý ayný deðil..');
+      raise exception.Create('DosyalarÄ±n ad veya soyadlarÄ± aynÄ± deÄŸil..');
    Tablo.Query1.SQL.Text := 'Select max(GELISNO) from GELISLER where DOSYANO='''+DNo1+'''';
    Tablo.Query1.Open;
 
@@ -566,10 +566,10 @@ begin
        except
           Tablo.Query3.SQL.Text := 'Select * From '+stlist.strings[i]+' where DOSYANO='''+DNo1+'''';
           Tablo.Query3.Open;
-          if Tablo.Query3.RecordCount > 0 then begin //Önceki dosyada varsa bilgileri al ve sil
+          if Tablo.Query3.RecordCount > 0 then begin //Ã–nceki dosyada varsa bilgileri al ve sil
              Tablo.Query4.SQL.Text := 'Select * From '+stlist.strings[i]+' where DOSYANO='''+DNo2+'''';
              Tablo.Query4.Open;
-             if Tablo.Query4.RecordCount > 0 then begin //Önceki dosyada varsa bilgileri al ve sil
+             if Tablo.Query4.RecordCount > 0 then begin //Ã–nceki dosyada varsa bilgileri al ve sil
                for i := 1 to Tablo.Query3.FieldCount - 1 do
                  if Tablo.Query3.Fields[i].AsString <> '' then begin
                     Tablo.Query5.SQL.Text := 'Update '+stlist.strings[i]+' set '+Tablo.Query4.Fields[i].FieldName+'='''+Tablo.Query4.Fields[i].AsString+''' where DOSYANO='''+DNo2+'''';
@@ -614,13 +614,13 @@ begin
    Tablo.TabKimlik.Post;
    Tablo.Query3.SQL.Text := 'Delete from KIMLIK where DOSYANO='''+DNo2+'''';
    Tablo.Query3.ExecSQL;
-   ShowMessage('Ýþlem tamamlandý..');
+   ShowMessage('Ä°ÅŸlem tamamlandÄ±..');
    *)
 end;
 
 procedure TAraDlg.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-   if (Key in ['0'..'9'])or(Key in ['a'..'z'])or(Key in ['A'..'Z'])or(Key in ['ð','ü','þ','ý','ö','ç','Ð','Ü','Þ','Ý','Ö','Ç']) then begin
+   if (Key in ['0'..'9'])or(Key in ['a'..'z'])or(Key in ['A'..'Z'])or(Key in ['ÄŸ','Ã¼','ÅŸ','Ä±','Ã¶','Ã§','Äž','Ãœ','Åž','Ä°','Ã–','Ã‡']) then begin
       ParcaAraTus.Default := True;
       ErisTus.Default := False;
    end
@@ -648,7 +648,7 @@ end;
 procedure TAraDlg.ErisTusClick(Sender: TObject);
 begin
    if (not AraQuery1.Active)or(AraQuery1.Fields[0].AsString='') then
-      raise exception.create('Eriþim için hasta bulunamadý..')
+      raise exception.create('EriÅŸim iÃ§in hasta bulunamadÄ±..')
    else
       ModalResult := mrOk;
 end;
@@ -656,7 +656,7 @@ end;
 procedure TAraDlg.GelisSayisiBelirleClick(Sender: TObject);
 begin
 //   s := GenotipIni.ReadString('GenelOpsiyon','SonGelisSay', '0');
-//   if not MesajStrAl('','Hastanýn son kaç geliþi :','E', nil,s, '', 'E', nil,s) then exit;
+//   if not MesajStrAl('','HastanÄ±n son kaÃ§ geliÅŸi :','E', nil,s, '', 'E', nil,s) then exit;
 //   SonGelisSay := StrToInt(s);
 //   GenotipIni.WriteInteger('GenelOpsiyon','SonGelisSay', SonGelisSay);
 end;
@@ -669,9 +669,9 @@ end;
 procedure TAraDlg.DetaylAramaysteEkle1Click(Sender: TObject);
 begin
    if (ComboBox1.Text='')or(ComboBox2.Text='')or(ComboBox3.Text='')then
-      showmessage('Alanlarda boþluk býrakmayýn..')
+      showmessage('Alanlarda boÅŸluk bÄ±rakmayÄ±n..')
    else begin
-//      GenotipIni.WriteString('AramaEkraný',TabloDokum.Modul, Trim(ComboBox1.Text)+'.'+Trim(ComboBox2.Text)+' '+Trim(ComboBox3.Text));
+//      GenotipIni.WriteString('AramaEkranÄ±',TabloDokum.Modul, Trim(ComboBox1.Text)+'.'+Trim(ComboBox2.Text)+' '+Trim(ComboBox3.Text));
       LabelEk.Hint:= Trim(ComboBox1.Text);
       LabelEk.Caption := Trim(ComboBox2.Text)+' '+Trim(ComboBox3.Text);
       LabelEk.Visible := True;
@@ -681,7 +681,7 @@ end;
 
 procedure TAraDlg.sttekiEkAramayKaldr1Click(Sender: TObject);
 begin
-//      GenotipIni.WriteString('AramaEkraný',TabloDokum.Modul, '---');
+//      GenotipIni.WriteString('AramaEkranÄ±',TabloDokum.Modul, '---');
       LabelEk.Visible := False;
       EditEk.Visible := False;
 end;
@@ -689,7 +689,7 @@ end;
 procedure TAraDlg.Aramadalkkahastalistelensin1Click(Sender: TObject);
 begin
 //   s := GenotipIni.ReadString('GenelOpsiyon','AramaHastaSay', '30');
-//   if not MesajStrAl('','Aramada Ýlk kaç hasta listelensin : (Sýnýrsýz için 0 girin)','E', nil,s, '', 'E', nil,s) then exit;
+//   if not MesajStrAl('','Aramada Ä°lk kaÃ§ hasta listelensin : (SÄ±nÄ±rsÄ±z iÃ§in 0 girin)','E', nil,s, '', 'E', nil,s) then exit;
 //   GenotipIni.WriteString('GenelOpsiyon','AramaHastaSay', s);
    if StrToInt(s) < 1 then
       AramaHastaSay := ''

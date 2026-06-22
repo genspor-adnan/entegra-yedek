@@ -1,4 +1,4 @@
-unit UOzelNotlar;
+ï»¿unit UOzelNotlar;
 
 interface
 
@@ -37,7 +37,7 @@ end;
 procedure TOzelNotlarDlg.BitBtn2Click(Sender: TObject);
 begin
 //   if Tablo.TabRehber.State in [dsEdit, dsInsert] then
-//    if MessageDlg('Deðiþiklik yapýldý kaydetmek ister misiniz',mtConfirmation,mbYesNoCancel,0 ) = mryes
+//    if MessageDlg('DeÄŸiÅŸiklik yapÄ±ldÄ± kaydetmek ister misiniz',mtConfirmation,mbYesNoCancel,0 ) = mryes
 //    then
 //      Tablo.TabRehber.Post
 //    ELSE

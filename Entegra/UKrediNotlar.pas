@@ -1,4 +1,4 @@
-unit UKrediNotlar;
+ï»¿unit UKrediNotlar;
 
 interface
 
@@ -113,7 +113,7 @@ end;
 function TKrediNotlarDlg.FUpdating_SetUpdate :Boolean;
 begin
   FUpdating_SetUpdate := FUpdating;
-  { TODO -oDeveloper -cKrediNotlarDlg : Kredi notlar kapatýldý! }
+  { TODO -oDeveloper -cKrediNotlarDlg : Kredi notlar kapatÄ±ldÄ±! }
 //  if not FUpdating then
 //    if Tablo.TabRehber.Active then
 //      Tablo.TabRehber.Edit;
@@ -262,7 +262,7 @@ end;
 procedure TKrediNotlarDlg.BitBtn2Click(Sender: TObject);
 begin
 {   if Tablo.TabRehber.State in [dsEdit, dsInsert] then
-    if MessageDlg('Deðiþiklik yapýldý kaydetmek ister misiniz',mtConfirmation,mbYesNoCancel,0 ) = mryes
+    if MessageDlg('DeÄŸiÅŸiklik yapÄ±ldÄ± kaydetmek ister misiniz',mtConfirmation,mbYesNoCancel,0 ) = mryes
     then
       Tablo.TabRehber.Post
     ELSE
@@ -299,7 +299,7 @@ end;
 
 procedure TKrediNotlarDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   GetFontNames;
   SetupRuler;
   SelectionChange(Self);

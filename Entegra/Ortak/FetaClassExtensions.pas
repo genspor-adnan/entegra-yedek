@@ -1,14 +1,14 @@
-{********************************************************}
+ï»¿{********************************************************}
 {*                  GenoTIP HBYS                        *}
-{*                Sınıf Uzantıları                      *}
+{*                SÄ±nÄ±f UzantÄ±larÄ±                      *}
 {*                     v1.0                             *}
 {*                                                      *}
 {*                                                      *}
-{* (c) Telif Hakkı 2009 Feta Bilgisayar                 *}
+{* (c) Telif HakkÄ± 2009 Feta Bilgisayar                 *}
 {********************************************************}
 
 {
-  - - - - - Geçmiş - - - - -
+  - - - - - GeÃ§miÅŸ - - - - -
   01.09.2009
     - TTimerExtension impl.
     - TCustomEditExtension impl.
@@ -35,14 +35,14 @@ uses
 
 type
 
-  { ! Bu yardımcıları kullanabilmek için uses kısmında bu unit'i referans edin. !}
+  { ! Bu yardÄ±mcÄ±larÄ± kullanabilmek iÃ§in uses kÄ±smÄ±nda bu unit'i referans edin. !}
 
 
   TListExtension = class helper for TList
   public
     /// <summary>
-    ///  Listenin içerisinde var mı yok mu kontrol eder
-    ///  <param name="AItem">Kontrol edilecek pointer tipinde değişken</param>
+    ///  Listenin iÃ§erisinde var mÄ± yok mu kontrol eder
+    ///  <param name="AItem">Kontrol edilecek pointer tipinde deÄŸiÅŸken</param>
     /// </summary>
     function Contains(AItem: Pointer): Boolean;
   end;
@@ -58,13 +58,13 @@ type
   published
   public
     /// <summary>
-    ///   TabloDokum modülünde bulunan Menü işlemlerinin TMenuItem e aktarılmış hali
-    ///   Fazladan AImageIndex parametresi eklenmiştir.
+    ///   TabloDokum modÃ¼lÃ¼nde bulunan MenÃ¼ iÅŸlemlerinin TMenuItem e aktarÄ±lmÄ±ÅŸ hali
+    ///   Fazladan AImageIndex parametresi eklenmiÅŸtir.
     /// </summary>
     function ItemOperation(AOperation: TMenuOperation;ACaption1: string;
       AOnClick: TNotifyEvent;AImageIndex: Integer = -1;ACaption2: string=''; ATag:Integer=0): TMenuItem;
     /// <summary>
-    ///   Caption özelliğinin içeriğini & işareti olmadan dönürür
+    ///   Caption Ã¶zelliÄŸinin iÃ§eriÄŸini & iÅŸareti olmadan dÃ¶nÃ¼rÃ¼r
     /// </summary>
     property CaptionShortCutLess : string read GetShortCutLessCaption;
   end;
@@ -88,85 +88,85 @@ type
   published
   public
     /// <summary>
-    ///   IndexOf('xyz') > -1 ifadesinin kısaltılmış hali
+    ///   IndexOf('xyz') > -1 ifadesinin kÄ±saltÄ±lmÄ±ÅŸ hali
     /// </summary>
     function Contains(AVariant: Variant) : Boolean;
     /// <summary>
-    ///   TStrings e variant değer ekleyebilmeyi sağlar.böylelikle değişik
-    ///   değer tiplerini dönüştürmeden saklanması sağlanır.
+    ///   TStrings e variant deÄŸer ekleyebilmeyi saÄŸlar.bÃ¶ylelikle deÄŸiÅŸik
+    ///   deÄŸer tiplerini dÃ¶nÃ¼ÅŸtÃ¼rmeden saklanmasÄ± saÄŸlanÄ±r.
     /// </summary>
     function AddVar(AVariant: Variant): Integer;
     /// <summary>
-    ///   TStrings i bir integer listesi olarak kullanmayı sağlayan yöntem.
+    ///   TStrings i bir integer listesi olarak kullanmayÄ± saÄŸlayan yÃ¶ntem.
     /// </summary>
     function AsInteger(AIndex: Integer): Integer;
     /// <summary>
-    ///   Bu işlevi listede sadece integer değerler içeriyorsa kullanın.
-    ///  Aksi takdirde Exception fırlatabilir!
+    ///   Bu iÅŸlevi listede sadece integer deÄŸerler iÃ§eriyorsa kullanÄ±n.
+    ///  Aksi takdirde Exception fÄ±rlatabilir!
     /// </summary>
     function FindMaxInteger: Integer;
     /// <summary>
-    ///   a,b,c gibi ayrılmış string i listeye atılabilmesini sağlayan yöntem.
+    ///   a,b,c gibi ayrÄ±lmÄ±ÅŸ string i listeye atÄ±labilmesini saÄŸlayan yÃ¶ntem.
     /// </summary>
     procedure LoadFromString(AString: string;ADelimiter: string);
     /// <summary>
-    ///   Count > 0 ifadesinin yerine geçen yöntem
+    ///   Count > 0 ifadesinin yerine geÃ§en yÃ¶ntem
     /// </summary>
     function HasItems : Boolean;
     /// <summary>
-    ///   Liste içerisindekilerini a,b,c gibi alınabilmesini sağlar.
+    ///   Liste iÃ§erisindekilerini a,b,c gibi alÄ±nabilmesini saÄŸlar.
     /// </summary>
     function Join(ADelimiter: string): string;
     /// <summary>
-    /// Nesne yoksa yeni bir tane ekler eğer varsa var olan nesneyi değiştirir
+    /// Nesne yoksa yeni bir tane ekler eÄŸer varsa var olan nesneyi deÄŸiÅŸtirir
     /// </summary>
     function AddOrUpdateObject(AValue: string;AObject: TObject): Integer;
     /// <summary>
-    /// Adı verilerek nesnenin elde edilmesini sağlar.
+    /// AdÄ± verilerek nesnenin elde edilmesini saÄŸlar.
     /// </summary>
     property ObjectByName[Index: string] : TObject read GetObjectByName write SetObjectByName;
     /// <summary>
-    /// Adı verilen elemanın değerini tam sayı olarak döndürür.  
+    /// AdÄ± verilen elemanÄ±n deÄŸerini tam sayÄ± olarak dÃ¶ndÃ¼rÃ¼r.  
     /// </summary>
     function ValueAsInteger(AName: string;ADefault: Integer): Integer;
     /// <summary>
-    /// AName=AValue olarak eklemeyi sağlar.
+    /// AName=AValue olarak eklemeyi saÄŸlar.
     /// </summary>
     function AddNameValue(AName, AValue: Variant): Integer;
     /// <summary>
-    /// Verilen değer liste içinde yoksa ekler varsa eklemez.
+    /// Verilen deÄŸer liste iÃ§inde yoksa ekler varsa eklemez.
     /// </summary>
     function AddDistinct(AValue: Variant): Integer;
     procedure FillFromSQL(AConnection: TFDConnection;ASQL: string;
       AParams: array of string;AParamValues: array of Variant;
       ADistinct: Boolean = False;AClearList: Boolean = True);
     /// <summary>
-    /// Verilen eski adı yeni adı ile değiştirir
+    /// Verilen eski adÄ± yeni adÄ± ile deÄŸiÅŸtirir
     /// </summary>
-    /// <param name="AOldName">Değiştirilmesi gereken ad</param>
-    /// <param name="ANewName">Yeni adı</param>
-    /// <returns>Değişen adın indexi</returns>
+    /// <param name="AOldName">DeÄŸiÅŸtirilmesi gereken ad</param>
+    /// <param name="ANewName">Yeni adÄ±</param>
+    /// <returns>DeÄŸiÅŸen adÄ±n indexi</returns>
     function Change(AOldName: string;ANewName: string): Integer;
     /// <summary>
-    /// Listedeki elemana atanmış nesneyi (Object) TStrings olarak döndürür.
-    /// Atanan nesnenin tipi TStrings türetilmiş olmalı
+    /// Listedeki elemana atanmÄ±ÅŸ nesneyi (Object) TStrings olarak dÃ¶ndÃ¼rÃ¼r.
+    /// Atanan nesnenin tipi TStrings tÃ¼retilmiÅŸ olmalÄ±
     /// </summary>
     /// <remarks>
-    ///  Bu özelliği kullanan yöntemler ve procedure'ler işleri bittiklerinde
-    ///  ClearObjects yöntemini kesinlikle çağırmalıdırlar.!
+    ///  Bu Ã¶zelliÄŸi kullanan yÃ¶ntemler ve procedure'ler iÅŸleri bittiklerinde
+    ///  ClearObjects yÃ¶ntemini kesinlikle Ã§aÄŸÄ±rmalÄ±dÄ±rlar.!
     /// </remarks>
     property SubList[IndexOrName: Variant]: TStrings read GetSubList write SetSubList;
     /// <summary>
-    /// Listedeki elemanlara atanmış tüm nesnelerin Free yöntemlerini çağırır
-    /// Eğer nesne TStrings türünde ise onunda ClearObjects yöntemini çağırır
+    /// Listedeki elemanlara atanmÄ±ÅŸ tÃ¼m nesnelerin Free yÃ¶ntemlerini Ã§aÄŸÄ±rÄ±r
+    /// EÄŸer nesne TStrings tÃ¼rÃ¼nde ise onunda ClearObjects yÃ¶ntemini Ã§aÄŸÄ±rÄ±r
     /// </summary>
     procedure ClearObjects;
     /// <summary>
-    /// Listedeki tüm elemanların Object özelliği için yeni bir TStringList
-    /// nesnesi başlatır ve atar
+    /// Listedeki tÃ¼m elemanlarÄ±n Object Ã¶zelliÄŸi iÃ§in yeni bir TStringList
+    /// nesnesi baÅŸlatÄ±r ve atar
     /// </summary>
     /// <remarks>
-    /// Eğer elemanın nesnesi nil ise bu işlemi yapar 
+    /// EÄŸer elemanÄ±n nesnesi nil ise bu iÅŸlemi yapar 
     /// </remarks>
     procedure CreateSubLists;
     procedure AddMulti(Names: array of Variant);
@@ -184,7 +184,7 @@ type
   TStringListExtension = class helper for TStringList
   public
     /// <summary>
-    ///   Liste içerisindekilerini sıralar
+    ///   Liste iÃ§erisindekilerini sÄ±ralar
     /// </summary>
     procedure IntegerSort(AAscending: Boolean = True);
   end;
@@ -209,47 +209,47 @@ type
     procedure ClearFieldsReadOnlyFlags;
     procedure CopyStructureTo(ADataSet: TDataSet);
     /// <summary>
-    ///   Belirtilen alandaki tüm değerleri verilen TStrings tipindeki değişkene
-    ///  aktarır.
+    ///   Belirtilen alandaki tÃ¼m deÄŸerleri verilen TStrings tipindeki deÄŸiÅŸkene
+    ///  aktarÄ±r.
     /// </summary>
     procedure FillStringList(AField: string;AList: TStrings;AClearList: Boolean = True);
     /// <summary>
-    /// Fields[x] yerine DataSetten AsString olarak erişmeyi sağlayan özellik
+    /// Fields[x] yerine DataSetten AsString olarak eriÅŸmeyi saÄŸlayan Ã¶zellik
     /// </summary>
-    /// <returns>Alanı değerini string olarak döndürür</returns>
+    /// <returns>AlanÄ± deÄŸerini string olarak dÃ¶ndÃ¼rÃ¼r</returns>
     property AsString[IndexOrName: Variant]: string read GetFieldAsString write SetFieldAsString;
     /// <summary>
-    /// Fields[x] yerine DataSetten AsInteger olarak erişmeyi sağlayan özellik
+    /// Fields[x] yerine DataSetten AsInteger olarak eriÅŸmeyi saÄŸlayan Ã¶zellik
     /// </summary>
-    /// <returns>Alanın değerini integer olarak döndürür</returns>
+    /// <returns>AlanÄ±n deÄŸerini integer olarak dÃ¶ndÃ¼rÃ¼r</returns>
     property AsInteger[IndexOrName: Variant]: Integer read GetFieldAsInteger write SetFieldAsInteger;
     /// <summary>
-    /// Fields[x] yerine DataSetten AsBoolean olarak erişmeyi sağlayan özellik
+    /// Fields[x] yerine DataSetten AsBoolean olarak eriÅŸmeyi saÄŸlayan Ã¶zellik
     /// </summary>
-    /// <returns>Alanın değerini boolean olarak döndürür</returns>
+    /// <returns>AlanÄ±n deÄŸerini boolean olarak dÃ¶ndÃ¼rÃ¼r</returns>
     property AsBoolean[IndexOrName: Variant]: Boolean read GetFieldAsBoolean write SetFieldAsBoolean;
     /// <summary>
-    /// Fields[x] yerine DataSetten AsFloat olarak erişmeyi sağlayan özellik
+    /// Fields[x] yerine DataSetten AsFloat olarak eriÅŸmeyi saÄŸlayan Ã¶zellik
     /// </summary>
-    /// <returns>Alanın değerini float olarak döndürür</returns>
+    /// <returns>AlanÄ±n deÄŸerini float olarak dÃ¶ndÃ¼rÃ¼r</returns>
     property AsFloat[IndexOrName: Variant]: Double read GetFieldAsFloat write SetFieldAsFloat;
     /// <summary>
-    /// Alanın bir sonraki satırdaki değerini döndürür.Eğer DataSet'in
-    /// Eof bayrağı aktifse Null döner.
+    /// AlanÄ±n bir sonraki satÄ±rdaki deÄŸerini dÃ¶ndÃ¼rÃ¼r.EÄŸer DataSet'in
+    /// Eof bayraÄŸÄ± aktifse Null dÃ¶ner.
     /// </summary>
-    /// <returns>Alanın değerini Variant olarak döndürür</returns>
+    /// <returns>AlanÄ±n deÄŸerini Variant olarak dÃ¶ndÃ¼rÃ¼r</returns>
     property PeekNextValue[IndexOrName: Variant] : Variant read GetPeekNextValue;
   end;
 
   TFieldExtension = class helper for TField
   public
     /// <summary>
-    ///   Alan içindeki değerin null veya boş olup olmadığını döndüren yöntem
+    ///   Alan iÃ§indeki deÄŸerin null veya boÅŸ olup olmadÄ±ÄŸÄ±nÄ± dÃ¶ndÃ¼ren yÃ¶ntem
     /// </summary>
     function IsNullOrEmpty : Boolean;
     /// <summary>
-    ///   TDataSetExtension sınıfında tanımlanan yöntemin TField içinde yapılmış
-    ///  şekli.Nitekim kullanması TDataSet'te kullanılmasından daha kolay.
+    ///   TDataSetExtension sÄ±nÄ±fÄ±nda tanÄ±mlanan yÃ¶ntemin TField iÃ§inde yapÄ±lmÄ±ÅŸ
+    ///  ÅŸekli.Nitekim kullanmasÄ± TDataSet'te kullanÄ±lmasÄ±ndan daha kolay.
     /// </summary>
     procedure CopyAllRowsToStringList(AList: TStrings;
       AClearList: Boolean = True);
@@ -259,8 +259,8 @@ type
   TADOQueryExtension = class helper for TADOQuery
   public
     /// <summary>
-    ///   Veritabani.SorguBaslat (eski adı ile _query_exec) yönteminin TADOQuery
-    ///  sınıfının içinden çalıştırılmasını sağlayan yöntem.
+    ///   Veritabani.SorguBaslat (eski adÄ± ile _query_exec) yÃ¶nteminin TADOQuery
+    ///  sÄ±nÄ±fÄ±nÄ±n iÃ§inden Ã§alÄ±ÅŸtÄ±rÄ±lmasÄ±nÄ± saÄŸlayan yÃ¶ntem.
     /// </summary>
     procedure InitSql(ASql: string;paramNames : array of string;params:array of variant;
       UseDataSource: TDataSource = nil);
@@ -278,8 +278,8 @@ type
   TADOCommandExtension = class helper for TADOCommand
   public
     /// <summary>
-    ///   Veritabani.KomutBaslat (eski adı ile _query_cmd) yönteminin TADOCommand
-    ///  sınıfının içinden çalıştırılmasını sağlayan yöntem.
+    ///   Veritabani.KomutBaslat (eski adÄ± ile _query_cmd) yÃ¶nteminin TADOCommand
+    ///  sÄ±nÄ±fÄ±nÄ±n iÃ§inden Ã§alÄ±ÅŸtÄ±rÄ±lmasÄ±nÄ± saÄŸlayan yÃ¶ntem.
     /// </summary>
     procedure InitCommand(ASql: string;paramNames : array of string;params:array of variant;
       UseDataSource: TDataSource = nil);
@@ -288,12 +288,12 @@ type
   TStreamExtension = class helper for TStream
   public
     /// <summary>
-    ///   Stream içeriğini 00ABCDEF00... gibi hex rakamlarla dize olarak
-    ///   aktarılmasını sağlar.
+    ///   Stream iÃ§eriÄŸini 00ABCDEF00... gibi hex rakamlarla dize olarak
+    ///   aktarÄ±lmasÄ±nÄ± saÄŸlar.
     /// </summary>
     function ToHexString(AByteCountPerLine: Byte): string;
     /// <summary>
-    ///   Verilen hex dizenin stream'a yazılmasını sağlar
+    ///   Verilen hex dizenin stream'a yazÄ±lmasÄ±nÄ± saÄŸlar
     /// </summary>
     procedure FromHexString(AHexString: string);
   end;
@@ -305,7 +305,7 @@ type
   published
   public
     /// <summary>
-    ///   Çağrıldığında bu nesne ekrana çizilmez
+    ///   Ã‡aÄŸrÄ±ldÄ±ÄŸÄ±nda bu nesne ekrana Ã§izilmez
     /// </summary>
     procedure CizimiKilitle(AKilitle: Boolean);
     procedure DenetimleriAcKapat(AAc : Boolean);
@@ -606,15 +606,15 @@ procedure TStringsExtension.FillFromSQL(AConnection: TFDConnection;
   ASQL: string; AParams: array of string; AParamValues: array of Variant;
   ADistinct: Boolean;AClearList: Boolean);
 var
-  AdDeğer : Boolean;
+  AdDeÄŸer : Boolean;
 begin
   if AClearList then Clear;
   with Veritabani.SorguBaslat(AConnection,ASQL,AParams,AParamValues) do
   try
     Open;
-    AdDeğer := Fields.Count > 1;
+    AdDeÄŸer := Fields.Count > 1;
     while not Eof do begin
-      if AdDeğer then
+      if AdDeÄŸer then
         AddNameValue(Fields[0].AsString,Fields[1].AsString)
       else if Trim(Fields[0].AsString) <> '' then begin
         if ADistinct then
@@ -1039,7 +1039,7 @@ begin
   try
     DataSet.First;
     while not DataSet.Eof do begin
-      if not IsNullOrEmpty then {EA : 18.06.2009 14:09 Null kayıtlar gereksiz yer kaplıyorlar }
+      if not IsNullOrEmpty then {EA : 18.06.2009 14:09 Null kayÄ±tlar gereksiz yer kaplÄ±yorlar }
         AList.Add(AsString);
       DataSet.Next;
     end;
@@ -1106,7 +1106,7 @@ begin
     paramValues[prmCnt] := AExtraParamValues[i];
     Inc(prmCnt);
   end;
-  Result := Veritabani.BasitKomutÇalıştır(TFDConnection(Self.Connection),ASql,params,paramValues,AReturnsResult);
+  Result := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(TFDConnection(Self.Connection),ASql,params,paramValues,AReturnsResult);
 end;
 
 function TADOQueryExtension.GetSubTable(ASubTable: string; ASubTableColumns,
@@ -1174,11 +1174,11 @@ begin
           end;
       end else if Assigned(UseDataSource) then begin
         for i := Low(paramNames) to High(paramNames) do begin
-          { $ işaretini kaldırıyoruz }
+          { $ iÅŸaretini kaldÄ±rÄ±yoruz }
           fieldName := Dize.AltDize(paramNames[i],2);
-          { alanı buluyoruz }
+          { alanÄ± buluyoruz }
           field := UseDataSource.DataSet.FieldByName(fieldName);
-          { tipine göre ASql içinde yerine koyuyoruz }
+          { tipine gÃ¶re ASql iÃ§inde yerine koyuyoruz }
           case field.DataType of
             ftString: begin
               ASql := StringReplace(ASql,paramNames[i],#39 + StringReplace(field.AsString,#39,#39#39,[rfReplaceAll]) + #39,[rfReplaceAll])
@@ -1269,11 +1269,11 @@ begin
         end;
     end else if Assigned(UseDataSource) then begin
       for i := Low(paramNames) to High(paramNames) do begin
-        { $ işaretini kaldırıyoruz }
+        { $ iÅŸaretini kaldÄ±rÄ±yoruz }
         fieldName := Dize.AltDize(paramNames[i],2);
-        { alanı buluyoruz }
+        { alanÄ± buluyoruz }
         field := UseDataSource.DataSet.FieldByName(fieldName);
-        { tipine göre ASql içinde yerine koyuyoruz }
+        { tipine gÃ¶re ASql iÃ§inde yerine koyuyoruz }
         case field.DataType of
           ftString: begin
             ASql := StringReplace(ASql,paramNames[i],#39 + StringReplace(field.AsString,#39,#39#39,[rfReplaceAll]) + #39,[rfReplaceAll])
@@ -1306,13 +1306,13 @@ begin
   AHexString := StringReplace(AHexString,#13,'',[rfReplaceAll]);
   AHexString := StringReplace(AHexString,#10,'',[rfReplaceAll]);
   // dize temizleme tamam
-  // şimdi tek tek çevirip stream e yazıyoruz
+  // ÅŸimdi tek tek Ã§evirip stream e yazÄ±yoruz
   for i := 0 to (Length(AHexString) div 2) - 1 do begin
-    // hex olarak dizeye atıyoruz örn $55
+    // hex olarak dizeye atÄ±yoruz Ã¶rn $55
     s := '$' + Copy(AHexString,(i * 2) + 1, 2);
-    // byte'a dönüştürüp w ye atıyoruz
+    // byte'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼p w ye atÄ±yoruz
     w := StrToInt(s);
-    // stream'a yazıyoruz
+    // stream'a yazÄ±yoruz
     Write(w,1);
   end;
 

@@ -1,4 +1,4 @@
-unit UKullaniciGiris;
+ï»¿unit UKullaniciGiris;
 
 interface
 
@@ -79,16 +79,16 @@ begin
   X := 0;
   for i := 1 to Length(s) do
   begin
-    // Tüm karakterler için XOR deðeri belirleniyor.
+    // TÃ¼m karakterler iÃ§in XOR deÄŸeri belirleniyor.
     X := X xor Ord(s[i]);
   end;
   for i := 1 to Length(s) do
   begin
-    // Her bir karakterin sayýsal karþýlýðýna X ve dizi indisi ekleniyor ve
-    // X ile XOR yapýlýyor
+    // Her bir karakterin sayÄ±sal karÅŸÄ±lÄ±ÄŸÄ±na X ve dizi indisi ekleniyor ve
+    // X ile XOR yapÄ±lÄ±yor
     r := r + IntToHex((Ord(s[i]) + (X + i)) xor X, 4)
   end;
-  // Þifreli Metinin sonuna X 170 ile XOR yapýlarak Ekleniyor.
+  // Åžifreli Metinin sonuna X 170 ile XOR yapÄ±larak Ekleniyor.
   Result := r + IntToHex(X xor 170, 2);
 end;
 
@@ -152,12 +152,12 @@ end;
 
 procedure TKullaniciGirisDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   TabKullanici.Close;
   TabKullanici.Open;
 
 {
- try          yetkisiz kul           sistem hatasý java null pointer exception
+ try          yetkisiz kul           sistem hatasÄ± java null pointer exception
   Tablo.FDCnn.Connected:=False;
   Tablo.FDCnn.ConnectionString:= GenRegIni.RegReadString('','ConnectionString','','C');
   if Tablo.FDCnn.ConnectionString<>'' then
@@ -224,7 +224,7 @@ begin
        end;
   end;
  except
-   Application.MessageBox('Kullanýcý Listesi Yüklenemedi','U Y A R I', MB_OK+ MB_ICONWARNING);
+   Application.MessageBox('KullanÄ±cÄ± Listesi YÃ¼klenemedi','U Y A R I', MB_OK+ MB_ICONWARNING);
  end;
  }
 end;

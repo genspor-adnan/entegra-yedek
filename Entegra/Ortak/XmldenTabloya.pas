@@ -1,4 +1,4 @@
-unit XmldenTabloya;
+ï»¿unit XmldenTabloya;
 
 interface
 
@@ -109,13 +109,13 @@ begin
       ATablo.Active := True;
       node := GetNode('s:Envelope/s:Body/' + ASemaYolu +
         '/diffgr:diffgram', XmlDoc.DOMDocument);
-      // diffgram içindeki ilk elementi alıyoruz
-      // çünkü mainDataTable = true ise DocumentElement diğer durumda başka
-      // bişey oluyor bunu önlemek için ilk elementi alıyoruz.
+      // diffgram iÃ§indeki ilk elementi alÄ±yoruz
+      // Ã§Ã¼nkÃ¼ mainDataTable = true ise DocumentElement diÄŸer durumda baÅŸka
+      // biÅŸey oluyor bunu Ã¶nlemek iÃ§in ilk elementi alÄ±yoruz.
       node := node.childNodes[0];
       //Atablo.DisableControls;
 
-      //node nil değer alıyor bilinmiyor kontrol et
+      //node nil deÄŸer alÄ±yor bilinmiyor kontrol et
       if node <> nil then
       begin
 

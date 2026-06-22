@@ -139,6 +139,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
+        ExplicitTop = 274
+        ExplicitHeight = 336
         object PanelAlt: TPanel
           Left = 1
           Top = 167
@@ -154,6 +156,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
+          ExplicitTop = 170
           DesignSize = (
             1102
             165)
@@ -757,12 +760,14 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
+          ExplicitHeight = 145
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
             Navigator.Buttons.CustomButtons = <>
             ScrollbarAnnotations.CustomAnnotations = <>
             OnCanFocusRecord = GridFaturaViewCanFocusRecord
+            OnCellClick = GridFaturaViewCellClick
             DataController.DataModeController.SmartRefresh = True
             DataController.DataSource = DtsFatura
             DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
@@ -1622,6 +1627,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         OnChange = PageUstChange
+        ExplicitTop = 102
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -2563,6 +2569,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ShowCaptions = True
         TabOrder = 8
         Transparent = True
+        ExplicitHeight = 29
         object KaydetTus: TToolButton
           Left = 0
           Top = 0
@@ -3273,7 +3280,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object PopupMenuFatura: TPopupMenu
     OnPopup = PopupMenuFaturaPopup
     Left = 434
-    Top = 262
+    Top = 238
     object info1: TMenuItem
       Caption = 'info'
       OnClick = info1Click
@@ -3653,8 +3660,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATURA F'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
-    Left = 29
-    Top = 36
+    Left = 37
+    Top = 4
     ParamData = <
       item
         Name = 'Par'

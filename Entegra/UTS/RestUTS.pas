@@ -1,12 +1,12 @@
-{———————————————————————————————————————————————————————————————————————————————
-  ARvRA M	  Töre library for Delphi.
+ï»¿{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+  ARvRA M	  TÃ¶re library for Delphi.
 
-  Copyright	: (C)2018-2071 Ýhsan V. Töre and licensors. All rights reserved.
+  Copyright	: (C)2018-2071 Ä°hsan V. TÃ¶re and licensors. All rights reserved.
   About		: A simple REST communicator for UTS.
   Home		: www.toretek.com
   Version	: 20181219 Authors: IVT
-  Author	: IVT : Ýhsan V. Töre : ihsan@toretek.com : www.toretek.com
-———————————————————————————————————————————————————————————————————————————————}
+  Author	: IVT : Ä°hsan V. TÃ¶re : ihsan@toretek.com : www.toretek.com
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 unit RestUTS;
 
 
@@ -22,7 +22,7 @@ uses
 	Vcl.Dialogs,
     ModelApi;
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   CLASS: TRestUTS
   USAGE:
 	*	It is simple Https communicator for UTS servers.
@@ -31,7 +31,7 @@ uses
 	*	Internal and Safe.
 	*	Has only one service routine named talk.
 	*	Sends and Receives Utf-8 json data.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 type
     TRestUTS = class(TObject)
         function    talk(adr: String; req: String): String;     overload;
@@ -80,7 +80,7 @@ var
 
 implementation
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   FUNC: talk
   TASK: Sends a request to Uts server, then receives an answer, both in json.
   ARGS:	adr	:	String	: Request path to add to uts server base address.
@@ -89,7 +89,7 @@ implementation
   INFO:	Internal. Do not use this.
 		Uses global utsServer 	as uts server base address.
 		Uses global utsToken    as uts client token.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 function TRestUTS.talk(adr, req: String): String;
 var
 	u: String;
@@ -120,7 +120,7 @@ begin
 	fClient.IOHandler := fSocket;
 	u       := utsServer + adr;
 	fStream := TStringStream.Create(req,TEncoding.UTF8);
-  rStream := TStringStream.Create('',TEncoding.UTF8); //14.04.2022 AÇ
+  rStream := TStringStream.Create('',TEncoding.UTF8); //14.04.2022 AÃ‡
 	try
 		fClient.Post(u, fStream,rStream);
     Result:= rStream.DataString;
@@ -144,7 +144,7 @@ begin
     FreeAndNil(rstream);
 end;
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   FUNC: utsTalkSS (SS = send String recv String)
   TASK: Sends a request to Uts server, then receives an answer, both in json.
   ARGS:	address	:	String	: Request path to add to uts server base address.
@@ -152,7 +152,7 @@ end;
   RETV:         	String  : answer as json string.
   INFO:	Uses global utsServer 	as uts server base address.
 		Uses global utsToken    as uts client token.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 function    utsTalkSS(address: String; request: String): String;
 var
 	r:   TRestUTS;
@@ -162,7 +162,7 @@ begin
 	r.Free;
 end;
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   FUNC: utsTalkMS (MS = send Model recv String)
   TASK: Converts request model object to json string and sends it to uts
 		server, then receives an answer as json string.
@@ -172,7 +172,7 @@ end;
   RETV:         	String  : answer as json string.
   INFO:	Uses global utsServer 	as uts server base address.
 		Uses global utsToken    as uts client token.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 function    utsTalkMS(
 				address: String;
 				request: TModel;
@@ -192,7 +192,7 @@ begin
 		FreeAndNil(request);
 end;
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   FUNC: utsTalkMM (MM = send Model recv Model)
   TASK: Converts request model object to json string and sends it to uts
 		server, then receives an answer as json string and converts it to the
@@ -208,7 +208,7 @@ end;
 		Uses global utsServer 	as uts server base address.
 		Uses global utsToken    as uts client token.
   WARN:	The response model object should match the received data.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 function    utsTalkMM(
 				address: String;
 				request: TModel;
@@ -225,7 +225,7 @@ begin
     result := rsModel;
 end;
 
-{———————————————————————————————————————————————————————————————————————————————
+{â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
   FUNC: utsTalkMC (MC = send Model recv template Class)
   TASK: Converts request model object to json string and sends it to uts
 		server, then receives an answer as json string.
@@ -248,7 +248,7 @@ end;
 		Uses global utsServer 	as uts server base address.
 		Uses global utsToken    as uts client token.
   WARN:	The response model class should match the received data.
-———————————————————————————————————————————————————————————————————————————————}
+â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”}
 function    utsTalkMC(
                 address: String;
                 request: TModel;

@@ -1,4 +1,4 @@
-unit UKasaTanimWizard;
+ï»¿unit UKasaTanimWizard;
 
 interface
 
@@ -134,7 +134,7 @@ end;
 procedure TKasaTanimWizardDlg.FormCreate(Sender: TObject);
 begin
    if CokluDilVar then
-      LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.;
+      LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.;
    Tablo.WizardTurkcelestir(WizardKontrol);
    ComboKUR.Enabled := DovizTakibi;
 end;
@@ -160,8 +160,8 @@ begin
   if islemOp='D' then
      Tablo.LogIslemleri(TabNo_KASA,TabKasalar.Fields[0].AsInteger, 4, TabKasalar);
 
-  // if YeniKayit then  //Eðer yeni kayýtsa otomatik olarak 0 miktarlý açýlýþ fiþi oluþtursun
-  //    Tablo.KasaKaydet(2001,StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açýlýþ Fiþi',
+  // if YeniKayit then  //EÄŸer yeni kayÄ±tsa otomatik olarak 0 miktarlÄ± aÃ§Ä±lÄ±ÅŸ fiÅŸi oluÅŸtursun
+  //    Tablo.KasaKaydet(2001,StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'AÃ§Ä±lÄ±ÅŸ FiÅŸi',
   //                  TabKasalar.FieldByName('ID').AsInteger, ComboKur.Text,'', 0,0,0,0,-1, -1,-1,-1,-1, SubeId,' ');
 
 end;
@@ -176,10 +176,10 @@ procedure TKasaTanimWizardDlg.TabKasalarBeforePost(DataSet: TDataSet);
 begin
   EkleyenDegistiren(DtsKasalar);
   if not BoslukKontrol(EditKASAKODU.text, KTWKasaKodu) then Abort;
-  if not BoslukKontrol(EditKASAADI.text, KTWKasaAdý) then Abort;
+  if not BoslukKontrol(EditKASAADI.text, KTWKasaAdÄ±) then Abort;
   if not BoslukKontrol(ComboKUR.text, KTWParaBirimi) then Abort;
   if comboPersonel.Visible then
-    if not BoslukKontrol(comboPersonel.text, 'Personel Bilgisi Boþ Býrakýlamaz!') then Abort;
+    if not BoslukKontrol(comboPersonel.text, 'Personel Bilgisi BoÅŸ BÄ±rakÄ±lamaz!') then Abort;
 end;
 
 procedure TKasaTanimWizardDlg.TabKasalarNewRecord(DataSet: TDataSet);

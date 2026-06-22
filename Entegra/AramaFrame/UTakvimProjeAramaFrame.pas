@@ -1,4 +1,4 @@
-unit UTakvimProjeAramaFrame;
+﻿unit UTakvimProjeAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 03/12/2010 11:01:09 }
@@ -95,7 +95,7 @@ end;
 
 procedure TTakvimProjeAramaFrame.Baslatildi;
 begin
-    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TTakvimProjeAramaFrame.checkKapaliGosterPropertiesEditValueChanged(

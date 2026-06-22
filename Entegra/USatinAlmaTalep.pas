@@ -1,4 +1,4 @@
-unit USatinAlmaTalep;
+ï»¿unit USatinAlmaTalep;
 
 interface
 
@@ -121,7 +121,7 @@ UTablo,PrjConst;
 
 //////  ACIKLAMA
 {
- GridTeklif gridinde bazý alanlarýn TEKLIFDETAY tablosundaki karþýlýklarý þunlardýr.
+ GridTeklif gridinde bazÄ± alanlarÄ±n TEKLIFDETAY tablosundaki karÅŸÄ±lÄ±klarÄ± ÅŸunlardÄ±r.
 
  Onaylanan Miktar = ADET
  Onaylayan        = DEGISTIREN
@@ -280,7 +280,7 @@ begin
   belgeno := SiradakiBelgeNumarasi(81,TabTeklif.FieldByName('TARIH').AsDateTime);
   TabTeklif.FieldByName('TEKLIFSERI').AsString := belgeno.SeriNo; // seri
   TabTeklif.FieldByName('TEKLIFNO').AsString := belgeno.belgeno; // FatNo;
-  TabTeklif.FieldByName('KOCANNO').AsInteger := KocannoBul(81); // KOCAN numarasý
+  TabTeklif.FieldByName('KOCANNO').AsInteger := KocannoBul(81); // KOCAN numarasÄ±
 
   TabTeklif.FieldByName('REHBERID').AsInteger := -1;
   TabTeklif.FieldByName('TARIH').Value := Tablo.GENINI.BugunTrh;
@@ -297,14 +297,14 @@ begin
   TabTeklif.FieldByName('NOTLAR').AsString := '';
   TabTeklif.FieldByName('DOVIZ_TUTARI').AsFloat := 0;
   TabTeklif.FieldByName('EKLEYEN').AsString := Kullanan;
-  TabTeklif.FieldByName('KDVDURUM').AsString := 'Hariç';
+  TabTeklif.FieldByName('KDVDURUM').AsString := 'HariÃ§';
   TabTeklif.FieldByName('KUR').AsString := CariDoviz;
   TabTeklif.FieldByName('PROJEID').AsInteger := -1;
 
-  /////Ýletiþim
+  /////Ä°letiÅŸim
    TabTeklif.FieldByName('REHBERILETID').AsInteger :=-1 ;
 
-   /////Ýletiþim
+   /////Ä°letiÅŸim
 
   TabTeklif.FieldByName('TARIH').AsDateTime := Tablo.GENINI.BugunTrhSaat;
   TabTeklif.FieldByName('SUBEID').AsInteger := SubeID;

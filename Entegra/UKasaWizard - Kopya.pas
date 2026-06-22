@@ -1,9 +1,9 @@
-unit UKasaWizard;
+ï»¿unit UKasaWizard;
 
-(* Çalýþma Prensipleri
-Tahsilat veya Ödeme :  Plan -> Belge - Tahsilat
-Plan yaptýk, faturasý geldi bundan sonra Kasa tablosundaki : Planýn durumu Fatura diye güncellenir
-Plan yaptýk, Tahsilat veya Ödemesi geldi bundan sonra 2 türlü durum olabilir: Kasa tablosundaki : 1. plan silinir 2.Planýn durumu Tamamlandý diye güncellenir
+(* Ã‡alÄ±ÅŸma Prensipleri
+Tahsilat veya Ã–deme :  Plan -> Belge - Tahsilat
+Plan yaptÄ±k, faturasÄ± geldi bundan sonra Kasa tablosundaki : PlanÄ±n durumu Fatura diye gÃ¼ncellenir
+Plan yaptÄ±k, Tahsilat veya Ã–demesi geldi bundan sonra 2 tÃ¼rlÃ¼ durum olabilir: Kasa tablosundaki : 1. plan silinir 2.PlanÄ±n durumu TamamlandÄ± diye gÃ¼ncellenir
 *)
 interface
 
@@ -417,8 +417,8 @@ type
     function MasrafGelir : Integer;
   public
     { Public declarations }
-    SecIslem, SecIslem2 : SmallInt; //1 Fat Gir, 2 Fat Çýk, 4 Nakit Tah, 5 Havale Tah
-    // 7 Nakit öde, 8 Havale öde, 21 Virman, 25 Çek Tah, 26 Çek Öde
+    SecIslem, SecIslem2 : SmallInt; //1 Fat Gir, 2 Fat Ã‡Ä±k, 4 Nakit Tah, 5 Havale Tah
+    // 7 Nakit Ã¶de, 8 Havale Ã¶de, 21 Virman, 25 Ã‡ek Tah, 26 Ã‡ek Ã–de
     SecGrup : String[30];
     RehberId, FaturaId : Integer;
     procedure IslemSecildi;
@@ -439,7 +439,7 @@ var
 
 procedure TKasaWizardDlg.InitDeger(Sayfa : TJvWizardInteriorPage);
 begin
-   //Eðer o sayfa kullanýlacaksa ilk deðer atamalarýný buradan yapýyoruz
+   //EÄŸer o sayfa kullanÄ±lacaksa ilk deÄŸer atamalarÄ±nÄ± buradan yapÄ±yoruz
    if Sayfa = FaturaEkr then begin
       if not TabFatBaslik.Active then  begin
          TabFatBaslik.SQL.Text := StringReplace(SQLFatbasOpen.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
@@ -450,14 +450,14 @@ begin
       RehberIni.ReadSection('KURLAR', ComboKurFat.Properties.Items);
       ComboKurFat.ItemIndex := 0;
       ComboKDV.ItemIndex := 0;
-      ComboBoxKDVOran.ItemIndex := 0; //KDV oranýný 18 yapalým
+      ComboBoxKDVOran.ItemIndex := 0; //KDV oranÄ±nÄ± 18 yapalÄ±m
 
 
       if SecIslem in [11,12] then begin  ///,101
-          FaturaEkr.Title.Text := 'Fatura Giriþi';
-          FaturaEkr.Subtitle.Text := 'Gelen fatura bilgilerini girin ve müþteriyi alacaklandýrýn';
+          FaturaEkr.Title.Text := 'Fatura GiriÅŸi';
+          FaturaEkr.Subtitle.Text := 'Gelen fatura bilgilerini girin ve mÃ¼ÅŸteriyi alacaklandÄ±rÄ±n';
           RehberIni.ReadSection('FaturaGirisAciklama', ComboBoxFatAciklama.Properties.Items);
-          {if (not CheckDisinda.Checked)and(TabTakvimPlan.RecordCount>0) then begin //eðer sabit gider faturasý ise ve daha önce tahmini giriþ yapýlmýþsa onun bilgilerini getirelim
+          {if (not CheckDisinda.Checked)and(TabTakvimPlan.RecordCount>0) then begin //eÄŸer sabit gider faturasÄ± ise ve daha Ã¶nce tahmini giriÅŸ yapÄ±lmÄ±ÅŸsa onun bilgilerini getirelim
               ComboBoxFatAciklama.Text := TabTakvimPlan.FieldByName('ACIKLAMA').AsString;
               EditFaturaTutar.Value := TabTakvimPlan.FieldByName('TUTAR').AsCurrency;
               EditKDVSIZ.Value := EditFaturaTutar.Value;
@@ -467,8 +467,8 @@ begin
           Tablo.FaturaBaslik(-1, TabFatBaslik);
        end else begin
           CheckFatDetay.Checked := True;
-          FaturaEkr.Title.Text := 'Fatura Çýkýþý';
-          FaturaEkr.Subtitle.Text := 'Giden fatura bilgilerini girin ve müþteriyi borçlandýrýn';
+          FaturaEkr.Title.Text := 'Fatura Ã‡Ä±kÄ±ÅŸÄ±';
+          FaturaEkr.Subtitle.Text := 'Giden fatura bilgilerini girin ve mÃ¼ÅŸteriyi borÃ§landÄ±rÄ±n';
           RehberIni.ReadSection('FaturaCikisAciklama', ComboBoxFatAciklama.Properties.Items);
        end;
 
@@ -477,37 +477,37 @@ begin
           EditFaturaSaat.Time:= GenotipIni.BugunTrhSaat;
        end;
        if SecIslem in [12, 16] then
-          ComboBoxKDVOran.ItemIndex := ComboBoxKDVOran.Properties.Items.Count-1 //Eðer alýþ fiþiyse KDV sýfýr demektir
+          ComboBoxKDVOran.ItemIndex := ComboBoxKDVOran.Properties.Items.Count-1 //EÄŸer alÄ±ÅŸ fiÅŸiyse KDV sÄ±fÄ±r demektir
        else
           ComboBoxKDVOran.ItemIndex := 0;
        CheckFatDetayPropertiesChange(Self)
    end
    else if Sayfa = SorEkr then begin
            if SecIslem in [11,12] then begin  //   ,101,103
-                MasrafEkr.Title.Text := 'Ödeme Seçimi';
-                MasrafEkr.Subtitle.Text := 'Ödemeyi nasýl yapmayý düþünüyorsunuz';
-                OdemeBelirsizTus.Caption := 'Ödeme zamaný belirsiz';
-                OdemeTaksitliTus.Caption := 'Tek veya Taksitli ödeme tarihlerini belirle';
-                OdemeNakitTus.Caption := 'Nakit Ödeme';
-                KKTus.Caption := 'Kredi Kartlý Ödeme';
+                MasrafEkr.Title.Text := 'Ã–deme SeÃ§imi';
+                MasrafEkr.Subtitle.Text := 'Ã–demeyi nasÄ±l yapmayÄ± dÃ¼ÅŸÃ¼nÃ¼yorsunuz';
+                OdemeBelirsizTus.Caption := 'Ã–deme zamanÄ± belirsiz';
+                OdemeTaksitliTus.Caption := 'Tek veya Taksitli Ã¶deme tarihlerini belirle';
+                OdemeNakitTus.Caption := 'Nakit Ã–deme';
+                KKTus.Caption := 'Kredi KartlÄ± Ã–deme';
                 OdemeHavaleTus.Caption := 'Giden Havale/EFT';
-                OdemeCekTus.Caption := 'Verilen Çek';
+                OdemeCekTus.Caption := 'Verilen Ã‡ek';
                 OdemeSenetTus.Caption := 'Verilen Senet';
              end else begin
-                MasrafEkr.Title.Text := 'Tahsilat Seçimi';
-                MasrafEkr.Subtitle.Text := 'Tahsilatý nasýl yapmayý düþünüyorsunuz';
-                OdemeBelirsizTus.Caption := 'Tahsilat zamaný belirsiz';
+                MasrafEkr.Title.Text := 'Tahsilat SeÃ§imi';
+                MasrafEkr.Subtitle.Text := 'TahsilatÄ± nasÄ±l yapmayÄ± dÃ¼ÅŸÃ¼nÃ¼yorsunuz';
+                OdemeBelirsizTus.Caption := 'Tahsilat zamanÄ± belirsiz';
                 OdemeTaksitliTus.Caption := 'Tek veya Taksitli Tahsilat tarihlerini belirle';
                 OdemeNakitTus.Caption := 'Nakit Tahsilat';
-                KKTus.Caption := 'Kredi Kartlý Tahsilat';
+                KKTus.Caption := 'Kredi KartlÄ± Tahsilat';
                 OdemeHavaleTus.Caption := 'Gelen Havale/EFT';
-                OdemeCekTus.Caption := 'Alýnan Çek';
-                OdemeSenetTus.Caption := 'Alýnan Senet';
+                OdemeCekTus.Caption := 'AlÄ±nan Ã‡ek';
+                OdemeSenetTus.Caption := 'AlÄ±nan Senet';
              end;
    end
    else if Sayfa = PlanlamaEkr then begin
 
-      DatePesinat.Enabled := not SecIslem in [25,35]; //KK veya POS ise tarih deðiþmez;
+      DatePesinat.Enabled := not SecIslem in [25,35]; //KK veya POS ise tarih deÄŸiÅŸmez;
       DateTaksit.Enabled := DatePesinat.Enabled;
 
       RehberIni.ReadSection('KURLAR', ComboKurPlan.Properties.Items);
@@ -525,7 +525,7 @@ begin
        RehberIni.ReadSection('KURLAR', ComboCekKur.Properties.Items);
        ComboCekKur.ItemIndex := 0;
        ComboDURUM.ItemIndex :=0;
-       SeriNoTus.Visible := (SeriNoKontrol)and(SecIslem = 33); //Eðer biz çek kesiyorsak seri no yu listeden seçmek için tuþ görünür
+       SeriNoTus.Visible := (SeriNoKontrol)and(SecIslem = 33); //EÄŸer biz Ã§ek kesiyorsak seri no yu listeden seÃ§mek iÃ§in tuÅŸ gÃ¶rÃ¼nÃ¼r
        case SecIslem of
           23: ComboTUR.ItemIndex :=0;
           24: ComboTUR.ItemIndex :=1;
@@ -536,18 +536,18 @@ begin
    end
    else if Sayfa = MasrafEkr then begin
            if SecIslem in [11,12,31,32,33,34,71,111] then begin  // ,101,103
-              MasrafEkr.Title.Text := 'Masraf Merkezi Seçimi';
-              MasrafEkr.Subtitle.Text := 'Yapýlan harcama hangi masraf kalemine aitse listeden onu seçin';
+              MasrafEkr.Title.Text := 'Masraf Merkezi SeÃ§imi';
+              MasrafEkr.Subtitle.Text := 'YapÄ±lan harcama hangi masraf kalemine aitse listeden onu seÃ§in';
            end else begin
-              MasrafEkr.Title.Text := 'Gelir Merkezi Seçimi';
-              MasrafEkr.Subtitle.Text := 'Kasaya giren gelir hangi gelir kalemine aitse listeden onu seçin';
+              MasrafEkr.Title.Text := 'Gelir Merkezi SeÃ§imi';
+              MasrafEkr.Subtitle.Text := 'Kasaya giren gelir hangi gelir kalemine aitse listeden onu seÃ§in';
            end;
    end;
 end;
 
 procedure TKasaWizardDlg.IslemSecildi;
-   //121 pos giriþi : kasa - miktar
-   //122 nakit giriþi : kasa - miktar
+   //121 pos giriÅŸi : kasa - miktar
+   //122 nakit giriÅŸi : kasa - miktar
 begin
    FaturaId := -1;
 
@@ -558,7 +558,7 @@ begin
    FaturaEkr.Enabled :=  SecIslem in [11,12,15,16];
    SorEkr.Enabled := FaturaEkr.Enabled;
    CekEkr.Enabled :=  SecIslem in [23,24,33,34];
-   PlanlamaEkr.Enabled := SecIslem in [25,35, 61, 71];// 61:tahsilat planý  /   71:ödeme planý
+   PlanlamaEkr.Enabled := SecIslem in [25,35, 61, 71];// 61:tahsilat planÄ±  /   71:Ã¶deme planÄ±
    TahsilatEkr.Enabled :=  (SecIslem in [21,22,31,32,111,121,122]) or ( SecIslem in [41..49]);     // ,103
    KasaSecimEkr.Enabled :=  (SecIslem in [21,22,25,31,32,35,51,52,53,54,111,121,122]) or ( SecIslem in [41..49]);    // ,103
    FaturaPlanSecEkr.Enabled := ( SecIslem in [11,12,15,16,21,22,23,24,25,31,32,33,34,35,61,71]); //101,103
@@ -576,8 +576,8 @@ end;
 
 procedure TKasaWizardDlg.btn1Click(Sender: TObject);
 begin
-    SecIslem :=  TBitBtn(Sender).Tag; //Ýlk seçilen iþlemi tutuyor
-    SecIslem2 := 0;                   //2.seçileni tutuyor. Mesela önce fatura seçildi arkasýndan ödeme yapýlacaksa ödeme türünü tutuyor
+    SecIslem :=  TBitBtn(Sender).Tag; //Ä°lk seÃ§ilen iÅŸlemi tutuyor
+    SecIslem2 := 0;                   //2.seÃ§ileni tutuyor. Mesela Ã¶nce fatura seÃ§ildi arkasÄ±ndan Ã¶deme yapÄ±lacaksa Ã¶deme tÃ¼rÃ¼nÃ¼ tutuyor
     IslemSecildi;
 end;
 procedure TKasaWizardDlg.cxgrdceksenetkrediaramaDblClick(Sender: TObject);
@@ -599,40 +599,40 @@ end;
 procedure TKasaWizardDlg.MenuTreeClick(Sender: TObject);
 begin
    if not MenuTree.Selected.HasChildren then
-      case  MenuTree.Selected.SelectedIndex of //Ýlk seçilen iþlemi tutuyor
-        11,12 : MenuEkr.Subtitle.Text := 'Müþteri''yi alacaklandýr';
-        15,16 : MenuEkr.Subtitle.Text := 'Müþteri''yi borçlandýr';
-        21 : MenuEkr.Subtitle.Text := '(Müþteri''den TL, $, € gibi nakit giriþi varsa';
-        22 : MenuEkr.Subtitle.Text := 'Müþteri''den banka hesaplarýmýza gönderim yapýlmýþsa';
-        23 : MenuEkr.Subtitle.Text := 'Müþteri''den Çek veya Senet alýnmýþsa';
-        24 : MenuEkr.Subtitle.Text := 'Müþteri''den Çek veya Senet alýnmýþsa';
-        25 : MenuEkr.Subtitle.Text := 'Kredi Kartý ile tahsilat';
-        31 : MenuEkr.Subtitle.Text := 'Müþteri''ye TL, $, € gibi nakit çýkýþý varsa';
-        32 : MenuEkr.Subtitle.Text := 'Müþteri''nin banka hesabýna ödeme  gönderilmiþse';
-        33 : MenuEkr.Subtitle.Text := 'Müþteri''ye Çek veya Senetle ödeme yapýlmýþsa';
-        34 : MenuEkr.Subtitle.Text := 'Müþteri''ye Çek veya Senetle ödeme yapýlmýþsa';
-        35 : MenuEkr.Subtitle.Text := 'Kredi Kartý ile ödeme';
+      case  MenuTree.Selected.SelectedIndex of //Ä°lk seÃ§ilen iÅŸlemi tutuyor
+        11,12 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''yi alacaklandÄ±r';
+        15,16 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''yi borÃ§landÄ±r';
+        21 : MenuEkr.Subtitle.Text := '(MÃ¼ÅŸteri''den TL, $, â‚¬ gibi nakit giriÅŸi varsa';
+        22 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''den banka hesaplarÄ±mÄ±za gÃ¶nderim yapÄ±lmÄ±ÅŸsa';
+        23 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''den Ã‡ek veya Senet alÄ±nmÄ±ÅŸsa';
+        24 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''den Ã‡ek veya Senet alÄ±nmÄ±ÅŸsa';
+        25 : MenuEkr.Subtitle.Text := 'Kredi KartÄ± ile tahsilat';
+        31 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''ye TL, $, â‚¬ gibi nakit Ã§Ä±kÄ±ÅŸÄ± varsa';
+        32 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''nin banka hesabÄ±na Ã¶deme  gÃ¶nderilmiÅŸse';
+        33 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''ye Ã‡ek veya Senetle Ã¶deme yapÄ±lmÄ±ÅŸsa';
+        34 : MenuEkr.Subtitle.Text := 'MÃ¼ÅŸteri''ye Ã‡ek veya Senetle Ã¶deme yapÄ±lmÄ±ÅŸsa';
+        35 : MenuEkr.Subtitle.Text := 'Kredi KartÄ± ile Ã¶deme';
         41 : MenuEkr.Subtitle.Text := 'Kasadan bankaya para transferi varsa';
         42 : MenuEkr.Subtitle.Text := 'Bankadan kasaya  para transferi varsa';
-        43 : MenuEkr.Subtitle.Text := 'Bankadaki hesaplar arasý para transferi varsa';
-        51 : MenuEkr.Subtitle.Text := 'Elimzde bulunan çek bankadan tahsil edilirse';
+        43 : MenuEkr.Subtitle.Text := 'Bankadaki hesaplar arasÄ± para transferi varsa';
+        51 : MenuEkr.Subtitle.Text := 'Elimzde bulunan Ã§ek bankadan tahsil edilirse';
         52 : MenuEkr.Subtitle.Text := 'Elimzde bulunan senet bankadan tahsil edilirse';
-        53 : MenuEkr.Subtitle.Text := 'Verdiðimiz çek karþýlýðý bankadan ödenirse';
-        54 : MenuEkr.Subtitle.Text := 'Verdiðimiz senet karþýlýðý bankadan ödenirse';
-        45 : MenuEkr.Subtitle.Text := 'Kasadaki nakit paranýn bir kýsmýyla döviz alýnýrsa';
-        46 : MenuEkr.Subtitle.Text := 'Döviz kasasýndaki paranýn bir kýsmý bozdurulacaksa ';
-        47 : MenuEkr.Subtitle.Text := 'Bankadaki nakit paranýn bir kýsmýyla döviz alýnýrsa';
-        48 : MenuEkr.Subtitle.Text := 'Döviz hesabýndaki paranýn bir kýsmý bozdurulacaksa';
-//        61 : Tahsilat Planý;
-//        62 : Düzenli Tahsilat;
-//        71 : Ödeme Planý;
-//        72 : Düzenli Ödeme;
-//        73 : Personel Maaþ;
-        111 : MenuEkr.Subtitle.Text := 'Alýnmýþ olan kredi taksitlerinin ödemesi yapýlýr';
-        121 : MenuEkr.Subtitle.Text := 'Bankoda tahsil edilmiþ olan kredi kartlarýnýn giriþi yapýlýr';
-        122 : MenuEkr.Subtitle.Text := 'Bankoda tahsil edilmiþ olan nakit ödemelerin giriþi yapýlýr';
+        53 : MenuEkr.Subtitle.Text := 'VerdiÄŸimiz Ã§ek karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶denirse';
+        54 : MenuEkr.Subtitle.Text := 'VerdiÄŸimiz senet karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶denirse';
+        45 : MenuEkr.Subtitle.Text := 'Kasadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alÄ±nÄ±rsa';
+        46 : MenuEkr.Subtitle.Text := 'DÃ¶viz kasasÄ±ndaki paranÄ±n bir kÄ±smÄ± bozdurulacaksa ';
+        47 : MenuEkr.Subtitle.Text := 'Bankadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alÄ±nÄ±rsa';
+        48 : MenuEkr.Subtitle.Text := 'DÃ¶viz hesabÄ±ndaki paranÄ±n bir kÄ±smÄ± bozdurulacaksa';
+//        61 : Tahsilat PlanÄ±;
+//        62 : DÃ¼zenli Tahsilat;
+//        71 : Ã–deme PlanÄ±;
+//        72 : DÃ¼zenli Ã–deme;
+//        73 : Personel MaaÅŸ;
+        111 : MenuEkr.Subtitle.Text := 'AlÄ±nmÄ±ÅŸ olan kredi taksitlerinin Ã¶demesi yapÄ±lÄ±r';
+        121 : MenuEkr.Subtitle.Text := 'Bankoda tahsil edilmiÅŸ olan kredi kartlarÄ±nÄ±n giriÅŸi yapÄ±lÄ±r';
+        122 : MenuEkr.Subtitle.Text := 'Bankoda tahsil edilmiÅŸ olan nakit Ã¶demelerin giriÅŸi yapÄ±lÄ±r';
         else
-            MenuEkr.Subtitle.Text := 'Bir aksiyon seçin';
+            MenuEkr.Subtitle.Text := 'Bir aksiyon seÃ§in';
       end;
 end;
 
@@ -727,14 +727,14 @@ begin
       Stop := True;
    end
    else if Trim(EditFaturaNo.Text) = '' then begin
-      ShowMessage('Fatura numarasýný girin!');
+      ShowMessage('Fatura numarasÄ±nÄ± girin!');
       Stop := True;
    end
    else if Trim(EditFaturaTutar.Text) = '' then begin
-      ShowMessage('Fatura tutarýný girin!');
+      ShowMessage('Fatura tutarÄ±nÄ± girin!');
       Stop := True;
    end;
-//   if (SecGrup='Düzenli Ödeme'){(SecIslem = 101)}and(TabTakvimFat.RecordCount>0)and(TabDuzenliOdeme.FieldByName('ODEMETARIHISOR').AsBoolean) then  //eðer sabit gider faturasý ise ve daha önce tahmini giriþ yapýlmýþsa onun bilgilerini getirelim
+//   if (SecGrup='DÃ¼zenli Ã–deme'){(SecIslem = 101)}and(TabTakvimFat.RecordCount>0)and(TabDuzenliOdeme.FieldByName('ODEMETARIHISOR').AsBoolean) then  //eÄŸer sabit gider faturasÄ± ise ve daha Ã¶nce tahmini giriÅŸ yapÄ±lmÄ±ÅŸsa onun bilgilerini getirelim
 //       OdemeTaksitliTus.Click;
 end;
 
@@ -752,7 +752,7 @@ end;
 
 procedure TKasaWizardDlg.FaturaPlanSecEkrPage(Sender: TObject);
 begin
-   if TabTakvimFat.RecordCount < 1 then //eðer daha önceden girilmiþ fatura ya da ödeme planý yoksa seçilecek biþey de yok demektir
+   if TabTakvimFat.RecordCount < 1 then //eÄŸer daha Ã¶nceden girilmiÅŸ fatura ya da Ã¶deme planÄ± yoksa seÃ§ilecek biÅŸey de yok demektir
       WizardKontrol.SelectNextPage;
 end;
 
@@ -760,10 +760,10 @@ procedure TKasaWizardDlg.FormCreate(Sender: TObject);
 begin
    cxFormatController.UseDelphiDateTimeFormats := True;
    KasaWizardDlg.RehberId := -1;
-   // Fatura Açýklama listesini ve Masraf merkezi listesini doldur
+   // Fatura AÃ§Ä±klama listesini ve Masraf merkezi listesini doldur
    RehberIni.ReadSection('KASA_FAT_ACIKLAMA', ComboBoxFatAciklama.Properties.Items);
    RehberIni.ReadSection('KASA_TAH_ACIKLAMA', ComboBoxTahAciklama.Properties.Items);
-   // Kur kombosunu dolduralým
+   // Kur kombosunu dolduralÄ±m
 
    ComboGrup.Properties.Items.AddStrings(GrupList);
  end;
@@ -806,10 +806,10 @@ end;
 procedure TKasaWizardDlg.KasaSecimEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 var i : SmallInt;
 begin
-   //kasa çýkýþ ise ve TL ise TL olan sýfýrdan büyük rakamlarý, aksi halde kasa giriþ ise kura göre kasalarý listelesin
+   //kasa Ã§Ä±kÄ±ÅŸ ise ve TL ise TL olan sÄ±fÄ±rdan bÃ¼yÃ¼k rakamlarÄ±, aksi halde kasa giriÅŸ ise kura gÃ¶re kasalarÄ± listelesin
    KasaQuery.Close;
-   if SecIslem2 > 0 then //Eðer 2 iþlem varsa yani fatura sonra tahsilat o zaman tahsilatýn iþlem kodunu alýyoruz
-      i := SecIslem2     // yok eðer direk tahsilat seçilmiþse baþtan o zaman onun kodunu alýyoruz
+   if SecIslem2 > 0 then //EÄŸer 2 iÅŸlem varsa yani fatura sonra tahsilat o zaman tahsilatÄ±n iÅŸlem kodunu alÄ±yoruz
+      i := SecIslem2     // yok eÄŸer direk tahsilat seÃ§ilmiÅŸse baÅŸtan o zaman onun kodunu alÄ±yoruz
    else
       i := SecIslem;
 
@@ -819,7 +819,7 @@ begin
                     ' from BANKAHESAPLAR BH inner join BANKASUBELER BS on BH.BANKASUBELERID = BS.ID where KUR = '''+ComboKurTah.Text+''' and KREDIKARTI=0  Order By 1,3 ';
      23 : KasaQuery.SQL.Add(' and HESAPKODU like ''101%'' ');
      33 : KasaQuery.SQL.Add(' and HESAPKODU like ''103%'' ');
-     25 :{KK ödeme} KasaQuery.SQL.Text := ' SELECT ID, KASAKODU=KODU, KASAADI=ADI, KUR FROM POS WHERE KUR ='''+ComboKurPlan.Text+''' order by 1 ';
+     25 :{KK Ã¶deme} KasaQuery.SQL.Text := ' SELECT ID, KASAKODU=KODU, KASAADI=ADI, KUR FROM POS WHERE KUR ='''+ComboKurPlan.Text+''' order by 1 ';
      35 :{pos} KasaQuery.SQL.Text := ' SELECT ID, KASAKODU=KODU, KASAADI=ADI, KUR FROM KREDIKARTI WHERE KUR ='''+ComboKurPlan.Text+''' order by 1 ';
      51,52,53,54{,103} : KasaQuery.SQL.Text := ' SELECT ID, KASAKODU, KASAADI, SUBEADI=NULL, HESAPNO=NULL, KUR FROM KASALAR WHERE KUR ='''+ComboKurTah.Text+''''+
                                    ' union all '+
@@ -835,11 +835,11 @@ begin
      KasaGridTableView.DataController.CreateAllItems;// CreateAllColumns;
      KasaGridTableView.ApplyBestFit(nil);
 
-//     if (TabTakvimFat.active)and(TabTakvimFat.RecordCount>0) then  //eðer sabit gider ödemesi ise ve daha önce plan yapýlmýþsa onun bilgilerini getirelim
+//     if (TabTakvimFat.active)and(TabTakvimFat.RecordCount>0) then  //eÄŸer sabit gider Ã¶demesi ise ve daha Ã¶nce plan yapÄ±lmÄ±ÅŸsa onun bilgilerini getirelim
 //        KasaQuery.Locate('ID', AraQuery1.FieldByName('MASRAFID').AsInteger,[])
    end
    else begin
-      Showmessage('Tanýmlý hesap bulunamadý. Kasa veya Banka hesabý tanýmlayýn!');
+      Showmessage('TanÄ±mlÄ± hesap bulunamadÄ±. Kasa veya Banka hesabÄ± tanÄ±mlayÄ±n!');
        close;
    end;
 end;
@@ -848,7 +848,7 @@ procedure TKasaWizardDlg.KasaSecimEkrExitPage(Sender: TObject;
   const FromPage: TJvWizardCustomPage);
 begin
    if KasaQuery.RecordCount<1 then 
-      raise Exception.Create('Önce hesabý tanýmlayýn!');
+      raise Exception.Create('Ã–nce hesabÄ± tanÄ±mlayÄ±n!');
 end;
 
 procedure TKasaWizardDlg.MasrafEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
@@ -882,16 +882,16 @@ end;
 procedure TKasaWizardDlg.MenuEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
 begin
    if not MenuTree.Selected.HasChildren then begin
-      SecIslem :=  MenuTree.Selected.SelectedIndex; //Ýlk seçilen iþlemi tutuyor
-      SecIslem2 := 0;                   //2.seçileni tutuyor. Mesela önce fatura seçildi arkasýndan ödeme yapýlacaksa ödeme türünü tutuyor
+      SecIslem :=  MenuTree.Selected.SelectedIndex; //Ä°lk seÃ§ilen iÅŸlemi tutuyor
+      SecIslem2 := 0;                   //2.seÃ§ileni tutuyor. Mesela Ã¶nce fatura seÃ§ildi arkasÄ±ndan Ã¶deme yapÄ±lacaksa Ã¶deme tÃ¼rÃ¼nÃ¼ tutuyor
       IslemSecildi;
    end else
-      raise Exception.Create('Aksiyon Seçin!');
+      raise Exception.Create('Aksiyon SeÃ§in!');
 end;
 
 procedure TKasaWizardDlg.OdemeBelirsizTusClick(Sender: TObject);
 begin
-   //Masraf varsa o sayfaya geç yoksa bitir
+   //Masraf varsa o sayfaya geÃ§ yoksa bitir
    SecIslem2 := 0;
    if MasrafEkr.Enabled then
       WizardKontrol.SelectNextPage
@@ -901,7 +901,7 @@ end;
 
 procedure TKasaWizardDlg.OdemeCekTusClick(Sender: TObject);
 begin
-   if SecIslem in [11,12] then  //fatura giriþi
+   if SecIslem in [11,12] then  //fatura giriÅŸi
       SecIslem2 := 33
    else
       SecIslem2 := 23;
@@ -916,7 +916,7 @@ end;
 
 procedure TKasaWizardDlg.OdemeHavaleTusClick(Sender: TObject);
 begin
-   if SecIslem in [11,12] then  //fatura giriþi
+   if SecIslem in [11,12] then  //fatura giriÅŸi
       SecIslem2 := 32
    else
       SecIslem2 := 22;
@@ -933,7 +933,7 @@ end;
 
 procedure TKasaWizardDlg.OdemeNakitTusClick(Sender: TObject);
 begin
-   if SecIslem in [11,12] then  //müþteri fatura giriþi veya sabit fatura giriþi     ,101
+   if SecIslem in [11,12] then  //mÃ¼ÅŸteri fatura giriÅŸi veya sabit fatura giriÅŸi     ,101
       SecIslem2 := 31
    else
       SecIslem2 := 21;
@@ -990,16 +990,16 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject;
        BasTarih : TDateTime;
        Gun : SmallInt;
     begin
-       //önce ne ödemesi soralým.
+       //Ã¶nce ne Ã¶demesi soralÄ±m.
        TurList := TStringList.Create;
        TurList.Add('Anapara');
        TurList.Add('Faiz');
        TurList.Add('Anapara+Faiz');
-       if not MesajStrAl('Lütfen Seçin ', 'Ödeme Türü:', 'C', TurList, OdemeTuru, '', 'E', nil, OdemeTuru) then exit;
+       if not MesajStrAl('LÃ¼tfen SeÃ§in ', 'Ã–deme TÃ¼rÃ¼:', 'C', TurList, OdemeTuru, '', 'E', nil, OdemeTuru) then exit;
        TurList.Free;
-       //Eðer faiz ödemesi ise ne kadar faiz ödemesi var hesaplayalým
-       //Valör var mý soralým
-       if Application.MessageBox('Valör var mý?', 'O N A Y', MB_YESNO) = IDYES then
+       //EÄŸer faiz Ã¶demesi ise ne kadar faiz Ã¶demesi var hesaplayalÄ±m
+       //ValÃ¶r var mÄ± soralÄ±m
+       if Application.MessageBox('ValÃ¶r var mÄ±?', 'O N A Y', MB_YESNO) = IDYES then
           Valor := 1
        else
           Valor := 0;
@@ -1007,14 +1007,14 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject;
        BakiyeAnaparaTut := CekSenetKrediQuery.FieldByName('BAKIYE').AsCurrency;
        BakiyeFaizTut := CekSenetKrediQuery.FieldByName('KALANFAIZ').AsCurrency;
 
-       // son tarihi alalým
+       // son tarihi alalÄ±m
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select top 1 TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
                    ' and KREDIREFERANSNO='''+Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+''' order by ID desc ';
        Tablo.Query1.Open;
        if Tablo.Query1.RecordCount>0 then begin
            BasTarih := Tablo.Query1.Fields[0].AsDateTime;
-           if Tablo.Query1.FieldByName('VALOR').AsBoolean then begin//Eðer SonMuayeneBilgisi ödemede Valor varsa baslama tarihini bir gün sonra baþlatýrýz
+           if Tablo.Query1.FieldByName('VALOR').AsBoolean then begin//EÄŸer SonMuayeneBilgisi Ã¶demede Valor varsa baslama tarihini bir gÃ¼n sonra baÅŸlatÄ±rÄ±z
               s := FormatDateTime('dddd', BasTarih);
               if (FormatDateTime('dddd', BasTarih)='Cuma')or (FormatDateTime('dddd', BasTarih)='Friday') then
                  Inc(Gun,3)
@@ -1028,7 +1028,7 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject;
        else
            SimdikiFaizTut:= 0.0;
 
-      ComboBoxTahAciklama.text := Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+' Ref. Ödeme';
+      ComboBoxTahAciklama.text := Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+' Ref. Ã–deme';
       if Pos('Anapara',OdemeTuru)>0 then
          EditTahsilatTutar.Value := BakiyeAnaparaTut
       else
@@ -1053,10 +1053,10 @@ begin
    end;
 
    if SecIslem in [11,12,31,32,33,111] then begin
-      TahsilatEkr.Title.Text := 'Ödeme Ekraný';
-      TahsilatEkr.Subtitle.Text := 'Ödeme bilgilerini girin';
+      TahsilatEkr.Title.Text := 'Ã–deme EkranÄ±';
+      TahsilatEkr.Subtitle.Text := 'Ã–deme bilgilerini girin';
       RehberIni.ReadSection('GELIRAD', ComboBoxTahAciklama.Properties.Items);
-      if (SecIslem = 111)and(CekSenetKrediQuery.RecordCount>0) then begin//Kredi geri ödemesi varsa kredi miktarýný buraya alalým
+      if (SecIslem = 111)and(CekSenetKrediQuery.RecordCount>0) then begin//Kredi geri Ã¶demesi varsa kredi miktarÄ±nÄ± buraya alalÄ±m
          if Pos('Rotatif', CekSenetKrediQuery.FieldByName('KREDITURU').AsString)>0 then
             RotatifIslemler
          else
@@ -1064,12 +1064,12 @@ begin
          ComboKurTah.ItemIndex := ComboKurTah.Properties.Items.IndexOf(CekSenetKrediQuery.FieldByName('KUR').AsString);
       end;
    end else begin
-      TahsilatEkr.Title.Text := 'Tahsilat Ekraný';
+      TahsilatEkr.Title.Text := 'Tahsilat EkranÄ±';
       TahsilatEkr.Subtitle.Text := 'Tahsilat bilgilerini girin';
       RehberIni.ReadSection('MASRAFAD', ComboBoxTahAciklama.Properties.Items);
    end;
 
-   if (not CheckDisinda.Checked)and(TabTakvimFat.active)and(TabTakvimFat.RecordCount>0) then begin //eðer sabit gider ödemesi ise ve daha önce plan yapýlmýþsa onun bilgilerini getirelim
+   if (not CheckDisinda.Checked)and(TabTakvimFat.active)and(TabTakvimFat.RecordCount>0) then begin //eÄŸer sabit gider Ã¶demesi ise ve daha Ã¶nce plan yapÄ±lmÄ±ÅŸsa onun bilgilerini getirelim
        ComboBoxTahAciklama.Text := TabTakvimFat.FieldByName('ACIKLAMA').AsString;
        EditTahsilatTutar.Value := TabTakvimFat.FieldByName('TUTAR').AsCurrency;
        ComboKurTah.Text := TabTakvimFat.FieldByName('KUR').AsString;
@@ -1081,11 +1081,11 @@ procedure TKasaWizardDlg.TahsilatEkrNextButtonClick(Sender: TObject;
 begin
    if SecIslem = 111 then begin
       if (Trim(EditTahsilatTutar.Text) = '')and(Trim(EditFaizTutar.Text) = '') then begin
-         ShowMessage('Anapara veya Faiz tutarýný girin!');
+         ShowMessage('Anapara veya Faiz tutarÄ±nÄ± girin!');
          Stop := True;
       end
       else if (Pos('Rotatif', CekSenetKrediQuery.FieldByName('KREDITURU').AsString)>0)and(EditTahsilatTutar.Value-1.0 > (BakiyeAnaparaTut))or(EditFaizTutar.Value-1.0 > (BakiyeFaizTut+SimdikiFaizTut+(SimdikiFaizTut*BSMV))) then begin
-          ShowMessage('Kredi ödemesinde Anapara veya Faiz bakiyeden fazla ödenemez!');
+          ShowMessage('Kredi Ã¶demesinde Anapara veya Faiz bakiyeden fazla Ã¶denemez!');
           Stop := True;
       end else begin
           EditFaizTutar.Visible := False;
@@ -1093,17 +1093,17 @@ begin
       end;
    end
    else if Trim(EditTahsilatTutar.Text) = '' then begin
-      ShowMessage('Tutarý girin!');
+      ShowMessage('TutarÄ± girin!');
       Stop := True;
    end;
 
    case SecIslem of
       45, 47 : if ComboKurTah.ItemIndex <> 0 then begin
-                  ShowMessage('Döviz satýþýnda çýkýþ kasasý TL olmalý');
+                  ShowMessage('DÃ¶viz satÄ±ÅŸÄ±nda Ã§Ä±kÄ±ÅŸ kasasÄ± TL olmalÄ±');
                   Stop := True;
                end;
       46, 48 : if ComboKurTah.ItemIndex = 0 then begin
-                  ShowMessage('Döviz satýþýnda çýkýþ kasasý TL olamaz');
+                  ShowMessage('DÃ¶viz satÄ±ÅŸÄ±nda Ã§Ä±kÄ±ÅŸ kasasÄ± TL olamaz');
                   Stop := True;
                end;
    end;
@@ -1116,7 +1116,7 @@ end;
 
 procedure TKasaWizardDlg.OdemeTaksitliTusClick(Sender: TObject);
 begin
-  //Taksitli Ekraný gelsin
+  //Taksitli EkranÄ± gelsin
    SecIslem2 := 88;
    PlanlamaEkr.Enabled := True;
    InitDeger(PlanlamaEkr);
@@ -1159,19 +1159,19 @@ end;
 
 procedure TKasaWizardDlg.PlanlamaEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
-     if SecIslem = 35 then begin //KK veya POS ise tarihi tanýmdan getirelim;
-       // hesap kesim tarihi + son ödeme ne zaman
+     if SecIslem = 35 then begin //KK veya POS ise tarihi tanÄ±mdan getirelim;
+       // hesap kesim tarihi + son Ã¶deme ne zaman
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select isnull(HESAP_KESIM_TARIHI,1)+ isnull(ODEME_GUN_SAYISI,1) as SOT from  KREDIKARTI where ID=' +KasaQuery.FieldByName('ID').AsString;
        Tablo.Query1.Open; //diyelim ki 5 ve 10 geldi
        DatePesinat.Date := StrToDateDef(Tablo.Query1.Fields[0].AsString+FormatDateTime('/mm/yyyy', GenotipIni.BugunTrh), StrToDate('01/01/1900'));
-       //5 i geçtiyse gelecek ay geçmediyse bu ay
+       //5 i geÃ§tiyse gelecek ay geÃ§mediyse bu ay
        if StrToInt(FormatDateTime('dd', GenotipIni.BugunTrh)) > Tablo.Query1.Fields[0].AsInteger then
           DatePesinat.Date := IncMonth(DatePesinat.Date,1);
      end;
-     if SecGrup='Düzenli Ödeme' then begin
-              //LabelOdemeTarihi.Caption := 'Son Ödeme Tarihi';
-              if (not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0)   then begin //eðer sabit gider faturasý ise ve daha önce tahmini giriþ yapýlmýþsa onun bilgilerini getirelim
+     if SecGrup='DÃ¼zenli Ã–deme' then begin
+              //LabelOdemeTarihi.Caption := 'Son Ã–deme Tarihi';
+              if (not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0)   then begin //eÄŸer sabit gider faturasÄ± ise ve daha Ã¶nce tahmini giriÅŸ yapÄ±lmÄ±ÅŸsa onun bilgilerini getirelim
                   DatePesinat.Date := TabTakvimFat.FieldByName('TARIH').AsDateTime;
                   ComboBoxOdemeYeri.Text := TabDuzenliOdeme.FieldByName('ODEMEYERI').AsString;
                   EditPlanBankaHesapAdi.Text := TabTakvimFat.FieldByName('HESAPADI').AsString;
@@ -1184,7 +1184,7 @@ end;
 procedure TKasaWizardDlg.PlanlamaEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
 begin
      if EditTutar.Text = '' then begin
-        ShowMessage('Tutar kýsmý boþ olamaz!');
+        ShowMessage('Tutar kÄ±smÄ± boÅŸ olamaz!');
         Stop := True;
      end;
 
@@ -1220,7 +1220,7 @@ var
   DovizAlis : Boolean;
 begin
    if VirmanNereyeQuery.RecordCount<1 then begin
-      ShowMessage('Önce hedef hesabý tanýmlayýn!');
+      ShowMessage('Ã–nce hedef hesabÄ± tanÄ±mlayÄ±n!');
       Stop := True;
       exit;
    end;
@@ -1236,7 +1236,7 @@ begin
 
     kur := FormatCurr('###,###.0000', DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00', KasaTarihi.date), DCinsi, 'ALIS'));
 
-    if not MesajStrAl('Döviz Kurunu Giriniz: ?', '1 '+DCinsi + ' = ', 'E', nil, kur, '', 'E', nil, kur) then exit;
+    if not MesajStrAl('DÃ¶viz Kurunu Giriniz: ?', '1 '+DCinsi + ' = ', 'E', nil, kur, '', 'E', nil, kur) then exit;
 
     if DovizAlis then
        Cikan :=  EditTahsilatTutar.value / StrToFloat(kur)
@@ -1277,7 +1277,7 @@ var s:string[5];
          Sira := '100';
          Etiket := '';
       end;
-      //daha önce girilmiþ mi bakalým
+      //daha Ã¶nce girilmiÅŸ mi bakalÄ±m
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := ' select count(*) from  REHBERBILGI where YERI='+IntToStr(Yer)+' AND YER_ID = '+IntToStr(RehberId) +' and ETIKET ='''+Etiket+'''';
       Tablo.Query1.open;
@@ -1295,7 +1295,7 @@ begin
                ':TARIH,:TUR,:DURUM,:REHBERID,:BASLIK,:ADRES,:ILCE,:IL,:VD,:VNO,:FATURATARIH,:FATURANO,:KDVDURUM,:FATURA_MATRAHI,:KDV_TUTARI,:FATURA_TUTARI,:ACIKLAMA,:KUR,:ODEMEPLANI,:KASA,:EKLEYEN)';
 
     Tablo.Query1.Params.ParamByName('TARIH').Value :=  FormatDateTime('yyyy-mm-dd', KasaTarihi.date);
-    if SecGrup='Düzenli Ödeme' then                 //if Tur = 101 then //Eðer sabit gider fat ise türünü 11 diye ekleriz
+    if SecGrup='DÃ¼zenli Ã–deme' then                 //if Tur = 101 then //EÄŸer sabit gider fat ise tÃ¼rÃ¼nÃ¼ 11 diye ekleriz
        Tur := 11;
     Tablo.Query1.Params.ParamByName('TUR').Value := Tur;
     Tablo.Query1.Params.ParamByName('DURUM').Value := 0;
@@ -1390,7 +1390,7 @@ procedure TKasaWizardDlg.CekEkrNextButtonClick(Sender: TObject; var Stop: Boolea
     Begin
       if Alan='' then
       Begin
-        Application.MessageBox(PChar(Ad+' boþ býrakýlamaz .'),'U Y A R I',MB_OK+MB_ICONERROR);
+        Application.MessageBox(PChar(Ad+' boÅŸ bÄ±rakÄ±lamaz .'),'U Y A R I',MB_OK+MB_ICONERROR);
         Result := False;
       End
       else
@@ -1401,8 +1401,8 @@ begin
 //       Stop := not Tablo.CekSenetBilgiKontrolu(TextHESAPID.Text, EditSERINO.Text,'-1');
 
    if not Kontrol(LabelBankaSubeID.Caption, 'Banka') then abort;
-   if not Kontrol(EditODEMEYERI.Text, 'Keþide Yeri') then abort;
-   if not Kontrol(DateKesideTarihi.Text, 'Keþide Tarihi') then abort;
+   if not Kontrol(EditODEMEYERI.Text, 'KeÅŸide Yeri') then abort;
+   if not Kontrol(DateKesideTarihi.Text, 'KeÅŸide Tarihi') then abort;
    if not Kontrol(EditCekTutar.Text, 'Tutar') then abort;
 end;
 procedure TKasaWizardDlg.CekKaydet;
@@ -1412,10 +1412,10 @@ begin
   Tablo.Query1.SQL.Text := 'Insert Into CEKSENETLER (TUR,DURUM,TARIH,VADE,TUTAR,KUR,HITAP,REHBERID, BANKASUBELERID,HESAPNO,SERINO,ODEMEYERI,KEFIL,PORTFOY,ACIKLAMA,EKLEYEN)values(' +
              ':TUR,:DURUM,:TARIH,:VADE,:TUTAR,:KUR,:HITAP,:REHBERID, :BANKASUBELERID,:HESAPNO,:SERINO,:ODEMEYERI,:KEFIL,:PORTFOY,:ACIKLAMA,:EKLEYEN)';
   if SecIslem2>0 then
-     i := SecIslem2   //eðer 2 seçimli iþ yapýlýyorsa örneðin fat giriþ ardýndan çek çýkýþ
+     i := SecIslem2   //eÄŸer 2 seÃ§imli iÅŸ yapÄ±lÄ±yorsa Ã¶rneÄŸin fat giriÅŸ ardÄ±ndan Ã§ek Ã§Ä±kÄ±ÅŸ
   else
-     i := SecIslem;  // eðer tek iþ yapýlýyorsa ör: çek giriþ
-  Tablo.Query1.Params.ParamByName('TUR').Value := i;  //Tür 11 ise False yani giren fatura; Tür 15 ise True yani çýkan fatura
+     i := SecIslem;  // eÄŸer tek iÅŸ yapÄ±lÄ±yorsa Ã¶r: Ã§ek giriÅŸ
+  Tablo.Query1.Params.ParamByName('TUR').Value := i;  //TÃ¼r 11 ise False yani giren fatura; TÃ¼r 15 ise True yani Ã§Ä±kan fatura
   Tablo.Query1.Params.ParamByName('DURUM').Value := 1;
   Tablo.Query1.Params.ParamByName('TARIH').Value := FormatDateTime('yyyy-mm-dd', KasaTarihi.date);
   Tablo.Query1.Params.ParamByName('VADE').Value := FormatDateTime('yyyy-mm-dd', DateKesideTarihi.Date);
@@ -1451,7 +1451,7 @@ begin
 //  Tablo.Query1.Params.ParamByName('KASA').Value := Kasa;
 
   Tablo.Query1.ExecSQL;
-  //Kaydedilen çekin ID numarasý alýnýr (çek senet ekleme ekraný için gereklidir)
+  //Kaydedilen Ã§ekin ID numarasÄ± alÄ±nÄ±r (Ã§ek senet ekleme ekranÄ± iÃ§in gereklidir)
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' select @@IDENTITY from CEKSENETLER ';
   Tablo.Query1.Open;
@@ -1469,10 +1469,10 @@ var PlanTarihi : TDateTime;
 begin
    PlanTarihi := StrToDate('01/01/1900');
    FaturaId := -1;
-   //Önce kasaya toplam olarak kaydedelim
+   //Ã–nce kasaya toplam olarak kaydedelim
    KasaId := Tablo.KasaKaydet(Turu, PlanTarihi, StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),AraQuery1.FieldByName('ID').AsInteger,
                     ComboPlanAciklama.Text,KasaQuery.FieldByName('ID').AsInteger, ComboKurPlan.Text, MasrafGelir, EditTutar.value,0,-1, FaturaId,-1,-1);
-   //Sonra kredi kartý planlama tablosuna kaydedlim
+   //Sonra kredi kartÄ± planlama tablosuna kaydedlim
    tkst := 0;
    TabOdemeTakvimi.First;
    while not TabOdemeTakvimi.Eof do
@@ -1517,7 +1517,7 @@ var j : SmallInt;
             Giren, Cikan : Currency;
         procedure Insert(Tarih : TDateTime; TUTAR:Currency; ACIKLAMA,KUR :string);
         begin
-               //11: Giren müþteri faturasý ;;; 101 : Giren sabit gider faturasý
+               //11: Giren mÃ¼ÅŸteri faturasÄ± ;;; 101 : Giren sabit gider faturasÄ±
            if SecIslem in [11,12, 71] then begin //101
               Tur := 71; Giren :=0; Cikan:= TUTAR
            end else begin
@@ -1525,14 +1525,14 @@ var j : SmallInt;
            end;
            if EditPlanBankaHesapId.Text='' then
               HId := 0 else HId := StrToInt(EditPlanBankaHesapId.Text);
-           if FaturaId > 0 then //Fatura varsa durum faturalý yoksa plan diye eklenir
+           if FaturaId > 0 then //Fatura varsa durum faturalÄ± yoksa plan diye eklenir
               j := 1 else j := 0;
            Tablo.PlanKaydet(Tur, Tarih, AraQuery1.Fieldbyname('ID').AsInteger,ACIKLAMA,HId, KUR, Giren, Cikan, 0, 0,False);
 //           Tablo.KasaKaydet(Tur, Tarih,AraQuery1.Fieldbyname('ID').AsInteger,AraQuery1.Fieldbyname('KOD').AsString,AraQuery1.Fieldbyname('FIRMA').AsString,
 //           ACIKLAMA, HId, EditPlanBankaHesapNo.Text, EditPlanBankaHesapAdi.Text, KUR, StrToIntDef(EditMASRAFID.Text,-1), EditMASRAFKODU.Text, EditMASRAFMERKEZI.Text, Giren, Cikan, i,FaturaId, -1,-1);
 //           Tablo.FaturaDurumUpdate(FaturaId, 1);
 //           if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then
-//               if TabTakvimFat.FieldByName('TUR').AsInteger in [61,71] then  //eðer sabit gider faturasý ise ve daha önce tahmini giriþ yapýlmýþsa onun bilgilerini Plan olarak ekledik eski Tahmi olaný silelim
+//               if TabTakvimFat.FieldByName('TUR').AsInteger in [61,71] then  //eÄŸer sabit gider faturasÄ± ise ve daha Ã¶nce tahmini giriÅŸ yapÄ±lmÄ±ÅŸsa onun bilgilerini Plan olarak ekledik eski Tahmi olanÄ± silelim
 //                  Tablo.KasadanSil(TabTakvimFat.FieldByName('ID').AsInteger);
         end;
   begin
@@ -1560,12 +1560,12 @@ var j : SmallInt;
          11,12,15,16: begin
                    FaturaId := FatBaslikKaydet(Turu); // ,101
                    if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then
-                      if TabTakvimFat.FieldByName('TUR').AsInteger in [61,71] then  //faturasý gelenin daha önce bir planý varsa durumu "faturalý" hale getirilir
+                      if TabTakvimFat.FieldByName('TUR').AsInteger in [61,71] then  //faturasÄ± gelenin daha Ã¶nce bir planÄ± varsa durumu "faturalÄ±" hale getirilir
                          Tablo.KasaUpdate(TabTakvimFat.FieldByName('ID').AsInteger,'DURUM=1');
                 end;
-         21,22 : begin//Müþteriden Tah giriþi
-                   if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then begin //eðer ödeme planý veya fat varsa onun ID'sini ödemenin FatId'sine kaydedelim
-                      if (TabTakvimFat.FieldByName('TUR').AsInteger in [61]) then  //tahsilatý yapýlan bir plansa silelim
+         21,22 : begin//MÃ¼ÅŸteriden Tah giriÅŸi
+                   if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then begin //eÄŸer Ã¶deme planÄ± veya fat varsa onun ID'sini Ã¶demenin FatId'sine kaydedelim
+                      if (TabTakvimFat.FieldByName('TUR').AsInteger in [61]) then  //tahsilatÄ± yapÄ±lan bir plansa silelim
                           PlanTarihi := TabTakvimFat.FieldByName('TARIH').AsDateTime;
                           FaturaId := TabTakvimFat.FieldByName('FATURAID').AsInteger;
                       end
@@ -1578,20 +1578,20 @@ var j : SmallInt;
 //                   Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger, EditTahsilatTutar.value,0);
                    Tablo.FaturaDurumUpdate(FaturaId,2);
                  end;
-         23,33: begin//Çek giriþi ve çýkýþý
+         23,33: begin//Ã‡ek giriÅŸi ve Ã§Ä±kÄ±ÅŸÄ±
                    CekKaydet;
                 end;
-         25,35: begin//Çek giriþi ve çýkýþý
+         25,35: begin//Ã‡ek giriÅŸi ve Ã§Ä±kÄ±ÅŸÄ±
                    KrediKartiKaydet(Turu);
                 end;
-         31,32: begin//Müþteriye Ödeme çýkýþý  ,103
+         31,32: begin//MÃ¼ÅŸteriye Ã–deme Ã§Ä±kÄ±ÅŸÄ±  ,103
                    if Turu=31 then
                        HesapTur:='K'
                    else
                        HesapTur:='B';
 
-                   if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then begin //eðer ödeme planý veya fat varsa onun ID'sini ödemenin FatId'sine kaydedelim
-                      if (TabTakvimFat.FieldByName('TUR').AsInteger in [71, 72]) then //71:ödeme planý 72 : düzenli ödeme
+                   if (TabTakvimFat.Active)and(not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0) then begin //eÄŸer Ã¶deme planÄ± veya fat varsa onun ID'sini Ã¶demenin FatId'sine kaydedelim
+                      if (TabTakvimFat.FieldByName('TUR').AsInteger in [71, 72]) then //71:Ã¶deme planÄ± 72 : dÃ¼zenli Ã¶deme
                           PlanTarihi := TabTakvimFat.FieldByName('TARIH').AsDateTime;
                           FaturaId := TabTakvimFat.FieldByName('FATURAID').AsInteger;
                       end
@@ -1600,7 +1600,7 @@ var j : SmallInt;
                       FaturaId := -1;
                    end;
 
-                          //ödeme için  bir plan seçilmiþse 1-türünü 2-durumunu 3-açýklamasýný 4-tutarýný 5-islemtarihini ve 6-faturanýn durumunu deðiþtir
+                          //Ã¶deme iÃ§in  bir plan seÃ§ilmiÅŸse 1-tÃ¼rÃ¼nÃ¼ 2-durumunu 3-aÃ§Ä±klamasÄ±nÄ± 4-tutarÄ±nÄ± 5-islemtarihini ve 6-faturanÄ±n durumunu deÄŸiÅŸtir
                           {Tablo.KasaUpdate(TabTakvimFat.FieldByName('ID').AsInteger,'TUR='+IntToStr(Turu)+',DURUM=2,'+
                                          ' ACIKLAMA='''+ComboBoxTahAciklama.Text+''',CIKAN='+FloatToStr(EditTahsilatTutar.value)+
                                          ',HESAPTURU='''+HesapTur+''' ,HESAPID='+KasaQuery.FieldByName('ID').AsString+',KUR='''+ComboKurTah.Text+''','+
@@ -1614,62 +1614,62 @@ var j : SmallInt;
                          ComboBoxTahAciklama.Text,KasaQuery.FieldByName('ID').AsInteger,
                          ComboKurTah.Text,MasrafGelir,  0.0, EditTahsilatTutar.value,-1, FaturaId,-1,-1);
 //                   Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger, 0, EditTahsilatTutar.value);
-                   Tablo.FaturaDurumUpdate(FaturaId,2);  //Eðer girilmiþ fat. varsa faturanýn durumunu tamamlanmýþ yapalým
-                   //if (not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0)   then //Eðer seçilmiþ plan varsa durumunu tamamlanmýþ yapalým
+                   Tablo.FaturaDurumUpdate(FaturaId,2);  //EÄŸer girilmiÅŸ fat. varsa faturanÄ±n durumunu tamamlanmÄ±ÅŸ yapalÄ±m
+                   //if (not CheckDisinda.Checked)and(TabTakvimFat.RecordCount>0)   then //EÄŸer seÃ§ilmiÅŸ plan varsa durumunu tamamlanmÄ±ÅŸ yapalÄ±m
                    //   Tablo.KasaDurumUpdate(TabTakvimFat.FieldByName('ID').AsInteger,2);
                  end;
-          51,52 : begin //Çek senet tahsilatý
+          51,52 : begin //Ã‡ek senet tahsilatÄ±
 //                   MasrafGelir('G');
-                   Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'),StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0,'Çek Tahsilatý',
+                   Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'),StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0,'Ã‡ek TahsilatÄ±',
                                     KasaQuery.FieldByName('ID').AsInteger,   CekSenetKrediQuery.FieldByName('KUR').AsString, MasrafGelir, CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency,0,-1, -1,-1, CekSenetKrediQuery.FieldByName('ID').AsInteger);
 //                   Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger, EditTahsilatTutar.value, 0);
                    Tablo.Query1.Close;
                    Tablo.Query1.SQL.Text := 'update CEKSENETLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString ;
                    Tablo.Query1.ExecSQL;
                   end;
-          53,54 : begin //Çek senet ödemesi
+          53,54 : begin //Ã‡ek senet Ã¶demesi
 //                   MasrafGelir('M');
-                   Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'),StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0, 'Çek Ödemesi',
+                   Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'),StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0, 'Ã‡ek Ã–demesi',
                                     KasaQuery.FieldByName('ID').AsInteger, CekSenetKrediQuery.FieldByName('KUR').AsString,MasrafGelir, 0,CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency,-1, -1,-1, CekSenetKrediQuery.FieldByName('ID').AsInteger);
 //                   Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger,0, EditTahsilatTutar.value);
                    Tablo.Query1.Close;
                    Tablo.Query1.SQL.Text := 'update CEKSENETLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString;
                    Tablo.Query1.ExecSQL;
                end;
-         61,71,88 : PlanKaydet; //   Eðer önce SecIslem := 11 veya 15 ise ve vadeli ödeme varsa SecIslem2 := 88; oluyor
-         111 : begin//Kredi Ödeme çýkýþý, kredinin alýndýðý hesap müþteri gibi olacak
+         61,71,88 : PlanKaydet; //   EÄŸer Ã¶nce SecIslem := 11 veya 15 ise ve vadeli Ã¶deme varsa SecIslem2 := 88; oluyor
+         111 : begin//Kredi Ã–deme Ã§Ä±kÄ±ÅŸÄ±, kredinin alÄ±ndÄ±ÄŸÄ± hesap mÃ¼ÅŸteri gibi olacak
                    //Tablo.NakitHavaleKaydet(i,KasaTarihi.date,CekSenetKrediQuery.FieldByName('BANKAKREDIHESAPID').AsInteger, CekSenetKrediQuery.FieldByName('BANKAKREDIHESAPNO').AsString, CekSenetKrediQuery.FieldByName('BANKAKREDIHESAPADI').AsString,ComboBoxTahAciklama.Text,0,EditTahsilatTutar.value, KasaQuery.FieldByName('ID').AsInteger, KasaQuery.FieldByName('KASAKODU').AsString,
                    //         KasaQuery.FieldByName('KASAADI').AsString, ComboKurTah.Text,CekSenetKrediQuery.FieldByName('KREDIID').AsInteger,CekSenetKrediQuery.FieldByName('DETAYID').AsInteger);
 //                   MasrafGelir('M');
                    Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'), StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),CekSenetKrediQuery.FieldByName('BANKAKREDIHESAPID').AsInteger,ComboBoxTahAciklama.Text,
                                     KasaQuery.FieldByName('ID').AsInteger, ComboKurTah.Text, MasrafGelir, 0,EditTahsilatTutar.value, -1,CekSenetKrediQuery.FieldByName('KREDIID').AsInteger,CekSenetKrediQuery.FieldByName('DETAYID').AsInteger,-1);
 //                   Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger, 0, EditTahsilatTutar.value);
-               //Kasadan çýkýþý oldu þimdi 'Ödendi' diye iþaretleyebiliriz
-                 if Pos('Rotatif', CekSenetKrediQuery.FieldByName('KREDITURU').AsString)>0 then begin //Rotatif kredi tutar çýkan kalan update edilecek
-                    //En son kalan anapara : BakiyeAnaparaTut   Þimdi hesaplanan faiz : FaizTut
+               //Kasadan Ã§Ä±kÄ±ÅŸÄ± oldu ÅŸimdi 'Ã–dendi' diye iÅŸaretleyebiliriz
+                 if Pos('Rotatif', CekSenetKrediQuery.FieldByName('KREDITURU').AsString)>0 then begin //Rotatif kredi tutar Ã§Ä±kan kalan update edilecek
+                    //En son kalan anapara : BakiyeAnaparaTut   Åžimdi hesaplanan faiz : FaizTut
                     Tablo.Query1.Close;
                     Tablo.Query1.SQL.Text := 'insert into KREDIROTATIF (KREDIID,TARIH,KREDIREFERANSNO,TUTAR,ODENEN,BAKIYE,FAIZTUTARI,BSMV,TOPLAM,ODENENFAIZ,KALANFAIZ,KUR,ACIKLAMA,VALOR,ODENMIS,EKLEYEN)values '+
                        '('+CekSenetKrediQuery.FieldByName('KREDIID').AsString+','''+ FormatDateTime('yyyy-mm-dd', KasaTarihi.date)+
                          ''','''+Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+''',0,'+
                        FloatToStr(EditTahsilatTutar.value)+','+FloatToStr(BakiyeAnaparaTut-EditTahsilatTutar.value)+','+FloatToStr(SimdikiFaizTut)+','+
-                       FloatToStr(SimdikiFaizTut*BSMV)+','+FloatToStr(SimdikiFaizTut+SimdikiFaizTut*BSMV)+','+FloatToStr(EditFaizTutar.value)+','+FloatToStr(BakiyeFaizTut+SimdikiFaizTut+SimdikiFaizTut*BSMV-EditFaizTutar.value)+',''TL'',''Ödenen'','+IntToStr(Valor)+',0,'''+Kullanan+''' )';
+                       FloatToStr(SimdikiFaizTut*BSMV)+','+FloatToStr(SimdikiFaizTut+SimdikiFaizTut*BSMV)+','+FloatToStr(EditFaizTutar.value)+','+FloatToStr(BakiyeFaizTut+SimdikiFaizTut+SimdikiFaizTut*BSMV-EditFaizTutar.value)+',''TL'',''Ã–denen'','+IntToStr(Valor)+',0,'''+Kullanan+''' )';
                     Tablo.Query1.ExecSQL;
-                    // Tüm ödemeler bittiyse kapandý olarak iþaretlernir
+                    // TÃ¼m Ã¶demeler bittiyse kapandÄ± olarak iÅŸaretlernir
                     if (BakiyeAnaparaTut-EditTahsilatTutar.value<1.0)and(BakiyeFaizTut+SimdikiFaizTut+SimdikiFaizTut*BSMV-EditFaizTutar.value < 1.0)and
-                       (Application.MessageBox('Bu kredi kapandý olarak iþaretlensin mi?', 'O N A Y', MB_YESNO) = IDYES) then begin
+                       (Application.MessageBox('Bu kredi kapandÄ± olarak iÅŸaretlensin mi?', 'O N A Y', MB_YESNO) = IDYES) then begin
                         Tablo.Query1.Close;
                         Tablo.Query1.SQL.Text := 'update KREDIROTATIF set ODENMIS=1 where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +' and KREDIREFERANSNO=' +Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString);
                         Tablo.Query1.ExecSQL;
                     end;
                  end
-                 else  begin //Diðer kredilerin tümünde ödendi update edilecek
+                 else  begin //DiÄŸer kredilerin tÃ¼mÃ¼nde Ã¶dendi update edilecek
                     Tablo.Query1.Close;
                     Tablo.Query1.SQL.Text := 'update PLANKREDI set ODENMIS=1 where ID=' +CekSenetKrediQuery.FieldByName('DETAYID').AsString +' and KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString;
                     Tablo.Query1.ExecSQL;
                  end;
                end;
-          121,122: begin //posgiriþi
-                    Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'), StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0, 'Pos Giriþi',
+          121,122: begin //posgiriÅŸi
+                    Tablo.KasaKaydet(Turu, StrToDate('01/01/1900'), StrToDateTime(FormatDateTime('dd/mm/yyyy', KasaTarihi.date)),0, 'Pos GiriÅŸi',
                                     KasaQuery.FieldByName('ID').AsInteger, ComboKurTah.Text,0,EditTahsilatTutar.value,0,-1, -1,-1,-1);
 //                    Tablo.KasaUpdate('+',i, KasaQuery.FieldByName('ID').AsInteger, EditTahsilatTutar.value,0);
                end;
@@ -1678,14 +1678,14 @@ var j : SmallInt;
 
 begin
    KaydetCase(SecIslem);
-   if SecIslem2>0 then //2.iþem seçilmiþse örneðin fat giriþ ardýndan ödeme
+   if SecIslem2>0 then //2.iÅŸem seÃ§ilmiÅŸse Ã¶rneÄŸin fat giriÅŸ ardÄ±ndan Ã¶deme
       KaydetCase(SecIslem2);
    ModalResult := mrOK;
 end;
 
 procedure TKasaWizardDlg.KKTusClick(Sender: TObject);
 begin
-   if SecIslem in [11,12] then  //müþteri fatura giriþi veya sabit fatura giriþi     ,101
+   if SecIslem in [11,12] then  //mÃ¼ÅŸteri fatura giriÅŸi veya sabit fatura giriÅŸi     ,101
       SecIslem2 := 35
    else
       SecIslem2 := 25;
@@ -1721,18 +1721,18 @@ begin
 
 
     TabOdemeTakvimi.Close;
-    if not CheckTaksit.Checked then begin //peþinse
+    if not CheckTaksit.Checked then begin //peÅŸinse
              TabOdemeTakvimi.SQL.Text:= StringReplace(SQLPlan.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
              TabOdemeTakvimi.Params[0].Value := 1;                  //taksitsay
-             TabOdemeTakvimi.Params[1].Value := DatePesinat.date; //baþlangýç
+             TabOdemeTakvimi.Params[1].Value := DatePesinat.date; //baÅŸlangÄ±Ã§
              TabOdemeTakvimi.Params[2].Value := EditTutar.Value;   //tutar
              TabOdemeTakvimi.Params[3].Value := ComboKurPlan.Text;         //kur
-             TabOdemeTakvimi.Params[4].Value := ComboPlanAciklama.Text;   //açýklama
-             TabOdemeTakvimi.Params[5].Value := uyar;   //açýklama
-             TabOdemeTakvimi.Params[6].Value := UyariGun;   //açýklama
+             TabOdemeTakvimi.Params[4].Value := ComboPlanAciklama.Text;   //aÃ§Ä±klama
+             TabOdemeTakvimi.Params[5].Value := uyar;   //aÃ§Ä±klama
+             TabOdemeTakvimi.Params[6].Value := UyariGun;   //aÃ§Ä±klama
              TabOdemeTakvimi.Params[7].Value := IntToStr(OnceSonra);
     end else begin
-     //peþin + taksit
+     //peÅŸin + taksit
         EditTaksitTutar.Value := (EditTutar.Value - EditPesinTutar.Value) / TaksitSay.Value;
         Param:='  SET @TAKSIT='+IntToStr(TAKSITSay.Value)+
         ' SET @TARIH_PESIN= '''+Formatdatetime('yyyy-mm-dd',  DatePesinat.Date)+''''+
@@ -1742,7 +1742,7 @@ begin
         ' SET @KUR= '''+ComboKurPlan.Text+''''+
         ' set @UYAR='+ Uyar+
         ' set @UYARIGUN='+ SpinUYARIGUN.Text+
-        ' SET @ONCESONRA = '+ IntToStr(OnceSonra);               //  -1 : onceki günlere gider, 1: sonraki günlere gider
+        ' SET @ONCESONRA = '+ IntToStr(OnceSonra);               //  -1 : onceki gÃ¼nlere gider, 1: sonraki gÃ¼nlere gider
        TabOdemeTakvimi.SQL.Text:= StringReplace(SQLPesin.text,'SQLKOMUT',Param, [rfReplaceAll]);
     end;
    TabOdemeTakvimi.Open;
@@ -1772,10 +1772,10 @@ end;
 procedure TKasaWizardDlg.AramaEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
 begin
    if not AraQuery1.Active then
-      raise Exception.Create('Müþteri seçin!')
+      raise Exception.Create('MÃ¼ÅŸteri seÃ§in!')
    else
       SecGrup := AraQuery1.FieldByName('GRUP').AsString;
-   if SecGrup = 'Düzenli Ödeme' then begin
+   if SecGrup = 'DÃ¼zenli Ã–deme' then begin
       TabDuzenliOdeme.Close;
       TabDuzenliOdeme.SQL.Text := 'select REHBERID,ODEMEYERI from REHBERODEME where REHBERID='+AraQuery1.Fields[0].AsString;
       TabDuzenliOdeme.Open;
@@ -1784,7 +1784,7 @@ end;
 
 procedure TKasaWizardDlg.AramaEkrPage(Sender: TObject);
 begin
-   if KasaWizardDlg.RehberId > -1 then begin//çaðrýlan yerden rehber ID si verilmiþ
+   if KasaWizardDlg.RehberId > -1 then begin//Ã§aÄŸrÄ±lan yerden rehber ID si verilmiÅŸ
       if GeldigiEkranAdi = 'MenuEkr' then begin
          AraQuery1.Close;
          AraQuery1.SQL.Text := ' select * from REHBER where ID = '+ IntToStr(RehberId);
@@ -1851,21 +1851,21 @@ begin
    CekSenetKrediQuery.Close;
    if SecIslem = 111 then begin//kredi aranacak
       ComboCekSenetKrediDurum.Clear;
-      ComboCekSenetKrediDurum.Properties.Items.Add('Tümü');
-      ComboCekSenetKrediDurum.Properties.Items.Add('Ödenmemiþler');
-      ComboCekSenetKrediDurum.Properties.Items.Add('Ödenmiþler');
+      ComboCekSenetKrediDurum.Properties.Items.Add('TÃ¼mÃ¼');
+      ComboCekSenetKrediDurum.Properties.Items.Add('Ã–denmemiÅŸler');
+      ComboCekSenetKrediDurum.Properties.Items.Add('Ã–denmiÅŸler');
       ComboCekSenetKrediDurum.ItemIndex := 1;
    end
-   else if SecIslem in [51..54] then begin//çek senet aranacak
+   else if SecIslem in [51..54] then begin//Ã§ek senet aranacak
       ComboCekSenetKrediDurum.Clear;
-      ComboCekSenetKrediDurum.Properties.Items.Add('Tümü');
-      ComboCekSenetKrediDurum.Properties.Items.Add('Portföyde');
+      ComboCekSenetKrediDurum.Properties.Items.Add('TÃ¼mÃ¼');
+      ComboCekSenetKrediDurum.Properties.Items.Add('PortfÃ¶yde');
       ComboCekSenetKrediDurum.Properties.Items.Add('Tahsil Edildi');
       ComboCekSenetKrediDurum.Properties.Items.Add('Ciro Edildi');
       ComboCekSenetKrediDurum.Properties.Items.Add('Tahsile Verildi');
       ComboCekSenetKrediDurum.Properties.Items.Add('Teminata Verildi');
       ComboCekSenetKrediDurum.Properties.Items.Add('Protesto Edildi');
-      ComboCekSenetKrediDurum.Properties.Items.Add('Karþýlýðý Yok');
+      ComboCekSenetKrediDurum.Properties.Items.Add('KarÅŸÄ±lÄ±ÄŸÄ± Yok');
       ComboCekSenetKrediDurum.Properties.Items.Add('Tahsil Edilemiyor');
       ComboCekSenetKrediDurum.ItemIndex := 1;
    end;
@@ -1880,11 +1880,11 @@ procedure TKasaWizardDlg.CekSenetKrediAraEkrExitPage(Sender: TObject;
   const FromPage: TJvWizardCustomPage);
 begin
    if (not CekSenetKrediQuery.Active) or (CekSenetKrediQuery.RecordCount<1) then
-      raise Exception.Create ('Listeden seçim yapýn!');
+      raise Exception.Create ('Listeden seÃ§im yapÄ±n!');
 
    if SecIslem in [51..54] then begin
        if CekSenetKrediQuery.FieldByName('DURUM').AsInteger = 2 then
-          raise Exception.Create ('Daha önce tahsil edilmiþ!');
+          raise Exception.Create ('Daha Ã¶nce tahsil edilmiÅŸ!');
    end;
 
    //vbCekSenetId := CekSenetAramaDlg.CekSenetQuery.FieldByName('SIRANO').AsInteger;
@@ -1976,7 +1976,7 @@ var s : string;
             s:=s+' and BANKAKREDIHESAPKODU like '''+edCarikod.Text+'%'' ';
          if edCariAd.Text <>'' then
             s:=s+' and BANKAKREDIHESAPADI like '''+edCariad.Text+'%'' ';
-         if ComboCekSenetKrediDurum.Text <>'Tümü' then
+         if ComboCekSenetKrediDurum.Text <>'TÃ¼mÃ¼' then
             s:=s+' and ODENMIS = '+IntToStr(ComboCekSenetKrediDurum.ItemIndex-1);
          CekSenetKrediQuery.SQL.Add(s);
       end;
@@ -2020,7 +2020,7 @@ begin
    Application.CreateForm(TBankaSecimDlg, BankaSecimDlg);
    if ComboTUR.ItemIndex < 2 then begin
       BankaSecimDlg.RehberId := AraQuery1.FieldByName('ID').AsString;
-      BankaSecimDlg.Cagiran := 4;//4; //müþteri (genel) banka lastesi gelsin
+      BankaSecimDlg.Cagiran := 4;//4; //mÃ¼ÅŸteri (genel) banka lastesi gelsin
    end else begin
       BankaSecimDlg.RehberId := '-1';// bizim hesap listemiz
       BankaSecimDlg.Cagiran := 21;// bizim hesap listemiz
@@ -2029,14 +2029,14 @@ begin
    if BankaSecimDlg.ModalResult = mrOk then begin
 
  //     if BankaSecimDlg.Cagiran > 20 then
- //        LabelBankaSubeID.caption := BankaSecimDlg.TabSubeler.FieldByname('HESAPID').AsString //20 ve üzeri bizim hesaplar için
+ //        LabelBankaSubeID.caption := BankaSecimDlg.TabSubeler.FieldByname('HESAPID').AsString //20 ve Ã¼zeri bizim hesaplar iÃ§in
  //     else
          LabelBankaSubeID.caption := BankaSecimDlg.TabSubeler.FieldByname('SUBEID').AsString;
 
       LabelSubeKodu.caption := BankaSecimDlg.TabSubeler.FieldByname('SUBEKODU').AsString;
       LabelSubeAdi.caption  := BankaSecimDlg.TabSubeler.FieldByname('SUBEADI').AsString;
       Logo.Picture.Assign(BankaSecimDlg.TabBankalar.FieldByname('LOGO'));
-      if ComboTUR.ItemIndex >= 2 then //bizim çekimiz; hesapno yu da dolduralým
+      if ComboTUR.ItemIndex >= 2 then //bizim Ã§ekimiz; hesapno yu da dolduralÄ±m
          EditHESAPNO.Text := BankaSecimDlg.TabSubeler.FieldByname('HESAPNO').AsString;
    end;
    BankaSecimDlg.Destroy;

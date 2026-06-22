@@ -1,4 +1,4 @@
-unit UAksiyonlarFrame;
+ï»¿unit UAksiyonlarFrame;
 
 interface
 
@@ -34,7 +34,7 @@ type
     procedure btn1Click(Sender: TObject);
     procedure pnlBaslikPaint(Sender: TObject);
   private
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FYonetici : TFrameYoneticisi;
     FFrameYoneticisi : TFrameYoneticisi;
     FAramaFrameYoneticisi : TFrameYoneticisi; 
@@ -61,7 +61,7 @@ type
     function GetFrameBilgi : TFrameBilgi;
     procedure SetFrameBilgi(AValue : TFrameBilgi);
     {********************************}
-    { IFrameYoneticisi üyeleri }
+    { IFrameYoneticisi Ã¼yeleri }
     function GetFrameYoneticisi : TFrameYoneticisi;
 
     procedure FrameAktifOldu(Sender: TObject);
@@ -82,19 +82,19 @@ uses JvJVCLUtils, UKasa, UKasaWizard, Utablo, UTakvim, UGenelGirisSayfasiFrame;
 var
   sekmeConfigXml : string =  '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Rehber Ara" Tip="TRehberAraDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Kasa" Tip="TKasaDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Kurum" Tip="TKurumDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Takvim" Tip="TTakvimDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Rehber Ara" Tip="TRehberAraDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Kasa" Tip="TKasaDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Kurum" Tip="TKurumDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Takvim" Tip="TTakvimDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="GiriÅŸ SayfasÄ±" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
   sekmeConfigAramaXml : string = '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Günlük Aksiyon" Tip="TGunlukAksiyonAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Günlük Aksiyon" Tip="TTakvimAksiyonFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="GÃ¼nlÃ¼k Aksiyon" Tip="TGunlukAksiyonAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="GÃ¼nlÃ¼k Aksiyon" Tip="TTakvimAksiyonFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
@@ -128,18 +128,18 @@ end;
 constructor TAksiyonlarFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  { Arama frame yöneticisi önce baþlatýlmalý }
-  { Çünkü Gorunur yöntemi FrameleriYukle olayýnda çaðýrýlabilir }
+  { Arama frame yÃ¶neticisi Ã¶nce baÅŸlatÄ±lmalÄ± }
+  { Ã‡Ã¼nkÃ¼ Gorunur yÃ¶ntemi FrameleriYukle olayÄ±nda Ã§aÄŸÄ±rÄ±labilir }
   FAramaFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     pcArama,sekmeConfigAramaXml);
-  { Arama ile ilgili frame bilgilerini yükle }
+  { Arama ile ilgili frame bilgilerini yÃ¼kle }
   FAramaFrameYoneticisi.FrameleriYukle;
-  { Bu frame'in alt framelerini yönetecek frame yöneticisini baþlat  }
+  { Bu frame'in alt framelerini yÃ¶netecek frame yÃ¶neticisini baÅŸlat  }
   FFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     AnaSayfaDenetimi, sekmeConfigXml);
-  { Arama frame yöneticisini belirt }
+  { Arama frame yÃ¶neticisini belirt }
   FFrameYoneticisi.AramaFrameYoneticisi := FAramaFrameYoneticisi;
-  { Alt frame bilgilerini yükle }
+  { Alt frame bilgilerini yÃ¼kle }
   FFrameYoneticisi.FrameleriYukle;
   FFrameYoneticisi.OnFrameBaslikDegisti.Add(FrameBaslikDegisti);
   FFrameYoneticisi.OnFrameDegisti.Add(FrameAktifOldu);

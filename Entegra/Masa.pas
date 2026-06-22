@@ -1,4 +1,4 @@
-unit Masa;
+ï»¿unit Masa;
 
 interface
 
@@ -538,7 +538,7 @@ end;
 procedure TMasa.SetKapasite(Value: integer);
 begin
   if Value < 0 then
-    raise Exception.Create('Kapasite negatif deðerli olamaz');
+    raise Exception.Create('Kapasite negatif deÄŸerli olamaz');
   case Tipi of
     mtDikdortgen : KenarlariTopla;
     mtDaire      : FKapasite:=Value;
@@ -553,7 +553,7 @@ procedure TMasa.SetKenar1(Value: integer);
 begin
   if Tipi = mtDaire then exit;
   if Value < 0 then
-    raise Exception.Create('Kenar negatif deðerli olamaz');
+    raise Exception.Create('Kenar negatif deÄŸerli olamaz');
   FKenar1:=Value;
   KenarlariTopla;
   Paint;
@@ -562,7 +562,7 @@ end;
 procedure TMasa.SetKenar2(Value: integer);
 begin
   if Value < 0 then
-    raise Exception.Create('Kenar negatif deðerli olamaz');
+    raise Exception.Create('Kenar negatif deÄŸerli olamaz');
   FKenar2:=Value;
   KenarlariTopla;
   Paint;
@@ -571,7 +571,7 @@ end;
 procedure TMasa.SetKenar3(Value: integer);
 begin
   if Value < 0 then
-    raise Exception.Create('Kenar negatif deðerli olamaz');
+    raise Exception.Create('Kenar negatif deÄŸerli olamaz');
   FKenar3:=Value;
   KenarlariTopla;
   Paint;
@@ -580,7 +580,7 @@ end;
 procedure TMasa.SetKenar4(Value: integer);
 begin
   if Value < 0 then
-    raise Exception.Create('Kenar negatif deðerli olamaz');
+    raise Exception.Create('Kenar negatif deÄŸerli olamaz');
   FKenar4:=Value;
   KenarlariTopla;
   Paint;
@@ -656,7 +656,7 @@ end;
 procedure TMasa.SetMasaAdi(const Value: String);
 var
   i : integer;
-  sl: TStringList; // Sorted List manaaaasýnda
+  sl: TStringList; // Sorted List manaaaasÄ±nda
 begin
   if  Parent <> nil then
   for i := 0 to parent.ComponentCount-1 do

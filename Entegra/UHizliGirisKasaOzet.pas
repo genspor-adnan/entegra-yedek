@@ -1,4 +1,4 @@
-unit UHizliGirisKasaOzet;
+ï»¿unit UHizliGirisKasaOzet;
 
 interface
 
@@ -146,20 +146,20 @@ type
   end;
 
 const
-  // CÝHAZLAR
-  Nakit: Integer = 5; // NAKÝTTOPLAM TUR
+  // CÄ°HAZLAR
+  Nakit: Integer = 5; // NAKÄ°TTOPLAM TUR
   Pos: Integer = 6; // POSTOPLAM TUR
-  SatisTutar: Integer = 7; // SATIÞTOPLAMTUTAR TUR
+  SatisTutar: Integer = 7; // SATIÅžTOPLAMTUTAR TUR
   PosIslemleri: integer = 11; // POSISLEMLERI TUR
   // SAYIMLAR
-  NakitSayim: Integer = 20; // NAKÝTSAYIM TUR
+  NakitSayim: Integer = 20; // NAKÄ°TSAYIM TUR
   MultinetTicketSayim: integer = 30; // MULTINETTICKET TUR
-  HediyeSayim: Integer = 40; // HEDÝYE TUR
+  HediyeSayim: Integer = 40; // HEDÄ°YE TUR
   IadeSayim: Integer = 50; // IADE TUR
-  AcilisTutar: Integer = 0; // AÇILIÞ TUTAR TUR
-  KapanisTutar: Integer = 100; // KAPANIÞ TUTAR TUR
-  // ÝADE VE HEDÝYECEKÝ ID'LER
-  HediyeID: Integer = -1; // HEDÝYE ÇEKÝ ID
+  AcilisTutar: Integer = 0; // AÃ‡ILIÅž TUTAR TUR
+  KapanisTutar: Integer = 100; // KAPANIÅž TUTAR TUR
+  // Ä°ADE VE HEDÄ°YECEKÄ° ID'LER
+  HediyeID: Integer = -1; // HEDÄ°YE Ã‡EKÄ° ID
   IadeID: Integer = -2; // IADE ID
 
 var
@@ -249,11 +249,11 @@ begin
                               'FROM dbo.KASAACKAPAT_DETAY KD' + #13#10 +
                               'WHERE KASAACKAPAT_ID=:ID AND KD.YER=100' + #13#10 +
                               'UNION' + #13#10 +
-							                'SELECT KD.KASAACKAPAT_ID,KD.HESAP_ID,''Hediye Çeki Sayým Tutar'' AS ADI,KD.TUTAR_SISTEM,KD.TUTAR_KAPANIS,KD.KUR' + #13#10 +
+							                'SELECT KD.KASAACKAPAT_ID,KD.HESAP_ID,''Hediye Ã‡eki SayÄ±m Tutar'' AS ADI,KD.TUTAR_SISTEM,KD.TUTAR_KAPANIS,KD.KUR' + #13#10 +
                               'FROM dbo.KASAACKAPAT_DETAY KD' + #13#10 +
                               'WHERE KASAACKAPAT_ID=:ID3 AND KD.YER=40' + #13#10 +
                               'UNION' + #13#10 +
-                              'SELECT KD.KASAACKAPAT_ID,KD.HESAP_ID,''Ýade Sayým Tutar'' AS ADI,KD.TUTAR_SISTEM,KD.TUTAR_KAPANIS,KD.KUR' + #13#10 +
+                              'SELECT KD.KASAACKAPAT_ID,KD.HESAP_ID,''Ä°ade SayÄ±m Tutar'' AS ADI,KD.TUTAR_SISTEM,KD.TUTAR_KAPANIS,KD.KUR' + #13#10 +
                               'FROM dbo.KASAACKAPAT_DETAY KD' + #13#10 +
                               'WHERE KASAACKAPAT_ID=:ID2 AND KD.YER=50' + #13#10 +
                               'UNION' + #13#10 +
@@ -295,8 +295,8 @@ begin
                             'ALTER TABLE ##TEMPKUP ADD HESAPID INTEGER' + #13#10 +
                             'ALTER TABLE ##TEMPKUP ADD YER INTEGER' + #13#10 +
                             'INSERT INTO ##TEMPKUP (ADI,TUTAR_KAPANIS,YER) VALUES (''Nakit Tutar'',0,100)' + #13#10 +
-                            'INSERT INTO ##TEMPKUP (ADI,TUTAR_KAPANIS,YER) VALUES (''Hediye Çeki Sayým Tutar'',0,40)' + #13#10 +
-                            'INSERT INTO ##TEMPKUP (ADI,TUTAR_KAPANIS,YER) VALUES (''Ýade Sayým Tutar'',0,50)' + #13#10 +
+                            'INSERT INTO ##TEMPKUP (ADI,TUTAR_KAPANIS,YER) VALUES (''Hediye Ã‡eki SayÄ±m Tutar'',0,40)' + #13#10 +
+                            'INSERT INTO ##TEMPKUP (ADI,TUTAR_KAPANIS,YER) VALUES (''Ä°ade SayÄ±m Tutar'',0,50)' + #13#10 +
                             'UPDATE ##TEMPKUP SET TUTAR_KAPANIS=0' + #13#10 +
                             'UPDATE ##TEMPKUP SET KUR=''TL''' + #13#10 +
                             'UPDATE ##TEMPKUP SET YER=30 WHERE TUR=26' + #13#10 +
@@ -406,7 +406,7 @@ begin
   cmbSubeler.Enabled:=True;
   cmbDurum.Enabled:=True;
   edtAciklama.Enabled:=True;
-   //SÝSTEME GÝRENLERÝN BÝLGÝSÝ
+   //SÄ°STEME GÄ°RENLERÄ°N BÄ°LGÄ°SÄ°
   cmbAcan.EditValue := Kullanan;
   cmbSubeler.EditValue := SubeId;
   cmbSonGunListe.EditValue := 3;

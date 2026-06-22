@@ -1,4 +1,4 @@
-unit UYatan;
+ï»¿unit UYatan;
 
 interface
 
@@ -210,8 +210,8 @@ procedure TYatanHastaListDlg.trvOdaYatakChange(Sender: TObject;
   Node: TTreeNode);
 begin
 {--------------------------------------------------------------------
-15/02/2004 Necdet Çetinkaya
-        Treeviewda deðiþen bölümün isminin alýnmasý 
+15/02/2004 Necdet Ã‡etinkaya
+        Treeviewda deÄŸiÅŸen bÃ¶lÃ¼mÃ¼n isminin alÄ±nmasÄ± 
 --------------------------------------------------------------------}
 //        bolum:=trvOdaYatak.Selected.Text;
 
@@ -220,8 +220,8 @@ end;
 procedure TYatanHastaListDlg.cbTedaviDropDown(Sender: TObject);
 begin
 {------------------------------------------------------------------
-/* 15/02/2004 Necdet Çetinkaya                                    *\
-/*            Tedavi Combosunu doldurulmasý                       *\
+/* 15/02/2004 Necdet Ã‡etinkaya                                    *\
+/*            Tedavi Combosunu doldurulmasÄ±                       *\
 ------------------------------------------------------------------}
 
    ServisIni.ReadSection('Tedavi', TComboBox(Sender).Items);
@@ -232,8 +232,8 @@ procedure TYatanHastaListDlg.DBGrid1CellClick(Column: TColumn);
 begin
 //   ModalResult := mrOK;
 {------------------------------------------------------------------
-/* 15/02/2004 Necdet Çetinkaya                                    *\
-/*            Tedavi Combosunu doldurulmasý                       *\
+/* 15/02/2004 Necdet Ã‡etinkaya                                    *\
+/*            Tedavi Combosunu doldurulmasÄ±                       *\
 ------------------------------------------------------------------}
 
         ToolButton1.Enabled:=true;
@@ -272,15 +272,15 @@ end;
 procedure TYatanHastaListDlg.Buyataekrandakiaktifhastailedoldur1Click(Sender: TObject);
 begin
    if (not Tablo.TabGelisler.Active)or(Tablo.TabGelisler.RecordCount=0) then
-       raise Exception.Create('Önce hasta ve geliþini seçin. ');
-   if TabYatan.FieldByName('DURUM').AsString <> 'BOÞ' then
-      raise Exception.Create('Yatak boþ deðil. Önce boþaltmalýsýnýz.');
+       raise Exception.Create('Ã–nce hasta ve geliÅŸini seÃ§in. ');
+   if TabYatan.FieldByName('DURUM').AsString <> 'BOÅž' then
+      raise Exception.Create('Yatak boÅŸ deÄŸil. Ã–nce boÅŸaltmalÄ±sÄ±nÄ±z.');
 
    Tablo.Query1.Close;
    Tablo.Query1.SQL.Text := 'select ODA, YATAK from YATAKDURUM where DOSYANO = '''+Tablo.TabGelisler.Fields[0].AsString+'''';
    Tablo.Query1.Open;
    if Tablo.Query1.RecordCount > 0 then
-      raise Exception.Create('Bu hasta daha önce '+Tablo.Query1.FieldByName('ODA').AsString+' '+Tablo.Query1.FieldByName('YATAK').AsString+' nolu oda ve yatakta yatýyor görünüyor!');
+      raise Exception.Create('Bu hasta daha Ã¶nce '+Tablo.Query1.FieldByName('ODA').AsString+' '+Tablo.Query1.FieldByName('YATAK').AsString+' nolu oda ve yatakta yatÄ±yor gÃ¶rÃ¼nÃ¼yor!');
 
    TabYatan.Edit;
    TabYatan.FieldByName('DURUM').AsString := 'DOLU';
@@ -293,10 +293,10 @@ end;
 
 procedure TYatanHastaListDlg.Buyataboalt1Click(Sender: TObject);
 begin
-   if Application.MessageBox(PChar(TabYatan.FieldByName('ADSOYAD').AsString+' adlý hastanýn yataðý boþaltýlacaktýr. Onaylýyor musunuz?'),'GenoTIP - ONAY',MB_YESNO)<>IDYES then
+   if Application.MessageBox(PChar(TabYatan.FieldByName('ADSOYAD').AsString+' adlÄ± hastanÄ±n yataÄŸÄ± boÅŸaltÄ±lacaktÄ±r. OnaylÄ±yor musunuz?'),'GenoTIP - ONAY',MB_YESNO)<>IDYES then
       exit;
    TabYatan.Edit;
-   TabYatan.FieldByName('DURUM').AsString := 'BOÞ';
+   TabYatan.FieldByName('DURUM').AsString := 'BOÅž';
    TabYatan.FieldByName('DOSYANO').AsString := '';
    TabYatan.FieldByName('GELISNO').AsInteger := 0;
    TabYatan.Post;

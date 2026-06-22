@@ -1,4 +1,4 @@
-unit UFatTransferAramaFrame;
+﻿unit UFatTransferAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 10:00:42}
@@ -64,7 +64,7 @@ implementation
 
 procedure TFatTransferAramaFrame.Baslatildi;
 begin
-     LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+     LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TFatTransferAramaFrame.btnSilClick(Sender: TObject);

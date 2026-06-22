@@ -1,4 +1,4 @@
-unit UCekHareketDetay;
+﻿unit UCekHareketDetay;
 
 interface
 

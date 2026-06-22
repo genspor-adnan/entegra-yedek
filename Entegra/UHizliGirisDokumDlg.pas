@@ -1,4 +1,4 @@
-unit UHizliGirisDokumDlg;
+ï»¿unit UHizliGirisDokumDlg;
 
 interface
 
@@ -173,10 +173,10 @@ begin
   if TabDokum.FieldByName('SQL').AsString <> '' then
   begin
     Komut.Assign(TabDokum.FieldByName('SQL'));
-    komut.Text := StringReplace(komut.Text,'%KullanýcýKodu%',Kullanan,[rfReplaceAll]);
-    komut.Text := StringReplace(komut.Text,'%KullanýcýAdý%',KullanAdi,[rfReplaceAll]);
+    komut.Text := StringReplace(komut.Text,'%KullanÄ±cÄ±Kodu%',Kullanan,[rfReplaceAll]);
+    komut.Text := StringReplace(komut.Text,'%KullanÄ±cÄ±AdÄ±%',KullanAdi,[rfReplaceAll]);
 
-    i := 0; //Koþullarý Diziye Al
+    i := 0; //KoÅŸullarÄ± Diziye Al
     TabKosul.First;
     while not TabKosul.eof do
     begin
@@ -266,7 +266,7 @@ procedure THizliGirisDokumDlg.FormCreate(Sender: TObject);
 var
    aktifFrame : TGenelAnaSekmeFrame;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Komut := TStringList.Create;
   DokumleriYerlestir('K');
 
@@ -345,7 +345,7 @@ begin
       if Params.ParamByName('MOD').DataType = ftUnknown then
         Params.ParamByName('MOD').DataType := ftInteger;
     Open;
-    if Eof then   //Eðer tablo boþsa sayfayý direk açsýn
+    if Eof then   //EÄŸer tablo boÅŸsa sayfayÄ± direk aÃ§sÄ±n
       DtsDokumler.DataSet := TabDokum
     else begin
       while not Eof do

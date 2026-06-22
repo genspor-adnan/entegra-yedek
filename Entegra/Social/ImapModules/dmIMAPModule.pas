@@ -1,12 +1,12 @@
-{
+ï»¿{
   M.Y.
-  Önce Clever Internet Suite ile yazýldý
-  "Clever"in SSL kütüphanesine ihtiyaç duymamasý iyi olsa da
-  Kod Açýk kaynak "Indy" kütüphanesinin kullanýlmasý daha mantýklý geldi
+  Ã–nce Clever Internet Suite ile yazÄ±ldÄ±
+  "Clever"in SSL kÃ¼tÃ¼phanesine ihtiyaÃ§ duymamasÄ± iyi olsa da
+  Kod AÃ§Ä±k kaynak "Indy" kÃ¼tÃ¼phanesinin kullanÄ±lmasÄ± daha mantÄ±klÄ± geldi
   https://github.com/IndySockets/Indy
 
-  "IMAP" protokolünün Telnet gibi komut setleri ile çalýþmasý kolaylýklar saðladýðýndan tercih edilmiþtir.
-  bu ünite yalnýzca "IMAP4" protokolü için yazýlmýþtýr. "POP3" protokolü için ayrý bir ünite yazýlmalý
+  "IMAP" protokolÃ¼nÃ¼n Telnet gibi komut setleri ile Ã§alÄ±ÅŸmasÄ± kolaylÄ±klar saÄŸladÄ±ÄŸÄ±ndan tercih edilmiÅŸtir.
+  bu Ã¼nite yalnÄ±zca "IMAP4" protokolÃ¼ iÃ§in yazÄ±lmÄ±ÅŸtÄ±r. "POP3" protokolÃ¼ iÃ§in ayrÄ± bir Ã¼nite yazÄ±lmalÄ±
 
 }
 
@@ -61,15 +61,15 @@ type
     property Port : Word read GetPort write SetPort;
     property TLSSupport : TIdUseTLS read GetTLS write SetTls;
     property LastOutput : string read fLastOutput write fLastOutput;
-    // IMAP bileþeni Connected durumuyla ayný
+    // IMAP bileÅŸeni Connected durumuyla aynÄ±
     property Connected : boolean read GetConnected write SetConnected;
     property SenderCriteria : string read fSenderCriteria write fSenderCriteria;
   public
     { Public declarations }
     procedure Connect;
     procedure Disconnect;
-    // Arama için oluþan ' ' #32 SEARCH ile gelen ayraçlý liste TStrings türevine aktarýlýr
-    // ' ' ayraçlý listeden FETCH için ',' ayraçlý string listeye dönüþtürülür
+    // Arama iÃ§in oluÅŸan ' ' #32 SEARCH ile gelen ayraÃ§lÄ± liste TStrings tÃ¼revine aktarÄ±lÄ±r
+    // ' ' ayraÃ§lÄ± listeden FETCH iÃ§in ',' ayraÃ§lÄ± string listeye dÃ¶nÃ¼ÅŸtÃ¼rÃ¼lÃ¼r
     function SearchListToFetch(_searchList : TStrings) : string; overload;
     function SearchListToFetch(_searchList : String) : string; overload;
     function ExecuteCmd( _cmd : string) : string;
@@ -87,8 +87,8 @@ var
   IMAPLoggerMethod : TLogMethod = nil;
 
 resourcestring
-   resBaglantiKurulmamis          = 'IMAP Baðlantýsý kurulmamýþ. "Connect" metodunu çaðýrýnýz.';
-   resAktifBilesen_Degistirilemez = 'Baðlantý kurulmuþ bileþen deðeri/durumu deðiþtirilemez!';
+   resBaglantiKurulmamis          = 'IMAP BaÄŸlantÄ±sÄ± kurulmamÄ±ÅŸ. "Connect" metodunu Ã§aÄŸÄ±rÄ±nÄ±z.';
+   resAktifBilesen_Degistirilemez = 'BaÄŸlantÄ± kurulmuÅŸ bileÅŸen deÄŸeri/durumu deÄŸiÅŸtirilemez!';
 
 procedure LogIMAP( _statusMessage : string);
 function BytesToString(const ABuffer: TIdBytes): string;
@@ -119,43 +119,43 @@ ALTER TABLE META_Collect
 ALTER TABLE META_Collect
   ALTER COLUMN Contact_ID varchar(64);
 
-TLS desteði
+TLS desteÄŸi
 0    utNoTLSSupport,
 1    utUseImplicitTLS, // ssl iohandler req, allways tls
 2    utUseRequireTLS, // ssl iohandler req, user command only accepted when in tls
 3    utUseExplicitTLS // < user can choose to use tls
 
 }
-    IMAP örnekler
+    IMAP Ã¶rnekler
     ------------------------------------
-    LOGIN "gentegrecrm@granit.com.tr" "þifre"   > Bilgilerle LOGIN olur         > OK, NO, BAD
-    CAPABILITY                                  > IMAP sunucu yeteneklerini gösterir
-    SELECT "INBOX"                              > INBOX klasörünü seçer
-    EXAMINE "INBOX"                             > SELECT gibidir fakat Read-Only açar
-    LIST "" *                                   > Klasörleri listeler.
-    SEARCH FROM "mail@granit.com.tr"            > Gönderen "mail@granit.com.tr" olanlarýn listesini getirir. * SEARCH 215 216 225
-    SEARCH (UNSEEN)                             > Henüz görülmemiþ, okunmamýþ posta listesi
-    SEARCH NEW                                  > Okunmamýþ Yeni postalarýn ID biglisini getirir. * 235 EXISTS
-    SEARCH (FROM "mail@granit.com.tr" UNSEEN)   > "mail@granit.com.tr" tarafýndan gönderilmiþ ve okunmamýþ postalar
+    LOGIN "gentegrecrm@granit.com.tr" "ÅŸifre"   > Bilgilerle LOGIN olur         > OK, NO, BAD
+    CAPABILITY                                  > IMAP sunucu yeteneklerini gÃ¶sterir
+    SELECT "INBOX"                              > INBOX klasÃ¶rÃ¼nÃ¼ seÃ§er
+    EXAMINE "INBOX"                             > SELECT gibidir fakat Read-Only aÃ§ar
+    LIST "" *                                   > KlasÃ¶rleri listeler.
+    SEARCH FROM "mail@granit.com.tr"            > GÃ¶nderen "mail@granit.com.tr" olanlarÄ±n listesini getirir. * SEARCH 215 216 225
+    SEARCH (UNSEEN)                             > HenÃ¼z gÃ¶rÃ¼lmemiÅŸ, okunmamÄ±ÅŸ posta listesi
+    SEARCH NEW                                  > OkunmamÄ±ÅŸ Yeni postalarÄ±n ID biglisini getirir. * 235 EXISTS
+    SEARCH (FROM "mail@granit.com.tr" UNSEEN)   > "mail@granit.com.tr" tarafÄ±ndan gÃ¶nderilmiÅŸ ve okunmamÄ±ÅŸ postalar
     SEARCH (SENTSINCE "03-Jan-2024")            > 3-Ocak-2024 ten itibaren Arama yapar. * SEARCH 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235
     SINCE "01-Jan-2024" BEFORE "06-Jan-2024"    >
 *   SEARCH (FROM "mail@granit.com.tr") UID 236:*
-                                                > "mail.granit.com.tr" den gelen UID deðeri 236 ve sonrasý
+                                                > "mail.granit.com.tr" den gelen UID deÄŸeri 236 ve sonrasÄ±
     SEARCH (FROM "mail@granit.com.tr" SENTSINCE "03-Jan-2024")
-                                                > 3-Ocak-2024 tarihinden itibaren "mail@granit.com.tr" tarafýndan gönderilen postalar
+                                                > 3-Ocak-2024 tarihinden itibaren "mail@granit.com.tr" tarafÄ±ndan gÃ¶nderilen postalar
                                                  * SEARCH 215 216 225 235
                                                  * 236 EXISTS
-                                                > ikinci kez çaðýrýldýðýnda * SEARCH 215 216 225 235 236
+                                                > ikinci kez Ã§aÄŸÄ±rÄ±ldÄ±ÄŸÄ±nda * SEARCH 215 216 225 235 236
 
-    UID SEARCH (FROM "mail@granit.com.tr") 236:*> UID Aramayý sequence(sýra) üzerinden yapar
+    UID SEARCH (FROM "mail@granit.com.tr") 236:*> UID AramayÄ± sequence(sÄ±ra) Ã¼zerinden yapar
     UID SEARCH (FROM "mail@granit.com.tr") UID 249:*
-                                                > UID Aramayý UID(tekil numara) üzerinden yapar
+                                                > UID AramayÄ± UID(tekil numara) Ã¼zerinden yapar
 
     UID SEARCH HEADER Message-ID "<MwBykOwQmHkjTT9b0lTDyuMhFkCCKjhm7TuovcylTKg@www.granit.com.tr>"
                                                 > * SEARCH 215
 
-    fetch 224,225 RFC822                        > Üstteki SEARCH ile alýnan liste FETCH edilir iletiler alýnýr.
-    FETCH 309 (BODY.PEEK[])                     > 309 UID numaralý ePosta "Body" gövdesini alýr
+    fetch 224,225 RFC822                        > Ãœstteki SEARCH ile alÄ±nan liste FETCH edilir iletiler alÄ±nÄ±r.
+    FETCH 309 (BODY.PEEK[])                     > 309 UID numaralÄ± ePosta "Body" gÃ¶vdesini alÄ±r
     FETCH 215 (FLAGS BODY[HEADER.FIELDS (DATE FROM MESSAGE-ID)])
     FETCH 215 (FLAGS BODY[HEADER.FIELDS (DATE FROM MESSAGE-ID)] BODY[TEXT])
                                                 > * 215 FETCH (FLAGS (\Seen) BODY[HEADER.FIELDS (DATE FROM MESSAGE-ID)] {166}
@@ -164,13 +164,13 @@ TLS desteði
                                                   Message-ID: <MwBykOwQmHkjTT9b0lTDyuMhFkCCKjhm7TuovcylTKg@www.granit.com.tr>
 
                                                    BODY[TEXT] {250}
-                                                  Ýsim - Soyad: Ali ince <br/>E-Mail: ali@granit.com.tr <br/>Cep Tel: 05427478855 <br/>Cinsiyet: Erkek <br/>Þehir: istanbul <br/>Ýlçe: kadýköy <br/>Ülke: Türkiye <br/>Adresiniz: deneme <br/> <br/>Mesajýnýz: deneme mesajýdýr. <br/> <br/>
+                                                  Ä°sim - Soyad: Ali ince <br/>E-Mail: ali@granit.com.tr <br/>Cep Tel: 05427478855 <br/>Cinsiyet: Erkek <br/>Åžehir: istanbul <br/>Ä°lÃ§e: kadÄ±kÃ¶y <br/>Ãœlke: TÃ¼rkiye <br/>Adresiniz: deneme <br/> <br/>MesajÄ±nÄ±z: deneme mesajÄ±dÄ±r. <br/> <br/>
 
                                                   )
 
     FETCH 224,225 (BODY[HEADER.FIELDS(Subject)])
-    FETCH 215,216,225 (BODY[TEXT])              > Ýlgili postanýn yalnýzca BODY[TEXT] içeriðini getirir
-    STATUS "INBOX" (UIDNEXT MESSAGES)           > STATUS INBOX (MESSAGES 231 UIDNEXT 233) 233 adet mail var 230 tanesi görülmüþ
+    FETCH 215,216,225 (BODY[TEXT])              > Ä°lgili postanÄ±n yalnÄ±zca BODY[TEXT] iÃ§eriÄŸini getirir
+    STATUS "INBOX" (UIDNEXT MESSAGES)           > STATUS INBOX (MESSAGES 231 UIDNEXT 233) 233 adet mail var 230 tanesi gÃ¶rÃ¼lmÃ¼ÅŸ
     UID FETCH 215,216,225 FLAGS                 > OK [PERMANENTFLAGS ()] Read-only mailbox. OK [UIDNEXT 233] Predicted next UID
 
   ------------------------
@@ -208,11 +208,11 @@ begin
 
      FS := TFormatSettings.Create('en-US');
      // Orijinal 'Fri 05/Jan/2024 22:48:24'
-     NewStr := Lst[1]+'/'+                                               // gün
+     NewStr := Lst[1]+'/'+                                               // gÃ¼n
                (IndexText(Lst[2],FS.ShortMonthNames)+1).ToString+'/'+    // ay
-               Lst[3]+' '+                                               // yýl
+               Lst[3]+' '+                                               // yÄ±l
                Lst[4];                                                   // saat
-     // Dönüþmüþ '05/1/2024 22:48:24'
+     // DÃ¶nÃ¼ÅŸmÃ¼ÅŸ '05/1/2024 22:48:24'
      FS.ShortDateFormat := 'dd/mm/yyyy';
      Result := TryStrToDateTime(NewStr, _TargetDate, FS);
    finally
@@ -229,31 +229,31 @@ begin
    i := _List.Count-1;
    while i > -1 do
     begin
-      if Trim(_List[i]) = _empty then // Yalnýzca boþ stringleri deðil, bazen ')' gibi String de silinmek istenir
+      if Trim(_List[i]) = _empty then // YalnÄ±zca boÅŸ stringleri deÄŸil, bazen ')' gibi String de silinmek istenir
        _List.Delete(i);
       Dec(i);
     end;
 end;
 
 { https://www.w3schools.com/tags/ref_urlencode.ASP
-  Oðuzhan YAÐMUR
+  OÄŸuzhan YAÄžMUR
   O%C4%9Fuzhan%20YA%C4%9EMUR
 }
 function URLDecodeString (_input : string) : string;
 begin
   Result := _input;
-  Result := StringReplace(Result,#$C4#$B0,'Ý',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C4#$B1,'ý',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C5#$9E,'Þ',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C5#$9F,'þ',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C4#$9E,'Ð',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C4#$9F,'ð',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$9C,'Ü',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$Bc,'ü',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$87,'Ç',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$A7,'ç',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$96,'Ö',[rfReplaceAll]);
-  Result := StringReplace(Result,#$C3#$B6,'ö',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C4#$B0,'Ä°',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C4#$B1,'Ä±',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C5#$9E,'Åž',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C5#$9F,'ÅŸ',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C4#$9E,'Äž',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C4#$9F,'ÄŸ',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$9C,'Ãœ',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$Bc,'Ã¼',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$87,'Ã‡',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$A7,'Ã§',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$96,'Ã–',[rfReplaceAll]);
+  Result := StringReplace(Result,#$C3#$B6,'Ã¶',[rfReplaceAll]);
 end;
 
 function BytesToString(const ABuffer: TIdBytes): string;
@@ -284,8 +284,8 @@ begin
     //ExecuteCmd('EXAMINE "'+RootFolder+'"');
     //ExecuteCmd('SELECT "'+RootFolder+'"');
     {
-      ExecuteCMD yani (Send) ile yapýlan talepler, doðru sonucu dönse de, IMAP istemcinin statüsünü "Authenticated"
-      olarak tuttuðu için doðrudan IMAP "SelectMailBox" tercih edilmeli
+      ExecuteCMD yani (Send) ile yapÄ±lan talepler, doÄŸru sonucu dÃ¶nse de, IMAP istemcinin statÃ¼sÃ¼nÃ¼ "Authenticated"
+      olarak tuttuÄŸu iÃ§in doÄŸrudan IMAP "SelectMailBox" tercih edilmeli
     }
     IdIMAP4.SelectMailBox(RootFolder);
 
@@ -320,7 +320,7 @@ function TIMAPModule.ExecuteCmd(_cmd: string) : string;
 begin
   if Not IdIMAP4.Connected then
     raise Exception.Create(resBaglantiKurulmamis);
-  // Sonuç 'OK' veya 'BAD' olabilir.
+  // SonuÃ§ 'OK' veya 'BAD' olabilir.
   LastOutput := '';
   Result := IdIMAP4.SendCmd(_cmd, []);
 end;
@@ -333,7 +333,7 @@ begin
   _source := StringReplace(_source,'<br/>',#13#10,[rfReplaceAll]);
   _source := StringReplace(_source,'<br />',#13#10,[rfReplaceAll]);
 
-  msgIndex := Pos('Mesajýnýz:', _source);
+  msgIndex := Pos('MesajÄ±nÄ±z:', _source);
   if msgIndex>0 then
     begin
       tmpStr := Copy(_source, msgIndex + 10, 4096);
@@ -353,12 +353,12 @@ var
   Il, Ilce : string;
 begin
    {
-     WebForm tasarýmý "Erhan Savaþeri" tarafýndan saðlanan bilgiler üzerinden þekillendi.
-     Farklý müþterilerin de benzer web sayfasý veya en azýndan benzer ePosta içerikleri göndermleri saðlanmalý.
-     Yani ePosa ayýklama esnasýnda "Ýsim - Soyad:" etiketi ve diðer etiketler bire-bir ayný olmalý.
-     Etiketlerin ayný olmamasý durumunda aþaðýdaki kodlara ekleme yapýlmalý
+     WebForm tasarÄ±mÄ± "Erhan SavaÅŸeri" tarafÄ±ndan saÄŸlanan bilgiler Ã¼zerinden ÅŸekillendi.
+     FarklÄ± mÃ¼ÅŸterilerin de benzer web sayfasÄ± veya en azÄ±ndan benzer ePosta iÃ§erikleri gÃ¶ndermleri saÄŸlanmalÄ±.
+     Yani ePosa ayÄ±klama esnasÄ±nda "Ä°sim - Soyad:" etiketi ve diÄŸer etiketler bire-bir aynÄ± olmalÄ±.
+     Etiketlerin aynÄ± olmamasÄ± durumunda aÅŸaÄŸÄ±daki kodlara ekleme yapÄ±lmalÄ±
    }
-   // _mail içeriðini aLead record yapýsýnda aktarýr
+   // _mail iÃ§eriÄŸini aLead record yapÄ±sÄ±nda aktarÄ±r
 
   aLead.created_time := DateTimeToStr(_mail.Date);
   BodyStr := _mail.Body.Text;
@@ -372,7 +372,7 @@ begin
     for i := 0 to BodyList.Count-1 do
      begin
        if aLead.FULL_NAME='' then
-         ParseLine('Ýsim - Soyad:',BodyList[i], aLead.FULL_NAME);
+         ParseLine('Ä°sim - Soyad:',BodyList[i], aLead.FULL_NAME);
 
        if aLead.EMAIL='' then
          ParseLine('E-Mail:',BodyList[i], aLead.EMAIL);
@@ -384,19 +384,19 @@ begin
          ParseLine('Cinsiyet:',BodyList[i], aLead.GENDER);
 
        if Il='' then
-         ParseLine('Þehir:',BodyList[i], Il);
+         ParseLine('Åžehir:',BodyList[i], Il);
 
        if Ilce='' then
-         ParseLine('Ýlçe:',BodyList[i], Ilce);
+         ParseLine('Ä°lÃ§e:',BodyList[i], Ilce);
 
        if aLead.COUNTRY='' then
-         ParseLine('Ülke:',BodyList[i], aLead.COUNTRY);
+         ParseLine('Ãœlke:',BodyList[i], aLead.COUNTRY);
 
        if aLead.STREET_ADDRESS='' then
          ParseLine('Adresiniz:',BodyList[i], aLead.STREET_ADDRESS);
 
        if aLead.NOT1='' then
-         ParseLine('Mesajýnýz:',BodyList[i], aLead.NOT1);
+         ParseLine('MesajÄ±nÄ±z:',BodyList[i], aLead.NOT1);
 
      end;
 
@@ -519,7 +519,7 @@ procedure TIMAPModule.Search(_SearchStr: string; _outputList: TStrings);
 begin
   if not IdIMAP4.Connected then
     raise Exception.Create(resBaglantiKurulmamis);
-  raise Exception.Create('IdIMPA4 üzerinden arama yapýlmýyor!');
+  raise Exception.Create('IdIMPA4 Ã¼zerinden arama yapÄ±lmÄ±yor!');
   {
   srcInfo.FieldName := '';
   IdIMAP4.UIDSearchMailBox( [srcInfo] );
@@ -541,7 +541,7 @@ begin
         Output := LastOutput;
         if Pos('* SEARCH'#13#10,Output)=1 then
          begin
-                { // böyle bir output gelmiþ olabilir yani, Hiç bir sonuç dönmedi anlamý taþýr
+                { // bÃ¶yle bir output gelmiÅŸ olabilir yani, HiÃ§ bir sonuÃ§ dÃ¶nmedi anlamÄ± taÅŸÄ±r
                 * SEARCH
                 C4 OK Search completed (0.001 + 0.000 secs).
                 }

@@ -1,4 +1,4 @@
-unit UGiderPusulasi;
+ï»¿unit UGiderPusulasi;
 
 interface
 
@@ -220,9 +220,9 @@ var
 
 procedure TGiderPusulasiDlg.FaturaTutarGuncelle;
 begin
-      //FATBASLIK tablosu da güncelleniyor
+      //FATBASLIK tablosu da gÃ¼ncelleniyor
       Tablo.Query1.Close;
-      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'Hariç' then
+      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'HariÃ§' then
          Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + FATBASLIK.Fields[0].AsString
        else
          Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + '  ROUND(isnull(SUM(TUTAR-(TUTAR/(1+(KDV/100.0)))),0),2) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + FATBASLIK.Fields[0].AsString;
@@ -230,7 +230,7 @@ begin
       FATBASLIK.Edit;
       FATBASLIK.FieldByName('FATURA_MATRAHI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency;
       FATBASLIK.FieldByName('KDV_TUTARI').Value := Tablo.Query1.FieldByName('KDVTOPLAM').Value;
-      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'Hariç' then
+      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'HariÃ§' then
          FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency + Tablo.Query1.FieldByName('KDVTOPLAM').AsCurrency+FATBASLIK.FieldByName('EKVERGI').AsCurrency
       else
          FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency+FATBASLIK.FieldByName('EKVERGI').AsCurrency;
@@ -280,7 +280,7 @@ begin
         FieldByName('ADET').AsFloat:= tabFisDetay.FieldByName('ADET').AsFloat - tabFisDetay.FieldByName('IADEADET').AsFloat;
         FieldByName('MIKTAR').AsFloat:= tabFisDetay.FieldByName('MIKTAR').AsFloat;
         FieldByName('IADEFATURAID').AsInteger:= TabFisDetay.FieldByName('ID').AsInteger;
-        //iade adet ve birim e göre miktar ve tutar hesaplamasý
+        //iade adet ve birim e gÃ¶re miktar ve tutar hesaplamasÄ±
         FieldByName('TUTAR').AsCurrency := (100 - FieldByName('ISKONTO').AsFloat) * FieldByName('ADET').AsFloat * FieldByName('BIRIMFIYAT').AsFloat / 100;
          if FieldByName('TUR').AsInteger=1 then //stoksa
            FieldByName('MIKTAR').AsFloat := FieldByName('ADET').AsFloat * Tablo.StokCarpan(FieldByName('URUNID').AsInteger, FieldByName('BIRIM').AsInteger);
@@ -301,7 +301,7 @@ begin
     belgeno:= SiradakiBelgeNumarasi(8,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
     FATBASLIK.FieldByName('FATURASERI').AsString := belgeno.serino; //seri
     FATBASLIK.FieldByName('FATURANO').AsString := belgeno.belgeno; //FatNo;
-    FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(8); //KOCAN numarasý
+    FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(8); //KOCAN numarasÄ±
     FATBASLIK.FieldByName('REHBERID').AsInteger:= TabFisDetay.FieldByName('REHBERID').AsInteger;
     FATBASLIK.FieldByName('GIRISDEPO').AsInteger:= tabFisler.FieldByName('CIKISDEPO').AsInteger;
     FATBASLIK.FieldByName('KDVDURUM').AsString:= tabFisler.FieldByName('KDVDURUM').AsString;
@@ -333,7 +333,7 @@ begin
   Tablo.FaturaBaslik(FATBASLIK,-1);
   FATBASLIK.FieldByName('ACIKLAMA').AsString := '';
   FATBASLIK.FieldByName('EKLEYEN').AsString := Kullanan;
-  FATBASLIK.FieldByName('KDVDURUM').AsString := 'Hariç';
+  FATBASLIK.FieldByName('KDVDURUM').AsString := 'HariÃ§';
   FATBASLIK.FieldByName('KUR').AsString := CariDoviz;
   FATBASLIK.FieldByName('DOVIZ_TUTARI').AsCurrency := 0;
 
@@ -345,7 +345,7 @@ end;
 
 procedure TGiderPusulasiDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 end;
 
@@ -405,25 +405,25 @@ begin
   case HizliGirisOdemeTipiDlg.ModalResult of
     mrOk    :Begin  //nakit  31
       Tablo.KasaKaydet(31,Tablo.GENINI.BugunTrhSaat,Tablo.GENINI.BugunTrhSaat,
-      FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasý ödemesi.',
+      FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasÄ± Ã¶demesi.',
       VarsKasa,FATBASLIK.FieldByName('KUR').AsString,'',-1,
       FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency,0.0,0.0,1,FATBASLIK.FieldByName('ID').AsInteger,-1,-1,-1, SubeId,'K',TabNo_KASATAKIP,HizliGirisAnaMenu.KasaTakipIdBilgisi);
     End;
     mrNo    :Begin  //kk  35   poslara - tahsilat giriyoruz!!
-      //önce hangi pos cihazýndan iþlem yapýlacaðýný sormamýz gerekiyor!!!
+      //Ã¶nce hangi pos cihazÄ±ndan iÅŸlem yapÄ±lacaÄŸÄ±nÄ± sormamÄ±z gerekiyor!!!
       Application.CreateForm(THizliGirisKKTahsilatDlg,HizliGirisKKTahsilatDlg);
       HizliGirisKKTahsilatDlg.EditToplamTutar.Visible:=False;
       HizliGirisKKTahsilatDlg.LabelKur.Visible:=False;
       HizliGirisKKTahsilatDlg.ShowModal;
       Tablo.KasaKaydet(25,Tablo.GENINI.BugunTrhSaat,Tablo.GENINI.BugunTrhSaat,
-      FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasý ödemesi.',
+      FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasÄ± Ã¶demesi.',
       HizliGirisKKTahsilatDlg.TabPOSListesi.FieldByName('ID').Value,FATBASLIK.FieldByName('KUR').AsString,'',-1,
       0.0,-FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency,0.0,1,FATBASLIK.FieldByName('ID').AsInteger,
       -1,-1,-1, SubeId,'P',TabNo_KASATAKIP,HizliGirisAnaMenu.KasaTakipIdBilgisi);
       FreeAndNil(HizliGirisKKTahsilatDlg);
     End;
-    mrClose :Begin  //iade çeki 39
-      Tablo.KasaKaydet(39,Tablo.GENINI.BugunTrhSaat,Tablo.GENINI.BugunTrhSaat,FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasý ödemesi.',
+    mrClose :Begin  //iade Ã§eki 39
+      Tablo.KasaKaydet(39,Tablo.GENINI.BugunTrhSaat,Tablo.GENINI.BugunTrhSaat,FATBASLIK.FieldByName('REHBERID').AsInteger,FATBASLIK.FieldByName('FATURANO').AsString+' gider pusulasÄ± Ã¶demesi.',
       VarsKasa,FATBASLIK.FieldByName('KUR').AsString,'',-1,FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency,0,0,1,FATBASLIK.FieldByName('ID').AsInteger,-1,-1,-1, SubeId,'H',
       TabNo_KASATAKIP,HizliGirisAnaMenu.KasaTakipIdBilgisi,SiradakiBelgeNumarasi(39,Tablo.GENINI.BugunTrhSaat).BelgeNo);
     End;
@@ -439,15 +439,15 @@ begin
     Application.MessageBox(PCHAR(FWIadeurunbulunamadi),PCHAR(Uyari),MB_OK+ MB_ICONWARNING);
     Abort;
   end else begin
-{    // önce fatbaslýk tablosunda kayýt oluþturulacak
+{    // Ã¶nce fatbaslÄ±k tablosunda kayÄ±t oluÅŸturulacak
     TabloYenile(FATBASLIK,[-100]);
     iadeeden:='';
     iadeedentcno:='';
     iadeedenadres:='';
     iadeedentel:='';
     while (iadeeden='') do begin
-      ctrls:= TGirdiDenetimleri.Create.Edit('Ýade Eden Müþteri Adý',@iadeeden).Edit('TC Kimlik No:',@iadeedentcno).Edit('Telefon:',@iadeedentel).Edit('Adres:',@iadeedenadres);
-      if TGirisKutusuEx.BilgiAlEx('Müþteri Bilgileri:', ctrls) <> mrOk then
+      ctrls:= TGirdiDenetimleri.Create.Edit('Ä°ade Eden MÃ¼ÅŸteri AdÄ±',@iadeeden).Edit('TC Kimlik No:',@iadeedentcno).Edit('Telefon:',@iadeedentel).Edit('Adres:',@iadeedenadres);
+      if TGirisKutusuEx.BilgiAlEx('MÃ¼ÅŸteri Bilgileri:', ctrls) <> mrOk then
         abort;
     end; }
 
@@ -459,7 +459,7 @@ begin
     Tablo.UyariGoster(Bilgi,HGKasa_Iade_Tamamlandi);
     YaziciYaz.Enabled := True;
     BtnAra.Click;
-    //sonra fatura satýrlarý oluþturulacak
+    //sonra fatura satÄ±rlarÄ± oluÅŸturulacak
   end;
 end;
 
@@ -489,17 +489,17 @@ begin
     iadeedenadres:='';
     iadeedentel:='';
     while (iadeeden='') do begin
-      ctrls:= TGirdiDenetimleri.Create.Edit('Ýade Eden Müþteri Adý*',@iadeeden).Edit('TC Kimlik No:*',@iadeedentcno).Edit('Telefon:*',@iadeedentel).Edit('Adres:',@iadeedenadres);
-      if TGirisKutusuEx.BilgiAlEx('Müþteri Bilgileri:', ctrls) <> mrOk then
+      ctrls:= TGirdiDenetimleri.Create.Edit('Ä°ade Eden MÃ¼ÅŸteri AdÄ±*',@iadeeden).Edit('TC Kimlik No:*',@iadeedentcno).Edit('Telefon:*',@iadeedentel).Edit('Adres:',@iadeedenadres);
+      if TGirisKutusuEx.BilgiAlEx('MÃ¼ÅŸteri Bilgileri:', ctrls) <> mrOk then
         abort;
     end;}
     while not tabIadeFisDetay.IsEmpty do
       tabIadeFisDetay.Delete;
-     // önce fatbaslýk tablosunda kayýt oluþturulacak
+     // Ã¶nce fatbaslÄ±k tablosunda kayÄ±t oluÅŸturulacak
     TabloYenile(FATBASLIK,[-100]);
     TabloYenile(FATURA,[Dil,FATBASLIK.FieldByName('ID').AsInteger]);
     if FatBaslikOlustur=-1 then abort;
-    // önce temp tabloyu yenileyelim manuel secilmiþ ürün varsa listeden temizlensin hataya neden olmayalým
+    // Ã¶nce temp tabloyu yenileyelim manuel secilmiÅŸ Ã¼rÃ¼n varsa listeden temizlensin hataya neden olmayalÄ±m
     TabloYenile(TabFisDetay,[tabFisler.FieldByName('ID').AsInteger]);
     TumuIade;
     FaturaTutarGuncelle;
@@ -522,7 +522,7 @@ var
 begin
   DokumAdi := YaziciYaz.Caption;
   Delete(DokumAdi, pos('&',DokumAdi), 1);
-  //Deðiþkenler atanýr
+  //DeÄŸiÅŸkenler atanÄ±r
   TabloYenile(TOPLAMLAR, [FATBASLIK.FieldByName('ID').AsInteger]);
   TabloYenile(FATURA, [Dil,FATBASLIK.FieldByName('ID').AsInteger]);
   for i := 0 to Tablo.repStokKDV.Properties.Items.Count-1 do begin
@@ -530,7 +530,7 @@ begin
          deger := TOPLAMLAR.FieldByName('DEGER').AsCurrency
       else
          deger := 0;
-      //A AFastReport.Variables.AddVariable('Fatura Deðiþkenleri','KDV'+inttostr(i+1), deger);
+      //A AFastReport.Variables.AddVariable('Fatura DeÄŸiÅŸkenleri','KDV'+inttostr(i+1), deger);
       DokumDegiskenListesi.Add('KDV'+inttostr(i+1)+'$@$'+CurrToStr(Deger));
       //FATBASLIK.FieldByName('KDV'+inttostr(i+1)).AsCurrency := deger;
   end;
@@ -594,7 +594,7 @@ begin
      btnTumunuIadeAl.Enabled:= not(tabFisler.FieldByName('IADEADET').AsFloat>0);
      SecilileriIadeAlTus.Enabled:= not(tabFisler.FieldByName('IADEADET').AsFloat= tabFisler.FieldByName('SATISADET').AsFloat);
 //    TabloYenile(tabIadeFisDetay,[tabFisler.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'TRUNCATE TABLE ##IADETEMP_SPID_',[],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'TRUNCATE TABLE ##IADETEMP_SPID_',[],[]);
      TabloYenile(tabIadeFisDetay,[]);
   end;
 end;
@@ -629,14 +629,14 @@ begin
     FieldByName('ISKONTO2').AsFloat:= TabFisDetay.FieldByName('ISKONTO2').AsFloat;
     FieldByName('BIRIMFIYAT').AsFloat:= TabFisDetay.FieldByName('BIRIMFIYAT').AsFloat;
     FieldByName('BIRIM').AsInteger:= TabFisDetay.FieldByName('BIRIM').AsInteger;
-    {adet birim fiyat hesaplarý iade miktarýna göre yapýlmalý
-    eðer 1 tane ürün varsa aynen iade edilecek ancak birden fazla ise miktar sorulacak
+    {adet birim fiyat hesaplarÄ± iade miktarÄ±na gÃ¶re yapÄ±lmalÄ±
+    eÄŸer 1 tane Ã¼rÃ¼n varsa aynen iade edilecek ancak birden fazla ise miktar sorulacak
     }
     if TabFisDetay.FieldByName('ADET').AsFloat=1 then begin
        FieldByName('ADET').AsFloat:= TabFisDetay.FieldByName('ADET').AsFloat;
        FieldByName('TUTAR').AsFloat:= TabFisDetay.FieldByName('TUTAR').AsFloat;
        FieldByName('MIKTAR').AsFloat:= TabFisDetay.FieldByName('MIKTAR').AsFloat;
-    end else begin // satýlan miktar 1 den fazla ise geri alýnacak ürün miktarý kullanýcýdan istenecek ve ona göre birimfiyat hesaplamasý yapýlacak
+    end else begin // satÄ±lan miktar 1 den fazla ise geri alÄ±nacak Ã¼rÃ¼n miktarÄ± kullanÄ±cÄ±dan istenecek ve ona gÃ¶re birimfiyat hesaplamasÄ± yapÄ±lacak
       Miktar:= TabFisDetay.FieldByName('ADET').AsFloat- TabFisDetay.FieldByName('IADEADET').AsFloat;
       if TGirisKutusuEx.BilgiAlEx( FieldByName('AD').AsString , TGirdiDenetimleri.Create.Edit(BGIade_miktari, @Miktar)) <> mrOk then begin
         Cancel;

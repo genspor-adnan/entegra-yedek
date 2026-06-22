@@ -1,4 +1,4 @@
-unit UHizliGirisBaski;
+﻿unit UHizliGirisBaski;
 
 interface
 
@@ -56,7 +56,7 @@ end;
 
 procedure THizliGirisBaskiDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   BaskiAl := False;
   Say := 0;
   BtnFisDok.Visible := Tablo.GENINI.ReadBoolean(Ops_HizliGiris_FisGiris,True);

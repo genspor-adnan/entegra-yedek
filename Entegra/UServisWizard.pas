@@ -1,4 +1,4 @@
-unit UServisWizard;
+ï»¿unit UServisWizard;
 
 interface
 
@@ -588,7 +588,7 @@ end;
 procedure TServisWizardDlg.DetayEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-      Ekle(TabDetay,TabNo_SERVIS, ServisID, 'Deðiþ');
+      Ekle(TabDetay,TabNo_SERVIS, ServisID, 'DeÄŸiÅŸ');
 end;
 
 procedure TServisWizardDlg.DetayEkrPage(Sender: TObject);
@@ -688,7 +688,7 @@ begin
       TabServis.Cancel
     end else begin
       TabServis.Post;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_SERVIS,ServisID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_SERVIS,ServisID]);
       DetayEkrPage(Self);
     end;
   end;
@@ -733,7 +733,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
 //     if islemOp='D' then
 //        Tablo.LogIslemleri(DatasetinTabNosunuBul(TabServisUygulama),(TabServisUygulama.FieldByName('ID').AsInteger),5,TabServisUygulama);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from SERVISBILGI where ID=&id ',['&id'],[TabGenel.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from SERVISBILGI where ID=&id ',['&id'],[TabGenel.FieldByName('ID').AsInteger]);
      TabloYenile(TabGenel,[ServisID])
   end;
 end;
@@ -761,7 +761,7 @@ begin
 
   Application.CreateForm(TTabloGirisDlg, TabloGirisDlg);
   TabloGirisDlg.EkranYazdirAdi := 'GecmisCozumlerDlg';
-  TabloGirisDlg.Caption := 'Geçmiþ çözümler';
+  TabloGirisDlg.Caption := 'GeÃ§miÅŸ Ã§Ã¶zÃ¼mler';
   TabloGirisDlg.Komut := 'select E.AD,SB.COZUM, SB.ID, SB.EKLEMETARIHI,EKLEYEN=R.FIRMA from SERVISBILGI SB '+
          ' inner join SERVIS S on S.ID=SB.SERVISID inner join EKIPMANLAR E on S.EKIPMANID=E.ID inner join REHBER R on R.ID=SB.EKLEYEN  '+
          ' where SB.ID<>'+TabGenel.FieldbyName('ID').AsString+' and SERVISTUR=210 and SB.SERVISLISTEID='+TabGenel.FieldbyName('SERVISLISTEID').AsString+' ORDER BY 3 DESC ';
@@ -774,7 +774,7 @@ begin
 
   TabloGirisDlg.ShowModal;
   if (TabloGirisDlg.ModalResult=mrOK)and(Trim(TabGenel.FieldByName('COZUM').AsString)='') then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update SERVISBILGI set COZUM=&czm where ID=&id ',['&czm','&id'],
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update SERVISBILGI set COZUM=&czm where ID=&id ',['&czm','&id'],
         [ TabloGirisDlg.Query1.fields[1].AsString , TabGenel.FieldByName('ID').AsInteger]);
      TabloYenile(TabGenel,[ServisID]);
   end;
@@ -894,7 +894,7 @@ begin
     Tarih := TabYorum.FieldByName('EKLEMETARIHI').AsDateTime;
     //if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.DateTimePicker(BGTeslim_Tarihi, @Tarih, dtkDate)) <> mrOk then
     if TGirisKutusuEx.BilgiAlEx('Tarih', TGirdiDenetimleri.Create.DateTimePicker('Tarih:', @Tarih, dtkDate)) = mrOk then begin
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE GOREVYORUM SET EKLEMETARIHI='''+Formatdatetime('yyyy-mm-dd hh:nn', Tarih)+''' WHERE ID='+TabYorum.Fields[0].AsString, [], []);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE GOREVYORUM SET EKLEMETARIHI='''+Formatdatetime('yyyy-mm-dd hh:nn', Tarih)+''' WHERE ID='+TabYorum.Fields[0].AsString, [], []);
          //Tabloyenile(TabYorum,[TabloNo, RehId]);
 
        TabHareketlerAfterScroll( TabHareketler);
@@ -936,7 +936,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Hedef SeÃ§imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -1187,23 +1187,23 @@ begin
     Tablo.Query1.Next;
   end;
   IL:=Liste.Strings[0];
-  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('ýlçe',@ILCE).ComboBox(('ýl'),@IL,liste);
+  ctrls:=TGirdiDenetimleri.Create.Edit('Ad',@AD).Memo('Adres',@ADRES).Edit('Ä±lÃ§e',@ILCE).ComboBox(('Ä±l'),@IL,liste);
   if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls)<> mrOK  then
   Abort;
    //eklenen yeni ileti?im ID sini al?yoruz.
   Tablo.TablodanSorguAc(1,'INSERT INTO REHBERILETISIM (REHBERID,AD,VARSAYILAN ,AKTIF,SUBEID) values('+IntToStr(RehberId)+','''+AD+''',0,1,'+IntToStr(SubeId)+' )  Select SCOPE_IDENTITY() ');
   //Adres i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'''+ADRES+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )  ',[],[]);
 
   //?l?e i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'''+ILCE+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
   //?l i?in
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
   ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'+
   ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'''+IL+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
@@ -1234,7 +1234,7 @@ begin
         ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
         ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
         ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
-      if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
+      if Tablo.ListedenBilgiGetir('Adres SeÃ§iniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
         TabServis.FieldByName(sonbasilanctrl.TextHint).AsString:=st.Strings[0];
         sonbasilanctrl.Text:=st.Strings[1];
         sonbasilanctrl.Hint:=st.Strings[2];
@@ -1442,7 +1442,7 @@ begin
   if BeditProje.Visible then begin
      ProjeFirsatSec := Tablo.GENINI.ReadInteger(Ops_Servis_ProjeFirsatSec, 1);
      if ProjeFirsatSec = 1 then
-        LabelProje.Caption := 'Fýrsat'
+        LabelProje.Caption := 'FÄ±rsat'
   end;
 
   LabelProje.Visible:=BeditProje.Visible;
@@ -1473,7 +1473,7 @@ begin
     'E':begin
           if RehberID<=0 then
              LabelKodClick(Self);
-          ServisID:=veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'exec sp_prg_Servis_Yeni '+IntToStr(RehberID)+','+IntToStr(SubeID)+','+Kullanan+', '''', '''+formatdatetime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+'''  ',[],[],true);
+          ServisID:=veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'exec sp_prg_Servis_Yeni '+IntToStr(RehberID)+','+IntToStr(SubeID)+','+Kullanan+', '''', '''+formatdatetime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+'''  ',[],[],true);
           TabloYenile(TabServis,[ServisID]);
           OncekiSorumlu:=0;
         end;
@@ -1494,7 +1494,7 @@ begin
      RehberId := TabServis.FieldByName('REHBERID').AsInteger;
   FirmaBilgileri;
   if TabServis.FieldByName('REHBERID').AsInteger=0 then
-     LabelKod.Caption := 'Firma Seç..';
+     LabelKod.Caption := 'Firma SeÃ§..';
 //  LabelFirmaSec.Visible :=TabServis.FieldByName('REHBERID').AsInteger=0;
   LogBelge.Clear;
   LogBelge2.Clear;
@@ -1585,8 +1585,8 @@ procedure TServisWizardDlg.GenelTreeListACIKLAMAPropertiesButtonClick(Sender: TO
 var Bilgi:Variant;
 begin
    Bilgi := TabGenel.FieldByName('ACIKLAMA').AsString;
-   if TGirisKutusuEx.BilgiAlEx(TabGenel.FieldByName('AD').AsString , TGirdiDenetimleri.Create.Memo('Açýklama' , @Bilgi)) = mrOk then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update SERVISBILGI set ACIKLAMA=&czm where ID=&id ',['&czm','&id'],
+   if TGirisKutusuEx.BilgiAlEx(TabGenel.FieldByName('AD').AsString , TGirdiDenetimleri.Create.Memo('AÃ§Ä±klama' , @Bilgi)) = mrOk then begin
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update SERVISBILGI set ACIKLAMA=&czm where ID=&id ',['&czm','&id'],
         [StringReplace(VarToStr(Bilgi), '''', '"',[rfReplaceAll]) , TabGenel.FieldByName('ID').AsInteger]);
        TabloYenile(TabGenel,[ServisID])
    end;
@@ -1603,7 +1603,7 @@ var Bilgi:Variant;
 begin
    //Bilgi := TabGenel.FieldByName('COZUM').AsString;
    Bilgi := vartostr( (Sender as TcxButtonEdit).EditingValue );
-   if TGirisKutusuEx.BilgiAlEx(TabGenel.FieldByName('AD').AsString , TGirdiDenetimleri.Create.Memo('çözüm' , @Bilgi)) = mrOk then begin
+   if TGirisKutusuEx.BilgiAlEx(TabGenel.FieldByName('AD').AsString , TGirdiDenetimleri.Create.Memo('Ã§Ã¶zÃ¼m' , @Bilgi)) = mrOk then begin
       TabGenel.Edit;
       TabGenel.FieldByName('COZUM').AsString := VarToStr(Bilgi);
    end;
@@ -1618,7 +1618,7 @@ begin
   if State = dsDragLeave then begin
     TreeHitTest := (Sender as TcxDBTreeList).HitTest;
     if TreeHitTest.HitAtBackground then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SERVISBILGI set USTID = null where ID='+TabGenel.FieldByName('ID').AsString,[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SERVISBILGI set USTID = null where ID='+TabGenel.FieldByName('ID').AsString,[],[]);
       TabloYenile(TabGenel,[ServisID]);
       Accept := False;
     end;
@@ -1933,7 +1933,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Kaynak SeÃ§imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -2048,21 +2048,21 @@ begin
   BodyStr := StringReplace(BodyStr,'@@ILGILIID@@',TabServis.FieldByName('MUS_ILGILI').AsString,[rfReplaceAll]);
 
   if tabServis.FieldByName('ACIL').AsBoolean then
-    DetayStr := DetayStr + '<b> ACýL! </b> '+'<br/>';
+    DetayStr := DetayStr + '<b> ACÄ±L! </b> '+'<br/>';
   if tabServis.FieldByName('ONEMLI').AsBoolean then
-    DetayStr := DetayStr + '<b> önemli! </b> '+'<br/>';
+    DetayStr := DetayStr + '<b> Ã¶nemli! </b> '+'<br/>';
   if tabServis.FieldByName('DISSERVIS').AsBoolean then
-    DetayStr := DetayStr + ' Dýþ Servis  '+'<br/>';
+    DetayStr := DetayStr + ' DÄ±ÅŸ Servis  '+'<br/>';
   if Tip=1 then begin//i? personel
     DetayStr := DetayStr + '<b>  Kimden : </b> '+Tablo.AciklamaGetir('REHBER','FIRMA',TabHareketler.FieldByName('EKLEYEN').AsInteger)+'<br/>';
     DetayStr := DetayStr + '<b>  Kime : </b> '+Tablo.AciklamaGetir('REHBER','FIRMA',TabHareketler.FieldByName('PERSONEL').AsInteger)+'<br/>';
-    DetayStr := DetayStr + '<b>  Müþteri : </b> '+Tablo.AciklamaGetir('REHBER','FIRMA',TabServis.FieldByName('REHBERID').AsInteger)+'<br/>';
+    DetayStr := DetayStr + '<b>  MÃ¼ÅŸteri : </b> '+Tablo.AciklamaGetir('REHBER','FIRMA',TabServis.FieldByName('REHBERID').AsInteger)+'<br/>';
     if StrToIntDef(TabServis.FieldByName('MUS_ILGILI').AsString,0) > 0 then
-      DetayStr := DetayStr + '<b>  ýlgili : </b> '+Tablo.AciklamaGetir('REHBERPERSONEL','ADSOYAD',TabServis.FieldByName('MUS_ILGILI').AsInteger)+'<br/>';
+      DetayStr := DetayStr + '<b>  Ä±lgili : </b> '+Tablo.AciklamaGetir('REHBERPERSONEL','ADSOYAD',TabServis.FieldByName('MUS_ILGILI').AsInteger)+'<br/>';
 
   end;
   DetayStr := DetayStr + '<b>  Konusu : </b> '+tabServis.FieldByName('KONUSU').AsString+'<br/>';
-  DetayStr := DetayStr + '<b>  Durum : </b> '+VarToStr(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select ANAHTAR from GENINI where BOLUM=-3007 and DEGER='+TabHareketler.FieldByName('DURUM').AsString+' and DIL=-1',[],[],True))+'<br/>';
+  DetayStr := DetayStr + '<b>  Durum : </b> '+VarToStr(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select ANAHTAR from GENINI where BOLUM=-3007 and DEGER='+TabHareketler.FieldByName('DURUM').AsString+' and DIL=-1',[],[],True))+'<br/>';
 
   if TabHareketler.FieldByName('ACIKLAMA').AsString <> '' then
     DetayStr := DetayStr + '<b>  Not : </b> '+ TabHareketler.FieldByName('ACIKLAMA').AsString+'<br/>';
@@ -2073,9 +2073,9 @@ begin
     while not TabGenel.Eof do begin
       DetayStr := DetayStr + '<b> '+TabGenel.FieldByName('KOD').AsString+' - '+TabGenel.FieldByName('GRUP').AsString+' - '+TabGenel.FieldByName('AD').AsString+'</b> '+'<br/>';
       if TabGenel.FieldByName('ACIKLAMA').AsString <> '' then
-        DetayStr := DetayStr + '<b> Açýklama : </b><i>'+TabGenel.FieldByName('ACIKLAMA').AsString+'</i>'+'<br/>';
+        DetayStr := DetayStr + '<b> AÃ§Ä±klama : </b><i>'+TabGenel.FieldByName('ACIKLAMA').AsString+'</i>'+'<br/>';
       if TabGenel.FieldByName('COZUM').AsString <> '' then
-        DetayStr := DetayStr + '<b> çözüm    : </b><i>'+TabGenel.FieldByName('COZUM').AsString+'</i>'+'<br/>';
+        DetayStr := DetayStr + '<b> Ã§Ã¶zÃ¼m    : </b><i>'+TabGenel.FieldByName('COZUM').AsString+'</i>'+'<br/>';
       TabGenel.Next;
     end;
   end;
@@ -2198,7 +2198,7 @@ begin
     if not Tablo.Query6.IsEmpty then begin
       TabloYenile(TabHareketler,[ServisID]);
       if TabHareketler.IsEmpty then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into SERVISHAREKET(SERVISID,BASLAMA,DURUM,EKLEYEN,ACILIS,PERSONEL)'+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into SERVISHAREKET(SERVISID,BASLAMA,DURUM,EKLEYEN,ACILIS,PERSONEL)'+
                               ' values('+IntToStr(ServisID)+',getdate(),'+Tablo.Query6.FieldByName('DEGER').AsString+','+kullanan+',1,'+kullanan+')',[],[]);
       end;
     end else
@@ -2292,8 +2292,8 @@ end;
 
 procedure TServisWizardDlg.TabServisBelgeAfterScroll(DataSet: TDataSet);
 begin
-   SipariOlutur1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger = 80)and((TabServisBelge.FieldByName('HEDEF').AsString='Verilen Sipariþ ')or(TabServisBelge.FieldByName('HEDEF').AsString='')));
-   VerSipariineDntr1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger = 80)and((TabServisBelge.FieldByName('HEDEF').AsString='Alýnan Sipariþ')or(TabServisBelge.FieldByName('HEDEF').AsString='')));
+   SipariOlutur1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger = 80)and((TabServisBelge.FieldByName('HEDEF').AsString='Verilen SipariÅŸ ')or(TabServisBelge.FieldByName('HEDEF').AsString='')));
+   VerSipariineDntr1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger = 80)and((TabServisBelge.FieldByName('HEDEF').AsString='AlÄ±nan SipariÅŸ')or(TabServisBelge.FieldByName('HEDEF').AsString='')));
    rsaliyeOlutur2.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger in [9])and(TabServisBelge.FieldByName('HEDEF').AsString=''));
    FaturaOlutur1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger in [9,10])and(TabServisBelge.FieldByName('HEDEF').AsString=''));
    FiOlutur1.Visible := ((not TabServisBelge.IsEmpty) and (TabServisBelge.FieldByName('TUR').AsInteger in [9,10])and(TabServisBelge.FieldByName('HEDEF').AsString=''));
@@ -2436,7 +2436,7 @@ begin
    if TabDetay.State in [dsInsert, dsEdit] then
       TabDetay.post;
    if EkleDetay then
-      Ekle(TabDetay,TabNo_SERVIS,ServisID,'Deðiþ');
+      Ekle(TabDetay,TabNo_SERVIS,ServisID,'DeÄŸiÅŸ');
    IptalSecildi:=False;
    ModalResult := mrOk;
 end;

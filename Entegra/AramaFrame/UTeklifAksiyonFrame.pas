@@ -1,4 +1,4 @@
-unit UTeklifAksiyonFrame;
+﻿unit UTeklifAksiyonFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:51:29 }
@@ -45,7 +45,7 @@ implementation
 
 procedure TTeklifAksiyonFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.v
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.v
 end;
 
 procedure TTeklifAksiyonFrame.EkranYazdir(Sender: TObject);

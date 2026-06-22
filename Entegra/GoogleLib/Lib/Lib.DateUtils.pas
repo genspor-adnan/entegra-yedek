@@ -1,4 +1,4 @@
-unit Lib.DateUtils;
+﻿unit Lib.DateUtils;
 {< System level date/time utilities }
 
 {$INCLUDE 'Lib.inc'}

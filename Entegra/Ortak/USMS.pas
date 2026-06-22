@@ -1,4 +1,4 @@
-unit USMS;
+ï»¿unit USMS;
 
 interface
 
@@ -93,7 +93,7 @@ end;
 
 procedure TSmsDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 if AjandaIni=nil then
   AjandaIni := TIni.Create('AJANDAINI', tablo.IniSQL);
@@ -147,9 +147,9 @@ begin
     begin
       hata := true;
       if pos('unknown', E.Message) > 0 then
-         EpostaSonucMsg:='Hatalý Mail adresi'
+         EpostaSonucMsg:='HatalÄ± Mail adresi'
       else
-        EpostaSonucMsg:='Baþarýsýz';
+        EpostaSonucMsg:='BaÅŸarÄ±sÄ±z';
     end;
   end;
   InMailGonderme.Disconnect;
@@ -165,7 +165,7 @@ begin
     Tablo.Query1.Parameters.ParamByName('PRM4').Value := FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrh);
     Tablo.Query1.Parameters.ParamByName('PRM5').Value := TRaporAraclari.Modul;
     Tablo.Query1.Parameters.ParamByName('PRM6').Value := mMesaj.Text;
-    Tablo.Query1.Parameters.ParamByName('PRM7').Value := 'Gönderildi';
+    Tablo.Query1.Parameters.ParamByName('PRM7').Value := 'GÃ¶nderildi';
     Tablo.Query1.Parameters.ParamByName('PRM8').Value := Kullanan;
     Tablo.Query1.Parameters.ParamByName('PRM9').Value := '';
     Tablo.Query1.Parameters.ParamByName('PRM10').Value := '';
@@ -174,7 +174,7 @@ begin
     Tablo.Query1.Parameters.ParamByName('PRM13').Value := 1;
     Tablo.Query1.Parameters.ParamByName('PRM14').Value := SubeId;
     Tablo.Query1.ExecSQL;
-    EpostaSonucMsg:='Gönderildi';
+    EpostaSonucMsg:='GÃ¶nderildi';
   end;
 
 end;
@@ -185,7 +185,7 @@ var MesajIcerik,  GSMNo: string;
   sonuc: TSmsMesajSonuc;
 
 begin
-  if rgZamanlama.ItemIndex = 1 then //Zamanlý SMS gönderilmesi
+  if rgZamanlama.ItemIndex = 1 then //ZamanlÄ± SMS gÃ¶nderilmesi
   begin
     GondermeZamanli := True;
 //      vbBasTarZaman :=     dtpBaslangic.Date + dtpBaslangicSaat.Time;
@@ -209,7 +209,7 @@ begin
   MesajKumesi[0].Id := -1;
 
   Sonuc := TopluSmsAt(MesajKumesi, vbBasTarZaman, vbBitTarZaman, GondermeZamanli);
-  // Hata yoksa tabloya atalým.
+  // Hata yoksa tabloya atalÄ±m.
   if sonuc.HataKodu = '-1' then
   begin
     Tablo.Query1.Close;
@@ -257,45 +257,45 @@ var GsmNo: string;
   end;
 
 begin
-// **************  HATALI VEYA EKSÝK ALANLAR KONTROL EDÝLÝYOR ****************
+// **************  HATALI VEYA EKSÄ°K ALANLAR KONTROL EDÄ°LÄ°YOR ****************
   HataMesaji := TStringList.Create;
   HataMesaji.Clear;
   if rgtercih.ItemIndex = 0 then
   begin
     if Trim(EditGSMNo.Text) = '' then
-      HataMesaji.Add('GSM numarasý alaný boþ.')
+      HataMesaji.Add('GSM numarasÄ± alanÄ± boÅŸ.')
     else if not GSMNoKontrol then
-      HataMesaji.Add('GSM numarasý hatalý.');
+      HataMesaji.Add('GSM numarasÄ± hatalÄ±.');
 
     if Length(mMesaj.Text) > 160 then
-      HataMesaji.Add('Mesaj uzunluðu kapasiteden fazla.')
+      HataMesaji.Add('Mesaj uzunluÄŸu kapasiteden fazla.')
   end
 
   else if rgtercih.ItemIndex = 1 then
   begin
     if trim(EditEPosta.Text) = '' then
-      HataMesaji.Add('E-Posta adresi boþ.')
+      HataMesaji.Add('E-Posta adresi boÅŸ.')
     else if not EpostaKontrol then
-      HataMesaji.Add('E-Posta adresi geçersiz.');
+      HataMesaji.Add('E-Posta adresi geÃ§ersiz.');
   end
   else
   begin
     if Trim(EditGSMNo.Text) = '' then
-      HataMesaji.Add('GSM numarasý alaný boþ.')
+      HataMesaji.Add('GSM numarasÄ± alanÄ± boÅŸ.')
     else if not GSMNoKontrol then
-      HataMesaji.Add('GSM numarasý hatalý.');
+      HataMesaji.Add('GSM numarasÄ± hatalÄ±.');
 
     if trim(EditEPosta.Text) = '' then
-      HataMesaji.Add('E-Posta adresi boþ.')
+      HataMesaji.Add('E-Posta adresi boÅŸ.')
     else if not EpostaKontrol then
-      HataMesaji.Add('E-Posta adresi geçersiz.');
+      HataMesaji.Add('E-Posta adresi geÃ§ersiz.');
 
     if Length(mMesaj.Text) > 160 then
-      HataMesaji.Add('Mesaj uzunluðu kapasiteden fazla.')
+      HataMesaji.Add('Mesaj uzunluÄŸu kapasiteden fazla.')
   end;
 
   if trim(mMesaj.Text) = '' then
-    HataMesaji.Add('Mesaj içeriði boþ.');
+    HataMesaji.Add('Mesaj iÃ§eriÄŸi boÅŸ.');
 
   if HataMesaji.Text <> '' then
   begin
@@ -304,8 +304,8 @@ begin
     Abort;
   end;
   HataMesaji.Free;
-// **************  HATALI VEYA EKSÝK ALANLAR KONTROL EDÝLÝYOR **************** SONU
-// **************  HATA YOK ÝSE GÖNDERÝM ÝÞLEMÝ BAÞLIYOR ****************
+// **************  HATALI VEYA EKSÄ°K ALANLAR KONTROL EDÄ°LÄ°YOR **************** SONU
+// **************  HATA YOK Ä°SE GÃ–NDERÄ°M Ä°ÅžLEMÄ° BAÅžLIYOR ****************
 
   if rgTercih.ItemIndex = 0 then begin // Tercih SMS
     SMSAt;
@@ -316,7 +316,7 @@ begin
     SMSAt;
     Application.MessageBox(pchar('SMS     : '+ SMSSonucMSG+#13+#10 + 'E-Posta : '+EpostaSonucMsg), PCHAR(Bilgi), MB_OK + MB_ICONINFORMATION);
   end;
-// **************  HATA YOK ÝSE GÖNDERÝM ÝÞLEMÝ BAÞLIYOR **************** SONU
+// **************  HATA YOK Ä°SE GÃ–NDERÄ°M Ä°ÅžLEMÄ° BAÅžLIYOR **************** SONU
 
  Self.Close;
 end;
@@ -348,9 +348,9 @@ begin
       TabSMS.Edit;
       try
         Durum:=SMSGonderiKontrolTek(TabSMS.FieldByName('MSGREFERANSKOD').AsString, TabSMS.FieldByName('SERVIS').AsString);
-        if Durum='Baþarýlý' then Statu:=9
-        else if Durum='Hatalý' then Statu:=-1
-        else if Durum='Zaman Aþýmý' then Statu:=-1
+        if Durum='BaÅŸarÄ±lÄ±' then Statu:=9
+        else if Durum='HatalÄ±' then Statu:=-1
+        else if Durum='Zaman AÅŸÄ±mÄ±' then Statu:=-1
         else if Durum='Reddedildi' then Statu:=-1
         else Statu:=1;
 
@@ -398,7 +398,7 @@ begin
   if mMesaj.Text = '' then exit;
   msgbaslik := False;
   while not msgbaslik do begin
-    if MesajStrAl('Hazýr Mesaj', 'Mesaj Baþlýðý Giriniz :', 'E', nil, Baslik, '', 'E', nil, Baslik) then
+    if MesajStrAl('HazÄ±r Mesaj', 'Mesaj BaÅŸlÄ±ÄŸÄ± Giriniz :', 'E', nil, Baslik, '', 'E', nil, Baslik) then
     begin
       if Baslik = '' then
         raise Exception.Create(MsgBaslikYaz);

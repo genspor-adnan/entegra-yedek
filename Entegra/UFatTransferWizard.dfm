@@ -49,7 +49,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     ShowRouteMap = False
     OnFinishButtonClick = WizardKontrolFinishButtonClick
     OnCancelButtonClick = WizardKontrolCancelButtonClick
-    ExplicitWidth = 845
     DesignSize = (
       1012
       499)
@@ -73,7 +72,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       OnNextButtonClick = FaturaEkrNextButtonClick
-      ExplicitWidth = 845
       object PanelUst: TPanel
         Left = 0
         Top = 70
@@ -190,7 +188,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
-          ExplicitWidth = 839
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -427,9 +424,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 1
-        ExplicitTop = 158
-        ExplicitWidth = 845
-        ExplicitHeight = 299
         object PanelAlt: TPanel
           Left = 1
           Top = 225
@@ -445,8 +439,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
-          ExplicitTop = 241
-          ExplicitWidth = 843
           DesignSize = (
             1010
             57)
@@ -475,7 +467,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             Style.IsFontAssigned = True
           end
           object GridFaturaToplam: TStringGrid
-            Left = 32767
+            Left = 32481
             Top = -31
             Width = 260
             Height = 118
@@ -496,7 +488,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
             ParentFont = False
             ScrollBars = ssNone
             TabOrder = 0
-            ExplicitLeft = 29370
           end
           object DBEdit10: TcxDBTextEdit
             Left = 85
@@ -560,8 +551,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = False
           LookAndFeel.SkinName = 'LondonLiquidSky'
-          ExplicitWidth = 843
-          ExplicitHeight = 213
           object GridFaturaView: TcxGridDBTableView
             PopupMenu = PopupMenuFatura
             Navigator.Buttons.CustomButtons = <>
@@ -676,7 +665,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
-          ExplicitWidth = 837
           object SatirEkle: TToolButton
             Left = 0
             Top = 0

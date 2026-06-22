@@ -1,4 +1,4 @@
-unit UDokumanGorevFrame;
+ï»¿unit UDokumanGorevFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi
  Tarih : 25/01/2010 11:04:25 }
@@ -66,7 +66,7 @@ end;
 
 procedure TDokumanGorevFrame.BtnKaliteClick(Sender: TObject);
 begin
-  with TDokumanListeFrame(FFrameBilgi.IcerikGit('Kalite Yönetim Listeleri').Ornek) do begin
+  with TDokumanListeFrame(FFrameBilgi.IcerikGit('Kalite YÃ¶netim Listeleri').Ornek) do begin
 
   end;
   btnUpAndDown(Sender);
@@ -103,7 +103,7 @@ end;
 procedure TDokumanGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3202,YetkiTur_Gorme);
   BtnKalite.Visible := Tablo.YetkiVarmi(3203,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(3299,YetkiTur_Gorme);

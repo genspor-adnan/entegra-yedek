@@ -1,4 +1,4 @@
-unit ULisans;
+ï»¿unit ULisans;
 
 interface
 
@@ -56,7 +56,7 @@ begin
   LisansNo := GenRegIni.RegReadString('','LisansNo7', 'xxx', RgstryLC);
   LisansTar := GenRegIni.RegReadString('','LisansTarih7', '01' + DATESEPARATOR + '01' + DATESEPARATOR + '2000 00:00:00', RgstryLC);
   if LisansTar = '' then LisansTar := FormatDateTime('dd/mm/yyyy hh:mm:ss', now);
-  if pos(DATESEPARATOR, LisansTar) = 0 then //farklýysa
+  if pos(DATESEPARATOR, LisansTar) = 0 then //farklÄ±ysa
     LisansTar := copy(LisansTar, 1, 2) + DATESEPARATOR + copy(LisansTar, 4, 2) + DATESEPARATOR + copy(LisansTar, 7, 20);
   Application.CreateForm(TLisansDlg, LisansDlg);
 
@@ -120,7 +120,7 @@ procedure TLisansDlg.OKBtnClick(Sender: TObject);
 begin
   if (uppercase(Edit1.Text) <> 'DEMO') and (Edit1.Text <> '070896281100') and (piKeyPass1.ResultKey <> Edit1.Text) then begin
     Kapat := False;
-    Showmessage('Geçersiz Lisans...');
+    Showmessage('GeÃ§ersiz Lisans...');
   end else begin
     if uppercase(Edit1.Text) = 'DEMO' then
       Demo := True

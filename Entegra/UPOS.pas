@@ -1,4 +1,4 @@
-unit UPOS;
+﻿unit UPOS;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 01/07/2010 22:58:08}
@@ -162,7 +162,7 @@ end;
 
 procedure TPOS.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TPOS.BEditKMMPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);

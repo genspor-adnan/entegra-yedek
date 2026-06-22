@@ -1,4 +1,4 @@
-unit UMaliyetAramaFrame;
+﻿unit UMaliyetAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:38:20}
@@ -92,7 +92,7 @@ end;
 procedure TMaliyetAramaFrame.Baslatildi;
 var s:string;
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    cbHesaplamaYontemi.ItemIndex := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_Maliyet_Hesap, 0);
    cbDepo.EditValue := VarsDepo;
    cbDepo.PostEditValue;

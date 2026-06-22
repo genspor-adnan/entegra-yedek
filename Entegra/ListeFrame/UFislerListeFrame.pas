@@ -1,4 +1,4 @@
-unit UFislerListeFrame;
+﻿unit UFislerListeFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 06/01/2010 14:12:11}
@@ -120,7 +120,7 @@ SQLMemo :String;
 
 procedure TFislerListeFrame.Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.GridTurkcelestir;
   FArama.CalendarBit.Date := Tablo.GENINI.BugunTrh;
   FArama.CalendarBas.Date := FArama.CalendarBit.Date;

@@ -1,4 +1,4 @@
-unit Notlar;
+ï»¿unit Notlar;
 
 interface
 
@@ -7,43 +7,43 @@ implementation
 end.
 (*
 *******************************
-STATÜLER
-Gelen Fatura/Fiş : Giriş yapıldı - Ödeme Planlandı - Ödendi
-Giden Fatura/Fiş : Çıkış yapıldı - Tahsilat Planlandı - Tahsil edildi
-Tahsilat Planı : Bekliyor - Tahsil edildi
-Ödeme Planı : Bekliyor - Onaylandı - İmzalandı - Ödendi
-Çek Senet Tahsilatı : Portföyde - Tahsilata verildi - Tahsil edildi
-Çek Senet Ödeme : Bekliyor - Ödendi
-Kredi : Bekliyor - Ödendi
+STATÃœLER
+Gelen Fatura/FiÅŸ : GiriÅŸ yapÄ±ldÄ± - Ã–deme PlanlandÄ± - Ã–dendi
+Giden Fatura/FiÅŸ : Ã‡Ä±kÄ±ÅŸ yapÄ±ldÄ± - Tahsilat PlanlandÄ± - Tahsil edildi
+Tahsilat PlanÄ± : Bekliyor - Tahsil edildi
+Ã–deme PlanÄ± : Bekliyor - OnaylandÄ± - Ä°mzalandÄ± - Ã–dendi
+Ã‡ek Senet TahsilatÄ± : PortfÃ¶yde - Tahsilata verildi - Tahsil edildi
+Ã‡ek Senet Ã–deme : Bekliyor - Ã–dendi
+Kredi : Bekliyor - Ã–dendi
 *******************************
-Takvimde kullanılan temel Tablolar
-PLANLANAN : Planlanan kasa ödemeleri, havale ve EFT ödemeleri veya tahsilatlar
-            Planlanan düzenli ödemeler
-CEKSENET :  Planlanan çek ve senet ödemeleri veya tahsilatları (Vade tarihine göre gösterilir)
-PLANKREDI : Planlanan Kredi ödemeleri
-PLANMAAS : Planlanan maaş ödemeleri
+Takvimde kullanÄ±lan temel Tablolar
+PLANLANAN : Planlanan kasa Ã¶demeleri, havale ve EFT Ã¶demeleri veya tahsilatlar
+            Planlanan dÃ¼zenli Ã¶demeler
+CEKSENET :  Planlanan Ã§ek ve senet Ã¶demeleri veya tahsilatlarÄ± (Vade tarihine gÃ¶re gÃ¶sterilir)
+PLANKREDI : Planlanan Kredi Ã¶demeleri
+PLANMAAS : Planlanan maaÅŸ Ã¶demeleri
 
 
 *******************************  15/3/2010
-Yararlı 2 adet SP yazıldı
- dbo.fn_GT_Tatilmi(Tarih) : Verilen bir tarihin tatil olup olmadığını seçeneklerdeki resmi tatil listeye bakarak geri döndürür. Tüm yıllara bakar. C.tesi ve pazarada bakar
- dbo.fn_GT_UygunTarihBul(Tarih, OnceSonra) : Bir tarih ve (1/0/-1) gibi parametreler verildiğinde eğer tatilse önceki/sonraki ilk günü bulur
+YararlÄ± 2 adet SP yazÄ±ldÄ±
+ dbo.fn_GT_Tatilmi(Tarih) : Verilen bir tarihin tatil olup olmadÄ±ÄŸÄ±nÄ± seÃ§eneklerdeki resmi tatil listeye bakarak geri dÃ¶ndÃ¼rÃ¼r. TÃ¼m yÄ±llara bakar. C.tesi ve pazarada bakar
+ dbo.fn_GT_UygunTarihBul(Tarih, OnceSonra) : Bir tarih ve (1/0/-1) gibi parametreler verildiÄŸinde eÄŸer tatilse Ã¶nceki/sonraki ilk gÃ¼nÃ¼ bulur
 
 *******************************  20/3/2010
-Bir ekranda yazdırma yapabilmek için :
-Nerden yazdırma yapılacak? I-Frameden II-Modal Dialogdan
-I-Frameden yazdırma aşağıdaki şekilde olacak
-(Fare sağ tuş (ayarlar, kopyalama vb işlemler için UGenelAnaSekmeFrame pmDokumAyarlar kullanılır )
-      1. Aşağıdaki gibi  'IAracCubuguDestegi' ekle
+Bir ekranda yazdÄ±rma yapabilmek iÃ§in :
+Nerden yazdÄ±rma yapÄ±lacak? I-Frameden II-Modal Dialogdan
+I-Frameden yazdÄ±rma aÅŸaÄŸÄ±daki ÅŸekilde olacak
+(Fare saÄŸ tuÅŸ (ayarlar, kopyalama vb iÅŸlemler iÃ§in UGenelAnaSekmeFrame pmDokumAyarlar kullanÄ±lÄ±r )
+      1. AÅŸaÄŸÄ±daki gibi  'IAracCubuguDestegi' ekle
       type
         TCariDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IAracCubuguDestegi)
-      2. Üstteki eklendiği için alttaki procedurleri de ekle
+      2. Ãœstteki eklendiÄŸi iÃ§in alttaki procedurleri de ekle
           function GezinmeAktifMi : Boolean;
           procedure GezinmeBagla(ADBNavigator : TDBNavigator);
           function YazdirmaAktifMi : Boolean;
           procedure YazdirmayaHazirla(AFastReport : TfrxReport);
 
-          İlk ikisinin içeriği boş diğerleri:
+          Ä°lk ikisinin iÃ§eriÄŸi boÅŸ diÄŸerleri:
 
       function TCariDlg.YazdirmaAktifMi: Boolean;
       begin
@@ -56,33 +56,33 @@ I-Frameden yazdırma aşağıdaki şekilde olacak
          AFastReport.EnabledDataSets.Add(frxSQLKomut);
       end;
 
-      3. 'Baskı önizleme' menüsüne basıldığında aşağıdaki satır bulunmalı
+      3. 'BaskÄ± Ã¶nizleme' menÃ¼sÃ¼ne basÄ±ldÄ±ÄŸÄ±nda aÅŸaÄŸÄ±daki satÄ±r bulunmalÄ±
          YazdirmayaHazirla(FastRaporDlg.frxReport1);
 
-      4. Sağ tuş yapıldığında menünün çıkması içinse şunlar eklenir
+      4. SaÄŸ tuÅŸ yapÄ±ldÄ±ÄŸÄ±nda menÃ¼nÃ¼n Ã§Ä±kmasÄ± iÃ§inse ÅŸunlar eklenir
       procedure TCariDlg.Gorunur;
       begin
         YaziciYaz.PopupMenu := TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).pmDokumAyarlar;
         PopupMenuYaz.Images := TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).ImageList1;
       end;
 
-II-Modal Dialogdan yazdırma aşağıdaki şekilde olacak
-(Fare sağ tuş (ayarlar, kopyalama vb işlemler için UFastRap 'deki pmDokumAyarlar kullanılır )
-      1. Burda da YazdirmayaHazirla vardır. İki şekilde çağrılır:
-         a. Baskı önizlemede b. Ayarlar içinse YaziciYazMouseDown(...) Event'ine sağrtuşta çalışacak şekilde
-       Bunun örneğini UHavaleEFT ekranında bulabilirsiniz.
+II-Modal Dialogdan yazdÄ±rma aÅŸaÄŸÄ±daki ÅŸekilde olacak
+(Fare saÄŸ tuÅŸ (ayarlar, kopyalama vb iÅŸlemler iÃ§in UFastRap 'deki pmDokumAyarlar kullanÄ±lÄ±r )
+      1. Burda da YazdirmayaHazirla vardÄ±r. Ä°ki ÅŸekilde Ã§aÄŸrÄ±lÄ±r:
+         a. BaskÄ± Ã¶nizlemede b. Ayarlar iÃ§inse YaziciYazMouseDown(...) Event'ine saÄŸrtuÅŸta Ã§alÄ±ÅŸacak ÅŸekilde
+       Bunun Ã¶rneÄŸini UHavaleEFT ekranÄ±nda bulabilirsiniz.
 
 **************************** 24/3/2010
-BANKAHESAPLARI tablosu hem kendi hesaplarımızı hem de müşteri hesaplarını tanımlamak için kullanılmıştır.
-REHBERID=-1 ise firmaya ait hesap aksi halde müşteriye ait hesap olduğunu anlıyoruz.
+BANKAHESAPLARI tablosu hem kendi hesaplarÄ±mÄ±zÄ± hem de mÃ¼ÅŸteri hesaplarÄ±nÄ± tanÄ±mlamak iÃ§in kullanÄ±lmÄ±ÅŸtÄ±r.
+REHBERID=-1 ise firmaya ait hesap aksi halde mÃ¼ÅŸteriye ait hesap olduÄŸunu anlÄ±yoruz.
 
 **************************** 01/04/2010
-Açılış Fişleri için Kasa Ekranında TUR=1 kullanılacak
-Açılış Fişleri günlük kasa ekranından silinemeyecek veya değiştirilemeyecek
-KASALAR, BANKALAR ve REHBER için açılış fişleri olabilir. KASA ve BANKA için birer tane REHBER içinse her para birimi için bir tane daha olabilir
-Açılış fişinde kasa ve banka için alacak olamaz her zaman borçlu olur.
+AÃ§Ä±lÄ±ÅŸ FiÅŸleri iÃ§in Kasa EkranÄ±nda TUR=1 kullanÄ±lacak
+AÃ§Ä±lÄ±ÅŸ FiÅŸleri gÃ¼nlÃ¼k kasa ekranÄ±ndan silinemeyecek veya deÄŸiÅŸtirilemeyecek
+KASALAR, BANKALAR ve REHBER iÃ§in aÃ§Ä±lÄ±ÅŸ fiÅŸleri olabilir. KASA ve BANKA iÃ§in birer tane REHBER iÃ§inse her para birimi iÃ§in bir tane daha olabilir
+AÃ§Ä±lÄ±ÅŸ fiÅŸinde kasa ve banka iÃ§in alacak olamaz her zaman borÃ§lu olur.
 
 
 //2.1 Vers
-- Fatbaslık tablosunda dosyano, gelisno,kartno,carikod   silindi
+- FatbaslÄ±k tablosunda dosyano, gelisno,kartno,carikod   silindi
   *)

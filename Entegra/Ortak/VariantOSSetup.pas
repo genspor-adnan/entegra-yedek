@@ -1,4 +1,4 @@
-unit VariantOSSetup;
+﻿unit VariantOSSetup;
 
 interface
 

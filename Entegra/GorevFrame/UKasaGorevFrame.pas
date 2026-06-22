@@ -1,4 +1,4 @@
-unit UKasaGorevFrame;
+ï»¿unit UKasaGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -48,7 +48,7 @@ type
     procedure TumTusResimleriniDegistir(Menu: TCategoryButtons; ImajIndex: Integer);
   public
     { Public declarations }
-    FAltTur : SmallInt;    //AltTur: MasrafKalemleri:3,Sorumluluk Merkezleri:4,DaðýtýmAnahtarý:5
+    FAltTur : SmallInt;    //AltTur: MasrafKalemleri:3,Sorumluluk Merkezleri:4,DaÄŸÄ±tÄ±mAnahtarÄ±:5
   published
     property FrameBilgi : TAnaFrameBilgi read FFrameBilgi write SetFrameBilgi;
   end;
@@ -313,7 +313,7 @@ end;
 procedure TKasaGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Value.IcerikFrameYoneticisi.OnMesaj.Add(MesajAlindi);
   btnKasaTanimlari.Visible := Tablo.YetkiVarmi(2301,YetkiTur_Gorme);
   //btnMasrafMerkeziTanimlari.Visible := Tablo.YetkiVarmi(2311,YetkiTur_Gorme);
@@ -329,9 +329,9 @@ begin
 
   if not Tablo.YetkiVarmi(2313,YetkiTur_Gorme) then begin
       ListelerMenuGider.Categories[0].items[2].Free; //
-      ListelerMenuGider.Categories[0].items[1].Free; //Daðýtým
+      ListelerMenuGider.Categories[0].items[1].Free; //DaÄŸÄ±tÄ±m
       ListelerMenuGelir.Categories[0].items[2].Free; //
-      ListelerMenuGelir.Categories[0].items[1].Free; //Daðýtým
+      ListelerMenuGelir.Categories[0].items[1].Free; //DaÄŸÄ±tÄ±m
   end;
 
 end;

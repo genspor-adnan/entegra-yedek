@@ -1,4 +1,4 @@
-unit UServisSonlandir;
+ï»¿unit UServisSonlandir;
 
 interface
 
@@ -104,7 +104,7 @@ procedure TServisSonlandirDlg.comboDurumPropertiesEditValueChanged(Sender: TObje
 begin
 (*
   if (ServisID>0)and(comboDurum.EditValue<>null) then begin
-   //insert mode ise en son hareket aranýyor   **kaynak durum**
+   //insert mode ise en son hareket aranÄ±yor   **kaynak durum**
      Tablo.TablodanSorguAc(9,'select top 1 ID,DURUM from SERVISHAREKET where SERVISID='+IntToStr(ServisID)+' order by ID desc');
      if Tablo.Query9.RecordCount > 0 then begin
         Tablo.TablodanSorguAc(0,' select ID,UYARITURU, DISUYARITURU, TARIHIDESOR from DURUMBAGLANTI where BOLUM=-3007 and KAYNAKDURUM='+Tablo.Query9.FieldByName('DURUM').AsString+
@@ -167,7 +167,7 @@ begin
   try
     Tablo.AlanOlustur(TServisSonlandirDlg(Self), -1,nil);  //
   except
-    showmessage('Ek alanlar oluþturuluken bir hata ile karþýlaþýldý.');
+    showmessage('Ek alanlar oluÅŸturuluken bir hata ile karÅŸÄ±laÅŸÄ±ldÄ±.');
   end;
 end;
 
@@ -178,7 +178,7 @@ Var
    Strin : String;
    ctrl  : TWinControl;
 begin
-  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bileþen Ekle
+  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni BileÅŸen Ekle
     clientPos := Self.ScreenToClient(Mouse.CursorPos);
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
@@ -186,7 +186,7 @@ begin
       Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TServisSonlandirDlg(Self),nil);
       Tablo.AlanOlustur(TServisSonlandirDlg(Self), -1,nil);
     end;
-  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bileþen Düzenle
+  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //BileÅŸen DÃ¼zenle
     clientPos := Self.ScreenToClient(Mouse.CursorPos);
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
@@ -216,7 +216,7 @@ end;
 procedure TServisSonlandirDlg.KaydetTusClick(Sender: TObject);
 begin
   if GrpBitis.Visible and ((DateBaslama.Date>DateBitis.Date)or((DateBaslama.Date=DateBitis.Date)and(TimeBaslama.Time>TimeBitis.Time))) then begin
-    Application.MessageBox(PChar('Dikkat! Baþlama bitiþten sonra gerçekleþemez!'), PChar(''), MB_OK);
+    Application.MessageBox(PChar('Dikkat! BaÅŸlama bitiÅŸten sonra gerÃ§ekleÅŸemez!'), PChar(''), MB_OK);
     Abort;
   end else
     ModalResult := mrOk

@@ -1,4 +1,4 @@
-unit UStokDurumDetay;
+﻿unit UStokDurumDetay;
 
 interface
 
@@ -77,7 +77,7 @@ uses
 
 procedure TStokDurumDetayDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.GridTurkcelestir;
 end;
 

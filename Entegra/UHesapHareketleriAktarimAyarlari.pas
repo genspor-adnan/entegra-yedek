@@ -1,4 +1,4 @@
-unit UHesapHareketleriAktarimAyarlari;
+﻿unit UHesapHareketleriAktarimAyarlari;
 
 interface
 

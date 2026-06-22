@@ -1,4 +1,4 @@
-unit UItsAraclari;
+﻿unit UItsAraclari;
 
 interface
 
@@ -674,7 +674,7 @@ begin
 
 end;
 
-{ TDepoSat�sIstek }
+{ TDepoSatısIstek }
 
 procedure TDepoSatisIstek.Baslat;
 begin

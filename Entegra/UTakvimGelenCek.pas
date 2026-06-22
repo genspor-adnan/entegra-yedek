@@ -1,4 +1,4 @@
-unit UTakvimGelenCek;
+ï»¿unit UTakvimGelenCek;
 
 interface
 
@@ -117,10 +117,10 @@ begin
    if  Ciro > 0  then
       LabelCIROLU.Caption:='(Cirolu)';
 
-   //Hitap kýsmý
+   //Hitap kÄ±smÄ±
    Hitap := TabCek.FieldByName('HITAP').AsInteger;
    case  Hitap of
-      0:LabelHitap.Caption := ('HAMÝLÝNE ('+tablo.tabbizim.FieldByName('FIRMA').AsString+')'  );
+      0:LabelHitap.Caption := ('HAMÄ°LÄ°NE ('+tablo.tabbizim.FieldByName('FIRMA').AsString+')'  );
       //1:LabelHitap.Caption := TabCek.FieldByName('FIRMA').AsString;
       Else LabelHitap.Caption := tablo.tabbizim.FieldByName('FIRMA').AsString ;
    end;
@@ -142,10 +142,10 @@ begin
 
    Htp := TabCek.FieldByName('HITAP').AsInteger;
    hitap := 'Hamiline';
-   lst := Dize.StringListOlarak('Hamiline;Þahsa');
+   lst := Dize.StringListOlarak('Hamiline;Åžahsa');
 
    case  Htp of
-      0:LabelHitap.Caption := ('HAMÝLÝNE ('+tablo.tabbizim.FieldByName('FIRMA').AsString+')'  );
+      0:LabelHitap.Caption := ('HAMÄ°LÄ°NE ('+tablo.tabbizim.FieldByName('FIRMA').AsString+')'  );
       //1:LabelHitap.Caption := TabCek.FieldByName('FIRMA').AsString;
       Else LabelHitap.Caption := TabCek.FieldByName('FIRMA').AsString ;
    end;
@@ -156,10 +156,10 @@ begin
                cmb := TComboBox(AForm.FindComponent('Denetim0'));
                edt := TEdit(AForm.FindComponent('Denetim1'));
                edt.Visible := cmb.ItemIndex > 0;
-             end).Edit('Yeni Adý',@eskiad)) = mrOk then
+             end).Edit('Yeni AdÄ±',@eskiad)) = mrOk then
                    begin
                      if cmb.SelText='Hamiline' then begin
-                            { DökümDlg açýk }
+                            { DÃ¶kÃ¼mDlg aÃ§Ä±k }
                        TabCek.Edit;
                        TabCek.FieldByName('HITAP').AsInteger := 0;
                        TabCek.Post;
@@ -185,14 +185,14 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      //date bilgi giriþi
-      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
+      //edit bilgi giriÅŸi
+      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      //date bilgi giriÅŸi
+      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
    end;
    if TGirisKutusuEx.BilgiAlEx('Yeni bilgiyi girin',ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin
-        MessageDlg(('Yeni '+alanAdi+' Deðeri Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Yeni '+alanAdi+' DeÄŸeri BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit; End
       else begin
         TabCEK.Edit;

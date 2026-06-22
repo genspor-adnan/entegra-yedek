@@ -1,4 +1,4 @@
-unit UFastRap;
+ï»¿unit UFastRap;
 
 interface
 
@@ -198,7 +198,7 @@ var
     procedure YeniRapor;
     var YeniDokId : Integer;
     begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         ' insert into DOKUMLER(RAPORADI,MODUL,GRUBU,SAYAC,EKLEYEN ) '+
         ' Values (&RaporAdi1, ''-'', &EkranAdi1,0,&Ekleyen)', ['&RaporAdi1','&EkranAdi1','&Ekleyen'],[RaporAdi1,EkranAdi1,Kullanan]);
         Tablo.Query1.Close;
@@ -206,7 +206,7 @@ var
         Tablo.Query1.Open;
         YeniDokId := Tablo.Query1.Fields[0].AsInteger;
 
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         ' insert into AYARLARYENI (DOKUMID,EKLEYEN ) '+
         ' Values (&YeniDokId, &Ekleyen)',['&YeniDokId','&Ekleyen'],[YeniDokId, Kullanan]);
     end;
@@ -361,7 +361,7 @@ begin
    end;
    RaporKaydet(frxReport1);
    TabYeniAyar.Post;
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DOKUMLER set VERSIYON='''+VersiyonGetir(frxReport1.ReportOptions.VersionRelease)+'''  where ID=&id ',['&id'],[frxReport1.Tag]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DOKUMLER set VERSIYON='''+VersiyonGetir(frxReport1.ReportOptions.VersionRelease)+'''  where ID=&id ',['&id'],[frxReport1.Tag]);
 end;
 
 
@@ -468,9 +468,9 @@ var DokumId : Integer;
           Tablo.TablodanSorguAc(1,'select ID from DOKUMLER where RAPORADI = '''+Ad+''' and isnull(GRUBU,'''')='''+Grubu+'''');
           if Tablo.Query1.recordcount > 0 then begin
              if Application.MessageBox('Bu d?k?m zaten mevcut. ?zerine yaz?ls?n m??', 'Onay', MB_YESNO) = IDYES then begin
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[Tablo.Query1.Fields[0].AsInteger]);
                 Result := True
              end
              else

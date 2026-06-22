@@ -1,8 +1,8 @@
-unit UOlaylar;
+ï»¿unit UOlaylar;
 
-   //TUR : 1-Bilgi, 2-Uyarý, 3-Hata
+   //TUR : 1-Bilgi, 2-UyarÄ±, 3-Hata
    // KAYNAK : 1 : Sistem
-   // KATEGORI : 1 Cari, 2 Kasa, 3 Banka, 4 Fatura, 5 ÇekSenet, 6 Stok, 7 Teklif
+   // KATEGORI : 1 Cari, 2 Kasa, 3 Banka, 4 Fatura, 5 Ã‡ekSenet, 6 Stok, 7 Teklif
 
 
 interface
@@ -101,7 +101,7 @@ end;
 
 procedure TOlaylarDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    cxCheckBox1PropertiesChange(Self);
 
    Tablo.GridTurkcelestir;

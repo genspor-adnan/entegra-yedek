@@ -1,4 +1,4 @@
-unit UHesapKoduPicker;
+ï»¿unit UHesapKoduPicker;
 
 interface
 
@@ -46,7 +46,11 @@ type
      KodGurubu, Varsayilan: integer;
      RefTablo,RefKod,RefAd, SiradakiKod,  Tablosu, Alani : string;
      function InitIslemler : integer;
-     function SiradakiKoduGetir(Kod:string) : String;
+     // Form-bagimsiz: tum girdi parametrelerle, sonuc dondurulur. ALog opsiyonel.
+     // Form'un SiradakiKod alani bu fonksiyon icinde ARTIK degistirilmez;
+     // cagri yerinde set edilir.
+     class function SiradakiKoduGetir(const AKod, ARefTablo, ARefKod, ARefAd,
+       ATablosu, AAlani: string; ALog: TStrings = nil) : String; static;
     { Public declarations }
   end;
 
@@ -79,9 +83,12 @@ begin
        MemoKodlar.Lines.Add(Tablo.Query1.FieldByName(''+RefKod+'').AsString+' - '+Tablo.Query1.FieldS[1].AsString);
     end;
   End;
-  if EkleTus.Enabled then
-     LabelYeniKod.Caption := SiradakiKoduGetir(Kod)
-  else
+  if EkleTus.Enabled then begin
+     LabelYeniKod.Caption :=
+       THesapKoduPicker.SiradakiKoduGetir(Kod, RefTablo, RefKod, RefAd,
+                                          Tablosu, Alani, MemoKodlar.Lines);
+     SiradakiKod := LabelYeniKod.Caption;
+  end else
      LabelYeniKod.Caption := '';
 end;
 
@@ -108,34 +115,44 @@ end;
 
 procedure THesapKoduPicker.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Varsayilan:=0;
 end;
 
-function THesapKoduPicker.SiradakiKoduGetir(Kod:string) : String;
+class function THesapKoduPicker.SiradakiKoduGetir(const AKod, ARefTablo,
+  ARefKod, ARefAd, ATablosu, AAlani: string; ALog: TStrings) : String;
+// Form state'ine dokunmaz; tum girdiler parametre, sonuc Result.
+// ALog nil olabilir (UI gerekmiyorsa log atilmaz).
 Var  Digit:Integer;
      SonKisim:string;
+
+  procedure _Log(const ASatir: string);
+  begin
+    if ALog <> nil then ALog.Add(ASatir);
+  end;
+
 begin
+   Result := '';
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text := 'Select '+RefKod+','+RefAd+',isnull(DIGITSAY,2) as DIGITSAY from '+RefTablo+' where '+RefKod+'= :Pkod';
-   Tablo.Query1.Params[0].value := Kod;
+   Tablo.Query1.SQL.Text := 'Select '+ARefKod+','+ARefAd+',isnull(DIGITSAY,2) as DIGITSAY from '+ARefTablo+' where '+ARefKod+'= :Pkod';
+   Tablo.Query1.Params[0].value := AKod;
    Tablo.Query1.Open;
-   MemoKodlar.Lines.Add(Kod+' - '+Tablo.Query1.Fields[1].AsString);
+   _Log(AKod+' - '+Tablo.Query1.Fields[1].AsString);
    Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
    Tablo.Query1.Close;
    Tablo.Query1.SQL.Text := 'Select top 1 '
-     +'SONKISIM=CASE WHEN ISNULL(CHARINDEX(''.'','+Alani+'),0)<1 THEN '+Alani+' ELSE  REVERSE( SUBSTRING(REVERSE('+Alani+'),1,CHARINDEX(''.'',REVERSE('+Alani+'),1)-1)) END,'
-     +'ROOTKOD=REVERSE( SUBSTRING(REVERSE('+Alani+'),CHARINDEX(''.'',REVERSE('+Alani+'),1)+1,LEN('+Alani+')-(CHARINDEX(''.'',REVERSE('+Alani+'),1)-1))),'
-     +Alani+' from '+Tablosu+' where '+Alani+' like '''+Kod+'%'' and '
-     +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+Alani+'),0)<1 THEN '+Alani+' ELSE  REVERSE( SUBSTRING(REVERSE('+Alani+'),1,CHARINDEX(''.'',REVERSE('+Alani+'),1)-1)) END) >= '+inttostr(Digit)
-     +' order by LEN('+Alani+') desc , 1 desc';
+     +'SONKISIM=CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END,'
+     +'ROOTKOD=REVERSE( SUBSTRING(REVERSE('+AAlani+'),CHARINDEX(''.'',REVERSE('+AAlani+'),1)+1,LEN('+AAlani+')-(CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1))),'
+     +AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
+     +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END) >= '+inttostr(Digit)
+     +' order by LEN('+AAlani+') desc , 1 desc';
    Tablo.Query1.Open;
-   //yeni kayýt için düzeltme
+   //yeni kayÄ±t iÃ§in dÃ¼zeltme
    if Tablo.Query1.RecordCount=0 then begin
      SonKisim := '1';
    end else begin
      if Length(Tablo.Query1.FieldByName('SONKISIM').AsString) >= Digit then begin
-     //eski kayýtlar için
+     //eski kayÄ±tlar iÃ§in
        SonKisim := IntToStr(Tablo.Query1.FieldByName('SONKISIM').AsInteger+1);
      end Else begin
        SonKisim := '1';
@@ -143,21 +160,20 @@ begin
    end;
    case Digit of
      -1: begin
-       Result := Kod;
-       MemoKodlar.Lines.Add(Kod+' - '+'Sýradaki Kod');
+       Result := AKod;
+       _Log(AKod+' - '+'SÄ±radaki Kod');
      end;
      0: Begin
-       Result := Kod+'.'+Sonkisim;
-       MemoKodlar.Lines.Add(Result+' - '+'Sýradaki Kod');
+       Result := AKod+'.'+Sonkisim;
+       _Log(Result+' - '+'SÄ±radaki Kod');
      End;
      1..9: begin
        while Digit>Length(SonKisim) do
        SonKisim := '0'+Sonkisim;
-       Result := Kod+'.'+Sonkisim;
-       MemoKodlar.Lines.Add(Result+' - '+'Sýradaki Kod');
+       Result := AKod+'.'+Sonkisim;
+       _Log(Result+' - '+'SÄ±radaki Kod');
      end;
    end;
-   SiradakiKod:=Result;
 end;
 
 function THesapKoduPicker.InitIslemler : integer;
@@ -194,7 +210,7 @@ begin
 end;
 
 Function THesapKoduPicker.HesapkoduAgaciIslemleri(Kod:String;Degisken:Integer):String;
-//320.01.006 gibi bir koddan sonra 320.01.007 yi getirir, giriþe 320.01 yada 320.01. yazýlmalýdýr.
+//320.01.006 gibi bir koddan sonra 320.01.007 yi getirir, giriÅŸe 320.01 yada 320.01. yazÄ±lmalÄ±dÄ±r.
 Var
   I,J:Integer;
   TempKod:string;
@@ -214,7 +230,7 @@ begin
   case Degisken of
     1: Result := Result;//Tam Ad
     2: Result := Copy(Kod,0,(J-1));//Root Kod
-    3: Result := Copy(Kod,(J+1),(Length(Kod)-J));//Sayaçtaki en son numara(sadece alt baþlýklar için!!)
+    3: Result := Copy(Kod,(J+1),(Length(Kod)-J));//SayaÃ§taki en son numara(sadece alt baÅŸlÄ±klar iÃ§in!!)
   end;
 end;
 

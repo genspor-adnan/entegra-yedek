@@ -1,4 +1,4 @@
-unit UDualSec;
+ï»¿unit UDualSec;
 
 interface
 
@@ -173,7 +173,7 @@ end;
 
 procedure TDualListDlg.SilTusClick(Sender: TObject);
 begin
-  if MessageDlg(SrcList.Items[SrcList.ItemIndex]+' silinecektir!!! Ýþleme devam edilsin mi?',
+  if MessageDlg(SrcList.Items[SrcList.ItemIndex]+' silinecektir!!! Ä°ÅŸleme devam edilsin mi?',
                       mtConfirmation, [mbYes,mbNo], 0) = mrYES then begin
      SrcList.Items.Delete(SrcList.ItemIndex) ;
      Ini.DeleteKey(Baslik, SrcList.Items[SrcList.ItemIndex]);

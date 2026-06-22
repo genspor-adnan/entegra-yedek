@@ -1,4 +1,4 @@
-unit UCombo;
+ï»¿unit UCombo;
 
 interface
 
@@ -37,7 +37,7 @@ type
 
   TIni = class(TObject)
   private
-    { Kümeleme }
+    { KÃ¼meleme }
     FBolumList : TStringList;
     function GetValueWithDefault(ABolum, AAnahtar, ADeger: string): string;
     procedure ListeyiDoldur;
@@ -221,7 +221,7 @@ begin
     Application.CreateForm(TListeDlg, ListeDlg);
     try
       Ini.ReadSections(ListeDlg.ListAmac.Items);
-      ListeDlg.ListAmac.Items.Add(' *** YENÝ ***');
+      ListeDlg.ListAmac.Items.Add(' *** YENÄ° ***');
       ListeDlg.ListAmac.ItemIndex := Ind;
       ListeDlg.ShowModal;
       Ind := ListeDlg.ListAmac.ItemIndex;
@@ -229,9 +229,9 @@ begin
         Secilen := ListeDlg.ListAmac.Items[ListeDlg.ListAmac.ItemIndex]
       else
         Secilen := '';
-      if Secilen = ' *** YENÝ ***' then begin
+      if Secilen = ' *** YENÄ° ***' then begin
         Secilen := '';
-        MesajStrAl('', 'Bölüm Adýný Giriniz : ', 'E', nil, Secilen, '', 'E', nil, Secilen);
+        MesajStrAl('', 'BÃ¶lÃ¼m AdÄ±nÄ± Giriniz : ', 'E', nil, Secilen, '', 'E', nil, Secilen);
       end;
       if Secilen <> '' then
         ComboIniDuzenle(Secilen, Ini);
@@ -277,7 +277,7 @@ end;
 
 procedure TListeAyarlaDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TListeAyarlaDlg.FormShow(Sender: TObject);
@@ -330,8 +330,8 @@ var i, yer: integer;
 begin
   Ini.EraseSection(AnahtarKelime);
   for i := 0 to ListBox1.Items.Count - 1 do begin
-    if pos('Varsayýlan:',ListBox1.Items[i])>0 then
-    ListBox1.Items[i]:=StringReplace(ListBox1.Items[i],'Varsayýlan: ','',[]);
+    if pos('VarsayÄ±lan:',ListBox1.Items[i])>0 then
+    ListBox1.Items[i]:=StringReplace(ListBox1.Items[i],'VarsayÄ±lan: ','',[]);
     yer := pos('=', ListBox1.Items[i]);
     if yer = 0 then
       Ini.WriteString(AnahtarKelime, ListBox1.Items[i], '')
@@ -456,8 +456,8 @@ begin
     ListeyeEkle(Bolum,Anahtar,Deger);
   except
     IniSQL.Connection.Rollback;
-    MessageDlg(Format('Seçenek deðeri yazýlamadý !. Yapýlan deðiþiklikler geri alýndý.'+
-      ' [Bölüm][Anahtar][Deðer]-[%s][%s][%s]',[Bolum,Anahtar,Deger]),mtError,[mbOK],0);
+    MessageDlg(Format('SeÃ§enek deÄŸeri yazÄ±lamadÄ± !. YapÄ±lan deÄŸiÅŸiklikler geri alÄ±ndÄ±.'+
+      ' [BÃ¶lÃ¼m][Anahtar][DeÄŸer]-[%s][%s][%s]',[Bolum,Anahtar,Deger]),mtError,[mbOK],0);
   end;
 end;
 
@@ -521,7 +521,7 @@ begin
         if StrToIntDef(IniSQL.Fields[1].AsString,51)>50 then  //serkan
            Liste.Add(IniSQL.Fields[0].AsString + '=' + IniSQL.Fields[1].AsString)
         else
-           Liste.Add('Varsayýlan: '+IniSQL.Fields[0].AsString+ '=' + IniSQL.Fields[1].AsString);//serkan
+           Liste.Add('VarsayÄ±lan: '+IniSQL.Fields[0].AsString+ '=' + IniSQL.Fields[1].AsString);//serkan
       end else
         Liste.Add(IniSQL.Fields[0].AsString);
       IniSQL.Next;
@@ -667,7 +667,7 @@ begin
 end;
 
 procedure TIni.ReadSectionAnahtar(Bolum: string; Liste: TStrings;AOnbellekKullanma: Boolean = True);
-//birden fazla ayný adla anahtar varsa distinct yaparak getirir
+//birden fazla aynÄ± adla anahtar varsa distinct yaparak getirir
 begin
   Liste.Clear;
   if (not AOnbellekKullanma) then begin
@@ -894,18 +894,18 @@ var
   anahtarlar: TStringList;
   degerler  : TStringList;
 begin
-  { Kümeleme Yapýlýyor }
+  { KÃ¼meleme YapÄ±lÄ±yor }
   blmtrk := TurkishUppercaseString(ABolum);
   anatrk := TurkishUppercaseString(AAnahtar);
   idx := FBolumList.IndexOf(blmtrk);
   if (idx = -1) then begin
-    { Bölüm bulunamadý }
+    { BÃ¶lÃ¼m bulunamadÄ± }
     anahtarlar := TStringList.Create;
     FBolumList.AddObject(blmtrk,anahtarlar);
     degerler := TStringList.Create;
     anahtarlar.AddObject(anatrk,degerler);
   end else begin
-    { Bölüm var }
+    { BÃ¶lÃ¼m var }
     anahtarlar := TStringList(FBolumList.Objects[idx]);
     idx := anahtarlar.IndexOf(anatrk);
     if (idx = -1) then begin

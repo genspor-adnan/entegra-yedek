@@ -1,4 +1,4 @@
-unit UMT940Reader;
+﻿unit UMT940Reader;
 
 // MT940 SWIFT formatı parser'ı — Excel/CSV reader'dan tamamen bağımsız.
 // MT940 satır tipleri:

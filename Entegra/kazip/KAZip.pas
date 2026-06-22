@@ -1,4 +1,4 @@
-unit KAZip;
+﻿unit KAZip;
 interface
 //{$DEFINE USE_BZIP2}
 uses

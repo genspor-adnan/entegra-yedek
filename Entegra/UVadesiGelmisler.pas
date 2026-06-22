@@ -1,4 +1,4 @@
-unit UVadesiGelmisler;
+ï»¿unit UVadesiGelmisler;
 
 interface
 
@@ -49,7 +49,7 @@ end;
 
 procedure TVadesiGelmislerDlg.FormCreate(Sender :TObject);
 begin
-// Added by Adnan Odabaþý 27/10/2009 16:39:55
+// Added by Adnan OdabaÅŸÄ± 27/10/2009 16:39:55
 {
   sorgu := 'SELECT ' +
     ' CARIKOD ,CARIAD,ACIKLAMA,GIREN,CIKAN,HESAPKODU,HESAPADI,VADE,KUR' +
@@ -57,7 +57,7 @@ begin
     '	KASA ' +
     '  WHERE	VADE  BETWEEN :VADEBASLA AND :VADEBITIS ';           }
 
-    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TVadesiGelmislerDlg.GrupIslemTuruClick(Sender :TObject);

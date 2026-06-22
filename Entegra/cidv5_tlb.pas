@@ -1,4 +1,4 @@
-unit cidv5_tlb;
+﻿unit cidv5_tlb;
 
 {$TYPEDADDRESS OFF} // Unit must be compiled without type-checked pointers. 
 {$WARN SYMBOL_PLATFORM OFF}

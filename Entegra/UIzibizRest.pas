@@ -1,4 +1,4 @@
-unit UIzibizRest;
+﻿unit UIzibizRest;
 
 // Izibiz REST API istemcisi — Login + SendInvoice.
 // Postman koleksiyonundan elde edilen yapi:
@@ -34,6 +34,30 @@ type
     /// SendInvoice — Bearer token header'i + JSON body POST'lanir.
     /// AYol genelde '/v1/einvoices'.
     class function SendInvoice(const ABaseURL, AAccessToken, AYol, ABody: string;
+      out ASonuc: TIzibizGonderimSonuc): Boolean; static;
+
+    /// Inbox listesi — GET /v1/einvoices/inbox
+    /// Postman ornegi (delivered + tarih araligi ile):
+    ///   ?dateType=DELIVERY&status=Delivered&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+    ///   &page=1&pageSize=100&sort=desc&sortProperty=documentNo
+    /// Headers: Authorization: Bearer, Client-Type: REST
+    ///   AStatus: 'Delivered' (indirilebilir), 'New' (yeni gelen ama henuz teslim alinmamis)
+    ///   AStartDate/AEndDate: 0 ise query'ye eklenmez
+    class function InboxList(const ABaseURL, AAccessToken, AStatus: string;
+      AStartDate, AEndDate: TDate;
+      APage, APageSize: Integer; out AYanitJSON: string;
+      out AHttpKodu: Integer; out AHata: string): Boolean; static;
+
+    /// Inbox XML indir - POST /v2/einvoices/inbox/download/xml
+    /// AUUIDs: indirilecek Izibiz inbox id listesi
+    class function InboxDownloadUBL(const ABaseURL, AAccessToken: string;
+      const AUUIDs: array of string; out AYanitJSON: string;
+      out AHttpKodu: Integer; out AHata: string): Boolean; static;
+
+    /// Gelen ticari e-fatura uygulama yaniti.
+    /// AKabul=True -> kabul, False -> red.
+    class function InboxResponse(const ABaseURL, AAccessToken, AID,
+      AUUID, AAciklama: string; AKabul: Boolean;
       out ASonuc: TIzibizGonderimSonuc): Boolean; static;
   end;
 
@@ -236,4 +260,309 @@ begin
   end;
 end;
 
+class function TIzibizRest.InboxList(const ABaseURL, AAccessToken, AStatus: string;
+  AStartDate, AEndDate: TDate;
+  APage, APageSize: Integer; out AYanitJSON: string;
+  out AHttpKodu: Integer; out AHata: string): Boolean;
+var
+  LClient: THTTPClient;
+  LYanit: IHTTPResponse;
+  LURL: string;
+begin
+  Result := False;
+  AYanitJSON := '';
+  AHttpKodu := 0;
+  AHata := '';
+  LClient := THTTPClient.Create;
+  try
+    try
+      // dateType=DOCUMENT -> belge (issue) tarihine gore filtre.
+      // Gecerli degerler: DOCUMENT, DELIVERY (Izibiz enum).
+      LURL := ABaseURL.TrimRight(['/']) + '/v1/einvoices/inbox' +
+        '?dateType=DOCUMENT';
+      if Trim(AStatus) <> '' then
+        LURL := LURL + '&status=' + AStatus;
+      if AStartDate > 0 then
+        LURL := LURL + '&startDate=' + FormatDateTime('yyyy-mm-dd', AStartDate);
+      if AEndDate > 0 then
+        LURL := LURL + '&endDate=' + FormatDateTime('yyyy-mm-dd', AEndDate);
+      LURL := LURL +
+        '&page=' + IntToStr(APage) +
+        '&pageSize=' + IntToStr(APageSize) +
+        '&sort=desc' +
+        '&sortProperty=documentNo';
+      LClient.Accept := 'application/json';
+      LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+      LClient.CustomHeaders['Client-Type'] := 'REST';
+      LClient.ConnectionTimeout := 30000;
+      LClient.ResponseTimeout := 120000;
+
+      LYanit := LClient.Get(LURL);
+      AHttpKodu := LYanit.StatusCode;
+      AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+      if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then
+        Result := True
+      else
+        AHata := Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+    except
+      on E: Exception do
+        AHata := 'InboxList istisnasi: ' + E.Message;
+    end;
+  finally
+    LClient.Free;
+  end;
+end;
+
+class function TIzibizRest.InboxDownloadUBL(const ABaseURL, AAccessToken: string;
+  const AUUIDs: array of string; out AYanitJSON: string;
+  out AHttpKodu: Integer; out AHata: string): Boolean;
+const
+  LPostPaths: array[0..3] of string = (
+    '/v1/einvoices/inbox/download/ubl',
+    '/v2/einvoices/inbox/download',
+    '/v2/einvoices/inbox/download/ubl',
+    '/v2/einvoices/inbox/download/xml'
+  );
+  LGetPathFormats: array[0..5] of string = (
+    '/v1/einvoices/inbox/%s/xml',
+    '/v1/einvoices/inbox/%s/ubl',
+    '/v2/einvoices/inbox/%s/xml',
+    '/v2/einvoices/inbox/%s/ubl',
+    '/v1/einvoices/%s/xml',
+    '/v2/einvoices/%s/xml'
+  );
+var
+  LClient: THTTPClient;
+  LStream: TMemoryStream;
+  LBytes: TBytes;
+  LYanit: IHTTPResponse;
+  LURL, LBody, LDenemeler: string;
+  i, p: Integer;
+  LArr: TJSONArray;
+  LObj: TJSONObject;
+begin
+  Result := False;
+  AYanitJSON := '';
+  AHttpKodu := 0;
+  AHata := '';
+  if Length(AUUIDs) = 0 then begin
+    AHata := 'InboxDownloadUBL: id listesi bos.';
+    Exit;
+  end;
+
+  LArr := TJSONArray.Create;
+  try
+    for i := 0 to High(AUUIDs) do begin
+      LObj := TJSONObject.Create;
+      LObj.AddPair('id', AUUIDs[i]);
+      LObj.AddPair('contentType', 'XML');
+      LObj.AddPair('exportType', 'SINGLE');
+      LArr.AddElement(LObj);
+    end;
+    LBody := LArr.ToJSON;
+  finally
+    LArr.Free;
+  end;
+
+  LClient := THTTPClient.Create;
+  LStream := TMemoryStream.Create;
+  try
+    try
+      LClient.ContentType := 'application/json; charset=UTF-8';
+      LClient.Accept := 'application/json';
+      LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+      LClient.CustomHeaders['Client-Type'] := 'REST';
+      LClient.ConnectionTimeout := 30000;
+      LClient.ResponseTimeout := 120000;
+
+      for p := Low(LPostPaths) to High(LPostPaths) do begin
+        LBytes := TEncoding.UTF8.GetBytes(LBody);
+        LStream.Size := 0;
+        LStream.WriteBuffer(LBytes, Length(LBytes));
+        LStream.Position := 0;
+
+        LURL := ABaseURL.TrimRight(['/']) + LPostPaths[p];
+        LYanit := LClient.Post(LURL, LStream);
+        AHttpKodu := LYanit.StatusCode;
+        AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+        if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+          Result := True;
+          Exit;
+        end;
+
+        if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+        LDenemeler := LDenemeler + 'POST ' + LPostPaths[p] + ' -> ' +
+          Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+      end;
+
+      for p := Low(LGetPathFormats) to High(LGetPathFormats) do begin
+        for i := 0 to High(AUUIDs) do begin
+          LURL := ABaseURL.TrimRight(['/']) + Format(LGetPathFormats[p], [AUUIDs[i]]);
+          LYanit := LClient.Get(LURL);
+          AHttpKodu := LYanit.StatusCode;
+          AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+          if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+            Result := True;
+            Exit;
+          end;
+
+          if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+          LDenemeler := LDenemeler + 'GET ' + Format(LGetPathFormats[p], [AUUIDs[i]]) + ' -> ' +
+            Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+        end;
+      end;
+      AHata := LDenemeler;
+    except
+      on E: Exception do
+        AHata := 'InboxDownloadUBL istisnasi: ' + E.Message;
+    end;
+  finally
+    LStream.Free;
+    LClient.Free;
+  end;
+end;
+
+class function TIzibizRest.InboxResponse(const ABaseURL, AAccessToken, AID,
+  AUUID, AAciklama: string; AKabul: Boolean;
+  out ASonuc: TIzibizGonderimSonuc): Boolean;
+const
+  LAcceptPaths: array[0..7] of string = (
+    '/v2/einvoices/inbox/accept',
+    '/v1/einvoices/inbox/accept',
+    '/v2/einvoices/inbox/approve',
+    '/v1/einvoices/inbox/approve',
+    '/v2/einvoices/inbox/response',
+    '/v1/einvoices/inbox/response',
+    '/v2/einvoices/inbox/application-response',
+    '/v1/einvoices/inbox/application-response'
+  );
+  LRejectPaths: array[0..7] of string = (
+    '/v2/einvoices/inbox/reject',
+    '/v1/einvoices/inbox/reject',
+    '/v2/einvoices/inbox/decline',
+    '/v1/einvoices/inbox/decline',
+    '/v2/einvoices/inbox/response',
+    '/v1/einvoices/inbox/response',
+    '/v2/einvoices/inbox/application-response',
+    '/v1/einvoices/inbox/application-response'
+  );
+var
+  LClient: THTTPClient;
+  LStream: TMemoryStream;
+  LBytes: TBytes;
+  LYanit: IHTTPResponse;
+  LURL, LBody, LDenemeler, LAction, LStatus: string;
+  p, b: Integer;
+
+  function _JSONEscape(const S: string): string;
+  begin
+    Result := S;
+    Result := StringReplace(Result, '\', '\\', [rfReplaceAll]);
+    Result := StringReplace(Result, '"', '\"', [rfReplaceAll]);
+    Result := StringReplace(Result, #13, '\r', [rfReplaceAll]);
+    Result := StringReplace(Result, #10, '\n', [rfReplaceAll]);
+  end;
+
+  function _BodyOlustur(AIndex: Integer): string;
+  var
+    LIDParca, LUUIDParca, LAciklama: string;
+  begin
+    LIDParca := '"id":"' + _JSONEscape(AID) + '"';
+    LUUIDParca := '';
+    if Trim(AUUID) <> '' then
+      LUUIDParca := ',"uuid":"' + _JSONEscape(AUUID) + '"';
+    LAciklama := _JSONEscape(AAciklama);
+
+    case AIndex of
+      0:
+        Result := '[{' + LIDParca + LUUIDParca + ',"response":"' + LStatus +
+          '","description":"' + LAciklama + '"}]';
+      1:
+        Result := '{' + LIDParca + LUUIDParca + ',"response":"' + LStatus +
+          '","description":"' + LAciklama + '"}';
+      2:
+        Result := '{"documents":[{' + LIDParca + LUUIDParca + '}],"responseType":"' +
+          LAction + '","description":"' + LAciklama + '"}';
+    else
+      Result := '{"items":[{' + LIDParca + LUUIDParca + '}],"status":"' +
+        LStatus + '","note":"' + LAciklama + '"}';
+    end;
+  end;
+
+  function _Path(AIndex: Integer): string;
+  begin
+    if AKabul then
+      Result := LAcceptPaths[AIndex]
+    else
+      Result := LRejectPaths[AIndex];
+  end;
+
+begin
+  Result := False;
+  ASonuc := Default(TIzibizGonderimSonuc);
+  if Trim(AID) = '' then begin
+    ASonuc.Mesaj := 'InboxResponse: Izibiz belge id bilgisi bos.';
+    Exit;
+  end;
+
+  if AKabul then begin
+    LAction := 'ACCEPT';
+    LStatus := 'ACCEPTED';
+  end else begin
+    LAction := 'REJECT';
+    LStatus := 'REJECTED';
+  end;
+
+  LClient := THTTPClient.Create;
+  LStream := TMemoryStream.Create;
+  try
+    try
+      LClient.ContentType := 'application/json; charset=UTF-8';
+      LClient.Accept := 'application/json';
+      LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+      LClient.CustomHeaders['Client-Type'] := 'REST';
+      LClient.ConnectionTimeout := 30000;
+      LClient.ResponseTimeout := 120000;
+
+      for p := Low(LAcceptPaths) to High(LAcceptPaths) do begin
+        for b := 0 to 3 do begin
+          LBody := _BodyOlustur(b);
+          LBytes := TEncoding.UTF8.GetBytes(LBody);
+          LStream.Size := 0;
+          LStream.WriteBuffer(LBytes, Length(LBytes));
+          LStream.Position := 0;
+
+          LURL := ABaseURL.TrimRight(['/']) + _Path(p);
+          LYanit := LClient.Post(LURL, LStream);
+          ASonuc.HttpKodu := LYanit.StatusCode;
+          ASonuc.YanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+          if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+            ASonuc.BasariliMI := True;
+            if AKabul then
+              ASonuc.Mesaj := 'Kabul yaniti gonderildi.'
+            else
+              ASonuc.Mesaj := 'Red yaniti gonderildi.';
+            ASonuc.UUID := AUUID;
+            Result := True;
+            Exit;
+          end;
+
+          if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+          LDenemeler := LDenemeler + 'POST ' + _Path(p) +
+            Format(' body%d -> HTTP %d: %s',
+              [b, LYanit.StatusCode, Copy(ASONuc.YanitJSON, 1, 500)]);
+        end;
+      end;
+      ASonuc.Mesaj := LDenemeler;
+    except
+      on E: Exception do
+        ASonuc.Mesaj := 'InboxResponse istisnasi: ' + E.Message;
+    end;
+  finally
+    LStream.Free;
+    LClient.Free;
+  end;
+end;
+
 end.
+

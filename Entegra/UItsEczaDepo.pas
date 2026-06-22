@@ -1,4 +1,4 @@
-unit UItsEczaDepo;
+ï»¿unit UItsEczaDepo;
 
 interface
 
@@ -267,7 +267,7 @@ type
     procedure GecmisGetir();
     procedure BekletmeBaslat(Ust,Icerik:String;Max : integer);
     procedure BekletmeIlerle(Deger:Integer);
-    procedure BekletmeSonlandýr();
+    procedure BekletmeSonlandÄ±r();
 {    procedure Beklet;  }
   public
     { Public declarations }
@@ -344,7 +344,7 @@ begin
     BekletDlg.cxProgressBar1.Position := BekletDlg.cxProgressBar1.Position + Deger;  }
 end;
 
-procedure TITSEzcaDepoDlg.BekletmeSonlandýr;
+procedure TITSEzcaDepoDlg.BekletmeSonlandÄ±r;
 begin
 {while BekletDlg.cxProgressBar1.Position = BekletDlg.cxProgressBar1.Properties.max do
 begin
@@ -378,17 +378,17 @@ dosya.SaveToFile('deneme.xml');
 {xml1:= tstringlist.Create;
 stream:=tmemorystream.Create;
 try
-HTTPReqResp1.URL:= 'http://212.174.130.240/DepoMalAlim/DepoMalAlimReceiverService';//'http://212.174.130.240:8080/DepoDogrulama/DepoDogrulamaReceiverService';  // bunu wsdl den aldýk
+HTTPReqResp1.URL:= 'http://212.174.130.240/DepoMalAlim/DepoMalAlimReceiverService';//'http://212.174.130.240:8080/DepoDogrulama/DepoDogrulamaReceiverService';  // bunu wsdl den aldÄ±k
 HTTPReqResp1.UseUTF8InHeader:=true;
 HTTPReqResp1.SoapAction:= 'DepoMalAlimReceiverService';
-HTTPReqResp1.UserName:='genotip';  //kullanýcý adý ve þifre
+HTTPReqResp1.UserName:='genotip';  //kullanÄ±cÄ± adÄ± ve ÅŸifre
 HTTPReqResp1.Password:='genotip001';
 
-HTTPReqResp1.Execute(Memo1.Text,Stream);  // burada oluþturduðumuz xml i post ediyoruz. cevap Stream içinde dönecek
+HTTPReqResp1.Execute(Memo1.Text,Stream);  // burada oluÅŸturduÄŸumuz xml i post ediyoruz. cevap Stream iÃ§inde dÃ¶necek
 Strstream:= Tstringstream.Create('');
 try
   Strstream.CopyFrom(stream,0);
-  Memo2.Text:= Strstream.DataString;   // gelen cevabý memo içinde görebilirsin.  bunu dosyaya yazdýrýp sonra bir datasete alacaz
+  Memo2.Text:= Strstream.DataString;   // gelen cevabÄ± memo iÃ§inde gÃ¶rebilirsin.  bunu dosyaya yazdÄ±rÄ±p sonra bir datasete alacaz
   xml := TECXMLParser.Create(nil);
   xml.LoadFromStream(Stream);
   data := xml.Root.SubItems[0].SubItems[0];
@@ -421,7 +421,7 @@ XMLData.Add('<depo:DepoMalAlim>');
 XMLData.Add('<DT>A</DT> ');
 XMLData.Add('<FR>'+TabMalAlim.FieldByName('MALALINANGLN').Value+'</FR>');
 XMLData.Add('<TO>'+'8680052900019'+'</TO>');
-XMLData.Add('<URUNLER>');   // aþaðýda veritabaný tablomuzdan karekod bilgilerini çekiyoruz
+XMLData.Add('<URUNLER>');   // aÅŸaÄŸÄ±da veritabanÄ± tablomuzdan karekod bilgilerini Ã§ekiyoruz
 while not TabMalAlim.Eof do
 begin
 XMLData.Add('<URUN>');
@@ -440,7 +440,7 @@ XMLData.Add('</soapenv:Envelope>');  // XML sonu
 memo1.Lines:=XMLData;
 
 
-// bu xml i datasette görmek için kapatýp açmak yeterli
+// bu xml i datasette gÃ¶rmek iÃ§in kapatÄ±p aÃ§mak yeterli
 //clientdataset1.Active:=false;
 
 //clientdataset1.Active:=true;    }
@@ -468,7 +468,7 @@ Var
 begin
   AColumn1 := (Sender as TcxGridDBTableView).GetColumnByFieldName('HATA_ACIKLAMA');
   AColumn2 := (Sender as TcxGridDBTableView).GetColumnByFieldName('URUN_DURUM');
-  if ARecord.Values[AColumn1.Index] = 'Doðru Bildirim.' then
+  if ARecord.Values[AColumn1.Index] = 'DoÄŸru Bildirim.' then
      AStyle := Tablo.cxStDogruBildirim;
 
   if ARecord.Values[AColumn2.Index] = '' then
@@ -539,7 +539,7 @@ procedure TITSEzcaDepoDlg.FormCreate(Sender: TObject);
 var
 Etiketler,Bilgiler : TArrayOfString;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.;
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.;
   Tablo.RehberEkBilgileriniGetir(-1,2,[81],Etiketler,Bilgiler);
   GLNFirma:= Bilgiler[0];
   PcBildirim.ActivePageIndex := 6;
@@ -582,8 +582,8 @@ begin
       3 : Ters := True;
     end;
   GridDc.BeginUpdate;
-// toplamKayit:= GridDc.RecordCount; // tümünü seçmek için
-  ToplamKayit:= GridDc.FilteredRecordCount; // filtre kullanýlýyorsa filtrelenmiþ olanlar arasýnda tümünü seçmek için
+// toplamKayit:= GridDc.RecordCount; // tÃ¼mÃ¼nÃ¼ seÃ§mek iÃ§in
+  ToplamKayit:= GridDc.FilteredRecordCount; // filtre kullanÄ±lÄ±yorsa filtrelenmiÅŸ olanlar arasÄ±nda tÃ¼mÃ¼nÃ¼ seÃ§mek iÃ§in
   for i := 0 to toplamkayit - 1 do
   Begin
     if Ters then
@@ -645,7 +645,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
     end;
     if BarBildirim.ActiveGroup.SelectedLinkIndex = 1  then //Mal Alim
     begin
-    if BarBildirim.ActiveGroupIndex = 0 then     //Mal Alim Hatasýz Gonderilen Kayýtlar
+    if BarBildirim.ActiveGroupIndex = 0 then     //Mal Alim HatasÄ±z Gonderilen KayÄ±tlar
       begin
       TabMalAlim.Close;
       TabMalAlim.sql.clear;
@@ -656,7 +656,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalAlim.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
       TabMalAlim.Open;
       end
-    else        //Mal Alim Hatali Kayýtlar
+    else        //Mal Alim Hatali KayÄ±tlar
       begin
       TabMalAlim.Close;
       TabMalAlim.sql.clear;
@@ -668,9 +668,9 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalAlim.Open;
       end;
     end;
-    if BarBildirim.ActiveGroup.SelectedLinkIndex = 2  then     //Mal iade Malalim hatasýzlar ve satýþý olmayanlar gelecek.
+    if BarBildirim.ActiveGroup.SelectedLinkIndex = 2  then     //Mal iade Malalim hatasÄ±zlar ve satÄ±ÅŸÄ± olmayanlar gelecek.
     begin
-    if BarBildirim.ActiveGroupIndex = 1 then   //Mal Alým iade için ürünün alýmý yapýlmýþ ve satýlmamaýþ olmasý gerekir.
+    if BarBildirim.ActiveGroupIndex = 1 then   //Mal AlÄ±m iade iÃ§in Ã¼rÃ¼nÃ¼n alÄ±mÄ± yapÄ±lmÄ±ÅŸ ve satÄ±lmamaÄ±ÅŸ olmasÄ± gerekir.
       begin
       TabMalIade.Close;
       TabMalIade.sql.clear;
@@ -684,9 +684,9 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalIade.Open;
       end;
     end;
-    if BarBildirim.ActiveGroup.SelectedLinkIndex = 3  then    //Satýþ için
+    if BarBildirim.ActiveGroup.SelectedLinkIndex = 3  then    //SatÄ±ÅŸ iÃ§in
     begin
-    if BarBildirim.ActiveGroupIndex = 0 then    //Satýþ yapýlmýþlar
+    if BarBildirim.ActiveGroupIndex = 0 then    //SatÄ±ÅŸ yapÄ±lmÄ±ÅŸlar
       begin
       TabSatis.Close;
       TabSatis.sql.clear;
@@ -697,7 +697,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabSatis.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
       TabSatis.Open;
       end
-    else    //Satýþ durum daha önceden satýlmýþ olmayacak ve alým durum doðru olacak
+    else    //SatÄ±ÅŸ durum daha Ã¶nceden satÄ±lmÄ±ÅŸ olmayacak ve alÄ±m durum doÄŸru olacak
       begin
       TabSatis.Close;
       TabSatis.sql.clear;
@@ -759,7 +759,7 @@ var
   Urun      : TUrun;
   Baslik    : string;
 begin
-  BekletmeBaslat('Alým Gönderim Ýþlemi','Lütfen Bekleyiniz...',100);
+  BekletmeBaslat('AlÄ±m GÃ¶nderim Ä°ÅŸlemi','LÃ¼tfen Bekleyiniz...',100);
   BekletmeIlerle(10);
   MalAlim := TDepoAlimIstek.Create;
   TabMalAlim.First;

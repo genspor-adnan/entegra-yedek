@@ -1,4 +1,4 @@
-// (c) Alex Konshin    12 jul 2000      mailto:alexk@mtgroup.ru
+﻿// (c) Alex Konshin    12 jul 2000      mailto:alexk@mtgroup.ru
 
 // Code based on C code from MSDN -> KB: Windows development
 // -> SAMPLE: SmartApp.exe

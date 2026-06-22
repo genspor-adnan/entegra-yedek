@@ -1,4 +1,4 @@
-unit UTakvimAcilisKaydi;
+﻿unit UTakvimAcilisKaydi;
 
 interface
 
@@ -36,7 +36,7 @@ implementation
 
 procedure TfrmTakvimAcilis.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TfrmTakvimAcilis.KaydetTusClick(Sender: TObject);

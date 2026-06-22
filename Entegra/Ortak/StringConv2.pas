@@ -1,4 +1,4 @@
-unit StringConv;
+п»їunit StringConv;
 
 interface
 
@@ -11,10 +11,10 @@ const
 
 	AlphaNum : String =  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	AlphaNum2 : String = '_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	AlphaNum3 : String = '_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёЁ';
+	AlphaNum3 : String = '_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789Г©Г¶ГіГЄГҐГ­ГЈГёГ№Г§ГµГєГґГ»ГўГ ГЇДџГ®Г«Г¤Г¦Д±ГїГ·Г±Г¬ГЁГІГјГЎЕџГ‰Г–Г“ГЉГ…ГЌГѓГГ™Г‡Г•ГљГ”Г›Г‚ГЂГЏДћГЋГ‹Г„Г†Д°ГџГ—Г‘ГЊГ€Г’ГњГЃЕћВёВЁ';
 	CfgAllowedChars : String = '_#@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	Printable: String = ' !%&()-+=*[]{}~;:"?/\<>.,_|№#@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	Printable1251: String = ' !%&()-+=*[]{}~`;:"?/\<>.,_|#@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёЁ';
+	Printable: String = ' !%&()-+=*[]{}~;:"?/\<>.,_|В№#@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	Printable1251: String = ' !%&()-+=*[]{}~`;:"?/\<>.,_|#@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789Г©Г¶ГіГЄГҐГ­ГЈГёГ№Г§ГµГєГґГ»ГўГ ГЇДџГ®Г«Г¤Г¦Д±ГїГ·Г±Г¬ГЁГІГјГЎЕџГ‰Г–Г“ГЉГ…ГЌГѓГГ™Г‡Г•ГљГ”Г›Г‚ГЂГЏДћГЋГ‹Г„Г†Д°ГџГ—Г‘ГЊГ€Г’ГњГЃЕћВёВЁ';
 	Delimitors : String = '=,.<>;:\/?+-*&^%(){}[]|!~ '#9#10#13#0;
 	i2xtable : array [0..15] of char = '0123456789abcdef';
 	HexDigits : String = '0123456789abcdefABCDEF';
@@ -61,10 +61,10 @@ function QStrUnquote( str : String ) : String;
 function DeEsc( Str : String ) : String;
 
 function SkipBlanks(ptr:PChar):PChar;
-function SkipBlanksLen( var ptr : PChar; var len : Integer ) : PChar; // Пропускаем пробелы и символы табуляции
-function RemoveTrailingBlanksLen( var ptr : PChar; var len : Integer ) : PChar; // Удаляем концевые пробелы и табуляции - уменьшаем len на количество концевых прбелов и табуляций
-function FindLexLen( var ptr : PChar; var len : Integer ) : PChar; // Пропускаем управляющие символы и пробелы ( все символы меньше $21 )
-function NextLine( var ptr : PChar; var len : Integer ) : PChar; // Пара ptr/len устанавливается за первый CR и/или LF
+function SkipBlanksLen( var ptr : PChar; var len : Integer ) : PChar; // ГЏДџГ®ГЇГіГ±ГЄГ ГҐГ¬ ГЇДџГ®ГЎГҐГ«Г» ГЁ Г±ГЁГ¬ГўГ®Г«Г» ГІГ ГЎГіГ«ГїГ¶ГЁГЁ
+function RemoveTrailingBlanksLen( var ptr : PChar; var len : Integer ) : PChar; // Г“Г¤Г Г«ГїГҐГ¬ ГЄГ®Г­Г¶ГҐГўГ»ГҐ ГЇДџГ®ГЎГҐГ«Г» ГЁ ГІГ ГЎГіГ«ГїГ¶ГЁГЁ - ГіГ¬ГҐГ­ГјГёГ ГҐГ¬ len Г­Г  ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЄГ®Г­Г¶ГҐГўГ»Гµ ГЇДџГЎГҐГ«Г®Гў ГЁ ГІГ ГЎГіГ«ГїГ¶ГЁГ©
+function FindLexLen( var ptr : PChar; var len : Integer ) : PChar; // ГЏДџГ®ГЇГіГ±ГЄГ ГҐГ¬ ГіГЇДџГ ГўГ«ГїЕџГ№ГЁГҐ Г±ГЁГ¬ГўГ®Г«Г» ГЁ ГЇДџГ®ГЎГҐГ«Г» ( ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» Г¬ГҐГ­ГјГёГҐ $21 )
+function NextLine( var ptr : PChar; var len : Integer ) : PChar; // ГЏГ ДџГ  ptr/len ГіГ±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГІГ±Гї Г§Г  ГЇГҐДџГўГ»Г© CR ГЁ/ГЁГ«ГЁ LF
 function NextTokenLen( var ptr : PChar; var len : Integer ) : PChar;
 function NextToken( var ptr : PChar ) : PChar;
 
@@ -74,25 +74,25 @@ function QSkipChars( ptr:PChar; len:Integer; chars : String )	: Integer;
 function QScanChars( ptr:PChar; len:Integer; chars : String ) : Integer;
 function StripCRLF( Str : String ) : String;
 
-// Извлекаем строку до первого символа, не входящего в AllowedChars, этот символ будет выдан в ATerm.
-// Если все символы из AllowedChars, то ATerm будет #0
-// Если AllowedChars='' то будет использоваться AlphaNum2
-// Пара ptr/len будет указывать на символ-терминатор
+// Г€Г§ГўГ«ГҐГЄГ ГҐГ¬ Г±ГІДџГ®ГЄГі Г¤Г® ГЇГҐДџГўГ®ГЈГ® Г±ГЁГ¬ГўГ®Г«Г , Г­ГҐ ГўГµГ®Г¤ГїГ№ГҐГЈГ® Гў AllowedChars, Д±ГІГ®ГІ Г±ГЁГ¬ГўГ®Г« ГЎГіГ¤ГҐГІ ГўГ»Г¤Г Г­ Гў ATerm.
+// Г…Г±Г«ГЁ ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» ГЁГ§ AllowedChars, ГІГ® ATerm ГЎГіГ¤ГҐГІ #0
+// Г…Г±Г«ГЁ AllowedChars='' ГІГ® ГЎГіГ¤ГҐГІ ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГјГ±Гї AlphaNum2
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  Г±ГЁГ¬ГўГ®Г«-ГІГҐДџГ¬ГЁГ­Г ГІГ®Дџ
 function GetTerm( var ptr : PChar; var len : Integer; var ATerm : Char; AllowedChars : String = '' ) : String;
 
-// Если первый значимый символ - апостроф или кавычка, то будет возвращена расквоченная строка,
-// иначе извлекает строку до терминатора, а пробелы/табуляции с обоих сторон будут удалены.
-// Пара ptr/len будет указывать на символ-терминатор.
-// Если ATerminators='' то будет использоваться DefaultStringTerminators
+// Г…Г±Г«ГЁ ГЇГҐДџГўГ»Г© Г§Г­Г Г·ГЁГ¬Г»Г© Г±ГЁГ¬ГўГ®Г« - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ , ГІГ® ГЎГіГ¤ГҐГІ ГўГ®Г§ГўДџГ Г№ГҐГ­Г  ДџГ Г±ГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ ,
+// ГЁГ­Г Г·ГҐ ГЁГ§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®ГЄГі Г¤Г® ГІГҐДџГ¬ГЁГ­Г ГІГ®ДџГ , Г  ГЇДџГ®ГЎГҐГ«Г»/ГІГ ГЎГіГ«ГїГ¶ГЁГЁ Г± Г®ГЎГ®ГЁГµ Г±ГІГ®ДџГ®Г­ ГЎГіГ¤ГіГІ ГіГ¤Г Г«ГҐГ­Г».
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  Г±ГЁГ¬ГўГ®Г«-ГІГҐДџГ¬ГЁГ­Г ГІГ®Дџ.
+// Г…Г±Г«ГЁ ATerminators='' ГІГ® ГЎГіГ¤ГҐГІ ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГјГ±Гї DefaultStringTerminators
 function GetStringTerm( var ptr : PChar; var len : Integer; ATerminators : String = '' ) : String;
 
-// Эквивалентно вызову GetStringTerm(ptr,len,'');
+// Д°ГЄГўГЁГўГ Г«ГҐГ­ГІГ­Г® ГўГ»Г§Г®ГўГі GetStringTerm(ptr,len,'');
 function GetString( var ptr : PChar; var len : Integer ) : String;
 
-// Если первый значимый символ - апостроф или кавычка, то будет возвращена расквоченная строка,
-// иначе извлекает строку до первого недопустимого симола.
-// Пара ptr/len будет указывать на первый символ, не входящий в число допустимых
-// Если AllowedChars='' то будет использоваться AlphaNum2
+// Г…Г±Г«ГЁ ГЇГҐДџГўГ»Г© Г§Г­Г Г·ГЁГ¬Г»Г© Г±ГЁГ¬ГўГ®Г« - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ , ГІГ® ГЎГіГ¤ГҐГІ ГўГ®Г§ГўДџГ Г№ГҐГ­Г  ДџГ Г±ГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ ,
+// ГЁГ­Г Г·ГҐ ГЁГ§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®ГЄГі Г¤Г® ГЇГҐДџГўГ®ГЈГ® Г­ГҐГ¤Г®ГЇГіГ±ГІГЁГ¬Г®ГЈГ® Г±ГЁГ¬Г®Г«Г .
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  ГЇГҐДџГўГ»Г© Г±ГЁГ¬ГўГ®Г«, Г­ГҐ ГўГµГ®Г¤ГїГ№ГЁГ© Гў Г·ГЁГ±Г«Г® Г¤Г®ГЇГіГ±ГІГЁГ¬Г»Гµ
+// Г…Г±Г«ГЁ AllowedChars='' ГІГ® ГЎГіГ¤ГҐГІ ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГјГ±Гї AlphaNum2
 function GetStringAlpha( var ptr : PChar; var len : Integer; AllowedChars : String = '' ) : String;
 
 function GetLine( var ptr : PChar; var len : Integer ) : String;
@@ -266,7 +266,7 @@ var buf : Array [0..(MAXLEN*2+1)] of Char;
 		jz		@@5
 	rep	movsb
 	@@5:
-		stosb		// удваиваем кавычку
+		stosb		// ГіГ¤ГўГ ГЁГўГ ГҐГ¬ ГЄГ ГўГ»Г·ГЄГі
 		mov		edx,edi
 		mov		ecx,ebx
 		test	ebx,ebx
@@ -309,7 +309,7 @@ begin
 		end;
 end; {TextToCSV}
 //-------------------------------------------------------------
-// !!! buf указывает на область, длинной не менее len*3+2 !!!
+// !!! buf ГіГЄГ Г§Г»ГўГ ГҐГІ Г­Г  Г®ГЎГ«Г Г±ГІГј, Г¤Г«ГЁГ­Г­Г®Г© Г­ГҐ Г¬ГҐГ­ГҐГҐ len*3+2 !!!
 function asmXquote( const Src : String; buf : PChar; const Tbl : String ) : Integer; assembler;
 var	Table : Array [0..255] of Char;
 asm
@@ -328,7 +328,7 @@ asm
 		lea		esi,Printable
 		mov		ecx,[esi-4]
 @BuildTable:
-// строим таблицу
+// Г±ГІДџГ®ГЁГ¬ ГІГ ГЎГ«ГЁГ¶Гі
   	lea		ebx,Table
   	mov		edi,ebx
   	mov		ecx,256
@@ -343,7 +343,7 @@ rep	stosb
   	mov		Byte[ebx+'$'],2
   	pop		esi	// Src
 
-// подготовка к циклу
+// ГЇГ®Г¤ГЈГ®ГІГ®ГўГЄГ  ГЄ Г¶ГЁГЄГ«Гі
 		push	edx
   	mov		edi,edx
 		mov		ecx,[esi-4]
@@ -351,7 +351,7 @@ rep	stosb
 		inc		edi
 		jcxz	@End
 		xor		edx,edx
-// преобразование
+// ГЇДџГҐГ®ГЎДџГ Г§Г®ГўГ Г­ГЁГҐ
 @Next:
 		xor		eax,eax
 		lodsb
@@ -426,7 +426,7 @@ function asmquote( src, buf : PChar; len : Integer ): Integer; assembler;
 asm
 {	test	eax,eax
   jz		@@Ret
-  test	ecx,ecx  всегда ecx<>0 <- это уже проверено
+  test	ecx,ecx  ГўГ±ГҐГЈГ¤Г  ecx<>0 <- Д±ГІГ® ГіГ¦ГҐ ГЇДџГ®ГўГҐДџГҐГ­Г®
   jnz		@@Start
 	xor		eax,eax
 	jmp		@@Ret
@@ -506,11 +506,11 @@ asm
   CMP		AL,' '
   JC		@@RetNIL
   CMP		AL,''''
-  JE		@@1	{ начинается с апострофа }
+  JE		@@1	{ Г­Г Г·ГЁГ­Г ГҐГІГ±Гї Г± Г ГЇГ®Г±ГІДџГ®ГґГ  }
   CMP		AL,'"'
-  JNE		@@UNQ	{ начинается не с апострофа и не с кавычки }
-{ нормальная отквоченная строчка }
-@@1:  MOV		AH,AL	{ сохраняем первый символ }
+  JNE		@@UNQ	{ Г­Г Г·ГЁГ­Г ГҐГІГ±Гї Г­ГҐ Г± Г ГЇГ®Г±ГІДџГ®ГґГ  ГЁ Г­ГҐ Г± ГЄГ ГўГ»Г·ГЄГЁ }
+{ Г­Г®ДџГ¬Г Г«ГјГ­Г Гї Г®ГІГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®Г·ГЄГ  }
+@@1:  MOV		AH,AL	{ Г±Г®ГµДџГ Г­ГїГҐГ¬ ГЇГҐДџГўГ»Г© Г±ГЁГ¬ГўГ®Г« }
 @@2:	LODSB
 	CMP		AL,' '
   JC		@@Unmatch
@@ -521,11 +521,11 @@ asm
 @@Store:
 	STOSB
 	LOOP	@@2
-@@Overflow:	{ Ошибка - переполнение буфера }
+@@Overflow:	{ ГЋГёГЁГЎГЄГ  - ГЇГҐДџГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐДџГ  }
 	MOV		EAX,-1
   JMP		@@Abort
 
-@@Unmatch:	{ Ошибка - нет завершающего апострофа или кавычки }
+@@Unmatch:	{ ГЋГёГЁГЎГЄГ  - Г­ГҐГІ Г§Г ГўГҐДџГёГ ЕџГ№ГҐГЈГ® Г ГЇГ®Г±ГІДџГ®ГґГ  ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГЁ }
 	MOV		EAX,-3
   JMP		@@Abort
 
@@ -538,7 +538,7 @@ asm
   CMP		AL,32
   JC		@@Store
 @@ErrEsc:
-	MOV		EAX,-2	{ Ошибка - неверный символ после # }
+	MOV		EAX,-2	{ ГЋГёГЁГЎГЄГ  - Г­ГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ # }
 @@Abort:
 	XOR		ESI,ESI	{ nil }
 	JMP		@@Exit
@@ -591,7 +591,7 @@ asm
 			mov		ecx,[edi-4]
 			test	ecx,ecx
 			jz		@@RetNil
-// Пропуск пробелов и табуляций
+// ГЏДџГ®ГЇГіГ±ГЄ ГЇДџГ®ГЎГҐГ«Г®Гў ГЁ ГІГ ГЎГіГ«ГїГ¶ГЁГ©
 			mov		ax,2920h
 @@SkipBlanks:
 			repe	scasb
@@ -601,14 +601,14 @@ asm
 			xor		al,ah
 			cmp		al,[edi]
 			je		@@SkipBlanks
-// Начало сканирования //
+// ГЌГ Г·Г Г«Г® Г±ГЄГ Г­ГЁДџГ®ГўГ Г­ГЁГї //
 			mov		esi,edi
 			mov		edi,edx	{buf}
 			mov		pBufStart,edx
 			mov		edx,0
 			mov		eax,0
 
-// Неотквоченная строка
+// ГЌГҐГ®ГІГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ 
 @@NextUnq:
 			lodsb
 @@Unquoted:
@@ -621,7 +621,7 @@ asm
 			jmp		@@Exit
 
 @@Quoted:
-			mov		dh,al	{ сохраняем разделитель - апостроф или кавычку }
+			mov		dh,al	{ Г±Г®ГµДџГ Г­ГїГҐГ¬ ДџГ Г§Г¤ГҐГ«ГЁГІГҐГ«Гј - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГі }
 			loop	@@Dequote
 			jmp		@@Unmatch
 
@@ -631,14 +631,14 @@ asm
 			db		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 			db		-1,10,11,12,13,14,15
 
-// нормальная отквоченная строчка
+// Г­Г®ДџГ¬Г Г«ГјГ­Г Гї Г®ГІГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®Г·ГЄГ 
 @@Dequote:
 			lodsb
 			cmp		al,dh
 			je		@@Quote
 			cmp		al,'$'
 			jne		@@Store
-// Escape в отквоченной строчке
+// Escape Гў Г®ГІГЄГўГ®Г·ГҐГ­Г­Г®Г© Г±ГІДџГ®Г·ГЄГҐ
 			dec		ecx
 			jz		@@ErrEsc
 			lodsb
@@ -666,21 +666,21 @@ asm
 			jmp		@@Store
 
 @@ErrESC:
-			mov		eax,-2	{ Ошибка - неверный символ после $ }
+			mov		eax,-2	{ ГЋГёГЁГЎГЄГ  - Г­ГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ $ }
 			jmp		@@Ret0
 
-// Кавычка или апостроф при сканировании отквоченной строчки
+// ГЉГ ГўГ»Г·ГЄГ  ГЁГ«ГЁ Г ГЇГ®Г±ГІДџГ®Гґ ГЇДџГЁ Г±ГЄГ Г­ГЁДџГ®ГўГ Г­ГЁГЁ Г®ГІГЄГўГ®Г·ГҐГ­Г­Г®Г© Г±ГІДџГ®Г·ГЄГЁ
 @@Quote:
 			dec		ecx
 			jz		@@Exit
 			lodsb
-			cmp		al,dh		// проверяем на двойную кавычку/апостроф
+			cmp		al,dh		// ГЇДџГ®ГўГҐДџГїГҐГ¬ Г­Г  Г¤ГўГ®Г©Г­ГіЕџ ГЄГ ГўГ»Г·ГЄГі/Г ГЇГ®Г±ГІДџГ®Гґ
 			jne		@@Unquoted
 @@Store:
 			stosb
 @@Iterate:
 			loop	@@Dequote
-@@Unmatch:	{ Ошибка - нет завершающего апострофа или кавычки }
+@@Unmatch:	{ ГЋГёГЁГЎГЄГ  - Г­ГҐГІ Г§Г ГўГҐДџГёГ ЕџГ№ГҐГЈГ® Г ГЇГ®Г±ГІДџГ®ГґГ  ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГЁ }
 			mov		eax,-3
   		jmp		@@Ret0
 
@@ -724,10 +724,10 @@ begin
 	if len<0 then
 	begin
   	case -len of
-  	2: Msg := 'StrUnquote: Неверный символ после $';
-  	3: Msg := 'StrUnquote: Непарный апостроф или кавычка';
+  	2: Msg := 'StrUnquote: ГЌГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ $';
+  	3: Msg := 'StrUnquote: ГЌГҐГЇГ ДџГ­Г»Г© Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ ';
   	else
-    	Msg := 'StrUnquote: Неизвестная ошибка '+IntToStr(len);
+    	Msg := 'StrUnquote: ГЌГҐГЁГ§ГўГҐГ±ГІГ­Г Гї Г®ГёГЁГЎГЄГ  '+IntToStr(len);
   	end;
   	raise EStrConvError.Create( Msg );
 	end;
@@ -750,11 +750,11 @@ begin
     begin
 	    ptr := nil;
 	  	case -Len of
-  	  1: Msg := 'UnQuote: Переполнение буфера';
-    	2: Msg := 'UnQuote: Неверный символ после #';
-	    3: Msg := 'UnQuote: Непарный апостроф или кавычка';
+  	  1: Msg := 'UnQuote: ГЏГҐДџГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐДџГ ';
+    	2: Msg := 'UnQuote: ГЌГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ #';
+	    3: Msg := 'UnQuote: ГЌГҐГЇГ ДџГ­Г»Г© Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ ';
   	  else
-    		Msg := 'Unquote: Неизвестная ошибка '+IntToStr(Len);
+    		Msg := 'Unquote: ГЌГҐГЁГ§ГўГҐГ±ГІГ­Г Гї Г®ГёГЁГЎГЄГ  '+IntToStr(Len);
 	    end;
   	  raise EStrConvError.Create( Msg );
     end;
@@ -789,7 +789,7 @@ asm
   LOOP	@@3
 @@ErrEsc:
 	XOR		EAX,EAX
-  DEC		EAX  { Ошибка - неверный символ после # }
+  DEC		EAX  { ГЋГёГЁГЎГЄГ  - Г­ГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ # }
 	JMP		@@Exit
 
 @@Ret0:
@@ -830,8 +830,8 @@ begin
   	Result := '';
     if Len<0 then
     begin
-	  	if Len =-1 then Msg := 'DeEscBuf: Неверный символ после #'
-  	  else Msg := 'DeEscBuf: Неизвестная ошибка '+IntToStr(Len);
+	  	if Len =-1 then Msg := 'DeEscBuf: ГЌГҐГўГҐДџГ­Г»Г© Г±ГЁГ¬ГўГ®Г« ГЇГ®Г±Г«ГҐ #'
+  	  else Msg := 'DeEscBuf: ГЌГҐГЁГ§ГўГҐГ±ГІГ­Г Гї Г®ГёГЁГЎГЄГ  '+IntToStr(Len);
   	  raise EStrConvError.Create( Msg );
 		end;
 	 end
@@ -868,7 +868,7 @@ asm
   MOV		EDI,buf
   MOV		ESI,src
 	XOR		AH,AH
-{ Цикл поиска CRLF }
+{ Г–ГЁГЄГ« ГЇГ®ГЁГ±ГЄГ  CRLF }
 @@FindCRLF:
 	LODSB
 	CMP		AL,13
@@ -891,7 +891,7 @@ asm
 	XOR		EAX,EAX
   JMP		@@Ret
 
-{ Цикл подавления пустых строк }
+{ Г–ГЁГЄГ« ГЇГ®Г¤Г ГўГ«ГҐГ­ГЁГї ГЇГіГ±ГІГ»Гµ Г±ГІДџГ®ГЄ }
 @@SkipCRLF:
 	LODSB
   CMP		AL,10
@@ -971,7 +971,7 @@ begin
 	Result := Copy( Res, 1, 8 );
 end;}
 //-------------------------------------------------------------
-// вывод в hex как есть
+// ГўГ»ГўГ®Г¤ Гў hex ГЄГ ГЄ ГҐГ±ГІГј
 function c2hex( Dest, Src : Pointer; len : Integer ) : Integer; assembler;
 asm
 	push	esi
@@ -1000,7 +1000,7 @@ asm
 	pop		esi
 end;
 //-------------------------------------------------------------
-// вывод в hex как есть + ведущие 0x
+// ГўГ»ГўГ®Г¤ Гў hex ГЄГ ГЄ ГҐГ±ГІГј + ГўГҐГ¤ГіГ№ГЁГҐ 0x
 function c2x( Dest, Src : Pointer; len : Integer ) : Integer; assembler;
 asm
 	push	esi
@@ -1033,7 +1033,7 @@ asm
 	pop		esi
 end;
 {---------------------------------------------------------------------------}
-// вывод в hex в обратном порядке
+// ГўГ»ГўГ®Г¤ Гў hex Гў Г®ГЎДџГ ГІГ­Г®Г¬ ГЇГ®ДџГїГ¤ГЄГҐ
 function i2x( Dest, Src : Pointer; len : Integer ) : Integer; assembler;
 asm
 	push	esi
@@ -1076,8 +1076,8 @@ begin
 	c2x(PChar(Result),ptr,len);
 end;
 //-------------------------------------------------------------
-// Вывод дампа
-// размер буфера = (len*3)+((len-1) shr 2)-1
+// Г‚Г»ГўГ®Г¤ Г¤Г Г¬ГЇГ 
+// ДџГ Г§Г¬ГҐДџ ГЎГіГґГҐДџГ  = (len*3)+((len-1) shr 2)-1
 function DumpToBuf( Dest, Src : Pointer; len : Integer ) : Integer; assembler;
 asm
 	push	esi
@@ -1372,11 +1372,11 @@ begin
     	if len<=0 then
         begin
     	 	  case -Len of
-          1: Msg := 'MacroExpand: Неверный параметр';
-          2: Msg := 'MacroExpand: Переполнение буфера';
-         	3: Msg := 'MacroExpand: Неверный номер параметра';
+          1: Msg := 'MacroExpand: ГЌГҐГўГҐДџГ­Г»Г© ГЇГ ДџГ Г¬ГҐГІДџ';
+          2: Msg := 'MacroExpand: ГЏГҐДџГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐДџГ ';
+         	3: Msg := 'MacroExpand: ГЌГҐГўГҐДџГ­Г»Г© Г­Г®Г¬ГҐДџ ГЇГ ДџГ Г¬ГҐГІДџГ ';
     		  else
-		    	  Msg := 'MacroExpand: Неизвестная ошибка '+IntToStr(Len);
+		    	  Msg := 'MacroExpand: ГЌГҐГЁГ§ГўГҐГ±ГІГ­Г Гї Г®ГёГЁГЎГЄГ  '+IntToStr(Len);
       		end;
 		      raise EStrConvError.Create( Msg );
     	  end
@@ -1500,7 +1500,7 @@ asm
 @@Ret:
 end;
 //-------------------------------------------------------------
-// Пропускаем пробелы и символы табуляции
+// ГЏДџГ®ГЇГіГ±ГЄГ ГҐГ¬ ГЇДџГ®ГЎГҐГ«Г» ГЁ Г±ГЁГ¬ГўГ®Г«Г» ГІГ ГЎГіГ«ГїГ¶ГЁГЁ
 function SkipBlanksLen( var ptr : PChar; var len : Integer ) : PChar; assembler;
 asm
 	test	EAX,EAX
@@ -1538,7 +1538,7 @@ asm
 @@Ret:
 end;
 //-------------------------------------------------------------
-// Удаляем концевые пробелы и символы табуляции
+// Г“Г¤Г Г«ГїГҐГ¬ ГЄГ®Г­Г¶ГҐГўГ»ГҐ ГЇДџГ®ГЎГҐГ«Г» ГЁ Г±ГЁГ¬ГўГ®Г«Г» ГІГ ГЎГіГ«ГїГ¶ГЁГЁ
 function RemoveTrailingBlanksLen( var ptr : PChar; var len : Integer ) : PChar; assembler;
 asm
 	test	eax,eax
@@ -1581,7 +1581,7 @@ asm
 end;
 
 //-------------------------------------------------------------
-// Пропускаем управляющие символы и пробелы ( все символы меньше $21 )
+// ГЏДџГ®ГЇГіГ±ГЄГ ГҐГ¬ ГіГЇДџГ ГўГ«ГїЕџГ№ГЁГҐ Г±ГЁГ¬ГўГ®Г«Г» ГЁ ГЇДџГ®ГЎГҐГ«Г» ( ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» Г¬ГҐГ­ГјГёГҐ $21 )
 function FindLexLen( var ptr : PChar; var len : Integer ) : PChar; assembler;
 asm
 	test	eax,eax
@@ -1626,7 +1626,7 @@ begin
 	 end;
 end;
 
-// Внимание!!! Изменяет значение указанной строки!!!
+// Г‚Г­ГЁГ¬Г Г­ГЁГҐ!!! Г€Г§Г¬ГҐГ­ГїГҐГІ Г§Г­Г Г·ГҐГ­ГЁГҐ ГіГЄГ Г§Г Г­Г­Г®Г© Г±ГІДџГ®ГЄГЁ!!!
 procedure AsmXLAT( Str : String; const sFrom, sTo : String; Pad : Char );
 var	Table : Array [0..255] of Char;
 asm
@@ -1643,7 +1643,7 @@ asm
 	MOV		ESI,[EDX-4]
   OR		ESI,ESI
   JZ		@@Ret0
-// строим таблицу
+// Г±ГІДџГ®ГЁГ¬ ГІГ ГЎГ«ГЁГ¶Гі
 	PUSH	EAX
   PUSH	ECX
   LEA		EBX,table
@@ -1684,7 +1684,7 @@ asm
   LODSB
 	MOV		[EAX+EBX],DL
 	LOOP	@@FillTBL4
-// Цикл перекодировки
+// Г–ГЁГЄГ« ГЇГҐДџГҐГЄГ®Г¤ГЁДџГ®ГўГЄГЁ
 @@FillTBL9:
 	POP		EDI
   MOV		ECX,[EDI-4]
@@ -1717,7 +1717,7 @@ asm
 		mov		ecx,[esi-4] // length(chars)
 		test	ecx,ecx
 		jz		@@Ret0
-		// строим таблицу
+		// Г±ГІДџГ®ГЁГ¬ ГІГ ГЎГ«ГЁГ¶Гі
 		push	eax
 		lea		ebx,Table
 		mov		edi,ebx
@@ -1835,8 +1835,8 @@ begin
 	else Result := XQuote(Line,Printable1251);
 end;
 //-------------------------------------------------------------
-// Извлекаем строку до первого символа, не входящего в AllowedChars, этот символ будет выдан в ATerm.
-// Если все символы из AllowedChars, то ATerm будет #0
+// Г€Г§ГўГ«ГҐГЄГ ГҐГ¬ Г±ГІДџГ®ГЄГі Г¤Г® ГЇГҐДџГўГ®ГЈГ® Г±ГЁГ¬ГўГ®Г«Г , Г­ГҐ ГўГµГ®Г¤ГїГ№ГҐГЈГ® Гў AllowedChars, Д±ГІГ®ГІ Г±ГЁГ¬ГўГ®Г« ГЎГіГ¤ГҐГІ ГўГ»Г¤Г Г­ Гў ATerm.
+// Г…Г±Г«ГЁ ГўГ±ГҐ Г±ГЁГ¬ГўГ®Г«Г» ГЁГ§ AllowedChars, ГІГ® ATerm ГЎГіГ¤ГҐГІ #0
 function GetTerm( var ptr : PChar; var len : Integer; var ATerm : Char; AllowedChars : String ) : String;
 var	i : Integer;
 begin
@@ -1863,9 +1863,9 @@ begin
 		end;
 end;
 //-------------------------------------------------------------
-// Если первый значимый символ - апостроф или кавычка, то будет возвращена расквоченная строка,
-// иначе извлекает строку до терминатора, а пробелы/табуляции с обоих сторон будут удалены.
-// Пара ptr/len будет указывать на символ-терминитор
+// Г…Г±Г«ГЁ ГЇГҐДџГўГ»Г© Г§Г­Г Г·ГЁГ¬Г»Г© Г±ГЁГ¬ГўГ®Г« - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ , ГІГ® ГЎГіГ¤ГҐГІ ГўГ®Г§ГўДџГ Г№ГҐГ­Г  ДџГ Г±ГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ ,
+// ГЁГ­Г Г·ГҐ ГЁГ§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®ГЄГі Г¤Г® ГІГҐДџГ¬ГЁГ­Г ГІГ®ДџГ , Г  ГЇДџГ®ГЎГҐГ«Г»/ГІГ ГЎГіГ«ГїГ¶ГЁГЁ Г± Г®ГЎГ®ГЁГµ Г±ГІГ®ДџГ®Г­ ГЎГіГ¤ГіГІ ГіГ¤Г Г«ГҐГ­Г».
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  Г±ГЁГ¬ГўГ®Г«-ГІГҐДџГ¬ГЁГ­ГЁГІГ®Дџ
 function GetStringTerm( var ptr : PChar; var len : Integer; ATerminators : String ) : String;
 var	i : Integer;
 		pValue : PChar;
@@ -1906,9 +1906,9 @@ begin
 	len := 0;
 end;
 //-------------------------------------------------------------
-// Если первый значимый символ - апостроф или кавычка, то будет возвращена расквоченная строка,
-// иначе извлекает строку до первого недопустимого симола.
-// Пара ptr/len будет указывать на первый символ, не входящий в число допустимых
+// Г…Г±Г«ГЁ ГЇГҐДџГўГ»Г© Г§Г­Г Г·ГЁГ¬Г»Г© Г±ГЁГ¬ГўГ®Г« - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ , ГІГ® ГЎГіГ¤ГҐГІ ГўГ®Г§ГўДџГ Г№ГҐГ­Г  ДџГ Г±ГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ ,
+// ГЁГ­Г Г·ГҐ ГЁГ§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®ГЄГі Г¤Г® ГЇГҐДџГўГ®ГЈГ® Г­ГҐГ¤Г®ГЇГіГ±ГІГЁГ¬Г®ГЈГ® Г±ГЁГ¬Г®Г«Г .
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  ГЇГҐДџГўГ»Г© Г±ГЁГ¬ГўГ®Г«, Г­ГҐ ГўГµГ®Г¤ГїГ№ГЁГ© Гў Г·ГЁГ±Г«Г® Г¤Г®ГЇГіГ±ГІГЁГ¬Г»Гµ
 function GetStringAlpha( var ptr : PChar; var len : Integer; AllowedChars : String ) : String;
 var	i : Integer;
 begin
@@ -1993,16 +1993,16 @@ begin
 		end;
 end;
 //-------------------------------------------------------------
-// Если первый значимый символ - апостроф или кавычка, то будет возвращена расквоченная строка,
-// иначе извлекает строку до терминатора ( символ из DefaultStringTerminators ).
-// Пара ptr/len будет указывать на символ-терминитор
+// Г…Г±Г«ГЁ ГЇГҐДџГўГ»Г© Г§Г­Г Г·ГЁГ¬Г»Г© Г±ГЁГ¬ГўГ®Г« - Г ГЇГ®Г±ГІДџГ®Гґ ГЁГ«ГЁ ГЄГ ГўГ»Г·ГЄГ , ГІГ® ГЎГіГ¤ГҐГІ ГўГ®Г§ГўДџГ Г№ГҐГ­Г  ДџГ Г±ГЄГўГ®Г·ГҐГ­Г­Г Гї Г±ГІДџГ®ГЄГ ,
+// ГЁГ­Г Г·ГҐ ГЁГ§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®ГЄГі Г¤Г® ГІГҐДџГ¬ГЁГ­Г ГІГ®ДџГ  ( Г±ГЁГ¬ГўГ®Г« ГЁГ§ DefaultStringTerminators ).
+// ГЏГ ДџГ  ptr/len ГЎГіГ¤ГҐГІ ГіГЄГ Г§Г»ГўГ ГІГј Г­Г  Г±ГЁГ¬ГўГ®Г«-ГІГҐДџГ¬ГЁГ­ГЁГІГ®Дџ
 function GetString( var ptr : PChar; var len : Integer ) : String;
 begin
 	Result := GetStringTerm(ptr,len,DefaultStringTerminators);
 end;
 //-------------------------------------------------------------
-// Ищем терминатор, Result = строка до терминатора или исходная строка
-// Строки не расквочиваются.
+// Г€Г№ГҐГ¬ ГІГҐДџГ¬ГЁГ­Г ГІГ®Дџ, Result = Г±ГІДџГ®ГЄГ  Г¤Г® ГІГҐДџГ¬ГЁГ­Г ГІГ®ДџГ  ГЁГ«ГЁ ГЁГ±ГµГ®Г¤Г­Г Гї Г±ГІДџГ®ГЄГ 
+// Г‘ГІДџГ®ГЄГЁ Г­ГҐ ДџГ Г±ГЄГўГ®Г·ГЁГўГ ЕџГІГ±Гї.
 function GetSubStr( var ptr : PChar; var len : Integer; const ATerminators : String ) : String;
 type	PWord = ^Word;
 var	i : Integer;
@@ -2025,7 +2025,7 @@ end;
 //-------------------------------------------------------------
 const ScanCRLF : String = #10#13#0;
 //-------------------------------------------------------------
-// Извлекает строчку - до очередного CRLF.  ptr,len будут указазывать ЗА CRLF
+// Г€Г§ГўГ«ГҐГЄГ ГҐГІ Г±ГІДџГ®Г·ГЄГі - Г¤Г® Г®Г·ГҐДџГҐГ¤Г­Г®ГЈГ® CRLF.  ptr,len ГЎГіГ¤ГіГІ ГіГЄГ Г§Г Г§Г»ГўГ ГІГј Г‡ГЂ CRLF
 function GetLine( var ptr : PChar; var len : Integer ) : String;
 type	PWord = ^Word;
 var	i : Integer;
@@ -2331,7 +2331,7 @@ begin
   Dec(len,i);
 end;
 //=============================================================
-// ищем символ (с пониманием кавычек)
+// ГЁГ№ГҐГ¬ Г±ГЁГ¬ГўГ®Г« (Г± ГЇГ®Г­ГЁГ¬Г Г­ГЁГҐГ¬ ГЄГ ГўГ»Г·ГҐГЄ)
 function QMemScan( ptr : PChar; len : Integer; c : Char ) : PChar;
 asm
 	test	eax,eax
@@ -2343,7 +2343,7 @@ asm
   mov		ecx,edx	// ecx <- len
 	test	ecx,ecx
   jz		@@Ret0
-@@Next:	// ??????? Оптимизировать ?
+@@Next:	// ??????? ГЋГЇГІГЁГ¬ГЁГ§ГЁДџГ®ГўГ ГІГј ?
 	lodsb
 	cmp		al,ah
   je		@@Exit
@@ -2525,12 +2525,12 @@ function SpellCurrency( ANum : Currency ) : String;
 type
 	TUnitGender = ( ugMale, ugFemale );
 const
-		female : Array[1..2] of String = ('одна','две');
+		female : Array[1..2] of String = ('Г®Г¤Г­Г ','Г¤ГўГҐ');
 		upto20 : Array[1..20] of String =
-			('один','два','три','четыре','пять','шесть','семь','восемь','девять','десять',
-			'одиннадцать','двенадцать','тринадцать','четырнадцать','пятнадцать','шестнадцать','семнадцать','восемнадцать','девятнадцать','двадцать');
-		decades: Array [2..9] of String = ('двадцать','тридцать','сорок','пятьдесят','шестьдесят','семьдесят','восемьдесят','девяносто');
-		hundreds: Array [1..9] of String = ('сто','двести','триста','четыреста','пятьсот','шестьсот','семьсот','восемьсот','девятсот');
+			('Г®Г¤ГЁГ­','Г¤ГўГ ','ГІДџГЁ','Г·ГҐГІГ»ДџГҐ','ГЇГїГІГј','ГёГҐГ±ГІГј','Г±ГҐГ¬Гј','ГўГ®Г±ГҐГ¬Гј','Г¤ГҐГўГїГІГј','Г¤ГҐГ±ГїГІГј',
+			'Г®Г¤ГЁГ­Г­Г Г¤Г¶Г ГІГј','Г¤ГўГҐГ­Г Г¤Г¶Г ГІГј','ГІДџГЁГ­Г Г¤Г¶Г ГІГј','Г·ГҐГІГ»ДџГ­Г Г¤Г¶Г ГІГј','ГЇГїГІГ­Г Г¤Г¶Г ГІГј','ГёГҐГ±ГІГ­Г Г¤Г¶Г ГІГј','Г±ГҐГ¬Г­Г Г¤Г¶Г ГІГј','ГўГ®Г±ГҐГ¬Г­Г Г¤Г¶Г ГІГј','Г¤ГҐГўГїГІГ­Г Г¤Г¶Г ГІГј','Г¤ГўГ Г¤Г¶Г ГІГј');
+		decades: Array [2..9] of String = ('Г¤ГўГ Г¤Г¶Г ГІГј','ГІДџГЁГ¤Г¶Г ГІГј','Г±Г®ДџГ®ГЄ','ГЇГїГІГјГ¤ГҐГ±ГїГІ','ГёГҐГ±ГІГјГ¤ГҐГ±ГїГІ','Г±ГҐГ¬ГјГ¤ГҐГ±ГїГІ','ГўГ®Г±ГҐГ¬ГјГ¤ГҐГ±ГїГІ','Г¤ГҐГўГїГ­Г®Г±ГІГ®');
+		hundreds: Array [1..9] of String = ('Г±ГІГ®','Г¤ГўГҐГ±ГІГЁ','ГІДџГЁГ±ГІГ ','Г·ГҐГІГ»ДџГҐГ±ГІГ ','ГЇГїГІГјГ±Г®ГІ','ГёГҐГ±ГІГјГ±Г®ГІ','Г±ГҐГ¬ГјГ±Г®ГІ','ГўГ®Г±ГҐГ¬ГјГ±Г®ГІ','Г¤ГҐГўГїГІГ±Г®ГІ');
 var n, m, i : LongInt;
 		s : String;
 
@@ -2569,18 +2569,18 @@ var n, m, i : LongInt;
 
 begin
 	n := Trunc(ANum);
-	if n=0 then Result := 'Ноль рублей'
+	if n=0 then Result := 'ГЌГ®Г«Гј ДџГіГЎГ«ГҐГ©'
 	else
 		begin
 			Result := '';
-			SpellNum(Result,['рубль','рубля','рублей'],ugMale);
+			SpellNum(Result,['ДџГіГЎГ«Гј','ДџГіГЎГ«Гї','ДџГіГЎГ«ГҐГ©'],ugMale);
 			if n<>0 then
 			begin
-				SpellNum(Result,['тысяча','тысячи','тысяч'],ugFemale);
+				SpellNum(Result,['ГІГ»Г±ГїГ·Г ','ГІГ»Г±ГїГ·ГЁ','ГІГ»Г±ГїГ·'],ugFemale);
 				if n<>0 then
 				begin
-					SpellNum(Result,['миллион','миллиона','миллионов'],ugMale);
-					if n<>0 then SpellNum(Result,['миллиард','миллиарда','миллиардов'],ugMale);
+					SpellNum(Result,['Г¬ГЁГ«Г«ГЁГ®Г­','Г¬ГЁГ«Г«ГЁГ®Г­Г ','Г¬ГЁГ«Г«ГЁГ®Г­Г®Гў'],ugMale);
+					if n<>0 then SpellNum(Result,['Г¬ГЁГ«Г«ГЁГ ДџГ¤','Г¬ГЁГ«Г«ГЁГ ДџГ¤Г ','Г¬ГЁГ«Г«ГЁГ ДџГ¤Г®Гў'],ugMale);
 				end;
 			end;
 		end;
@@ -2588,12 +2588,12 @@ begin
 	if n<10 then s := '0'+Chr(Ord('0')+n) else s := IntToStr(n);
 	if (n>20)or(n<10) then
 		case n mod 10 of
-		1: s := s+' копейка';
-		2,3,4: s := s+' копейки';
+		1: s := s+' ГЄГ®ГЇГҐГ©ГЄГ ';
+		2,3,4: s := s+' ГЄГ®ГЇГҐГ©ГЄГЁ';
 		else
-			s := s+' копеек';
+			s := s+' ГЄГ®ГЇГҐГҐГЄ';
 		end
-	else s := s+' копеек';
+	else s := s+' ГЄГ®ГЇГҐГҐГЄ';
 	CharUpperBuff( PChar(Result), 1 );
 	Result := Result+' '+s;
 end;
@@ -2606,7 +2606,7 @@ begin
 end;
 //-------------------------------------------------------------
 function SpellDate( const ADate : TDateTime ) : String;
-const aMonth : array [1..12] of String = ('января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря');
+const aMonth : array [1..12] of String = ('ГїГ­ГўГ ДџГї','ГґГҐГўДџГ Г«Гї','Г¬Г ДџГІГ ','Г ГЇДџГҐГ«Гї','Г¬Г Гї','ГЁЕџГ­Гї','ГЁЕџГ«Гї','Г ГўГЈГіГ±ГІГ ','Г±ГҐГ­ГІГїГЎДџГї','Г®ГЄГІГїГЎДџГї','Г­Г®ГїГЎДџГї','Г¤ГҐГЄГ ГЎДџГї');
 var	wYear, wMonth, wDay : Word;
 begin
 	DecodeDate( ADate, wYear, wMonth, wDay );

@@ -1,4 +1,4 @@
-unit uEvrak_Tanimlar;
+ï»¿unit uEvrak_Tanimlar;
 
 interface
 
@@ -54,7 +54,7 @@ type
   private
     { Private declarations }
     procedure Frames_Doldur;
-    //Sekme Index'i döndürür
+    //Sekme Index'i dÃ¶ndÃ¼rÃ¼r
     function SekmeIndexGetir( _FrameClass : TClass) : integer;
     function SekmeEkle( _FrameClass : TClass) : integer; overload;
     function SekmeEkle( _FramClassType : TEvrakTanimClassType) : integer;overload;
@@ -80,36 +80,36 @@ const
    (Caption : 'Alt Bilgi';                          Tag:1;  Enabled: True;   FrameClass: TEvrakTanimAltBilgiFrame),
    (Caption : 'Paraf ';                             Tag:2;  Enabled: True;   FrameClass: TEvrakTanimParafFrame),
    (Caption : 'Havale Kural';                       Tag:3;  Enabled: True;   FrameClass: TEvrakTanimHavaleKuralFrame),
-   (Caption : 'Daðýtým';                            Tag:4;  Enabled: True;   FrameClass: TEvrakTanimDagitimFrame),
-   (Caption : 'Evrak Özel ALan';                    Tag:5;  Enabled: True;   FrameClass: TEvrakTanimOzelAlanFrame),
-   (Caption : 'Gelen Konu Tanýmlama';               Tag:6;  Enabled: True;   FrameClass: TEvrakTanimGelenKonuFrame),
-   (Caption : 'Gelen Yer Tanýmlama';                Tag:7;  Enabled: True;   FrameClass: TEvrakTanimGelenYerFrame),
+   (Caption : 'DaÄŸÄ±tÄ±m';                            Tag:4;  Enabled: True;   FrameClass: TEvrakTanimDagitimFrame),
+   (Caption : 'Evrak Ã–zel ALan';                    Tag:5;  Enabled: True;   FrameClass: TEvrakTanimOzelAlanFrame),
+   (Caption : 'Gelen Konu TanÄ±mlama';               Tag:6;  Enabled: True;   FrameClass: TEvrakTanimGelenKonuFrame),
+   (Caption : 'Gelen Yer TanÄ±mlama';                Tag:7;  Enabled: True;   FrameClass: TEvrakTanimGelenYerFrame),
    (Caption : 'Antet';                              Tag:8;  Enabled: True;   FrameClass: TEvrakTanimAntetFrame),
    (Caption : 'Evrak Birimi';                       Tag:9;  Enabled: True;   FrameClass: TEvrakTanimEvrakBirimiFrame),
-   (Caption : 'Dosya Tasnif Plan Gruplarý';         Tag:10; Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanGrupFrame),
-   (Caption : 'Dosya Tasnif Planý';                 Tag:11; Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanFrame),
-   (Caption : 'Dosya Tasnif Planý (Birimlere Göre)'; Tag:12;Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanBirimlererGoreFrame),
+   (Caption : 'Dosya Tasnif Plan GruplarÄ±';         Tag:10; Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanGrupFrame),
+   (Caption : 'Dosya Tasnif PlanÄ±';                 Tag:11; Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanFrame),
+   (Caption : 'Dosya Tasnif PlanÄ± (Birimlere GÃ¶re)'; Tag:12;Enabled: False;   FrameClass: TEvrakTanimDosyaTasnifPlanBirimlererGoreFrame),
    (Caption : 'Gizlilik';                           Tag:13; Enabled: False;   FrameClass: TEvrakTanimGizlilikFrame),
-   (Caption : 'Yazý Durmu';                         Tag:14; Enabled: False;   FrameClass: TEvrakTanimYaziDurumuFrame),
-   (Caption : 'Geliþ Þekli';                        Tag:15; Enabled: True;   FrameClass: TEvrakTanimGelisSekliFrame),
-   (Caption : 'Giden Tür';                          Tag:16; Enabled: True;   FrameClass: TEvrakTanimGidenTurFrame),
-   (Caption : 'Posta Tür';                          Tag:17; Enabled: False;   FrameClass: TEvrakTanimPostaTurFrame),
+   (Caption : 'YazÄ± Durmu';                         Tag:14; Enabled: False;   FrameClass: TEvrakTanimYaziDurumuFrame),
+   (Caption : 'GeliÅŸ Åžekli';                        Tag:15; Enabled: True;   FrameClass: TEvrakTanimGelisSekliFrame),
+   (Caption : 'Giden TÃ¼r';                          Tag:16; Enabled: True;   FrameClass: TEvrakTanimGidenTurFrame),
+   (Caption : 'Posta TÃ¼r';                          Tag:17; Enabled: False;   FrameClass: TEvrakTanimPostaTurFrame),
    (Caption : 'Evrak Cinsi';                        Tag:18; Enabled: False;   FrameClass: TEvrakTanimEvrakCinsiFrame),
-   (Caption : 'Ýmza Yolu';                          Tag:19; Enabled: True;   FrameClass: TEvrakTanimImzaYoluFrame),
-   (Caption : 'Arþiv Klasörleri';                   Tag:20; Enabled: False;   FrameClass: TEvrakTanimArsivKlasorleriFrame),
+   (Caption : 'Ä°mza Yolu';                          Tag:19; Enabled: True;   FrameClass: TEvrakTanimImzaYoluFrame),
+   (Caption : 'ArÅŸiv KlasÃ¶rleri';                   Tag:20; Enabled: False;   FrameClass: TEvrakTanimArsivKlasorleriFrame),
    (Caption : 'Meta Grup Bilgileri';                Tag:21; Enabled: False;   FrameClass: TEvrakTanimMetaGrupBilgileri),
    (Caption : 'Meta Bilgileri';                     Tag:22; Enabled: False;   FrameClass: TEvrakTanimMetaBilgileriFrame),
    (Caption : 'Vekalet';                            Tag:23; Enabled: True;   FrameClass: TEvrakTanimVekaletFrame),
    (Caption : 'DTVT Birim Bilgileri';               Tag:24; Enabled: True;   FrameClass: TEvrakTanimDTVTBirimFrame),
-   (Caption : 'Dinamik Form Oluþtur';               Tag:25; Enabled: False;    FrameClass: TEvrakTanimDinamikFormFrame)
+   (Caption : 'Dinamik Form OluÅŸtur';               Tag:25; Enabled: False;    FrameClass: TEvrakTanimDinamikFormFrame)
    );
 
 implementation
 
 {$R *.dfm}
 {
-  EvrakTanimGoster : Tag -1 Tüm Taným Sýnýflarý sekmelerini gösterir
-                     Tag 1..25 Yalnýzca ilgili Taným sýnýfýný gösterir
+  EvrakTanimGoster : Tag -1 TÃ¼m TanÄ±m SÄ±nÄ±flarÄ± sekmelerini gÃ¶sterir
+                     Tag 1..25 YalnÄ±zca ilgili TanÄ±m sÄ±nÄ±fÄ±nÄ± gÃ¶sterir
 }
 function EvrakTanimGoster( _Tag : integer; _Owner : TComponent; _Parent : TwinControl=Nil) : integer;
 var
@@ -261,7 +261,7 @@ begin
        classID := EvrakSinifID(_FrameClass);
        if classID>-1 then
          sekme.Caption := cListEvrakTanimClass[classID].Caption;
-       // FocusIlkControl kaldýrýlabilir.
+       // FocusIlkControl kaldÄ±rÄ±labilir.
        if newFrameClass is TEvrakTanimHavaleKuralFrame then
          newFrameClass.FocusIlkControl(TEvrakTanimHavaleKuralFrame(newFrameClass).GridPanel2)
          else
@@ -301,7 +301,7 @@ begin
        classID := EvrakSinifID(_FramClassType);
        if classID>-1 then
          sekme.Caption := cListEvrakTanimClass[classID].Caption;
-       // FocusIlkControl kaldýrýlabilir.
+       // FocusIlkControl kaldÄ±rÄ±labilir.
        if newFrameClass is TEvrakTanimHavaleKuralFrame then
          newFrameClass.FocusIlkControl(TEvrakTanimHavaleKuralFrame(newFrameClass).GridPanel2)
          else

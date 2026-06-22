@@ -1,4 +1,4 @@
-unit uYaziciSec;
+ï»¿unit uYaziciSec;
 
 interface
 
@@ -55,7 +55,7 @@ var
 begin
    ad:=LSYazici.Items.Strings[LSYazici.itemindex];
    AYARLARDLG.LabelYazici.Caption:=ad;
-   GenRegIni.RegWriteString('Yazýcýlar', AyarlarDlg.EkranAdi+'_Yzc', Ad, 'C');
+   GenRegIni.RegWriteString('YazÄ±cÄ±lar', AyarlarDlg.EkranAdi+'_Yzc', Ad, 'C');
    CLOSE;
 end;
 

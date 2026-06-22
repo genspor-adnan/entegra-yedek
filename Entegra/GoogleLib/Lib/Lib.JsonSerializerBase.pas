@@ -1,4 +1,4 @@
-unit Lib.JsonSerializerBase;
+﻿unit Lib.JsonSerializerBase;
 
 interface
 

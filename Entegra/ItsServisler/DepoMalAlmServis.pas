@@ -1,8 +1,8 @@
-// ************************************************************************ //
+ï»¿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
-// WSDL     : http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlýmReceiver.wsdl
-//  >Import : http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlýmReceiver.wsdl>0
+// WSDL     : http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlÄ±mReceiver.wsdl
+//  >Import : http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlÄ±mReceiver.wsdl>0
 // Encoding : UTF-8
 // Codegen  : [wfForceSOAP11+]
 // Version  : 1.0
@@ -241,7 +241,7 @@ implementation
 
 function GetDepoMalAlimBildirimReceiver(UseWSDL: Boolean; Addr: string; HTTPRIO: THTTPRIO): DepoMalAlimBildirimReceiver;
 const
-  defWSDL = 'http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlýmReceiver.wsdl';
+  defWSDL = 'http://www.iegm.gov.tr/Folders/file/its/wsdl/DepoMalAlÄ±mReceiver.wsdl';
   defURL  = 'http://212.174.130.240/DepoMalAlim/DepoMalAlimReceiverService';
   defSvc  = 'DepoMalAlimReceiverService';
   defPrt  = 'DepoMalAlimBildirimReceiverBindingPort';

@@ -1,4 +1,4 @@
-unit OpenSQLServer;
+ï»¿unit OpenSQLServer;
 
 {
 
@@ -260,12 +260,12 @@ begin
 
       if (sc.ServerName = '') or (sc.DatabaseName = '') then
       begin
-         MessageDlg('Sunucu ve veritabaný seçin!', mtWarning, [mbOK], 0);
+         MessageDlg('Sunucu ve veritabanÄ± seÃ§in!', mtWarning, [mbOK], 0);
          Exit;
       end;
       if ledUserName.Text='' Then
        begin
-         MessageDlg('Kullanýcý Adýný Giriniz',mtWarning,[mbOk],0);
+         MessageDlg('KullanÄ±cÄ± AdÄ±nÄ± Giriniz',mtWarning,[mbOk],0);
          exit;
        end;
 
@@ -273,7 +273,7 @@ begin
          dbc.Open;
          dbc.Close;
          if (Sender as TBitBtn).Name = 'TestConButton' then
-            MessageDlg('Baðlantý baþarýlý!', mtInformation, [mbOK], 0);
+            MessageDlg('BaÄŸlantÄ± baÅŸarÄ±lÄ±!', mtInformation, [mbOK], 0);
       except
          on e: exception do
             MessageDlg(e.Message, mtError, [mbOK], 0);
@@ -422,8 +422,8 @@ begin
   if (winAuth) then yetkilendirmeComboBox.ItemIndex := 0 else begin
     yetkilendirmeComboBox.ItemIndex := 1;
     yetkilendirmeComboBoxChange(nil);
-    { þifre OnChange olayýnda Clear methodu ile siliniyor }
-    { Bunu engellemek için programsal olarak eþitlendi. }
+    { ÅŸifre OnChange olayÄ±nda Clear methodu ile siliniyor }
+    { Bunu engellemek iÃ§in programsal olarak eÅŸitlendi. }
     ledPassword.Text := pass;
   end;
 

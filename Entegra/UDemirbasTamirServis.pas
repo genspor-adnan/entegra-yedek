@@ -1,4 +1,4 @@
-unit UDemirbasTamirServis;
+ï»¿unit UDemirbasTamirServis;
 
 interface
 
@@ -170,15 +170,15 @@ begin
   if TabGenel.State in [dsInsert, dsEdit] then
      TabGenel.post;
   case ServisOp of
-    'G': //gönder
+    'G': //gÃ¶nder
       begin
         //if not BoslukKontrol(cbServisDurum.text, 'Durum') then
         //  Abort;
         if not BoslukKontrol(dateServisTarih.text, 'Tarih') then
             Abort;
-        if not BoslukKontrol(cbServiseGonderen.text, 'Gönderen') then
+        if not BoslukKontrol(cbServiseGonderen.text, 'GÃ¶nderen') then
             Abort;
-        if (cbGonderilenFirma.visible)and( not BoslukKontrol(cbGonderilenFirma.text, 'Gönderilen Firma')) then
+        if (cbGonderilenFirma.visible)and( not BoslukKontrol(cbGonderilenFirma.text, 'GÃ¶nderilen Firma')) then
             Abort;
         if (EditProblem.visible)and( not BoslukKontrol(EditProblem.text, 'Problem')) then
             Abort;
@@ -202,11 +202,11 @@ begin
           Abort;
         if not BoslukKontrol(dateDonusTarihi.text, 'Teslim Alma Tarihi') then
           Abort;
-        if ServisKapsami = 1 then begin// demirbaþa servis ise
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=0 where ID=&id ', ['&id'], [DemirbasId]);
-           //TODO demirbaþtan servis durumu deðiþtirme
-           //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update SERVIS set DURUM='+Tablo.GENINI.ReadString(Ops_OpsiyonServis_Varsayilan_Durum_Son,'-1')+' where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsString]);
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update SERVIS set ACKAPA=1 where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsString]);
+        if ServisKapsami = 1 then begin// demirbaÅŸa servis ise
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=0 where ID=&id ', ['&id'], [DemirbasId]);
+           //TODO demirbaÅŸtan servis durumu deÄŸiÅŸtirme
+           //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update SERVIS set DURUM='+Tablo.GENINI.ReadString(Ops_OpsiyonServis_Varsayilan_Durum_Son,'-1')+' where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsString]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update SERVIS set ACKAPA=1 where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsString]);
         end;
 
 
@@ -360,10 +360,10 @@ begin
           btnKaydet.Click
       else begin
           if IslemOp='E' then begin
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from SERVISBILGI where SERVISID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from SERVISHIZMET where SERVISID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from SERVIS where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=0 where ID=&id ', ['&id'], [DemirbasId]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from SERVISBILGI where SERVISID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from SERVISHIZMET where SERVISID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from SERVIS where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=0 where ID=&id ', ['&id'], [DemirbasId]);
           end;
           ModalResult := mrOk;
       end;
@@ -373,7 +373,7 @@ begin
 (*  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDNO then begin
     Abort;
   end else   begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from DEMIRBAS_SERVIS where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from DEMIRBAS_SERVIS where ID=&id ', ['&id'], [TabServis.FieldByName('ID').AsInteger]);
 
     Tablo.Query3.Close;
     Tablo.Query3.SQL.text := ' SELECT  TOP (1) DTD.TUTANAKID, DTD.DEMIRBASID, DT.TIP, DT.TARIH, DT.ZIMMETVERENID, '+
@@ -408,7 +408,7 @@ end;
 
 procedure TDemirbasTamirServisDLG.FormCreate(Sender: TObject);
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TDemirbasTamirServisDLG.FormShow(Sender: TObject);
@@ -434,7 +434,7 @@ begin
           TabServis.Append; // Ekleme
           TabServis.Post;
           if TeknikSerSor>0 then //teknik servis sorumlusu varsa onu da insert etmeli
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into GOREVKULLANICI (LISTGOREVID,TUR,REHBERID,EKLEYEN,EKLEMETARIHI) '+
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GOREVKULLANICI (LISTGOREVID,TUR,REHBERID,EKLEYEN,EKLEMETARIHI) '+
                      ' values('+TabServis.FieldByName('ID').AsString+',12,'+IntToStr(TeknikSerSor)+','+Kullanan+','+
                      ''''+FormatDateTime('yyyy-mm-dd', Tablo.GenIni.BugunTrhSaat)+''')',[],[]);
 
@@ -446,8 +446,8 @@ begin
     'D':TabloYenile(TabGenel, [TabServis.Fields[0].AsInteger]);
     end;
 
-    GbServiseGonder.Enabled := ServisOp='G';//gönderim
-    GbServisiadeAl.Enabled := ServisOp='I';//Ýade
+    GbServiseGonder.Enabled := ServisOp='G';//gÃ¶nderim
+    GbServisiadeAl.Enabled := ServisOp='I';//Ä°ade
     if ServisOp='I' then begin
        TabServis.Edit; //
        TabServis.FieldByName('TESLIM_TARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
@@ -484,7 +484,7 @@ begin
               end
               else
               begin
-                TabServis.Edit; // Deðiþtirme
+                TabServis.Edit; // DeÄŸiÅŸtirme
                 TabServis.FieldByName('DONUSTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
               end;
             end;
@@ -505,12 +505,12 @@ begin
           'G':
             begin
               //
-              TabServis.Edit; // Deðiþtirme
+              TabServis.Edit; // DeÄŸiÅŸtirme
               TabServis.FieldByName('DURUM').AsInteger := 6;
             end;
           'I':
             begin
-              TabServis.Edit; // Deðiþtirme
+              TabServis.Edit; // DeÄŸiÅŸtirme
               TabServis.FieldByName('DONUSTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
               TabServis.FieldByName('DURUM').AsInteger := 7;
             end;
@@ -581,7 +581,7 @@ begin
       TabServis.FieldByName('ACKAPA').AsBoolean := False;
       TabServis.FieldByName('TESLIM_SEKLI').AsInteger:= 1;
       TabServis.FieldByName('DURUM').AsInteger := 0;//Tablo.GENINI.ReadInteger(Ops_OpsiyonServis_Varsayilan_Durum_Yeni,1);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=1 where ID =&id ', ['&id'], [DemirbasId]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update DEMIRBAS set SERVISDURUM=1 where ID =&id ', ['&id'], [DemirbasId]);
 
 
       TabServis.FieldByName('NOTLAR').AsString := '';
@@ -591,7 +591,7 @@ begin
       belgeno:= SiradakiBelgeNumarasi(TabNo_SERVIS,Tablo.GENINI.BugunTrhSaat);
       TabServis.FieldByName('SERVISNO').AsString := belgeno.belgeno;
      // TabServis.FieldByName('SERVISSERI').AsString := belgeno.serino;
-     // TabServis.FieldByName('KOCANNO').AsInteger := KocannoBul(TabNo_SERVIS); //KOCAN numarasý
+     // TabServis.FieldByName('KOCANNO').AsInteger := KocannoBul(TabNo_SERVIS); //KOCAN numarasÄ±
       TabServis.FieldByName('SUBEID').AsInteger := SubeID;
 end;
 `r`n

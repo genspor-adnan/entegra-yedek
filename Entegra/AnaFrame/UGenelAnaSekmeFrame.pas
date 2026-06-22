@@ -1,4 +1,4 @@
-unit UGenelAnaSekmeFrame;
+ï»¿unit UGenelAnaSekmeFrame;
 
 interface
 
@@ -71,7 +71,7 @@ type
   private
     { Private declarations }
     //FFrameBilgi : TAnaFrameBilgi;
-    { IAnaBilgiFrame üyeleri            }
+    { IAnaBilgiFrame Ã¼yeleri            }
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -127,7 +127,7 @@ const
 
 procedure TGenelAnaSekmeFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 type
@@ -157,7 +157,7 @@ var
   YaziciYaz.Caption := ra;
 
 
-//    if Sender.Etiketler.AsBoolean['DökümEkraný'] then
+//    if Sender.Etiketler.AsBoolean['DÃ¶kÃ¼mEkranÄ±'] then
 //    begin
 //      EkranYaz.Caption := 'Liste';
 //      YaziciYaz.Caption := 'Liste';
@@ -194,7 +194,7 @@ begin
   with FFrameBilgi.IcerikFrameYoneticisi.AktifFrame do begin
     AracCubuguDestegi.YazdirmayaHazirla(FastRaporDlg.frxReport1);
     BilgiFrameIntf.EkranYazdir(FastRaporDlg);
-    if Etiketler.AsBoolean['DökümEkraný'] then
+    if Etiketler.AsBoolean['DÃ¶kÃ¼mEkranÄ±'] then
       ekranAdi := TDokumDlg(Ornek).TabDokum.AsString['RAPORADI']
     else  // ekranAdi := TToolButton(FFrameBilgi.AktifIcerik.Ornek.FindComponent('YaziciYaz')).Caption;
       ekranAdi := TToolButton(TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent).Caption;
@@ -290,7 +290,7 @@ begin
   dokumAdi:= kaynakDokum;
   if TGirisKutusuEx.BilgiAlEx(BGDokum_Rapor_Ad_Degistir, TGirdiDenetimleri.Create.Edit(BGYeni_ad,@dokumAdi)) = mrOk then begin
     if Trim(dokumAdi) = '' then begin
-      MessageDlg('Döküm/Rapor adý boþ olamaz!',mtError,[mbOK],0);
+      MessageDlg('DÃ¶kÃ¼m/Rapor adÄ± boÅŸ olamaz!',mtError,[mbOK],0);
       Exit;
     end;
 
@@ -300,7 +300,7 @@ begin
     end;
 
     if Ekranadi = 'DokumDlg' then begin  // Assigned(dokumEkran)
-      { DökümDlg açýk }
+      { DÃ¶kÃ¼mDlg aÃ§Ä±k }
       dokumEkran.TabDokum.Edit;
       dokumEkran.TabDokum.AsString['RAPORADI'] := dokumAdi;
       dokumEkran.TabDokum.Post;
@@ -398,15 +398,15 @@ begin
    if Ekranadi = 'DokumDlg' then begin
      kaynakDokum := TDokumDlg(Dlg).TabDokum.AsString['RAPORADI'];
      Ver := TDokumDlg(Dlg).TabDokum.AsString['VERSIYON'];
-     dlgSave.FileName := kaynakDokum + '.frd'; //döküm ayarlarý
+     dlgSave.FileName := kaynakDokum + '.frd'; //dÃ¶kÃ¼m ayarlarÄ±
      dlgSave.Filter := '.frd';
      RaporId := TDokumDlg(Dlg).TabDokum.AsInteger['ID'];
-   end else begin                                                                  //sayfayý kaydetme
+   end else begin                                                                  //sayfayÄ± kaydetme
      kaynakDokum := TToolButton(TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent).Caption;  // kaynakDokum := TToolButton(FFrameBilgi.AktifIcerik.Ornek.FindComponent('YaziciYaz')).Caption;
      Ver := '';
      Delete(kaynakDokum, pos('&',kaynakDokum), 1);
      dlgSave.Filter := '.frs';
-     dlgSave.FileName := kaynakDokum+'.frs';//sayfa ayarlarý
+     dlgSave.FileName := kaynakDokum+'.frs';//sayfa ayarlarÄ±
      RaporId := DokumIDGetir(kaynakDokum, EkranAdi);
    end;
 
@@ -441,11 +441,11 @@ begin
   if TGirisKutusuEx.BilgiAlEx(BGDokum_Rapor_Kopyala,
     TGirdiDenetimleri.Create.Edit(BGYeni_ad,@dokumAdi)) = mrOk then begin
     if Trim(dokumAdi) = '' then begin
-      MessageDlg('Döküm/Rapor adý boþ olamaz!',mtError,[mbOK],0);
+      MessageDlg('DÃ¶kÃ¼m/Rapor adÄ± boÅŸ olamaz!',mtError,[mbOK],0);
       Exit;
     end;
     if Ekranadi = 'DokumDlg' then begin  // Assigned(dokumEkran)
-      { DökümDlg açýk }
+      { DÃ¶kÃ¼mDlg aÃ§Ä±k }
       TRaporAraclari.RaporKopyala(dokumEkran.TabDokum.AsInteger['ID'], dokumAdi);    // kaynakDokum,dokumAdi, dokumEkran.TabDokum
       TDokumDlg(Dlg).EkranDegisveKonumlan(0)
     end else begin
@@ -474,7 +474,7 @@ begin
    PopupMenuYaz := ((TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent).Owner).FindComponent('PopupMenuYaz') as TPopupMenu;
 
    aktifFrame := TGenelAnaSekmeFrame(UTablo.AnaFrameYoneticisi.AktifFrame.Ornek);
-   //eski yazdýrma menülerini silelim
+   //eski yazdÄ±rma menÃ¼lerini silelim
    while PopupMenuYaz.Items.Count > 5 do
          PopupMenuYaz.Items.Delete(PopupMenuYaz.Items.Count-1);
    //yenileri ekleyelim
@@ -487,7 +487,7 @@ var PM : TPopupMenu;
   c, Dlg : TComponent;
   Ekranadi : String[50];
 begin
-  if MessageDlg('Geçerli dökümü silmek istiyor musunuz?',
+  if MessageDlg('GeÃ§erli dÃ¶kÃ¼mÃ¼ silmek istiyor musunuz?',
      mtConfirmation,[mbYes,mbNo],0) = mrNo then Exit;
    c := TToolButton(TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent).GetParentComponent;
    Dlg := c.Owner;
@@ -586,10 +586,10 @@ begin
         TRaporAraclari.YeniRapor(EkranAdi, dokumAdi);
     //    YazdirmaBilgileriniYenile(FFrameBilgi.AktifIcerik);
         //?FFrameBilgi.AktifIcerik.AktifRaporAdi := dokumAdi;
-        //Önce eski dökümü aþaðý menüye indirelim
-        //TB := TToolButton(FFrameBilgi.AktifIcerik.Ornek.FindComponent('YaziciYaz'));  yerine aþaðýdaki yapýldý 12/2/2011 ao
+        //Ã–nce eski dÃ¶kÃ¼mÃ¼ aÅŸaÄŸÄ± menÃ¼ye indirelim
+        //TB := TToolButton(FFrameBilgi.AktifIcerik.Ornek.FindComponent('YaziciYaz'));  yerine aÅŸaÄŸÄ±daki yapÄ±ldÄ± 12/2/2011 ao
         TB :=TToolButton( TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent);
-    //    TPopupMenu(FFrameBilgi.AktifIcerik.Ornek.FindComponent('PopupMenuYaz')).Items.ItemOperation(moAdd, TB.Caption, RaporSecClick); yerine aþaðýdaki yapýldý
+    //    TPopupMenu(FFrameBilgi.AktifIcerik.Ornek.FindComponent('PopupMenuYaz')).Items.ItemOperation(moAdd, TB.Caption, RaporSecClick); yerine aÅŸaÄŸÄ±daki yapÄ±ldÄ±
         TPopupMenu(TMenuItem(sender).GetParentComponent).Items.ItemOperation(moAdd, TB.Caption, RaporSecClick);
         TB.Caption := dokumAdi;
         mnuSayfaAyarlar.Click;
@@ -637,7 +637,7 @@ procedure TGenelAnaSekmeFrame.pnlYazdirmaPaint(Sender: TObject);
 begin
 //  GradientFillRect(TJvPanel(Sender).Canvas,TJvPanel(Sender).ClientRect,clWhite,$00D6D6D6,fdTopToBottom,255);
 //  if TJvPanel(Sender).Height = KapanmisHali then begin
-//    TJvPanel(Sender).Caption := 'Gezinme ve Yazdýrma';
+//    TJvPanel(Sender).Caption := 'Gezinme ve YazdÄ±rma';
 //    t(TJvPanel(Sender)).DrawCaption;
 //  end;
 
@@ -702,7 +702,7 @@ begin
 {  with FFrameBilgi.IcerikFrameYoneticisi.AktifFrame do begin
     AracCubuguDestegi.YazdirmayaHazirla(FastRaporDlg.frxReport1);
     BilgiFrameIntf.YaziciYazdir(FastRaporDlg);
-    if Etiketler.AsBoolean['DökümEkraný'] then
+    if Etiketler.AsBoolean['DÃ¶kÃ¼mEkranÄ±'] then
       ekranAdi := TDokumDlg(Ornek).TabDokum.AsString['RAPORADI']
     else
       ekranAdi := TToolButton(TPopupMenu(TMenuItem(sender).GetParentComponent).PopupComponent).Caption;  // ekranAdi := TToolButton(FFrameBilgi.AktifIcerik.Ornek.FindComponent('YaziciYaz')).Caption;

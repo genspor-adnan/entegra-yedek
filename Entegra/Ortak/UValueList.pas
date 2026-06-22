@@ -1,4 +1,4 @@
-unit UValueList;
+ï»¿unit UValueList;
 
 interface
 
@@ -66,7 +66,7 @@ begin
 {   Degervar:=True;
    for i := 1 to ValueListEditor1.rowcount -1 do
        if ValueListEditor1.Cells[1,i] = '' then Degervar:=False;
-   if not Degervar then ShowMessage('Boþ satýr olmamalý...');
+   if not Degervar then ShowMessage('BoÅŸ satÄ±r olmamalÄ±...');
    CanClose := Degervar;  }
    CanClose := True;
 end;

@@ -1,4 +1,4 @@
-unit USenetAramaFrame;
+﻿unit USenetAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 11:09:52}
@@ -89,7 +89,7 @@ end;
 
 procedure TSenetAramaFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TSenetAramaFrame.btnSilClick(Sender: TObject);

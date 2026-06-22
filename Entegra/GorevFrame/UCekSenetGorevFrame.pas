@@ -1,4 +1,4 @@
-unit UCekSenetGorevFrame;
+ï»¿unit UCekSenetGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -45,13 +45,13 @@ end;
 
 procedure TCekSenetGorevFrame.btnDokumlerClick(Sender: TObject);
 begin
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'Ç';
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'Ã‡';
 end;
 
 procedure TCekSenetGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   btnCekSenet.Visible := Tablo.YetkiVarmi(255101,YetkiTur_Gorme);
   btnSenet.Visible := Tablo.YetkiVarmi(255111,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(255199,YetkiTur_Gorme);

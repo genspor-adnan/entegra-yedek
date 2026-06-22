@@ -1,4 +1,4 @@
-unit UKimlik;
+ï»¿unit UKimlik;
 
 interface
 
@@ -202,7 +202,7 @@ begin
    AktifYas := '';
 
    if pos('.', EditDOGUMTARIH.Text)>0 then
-      raise exception.Create('Doðum tarihi için ''.'' yerine ''/'' kullanýlmalý..');
+      raise exception.Create('DoÄŸum tarihi iÃ§in ''.'' yerine ''/'' kullanÄ±lmalÄ±..');
 
   { if pos('/', EditDOGUMTARIH.Text)=0 then begin
       dtar := StrToInt(EditDOGUMTARIH.Text); //1985 veya 26
@@ -234,13 +234,13 @@ begin
 
    if yil = 0 Then
    If Ay = 0 Then
-      AktifYas := Format('%d gün', [gun])
+      AktifYas := Format('%d gÃ¼n', [gun])
    Else
-      AktifYas := Format('%d ay %d gün', [ay, gun])
+      AktifYas := Format('%d ay %d gÃ¼n', [ay, gun])
    else if (yil > 0)and(yil < 2) Then
-      AktifYas := Format('%d yýl %d ay', [yil, ay])
+      AktifYas := Format('%d yÄ±l %d ay', [yil, ay])
    else if (yil >= 0)and(yil < 5) Then
-      AktifYas := Format('%d yýl %d ay', [yil, ay])
+      AktifYas := Format('%d yÄ±l %d ay', [yil, ay])
    else
       AktifYas := Format('%d', [yil]);
 
@@ -250,7 +250,7 @@ end;
 procedure TKimlikDlg.AppException(Sender: TObject; E: Exception);
 begin
   if pos('Key violation', E.Message) > 0  then
-     showmessage('Ayný numara ya da isimle kayýtlý bilgi var!!!')
+     showmessage('AynÄ± numara ya da isimle kayÄ±tlÄ± bilgi var!!!')
   else if pos('not a valid date', E.Message) > 0  then begin
           dtar := StrToInt(EditDOGUMTARIH.Text); //1985 veya 26
           if (dtar > 1900)and(dtar < 2020) then
@@ -277,7 +277,7 @@ var ii : integer;
     gg : Boolean;
     DtsKimlik : TDataSource;
 begin
-  {Tuþlarý görüntüle/görüntüleme}
+  {TuÅŸlarÄ± gÃ¶rÃ¼ntÃ¼le/gÃ¶rÃ¼ntÃ¼leme}
 
    for ii := 0 To KimlikDlg.ComponentCount - 1 do begin
        if GenotipIni.ReadInteger('GOR', KimlikDlg.Components[ii].Name, 1)=0 then
@@ -305,7 +305,7 @@ procedure TKimlikDlg.ComboPOLIKLINIKExit(Sender: TObject);
 begin
    if (TabGelisler.State = dsBrowse)or(ComboDOKTOR.Text<>'') then exit;
    Tablo.Query3.Close;
-   Tablo.Query3.SQL.Text := 'Select DOKTORKOD, DOKTOR From DOKTOR Where UZMANLIK='''+ComboPOLIKLINIK.Text+''' AND DURUM<>''PASÝF'' order by DOKTORKOD';
+   Tablo.Query3.SQL.Text := 'Select DOKTORKOD, DOKTOR From DOKTOR Where UZMANLIK='''+ComboPOLIKLINIK.Text+''' AND DURUM<>''PASÄ°F'' order by DOKTORKOD';
    Tablo.Query3.Open;
    LabelDOKTORKOD.Field.AsString := Tablo.Query3.Fields[0].AsString;
    ComboDOKTOR.Field.AsString := Tablo.Query3.Fields[1].AsString;
@@ -403,7 +403,7 @@ begin
      Inc(Rakam);
      PNo := IntToStr(Rakam);
    except
-     raise exception.Create('Dosya Numarasýnda Rakam Dýþýnda Karakter Var!');
+     raise exception.Create('Dosya NumarasÄ±nda Rakam DÄ±ÅŸÄ±nda Karakter Var!');
    end;
    for i:=1 to DosyanoRakSay-length(PNo) do insert('0',PNo,1);
    PNO := DosyanoRakOnek+PNO;
@@ -434,7 +434,7 @@ begin
    end
    else
      if TabGelisler.State in [dsEdit, DsInsert] then TabGelisler.Post;
-//     LogIslemleri('Kimlik', 'Deðiþ', TabKimlik, True);
+//     LogIslemleri('Kimlik', 'DeÄŸiÅŸ', TabKimlik, True);
    Panel1.Visible := True;
 end;
 
@@ -450,9 +450,9 @@ begin
      if TabKimlik.FieldByName(KimlikZorunlu.Strings[i]).AsString = '' then
         if (pos('TEL',KimlikZorunlu.Strings[i])>0)and(TabKimlik.FieldByName('EVTEL').AsString='')and
            (TabKimlik.FieldByName('ISTEL').AsString='')and(TabKimlik.FieldByName('CEPTEL').AsString='')then
-           raise Exception.Create(KimlikZorunlu.Strings[i]+' Dolu Olmalý!!!!')
+           raise Exception.Create(KimlikZorunlu.Strings[i]+' Dolu OlmalÄ±!!!!')
         else if pos('TEL',KimlikZorunlu.Strings[i])=0  then
-                raise Exception.Create(KimlikZorunlu.Strings[i]+' Dolu Olmalý!!!!');
+                raise Exception.Create(KimlikZorunlu.Strings[i]+' Dolu OlmalÄ±!!!!');
 
    if YeniEklenenKayit then begin
       TabKimlik.Fields[1].AsString := TrimLeft(TabKimlik.Fields[1].AsString);
@@ -469,7 +469,7 @@ begin
    TabKimlik.FieldByName('SOYAD').AsString := SoyAd;
    if pos('EV',uppercase(Tel))>0 then
       TabKimlik.FieldByName('EVTEL').AsString := copy(Tel,1,15)
-   else if (pos('ÝÞ',Tel)>0)or(pos('iþ',Tel)>0) then
+   else if (pos('Ä°Åž',Tel)>0)or(pos('iÅŸ',Tel)>0) then
       TabKimlik.FieldByName('ISTEL').AsString := copy(Tel,1,15)
    else if pos('CEP',uppercase(Tel))>0 then
       TabKimlik.FieldByName('CEPTEL').AsString := copy(Tel,1,15);
@@ -602,7 +602,7 @@ end;
 procedure TKimlikDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    if TabKimlik.State in [dsEdit,dsInsert] then
-      if Application.MessageBox('Ýþlemler kaydedilmedi. Kayýt edilsin mi? ', 'GenoTIP ONAY', MB_YESNO)=IDYES then
+      if Application.MessageBox('Ä°ÅŸlemler kaydedilmedi. KayÄ±t edilsin mi? ', 'GenoTIP ONAY', MB_YESNO)=IDYES then
          TabKimlik.Post;
 end;
 

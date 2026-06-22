@@ -1,4 +1,4 @@
-unit USiparisPivot;
+﻿unit USiparisPivot;
 
 interface
 

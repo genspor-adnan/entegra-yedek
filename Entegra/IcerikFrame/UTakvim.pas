@@ -1,16 +1,16 @@
-unit UTakvim;
+ï»¿unit UTakvim;
 
-// Plan     ->    Faturasý Geldi   ->   Ödeme yap
-// Kredi    ->   Ödeme yap
-// Fatura   ->   Ödeme yap
-// Çek / Senet   ->   Ödeme yap
+// Plan     ->    FaturasÄ± Geldi   ->   Ã–deme yap
+// Kredi    ->   Ã–deme yap
+// Fatura   ->   Ã–deme yap
+// Ã‡ek / Senet   ->   Ã–deme yap
 
 //Planlananlar
-// I  - Planlanan tablosundan müþteri tahsil (61) ve ödeme (71) satýrlarý
-// II - Planlanan tablosundan düzenli tahsil (62) ve düzenli ödeme (72) satýrlarý
-// III- Planmaas tablosundan personel ödeme (73) satýrlarý
-// IV - PlanKredi tablosundan kredi ödeme (58) satýrlarý
-// V  - CekSenet tablosundan müþteri tahsil (23,24) ve ödeme (33,34) satýrlarý
+// I  - Planlanan tablosundan mÃ¼ÅŸteri tahsil (61) ve Ã¶deme (71) satÄ±rlarÄ±
+// II - Planlanan tablosundan dÃ¼zenli tahsil (62) ve dÃ¼zenli Ã¶deme (72) satÄ±rlarÄ±
+// III- Planmaas tablosundan personel Ã¶deme (73) satÄ±rlarÄ±
+// IV - PlanKredi tablosundan kredi Ã¶deme (58) satÄ±rlarÄ±
+// V  - CekSenet tablosundan mÃ¼ÅŸteri tahsil (23,24) ve Ã¶deme (33,34) satÄ±rlarÄ±
 //
 
 interface
@@ -242,7 +242,7 @@ type
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
   private
     { Private declarations }
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
     FTakvimAksiyonlar : TTakvimAksiyonFrame;
     //FGridTableView        : TcxGridDBTableView;
@@ -316,7 +316,7 @@ begin
       Tablo.SiparisSihirbazBaslat('E', Sonuc,0, -1, -1)
    else if Sonuc in [10..16] then begin
       if Sonuc=11 then
-        Sonuc := 0 //0:belge giriþi  1:belge çýkýþý
+        Sonuc := 0 //0:belge giriÅŸi  1:belge Ã§Ä±kÄ±ÅŸÄ±
       else
         Sonuc := 1;
       Tablo.FaturaSihirbazBaslat('E', Sonuc,-1, -1,0)
@@ -332,13 +332,13 @@ begin
   Scheduler.SelectDays([Date - 1, Date, Date + 13], True);
   Height := 550;
   Width := 700;
-  //SQL komutunda SPID deðernini deðiþtirelim
+  //SQL komutunda SPID deÄŸernini deÄŸiÅŸtirelim
 end;
 
 procedure TTakvimDlg.PageControlChange(Sender: TObject);
 var s, ra : string;
 begin
-   //yazdýrma ayarlarý her sekmeye göre yapýlýr
+   //yazdÄ±rma ayarlarÄ± her sekmeye gÃ¶re yapÄ±lÄ±r
    TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra, TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
    YaziciYaz.Caption := ra;
 
@@ -368,7 +368,7 @@ begin
     if (CheckTahsilat.Checked)and(CheckOdeme.Checked) then s:=s+' (TUR=61 or TUR=71) '
     else if CheckTahsilat.Checked then s:=s+' (TUR=61) '
     else if CheckOdeme.Checked then s:=s+' (TUR=71) '
-    else s:=s+' TUR=9999 ';  // hiç iþaretlenmediyse
+    else s:=s+' TUR=9999 ';  // hiÃ§ iÅŸaretlenmediyse
     LISTE.SQL.Text := SQLListe.Text + ' PLANTARIHI <= '''+FormatDateTime('yyyy-MM-dd 23:59', DateTimeListeBitis.Date)+''' '+s+' order by 2 ';
     TabloYenile(LISTE, []);
   end;
@@ -379,10 +379,10 @@ var
   OlusanSQL: string;
 begin
  OlusanSQL:='';
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[0]=cbsChecked then begin  //Odeme Planý
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[0]=cbsChecked then begin  //Odeme PlanÄ±
            OlusanSQL:= ' Union All '+SqlGrafikOdemePlan.Lines.Text;
          end;
-         if FTakvimAksiyonlar.GelirFiltreCheck.States[0]=cbsChecked then begin  //Tahsilat Planý
+         if FTakvimAksiyonlar.GelirFiltreCheck.States[0]=cbsChecked then begin  //Tahsilat PlanÄ±
            OlusanSQL:= OlusanSQL +' Union All '+SqlGrafikTahsilatPlan.Lines.Text;
          end;
          if FTakvimAksiyonlar.GiderFiltreCheck.States[1]=cbsChecked then begin  //KK
@@ -391,10 +391,10 @@ begin
          if FTakvimAksiyonlar.GelirFiltreCheck.States[1]=cbsChecked then begin  //POS
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikPOS.Lines.Text;
          end;
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then begin  //Çek
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then begin  //Ã‡ek
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikCekKendi.Lines.Text;
          end;
-         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then begin  //Çek
+         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then begin  //Ã‡ek
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikCekMusteri.Lines.Text;
          end;
          if FTakvimAksiyonlar.GiderFiltreCheck.States[3]=cbsChecked then begin  //Senet
@@ -412,7 +412,7 @@ begin
          if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then begin  //Gider
             OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikGider.Lines.Text;
          end;
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then begin  //Maaþ
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then begin  //MaaÅŸ
            OlusanSQL:= OlusanSQL + ' Union All '+ SqlGrafikMaas.Lines.Text;
          end;
   TabGrafik.Close;
@@ -422,7 +422,7 @@ begin
          TabGrafik.SQL.Add('select * from GRAFIKPLAN_SPID ORDER by TARIH');
        end;
        2:begin
-         TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar günlerini listelele
+         TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar gÃ¼nlerini listelele
        end;
        -1,3:begin
          TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112)  from GRAFIKPLAN_SPID'+
@@ -455,7 +455,7 @@ end;
 
 procedure TTakvimDlg.ExcelPivot1Click(Sender: TObject);
 begin
-  Tablo.SaveDialog1.FileName := 'Nakit Akýþ Pivot-'+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+'.xlsx';
+  Tablo.SaveDialog1.FileName := 'Nakit AkÄ±ÅŸ Pivot-'+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+'.xlsx';
   if Tablo.SaveDialog1.Execute then begin
     if ExportToExcelPivot(Tablo.SaveDialog1.FileName,FGrid,FGridTableView,pivot) then
       ShellExecute(0,'open',PWideChar(Tablo.SaveDialog1.FileName),nil,nil,SW_SHOW);
@@ -608,10 +608,10 @@ var
 
    end;
 begin
-// Plan   (Tur = 61 veya 71)   ->   Ödeme yap   //Burdaki ID PLANLANAN tablosundaki ID karþýlýðý
-// Kredi  (Tur = 58)   ->   Ödeme yap   //Burdaki ID PLANKREDI tablosundaki ID karþýlýðý
-// Fatura (Tur = 11 veya 15)  ->   Ödeme yap   //Burdaki ID FATBASLIK tablosundaki ID karþýlýðý
-// Çek / Senet (Tur = Çek:23 veya 33 Sen:24 veya 34)  ->   Ödeme yap //Burdaki ID CEKSENET tablosundaki ID karþýlýðý
+// Plan   (Tur = 61 veya 71)   ->   Ã–deme yap   //Burdaki ID PLANLANAN tablosundaki ID karÅŸÄ±lÄ±ÄŸÄ±
+// Kredi  (Tur = 58)   ->   Ã–deme yap   //Burdaki ID PLANKREDI tablosundaki ID karÅŸÄ±lÄ±ÄŸÄ±
+// Fatura (Tur = 11 veya 15)  ->   Ã–deme yap   //Burdaki ID FATBASLIK tablosundaki ID karÅŸÄ±lÄ±ÄŸÄ±
+// Ã‡ek / Senet (Tur = Ã‡ek:23 veya 33 Sen:24 veya 34)  ->   Ã–deme yap //Burdaki ID CEKSENET tablosundaki ID karÅŸÄ±lÄ±ÄŸÄ±
 //           ID := Scheduler.CurrentView.HitTest.Event.Source.GetCustomFieldValueByName('ID2');
    if Scheduler.SelectedEventCount = 0 then Exit;
    selectedEvent := Scheduler.SelectedEvents[0];
@@ -621,7 +621,7 @@ begin
    Tutar:= selectedEvent.GetCustomFieldValueByName('TUTAR');
    Kur:= selectedEvent.GetCustomFieldValueByName('KUR');
 
-   //þimdi sihirbazý çaðýrabiliriz
+   //ÅŸimdi sihirbazÄ± Ã§aÄŸÄ±rabiliriz
    Tur := TMenuItem(Sender).Tag;
    case Tur of
        21,31 : HesapTuru := 'K';
@@ -640,7 +640,7 @@ begin
        NakitDlg.IslemOp := 'E';
        NakitDlg.RehberId := RehberId;
        NakitDlg.MakbuzTarih := Tablo.GENINI.BugunTrhSaat;
-       NakitDlg.LabelTarih.Visible := True; //menüden kýsayol olduðu için tarih girilebilir
+       NakitDlg.LabelTarih.Visible := True; //menÃ¼den kÄ±sayol olduÄŸu iÃ§in tarih girilebilir
        NakitDlg.EditTarih.Visible := True;
        NakitDlg.MakbuzNo := SiradakiMakbuzNumarasi(Tur);
        NakitDlg.Tutar := Tutar;
@@ -684,10 +684,10 @@ var Dosya,s :String[20];
        SenetOdemeMenu.Tag := i+3;
     end;
 begin
-// Plan     ->    Faturasý Geldi   ->   Ödeme yap
-// Kredi    ->   Ödeme yap
-// Fatura   ->   Ödeme yap
-// Çek / Senet   ->   Ödeme yap
+// Plan     ->    FaturasÄ± Geldi   ->   Ã–deme yap
+// Kredi    ->   Ã–deme yap
+// Fatura   ->   Ã–deme yap
+// Ã‡ek / Senet   ->   Ã–deme yap
    Enable := Scheduler.CurrentView.HitTest.Event <> nil;
    BilgileriDegisMenu.Enabled := Enable;
    TahsilMenu.Enabled := Enable;
@@ -698,33 +698,33 @@ begin
        Tur := StrToInt(Scheduler.CurrentView.HitTest.Event.Source.GetCustomFieldValueByName('Tur'));
        Aciklama := Scheduler.CurrentView.HitTest.Event.Caption; //Scheduler.CurrentView.HitTest.Event.Source.Get  CustomFieldValueByName('caption');
 
-       //Çek senet ödemesi tekrar çek senetle yapýlmayacaðý için kapatýrýz
+       //Ã‡ek senet Ã¶demesi tekrar Ã§ek senetle yapÄ±lmayacaÄŸÄ± iÃ§in kapatÄ±rÄ±z
        TahsilMenu.Visible := Tur = 61;
        OdemeMenu.Visible := Tur = 71;
        case Tur of
          23 : begin
                 GenelMenu.Visible := True;
-                GenelMenu.Caption := 'Çek Tahsilatýný Yap';
+                GenelMenu.Caption := 'Ã‡ek TahsilatÄ±nÄ± Yap';
                 GenelMenu.Tag := 51;
               end;
          24 : begin
                 GenelMenu.Visible := True;
-                GenelMenu.Caption := 'Senet Tahsilatýný Yap';
+                GenelMenu.Caption := 'Senet TahsilatÄ±nÄ± Yap';
                 GenelMenu.Tag := 52;
               end;
          33 : begin
                 GenelMenu.Visible := True;
-                GenelMenu.Caption := 'Çek Ödemesini Yap';
+                GenelMenu.Caption := 'Ã‡ek Ã–demesini Yap';
                 GenelMenu.Tag := 53;
               end;
          34 : begin
                 GenelMenu.Visible := True;
-                GenelMenu.Caption := 'Senet Ödemesini Yap';
+                GenelMenu.Caption := 'Senet Ã–demesini Yap';
                 GenelMenu.Tag := 54;
               end;
          111: begin
                 GenelMenu.Visible := True;
-                GenelMenu.Caption := 'Kredi Ödemesini Yap';
+                GenelMenu.Caption := 'Kredi Ã–demesini Yap';
                 GenelMenu.Tag := 58;
               end
          else
@@ -733,21 +733,21 @@ begin
 //       NakitOdemeMenu.Visible := Dosya <> 'PLANKREDI' ;
 //       CekOdemeMenu.Visible := not((Dosya = 'CEKLER') or (Dosya = 'PLANKREDI'));
 //       SenetOdemeMenu.Visible := not((Dosya = 'SENETLER') or (Dosya = 'PLANKREDI'));
-       //Sadece planlarda ve ahmin olduðu zaman fatura menüsü görülecek
-       Gizle1.Visible := Dosya = 'Bütçe';
-       if Dosya = 'KASA' then begin //eðer plansa
+       //Sadece planlarda ve ahmin olduÄŸu zaman fatura menÃ¼sÃ¼ gÃ¶rÃ¼lecek
+       Gizle1.Visible := Dosya = 'BÃ¼tÃ§e';
+       if Dosya = 'KASA' then begin //eÄŸer plansa
           s := 'Plan';
        end else if Dosya = 'FATBASLIK' then begin
           s := 'Fatura';
           if Tur=11 then begin
-             TahsilMenu.Caption := 'Fatura ödemesini yap';
+             TahsilMenu.Caption := 'Fatura Ã¶demesini yap';
              TagaBilgiYaz(31);
           end else begin
-             TahsilMenu.Caption := 'Fatura tahsilatýný yap' ;
+             TahsilMenu.Caption := 'Fatura tahsilatÄ±nÄ± yap' ;
              TagaBilgiYaz(21);
           end;
        end else
-       BilgileriDegisMenu.Caption :=s+' bilgilerini gör / deðiþtir';
+       BilgileriDegisMenu.Caption :=s+' bilgilerini gÃ¶r / deÄŸiÅŸtir';
    end;
 end;
 
@@ -833,7 +833,7 @@ if PageControl.ActivePage=TabSheetTakvim then begin
 end else if PageControl.ActivePage=TabSheetPivot then begin
     TabPivot.Close;
     case AylikHaftalikGunluk  of
-      0: TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot](:PSonTarih)'; //günlük
+      0: TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot](:PSonTarih)'; //gÃ¼nlÃ¼k
       2: TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot_Haftalik](:PSonTarih)'; //hafta
       3: TabPivot.SQL.Text := 'select * from [dbo].[fn_NakitAkisiPivot_Aylik](:PSonTarih)'; //ay
     end;
@@ -843,15 +843,15 @@ end else begin
     TabGrafik.Close;
     case AylikHaftalikGunluk  of
        0:TabGrafik.SQL.Text:='select * from GRAFIKPLAN_SPID ORDER by TARIH';
-       2:TabGrafik.SQL.Text:='Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ';//Pazar günlerini listelele
+       2:TabGrafik.SQL.Text:='Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ';//Pazar gÃ¼nlerini listelele
        3:TabGrafik.SQL.Text:='select GUN,AY,BAKIYE,TARIH,CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112)  from GRAFIKPLAN_SPID'+
          ' Where TARIH=CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112) and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBasTar.Date)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBitTar.Date)+''' '+
          ' Order by TARIH';
     end;
     TabloYenile(TabGrafik,[]);
-   GridGrafikDBChartView.DiagramColumn.AxisValue.GridLines := true; // grid çizgileri
-   GridGrafikDBChartView.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarý gösterir
-   GridGrafikDBChartView.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // üstte deðerlerinin görünmesini saðlar
+   GridGrafikDBChartView.DiagramColumn.AxisValue.GridLines := true; // grid Ã§izgileri
+   GridGrafikDBChartView.DiagramColumn.AxisValue.TickMarkLabels := true; // Altta aylarÄ± gÃ¶sterir
+   GridGrafikDBChartView.DiagramColumn.Values.CaptionPosition := cdvcpOutsideEnd; // Ã¼stte deÄŸerlerinin gÃ¶rÃ¼nmesini saÄŸlar
   end;
 end;
 
@@ -873,12 +873,12 @@ begin
       AFastReport.EnabledDataSets.Add(frxTAKVIM)
    else begin
       case PageControl.ActivePage.Tag of
-        1 : begin //takvin nakit akýþý
+        1 : begin //takvin nakit akÄ±ÅŸÄ±
               TabloAc(TAKVIM, Scheduler.DateNavigator.SelectionList.Items[0] , Scheduler.DateNavigator.SelectionList.Items[Scheduler.DateNavigator.SelectionList.Count-1]);
               frxTAKVIM.DataSet := TAKVIM;
               frxTAKVIM.UserName := 'TAKVIM';
             end;
-        4 : begin //takvin nakit akýþý
+        4 : begin //takvin nakit akÄ±ÅŸÄ±
               frxTAKVIM.DataSet := LISTE;
               frxTAKVIM.UserName := 'LISTE';
             end;
@@ -900,7 +900,7 @@ end;
 
 procedure TTakvimDlg.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
    Tablo.GridTurkcelestir;
 
@@ -1052,21 +1052,21 @@ begin
             Ekle(MemoTakvimTahsilatPlan.Lines.Text);
          if FTakvimAksiyonlar.GiderFiltreCheck.States[1]=cbsChecked then //KK
             Ekle(MemoTakvimPlanKK.Lines.Text);
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then //Çekimiz
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[2]=cbsChecked then //Ã‡ekimiz
             Ekle(MemoTakvimCekKendi.Lines.Text);
-         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then //Müþteri Çek
+         if FTakvimAksiyonlar.GelirFiltreCheck.States[2]=cbsChecked then //MÃ¼ÅŸteri Ã‡ek
             Ekle(MemoTakvimCekMusteri.Lines.Text);
          if FTakvimAksiyonlar.GiderFiltreCheck.States[3]=cbsChecked then //Senetimiz
             Ekle(MemoTakvimSenetKendi.Lines.Text);
-         if FTakvimAksiyonlar.GelirFiltreCheck.States[3]=cbsChecked then //Müþteri Senet
+         if FTakvimAksiyonlar.GelirFiltreCheck.States[3]=cbsChecked then //MÃ¼ÅŸteri Senet
             Ekle(MemoTakvimSenetMusteri.Lines.Text);
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then //Maaþ
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[6]=cbsChecked then //MaaÅŸ
             Ekle(MemoPlanMaas.Lines.Text);
          if FTakvimAksiyonlar.GiderFiltreCheck.States[5]=cbsChecked then //Kredi
             Ekle(MemoPlanKredi.Lines.Text);
-         if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then //Gider Bütçe
+         if FTakvimAksiyonlar.GiderFiltreCheck.States[4]=cbsChecked then //Gider BÃ¼tÃ§e
             Ekle(MemoTakvimGider.Lines.Text);
-         if FTakvimAksiyonlar.GelirFiltreCheck.States[4]=cbsChecked then //Gelir Bütçe
+         if FTakvimAksiyonlar.GelirFiltreCheck.States[4]=cbsChecked then //Gelir BÃ¼tÃ§e
             Ekle(MemoTakvimGelir.Lines.Text);
          if FTakvimAksiyonlar.GelirFiltreCheck.States[1]=cbsChecked then //POS
             Ekle(MemoTakvimPOS.Lines.Text);
@@ -1102,7 +1102,7 @@ begin
      Application.CreateForm(TGunlukTakvimDlg, GunlukTakvimDlg);
   GunlukTakvimDlg.Tarih :=Tablo.GENINI.BugunTrh;// Trh;// .RealFirstDate;// Date;
   GunlukTakvimDlg.InitIslemler;
-  GunlukTakvimDlg.Caption:='Varlýklar';
+  GunlukTakvimDlg.Caption:='VarlÄ±klar';
   GunlukTakvimDlg.Width:=373;
   GunlukTakvimDlg.AutoSize:=True;
   GunlukTakvimDlg.ShowModal;

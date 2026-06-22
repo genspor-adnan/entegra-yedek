@@ -1,4 +1,4 @@
-unit UBankaKredileriListeFrame;
+ï»¿unit UBankaKredileriListeFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 06/01/2010 08:46:37}
@@ -491,7 +491,7 @@ begin
    end;
 
 
-  KalanAnaPara := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select	isnull(sum(BORC-ALACAK),0) from KASA KS where HESAPTURU=''R'' '+
+  KalanAnaPara := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select	isnull(sum(BORC-ALACAK),0) from KASA KS where HESAPTURU=''R'' '+
      'and KS.TUR<>2 and KS.HESAPID='+KREDILER.FieldByName('ID').AsString,[],[], True);
 
   Tarih := Tablo.GENINI.BugunTrhSaat;
@@ -515,7 +515,7 @@ begin
               KREDILER.FieldByName('KUR').AsString,'',0,FStrToCurrDef(VarToStr(Tutar),0),0,0,-1,KREDILER.FieldByName('ID').AsInteger,KREDILER.FieldByName('ID').AsInteger,
               -1,ID, SubeId,' ',0,0, VarToStr(RefNo));
 
-              Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
+              Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
 
      if Abs(StrToFloatDef(VarToStr(Tutar),0)-KalanAnaPara) < 1  then
         RotatifFaizMasrafEkle(True);
@@ -610,7 +610,7 @@ var ID : integer;
 begin
    if EKSTRE.RecordCount = 0 then exit;
    ID := Tablo.NakitSihirbazBaslat('B','E', 32, 1, -1, 0, Tablo.GENINI.BugunTrhSaat, '-1');
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
    EkstreGoster(CheckMasrafGoster.checked);
 end;
 
@@ -639,7 +639,7 @@ begin
    if EKSTRE.RecordCount = 0 then exit;
    Tablo.TablodanSorguAc(1,'select isnull(FAIZMASRAFID,0) from KREDILER where ID='+KREDILER.FieldByName('ID').AsString);
    ID := Tablo.NakitSihirbazBaslat('B','E', 32, 1, -1, 0, Tablo.GENINI.BugunTrhSaat, '-1',False,Tablo.Query1.Fields[0].AsInteger);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
    EkstreGoster(CheckMasrafGoster.checked);
 end;
 
@@ -716,8 +716,8 @@ begin
   ID2 := Tablo.KasaKaydet(Tur, KREDIROTATIF.FieldByName('TARIH').AsDateTime, KREDIROTATIF.FieldByName('TARIH').AsDateTime,0,
          KREDIROTATIF.FieldByName('ACIKLAMA').AsString, KREDILER.FieldByName('ID').AsInteger,Kur,Kur,0,
          Alacak,Borc,Abs(Borc-Alacak),0,FaturaId,KrediId,0,0,SubeId, HesapTur, Yer,YerId, KREDIROTATIF.FieldByName('KREDIREFERANSNO').AsString);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID)+' where ID = '+IntToStr(ID2),[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID)+' where ID = '+IntToStr(ID2),[],[]);
 end;
 
 procedure TBankaKredileriListeFrame.KrediEkleTusClick(Sender: TObject);
@@ -871,7 +871,7 @@ procedure TBankaKredileriListeFrame.RotatifDigerTurMasrafEkleMenuClick(Sender: T
 var ID : integer;
 begin
    ID := Tablo.TahakkukSihirbaziBaslat('E',13,0,-1,0,Tablo.GENINI.BugunTrhSaat);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update FATBASLIK set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update FATBASLIK set YERI='+IntToStr(TabNo_KREDILER)+', YERID='+KREDILER.FieldByName('ID').AsString+' where ID='+IntToStr(ID),[],[]);
    EkstreGoster(CheckMasrafGoster.checked);
 end;
 
@@ -931,7 +931,7 @@ var SimdikiFaizTut : Currency;
       Tablo.TablodanSorguAc(2,'select isnull(sum(BORC-ALACAK),0.0) from KASA where TUR in (58,59)and HESAPTURU=''R'' and HESAPID='+KREDILER.FieldByName('ID').AsString+
            ' and ISLEMTARIHI < '''+FormatDateTime('yyyy-mm-dd 00:00', DonemTarihi)+'''  ');
 
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO FATBASLIK(TARIH, TUR,TIPI,REHBERID, FATURATARIH,FATURA_MATRAHI, FATURA_TUTARI, KUR, DOVIZ_TUTARI,DOVIZ_CINSI, '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO FATBASLIK(TARIH, TUR,TIPI,REHBERID, FATURATARIH,FATURA_MATRAHI, FATURA_TUTARI, KUR, DOVIZ_TUTARI,DOVIZ_CINSI, '+
         'MASRAFID, ACIKLAMA, EKLEYEN, DOVIZKUR, EKSTREDEKULLAN,RAPORDOVIZ,YERI,YERID,LOKASYON,GIRISKAYNAK)values('''+FormatDateTime('yyyy-mm-dd hh:nn', ValorTarih)+''',13,1,0,'+
         ''''+FormatDateTime('yyyy-mm-dd hh:nn', IslemTarih)+''','+Tablo.Query2.Fields[0].AsString+','+Float_ToStr(TUTAR)+','''+CariDoviz+''','+Float_ToStr(TUTAR)+','''+CariDoviz+''','+
       Tablo.Query1.Fields[0].AsString+','''+Aciklama+''','+Kullanan+',1.0,0,'''+CariDoviz+''','+IntToStr(TabNo_KREDILER)+','+KREDILER.FieldByName('ID').AsString+','+IntToStr(LokTipi)+',1)',[],[]);
@@ -1121,11 +1121,11 @@ procedure TBankaKredileriListeFrame.KrediSilTusClick(Sender: TObject);
 begin
   if Veritabani.VeriVarMi(Tablo.FDCnn,'select * from KASA where  TUR=59 and KREDIID='+KREDILER.FieldByName('ID').AsString ,[],[]) or
      Veritabani.VeriVarMi(Tablo.FDCnn,'select * from KASA where  TUR=55 and KREDIID='+KREDILER.FieldByName('ID').AsString ,[],[]) then
-     Showmessage('Hareket görmüþ, silinemez!')
+     Showmessage('Hareket gÃ¶rmÃ¼ÅŸ, silinemez!')
   else begin
      if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from KREDILER where ID='+KREDILER.FieldByName('ID').AsString,[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from KREDILER where ID='+KREDILER.FieldByName('ID').AsString,[],[]);
         YenileTusClick;
      end;
   end;
@@ -1156,7 +1156,7 @@ end;
 procedure TBankaKredileriListeFrame.OdemeSilTusClick(Sender: TObject);
 begin
    if (KREDIROTATIF.FieldByName('TUTAR').AsCurrency>0)and(Application.MessageBox(PChar(KKrediBilgisiSilinsinmi),PChar(Onay), MB_YESNO) = IDYES) then begin
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from KASA where KREDIID='+KREDILER.FieldByName('ID').AsString+' and YERI='+IntToStr(TabNo_KREDIROTATIF)+
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from KASA where KREDIID='+KREDILER.FieldByName('ID').AsString+' and YERI='+IntToStr(TabNo_KREDIROTATIF)+
                 ' and YERID='+KREDIROTATIF.FieldByName('ID').AsString, [], []);
          KREDIROTATIF.Delete;
    end;
@@ -1197,7 +1197,7 @@ begin
                 KREDILER.FieldByName('KUR').AsString, CariDoviz,0,0,Tutar2,Tutar2*KurDegeri,-1,
                 /// Rotatifin ID'sini fatura id'ye Kredinin Id sini de kredi Id ye atar?z
                 -1, KREDILER.FieldByName('ID').AsInteger,-1,ID,SubeId,'B',0,0,RefNo); // HesapTuru
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
       //end;
   end;
   YenileTusClick;

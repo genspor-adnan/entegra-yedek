@@ -1,4 +1,4 @@
-unit UTakvimGidenCek;
+ï»¿unit UTakvimGidenCek;
 
 interface
 
@@ -135,7 +135,7 @@ begin
    LabelVergiNo.Left:=LabelVERGI.left+LabelVERGI.Width+2;
    Hitap := TabCek.FieldByName('HITAP').AsInteger;
    case  Hitap of
-      0:LabelHitap.Caption := ('HAMÝLÝNE ('+tabcek.FieldByName('FIRMA').AsString+')'  );
+      0:LabelHitap.Caption := ('HAMÄ°LÄ°NE ('+tabcek.FieldByName('FIRMA').AsString+')'  );
       //1:LabelHitap.Caption := TabCek.FieldByName('FIRMA').AsString;
       Else LabelHitap.Caption := TabCek.FieldByName('FIRMA').AsString ;
    end;
@@ -156,14 +156,14 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      //date bilgi giriþi
-      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
+      //edit bilgi giriÅŸi
+      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      //date bilgi giriÅŸi
+      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
    end;
    if TGirisKutusuEx.BilgiAlEx('Yeni bilgiyi girin',ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin
-        MessageDlg(('Yeni '+alanAdi+' Deðeri Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Yeni '+alanAdi+' DeÄŸeri BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit; End
       else begin
         TabCEK.Edit;

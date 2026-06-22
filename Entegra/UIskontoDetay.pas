@@ -1,4 +1,4 @@
-unit UIskontoDetay;
+﻿unit UIskontoDetay;
 
 interface
 

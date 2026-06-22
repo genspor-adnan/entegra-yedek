@@ -1,4 +1,4 @@
-unit UHatirlatma;
+ï»¿unit UHatirlatma;
 
 interface
 
@@ -189,7 +189,7 @@ Function THatirlatmaDlg.Gun(I1: Integer; s2: string): Integer;
   begin
     if pos('Hafta', s2) > 0 then Gun := I1 * 7
     else if pos('Ay', s2) > 0 then Gun := I1 * 30
-    else if pos('Yýl', s2) > 0 then Gun := I1 * 365
+    else if pos('YÄ±l', s2) > 0 then Gun := I1 * 365
     else Gun := I1;
   end;
 }
@@ -229,7 +229,7 @@ begin
   if TabCagri.State = dsbrowse then
     TabCagri.Edit;
   TabCagri.FieldByName('ILKGELIS_GUN').AsInteger := GunHesapla(IlkTarih);
-  TabCagri.FieldByName('ILKGELIS_PERIYOT').AsString := 'Gün';
+  TabCagri.FieldByName('ILKGELIS_PERIYOT').AsString := 'GÃ¼n';
   TabCagri.fieldbyname('ILKCAGRITARIHI').asdatetime := IlkTarih;
   TarihGuncelle(IlkTarih);
 
@@ -256,8 +256,8 @@ function THatirlatmaDlg.Gun(AnTarih: TDateTime; xsay: Integer; per: string): TDa
 begin
   if pos('Hafta', per) > 0 then Gun := IncWeek(AnTarih, xsay)
   else if pos('Ay', per) > 0 then Gun := IncMonth(AnTarih, xsay)
-  else if pos('Yýl', per) > 0 then Gun := IncYear(AnTarih, xsay)
-  else if pos('Gün', per) > 0 then Gun := IncDay(AnTarih, xsay);
+  else if pos('YÄ±l', per) > 0 then Gun := IncYear(AnTarih, xsay)
+  else if pos('GÃ¼n', per) > 0 then Gun := IncDay(AnTarih, xsay);
 end;
 
 procedure THatirlatmaDlg.IlkGelis_GunChange(Sender: TObject);
@@ -269,8 +269,8 @@ begin
   except
   end;
   if IlkGelis_Periyot.text = '' then
-    TabCagri.fieldbyname('ILKGELIS_PERIYOT').AsString := 'Gün';
-  //    IlkGelis_Periyot.itemindex := IlkGelis_Periyot.Items.IndexOf('Gün');
+    TabCagri.fieldbyname('ILKGELIS_PERIYOT').AsString := 'GÃ¼n';
+  //    IlkGelis_Periyot.itemindex := IlkGelis_Periyot.Items.IndexOf('GÃ¼n');
   periyot := ILKGELIS_PERIYOT.text;
   try
     IlkTarih := Gun(GenotipIni.BugunTrh, say, periyot);
@@ -336,7 +336,7 @@ begin
     Tablo.LogIslemleri('HATIRLATMA', 'Ekleme', TabCagri, true, false, false, false);
   end
   else
-    Tablo.LogIslemleri('HATIRLATMA', 'Deðiþ', TabCagri, true, false, false, false);
+    Tablo.LogIslemleri('HATIRLATMA', 'DeÄŸiÅŸ', TabCagri, true, false, false, false);
 
   ID := TabCagri.Fieldbyname('ID').AsInteger;
   TabCagri.Close;
@@ -344,7 +344,7 @@ begin
   TabCagri.Locate('ID', ID, []);
 
   if (not YeniEklenenCagri) then
-    if Application.MessageBox(PChar(TabCagri.FieldByName('ISLEMADI').AsString + ' için çaðrý tarihleri yeniden düzenlensin mi?'),
+    if Application.MessageBox(PChar(TabCagri.FieldByName('ISLEMADI').AsString + ' iÃ§in Ã§aÄŸrÄ± tarihleri yeniden dÃ¼zenlensin mi?'),
       'O N A Y', mb_YesNo) <> IDYes then abort;
 
   Temizle(TabCagri.Fieldbyname('ID').AsInteger);
@@ -414,7 +414,7 @@ begin
   YeniEklenenCagri := False;
   if (not (TabCagri.Fieldbyname('ISLEMADI').AsString <> '')) then
   begin
-    Application.MessageBox('Ýþlem seçiniz.', 'U Y A R I', MB_ICONWARNING);
+    Application.MessageBox('Ä°ÅŸlem seÃ§iniz.', 'U Y A R I', MB_ICONWARNING);
     sbIslemSec.Click;
     abort;
   end;
@@ -422,7 +422,7 @@ begin
   if TabCagri.state = dsInsert then
     if (not GunHesapla(IlkTarih) >= 0) then
     begin
-      Application.MessageBox('Ýlk geliþ zamaný belirleyiniz (Geçmiþ tarihe hatýrlatma tanýmlanamaz).', 'U Y A R I', MB_ICONWARNING);
+      Application.MessageBox('Ä°lk geliÅŸ zamanÄ± belirleyiniz (GeÃ§miÅŸ tarihe hatÄ±rlatma tanÄ±mlanamaz).', 'U Y A R I', MB_ICONWARNING);
       IlkGelis_Gun.SetFocus;
       abort;
     end;
@@ -432,7 +432,7 @@ begin
 
     if (not (TabCagri.Fieldbyname('GELISSIKLIGI_SAYI').AsInteger > 0)) or (TabCagri.Fieldbyname('GELISSIKLIGI_PERIYOT').AsString = '') then
     begin
-      Application.MessageBox('Geliþ periyodu belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
+      Application.MessageBox('GeliÅŸ periyodu belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
       GELISSIKLIGI_SAYI.SetFocus;
       abort;
     end;
@@ -440,7 +440,7 @@ begin
     if rbseans.Checked then begin
       if (not (TabCagri.Fieldbyname('SEANS_SAYISI').AsInteger > 0)) then
       begin
-        Application.MessageBox('Seans sayýsý veya sonlanma zamaný belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
+        Application.MessageBox('Seans sayÄ±sÄ± veya sonlanma zamanÄ± belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
         SEANS_SAYISI.SetFocus;
         abort;
       end;
@@ -448,7 +448,7 @@ begin
     else begin
       SonTarih1 := Gun(GenotipIni.BugunTrh, TabCagri.Fieldbyname('SONLANMA_SAYI').AsInteger, TabCagri.Fieldbyname('SONLANMA_PERIYOT').AsString);
       if (not (sontarih1 > GenotipIni.BugunTrh)) then begin
-        Application.MessageBox('Seans sayýsý veya sonlanma zamaný belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
+        Application.MessageBox('Seans sayÄ±sÄ± veya sonlanma zamanÄ± belirleyiniz.', 'U Y A R I', MB_ICONWARNING);
         SONLANMA_SAYI.SetFocus;
         abort;
       end;
@@ -492,7 +492,7 @@ end;
 
 procedure THatirlatmaDlg.TabCagriBeforeDelete(DataSet: TDataSet);
 begin
-  if Application.MessageBox(PChar(TabCagri.FieldByName('ISLEMADI').AsString + ' için tanýmlanmýþ olan çaðrý bilgisi silinecektir. Emin misiniz?'),
+  if Application.MessageBox(PChar(TabCagri.FieldByName('ISLEMADI').AsString + ' iÃ§in tanÄ±mlanmÄ±ÅŸ olan Ã§aÄŸrÄ± bilgisi silinecektir. Emin misiniz?'),
     'O N A Y', mb_YesNo) <> IDYes then abort;
 
 //  Tablo.Query1.Close;
@@ -542,7 +542,7 @@ var i: integer;
 begin
   if (DtsCagri.State in [dsinsert, dsedit]) or (DtsCagriDetay.State in [dsinsert, dsedit]) then
   begin
-    i := Application.MessageBox(PChar('Deðiþiklikler kaydedilsin mi ?'), 'O N A Y', MB_YESNOCANCEL);
+    i := Application.MessageBox(PChar('DeÄŸiÅŸiklikler kaydedilsin mi ?'), 'O N A Y', MB_YESNOCANCEL);
     case i of
       IDYes:
         begin

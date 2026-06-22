@@ -1,4 +1,4 @@
-unit UPrinter;
+﻿unit UPrinter;
 
 interface
 
@@ -40,7 +40,7 @@ end;
 procedure TPrinterDlg.FormCreate(Sender: TObject);
 var Pr: TPrinter;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Pr := TPrinter.Create;
   ListBox1.Items := Pr.Printers;
   ListBox1.ItemIndex := Pr.PrinterIndex;

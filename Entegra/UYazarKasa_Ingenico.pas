@@ -1,4 +1,4 @@
-unit UYazarKasa_Ingenico;
+ï»¿unit UYazarKasa_Ingenico;
 interface
 uses
   SysUtils, Dialogs, Windows, ActiveX, FetaUtil;
@@ -31,7 +31,7 @@ begin
   begin
     P := GetProcAddress(NativeDllHandle, PChar(ProcName));
     if not Assigned(P) then
-      raise Exception.CreateFmt('Procedure bulunamadý %s', [ProcName]);
+      raise Exception.CreateFmt('Procedure bulunamadÄ± %s', [ProcName]);
   end;
 end;
 procedure Open;
@@ -68,7 +68,7 @@ begin
   if NativeDllHandle = 0 then begin
     NativeDllHandle := SafeLoadLibrary(NativeDll);
     if NativeDllHandle = 0 then
-      raise Exception.CreateFmt('Dll yüklenemedi! %s', [NativeDll]);
+      raise Exception.CreateFmt('Dll yÃ¼klenemedi! %s', [NativeDll]);
   end;
 end;
 procedure DisposeApi;

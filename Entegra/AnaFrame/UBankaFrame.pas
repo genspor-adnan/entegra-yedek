@@ -1,4 +1,4 @@
-unit UBankaFrame;
+ï»¿unit UBankaFrame;
 
 interface
 
@@ -42,7 +42,7 @@ type
     procedure pnlBaslikPaint(Sender: TObject);
   private
     { Private declarations }
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FYonetici : TFrameYoneticisi;
     FFrameYoneticisi : TFrameYoneticisi;
     FFrameBilgi : TFrameBilgi;
@@ -69,7 +69,7 @@ type
     function GetFrameBilgi : TFrameBilgi;
     procedure SetFrameBilgi(AValue : TFrameBilgi);
     {********************************}
-    { IFrameYoneticisi üyeleri }
+    { IFrameYoneticisi Ã¼yeleri }
     function GetFrameYoneticisi : TFrameYoneticisi;
 
     procedure FrameAktifOldu(Sender: TObject);
@@ -93,31 +93,31 @@ uses JvJVCLUtils,UBankalar, UTeminatMektubu, UCari, UKrediler, UVadeliHesap, UBa
 var
   sekmeConfigXml : string =  '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Tanýmlarý" Tip="TBankalarDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Hareketleri" Tip="TCariDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Teminat Mektubu" Tip="TTeminatMektubuDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Kredi ve Leasing Hesaplama" Tip="TKrediHesapMakinasi" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Kredileri" Tip="TKredilerDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Vadeli Hesap Tanýmlarý" Tip="TVadeliHesapDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Çek Koçaný" Tip="TBankaCekleriDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Giriþ Sayfasý" Tip="TBankaGirisSayfasiFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Kredileri" Tip="TBankaKredileriListeFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Teminat Mektuplarý" Tip="TTeminatMektuplariListeFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Vadeli Hesaplar" Tip="TVadeliHesaplarListeFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Çekleri" Tip="TBankaCekleriListeFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="GiriÅŸ SayfasÄ±" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka TanÄ±mlarÄ±" Tip="TBankalarDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Hareketleri" Tip="TCariDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Teminat Mektubu" Tip="TTeminatMektubuDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Kredi ve Leasing Hesaplama" Tip="TKrediHesapMakinasi" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Kredileri" Tip="TKredilerDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Vadeli Hesap TanÄ±mlarÄ±" Tip="TVadeliHesapDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Ã‡ek KoÃ§anÄ±" Tip="TBankaCekleriDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="GiriÅŸ SayfasÄ±" Tip="TBankaGirisSayfasiFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Kredileri" Tip="TBankaKredileriListeFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Teminat MektuplarÄ±" Tip="TTeminatMektuplariListeFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Vadeli Hesaplar" Tip="TVadeliHesaplarListeFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Ã‡ekleri" Tip="TBankaCekleriListeFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
   sekmeConfigAramaXml : string = '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Cari" Tip="TCariDlgGenelAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Arama" Tip="TBankalarAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Kredi Arama" Tip="TBankaKredileriAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Arama" Tip="TTeminatMektubuAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Vadeli Hesap Arama" Tip="TVadeliHesapAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Banka Çekleri Arama" Tip="TBankaCekleriAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Cari" Tip="TCariDlgGenelAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Arama" Tip="TBankalarAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Kredi Arama" Tip="TBankaKredileriAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Arama" Tip="TTeminatMektubuAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Vadeli Hesap Arama" Tip="TVadeliHesapAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Banka Ã‡ekleri Arama" Tip="TBankaCekleriAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
@@ -184,18 +184,18 @@ end;
 constructor TBankaFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  { Arama frame yöneticisi önce baþlatýlmalý }
-  { Çünkü Gorunur yöntemi FrameleriYukle olayýnda çaðýrýlabilir }
+  { Arama frame yÃ¶neticisi Ã¶nce baÅŸlatÄ±lmalÄ± }
+  { Ã‡Ã¼nkÃ¼ Gorunur yÃ¶ntemi FrameleriYukle olayÄ±nda Ã§aÄŸÄ±rÄ±labilir }
   FAramaFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     pcArama,sekmeConfigAramaXml);
-  { Arama ile ilgili frame bilgilerini yükle }
+  { Arama ile ilgili frame bilgilerini yÃ¼kle }
   FAramaFrameYoneticisi.FrameleriYukle;
-  { Bu frame'in alt framelerini yönetecek frame yöneticisini baþlat  }
+  { Bu frame'in alt framelerini yÃ¶netecek frame yÃ¶neticisini baÅŸlat  }
   FFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     AnaSayfaDenetimi, sekmeConfigXml);
-  { Arama frame yöneticisini belirt }
+  { Arama frame yÃ¶neticisini belirt }
   FFrameYoneticisi.AramaFrameYoneticisi := FAramaFrameYoneticisi;
-  { Alt frame bilgilerini yükle }
+  { Alt frame bilgilerini yÃ¼kle }
   FFrameYoneticisi.FrameleriYukle;
   FFrameYoneticisi.OnFrameBaslikDegisti.Add(FrameBaslikDegisti);
   FFrameYoneticisi.OnFrameDegisti.Add(FrameAktifOldu);
@@ -293,13 +293,13 @@ begin
       btnBankaHareketleriClick(nil);
     end else if sl[0] = 'BankaKredileri' then begin
       btnBankaKredileriClick(nil);
-    end else if sl[0] = 'BankaTanýmlarý' then begin
+    end else if sl[0] = 'BankaTanÄ±mlarÄ±' then begin
       btnBankaClick(nil);
     end else if sl[0] = 'BankaVadeliHesap' then begin
       btnVadeliHesapClick(nil);
     end else if sl[0] = 'BankaTeminatMektubu' then begin
       btnTeminatMektubuClick(nil);
-    end else if sl[0] = 'BankaÇekKoçaný' then begin
+    end else if sl[0] = 'BankaÃ‡ekKoÃ§anÄ±' then begin
       btnCekKocaniClick(nil);    
     end;
   finally

@@ -1,4 +1,4 @@
-unit UBelgeIslemleri;
+ï»¿unit UBelgeIslemleri;
 
 interface
 
@@ -68,7 +68,7 @@ begin
    if OpenDialog1.Execute then begin
       Tablo.Query1.Close;
       Str := ExtractFileName(OpenDialog1.FileName);
-      //bELGENÝN ÝÇERÝÐÝ KutugeYaz proceduru içinde dolduruluyor
+      //bELGENÄ°N Ä°Ã‡ERÄ°ÄžÄ° KutugeYaz proceduru iÃ§inde dolduruluyor
       Tablo.Query1.SQL.Text:= ' INSERT INTO IMAJ (YERI,YER_ID,BELGEADI,BELGE,EKLEYEN,SUBEID) '+
       'VALUES('''+IntToStr(Yeri)+''','+IntToStr(Yer_ID)+','''+STR+''',:PBELGE,'''+Kullanan+''','+IntToStr(SubeId)+')';
       KutugeYaz(Tablo.Query1, OpenDialog1.FileName);
@@ -101,7 +101,7 @@ end;
 
 procedure TBelgeIslemleriDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
   Tablo.GridTurkcelestir;
 
@@ -132,7 +132,7 @@ begin
   fs.Position:=0;
   SaveDialog1.Title := 'Belge Kaydetme';
   SaveDialog1.DefaultExt := ExtractFileExt(TabImaj.FieldByName('BELGEADI').AsString);
-  SaveDialog1.Filter:=ExtractFileExt(TabImaj.FieldByName('BELGEADI').AsString)+' dosyasý'+'|*'+ExtractFileExt(TabImaj.FieldByName('BELGEADI').AsString);
+  SaveDialog1.Filter:=ExtractFileExt(TabImaj.FieldByName('BELGEADI').AsString)+' dosyasÄ±'+'|*'+ExtractFileExt(TabImaj.FieldByName('BELGEADI').AsString);
   SaveDialog1.InitialDir := GetEnvironmentVariable('%USERPROFILE%')+'\Desktop';
   SaveDialog1.FileName := ExtractFileName(TabImaj.FieldByName('BELGEADI').AsString);
   if SaveDialog1.Execute then begin

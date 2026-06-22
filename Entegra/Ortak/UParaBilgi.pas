@@ -1,4 +1,4 @@
-unit UParaBilgi;    //AYDÝNOZBEY@HOTMAIL
+ï»¿unit UParaBilgi;    //AYDÄ°NOZBEY@HOTMAIL
 
 interface
 
@@ -38,7 +38,7 @@ begin
    end;
    KurumGrubu := Tablo.Query3.Fields[1].AsString;
    Tablo.Query3.Close;
-   Tablo.Query3.SQL.Text :=' Select SIRASI = CASE WHEN KOD=''*TÜM*'' THEN 1 ELSE 2 END,KOD, YUZDE, ISKONTODAN, KDV, KURUM,'+
+   Tablo.Query3.SQL.Text :=' Select SIRASI = CASE WHEN KOD=''*TÃœM*'' THEN 1 ELSE 2 END,KOD, YUZDE, ISKONTODAN, KDV, KURUM,'+
                            ' GUNGECE,TUR,isnull(FIX,0) as FIX,ALT, BELGE From DOKYUZDE Where DOKTORKOD = '''+DrKodu+''' ';
    if KurumKontrolu then Tablo.Query3.SQL.Add(' and (KURUM IS NULL OR KURUM ='''' OR KURUM='''+Kurum+''')');
    if KurumGrubuKontrolu then Tablo.Query3.SQL.Add(' and (KURUMGRUBU IS NULL OR KURUMGRUBU ='''' OR KURUMGRUBU='''+KurumGrubu+''')');
@@ -47,7 +47,7 @@ begin
    if GunGeceKontrolu then Tablo.Query3.SQL.Add(' and (GUNGECE IS NULL OR  GUNGECE='''' OR GUNGECE='''+Gece+''')');
    if TutarKontrolu then Tablo.Query3.SQL.Add(' and '+FloatToStr(Tutar)+'/'+FloatToStr((100.0+kdv)/100.0)+'>=ALT ');
    if Dr2Kontrolu then Tablo.Query3.SQL.Add(DrSecimi);
-   Tablo.Query3.SQL.Add(' and (KOD=''*TÜM*'' ');
+   Tablo.Query3.SQL.Add(' and (KOD=''*TÃœM*'' ');
    St:='';
    repeat
      //if st <> '' then Tablo.Query3.SQL.Add(' or ');
@@ -66,30 +66,30 @@ begin
      if Kodu<>'' then St := St+'.';
    Until Kodu='';
    if KurumOncelikli then
-      Tablo.Query3.SQL.Add(') ORDER BY 1, TUR, KURUM, KURUMGRUBU, KOD, GUNGECE, ALT') //Tekdende böyle
+      Tablo.Query3.SQL.Add(') ORDER BY 1, TUR, KURUM, KURUMGRUBU, KOD, GUNGECE, ALT') //Tekdende bÃ¶yle
    else
-      Tablo.Query3.SQL.Add(') ORDER BY 1, TUR, KOD, KURUM, KURUMGRUBU, GUNGECE, ALT');//Uðurlu hast.de böyle
+      Tablo.Query3.SQL.Add(') ORDER BY 1, TUR, KOD, KURUM, KURUMGRUBU, GUNGECE, ALT');//UÄŸurlu hast.de bÃ¶yle
    Tablo.Query3.open;
    Tablo.Query3.Last;
    if Tablo.Query3.RecordCount > 0 then begin
-      if Tablo.Query3.FieldByName('FIX').AsFloat > 0 then //oran 1000 den büyük demek ki sabit fiyat
+      if Tablo.Query3.FieldByName('FIX').AsFloat > 0 then //oran 1000 den bÃ¼yÃ¼k demek ki sabit fiyat
          DoktorPayi_Getir := Tablo.Query3.FieldByName('FIX').AsFloat * Adet
       else begin
-         if (Tablo.Query3.Fields[4].AsString{KDV}= 'HARÝÇ') then
+         if (Tablo.Query3.Fields[4].AsString{KDV}= 'HARÄ°Ã‡') then
             carp := 1+(KDV/100)
-         else if (Tablo.Query3.Fields[4].AsString{KDV}= 'F.LI HARÝÇ') then begin
+         else if (Tablo.Query3.Fields[4].AsString{KDV}= 'F.LI HARÄ°Ã‡') then begin
             carp := 1;
             Sonuc:= 3;
          end else
             carp := 1;
 
-         if (Tur = 'HAK') and (Birim<>'') and (BirFiyatAdet<0.01) then begin ////Ek katký var demektir diðer doktorlar için;
+         if (Tur = 'HAK') and (Birim<>'') and (BirFiyatAdet<0.01) then begin ////Ek katkÄ± var demektir diÄŸer doktorlar iÃ§in;
              BirFiyatAdet := StrToFloat(Birim);
              Tutar :=  BirFiyatAdet*Adet;
          end;
 
 
-         if Tablo.Query3.Fields[3].AsString{Ýsk} = 'ETKÝLENMEZ' then
+         if Tablo.Query3.Fields[3].AsString{Ä°sk} = 'ETKÄ°LENMEZ' then
             DP := (BirFiyatAdet/carp)*Tablo.Query3.Fields[2].AsFloat/100
          else
             DP := ((Tutar/carp)*Tablo.Query3.Fields[2].AsFloat)/100;
@@ -119,7 +119,7 @@ begin
   Tablo.Query3.Close;
   Tablo.Query3.SQL.Text := 'Select KOD, isnull(ISKONTO,0.0), FIYAT, isnull(TUTAR,0.0) From KURUMISK Where '+
                      ' KURUM = '''+Kr+''''+
-                     ' and KOD=''*TÜM*'' UNION Select KOD, isnull(ISKONTO,0.0), FIYAT, isnull(TUTAR,0.0) From KURUMISK Where '+
+                     ' and KOD=''*TÃœM*'' UNION Select KOD, isnull(ISKONTO,0.0), FIYAT, isnull(TUTAR,0.0) From KURUMISK Where '+
                      ' KURUM = '''+Kr+''''+' and (';
   St:='';
   repeat
@@ -154,7 +154,7 @@ var Kampanya_turu, Kod1:String;
          function Kampanya_Turunu_Getir : String;
          begin
             Application.CreateForm(TListeDlg, ListeDlg);
-            ListeDlg.Label1.Caption := 'Kampanya Seçin';
+            ListeDlg.Label1.Caption := 'Kampanya SeÃ§in';
             while not   Tablo.Query3.eof do begin
                 ListeDlg.ListAmac.Items.Add(Tablo.Query3.Fields[6].AsString);
                 Tablo.Query3.next;
@@ -177,10 +177,10 @@ begin
   Tablo.Query3.Close;
   Tablo.Query3.SQL.Text := 'Select KURUM, KOD, isnull(ISKONTO,0.0), isnull(MIKTAR,0.0), ISK_GOSTER, SOR,KAMPANYA_ADI From KAMPANYA K, KAMPANYADETAY D Where '+
                      ' K.KNO = D.KNO AND '''+FormatDateTime('MM/DD/YYYY',GenotipIni.BugunTrh)+''' BETWEEN K.BASLAMA_TARIHI AND K.BITIS_TARIHI '+
-                     ' AND (KURUM = '''+Kr+''' or isnull(KURUM,'''')='''') and isnull(K.DURUM,'''')<>''PASÝF'' and isnull(D.DURUM,'''')<>''PASÝF'' and KOD=''*TÜM*''  '+
+                     ' AND (KURUM = '''+Kr+''' or isnull(KURUM,'''')='''') and isnull(K.DURUM,'''')<>''PASÄ°F'' and isnull(D.DURUM,'''')<>''PASÄ°F'' and KOD=''*TÃœM*''  '+
                      ' UNION All Select KURUM, KOD, isnull(ISKONTO,0.0), isnull(MIKTAR,0.0), ISK_GOSTER, SOR,KAMPANYA_ADI From KAMPANYA K, KAMPANYADETAY D Where '+
                      ' K.KNO = D.KNO AND '''+FormatDateTime('MM/DD/YYYY',GenotipIni.BugunTrh)+''' BETWEEN K.BASLAMA_TARIHI AND K.BITIS_TARIHI '+
-                     ' AND (KURUM = '''+Kr+''' or isnull(KURUM,'''')='''') and isnull(K.DURUM,'''')<>''PASÝF'' and isnull(D.DURUM,'''')<>''PASÝF'' and (';
+                     ' AND (KURUM = '''+Kr+''' or isnull(KURUM,'''')='''') and isnull(K.DURUM,'''')<>''PASÄ°F'' and isnull(D.DURUM,'''')<>''PASÄ°F'' and (';
   St:='';
   repeat
     if st <> '' then Tablo.Query3.SQL.Add(' or ');
@@ -196,8 +196,8 @@ begin
   Until Kodu='';
   Tablo.Query3.SQL.Add(') ORDER BY 1, 2');
   Tablo.Query3.open;
-  if Tablo.Query3.RecordCount>1 then //Ayný anda birden fazla kampanya var
-     Kampanya_turu := Kampanya_Turunu_Getir; //bunlardan birini seçtirelim
+  if Tablo.Query3.RecordCount>1 then //AynÄ± anda birden fazla kampanya var
+     Kampanya_turu := Kampanya_Turunu_Getir; //bunlardan birini seÃ§tirelim
   if Kampanya_turu = '-1' then begin
      Isk := 0;
      exit;
@@ -206,14 +206,14 @@ begin
   Tablo.Query3.first;
   bulundu := False;
   while (not bulundu)and(not Tablo.Query3.Eof) do
-     if Kampanya_turu = Tablo.Query3.Fields[6].AsString then  //seçilen kampanyayý uygulayalým
+     if Kampanya_turu = Tablo.Query3.Fields[6].AsString then  //seÃ§ilen kampanyayÄ± uygulayalÄ±m
         bulundu :=True
      else
         Tablo.Query3.next;
 
-  if (SonKampKod <> Kod1)and(Tablo.Query3.Fields[5].AsString='E') then begin//Kampanya uygulansýn mý??? hemen soralým
+  if (SonKampKod <> Kod1)and(Tablo.Query3.Fields[5].AsString='E') then begin//Kampanya uygulansÄ±n mÄ±??? hemen soralÄ±m
      SonKampKod := Kod1;
-     if Application.MessageBox(PChar(Tablo.Query3.Fields[6].AsString+' Kampanyasý uygulansýn mý?'),'O N A Y', MB_YESNO) <> idYES then begin
+     if Application.MessageBox(PChar(Tablo.Query3.Fields[6].AsString+' KampanyasÄ± uygulansÄ±n mÄ±?'),'O N A Y', MB_YESNO) <> idYES then begin
         Isk := 0;
         exit;
      end;
@@ -280,14 +280,14 @@ var s, SaklaFiyatAdi, Carpan, tt : String[20];
         if Tablo.Query2.FieldByName('KATSAYI').AsFloat = -1 then begin
            Carpan:='';
            if UcretSor then begin
-              if MesajStrAl(Ad,'Ücreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
+              if MesajStrAl(Ad,'Ãœcreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
                  Fiyat1 := StrToFloat(MesajOkunan)
               else
                  Fiyat1 := 0;
            end
            else Fiyat1 := 0;
         end
-        else if Tablo.Query2.FieldByName('KATSAYI').AsFloat = -2 then begin //2.fiyat uygulanýyor....
+        else if Tablo.Query2.FieldByName('KATSAYI').AsFloat = -2 then begin //2.fiyat uygulanÄ±yor....
            Tablo.Query2.Close;
            Tablo.Query2.SQL.Text := ' Select FIYATLAR.FIYATADI, SEC, isnull(KATSAYI,0) AS KATSAYI, isnull(CARPAN,1) as CARPAN '+
                                     ' From FIYATLAR, KURUM '+
@@ -300,14 +300,14 @@ var s, SaklaFiyatAdi, Carpan, tt : String[20];
         else
            Fiyat1 := Tablo.Query2.FieldByName('KATSAYI').AsFloat;
 
-        if (Tablo.Query2.FieldByName('CARPAN').AsFloat > 1)or(Tablo.Query2.FieldByName('SEC').AsString = '*') then  //TTB veya Dövizse Birime yaz
+        if (Tablo.Query2.FieldByName('CARPAN').AsFloat > 1)or(Tablo.Query2.FieldByName('SEC').AsString = '*') then  //TTB veya DÃ¶vizse Birime yaz
            Birim := FloatToStr(Fiyat1)
-        else if Tablo.Query2.FieldByName('SEC').AsString = 'S' then begin //SSK lý Birime yaz Birim fiyatý sýfýrla
+        else if Tablo.Query2.FieldByName('SEC').AsString = 'S' then begin //SSK lÄ± Birime yaz Birim fiyatÄ± sÄ±fÄ±rla
            Birim := FloatToStr(Fiyat1);
            Fiyat1:=0;
         end;
 
-        if Tablo.Query2.FieldByName('SEC').AsString = '*' then begin//Demekki döviz..
+        if Tablo.Query2.FieldByName('SEC').AsString = '*' then begin//Demekki dÃ¶viz..
                 s := Tablo.Query2.FieldByName('FIYATADI').AsString;
                 s := copy(s,pos('(',s)+1,pos(')',s)-pos('(',s)-1);
 
@@ -318,7 +318,7 @@ var s, SaklaFiyatAdi, Carpan, tt : String[20];
 
                 Fiyat1 := Fiyat1*DovizKuru;
              end
-        else if (Tablo.Query2.FieldByName('SEC').AsString = '$')or(Tablo.Query2.FieldByName('SEC').AsString = '€') then begin//Demekki döviz..
+        else if (Tablo.Query2.FieldByName('SEC').AsString = '$')or(Tablo.Query2.FieldByName('SEC').AsString = 'â‚¬') then begin//Demekki dÃ¶viz..
                 Birim := FloatToStr(Fiyat1)+Tablo.Query2.FieldByName('SEC').AsString;
                 s := Tablo.Query2.FieldByName('SEC').AsString;
                 tt := 'SATIS';
@@ -346,10 +346,10 @@ begin
      if Tablo.Query1.FieldByName('KDV').AsString = '' then begin
         Birimfiyat := 0;
         exit;
-        //raise exception.Create(Kod+' '+Ad+' iþleminin KDV oraný bulunamadý..')
+        //raise exception.Create(Kod+' '+Ad+' iÅŸleminin KDV oranÄ± bulunamadÄ±..')
      end else
         KDVOrani := Tablo.Query1.FieldByName('KDV').AsInteger;
-     //Adýný Getir
+     //AdÄ±nÄ± Getir
      Ad := Tablo.Query1.Fields[1].AsString;
      //Dr.Kodunu Getir
      Dr := DrKod_Getir(Kod, Dr);
@@ -363,10 +363,10 @@ begin
         Tur     := Tablo.Query1.FieldByName('TUR').AsString;
         Grup    := Tablo.Query1.FieldByName('GRUP').AsString
      end;
-        //KDV - Ýskonto Getir
+        //KDV - Ä°skonto Getir
      KDV := Tablo.Query1.FieldByName('KDV').AsInteger;
-     if (Tur <> 'STOK')and(Tur <> 'ECZ')and(Tablo.Query1.FieldByName('BIRIM').AsString = 'Seanslý') then
-        Grup := 'Seanslý';
+     if (Tur <> 'STOK')and(Tur <> 'ECZ')and(Tablo.Query1.FieldByName('BIRIM').AsString = 'SeanslÄ±') then
+        Grup := 'SeanslÄ±';
 
 //     if PaketKod <> '' then
 //        Isk := Iskonto_Getir(Kurum, PaketKOD, GecFiyat)
@@ -379,18 +379,18 @@ begin
         SaklaFiyatAdi := FiyatAdi;
         FiyatAdi := GecFiyat;
      end;
-     //Fiyatýný Getir
+     //FiyatÄ±nÄ± Getir
      if (Tur = 'STOK')or(Tur = 'ECZ') then begin
         Tablo.Query2.Close;
         Tablo.Query2.SQL.Text := 'Select FIYATADI, FIYAT  From '+Tur+'FIYAT Where KOD='''+Kod+''' '+
                            'and (FIYATADI = '''+FiyatAdi+''' or FIYATADI = '''' or FIYATADI is NULL) and BIRIM ='''+Birim+'''';
-        Tablo.Query2.open; //hem o fiyatla hem de boþ fiyat adýyla 2 ayrý kayýt bulunmuþsa öncelik fiyatadýna
+        Tablo.Query2.open; //hem o fiyatla hem de boÅŸ fiyat adÄ±yla 2 ayrÄ± kayÄ±t bulunmuÅŸsa Ã¶ncelik fiyatadÄ±na
         if (Tablo.Query2.RecordCount > 1)and(Tablo.Query2.Fields[0].AsString <> FiyatAdi) then
             Tablo.Query2.next;
         Birimfiyat := Tablo.Query2.Fields[1].AsFloat;
         if Birimfiyat = -1 then begin
            if UcretSor then begin
-              if MesajStrAl(Ad,'Ücreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
+              if MesajStrAl(Ad,'Ãœcreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then
                  Birimfiyat := StrToFloat(MesajOkunan)
               else
                  Birimfiyat := 0;
@@ -399,7 +399,7 @@ begin
         end;
      end
      else begin
-        if pos('<>', FiyatAdi)>0 then begin //Poliklinik-TTB iki fiyat var; düþük olaný seçilecek
+        if pos('<>', FiyatAdi)>0 then begin //Poliklinik-TTB iki fiyat var; dÃ¼ÅŸÃ¼k olanÄ± seÃ§ilecek
            BirimFiyat := FiyatGetir(copy(FiyatAdi,1,pos('<>', FiyatAdi)-1));
            Fiyat2 := FiyatGetir(copy(FiyatAdi, pos('<>', FiyatAdi)+2, length(FiyatAdi)-pos('<>', FiyatAdi)));
            if Fiyat2 <  BirimFiyat*(100-Isk)/100 then begin
@@ -428,7 +428,7 @@ begin
          end;
      end;
 
-     if KDVDurum = 'Hariç' then begin
+     if KDVDurum = 'HariÃ§' then begin
         BirimFiyat := BirimFiyat / (1+(KDVOrani/100));
         KDV := 0;
      end;
@@ -452,10 +452,10 @@ begin
         Tablo.Query1.SQL.Text := 'Select KOD,GRUP,OZELKOD,BUTCEKODU,KDV,MUHKODU,TUR From ISLEMLER Where KOD='''+Kod+'''';
      Tablo.Query1.open;
      if Tablo.Query1.FieldByName('KDV').AsString = '' then
-        raise exception.Create(Ad+' iþleminin KDV oraný bulunamadý..')
+        raise exception.Create(Ad+' iÅŸleminin KDV oranÄ± bulunamadÄ±..')
      else
         KDVOrani := Tablo.Query1.FieldByName('KDV').AsInteger;
-     //Adýný Getir
+     //AdÄ±nÄ± Getir
      Ad := 'KATKI PAYI';
      //Dr.Kodunu Getir
      Dr := DrKod_Getir(Kod, Dr);
@@ -470,14 +470,14 @@ begin
      end;
      KDV := Tablo.Query1.FieldByName('KDV').AsInteger;
 
-     //Fiyatýný Getir
+     //FiyatÄ±nÄ± Getir
      if (Tur = 'STOK')or(Tur = 'ECZ') then begin
         Tablo.Query2.Close;
         Tablo.Query2.SQL.Text := 'Select FIYAT From '+Tur+'FIYAT Where KOD='''+Kod+''' '+
                                  'and FIYATADI = '''+KatkiAdi+''' and BIRIM ='''+Birim+'''';
         Tablo.Query2.open;
         if Tablo.Query2.Fields[0].AsString='' then
-           BirimFiyat := -9.0 // katký yok
+           BirimFiyat := -9.0 // katkÄ± yok
         else
            Birimfiyat := Tablo.Query2.Fields[0].AsFloat;
      end
@@ -489,11 +489,11 @@ begin
         Tablo.Query2.open;
 
         if Tablo.Query2.Fields[0].AsString='' then
-           BirimFiyat := -9.0 // katký yok
+           BirimFiyat := -9.0 // katkÄ± yok
         else
            if Tablo.Query2.Fields[0].AsFloat = -1 then begin
               if UcretSor then begin
-                 if MesajStrAl(Ad,'Ücreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then begin
+                 if MesajStrAl(Ad,'Ãœcreti Giriniz :','E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then begin
                     if MesajOkunan='' then MesajOkunan:='-9';
                     BirimFiyat := StrToFloat(MesajOkunan);
                  end

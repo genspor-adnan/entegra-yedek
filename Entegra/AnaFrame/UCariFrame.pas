@@ -1,4 +1,4 @@
-unit UCariFrame;
+ï»¿unit UCariFrame;
 
 interface
 
@@ -39,7 +39,7 @@ type
     FAramaFrameYoneticisi : TFrameYoneticisi;
     FFrameBilgi : TFrameBilgi;
 
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -62,7 +62,7 @@ type
     function GetFrameBilgi : TFrameBilgi;
     procedure SetFrameBilgi(AValue : TFrameBilgi);
     {********************************}
-    { IFrameYoneticisi üyeleri }
+    { IFrameYoneticisi Ã¼yeleri }
     function GetFrameYoneticisi : TFrameYoneticisi;
     procedure RehberErisimTamamlandi(Sender: TObject);
     procedure MesajAlicisi(AMesaj: Variant);   
@@ -85,22 +85,22 @@ uses UFIRMALAR, FetaClassExtensions, UCari, UAramaYokFrame,
 var
   sekmeConfigXml : string =  '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Rehberde Ara" Arama="TRehberAramaFrame" Tip="TRehberAraDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Kurum Bilgileri" Tip="TKurumDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Cari Hareketler" Tip="TCariDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Döküm Ekraný" Tip="TDokumDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Rehberde Ara" Arama="TRehberAramaFrame" Tip="TRehberAraDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Kurum Bilgileri" Tip="TKurumDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Cari Hareketler" Tip="TCariDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="GiriÅŸ SayfasÄ±" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="DÃ¶kÃ¼mler GiriÅŸ SayfasÄ±" Tip="TDokumGirisFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="DÃ¶kÃ¼m EkranÄ±" Tip="TDokumDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="DÃ¶kÃ¼m ÅžartlarÄ±" Tip="TDokumSartDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
   sekmeConfigAramaXml : string = '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Rehber Arama" Tip="TRehberAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Cari Hareketler" Tip="TCariDlgGenelAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Cari Aksiyon" Tip="TCariKartAksiyonFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Döküm Arama" Tip="TDokumAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Rehber Arama" Tip="TRehberAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Cari Hareketler" Tip="TCariDlgGenelAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Cari Aksiyon" Tip="TCariKartAksiyonFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="DÃ¶kÃ¼m Arama" Tip="TDokumAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
@@ -113,7 +113,7 @@ end;
 procedure TCariFrame.btnDokumlerClick(Sender: TObject);
 begin
   with FFrameYoneticisi.FrameBul(TDokumGirisFrame).Git do begin
-    {TODO -oDeveloper -cCariFrame : Döküm ile ilgili olaylar burada atanacak }
+    {TODO -oDeveloper -cCariFrame : DÃ¶kÃ¼m ile ilgili olaylar burada atanacak }
   end;
 end;
 
@@ -131,18 +131,18 @@ end;
 constructor TCariFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  { Arama frame yöneticisi önce baþlatýlmalý }
-  { Çünkü Gorunur yöntemi FrameleriYukle olayýnda çaðýrýlabilir }
+  { Arama frame yÃ¶neticisi Ã¶nce baÅŸlatÄ±lmalÄ± }
+  { Ã‡Ã¼nkÃ¼ Gorunur yÃ¶ntemi FrameleriYukle olayÄ±nda Ã§aÄŸÄ±rÄ±labilir }
   FAramaFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     pcArama,sekmeConfigAramaXml);
-  { Arama ile ilgili frame bilgilerini yükle }
+  { Arama ile ilgili frame bilgilerini yÃ¼kle }
   FAramaFrameYoneticisi.FrameleriYukle;
-  { Bu frame'in alt framelerini yönetecek frame yöneticisini baþlat  }
+  { Bu frame'in alt framelerini yÃ¶netecek frame yÃ¶neticisini baÅŸlat  }
   FFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     AnaSayfaDenetimi, sekmeConfigXml);
-  { Arama frame yöneticisini belirt }
+  { Arama frame yÃ¶neticisini belirt }
   FFrameYoneticisi.AramaFrameYoneticisi := FAramaFrameYoneticisi;
-  { Alt frame bilgilerini yükle }
+  { Alt frame bilgilerini yÃ¼kle }
   FFrameYoneticisi.FrameleriYukle;
   FFrameYoneticisi.OnMesaj.Add(MesajAlicisi);
   FFrameYoneticisi.OnFrameBaslikDegisti.Add(FrameBaslikDegisti);
@@ -240,7 +240,7 @@ begin
     btnHesapKarti.Enabled := False;
     //btnHesapExtresi.Enabled := False;
     btnDokumler.Enabled := False;
-  end else if AMesaj = 'GezinmeAç' then begin
+  end else if AMesaj = 'GezinmeAÃ§' then begin
     btnHesapKarti.Enabled := True;
     //btnHesapExtresi.Enabled := True;
     btnDokumler.Enabled := True;

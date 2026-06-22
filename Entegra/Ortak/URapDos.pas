@@ -1,4 +1,4 @@
-unit URapDos;
+ï»¿unit URapDos;
 
 interface
 
@@ -80,7 +80,7 @@ begin
            RapSyf.Width := RapTablo.Ayarlar.FieldByName('EN').AsInteger;
            RapSyf.Height:= RapTablo.Ayarlar.FieldByName('BOY').AsInteger;
          except
-           raise exception.Create('Kaðýt boyutunun en ve boyu dolu ve tamsayý olmalý!!')
+           raise exception.Create('KaÄŸÄ±t boyutunun en ve boyu dolu ve tamsayÄ± olmalÄ±!!')
          end;
       end
 end;
@@ -100,7 +100,7 @@ begin
       ZRepGroup.Variable := GetFieldVariable(RapTablo.Ayarlar.FieldByName('ALANADI').AsString);
       exit;
    end;
-   if RapTablo.Ayarlar.FieldByName('TABLO').AsString='GRUPBAÞI' then begin
+   if RapTablo.Ayarlar.FieldByName('TABLO').AsString='GRUPBAÅžI' then begin
       ZRepGroup.Bands.HasHeader := True;
       TZRBand(CompBul('GroupHeader')).Name := Ad;
       TZRBand(CompBul(Ad)).ForceKind := [zfkPageBefore];
@@ -116,7 +116,7 @@ begin
       TZRBand(CompBul(Ad)).BandType := zbtGroupFooter
 //      GroupOrder = 0
    end
-   else if RapTablo.Ayarlar.FieldByName('TABLO').AsString='RAPORBAÞI' then begin
+   else if RapTablo.Ayarlar.FieldByName('TABLO').AsString='RAPORBAÅžI' then begin
       RapSyf.Bands.HasHeader := True;
       TZRBand(CompBul('Header')).Name := Ad;
    end
@@ -124,7 +124,7 @@ begin
       RapSyf.Bands.HasFooter := True;
       TZRBand(CompBul('Footer')).Name := Ad;
    end
-   else if RapTablo.Ayarlar.FieldByName('TABLO').AsString='SAYFABAÞI' then begin
+   else if RapTablo.Ayarlar.FieldByName('TABLO').AsString='SAYFABAÅžI' then begin
       RapSyf.Bands.HasPageHeader := True;
       TZRBand(CompBul('PageHeader')).Name := Ad;
       if RapTablo.Ayarlar.FieldByName('FORMAT').AsString = 'X' then
@@ -155,7 +155,7 @@ Begin
      Parent := TWinControl(RapDos.BandBul(RapTablo.Ayarlar.FieldByName('BANDNO').AsString));
      Name := 'L'+RapTablo.Ayarlar.FieldByName('SIRANO').AsString;
      Autosize := zasWidth;
-     If RapTablo.Ayarlar.FieldByName('YANASIK').AsString = 'SAÐ' Then
+     If RapTablo.Ayarlar.FieldByName('YANASIK').AsString = 'SAÄž' Then
         Alignment.X := zawRight
      Else If RapTablo.Ayarlar.FieldByName('YANASIK').AsString = 'ORT' Then
         Alignment.X := zawCenter
@@ -293,7 +293,7 @@ begin
    while (not RapTablo.Ayarlar.eof)and(RapTablo.Ayarlar.FieldByName('SIRANO').AsInteger<3000) do begin
       if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'SAYFA' then SayfaIslemler
       else if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'BAND' then BandIslemler
-      else if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'SABÝT' then SabitIslemler
+      else if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'SABÄ°T' then SabitIslemler
       else if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'ALAN' then AlanIslemler
       else if RapTablo.Ayarlar.FieldByName('ALANTURU').AsString = 'HESAP' then ExprIslemler;
       RapTablo.Ayarlar.Next;

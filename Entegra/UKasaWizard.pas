@@ -1,4 +1,4 @@
-unit UKasaWizard;
+ï»¿unit UKasaWizard;
 
 (* ?al??ma Prensipleri
 Tahsilat veya ?deme :  Plan -> Belge - Tahsilat
@@ -1767,9 +1767,9 @@ var
   cari : string[30];
 begin
   if (islemop = 'D')and((SecIslem in [40..50])or(SecIslem in [57, 87]))and(Id1 > 0 ) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KASA where ID in (&id1,&id2) ',['&id1','&id2'],[Id1, IdDonus]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KASA where ID in (&id1,&id2) ',['&id1','&id2'],[Id1, IdDonus]);
        if SecIslem = 44 then //pos aktar?m?
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KASA where ID = &id1 ',['&id1'],[MasrafOlanId]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KASA where ID = &id1 ',['&id1'],[MasrafOlanId]);
   end;
   if (not VirmanNereyeQuery.Active)or(VirmanNereyeQuery.RecordCount<1) then begin
     ShowMessage(KWHedefHesapSecYoksaTanimla);
@@ -1951,7 +1951,7 @@ begin
              VirmanNerdenQuery.FieldByName('ID').AsInteger,VirmanNereyeQuery.FieldByName('KUR').AsString,CariDoviz,
              KomMsrID,VirmanKomisyon.value,0,VirmanKomisyon.value{d?viztutar},-1, -1,-1,-1, ID, VirmanSubesi,HesapTuru,0,0,EditIslemNo.Text,1,checkR.Checked);
   end;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' update KASA set GERIDONUSID = '+IntToStr(ID2)+' where ID = '+IntToStr(ID),[],[]);
   Tablo.SKIslemEkle(230200+SecIslem);
 end;
 
@@ -2158,7 +2158,7 @@ var     j : SmallInt;
   begin
      //eskiyi silelim
      if ID > 0  then
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61, 71)',['&id'],[ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61, 71)',['&id'],[ID]);
 
      TabOdemeTakvimi.First;
      while not TabOdemeTakvimi.Eof do begin
@@ -2191,18 +2191,18 @@ var     j : SmallInt;
            Komut := 'insert into CEKLER(KOD, REHBERID, TUR, DURUM, TARIH, VADE, TUTAR, KUR, MAKBUZNO, SERINO, MASRAFID, CIROLU, DOVIZ_TUTARI, DOVIZ_KURU, ANIMSAT, EKLEYEN,DEGISTIREN, DEGISTIRMETARIHI,  SUBEID, MUHAKTAR, BASKASININ, EKSTREDEKULLAN, CEKSENET)';
            Komut := Komut + ' values('''+LabelCekSenetKod.Caption+''','+IntToStr(RehberId)+','+IntToStr(Tur)+',1,'''+FormatDateTime('yyyy-mm-dd hh:nn', CekSenetKayitTarihi.Date)+''','''+FormatDateTime('yyyy-mm-dd hh:nn', PTarih)+''','+
                       stringreplace(FloatToStr(TUTAR),',','.',[])+','''+KUR+''','''+MakbuzNo+''','''+Tablo.Query2.Fields[0].AsString+''',-1,0,'+stringreplace(FloatToStr(TUTAR),',','.',[])+','''+KUR+''',0,'+Kullanan+','+Kullanan+',GetDate(),'+IntToStr(SubeId)+',0,0,0,121)';
-           SenetID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
+           SenetID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
 
            Komut := 'insert into CEKHAREKET(CEKSENETLERID,TARIH,ISLEM, REHBERID, BANKAHESAPLARID, EKLEYEN, SUBEID, TIP, DURUM, DOVIZ_TUTARI, DOVIZ_KURU, TUTAR, KUR, EKSTREDEKULLAN)';
            Komut := Komut + ' values('+IntToStr(SenetID)+','''+FormatDateTime('yyyy-mm-dd hh:nn', CekSenetKayitTarihi.Date)+''',130,'+IntToStr(RehberId)+',0,'+ Kullanan+','+IntToStr(SubeId)+',1,1,'+
                       stringreplace(FloatToStr(TUTAR),',','.',[])+','''+KUR+''','+stringreplace(FloatToStr(TUTAR),',','.',[])+','''+KUR+''',0)';
-           SenetID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
+           SenetID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
 
         end;
   begin
      //eskiyi silelim
     // if ID > 0  then
-    //    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61, 71)',['&id'],[ID]);
+    //    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61, 71)',['&id'],[ID]);
 
      //makbuzno i?in en y?ksek no ya 1 ekleyelim
      Tablo.TablodanSorguAc(1,'SELECT  isnull(MAX(CAST(MAKBUZNO AS INT)), 0)+1  as MaxMakbuzNo FROM CEKLER WHERE ISNUMERIC(MAKBUZNO) = 1 ');
@@ -2308,14 +2308,14 @@ var     j : SmallInt;
                                     KasaQuery.FieldByName('ID').AsInteger,   CekSenetKrediQuery.FieldByName('KUR').AsString,CariDoviz, MasrafGelir,BorcTutar,AlacakTutar,DovizTutar,-1, -1,-1, CekSenetKrediQuery.FieldByName('ID').AsInteger,-1, SubeId,HesapTuru);
                    if Turu in [51,53] then begin  //?ek senet g?ncellemeleri..
                       if Tablo.GENINI.ReadBoolean(Ops_Cekler_CekOdemedeMMSil,False)  then   //    ?ekOdemedeMMSil
-                        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update CEKLER set DURUM=2,MASRAFID=-1 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
+                        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update CEKLER set DURUM=2,MASRAFID=-1 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
                       else
-                        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update CEKLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
+                        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update CEKLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
                    end else if Turu in [52,54] then begin
                       if Tablo.GENINI.ReadBoolean(Ops_Senetler_SenetOdemedeMMAktar,False) then    //    SenetOdemedeMMAktar
-                        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SENETLER set DURUM=2,MASRAFID=-1 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
+                        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SENETLER set DURUM=2,MASRAFID=-1 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
                       else
-                        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SENETLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
+                        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SENETLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
                    end;
                  end;
          61,71,88,161 : case ComboPlanSecim.ItemIndex of
@@ -2337,7 +2337,7 @@ var     j : SmallInt;
                           ID2:=KrediKaydet(Anapara,Anapara, 0,CekSenetKrediQuery.FieldByName('MASRAFID').AsInteger,'(Anapara)',
                             TabNo_PLANKREDI,CekSenetKrediQuery.FieldByName('DETAYID').AsInteger);
                        end;
-                       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
+                       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
                        if Faiz > 0.01 then
                              KrediKaydet(Faiz,Faiz, 0,CekSenetKrediQuery.FieldByName('FAIZMASRAFID').AsInteger,'(Faiz)',
                             TabNo_PLANKREDI,CekSenetKrediQuery.FieldByName('DETAYID').AsInteger);
@@ -2392,19 +2392,19 @@ var     j : SmallInt;
                                   CekSenetKrediQuery.FieldByName('BELGENO').AsString);
 
 
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID3)+' where ID='+IntToStr(ID2),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID3)+' where ID='+IntToStr(ID2),[],[]);
                              //e?er bu kredinin masraf projesi varsa onu update edelim;
                              Tablo.TablodanSorguAc(1, 'select PROJEID from KREDILER where ID='+CekSenetKrediQuery.FieldByName('KREDIID').AsString);
                              if Trim(Tablo.Query1.Fields[0].AsString)<>'' then
                                 Proje := ', PROJEID='+Tablo.Query1.Fields[0].AsString
                              else
                                 Proje :='';
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID4)+Proje+' where ID='+IntToStr(ID3),[],[]);
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID)+Proje+' where ID='+IntToStr(ID4),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID4)+Proje+' where ID='+IntToStr(ID3),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID)+Proje+' where ID='+IntToStr(ID4),[],[]);
                           end else begin
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID)+' where ID='+IntToStr(ID2),[],[]);
-                             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID)+' where ID='+IntToStr(ID2),[],[]);
+                             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KASA set BELGENO='''+TopluMakbuzno+''' , GERIDONUSID='+IntToStr(ID2)+' where ID='+IntToStr(ID),[],[]);
                           end;
 
                              //                       end else

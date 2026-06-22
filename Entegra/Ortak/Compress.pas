@@ -1,4 +1,4 @@
-unit Compress;
+ï»¿unit Compress;
 
 interface
 
@@ -42,7 +42,7 @@ var
   InFile,OutFile:TFileStream;
   Comp:TCompressionStream;
   DeComp:TDeCompressionStream;
-  Buffer:Array[0..4095] Of Byte; //bu açmak için kullanacağımız geçici bir buffer
+  Buffer:Array[0..4095] Of Byte; //bu aÃ§mak iÃ§in kullanacaÄŸÄ±mÄ±z geÃ§ici bir buffer
   Count:Integer;
 
 
@@ -105,27 +105,27 @@ Function TCompress.DecompressFile(FileName,DeCompressedFileName:String):Byte;
 
 {
 DeCompressFile
-Dosya sıkıştırmak için kullanılır
-FileName            : Sıkıştırılmış dosyanın adı.
-DeCompressedFileName  : Açılan
-    dosyanın kaydedileceği dosya adı.
-Sonuç :
-  00: Başarılı
-  01: Giriş dosyası açılamadı. (Dosya yok, kullanımda, yada hafıza yetersiz)
-  02: Çıkış dosyası yaratılamadı. (Yazma hakkı yok,
-    dosya adı hatalı yada hafıza yetersiz)
-  03: Açma stream'i yaratılamadı. (Hafıza yetersiz)
-  04: Açma işlemi başarısız oldu. (Hafıza yetersiz)
+Dosya sÄ±kÄ±ÅŸtÄ±rmak iÃ§in kullanÄ±lÄ±r
+FileName            : SÄ±kÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ dosyanÄ±n adÄ±.
+DeCompressedFileName  : AÃ§Ä±lan
+    dosyanÄ±n kaydedileceÄŸi dosya adÄ±.
+SonuÃ§ :
+  00: BaÅŸarÄ±lÄ±
+  01: GiriÅŸ dosyasÄ± aÃ§Ä±lamadÄ±. (Dosya yok, kullanÄ±mda, yada hafÄ±za yetersiz)
+  02: Ã‡Ä±kÄ±ÅŸ dosyasÄ± yaratÄ±lamadÄ±. (Yazma hakkÄ± yok,
+    dosya adÄ± hatalÄ± yada hafÄ±za yetersiz)
+  03: AÃ§ma stream'i yaratÄ±lamadÄ±. (HafÄ±za yetersiz)
+  04: AÃ§ma iÅŸlemi baÅŸarÄ±sÄ±z oldu. (HafÄ±za yetersiz)
 }
 
 Begin
   Try
     InFile:=TFileStream.Create(FileName,fmOpenRead);
 
-    // Sıkıştırılmış dosya açılıyor
+    // SÄ±kÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ dosya aÃ§Ä±lÄ±yor
   Except
-    //Dosyayı açamadık. Hata verip
-  //  çıkacağız.
+    //DosyayÄ± aÃ§amadÄ±k. Hata verip
+  //  Ã§Ä±kacaÄŸÄ±z.
     Result:=01;
     Exit;
 
@@ -133,72 +133,72 @@ Begin
   Try
     OutFile:=TFileStream.Create(DeCompressedFileName,
     fmCreate);
-    // Kaydedilecek dosya yaratılıyor
+    // Kaydedilecek dosya yaratÄ±lÄ±yor
   Except
-    // Çıkış dosyası yaratılamadı. Hata verip çıkacağız.
+    // Ã‡Ä±kÄ±ÅŸ dosyasÄ± yaratÄ±lamadÄ±. Hata verip Ã§Ä±kacaÄŸÄ±z.
     Result:=02;
     InFile.Free;
-     //Açtığımız stream'i kapamayı unutmuyoruz.
+     //AÃ§tÄ±ÄŸÄ±mÄ±z stream'i kapamayÄ± unutmuyoruz.
     Exit;
   End;
 
   Try
     DeComp:=TDeCompressionStream.Create(InFile);
-    // Açma işlemi için kullanılacak olan
-    //stream yaratılıyor.
-    // Decompression sınıfının dolayısı ile DeComp'un özelliği
+    // AÃ§ma iÅŸlemi iÃ§in kullanÄ±lacak olan
+    //stream yaratÄ±lÄ±yor.
+    // Decompression sÄ±nÄ±fÄ±nÄ±n dolayÄ±sÄ± ile DeComp'un Ã¶zelliÄŸi
     // bu stream'den bilgi okunurken otomatik olarak okunma
-    //anında
-    //bilgi açılır. Bu stream'in kodunu zlib.pas dosyasında bulabilirsiniz.
+    //anÄ±nda
+    //bilgi aÃ§Ä±lÄ±r. Bu stream'in kodunu zlib.pas dosyasÄ±nda bulabilirsiniz.
   Except
     //Dosyalar
-  //  ile ilgili bir problemimiz yok, ama sıkıştırma işlemini
-    //gerçekleştiremedik. Hata verip çıkıyoruz.
+  //  ile ilgili bir problemimiz yok, ama sÄ±kÄ±ÅŸtÄ±rma iÅŸlemini
+    //gerÃ§ekleÅŸtiremedik. Hata verip Ã§Ä±kÄ±yoruz.
     Result:=03;
     InFile.Free;
-      // Açtığımız tüm stream'leri kapıyoruz.
+      // AÃ§tÄ±ÄŸÄ±mÄ±z tÃ¼m stream'leri kapÄ±yoruz.
     OutFile.Free;
 
     Exit;
   End;
-  Result:=00; //Sonucu herşey iyiymiş gibi ayarlıyoruz.
-  //Açma işlemi için farklı bir yöntem
-  //  kullanmak zorundayız. Çünkü
-  //DeComp bilgiyi biz okurken açtığı için boyutunu önceden hesaplamıyor.
-  //Bu yüzden ya dosya boyunu dosyayı
- //   sıkıştırırken (ki bu dosya adıda eklendiği
-  //zaman benim sevdiğim ve kullandığım teknik oluyor.)
-  //dosyanın en başına ekleyeceğiz,
+  Result:=00; //Sonucu herÅŸey iyiymiÅŸ gibi ayarlÄ±yoruz.
+  //AÃ§ma iÅŸlemi iÃ§in farklÄ± bir yÃ¶ntem
+  //  kullanmak zorundayÄ±z. Ã‡Ã¼nkÃ¼
+  //DeComp bilgiyi biz okurken aÃ§tÄ±ÄŸÄ± iÃ§in boyutunu Ã¶nceden hesaplamÄ±yor.
+  //Bu yÃ¼zden ya dosya boyunu dosyayÄ±
+ //   sÄ±kÄ±ÅŸtÄ±rÄ±rken (ki bu dosya adÄ±da eklendiÄŸi
+  //zaman benim sevdiÄŸim ve kullandÄ±ÄŸÄ±m teknik oluyor.)
+  //dosyanÄ±n en baÅŸÄ±na ekleyeceÄŸiz,
  //   yada bir hata alana kadar bu stream'den
-  //okumaya devam edeceğiz (buda zlib ile bereber gelen örnek programdaki teknik)
-  //ben burada basit olduğu
- //   için ikinci tekniği kullanacağım.
+  //okumaya devam edeceÄŸiz (buda zlib ile bereber gelen Ã¶rnek programdaki teknik)
+  //ben burada basit olduÄŸu
+ //   iÃ§in ikinci tekniÄŸi kullanacaÄŸÄ±m.
   Repeat
     Try
       DeComp.OnProgress:=Process;
       Count:= DeComp.Read(Buffer,SizeOf(Buffer));
-      //Okuyabildiğimiz kadar veriyi okuyoruz. Count
-   // okuduğumuz toplam
-      //byte sayısını tutuyor.
+      //OkuyabildiÄŸimiz kadar veriyi okuyoruz. Count
+   // okuduÄŸumuz toplam
+      //byte sayÄ±sÄ±nÄ± tutuyor.
       If Count<>
     0 Then OutFile.WriteBuffer(Buffer,
     Count);
-      //Eğer veri okuyabildiysek (ki verilerin sonuna gelene kadar okuyacağız)
+      //EÄŸer veri okuyabildiysek (ki verilerin sonuna gelene kadar okuyacaÄŸÄ±z)
 
-    //bunu OutFile'a yazıyoruz.
+    //bunu OutFile'a yazÄ±yoruz.
     Except
       Result:=04;
       Count:=0;
 
-      //Hata oluştu. Hata kodunu ayarlıyoruz, ve count'u döngüden çıkmak için sıfırlıyoruz.
+      //Hata oluÅŸtu. Hata kodunu ayarlÄ±yoruz, ve count'u dÃ¶ngÃ¼den Ã§Ä±kmak iÃ§in sÄ±fÄ±rlÄ±yoruz.
     End;
 
   Until Count=0;
-  // İşte işimiz bitti. Artık açılmış
- //   dosyayı elde ettik. (Tabi hata almadıysak)
-  //tabiki OutFile Free method'unu çağırına dek bu dosyanın disk üzerine yazıldığından
-  //emin olamayız.
- //   Yine önce Decomp'u bırakıyoruz.
+  // Ä°ÅŸte iÅŸimiz bitti. ArtÄ±k aÃ§Ä±lmÄ±ÅŸ
+ //   dosyayÄ± elde ettik. (Tabi hata almadÄ±ysak)
+  //tabiki OutFile Free method'unu Ã§aÄŸÄ±rÄ±na dek bu dosyanÄ±n disk Ã¼zerine yazÄ±ldÄ±ÄŸÄ±ndan
+  //emin olamayÄ±z.
+ //   Yine Ã¶nce Decomp'u bÄ±rakÄ±yoruz.
   DeComp.Free;
   InFile.Free;
   OutFile.Free;
@@ -209,17 +209,17 @@ Function TCompress.CompressFile(FileName,CompressedFileName:String): Byte;
 {
 CompressFile
 Dosya
-    sıkıştırmak için kullanılır
-FileName            : Sıkıştırılacak olan dosyanın adı.
-CompressedFileName  : Sıkıştırılmış dosyanın kaydedileceği dosya adı.
-Sonuç :
+    sÄ±kÄ±ÅŸtÄ±rmak iÃ§in kullanÄ±lÄ±r
+FileName            : SÄ±kÄ±ÅŸtÄ±rÄ±lacak olan dosyanÄ±n adÄ±.
+CompressedFileName  : SÄ±kÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ dosyanÄ±n kaydedileceÄŸi dosya adÄ±.
+SonuÃ§ :
   00:
-    Başarılı
-  01: Giriş dosyası açılamadı. (Dosya yok, kullanımda, yada hafıza yetersiz)
-  02: Çıkış dosyası yaratılamadı. (Yazma hakkı yok, dosya adı hatalı yada hafıza yetersiz)
-  03: Sıkıştırma
-    stream'i yaratılamadı. (Hafıza yetersiz)
-  04: Sıkıştırma başarısız oldu. (Hafıza yetersiz)
+    BaÅŸarÄ±lÄ±
+  01: GiriÅŸ dosyasÄ± aÃ§Ä±lamadÄ±. (Dosya yok, kullanÄ±mda, yada hafÄ±za yetersiz)
+  02: Ã‡Ä±kÄ±ÅŸ dosyasÄ± yaratÄ±lamadÄ±. (Yazma hakkÄ± yok, dosya adÄ± hatalÄ± yada hafÄ±za yetersiz)
+  03: SÄ±kÄ±ÅŸtÄ±rma
+    stream'i yaratÄ±lamadÄ±. (HafÄ±za yetersiz)
+  04: SÄ±kÄ±ÅŸtÄ±rma baÅŸarÄ±sÄ±z oldu. (HafÄ±za yetersiz)
 
 }
 Begin
@@ -227,10 +227,10 @@ Begin
   Try
     InFile:=TFileStream.Create(FileName,fmOpenRead);
 
-    // Sıkıştırılacak dosya açılıyor
+    // SÄ±kÄ±ÅŸtÄ±rÄ±lacak dosya aÃ§Ä±lÄ±yor
   Except
-    //Dosyayı açamadık. Hata verip
-    //çıkacağız.
+    //DosyayÄ± aÃ§amadÄ±k. Hata verip
+    //Ã§Ä±kacaÄŸÄ±z.
     Result:=01;
     Exit;
 
@@ -238,61 +238,61 @@ Begin
   Try
     OutFile:=TFileStream.Create(CompressedFileName,
     fmCreate);
-    // Kaydedilecek dosya yaratılıyor
+    // Kaydedilecek dosya yaratÄ±lÄ±yor
   Except
-    // Çıkış dosyası yaratılamadı. Hata verip çıkacağız.
+    // Ã‡Ä±kÄ±ÅŸ dosyasÄ± yaratÄ±lamadÄ±. Hata verip Ã§Ä±kacaÄŸÄ±z.
     Result:=02;
     InFile.Free;
-     //Açtığımız stream'i kapamayı unutmuyoruz.
+     //AÃ§tÄ±ÄŸÄ±mÄ±z stream'i kapamayÄ± unutmuyoruz.
     Exit;
   End;
 
   Try
     Comp:=TCompressionStream.Create(clMax,OutFile);
 
-    // Sıkıştırma için kullanılacak olan stream yaratılıyor.
-    // bu stream'in kodunu zlib.pas dosyasında bulabilirsiniz.
+    // SÄ±kÄ±ÅŸtÄ±rma iÃ§in kullanÄ±lacak olan stream yaratÄ±lÄ±yor.
+    // bu stream'in kodunu zlib.pas dosyasÄ±nda bulabilirsiniz.
 
-    // stream'ler ile ilgili daha detaylı bilgi için
-    // Delphi help'te TStream konusunu aratın.
+    // stream'ler ile ilgili daha detaylÄ± bilgi iÃ§in
+    // Delphi help'te TStream konusunu aratÄ±n.
   Except
 
-    //Dosyalar ile ilgili bir problemimiz yok, ama sıkıştırma işlemini
-    //gerçekleştiremedik. Hata verip çıkıyoruz.
+    //Dosyalar ile ilgili bir problemimiz yok, ama sÄ±kÄ±ÅŸtÄ±rma iÅŸlemini
+    //gerÃ§ekleÅŸtiremedik. Hata verip Ã§Ä±kÄ±yoruz.
     Result:=03;
-    InFile.Free;  // Açtığımız tüm stream'leri kapıyoruz.
+    InFile.Free;  // AÃ§tÄ±ÄŸÄ±mÄ±z tÃ¼m stream'leri kapÄ±yoruz.
     OutFile.Free;
 
     Exit;
   End;
-  Result:=00; //Sonucu herşey iyiymiş gibi ayarlıyoruz.
+  Result:=00; //Sonucu herÅŸey iyiymiÅŸ gibi ayarlÄ±yoruz.
   Try
     FProcess(self,0);
     comp.OnProgress:=Process;
     Comp.CopyFrom(InFile,0);
-    // InFile stream'inin içeriğini sonuna kadar Comp'a kopyalıyoruz.
-    //TCompression sınıfının
-   // dolayısı ile Comp'un özelliği içine yazılması
-    //sırasında yazılan bilgiyi otomatik olarak sıkıştırmasıdır. Yani bu
-    //kopyalama sırasında aynı
-  //  zamanda bilgiyi sıkıştırmışta olduk.
-    //Kolay değilmi ?
-    //Eğer Comp.OnProgress event'ına bir procedure atayacak olursanız
-   // aynı
-    //zamanda işlemin devamı sırasında otomatik olarak belirli aralıklarla
-    //istediğiniz bir procedure'ü çalıştırabilirsiniz. Bu da size bir
-    //progressbar'ı
-    //ilerletmeniz için yardımcı olur.
+    // InFile stream'inin iÃ§eriÄŸini sonuna kadar Comp'a kopyalÄ±yoruz.
+    //TCompression sÄ±nÄ±fÄ±nÄ±n
+   // dolayÄ±sÄ± ile Comp'un Ã¶zelliÄŸi iÃ§ine yazÄ±lmasÄ±
+    //sÄ±rasÄ±nda yazÄ±lan bilgiyi otomatik olarak sÄ±kÄ±ÅŸtÄ±rmasÄ±dÄ±r. Yani bu
+    //kopyalama sÄ±rasÄ±nda aynÄ±
+  //  zamanda bilgiyi sÄ±kÄ±ÅŸtÄ±rmÄ±ÅŸta olduk.
+    //Kolay deÄŸilmi ?
+    //EÄŸer Comp.OnProgress event'Ä±na bir procedure atayacak olursanÄ±z
+   // aynÄ±
+    //zamanda iÅŸlemin devamÄ± sÄ±rasÄ±nda otomatik olarak belirli aralÄ±klarla
+    //istediÄŸiniz bir procedure'Ã¼ Ã§alÄ±ÅŸtÄ±rabilirsiniz. Bu da size bir
+    //progressbar'Ä±
+    //ilerletmeniz iÃ§in yardÄ±mcÄ± olur.
   Except
-    Result:=04; //Beklediğimiz olmadı. Sonucu hataya göre ayarlıyoruz.
+    Result:=04; //BeklediÄŸimiz olmadÄ±. Sonucu hataya gÃ¶re ayarlÄ±yoruz.
   End;
-  // İşte işimiz bitti. Artık sıkıştırılmış bir dosya elde ettik. (Tabi hata almadıysak)
+  // Ä°ÅŸte iÅŸimiz bitti. ArtÄ±k sÄ±kÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ bir dosya elde ettik. (Tabi hata almadÄ±ysak)
   //tabiki OutFile Free method'unu
-   // çağırına dek bu dosyanın disk üzerine yazıldığından
-  //emin olamayız. Burada dikkat etmeniz gereken bir nokta daha var. Comp siz onu
+   // Ã§aÄŸÄ±rÄ±na dek bu dosyanÄ±n disk Ã¼zerine yazÄ±ldÄ±ÄŸÄ±ndan
+  //emin olamayÄ±z. Burada dikkat etmeniz gereken bir nokta daha var. Comp siz onu
   //yok edene dek
- //   OutFilew Stream'ini kullanacaktır. Dolayısı ile önce Comp'u daha sonra
-  //OutFile'ı kapatmak zorundasınız.
+ //   OutFilew Stream'ini kullanacaktÄ±r. DolayÄ±sÄ± ile Ã¶nce Comp'u daha sonra
+  //OutFile'Ä± kapatmak zorundasÄ±nÄ±z.
   Comp.Free;
   InFile.Free;
 

@@ -1,4 +1,4 @@
-unit URehAraDlg;
+ï»¿unit URehAraDlg;
 
 interface
 
@@ -757,7 +757,7 @@ type
     procedure BtnIptalBHClick(Sender: TObject);
     procedure BtnKaydetBHClick(Sender: TObject);
     procedure TabBankaHesaplarAfterPost(DataSet: TDataSet);
-    // Alias sekmesi handler'larÄ±
+    // Alias sekmesi handler'larÃ„Â±
     procedure AliasYeniTusClick(Sender: TObject);
     procedure AliasSilTusClick(Sender: TObject);
     procedure AliasDuzenleTusClick(Sender: TObject);
@@ -1163,8 +1163,8 @@ end;
 procedure TRehberAraDlg.Varsaylan1Click(Sender: TObject);
 begin
   if TabRehberIlgili.FieldByName('DURUM').AsInteger = 1 then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBER Set STATU=0 Where BAGID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBER Set STATU=1 Where BAGID=&RehID and ID=&PersID',['&RehID','&PersID'],[REHBER.FieldByName('ID').AsInteger,TabRehberIlgili.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBER Set STATU=0 Where BAGID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBER Set STATU=1 Where BAGID=&RehID and ID=&PersID',['&RehID','&PersID'],[REHBER.FieldByName('ID').AsInteger,TabRehberIlgili.FieldByName('ID').AsInteger]);
      TabloYenile(TabRehberIlgili,[REHBER.FieldByName('ID').AsInteger]);
      cxGridPersoneller.DataController.FocusedRecordIndex:=0;
      cxGridPersoneller.ViewData.Records[0].Selected:=True;
@@ -1173,8 +1173,8 @@ end;
 
 procedure TRehberAraDlg.VarsaylanYap1Click(Sender: TObject);
 begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBERILETISIM Set VARSAYILAN=0 Where AKTIF=1 and REHBERID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBERILETISIM Set VARSAYILAN=1 Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',['&RehID','&IletID'],[REHBER.FieldByName('ID').AsInteger,REHBERILETISIM.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBERILETISIM Set VARSAYILAN=0 Where AKTIF=1 and REHBERID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBERILETISIM Set VARSAYILAN=1 Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',['&RehID','&IletID'],[REHBER.FieldByName('ID').AsInteger,REHBERILETISIM.FieldByName('ID').AsInteger]);
     TabloYenile(REHBERILETISIM,[REHBER.FieldByName('ID').AsInteger]);
     GridRehberIletisimView.DataController.FocusedRecordIndex:=0;
     GridRehberIletisimView.ViewData.Records[0].Selected:=True;
@@ -1275,7 +1275,7 @@ end;
 
 procedure TRehberAraDlg.TabRehberIlgiliBeforeDelete(DataSet: TDataSet);
 begin
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KULLANICI where REHBERID='+TabRehberIlgili.FieldByName('ID').AsString+' and PERSONEL=0', [], []);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KULLANICI where REHBERID='+TabRehberIlgili.FieldByName('ID').AsString+' and PERSONEL=0', [], []);
 end;
 
 procedure TRehberAraDlg.TabSheetIzinBilgileriShow(Sender: TObject);
@@ -1317,12 +1317,12 @@ procedure TRehberAraDlg.TeklifSilClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
       //varsa dokumanlar?n silinmeli
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
          [81, TabTeklifler.Fields[0].AsInteger]);
       //varsa proje ba?lant?lar? silinmeli
       //kendisi silinir
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
 
    if LogGun>0 then
      Tablo.OncekiLogBelirle(TabTeklifler);
@@ -1382,7 +1382,7 @@ begin
         end;
         if not KayitBulundu then
         begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
           'UPDATE REHBERBILGI SET BILGI=&BILGI,DEGISTIREN=&DEGISTIREN,DEGISTIRMETARIHI=&DEGISTIRMETARIHI WHERE YER_ID=&YER_ID AND SIRA=10 AND YERI=11 AND ETIKET='''+GenIniAnahtar+'''',
           ['&BILGI','&DEGISTIREN','&DEGISTIRMETARIHI','&YER_ID'],
           [Sonuc,Kullanan,FormatDateTime('yyyy-MM-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat),RehberID]);
@@ -1411,7 +1411,7 @@ begin
         end;
         if not KayitBulundu then
         begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
           'INSERT INTO REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI) VALUES(11,&IDYER,10,&ETIKET,&BILGI,&EKLEYEN,&EKLEMETARIHI)',
           ['&IDYER','&ETIKET','&BILGI','&EKLEYEN','&EKLEMETARIHI'],
           [RehberID,GenIniAnahtar,Sonuc,Kullanan,FormatDateTime('yyyy-MM-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)]);
@@ -1448,10 +1448,10 @@ begin
 
     Tablo.TablodanSorguAc(1,'SELECT * from REHBERBILGI WHERE SIRA=21 AND YERI=21 AND YER_ID='+IntToStr(RehberID));
     if not Tablo.Query1.IsEmpty then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE REHBERBILGI SET BILGI=&BILGI, DEGISTIREN=&DEGISTIREN, DEGISTIRMETARIHI=GETDATE() '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE REHBERBILGI SET BILGI=&BILGI, DEGISTIREN=&DEGISTIREN, DEGISTIRMETARIHI=GETDATE() '+
       'WHERE YER_ID=&YERID AND SIRA=21 AND YERI=21',['&YERID','&BILGI','&DEGISTIREN'],[RehberID,TurAdi,Kullanan])
     else
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO REHBERBILGI (YER_ID, BILGI, SIRA, YERI, EKLEYEN, EKLEMETARIHI)'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO REHBERBILGI (YER_ID, BILGI, SIRA, YERI, EKLEYEN, EKLEMETARIHI)'+
       ' VALUES(&YER_ID, &BILGI, &SIRA, &YERI, &EKLEYEN, GETDATE())',
       ['&YER_ID','&BILGI','&SIRA','&YERI','&EKLEYEN'],[RehberID,TurAdi,21,21,Kullanan]);
   end
@@ -1716,14 +1716,14 @@ begin
   Tablo.TablodanSorguAc(1,'SELECT * FROM dbo.PLANMAAS WHERE YER=61 AND YERID='+RehberID);
   if not Tablo.Query1.IsEmpty then
   begin
-    OdemeKaynagi := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
-    Tutar := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
+    OdemeKaynagi := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
+    Tutar := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
     .ImageComboBox('ï¿½deme kaynaï¿½ï¿½',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
     .CurrencyEdit('ï¿½denecek avans miktarï¿½',@Tutar,2));
 
     if mResult = mrOk then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR, DEGISTIREN=&DEGISTIREN,'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE PLANMAAS SET TUTAR=&TUTAR, DEGISTIREN=&DEGISTIREN,'+
       ' DEGISTIRMETARIHI=GETDATE(),TUR=&TUR WHERE YER=61 AND YERID=&YERID',
         ['&TUTAR','&YERID','&DEGISTIREN','&TUR'], [FCurrToStr(Tutar),RehberID,Kullanan,OdemeKaynagi]);
       //LabelStandartAvans.Caption := FCurrToStr(Tutar) + ' ' + CariDoviz;
@@ -1736,7 +1736,7 @@ begin
     .CurrencyEdit('Avans tutarï¿½',@Tutar,2));
 
     if mResult = mrOk then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO PLANMAAS (TUTAR,YER,YERID,KUR,TUR,EKLEYEN,EKLEMETARIHI)'+
         ' VALUES(&TUTAR,61,&YERID,&KUR,&TUR,&EKLEYEN,GETDATE())',
         ['&TUTAR','&YERID','&KUR','&TUR','&EKLEYEN'], [FCurrToStr(Tutar),RehberID,CariDoviz,OdemeKaynagi,Kullanan]);
       //LabelStandartAvans.Caption := FCurrToStr(Tutar) + ' ' + CariDoviz;;
@@ -1782,7 +1782,7 @@ begin
    EtiAdi := REHBERILETISIM.FieldByName('AD').AsString;
    if  TGirisKutusuEx.BilgiAlEx(YeniBilgiGirisi,
        TGirdiDenetimleri.Create.Edit(IletisimAdiniGirin,@EtiAdi)) = mrOK then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBERILETISIM Set AD='''+EtiAdi+''' Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',['&RehID','&IletID'],[REHBER.FieldByName('ID').AsInteger,REHBERILETISIM.FieldByName('ID').AsInteger]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBERILETISIM Set AD='''+EtiAdi+''' Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',['&RehID','&IletID'],[REHBER.FieldByName('ID').AsInteger,REHBERILETISIM.FieldByName('ID').AsInteger]);
        PageControlSekmeChange(nil);
        REHBERILETISIM.Locate('ID',REHBERILETISIM.FieldByName('ID').Value,[]);
    end;
@@ -1796,8 +1796,8 @@ end;
 
 procedure TRehberAraDlg.lgiliKurumdanAyrld1Click(Sender: TObject);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBER set STATU=0 , DURUM='+IntToStr(TMenuItem(Sender).Tag)+' where ID=&ID',['&ID'],[TabRehberIlgili.FieldByName('ID').AsInteger]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KULLANICI set DURUM=0 where REHBERID=&ID ',['&ID'],[TabRehberIlgili.FieldByName('ID').AsInteger]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBER set STATU=0 , DURUM='+IntToStr(TMenuItem(Sender).Tag)+' where ID=&ID',['&ID'],[TabRehberIlgili.FieldByName('ID').AsInteger]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KULLANICI set DURUM=0 where REHBERID=&ID ',['&ID'],[TabRehberIlgili.FieldByName('ID').AsInteger]);
   TabRehberIlgili.close;
   TabRehberIlgili.open;
   cxGridPersonellerSelectionChanged(nil);
@@ -1813,7 +1813,7 @@ begin
   if TGirisKutusuEx.BilgiAlEx(RDAdSoyad, ctrls) = mrOk then begin
     Tablo.TablodanSorguAc(3,('insert into REHBER(BAGID, FIRMA, STATU, GRUP, NOTLAR, DURUM,SUBEID) values('+REHBER.FieldByName('ID').AsString+','''+Bilgi+''',0,334,'''+TabRehberIlgili.FieldByName('NOTLAR').AsString+''',1,'+IntToStr(SubeId)+') select scope_identity() '));
     Tablo.TablodanSorguAc(4,('insert into REHBERILETISIM(REHBERID,AD,VARSAYILAN,AKTIF,SUBEID) values('+Tablo.Query3.Fields[0].AsString+',''Merkez'',1,1,'+IntToStr(SubeId)+') select scope_identity() '));
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) '+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) '+
          ' select 1,&Yer_ID,SIRA,ETIKET,BILGI,SUBEID from REHBERBILGI where YERI=1 and YER_ID=(select ID from REHBERILETISIM where REHBERID=&YerID2)',['&Yer_ID','&YerID2'],[Tablo.Query4.Fields[0].AsInteger,
           TabRehberIlgili.FieldByName('ID').AsInteger]);
     TabRehberIlgili.close;
@@ -1977,7 +1977,7 @@ begin
      Tablo.Query1.Open;
      if not Tablo.Query1.IsEmpty then
         raise Exception.Create(Tablo.Query1.Fields[0].AsString+RDGirilmisBankaBilgisiVarSilinemez);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from BANKAHESAPLAR where ID=&id ',['&id'],[TabBankaHesaplar.Fields[0].AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from BANKAHESAPLAR where ID=&id ',['&id'],[TabBankaHesaplar.Fields[0].AsInteger]);
      PageControlSekmeChange(Self);
   end;
 end;
@@ -1985,17 +1985,17 @@ end;
 { ---------- Alias sekmesi (REHBERALIAS) ---------- }
 
 procedure TRehberAraDlg.AliasToolbarDurumuGuncelle(DuzenlemeKipinde: Boolean);
-// Yeni/Sil/DÃ¼zenle butonlarÄ± normal modda gÃ¶rÃ¼nÃ¼r; Kaydet/Ä°ptal Edit/Insert modunda.
+// Yeni/Sil/DÃƒÂ¼zenle butonlarÃ„Â± normal modda gÃƒÂ¶rÃƒÂ¼nÃƒÂ¼r; Kaydet/Ã„Â°ptal Edit/Insert modunda.
 begin
   ToolButton17.Visible := not DuzenlemeKipinde;   // Yeni
   ToolButton19.Visible := not DuzenlemeKipinde;   // Sil
-  ToolButton21.Visible := not DuzenlemeKipinde;   // DÃ¼zenle
+  ToolButton21.Visible := not DuzenlemeKipinde;   // DÃƒÂ¼zenle
   ToolButton22.Visible := DuzenlemeKipinde;       // Kaydet
-  ToolButton23.Visible := DuzenlemeKipinde;       // Ä°ptal
+  ToolButton23.Visible := DuzenlemeKipinde;       // Ã„Â°ptal
 end;
 
 procedure TRehberAraDlg.TabAliasNewRecord(DataSet: TDataSet);
-// Yeni alias satÄ±rÄ±nda zorunlu kolonlarÄ±n varsayÄ±lan deÄŸerlerini set et.
+// Yeni alias satÃ„Â±rÃ„Â±nda zorunlu kolonlarÃ„Â±n varsayÃ„Â±lan deÃ„Å¸erlerini set et.
 begin
   if (REHBER = nil) or REHBER.IsEmpty then Exit;
   DataSet.FieldByName('REHBERID').AsInteger        := REHBER.Fields[0].AsInteger;
@@ -2040,13 +2040,13 @@ procedure TRehberAraDlg.AliasKaydetTusClick(Sender: TObject);
 begin
   if not TabAlias.Active then Exit;
   if TabAlias.State in [dsEdit, dsInsert] then begin
-    // ALIAS boÅŸsa kaydetmeye izin verme
+    // ALIAS boÃ…Å¸sa kaydetmeye izin verme
     if Trim(TabAlias.FieldByName('ALIAS').AsString) = '' then begin
-      Application.MessageBox('Alias deÄŸeri boÅŸ olamaz.', PChar(SGenotipOnay),
+      Application.MessageBox('Alias deÃ„Å¸eri boÃ…Å¸ olamaz.', PChar(SGenotipOnay),
                              MB_ICONWARNING + MB_OK);
       Exit;
     end;
-    // DÃ¼zenlemede son kontrol tarihini gÃ¼ncelle
+    // DÃƒÂ¼zenlemede son kontrol tarihini gÃƒÂ¼ncelle
     if TabAlias.State = dsEdit then
       TabAlias.FieldByName('SONKONTROLTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
     TabAlias.Post;
@@ -2229,8 +2229,8 @@ end;
 procedure TRehberAraDlg.btnEkipmanDetaySilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBERBILGI where YERI='+IntToStr(TabNo_EKIPMANREHBER)+' and YER_ID=&id ',['&id'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from EKIPMANREHBER where ID=&id ',['&id'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBERBILGI where YERI='+IntToStr(TabNo_EKIPMANREHBER)+' and YER_ID=&id ',['&id'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from EKIPMANREHBER where ID=&id ',['&id'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
     //TabEkipmanlar.Delete;
      TabloYenile(TabEkipmanlar,[REHBER.FieldByName('ID').AsInteger]);
   end;
@@ -2280,7 +2280,7 @@ begin
 
       Tablo.TablodanSorguAc(4,'insert into EKIPMANREHBER(EKIPMANID,REHBERID,USTID,SAHIP,MARKA,MODEL,EKLEYEN,SUBEID) values('+
             Tablo.Query1.FieldByName('ID').AsString+','+REHBER.FieldByName('ID').AsString+','+IntToStr(UstIDID)+','+S1+','+S2+','+S3+','+Kullanan+','+IntToStr(SubeId)+') select scope_identity()');
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) select :PYeri,:PYerID,SIRA,ETIKET,BILGI,SUBEID from REHBERBILGI where YERI=&PYeri and YER_ID=&PYerID',
         [':PYeri',':PYerID','&PYeri','&PYerID'],
       [TabNo_EKIPMANREHBER,Tablo.Query4.Fields[0].AsInteger,TabNo_EKIPMAN,Tablo.Query1.FieldByName('ID').AsInteger]);
@@ -2315,10 +2315,10 @@ procedure TRehberAraDlg.BtnKotaClick(Sender: TObject);
 //var str:TStringList;
 var Sonuc:variant;
 begin
-  Sonuc := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select isnull((select top 1 TUTAR from REHBER_KOTA Where REHBERID=&RehID),0.0) ',['&RehID'],[REHBER.FieldByName('ID').AsInteger],True);
+  Sonuc := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select isnull((select top 1 TUTAR from REHBER_KOTA Where REHBERID=&RehID),0.0) ',['&RehID'],[REHBER.FieldByName('ID').AsInteger],True);
   if TGirisKutusuEx.BilgiAlEx('Risk Limiti Bilgisi Giriniz.',TGirdiDenetimleri.Create.CurrencyEdit(CariDoviz+' : ',@Sonuc,2)) = mrOk then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBER_KOTA Where REHBERID=&RehID ',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into REHBER_KOTA(REHBERID,TUTAR,KUR) values (&RehID,&Tutar,&Kur) ',
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBER_KOTA Where REHBERID=&RehID ',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into REHBER_KOTA(REHBERID,TUTAR,KUR) values (&RehID,&Tutar,&Kur) ',
                                   ['&RehID','&Tutar','&Kur'],[REHBER.FieldByName('ID').AsInteger,Sonuc,CariDoviz]);
   end;
 
@@ -2363,17 +2363,17 @@ constructor TRehberAraDlg.Create(AOwner: TComponent);
 begin
   inherited;
   FArama := nil;
-  // Alias sekmesi baÄŸlantÄ±larÄ± runtime'da kurulur
-  // (DFM'de yapÄ±lan deÄŸiÅŸiklikler "invalid property value" hatasÄ±na yol aÃ§tÄ±ÄŸÄ±ndan programatik baÄŸlanÄ±yor)
+  // Alias sekmesi baÃ„Å¸lantÃ„Â±larÃ„Â± runtime'da kurulur
+  // (DFM'de yapÃ„Â±lan deÃ„Å¸iÃ…Å¸iklikler "invalid property value" hatasÃ„Â±na yol aÃƒÂ§tÃ„Â±Ã„Å¸Ã„Â±ndan programatik baÃ„Å¸lanÃ„Â±yor)
   TabAlias.OnNewRecord     := TabAliasNewRecord;
   ToolButton17.OnClick     := AliasYeniTusClick;       // Yeni
   ToolButton19.OnClick     := AliasSilTusClick;        // Sil
-  ToolButton21.OnClick     := AliasDuzenleTusClick;    // DÃ¼zenle
+  ToolButton21.OnClick     := AliasDuzenleTusClick;    // DÃƒÂ¼zenle
   ToolButton22.OnClick     := AliasKaydetTusClick;     // Kaydet
-  ToolButton23.OnClick     := AliasIptalTusClick;      // Ä°ptal
+  ToolButton23.OnClick     := AliasIptalTusClick;      // Ã„Â°ptal
   GridAliasView.OnDblClick := AliasDuzenleTusClick;
-  GridAliasView.OnCanFocusRecord := nil;               // Banka handler'Ä± dezaktif et
-  // ALIAS kolonu yazÄ±labilir olsun
+  GridAliasView.OnCanFocusRecord := nil;               // Banka handler'Ã„Â± dezaktif et
+  // ALIAS kolonu yazÃ„Â±labilir olsun
   if GridAliasViewALIAS.Properties is TcxTextEditProperties then
     TcxTextEditProperties(GridAliasViewALIAS.Properties).ReadOnly := False;
 end;
@@ -2481,7 +2481,7 @@ begin
   if State = dsDragLeave then begin //
      TreeHitTest := (Sender as TcxDBTreeList).HitTest;
      if not TreeHitTest.HitAtNode then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update EKIPMANREHBER set USTID = 0 where ID='+TabEkipmanlar.Fields[0].AsString,[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update EKIPMANREHBER set USTID = 0 where ID='+TabEkipmanlar.Fields[0].AsString,[],[]);
         TabloYenile(TabEkipmanlar,[REHBER.FieldByName('ID').AsInteger]);
      end;
   end
@@ -2507,8 +2507,8 @@ begin
       dropId := TcxDBTreeListNode( AttachNode ).KeyValue;
       dragId := TcxDBTreeListNode( Nodes[0] ).Values[0];
       if (DragId>0)and(dropId>0) then begin
-         //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update EKIPMANREHBER set USTID = '+IntToStr(abs(dropId))+' where ID='+IntToStr(abs(dragId)),[],[]);
+         //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update EKIPMANREHBER set USTID = '+IntToStr(abs(dropId))+' where ID='+IntToStr(abs(dragId)),[],[]);
          TabloYenile(TabEkipmanlar,[REHBER.FieldByName('ID').AsInteger]);
       end;
     end;
@@ -2866,7 +2866,7 @@ begin
           Kur :=StringReplace(Kur, ',', '.', [rfReplaceAll]);
           Karsilik :=  VarToStrDef(sayfa.Cells[j,7].Value, '1');
           Karsilik :=StringReplace(Karsilik, ',', '.', [rfReplaceAll]);
-          veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+          veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
             'insert into FATBASLIK(TARIH,TUR,REHBERID,FATURATARIH,FATURANO,FATURA_TUTARI,KUR,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR,'+
             'RAPORDOVIZ,TIPI,EKSTREDEKULLAN, MASRAFID,YERI, ACIKLAMA,DIL,SUBEID) '+
             'values(&TARIH,&TUR,&REHBERID,&FATURATARIH,&FATURANO,&FATURA_TUTARI,&KUR,&DOVIZ_TUTARI,&DOVIZ_CINSI,&DOVIZKUR,'+
@@ -3361,7 +3361,7 @@ procedure TRehberAraDlg.ifreOlutur1Click(Sender: TObject);
 begin
   Tablo.TablodanSorguAc(1, 'select ID from KULLANICI where REHBERID='+TabRehberIlgili.FieldByName('ID').AsString+' ');
   if Tablo.Query1.IsEmpty then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into KULLANICI (REHBERID,SIFRE,KOD,ROLID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID,DIL) values '+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into KULLANICI (REHBERID,SIFRE,KOD,ROLID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID,DIL) values '+
            '(&Rehber_Id,'''+UGenSifre.sifre(TabRehberIlgili.FieldByName('ID').AsString)+''',&Kod, &Rol_Id,1,&Ekleyen, getdate(),'+inttostr(SubeID)+',-1) ',
            ['&Rehber_Id','&Kod', '&Rol_Id','&Ekleyen'],
            [TabRehberIlgili.FieldByName('ID').AsInteger,TabRehberIlgili.FieldByName('ID').AsString, 0, StrToInt(Kullanan)]);
@@ -3695,7 +3695,7 @@ begin
       EditKOD := tablo.KodBulmaSihirbazi(120, 'HESAPPLANI', 'HESAPKODU', 'HESAPADI', 'REHBER', 'KOD',120);
 
    if EditKOD <> '0' then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBER Set GRUP=120, KOD='''+EditKOD+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBER Set GRUP=120, KOD='''+EditKOD+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
       CariGridView.DataController.DeleteRecord(CariGridView.DataController.FocusedRecordIndex);
    end;
 end;
@@ -3717,7 +3717,7 @@ begin
 
    EID := Tablo.SatirKopyala('EKIPMANREHBER', TabEkipmanlar.FieldByName('ID').AsInteger);
    if Id>1 then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'UPDATE EKIPMANREHBER SET REHBERID='+IntToStr(Id)+' WHERE ID = &ID', ['&ID'],[IntToStr(EID)]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'UPDATE EKIPMANREHBER SET REHBERID='+IntToStr(Id)+' WHERE ID = &ID', ['&ID'],[IntToStr(EID)]);
    TabEkipmanEkBilgi.First;
    while not TabEkipmanEkBilgi.Eof do begin
       Tablo.TablodanSorguAc(5,'select * from REHBERBILGI where ID=-1');
@@ -3950,7 +3950,7 @@ begin
    if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from CEKLER where REHBERID =  &RId', ['&RId'],[REHBER.FieldByName('ID').AsInteger]) then
       raise Exception.Create(Hareketgormussilinemez);
 
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update REHBER Set GRUP=1, KOD='''+REHBER.FieldByName('ID').AsString+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update REHBER Set GRUP=1, KOD='''+REHBER.FieldByName('ID').AsString+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
     CariGridView.DataController.DeleteRecord(CariGridView.DataController.FocusedRecordIndex);
 end;
 

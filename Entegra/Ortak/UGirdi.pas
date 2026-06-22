@@ -1,4 +1,4 @@
-unit UGirdi;
+﻿unit UGirdi;
 
 interface
 
@@ -229,7 +229,7 @@ End;
 
 procedure TGirdiAyarlaDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TGirdiAyarlaDlg.FormShow(Sender: TObject);

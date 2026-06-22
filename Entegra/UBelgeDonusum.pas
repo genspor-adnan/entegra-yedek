@@ -685,24 +685,24 @@ Begin
   //önce kaynak belge depo ile hedef belge depolar uyuşuyor mu kontrol edelim..
   Tablo.TablodanSorguAc(1, 'select GIRISDEPO, CIKISDEPO from FATBASLIK where ID='+IntToStr(HedefBaslikID));
   if ((   DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Irsaliye)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fatura)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fis))and
-     (TabKaynak.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
+     (TabKaynakBaslik.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
      showmessage(DonusumDepoAyniOlmali);
      exit;
   end
   else if (DonusumTuru = TabNo_DONUSUM_SATIS_IRS_FAT) and
-     (TabKaynak.FieldByName('CIKISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
+     (TabKaynakBaslik.FieldByName('CIKISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
      showmessage(DonusumDepoAyniOlmali);
      exit;
   end
   else if ((DonusumTuru = TabNo_DONUSUM_Gelen_Konsinye_Irsaliye)or(DonusumTuru = TabNo_DONUSUM_Gelen_Konsinye_Fatura)or
      (DonusumTuru = TabNo_DONUSUM_ALIS_IRS_FAT)) and
-     (TabKaynak.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('GIRISDEPO').AsString) then begin
+     (TabKaynakBaslik.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('GIRISDEPO').AsString) then begin
      showmessage(DonusumDepoAyniOlmali);
      exit;
   end
   else if (DonusumTuru = TabNo_DONUSUM_STOKTALEP_TRANSFER) and
-     (TabKaynak.FieldByName('CIKISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString)and
-     (TabKaynak.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('GIRISDEPO').AsString) then begin
+     (TabKaynakBaslik.FieldByName('CIKISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString)and
+     (TabKaynakBaslik.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('GIRISDEPO').AsString) then begin
      showmessage(DonusumDepoAyniOlmali);
      exit;
   end;

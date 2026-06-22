@@ -1,4 +1,4 @@
-unit UFirsatListeAramaFrame;
+﻿unit UFirsatListeAramaFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 04/12/2010 13:46:20 }
@@ -107,7 +107,7 @@ end;
 
 procedure TFirsatListeAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    YenileTus.Click;
 end;
 

@@ -1,4 +1,4 @@
-unit UServisDetayPersonel;
+ï»¿unit UServisDetayPersonel;
 
 interface
 
@@ -120,7 +120,7 @@ begin
     11:begin //saat
          SpinSure.Properties.MaxValue := 24;
        end;
-    12:begin //gün
+    12:begin //gÃ¼n
          SpinSure.Properties.MaxValue := 360;
        end;
   end;
@@ -188,7 +188,7 @@ end;
 
 procedure TServisDetayPersonelDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Sablon:=False;
 end;
 

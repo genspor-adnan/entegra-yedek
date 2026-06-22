@@ -1,4 +1,4 @@
-unit UFatTransferWizard;
+ï»¿unit UFatTransferWizard;
 
 interface
 
@@ -325,7 +325,7 @@ begin
     raise Exception.Create('FATURA satiri veritabanina yazilmadi. ID=' + IntToStr(YeniID) + ' FATBASID=' + IntToStr(FatBasId));
 
 //  TabFATBASLIK.Refresh;
- /// Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
+ /// Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'exec dbo.sp_KuyrukIsle', [], []);
   FaturaTutarHesapla;
 
   TabloYenile(FATURA,[FatBasId]);
@@ -379,8 +379,8 @@ begin
   PopupMenuYaz.Images := TGenelAnaSekmeFrame(aktifFrame).ImageList1;
 
   if not SubeVarmi then begin
-    LblCikis.Caption:='Çýkýþ Deposu';
-    LblGiris.Caption:='Giriþ Deposu';
+    LblCikis.Caption:='Ã‡Ä±kÄ±ÅŸ Deposu';
+    LblGiris.Caption:='GiriÅŸ Deposu';
     ComboSubeCikis.Visible:=False;
     ComboSubeGiris.Visible:=False;
     ComboCikisDepo.Width:=160;
@@ -517,7 +517,7 @@ begin
     VFatNo := Trim(TabFatBaslik.FieldByName('FATURANO').AsString);
     VSeri := Trim(TabFatBaslik.FieldByName('FATURASERI').AsString);
     if VFatNo <> '' then
-      YeniID := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalýþtýr(
+      YeniID := StrToIntDef(VarToStr(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(
         Tablo.FDCnn,
         'select top 1 ID from FATBASLIK where FATURANO=&NO and FATURASERI=&SERI and TUR=&TUR and SUBEID=&SUBE order by ID desc',
         ['&NO','&SERI','&TUR','&SUBE'],
@@ -641,11 +641,12 @@ procedure TFatTransferWizardDlg.TabFaturaAfterScroll(DataSet: TDataSet);
 begin
   ComboCikisDepo.Enabled := TabFatura.RecordCount = 0;
   ComboGirisDepo.Enabled := TabFatura.RecordCount = 0;
+  EditFatTarih.Enabled := TabFatura.RecordCount = 0;
 end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforeDelete(DataSet: TDataSet);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKIZLEME where BASLIKID=&BID and SATIRID=&SID',['&BID','&SID'],[TABFATBASLIK.FieldByName('ID').AsString,TABFATURA.FieldByName('ID').AsString]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKIZLEME where BASLIKID=&BID and SATIRID=&SID',['&BID','&SID'],[TABFATBASLIK.FieldByName('ID').AsString,TABFATURA.FieldByName('ID').AsString]);
 end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforeEdit(DataSet: TDataSet);
@@ -661,6 +662,8 @@ var
   miktar : extended;
   mik : variant;
   MiktarInt : real;
+  LUrunID: Integer;
+  LTransferTarihi, LSonGiris: TDateTime;
 begin
   if FATURA.Active then
      FATURA.Close;
@@ -722,6 +725,34 @@ begin
       end;
     end;
   end;
+  // Tarih  kontrolu: Transfer tarihinde veya sonrasinda urunun bir giris belgesi
+  // (BELGETUR 3,6,10,11,12) varsa, gecmise donuk transfer yapilamaz. Aksi
+  // halde henuz girisi gelmemis stogu transfer etmis oluruz.
+  LUrunID := TabFATURA.FieldByName('URUNID').AsInteger;
+  LTransferTarihi := TabFatBaslik.FieldByName('FATURATARIH').AsDateTime;
+  if LUrunID > 0 then begin
+    Tablo.TablodanSorguAc(1,
+      'SELECT MAX(FB1.FATURATARIH) AS SonGiris ' +
+      'FROM FATURA F1 INNER JOIN FATBASLIK FB1 ON FB1.ID = F1.FATBASID ' +
+      'WHERE F1.URUNID = ' + IntToStr(LUrunID) +
+      '  AND FB1.TUR IN (3, 6, 10, 11, 12) ' +
+      '  AND (FB1.TUR <> 6 OR F1.ADET > 0)');
+    if (not Tablo.Query1.Eof) and (not Tablo.Query1.Fields[0].IsNull) then begin
+      LSonGiris := Tablo.Query1.Fields[0].AsDateTime;
+      Tablo.Query1.Close;
+      if LTransferTarihi <= LSonGiris then begin
+        ShowMessage('Bu urunun en son giris tarihi ' +
+                    FormatDateTime('dd.mm.yyyy', LSonGiris) +
+                    ' olup transfer tarihinden (' +
+                    FormatDateTime('dd.mm.yyyy', LTransferTarihi) +
+                    ') ileride veya esit. Bu satir transfer edilemez.');
+        TabFATURA.Cancel;
+        Abort;
+      end;
+    end else
+      Tablo.Query1.Close;
+  end;
+
   EkleyenDegistiren(DtsFatura);
 end;
 

@@ -1,4 +1,4 @@
-unit UMasrafGelirSec;
+ï»¿unit UMasrafGelirSec;
 
 interface
 
@@ -134,11 +134,11 @@ begin
       ComboSube.EditValue := SubeId;
 
    if GelirMi=1 then
-      Caption := 'Gelir Seçimi Ekranı'
+      Caption := 'Gelir SeÃ§imi EkranÄ±'
    else if GelirMi=0 then
-      Caption := 'Masraf Seçimi Ekranı'
+      Caption := 'Masraf SeÃ§imi EkranÄ±'
    else
-      Caption := 'Masraf/Gelir Seçimi Ekranı';
+      Caption := 'Masraf/Gelir SeÃ§imi EkranÄ±';
 
 
 
@@ -162,20 +162,20 @@ procedure TMasrafGelirSecDlg.SecTusClick(Sender: TObject);
 begin
   if cxDBTreeList1.SelectionCount = 1 then begin
      if (not BaslikSecilebilir)and(cxDBTreeList1.Selections[0].HasChildren) then
-        raise Exception.Create('Başlık değil Detay seçmelisiniz!')
+        raise Exception.Create('BaÅŸlÄ±k deÄŸil Detay seÃ§melisiniz!')
      else
         ModalResult := mrOk;
       {else begin
         if Gelirmi=16 then
-           raise Exception.Create('Detay değil Başlık seçmelisiniz!')
+           raise Exception.Create('Detay deÄŸil BaÅŸlÄ±k seÃ§melisiniz!')
         else
            ModalResult := mrOk;}
   end
   else
-    raise Exception.Create('Sadece bir seçim yapabilirsiniz!')
+    raise Exception.Create('Sadece bir seÃ§im yapabilirsiniz!')
 
   // if TabMasrafListe.FieldByName('BASLIK').AsBoolean then
-  //    raise Exception.Create('Başlık değil detay işlem seçmelisiniz!');
+  //    raise Exception.Create('BaÅŸlÄ±k deÄŸil detay iÅŸlem seÃ§melisiniz!');
 
 end;
 

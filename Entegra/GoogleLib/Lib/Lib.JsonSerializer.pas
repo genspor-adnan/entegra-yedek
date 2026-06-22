@@ -1,4 +1,4 @@
-unit Lib.JsonSerializer;
+﻿unit Lib.JsonSerializer;
 
 interface
 

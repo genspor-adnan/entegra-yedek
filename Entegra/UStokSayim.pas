@@ -1,4 +1,4 @@
-//Stok sayým için kullanýlan sp ler
+ï»¿//Stok sayÄ±m iÃ§in kullanÄ±lan sp ler
 //  tek tek eklerken : sp_StokSayim ve  toplu eklerken : fn_StokSayimButun
 unit UStokSayim;
 
@@ -191,7 +191,7 @@ type
     sayimKontrolSonucu: SayimKontrolu;
     oncekisayimmiktar: Double;
     AraDlg: TStokHizmetAraDlg;
-    ExcelStokId,ButtonSelect :integer; // ExcelStokId =Eðer dosyadan aktarým ise yeni eklenen stokIdyi alýyor..    buttonSelect=messagedlg'den donen sonuc
+    ExcelStokId,ButtonSelect :integer; // ExcelStokId =EÄŸer dosyadan aktarÄ±m ise yeni eklenen stokIdyi alÄ±yor..    buttonSelect=messagedlg'den donen sonuc
 
 implementation
 
@@ -221,11 +221,11 @@ var
         Tablo.TablodanSorguAc(0,'select ID from REHBERILETISIM where REHBERID=-1 order by VARSAYILAN desc');
         RehberId := -1;
         TabloYenile(Tablo.tabCariBilgileri, [RehberId,Tablo.Query0.FieldByName('ID').AsInteger]);
-        KulFatbasID := StrToIntDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'INSERT INTO FATBASLIK (TARIH, KOCANNO, FATURANO, TUR, TIPI, REHBERID,DURUM,DOVIZKUR, ACIK_KAPALI, EKSTREDEKULLAN, GIRISKAYNAK, YERI,YERID, ANAKAYITID, '+
+        KulFatbasID := StrToIntDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'INSERT INTO FATBASLIK (TARIH, KOCANNO, FATURANO, TUR, TIPI, REHBERID,DURUM,DOVIZKUR, ACIK_KAPALI, EKSTREDEKULLAN, GIRISKAYNAK, YERI,YERID, ANAKAYITID, '+
                   ' FATURATARIH, GIRISDEPO, CIKISDEPO, EKLEYEN, EKLEMETARIHI , KDVDURUM, KUR, DOVIZ_CINSI, RAPORDOVIZ, FATURADOVIZI,SUBEID, BASLIK, ADRES, ILCE, IL, VD, VNO ) '+
                   ' VALUES ('''+formatdatetime('yyyy-mm-dd hh:nn:ss', TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime)+''', '+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','+
                   IntToStr(IslemTur)+','+IntToStr(IslemTip)+', -1,0,1.0,0,0,1,99,'+TabSayTutanak.FieldByName('ID').AsString+','+TabSayTutanak.FieldByName('ID').AsString+','''+formatdatetime('yyyy-mm-dd hh:nn:ss', TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime)+''',  '+
-                  IntToStr(GirDepo)+','+IntToStr(CikDepo)+','+Kullanan+', GETDATE(), ''Hariç'','''+CariDoviz+''','''+CariDoviz+''','''+CariDoviz+''','''+CariDoviz+''','+
+                  IntToStr(GirDepo)+','+IntToStr(CikDepo)+','+Kullanan+', GETDATE(), ''HariÃ§'','''+CariDoviz+''','''+CariDoviz+''','''+CariDoviz+''','''+CariDoviz+''','+
                   '0, &BASLIK, &ADRES, &ILCE, &IL, &VD, &VNO) SELECT ID = SCOPE_IDENTITY() ',
                   ['&BASLIK', '&ADRES', '&ILCE', '&IL', '&VD', '&VNO'], [Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString,Tablo.tabCariBilgileri.FieldByName('ADRES').AsString,
                   Tablo.tabCariBilgileri.FieldByName('ILCE').AsString, Tablo.tabCariBilgileri.FieldByName('IL').AsString,
@@ -253,9 +253,9 @@ var
 
   procedure IzlemVar(SayimKalemID:integer; GirenCikan:char);
   begin
-     //önce bakalým eksik var mý yaný fiþ çýkýþý olacak                                                                                       //  > veya <
+     //Ã¶nce bakalÄ±m eksik var mÄ± yanÄ± fiÅŸ Ã§Ä±kÄ±ÅŸÄ± olacak                                                                                       //  > veya <
      Tablo.TablodanSorguAc(7, 'select abs(sum(KALAN)) FROM STOKIZLEME WHERE BELGETUR=99 and SATIRID='+IntToStr(SayimKalemID)+ ' and KALAN '+GirenCikan+' 0');
-     if Tablo.Query7.Fields[0].AsFloat > 0 then   // toplam çýkan lotlar için ön tarafa adet girilmeli
+     if Tablo.Query7.Fields[0].AsFloat > 0 then   // toplam Ã§Ä±kan lotlar iÃ§in Ã¶n tarafa adet girilmeli
          SatirID := FiseSatirEkle(tabSayimKalemleri.FieldByName('ID').AsInteger, Tablo.Query7.Fields[0].AsFloat);
 
      Tablo.TablodanSorguAc(8, 'select SI.ID, SI.STOKID,SERINO, LOTNO, SKT, URT, KALAN = ABS(KALAN), DURUM= SI.ADET '+
@@ -283,14 +283,14 @@ begin
      FreeAndNil(BekletDlg);
   Application.CreateForm(TBekletmeDlg, BekletDlg);
   BekletDlg.cxProgressBar1.Position := 0;
-  BekletDlg.Caption := 'Sayým Ýþlemi Tamamlanýrken Lütfen Bekleyiniz...';
+  BekletDlg.Caption := 'SayÄ±m Ä°ÅŸlemi TamamlanÄ±rken LÃ¼tfen Bekleyiniz...';
   BekletDlg.Show;
 
 
   LokasyonKullan := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_LokasyonVar,False);
   tabSayimKalemleri.FetchAll;
   tabSayimKalemleri.First;
-  while not tabSayimKalemleri.Eof do begin  //fatura satýrlarýný insert ediyoruz..
+  while not tabSayimKalemleri.Eof do begin  //fatura satÄ±rlarÄ±nÄ± insert ediyoruz..
 
     BekletDlg.cxProgressBar1.Position := ABS(100.0*(tabSayimKalemleri.RecNo/tabSayimKalemleri.RecordCount));
     BekletDlg.cxProgressBar1.Refresh;
@@ -298,27 +298,27 @@ begin
     BekletDlg.LabelUstTaraf.Update;
 
     if (tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsString<>'')and(tabSayimKalemleri.FieldByName('SISTEMDEKIMIKTAR').AsFloat<>tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsFloat) then begin
-       //önce bakýyoruz izlem var mý
-       //eðer izlem varsa bir kalemin hem lot eksikleri hem de fazlalarý olabilir..
+       //Ã¶nce bakÄ±yoruz izlem var mÄ±
+       //eÄŸer izlem varsa bir kalemin hem lot eksikleri hem de fazlalarÄ± olabilir..
        if tabSayimKalemleri.FieldByName('IZLEME').AsInteger > 0 then begin
-           //sayým eksiði çýkýþ fiþine girilecek
+           //sayÄ±m eksiÄŸi Ã§Ä±kÄ±ÅŸ fiÅŸine girilecek
            KulFatbasID := sayimCikfisfatbasid;
            IslemTur := 4; IslemTip := 16; GirDepo := 0; CikDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger;
            IzlemVar(tabSayimKalemleri.FieldByName('ID').AsInteger, '<');
 
-           //sayým fazlasý giriþ fiþine girilecek
+           //sayÄ±m fazlasÄ± giriÅŸ fiÅŸine girilecek
            KulFatbasID := sayimGirfisfatbasid;
            IslemTur := 3; IslemTip := 17; GirDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger; CikDepo := 0;
            IzlemVar(tabSayimKalemleri.FieldByName('ID').AsInteger, '>');
        end
-       else begin //Ýzlem yooook
+       else begin //Ä°zlem yooook
            if tabSayimKalemleri.FieldByName('SISTEMDEKIMIKTAR').AsFloat>tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsFloat then begin
-              //sayým eksiði çýkýþ fiþine girilecek
+              //sayÄ±m eksiÄŸi Ã§Ä±kÄ±ÅŸ fiÅŸine girilecek
               KulFatbasID := sayimCikfisfatbasid;
               IslemTur := 4; IslemTip := 16;
               GirDepo := 0; CikDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger;
            end else begin
-              //sayým fazlasý giriþ fiþine girilecek
+              //sayÄ±m fazlasÄ± giriÅŸ fiÅŸine girilecek
               KulFatbasID := sayimGirfisfatbasid;
               IslemTur := 3; IslemTip := 17;
               GirDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger; CikDepo := 0;
@@ -336,8 +336,8 @@ begin
       end;
 
       {if tabSayimKalemleri.FieldByName('IZLEME').AsInteger>0 then begin
-        //o depodaki eski SERINO bilgileri için bir sýfýrlama yapýlýcak..
-        //herzaman giriþ depo kullanýlacak, gerekir ise - giriþ yapýlacak..
+        //o depodaki eski SERINO bilgileri iÃ§in bir sÄ±fÄ±rlama yapÄ±lÄ±cak..
+        //herzaman giriÅŸ depo kullanÄ±lacak, gerekir ise - giriÅŸ yapÄ±lacak..
         Tablo.Query5.Close;
         Tablo.Query5.SQL.Text := ' declare @DepoID int declare @StokID int set @DepoID='+VarToStr(cbSayimDepo.EditValue)+' set @StokID='+tabSayimKalemleri.FieldByName('STOKID').AsString;
         Tablo.Query5.SQL.Add('INSERT INTO STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,IZLEMTUR,IZLEMID,SERINO,LOTNO,SKT,MIKTAR)');
@@ -351,21 +351,21 @@ begin
         Tablo.Query5.SQL.Add('where SI1.STOKID=@StokID and SI1.DURUM=1');
         Tablo.Query5.SQL.Add('group by SI1.STOKID,SI1.IZLEMID,SI1.SKT,SI1.LOTNO,SI1.SERINO,SI1.IZLEMTUR');
         Tablo.Query5.ExecSQL;
-        //sayýlanlar da yeniden giriþ olarak yazýlacak..
-        veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEMID,SERINO,LOTNO,SKT,DURUM)'+
+        //sayÄ±lanlar da yeniden giriÅŸ olarak yazÄ±lacak..
+        veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEMID,SERINO,LOTNO,SKT,DURUM)'+
                                           'select STOKID,BELGETUR,'+IntToStr(KulFatbasID)+','+Tablo.Query2.Fields[0].AsString+',GIRISDEPO,0,IZLEMTUR,MIKTAR,IZLEMID,SERINO,LOTNO,SKT,1 from STOKIZLEME '+
                                           'where DURUM=0 and BELGETUR=99 and BASLIKID='+TabSayTutanak.FieldByName('ID').AsString+' and SATIRID='+tabSayimKalemleri.FieldByName('ID').AsString,[],[]);
 
       end;}
       if LokasyonKullan then begin
-        //o depodaki eski lokasyon bilgileri için bir sýfýrlama yapýlýcak..
+        //o depodaki eski lokasyon bilgileri iÃ§in bir sÄ±fÄ±rlama yapÄ±lÄ±cak..
         Tablo.Query6.Close;
         Tablo.Query6.SQL.Text := 'INSERT INTO STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)';
         Tablo.Query6.SQL.Add('select '+tabSayimKalemleri.FieldByName('STOKID').AsString+','+IntToStr(KasaTur_StokSayimFisi)+','+IntToStr(KulFatbasID)+','+Tablo.Query2.Fields[0].AsString+','+VarToStr(cbSayimDepo.EditValue)+',0,MIKTAR=-Miktar,GIRISLOKASYONID=Lokasyon,0,1');
         Tablo.Query6.SQL.Add('from [dbo].[fn_STOK_LOKASYON_DURUM] ('+tabSayimKalemleri.FieldByName('STOKID').AsString+','+VarToStr(cbSayimDepo.EditValue)+')');
         Tablo.Query6.ExecSQL;
-        //herzaman giriþ depo kullanýlacak, gerekir ise - giriþ yapýlacak..
-        veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
+        //herzaman giriÅŸ depo kullanÄ±lacak, gerekir ise - giriÅŸ yapÄ±lacak..
+        veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
                                           'select STOKID,BELGETUR,'+IntToStr(KulFatbasID)+','+Tablo.Query2.Fields[0].AsString+',GIRISDEPO,0,MIKTAR,GIRISLOKASYONID,0,1 from STOKLOKASYON '+
                                           'where DURUM=0 and BELGETUR=99 and BASLIKID='+TabSayTutanak.FieldByName('ID').AsString+' and SATIRID='+tabSayimKalemleri.FieldByName('ID').AsString,[],[]);
 
@@ -376,10 +376,10 @@ begin
 
     BekletDlg.cxProgressBar1.Position := 100;
     BekletDlg.cxProgressBar1.Refresh;
-    BekletDlg.LabelUstTaraf.Caption := 'Sayým Sonlandýrýlýyor..';
+    BekletDlg.LabelUstTaraf.Caption := 'SayÄ±m SonlandÄ±rÄ±lÄ±yor..';
     BekletDlg.LabelUstTaraf.Update;
 
-  // sayým fiþ tablosu oluþturulduktan sonra fatbaslýktaki tutar alanlarý güncellenir.
+  // sayÄ±m fiÅŸ tablosu oluÅŸturulduktan sonra fatbaslÄ±ktaki tutar alanlarÄ± gÃ¼ncellenir.
 {  Tablo.Query1.Close;
   Tablo.Query1.SQL.Text:= 'UPDATE FATBASLIK SET FATURA_MATRAHI = ARATOPLAM,KDV_TUTARI = KDV_MATRAHI, FATURA_TUTARI = FATURATOPLAMI FROM FATBASLIK FB INNER JOIN  ';
   Tablo.Query1.SQL.Add(' (SELECT FATBASID, ARATOPLAM = isnull(SUM(ROUND(TUTAR,2)),0) , ');
@@ -412,30 +412,30 @@ procedure TStokSayimDlg.FaturaSayimFisiOlusturGuncelle;
 
  {  function FatBaslikOlustur(Tur, Tipi, GDepo,CDepo :integer) : integer;
    begin
-     Result := StrToIntDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'INSERT INTO FATBASLIK (TARIH, TUR, TIPI, REHBERID, ANAKAYITID, FATURATARIH, GIRISDEPO, CIKISDEPO, EKLEYEN, EKLEMETARIHI , KDVDURUM,SUBEID ) '+
+     Result := StrToIntDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'INSERT INTO FATBASLIK (TARIH, TUR, TIPI, REHBERID, ANAKAYITID, FATURATARIH, GIRISDEPO, CIKISDEPO, EKLEYEN, EKLEMETARIHI , KDVDURUM,SUBEID ) '+
                   ' VALUES ('''+formatdatetime('yyyy-mm-dd hh:nn:ss', TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime)+''', '+
                   IntToStr(Tur)+','+IntToStr(Tipi)+', -1,'+TabSayTutanak.FieldByName('ID').AsString+','''+formatdatetime('yyyy-mm-dd hh:nn:ss', TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime)+''',  '+
-                  IntToStr(GDepo)+','+IntToStr(CDepo)+','+Kullanan+', GETDATE(), ''Hariç'','+IntToStr(SubeId)+' ) SELECT ID = SCOPE_IDENTITY() ',[],[],True),0);
+                  IntToStr(GDepo)+','+IntToStr(CDepo)+','+Kullanan+', GETDATE(), ''HariÃ§'','+IntToStr(SubeId)+' ) SELECT ID = SCOPE_IDENTITY() ',[],[],True),0);
    end;   }
 
 begin
-  //Önce temizlik yapýlacak..
+  //Ã–nce temizlik yapÄ±lacak..
   TabloYenile(tabSayimKalemleri,[TabSayTutanak.FieldByName('ID').AsInteger, '%%', '%%']);
   FaturaSayimFisiSil;
-  //giriþ fiþi oluþuyor    giriþ fiþi:3 - sayým fazlasý:17
+  //giriÅŸ fiÅŸi oluÅŸuyor    giriÅŸ fiÅŸi:3 - sayÄ±m fazlasÄ±:17
  { Tablo.TablodanSorguAc(1,'select count(*) from  STOKSAYIMKALEMLERI SS where SS.SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and SISTEMDEKIMIKTAR<SAYIMMIKTAR ');
   if Tablo.Query1.fields[0].AsInteger>0 then
      girID := FatBaslikOlustur(3, 17, TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger, 0)
   else
      girID := 0;
-  //çýkýþ fiþi oluþuyor    çýkýþ fiþi:4 - sayým eksiði:16
+  //Ã§Ä±kÄ±ÅŸ fiÅŸi oluÅŸuyor    Ã§Ä±kÄ±ÅŸ fiÅŸi:4 - sayÄ±m eksiÄŸi:16
   Tablo.TablodanSorguAc(1,'select count(*) from  STOKSAYIMKALEMLERI SS where SS.SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and SISTEMDEKIMIKTAR>SAYIMMIKTAR ');
   if Tablo.Query1.fields[0].AsInteger>0 then
      cikID := FatBaslikOlustur(4, 16, 0, TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger)
   else
      cikID := 0; }
   FaturaSayimFisiSatirlariniOlusturGuncelle(0,0); //girID,cikID);
-  //serinolari onaylýyoruz çýkýþ ekranlarýnda görünmesi için
+  //serinolari onaylÄ±yoruz Ã§Ä±kÄ±ÅŸ ekranlarÄ±nda gÃ¶rÃ¼nmesi iÃ§in
 end;
 
 procedure TStokSayimDlg.SayimIptalClick(Sender: TObject);
@@ -454,7 +454,7 @@ begin
     Application.MessageBox(PChar(STOnce_sil),PChar(Bilgi), MB_OK + MB_ICONWARNING);
     Abort
   end;
-  //önce Ýlgili fatura kaydý silinsin
+  //Ã¶nce Ä°lgili fatura kaydÄ± silinsin
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text:= 'DELETE FROM FATBASLIK WHERE TUR = 7 AND ANAKAYITID ='+ TabSayTutanak.FieldByName('ID').AsString +' ';
   Tablo.Query1.ExecSQL;
@@ -475,12 +475,12 @@ var
   SayimMiktari:extended;
   Fiyat:Currency;
 begin
-  if OpenDialog2.Execute then begin //burada text dosyayý seçtiriyoruz.. uzantýsý .txt .dat gibi olabilir..
+  if OpenDialog2.Execute then begin //burada text dosyayÄ± seÃ§tiriyoruz.. uzantÄ±sÄ± .txt .dat gibi olabilir..
     sl := TStringList.Create;
     try
       sl.LoadFromFile(OpenDialog2.Filename);
       for I := 0 to sl.Count-1 do begin
-        //dosya içerisindeki ',' leri '.' ile deðiþtirerek baþlamak gerekiyor..
+        //dosya iÃ§erisindeki ',' leri '.' ile deÄŸiÅŸtirerek baÅŸlamak gerekiyor..
         StokId := 0;
         SayimId := 0;
         SayimMiktari := 0.0;
@@ -489,10 +489,10 @@ begin
         BoyutID := 0;
         Satir := StringReplace(sl.Strings[i],',','.',[rfReplaceAll]);
         SatirTur := dize.SinirlandirilmisMetin(Satir,'|');
-        if SatirTur='S' then begin //stok kartý
-          //' Stok Id,' Sayým Id,' Ýzleme Turu Id,' Depo ID si,' Ürün Barkodu,' Sayým Miktari,
-          //' Ürün Adý,' Ürün Kodu,' Ürün Birim,' Ürün Raf Barcode,' Ürün Lokasyon,' Tarih
-          //S|28|1|0|2|8691273367000|3|100X100 PLAYFUL SÝYAH|100X100PLY93|58|||01.01.2006
+        if SatirTur='S' then begin //stok kartÄ±
+          //' Stok Id,' SayÄ±m Id,' Ä°zleme Turu Id,' Depo ID si,' ÃœrÃ¼n Barkodu,' SayÄ±m Miktari,
+          //' ÃœrÃ¼n AdÄ±,' ÃœrÃ¼n Kodu,' ÃœrÃ¼n Birim,' ÃœrÃ¼n Raf Barcode,' ÃœrÃ¼n Lokasyon,' Tarih
+          //S|28|1|0|2|8691273367000|3|100X100 PLAYFUL SÄ°YAH|100X100PLY93|58|||01.01.2006
           StokId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           SayimId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           IzlemeTuru := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
@@ -507,7 +507,7 @@ begin
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
           if (StokId>0)and(SayimId>0)and(SayimMiktari>0.0) then begin
             Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and STOKID='+IntToStr(StokId));
-            if Tablo.Query0.RecordCount=0 then begin //ilk kez insert iþlemi
+            if Tablo.Query0.RecordCount=0 then begin //ilk kez insert iÅŸlemi
               Tablo.TablodanSorguAc(1,'select KALAN=isnull(sum(isnull(SD.KALAN,0)),0) from STOKLAR S left outer join STOKDURUM SD on S.ID=SD.STOKID where S.ID='+IntToStr(StokId)+' and SD.DEPOID='+VarToStr(cbSayimDepo.EditValue));
               Tablo.TablodanSorguAc(2,'select FIYAT=isnull(FIYAT,0.0) from STOKFIYAT where STOKID='+IntToStr(StokId)+' and FIYATADI='+VarToStr(cbFiyatAdi.EditValue)+' and BIRIM='+IntToStr(UrunBirim)+' and SATIS=0 ');
               if Tablo.Query2.RecordCount=0 then
@@ -520,24 +520,24 @@ begin
                                                 +Tablo.Query1.FieldByName('KALAN').AsString+','
                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
                                                 +StringReplace(FloatToStr(Fiyat),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
-                                                +'0.0,'//tutar birimfiyata göre bilaare güncellenecek..
+                                                +'0.0,'//tutar birimfiyata gÃ¶re bilaare gÃ¼ncellenecek..
                                                 +IntToStr(IzlemeTuru)+','''
                                                 +CariDoviz+''','
                                                 +IntToStr(SubeID)+','
                                                 +IntToStr(SayimId)+') select scope_identity()',True);
-              if UrunLokasyon>0 then begin //lokasyon içeren sayým..
-                veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
+              if UrunLokasyon>0 then begin //lokasyon iÃ§eren sayÄ±m..
+                veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
                                                         'values('+IntToStr(StokId)+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query3.Fields[0].AsString+','
                                                                 +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+','
                                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
                                                                 +IntToStr(UrunLokasyon)+','+IntToStr(UrunLokasyon)+',0)',[],[]);
               end;
-            end else begin //üstüne ekleme iþlemleri
-              //sayýmmiktar güncellenir..
-              veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKSAYIMKALEMLERI set SAYIMMIKTAR=SAYIMMIKTAR+'+StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+' where ID='+Tablo.Query0.FieldByName('ID').AsString,[],[]);
+            end else begin //Ã¼stÃ¼ne ekleme iÅŸlemleri
+              //sayÄ±mmiktar gÃ¼ncellenir..
+              veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKSAYIMKALEMLERI set SAYIMMIKTAR=SAYIMMIKTAR+'+StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+' where ID='+Tablo.Query0.FieldByName('ID').AsString,[],[]);
               //lokasyon varsa lokasyon eklenir..
-              if UrunLokasyon>0 then begin //lokasyon içeren sayýmda yeni lokasyon da üstüne eklenecek..
-                veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
+              if UrunLokasyon>0 then begin //lokasyon iÃ§eren sayÄ±mda yeni lokasyon da Ã¼stÃ¼ne eklenecek..
+                veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKLOKASYON(STOKID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,MIKTAR,GIRISLOKASYONID,CIKISLOKASYONID,DURUM)'+
                                                         'values('+IntToStr(StokId)+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
                                                                 +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+','
                                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
@@ -546,7 +546,7 @@ begin
             end;
           end;
         end else if SatirTur='SSKT' then begin//izleme bilgisi skt
-          //Sayým ID,Son Kullaným Tarihi,Miktar,Tarih
+          //SayÄ±m ID,Son KullanÄ±m Tarihi,Miktar,Tarih
           //SSKT|1|21.10.2013|1|25.09.2013
           SayimId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           SKT := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
@@ -554,15 +554,15 @@ begin
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
           Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
           if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (SKT>0.0) and (SayimMiktari>0) then
-            veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKIZLEME(STOKID, DEPOID, BELGETUR, BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
+            veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKIZLEME(STOKID, DEPOID, BELGETUR, BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
                                                     'values('+Tablo.Query0.FieldByName('STOKID').AsString+','+TabSayTutanak.FieldByName('SAYIMDEPO').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
                                                                 +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',2,'
                                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
                                                                 +' '''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''',0,'''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''','''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''',0)',[],[]);
 
         end else if SatirTur='SBYT' then begin//izleme bilgisi boyut
-          //Sayým ID, STOK ID, ID,TURU,Miktar,Tarih
-          //SBYT|1|28|Kýrmýzý M ID si|Kýrmýzý M|3|25.09.2013
+          //SayÄ±m ID, STOK ID, ID,TURU,Miktar,Tarih
+          //SBYT|1|28|KÄ±rmÄ±zÄ± M ID si|KÄ±rmÄ±zÄ± M|3|25.09.2013
           SayimId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           StokId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           BoyutID := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
@@ -571,13 +571,13 @@ begin
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
           Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
           if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (BoyutID>0.0) and (SayimMiktari>0) then
-            veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
+            veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
                                                     'values('+Tablo.Query0.FieldByName('STOKID').AsString+','+TabSayTutanak.FieldByName('SAYIMDEPO').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
                                                                 +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',4,'
                                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
                                                                 +' '''+BoyutAdi+''','+IntToStr(BoyutID)+','''+BoyutAdi+''',null,0)',[],[]);
         end else if SatirTur='SKRKSN' then begin//izleme bilgisi serino/karekod
-          //Sayým ID,Seri Numarasý veya  Kare Kodu,Tarih
+          //SayÄ±m ID,Seri NumarasÄ± veya  Kare Kodu,Tarih
           //SKRKSN|1|54687984564163|25.09.2013
           SayimId := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           Serino := dize.SinirlandirilmisMetin(Satir,'|');
@@ -585,7 +585,7 @@ begin
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
           Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
           if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (Serino>'') then
-            veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
+            veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
                                                     'values('+Tablo.Query0.FieldByName('STOKID').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
                                                                 +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',1,'
                                                                 +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
@@ -620,9 +620,9 @@ end;
 
 procedure TStokSayimDlg.tabSayimKalemleriBeforeDelete(DataSet: TDataSet);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&BTur and BASLIKID=&BID and SATIRID=&SID',
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&BTur and BASLIKID=&BID and SATIRID=&SID',
                 ['&BTur','&BID','&SID'],[99,TabSayTutanak.FieldByName('ID').AsString,tabSayimKalemleri.FieldByName('ID').AsString]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKLOKASYON where DURUM=0 and BELGETUR=&BTur and BASLIKID=&BID and SATIRID=&SID',
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKLOKASYON where DURUM=0 and BELGETUR=&BTur and BASLIKID=&BID and SATIRID=&SID',
                 ['&BTur','&BID','&SID'],[99,TabSayTutanak.FieldByName('ID').AsString,tabSayimKalemleri.FieldByName('ID').AsString]);
 end;
 
@@ -676,11 +676,11 @@ begin
   else
      tabSayimKalemleri.FieldByName('DEGISTIRMETARIHI').AsDateTime := tabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime;
 //  Tablo.ADOStoredProc1.ProcedureName:='sp_StokSayim';
-//  if TabSayTutanak.FieldByName('SATISDURUMU').AsBoolean=False then //Satýþ kapalýysa genel tarih
+//  if TabSayTutanak.FieldByName('SATISDURUMU').AsBoolean=False then //SatÄ±ÅŸ kapalÄ±ysa genel tarih
 //     Tablo.ADOStoredProc1.Params[0].Value :=  TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime
 //     Trh := TabSayTutanak.FieldByName('SAYIMTARIHI').AsDateTime
 //  else
-//     Tablo.ADOStoredProc1.Params[0].Value :=  tabSayimKalemleri.FieldByName('DEGISTIRMETARIHI').AsDateTime; //açýksa o satýrýn zamaný
+//     Tablo.ADOStoredProc1.Params[0].Value :=  tabSayimKalemleri.FieldByName('DEGISTIRMETARIHI').AsDateTime; //aÃ§Ä±ksa o satÄ±rÄ±n zamanÄ±
 //     Trh := tabSayimKalemleri.FieldByName('DEGISTIRMETARIHI').AsDateTime;
 //  Tablo.ADOStoredProc1.Params[1].Value :=  tabSayimKalemleri.FieldByName('STOKID').Value;
 //  Tablo.ADOStoredProc1.Params[2].Value :=  TabSayTutanak.FieldByName('SAYIMDEPO').Value;
@@ -694,7 +694,7 @@ end;
 
 procedure TStokSayimDlg.TumKaytlarnSaymMiktarlarnSfrAtaMenuClick(Sender: TObject);
 begin
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update STOKSAYIMKALEMLERI set SAYIMMIKTAR=0 where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString,[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update STOKSAYIMKALEMLERI set SAYIMMIKTAR=0 where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString,[],[]);
    TabloYenile(tabSayimKalemleri,[TabSayTutanak.FieldByName('ID').AsInteger, '%'+EditAra.Text+'%', '%'+EditAra.Text+'%']);
 end;
 
@@ -752,12 +752,12 @@ end;
 
 procedure TStokSayimDlg.FaturaSayimFisiSil;
 begin
-//giriþ fiþi:3 - sayým fazlasý:17
-//çýkýþ fiþi:4 - sayým eksiði:16
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete S from STOKLOKASYON S inner join FATBASLIK FB on FB.ID=S.BASLIKID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND ANAKAYITID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete S from STOKIZLEME S inner join FATBASLIK FB on FB.ID=S.BASLIKID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND ANAKAYITID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete F from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND FB.YERI=99 AND FB.YERID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
-  veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from FATBASLIK where TUR in (3,4) and TIPI in (16,17) AND YERI=99 AND YERID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
+//giriÅŸ fiÅŸi:3 - sayÄ±m fazlasÄ±:17
+//Ã§Ä±kÄ±ÅŸ fiÅŸi:4 - sayÄ±m eksiÄŸi:16
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete S from STOKLOKASYON S inner join FATBASLIK FB on FB.ID=S.BASLIKID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND ANAKAYITID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete S from STOKIZLEME S inner join FATBASLIK FB on FB.ID=S.BASLIKID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND ANAKAYITID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete F from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID where FB.TUR in (3,4) and FB.TIPI in (16,17) AND FB.YERI=99 AND FB.YERID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
+  veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from FATBASLIK where TUR in (3,4) and TIPI in (16,17) AND YERI=99 AND YERID = '+TabSayTutanak.FieldByName('ID').AsString,[],[]);
 end;
 
 
@@ -779,7 +779,7 @@ end;
 
 procedure TStokSayimDlg.TabSayTutanakBeforePost(DataSet: TDataSet);
 begin
-  if not TarihKontrol(dateSayimTarih.Date, 'Sayým' + KontrolTarihi) then
+  if not TarihKontrol(dateSayimTarih.Date, 'SayÄ±m' + KontrolTarihi) then
      Abort;
   if TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger<=0 then begin
      Application.MessageBox(PChar(STDepo_bos_olmaz),PChar(HataPrj),MB_OK+MB_ICONWARNING);
@@ -835,7 +835,7 @@ begin
    KategoriDlg.StokKartinSubesi := SubeId;
    KategoriDlg.ShowModal;
    s:='';
-   if KategoriDlg.ModalResult = mrOk then begin //kategori seçilmiþse
+   if KategoriDlg.ModalResult = mrOk then begin //kategori seÃ§ilmiÅŸse
       KategoriDlg.Kategori.first;
       while not KategoriDlg.Kategori.eof do begin
         if KategoriDlg.Kategori.FieldByname('SEC').AsBoolean then begin
@@ -871,11 +871,11 @@ begin
   if Application.MessageBox(PChar(STHepsi_silinecek_onay),PChar(Onay), MB_YESNO + MB_ICONQUESTION) = ID_NO then
      Abort
   else begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&BTur and BASLIKID=&BID ',
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&BTur and BASLIKID=&BID ',
                   ['&BTur','&BID'],[99,TabSayTutanak.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKLOKASYON where DURUM=0 and BELGETUR=&BTur and BASLIKID=&BID ',
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKLOKASYON where DURUM=0 and BELGETUR=&BTur and BASLIKID=&BID ',
                   ['&BTur','&BID'],[99,TabSayTutanak.FieldByName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from STOKSAYIMKALEMLERI where SAYIMID=&SID ',
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from STOKSAYIMKALEMLERI where SAYIMID=&SID ',
                   ['&SID'],[TabSayTutanak.FieldByName('ID').AsInteger]);
      TabSayTutanakAfterScroll(tabSayimKalemleri);
   end;
@@ -949,7 +949,7 @@ end;
 
 procedure TStokSayimDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   //tvSayimTutanak.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\StokSayimTutanak',true,false,[gsoUseFilter],'StokSayimTutanak');
   Tablo.GridAyarRestore('StokSayimTutanak',tvSayimTutanak );
   Tablo.GridTurkcelestir;

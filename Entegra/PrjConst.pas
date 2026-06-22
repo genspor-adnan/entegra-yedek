@@ -1,4 +1,4 @@
-unit PrjConst;
+ï»¿unit PrjConst;
 
 interface
 
@@ -9,981 +9,981 @@ resourcestring
 
 
  // Bilgi al
-   jvIptal='İptal';
-   jvIleri='İleri >';
+   jvIptal='Ä°ptal';
+   jvIleri='Ä°leri >';
    jvGeri='< Geri';
    jvSon='Son';
-   jvAktivite='Aktivite / Görev Bilgileri';
+   jvAktivite='Aktivite / GÃ¶rev Bilgileri';
    jvAktiviteDetay='Ek Detay Bilgiler';
-   jvDokuman='Doküman bilgileri';
-   jvIzlem='İzlem bilgileri';
+   jvDokuman='DokÃ¼man bilgileri';
+   jvIzlem='Ä°zlem bilgileri';
    jvAktiviteYinele='Aktivite Yineleme';
-   jvTarihce='Tarihçe';
-   jvCekKocan='Çek Koçanları';
-   jvCekHesap='Çek Hesapları';
-   jvSablonDuzenle='Aktivite / Görev Şablonu';
-   jvIsSuresi = 'İş süresi 7 günden büyük olamaz!';
-   jvHesapOlusturmaDuzenleme='Hesap oluşturma ve düzenleme';
-   jvCek='Çek';
-   jvBaskasiCek='Başkasının çeki';
+   jvTarihce='TarihÃ§e';
+   jvCekKocan='Ã‡ek KoÃ§anlarÄ±';
+   jvCekHesap='Ã‡ek HesaplarÄ±';
+   jvSablonDuzenle='Aktivite / GÃ¶rev Åablonu';
+   jvIsSuresi = 'Ä°ÅŸ sÃ¼resi 7 gÃ¼nden bÃ¼yÃ¼k olamaz!';
+   jvHesapOlusturmaDuzenleme='Hesap oluÅŸturma ve dÃ¼zenleme';
+   jvCek='Ã‡ek';
+   jvBaskasiCek='BaÅŸkasÄ±nÄ±n Ã§eki';
    jvSenet='Senet';
-   jvBaskasiSenet='Başkasının seneti';
-   jvCekSihirbaz='Çek Sihirbazı';
-   jvSenetSihirbaz='Senet Sihirbazı';
+   jvBaskasiSenet='BaÅŸkasÄ±nÄ±n seneti';
+   jvCekSihirbaz='Ã‡ek SihirbazÄ±';
+   jvSenetSihirbaz='Senet SihirbazÄ±';
    jvDemirbas='Demirbas bilgileri';
    Devam_Etmek = 'Devam etmek istiyor musunuz?';
-   KarekodAitDegil = 'Bu karekod bu stoğa ait değil';
+   KarekodAitDegil = 'Bu karekod bu stoÄŸa ait deÄŸil';
 
-   BGYeni_bilgi_girisi='Yeni bilgi girişi.';
+   BGYeni_bilgi_girisi='Yeni bilgi giriÅŸi.';
    BGListeye_bilgi_ekle='Listeye bilgi ekle';
    BGKilit_tarih_gir='Yeni kilit tarihini giriniz';
-   BGOtomatik_gun='Otomatik gün giriniz';
-   BGTutari_duzenle=' tutarı düzenle';
+   BGOtomatik_gun='Otomatik gÃ¼n giriniz';
+   BGTutari_duzenle=' tutarÄ± dÃ¼zenle';
    BGTutar='Tutar';
-   BGBaslama_tarih='Başlama Tarih Bilgisi';
-   BGBaslangic_tarih_gir='Başlama Tarihini Giriniz';
+   BGBaslama_tarih='BaÅŸlama Tarih Bilgisi';
+   BGBaslangic_tarih_gir='BaÅŸlama Tarihini Giriniz';
    BGTC_no='TC Kimlik No';
-   BGMaas='Maaş';
+   BGMaas='MaaÅŸ';
    BGAgi='Agi';
-   BGDiger='Diğer';
+   BGDiger='DiÄŸer';
    BGBanka='Banka';
    BGKasa='Kasa';
    BGAvans_banka='AvBanka';
    BGAvans_kasa='AvKasa';
    BGOde_banka='OdeBanka';
    BGOde_kasa='OdeKasa';
-   Coklu_Senet = 'Çoklu Senet';
-   BGBanka_maas_tutar=' bankadan maaş tutarı.';
-   BGAvans_miktari=' için ödenecek avans miktarı';
-   BGDokum_Rapor_Ad_Degistir='Döküm/Rapor Ad Değiştir';
-   BGYeni_ad='Yeni Adı';
-   BGDokum_Rapor_Kopyala='Döküm/Rapor Kopyalama';
+   Coklu_Senet = 'Ã‡oklu Senet';
+   BGBanka_maas_tutar=' bankadan maaÅŸ tutarÄ±.';
+   BGAvans_miktari=' iÃ§in Ã¶denecek avans miktarÄ±';
+   BGDokum_Rapor_Ad_Degistir='DÃ¶kÃ¼m/Rapor Ad DeÄŸiÅŸtir';
+   BGYeni_ad='Yeni AdÄ±';
+   BGDokum_Rapor_Kopyala='DÃ¶kÃ¼m/Rapor Kopyalama';
    BGYeni_rapor='Yeni Rapor';
    BGBilgi_gir=' bilgisini giriniz';
-   BGVardiya_Tur_Sec='Vardiya Türü Seçiniz';
-   BGKredi_odemesi='Kredi Ödemesi';
-   BGOdeme_tarihi='Ödeme Tarihi :';
-   BGKredi_giris='Kredi Girişi';
+   BGVardiya_Tur_Sec='Vardiya TÃ¼rÃ¼ SeÃ§iniz';
+   BGKredi_odemesi='Kredi Ã–demesi';
+   BGOdeme_tarihi='Ã–deme Tarihi :';
+   BGKredi_giris='Kredi GiriÅŸi';
    BGYeni_kod_gir='Yeni kodu giriniz. ';
    BGYeni_banka='Yeni Banka';
-   BGYeni_sube='Yeni Şube';
+   BGYeni_sube='Yeni Åube';
    BGBanka_kod='Banka Kodu *';
-   BGBanka_adi='Banka Adı *';
-   BGSube_Kod='Şube Kodu *';
-   BGSube_Ad= 'Şube Adı *';
-   BGSubeler='Şubeler...';
-   BGMusteri_kodu_gir='Müşteri kodunuzu giriniz.';
-   BGMusteri_kodu='Müşteri Kodu';
+   BGBanka_adi='Banka AdÄ± *';
+   BGSube_Kod='Åube Kodu *';
+   BGSube_Ad= 'Åube AdÄ± *';
+   BGSubeler='Åubeler...';
+   BGMusteri_kodu_gir='MÃ¼ÅŸteri kodunuzu giriniz.';
+   BGMusteri_kodu='MÃ¼ÅŸteri Kodu';
    BGProje_kodu='Proje Kodu';
-   BGMusteri_notu='Müşteri Notu';
-   BGSiparis_notu='Sipariş Notu';
-   BGLisans_no_gir='Lütfen lisans numaranızı giriniz.';
-   BGLisans_no_yetkili_ara='Lisans Numarası İçin; GenYazılım:02163450378 Granit Bilg.:02164490019';
-   BGIslem_tarih_gir='İşlem tarihini giriniz.';
+   BGMusteri_notu='MÃ¼ÅŸteri Notu';
+   BGSiparis_notu='SipariÅŸ Notu';
+   BGLisans_no_gir='LÃ¼tfen lisans numaranÄ±zÄ± giriniz.';
+   BGLisans_no_yetkili_ara='Lisans NumarasÄ± Ä°Ã§in; GenYazÄ±lÄ±m:02163450378 Granit Bilg.:02164490019';
+   BGIslem_tarih_gir='Ä°ÅŸlem tarihini giriniz.';
    BGSaat_gir='Saatini giriniz.';
-   BGAciklama_gir='Açıklama giriniz.';
+   BGAciklama_gir='AÃ§Ä±klama giriniz.';
    BGTarih_gir=' Tarihini Giriniz.';
-   BGEski_rol_adi='Eski Rol Adı: ';
+   BGEski_rol_adi='Eski Rol AdÄ±: ';
    BGYetki_durumu='Yetki Durumu';
-   BGYeni_rol_adi_gir='Yeni Rol Adını Giriniz.';
-   BGYeni_test_adi_gir='Yeni Test Adını Giriniz.';
+   BGYeni_rol_adi_gir='Yeni Rol AdÄ±nÄ± Giriniz.';
+   BGYeni_test_adi_gir='Yeni Test AdÄ±nÄ± Giriniz.';
    BGYeni='Yeni ';
-   BGDegeri_bos_olamaz=' Değeri Boş Olamaz.';
-   BGBolum='Bölüm: ';
-   BGYeni_bolum_adi='Yeni Bölüm Adını Giriniz.';
-   BGYeni_Departman_adi='Yeni Departman Adını Giriniz.';
-   BGPersonel_secimi='Personel Seçimi';
+   BGDegeri_bos_olamaz=' DeÄŸeri BoÅŸ Olamaz.';
+   BGBolum='BÃ¶lÃ¼m: ';
+   BGYeni_bolum_adi='Yeni BÃ¶lÃ¼m AdÄ±nÄ± Giriniz.';
+   BGYeni_Departman_adi='Yeni Departman AdÄ±nÄ± Giriniz.';
+   BGPersonel_secimi='Personel SeÃ§imi';
    BGBilgi='Bilgiler.';
    BGMail_adres_gir='Mail adresi giriniz.';
    BGMail_adresi='Mail Adresi:';
-   BGBarkod_baslangic_karakter='Barkod Başlangıç Karekterleri';
-   BGAciklama='Açıklama';
+   BGBarkod_baslangic_karakter='Barkod BaÅŸlangÄ±Ã§ Karekterleri';
+   BGAciklama='AÃ§Ä±klama';
    BGYeni_birim='Yeni Birim : ';
    BGYeni_birim_gir='Yeni birim girin';
-   BGYeni_tur_gir='Yeni türü girin';
-   BGYeni_tur='Yeni Tür : ';
-   BGBoyut_sec='Boyut Seçimi';
+   BGYeni_tur_gir='Yeni tÃ¼rÃ¼ girin';
+   BGYeni_tur='Yeni TÃ¼r : ';
+   BGBoyut_sec='Boyut SeÃ§imi';
    BGKampanya_kodu_gir='Yeni Kampanya kodunu giriniz.';
-   BGKampanya_adi_gir='Yeni Kampanya adını giriniz.';
+   BGKampanya_adi_gir='Yeni Kampanya adÄ±nÄ± giriniz.';
    BGMerkez_depo=' ve Merkez Depo';
-   BGBoyut_tanimi='Yeni Boyut Tanımı';
-   BGBoyut_adi='Yeni Boyut Adı';
-   BGExcel_satiri_gir='Excel başlama satırı giriniz.';
-   BGOdeme_Girisi='Ödeme bilgi girişi.';
-   BGOdeme_turu='Ödeme türünü seçiniz.';
-   BGTahsilat_bilgi_gir='Tahsilat bilgi girişi.';
-   BGTahsilat_turu_sec='Tahsilat türünü seçiniz.';
-   BGKur_degeri= 'Kur Değeri';
-   BGFirma_adi_gir='Firma Adı Giriniz.';
-   BGKopyalanacak_Demirbas_Miktari=' Kopyalanacak demirbaş miktarını giriniz.';
-   BGYazici_Bilgisini_gir='Yazıcı bilgilerini girin';
-   BGYazici_sec='Yazıcı Seçimi:';
-   BGKopya_sayisi='Kopya Sayısı:';
-   BGYeni_fiyat_adi_gir=' fiyat adını kopyalıyorsunuz.Yeni Fiyat adı giriniz';
-   BGFiyat_sec='Fiyat Seçimi';
+   BGBoyut_tanimi='Yeni Boyut TanÄ±mÄ±';
+   BGBoyut_adi='Yeni Boyut AdÄ±';
+   BGExcel_satiri_gir='Excel baÅŸlama satÄ±rÄ± giriniz.';
+   BGOdeme_Girisi='Ã–deme bilgi giriÅŸi.';
+   BGOdeme_turu='Ã–deme tÃ¼rÃ¼nÃ¼ seÃ§iniz.';
+   BGTahsilat_bilgi_gir='Tahsilat bilgi giriÅŸi.';
+   BGTahsilat_turu_sec='Tahsilat tÃ¼rÃ¼nÃ¼ seÃ§iniz.';
+   BGKur_degeri= 'Kur DeÄŸeri';
+   BGFirma_adi_gir='Firma AdÄ± Giriniz.';
+   BGKopyalanacak_Demirbas_Miktari=' Kopyalanacak demirbaÅŸ miktarÄ±nÄ± giriniz.';
+   BGYazici_Bilgisini_gir='YazÄ±cÄ± bilgilerini girin';
+   BGYazici_sec='YazÄ±cÄ± SeÃ§imi:';
+   BGKopya_sayisi='Kopya SayÄ±sÄ±:';
+   BGYeni_fiyat_adi_gir=' fiyat adÄ±nÄ± kopyalÄ±yorsunuz.Yeni Fiyat adÄ± giriniz';
+   BGFiyat_sec='Fiyat SeÃ§imi';
    BGNakliye_bilgileri='Nakliye Bilgileri';
    BGNakliye_tipi='Nakliye Tipi'  ;
-   BGNakliye_tutari='Nakliye Tutarı';
-   BGIskonto_aciklama='İskonto Açıklaması';
-   BGIskonto_orani='İskonto Oranı:';
+   BGNakliye_tutari='Nakliye TutarÄ±';
+   BGIskonto_aciklama='Ä°skonto AÃ§Ä±klamasÄ±';
+   BGIskonto_orani='Ä°skonto OranÄ±:';
    BGTeklif_bilgi='Teklif Bilgileri';
-   BGTeslim_sekli='Teslim Şekli';
+   BGTeslim_sekli='Teslim Åekli';
    BGTeslim_alan='Teslim Alan';
    BGTeslim_Tarihi='Teslim Tarihi';
-   BGSiradaki_belge_no='Sıradaki Belge Numarası:'  ;
+   BGSiradaki_belge_no='SÄ±radaki Belge NumarasÄ±:'  ;
    BGBelge_tarihi='Belge Tarihi';
-   BGBelge_no='Belge Numarası';
-   BGIade_miktari='İade edilen miktarı girin' ;
-   BGUretim_miktari_gir='Üretim Miktarını Girin';
-   BGRecete_bilgileri='Reçete Tanım Bilgileri.';
-   BGRecete_kodu_gir='Reçete Kodu Giriniz.';
-   BGRecete_adi_gir='Reçete Adı Giriniz.';
+   BGBelge_no='Belge NumarasÄ±';
+   BGIade_miktari='Ä°ade edilen miktarÄ± girin' ;
+   BGUretim_miktari_gir='Ãœretim MiktarÄ±nÄ± Girin';
+   BGRecete_bilgileri='ReÃ§ete TanÄ±m Bilgileri.';
+   BGRecete_kodu_gir='ReÃ§ete Kodu Giriniz.';
+   BGRecete_adi_gir='ReÃ§ete AdÄ± Giriniz.';
    BGPara_transfer_kalan_tutar='Para transferi: Kalan Tutar=';
-   BGDepo_kullan='Depo Kullanımı';
-   BGKasa_kullan='Kasa Kullanımı';
-   BGPos_kullan='POS Kullanımı';
-   BGYeni_Barkod_gir='Yeni Barkod girişi.';
-   BGBarkod_no='Barkod Numarası:';
-   BGIse_giris_tarih='İşe Giriş Tarihi :';
-   BGIsten_cikis_tarih='İşten Çıkış Tarihi :';
-   BGIsten_cikis_Nedeni='İşten Çıkış Nedeni :';
-   BGIade_alindi_yeni_fatura_no=' İade alınıyor.Yeni Fatura No giriniz';
-   BGEksiIskontoGirilemez='Eksi İskonto Girilemez!';
-   BGSadeceIskonto2Girilemez='İskonto1 olmadan iskonto2 Girilemez!';
+   BGDepo_kullan='Depo KullanÄ±mÄ±';
+   BGKasa_kullan='Kasa KullanÄ±mÄ±';
+   BGPos_kullan='POS KullanÄ±mÄ±';
+   BGYeni_Barkod_gir='Yeni Barkod giriÅŸi.';
+   BGBarkod_no='Barkod NumarasÄ±:';
+   BGIse_giris_tarih='Ä°ÅŸe GiriÅŸ Tarihi :';
+   BGIsten_cikis_tarih='Ä°ÅŸten Ã‡Ä±kÄ±ÅŸ Tarihi :';
+   BGIsten_cikis_Nedeni='Ä°ÅŸten Ã‡Ä±kÄ±ÅŸ Nedeni :';
+   BGIade_alindi_yeni_fatura_no=' Ä°ade alÄ±nÄ±yor.Yeni Fatura No giriniz';
+   BGEksiIskontoGirilemez='Eksi Ä°skonto Girilemez!';
+   BGSadeceIskonto2Girilemez='Ä°skonto1 olmadan iskonto2 Girilemez!';
    BGYeni_versiyon_no='Yeni Revizyon No Girin';
-   BGVersiyon_aciklama_gir='Revizyon Açıklaması Girin';
+   BGVersiyon_aciklama_gir='Revizyon AÃ§Ä±klamasÄ± Girin';
    BGKart_no='Kart No :';
    BGDuyuru_yorumu='Duyuru Yorumu';
-   BGYorum_yaz='Yorumunuzu yazınız.';
-   BGErteleme_giris='Erteleme girişi.';
+   BGYorum_yaz='Yorumunuzu yazÄ±nÄ±z.';
+   BGErteleme_giris='Erteleme giriÅŸi.';
    BGErteleme_tarih_gir='Erteleme tarihi giriniz';
    BGErteleme_nedeni_gir='Erteleme nedeni giriniz';
    BGYeni_zarf_bilgi_gir='Yeni zarf bilgilerini girin';
-   BGZarf_ismi='Zarf İsmi:';
-   BGGiris_saat_gir='Giriş Saati Gir.';
-   BGCikis_saat_gir='Çıkış Saati Gir.';
-   BGMola_saat_gir='Mola Süresi Gir.';
+   BGZarf_ismi='Zarf Ä°smi:';
+   BGGiris_saat_gir='GiriÅŸ Saati Gir.';
+   BGCikis_saat_gir='Ã‡Ä±kÄ±ÅŸ Saati Gir.';
+   BGMola_saat_gir='Mola SÃ¼resi Gir.';
    BGBilgisini_gir=' bilgisini giriniz.';
-   BGIzin_bilgi_gir=' İzin Bilgilerini giriniz ';
-   BGIzin_tarih_gir='İzin Tarihini Giriniz';
-   BGGun_miktari_gir= 'Gün Miktarını Giriniz';
-   BGBankadan_odenecek_maas='Bankadan ödenecek maaş tutarı';
-   BGMaas_kesintisi_duzenle='Maaş kesintisi düzenle';
-   BGYeni_maas_kesintisi='Yeni maaş kesintisi';
-   BGBelgeTipiSecimi='Bir Belge Tipi Seçiniz.';
+   BGIzin_bilgi_gir=' Ä°zin Bilgilerini giriniz ';
+   BGIzin_tarih_gir='Ä°zin Tarihini Giriniz';
+   BGGun_miktari_gir= 'GÃ¼n MiktarÄ±nÄ± Giriniz';
+   BGBankadan_odenecek_maas='Bankadan Ã¶denecek maaÅŸ tutarÄ±';
+   BGMaas_kesintisi_duzenle='MaaÅŸ kesintisi dÃ¼zenle';
+   BGYeni_maas_kesintisi='Yeni maaÅŸ kesintisi';
+   BGBelgeTipiSecimi='Bir Belge Tipi SeÃ§iniz.';
    BGBelgeTipi='Belge Tipi';
-   Guncellendi = 'Güncellendi';
-   Ithalat='İthalat';
-   Ihracat='İhracat';
-   ExceldenVerilerAktariliyor='Veriler aktarılıyor. Bekleyiniz...';
-   GIBtenSorgulamaYapilamadi = 'Bu firma için GİB ten sorgulama yapılamamıştır. İnternet vb. kontrol edip tekrar deneyiniz..';
+   Guncellendi = 'GÃ¼ncellendi';
+   Ithalat='Ä°thalat';
+   Ihracat='Ä°hracat';
+   ExceldenVerilerAktariliyor='Veriler aktarÄ±lÄ±yor. Bekleyiniz...';
+   GIBtenSorgulamaYapilamadi = 'Bu firma iÃ§in GÄ°B ten sorgulama yapÄ±lamamÄ±ÅŸtÄ±r. Ä°nternet vb. kontrol edip tekrar deneyiniz..';
    YerelParaZorunlu = 'Para birimlerinden birisi yerel para olmak zorunda!';
-   EnUstte = 'En Üstte';
-   EnAltta = 'En Üstte';
+   EnUstte = 'En Ãœstte';
+   EnAltta = 'En Ãœstte';
 
-   YetkilerAynidegil = 'Yetkiler aynı değil';
-  //Sektör Adları
+   YetkilerAynidegil = 'Yetkiler aynÄ± deÄŸil';
+  //SektÃ¶r AdlarÄ±
     Sektor_ERP_Ad='ERP';
     Sektor_Tekstil_Ad='Tekstil Bilgi Sistemi';
     Sektor_Gida_Ad='Gida Bilgi Sistemi';
     Sektor_OtomotivServis_Ad='Otomotiv Bilgi Sistemi';
     Sektor_Market_Ad='Market Bilgi Sistemi';
-    Sektor_Firin_Ad='Unlu Mamüller Bilgi Sistemi';
-    Sektor_Firin_Cafe_Ad='Unlu Mamüller ve Cafe Bilgi Sistemi';
+    Sektor_Firin_Ad='Unlu MamÃ¼ller Bilgi Sistemi';
+    Sektor_Firin_Cafe_Ad='Unlu MamÃ¼ller ve Cafe Bilgi Sistemi';
     Sektor_Cafe_Ad='Cafe Bilgi Sistemi';
     Sektor_Rest_Ad='Restaurant Bilgi Sistemi';
 
-  //Uyarı
-    GirenAdetUyari = 'Giriş işleminde sadece giren adet dolu olabilir!';
-    CikanAdetUyari = 'Çıkış işleminde sadece çıkan adet dolu olabilir!';
-    sButce_Silin = 'Önce bütçe bilgileri silin';
-    sDetay_Silin = 'Önce detay bilgileri silin';
-    Girisyapamazsiniz=' tarihine kadar programa giriş yapamassınız!';
-    Kullaniciadiparola='Önce Kullanıcı Adı ve Parolayı Giriniz..';
-    Degistirilemedi='Şifre Girişleri Uyumsuz!!! Değiştirilemedi...';
-    GirdiginizSifre = 'Girdiğiniz şifre :';
-    OncekiSifreileAyni = '- Önceki şifre ile aynı.';
-    AyniDegil = '- Aynı değil.';
-    SifreKisa = '- 8 karakterden kısa.';
-    HicRakamYok = '- Hiç rakam bulundurmuyor.';
-    HicKucukHarfYok = '- Hiç küçük harf bulundurmuyor.';
-    HicBuyukHarfYok = '- Hiç büyük harf bulundurmuyor.';
-    HicOzelKarakterYok = '- Hiç özel karakter bulundurmuyor.';
+  //UyarÄ±
+    GirenAdetUyari = 'GiriÅŸ iÅŸleminde sadece giren adet dolu olabilir!';
+    CikanAdetUyari = 'Ã‡Ä±kÄ±ÅŸ iÅŸleminde sadece Ã§Ä±kan adet dolu olabilir!';
+    sButce_Silin = 'Ã–nce bÃ¼tÃ§e bilgileri silin';
+    sDetay_Silin = 'Ã–nce detay bilgileri silin';
+    Girisyapamazsiniz=' tarihine kadar programa giriÅŸ yapamassÄ±nÄ±z!';
+    Kullaniciadiparola='Ã–nce KullanÄ±cÄ± AdÄ± ve ParolayÄ± Giriniz..';
+    Degistirilemedi='Åifre GiriÅŸleri Uyumsuz!!! DeÄŸiÅŸtirilemedi...';
+    GirdiginizSifre = 'GirdiÄŸiniz ÅŸifre :';
+    OncekiSifreileAyni = '- Ã–nceki ÅŸifre ile aynÄ±.';
+    AyniDegil = '- AynÄ± deÄŸil.';
+    SifreKisa = '- 8 karakterden kÄ±sa.';
+    HicRakamYok = '- HiÃ§ rakam bulundurmuyor.';
+    HicKucukHarfYok = '- HiÃ§ kÃ¼Ã§Ã¼k harf bulundurmuyor.';
+    HicBuyukHarfYok = '- HiÃ§ bÃ¼yÃ¼k harf bulundurmuyor.';
+    HicOzelKarakterYok = '- HiÃ§ Ã¶zel karakter bulundurmuyor.';
 
 
 
 
-    Degistirildi='Şifre başarıyla değiştirildi...';
-    Gecersizsifre='Geçersiz Şifre...';
-    Kullanicisayiasimi=' Olan Lisanslı Kullanıcı Sayınızı Aşıyorsunuz!';
-    Sube='Şube Seçin!';
-    Sunucubulunamadi='Sunucu Bilgisi Bulunamadı!';
-    Yetkisiz_Islem='Yetkisiz İşlem' ;
-    GenotipBaglantiHatasi='Genotıp Bağlantı Hatası';
-    Uygulanacak_Komut_Hatasi='Uygulanacak Komut Bulunamadı!';
-    Uygulama_tamam='Uygulama gerçekleşti.';
-    Uygulanamayan_alt_sorgu_sayisi=' Adet Alt Sorgu Uygulanamadı!!';
+    Degistirildi='Åifre baÅŸarÄ±yla deÄŸiÅŸtirildi...';
+    Gecersizsifre='GeÃ§ersiz Åifre...';
+    Kullanicisayiasimi=' Olan LisanslÄ± KullanÄ±cÄ± SayÄ±nÄ±zÄ± AÅŸÄ±yorsunuz!';
+    Sube='Åube SeÃ§in!';
+    Sunucubulunamadi='Sunucu Bilgisi BulunamadÄ±!';
+    Yetkisiz_Islem='Yetkisiz Ä°ÅŸlem' ;
+    GenotipBaglantiHatasi='GenotÄ±p BaÄŸlantÄ± HatasÄ±';
+    Uygulanacak_Komut_Hatasi='Uygulanacak Komut BulunamadÄ±!';
+    Uygulama_tamam='Uygulama gerÃ§ekleÅŸti.';
+    Uygulanamayan_alt_sorgu_sayisi=' Adet Alt Sorgu UygulanamadÄ±!!';
     //Adet = 'Faturadaki Lot Adet';
-    Guncelleme_Satiri_Hatasi='Güncellenecek satırı seçiniz.';
-    Uygulandi='Bu değişiklik daha önce uygulanmış..';
-    Listeden_sec='Listeden seçim yapınız.';
-    Degistirilmez='Komut değiştirilemez..';
-    Minimum_gun_sayisi='Girilecek gün minumum 1 olmalıdır.';
-    Yedek_Alindi='Yedek alınmıştır.';
-    Yedek_alma_basarisiz_server_kontrol_edin='Yedek alma başarısız oldu.Server bağlantı bilgilerini kontrol ediniz.';
-    Yedek_Alindi_Sikistirma_Basarisiz_server_kontrol='Servere yedek alınmıştır.Sıkıştırma işlemi gerçekleşmedi.Server bağlantı bilgilerini kontrol ediniz.';
-    Yedek_al='Yedek alınız.';
-    Tanimlama_eksik_hatali='Tanımlamalar eksik ya da hatalı..';
+    Guncelleme_Satiri_Hatasi='GÃ¼ncellenecek satÄ±rÄ± seÃ§iniz.';
+    Uygulandi='Bu deÄŸiÅŸiklik daha Ã¶nce uygulanmÄ±ÅŸ..';
+    Listeden_sec='Listeden seÃ§im yapÄ±nÄ±z.';
+    Degistirilmez='Komut deÄŸiÅŸtirilemez..';
+    Minimum_gun_sayisi='Girilecek gÃ¼n minumum 1 olmalÄ±dÄ±r.';
+    Yedek_Alindi='Yedek alÄ±nmÄ±ÅŸtÄ±r.';
+    Yedek_alma_basarisiz_server_kontrol_edin='Yedek alma baÅŸarÄ±sÄ±z oldu.Server baÄŸlantÄ± bilgilerini kontrol ediniz.';
+    Yedek_Alindi_Sikistirma_Basarisiz_server_kontrol='Servere yedek alÄ±nmÄ±ÅŸtÄ±r.SÄ±kÄ±ÅŸtÄ±rma iÅŸlemi gerÃ§ekleÅŸmedi.Server baÄŸlantÄ± bilgilerini kontrol ediniz.';
+    Yedek_al='Yedek alÄ±nÄ±z.';
+    Tanimlama_eksik_hatali='TanÄ±mlamalar eksik ya da hatalÄ±..';
 
-    Devir_gerceklesti='Devir İşleminiz Gerçekleştirildi.';
-    Devir_silindi='Devir Silme İşleminiz Gerçekleştirildi.';
+    Devir_gerceklesti='Devir Ä°ÅŸleminiz GerÃ§ekleÅŸtirildi.';
+    Devir_silindi='Devir Silme Ä°ÅŸleminiz GerÃ§ekleÅŸtirildi.';
 
-    En_Az_Bir='En az bir satır bilgi olmak zorundadır!';
+    En_Az_Bir='En az bir satÄ±r bilgi olmak zorundadÄ±r!';
 
   //Onay
     SGenotipOnay = 'Gentegre Onay' ;
-    SSilmeSorusu = 'Kaydı silmek istediğinize emin misiniz?';
-    KaydetmeSorusu = 'Yapılan işlemleri kaydetmek ister misiniz?'+#13#10+'Evet:Kaydet Hayır:Kaydetme İptal:Geri Dön';
-    GDonusumSorusu = 'Tüm öğeleri kalıcı olarak silmek istediğinizden emin misini?' ;
-    KisayolUyari ='Dosya geri yüklenmeden kısayol geri yüklenemez!';
-    DosyayaYazmaBitti='Dosyaya yazma işlemi sona erdi...';
+    SSilmeSorusu = 'KaydÄ± silmek istediÄŸinize emin misiniz?';
+    KaydetmeSorusu = 'YapÄ±lan iÅŸlemleri kaydetmek ister misiniz?'+#13#10+'Evet:Kaydet HayÄ±r:Kaydetme Ä°ptal:Geri DÃ¶n';
+    GDonusumSorusu = 'TÃ¼m Ã¶ÄŸeleri kalÄ±cÄ± olarak silmek istediÄŸinizden emin misini?' ;
+    KisayolUyari ='Dosya geri yÃ¼klenmeden kÄ±sayol geri yÃ¼klenemez!';
+    DosyayaYazmaBitti='Dosyaya yazma iÅŸlemi sona erdi...';
 
-  //cxGrid Türkçeleştirme
-    cxGruplamak = 'Gruplamak istediğiniz kolonu buraya sürükleyin';//'Drag a column header here to group by that column';
-    cxGeri= 'Geri dönüşümlü bir değer oluşturamazsınız';//'You cannot create recursive levels';
+  //cxGrid TÃ¼rkÃ§eleÅŸtirme
+    cxGruplamak = 'Gruplamak istediÄŸiniz kolonu buraya sÃ¼rÃ¼kleyin';//'Drag a column header here to group by that column';
+    cxGeri= 'Geri dÃ¶nÃ¼ÅŸÃ¼mlÃ¼ bir deÄŸer oluÅŸturamazsÄ±nÄ±z';//'You cannot create recursive levels';
     cxOnay= 'Onay';
-    cxKayit= 'Kayıt silinsin mi?'; //'Delete record?');
-    cxSecilen= 'Seçilen tüm kayıtlar silinsin mi?'; //'Delete all selected records?');
-    cxGosterilecek= 'Gösterilecek kayıt yok.'; //'<No data to display>');
-    cxFiltre= 'Filtre oluşturmak için buraya tıklayın .'; //'Click here to define a filter');
-    cxYeni= 'Yeni bir satır oluşturmak için buraya tıklayın'; //'Click here to add a new row');
-    cxFiltre2= 'Filtre boş'; //'<Filter is Empty>');
-    cxOzellestirme= 'Özelleştirme'; //'Customization');
-    cxSutunlar ='Sütunlar'; //'Columns');
+    cxKayit= 'KayÄ±t silinsin mi?'; //'Delete record?');
+    cxSecilen= 'SeÃ§ilen tÃ¼m kayÄ±tlar silinsin mi?'; //'Delete all selected records?');
+    cxGosterilecek= 'GÃ¶sterilecek kayÄ±t yok.'; //'<No data to display>');
+    cxFiltre= 'Filtre oluÅŸturmak iÃ§in buraya tÄ±klayÄ±n .'; //'Click here to define a filter');
+    cxYeni= 'Yeni bir satÄ±r oluÅŸturmak iÃ§in buraya tÄ±klayÄ±n'; //'Click here to add a new row');
+    cxFiltre2= 'Filtre boÅŸ'; //'<Filter is Empty>');
+    cxOzellestirme= 'Ã–zelleÅŸtirme'; //'Customization');
+    cxSutunlar ='SÃ¼tunlar'; //'Columns');
     cxFiltreyi= 'Filtreyi uygula'; //'Apply Filter');
-    cxOzellestir = 'Özelleştir…'; //'Customize…');
-    cxSutunu= 'Sütunu Gizlemek/Göstermek veya hareket ettirmek için buraya tıklayın'; //'Click here to show/hide/move columns');
+    cxOzellestir = 'Ã–zelleÅŸtirâ€¦'; //'Customizeâ€¦');
+    cxSutunu= 'SÃ¼tunu Gizlemek/GÃ¶stermek veya hareket ettirmek iÃ§in buraya tÄ±klayÄ±n'; //'Click here to show/hide/move columns');
     cxBantlar= 'Bantlar';//'Bands');
-    cxBanti= 'Bantı Gizlemek/Göstermek veya hareket ettirmek için buraya tıklayın'; //'Click here to show/hide/move bands');
-    cxSatirlar= 'Satırlar'; //'Rows');
-    cxAraci= 'Aracı bir bileşenin eksik!'#1310'% s bileşeni forma ekleyin.'; //'Missing an intermediary component!'#13#10'Please add a %s component to the form.');
+    cxBanti= 'BantÄ± Gizlemek/GÃ¶stermek veya hareket ettirmek iÃ§in buraya tÄ±klayÄ±n'; //'Click here to show/hide/move bands');
+    cxSatirlar= 'SatÄ±rlar'; //'Rows');
+    cxAraci= 'AracÄ± bir bileÅŸenin eksik!'#1310'% s bileÅŸeni forma ekleyin.'; //'Missing an intermediary component!'#13#10'Please add a %s component to the form.');
     //m.y.
-    cxRES_TarihBugun = 'Bugün';                  // 'Today'
+    cxRES_TarihBugun = 'BugÃ¼n';                  // 'Today'
     cxRES_TarihTemizle = 'Temizle';              // 'Clear';
-    cxRES_TarihSimdi = 'Şimdi';                  //  'Now';
+    cxRES_TarihSimdi = 'Åimdi';                  //  'Now';
     cxRES_TarihTamam = 'Tamam';                  //  'OK';
-    cxRES_TarihVazgec = 'Vazgeç';                //  'Cancel';
-    cxRES_TarihGecersizTarih = 'Geçersiz Tarih'; //  'Invalid Date';
+    cxRES_TarihVazgec = 'VazgeÃ§';                //  'Cancel';
+    cxRES_TarihGecersizTarih = 'GeÃ§ersiz Tarih'; //  'Invalid Date';
 
-    cxRES_SFilterDialogRows = 'Satırları göster:'; //  'Show rows where:'
-    cxRES_SFilterDialogCharactersSeries = 'herhangi bir karakter dizisini sunmak için'; // 'to represent any series of characters'
-    cxRES_SFilterDialogSingleCharacter = 'herhangi bir karakteri sunmak için'; // 'to represent any single character'
-    cxRES_SFilterAddCondition= 'Koşul &Ekle';
+    cxRES_SFilterDialogRows = 'SatÄ±rlarÄ± gÃ¶ster:'; //  'Show rows where:'
+    cxRES_SFilterDialogCharactersSeries = 'herhangi bir karakter dizisini sunmak iÃ§in'; // 'to represent any series of characters'
+    cxRES_SFilterDialogSingleCharacter = 'herhangi bir karakteri sunmak iÃ§in'; // 'to represent any single character'
+    cxRES_SFilterAddCondition= 'KoÅŸul &Ekle';
     cxRES_SFilterAddGroup= 'Grup&Ekle';
     cxRES_SFilterAndCaption= 've';
-    cxRES_SFilterBlankCaption= 'boşluk';
+    cxRES_SFilterBlankCaption= 'boÅŸluk';
     cxRES_SFilterBoolOperatorAnd= 'VE';
-    cxRES_SFilterBoolOperatorNotAnd= 'DEĞİL VE';
-    cxRES_SFilterBoolOperatorNotOr= 'DEĞİL VEYA';
+    cxRES_SFilterBoolOperatorNotAnd= 'DEÄÄ°L VE';
+    cxRES_SFilterBoolOperatorNotOr= 'DEÄÄ°L VEYA';
     cxRES_SFilterBoolOperatorOr= 'VEYA';
-    cxRES_SFilterBoxAllCaption= '(Tümü)';
-    cxRES_SFilterBoxBlanksCaption= '(Boş Olanlar)';
-    cxRES_SFilterBoxCustomCaption= '(Özelleştir...)';
-    cxRES_SFilterBoxNonBlanksCaption= '(BoşOlmayanlar)';
-    cxRES_SFilterClearAll= 'Tümünü &Temizle';
+    cxRES_SFilterBoxAllCaption= '(TÃ¼mÃ¼)';
+    cxRES_SFilterBoxBlanksCaption= '(BoÅŸ Olanlar)';
+    cxRES_SFilterBoxCustomCaption= '(Ã–zelleÅŸtir...)';
+    cxRES_SFilterBoxNonBlanksCaption= '(BoÅŸOlmayanlar)';
+    cxRES_SFilterClearAll= 'TÃ¼mÃ¼nÃ¼ &Temizle';
     cxRES_SFilterControlDialogActionApplyCaption= '&Uygula';
-    cxRES_SFilterControlDialogActionCancelCaption= 'İptal et';
+    cxRES_SFilterControlDialogActionCancelCaption= 'Ä°ptal et';
     cxRES_SFilterControlDialogActionOkCaption= 'TAMAM';
-    cxRES_SFilterControlDialogActionOpenCaption= '&Aç...';
+    cxRES_SFilterControlDialogActionOpenCaption= '&AÃ§...';
     cxRES_SFilterControlDialogActionOpenHint= 'Open|Opens var olan filtre';
     cxRES_SFilterControlDialogActionSaveCaption= '&Olarak kaydet...';
     cxRES_SFilterControlDialogActionSaveHint= 'Save As|Saves aktif filtreyi yeni isimle kaydet';
-    cxRES_SFilterControlDialogCaption= 'Filtre oluşturucu';
-    cxRES_SFilterControlDialogFileExt= 'Dosya uzantısı';
+    cxRES_SFilterControlDialogCaption= 'Filtre oluÅŸturucu';
+    cxRES_SFilterControlDialogFileExt= 'Dosya uzantÄ±sÄ±';
     cxRES_SFilterControlDialogFileFilter= 'Filtreler (*.flt)|*.flt';
     cxRES_SFilterControlDialogNewFile= 'Yeni dosya';
-    cxRES_SFilterControlDialogOpenDialogCaption= 'Varolan bir filtreyi açın';
+    cxRES_SFilterControlDialogOpenDialogCaption= 'Varolan bir filtreyi aÃ§Ä±n';
     cxRES_SFilterControlDialogSaveDialogCaption= 'Etkin filtre dosyaya Kaydet';
-    cxRES_SFilterControlNullString= '<boş>';
-    cxRES_SFilterDialogCaption= 'Özel filtre';
-    cxRES_SFilterDialogInvalidValue= 'Geçersiz değer';
+    cxRES_SFilterControlNullString= '<boÅŸ>';
+    cxRES_SFilterDialogCaption= 'Ã–zel filtre';
+    cxRES_SFilterDialogInvalidValue= 'GeÃ§ersiz deÄŸer';
     cxRES_SFilterDialogOperationAnd= 'VE';
     cxRES_SFilterDialogOperationOr= 'VEYA';
     cxRES_SFilterDialogUse= 'Kullan';
-    cxRES_SFilterErrorBuilding= 'Kaynaktan filtre oluştrulamaz';
-    cxRES_SFilterFooterAddCondition= 'yeni bir koşul eklemek için tuşa basınız';
-    cxRES_SFilterGroupCaption= 'aşağıdaki komutları uygular';
-    cxRES_SFilterNotCaption= 'değil';
-    cxRES_SFilterOperatorBeginsWith= 'ile başlayan';
-    cxRES_SFilterOperatorBetween= 'arasında';
-    cxRES_SFilterOperatorContains= 'içeren';
-    cxRES_SFilterOperatorDoesNotBeginWith= 'ile başlamayan';
-    cxRES_SFilterOperatorDoesNotContain= 'içermeyen';
+    cxRES_SFilterErrorBuilding= 'Kaynaktan filtre oluÅŸtrulamaz';
+    cxRES_SFilterFooterAddCondition= 'yeni bir koÅŸul eklemek iÃ§in tuÅŸa basÄ±nÄ±z';
+    cxRES_SFilterGroupCaption= 'aÅŸaÄŸÄ±daki komutlarÄ± uygular';
+    cxRES_SFilterNotCaption= 'deÄŸil';
+    cxRES_SFilterOperatorBeginsWith= 'ile baÅŸlayan';
+    cxRES_SFilterOperatorBetween= 'arasÄ±nda';
+    cxRES_SFilterOperatorContains= 'iÃ§eren';
+    cxRES_SFilterOperatorDoesNotBeginWith= 'ile baÅŸlamayan';
+    cxRES_SFilterOperatorDoesNotContain= 'iÃ§ermeyen';
     cxRES_SFilterOperatorDoesNotEndWith= 'ile bitmeyen';
     cxRES_SFilterOperatorEndsWith= 'ile biten';
-    cxRES_SFilterOperatorEqual= 'eşittir';
+    cxRES_SFilterOperatorEqual= 'eÅŸittir';
     cxRES_SFilterOperatorFuture= 'ileriki';
-    cxRES_SFilterOperatorGreater= 'den büyük olan';
-    cxRES_SFilterOperatorGreaterEqual= 'den büyük ya da eşit olan';
-    cxRES_SFilterOperatorInList= 'geçen';
-    cxRES_SFilterOperatorIsNotNull= 'boş olmayan';
-    cxRES_SFilterOperatorIsNull= 'boş olan';
-    cxRES_SFilterOperatorLast14Days= 'son 14 gün';
-    cxRES_SFilterOperatorLast30Days= 'son 30 gün';
-    cxRES_SFilterOperatorLast7Days= 'son 7 gün';
-    cxRES_SFilterOperatorLastMonth= 'geçen ay';
+    cxRES_SFilterOperatorGreater= 'den bÃ¼yÃ¼k olan';
+    cxRES_SFilterOperatorGreaterEqual= 'den bÃ¼yÃ¼k ya da eÅŸit olan';
+    cxRES_SFilterOperatorInList= 'geÃ§en';
+    cxRES_SFilterOperatorIsNotNull= 'boÅŸ olmayan';
+    cxRES_SFilterOperatorIsNull= 'boÅŸ olan';
+    cxRES_SFilterOperatorLast14Days= 'son 14 gÃ¼n';
+    cxRES_SFilterOperatorLast30Days= 'son 30 gÃ¼n';
+    cxRES_SFilterOperatorLast7Days= 'son 7 gÃ¼n';
+    cxRES_SFilterOperatorLastMonth= 'geÃ§en ay';
     cxRES_SFilterOperatorLastTwoWeeks= 'son iki hafta';
-    cxRES_SFilterOperatorLastWeek= 'geçen hafta';
-    cxRES_SFilterOperatorLastYear= 'geçen yıl';
+    cxRES_SFilterOperatorLastWeek= 'geÃ§en hafta';
+    cxRES_SFilterOperatorLastYear= 'geÃ§en yÄ±l';
     cxRES_SFilterOperatorLess= 'den az olan';
-    cxRES_SFilterOperatorLessEqual= 'den az ya da eşit olan';
+    cxRES_SFilterOperatorLessEqual= 'den az ya da eÅŸit olan';
     cxRES_SFilterOperatorLike= 'benzeyen (Like)';
-    cxRES_SFilterOperatorNext14Days= 'sonraki 14 gün';
-    cxRES_SFilterOperatorNext30Days= 'sonraki 30 gün';
-    cxRES_SFilterOperatorNext7Days= 'sonraki 7 gün';
+    cxRES_SFilterOperatorNext14Days= 'sonraki 14 gÃ¼n';
+    cxRES_SFilterOperatorNext30Days= 'sonraki 30 gÃ¼n';
+    cxRES_SFilterOperatorNext7Days= 'sonraki 7 gÃ¼n';
     cxRES_SFilterOperatorNextMonth= 'sonraki ay';
     cxRES_SFilterOperatorNextTwoWeeks= 'sonraki iki hafta';
     cxRES_SFilterOperatorNextWeek= 'sonraki hafta';
-    cxRES_SFilterOperatorNextYear= 'sonraki yıl';
-    cxRES_SFilterOperatorNotBetween= 'arasında olmayan';
-    cxRES_SFilterOperatorNotEqual= 'eşit olmayan';
-    cxRES_SFilterOperatorNotInList= 'geçmeyen';
+    cxRES_SFilterOperatorNextYear= 'sonraki yÄ±l';
+    cxRES_SFilterOperatorNotBetween= 'arasÄ±nda olmayan';
+    cxRES_SFilterOperatorNotEqual= 'eÅŸit olmayan';
+    cxRES_SFilterOperatorNotInList= 'geÃ§meyen';
     cxRES_SFilterOperatorNotLike= 'benzemeyen (not Like)';
-    cxRES_SFilterOperatorPast= 'önceki';
+    cxRES_SFilterOperatorPast= 'Ã¶nceki';
     cxRES_SFilterOperatorThisMonth= 'bu ay';
     cxRES_SFilterOperatorThisWeek= 'bu hafta';
-    cxRES_SFilterOperatorThisYear= 'bu yıl';
-    cxRES_SFilterOperatorToday= 'bugün';
-    cxRES_SFilterOperatorTomorrow= 'yarın';
-    cxRES_SFilterOperatorYesterday= 'dün';
+    cxRES_SFilterOperatorThisYear= 'bu yÄ±l';
+    cxRES_SFilterOperatorToday= 'bugÃ¼n';
+    cxRES_SFilterOperatorTomorrow= 'yarÄ±n';
+    cxRES_SFilterOperatorYesterday= 'dÃ¼n';
     cxRES_SFilterOrCaption= 'ya da';
-    cxRES_SFilterRemoveRow= '&Satırı kaldır';
+    cxRES_SFilterRemoveRow= '&SatÄ±rÄ± kaldÄ±r';
     cxRES_SFilterRootButtonCaption= 'Filtre';
-    cxRES_SFilterRootGroupCaption= '<kök>';
+    cxRES_SFilterRootGroupCaption= '<kÃ¶k>';
     cxRES_SGridAlignCenter= 'Ortala';
     cxRES_SGridAlignLeft= 'Sola Hizala';
     cxRES_SGridAlignmentSubMenu= 'Hizalama';
-    cxRES_SGridAlignRight= 'Sağa Hizala';
+    cxRES_SGridAlignRight= 'SaÄŸa Hizala';
     cxRES_SGridAvgMenuItem= 'Ortalama';
     cxRES_SGridBestFit= 'En Uygun';
-    cxRES_SGridBestFitAllColumns= 'En Uygun (Tüm sütunlar)';
-    cxRES_SGridClearGrouping= 'Gruplamayı Temizle';
-    cxRES_SGridClearSorting= 'Sıralamayı temizle';
+    cxRES_SGridBestFitAllColumns= 'En Uygun (TÃ¼m sÃ¼tunlar)';
+    cxRES_SGridClearGrouping= 'GruplamayÄ± Temizle';
+    cxRES_SGridClearSorting= 'SÄ±ralamayÄ± temizle';
     cxRES_SGridCountMenuItem= 'Adet';
-    cxRES_SGridFieldChooser= 'Alan Seçici';
+    cxRES_SGridFieldChooser= 'Alan SeÃ§ici';
     cxRES_SGridFullCollapse= 'Tam daralt';
-    cxRES_SGridFullExpand= 'Tam genişlet';
-    cxRES_SGridGroupByBox= 'Kutuya göre grupla';
-    cxRES_SGridGroupByThisField= 'Bu alana göre grupla';
-    cxRES_SGridHideGroupByBox= 'Gruplamayı gizle';
+    cxRES_SGridFullExpand= 'Tam geniÅŸlet';
+    cxRES_SGridGroupByBox= 'Kutuya gÃ¶re grupla';
+    cxRES_SGridGroupByThisField= 'Bu alana gÃ¶re grupla';
+    cxRES_SGridHideGroupByBox= 'GruplamayÄ± gizle';
     cxRES_SGridMaxMenuItem= 'Maks';
     cxRES_SGridMinMenuItem= 'Min ';
-    cxRES_SGridNone= 'Hiçbiri';
-    cxRES_SGridNoneMenuItem= 'Hiçbiri';
-    cxRES_SGridRemoveColumn= 'Bu kolonu kaldır';
-    cxRES_SGridRemoveThisGroupItem= 'Gruplamadan kaldır';
-    cxRES_SGridShowExpressionEditor= 'İfade Düzenleyici...';
+    cxRES_SGridNone= 'HiÃ§biri';
+    cxRES_SGridNoneMenuItem= 'HiÃ§biri';
+    cxRES_SGridRemoveColumn= 'Bu kolonu kaldÄ±r';
+    cxRES_SGridRemoveThisGroupItem= 'Gruplamadan kaldÄ±r';
+    cxRES_SGridShowExpressionEditor= 'Ä°fade DÃ¼zenleyici...';
     cxRES_SGridShowFindPanel= 'Paneli bul';
     cxRES_SGridShowFooter= 'Altband';
-    cxRES_SGridShowGroupFooter= 'Grup Altbantı göster';
-    cxRES_SGridSortByGroupValues= 'Grup değerine göre sırala';
-    cxRES_SGridSortBySummary= '%s için %s';
-    cxRES_SGridSortBySummaryCaption= 'Grup özetine göre sırala:';
-    cxRES_SGridSortColumnAsc= 'Artana göre sırala';
-    cxRES_SGridSortColumnDesc= 'Azalana göre sırala';
+    cxRES_SGridShowGroupFooter= 'Grup AltbantÄ± gÃ¶ster';
+    cxRES_SGridSortByGroupValues= 'Grup deÄŸerine gÃ¶re sÄ±rala';
+    cxRES_SGridSortBySummary= '%s iÃ§in %s';
+    cxRES_SGridSortBySummaryCaption= 'Grup Ã¶zetine gÃ¶re sÄ±rala:';
+    cxRES_SGridSortColumnAsc= 'Artana gÃ¶re sÄ±rala';
+    cxRES_SGridSortColumnDesc= 'Azalana gÃ¶re sÄ±rala';
     cxRES_SGridSumMenuItem= 'Toplam';
     cxRES_SMenuItemCaptionAssignFromWebCam= 'Kameradan &ata...';
     cxRES_SMenuItemCaptionCopy= '&Kopyala';
     cxRES_SMenuItemCaptionCut= 'Ke&s';
     cxRES_SMenuItemCaptionDelete= '&Sil';
-    cxRES_SMenuItemCaptionLoad= '&Yükle...';
-    cxRES_SMenuItemCaptionPaste= '&Yapıştır';
+    cxRES_SMenuItemCaptionLoad= '&YÃ¼kle...';
+    cxRES_SMenuItemCaptionPaste= '&YapÄ±ÅŸtÄ±r';
     cxRES_SMenuItemCaptionSave= 'Olarak&kaydet...';
-    cxRES_SNoMatchesFound= 'Eşleşme bulunamadı';
+    cxRES_SNoMatchesFound= 'EÅŸleÅŸme bulunamadÄ±';
     //M.Y 06.02.2024
-    cxRES_scxQuickCustomizationAllCommandCaption= '(Tümü)';
-    cxRES_scxQuickCustomizationSortedCommandCaption = '(Sıralı)';
+    cxRES_scxQuickCustomizationAllCommandCaption= '(TÃ¼mÃ¼)';
+    cxRES_scxQuickCustomizationSortedCommandCaption = '(SÄ±ralÄ±)';
 
   //AnaGirisSayfasi
     AGS_Arama = 'Genel Arama';
-    AGS_Iletisim = 'İletişim';
+    AGS_Iletisim = 'Ä°letiÅŸim';
     AGS_Mesajlasma = 'Mesaj';
     AGS_Duyuru = 'Duyuru';
     AGS_CRM = 'CRM';
     AGS_Aktivite = 'Aktivite';
-    AGS_Gorevler = 'Görev';
+    AGS_Gorevler = 'GÃ¶rev';
     AGS_Projeler = 'Proje';
     AGS_Servis= 'Servis';
-    AGS_Günlük = 'Günlük';
+    AGS_GÃ¼nlÃ¼k = 'GÃ¼nlÃ¼k';
     AGS_Haber = 'Haber';
     AGS_Piyasa = 'Piyasa';
     AGS_HavaDurumu = 'Hava Durumu';
-    AGS_Yonetim = 'Yönetim';
+    AGS_Yonetim = 'YÃ¶netim';
     AGS_FinansAnalizi = 'Finans';
     AGS_CRMAnalizi = 'CRM';
     AGS_TeklifAnalizi = 'Teklif';
     AGS_ServisAnalizi = 'Servis';
-    AGS_FarkliDurumVeAtayanSecilemez = 'Farklı durum ve görev atayan seçilemez';
-    AGS_FarkliDurumVeSorumluSecilemez = 'Farklı durum ve sorumlu seçilemez';
+    AGS_FarkliDurumVeAtayanSecilemez = 'FarklÄ± durum ve gÃ¶rev atayan seÃ§ilemez';
+    AGS_FarkliDurumVeSorumluSecilemez = 'FarklÄ± durum ve sorumlu seÃ§ilemez';
 
-  //Ödeme - tahsilat
-    SOdeme = 'Ödeme';
+  //Ã–deme - tahsilat
+    SOdeme = 'Ã–deme';
     STahsilat = 'Tahsilat';
-    SMakbuzNoGir = 'Makbuz Numarasını Giriniz.';
+    SMakbuzNoGir = 'Makbuz NumarasÄ±nÄ± Giriniz.';
 
   //Fatura
     SGelenFaturaBilgileri = 'Gelen Fatura Bilgileri';
     SFaturaTarihi ='Fatura Tarihi';
     SFaturaNo='Fatura No';
-    SSatisIrs='Satış İrsaliyesi';
-    SSatisFat='Satış Faturası';
-    SSatisFis='Satış Fişi';
-    SGirisFisi='Giriş Fişi';
-    SCikisFisi='Çıkış Fişi';
+    SSatisIrs='SatÄ±ÅŸ Ä°rsaliyesi';
+    SSatisFat='SatÄ±ÅŸ FaturasÄ±';
+    SSatisFis='SatÄ±ÅŸ FiÅŸi';
+    SGirisFisi='GiriÅŸ FiÅŸi';
+    SCikisFisi='Ã‡Ä±kÄ±ÅŸ FiÅŸi';
 
   //UFaturalar ,UFaturaTransferListe
-    idd='İşaretlilerin Durumunu Değiştir' ;
-    UrungirilmedenKaydedilemez ='Ürün veya hizmet satırı girilmeden kaydedilemez!';
-    Transferurunlersilinemez='Transfer edilen ürünler hareket görmüştür.Silinemez.';
-    Adetsifirvesifirdankucukolamaz='Adet sıfır veya sıfırdan küçük olamaz!';
-    Urungirilmedenkadedilmez='Ürün adı girilmeden kaydedilemez!';
-    Mailbulunamadiadresekle='Mail adresi bulunamadı! Mail adresi eklemek istermisiniz?';
-    Excelkolonayarlarinigiriniz='Seçenekler/Opsiyonlar/Alış Satış ekranında varsayılan excel kolon ayarlarını giriniz';
+    idd='Ä°ÅŸaretlilerin Durumunu DeÄŸiÅŸtir' ;
+    UrungirilmedenKaydedilemez ='ÃœrÃ¼n veya hizmet satÄ±rÄ± girilmeden kaydedilemez!';
+    Transferurunlersilinemez='Transfer edilen Ã¼rÃ¼nler hareket gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez.';
+    Adetsifirvesifirdankucukolamaz='Adet sÄ±fÄ±r veya sÄ±fÄ±rdan kÃ¼Ã§Ã¼k olamaz!';
+    Urungirilmedenkadedilmez='ÃœrÃ¼n adÄ± girilmeden kaydedilemez!';
+    Mailbulunamadiadresekle='Mail adresi bulunamadÄ±! Mail adresi eklemek istermisiniz?';
+    Excelkolonayarlarinigiriniz='SeÃ§enekler/Opsiyonlar/AlÄ±ÅŸ SatÄ±ÅŸ ekranÄ±nda varsayÄ±lan excel kolon ayarlarÄ±nÄ± giriniz';
     Stokfiyatgir='Stok Fiyat bilgilerini giriniz..';
-    Excelverikaydedildi='Excel verileri kaydedilmiştir.';
-    Butarihoncesiislemyapilmaz='Kilitlenmiş bilgi, işlem yapılamaz!';
-    CikisYapilmis='Lot/Seri No lu ürün çıkışı yapılmış!';
-    BildirimYapilmis='ÜTS Bildirimi Yapılmış!';
-    BildirimYapilmisSilinemez='ÜTS Bildirimi Yapılmış Silinemez!';
-    BildirimYapilmisDegisemez='ÜTS Bildirimi Yapılmış Değişemez!';
-    DonusumYapilamaz='İzleme bilgisi olan belgel buradan dönüşüm yapılamaz! Yeni belge oluşturup dönüşüm butonundan seçin.';
-    DonusumYapilmis='Dönüşüm Yapılmış!';
-    Butariheislemyapilmaz='Kilitlenmiş tarih alanına veya devir öncesine işlem yapılamaz!';
-    DevirOncesineIslemEklenmez='İşlem yapmaya çalıştığınız tarihin sonrasında bir devir kaydı var!';
-    Planlifaturaiptalolsunmu='Bu faturada oluşturulmuş plan vardır.İptal etmek istiyor musunuz? ';
-    Belge_olustu='Belge Oluşturuldu';
-    Belge_olusmadi='Belge Oluşturulmadı';
-    Belge_goruldu =  'Belge görüldü';
-    Belge_degisti =  'Belge değiştirildi';
+    Excelverikaydedildi='Excel verileri kaydedilmiÅŸtir.';
+    Butarihoncesiislemyapilmaz='KilitlenmiÅŸ bilgi, iÅŸlem yapÄ±lamaz!';
+    CikisYapilmis='Lot/Seri No lu Ã¼rÃ¼n Ã§Ä±kÄ±ÅŸÄ± yapÄ±lmÄ±ÅŸ!';
+    BildirimYapilmis='ÃœTS Bildirimi YapÄ±lmÄ±ÅŸ!';
+    BildirimYapilmisSilinemez='ÃœTS Bildirimi YapÄ±lmÄ±ÅŸ Silinemez!';
+    BildirimYapilmisDegisemez='ÃœTS Bildirimi YapÄ±lmÄ±ÅŸ DeÄŸiÅŸemez!';
+    DonusumYapilamaz='Ä°zleme bilgisi olan belgel buradan dÃ¶nÃ¼ÅŸÃ¼m yapÄ±lamaz! Yeni belge oluÅŸturup dÃ¶nÃ¼ÅŸÃ¼m butonundan seÃ§in.';
+    DonusumYapilmis='DÃ¶nÃ¼ÅŸÃ¼m YapÄ±lmÄ±ÅŸ!';
+    Butariheislemyapilmaz='KilitlenmiÅŸ tarih alanÄ±na veya devir Ã¶ncesine iÅŸlem yapÄ±lamaz!';
+    DevirOncesineIslemEklenmez='Ä°ÅŸlem yapmaya Ã§alÄ±ÅŸtÄ±ÄŸÄ±nÄ±z tarihin sonrasÄ±nda bir devir kaydÄ± var!';
+    Planlifaturaiptalolsunmu='Bu faturada oluÅŸturulmuÅŸ plan vardÄ±r.Ä°ptal etmek istiyor musunuz? ';
+    Belge_olustu='Belge OluÅŸturuldu';
+    Belge_olusmadi='Belge OluÅŸturulmadÄ±';
+    Belge_goruldu =  'Belge gÃ¶rÃ¼ldÃ¼';
+    Belge_degisti =  'Belge deÄŸiÅŸtirildi';
     Belge_revize = 'Belge revize edildi';
     Form_Kaydedildi = 'Form Kaydedildi';
-    SifirYuzArasinda = '0 ile 100 arasında olmalı';
-    Irsaliyeyapilsinmi='Bu siparişi irsaliyeleştirmek istiyor musunuz ? ';
-    Hareketgormussilinemez='Hareket görmüş, kayıt silinemez. Belge ID:';
-    Kilitlibelgedeislemyapilmaz='Seçilenler arasında kilitli belge vardır.Kilitli belgeler de işlem yapılamaz !';
-    Planlibelgesilinmedi='Seçilenler arasında plan oluşturulmuş belge vardır.Bu belgeler silinmemiştir. !';
-    Kilitliveplanlibelgesilinemez='Seçilenler arasında kilitli ve plan oluşturulmuş belge vardır.Bu belgeler silinmemiştir. !';
-    faturaplanlisilinecekmi='Bu faturada oluşturulmuş plan vardır.Silmek istiyor musunuz? ';
-    Tanimsiz_Firma='Tanımlı olmayan firmalar vardır.';
-    Farklicariberaberbelgelenmez='Farklı cari kayıtlar bir arada belgelendirilemez!';
-    Girenirsaliyelisiparis='Bu Siparişin irsaliyesi oluşturulmuştur.Giren';
-    Cikanirsaliyelisiparis='Bu Siparişin irsaliyesi oluşturulmuştur.Çıkan';
-    Girenirsaliyelifatura='Bu irsaliyenin Faturası oluşturulmuştur.Giren';
-    Cikanirsaliyelifatura='Bu irsaliyenin Faturası oluşturulmuştur.Çıkan';
-    HesapEfaturadadevamedecekmisin='Bu hesap EFatura kullanmaktadır. Yine de devam etmek istiyor musunuz?';
-    MukerrerKayit = 'Aynı gün, aynı tutarda, aynı türde ve aynı cari için oluşturulmuş bir belge daha var. Devam etsin mi?';
-    Adresdegistikartguncelle='Adres Değişti. Cari Kartta güncellensin mi?';
-    Uruniadeedilmisdevamedecekmisin='Bu ürün daha önce iade edilmiş. Devam etmek istiyor musunuz?';
-    Urunfiyatfarkivardevamedecekmisin='Bu ürün için daha önce fiyat farkı oluşturulmuş. Devam etmek istiyor musunuz?';
-    Irsaliyedefaturaileiptaledilsinmi='Faturaya bağlı irsaliyeler de bu fatura ile birlikte iptal edilsin mi?';
-    Secilisatirlarsilinsinmi='Seçili plan satırları silinsin mi?';
-    Belgeiptaledilsinmi='Bu Belgeyi iptal etmek istediğinize emin misiniz?';
-    Islemgorenfaturadadegisiklikyapilmaz='İşlem gören efatura üzerinde değişiklik yapılamaz!';
-    DonusturulmusSilinemez='"Dönüştürülmüş Belge", silinemez!';
-    DonusturulmusDegisemez='"Dönüştürülmüş Belge", değişemez!';
-    Belgenogirisiyanlis='Belgeno alanına yanlış tipte veri girişi yapıyorsunuz.';
-    //Yetkisiz_Islem='Yetkisiz işlem';
-    Iskontooraniasildi='Max iskonto oranını aştınız.';
-    Adetsifirolamaz='Adet sıfır veya sıfırdan küçük olamaz!';
+    SifirYuzArasinda = '0 ile 100 arasÄ±nda olmalÄ±';
+    Irsaliyeyapilsinmi='Bu sipariÅŸi irsaliyeleÅŸtirmek istiyor musunuz ? ';
+    Hareketgormussilinemez='Hareket gÃ¶rmÃ¼ÅŸ, kayÄ±t silinemez. Belge ID:';
+    Kilitlibelgedeislemyapilmaz='SeÃ§ilenler arasÄ±nda kilitli belge vardÄ±r.Kilitli belgeler de iÅŸlem yapÄ±lamaz !';
+    Planlibelgesilinmedi='SeÃ§ilenler arasÄ±nda plan oluÅŸturulmuÅŸ belge vardÄ±r.Bu belgeler silinmemiÅŸtir. !';
+    Kilitliveplanlibelgesilinemez='SeÃ§ilenler arasÄ±nda kilitli ve plan oluÅŸturulmuÅŸ belge vardÄ±r.Bu belgeler silinmemiÅŸtir. !';
+    faturaplanlisilinecekmi='Bu faturada oluÅŸturulmuÅŸ plan vardÄ±r.Silmek istiyor musunuz? ';
+    Tanimsiz_Firma='TanÄ±mlÄ± olmayan firmalar vardÄ±r.';
+    Farklicariberaberbelgelenmez='FarklÄ± cari kayÄ±tlar bir arada belgelendirilemez!';
+    Girenirsaliyelisiparis='Bu SipariÅŸin irsaliyesi oluÅŸturulmuÅŸtur.Giren';
+    Cikanirsaliyelisiparis='Bu SipariÅŸin irsaliyesi oluÅŸturulmuÅŸtur.Ã‡Ä±kan';
+    Girenirsaliyelifatura='Bu irsaliyenin FaturasÄ± oluÅŸturulmuÅŸtur.Giren';
+    Cikanirsaliyelifatura='Bu irsaliyenin FaturasÄ± oluÅŸturulmuÅŸtur.Ã‡Ä±kan';
+    HesapEfaturadadevamedecekmisin='Bu hesap EFatura kullanmaktadÄ±r. Yine de devam etmek istiyor musunuz?';
+    MukerrerKayit = 'AynÄ± gÃ¼n, aynÄ± tutarda, aynÄ± tÃ¼rde ve aynÄ± cari iÃ§in oluÅŸturulmuÅŸ bir belge daha var. Devam etsin mi?';
+    Adresdegistikartguncelle='Adres DeÄŸiÅŸti. Cari Kartta gÃ¼ncellensin mi?';
+    Uruniadeedilmisdevamedecekmisin='Bu Ã¼rÃ¼n daha Ã¶nce iade edilmiÅŸ. Devam etmek istiyor musunuz?';
+    Urunfiyatfarkivardevamedecekmisin='Bu Ã¼rÃ¼n iÃ§in daha Ã¶nce fiyat farkÄ± oluÅŸturulmuÅŸ. Devam etmek istiyor musunuz?';
+    Irsaliyedefaturaileiptaledilsinmi='Faturaya baÄŸlÄ± irsaliyeler de bu fatura ile birlikte iptal edilsin mi?';
+    Secilisatirlarsilinsinmi='SeÃ§ili plan satÄ±rlarÄ± silinsin mi?';
+    Belgeiptaledilsinmi='Bu Belgeyi iptal etmek istediÄŸinize emin misiniz?';
+    Islemgorenfaturadadegisiklikyapilmaz='Ä°ÅŸlem gÃ¶ren efatura Ã¼zerinde deÄŸiÅŸiklik yapÄ±lamaz!';
+    DonusturulmusSilinemez='"DÃ¶nÃ¼ÅŸtÃ¼rÃ¼lmÃ¼ÅŸ Belge", silinemez!';
+    DonusturulmusDegisemez='"DÃ¶nÃ¼ÅŸtÃ¼rÃ¼lmÃ¼ÅŸ Belge", deÄŸiÅŸemez!';
+    Belgenogirisiyanlis='Belgeno alanÄ±na yanlÄ±ÅŸ tipte veri giriÅŸi yapÄ±yorsunuz.';
+    //Yetkisiz_Islem='Yetkisiz iÅŸlem';
+    Iskontooraniasildi='Max iskonto oranÄ±nÄ± aÅŸtÄ±nÄ±z.';
+    Adetsifirolamaz='Adet sÄ±fÄ±r veya sÄ±fÄ±rdan kÃ¼Ã§Ã¼k olamaz!';
     AltVeriVarSilinemez = 'Alt veriler var, silinemez!';
 
-  //Fiş
-    SGelenFisBilgileri = 'Gelen Fiş Bilgileri';
-    SFisTarihi ='Fiş Tarihi';
-    SFisNo='Fiş No';
-    SAlisIrs='Alış İrsaliyesi';
-    SAlisFat='Alış Faturası';
-    SAlisFis='Alış Fişi';
+  //FiÅŸ
+    SGelenFisBilgileri = 'Gelen FiÅŸ Bilgileri';
+    SFisTarihi ='FiÅŸ Tarihi';
+    SFisNo='FiÅŸ No';
+    SAlisIrs='AlÄ±ÅŸ Ä°rsaliyesi';
+    SAlisFat='AlÄ±ÅŸ FaturasÄ±';
+    SAlisFis='AlÄ±ÅŸ FiÅŸi';
 
   //UMasrafGelir
-    Ay_Yanlis = 'Ay bilgisi 1 ile 12 arasında olmalı!';
-    MGKayitlarbasariylakopyalandi = 'Kayıtlar başarıyla kopyalandı.';
-    MGKaydedildi='Veriler kaydedilmiştir.';
-    MGFarklikod='Girilen Kod farklı olmalı.';
-    MGSilinmez='Bu sözleşmeye demirbaş eklenmiştir.Silinemez !';
-    CariAktarimkosullari='Aktarılacak kolonlar sırasıyla "Kod,Ad,Grup,İlk Temas,Sektor,Kategori,Sinif,Temsilci,Bolge,AltBolge,Ozelkod,Muhkodu,Peryot,'+
-                       'VergiDai,VergiNo,IsTel, Faks, CepTel,	Eposta, Web, Adres,PK, Ilce, Il, Ulke,PostaDgt,EPostaDgt,Vade,Notlar, Firma ÜTS No, Firma Resmi Ad" şeklinde olmalıdır..';
+    Ay_Yanlis = 'Ay bilgisi 1 ile 12 arasÄ±nda olmalÄ±!';
+    MGKayitlarbasariylakopyalandi = 'KayÄ±tlar baÅŸarÄ±yla kopyalandÄ±.';
+    MGKaydedildi='Veriler kaydedilmiÅŸtir.';
+    MGFarklikod='Girilen Kod farklÄ± olmalÄ±.';
+    MGSilinmez='Bu sÃ¶zleÅŸmeye demirbaÅŸ eklenmiÅŸtir.Silinemez !';
+    CariAktarimkosullari='AktarÄ±lacak kolonlar sÄ±rasÄ±yla "Kod,Ad,Grup,Ä°lk Temas,Sektor,Kategori,Sinif,Temsilci,Bolge,AltBolge,Ozelkod,Muhkodu,Peryot,'+
+                       'VergiDai,VergiNo,IsTel, Faks, CepTel,	Eposta, Web, Adres,PK, Ilce, Il, Ulke,PostaDgt,EPostaDgt,Vade,Notlar, Firma ÃœTS No, Firma Resmi Ad" ÅŸeklinde olmalÄ±dÄ±r..';
 
-    StokAktarimkosullari='Aktarılacak kolonlar sırasıyla "Kod,Ad,Kategori,Tipi,Barkod,Marka,Model,Grubu, Ozellik, AnaBirim,Birim2,Birim2Carpan,KDV,OTV_Katsayi, OTV_Yuzde,Izleme,KulSekli,'+
-                'Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, Ürün No" şeklinde olmalıdır..';
+    StokAktarimkosullari='AktarÄ±lacak kolonlar sÄ±rasÄ±yla "Kod,Ad,Kategori,Tipi,Barkod,Marka,Model,Grubu, Ozellik, AnaBirim,Birim2,Birim2Carpan,KDV,OTV_Katsayi, OTV_Yuzde,Izleme,KulSekli,'+
+                'Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, ÃœrÃ¼n No" ÅŸeklinde olmalÄ±dÄ±r..';
 
-    UTSUrunAktarimkosullari='Aktarılacak kolonlar sırasıyla'+#13+#10+
+    UTSUrunAktarimkosullari='AktarÄ±lacak kolonlar sÄ±rasÄ±yla'+#13+#10+
       '"KURUM_ADI,KURUM_UTS_NO,STOKKOD,URUNNO,'+#13+#10+
-      ' SERINO,LOTNO,ADET,FİYAT,ÜRT,SKT"'+#13+#10+
-      ' şeklinde olmalıdır..';
+      ' SERINO,LOTNO,ADET,FÄ°YAT,ÃœRT,SKT"'+#13+#10+
+      ' ÅŸeklinde olmalÄ±dÄ±r..';
 
-    MGAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Kod (Yazı),'+#13+#10+
-              '     * sütun2(B):Ad (Yazı),'+#13+#10+
-              '     * sütun3(C):KDV (Numerik),'+#13+#10+
-              '     * sütun4(D):Şube ID (Numerik) '+#13+#10+
-              '   öğelerine sahip olmalıdır.';
-    KrediAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile 9 sütun:'+#13+#10+
-              '     * sütun1(A):Tarih,'+#13+#10+
-              '     * son sütun9(I):Açıklama,'+#13+#10+
-              '   öğelerine sahip olmalıdır.';
-     MGHatalikayit='Hatalı formatta kayıt ekliyorsunuz!';
-     MGKurum='Önce kurum seçin';
-     MGKodvar='Bu kod daha önce eklenmiş!';
-     MGEmirNovar='Bu Emir No daha önce eklenmiş!';
+    MGAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):Kod (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun2(B):Ad (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun3(C):KDV (Numerik),'+#13+#10+
+              '     * sÃ¼tun4(D):Åube ID (Numerik) '+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
+    KrediAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile 9 sÃ¼tun:'+#13+#10+
+              '     * sÃ¼tun1(A):Tarih,'+#13+#10+
+              '     * son sÃ¼tun9(I):AÃ§Ä±klama,'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
+     MGHatalikayit='HatalÄ± formatta kayÄ±t ekliyorsunuz!';
+     MGKurum='Ã–nce kurum seÃ§in';
+     MGKodvar='Bu kod daha Ã¶nce eklenmiÅŸ!';
+     MGEmirNovar='Bu Emir No daha Ã¶nce eklenmiÅŸ!';
 
   //Banka_TEB ,Banka_Garanti
-    secimyapilmadihata = 'Alıcı listesinden en az bir seçim yapınız.' ;
+    secimyapilmadihata = 'AlÄ±cÄ± listesinden en az bir seÃ§im yapÄ±nÄ±z.' ;
 
   //UHavalaeEFT
-    Logayazamadihata = 'Dosya imza log veritabanına kaydedilemedi.';
-    yanlistelnohata = 'Geçerli bir telefon numarası giriniz.';
-    yanlisoperatorhata = 'Elektronik imza türkcell ve avea için kullanılmaktadır, operatör seçiminizi yapınız.';
-    eimzahata = 'Elektronik imza başarısız.';
-    secimyokhata = 'En az bir Havale/EFT seçmelisiniz.';
-    bankadanodemeyokhata = 'Seçtiğiniz tarihte banka üzerinden ödemeniz bulunmamaktadır. Başka bir tarih seçin yada ödeme türünüzü düzeltin.';
-    Dosyaturuhata = 'Yanlış türde bir dosya oluşturuldu.';
-    Eminmisin = 'Havale/Eft Sihirbazından çıkmak istediğinize emin misiniz?';
-    FTPhatali='FTP Bilgileri Hatalı';
-    BankaHareketAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Tarih (Tarih),'+#13+#10+
-              '     * sütun2(B):No (Yazı),'+#13+#10+
-              '     * sütun3(C):Açıklama (Yazı),'+#13+#10+
-              '     * sütun6(F):Tutar (Numerik) '+#13+#10+
-              '   öğelerine sahip olmalıdır.';
+    Logayazamadihata = 'Dosya imza log veritabanÄ±na kaydedilemedi.';
+    yanlistelnohata = 'GeÃ§erli bir telefon numarasÄ± giriniz.';
+    yanlisoperatorhata = 'Elektronik imza tÃ¼rkcell ve avea iÃ§in kullanÄ±lmaktadÄ±r, operatÃ¶r seÃ§iminizi yapÄ±nÄ±z.';
+    eimzahata = 'Elektronik imza baÅŸarÄ±sÄ±z.';
+    secimyokhata = 'En az bir Havale/EFT seÃ§melisiniz.';
+    bankadanodemeyokhata = 'SeÃ§tiÄŸiniz tarihte banka Ã¼zerinden Ã¶demeniz bulunmamaktadÄ±r. BaÅŸka bir tarih seÃ§in yada Ã¶deme tÃ¼rÃ¼nÃ¼zÃ¼ dÃ¼zeltin.';
+    Dosyaturuhata = 'YanlÄ±ÅŸ tÃ¼rde bir dosya oluÅŸturuldu.';
+    Eminmisin = 'Havale/Eft SihirbazÄ±ndan Ã§Ä±kmak istediÄŸinize emin misiniz?';
+    FTPhatali='FTP Bilgileri HatalÄ±';
+    BankaHareketAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):Tarih (Tarih),'+#13+#10+
+              '     * sÃ¼tun2(B):No (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun3(C):AÃ§Ä±klama (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun6(F):Tutar (Numerik) '+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
 
   //PDKSListeFrame
-    PDKSSil='Seçili satırlar silinsin mi?';
-    PDKSSec='Personel Seçiniz !' ;
+    PDKSSil='SeÃ§ili satÄ±rlar silinsin mi?';
+    PDKSSec='Personel SeÃ§iniz !' ;
 
   //PosListeFrame
-    PosOranSilmeOnayi = 'Seçili olan pos oranı silinsinmi?';
-    PosOranPosSecimi = 'Yeni kayıt için öncelikle pos seçimi yapmalısınız.';
-    PosSilinecekkayitsec='Silme İşlemi İçin Herhangi Bir Kayıt Seçmediniz.';
-    POSBulunamadi='Kredi Kartı tahsilatı için POS tanımı yapılmalı.';
+    PosOranSilmeOnayi = 'SeÃ§ili olan pos oranÄ± silinsinmi?';
+    PosOranPosSecimi = 'Yeni kayÄ±t iÃ§in Ã¶ncelikle pos seÃ§imi yapmalÄ±sÄ±nÄ±z.';
+    PosSilinecekkayitsec='Silme Ä°ÅŸlemi Ä°Ã§in Herhangi Bir KayÄ±t SeÃ§mediniz.';
+    POSBulunamadi='Kredi KartÄ± tahsilatÄ± iÃ§in POS tanÄ±mÄ± yapÄ±lmalÄ±.';
 
-  //UHesapPlanı
-    YanlisTabHata = 'Kartlar üzerinde düzenleme yapamazsınız, sadece hesap planını değiştirebilirsiniz. Lütfen Sağ Tuş menüsünden "Görünüm \ Sadece Plan" ı seçiniz.';
-    Kaydedildi='Başarıyla kaydedilmiştir.';
-    Yanlis_Isaret='Hesap adında kesme işareti olamaz!';
+  //UHesapPlanÄ±
+    YanlisTabHata = 'Kartlar Ã¼zerinde dÃ¼zenleme yapamazsÄ±nÄ±z, sadece hesap planÄ±nÄ± deÄŸiÅŸtirebilirsiniz. LÃ¼tfen SaÄŸ TuÅŸ menÃ¼sÃ¼nden "GÃ¶rÃ¼nÃ¼m \ Sadece Plan" Ä± seÃ§iniz.';
+    Kaydedildi='BaÅŸarÄ±yla kaydedilmiÅŸtir.';
+    Yanlis_Isaret='Hesap adÄ±nda kesme iÅŸareti olamaz!';
 
   //Takvim
     TAksiyonsil='Bu aksiyon silinsin mi?';
-    TFaturaPlanliSilinsinmi='Bu faturada oluşturulmuş plan vardır.Silmek istiyor musunuz? ';
+    TFaturaPlanliSilinsinmi='Bu faturada oluÅŸturulmuÅŸ plan vardÄ±r.Silmek istiyor musunuz? ';
 
   //UTakvimBankaParaTransfer
     TutarGiren = 'Tutar(Giren):  ';
     ParaGiren = 'Para Transferi(Giren)';
-    TutarCikan =  'Tutar(Çıkan):  ';
-    ParaCikan =  'Para Transferi(Çıkan)';
-    istarih = 'İşlem Tarihi:  ' ;
-    gerceklesen = 'Gerçekleşen ';
+    TutarCikan =  'Tutar(Ã‡Ä±kan):  ';
+    ParaCikan =  'Para Transferi(Ã‡Ä±kan)';
+    istarih = 'Ä°ÅŸlem Tarihi:  ' ;
+    gerceklesen = 'GerÃ§ekleÅŸen ';
     pltarih =  'Plan Tarihi:  ';
     planlanan =  'Planlanan ';
     kasa111 = 'Kasa:  ';
-    CVarsayilan = 'Varsayılan';
-    Varskasa111 = 'Varsayılan Kasa:  ';
+    CVarsayilan = 'VarsayÄ±lan';
+    Varskasa111 = 'VarsayÄ±lan Kasa:  ';
     kasakodu = 'Kasa Kodu:  ';
     cNakit = 'Nakit    ';
     banka111 = 'Banka:  ';
-    sube1 = 'Şube:  ';
+    sube1 = 'Åube:  ';
     hesap1 = 'Hesap:  ';
     bankakk1 = 'Banka:  ';
     subekk1 = 'Kart No:  ';
-    hesapkk1 = 'Tanımlı Kişi:  ';
+    hesapkk1 = 'TanÄ±mlÄ± KiÅŸi:  ';
     bankakk2 = 'Banka:  ';
     subekk2 = 'POS No:  ';
-    hesapkk2 = 'POS Adı:  ';
+    hesapkk2 = 'POS AdÄ±:  ';
     PosCihazi = 'POS   ';
-    KKarti = 'Kredi Kartı  ';
-    SQLBulunamadi='SQL Bulunamadı..';
-    GrupAdi = 'Grup Adı';
+    KKarti = 'Kredi KartÄ±  ';
+    SQLBulunamadi='SQL BulunamadÄ±..';
+    GrupAdi = 'Grup AdÄ±';
 
 
   //UTakvimKKEkstresi
-    dekstiresi=' Dönemi Ekstre Bilgileri.';
-    faiz_donem_odemesi='Arada faiz dönem ödemesi var eklensin mi?';
+    dekstiresi=' DÃ¶nemi Ekstre Bilgileri.';
+    faiz_donem_odemesi='Arada faiz dÃ¶nem Ã¶demesi var eklensin mi?';
   //UTakvimVirman
 
   //UTablo ,Senetler
-    //HareketGormusSilinemez =  'Hareket görmüş bilgi silinemez!';
-    CekKasaHareketiHatasi= 'Tahsilatı bulunan çek kaydı silinemez!';
-    CekFarkliDurum= 'Farklı durumdaki çekler bir arada işlem göremez!';
-    CekHareketHareketiHatasi = 'Hareket görmüş çek kaydı silinemez!';
-    CekPortfoyHariciHatasi = 'Sadece Portföydeki çekler silinebilir!';
-    IntBaglanti = 'İnternet bağlantınız yok';
+    //HareketGormusSilinemez =  'Hareket gÃ¶rmÃ¼ÅŸ bilgi silinemez!';
+    CekKasaHareketiHatasi= 'TahsilatÄ± bulunan Ã§ek kaydÄ± silinemez!';
+    CekFarkliDurum= 'FarklÄ± durumdaki Ã§ekler bir arada iÅŸlem gÃ¶remez!';
+    CekHareketHareketiHatasi = 'Hareket gÃ¶rmÃ¼ÅŸ Ã§ek kaydÄ± silinemez!';
+    CekPortfoyHariciHatasi = 'Sadece PortfÃ¶ydeki Ã§ekler silinebilir!';
+    IntBaglanti = 'Ä°nternet baÄŸlantÄ±nÄ±z yok';
     Emailhatasitekraryollayin='Error while trying to send email';
-    Listele='Önce kayıtları listeleyiniz.';
-    Kayityok='Aktarılacak herhangi bir kayıt yok.';
-    Kayitsec='Aktarılacak kayıtları seçiniz.';
-    Iadeyapilamaz='Bu faturada oluşturulmuş plan vardır.İade yapılamaz ' ;
-    Personelbilgisayarkullanacakmi='Bu personel bilgisayar kullanacak mı?';
-    Uzerineyazilsinmi='Bu isimde kayıtlı dosya var. Üzerine yazılsın mı?';
-    BirIsimGiriniz='İşleme devam etmek için lütfen bir isim giriniz.';
+    Listele='Ã–nce kayÄ±tlarÄ± listeleyiniz.';
+    Kayityok='AktarÄ±lacak herhangi bir kayÄ±t yok.';
+    Kayitsec='AktarÄ±lacak kayÄ±tlarÄ± seÃ§iniz.';
+    Iadeyapilamaz='Bu faturada oluÅŸturulmuÅŸ plan vardÄ±r.Ä°ade yapÄ±lamaz ' ;
+    Personelbilgisayarkullanacakmi='Bu personel bilgisayar kullanacak mÄ±?';
+    Uzerineyazilsinmi='Bu isimde kayÄ±tlÄ± dosya var. Ãœzerine yazÄ±lsÄ±n mÄ±?';
+    BirIsimGiriniz='Ä°ÅŸleme devam etmek iÃ§in lÃ¼tfen bir isim giriniz.';
     Yanlistarih='Erteleme geri bir tarihe olamaz!';
-    BosOlamaz='Erteleme nedeni boş olamaz!';
-    KurGuncellenemedi='Döviz Kurları Güncellenemedi';
-    KurGuncellendi='Döviz Kurları Güncellendi';
-    Hataliadsifre='Kullanıcı Adı / Şifre Hatalı!';
-    MailHata='Mail Gönderim Hatası';
-    GecerliEPosta='Geçerli Bir Eposta Hesabı Seçiniz';
-    EPosta_Enazbiralici='Alıcı listesinde en az bir alıcı olmalıdır.';
-    Outlookacik='E-Posta gönderim programı açık görünüyor. Kapatıp tekrar deneyin.';
-    CekiSilin='Çek girişi hareketi silinemez, Lütfen çekin kendisini silin.';
+    BosOlamaz='Erteleme nedeni boÅŸ olamaz!';
+    KurGuncellenemedi='DÃ¶viz KurlarÄ± GÃ¼ncellenemedi';
+    KurGuncellendi='DÃ¶viz KurlarÄ± GÃ¼ncellendi';
+    Hataliadsifre='KullanÄ±cÄ± AdÄ± / Åifre HatalÄ±!';
+    MailHata='Mail GÃ¶nderim HatasÄ±';
+    GecerliEPosta='GeÃ§erli Bir Eposta HesabÄ± SeÃ§iniz';
+    EPosta_Enazbiralici='AlÄ±cÄ± listesinde en az bir alÄ±cÄ± olmalÄ±dÄ±r.';
+    Outlookacik='E-Posta gÃ¶nderim programÄ± aÃ§Ä±k gÃ¶rÃ¼nÃ¼yor. KapatÄ±p tekrar deneyin.';
+    CekiSilin='Ã‡ek giriÅŸi hareketi silinemez, LÃ¼tfen Ã§ekin kendisini silin.';
     Sonhareketsilinebilir='Sadece son hareketi silebilirsiniz.';
-    Bulunamiyor='Seçtiğiniz satır bulunamıyor!';
-    Guncellemetekraroturumacin='Lisans bilgileriniz güncellendi, tekrar oturum açın.';
-    Guncellemetekraroturumacilacak='Lisans bilgileriniz güncellendi, tekrar oturum açılacak.';
-    LisansSilinecek='Lisans bilgileriniz tekrar düzenlemeniz için silinecek. Devam etmek istediğinize emin misiniz?';
-    Lisansyenileme='Lisansınızın son kullanım tarihine girdiniz. Lisansınızı yenilemeniz gerekmektedir.';
-    Baglantikontrolediniz='ile bağlantınızı kontrol ediniz.' ;
-    Yedeklemeyap=' gündür datalarınızın yedeği alınmamıştır..';
-    LisansyenilemeMaksimum19girisyapilabilir='Lisans süreniz sona ermiştir. Lisansınızı yenilemeden en fazla 19 kez daha giriş yapabilirsiniz.';
-    Lisanssizgirissayisi='Lisans süreniz sona ermiştir. Lisansınızı yenilemeden  maksimum yapabileceğiniz giriş sayısı : ';
-    LisansHatasi='Lisans Hatası!';
+    Bulunamiyor='SeÃ§tiÄŸiniz satÄ±r bulunamÄ±yor!';
+    Guncellemetekraroturumacin='Lisans bilgileriniz gÃ¼ncellendi, tekrar oturum aÃ§Ä±n.';
+    Guncellemetekraroturumacilacak='Lisans bilgileriniz gÃ¼ncellendi, tekrar oturum aÃ§Ä±lacak.';
+    LisansSilinecek='Lisans bilgileriniz tekrar dÃ¼zenlemeniz iÃ§in silinecek. Devam etmek istediÄŸinize emin misiniz?';
+    Lisansyenileme='LisansÄ±nÄ±zÄ±n son kullanÄ±m tarihine girdiniz. LisansÄ±nÄ±zÄ± yenilemeniz gerekmektedir.';
+    Baglantikontrolediniz='ile baÄŸlantÄ±nÄ±zÄ± kontrol ediniz.' ;
+    Yedeklemeyap=' gÃ¼ndÃ¼r datalarÄ±nÄ±zÄ±n yedeÄŸi alÄ±nmamÄ±ÅŸtÄ±r..';
+    LisansyenilemeMaksimum19girisyapilabilir='Lisans sÃ¼reniz sona ermiÅŸtir. LisansÄ±nÄ±zÄ± yenilemeden en fazla 19 kez daha giriÅŸ yapabilirsiniz.';
+    Lisanssizgirissayisi='Lisans sÃ¼reniz sona ermiÅŸtir. LisansÄ±nÄ±zÄ± yenilemeden  maksimum yapabileceÄŸiniz giriÅŸ sayÄ±sÄ± : ';
+    LisansHatasi='Lisans HatasÄ±!';
 
     max14karakter = '14 karakterden fazla olamaz!';
 
-    Lisansalin='Lisanssız Kullanım Süreniz Sona Ermiştir. Lütfen Lisans Alın.';
-    Kullanilmisstok='Bu stok daha önce stok sayımlarında kullanılmıştır.';
-    Fatkulstok='Bu stok daha önce fatura/fiş/irsaliye içerisinde kullanılmıştır.';
-    Sipariskulstok='Bu stok daha önce siparişte kullanılmıştır.';
-    SipariskulNo='Bu sipariş numarası daha önce başka bir siparişte de kullanılmıştır.';
-    Teklifkulstok='Bu stok daha önce teklifte kullanılmıştır.';
-    ServiskulStok='Bu stok daha önce serviste kullanılmıştır.';
-    Musteriekipmanaeklensinmi=' adlı stok müşteri ekipmanları listesine eklensin mi?';
-    stokServisekipmanaeklensinmi='Bu stok servis ekipmanları listesine eklensin mi?';
-    stokServisekipmandanciksinmi='Bu stok servis ekipmanları listesinden çıkarılsın mı?';
-    Servisekipmankullanılanstok='Bu stok daha önce servis ekipmanlarında kullanılmıştır.';
-    Servisekipmankullanilanstok='Bu stok daha önce servis ekipmanlarında kullanılmıştır.';
-    Gecersizalanadi='Stil Denetiminde Kullanılan Alan Adı Geçersiz: ';
-    Gecersizkosul='Stil Denetiminde Kullanılan Koşullar Geçersiz: ';
-    IzlemeSecin='İzleme Yöntemi seçin!';
-    IzlemliUrunVar = 'İzleme bilgili ürün bulundu. DÖNÜŞÜM butonundan dönüştürülebilir!';
-    Maksimumdosyaboyutu='Arşive atılabilecek maksimum dosya boyutu :';
-    Kartsilinemez='Hareket görmüş stok kartı silinemez!'  ;
-    StokKartBulunamadi= 'Stok kartı bulunamadı!';
-    Birim2Miktar1olmasi='1. Birim ve 2. Birim aynı ise miktar sadece 1 olabilir!';
-    Fazlakarakteruyarisi='EAN13 için yapılmış tanımlama hatalı.. Tanımlama 12 karakterden oluşmalı ve 13. kontrol karakteri belirtilmemelidir.';
-    Islemturubelirtilmemis='IslemTuru belirtilmemiş';
-    Isim_='İsim';
-    SGirisYapildi = 'Giriş yapıldı';
-    SOdemePlanlandi = 'Ödeme planlandı';
-    SOdendi = 'Ödendi';
-    SCikisYapildi = 'Çıkış yapıldı';
-    STahsilatPlanlandi = 'Tahsilat planlandı';
+    Lisansalin='LisanssÄ±z KullanÄ±m SÃ¼reniz Sona ErmiÅŸtir. LÃ¼tfen Lisans AlÄ±n.';
+    Kullanilmisstok='Bu stok daha Ã¶nce stok sayÄ±mlarÄ±nda kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Fatkulstok='Bu stok daha Ã¶nce fatura/fiÅŸ/irsaliye iÃ§erisinde kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Sipariskulstok='Bu stok daha Ã¶nce sipariÅŸte kullanÄ±lmÄ±ÅŸtÄ±r.';
+    SipariskulNo='Bu sipariÅŸ numarasÄ± daha Ã¶nce baÅŸka bir sipariÅŸte de kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Teklifkulstok='Bu stok daha Ã¶nce teklifte kullanÄ±lmÄ±ÅŸtÄ±r.';
+    ServiskulStok='Bu stok daha Ã¶nce serviste kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Musteriekipmanaeklensinmi=' adlÄ± stok mÃ¼ÅŸteri ekipmanlarÄ± listesine eklensin mi?';
+    stokServisekipmanaeklensinmi='Bu stok servis ekipmanlarÄ± listesine eklensin mi?';
+    stokServisekipmandanciksinmi='Bu stok servis ekipmanlarÄ± listesinden Ã§Ä±karÄ±lsÄ±n mÄ±?';
+    ServisekipmankullanÄ±lanstok='Bu stok daha Ã¶nce servis ekipmanlarÄ±nda kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Servisekipmankullanilanstok='Bu stok daha Ã¶nce servis ekipmanlarÄ±nda kullanÄ±lmÄ±ÅŸtÄ±r.';
+    Gecersizalanadi='Stil Denetiminde KullanÄ±lan Alan AdÄ± GeÃ§ersiz: ';
+    Gecersizkosul='Stil Denetiminde KullanÄ±lan KoÅŸullar GeÃ§ersiz: ';
+    IzlemeSecin='Ä°zleme YÃ¶ntemi seÃ§in!';
+    IzlemliUrunVar = 'Ä°zleme bilgili Ã¼rÃ¼n bulundu. DÃ–NÃœÅÃœM butonundan dÃ¶nÃ¼ÅŸtÃ¼rÃ¼lebilir!';
+    Maksimumdosyaboyutu='ArÅŸive atÄ±labilecek maksimum dosya boyutu :';
+    Kartsilinemez='Hareket gÃ¶rmÃ¼ÅŸ stok kartÄ± silinemez!'  ;
+    StokKartBulunamadi= 'Stok kartÄ± bulunamadÄ±!';
+    Birim2Miktar1olmasi='1. Birim ve 2. Birim aynÄ± ise miktar sadece 1 olabilir!';
+    Fazlakarakteruyarisi='EAN13 iÃ§in yapÄ±lmÄ±ÅŸ tanÄ±mlama hatalÄ±.. TanÄ±mlama 12 karakterden oluÅŸmalÄ± ve 13. kontrol karakteri belirtilmemelidir.';
+    Islemturubelirtilmemis='IslemTuru belirtilmemiÅŸ';
+    Isim_='Ä°sim';
+    SGirisYapildi = 'GiriÅŸ yapÄ±ldÄ±';
+    SOdemePlanlandi = 'Ã–deme planlandÄ±';
+    SOdendi = 'Ã–dendi';
+    SCikisYapildi = 'Ã‡Ä±kÄ±ÅŸ yapÄ±ldÄ±';
+    STahsilatPlanlandi = 'Tahsilat planlandÄ±';
     STahsilEdildi = 'Tahsil edildi';
     SBekliyor = 'Bekliyor';
-    SOnaylandi = 'Onaylandı';
-    SImzalandi = 'İmzalandı';
-    SPortfoyde = 'Portföyde';
+    SOnaylandi = 'OnaylandÄ±';
+    SImzalandi = 'Ä°mzalandÄ±';
+    SPortfoyde = 'PortfÃ¶yde';
     STahsilataVerildi = 'Tahsilata verildi';
-    SDoldurunuz=' boş bırakılamaz .';
-    SProjeFirsatKapansin = 'Projeye oluştuktan sonra fırsat kapansın mı?';
+    SDoldurunuz=' boÅŸ bÄ±rakÄ±lamaz .';
+    SProjeFirsatKapansin = 'Projeye oluÅŸtuktan sonra fÄ±rsat kapansÄ±n mÄ±?';
 
-  //Cari - Rehber Ekranları
-    CRPasif_kayda_islem_olmaz= 'Pasif kayda işlem yapılamaz';
-    CRPasif_kayda_islem_Secimi= 'Dikkat! Pasif kayda işlem yapılamaz! Devam etmek istiyor musunuz?';
-    CRPlanli_belge_silinemez='Seçilenler arasında plan oluşturulmuş belge vardır.Bu belgeler silinmemiştir. !';
-    CRKilitli_planli_belge_silinemez='Seçilenler arasında kilitli ve plan oluşturulmuş belge vardır.Bu belgeler silinmemiştir. !' ;
-    CRKilittarih_oncesi_islem_yok='Kilit tarihi ve öncesine işlem yapılamaz !';
-    CROpsiyon_kaydi_bulunamadi='Giriş yapılabilecek opsiyon kaydı bulunamadı!';
-    CRIslem_basarisiz_eslesen_kayit_bulundu='İşleminiz Gerçekleşmedi! Girmiş olduğunuz bilgiyle eşleşen kayıt bulunmuştur.' ;
-    CRAktarim_Kosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Tarih,'+#13+#10+
-              '     * sütun2(B):Borç(Numerik),'+#13+#10+
-              '     * sütun3(C):Alacak(Numerik),'+#13+#10+
-              '     * sütun4(D):Para Birimi (Yazı),'+#13+#10+
-              '     * sütun5(E):Açıklama(Yazı),'+#13+#10+
-              '     * sütun6(F):Kur(Nümerik),'+#13+#10+
-              '     * sütun7(G):Karşılığı(Nümerik),'+#13+#10+
-              '     * sütun8(H):Karşılığı Para Birimi (Nümerik),'+#13+#10+
-              '   öğelerine sahip olmalıdır.' ;
-    CRKart_bulunamadi='Cari kartı bulunamadı!';
-    CRAlan_silinsinmi=' alanını silmek istiyor musunuz ?' ;
-    CRPersonel_carikart_var='Bu personele daha önce cari kart açılmış!';
-    CRKarakter_sayisi='Karakter sayısı :' ;
-    CRalisSatis_belgesi_kopyala='Alış ve Satış belgelerini kopyalayabilirsiniz.' ;
-    CRKimlik_no_kullanilmis='Bu kimlik no daha önce kullanılmıştır: ';
-    CRKilitli_belge_islem_yapilamaz='Seçilenler arasında kilitli belge vardır.Kilitli belgeler de işlem yapılamaz !' ;
-    CRRisk_limiti_asimi_islem_basarisiz='Yetkinizin aşan bir risk limiti tanımladınız. İşleminiz kaydedilemeyecektir.';
+  //Cari - Rehber EkranlarÄ±
+    CRPasif_kayda_islem_olmaz= 'Pasif kayda iÅŸlem yapÄ±lamaz';
+    CRPasif_kayda_islem_Secimi= 'Dikkat! Pasif kayda iÅŸlem yapÄ±lamaz! Devam etmek istiyor musunuz?';
+    CRPlanli_belge_silinemez='SeÃ§ilenler arasÄ±nda plan oluÅŸturulmuÅŸ belge vardÄ±r.Bu belgeler silinmemiÅŸtir. !';
+    CRKilitli_planli_belge_silinemez='SeÃ§ilenler arasÄ±nda kilitli ve plan oluÅŸturulmuÅŸ belge vardÄ±r.Bu belgeler silinmemiÅŸtir. !' ;
+    CRKilittarih_oncesi_islem_yok='Kilit tarihi ve Ã¶ncesine iÅŸlem yapÄ±lamaz !';
+    CROpsiyon_kaydi_bulunamadi='GiriÅŸ yapÄ±labilecek opsiyon kaydÄ± bulunamadÄ±!';
+    CRIslem_basarisiz_eslesen_kayit_bulundu='Ä°ÅŸleminiz GerÃ§ekleÅŸmedi! GirmiÅŸ olduÄŸunuz bilgiyle eÅŸleÅŸen kayÄ±t bulunmuÅŸtur.' ;
+    CRAktarim_Kosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):Tarih,'+#13+#10+
+              '     * sÃ¼tun2(B):BorÃ§(Numerik),'+#13+#10+
+              '     * sÃ¼tun3(C):Alacak(Numerik),'+#13+#10+
+              '     * sÃ¼tun4(D):Para Birimi (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun5(E):AÃ§Ä±klama(YazÄ±),'+#13+#10+
+              '     * sÃ¼tun6(F):Kur(NÃ¼merik),'+#13+#10+
+              '     * sÃ¼tun7(G):KarÅŸÄ±lÄ±ÄŸÄ±(NÃ¼merik),'+#13+#10+
+              '     * sÃ¼tun8(H):KarÅŸÄ±lÄ±ÄŸÄ± Para Birimi (NÃ¼merik),'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.' ;
+    CRKart_bulunamadi='Cari kartÄ± bulunamadÄ±!';
+    CRAlan_silinsinmi=' alanÄ±nÄ± silmek istiyor musunuz ?' ;
+    CRPersonel_carikart_var='Bu personele daha Ã¶nce cari kart aÃ§Ä±lmÄ±ÅŸ!';
+    CRKarakter_sayisi='Karakter sayÄ±sÄ± :' ;
+    CRalisSatis_belgesi_kopyala='AlÄ±ÅŸ ve SatÄ±ÅŸ belgelerini kopyalayabilirsiniz.' ;
+    CRKimlik_no_kullanilmis='Bu kimlik no daha Ã¶nce kullanÄ±lmÄ±ÅŸtÄ±r: ';
+    CRKilitli_belge_islem_yapilamaz='SeÃ§ilenler arasÄ±nda kilitli belge vardÄ±r.Kilitli belgeler de iÅŸlem yapÄ±lamaz !' ;
+    CRRisk_limiti_asimi_islem_basarisiz='Yetkinizin aÅŸan bir risk limiti tanÄ±mladÄ±nÄ±z. Ä°ÅŸleminiz kaydedilemeyecektir.';
 
   //Cek
-    CCek_kayit_silinemez_ceki_sil='Çeklerin ilk giriş kayıtları silinemez! Lütfen çeki silmeyi deneyin.';
-    CHata_kaydi_sil_ekle='Çek Kaydı Hata İçermektedir. Lütfen Kaydı Silip Tekrar Ekleyin.';
-    CBu_tarih_oncesi_islem_kaydi_yapamazsiniz='Son işlem tarihinin öncesine işlem kaydedemezsiniz.: ';
-    CHesap_bilgisi_bulunamadi='Banka hesap bilgileri bulunamadı!';
+    CCek_kayit_silinemez_ceki_sil='Ã‡eklerin ilk giriÅŸ kayÄ±tlarÄ± silinemez! LÃ¼tfen Ã§eki silmeyi deneyin.';
+    CHata_kaydi_sil_ekle='Ã‡ek KaydÄ± Hata Ä°Ã§ermektedir. LÃ¼tfen KaydÄ± Silip Tekrar Ekleyin.';
+    CBu_tarih_oncesi_islem_kaydi_yapamazsiniz='Son iÅŸlem tarihinin Ã¶ncesine iÅŸlem kaydedemezsiniz.: ';
+    CHesap_bilgisi_bulunamadi='Banka hesap bilgileri bulunamadÄ±!';
 
   //Kasa
-    KPlanli_fatura_silinsinmi='Bu faturada oluşturulmuş plan vardır.Silmek istiyor musunuz? ';
-    KBu_ekrandan_silinemez_Hizli_Satistan='Bu kayıt Hızlı Satış ekranından oluşturulmuştur, bu ekrandan silinemez.';
-    KKilittarih_oncesi_islem_yok='Kilit tarihi ve öncesine işlem yapılamaz !';
+    KPlanli_fatura_silinsinmi='Bu faturada oluÅŸturulmuÅŸ plan vardÄ±r.Silmek istiyor musunuz? ';
+    KBu_ekrandan_silinemez_Hizli_Satistan='Bu kayÄ±t HÄ±zlÄ± SatÄ±ÅŸ ekranÄ±ndan oluÅŸturulmuÅŸtur, bu ekrandan silinemez.';
+    KKilittarih_oncesi_islem_yok='Kilit tarihi ve Ã¶ncesine iÅŸlem yapÄ±lamaz !';
     KAksiyon_silinsinmi='Bu aksiyon silinsin mi?' ;
-    KAlisSatis_belgesi_kopyala='Alış ve Satış belgelerini kopyalayabilirsiniz.' ;
-    KTanimsiz_islem= 'Tanımsız bir işlem seçtiniz!'  ;
-    KKayit_silinsinmi='Seçili Kayıt Silinecektir, Onaylıyor musunuz?';
-    KOnceki_kayit_silinsinmi='Daha önceden aktarılmış bir kaydı tekrar aktarmaya çalışıyorsunuz, Önceki kayıt silinsin mi?';
-    KSecili_kisiye_eklensinmi=' "VergiNo - TCNo" Rehber kayıtlarında seçtiğiniz kişiye eklensin mi?';
-    KIslem_basarili='İşlem Başarılı.';
-    KIslem_basarisiz='İşlem Başarısız.';
-    KGecersiz='Geçersiz TC/VK No!';
-    KKasa_tanimla='Kasa tanımı yapınız.';
-    KOdeme_tipi='Ödeme Tipi Seçiniz.';
-    KKupon_tipi='Kupon Tipi Seçiniz.';
-    KKasa_bulunamadi='Tanımlı kasa bulunamadı!';
-    KSube_sec='Hareketler ortak olmaz! Şube seçin..';
+    KAlisSatis_belgesi_kopyala='AlÄ±ÅŸ ve SatÄ±ÅŸ belgelerini kopyalayabilirsiniz.' ;
+    KTanimsiz_islem= 'TanÄ±msÄ±z bir iÅŸlem seÃ§tiniz!'  ;
+    KKayit_silinsinmi='SeÃ§ili KayÄ±t Silinecektir, OnaylÄ±yor musunuz?';
+    KOnceki_kayit_silinsinmi='Daha Ã¶nceden aktarÄ±lmÄ±ÅŸ bir kaydÄ± tekrar aktarmaya Ã§alÄ±ÅŸÄ±yorsunuz, Ã–nceki kayÄ±t silinsin mi?';
+    KSecili_kisiye_eklensinmi=' "VergiNo - TCNo" Rehber kayÄ±tlarÄ±nda seÃ§tiÄŸiniz kiÅŸiye eklensin mi?';
+    KIslem_basarili='Ä°ÅŸlem BaÅŸarÄ±lÄ±.';
+    KIslem_basarisiz='Ä°ÅŸlem BaÅŸarÄ±sÄ±z.';
+    KGecersiz='GeÃ§ersiz TC/VK No!';
+    KKasa_tanimla='Kasa tanÄ±mÄ± yapÄ±nÄ±z.';
+    KOdeme_tipi='Ã–deme Tipi SeÃ§iniz.';
+    KKupon_tipi='Kupon Tipi SeÃ§iniz.';
+    KKasa_bulunamadi='TanÄ±mlÄ± kasa bulunamadÄ±!';
+    KSube_sec='Hareketler ortak olmaz! Åube seÃ§in..';
     KHatali_tarih='Kilit tarihi ileri bir tarih olamaz.';
-    KGeri_donusu_yok='Veri tabanında ilgili alan genişletilecektir. Bu işlemin geri dönüşü yoktur. Onaylıyor musunuz?';
-    KSablon_silinsinmi='Şablonu silmek istiyor musunuz?';
-    EFatSenaryoDegisti = 'Bildirimli ürün tespit edildi. Senaryo "İlaç_TıbbiCihaz" olarak değiştirildi!';
-    EFatBildirimliUrunTesbiti = 'DİKKAT!! Bildirimli ürün tesbit edildi.. Senaryo kontrolü yapın! Eminseniz devam edin!';
-    EFatSenaryoUygunDegil = 'Bildirimli ürün tespit edilemedi. Senaryo "İlaç_TıbbiCihaz" olarak kaydedilemez!';
-    SenaryoSecin = 'Senaryo dolu olmalı!';
-  //Satın Alma
-    SAMail_Bulunamadi='Mail adresi bulunamadı!';
-    SAKaydedilemez='Ürün veya hizmet satırı girilmeden kaydedilemez!';
+    KGeri_donusu_yok='Veri tabanÄ±nda ilgili alan geniÅŸletilecektir. Bu iÅŸlemin geri dÃ¶nÃ¼ÅŸÃ¼ yoktur. OnaylÄ±yor musunuz?';
+    KSablon_silinsinmi='Åablonu silmek istiyor musunuz?';
+    EFatSenaryoDegisti = 'Bildirimli Ã¼rÃ¼n tespit edildi. Senaryo "Ä°laÃ§_TÄ±bbiCihaz" olarak deÄŸiÅŸtirildi!';
+    EFatBildirimliUrunTesbiti = 'DÄ°KKAT!! Bildirimli Ã¼rÃ¼n tesbit edildi.. Senaryo kontrolÃ¼ yapÄ±n! Eminseniz devam edin!';
+    EFatSenaryoUygunDegil = 'Bildirimli Ã¼rÃ¼n tespit edilemedi. Senaryo "Ä°laÃ§_TÄ±bbiCihaz" olarak kaydedilemez!';
+    SenaryoSecin = 'Senaryo dolu olmalÄ±!';
+  //SatÄ±n Alma
+    SAMail_Bulunamadi='Mail adresi bulunamadÄ±!';
+    SAKaydedilemez='ÃœrÃ¼n veya hizmet satÄ±rÄ± girilmeden kaydedilemez!';
 
-  // İnsan Kaynakları // İzlem Bilgisi
-    IKSifirdan_buyuk =' İzin miktarı sıfırdan büyük olmalı.';
-    IKDolu_alan =' İzin miktarı daha önce girilmiştir.'  ;
-    //IKSifirdan_buyuk = ' İzin miktarı sıfırdan büyük olmalı.';
-    IKKayit_bulunamadi='Giriş yapılabilecek opsiyon kaydı bulunamadı!';
-    IKDoldurun='Zorunlu alanları boş geçemezsiniz.';
-    IKYanlis_taksit_sayisi='Taksit sayısı 1''den küçük veya 24''den büyük olamaz.';
-    IKEksik_bilgi='REHBER Hareketleri altında ''İşe Giriş Tarihi'' girilmelidir.';
-    IKMaksimum_sayi='Maksimum karakter sayısı :';
-    IKSilinemez='Girilmiş bilgi var silinemez!';
-    IKMail_atilsinmi='Toplantı bilgileri Katılımcılara e-posta ile gönderilsin mi?';
-    Yoplanti_Yeri='Toplantı yeri';
+  // Ä°nsan KaynaklarÄ± // Ä°zlem Bilgisi
+    IKSifirdan_buyuk =' Ä°zin miktarÄ± sÄ±fÄ±rdan bÃ¼yÃ¼k olmalÄ±.';
+    IKDolu_alan =' Ä°zin miktarÄ± daha Ã¶nce girilmiÅŸtir.'  ;
+    //IKSifirdan_buyuk = ' Ä°zin miktarÄ± sÄ±fÄ±rdan bÃ¼yÃ¼k olmalÄ±.';
+    IKKayit_bulunamadi='GiriÅŸ yapÄ±labilecek opsiyon kaydÄ± bulunamadÄ±!';
+    IKDoldurun='Zorunlu alanlarÄ± boÅŸ geÃ§emezsiniz.';
+    IKYanlis_taksit_sayisi='Taksit sayÄ±sÄ± 1''den kÃ¼Ã§Ã¼k veya 24''den bÃ¼yÃ¼k olamaz.';
+    IKEksik_bilgi='REHBER Hareketleri altÄ±nda ''Ä°ÅŸe GiriÅŸ Tarihi'' girilmelidir.';
+    IKMaksimum_sayi='Maksimum karakter sayÄ±sÄ± :';
+    IKSilinemez='GirilmiÅŸ bilgi var silinemez!';
+    IKMail_atilsinmi='ToplantÄ± bilgileri KatÄ±lÄ±mcÄ±lara e-posta ile gÃ¶nderilsin mi?';
+    Yoplanti_Yeri='ToplantÄ± yeri';
 
-    ekli = 'Zaten eklenmiş!';
-    IZBilgi_gir='İzlem bilgisini giriniz!';
-    IzlemKullanilmis='İzlem bilgisi başka yerde kullanılmış!';
+    ekli = 'Zaten eklenmiÅŸ!';
+    IZBilgi_gir='Ä°zlem bilgisini giriniz!';
+    IzlemKullanilmis='Ä°zlem bilgisi baÅŸka yerde kullanÄ±lmÄ±ÅŸ!';
 
-  // Kullanıcı
-    KTum_Kullanicilar = 'Tüm Kullanıcılar';
-    KUKaydedilmeden_cikilsinmi='Yapılan Değişiklikler Kaydedilmedi, Çıkmak İstiyor musunuz?';
-    KUTekrar_deneyiniz='Lütfen Şifreyi kontrol ederek tekrar deneyiniz.';
-    KUGecersiz_sifre='Geçersiz Şifre Girdiniz!';
-    KUkullanici_sil='Kullanıcı silinecek onaylıyor musunuz?';
-    KURol_sil='Rol Silinecek Onaylıyor musunuz?';
-    KUYetkili_rol_giriniz='En az 1 tam yetkili rol bulunmalıdır!';
-    KUYonetici_silinemez='Yönetici Rolü silinemez yada değiştirilemez!';
+  // KullanÄ±cÄ±
+    KTum_Kullanicilar = 'TÃ¼m KullanÄ±cÄ±lar';
+    KUKaydedilmeden_cikilsinmi='YapÄ±lan DeÄŸiÅŸiklikler Kaydedilmedi, Ã‡Ä±kmak Ä°stiyor musunuz?';
+    KUTekrar_deneyiniz='LÃ¼tfen Åifreyi kontrol ederek tekrar deneyiniz.';
+    KUGecersiz_sifre='GeÃ§ersiz Åifre Girdiniz!';
+    KUkullanici_sil='KullanÄ±cÄ± silinecek onaylÄ±yor musunuz?';
+    KURol_sil='Rol Silinecek OnaylÄ±yor musunuz?';
+    KUYetkili_rol_giriniz='En az 1 tam yetkili rol bulunmalÄ±dÄ±r!';
+    KUYonetici_silinemez='YÃ¶netici RolÃ¼ silinemez yada deÄŸiÅŸtirilemez!';
 
 
   //Banka
-    BCek_kocani_tanimli_silin= 'Bu çek kredisinde çek koçanı tanımlanmış, önce onu silin!' ;
+    BCek_kocani_tanimli_silin= 'Bu Ã§ek kredisinde Ã§ek koÃ§anÄ± tanÄ±mlanmÄ±ÅŸ, Ã¶nce onu silin!' ;
     BHello_world= 'hello world';
     BAksiyon_silinsinmi='Bu aksiyon silinsin mi?' ;
     BBanka_kodu=' Banka koduyla ' ;
     BBanka_adi= 'BANKAADI';
-    BBanka_ismi_degistirilsinmi=' banka bulunmuştur.Verdiğiniz banka ismiyle değiştirilsinmi?' ;
-    BSube_kodu=' şube koduyla ' ;
+    BBanka_ismi_degistirilsinmi=' banka bulunmuÅŸtur.VerdiÄŸiniz banka ismiyle deÄŸiÅŸtirilsinmi?' ;
+    BSube_kodu=' ÅŸube koduyla ' ;
     BSube_adi='SUBEADI' ;
-    BSube_adi_degistirilsinmi= ' şube bulunmuştur.Verdiğiniz şube ismiyle değiştirilsinmi?';
-    BZorunlu_alan_doldur='Zorunlu alanları doldurunuz!' ;
-    BAktarim_tamam='Aktarım tamamlandı..' ;
-    BSube_var_silinemez='Banka Şubeleri var, silinemez!' ;
-    BYapilmis_islem='daha önce bu rotatif kredi için bu referans no ile giriş yapılmış!';
-    BPlanlar_silinsinmi='Öncede oluşturulmuş tüm planlar silinecektir.Kabul ediyor musunuz?';
-    BTeminat_sonlansinmi='Bu teminatı sonlandırmak istediğinize emin misiniz?';
-    BKomisyon_turu_sec='Bir Komisyon Türü Seçmelisiniz!';
-    BVadeli_islem_Silinemez='Vadeli işlemler var. Silinemez!';
+    BSube_adi_degistirilsinmi= ' ÅŸube bulunmuÅŸtur.VerdiÄŸiniz ÅŸube ismiyle deÄŸiÅŸtirilsinmi?';
+    BZorunlu_alan_doldur='Zorunlu alanlarÄ± doldurunuz!' ;
+    BAktarim_tamam='AktarÄ±m tamamlandÄ±..' ;
+    BSube_var_silinemez='Banka Åubeleri var, silinemez!' ;
+    BYapilmis_islem='daha Ã¶nce bu rotatif kredi iÃ§in bu referans no ile giriÅŸ yapÄ±lmÄ±ÅŸ!';
+    BPlanlar_silinsinmi='Ã–ncede oluÅŸturulmuÅŸ tÃ¼m planlar silinecektir.Kabul ediyor musunuz?';
+    BTeminat_sonlansinmi='Bu teminatÄ± sonlandÄ±rmak istediÄŸinize emin misiniz?';
+    BKomisyon_turu_sec='Bir Komisyon TÃ¼rÃ¼ SeÃ§melisiniz!';
+    BVadeli_islem_Silinemez='Vadeli iÅŸlemler var. Silinemez!';
 
 
 
-  //UKullaniciYetki  ,UKullaniciDüzenle
-    gorsun = 'Görsün';
+  //UKullaniciYetki  ,UKullaniciDÃ¼zenle
+    gorsun = 'GÃ¶rsÃ¼n';
     eklesin = 'Eklesin';
-    degistirsin = 'Değiştirsin';
+    degistirsin = 'DeÄŸiÅŸtirsin';
     silsin='Silsin';
-    yonetici = 'Yönetici';
-    kullanici = 'Kullanıcı';
-    roldegishata = 'Başlangıç Rolleri ile ilgili değişiklik yapılamaz!';
+    yonetici = 'YÃ¶netici';
+    kullanici = 'KullanÄ±cÄ±';
+    roldegishata = 'BaÅŸlangÄ±Ã§ Rolleri ile ilgili deÄŸiÅŸiklik yapÄ±lamaz!';
     yetkileri = ' Yetkileri';
-    kullanicilari =' Kullanıcıları';
-    rolsilinemez = 'Seçili rolün tanımlı olduğu kullanıcılar mevcut, öncelikle bu kullanıcıların rollerini değiştirip daha sonra silme işlemini tekrar deneyiniz.';
-    rolyonsilinemez = 'Yönetici rolü silinemez!';
-    mukerrerkod = 'Seçtiğiniz kullanıcı kodu daha önce kullanılmıştır, lütfen düzeltip tekrar deneyiniz..';
-    kullanicisilinemez = 'Silmek istediğiniz kullanıcının yapmış olduğu işlemler vardır. Önce bu işlemleri siliniz.';
-    rolyok = 'Seçili Rol Bulunamadı!';
-    kullaniciyok = 'Seçili Kullanıcı Bulunamadı!!';
+    kullanicilari =' KullanÄ±cÄ±larÄ±';
+    rolsilinemez = 'SeÃ§ili rolÃ¼n tanÄ±mlÄ± olduÄŸu kullanÄ±cÄ±lar mevcut, Ã¶ncelikle bu kullanÄ±cÄ±larÄ±n rollerini deÄŸiÅŸtirip daha sonra silme iÅŸlemini tekrar deneyiniz.';
+    rolyonsilinemez = 'YÃ¶netici rolÃ¼ silinemez!';
+    mukerrerkod = 'SeÃ§tiÄŸiniz kullanÄ±cÄ± kodu daha Ã¶nce kullanÄ±lmÄ±ÅŸtÄ±r, lÃ¼tfen dÃ¼zeltip tekrar deneyiniz..';
+    kullanicisilinemez = 'Silmek istediÄŸiniz kullanÄ±cÄ±nÄ±n yapmÄ±ÅŸ olduÄŸu iÅŸlemler vardÄ±r. Ã–nce bu iÅŸlemleri siliniz.';
+    rolyok = 'SeÃ§ili Rol BulunamadÄ±!';
+    kullaniciyok = 'SeÃ§ili KullanÄ±cÄ± BulunamadÄ±!!';
 
   //Banka_ING
-    talhata =  'Talimat Hatası: ';
-    borhata =  'Bordro Hatası: ';
+    talhata =  'Talimat HatasÄ±: ';
+    borhata =  'Bordro HatasÄ±: ';
 
 
 
   ////Errors
-      BozukKayit= 'Açmaya çalıştığınız kaydın içeriği bozulmuştur lütfen silip tekrar oluşturunuz.';
+      BozukKayit= 'AÃ§maya Ã§alÄ±ÅŸtÄ±ÄŸÄ±nÄ±z kaydÄ±n iÃ§eriÄŸi bozulmuÅŸtur lÃ¼tfen silip tekrar oluÅŸturunuz.';
 
   ////captions
       islem41= 'Kasadan bankaya para transferi'; //41
       islem42= 'Bankadan kasaya  para transferi'; //42
-      islem43= 'Bankadaki hesaplar arası para transferi'; //43
-      islem45= 'Kasadaki nakit paranın bir kısmıyla döviz alma'; //45
-      islem46= 'Döviz kasasındaki paranın bir kısmını bozdurma'; //46
-      islem47= 'Bankadaki nakit paranın bir kısmıyla döviz alma'; //47
-      islem48= 'Döviz hesabındaki paranın bir kısmını bozdurma'; //48
-      islem51= 'Elimzde bulunan çeki bankadan tahsil etme';  //51
+      islem43= 'Bankadaki hesaplar arasÄ± para transferi'; //43
+      islem45= 'Kasadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alma'; //45
+      islem46= 'DÃ¶viz kasasÄ±ndaki paranÄ±n bir kÄ±smÄ±nÄ± bozdurma'; //46
+      islem47= 'Bankadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alma'; //47
+      islem48= 'DÃ¶viz hesabÄ±ndaki paranÄ±n bir kÄ±smÄ±nÄ± bozdurma'; //48
+      islem51= 'Elimzde bulunan Ã§eki bankadan tahsil etme';  //51
       islem52= 'Elimzde bulunan senedi bankadan tahsil etme'; //52
-      islem53= 'Verdiğimiz çek karşılığı bankadan ödeme';  //53
-      islem54= 'Verdiğimiz senet karşılığı bankadan ödeme'; //54
-      islem58= 'Alınmış olan kredi taksitlerinin ödemesi'; //58
-      islem95= 'Bankoda tahsil edilmiş olan kredi kartlarının girişi';  //95
-      islem91= 'Bankoda tahsil edilmiş olan nakit ödemelerin girişi';  //91
+      islem53= 'VerdiÄŸimiz Ã§ek karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶deme';  //53
+      islem54= 'VerdiÄŸimiz senet karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶deme'; //54
+      islem58= 'AlÄ±nmÄ±ÅŸ olan kredi taksitlerinin Ã¶demesi'; //58
+      islem95= 'Bankoda tahsil edilmiÅŸ olan kredi kartlarÄ±nÄ±n giriÅŸi';  //95
+      islem91= 'Bankoda tahsil edilmiÅŸ olan nakit Ã¶demelerin giriÅŸi';  //91
 
     ////Panels
       Tutar123='Tutar:  ';
       banka11='Banka:  ';
       sube11='Sube:  ';
       hesap11='Hesap:  ';
-      kasaadi11='Kasa Adı:  ';
+      kasaadi11='Kasa AdÄ±:  ';
       kasakodu11='Kasa Kodu:  ';
       kasakur11='  ';
-      posadi='Pos Adı:  ';
+      posadi='Pos AdÄ±:  ';
       poskodu='Pos Kodu:  ';
-      posbankasi='Bankası:  ';
+      posbankasi='BankasÄ±:  ';
 
 
 
   //UGorevWizard
-    SablonYap='Aşağıdaki görevi şablon olarak kaydet.';
-    SablonKaldir='Aşağıdaki görevin şablon özelliğini kaldır.';
+    SablonYap='AÅŸaÄŸÄ±daki gÃ¶revi ÅŸablon olarak kaydet.';
+    SablonKaldir='AÅŸaÄŸÄ±daki gÃ¶revin ÅŸablon Ã¶zelliÄŸini kaldÄ±r.';
 
 
-    GorevAktarim_Kosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1  (A):ListeAdı,'+#13+#10+
-              '     * sütun2  (B):Konusu,'+#13+#10+
-              '     * sütun3  (C):Türü,'+#13+#10+
-              '     * sütun4  (D):Açık/Kapalı(Açık:0/Kapalı:1),'+#13+#10+
-              '     * sütun5  (E):Bayrak(Yok:0/Bayrak var:1),'+#13+#10+
-              '       sütun6  (F):Durum,'+#13+#10+
-              '     * sütun7  (G):Atayan,'+#13+#10+
-              '       sütun8  (H):Atanan,'+#13+#10+
-              '       sütun9  (I):Başlama Tarihi,'+#13+#10+
-              '       sütun10 (J):Bitiş Tarihi,'+#13+#10+
-              '       sütun11 (K):Cari Kod, (Dolu ise burası kullanılır)'+#13+#10+
-              '       sütun12 (L):Cari Ad,'+#13+#10+
-              '       sütun13 (M):Cari İlgili,'+#13+#10+
-              '       sütun14 (N):Notlar,'+#13+#10+
-              '       sütun15 (N):Yorum,'+#13+#10+
-              '   öğelerine sahip olmalıdır. (Yıldızlar zorunlu)' ;
+    GorevAktarim_Kosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1  (A):ListeAdÄ±,'+#13+#10+
+              '     * sÃ¼tun2  (B):Konusu,'+#13+#10+
+              '     * sÃ¼tun3  (C):TÃ¼rÃ¼,'+#13+#10+
+              '     * sÃ¼tun4  (D):AÃ§Ä±k/KapalÄ±(AÃ§Ä±k:0/KapalÄ±:1),'+#13+#10+
+              '     * sÃ¼tun5  (E):Bayrak(Yok:0/Bayrak var:1),'+#13+#10+
+              '       sÃ¼tun6  (F):Durum,'+#13+#10+
+              '     * sÃ¼tun7  (G):Atayan,'+#13+#10+
+              '       sÃ¼tun8  (H):Atanan,'+#13+#10+
+              '       sÃ¼tun9  (I):BaÅŸlama Tarihi,'+#13+#10+
+              '       sÃ¼tun10 (J):BitiÅŸ Tarihi,'+#13+#10+
+              '       sÃ¼tun11 (K):Cari Kod, (Dolu ise burasÄ± kullanÄ±lÄ±r)'+#13+#10+
+              '       sÃ¼tun12 (L):Cari Ad,'+#13+#10+
+              '       sÃ¼tun13 (M):Cari Ä°lgili,'+#13+#10+
+              '       sÃ¼tun14 (N):Notlar,'+#13+#10+
+              '       sÃ¼tun15 (N):Yorum,'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r. (YÄ±ldÄ±zlar zorunlu)' ;
 
 
   //URehberWizar
-    isimeksikhata = 'Lütfen ilgili kişinin ismini doldurarak tekrar deneyin.';
-    zorunlualanhata ='Lütfen farklı renk ile belirlenmiş zorunlu alanların tümünü doldurarak tekrar deneyin.';
+    isimeksikhata = 'LÃ¼tfen ilgili kiÅŸinin ismini doldurarak tekrar deneyin.';
+    zorunlualanhata ='LÃ¼tfen farklÄ± renk ile belirlenmiÅŸ zorunlu alanlarÄ±n tÃ¼mÃ¼nÃ¼ doldurarak tekrar deneyin.';
     yenisorgugirin ='Yeni sorgunuzu giriniz.';
-    RWOnceGrupSeciniz = 'Önce grup seçin!';
-    RWAdSoyad = 'Adı Soyadı';
-    RWUnvan = 'Ünvan';
+    RWOnceGrupSeciniz = 'Ã–nce grup seÃ§in!';
+    RWAdSoyad = 'AdÄ± SoyadÄ±';
+    RWUnvan = 'Ãœnvan';
     RWBirAy = '1 ay';
     RWUcAy = '3 ay';
     RWAltiAy = '6 ay';
-    RWBirYil = '1 yıl';
-    RWikiYil = '2 yıl';
-    RWTumKayitlar = 'Tüm Kayıtlar';
+    RWBirYil = '1 yÄ±l';
+    RWikiYil = '2 yÄ±l';
+    RWTumKayitlar = 'TÃ¼m KayÄ±tlar';
 
   //USifre
-    SLangChanged = 'Program dili değişti ("%s").'#13#10' Geçerli olabilmesi için yeniden başlatmalısınız';
+    SLangChanged = 'Program dili deÄŸiÅŸti ("%s").'#13#10' GeÃ§erli olabilmesi iÃ§in yeniden baÅŸlatmalÄ±sÄ±nÄ±z';
 
   //Terazi
     IptalEdilsinmi=' iptal edilecektir, devam etmek istiyor musunuz?';
-    DaraKodGirilmemis='Dara için kodlar girilmemiş!';
+    DaraKodGirilmemis='Dara iÃ§in kodlar girilmemiÅŸ!';
 
   //UAnaForm
     Aksiyonlar1 = 'CRM';
     Cari1 = 'Cari';
-    CekSenet1 = 'ÇekSenet';
+    CekSenet1 = 'Ã‡ekSenet';
     Banka1 = 'Banka';
-    Fatura1 = 'Alış/Satış';
+    Fatura1 = 'AlÄ±ÅŸ/SatÄ±ÅŸ';
     Kasa1 = 'Kasa';
     Stok1 = 'Stok';
-    Demirbas1 = 'Demirbaş';
+    Demirbas1 = 'DemirbaÅŸ';
     Teklif1 = 'Teklif';
-    Siparis1 = 'Sipariş';
+    Siparis1 = 'SipariÅŸ';
     Servis1 = 'Servis';
-    Dokuman1 = 'Doküman';
-    Uretim1 = 'Üretim';
-    IK1='İK';
-    AFBilgi_birden_fazla_eklenemez='Aynı bilgi birden fazla eklenemez!: ' ;
-    AFYanlis_deger_girisi='Yanlış tipte değer girişi yapıyorsunuz!: ';
-    AFAd_sifre_destek_gir='Gelecek olan ekrandaki kullanıcı adı ve şifresi kısımlarına destek yazın..';
-    AGOkunmayan_akt_gorev='Okunmayan aktivite-görev bilgisi adedi :';
-    AGGrafik_kategori_yok='Grafik için Kategori bulunamadı..';
-    AGsec_sil='Silinecek Duyuruyu seçiniz.';
-    AGKosul_sil='Önce Koşulları Silmelisiniz...';
+    Dokuman1 = 'DokÃ¼man';
+    Uretim1 = 'Ãœretim';
+    IK1='Ä°K';
+    AFBilgi_birden_fazla_eklenemez='AynÄ± bilgi birden fazla eklenemez!: ' ;
+    AFYanlis_deger_girisi='YanlÄ±ÅŸ tipte deÄŸer giriÅŸi yapÄ±yorsunuz!: ';
+    AFAd_sifre_destek_gir='Gelecek olan ekrandaki kullanÄ±cÄ± adÄ± ve ÅŸifresi kÄ±sÄ±mlarÄ±na destek yazÄ±n..';
+    AGOkunmayan_akt_gorev='Okunmayan aktivite-gÃ¶rev bilgisi adedi :';
+    AGGrafik_kategori_yok='Grafik iÃ§in Kategori bulunamadÄ±..';
+    AGsec_sil='Silinecek Duyuruyu seÃ§iniz.';
+    AGKosul_sil='Ã–nce KoÅŸullarÄ± Silmelisiniz...';
 
   // Dokum
-    DExele_kaydedildi='Veriler Excele kaydedilmiştir.';
-    DRapor_gorulecek_onayi='Tüm kullanıcılar bu raporu görecektir. Onaylıyor musunuz?';
-    DRapor_gorulmeyecek_onayi='Tüm kullanıcılar bu raporu göremeyecektir. Onaylıyor musunuz?';
-    DEklenmis_fat_tekrar_eklensinmi='Dikkat eklenmiş fatura. Bunu da eklesin mi?';
-    DDokum_gormek_icin_yetki='Döküm kopyalandı. Yönetici dışınaki kullanıcıların görmesi için yetki verilmelidir.';
+    DExele_kaydedildi='Veriler Excele kaydedilmiÅŸtir.';
+    DRapor_gorulecek_onayi='TÃ¼m kullanÄ±cÄ±lar bu raporu gÃ¶recektir. OnaylÄ±yor musunuz?';
+    DRapor_gorulmeyecek_onayi='TÃ¼m kullanÄ±cÄ±lar bu raporu gÃ¶remeyecektir. OnaylÄ±yor musunuz?';
+    DEklenmis_fat_tekrar_eklensinmi='Dikkat eklenmiÅŸ fatura. Bunu da eklesin mi?';
+    DDokum_gormek_icin_yetki='DÃ¶kÃ¼m kopyalandÄ±. YÃ¶netici dÄ±ÅŸÄ±naki kullanÄ±cÄ±larÄ±n gÃ¶rmesi iÃ§in yetki verilmelidir.';
 
   // Dokuman
-   DOKGeriDonusumIslem='Geri Dönüşüm Klasörü üzerinde işlem yapılamaz!';
-   DOKBir_Klasor_sart='En az bir klasör bulunmak zorunda..';
-   DOKDokumanda_degisiklik_yapan='Doküman üzerinde değişiklik yapılmaktadır. Değişiklik Yapan:';
-   DOKAdi_ayni_olacak='Döküman adı aynı olmak zorunda!';
-   DOKUzanti_bulunamadi='Dosya uzantısı bulunamadı.';
-   DOKEklenmis_dok_bulunamadi='Eklenmiş döküman bulunamadı. ';
-   DOKVersiyon_no_ver='Önce şu anki dokümana versiyon no verin';
+   DOKGeriDonusumIslem='Geri DÃ¶nÃ¼ÅŸÃ¼m KlasÃ¶rÃ¼ Ã¼zerinde iÅŸlem yapÄ±lamaz!';
+   DOKBir_Klasor_sart='En az bir klasÃ¶r bulunmak zorunda..';
+   DOKDokumanda_degisiklik_yapan='DokÃ¼man Ã¼zerinde deÄŸiÅŸiklik yapÄ±lmaktadÄ±r. DeÄŸiÅŸiklik Yapan:';
+   DOKAdi_ayni_olacak='DÃ¶kÃ¼man adÄ± aynÄ± olmak zorunda!';
+   DOKUzanti_bulunamadi='Dosya uzantÄ±sÄ± bulunamadÄ±.';
+   DOKEklenmis_dok_bulunamadi='EklenmiÅŸ dÃ¶kÃ¼man bulunamadÄ±. ';
+   DOKVersiyon_no_ver='Ã–nce ÅŸu anki dokÃ¼mana versiyon no verin';
 
 
   //Aboutbox
-    ABMusteri_no_yok='Girdiğiniz Müşteri No ile eşleşme sağlanamadı.';
-    ABHatali_kod='Müşteri kodunu hatalı girdiniz.';
-    ABGuncellendi_tekrar_oturum_ac='Lisans bilgileriniz güncellendi, tekrar oturum açın.';
+    ABMusteri_no_yok='GirdiÄŸiniz MÃ¼ÅŸteri No ile eÅŸleÅŸme saÄŸlanamadÄ±.';
+    ABHatali_kod='MÃ¼ÅŸteri kodunu hatalÄ± girdiniz.';
+    ABGuncellendi_tekrar_oturum_ac='Lisans bilgileriniz gÃ¼ncellendi, tekrar oturum aÃ§Ä±n.';
 
   //Aktivite
     AKGoogle_takvim_silinemedi='Google Takvim Silinemedi.';
-    AKBos_olmaz=' boş olamaz';
-    AKTemsilciye_Eposta_gönderilsinmi='Aktivite bilgisi müşteri temsilcisine e-posta gönderilsin mi?';
-    AKTemsilciye_SMS_gönderilsinmi='Aktivite bilgisi müşteri temsilcisine sms gönderilsin mi?';
+    AKBos_olmaz=' boÅŸ olamaz';
+    AKTemsilciye_Eposta_gÃ¶nderilsinmi='Aktivite bilgisi mÃ¼ÅŸteri temsilcisine e-posta gÃ¶nderilsin mi?';
+    AKTemsilciye_SMS_gÃ¶nderilsinmi='Aktivite bilgisi mÃ¼ÅŸteri temsilcisine sms gÃ¶nderilsin mi?';
     AKCalendar_kayit_edilemedi='Google calendar kayit edilemedi.';
-    AKBos_birakilamaz='Liste boş bırakılamaz';
-    AKEtiket_bos_birakilamaz='Etiket adı boş bırakılamaz';
+    AKBos_birakilamaz='Liste boÅŸ bÄ±rakÄ±lamaz';
+    AKEtiket_bos_birakilamaz='Etiket adÄ± boÅŸ bÄ±rakÄ±lamaz';
 
   //Alarm
-    ALGorevler_animsaticilardan_cikartilsinmi='Görevlerin tümünü anımsatılacaklardan çıkartmak istediğinize emin misiniz?';
+    ALGorevler_animsaticilardan_cikartilsinmi='GÃ¶revlerin tÃ¼mÃ¼nÃ¼ anÄ±msatÄ±lacaklardan Ã§Ä±kartmak istediÄŸinize emin misiniz?';
 
   //Mesajlasma
-    MsgDosyayiPaylasiyorsunuz = 'Dosyayı Paylaşıyorsunuz';
-    MsgDosyaSizinlePaylasiliyor = 'Sizinle Dosya Paylaşıyor';
-    MsgDosyaPaylasiminiIptalEttiniz = 'Dosya Paylaşımını İptal Ettiniz';
-    MsgDosyaPaylasiminizIptalEdildi = 'Dosya Paylaşımınız İptal Edildi';
-    MsgDosyaPaylasiminiKabulEttiniz = 'Dosya Paylaşımını Kabul Ettiniz';
-    MsgDosyaPaylasiminizKabulEdildi = 'Dosya Paylaşımınız Kabul Edildi';
-    MsgDosyaPaylasiminiReddettiniz = 'Dosya Paylaşımını Reddettiniz';
-    MsgDosyaPaylasiminizReddedildi = 'Dosya Paylaşımınız Reddedildi';
-    MsgDosyaAliniyor = 'Dosya Alınıyor';
+    MsgDosyayiPaylasiyorsunuz = 'DosyayÄ± PaylaÅŸÄ±yorsunuz';
+    MsgDosyaSizinlePaylasiliyor = 'Sizinle Dosya PaylaÅŸÄ±yor';
+    MsgDosyaPaylasiminiIptalEttiniz = 'Dosya PaylaÅŸÄ±mÄ±nÄ± Ä°ptal Ettiniz';
+    MsgDosyaPaylasiminizIptalEdildi = 'Dosya PaylaÅŸÄ±mÄ±nÄ±z Ä°ptal Edildi';
+    MsgDosyaPaylasiminiKabulEttiniz = 'Dosya PaylaÅŸÄ±mÄ±nÄ± Kabul Ettiniz';
+    MsgDosyaPaylasiminizKabulEdildi = 'Dosya PaylaÅŸÄ±mÄ±nÄ±z Kabul Edildi';
+    MsgDosyaPaylasiminiReddettiniz = 'Dosya PaylaÅŸÄ±mÄ±nÄ± Reddettiniz';
+    MsgDosyaPaylasiminizReddedildi = 'Dosya PaylaÅŸÄ±mÄ±nÄ±z Reddedildi';
+    MsgDosyaAliniyor = 'Dosya AlÄ±nÄ±yor';
     MsgDosyaVeriliyor = 'Dosya Veriliyor';
-    MsgDosyaAlmayiDurduruldunuz = 'Dosya Almayı Durdurdunuz';
-    MsgDosyaPaylasimiAliciTarafindanDurduruldu = 'Dosya Paylaşımı Alıcı Tarafından Durduruldu';
+    MsgDosyaAlmayiDurduruldunuz = 'Dosya AlmayÄ± Durdurdunuz';
+    MsgDosyaPaylasimiAliciTarafindanDurduruldu = 'Dosya PaylaÅŸÄ±mÄ± AlÄ±cÄ± TarafÄ±ndan Durduruldu';
     MsgDosyaVermeyiDurduruldunuz = 'Dosya Vermeyi Durdurdunuz';
-    MsgDosyaPaylasimiGonderenTarafindanDurduruldu = 'Dosya Paylaşımı Gönderici Tarafından Durduruldu';
-    MsgDosyaAliminizTamamlandi = 'Dosya Alımınız Tamamlandi';
-    MsgDosyaGonderiminizTamamlandi = 'Dosya Gönderiminiz Tamamlandi';
-    MsgUzerinekayitedilsinmi='Aynı mesaj başlığı ile kayıtlı mesaj var. Üzerine kaydedilsin mi?';
-    MsgBaslikYaz='Mesaj başlığı boş bırakılamaz';
+    MsgDosyaPaylasimiGonderenTarafindanDurduruldu = 'Dosya PaylaÅŸÄ±mÄ± GÃ¶nderici TarafÄ±ndan Durduruldu';
+    MsgDosyaAliminizTamamlandi = 'Dosya AlÄ±mÄ±nÄ±z Tamamlandi';
+    MsgDosyaGonderiminizTamamlandi = 'Dosya GÃ¶nderiminiz Tamamlandi';
+    MsgUzerinekayitedilsinmi='AynÄ± mesaj baÅŸlÄ±ÄŸÄ± ile kayÄ±tlÄ± mesaj var. Ãœzerine kaydedilsin mi?';
+    MsgBaslikYaz='Mesaj baÅŸlÄ±ÄŸÄ± boÅŸ bÄ±rakÄ±lamaz';
 
 
   //TEB_Encrypter_TLB
@@ -991,425 +991,425 @@ resourcestring
     dtlOcxPage = '(none)';
 
   //UDokumSart
-    STextNotFound = 'Metin bulunmadı';
-    SNoSelectionAvailable = 'Arama işlemi tüm metin içerisinde yapılsın mı?';
+    STextNotFound = 'Metin bulunmadÄ±';
+    SNoSelectionAvailable = 'Arama iÅŸlemi tÃ¼m metin iÃ§erisinde yapÄ±lsÄ±n mÄ±?';
 
   //Ekipman
-    EHareketli_silinemez='Hareket görmüş ekipman silinemez..';
+    EHareketli_silinemez='Hareket gÃ¶rmÃ¼ÅŸ ekipman silinemez..';
 
   //Entegrasyon
-    ENTanimlama_yap='Entegrasyon Yapılabilecek Bağlantı Tanımı bulunamadı, önce tanımlama yapmanız gerekmektedir.';
-    ENKayit_Silinsinmi='Seçili Kayıt Silinecektir Onaylıyor musunuz?';
-    Kaynak_doldur='Kaynak Değeri dolu olmalıdır.';
-    ENDegerleri_doldur='Kaynak ve Hedef Değerleri dolu olmalıdır.';
-    ENCari_bilgisi_doldur='Cari Bilgisi Boş Olamaz';
+    ENTanimlama_yap='Entegrasyon YapÄ±labilecek BaÄŸlantÄ± TanÄ±mÄ± bulunamadÄ±, Ã¶nce tanÄ±mlama yapmanÄ±z gerekmektedir.';
+    ENKayit_Silinsinmi='SeÃ§ili KayÄ±t Silinecektir OnaylÄ±yor musunuz?';
+    Kaynak_doldur='Kaynak DeÄŸeri dolu olmalÄ±dÄ±r.';
+    ENDegerleri_doldur='Kaynak ve Hedef DeÄŸerleri dolu olmalÄ±dÄ±r.';
+    ENCari_bilgisi_doldur='Cari Bilgisi BoÅŸ Olamaz';
 
   //UDemirbasWizard
-    DWYeniDemirbas = 'Yeni Demirbaş girmelisiniz.';
-    DWislemYapilmaz = 'Bu demirbaşı ile işlem yapamazsınız.';
-    DWTransferYapilmaz = 'Bu demirbaşı transfer yapamazsınız.';
-    DWKayitliDegil =  'Bu demirbaş kayıtlı değildir.';
-    DWServisYapilmaz = 'Bu demirbaş ile servis işlemi yapamazsınız.';
-    DWZimmetYapilmaz = 'Bu demirbaşı zimmet yapamazsınız.';
-    DWiadeYapilmaz = 'Bu demirbaşı İade yapamazsınız.';
-    DWGarTarihiGir = 'Garanti Bitiş Tarihini giriniz.';
-    DWBitisTarihiGir = 'Bitiş Tarihini Giriniz.';
-    DWBakimPeriyoduBirimi = 'Bakım Periyodu birimini giriniz.';
-    DWTakipSilme='Seçili demişbaş takibini silmek istediğinize eminmisiniz?';
-    DWAmortismanBaslik='Amortisman Oranları';
-    DWAmortismanSilme='Seçili amortismanı iptal etmek istediğinize eminmisiniz?';
+    DWYeniDemirbas = 'Yeni DemirbaÅŸ girmelisiniz.';
+    DWislemYapilmaz = 'Bu demirbaÅŸÄ± ile iÅŸlem yapamazsÄ±nÄ±z.';
+    DWTransferYapilmaz = 'Bu demirbaÅŸÄ± transfer yapamazsÄ±nÄ±z.';
+    DWKayitliDegil =  'Bu demirbaÅŸ kayÄ±tlÄ± deÄŸildir.';
+    DWServisYapilmaz = 'Bu demirbaÅŸ ile servis iÅŸlemi yapamazsÄ±nÄ±z.';
+    DWZimmetYapilmaz = 'Bu demirbaÅŸÄ± zimmet yapamazsÄ±nÄ±z.';
+    DWiadeYapilmaz = 'Bu demirbaÅŸÄ± Ä°ade yapamazsÄ±nÄ±z.';
+    DWGarTarihiGir = 'Garanti BitiÅŸ Tarihini giriniz.';
+    DWBitisTarihiGir = 'BitiÅŸ Tarihini Giriniz.';
+    DWBakimPeriyoduBirimi = 'BakÄ±m Periyodu birimini giriniz.';
+    DWTakipSilme='SeÃ§ili demiÅŸbaÅŸ takibini silmek istediÄŸinize eminmisiniz?';
+    DWAmortismanBaslik='Amortisman OranlarÄ±';
+    DWAmortismanSilme='SeÃ§ili amortismanÄ± iptal etmek istediÄŸinize eminmisiniz?';
 
   //USenetWizard
-    SWSenetGirBilg = 'Senet Giriş Bilgileri';
-    SWSenetCikBilg = 'Senet Çıkış Bilgileri';
+    SWSenetGirBilg = 'Senet GiriÅŸ Bilgileri';
+    SWSenetCikBilg = 'Senet Ã‡Ä±kÄ±ÅŸ Bilgileri';
 
   //UCekWizard
-    kullanilmisserino = 'Bu Seri No daha önce kullanılmıştır.' ; //UKasaWizard
-    CWCekGirBilg = 'Çek Giriş Bilgileri';
-    CWCekCikBilg = 'Çek Çıkış Bilgileri';
+    kullanilmisserino = 'Bu Seri No daha Ã¶nce kullanÄ±lmÄ±ÅŸtÄ±r.' ; //UKasaWizard
+    CWCekGirBilg = 'Ã‡ek GiriÅŸ Bilgileri';
+    CWCekCikBilg = 'Ã‡ek Ã‡Ä±kÄ±ÅŸ Bilgileri';
     CWKontBanka = 'Banka';
     CWKontCariKod = 'Cari Kod';
     CWKontSeriNo = 'Seri No';
     CWKontKod = 'Kod';
-    CWKontKesideYei = 'Keşide Yeri';
+    CWKontKesideYei = 'KeÅŸide Yeri';
     CWKontKesideTarihi = 'Vade Tarihi';
     CWKontTutar = 'Tutar';
-    CWCekKocaniCek = 'Çek Koçanı Listesi';
-    CWCekKocanBulunamadi = 'Tanımlı çek koçanı bulunamadı!';
-    CWTarihAtansinmi = 'Seçtiğiniz "Tarih" tatil gününe denk geliyor, sonraki uygun tarih atansın mı?';
-    CWKayitIleriTarihliOlamaz = 'Kayıt gelecekte bir tarihe olamaz!';
+    CWCekKocaniCek = 'Ã‡ek KoÃ§anÄ± Listesi';
+    CWCekKocanBulunamadi = 'TanÄ±mlÄ± Ã§ek koÃ§anÄ± bulunamadÄ±!';
+    CWTarihAtansinmi = 'SeÃ§tiÄŸiniz "Tarih" tatil gÃ¼nÃ¼ne denk geliyor, sonraki uygun tarih atansÄ±n mÄ±?';
+    CWKayitIleriTarihliOlamaz = 'KayÄ±t gelecekte bir tarihe olamaz!';
 
-    DahaOnceKontrolEdilmis = 'Daha önce kontrol edilmiştir.';
+    DahaOnceKontrolEdilmis = 'Daha Ã¶nce kontrol edilmiÅŸtir.';
   //UCekKocanWizard
-    serinohata='Bu aralıktaki Seri Nolar diğer koçanlarda kullanılmıştır.'; //
+    serinohata='Bu aralÄ±ktaki Seri Nolar diÄŸer koÃ§anlarda kullanÄ±lmÄ±ÅŸtÄ±r.'; //
 
   //UKasaWizard
-    KWOdemeKanali = 'Ödeme kanalı';
-    KWTahsilatKanali = 'Tahsilat kanalı';
-    KWYapilanHarcamaSec = 'Yapılan harcama hangi masraf kalemine aitse listeden onu seçin';
-    KWGirenGelirSec = 'Kasaya giren gelir hangi gelir kalemine aitse listeden onu seçin';
-    KWAkt_KayitBulunamadi = 'Seçilen veritabanında aktarılmamış kayıt bulunamadı.';
-    KWTahsilatGirisi = ' Tahsilat Girişi';
-    KWMusteriAlacaklandir = 'Müşteri''yi alacaklandır';
-    KWMusteriBorclandir = 'Müşteri''yi borçlandır';
-    KWNakitGirisiVarsa = 'Müşteri''den TL, $, € gibi nakit girişi varsa';
-    KWNakitCikisiVarsa = 'Müşteri''ye TL, $, € gibi nakit çıkışı varsa';
-    KWHesaplarimizaGonderimYapilmissa = 'Müşteri''den banka hesaplarımıza gönderim yapılmışsa';
-    KWHesaplarinaOdemeYapilmissa = 'Müşteri''nin banka hesabına ödeme  gönderilmişse';
-    KWCekveyaSenetAlinmissa = 'Müşteri''den Çek veya Senet alınmışsa';
-    KWCekveyaSenetVerilmisse = 'Müşteri''ye Çek veya Senetle ödeme yapılmışsa';
-    KWKrediKartiileTahsilat = 'Kredi Kartı ile tahsilat';
-    KWKrediKartiileOdeme = 'Kredi Kartı ile ödeme';
-    KWTahsilatPlani = 'Tahsilat Planı';
-    KWDuzenliTahsilat = 'Düzenli Tahsilat';
-    KWAvansTahsilati = 'Avans Tahsilatı';
+    KWOdemeKanali = 'Ã–deme kanalÄ±';
+    KWTahsilatKanali = 'Tahsilat kanalÄ±';
+    KWYapilanHarcamaSec = 'YapÄ±lan harcama hangi masraf kalemine aitse listeden onu seÃ§in';
+    KWGirenGelirSec = 'Kasaya giren gelir hangi gelir kalemine aitse listeden onu seÃ§in';
+    KWAkt_KayitBulunamadi = 'SeÃ§ilen veritabanÄ±nda aktarÄ±lmamÄ±ÅŸ kayÄ±t bulunamadÄ±.';
+    KWTahsilatGirisi = ' Tahsilat GiriÅŸi';
+    KWMusteriAlacaklandir = 'MÃ¼ÅŸteri''yi alacaklandÄ±r';
+    KWMusteriBorclandir = 'MÃ¼ÅŸteri''yi borÃ§landÄ±r';
+    KWNakitGirisiVarsa = 'MÃ¼ÅŸteri''den TL, $, â‚¬ gibi nakit giriÅŸi varsa';
+    KWNakitCikisiVarsa = 'MÃ¼ÅŸteri''ye TL, $, â‚¬ gibi nakit Ã§Ä±kÄ±ÅŸÄ± varsa';
+    KWHesaplarimizaGonderimYapilmissa = 'MÃ¼ÅŸteri''den banka hesaplarÄ±mÄ±za gÃ¶nderim yapÄ±lmÄ±ÅŸsa';
+    KWHesaplarinaOdemeYapilmissa = 'MÃ¼ÅŸteri''nin banka hesabÄ±na Ã¶deme  gÃ¶nderilmiÅŸse';
+    KWCekveyaSenetAlinmissa = 'MÃ¼ÅŸteri''den Ã‡ek veya Senet alÄ±nmÄ±ÅŸsa';
+    KWCekveyaSenetVerilmisse = 'MÃ¼ÅŸteri''ye Ã‡ek veya Senetle Ã¶deme yapÄ±lmÄ±ÅŸsa';
+    KWKrediKartiileTahsilat = 'Kredi KartÄ± ile tahsilat';
+    KWKrediKartiileOdeme = 'Kredi KartÄ± ile Ã¶deme';
+    KWTahsilatPlani = 'Tahsilat PlanÄ±';
+    KWDuzenliTahsilat = 'DÃ¼zenli Tahsilat';
+    KWAvansTahsilati = 'Avans TahsilatÄ±';
     KWKomisyon = 'Komisyon';
-    KWOdemePlani = 'Ödeme Planı';
-    KWDuzenliOdeme = 'Düzenli Ödeme';
-    KWPersonelMaasi = 'Personel Maaş';
-    KWAksiyonSecin = 'Bir aksiyon seçin';
+    KWOdemePlani = 'Ã–deme PlanÄ±';
+    KWDuzenliOdeme = 'DÃ¼zenli Ã–deme';
+    KWPersonelMaasi = 'Personel MaaÅŸ';
+    KWAksiyonSecin = 'Bir aksiyon seÃ§in';
     KWKasadanKasayaTransfer = 'Kasadan kasaya para transferi varsa';
     KWKasadanBankayaTransfer = 'Kasadan bankaya para transferi varsa';
     KWBankadanKasayaTransfer = 'Bankadan kasaya  para transferi varsa';
-    KWBankadakiHesaplarArasiTransfer = 'Bankadaki hesaplar arası para transferi varsa';
-    KWBankadaArbitraj = 'Banka hesaplar arası arbitraj varsa';
-    KWPOSBankaArasiTransfer = 'POS hesabından banka hesabına yapılan para transferi';
-    KWKasadakiParaylaDovizAlirsa = 'Kasadaki nakit paranın bir kısmıyla döviz alınırsa';
-    KWDovizKasasindakiBozdurulacaksa = 'Döviz kasasındaki paranın bir kısmı bozdurulacaksa ';
-    KWBankadakiParaylaDovizAlirsa = 'Bankadaki nakit paranın bir kısmıyla döviz alınırsa';
-    KWDovizHesabindakiBozdurulacaksa = 'Döviz hesabındaki paranın bir kısmı bozdurulacaksa';
-    KWEldekiCekBankadanTahsilati = 'Elimizde bulunan çek bankadan tahsil edilirse';
+    KWBankadakiHesaplarArasiTransfer = 'Bankadaki hesaplar arasÄ± para transferi varsa';
+    KWBankadaArbitraj = 'Banka hesaplar arasÄ± arbitraj varsa';
+    KWPOSBankaArasiTransfer = 'POS hesabÄ±ndan banka hesabÄ±na yapÄ±lan para transferi';
+    KWKasadakiParaylaDovizAlirsa = 'Kasadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alÄ±nÄ±rsa';
+    KWDovizKasasindakiBozdurulacaksa = 'DÃ¶viz kasasÄ±ndaki paranÄ±n bir kÄ±smÄ± bozdurulacaksa ';
+    KWBankadakiParaylaDovizAlirsa = 'Bankadaki nakit paranÄ±n bir kÄ±smÄ±yla dÃ¶viz alÄ±nÄ±rsa';
+    KWDovizHesabindakiBozdurulacaksa = 'DÃ¶viz hesabÄ±ndaki paranÄ±n bir kÄ±smÄ± bozdurulacaksa';
+    KWEldekiCekBankadanTahsilati = 'Elimizde bulunan Ã§ek bankadan tahsil edilirse';
     KWEldekiSenetBankadanTahsilati = 'Elimizde bulunan senet bankadan tahsil edilirse';
-    KWCekBankadanOdenirse = 'Verdiğimiz çek karşılığı bankadan ödenirse';
-    KWSenetBankadanOdenirse = 'Verdiğimiz senet karşılığı bankadan ödenirse';
-    KWKrediGirisi = 'Kredi Girişi';
-    KWKrediGirisiBankaya = 'Kredi girişi banka hesabına eklnsin mi?';
-    KWKrediOdemesiYapilir = 'Kredi kartı taksitlerinin ödemesi yapılır';
-    KWKrediOdemesiIade = 'Kredi kartı ödemesinin iadesi yapılır';
-    KWAlinmisKrediOdemesiYapilir = 'Alınmış olan kredi taksitlerinin ödemesi yapılır';
-    KWNakitOdemelerinGirisiYapilir = 'Bankada tahsil edilmiş olan nakit ödemelerin girişi yapılır';
-    KWKrediGirisiYapilir = 'Bankoda tahsil edilmiş olan kredi kartlarının girişi yapılır';
-    KWFaizGirisiYapilir = 'Bankadan faiz/kar payı tahsilatı yapılır';
-    KWFaizCikisiYapilir = 'Bankaya faiz/masraf ödemesi yapılır';
-    KWOnceOdemeKanaliSec = 'Önce ödeme kanalını seçin!';
-    KWOnceHesabiTanimla = 'Önce hesabı tanımlayın!';
-    KWKasaVeyaBankaHesabiTanimla = 'Tanımlı hesap bulunamadı. Kasa veya Banka hesabı tanımlayın!';
+    KWCekBankadanOdenirse = 'VerdiÄŸimiz Ã§ek karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶denirse';
+    KWSenetBankadanOdenirse = 'VerdiÄŸimiz senet karÅŸÄ±lÄ±ÄŸÄ± bankadan Ã¶denirse';
+    KWKrediGirisi = 'Kredi GiriÅŸi';
+    KWKrediGirisiBankaya = 'Kredi giriÅŸi banka hesabÄ±na eklnsin mi?';
+    KWKrediOdemesiYapilir = 'Kredi kartÄ± taksitlerinin Ã¶demesi yapÄ±lÄ±r';
+    KWKrediOdemesiIade = 'Kredi kartÄ± Ã¶demesinin iadesi yapÄ±lÄ±r';
+    KWAlinmisKrediOdemesiYapilir = 'AlÄ±nmÄ±ÅŸ olan kredi taksitlerinin Ã¶demesi yapÄ±lÄ±r';
+    KWNakitOdemelerinGirisiYapilir = 'Bankada tahsil edilmiÅŸ olan nakit Ã¶demelerin giriÅŸi yapÄ±lÄ±r';
+    KWKrediGirisiYapilir = 'Bankoda tahsil edilmiÅŸ olan kredi kartlarÄ±nÄ±n giriÅŸi yapÄ±lÄ±r';
+    KWFaizGirisiYapilir = 'Bankadan faiz/kar payÄ± tahsilatÄ± yapÄ±lÄ±r';
+    KWFaizCikisiYapilir = 'Bankaya faiz/masraf Ã¶demesi yapÄ±lÄ±r';
+    KWOnceOdemeKanaliSec = 'Ã–nce Ã¶deme kanalÄ±nÄ± seÃ§in!';
+    KWOnceHesabiTanimla = 'Ã–nce hesabÄ± tanÄ±mlayÄ±n!';
+    KWKasaVeyaBankaHesabiTanimla = 'TanÄ±mlÄ± hesap bulunamadÄ±. Kasa veya Banka hesabÄ± tanÄ±mlayÄ±n!';
     KWAnaPara = 'Anapara';
     KWFaiz = 'Faiz';
     KWAnaparaveFaiz = 'Anapara+Faiz';
-    KWLutfenSecin = 'Lütfen Seçin ';
-    KWOdemeTuru = 'Ödeme Türü:';
-    KWValorVarmi = 'Valör var mı?';
-    KWOdemeEkrani = 'Ödeme Ekranı';
-    KWOdemeBilgileriGir = 'Ödeme bilgilerini girin';
-    KWTahsilatEkrani = 'Tahsilat Ekranı';
+    KWLutfenSecin = 'LÃ¼tfen SeÃ§in ';
+    KWOdemeTuru = 'Ã–deme TÃ¼rÃ¼:';
+    KWValorVarmi = 'ValÃ¶r var mÄ±?';
+    KWOdemeEkrani = 'Ã–deme EkranÄ±';
+    KWOdemeBilgileriGir = 'Ã–deme bilgilerini girin';
+    KWTahsilatEkrani = 'Tahsilat EkranÄ±';
     KWTahsilatBilgileriGir = 'Tahsilat bilgilerini girin';
-    KWAnaparaveFaizTutariGir = 'Anapara veya Faiz tutarını girin!';
-    KWBakiyedenFazlaOdenemez = 'Kredi ödemesinde Anapara veya Faiz bakiyeden fazla ödenemez!';
-    KWTutariGiriniz = 'Tutarı girin!';
-    KWDovizdenSonraCikisTLOlmali = 'Döviz satışında çıkış kasası TL olmalı';
-    KWDovizdenSonraCikisTLOlamaz = 'Döviz satışında çıkış kasası TL olamaz';
-    KWTutarKismiBosOlamaz = 'Tutar kısmı boş olamaz!';
-    KWHedefHesapSecYoksaTanimla = 'Önce hedef hesabı seçin, yoksa tanımlayın!';
-    KWMiktariGirin = 'Miktarı girin!';
-    KWDovizKurunuGiriniz = 'Döviz Kurunu Giriniz: ?';
-    KWDovizKarsiGiriniz = 'Döviz Karşılığını Giriniz';
-    KWAnaparaBorctanBuyukOlamaz = 'Ödenecek anapara kalan anapara borçtan büyük olamaz!';
-    KWFaizBorctanBuyukOlamaz = 'Ödenecek faiz kalan faiz borçtan büyük olamaz!';
-    KWKrediKapandiOlarakIsaretlensinmi = 'Bu kredi kapandı olarak işaretlensin mi?';
-    KWKapandiOlarakIsaretlensinmi = 'Kapandı olarak işaretlensin mi?';
-    KWKrediKartiSec = 'Kredi Kartı Seçme';
-    KWCekSenetArama = 'Çek / Senet Arama';
-    KWTumu = 'Tümü';
-    KWPortfoyde = 'Portföyde';
+    KWAnaparaveFaizTutariGir = 'Anapara veya Faiz tutarÄ±nÄ± girin!';
+    KWBakiyedenFazlaOdenemez = 'Kredi Ã¶demesinde Anapara veya Faiz bakiyeden fazla Ã¶denemez!';
+    KWTutariGiriniz = 'TutarÄ± girin!';
+    KWDovizdenSonraCikisTLOlmali = 'DÃ¶viz satÄ±ÅŸÄ±nda Ã§Ä±kÄ±ÅŸ kasasÄ± TL olmalÄ±';
+    KWDovizdenSonraCikisTLOlamaz = 'DÃ¶viz satÄ±ÅŸÄ±nda Ã§Ä±kÄ±ÅŸ kasasÄ± TL olamaz';
+    KWTutarKismiBosOlamaz = 'Tutar kÄ±smÄ± boÅŸ olamaz!';
+    KWHedefHesapSecYoksaTanimla = 'Ã–nce hedef hesabÄ± seÃ§in, yoksa tanÄ±mlayÄ±n!';
+    KWMiktariGirin = 'MiktarÄ± girin!';
+    KWDovizKurunuGiriniz = 'DÃ¶viz Kurunu Giriniz: ?';
+    KWDovizKarsiGiriniz = 'DÃ¶viz KarÅŸÄ±lÄ±ÄŸÄ±nÄ± Giriniz';
+    KWAnaparaBorctanBuyukOlamaz = 'Ã–denecek anapara kalan anapara borÃ§tan bÃ¼yÃ¼k olamaz!';
+    KWFaizBorctanBuyukOlamaz = 'Ã–denecek faiz kalan faiz borÃ§tan bÃ¼yÃ¼k olamaz!';
+    KWKrediKapandiOlarakIsaretlensinmi = 'Bu kredi kapandÄ± olarak iÅŸaretlensin mi?';
+    KWKapandiOlarakIsaretlensinmi = 'KapandÄ± olarak iÅŸaretlensin mi?';
+    KWKrediKartiSec = 'Kredi KartÄ± SeÃ§me';
+    KWCekSenetArama = 'Ã‡ek / Senet Arama';
+    KWTumu = 'TÃ¼mÃ¼';
+    KWPortfoyde = 'PortfÃ¶yde';
     KWTahsilEdildi = 'Tahsil Edildi';
     KWCiroEdildi ='Ciro Edildi';
     KWTahsileVerildi = 'Tahsile Verildi';
     KWTeminataVerildi ='Teminata Verildi';
     KWProtestoEdildi = 'Protesto Edildi';
-    KWKarsiligiYok = 'Karşılığı Yok';
+    KWKarsiligiYok = 'KarÅŸÄ±lÄ±ÄŸÄ± Yok';
     KWTahsilEdilemiyor = 'Tahsil Edilemiyor';
-    KWKrediSec = 'Kredi Seçme';
-    KWOdenmemisler = 'Ödenmemişler';
-    KWOdenmisler = 'Ödenmişler';
-    KWListedenSec = 'Listeden seçim yapın!';
-    KWTahsilEdilmis = 'Daha önce tahsil edilmiş!';
-    MiktarBuyuk = 'Miktar Durumdan büyük olamaz!';
-    SKTKucukOlamaz='SKT bugünden küçük olamaz!';
-    URTKucukOlamaz='URT bugünden büyük olamaz!';
-    BugundenBuyukOlamaz='Bugünden büyük olamaz!';
-  //UKasaTanımWizard
+    KWKrediSec = 'Kredi SeÃ§me';
+    KWOdenmemisler = 'Ã–denmemiÅŸler';
+    KWOdenmisler = 'Ã–denmiÅŸler';
+    KWListedenSec = 'Listeden seÃ§im yapÄ±n!';
+    KWTahsilEdilmis = 'Daha Ã¶nce tahsil edilmiÅŸ!';
+    MiktarBuyuk = 'Miktar Durumdan bÃ¼yÃ¼k olamaz!';
+    SKTKucukOlamaz='SKT bugÃ¼nden kÃ¼Ã§Ã¼k olamaz!';
+    URTKucukOlamaz='URT bugÃ¼nden bÃ¼yÃ¼k olamaz!';
+    BugundenBuyukOlamaz='BugÃ¼nden bÃ¼yÃ¼k olamaz!';
+  //UKasaTanÄ±mWizard
     KTWKasaKodu = 'Kasa Kodu';
-    KTWKasaAdı =  'Kasa Adı';
+    KTWKasaAdÄ± =  'Kasa AdÄ±';
     KTWParaBirimi ='Para Birimi';
 
   //UServisWizard
   // Servis
     SERWServis_Servis = 'Servis';
-    SERWServis_Servis_dis = 'Dış Servis';
-    SERWServis_Servis_ic = 'İç Servis';
+    SERWServis_Servis_dis = 'DÄ±ÅŸ Servis';
+    SERWServis_Servis_ic = 'Ä°Ã§ Servis';
     SERWServis_Ekipman = 'Servis Ekipman';
     SERWServis_Problem = 'Servis Problem';
     SERWServis_FizikselDurum = 'Servis Fiziksel Durum';
     SERWServis_Aksesuar = 'Servis Aksesuar';
     SERWServis_Nedeni = 'Servis Nedeni';
     SERWServis_Planlanan = 'Servis Planlanan';
-    SERWServis_Yapilan = 'Servis Yapılan';
+    SERWServis_Yapilan = 'Servis YapÄ±lan';
     SERWServis_Uygulama = 'Servis Uygulama';
-    SERWServis_Iade = 'Servis İade';
+    SERWServis_Iade = 'Servis Ä°ade';
     SERWServis_Testler = 'Servis Testler';
     SERWServis_Giderler= 'Servis Giderler';
     SERWServis_Notlar = 'Servis Notlar';
-    SERWServisEkipman = 'Servis Ekipmanları';
+    SERWServisEkipman = 'Servis EkipmanlarÄ±';
     SERWSorumluOldugunServisVar = 'Sorumlu olarak atandiginiz yeni bir servis var. Servis No:';
-    SERWBelge_olusturuldu='Seçilen uygulamaların belgesi oluşturulmuştur.';
-    SERWMusteri_SMS='Servis bilgisi müşteri temsilcisine sms gönderilsin mi?';
-    SERWMusteri_EPosta='Servis bilgisi müşteri temsilcisine e-posta gönderilsin mi?';
-    SERWOnaysiz_uygulanamaz='Onaysız işlemler uygulanamaz!';
-    SERAd_Gir='Ad alanı boş bırakılamaz!';
-    SERYanlis_tarih='Bitiş tarihi başlamadan önce olamaz!';
-    SERBaslik_belirtin='Başlık veya Detay olduğunu belirtiniz. ';
-    Servis_Atanan_Dolu_Olmali = 'Servisi kapatmak için en az bir atanan olmalı!';
-    Servis_Har_Baslangic = 'Servis hereketi eklenemedi. Lütfen servis opsiyonları içerisinden uygun şekilde düzenleyin.';
-    SonSerisHareketiEksik = 'Son servis hareketi henüz tamamlanmamış. Yeni bir hareket eklemeden önce Başlama ve Bitiş alanlarını doldurmalısınız.';
+    SERWBelge_olusturuldu='SeÃ§ilen uygulamalarÄ±n belgesi oluÅŸturulmuÅŸtur.';
+    SERWMusteri_SMS='Servis bilgisi mÃ¼ÅŸteri temsilcisine sms gÃ¶nderilsin mi?';
+    SERWMusteri_EPosta='Servis bilgisi mÃ¼ÅŸteri temsilcisine e-posta gÃ¶nderilsin mi?';
+    SERWOnaysiz_uygulanamaz='OnaysÄ±z iÅŸlemler uygulanamaz!';
+    SERAd_Gir='Ad alanÄ± boÅŸ bÄ±rakÄ±lamaz!';
+    SERYanlis_tarih='BitiÅŸ tarihi baÅŸlamadan Ã¶nce olamaz!';
+    SERBaslik_belirtin='BaÅŸlÄ±k veya Detay olduÄŸunu belirtiniz. ';
+    Servis_Atanan_Dolu_Olmali = 'Servisi kapatmak iÃ§in en az bir atanan olmalÄ±!';
+    Servis_Har_Baslangic = 'Servis hereketi eklenemedi. LÃ¼tfen servis opsiyonlarÄ± iÃ§erisinden uygun ÅŸekilde dÃ¼zenleyin.';
+    SonSerisHareketiEksik = 'Son servis hareketi henÃ¼z tamamlanmamÄ±ÅŸ. Yeni bir hareket eklemeden Ã¶nce BaÅŸlama ve BitiÅŸ alanlarÄ±nÄ± doldurmalÄ±sÄ±nÄ±z.';
   //UGorevWizard
-    GWGecmiseAtanamaz = '"Bitiş Tarihi" geçmişe atanamaz!';
-    GWGecmisTarihliSecilmez = 'Görev Başlangıç tarihi geçmiş tarihli seçilemez';
-    GWBitTarihKucukSecilemez = 'Bitiş tarihi Başlama tarihinden küçük olamaz';
-    GWGunSecimiYapilmali = 'Öncelikle gün seçimi yapmalısınız';
-    GWKacHaftadaBirYapilacak = 'Planlamanın kaç haftada bir yapılacağını seçiniz';
-    GWYeniTarihDegeri = 'Yeni Tarih Değeri';
+    GWGecmiseAtanamaz = '"BitiÅŸ Tarihi" geÃ§miÅŸe atanamaz!';
+    GWGecmisTarihliSecilmez = 'GÃ¶rev BaÅŸlangÄ±Ã§ tarihi geÃ§miÅŸ tarihli seÃ§ilemez';
+    GWBitTarihKucukSecilemez = 'BitiÅŸ tarihi BaÅŸlama tarihinden kÃ¼Ã§Ã¼k olamaz';
+    GWGunSecimiYapilmali = 'Ã–ncelikle gÃ¼n seÃ§imi yapmalÄ±sÄ±nÄ±z';
+    GWKacHaftadaBirYapilacak = 'PlanlamanÄ±n kaÃ§ haftada bir yapÄ±lacaÄŸÄ±nÄ± seÃ§iniz';
+    GWYeniTarihDegeri = 'Yeni Tarih DeÄŸeri';
     GWErtelemeTarihiGirin = 'Erteleme Tarihi girin';
-    GWErtelemeTarihiBosOlmaz = 'Erteleme Tarihi Boş Olamaz.';
-    GWDegisiklikIcınAciklamaGir = 'Durum değişikliğiniz için bir açıklama giriniz.';
-    GWAciklamaGir = 'Açıklamayı girin';
-    GWAciklamaBosOlamaz = 'Açıklama Boş Olamaz.';
-    GWDurumYeniGorevOlamaz = 'Görevin Durumu Yeni Görev olarak değiştirilemez!';
-    GWDegisiklikKaydedilmedi = 'Hata: Değişiklik kaydedilemedi!';
-    GWSablonYok = 'Böyle bir şablon artık yok!';
-    GWAynıisimdeSablonVar = 'Aynı isimde çok sayıda şablon var!';
-    GWAktarilamayanAlanlar = 'Aktarılamayan Alanlar:';
-    GWYeniGorevOlustur = 'Yeni Görev Oluşturma Sihirbazı';
-    GWGorevDuzenleme = 'Görev Düzenleme Sihirbazı';
-    GWYeniGorevSablonuOlustur = 'Yeni Görev Şablonu Oluşturma Sihirbazı';
-    GWGorevSablonuDuzenleme = 'Görev Şablonu Düzenleme Sihirbazı';
-    GWBoyleBirGorevYok = 'Böyle bir görev yok!!!';
-    GWIslemOpBelirtilmeli = 'İşlem Op Belirtilmeli!!';
-    GWKayitlardaHatalarOlustu = 'Bazı kayıtlarda hatalar oluştu: ';
+    GWErtelemeTarihiBosOlmaz = 'Erteleme Tarihi BoÅŸ Olamaz.';
+    GWDegisiklikIcÄ±nAciklamaGir = 'Durum deÄŸiÅŸikliÄŸiniz iÃ§in bir aÃ§Ä±klama giriniz.';
+    GWAciklamaGir = 'AÃ§Ä±klamayÄ± girin';
+    GWAciklamaBosOlamaz = 'AÃ§Ä±klama BoÅŸ Olamaz.';
+    GWDurumYeniGorevOlamaz = 'GÃ¶revin Durumu Yeni GÃ¶rev olarak deÄŸiÅŸtirilemez!';
+    GWDegisiklikKaydedilmedi = 'Hata: DeÄŸiÅŸiklik kaydedilemedi!';
+    GWSablonYok = 'BÃ¶yle bir ÅŸablon artÄ±k yok!';
+    GWAynÄ±isimdeSablonVar = 'AynÄ± isimde Ã§ok sayÄ±da ÅŸablon var!';
+    GWAktarilamayanAlanlar = 'AktarÄ±lamayan Alanlar:';
+    GWYeniGorevOlustur = 'Yeni GÃ¶rev OluÅŸturma SihirbazÄ±';
+    GWGorevDuzenleme = 'GÃ¶rev DÃ¼zenleme SihirbazÄ±';
+    GWYeniGorevSablonuOlustur = 'Yeni GÃ¶rev Åablonu OluÅŸturma SihirbazÄ±';
+    GWGorevSablonuDuzenleme = 'GÃ¶rev Åablonu DÃ¼zenleme SihirbazÄ±';
+    GWBoyleBirGorevYok = 'BÃ¶yle bir gÃ¶rev yok!!!';
+    GWIslemOpBelirtilmeli = 'Ä°ÅŸlem Op Belirtilmeli!!';
+    GWKayitlardaHatalarOlustu = 'BazÄ± kayÄ±tlarda hatalar oluÅŸtu: ';
 
   //UProjeWizard
-    PWSilerekTekrarDeneyin = 'Detay Kayıtları varken bu işlemi gerçekleştiremessiniz, detay bilgilerini silerek tekrar deneyiniz.';
-    PWHepsiSilinecektirUyari = 'Yeni şablon oluşturulurken bu bölümdeki girilmiş tüm detay bilgileri silinecektir.';
-    PWSonucBilgisiGir = 'Projeyi kapatırken Sonuç Bilgisi girilmelidir.';
-    PWBitRarihKucukSecilemez = 'Proje Bitiş tarihi Başlama tarihinden küçük olamaz';
-    PWListefiyatiKurBilgisiGir = 'Liste Fiyatı için kur bilgisi giriniz';
-    PWSatisFiyatiKurBilgisiGir = 'Satış Fiyatı için kur bilgisi giriniz';
-    PWSeciliKaydiListedenSil = 'Seçili Kaydı listeden silmek istiyor musunuz?';
-    PWTurSec='Proje Tipi Tanımı yapabilmek için Proje Türü Seçilmelidir';
-    PWButceAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Kod (Yazı),'+#13+#10+
-              '     * sütun2(B):Ad (Yazı),'+#13+#10+
-              '     * sütun3(C):Birim (Yazı),'+#13+#10+
-              '     * sütun4(D):Miktar (Numerik),'+#13+#10+
-              '     * sütun5(E):Birim Fiyat (Numerik) '+#13+#10+
-              '     * sütun6(F):Tutar (Numerik) '+#13+#10+
-              '   öğelerine sahip olmalıdır.';
-    PWReceteAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Ürün Kodu (Yazı),'+#13+#10+
-              '     * sütun2(B):Ürün Adı (Yazı),'+#13+#10+
-              '     * sütun5(C):Sarf Kodu (Yazı) '+#13+#10+
-              '     * sütun6(D):Sarf Adı (Yazı) '+#13+#10+
-              '     * sütun4(E):Miktar (Numerik),'+#13+#10+
-              '     * sütun3(F):Birim (Yazı),'+#13+#10+
-              '   öğelerine sahip olmalıdır.';
-    PWReceteOprAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Reçete ID (Numerik),'+#13+#10+
-              '     * sütun2(B):Konusu (Yazı),'+#13+#10+
-              '     * sütun4(c):Sıra (Numerik),'+#13+#10+
-              '   öğelerine sahip olmalıdır.';
+    PWSilerekTekrarDeneyin = 'Detay KayÄ±tlarÄ± varken bu iÅŸlemi gerÃ§ekleÅŸtiremessiniz, detay bilgilerini silerek tekrar deneyiniz.';
+    PWHepsiSilinecektirUyari = 'Yeni ÅŸablon oluÅŸturulurken bu bÃ¶lÃ¼mdeki girilmiÅŸ tÃ¼m detay bilgileri silinecektir.';
+    PWSonucBilgisiGir = 'Projeyi kapatÄ±rken SonuÃ§ Bilgisi girilmelidir.';
+    PWBitRarihKucukSecilemez = 'Proje BitiÅŸ tarihi BaÅŸlama tarihinden kÃ¼Ã§Ã¼k olamaz';
+    PWListefiyatiKurBilgisiGir = 'Liste FiyatÄ± iÃ§in kur bilgisi giriniz';
+    PWSatisFiyatiKurBilgisiGir = 'SatÄ±ÅŸ FiyatÄ± iÃ§in kur bilgisi giriniz';
+    PWSeciliKaydiListedenSil = 'SeÃ§ili KaydÄ± listeden silmek istiyor musunuz?';
+    PWTurSec='Proje Tipi TanÄ±mÄ± yapabilmek iÃ§in Proje TÃ¼rÃ¼ SeÃ§ilmelidir';
+    PWButceAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):Kod (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun2(B):Ad (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun3(C):Birim (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun4(D):Miktar (Numerik),'+#13+#10+
+              '     * sÃ¼tun5(E):Birim Fiyat (Numerik) '+#13+#10+
+              '     * sÃ¼tun6(F):Tutar (Numerik) '+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
+    PWReceteAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):ÃœrÃ¼n Kodu (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun2(B):ÃœrÃ¼n AdÄ± (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun5(C):Sarf Kodu (YazÄ±) '+#13+#10+
+              '     * sÃ¼tun6(D):Sarf AdÄ± (YazÄ±) '+#13+#10+
+              '     * sÃ¼tun4(E):Miktar (Numerik),'+#13+#10+
+              '     * sÃ¼tun3(F):Birim (YazÄ±),'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
+    PWReceteOprAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):ReÃ§ete ID (Numerik),'+#13+#10+
+              '     * sÃ¼tun2(B):Konusu (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun4(c):SÄ±ra (Numerik),'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
 
   //UFaturaWizard
-    FWYuzdesiniGirin = 'Yüzdesini girin';
-    FWToplamTutariGir = 'Toplam tutarı girin.';
+    FWYuzdesiniGirin = 'YÃ¼zdesini girin';
+    FWToplamTutariGir = 'Toplam tutarÄ± girin.';
     FWKurGir = 'Kuru girin.';
-    FWMalFazlasiGir = 'Mal fazlası olarak verilecek miktarı girin.';
-    FWTutarGir = 'Yeni tutarı girin. Bu işlem birim fiyatları değiştirecektir!';
-    FWGiris = 'Giriş ';
-    FWCikis = 'Çıkış ';
+    FWMalFazlasiGir = 'Mal fazlasÄ± olarak verilecek miktarÄ± girin.';
+    FWTutarGir = 'Yeni tutarÄ± girin. Bu iÅŸlem birim fiyatlarÄ± deÄŸiÅŸtirecektir!';
+    FWGiris = 'GiriÅŸ ';
+    FWCikis = 'Ã‡Ä±kÄ±ÅŸ ';
     FWGelen = 'Gelen ';
     FWGiden = 'Giden ';
-    FWGiderPusula = 'Gider Pusulası';
-    FWIrsaliye = 'İrsaliye';
+    FWGiderPusula = 'Gider PusulasÄ±';
+    FWIrsaliye = 'Ä°rsaliye';
     FWFatura = 'Fatura';
-    FWFis = 'Fiş';
+    FWFis = 'FiÅŸ';
     FWKonsinye = 'Konsinye';
     FWSayfa = 'Sayfa';
-    FWBasligi = ' Başlığı';
+    FWBasligi = ' BaÅŸlÄ±ÄŸÄ±';
     FWAdresi= ' Adresi';
-    FWIlcesi= ' İlçesi';
-    FWIli = ' İli';
+    FWIlcesi= ' Ä°lÃ§esi';
+    FWIli = ' Ä°li';
     FWVD = ' Vergi Dairesi';
     FWVNO = ' Vergi No';
     FWVade = ' Vade';
     FWBilgileri = ' bilgileri';
-    FWOlustur = ' Oluştur';
-    FWSeciniz = 'Seçiniz';
+    FWOlustur = ' OluÅŸtur';
+    FWSeciniz = 'SeÃ§iniz';
     FWKurumunaGiden = ' Kurumuna Giden ';
     FWKurumundanGelen = ' Kurumundan Gelen ';
-    FWKaynagaUygulansinmi = 'İşlem Kaynak Belgeye de uygulansın mı?';
-    FWHedefeUygulansinmi = 'İşlem Hedef Belgeye de uygulansın mı?';
-    FWKayitSilinemez = 'Bu ürüne ait seri numaraları hareket görmüş.Kayıt silinemez.';
-    FWKayitBelgeYilindanFarkliOlamaz = 'Kayıt yılı belge yılından küçük olamaz.';
-    FWKayitveBelgeTarihiIleriTarihOlamaz = 'Kayıt tarihi ve belge tarihi ileri bir gün olamaz.';
-    FWSadeceRakamGir = 'Fatura numarasında rakam dışında karakter olamaz!';
-    FWFaturaNoKullanilmistir = ' tarihinde bu fatura numarası kullanılmış!';
-    FWFislerdeEkranKullanilmaz = 'Belge türü Fiş olan kayıtlar için bu ekran kullanılamaz';
-    FWFirmayaAitSiparisYoktur = 'Bu firmaya ait sipariş bulunmamaktadır.';
-    FWFirmayaAitIrsaliyeYoktur = 'Bu firmaya ait irsaliye bulunmamaktadır.';
-    FWFirmayaAitSiparisIrsaliyeYoktur = 'Bu firmaya ait Sipariş ve İrsaliye bulunmamaktadır.';
+    FWKaynagaUygulansinmi = 'Ä°ÅŸlem Kaynak Belgeye de uygulansÄ±n mÄ±?';
+    FWHedefeUygulansinmi = 'Ä°ÅŸlem Hedef Belgeye de uygulansÄ±n mÄ±?';
+    FWKayitSilinemez = 'Bu Ã¼rÃ¼ne ait seri numaralarÄ± hareket gÃ¶rmÃ¼ÅŸ.KayÄ±t silinemez.';
+    FWKayitBelgeYilindanFarkliOlamaz = 'KayÄ±t yÄ±lÄ± belge yÄ±lÄ±ndan kÃ¼Ã§Ã¼k olamaz.';
+    FWKayitveBelgeTarihiIleriTarihOlamaz = 'KayÄ±t tarihi ve belge tarihi ileri bir gÃ¼n olamaz.';
+    FWSadeceRakamGir = 'Fatura numarasÄ±nda rakam dÄ±ÅŸÄ±nda karakter olamaz!';
+    FWFaturaNoKullanilmistir = ' tarihinde bu fatura numarasÄ± kullanÄ±lmÄ±ÅŸ!';
+    FWFislerdeEkranKullanilmaz = 'Belge tÃ¼rÃ¼ FiÅŸ olan kayÄ±tlar iÃ§in bu ekran kullanÄ±lamaz';
+    FWFirmayaAitSiparisYoktur = 'Bu firmaya ait sipariÅŸ bulunmamaktadÄ±r.';
+    FWFirmayaAitIrsaliyeYoktur = 'Bu firmaya ait irsaliye bulunmamaktadÄ±r.';
+    FWFirmayaAitSiparisIrsaliyeYoktur = 'Bu firmaya ait SipariÅŸ ve Ä°rsaliye bulunmamaktadÄ±r.';
     FWNoluFatura = 'Nolu Fatura';
-    FWFaturaninTahsilati = 'Nolu Faturanın Tahsilatı.';
-    FWFaturaninOdemesi = 'Nolu Faturanın Ödemesi.';
-    FWIadeurunbulunamadi='İade alınacak ürün bulunamadı';
-    FWBubasliktakikayitlarsilinsinmi='Bu başlığın altındaki bütün kayıtlar silinecektir. Onaylıyor musunuz?';
-    FWAdkullanilmis='Bu adla daha önce eklenmiş..';
-    KonsinyeDeismez='Konsinye carisi değişemez!';
-      Yetersiz_Miktar='Yetersiz miktar.. Başka bilgisayardan çıkılmış olabilir..';
+    FWFaturaninTahsilati = 'Nolu FaturanÄ±n TahsilatÄ±.';
+    FWFaturaninOdemesi = 'Nolu FaturanÄ±n Ã–demesi.';
+    FWIadeurunbulunamadi='Ä°ade alÄ±nacak Ã¼rÃ¼n bulunamadÄ±';
+    FWBubasliktakikayitlarsilinsinmi='Bu baÅŸlÄ±ÄŸÄ±n altÄ±ndaki bÃ¼tÃ¼n kayÄ±tlar silinecektir. OnaylÄ±yor musunuz?';
+    FWAdkullanilmis='Bu adla daha Ã¶nce eklenmiÅŸ..';
+    KonsinyeDeismez='Konsinye carisi deÄŸiÅŸemez!';
+      Yetersiz_Miktar='Yetersiz miktar.. BaÅŸka bilgisayardan Ã§Ä±kÄ±lmÄ±ÅŸ olabilir..';
   //UFatTransferWizard
-    FTWTransferleriSil = 'Önce Transfer satırlarını silmeniz gerekiyor';
-    FTWGirisDeposuBosOlamaz = 'Giriş Deposu boş olamaz';
-    FTWCikisDeposuBosOlamaz = 'Çıkış Deposu boş olamaz';
-    FTWDepolarAyniOlamaz = 'Giriş Çıkış Depoları aynı olamaz';
-    FTWTarihKucukOlamaz = 'Başlama bitişten sonra olamaz';
-    FTWTarihUzakOlamaz = 'Verdiğiniz tarih o kadar uzak olamaz';
+    FTWTransferleriSil = 'Ã–nce Transfer satÄ±rlarÄ±nÄ± silmeniz gerekiyor';
+    FTWGirisDeposuBosOlamaz = 'GiriÅŸ Deposu boÅŸ olamaz';
+    FTWCikisDeposuBosOlamaz = 'Ã‡Ä±kÄ±ÅŸ Deposu boÅŸ olamaz';
+    FTWDepolarAyniOlamaz = 'GiriÅŸ Ã‡Ä±kÄ±ÅŸ DepolarÄ± aynÄ± olamaz';
+    FTWTarihKucukOlamaz = 'BaÅŸlama bitiÅŸten sonra olamaz';
+    FTWTarihUzakOlamaz = 'VerdiÄŸiniz tarih o kadar uzak olamaz';
 
   //UMakbuzWizard
     MWTahsilat = 'Tahsilat ' ;
-    MWOdeme = 'Ödeme ';
+    MWOdeme = 'Ã–deme ';
     MWMakbuzNo= 'Makbuz No ';
-    MWSeciliMakbuzSilinecek = 'Seçili Makbuz satırı silinecektir. Onaylıyor musunuz?';
-    MWSatirGirilmisSilinemez = 'Girilmiş detay satırı var, değiştirilemez!';
+    MWSeciliMakbuzSilinecek = 'SeÃ§ili Makbuz satÄ±rÄ± silinecektir. OnaylÄ±yor musunuz?';
+    MWSatirGirilmisSilinemez = 'GirilmiÅŸ detay satÄ±rÄ± var, deÄŸiÅŸtirilemez!';
 
   //UTeklifWizard
   //Teklif
-    TETeklifSiparisiOlusturuldu='Bu Teklifin siparişi oluşturulmuştur.';
-    TESevkAdresiGir='Sevk adresi boş olamaz.';
+    TETeklifSiparisiOlusturuldu='Bu Teklifin sipariÅŸi oluÅŸturulmuÅŸtur.';
+    TESevkAdresiGir='Sevk adresi boÅŸ olamaz.';
     TWAlternatif = 'Alternatif ';
-    TWYeniTeklifeAit = 'Teklif kopyalandı. Ekrandaki görüntü yeni teklife aittir..';
-    TWDetaySatirBos='Teklif detay satırları boş olamaz.';
-    TWOnayIptal='Tüm Onaylar Kaldırılacaktır!';
-    TWSilinsinmi=' alanını silmek istiyor musunuz ?';
-    TWDikkatMusteriDegistirme='Dikkat! Bu teklifin müşterisini değiştiriyorsunuz. ';
+    TWYeniTeklifeAit = 'Teklif kopyalandÄ±. Ekrandaki gÃ¶rÃ¼ntÃ¼ yeni teklife aittir..';
+    TWDetaySatirBos='Teklif detay satÄ±rlarÄ± boÅŸ olamaz.';
+    TWOnayIptal='TÃ¼m Onaylar KaldÄ±rÄ±lacaktÄ±r!';
+    TWSilinsinmi=' alanÄ±nÄ± silmek istiyor musunuz ?';
+    TWDikkatMusteriDegistirme='Dikkat! Bu teklifin mÃ¼ÅŸterisini deÄŸiÅŸtiriyorsunuz. ';
 
   //UTalimatWizard
   //Talimatlar
-    SurecAdimindakiKullanici='Süreç adımındaki kullanıcı:';
-    KullaniciEklendi = 'Kullanıcı olarak eklendi';
-    TalimatSilinemez='Sürecin içerisinde işlem görmüş talimat. silinemez.' ;
-    BankaDeseniYok='Bu banka için desen bulunmamaktadır..';
-    TalWBankaTalimati = 'Banka Talimatı';
+    SurecAdimindakiKullanici='SÃ¼reÃ§ adÄ±mÄ±ndaki kullanÄ±cÄ±:';
+    KullaniciEklendi = 'KullanÄ±cÄ± olarak eklendi';
+    TalimatSilinemez='SÃ¼recin iÃ§erisinde iÅŸlem gÃ¶rmÃ¼ÅŸ talimat. silinemez.' ;
+    BankaDeseniYok='Bu banka iÃ§in desen bulunmamaktadÄ±r..';
+    TalWBankaTalimati = 'Banka TalimatÄ±';
     TalWTalimat = 'Talimat: ';
-    TalWTarihAralikOdeme = ' tarih aralığındaki ödeme.';
+    TalWTarihAralikOdeme = ' tarih aralÄ±ÄŸÄ±ndaki Ã¶deme.';
     TalWile = ' ile ';
-    TalWAlacaktanBuyukOlamaz = ' için yapılacak ödemede Borç, Alacaktan büyük olamaz..';
+    TalWAlacaktanBuyukOlamaz = ' iÃ§in yapÄ±lacak Ã¶demede BorÃ§, Alacaktan bÃ¼yÃ¼k olamaz..';
     TalWTalimatSlash = 'Talimat\';
-    TalWDosyayaYazilamadi = 'Dosya veritabanına yazılamadı!';
-    TalWKaydetmedenCikacakmisin = 'Yaptığınız değişiklikleri kaydetmeden çıkmak istediğinize emin misiniz?';
-    TalWIslemIptalEdiliyor = 'Kayıt işlemi iptal ediliyor.';
-    TalW14HaneliGiriniz = 'Başında 0 ile 14 haneli giriniz.';
-    TalWTurkceKarakterHaric = 'Türkçe karakter içermeden giriniz';
+    TalWDosyayaYazilamadi = 'Dosya veritabanÄ±na yazÄ±lamadÄ±!';
+    TalWKaydetmedenCikacakmisin = 'YaptÄ±ÄŸÄ±nÄ±z deÄŸiÅŸiklikleri kaydetmeden Ã§Ä±kmak istediÄŸinize emin misiniz?';
+    TalWIslemIptalEdiliyor = 'KayÄ±t iÅŸlemi iptal ediliyor.';
+    TalW14HaneliGiriniz = 'BaÅŸÄ±nda 0 ile 14 haneli giriniz.';
+    TalWTurkceKarakterHaric = 'TÃ¼rkÃ§e karakter iÃ§ermeden giriniz';
     TalWYeni = 'Yeni ';
-    TalWDegeri = ' Değeri';
-    TalWSeciliIsleminizYok = 'Seçili işleminiz yok!';
-    IslemUzunSurebilir = 'Bu işlem uzun sürebilir. Devam edilsin mi?';
+    TalWDegeri = ' DeÄŸeri';
+    TalWSeciliIsleminizYok = 'SeÃ§ili iÅŸleminiz yok!';
+    IslemUzunSurebilir = 'Bu iÅŸlem uzun sÃ¼rebilir. Devam edilsin mi?';
 
   //UAktiviteWizard
     AWNo ='No        :';
-    AWTuru = 'Türü';
+    AWTuru = 'TÃ¼rÃ¼';
     AWTipi = 'Tipi      :';
     AWSorumlu = 'Sorumlu   :';
     AWKapsam = 'Kapsam   :';
     AWAtayan = 'Atayan    :';
-    AWTakipci = 'Takipçi   :';
+    AWTakipci = 'TakipÃ§i   :';
     AWBilgi = 'Bilgi     :';
     AWKonusu = 'Konusu    :';
     AWKonum = 'Konum     :' ;
-    AWMusteri = 'Müşteri   :';
+    AWMusteri = 'MÃ¼ÅŸteri   :';
     AWDurum = 'Durum     :';
     AWPuan = 'Puan      :';
-    AWOncelik = 'Öncelik   :';
-    AWBaslangic = 'Başlama :';
-    AWBitis = 'Bitiş     :';
+    AWOncelik = 'Ã–ncelik   :';
+    AWBaslangic = 'BaÅŸlama :';
+    AWBitis = 'BitiÅŸ     :';
     AWNotlar = 'Notlar';
-    AWMusteriSecimiYap = 'Önce Müşteri Seçimi Yapmanız gerekmektedir.';
-    AWBuPersonelSecilemez = 'Seçilen personel bu tarihte izinli, bu personel seçilemez';
-    AWVekaletEdenSecilecek = 'Seçilen personel bu tarihte izinli, vekalet eden personel seçilecek.';
-    AWVekaletEdenSecilmemis = 'Seçilen personel bu tarihte izinli, vekalet edecek personel seçilmemiş. İzinler ekranından gerekli ayarlamayı yapıp tekrar deneyiniz.';
-    AWPersonelBuTarihteIzinli = 'Seçilen personel bu tarihte izinli';
-    AWGecmisTarihliSecilemez = 'Görev Başlangıç tarihi geçmiş tarihli seçilemez';
-    AWGorevBitisTarihiBuyukOlacak = 'Görev Bitiş tarihi Başlama tarihinden küçük olamaz';
-    AWGunSecimiYapmalisiniz = 'Öncelikle gün seçimi yapmalısınız';
-    AWTurBosOlamaz = 'Tür bilgisi boş olamaz';
-    AWDetayBilgileriniSilTekrarDene = 'Detay Kayıtları varken bu işlemi gerçekleştiremessiniz, detay bilgilerini silerek tekrar deneyiniz.';
-    AWAktarilamayanAlanalar = 'Aktarılamayan Alanlar:';
-    AWBoyleBirSablonArtikYok = 'Böyle bir şablon artık yok!';
-    AWAyniIsimdeSablonVar = 'Aynı isimde çok sayıda şablon var!';
-    AWKaydediliyorOnayliyormusun = 'Öncelikle yaptığınız değişikliklerin kaydedilmesi gerekmektedir. Onaylıyor musunuz?';
-    AWBitisTarihiKucukOlamaz = 'Bitiş tarihi başlama tarihinden küçük olamaz!';
-    AWOnceMusteriSecin = 'Önce müşteri seçin!';
-    AWAktiviteTuru = 'Aktivite Türü';
+    AWMusteriSecimiYap = 'Ã–nce MÃ¼ÅŸteri SeÃ§imi YapmanÄ±z gerekmektedir.';
+    AWBuPersonelSecilemez = 'SeÃ§ilen personel bu tarihte izinli, bu personel seÃ§ilemez';
+    AWVekaletEdenSecilecek = 'SeÃ§ilen personel bu tarihte izinli, vekalet eden personel seÃ§ilecek.';
+    AWVekaletEdenSecilmemis = 'SeÃ§ilen personel bu tarihte izinli, vekalet edecek personel seÃ§ilmemiÅŸ. Ä°zinler ekranÄ±ndan gerekli ayarlamayÄ± yapÄ±p tekrar deneyiniz.';
+    AWPersonelBuTarihteIzinli = 'SeÃ§ilen personel bu tarihte izinli';
+    AWGecmisTarihliSecilemez = 'GÃ¶rev BaÅŸlangÄ±Ã§ tarihi geÃ§miÅŸ tarihli seÃ§ilemez';
+    AWGorevBitisTarihiBuyukOlacak = 'GÃ¶rev BitiÅŸ tarihi BaÅŸlama tarihinden kÃ¼Ã§Ã¼k olamaz';
+    AWGunSecimiYapmalisiniz = 'Ã–ncelikle gÃ¼n seÃ§imi yapmalÄ±sÄ±nÄ±z';
+    AWTurBosOlamaz = 'TÃ¼r bilgisi boÅŸ olamaz';
+    AWDetayBilgileriniSilTekrarDene = 'Detay KayÄ±tlarÄ± varken bu iÅŸlemi gerÃ§ekleÅŸtiremessiniz, detay bilgilerini silerek tekrar deneyiniz.';
+    AWAktarilamayanAlanalar = 'AktarÄ±lamayan Alanlar:';
+    AWBoyleBirSablonArtikYok = 'BÃ¶yle bir ÅŸablon artÄ±k yok!';
+    AWAyniIsimdeSablonVar = 'AynÄ± isimde Ã§ok sayÄ±da ÅŸablon var!';
+    AWKaydediliyorOnayliyormusun = 'Ã–ncelikle yaptÄ±ÄŸÄ±nÄ±z deÄŸiÅŸikliklerin kaydedilmesi gerekmektedir. OnaylÄ±yor musunuz?';
+    AWBitisTarihiKucukOlamaz = 'BitiÅŸ tarihi baÅŸlama tarihinden kÃ¼Ã§Ã¼k olamaz!';
+    AWOnceMusteriSecin = 'Ã–nce mÃ¼ÅŸteri seÃ§in!';
+    AWAktiviteTuru = 'Aktivite TÃ¼rÃ¼';
     AWSorumluBilgisi = 'Sorumlu Bilgisi';
     AWAktiviteKonusu = 'Aktivite Konusu';
-    AWYeniFirmaAdi = 'Yeni Firma Adı.';
-    AWSablonAdiniGiriniz = 'Şablon Adını Giriniz';
-    AWSablonTanımlandi = 'Şablon Tanımlandı';
+    AWYeniFirmaAdi = 'Yeni Firma AdÄ±.';
+    AWSablonAdiniGiriniz = 'Åablon AdÄ±nÄ± Giriniz';
+    AWSablonTanÄ±mlandi = 'Åablon TanÄ±mlandÄ±';
     AWSorumluOldugunAktiviteVar = 'Sorumlu olarak atandiginiz yeni bir aktivite var.Aktivite No:';
     AWTakipciOldugunAktiviteVar = 'Takipci olarak atandiginiz yeni bir aktivite var.Aktivite No:';
     AWBilgilendirilecekOldugunAktiviteVar = 'Bilgilendirilecek kisi olarak secildiginiz yeni bir aktivite var.Aktivite No:';
-    AWNotGirisiSilinebilir = 'Not girişi sadece ekleyen kullanıcı tarafından silinebilir';
-    AWNotSahibiDuzenlemeYapabilir = 'Bu not üzerinde sadece not sahibi düzenleme yapabilir';
-    AWSorumluHaricindeEklemeYapılmazAltEkle = 'Sorumlu haricinde ekleme yapılmaz.Ancak alta ekleme yapabilirsiniz.';
-    AWSorumluHaricindeDegisYapilmaz = 'Sorumlu haricinde değişiklik yapılmaz.';
-    AWSorumluHaricindeEklemeYapilmaz = 'Sorumlu haricinde ekleme yapılmaz.';
-    AWGoreviAtayanHaricindeOnaylandiYapilmaz = 'Görevi Atayan haricinde Onaylandı yapılmaz.';
-    AWSorumluHaricindeSilmeYapilmaz = 'Sorumlu haricinde silme yapılmaz.';
-    AWGoreviAtayanVeSorumluAyniOlamaz = 'Görevi Atayan ve Sorumlu aynı olamaz.';
+    AWNotGirisiSilinebilir = 'Not giriÅŸi sadece ekleyen kullanÄ±cÄ± tarafÄ±ndan silinebilir';
+    AWNotSahibiDuzenlemeYapabilir = 'Bu not Ã¼zerinde sadece not sahibi dÃ¼zenleme yapabilir';
+    AWSorumluHaricindeEklemeYapÄ±lmazAltEkle = 'Sorumlu haricinde ekleme yapÄ±lmaz.Ancak alta ekleme yapabilirsiniz.';
+    AWSorumluHaricindeDegisYapilmaz = 'Sorumlu haricinde deÄŸiÅŸiklik yapÄ±lmaz.';
+    AWSorumluHaricindeEklemeYapilmaz = 'Sorumlu haricinde ekleme yapÄ±lmaz.';
+    AWGoreviAtayanHaricindeOnaylandiYapilmaz = 'GÃ¶revi Atayan haricinde OnaylandÄ± yapÄ±lmaz.';
+    AWSorumluHaricindeSilmeYapilmaz = 'Sorumlu haricinde silme yapÄ±lmaz.';
+    AWGoreviAtayanVeSorumluAyniOlamaz = 'GÃ¶revi Atayan ve Sorumlu aynÄ± olamaz.';
 
 
   //UBankaTanimWizard
-    BTWIBANGecersiz = 'IBAN Numarası Geçersiz!';
-    BTWYeniBankaGir = 'Yeni Banka Adını Giriniz.';
-    BTWBankaAdi = 'Banka Adı:';
-    BTWBankaAdiBosOlamaz = 'Banka Adı Boş Olamaz.';
-    BTWYeniSubeGir = 'Yeni Şube Adını Giriniz.';
-    BTWSubeAdi = 'Şube Adı:';
-    BTWSubeAdiBosOlamaz = 'Şube Adı Boş Olamaz.';
-    BTWYeniSubeKoduGir = 'Yeni Şube Kodunu Giriniz.';
-    BTWSubeKoduBosOlamaz = 'Şube Kodu Boş Olamaz.';
+    BTWIBANGecersiz = 'IBAN NumarasÄ± GeÃ§ersiz!';
+    BTWYeniBankaGir = 'Yeni Banka AdÄ±nÄ± Giriniz.';
+    BTWBankaAdi = 'Banka AdÄ±:';
+    BTWBankaAdiBosOlamaz = 'Banka AdÄ± BoÅŸ Olamaz.';
+    BTWYeniSubeGir = 'Yeni Åube AdÄ±nÄ± Giriniz.';
+    BTWSubeAdi = 'Åube AdÄ±:';
+    BTWSubeAdiBosOlamaz = 'Åube AdÄ± BoÅŸ Olamaz.';
+    BTWYeniSubeKoduGir = 'Yeni Åube Kodunu Giriniz.';
+    BTWSubeKoduBosOlamaz = 'Åube Kodu BoÅŸ Olamaz.';
 
   //UOpsDlg
-    ODlgHerYilTatikicin = ' Her yıl,  tatil için';
-    ODlgTatilinAdiniGiriniz = 'Tatilin adını giriniz :';
-    ODlgGunuGiriniz = 'Günü giriniz :';
-    ODlgAyiGiriniz = 'Ayı Giriniz';
-    ODlgOnayliyormusunu = ' silinecektir. Onaylıyor musunuz?';
-    ODlgAktifFisKocanNo = 'Fiş Koçan No:';
-    ODlgAktifFaturaKocanNo = 'Fatura Koçan No:';
-    ODlgAktifIrsaliyeKocanNo = 'İrsaliye Koçan No:';
-    ODlgAktifAlisSiparisKocanNo = 'Alış Siparişi Koçan No:';
-    ODlgAktifSatisSiparisKocanNo = 'SatışSiparişi Koçan No:';
-    ODlgAktifGiderPusulasiKocanNo = 'Gider Pusulası Koçan No:';
-    ODlgAktifIrsaliyeliFaturaKocanNo = 'İrsaliyeli Fatura Koçan No:';
-    ODlgAktifTransferKocanNo = 'Transfer Fişi Koçan No:';
-    ODlgAktifServisKocanNo = 'Servis Fişi Koçan No:';
-    ODlgAktifATeklifKocanNo = 'Alınan Teklif Koçan No:';
-    ODlgAktifVTeklifKocanNo = 'Verilen Teklif Koçan No:';
+    ODlgHerYilTatikicin = ' Her yÄ±l,  tatil iÃ§in';
+    ODlgTatilinAdiniGiriniz = 'Tatilin adÄ±nÄ± giriniz :';
+    ODlgGunuGiriniz = 'GÃ¼nÃ¼ giriniz :';
+    ODlgAyiGiriniz = 'AyÄ± Giriniz';
+    ODlgOnayliyormusunu = ' silinecektir. OnaylÄ±yor musunuz?';
+    ODlgAktifFisKocanNo = 'FiÅŸ KoÃ§an No:';
+    ODlgAktifFaturaKocanNo = 'Fatura KoÃ§an No:';
+    ODlgAktifIrsaliyeKocanNo = 'Ä°rsaliye KoÃ§an No:';
+    ODlgAktifAlisSiparisKocanNo = 'AlÄ±ÅŸ SipariÅŸi KoÃ§an No:';
+    ODlgAktifSatisSiparisKocanNo = 'SatÄ±ÅŸSipariÅŸi KoÃ§an No:';
+    ODlgAktifGiderPusulasiKocanNo = 'Gider PusulasÄ± KoÃ§an No:';
+    ODlgAktifIrsaliyeliFaturaKocanNo = 'Ä°rsaliyeli Fatura KoÃ§an No:';
+    ODlgAktifTransferKocanNo = 'Transfer FiÅŸi KoÃ§an No:';
+    ODlgAktifServisKocanNo = 'Servis FiÅŸi KoÃ§an No:';
+    ODlgAktifATeklifKocanNo = 'AlÄ±nan Teklif KoÃ§an No:';
+    ODlgAktifVTeklifKocanNo = 'Verilen Teklif KoÃ§an No:';
 
     ODlgAktifTahsilKocanNo = 'Tahsilat Makbuz No:';
     ODlgAktifTediyeKocanNo = 'Tediye Makbuz No:';
@@ -1417,762 +1417,762 @@ resourcestring
 
 
 
-    ODlgBayraminilkGununun = ' bayramının ilk gününün';
-    ODlgGununuGiriniz = 'Gününü giriniz :';
-    ODlgAyiniGiriniz = 'Ayını Giriniz';
-    ODlgStilTanimiYapiniz = 'Önce stil tanımı yapmanız gerekmektedir.';
-    ODlgStilKosulSilinecektir = 'Seçili Stil koşul tanımı silinecektir. Onaylıyor musunuz?';
-    ODlgStilSilinecektir = 'Seçili Stil tanımı silinecektir. Onaylıyor musunuz?';
-    ODlgSMSServisBosOlamaz = 'SMS Servisi Boş Olamaz';
-    ODlgBilgilerBosBirakilamaz = 'Kullanıcı Adı-Şifre-Başlık bilgileri boş olamaz';
-    ODlgStilAdiBosBirakilamaz = 'Stil Adı Boş Bırakılamaz';
+    ODlgBayraminilkGununun = ' bayramÄ±nÄ±n ilk gÃ¼nÃ¼nÃ¼n';
+    ODlgGununuGiriniz = 'GÃ¼nÃ¼nÃ¼ giriniz :';
+    ODlgAyiniGiriniz = 'AyÄ±nÄ± Giriniz';
+    ODlgStilTanimiYapiniz = 'Ã–nce stil tanÄ±mÄ± yapmanÄ±z gerekmektedir.';
+    ODlgStilKosulSilinecektir = 'SeÃ§ili Stil koÅŸul tanÄ±mÄ± silinecektir. OnaylÄ±yor musunuz?';
+    ODlgStilSilinecektir = 'SeÃ§ili Stil tanÄ±mÄ± silinecektir. OnaylÄ±yor musunuz?';
+    ODlgSMSServisBosOlamaz = 'SMS Servisi BoÅŸ Olamaz';
+    ODlgBilgilerBosBirakilamaz = 'KullanÄ±cÄ± AdÄ±-Åifre-BaÅŸlÄ±k bilgileri boÅŸ olamaz';
+    ODlgStilAdiBosBirakilamaz = 'Stil AdÄ± BoÅŸ BÄ±rakÄ±lamaz';
 
   //UNakitDlg
-    NDTutarDoluOlmali = 'Tutar dolu olmalı!';
-    NDAlis = 'Alış: ';
-    NDSatis = 'Satış: ';
-    NDEfAlis = 'Ef.Alış: ';
-    NDEfSatis = 'Ef.Satış: ';
+    NDTutarDoluOlmali = 'Tutar dolu olmalÄ±!';
+    NDAlis = 'AlÄ±ÅŸ: ';
+    NDSatis = 'SatÄ±ÅŸ: ';
+    NDEfAlis = 'Ef.AlÄ±ÅŸ: ';
+    NDEfSatis = 'Ef.SatÄ±ÅŸ: ';
     NDPos = 'POS: ';
-    NDKurBilgisiBosOlamaz = 'Kur Bilgisi Boş Olamaz';
+    NDKurBilgisiBosOlamaz = 'Kur Bilgisi BoÅŸ Olamaz';
     NDBakiyeYetersiz = 'Bakiye yetersiz!';
     NDBakiyeYetersizDevammi ='Bakiye yetersiz! Yine de devam etsin mi?';
     NDKalanBakiye = 'Kalan Bakiye:';
 
   //URehAraDlg
-    RDAksiyonSilinsinmi = 'Seçilen aksiyonlar silinsin mi?';
+    RDAksiyonSilinsinmi = 'SeÃ§ilen aksiyonlar silinsin mi?';
     RDYorumMedyaVarSilinemez = 'Yorum/Medya var, Silinemez!';
-    RDDOFVarSilinemez = 'DÖF bilgisi var, Silinemez!';
-    RDGorevVarSilinemez = 'Görev bilgisi var, Silinemez!';
+    RDDOFVarSilinemez = 'DÃ–F bilgisi var, Silinemez!';
+    RDGorevVarSilinemez = 'GÃ¶rev bilgisi var, Silinemez!';
     RDAnaFirmaSilinemez = 'Ana Firma Silinemez!';
-    RDYoneticiKullaniciSilinemez = 'Yönetici Kullanıcı Silinemez!';
-    RDKrediTanimiSilinemez = 'Kredi Tanımı Silinemez!';
-    RDBankaTanimiSilinemez = 'Banka Tanımı Silinemez!';
-    RDPlanVerisiVarSilinemez = ' tarihinde girilmiş ödeme,tahsilat veya plan verisi var, silinemez!';
-    RDFaturaVerisiVarSilinemez = 'Girilmiş fatura verisi var, silinemez!';
-    RDCekVerisiVarSilinemez = 'Girilmiş çek verisi var, silinemez!';
-    RDSenetVerisiVarSilinemez = 'Girilmiş senet verisi var, silinemez!';
-    RDPersonelBigisiVarSilinemez = 'Girilmiş personel bilgisi var, silinemez!';
-    RDiletisimBigisiVarSilinemez = 'Girilmiş iletişim bilgisi var, silinemez!';
-    RDBankaVerisiVarSilinemez = 'Girilmiş banka bilgisi var, silinemez!';
-    RDProjeVerisiVarSilinemez = 'Girilmiş proje bilgisi var, silinemez!';
-    RDAktiviteVerisiVarSilinemez = 'Girilmiş aktivite verisi var, silinemez!';
-    RDTeklifVerisiVarSilinemez = 'Girilmiş teklif verisi var, silinemez!';
-    RDServisVerisiVarSilinemez = 'Girilmiş servis verisi var, silinemez!';
-    RDServisHarVerisiVarSilinemez = 'Girilmiş birden çok hareket verisi var, silinemez!';
-    RDServisTekHareketVarSilinemez = 'Bir serviste en az bir hareket olmalıdır, silinemez!';
-    RDKararVerisiVarSilinemez = 'Girilmiş karar verisi var, silinemez!';
-    RDDokumanVerisiVarSilinemez = 'Girilmiş döküman verisi var, silinemez!';
-    RDYeniilgiliADSoyadGir = 'Yeni İlgili Adı-Soyadını Giriniz.';
-    RDIlgiliIletisimSec = 'Kopyalanacak İletişim Bilgilerini Seçiniz.';
-    RDIletisimAdresiSecimi = 'İletişim Adresi Seçimi';
+    RDYoneticiKullaniciSilinemez = 'YÃ¶netici KullanÄ±cÄ± Silinemez!';
+    RDKrediTanimiSilinemez = 'Kredi TanÄ±mÄ± Silinemez!';
+    RDBankaTanimiSilinemez = 'Banka TanÄ±mÄ± Silinemez!';
+    RDPlanVerisiVarSilinemez = ' tarihinde girilmiÅŸ Ã¶deme,tahsilat veya plan verisi var, silinemez!';
+    RDFaturaVerisiVarSilinemez = 'GirilmiÅŸ fatura verisi var, silinemez!';
+    RDCekVerisiVarSilinemez = 'GirilmiÅŸ Ã§ek verisi var, silinemez!';
+    RDSenetVerisiVarSilinemez = 'GirilmiÅŸ senet verisi var, silinemez!';
+    RDPersonelBigisiVarSilinemez = 'GirilmiÅŸ personel bilgisi var, silinemez!';
+    RDiletisimBigisiVarSilinemez = 'GirilmiÅŸ iletiÅŸim bilgisi var, silinemez!';
+    RDBankaVerisiVarSilinemez = 'GirilmiÅŸ banka bilgisi var, silinemez!';
+    RDProjeVerisiVarSilinemez = 'GirilmiÅŸ proje bilgisi var, silinemez!';
+    RDAktiviteVerisiVarSilinemez = 'GirilmiÅŸ aktivite verisi var, silinemez!';
+    RDTeklifVerisiVarSilinemez = 'GirilmiÅŸ teklif verisi var, silinemez!';
+    RDServisVerisiVarSilinemez = 'GirilmiÅŸ servis verisi var, silinemez!';
+    RDServisHarVerisiVarSilinemez = 'GirilmiÅŸ birden Ã§ok hareket verisi var, silinemez!';
+    RDServisTekHareketVarSilinemez = 'Bir serviste en az bir hareket olmalÄ±dÄ±r, silinemez!';
+    RDKararVerisiVarSilinemez = 'GirilmiÅŸ karar verisi var, silinemez!';
+    RDDokumanVerisiVarSilinemez = 'GirilmiÅŸ dÃ¶kÃ¼man verisi var, silinemez!';
+    RDYeniilgiliADSoyadGir = 'Yeni Ä°lgili AdÄ±-SoyadÄ±nÄ± Giriniz.';
+    RDIlgiliIletisimSec = 'Kopyalanacak Ä°letiÅŸim Bilgilerini SeÃ§iniz.';
+    RDIletisimAdresiSecimi = 'Ä°letiÅŸim Adresi SeÃ§imi';
     RDAdSoyad = 'Ad-Soyad: ';
-    RDIlgiliGecmisi = 'İlgili Geçmişi';
-    RDGirilmisBankaBilgisiVarSilinemez = ' tarihinde girilmiş banka bilgisi var, silinemez!';
-    RDOnceAramaYapin = 'Önce arama yapın!';
-    RDAlisveSatisBelgeKopyalayin = 'Alış ve Satış belgelerini kopyalayabilirsiniz.';
+    RDIlgiliGecmisi = 'Ä°lgili GeÃ§miÅŸi';
+    RDGirilmisBankaBilgisiVarSilinemez = ' tarihinde girilmiÅŸ banka bilgisi var, silinemez!';
+    RDOnceAramaYapin = 'Ã–nce arama yapÄ±n!';
+    RDAlisveSatisBelgeKopyalayin = 'AlÄ±ÅŸ ve SatÄ±ÅŸ belgelerini kopyalayabilirsiniz.';
 
   //UTahakkukDlg
-    TDTutarDoluOlmali = 'Tutar dolu olmalı!';
+    TDTutarDoluOlmali = 'Tutar dolu olmalÄ±!';
 
   //UStokListeDlg
     SDStok = 'Stok';
-    SDKSeviyeMiktariBilgisi = ' için Seviye Bilgisi';
+    SDKSeviyeMiktariBilgisi = ' iÃ§in Seviye Bilgisi';
     SDKMaksimumSeviyeMiktariGir = 'Maksimum Seviye Miktar Giriniz';
     SDKMinimumSeviyeMiktariGir = 'Minimum Seviye Miktar Giriniz';
     SDKKritikSeviyeMiktariGir = 'Kritik Seviye Miktar Giriniz';
-    SDBaglantiZamanAsimi = '-Bağlantı Zaman Aşımı!';
-    SDKartTanimliDegil = '-Kart Tanımlı Değil!';
-    SDStokSayimVerisiVarSilinemez = 'Girilmiş stok sayımı verisi var, silinemez!';
-    SDStokVerisiVarSilinemez = 'Girilmiş stok verisi var, silinemez!';
+    SDBaglantiZamanAsimi = '-BaÄŸlantÄ± Zaman AÅŸÄ±mÄ±!';
+    SDKartTanimliDegil = '-Kart TanÄ±mlÄ± DeÄŸil!';
+    SDStokSayimVerisiVarSilinemez = 'GirilmiÅŸ stok sayÄ±mÄ± verisi var, silinemez!';
+    SDStokVerisiVarSilinemez = 'GirilmiÅŸ stok verisi var, silinemez!';
     SDStokDetayKopyalansinMi = 'Detay bilgilerini de kopyalamak ister misiniz?';
-    SDStokEkleme = 'Giriş';
-    SDStokCikartma = 'Çıkış';
+    SDStokEkleme = 'GiriÅŸ';
+    SDStokCikartma = 'Ã‡Ä±kÄ±ÅŸ';
     SDStokTiransfer = 'Transfer';
     SDStokDurum = 'Durum';
-    SDStokGirisDepo = 'Giriş Depo';
-    SDStokCikisDepo = 'Çıkış Depo';
-    SDVarsayilan_Depo='Varsayılan Depo';
-    SDStokAciklama = 'Açıklama';
+    SDStokGirisDepo = 'GiriÅŸ Depo';
+    SDStokCikisDepo = 'Ã‡Ä±kÄ±ÅŸ Depo';
+    SDVarsayilan_Depo='VarsayÄ±lan Depo';
+    SDStokAciklama = 'AÃ§Ä±klama';
 
   //STOK
-    STUrun_var='Bu ürün daha önce eklenmiş;' ;
-    STYeniSatir=' Yeni bir satır daha eklemek istiyor musunuz)';
-    STUzerine_ekle=' Üzerine eklemek için Evet';
-    STYeni_satir_hayir=' Yeni Satır için Hayır';
-    STIptale_tiklayin=' İşlemi iptal etmek için İptal e tıklayın' ;
-    STBu_islem_var='Bu hizmet daha önce eklenmiş;' ;
-    STeklemek_icin_Evet=' Üzerine eklemek için Evet';
-    STSatir_hayir='Yeni Satır için Hayır' ;
-    STIslem_iptal=' İşlemi iptal etmek için İptal e tıklayın';
+    STUrun_var='Bu Ã¼rÃ¼n daha Ã¶nce eklenmiÅŸ;' ;
+    STYeniSatir=' Yeni bir satÄ±r daha eklemek istiyor musunuz)';
+    STUzerine_ekle=' Ãœzerine eklemek iÃ§in Evet';
+    STYeni_satir_hayir=' Yeni SatÄ±r iÃ§in HayÄ±r';
+    STIptale_tiklayin=' Ä°ÅŸlemi iptal etmek iÃ§in Ä°ptal e tÄ±klayÄ±n' ;
+    STBu_islem_var='Bu hizmet daha Ã¶nce eklenmiÅŸ;' ;
+    STeklemek_icin_Evet=' Ãœzerine eklemek iÃ§in Evet';
+    STSatir_hayir='Yeni SatÄ±r iÃ§in HayÄ±r' ;
+    STIslem_iptal=' Ä°ÅŸlemi iptal etmek iÃ§in Ä°ptal e tÄ±klayÄ±n';
     STstok_adi='STOKADI'  ;
-    STListeden_cik=' listeden çıksın mı?' ;
-    STUrun_listede_var='Seçilen ürün listede vardır.' ;
-    STKilide_islem_yapilamaz='Kilit tarihi ve öncesine işlem yapılamaz !' ;
-    DahaOnceEklenmis='Daha önce eklenmiş!' ;
-    STRecete_bulunamadi='Kayıtlı Reçete Bulunamadı.';
-    STsil_tekrar_dene='Birden fazla sayıda reçete bulundu.. Lütfen fazla reçeteleri silerek tekrar deneyin.';
-    STOnce_sil='Önce sayım kalemlerini silmeniz gerekmektedir.' ;
-    STDepo_bos_olmaz='Sayım Depo Bilgisi Boş olamaz' ;
-    STFiyat_gir='Fiyat Adı Boş Olamaz' ;
-    STHepsi_silinecek_onay='Bütün Sayım Kalemleri Temizlenecektir. Onaylıyor musunuz?';
-    STDuzenleniyor_tekrar_dene='Sayım Tutanağındaki düzenleme modunda, işlemi tamamladıktan sonra tekrar deneyiniz.';
-    STTutanak_onayla='Stok Durumu güncellemek için sayım tutanağının onaylanmış olması gerekmektedir.';
-    STUrun_kaydi_yok='Sayım Tutanağında ürün kaydı bulunamadı' ;
-    STOnaylanmamis_sayim_ekran_kapansinmi='Sistemde henüz Onaylanmamış sayım var, Ekranı kapatmak istiyor musunuz?' ;
-    STsayim_sil_onay='Seçili sayım bilgisi silinecektir. Onaylıyor musunuz?' ;
-    STAktarim_kosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):Kod (Yazı),'+#13+#10+
-              '     * sütun2(B):Ad (Yazı),'+#13+#10+
-              '     * sütun3(C):Birim (Yazı),'+#13+#10+
-              '     * sütun4(D):Adet (Numerik),'+#13+#10+
-              '     * sütun5(E):Birim Fiyat (Numerik)'+#13+#10+
-              '     * sütun6(F):Sonuç Alanı (Boş, bu alan aktarım sırasında doldurulacaktır)'+#13+#10+
-              '   öğelerine sahip olmalıdır.'      ;
-    STAktarim_tamam='Aktarım tamamlandı.';
-    STListede_var='Seçilen ürün listede vardır.';
-    STAlan_silinsinmi=' alanını silmek istiyor musunuz ?' ;
-    STStokfiyat_kontrol_et='Opsiyonlar/Stok/Fiyat Listelerinden StokFiyatları kontrol ediniz.';
-    STMarka_sec='Model Tanımı yapabilmek için Marka Seçilmelidir';
-    STBarkodu_doldur='Barkod Bilgisi Boş Olamaz' ;
-    STGecerli_deger_gir='Barkod birimi için geçerli bir değer seçiniz';
-    STStokkart_tanimli_deger_gir='Barkod birimi için stok kartında tanımlı olan bir değer giriniz' ;
-    STAciklama_alani_doldur='Açıklama alanı boş olamaz';
-    STUrun_once_girilmis=' kodlu ürün daha önce girilmiş';
-    STKampanya_kodu_degistir='Kampanya Kodu farklı olmalı.';
-    STKampanya_adi_degistir='Kampanya Adı farklı olmalı.';
-    STkod_sifir_olamaz='Kod Sıfır(0) olamaz'  ;
+    STListeden_cik=' listeden Ã§Ä±ksÄ±n mÄ±?' ;
+    STUrun_listede_var='SeÃ§ilen Ã¼rÃ¼n listede vardÄ±r.' ;
+    STKilide_islem_yapilamaz='Kilit tarihi ve Ã¶ncesine iÅŸlem yapÄ±lamaz !' ;
+    DahaOnceEklenmis='Daha Ã¶nce eklenmiÅŸ!' ;
+    STRecete_bulunamadi='KayÄ±tlÄ± ReÃ§ete BulunamadÄ±.';
+    STsil_tekrar_dene='Birden fazla sayÄ±da reÃ§ete bulundu.. LÃ¼tfen fazla reÃ§eteleri silerek tekrar deneyin.';
+    STOnce_sil='Ã–nce sayÄ±m kalemlerini silmeniz gerekmektedir.' ;
+    STDepo_bos_olmaz='SayÄ±m Depo Bilgisi BoÅŸ olamaz' ;
+    STFiyat_gir='Fiyat AdÄ± BoÅŸ Olamaz' ;
+    STHepsi_silinecek_onay='BÃ¼tÃ¼n SayÄ±m Kalemleri Temizlenecektir. OnaylÄ±yor musunuz?';
+    STDuzenleniyor_tekrar_dene='SayÄ±m TutanaÄŸÄ±ndaki dÃ¼zenleme modunda, iÅŸlemi tamamladÄ±ktan sonra tekrar deneyiniz.';
+    STTutanak_onayla='Stok Durumu gÃ¼ncellemek iÃ§in sayÄ±m tutanaÄŸÄ±nÄ±n onaylanmÄ±ÅŸ olmasÄ± gerekmektedir.';
+    STUrun_kaydi_yok='SayÄ±m TutanaÄŸÄ±nda Ã¼rÃ¼n kaydÄ± bulunamadÄ±' ;
+    STOnaylanmamis_sayim_ekran_kapansinmi='Sistemde henÃ¼z OnaylanmamÄ±ÅŸ sayÄ±m var, EkranÄ± kapatmak istiyor musunuz?' ;
+    STsayim_sil_onay='SeÃ§ili sayÄ±m bilgisi silinecektir. OnaylÄ±yor musunuz?' ;
+    STAktarim_kosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):Kod (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun2(B):Ad (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun3(C):Birim (YazÄ±),'+#13+#10+
+              '     * sÃ¼tun4(D):Adet (Numerik),'+#13+#10+
+              '     * sÃ¼tun5(E):Birim Fiyat (Numerik)'+#13+#10+
+              '     * sÃ¼tun6(F):SonuÃ§ AlanÄ± (BoÅŸ, bu alan aktarÄ±m sÄ±rasÄ±nda doldurulacaktÄ±r)'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.'      ;
+    STAktarim_tamam='AktarÄ±m tamamlandÄ±.';
+    STListede_var='SeÃ§ilen Ã¼rÃ¼n listede vardÄ±r.';
+    STAlan_silinsinmi=' alanÄ±nÄ± silmek istiyor musunuz ?' ;
+    STStokfiyat_kontrol_et='Opsiyonlar/Stok/Fiyat Listelerinden StokFiyatlarÄ± kontrol ediniz.';
+    STMarka_sec='Model TanÄ±mÄ± yapabilmek iÃ§in Marka SeÃ§ilmelidir';
+    STBarkodu_doldur='Barkod Bilgisi BoÅŸ Olamaz' ;
+    STGecerli_deger_gir='Barkod birimi iÃ§in geÃ§erli bir deÄŸer seÃ§iniz';
+    STStokkart_tanimli_deger_gir='Barkod birimi iÃ§in stok kartÄ±nda tanÄ±mlÄ± olan bir deÄŸer giriniz' ;
+    STAciklama_alani_doldur='AÃ§Ä±klama alanÄ± boÅŸ olamaz';
+    STUrun_once_girilmis=' kodlu Ã¼rÃ¼n daha Ã¶nce girilmiÅŸ';
+    STKampanya_kodu_degistir='Kampanya Kodu farklÄ± olmalÄ±.';
+    STKampanya_adi_degistir='Kampanya AdÄ± farklÄ± olmalÄ±.';
+    STkod_sifir_olamaz='Kod SÄ±fÄ±r(0) olamaz'  ;
     STkategorisinde=' kategorisinde '  ;
-    STKayit_etkilendi=' kayıt etkilenmiştir.' ;
-    STKayit_bulunamadi=' kategorisinde uygulanacak kayıt bulunamadı.';
-    STHareketli_Silinemez='Hareket görmüş kayıt silinemez!';
-    STBirimler_farkli_degismez='Anabirim ve 2.birim farklı.. Değiştirilemez!' ;
+    STKayit_etkilendi=' kayÄ±t etkilenmiÅŸtir.' ;
+    STKayit_bulunamadi=' kategorisinde uygulanacak kayÄ±t bulunamadÄ±.';
+    STHareketli_Silinemez='Hareket gÃ¶rmÃ¼ÅŸ kayÄ±t silinemez!';
+    STBirimler_farkli_degismez='Anabirim ve 2.birim farklÄ±.. DeÄŸiÅŸtirilemez!' ;
     STDepo_adi='DEPOADI' ;
-    STDepo_silinsinmi=' adlı depo silinsin mi?';
-    STBarkod_uretiminde='Barkod üretiminde;'+#13#10
-                +'"_" karakteri, barkodun sayaç bölümünü,'+#13#10
-                +'"#" karakteri, barkodun miktar(gram/kg) bölümünü'+#13#10
-                +'"$" karakteri, barkodun miktar(Adet) bölümünü'+#13#10
-                +'"G" karakteri, barkodun Gün bölümünü'+#13#10
-                +'"A" karakteri, barkodun Ay bölümünü'+#13#10
-                +'"Y" karakteri, barkodun Yıl bölümünü(2 veya 4 karekter)'+#13#10
-                +'"L" karakteri, barkodun Lot Numarasını'+#13#10
-                +'"S" karakteri, barkodun Seri Numarasını'+#13#10
-                +'"C" karakteri, barkodun Checksum bölümünü'+#13#10
+    STDepo_silinsinmi=' adlÄ± depo silinsin mi?';
+    STBarkod_uretiminde='Barkod Ã¼retiminde;'+#13#10
+                +'"_" karakteri, barkodun sayaÃ§ bÃ¶lÃ¼mÃ¼nÃ¼,'+#13#10
+                +'"#" karakteri, barkodun miktar(gram/kg) bÃ¶lÃ¼mÃ¼nÃ¼'+#13#10
+                +'"$" karakteri, barkodun miktar(Adet) bÃ¶lÃ¼mÃ¼nÃ¼'+#13#10
+                +'"G" karakteri, barkodun GÃ¼n bÃ¶lÃ¼mÃ¼nÃ¼'+#13#10
+                +'"A" karakteri, barkodun Ay bÃ¶lÃ¼mÃ¼nÃ¼'+#13#10
+                +'"Y" karakteri, barkodun YÄ±l bÃ¶lÃ¼mÃ¼nÃ¼(2 veya 4 karekter)'+#13#10
+                +'"L" karakteri, barkodun Lot NumarasÄ±nÄ±'+#13#10
+                +'"S" karakteri, barkodun Seri NumarasÄ±nÄ±'+#13#10
+                +'"C" karakteri, barkodun Checksum bÃ¶lÃ¼mÃ¼nÃ¼'+#13#10
                 +'"O" karakteri, barkodun 1. Boyutunu'+#13#10
                 +'"P" karakteri, barkodun 2. Boyutunu'+#13#10
                 +'"Q" karakteri, barkodun 3. Boyutunu'+#13#10
-                +'gösterir'      ;
-    STDepo_hareketli_silinmez='Depo hareket görmüştür, silinemez.';
-    STDepo_SiparişHareketi_silinemez='Depo sipariş hareketi görmüştür, silinemez.';
+                +'gÃ¶sterir'      ;
+    STDepo_hareketli_silinmez='Depo hareket gÃ¶rmÃ¼ÅŸtÃ¼r, silinemez.';
+    STDepo_SipariÅŸHareketi_silinemez='Depo sipariÅŸ hareketi gÃ¶rmÃ¼ÅŸtÃ¼r, silinemez.';
     STDepo_SiparisHareketi_silinemez='Depo siparis hareketi gormustur, silinemez.';
-    STDepo_servisHareketi_silinemez='Depo servis hareketi görmüştür, silinemez.';
-    STayni_isim_var='Aynı isimde depo eklenemez.' ;
-    SFarkli_isim_var='Farklı isimde depo eklenemez.' ;
-    STMerkez_bir_depo_olmali='Varsayılanı Merkez olan en az bir depo olmalı.';
-    STEKlenen_depo_merkezde_olmali='Eklenen ilk deponun Varsayılanı Merkez olmalı.' ;
-    STFiyatadi_kayitli='Bu Fiyat adı kayıtlıdır.';
-    STFiyatadi_silinecekmi=' fiyat adı silinecektir. Onaylıyor musunuz?';
-    STFiyatadi_silinemez='Bu Fiyat adı son kayıttır. Silinemez.';
-    STFiyatadi_tasinsinmi=' Fiyat adı taşınacaktır. Onaylıyor musunuz?';
-    STListe_fiyatadi_sec='Listede görünecek Alış-Satış fiyat adlarını seçiniz.';
-    STListeden_sec='Listeden seçim yapınız.';
-    STFiyatadi_tasindi=' Fiyat adı taşınmıştır.';
-    STBos_tutar_olusturuldu=' fiyatının boş tutarları oluşturuldu..';
+    STDepo_servisHareketi_silinemez='Depo servis hareketi gÃ¶rmÃ¼ÅŸtÃ¼r, silinemez.';
+    STayni_isim_var='AynÄ± isimde depo eklenemez.' ;
+    SFarkli_isim_var='FarklÄ± isimde depo eklenemez.' ;
+    STMerkez_bir_depo_olmali='VarsayÄ±lanÄ± Merkez olan en az bir depo olmalÄ±.';
+    STEKlenen_depo_merkezde_olmali='Eklenen ilk deponun VarsayÄ±lanÄ± Merkez olmalÄ±.' ;
+    STFiyatadi_kayitli='Bu Fiyat adÄ± kayÄ±tlÄ±dÄ±r.';
+    STFiyatadi_silinecekmi=' fiyat adÄ± silinecektir. OnaylÄ±yor musunuz?';
+    STFiyatadi_silinemez='Bu Fiyat adÄ± son kayÄ±ttÄ±r. Silinemez.';
+    STFiyatadi_tasinsinmi=' Fiyat adÄ± taÅŸÄ±nacaktÄ±r. OnaylÄ±yor musunuz?';
+    STListe_fiyatadi_sec='Listede gÃ¶rÃ¼necek AlÄ±ÅŸ-SatÄ±ÅŸ fiyat adlarÄ±nÄ± seÃ§iniz.';
+    STListeden_sec='Listeden seÃ§im yapÄ±nÄ±z.';
+    STFiyatadi_tasindi=' Fiyat adÄ± taÅŸÄ±nmÄ±ÅŸtÄ±r.';
+    STBos_tutar_olusturuldu=' fiyatÄ±nÄ±n boÅŸ tutarlarÄ± oluÅŸturuldu..';
     STRakam_gir='Sadece rakam giriniz.';
-    STFiyat_adi_gir='Fiyat adı boş olamaz.';
-    STBilgi_alani_doldur='Boş bilgi alanı olamaz!';
-    STYanlis_karakter='Yanlış karakter girilmiş!';
-    STKod_degistir='Kampanya Kodu farklı olmalı.';
-    STad_degistir='Kampanya Adı farklı olmalı.';
-    STSiliniz='Önce koşul ve sonuçları silmelisiniz!';
-    STTestadi_kayitli='Bu Test adı kayıtlıdır.';
-    STSablonadi_kayitli='Bu Şablon adı kayıtlıdır.';
+    STFiyat_adi_gir='Fiyat adÄ± boÅŸ olamaz.';
+    STBilgi_alani_doldur='BoÅŸ bilgi alanÄ± olamaz!';
+    STYanlis_karakter='YanlÄ±ÅŸ karakter girilmiÅŸ!';
+    STKod_degistir='Kampanya Kodu farklÄ± olmalÄ±.';
+    STad_degistir='Kampanya AdÄ± farklÄ± olmalÄ±.';
+    STSiliniz='Ã–nce koÅŸul ve sonuÃ§larÄ± silmelisiniz!';
+    STTestadi_kayitli='Bu Test adÄ± kayÄ±tlÄ±dÄ±r.';
+    STSablonadi_kayitli='Bu Åablon adÄ± kayÄ±tlÄ±dÄ±r.';
 
   //UProjeListeDlg
-    PDFaturaVerisiVarSilinemez = 'Girilmiş Fatura verisi var, Silinemez';
+    PDFaturaVerisiVarSilinemez = 'GirilmiÅŸ Fatura verisi var, Silinemez';
 
   //UAktiviteListeDlg
     ADOkunmayan = 'Okunmayan ';
-    ADAktiviteGorevBilgisiVar = ' adet aktivite-görev bilgisi var';
-    ADKaydiOlusturanSilebilir = 'Bu kayıt başkası tarafından oluşturulmuştur, Yalnızca oluşturan kişi kaydı silebilir';
-    ADBagliAktiviteVarSilinemez = 'Bu Aktiviteye Bağlı Aktivite verisi var, Silinemez';
-    ADKaydiOlusturanDegistirebilir='Bu kayıt başkası tarafından oluşturulmuştur, Yalnızca oluşturan kişi kaydı değiştirebilir';
-    ADKaydiOlusturanOnaylayabilir='Bu kayıt başkası tarafından oluşturulmuştur,Yalnızca oluşturan kişi kaydı Onaylayabilir.';
+    ADAktiviteGorevBilgisiVar = ' adet aktivite-gÃ¶rev bilgisi var';
+    ADKaydiOlusturanSilebilir = 'Bu kayÄ±t baÅŸkasÄ± tarafÄ±ndan oluÅŸturulmuÅŸtur, YalnÄ±zca oluÅŸturan kiÅŸi kaydÄ± silebilir';
+    ADBagliAktiviteVarSilinemez = 'Bu Aktiviteye BaÄŸlÄ± Aktivite verisi var, Silinemez';
+    ADKaydiOlusturanDegistirebilir='Bu kayÄ±t baÅŸkasÄ± tarafÄ±ndan oluÅŸturulmuÅŸtur, YalnÄ±zca oluÅŸturan kiÅŸi kaydÄ± deÄŸiÅŸtirebilir';
+    ADKaydiOlusturanOnaylayabilir='Bu kayÄ±t baÅŸkasÄ± tarafÄ±ndan oluÅŸturulmuÅŸtur,YalnÄ±zca oluÅŸturan kiÅŸi kaydÄ± Onaylayabilir.';
 
   //UDemirbasListeDlg
-    DDFarkliDurumVeZimmetSahibiSecilemez = 'Farklı durum ve zimmet sahibi seçilemez';
-    DDDemirbasFarkliDurum= 'Farklı durumdaki demirbaşlar bir arada işlem göremez!';
-    DDDemirbasileIslemYapamazsiniz = 'Bu demirbaşı ile işlem yapamazsınız.';
-    DDDemirbasiIadeYapamazsin = 'Bu demirbaşı İade yapamazsınız.';
-    DDDemirbasiZimmetYapamazsin = 'Bu demirbaşı Zimmet yapamazsınız.';
-    DDDemirbasKayipIslemYapamazsin = 'Bu demirbaş ile kayıp işlem yapamazsınız.';
-    DDDemirbasiTransferYapamazsin = 'Bu demirbaşı Transfer yapamazsınız.';
-    DDDemirbasServisGonderYapamazsin = 'Bu demirbaş şu anda zaten serviste.';
-    DDDemirbasServisTekniksorumluata = 'Önce teknik servise kabul edecek personeli atayın!';
-    DDDemirbasServisIadeYapamazsin = 'Bu demirbaş ile servis iade işlemi yapamazsınız.';
-    DDDemirbasServisIslemiYapamazsin = 'Bu demirbaş ile servis işlemi yapamazsınız.';
-    DDServisHareketGormusSilinemez = 'Bu Demirbaş servis hareketi görmüştür.Silinemez !';
-    DDKalibrasyonHareketGormusSilinemez = 'Bu Demirbaş Kalibrasyon hareketi görmüştür.Silinemez !';
-    DDTakipHareketGormusSilinemez = 'Bu Demirbaş Takip hareketi görmüştür.Silinemez !';
-    DDYorumMedyaHareketGormusSilinemez = 'Bu Demirbaş Yorum/Medya hareketi görmüştür.Silinemez !';
-    DDTutanakHareketGormusSilinemez = 'Bu Demirbaş tutanak hareketi görmüştür.Silinemez !';
-    DDmasrafHareketGormusSilinemez = 'Bu Demirbaş masraf / gelir hareketi görmüştür.Silinemez !';
-    DDUst_bilgi_kayit='Önce Üst Bilgiyi Kaydedin';
-    DDKaydedilsinmi='Değişiklikleri kaydetmek istiyor musunuz';
-    DDSilinsinmi='Tutanağı silmek istiyor musunuz ?';
-    DDUst_bilgiyi_kaydet='Önce Üst Bilgiyi Kaydedin';
-    DDKayit_demirbastan_cikarilacak_onay='Seçili Kayıt Demirbaş tutanağından çıkarılacaktır, Onaylıyor musunuz?';
-    DDSube_Demirbas_depo_tanimla='Bu şube için "Demirbaş" deposu tanımlayın';
-    DDDepoda_kalmamistir=' adlı stok Demirbaş deposunda kalmamıştır.';
-    DDDepodaki_kadar_kopyala='Demirbaş deposunda istenen miktar kalmamıştır. Depodaki kadar kopyalansın mı?';
-    DDSilinecek_sozlesme_sec='Silinecek sözleşme kaydını seçiniz.';
-    DDSilinecek_servis_sec='Silinecek Tamir-Servis kaydını seçiniz.';
-    DDBitis_tarih_buyuk_gir=' Sigorta Bitiş Tarihini büyük giriniz.';
-    DDKalan_sifir_eklenmez='Kalanı sıfır olanlar eklenemez.';
-    DDAlan_silinsinmi=' alanını silmek istiyor musunuz ?';
-    DDModel_icin_marka_sec='Model Tanımı yapabilmek için Marka Seçilmelidir';
-    DDTutanak_silinsinmi='Tutanağı silmek istiyor musunuz ?';
-    DDKategori_secilemez='Kategori seçimi yapılamaz!';
+    DDFarkliDurumVeZimmetSahibiSecilemez = 'FarklÄ± durum ve zimmet sahibi seÃ§ilemez';
+    DDDemirbasFarkliDurum= 'FarklÄ± durumdaki demirbaÅŸlar bir arada iÅŸlem gÃ¶remez!';
+    DDDemirbasileIslemYapamazsiniz = 'Bu demirbaÅŸÄ± ile iÅŸlem yapamazsÄ±nÄ±z.';
+    DDDemirbasiIadeYapamazsin = 'Bu demirbaÅŸÄ± Ä°ade yapamazsÄ±nÄ±z.';
+    DDDemirbasiZimmetYapamazsin = 'Bu demirbaÅŸÄ± Zimmet yapamazsÄ±nÄ±z.';
+    DDDemirbasKayipIslemYapamazsin = 'Bu demirbaÅŸ ile kayÄ±p iÅŸlem yapamazsÄ±nÄ±z.';
+    DDDemirbasiTransferYapamazsin = 'Bu demirbaÅŸÄ± Transfer yapamazsÄ±nÄ±z.';
+    DDDemirbasServisGonderYapamazsin = 'Bu demirbaÅŸ ÅŸu anda zaten serviste.';
+    DDDemirbasServisTekniksorumluata = 'Ã–nce teknik servise kabul edecek personeli atayÄ±n!';
+    DDDemirbasServisIadeYapamazsin = 'Bu demirbaÅŸ ile servis iade iÅŸlemi yapamazsÄ±nÄ±z.';
+    DDDemirbasServisIslemiYapamazsin = 'Bu demirbaÅŸ ile servis iÅŸlemi yapamazsÄ±nÄ±z.';
+    DDServisHareketGormusSilinemez = 'Bu DemirbaÅŸ servis hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDKalibrasyonHareketGormusSilinemez = 'Bu DemirbaÅŸ Kalibrasyon hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDTakipHareketGormusSilinemez = 'Bu DemirbaÅŸ Takip hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDYorumMedyaHareketGormusSilinemez = 'Bu DemirbaÅŸ Yorum/Medya hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDTutanakHareketGormusSilinemez = 'Bu DemirbaÅŸ tutanak hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDmasrafHareketGormusSilinemez = 'Bu DemirbaÅŸ masraf / gelir hareketi gÃ¶rmÃ¼ÅŸtÃ¼r.Silinemez !';
+    DDUst_bilgi_kayit='Ã–nce Ãœst Bilgiyi Kaydedin';
+    DDKaydedilsinmi='DeÄŸiÅŸiklikleri kaydetmek istiyor musunuz';
+    DDSilinsinmi='TutanaÄŸÄ± silmek istiyor musunuz ?';
+    DDUst_bilgiyi_kaydet='Ã–nce Ãœst Bilgiyi Kaydedin';
+    DDKayit_demirbastan_cikarilacak_onay='SeÃ§ili KayÄ±t DemirbaÅŸ tutanaÄŸÄ±ndan Ã§Ä±karÄ±lacaktÄ±r, OnaylÄ±yor musunuz?';
+    DDSube_Demirbas_depo_tanimla='Bu ÅŸube iÃ§in "DemirbaÅŸ" deposu tanÄ±mlayÄ±n';
+    DDDepoda_kalmamistir=' adlÄ± stok DemirbaÅŸ deposunda kalmamÄ±ÅŸtÄ±r.';
+    DDDepodaki_kadar_kopyala='DemirbaÅŸ deposunda istenen miktar kalmamÄ±ÅŸtÄ±r. Depodaki kadar kopyalansÄ±n mÄ±?';
+    DDSilinecek_sozlesme_sec='Silinecek sÃ¶zleÅŸme kaydÄ±nÄ± seÃ§iniz.';
+    DDSilinecek_servis_sec='Silinecek Tamir-Servis kaydÄ±nÄ± seÃ§iniz.';
+    DDBitis_tarih_buyuk_gir=' Sigorta BitiÅŸ Tarihini bÃ¼yÃ¼k giriniz.';
+    DDKalan_sifir_eklenmez='KalanÄ± sÄ±fÄ±r olanlar eklenemez.';
+    DDAlan_silinsinmi=' alanÄ±nÄ± silmek istiyor musunuz ?';
+    DDModel_icin_marka_sec='Model TanÄ±mÄ± yapabilmek iÃ§in Marka SeÃ§ilmelidir';
+    DDTutanak_silinsinmi='TutanaÄŸÄ± silmek istiyor musunuz ?';
+    DDKategori_secilemez='Kategori seÃ§imi yapÄ±lamaz!';
 
 
   //UKampanyaDlg
-    KDDetayGirilmisSilinsinmi = 'Bu kampanyaya girilmiş alt bilgiler vardır.Silinsin mi ?';
+    KDDetayGirilmisSilinsinmi = 'Bu kampanyaya girilmiÅŸ alt bilgiler vardÄ±r.Silinsin mi ?';
 
   //UKrediHesapMakineDlg
-    KDOdemeTakvimiHesaplanmamis = 'Ödeme takvimi hesaplanmamış!';
-    KDSatisTutariGirilmemis = 'Satış tutarı girilmemiş!';
-    KDBasitFaizOrani = 'Basit Faiz Oranı';
+    KDOdemeTakvimiHesaplanmamis = 'Ã–deme takvimi hesaplanmamÄ±ÅŸ!';
+    KDSatisTutariGirilmemis = 'SatÄ±ÅŸ tutarÄ± girilmemiÅŸ!';
+    KDBasitFaizOrani = 'Basit Faiz OranÄ±';
 
   // KDBasitFaiz = ' Basit Faiz %';
-    KDOranBosOlamaz = 'Oran Boş Olamaz.';
+    KDOranBosOlamaz = 'Oran BoÅŸ Olamaz.';
     KDKDVliKira = 'KDV li Kira';
     KDTaksit = 'Taksit';
 
   //UBDSListeFrame
-    BDSVeriSilinsinmi = 'Seçili veri silinsin mi?';
+    BDSVeriSilinsinmi = 'SeÃ§ili veri silinsin mi?';
 
   //Barkod
-    BRfazla_giris_uyarisi='Gerekenden Farklı Miktarda Giriş Yapıyorsunuz!';
+    BRfazla_giris_uyarisi='Gerekenden FarklÄ± Miktarda GiriÅŸ YapÄ±yorsunuz!';
 
   //UReplikasyon
-    RBagli = 'Bağlı';
-    RBaglantiYok = 'Bağlantı Yok';
-    RGenotipdanRehberAl = 'Genotıpdan Rehber Al';
-    RGenotipeRehberVer = 'Genotıpa Rehber Ver';
-    RGenotipdanStokFaturasiAl = 'Genotıpdan Stok Faturası Al';
+    RBagli = 'BaÄŸlÄ±';
+    RBaglantiYok = 'BaÄŸlantÄ± Yok';
+    RGenotipdanRehberAl = 'GenotÄ±pdan Rehber Al';
+    RGenotipeRehberVer = 'GenotÄ±pa Rehber Ver';
+    RGenotipdanStokFaturasiAl = 'GenotÄ±pdan Stok FaturasÄ± Al';
     RGentegreDevirCariBankaKasa = 'Gentegre Devir(Cari,Banka,Kasa)';
-    RGentegreDevirCekSenet = 'Gentegre Devir(Çek,Senet)';
-    RGentegreDevirCariYılDetay = 'Gentegre Devir(Cari Yıl Detay)';
-    RGenotipdanStokKartAl = 'Genotıpdan Stok Kart Al';
-    RGenotipaStokKartVer ='Genotıpa Stok Kart Ver';
-    RHataliSatirSayisi = 'Hatalı/Aktarılamayan satır sayısı: ';
-    RAktarimBasarili = 'Tebrikler, aktarımınız başarılı.';
-    RAktarimHatasi = 'Aktarım Hatası';
-    REntegraBaglantiHatasi = 'Entegra Bağlantı Hatası';
-    //RGenotipBaglantiHatasi = 'Genotıp Bağlantı Hatası';
-    RFaturaSilinmeyeUygunDegildir = 'Faturanın Entegrada durumu silinmeye uygun değildir.';
-    REntegraFaturaSilmeHatasi = 'Entegra fatura silme hatası';
-    RFaturadaEslesmeicinFirmaKoduYok = 'Genotıp faturasında eşleşme için firma kodu bulunamadı!';
-    ROnceRehberKayitlariniziAktarin = 'Genotıp faturasındaki rehber kaydı Entegrada bulunamadı. lütfen ilk önce rehber kayıtlarınızı aktarınız!';
-    ROdemeTarihiGirilmemis = 'Ödeme planı oluşturulamadı: Ödeme tarihi girilmemiş.';
-    RDigerTumAlanlarOpsiyoneldir = 'Rehber entegrasyonunda ''KOD'' ve ''FIRMA'' alanları zorunlu alanlardır. Diğer tüm alanlar opsiyoneldir.';
-    RHesapPlaniniYapilandir = 'Aktarımdan önce Hesap Planınızı uygun olarak yapılandırmalısınız.';
-    RBirSonrakiKayittanDevamEdilecek = 'Aktarımda zorunlu alanlardan birinin boş kalması durumunda o kayıt atlanacak ve bir sonraki kayıttan devam edilecektir.';
-    REklenecekOpsiyonelAlanlar = 'Kayıtlarda eklenecek olan opsiyonel alanlar;';
-    RAdresBilgileri = 'Adres,PK,ILCE,IL,Fatura Başlığı,Vergi Dairesi,Vergi No,İş Tel,Cep Tel,Ev Tel,E-Posta,Web Adresidir.';
-    REklenecekAlanlar = 'Kayıtlarda eklenecek olan alanlar;';
-    RAdresBilgileri2 = 'Kod,Ünvan,Adres,PK,ILCE,IL,Fatura Başlığı,Vergi Dairesi,Vergi No,İş Tel,Cep Tel,Ev Tel,E-Posta,Web Adresidir.';
-    RBuBolumeGecmedenOnce = 'Bu bölüme geçmeden önce;';
-    RRehberAktarımınıTamamla = 'Hesap planınızı oluşturmalı ve rehber aktarımınızı tamamlamalısınız.';
-    REntegradaTanımlıOlmasıGerek = 'Faturaların ilgili kurumlarının Entegrada da tanımlı olması gerekmektedir. ';
-    RRehberAktariminiziTamamla = 'Bu bölüme geçmeden önce daha önce yapmadıysanız lütfen rehber aktarımınızı tamamlayınız.';
-    RBirlikteAktarilacaktir = 'Faturalar tüm satırları, var ise masraf/gelir merkezleri ve planlanan ödeme tarihleri ile birlikte aktarılacatır.';
-    RCariDevirKayitlariAktarilmayacak = 'Eklenmemiş Rehber kayıtları için Cari devir kayıtları aktarılmayacaktır.';
-    RBankaTanimlamalariYenidenDuzenle = 'Banka tanımlama sistemi değiştiğinden; Bankalar bölümü içerisinden tüm banka tanımlamalarınızı yeniden düzenlemelisiniz.';
-    RLogayaTiklayarakYap = 'Bu düzenlemeleri seçmiş olduğunuz bankanın logosuna tıklayarak kolayca yapabilirsiniz.';
-    RCekVeSenetlericerisinden = 'Çek ve Senetler içerisinden;';
-    RTumVerilerAktarilacaktir = 'Vade tarihi henüz gelmemiş olanlar ile ve durumu ödendi yada iptal olarak işaretlenmemiş tüm veriler aktarılacaktır.';
-    RDuzenlemeleriTamamlamisOlmali = 'Tüm diğer aktarım işlemlerini bitirmiş ve aktarımlar sonrasındaki düzenlemeleri tamamlamış olmanız gerekmektedir.';
-    RKayitlarSistemUzerineEklenebilir = 'Detay kayıtları ancak kullanıma geçmiş bir sistem üzerine eklenebilir!';
+    RGentegreDevirCekSenet = 'Gentegre Devir(Ã‡ek,Senet)';
+    RGentegreDevirCariYÄ±lDetay = 'Gentegre Devir(Cari YÄ±l Detay)';
+    RGenotipdanStokKartAl = 'GenotÄ±pdan Stok Kart Al';
+    RGenotipaStokKartVer ='GenotÄ±pa Stok Kart Ver';
+    RHataliSatirSayisi = 'HatalÄ±/AktarÄ±lamayan satÄ±r sayÄ±sÄ±: ';
+    RAktarimBasarili = 'Tebrikler, aktarÄ±mÄ±nÄ±z baÅŸarÄ±lÄ±.';
+    RAktarimHatasi = 'AktarÄ±m HatasÄ±';
+    REntegraBaglantiHatasi = 'Entegra BaÄŸlantÄ± HatasÄ±';
+    //RGenotipBaglantiHatasi = 'GenotÄ±p BaÄŸlantÄ± HatasÄ±';
+    RFaturaSilinmeyeUygunDegildir = 'FaturanÄ±n Entegrada durumu silinmeye uygun deÄŸildir.';
+    REntegraFaturaSilmeHatasi = 'Entegra fatura silme hatasÄ±';
+    RFaturadaEslesmeicinFirmaKoduYok = 'GenotÄ±p faturasÄ±nda eÅŸleÅŸme iÃ§in firma kodu bulunamadÄ±!';
+    ROnceRehberKayitlariniziAktarin = 'GenotÄ±p faturasÄ±ndaki rehber kaydÄ± Entegrada bulunamadÄ±. lÃ¼tfen ilk Ã¶nce rehber kayÄ±tlarÄ±nÄ±zÄ± aktarÄ±nÄ±z!';
+    ROdemeTarihiGirilmemis = 'Ã–deme planÄ± oluÅŸturulamadÄ±: Ã–deme tarihi girilmemiÅŸ.';
+    RDigerTumAlanlarOpsiyoneldir = 'Rehber entegrasyonunda ''KOD'' ve ''FIRMA'' alanlarÄ± zorunlu alanlardÄ±r. DiÄŸer tÃ¼m alanlar opsiyoneldir.';
+    RHesapPlaniniYapilandir = 'AktarÄ±mdan Ã¶nce Hesap PlanÄ±nÄ±zÄ± uygun olarak yapÄ±landÄ±rmalÄ±sÄ±nÄ±z.';
+    RBirSonrakiKayittanDevamEdilecek = 'AktarÄ±mda zorunlu alanlardan birinin boÅŸ kalmasÄ± durumunda o kayÄ±t atlanacak ve bir sonraki kayÄ±ttan devam edilecektir.';
+    REklenecekOpsiyonelAlanlar = 'KayÄ±tlarda eklenecek olan opsiyonel alanlar;';
+    RAdresBilgileri = 'Adres,PK,ILCE,IL,Fatura BaÅŸlÄ±ÄŸÄ±,Vergi Dairesi,Vergi No,Ä°ÅŸ Tel,Cep Tel,Ev Tel,E-Posta,Web Adresidir.';
+    REklenecekAlanlar = 'KayÄ±tlarda eklenecek olan alanlar;';
+    RAdresBilgileri2 = 'Kod,Ãœnvan,Adres,PK,ILCE,IL,Fatura BaÅŸlÄ±ÄŸÄ±,Vergi Dairesi,Vergi No,Ä°ÅŸ Tel,Cep Tel,Ev Tel,E-Posta,Web Adresidir.';
+    RBuBolumeGecmedenOnce = 'Bu bÃ¶lÃ¼me geÃ§meden Ã¶nce;';
+    RRehberAktarÄ±mÄ±nÄ±Tamamla = 'Hesap planÄ±nÄ±zÄ± oluÅŸturmalÄ± ve rehber aktarÄ±mÄ±nÄ±zÄ± tamamlamalÄ±sÄ±nÄ±z.';
+    REntegradaTanÄ±mlÄ±OlmasÄ±Gerek = 'FaturalarÄ±n ilgili kurumlarÄ±nÄ±n Entegrada da tanÄ±mlÄ± olmasÄ± gerekmektedir. ';
+    RRehberAktariminiziTamamla = 'Bu bÃ¶lÃ¼me geÃ§meden Ã¶nce daha Ã¶nce yapmadÄ±ysanÄ±z lÃ¼tfen rehber aktarÄ±mÄ±nÄ±zÄ± tamamlayÄ±nÄ±z.';
+    RBirlikteAktarilacaktir = 'Faturalar tÃ¼m satÄ±rlarÄ±, var ise masraf/gelir merkezleri ve planlanan Ã¶deme tarihleri ile birlikte aktarÄ±lacatÄ±r.';
+    RCariDevirKayitlariAktarilmayacak = 'EklenmemiÅŸ Rehber kayÄ±tlarÄ± iÃ§in Cari devir kayÄ±tlarÄ± aktarÄ±lmayacaktÄ±r.';
+    RBankaTanimlamalariYenidenDuzenle = 'Banka tanÄ±mlama sistemi deÄŸiÅŸtiÄŸinden; Bankalar bÃ¶lÃ¼mÃ¼ iÃ§erisinden tÃ¼m banka tanÄ±mlamalarÄ±nÄ±zÄ± yeniden dÃ¼zenlemelisiniz.';
+    RLogayaTiklayarakYap = 'Bu dÃ¼zenlemeleri seÃ§miÅŸ olduÄŸunuz bankanÄ±n logosuna tÄ±klayarak kolayca yapabilirsiniz.';
+    RCekVeSenetlericerisinden = 'Ã‡ek ve Senetler iÃ§erisinden;';
+    RTumVerilerAktarilacaktir = 'Vade tarihi henÃ¼z gelmemiÅŸ olanlar ile ve durumu Ã¶dendi yada iptal olarak iÅŸaretlenmemiÅŸ tÃ¼m veriler aktarÄ±lacaktÄ±r.';
+    RDuzenlemeleriTamamlamisOlmali = 'TÃ¼m diÄŸer aktarÄ±m iÅŸlemlerini bitirmiÅŸ ve aktarÄ±mlar sonrasÄ±ndaki dÃ¼zenlemeleri tamamlamÄ±ÅŸ olmanÄ±z gerekmektedir.';
+    RKayitlarSistemUzerineEklenebilir = 'Detay kayÄ±tlarÄ± ancak kullanÄ±ma geÃ§miÅŸ bir sistem Ã¼zerine eklenebilir!';
 
   //UTablo
-    TGorevUzerindeDegisiklikYapamaz = 'Görevle ilişkisi olmayan kişiler görev üzerinde değişiklik yapamaz.';
-    TIptalEdilmisGorevAktifEdilemez = 'İptal edilmiş bir görev tekrar aktif edilemez';
-    TDurumuAtayanDegistirebilir = 'Onaylanmış bir görevin durumu yalnızca atayan kişi tarafından değiştirilebilir';
-    TGoreviAtayanOnaylar = 'Görev ancak atayan kişi tarafından onaylanabilir';
-    TGoreviAtayanIptalEder = 'Görev ancak atayan kişi tarafından iptal edilebilir';
-    TErtelemeAtayanKisiYapar = 'Görev erteleme onayı yalnızca görevi atayan kişi tarafından yapılabilir';
-    TErtelemeTarihiDoluOlmalidir = 'Görev Erteleme tarihi dolu olmalıdır';
+    TGorevUzerindeDegisiklikYapamaz = 'GÃ¶revle iliÅŸkisi olmayan kiÅŸiler gÃ¶rev Ã¼zerinde deÄŸiÅŸiklik yapamaz.';
+    TIptalEdilmisGorevAktifEdilemez = 'Ä°ptal edilmiÅŸ bir gÃ¶rev tekrar aktif edilemez';
+    TDurumuAtayanDegistirebilir = 'OnaylanmÄ±ÅŸ bir gÃ¶revin durumu yalnÄ±zca atayan kiÅŸi tarafÄ±ndan deÄŸiÅŸtirilebilir';
+    TGoreviAtayanOnaylar = 'GÃ¶rev ancak atayan kiÅŸi tarafÄ±ndan onaylanabilir';
+    TGoreviAtayanIptalEder = 'GÃ¶rev ancak atayan kiÅŸi tarafÄ±ndan iptal edilebilir';
+    TErtelemeAtayanKisiYapar = 'GÃ¶rev erteleme onayÄ± yalnÄ±zca gÃ¶revi atayan kiÅŸi tarafÄ±ndan yapÄ±labilir';
+    TErtelemeTarihiDoluOlmalidir = 'GÃ¶rev Erteleme tarihi dolu olmalÄ±dÄ±r';
     TYok = '(yok)';
-    TSurumBilgisiYok = 'Sürüm bilgisi yok';
-    TCikmakIstediginizKadarUrunYok = 'Stokta çıkmak istediğiniz kadar ürün yok';
-    TCikmakIstediginizKadarUrunYokYinedeCik = 'Stokta çıkmak istediğiniz kadar ürün yok, Yine de Çıkış yapmak istiyor musunuz?';
-    TYetkiAlanindakiPersoneller = 'Yetki Alanındaki personeller';
-    TAyniKodaSahipKayitOlamaz = 'Aynı koda veya no"ya sahip iki kayıt bulunamaz...';
-    TAyniAdaSahipKayitOlamaz = 'Aynı ada sahip iki kayıt bulunamaz...';
-    TBosAlanHatasi = 'Boş alan hatası';
-    TSeriNumaraDahaOnce = 'Bu seri numarası daha önce ' ;
-    TIsimliMusterideKullanilmistir = ' isimli müşteride kullanılmış!';
-    TKlasorAdiniGirin = 'Klasör Adını Giriniz';
-    TKlasorResiminiSeciniz = 'Klasör Resmini Seçiniz';
-    TServerAdiniGirin = 'Aktarım Yapılacak Server Adını Giriniz.';
-    TServerAdiVeyaIpAdresi = 'Server Adı veya IP Adresi:';
-    TServerAdiBosOlamaz = 'Server Adı Boş Olamaz.';
-    TVeritabaniAdiniGiriniz = 'Aktarım Yapılacak Veritabanı Adını Giriniz.';
-    TVeritabaniAdi = 'Veritabanı Adı:';
-    TDizinAdi = 'Dizin Adı';
-    TVeritabaniBosOlamaz = 'Veritabanı Adı Boş Olamaz.';
-    TKullaniciAdiniGiriniz = 'Kullanıcı Adını Giriniz.';
-    TKullaniciAdi = 'Kullanıcı Adı:';
-    TKullaniciAdiBosOlamaz = 'Kullanıcı Adı Boş Olamaz.';
-    TSifre = 'Şifre';
-    TYeniSifreyiGiriniz = 'Yeni Şifreyi Giriniz.';
-    TServerSifresiniGiriniz = 'Aktarım Yapılacak Server Şifresini Giriniz.';
-    TServerSifresi = 'Server Şifresi';
-    TDikkatBulunamayanIndex = 'Dikkat! Bulunamayan İndeks : ';
-    TVarsayilanFiyaSec = 'Kasa opsiyonlardan varsayılan alış satış fiyatlarını ayarlayınız! Hatalara sebep olabilir.';
-    TEklenecekBilgiyiYaz = 'Eklemek istediğiniz bilgiyi buraya yazınız.';
-    TDurumDegisikligiBilgisiGir = 'Durum değişikliği ile ilgili bilgi giriniz.';
-    TYeniDurumAcıklamasiGir = 'Yeni Durum için açıklama girin.';
+    TSurumBilgisiYok = 'SÃ¼rÃ¼m bilgisi yok';
+    TCikmakIstediginizKadarUrunYok = 'Stokta Ã§Ä±kmak istediÄŸiniz kadar Ã¼rÃ¼n yok';
+    TCikmakIstediginizKadarUrunYokYinedeCik = 'Stokta Ã§Ä±kmak istediÄŸiniz kadar Ã¼rÃ¼n yok, Yine de Ã‡Ä±kÄ±ÅŸ yapmak istiyor musunuz?';
+    TYetkiAlanindakiPersoneller = 'Yetki AlanÄ±ndaki personeller';
+    TAyniKodaSahipKayitOlamaz = 'AynÄ± koda veya no"ya sahip iki kayÄ±t bulunamaz...';
+    TAyniAdaSahipKayitOlamaz = 'AynÄ± ada sahip iki kayÄ±t bulunamaz...';
+    TBosAlanHatasi = 'BoÅŸ alan hatasÄ±';
+    TSeriNumaraDahaOnce = 'Bu seri numarasÄ± daha Ã¶nce ' ;
+    TIsimliMusterideKullanilmistir = ' isimli mÃ¼ÅŸteride kullanÄ±lmÄ±ÅŸ!';
+    TKlasorAdiniGirin = 'KlasÃ¶r AdÄ±nÄ± Giriniz';
+    TKlasorResiminiSeciniz = 'KlasÃ¶r Resmini SeÃ§iniz';
+    TServerAdiniGirin = 'AktarÄ±m YapÄ±lacak Server AdÄ±nÄ± Giriniz.';
+    TServerAdiVeyaIpAdresi = 'Server AdÄ± veya IP Adresi:';
+    TServerAdiBosOlamaz = 'Server AdÄ± BoÅŸ Olamaz.';
+    TVeritabaniAdiniGiriniz = 'AktarÄ±m YapÄ±lacak VeritabanÄ± AdÄ±nÄ± Giriniz.';
+    TVeritabaniAdi = 'VeritabanÄ± AdÄ±:';
+    TDizinAdi = 'Dizin AdÄ±';
+    TVeritabaniBosOlamaz = 'VeritabanÄ± AdÄ± BoÅŸ Olamaz.';
+    TKullaniciAdiniGiriniz = 'KullanÄ±cÄ± AdÄ±nÄ± Giriniz.';
+    TKullaniciAdi = 'KullanÄ±cÄ± AdÄ±:';
+    TKullaniciAdiBosOlamaz = 'KullanÄ±cÄ± AdÄ± BoÅŸ Olamaz.';
+    TSifre = 'Åifre';
+    TYeniSifreyiGiriniz = 'Yeni Åifreyi Giriniz.';
+    TServerSifresiniGiriniz = 'AktarÄ±m YapÄ±lacak Server Åifresini Giriniz.';
+    TServerSifresi = 'Server Åifresi';
+    TDikkatBulunamayanIndex = 'Dikkat! Bulunamayan Ä°ndeks : ';
+    TVarsayilanFiyaSec = 'Kasa opsiyonlardan varsayÄ±lan alÄ±ÅŸ satÄ±ÅŸ fiyatlarÄ±nÄ± ayarlayÄ±nÄ±z! Hatalara sebep olabilir.';
+    TEklenecekBilgiyiYaz = 'Eklemek istediÄŸiniz bilgiyi buraya yazÄ±nÄ±z.';
+    TDurumDegisikligiBilgisiGir = 'Durum deÄŸiÅŸikliÄŸi ile ilgili bilgi giriniz.';
+    TYeniDurumAcÄ±klamasiGir = 'Yeni Durum iÃ§in aÃ§Ä±klama girin.';
     TREHBERINIexTablosunda = 'REHBERINIEX tablosunda ' ;
-    TBolumuIcin = ' bölümü için ' ;
-    TAnahtariBulunamadi = ' Anahtarı bulunamadı!';
-    TAktiviteSablonlari = 'Aktivite Şablonları';
-    TTalimatSureciUyarisi = 'Talimat Süreci Uyarısı';
-    TEPostaHatali = 'EPosta Hatalı..';
-    TBaglantiKurulamadi = 'Bağlantıda Hata(FTP): Bağlantı Kurulamadı!';
-    TDosyaTransferEdilemedi = 'Bağlantıda Hata(FTP): Dosya Transfer Edilemedi!';
-    TBaglantiTuruDesteklenmiyor = 'Bağlantı türü desteklenmiyor!';
-    TFTPBilgileriYokyadaHatali = 'FTP Bilgileri Yok yada Hatalı!';
-    TKayitIslemiGerceklestirilemedi = ' Kayıt İşlemi Gerçekleştirilemedi!!';
-    TAktarilamayanAlanlar = 'Aktivite Oluşturuldu, Aktarılamayan Alanlar:';
-    TAktiviteSablonuBulunamadi = 'Hata: Aktivite Şablonu Bulunamadı!';
-    TAkibetAlinirkenLutfenBekleyin = 'Akibet bilgileri alınırken lütfen bekleyiniz..';
-    TBaglantiBilgileriAliniyor = 'Bağlantı Bilgileri Alınıyor...';
-    TDesenBulunmamaktadir = 'Bu banka için desen bulunmamaktadır..';
-    TBaglantiKuruluyor = 'Bağlantı Kuruluyor..';
-    TSonlandirmaIslemleriYapiliyor = 'Sonlandırma işlemleri yapılıyor..';
-    TTalimatImzalanirkenBekle = 'Talimat imzalanırken lütfen bekleyiniz..';
-    TTelefonNoHatali = 'Telefon no hatalı.. Rehber kayıtlarınıza gözatın..';
-    TGSMOperatoruHatali = 'GSM Operatörü hatalı.. Rehber kayıtlarınıza gözatın..';
-    TParmakIziAliniyor = 'Parmak izi alınıyor...';
-    TImzaGonderimHatasi = 'İmza Gönderim Hatası:';
+    TBolumuIcin = ' bÃ¶lÃ¼mÃ¼ iÃ§in ' ;
+    TAnahtariBulunamadi = ' AnahtarÄ± bulunamadÄ±!';
+    TAktiviteSablonlari = 'Aktivite ÅablonlarÄ±';
+    TTalimatSureciUyarisi = 'Talimat SÃ¼reci UyarÄ±sÄ±';
+    TEPostaHatali = 'EPosta HatalÄ±..';
+    TBaglantiKurulamadi = 'BaÄŸlantÄ±da Hata(FTP): BaÄŸlantÄ± KurulamadÄ±!';
+    TDosyaTransferEdilemedi = 'BaÄŸlantÄ±da Hata(FTP): Dosya Transfer Edilemedi!';
+    TBaglantiTuruDesteklenmiyor = 'BaÄŸlantÄ± tÃ¼rÃ¼ desteklenmiyor!';
+    TFTPBilgileriYokyadaHatali = 'FTP Bilgileri Yok yada HatalÄ±!';
+    TKayitIslemiGerceklestirilemedi = ' KayÄ±t Ä°ÅŸlemi GerÃ§ekleÅŸtirilemedi!!';
+    TAktarilamayanAlanlar = 'Aktivite OluÅŸturuldu, AktarÄ±lamayan Alanlar:';
+    TAktiviteSablonuBulunamadi = 'Hata: Aktivite Åablonu BulunamadÄ±!';
+    TAkibetAlinirkenLutfenBekleyin = 'Akibet bilgileri alÄ±nÄ±rken lÃ¼tfen bekleyiniz..';
+    TBaglantiBilgileriAliniyor = 'BaÄŸlantÄ± Bilgileri AlÄ±nÄ±yor...';
+    TDesenBulunmamaktadir = 'Bu banka iÃ§in desen bulunmamaktadÄ±r..';
+    TBaglantiKuruluyor = 'BaÄŸlantÄ± Kuruluyor..';
+    TSonlandirmaIslemleriYapiliyor = 'SonlandÄ±rma iÅŸlemleri yapÄ±lÄ±yor..';
+    TTalimatImzalanirkenBekle = 'Talimat imzalanÄ±rken lÃ¼tfen bekleyiniz..';
+    TTelefonNoHatali = 'Telefon no hatalÄ±.. Rehber kayÄ±tlarÄ±nÄ±za gÃ¶zatÄ±n..';
+    TGSMOperatoruHatali = 'GSM OperatÃ¶rÃ¼ hatalÄ±.. Rehber kayÄ±tlarÄ±nÄ±za gÃ¶zatÄ±n..';
+    TParmakIziAliniyor = 'Parmak izi alÄ±nÄ±yor...';
+    TImzaGonderimHatasi = 'Ä°mza GÃ¶nderim HatasÄ±:';
     TEimzaMesaji = 'E-imza mesaji';
-    TImzaGercekDosyaKaydediliyor = 'İmza Gerçek, Dosya kaydediliyor..';
-    TDosyaKistiriliyor = 'Dosya Sıkıştırılıyor..';
-    TDosyaVeritabaninaYazilamadi = 'Dosya veritabanına yazılamadı!';
-    TDosyaBasariylaKaydedildi = 'Dosya Başarıyla kaydedildi.';
-    TGirilmisBilgiVarOnce = 'Girilmiş bilgi var. Önce ';
+    TImzaGercekDosyaKaydediliyor = 'Ä°mza GerÃ§ek, Dosya kaydediliyor..';
+    TDosyaKistiriliyor = 'Dosya SÄ±kÄ±ÅŸtÄ±rÄ±lÄ±yor..';
+    TDosyaVeritabaninaYazilamadi = 'Dosya veritabanÄ±na yazÄ±lamadÄ±!';
+    TDosyaBasariylaKaydedildi = 'Dosya BaÅŸarÄ±yla kaydedildi.';
+    TGirilmisBilgiVarOnce = 'GirilmiÅŸ bilgi var. Ã–nce ';
     TBilgileriniSiliniz = ' bilgilerini siliniz...';
-    TZimmetIadeKaydi = 'Zimmet İade Kaydı';
-    TZimmetIadeVeren = 'Zimmet İade Veren';
-    TZimmetIadeAlani = 'Zimmet İade Alan';
-    TYeniZimmetKaydi = 'Yeni Zimmet Kaydı';
-    TDemirbasKayipKaydi = 'Demirbaş Kayıp Kaydı';
+    TZimmetIadeKaydi = 'Zimmet Ä°ade KaydÄ±';
+    TZimmetIadeVeren = 'Zimmet Ä°ade Veren';
+    TZimmetIadeAlani = 'Zimmet Ä°ade Alan';
+    TYeniZimmetKaydi = 'Yeni Zimmet KaydÄ±';
+    TDemirbasKayipKaydi = 'DemirbaÅŸ KayÄ±p KaydÄ±';
     TZimmetSahibi = 'Zimmet Sahibi';
-    TDemirbasHurdaKaydi = 'Demirbaş Hurda Kaydı';
-    TZimmetTransferKaydi = 'Zimmet Transfer Kaydı';
+    TDemirbasHurdaKaydi = 'DemirbaÅŸ Hurda KaydÄ±';
+    TZimmetTransferKaydi = 'Zimmet Transfer KaydÄ±';
 
  //URehberAyar
-    RGirilmisBilgiVar = 'Girilmiş bilgi var! Silinemez/Değiştirilemez';
+    RGirilmisBilgiVar = 'GirilmiÅŸ bilgi var! Silinemez/DeÄŸiÅŸtirilemez';
 
  //URehberAramaEkrani
-    RAEPersonelAramaEkrani = 'Personel arama ekranı';
-    RAEAramaEkrani = 'Arama ekranı';
-    RAEPersonelHareketiSilme = 'Seçili olan personel hareketini silmek istediğinize eminmisiniz?';
+    RAEPersonelAramaEkrani = 'Personel arama ekranÄ±';
+    RAEAramaEkrani = 'Arama ekranÄ±';
+    RAEPersonelHareketiSilme = 'SeÃ§ili olan personel hareketini silmek istediÄŸinize eminmisiniz?';
 
   //UOpsiyonStok
-    OSIslemTamamlandi = 'İşlem Tamamlandı';
-    OSDegisiklikKaydedilsinmi = 'Depo Tanımlarında yaptığınız değişiklik kaydedilsin mi?';
-    OSDepoAdiBosOlamaz = 'Depo Adı Boş olamaz';
-    DonusumDepoAyniOlmali = 'Dönüşümde Kaynak depo ile hedef depo aynı olmalı';
+    OSIslemTamamlandi = 'Ä°ÅŸlem TamamlandÄ±';
+    OSDegisiklikKaydedilsinmi = 'Depo TanÄ±mlarÄ±nda yaptÄ±ÄŸÄ±nÄ±z deÄŸiÅŸiklik kaydedilsin mi?';
+    OSDepoAdiBosOlamaz = 'Depo AdÄ± BoÅŸ olamaz';
+    DonusumDepoAyniOlmali = 'DÃ¶nÃ¼ÅŸÃ¼mde Kaynak depo ile hedef depo aynÄ± olmalÄ±';
 
   //ULisans
-    LKurumKodunuGir = 'Lisans için kurum kodunu girin:';
-    LKurumKoduBosOlamaz = 'Kurum Kodu Boş Olamaz.';
+    LKurumKodunuGir = 'Lisans iÃ§in kurum kodunu girin:';
+    LKurumKoduBosOlamaz = 'Kurum Kodu BoÅŸ Olamaz.';
     LTerminalLimitinizDolu = 'Terminal Limitiniz Dolu';
-    LTerminalSayisiniAyarlayiniz = 'Lütfen Lisanslama modülünden aktif terminal sayısını ayarlayınız.';
-    LTerminalAktifDegil = 'Bu terminal aktif değil';
-    LDuzenlemeYapmalisin = 'Aktif hale getirebilmek için GenLisanslama Modülünden, Terminaller bölümünden düzenleme yapmalısınız';
-    LTerminalKayitliDegil = 'Bu terminal tanımlı değil';
-    LTerminaliKaydetmekicinOK = 'Terminali kaydetmek için ismi yazıp Tamama tıklamalısınız';
+    LTerminalSayisiniAyarlayiniz = 'LÃ¼tfen Lisanslama modÃ¼lÃ¼nden aktif terminal sayÄ±sÄ±nÄ± ayarlayÄ±nÄ±z.';
+    LTerminalAktifDegil = 'Bu terminal aktif deÄŸil';
+    LDuzenlemeYapmalisin = 'Aktif hale getirebilmek iÃ§in GenLisanslama ModÃ¼lÃ¼nden, Terminaller bÃ¶lÃ¼mÃ¼nden dÃ¼zenleme yapmalÄ±sÄ±nÄ±z';
+    LTerminalKayitliDegil = 'Bu terminal tanÄ±mlÄ± deÄŸil';
+    LTerminaliKaydetmekicinOK = 'Terminali kaydetmek iÃ§in ismi yazÄ±p Tamama tÄ±klamalÄ±sÄ±nÄ±z';
     LLisans = 'Lisans';
-    LEntegraileIrtibataGec = 'Sistemin çalışma izni yok. Yetkili firmanız ile irtibata geçmeniz gerekmektedir.';
-    LModulLisansi = 'Modül Lisansı';
-    LLisansınBulunmamaktadir = 'Bu modül için lisansınız bulunmamaktadır';
+    LEntegraileIrtibataGec = 'Sistemin Ã§alÄ±ÅŸma izni yok. Yetkili firmanÄ±z ile irtibata geÃ§meniz gerekmektedir.';
+    LModulLisansi = 'ModÃ¼l LisansÄ±';
+    LLisansÄ±nBulunmamaktadir = 'Bu modÃ¼l iÃ§in lisansÄ±nÄ±z bulunmamaktadÄ±r';
     LTerminal = 'Terminal';
-    LTerminalSistemdeKayitliDegil = 'Bu terminal sistemde kayıtlı değil.';
-    LServerAyarDegismisIrtibataGec = 'Server ayarlarınız değişmiş. Lütfen yetkili firmanız ile görüşünüz.';
-    LYeniBirLisansAlmanGerek = 'Yeni bir lisans almanız gerekebilir.';
-    LDemoSuresi = 'Demo süresi';
-    LDemoSuresininDolmasina = 'Demo süresinin dolmasına  ';
-    LDemoSuresiDolmustur = 'Demo süresi dolmuştur.';
-    LLisansSuresi = 'Lisans süresi';
-    LLisansSuresininDolmasina = 'Lisans süresinin dolmasına ';
-    LGunKalmistir = ' gün kalmıştır.';
+    LTerminalSistemdeKayitliDegil = 'Bu terminal sistemde kayÄ±tlÄ± deÄŸil.';
+    LServerAyarDegismisIrtibataGec = 'Server ayarlarÄ±nÄ±z deÄŸiÅŸmiÅŸ. LÃ¼tfen yetkili firmanÄ±z ile gÃ¶rÃ¼ÅŸÃ¼nÃ¼z.';
+    LYeniBirLisansAlmanGerek = 'Yeni bir lisans almanÄ±z gerekebilir.';
+    LDemoSuresi = 'Demo sÃ¼resi';
+    LDemoSuresininDolmasina = 'Demo sÃ¼resinin dolmasÄ±na  ';
+    LDemoSuresiDolmustur = 'Demo sÃ¼resi dolmuÅŸtur.';
+    LLisansSuresi = 'Lisans sÃ¼resi';
+    LLisansSuresininDolmasina = 'Lisans sÃ¼resinin dolmasÄ±na ';
+    LGunKalmistir = ' gÃ¼n kalmÄ±ÅŸtÄ±r.';
     LLisansSuresiDolmustur = 'Lisans hata kodu : HK-020.';
-    LLisansDondurulmustur = 'Lisans dondurulmuştur';
-    LYazilimCalismayacaktir = 'Yazılım çalışmayacaktır';
-    LBuisimdeKayitliTerminalVar = 'Bu isimde kayıtlı terminal var.';
+    LLisansDondurulmustur = 'Lisans dondurulmuÅŸtur';
+    LYazilimCalismayacaktir = 'YazÄ±lÄ±m Ã§alÄ±ÅŸmayacaktÄ±r';
+    LBuisimdeKayitliTerminalVar = 'Bu isimde kayÄ±tlÄ± terminal var.';
     LTerminalKaydedildi = 'Terminal kaydedildi.';
 
   //UMaasTablo
-    MTTutarSatiriBulunamadi = 'Ad Soyad - Hesapno - Tutar satırı bulunamadı..';
-    MTTutarSutunuBulunamadi = 'Tutar sütunu bulunamadı!';
-    MTHesapNoSutunuBulunamadi = 'Hesap No sütunu bulunamadı!';
-    MTHesapNoBulunamadi = ' Hesap No bulunamadı!';
-    MTBorcluBankaHesapNoEksik = 'borçlu banka hesap numaraları eksik!';
-    MTAlacakliBankaHesapNoEksik = 'alacaklı banka hesap numaraları eksik!';
-    MTHicSecimYapilmamis = ' Hiç seçim yapılmamış!';
-    MTExcelTablosunuSecin = ' Excel tablosunu seçin!';
-    MTExceleAktarildi = 'Excele aktarıldı..';
-    MTKimlikNoSutunNo = 'T.C.Kimlik No Sütun No :';
-    MTToplamMaasSutunNo = 'Toplam Maaş Sütun No :';
-    MTBankadanOdenecekSutunNo = 'Bankadan Ödenecek Sütun No :';
-    MTAgiSutunNo = 'Agi Sütun No :';
-    MTKasaSutunNo = 'Kasa Sütun No :';
-    MTBankadanAvansSutunNo = 'Bankadan Avans Sütun No :';
-    MTKasadanAvansSutunNo = 'Kasadan Avans Sütun No :';
-    MTKasadanOdenecekSutunNo = 'Kasadan Ödenecek Sütun No :';
-    MTPersonelListesindeBulunamadi = ' T.C.Kimlik No Personel listesinde bulunamadı!';
-    MTAsagidakiPersonellerden = 'Aşağıdaki personellerden ';
-    MTBorcluKasaBilgisiEksik = 'borçlu kasa bilgisi eksik!';
-    MTMakbuzNoVerilsinmi = 'Makbuz Numarası verilsin mi?';
-    MTMakbuzKesmeOnayi = 'Makbuz kesme onayı';
+    MTTutarSatiriBulunamadi = 'Ad Soyad - Hesapno - Tutar satÄ±rÄ± bulunamadÄ±..';
+    MTTutarSutunuBulunamadi = 'Tutar sÃ¼tunu bulunamadÄ±!';
+    MTHesapNoSutunuBulunamadi = 'Hesap No sÃ¼tunu bulunamadÄ±!';
+    MTHesapNoBulunamadi = ' Hesap No bulunamadÄ±!';
+    MTBorcluBankaHesapNoEksik = 'borÃ§lu banka hesap numaralarÄ± eksik!';
+    MTAlacakliBankaHesapNoEksik = 'alacaklÄ± banka hesap numaralarÄ± eksik!';
+    MTHicSecimYapilmamis = ' HiÃ§ seÃ§im yapÄ±lmamÄ±ÅŸ!';
+    MTExcelTablosunuSecin = ' Excel tablosunu seÃ§in!';
+    MTExceleAktarildi = 'Excele aktarÄ±ldÄ±..';
+    MTKimlikNoSutunNo = 'T.C.Kimlik No SÃ¼tun No :';
+    MTToplamMaasSutunNo = 'Toplam MaaÅŸ SÃ¼tun No :';
+    MTBankadanOdenecekSutunNo = 'Bankadan Ã–denecek SÃ¼tun No :';
+    MTAgiSutunNo = 'Agi SÃ¼tun No :';
+    MTKasaSutunNo = 'Kasa SÃ¼tun No :';
+    MTBankadanAvansSutunNo = 'Bankadan Avans SÃ¼tun No :';
+    MTKasadanAvansSutunNo = 'Kasadan Avans SÃ¼tun No :';
+    MTKasadanOdenecekSutunNo = 'Kasadan Ã–denecek SÃ¼tun No :';
+    MTPersonelListesindeBulunamadi = ' T.C.Kimlik No Personel listesinde bulunamadÄ±!';
+    MTAsagidakiPersonellerden = 'AÅŸaÄŸÄ±daki personellerden ';
+    MTBorcluKasaBilgisiEksik = 'borÃ§lu kasa bilgisi eksik!';
+    MTMakbuzNoVerilsinmi = 'Makbuz NumarasÄ± verilsin mi?';
+    MTMakbuzKesmeOnayi = 'Makbuz kesme onayÄ±';
     MTParaBirimiEksik = 'para birimi eksik!';
     MTParaBirimiGirin = 'Para Birimi girin!';
-    MTOnceMaasTablosunuBosalt = 'Yeniden oluşturmak için önce maaş tablosunu boşaltmalısınız!';
-    MTAktarimkosullari='Aktarım Koşulları:'+#13+#10+
-              ' - Aktarım dosyası excell uzantısına sahip olmalıdır.'+#13+#10+
-              ' - Aktarılacak belge sırası ile;'+#13+#10+
-              '     * sütun1(A):TC Kimlik No,'+#13+#10+
-              '     * sütun2(B):Ad Soyad,'+#13+#10+
-              '     * sütun3(C):Prim(Numerik),'+#13+#10+
-              '   öğelerine sahip olmalıdır.';
+    MTOnceMaasTablosunuBosalt = 'Yeniden oluÅŸturmak iÃ§in Ã¶nce maaÅŸ tablosunu boÅŸaltmalÄ±sÄ±nÄ±z!';
+    MTAktarimkosullari='AktarÄ±m KoÅŸullarÄ±:'+#13+#10+
+              ' - AktarÄ±m dosyasÄ± excell uzantÄ±sÄ±na sahip olmalÄ±dÄ±r.'+#13+#10+
+              ' - AktarÄ±lacak belge sÄ±rasÄ± ile;'+#13+#10+
+              '     * sÃ¼tun1(A):TC Kimlik No,'+#13+#10+
+              '     * sÃ¼tun2(B):Ad Soyad,'+#13+#10+
+              '     * sÃ¼tun3(C):Prim(Numerik),'+#13+#10+
+              '   Ã¶ÄŸelerine sahip olmalÄ±dÄ±r.';
 
   //UKrediler
-    KGirilmisOdemeTakvimiVarSilinsinmi = 'Daha önce girilmiş ödeme takvimi var. Silinsin mi?';
-    KKrediHesabinaEklensinmi = 'Kredi hesabına eklensin mi?';
-    KDahaOnceEklenmis = 'Daha önce eklenmiş';
-    KOdemePlaniTumuyleSilinsinmi = 'Ödeme planı tümüyle silinsin mi?';
+    KGirilmisOdemeTakvimiVarSilinsinmi = 'Daha Ã¶nce girilmiÅŸ Ã¶deme takvimi var. Silinsin mi?';
+    KKrediHesabinaEklensinmi = 'Kredi hesabÄ±na eklensin mi?';
+    KDahaOnceEklenmis = 'Daha Ã¶nce eklenmiÅŸ';
+    KOdemePlaniTumuyleSilinsinmi = 'Ã–deme planÄ± tÃ¼mÃ¼yle silinsin mi?';
     KKrediBilgisiSilinsinmi = 'Kredi bilgisi silinsin mi?';
-    KOdemeBilgisiSilinsinmi = 'Ödeme bilgisi silinsin mi?';
+    KOdemeBilgisiSilinsinmi = 'Ã–deme bilgisi silinsin mi?';
     KBuKredinin = 'Bu kredinin ';
-    KTarihindeOdemesiVarSilinemez = ' tarihinde ödemesi var silinemez!';
+    KTarihindeOdemesiVarSilinemez = ' tarihinde Ã¶demesi var silinemez!';
 
-  //üretim
-    FTWUretimleriSil = 'Önce Transfer satırlarını silmeniz gerekiyor';
-    URKayitSilinemez='Hareket Görmüş Kayıt Silinemez!';
-    URAdedBosOlamaz='Üretim Adedi Boş Olamaz!';
-    UROnceOperasyonEkle='Önce operasyon ekleyin!';
-    UROnceUretimEkle='Önce üretim satırı ekleyin!';
-    URUrunlerIcinKalite='Sadece ürünler için kalite bilgisi girilebilir!';
-    UROnceOperasyonlariSil='Bu işlemi yapabilmek için önce operasyonları silmelisiniz!';
-    URBirimHatasi='Anabirim ve birim 2 hatası!!';
-    URSifirdanKucukUyarisi='Ürün adedi 0 dan küçük olamaz!';
-    URSifirdanBuyukUyarisi='Bileşen adedi 0 dan büyük olamaz!';
-    UREslesmediUyarisi='Operasyon Üretim ile eşleşmedi!!';
-    URAktarilacakKayitYok='Aktarılacak kayıt bulunamadı.';
-    URUretimEmirleriniSil='Önce bu plan dahilindeki üretim emirlerini silmelisiniz!';
-    URUretimOperasyonuSil='Önce bu plan dahilindeki üretim operasyonlarını silmelisiniz!';
-    URUretimFisSil='Önce bu plan dahilindeki üretim fişlerini silmelisiniz!'  ;
-    URSiparissizIslemOlmaz ='Alınan sipariş olmadan işlem yapılamaz.';
-    URPlanOlustur='Önce bir plan oluşturmalısınız.';
-    URYeniReceteYap='Kayıtlı Reçete Bulunamadı. Önce Yeni Reçete Oluşturmalısınız.';
-    URYeterliKayitUyarisi='Yeterli kayıt girilmemiştir.';
-    URKodAdUyarisi='Kod ve Ad boş olamaz!';
-    URIslemVarReceteAktarilmaz='İşlem satırları varken reçete bilgisi aktaramazsınız!!';
+  //Ã¼retim
+    FTWUretimleriSil = 'Ã–nce Transfer satÄ±rlarÄ±nÄ± silmeniz gerekiyor';
+    URKayitSilinemez='Hareket GÃ¶rmÃ¼ÅŸ KayÄ±t Silinemez!';
+    URAdedBosOlamaz='Ãœretim Adedi BoÅŸ Olamaz!';
+    UROnceOperasyonEkle='Ã–nce operasyon ekleyin!';
+    UROnceUretimEkle='Ã–nce Ã¼retim satÄ±rÄ± ekleyin!';
+    URUrunlerIcinKalite='Sadece Ã¼rÃ¼nler iÃ§in kalite bilgisi girilebilir!';
+    UROnceOperasyonlariSil='Bu iÅŸlemi yapabilmek iÃ§in Ã¶nce operasyonlarÄ± silmelisiniz!';
+    URBirimHatasi='Anabirim ve birim 2 hatasÄ±!!';
+    URSifirdanKucukUyarisi='ÃœrÃ¼n adedi 0 dan kÃ¼Ã§Ã¼k olamaz!';
+    URSifirdanBuyukUyarisi='BileÅŸen adedi 0 dan bÃ¼yÃ¼k olamaz!';
+    UREslesmediUyarisi='Operasyon Ãœretim ile eÅŸleÅŸmedi!!';
+    URAktarilacakKayitYok='AktarÄ±lacak kayÄ±t bulunamadÄ±.';
+    URUretimEmirleriniSil='Ã–nce bu plan dahilindeki Ã¼retim emirlerini silmelisiniz!';
+    URUretimOperasyonuSil='Ã–nce bu plan dahilindeki Ã¼retim operasyonlarÄ±nÄ± silmelisiniz!';
+    URUretimFisSil='Ã–nce bu plan dahilindeki Ã¼retim fiÅŸlerini silmelisiniz!'  ;
+    URSiparissizIslemOlmaz ='AlÄ±nan sipariÅŸ olmadan iÅŸlem yapÄ±lamaz.';
+    URPlanOlustur='Ã–nce bir plan oluÅŸturmalÄ±sÄ±nÄ±z.';
+    URYeniReceteYap='KayÄ±tlÄ± ReÃ§ete BulunamadÄ±. Ã–nce Yeni ReÃ§ete OluÅŸturmalÄ±sÄ±nÄ±z.';
+    URYeterliKayitUyarisi='Yeterli kayÄ±t girilmemiÅŸtir.';
+    URKodAdUyarisi='Kod ve Ad boÅŸ olamaz!';
+    URIslemVarReceteAktarilmaz='Ä°ÅŸlem satÄ±rlarÄ± varken reÃ§ete bilgisi aktaramazsÄ±nÄ±z!!';
 
 
   //HizliGiris
     HGToplam = 'Toplam';
-    HGOdenmis = 'Ödenmiş';
+    HGOdenmis = 'Ã–denmiÅŸ';
     HGNakitOdeme ='Nakit';
     HGKKOdeme = 'KK';
-    HGDigerOdeme = 'Diğer';
-    HGIadeCeki = 'İade Çeki';
-    HGHediyeCeki = 'Hediye Çeki';
-    HGKasa_Acilis='Kasa Açılışı yapmadan işlem yapamazsınız.';
-    HGKasa_Iade_Tamamlandi='İade İşlemi Tamamlandı.';
-    HGKasa_Iade_Bulunamadi='İade alınacak ürün bulunamadı.';
-    HGKasa_Iade_MaxAdet='Satış yapılmış miktardan fazla iade alamazsınız.';
-    HGKasadan='Kasadan Çıkış Yapılamadı. ';
-    HGCarikart='Carikart seçmeden işleme devam edemezsiniz.';
-    HGKasa_Ayarlarinda= 'Kasa Ayarlarında geçerli bir müşteri kaydı seçiniz';
-    HGTanimli_depo_bulunamadi='Bu şubenin tanımlı deposu bulunamadı!' ;
-    HGKayit_iptal_edilsinmi='Girilmiş kayıtlar var, iptal edilecektir, devam etmek istiyor musunuz?';
-    HGBelge_Numarasi_uzun='Belge Numarası fazla uzun, lütfen kontrol ediniz.';
-    HGTablo_dusurme_basarisiz='Tablo düşürme işlemi başarısız oldu.' ;
-    HGIskonto_Yapilamaz='Bu Ürüne İskonto Yapılamaz!';
-    HGSiparis_iptal_edilir='Sipariş edilmiş, silinemez, iptal edilebilir!';
-    HGstok_boyutu_eksik='Bu stok için boyut tanımlamalarınız eksik veya hatalıdır.';
-    HGbarkod_tanimlariniz_hatali='Boyutlara göre yapılan barkod tanımlamalarınız hatalı.';
-    HGIslem_yarim_kapatilamaz='Seçilmiş ürünler var. İşlem yarım kalmış. Kapatılamaz..' ;
-    HGSatistan_Buyuk_iskonto_yapilamaz='Satış tutarından büyük iskonto tutarı girilemez';
-    HGdegistirme_yetkiniz_yok='Bu kayıttan sonra oluşturulmuş kasa kaydı olduğu için bu kaydı değiştirme yetkiniz yok.' ;
-    HGfarki_onayliyormusun='Onaylıyor musunuz?';
-    HGkasa_kapat='Önce açık olan kasanızı kapatmalısınız!';
-    HGkasa_aktif_degil='Kasa Açılış Kapanış İşlemleri Aktif Değil.' ;
-    HGkasa_kapandi='Kasa Kapatma işlemi yapıldı.';
-    HGOnce_kaydetin='Önce yapılan işlemi kaydedin veya iptal edin!' ;
+    HGDigerOdeme = 'DiÄŸer';
+    HGIadeCeki = 'Ä°ade Ã‡eki';
+    HGHediyeCeki = 'Hediye Ã‡eki';
+    HGKasa_Acilis='Kasa AÃ§Ä±lÄ±ÅŸÄ± yapmadan iÅŸlem yapamazsÄ±nÄ±z.';
+    HGKasa_Iade_Tamamlandi='Ä°ade Ä°ÅŸlemi TamamlandÄ±.';
+    HGKasa_Iade_Bulunamadi='Ä°ade alÄ±nacak Ã¼rÃ¼n bulunamadÄ±.';
+    HGKasa_Iade_MaxAdet='SatÄ±ÅŸ yapÄ±lmÄ±ÅŸ miktardan fazla iade alamazsÄ±nÄ±z.';
+    HGKasadan='Kasadan Ã‡Ä±kÄ±ÅŸ YapÄ±lamadÄ±. ';
+    HGCarikart='Carikart seÃ§meden iÅŸleme devam edemezsiniz.';
+    HGKasa_Ayarlarinda= 'Kasa AyarlarÄ±nda geÃ§erli bir mÃ¼ÅŸteri kaydÄ± seÃ§iniz';
+    HGTanimli_depo_bulunamadi='Bu ÅŸubenin tanÄ±mlÄ± deposu bulunamadÄ±!' ;
+    HGKayit_iptal_edilsinmi='GirilmiÅŸ kayÄ±tlar var, iptal edilecektir, devam etmek istiyor musunuz?';
+    HGBelge_Numarasi_uzun='Belge NumarasÄ± fazla uzun, lÃ¼tfen kontrol ediniz.';
+    HGTablo_dusurme_basarisiz='Tablo dÃ¼ÅŸÃ¼rme iÅŸlemi baÅŸarÄ±sÄ±z oldu.' ;
+    HGIskonto_Yapilamaz='Bu ÃœrÃ¼ne Ä°skonto YapÄ±lamaz!';
+    HGSiparis_iptal_edilir='SipariÅŸ edilmiÅŸ, silinemez, iptal edilebilir!';
+    HGstok_boyutu_eksik='Bu stok iÃ§in boyut tanÄ±mlamalarÄ±nÄ±z eksik veya hatalÄ±dÄ±r.';
+    HGbarkod_tanimlariniz_hatali='Boyutlara gÃ¶re yapÄ±lan barkod tanÄ±mlamalarÄ±nÄ±z hatalÄ±.';
+    HGIslem_yarim_kapatilamaz='SeÃ§ilmiÅŸ Ã¼rÃ¼nler var. Ä°ÅŸlem yarÄ±m kalmÄ±ÅŸ. KapatÄ±lamaz..' ;
+    HGSatistan_Buyuk_iskonto_yapilamaz='SatÄ±ÅŸ tutarÄ±ndan bÃ¼yÃ¼k iskonto tutarÄ± girilemez';
+    HGdegistirme_yetkiniz_yok='Bu kayÄ±ttan sonra oluÅŸturulmuÅŸ kasa kaydÄ± olduÄŸu iÃ§in bu kaydÄ± deÄŸiÅŸtirme yetkiniz yok.' ;
+    HGfarki_onayliyormusun='OnaylÄ±yor musunuz?';
+    HGkasa_kapat='Ã–nce aÃ§Ä±k olan kasanÄ±zÄ± kapatmalÄ±sÄ±nÄ±z!';
+    HGkasa_aktif_degil='Kasa AÃ§Ä±lÄ±ÅŸ KapanÄ±ÅŸ Ä°ÅŸlemleri Aktif DeÄŸil.' ;
+    HGkasa_kapandi='Kasa Kapatma iÅŸlemi yapÄ±ldÄ±.';
+    HGOnce_kaydetin='Ã–nce yapÄ±lan iÅŸlemi kaydedin veya iptal edin!' ;
     HGsilinsinmi=' silinsin mi?' ;
-    HGsecililer_var_kapatilamaz='Ortada seçilenler var, kapatılamaz..' ;
-    HGsifirdan_buyuk_kapatilmaz='Kalan tutar sıfırdan büyük, kapatılamaz..' ;
-    HGTahsilat_eklenemez='Kalan sıfırlandı. Tahsilat eklenemez..';
-    HGKapatmak_icin_sil='Girilmiş tahsilatlar var. Kapatmak için üzerine tıklayarak silin..' ;
-    HGYazdirilsinmi='Yazdırılsın mı';
+    HGsecililer_var_kapatilamaz='Ortada seÃ§ilenler var, kapatÄ±lamaz..' ;
+    HGsifirdan_buyuk_kapatilmaz='Kalan tutar sÄ±fÄ±rdan bÃ¼yÃ¼k, kapatÄ±lamaz..' ;
+    HGTahsilat_eklenemez='Kalan sÄ±fÄ±rlandÄ±. Tahsilat eklenemez..';
+    HGKapatmak_icin_sil='GirilmiÅŸ tahsilatlar var. Kapatmak iÃ§in Ã¼zerine tÄ±klayarak silin..' ;
+    HGYazdirilsinmi='YazdÄ±rÄ±lsÄ±n mÄ±';
 
 
 
   //Genel
     TamEkran = 'Tam Ekran';
-    KucukEkran = 'Küçük Ekran';
+    KucukEkran = 'KÃ¼Ã§Ã¼k Ekran';
     Uyari = 'U Y A R I';
     Kaydet='KAYDET';
     Onay = 'O N A Y';
-    Bilgi = 'B İ L G İ';
+    Bilgi = 'B Ä° L G Ä°';
     HataPrj = 'H A T A';
-    Dikkat = 'D İ K K A T';
+    Dikkat = 'D Ä° K K A T';
     Adres = 'Adres : ';
-    isTel = 'İş Tel : ';
+    isTel = 'Ä°ÅŸ Tel : ';
     cepTel = 'Mobil : ';
     EPosta = 'Eposta : ';
-    Seciniz = 'Seçiniz';
+    Seciniz = 'SeÃ§iniz';
     SerinoSec = 'Seri No Listesi';
     GelirMerkeziSec = 'Gelir Merkezi';
     MasrafMerkeziSec = 'Masraf Merkezi';
-    BosBirakilamaz = ' boş bırakılamaz.';
+    BosBirakilamaz = ' boÅŸ bÄ±rakÄ±lamaz.';
     SifirOlamaz = ' 0 olamaz.';
-    HizmetSecimi = 'Hizmet Seçimi';
+    HizmetSecimi = 'Hizmet SeÃ§imi';
     StokSecimi ='Stok Kart Listesi';
     KasaListesi = 'Kasa Listesi';
     KampanyaSecimi = 'Kampanya Listesi';
-    MusteriilgiliSec = 'Müşteri İlgili Listesi';
-    HizmetUrunSec = 'Hizmet/Ürün Seçimi';
-    AktiviteSecimi = 'Aktivite Seçimi';
-    ProjeSecimi = 'Proje Seçimi';
-    ServisSecimi = 'Servis Seçimi';
-    AksiyonSecimi = 'Aksiyon Seçin!';
-    AktiviteGorevSec = 'Aktivite/Görev Listesi';
+    MusteriilgiliSec = 'MÃ¼ÅŸteri Ä°lgili Listesi';
+    HizmetUrunSec = 'Hizmet/ÃœrÃ¼n SeÃ§imi';
+    AktiviteSecimi = 'Aktivite SeÃ§imi';
+    ProjeSecimi = 'Proje SeÃ§imi';
+    ServisSecimi = 'Servis SeÃ§imi';
+    AksiyonSecimi = 'Aksiyon SeÃ§in!';
+    AktiviteGorevSec = 'Aktivite/GÃ¶rev Listesi';
     TeklifSec ='Teklif Listesi';
     MasrafMerkeziPrj = 'Masraf Kalemi';
-    MasrafAdi = 'Masraf Adı';
+    MasrafAdi = 'Masraf AdÄ±';
     GelirMerkezi = 'Gelir Kalemi';
-    GelirAdi = 'Gelir Adı';
+    GelirAdi = 'Gelir AdÄ±';
     KategoriListesi = 'Kategori Listesi';
-    UlkeListesi = 'Ülke Listesi';
-    TabloHatali = 'Tablo Hatalı!!';
-    BankaSecimi = 'Banka Seçimi';
-    BaglantiBilgileri = 'Bağlantı Bilgileri';
+    UlkeListesi = 'Ãœlke Listesi';
+    TabloHatali = 'Tablo HatalÄ±!!';
+    BankaSecimi = 'Banka SeÃ§imi';
+    BaglantiBilgileri = 'BaÄŸlantÄ± Bilgileri';
     Tahsilat = 'Tahsilat';
     AlacakTahakkuku = 'Alacak Tahakkuku';
-    Odeme = 'Ödeme';
+    Odeme = 'Ã–deme';
     Alacak = 'Alacak ';
-    Borc = 'Borç ';
-    BorcTahakkuku = 'Borç Tahakkuku';
-    BorcAlacak = 'Borç ve alacak aynı anda dolu olamaz!';
+    Borc = 'BorÃ§ ';
+    BorcTahakkuku = 'BorÃ§ Tahakkuku';
+    BorcAlacak = 'BorÃ§ ve alacak aynÄ± anda dolu olamaz!';
     NakitTahsilat = 'Nakit Tahsilat';
     GelenHavaleEFT = 'Gelen Havale / EFT';
-    KurFarkiGeliri='Kur Farkı Geliri';
-    KurFarkiGideri='Kur Farkı Gideri';
+    KurFarkiGeliri='Kur FarkÄ± Geliri';
+    KurFarkiGideri='Kur FarkÄ± Gideri';
     PosileTahsilat = 'POS ile Tahsilat ';
-    PosileOdeme = 'POS ile Ödeme ';
-    NakitOdeme = 'Nakit Ödeme';
-    GonderilenHavaleEFT = 'Gönderilen Havale / EFT ';
-    KrediKartiileOdeme = 'Kredi Kartı ile Ödeme';
-    KrediKartiileOdemeIade = 'Kredi Kartına İade';
-    IadeCekiileOdeme ='İade Çeki ile Ödeme';
-    IadeCekiileTahsilat ='İade Çeki ile Tahsilat';
-    HediyeCekiileOdeme ='Hediye Çeki ile Ödeme';
-    HediyeCekiileTahsilat ='Hediye Çeki ile Tahsilat';
-    KuponileOdeme ='Kupon ile Ödeme';
+    PosileOdeme = 'POS ile Ã–deme ';
+    NakitOdeme = 'Nakit Ã–deme';
+    GonderilenHavaleEFT = 'GÃ¶nderilen Havale / EFT ';
+    KrediKartiileOdeme = 'Kredi KartÄ± ile Ã–deme';
+    KrediKartiileOdemeIade = 'Kredi KartÄ±na Ä°ade';
+    IadeCekiileOdeme ='Ä°ade Ã‡eki ile Ã–deme';
+    IadeCekiileTahsilat ='Ä°ade Ã‡eki ile Tahsilat';
+    HediyeCekiileOdeme ='Hediye Ã‡eki ile Ã–deme';
+    HediyeCekiileTahsilat ='Hediye Ã‡eki ile Tahsilat';
+    KuponileOdeme ='Kupon ile Ã–deme';
     KuponileTahsilat ='Kupon ile Tahsilat';
-    Degis = 'Değiş';
-    KayitIslemi = 'Kayıt işlemi yapılmadı kaydetmek istiyormusunuz?';
-    UrunDoluOlmali = 'Ürün bilgiler dolu olmalı!';
-    AdetDoluOlmali = 'Adet dolu olmalı!';
-    DoluOlmali = ' dolu olmalı!';
-    ConnectionNesnesiAcik = 'Connection Nesnesi Açık';
+    Degis = 'DeÄŸiÅŸ';
+    KayitIslemi = 'KayÄ±t iÅŸlemi yapÄ±lmadÄ± kaydetmek istiyormusunuz?';
+    UrunDoluOlmali = 'ÃœrÃ¼n bilgiler dolu olmalÄ±!';
+    AdetDoluOlmali = 'Adet dolu olmalÄ±!';
+    DoluOlmali = ' dolu olmalÄ±!';
+    ConnectionNesnesiAcik = 'Connection Nesnesi AÃ§Ä±k';
     Server = 'Server';
-    Veritabaniprj = 'Veritabanı';
+    Veritabaniprj = 'VeritabanÄ±';
     Cuma = 'Cuma';
     Cumartesi = 'Cumartesi';
     Pazar = 'Pazar';
-    YeniBelgeCikisi = 'Yeni Belge Çıkışı';
-    YeniBilgiGirisi = 'Yeni bilgi girişi';
-    DosyaAdiniGirin = 'Dosya adını girin';
-    BaslikAdiniGirin = 'Başlık adını girin';
-    ilgiliAdiniGirin = 'İlgili adını girin';
+    YeniBelgeCikisi = 'Yeni Belge Ã‡Ä±kÄ±ÅŸÄ±';
+    YeniBilgiGirisi = 'Yeni bilgi giriÅŸi';
+    DosyaAdiniGirin = 'Dosya adÄ±nÄ± girin';
+    BaslikAdiniGirin = 'BaÅŸlÄ±k adÄ±nÄ± girin';
+    ilgiliAdiniGirin = 'Ä°lgili adÄ±nÄ± girin';
     BildirimYapan = 'Bildirim yapan';
-    IletisimAdiniGirin = 'İletişim adını girin';
+    IletisimAdiniGirin = 'Ä°letiÅŸim adÄ±nÄ± girin';
     Bilgilendirma = 'Bilgilendirme';
-    SeriNoGirin = 'Seri numarasını girin!';
-    BankayiSecveGirin = 'Bankayı seçin girin!';
-    GecersizSeriNo = 'Geçersiz Seri Numarası!';
-    GecersizLisans = 'Lisanslama sorunu. Lisans için arayınız!';
-    Urun='Ürün';
+    SeriNoGirin = 'Seri numarasÄ±nÄ± girin!';
+    BankayiSecveGirin = 'BankayÄ± seÃ§in girin!';
+    GecersizSeriNo = 'GeÃ§ersiz Seri NumarasÄ±!';
+    GecersizLisans = 'Lisanslama sorunu. Lisans iÃ§in arayÄ±nÄ±z!';
+    Urun='ÃœrÃ¼n';
     Sarf='Sarf';
     Adet='Adet';
 
-    KontrolAktiviteTuru = 'Aktivite Türü';
+    KontrolAktiviteTuru = 'Aktivite TÃ¼rÃ¼';
     KontrolAktiviteKonusu = 'Aktivite Konusu';
     KontrolStokKodu = 'Stok Kodu';
-    KontrolStokAdi = 'Stok Adı';
-    KontrolDemirbasAdi = 'Demirbaş Adı';
+    KontrolStokAdi = 'Stok AdÄ±';
+    KontrolDemirbasAdi = 'DemirbaÅŸ AdÄ±';
     KontrolKategori= 'Kategori';
     KontrolAnaBirimi = 'Ana Birimi';
     KontrolKDV = 'KDV';
     KontrolKDVDahil = 'KDV Dahil';
-    KontrolKDVHaric = 'KDV Hariç';
+    KontrolKDVHaric = 'KDV HariÃ§';
     Kontrol2Birim = '2.Birim';
-    Kontrol2BirimCarpani = '2.Birim Çarpanı';
-    KontrolAlimTarihi= 'Alım Tarihi';
+    Kontrol2BirimCarpani = '2.Birim Ã‡arpanÄ±';
+    KontrolAlimTarihi= 'AlÄ±m Tarihi';
     KontrolKabulEden = 'Kabul Eden';
     KontrolEkleyen = 'Ekleyen';
     KontrolLokasyon = 'Lokasyon';
     KontrolDurum = 'Durum';
     KontrolMaasTarih = 'Maas Tarihi';
-    KontrolTuru = 'Türü';
-    KontrolFiyatListeAdi = 'Fiyat Adı';
+    KontrolTuru = 'TÃ¼rÃ¼';
+    KontrolFiyatListeAdi = 'Fiyat AdÄ±';
     KontrolKonusu = 'Konusu';
     KontrolSorumlu = 'Sorumlu';
     KontrolSorumluBilgisi = 'Sorumlu Bilgisi';
-    KontrolAsamaSorumlusu = 'Aşama Sorumlusu';
-    KontrolAsamasi = 'Aşaması';
+    KontrolAsamaSorumlusu = 'AÅŸama Sorumlusu';
+    KontrolAsamasi = 'AÅŸamasÄ±';
     KontrolDurumu = 'Durumu';
-    KontrolGorevAtayan = 'Görev Atayan';
-    KontrolGorevAtanan = 'Görev Atanan';
-    KontrolBaslangisTarihi = 'Baslangıç Tarihi';
-    KontrolBitisTarihi = 'Bitiş Tarihi';
-    KontrolGorevBasligi = 'Görev Başlığı';
-    KontrolSablonAdi = 'Şablon Adı';
+    KontrolGorevAtayan = 'GÃ¶rev Atayan';
+    KontrolGorevAtanan = 'GÃ¶rev Atanan';
+    KontrolBaslangisTarihi = 'BaslangÄ±Ã§ Tarihi';
+    KontrolBitisTarihi = 'BitiÅŸ Tarihi';
+    KontrolGorevBasligi = 'GÃ¶rev BaÅŸlÄ±ÄŸÄ±';
+    KontrolSablonAdi = 'Åablon AdÄ±';
     KontrolFaturaAdet = 'Fatura adet';
     KontrolBirimFiyati = 'Birim Fiyat';
     KontrolFaturaTarihi = 'Fatura Tarihi';
     KontrolTarihi = ' Tarih';
     KontrolNo = ' No';
-    KontrolStatu = 'Statü';
-    KontrolDokumanNo = 'Döküman No';
-    KontrolSurum = 'Sürüm';
-    KontrolYonu = 'Yönü';
-    KontrolDokumanAd = 'Döküman Ad';
+    KontrolStatu = 'StatÃ¼';
+    KontrolDokumanNo = 'DÃ¶kÃ¼man No';
+    KontrolSurum = 'SÃ¼rÃ¼m';
+    KontrolYonu = 'YÃ¶nÃ¼';
+    KontrolDokumanAd = 'DÃ¶kÃ¼man Ad';
     KontrolGrup = 'Grup';
     KontrolKod = 'Kod' ;
-    KontrolKodAdi = 'Kod Adı' ;
+    KontrolKodAdi = 'Kod AdÄ±' ;
     KontrolFirma = 'Firma';
-    KontrolBolge = 'Bölge';
-    KontrolAltBolge = 'Alt Bölge';
+    KontrolBolge = 'BÃ¶lge';
+    KontrolAltBolge = 'Alt BÃ¶lge';
     KontrolKonu = 'Konu';
     KontrolTipi = 'Tipi';
-    KontrolAciklama = 'Açıklama';
-    KontrolIcerikTuru = 'İçerik Türü';
-    KontrolBankaHesabi = 'Banka Hesabı';
-    KontrolCekKrediKodu = 'Çek Kredi Kodu';
-    KontrolCekKrediAdi = 'Çek Kredi Adı';
-    KontrolCekKrediSozlesmeNo = 'Çek Kredi Sözleşme No';
-    KontrolTeminati = 'Teminatı';
+    KontrolAciklama = 'AÃ§Ä±klama';
+    KontrolIcerikTuru = 'Ä°Ã§erik TÃ¼rÃ¼';
+    KontrolBankaHesabi = 'Banka HesabÄ±';
+    KontrolCekKrediKodu = 'Ã‡ek Kredi Kodu';
+    KontrolCekKrediAdi = 'Ã‡ek Kredi AdÄ±';
+    KontrolCekKrediSozlesmeNo = 'Ã‡ek Kredi SÃ¶zleÅŸme No';
+    KontrolTeminati = 'TeminatÄ±';
     KontrolLimitTipi = 'Limit Tipi';
     KontrolMinSeviye = 'Min.Seviye';
-    KontrolLimitSuresi = 'Limit Süresi';
+    KontrolLimitSuresi = 'Limit SÃ¼resi';
     KontrolLimit = 'Limit';
-    KontrolBankaSubesi = 'Banka Şubesi';
+    KontrolBankaSubesi = 'Banka Åubesi';
     KontrolHesapKodu = 'Hesap Kodu';
-    KontrolHesapAdi = 'Hesap Adı';
+    KontrolHesapAdi = 'Hesap AdÄ±';
     KontrolHesapNo = 'Hesap No';
     KontrolParaBirimi = 'Para Birimi';
     KontrolHesapTipi = 'Hesap Tipi';
-    KontrolSubeAdi = 'Şube Adı';
-    KontrolSubeKodu = 'Şube Kodu';
+    KontrolSubeAdi = 'Åube AdÄ±';
+    KontrolSubeKodu = 'Åube Kodu';
     KontrolEposta = 'EPosta';
-    KontrolKullaniciAdi = 'Kullanıcı Adı';
-    KontrolGonderen = 'Gönderen';
-    KontrolSifre = 'Şifre';
+    KontrolKullaniciAdi = 'KullanÄ±cÄ± AdÄ±';
+    KontrolGonderen = 'GÃ¶nderen';
+    KontrolSifre = 'Åifre';
     KontrolSunucu = 'Sunucu';
     KontrolPort = 'Port';
-    KontrolKocanNo = 'Koçan No';
-    KontrolBaslangicNo = 'Başlangıç No';
+    KontrolKocanNo = 'KoÃ§an No';
+    KontrolBaslangicNo = 'BaÅŸlangÄ±Ã§ No';
     KontrolKrediKodu = 'Kredi Kodu';
-    KontrolKrediAdi = 'Kredi Adı';
-    KontrolSozlesmeNo = 'Sözleşme No';
-    KontrolKrediTuru = 'Kredi Türü';
+    KontrolKrediAdi = 'Kredi AdÄ±';
+    KontrolSozlesmeNo = 'SÃ¶zleÅŸme No';
+    KontrolKrediTuru = 'Kredi TÃ¼rÃ¼';
     KontrolBankaKoduTicari = 'Banka Kodu (Ticari)';
-    KontrolKullanimSuresi = 'Kullanım Süresi';
+    KontrolKullanimSuresi = 'KullanÄ±m SÃ¼resi';
     KontrolGelir = 'Gelir';
     KontrolMasraf = 'Masraf';
     KontrolKur = 'Kur';
     KontrolSevkAdresi = 'Sevk Adresi';
     Depo   = 'Depo';
 
-    GecerliBirimTipiDegil = 'Seçilen birim bu ürün için geçerli bir birim tipi değil';
-    SeciliSatirSil = 'Seçili kayıt silinecektir. Onaylıyor musunuz?';
-    BirlestirAciklama = 'Birleştirmede girilmiş açıklamalar silinecektir. Devam etsin mi?';
+    GecerliBirimTipiDegil = 'SeÃ§ilen birim bu Ã¼rÃ¼n iÃ§in geÃ§erli bir birim tipi deÄŸil';
+    SeciliSatirSil = 'SeÃ§ili kayÄ±t silinecektir. OnaylÄ±yor musunuz?';
+    BirlestirAciklama = 'BirleÅŸtirmede girilmiÅŸ aÃ§Ä±klamalar silinecektir. Devam etsin mi?';
 
-    cnst_SablonAdiBosOlamaz ='Şablon Adı Boş Olamaz';
+    cnst_SablonAdiBosOlamaz ='Åablon AdÄ± BoÅŸ Olamaz';
 
     Silinemedi=' den silinemedi...';
-    Yazilamadi=' ye yazılamadı...';
+    Yazilamadi=' ye yazÄ±lamadÄ±...';
 
-    Tablo_sec='Öncelikle tablo seçin!';
+    Tablo_sec='Ã–ncelikle tablo seÃ§in!';
 
-        //Sipariş
-    Sil_Onay='Seçili satır silinecektir. Onaylıyor musunuz?';
-    Yanlis_Ekran='Belge türü Fiş olan kayıtlar için bu ekran kullanılamaz';
-    Yeniden_duzenleme='Fiyat liste adı değişti. Yeniden düzenlensin mi?';
-    Yanlis_karakter='Sipariş numarasında rakam dışında karakter olamaz!';
-    Yanlis_numara=' tarihinde bu Sipariş numarası kullanılmış!';
-    Onaylanmis_siparis= 'Bu Sipariş Daha Önce Onaylanmış.' ;
-    Aksiyon_sec='Aksiyon Seçin!';
+        //SipariÅŸ
+    Sil_Onay='SeÃ§ili satÄ±r silinecektir. OnaylÄ±yor musunuz?';
+    Yanlis_Ekran='Belge tÃ¼rÃ¼ FiÅŸ olan kayÄ±tlar iÃ§in bu ekran kullanÄ±lamaz';
+    Yeniden_duzenleme='Fiyat liste adÄ± deÄŸiÅŸti. Yeniden dÃ¼zenlensin mi?';
+    Yanlis_karakter='SipariÅŸ numarasÄ±nda rakam dÄ±ÅŸÄ±nda karakter olamaz!';
+    Yanlis_numara=' tarihinde bu SipariÅŸ numarasÄ± kullanÄ±lmÄ±ÅŸ!';
+    Onaylanmis_siparis= 'Bu SipariÅŸ Daha Ã–nce OnaylanmÄ±ÅŸ.' ;
+    Aksiyon_sec='Aksiyon SeÃ§in!';
 
 
 
 
   //UItsEczaDepo
-    Its_Islem_Gonderildi = 'İts sistemine gönderim tamamlandı.';
-    Its_Islem_Secilen_Adet_Gecerli_Degil = 'Seçilen adet geçerli değil';
+    Its_Islem_Gonderildi = 'Ä°ts sistemine gÃ¶nderim tamamlandÄ±.';
+    Its_Islem_Secilen_Adet_Gecerli_Degil = 'SeÃ§ilen adet geÃ§erli deÄŸil';
 
-  //Döküman Yönetimi
-    DYIcerikSilmeSorusu = 'İçerikteki &Parametre& silmek istediğinize emin misiniz?';
-    DYKlasor ='Klasör';
-    DYDokuman ='Döküman';
+  //DÃ¶kÃ¼man YÃ¶netimi
+    DYIcerikSilmeSorusu = 'Ä°Ã§erikteki &Parametre& silmek istediÄŸinize emin misiniz?';
+    DYKlasor ='KlasÃ¶r';
+    DYDokuman ='DÃ¶kÃ¼man';
     DYBelge ='Belge';
-    DYKlasoru ='Klasörü';
-    DYDokumani ='Dökümanı';
+    DYKlasoru ='KlasÃ¶rÃ¼';
+    DYDokumani ='DÃ¶kÃ¼manÄ±';
     DYBelgeyi ='Belgeyi';
-    DAltKlasor='Tüm alt klasorlere uygulamak ister misiniz?';
-    //Yetkisiz_Islem='Yetkisiz işlem!';
-    DMusteri_kod_girilmemis='Müşteri Kod Girilmemiş';
-    DMasraf_kod_girilmemis='Masraf Kod Girilmemiş';
-    DFiyat_girilmemis='B.Fiyat Girilmemiş';
-    DOdeme_girilmemis='Ödeme Girilmemiş';
-    DGiris_yapin='Lütfen Önce Giriş Yapın';
-    DBos_alan='Boş Alan';
-    DKayit_yapildi='Kayıt Yapıldı';
-    DKaydedilmedi_cikis_olacakmi='Kaydedilmemiş! Yine de çıkmak istiyor musunuz';
+    DAltKlasor='TÃ¼m alt klasorlere uygulamak ister misiniz?';
+    //Yetkisiz_Islem='Yetkisiz iÅŸlem!';
+    DMusteri_kod_girilmemis='MÃ¼ÅŸteri Kod GirilmemiÅŸ';
+    DMasraf_kod_girilmemis='Masraf Kod GirilmemiÅŸ';
+    DFiyat_girilmemis='B.Fiyat GirilmemiÅŸ';
+    DOdeme_girilmemis='Ã–deme GirilmemiÅŸ';
+    DGiris_yapin='LÃ¼tfen Ã–nce GiriÅŸ YapÄ±n';
+    DBos_alan='BoÅŸ Alan';
+    DKayit_yapildi='KayÄ±t YapÄ±ldÄ±';
+    DKaydedilmedi_cikis_olacakmi='KaydedilmemiÅŸ! Yine de Ã§Ä±kmak istiyor musunuz';
 
   //UMailSablon
-    MailSablonSilmeOnayi = 'Mail Şablonunu silmek istediğinize eminmisiniz?';
-    Subebilgisigir='Şube Bilgisi Boş olamaz';
-    Kimebilgisigir='Kime Bilgisi Boş olamaz';
-    Mesajturugir='Mesaj Türü Bilgisi Boş olamaz';
-    Oncelikgir='Öncelik Bilgisi Boş olamaz';
-    Gonderengir='Gönderen Bilgisi Boş olamaz';
-    Gonderildi='Mesajınız Gönderildi';
-    EPostaGonderildi='E-Posta Gönderildi..';
+    MailSablonSilmeOnayi = 'Mail Åablonunu silmek istediÄŸinize eminmisiniz?';
+    Subebilgisigir='Åube Bilgisi BoÅŸ olamaz';
+    Kimebilgisigir='Kime Bilgisi BoÅŸ olamaz';
+    Mesajturugir='Mesaj TÃ¼rÃ¼ Bilgisi BoÅŸ olamaz';
+    Oncelikgir='Ã–ncelik Bilgisi BoÅŸ olamaz';
+    Gonderengir='GÃ¶nderen Bilgisi BoÅŸ olamaz';
+    Gonderildi='MesajÄ±nÄ±z GÃ¶nderildi';
+    EPostaGonderildi='E-Posta GÃ¶nderildi..';
 
-    Gonderim_tamam='Gönderim İşlemi Tamamlanamadı';
-    Listedencikarilsinmi='Seçili ek dosya listeden çıkarılacaktır. Onaylıyor musunuz?';
+    Gonderim_tamam='GÃ¶nderim Ä°ÅŸlemi TamamlanamadÄ±';
+    Listedencikarilsinmi='SeÃ§ili ek dosya listeden Ã§Ä±karÄ±lacaktÄ±r. OnaylÄ±yor musunuz?';
 
-    EskiVersiyonKullniliyor = 'Programın eski versiyonlarından birini kullanmaktasınız, lütfen sistem yöneticiniz ile iletişime geçiniz.';
+    EskiVersiyonKullniliyor = 'ProgramÄ±n eski versiyonlarÄ±ndan birini kullanmaktasÄ±nÄ±z, lÃ¼tfen sistem yÃ¶neticiniz ile iletiÅŸime geÃ§iniz.';
 
 
   //Destekdlh
-    Destekdlg_MusteriKodu_Mesaj = 'Müşteri kodunuz bulunamadı.'+#13#10+'Yazılım firmanızla görüşüp sorunu giderebilirsiniz.';
+    Destekdlg_MusteriKodu_Mesaj = 'MÃ¼ÅŸteri kodunuz bulunamadÄ±.'+#13#10+'YazÄ±lÄ±m firmanÄ±zla gÃ¶rÃ¼ÅŸÃ¼p sorunu giderebilirsiniz.';
 
 const
-  //OPSİYONLAR
+  //OPSÄ°YONLAR
  //Genel Opsiyonlar 10___
     MesajGrup=99;
 
@@ -2205,26 +2205,26 @@ const
     Ops_Entegrasyon_Ent_DB = -10026;
     Ops_GenelOpsiyon_BSMV = -10027;
     Ops_GenelOpsiyon_KURUMADI = -10028;
-    Ops_IlaçFiyatOranBilgileri_Kademe1_Barem = -10029;
-    Ops_IlaçFiyatOranBilgileri_Kademe1_Etiket = -10030;
-    Ops_IlaçFiyatOranBilgileri_Kademe1_DepoKar = -10031;
-    Ops_IlaçFiyatOranBilgileri_Kademe1_EczaciKar = -10032;
-    Ops_IlaçFiyatOranBilgileri_Kademe2_Barem = -10033;
-    Ops_IlaçFiyatOranBilgileri_Kademe2_Etiket = -10034;
-    Ops_IlaçFiyatOranBilgileri_Kademe2_DepoKar = -10035;
-    Ops_IlaçFiyatOranBilgileri_Kademe2_EczaciKar = -10036;
-    Ops_IlaçFiyatOranBilgileri_Kademe3_Barem = -10037;
-    Ops_IlaçFiyatOranBilgileri_Kademe3_Etiket = -10038;
-    Ops_IlaçFiyatOranBilgileri_Kademe3_DepoKar = -10039;
-    Ops_IlaçFiyatOranBilgileri_Kademe3_EczaciKar = -10040;
-    Ops_IlaçFiyatOranBilgileri_Kademe4_Barem = -10041;
-    Ops_IlaçFiyatOranBilgileri_Kademe4_Etiket = -10042;
-    Ops_IlaçFiyatOranBilgileri_Kademe4_DepoKar = -10043;
-    Ops_IlaçFiyatOranBilgileri_Kademe4_EczaciKar = -10044;
-    Ops_IlaçFiyatOranBilgileri_Kademe5_Barem = -10045;
-    Ops_IlaçFiyatOranBilgileri_Kademe5_DepoKar = -10046;
-    Ops_IlaçFiyatOranBilgileri_Kademe5_EczaciKar = -10047;
-    Ops_IlaçFiyatOranBilgileri_KDVOranı = -10048;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe1_Barem = -10029;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe1_Etiket = -10030;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe1_DepoKar = -10031;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe1_EczaciKar = -10032;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe2_Barem = -10033;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe2_Etiket = -10034;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe2_DepoKar = -10035;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe2_EczaciKar = -10036;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe3_Barem = -10037;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe3_Etiket = -10038;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe3_DepoKar = -10039;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe3_EczaciKar = -10040;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe4_Barem = -10041;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe4_Etiket = -10042;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe4_DepoKar = -10043;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe4_EczaciKar = -10044;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe5_Barem = -10045;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe5_DepoKar = -10046;
+    Ops_IlaÃ§FiyatOranBilgileri_Kademe5_EczaciKar = -10047;
+    Ops_IlaÃ§FiyatOranBilgileri_KDVOranÄ± = -10048;
 
     Ops_GenelOpsiyon_AktarimRehberKayitlari = -10049;
     Ops_GenelOpsiyon_AktarimStokKart = -10050;
@@ -2305,7 +2305,7 @@ const
     Ops_AktiviteOpsiyon_TarihceEkleTO = -21008;
     Ops_AktiviteOpsiyon_TarihceEkleTuru = -21009;
     Ops_AktiviteOpsiyon_BagliAktiviteKullan = -21010;
-    Ops_AktiviteOpsiyon_GorevAtamaIzınKontrol = -21011;
+    Ops_AktiviteOpsiyon_GorevAtamaIzÄ±nKontrol = -21011;
     Ops_AktiviteOpsiyon_AmiriTakipciGetir = -21012;
     Ops_AktiviteOpsiyon_AmiriBilgilendirilecekGetir = -21013;
     }
@@ -2562,7 +2562,7 @@ const
 
 
     ops_guvenlik_sorusu = -24000;
- //Alış-Satış Opsiyonlar 24___
+ //AlÄ±ÅŸ-SatÄ±ÅŸ Opsiyonlar 24___
     Ops_FaturaOpsiyon_ZorunluPlanOlustur =-24001;
     Ops_FaturaOpsiyon_OndalikDijitSayBr = -24002;
     Ops_FaturaOpsiyon_OndalikDijitSayTut =-24003;
@@ -2650,6 +2650,13 @@ const
     Ops_FaturaOpsiyon_EBelgeSOAPTestURL = -24103;
     Ops_FaturaOpsiyon_EBelgeSOAPUretimURL = -24104;
     Ops_FaturaOpsiyon_EIrsaliyeGIBAlias = -24105;
+    // Gelen e-Belge XSLT opsiyonlari (DOKUMLER.RAPORID = 1/11/31/51)
+    Ops_FaturaOpsiyon_EFaturaGelenXSLT = -24107;
+    Ops_FaturaOpsiyon_EArsivFaturaGelenXSLT = -24108;
+    Ops_FaturaOpsiyon_ESMMGelenXSLT = -24109;
+    Ops_FaturaOpsiyon_EIrsaliyeGelenXSLT = -24110;
+    // Cari olusturulurken kullanilacak kok HESAPKODU (HESAPPLANI'dan secilir).
+    Ops_FaturaOpsiyon_CariKod = -24111;
 
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;
@@ -2664,7 +2671,7 @@ const
     Ops_OpsiyonKrediKarti_BilgilendirmeMail = 25006;
     Ops_OpsiyonKrediKarti_BilgilendirmeSms = 25007;
     Ops_OpsiyonBanka_KrediTipi = 25008;
-    Ops_OpsiyonBanka_Rotatif_Dönemleri = 25009;
+    Ops_OpsiyonBanka_Rotatif_DÃ¶nemleri = 25009;
 
 
     Ops_Banka_Excelden_SatSut= 25010;
@@ -2674,7 +2681,7 @@ const
     Ops_OpsiyonBanka_KrediTeminat = 25018;
     Ops_OpsiyonBanka_KrediLimitSureTipi = 25019;
 
- //Çek-Senet Opsiyonlar  26___
+ //Ã‡ek-Senet Opsiyonlar  26___
     Ops_Cekler_CekSeriNoKontrolu = 26001;
     Ops_Cekler_CekRiskPayiKontrolu = 26002;
     Ops_Cekler_CekOdemedeMMAktar = 26003;
@@ -2707,7 +2714,7 @@ const
     Ops_StokOpsiyon_Birim2Miktar1denFarkliOlamaz = -27016;
 
 
- //Demirbaş Opsiyonlar 28___
+ //DemirbaÅŸ Opsiyonlar 28___
     Ops_OpsiyonDemirbas_VarsayilanKlasor = 28001;
     Ops_OpsiyonDemirbas_Stoktan= 28003;
     Ops_OpsiyonDemirbas_TakipTur= -28004;
@@ -2753,7 +2760,7 @@ const
     Ops_ServisHareketlerSekmesi=-30031;
     Ops_Servis_OzellikSekmesi=-30032;
     Ops_Servis_TureDurum=-30033;
- //Döküman Opsiyonlar  32___
+ //DÃ¶kÃ¼man Opsiyonlar  32___
     Ops_Dokuman_GoogleWsdl =-31001;
     Ops_Dokuman_GelenKutusu = -31002;
     Ops_Dokuman_GidenKutusu = -31003;
@@ -2784,12 +2791,12 @@ const
     Ops_EditUTSFirmaNo = -33053;
     Ops_CheckTest = -33054;
     Ops_CheckUrunNoTek = -33055;
- //İÇERİKLER
- //Genel İniler 10__
+ //Ä°Ã‡ERÄ°KLER
+ //Genel Ä°niler 10__
 
     Ops_YDil_Aktif=-1000;
     Ops_AktifPasif = -1001;
-    Ops_HaftanınGünleri = -1003;
+    Ops_HaftanÄ±nGÃ¼nleri = -1003;
     Ops_KURLAR = -1004;
     Ops_KasaTurleri = -1005;
     Ops_DepoVarsayilan = -1006;
@@ -2804,14 +2811,14 @@ const
     Ops_Sektor=-10000;
     Ops_Sektor_Liste=-10100;
     Ops_RepImhaGerekce=-1016;
-    Ops_TahsilatTürleri = -1021;
+    Ops_TahsilatTÃ¼rleri = -1021;
  // CRM iniler 21__
     Ops_Aktivite_Tipi = -2101;
     Ops_Aktivite_Konum = -2102;
     Ops_Aktivite_Oncelik =-2103;
     Ops_Aktivite_Puan = -2104;
     Ops_Aktivite_Durum = -2105;
-    Ops_Aktivite_Türü = -2106;
+    Ops_Aktivite_TÃ¼rÃ¼ = -2106;
     Ops_Aktivite_Konu = -2107;
     Ops_Aktivite_TarihceDurumu = -2108;
 
@@ -2820,7 +2827,7 @@ const
     Ops_Firsat_Durum = -2114;
     Ops_Firsat_Asama = -2113;
 
-    Ops_Firsat_Sonuç = -2115;
+    Ops_Firsat_SonuÃ§ = -2115;
     Ops_Firsat_Sebebi = -2116;
     Ops_Firsat_Konusu = -2117;
     Ops_Firsat_Olasilik=-2119;
@@ -2833,12 +2840,12 @@ const
     Ops_Proje_Durum = -2134;
     Ops_Proje_Konusu = -2137;
 
-    Ops_Görev_Durum=-2118;
+    Ops_GÃ¶rev_Durum=-2118;
     Ops_Gorev_Konusu = -2122;
 
     Ops_AnaKaynak = -2120;
 
- //Cari İniler  22__
+ //Cari Ä°niler  22__
     Ops_CariKart_Grup        = -2200;
     Ops_CariKart_Durum       = -2201;
 
@@ -2870,11 +2877,11 @@ const
     PDKS_GirSut  =-2285;
     PDKS_CikSut  =-2286;
     PDKS_AcikSut =-2287;
- //Kasa İniler 23__
+ //Kasa Ä°niler 23__
     Ops_Masraf_Turu = -2301;
     Ops_Masraf_Grubu = -2302;
     Ops_Masraf_SozlesmeTipi = -2303;
-    Ops_Varsayılan_Masraf_Gelir_Merkezleri= -2304;
+    Ops_VarsayÄ±lan_Masraf_Gelir_Merkezleri= -2304;
     Ops_GELIRAD = -2305;
     Ops_MASRAFAD= -2306;
     Ops_TahsilatAciklama = -2307;
@@ -2896,7 +2903,7 @@ const
     //Ops_Kasiyer_Cafe_Sip_Sablon = -238701; -238702; -238703; -238704; -238705
     //Ops_Kasiyer_Cafe_Hesap_Sablon = -238801;-238802;-238803;-238804;-238805;
 
- //Alış-Satış İniler 24__
+ //AlÄ±ÅŸ-SatÄ±ÅŸ Ä°niler 24__
     Ops_FatDetayTur = -2401;
     Ops_FaturaTipi = -2407;
 
@@ -2904,18 +2911,18 @@ const
 
     Ops_UretimEmirTuru = -2488;
 
- //Banka İniler  25__
-    Ops_POS_Türü = -2501;
-    Ops_POS_Statüsü = -2502;
+ //Banka Ä°niler  25__
+    Ops_POS_TÃ¼rÃ¼ = -2501;
+    Ops_POS_StatÃ¼sÃ¼ = -2502;
     Ops_Talimat_Durum = -2503;
-    Ops_KrediKarti_Türü = -2504;
+    Ops_KrediKarti_TÃ¼rÃ¼ = -2504;
 
- //Çek-Senet İniler  26__
+ //Ã‡ek-Senet Ä°niler  26__
     Ops_Cek_Durum_Alinan = -2601;
     Ops_Cek_Durum_Verilen = -2602;
     Ops_Senet_Durum = -2651;
 
- //Stok İniler  27__
+ //Stok Ä°niler  27__
     Ops_StokKart_Marka = -2701;
     Ops_StokKart_MarkaRakip = -2727;
     Ops_StokKart_Anabirim = -2702;
@@ -2931,9 +2938,9 @@ const
     Ops_StokKart_HacimBirimi = -2712;
     Ops_StokKart_AgirlikBirimi = -2713;
     Ops_StokKart_BarkodTipi = -2714;
-    Ops_StokKart_SayımTutanakTipi = -2715;
+    Ops_StokKart_SayÄ±mTutanakTipi = -2715;
     Ops_StokKart_Analiz = -2716;
-    //2717 kullanılmış sanırım..
+    //2717 kullanÄ±lmÄ±ÅŸ sanÄ±rÄ±m..
     Ops_StokKart_Icerik = -2718;
     Ops_StokKart_FisTipi = -2720;
     Ops_StokKart_Kategori = -2721;
@@ -2943,9 +2950,9 @@ const
     Ops_StokKart_OTV=-2756;
     Ops_StokKart_MedikalSinif=-2757;
 
-    Ops_KampanyaTürleri = -2780;
-    Ops_KampanyaKosulTürleri = -2781;
-    Ops_KampanyaSonucTürleri = -2782;
+    Ops_KampanyaTÃ¼rleri = -2780;
+    Ops_KampanyaKosulTÃ¼rleri = -2781;
+    Ops_KampanyaSonucTÃ¼rleri = -2782;
 
 
     Ops_IsEmri_Durum = -2785;
@@ -2972,15 +2979,15 @@ const
     Ops_EditIsEmriSekme2 = -33112;
     Ops_RadioGroupLotKaynak = -33114;
 
-    Ops_StokKategoriTurleri = -27990001; //bu key altına -27990001,-27990002,-27990003 gibi eklenmeye devam edilicektir..bu aralık rezerve!!
+    Ops_StokKategoriTurleri = -27990001; //bu key altÄ±na -27990001,-27990002,-27990003 gibi eklenmeye devam edilicektir..bu aralÄ±k rezerve!!
 
- //Demirbaş İniler 28__
+ //DemirbaÅŸ Ä°niler 28__
     Ops_Demirbas_Aksiyon = -2801;
     Ops_Demirbas_AlimSekli =-2802;
     Ops_Demirbas_Durum = -2803;
     Ops_Demirbas_Marka = -2804;
 
- //Teklif İniler  29__   ve SatınAlma İniler
+ //Teklif Ä°niler  29__   ve SatÄ±nAlma Ä°niler
     Ops_Teklif_Turu = -2901;
     Ops_Teklif_Durum = -2902;
     Ops_Teklif_Teslim_Sekli = -2903;
@@ -2993,10 +3000,10 @@ const
     Ops_Teklif_Sebebi =-2912;
 
 
- //Servis İniler 30__
+ //Servis Ä°niler 30__
     Ops_Servis_Teslim_Sekli = -3001;
     Ops_Servis_Kabul_Sekli = -3002;
-    Ops_Servis_Bildirim_Şekli = -3003;
+    Ops_Servis_Bildirim_Åekli = -3003;
     Ops_Servis_Bildirim_Yazisi = -3004;
     Ops_Servis_OnaySekli = -3005;
     Ops_Servis_Turu = -3006;
@@ -3011,7 +3018,7 @@ const
     Ops_ServisAsama_Durum = -3027;
 
     Ops_Bildirim_Adres=-5001;
- //Döküman İniler  32__
+ //DÃ¶kÃ¼man Ä°niler  32__
     Ops_Dokuman_Modul = -3201;
     Ops_Dokuman_Bolumu = -3202;
     Ops_Dokuman_Konusu = -3203;
@@ -3020,17 +3027,17 @@ const
     Ops_Dokuman_Gizlilik = -3206;
     Ops_Dokuman_Tipi = -3207;
     Ops_Sozlesme_Sure = -3225;
- //YılSonu İniler 33_
+ //YÄ±lSonu Ä°niler 33_
     Ops_DevirIslemleri = -3301;
 
  //Duyuru
-    DUYazilanlar_kaydedilmedi_onayla='Yazdıklarınız kaydedilmeyip iptal edilecektir. Onaylıyor musunuz?';
-    DUAlici_sec='Alıcı girilmedi. Şimdi alıcı seçmek ister misiniz?';
-    DUKonu_doldur='Konu boş olamaz!';
-    DUIcerik_doldur='İçerik boş olamaz!';
-    DUOnemderecesi_doldur='Önem Derecesi boş olamaz!';
-    DUKategori_doldur='Kategori boş olamaz!';
- //Duyuru İniler 34_
+    DUYazilanlar_kaydedilmedi_onayla='YazdÄ±klarÄ±nÄ±z kaydedilmeyip iptal edilecektir. OnaylÄ±yor musunuz?';
+    DUAlici_sec='AlÄ±cÄ± girilmedi. Åimdi alÄ±cÄ± seÃ§mek ister misiniz?';
+    DUKonu_doldur='Konu boÅŸ olamaz!';
+    DUIcerik_doldur='Ä°Ã§erik boÅŸ olamaz!';
+    DUOnemderecesi_doldur='Ã–nem Derecesi boÅŸ olamaz!';
+    DUKategori_doldur='Kategori boÅŸ olamaz!';
+ //Duyuru Ä°niler 34_
     Ops_Seviye = -3401;
     Ops_DuyuruKategori = -3402;
 
@@ -3059,7 +3066,7 @@ const
 
 
    //////////////
-   ///  G2LKS opsiyonkları
+   ///  G2LKS opsiyonklarÄ±
     Ops_G2LKS_Registry = -100040;
     Ops_G2LKS_LOGOExportPath = -100041;
     Ops_G2LKS_Server = -100042;
@@ -3073,7 +3080,7 @@ const
     Ops_G2LKS_VarsayilanMuhasebeProg = -100050;
     Ops_G2LKS_ORKAExportPath = -100051;
 
-  //Entegrasyon Firmaları
+  //Entegrasyon FirmalarÄ±
     G2MuhEnt_LKS = 1;
     G2MuhEnt_Orka = 2;
     G2MuhEnt_Mikro = 3;
@@ -3082,19 +3089,19 @@ const
     Destekdlg_MusteriKodu = -3601;
     Destekdlg_SorumluKisi = -3602;
   // Social Media
-  //m.y. Mücahit Yağmur
-    sDegisiklikVar = 'İçerik değişikliği yok sayılacak. Yine de kapatmak istiyor musnuz?';
-    sKayitlarSifirlanacak = 'Veri içeriği başlangıç değerlerine getirilecek. Devam etmek istiyor musunuz ?';
-      { DONE -oMücahit -cConstants : GENINI içinden alınacak birçok Combo değerler, EVRAK_ tabloları unutulacak. }
+  //m.y. MÃ¼cahit YaÄŸmur
+    sDegisiklikVar = 'Ä°Ã§erik deÄŸiÅŸikliÄŸi yok sayÄ±lacak. Yine de kapatmak istiyor musnuz?';
+    sKayitlarSifirlanacak = 'Veri iÃ§eriÄŸi baÅŸlangÄ±Ã§ deÄŸerlerine getirilecek. Devam etmek istiyor musunuz ?';
+      { DONE -oMÃ¼cahit -cConstants : GENINI iÃ§inden alÄ±nacak birÃ§ok Combo deÄŸerler, EVRAK_ tablolarÄ± unutulacak. }
 
     // constEvrakGizlilik = -4001// EVRAK_GIZLILIK -3206
     constEvrakGizlilik = Ops_Dokuman_Gizlilik;
     constEvrakCinsi = -4002;      // EVRAK_CINSI
     constEvrakYaziDurumu = -4003; // EVRAK_YAZI_DURUMU Aktif, Beklemede Durumx
 
-    constEvrakGelenYerTur = -4004;// EVRAK_GELEN_YER_TUR  Kamu, Kurum içi, Tüzel..
+    constEvrakGelenYerTur = -4004;// EVRAK_GELEN_YER_TUR  Kamu, Kurum iÃ§i, TÃ¼zel..
     constEvrakGelisSekli = -4005; // EVRAK_GELIS_SEKLI    Posta, ePosta, Faks, Elden vs.vs
-    constEvrakPostaTuru = -4006;  // EVRAK_POSTA_TUR      Elden, İadeli Taahhütlü, Adi Posta, APS vs
+    constEvrakPostaTuru = -4006;  // EVRAK_POSTA_TUR      Elden, Ä°adeli TaahhÃ¼tlÃ¼, Adi Posta, APS vs
 
     Ops_SocialMedia = -48001;
     Ops_SocialMedia_Meta = -48002;
@@ -3105,18 +3112,18 @@ const
 
 
   // ASCII aliases for mixed-encoding usages
-  Ops_HaftaninGunleri = Ops_HaftanınGünleri;
-  Ops_Aktivite_Turu = Ops_Aktivite_Türü;
-  Ops_Firsat_Sonuc = Ops_Firsat_Sonuç;
-  Ops_StokKart_SayimTutanakTipi = Ops_StokKart_SayımTutanakTipi;
-  Ops_KampanyaTurleri = Ops_KampanyaTürleri;
-  Ops_KampanyaKosulTurleri = Ops_KampanyaKosulTürleri;
-  Ops_KampanyaSonucTurleri = Ops_KampanyaSonucTürleri;
-  Ops_Servis_Bildirim_Sekli = Ops_Servis_Bildirim_Şekli;
-  Ops_POS_Turu = Ops_POS_Türü;
-  Ops_POS_Statusu = Ops_POS_Statüsü;
-  Ops_KrediKarti_Turu = Ops_KrediKarti_Türü;
-  Ops_Varsayilan_Masraf_Gelir_Merkezleri = Ops_Varsayılan_Masraf_Gelir_Merkezleri;
+  Ops_HaftaninGunleri = Ops_HaftanÄ±nGÃ¼nleri;
+  Ops_Aktivite_Turu = Ops_Aktivite_TÃ¼rÃ¼;
+  Ops_Firsat_Sonuc = Ops_Firsat_SonuÃ§;
+  Ops_StokKart_SayimTutanakTipi = Ops_StokKart_SayÄ±mTutanakTipi;
+  Ops_KampanyaTurleri = Ops_KampanyaTÃ¼rleri;
+  Ops_KampanyaKosulTurleri = Ops_KampanyaKosulTÃ¼rleri;
+  Ops_KampanyaSonucTurleri = Ops_KampanyaSonucTÃ¼rleri;
+  Ops_Servis_Bildirim_Sekli = Ops_Servis_Bildirim_Åekli;
+  Ops_POS_Turu = Ops_POS_TÃ¼rÃ¼;
+  Ops_POS_Statusu = Ops_POS_StatÃ¼sÃ¼;
+  Ops_KrediKarti_Turu = Ops_KrediKarti_TÃ¼rÃ¼;
+  Ops_Varsayilan_Masraf_Gelir_Merkezleri = Ops_VarsayÄ±lan_Masraf_Gelir_Merkezleri;
 
 implementation
 

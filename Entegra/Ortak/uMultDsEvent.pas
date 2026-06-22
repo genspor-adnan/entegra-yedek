@@ -1,4 +1,4 @@
-unit uMultDsEvent;   // Only for DELPHI 7 Win 32
+Ôªøunit uMultDsEvent;   // Only for DELPHI 7 Win 32
 
 interface
 
@@ -22,7 +22,7 @@ uses Classes, db, variants, dialogs;
    when you add an extra handler, the original will be fired to.
 
    ===================================================================================
-   Adiciona a capacidade de executar v·rios manipuladores (multicast event handlers)
+   Adiciona a capacidade de executar v√°rios manipuladores (multicast event handlers)
    associados a um determinado evento do TDataSet ou TField.
 
    Exemplo:
@@ -32,10 +32,10 @@ uses Classes, db, variants, dialogs;
       Delegate.AddEventHandler(TablePRP_FONERES,FLD_ONCHANGE,onchange3);
       MultiEvent.Destroy;
 
-   Os mÈtodos adicionais devem ser declarados como published.
+   Os m√©todos adicionais devem ser declarados como published.
 
-   Caso o objeto ja possua um manipulador atribuÌdo ao evento, ao adicionar
-   um manipulador o original tambÈm ser· executado.
+   Caso o objeto ja possua um manipulador atribu√≠do ao evento, ao adicionar
+   um manipulador o original tamb√©m ser√° executado.
 
    ===================================================================================
    Any changes or doubts, please notify me. I will be glad to know any ideas, opnions

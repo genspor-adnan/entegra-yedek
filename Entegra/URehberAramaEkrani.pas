@@ -1,4 +1,4 @@
-unit URehberAramaEkrani;
+ï»¿unit URehberAramaEkrani;
 
 interface
 
@@ -163,7 +163,7 @@ end;
 
 procedure TRehberAramaEkrani.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 end;
 
@@ -207,7 +207,7 @@ begin
       //     AraTusClick(Self);
    end
    else begin
-      if not Potansiyel then //potansiyeller gelmeyecekse combodan çýkaralým.
+      if not Potansiyel then //potansiyeller gelmeyecekse combodan Ã§Ä±karalÄ±m.
          Tablo.RepCariGrup.Properties.Items.Delete(Tablo.RepCariGrup.Properties.FindItemByValue(1).Index );
       Tablo.RepCariGrup.Properties.Items.Delete(Tablo.RepCariGrup.Properties.FindItemByValue(335).Index );
       Caption:= RAEAramaEkrani;
@@ -239,7 +239,7 @@ var GrupListe : TStringList;
     i : integer;
 begin
     Application.CreateForm(TListeDlg, ListeDlg);
-    ListeDlg.Label1.Caption := 'Grup Üyeleri';
+    ListeDlg.Label1.Caption := 'Grup Ãœyeleri';
     GrupListe := TStringList.Create;
     GrupListe.Delimiter := ',';
     GrupListe.QuoteChar := ',';
@@ -288,15 +288,15 @@ begin
   //    AraQuery1.SQL.Add(' and R.GRUP='+IntToStr(AramaGrup))
    if AramaGrup = 337 then begin                 // 337 personel + grup
       if TFirma = '%%' then
-         Grup := ' and R.GRUP ='+IntToStr(ComboGrup.EditValue) //arama alaný boþsa gruba göre listelenir
+         Grup := ' and R.GRUP ='+IntToStr(ComboGrup.EditValue) //arama alanÄ± boÅŸsa gruba gÃ¶re listelenir
       else
-         Grup := ' and R.GRUP between 335 and 336 ' //aramaya harf girildiyse personel ve grup içinden arama yapýlýr
+         Grup := ' and R.GRUP between 335 and 336 ' //aramaya harf girildiyse personel ve grup iÃ§inden arama yapÄ±lÄ±r
    end else if AramaGrup > 0 then
-      Grup := ' and R.GRUP ='+IntToStr(AramaGrup) //Sadece personeli lislemek için yapýldý
+      Grup := ' and R.GRUP ='+IntToStr(AramaGrup) //Sadece personeli lislemek iÃ§in yapÄ±ldÄ±
    else if ComboGrup.Text <> '' then
       Grup := ' and R.GRUP ='+IntToStr(ComboGrup.EditValue)//ComboGrup.Properties.Items[ComboGrup.ItemIndex].Value)
    else
-      Grup := ' and R.GRUP<>99 and R.GRUP<>334 and R.GRUP<>335  ';//grup adý,  potansiyel personel ve personel
+      Grup := ' and R.GRUP<>99 and R.GRUP<>334 and R.GRUP<>335  ';//grup adÄ±,  potansiyel personel ve personel
 
   if (not Potansiyel)and(AramaGrup < 1) then
      Grup := Grup+' and R.GRUP > 1 ';
@@ -311,7 +311,7 @@ begin
      if Length(AraBarkod.Text)=1 then
         Barkod := AraBarkod.Text
      else
-        Barkod := Copy(AraBarkod.Text,1,Length(AraBarkod.Text)-1);//checksum almayalým
+        Barkod := Copy(AraBarkod.Text,1,Length(AraBarkod.Text)-1);//checksum almayalÄ±m
 
   if SubeVarmi then
      Sube := ' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') '
@@ -324,7 +324,7 @@ begin
      Durumu := ' and R.DURUM > 0 ';
 
   AraQuery1.Close;
-  ///Aramalarda bankalar gelmesin diye 102 kod ile baþlayanlarý devre dýþý býraktýk
+  ///Aramalarda bankalar gelmesin diye 102 kod ile baÅŸlayanlarÄ± devre dÄ±ÅŸÄ± bÄ±raktÄ±k
   FatBaslik:= '';
   if AraFirma.Text <> '' then begin
      if AramaGrup = -1 then
@@ -362,7 +362,7 @@ begin
      AraQuery1.SQL.Add(' ,FATBASLIK=X1.BILGI ');
   AraQuery1.SQL.Add(' from REHBER R left outer join REHBER P on R.ID=P.BAGID AND P.GRUP=334 and isnull(P.STATU,1) = 1 ');
 
-  if (TFirma<>'%%')and(AramaGrup = -1) then begin//Firma adý aramasý yapýlacaksa fatura baþlýðýna da bakýlmasý lazým
+  if (TFirma<>'%%')and(AramaGrup = -1) then begin//Firma adÄ± aramasÄ± yapÄ±lacaksa fatura baÅŸlÄ±ÄŸÄ±na da bakÄ±lmasÄ± lazÄ±m
      AraQuery1.SQL.Add(' LEFT OUTER JOIN (SELECT YER_ID,RB.BILGI FROM REHBERBILGI RB '+
       ' INNER JOIN REHBERAYAR RA ON RA.YERI = 2 AND RA.SIRA = RB.SIRA AND RA.YERI = RB.YERI AND RA.VARSAYILAN = 10) X1 ON X1.YER_ID = R.ID');
      GridCariAramaDBTableView1FATBASLIK.Visible := True;
@@ -400,11 +400,11 @@ procedure TRehberAramaEkrani.SecTusClick(Sender: TObject);
 begin
    if (SecTus.Visible)and(AraQuery1.RecordCount>0)  then begin
       case AraQuery1.FieldByName('DURUM').AsInteger of
-       0 : if (MessageBox(0,PChar(CRPasif_kayda_islem_Secimi),PChar(Onay),MB_YESNO)<> ID_YES) then begin //pasif kayýt
+       0 : if (MessageBox(0,PChar(CRPasif_kayda_islem_Secimi),PChar(Onay),MB_YESNO)<> ID_YES) then begin //pasif kayÄ±t
                 ModalResult := mrCancel;
                 exit;
              end;
-       2,3 : if Tablo.Uyari_Yasak_Ekrani(AraQuery1.FieldS[0].AsInteger)= 13 then begin //yasak varsa iþlem yapýlamaz
+       2,3 : if Tablo.Uyari_Yasak_Ekrani(AraQuery1.FieldS[0].AsInteger)= 13 then begin //yasak varsa iÅŸlem yapÄ±lamaz
                 ModalResult := mrCancel;
                 exit;
              end;

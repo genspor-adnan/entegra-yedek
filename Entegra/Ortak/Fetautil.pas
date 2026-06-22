@@ -1,4 +1,4 @@
-unit Fetautil;
+ï»¿unit Fetautil;
                                      
 interface
 
@@ -68,7 +68,7 @@ function TurkceDegisBoslukBirakma(AString: string): string;
 {ver 1.0}
 function GetMACAdress: string;
 procedure LogaEkle(s :string);
-{ 15.11.2008 23:25 deðiþtirildi }
+{ 15.11.2008 23:25 deÄŸiÅŸtirildi }
 function _query_exec(cnn : TADOConnection;sql: string;paramNames : array of string;params:array of variant;
   UseDataSource: TDataSource = nil) : TADOQuery;
 {ver 1.1}
@@ -103,13 +103,13 @@ procedure LockControl(c: TWinControl; bLock: Boolean);
 function GetDelimitedStringEx(var s : string;delimiter : string): string;
 {ver 2.0}
 /// <summary>
-/// Kolon içindeki deðerlerin en büyüðünü döndürür.
+/// Kolon iÃ§indeki deÄŸerlerin en bÃ¼yÃ¼ÄŸÃ¼nÃ¼ dÃ¶ndÃ¼rÃ¼r.
 /// </summary>
-/// <param name="cnn">Baðlantý nesnesi</param>
-/// <param name="TableName">Tablo adý</param>
-/// <param name="ColumnName">Kolon adý</param>
-/// <param name="WhereClause">Sorgunun WHERE kýsmý</param>
-/// <returns>Sorgu içindeki kolonun en büyük deðeri döner. Eðer sorgudan hiç kayýt dönmezse sonuç 0 döner. </returns>
+/// <param name="cnn">BaÄŸlantÄ± nesnesi</param>
+/// <param name="TableName">Tablo adÄ±</param>
+/// <param name="ColumnName">Kolon adÄ±</param>
+/// <param name="WhereClause">Sorgunun WHERE kÄ±smÄ±</param>
+/// <returns>Sorgu iÃ§indeki kolonun en bÃ¼yÃ¼k deÄŸeri dÃ¶ner. EÄŸer sorgudan hiÃ§ kayÄ±t dÃ¶nmezse sonuÃ§ 0 dÃ¶ner. </returns>
 function FindMaximumOfColumn(cnn: TADOConnection;TableName,ColumnName,WhereClause: string): Integer;
 function TurkishToEnglishCharset(st :string) :string;
 {ver 2.1}
@@ -362,11 +362,11 @@ begin
           end;
       end else if Assigned(UseDataSource) then begin
         for i := Low(paramNames) to High(paramNames) do begin
-          { $ iþaretini kaldýrýyoruz }
+          { $ iÅŸaretini kaldÄ±rÄ±yoruz }
           fieldName := SubString(paramNames[i],2);
-          { alaný buluyoruz }
+          { alanÄ± buluyoruz }
           field := UseDataSource.DataSet.FieldByName(fieldName);
-          { tipine göre sql içinde yerine koyuyoruz }
+          { tipine gÃ¶re sql iÃ§inde yerine koyuyoruz }
           case field.DataType of
             ftString: begin
               sql := StringReplace(sql,paramNames[i],#39 + StringReplace(field.AsString,#39,#39#39,[rfReplaceAll]) + #39,[rfReplaceAll])
@@ -396,7 +396,7 @@ var s, vers, Dizin, Modulexe, eskiad:String;
 begin
     // vers := GenotipIni.ReadString('Versiyonlar',Modul,'xx');
      if (vers = 'xx')or (vers < Versiyon) then begin
-         if Application.MessageBox(Pchar('Bu yeni bir sürüm. Sisteme kayýt edilsin mi'), 'O N A Y', MB_YESNO)<>IDYES then begin
+         if Application.MessageBox(Pchar('Bu yeni bir sÃ¼rÃ¼m. Sisteme kayÄ±t edilsin mi'), 'O N A Y', MB_YESNO)<>IDYES then begin
                VersiyonKontrolu := 1;
                exit;
          end
@@ -404,23 +404,23 @@ begin
          //   GenotipIni.WriteString('Versiyonlar', Modul, Versiyon)
      end
      else if vers > Versiyon then begin
-         if (i = 1)and(Application.MessageBox(Pchar('Yeni '+Modul+' sürümü bulundu, yüklensin mi'), 'O N A Y', MB_YESNO)<>IDYES) then begin
+         if (i = 1)and(Application.MessageBox(Pchar('Yeni '+Modul+' sÃ¼rÃ¼mÃ¼ bulundu, yÃ¼klensin mi'), 'O N A Y', MB_YESNO)<>IDYES) then begin
                VersiyonKontrolu := 1;
                exit;
          end;
      //    Dizin := GenotipIni.ReadString('Versiyonlar', 'YeniVersDizini', '---');
-         if Modul = 'Kayýt Kabul' then
+         if Modul = 'KayÄ±t Kabul' then
             Modulexe := 'KayitKabul.exe'
          else
             Modulexe := Modul+'.exe';
 
          while not FileExists(Dizin+Modulexe) do begin
-            if not MesajStrAl('Dizinde '+Modulexe+' bulunamadý..', 'Yeni sürüm için server kaynak dizini girin (Ör:\\server\prg\)', 'E', nil, Dizin, '', 'E', nil, Dizin) then begin
+            if not MesajStrAl('Dizinde '+Modulexe+' bulunamadÄ±..', 'Yeni sÃ¼rÃ¼m iÃ§in server kaynak dizini girin (Ã–r:\\server\prg\)', 'E', nil, Dizin, '', 'E', nil, Dizin) then begin
                VersiyonKontrolu := 1;
                exit;
             end;
       //      GenotipIni.WriteString('Versiyonlar', 'YeniVersDizini', Dizin);
-            //if Modul = 'Kayýt Kabul' then
+            //if Modul = 'KayÄ±t Kabul' then
             //   Dizin := Dizin+'KayitKabul.exe'
             //else
             //   Dizin := Dizin+Modul+'.exe';
@@ -441,10 +441,10 @@ begin
            //Kopyalanamazsa eski haline geri getirilir..
            AssignFile(f, s);
            rename(f, s);
-           Showmessage(vers+' sürümü bilgisayarýnýza yüklenemedi..');
+           Showmessage(vers+' sÃ¼rÃ¼mÃ¼ bilgisayarÄ±nÄ±za yÃ¼klenemedi..');
            VersiyonKontrolu:= 1;
          end else begin
-           Showmessage(vers+' sürümü bilgisayarýnýza yüklendi, programa tekrar girin..');
+           Showmessage(vers+' sÃ¼rÃ¼mÃ¼ bilgisayarÄ±nÄ±za yÃ¼klendi, programa tekrar girin..');
            VersiyonKontrolu:= 9;
          end;
      end;
@@ -464,7 +464,7 @@ begin
   liste := StringToStringList(ADegerListesi);
   try
     if (liste.Count = 0) then begin
-      { Hiç seçili deðer yok öyleyse tüm checkleri kaldýrýyoruz }
+      { HiÃ§ seÃ§ili deÄŸer yok Ã¶yleyse tÃ¼m checkleri kaldÄ±rÄ±yoruz }
       for i := 0 to AKontrol.Items.Count - 1 do
         AKontrol.Checked[i] := False;
     end;
@@ -640,13 +640,13 @@ begin
   AHexString := StringReplace(AHexString,#13,'',[rfReplaceAll]);
   AHexString := StringReplace(AHexString,#10,'',[rfReplaceAll]);
   // dize temizleme tamam
-  // þimdi tek tek çevirip stream e yazýyoruz
+  // ÅŸimdi tek tek Ã§evirip stream e yazÄ±yoruz
   for i := 0 to (Length(AHexString) div 2) - 1 do begin
-    // hex olarak dizeye atýyoruz örn $55
+    // hex olarak dizeye atÄ±yoruz Ã¶rn $55
     s := '$' + Copy(AHexString,(i * 2) + 1, 2);
-    // byte'a dönüþtürüp w ye atýyoruz
+    // byte'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼p w ye atÄ±yoruz
     w := StrToInt(s);
-    // stream'a yazýyoruz
+    // stream'a yazÄ±yoruz
     ADestination.Write(w,1);
   end;
 end;
@@ -890,13 +890,13 @@ end;
 function TurkishUpperCaseChar(st: char): Char;
 begin
   case st of
-    'ç': Result := 'Ç';
-    'ö': Result := 'Ö';
-    'þ': Result := 'Þ';
-    'i': Result := 'Ý';
-    'ý': Result := 'I';
-    'ð': Result := 'Ð';
-    'ü': Result := 'Ü';
+    'Ã§': Result := 'Ã‡';
+    'Ã¶': Result := 'Ã–';
+    'ÅŸ': Result := 'Åž';
+    'i': Result := 'Ä°';
+    'Ä±': Result := 'I';
+    'ÄŸ': Result := 'Äž';
+    'Ã¼': Result := 'Ãœ';
   else
     Result := Upcase(st);
   end;
@@ -922,19 +922,19 @@ begin
     begin
       ch := st[xi];
       case ch of
-        'Ç' :ch2 := 'C';
-        'Ð' :ch2 := 'Ð';
-        'Ý' :ch2 := 'I';
-        'Ö' :ch2 := 'O';
-        'Þ' :ch2 := 'S';
-        'Ü' :ch2 := 'U';
+        'Ã‡' :ch2 := 'C';
+        'Äž' :ch2 := 'Äž';
+        'Ä°' :ch2 := 'I';
+        'Ã–' :ch2 := 'O';
+        'Åž' :ch2 := 'S';
+        'Ãœ' :ch2 := 'U';
         ' ' :ch2 := '_';
-        'ç' :ch2 := 'c';
-        'ð' :ch2 := 'g';
-        'ý' :ch2 := 'i';
-        'ö' :ch2 := 'o';
-        'þ' :ch2 := 's';
-        'ü' :ch2 := 'u';
+        'Ã§' :ch2 := 'c';
+        'ÄŸ' :ch2 := 'g';
+        'Ä±' :ch2 := 'i';
+        'Ã¶' :ch2 := 'o';
+        'ÅŸ' :ch2 := 's';
+        'Ã¼' :ch2 := 'u';
       else
         ch2 := ch;
       end;
@@ -1217,14 +1217,14 @@ function SubString(AValue: string;StartIndex: Integer;Count : integer = 0): stri
 begin
   (*
      Senaryo 1:
-       AValue = Merhaba dünya
+       AValue = Merhaba dÃ¼nya
        StartIndex = 4
        Count = 0
 
-       Deðerler
+       DeÄŸerler
          Length(AValue) = 13
          Length(AValue) - StartIndex = 9
-         alýnmasý gereken karakter sayýsý = 10
+         alÄ±nmasÄ± gereken karakter sayÄ±sÄ± = 10
   *)  
   if (Count > 0) then
     Result := Copy(AValue,StartIndex,Count)
@@ -1344,18 +1344,18 @@ End;
 //  Result := S;Exit;
 //  for i := 1 to Length(s) do
 //    case s[i] of
-//      'ö': Result := Result + '\''f6';
-//      'ç': Result := Result + '\''e7';
-//      'þ': Result := Result + '\''fe';
-//      'ý': Result := Result + '\''fd';
-//      'ð': Result := Result + '\''f0';
-//      'ü': Result := Result + '\''fc';
-//      'Ö': Result := Result + '\''d6';
-//      'Ç': Result := Result + '\''c7';
-//      'Þ': Result := Result + '\''de';
-//      'Ý': Result := Result + '\''dd';
-//      'Ð': Result := Result + '\''d0';
-//      'Ü': Result := Result + '\''dc';
+//      'Ã¶': Result := Result + '\''f6';
+//      'Ã§': Result := Result + '\''e7';
+//      'ÅŸ': Result := Result + '\''fe';
+//      'Ä±': Result := Result + '\''fd';
+//      'ÄŸ': Result := Result + '\''f0';
+//      'Ã¼': Result := Result + '\''fc';
+//      'Ã–': Result := Result + '\''d6';
+//      'Ã‡': Result := Result + '\''c7';
+//      'Åž': Result := Result + '\''de';
+//      'Ä°': Result := Result + '\''dd';
+//      'Äž': Result := Result + '\''d0';
+//      'Ãœ': Result := Result + '\''dc';
 //    else
 //      Result := Result + s[i];
 //    end;
@@ -1473,7 +1473,7 @@ begin
       Result := Result + Format( '\pard\plain\f4%s\cf3 %s'#13#10, [ GetRTFFontInfo( blockFont ),
          '>>' + ABlockName + '\par' ]);
 
-    // Baþlýk Bilgisi
+    // BaÅŸlÄ±k Bilgisi
     if (Length(Title) > 0) then
       Result := Result + Format( '\par \par \pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
          '             -------  '+Title+'  -------\par' ] );
@@ -1642,7 +1642,7 @@ begin
     if (Length(ABlockName) > 0) then
       Result := Result + Format( '\pard\plain\f4%s\cf3 %s'#13#10, [ GetRTFFontInfo( blockFont ),
          '>>' + ABlockName + '\par' ]);
-    // Baþlýk Bilgisi
+    // BaÅŸlÄ±k Bilgisi
     if (Length(ATitle) > 0) then
       Result := Result + Format( '\pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
          '             -------  ' + ATitle + '  -------\par' ] );
@@ -1748,7 +1748,7 @@ begin
 
     Result := Result + Format( '\margl%d\margr%d\margt%d\margb%d', [ 461, 562, 101,101 ] ) ;
 
-    // Baþlýk Bilgisi
+    // BaÅŸlÄ±k Bilgisi
 
     Result := Result + Format( '\par \par \pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
        '             -------  '+Title+'  -------\par' ] );
@@ -1795,7 +1795,7 @@ begin
       end;
     Result := Result + '}\pard \nowidctlpar\widctlpar\intbl\adjustright {\row}'#13#10;
     Result := Result + '\pard\nowidctlpar\widctlpar\adjustright {'#13#10;
-    //Result := Result + Format( '\par \pard\plain\f0%s\cf0 %s'#13#10, [ GetRTFFontInfo( grid.Font ), 'Footerim tekerleðim' ] );
+    //Result := Result + Format( '\par \pard\plain\f0%s\cf0 %s'#13#10, [ GetRTFFontInfo( grid.Font ), 'Footerim tekerleÄŸim' ] );
     Result := Result + '}}';
   finally
     AFont.Free;
@@ -1844,11 +1844,11 @@ begin
           end;
       end else if Assigned(UseDataSource) then begin
         for i := Low(paramNames) to High(paramNames) do begin
-          { $ iþaretini kaldýrýyoruz }
+          { $ iÅŸaretini kaldÄ±rÄ±yoruz }
           fieldName := SubString(paramNames[i],2);
-          { alaný buluyoruz }
+          { alanÄ± buluyoruz }
           field := UseDataSource.DataSet.FieldByName(fieldName);
-          { tipine göre sql içinde yerine koyuyoruz }
+          { tipine gÃ¶re sql iÃ§inde yerine koyuyoruz }
           case field.DataType of
             ftString: begin
               sql := StringReplace(sql,paramNames[i],#39 + StringReplace(field.AsString,#39,#39#39,[rfReplaceAll]) + #39,[rfReplaceAll])
@@ -1932,7 +1932,7 @@ begin
   else begin
      Result := FormatCurr('##########.##', Para);
      Result:=StringReplace(Result,',','.',[rfReplaceAll]);
-     if pos('.', Result)=0 then //tamsayý ise sonuna .0  ekleyelim
+     if pos('.', Result)=0 then //tamsayÄ± ise sonuna .0  ekleyelim
         Result:=Result+'.0'
   end;
 
@@ -2046,7 +2046,7 @@ begin
   if (i > 0) and (j >= 3) and (j <= 6) then
     inc(i);
 
-  Gun := Gun + i * 2; //Kaç haftasonu varsa ekliyorum
+  Gun := Gun + i * 2; //KaÃ§ haftasonu varsa ekliyorum
   j := DayOfWeek(Tarih + Gun);
   if i > 0 then begin //arada haftasonu varsa
     if j = 1 then //pazar
@@ -2244,7 +2244,7 @@ begin
         Tablo.FDCnn.Connected := True;
     except
       on E: Exception do
-        ShowMessage('Baðlantý Hatasý!' + E.Message);
+        ShowMessage('BaÄŸlantÄ± HatasÄ±!' + E.Message);
     end;
 
 
@@ -2264,7 +2264,7 @@ begin
        s := StringReplace(s, ',', '.', [rfReplaceAll]);
     Result := s;
 end;
-{Þifreleme ile ilgili yordamlar}
+{Åžifreleme ile ilgili yordamlar}
 
 function FetaSetSize(FileName: string; Sz: Integer): Boolean;
 var
@@ -2485,7 +2485,7 @@ var AnMuProc: TFarProc;
 begin
   AnMuProc := MakeProcInstance(YordamAd, Handel);
   if DialogBox(Handel, DialogAd, BabaDialog, AnMuProc) = -1 then
-    Messagebox(0, 'Dialog Box oluþturulamadý..', DialogAd, mb_OK);
+    Messagebox(0, 'Dialog Box oluÅŸturulamadÄ±..', DialogAd, mb_OK);
   FreeProcInstance(AnMuProc);
 end;
 
@@ -2615,23 +2615,23 @@ var
   i: integer;
 begin
   CSt := St;
-  CSt:=StringReplace(CSt,'ç','Ç',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'ü','Ü',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'ð','Ð',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'þ','Þ',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'ö','Ö',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'ý','I',[rfReplaceAll]);
-  CSt:=StringReplace(CSt,'i','Ý',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'Ã§','Ã‡',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'Ã¼','Ãœ',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'ÄŸ','Äž',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'ÅŸ','Åž',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'Ã¶','Ã–',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'Ä±','I',[rfReplaceAll]);
+  CSt:=StringReplace(CSt,'i','Ä°',[rfReplaceAll]);
 {  if St <> '' then
     for i := 0 to Length(CSt) do
       case CSt[i] of
-        'ç': CSt[i] := 'Ç';
-        'ü': CSt[i] := 'Ü';
-        'ð': CSt[i] := 'Ð';
-        'þ': CSt[i] := 'Þ';
-        'ö': CSt[i] := 'Ö';
-        'ý': CSt[i] := 'I';
-        'i': CSt[i] := 'Ý';
+        'Ã§': CSt[i] := 'Ã‡';
+        'Ã¼': CSt[i] := 'Ãœ';
+        'ÄŸ': CSt[i] := 'Äž';
+        'ÅŸ': CSt[i] := 'Åž';
+        'Ã¶': CSt[i] := 'Ã–';
+        'Ä±': CSt[i] := 'I';
+        'i': CSt[i] := 'Ä°';
 //     else if CSt[i] in ['a'..'z'] then CSt[i] := UpperCase(StrPCopy(CSt[i]));
       end;}
   UpStr := UpperCase(Cst);
@@ -2733,11 +2733,11 @@ begin
   while not Table1.eof do begin
     //Sev := GecenSay(Table1.FieldByName(KeyAlan1).AsString);
     //Seviye[Sev + 1] := TreeView1.Items.AddChild(Seviye[Sev], Table1.FieldByName(Alan1).AsString); { Add a child };
-    if Table1.FieldByName(KeyAlan1).AsString = '' then //grubu boþsa
+    if Table1.FieldByName(KeyAlan1).AsString = '' then //grubu boÅŸsa
        TreeView1.Items.AddChild(nil, Table1.FieldByName(Alan1).AsString) { Add a child }
     else begin
        nod := AgactaBul(TreeView1,Table1.FieldByName(KeyAlan1).AsString);
-       if nod = nil  then //bulunamadýysa eklesin
+       if nod = nil  then //bulunamadÄ±ysa eklesin
           TreeView1.Items.AddChild(nod, Table1.FieldByName(KeyAlan1).AsString) { Add a child }
        else
           TreeView1.Items.AddChild(nod, Table1.FieldByName(Alan1).AsString) { Add a child };
@@ -2817,12 +2817,12 @@ begin
   tb := 0;
 
   for i := 1 to length(giren) do begin
-    if (giren[i] = 'Ü') or (giren[i] = 'U') or
-      (giren[i] = 'Þ') or (giren[i] = 'S') or
-      (giren[i] = 'Ç') or (giren[i] = 'C') or
-      (giren[i] = 'Ý') or (giren[i] = 'I') or
-      (giren[i] = 'Ö') or (giren[i] = 'O') or
-      (giren[i] = 'Ð') or (giren[i] = 'G') then
+    if (giren[i] = 'Ãœ') or (giren[i] = 'U') or
+      (giren[i] = 'Åž') or (giren[i] = 'S') or
+      (giren[i] = 'Ã‡') or (giren[i] = 'C') or
+      (giren[i] = 'Ä°') or (giren[i] = 'I') or
+      (giren[i] = 'Ã–') or (giren[i] = 'O') or
+      (giren[i] = 'Äž') or (giren[i] = 'G') then
     begin
       tb := tb + 1;
       yer[tb] := i;
@@ -2848,18 +2848,18 @@ begin
         dg := temp[yer[i]];
         ydg := '?';
         case dg of
-          'Ý': ydg := 'I';
-          'I': ydg := 'Ý';
-          'Þ': ydg := 'S';
-          'S': ydg := 'Þ';
-          'Ö': ydg := 'O';
-          'O': ydg := 'Ö';
-          'Ü': ydg := 'U';
-          'U': ydg := 'Ü';
-          'Ð': ydg := 'G';
-          'G': ydg := 'Ð';
-          'Ç': ydg := 'C';
-          'C': ydg := 'Ç';
+          'Ä°': ydg := 'I';
+          'I': ydg := 'Ä°';
+          'Åž': ydg := 'S';
+          'S': ydg := 'Åž';
+          'Ã–': ydg := 'O';
+          'O': ydg := 'Ã–';
+          'Ãœ': ydg := 'U';
+          'U': ydg := 'Ãœ';
+          'Äž': ydg := 'G';
+          'G': ydg := 'Äž';
+          'Ã‡': ydg := 'C';
+          'C': ydg := 'Ã‡';
         end;
         temp[yer[i]] := ydg;
         Result.Strings[k - 1] := temp;
@@ -2907,14 +2907,14 @@ end;
 function LeadingZero(ANumber: string;ADigit: Integer): string;
 begin
   Result := ANumber;
-  while Length(Result) < ADigit do   //hesapno 123 gibiyse 8 karakter olana kadar önüne 0 konmalý
+  while Length(Result) < ADigit do   //hesapno 123 gibiyse 8 karakter olana kadar Ã¶nÃ¼ne 0 konmalÄ±
     Result := '0' + Result;
 end;
 
 function FinishingSpace(ANumber: string;ADigit: Integer): string;
 begin
   Result := ANumber;
-  while Length(Result) < ADigit do   //isim ali gibiyse 8 karakter olana kadar sonuna boþluk konmalý
+  while Length(Result) < ADigit do   //isim ali gibiyse 8 karakter olana kadar sonuna boÅŸluk konmalÄ±
     Result :=Result + ' ';
 end;
 (*
@@ -2960,7 +2960,7 @@ Begin
     hDriver:=LoadLibrary(szDP);
     If hDriver<32 Then
        Begin Str(hdriver,s);
-             StrCat(s,' : Hdriver Hatasý');
+             StrCat(s,' : Hdriver HatasÄ±');
              MessageBox(0,s,'GENOTIP',mb_OK);
        End;
     PAdr:=GetProcAddress(hDriver,'ExtDeviceMode');
@@ -2969,13 +2969,13 @@ Begin
        DMOutp:=Nil;
        Cb := TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMOutp,PChar(0),0);
        hT1 := LocalAlloc (LHND,cb);
-       If ht1=0 Then Messagebox(0,'Local Alloc Hatasý','GetprinterDC',mb_OK);
+       If ht1=0 Then Messagebox(0,'Local Alloc HatasÄ±','GetprinterDC',mb_OK);
        DMInp := LocalLock (hT1);
-       If DMInp=nil Then Messagebox(0,'Local Lock Hatasý','GetprinterDC',mb_OK);
+       If DMInp=nil Then Messagebox(0,'Local Lock HatasÄ±','GetprinterDC',mb_OK);
        hT2 := LocalAlloc (LHND,cb);
-       If ht2=0 Then Messagebox(0,'Local Alloc Hatasý','GetprinterDC',mb_OK);
+       If ht2=0 Then Messagebox(0,'Local Alloc HatasÄ±','GetprinterDC',mb_OK);
        DMOutp := LocalLock (hT2);
-       If DMOutp=nil Then Messagebox(0,'Local Lock Hatasý','GetprinterDC',mb_OK);
+       If DMOutp=nil Then Messagebox(0,'Local Lock HatasÄ±','GetprinterDC',mb_OK);
        TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMOutp,PChar(0),DM_COPY);
        {Header Information}
        StrCopy(DMInp^.dmDeviceName,szD);
@@ -2998,9 +2998,9 @@ Begin
        End;
       { DMInp^.dmPaperSize:=dmPaper_B5 DMPAPER_A5};
        If TExtDevMode(Padr)(0,hDriver,DMInp,szD,szPP,DMInp,PChar(0),DM_MODIFY Or DM_COPY)<0 Then
-          MessageBox(0,'Ext Device Mode Hatasý','GENOTIP',mb_OK);
+          MessageBox(0,'Ext Device Mode HatasÄ±','GENOTIP',mb_OK);
        IF TExtDevMode(Padr)(0,hDriver,DMOutp,szD,szPP,DMInp,PChar(0),DM_COPY Or DM_MODIFY)<0 Then
-          MessageBox(0,'Ext Device Mode Hatasý-2','GENOTIP',mb_OK);
+          MessageBox(0,'Ext Device Mode HatasÄ±-2','GENOTIP',mb_OK);
        GetPrinterDC:=CreateDC(szDP,szD,szPP,DMOutp);
   {     GetPrinterDC:=CreateDC(szDP,szD,szPP,PChar(0));}
        LocalUnlock(hT2);
@@ -3018,18 +3018,18 @@ function TurkceDegisBoslukBirakma(AString: string): string;
 var s:string;
 begin
     s := StringReplace(Astring,' ','_',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'ç','c',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'þ','s',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'ý','i',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'ð','g',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'ö','o',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'ü','u',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Ç','C',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Þ','S',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Ý','I',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Ð','G',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Ö','O',[rfReplaceAll, rfIgnoreCase]);
-    s := StringReplace(s,'Ü','U',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ã§','c',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'ÅŸ','s',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ä±','i',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'ÄŸ','g',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ã¶','o',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ã¼','u',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ã‡','C',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Åž','S',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ä°','I',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Äž','G',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ã–','O',[rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(s,'Ãœ','U',[rfReplaceAll, rfIgnoreCase]);
     Result := s;
 end;
 
@@ -3201,10 +3201,10 @@ begin
 
   issame := inputStr = inputStr2;
 
-  // En az 8 karakter olup olmadýðýný kontrol ediyoruz
+  // En az 8 karakter olup olmadÄ±ÄŸÄ±nÄ± kontrol ediyoruz
   isLongEnough := Length(inputStr) >= 8;
 
-  // Baþlangýçta tüm kontrol flag'lerini false olarak ayarlýyoruz
+  // BaÅŸlangÄ±Ã§ta tÃ¼m kontrol flag'lerini false olarak ayarlÄ±yoruz
   hasDigit := False;
   hasLower := False;
   hasUpper := False;
@@ -3213,24 +3213,24 @@ begin
   // String'in her karakterini kontrol ediyoruz
   for i := 1 to Length(inputStr) do
   begin
-    // Eðer karakter bir rakam ise
+    // EÄŸer karakter bir rakam ise
     if CharInSet(inputStr[i], ['0'..'9']) then
       hasDigit := True;
 
-    // Eðer karakter küçük harf (a-z, ðüþöç) ise
-    if CharInSet(inputStr[i], ['a'..'z', 'ð', 'ü', 'þ', 'ö', 'ç']) then
+    // EÄŸer karakter kÃ¼Ã§Ã¼k harf (a-z, ÄŸÃ¼ÅŸÃ¶Ã§) ise
+    if CharInSet(inputStr[i], ['a'..'z', 'ÄŸ', 'Ã¼', 'ÅŸ', 'Ã¶', 'Ã§']) then
       hasLower := True;
 
-    // Eðer karakter büyük harf (A-Z, ÐÜÞÝÖÇ) ise
-    if CharInSet(inputStr[i], ['A'..'Z', 'Ð', 'Ü', 'Þ', 'Ý', 'Ö', 'Ç']) then
+    // EÄŸer karakter bÃ¼yÃ¼k harf (A-Z, ÄžÃœÅžÄ°Ã–Ã‡) ise
+    if CharInSet(inputStr[i], ['A'..'Z', 'Äž', 'Ãœ', 'Åž', 'Ä°', 'Ã–', 'Ã‡']) then
       hasUpper := True;
 
-    // Eðer karakter özel bir karakterse (alfabetik olmayan ve rakam olmayan)
-    if not CharInSet(inputStr[i], ['a'..'z', 'A'..'Z', '0'..'9', 'ð', 'ü', 'þ', 'ö', 'ç', 'Ð', 'Ü', 'Þ', 'Ý', 'Ö', 'Ç']) then
+    // EÄŸer karakter Ã¶zel bir karakterse (alfabetik olmayan ve rakam olmayan)
+    if not CharInSet(inputStr[i], ['a'..'z', 'A'..'Z', '0'..'9', 'ÄŸ', 'Ã¼', 'ÅŸ', 'Ã¶', 'Ã§', 'Äž', 'Ãœ', 'Åž', 'Ä°', 'Ã–', 'Ã‡']) then
       hasSpecial := True;
   end;
 
-  // Sonuçlarý ekrana yazdýrýyoruz
+  // SonuÃ§larÄ± ekrana yazdÄ±rÄ±yoruz
   s:= GirdiginizSifre+#32#10;
 
   if not isBefore then

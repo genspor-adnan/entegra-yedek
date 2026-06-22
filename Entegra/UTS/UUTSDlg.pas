@@ -1,4 +1,4 @@
-unit UUTSDlg;
+ï»¿unit UUTSDlg;
 
 interface
 
@@ -270,7 +270,7 @@ begin
       Result := IdHTTP1.Get(s);
     except on e:Exception do
       begin
-      //  ShowMessage('Girilmiþ olan Pacs Server Adresinde Orthanc bulunamadý! Ayarlardan Pacs Server Adresinizi kontrol ediniz.');
+      //  ShowMessage('GirilmiÅŸ olan Pacs Server Adresinde Orthanc bulunamadÄ±! Ayarlardan Pacs Server Adresinizi kontrol ediniz.');
         Result:='';
       end;
     end;
@@ -282,29 +282,29 @@ end;
 
 function TForm2.GetUrlContent(s: string): string;
 var
-  // Kod içinde düzenlenmesi gerekli
+  // Kod iÃ§inde dÃ¼zenlenmesi gerekli
   ClientId, ClientSecret, UserName, FirmNo, Password: string;
 
-  // prosedür içinde kullanýlan "local" deðiþken/bileþenler
+  // prosedÃ¼r iÃ§inde kullanÄ±lan "local" deÄŸiÅŸken/bileÅŸenler
   TempString, HeaderStr: string;
   Response: string;
   FormData: TIdMultiPartFormDataStream;
   Http: TIdHTTP;
   Bytes: TBytes;
 begin
-  // Aþaðýdaki deðiþkenlerin deðerleri doðru þekilde doldurulmalý
+  // AÅŸaÄŸÄ±daki deÄŸiÅŸkenlerin deÄŸerleri doÄŸru ÅŸekilde doldurulmalÄ±
   ClientId     := 'id';
   ClientSecret := 'secret';
   UserName     := 'username';
   Password     := 'password';
   FirmNo       := 'firmno';
 
-  // Custom Header bilgisi hazýrlanýyor.
+  // Custom Header bilgisi hazÄ±rlanÄ±yor.
   TempString := ClientId + ':' + ClientSecret;
   Bytes := TEncoding.UTF8.GetBytes(TempString);
   HeaderStr := 'Basic ' + string(EncodeBase64(Pointer(Bytes), Length(Bytes)));
 
-  // Parametre olarak gönderilecek FormData bilgisi hazýrlanýyor.
+  // Parametre olarak gÃ¶nderilecek FormData bilgisi hazÄ±rlanÄ±yor.
   FormData := TIdMultiPartFormDataStream.Create();
   try
     FormData.AddFormField('grant_type','password');
@@ -312,22 +312,22 @@ begin
     FormData.AddFormField('firmno', FirmNo);
     FormData.AddFormField('password', Password);
 
-    // POST iþlemi ile bilgi talep ediliyor
+    // POST iÅŸlemi ile bilgi talep ediliyor
     Screen.Cursor := crHourGlass;
     Http := TIdHTTP.Create(nil);
     try
       Http.Request.ContentType := 'application/json';
       Http.Request.CharSet     := 'utf-8';
-      // Uzun bir header 76 karakterde bir yeni satýr karakteri ile bölünmesin
+      // Uzun bir header 76 karakterde bir yeni satÄ±r karakteri ile bÃ¶lÃ¼nmesin
       Http.Request.CustomHeaders.UnfoldLines := True;
       Http.Request.CustomHeaders.Values['Authorization'] := HeaderStr;
       try
-        // Sorgulama yapan bileþen, aþaðýdaki url doðru þekilde düzenlenmeli
+        // Sorgulama yapan bileÅŸen, aÅŸaÄŸÄ±daki url doÄŸru ÅŸekilde dÃ¼zenlenmeli
         Response := Http.Post('url', FormData);
       except
         on E: Exception do
         begin
-          ShowMessage('*** Ýletiþim hatasý: ' + E.Message);
+          ShowMessage('*** Ä°letiÅŸim hatasÄ±: ' + E.Message);
         end;
       end;
     finally
@@ -338,8 +338,8 @@ begin
   end;
 
 
-  // Bu noktada Response deðiþkeni içinde yüksek ihtimalle bir Json bilgisi olacak
-  // Bu Json bilgisinin kullanýlabilmesi için de-serialize edilmesi gerekecek
+  // Bu noktada Response deÄŸiÅŸkeni iÃ§inde yÃ¼ksek ihtimalle bir Json bilgisi olacak
+  // Bu Json bilgisinin kullanÄ±labilmesi iÃ§in de-serialize edilmesi gerekecek
 end;
 end;  *)
 
@@ -357,7 +357,7 @@ var i, ID, FatBasId	: integer;
     gGtc	: TcxCustomGridTableController;
 begin
    if (DateFisTarihi.Text='')or(EditFisNo.Text='') then begin
-       Showmessage('Fiþ tarihi ve no dolu olmalý!');
+       Showmessage('FiÅŸ tarihi ve no dolu olmalÄ±!');
        exit;
    end;
    BaslikTur := 0;
@@ -365,7 +365,7 @@ begin
    gGtc := GridSorguView.DataController.Controller;
    for i := 0 to gGtc.SelectedRecordCount - 1 do begin
        TS:= gGtc.SelectedRecords[i];
-       //combodan adet seçilmiþse
+       //combodan adet seÃ§ilmiÅŸse
        if (ComboFisAdet.ItemIndex=0)or(TS.Values[GridSorguView.GetColumnByFieldName('GELENADET').Index]=null) then
           ADT := TS.Values[GridSorguView.GetColumnByFieldName('ADET').Index]
        else begin
@@ -374,13 +374,13 @@ begin
              ASKI:='0'
           else
              ASKI := TS.Values[GridSorguView.GetColumnByFieldName('ASKIADET').Index];
-          ADT:= IntToStr(StrToIntDef(ADT,0) - StrToIntDef(ASKI,0)); //Askýdaki ürünler artýk verilmiþtir, bizim depoda deðildir..
+          ADT:= IntToStr(StrToIntDef(ADT,0) - StrToIntDef(ASKI,0)); //AskÄ±daki Ã¼rÃ¼nler artÄ±k verilmiÅŸtir, bizim depoda deÄŸildir..
        end;
-       //if ADT <> '' then begin//eðer ÜTS'den bilgi gelmiþ ise belge kaydederiz
+       //if ADT <> '' then begin//eÄŸer ÃœTS'den bilgi gelmiÅŸ ise belge kaydederiz
           ID := 0;
           BNO := EditFisNo.Text;
           BZA := FormatDateTime('yyyy-mm-dd hh:nn', DateFisTarihi.Date);
-          KRM := TS.Values[GridSorguView.GetColumnByFieldName('KURUM_UTS_NO').Index]; //üreten/ithal eden kurum
+          KRM := TS.Values[GridSorguView.GetColumnByFieldName('KURUM_UTS_NO').Index]; //Ã¼reten/ithal eden kurum
           UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
           LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
           SNO := TS.Values[GridSorguView.GetColumnByFieldName('SERINO').Index];
@@ -390,10 +390,10 @@ begin
           FatBasId := BelgeKaydet(ID,ID,KRM,BNO,BZA,UNO,LNO,SNO,ADT,SKT,URT,FYT);
       // end;
   end;
-  //fiþ oluþtu. þimdi de adetleri izleme tablosuna göre düzenleyelim ve tutarý da adetle birim fiyatý çarparak bulalým.
-  //if TcxLabel(Sender).Tag=3 then // giriþ fiþi eklendi tipini 17 sayým fazlasý yapalým
-  //   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK SET TIPI=17 where ID='+IntToStr(FatBasId),[],[]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update F set F.ADET=abs(SI2.TOPLAM), F.MIKTAR=abs(SI2.TOPLAM), F.TUTAR=F.BIRIMFIYAT*abs(SI2.TOPLAM)  from FATURA F '+
+  //fiÅŸ oluÅŸtu. ÅŸimdi de adetleri izleme tablosuna gÃ¶re dÃ¼zenleyelim ve tutarÄ± da adetle birim fiyatÄ± Ã§arparak bulalÄ±m.
+  //if TcxLabel(Sender).Tag=3 then // giriÅŸ fiÅŸi eklendi tipini 17 sayÄ±m fazlasÄ± yapalÄ±m
+  //   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK SET TIPI=17 where ID='+IntToStr(FatBasId),[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update F set F.ADET=abs(SI2.TOPLAM), F.MIKTAR=abs(SI2.TOPLAM), F.TUTAR=F.BIRIMFIYAT*abs(SI2.TOPLAM)  from FATURA F '+
        ' inner join (select SATIRID, TOPLAM =sum(SI.KALAN) from STOKIZLEME SI'+
        ' group by SI.STOKID, SI.SATIRID) as SI2 on F.ID=SI2.SATIRID where F.FATBASID='+IntToStr(FatBasId),[],[]);
   ShowMessage(Belge_olustu);
@@ -433,11 +433,11 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
         TMU := TM_Urun.Create;
         TMU.UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
         TMU.LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
-        //ürün adeti,SKT,ÜRT sorgula
+        //Ã¼rÃ¼n adeti,SKT,ÃœRT sorgula
         u := TUrunSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, TMU, TUrunSonuc));
         n := length(u.SNC);
         if n > 0 then begin
-           //ürünün askýdaki sayýsýný sorgula
+           //Ã¼rÃ¼nÃ¼n askÄ±daki sayÄ±sÄ±nÄ± sorgula
            TMU := TM_Urun.Create;
            TMU.UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
            TMU.LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
@@ -454,7 +454,7 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
                  Adet := Adet + aski.SNC.LST[j].ADT;
       //24.10.2023           Adet := Adet + aski.SNC[j].ADT;
            inc(SayBasari);
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+IntToStr(u.SNC[0].ADT)+',ASKIADET='+IntToStr(Adet)+
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+IntToStr(u.SNC[0].ADT)+',ASKIADET='+IntToStr(Adet)+
             ', GELENSKT='''+u.SNC[0].SKT+''',GELENURT='''+u.SNC[0].URT+''',TARIH='''+Tarih+''' '+
             ' where ID='+ IntToStr(ID),[],[]);
         end else inc(SayHata)
@@ -472,13 +472,13 @@ begin
 {   Tablo.TablodanSorguAc(0,'SELECT URUNNO FROM STOKLAR WHERE ISNULL(URUNNO,'''')<>'''' GROUP BY URUNNO HAVING COUNT(URUNNO)>1 ');
    if not Tablo.Query0.IsEmpty then begin
       DtsSorgu.DataSet:=Tablo.Query0;
-      Showmessage('Stok kartlarýnda birden fazla tanýmlanmýþ ürünler var! Altta Listede');
+      Showmessage('Stok kartlarÄ±nda birden fazla tanÄ±mlanmÄ±ÅŸ Ã¼rÃ¼nler var! Altta Listede');
       exit;
    end;
    Tablo.TablodanSorguAc(0,'select DISTINCT U.URUNNO from UTSENVANTER U left join STOKLAR S on S.URUNNO=U.URUNNO where S.ID is null order by 1');
    if not Tablo.Query0.IsEmpty then begin
       DtsSorgu.DataSet:=Tablo.Query0;
-      Showmessage('Excelde olup Stok kartlarýnda tanýmlanmamýþ ürünler var! Altta Listede');
+      Showmessage('Excelde olup Stok kartlarÄ±nda tanÄ±mlanmamÄ±ÅŸ Ã¼rÃ¼nler var! Altta Listede');
       exit;
    end; }
    SorgulamaIslemi;
@@ -500,12 +500,12 @@ begin
      BekletmeDlg.Caption := ExceldenVerilerAktariliyor;
      BekletmeDlg.cxProgressBar1.Properties.Max:=gGtc.SelectedRecordCount;
      BekletmeDlg.Show;
-     //önce iþaretlileri bir listeye alýrýz
+     //Ã¶nce iÅŸaretlileri bir listeye alÄ±rÄ±z
      for i := 0 to gGtc.SelectedRecordCount - 1 do begin
          ListUNO.Add(gGtc.SelectedRecords[i].Values[GridSorguView.GetColumnByFieldName('URUNNO').Index]);
          ListLNO.Add(gGtc.SelectedRecords[i].Values[GridSorguView.GetColumnByFieldName('LOTNO').Index]);
      end;
-     //sonra listeden sorgulamalarý yaparýz
+     //sonra listeden sorgulamalarÄ± yaparÄ±z
      Tablo.TablodanSorguAc(1,'select ADRESSORGU from  UTS_BILDIRIM_TUR where ID=55');
      SorguAdresi:=Tablo.Query1.Fields[0].Asstring;
      GridSorguView.ClearItems;
@@ -542,7 +542,7 @@ var Devam : Boolean;
             k := TAskiSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
                                       TMU, TAskiSonuc));         //     TModel.Create
             if k = nil then
-               raise Exception.Create('Okunamadý');
+               raise Exception.Create('OkunamadÄ±');
             n := length(k.SNC);
             for i := 0 to n - 1 do
                 k.SNC[i].toDataSet(MemDataSorgu);
@@ -563,14 +563,14 @@ var Devam : Boolean;
             k := TBildirimSonucListe(utsTalkMC(ADRESSORGU, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
                                       TMU, TBildirimSonucListe));         //     TModel.Create
             if k = nil then
-               raise Exception.Create('Okunamadý');
+               raise Exception.Create('OkunamadÄ±');
             n := length(k.SNC);
 //            for i := 0 to n - 1 do
 //                k.SNC[i].toDataSet(MemDataSorgu);
             Result := n=10;
             modelArrayToDataSet(k.SNC, MemDataSorgu);
         end;
-begin //Alma için kabul sorgulama
+begin //Alma iÃ§in kabul sorgulama
     if (Sifirla)or(MemDataSorgu.IsEmpty) then begin
        GridSorguView.ClearItems;
        TBildirimSonucItem.toTable(MemDataSorgu);
@@ -612,7 +612,7 @@ var
             k := TKabulSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula/offset',
                                       TMAS, TKabulSonuc));         //     TModel.Create
             if k = nil then
-               raise Exception.Create('Okunamadý');
+               raise Exception.Create('OkunamadÄ±');
 
             if k.SNC <> nil then
             begin
@@ -625,7 +625,7 @@ var
             Result := n=100;
          end;
 
-    begin //Alma için kabul sorgulama
+    begin //Alma iÃ§in kabul sorgulama
         GridSorguView.ClearItems;
         TKabulSonucItem.toTable(MemDataSorgu);
         DtsSorgu.DataSet := MemDataSorgu;
@@ -657,18 +657,18 @@ var
             k := TAskiSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
                                       TMU, TAskiSonuc));         //     TModel.Create
             if k = nil then
-               raise Exception.Create('Okunamadý');
+               raise Exception.Create('OkunamadÄ±');
             n := length(k.SNC.LST);
             for i := 0 to n - 1 do
                  k.SNC.LST[i].toDataSet(MemDataSorgu);
             Result := n=10;
          end;
-    begin //Alma için kabul sorgulama
+    begin //Alma iÃ§in kabul sorgulama
         GridSorguView.ClearItems;
         TAskiSorgulaSonucItem.toTable(MemDataSorgu);
         DtsSorgu.DataSet := MemDataSorgu;
         GridSorguView.DataController.CreateAllItems();
-        // sayfa sayfa askýdakileri getirelim. her bir sayfada 10 adet var
+        // sayfa sayfa askÄ±dakileri getirelim. her bir sayfada 10 adet var
         Devam :=True; sayfa:=0;
         while Devam do begin
           Devam := Getir(sayfa, EditUNO.Text, EditLNO.Text);
@@ -681,9 +681,9 @@ var
 	       k : TUrunSonuc;
          TMU : TM_Urun;
          i : Integer;
-    begin //Alma için kabul sorgulama
+    begin //Alma iÃ§in kabul sorgulama
         if (EditUNO.Text='')then begin // or(EditLNO.Text='')
-            Showmessage('Ürün no ve Lotno bilgisi girin!');
+            Showmessage('ÃœrÃ¼n no ve Lotno bilgisi girin!');
             Exit;
         end;
 
@@ -699,7 +699,7 @@ var
         k := TUrunSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
                                   TMU, TUrunSonuc));         //     TModel.Create
         if k = nil then
-           raise Exception.Create('Okunamadý');
+           raise Exception.Create('OkunamadÄ±');
         n := length(k.SNC);
         for i := 0 to n - 1 do
             k.SNC[i].toDataSet(MemDataSorgu);
@@ -770,7 +770,7 @@ var
 
     begin //Alma i?in kabul sorgulama
         if (EditUNO.Text='')then begin // or(EditLNO.Text='')
-            Showmessage('ürün no ve Lotno bilgisi girin!');
+            Showmessage('Ã¼rÃ¼n no ve Lotno bilgisi girin!');
             Exit;
         end;
 
@@ -793,7 +793,7 @@ var
                                       TMU, TAyrintiUrunSonuc));         //     TModel.Create
             inc(Sayfa);
             if k = nil then
-               raise Exception.Create('Okunamadý');
+               raise Exception.Create('OkunamadÄ±');
             n := length(k.SNC);
             if n>0 then
                Tablo.Query0.SQL.Text := SQLMEMO1.text;   //her sat?r i?in kalan irsaliye kolonu g?ncellenecek
@@ -830,7 +830,7 @@ var
 	       k : TBildirimSonucUrun;
          TMU : TM_Urun_Off;
          i : Integer;
-    begin //Alma için kabul sorgulama
+    begin //Alma iÃ§in kabul sorgulama
          GridSorguView.ClearItems;
         TBildirimSonucItem.toTable(MemDataSorgu);
         DtsSorgu.DataSet := MemDataSorgu;
@@ -844,7 +844,7 @@ var
         k := TBildirimSonucUrun(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
                                   TMU, TBildirimSonucUrun));         //     TModel.Create
         if k = nil then
-           raise Exception.Create('Okunamadý')
+           raise Exception.Create('OkunamadÄ±')
         else //if((k.SNC <> nil) and (k.SNC.LST <> nil)) then
             modelArrayToDataSet(k.SNC.LST, MemDataSorgu);
         {n := length(k.SNC);
@@ -856,7 +856,7 @@ begin
 	//utsToken 	:= TEST_UTS_TOKEN;
 //	utsServer	:= TEST_UTS_SERVER;//   TEST_UTS_SERVER
 // --------------------
-  //////// aç   MemDataSorgu.ReadOnly:=False;
+  //////// aÃ§   MemDataSorgu.ReadOnly:=False;
   case TabBildirimTur.FieldByName('ID').AsInteger of
     1 : AlmaSorgusu;
     45: SistemdeTekilUrunSorgusu;
@@ -864,8 +864,8 @@ begin
     52: AskidakilerSorgusu;
     55: BildirimListesiSorgusu_Liste;
     56: BildirimListesiSorgusu_Urun;
-(*    51: begin //giriþ fiþi için ürün sorgulama
-           //önce seçilmiþleri bir diziye alalým
+(*    51: begin //giriÅŸ fiÅŸi iÃ§in Ã¼rÃ¼n sorgulama
+           //Ã¶nce seÃ§ilmiÅŸleri bir diziye alalÄ±m
           slist := TStringlist.Create;
           if GridSorguView.DataController.Controller.SelectedRecordCount > 0 then
             for I := 0 to GridSorguView.DataController.Controller.SelectedRecordCount-1 do begin
@@ -897,8 +897,8 @@ begin
            n := length(u.SNC);
            for i := 0 to n - 1 do
                u.SNC[i].toDataSet(MemDataSorgu);
-           //gelen bilgileri envanter tablosuna iþleyelim
-           if TMU.UNO='' then begin//bulunamadýysa
+           //gelen bilgileri envanter tablosuna iÅŸleyelim
+           if TMU.UNO='' then begin//bulunamadÄ±ysa
               ADT:='0';
               SKT:='NULL';
               URT:='NULL';
@@ -909,7 +909,7 @@ begin
               ADT:=''''+MemDataSorgu.FieldByName('ADT').AsString+'''';
               SKT:=''''+MemDataSorgu.FieldByName('SKT').AsString+'''';
            end;
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+ADT+','+
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+ADT+','+
 //            ' GELENSKT='''+FormatDateTime('yyyy-mm-dd hh:nn', MemDataSorgu.FieldByName('SKT').AsDateTime)+''',GELENURT='''+FormatDateTime('yyyy-mm-dd hh:nn', MemDataSorgu.FieldByName('URT').AsDateTime)+''',TARIH=getdate()'+
             ' GELENSKT='+SKT+',GELENURT='+URT+',TARIH=getdate()'+
             ' where ID='+ Tablo.Query8.FieldByName('ID').AsString,[],[]);
@@ -922,7 +922,7 @@ begin
   end;
 {  firstColumn := GridSorguView.VisibleColumns[0];
   GridSorguView.DataController.Summary.FooterSummaryItems.Add(firstColumn, spFooter, skCount, '');
-burayý açmayý unutma  MemDataSorgu.ReadOnly:=True;  }
+burayÄ± aÃ§mayÄ± unutma  MemDataSorgu.ReadOnly:=True;  }
 end;
 
 
@@ -979,7 +979,7 @@ begin
 
    DtsSorgu.DataSet := TabSorgu;
    TabSorgu.SQL.Text := 'sp_UTS_'+TabBildirimTur.FieldByName('TUR').AsString+'  '''+TarihBas+''','''+ TarihBit+'''';
-   if TabBildirimTur.Fields[0].AsInteger=51 then //fiþ oluþturma ekranýnda süzme
+   if TabBildirimTur.Fields[0].AsInteger=51 then //fiÅŸ oluÅŸturma ekranÄ±nda sÃ¼zme
 //      TabSorgu.SQL.Add(','''+UNO+''','''+LNO+''','''+SNO+''' ');
       TabSorgu.SQL.Add(','''+EditUNO.text+''','''+EditLNO.text+''','''+EditSNO.text+''' ');
    TabSorgu.Open;
@@ -994,25 +994,25 @@ Procedure TUTSDlg.SonucMesajYaz(ID, Durum:integer; MesajKod, MesajMetin:string);
 //var URT, SKT, s : string;
 begin
 {   s:='';
-   if Durum=1 then begin // baþarýlýysa Üretim ve SKT tarihlerini bulup bildirim mesajdaki alanlarý güncelleyelim
+   if Durum=1 then begin // baÅŸarÄ±lÄ±ysa Ãœretim ve SKT tarihlerini bulup bildirim mesajdaki alanlarÄ± gÃ¼ncelleyelim
       Urt_SKT_Bul_Kaydet(ID, URT, SKT);
       if URT<>'' then
          s:=',URT='''+URT+''' ';
       if SKT<>'' then
          s:=s+',SKT='''+SKT+''' ';
    end;  }
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSBILDIRIM set DURUM='+IntToStr(Durum)+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSBILDIRIM set DURUM='+IntToStr(Durum)+
      ' where ID='+IntToStr(ID), [],[]);
 
    MesajKod := stringReplace(MesajKod, '''','"', [rfReplaceAll]);
    MesajMetin := stringReplace(MesajMetin, '''','"', [rfReplaceAll]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSBILDIRIMMESAJ set SONUCKODU='''+MesajKod+''', SONUCMESAJI='''+MesajMetin+''' '+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSBILDIRIMMESAJ set SONUCKODU='''+MesajKod+''', SONUCMESAJI='''+MesajMetin+''' '+
      ' where ID='+IntToStr(ID), [],[]);
 end;
 
 procedure TUTSDlg.IzlemeTablosunuGuncelle(ID, TabloNo, YERID:integer);
 begin
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKIZLEME set YER='+IntToStr(TabloNo)+', YERID='+IntToStr(YERID)+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKIZLEME set YER='+IntToStr(TabloNo)+', YERID='+IntToStr(YERID)+
           ' where ID='+IntToStr(ID), [],[]);
 end;
 
@@ -1041,7 +1041,7 @@ begin
            TSnc.byJson(s); //TS.SNC
            if TSnc.MSJ[0].TIP = 'BILGI' then begin
               SonucMesajYaz(ID,3,TSnc.MSJ[0].KOD, SONUCMESAJI+'  /  '+TSnc.SNC);
-              IzlemeTablosunuGuncelle(YERID, 0, 0); //izleme tablosunu boþaltalým
+              IzlemeTablosunuGuncelle(YERID, 0, 0); //izleme tablosunu boÅŸaltalÄ±m
            end else
               MessageBox(Handle, PWideChar(TSnc.MSJ[0].MET), PWideChar(TSnc.MSJ[0].KOD), MB_ICONERROR or MB_OK);
            TSnc.Free;
@@ -1056,9 +1056,9 @@ end;
 procedure TUTSDlg.ButtonBildirimIptalClick(Sender: TObject);
 begin
   if GridUTSView.DataController.Controller.SelectedRecordCount < 1 then
-     ShowMessage('Önce seçim yapýn!')
+     ShowMessage('Ã–nce seÃ§im yapÄ±n!')
   else
-     if Application.MessageBox(PChar('Saðlýk Bakanlýðýndan iptal edilecektir!'+' '+Devam_Etmek), PChar(Uyari),  MB_YESNO)=ID_YES then   // Sor
+     if Application.MessageBox(PChar('SaÄŸlÄ±k BakanlÄ±ÄŸÄ±ndan iptal edilecektir!'+' '+Devam_Etmek), PChar(Uyari),  MB_YESNO)=ID_YES then   // Sor
         IptalEt;
 end;
 
@@ -1072,13 +1072,13 @@ begin
         YERID := TabBildirim.FieldByName('YERID').AsInteger;
         Tablo.TablodanSorguAc(1,'select ADRES+ADRESEKLE from UTS_BILDIRIM_TUR where ID='+IntToStr(TUR));
         s:=Tablo.Query1.Fields[0].AsString;
-        //if TUR=21 then //tük.verme
+        //if TUR=21 then //tÃ¼k.verme
         //   s:=s+'/essizKimlik';
-        //bURADA BÝLDÝRÝM
+        //bURADA BÄ°LDÄ°RÄ°M
         s := utsTalkSS(s, TabBildirim.FieldByName('JSON').AsString);
-        //sonuç gelir
+        //sonuÃ§ gelir
         TSnc := TSonuc.Create();
-        //jsno sonucu modele çevrilir
+        //jsno sonucu modele Ã§evrilir
         TSnc.byJson(s); //TS.SNC
         //////////
         ///
@@ -1087,26 +1087,26 @@ begin
         SNO := TabBildirim.FieldByName('SERINO').AsString;
         if TSnc.MSJ[0].TIP = 'BILGI' then begin  //HATA UYARI
            Result := True;
-           SonucMesajYaz(BildirimId, 1, TSnc.MSJ[0].KOD, TSnc.SNC);   //1 baþarýlý
-           if TUR=1 then begin//alma ise faturaya ekleyeceðiz
+           SonucMesajYaz(BildirimId, 1, TSnc.MSJ[0].KOD, TSnc.SNC);   //1 baÅŸarÄ±lÄ±
+           if TUR=1 then begin//alma ise faturaya ekleyeceÄŸiz
                BNO := TabBildirim.FieldByName('BELGENO').AsString;
                BZA := FormatDateTime('yyyy-mm-dd hh:nn', TabBildirim.FieldByName('TARIH').AsDateTime);
                KRM := TabBildirim.FieldByName('KURUMNO').AsString;
                ADT := TabBildirim.FieldByName('ADET').AsString;
                Urt_SKT_Bul_Kaydet(BildirimId, URT, SKT);
 
-               //fatura giriþi yapýyoruz  eklenen izlemid yi buradan alýyoruz
+               //fatura giriÅŸi yapÄ±yoruz  eklenen izlemid yi buradan alÄ±yoruz
                BelgeKaydet(YERID, BildirimId,KRM,BNO,BZA,UNO,LNO,SNO,ADT,SKT,URT);
            end;
-           MemoLog.Lines.Add('Bildirim baþarýyla yapýldý.');
+           MemoLog.Lines.Add('Bildirim baÅŸarÄ±yla yapÄ±ldÄ±.');
            IzlemeTablosunuGuncelle(YERID, TabNo_STOKUTS, TabBildirim.FieldByName('ID').AsInteger);
-           // üstte yazdýk
-           //SonucMesajYaz(BildirimId, 1, TSnc.MSJ[0].KOD, TSnc.MSJ[0].MET);  //0 hatasýz
+           // Ã¼stte yazdÄ±k
+           //SonucMesajYaz(BildirimId, 1, TSnc.MSJ[0].KOD, TSnc.MSJ[0].MET);  //0 hatasÄ±z
         end
         else begin
            Result := False;
-           MemoLog.Lines.Add('Bildirim baþarýsýz.');
-           SonucMesajYaz(BildirimId, 2, TSnc.MSJ[0].KOD, TSnc.MSJ[0].MET);  //2 hatalý olduðunu gösterir ve sekmede ona göre çýkar
+           MemoLog.Lines.Add('Bildirim baÅŸarÄ±sÄ±z.');
+           SonucMesajYaz(BildirimId, 2, TSnc.MSJ[0].KOD, TSnc.MSJ[0].MET);  //2 hatalÄ± olduÄŸunu gÃ¶sterir ve sekmede ona gÃ¶re Ã§Ä±kar
         end;
         TSnc.Free;
 end;
@@ -1114,7 +1114,7 @@ end;
 procedure TUTSDlg.ButtonGonderClick(Sender: TObject);
 begin
    if GridSorguView.DataController.Controller.SelectedRecordCount < 1 then
-      ShowMessage('Önce seçim yapýn!')
+      ShowMessage('Ã–nce seÃ§im yapÄ±n!')
    else begin
       TabloyaKaydet;
    end;
@@ -1234,7 +1234,7 @@ begin
             end;
             mObjHEK.Free;
       end;
-      11: begin  //Ýthal
+      11: begin  //Ä°thal
             if (GridSorguView.DataController.DataSet <> nil) then begin
                 mObjIthal_SNo := TM_Ithal_SNo.Create(GridSorguView.DataController.DataSet);
                 Result := mObjIthal_SNo.toJson;
@@ -1259,14 +1259,14 @@ begin
             end;
             mObjStok.Free;
       end;
-      20: begin  //kullaným iade
+      20: begin  //kullanÄ±m iade
             if (GridSorguView.DataController.DataSet <> nil) then begin
                 mObjKulIade := TM_Kullanim_Iade.Create(GridSorguView.DataController.DataSet);
                 Result := mObjKulIade.toJson;
             end;
             mObjUrt.Free;
       end;
-      21: begin  //kullaným
+      21: begin  //kullanÄ±m
             if (GridSorguView.DataController.DataSet <> nil) then begin
                 mObjKul := TM_Kullanim.Create(GridSorguView.DataController.DataSet);
                 str := mObjKul.toJson;
@@ -1276,7 +1276,7 @@ begin
             mObjKul.Free;
       end;
 
-      22: begin  //üret
+      22: begin  //Ã¼ret
             if (GridSorguView.DataController.DataSet <> nil) then begin
                 mObjUrt := TM_Uretim.Create(GridSorguView.DataController.DataSet);
                 Result := mObjUrt.toJson;
@@ -1287,7 +1287,7 @@ begin
             if (GridSorguView.DataController.DataSet <> nil) then begin
                 mObjVer := TM_Verme.Create(GridSorguView.DataController.DataSet);
                 str := mObjVer.toJson;
-                //Delete(str, pos('\\',str),2);  //anlayamadýðým þekilde lotno sonuna '\\' ekliyor.. bu varsa siliyoruz..
+                //Delete(str, pos('\\',str),2);  //anlayamadÄ±ÄŸÄ±m ÅŸekilde lotno sonuna '\\' ekliyor.. bu varsa siliyoruz..
                 {str := stringreplace(str, '\\\\', '\', []);
                 str := stringreplace(str, '\\\', '\', []);
                 str := stringreplace(str, '\\', '\', []);
@@ -1314,9 +1314,9 @@ begin
    end;
 
    if UNO[1] = '0' then
-      UNO2 := copy(UNO, 2, 50)  //eðer UNO 0 ile baþlýyorsa o ý kaldýrýp uno2 ye yazalým
+      UNO2 := copy(UNO, 2, 50)  //eÄŸer UNO 0 ile baÅŸlÄ±yorsa o Ä± kaldÄ±rÄ±p uno2 ye yazalÄ±m
    else
-      UNO2 := '0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalým
+      UNO2 := '0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalÄ±m
    Tablo.TablodanSorguAc(1, 'select ID from STOKLAR where URUNNO='''+UNO+''' or URUNNO='''+UNO2+''' ');
    if Tablo.Query1.IsEmpty then begin
       Application.MessageBox(PChar(UNO+' '+StokKartBulunamadi), PChar(Uyari),  MB_OK + MB_ICONERROR);
@@ -1329,7 +1329,7 @@ var
      k : TUrunSonuc;
      TMU : TM_Urun;
      s:string;
-begin //Alma için kabul sorgulama
+begin //Alma iÃ§in kabul sorgulama
     URT := '';  SKT := '';
     Tablo.TablodanSorguAc(1,'select URUNNO,LOTNO,SERINO from UTSBILDIRIMMESAJ where ID='+IntToStr(BildirimID));
 
@@ -1340,7 +1340,7 @@ begin //Alma için kabul sorgulama
     k := TUrunSonuc(utsTalkMC('/UTS/uh/rest/tekilUrun/sorgula',
                               TMU, TUrunSonuc));
     if k = nil then
-       raise Exception.Create('Okunamadý');
+       raise Exception.Create('OkunamadÄ±');
     if length(k.SNC)>0 then begin
         URT := k.SNC[0].URT;
         SKT := k.SNC[0].SKT;
@@ -1352,7 +1352,7 @@ begin //Alma için kabul sorgulama
            s:=s+'SKT='''+SKT+''' ';
         end;
         if s<>'' then
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSBILDIRIMMESAJ set  '+s+ ' where ID='+IntToStr(BildirimId), [],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSBILDIRIMMESAJ set  '+s+ ' where ID='+IntToStr(BildirimId), [],[]);
     end;
 end;
 
@@ -1371,9 +1371,9 @@ var
     SonucListe : TStringList;
 begin
 
-    if TabBildirimTur.fields[0].asInteger = 1 then begin//alma bildirimi ise irs fat soralým
+    if TabBildirimTur.fields[0].asInteger = 1 then begin//alma bildirimi ise irs fat soralÄ±m
         SonucListe := TStringList.Create;
-        if not Tablo.HizliGirisListedenBilgiGetir('Kayýt Ýçin Belge Seçimi','select 10,''ÝRSALÝYE'' UNION select 11,''FATURA''',SonucListe,False,[False, True],[]) then
+        if not Tablo.HizliGirisListedenBilgiGetir('KayÄ±t Ä°Ã§in Belge SeÃ§imi','select 10,''Ä°RSALÄ°YE'' UNION select 11,''FATURA''',SonucListe,False,[False, True],[]) then
            exit;
          BaslikTur := StrToIntDef(SonucListe[0],11);
          SonucListe.Free;
@@ -1387,7 +1387,7 @@ begin
 
 
     gGtc := GridSorguView.DataController.Controller;
-    //Eðer alma iþlemi yapýlacaksa, kurum ve ürünler gentegrede tanýmlý mý kontrolü yapýlýr
+    //EÄŸer alma iÅŸlemi yapÄ±lacaksa, kurum ve Ã¼rÃ¼nler gentegrede tanÄ±mlÄ± mÄ± kontrolÃ¼ yapÄ±lÄ±r
     if TabBildirimTur.fields[0].asInteger=1 then //ALMA
        for i := 0 to gGtc.SelectedRecordCount - 1 do begin
            TS:= gGtc.SelectedRecords[i];
@@ -1396,7 +1396,7 @@ begin
            if BelgeIcinAlmaKontrolu(KRM,UNO)=False then
               abort;
        end;
-    ///  önce iþaretlileri bir listeye alalým
+    ///  Ã¶nce iÅŸaretlileri bir listeye alalÄ±m
     k := gGtc.SelectedRecordCount;
     SetLength(aSel, k);
     SetLength(json, k);
@@ -1406,7 +1406,7 @@ begin
         gGtc.FocusedRecord := TS;
         json[i] := JSonOlustur;
     end;
-    //sonra aldýðýmýz listedeki recordlarýn her biri için json oluþturup bildirim yapacaðýz.
+    //sonra aldÄ±ÄŸÄ±mÄ±z listedeki recordlarÄ±n her biri iÃ§in json oluÅŸturup bildirim yapacaÄŸÄ±z.
     for i := 0 to k - 1 do begin //
         //gGtc.FocusedRecordIndex := aSel[i];
         GridSorguView.DataController.FocusedRowIndex := GridSorguView.DataController.GetRowIndexByRecordIndex(aSel[i], True);
@@ -1421,23 +1421,23 @@ begin
                     TRH := TS.Values[GridSorguView.GetColumnByFieldName('BZA').Index];
                     BNO := TS.Values[GridSorguView.GetColumnByFieldName('BNO').Index];
                     KRM := TS.Values[GridSorguView.GetColumnByFieldName('GKK').Index];
-                     //veri BID olarak gelir, aktarým olduktan sonra BID -> VBI olrak deðiþtirilir ve öyle Alma bildirimine gönderilir.
+                     //veri BID olarak gelir, aktarÄ±m olduktan sonra BID -> VBI olrak deÄŸiÅŸtirilir ve Ã¶yle Alma bildirimine gÃ¶nderilir.
                     json[i] := stringreplace(json[i], 'BID', 'VBI', [])
                  end;
              7 : begin      //hek zayiat
                     TRH := TS.Values[GridSorguView.GetColumnByFieldName('BZA').Index];
                     BNO := TS.Values[GridSorguView.GetColumnByFieldName('BNO').Index];
                  end;
-             11: begin    //ÝTHAL BÝLDÝRÝMÝ
+             11: begin    //Ä°THAL BÄ°LDÄ°RÄ°MÄ°
                     IEU := TS.Values[GridSorguView.GetColumnByFieldName('IEU').Index];
                     MEU := TS.Values[GridSorguView.GetColumnByFieldName('MEU').Index];
                  end;
-             19: begin    //STOK BÝLDÝRÝMÝ
+             19: begin    //STOK BÄ°LDÄ°RÄ°MÄ°
                     TRH := TS.Values[GridSorguView.GetColumnByFieldName('BZA').Index];
                     BNO := TS.Values[GridSorguView.GetColumnByFieldName('BNO').Index];
                     //KRM := TS.Values[GridSorguView.GetColumnByFieldName('GKK').Index];
                  end;
-             20: begin  //TÜKETÝCÝDEN ÝADE ALMA
+             20: begin  //TÃœKETÄ°CÄ°DEN Ä°ADE ALMA
                     //GIT := TS.Values[GridSorguView.GetColumnByFieldName('URT').Index];
                     //TUA := TS.Values[GridSorguView.GetColumnByFieldName('TUKETICI_AD').Index];
                     //TUS := TS.Values[GridSorguView.GetColumnByFieldName('TUKETICI_SOYAD').Index];
@@ -1447,7 +1447,7 @@ begin
                     //KTN := TS.Values[GridSorguView.GetColumnByFieldName('KISI_NO').Index];
                     //TUR := TS.Values[GridSorguView.GetColumnByFieldName('KIMLIK_TUR').Index];
                  end;
-             21: begin  //TÜKETÝCÝYE VERME
+             21: begin  //TÃœKETÄ°CÄ°YE VERME
                     TUA := TS.Values[GridSorguView.GetColumnByFieldName('TUA').Index];
                     TUS := TS.Values[GridSorguView.GetColumnByFieldName('TUS').Index];
                     GIT := TS.Values[GridSorguView.GetColumnByFieldName('GIT').Index];
@@ -1468,7 +1468,7 @@ begin
         end;
         if TabBildirimTur.fields[0].asInteger=1 then  //alma bildirimi
            URTSKT := ',null,null'
-        else begin //alma bildirimi deðilse üretim ve SKT yi de ekleyelim
+        else begin //alma bildirimi deÄŸilse Ã¼retim ve SKT yi de ekleyelim
            try
              URT := TS.Values[GridSorguView.GetColumnByFieldName('URT').Index];
            except
@@ -1497,17 +1497,17 @@ begin
              YERID := TS.Values[GridSorguView.GetColumnByFieldName('YERID').Index];
         end;
 
-        MemoLog.Lines.Add(UNO+' '+LNO+' ürünü için iþlem baþlatýldý.');
+        MemoLog.Lines.Add(UNO+' '+LNO+' Ã¼rÃ¼nÃ¼ iÃ§in iÅŸlem baÅŸlatÄ±ldÄ±.');
 
         if UNO[1]='0' then
-           UNO2:=copy(UNO, 2, 50)  //eðer UNO 0 ile baþlýyorsa o ý kaldýrýp uno2 ye yazalým
+           UNO2:=copy(UNO, 2, 50)  //eÄŸer UNO 0 ile baÅŸlÄ±yorsa o Ä± kaldÄ±rÄ±p uno2 ye yazalÄ±m
         else
-           UNO2:='0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalým
+           UNO2:='0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalÄ±m
 
 
         Tablo.TablodanSorguAc(2,'select ID from STOKLAR where URUNNO='''+UNO+''' or URUNNO='''+UNO2+''' ');
-          //alma bildirimi yapmadan önce kurum ve stok tanýmlý mý kontrol etmemiz lazým
-          //hatalý olarak durum insert ediyorum.. çünkü 400 hatasý verip hiç gitmeyebiliyor
+          //alma bildirimi yapmadan Ã¶nce kurum ve stok tanÄ±mlÄ± mÄ± kontrol etmemiz lazÄ±m
+          //hatalÄ± olarak durum insert ediyorum.. Ã§Ã¼nkÃ¼ 400 hatasÄ± verip hiÃ§ gitmeyebiliyor
         try
             Tablo.Query1.SQL.Text := 'insert into [UTSBILDIRIM] (STOKID, YER, YERID, TUR, DURUM, TARIH, ADET)values('+Tablo.Query2.Fields[0].AsString+','+IntToStr(TabNo)+','+IntToStr(YERID)+','+
             TabBildirimTur.FieldByName('ID').AsString+',2,'''+TRH+''','+ADT+') SELECT SCOPE_IDENTITY() ';
@@ -1516,9 +1516,9 @@ begin
                  Tablo.Query1.Fields[0].AsString+','''+KRM+''','''+BNO+''','''+UNO+''','''+SNO+''','''+LNO+''''+URTSKT+','''+json[i]+''','''+ONAY+''','+Kullanan+') ';
             Tablo.Query2.execsql;
         except
-            MemoLog.Lines.Add('Bildirim için tabloya ekleme olmadý.');
+            MemoLog.Lines.Add('Bildirim iÃ§in tabloya ekleme olmadÄ±.');
         end;
-        MemoLog.Lines.Add(Tablo.Query1.Fields[0].AsString+' ID ile Bildirim için tabloya ekleme yapýldý.');
+        MemoLog.Lines.Add(Tablo.Query1.Fields[0].AsString+' ID ile Bildirim iÃ§in tabloya ekleme yapÄ±ldÄ±.');
         IzlemeTablosunuGuncelle(YERID, TabNo_STOKUTS, 0);
         Sonuc := UTSyeGonder(Tablo.Query1.Fields[0].AsInteger, BaslikTur);
         if Sonuc then
@@ -1591,7 +1591,7 @@ procedure TUTSDlg.ButtonYenileClick(Sender: TObject);
 begin
    if cxPageControl1.ActivePageIndex=0 then begin
       if TabBildirimTur.Fields[0].AsInteger = 47 then  //adet sorgulama ise utsenvanteri bo?altal?m
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'truncate table UTSENVANTER',[],[]);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'truncate table UTSENVANTER',[],[]);
       Listele
    end else
       TabloAc(cxPageControl1.ActivePageIndex);
@@ -1633,7 +1633,7 @@ begin
 
    case TabBildirimTur.Fields[0].AsInteger of
      1,45,46,52,55,56 : begin
-            Liste_Memdata;  //Alma,Sistemde Tekil Ürün Sorgu, Askýdaki Tüm ürünler,  Bildirim liste, Bildirim ürün
+            Liste_Memdata;  //Alma,Sistemde Tekil ÃœrÃ¼n Sorgu, AskÄ±daki TÃ¼m Ã¼rÃ¼nler,  Bildirim liste, Bildirim Ã¼rÃ¼n
             KolonOlustur(MemDataSorgu);
      end else begin
             Liste_SQL;
@@ -1696,7 +1696,7 @@ begin
    if (cxPageControl1.ActivePageIndex>0)and(ComboBildirim.Properties.Items.count=0) then
        ComboBildirim.Properties.Items := Tablo.imgComboboxInit(' SELECT [ID]=0,[BILDIRIM]='''' UNION ALL  SELECT [ID],[BILDIRIM] FROM [UTS_BILDIRIM_TUR] WHERE AKTIF=1 AND  ADRES<>''''  ').Items;
 
-   //ürün ve lot
+   //Ã¼rÃ¼n ve lot
 end;
 
 procedure TUTSDlg.EditKonsFirmaPropertiesButtonClick(Sender: TObject;AButtonIndex: Integer);
@@ -1717,7 +1717,7 @@ var
 begin
   Sonuclar := TStringList.Create;
     try
-      if Tablo.ListedenBilgiGetir('Hareket Görmüþ Ürün Bilgileri', 'select distinct '+
+      if Tablo.ListedenBilgiGetir('Hareket GÃ¶rmÃ¼ÅŸ ÃœrÃ¼n Bilgileri', 'select distinct '+
           ' SI.ID, BELGE=I.AD,S.KOD, S.STOKADI,SI.KALAN,S.URUNNO, SSL.LOTNO, SSL.SERINO,BILDIRIMID= SI.YERID'+
           ' from STOKIZLEME SI inner join [STOKSERILOT] SSL ON SI.SERILOTID=SSL.ID '+
           ' inner join STOKLAR S on S.ID=SI.STOKID '+
@@ -1744,7 +1744,7 @@ begin
    TJvNavPanelButton(Sender).down := True;
    PanelBaslik.Caption := TabBildirimTur.FieldByName('BILDIRIM').AsString;
    TabSorgu.Close;
-   // ürünlerin üts den sorgulanmasý isteniyorsa
+   // Ã¼rÃ¼nlerin Ã¼ts den sorgulanmasÄ± isteniyorsa
    ButtonGonder.Visible := TabBildirimTur.Fields[0].AsInteger<40;
    //PanelFisOlus.Visible := TabBildirimTur.Fields[0].AsInteger = 51;
    PanelFisOlus.Visible := TabBildirimTur.Fields[0].AsInteger in [47, 51];
@@ -1777,7 +1777,7 @@ begin
    //   PageControlUrun.ActivePageIndex := 1;
    //
 
-   if not (TabBildirimTur.Fields[0].AsInteger  in [ 45,46,52,55,56]) then //askýdakileri direk sorgulamasýn
+   if not (TabBildirimTur.Fields[0].AsInteger  in [ 45,46,52,55,56]) then //askÄ±dakileri direk sorgulamasÄ±n
       Listele;
 end;
 
@@ -1836,7 +1836,7 @@ procedure TUTSDlg.GridSorguViewCanFocusRecord(Sender: TcxCustomGridTableView;
 begin
   AnaForm.cxGridPopupMenu1.Grid:=GridSorgu;
   AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridSorguView;
- // AnaForm.pmGridStil.Tags.Values[GridSorgu.Name]:='ÜTSSorguGridi';
+ // AnaForm.pmGridStil.Tags.Values[GridSorgu.Name]:='ÃœTSSorguGridi';
 end;
 
 procedure TUTSDlg.GridUTSViewCanFocusRecord(Sender: TcxCustomGridTableView;
@@ -1852,7 +1852,7 @@ begin
     //
     inc(ButonSay);
     if ButonSay = 3 then
-       ButtonYap(51, 'Giriþ Fiþi Oluþturma Bildirimi');
+       ButtonYap(51, 'GiriÅŸ FiÅŸi OluÅŸturma Bildirimi');
 end;
 
 function TUTSDlg.Sorgula(Adres, Data:string):string;
@@ -1894,7 +1894,7 @@ begin
    json3 := Sorgula(TestAdresCihaz, '{"sayfaBuyuklugu": "250","sayfaIndeksi": "0","baslangicTarihi": "01/01/2018"}');
   //Onko
 //   json3:=Sorgula(UygAdresAskida, '{"KUN" : 2667269209036, "UNO" : "08714729932918", "LNO" : "20245539", "SAN" : 10 }');
-  //Gözde
+  //GÃ¶zde
  //  json3:=Sorgula(UygAdresAskida, '{"KUN" : 2667269204697, "UNO" : "08714729335658", "LNO" : "19146599", "SAN" : 10 }');
 //   json3:=Sorgula(UygAdresAskida, '{}');
    //json3:=Sorgula('{"UNV" : "Truemed"}');
@@ -1916,7 +1916,7 @@ begin
 end;
 
 function  TUTSDlg.BelgeKaydet(var IzlemId:integer; UTSID:integer; KRM,BNO,BZA,UNO,LNO,SNO,ADT:string; SKT:string='1990-01-01';URT:string='1990-01-01';FYT:string='0'):integer;
-//buraya 1 alma bildirimiyke giriþ faturasý; 51 sistemi sorgulayarak Giriþ firiþi oluþturma; 119 çýkýþ konsinyesi oluþturma için belge kaydetme gelir
+//buraya 1 alma bildirimiyke giriÅŸ faturasÄ±; 51 sistemi sorgulayarak GiriÅŸ firiÅŸi oluÅŸturma; 119 Ã§Ä±kÄ±ÅŸ konsinyesi oluÅŸturma iÃ§in belge kaydetme gelir
 var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : Integer;
     Sonuclar : TStringList;
     Seri : string[10];
@@ -1927,7 +1927,7 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
         FatTipi : Variant;
         FaturaTipi   : Smallint;  // FatTuru
     begin
-          if BaslikTur = 119 then //konsinye çýkýþ ise
+          if BaslikTur = 119 then //konsinye Ã§Ä±kÄ±ÅŸ ise
              FaturaTipi := 1
           else begin
               //Fatura tipi soral?m, normal al?m m? yoksa iade mi
@@ -1957,11 +1957,11 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
                 //      FaturaTipi := 1; //Al?? Faturas?
               end;
           end;
-         //Depo seç Sonuclar := TStringList.Create;
+         //Depo seÃ§ Sonuclar := TStringList.Create;
          Sonuclar := TStringList.Create;
           try
             if BaslikTur=119 then
-               s:='Çýkýþ Deposu Seçin'
+               s:='Ã‡Ä±kÄ±ÅŸ Deposu SeÃ§in'
             else
                s:=BGDepo_kullan;
             if Tablo.ListedenBilgiGetir(s, 'select ID,DEPOADI from DEPOLAR where VARSAYILAN=1 order by 2', Sonuclar,  []) then
@@ -1972,7 +1972,7 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
             FreeAndNil(Sonuclar);
           end;
 
-          if BaslikTur=119 then begin// çýkýþ konsinye ise gireceði depo id bulalým   HERZAMAN ANA DEPODAN ÇIKAR KONSÝNYE ÇIKIÞA GÝRER
+          if BaslikTur=119 then begin// Ã§Ä±kÄ±ÅŸ konsinye ise gireceÄŸi depo id bulalÄ±m   HERZAMAN ANA DEPODAN Ã‡IKAR KONSÄ°NYE Ã‡IKIÅžA GÄ°RER
              Tablo.TablodanSorguAc(2, 'select ID from DEPOLAR where VARSAYILAN=7');
              GirisDepoId := Tablo.Query2.FieldByName('ID').AsInteger;
              CikisDepoId := 1;//DepoId;
@@ -2005,14 +2005,14 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
 
 
 
-        Result := StrToIntDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into FATBASLIK( TUR,REHBERID ) values('+IntToStr(BaslikTur)+','+IntToStr(RehberId)+') select SCOPE_IDENTITY() ',[],[], True),0);
+        Result := StrToIntDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into FATBASLIK( TUR,REHBERID ) values('+IntToStr(BaslikTur)+','+IntToStr(RehberId)+') select SCOPE_IDENTITY() ',[],[], True),0);
         Tablo.Query0.SQL.Text := 'select * from FATBASLIK where ID='+IntToStr(Result);
         Tablo.Query0.Open;
         Tablo.Query0.Edit;
         Tablo.FATBASLIKYeniKayit(Tablo.Query0, RehberId, BaslikTur, FaturaTipi,DepoId,-1);
         Tablo.Query0.Post;
 
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK  set GIRISDEPO='+IntToStr(GirisDepoId)+', CIKISDEPO='+IntToStr(CikisDepoId)+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK  set GIRISDEPO='+IntToStr(GirisDepoId)+', CIKISDEPO='+IntToStr(CikisDepoId)+
          ', FATURATARIH='''+BZA+''', TARIH='''+ BZA+''', FATURASERI='''+Seri+''', FATURANO='''+BNO+''',EKSTREDEKULLAN=0,GIRISKAYNAK='+IntToStr(Windows_Excelden)+' WHERE ID='+Tablo.Query0.FieldByName('ID').AsString,[],[]);
      end;
 
@@ -2020,7 +2020,7 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
     var izlem:smallint;
     begin
         FYT := StringReplace( FYT, ',','.',[]);
-        Result := StrToIntDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,  'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' +
+        Result := StrToIntDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,  'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' +
          ',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,MASRAFID,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,EKIPMANID)  '+
          'select '+inttostr(BaslikID)+','+IntToStr(RehberId)+',1,S.ID,'''','+ADT+
                              ',S.ANABIRIM,'+ADT+','+FYT+','+ADT+'*'+FYT+','''+CariDoviz+''',0,0,S.KDV,'+ADT+'*'+FYT+','''+CariDoviz+''','+FYT+',1'+
@@ -2033,13 +2033,13 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
         Komut : string;
         Procedure DepoInsert(IzlemId,DepoId, Miktars:Integer);
         begin
-               Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into STOKIZLEMEDEPO (IZLEMID, DEPOID, ADET) values('+
+               Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into STOKIZLEMEDEPO (IZLEMID, DEPOID, ADET) values('+
                       IntToStr(IzlemId)+','+IntToStr(DepoId)+','+IntToStr(Miktars)+')', [], []);
         end;
     begin
         Tablo.TablodanSorguAc(1,'select TUR, GIRISDEPO, CIKISDEPO from FATBASLIK where ID='+IntToStr(BaslikID));
         Tablo.TablodanSorguAc(2,'select IZLEME from FATURA where ID='+IntToStr(SatirID));
-        //çýkýþ irsaliyesi ise adetlerin eksi olmasý lazým
+        //Ã§Ä±kÄ±ÅŸ irsaliyesi ise adetlerin eksi olmasÄ± lazÄ±m
         if (BaslikTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,KasaTur_Giden_Konsinye,KasaTur_StokSayimIslemi]) then begin
           // ADT := '-1*'+ADT;
            DepoId := Tablo.Query1.FieldByName('CIKISDEPO').AsInteger;
@@ -2058,9 +2058,9 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
            if URT='' then URT:='1990-01-01';
            Komut := 'INSERT INTO [STOKSERILOT] ([STOKID],[SERINO],[LOTNO],[URT],[SKT])';
            Komut := Komut + ' values('+IntToStr(StokID)+','''+ SNO+''','''+LNO+''','''+URT+''','''+SKT+''')';
-           SeriLotId := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
+           SeriLotId := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
         end;
-        IzlemId := StrToIntDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into STOKIZLEME ([STOKID],[BELGETUR],[BASLIKID],[SATIRID],'+
+        IzlemId := StrToIntDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into STOKIZLEME ([STOKID],[BELGETUR],[BASLIKID],[SATIRID],'+
            '[IZLEMTUR],ADET,[KALAN],[EKLEYEN],[YER],[YERID], SERILOTID)values('+IntToStr(StokID)+','+Tablo.Query1.FieldByName('TUR').AsString+
            ','+IntToStr(BaslikID)+','+IntToStr(SatirID)+','+Tablo.Query2.FieldByName('IZLEME').AsString+',ABS('+ADT+'),ABS('+ADT+'),'+Kullanan+','+
            IntToStr(TabNo_STOKUTS)+','+IntToStr(UTSID)+','+IntToStr(SeriLotId)+') select SCOPE_IDENTITY()',[],[],True),0);
@@ -2073,25 +2073,25 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
 
         if BaslikTur in [KasaTur_Giden_Konsinye, KasaTur_StokTransferi] then
            DepoInsert(IzlemId, GirisDepoId, StrToInt(ADT));
-      //  else if (BaslikTur in [KasaTur_Gelen_Konsinye])and(IslemTip=2)  then  //iade konsinye ise konsinyeden çýkýþ anadepoya giriþ olmalý
+      //  else if (BaslikTur in [KasaTur_Gelen_Konsinye])and(IslemTip=2)  then  //iade konsinye ise konsinyeden Ã§Ä±kÄ±ÅŸ anadepoya giriÅŸ olmalÄ±
       //     DepoInsert(IzlemId, CikDepo, -1*Miktar);
 
 
-       if TabBildirimTur.Fields[0].AsInteger=51 then //sorgulayýp fiþe yazma ise
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update UTSENVANTER set IZLEMID='+IntToStr(Result)+' where URUNNO='''+UNO+''' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' ',[],[]);
+       if TabBildirimTur.Fields[0].AsInteger=51 then //sorgulayÄ±p fiÅŸe yazma ise
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update UTSENVANTER set IZLEMID='+IntToStr(Result)+' where URUNNO='''+UNO+''' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' ',[],[]);
        Application.ProcessMessages;
        Tablo.TablodanSorguAc(2,'select sum(ADET) from STOKIZLEME where SATIRID=' + IntToStr(SatirID));
-       //faturada adedi güncelleyelim
+       //faturada adedi gÃ¼ncelleyelim
        Application.ProcessMessages;
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set ADET = '+Tablo.Query2.Fields[0].AsString+', MIKTAR = '+Tablo.Query2.Fields[0].AsString+' where ID ='+IntToStr(SatirID),[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set ADET = '+Tablo.Query2.Fields[0].AsString+', MIKTAR = '+Tablo.Query2.Fields[0].AsString+' where ID ='+IntToStr(SatirID),[],[]);
     end;
 begin
  //  baslikTur := baslikTur1;
    if UNO[1]='0' then
-      UNO2:=copy(UNO, 2, 50)  //eðer UNO 0 ile baþlýyorsa o ý kaldýrýp uno2 ye yazalým
+      UNO2:=copy(UNO, 2, 50)  //eÄŸer UNO 0 ile baÅŸlÄ±yorsa o Ä± kaldÄ±rÄ±p uno2 ye yazalÄ±m
    else
-      UNO2:='0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalým
-   if EditKonsFirma.Tag=0 then begin //konsinye firma seçilmediyse satýrlardan bulalým
+      UNO2:='0'+UNO;          //yoksa  uno2 ye 0 ekleyip yazalÄ±m
+   if EditKonsFirma.Tag=0 then begin //konsinye firma seÃ§ilmediyse satÄ±rlardan bulalÄ±m
       Tablo.TablodanSorguAc(1, 'select REHBERID=YER_ID from REHBERBILGI where YERI=2 and SIRA=40 and BILGI='''+KRM+''' ');
       if not Tablo.Query1.IsEmpty then
          RehberId := Tablo.Query1.Fields[0].AsInteger;
@@ -2103,34 +2103,34 @@ begin
    if not Tablo.Query1.IsEmpty then begin
       StokId := Tablo.Query1.Fields[0].AsInteger;
       if Tablo.Query1.Fields[1].AsInteger=0 then
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKLAR set IZLEME=2 where ID='+IntToStr(StokId), [], []);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKLAR set IZLEME=2 where ID='+IntToStr(StokId), [], []);
       if Tablo.Query1.Fields[2].AsInteger<>2 then
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKLAR set BILDIRIM=2 where ID='+IntToStr(StokId), [], []);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKLAR set BILDIRIM=2 where ID='+IntToStr(StokId), [], []);
    end;
-   //önce bakýyoruz bu belgeno ile daha önce kayýtlý fat veya irs var mý?
+   //Ã¶nce bakÄ±yoruz bu belgeno ile daha Ã¶nce kayÄ±tlÄ± fat veya irs var mÄ±?
    Seri :='';
-   if length(BNO)>=14 then begin//efatura BAÞTAKÝ ÝLK 3 KARAKTERÝ SERÝ YAPARIZ
+   if length(BNO)>=14 then begin//efatura BAÅžTAKÄ° Ä°LK 3 KARAKTERÄ° SERÄ° YAPARIZ
        Seri := copy(BNO,1,3);
        BNO := copy(BNO,4,50);
    end;
 
    Tablo.TablodanSorguAc(1, 'select ID, GIRISDEPO, TUR from FATBASLIK where REHBERID='+IntToStr(RehberId)+' and TUR in ('+IntToStr(BaslikTur)+',10) '+
           ' and isnull(FATURASERI,'''')='''+Seri+''' and FATURANO='''+BNO+'''  ');  //   and FATURATARIH='''+BZA+'''
-   if not Tablo.Query1.IsEmpty then begin                                                                     //giriþ irsaliyesi de olabilir
+   if not Tablo.Query1.IsEmpty then begin                                                                     //giriÅŸ irsaliyesi de olabilir
       BaslikID := Tablo.Query1.Fields[0].AsInteger;
       GirisDepoId:= Tablo.Query1.Fields[1].AsInteger;
       BaslikTur :=  Tablo.Query1.Fields[2].AsInteger;
-   end else //yoksa oluþturalým
+   end else //yoksa oluÅŸturalÄ±m
       BaslikID := FatbaslikOlustur;
    //
-   //önce izleme tablosuna bakalým bu lotno dan daha önce eklenmiþ mi?
+   //Ã¶nce izleme tablosuna bakalÄ±m bu lotno dan daha Ã¶nce eklenmiÅŸ mi?
    Tablo.TablodanSorguAc(1, 'select * from STOKIZLEME SI1   INNER JOIN [STOKSERILOT] SSL ON SI1.SERILOTID=SSL.ID '+
       ' where SI1.STOKID='+IntToStr(StokId)+' and BASLIKID='+IntToStr(BaslikID)+' and SSL.SERINO='''+SNO+''' and SSL.LOTNO='''+LNO+''' and SSL.SKT='''+SKT+''' ');
-//   if Tablo.Query1.IsEmpty then begin //yoksa bu ürün id için eklenmiþ satýr varsa onu kullanalým. bir satýra daha gerek yok
+//   if Tablo.Query1.IsEmpty then begin //yoksa bu Ã¼rÃ¼n id iÃ§in eklenmiÅŸ satÄ±r varsa onu kullanalÄ±m. bir satÄ±ra daha gerek yok
 //      Tablo.TablodanSorguAc(2, 'select ID from FATURA where FATBASID='+IntToStr(BaslikID)+' and URUNID='+IntToStr(StokId));
 //      if not Tablo.Query2.IsEmpty then
 //         SatirID := Tablo.Query2.Fields[0].AsInteger
-//      else //yoksa oluþturalým } /// AO sorun çýktý burayý kaldýrdým. her satýr için bir satýr ekleyelim
+//      else //yoksa oluÅŸturalÄ±m } /// AO sorun Ã§Ä±ktÄ± burayÄ± kaldÄ±rdÄ±m. her satÄ±r iÃ§in bir satÄ±r ekleyelim
    SatirID := FatSatirOlustur;
    Id := Tablo.Query1.FieldByName('ID').AsInteger;
    IzlemSatirOlustur;
@@ -2140,10 +2140,10 @@ begin
           Tablo.TablodanSorguAc(2, 'select ID from FATURA where FATBASID='+IntToStr(BaslikID)+' and URUNID='+IntToStr(StokId));
           if not Tablo.Query2.IsEmpty then
              SatirID := Tablo.Query2.Fields[0].AsInteger;
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKIZLEME set KALAN=KALAN+'+ADT+', ADET=ADET+'+ADT+' WHERE ID='+IntToStr(Id), [], []);
-          //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKDURUM set GIREN=GIREN+'+ADT+', KALAN=KALAN+'+ADT+'  WHERE STOKID='+IntToStr(StokId)+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
-          //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKDURUMIZLEME set KALAN=KALAN+'+ADT+' WHERE STOKID='+IntToStr(StokId)+' AND SERILOTID='+Tablo.Query1.FieldByName('SERILOTID').Asstring+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKIZLEMEDEPO set ADET=ADET+'+ ADT +' where '+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKIZLEME set KALAN=KALAN+'+ADT+', ADET=ADET+'+ADT+' WHERE ID='+IntToStr(Id), [], []);
+          //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKDURUM set GIREN=GIREN+'+ADT+', KALAN=KALAN+'+ADT+'  WHERE STOKID='+IntToStr(StokId)+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
+          //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKDURUMIZLEME set KALAN=KALAN+'+ADT+' WHERE STOKID='+IntToStr(StokId)+' AND SERILOTID='+Tablo.Query1.FieldByName('SERILOTID').Asstring+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKIZLEMEDEPO set ADET=ADET+'+ ADT +' where '+
                      ' IZLEMID='+IntToStr(Id) +' AND DEPOID='+IntToStr(GirisDepoId), [], []);
 
    end;
@@ -2152,14 +2152,14 @@ end;
 
 end.
 (* AO 24/04/2021
-  //önce izleme tablosuna bakalým bu lotno dan daha önce eklenmiþ mi?
+  //Ã¶nce izleme tablosuna bakalÄ±m bu lotno dan daha Ã¶nce eklenmiÅŸ mi?
    Tablo.TablodanSorguAc(1, 'select * from STOKIZLEME SI1   INNER JOIN [STOKSERILOT] SSL ON SI1.SERILOTID=SSL.ID '+
       ' where SI1.STOKID='+IntToStr(StokId)+' and BASLIKID='+IntToStr(BaslikID)+' and SSL.SERINO='''+SNO+''' and SSL.LOTNO='''+LNO+''' and SSL.SKT='''+SKT+''' ');
-   if Tablo.Query1.IsEmpty then begin //yoksa bu ürün id için eklenmiþ satýr varsa onu kullanalým. bir satýra daha gerek yok
+   if Tablo.Query1.IsEmpty then begin //yoksa bu Ã¼rÃ¼n id iÃ§in eklenmiÅŸ satÄ±r varsa onu kullanalÄ±m. bir satÄ±ra daha gerek yok
       Tablo.TablodanSorguAc(2, 'select ID from FATURA where FATBASID='+IntToStr(BaslikID)+' and URUNID='+IntToStr(StokId));
       if not Tablo.Query2.IsEmpty then
          SatirID := Tablo.Query2.Fields[0].AsInteger
-      else //yoksa oluþturalým } /// AO sorun çýktý burayý kaldýrdým. her satýr için bir satýr ekleyelim
+      else //yoksa oluÅŸturalÄ±m } /// AO sorun Ã§Ä±ktÄ± burayÄ± kaldÄ±rdÄ±m. her satÄ±r iÃ§in bir satÄ±r ekleyelim
          SatirID := FatSatirOlustur;
       IzlemSatirOlustur;
    end
@@ -2168,10 +2168,10 @@ end.
           Tablo.TablodanSorguAc(2, 'select ID from FATURA where FATBASID='+IntToStr(BaslikID)+' and URUNID='+IntToStr(StokId));
           if not Tablo.Query2.IsEmpty then
              SatirID := Tablo.Query2.Fields[0].AsInteger;
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKIZLEME set KALAN=KALAN+'+ADT+', ADET=ADET+'+ADT+' WHERE ID='+Tablo.Query1.FieldByName('ID').Asstring, [], []);
-          //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKDURUM set GIREN=GIREN+'+ADT+', KALAN=KALAN+'+ADT+'  WHERE STOKID='+IntToStr(StokId)+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
-          //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKDURUMIZLEME set KALAN=KALAN+'+ADT+' WHERE STOKID='+IntToStr(StokId)+' AND SERILOTID='+Tablo.Query1.FieldByName('SERILOTID').Asstring+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update STOKIZLEMEDEPO set ADET=ADET+'+ ADT +' where '+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKIZLEME set KALAN=KALAN+'+ADT+', ADET=ADET+'+ADT+' WHERE ID='+Tablo.Query1.FieldByName('ID').Asstring, [], []);
+          //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKDURUM set GIREN=GIREN+'+ADT+', KALAN=KALAN+'+ADT+'  WHERE STOKID='+IntToStr(StokId)+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
+          //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKDURUMIZLEME set KALAN=KALAN+'+ADT+' WHERE STOKID='+IntToStr(StokId)+' AND SERILOTID='+Tablo.Query1.FieldByName('SERILOTID').Asstring+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update STOKIZLEMEDEPO set ADET=ADET+'+ ADT +' where '+
                      ' IZLEMID='+ Tablo.Query1.FieldByName('ID').Asstring+' AND DEPOID='+IntToStr(GirisDepoId), [], []);
 
       end;

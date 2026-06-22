@@ -1,4 +1,4 @@
-unit UPOSListeFrame;
+ï»¿unit UPOSListeFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 01/07/2010 22:58:05}
@@ -433,7 +433,7 @@ end;
 
 procedure TPOSListeFrame.MenuItem1Click(Sender: TObject);
 begin
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update POS set BAKIYE = &Bak where ID=&ID ',['&Bak','&ID'],[StringReplace(TOPLAMLAR.FieldByName('BAKIYE').AsString,',','.',[]),POSLAR.FieldByName('ID').AsInteger]);
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update POS set BAKIYE = &Bak where ID=&ID ',['&Bak','&ID'],[StringReplace(TOPLAMLAR.FieldByName('BAKIYE').AsString,',','.',[]),POSLAR.FieldByName('ID').AsInteger]);
    YenileClick;
 end;
 
@@ -519,12 +519,12 @@ begin
         Tablo.Query4.SQL.Text := 'Select top 1 ISLEMTARIHI From KASA Where HESAPTURU=''P'' AND HESAPID = '+ POSLAR.FieldByName('ID').AsString+' AND TUR<>1';
         Tablo.Query4.Open;
         if Tablo.Query4.RecordCount> 0 then
-          raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiþ kasa bilgisi var, silinemez...')
+          raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiÅŸ kasa bilgisi var, silinemez...')
         else begin//yoksa a??l?? kayd?n? silelim
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
                //kendisini sil
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from POS  where ID=&id ',['&id'],[POSLAR.Fields[0].AsInteger]);
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from posoran where POSID=&id',['&id'],[POSLAR.Fields[0].AsInteger]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from POS  where ID=&id ',['&id'],[POSLAR.Fields[0].AsInteger]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from posoran where POSID=&id',['&id'],[POSLAR.Fields[0].AsInteger]);
           YenileClick;
         end;
       end;

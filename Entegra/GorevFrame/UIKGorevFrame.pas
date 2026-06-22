@@ -1,4 +1,4 @@
-unit UIKGorevFrame;
+﻿unit UIKGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -140,7 +140,7 @@ end;
 procedure TIKGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3401,YetkiTur_Gorme);
   BtnGenelPDKS.Visible := Tablo.YetkiVarmi(3402,YetkiTur_Gorme);

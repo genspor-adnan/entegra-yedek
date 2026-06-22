@@ -1,4 +1,4 @@
-unit UHizliGirisGenelTahsilatlar;
+﻿unit UHizliGirisGenelTahsilatlar;
 
 interface
 

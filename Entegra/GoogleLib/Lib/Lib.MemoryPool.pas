@@ -1,4 +1,4 @@
-unit Lib.MemoryPool;
+﻿unit Lib.MemoryPool;
 
 { A reusable memory pooling class }
 

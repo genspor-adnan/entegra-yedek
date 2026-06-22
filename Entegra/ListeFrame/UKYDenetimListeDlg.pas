@@ -1,4 +1,4 @@
-unit UKYDenetimListeDlg;
+ï»¿unit UKYDenetimListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:54}
@@ -162,7 +162,7 @@ end;
 
 procedure TKYDenetimListeDlg .Baslatildi;
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   TabloYenile(TabDenetim,[]);
   //GridDOFView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\KaliteToplantiGridi',true,false,[gsoUseFilter],'KaliteDOFGridi');
   Tablo.GridAyarRestore('KaliteDOFGridi',GridDOFView );
@@ -289,10 +289,10 @@ begin
 //    DateTeslimBas.Date := AraTarihBas.Date;
 //    DateTeslimBit.Date := AraTarihBit.Date ;
 //    TabloYenile(TabDenetim,[]);
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 

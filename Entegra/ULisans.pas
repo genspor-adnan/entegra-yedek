@@ -1,11 +1,11 @@
-{
+ï»¿{
 #### MODUL KOD Listesi ####
 
 Modul1	Ajanda
 Modul2	Ameliyat
 Modul3	Anket
 Modul4	Diyaliz
-Modul5	DoğanBebek
+Modul5	DoÄŸanBebek
 Modul6	Evrak Defteri
 Modul7	Evrak Takip
 Modul8	Fatura Takip
@@ -17,12 +17,12 @@ Modul13	GenScan
 Modul14	Genspor
 Modul15	Gentegre
 Modul16	Giykimbil
-Modul17	Hızlı Giriş
+Modul17	HÄ±zlÄ± GiriÅŸ
 Modul18	KamuLab
-Modul19	Kayıtkabul
+Modul19	KayÄ±tkabul
 Modul20	Kullanan
 Modul21	Lab
-Modul22	LIS - Cihaz bağlantısı
+Modul22	LIS - Cihaz baÄŸlantÄ±sÄ±
 Modul23	LISNET
 Modul24	Medula Entegrasyon
 Modul25	Muayene
@@ -31,15 +31,15 @@ Modul27	Radyoloji
 Modul28	Randevu
 Modul29	Servis
 Modul30	Stok
-Modul31	Sıramatik
-Modul32	Tüp Bebek
-Modul33	Yönlendirme
-Modul34	İşyeri Hekimliği
+Modul31	SÄ±ramatik
+Modul32	TÃ¼p Bebek
+Modul33	YÃ¶nlendirme
+Modul34	Ä°ÅŸyeri HekimliÄŸi
 Modul35	Magic SAS
 Modul36	Muhasebe Entegrasyonu
-Modul37	Satınalma
+Modul37	SatÄ±nalma
 Modul38 Doktorlar
-Modul39 Yeni Versiyon Çalışmasın
+Modul39 Yeni Versiyon Ã‡alÄ±ÅŸmasÄ±n
 }
 
 unit ULisans;
@@ -221,12 +221,12 @@ begin
   with Query('select name from sysobjects where name = ''GENOTIP''') do
   begin
     if recordcount = 0 then
-      raise ELisansHatasi.Create('Öncelikle GenLisanslama Modülünü Çalıştırmalısınız', '', lhHata, ldHataVerBitir, nil);
+      raise ELisansHatasi.Create('Ã–ncelikle GenLisanslama ModÃ¼lÃ¼nÃ¼ Ã‡alÄ±ÅŸtÄ±rmalÄ±sÄ±nÄ±z', '', lhHata, ldHataVerBitir, nil);
   end;
   with Query('select top 1 * from GENOTIP') do
   begin
     if recordcount = 0 then
-      raise ELisansHatasi.Create('Öncelikle GenLisanslama Modülünü Çalıştırmalısınız', '', lhHata, ldHataVerBitir, nil);
+      raise ELisansHatasi.Create('Ã–ncelikle GenLisanslama ModÃ¼lÃ¼nÃ¼ Ã‡alÄ±ÅŸtÄ±rmalÄ±sÄ±nÄ±z', '', lhHata, ldHataVerBitir, nil);
   end;
 end;
 
@@ -257,14 +257,14 @@ begin
   with q1 do
    begin
       if LisansBilgileri.LisansSayisi < q1.FieldByName('SAYI').AsInteger then
-       raise ELisansHatasi.Create('Terminal Limitiniz Dolu',  'Lütfen Lisanslama modülünden aktif terminal sayısını ayarlayınız.',lhHata,ldHataVerBitir,nil);
+       raise ELisansHatasi.Create('Terminal Limitiniz Dolu',  'LÃ¼tfen Lisanslama modÃ¼lÃ¼nden aktif terminal sayÄ±sÄ±nÄ± ayarlayÄ±nÄ±z.',lhHata,ldHataVerBitir,nil);
    end;
 
   with Query('SELECT * FROM GENOTIP WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre(GetMACAdress ) + ''')') do
   begin
     Result := recordcount <> 0;
     if FieldbyName('DURUM').AsString = '0' then
-      raise ELisansHatasi.Create('Bu terminal aktif değil', 'Aktif hale getirebilmek için GenLisanslama Modülünden, Terminaller bölümünden düzenleme yapmalısınız', lhHata, ldHataVerBitir, nil);
+      raise ELisansHatasi.Create('Bu terminal aktif deÄŸil', 'Aktif hale getirebilmek iÃ§in GenLisanslama ModÃ¼lÃ¼nden, Terminaller bÃ¶lÃ¼mÃ¼nden dÃ¼zenleme yapmalÄ±sÄ±nÄ±z', lhHata, ldHataVerBitir, nil);
     LisansBilgileri.TerminalAdi := DeSifre(FieldbyName('SABITTEXT').AsString);
     LisansBilgileri.TerminalMAC := DeSifre(FieldbyName('DEGER').AsString);
   end;
@@ -274,7 +274,7 @@ begin
   begin
     Result := recordcount <> 0;
     if not Result then
-      raise ELisansHatasi.Create('Bu terminal tanımlı değil', 'Terminali kaydetmek için ismi yazıp Tamama tıklamalısınız', lhHata, ldTerminalTanitDevamEt, nil);
+      raise ELisansHatasi.Create('Bu terminal tanÄ±mlÄ± deÄŸil', 'Terminali kaydetmek iÃ§in ismi yazÄ±p Tamama tÄ±klamalÄ±sÄ±nÄ±z', lhHata, ldTerminalTanitDevamEt, nil);
   end;  }
 
 end;
@@ -296,9 +296,9 @@ end;
 
 function VersiyonKontrol : String;
 Begin
-  // 09.09.2010 Okan ÜNAL
-  // DB'deki versiyon alınıyor. 60 DBdeki versiyonu bulunan KOD.
-  // Hiç versiyon kaydı yoksa 20.10.08.99 alınıyor. Bu sistemin başlamadan önceki son olası versiyon bilgisidir.
+  // 09.09.2010 Okan ÃœNAL
+  // DB'deki versiyon alÄ±nÄ±yor. 60 DBdeki versiyonu bulunan KOD.
+  // HiÃ§ versiyon kaydÄ± yoksa 20.10.08.99 alÄ±nÄ±yor. Bu sistemin baÅŸlamadan Ã¶nceki son olasÄ± versiyon bilgisidir.
   Result := DeSifre(Query('select DEGER as DEGER from GENOTIP WHERE SABIT = ''60''').Fieldbyname('DEGER').AsString);;
   if Result = '' then
     Result := '20100899';
@@ -339,7 +339,7 @@ begin
     LisansSuresi := StrToint(Items.Values['LisansSuresi']);
     UyariGunSayisi := StrToint(Items.Values['UyariGunSayisi']);
     Moduller := copy(PAcikLisans, pos('Modul1', PAcikLisans), maxint);
-    // 09.09.2010 Okan ÜNAL
+    // 09.09.2010 Okan ÃœNAL
     if Items.Values['YeniVersiyonDurumu'] <> '' then
       YeniVersiyonDurumu := StrToBool(Items.Values['YeniVersiyonDurumu'])
     else
@@ -355,8 +355,8 @@ begin
     'Select DEGER FROM GENOTIP WHERE SABIT = ''50''');
 end;
 
-// 09.09.2010 Okan ÜNAL
-// Yeni çalışan Versiyonun bilgilerini sisteme günceller...
+// 09.09.2010 Okan ÃœNAL
+// Yeni Ã§alÄ±ÅŸan Versiyonun bilgilerini sisteme gÃ¼nceller...
 procedure DBVersiyonGuncelle(Versiyon :string);
 begin
   with Query('SELECT SABIT FROM GENOTIP WHERE SABIT >= ''60''') do
@@ -396,40 +396,40 @@ begin
       GunTarihi := DBGunTarihi;
       WEBLisansUygulandimi;
 
-      // Makinenin MAC i Şirkete ait Bir MAC olarak kayıtlı mı?
+      // Makinenin MAC i Åirkete ait Bir MAC olarak kayÄ±tlÄ± mÄ±?
       if GenoTIPMACAdresiMi then
          exit;
 
-      // Sistemde var olan Açık Lisans Bilgisi alınıyor.
+      // Sistemde var olan AÃ§Ä±k Lisans Bilgisi alÄ±nÄ±yor.
       LisansBilgileri := AcikLisansToTlisans(DBAcikLisans);
 
-      //  Sistemin çalışması için izin var mı?
+      //  Sistemin Ã§alÄ±ÅŸmasÄ± iÃ§in izin var mÄ±?
       if not LisansBilgileri.YazilimCalissin then
       begin
-        // Lisans Bilgilerinde Yazılım Çalışma izni kapalı olarak kayıtlı....
-        raise ELisansHatasi.Create('Lisans', 'Sistemin çalışma izni yok. GenoTIP ile irtibata geçmeniz gerekmektedir.', lhHata, ldHataVerBitir, nil);
+        // Lisans Bilgilerinde YazÄ±lÄ±m Ã‡alÄ±ÅŸma izni kapalÄ± olarak kayÄ±tlÄ±....
+        raise ELisansHatasi.Create('Lisans', 'Sistemin Ã§alÄ±ÅŸma izni yok. GenoTIP ile irtibata geÃ§meniz gerekmektedir.', lhHata, ldHataVerBitir, nil);
       end;
 
-      // Terminal kayıtlı mı?  Burada Terminalin Serverdaki MAC adresi de alınıyor.
+      // Terminal kayÄ±tlÄ± mÄ±?  Burada Terminalin Serverdaki MAC adresi de alÄ±nÄ±yor.
       if not DBTerminalKayitliMi then
       begin
-        // Terminal sisteme tanımlı değil ise...
-        raise ELisansHatasi.Create('Terminal', 'Bu terminal sistemde kayıtlı değil.', lhHata, ldTerminalTanitDevamEt, nil);
+        // Terminal sisteme tanÄ±mlÄ± deÄŸil ise...
+        raise ELisansHatasi.Create('Terminal', 'Bu terminal sistemde kayÄ±tlÄ± deÄŸil.', lhHata, ldTerminalTanitDevamEt, nil);
       end;
 
-      // Modul Yetkisi Var mı?
+      // Modul Yetkisi Var mÄ±?
       if not ModulYetkisiVarMi then
       begin
-        //  Modul kullanma için izin yoksa
-        raise ELisansHatasi.Create('Modül Lisansı', 'Bu modül için lisansınız bulunmamaktadır', lhHata, ldHataVerBitir, nil);
+        //  Modul kullanma iÃ§in izin yoksa
+        raise ELisansHatasi.Create('ModÃ¼l LisansÄ±', 'Bu modÃ¼l iÃ§in lisansÄ±nÄ±z bulunmamaktadÄ±r', lhHata, ldHataVerBitir, nil);
       end;
 
-       //LİSANS Versyion Kontrolü
-       // 09.09.2010 Okan ÜNAL
-      // Bu çalışan yeni versiyon mu DB deki ile kontrol edelim.
+       //LÄ°SANS Versyion KontrolÃ¼
+       // 09.09.2010 Okan ÃœNAL
+      // Bu Ã§alÄ±ÅŸan yeni versiyon mu DB deki ile kontrol edelim.
       DBVersiyon := StrToInt(VersiyonKontrol);
 
-      // Çalıştırılmak istenen versiyon bilgisi Sistemdeki kayıtlı versiyon bilgisinden yeni ise...
+      // Ã‡alÄ±ÅŸtÄ±rÄ±lmak istenen versiyon bilgisi Sistemdeki kayÄ±tlÄ± versiyon bilgisinden yeni ise...
       if (LisansModul = 'Modul19') and (StrToInt(StringReplace(Versiyon,'.','',[rfReplaceAll])) > DBVersiyon)  then
       Begin
         try
@@ -441,41 +441,41 @@ begin
         except //
           LisansSorgulandi := False;
           lws := 0;
-          raise ELisansHatasi.Create('Yeni versiyonu kullanmaya çalıştığınız terminalin internet erişimi olmalıdır.', 'İnternet erişimi olan bir makineden tekrar deneyiniz.', lhHata, ldHataVerBitir, nil);
+          raise ELisansHatasi.Create('Yeni versiyonu kullanmaya Ã§alÄ±ÅŸtÄ±ÄŸÄ±nÄ±z terminalin internet eriÅŸimi olmalÄ±dÄ±r.', 'Ä°nternet eriÅŸimi olan bir makineden tekrar deneyiniz.', lhHata, ldHataVerBitir, nil);
         end;
 
         if LisansSorgulandi then
         Begin
-          // Lisans Sorgulandı ve Yeni versiyon kullanmaya yetkisi yok ise.
+          // Lisans SorgulandÄ± ve Yeni versiyon kullanmaya yetkisi yok ise.
           //if not LisansBilgileri.YeniVersiyonDurumu then
          // if (LisansBilgileri.SatisTipi = stCalismasin) then
           if (pos('Modul39=1', LisansBilgileri.Moduller) <> 0 ) then
           Begin
-            raise ELisansHatasi.Create('Lisans bilgilerinize ulaşılamadı. Lütfen GenoTIP ile görüşünüz.', 'Yeni lisans almanız gerekebilir.', lhHata, ldHataVerBitir, nil);
+            raise ELisansHatasi.Create('Lisans bilgilerinize ulaÅŸÄ±lamadÄ±. LÃ¼tfen GenoTIP ile gÃ¶rÃ¼ÅŸÃ¼nÃ¼z.', 'Yeni lisans almanÄ±z gerekebilir.', lhHata, ldHataVerBitir, nil);
           End
-          else // Lisans Sorgulandı ve Yeni versiyon kullanmaya yetkisi var ise.
+          else // Lisans SorgulandÄ± ve Yeni versiyon kullanmaya yetkisi var ise.
           Begin
             DBVersiyonGuncelle(StringReplace(Versiyon,'.','',[rfREplaceAll]));
           End;
         End;
       End;
       
-      // Sistemdeki SonLisansTarihi Alınıyor...
+      // Sistemdeki SonLisansTarihi AlÄ±nÄ±yor...
       SonLisansSorgulamaTarihi := DBSonLisansSorgulamaTarihi;
 
-      // Lisans Web Service'ten tekrar alınması gerekiyor mu?
+      // Lisans Web Service'ten tekrar alÄ±nmasÄ± gerekiyor mu?
       if ((Round(DBGunTarihi - SonLisansSorgulamaTarihi)) >= LisansBilgileri.LisansSorgulamaSuresi) and (LisansModul = 'Modul19') then
       begin
         try
           if LisansSorgulandi = False then
           Begin
-            // Web service'ten dönen değer ile Lisans Güncellenecek...
+            // Web service'ten dÃ¶nen deÄŸer ile Lisans GÃ¼ncellenecek...
             AcikLisans := Lisanssrv.AcikLisans(LisansBilgileri.KurumKod1, LisansBilgileri.KurumKod2, LisansBilgileri.MAC);
-            // Lisans Web Service'ten gelen lisans bilgisi güncelleniyor
+            // Lisans Web Service'ten gelen lisans bilgisi gÃ¼ncelleniyor
             LisansBilgileri := AcikLisansToTlisans(AcikLisans);
           End;
 
-          // Sistemdeki KapalıLisans'taki Server MAC ile Merkezden alınan AçıkLisans'tak, MAC ler tutuyormu?
+          // Sistemdeki KapalÄ±Lisans'taki Server MAC ile Merkezden alÄ±nan AÃ§Ä±kLisans'tak, MAC ler tutuyormu?
           if LisansBilgileri.MAC = DBKapaliLisansMACAdres then
           begin
             lws := 1;
@@ -486,48 +486,48 @@ begin
         except
           lws := 1;
         end;
-      end; // Lisans Web Service'ten tekrar alınması gerekiyor mu?
+      end; // Lisans Web Service'ten tekrar alÄ±nmasÄ± gerekiyor mu?
 
       if lws = 0 then
       begin
-        // WEB Service ten dönen değerler çalışma iznini 0 yapmış. Sistem Server'ı ile FetaServer daki MAC ler farklı...
-        raise ELisansHatasi.Create('Server ayarlarınız değişmiş. Lütfen GenoTIP ile görüşünüz.', 'Yeni bir lisans almanız gerekebilir.', lhHata, ldHataVerBitir, nil);
+        // WEB Service ten dÃ¶nen deÄŸerler Ã§alÄ±ÅŸma iznini 0 yapmÄ±ÅŸ. Sistem Server'Ä± ile FetaServer daki MAC ler farklÄ±...
+        raise ELisansHatasi.Create('Server ayarlarÄ±nÄ±z deÄŸiÅŸmiÅŸ. LÃ¼tfen GenoTIP ile gÃ¶rÃ¼ÅŸÃ¼nÃ¼z.', 'Yeni bir lisans almanÄ±z gerekebilir.', lhHata, ldHataVerBitir, nil);
       end;
 
-      // Web serviceten dönen değer veya hiç sorgulamadan durum lisans kontrolü yapmaya müsait olduğunu belirtirse...
+      // Web serviceten dÃ¶nen deÄŸer veya hiÃ§ sorgulamadan durum lisans kontrolÃ¼ yapmaya mÃ¼sait olduÄŸunu belirtirse...
       case LisansBilgileri.SatisTipi of
         stDemo :
           begin
-            // Demo Süresi içerisinde ise.
+            // Demo SÃ¼resi iÃ§erisinde ise.
             if (GunTarihi - LisansBilgileri.LisansTarihi) <= LisansBilgileri.LisansSuresi then
-              raise ELisansHatasi.Create('Demo süresi', 'Demo süresinin dolmasına  ' + IntToStr(round(LisansBilgileri.LisansTarihi + LisansBilgileri.LisansSuresi - GunTarihi)) + ' gün kaldı', lhUyari, ldUyarDevamEt, nil)
-            else // Demo süresi dolmuş ise....
-              raise ELisansHatasi.Create('Demo süresi', 'Demo süresi dolmuştur.', lhHata, ldHataVerBitir, nil);
+              raise ELisansHatasi.Create('Demo sÃ¼resi', 'Demo sÃ¼resinin dolmasÄ±na  ' + IntToStr(round(LisansBilgileri.LisansTarihi + LisansBilgileri.LisansSuresi - GunTarihi)) + ' gÃ¼n kaldÄ±', lhUyari, ldUyarDevamEt, nil)
+            else // Demo sÃ¼resi dolmuÅŸ ise....
+              raise ELisansHatasi.Create('Demo sÃ¼resi', 'Demo sÃ¼resi dolmuÅŸtur.', lhHata, ldHataVerBitir, nil);
           end;
 
         stKira :
           begin
             if (GunTarihi - LisansBilgileri.LisansTarihi) <= LisansBilgileri.LisansSuresi then
-            begin // Kira süresi içerisinde ise
-              //  Kira Uyarı Opsiyon Günü süresi içersine girilmemiş ise...
+            begin // Kira sÃ¼resi iÃ§erisinde ise
+              //  Kira UyarÄ± Opsiyon GÃ¼nÃ¼ sÃ¼resi iÃ§ersine girilmemiÅŸ ise...
               if (LisansBilgileri.LisansSuresi) - (GunTarihi - LisansBilgileri.LisansTarihi) >= LisansBilgileri.UyariGunSayisi then
                 exit
-              else //  Kira Uyarı Opsiyon Günü süresi içersine gelinmiş ise...
-                raise ELisansHatasi.Create('Lisans süresi', 'Lisans süresinin dolmasına ' + IntToStr((LisansBilgileri.LisansSuresi) - trunc((GunTarihi - LisansBilgileri.LisansTarihi))) + ' gün kalmıştır.', lhUyari, ldUyarDevamEt, nil);
+              else //  Kira UyarÄ± Opsiyon GÃ¼nÃ¼ sÃ¼resi iÃ§ersine gelinmiÅŸ ise...
+                raise ELisansHatasi.Create('Lisans sÃ¼resi', 'Lisans sÃ¼resinin dolmasÄ±na ' + IntToStr((LisansBilgileri.LisansSuresi) - trunc((GunTarihi - LisansBilgileri.LisansTarihi))) + ' gÃ¼n kalmÄ±ÅŸtÄ±r.', lhUyari, ldUyarDevamEt, nil);
             end
-            else // Kira süresi dolmuş ise
-              raise ELisansHatasi.Create('Lisans süresi', 'Lisans süresi dolmuştur.', lhHata, ldHataVerBitir, nil);
+            else // Kira sÃ¼resi dolmuÅŸ ise
+              raise ELisansHatasi.Create('Lisans sÃ¼resi', 'Lisans sÃ¼resi dolmuÅŸtur.', lhHata, ldHataVerBitir, nil);
           end;
 
         stSatis :
           begin
             exit;
           end;
-       { // 27.09.2010 Okan ÜNAL
-         // Yeni Versiyon kontrolü ile birlikte çalışmasın kontrolünü değiştiriyoruz.
+       { // 27.09.2010 Okan ÃœNAL
+         // Yeni Versiyon kontrolÃ¼ ile birlikte Ã§alÄ±ÅŸmasÄ±n kontrolÃ¼nÃ¼ deÄŸiÅŸtiriyoruz.
         stCalismasin :
           begin
-            raise ELisansHatasi.Create('Lisans dondurulmuştur', 'Yazılım çalışmayacaktır', lhHata, ldHataVerBitir, nil);
+            raise ELisansHatasi.Create('Lisans dondurulmuÅŸtur', 'YazÄ±lÄ±m Ã§alÄ±ÅŸmayacaktÄ±r', lhHata, ldHataVerBitir, nil);
           end;
         }
       end;
@@ -600,7 +600,7 @@ procedure TLisansDlg.BtnLisansClick(Sender :TObject);
 var
   q1, q2 :TFDQuery;
 begin
-  // Aktif Lisanslı kullanıcı sayısı
+  // Aktif LisanslÄ± kullanÄ±cÄ± sayÄ±sÄ±
   q1 := Query('Select count(*) SAYI, ISNULL(MAX(SABIT),''1000'') as MAXNO from GENOTIP WHERE DURUM <> 0 AND SABIT between ''1000'' and ''9999''');
   try
     if LisansBilgileri.LisansSayisi > q1.FieldByName('SAYI').AsInteger then
@@ -609,7 +609,7 @@ begin
       try
         if q2.RecordCount <> 0 then
         begin
-          raise Exception.Create('Bu isimde kayıtlı terminal var.');
+          raise Exception.Create('Bu isimde kayÄ±tlÄ± terminal var.');
         end
         else
         begin

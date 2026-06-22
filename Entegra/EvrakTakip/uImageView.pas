@@ -1,4 +1,4 @@
-unit uImageView;
+ï»¿unit uImageView;
 
 interface
 
@@ -54,7 +54,7 @@ begin
      frmImageView.Free;
      Pic.Free;
      { Graphic nesnesi burada Free edilmesin,
-       bu yordamý çaðýran "BlobEklendi" DosyaStream Free edilecek!
+       bu yordamÄ± Ã§aÄŸÄ±ran "BlobEklendi" DosyaStream Free edilecek!
      //if Assigned(Graphic) then
      //  Graphic.Free;
      }

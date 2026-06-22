@@ -1,4 +1,4 @@
-
+ï»¿
 unit UDemirbasWizard;
 
 interface
@@ -591,14 +591,14 @@ begin
       //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabDemirbas.active)and(TabDemirbas.Fields[0].AsString <> '') then begin
         //varsa dokumanlar?n silinmeli
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[Yeri, Yer_ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[Yeri, Yer_ID]);
         //Demirba? ile ili?kini di?er veriler siliniyor.
-        //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from SERVIS where EKIPMANID=&Id ',['&Id'], [TabDemirbas.FieldByName('ID').AsInteger]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from KALIBRASYON where DEMIRBASID=&Id ',['&Id'], [TabDemirbas.FieldByName('ID').AsInteger]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&ID',['&ID'],[TabDemirbas.FieldByName('ID').AsInteger]);
+        //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from SERVIS where EKIPMANID=&Id ',['&Id'], [TabDemirbas.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from KALIBRASYON where DEMIRBASID=&Id ',['&Id'], [TabDemirbas.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&ID',['&ID'],[TabDemirbas.FieldByName('ID').AsInteger]);
         //Son olarak demirba? kayd?n?n asl? siliniyor.
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' DELETE FROM DEMIRBAS_TUTANAK_DETAY WHERE DEMIRBASID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' DELETE FROM DEMIRBAS WHERE ID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' DELETE FROM DEMIRBAS_TUTANAK_DETAY WHERE DEMIRBASID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' DELETE FROM DEMIRBAS WHERE ID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
       end;
    end;
 end;
@@ -659,9 +659,9 @@ begin
         Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+' and TUR <> 11 ');
         if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+PChar(DDAlan_silinsinmi)),PChar(Uyari),MB_YESNO)=mrYes then  begin
 
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
           try
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Alter table DEMIRBAS drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Alter table DEMIRBAS drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
           except
           end;
            ctrl.Visible := False;
@@ -706,9 +706,9 @@ begin
     case IslemOp of
       'E': begin
              if DemirbasID <=0 then begin
-                DemirbasID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into DEMIRBAS (DURUM,EKLEYEN,SUBEID,R,TAKIP,KALIBRASYON,SERVIS)values('+IntToStr(BaslangicDurumu)+','+Kullanan+','+IntToStr(SubeId)+',0,0,0,0) SELECT SCOPE_IDENTITY() ', [],[],True);
-                TutanakID := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into DEMIRBAS_TUTANAK (TIP,TARIH,VERENID,ALANID,LOKASYONID,BELGENO,EKLEYEN)values('+IntToStr(BaslangicDurumu)+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','+Kullanan+',0,''0'','+Kullanan+') SELECT SCOPE_IDENTITY() ', [],[],True);
-                Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into DEMIRBAS_TUTANAK_DETAY (TUTANAKID,DEMIRBASID)values('+IntToStr(TutanakID)+','+IntToStr(DemirbasID)+')',[],[]);
+                DemirbasID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into DEMIRBAS (DURUM,EKLEYEN,SUBEID,R,TAKIP,KALIBRASYON,SERVIS)values('+IntToStr(BaslangicDurumu)+','+Kullanan+','+IntToStr(SubeId)+',0,0,0,0) SELECT SCOPE_IDENTITY() ', [],[],True);
+                TutanakID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into DEMIRBAS_TUTANAK (TIP,TARIH,VERENID,ALANID,LOKASYONID,BELGENO,EKLEYEN)values('+IntToStr(BaslangicDurumu)+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','+Kullanan+',0,''0'','+Kullanan+') SELECT SCOPE_IDENTITY() ', [],[],True);
+                Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into DEMIRBAS_TUTANAK_DETAY (TUTANAKID,DEMIRBASID)values('+IntToStr(TutanakID)+','+IntToStr(DemirbasID)+')',[],[]);
              end;
              TabloYenile(TabDemirbas,[DemirbasID]);
              TabDemirbas.Edit;
@@ -774,7 +774,7 @@ procedure TDemirbasWizardDlg.KodAgaciTusClick(Sender: TObject);
 begin
   TabDemirbas.Edit;
   EditDEMIRBASNO.Text := Tablo.KodBulmaSihirbazi(0,'HESAPPLANI','HESAPKODU','HESAPADI','DEMIRBAS' ,'DEMIRBASNO',253);
-  LabelHesapAciklama.Caption := VarToStrDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select HESAPADI from HESAPPLANI where HESAPKODU='''+Atasi(EditDEMIRBASNO.Text)+'''',[],[],True),'');
+  LabelHesapAciklama.Caption := VarToStrDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select HESAPADI from HESAPPLANI where HESAPKODU='''+Atasi(EditDEMIRBASNO.Text)+'''',[],[],True),'');
 end;
 
 procedure TDemirbasWizardDlg.LabelMarkaClick(Sender: TObject);
@@ -788,10 +788,10 @@ begin
     Application.MessageBox(PChar(DDModel_icin_marka_sec),PChar(HataPrj),MB_OK+ MB_ICONERROR);
     abort;
   end else begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2804%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2804''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2804)',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2804%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2804''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2804)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2804%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2804''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2804)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2804%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2804''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2804)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_Demirbas_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_Demirbas_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -833,7 +833,7 @@ begin
         Abort;
 
 
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into MASRAFGELIR (GELIRMI,BASLIK,DIGITSAY,KOD,AD,DURUM,EKLEYEN,MUHAKTAR,ZARFMALIYETDURUMU,YER,YER_ID,SUBEID)values'+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into MASRAFGELIR (GELIRMI,BASLIK,DIGITSAY,KOD,AD,DURUM,EKLEYEN,MUHAKTAR,ZARFMALIYETDURUMU,YER,YER_ID,SUBEID)values'+
         '(0,0,5,'''+kod2+''','''+Ad+''',1,'+Kullanan+',0,0,'+IntToStr(TabNo_DEMIRBAS)+','+TabDemirbas.Fields[0].AsString+','+IntToStr(SubeId)+')',[],[]);
       Tabloyenile(tabDemirbasMasraf,[DemirbasId]);
    end;
@@ -844,7 +844,7 @@ begin
    Tablo.TablodanSorguAc(0,'select ID from MASRAFGELIR where YER='+IntToStr(TabNo_DEMIRBAS)+' and '+
          'YER_ID='+TabDemirbas.Fields[0].AsString+' and KOD like '''+TabDemirbasMasraf.FieldByName('KOD').AsString+'%''');
    if MasrafSilmeIslemi(Tablo.query0.fields[0].AsInteger) then begin //burada bu masraf kullan?lm?? m? bakar?z
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'Delete From MASRAFGELIR Where ID='+Tablo.query0.fields[0].AsString, [],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'Delete From MASRAFGELIR Where ID='+Tablo.query0.fields[0].AsString, [],[]);
       Tabloyenile(tabDemirbasMasraf,[DemirbasId]);
    end;
 end;
@@ -937,7 +937,7 @@ end;
 procedure TDemirbasWizardDlg.TabDemirbasAfterOpen(DataSet: TDataSet);
 begin
   if DataSet.RecordSize>0 then
-     LabelHesapAciklama.Caption := VarToStrDef(Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'select HESAPADI from HESAPPLANI where HESAPKODU='''+Atasi(TabDemirbas.FieldByName('DEMIRBASNO').AsString)+'''',[],[],True),'');
+     LabelHesapAciklama.Caption := VarToStrDef(Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'select HESAPADI from HESAPPLANI where HESAPKODU='''+Atasi(TabDemirbas.FieldByName('DEMIRBASNO').AsString)+'''',[],[],True),'');
 
 end;
 
@@ -966,8 +966,8 @@ begin
    TabDemirbas.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
    if OncekiSubeId <> TabDemirbas.FieldByName('SUBEID').AsInteger then
    begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update DEMIRBAS_TUTANAK set SUBEID='+TabDemirbas.FieldByName('SUBEID').AsString+' Where ID in (Select TUTANAKID From DEMIRBAS_TUTANAK_DETAY Where DEMIRBASID ='+IntToStr(DemirbasID)+' )  ',[],[]);
-      //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update DEMIRBAS_TUTANAK_DETAY set SUBEID='+TabDemirbas.FieldByName('SUBEID').AsString+' Where DEMIRBASID ='+IntToStr(DemirbasID)+' ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update DEMIRBAS_TUTANAK set SUBEID='+TabDemirbas.FieldByName('SUBEID').AsString+' Where ID in (Select TUTANAKID From DEMIRBAS_TUTANAK_DETAY Where DEMIRBASID ='+IntToStr(DemirbasID)+' )  ',[],[]);
+      //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update DEMIRBAS_TUTANAK_DETAY set SUBEID='+TabDemirbas.FieldByName('SUBEID').AsString+' Where DEMIRBASID ='+IntToStr(DemirbasID)+' ',[],[]);
    end;
 end;
 

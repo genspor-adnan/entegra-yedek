@@ -1,4 +1,4 @@
-unit UHizmetAra;
+ï»¿unit UHizmetAra;
 
 interface
 
@@ -135,7 +135,7 @@ type
 var
   HizmetAraDlg: THizmetAraDlg;
 
-  //// 0  : tüm stoklar , 1: secili depoya ait stoklar , 2: stok sayim ekraný
+  //// 0  : tÃ¼m stoklar , 1: secili depoya ait stoklar , 2: stok sayim ekranÄ±
 implementation
 
 uses Utablo, UGirisKutusuEx, UFaturaWizard, UResim;//,LocOnFly;
@@ -210,7 +210,7 @@ var
        TabMasrafListe.SQL.Text := TabMasrafListe.SQL.Text + ' Order by M.KOD';
     TabMasrafListe.open;
   end;
-begin  //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 : demirbaþ 4:transfer  5:teklif  6:servis
+begin  //   HizmetAraCagiran 0 : giren fat, 1 Ã§Ä±kÄ±ÅŸ fatura 2: sayÄ±m tutanaÄŸÄ± 3 : demirbaÅŸ 4:transfer  5:teklif  6:servis
   if (not showing)or(FiyatAdTut = '') then
      exit;
   QueryIslem.SQL.Clear;
@@ -229,17 +229,17 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 :
     HizmetSorguTamamla;
   end;
 
-  if (Tablo.YetkiVarmi(MODUL_Stok,YetkiTur_Gorme)) and (cxPageControl1.ActivePageIndex = 1) then begin // Burada Stok Seçimi var
+  if (Tablo.YetkiVarmi(MODUL_Stok,YetkiTur_Gorme)) and (cxPageControl1.ActivePageIndex = 1) then begin // Burada Stok SeÃ§imi var
     if cbStokDepo.EditValue=null then
-       raise Exception.Create('Önce Depo Seçin!');
+       raise Exception.Create('Ã–nce Depo SeÃ§in!');
     if FiyatGoster then
       FiyatG := ', convert(varchar(18), convert(money, isnull(FIYAT,0.0)))+'' ''+isnull(DOVIZ,'' TL'')AS FIYAT  '
     else
       FiyatG := '';
 
-     //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 : demirbaþ
-     //     4:transfer  5:teklif  6:servis   7 : iade alýþ fiþi
-     //tüm stoklar gelicek
+     //   HizmetAraCagiran 0 : giren fat, 1 Ã§Ä±kÄ±ÅŸ fatura 2: sayÄ±m tutanaÄŸÄ± 3 : demirbaÅŸ
+     //     4:transfer  5:teklif  6:servis   7 : iade alÄ±ÅŸ fiÅŸi
+     //tÃ¼m stoklar gelicek
      //elimizdeki stoklar gelicek
     //tvStokAraListeviewFIYAT.Visible := HizmetAraCagiran in [0,1,5,6];
     case HizmetAraCagiran of
@@ -255,8 +255,8 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 :
              ' where S.DURUM=1 and (SF.BIRIM='+vartostr(comboBirim.EditValue)+') ';
           StokSorguTamamla;
         end;
-      1, 4: //çýkýþ fat ve transfer
-        begin // seçili depodaki stoklar gelecek
+      1, 4: //Ã§Ä±kÄ±ÅŸ fat ve transfer
+        begin // seÃ§ili depodaki stoklar gelecek
           QueryIslem.SQL.Text := ' Select distinct ' + TopAramaSayi + ' S.ID as URUNID, S.KOD, STOKADI AS AD, ' +
             ' cast(''STOK'' as varchar(5)) AS TUR, ISNULL(SD.SKT,''1900-01-01'') AS SKT, ' +
             ' isnull(SD.KALAN,0) AS ADET,ANABIRIM, BIRIM2, isnull(MINSTOK,0) as MINSTOK,MASRAFID,KDV, FIYAT=isnull(SF.FIYAT,0), ' +
@@ -268,11 +268,11 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 :
             ' where S.DURUM=1 and SF.BIRIM='+vartostr(comboBirim.EditValue)+' ' +
             ' AND SD.DEPOID = ' + inttostr(cbStokDepo.EditValue) + ' ' + ' AND FIYATADI = ' + FiyatAdTut +' '+
             '  ';
-          if StokDurumKontrolKurali=0 then  //stok eksiye düþmesine izin yoksa stokdurumu 0 olanlar listeye gelmesin.
+          if StokDurumKontrolKurali=0 then  //stok eksiye dÃ¼ÅŸmesine izin yoksa stokdurumu 0 olanlar listeye gelmesin.
            QueryIslem.SQL.Add(' AND isnull(SD.KALAN,0) > 0 ');
           StokSorguTamamla;
         end;
-      7 : //iade fiþi ise
+      7 : //iade fiÅŸi ise
         begin
            QueryIslem.Close;
            QueryIslem.SQL.Text:= MemoIadeUrunAra.Text;
@@ -339,7 +339,7 @@ var
   stokbirimmiktar : Double;
   begin
     stokbirimmiktar := Tablo.StokCarpan(QueryIslem.FieldByName('URUNID').AsInteger, comboBirim.EditValue) * strtoint(Adet.Text);
-    // Stokta yeterli ürün var mý
+    // Stokta yeterli Ã¼rÃ¼n var mÄ±
     if QueryIslem.FieldByName('ADET').AsFloat < stokbirimmiktar then
     begin
       if not (Tablo.StokCikisYapilabilirmi(stokbirimmiktar,QueryIslem.FieldByName('ADET').AsFloat)) then
@@ -356,7 +356,7 @@ procedure StokGirisIslemi;
   begin
     if cbStokDepo.EditValue>=1 then begin
       if QueryIslem.FieldByName('IZLEME').AsInteger = 2 then // skt takibi
-        if TGirisKutusuEx.BilgiAlEx(QueryIslem.FieldByName('AD').AsString + ' için SKT Bilgisi', TGirdiDenetimleri.Create.DateTimePicker('SKT Giriniz', @SKT)) <> mrOk then
+        if TGirisKutusuEx.BilgiAlEx(QueryIslem.FieldByName('AD').AsString + ' iÃ§in SKT Bilgisi', TGirdiDenetimleri.Create.DateTimePicker('SKT Giriniz', @SKT)) <> mrOk then
           Abort
         else
           TabFatura.FieldByName('SKT').Value := SKT;
@@ -365,9 +365,9 @@ procedure StokGirisIslemi;
 function UrunVarsaArttir : Boolean;
   begin
     Result:=False;
-    //Eðer daha önce girilmiþse onun sayýsýný artýralým
-    if (cxPageControl1.ActivePage= shtStokAra) and   (HizmetAraCagiran in [1,2,4]) then begin //(not (TabFatBaslik.FieldByName('TUR').AsInteger in [10,11,12])) then  //stok çýkýþý ise skt dahil olacak
-      // stok çýkýþý yapýlýyorsa skt ye göre ve birime göre de arasýn
+    //EÄŸer daha Ã¶nce girilmiÅŸse onun sayÄ±sÄ±nÄ± artÄ±ralÄ±m
+    if (cxPageControl1.ActivePage= shtStokAra) and   (HizmetAraCagiran in [1,2,4]) then begin //(not (TabFatBaslik.FieldByName('TUR').AsInteger in [10,11,12])) then  //stok Ã§Ä±kÄ±ÅŸÄ± ise skt dahil olacak
+      // stok Ã§Ä±kÄ±ÅŸÄ± yapÄ±lÄ±yorsa skt ye gÃ¶re ve birime gÃ¶re de arasÄ±n
       if TabFatura.Locate('KOD;SKT;BIRIM',VarArrayOf([TabEkle.FieldByName('KOD').AsString,TabEkle.FieldByName('SKT').AsDateTime,comboBirim.Properties.Items[comboBirim.ItemIndex].Value]),[]) then begin
         Result:=True;
         TabFatura.Edit;
@@ -384,13 +384,13 @@ function UrunVarsaArttir : Boolean;
     end;
   end;
 begin
-//   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 : demirbaþ 4:transfer  5:teklif  6:servis
-//  7 : iade fiþ
+//   HizmetAraCagiran 0 : giren fat, 1 Ã§Ä±kÄ±ÅŸ fatura 2: sayÄ±m tutanaÄŸÄ± 3 : demirbaÅŸ 4:transfer  5:teklif  6:servis
+//  7 : iade fiÅŸ
   if HizmetAraCagiran = 2 then
- {$REGION 'SAYIMTUTANAK KONTROLLERÝ'}
-  begin // sayým tutanaðý ekranýndan çaðrýldýysa
+ {$REGION 'SAYIMTUTANAK KONTROLLERÄ°'}
+  begin // sayÄ±m tutanaÄŸÄ± ekranÄ±ndan Ã§aÄŸrÄ±ldÄ±ysa
     if QueryIslem.FieldByName('IZLEME').AsInteger = 2 then // skt takibi
-      if TGirisKutusuEx.BilgiAlEx(QueryIslem.FieldByName('AD').AsString + ' için SKT Bilgisi', TGirdiDenetimleri.Create.DateTimePicker('SKT Giriniz', @SKT)) <> mrOk then
+      if TGirisKutusuEx.BilgiAlEx(QueryIslem.FieldByName('AD').AsString + ' iÃ§in SKT Bilgisi', TGirdiDenetimleri.Create.DateTimePicker('SKT Giriniz', @SKT)) <> mrOk then
         Abort;
 
 
@@ -408,21 +408,21 @@ begin
   else begin
      if cxPageControl1.ActivePage = shtHizmetAra then begin
         if cxDBTreeList1.Selections[0].HasChildren=True then
-           raise Exception.Create('Baþlýk deðil detay iþlem seçmelisiniz!');
+           raise Exception.Create('BaÅŸlÄ±k deÄŸil detay iÅŸlem seÃ§melisiniz!');
         TabEkle := TabMasrafListe;
      end else
         TabEkle := QueryIslem;
-     if TabEkle.RecordCount < 1 then // 0 veya 1 ise fatura ekranýndan çaðrýlmýþ
-        raise Exception.Create('Önce girilecek hizmet veya ürünü seçin!');
+     if TabEkle.RecordCount < 1 then // 0 veya 1 ise fatura ekranÄ±ndan Ã§aÄŸrÄ±lmÄ±ÅŸ
+        raise Exception.Create('Ã–nce girilecek hizmet veya Ã¼rÃ¼nÃ¼ seÃ§in!');
      if (HizmetAraCagiran in [1,2,3,4])and(cxPageControl1.ActivePageIndex = 1)and(cbStokDepo.Text = '') then
-        raise Exception.Create('Depoyu seçin!');
+        raise Exception.Create('Depoyu seÃ§in!');
 
-   {$REGION 'ÝadeFiþi Kontrolü'}
+   {$REGION 'Ä°adeFiÅŸi KontrolÃ¼'}
      if HizmetAraCagiran = 7 then
       begin
         if  StrToFloat(Adet.Text)*Tablo.StokCarpan(QueryIslem.FieldByName('URUNID').AsInteger, comboBirim.EditValue ) > QueryIslem.FieldByName('ADET').AsFloat  then
           begin
-            Application.MessageBox('Geri Almak istediðiniz ürün miktarý çýkýlan miktardan fazla olamaz','U Y A R I',MB_OK+ MB_ICONWARNING);
+            Application.MessageBox('Geri Almak istediÄŸiniz Ã¼rÃ¼n miktarÄ± Ã§Ä±kÄ±lan miktardan fazla olamaz','U Y A R I',MB_OK+ MB_ICONWARNING);
             Abort;
           end;
       end;
@@ -436,20 +436,20 @@ begin
           TabFatura.FieldByName('BIRIM').AsInteger := comboBirim.EditValue
         else
           TabFatura.FieldByName('BIRIM').AsInteger := 0;
-        //miktar hesaplamasý için tür ve birim bilgisi mutlaka adetten önce atanmalý
+        //miktar hesaplamasÄ± iÃ§in tÃ¼r ve birim bilgisi mutlaka adetten Ã¶nce atanmalÄ±
         if cxPageControl1.ActivePage= shtStokAra then begin
-           TabFatura.FieldByName('TUR').AsInteger := 1;//Stok iþlemleri için tür 1 olmalý //TabEkle.FieldByName('TIPI').AsInteger;        // türün stok olduðunu belirtiyor
+           TabFatura.FieldByName('TUR').AsInteger := 1;//Stok iÅŸlemleri iÃ§in tÃ¼r 1 olmalÄ± //TabEkle.FieldByName('TIPI').AsInteger;        // tÃ¼rÃ¼n stok olduÄŸunu belirtiyor
            if (comboBirim.EditValue<>TabEkle.FieldByName('ANABIRIM').AsInteger) and
               (comboBirim.EditValue<>TabEkle.FieldByName('BIRIM2').AsInteger )  then begin
-               Application.MessageBox('Seçmiþ olduðunuz birim bilgisi bu ürün için kullanýlamaz','H A T A', MB_OK+MB_ICONERROR);
+               Application.MessageBox('SeÃ§miÅŸ olduÄŸunuz birim bilgisi bu Ã¼rÃ¼n iÃ§in kullanÄ±lamaz','H A T A', MB_OK+MB_ICONERROR);
                TabFatura.Cancel;
                Abort;
            end;
         end;
-        // miktar hesaplamasý için adetten önce tür ve birim bilgisi mutlaka atanmýþ olmalý
+        // miktar hesaplamasÄ± iÃ§in adetten Ã¶nce tÃ¼r ve birim bilgisi mutlaka atanmÄ±ÅŸ olmalÄ±
         TabFatura.FieldByName('ADET').AsFloat := StrToFloat(Adet.Text);
         TabFatura.FieldByName('KDV').AsInteger := TabEkle.FieldByName('KDV').AsInteger;
-        if (HizmetAraCagiran in [0,1]) and (cxPageControl1.ActivePage= shtStokAra)  then //giriþ çýkýþ faturalarýnda izleme alaný dolacak
+        if (HizmetAraCagiran in [0,1]) and (cxPageControl1.ActivePage= shtStokAra)  then //giriÅŸ Ã§Ä±kÄ±ÅŸ faturalarÄ±nda izleme alanÄ± dolacak
           TabFatura.FieldByName('IZLEME').AsInteger:=TabEkle.FieldByName('IZLEME').AsInteger;
         if cxPageControl1.ActivePageIndex = 1 then begin
            if HizmetAraCagiran in [0,1,2,3,4,7] then begin
@@ -459,7 +459,7 @@ begin
                StokGirisIslemi
              else
                StokCikisIslemi;
-             if (HizmetAraCagiran in [0,1,2,3,4,7])and(cbStokDepo.Enabled) then begin//demekki ilk kez çýkýþ yapýlýyor; bunu kaydedelim bir daha depo adý depiþemesin
+             if (HizmetAraCagiran in [0,1,2,3,4,7])and(cbStokDepo.Enabled) then begin//demekki ilk kez Ã§Ä±kÄ±ÅŸ yapÄ±lÄ±yor; bunu kaydedelim bir daha depo adÄ± depiÅŸemesin
                 cbStokDepo.Enabled := False;
                 TabFatBaslik.Refresh;
                 TabFatBaslik.Edit;
@@ -482,7 +482,7 @@ begin
         else
         s:='0';
         if ((s = '-1')or(s='') or (Tur in [9,10,11,12,13]))then begin // fiyat sorulacak
-          if (TGirisKutusuEx.BilgiAlEx('Ürün Fiyatýný Giriniz('+TabEkle.FieldByName('KUR').AsString+')', TGirdiDenetimleri.Create.CurrencyEdit('Fiyatýný girin('+TabEkle.FieldByName('KUR').AsString+')', @Fiyat,Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_OndalikDijitSayTut,2))) = mrOk) then
+          if (TGirisKutusuEx.BilgiAlEx('ÃœrÃ¼n FiyatÄ±nÄ± Giriniz('+TabEkle.FieldByName('KUR').AsString+')', TGirdiDenetimleri.Create.CurrencyEdit('FiyatÄ±nÄ± girin('+TabEkle.FieldByName('KUR').AsString+')', @Fiyat,Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_OndalikDijitSayTut,2))) = mrOk) then
             s := Trim(Fiyat)
           else begin
             TabFatura.Cancel;
@@ -493,7 +493,7 @@ begin
         TabFatura.Post;
      end;
   end;
-{$REGION 'Ekraný Yenile'}
+{$REGION 'EkranÄ± Yenile'}
   if TabEkle<>nil then
    urunid := TabEkle.FieldByName('URUNID').AsInteger;
 
@@ -544,7 +544,7 @@ end;
 
 procedure THizmetAraDlg.FormCreate(Sender: TObject);
 begin
-  //LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  //LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   HizmetAraCagiran := 0;
   StokKontrol := False;
   FiyatGoster := True;
@@ -564,7 +564,7 @@ begin
   Tablo.GENINI.ReadImageSection(Ops_StokKart_Anabirim,comboBirim.Properties.Items);
   (tvStokAraListeviewANABIRIM.Properties as TcxImageComboBoxProperties).Items := comboBirim.Properties.Items;
   if comboBirim.Properties.Items.Count < 1 then
-    ShowMessage('Sisteme birim tanýmý girin (Adet vb..)')
+    ShowMessage('Sisteme birim tanÄ±mÄ± girin (Adet vb..)')
   else
     comboBirim.ItemIndex := 0;
 
@@ -572,9 +572,9 @@ begin
 end;
 
 procedure THizmetAraDlg.FormShow(Sender: TObject);
-begin    //   HizmetAraCagiran 0 : giren fat, 1 çýkýþ fatura 2: sayým tutanaðý 3 : demirbaþ 4:transfer  5:teklif  6:servis
-    // sayým tutanaðý ekraný veya transfer ekraný formu caðýrmýþsa hizmet aramasý yapýlmasýn
-  if HizmetAraCagiran in[0,2,5] then //burqada fiyat gözükmeyecek..
+begin    //   HizmetAraCagiran 0 : giren fat, 1 Ã§Ä±kÄ±ÅŸ fatura 2: sayÄ±m tutanaÄŸÄ± 3 : demirbaÅŸ 4:transfer  5:teklif  6:servis
+    // sayÄ±m tutanaÄŸÄ± ekranÄ± veya transfer ekranÄ± formu caÄŸÄ±rmÄ±ÅŸsa hizmet aramasÄ± yapÄ±lmasÄ±n
+  if HizmetAraCagiran in[0,2,5] then //burqada fiyat gÃ¶zÃ¼kmeyecek..
     FiyatGoster:=False;
   cbFiyatAdi.Visible:= FiyatGoster;
   lbFiyatAdi.Visible:= FiyatGoster;

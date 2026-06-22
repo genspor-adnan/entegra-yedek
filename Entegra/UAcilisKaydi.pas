@@ -1,4 +1,4 @@
-unit UAcilisKaydi;
+ï»¿unit UAcilisKaydi;
 
 interface
 
@@ -85,7 +85,7 @@ end;
 
 procedure TAcilisKaydiDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TAcilisKaydiDlg.FormShow(Sender: TObject);
@@ -102,20 +102,20 @@ begin
 
 
    case Acilis_Devir of
-    0 : Caption := 'Mutabakat Kaydý Ekraný';
-    1 : Caption := 'Açýlýþ Kaydý Ekraný';
-    2 : Caption := 'Devir Kaydý Ekraný';
+    0 : Caption := 'Mutabakat KaydÄ± EkranÄ±';
+    1 : Caption := 'AÃ§Ä±lÄ±ÅŸ KaydÄ± EkranÄ±';
+    2 : Caption := 'Devir KaydÄ± EkranÄ±';
    end;
 
                 //Tablo.TablodanSorguAc(5,'select K.ID from KASA K inner join BANKAHESAPLAR B on B.ID=K.HESAPID where K.TUR=1 and K.HESAPTURU=''B'' and B.HESAPKODU='''+Kod+''' ');
                 //HESAPTURU:='B';
                 //Tablo.TablodanSorguAc(5,'select K.ID from KASA K inner join KASALAR KS on KS.ID=K.HESAPID where K.TUR=1 and K.HESAPTURU=''K'' and KS.KASAKODU='''+Kod+''' ');
                 //HESAPTURU:='K';
-   btnYeni.visible := Cagiran=1;  //sadece müþteri için birden fazla açýlýþ fiþi olabilir, her para birimi için
+   btnYeni.visible := Cagiran=1;  //sadece mÃ¼ÅŸteri iÃ§in birden fazla aÃ§Ä±lÄ±ÅŸ fiÅŸi olabilir, her para birimi iÃ§in
    TabAcilis.Close;
 
    case Cagiran of
-     0 : begin  // Mutabakat kaydý
+     0 : begin  // Mutabakat kaydÄ±
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
@@ -124,7 +124,7 @@ begin
 
            TabAcilis.SQL.Add(' order by 3 desc ');
          end;
-     1 : begin  // Müþteri açýlýþý
+     1 : begin  // MÃ¼ÅŸteri aÃ§Ä±lÄ±ÅŸÄ±
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
@@ -144,7 +144,7 @@ begin
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
            TabAcilis.SQL.Add(' order by 3 desc ');
          end;
-     3 : begin // 3-Banka açýlýþý
+     3 : begin // 3-Banka aÃ§Ä±lÄ±ÅŸÄ±
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''B'' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
@@ -152,7 +152,7 @@ begin
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
            TabAcilis.SQL.Add(' order by 3 desc ');
          end;
-     4 :begin   //Kredi Kartý açýlýþý
+     4 :begin   //Kredi KartÄ± aÃ§Ä±lÄ±ÅŸÄ±
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''V'' and ';
            if KasaId > 0 then
@@ -161,7 +161,7 @@ begin
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
            TabAcilis.SQL.Add(' order by 3 desc ');
         end;
-     5 :begin   //POS açýlýþý
+     5 :begin   //POS aÃ§Ä±lÄ±ÅŸÄ±
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''P'' and ';
            if KasaId > 0 then
@@ -170,7 +170,7 @@ begin
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
            TabAcilis.SQL.Add(' order by 3 desc ');
         end;
-     6 :begin   //Rotatif Kredi açýlýþý
+     6 :begin   //Rotatif Kredi aÃ§Ä±lÄ±ÅŸÄ±
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
            if KasaId > 0 then
@@ -179,7 +179,7 @@ begin
               TabAcilis.SQL.Add(' K.ID  = '+LabelId.Caption);
            TabAcilis.SQL.Add(' order by 3 desc ');
         end;
-     7 :begin   //masrafgelir açýlýþý
+     7 :begin   //masrafgelir aÃ§Ä±lÄ±ÅŸÄ±
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
            TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
            if KasaId > 0 then
@@ -200,8 +200,8 @@ begin
        else
          ComboKur.EditValue := CariDoviz;
 
-       EditBorc.Value :=   TabAcilis.Fields[3].AsCurrency;       // alacaðý borca
-       EditAlacak.Value :=     TabAcilis.Fields[4].AsCurrency;   //borcu alacaða atýyoruz
+       EditBorc.Value :=   TabAcilis.Fields[3].AsCurrency;       // alacaÄŸÄ± borca
+       EditAlacak.Value :=     TabAcilis.Fields[4].AsCurrency;   //borcu alacaÄŸa atÄ±yoruz
        EditYerelPara.Value   :=     TabAcilis.Fields[5].AsCurrency;
        if abs(EditBorc.Value-EditAlacak.Value)<>0 then
           EditKulKur.EditValue := EditYerelPara.Value  / abs(EditBorc.Value-EditAlacak.Value) ;
@@ -214,7 +214,7 @@ begin
        else
          ComboKur.EditValue := CariDoviz;
    end;
-   //Eðer ilk kez giriþ yapýlýyorsa kur girilebilsin deðiþtirme yapýlýyorsa kur deðiþemesin
+   //EÄŸer ilk kez giriÅŸ yapÄ±lÄ±yorsa kur girilebilsin deÄŸiÅŸtirme yapÄ±lÄ±yorsa kur deÄŸiÅŸemesin
 end;
 
 procedure TAcilisKaydiDlg.btnKaydetClick(Sender: TObject);
@@ -222,11 +222,11 @@ var s, Saat : string;
 begin
    {if not BoslukKontrol(ComboKur.EditingValue, 'Para Birimi') then Abort;
    s := 'select KUR from KASA where ISLEMTARIHI >= '''+IntToStr(CariYil)+'-01-01'' and (TUR=1 or TUR = 2) and KUR='''+ComboKur.EditingValue+''' and REHBERID='+LabelId.Caption;
-   if KasaId > 0 then //Kasa bilgisi var ve deðiþiklik yapýlýyorsa
+   if KasaId > 0 then //Kasa bilgisi var ve deÄŸiÅŸiklik yapÄ±lÄ±yorsa
       s := s + ' and ID<>'+ IntToStr(KasaId);
    s := s +' order by KUR';
    if Veritabani.VeriVarMi(Tablo.FDCnn,s,[],[]) then begin
-      Application.MessageBox(PChar(ComboKur.Text +' kurlu Açýlýþ Fiþi daha önce girilmiþtir.'),PChar(Uyari),MB_OK);
+      Application.MessageBox(PChar(ComboKur.Text +' kurlu AÃ§Ä±lÄ±ÅŸ FiÅŸi daha Ã¶nce girilmiÅŸtir.'),PChar(Uyari),MB_OK);
       Abort;
    end;}
   if not BoslukKontrol(DateTimePickerOdemeBasl.Text, KontrolTarihi) then
@@ -249,42 +249,42 @@ begin
       EditYerelPara.Value := abs(EditBorc.Value - EditAlacak.Value);
    DateTimePickerOdemeBasl.PostEditValue;
    case Cagiran of
-     {0 : // Müþteri mutabakatý
-         begin //  kaydederken borcu alacaða, alacaðý da borca kaydediyoruz.
+     {0 : // MÃ¼ÅŸteri mutabakatÄ±
+         begin //  kaydederken borcu alacaÄŸa, alacaÄŸÄ± da borca kaydediyoruz.
              Tablo.KasaKaydet(1000+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToInt(LabelId.Caption),EditAcik.Text,
                             0, ComboKur.Text,CariDoviz, 0,EditBorc.Value,EditAlacak.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,' ');
          end; }
-     1 : // Müþteri açýlýþý / devri / mutabakatý
-         begin //  kaydederken borcu alacaða, alacaðý da borca kaydediyoruz.
-             if ComboTur.EditValue=0 then // mutabakatsa saat ve dakika olmalý
+     1 : // MÃ¼ÅŸteri aÃ§Ä±lÄ±ÅŸÄ± / devri / mutabakatÄ±
+         begin //  kaydederken borcu alacaÄŸa, alacaÄŸÄ± da borca kaydediyoruz.
+             if ComboTur.EditValue=0 then // mutabakatsa saat ve dakika olmalÄ±
                 Saat := ' hh:mm'
              else
                 Saat := '';
              Tablo.KasaKaydet(1000+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy'+Saat, DateTimePickerOdemeBasl.Date)),StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToInt(LabelId.Caption),EditAcik.Text,
                             0, ComboKur.Text,CariDoviz, 0,EditBorc.Value,EditAlacak.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,' ');
          end;
-     2 : begin //2001-Kasa açýlýþ 2002:devir   3001-Banka açýlýþý 3002 : devir
+     2 : begin //2001-Kasa aÃ§Ä±lÄ±ÅŸ 2002:devir   3001-Banka aÃ§Ä±lÄ±ÅŸÄ± 3002 : devir
              Tablo.KasaKaydet((Cagiran*1000)+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),0,EditAcik.Text,
                              StrToInt(LabelId.Caption),ComboKur.Text,CariDoviz, 0,EditAlacak.Value,EditBorc.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,'K');
 //                   Tablo.KasaUpdate('+', AcilisTuru, StrToInt(LabelId.Caption), EditBorc.Value, EditAlacak.Value);
          end;
-     3 : begin //2001-Kasa açýlýþ 2002:devir   3001-Banka açýlýþý 3002 : devir
+     3 : begin //2001-Kasa aÃ§Ä±lÄ±ÅŸ 2002:devir   3001-Banka aÃ§Ä±lÄ±ÅŸÄ± 3002 : devir
              Tablo.KasaKaydet((Cagiran*1000)+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),0,EditAcik.Text,
                             StrToInt(LabelId.Caption),ComboKur.Text,CariDoviz, 0,EditAlacak.Value,EditBorc.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,'B');
 //                   Tablo.KasaUpdate('+', AcilisTuru, StrToInt(LabelId.Caption), EditBorc.Value, EditAlacak.Value);
          end;
      4 : begin
-             //2001-Kasa açýlýþ 2002:devir   3001-Banka açýlýþý 3002 : devir   4001-Kredi Karti Açýlýþý 4002-Devir
+             //2001-Kasa aÃ§Ä±lÄ±ÅŸ 2002:devir   3001-Banka aÃ§Ä±lÄ±ÅŸÄ± 3002 : devir   4001-Kredi Karti AÃ§Ä±lÄ±ÅŸÄ± 4002-Devir
             Tablo.KasaKaydet((Cagiran*1000)+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),0,EditAcik.Text,
                     StrToInt(LabelId.Caption),ComboKur.Text,CariDoviz, 0,EditBorc.Value,EditAlacak.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,'V');
          end;
      5 : begin
-             //2001-Kasa açýlýþ 2002:devir   3001-Banka açýlýþý 3002 : devir   4001-Kredi Karti Açýlýþý 4002-Devir
+             //2001-Kasa aÃ§Ä±lÄ±ÅŸ 2002:devir   3001-Banka aÃ§Ä±lÄ±ÅŸÄ± 3002 : devir   4001-Kredi Karti AÃ§Ä±lÄ±ÅŸÄ± 4002-Devir
             Tablo.KasaKaydet((Cagiran*1000)+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),0,EditAcik.Text,
                     StrToInt(LabelId.Caption),ComboKur.Text,CariDoviz, 0,EditAlacak.Value,EditBorc.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,'P');
          end;
      6 : begin //Kredi
-             //2001-Kasa açýlýþ 2002:devir   3001-Banka açýlýþý 3002 : devir   4001-Kredi Karti Açýlýþý 4002-Devir
+             //2001-Kasa aÃ§Ä±lÄ±ÅŸ 2002:devir   3001-Banka aÃ§Ä±lÄ±ÅŸÄ± 3002 : devir   4001-Kredi Karti AÃ§Ä±lÄ±ÅŸÄ± 4002-Devir
             Tablo.KasaKaydet((Cagiran*1000)+ComboTur.EditValue, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', DateTimePickerOdemeBasl.Date)),0,EditAcik.Text,
                     StrToInt(LabelId.Caption),ComboKur.Text,CariDoviz, 0,EditAlacak.Value,EditBorc.Value,EditYerelPara.Value,-1, -1,-1,-1,-1, SubeId,'R');
          end;
@@ -305,9 +305,9 @@ begin
    EditBorc.Value := 0;
    EditAlacak.Value := 0;
    case ComboTur.Properties.Items[ComboTur.ItemIndex].Value of
-     0 : EditAcik.Text := 'Mutabakat Kaydý';
-     1 : EditAcik.Text := 'Açýlýþ Fiþi';
-     2 : EditAcik.Text := 'Devir Fiþi';
+     0 : EditAcik.Text := 'Mutabakat KaydÄ±';
+     1 : EditAcik.Text := 'AÃ§Ä±lÄ±ÅŸ FiÅŸi';
+     2 : EditAcik.Text := 'Devir FiÅŸi';
    end;
    YeniKayit := True;
 end;
@@ -317,16 +317,16 @@ var liste : TStringList;
     s : string;
     I : Smallint;
 begin
-   //Kur seçtir
+   //Kur seÃ§tir
    liste := TStringList.create;
 
-{   //daha önceki dövizleri listeden çýkaralým ki yeniden eklenmesin
+{   //daha Ã¶nceki dÃ¶vizleri listeden Ã§Ä±karalÄ±m ki yeniden eklenmesin
    for I := 0 to ComboKur.Properties.Items.Count - 1 do begin
        s := ComboKur.Properties.Items[I];
        liste.delete(liste.IndexOf(s));
    end;
 
-   if not MesajStrAl('', 'Para Birimini Seçiniz :', 'C', liste, s, '', 'C', nil, s) then begin
+   if not MesajStrAl('', 'Para Birimini SeÃ§iniz :', 'C', liste, s, '', 'C', nil, s) then begin
       liste.destroy;
       exit;
    end;

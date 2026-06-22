@@ -1,4 +1,4 @@
-unit UCombo;
+ï»¿unit UCombo;
 
 interface
 
@@ -137,7 +137,7 @@ begin
   try
     SystemIni.WriteString(Anahtar, Deger);
   except
-    Showmessage(lc + ' ye yazýlamadý...');
+    Showmessage(lc + ' ye yazÄ±lamadÄ±...');
   end;
   SystemIni.Free;
 end;
@@ -151,7 +151,7 @@ begin
   repeat
     Application.CreateForm(TListeDlg, ListeDlg);
     Ini.ReadSections(ListeDlg.ListAmac.Items);
-    ListeDlg.ListAmac.Items.Add(' *** YENÝ ***');
+    ListeDlg.ListAmac.Items.Add(' *** YENÄ° ***');
     ListeDlg.ListAmac.ItemIndex := Ind;
     ListeDlg.ShowModal;
     Ind := ListeDlg.ListAmac.ItemIndex;
@@ -161,10 +161,10 @@ begin
       Secilen := '';
     ListeDlg.Destroy;
 
-    if Secilen = ' *** YENÝ ***' then
+    if Secilen = ' *** YENÄ° ***' then
     begin
       Secilen := '';
-      MesajStrAl('', 'Bölüm Adýný Giriniz : ', 'E', nil, Secilen, '', 'E', nil, Secilen);
+      MesajStrAl('', 'BÃ¶lÃ¼m AdÄ±nÄ± Giriniz : ', 'E', nil, Secilen, '', 'E', nil, Secilen);
     end;
     if Secilen <> '' then
       ComboIniDuzenle(Secilen, Ini);
@@ -438,7 +438,7 @@ begin {
 end;
 
 procedure TIni.ReadSectionAnahtar(Bolum :string; Liste :TStrings);
-//birden fazla ayný adla anahtar varsa distinct yaparak getirir
+//birden fazla aynÄ± adla anahtar varsa distinct yaparak getirir
 begin
   IniSQL.Close;
   IniSQL.SQL.Text := 'Select ANAHTAR, min(SIRANO) from ' + Dosya + ' Where BOLUM=''' + Bolum + ''' group by ANAHTAR order by 2';
@@ -518,7 +518,7 @@ begin
   try
     SystemIni.WriteString(Bolum, Anahtar);
   except
-    Showmessage(lc + ' ye yazýlamadý...');
+    Showmessage(lc + ' ye yazÄ±lamadÄ±...');
   end;
   SystemIni.Free;
 end;

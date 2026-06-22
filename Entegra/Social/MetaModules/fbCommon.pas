@@ -1,4 +1,4 @@
-unit fbCommon;
+ï»¿unit fbCommon;
 
 interface
 
@@ -41,7 +41,7 @@ type
     {
       "name": "FULL_NAME",
       "values": [
-        "Mücahit Yaðmur"
+        "MÃ¼cahit YaÄŸmur"
       ]
     },
     {
@@ -59,7 +59,7 @@ type
     {
       "name": "STREET_ADDRESS",
       "values": [
-        "Açelya Sokak 2/4 Esentepe Mah Bursa Türkiye"
+        "AÃ§elya Sokak 2/4 Esentepe Mah Bursa TÃ¼rkiye"
       ]
     },
     {
@@ -91,8 +91,8 @@ type
 var
   varBaseURL : string = cgraphFacebookURL;
   { WITH PAGE ACCESS TOKEN
-    me?fields=business    Ýþletme hesabý
-    me?fields=about       Sayfa Hakkýnda bilgi
+    me?fields=business    Ä°ÅŸletme hesabÄ±
+    me?fields=about       Sayfa HakkÄ±nda bilgi
 
   }
   { APPLICATIONS
@@ -108,7 +108,7 @@ var
     Name                 ID                Facebook/Page
 
     Granit               164408166754533  facebook.com/gentegre.granit
-    Logix Yazýlým        193888073799204  facebook.com/logixyazilim
+    Logix YazÄ±lÄ±m        193888073799204  facebook.com/logixyazilim
 
   }
 
@@ -116,11 +116,11 @@ var
   ----------------------------------------
 
   271076412223919		Form_3.12.2023
-  1569153207222534		Granit'(n)in 2 Aralýk 2023 Cumartesi 14:31 tarihinde oluþturduðu form
+  1569153207222534		Granit'(n)in 2 AralÄ±k 2023 Cumartesi 14:31 tarihinde oluÅŸturduÄŸu form
   				https://graph.facebook.com/v18.0/1569153207222534?fields=organic_leads_count,name,id,page,created_time,status,leads,expired_leads_count
 
-  2184820375186596		Ýletiþim formu oluþturma zamaný: 12/02/2023 9:05:10
-  1489718305293779		FormX-Türkçe
+  2184820375186596		Ä°letiÅŸim formu oluÅŸturma zamanÄ±: 12/02/2023 9:05:10
+  1489718305293779		FormX-TÃ¼rkÃ§e
 
   }
 
@@ -155,7 +155,7 @@ const
 
    constComboPages : array[0..cFacebookPageCount-1] of recPage =(
      (pageName: 'Granit'; pageId : '164408166754533'{;        pageToken : 'EAALZCwfVjW3EBOxGcunqEVLpN9P6LkWZA2QarQIv9Ys5fko29fTrzWEDaWZADDIqpZAAE3ZAWbl7YNXgmvep1aY8S6QNxFO5v6TlnYC2Mw3auAp12GRPssu4hOUEf4gwZBslI8cAvBYSQ3m0PaPDj9gNthjMebWwW4v1WzpXC8bo2tlBgoWjfI3ZC03REXxwsAR0fEFEGSn8YNwI4wZD'})
-     //,(pageName: 'Logix Yazýlým'; pageId : '193888073799204'{; pageToken : 'EAAJFC5NMtMcBO84wgp6ydDSH9gkVwTBER6Lzi0jbllb4NgIqB6d8BZBTc7tt4CSjrRcg3pRDRZACjx8gJZCCSH7dAZACSMDBFDdZCZCjW5HUYHKQGeAheWQnbwW5U4pvaVV4FFzDpJteIcc69taAvQ5EDaK7ar7n9IZACqGZA1TkEF4JiqiXF0QEZAj7FzpscuTEtalpnZBg32l1OchBwZD'})
+     //,(pageName: 'Logix YazÄ±lÄ±m'; pageId : '193888073799204'{; pageToken : 'EAAJFC5NMtMcBO84wgp6ydDSH9gkVwTBER6Lzi0jbllb4NgIqB6d8BZBTc7tt4CSjrRcg3pRDRZACjx8gJZCCSH7dAZACSMDBFDdZCZCjW5HUYHKQGeAheWQnbwW5U4pvaVV4FFzDpJteIcc69taAvQ5EDaK7ar7n9IZACqGZA1TkEF4JiqiXF0QEZAj7FzpscuTEtalpnZBg32l1OchBwZD'})
    );
 
 
@@ -182,7 +182,7 @@ const
   );
 
   {
-    faceBook graph explorer da üretildiler.
+    faceBook graph explorer da Ã¼retildiler.
   }
   userAccessToken : string = '';//'EAAJFC5NMtMcBO3ittBKkTLDZC5XgqevELoeMnEk5zReNvScIpP6xuf1ZAaiPXCInrVaqFZCqxEmHwgvKCly4ZAoc3TxSNYtZBEfZCUoiicSj3Y3OnurJVV01iDIbvBLeateM0oj0ljEVlhoEkeIqRro2JZAZC5Mc6lw9hVz4RfD8zG82dIaEPI6TuMxJBoS6ZCLmwtRBIzv5M';
 

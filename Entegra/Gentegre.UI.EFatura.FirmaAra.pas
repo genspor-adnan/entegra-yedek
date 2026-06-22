@@ -1,4 +1,4 @@
-unit Gentegre.UI.EFatura.FirmaAra;
+﻿unit Gentegre.UI.EFatura.FirmaAra;
 
 interface
 
@@ -122,7 +122,7 @@ end;
 
 procedure TEFaturaFirmaAra.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   if ProxyAdres<>'' then
      HTTPRIOEfat.HTTPWebNode.Proxy := ProxyAdres+':'+ProxyPort;
   FServis := GetEFaturaOIBPort(False,'',HTTPRIOEfat);

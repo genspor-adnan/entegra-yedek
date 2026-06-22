@@ -1,4 +1,4 @@
-unit UBaglanti;
+ï»¿unit UBaglanti;
 
 interface
 
@@ -56,7 +56,7 @@ begin
         Port := StrToInt( edPort.Text );
       end;
       tcpServer.Active := True;
-      listValue.Items.Add('Dinleme baþlatýldý..');
+      listValue.Items.Add('Dinleme baÅŸlatÄ±ldÄ±..');
       btnDinle.Caption:='Durdur';
   end
   else begin
@@ -103,10 +103,10 @@ var
   value : string;
   i,j,RehberId,FatbasId,Tur: Integer;
 begin
-//Tür:1 sipariþ yaz; 2:hesap yaz
+//TÃ¼r:1 sipariÅŸ yaz; 2:hesap yaz
 
 //[RehberId<FatbasId>Tur]
-      value := InputBox('Yazýlacak Adisyon','FATBASLIK Adisyon ID:','');
+      value := InputBox('YazÄ±lacak Adisyon','FATBASLIK Adisyon ID:','');
      St:=  '[1<'+value+'>1,-1]';
      listValue.Items.Add(St);
      i:= pos('<',st);
@@ -167,7 +167,7 @@ var
   St:String;
   i,j,RehberId,FatbasId,Tur: Integer;
 begin
-     St := FaturaNoGetir(AContext.Connection.Socket.ReadLn()); //Okunan : [RehberId<FatbasId>Tur] Tür:1 sipariþ yaz; 2:hesap yaz
+     St := FaturaNoGetir(AContext.Connection.Socket.ReadLn()); //Okunan : [RehberId<FatbasId>Tur] TÃ¼r:1 sipariÅŸ yaz; 2:hesap yaz
 //     St:=  '[1<38487>2,-1]';
      if Trim(St)='' then
         listValue.Items.Add('Parametre Yok')
@@ -197,7 +197,7 @@ begin
          else
             Tablo.HesapYaz(FatbasId, RehberId);
        finally
-          Application.MessageBox('Tamamdýr.',0, 0);
+          Application.MessageBox('TamamdÄ±r.',0, 0);
        end;
     end;
 end;

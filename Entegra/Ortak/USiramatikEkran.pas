@@ -1,4 +1,4 @@
-unit USiramatikEkran;
+ï»¿unit USiramatikEkran;
 
 interface
 
@@ -88,7 +88,7 @@ var
   r: TRect;
 begin
 
-  KayanYazi := RadyoIni.ReadString('GenelOpsiyon', 'KayanYazý', '');
+  KayanYazi := RadyoIni.ReadString('GenelOpsiyon', 'KayanYazÄ±', '');
   canv := PanelKayanyazi.Canvas;
   bmp := TBitmap.Create;
   bmp.Width := PanelKayanyazi.Width;
@@ -113,8 +113,8 @@ begin
   Top := mon.Top;
   Width := mon.Width;
   Height := mon.Height;
-  if FileExists(ExtractFilePath(ParamStr(0)) + 'sýramatik.png') then
-    Image1.Picture.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sýramatik.png');
+  if FileExists(ExtractFilePath(ParamStr(0)) + 'sÄ±ramatik.png') then
+    Image1.Picture.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sÄ±ramatik.png');
 end;
 
 procedure TSiramatik.FormCreate(Sender: TObject);
@@ -159,7 +159,7 @@ begin
     LblSiradakiHasta.Visible := False;
 
     bmp := TPNGObject.Create;
-    bmp.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sýramatik.png');
+    bmp.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sÄ±ramatik.png');
     G := TGPGraphics.Create(bmp.Canvas.Handle);
     FontFamily := TGPFontFamily.Create('Verdana');
     Font1 := TGPFont.Create(FontFamily, 70, FontStyleBold, UnitPixel);
@@ -185,7 +185,7 @@ begin
     LblHastaAdiSoyadi.Visible := True;
     LblHastaDosyaNo.Visible := True;
     LblSiradakiHasta.Visible := True;
-    Image1.Picture.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sýramatik.png');
+    Image1.Picture.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'sÄ±ramatik.png');
   end;
 end;
 

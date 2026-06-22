@@ -1,4 +1,4 @@
-unit UUretimPlanlamaListeDlg;
+ï»¿unit UUretimPlanlamaListeDlg;
 
 interface
 
@@ -232,7 +232,7 @@ uses FetaKurulusSiniflari, FetaClassExtensions,Utablo, PrjConst, UUretimRecete, 
 procedure TUretimPlanlamaListeDlg.Baslatildi;
 begin
   AramaYap(nil);
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 
 end;
@@ -249,8 +249,8 @@ end;
 
 procedure TUretimPlanlamaListeDlg.AlnanSipariEkle1Click(Sender: TObject);
 begin
-  //sender.tag 9 ise verilen 19 ise alýnan sipariþ..
-  //sender.hint + ise ekleme - ise çýkartma
+  //sender.tag 9 ise verilen 19 ise alÄ±nan sipariÅŸ..
+  //sender.hint + ise ekleme - ise Ã§Ä±kartma
 end;
 
 procedure TUretimPlanlamaListeDlg.AramaYap(Sender: TObject);
@@ -314,17 +314,17 @@ var
   AlinanStr,VarilenStr:string;
   i:Integer;
 begin
-  //planlama içeriðine girecek sipariþlerin hangileri olacaðý belirlenir.. alýnan ve verilen sipariþler..
-  AlinanSip := Tablo.ListedenCokluSecim('Üretim Planýna Dahil Edilecek Alýnan Sipariþler',MemoSiparisAra.Lines.Text+' and S.TUR=19 ' //and S.CIKISDEPO='+IntToStr(DepoID)
+  //planlama iÃ§eriÄŸine girecek sipariÅŸlerin hangileri olacaÄŸÄ± belirlenir.. alÄ±nan ve verilen sipariÅŸler..
+  AlinanSip := Tablo.ListedenCokluSecim('Ãœretim PlanÄ±na Dahil Edilecek AlÄ±nan SipariÅŸler',MemoSiparisAra.Lines.Text+' and S.TUR=19 ' //and S.CIKISDEPO='+IntToStr(DepoID)
                                         ,[nil,nil,nil,nil,Tablo.RepSubelerOrtakTumSubeler,nil,nil,nil,Tablo.repStokOzellik,Tablo.repStokTipi,nil,nil]
-                                        ,['ID','Tarih','Seri','No','Þube','Firma','Kod','Stok','Özellik','Tip','Miktar','Reçete']);
+                                        ,['ID','Tarih','Seri','No','Åžube','Firma','Kod','Stok','Ã–zellik','Tip','Miktar','ReÃ§ete']);
   AlinanStr := '0';
   for I := 0 to AlinanSip.Count - 1 do
     AlinanStr := AlinanStr + ',' + AlinanSip[i];
 
-  VarilenSip := Tablo.ListedenCokluSecim('Üretim Planýna Dahil Edilecek Verilen Sipariþler',MemoSiparisAra.Lines.Text+' and S.TUR=9 and S.GIRISDEPO='+VarToStr(FArama.cbDepo.EditValue)
+  VarilenSip := Tablo.ListedenCokluSecim('Ãœretim PlanÄ±na Dahil Edilecek Verilen SipariÅŸler',MemoSiparisAra.Lines.Text+' and S.TUR=9 and S.GIRISDEPO='+VarToStr(FArama.cbDepo.EditValue)
                                         ,[nil,nil,nil,nil,Tablo.RepSubelerOrtakTumSubeler,nil,nil,nil,Tablo.repStokOzellik,Tablo.repStokTipi,nil,nil]
-                                        ,['ID','Tarih','Seri','No','Þube','Firma','Kod','Stok','Özellik','Tip','Miktar','Reçete']);
+                                        ,['ID','Tarih','Seri','No','Åžube','Firma','Kod','Stok','Ã–zellik','Tip','Miktar','ReÃ§ete']);
   VarilenStr:= '0';
   if VarilenSip.Count>0 then begin
     for I := 0 to VarilenSip.Count - 1 do
@@ -332,7 +332,7 @@ begin
   end;
 
 
-  //olan satýrlar için miktar güncellemesi yapalým.. olmayanlar için de insert yapmamýz gerekecek..
+  //olan satÄ±rlar iÃ§in miktar gÃ¼ncellemesi yapalÄ±m.. olmayanlar iÃ§in de insert yapmamÄ±z gerekecek..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'update URETIMPLANLAMADETAY set ';
   Tablo.Query1.SQL.Add('  ALINANSIPARIS = ALINANSIPARIS + isnull((select SUM(MIKTAR)from SIPARISDETAY SD where SD.ID in ('+AlinanStr+') and SD.TUR=1 and SD.URUNID=S.ID and SD.URETIMPLANDETAYID is null),0.0),');
@@ -340,7 +340,7 @@ begin
   Tablo.Query1.SQL.Add(' from STOKLAR S inner join URETIMRECETE UR on S.ID=UR.STOKID ');
   Tablo.Query1.SQL.Add(' where URETIMPLANLAMADETAY.STOKID=S.ID and URETIMPLANLAMADETAY.URETIMPLANLAMAID='+FArama.TabPlanlar.FieldByName('ID').AsString);
   Tablo.Query1.ExecSQL;
-  //detay satýrlarýný ekleyelim.. sadece uretimplan alaný null olan satýrlar..
+  //detay satÄ±rlarÄ±nÄ± ekleyelim.. sadece uretimplan alanÄ± null olan satÄ±rlar..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'insert into URETIMPLANLAMADETAY(URETIMPLANLAMAID,STOKID,DEPODURUMU,ALINANSIPARIS,VERILENSIPARIS,MINIMUMSTOK,GEREKLIURETIM,EKLEYEN,RECETEID)';
   Tablo.Query1.SQL.Add(' select '+IntToStr(FArama.TabPlanlar.FieldByName('ID').AsInteger)+',S.ID,');
@@ -352,13 +352,13 @@ begin
   Tablo.Query1.SQL.Add(' where S.ID not in (select STOKID from URETIMPLANLAMADETAY where URETIMPLANLAMAID='+FArama.TabPlanlar.FieldByName('ID').AsString+')');
   Tablo.Query1.SQL.Add('   ');
   Tablo.Query1.ExecSQL;
-  //sipariþleri güncelleyelim.. dahil olduklarý planýn iþaretini koyup daha sonra sormayalým..
+  //sipariÅŸleri gÃ¼ncelleyelim.. dahil olduklarÄ± planÄ±n iÅŸaretini koyup daha sonra sormayalÄ±m..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'update SIPARISDETAY set URETIMPLANID=UPD.URETIMPLANLAMAID , URETIMPLANDETAYID=UPD.ID ';
   Tablo.Query1.SQL.Add('  from SIPARISDETAY SD inner join URETIMPLANLAMADETAY UPD on SD.TUR=1 and SD.URUNID=UPD.STOKID ');
   Tablo.Query1.SQL.Add('  where UPD.URETIMPLANLAMAID='+IntToStr(FArama.TabPlanlar.FieldByName('ID').AsInteger)+' AND SD.ID in ('+AlinanStr+','+VarilenStr+') and isnull(SD.URETIMPLANDETAYID,0)<1 ');
   Tablo.Query1.ExecSQL;
-  //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli üretimi hesaplayalým..
+  //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli Ã¼retimi hesaplayalÄ±m..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'update URETIMPLANLAMADETAY set GEREKLIURETIM = ALINANSIPARIS+MINIMUMSTOK-VERILENSIPARIS-DEPODURUMU where URETIMPLANLAMAID='+IntToStr(FArama.TabPlanlar.FieldByName('ID').AsInteger);
   Tablo.Query1.ExecSQL;
@@ -392,7 +392,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Üretim Emri Seçimi',Tablo.Query1.SQL.Text,sts,[nil,nil,nil,nil,Tablo.repGenelPersonelListesi],'UretimEmriSecimi')then
+      if Tablo.ListedenBilgiGetir('Ãœretim Emri SeÃ§imi',Tablo.Query1.SQL.Text,sts,[nil,nil,nil,nil,Tablo.repGenelPersonelListesi],'UretimEmriSecimi')then
         Tablo.UretimEmriSihirbazBaslat('D',0,StrToInt(sts[0]));
     finally
       sts.Free;
@@ -412,8 +412,8 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMOPERASYON where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimOperasyonuSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANDETAYID=&UPID)',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANDETAYID=&UPID)',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
 
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
@@ -428,7 +428,7 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from FATURA where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimFisSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMPLANDETAYID = &UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMPLANDETAYID = &UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
     end;
@@ -462,10 +462,10 @@ begin
       FreeAndNil(BekletDlg);
     Application.CreateForm(TBekletmeDlg, BekletDlg);
     BekletDlg.cxProgressBar1.Position := 0;
-    BekletDlg.Caption := 'Üretim Emirleri Oluþturuluyor...';
-    BekletDlg.LabelUstTaraf.Caption := 'Güncellemeler Yapýlýyor.';
+    BekletDlg.Caption := 'Ãœretim Emirleri OluÅŸturuluyor...';
+    BekletDlg.LabelUstTaraf.Caption := 'GÃ¼ncellemeler YapÄ±lÄ±yor.';
     BekletDlg.Show;
-    //buradan sonra listemizi açýp gerekli üretimi 0 dan büyük olan tüm satýrlar için üretim emri oluþturmamýz gerekiyor..
+    //buradan sonra listemizi aÃ§Ä±p gerekli Ã¼retimi 0 dan bÃ¼yÃ¼k olan tÃ¼m satÄ±rlar iÃ§in Ã¼retim emri oluÅŸturmamÄ±z gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text :=  'select *,URETIMEMRIMIKTAR=isnull((select sum(MIKTAR) from URETIMEMRI where URETIMPLANDETAYID=UPD.ID),0.0) '+
                               ' from URETIMPLANLAMADETAY UPD where GEREKLIURETIM-isnull((select sum(MIKTAR) from URETIMEMRI '+
@@ -474,7 +474,7 @@ begin
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
     while not Tablo.Query8.Eof do begin
-      //---------------------Üretimleri Oluþturalým------------\\
+      //---------------------Ãœretimleri OluÅŸturalÄ±m------------\\
       ReceteID := Tablo.Query8.FieldByName('RECETEID').AsInteger;
       Miktar := Tablo.Query8.FieldByName('GEREKLIURETIM').AsFloat-Tablo.Query8.FieldByName('URETIMEMRIMIKTAR').AsFloat;
       if (ReceteID>0)and(Miktar>0.0) then begin
@@ -482,11 +482,11 @@ begin
         StokID := Tablo.Query1.FieldByName('STOKID').AsInteger;
         Tablo.TablodanSorguAc(2,'select * from URETIMRECETEDETAY where MIKTAR>0.0 and URETIMRECETEID='+IntToStr(ReceteID));
         Tablo.TablodanSorguAc(3,'select * from STOKLAR where ID='+IntToStr(StokID));
-        //buradan bilgilerin gelip gelmediðini kontrol edeceðiz..
+        //buradan bilgilerin gelip gelmediÄŸini kontrol edeceÄŸiz..
         if (Tablo.Query1.RecordCount>0)and(Tablo.Query2.RecordCount>0)and(Tablo.Query3.RecordCount>0)then begin
-          //reçete içerisindeki ürün birimine ve adedine bakýlmasý gerekiyor.. reçetede üretilecek ürünün satýrý olup olmadýðý da kontrol edilmiþ oluyor..
+          //reÃ§ete iÃ§erisindeki Ã¼rÃ¼n birimine ve adedine bakÄ±lmasÄ± gerekiyor.. reÃ§etede Ã¼retilecek Ã¼rÃ¼nÃ¼n satÄ±rÄ± olup olmadÄ±ÄŸÄ± da kontrol edilmiÅŸ oluyor..
           if Tablo.Query2.Locate('TUR;URUNID',VarArrayOf([1,Tablo.Query3.FieldByName('ID').AsInteger]),[]) then begin
-            //baþlýk bilgilerini kaydedelim..
+            //baÅŸlÄ±k bilgilerini kaydedelim..
             Tablo.Query7.Close;
             Tablo.Query7.SQL.Text := 'INSERT INTO URETIMEMRI';
             Tablo.Query7.SQL.Add('(BASTAR,BITTAR,ONAY,DURUM,EKLEYEN,SUBEID,MIKTAR,STOKID,ADET,BIRIM,RECETEID,URETIMPLANID,URETIMPLANDETAYID)');
@@ -497,7 +497,7 @@ begin
             Tablo.Query7.Open;
             UretimEmriID := Tablo.Query7.Fields[0].AsInteger;
 
-            //ilk satýrý ekledikten sonra döngüye sokabiliriz.. önce ilk satýrý ekleyelim..
+            //ilk satÄ±rÄ± ekledikten sonra dÃ¶ngÃ¼ye sokabiliriz.. Ã¶nce ilk satÄ±rÄ± ekleyelim..
             Seviye := 0;
             Tablo.Query4.Close;
             Tablo.Query4.SQL.Text := 'INSERT INTO URETIMEMRIDETAY(URETIMEMRIID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,EKLEYEN,YERI,YERID,SEVIYE,USTID,KAYNAKRECETEID,KAYNAKRECETEDETAYID)';
@@ -507,15 +507,15 @@ begin
             Tablo.Query4.SQL.Add(' select scope_identity() ');
             Tablo.Query4.Open;
 
-            //detay aþaðý þekilde insert edilecek.. döngüye girip kitlenmemesi için en fazla 20 kademe olacak.....
+            //detay aÅŸaÄŸÄ± ÅŸekilde insert edilecek.. dÃ¶ngÃ¼ye girip kitlenmemesi iÃ§in en fazla 20 kademe olacak.....
             while Seviye < 20 do begin
-              //ilgili seviyenin(baþlangýç için 0) alt reçeteleri bulunur... sadece bu üretime girecek olan stok bileþenlerin reçeteleri aranýr..
+              //ilgili seviyenin(baÅŸlangÄ±Ã§ iÃ§in 0) alt reÃ§eteleri bulunur... sadece bu Ã¼retime girecek olan stok bileÅŸenlerin reÃ§eteleri aranÄ±r..
               Tablo.TablodanSorguAc(1,'select RECETEID=R.ID,URETIMEMRIDETAYID=E.ID,E.ADET,E.BIRIM,E.MIKTAR,R.STOKID from URETIMRECETE R inner join URETIMEMRIDETAY E on R.STOKID=E.URUNID where E.TUR=1 and E.MIKTAR>0.0 and E.URETIMEMRIID='+IntToStr(UretimEmriID)+' and E.SEVIYE='+IntToStr(Seviye));
-              //her alt reçete için reçete içeriði bir sonraki seviyeye insert edilir...
+              //her alt reÃ§ete iÃ§in reÃ§ete iÃ§eriÄŸi bir sonraki seviyeye insert edilir...
               if Tablo.Query1.RecordCount>0 then begin
                 Tablo.Query1.First;
                 while not Tablo.Query1.Eof do begin
-                  //birim kontrolleri ve çarpan hesaplamasý..
+                  //birim kontrolleri ve Ã§arpan hesaplamasÄ±..
                   Tablo.TablodanSorguAc(2,'select * from URETIMRECETEDETAY where TUR=1 and URUNID='+Tablo.Query1.FieldByName('STOKID').AsString+' and URETIMRECETEID='+Tablo.Query1.FieldByName('RECETEID').AsString);
 
                   if Tablo.Query1.FieldByName('BIRIM').AsInteger=Tablo.Query2.FieldByName('BIRIM').AsInteger then begin
@@ -544,11 +544,11 @@ begin
                   Tablo.Query1.Next;
                 end;
               end else begin
-                Seviye := 20;//artýk daha fazla detay gelmemeye baþlýyor..
+                Seviye := 20;//artÄ±k daha fazla detay gelmemeye baÅŸlÄ±yor..
               end;
               Inc(Seviye);
             end;
-            //reçete güncellemeleri..
+            //reÃ§ete gÃ¼ncellemeleri..
             Tablo.Query5.Close;
             Tablo.Query5.SQL.Text := 'update URETIMEMRIDETAY set KAYNAKRECETEID = URD.URETIMRECETEID, KAYNAKRECETEDETAYID = URD.ID ';
             Tablo.Query5.SQL.Add(' from URETIMEMRIDETAY inner join URETIMEMRIDETAY KU on URETIMEMRIDETAY.ID=KU.USTID  ');
@@ -562,7 +562,7 @@ begin
       Tablo.Query8.Next;
       BekletDlg.cxProgressBar1.Position := (Tablo.Query8.RecNo/Tablo.Query8.RecordCount)*100;
       BekletDlg.cxProgressBar1.Refresh;
-      BekletDlg.LabelUstTaraf.Caption := 'Üretim Emri '+IntToStr(Tablo.Query8.RecNo)+'/'+IntToStr(Tablo.Query8.RecordCount);
+      BekletDlg.LabelUstTaraf.Caption := 'Ãœretim Emri '+IntToStr(Tablo.Query8.RecNo)+'/'+IntToStr(Tablo.Query8.RecordCount);
       BekletDlg.LabelUstTaraf.Update;
     end;
   finally
@@ -577,16 +577,16 @@ procedure TUretimPlanlamaListeDlg.SeiliSatrinretimFiiOlutur1Click(
 var
   UretimPlanID,UretimPlanDetayID:variant;
 begin
-  //Operasyonlarý açalým..
+  //OperasyonlarÄ± aÃ§alÄ±m..
   Tablo.TablodanSorguAc(4,'select * from URETIMOPERASYON where URETIMPLANDETAYID='+TabUretimPlanlama.FieldByName('ID').AsString);
   if Tablo.Query4.RecordCount>0 then begin
     Tablo.Query4.First;
     while not Tablo.Query4.Eof do begin
-      //Operasyondan ürün aðacýndaki ilgili kayda locate olunur.. üretim aðaca göre yapýlacak..
+      //Operasyondan Ã¼rÃ¼n aÄŸacÄ±ndaki ilgili kayda locate olunur.. Ã¼retim aÄŸaca gÃ¶re yapÄ±lacak..
       if TabUretimPlanlama.Locate('ID',Tablo.Query4.FieldByName('URETIMPLANDETAYID').AsInteger,[])
       and TabUretimEmriDetay.Locate('ID',Tablo.Query4.FieldByName('URETIMEMRIDETAYID').AsInteger,[]) then begin
         if TabUretimPlanlama.FieldByName('URETIMOPERASYON').AsInteger>TabUretimPlanlama.FieldByName('URETIMFISI').AsInteger then begin
-          //Fatbaþlýða kayýt atýlýr..
+          //FatbaÅŸlÄ±ÄŸa kayÄ±t atÄ±lÄ±r..
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text:= 'INSERT INTO FATBASLIK (TARIH,FATURATARIH,TUR,TIPI,REHBERID,GIRISDEPO,CIKISDEPO';
           Tablo.Query1.SQL.Add(' ,FATURA_MATRAHI,KDV_TUTARI,EKVERGI,FATURA_TUTARI,KUR,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR');
@@ -603,7 +603,7 @@ begin
             UretimPlanDetayID := 'null'
           else
             UretimPlanDetayID := TabUretimEmri.FieldByName('URETIMPLANDETAYID').Value;
-          //Reçeteden Kaynak eklenir
+          //ReÃ§eteden Kaynak eklenir
           Tablo.Query2.Close;
           Tablo.Query2.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
           Tablo.Query2.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,URETIMPLANID,URETIMPLANDETAYID)  ');
@@ -612,8 +612,8 @@ begin
           Tablo.Query2.SQL.Add(','+VarToStr(UretimPlanID)+','+VarToStr(UretimPlanDetayID)+' ');
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and KAYNAKRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
-          Tablo.Query2.ExecSQL; //ayný reçeteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir çapraz tablo gerekiyor..
-          //Reçeteden Hedefler eklenir.. - ile çarpýlarak.. ustid nin kaynak olmasý da gerekiyor..
+          Tablo.Query2.ExecSQL; //aynÄ± reÃ§eteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir Ã§apraz tablo gerekiyor..
+          //ReÃ§eteden Hedefler eklenir.. - ile Ã§arpÄ±larak.. ustid nin kaynak olmasÄ± da gerekiyor..
           Tablo.Query2.Close;
           Tablo.Query2.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
           Tablo.Query2.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,URETIMPLANID,URETIMPLANDETAYID)  ');
@@ -628,11 +628,11 @@ begin
           Tablo.UretimSatirMaliyetUpdate(Tablo.Query1.Fields[0].AsInteger);
         end;
       end else
-        showmessage('Operasyon üretim ile eþleþmedi!!');
+        showmessage('Operasyon Ã¼retim ile eÅŸleÅŸmedi!!');
       Tablo.Query4.Next;
     end;
   end else
-    showmessage('Aktarýlacak kayýt bulunamadý.');
+    showmessage('AktarÄ±lacak kayÄ±t bulunamadÄ±.');
   AramaYap(nil);
 
 end;
@@ -645,17 +645,17 @@ begin
       FreeAndNil(BekletDlg);
     Application.CreateForm(TBekletmeDlg, BekletDlg);
     BekletDlg.cxProgressBar1.Position := 0;
-    BekletDlg.Caption := 'Üretim Operasyonlarý Oluþturuluyor...';
-    BekletDlg.LabelUstTaraf.Caption := 'Güncellemeler Yapýlýyor.';
+    BekletDlg.Caption := 'Ãœretim OperasyonlarÄ± OluÅŸturuluyor...';
+    BekletDlg.LabelUstTaraf.Caption := 'GÃ¼ncellemeler YapÄ±lÄ±yor.';
     BekletDlg.Show;
-    //buradan sonra listemizi açýp gerekli üretimi 0 dan büyük olan tüm satýrlar için üretim operasyonu oluþturmamýz gerekiyor..
+    //buradan sonra listemizi aÃ§Ä±p gerekli Ã¼retimi 0 dan bÃ¼yÃ¼k olan tÃ¼m satÄ±rlar iÃ§in Ã¼retim operasyonu oluÅŸturmamÄ±z gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text := 'select UE.ID from URETIMPLANLAMADETAY UPD inner join URETIMEMRI UE on UPD.ID=UE.URETIMPLANDETAYID where UPD.GEREKLIURETIM>0.0 and UPD.ID='+TabUretimPlanlama.FieldByName('ID').AsString;
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
     while not Tablo.Query8.Eof do begin
-      //-----------Operasyonlarý oluþturalým..------------------\\
+      //-----------OperasyonlarÄ± oluÅŸturalÄ±m..------------------\\
       Tablo.Query6.Close;
       Tablo.Query6.SQL.Text := ' INSERT INTO URETIMOPERASYON ';
       Tablo.Query6.SQL.Add('(URETIMEMRIID,URETIMEMRIDETAYID,HEDEFOPERASYON,STOKID,RECETEID,RECETEDETAYID,LOKASYON,ISMERKEZI,PERSONEL,BASTAR,BITTAR ');
@@ -688,8 +688,8 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMEMRI where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimEmirleriniSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARISDETAY set URETIMPLANID=null,URETIMPLANDETAYID=null where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMPLANLAMADETAY where ID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SIPARISDETAY set URETIMPLANID=null,URETIMPLANDETAYID=null where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMPLANLAMADETAY where ID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
       AramaYap(nil);
     end;
   end;
@@ -700,10 +700,10 @@ procedure TUretimPlanlamaListeDlg.SetArama( const Value: TUretimPlanlamaAramaFra
 begin
   FArama := Value;
   with FArama do begin
-    { Arama olay atamasý }
+    { Arama olay atamasÄ± }
     { xxx.OnClick := bu.xxxClick; gibi }
-    { Bu tanýmlamayý AnaForm'daki AramaFrame OlayBaglamalari tag'ýnda gerçekleþtirebilirsiniz.  }
-    { Detaylý bilgi için AnaForm'daki örneklere bakýnýz. }
+    { Bu tanÄ±mlamayÄ± AnaForm'daki AramaFrame OlayBaglamalari tag'Ä±nda gerÃ§ekleÅŸtirebilirsiniz.  }
+    { DetaylÄ± bilgi iÃ§in AnaForm'daki Ã¶rneklere bakÄ±nÄ±z. }
   end;
 end;
 
@@ -718,9 +718,9 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMEMRI where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimEmirleriniSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update SIPARISDETAY set URETIMPLANID=null,URETIMPLANDETAYID=null where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMPLANLAMA where ID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMPLANLAMADETAY where URETIMPLANLAMAID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update SIPARISDETAY set URETIMPLANID=null,URETIMPLANDETAYID=null where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMPLANLAMA where ID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMPLANLAMADETAY where URETIMPLANLAMAID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
     end;
@@ -734,8 +734,8 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMOPERASYON where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimOperasyonuSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANID=&UPID)',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANID=&UPID)',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
 
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
@@ -749,7 +749,7 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from FATURA where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimFisSil)
     else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMPLANID = &UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMPLANID = &UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
 
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
@@ -830,28 +830,28 @@ var
   AlinanStr,VarilenStr:string;
   i:Integer;
 begin
-  //planlama içeriðine girecek sipariþlerin hangileri olacaðý belirlenir.. alýnan ve verilen sipariþler..
+  //planlama iÃ§eriÄŸine girecek sipariÅŸlerin hangileri olacaÄŸÄ± belirlenir.. alÄ±nan ve verilen sipariÅŸler..
   Result := 0;
-  AlinanSip := Tablo.ListedenCokluSecim('Üretim Planýna Dahil Edilecek Alýnan Sipariþler',MemoSiparisAra.Lines.Text+' and S.TUR=19 ' //and S.CIKISDEPO='+IntToStr(DepoID)
+  AlinanSip := Tablo.ListedenCokluSecim('Ãœretim PlanÄ±na Dahil Edilecek AlÄ±nan SipariÅŸler',MemoSiparisAra.Lines.Text+' and S.TUR=19 ' //and S.CIKISDEPO='+IntToStr(DepoID)
                                         ,[nil,nil,nil,nil,Tablo.RepSubelerOrtakTumSubeler,nil,nil,nil,Tablo.repStokOzellik,Tablo.repStokTipi,nil,nil]
-                                        ,['ID','Tarih','Seri','No','Þube','Firma','Kod','Stok','Özellik','Tip','Miktar','Reçete']);
+                                        ,['ID','Tarih','Seri','No','Åžube','Firma','Kod','Stok','Ã–zellik','Tip','Miktar','ReÃ§ete']);
   if AlinanSip.Count>0 then begin
     //dize.Birlestir
     AlinanStr := '0';
     for I := 0 to AlinanSip.Count - 1 do
       AlinanStr := AlinanStr + ',' + AlinanSip[i];
-    VarilenSip := Tablo.ListedenCokluSecim('Üretim Planýna Dahil Edilecek Verilen Sipariþler',MemoSiparisAra.Lines.Text+' and S.TUR=9 and S.GIRISDEPO='+IntToStr(DepoID)
+    VarilenSip := Tablo.ListedenCokluSecim('Ãœretim PlanÄ±na Dahil Edilecek Verilen SipariÅŸler',MemoSiparisAra.Lines.Text+' and S.TUR=9 and S.GIRISDEPO='+IntToStr(DepoID)
                                           ,[nil,nil,nil,nil,Tablo.RepSubelerOrtakTumSubeler,nil,nil,nil,Tablo.repStokOzellik,Tablo.repStokTipi,nil,nil]
-                                          ,['ID','Tarih','Seri','No','Þube','Firma','Kod','Stok','Özellik','Tip','Miktar','Reçete']);
+                                          ,['ID','Tarih','Seri','No','Åžube','Firma','Kod','Stok','Ã–zellik','Tip','Miktar','ReÃ§ete']);
     VarilenStr:= '0';
     if VarilenSip.Count>0 then begin
       for I := 0 to VarilenSip.Count - 1 do
         VarilenStr := VarilenStr + ',' + VarilenSip[i];
     end;
-    //baþlýðý ekleyip id döndürelim..
+    //baÅŸlÄ±ÄŸÄ± ekleyip id dÃ¶ndÃ¼relim..
     Tablo.TablodanSorguAc(1,'insert into URETIMPLANLAMA(TARIH,DURUM,SUBEID,DEPOID,EKLEYEN)values(GETDATE(),1,'+IntToStr(SubeId)+','+IntToStr(DepoID)+','+Kullanan+') select scope_identity()');
     Result := Tablo.Query1.Fields[0].AsInteger;
-    //detay satýrlarýný ekleyelim.. sadece uretimplan alaný null olan satýrlar..
+    //detay satÄ±rlarÄ±nÄ± ekleyelim.. sadece uretimplan alanÄ± null olan satÄ±rlar..
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'insert into URETIMPLANLAMADETAY(URETIMPLANLAMAID,STOKID,DEPODURUMU,ALINANSIPARIS,VERILENSIPARIS,MINIMUMSTOK,GEREKLIURETIM,EKLEYEN,RECETEID)';
     Tablo.Query1.SQL.Add(' select '+IntToStr(Result)+',S.ID,');
@@ -861,13 +861,13 @@ begin
     Tablo.Query1.SQL.Add('  MINSTOK=isnull(S.MINSTOK,0),0,'+Kullanan+',UR.ID');
     Tablo.Query1.SQL.Add('  from STOKLAR S inner join URETIMRECETE UR on S.ID=UR.STOKID ');
     Tablo.Query1.ExecSQL;
-    //sipariþleri güncelleyelim.. dahil olduklarý planýn iþaretini koyup daha sonra sormayalým..
+    //sipariÅŸleri gÃ¼ncelleyelim.. dahil olduklarÄ± planÄ±n iÅŸaretini koyup daha sonra sormayalÄ±m..
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'update SIPARISDETAY set URETIMPLANID=UPD.URETIMPLANLAMAID , URETIMPLANDETAYID=UPD.ID ';
     Tablo.Query1.SQL.Add('  from SIPARISDETAY SD inner join URETIMPLANLAMADETAY UPD on SD.TUR=1 and SD.URUNID=UPD.STOKID ');
     Tablo.Query1.SQL.Add('  where UPD.URETIMPLANLAMAID='+IntToStr(Result)+' AND SD.ID in ('+AlinanStr+','+VarilenStr+') and isnull(SD.URETIMPLANDETAYID,0)<1 ');
     Tablo.Query1.ExecSQL;
-    //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli üretimi hesaplayalým..
+    //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli Ã¼retimi hesaplayalÄ±m..
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'update URETIMPLANLAMADETAY set GEREKLIURETIM = ALINANSIPARIS+MINIMUMSTOK-VERILENSIPARIS-DEPODURUMU where URETIMPLANLAMAID='+IntToStr(Result);
     Tablo.Query1.ExecSQL;
@@ -885,10 +885,10 @@ begin
       FreeAndNil(BekletDlg);
     Application.CreateForm(TBekletmeDlg, BekletDlg);
     BekletDlg.cxProgressBar1.Position := 0;
-    BekletDlg.Caption := 'Üretim Emirleri Oluþturuluyor...';
-    BekletDlg.LabelUstTaraf.Caption := 'Güncellemeler Yapýlýyor.';
+    BekletDlg.Caption := 'Ãœretim Emirleri OluÅŸturuluyor...';
+    BekletDlg.LabelUstTaraf.Caption := 'GÃ¼ncellemeler YapÄ±lÄ±yor.';
     BekletDlg.Show;
-    //buradan sonra listemizi açýp gerekli üretimi 0 dan büyük olan tüm satýrlar için üretim emri oluþturmamýz gerekiyor..
+    //buradan sonra listemizi aÃ§Ä±p gerekli Ã¼retimi 0 dan bÃ¼yÃ¼k olan tÃ¼m satÄ±rlar iÃ§in Ã¼retim emri oluÅŸturmamÄ±z gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text :=  'select *,URETIMEMRIMIKTAR=isnull((select sum(MIKTAR) from URETIMEMRI where URETIMPLANDETAYID=UPD.ID),0.0) '+
                               ' from URETIMPLANLAMADETAY UPD where GEREKLIURETIM-isnull((select sum(MIKTAR) from URETIMEMRI '+
@@ -897,7 +897,7 @@ begin
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
     while not Tablo.Query8.Eof do begin
-      //---------------------Üretimleri Oluþturalým------------\\
+      //---------------------Ãœretimleri OluÅŸturalÄ±m------------\\
       ReceteID := Tablo.Query8.FieldByName('RECETEID').AsInteger;
       Miktar := Tablo.Query8.FieldByName('GEREKLIURETIM').AsFloat-Tablo.Query8.FieldByName('URETIMEMRIMIKTAR').AsFloat;
       if (ReceteID>0)and(Miktar>0.0) then begin
@@ -905,11 +905,11 @@ begin
         StokID := Tablo.Query1.FieldByName('STOKID').AsInteger;
         Tablo.TablodanSorguAc(2,'select * from URETIMRECETEDETAY where MIKTAR>0.0 and URETIMRECETEID='+IntToStr(ReceteID));
         Tablo.TablodanSorguAc(3,'select * from STOKLAR where ID='+IntToStr(StokID));
-        //buradan bilgilerin gelip gelmediðini kontrol edeceðiz..
+        //buradan bilgilerin gelip gelmediÄŸini kontrol edeceÄŸiz..
         if (Tablo.Query1.RecordCount>0)and(Tablo.Query2.RecordCount>0)and(Tablo.Query3.RecordCount>0)then begin
-          //reçete içerisindeki ürün birimine ve adedine bakýlmasý gerekiyor.. reçetede üretilecek ürünün satýrý olup olmadýðý da kontrol edilmiþ oluyor..
+          //reÃ§ete iÃ§erisindeki Ã¼rÃ¼n birimine ve adedine bakÄ±lmasÄ± gerekiyor.. reÃ§etede Ã¼retilecek Ã¼rÃ¼nÃ¼n satÄ±rÄ± olup olmadÄ±ÄŸÄ± da kontrol edilmiÅŸ oluyor..
           if Tablo.Query2.Locate('TUR;URUNID',VarArrayOf([1,Tablo.Query3.FieldByName('ID').AsInteger]),[]) then begin
-            //baþlýk bilgilerini kaydedelim..
+            //baÅŸlÄ±k bilgilerini kaydedelim..
             Tablo.Query7.Close;
             Tablo.Query7.SQL.Text := 'INSERT INTO URETIMEMRI';
             Tablo.Query7.SQL.Add('(BASTAR,BITTAR,ONAY,DURUM,EKLEYEN,SUBEID,MIKTAR,STOKID,ADET,BIRIM,RECETEID,URETIMPLANID,URETIMPLANDETAYID)');
@@ -920,7 +920,7 @@ begin
             Tablo.Query7.Open;
             UretimEmriID := Tablo.Query7.Fields[0].AsInteger;
 
-            //ilk satýrý ekledikten sonra döngüye sokabiliriz.. önce ilk satýrý ekleyelim..
+            //ilk satÄ±rÄ± ekledikten sonra dÃ¶ngÃ¼ye sokabiliriz.. Ã¶nce ilk satÄ±rÄ± ekleyelim..
             Seviye := 0;
             Tablo.Query4.Close;
             Tablo.Query4.SQL.Text := 'INSERT INTO URETIMEMRIDETAY(URETIMEMRIID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,EKLEYEN,YERI,YERID,SEVIYE,USTID,KAYNAKRECETEID,KAYNAKRECETEDETAYID)';
@@ -930,15 +930,15 @@ begin
             Tablo.Query4.SQL.Add(' select scope_identity() ');
             Tablo.Query4.Open;
 
-            //detay aþaðý þekilde insert edilecek.. döngüye girip kitlenmemesi için en fazla 20 kademe olacak.....
+            //detay aÅŸaÄŸÄ± ÅŸekilde insert edilecek.. dÃ¶ngÃ¼ye girip kitlenmemesi iÃ§in en fazla 20 kademe olacak.....
             while Seviye < 20 do begin
-              //ilgili seviyenin(baþlangýç için 0) alt reçeteleri bulunur... sadece bu üretime girecek olan stok bileþenlerin reçeteleri aranýr..
+              //ilgili seviyenin(baÅŸlangÄ±Ã§ iÃ§in 0) alt reÃ§eteleri bulunur... sadece bu Ã¼retime girecek olan stok bileÅŸenlerin reÃ§eteleri aranÄ±r..
               Tablo.TablodanSorguAc(1,'select RECETEID=R.ID,URETIMEMRIDETAYID=E.ID,E.ADET,E.BIRIM,E.MIKTAR,R.STOKID from URETIMRECETE R inner join URETIMEMRIDETAY E on R.STOKID=E.URUNID where E.TUR=1 and E.MIKTAR>0.0 and E.URETIMEMRIID='+IntToStr(UretimEmriID)+' and E.SEVIYE='+IntToStr(Seviye));
-              //her alt reçete için reçete içeriði bir sonraki seviyeye insert edilir...
+              //her alt reÃ§ete iÃ§in reÃ§ete iÃ§eriÄŸi bir sonraki seviyeye insert edilir...
               if Tablo.Query1.RecordCount>0 then begin
                 Tablo.Query1.First;
                 while not Tablo.Query1.Eof do begin
-                  //birim kontrolleri ve çarpan hesaplamasý..
+                  //birim kontrolleri ve Ã§arpan hesaplamasÄ±..
                   Tablo.TablodanSorguAc(2,'select * from URETIMRECETEDETAY where TUR=1 and URUNID='+Tablo.Query1.FieldByName('STOKID').AsString+' and URETIMRECETEID='+Tablo.Query1.FieldByName('RECETEID').AsString);
 
                   if Tablo.Query1.FieldByName('BIRIM').AsInteger=Tablo.Query2.FieldByName('BIRIM').AsInteger then begin
@@ -967,11 +967,11 @@ begin
                   Tablo.Query1.Next;
                 end;
               end else begin
-                Seviye := 20;//artýk daha fazla detay gelmemeye baþlýyor..
+                Seviye := 20;//artÄ±k daha fazla detay gelmemeye baÅŸlÄ±yor..
               end;
               Inc(Seviye);
             end;
-            //reçete güncellemeleri..
+            //reÃ§ete gÃ¼ncellemeleri..
             Tablo.Query5.Close;
             Tablo.Query5.SQL.Text := 'update URETIMEMRIDETAY set KAYNAKRECETEID = URD.URETIMRECETEID, KAYNAKRECETEDETAYID = URD.ID ';
             Tablo.Query5.SQL.Add(' from URETIMEMRIDETAY inner join URETIMEMRIDETAY KU on URETIMEMRIDETAY.ID=KU.USTID  ');
@@ -985,7 +985,7 @@ begin
       Tablo.Query8.Next;
       BekletDlg.cxProgressBar1.Position := (Tablo.Query8.RecNo/Tablo.Query8.RecordCount)*100;
       BekletDlg.cxProgressBar1.Refresh;
-      BekletDlg.LabelUstTaraf.Caption := 'Üretim Emri '+IntToStr(Tablo.Query8.RecNo)+'/'+IntToStr(Tablo.Query8.RecordCount);
+      BekletDlg.LabelUstTaraf.Caption := 'Ãœretim Emri '+IntToStr(Tablo.Query8.RecNo)+'/'+IntToStr(Tablo.Query8.RecordCount);
       BekletDlg.LabelUstTaraf.Update;
     end;
   finally
@@ -1001,17 +1001,17 @@ begin
       FreeAndNil(BekletDlg);
     Application.CreateForm(TBekletmeDlg, BekletDlg);
     BekletDlg.cxProgressBar1.Position := 0;
-    BekletDlg.Caption := 'Üretim Operasyonlarý Oluþturuluyor...';
-    BekletDlg.LabelUstTaraf.Caption := 'Güncellemeler Yapýlýyor.';
+    BekletDlg.Caption := 'Ãœretim OperasyonlarÄ± OluÅŸturuluyor...';
+    BekletDlg.LabelUstTaraf.Caption := 'GÃ¼ncellemeler YapÄ±lÄ±yor.';
     BekletDlg.Show;
-    //buradan sonra listemizi açýp gerekli üretimi 0 dan büyük olan tüm satýrlar için üretim operasyonu oluþturmamýz gerekiyor..
+    //buradan sonra listemizi aÃ§Ä±p gerekli Ã¼retimi 0 dan bÃ¼yÃ¼k olan tÃ¼m satÄ±rlar iÃ§in Ã¼retim operasyonu oluÅŸturmamÄ±z gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text := 'select UE.ID from URETIMPLANLAMADETAY UPD inner join URETIMEMRI UE on UPD.ID=UE.URETIMPLANDETAYID where UPD.GEREKLIURETIM>0.0 and URETIMPLANLAMAID='+IntToStr(PlanID);
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
     while not Tablo.Query8.Eof do begin
-      //-----------Operasyonlarý oluþturalým..------------------\\
+      //-----------OperasyonlarÄ± oluÅŸturalÄ±m..------------------\\
       Tablo.Query6.Close;
       Tablo.Query6.SQL.Text := ' INSERT INTO URETIMOPERASYON ';
       Tablo.Query6.SQL.Add('(URETIMEMRIID,URETIMEMRIDETAYID,HEDEFOPERASYON,STOKID,RECETEID,RECETEDETAYID,LOKASYON,ISMERKEZI,PERSONEL,BASTAR,BITTAR ');
@@ -1054,16 +1054,16 @@ procedure TUretimPlanlamaListeDlg.UretimFisleriniOlustur(PlanID:integer);
 var
   UretimPlanID,UretimPlanDetayID:variant;
 begin
-  //Operasyonlarý açalým..
+  //OperasyonlarÄ± aÃ§alÄ±m..
   Tablo.TablodanSorguAc(4,'select * from URETIMOPERASYON where URETIMPLANID='+IntToStr(PlanID));
   if Tablo.Query4.RecordCount>0 then begin
     Tablo.Query4.First;
     while not Tablo.Query4.Eof do begin
-      //Operasyondan ürün aðacýndaki ilgili kayda locate olunur.. üretim aðaca göre yapýlacak..
+      //Operasyondan Ã¼rÃ¼n aÄŸacÄ±ndaki ilgili kayda locate olunur.. Ã¼retim aÄŸaca gÃ¶re yapÄ±lacak..
       if TabUretimPlanlama.Locate('ID',Tablo.Query4.FieldByName('URETIMPLANDETAYID').AsInteger,[])
       and TabUretimEmriDetay.Locate('ID',Tablo.Query4.FieldByName('URETIMEMRIDETAYID').AsInteger,[]) then begin
         if TabUretimPlanlama.FieldByName('URETIMOPERASYON').AsInteger>TabUretimPlanlama.FieldByName('URETIMFISI').AsInteger then begin
-          //Fatbaþlýða kayýt atýlýr..
+          //FatbaÅŸlÄ±ÄŸa kayÄ±t atÄ±lÄ±r..
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text:= 'INSERT INTO FATBASLIK (TARIH,FATURATARIH,TUR,TIPI,REHBERID,GIRISDEPO,CIKISDEPO';
           Tablo.Query1.SQL.Add(' ,FATURA_MATRAHI,KDV_TUTARI,EKVERGI,FATURA_TUTARI,KUR,DOVIZ_TUTARI,DOVIZ_CINSI,DOVIZKUR');
@@ -1080,7 +1080,7 @@ begin
             UretimPlanDetayID := 'null'
           else
             UretimPlanDetayID := TabUretimEmri.FieldByName('URETIMPLANDETAYID').Value;
-          //Reçeteden Kaynak eklenir
+          //ReÃ§eteden Kaynak eklenir
           Tablo.Query2.Close;
           Tablo.Query2.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
           Tablo.Query2.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,URETIMPLANID,URETIMPLANDETAYID)  ');
@@ -1089,8 +1089,8 @@ begin
           Tablo.Query2.SQL.Add(','+VarToStr(UretimPlanID)+','+VarToStr(UretimPlanDetayID)+' ');
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and KAYNAKRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
-          Tablo.Query2.ExecSQL; //ayný reçeteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir çapraz tablo gerekiyor..
-          //Reçeteden Hedefler eklenir.. - ile çarpýlarak.. ustid nin kaynak olmasý da gerekiyor..
+          Tablo.Query2.ExecSQL; //aynÄ± reÃ§eteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir Ã§apraz tablo gerekiyor..
+          //ReÃ§eteden Hedefler eklenir.. - ile Ã§arpÄ±larak.. ustid nin kaynak olmasÄ± da gerekiyor..
           Tablo.Query2.Close;
           Tablo.Query2.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
           Tablo.Query2.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID,URETIMPLANID,URETIMPLANDETAYID)  ');
@@ -1105,11 +1105,11 @@ begin
           //Tablo.UretimSihirbazBaslat('D',0,Tablo.Query1.Fields[0].AsInteger);
         end;
       end else
-        showmessage('Operasyon üretim ile eþleþmedi!!');
+        showmessage('Operasyon Ã¼retim ile eÅŸleÅŸmedi!!');
       Tablo.Query4.Next;
     end;
   end else
-    showmessage('Aktarýlacak kayýt bulunamadý.');
+    showmessage('AktarÄ±lacak kayÄ±t bulunamadÄ±.');
 end;
 
 procedure TUretimPlanlamaListeDlg.YeniOperasyonClick(Sender: TObject);

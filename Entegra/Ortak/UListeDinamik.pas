@@ -1,4 +1,4 @@
-unit UListeDinamik;
+﻿unit UListeDinamik;
 
 interface
 

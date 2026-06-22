@@ -1,4 +1,4 @@
-unit UProjeWizard;
+ï»¿unit UProjeWizard;
 
 interface
 
@@ -440,7 +440,7 @@ begin
   Tablo.TablodanSorguAc(1,'Select DEGER,SIRA from GENINI Where BOLUM='+inttoStr(Ops_Proje_Asama)+' order by SIRA');
     Tablo.Query1.First;
   while not Tablo.Query1.Eof do begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO [PROJEASAMA]([PROJEID],[REHBERID],[ASAMA],[BASTAR],[DURUM],[AKTIF],[EKLEYEN],[SUBEID]) Values('+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO [PROJEASAMA]([PROJEID],[REHBERID],[ASAMA],[BASTAR],[DURUM],[AKTIF],[EKLEYEN],[SUBEID]) Values('+
     ''+TabProjeler.FieldByName('ID').AsString+','''+Kullanan+''','+Tablo.Query1.FieldByName('DEGER').AsString+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',  '+
     '1,1,'''+Kullanan+''','+IntToStr(SubeId)+' )',[],[]);
 
@@ -522,7 +522,7 @@ begin
       TabProjeler.Cancel
     end else begin
       TabProjeler.Post;
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_PROJELER,ProjeID]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[TabNo_PROJELER,ProjeID]);
       ProjeEkDetayEkrPage(Self);
     end;
   end;
@@ -713,12 +713,12 @@ begin
   if  (Sontus='I') and ((IslemOp='E') or (IslemOp='K'))  then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabProjeler.active)and(TabProjeler.Fields[0].AsString <> '')  then begin
         //varsa dokumanlar?n silinmeli
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_PROJELER, Yer_ID]);
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from DOKUMAN where MODUL = &TabNo AND MODULID = &Modulid ',['&TabNo', '&Modulid'],[TabNo_PROJELER, TabProjeler.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_PROJELER, Yer_ID]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from DOKUMAN where MODUL = &TabNo AND MODULID = &Modulid ',['&TabNo', '&Modulid'],[TabNo_PROJELER, TabProjeler.FieldByName('ID').AsInteger]);
         //varsa proje ba?lant?lar? silinmeli
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update AKTIVITELER set PROJEID=-1   where PROJEID ='+TabProjeler.FieldByName('ID').AsString,[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update AKTIVITELER set PROJEID=-1   where PROJEID ='+TabProjeler.FieldByName('ID').AsString,[],[]);
         //sonra kendi silinir
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from PROJELER where ID=&Id ',['&Id'], [TabProjeler.FieldByName('ID').AsInteger]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from PROJELER where ID=&Id ',['&Id'], [TabProjeler.FieldByName('ID').AsInteger]);
       end;
    end;
 end;
@@ -796,9 +796,9 @@ begin
        Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG,TABLO from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+'  ');
        if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+' alan?n? silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
 
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
          try
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Alter table '+Tablo.Query1.FieldByName('TABLO').AsString+' drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Alter table '+Tablo.Query1.FieldByName('TABLO').AsString+' drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
          except
          end;
            ctrl.Visible := False;
@@ -1232,12 +1232,12 @@ var
     MASRAFID, MASRAFKODU, MASRAFMERKEZI: string;
 begin
     if Tablo.MasrafMerkeziSecimEkrani(0, MASRAFID, MASRAFKODU, MASRAFMERKEZI,'',True) then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
        TabProjeler.FieldByName('ID').AsString+','+MASRAFID+','''+CariDoviz+''')',[],[]);
        //bakal?m bu kodun alt?nda eklenecek ba?ka sat?rlar varsa onlar? da ekleyelim..
        Tablo.TablodanSorguAc(0, 'select ID from MASRAFGELIR where KOD like '''+MASRAFKODU+'.%'' ');
        while not Tablo.Query0.Eof do begin
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
              TabProjeler.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','''+CariDoviz+''')',[],[]);
          Tablo.Query0.next;
        end;
@@ -1259,7 +1259,7 @@ end;
 procedure TProjeWizardDlg.BtnButceSilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from PROJEBUTCE where ID='+TabProjeButce.FieldByName('ID').AsString,[],[]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from PROJEBUTCE where ID='+TabProjeButce.FieldByName('ID').AsString,[],[]);
      TabloYenile(TabProjeButce,[TabProjeler.Fields[0].AsInteger]);
   end;
 end;
@@ -1293,10 +1293,10 @@ begin
     ShowMessage(PWTurSec);
     abort;
   end else begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2132%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER like ''-2132%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2132%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER like ''-2132%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(comboPRJ_TIPI.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
         'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_Proje_Turu)+' and DEGER='+VarToStr(ComboPRJ_TURU.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);

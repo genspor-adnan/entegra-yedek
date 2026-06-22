@@ -1,4 +1,4 @@
-unit UBankaGorevFrame;
+ï»¿unit UBankaGorevFrame;
  
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 25/01/2010 11:04:25}
@@ -55,7 +55,7 @@ uses UBankaKredileriListeFrame, UTeminatMektuplariListeFrame,UPOSListeFrame, UKr
 
 procedure TBankaGorevFrame.btnBankaKredileriClick(Sender: TObject);
 begin
-  with TBankalarListeFrame(FFrameBilgi.IcerikGit('Banka Kredileri Tanýmlama').Ornek) do begin
+  with TBankalarListeFrame(FFrameBilgi.IcerikGit('Banka Kredileri TanÄ±mlama').Ornek) do begin
   end;
   btnUpAndDown(Sender);
 end;
@@ -99,7 +99,7 @@ end;
 
 procedure TBankaGorevFrame.BtnKredilerClick(Sender: TObject);
 begin
-  {Burasý Talimat Çaðýrma bölümü idi
+  {BurasÄ± Talimat Ã‡aÄŸÄ±rma bÃ¶lÃ¼mÃ¼ idi
 
   with FFrameBilgi.IcerikGit(TTalimatlarListeFrame).Ornek as TTalimatlarListeFrame do begin
   end;
@@ -119,16 +119,16 @@ begin
        CekTur := 140;
     //SQLEk := ' and C.TUR='+inttoStr(TComponent(Sender).Tag)+' ';
     if POS('Cek', TComponent(Sender).Name)>0 then
-       CekTurAd:='Çek'
+       CekTurAd:='Ã‡ek'
     else
        CekTurAd:='Senet';
 
-    Arama.SheetAlinanCekler.Caption := 'Alýnan '+CekTurAd+'ler';
+    Arama.SheetAlinanCekler.Caption := 'AlÄ±nan '+CekTurAd+'ler';
     Arama.SheetVerilenCekler.Caption := 'Verilen '+CekTurAd+'ler';
-    SheetHesapListe.Caption := CekTurAd+' Hesaplarý';
+    SheetHesapListe.Caption := CekTurAd+' HesaplarÄ±';
 
     case CekTur of
-     130 : begin  //alýnan çek / senet
+     130 : begin  //alÄ±nan Ã§ek / senet
        GridTviewDURUM.RepositoryItem := Tablo.RepCekDurum_Alinan;
        TabloNo := TabNo_CEKLER_Alinan;
        Arama.SheetAlinanCekler.Visible := True;
@@ -138,7 +138,7 @@ begin
        Arama.SheetVerilenCekler.Visible := False;
        Arama.SheetVerilenCekler.TabVisible := False;
     end;
-    140 : begin //verilen çek / senet
+    140 : begin //verilen Ã§ek / senet
       GridTviewDURUM.RepositoryItem := Tablo.RepCekDurum_Verilen;
       TabloNo := TabNo_CEKLER_Verilen;
       Arama.SheetVerilenCekler.Visible := True;
@@ -158,7 +158,7 @@ end;
 procedure TBankaGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   //BtnTalimatlar.Visible := Tablo.YetkiVarmi(2511,YetkiTur_Gorme);
   BtnKrediler.Visible := Tablo.YetkiVarmi(253120,YetkiTur_Gorme);
   PanelCek.Visible := Tablo.YetkiVarmi(2551,YetkiTur_Gorme);

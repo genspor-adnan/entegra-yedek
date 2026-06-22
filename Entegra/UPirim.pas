@@ -1,4 +1,4 @@
-unit UPirim;
+ï»¿unit UPirim;
 
 interface
 
@@ -103,7 +103,7 @@ begin
     2:begin //Stok Kategori
         UrunID := StokKategoriSec;
       end;
-    3:begin //tüm stok
+    3:begin //tÃ¼m stok
         UrunID := 3;
       end;
     11:begin //Hizmet
@@ -112,11 +112,11 @@ begin
     12:begin //Hizmet Kategori
         UrunID := MasrafGrubuSec;
       end;
-    13:begin //Tüm hizmet
+    13:begin //TÃ¼m hizmet
         UrunID := 13;
       end;
   else
-    ShowMessage('Geçerli bir tür bulunamadý.');
+    ShowMessage('GeÃ§erli bir tÃ¼r bulunamadÄ±.');
     Exit;
   end;
   TabPersPirim.FieldByName('URUNID').AsInteger := UrunID;

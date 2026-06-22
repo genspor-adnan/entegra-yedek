@@ -1,4 +1,4 @@
-unit UOpsiyonFatura;
+ï»¿unit UOpsiyonFatura;
 
 interface
 
@@ -249,6 +249,16 @@ type
     EditEnt_SifreTest: TcxTextEdit;
     Panel3: TPanel;
     LabelXSLTYukle: TcxLabel;
+    cxLabel12: TcxLabel;
+    ComboGelenXSLT: TcxImageComboBox;
+    ComboGelenEArsivXSLT: TcxImageComboBox;
+    cxLabel33: TcxLabel;
+    ComboGidenESMMXSLT: TcxImageComboBox;
+    cxLabel42: TcxLabel;
+    ComboGelenEIrsaliyeXSLT: TcxImageComboBox;
+    cxLabel43: TcxLabel;
+    ComboCariKod: TcxComboBox;
+    cxLabel44: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure GelenFaturaDetaySablonEkleTusClick(Sender: TObject);
@@ -300,9 +310,11 @@ type
     procedure LabelXSLTYukleClick(Sender: TObject);
     procedure TabSheetEBelgeShow(Sender: TObject);
     procedure ComboXSLTPropertiesPopup(Sender: TObject);
+    procedure XSLTComboEnter(Sender: TObject);
   private
     DoChange:boolean;
     procedure XSLTCombosYenile;
+    procedure XSLTComboYukle(ACombo: TcxImageComboBox);
     procedure XSLTIcerikDuzenle;
     { Private declarations }
   public
@@ -367,7 +379,7 @@ procedure TOpsiyonFaturaDlg.ComboDijitBrPropertiesCloseUp(Sender: TObject);
 
    { procedure Islem(Tablo1, Alan1:String);
     begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'alter table '+Tablo1+' drop column 	[ISKONTOLUBRMFIYAT] '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'alter table '+Tablo1+' drop column 	[ISKONTOLUBRMFIYAT] '+
         ' alter table '+Tablo1+'  drop column 	KDVDAHILFIYAT '+
         ' alter table '+Tablo1+'  alter column '+Alan1+' numeric(18,8) '+
         ' alter table '+Tablo1+'  add ISKONTOLUBRMFIYAT  AS ((([BIRIMFIYAT]*((100)-[ISKONTO]))*((100)-[ISKONTO2]))/(10000)) '+
@@ -382,11 +394,11 @@ begin
         Islem('FATURA', 'BIRIMFIYAT');
         Islem('TEKLIFDETAY', 'BIRIMFIYAT');
         Islem('SIPARISDETAY', 'BIRIMFIYAT');
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' alter table FATURA alter column DOVIZ_BIRIMFIYAT numeric(18,8) '
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' alter table FATURA alter column DOVIZ_BIRIMFIYAT numeric(18,8) '
                                          +' alter table TEKLIFDETAY alter column DOVIZ_BIRIMFIYAT numeric(18,8) '
                                          +' alter table SIPARISDETAY alter column DOVIZ_BIRIMFIYAT numeric(18,8) ',[],[]);
      if ComboDijitTut.EditValue>4 then
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' alter table FATURA alter column TUTAR numeric(18,8) '
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' alter table FATURA alter column TUTAR numeric(18,8) '
                                          +' alter table FATURA alter column DOVIZ_TUTARI numeric(18,8) '
                                          +' alter table TEKLIFDETAY alter column TUTAR numeric(18,8) '
                                          +' alter table TEKLIFDETAY alter column DOVIZ_TUTARI numeric(18,8) '
@@ -463,6 +475,24 @@ begin
   ComboEArsivFaturaXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EArsivFaturaXSLT, 0);
   ComboESMMXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_ESMMXSLT, 0);
   ComboEIrsaliyeXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EIrsaliyeXSLT, 0);
+  // Gelen XSLT combolari
+  ComboGelenXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EFaturaGelenXSLT, 0);
+  ComboGelenEArsivXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EArsivFaturaGelenXSLT, 0);
+  ComboGidenESMMXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_ESMMGelenXSLT, 0);
+  ComboGelenEIrsaliyeXSLT.EditValue := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_EIrsaliyeGelenXSLT, 0);
+
+  // CariKod combosu: HESAPPLANI'dan VARSAYILAN=320 olan tum HESAPKODU'lar
+  // (ornek "320", "320.01", "320.02"...). Secilen kod cari olusturulurken
+  // sayisal sira root'u olarak kullanilir (ornek "320.01.225").
+  // ComboCariKod = TcxComboBox (Items: TStrings). Items.Add string parametre ister.
+  ComboCariKod.Properties.Items.Clear;
+  Tablo.TablodanSorguAc(1,  'SELECT HESAPKODU FROM HESAPPLANI WHERE VARSAYILAN = 320');
+  while not Tablo.Query1.Eof do begin
+    ComboCariKod.Properties.Items.Add(Tablo.Query1.Fields[0].AsString);
+    Tablo.Query1.Next;
+  end;
+  Tablo.Query1.Close;
+  ComboCariKod.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_CariKod, '320.01');
   CheckTestAktif.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_EBelgeTestAktif, True);
   EditVergiNo.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeVergiNo, EditVergiNo.Text);
   EditEnt_KullaniciTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeKullanici, EditEnt_KullaniciTest.Text);
@@ -578,12 +608,17 @@ begin
   Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EArsivFaturaXSLT, ComboEArsivFaturaXSLT.EditValue);
   Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_ESMMXSLT, ComboESMMXSLT.EditValue);
   Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EIrsaliyeXSLT, ComboEIrsaliyeXSLT.EditValue);
+  Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EFaturaGelenXSLT, ComboGelenXSLT.EditValue);
+  Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EArsivFaturaGelenXSLT, ComboGelenEArsivXSLT.EditValue);
+  Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_ESMMGelenXSLT, ComboGidenESMMXSLT.EditValue);
+  Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EIrsaliyeGelenXSLT, ComboGelenEIrsaliyeXSLT.EditValue);
+  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_CariKod, ComboCariKod.Text);
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_EBelgeTestAktif, CheckTestAktif.Checked);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EBelgeVergiNo, EditVergiNo.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EBelgeKullanici, EditEnt_KullaniciTest.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EBelgeSifre, EditEnt_SifreTest.Text);
 
-  // Opsiyon kaydedildi â†’ ortak kimlik cache'ini sifirla, sonraki istek tazelenir
+  // Opsiyon kaydedildi Ã¢â€ â€™ ortak kimlik cache'ini sifirla, sonraki istek tazelenir
   TEBelgeKimlik.Sifirla;
 
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_EArsivFaturaAktif, CheckEArsivFaturaAktif.Checked);
@@ -779,7 +814,7 @@ begin
   Bilgi:=GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex];
   ctrls := TGirdiDenetimleri.Create.Edit(AWSablonAdiniGiriniz,@Bilgi);
   if TGirisKutusuEx.BilgiAlEx(KontrolSablonAdi, ctrls) = mrOk then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex],TabNo_FATURA_GidenFatFisIrs]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex],TabNo_FATURA_GidenFatFisIrs]);
     GidenFaturaDetaySablonList.DeleteSelected;
     GidenFaturaDetaySablonList.Items.Add(Bilgi);
     GidenFaturaDetaySablonList.ClearSelection;
@@ -804,7 +839,7 @@ end;
 procedure TOpsiyonFaturaDlg.GelenFaturaDetaySilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar('"'+GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex]+'" ve tï¿½m alt ï¿½ï¿½eler silinecektir. Onaylï¿½yor musunuz?'),PChar('ONAY'),MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_GelenFatFisIrs,GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex]]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_GelenFatFisIrs,GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex]]);
      GelenFaturaDetaySablonList.DeleteSelected;
    end;
 end;
@@ -818,7 +853,7 @@ begin
   Bilgi:=GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex];
   ctrls := TGirdiDenetimleri.Create.Edit(AWSablonAdiniGiriniz,@Bilgi);
   if TGirisKutusuEx.BilgiAlEx(KontrolSablonAdi, ctrls) = mrOk then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex],TabNo_FATURA_AlisSiparis]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex],TabNo_FATURA_AlisSiparis]);
     GelenSiparisDetaySablonList.DeleteSelected;
     GelenSiparisDetaySablonList.Items.Add(Bilgi);
     GelenSiparisDetaySablonList.ClearSelection;
@@ -858,7 +893,7 @@ end;
 procedure TOpsiyonFaturaDlg.GelenSiparisDetaySablonSilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar('"'+GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex]+'" ve tï¿½m alt ï¿½ï¿½eler silinecektir. Onaylï¿½yor musunuz?'),PChar('ONAY'),MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_AlisSiparis,GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex]]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_AlisSiparis,GelenSiparisDetaySablonList.Items[GelenSiparisDetaySablonList.ItemIndex]]);
      GelenSiparisDetaySablonList.DeleteSelected;
    end;
 end;
@@ -871,7 +906,7 @@ begin
   Bilgi:=GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex];
   ctrls := TGirdiDenetimleri.Create.Edit(AWSablonAdiniGiriniz,@Bilgi);
   if TGirisKutusuEx.BilgiAlEx(KontrolSablonAdi, ctrls) = mrOk then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex],TabNo_FATURA_GelenFatFisIrs]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GelenFaturaDetaySablonList.Items[GelenFaturaDetaySablonList.ItemIndex],TabNo_FATURA_GelenFatFisIrs]);
     GelenFaturaDetaySablonList.DeleteSelected;
     GelenFaturaDetaySablonList.Items.Add(Bilgi);
     GelenFaturaDetaySablonList.ClearSelection;
@@ -918,7 +953,7 @@ end;
 procedure TOpsiyonFaturaDlg.GidenFaturaDetaySilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar('"'+GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex]+'" ve tï¿½m alt ï¿½ï¿½eler silinecektir. Onaylï¿½yor musunuz?'),PChar('ONAY'),MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_GidenFatFisIrs,GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex]]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_GidenFatFisIrs,GidenFaturaDetaySablonList.Items[GidenFaturaDetaySablonList.ItemIndex]]);
      GidenFaturaDetaySablonList.DeleteSelected;
    end;
 end;
@@ -933,7 +968,7 @@ begin
   Bilgi:=GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex];
   ctrls := TGirdiDenetimleri.Create.Edit(AWSablonAdiniGiriniz,@Bilgi);
   if TGirisKutusuEx.BilgiAlEx(KontrolSablonAdi, ctrls) = mrOk then begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex],TabNo_FATURA_SatisSiparis]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set BOLUM=&YeniIsim where isnull(BOLUM,'''')=&EskiIsim and YERI=&Yeri',['&YeniIsim','&EskiIsim','&Yeri'],[Bilgi,GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex],TabNo_FATURA_SatisSiparis]);
     GidenSiparisDetaySablonList.DeleteSelected;
     GidenSiparisDetaySablonList.Items.Add(Bilgi);
     GidenSiparisDetaySablonList.ClearSelection;
@@ -970,7 +1005,7 @@ end;
 procedure TOpsiyonFaturaDlg.GidenSiparisDetaySablonSilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar('"'+GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex]+'" ve tï¿½m alt ï¿½ï¿½eler silinecektir. Onaylï¿½yor musunuz?'),PChar('ONAY'),MB_YESNO) = IDYES then begin
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_SatisSiparis,GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex]]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from REHBERAYAR where YERI=&Yeri and isnull(BOLUM,'''')=&Bolum ',['&Yeri','&Bolum'],[TabNo_FATURA_SatisSiparis,GidenSiparisDetaySablonList.Items[GidenSiparisDetaySablonList.ItemIndex]]);
      GidenSiparisDetaySablonList.DeleteSelected;
    end;
 
@@ -1066,16 +1101,74 @@ begin
   DataSet.FieldByName('DURUM').AsInteger := 9;
 end;
 
-procedure TOpsiyonFaturaDlg.XSLTCombosYenile;
+procedure TOpsiyonFaturaDlg.XSLTComboYukle(ACombo: TcxImageComboBox);
+// Tek combo'yu Tag (=DOKUMLER.RAPORID) degerine gore yeniden yukler.
+// Tag eslemesi:
+//   Giden -> 2/12/32/52,  Gelen -> 1/11/31/51
+var
+  LMevcut: Variant;
 begin
-  ComboEFaturaXSLT.Properties.Items := Tablo.imgComboboxInit(
-    'select ID,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=1 order by RAPORADI').Items;
-  ComboEArsivFaturaXSLT.Properties.Items := Tablo.imgComboboxInit(
-    'select ID,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=2 order by RAPORADI').Items;
-  ComboESMMXSLT.Properties.Items := Tablo.imgComboboxInit(
-    'select ID,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=3 order by RAPORADI').Items;
-  ComboEIrsaliyeXSLT.Properties.Items := Tablo.imgComboboxInit(
-    'select ID,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=4 order by RAPORADI').Items;
+  if ACombo = nil then Exit;
+  if ACombo.Tag <= 0 then Exit;
+  LMevcut := ACombo.EditValue;  // refresh sirasinda secimi koru
+  ACombo.Properties.Items := Tablo.imgComboboxInit(
+    'select ID,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=' +
+    IntToStr(ACombo.Tag) + ' order by RAPORADI').Items;
+  if not VarIsNull(LMevcut) then
+    ACombo.EditValue := LMevcut;
+end;
+
+procedure TOpsiyonFaturaDlg.XSLTComboEnter(Sender: TObject);
+// Combo focus aldiginda items'i Tag'e gore tazele.
+// FormCreate'te 8 combonun OnEnter'i buraya yonlendirilir.
+begin
+  if Sender is TcxImageComboBox then
+    XSLTComboYukle(TcxImageComboBox(Sender));
+end;
+
+procedure TOpsiyonFaturaDlg.XSLTCombosYenile;
+// Default Tag atamasi (DFM'de bos kalmis combolar icin) + ilk yukleme.
+// FormCreate'te OnEnter wiring de burada yapilir.
+
+  procedure _DefTag(ACombo: TcxImageComboBox; ADefault: Integer);
+  begin
+    if (ACombo <> nil) and (ACombo.Tag = 0) then
+      ACombo.Tag := ADefault;
+  end;
+
+  procedure _WireEnter(ACombo: TcxImageComboBox);
+  begin
+    if ACombo <> nil then
+      ACombo.OnEnter := XSLTComboEnter;
+  end;
+
+begin
+  _DefTag(ComboEFaturaXSLT, 2);
+  _DefTag(ComboEArsivFaturaXSLT, 12);
+  _DefTag(ComboESMMXSLT, 32);
+  _DefTag(ComboEIrsaliyeXSLT, 52);
+  _DefTag(ComboGelenXSLT, 1);
+  _DefTag(ComboGelenEArsivXSLT, 11);
+  _DefTag(ComboGidenESMMXSLT, 31);
+  _DefTag(ComboGelenEIrsaliyeXSLT, 51);
+
+  _WireEnter(ComboEFaturaXSLT);
+  _WireEnter(ComboEArsivFaturaXSLT);
+  _WireEnter(ComboESMMXSLT);
+  _WireEnter(ComboEIrsaliyeXSLT);
+  _WireEnter(ComboGelenXSLT);
+  _WireEnter(ComboGelenEArsivXSLT);
+  _WireEnter(ComboGidenESMMXSLT);
+  _WireEnter(ComboGelenEIrsaliyeXSLT);
+
+  XSLTComboYukle(ComboEFaturaXSLT);
+  XSLTComboYukle(ComboEArsivFaturaXSLT);
+  XSLTComboYukle(ComboESMMXSLT);
+  XSLTComboYukle(ComboEIrsaliyeXSLT);
+  XSLTComboYukle(ComboGelenXSLT);
+  XSLTComboYukle(ComboGelenEArsivXSLT);
+  XSLTComboYukle(ComboGidenESMMXSLT);
+  XSLTComboYukle(ComboGelenEIrsaliyeXSLT);
 end;
 
 procedure TOpsiyonFaturaDlg.XSLTIcerikDuzenle;

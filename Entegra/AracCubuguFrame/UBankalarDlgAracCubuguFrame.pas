@@ -1,4 +1,4 @@
-unit UBankalarDlgAracCubuguFrame;
+﻿unit UBankalarDlgAracCubuguFrame;
 
 interface
 
@@ -10,7 +10,7 @@ type
   TBankalarDlgAracCubuguFrame = class(TFrame,IAracCubuguBilgiFrame)
   private
     { Private declarations }
-    { IBilgiFrame �yeleri            }
+    { IBilgiFrame üyeleri            }
     FFrameBilgi : TAracCubuguFrameBilgi;
     procedure GorunurOlacak;
     procedure GorunmezOlacak;

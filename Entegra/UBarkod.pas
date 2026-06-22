@@ -1,4 +1,4 @@
-unit UBarkod;
+ï»¿unit UBarkod;
 
 interface
 
@@ -51,7 +51,7 @@ uses UTablo, UHizliGirisAnaMenu, LocOnFly;
 
 procedure TBarkodDlg.FormCreate(Sender: TObject);
 begin
-    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+    LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TBarkodDlg.JvNavPanelButton1Click(Sender: TObject);
@@ -84,11 +84,11 @@ begin
        else
          TabStok.SQL.add(' where (S.KOD like '''+Ara+'%'' OR S.STOKADI like ''%'+Ara+'%'' ');
        TabStok.SQL.add(' or ( LEN('''+Ara+'%'')=14 and substring('''+Ara+'%'',1,12) like replace(replace(substring(BARKOD,1,12),''#'',''_''),''$'',''_'')) or (replace(replace(BARKOD,''#'',''_''),''$'',''_'') like '''+Ara+'%'' )' );
-       TabStok.SQL.add(' or ( '''+Ara+''' like replace(replace(replace(BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') ) '); //boyut barkodlarý
+       TabStok.SQL.add(' or ( '''+Ara+''' like replace(replace(replace(BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') ) '); //boyut barkodlarÄ±
 
        //TabStok.SQL.add(' or B.BARKOD like '''+Ara+'%'' ');
        TabStok.SQL.add(')and S.DURUM = 1 ');
-       //BURADA hangi kod listes belirtilmiþse onun içinde arama yapýlýr
+       //BURADA hangi kod listes belirtilmiÅŸse onun iÃ§inde arama yapÄ±lÄ±r
        {if KategoriBasKodList.Items.Count > 0 then begin
            TabStok.SQL.add(' and (');
            for i := 0 to KategoriBasKodList.Items.Count - 1 do begin

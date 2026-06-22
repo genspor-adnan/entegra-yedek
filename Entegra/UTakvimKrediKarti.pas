@@ -1,4 +1,4 @@
-unit UTakvimKrediKarti;
+﻿unit UTakvimKrediKarti;
 
 interface
 

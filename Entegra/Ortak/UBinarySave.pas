@@ -1,4 +1,4 @@
-unit UBinarySave;
+ï»¿unit UBinarySave;
 
 
 interface
@@ -145,7 +145,7 @@ begin
 end;
 
 // 2/3/2010
-//Emreden aldýðým yeni yöntem
+//Emreden aldÄ±ÄŸÄ±m yeni yÃ¶ntem
 function KutuktenOku(Tablo1:TFDQuery; AlanAdi, Uzanti:string; DokumaniAc : Boolean; DokumanAd:String='') : string;
 var
   Stream_ :TStream;
@@ -161,7 +161,7 @@ begin
   end;
   Stream_.Position:=0;
 
-  if DokumanAd='' then begin //dokümanýn adý önceden verilmemiþse burada oluþtururuz..
+  if DokumanAd='' then begin //dokÃ¼manÄ±n adÄ± Ã¶nceden verilmemiÅŸse burada oluÅŸtururuz..
       uzanti1:=copy(Uzanti,pos('1', Uzanti)+1,100);
       if uzanti= '1'+uzanti1 then
          DokumanAd := uzanti1 //+Tablo1.FieldByName('DosyaAdi').AsString
@@ -171,7 +171,7 @@ begin
          DokumanAd := 'tmp'+FormatDateTime('yyyyMMddhhnnss',Now)+Uzanti;
       end;
   end;
-  //baþýna windows geçici dizini koyalým..
+  //baÅŸÄ±na windows geÃ§ici dizini koyalÄ±m..
   DokumanAd := GetEnvironmentVariable('Temp')+'\'+DokumanAd;
 
   tempfile:= TFileStream.Create(DokumanAd, fmCreate );
@@ -205,13 +205,13 @@ begin
   fs.Position := 0;
   ZCompressStream(fs, CompressedStream_);
   try
-     if Dokuman_Kayit_Yeri=0 then begin//Eðer doküman veritabaný içinde BELGE alanýnda tutulacaksa burada içine gömeriz.. (Record oluþturmadan)
+     if Dokuman_Kayit_Yeri=0 then begin//EÄŸer dokÃ¼man veritabanÄ± iÃ§inde BELGE alanÄ±nda tutulacaksa burada iÃ§ine gÃ¶meriz.. (Record oluÅŸturmadan)
         Tablo1.Params[0].LoadFromStream(CompressedStream_ , ftBlob);  //tabloya belgeyi kaydediyor
         if pos('update', Tablo1.SQL.Text)=1 then
            Tablo1.ExecSQL
         else
            Tablo1.Open;
-     end else if Dokuman_Kayit_Yeri=1 then begin//Eðer doküman veritabaný dýþýnda klasörde tutulacaksa burada klasöre kaydediyoruz.. (Record oluþturduktan sonra)
+     end else if Dokuman_Kayit_Yeri=1 then begin//EÄŸer dokÃ¼man veritabanÄ± dÄ±ÅŸÄ±nda klasÃ¶rde tutulacaksa burada klasÃ¶re kaydediyoruz.. (Record oluÅŸturduktan sonra)
 
         with Tablo.Query1.Params.ParamByName('PBELGE') do
         begin
@@ -226,16 +226,16 @@ begin
         Tablo.Query5.SQL.Text:='DECLARE @BELGE varbinary(MAX) SELECT @BELGE=CONVERT(VARBINARY(MAX), :PBELGE)  EXEC [sp_Imaj_Kaydetme] '+IntToStr(ImajID)+',@BELGE ';  //  Tablo1.Fields[0].AsString
         Tablo.Query5.Params[0].LoadFromStream(CompressedStream_ , ftBlob);
         Tablo.Query5.ExecSQL;
-        ///Burada kütüðe yazýlan okunabiliyor mu kontrol edelim
+        ///Burada kÃ¼tÃ¼ÄŸe yazÄ±lan okunabiliyor mu kontrol edelim
         try
           tablo.Query5.Close;                                                             //Tablo1.Fields[0].AsString
           tablo.Query5.SQL.Text := ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma '+IntToStr(ImajID)+' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI='''+ExtractFileExt(DosyaAdi)+'''';
           tablo.Query5.Open;
         except
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from GOREVYORUM where ID in (select MODULID from DOKUMAN where MODUL=210 and ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id)) ',['&Id'] , [ImajID]);    // Tablo1.Fields[0].AsInteger
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from DOKUMAN where ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id) ',['&Id'] , [ImajID]);Tablo1.Fields[0].AsInteger;
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from IMAJ  where ID= &Id ',['&Id'] , [ImajID]);// Tablo1.Fields[0].AsInteger
-          showmessage('Doküman eklemede hata oluþtu!');
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from GOREVYORUM where ID in (select MODULID from DOKUMAN where MODUL=210 and ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id)) ',['&Id'] , [ImajID]);    // Tablo1.Fields[0].AsInteger
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from DOKUMAN where ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id) ',['&Id'] , [ImajID]);Tablo1.Fields[0].AsInteger;
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from IMAJ  where ID= &Id ',['&Id'] , [ImajID]);// Tablo1.Fields[0].AsInteger
+          showmessage('DokÃ¼man eklemede hata oluÅŸtu!');
           fs.Free;
           //Stream_.Free;
           CompressedStream_.Free;
@@ -246,9 +246,9 @@ begin
         //Tablo.TablodanSorguAc(5,' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma '+Tablo1.Fields[0].AsString+' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI='''+ExtractFileExt(DosyaAdi)+'''' );
         if KutuktenOku(Tablo.Query5, 'BELGE',ExtractFileExt(DosyaAdi), False)='' then begin
 
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from DOKUMAN where ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id) ',['&Id'] , [Tablo1.Fields[0].AsInteger]);
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from IMAJ  where ID= &Id ',['&Id'] , [Tablo1.Fields[0].AsInteger]);
-            showmessage('Doküman eklemede hata oluþtu!');
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from DOKUMAN where ID in (select YER_ID from IMAJ where YERI=1 and ID= &Id) ',['&Id'] , [Tablo1.Fields[0].AsInteger]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from IMAJ  where ID= &Id ',['&Id'] , [Tablo1.Fields[0].AsInteger]);
+            showmessage('DokÃ¼man eklemede hata oluÅŸtu!');
               fs.Free;
               //Stream_.Free;
               CompressedStream_.Free;

@@ -1,4 +1,4 @@
-unit UDestekdlg;
+ï»¿unit UDestekdlg;
 
 interface
 
@@ -117,7 +117,7 @@ begin
 
   if (Trim(ComboFirma.Text) = '') or (Trim(ComboSorumluKisi.EditText) = '') or (ComboTipi.EditValue = null) or (Trim(ComboKonu.Text) = '') then
   begin
-    ShowMessage('Lütfen tüm alanları doldurunuz.');
+    ShowMessage('LÃ¼tfen tÃ¼m alanlarÄ± doldurunuz.');
     Exit;
   end;
 
@@ -125,7 +125,7 @@ begin
 
   if Sonuc = 'Kaydedildi' then
   begin
-    ShowMessage('Destek kaydı başarıyla gönderildi.');
+    ShowMessage('Destek kaydÄ± baÅŸarÄ±yla gÃ¶nderildi.');
     Close;
   end
   else if Pos('Hata',Sonuc) > 0 then
@@ -135,7 +135,7 @@ begin
   end
   else if Sonuc = 'Eksik Bilgi' then
   begin
-    ShowMessage('Eksik bilgi girişi yapıldı.');
+    ShowMessage('Eksik bilgi giriÅŸi yapÄ±ldÄ±.');
     ModalResult := mrNone;
   end;
 end;

@@ -1,17 +1,17 @@
-unit Manifesto;
+ï»¿unit Manifesto;
 
-GENEL ÖZELLÝKLER
-
-
+GENEL Ã–ZELLÄ°KLER
 
 
-MODÜL ÖZELLÝKLERÝ
+
+
+MODÃœL Ã–ZELLÄ°KLERÄ°
 
 KASA *****************************
 1)
-Kasa wizardda banka gider/gelirleri için menü eklendi.
-Bu iþlem sonucu bir tahakkuk ve bir banka ödeme/tahsilat oluþur.
-Bu iþlemlerbirbirine YER ve YERID den baðlanýr
+Kasa wizardda banka gider/gelirleri iÃ§in menÃ¼ eklendi.
+Bu iÅŸlem sonucu bir tahakkuk ve bir banka Ã¶deme/tahsilat oluÅŸur.
+Bu iÅŸlemlerbirbirine YER ve YERID den baÄŸlanÄ±r
 KASA tablosundaki gider/gelir silinirse ve GERIDONUSID = -9 ise YER ve YERID'deki tablodaki bilgiler silinir.
 Tahakkuk (FATBASLIK) silinirse ve KASA = -9 ise YER ve YERID'deki tablodaki bilgiler silinir.
 2)

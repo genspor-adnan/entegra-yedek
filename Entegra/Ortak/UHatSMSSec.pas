@@ -1,4 +1,4 @@
-unit UHatSMSSec;
+ï»¿unit UHatSMSSec;
 
 interface
 
@@ -91,16 +91,16 @@ begin
   if mMesaj.Text = '' then exit;
   msgbaslik := False;
   while not msgbaslik do begin
-    if MesajStrAl('Hazýr Mesaj', 'Mesaj Baþlýðý Giriniz :', 'E', nil, Baslik, '', 'E', nil, Baslik) then
+    if MesajStrAl('HazÄ±r Mesaj', 'Mesaj BaÅŸlÄ±ÄŸÄ± Giriniz :', 'E', nil, Baslik, '', 'E', nil, Baslik) then
     begin
       if Baslik = '' then
-        raise Exception.Create('Mesaj baþlýðý boþ býrakýlamaz');
+        raise Exception.Create('Mesaj baÅŸlÄ±ÄŸÄ± boÅŸ bÄ±rakÄ±lamaz');
 
       Tablo.Query2.Close;
       Tablo.Query2.SQL.Text := 'select * FROM SMSPOSTAHAZMESAJ WHERE BASLIK=''' + Baslik + '''';
       tablo.Query2.Open;
       if tablo.Query2.RecordCount > 0 then begin
-        if Application.MessageBox('Ayný mesaj baþlýðý ile kayýtlý mesaj var. Üzerine kaydedilsin mi?', 'U Y A R I', MB_YESNO + MB_ICONQUESTION) = IDYES then
+        if Application.MessageBox('AynÄ± mesaj baÅŸlÄ±ÄŸÄ± ile kayÄ±tlÄ± mesaj var. Ãœzerine kaydedilsin mi?', 'U Y A R I', MB_YESNO + MB_ICONQUESTION) = IDYES then
         begin
           Tablo.Query2.Close;
           Tablo.Query2.SQL.Text := 'update SMSPOSTAHAZMESAJ set MESAJ=''' + mMesaj.Text + ''' WHERE BASLIK=''' + Baslik + '''';

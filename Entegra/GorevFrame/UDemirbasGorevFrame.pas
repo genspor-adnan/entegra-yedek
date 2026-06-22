@@ -1,4 +1,4 @@
-unit UDemirbasGorevFrame;
+﻿unit UDemirbasGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -92,7 +92,7 @@ end;
 procedure TDemirbasGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(2801,YetkiTur_Gorme);
   PanelDokumler.Visible := Tablo.YetkiVarmi(2899,YetkiTur_Gorme);
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);

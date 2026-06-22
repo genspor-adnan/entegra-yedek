@@ -1,4 +1,4 @@
-unit UTakvimBankaParaTransfer;
+ï»¿unit UTakvimBankaParaTransfer;
 
 interface
 
@@ -124,26 +124,26 @@ var
 //Resourcestring
 //   TutarGiren = 'Tutar(Giren):  ';
 //   ParaGiren = 'Para Transferi(Giren)';
-//   TutarCikan =  'Tutar(Çýkan):  ';
-//   ParaCikan =  'Para Transferi(Çýkan)';
-//   istarih = 'Ýþlem Tarihi:  ' ;
-//   gerceklesen = 'Gerçekleþen ';
+//   TutarCikan =  'Tutar(Ã‡Ä±kan):  ';
+//   ParaCikan =  'Para Transferi(Ã‡Ä±kan)';
+//   istarih = 'Ä°ÅŸlem Tarihi:  ' ;
+//   gerceklesen = 'GerÃ§ekleÅŸen ';
 //   pltarih =  'Plan Tarihi:  ';
 //   planlanan =  'Planlanan ';
 //   kasa111 = 'Kasa:  ';
 //   kasakodu = 'Kasa Kodu:  ';
 //   nakit = 'Nakit    ';
 //   banka111 = 'Banka:  ';
-//   sube1 = 'Þube:  ';
+//   sube1 = 'Åžube:  ';
 //   hesap1 = 'Hesap:  ';
 //   bankakk1 = 'Banka:  ';
 //   subekk1 = 'Kart No:  ';
-//   hesapkk1 = 'Tanýmlý Kiþi:  ';
+//   hesapkk1 = 'TanÄ±mlÄ± KiÅŸi:  ';
 //   bankakk2 = 'Banka:  ';
 //   subekk2 = 'POS No:  ';
-//   hesapkk2 = 'POS Adý:  ';
+//   hesapkk2 = 'POS AdÄ±:  ';
 //   PosCihazi = 'POS   ';
-//   KKarti = 'Kredi Kartý  ';
+//   KKarti = 'Kredi KartÄ±  ';
 
 implementation
 uses
@@ -229,7 +229,7 @@ end;
 
 procedure TTakvimBankaParaTransferDLG.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TTakvimBankaParaTransferDLG.FormShow(Sender: TObject);
@@ -246,25 +246,25 @@ begin
 
   HesapTuru := TabKasa.FieldByName('HESAPTURU').AsString;
 
-  //ComboOdemeKanali itemlerini oluþturalým...
+  //ComboOdemeKanali itemlerini oluÅŸturalÄ±m...
   if ComboOdemeKanali.Properties.Items.Count=0 then begin
     ComboOdemeKanali.Properties.Items.Clear;
     if IsTuru in[61] then begin
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Bankadan Tahsilat Planý';
+         Description := 'Bankadan Tahsilat PlanÄ±';
          Value := 'B61';
        end;
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Kasadan Tahsilat Planý';
+         Description := 'Kasadan Tahsilat PlanÄ±';
          Value := 'K61';
        end;
     end else if IsTuru in[71] then begin
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Bankadan Ödeme Planý';
+         Description := 'Bankadan Ã–deme PlanÄ±';
          Value := 'B71';
        end;
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Kasadan Ödeme Planý';
+         Description := 'Kasadan Ã–deme PlanÄ±';
          Value := 'K71';
        end;
     end Else if IsTuru in[21,22] then begin
@@ -282,15 +282,15 @@ begin
        end;
     End else if IsTuru in[31,32] then begin
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Kasadan Ödeme';
+         Description := 'Kasadan Ã–deme';
          Value := '31';
        end;
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'Bankadan Ödeme';
+         Description := 'Bankadan Ã–deme';
          Value := '32';
        end;
        with ComboOdemeKanali.Properties.Items.Add do begin
-         Description := 'KK ile Ödeme';
+         Description := 'KK ile Ã–deme';
          Value := '35';
        end;
     end;
@@ -321,9 +321,9 @@ begin
         end;
   end;
 
-//ekraný düzenleme iþlemleri
+//ekranÄ± dÃ¼zenleme iÅŸlemleri
   //Dts secimleri..
-  if IsTuru in[31,32,35,71] then begin //giren olmasý durumu;
+  if IsTuru in[31,32,35,71] then begin //giren olmasÄ± durumu;
      LabelGonAd.DataBinding.DataSource := DtsMusteriBilgileri;
      LabelGonBanka.DataBinding.DataSource := DtsMusteriBilgileri;
      LabelGonSube.DataBinding.DataSource := DtsMusteriBilgileri;
@@ -348,7 +348,7 @@ begin
      PanelTutar.Caption := TutarGiren;
      LabelTutar.DataBinding.DataField := 'ALACAK';
      TakvimBankaParaTransferDLG.Caption := ParaGiren;
-  end Else if IsTuru in[21,22,25,61] then begin //çýkan olmasý durumu;
+  end Else if IsTuru in[21,22,25,61] then begin //Ã§Ä±kan olmasÄ± durumu;
      LabelGonAd.DataBinding.DataSource := DtsBizimBilgiler;
      LabelGonBanka.DataBinding.DataSource := DtsBizimBilgiler;
      LabelGonSube.DataBinding.DataSource := DtsBizimBilgiler;
@@ -374,7 +374,7 @@ begin
      LabelTutar.DataBinding.DataField := 'BORC';
      TakvimBankaParaTransferDLG.Caption := ParaCikan;
   end;
-  if IsTuru in[22,32] then begin //havale/eft olmasý durumu;
+  if IsTuru in[22,32] then begin //havale/eft olmasÄ± durumu;
     AlImg.Visible := False;
     GonImg.Visible := False;
     AlImg2.Visible := False;
@@ -395,7 +395,7 @@ begin
     LabelGonSube.DataBinding.DataField := 'SUBEADI' ;
     LabelGonHesap.DataBinding.DataField := 'HESAPNO' ;
 
-  end Else if IsTuru in[21,31] then begin //nakit tahsilatý olmasý durumu;
+  end Else if IsTuru in[21,31] then begin //nakit tahsilatÄ± olmasÄ± durumu;
      AlImg.Visible := True;
      GonImg.Visible := True;
      AlImg2.Visible := False;
@@ -416,7 +416,7 @@ begin
         PanelGonBanka.Caption := cNakit;
         PanelGonSube.Caption := '';
         PanelGonHesap.Caption := '';
-     end Else if IsTuru = 31 then begin //çýkan
+     end Else if IsTuru = 31 then begin //Ã§Ä±kan
         PanelGonBanka.Caption := kasa111;
         PanelGonSube.Caption := kasakodu;
         PanelGonHesap.Caption := '';
@@ -430,7 +430,7 @@ begin
         PanelAlSube.Caption := '';
         PanelAlHesap.Caption := '';
      end;
-  end Else if IsTuru in[25,35] then begin //nakit tahsilatý olmasý durumu;
+  end Else if IsTuru in[25,35] then begin //nakit tahsilatÄ± olmasÄ± durumu;
      AlImg.Visible := False;
      GonImg.Visible := False;
      AlImg2.Visible := True;
@@ -451,7 +451,7 @@ begin
         PanelGonBanka.Caption := KKarti;
         PanelGonSube.Caption := '';
         PanelGonHesap.Caption := '';
-     end Else if IsTuru = 35 then begin //çýkan
+     end Else if IsTuru = 35 then begin //Ã§Ä±kan
         PanelAlBanka.Caption := POSCihazi;
         PanelAlSube.Caption := '';
         PanelAlHesap.Caption := '';
@@ -465,7 +465,7 @@ begin
         PanelGonSube.Caption := subekk1;
         PanelGonHesap.Caption := hesapkk1;
      end;
-  end Else if IsTuru in[61,71] then begin //plan olmasý durumu;
+  end Else if IsTuru in[61,71] then begin //plan olmasÄ± durumu;
      if HesapTuru = 'B' then begin
         PanelTarih.Caption := pltarih ;
         LabelTarih.DataBinding.DataField := 'PLANTARIHI' ;
@@ -502,7 +502,7 @@ begin
           PanelGonBanka.Caption := cNakit;
           PanelGonSube.Caption := '';
           PanelGonHesap.Caption := '';
-        end Else if IsTuru = 71 then begin //çýkan
+        end Else if IsTuru = 71 then begin //Ã§Ä±kan
           PanelGonBanka.Caption := kasa111;
           PanelGonSube.Caption := kasakodu;
           PanelGonHesap.Caption := '';
@@ -548,7 +548,7 @@ begin
   LabelKur.Left:= LabelTutar.Left+LabelTutar.Width +2;
 
   if TabKasa.FieldByName('DOVIZ_TUTARI').AsFloat>0 then begin
-    LabelDovizTutari.Caption:= 'Karþýlýðý  '+FExtToStr(TabKasa.FieldByName('DOVIZ_TUTARI').AsFloat,2);
+    LabelDovizTutari.Caption:= 'KarÅŸÄ±lÄ±ÄŸÄ±  '+FExtToStr(TabKasa.FieldByName('DOVIZ_TUTARI').AsFloat,2);
     LabelDovizKuru.Caption:=TabKasa.FieldByName('DOVIZ_KURU').AsString;
     LabelDovizTutari.Left:= LabelKur.Left+LabelKur.Width +2;
     LabelDovizKuru.Left:= LabelDovizTutari.Left+LabelDovizTutari.Width +2;
@@ -591,17 +591,17 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      //date bilgi giriþi
+      //edit bilgi giriÅŸi
+      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      //date bilgi giriÅŸi
       2 : begin
             if eskiad='' then eskiad :=Tablo.GENINI.BugunTrh;
-            ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
+            ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
           end;
    end;
    if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin
-        MessageDlg(('Yeni '+alanAdi+' Deðeri Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Yeni '+alanAdi+' DeÄŸeri BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit; End
       else begin
         TabKasa.Edit;
@@ -623,7 +623,7 @@ begin
    if (IsTuru in [21,31]) or (HesapTuru='K') then  begin
      if TcxDBLabel(Sender).DataBinding.DataSource.DataSet = TabBizimBilgiler then begin
        st1 := Tstringlist.create;
-       if Tablo.ListedenBilgiGetir('Lütfen Ýþlem Yapýlacak Kasanýzý Seçiniz.','SELECT ID,KASAKODU,KASAADI,KUR FROM KASALAR WHERE KASAADI like ''%<ara>%'' and DURUM = 1',st1,[]) then  Begin
+       if Tablo.ListedenBilgiGetir('LÃ¼tfen Ä°ÅŸlem YapÄ±lacak KasanÄ±zÄ± SeÃ§iniz.','SELECT ID,KASAKODU,KASAADI,KUR FROM KASALAR WHERE KASAADI like ''%<ara>%'' and DURUM = 1',st1,[]) then  Begin
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''K'' WHERE ID= '+inttostr(ID);
          Tablo.Query1.ExecSQL;
@@ -672,13 +672,13 @@ begin
      if TcxDBLabel(Sender).DataBinding.DataSource.DataSet = TabBizimBilgiler then begin
        st1 := Tstringlist.create;
        if IsTuru in [25,61] then Begin
-         if Tablo.ListedenBilgiGetir('Lütfen Ýþlem Yapýlacak Pos Cihazýný Seçiniz.','SELECT ID,KODU,ADI,NOSU FROM POS --WHERE DURUM = 1',st1,[]) then  Begin
+         if Tablo.ListedenBilgiGetir('LÃ¼tfen Ä°ÅŸlem YapÄ±lacak Pos CihazÄ±nÄ± SeÃ§iniz.','SELECT ID,KODU,ADI,NOSU FROM POS --WHERE DURUM = 1',st1,[]) then  Begin
            Tablo.Query1.Close;
            Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''P'' WHERE ID= '+inttostr(ID);
            Tablo.Query1.ExecSQL;
          End;
        End Else if IsTuru in [35,71] then begin
-          if Tablo.ListedenBilgiGetir('Lütfen Ýþlem Yapýlacak Kredi Kartýný Seçiniz.','SELECT ID,KODU,ADI,HAMILI FROM KREDIKARTI --WHERE DURUM = 1',st1,[]) then  Begin
+          if Tablo.ListedenBilgiGetir('LÃ¼tfen Ä°ÅŸlem YapÄ±lacak Kredi KartÄ±nÄ± SeÃ§iniz.','SELECT ID,KODU,ADI,HAMILI FROM KREDIKARTI --WHERE DURUM = 1',st1,[]) then  Begin
            Tablo.Query1.Close;
            Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''V'' WHERE ID= '+inttostr(ID);
            Tablo.Query1.ExecSQL;
@@ -712,17 +712,17 @@ begin
    alanAdi := TcxDBLabel(Sender).DataBinding.DataField ;
    eskiad := TcxDBLabel(Sender).Caption;
    case TcxDBLabel(Sender).Tag of
-      //edit bilgi giriþi
-      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      //date bilgi giriþi
-      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' Deðeri'),@eskiad);
-      10: ctrls := TGirdiDenetimleri.Create.ComboBox(('Yeni '+alanAdi+' Deðeri'),@eskiad,tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_KURLAR)+' ').items); //kur listesi
+      //edit bilgi giriÅŸi
+      1 : ctrls := TGirdiDenetimleri.Create.Edit(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      //date bilgi giriÅŸi
+      2 : ctrls := TGirdiDenetimleri.Create.DateTimePicker(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad);
+      10: ctrls := TGirdiDenetimleri.Create.ComboBox(('Yeni '+alanAdi+' DeÄŸeri'),@eskiad,tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_KURLAR)+' ').items); //kur listesi
 
    end;
 
    if TGirisKutusuEx.BilgiAlEx(BGBilgi_gir,ctrls) = mrOK then begin
      if Trim(eskiad) = '' then begin
-        MessageDlg(('Yeni '+alanAdi+' Deðeri Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Yeni '+alanAdi+' DeÄŸeri BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit; End
       else begin
         TabKasa.Edit;

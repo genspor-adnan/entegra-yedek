@@ -1,4 +1,4 @@
-unit Lib.Bson;
+﻿unit Lib.Bson;
 (*< A light-weight and fast BSON and JSON object model, with support for
   efficiently parsing and writing in JSON and BSON format.
 

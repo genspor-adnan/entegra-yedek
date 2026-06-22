@@ -1,4 +1,4 @@
-unit UStokGorevFrame;
+﻿unit UStokGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -137,7 +137,7 @@ end;
 procedure TStokGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);
 

@@ -1,4 +1,4 @@
-unit UOpsiyonBanka;
+ï»¿unit UOpsiyonBanka;
 
 interface
 
@@ -167,7 +167,7 @@ end;
 
 procedure TOpsiyonBankaDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   txtMasrafTutar.Value:=FStrToCurrDef(Tablo.GENINI.ReadString(Ops_OpsiyonBanka_MasrafTutar,'0'),0);   //   MasrafTutar
   BeMasrafMerkezi.Tag:=StrToInt(Tablo.GENINI.ReadString(Ops_OpsiyonBanka_MasrafMerkezi,'0'));   //  MasrafMerkezi
 
@@ -199,10 +199,10 @@ begin
   Tablo.GENINI.WriteInteger(Ops_OpsiyonBanka_GorunecekSubeler,CbSubeler.EditValue);
   Tablo.GENINI.WriteString(Ops_OpsiyonBanka_MasrafTutar,FCurrToStr(txtMasrafTutar.Value));  //   OpsiyonBanka   MasrafTutar
   Tablo.GENINI.WriteString(Ops_OpsiyonBanka_MasrafMerkezi,IntToStr(BeMasrafMerkezi.Tag));  //   OpsiyonBanka   MasrafMerkezi
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKrediKarti_BilgilendirmeMail,ComboBilgiEposta.EditValue);//  Opsiyon Kredi Kartý E-Posta Ýle Bilgilendirme
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKrediKarti_BilgilendirmeSms,ComboBilgiSms.EditValue);//  Opsiyon Kredi Karti Sms Ýle Bilgilendirme
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKredi_BilgilendirmeMail,ComboBilgiEpostaKredi.EditValue);//  Opsiyon Kredi E-Posta Ýle Bilgilendirme
-  Tablo.GENINI.WriteInteger(Ops_OpsiyonKredi_BilgilendirmeSms,ComboBilgiSmsKredi.EditValue);//  Opsiyon Kredi Sms Ýle Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKrediKarti_BilgilendirmeMail,ComboBilgiEposta.EditValue);//  Opsiyon Kredi KartÄ± E-Posta Ä°le Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKrediKarti_BilgilendirmeSms,ComboBilgiSms.EditValue);//  Opsiyon Kredi Karti Sms Ä°le Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKredi_BilgilendirmeMail,ComboBilgiEpostaKredi.EditValue);//  Opsiyon Kredi E-Posta Ä°le Bilgilendirme
+  Tablo.GENINI.WriteInteger(Ops_OpsiyonKredi_BilgilendirmeSms,ComboBilgiSmsKredi.EditValue);//  Opsiyon Kredi Sms Ä°le Bilgilendirme
   end;
 
 end.

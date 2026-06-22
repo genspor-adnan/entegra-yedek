@@ -1,4 +1,4 @@
-unit UCariGorevFrame;
+﻿unit UCariGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -126,7 +126,7 @@ end;
 procedure TCariGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(2201,YetkiTur_Gorme);
 
 //  btnDokumlerOzel.Visible := Tablo.YetkiVarmi(2298,YetkiTur_Gorme);

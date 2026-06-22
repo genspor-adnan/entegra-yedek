@@ -1,4 +1,4 @@
-unit UServisGorevFrame;
+ï»¿unit UServisGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -105,7 +105,7 @@ var
    i:Integer;
   st:string;
 begin
-  with TServisListeDlg(FFrameBilgi.IcerikGit('Taným Listeleri').Ornek) do begin
+  with TServisListeDlg(FFrameBilgi.IcerikGit('TanÄ±m Listeleri').Ornek) do begin
     //    KayitErisimTamamlandi := RehberKayitErisimTamamlandi;
   end;
   btnUpAndDown(Sender);
@@ -123,7 +123,7 @@ end;
 procedure TServisGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3001,YetkiTur_Gorme);
   JvNavPanelButton2.Visible := Tablo.YetkiVarmi(3011,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(3099,YetkiTur_Gorme);

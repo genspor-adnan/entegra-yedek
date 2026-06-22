@@ -1,4 +1,4 @@
-unit UServisKoduPicker;
+ï»¿unit UServisKoduPicker;
 
 interface
 
@@ -113,14 +113,14 @@ begin
      +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+Alani+'),0)<1 THEN '+Alani+' ELSE  REVERSE( SUBSTRING(REVERSE('+Alani+'),1,CHARINDEX(''.'',REVERSE('+Alani+'),1)-1)) END) >= '+inttostr(Digit)
      +' order by LEN('+Alani+') desc , 1 desc';
    Tablo.Query1.Open;
-   //yeni kayýt için düzeltme
+   //yeni kayÄ±t iÃ§in dÃ¼zeltme
 
 
    if Tablo.Query1.RecordCount=0 then begin
      SonKisim := '1';
    end else begin
      if Length(Tablo.Query1.FieldByName('SONKISIM').AsString) >= Digit then begin
-     //eski kayýtlar için
+     //eski kayÄ±tlar iÃ§in
        SonKisim := IntToStr(Tablo.Query1.FieldByName('SONKISIM').AsInteger+1);
      end Else begin
        SonKisim := '1';
@@ -130,17 +130,17 @@ begin
    case Digit of
      -1: begin
        Result := Kod;
-       MemoKodlar.Lines.Add(Kod+' - '+'Sýradaki Kod');
+       MemoKodlar.Lines.Add(Kod+' - '+'SÄ±radaki Kod');
      end;
      0: Begin
        Result := Kod+'.'+Sonkisim;
-       MemoKodlar.Lines.Add(Result+' - '+'Sýradaki Kod');
+       MemoKodlar.Lines.Add(Result+' - '+'SÄ±radaki Kod');
      End;
      1..9: begin
        while Digit>Length(SonKisim) do
        SonKisim := '0'+Sonkisim;
        Result := Kod+'.'+Sonkisim;
-       MemoKodlar.Lines.Add(Result+' - '+'Sýradaki Kod');
+       MemoKodlar.Lines.Add(Result+' - '+'SÄ±radaki Kod');
      end;
    end;
    SiradakiKod:=Result;
@@ -169,7 +169,7 @@ begin
 end;
 
 Function TServisKoduPicker.HesapkoduAgaciIslemleri(Kod:String;Degisken:Integer):String;
-//320.01.006 gibi bir koddan sonra 320.01.007 yi getirir, giriþe 320.01 yada 320.01. yazýlmalýdýr.
+//320.01.006 gibi bir koddan sonra 320.01.007 yi getirir, giriÅŸe 320.01 yada 320.01. yazÄ±lmalÄ±dÄ±r.
 Var
   I,J:Integer;
   TempKod:string;
@@ -189,7 +189,7 @@ begin
   case Degisken of
     1: Result := Result;//Tam Ad
     2: Result := Copy(Kod,0,(J-1));//Root Kod
-    3: Result := Copy(Kod,(J+1),(Length(Kod)-J));//Sayaçtaki en son numara(sadece alt baþlýklar için!!)
+    3: Result := Copy(Kod,(J+1),(Length(Kod)-J));//SayaÃ§taki en son numara(sadece alt baÅŸlÄ±klar iÃ§in!!)
   end;
 end;
 

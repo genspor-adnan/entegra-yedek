@@ -1,4 +1,4 @@
-unit UArsivdenAl;
+ï»¿unit UArsivdenAl;
 
 interface
 
@@ -35,7 +35,7 @@ Uses UTablo, FetaUtil;
 
 (*
    ArsivBaslikList.Clear;
-   ArsivBaslikList.Add('Ücret,0');
+   ArsivBaslikList.Add('Ãœcret,0');
    ArsivBaslikList.Add('Tahsilat,1');
    ArsivBaslikList.Add('Fatura,2,3');
    ArsivTabloList.Add('PARA/'+ParaAlanlar);
@@ -55,15 +55,15 @@ begin
    if ArsivdenAlDlg.Tablolar = nil then
       ArsivdenAlDlg.Tablolar := TStringList.Create;
    ArsivdenAlDlg.Tablolar.Assign(Tablolar1);
-   for i := 0 to ArsivdenAlDlg.Basliklar.Count-1 do begin          //  Ücret,0  Basliklardaki sağdaki rakamlar aktarımda kaç tablo ve hangilerinin kullanılacağını gösteriyor 0 tablolardaki 0 ncı tablodan alınacağını gösteriyor
-       ArsivdenAlDlg.cxCheckListBox1.Items.Add;      //  Ücret,0   Aşağıda Text kısmına Ücreti DisplayName kısmına da 0 atıyoruz
+   for i := 0 to ArsivdenAlDlg.Basliklar.Count-1 do begin          //  Ãœcret,0  Basliklardaki saÄŸdaki rakamlar aktarÄ±mda kaÃ§ tablo ve hangilerinin kullanÄ±lacaÄŸÄ±nÄ± gÃ¶steriyor 0 tablolardaki 0 ncÄ± tablodan alÄ±nacaÄŸÄ±nÄ± gÃ¶steriyor
+       ArsivdenAlDlg.cxCheckListBox1.Items.Add;      //  Ãœcret,0   AÅŸaÄŸÄ±da Text kÄ±smÄ±na Ãœcreti DisplayName kÄ±smÄ±na da 0 atÄ±yoruz
        ArsivdenAlDlg.cxCheckListBox1.Items[i].Text := copy(ArsivdenAlDlg.Basliklar.Strings[i],1,pos(',', ArsivdenAlDlg.Basliklar.Strings[i])-1);
        ArsivdenAlDlg.cxCheckListBox1.Items[i].Checked := True;
 //       ArsivdenAlDlg.cxCheckListBox1.Items[i].DisplayName := copy(Basliklar.Strings[i],pos(',', Basliklar.Strings[i])+1, 20);
    end;
 
 
-   if ArsivdenAlDlg.Basliklar.Count = 1 then //Tek bilgi var. Sorulmadan direk arşivden getir
+   if ArsivdenAlDlg.Basliklar.Count = 1 then //Tek bilgi var. Sorulmadan direk arÅŸivden getir
       ArsivdenAlDlg.SadeceBuGelisGetir
    else
       ArsivdenAlDlg.ShowModal;

@@ -1,4 +1,4 @@
-unit UOpsiyonCari;
+ï»¿unit UOpsiyonCari;
 
 interface
 
@@ -86,7 +86,7 @@ begin
     if AButtonIndex = 0 then begin
        Application.CreateForm(TKodAgaciDlg,KodAgaciLokasyonDlg);
        sqltext:=' select ID, ROOTKOD=USTID, KOD=ID, ACIKLAMA=AD FROM DOKUMANKLASOR WHERE ID > 0 ORDER BY USTID ' ;
-       if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[Tablo.repDokumanKlasor,nil],[],[],['Klasor','Açýklama'],[true,False]) then begin
+       if Tablo.KodAgacindanSec(KodAgaciLokasyonDlg,sqltext,True,True,True,True,LokID,LokKod,LokAciklama,slist,[Tablo.repDokumanKlasor,nil],[],[],['Klasor','AÃ§Ä±klama'],[true,False]) then begin
           VarsayilanKlasor.Text:=LokAciklama;
           VarsayilanKlasor.Tag:=LokID;
        end;
@@ -106,7 +106,7 @@ procedure TOpsiyonCariDlg.FormCreate(Sender: TObject);
 var
 i,j:integer;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   PageControl1.ActivePage := TabSheetGenel;
   j:=Tablo.GENINI.ReadInteger(Ops_OpsiyonCari_CariKodGirisi,2) ;   //  CariOpsiyon','CariKodGirisi',2)
     for I := 0 to cbCariKodGirisi.Properties.Items.Count - 1 do
@@ -138,7 +138,7 @@ end;
 procedure TOpsiyonCariDlg.KaydetTusClick(Sender: TObject);
 begin
    Tablo.GENINI.WriteInteger(Ops_OpsiyonCari_CariKodGirisi,cbCariKodGirisi.EditValue);//    CariOpsiyon','CariKodGirisi'
-   Tablo.GENINI.WriteInteger(Ops_OpsiyonCari_VarsayilanKlasor,VarsayilanKlasor.Tag);//  OpsiyonCari VarsayilanKlasor Dokuman için
+   Tablo.GENINI.WriteInteger(Ops_OpsiyonCari_VarsayilanKlasor,VarsayilanKlasor.Tag);//  OpsiyonCari VarsayilanKlasor Dokuman iÃ§in
    Tablo.GENINI.WriteInteger(Ops_OpsiyonCari_GorunecekSubeler,CbSubeler.EditValue);
    //Tablo.GENINI.WriteBoolean(Ops_OpsiyonCari_CheckKurumsalZorunlu, CheckKurumsalZorunlu.Checked);
    Tablo.GENINI.WriteBoolean( StrToInt(inttoStr(Ops_OpsiyonCari_CallerIDCalistir)), cxCheckBoxCallerID.Checked);

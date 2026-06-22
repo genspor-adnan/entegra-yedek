@@ -1,4 +1,4 @@
-unit UKrediEkle;
+ï»¿unit UKrediEkle;
 
 interface
 
@@ -44,12 +44,12 @@ uses Utablo,PrjConst,LocOnFly;
 
 procedure TKrediEkleDlg.EditRefExit(Sender: TObject);
 begin
-   EditAcik.Text := EditRef.Text + ' Ref. Nolu Alınan kredi '
+   EditAcik.Text := EditRef.Text + ' Ref. Nolu AlÄ±nan kredi '
 end;
 
 procedure TKrediEkleDlg.FormCreate(Sender: TObject);
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    DateTimePickerOdemeBasl.Date := Tablo.GENINI.BugunTrhSaat;
 end;
 
@@ -63,7 +63,7 @@ procedure TKrediEkleDlg.SpeedButton1Click(Sender: TObject);
 begin
    if not BoslukKontrol(EditRef.Text, 'Referans No') then begin EditRef.SetFocus; Abort; end ;
    if not BoslukKontrol(EditTutar.Text, 'Tutar') then  begin EditTutar.SetFocus;Abort; end ;
-   if not BoslukKontrol(EditAcik.Text, 'Açıklama') then begin EditAcik.SetFocus; Abort; end ;
+   if not BoslukKontrol(EditAcik.Text, 'AÃ§Ä±klama') then begin EditAcik.SetFocus; Abort; end ;
 
    Tablo.TablodanSorguAc(1,'select KREDIREFERANSNO from KREDIROTATIF where KREDIID='+IntToStr(KrediID)+' and KREDIREFERANSNO='''+EditRef.Text+'''');
    if Tablo.Query1.RecordCount > 0 then

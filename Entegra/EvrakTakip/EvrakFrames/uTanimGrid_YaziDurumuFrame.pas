@@ -1,4 +1,4 @@
-unit uTanimGrid_YaziDurumuFrame;
+ï»¿unit uTanimGrid_YaziDurumuFrame;
 
 interface
 
@@ -38,7 +38,7 @@ uses
 
 procedure TEvrakTanimYaziDurumuFrame.actYazdirExecute(Sender: TObject);
 begin
-  Application.MessageBox('Yazdýrýlacak Bilgi bulunamadý!','Bilgilendirme', MB_ICONEXCLAMATION or MB_OK);
+  Application.MessageBox('YazdÄ±rÄ±lacak Bilgi bulunamadÄ±!','Bilgilendirme', MB_ICONEXCLAMATION or MB_OK);
 
 end;
 

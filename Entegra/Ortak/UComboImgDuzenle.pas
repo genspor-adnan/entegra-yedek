@@ -1,4 +1,4 @@
-unit UComboImgDuzenle;
+ï»¿unit UComboImgDuzenle;
 
 interface
 
@@ -90,7 +90,7 @@ begin
   if ListBox1.Items.Count = 0 then
      exit;
   s := ListBox1.Items[ListBox1.ItemIndex];
-  if Pos('Varsayýlan:',s)>0 then
+  if Pos('VarsayÄ±lan:',s)>0 then
      exit;
   if pos('=',s)>0 then begin
     delete(s,1,Pos('=',s));
@@ -111,7 +111,7 @@ procedure TImgListeAyarlaDlg.DegistirTusClick(Sender: TObject);
 var MesajOkunan: string;
 begin
 {$IFNDEF NO_UTABLO}
-  if Pos('Varsayýlan:',ListBox1.Items.Strings[ListBox1.ItemIndex])>0 then
+  if Pos('VarsayÄ±lan:',ListBox1.Items.Strings[ListBox1.ItemIndex])>0 then
      Exit;
   MesajOkunan := ListBox1.Items[ListBox1.ItemIndex];
   if MesajStrAl('', 'Listeye Yeni Bilgiyi Giriniz..', 'E', nil, MesajOkunan, '', 'E', nil, MesajOkunan) then
@@ -136,7 +136,7 @@ end;
 
 procedure TImgListeAyarlaDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure TImgListeAyarlaDlg.FormShow(Sender: TObject);
@@ -154,7 +154,7 @@ begin
     if yer = 0 then
       Ini.WriteString(AnahtarKelime, ListBox1.Items[i], '')
     else begin
-      ListBox1.Items[i]:=StringReplace(ListBox1.Items[i],'Varsayýlan: ','',[]);
+      ListBox1.Items[i]:=StringReplace(ListBox1.Items[i],'VarsayÄ±lan: ','',[]);
       yer := pos('=', ListBox1.Items[i]);
      // if StrToIntDef(copy(ListBox1.Items[i], yer + 1,length(ListBox1.Items[i])),99)>50 then  //serkan
         Ini.WriteString(AnahtarKelime, copy(ListBox1.Items[i], 1, yer - 1), copy(ListBox1.Items[i], yer + 1,length(ListBox1.Items[i])))

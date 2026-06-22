@@ -1,4 +1,4 @@
-// ************************************************************************ //
+﻿// ************************************************************************ //
 // The types declared in this file were generated from data read from the
 // WSDL File described below:
 // WSDL     : http://genlisans.genyazilim.com/GenUpdate/DataServices/GenUpdateWS.svc?wsdl
@@ -90,7 +90,7 @@ type
   // ************************************************************************ //
   IGenUpdateWS = interface(IInvokable)
   ['{05BC0325-4650-A8B3-0606-180A81C34C74}']
-    function  guncelleme(const programid: Integer; const baslang�c_verno: Integer; const bitis_verno: Integer): ArrayOfGenUpdateWS_komutListe; stdcall;
+    function  guncelleme(const programid: Integer; const baslangıc_verno: Integer; const bitis_verno: Integer): ArrayOfGenUpdateWS_komutListe; stdcall;
   end;
 
 function GetIGenUpdateWS(UseWSDL: Boolean=System.False; Addr: string=''; HTTPRIO: THTTPRIO = nil): IGenUpdateWS;

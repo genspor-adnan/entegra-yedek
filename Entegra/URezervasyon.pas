@@ -1,4 +1,4 @@
-unit URezervasyon;
+ï»¿unit URezervasyon;
 
 interface
 
@@ -60,14 +60,14 @@ procedure TRezervasyonDlg.FormShow(Sender: TObject);
 begin
    TabRezervasyon.Close;
    TabRezervasyon.SQL.Text := 'select top 1 * from REZERVASYON where ';
-   if RezID = 0 then  //önceki rez. bilgileri açýlýr
+   if RezID = 0 then  //Ã¶nceki rez. bilgileri aÃ§Ä±lÄ±r
       TabRezervasyon.SQL.Add(' MASAID='+IntToStr(MasaID)+' and DURUM=2 order by ID desc')//and TARIH between '''+FormatDateTime('yyyy-mm-dd 00:00', Tarih)+''' and '''+FormatDateTime('yyyy-mm-dd 23:59', Tarih)+'''')
    else
       TabRezervasyon.SQL.Add(' 1=2');
 
    TabRezervasyon.Open;
 
-   if TabRezervasyon.RecordCount<1 then begin  //þimdi yapýlýyor
+   if TabRezervasyon.RecordCount<1 then begin  //ÅŸimdi yapÄ±lÄ±yor
       TabRezervasyon.Append;
       TabRezervasyon.FieldByName('TARIH').AsDateTime := Tarih;
       TabRezervasyon.FieldByName('MASAID').AsInteger := MasaID;
@@ -85,7 +85,7 @@ end;
 
 procedure TRezervasyonDlg.KaydetTusClick(Sender: TObject);
 begin
-    if (TJvNavPanelButton(Sender).Tag = 3)and(TabRezervasyon.FieldByName('ID').AsString = '') then //daha giriþteyken iptal edilirse
+    if (TJvNavPanelButton(Sender).Tag = 3)and(TabRezervasyon.FieldByName('ID').AsString = '') then //daha giriÅŸteyken iptal edilirse
        TabRezervasyon.Cancel
     else begin
       TabRezervasyon.Edit;

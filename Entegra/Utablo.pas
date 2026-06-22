@@ -8682,7 +8682,7 @@ end;
 
 function TTablo.FaturaSihirbazBaslat(IslemOp: Char; Tur, Cagiran, FaturaId, RehberId: Integer; Tipi:Integer=1;Kilit:Boolean=False;MasrafMerkezi: Integer = -1; ServisID: Integer = -1): Integer;
 begin
-  if RehberId = 0 then begin
+  if RehberId = -999 then begin
     RehberId := Tablo.RehberAra_IDGetir(-1);
     if RehberId <= 0 then
       exit;

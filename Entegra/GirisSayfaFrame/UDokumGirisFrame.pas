@@ -1,4 +1,4 @@
-unit UDokumGirisFrame;
+﻿unit UDokumGirisFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 18/01/2010 13:55:39}
@@ -64,7 +64,7 @@ procedure TDokumGirisFrame.Baslatildi;
 var
   a : TWinControl;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   a := FFrameBilgi.AnaFrameBilgi.AramaSayfaDenetimi.FindVisualAncestor(TcxGroupBox);
   if Assigned(a) then begin
     Label3.Top := a.Top + 45;

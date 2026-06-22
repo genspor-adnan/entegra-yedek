@@ -1,10 +1,10 @@
-{********************************************************}
+ï»¿{********************************************************}
 {*                 GenoTIP HBYS                          *}
-{*               Kuruluş Sınıfları                       *}
+{*               KuruluÅŸ SÄ±nÄ±flarÄ±                       *}
 {*                     v1.0                              *}
 {*                                                       *}
 {*                                                       *}
-{* (c) Telif Hakkı 2009 Feta Bilgisayar                  *}
+{* (c) Telif HakkÄ± 2009 Feta Bilgisayar                  *}
 {********************************************************}
 
 unit FetaKurulusSiniflari;
@@ -25,7 +25,7 @@ type
     type
       Dizin = class
       public
-        class procedure ŞuAnkiDizindekiDosyalar(AUzanti : string;AListe: TStrings);
+        class procedure ÅuAnkiDizindekiDosyalar(AUzanti : string;AListe: TStrings);
         class procedure DizindekiDosyalar(AramaFiltresi : string;AListe: TStrings);
       end;
     class procedure TumMetniYaz(ADosyaAdi: string;AIcerik: string);
@@ -91,8 +91,8 @@ type
     class function SifirliYaz(ADeger : Integer;ARakamSayisi: Byte): string;
     class function MaxInt(A,B : Integer): Integer;
     class function MinInt(A,B : Integer): Integer;
-    class function BunlardanBiriVarMı(ADeğer: Integer;
-      ADeğerler: array of Integer): Boolean;
+    class function BunlardanBiriVarMÄ±(ADeÄŸer: Integer;
+      ADeÄŸerler: array of Integer): Boolean;
   end;
 
   KullaniciArayuzu = class
@@ -136,7 +136,7 @@ type
     class procedure DenetimCiziminiKilitle(ADenetim: TWinControl;AKilitle: Boolean);
   end;
 
-  Kültür = class
+  KÃ¼ltÃ¼r = class
   public
     class function IkiHarfliDilAdi : string;
   end;
@@ -147,9 +147,9 @@ type
     class function OleGorunenAdi(const ASinifAdi: string): string;
   end;
 
-  TSaatDeğeriniDeğiştir = (sddDeğişiklikYok,sddGünBaşıOlarak,sddGünSonuOlarak);
+  TSaatDeÄŸeriniDeÄŸiÅŸtir = (sddDeÄŸiÅŸiklikYok,sddGÃ¼nBaÅŸÄ±Olarak,sddGÃ¼nSonuOlarak);
 
-  TTarihSaatBiçimi = (tsbNormal,tsbSQL);
+  TTarihSaatBiÃ§imi = (tsbNormal,tsbSQL);
 
   TarihSaat = class
   public
@@ -159,10 +159,10 @@ type
     class function TarihFarki(tarih1, tarih2: string): Integer;
     class function TarihDogruMu(ATarihStr: string): Boolean;
     class function TarihStringOlarak(ATarih: TDateTime): string;
-    class function TarihSaatStringOlarak(ATarih: TDateTime;ATarihSaatBiçimi: TTarihSaatBiçimi = tsbNormal;
-      ASaatDeğeriDeğişsin: TSaatDeğeriniDeğiştir = sddDeğişiklikYok): string;
-    class function KüçükTarihSaatStringOlarak(ATarih: TDateTime;ATarihSaatBiçimi: TTarihSaatBiçimi = tsbNormal;
-      ASaatDeğeriDeğişsin: TSaatDeğeriniDeğiştir = sddDeğişiklikYok): string;
+    class function TarihSaatStringOlarak(ATarih: TDateTime;ATarihSaatBiÃ§imi: TTarihSaatBiÃ§imi = tsbNormal;
+      ASaatDeÄŸeriDeÄŸiÅŸsin: TSaatDeÄŸeriniDeÄŸiÅŸtir = sddDeÄŸiÅŸiklikYok): string;
+    class function KÃ¼Ã§Ã¼kTarihSaatStringOlarak(ATarih: TDateTime;ATarihSaatBiÃ§imi: TTarihSaatBiÃ§imi = tsbNormal;
+      ASaatDeÄŸeriDeÄŸiÅŸsin: TSaatDeÄŸeriniDeÄŸiÅŸtir = sddDeÄŸiÅŸiklikYok): string;
     class function TarihFarkGunOlarak(ASimdi,ASonra: TDateTime;AOnceSonraEkle: Boolean = True): string;
   end;
 
@@ -176,23 +176,23 @@ type
     class function VeriVarMi(cnn: TFDConnection;ASQL: string; AParams: array of string;AParamValues: array of Variant; var AFirstColumn: Variant): Boolean;overload;
     class function TabloKayitSayisi(cnn: TFDConnection; ATableName: string): Integer;
     /// <summary>
-    /// Kolon içindeki değerlerin en büyüğünü döndürür.
+    /// Kolon iÃ§indeki deÄŸerlerin en bÃ¼yÃ¼ÄŸÃ¼nÃ¼ dÃ¶ndÃ¼rÃ¼r.
     /// </summary>
-    /// <param name="cnn">Bağlantı nesnesi</param>
-    /// <param name="TableName">Tablo adı</param>
-    /// <param name="ColumnName">Kolon adı</param>
-    /// <param name="WhereClause">Sorgunun WHERE kısmı</param>
-    /// <returns>Sorgu içindeki kolonun en büyük değeri döner. Eğer sorgudan hiç kayıt dönmezse sonuç 0 döner. </returns>
+    /// <param name="cnn">BaÄŸlantÄ± nesnesi</param>
+    /// <param name="TableName">Tablo adÄ±</param>
+    /// <param name="ColumnName">Kolon adÄ±</param>
+    /// <param name="WhereClause">Sorgunun WHERE kÄ±smÄ±</param>
+    /// <returns>Sorgu iÃ§indeki kolonun en bÃ¼yÃ¼k deÄŸeri dÃ¶ner. EÄŸer sorgudan hiÃ§ kayÄ±t dÃ¶nmezse sonuÃ§ 0 dÃ¶ner. </returns>
     class function AlaninMaximumunuBul(cnn: TFDConnection; TableName, ColumnName, WhereClause: string): Integer;
-    class function SqlTarihAralığı(ABaşlangıç, ABitiş: TDateTime; AKolonlar: array of string;ABetweenKullan: Boolean = True): string;
-    class procedure TabloSatırlarınıKopyala(ABağlantı: TFDConnection; ATabloAdı, ADeğişecekAlan, AŞimdikiDeğeri, AİstenenDeğer : string);
-    class function BasitKomutÇalıştır(cnn: TFDConnection;ASQL: string; AParamAdları: array of string;AParamDeğerleri: array of Variant; ASonuçDönecek : Boolean = False;AUseDataSource : TDataSource = nil): Variant;
-    class function BağlantıDizesiDeğerDeğiştir(AKaynakDize: string; AAnahtar: string;ADeğer: string): string;
-    class function BoşDataSet(ABağlantı: TFDConnection;ATabloAdi : string) : TADOQuery;
-    class function IntegerListGetir(cnn: TFDConnection;ASql: string; AParamAdları: array of string;AParamDeğerleri: array of variant): TList<Integer>;
+    class function SqlTarihAralÄ±ÄŸÄ±(ABaÅŸlangÄ±Ã§, ABitiÅŸ: TDateTime; AKolonlar: array of string;ABetweenKullan: Boolean = True): string;
+    class procedure TabloSatÄ±rlarÄ±nÄ±Kopyala(ABaÄŸlantÄ±: TFDConnection; ATabloAdÄ±, ADeÄŸiÅŸecekAlan, AÅimdikiDeÄŸeri, AÄ°stenenDeÄŸer : string);
+    class function BasitKomutÃ‡alÄ±ÅŸtÄ±r(cnn: TFDConnection;ASQL: string; AParamAdlarÄ±: array of string;AParamDeÄŸerleri: array of Variant; ASonuÃ§DÃ¶necek : Boolean = False;AUseDataSource : TDataSource = nil): Variant;
+    class function BaÄŸlantÄ±DizesiDeÄŸerDeÄŸiÅŸtir(AKaynakDize: string; AAnahtar: string;ADeÄŸer: string): string;
+    class function BoÅŸDataSet(ABaÄŸlantÄ±: TFDConnection;ATabloAdi : string) : TADOQuery;
+    class function IntegerListGetir(cnn: TFDConnection;ASql: string; AParamAdlarÄ±: array of string;AParamDeÄŸerleri: array of variant): TList<Integer>;
   end;
 
-  SenaryoYönetimi = class
+  SenaryoYÃ¶netimi = class
   public
     class function PascalKodunaDonustur(AKodlanmisDize: string): string;
     class function MetinDizeIsle(AKaynak: string;ADegiskenler: TStringList): string;
@@ -262,7 +262,7 @@ type
     class function TumTabloyuKopyala(ADataSet: TDataSet;AAlanListesi: array of string): TBasitTablo;
   end;
 
-  { Doğrudan çağrılabilir işlev ve yordamlar }
+  { DoÄŸrudan Ã§aÄŸrÄ±labilir iÅŸlev ve yordamlar }
 
   function IIf(condition: Boolean;IfTrue: string;IfFalse: string): string;overload;
   function IIf(condition: Boolean;IfTrue: Integer;IfFalse: Integer): Integer;overload;
@@ -346,18 +346,18 @@ End;
 //  Result := S;Exit;
 //  for i := 1 to Length(s) do
 //    case s[i] of
-//      'ö': Result := Result + '\''f6';
-//      'ç': Result := Result + '\''e7';
-//      'ş': Result := Result + '\''fe';
-//      'ı': Result := Result + '\''fd';
-//      'ğ': Result := Result + '\''f0';
-//      'ü': Result := Result + '\''fc';
-//      'Ö': Result := Result + '\''d6';
-//      'Ç': Result := Result + '\''c7';
-//      'Ş': Result := Result + '\''de';
-//      'İ': Result := Result + '\''dd';
-//      'Ğ': Result := Result + '\''d0';
-//      'Ü': Result := Result + '\''dc';
+//      'Ã¶': Result := Result + '\''f6';
+//      'Ã§': Result := Result + '\''e7';
+//      'ÅŸ': Result := Result + '\''fe';
+//      'Ä±': Result := Result + '\''fd';
+//      'ÄŸ': Result := Result + '\''f0';
+//      'Ã¼': Result := Result + '\''fc';
+//      'Ã–': Result := Result + '\''d6';
+//      'Ã‡': Result := Result + '\''c7';
+//      'Å': Result := Result + '\''de';
+//      'Ä°': Result := Result + '\''dd';
+//      'Ä': Result := Result + '\''d0';
+//      'Ãœ': Result := Result + '\''dc';
 //    else
 //      Result := Result + s[i];
 //    end;
@@ -677,13 +677,13 @@ end;
 class function Dize.BuyukKarakterTurkce(AKarakter: Char): Char;
 begin
   case AKarakter of
-    'ç': Result := 'Ç';
-    'ö': Result := 'Ö';
-    'ş': Result := 'Ş';
-    'i': Result := 'İ';
-    'ı': Result := 'I';
-    'ğ': Result := 'Ğ';
-    'ü': Result := 'Ü';
+    'Ã§': Result := 'Ã‡';
+    'Ã¶': Result := 'Ã–';
+    'ÅŸ': Result := 'Å';
+    'i': Result := 'Ä°';
+    'Ä±': Result := 'I';
+    'ÄŸ': Result := 'Ä';
+    'Ã¼': Result := 'Ãœ';
   else
     Result := Upcase(AKarakter);
   end;
@@ -884,19 +884,19 @@ begin
     begin
       ch := AKaynak[xi];
       case ch of
-        'Ç' :ch2 := 'C';
-        'Ğ' :ch2 := 'Ğ';
-        'İ' :ch2 := 'I';
-        'Ö' :ch2 := 'O';
-        'Ş' :ch2 := 'S';
-        'Ü' :ch2 := 'U';
+        'Ã‡' :ch2 := 'C';
+        'Ä' :ch2 := 'Ä';
+        'Ä°' :ch2 := 'I';
+        'Ã–' :ch2 := 'O';
+        'Å' :ch2 := 'S';
+        'Ãœ' :ch2 := 'U';
         ' ' :ch2 := '_';
-        'ç' :ch2 := 'c';
-        'ğ' :ch2 := 'g';
-        'ı' :ch2 := 'i';
-        'ö' :ch2 := 'o';
-        'ş' :ch2 := 's';
-        'ü' :ch2 := 'u';
+        'Ã§' :ch2 := 'c';
+        'ÄŸ' :ch2 := 'g';
+        'Ä±' :ch2 := 'i';
+        'Ã¶' :ch2 := 'o';
+        'ÅŸ' :ch2 := 's';
+        'Ã¼' :ch2 := 'u';
       else
         ch2 := ch;
       end;
@@ -1000,7 +1000,7 @@ begin
       Result := Result + Format( '\par \par \pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
          '             -------  '+ABaslik+'  -------\par' ] );
     Result := Result + Format( '\margl%d\margr%d\margt%d\margb%d', [ 461, 562, 101,101 ] ) ;
-    // Başlık Bilgisi
+    // BaÅŸlÄ±k Bilgisi
 
     Result := Result + '\par \pard\plain\cgrid'#13#10 ;
     Result := Result + '{\stylesheet{\nowidctlpar\widctlpar\adjustright \fs20\cgrid \snext0 Normal;}'#13#10 ;
@@ -1137,7 +1137,7 @@ begin
     Result := Result + GetRTFColor( clNavy ) + '}'#13#10 ;
     if (Length(ABlockName) > 0) then
       Result := Result + '{\*\v >>'+ABlockName+'}';
-    // Başlık Bilgisi
+    // BaÅŸlÄ±k Bilgisi
     if (Length(ATitle) > 0) then
       Result := Result + Format( '\pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
          '             -------  ' + ATitle + '  -------\par' ] );
@@ -1322,7 +1322,7 @@ begin
 
     Result := Result + Format( '\margl%d\margr%d\margt%d\margb%d', [ 461, 562, 101,101 ] ) ;
 
-    // Başlık Bilgisi
+    // BaÅŸlÄ±k Bilgisi
 
     Result := Result + Format( '\par \par \pard\plain\f3%s\cf6 %s'#13#10, [ GetRTFFontInfo( AFont ),
        '             -------  '+Baslik+'  -------\par' ] );
@@ -1369,7 +1369,7 @@ begin
       end;
     Result := Result + '}\pard \nowidctlpar\widctlpar\intbl\adjustright {\row}'#13#10;
     Result := Result + '\pard\nowidctlpar\widctlpar\adjustright {'#13#10;
-    //Result := Result + Format( '\par \pard\plain\f0%s\cf0 %s'#13#10, [ GetRTFFontInfo( grid.Font ), 'Footerim tekerleğim' ] );
+    //Result := Result + Format( '\par \pard\plain\f0%s\cf0 %s'#13#10, [ GetRTFFontInfo( grid.Font ), 'Footerim tekerleÄŸim' ] );
     Result := Result + '}}';
   finally
     AFont.Free;
@@ -1626,20 +1626,20 @@ end;
 
 { TarihSaat }
 
-class function TarihSaat.KüçükTarihSaatStringOlarak(ATarih: TDateTime;
-  ATarihSaatBiçimi: TTarihSaatBiçimi;
-  ASaatDeğeriDeğişsin: TSaatDeğeriniDeğiştir): string;
+class function TarihSaat.KÃ¼Ã§Ã¼kTarihSaatStringOlarak(ATarih: TDateTime;
+  ATarihSaatBiÃ§imi: TTarihSaatBiÃ§imi;
+  ASaatDeÄŸeriDeÄŸiÅŸsin: TSaatDeÄŸeriniDeÄŸiÅŸtir): string;
 var
   fmt : string;
 begin
-  case ATarihSaatBiçimi of
+  case ATarihSaatBiÃ§imi of
     tsbNormal: fmt := 'dd/mm/yyyy';
     tsbSQL: fmt := 'yyyy-mm-dd';
   end;
-  case ASaatDeğeriDeğişsin of
-    sddDeğişiklikYok: Result := FormatDateTime(fmt + ' hh:nn', ATarih);
-    sddGünBaşıOlarak: Result := FormatDateTime(fmt + ' 00:00', ATarih);
-    sddGünSonuOlarak: Result := FormatDateTime(fmt + ' 23:59', ATarih);
+  case ASaatDeÄŸeriDeÄŸiÅŸsin of
+    sddDeÄŸiÅŸiklikYok: Result := FormatDateTime(fmt + ' hh:nn', ATarih);
+    sddGÃ¼nBaÅŸÄ±Olarak: Result := FormatDateTime(fmt + ' 00:00', ATarih);
+    sddGÃ¼nSonuOlarak: Result := FormatDateTime(fmt + ' 23:59', ATarih);
   end;
 end;
 
@@ -1672,9 +1672,9 @@ begin
   fark := DaysBetween(ASimdi,ASonra);
   if AOnceSonraEkle then begin
     if ASonra > ASimdi then
-      Result := Format('%d gün sonra',[Abs(fark)])
+      Result := Format('%d gÃ¼n sonra',[Abs(fark)])
     else
-      Result := Format('%d gün önce',[Abs(fark)])
+      Result := Format('%d gÃ¼n Ã¶nce',[Abs(fark)])
   end else Result := IntToStr(fark);
 end;
 
@@ -1694,19 +1694,19 @@ begin
 end;
 
 class function TarihSaat.TarihSaatStringOlarak(ATarih: TDateTime;
-  ATarihSaatBiçimi: TTarihSaatBiçimi;
-  ASaatDeğeriDeğişsin: TSaatDeğeriniDeğiştir): string;
+  ATarihSaatBiÃ§imi: TTarihSaatBiÃ§imi;
+  ASaatDeÄŸeriDeÄŸiÅŸsin: TSaatDeÄŸeriniDeÄŸiÅŸtir): string;
 var
   fmt : string;
 begin
-  case ATarihSaatBiçimi of
+  case ATarihSaatBiÃ§imi of
     tsbNormal: fmt := 'dd/mm/yyyy';
     tsbSQL: fmt := 'yyyy-mm-dd';
   end;
-  case ASaatDeğeriDeğişsin of
-    sddDeğişiklikYok: Result := FormatDateTime(fmt + ' hh:nn:ss', ATarih);
-    sddGünBaşıOlarak: Result := FormatDateTime(fmt + ' 00:00:00', ATarih);
-    sddGünSonuOlarak: Result := FormatDateTime(fmt + ' 23:59', ATarih);
+  case ASaatDeÄŸeriDeÄŸiÅŸsin of
+    sddDeÄŸiÅŸiklikYok: Result := FormatDateTime(fmt + ' hh:nn:ss', ATarih);
+    sddGÃ¼nBaÅŸÄ±Olarak: Result := FormatDateTime(fmt + ' 00:00:00', ATarih);
+    sddGÃ¼nSonuOlarak: Result := FormatDateTime(fmt + ' 23:59', ATarih);
   end;
 end;
 
@@ -1729,7 +1729,7 @@ begin
       Dec(YAy);
     end;
   if (YYil = 0) and (YAy = 0) then
-    YasHesapla := IntToStr(YGun) + 'Gün'
+    YasHesapla := IntToStr(YGun) + 'GÃ¼n'
   else if YYil = 0 then
     YasHesapla := IntToStr(YAy) + 'Ay' //+IntToStr(YGun)+'g'
   else if YYil > 0 then
@@ -1756,23 +1756,23 @@ begin
   end;
 end;
 
-class function Veritabani.BasitKomutÇalıştır(cnn: TFDConnection;
-  ASQL: string; AParamAdları: array of string;
-  AParamDeğerleri: array of Variant;ASonuçDönecek : Boolean;
+class function Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(cnn: TFDConnection;
+  ASQL: string; AParamAdlarÄ±: array of string;
+  AParamDeÄŸerleri: array of Variant;ASonuÃ§DÃ¶necek : Boolean;
   AUseDataSource: TDataSource): Variant;
 var
   LSQL: string;
   LQry: TFDQuery;
 begin
-  if ASonuçDönecek then
+  if ASonuÃ§DÃ¶necek then
     LSQL := ASQL
   else
     LSQL := 'SET NOCOUNT ON; ' + ASQL;
 
-  LQry := SorguBaslat(cnn,LSQL,AParamAdları,AParamDeğerleri,AUseDataSource);
+  LQry := SorguBaslat(cnn,LSQL,AParamAdlarÄ±,AParamDeÄŸerleri,AUseDataSource);
 
   try
-    if ASonuçDönecek then
+    if ASonuÃ§DÃ¶necek then
     begin
       LQry.Open;
       if not LQry.Eof then
@@ -1790,32 +1790,32 @@ begin
   end;
 end;
 
-class function Veritabani.BağlantıDizesiDeğerDeğiştir(AKaynakDize,
-  AAnahtar, ADeğer: string): string;
+class function Veritabani.BaÄŸlantÄ±DizesiDeÄŸerDeÄŸiÅŸtir(AKaynakDize,
+  AAnahtar, ADeÄŸer: string): string;
 var
   cs : TStringList;
 begin
   cs := TStringList.Create;
   try
     cs.LoadFromString(AKaynakDize,';');
-    cs.Values[AAnahtar] := ADeğer;
+    cs.Values[AAnahtar] := ADeÄŸer;
     Result := cs.Join(';');
   finally
     cs.Free;
   end;
 end;
 
-class function Veritabani.BoşDataSet(ABağlantı: TFDConnection;ATabloAdi: string): TADOQuery;
+class function Veritabani.BoÅŸDataSet(ABaÄŸlantÄ±: TFDConnection;ATabloAdi: string): TADOQuery;
 begin
-  Result := SorguBaslat(ABağlantı,'SELECT TOP 0 * FROM ' + ATabloAdi,[],[]);
+  Result := SorguBaslat(ABaÄŸlantÄ±,'SELECT TOP 0 * FROM ' + ATabloAdi,[],[]);
 end;
 
 class function Veritabani.IntegerListGetir(cnn: TFDConnection; ASql: string;
-  AParamAdları: array of string;
-  AParamDeğerleri: array of variant): TList<Integer>;
+  AParamAdlarÄ±: array of string;
+  AParamDeÄŸerleri: array of variant): TList<Integer>;
 begin
   Result := TList<Integer>.Create;
-  with SorguBaslat(cnn, ASql, AParamAdları, AParamDeğerleri) do
+  with SorguBaslat(cnn, ASql, AParamAdlarÄ±, AParamDeÄŸerleri) do
     try
       Open;
       while not Eof do begin
@@ -1861,27 +1861,27 @@ begin
   Result.InitSql(Sql,paramNames,params,UseDataSource);
 end;
 
-class function Veritabani.SqlTarihAralığı(ABaşlangıç, ABitiş: TDateTime;
+class function Veritabani.SqlTarihAralÄ±ÄŸÄ±(ABaÅŸlangÄ±Ã§, ABitiÅŸ: TDateTime;
   AKolonlar: array of string; ABetweenKullan: Boolean): string;
 begin
   if Length(AKolonlar) > 1 then
     Result := Format('%s >= %s AND %s <= %s',[
       AKolonlar[0],
-      TarihSaat.TarihSaatStringOlarak(ABaşlangıç,tsbSQL,sddGünBaşıOlarak),
+      TarihSaat.TarihSaatStringOlarak(ABaÅŸlangÄ±Ã§,tsbSQL,sddGÃ¼nBaÅŸÄ±Olarak),
       AKolonlar[1],
-      TarihSaat.TarihSaatStringOlarak(ABitiş,tsbSQL,sddGünSonuOlarak)
+      TarihSaat.TarihSaatStringOlarak(ABitiÅŸ,tsbSQL,sddGÃ¼nSonuOlarak)
     ])
   else if ABetweenKullan then
     Result := Format('%0:s BETWEEN %1:s AND %2:s',[
       AKolonlar[0],
-      TarihSaat.TarihSaatStringOlarak(ABaşlangıç,tsbSQL,sddGünBaşıOlarak),
-      TarihSaat.TarihSaatStringOlarak(ABitiş,tsbSQL,sddGünSonuOlarak)
+      TarihSaat.TarihSaatStringOlarak(ABaÅŸlangÄ±Ã§,tsbSQL,sddGÃ¼nBaÅŸÄ±Olarak),
+      TarihSaat.TarihSaatStringOlarak(ABitiÅŸ,tsbSQL,sddGÃ¼nSonuOlarak)
     ])
   else
     Result := Format('%0:s >= %1:s AND %0:s <= %2:s',[
       AKolonlar[0],
-      TarihSaat.TarihSaatStringOlarak(ABaşlangıç,tsbSQL,sddGünBaşıOlarak),
-      TarihSaat.TarihSaatStringOlarak(ABitiş,tsbSQL,sddGünSonuOlarak)
+      TarihSaat.TarihSaatStringOlarak(ABaÅŸlangÄ±Ã§,tsbSQL,sddGÃ¼nBaÅŸÄ±Olarak),
+      TarihSaat.TarihSaatStringOlarak(ABitiÅŸ,tsbSQL,sddGÃ¼nSonuOlarak)
     ]);
 end;
 
@@ -1898,43 +1898,43 @@ begin
   end;
 end;
 
-class procedure Veritabani.TabloSatırlarınıKopyala(ABağlantı: TFDConnection;ATabloAdı,
-  ADeğişecekAlan, AŞimdikiDeğeri, AİstenenDeğer: string);
+class procedure Veritabani.TabloSatÄ±rlarÄ±nÄ±Kopyala(ABaÄŸlantÄ±: TFDConnection;ATabloAdÄ±,
+  ADeÄŸiÅŸecekAlan, AÅimdikiDeÄŸeri, AÄ°stenenDeÄŸer: string);
 var
   fld : string;
   lst : TStringList;
   _out : string;
-  değer : string;
+  deÄŸer : string;
   stringAlan: Boolean;
 begin
   lst := TStringList.Create;
-  with FetaKurulusSiniflari.Veritabani.SorguBaslat(ABağlantı,'SELECT c.name,t.name as tip FROM '+
+  with FetaKurulusSiniflari.Veritabani.SorguBaslat(ABaÄŸlantÄ±,'SELECT c.name,t.name as tip FROM '+
     'syscolumns c inner join systypes t on t.xtype = c.xtype WHERE '+
-    'c.id = OBJECT_ID(&1) ORDER BY c.colorder',['&1'],[ATabloAdı]) do
+    'c.id = OBJECT_ID(&1) ORDER BY c.colorder',['&1'],[ATabloAdÄ±]) do
   try
     Open;
     _out := '';
-    Locate('name',ADeğişecekAlan,[]);
+    Locate('name',ADeÄŸiÅŸecekAlan,[]);
     stringAlan := Dize.BunlardanBiriVarMi(Fields[1].AsString,
       ['varchar','nvarchar','char','nchar']);
-    { INSERT için alanları topluyoruz }
+    { INSERT iÃ§in alanlarÄ± topluyoruz }
     Fields[0].CopyAllRowsToStringList(lst);
     fld := lst.Join(',');
-    _out := Format('INSERT INTO %s (%s)',[ATabloAdı,fld]);
-    { SELECT için ayarlamalar yapıyoruz }
+    _out := Format('INSERT INTO %s (%s)',[ATabloAdÄ±,fld]);
+    { SELECT iÃ§in ayarlamalar yapÄ±yoruz }
     if stringAlan then
-      değer := '''' + AİstenenDeğer + ''''
+      deÄŸer := '''' + AÄ°stenenDeÄŸer + ''''
     else
-      değer := AİstenenDeğer;
-    değer := değer + ' AS ' + ADeğişecekAlan;
-    lst.Change(ADeğişecekAlan,değer);
+      deÄŸer := AÄ°stenenDeÄŸer;
+    deÄŸer := deÄŸer + ' AS ' + ADeÄŸiÅŸecekAlan;
+    lst.Change(ADeÄŸiÅŸecekAlan,deÄŸer);
     if stringAlan then
-      değer := '''' + AŞimdikiDeğeri + ''''
+      deÄŸer := '''' + AÅimdikiDeÄŸeri + ''''
     else
-      değer := AŞimdikiDeğeri;
+      deÄŸer := AÅimdikiDeÄŸeri;
     _out := _out + Format('SELECT %s FROM %s WHERE %s = %s',
-      [lst.Join(','),ATabloAdı,ADeğişecekAlan,değer]);
-    ABağlantı.ExecSQL(_out);
+      [lst.Join(','),ATabloAdÄ±,ADeÄŸiÅŸecekAlan,deÄŸer]);
+    ABaÄŸlantÄ±.ExecSQL(_out);
   finally
     Free;
     lst.Free;
@@ -1982,14 +1982,14 @@ end;
 
 { SayiYonetimi }
 
-class function SayiYonetimi.BunlardanBiriVarMı(ADeğer: Integer;
-  ADeğerler: array of Integer): Boolean;
+class function SayiYonetimi.BunlardanBiriVarMÄ±(ADeÄŸer: Integer;
+  ADeÄŸerler: array of Integer): Boolean;
 var
-  değer : Integer;
+  deÄŸer : Integer;
 begin
   Result := False;
-  for değer in ADeğerler do
-    if ADeğer = değer then begin
+  for deÄŸer in ADeÄŸerler do
+    if ADeÄŸer = deÄŸer then begin
       Result := True;
       Exit;
     end;
@@ -2023,9 +2023,9 @@ begin
     Result := '0' + Result;
 end;
 
-{ SenaryoYönetimi }
+{ SenaryoYÃ¶netimi }
 
-class function SenaryoYönetimi.MetinDizeIsle(AKaynak: string;
+class function SenaryoYÃ¶netimi.MetinDizeIsle(AKaynak: string;
   ADegiskenler: TStringList): string;
 
   function DoTableFieldValue(p: TParser): string;
@@ -2033,11 +2033,11 @@ class function SenaryoYönetimi.MetinDizeIsle(AKaynak: string;
     i : Integer;
   begin
     if (not Assigned(ADegiskenler)) then
-      raise EInvalidOperation.Create('İç hata ! : 1000');
+      raise EInvalidOperation.Create('Ä°Ã§ hata ! : 1000');
     Result := '';
     if (p.Token = '@') then begin
       if p.NextToken = '@' then begin
-        // Değişken
+        // DeÄŸiÅŸken
         // bundan sonra sembol gelmeli!!!
         p.NextToken;
         p.CheckToken(toSymbol);
@@ -2075,9 +2075,9 @@ class function SenaryoYönetimi.MetinDizeIsle(AKaynak: string;
       Classes.toString: begin
         Result := p.TokenString;
       end;
-      '~': begin // değişken
+      '~': begin // deÄŸiÅŸken
         if (not Assigned(ADegiskenler)) then
-          raise Exception.Create('İç hata 1000'); 
+          raise Exception.Create('Ä°Ã§ hata 1000'); 
         p.NextToken;
         p.CheckToken(toSymbol);
         Result := ADegiskenler.Values[p.TokenString];
@@ -2122,7 +2122,7 @@ class function SenaryoYönetimi.MetinDizeIsle(AKaynak: string;
           p.CheckToken(',');
           p.NextToken;
           tmp1 := DoStatement(p);
-          if tmp1 = '0' then // branş çocuk değilse
+          if tmp1 = '0' then // branÅŸ Ã§ocuk deÄŸilse
             Result := tmp2
           else
             Result := IntToStr(YasYil) + 'y ' + IntToStr(YasAy) + 'a ' + IntToStr(YasGun) + 'g';
@@ -2203,7 +2203,7 @@ class function SenaryoYönetimi.MetinDizeIsle(AKaynak: string;
           p.NextToken;
           p.CheckToken(',');
           p.NextToken;
-          tmp2 := DoStatement(p); // tarih formatı
+          tmp2 := DoStatement(p); // tarih formatÄ±
           if tmp1 <> '' then
             Result := FormatDateTime(tmp2,StrToDateTime(tmp1))
           else
@@ -2233,7 +2233,7 @@ begin
   end;
 end;
 
-class function SenaryoYönetimi.PascalKodunaDonustur(
+class function SenaryoYÃ¶netimi.PascalKodunaDonustur(
   AKodlanmisDize: string): string;
 type
   TTagInfo = record
@@ -2330,23 +2330,23 @@ var
     if F > 0 then begin
       { Kodlama sembollerini kontrol ediyoruz }
       if Copy(AKodlanmisDize,F + Length(AStartTag),1) = '=' then begin
-        {Burada belirtilen kod _write kullanarak çıktıya yansıtılmalı gerektiğini bildiriyor}
+        {Burada belirtilen kod _write kullanarak Ã§Ä±ktÄ±ya yansÄ±tÄ±lmalÄ± gerektiÄŸini bildiriyor}
         Result.WriteDirective := True;
-        { Değer çıkarma işlevlerinin düzgün çalışması için = sembolünü geçmesini sağlıyoruz }
+        { DeÄŸer Ã§Ä±karma iÅŸlevlerinin dÃ¼zgÃ¼n Ã§alÄ±ÅŸmasÄ± iÃ§in = sembolÃ¼nÃ¼ geÃ§mesini saÄŸlÄ±yoruz }
         AStartTag := AStartTag + '=';
         //AStartPos := AStartPos + 1;
       end else if Copy(AKodlanmisDize,F + Length(AStartTag),1) = '*' then begin
-        {Burada belirtilen kod bir başlık bilgisi olduğunu function,var gibi
-          global olarak kullanılan ifade içerdiğini bildiriyor}
+        {Burada belirtilen kod bir baÅŸlÄ±k bilgisi olduÄŸunu function,var gibi
+          global olarak kullanÄ±lan ifade iÃ§erdiÄŸini bildiriyor}
         Result.HeaderBlock := True;
         AStartTag := AStartTag + '*';
-        { Değer çıkarma işlevlerinin düzgün çalışması için * sembolünü geçmesini sağlıyoruz }
+        { DeÄŸer Ã§Ä±karma iÅŸlevlerinin dÃ¼zgÃ¼n Ã§alÄ±ÅŸmasÄ± iÃ§in * sembolÃ¼nÃ¼ geÃ§mesini saÄŸlÄ±yoruz }
       end;
       { Kapama etiketini buluyoruz }
       F2 := PosEx(AEndTag,AKodlanmisDize,F + Length(AStartTag));
-      { Bu etiketten önce bir girdi var ise bunları _write ile yazıyoruz }
+      { Bu etiketten Ã¶nce bir girdi var ise bunlarÄ± _write ile yazÄ±yoruz }
       Result.BeginEndBlock := Result.BeginEndBlock + _Write(Copy(AKodlanmisDize,AStartPos,(F) - AStartPos));
-      { Etiketler arasındaki kod kısımını yazıyoruz }
+      { Etiketler arasÄ±ndaki kod kÄ±sÄ±mÄ±nÄ± yazÄ±yoruz }
       S := TrimRight(Copy(AKodlanmisDize,F + Length(AStartTag), F2 - (F + Length(AStartTag))));
 
       if Result.WriteDirective then
@@ -2357,7 +2357,7 @@ var
         Result.HeaderString := S
       else
         Result.BeginEndBlock := Result.BeginEndBlock + S;
-      { Son pozisyon güncellemesini yapıyor F2 değişkeni  --> %> % işaretini gösteriyor. }
+      { Son pozisyon gÃ¼ncellemesini yapÄ±yor F2 deÄŸiÅŸkeni  --> %> % iÅŸaretini gÃ¶steriyor. }
       Result.LastPosition := F2 + Length(AEndTag);
       Result.Processed := True;
     end;
@@ -2369,32 +2369,32 @@ begin
   Header := '';
   try
     repeat
-      {Kod bloğu var mı bakıyoruz }
+      {Kod bloÄŸu var mÄ± bakÄ±yoruz }
       ti := DoCodeBlock(CurPos,'<%','%>');
-      { Bu çağırmadan birşey işlenmiş mi? }
+      { Bu Ã§aÄŸÄ±rmadan birÅŸey iÅŸlenmiÅŸ mi? }
       if ti.Processed then begin
-        {Bu kod başlık bloğu mu ?}
+        {Bu kod baÅŸlÄ±k bloÄŸu mu ?}
         if ti.HeaderBlock then begin
           Header := Header + ti.HeaderString;
           BeginEndBlock := BeginEndBlock + ti.BeginEndBlock;
         end
-        { Bu kod sadece _write kullanarak direk yazılması gereken bişey mi ? Örn. bir değişken }
+        { Bu kod sadece _write kullanarak direk yazÄ±lmasÄ± gereken biÅŸey mi ? Ã–rn. bir deÄŸiÅŸken }
         else BeginEndBlock := BeginEndBlock + ti.BeginEndBlock;
-        { Hep aynı şeyleri bulmaması için Pozisyonu değiştiriyoruz }
+        { Hep aynÄ± ÅŸeyleri bulmamasÄ± iÃ§in Pozisyonu deÄŸiÅŸtiriyoruz }
         CurPos := ti.LastPosition;
       end;
     until not ti.Processed;
   finally
     if (BeginEndBlock = '') then begin
-      { Hiç pascal kodu içermiyor }
-      { O zaman tamamını _write ile çevreliyoruz }
+      { HiÃ§ pascal kodu iÃ§ermiyor }
+      { O zaman tamamÄ±nÄ± _write ile Ã§evreliyoruz }
       BeginEndBlock := BeginEndBlock + _Write(AKodlanmisDize);
 //      CurPos := Length(AKodlanmisDize);
     end else if CurPos < Length(AKodlanmisDize) then begin
-      { Sonda kalanlarıda _write ile çevreliyoruz }
+      { Sonda kalanlarÄ±da _write ile Ã§evreliyoruz }
       BeginEndBlock := BeginEndBlock + _Write(Copy(AKodlanmisDize,CurPos,(Length(AKodlanmisDize) - CurPos) + 1 ));
     end;
-    {Pascal kod bloğunu inşa ediyoruz }
+    {Pascal kod bloÄŸunu inÅŸa ediyoruz }
     Result := Header + 'begin'#13#10 + BeginEndBlock + 'end.'#13#10;
     //ShowMessage(Result);
     //stringToFile('c:\sql_out.txt',Result);
@@ -2420,7 +2420,7 @@ begin
   end;
 end;
 
-class procedure DosyaSistemi.Dizin.ŞuAnkiDizindekiDosyalar(AUzanti: string;
+class procedure DosyaSistemi.Dizin.ÅuAnkiDizindekiDosyalar(AUzanti: string;
   AListe: TStrings);
 var
   SearchRec: TSearchRec;
@@ -2769,7 +2769,7 @@ end;
 
 { Kultur }
 
-class function Kültür.IkiHarfliDilAdi: string;
+class function KÃ¼ltÃ¼r.IkiHarfliDilAdi: string;
 var
  pcLCA: Array[0..20] of Char;
 begin

@@ -1,4 +1,4 @@
-unit USifre;
+ï»¿unit USifre;
 
 interface
 
@@ -64,7 +64,7 @@ begin
     p.Address:=sl.Values['SERVER NAME'];
     if p.Address='.' then p.Address := '127.0.0.1';
     if P.Ping = 0 then
-       if Application.MessageBox(PChar('''+p.Address+'' adlý bilgisayara ulaþýlamýyor.'#13'Kablolarýnýzý kontrol edin..'#13'Devam etsin mi?'), 'Dikkat! Network hatasý!!!',MB_YESNO)<>IDYES then
+       if Application.MessageBox(PChar('''+p.Address+'' adlÄ± bilgisayara ulaÅŸÄ±lamÄ±yor.'#13'KablolarÄ±nÄ±zÄ± kontrol edin..'#13'Devam etsin mi?'), 'Dikkat! Network hatasÄ±!!!',MB_YESNO)<>IDYES then
           halt;
   finally
     sl.Free;
@@ -91,7 +91,7 @@ begin
 
       if Tablo.KullaniciBilgisi(KullanAdi, Modul) then
          if not (Tablo.TabKulHar.FieldByName('GORME').AsString='1') then begin
-            Showmessage('Modülü kullanma yetki kodu bulunamadý..');
+            Showmessage('ModÃ¼lÃ¼ kullanma yetki kodu bulunamadÄ±..');
             halt;
           end;
    end
@@ -130,7 +130,7 @@ begin
   BilgisayarKodu := GenRegIni.RegReadString('','BilgisayarKodu', '','C');
 end;
 
-procedure TPasswordDlg.ServisGetir(sa:String); //// SERVÝS, AMELIYATHANE
+procedure TPasswordDlg.ServisGetir(sa:String); //// SERVÄ°S, AMELIYATHANE
 begin
    Uzmanlik.Clear;
    Tablo.Query1.Close;
@@ -207,13 +207,13 @@ begin
    Sifre := PassWord.Text;
    if (Sifre<>'')and(GenotipIni.ReadString('GenelOpsiyon', Sifre, '') <>'') then begin
       KullanAdi := GenotipIni.ReadString('GenelOpsiyon', Sifre, '');
-      if Tablo.KullaniciBilgisi(KullanAdi, 'Geçici') then Sifresizler := 4
+      if Tablo.KullaniciBilgisi(KullanAdi, 'GeÃ§ici') then Sifresizler := 4
       else if Tablo.KullaniciBilgisi(KullanAdi, 'Kimlik-Grup') then Sifresizler := 1
       else if Tablo.KullaniciBilgisi(KullanAdi, 'Fat.No suz') then Sifresizler := 2
-      else if Tablo.KullaniciBilgisi(KullanAdi, 'KDV (Hariç)') then Sifresizler := 3
+      else if Tablo.KullaniciBilgisi(KullanAdi, 'KDV (HariÃ§)') then Sifresizler := 3
    end;
    Kapat := True;
-   if TabKullan.RecordCount > 0 then  {kütük boþ deðilse}
+   if TabKullan.RecordCount > 0 then  {kÃ¼tÃ¼k boÅŸ deÄŸilse}
       if (TabKullan.Locate('KULLANICIADI',KullanAdi, []))and(Sifre = TabKullan.FieldByName('SIFRE').AsString) then begin
           if BilgisayarKodu<>'' then
              Kullanan:= BilgisayarKodu
@@ -233,7 +233,7 @@ begin
            end;
    if not Kapat then begin
       Inc(YanlisSay);
-      MessageDlg('Geçersiz Kullanýcý Adý veya Þifre', mtInformation, [mbOK], 0);
+      MessageDlg('GeÃ§ersiz KullanÄ±cÄ± AdÄ± veya Åžifre', mtInformation, [mbOK], 0);
       if YanlisSay > 4 then Begin
          TabKullan.Edit;
          TabKullan.FieldByName('GORUNMESIN').AsString := 'X';
@@ -276,7 +276,7 @@ procedure TPasswordDlg.Image1Click(Sender: TObject);
 var Sifre1, Sifre2:String;
 begin
    if (ComboAd.Text = '')or(Password.Text = '')then begin
-      showmessage('Önce Kullanýcý Adý ve Parolayý Giriniz..');
+      showmessage('Ã–nce KullanÄ±cÄ± AdÄ± ve ParolayÄ± Giriniz..');
       exit;
    end;
 
@@ -284,20 +284,20 @@ begin
    Sifre := PassWord.Text;
    if (TabKullan.Locate('KULLANICIADI',KullanAdi ,[]))and(Sifre = TabKullan.FieldByName('SIFRE').AsString) then begin
       Sifre1:=''; Sifre1:='';
-      if not MesajStrAl('', 'Yeni þifreyi giriniz : ','P',nil,Sifre1, 'Yeni þifreyi bir kez daha giriniz :','P',nil, Sifre2) then
+      if not MesajStrAl('', 'Yeni ÅŸifreyi giriniz : ','P',nil,Sifre1, 'Yeni ÅŸifreyi bir kez daha giriniz :','P',nil, Sifre2) then
          exit;
 
       if Sifre1 <> Sifre2 then
-         showmessage('Þifre Giriþleri Uyumsuz!!! Deðiþtirilemedi...')
+         showmessage('Åžifre GiriÅŸleri Uyumsuz!!! DeÄŸiÅŸtirilemedi...')
       else begin
             Tablo.Query1.Close;
             Tablo.Query1.SQL.Text := 'UPDATE KULLAN SET SIFRE='''+Sifre1+''' where KULLANICIADI = ''' + KullanAdi +'''';
             Tablo.Query1.ExecSQL;
-            showmessage('Þifre baþarýyla deðiþtirildi...');
+            showmessage('Åžifre baÅŸarÄ±yla deÄŸiÅŸtirildi...');
           end;
     end
     else
-       showmessage('Geçersiz Þifre...')
+       showmessage('GeÃ§ersiz Åžifre...')
 end;
 
 procedure TPasswordDlg.FormKeyPress(Sender: TObject; var Key: Char);

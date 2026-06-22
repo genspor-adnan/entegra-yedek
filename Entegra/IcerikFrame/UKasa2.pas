@@ -1,4 +1,4 @@
-unit UKasa;
+ï»¿unit UKasa;
 //tcxintl not found cxintl1
 interface
 
@@ -140,7 +140,7 @@ type
   private
     { private declarations }
     SonKaydedilenSiraNo :Integer;
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TGunlukAksiyonAramaFrame;
     procedure GorunurOlacak;
@@ -238,7 +238,7 @@ begin
   FArama.CheckFat.Checked := RehberIni.ReadBool('KasaEkran', 'Tahakkuk', True);
   FArama.CheckKasa.Checked := RehberIni.ReadBool('KasaEkran', 'Kasa', True);
   FArama.CheckBanka.Checked := RehberIni.ReadBool('KasaEkran', 'Banka', True);
-  FArama.CheckCekSenet.Checked := RehberIni.ReadBool('KasaEkran', 'ÇekveSenet', True);
+  FArama.CheckCekSenet.Checked := RehberIni.ReadBool('KasaEkran', 'Ã‡ekveSenet', True);
   FArama.CheckPlan.Checked := RehberIni.ReadBool('KasaEkran', 'Plan', True);
   FArama.CheckTop.Checked := RehberIni.ReadBool('KasaEkran', 'Toplamlar', True);
   FArama.ChStok.Checked := RehberIni.ReadBool('KasaEkran', 'StoktanGirisler', True);
@@ -314,17 +314,17 @@ Var CekSenetId, s:String;
     Giren, Cikan : Currency;
 begin
   if (TabKasa.FieldByName('ONAY').AsString <> '') and (not Super) then
-    raise Exception.Create('Kesinleşmiş kayıt..');
+    raise Exception.Create('KesinleÅŸmiÅŸ kayÄ±t..');
   vbKasaSirano := TabKasa.FieldByName('ID').AsInteger;
 
-  /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
+  /// SQL2005 TE hataya neden olduÄŸu iÃ§in delete olayÄ±nÄ± kendimiz yapÄ±yoruz
 
   Hid := TabKasa.FieldByName('HESAPID').AsInteger;
   Tur := TabKasa.FieldByName('TUR').AsInteger;
   Giren := TabKasa.FieldByName('GIREN').AsCurrency;
   Cikan := TabKasa.FieldByName('CIKAN').AsCurrency;
 
-  if Tur=111 then begin //eğer kredi ödemesi ise ödendi işaretini kaldıralım
+  if Tur=111 then begin //eÄŸer kredi Ã¶demesi ise Ã¶dendi iÅŸaretini kaldÄ±ralÄ±m
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := 'update PLANKREDI set ODENMIS = 0 where ID=' +TabKasa.FieldByName('KREDIID').AsString  + ' and  KREDIID='+TabKasa.FieldByName('FATURAID').AsString;
      Tablo.Query1.ExecSQL;
@@ -358,7 +358,7 @@ begin
   Calendar1Change(Self);
 
 
-  /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
+  /// SQL2005 TE hataya neden olduÄŸu iÃ§in delete olayÄ±nÄ± kendimiz yapÄ±yoruz
   Abort;
 
   //   Tablo.LogIslemleri('Cari', 'Silme', TabKasa, True);
@@ -479,7 +479,7 @@ end;
 
 procedure TKasaDlg.CheckCekSenetClick(Sender: TObject);
 begin
-  RehberIni.WriteBool('KasaEkran', 'ÇekveSenet', FArama.CheckCekSenet.Checked);
+  RehberIni.WriteBool('KasaEkran', 'Ã‡ekveSenet', FArama.CheckCekSenet.Checked);
   Calendar1Change(Self);
 end;
 
@@ -598,7 +598,7 @@ end;
 procedure TKasaDlg.SilTusClick(Sender: TObject);
 begin
    if TabKasa.FieldByName('TUR').AsInteger  in [1,2] then
-      raise Exception.Create('Açılış fişi veya devir kaydı silinemez!!');
+      raise Exception.Create('AÃ§Ä±lÄ±ÅŸ fiÅŸi veya devir kaydÄ± silinemez!!');
    if Application.MessageBox('Bu aksiyon silinsin mi?', 'O N A Y', MB_YESNO) = IDYES then
       KasaSilmeIslemleri;
 end;
@@ -825,13 +825,13 @@ initialization
 end.
 
 {
-Emre: stoktaki iade çıkış bölümü var firmalara iade faturalarının kesildiği bölüm, bu faturaları da gentegre de görmek istiyor malatya
+Emre: stoktaki iade Ã§Ä±kÄ±ÅŸ bÃ¶lÃ¼mÃ¼ var firmalara iade faturalarÄ±nÄ±n kesildiÄŸi bÃ¶lÃ¼m, bu faturalarÄ± da gentegre de gÃ¶rmek istiyor malatya
 
 
 Emre Baytar is online.
-Emre: giriş faturaları firma carisine yansıyor ama iadeler yapılmamış şimdi denedik de
+Emre: giriÅŸ faturalarÄ± firma carisine yansÄ±yor ama iadeler yapÄ±lmamÄ±ÅŸ ÅŸimdi denedik de
 bunu da eklermisiniz
-ahmet le konusursunuz nasıl olacağını sanırm
+ahmet le konusursunuz nasÄ±l olacaÄŸÄ±nÄ± sanÄ±rm
 }
 
 

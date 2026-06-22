@@ -1,4 +1,4 @@
-unit UKategori;
+ï»¿unit UKategori;
 
 interface
 
@@ -153,7 +153,7 @@ begin
   if PageKontrolSag.ActivePage=TabPageMuhasebe then begin
     TabloYenile(TabMuhasebeKod,[KATEGORI.FieldByName('ID').AsInteger]);
     if TabMuhasebeKod.RecordCount=0 then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
          ' YER=355, YER_ID=&KATEGORIID,MUHASEBEID=DEGER,EKLEYEN=&EKLEYEN FROM GENINI WHERE'+
          ' BOLUM=-2755',['&KATEGORIID','&EKLEYEN'],[KATEGORI.FieldByName('ID').AsInteger,Kullanan]);
          TabloYenile(TabMuhasebeKod, [KATEGORI.FieldByName('ID').AsInteger]);
@@ -179,7 +179,7 @@ end;
 procedure TKategoriDlg.cxDBTreeList1cxDBTreeListSECPropertiesChange(Sender: TObject);
 begin
    Kategori.Post;
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set SEC='+IntToStr(Abs(StrToInt(BoolToStr(KATEGORI.FieldByName('SEC').AsBoolean))))+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set SEC='+IntToStr(Abs(StrToInt(BoolToStr(KATEGORI.FieldByName('SEC').AsBoolean))))+
     ' where KOD like '''+ KATEGORI.FieldByName('KOD').AsString+'%'' ',[],[]);
    TabloYenile(KATEGORI, []);
 end;
@@ -194,7 +194,7 @@ begin
      if PageKontrolSag.ActivePage=TabPageMuhasebe then begin
     TabloYenile(TabMuhasebeKod,[KATEGORI.FieldByName('ID').AsInteger]);
     if TabMuhasebeKod.RecordCount=0 then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'INSERT INTO dbo.MUHASEBEKOD (YER,YER_ID,MUHASEBEID,EKLEYEN)SELECT'+
          ' YER=355, YER_ID=&KATEGORIID,MUHASEBEID=DEGER,EKLEYEN=&EKLEYEN FROM GENINI WHERE'+
          ' BOLUM=-2755',['&KATEGORIID','&EKLEYEN'],[KATEGORI.FieldByName('ID').AsInteger,Kullanan]);
          TabloYenile(TabMuhasebeKod, [KATEGORI.FieldByName('ID').AsInteger]);
@@ -238,7 +238,7 @@ begin
   end;
   if Cagiran = 3 then begin //say?m ekran?ndan ?a?r?l?yorsa
      cxDBTreeList1cxDBTreeListSEC.Visible := True;
-     veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set SEC=1',[],[]);
+     veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set SEC=1',[],[]);
   end;
   Listele;
 end;
@@ -287,13 +287,13 @@ end;
 
 procedure TKategoriDlg.HepsiniBrakMenuClick(Sender: TObject);
 begin
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set SEC=0',[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set SEC=0',[],[]);
    Listele;
 end;
 
 procedure TKategoriDlg.HepsiniSecMenuClick(Sender: TObject);
 begin
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set SEC=1',[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set SEC=1',[],[]);
    Listele;
 end;
 
@@ -328,11 +328,11 @@ begin
    if (TabKategori.FindField('DIGITSAY') <> nil) and TabKategori.FieldByName('DIGITSAY').IsNull then
       TabKategori.FieldByName('DIGITSAY').AsInteger := 0;
    {if TabKategori.FieldByName('MARKETSATIS').AsBoolean<>TabKategori.FieldByName('MARKETSATIS').OldValue then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set MARKETSATIS=Abs('+BoolToStr(TabKategori.FieldByName('MARKETSATIS').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set MARKETSATIS=Abs('+BoolToStr(TabKategori.FieldByName('MARKETSATIS').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
    if TabKategori.FieldByName('RESTSATIS').AsBoolean<>TabKategori.FieldByName('RESTSATIS').OldValue then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set RESTSATIS=Abs('+BoolToStr(TabKategori.FieldByName('RESTSATIS').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set RESTSATIS=Abs('+BoolToStr(TabKategori.FieldByName('RESTSATIS').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
    if TabKategori.FieldByName('TRANSFER').AsBoolean<>TabKategori.FieldByName('TRANSFER').OldValue then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set TRANSFER=Abs('+BoolToStr(TabKategori.FieldByName('TRANSFER').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set TRANSFER=Abs('+BoolToStr(TabKategori.FieldByName('TRANSFER').AsBoolean)+') where KOD like '''+TabKategori.FieldByName('KOD').AsString+'.%'' ',[],[]);
    }
 end;
 
@@ -348,7 +348,7 @@ end;
 
 procedure TKategoriDlg.TersCevirMenuClick(Sender: TObject);
 begin
-   veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update KATEGORI set SEC=case when SEC=1 then 0 else 1 end ',[],[]);
+   veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update KATEGORI set SEC=case when SEC=1 then 0 else 1 end ',[],[]);
    Listele;
 end;
 

@@ -1,4 +1,4 @@
-unit Lib.JWT;
+﻿unit Lib.JWT;
 
 { Java Web Tokens }
 

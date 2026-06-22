@@ -1,4 +1,4 @@
-unit USatinAlmaWizard;
+ï»¿unit USatinAlmaWizard;
 
 interface
 
@@ -255,14 +255,14 @@ DepoField:string;
 begin
   TeklifID :=TabTeklif.FieldByName('ID').AsInteger;
   if Veritabani.VeriVarMi(Tablo.FDCnn,'Select * from SIPARISDETAY Where YERI='''+TMenuItem(Sender).Hint+''' and YERID in (select ID from TEKLIFDETAY where TEKLIFID='+IntToStr(TeklifID)+')',[],[]) then begin
-    Application.MessageBox('Bu Teklifin sipariþi oluþturulmuþtur.',PChar(Uyari),MB_OK);
+    Application.MessageBox('Bu Teklifin sipariÅŸi oluÅŸturulmuÅŸtur.',PChar(Uyari),MB_OK);
     Abort;
   end;
 
   if TabTeklif.FieldByName('DURUM').AsInteger = 7 then begin
     VarsDepoID:=VarsDepo
     case TMenuItem(Sender).Tag of
-     9: begin      //Alýþ Belgesi--->  Verilen Sipariþ ise
+     9: begin      //AlÄ±ÅŸ Belgesi--->  Verilen SipariÅŸ ise
           Tur:=9;
           RehID := Tablo.RehberAra_IDGetir(-1);
           if RehID < 1 then
@@ -273,11 +273,11 @@ begin
           DepoField:='[GIRISDEPO]';
           DonusTipi:=TabNo_DONUSUM_TEKLIF_ALIS_SIPARIS;
         end;
-     19:begin       //Satýþ Belgesi ---> Alýnan sipariþ ise
+     19:begin       //SatÄ±ÅŸ Belgesi ---> AlÄ±nan sipariÅŸ ise
           Tur:=19;
           RehID:=TabTeklif.FieldByName('REHBERID').AsInteger;
           if TabTeklif.FieldByName('REHBERILETID').AsInteger < 1 then begin
-            ShowMessage('Sevk adresi boþ olamaz.');
+            ShowMessage('Sevk adresi boÅŸ olamaz.');
             Abort;
           end;
           FirmaRehID:= RehID;
@@ -287,9 +287,9 @@ begin
         end;
     end;
 
-    //Firma Baþlýk bilgileri
+    //Firma BaÅŸlÄ±k bilgileri
     TabloYenile(Tablo.tabCariBilgileri, [FirmaRehID,TabTeklif.FieldByName('REHBERILETID').AsInteger]);
-      // Sipariþ Tablosuna kayýt
+      // SipariÅŸ Tablosuna kayÄ±t
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text:='INSERT INTO [SIPARIS] ([TARIH],[TUR],[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[SIPARISTARIH],[SIPARISSERI],'+
     ' [KOCANNO],[SIPARISNO],'+DepoField+',[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[SIPARIS_MATRAHI],[KDV_TUTARI],'+
@@ -304,7 +304,7 @@ begin
     ' [FIYAT_LISTESI],[TESLIM_SEKLI],[ODEME],[VADE],[MUS_ILGILI],'+IntToStr(DonusTipi)+',T.ID,TEKLIFNO,HAZIRLAYAN,1,[REHBERILETID],T.SUBEID '+
     ' FROM [TEKLIF] T left outer join REHBERBILGI RB on T.REHBERID=RB.YER_ID Where T.ID='+IntToStr(TeklifID) +' select scope_identity() ';
     Tablo.Query1.Open;
-    //SipariþDetay tablosuna kayýt
+    //SipariÅŸDetay tablosuna kayÄ±t
     Tablo.Query2.Close;
     Tablo.Query2.SQL.Text:='INSERT INTO [SIPARISDETAY]([SIPARISID],[REHBERID],[TUR],[URUNID],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR]'+
     ' ,[BIRIMFIYAT],[TUTAR],[ISKONTO],[KDV],[MASRAFID],[KUR],[DOVIZ_TUTARI],[DOVIZ_KURU],[TESLIMTARIHI],[ISKONTO2],[IZLEME],'+
@@ -326,10 +326,10 @@ end;
 procedure TSatinAlmaWizard.btnSiparisSilClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-      //varsa dokumanlarýn silinmeli
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI in (19) and YER_ID=&yer_id ',['&yer_id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from SIPARISDETAY where SIPARISID=&Id ', ['&Id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
+      //varsa dokumanlarÄ±n silinmeli
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI in (19) and YER_ID=&yer_id ',['&yer_id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from SIPARISDETAY where SIPARISID=&Id ', ['&Id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
 
 
       TabloYenile(TabSiparisler,[SatinAlmaID]);
@@ -371,10 +371,10 @@ end;
 procedure TSatinAlmaWizard.btnTeklifSilClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     //varsa dokumanlarýn silinmeli
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI in (81) and YER_ID=&yer_id ',['&yer_id'], [TabTeklifler.FieldbyName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklifler.FieldbyName('ID').AsInteger]);
-     Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklifler.FieldbyName('ID').AsInteger]);
+     //varsa dokumanlarÄ±n silinmeli
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI in (81) and YER_ID=&yer_id ',['&yer_id'], [TabTeklifler.FieldbyName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklifler.FieldbyName('ID').AsInteger]);
+     Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklifler.FieldbyName('ID').AsInteger]);
 
      TabloYenile(TabTeklifler,[SatinAlmaID]);
      Abort;
@@ -397,7 +397,7 @@ end;
 
 procedure TSatinAlmaWizard.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
   Tablo.GridTurkcelestir;
 end;
@@ -466,7 +466,7 @@ begin
   TeklifURL := 'http://'+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_GenYazilimIPAdress,'genupdate.genyazilim.com')+'/GentegreTeklif/Default.aspx?companyid='+
     UGenSifre.Sifre(IntToStr(RehberId)) +'&teklifid='+UGenSifre.Sifre(SatinAlmaWizard.TabTeklifler.FieldByName('ID').AsString);
 
-  //Tekliflerde öncelik: ilgilinin maili varsa ona gider,ilgili yoksa kuruma gider,ikisindede yoksa girin uyarýsý verilir.
+  //Tekliflerde Ã¶ncelik: ilgilinin maili varsa ona gider,ilgili yoksa kuruma gider,ikisindede yoksa girin uyarÄ±sÄ± verilir.
   Tablo.TablodanSorguAc(1,'SELECT * FROM REHBERBILGI RB INNER JOIN REHBERAYAR RA (nolock) '+
      'ON RA.YERI=1 and RA.SIRA=RB.SIRA  AND RA.YERI=RB.YERI '+
      'WHERE RA.VARSAYILAN=46 AND RB.SIRA=16 AND YER_ID='+ IntToStr(RehberId) +'');
@@ -483,7 +483,7 @@ begin
   Mailsayi := Tablo.EMailSayisiGetir(RehberId); //mail adetini buluyor
 
   if mailsayi > 1 then
-  begin    // Birden fazla mail adresi varsa mail seçim ekrani getirilip oradan mail adresleri seçiliyor ve mail gönderiliyor.
+  begin    // Birden fazla mail adresi varsa mail seÃ§im ekrani getirilip oradan mail adresleri seÃ§iliyor ve mail gÃ¶nderiliyor.
     SetLength(gmail,100);
     maill.kime := TStringList.Create;
     maill.bilgi := TStringList.Create;
@@ -500,7 +500,7 @@ begin
   end
   else
   begin
-    Tablo.RehberEkBilgileriniGetir(RehberId,1,[RehVars_EPosta],Etiketler,Bilgiler); //Bir tane mail adresi var ise mail adresi alinip mail gönderiliyor.
+    Tablo.RehberEkBilgileriniGetir(RehberId,1,[RehVars_EPosta],Etiketler,Bilgiler); //Bir tane mail adresi var ise mail adresi alinip mail gÃ¶nderiliyor.
     maill.kime := TStringList.Create;
     maill.bilgi := TStringList.Create;
 
@@ -552,9 +552,9 @@ CellVal := '';
 
        if CellName ='PGTEKLIFONAY' then begin
          if CellVal = '1' then
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY = 0 Where YERI=463 and YERID=3 and ID='+CellValOnceki+'',[],[])
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY = 0 Where YERI=463 and YERID=3 and ID='+CellValOnceki+'',[],[])
          else
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY = 1 Where YERI=463 and YERID=3 and ID='+CellValOnceki+'',[],[]);
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY = 1 Where YERI=463 and YERID=3 and ID='+CellValOnceki+'',[],[]);
          TabloYenile(TabDegerlendirme,[SatinAlmaID]);
        end;
 
@@ -641,7 +641,7 @@ procedure TSatinAlmaWizard.TabSatinAlmaNewRecord(DataSet: TDataSet);
 var
   talepNo:Variant;
 begin
-  talepNo := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT (MAX(TALEPNO)+1) FROM SATINALMA',[],[],true);
+  talepNo := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'SELECT (MAX(TALEPNO)+1) FROM SATINALMA',[],[],true);
   if talepNo = null then talepNo := 1;
 
   TabSatinAlma.FieldByName('SUBEID').AsInteger := SubeId;
@@ -649,7 +649,7 @@ begin
   TabSatinAlma.FieldByName('TALEPTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
   TabSatinAlma.FieldByName('TALEPNO').AsString := talepNo;
   TabSatinAlma.FieldByName('EKLEYEN').AsString := Kullanan;
-  TabSatinAlma.FieldByName('ASAMA').AsInteger := Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'SELECT DEGER FROM GENINI (NOLOCK) WHERE BOLUM='+IntToStr(Ops_SatinAlma_Asama)+' AND ANAHTAR=''Talep''',[],[],true);
+  TabSatinAlma.FieldByName('ASAMA').AsInteger := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'SELECT DEGER FROM GENINI (NOLOCK) WHERE BOLUM='+IntToStr(Ops_SatinAlma_Asama)+' AND ANAHTAR=''Talep''',[],[],true);
   BETalepEden.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Kullanan);
   TabSatinAlma.FieldByName('TALEPEDEN').AsString := Kullanan;
 end;
@@ -671,9 +671,9 @@ end;
 
 procedure TSatinAlmaWizard.utarendkolanlaronayla1Click(Sender: TObject);
 begin
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY=0 Where YERI=463 and YERID='+IntToStr(SatinAlmaID),[],[]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY=0 Where YERI=463 and YERID='+IntToStr(SatinAlmaID),[],[]);
 
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY=1 Where ID in (Select TD.ID from TEKLIFDETAY TD '+
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'Update TEKLIFDETAY set TEKLIFONAY=1 Where ID in (Select TD.ID from TEKLIFDETAY TD '+
      ' Where TD.YERI=463 and TD.YERID='+IntToStr(SatinAlmaID)+' and TUTAR=(Select min(TUTAR) from TEKLIFDETAY where URUNID=TD.URUNID ))',[],[]);
 
    TabloYenile(TabDegerlendirme,[SatinAlmaID]);
@@ -742,11 +742,11 @@ end;
 function TSatinAlmaWizard.BoslukKontrolu: Boolean;
 begin
    BoslukKontrolu := True;
-   if not BoslukKontrol(EditTalepNo.text, 'Talep numarasý') then Abort;
+   if not BoslukKontrol(EditTalepNo.text, 'Talep numarasÄ±') then Abort;
    if not BoslukKontrol(ComboDURUM.text, KontrolDurum) then Abort;
    if not BoslukKontrol(DateTalepTarihi.text, 'Talep tarihi') then Abort;
    if not BoslukKontrol(BETalepEden.text, 'Talep eden') then Abort;
-   if not BoslukKontrol(ComboBolum.text, 'Talep eden bölüm') then Abort;
+   if not BoslukKontrol(ComboBolum.text, 'Talep eden bÃ¶lÃ¼m') then Abort;
    BoslukKontrolu := False;
 end;
 

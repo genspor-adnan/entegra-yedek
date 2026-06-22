@@ -1,4 +1,4 @@
-unit UCekler;
+ï»¿unit UCekler;
 
 interface
 
@@ -125,7 +125,7 @@ type
     procedure BtnCiroSilClick(Sender: TObject);
   private
     { Private declarations }
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
     procedure GorunurOlacak;
@@ -147,7 +147,7 @@ type
       MousePos: TPoint; var Handled: Boolean);
     function GetFrameBilgi : TIcerikFrameBilgi;
     procedure SetFrameBilgi(AValue : TIcerikFrameBilgi);
-    { Gezinme ve yazdýrma desteði }
+    { Gezinme ve yazdÄ±rma desteÄŸi }
     function GezinmeAktifMi : Boolean;
     function YazdirmaAktifMi : Boolean;
     procedure GezinmeBagla(ADBNavigator : TDBNavigator);
@@ -171,8 +171,8 @@ Uses Utablo, UReharadlg, UAnaForm, FetaClassExtensions, UAramaYokFrame,
 var
    EskiRehberID : Integer;
 Resourcestring
-    CekKasaHareketiHatasi=  'Tahsilatý bulunan çek kaydý silinemez!';
-    CekHareketHareketiHatasi =  'Hareket görmüþ çek kaydý silinemez!';
+    CekKasaHareketiHatasi=  'TahsilatÄ± bulunan Ã§ek kaydÄ± silinemez!';
+    CekHareketHareketiHatasi =  'Hareket gÃ¶rmÃ¼ÅŸ Ã§ek kaydÄ± silinemez!';
 
 
 procedure TCekDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -192,7 +192,7 @@ end;
 procedure TCekDlg.BtnCekTarihcesiClick(Sender: TObject);
 begin
   if DtsCekler.State in [dsEdit,dsInsert] then
-     raise Exception.Create('Lütfen Kayýt Ýþlemini Tamamlayýn.')
+     raise Exception.Create('LÃ¼tfen KayÄ±t Ä°ÅŸlemini TamamlayÄ±n.')
   Else
      cxGridTarihce.Visible := Not cxGridTarihce.Visible;
   BtnCiroEkle.Visible := cxGridTarihce.Visible;
@@ -204,7 +204,7 @@ begin
      TabCekHareketler.Params[2].Value:=TabCekler.FieldByName('ID').AsInteger;
      TabCekHareketler.Open;
   end;
-  //BtnCiroSil.Visible := TabCekHareketler.RecordCount>1; //açýlýþ kaydý her çekte geliyor..
+  //BtnCiroSil.Visible := TabCekHareketler.RecordCount>1; //aÃ§Ä±lÄ±ÅŸ kaydÄ± her Ã§ekte geliyor..
 
 end;
 
@@ -270,7 +270,7 @@ begin
       TabCekler.SQL.Text := 'SELECT *   FROM CEKLER WHERE ID = :ID';
       TabCekler.Params.ParamByName('ID').AsInteger := ACekId;
     end;
-  end else { Yani -1 -> Boþ Çek senet ekraný için boþ bir query }
+  end else { Yani -1 -> BoÅŸ Ã‡ek senet ekranÄ± iÃ§in boÅŸ bir query }
     TabCekler.SQL.Text := 'SELECT TOP 0  * FROM CEKLER ';
   TabCekler.Open;
 end;
@@ -280,13 +280,13 @@ begin
   if ComboDURUM.ItemIndex = -1 then Exit;
     case ComboDURUM.Properties.Items[ComboDURUM.ItemIndex].Value of
       1,2,6,7,8 : begin
-                //LabelIlgiliKod.Caption := 'Ýlgili Cari Hesap Kodu';
+                //LabelIlgiliKod.Caption := 'Ä°lgili Cari Hesap Kodu';
                 //EditILGILIKOD.Enabled := False;
           end;
-      3 : begin //LabelIlgiliKod.Caption := 'Ýlgili Cari Hesap Kodu';
+      3 : begin //LabelIlgiliKod.Caption := 'Ä°lgili Cari Hesap Kodu';
                 //EditILGILIKOD.Enabled := True;
           end;
-      4,5 : begin //LabelIlgiliKod.Caption := 'Ýlgili Bankanýn Kodu';
+      4,5 : begin //LabelIlgiliKod.Caption := 'Ä°lgili BankanÄ±n Kodu';
                 //EditILGILIKOD.Enabled := True;
           end;
     end;
@@ -329,9 +329,9 @@ begin
    KasaWizardDlg.KasaTarihi.Date := RehberIni.BugunTrh;
    KasaWizardDlg.PanelSag.Visible := False;
    KasaWizardDlg.MenuMusTree.Items.clear;
-   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil,'Alýnan Çek');
+   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil,'AlÄ±nan Ã‡ek');
    TN.selectedIndex := 23;
-   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil,'Verilen Çek');
+   TN := KasaWizardDlg.MenuMusTree.Items.Add(nil,'Verilen Ã‡ek');
    TN.selectedIndex := 33;
    KasaWizardDlg.ShowModal;
    if KasaWizardDlg.modalresult = mrOK then
@@ -434,7 +434,7 @@ var Cagiran : SmallInt;
 begin
    Application.CreateForm(TBankaSecimDlg, BankaSecimDlg);
    if ComboTUR.ItemIndex < 2 then
-      BankaSecimDlg.Cagiran := 4//4; //müþteri (genel) banka lastesi gelsin
+      BankaSecimDlg.Cagiran := 4//4; //mÃ¼ÅŸteri (genel) banka lastesi gelsin
    else
       BankaSecimDlg.Cagiran := 21;// bizim hesap listemiz
    BankaSecimDlg.ShowModal;
@@ -442,20 +442,20 @@ begin
       TabCekler.Edit;
       TabCekler.FieldByname('BANKASUBELERID').AsString := BankaSecimDlg.TabSubeler.FieldByname('SUBEID').AsString;
       TabCeklerAfterScroll(TabCekler);
-      if ComboTUR.ItemIndex >= 2 then //bizim çekimiz; hesapno yu da dolduralým
+      if ComboTUR.ItemIndex >= 2 then //bizim Ã§ekimiz; hesapno yu da dolduralÄ±m
          TabCekler.FieldByname('HESAPNO').AsString := BankaSecimDlg.TabSubeler.FieldByname('HESAPNO').AsString;
    end;
    BankaSecimDlg.Destroy;
 
 {   if ComboTUR.ItemIndex < 2 then
-      Cagiran := 4   //4; //müþteri (genel) banka lastesi gelsin
+      Cagiran := 4   //4; //mÃ¼ÅŸteri (genel) banka lastesi gelsin
    else
       Cagiran := 21; // bizim hesap listemiz
 
    if Tablo.BankaHesapEkrani(Cagiran, HESAPID, HESAPKODU,HESAPNO, HESAPADI, KUR) then begin
       TabCekler.Edit;
       TabCekler.FieldByname('BANKASUBELERID').AsString := HESAPID;
-      if ComboTUR.ItemIndex >= 2 then //bizim çekimiz; hesapno yu da dolduralým
+      if ComboTUR.ItemIndex >= 2 then //bizim Ã§ekimiz; hesapno yu da dolduralÄ±m
          TabCekler.FieldByname('HESAPNO').AsString := HESAPNO;
    end;}
 end;
@@ -528,14 +528,14 @@ var s : string;
     Begin
       if TabCekler.FieldByName(Alan).AsString='' then
       Begin
-        Application.MessageBox(PChar(Ad+' boþ býrakýlamaz .'),'U Y A R I',MB_OK+MB_ICONERROR);
+        Application.MessageBox(PChar(Ad+' boÅŸ bÄ±rakÄ±lamaz .'),'U Y A R I',MB_OK+MB_ICONERROR);
         Result := False;
       End
       else
         Result := True;
     end;
 begin
-  //yeni çek giriþleri için çek serino kontrolü
+  //yeni Ã§ek giriÅŸleri iÃ§in Ã§ek serino kontrolÃ¼
   if DtsCekler.State=dsInsert then begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text:=' select * from CEKLER where SERINO = '+inttostr(StrToIntDef(EditSERINO.Text, 0));
@@ -548,10 +548,10 @@ begin
   //if not Kontrol('BORDRO', 'Bordro') then abort;
   if not Kontrol('SERINO', 'Seri No') then abort;
   if not Kontrol('KOD', 'Kod') then abort;
-  if not Kontrol('ODEMEYERI', 'Keþide Yeri') then abort;
-  if not Kontrol('VADE', 'Keþide Tarihi') then abort;
+  if not Kontrol('ODEMEYERI', 'KeÅŸide Yeri') then abort;
+  if not Kontrol('VADE', 'KeÅŸide Tarihi') then abort;
   if not Kontrol('TUTAR', 'Tutar') then abort;
-  if (SeriNoKontrol)and(ComboTUR.ItemIndex in [2,3]) then begin//Verdiðimiz çekse serino kontrolu var
+  if (SeriNoKontrol)and(ComboTUR.ItemIndex in [2,3]) then begin//VerdiÄŸimiz Ã§ekse serino kontrolu var
      if TabCekler.State = dsInsert then
         s:='-1'
      else

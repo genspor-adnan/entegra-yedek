@@ -1,4 +1,4 @@
-unit UBankaCekleriAramaFrame;
+﻿unit UBankaCekleriAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:41:54}
@@ -51,7 +51,7 @@ implementation
 
 procedure TBankaCekleriAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TBankaCekleriAramaFrame.btnSilClick(Sender: TObject);

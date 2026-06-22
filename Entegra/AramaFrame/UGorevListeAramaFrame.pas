@@ -1,4 +1,4 @@
-unit UGorevListeAramaFrame;
+ï»¿unit UGorevListeAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 04/12/2010 11:44:34 }
@@ -151,7 +151,7 @@ procedure TGorevListeAramaFrame.Baslatildi;
 var
   GorevDurumSQL:string;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   OnaySistemiAktif := Tablo.GENINI.ReadBoolean(Ops_OpsiyonIsListesi_OnayAktif, False);
   dateAktBaslangic.Date := StartOfTheMonth(Tablo.GENINI.BugunTrh);
   dateAktBitis.Date := Tablo.GENINI.BugunTrhSaat;
@@ -273,22 +273,22 @@ var
               'L' :begin
                     Tablo.TablodanSorguAc(1,'Select ID from GOREVLISTE where ADI='''+Bilgi+''' ');
                     if Tablo.Query1.IsEmpty then
-                       Memokontrol.Lines.Add('Tanýmsýz Liste: '+Bilgi)
+                       Memokontrol.Lines.Add('TanÄ±msÄ±z Liste: '+Bilgi)
                    end;
               'G' : begin
                     Tablo.TablodanSorguAc(1,'Select DEGER from GENINI where BOLUM='+IntToStr(Ops_Gorev_Durum)+' and ANAHTAR='''+Bilgi+''' ');
                     if Tablo.Query1.IsEmpty then
-                       Memokontrol.Lines.Add('Tanýmsýz Durum: '+Bilgi)
+                       Memokontrol.Lines.Add('TanÄ±msÄ±z Durum: '+Bilgi)
               end;
               'T' : begin
                     Tablo.TablodanSorguAc(1,'Select DEGER from GENINI where BOLUM='+IntToStr(Ops_Gorev_Turu)+' and ANAHTAR='''+Bilgi+''' ');
                     if Tablo.Query1.IsEmpty then
-                       Memokontrol.Lines.Add('Tanýmsýz Tür: '+Bilgi)
+                       Memokontrol.Lines.Add('TanÄ±msÄ±z TÃ¼r: '+Bilgi)
               end;
               'P' : begin
                       Tablo.TablodanSorguAc(1,'Select ID from REHBER R where  R.FIRMA='''+Bilgi+''' ');
                       if Tablo.Query1.IsEmpty then
-                          Memokontrol.Lines.Add('Tanýmsýz: '+Bilgi)
+                          Memokontrol.Lines.Add('TanÄ±msÄ±z: '+Bilgi)
                     end;
               'R' : begin
                        if VarToStr(sheet.cells[satir,c_kod])<>'' then //Kod varsa
@@ -297,7 +297,7 @@ var
                           s:=' R.FIRMA='''+VarToStr(sheet.cells[satir,c_firma])+''' ';
                        Tablo.TablodanSorguAc(1,'Select ID from REHBER R where '+s);
                        if Tablo.Query1.IsEmpty then
-                          Memokontrol.Lines.Add('Tanýmsýz: '+Bilgi)
+                          Memokontrol.Lines.Add('TanÄ±msÄ±z: '+Bilgi)
                     end;
               'I' : begin
                        if VarToStr(sheet.cells[satir,c_kod])<>'' then //Kod varsa
@@ -307,7 +307,7 @@ var
                        Tablo.TablodanSorguAc(1,'SELECT RP.ID,R.FIRMA FROM REHBER RP INNER JOIN REHBER R ON R.ID=RP.BAGID and RP.GRUP=334 WHERE '+
                           s+' AND RP.FIRMA='''+Bilgi+''' ');
                        if Tablo.Query1.IsEmpty then
-                          Memokontrol.Lines.Add('Tanýmsýz Ýlgili:'+Bilgi+'/'+VarToStr(sheet.cells[satir, c_Firma]))
+                          Memokontrol.Lines.Add('TanÄ±msÄ±z Ä°lgili:'+Bilgi+'/'+VarToStr(sheet.cells[satir, c_Firma]))
                        end;
             end;
             if not Tablo.Query1.IsEmpty then
@@ -319,8 +319,8 @@ var
 begin
   ShowMessage( GorevAktarim_Kosullari );
   excel := CreateOleObject('Excel.Application');
-  Tablo.OpenDialog1.Title := 'Excel Dosyasýný Aç';
-  Tablo.OpenDialog1.Filter := 'Excel Dosyalarý *.xls';
+  Tablo.OpenDialog1.Title := 'Excel DosyasÄ±nÄ± AÃ§';
+  Tablo.OpenDialog1.Filter := 'Excel DosyalarÄ± *.xls';
 
   if Tablo.OpenDialog1.Execute then begin
      try
@@ -330,7 +330,7 @@ begin
 
       Screen.Cursor := crHourGlass;
       sheet := book.worksheets[1];
-      BekletmeDlg.Caption := 'Excelden veriler aktarýlýyor.Bekleyiniz...';
+      BekletmeDlg.Caption := 'Excelden veriler aktarÄ±lÄ±yor.Bekleyiniz...';
       BekletmeDlg.cxProgressBar1.Properties.Max := excelsonsatir(1)+1;
       BekletmeDlg.Show;
 
@@ -339,14 +339,14 @@ begin
       for satir := 2 to excelsonsatir(1)+1 do begin
         BekletmeDlg.cxProgressBar1.Position := satir;
         BekletmeDlg.cxProgressBar1.Refresh;
-        Kontrol('L', VarToStr(sheet.cells[satir, c_ListeAdi])); // ListeAdý
-        Kontrol('T', VarToStr(sheet.cells[satir, c_Turu])); // Türü
+        Kontrol('L', VarToStr(sheet.cells[satir, c_ListeAdi])); // ListeAdÄ±
+        Kontrol('T', VarToStr(sheet.cells[satir, c_Turu])); // TÃ¼rÃ¼
         Kontrol('G', VarToStr(sheet.cells[satir, c_Durum])); // Durum
         Kontrol('P', VarToStr(sheet.cells[satir, c_Atayan])); // Atayan
         Kontrol('P', VarToStr(sheet.cells[satir, c_Atanan])); // Atanan
-        Kontrol('R', VarToStr(sheet.cells[satir, c_kod])+VarToStr(sheet.cells[satir,c_Firma])); // Müþteri
-        Kontrol('I', VarToStr(sheet.cells[satir, c_Ilgili])); // Ýlgili
-        Kontrol('P', VarToStr(sheet.cells[satir, c_Sube])); // Þube
+        Kontrol('R', VarToStr(sheet.cells[satir, c_kod])+VarToStr(sheet.cells[satir,c_Firma])); // MÃ¼ÅŸteri
+        Kontrol('I', VarToStr(sheet.cells[satir, c_Ilgili])); // Ä°lgili
+        Kontrol('P', VarToStr(sheet.cells[satir, c_Sube])); // Åžube
       end;
       MemoKontrol.visible := MemoKontrol.lines.count>0;
       if MemoKontrol.visible then begin
@@ -372,13 +372,13 @@ begin
                 VarToStr(sheet.cells[satir,c_Ackapa])+','+VarToStr(sheet.cells[satir,c_Bayrak])+','+ Kontrol('G', VarToStr(sheet.cells[satir,c_Durum]))+','+Kontrol('P', VarToStr(sheet.cells[satir, c_Atayan]))+','+
                 bastar+','+bittar+','+ Kontrol('R', VarToStr(sheet.cells[satir,c_kod])+VarToStr(sheet.cells[satir,c_Firma]))+','+Kontrol('I', VarToStr(sheet.cells[satir,c_Ilgili]))+') select scope_identity() ');
                 if VarToStr(sheet.cells[satir, c_Atanan])<>'' then //atanan varsa
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',11,'+
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',11,'+
                       Kontrol('P', VarToStr(sheet.cells[satir, c_Atanan]))+','+Kullanan+') ',[],[]);
                 if VarToStr(sheet.cells[satir, c_Notlar])<>'' then //notlar varsa
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into [GOREVYORUM]([GOREVID],[TUR],[YORUM],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',1,'''+StringReplace(VarToStr(sheet.cells[satir,c_Notlar]),'''','',[rfReplaceAll
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into [GOREVYORUM]([GOREVID],[TUR],[YORUM],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',1,'''+StringReplace(VarToStr(sheet.cells[satir,c_Notlar]),'''','',[rfReplaceAll
                    ])+''','+Kullanan+')',[],[]);
                 if VarToStr(sheet.cells[satir, c_Yorum])<>'' then //notlar varsa
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'insert into [GOREVYORUM]([GOREVID],[TUR],[YORUM],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',2,'''+StringReplace(VarToStr(sheet.cells[satir,c_Yorum]),'''','',[rfReplaceAll
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'insert into [GOREVYORUM]([GOREVID],[TUR],[YORUM],[EKLEYEN])values('+Tablo.Query5.fields[0].AsString+',2,'''+StringReplace(VarToStr(sheet.cells[satir,c_Yorum]),'''','',[rfReplaceAll
                    ])+''','+Kullanan+')',[],[]);
          end;
       end;
@@ -481,11 +481,11 @@ procedure TGorevListeAramaFrame.ListeyiKopyala1Click(Sender: TObject);
 var ID:integer;
 begin
    ID := Tablo.SQLSatiriKopyala('GOREVLISTE', TabListe.Fields[0].AsInteger, ['ADI','EKLEYEN'],['Yeni Liste', Kullanan]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' insert into [GOREVLER] ([LISTEID],[KONUSU],[BASLAMATARIHI],[BITISTARIHI],[REHBERID],[MUS_ILGILI],[MUS_ILGILI2],'+
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' insert into [GOREVLER] ([LISTEID],[KONUSU],[BASLAMATARIHI],[BITISTARIHI],[REHBERID],[MUS_ILGILI],[MUS_ILGILI2],'+
      ' [PROJEID],[BAYRAK],[ACKAPA],[DURUM],[TEKRARID],[ANIMSAT],[EKLEYEN])'+
      ' select [LISTEID]='+IntToStr(ID)+',[KONUSU],[BASLAMATARIHI],[BITISTARIHI],[REHBERID],[MUS_ILGILI],[MUS_ILGILI2],[PROJEID],[BAYRAK],[ACKAPA],[DURUM],'+
      ' [TEKRARID]=0,[ANIMSAT]=0,[EKLEYEN] from [GOREVLER] where LISTEID='+TabListe.Fields[0].AsString, [], []);
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,' insert into [GOREVKULLANICI]([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN]) '+
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,' insert into [GOREVKULLANICI]([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN]) '+
      'select [LISTGOREVID]='+IntToStr(ID)+',[TUR],[REHBERID],'+Kullanan+' from [GOREVKULLANICI] where TUR<=5 and LISTGOREVID='+TabListe.Fields[0].AsString, [], []);
    TabloYenile(TabListe,[StrToInt(Kullanan)]);
 end;
@@ -493,10 +493,10 @@ end;
 procedure TGorevListeAramaFrame.ListeyiSilMenuClick(Sender: TObject);
 begin
    if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVLER WHERE LISTEID='+TabListe.Fields[0].AsString,[],[]) then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update GOREVLISTE set DURUM = 0 where ID='+TabListe.Fields[0].AsString,[],[])
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update GOREVLISTE set DURUM = 0 where ID='+TabListe.Fields[0].AsString,[],[])
    else begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GOREVKULLANICI where LISTGOREVID='+TabListe.Fields[0].AsString+' and TUR<=5',[],[]);
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'delete from GOREVLISTE where ID='+TabListe.Fields[0].AsString,[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GOREVKULLANICI where LISTGOREVID='+TabListe.Fields[0].AsString+' and TUR<=5',[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'delete from GOREVLISTE where ID='+TabListe.Fields[0].AsString,[],[]);
    end;
    TabloYenile(TabListe,[StrToInt(Kullanan)]);
 end;
@@ -510,7 +510,7 @@ begin
    Listele;
    TreeListeler.OnClick(Self);
 
-   //arama sekmesinde yeni butonu pasif olmalý
+   //arama sekmesinde yeni butonu pasif olmalÄ±
    if TGorevListeDlg(AnaFrameYoneticisi.AktifFrame.IcerikFrameYoneticisi.AktifFrame.Ornek).GorevEkleTus.visible then
       TGorevListeDlg(AnaFrameYoneticisi.AktifFrame.IcerikFrameYoneticisi.AktifFrame.Ornek).GorevEkleTus.Enabled := PageListeler.ActivePageIndex = 0;
 
@@ -564,12 +564,12 @@ begin
   else
     DropID :=  -1;
 
-  if (Source <> TreeListeler)and((DropId = Masaustu)or(DropId>0)) then begin  //Görev soldaki listelere sürüklenirse
+  if (Source <> TreeListeler)and((DropId = Masaustu)or(DropId>0)) then begin  //GÃ¶rev soldaki listelere sÃ¼rÃ¼klenirse
 //adn     aRealGridView := GetRealDragSourceGridView (TcxDragControlObject (Source));
 //adn     DragID:= aRealGridView.DataController.Values[aRealGridView.DataController.FocusedRecordIndex,
 //adn                 TGorevListeDlg(AnaFrameYoneticisi.AktifFrame.IcerikFrameYoneticisi.AktifFrame.Ornek).GorevGridDBTableView1ID.Index];
      //  TGorevListeDlg(AnaFrameYoneticisi.AktifFrame.IcerikFrameYoneticisi.AktifFrame.Ornek).GorevUpdate(DragID , 'LISTEID='+IntToStr( DropID ));
-    //Taþýnan Node Id si liste drag over dan alýnýr
+    //TaÅŸÄ±nan Node Id si liste drag over dan alÄ±nÄ±r
      ADragnode := TGorevListeDlg(AnaFrameYoneticisi.AktifFrame.IcerikFrameYoneticisi.AktifFrame.Ornek).ADragnode;
      if ADragnode <> nil then
         dragId := ADragnode.Values[0]
@@ -589,7 +589,7 @@ begin
   if State = dsDragLeave then begin //
      TreeHitTest := (Sender as TcxDBTreeList).HitTest;
      if not TreeHitTest.HitAtNode then begin
-        Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update GOREVLISTE set USTID = 0 where ID='+TabListe.Fields[0].AsString,[],[]);
+        Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update GOREVLISTE set USTID = 0 where ID='+TabListe.Fields[0].AsString,[],[]);
         Listele;
      end;
   end
@@ -610,27 +610,27 @@ var
 begin
   Sender.BeginUpdate;
   try
-    if (Nodes.Count = 1)and(PageListeler.ActivePageIndex=1) then begin  //Projeler açýksa
+    if (Nodes.Count = 1)and(PageListeler.ActivePageIndex=1) then begin  //Projeler aÃ§Ä±ksa
       dropId := TcxDBTreeListNode( AttachNode ).KeyValue;
-      if dropId>0 then begin//node deðil de proje adý üzerine býrakýldý
+      if dropId>0 then begin//node deÄŸil de proje adÄ± Ã¼zerine bÄ±rakÄ±ldÄ±
          Tablo.TablodanSorguAc(1, 'select ASAMA from PROJELER where ID='+IntToStr(dropId));
          dropId := StrToIntDef(Tablo.Query1.Fields[0].asstring,0);
       end;
       dragId := TcxDBTreeListNode( Nodes[0] ).Values[0];
       if DragId>0 then begin
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'insert into [PROJEASAMA] ([PROJEID],[REHBERID],[ASAMA],[BASTAR],[AKTIF],[DURUM],[EKLEYEN])values('+
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'insert into [PROJEASAMA] ([PROJEID],[REHBERID],[ASAMA],[BASTAR],[AKTIF],[DURUM],[EKLEYEN])values('+
              IntToStr(abs(dragId))+',0,'+IntToStr(abs(dropId))+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''',1,1,'+Kullanan+')',[],[]);
          Listele;
          TabListe.Locate('ID', abs(dragId), []);
       end;
     end
-    else if Nodes.Count = 1 then begin  //Projeler kapalý ve liste diðer listenin altýna gelecekse
+    else if Nodes.Count = 1 then begin  //Projeler kapalÄ± ve liste diÄŸer listenin altÄ±na gelecekse
       dropId := TcxDBTreeListNode( AttachNode ).KeyValue;
       dragId := TcxDBTreeListNode( Nodes[0] ).Values[0];
       if (DragId>0)and(dropId>0) then begin
-         //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
-         Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update GOREVLISTE set USTID = '+IntToStr(abs(dropId))+' where ID='+IntToStr(abs(dragId)),[],[]);
+         //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(abs(dropId))+' where ID='+IntToStr(dragId),[],[]);
+         Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update GOREVLISTE set USTID = '+IntToStr(abs(dropId))+' where ID='+IntToStr(abs(dragId)),[],[]);
          Listele;
       end;
     end;

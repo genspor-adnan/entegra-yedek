@@ -1,4 +1,4 @@
-unit uTanimGrid_HavaleKuralFrame;
+ï»¿unit uTanimGrid_HavaleKuralFrame;
 
 interface
 
@@ -149,7 +149,7 @@ begin
   inherited;
   if (comboAlan.ItemIndex<0) and (comboIslec.ItemIndex<0) and (comboDeger.ItemIndex<0) then
    begin
-    Application.MessageBox('Koþul Ekleme için "Alan" , "Ýþleç" ve "Deðer" bilgileri seçilmelidir','Uyarý', MB_OK + MB_ICONEXCLAMATION);
+    Application.MessageBox('KoÅŸul Ekleme iÃ§in "Alan" , "Ä°ÅŸleÃ§" ve "DeÄŸer" bilgileri seÃ§ilmelidir','UyarÄ±', MB_OK + MB_ICONEXCLAMATION);
     Exit;
    end;
 

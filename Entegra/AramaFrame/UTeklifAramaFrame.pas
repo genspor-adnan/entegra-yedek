@@ -1,4 +1,4 @@
-unit UTeklifAramaFrame;
+﻿unit UTeklifAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 07/12/2010 10:47:20 }
@@ -157,7 +157,7 @@ end;
 
 procedure TTeklifAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TTeklifAramaFrame.EkranYazdir(Sender: TObject);

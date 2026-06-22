@@ -1,4 +1,4 @@
-unit uTanimGrid_DagitimFrame;
+﻿unit uTanimGrid_DagitimFrame;
 
 interface
 

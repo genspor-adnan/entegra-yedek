@@ -1,4 +1,4 @@
-unit UFaturaTransferListe;
+ï»¿unit UFaturaTransferListe;
 
 interface
 
@@ -175,7 +175,7 @@ type
 
   public
     { Public declarations }
-    Tur : SmallInt; //Giren :0; Çýkan:1
+    Tur : SmallInt; //Giren :0; Ã‡Ä±kan:1
     procedure InitIslemler;
   published
     property Arama : TFatTransferAramaFrame read FArama write SetArama;
@@ -186,7 +186,7 @@ var
 
 
 //Resourcestring
- // idd='Ýþaretlilerin Durumunu Deðiþtir' ;
+ // idd='Ä°ÅŸaretlilerin Durumunu DeÄŸiÅŸtir' ;
 
 implementation
 
@@ -295,7 +295,7 @@ end;
 procedure TFatTransferListeDlg.Baslatildi;
 var ra : string;
 begin
-   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 LogID:=0;
    TRaporAraclari.RaporPopupMenuHazirla('FaturaDlg', PopupMenuYaz,ra,
         TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);

@@ -1,4 +1,4 @@
-unit UBankalarAramaFrame;
+﻿unit UBankalarAramaFrame;
 		
 interface
 
@@ -56,7 +56,7 @@ uses UTablo,LocOnFly;
 
 procedure TBankalarAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    ComboSube.Visible := SubeVarmi;
    LabelSube.Visible := ComboSube.Visible;
    if ComboSube.Visible then begin

@@ -1,4 +1,4 @@
-unit GenoTIP.Ortak.GridPivotUtils;
+ï»¿unit GenoTIP.Ortak.GridPivotUtils;
 
 interface
 uses
@@ -7,12 +7,12 @@ uses
   cxGridExportLink, ComObj, Variants, cxGridTableView, cxGridDBTableView, cxGrid,
   cxEdit,cxCurrencyEdit,FetaClassExtensions,FetaKurulusSiniflari;
   //GenoTIP.Ortak.Extensions, GenoTIP.Ortak.YardSiniflar,
-function ExportToExcelPivot(ADosyaAdý: string;AListeGrid: TcxGrid;ATableView:
+function ExportToExcelPivot(ADosyaAdÄ±: string;AListeGrid: TcxGrid;ATableView:
   TcxGridDBTableView; APivot: TcxCustomPivotGrid): Boolean;
 
 implementation
 uses
-  ShellApi;//, GenoTIP.Analist.RaporAraclarý;
+  ShellApi;//, GenoTIP.Analist.RaporAraclarÄ±;
 
 function ExportToExcelPivot;
 var
@@ -34,14 +34,14 @@ var
   rcCount   : Integer;
   dataCount : Integer;
   tblCol    : TcxGridDBColumn;
-  //özTipi    : TPivotKolonÖzellikTipi;
+  //Ã¶zTipi    : TPivotKolonÃ–zellikTipi;
   numFormat : string;
   position  : Integer;
 begin
   Result := False;
-  // Pivotta görünen fakat Grid de görünmeyen bir kolon olduðunda
-  // Excel sorun çýkarmakta bundan dolayý pivotta görünen gridde görünmeyen
-  // kolonlarý görünür yapalým
+  // Pivotta gÃ¶rÃ¼nen fakat Grid de gÃ¶rÃ¼nmeyen bir kolon olduÄŸunda
+  // Excel sorun Ã§Ä±karmakta bundan dolayÄ± pivotta gÃ¶rÃ¼nen gridde gÃ¶rÃ¼nmeyen
+  // kolonlarÄ± gÃ¶rÃ¼nÃ¼r yapalÄ±m
   for i := 0 to APivot.FieldCount - 1 do begin
     pf := TcxDBPivotGridField(APivot.Fields[i]);
     tblCol := ATableView.GetColumnByFieldName(pf.DataBinding.FieldName);
@@ -49,10 +49,10 @@ begin
       tblCol.Visible := True;
     end;
   end;
-  if ADosyaAdý.EndsWith('.xlsx') then
-    ExportGridToXLSX(ADosyaAdý,AListeGrid)
+  if ADosyaAdÄ±.EndsWith('.xlsx') then
+    ExportGridToXLSX(ADosyaAdÄ±,AListeGrid)
   else
-    ExportGridToExcel(ADosyaAdý,AListeGrid);
+    ExportGridToExcel(ADosyaAdÄ±,AListeGrid);
   if ATableView.DataController.RecordCount = 0 then begin
     Result := True;
     Exit;
@@ -60,7 +60,7 @@ begin
   app := CreateOleObject('Excel.Application');
   pvfList := TList<TcxDBPivotGridField>.Create;
   try
-    wb := app.Workbooks.Open(ADosyaAdý);
+    wb := app.Workbooks.Open(ADosyaAdÄ±);
     sh := wb.Worksheets[1];
     sh.Name := 'DataSheet';
     sh := wb.Sheets.Add;
@@ -69,14 +69,14 @@ begin
     pc := wb.PivotCaches.Add(xlDatabase, dataRange);
     pt := pc.CreatePivotTable(sh.Name + '!R3C1', 'AnalistPivot',Null, xlPivotTableVersion10);
     sh.Select;
-    // görünen alanlarý yeni bir listeye ekle
-    // bu listeyi gruplamak ve sýralamak için kullanacaðýz
+    // gÃ¶rÃ¼nen alanlarÄ± yeni bir listeye ekle
+    // bu listeyi gruplamak ve sÄ±ralamak iÃ§in kullanacaÄŸÄ±z
     for i := 0 to APivot.FieldCount - 1 do begin
       pf := TcxDBPivotGridField(APivot.Fields[i]);
       if pf.Visible then
         pvfList.Add(pf);
     end;
-    // gruplama iþi
+    // gruplama iÅŸi
     grp := TGroupBy<TcxPivotGridFieldArea,TcxDBPivotGridField>.Create(pvfList,
       function(A: TcxDBPivotGridField): TcxPivotGridFieldArea
       begin
@@ -85,22 +85,22 @@ begin
     );
     rcCount := 0;
     dataCount := 0;
-    // Amaç: Area alanýna göre gruplayýp ve AreaIndex'e göre sýralayýp
-    // Pivot alanlarýný bu þekilde oluþturmak
+    // AmaÃ§: Area alanÄ±na gÃ¶re gruplayÄ±p ve AreaIndex'e gÃ¶re sÄ±ralayÄ±p
+    // Pivot alanlarÄ±nÄ± bu ÅŸekilde oluÅŸturmak
     for grpItem in grp do begin
-      // sýralama iþi
+      // sÄ±ralama iÅŸi
       position := 1;
       oby := TOrderBy<Integer,TcxDBPivotGridField>.Create(grpItem,
         function(A: TcxDBPivotGridField): Integer begin Result := A.AreaIndex; end);
 
       for pf in oby do begin
-        {özTipi := TPivotKolonÖzellikTipi(pf.Tags.ValueAsInteger('Format',0));
-        case özTipi of
-          pkötYok: numFormat := '';
-          pkötPara0: numFormat := '#.##0 ' + FormatSettings.CurrencyString;
-          pkötPara2: numFormat := '#.##0,00 ' + FormatSettings.CurrencyString;
-          pkötSayý0: numFormat := '#.##0';
-          pkötSayý2: numFormat := '#.##0,00';
+        {Ã¶zTipi := TPivotKolonÃ–zellikTipi(pf.Tags.ValueAsInteger('Format',0));
+        case Ã¶zTipi of
+          pkÃ¶tYok: numFormat := '';
+          pkÃ¶tPara0: numFormat := '#.##0 ' + FormatSettings.CurrencyString;
+          pkÃ¶tPara2: numFormat := '#.##0,00 ' + FormatSettings.CurrencyString;
+          pkÃ¶tSayÄ±0: numFormat := '#.##0';
+          pkÃ¶tSayÄ±2: numFormat := '#.##0,00';
         end; }
         pff := pt.PivotFields(pf.DataBinding.FieldName);
         case pf.Area of

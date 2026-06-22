@@ -1,4 +1,4 @@
-unit UEntegrasyon;
+ï»¿unit UEntegrasyon;
 
 interface
 
@@ -76,13 +76,13 @@ implementation
 
 procedure TEntegrasyonDlg.cxButton1Click(Sender: TObject);
 begin
-   //baðlantý oluþturulacak ve baðlanýrsa;
+   //baÄŸlantÄ± oluÅŸturulacak ve baÄŸlanÄ±rsa;
    DBConnect;
    if CNNAktarilacak.Connected then begin
-     LabelBaglanti.Caption:='Baðlantý Baþarýlý.';
+     LabelBaglanti.Caption:='BaÄŸlantÄ± BaÅŸarÄ±lÄ±.';
      cxGroupBox3.Enabled:=True;
    end else begin
-     LabelBaglanti.Caption:='Baðlantý Baþarýsýz!';
+     LabelBaglanti.Caption:='BaÄŸlantÄ± BaÅŸarÄ±sÄ±z!';
      cxGroupBox3.Enabled:=False;
    end;
    {Tablo.Query1.close;
@@ -102,14 +102,14 @@ end;
 
 procedure TEntegrasyonDlg.cxButton2Click(Sender: TObject);
 begin
-  if cxImageComboBox1.Text = 'Genotýpdan Rehber Al' then  begin
+  if cxImageComboBox1.Text = 'GenotÄ±pdan Rehber Al' then  begin
     TabAktarilacak.first;
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text:='SELECT KOD FROM REHBER';
     Tablo.Query1.Open;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       if cxGrid1DBTableView1NAME.EditValue then begin
         if RehberSatiriniAl then
            cxGrid1DBTableView1NAME.EditValue:=True
@@ -118,15 +118,15 @@ begin
       end;
       TabAktarilacak.Next;
     end;
-  end else  if cxImageComboBox1.Text = 'Genotýpa Rehber Ver' then  begin
+  end else  if cxImageComboBox1.Text = 'GenotÄ±pa Rehber Ver' then  begin
     TabAktarilacak.first;
     Tablo.Query1.Close;
     Tablo.Query1.Connection:=CNNAktarilacak;
     Tablo.Query1.SQL.Text:='SELECT KOD FROM REHBER';
     Tablo.Query1.Open;
-    //ilk satýrdan son satýra kadar aktarým
+    //ilk satÄ±rdan son satÄ±ra kadar aktarÄ±m
     while not TabAktarilacak.Eof do begin
-      //ilk sütundaki seç deðeri deðiþtirilenler aktarýlmaz..
+      //ilk sÃ¼tundaki seÃ§ deÄŸeri deÄŸiÅŸtirilenler aktarÄ±lmaz..
       if cxGrid1DBTableView1NAME.EditValue then begin
         if RehberSatiriniVer then
            cxGrid1DBTableView1NAME.EditValue:=True
@@ -145,7 +145,7 @@ Var
   aramadaciksin:string;
   RehID:Integer;
 Begin
-  //ayný kaydýn bizde olup olmadýðý koduna bakýlarak kontrol edilir..  //
+  //aynÄ± kaydÄ±n bizde olup olmadÄ±ÄŸÄ± koduna bakÄ±larak kontrol edilir..  //
   if not Tablo.Query1.Locate('KOD',TabAktarilacak.FieldByName('KOD').AsString,[]) then begin
      if TabAktarilacak.FieldByName('DURUM').Asboolean = False then
         aramadaciksin:='H'
@@ -187,7 +187,7 @@ Var
   SQLParam:string;
   RehID:Integer;
 Begin
-  //ayný kaydýn bizde olup olmadýðý koduna bakýlarak kontrol edilir..  //
+  //aynÄ± kaydÄ±n bizde olup olmadÄ±ÄŸÄ± koduna bakÄ±larak kontrol edilir..  //
   if not Tablo.Query1.Locate('KOD',TabAktarilacak.FieldByName('KOD').AsString,[]) then begin
 //     if TabAktarilacak.FieldByName('ARAMADACIKSIN').AsString='H' then
 //        aramadaciksin:='0'
@@ -202,12 +202,12 @@ Begin
                        TabAktarilacak.FieldByName('GRUP').AsString+''','+'1,'''+TabAktarilacak.FieldByName('OZEL').AsString+''','''+
                        TabAktarilacak.FieldByName('NOTLAR').AsString+''',1,1,1,1,'''+Kullanan+''' )';
      Tablo.Query2.ExecSQL;
-     //eklediðimiz satýrý açýp aldýðý ID yi bulalým
+     //eklediÄŸimiz satÄ±rÄ± aÃ§Ä±p aldÄ±ÄŸÄ± ID yi bulalÄ±m
      Tablo.Query3.Close;
      Tablo.Query3.SQL.Text:='select * from REHBER where KOD = '''+TabAktarilacak.FieldByName('KOD').AsString+'''';
      Tablo.Query3.Open;
      RehID := Tablo.Query3.FieldByName('ID').AsInteger;
-     // eklenecek alanlarý bulalým(varsayýlaný dolu olanlar..
+     // eklenecek alanlarÄ± bulalÄ±m(varsayÄ±lanÄ± dolu olanlar..
      Tablo.Query4.Close;
      Tablo.Query4.SQL.Text:='select DISTINCT VARSAYILAN, YERI, ETIKET from REHBERAYAR where isnull(VARSAYILAN,'''')<>'''' ';
      Tablo.Query4.Open;
@@ -217,7 +217,7 @@ Begin
           4:	SQLParam := 'EVPK';//  Adres PK
           6:	SQLParam := 'EVILCE';//  Adres ILCE
           8:	SQLParam := 'EVIL';//  Adres IL
-          10: SQLParam := 'FATURABASLIK';//	Fatura Baþlýðý
+          10: SQLParam := 'FATURABASLIK';//	Fatura BaÅŸlÄ±ÄŸÄ±
           12: SQLParam := 'EVADRES';//	Fatura Adresi
           14: SQLParam := 'EVPK';//	Fatura Adresi PK
           16: SQLParam := 'EVILCE';//	Fatura Adresi ILCE
@@ -227,7 +227,7 @@ Begin
          // 32: SQLParam := '';//	Masraf Merkezi
          // 34: SQLParam := '';//	Gelir Merkezi
          // 36: SQLParam := '';//	Tahakkuk
-          40: SQLParam := 'ISTEL';//  Ýþ Tel
+          40: SQLParam := 'ISTEL';//  Ä°ÅŸ Tel
           42: SQLParam := 'CEP';//	Cep Tel
           44: SQLParam := 'EVTEL';//	Ev Tel
           46: SQLParam := 'EMAIL';//	E-Posta
@@ -235,7 +235,7 @@ Begin
          //50: SQLParam := '';//	T.C.Kimlik No
          //52: SQLParam := '';//	Baba Ad
        end;
-       // ilgili satýr insert edilir..
+       // ilgili satÄ±r insert edilir..
        Tablo.Query5.Close;
        Tablo.Query5.SQL.Text := 'INSERT INTO REHBERBILGI(YERI,SIRA,YER_ID,ETIKET,BILGI,EKLEYEN)VALUES('+
                          Tablo.Query4.FieldbyName('YERI').AsString+','+Tablo.Query4.FieldByName('VARSAYILAN').AsString+','+inttostr(RehID)+','''+
@@ -253,9 +253,9 @@ procedure TEntegrasyonDlg.cxImageComboBox1PropertiesEditValueChanged(
 Var
 i:Integer;
 begin
-  if cxImageComboBox1.Text = 'Genotýpdan Rehber Al' then  begin
+  if cxImageComboBox1.Text = 'GenotÄ±pdan Rehber Al' then  begin
     cxGrid1DBTableView1.DataController.KeyFieldNames := 'KOD';
-    //bir önce açýlmýþ olan tabloyu sileriz,
+    //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
     if cxGrid1DBTableView1.ColumnCount > 1 then begin
        for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
            cxGrid1DBTableView1.Columns[-i].Free;
@@ -264,7 +264,7 @@ begin
     TabAktarilacak.SQL.Text:='select * from REHBER';
     TabAktarilacak.Open;
     cxButton2.Enabled:=True;
-    //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+    //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
     for i := 0 to TabAktarilacak.FieldCount-1 do begin
       cxGrid1DBTableView1.CreateColumn;
       with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -274,9 +274,9 @@ begin
         //Properties.ReadOnly:=True;
       end;
     end;
-  end else  if cxImageComboBox1.Text = 'Genotýpa Rehber Ver' then  begin
+  end else  if cxImageComboBox1.Text = 'GenotÄ±pa Rehber Ver' then  begin
     cxGrid1DBTableView1.DataController.KeyFieldNames := 'KOD';
-    //bir önce açýlmýþ olan tabloyu sileriz,
+    //bir Ã¶nce aÃ§Ä±lmÄ±ÅŸ olan tabloyu sileriz,
     if cxGrid1DBTableView1.ColumnCount > 1 then begin
        for I := (-cxGrid1DBTableView1.ColumnCount)+1 to -1 do
            cxGrid1DBTableView1.Columns[-i].Free;
@@ -302,7 +302,7 @@ begin
     Tablo.Query1.Connection:=CNNAktarilacak;
     Tablo.Query1.SQL.Text:='select * from REHBER';
     Tablo.Query1.Open;
-    //grid içerisine seçilen yeni tabloyu açarýz(Tüm Kayýtlar)
+    //grid iÃ§erisine seÃ§ilen yeni tabloyu aÃ§arÄ±z(TÃ¼m KayÄ±tlar)
     for i := 0 to TabAktarilacak.FieldCount-1 do begin
       cxGrid1DBTableView1.CreateColumn;
       with cxGrid1DBTableView1.Columns[i+1] do begin
@@ -327,32 +327,32 @@ begin
 
    CNNAktarilacak.Connected:=False;
    bilgi:='.';
-   ctrls := TGirdiDenetimleri.Create.Edit('Aktarým Yapýlacak Server Adýný Giriniz.',@bilgi);
-   if TGirisKutusuEx.BilgiAlEx('Server Adý veya IP Adresi:',ctrls) = mrOK then begin
+   ctrls := TGirdiDenetimleri.Create.Edit('AktarÄ±m YapÄ±lacak Server AdÄ±nÄ± Giriniz.',@bilgi);
+   if TGirisKutusuEx.BilgiAlEx('Server AdÄ± veya IP Adresi:',ctrls) = mrOK then begin
      if Trim(bilgi) = '' then begin
-        MessageDlg(('Server Adý Boþ Olamaz.'),mtError,[mbOK],0);
+        MessageDlg(('Server AdÄ± BoÅŸ Olamaz.'),mtError,[mbOK],0);
         Exit;
      End else begin
         ServerName := bilgi;
         bilgi:='GEN2005';
-        ctrls := TGirdiDenetimleri.Create.Edit('Aktarým Yapýlacak Veritabaný Adýný Giriniz.',@bilgi);
-       if TGirisKutusuEx.BilgiAlEx('Veritabaný Adý:',ctrls) = mrOK then begin
+        ctrls := TGirdiDenetimleri.Create.Edit('AktarÄ±m YapÄ±lacak VeritabanÄ± AdÄ±nÄ± Giriniz.',@bilgi);
+       if TGirisKutusuEx.BilgiAlEx('VeritabanÄ± AdÄ±:',ctrls) = mrOK then begin
          if Trim(bilgi) = '' then begin
-            MessageDlg(('Veritabaný Adý Boþ Olamaz.'),mtError,[mbOK],0);
+            MessageDlg(('VeritabanÄ± AdÄ± BoÅŸ Olamaz.'),mtError,[mbOK],0);
             Exit;
          End else begin
             DBName := bilgi;
             bilgi:='SA';
-           ctrls := TGirdiDenetimleri.Create.Edit('Kullanýcý Adýný Giriniz.',@bilgi);
-           if TGirisKutusuEx.BilgiAlEx('Kullanýcý Adý:',ctrls) = mrOK then begin
+           ctrls := TGirdiDenetimleri.Create.Edit('KullanÄ±cÄ± AdÄ±nÄ± Giriniz.',@bilgi);
+           if TGirisKutusuEx.BilgiAlEx('KullanÄ±cÄ± AdÄ±:',ctrls) = mrOK then begin
              if Trim(bilgi) = '' then begin
-                MessageDlg(('Kullanýcý Adý Boþ Olamaz.'),mtError,[mbOK],0);
+                MessageDlg(('KullanÄ±cÄ± AdÄ± BoÅŸ Olamaz.'),mtError,[mbOK],0);
                 Exit;
              End else begin
                UserName := bilgi;
                bilgi:='GENOTIP';
-               ctrls := TGirdiDenetimleri.Create.Edit('Aktarým Yapýlacak Server Þifresini Giriniz.',@bilgi);
-               if TGirisKutusuEx.BilgiAlEx('Server Þifresi('+UserName+'):',ctrls) = mrOK then begin
+               ctrls := TGirdiDenetimleri.Create.Edit('AktarÄ±m YapÄ±lacak Server Åžifresini Giriniz.',@bilgi);
+               if TGirisKutusuEx.BilgiAlEx('Server Åžifresi('+UserName+'):',ctrls) = mrOK then begin
                   PassWord := bilgi;
                   CNNAktarilacak.ConnectionString :=
                   'Provider=SQLOLEDB.1;Password='+PassWord+
@@ -361,7 +361,7 @@ begin
                   ';Data Source='+ServerName;
                     CNNAktarilacak.Connected:=True;
                   if CNNAktarilacak.Connected then begin
-                    LabelBaglanti.Caption:='Baðlantý Baþarýlý';
+                    LabelBaglanti.Caption:='BaÄŸlantÄ± BaÅŸarÄ±lÄ±';
                     cxGroupBox3.Enabled;
                   end;
                end;
@@ -399,12 +399,12 @@ Begin
                      ',DEGISTIREN = '''+Kullanan+''+
                      ',DEGISTIRMETARIHI = '''+FormatDateTime('yyyy-mm-dd hh:nn',rehberini.BugunTrhSaat)+'';
    Tablo.Query2.ExecSQL;
-   //deðiþtirdiðimiz satýrý açýp aldýðý ID yi bulalým
+   //deÄŸiÅŸtirdiÄŸimiz satÄ±rÄ± aÃ§Ä±p aldÄ±ÄŸÄ± ID yi bulalÄ±m
    Tablo.Query3.Close;
    Tablo.Query3.SQL.Text:='select * from REHBER where KOD = '''+TabAktarilacak.FieldByName('KOD').AsString+'''';
    Tablo.Query3.Open;
    RehID := Tablo.Query3.FieldByName('ID').AsInteger;
-   // deðiþtirilecek alanlarý bulalým(varsayýlaný dolu olanlar)..
+   // deÄŸiÅŸtirilecek alanlarÄ± bulalÄ±m(varsayÄ±lanÄ± dolu olanlar)..
    Tablo.Query4.Close;
    Tablo.Query4.SQL.Text:='select  RA.VARSAYILAN, RB.YERI, RB.ETIKET,RB.BILGI '+
                           ' from REHBERAYAR RA inner join REHBERBILGI RB on RA.YERI=RB.YERI AND RA.ETIKET=RB.ETIKET '+
@@ -416,7 +416,7 @@ Begin
         4:	SQLParam := 'EVPK';//  Adres PK
         6:	SQLParam := 'EVILCE';//  Adres ILCE
         8:	SQLParam := 'EVIL';//  Adres IL
-        10: SQLParam := 'FATURABASLIK';//	Fatura Baþlýðý
+        10: SQLParam := 'FATURABASLIK';//	Fatura BaÅŸlÄ±ÄŸÄ±
         12: SQLParam := 'EVADRES';//	Fatura Adresi
         14: SQLParam := 'EVPK';//	Fatura Adresi PK
         16: SQLParam := 'EVILCE';//	Fatura Adresi ILCE
@@ -426,7 +426,7 @@ Begin
        // 32: SQLParam := '';//	Masraf Merkezi
        // 34: SQLParam := '';//	Gelir Merkezi
        // 36: SQLParam := '';//	Tahakkuk
-        40: SQLParam := 'ISTEL';//  Ýþ Tel
+        40: SQLParam := 'ISTEL';//  Ä°ÅŸ Tel
         42: SQLParam := 'CEP';//	Cep Tel
         44: SQLParam := 'EVTEL';//	Ev Tel
         46: SQLParam := 'EMAIL';//	E-Posta
@@ -434,7 +434,7 @@ Begin
        //50: SQLParam := '';//	T.C.Kimlik No
        //52: SQLParam := '';//	Baba Ad
      end;
-     // ilgili satýr update edilir..
+     // ilgili satÄ±r update edilir..
      Tablo.Query5.Close;
      Tablo.Query5.SQL.Text := 'UPDATE REHBERBILGI SET BILGI = '''+TabAktarilacak.FieldByName(SQLParam).AsString+''+
                        'WHERE VARSAYILAN = '+
@@ -455,7 +455,7 @@ Begin
   TabAktarilacak.Open;
 
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text:='';//üstteki selecte göre update,
+  Tablo.Query1.SQL.Text:='';//Ã¼stteki selecte gÃ¶re update,
   Tablo.Query1.ExecSQL;}
 end;
 

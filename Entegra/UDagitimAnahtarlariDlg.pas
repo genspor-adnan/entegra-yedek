@@ -1,4 +1,4 @@
-unit UDagitimAnahtarlariDlg;
+ï»¿unit UDagitimAnahtarlariDlg;
 
 interface
 
@@ -245,7 +245,7 @@ begin
      TabDagitimDetay.Edit;
   if AButtonIndex=0 then begin
     st := TStringList.Create;
-    if Tablo.ListedenBilgiGetir('Sorumluluk Merkezi Seçimi','select ID,Kod=MERKEZKODU,Ad=MERKEZADI from SRMMERKEZI Where GELIRMI='+intToStr(GelirGider)+' ',st,[],'SRM Seçimi') then begin
+    if Tablo.ListedenBilgiGetir('Sorumluluk Merkezi SeÃ§imi','select ID,Kod=MERKEZKODU,Ad=MERKEZADI from SRMMERKEZI Where GELIRMI='+intToStr(GelirGider)+' ',st,[],'SRM SeÃ§imi') then begin
       TabDagitimDetay.FieldByName('MERKEZID').AsInteger := StrToIntDef(st[0],0);
       TabDagitimDetay.Post;
       TabloYenile(TabDagitimDetay,[TabDagitim.FieldByName('ID').AsInteger,GELIRMI]);
@@ -312,7 +312,7 @@ end;
 procedure TDagitimAnahtarlariDlg.TabDagitimBeforePost(DataSet: TDataSet);
 begin
   if not BoslukKontrol(EditKOD.Text,'Kodu') then Abort;
-  if not BoslukKontrol(EditAD.Text,'Adý') then Abort;
+  if not BoslukKontrol(EditAD.Text,'AdÄ±') then Abort;
   if not BoslukKontrol(DateBaslamaTarihi.Text,'Baslama Tarihi') then Abort;
 end;
 

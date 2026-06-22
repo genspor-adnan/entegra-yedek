@@ -1,4 +1,4 @@
-unit UMekanMasaGor;
+ï»¿unit UMekanMasaGor;
 
 interface
 
@@ -180,18 +180,18 @@ procedure TMekanMasaGorDlg.MasaBosalt;
 var i : SmallInt;
     BirlesimNo : smallint;
 begin
-    //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0,BIRLESIM=null where BIRLESIM='+IntToStr(SeciliSekil.HelpContext),[],[]);
+    //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0,BIRLESIM=null where BIRLESIM='+IntToStr(SeciliSekil.HelpContext),[],[]);
     //e?er birle?ik masa ise t?m masalar bo? hale getirilir
     if SeciliSekil.HelpContext > 0 then begin// birle?ik masa ise
        BirlesimNo := SeciliSekil.HelpContext;//bu birle?im numars?n? al?p
        for i:=0 to ComponentCount-1 do       // dola?arak renkleri de?i?tirelim
             if (Components[i] is TShape)and(TShape(Components[i]).HelpContext=BirlesimNo)  Then begin
-               Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0,BIRLESIM=null where ID='+IntToStr(TShape(Components[i]).Tag),[],[]);
+               Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0,BIRLESIM=null where ID='+IntToStr(TShape(Components[i]).Tag),[],[]);
                TShape(Components[I]).Brush.Color := RenkMasaBos;
                TShape(Components[I]).HelpContext := 0 ;
             end
     end else begin //tek masa ise
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0,GARSON=0,KISISAY=0,TUTAR=0.0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
        SeciliSekil.Brush.Color := RenkMasaBos;
     end;
 end;
@@ -215,11 +215,11 @@ var i, sonuc : SmallInt;
       case Result of
        0,3: begin //rezerve d???ndaki durumlar (0:gelmedi 1:geldi 2:rezerve 3 :iptal edildi)
              SeciliSekil.Brush.Color := RenkMasaBos;
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
            end;
        2 : begin  //rezerve edildi
              SeciliSekil.Brush.Color := RenkMasaRezerve;
-             Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=2 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+             Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=2 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
            end;
       end;
       RezervasyonDlg.Destroy;
@@ -268,9 +268,9 @@ begin
             OncekiMasaId := SeciliSekil.Tag;
             StatusBar1.Panels[3].Text := 'Yeni masay? se?in';  //de?i?tirme
          end else begin
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=1 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(OncekiMasaId),[],[]);
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set FATURATARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',DURUM=0, LOKASYON='+IntToStr(SeciliSekil.Tag)+',OZELKOD='''+SeciliSekil.Hint+''' where ID=(select top 1 ID from FATBASLIK where TUR=110 and LOKASYON='+IntToStr(OncekiMasaId)+' order by ID desc) ',[],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=1 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(OncekiMasaId),[],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set FATURATARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',DURUM=0, LOKASYON='+IntToStr(SeciliSekil.Tag)+',OZELKOD='''+SeciliSekil.Hint+''' where ID=(select top 1 ID from FATBASLIK where TUR=110 and LOKASYON='+IntToStr(OncekiMasaId)+' order by ID desc) ',[],[]);
             //EskiSeciliSekil.Brush.Color := RenkMasaBos; //me?gul
             //?imdiki masan?n rengini dolu yapal?m
             SeciliSekil.Brush.Color := RenkMasaDolu; //me?gul
@@ -318,10 +318,10 @@ begin
                if Tablo.Query1.Recordcount>1 then begin //tek masadan fazla ise
                    if Tablo.Query1.Fields[0].asInteger=SeciliSekil.Tag then begin //en k???kse
                       Tablo.Query1.next;//bir sonraki masa
-                      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set LOKASYON='+Tablo.Query1.Fields[0].asstring+',OZELKOD='''+Tablo.Query1.Fields[1].asstring+''' where TUR=110 and LOKASYON='+IntToStr(SeciliSekil.Tag)+' and DURUM=0 ',[],[]);
+                      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set LOKASYON='+Tablo.Query1.Fields[0].asstring+',OZELKOD='''+Tablo.Query1.Fields[1].asstring+''' where TUR=110 and LOKASYON='+IntToStr(SeciliSekil.Tag)+' and DURUM=0 ',[],[]);
                    end;
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set BIRLESIM=null where ID='+IntToStr(SeciliSekil.Tag),[],[]);
-                   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set BIRLESIM=null where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+                   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
                    SeciliSekil.HelpContext := 0;
                    SeciliSekil.Brush.Color := RenkMasaBos; //
                    //MasaNoYaz(SeciliSekil);
@@ -350,7 +350,7 @@ begin
 
        if SeciliSekil.Brush.Color = RenkMasaBos then begin
           //masa bo? ve doluyor. Bu masayla ilgili a??k adisyon varsa kapat?l?r.
-          //Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set DURUM=1 where TUR=110 and DURUM=0 and LOKASYON='+IntToStr(SeciliSekil.Tag),[],[]);
+          //Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set DURUM=1 where TUR=110 and DURUM=0 and LOKASYON='+IntToStr(SeciliSekil.Tag),[],[]);
           if KisiSaySor then
              HizliGirisDlg.EditKisiClick(Self)
           else
@@ -374,14 +374,14 @@ begin
        HizliGirisDlg.MasaNo := SeciliSekil.Hint;
        if SeciliSekil.Brush.Color = RenkMasaBos
         then begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=1, GARSON='+IntToStr(KullananID)+',GARSONKOD='''+HizliGirisDlg.KullanKod+''',KISISAY='+HizliGirisDlg.EditKisi.Caption+', EKLEME_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=1, GARSON='+IntToStr(KullananID)+',GARSONKOD='''+HizliGirisDlg.KullanKod+''',KISISAY='+HizliGirisDlg.EditKisi.Caption+', EKLEME_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' where ID='+IntToStr(SeciliSekil.Tag),[],[]);
           SeciliSekil.Brush.Color := RenkMasaDolu; //me?gul
        end;
        HizliGirisDlg.ShowModal;
        if (HizliGirisDlg.TabFatBasDetay.FieldByName('DURUM').AsInteger=DefSiparisTahsil)or(HizliGirisDlg.TabDetay.RecordCount < 1) then //hi? giri? yap?lmam??sa tekrar beyaz yapal?m
           MasaBosalt
        else
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set TUTAR='+StringReplace(FloatToStr(HizliGirisDlg.EditToplamTutar.Value), ',','.',[])+', DEGISTIRME_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' where ID='+IntToStr(SeciliSekil.Tag),[],[]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set TUTAR='+StringReplace(FloatToStr(HizliGirisDlg.EditToplamTutar.Value), ',','.',[])+', DEGISTIRME_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' where ID='+IntToStr(SeciliSekil.Tag),[],[]);
 
        //Masa bilgilerini se?ili ?ekil ?zerine y?kleyelim
        Tablo.TablodanSorguAc(1,'select M.* from MASALAR M where M.ID='+inttostr(SeciliSekil.Tag));
@@ -689,7 +689,7 @@ end;
 
 procedure TMekanMasaGorDlg.IptalTusClick(Sender: TObject);
 begin
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set DURUM='+IntToStr(DefSiparisIptal)+' where ID='+TabSiparis.Fields[0].AsString,[],[]); //buraya
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set DURUM='+IntToStr(DefSiparisIptal)+' where ID='+TabSiparis.Fields[0].AsString,[],[]); //buraya
    PaketTarihChange(Self);
 end;
 
@@ -770,7 +770,7 @@ procedure TMekanMasaGorDlg.SonTusClick(Sender: TObject);
        EnKucukMasaNo := Tablo.Query1.Fields[0].asInteger;
        //dolu en k???k masa, birle?en en k???k masa olur
 //       Tablo.TablodanSorguAc(8, 'select top 1 FB.ID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(BirlesikEnKucukSekil.Tag)+' and FB.DURUM=0 order by 1 desc ');
-//       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set LOKASYON='+IntToStr(BirlesikEnKucukSekil.Tag)+',OZELKOD='''+BirlesikEnKucukSekil.Hint+''' where ID='+Tablo.Query8.Fields[0].AsString,[],[]);
+//       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set LOKASYON='+IntToStr(BirlesikEnKucukSekil.Tag)+',OZELKOD='''+BirlesikEnKucukSekil.Hint+''' where ID='+Tablo.Query8.Fields[0].AsString,[],[]);
        //di?er dolu masalara da bunun IDsi verilerek birle?tirilir
 //       for i := 0 to BirlesenDoluMasaList.Count-1 do
 //           if BirlesenDoluMasaList.Strings[i]<>IntToStr(BirlesenDoluMasaMinNo) then begin
@@ -779,8 +779,8 @@ procedure TMekanMasaGorDlg.SonTusClick(Sender: TObject);
             if (PanelBirlesen.Components[i] is TJvNavPanelButton)and(TJvNavPanelButton(PanelBirlesen.Components[i]).Name <> 'SonTus')
                 and(TJvNavPanelButton(PanelBirlesen.Components[i]).Tag<>EnKucukMasaNo)and(TJvNavPanelButton(PanelBirlesen.Components[i]).colors.ButtonColorFrom=RenkMasaDolu)  Then begin
                   Tablo.TablodanSorguAc(7, 'select top 1 FB.ID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(EnKucukMasaNo )+' and FB.DURUM=0 order by 1 desc ');
-                  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set FATBASID='+Tablo.Query8.Fields[0].AsString+' where FATBASID='+Tablo.Query7.Fields[0].AsString,[],[]);
-                  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'delete from FATBASLIK where ID='+Tablo.Query7.Fields[0].AsString,[],[]);
+                  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set FATBASID='+Tablo.Query8.Fields[0].AsString+' where FATBASID='+Tablo.Query7.Fields[0].AsString,[],[]);
+                  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'delete from FATBASLIK where ID='+Tablo.Query7.Fields[0].AsString,[],[]);
                end;
 
 }
@@ -790,18 +790,18 @@ procedure TMekanMasaGorDlg.SonTusClick(Sender: TObject);
       if Tablo.Query2.Fields[0].asInteger>0 then begin
          EnKucukFatbasId := Tablo.Query2.Fields[0].asInteger;
           //Sonra bu adisyona t?m a??lm?? ?r?n sat?rlar?n? birle?tirelim
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATURA set FATBASID= '+IntToStr(EnKucukFatbasId)+' where FATBASID in '+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATURA set FATBASID= '+IntToStr(EnKucukFatbasId)+' where FATBASID in '+
                ' (select ID from FATBASLIK where TUR=110 and LOKASYON in (select ID from MASALAR where DURUM=1 and BIRLESIM='+IntToStr(BirlesNo)+') and DURUM=0)',[],[]);
           //Sonra bu adisyonu en k???k se?ilmi? masaya ba?layal?m. (Bu masa bo? da olabilir)
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set LOKASYON= '+IntToStr(EnKucukMasaNo)+' where ID='+IntToStr(EnKucukFatbasId),[],[]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set LOKASYON= '+IntToStr(EnKucukMasaNo)+' where ID='+IntToStr(EnKucukFatbasId),[],[]);
           //En k???k adisyon d???ndakilerin fatbasl?klar?n? silebilirizart?k
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete  from FATBASLIK where  ID<>'+IntToStr(EnKucukFatbasId)+
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete  from FATBASLIK where  ID<>'+IntToStr(EnKucukFatbasId)+
            '  and TUR=110 and LOKASYON in (select ID from MASALAR where DURUM=1 and BIRLESIM='+IntToStr(BirlesNo)+') and DURUM=0',[],[]);
 
 
            //Birle?mi? masadaki YER ve YERID d?zenleyelim
           //Tablo.TablodanSorguAc(8, 'select top 1 FB.ID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(EnKucukMasaNo)+' and FB.DURUM=0 order by 1 desc ');
-           Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update F1 set F1.YERID=(select count(F2.ID) from FATURA F2 where F1.FATBASID=F2.FATBASID and F1.YERI=F2.YERI ) '+
+           Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update F1 set F1.YERID=(select count(F2.ID) from FATURA F2 where F1.FATBASID=F2.FATBASID and F1.YERI=F2.YERI ) '+
               ' from FATURA F1 where F1.FATBASID='+IntToStr(EnKucukFatbasId),[],[]);
       end;
 
@@ -825,7 +825,7 @@ procedure TMekanMasaGorDlg.SonTusClick(Sender: TObject);
             //    BirlesikEnKucukSekil := TJvNavPanelButton(PanelBirlesen.Components[i]);
 
 
-            Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update MASALAR set DURUM=1, BIRLESIM='+IntToStr(BirlesNo)+' where ID='+IntToStr(TJvNavPanelButton(PanelBirlesen.Components[i]).Tag),[],[]);
+            Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update MASALAR set DURUM=1, BIRLESIM='+IntToStr(BirlesNo)+' where ID='+IntToStr(TJvNavPanelButton(PanelBirlesen.Components[i]).Tag),[],[]);
             //TShape(Components[i]).Brush.Color := RenkMasaDolu;
         end;
       i:=-1;
@@ -912,7 +912,7 @@ begin
 //         KullaniciGirisDlg.edPassword.EditValue:= UGenSifre.DeSifre(KullaniciGirisDlg.TabKullanici.FieldByName('SIFRE').AsString);
    KullaniciGirisDlg.ShowModal;
    if KullaniciGirisDlg.ModalResult = mrOk then begin             //Durum serviste  buraya
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, 'update FATBASLIK set DURUM='+IntToStr(DefSiparisKurye)+', FATURA_GON_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''', '+
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, 'update FATBASLIK set DURUM='+IntToStr(DefSiparisKurye)+', FATURA_GON_TARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''', '+
         ' SATICIKODU='+KullaniciGirisDlg.TabKullanici.FieldByName('REHBERID').AsString+' where ID='+TabSiparis.Fields[0].AsString,[],[]);
       PaketTarihChange(Self);
    end;
@@ -976,7 +976,7 @@ var SonucListe : TStringList;
 begin
     SonucListe := TStringList.Create;
     if Tablo.HizliGirisListedenBilgiGetir('Tahsilat Se?imi','select ANAHTAR,DEGER from GENINI WHERE BOLUM=-1021',SonucListe,False,[True,True],[])then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set DETAYBOLUMU=&czm where ID=&id ',['&czm','&id'],
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set DETAYBOLUMU=&czm where ID=&id ',['&czm','&id'],
         [SonucListe[0] ,TabSiparis.FieldByName('ID').AsInteger]);
        TabloYenile(TabSiparis,[])
     end;
@@ -988,7 +988,7 @@ var Bilgi:Variant;
 begin
    Bilgi := TabSiparis.FieldByName('SipNotu').AsString;
    if TGirisKutusuEx.BilgiAlEx(BGSiparis_notu , TGirdiDenetimleri.Create.Memo('A??klama' , @Bilgi)) = mrOk then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set ACIKLAMA=&czm where ID=&id ',['&czm','&id'],
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set ACIKLAMA=&czm where ID=&id ',['&czm','&id'],
         [StringReplace(VarToStr(Bilgi), '''', '"',[rfReplaceAll]) ,TabSiparis .FieldByName('ID').AsInteger]);
        TabloYenile(TabSiparis,[])
    end;
@@ -1017,7 +1017,7 @@ var Bilgi:Variant;
 begin
    Bilgi := TabSiparis.FieldByName('CariNotu').AsString;
    if TGirisKutusuEx.BilgiAlEx(BGMusteri_notu , TGirdiDenetimleri.Create.Memo('A??klama' , @Bilgi)) = mrOk then begin
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update REHBER set NOTLAR=&czm where ID=&id ',['&czm','&id'],
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update REHBER set NOTLAR=&czm where ID=&id ',['&czm','&id'],
         [StringReplace(VarToStr(Bilgi), '''', '"',[rfReplaceAll]) ,TabSiparis .FieldByName('REHBERID').AsInteger]);
        TabloYenile(TabSiparis,[])
    end;
@@ -1030,7 +1030,7 @@ begin
   if AButtonIndex = 0 then begin
     ID := Tablo.RehberAra_IDGetir(335);
     if ID > 0 then begin
-       Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set EKLEYEN=&czm where ID=&id ',['&czm','&id'],
+       Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set EKLEYEN=&czm where ID=&id ',['&czm','&id'],
             [ID, TabSiparis.FieldByName('ID').AsInteger]);
        TabloYenile(TabSiparis,[])
     end;
@@ -1040,7 +1040,7 @@ end;
 procedure TMekanMasaGorDlg.DateTeslimPropertiesCloseUp(Sender: TObject);
 var SonucListe : TStringList;
 begin
-    Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' update FATBASLIK set TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', DateTeslim.date)+''' where ID=&id ',['&id'],
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' update FATBASLIK set TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', DateTeslim.date)+''' where ID=&id ',['&id'],
         [TabSiparis.FieldByName('ID').AsInteger]);
     TabloYenile(TabSiparis,[])
 end;

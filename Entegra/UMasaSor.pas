@@ -1,4 +1,4 @@
-unit UMasaSor;
+﻿unit UMasaSor;
 
 interface
 

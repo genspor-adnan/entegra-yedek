@@ -1,4 +1,4 @@
-unit URehberAramaFrame;
+﻿unit URehberAramaFrame;
 
 interface
 
@@ -94,7 +94,7 @@ uses Utablo,LocOnFly;
 
 procedure TRehberAramaFrame.Baslatildi;
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   ComboCariAnaliz.Visible := Tablo.YetkiVarMi(220190,1,False);
   LabelAnaliz.Visible := ComboCariAnaliz.Visible;
   SpinKayitSayisi.text := GenRegIni.RegReadString('CariOpsiyon', 'ListeKayitSayisi', '200', 'C');

@@ -1,4 +1,4 @@
-unit Lib.OpenSSL;
+﻿unit Lib.OpenSSL;
 { OpenSSL handler for Grijjy connections }
 {$I Lib.inc}
 interface

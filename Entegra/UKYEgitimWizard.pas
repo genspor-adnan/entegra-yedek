@@ -1,4 +1,4 @@
-unit UKYEgitimWizard;
+ï»¿unit UKYEgitimWizard;
 
 interface
 
@@ -385,7 +385,7 @@ begin        // EGITIM KULLANICI YER=2
 
   Kullanicilar := TstringList.Create;
   Kullanicilar := Tablo.ListedenCokluSecim('', 'SELECT DISTINCT R.ID,KULLANICI=R.FIRMA,ROL=(select ROL FROM ROLLER RO WHERE RO.ID=K.ROLID  ),R.GRUP,R.KATEGORI,R.SINIF  FROM KULLANICI K INNER JOIN REHBER R  ON K.REHBERID=R.ID' +
-  ' WHERE  R.DURUM=1 AND K.DURUM=1 AND R.ID NOT IN (SELECT REHID FROM KALITEKULLANICI KK WHERE KK.REHID=R.ID AND KK.YER=2 AND KK.YERID='+TabEgitim.FieldByName('ID').AsString+')', [nil, nil, nil, Tablo.RepCariGrup, Tablo.RepCariBolum, Tablo.RepCariSinif], ['Id', 'Kullanýcý', 'Rol', 'Grup', 'Kategori', 'Sýnýf']);
+  ' WHERE  R.DURUM=1 AND K.DURUM=1 AND R.ID NOT IN (SELECT REHID FROM KALITEKULLANICI KK WHERE KK.REHID=R.ID AND KK.YER=2 AND KK.YERID='+TabEgitim.FieldByName('ID').AsString+')', [nil, nil, nil, Tablo.RepCariGrup, Tablo.RepCariBolum, Tablo.RepCariSinif], ['Id', 'KullanÄ±cÄ±', 'Rol', 'Grup', 'Kategori', 'SÄ±nÄ±f']);
   if Kullanicilar.Count > 0 then
   begin
     for I := 0 to Kullanicilar.Count - 1 do
@@ -433,15 +433,15 @@ end;
 
 procedure TKYEgitimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
-  if not BoslukKontrol(ComboFaaliyet.text, 'Faaliyet Türü') then Abort;
+  if not BoslukKontrol(ComboFaaliyet.text, 'Faaliyet TÃ¼rÃ¼') then Abort;
   if  (ComboFaaliyet.ItemIndex =0) and (not BoslukKontrol(ComboBolum.text, 'Birim')) then Abort;
-  if (ComboFaaliyet.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'Müþteri')) then Abort;
-  if not BoslukKontrol(EditEgitimAcan.text, 'Eðitim Açan') then Abort;
+  if (ComboFaaliyet.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'MÃ¼ÅŸteri')) then Abort;
+  if not BoslukKontrol(EditEgitimAcan.text, 'EÄŸitim AÃ§an') then Abort;
   if not BoslukKontrol(ComboDURUM.text, 'Durum') then Abort;
-  //if not BoslukKontrol(ComboHataKaynagi.text, 'Tespit Kaynaðý') then Abort;
-  //if (ComboHataKaynagi.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'Müþteri')) then Abort;
-  if not BoslukKontrol(EditEgitimSorumlu.text, 'Eðitim Sorumlusu') then Abort;
-  if not BoslukKontrol(MemDofNeden.text, 'Eðitim Açýklama') then Abort;
+  //if not BoslukKontrol(ComboHataKaynagi.text, 'Tespit KaynaÄŸÄ±') then Abort;
+  //if (ComboHataKaynagi.ItemIndex =1) and (not BoslukKontrol(ComboMusteri.text, 'MÃ¼ÅŸteri')) then Abort;
+  if not BoslukKontrol(EditEgitimSorumlu.text, 'EÄŸitim Sorumlusu') then Abort;
+  if not BoslukKontrol(MemDofNeden.text, 'EÄŸitim AÃ§Ä±klama') then Abort;
 
   Kaydet;
 

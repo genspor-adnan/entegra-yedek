@@ -1,4 +1,4 @@
-unit UMasrafAnaliz;
+﻿unit UMasrafAnaliz;
 
 interface
 
@@ -113,7 +113,7 @@ end;
 
 procedure TMasrafAnalizDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.GridTurkcelestir;
 end;
 

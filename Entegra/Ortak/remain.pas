@@ -1,4 +1,4 @@
-unit remain;
+ï»¿unit remain;
 
 interface
 
@@ -144,8 +144,8 @@ resourcestring
   sSaveChanges = '';
   sOverWrite = '';
   sUntitled = '';
-  sModified = 'Düzenleniyor...';
-  sColRowInfo = 'Satýr: %3d   Sütun: %3d';
+  sModified = 'DÃ¼zenleniyor...';
+  sColRowInfo = 'SatÄ±r: %3d   SÃ¼tun: %3d';
 
 const
   RulerAdj = 4 / 3;
@@ -543,7 +543,7 @@ begin
     SendMessage(Editor.Handle, EM_LINEINDEX, CharPos.Y, 0));
   Inc(CharPos.Y);
   Inc(CharPos.X);
-  StatusBar.Panels[0].Text := 'Satýr : ' + inttostr(CharPos.Y) + '  Sütun : ' + inttostr(CharPos.X);
+  StatusBar.Panels[0].Text := 'SatÄ±r : ' + inttostr(CharPos.Y) + '  SÃ¼tun : ' + inttostr(CharPos.X);
 end;
 
 procedure TRaporModul.FormShow(Sender: TObject);

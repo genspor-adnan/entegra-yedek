@@ -1,4 +1,4 @@
-{**************************************************************************************************}
+﻿{**************************************************************************************************}
 {                                                                                                  }
 { Asynchronous function calls utilizing multiple threads.                                          }
 {                                                                                                  }
@@ -2609,7 +2609,7 @@ asm
   { Detect if the finally block is called by System._HandleFinally.
     In that case an exception was raised in the MainThread-Block. The
     Classes.CheckSynchronize function will handle the exception and the
-    thread switch for us. This will also restore the EBP reg�ster. }
+    thread switch for us. This will also restore the EBP regíster. }
   mov eax, [esp + $04] // finally return address
   mov edx, OFFSET System.@HandleFinally
   cmp eax, edx

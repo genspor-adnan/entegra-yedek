@@ -1,4 +1,4 @@
-unit UOnayDialog;
+﻿unit UOnayDialog;
 
 interface
 

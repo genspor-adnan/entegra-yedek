@@ -1,4 +1,4 @@
-unit UProjeListeDlg;
+ï»¿unit UProjeListeDlg;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 04/12/2010 13:45:17}
@@ -747,7 +747,7 @@ var EskiProjeID : integer;
 begin
    EskiProjeID := PROJELER.Fields[0].AsInteger;
    ProjeID:= Tablo.SQLSatiriKopyala('PROJELER',PROJELER.Fields[0].AsInteger,['EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-   Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,
+   Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,
            'INSERT INTO PROJEASAMA(PROJEID,REHBERID,TUR,ASAMA,ONAY,ACIKLAMA,EKLEYEN,BASTAR,BITTAR,AKTIF,DURUM,SUBEID) '
           +'select &ProjeID,REHBERID,TUR,ASAMA,ONAY,ACIKLAMA,&Ekleyen,BASTAR,BITTAR,AKTIF,DURUM,SUBEID '
           +'from PROJEASAMA where PROJEID=&EskiProjID ',
@@ -849,7 +849,7 @@ end;
 procedure TProjeListeDlg.FTileControlItemDragEnd(Sender: TdxCustomTileControl;AInfo: TdxTileControlDragItemInfo);
 begin
    if AInfo.Group <> nil then
-      Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(AInfo.Group.Tag)+' where ID='+IntToStr(ProjeID),[],[]);
+      Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update PROJELER set ASAMA='+IntToStr(AInfo.Group.Tag)+' where ID='+IntToStr(ProjeID),[],[]);
 end;
 
 procedure TProjeListeDlg.TreeListGorevClick(Sender: TObject);

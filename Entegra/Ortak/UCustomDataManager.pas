@@ -1,4 +1,4 @@
-unit UCustomDataManager;
+ï»¿unit UCustomDataManager;
 
 interface
 uses
@@ -121,7 +121,7 @@ begin
   if (FQuery.Active) then
     Result := FQuery.Locate('BOLUM;ALAN',VarArrayOf([ABolumNo,AAlanAdi]),[loPartialKey])
   else
-    raise Exception.Create('Konumlanma başarısız. Tablo açık değildi.');
+    raise Exception.Create('Konumlanma baÅŸarÄ±sÄ±z. Tablo aÃ§Ä±k deÄŸildi.');
 end;
 
 end.

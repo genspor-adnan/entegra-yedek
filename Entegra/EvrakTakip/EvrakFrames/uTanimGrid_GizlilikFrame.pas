@@ -1,4 +1,4 @@
-unit uTanimGrid_GizlilikFrame;
+ï»¿unit uTanimGrid_GizlilikFrame;
 
 interface
 
@@ -42,10 +42,10 @@ begin
   if Application.MessageBox(PChar(sKayitlarSifirlanacak), PChar(SGenotipOnay), MB_YESNO + MB_ICONQUESTION) = IDYES then
   begin
 
-     {  Sýfýrlanacak
+     {  SÄ±fÄ±rlanacak
         DELETE ALL,
         INSERT "Gizli"
-        INSERT "Özel"
+        INSERT "Ã–zel"
         INSERT "Kamusal"
      }
 

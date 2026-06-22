@@ -1,4 +1,4 @@
-unit UGrid;
+ï»¿unit UGrid;
 
 interface
 
@@ -91,7 +91,7 @@ begin
     for j := 0 to Bilgi.Count - 1 do
       Grid1.Cells[j + IndexAlanSay, i] := Bilgi.Strings[j];
   end;
-  Grid1.RowCount := Grid1.RowCount - 1; //Son Satýrý siler...
+  Grid1.RowCount := Grid1.RowCount - 1; //Son SatÄ±rÄ± siler...
 end;
 
 procedure TGridAyarlaDlg.SilTusClick(Sender: TObject);

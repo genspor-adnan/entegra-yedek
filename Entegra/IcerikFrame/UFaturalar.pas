@@ -1,4 +1,4 @@
-unit UFaturalar;
+﻿unit UFaturalar;
 
 interface
 
@@ -28,7 +28,7 @@ uses
   dxDateRanges, dxScrollbarAnnotations, frCoreClasses, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  FireDAC.Comp.DataSet;
+  FireDAC.Comp.DataSet, UEBelgeGelen, UHesapKoduPicker;
 
 type
   TFaturalarDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -61,7 +61,7 @@ type
     Panel4: TPanel;
     GridFaturaToplam: TStringGrid;
     GridFat: TcxGrid;
-    GridFatDBTableView1: TcxGridDBTableView;
+    GridFatView: TcxGridDBTableView;
     GridFatLevel1: TcxGridLevel;
     SilTus: TToolButton;
     ToolButton2: TToolButton;
@@ -87,18 +87,18 @@ type
     mnIrsaliyeyeDonustur: TMenuItem;
     mnFaturayaDonustur: TMenuItem;
     GridFatListeTviewACIKLAMA: TcxGridDBColumn;
-    GridFatDBTableView1KOD: TcxGridDBColumn;
-    GridFatDBTableView1ACIKLAMA: TcxGridDBColumn;
-    GridFatDBTableView1ADET: TcxGridDBColumn;
-    GridFatDBTableView1BIRIMFIYAT: TcxGridDBColumn;
-    GridFatDBTableView1TUTAR: TcxGridDBColumn;
-    GridFatDBTableView1ISKONTO: TcxGridDBColumn;
-    GridFatDBTableView1KDV: TcxGridDBColumn;
-    GridFatDBTableView1MASRAFKOD: TcxGridDBColumn;
-    GridFatDBTableView1MASRAFAD: TcxGridDBColumn;
-    GridFatDBTableView1TUR: TcxGridDBColumn;
-    GridFatDBTableView1BIRIM: TcxGridDBColumn;
-    GridFatDBTableView1AD: TcxGridDBColumn;
+    GridFatViewKOD: TcxGridDBColumn;
+    GridFatViewACIKLAMA: TcxGridDBColumn;
+    GridFatViewADET: TcxGridDBColumn;
+    GridFatViewBIRIMFIYAT: TcxGridDBColumn;
+    GridFatViewTUTAR: TcxGridDBColumn;
+    GridFatViewISKONTO: TcxGridDBColumn;
+    GridFatViewKDV: TcxGridDBColumn;
+    GridFatViewMASRAFKOD: TcxGridDBColumn;
+    GridFatViewMASRAFAD: TcxGridDBColumn;
+    GridFatViewTUR: TcxGridDBColumn;
+    GridFatViewBIRIM: TcxGridDBColumn;
+    GridFatViewAD: TcxGridDBColumn;
     GridFatListeTviewSATICIADI: TcxGridDBColumn;
     SIPARISDETAY: TFDQuery;
     GridFatListeTviewFATDURUM: TcxGridDBColumn;
@@ -118,7 +118,7 @@ type
     PopupMenu1: TPopupMenu;
     Kopyala2: TMenuItem;
     N4: TMenuItem;
-    GridFatDBTableView1PROJEKODU: TcxGridDBColumn;
+    GridFatViewPROJEKODU: TcxGridDBColumn;
     GridFatListeTviewDOVIZ_FATURA_MATRAHI: TcxGridDBColumn;
     GridFatListeTviewDOVIZ_KDV_TUTARI: TcxGridDBColumn;
     GridFatListeTviewDOVIZ_TUTARI: TcxGridDBColumn;
@@ -137,8 +137,8 @@ type
     GridFatListeTviewTIPI: TcxGridDBColumn;
     N6: TMenuItem;
     IptalIsaretleMenu: TMenuItem;
-    GridFatDBTableView1TESLIMTARIHI: TcxGridDBColumn;
-    GridFatDBTableView1KUR: TcxGridDBColumn;
+    GridFatViewTESLIMTARIHI: TcxGridDBColumn;
+    GridFatViewKUR: TcxGridDBColumn;
     GridFatListeTviewSAYFASAY: TcxGridDBColumn;
     GridFatListeTviewBASLIK: TcxGridDBColumn;
     N7: TMenuItem;
@@ -154,6 +154,9 @@ type
     GridFatListeTviewOZELKOD: TcxGridDBColumn;
     GridFatListeTviewZARF: TcxGridDBColumn;
     BtnBelgeZarfi: TToolButton;
+    BtnEFaturaGuncelle: TToolButton;
+    PanelKayitSayisi: TPanel;
+    LabelKayitSayisi: TLabel;
     GridFatListeTviewVADE: TcxGridDBColumn;
     JvTimer1: TJvTimer;
     GridFatListeTviewISEMRIDURUM: TcxGridDBColumn;
@@ -191,7 +194,6 @@ type
     GridFatListeTviewONAYLAYAN: TcxGridDBColumn;
     GridFatListeTviewEFATURADURUM: TcxGridDBColumn;
     GridFatListeTviewEFATURASONUC: TcxGridDBColumn;
-    EFaturaAktarBtn: TToolButton;
     UretimFisiniOlutur: TMenuItem;
     rnOlarak1: TMenuItem;
     Sae1: TMenuItem;
@@ -201,7 +203,7 @@ type
     TabSmsEPosta: TFDQuery;
     DtsSmsEPosta: TDataSource;
     GridFatListeTviewVADETARIH: TcxGridDBColumn;
-    GridFatDBTableView1SATICIKODU: TcxGridDBColumn;
+    GridFatViewSATICIKODU: TcxGridDBColumn;
     tvFatToplamlarTUR: TcxGridDBColumn;
     tvFatToplamlarACIKLAMA: TcxGridDBColumn;
     tvFatToplamlarDEGER: TcxGridDBColumn;
@@ -247,9 +249,9 @@ type
     IhracKayitliMenu: TMenuItem;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
-    GridFatDBTableView1URUNNO: TcxGridDBColumn;
-    GridFatDBTableView1POZNO: TcxGridDBColumn;
-    GridFatDBTableView1SUTKODU: TcxGridDBColumn;
+    GridFatViewURUNNO: TcxGridDBColumn;
+    GridFatViewPOZNO: TcxGridDBColumn;
+    GridFatViewSUTKODU: TcxGridDBColumn;
     MenuDurumuGuncelle: TMenuItem;
     N12: TMenuItem;
     mnSatisFisiniOlustur: TMenuItem;
@@ -258,7 +260,7 @@ type
     infoMenu: TMenuItem;
     GridFatListeTviewSANAL: TcxGridDBColumn;
     N14: TMenuItem;
-    eFatura1: TMenuItem;
+    MenueFatura: TMenuItem;
     MenuOlustur: TMenuItem;
     MenuOnizle: TMenuItem;
     MenuGonder: TMenuItem;
@@ -268,6 +270,23 @@ type
     MenuHTMLKaydet: TMenuItem;
     MenuPDFKaydet: TMenuItem;
     N16: TMenuItem;
+    MenuXMLKaydet: TMenuItem;
+    PageControlTur: TcxPageControl;
+    TabSheetTumu: TcxTabSheet;
+    N17: TMenuItem;
+    N19: TMenuItem;
+    MenuMesajlarGoster: TMenuItem;
+    MenuCevapVer: TMenuItem;
+    MenuKabulEt: TMenuItem;
+    MenuRedEt: TMenuItem;
+    rnEletirme1: TMenuItem;
+    MenuUrunEslestir: TMenuItem;
+    MenuEslesmeTablosunuAc: TMenuItem;
+    procedure MenuEslesmeTablosunuAcClick(Sender: TObject);
+    procedure MenuUrunEslestirClick(Sender: TObject);
+    procedure GridFatViewCellClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure GridFatListeTviewDblClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -279,7 +298,7 @@ type
     procedure FATBASLIKAfterOpen(DataSet: TDataSet);
     procedure mnIrsaliyeyeDonusturClick(Sender: TObject);
     procedure GridFatListeTviewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
-    procedure GridFatDBTableView1CanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    procedure GridFatViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure GridFatListeTviewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure TOPLAMLARAfterOpen(DataSet: TDataSet);
     procedure mnIrsaliyesiniOlusturClick(Sender: TObject);
@@ -328,13 +347,27 @@ type
     procedure MenuIptalEtClick(Sender: TObject);
     procedure MenuHTMLKaydetClick(Sender: TObject);
     procedure MenuPDFKaydetClick(Sender: TObject);
+    procedure MenuXMLKaydetClick(Sender: TObject);
     procedure MenuGonderClick(Sender: TObject);
+    procedure MenuSeriDegistirClick(Sender: TObject);
+    procedure PageControlTurChange(Sender: TObject);
+    procedure MenuCariKaydiOlusturClick(Sender: TObject);
+    procedure MenuMesajlarGosterClick(Sender: TObject);
+    procedure BtnEFaturaGuncelleClick(Sender: TObject);
+    procedure MenuKabulEtClick(Sender: TObject);
+    procedure MenuRedEtClick(Sender: TObject);
   private
 
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TFaturalarAramaFrame;
-    // (Eski FGonderim* alanlari kaldirildi — kimlik bilgileri TEBelgeKimlik ortak cache'inden gelir)
+    FEBelgeStyleYeni: TcxStyle;
+    FEBelgeStyleSari: TcxStyle;
+    FEBelgeStyleYesil: TcxStyle;
+    FEBelgeStyleKirmizi: TcxStyle;
+    FEBelgeStylePasif: TcxStyle;
+    function EBelgeHucreStyle(var AStyleRef: TcxStyle; ABackColor, ATextColor: TColor): TcxStyle;
+    // (Eski FGonderim* alanlari kaldirildi - kimlik bilgileri TEBelgeKimlik ortak cache'inden gelir)
     //FAltTur : Smallint;
     //FMenuTur : Smallint;
     procedure GorunurOlacak;
@@ -345,6 +378,18 @@ type
     procedure TusAsagi(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TusYukari(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TusBasili(Sender: TObject; var Key: Char);
+    // Belge no ortak yardimcilar (Olustur ve SeriDegistir ortak kullanir)
+    function _SeriSecimi(ATur: Integer; const AExcludeSeri: string;
+      out AYeniSeri: string): Boolean;
+    function _SonrakiSiraNo(AID, ATur: Integer; const ASeri: string;
+      AYil: Integer; out ASeq: Int64): Boolean;
+    procedure _TabsheetleriYukle(AAltTur: Integer);
+    procedure _KayitSayisiGuncelle;
+    procedure _MenuTagFiltrele(AParent: TMenuItem; AHedefTag: Integer);
+    procedure _GelenFaturaCevapVer(AKabul: Boolean);
+    procedure KuyrukGonderimleriniIsle(const AFatBaslikID: Integer;
+      out AGonderildi, AHata, AToplam: Integer; out AHataMesaj: string;
+      const AIlerleme: TIlerlemeOlay);
     procedure Baslatildi;
     procedure Kapatiliyor(var AKapansin: Boolean);
     procedure EkranYazdir(Sender: TObject);
@@ -381,14 +426,15 @@ type
 var
   FaturalarDlg: TFaturalarDlg;
 //Resourcestring
-//  idd='��aretlilerin Durumunu De�i�tir' ;
+//  idd='İşaretlilerin Durumunu Değiştir' ;
 
 implementation
 
-uses  System.StrUtils, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
+uses  System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
   Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
-  UEBelgeAliasServis, UEBelgeOlusturucu;
+  UEBelgeAliasServis, UEBelgeOlusturucu, UEBelgeMesajDlg, UIzibizRest,
+  UStokEslestirme, UFaturaWizard;
 
 {$R *.dfm}
 
@@ -408,13 +454,16 @@ begin
   gf.FMenuTur := gf.MenuTur;
   gf.FAltTur := gf.AltTur;
 
+  // PageControlTur sekmelerini AltTur'e gore olustur
+  _TabsheetleriYukle(gf.FAltTur);
+
   if EkAlanKolonList = nil then
      EkAlanKolonList := TStringList.Create
   else
-     if EkAlanKolonList.Count > 0 then  //ba�ka listeye ge�ildi.. �nceki ek kolonlar silinmeli..
+     if EkAlanKolonList.Count > 0 then  //başka listeye geçildi.. önceki ek kolonlar silinmeli..
         EkKolonSil;
 
-  BtnDonusum.Enabled := gf.FAltTur <> 101;// solda sat�nalma talepleri butonu bas�ld���nda �stte d�n���m butonu pasif olur..
+  BtnDonusum.Enabled := gf.FAltTur <> 101;// solda satınalma talepleri butonu basıldığında üstte dönüşüm butonu pasif olur..
 
   case gf.FAltTur of
   11,15 : begin
@@ -436,12 +485,12 @@ begin
 //03.05.2025 AO  Tablo.FaturaInit(gf.FMenuTur,TcxImageComboBoxProperties(GridFatListeTviewDURUM.Properties),TcxImageComboBoxProperties(GridFatDBTableView1TUR.Properties), TcxImageComboBoxProperties(GridFatDBTableView1BIRIM.Properties));
 
   Try
-  //popupmen� olu�turulur,
+  //popupmenü oluşturulur,
     Item := TMenuItem.Create(PopupMenu1);
     Item.Caption := idd; //resourcestring
     PopupMenu1.Items.Add(Item);
   Finally
-  //submen� olu�turulur...
+  //submenü oluşturulur...
      for i := 0 to (GridFatListeTviewDURUM.Properties as TcxImageComboBoxProperties).Items.Count - 1 do begin
        SubItem := TMenuItem.Create(Item);
        SubItem.Caption:=(GridFatListeTviewDURUM.Properties as TcxImageComboBoxProperties).Items[i].Description;
@@ -450,14 +499,14 @@ begin
        Item.Add(SubItem);
      end;
   End;
-  if gf.FMenuTur = 0 then begin //Giren faturalar g�r�necek
-    Caption := 'Al�� Belgeleri Listesi';
-    TahsilOdemeMenu.Caption := '�deme Yap';
+  if gf.FMenuTur = 0 then begin //Giren faturalar görünecek
+    Caption := 'Alış Belgeleri Listesi';
+    TahsilOdemeMenu.Caption := '?deme Yap';
     TahsilOdemeMenu.tag := 10;
     KrediKartiMenu.Visible:=True;
-    //GridFatListeTviewDURUM.Caption := '�deme Durumu';
+    //GridFatListeTviewDURUM.Caption := '?deme Durumu';
   end else begin
-    Caption := 'Sat�� Belgeleri Listesi';
+    Caption := 'Satış Belgeleri Listesi';
     TahsilOdemeMenu.Caption := 'Tahsil Et';
     TahsilOdemeMenu.tag := 0;
     KrediKartiMenu.Visible:=False;
@@ -474,10 +523,10 @@ begin
     k := 0;
     Self.AraKodKeyUp(Self, k, []);
   end;
-  GridFatDBTableView1SUTKODU.VisibleForCustomization:= UTSKullanimda;
-  GridFatDBTableView1SUTKODU.Visible := UTSKullanimda;
+  GridFatViewSUTKODU.VisibleForCustomization:= UTSKullanimda;
+  GridFatViewSUTKODU.Visible := UTSKullanimda;
 
-  // if EkAlanKolonList.Count > 0 then  //varsa �nceki ek kolonlar silinmeli..
+  // if EkAlanKolonList.Count > 0 then  //varsa önceki ek kolonlar silinmeli..
   //    EkKolonSil;
   // Tablo.GridAyarRestore('AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False), GridFatListeTview );
 
@@ -489,6 +538,43 @@ procedure TFaturalarDlg.FATBASLIKAfterOpen(DataSet: TDataSet);
 begin
 //   DegisTus.Visible := True;
 //   SilTus.Visible := True;
+  _KayitSayisiGuncelle;
+  // SP/sorgu yeniden yuklendiyse mevcut sekme filtresini tekrar uygula
+  // (ozellikle Tumu sekmesinde EFATURADURUM in (0,-2) filtresi devresi icin)
+  if (PageControlTur <> nil) and (PageControlTur.ActivePage <> nil) and
+     (Pos('/*YENIGELEN*/', FATBASLIK.SQL.Text) = 0) then
+    PageControlTurChange(PageControlTur);
+end;
+
+procedure TFaturalarDlg._KayitSayisiGuncelle;
+var
+  LSay: Integer;
+begin
+  if (PanelKayitSayisi = nil) or (LabelKayitSayisi = nil) then Exit;
+  if FATBASLIK.Active then
+    LSay := FATBASLIK.RecordCount
+  else
+    LSay := 0;
+  LabelKayitSayisi.Caption := 'Kay'#$131't Say'#$131's'#$131': ' + IntToStr(LSay);
+end;
+
+procedure TFaturalarDlg._MenuTagFiltrele(AParent: TMenuItem; AHedefTag: Integer);
+// Alt menu item'larini Tag'e gore goster/gizle:
+//   Tag = 0           -> her zaman gorunur (ayraclar/genel)
+//   Tag = AHedefTag   -> gorunur
+//   diger             -> gizli
+var
+  i: Integer;
+  LItem: TMenuItem;
+begin
+  if AParent = nil then Exit;
+  for i := 0 to AParent.Count - 1 do begin
+    LItem := AParent.Items[i];
+    if LItem.Tag = 0 then
+      LItem.Visible := True
+    else
+      LItem.Visible := LItem.Tag = AHedefTag;
+  end;
 end;
 
 
@@ -562,7 +648,7 @@ begin
   end;
 
   AtacDosya:= GetEnvironmentVariable('Temp')+Concat('\', FirmaAdi, '_', IntToStr(YearOf(SiparisTarih)), '_', IntToStr(MonthOfTheYear(SiparisTarih)), '_', IntToStr(DayOfTheMonth(SiparisTarih)), '_', SiparisNo, '.pdf');
-  //PDF kay�t edilecek.
+  //PDF kayıt edilecek.
   LFileStream := TFileStream.Create(AtacDosya, fmCreate or fmShareDenyNone);
   try
     PDFExport:=TfrxPDFExport.Create(nil);
@@ -585,7 +671,7 @@ begin
   end;
   RehberId := FATBASLIK.FieldByName('REHBERID').AsInteger;
 
-  ///Tekliflerde �ncelik: ilgilinin maili varsa ona gider, ilgili yoksa kuruma gider, ikisinde de yoksa girin uyar�s� verilir.
+  ///Tekliflerde öncelik: ilgilinin maili varsa ona gider, ilgili yoksa kuruma gider, ikisinde de yoksa girin uyarısı verilir.
   Tablo.TablodanSorguAc(1,'SELECT  TOP 1 RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
       ' INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA  AND RA.YERI=RB.YERI WHERE RI.REHBERID = '+inttostr(RehberId)+'  AND RB.YERI = 1'+
       ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 ');
@@ -598,7 +684,7 @@ begin
     begin
       if TGirisKutusuEx.BilgiAlEx(BGMail_adres_gir,TGirdiDenetimleri.Create.Edit(BGMail_adresi,@MailAdresi)) = mrOk then
       begin
-        Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
         'VALUES  (1,(SELECT ID FROM REHBERILETISIM WHERE REHBERID=&REHBERID),'+
         '(SELECT SIRA FROM dbo.REHBERAYAR WHERE YERI=1 AND ETIKET=&ETIKET),'+
         '(SELECT ETIKET FROM dbo.REHBERAYAR WHERE ETIKET=&ETIKET AND YERI=1),'+
@@ -611,7 +697,7 @@ begin
   Tablo.MailSablonGetir(MODUL_Alis_Satis,konu,icerik);
   Mailsayi := Tablo.EMailSayisiGetir(RehberId); //mail adetini buluyor
   if mailsayi > 1 then
-  begin    // Birden fazla mail adresi varsa mail se�im ekrani getirilip oradan mail adresleri se�iliyor ve mail g�nderiliyor.
+  begin    // Birden fazla mail adresi varsa mail seçim ekranı getirilip oradan mail adresleri seçiliyor ve mail gönderiliyor.
     SetLength(gmail,100);
     maill.kime:=TStringList.Create;
     maill.bilgi:=TStringList.Create;
@@ -627,12 +713,12 @@ begin
     Tablo.SendMail(konu,icerik,AtacDosya,'','','',maill.kime,maill.bilgi,nil,True);
   end else
   begin
-    Tablo.RehberEkBilgileriniGetir(RehberId,1,[RehVars_EPosta],Etiketler,Bilgiler); //Bir tane mail adresi var ise mail adresi alinip mail g�nderiliyor.
+    Tablo.RehberEkBilgileriniGetir(RehberId,1,[RehVars_EPosta],Etiketler,Bilgiler); //Bir tane mail adresi var ise mail adresi alinip mail gönderiliyor.
     maill.kime := TStringList.Create;
     maill.bilgi := TStringList.Create;
 
     if Bilgiler[0] ='' then begin
-      //ShowMessage('Mail adresi bulunamad�!');
+      //ShowMessage('Mail adresi bulunamad?!');
       maill.kime.add('');
       maill.bilgi.Add('');
       maill.kime.Add(bilgiler[0]);
@@ -680,18 +766,18 @@ begin
         ' F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU,F.DETAYBOLUMU, SATICIADI = SATICIBILGI.FIRMA,F.VADE, VADETARIH=FATURATARIH + F.VADE,  ';
     if Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DonusumGozuksun, True) then begin
       SQLPart1 := SQLPart1 + ' DURUMNEREDEN = case  '+
-          '   when exists(select F2.ID from SIPARISDETAY F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (406,407,409,410,429,473) and F1.FATBASID=F.ID)) then ''Sipari�ten''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (408,410,411) and F1.FATBASID=F.ID)) then ''�rsaliyeden''  '+
+          '   when exists(select F2.ID from SIPARISDETAY F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (406,407,409,410,429,473) and F1.FATBASID=F.ID)) then ''Siparişten''  '+
+          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (408,410,411) and F1.FATBASID=F.ID)) then ''İrsaliyeden''  '+
           '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (461,462,464,468,472) and F1.FATBASID=F.ID)) then ''Konsinyeden''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (425,426) and F1.FATBASID=F.ID)) then ''�retimden''  '+
+          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (425,426) and F1.FATBASID=F.ID)) then ''Üretimden''  '+
           '   else '''' end,  '+
           ' DURUMNEREYE = case '+
           '   when (F.TUR=10)and(408 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=14)and(411 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=109)and(461 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
           '   when (F.TUR=119)and(462 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=119)and(468 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''�rsaliyeye''   '+
-          '   when (F.TUR=119)and(472 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Fi�e''   '+
+          '   when (F.TUR=119)and(468 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''İrsaliyeye''   '+
+          '   when (F.TUR=119)and(472 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Fişe''   '+
           '   else '''' end,    ';
     end else begin
       SQLPart1 := SQLPart1 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
@@ -700,7 +786,7 @@ begin
     SQLPart1 := SQLPart1 + FatEkAlanlar;
     SQLPart1 := SQLPart1 + ' TESLIMTARIHI='''',F.FATURA_GON_TARIHI, '+
         ' F.ZARFID,ZARF=(select AD from BELGEZARFI B where B.ID=F.ZARFID),ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI, ' +
-        ' ONAYLAYACAK=0,ONAYLAYAN=0,EFATURADURUM' +
+        ' ONAYLAYACAK=0,ONAYLAYAN=0,EFATURADURUM,EFATURASONUC' +
         ' from FATBASLIK F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID '+
         ' LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID ' ;
     if FArama.AraStok.Text<> '' then
@@ -733,18 +819,18 @@ begin
           '   when (F.TUR=9)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden''  '+
           '   when (F.TUR=19)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden'' '+
           '   when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten'' '+
-          '   when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''�retimden'' '+
+          '   when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Üretimden'' '+
           '   else '''' end,  '+
           ' DURUMNEREYE = case '+
           ' 	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    '+
-          ' 	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''�rsaliyeye''  '+
-          ' 	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Sipari�e''  '+
+          ' 	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''  '+
+          ' 	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Siparişe''  '+
           ' 	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''   '+
-          ' 	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''�rsaliyeye'' '+
-          '   when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fi�e''    '   +
+          ' 	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye'' '+
+          '   when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fişe''    '   +
           ' 	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye'' '+
-          ' 	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''�retim Fi�ine'' '+
-          ' 	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''�retim Fi�ine'' '+
+          ' 	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine'' '+
+          ' 	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine'' '+
           ' 	else '''' end,    ';
     end else begin
       SQLPart2 := SQLPart2 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
@@ -753,7 +839,7 @@ begin
 
     SQLPart2 := SQLPart2 + ' TESLIMTARIHI =(Select Min(TESLIMTARIHI) from SIPARISDETAY Where SIPARISID=F.ID ), FATURA_GON_TARIHI=null, '+
         ' ZARFID=null,ZARF=null,ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI, '+
-        ' F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0' +
+        ' F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0,EFATURASONUC=0' +
         ' from SIPARIS F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID '+
         ' LEFT OUTER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID'+
         ' LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID ' ;
@@ -863,10 +949,10 @@ begin
     end;
 
     if gf.FMenuTur=1  then begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Ad�';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Ad?';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Gelir Kodu';
     end else begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Ad�';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Ad?';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Masraf Kodu';
     end;
   end;
@@ -920,10 +1006,18 @@ var
  // LocateID:integer;
 begin
    JvTimer1.Enabled := False;
+   // Gelen Kutusu sekmesinde standart SP sorgusunu calistirma; FArama filtre
+   // degisiminde gelen kutusu sorgusunu yeniden insa etmek icin
+   // PageControlTurChange'e route et.
+   if (PageControlTur.ActivePage <> nil) and (PageControlTur.ActivePage.Tag = 1101) then begin
+     PageControlTurChange(PageControlTur);
+     Exit;
+   end;
  // if (FATBASLIK.Active)and(FATBASLIK.RecordCount>0) then
 //      LocateID := FATBASLIK.FieldByName('ID').AsInteger;
    gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
    BtnBelgeZarfi.Visible := gf.FAltTur=11; //SQLEk=' and F.TUR = 11 ';
+
    SubeIDList := Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme);
    if SubeIDList = '-999' then
        SubeIDList := '-1';
@@ -945,7 +1039,7 @@ begin
        TarihBit := null;
    end;
 
-   if gf.FAltTur in [9, 19, 101] then // al sat sipari� ve sat�nalma talebi
+   if gf.FAltTur in [9, 19, 101] then // al sat sipariş ve satınalma talebi
       Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis', SipEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
       SubeIDList, Trim(FArama.AraFaturaNo.Text), Trim(FArama.AraBaslik.Text),Trim(FArama.AraKod.Text),Trim(FArama.AraAciklama.Text),Trim(FArama.AraStok.Text))
    else
@@ -973,11 +1067,11 @@ begin
     end;
 
     if gf.FMenuTur=1  then begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Ad�';
-      GridFatDBTableView1MASRAFKOD.Caption:= 'Gelir Kodu';
+      GridFatViewMASRAFAD.Caption:= 'Gelir Ad?';
+      GridFatViewMASRAFKOD.Caption:= 'Gelir Kodu';
     end else begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Ad�';
-      GridFatDBTableView1MASRAFKOD.Caption:= 'Masraf Kodu';
+      GridFatViewMASRAFAD.Caption:= 'Masraf Ad?';
+      GridFatViewMASRAFKOD.Caption:= 'Masraf Kodu';
     end;
 
     case gf.FAltTur of
@@ -989,6 +1083,14 @@ begin
     end;
 
   Tablo.GridAyarRestore('AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False), GridFatListeTview );
+
+  Self.Align := alClient;
+  GridFatListe.LookAndFeel.ScrollbarMode := sbmClassic;
+  GridFatListeTview.OptionsView.ScrollBars := ssBoth;
+  GridFatView.OptionsView.ScrollBars := ssBoth;
+
+  MenuKabulEt.OnClick := MenuKabulEtClick;
+  MenuRedEt.OnClick := MenuRedEtClick;
 
    GridFatListeTview.ViewData.Expand(True);
 end;
@@ -1060,7 +1162,7 @@ begin
    gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
 
 
-   if EkAlanKolonList.Count > 0 then  //varsa �nceki ek kolonlar silinmeli..
+   if EkAlanKolonList.Count > 0 then  //varsa önceki ek kolonlar silinmeli..
       EkKolonSil;
    Gorunur;
    TarihDegisti;
@@ -1235,11 +1337,62 @@ procedure TFaturalarDlg.Baslatildi;
 var
   ra : string;
   i : integer;
+
+  procedure ImageComboItemEkle(AProps: TcxImageComboBoxProperties; AValue: Integer; const ADesc: string);
+  var
+    j: Integer;
+  begin
+    if AProps = nil then Exit;
+    AProps.ShowDescriptions := True;
+    for j := 0 to AProps.Items.Count - 1 do
+      if VarToStr(AProps.Items[j].Value) = IntToStr(AValue) then begin
+        AProps.Items[j].Description := ADesc;
+        Exit;
+      end;
+    with AProps.Items.Add do begin
+      Description := ADesc;
+      Value := AValue;
+    end;
+  end;
+
 begin
 
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   cxPageControl1.ActivePageIndex := 0;
+  Self.Align := alClient;
+  GridFatListe.LookAndFeel.ScrollbarMode := sbmClassic;
+  GridFatListeTview.OptionsView.ScrollBars := ssBoth;
+  GridFatView.OptionsView.ScrollBars := ssBoth;
+
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, -3, 'Alinmayacak');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, -2, 'Iceri Alindi');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, -1, 'Gelen Yeni');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 0, 'Yeni');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 1, 'E-Fatura Hazir');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 2, 'E-Fatura Gonderilmis');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 11, 'E-Arsiv Hazir');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 12, 'E-Arsiv Gonderilmis');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 41, 'E-SMM Hazir');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 42, 'E-SMM Gonderilmis');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 51, 'E-Irsaliye Hazir');
+  ImageComboItemEkle(Tablo.repEFaturaDurum.Properties, 52, 'E-Irsaliye Gonderilmis');
+
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 0, 'Yeni');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 1, 'Islemde');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 2, 'Basarili');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 3, 'Hata/Red');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 4, 'Iptal');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 5, 'Cevap Suresi Gecti');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 6, 'Yanit bekliyor');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 7, 'Taslak');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 8, 'Raporlanacak');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 9, 'GIB e Gonderildi');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 10, 'Alindi');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 11, 'Yanit gerekmiyor');
+  ImageComboItemEkle(Tablo.repEFaturaSonuc.Properties, 12, 'Kanunen kabul');
+  MenuKabulEt.OnClick := MenuKabulEtClick;
+  MenuRedEt.OnClick := MenuRedEtClick;
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
   YaziciYaz.Caption := ra;
 
@@ -1257,18 +1410,18 @@ begin
        FreeAndNil(KurFark1);
    end;
 
-//   if not Tablo.YetkiVarmi(242112,YetkiTur_Gorme) then begin //Maliyet g�rme izni yoksa
+//   if not Tablo.YetkiVarmi(242112,YetkiTur_Gorme) then begin //Maliyet görme izni yoksa
 //       FreeAndNil(GridFatListeTviewFATURA_MALIYETI_ORT);
 //       FreeAndNil(GridFatListeTviewORTKAR);
 //   end;
-   Tablo.GridAyarRestore('AlSatListeDetayGridi',GridFatDBTableView1 );
+   Tablo.GridAyarRestore('AlSatListeDetayGridi',GridFatView );
 
    if Sektor in [ Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest] then begin
       GridFatListeTviewOZELKOD.Visible := True;
       GridFatListeTviewOZELKOD.Caption := 'Masa';
       GridFatListeTviewZARF.DataBinding.FieldName := 'ZARFID';
       GridFatListeTviewZARF.Visible := True;
-      GridFatListeTviewZARF.Caption := 'Ki�i';
+      GridFatListeTviewZARF.Caption := 'Kişi';
    end;
 
   YaziciYaz.Caption := ra;
@@ -1284,7 +1437,7 @@ begin
    cxPageControl1.ActivePage := SheetDetay;
 
 
-  if not Tablo.YetkiVarmi(2431,1,False) then begin  //tutarlar g�z�kmesin denirse;
+  if not Tablo.YetkiVarmi(2431,1,False) then begin  //tutarlar gözükmesin denirse;
 
 
     GridFatListeTview.OptionsView.Footer := False;
@@ -1310,6 +1463,710 @@ begin
   Application.CreateForm(TBelgeZarflariDlg,BzDlg);
   BzDlg.ShowModal;
   FreeAndNil(BzDlg);
+end;
+
+procedure TFaturalarDlg.KuyrukGonderimleriniIsle(const AFatBaslikID: Integer;
+  out AGonderildi, AHata, AToplam: Integer; out AHataMesaj: string;
+  const AIlerleme: TIlerlemeOlay);
+// EBELGEKUYRUK uzerindeki bekleyen/hatali gonderim islerini sirayla Izibiz'e gonderir.
+// AFatBaslikID = 0 ise kuyrukta uygun durumda olan tum kayitlari isler (toolbar).
+// AFatBaslikID > 0 ise sadece o FATBASLIK'a ait kuyruk kaydini isler (Gonder menusu).
+var
+  LQ: TFDQuery;
+  LListe: TStringList;
+  i, LQueueID, LFatBaslikID: Integer;
+  LUser, LSifre, LURL, LYan: string;
+  LTest: Boolean;
+  LSQL: string;
+begin
+  AGonderildi := 0;
+  AHata := 0;
+  AToplam := 0;
+  AHataMesaj := '';
+
+  TEBelgeKimlik.Yukle(LUser, LSifre, LURL, LTest);
+  if (Trim(LUser) = '') or (Trim(LSifre) = '') or (Trim(LURL) = '') then begin
+    AHataMesaj := 'Kuyruk gonderimi atlandi: eBelge kullanici/sifre/URL eksik.';
+    Exit;
+  end;
+
+  LListe := TStringList.Create;
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    // ONCE: 5dk'dan eski "Islemde" (DURUM=1) takilmis kayitlari geri al.
+    // Bu kayitlar onceki gonderim sirasinda crash/timeout olmustur.
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update EBELGEKUYRUK set DURUM=0 ' +
+      'where ISLEMTURU=1 and DURUM=1 ' +
+      '  and (SON_DENEME_TARIHI is null or SON_DENEME_TARIHI<dateadd(minute,-5,getdate()))',
+      [], []);
+
+    // Kuyruktan islenecek isleri al. AFatBaslikID=0 ise tum kuyrugu, degilse
+    // sadece ilgili FATBASLIK'a ait kaydi cek. SONRAKI_DENEME filtresi
+    // toplu modda (=0) uygulanir; tek belge modunda (>0) hemen denenmesi gerekir.
+    LSQL :=
+      'select ID,FATBASLIKID from EBELGEKUYRUK ' +
+      'where ISLEMTURU=1 and DURUM in (0,9) ';
+    if AFatBaslikID > 0 then
+      LSQL := LSQL + 'and FATBASLIKID=' + IntToStr(AFatBaslikID) + ' '
+    else
+      LSQL := LSQL +
+        'and (SONRAKI_DENEME_TARIHI is null or SONRAKI_DENEME_TARIHI<=getdate()) ';
+    LSQL := LSQL + 'order by ONCELIK,ID';
+    LQ.SQL.Text := LSQL;
+    LQ.Open;
+    while not LQ.Eof do begin
+      LListe.Add(LQ.FieldByName('ID').AsString + '=' + LQ.FieldByName('FATBASLIKID').AsString);
+      LQ.Next;
+    end;
+    LQ.Close;
+
+    AToplam := LListe.Count;
+    for i := 0 to LListe.Count - 1 do begin
+      LQueueID := StrToIntDef(LListe.Names[i], 0);
+      LFatBaslikID := StrToIntDef(LListe.ValueFromIndex[i], 0);
+      if (LQueueID <= 0) or (LFatBaslikID <= 0) then
+        Continue;
+
+      if Assigned(AIlerleme) then
+        AIlerleme(i + 1, LListe.Count, 'Kuyruk gonderiliyor');
+
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'update EBELGEKUYRUK set DURUM=1,SON_DENEME_TARIHI=getdate(), ' +
+        'DENEME_SAYISI=DENEME_SAYISI+1,DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
+        ['&KUL', '&ID'], [StrToIntDef(Kullanan, 0), LQueueID]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'UPDATE FATBASLIK SET EFATURASONUC=1 WHERE ID=&ID', ['&ID'], [LFatBaslikID]);
+
+      try
+        if TEBelgeOlusturucu.Gonder(Tablo.FDCnn, LFatBaslikID, LUser, LSifre, LURL, LTest, LYan) then begin
+          Inc(AGonderildi);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'delete from EBELGEKUYRUK where ID=&ID', ['&ID'], [LQueueID]);
+        end else begin
+          Inc(AHata);
+          if AHataMesaj = '' then
+            AHataMesaj := LYan;
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'update EBELGEKUYRUK set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
+            'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
+            ['&HATA', '&KUL', '&ID'], [Copy(LYan, 1, 1000), StrToIntDef(Kullanan, 0), LQueueID]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'UPDATE FATBASLIK SET EFATURASONUC=3 WHERE ID=&ID', ['&ID'], [LFatBaslikID]);
+        end;
+      except
+        on E: Exception do begin
+          Inc(AHata);
+          if AHataMesaj = '' then
+            AHataMesaj := E.Message;
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'update EBELGEKUYRUK set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
+            'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
+            ['&HATA', '&KUL', '&ID'], [Copy(E.Message, 1, 1000), StrToIntDef(Kullanan, 0), LQueueID]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'UPDATE FATBASLIK SET EFATURASONUC=3 WHERE ID=&ID', ['&ID'], [LFatBaslikID]);
+        end;
+      end;
+    end;
+  finally
+    LQ.Free;
+    LListe.Free;
+  end;
+end;
+
+procedure TFaturalarDlg.BtnEFaturaGuncelleClick(Sender: TObject);
+// Kuyruktaki gonderimleri isler, ardindan Izibiz inbox'tan gelen e-faturalari ceker.
+var
+  LYeni, LAtlanan, LYeniFB: Integer;
+  LHata, LFBHata, LMesaj, LEskiCaption: string;
+  LBasarili, LFBOK: Boolean;
+  LIlerleme: TIlerlemeOlay;
+  LKGonderildi, LKHata, LKToplam: Integer;
+  LKHataMesaj: string;
+begin
+  LEskiCaption := LabelKayitSayisi.Caption;
+  LIlerleme :=
+    procedure(const AMevcut, ATotal: Integer; const ABilgi: string)
+    begin
+      if ATotal > 0 then
+        LabelKayitSayisi.Caption :=
+          Format('%s: %d / %d', [ABilgi, AMevcut, ATotal])
+      else
+        LabelKayitSayisi.Caption := ABilgi + '...';
+      Application.ProcessMessages;
+    end;
+
+  Screen.Cursor := crHourGlass;
+  try
+    KuyrukGonderimleriniIsle(0, LKGonderildi, LKHata, LKToplam, LKHataMesaj, LIlerleme);
+
+    LBasarili := TEBelgeGelen.Cek(Tablo.FDCnn, LYeni, LAtlanan, LHata, LIlerleme);
+    LFBOK := False;
+    LYeniFB := 0;
+    LFBHata := '';
+    if LBasarili then
+      LFBOK := TEBelgeGelen.OlusturFatbaslikler(Tablo.FDCnn, LYeniFB, LFBHata,
+                                                 LIlerleme);
+  finally
+    Screen.Cursor := crDefault;
+    LabelKayitSayisi.Caption := LEskiCaption;
+  end;
+
+  LMesaj := 'Senkronizasyon tamamlandi.' + sLineBreak +
+            'Kuyruk toplam: ' + IntToStr(LKToplam) + sLineBreak +
+            'Kuyruk gonderilen: ' + IntToStr(LKGonderildi) + sLineBreak +
+            'Kuyruk hata: ' + IntToStr(LKHata);
+  if Trim(LKHataMesaj) <> '' then
+    LMesaj := LMesaj + sLineBreak + 'Kuyruk ilk hata: ' + LKHataMesaj;
+
+  if LBasarili then begin
+    LMesaj := LMesaj + sLineBreak + sLineBreak +
+              'Gelen faturalar cekildi.' + sLineBreak +
+              'EBELGE yeni: ' + IntToStr(LYeni) + sLineBreak +
+              'EBELGE atlanan: ' + IntToStr(LAtlanan);
+    if LFBOK then
+      LMesaj := LMesaj + sLineBreak + 'FATBASLIK olusturulan: ' + IntToStr(LYeniFB)
+    else
+      LMesaj := LMesaj + sLineBreak + 'FATBASLIK olusturma hata: ' + LFBHata;
+    if Trim(LHata) <> '' then
+      LMesaj := LMesaj + sLineBreak + sLineBreak + LHata;
+    TabloYenile(FATBASLIK, []);
+  end else
+    LMesaj := LMesaj + sLineBreak + sLineBreak + 'Gelen faturalar cekilemedi: ' + LHata;
+
+  ShowMessage(LMesaj);
+end;
+
+procedure TFaturalarDlg.MenuKabulEtClick(Sender: TObject);
+begin
+  _GelenFaturaCevapVer(True);
+end;
+
+procedure TFaturalarDlg.MenuRedEtClick(Sender: TObject);
+begin
+  _GelenFaturaCevapVer(False);
+end;
+
+procedure TFaturalarDlg._GelenFaturaCevapVer(AKabul: Boolean);
+var
+  LFatBaslikID, LKullanan, LHttpKodu: Integer;
+  LEBelgeID: Int64;
+  LUser, LSifre, LURL, LToken, LHata, LAciklama: string;
+  LRedSebep, LRedEkAciklama: Variant;
+  LRedListe: TStringList;
+  LUUID, LAPIJSON, LIzibizID, LMesaj: string;
+  LTest: Boolean;
+  LQ: TFDQuery;
+  LJSON: TJSONValue;
+  LObj: TJSONObject;
+  LVal: TJSONValue;
+  LSonuc: TIzibizGonderimSonuc;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+
+  LFatBaslikID := FATBASLIK.FieldByName('ID').AsInteger;
+  if FATBASLIK.FieldByName('TUR').AsInteger <> 11 then begin
+    ShowMessage('Bu islem sadece gelen e-fatura icin kullanilir.');
+    Exit;
+  end;
+  if FATBASLIK.FieldByName('EFATURASONUC').AsInteger <> 6 then begin
+    ShowMessage('Bu faturada cevap beklenmiyor.');
+    Exit;
+  end;
+
+  LAciklama := '';
+  if not AKabul then begin
+    LRedSebep := 'Fatura tutari hatalidir.';
+    LRedEkAciklama := '';
+    LRedListe := TStringList.Create;
+    try
+      LRedListe.Add('Mal/hizmet tarafimiza ait degildir.');
+      LRedListe.Add('Fatura tutari hatalidir.');
+      LRedListe.Add('Birim fiyat hatalidir.');
+      LRedListe.Add('KDV orani hatalidir.');
+      LRedListe.Add('Siparis/irsaliye ile uyumsuzdur.');
+      LRedListe.Add('Cari bilgiler hatalidir.');
+      LRedListe.Add('Mukerrer fatura duzenlenmistir.');
+      LRedListe.Add('Fatura tarihi/numarasi hatalidir.');
+      LRedListe.Add('Urun/hizmet aciklamasi hatalidir.');
+      LRedListe.Add('Ilgili teslimat gerceklesmemistir.');
+      if TGirisKutusuEx.BilgiAlEx('Red Nedeni',
+        TGirdiDenetimleri.Create.ComboBox('Sebep:', @LRedSebep, LRedListe, csDropDownList)
+          .Memo('Ek aciklama:', @LRedEkAciklama)) <> mrOk then
+        Exit;
+    finally
+      LRedListe.Free;
+    end;
+    LAciklama := Trim(VarToStr(LRedSebep));
+    if Trim(VarToStr(LRedEkAciklama)) <> '' then
+      LAciklama := LAciklama + ' ' + Trim(VarToStr(LRedEkAciklama));
+    if LAciklama = '' then begin
+      ShowMessage('Red icin sebep girilmelidir.');
+      Exit;
+    end;
+  end;
+
+  LEBelgeID := 0;
+  LUUID := '';
+  LAPIJSON := '';
+  LIzibizID := '';
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text :=
+      'select top 1 ID, UUID, cast(API_JSON as nvarchar(max)) API_JSON ' +
+      'from EBELGE where YON=2 and FATBASLIKID=:FID order by ID desc';
+    LQ.ParamByName('FID').AsInteger := LFatBaslikID;
+    LQ.Open;
+    if not LQ.Eof then begin
+      LEBelgeID := LQ.FieldByName('ID').AsLargeInt;
+      LUUID := LQ.FieldByName('UUID').AsString;
+      LAPIJSON := LQ.FieldByName('API_JSON').AsString;
+    end;
+  finally
+    LQ.Free;
+  end;
+
+  if LEBelgeID <= 0 then begin
+    ShowMessage('Bu gelen fatura icin EBELGE kaydi bulunamadi.');
+    Exit;
+  end;
+
+  LJSON := TJSONObject.ParseJSONValue(LAPIJSON);
+  try
+    if LJSON is TJSONObject then begin
+      LObj := TJSONObject(LJSON);
+      LVal := LObj.GetValue('id');
+      if LVal <> nil then LIzibizID := LVal.Value;
+      if LIzibizID = '' then begin
+        LVal := LObj.GetValue('documentId');
+        if LVal <> nil then LIzibizID := LVal.Value;
+      end;
+      if LIzibizID = '' then begin
+        LVal := LObj.GetValue('documentID');
+        if LVal <> nil then LIzibizID := LVal.Value;
+      end;
+    end;
+  finally
+    if LJSON <> nil then LJSON.Free;
+  end;
+  if LIzibizID = '' then LIzibizID := LUUID;
+
+  TEBelgeKimlik.Yukle(LUser, LSifre, LURL, LTest);
+  if (Trim(LUser) = '') or (Trim(LSifre) = '') or (Trim(LURL) = '') then begin
+    ShowMessage('eBelge kullanici/sifre/URL eksik.');
+    Exit;
+  end;
+
+  LToken := TEBelgeKimlik.TokenAl;
+  if LToken = '' then begin
+    if not TIzibizRest.Login(LURL, LUser, LSifre,
+      Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeVergiNo, ''),
+      KURUMADI, LToken, LHata) then begin
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+        'VALUES(&EID,2,3,9,&MSG,&KUL,GETDATE())',
+        ['&EID','&MSG','&KUL'], [LEBelgeID, 'Cevap login hatasi: ' + Copy(LHata, 1, 3500), StrToIntDef(Kullanan, 0)]);
+      ShowMessage('Izibiz login basarisiz: ' + LHata);
+      Exit;
+    end;
+    TEBelgeKimlik.TokenSet(LToken);
+  end;
+
+  LKullanan := StrToIntDef(Kullanan, 0);
+  Screen.Cursor := crHourGlass;
+  try
+    if TIzibizRest.InboxResponse(LURL, LToken, LIzibizID, LUUID, LAciklama, AKabul, LSonuc) then begin
+      if AKabul then
+        LMesaj := 'Gelen fatura kabul edildi.'
+      else
+        LMesaj := 'Gelen fatura red edildi.';
+
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,EKLEYEN,EKLEMETARIHI) ' +
+        'VALUES(&EID,2,3,2,&MSG,&HK,&SRV,&KUL,GETDATE())',
+        ['&EID','&MSG','&HK','&SRV','&KUL'],
+        [LEBelgeID, LMesaj + ' ' + Copy(LSonuc.YanitJSON, 1, 2500), LSonuc.HttpKodu, 'IZIBIZ', LKullanan]);
+
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'UPDATE EBELGE SET DURUM=&D, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
+        ['&D','&KUL','&EID'], [2 + Ord(not AKabul), LKullanan, LEBelgeID]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'UPDATE FATBASLIK SET EFATURASONUC=&S WHERE ID=&ID',
+        ['&S','&ID'], [2 + Ord(not AKabul), LFatBaslikID]);
+      ShowMessage(LMesaj);
+      TabloYenile(FATBASLIK, []);
+    end else begin
+      LHttpKodu := LSonuc.HttpKodu;
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) ' +
+        'VALUES(&EID,2,3,9,&MSG,&HK,&SRV,&HATA,&KUL,GETDATE())',
+        ['&EID','&MSG','&HK','&SRV','&HATA','&KUL'],
+        [LEBelgeID, 'Izibiz cevap gonderilemedi.', LHttpKodu, 'IZIBIZ', Copy(LSonuc.Mesaj, 1, 3500), LKullanan]);
+      ShowMessage('Izibiz cevap gonderilemedi: ' + LSonuc.Mesaj);
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
+procedure TFaturalarDlg.MenuCariKaydiOlusturClick(Sender: TObject);
+// FATBASLIK'taki BASLIK/ADRES/ILCE/IL/VD/VNO bilgileriyle cari (REHBER) olustur,
+// modal'i ac. Kaydedilirse FATBASLIK.REHBERID yi yeni cariye baglar.
+// Ayrica ayni VNO'lu + REHBERID=4 (default) olan diger FATBASLIK kayitlarini da gunceller.
+//
+// Akis:
+//   1) Mevcut REHBER (VNO eslesmesi) varsa -> onu kullan
+//   2) Yoksa sp_Grnt_CariIslem @TIP=1 ile yeni REHBER yarat
+//   3) RehberSihirbazBaslat(2, REHBERID) ile modal edit ac
+//   4) mrOk ise FATBASLIK.REHBERID guncelle + benzer VNO'lulari da
+
+  function _JSONKacis(const S: string): string;
+  begin
+    Result := S;
+    Result := StringReplace(Result, '\', '\\', [rfReplaceAll]);
+    Result := StringReplace(Result, '"', '\"', [rfReplaceAll]);
+    Result := StringReplace(Result, #13, '\r', [rfReplaceAll]);
+    Result := StringReplace(Result, #10, '\n', [rfReplaceAll]);
+  end;
+
+  function _XMLDeger(const AXML, ATag1, ATag2: string): string;
+  // ATag1 ile ATag2 arasindaki ilk metin (UBL extraction).
+  var P1, P2: Integer;
+  begin
+    Result := '';
+    P1 := Pos(ATag1, AXML);
+    if P1 = 0 then Exit;
+    Inc(P1, Length(ATag1));
+    P2 := PosEx(ATag2, AXML, P1);
+    if P2 = 0 then Exit;
+    Result := Trim(Copy(AXML, P1, P2 - P1));
+  end;
+
+var
+  LFatBaslikID, LRehberID, LSonucID, LEbelgeID: Integer;
+  LBaslik, LVD, LVNO, LAdres, LIlce, LIl, LSpJSON, LSonucMesaj: string;
+  LSP: TFDQuery;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+
+  LFatBaslikID := FATBASLIK.FieldByName('ID').AsInteger;
+  LBaslik := Trim(FATBASLIK.FieldByName('BASLIK').AsString);
+  LVD := Trim(FATBASLIK.FieldByName('VD').AsString);
+  LVNO := Trim(FATBASLIK.FieldByName('VNO').AsString);
+  LAdres := Trim(FATBASLIK.FieldByName('ADRES').AsString);
+  LIlce := Trim(FATBASLIK.FieldByName('ILCE').AsString);
+  LIl := Trim(FATBASLIK.FieldByName('IL').AsString);
+
+  if LBaslik = '' then begin
+    ShowMessage('Bu faturada BASLIK bos. Cari olusturulamaz.');
+    Exit;
+  end;
+
+  // 1) Ayni VNO ile aktif REHBER var mi?
+  LRehberID := 0;
+  if LVNO <> '' then begin
+    Tablo.TablodanSorguAc(1,
+      'SELECT TOP 1 R.ID FROM REHBER R ' +
+      'INNER JOIN REHBERBILGI RB ON RB.YER_ID=R.ID AND RB.YERI=2 ' +
+      ' AND RB.ETIKET=N''Vergi No'' ' +
+      'WHERE R.DURUM=1 AND REPLACE(RB.BILGI,'' '','''')=' + QuotedStr(LVNO) +
+      ' ORDER BY R.ID');
+    if not Tablo.Query1.Eof then
+      LRehberID := Tablo.Query1.Fields[0].AsInteger;
+    Tablo.Query1.Close;
+  end;
+
+  // 2) Yoksa SP ile yarat
+  if LRehberID = 0 then begin
+    // EBELGE.ID'yi GNTPID olarak gonder
+    LEbelgeID := 0;
+    Tablo.TablodanSorguAc(1,
+      'SELECT ISNULL(GNTPID,0) FROM FATBASLIK WHERE ID=' + IntToStr(LFatBaslikID));
+    if not Tablo.Query1.Eof then
+      LEbelgeID := Tablo.Query1.Fields[0].AsInteger;
+    Tablo.Query1.Close;
+
+    // Cari KOD'u Delphi tarafinda urat: HESAPPLANI'dan 'GEN-SATICI' icin
+    // HESAPKODU'yu bul, THesapKoduPicker.SiradakiKoduGetir ile bir sonraki
+    // bos kodu hesapla. Bos ise SP kendi mantigiyla uretir.
+    var LRootKod, LKod: string;
+    LKod := '';
+    // Cari kok kod opsiyon ekranindan secilir (HESAPPLANI'dan VARSAYILAN=320).
+    // Eski varsayilan: '320.01'.
+    LRootKod := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_CariKod, ''));
+    if LRootKod = '' then begin
+       Showmessage('E-Fatura opsiyonlarında Cari Kod Seçimi Yapın!');
+       exit;
+    end;
+    if LRootKod <> '' then
+      LKod := THesapKoduPicker.SiradakiKoduGetir(LRootKod,
+                'HESAPPLANI', 'HESAPKODU', 'HESAPADI',
+                'REHBER', 'KOD');
+
+    // Gelen e-fatura zarfindan supplier alias'ini al (varsa REHBERALIAS'a yazilir).
+    // Ayrica UBL_XML'den supplier Tel/Web/Eposta'yi cikar -> REHBERBILGI.
+    var LAlias, LUBL, LTel, LWeb, LEposta, LParty: string;
+    LAlias := ''; LUBL := ''; LTel := ''; LWeb := ''; LEposta := '';
+
+    if LEbelgeID > 0 then begin
+      Tablo.TablodanSorguAc(1,
+        'SELECT TOP 1 ISNULL(GONDERICIALIAS, N''''), ISNULL(CAST(UBL_XML AS NVARCHAR(MAX)), N'''') ' +
+        'FROM EBELGE WHERE ID=' + IntToStr(LEbelgeID));
+      if not Tablo.Query1.Eof then begin
+        LAlias := Trim(Tablo.Query1.Fields[0].AsString);
+        LUBL := Tablo.Query1.Fields[1].AsString;
+      end;
+      Tablo.Query1.Close;
+    end;
+
+    // UBL'den AccountingSupplierParty bloku icindeki Contact bilgilerini al.
+    if LUBL <> '' then begin
+      LParty := _XMLDeger(LUBL,
+                          '<cac:AccountingSupplierParty>',
+                          '</cac:AccountingSupplierParty>');
+      if LParty <> '' then begin
+        LTel    := _XMLDeger(LParty, '<cbc:Telephone>', '</cbc:Telephone>');
+        LEposta := _XMLDeger(LParty, '<cbc:ElectronicMail>', '</cbc:ElectronicMail>');
+        LWeb    := _XMLDeger(LParty, '<cbc:WebsiteURI>', '</cbc:WebsiteURI>');
+      end;
+    end;
+
+    LSpJSON :=
+      '{' +
+      '"KOD":"' + _JSONKacis(LKod) + '",' +
+      '"FIRMA":"' + _JSONKacis(LBaslik) + '",' +
+      '"EKLEYEN":' + Kullanan + ',' +
+      '"VNO":"' + _JSONKacis(LVNO) + '",' +
+      '"VD":"' + _JSONKacis(LVD) + '",' +
+      '"FATURABASLIK":"' + _JSONKacis(LBaslik) + '",' +
+      '"ADRES":"' + _JSONKacis(LAdres) + '",' +
+      '"ILCE":"' + _JSONKacis(LIlce) + '",' +
+      '"IL":"' + _JSONKacis(LIl) + '",' +
+      '"ALIAS":"' + _JSONKacis(LAlias) + '",' +
+      '"ALIASBELGETURU":151,' +
+      '"TEL":"' + _JSONKacis(LTel) + '",' +
+      '"WEB":"' + _JSONKacis(LWeb) + '",' +
+      '"EPOSTA":"' + _JSONKacis(LEposta) + '",' +
+      '"GNTPID":' + IntToStr(LEbelgeID) +
+      '}';
+
+    LSP := TFDQuery.Create(nil);
+    try
+      LSP.Connection := Tablo.FDCnn;
+      // Yeni basit cari olusturma SP'si. SONUC_ID = yeni REHBER.ID (basari)
+      // veya 0/-1 (hata). Mesaj SMSG'de.
+      LSP.SQL.Text :=
+        'DECLARE @sid INT, @smsg VARCHAR(1000); ' +
+        'EXEC sp_Grnt_CariOlustur @jsonData=:j, ' +
+        ' @SONUC_ID=@sid OUTPUT, @SONUC_MESAJ=@smsg OUTPUT; ' +
+        'SELECT @sid AS SID, @smsg AS SMSG';
+      LSP.ParamByName('j').AsString := LSpJSON;
+      LSP.Open;
+      LSonucID := LSP.FieldByName('SID').AsInteger;
+      LSonucMesaj := LSP.FieldByName('SMSG').AsString;
+      LSP.Close;
+    finally
+      LSP.Free;
+    end;
+
+    if LSonucID <= 0 then begin
+      ShowMessage('Cari olusturulamadi: ' + LSonucMesaj);
+      Exit;
+    end;
+    LRehberID := LSonucID;
+
+    // UBL'deki tum <cac:PaymentMeans> bloklarini tarayip BANKAHESAPLAR'a yaz.
+    // BANKAKODU: IBAN pozisyon 5-8 (TR + 2 check + 4-digit banka kodu).
+    // BANKASUBELERID: BANKALAR'da kayitli ise BANKASUBELER'den sube adi ile
+    // eslestir, yoksa TOP 1 sube veya NULL.
+    if LUBL <> '' then begin
+      var LIdx, LBlokSon, LBankaKodu, LSubeID: Integer;
+      var LBlok, LIBAN, LIBANTrim, LKur, LBankaAd, LSubeAd: string;
+      var LIlkBanka: Boolean;
+      LIdx := 1;
+      LIlkBanka := True;
+      while True do begin
+        LIdx := PosEx('<cac:PaymentMeans>', LUBL, LIdx);
+        if LIdx = 0 then Break;
+        LBlokSon := PosEx('</cac:PaymentMeans>', LUBL, LIdx);
+        if LBlokSon = 0 then Break;
+        LBlok := Copy(LUBL, LIdx, LBlokSon - LIdx);
+        LIdx := LBlokSon + Length('</cac:PaymentMeans>');
+
+        LIBAN := _XMLDeger(LBlok, '<cbc:ID>', '</cbc:ID>');
+        LKur := _XMLDeger(LBlok, '<cbc:CurrencyCode>', '</cbc:CurrencyCode>');
+        if LKur = '' then LKur := 'TRY';
+        // Sube adi: oncelikli kaynak <cac:FinancialInstitutionBranch><cbc:Name>
+        LSubeAd := _XMLDeger(LBlok,
+                             '<cac:FinancialInstitutionBranch>',
+                             '</cac:FinancialInstitutionBranch>');
+        if LSubeAd <> '' then
+          LSubeAd := _XMLDeger(LSubeAd, '<cbc:Name>', '</cbc:Name>');
+        LBankaAd := _XMLDeger(LBlok, '<cbc:InstructionNote>', '</cbc:InstructionNote>');
+        if LBankaAd = '' then LBankaAd := LSubeAd;
+
+        LIBANTrim := StringReplace(Trim(LIBAN), ' ', '', [rfReplaceAll]);
+        if LIBANTrim = '' then Continue;
+
+        // Ayni IBAN/REHBER zaten varsa atla.
+        Tablo.TablodanSorguAc(1,
+          'SELECT TOP 1 ID FROM BANKAHESAPLAR WHERE REHBERID=' + IntToStr(LRehberID) +
+          ' AND REPLACE(IBAN,'' '','''')=' + QuotedStr(LIBANTrim));
+        var LMevcut: Boolean;
+        LMevcut := not Tablo.Query1.Eof;
+        Tablo.Query1.Close;
+        if LMevcut then Continue;
+
+        // BANKAKODU lookup: TR + 2 check + 4-digit banka kodu (pozisyon 5-8).
+        LBankaKodu := 0;
+        LSubeID := 0;
+        if (Length(LIBANTrim) >= 8) and SameText(Copy(LIBANTrim, 1, 2), 'TR') then
+          LBankaKodu := StrToIntDef(Copy(LIBANTrim, 5, 4), 0);
+
+        if LBankaKodu > 0 then begin
+          // Once BANKALAR'da kayitli mi kontrol et.
+          Tablo.TablodanSorguAc(1,
+            'SELECT TOP 1 BANKAKODU FROM BANKALAR WHERE BANKAKODU=' + IntToStr(LBankaKodu));
+          var LBankaVar: Boolean;
+          LBankaVar := not Tablo.Query1.Eof;
+          Tablo.Query1.Close;
+
+          if LBankaVar then begin
+            // Sube adina gore esleme dene; bulamazsa TOP 1.
+            if Trim(LSubeAd) <> '' then begin
+              Tablo.TablodanSorguAc(1,
+                'SELECT TOP 1 ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
+                ' AND ISNULL(SUBEADI,N'''') LIKE ' + QuotedStr('%' + Trim(LSubeAd) + '%'));
+              if not Tablo.Query1.Eof then
+                LSubeID := Tablo.Query1.Fields[0].AsInteger;
+              Tablo.Query1.Close;
+            end;
+            if LSubeID = 0 then begin
+              Tablo.TablodanSorguAc(1,
+                'SELECT TOP 1 ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
+                ' ORDER BY SUBEKODU');
+              if not Tablo.Query1.Eof then
+                LSubeID := Tablo.Query1.Fields[0].AsInteger;
+              Tablo.Query1.Close;
+            end;
+          end;
+        end;
+
+        if LSubeID > 0 then
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'INSERT INTO BANKAHESAPLAR (REHBERID, BANKASUBELERID, IBAN, KUR, ' +
+            ' HESAPACIKLAMA, VARSAYILAN, DURUM, EKLEYEN, EKLEMETARIHI) VALUES ' +
+            ' (&RID, &BSID, &IBAN, &KUR, &ACK, &VRS, 1, &KUL, GETDATE())',
+            ['&RID', '&BSID', '&IBAN', '&KUR', '&ACK', '&VRS', '&KUL'],
+            [LRehberID, LSubeID, LIBANTrim, LKur, LBankaAd,
+             Ord(LIlkBanka), StrToIntDef(Kullanan, 0)])
+        else
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'INSERT INTO BANKAHESAPLAR (REHBERID, IBAN, KUR, ' +
+            ' HESAPACIKLAMA, VARSAYILAN, DURUM, EKLEYEN, EKLEMETARIHI) VALUES ' +
+            ' (&RID, &IBAN, &KUR, &ACK, &VRS, 1, &KUL, GETDATE())',
+            ['&RID', '&IBAN', '&KUR', '&ACK', '&VRS', '&KUL'],
+            [LRehberID, LIBANTrim, LKur, LBankaAd,
+             Ord(LIlkBanka), StrToIntDef(Kullanan, 0)]);
+        LIlkBanka := False;
+      end;
+    end;
+  end;
+
+  if LRehberID <= 0 then begin
+    ShowMessage('Olusturulan REHBER ID bulunamadi.');
+    Exit;
+  end;
+
+  // 3) REHBER modal'ini edit modunda ac
+  if Tablo.RehberSihirbazBaslat(2, LRehberID, -1, -1, False) <= 0 then
+    Exit;
+
+  // 4) FATBASLIK.REHBERID guncelle
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'UPDATE FATBASLIK SET REHBERID=&RID WHERE ID=&FID',
+    ['&RID', '&FID'], [LRehberID, LFatBaslikID]);
+
+  // 4b) Ayni VNO + REHBERID=4 (default) olanlari da guncelle
+  if LVNO <> '' then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'UPDATE FATBASLIK SET REHBERID=&RID ' +
+      'WHERE REHBERID=4 AND REPLACE(ISNULL(VNO,N''''), '' '','''')=' + QuotedStr(LVNO),
+      ['&RID'], [LRehberID]);
+
+  TabloYenile(FATBASLIK, [], LFatBaslikID, 'ID');
+  ShowMessage('Cari (REHBER.ID=' + IntToStr(LRehberID) +
+              ') olusturuldu/baglandi.');
+end;
+
+procedure TFaturalarDlg.MenuMesajlarGosterClick(Sender: TObject);
+// Aktif FATBASLIK satirinin tum islem gecmisini ve mesajlarini gosterir.
+// Grid'deki EFATURASONUC hucresine tiklamakla ayni etki.
+var
+  LFID: Integer;
+  LFaturaNo, LBaslik: string;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  LFID := FATBASLIK.FieldByName('ID').AsInteger;
+  LFaturaNo := Trim(FATBASLIK.FieldByName('FATURANO').AsString);
+  LBaslik := Trim(FATBASLIK.FieldByName('BASLIK').AsString);
+  TEBelgeMesajDlg.Goster(Self, Tablo.FDCnn, LFID, LFaturaNo, LBaslik);
+end;
+
+procedure TFaturalarDlg.MenuEslesmeTablosunuAcClick(Sender: TObject);
+// Stok/hizmet eslesme tablosu dialogunu acar.
+// Aktif FATBASLIK satirinin REHBERID'si onsecili olarak gelir.
+var
+  LRehberID: Integer;
+  LCariAdi: string;
+begin
+  LRehberID := 0;
+  LCariAdi := '';
+  if FATBASLIK.Active and (not FATBASLIK.IsEmpty) then begin
+    LRehberID := FATBASLIK.FieldByName('REHBERID').AsInteger;
+    if FATBASLIK.FindField('CARIAD') <> nil then
+      LCariAdi := Trim(FATBASLIK.FieldByName('CARIAD').AsString);
+  end;
+  TStokEslestirmeDlg.Goster(Self, Tablo.FDCnn, LRehberID, LCariAdi);
+end;
+
+procedure TFaturalarDlg.MenuUrunEslestirClick(Sender: TObject);
+// Tum mantik TStokEslestirmeDlg.FaturayiEslestir icindedir.
+var
+  LFatBaslikID, LRehberID: Integer;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  LFatBaslikID := FATBASLIK.FieldByName('ID').AsInteger;
+  LRehberID := FATBASLIK.FieldByName('REHBERID').AsInteger;
+  if TStokEslestirmeDlg.FaturayiEslestir(Tablo.FDCnn, LFatBaslikID,
+       LRehberID, StrToIntDef(Kullanan, 0)) then
+    TabloYenile(FATBASLIK, [], LFatBaslikID, 'ID');
+end;
+
+procedure TFaturalarDlg.GridFatViewCellClick(Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo;
+  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+// KOD hucresi:  paylasilan TFaturaWizardDlg.FaturaSatiriUrunSec kullanilir.
+var
+  LFaturaID, LFatBaslikID, LRehberID: Integer;
+begin
+  if AButton <> mbLeft then Exit;
+  if ACellViewInfo = nil then Exit;
+  if ACellViewInfo.Item <> GridFatViewKOD then Exit;
+  if (not FATURA.Active) or FATURA.IsEmpty then Exit;
+
+  AHandled := True;
+  LFaturaID := FATURA.FieldByName('ID').AsInteger;
+  LFatBaslikID := 0; LRehberID := 0;
+  if FATBASLIK.Active and (not FATBASLIK.IsEmpty) then begin
+    LFatBaslikID := FATBASLIK.FieldByName('ID').AsInteger;
+    LRehberID := FATBASLIK.FieldByName('REHBERID').AsInteger;
+  end;
+
+  if TFaturaWizardDlg.FaturaSatiriUrunSec(Tablo.FDCnn,
+       LFaturaID, LFatBaslikID, LRehberID) then
+    TabloYenile(FATURA, [], LFaturaID, 'ID');
 end;
 
 procedure TFaturalarDlg.BtnDonusumClick(Sender: TObject);
@@ -1421,17 +2278,17 @@ function TFaturalarDlg.BelgeIptalEt(Tur,ID:Integer):Boolean;
 Begin
   case Tur of
     9,19,101:begin
-      veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update SIPARIS set DURUM=6,SIPARIS_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,SIPARIS_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
+      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SIPARIS set DURUM=6,SIPARIS_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,SIPARIS_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
                 ,['&Tur','&ID'],[Tur,ID]);
-      veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update SIPARISDETAY set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,ADET=0,MIKTAR=0 where SIPARISID=&Siparisid'
+      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SIPARISDETAY set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,ADET=0,MIKTAR=0 where SIPARISID=&Siparisid'
                 ,['&Siparisid'],[ID]);
     end;
   else
-    veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update FATBASLIK set DURUM=6,FATURA_MALIYETI_ORT=0,FATURA_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,FATURA_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATBASLIK set DURUM=6,FATURA_MALIYETI_ORT=0,FATURA_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,FATURA_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
               ,['&Tur','&ID'],[Tur,ID]);
-    veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'update FATURA set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,STOKDURUMDEGIS=0,ADET=0,MIKTAR=0,YERI=0,YERID=0 where FATBASID=&Fatbasid'
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATURA set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,STOKDURUMDEGIS=0,ADET=0,MIKTAR=0,YERI=0,YERID=0 where FATBASID=&Fatbasid'
               ,['&Fatbasid'],[ID]);
-    veritabani.BasitKomut�al��t�r(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and BASLIKID=&Fatbasid'
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and BASLIKID=&Fatbasid'
               ,['&Tur','&Fatbasid'],[Tur,ID]);
   end;
 End;
@@ -1526,12 +2383,12 @@ begin//durum:6 iptal
 
   if FATBASLIK.FieldByName('DURUM').AsInteger<>6 then begin
     KaynakIptal := False;
-    if (FATBASLIK.FieldByName('DURUMNEREDEN').AsString<>'')and (Application.MessageBox(PChar(FWKaynagaUygulansinmi),pchar(Uyari), MB_YESNO + MB_ICONWARNING)=mrYes) then begin
-        KaynakBelgeIptalIslemi;
-        KaynakIptal:=True;
-    end;
-    if (FATBASLIK.FieldByName('DURUMNEREYE').AsString<>'')and(Application.MessageBox(PChar(FWHedefeUygulansinmi),pchar(Uyari), MB_YESNO + MB_ICONWARNING)=mrYes) then
-        HedefBelgeIptalIslemi;
+//    if (FATBASLIK.FieldByName('DURUMNEREDEN').AsString<>'')and (Application.MessageBox(PChar(FWKaynagaUygulansinmi),pchar(Uyari), MB_YESNO + MB_ICONWARNING)=mrYes) then begin
+//        KaynakBelgeIptalIslemi;
+//        KaynakIptal:=True;
+//    end;
+//    if (FATBASLIK.FieldByName('DURUMNEREYE').AsString<>'')and(Application.MessageBox(PChar(FWHedefeUygulansinmi),pchar(Uyari), MB_YESNO + MB_ICONWARNING)=mrYes) then
+//        HedefBelgeIptalIslemi;
     BelgeIptalEt(FATBASLIK.FieldByName('TUR').AsInteger,FATBASLIK.FieldByName('ID').AsInteger);
 
     if KaynakIptal=True then
@@ -1543,10 +2400,10 @@ begin//durum:6 iptal
 
 
     if (FATBASLIK.FieldByName('TUR').AsInteger in [11,15])and(FATBASLIK.FieldByName('EFATURADURUM').AsInteger = 1) then begin
-        //e�er e-fat mod�l�nde varsa silelim
+        //eğer e-fat modülünde varsa silelim
         Tablo.TablodanSorguAc(1,'SELECT ID FROM '+EFaturaDB+'.dbo.INVOICE WHERE OrgInvoiceNo = '''+FATBASLIK.FieldByName('ID').AsString+''' AND Status  = 1');
         if Tablo.Query1.Recordcount>0 then
-           Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'exec '+EFaturaDB+'.dbo.p_EFaturaSil '+Tablo.Query1.Fields[0].AsString,[],[])
+           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'exec '+EFaturaDB+'.dbo.p_EFaturaSil '+Tablo.Query1.Fields[0].AsString,[],[])
     end;
   end;
   TarihDegisti;
@@ -1558,7 +2415,7 @@ var
    bilgiler, etiketler : TArrayofString;
    CariUnvan, FatbssIDList :String;
 begin
-  //Farkl� carilerin belgeleri ayn� anda d�n��mez
+  //Farklı carilerin belgeleri aynı anda dönüşmez
    if GridFatListeTview.Controller.SelectedRecordCount < 1 then begin
       ShowMessage(Listeden_sec);
       exit;
@@ -1573,7 +2430,7 @@ begin
      TUR := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewTUR.Index]),0);
      FatbssIDList := FatbssIDList+IntToStr(ID);
 
-       //E�er bu belgeden ba�ka belgeye d�n���m yap�ld�ysa kaynak silinemez    Gelen/Giden Konsinye
+       //Eğer bu belgeden başka belgeye dönüşüm yapıldıysa kaynak silinemez    Gelen/Giden Konsinye
      if ((Tur=109)or(Tur=119))and(Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT * FROM STOKIZLEME WHERE BASLIKID='+IntToStr(ID),[],[])) then begin
         Tablo.UyariGoster(Uyari,DonusumYapilamaz);
         Abort;
@@ -1605,10 +2462,10 @@ begin
      else
         Tablo.TablodanSorguAc(1, 'select TUR, REHBERID from FATBASLIK where ID='+IntToStr(yeniid));
 
-     if donustipi = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN then begin //sat�� sipari�i �retim fi�ine d�n��t�yse ba�l��a �r�n id ve adet yazal�m
+     if donustipi = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN then begin //satış siparişi üretim fişine dönüştüyse başlığa ürün id ve adet yazalım
         Tablo.TablodanSorguAc(3,'select top 1 URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID));
         if Tablo.Query3.RecordCount > 0 then
-           Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+StringReplace(Tablo.Query3.Fields[1].AsString,',','.',[])+
+           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+StringReplace(Tablo.Query3.Fields[1].AsString,',','.',[])+
                                                     ' where ID='+IntToStr(yeniid), [],[])
      end;
 
@@ -1618,14 +2475,14 @@ begin
        9,19 :{if Tablo.Query1.FieldByName('REHBERID').AsInteger<0 then begin
                 i := Tablo.RehberAra_IDGetir(-1);
                 if i > 0 then begin
-                   Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'update SIPARIS set REHBERID='+IntToStr(i)+' where ID='+IntToStr(yeniid),[],[]);
+                   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update SIPARIS set REHBERID='+IntToStr(i)+' where ID='+IntToStr(yeniid),[],[]);
                    Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, i);
                end;
              end else }
                  Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger);
-       10,14://e�er al�� veya sat�� irsaliyesi faturaya d�n���yorsa, faturada irsaliye no ve tarihi de g�r�nmeli
+       10,14://eğer alış veya satış irsaliyesi faturaya dönüşüyorsa, faturada irsaliye no ve tarihi de görünmeli
              begin
-                Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
+                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
                 Tablo.FaturaSihirbazBaslat('E', Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger, 1,False,-1);
              end
        else
@@ -1648,9 +2505,9 @@ begin
     Abort
   else
   begin
-         //Tur: Giren:0,��kan:1 AltTur: sipari�:0,irsaliye:1,Fat:2,fi�:3,Tahakkuk:4,T�m�:-1
+         //Tur: Giren:0,Çıkan:1 AltTur: sipariş:0,irsaliye:1,Fat:2,fiş:3,Tahakkuk:4,Tümü:-1
     case (Sender as TMenuItem).Tag of
-     1 : begin // irsaliyeye d�n��t�r
+     1 : begin // irsaliyeye dönüştür
           case gf.FAltTur of
             0:begin
               case gf.FMenuTur of
@@ -1704,7 +2561,7 @@ begin
                          belgeno:= SiradakiBelgeNumarasi(9,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
                          FaturaSeriNo := belgeno.serino; //seri
                          FaturaNo:= belgeno.belgeno; //FatNo;
-                         KocanNo := KocannoBul(19); //KOCAN numaras�
+                         KocanNo := KocannoBul(19); //KOCAN numaras?
 
                        if Application.MessageBox(PChar(Irsaliyeyapilsinmi),PChar(Uyari),MB_YESNO)=IDNO then
                        Abort;
@@ -1752,7 +2609,7 @@ begin
           end;
         end;
 
-     2 : begin      //faturaya d�n��t�r
+     2 : begin      //faturaya dönüştür
           case gf.FAltTur of
             0:begin
               case gf.FMenuTur of
@@ -1805,9 +2662,9 @@ begin
    if TMenuItem(Sender).Tag=35 then
       Tur:=35
    else if (TMenuItem(Sender).Tag=25)and(TahsilOdemeMenu.tag=10)then
-       Tur:=125 //Bir tahsil pos bir de �deme pos var. bu �deme pos ise 125 olmal�
+       Tur:=125 //Bir tahsil pos bir de ?deme pos var. bu ?deme pos ise 125 olmal?
    else
-       Tur := TMenuItem(Sender).Tag + TahsilOdemeMenu.tag; //�demeler i�in 10 daha ekleriz.
+       Tur := TMenuItem(Sender).Tag + TahsilOdemeMenu.tag; //Ödemeler için 10 daha ekleriz.
    case Tur of
     21,31 : HesapTuru := 'K';
     22,32 : HesapTuru := 'B';
@@ -1845,13 +2702,14 @@ var
   gf : TFaturaGorevFrame;
 begin
   gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
+  MenuCevapVer.Visible := False;
   mnIrsaliyesiniOlustur.Enabled:=False;
   mnFaturasiniOlustur.Enabled:=False;
   mnSatisFisiniOlustur.Enabled:=False;
-  KonsinyesiniOlusturMenu.Visible := gf.FAltTur = KasaTur_SatisSiparisi; //19 ise g�r�ns�n
+  KonsinyesiniOlusturMenu.Visible := gf.FAltTur = KasaTur_SatisSiparisi; //19 ise görünsün
   UretimFisiniOlutur.Visible := gf.FAltTur = KasaTur_SatisSiparisi;
-  IptalIsaretleMenu.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString='';
-  MenuDurumuGuncelle.Visible := (gf.FAltTur = 9)or(gf.FAltTur = 19); //al�� sat�� sipari�i ise
+//  IptalIsaretleMenu.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString='';
+  MenuDurumuGuncelle.Visible := (gf.FAltTur = 9)or(gf.FAltTur = 19); //alış satış siparişi ise
 
   if gf.FAlttur in [109,119] then begin //konsinye ise
     SipariiniOlutur1.Visible := False;
@@ -1859,9 +2717,9 @@ begin
     mnFaturasiniOlustur.Visible:=True;
     mnSatisFisiniOlustur.Visible:=True;
     KaynakBelgeyiA1.Visible:=True;
-  end else if gf.FAlttur in [101] then begin //sat�nalma talebi ise
+  end else if gf.FAlttur in [101] then begin //satınalma talebi ise
     SipariiniOlutur1.Visible := True;
-    SipariiniOlutur1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
+//    SipariiniOlutur1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
     mnIrsaliyesiniOlustur.Visible:=False;
     mnFaturasiniOlustur.Visible:=False;
     mnSatisFisiniOlustur.Visible:=False;
@@ -1873,13 +2731,13 @@ begin
     mnSatisFisiniOlustur.Visible:=True;
     KaynakBelgeyiA1.Visible:=True;
   end;
-  if (FATBASLIK.FieldByName('DURUM').AsInteger <> 6) and (FATBASLIK.Active)then begin //belge iptal de�il ise
+  if (FATBASLIK.FieldByName('DURUM').AsInteger <> 6) and (FATBASLIK.Active)then begin //belge iptal değil ise
     case FATBASLIK.FieldByName('TUR').AsInteger of
       KasaTur_AlisSiparisi, KasaTur_SatisSiparisi : begin
-             mnIrsaliyesiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = '�retim Fi�ine') ;
-             mnFaturasiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = '�retim Fi�ine') ;
+             mnIrsaliyesiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine') ;
+             mnFaturasiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine') ;
              mnSatisFisiniOlustur.Enabled := mnFaturasiniOlustur.Enabled;
-             KonsinyesiniOlusturMenu.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = '�retim Fi�ine');
+             KonsinyesiniOlusturMenu.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine');
              UretimFisiniOlutur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
            end;
       109,119 : begin
@@ -1896,22 +2754,22 @@ begin
 
     case FATBASLIK.FieldByName('TUR').AsInteger of
       KasaTur_AlisSiparisi, KasaTur_AlisIrsaliyesi : begin
-                mnSatisFisiniOlustur.Caption := 'Al�� Fi�ini Olu�tur';
+                mnSatisFisiniOlustur.Caption := 'Alış Fişini Oluştur';
                 mnIrsaliyesiniOlustur.Tag := 10;
                 mnFaturasiniOlustur.Tag := 11;
                 mnSatisFisiniOlustur.Tag := 12;
              end;
       KasaTur_SatisSiparisi, KasaTur_SatisIrsaliyesi : begin
-                mnSatisFisiniOlustur.Caption := 'Sat�� Fi�ini Olu�tur';
+                mnSatisFisiniOlustur.Caption := 'Satış Fişini Oluştur';
                 mnIrsaliyesiniOlustur.Tag := 14;
                 mnFaturasiniOlustur.Tag := 15;
                 mnSatisFisiniOlustur.Tag := 16;
              end;
       end;
   end;
-  KaynakBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREDEN').AsString <> '';
-  HedefBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '';
-  //Tur: Giren:0,��kan:1 AltTur: sipari�:0,irsaliye:1,Fat:2,fi�:3,Tahakkuk:4,T�m�:-1
+//  KaynakBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREDEN').AsString <> '';
+//  HedefBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '';
+  //Tur: Giren:0,Çıkan:1 AltTur: sipariş:0,irsaliye:1,Fat:2,fiş:3,Tahakkuk:4,Tümü:-1
 
   //ExceldenBelgeEkle.Visible := gf.FAltTur in [14,15,19];
   //N7.Visible     := ExceldenBelgeEkle.Visible;
@@ -1920,25 +2778,36 @@ begin
   N8.Visible     := IadeAl.Visible;
   IptalIsaretleMenu.Visible := not( gf.FAltTur in [8,9,10,11,12,13,101,109]);
 
-  // e-Belge alt menusu: sadece e-Fatura (15) veya e-Irsaliye (14) icin gorunsun
-  // Caption: 14 -> 'e-Irsaliye', 15 -> 'e-Fatura'
+  // e-Belge alt menusu:
+  //   TUR=11 (alis/gelen)  -> Tag=2 olan alt menuler gorunur
+  //   TUR=14/15 (giden)    -> Tag=1 olan alt menuler gorunur
+  //   Tag=0 olanlar (ayraclar/genel) her zaman gorunur
   if FATBASLIK.Active and not FATBASLIK.IsEmpty then begin
     case FATBASLIK.FieldByName('TUR').AsInteger of
       EBelgeTuruEIrsaliye:
         begin
-          eFatura1.Caption := 'e-�rsaliye';
-          eFatura1.Visible := True;
+          MenueFatura.Caption := 'e-İrsaliye';
+          MenueFatura.Visible := True;
+          _MenuTagFiltrele(MenueFatura, 1);
         end;
       EBelgeTuruEFatura:
         begin
-          eFatura1.Caption := 'e-Fatura';
-          eFatura1.Visible := True;
+          MenueFatura.Caption := 'e-Fatura';
+          MenueFatura.Visible := True;
+          _MenuTagFiltrele(MenueFatura, 1);
+        end;
+      11:
+        begin
+          MenueFatura.Caption := 'e-Fatura';
+          MenueFatura.Visible := True;
+          _MenuTagFiltrele(MenueFatura, 2);
+          MenuCevapVer.Visible := FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 6;
         end;
     else
-      eFatura1.Visible := False;
+      MenueFatura.Visible := False;
     end;
   end else
-    eFatura1.Visible := False;
+    MenueFatura.Visible := False;
 //  if gf.FAltTur in [15,16] then
 //        POSMenu.Tag := 25
 //     else
@@ -1973,10 +2842,10 @@ begin
 
 end;
 
-procedure TFaturalarDlg.GridFatDBTableView1CanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+procedure TFaturalarDlg.GridFatViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
 begin
-  AnaForm.cxGridPopupMenu1.Grid:=GridFat;
-  AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridFatDBTableView1;
+  AnaForm.cxGridPopupMenu1.Grid := GridFat;
+  AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridFatView;
   AnaForm.pmGridStil.Tags.Values[GridFat.Name]:='AlSatListeDetayGridi';
 end;
 
@@ -1994,7 +2863,13 @@ procedure TFaturalarDlg.GridFatListeTviewDblClick(Sender: TObject);
 var
    ID,Tur :integer;
    Kilit:Boolean;
+   LGelenKutusu: Boolean;
 begin
+  // Gelen Kutusu sekmesinde (tag=1101) cift tikla: sadece faturayi ac,
+  // sonrasinda TarihDegisti vb. listeyi tazeleme/yan etki tetikleme.
+  LGelenKutusu := (PageControlTur.ActivePage <> nil) and
+                  (PageControlTur.ActivePage.Tag = 1101);
+
   case FATBASLIK.FieldByName('TUR').AsInteger of
     13,17: Tablo.TahakkukSihirbaziBaslat('D',FATBASLIK.FieldByName('TUR').AsInteger,1,FATBASLIK.FieldByName('ID').AsInteger, FATBASLIK.FieldByName('REHBERID').AsInteger,-1);
     9,19: Tablo.SiparisSihirbazBaslat('D',FATBASLIK.FieldByName('TUR').AsInteger,0,FATBASLIK.FieldByName('ID').AsInteger, 0);
@@ -2002,7 +2877,9 @@ begin
   else
     Tablo.FaturaSihirbazBaslat('D',FATBASLIK.AsInteger['TUR'],-1, FATBASLIK.AsInteger['ID'], FATBASLIK.AsInteger['REHBERID'],1,Kilit);
   end;
-  TarihDegisti;
+
+  if not LGelenKutusu then
+    TarihDegisti;
 end;
 
 procedure TFaturalarDlg.GridFatListeTviewSelectionChanged(Sender: TcxCustomGridTableView);
@@ -2025,11 +2902,53 @@ end;     }
 
 end;
 
+function TFaturalarDlg.EBelgeHucreStyle(var AStyleRef: TcxStyle;
+  ABackColor, ATextColor: TColor): TcxStyle;
+begin
+  if AStyleRef = nil then
+    AStyleRef := TcxStyle.Create(Self);
+  AStyleRef.Color := ABackColor;
+  AStyleRef.Font.Assign(GridFatListe.Font);
+  AStyleRef.Font.Color := ATextColor;
+  AStyleRef.TextColor := ATextColor;
+  Result := AStyleRef;
+end;
 procedure TFaturalarDlg.GridFatListeTviewStylesGetContentStyle(
   Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
   AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+var
+  LDeger: Integer;
 begin
- // Tablo.GridStilYonetim.StilDenetle(Sender.Name, AStyle, Sender, ARecord);
+  // Tablo.GridStilYonetim.StilDenetle(Sender.Name, AStyle, Sender, ARecord);
+  if (ARecord = nil) or (AItem = nil) then Exit;
+
+  if AItem = GridFatListeTviewEFATURADURUM then begin
+    LDeger := StrToIntDef(VarToStr(ARecord.Values[GridFatListeTviewEFATURADURUM.Index]), 0);
+    case LDeger of
+      0: AStyle := EBelgeHucreStyle(FEBelgeStyleYeni, clWhite, GridFatListe.Font.Color); // Yeni: beyaz
+      1, 11, 41, 51:
+         AStyle := EBelgeHucreStyle(FEBelgeStyleSari, RGB(255, 193, 7), clBlack); // Hazir: sari
+      2, 12, 42, 52, -2:
+         AStyle := EBelgeHucreStyle(FEBelgeStyleYesil, RGB(76, 175, 80), clWhite); // Gonderildi / iceri alindi
+      -1: AStyle := EBelgeHucreStyle(FEBelgeStyleYesil, RGB(76, 175, 80), clWhite); // Gelen yeni: yesil
+      -3: AStyle := EBelgeHucreStyle(FEBelgeStylePasif, RGB(158, 158, 158), clWhite); // Alinmayacak
+    end;
+    Exit;
+  end;
+
+  if AItem = GridFatListeTviewEFATURASONUC then begin
+    LDeger := StrToIntDef(VarToStr(ARecord.Values[GridFatListeTviewEFATURASONUC.Index]), 0);
+    case LDeger of
+      0: AStyle := EBelgeHucreStyle(FEBelgeStyleYeni, clWhite, GridFatListe.Font.Color); // Yeni: beyaz
+      1, 6, 7, 8, 9:
+         AStyle := EBelgeHucreStyle(FEBelgeStyleSari, RGB(255, 193, 7), clBlack); // Bekleyen/taslak/rapor/GIB/alindi: sari
+      2, 10, 11, 12: AStyle := EBelgeHucreStyle(FEBelgeStyleYesil, RGB(76, 175, 80), clWhite); // Basarili / yanit gerekmiyor / kanunen kabul
+      3: AStyle := EBelgeHucreStyle(FEBelgeStyleKirmizi, RGB(244, 67, 54), clWhite); // Hata / Red
+      4: AStyle := EBelgeHucreStyle(FEBelgeStylePasif, RGB(158, 158, 158), clWhite); // Iptal
+      5: AStyle := EBelgeHucreStyle(FEBelgeStyleYesil, RGB(76, 175, 80), clWhite); // Cevap suresi gecti
+    end;
+    Exit;
+  end;
 end;
 
 procedure TFaturalarDlg.GridYorumDBCardView1CellDblClick(
@@ -2080,7 +2999,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Se�imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -2099,11 +3018,308 @@ begin
   TarihDegisti;
 end;
 
+function TFaturalarDlg._SeriSecimi(ATur: Integer; const AExcludeSeri: string;
+  out AYeniSeri: string): Boolean;
+// Tanimli serilerden secim yap. AExcludeSeri bos ise tum seriler aday.
+// Tek seri varsa direk kullanilir; 2+ ise ComboBox ile sorulur.
+var
+  i: Integer;
+  LSeriler: string;
+  LListe: TStringList;
+  LCtrls: TGirdiDenetimleri;
+  LVarSecim: Variant;
+begin
+  Result := False;
+  AYeniSeri := '';
+
+  if ATur = EBelgeTuruEIrsaliye then
+    LSeriler := Trim(EIrsaliyeSerileri)
+  else
+    LSeriler := Trim(EFaturaSerileri);
+
+  if LSeriler = '' then begin
+    ShowMessage('Bu belge turu icin seri tanimi bulunamadi (Opsiyon ekranindan tanimlayin).');
+    Exit;
+  end;
+
+  LListe := TStringList.Create;
+  try
+    LListe.Delimiter := ',';
+    LListe.StrictDelimiter := True;
+    LListe.DelimitedText := LSeriler;
+    for i := LListe.Count - 1 downto 0 do begin
+      LListe[i] := Trim(LListe[i]);
+      if (LListe[i] = '') or
+         ((AExcludeSeri <> '') and SameText(LListe[i], AExcludeSeri)) then
+        LListe.Delete(i);
+    end;
+
+    if LListe.Count = 0 then begin
+      if AExcludeSeri <> '' then
+        ShowMessage('Tek seri tanimli, seri degistirilemez.')
+      else
+        ShowMessage('Tanimli seri bulunamadi.');
+      Exit;
+    end;
+
+    if LListe.Count = 1 then
+      AYeniSeri := LListe[0]
+    else begin
+      LVarSecim := LListe[0];
+      LCtrls := TGirdiDenetimleri.Create.ComboBox('Seri seciniz:', @LVarSecim, LListe);
+      if TGirisKutusuEx.BilgiAlEx('Belge Seri Secimi', LCtrls) <> mrOk then
+        Exit;
+      AYeniSeri := Trim(VarToStrDef(LVarSecim, ''));
+    end;
+
+    if Length(AYeniSeri) <> 3 then begin
+      ShowMessage('Seri 3 karakter olmalidir.');
+      Exit;
+    end;
+
+    Result := True;
+  finally
+    LListe.Free;
+  end;
+end;
+
+function TFaturalarDlg._SonrakiSiraNo(AID, ATur: Integer; const ASeri: string;
+  AYil: Integer; out ASeq: Int64): Boolean;
+// Sira no kurali:
+//   1) Bu yil+seri+TUR icin FATBASLIK'ta kayit varsa max+1
+//   2) Yoksa EBELGE tablosunda tum zamanlarda ayni seri ile kayit varsa 1 ile basla
+//   3) Hic kayit yoksa kullanicidan baslama no al
+var
+  LAdet, LBaslangic: Integer;
+  LSeriYil, LBelgeTuruList: string;
+  LStartStr: Variant;
+  LCtrls: TGirdiDenetimleri;
+begin
+  Result := False;
+  ASeq := 0;
+  LSeriYil := ASeri + IntToStr(AYil);
+
+  Tablo.TablodanSorguAc(1,
+    'select ENBUYUK=isnull(max(try_convert(bigint,right(FATURANO,9))),0), ' +
+    'ADET=count(*) from FATBASLIK where ID<>' + IntToStr(AID) +
+    ' and TUR=' + IntToStr(ATur) +
+    ' and len(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
+    ' and try_convert(bigint,right(FATURANO,9)) is not null');
+  LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
+  ASeq := Tablo.Query1.FieldByName('ENBUYUK').AsLargeInt;
+  Tablo.Query1.Close;
+
+  if LAdet > 0 then
+    ASeq := ASeq + 1
+  else begin
+    // Bu yil bos -> EBELGE tablosunda tum zamanlarda var mi?
+    if ATur = EBelgeTuruEIrsaliye then
+      LBelgeTuruList := '140,141'
+    else
+      LBelgeTuruList := '150,151';
+    Tablo.TablodanSorguAc(1,
+      'select ADET=count(*) from EBELGE where YON=1' +
+      ' and BELGETURU in (' + LBelgeTuruList + ')' +
+      ' and len(BELGENO)=16 and BELGENO like ''' + ASeri + '%''');
+    LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
+    Tablo.Query1.Close;
+
+    if LAdet = 0 then begin
+      LStartStr := '1';
+      LCtrls := TGirdiDenetimleri.Create.Edit(
+        'Baslangic numarasi (max 9 hane):', @LStartStr);
+      if TGirisKutusuEx.BilgiAlEx('Baslangic No - ' + ASeri, LCtrls) <> mrOk then
+        Exit;
+      LBaslangic := StrToIntDef(VarToStrDef(LStartStr, '0'), 0);
+      if LBaslangic <= 0 then begin
+        ShowMessage('Gecerli bir baslangic numarasi giriniz.');
+        Exit;
+      end;
+      ASeq := LBaslangic;
+    end else
+      ASeq := 1;
+  end;
+
+  if (ASeq <= 0) or (ASeq > 999999999) then begin
+    ShowMessage('Yillik sira numarasi siniri asildi (max 9 hane).');
+    Exit;
+  end;
+
+  Result := True;
+end;
+
+procedure TFaturalarDlg._TabsheetleriYukle(AAltTur: Integer);
+// AltTur=11 (alis fatura): Tumu | Gelen Kutusu | Iceri Alinan | Alinmayacak | Basarili | Bekleyen | Hata/Red | Suresi Gecen
+// AltTur=14/15 (giden e-belge): Tumu | Yeni | Hazir | Basarili | Bekleyen | Hata/Red | Iptal | Suresi Gecen
+const
+  TumuName = 'TabSheetTumu';
+
+  procedure EkleTab(const ACaption: string; ATag: Integer);
+  var TS: TcxTabSheet;
+  begin
+    TS := TcxTabSheet.Create(PageControlTur);
+    TS.PageControl := PageControlTur;
+    TS.Caption := ACaption;
+    TS.Tag := ATag;
+  end;
+
+var
+  i: Integer;
+  Sheet: TcxTabSheet;
+begin
+  // TabSheetTumu disindaki tum sekmeleri kaldir (eski AltTur'den arta kalanlar)
+  for i := PageControlTur.PageCount - 1 downto 0 do begin
+    Sheet := PageControlTur.Pages[i];
+    if (Sheet <> nil) and not SameText(Sheet.Name, TumuName) then
+      Sheet.Free;
+  end;
+  TabSheetTumu.Tag := 0;
+
+  case AAltTur of
+    11: begin
+      EkleTab('Gelen Kutusu', 1101);
+      EkleTab(#$130#$E7'eri Al'#$131'nan', 1102);    // Iceri Alinan
+      EkleTab('Al'#$131'nmayacak', 1103);             // Alinmayacak
+      EkleTab('Ba'#$15F'ar'#$131'l'#$131, 1104);      // Basarili
+      EkleTab('Bekleyen', 1105);
+      EkleTab('Hata/Red', 1106);
+      EkleTab('S'#$FC'resi Ge'#$E7'en', 1107);        // Suresi Gecen
+    end;
+    14, 15: begin
+      EkleTab('Yeni', 1501);
+      EkleTab('Haz'#$131'r', 1502);                   // Hazir
+      EkleTab('Ba'#$15F'ar'#$131'l'#$131, 1503);      // Basarili
+      EkleTab('Bekleyen', 1504);
+      EkleTab('Hata/Red', 1505);
+      EkleTab(#$130'ptal', 1506);                     // Iptal
+      EkleTab('S'#$FC'resi Ge'#$E7'en', 1507);        // Suresi Gecen
+    end;
+  end;
+
+  PageControlTur.ActivePage := TabSheetTumu;
+  // ActivePage degistirmek OnChange'i her zaman tetiklemeyebilir, manuel uygula
+  PageControlTurChange(PageControlTur);
+end;
+
+procedure TFaturalarDlg.PageControlTurChange(Sender: TObject);
+const
+  YeniGelenMarker = '/*YENIGELEN*/';
+var
+  LFilter, LSent, LReady, LWaiting: string;
+  gf: TFaturaGorevFrame;
+  LAltTur, LTag: Integer;
+  LYeniGelenAktif: Boolean;
+begin
+  if PageControlTur.ActivePage = nil then Exit;
+
+  gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
+  LAltTur := gf.FAltTur;
+  LTag := PageControlTur.ActivePage.Tag;
+  LYeniGelenAktif := Pos(YeniGelenMarker, FATBASLIK.SQL.Text) > 0;
+
+  // GELEN KUTUSU: TUR=11 AND EFATURADURUM=-1 sabit; FArama'dan kod/baslik/
+  // belge no/aciklama filtreleri uygulanir; tarih araligi bu sekmede pasif.
+  if LTag = 1101 then begin
+    var LSQL: string;
+    var LFiltreEk: string;
+    LFiltreEk := '';
+    if FArama <> nil then begin
+      if Trim(FArama.AraKod.Text) <> '' then
+        LFiltreEk := LFiltreEk + ' AND (R.KOD LIKE ''%' +
+          StringReplace(Trim(FArama.AraKod.Text), '''', '''''', [rfReplaceAll]) +
+          '%'' OR R.FIRMA LIKE ''%' +
+          StringReplace(Trim(FArama.AraKod.Text), '''', '''''', [rfReplaceAll]) +
+          '%'')';
+      if Trim(FArama.AraBaslik.Text) <> '' then
+        LFiltreEk := LFiltreEk + ' AND ISNULL(F.BASLIK,'''') LIKE ''%' +
+          StringReplace(Trim(FArama.AraBaslik.Text), '''', '''''', [rfReplaceAll]) +
+          '%''';
+      if Trim(FArama.AraFaturaNo.Text) <> '' then
+        LFiltreEk := LFiltreEk + ' AND ISNULL(F.FATURANO,'''') LIKE ''%' +
+          StringReplace(Trim(FArama.AraFaturaNo.Text), '''', '''''', [rfReplaceAll]) +
+          '%''';
+      if Trim(FArama.AraAciklama.Text) <> '' then
+        LFiltreEk := LFiltreEk + ' AND ISNULL(F.ACIKLAMA,'''') LIKE ''%' +
+          StringReplace(Trim(FArama.AraAciklama.Text), '''', '''''', [rfReplaceAll]) +
+          '%''';
+    end;
+    LSQL := YeniGelenMarker +
+      ' SELECT F.*, CARIKOD=R.KOD, CARIAD=R.FIRMA, ' +
+      '   YAZIYLATOPLAM=N'''' ' +
+      ' FROM FATBASLIK F (NOLOCK) ' +
+      '   INNER JOIN REHBER R ON R.ID = F.REHBERID ' +
+      ' WHERE F.TUR=11 AND F.EFATURADURUM=-1' +
+      LFiltreEk +
+      ' ORDER BY F.FATURATARIH DESC';
+    FATBASLIK.Close;
+    FATBASLIK.SQL.Text := LSQL;
+    FATBASLIK.Open;
+    FATBASLIK.Filter := '';
+    FATBASLIK.Filtered := False;
+    // Sol arama paneli aktif kalsin (sadece tarih araligi devre disi).
+    if FArama <> nil then begin
+      FArama.Enabled := True;
+      FArama.CheckTarihAralik.Enabled := False;
+      FArama.Calendar1.Enabled := False;
+      FArama.Calendar2.Enabled := False;
+      FArama.Panel1.Enabled := False;
+    end;
+    _KayitSayisiGuncelle;
+    Exit;
+  end;
+
+  // GELEN KUTUSU'ndan cikiyoruz: normal sorguya don, tarih kontrollerini geri ac.
+  if FArama <> nil then begin
+    FArama.Enabled := True;
+    FArama.CheckTarihAralik.Enabled := True;
+    FArama.Calendar1.Enabled := True;
+    FArama.Calendar2.Enabled := True;
+    FArama.Panel1.Enabled := True;
+  end;
+  if LYeniGelenAktif then begin
+    TarihDegisti;
+    Exit;
+  end;
+
+  if not FATBASLIK.Active then Exit;
+
+  LSent := '((EFATURADURUM = 2) OR (EFATURADURUM = 12) OR (EFATURADURUM = 52))';
+  LReady := '((EFATURADURUM = 1) OR (EFATURADURUM = 11) OR (EFATURADURUM = 51))';
+  LWaiting := '((EFATURASONUC IS NULL) OR (EFATURASONUC = 0) OR (EFATURASONUC = 1) OR ' +
+    '(EFATURASONUC = 6) OR (EFATURASONUC = 7) OR (EFATURASONUC = 8) OR ' +
+    '(EFATURASONUC = 9))';
+
+  case LTag of
+    1102: LFilter := 'EFATURADURUM = -2';   // Iceri Alinan
+    1103: LFilter := 'EFATURADURUM = -3';   // Alinmayacak
+    1104: LFilter := 'EFATURASONUC in (2,11,12)'; // Basarili / yanit gerekmiyor / kanunen kabul
+    1105: LFilter := LWaiting;              // Bekleyen
+    1106: LFilter := 'EFATURASONUC = 3';    // Hata/Red
+    1107: LFilter := 'EFATURASONUC = 5';    // Suresi Gecen
+    1501: LFilter := 'EFATURADURUM = 0';
+    1502: LFilter := LReady;
+    1503: LFilter := LSent + ' AND (EFATURASONUC = 2)';
+    1504: LFilter := LSent + ' AND ' + LWaiting;
+    1505: LFilter := LSent + ' AND (EFATURASONUC = 3)';
+    1506: LFilter := LSent + ' AND (EFATURASONUC = 4)';
+    1507: LFilter := LSent + ' AND (EFATURASONUC = 5)';
+  else
+    if LAltTur = 11 then
+      LFilter := '(EFATURADURUM = 0) OR (EFATURADURUM = -2)'
+    else
+      LFilter := '';
+  end;
+
+  FATBASLIK.Filter := LFilter;
+  FATBASLIK.Filtered := LFilter <> '';
+  _KayitSayisiGuncelle;
+end;
+
 procedure TFaturalarDlg.MenuOlusturClick(Sender: TObject);
 var
-  LSeri, LOnEk, LSQLOnEk, LNumara, LNumaraBolumu, LAlias, LVergiNo,
+  LSeri, LSeriler, LOnEk, LNumara, LNumaraBolumu, LAlias, LVergiNo,
   LAliasUyari, LMesaj: string;
-  LID, LRehberID, LTur, LVirgul, LNumaraYili: Integer;
+  LID, LRehberID, LTur, LNumaraYili, LVirgul: Integer;
   LSonrakiNo, LEBelgeID: Int64;
   LOwnTransaction: Boolean;
 begin
@@ -2112,8 +3328,13 @@ begin
 
   LID := FATBASLIK.FieldByName('ID').AsInteger;
   LTur := FATBASLIK.FieldByName('TUR').AsInteger;
-  if FATBASLIK.FieldByName('FATURANO').AsInteger > 0 then begin
-    ShowMessage('eBelge zaten olu�turulmu�.');
+  // Genel kural: gonderilmis belge uzerinde hicbir islem yapilmaz.
+  if FATBASLIK.FieldByName('EFATURADURUM').AsInteger in [2, 12, 52] then begin
+    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+    Exit;
+  end;
+  if FATBASLIK.FieldByName('EFATURADURUM').AsInteger > 0 then begin
+    ShowMessage('eBelge zaten oluşturulmuş.');
     Exit;
   end;
   if not (LTur in [EBelgeTuruEIrsaliye, EBelgeTuruEFatura]) then begin
@@ -2123,39 +3344,38 @@ begin
 
   try
     if Trim(FATBASLIK.FieldByName('FATURANO').AsString) = '0' then begin
+      // Olustur'da daima ILK seri kullanilir (kullaniciya sorulmaz)
       if LTur = EBelgeTuruEIrsaliye then
-        LSeri := Trim(EIrsaliyeSerileri)
+        LSeriler := Trim(EIrsaliyeSerileri)
       else
-        LSeri := Trim(EFaturaSerileri);
-      LVirgul := Pos(',', LSeri);
+        LSeriler := Trim(EFaturaSerileri);
+      LVirgul := Pos(',', LSeriler);
       if LVirgul > 0 then
-        LSeri := Trim(Copy(LSeri, 1, LVirgul - 1));
-      if Length(LSeri) <> 3 then
-        raise Exception.Create('E-Belge seri bilgisi tam 3 karakter olmalidir.');
+        LSeri := Trim(Copy(LSeriler, 1, LVirgul - 1))
+      else
+        LSeri := Trim(LSeriler);
+      if Length(LSeri) <> 3 then begin
+        ShowMessage('Bu belge turu icin gecerli ilk seri tanimi yok (3 karakter olmali).');
+        Exit;
+      end;
 
       LNumaraYili := YearOf(FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
       LOnEk := LSeri + IntToStr(LNumaraYili);
-      LSQLOnEk := StringReplace(LOnEk, '''', '''''', [rfReplaceAll]);
+
+      // Sira no belirleme (genel kural)
+      if not _SonrakiSiraNo(LID, LTur, LSeri, LNumaraYili, LSonrakiNo) then
+        Exit;
+
+      LNumaraBolumu := IntToStr(LSonrakiNo);
+      while Length(LNumaraBolumu) < 9 do
+        LNumaraBolumu := '0' + LNumaraBolumu;
+      LNumara := LOnEk + LNumaraBolumu;
+
       LOwnTransaction := not Tablo.FDCnn.InTransaction;
       if LOwnTransaction then
         Tablo.FDCnn.StartTransaction;
       try
-        Tablo.TablodanSorguAc(1,
-          'select ENBUYUK=isnull(max(try_convert(bigint,right(FATURANO,9))),0) ' +
-          'from FATBASLIK with(updlock,holdlock) where ID<>' + IntToStr(LID) +
-          ' and len(FATURANO)=16 and FATURANO like ''' + LSQLOnEk + '%'' ' +
-          'and try_convert(bigint,right(FATURANO,9)) is not null');
-        LSonrakiNo := Tablo.Query1.FieldByName('ENBUYUK').AsLargeInt + 1;
-        Tablo.Query1.Close;
-        // GIB e-Fatura standardi: 3 seri + 4 yil + 9 rakam = 16 karakter
-        if LSonrakiNo > 999999999 then
-          raise Exception.Create('E-Fatura yillik sira numarasi siniri asildi (max 9 hane).');
-        LNumaraBolumu := IntToStr(LSonrakiNo);
-        while Length(LNumaraBolumu) < 9 do
-          LNumaraBolumu := '0' + LNumaraBolumu;
-        LNumara := LOnEk + LNumaraBolumu;
-
-        Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'update FATBASLIK set FATURANO=&FATURANO,FATURASERI=&SERI ' +
           'where ID=&ID and ltrim(rtrim(isnull(FATURANO,'''')))=''0''',
           ['&FATURANO', '&SERI', '&ID'], [LNumara, LSeri, LID]);
@@ -2182,7 +3402,7 @@ begin
     LAliasUyari := '';
     // Yeni 4-branch akis: REHBERALIAS tablosuna gore + Izibiz sorgusu + mail diyalogu
     var LCariAdi: string := Tablo.AciklamaGetir('REHBER', 'FIRMA', LRehberID);
-    // Cari mail adres(ler)i — REHBERBILGI'den ilet. tipinde '@' iceren satirlar
+    // Cari mail adres(ler)i - REHBERBILGI'den ilet. tipinde '@' iceren satirlar
     var LRehberMail: string := '';
     try
       Tablo.TablodanSorguAc(8,
@@ -2208,14 +3428,14 @@ begin
     LAliasUyari := LAliasSonuc.Mesaj;
 
     // ALICIALIAS her iki turde de saklanir (EFatura=GIB URN, EArsiv=mail).
-    // Olustur'a RAlias kodu (150/151/140/141) gecilir � EBELGE.BELGETURU bu olur.
+    // Olustur'a RAlias kodu (150/151/140/141) gecilir ? EBELGE.BELGETURU bu olur.
     LEBelgeID := TEBelgeOlusturucu.Olustur(Tablo.FDCnn, LID, LAlias,
                                            LAliasSonuc.BelgeTuru);
 
-    // EBELGE kayd� olu�tuysa FATBASLIK.EFATURADURUM'u alias t�r�ne g�re i�aretle:
-    //   1  = e-Fatura olu�tu
-    //   11 = e-Ar�iv Fatura olu�tu
-    //   51 = e-�rsaliye olu�tu
+    // EBELGE kaydı oluştuysa FATBASLIK.EFATURADURUM'u alias türüne göre işaretle:
+    //   1  = e-Fatura oluştu
+    //   11 = e-Arşiv Fatura oluştu
+    //   51 = e-İrsaliye oluştu
     if LEBelgeID > 0 then begin
       var LDurum: Integer := 0;
       case LAliasSonuc.BelgeTuru of
@@ -2224,7 +3444,7 @@ begin
         RAlias_EIrsaliyeGIB, RAlias_EIrsaliyeKendi: LDurum := 51;
       end;
       if LDurum > 0 then
-        Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'UPDATE FATBASLIK SET EFATURADURUM=&D, EFATURASONUC=0 WHERE ID=&ID',
           ['&D', '&ID'], [LDurum, LID]);
     end;
@@ -2248,11 +3468,30 @@ begin
 end;
 
 procedure TFaturalarDlg.MenuOnizleClick(Sender: TObject);
+var
+  LTur: Integer;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then
     Exit;
 
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+
   try
+    // Gelen fatura (alis) -> EBELGE.UBL_XML kullan
+    if LTur = 11 then begin
+      TEBelgeOlusturucu.OnizleGelen(Tablo.FDCnn,
+        FATBASLIK.FieldByName('ID').AsInteger);
+      Exit;
+    end;
+
+    if FATBASLIK.FieldByName('EFATURADURUM').AsInteger = 0 then begin
+      MenuOlusturClick(Sender);
+      if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then
+        Exit;
+      if FATBASLIK.FieldByName('EFATURADURUM').AsInteger = 0 then
+        Exit;
+    end;
+
     TEBelgeOlusturucu.Onizle(Tablo.FDCnn,
       FATBASLIK.FieldByName('ID').AsInteger);
   except
@@ -2263,11 +3502,11 @@ end;
 
 procedure TFaturalarDlg.MenuIptalEtClick(Sender: TObject);
 // EFATURADURUM:
-//   0  -> hen�z olu�mam�� (uyar�)
-//   1  -> e-Fatura olu�tu (iptal edilebilir)
-//   11 -> e-Ar�iv olu�tu (iptal edilebilir)
-//   51 -> e-�rsaliye olu�tu (iptal edilebilir)
-//   2/12/52 -> g�nderildi (iptal edilemez)
+//   0  -> henüz oluşmamış (uyar?)
+//   1  -> e-Fatura oluştu (iptal edilebilir)
+//   11 -> e-Arşiv oluştu (iptal edilebilir)
+//   51 -> e-İrsaliye oluştu (iptal edilebilir)
+//   2/12/52 -> gönderildi (iptal edilemez)
 var
   LID, LDurum: Integer;
   LOwnTransaction: Boolean;
@@ -2279,11 +3518,11 @@ begin
   LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
 
   if LDurum in [2, 12, 52] then begin
-    ShowMessage('G�nderilmi� eBelge iptal edilemez!');
+    ShowMessage('Gönderilmiş eBelge iptal edilemez!');
     Exit;
   end;
   if LDurum = 0 then begin
-    ShowMessage('Hen�z eBelge olu�mam��!');
+    ShowMessage('Henüz eBelge oluşmamış!');
     Exit;
   end;
   if LDurum in [1, 11, 51] then
@@ -2291,17 +3530,21 @@ begin
         LOwnTransaction := not Tablo.FDCnn.InTransaction;
         if LOwnTransaction then Tablo.FDCnn.StartTransaction;
         try
-          // �nce EBELGEHAREKET (EBELGEID FK ile ba�l�)
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
-            'DELETE FROM EBELGEHAREKET WHERE EBELGEID IN ' +
+          // Önce EBELGEMESAJ (EBELGEID FK ile bağlı)
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'DELETE FROM EBELGEKUYRUK WHERE FATBASLIKID=&ID OR EBELGEID IN ' +
+            '(SELECT ID FROM EBELGE WHERE FATBASLIKID=&ID)',
+            ['&ID'], [LID]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'DELETE FROM EBELGEMESAJ WHERE EBELGEID IN ' +
             '(SELECT ID FROM EBELGE WHERE FATBASLIKID=&ID)',
             ['&ID'], [LID]);
           // Sonra EBELGE
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
             'DELETE FROM EBELGE WHERE FATBASLIKID=&ID',
             ['&ID'], [LID]);
-          // FATBASLIK durumunu s�f�rla + FATURANO=0 (yeniden numara alabilsin)
-          Veritabani.BasitKomut�al��t�r(Tablo.FDCnn,
+          // FATBASLIK durumunu sıfırla + FATURANO=0 (yeniden numara alabilsin)
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
             'UPDATE FATBASLIK SET EFATURADURUM=0, EFATURASONUC=0, FATURANO=''0'' WHERE ID=&ID',
             ['&ID'], [LID]);
           if LOwnTransaction then Tablo.FDCnn.Commit;
@@ -2309,7 +3552,7 @@ begin
           on E: Exception do begin
             if LOwnTransaction and Tablo.FDCnn.InTransaction then
               Tablo.FDCnn.Rollback;
-            ShowMessage('e-Belge iptal hatas�: ' + E.Message);
+            ShowMessage('e-Belge iptal hatas?: ' + E.Message);
             Exit;
           end;
         end;
@@ -2320,15 +3563,94 @@ begin
     ShowMessage('Bilinmeyen eFatura durumu: ' + IntToStr(LDurum));
 end;
 
+procedure TFaturalarDlg.MenuSeriDegistirClick(Sender: TObject);
+// Belge serisini degistirir, FATURANO yeniden hesaplanir.
+// Akis:
+//   FATURANO='0' -> ilk seri MEVCUT gibi dusunulup digerleri arasindan secilir,
+//                    ardindan MenuOlusturClick cagrilarak e-belge olusturulur.
+//   FATURANO<>'0' -> seri numaranin ilk 3 karakterinden alinir, digerleri arasindan
+//                    secilir, sadece FATURANO/FATURASERI guncellenir.
+var
+  LID, LTur, LYil, LVirgul: Integer;
+  LMevcutSeri, LYeniSeri, LYeniNo, LFatNo, LSeriler: string;
+  LSonrakiSeq: Int64;
+  LFatNoYok: Boolean;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then
+    Exit;
+
+  LID := FATBASLIK.FieldByName('ID').AsInteger;
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  LFatNo := Trim(FATBASLIK.FieldByName('FATURANO').AsString);
+  LYil := YearOf(FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
+  LFatNoYok := (LFatNo = '0');
+
+  if not (LTur in [EBelgeTuruEIrsaliye, EBelgeTuruEFatura]) then begin
+    ShowMessage('Bu islem yalnizca e-Fatura/e-Irsaliye belgeleri icin kullanilabilir.');
+    Exit;
+  end;
+
+  // Genel kural: gonderilmis belge uzerinde hicbir islem yapilmaz.
+  if FATBASLIK.FieldByName('EFATURADURUM').AsInteger in [2, 12, 52] then begin
+    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+    Exit;
+  end;
+
+  // Mevcut (haric tutulacak) seri
+  if LFatNoYok then begin
+    // FATURANO='0' -> ilk seri var gibi dusun
+    if LTur = EBelgeTuruEIrsaliye then
+      LSeriler := Trim(EIrsaliyeSerileri)
+    else
+      LSeriler := Trim(EFaturaSerileri);
+    LVirgul := Pos(',', LSeriler);
+    if LVirgul > 0 then
+      LMevcutSeri := Trim(Copy(LSeriler, 1, LVirgul - 1))
+    else
+      LMevcutSeri := Trim(LSeriler);
+  end else begin
+    // FATURANO != '0' -> seri = ilk 3 karakter
+    if Length(LFatNo) >= 3 then
+      LMevcutSeri := Copy(LFatNo, 1, 3)
+    else
+      LMevcutSeri := Trim(FATBASLIK.FieldByName('FATURASERI').AsString);
+  end;
+
+  // Seri secimi (mevcut seri haric)
+  if not _SeriSecimi(LTur, LMevcutSeri, LYeniSeri) then
+    Exit;
+
+  // Sira no
+  if not _SonrakiSiraNo(LID, LTur, LYeniSeri, LYil, LSonrakiSeq) then
+    Exit;
+
+  LYeniNo := IntToStr(LSonrakiSeq);
+  while Length(LYeniNo) < 9 do
+    LYeniNo := '0' + LYeniNo;
+  LYeniNo := LYeniSeri + IntToStr(LYil) + LYeniNo;
+
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'update FATBASLIK set FATURANO=&NO, FATURASERI=&SERI where ID=&ID',
+    ['&NO', '&SERI', '&ID'], [LYeniNo, LYeniSeri, LID]);
+
+  TabloYenile(FATBASLIK, [], LID, 'ID');
+
+  if LFatNoYok then
+    // FATURANO=0 -> simdi MenuOlustur'u tetikle (artik FATURANO atandi, alias+Olustur akisi calisir)
+    MenuOlusturClick(Sender)
+  else
+    ShowMessage('Yeni Belge No: ' + LYeniNo);
+end;
+
 function _IlkIkiKelime(const S: string): string;
-// Cari ad�n�n ilk 2 kelimesini d�nd�r�r — dosya ad� i�in ge�ersiz karakterleri eler.
+// Cari adının ilk 2 kelimesini döndürür - dosya adı için geçersiz karakterleri eler.
 var
   i: Integer;
   Tmp, C: string;
   Parcalar: TArray<string>;
 begin
   Tmp := Trim(S);
-  // Dosya ad�nda ge�ersiz karakterleri kald�r
+  // Dosya adında geçersiz karakterleri kaldır
   for i := 1 to Length(Tmp) do begin
     C := Tmp[i];
     if Pos(C, '\/:*?"<>|') > 0 then Tmp[i] := ' ';
@@ -2340,13 +3662,13 @@ begin
 end;
 
 function _BelgeTurAdi(AFatBaslikID, ATur: Integer): string;
-// Belge tipini dosya ad� i�in d�nd�r�r: 'E-Fatura', 'E-Ar�ivFatura', 'E-�rsaliye'.
-// E-Fatura vs E-Ar�iv ayr�m�: EBELGE.ALICIALIAS dolu mu?
+// Belge tipini dosya adı için döndürür: 'E-Fatura', 'E-ArşivFatura', 'E-İrsaliye'.
+// E-Fatura vs E-Arşiv ayrımı: EBELGE.ALICIALIAS dolu mu?
 var
   LAlias: string;
 begin
   case ATur of
-    EBelgeTuruEIrsaliye: Result := 'E-�rsaliye';
+    EBelgeTuruEIrsaliye: Result := 'E-İrsaliye';
     EBelgeTuruEFatura:
       begin
         LAlias := '';
@@ -2359,7 +3681,7 @@ begin
           LAlias := '';
         end;
         if Trim(LAlias) <> '' then Result := 'E-Fatura'
-        else Result := 'E-Ar�ivFatura';
+        else Result := 'E-ArşivFatura';
       end;
   else
     Result := 'eBelge';
@@ -2368,34 +3690,84 @@ end;
 
 procedure TFaturalarDlg.MenuHTMLKaydetClick(Sender: TObject);
 var
-  LID, LDurum: Integer;
+  LID, LDurum, LTur: Integer;
   LDefaultAd: string;
   Sd: TSaveDialog;
+  LGelen: Boolean;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  LGelen := LTur = 11;
   LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
-  if LDurum = 0 then begin
-    ShowMessage('Hen�z eBelge olu�mam��!');
+  // Gelen icin EFATURADURUM=0 kontrolu yapma (gelen kayitlarin durumu -1/-2/-3)
+  if (not LGelen) and (LDurum = 0) then begin
+    ShowMessage('Henüz eBelge oluşmamış!');
     Exit;
   end;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
-  LDefaultAd := _BelgeTurAdi(LID, FATBASLIK.FieldByName('TUR').AsInteger) + ' ' +
+  LDefaultAd := _BelgeTurAdi(LID, LTur) + ' ' +
                 _IlkIkiKelime(FATBASLIK.FieldByName('CARIAD').AsString);
 
   Sd := TSaveDialog.Create(nil);
   try
     Sd.Title := 'eBelge HTML Kaydet';
-    Sd.Filter := 'HTML dosyas� (*.html)|*.html|T�m dosyalar|*.*';
+    Sd.Filter := 'HTML dosyası (*.html)|*.html|Tüm dosyalar|*.*';
     Sd.DefaultExt := 'html';
     Sd.FileName := LDefaultAd + '.html';
     Sd.Options := Sd.Options + [ofOverwritePrompt, ofPathMustExist];
     if not Sd.Execute then Exit;
     try
-      TEBelgeOlusturucu.HTMLKaydet(Tablo.FDCnn, LID, Sd.FileName);
+      if LGelen then
+        TEBelgeOlusturucu.HTMLKaydetGelen(Tablo.FDCnn, LID, Sd.FileName)
+      else
+        TEBelgeOlusturucu.HTMLKaydet(Tablo.FDCnn, LID, Sd.FileName);
       ShowMessage('HTML kaydedildi: ' + Sd.FileName);
     except
       on E: Exception do
-        ShowMessage('HTML kaydetme hatas�: ' + E.Message);
+        ShowMessage('HTML kaydetme hatas?: ' + E.Message);
+    end;
+  finally
+    Sd.Free;
+  end;
+end;
+
+
+procedure TFaturalarDlg.MenuXMLKaydetClick(Sender: TObject);
+var
+  LID, LDurum, LTur: Integer;
+  LDefaultAd: string;
+  Sd: TSaveDialog;
+  LGelen: Boolean;
+begin
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  LGelen := LTur = 11;
+  LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
+  if (not LGelen) and (LDurum = 0) then begin
+    ShowMessage('Henüz eBelge oluşmamış!');
+    Exit;
+  end;
+  LID := FATBASLIK.FieldByName('ID').AsInteger;
+  LDefaultAd := _BelgeTurAdi(LID, LTur) + ' ' +
+                _IlkIkiKelime(FATBASLIK.FieldByName('CARIAD').AsString);
+
+  Sd := TSaveDialog.Create(nil);
+  try
+    Sd.Title := 'eBelge XML Kaydet';
+    Sd.Filter := 'XML dosyası (*.xml)|*.xml|Tüm dosyalar|*.*';
+    Sd.DefaultExt := 'xml';
+    Sd.FileName := LDefaultAd + '.xml';
+    Sd.Options := Sd.Options + [ofOverwritePrompt, ofPathMustExist];
+    if not Sd.Execute then Exit;
+    try
+      if LGelen then
+        TEBelgeOlusturucu.XMLKaydetGelen(Tablo.FDCnn, LID, Sd.FileName)
+      else
+        TEBelgeOlusturucu.XMLKaydet(Tablo.FDCnn, LID, Sd.FileName);
+      ShowMessage('XML kaydedildi: ' + Sd.FileName);
+    except
+      on E: Exception do
+        ShowMessage('XML kaydetme hatas?: ' + E.Message);
     end;
   finally
     Sd.Free;
@@ -2404,14 +3776,17 @@ end;
 
 procedure TFaturalarDlg.MenuPDFKaydetClick(Sender: TObject);
 var
-  LID, LDurum: Integer;
+  LID, LDurum, LTur: Integer;
   LDefaultAd: string;
   Sd: TSaveDialog;
+  LGelen: Boolean;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  LGelen := LTur = 11;
   LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
-  if LDurum = 0 then begin
-    ShowMessage('Hen�z eBelge olu�mam��!');
+  if (not LGelen) and (LDurum = 0) then begin
+    ShowMessage('Henüz eBelge oluşmamış!');
     Exit;
   end;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
@@ -2421,17 +3796,20 @@ begin
   Sd := TSaveDialog.Create(nil);
   try
     Sd.Title := 'eBelge PDF Kaydet';
-    Sd.Filter := 'PDF dosyas� (*.pdf)|*.pdf|T�m dosyalar|*.*';
+    Sd.Filter := 'PDF dosyası (*.pdf)|*.pdf|Tüm dosyalar|*.*';
     Sd.DefaultExt := 'pdf';
     Sd.FileName := LDefaultAd + '.pdf';
     Sd.Options := Sd.Options + [ofOverwritePrompt, ofPathMustExist];
     if not Sd.Execute then Exit;
     try
-      TEBelgeOlusturucu.PDFKaydet(Tablo.FDCnn, LID, Sd.FileName);
+      if LGelen then
+        TEBelgeOlusturucu.PDFKaydetGelen(Tablo.FDCnn, LID, Sd.FileName)
+      else
+        TEBelgeOlusturucu.PDFKaydet(Tablo.FDCnn, LID, Sd.FileName);
       ShowMessage('PDF kaydedildi: ' + Sd.FileName);
     except
       on E: Exception do
-        ShowMessage('PDF kaydetme hatas�: ' + E.Message);
+        ShowMessage('PDF kaydetme hatas?: ' + E.Message);
     end;
   finally
     Sd.Free;
@@ -2440,50 +3818,110 @@ end;
 
 procedure TFaturalarDlg.MenuGonderClick(Sender: TObject);
 var
-  LID, LDurum: Integer;
-  LURL: string;
-  FGonderimUser, FGonderimSifre, FGonderimURL: string;
-  FGonderimTestMi: Boolean;
+  LID, LDurum, LTur, LBelgeTuru: Integer;
+  LFaturaNo, LSeri, LSeriYil, LBekleyen: string;
+  LEBelgeID, LCurSeq: Int64;
+  LKGonderildi, LKHata, LKToplam: Integer;
+  LKHataMesaj: string;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
   LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
-  case LDurum of
-    0: begin ShowMessage('Hen�z eBelge olu�mam��!'); Exit; end;
-    2: begin ShowMessage('eBelge zaten G�B''e g�nderilmi�.'); Exit; end;
+  // Genel kural: gonderilmis belge uzerinde hicbir islem yapilmaz.
+  if LDurum in [2, 12, 52] then begin
+    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+    Exit;
   end;
-  // LDurum = 1: olu�mu�, g�nderilmemi� → g�nderilebilir
-
-  LID := FATBASLIK.FieldByName('ID').AsInteger;
-
-  // Kimlik bilgileri ve URL — sadece ilk �a�r�da y�kle (cache)
-  // Kimlik bilgileri ortak cache'den alinir (alias servisi ile paylasilir)
-  TEBelgeKimlik.Yukle(FGonderimUser, FGonderimSifre, FGonderimURL, FGonderimTestMi);
-
-  if (Trim(FGonderimUser) = '') or (Trim(FGonderimSifre) = '') or (Trim(FGonderimURL) = '') then begin
-    ShowMessage('Opsiyon ekran�ndan kullan�c�/�ifre/URL bilgilerini girin.' + sLineBreak +
-                'Mod: ' + IfThen(FGonderimTestMi, 'TEST', '�RET�M'));
+  if LDurum = 0 then begin
+    ShowMessage('Henuz eBelge olusmamis!');
     Exit;
   end;
 
-  if Application.MessageBox(
-       PChar(IfThen(FGonderimTestMi,
-          'eBelge TEST moduna g�nderilecek. Devam edilsin mi?',
-          'eBelge �RET�M moduna (G�B) g�nderilecek. Devam edilsin mi?')),
-       'eBelge G�nder', MB_YESNO + MB_ICONQUESTION) <> ID_YES then Exit;
+  LID := FATBASLIK.FieldByName('ID').AsInteger;
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  LFaturaNo := Trim(FATBASLIK.FieldByName('FATURANO').AsString);
+  LSeri := Trim(FATBASLIK.FieldByName('FATURASERI').AsString);
 
-  try
-    if TEBelgeOlusturucu.Gonder(Tablo.FDCnn, LID, FGonderimUser, FGonderimSifre,
-                                FGonderimURL, FGonderimTestMi, LURL) then begin
-      TabloYenile(FATBASLIK, [], LID, 'ID');
-      ShowMessage('eBelge ba�ar�yla g�nderildi.' + sLineBreak +
-                  'Mod: ' + IfThen(FGonderimTestMi, 'TEST', '�RET�M') + sLineBreak +
-                  'Yan�t: ' + LURL);
-    end else
-      ShowMessage('eBelge g�nderilemedi: ' + LURL);
-  except
-    on E: Exception do
-      ShowMessage('eBelge g�nderme hatas�: ' + E.Message);
+  // Gonderim sira kurali: ayni seri+yil icinde olusmus ama gonderilmemis
+  // ve mevcut belgeden kucuk sira nolu kayit varsa o gonderilmeden bu gonderilemez.
+  if (Length(LFaturaNo) = 16) and (Length(LSeri) = 3) then begin
+    LSeriYil := Copy(LFaturaNo, 1, 7);
+    LCurSeq := StrToInt64Def(Copy(LFaturaNo, 8, 9), 0);
+    if LCurSeq > 1 then begin
+      Tablo.TablodanSorguAc(1,
+        'select top 1 FATURANO from FATBASLIK where FATURASERI=' + QuotedStr(LSeri) +
+        ' and TUR=' + IntToStr(LTur) +
+        ' and EFATURADURUM in (1,11,51)' +
+        ' and len(FATURANO)=16 and left(FATURANO,7)=' + QuotedStr(LSeriYil) +
+        ' and try_convert(bigint,right(FATURANO,9)) is not null' +
+        ' and try_convert(bigint,right(FATURANO,9))<' + IntToStr(LCurSeq) +
+        ' order by try_convert(bigint,right(FATURANO,9))');
+      if not Tablo.Query1.Eof then
+        LBekleyen := Tablo.Query1.Fields[0].AsString
+      else
+        LBekleyen := '';
+      Tablo.Query1.Close;
+      if LBekleyen <> '' then begin
+        ShowMessage('Sira kurali: Once daha kucuk numarali belge gonderilmelidir.' + sLineBreak +
+                    'Bekleyen: ' + LBekleyen);
+        Exit;
+      end;
+    end;
   end;
+
+  Tablo.TablodanSorguAc(1,
+    'select top 1 ID,BELGETURU from EBELGE where FATBASLIKID=' + IntToStr(LID) +
+    ' and YON=1 order by ID desc');
+  if Tablo.Query1.Eof then begin
+    Tablo.Query1.Close;
+    ShowMessage('Gonderilecek EBELGE kaydi bulunamadi. Once Olustur menusu ile eBelge olusturun.');
+    Exit;
+  end;
+  LEBelgeID := Tablo.Query1.FieldByName('ID').AsLargeInt;
+  LBelgeTuru := Tablo.Query1.FieldByName('BELGETURU').AsInteger;
+  Tablo.Query1.Close;
+
+  // Zaten kuyrukta bekleyen/islemde/hatali bir gonderim isi varsa cift kayit acma.
+  Tablo.TablodanSorguAc(1,
+    'select top 1 DURUM from EBELGEKUYRUK where EBELGEID=' + IntToStr(LEBelgeID) +
+    ' and ISLEMTURU=1 and DURUM in (0,1,9)');
+  if Tablo.Query1.Eof then begin //kuyrukta yok ekle
+     try
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'INSERT INTO EBELGEKUYRUK(EBELGEID,FATBASLIKID,BELGETURU,YON,ISLEMTURU,DURUM,ONCELIK,EKLEYEN,EKLEMETARIHI) ' +
+          'VALUES(&EID,&FID,&BT,1,1,0,5,&KUL,GETDATE())',
+          ['&EID', '&FID', '&BT', '&KUL'], [LEBelgeID, LID, LBelgeTuru, StrToIntDef(Kullanan, 0)]);
+
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'UPDATE FATBASLIK SET EFATURASONUC=6 WHERE ID=&ID', ['&ID'], [LID]);
+
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+          'VALUES(&EID,1,1,1,&MSG,&KUL,GETDATE())',
+          ['&EID', '&MSG', '&KUL'], [LEBelgeID, 'Gonderim isi EBELGEKUYRUK tablosuna alindi.', StrToIntDef(Kullanan, 0)]);
+      except
+        on E: Exception do
+          ShowMessage('eBelge kuyruga alma hatasi: ' + E.Message);
+      end;
+   end;
+    // Sadece bu FATBASLIK'a ait kuyruk kaydini hemen isle - toolbar gibi
+    // tum kuyrugu ve Izibiz inbox cekme islemini yapmaz.
+    Screen.Cursor := crHourGlass;
+    try
+      KuyrukGonderimleriniIsle(LID, LKGonderildi, LKHata, LKToplam, LKHataMesaj, nil);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+    TabloYenile(FATBASLIK, [], LID, 'ID');
+
+    if LKGonderildi > 0 then
+      ShowMessage('eBelge Izibiz''e gonderildi.')
+    else if LKHata > 0 then
+      ShowMessage('eBelge kuyruga alindi ancak gonderim hatasi: ' + LKHataMesaj)
+    else if Trim(LKHataMesaj) <> '' then
+      ShowMessage('eBelge kuyruga alindi: ' + LKHataMesaj)
+    else
+      ShowMessage('eBelge gonderim kuyruguna alindi.');
+
 end;
 
 procedure TFaturalarDlg.infoMenuClick(Sender: TObject);
@@ -2565,7 +4003,7 @@ begin
   else
     try
       sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Se�imi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
+      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
         AYeri := StrToInt(sts[0]);
         AYerID:= StrToInt(sts[2]);
         ABelgeno:= sts[1];
@@ -2597,10 +4035,10 @@ end;
 procedure TFaturalarDlg.Kopyala2Click(Sender: TObject);
 var FaturaIDsi : integer;
 begin
-  if not (FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101]) then begin //sipari� ise kontrole gerek yok
+  if not (FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101]) then begin //sipariş ise kontrole gerek yok
       Tablo.TablodanSorguAc(1,'select * from FATURA F where F.IZLEME <> 0 and F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
       if Tablo.Query1.RecordCount > 0 then begin
-          Tablo.UyariGoster(Uyari,'Belge i�eri�inde izlem bilgisi aktif �r�nler var, bu i�lem ger�ekle�tirilemez.');
+          Tablo.UyariGoster(Uyari,'Belge içeriğinde izlem bilgisi aktif ürünler var, bu işlem gerçekleştirilemez.');
           Exit;
       end;
   end;
@@ -2639,6 +4077,9 @@ begin
     JvTimer1Timer(Self);
   end;
 end;
+
+
+
 
 procedure TFaturalarDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
@@ -2687,11 +4128,11 @@ var
   i,ResultID,TUR,Kilitli,Planli,TabNoID:integer;
   Tarih:TDateTime;
 begin
-    {d�n��t�r�lm�� ise silinemez}
-   if FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '' then begin
+    {dönüştürülmüş ise silinemez}
+{   if FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '' then begin
       ShowMessage(DonusturulmusSilinemez);
       Abort;
-   end;
+   end;   }
 
 
    {efat}
@@ -2715,7 +4156,7 @@ begin
                 Planli:=1
               else
                 Tablo.KasaSilmeIslemleri(ResultID,TUR, FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
-               //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye g�re d�zenlenecek
+               //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye göre düzenlenecek
           end;
           // else begin
           //  Application.MessageBox(PChar(Hareketgormussilinemez+IntToStr(ResultID)),PChar(Uyari),MB_OK+MB_ICONWARNING);
@@ -2744,14 +4185,14 @@ begin
                Tablo.KasaSilmeIslemleri(ResultID,TUR);
               end;
 
-               //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye g�re d�zenlenecek
+               //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye göre düzenlenecek
             end;
-                //Silme i�leminden �nce faturayla ili�kili d�k�manlar varsa silinsin.
-            //Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_FATBASLIK_DOKUMAN, ResultID]);
+                //Silme işleminden önce faturayla ilişkili dokümanlar varsa silinsin.
+            //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_FATBASLIK_DOKUMAN, ResultID]);
           end else if TUR in [9,19,101] then begin
             Tablo.SiparisSil(ResultID, TUR);
-                //Silme i�leminden �nce faturayla ili�kili d�k�manlar varsa silinsin.
-           // Veritabani.BasitKomut�al��t�r(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, ResultID]);
+                //Silme işleminden önce faturayla ilişkili dokümanlar varsa silinsin.
+           // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, ResultID]);
           end else begin
             Application.MessageBox(PChar(Hareketgormussilinemez + IntToStr(ResultID)),PChar(Uyari),MB_OK+MB_ICONWARNING);
           end;
@@ -2771,10 +4212,10 @@ begin
 {  If(Screen.Cursor = crHandPoint) and (SmsEPostaTableView.Controller.SelectedRecordCount > 0) then begin
     Tablo.TablodanSorguAc(2,'select * from IMAJ WHERE YERI= '+ TabSmsEPosta.FieldByName('YER').AsString+' AND YER_ID= '+TabSmsEPosta.FieldByName('ANAHTAR').AsString);
     Ad := Tablo.Query2.FieldByName('BELGEADI').AsString;
-    if Tablo.Query2.FieldByName('ICDIS').AsString = 'True' then // e�er dosyada tutuluyorsa
+    if Tablo.Query2.FieldByName('ICDIS').AsString = 'True' then // eğer dosyada tutuluyorsa
       Tablo.TablodanSorguAc(5, ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma ' + Tablo.Query2.FieldByName('ID').AsString + ' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI=''' + ExtractFileExt(Ad) + '''')
     else
-      Tablo.TablodanSorguAc(5, 'select ID,ICDIS,BELGE,BELGEADI from IMAJ where ID=' + Tablo.Query2.Fields[0].AsString); // e�er dok�man tabloda BELGE alan�nda ise
+      Tablo.TablodanSorguAc(5, 'select ID,ICDIS,BELGE,BELGEADI from IMAJ where ID=' + Tablo.Query2.Fields[0].AsString); // eğer doküman tabloda BELGE alanında ise
     KutuktenOku(Tablo.Query5, 'BELGE', ExtractFileExt(Ad), True);
   end else
      BelgeDuzenleTus.Click;   }
@@ -2824,7 +4265,7 @@ begin
   if Length(SQLEk)>18 then
     Tablo.FBtnIndex := -1;
   if gf.FAltTur in[3,4, 7, 8] then
-    ID := Tablo.FaturaSihirbazBaslat('E',gf.FAltTur,1,0,-1,TipSecimi(4))
+    ID := Tablo.FaturaSihirbazBaslat('E',gf.FAltTur,1,0,-999,TipSecimi(4))
   else if gf.FAltTur in[9,19] then
     ID := Tablo.SiparisSihirbazBaslat('E', gf.FAltTur,Tablo.FBtnIndex, -1, -1)
   else if gf.FAltTur = 101 then
@@ -2832,11 +4273,11 @@ begin
   else if gf.FAltTur in[13,17] then
     ID := Tablo.TahakkukSihirbaziBaslat('E', gf.FAltTur,Tablo.FBtnIndex, -1, -1,Tablo.GENINI.BugunTrhSaat)
   else begin //110
-    if Sender.ClassName='TMenuItem' then  //men�den se�ilen fat tipine bakar�z
+    if Sender.ClassName='TMenuItem' then  //menüden seçilen fat tipine bakarız
        i := TMenuItem(Sender).Tag
     else
        i := 1;
-    ID := Tablo.FaturaSihirbazBaslat('E',gf.FAltTur,Tablo.FBtnIndex,-1,0,i);
+    ID := Tablo.FaturaSihirbazBaslat('E',gf.FAltTur,Tablo.FBtnIndex,-1,-999,i);
   end;
   TarihDegisti;
 end;
@@ -2872,6 +4313,39 @@ end;
 initialization
   Classes.RegisterClass(TFaturalarDlg);
 end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

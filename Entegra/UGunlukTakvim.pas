@@ -1,4 +1,4 @@
-unit UGunlukTakvim;
+ï»¿unit UGunlukTakvim;
 
 
 interface
@@ -202,7 +202,7 @@ begin
    AkisView.GroupedColumns[1].Hidden := True;
    AkisView.GroupedColumns[2].Hidden := True;
 
-    //Tarih bugünden farklýyse üst kýsmý kapat
+    //Tarih bugÃ¼nden farklÄ±yse Ã¼st kÄ±smÄ± kapat
   // if FormatDateTime('YYYY-MM-DD', Tarih) = FormatDateTime('YYYY-MM-DD', GenotipIni.BugunTrh)then begin
       KasaHareketToplamlar;
   //    GridKasa.Visible := True;
@@ -242,7 +242,7 @@ end;
 
 procedure TGunlukTakvimDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
   Tablo.GridTurkcelestir;
 end;
 
@@ -263,7 +263,7 @@ var KASAID,KASAKODU,KASAADI,KUR,HESAPID,HESAPKODU, HESAPNO, HESAPADI:string;
     i, recordIndex : Integer;
 
 begin
-//Burada havaleyi göndereceðimiz hesabý seçiyoruz
+//Burada havaleyi gÃ¶ndereceÄŸimiz hesabÄ± seÃ§iyoruz
    HESAPID := '-1';
    if Tablo.BankaHesapEkrani(37,HESAPID,HESAPKODU, HESAPNO, HESAPADI, KUR) then begin
       for i := 0 to Akisview.DataController.GetSelectedCount - 1 do begin

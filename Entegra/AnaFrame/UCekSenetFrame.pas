@@ -1,4 +1,4 @@
-unit UCekSenetFrame;
+ï»¿unit UCekSenetFrame;
 
 interface
 
@@ -33,7 +33,7 @@ type
     procedure pnlBaslikPaint(Sender: TObject);
   private
     { Private declarations }
-    { IBilgiFrame üyeleri            }
+    { IBilgiFrame Ã¼yeleri            }
     FYonetici : TFrameYoneticisi;
     FFrameYoneticisi : TFrameYoneticisi;
     FAramaFrameYoneticisi : TFrameYoneticisi;
@@ -60,7 +60,7 @@ type
     function GetFrameBilgi : TFrameBilgi;
     procedure SetFrameBilgi(AValue : TFrameBilgi);
     {********************************}
-    { IFrameYoneticisi üyeleri }
+    { IFrameYoneticisi Ã¼yeleri }
     function GetFrameYoneticisi : TFrameYoneticisi;
 
     procedure FrameAktifOldu(Sender: TObject);
@@ -80,17 +80,17 @@ uses JvJVCLUtils, UCekSenet, UGenelGirisSayfasiFrame, UCekSenetListeFrame;
 var
   sekmeConfigXml : string =  '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Çek/Senet Tanýmlarý" Tip="TCekSenetDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Rehber Ara" Tip="TRehberAraDlg" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Çek/Senet Listesi" Tip="TCekSenetListeFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="GiriÅŸ SayfasÄ±" Tip="TGenelGirisSayfasiFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Ã‡ek/Senet TanÄ±mlarÄ±" Tip="TCekSenetDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Rehber Ara" Tip="TRehberAraDlg" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Ã‡ek/Senet Listesi" Tip="TCekSenetListeFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
   sekmeConfigAramaXml : string = '<Gentegra>' + #13#10 +
     '<Sekmeler>' + #13#10 +
-      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayýr"/>' + #13#10 +
-      '<Sekme Adi="Çek Senet Arama" Tip="TCekSenetAramaFrame" AnaSekme="hayýr"/>' + #13#10 +
+      '<Sekme Adi="Arama Yok" Tip="TAramaYokFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
+      '<Sekme Adi="Ã‡ek Senet Arama" Tip="TCekSenetAramaFrame" AnaSekme="hayÄ±r"/>' + #13#10 +
     '</Sekmeler>' + #13#10 +
   '</Gentegra>';
 
@@ -112,18 +112,18 @@ end;
 constructor TCekSenetFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  { Arama frame yöneticisi önce baþlatýlmalý }
-  { Çünkü Gorunur yöntemi FrameleriYukle olayýnda çaðýrýlabilir }
+  { Arama frame yÃ¶neticisi Ã¶nce baÅŸlatÄ±lmalÄ± }
+  { Ã‡Ã¼nkÃ¼ Gorunur yÃ¶ntemi FrameleriYukle olayÄ±nda Ã§aÄŸÄ±rÄ±labilir }
   FAramaFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     pcArama,sekmeConfigAramaXml);
-  { Arama ile ilgili frame bilgilerini yükle }
+  { Arama ile ilgili frame bilgilerini yÃ¼kle }
   FAramaFrameYoneticisi.FrameleriYukle;
-  { Bu frame'in alt framelerini yönetecek frame yöneticisini baþlat  }
+  { Bu frame'in alt framelerini yÃ¶netecek frame yÃ¶neticisini baÅŸlat  }
   FFrameYoneticisi := TFrameYoneticisi.Create(FYonetici, FFrameBilgi,
     AnaSayfaDenetimi, sekmeConfigXml);
-  { Arama frame yöneticisini belirt }
+  { Arama frame yÃ¶neticisini belirt }
   FFrameYoneticisi.AramaFrameYoneticisi := FAramaFrameYoneticisi;
-  { Alt frame bilgilerini yükle }
+  { Alt frame bilgilerini yÃ¼kle }
   FFrameYoneticisi.FrameleriYukle;
   FFrameYoneticisi.OnFrameBaslikDegisti.Add(FrameBaslikDegisti);
   FFrameYoneticisi.OnFrameDegisti.Add(FrameAktifOldu);

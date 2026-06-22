@@ -1,4 +1,4 @@
-unit UCariFonksiyonlar;
+ï»¿unit UCariFonksiyonlar;
 
 interface
 
@@ -33,7 +33,7 @@ var
   LogTur: Integer;
   procedure LogHarEkle(const AAlanAdi, AEskiDeger, AYeniDeger: string);
   begin
-    Veritabani.BasitKomutÇalýþtýr(
+    Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(
       Tablo.FDCnn,
       'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
       'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
@@ -49,7 +49,7 @@ begin
   while not Table1.Eof do
   begin
     if (Table1.FieldByName('ZORUNLU').AsBoolean) and (Trim(Table1.FieldByName('BILGI').AsString) = '') then
-      raise Exception.Create(Table1.FieldByName('ETIKET').AsString + ' girilmesi zorunlu alandýr!');
+      raise Exception.Create(Table1.FieldByName('ETIKET').AsString + ' girilmesi zorunlu alandÄ±r!');
     Table1.Next;
   end;
 
@@ -60,7 +60,7 @@ begin
 
   if LogID = 0 then
   begin
-    VLogID := Veritabani.BasitKomutÇalýþtýr(
+    VLogID := Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(
       Tablo.FDCnn,
       'insert into [LOG] (TARIH, TABLOID, SATIRID, EKLEYEN, TUR, PCADI) ' +
       'values (&TARIH, &TABLOID, &SATIRID, &EKLEYEN, &TUR, &PCADI) ' +
@@ -234,9 +234,9 @@ begin
   else
     ID := -1;
 
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=1 and YER_ID=&id ', ['&id'], [IletId]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=11 and YER_ID=&id ', ['&id'], [IletId]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBERILETISIM where ID=&id ', ['&id'], [IletId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=1 and YER_ID=&id ', ['&id'], [IletId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=11 and YER_ID=&id ', ['&id'], [IletId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBERILETISIM where ID=&id ', ['&id'], [IletId]);
   if ID > 0 then
     PersonelVarsayilanYap(RehberId, ID);
 end;
@@ -267,9 +267,9 @@ begin
 
   Tablo.Query1.SQL.Text := ' delete from REHBERBILGI where YERI = 1 and YER_ID=(select ID from REHBERILETISIM where REHBERID=' + IntToStr(PerId) + ')';
   Tablo.Query1.ExecSQL;
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from IMAJ where YERI=12 and YER_ID=&id ', ['&id'], [PerId]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID=&id ', ['&id'], [PerId]);
-  Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn, ' delete from REHBER where ID=&id ', ['&id'], [PerId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from IMAJ where YERI=12 and YER_ID=&id ', ['&id'], [PerId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID=&id ', ['&id'], [PerId]);
+  Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn, ' delete from REHBER where ID=&id ', ['&id'], [PerId]);
   if ID > 0 then
     PersonelVarsayilanYap(RehberId, ID);
 end;

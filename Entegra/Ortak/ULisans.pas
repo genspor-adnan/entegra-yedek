@@ -1,11 +1,11 @@
-{
+ï»¿{
 #### MODUL KOD Listesi ####
 
 Modul1	Ajanda
 Modul2	Ameliyat
 Modul3	Anket
 Modul4	Diyaliz
-Modul5	DoðanBebek
+Modul5	DoÄŸanBebek
 Modul6	Evrak Defteri
 Modul7	Evrak Takip
 Modul8	Fatura Takip
@@ -17,12 +17,12 @@ Modul13	GenScan
 Modul14	Genspor
 Modul15	Gentegre
 Modul16	Giykimbil
-Modul17	Hýzlý Giriþ
+Modul17	HÄ±zlÄ± GiriÅŸ
 Modul18	KamuLab
-Modul19	Kayýtkabul
+Modul19	KayÄ±tkabul
 Modul20	Kullanan
 Modul21	Lab
-Modul22	LIS - Cihaz baðlantýsý
+Modul22	LIS - Cihaz baÄŸlantÄ±sÄ±
 Modul23	LISNET
 Modul24	Medula Entegrasyon
 Modul25	Muayene
@@ -31,13 +31,13 @@ Modul27	Radyoloji
 Modul28	Randevu
 Modul29	Servis
 Modul30	Stok
-Modul31	Sýramatik
-Modul32	Tüp Bebek
-Modul33	Yönlendirme
-Modul34	Ýþyeri Hekimliði
+Modul31	SÄ±ramatik
+Modul32	TÃ¼p Bebek
+Modul33	YÃ¶nlendirme
+Modul34	Ä°ÅŸyeri HekimliÄŸi
 Modul35	Magic SAS
 Modul36	Muhasebe Entegrasyonu
-Modul37	Satýnalma
+Modul37	SatÄ±nalma
 Modul38 Doktorlar
 Modul39 GenoTIP
 }
@@ -249,7 +249,7 @@ var  ctrls: TGirdiDenetimleri;
               Exit;
             End
             else begin
-              //önce geçerli mi ona bakalým
+              //Ã¶nce geÃ§erli mi ona bakalÄ±m
               st := GetMACAdress;
               st := Lisanssrv.MACGuncelle(KurumKod, st);
               if st <> '' then begin
@@ -483,7 +483,7 @@ var
   q1, q2 :TADOQuery;
   res    : TADOQuery;
 begin
-  // Aktif Lisanslý kullanýcý sayýsý
+  // Aktif LisanslÄ± kullanÄ±cÄ± sayÄ±sÄ±
   q1 := Query('Select count(*) SAYI, ISNULL(MAX(SABIT),''1000'') as MAXNO from ENTEGRA WHERE DURUM <> 0 AND SABIT between ''1000'' and ''9999''');
   try
     if LisansBilgileri.LisansSayisi > q1.FieldByName('SAYI').AsInteger then
@@ -546,7 +546,7 @@ end;
 
 procedure TLisansDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 end;
 
 procedure ELisansHatasi.SetlisansDevam(const Value :TLisansDevam);

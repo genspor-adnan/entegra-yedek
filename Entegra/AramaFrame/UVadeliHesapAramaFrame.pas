@@ -1,4 +1,4 @@
-unit UVadeliHesapAramaFrame;
+﻿unit UVadeliHesapAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 05/01/2010 09:38:20}
@@ -51,7 +51,7 @@ implementation
 
 procedure TVadeliHesapAramaFrame.Baslatildi;
 begin
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 end;
 
 procedure TVadeliHesapAramaFrame.btnSilClick(Sender: TObject);

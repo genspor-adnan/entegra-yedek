@@ -1,4 +1,4 @@
-unit URehberBilgiDuzenle;
+ï»¿unit URehberBilgiDuzenle;
 
 interface
 
@@ -67,7 +67,7 @@ end;
 
 procedure TRehberBilgiDuzenleDlg.FormCreate(Sender: TObject);
 begin
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
 
   Tablo.GridTurkcelestir;
 end;
@@ -90,14 +90,14 @@ var
   ctrls: TGirdiDenetimleri;
   sql: Variant;
 begin
-  if ACellViewInfo.Item.Index=0 then begin //týklanan etiket mi
+  if ACellViewInfo.Item.Index=0 then begin //tÄ±klanan etiket mi
     Qry:=(Sender as TcxGridDBTableView).DataController.DataSource.DataSet as TFDQuery;
     if Trim(Qry.FieldByName('KAYNAK').AsString)<>'' then begin
       if Pos('select',LowerCase(Qry.FieldByName('KAYNAK').AsString))>0 then begin
         sql:=Qry.FieldByName('KAYNAK').AsString;
         ctrls := TGirdiDenetimleri.Create.Memo(Qry.FieldByName('ETIKET').AsString,@sql);
         if TGirisKutusuEx.BilgiAlEx(yenisorgugirin,ctrls) = mrOk then begin
-          Veritabani.BasitKomutÇalýþtýr(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
+          Veritabani.BasitKomutÃ‡alÄ±ÅŸtÄ±r(Tablo.FDCnn,'update REHBERAYAR set KAYNAK=&Sql where ETIKET=&Etiket and GIRIS=&Giris  ',['&Sql','&Etiket','&Giris'],[sql,Qry.FieldByName('ETIKET').AsString,Qry.FieldByName('GIRIS').AsInteger]);
         end;
       end else if Qry.FieldByName('GIRIS').AsInteger in [4,6,8,9] then begin //combo
         Tablo.TablodanSorguAc(7,'select DEGER from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and ANAHTAR='''+qry.FieldByName('KAYNAK').AsString+'''');
@@ -120,7 +120,7 @@ end;
 procedure TRehberBilgiDuzenleDlg.ToolButton1Click(Sender: TObject);
 begin
   if EkleDetay then
-     Ekle(TabDetay,Yeri,YerID,'Deðiþ');
+     Ekle(TabDetay,Yeri,YerID,'DeÄŸiÅŸ');
   ModalResult := mrOk;
 end;
 

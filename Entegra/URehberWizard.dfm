@@ -812,10 +812,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -853,8 +849,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1167,8 +1161,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = TicariEkrEnterPage
       OnPage = TicariEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1366,8 +1358,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1673,8 +1663,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 491
@@ -1735,7 +1723,6 @@ object RehberWizardDlg: TRehberWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 470
         AnchorX = 755
       end
       object GridYorum: TcxGrid
@@ -1845,8 +1832,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'CRMEkstreEkr'
       OnEnterPage = CRMEkstreEkrEnterPage
       OnPage = CRMEkstreEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar7: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2698,22 +2683,22 @@ object RehberWizardDlg: TRehberWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 440
     Top = 364
     object MenuKlasordenEkle: TMenuItem
