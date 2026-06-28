@@ -11,11 +11,9 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -275,10 +273,10 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
         Height = 104
         Width = 136
         object ListBoxBilgi: TcxListBox
-          Left = 3
-          Top = 16
-          Width = 130
-          Height = 80
+          Left = 2
+          Top = 18
+          Width = 132
+          Height = 84
           Align = alClient
           ItemHeight = 13
           Items.Strings = (
@@ -288,7 +286,6 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
           ShowHint = False
           TabOrder = 0
           OnClick = ListBoxBilgiClick
-          ExplicitHeight = 81
         end
       end
       object cxLabel4: TcxLabel
@@ -378,7 +375,6 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
           Caption = 'B'#246'lge Zorunlu Olacak'
           Properties.ImmediatePost = True
           TabOrder = 0
-          Width = 121
         end
         object ChZorunluALTBOLGE: TcxCheckBox
           Left = 12
@@ -386,7 +382,6 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
           Caption = 'Alt B'#246'lge Zorunlu Olacak'
           Properties.ImmediatePost = True
           TabOrder = 1
-          Width = 156
         end
       end
       object cxCheckBoxCallerID: TcxCheckBox
@@ -396,7 +391,15 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
         Properties.ImmediatePost = True
         TabOrder = 10
         Transparent = True
-        Width = 121
+      end
+      object CheckOtomatikDoldur: TcxCheckBox
+        Left = 179
+        Top = 92
+        Caption = 'VNo ile bilgileri otomatik doldur'
+        Properties.ImmediatePost = True
+        Style.TransparentBorder = False
+        TabOrder = 11
+        Transparent = True
       end
     end
   end

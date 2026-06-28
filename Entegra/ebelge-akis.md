@@ -33,6 +33,44 @@ DB CHECK: `CK_REHBERALIAS_BELGETURU IN (140, 141, 150, 151)`.
 | 51 | e-İrsaliye oluştu, gönderilmedi |
 | 52 | e-İrsaliye gönderildi |
 
+Gelen (alış) tarafında EFATURADURUM **negatif**tir (gelen kutusu kategorisi); detay `EFATURASONUC`’ta:
+| Değer | Anlamı |
+|---|---|
+| -1 | Gelen e-Fatura (gelen kutusu) |
+| -11 | Gelen e-Arşiv |
+| -2 / -12 | Sistemde (tasnif kategorisi) |
+| -3 / -13 | Tasnif dışı |
+
+### 1.3.1 `FATBASLIK.EFATURASONUC` — izibiz/GİB sonuç durumu
+Kaynak: `UFaturalar.pas` (sekme filtreleri), `UEBelgeOlusturucu.pas`, `UEBelgeGelen.pas`.
+| Değer | Anlamı | Nerede set edilir |
+|---|---|---|
+| 0 | Sonuç yok / yeni | `UEBelgeOlusturucu.pas:2467` (oluşturma sonrası) |
+| 1 | İşlemde (InProcessing) — gönderim başladı | `:2793` |
+| 2 | Kabul / Başarılı (Accepted) | `:3091` (`2+0`) |
+| 3 | Red / Hata (Rejected) | `:2809, :3707` |
+| 4 | İptal | giden sekme filtresi |
+| 5 | Süresi Geçti | giden sekme filtresi |
+| 6 | Yanıt Bekliyor (WaitingForResponse) | `:2906` |
+| 9 | Gönderim / iletişim hatası (log) | `:3735` |
+| 11 | Yanıt Gerekmez / Alındı | `UEBelgeGelen.pas:481,499` |
+| 12 | Kanunen Kabul / Cevap Süresi Doldu | `UEBelgeGelen.pas:484,497` |
+
+> 7 ve 8'in açık adı yok; yalnızca "Bekleyen" grubunda yer tutucu (`NULL,0,1,6,7,8,9`).
+
+### 1.3.2 İzibiz inbox `statusCode` → eşleme (gelen, GİB uyumlu)
+Kaynak: `UEBelgeGelen.pas:426-444` (`_IzibizStatusEsle`).
+| statusCode | İzibiz/GİB | → EFATURADURUM / EFATURASONUC |
+|---|---|---|
+| 100 | New | -1 / 0 |
+| 106 | WaitingForResponse | -1 / 6 |
+| 107, 126 | Rejected | -1 / 3 |
+| 108 | Accepted | -1 / 2 |
+| 109 | ResponseTimeExpired (kanunen kabul) | -1 / 12 |
+| 113 | Received | -1 / 0 |
+
+Ayrıca durum **metni** (`responseStatus`, `documentStatus.label`, `status`…) `_IzibizStatusMetinEsle` (`UEBelgeGelen.pas:469-502`) ile eşlenir: Accepted→2, Rejected→3, WaitingForResponse→6, InProcessing→1, DeemedAccepted/ResponseTimeExpired→12, ResponseIsNotRequired/Received→11.
+
 ### 1.4 XSLT eşlemesi (`DOKUMLER.GRUBU='XSLT'`)
 | RAPORID | Anlamı | GENINI Anahtarı | Global |
 |---|---|---|---|

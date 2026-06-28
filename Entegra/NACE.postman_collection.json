@@ -1,0 +1,191 @@
+{
+  "info": {
+    "_postman_id": "e6fb26bb-5e35-4063-9e0c-d76c6f5f0f26",
+    "name": "NACE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "15924234"
+  },
+  "item": [
+    {
+      "name": "Faaliyet ve Detay Çekme",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v2/taxpayers/4840847211?includeActivities=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v2",
+            "taxpayers",
+            "4840847211"
+          ],
+          "query": [
+            {
+              "key": "includeActivities",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sadece Detay Çekme",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v2/taxpayers/4840847211",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v2",
+            "taxpayers",
+            "4840847211"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gibden Direk Çekme - Faaliyet ve Detay Çekme",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v2/taxpayers/4840847211?includeActivities=true&enforceFromGib=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v2",
+            "taxpayers",
+            "4840847211"
+          ],
+          "query": [
+            {
+              "key": "includeActivities",
+              "value": "true"
+            },
+            {
+              "key": "enforceFromGib",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Faaliyet ve Detay Çekme ve Fatura tarihine göre Sorgulama",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v2/taxpayers/4840847211?includeActivities=true&documentDate=2012-01-10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v2",
+            "taxpayers",
+            "4840847211"
+          ],
+          "query": [
+            {
+              "key": "includeActivities",
+              "value": "true"
+            },
+            {
+              "key": "documentDate",
+              "value": "2012-01-10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "VKN Değişiklikleri",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v2/taxpayers/4840847211?includeActivities=true&documentDate=2012-01-10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v2",
+            "taxpayers",
+            "4840847211"
+          ],
+          "query": [
+            {
+              "key": "includeActivities",
+              "value": "true"
+            },
+            {
+              "key": "documentDate",
+              "value": "2012-01-10"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

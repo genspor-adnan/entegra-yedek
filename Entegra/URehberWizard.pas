@@ -366,6 +366,9 @@ type
     KurIletZorunlu, TicariZorunlu, PerIletZorunlu : SmallInt;
     // bo? kalan zorunlu alanlar? sayfalara g?re sayal?m.. next ve finish tu?lar?n?n visible lar?n? ayarlayal?m..
     function BoslukKontrolu: Boolean;
+    // Vergi No sorup izibiz NACE/mukellef bilgisini ceker, REHBER.ID olusturup
+    // donen bilgileri ilgili alanlara (FIRMA + REHBERBILGI) yazar.
+    procedure VeriAlNACE;
 
   public
     { Public declarations }
@@ -388,7 +391,8 @@ implementation
 
 uses PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle,
   Fetautil,URehberAramaEkrani,UResim, UComboImgDuzenle, UCariFonksiyonlar, UBinarySave, UAnaForm,
-  FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, URehberTemsilci;
+  FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, URehberTemsilci,
+  System.JSON, UEBelgeKimlik, UIzibizRest;
 
 var
   EkleKurIlet, EkleTicari, EklePerIlet : Boolean;
@@ -1180,6 +1184,229 @@ begin
   TabRehber.Edit;
   EditKOD.text := tablo.KodBulmaSihirbazi(ComboGRUP.EditValue, 'HESAPPLANI',
                    'HESAPKODU', 'HESAPADI', 'REHBER', 'KOD',StrToInt(VarToStrDef(ComboGRUP.EditValue,'0')));
+
+  // Yeni kayitta, opsiyonda "otomatik doldur" isaretliyse: kod secildikten
+  // sonra Vergi No sorup mukellef bilgisini cek.
+  if YeniKayit and (Trim(EditKOD.text) <> '') and
+     Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_OtomatikDoldur, False) then
+    try
+      VeriAlNACE;
+    except
+      on E: Exception do
+        ShowMessage('Mukellef bilgisi alinamadi: ' + E.Message);
+    end;
+end;
+
+procedure TRehberWizardDlg.VeriAlNACE;
+// "Veri al": Vergi No sorar, uygulamanin e-Belge (izibiz) ayarlariyla
+// /v2/taxpayers cagirir; REHBER.ID yoksa once kaydedip ID uretir, ardindan
+// donen bilgileri ilgili alanlara (FIRMA + REHBERBILGI) yazar.
+var
+  VKNo: Variant;
+  LVergiNo, LUser, LSifre, LURL, LToken, LHata, LJSON: string;
+  LTest: Boolean;
+  LHttp, i, LIletID: Integer;
+  LRoot: TJSONValue;
+  LObj, LAkt: TJSONObject;
+  LActs: TJSONArray;
+  LUnvan, LVD, LAdres, LIl, LIlce, LNace, LParca, LMevcutFirma: string;
+
+  function _Str(AO: TJSONObject; const AKeys: array of string): string;
+  var k: Integer; v: TJSONValue;
+  begin
+    Result := '';
+    if AO = nil then Exit;
+    for k := 0 to High(AKeys) do begin
+      v := AO.GetValue(AKeys[k]);
+      if (v <> nil) and not (v is TJSONNull) then begin
+        Result := Trim(v.Value);
+        if Result <> '' then Exit;
+      end;
+    end;
+  end;
+
+  // REHBERBILGI'yi REHBERAYAR sablonundan yazar: SIRA/ETIKET sablondan gelir
+  // (ETIKET metin). Eslesme VARSAYILAN=NO ve YERI uzerinden (REHBERAYAR.MODUL
+  // bu kurulumda NULL oldugundan MODUL ile filtre yapilmaz).
+  //   ANo   : REHBERVARSAYILAN.NO (RehVars_*)
+  //   AYeri : 2=firma bilgi (YER_ID=REHBER.ID), 1=iletisim (YER_ID=REHBERILETISIM.ID)
+  procedure _EkBilgiYazNO(ANo, AYeri, AYerID: Integer; const ABilgi: string);
+  var LWhere: string;
+  begin
+    if (Trim(ABilgi) = '') or (AYerID <= 0) then Exit;
+    LWhere := 'RV.NO=' + IntToStr(ANo) + ' and RA.YERI=' + IntToStr(AYeri);
+    // Ayni hedefte bu sablonun etiketi varsa once temizle (mukerrer olmasin).
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'delete from REHBERBILGI where YERI=' + IntToStr(AYeri) +
+      ' and YER_ID=' + IntToStr(AYerID) +
+      ' and ETIKET in (select RA.ETIKET from REHBERAYAR RA ' +
+      ' inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO where ' + LWhere + ')',
+      [], []);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,SUBEID) ' +
+      'select RA.YERI, ' + IntToStr(AYerID) + ', RA.SIRA, RA.ETIKET, &B, ' +
+      IntToStr(StrToIntDef(Kullanan, 0)) + ', ' + IntToStr(SubeID) + ' ' +
+      'from REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO ' +
+      'where ' + LWhere,
+      ['&B'], [ABilgi]);
+  end;
+
+begin
+  if Potansiyel then Exit;
+
+  // 1) Vergi / T.C. No sor
+  VKNo := '';
+  if TGirisKutusuEx.BilgiAlEx(YeniBilgiGirisi,
+       TGirdiDenetimleri.Create.Edit('Vergi No :', @VKNo)) <> mrOK then Exit;
+  LVergiNo := StringReplace(Trim(VarToStr(VKNo)), ' ', '', [rfReplaceAll]);
+  if not (Length(LVergiNo) in [10, 11]) then begin
+    ShowMessage('Gecerli bir vergi / T.C. kimlik no giriniz.');
+    Exit;
+  end;
+
+  // 1.5) Bu vergi/T.C. no ile zaten kayit var mi? Varsa onay iste.
+  LMevcutFirma := VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'select top 1 R.FIRMA from REHBERBILGI RB ' +
+    'inner join REHBER R on R.ID=RB.YER_ID ' +
+    'where RB.YERI=2 and RB.BILGI=&V and RB.ETIKET in ' +
+    '(select RA.ETIKET from REHBERAYAR RA inner join REHBERVARSAYILAN RV ' +
+    ' on RA.VARSAYILAN=RV.NO where RV.NO=22 and RA.YERI=2)',
+    ['&V'], [LVergiNo], True));
+  if Trim(LMevcutFirma) <> '' then
+    if Application.MessageBox(PChar('Bu vergi/T.C. no ile zaten kayit var:' +
+         sLineBreak + LMevcutFirma + sLineBreak + sLineBreak +
+         'Yine de yeni kayit olusturulsun mu?'),
+         PChar('Uyari'), MB_YESNO or MB_ICONQUESTION) <> IDYES then
+      Exit;
+
+  // 2) Kimlik + token (uygulamanin e-Belge ayarlari)
+  TEBelgeKimlik.Yukle(LUser, LSifre, LURL, LTest);
+  if (Trim(LUser) = '') or (Trim(LSifre) = '') or (Trim(LURL) = '') then begin
+    ShowMessage('e-Belge (izibiz) kullanici/sifre/URL ayarlari eksik.');
+    Exit;
+  end;
+  LToken := TEBelgeKimlik.TokenAl;
+  if LToken = '' then begin
+    if not TIzibizRest.Login(LURL, LUser, LSifre,
+         Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeVergiNo, ''), '',
+         LToken, LHata) then begin
+      ShowMessage('izibiz giris (token) basarisiz: ' + LHata);
+      Exit;
+    end;
+    TEBelgeKimlik.TokenSet(LToken);
+  end;
+
+  // 3) NACE / mukellef sorgu
+  Screen.Cursor := crHourGlass;
+  try
+    if not TIzibizRest.GetTaxpayer(LURL, LToken, LVergiNo, True,
+         LJSON, LHttp, LHata) then begin
+      ShowMessage('Mukellef sorgu basarisiz (HTTP ' + IntToStr(LHttp) + '): ' +
+        LHata);
+      Exit;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  // 4) Yaniti coz
+  LRoot := TJSONObject.ParseJSONValue(LJSON);
+  if not (LRoot is TJSONObject) then begin
+    if LRoot <> nil then LRoot.Free;
+    ShowMessage('Beklenmeyen yanit: ' + Copy(LJSON, 1, 400));
+    Exit;
+  end;
+  try
+    LObj := TJSONObject(LRoot);
+    if LObj.GetValue('data') is TJSONObject then
+      LObj := TJSONObject(LObj.GetValue('data'));
+
+    // Unvan: sirket -> commercialName; sahis -> name + surname.
+    LUnvan := _Str(LObj, ['commercialName', 'title']);
+    if LUnvan = '' then
+      LUnvan := Trim(_Str(LObj, ['name']) + ' ' + _Str(LObj, ['surname']));
+    LVD := _Str(LObj, ['taxoffice', 'taxOffice', 'taxOfficeName']);
+
+    // Adres: addresses[0] -> il=city, ilce=subCity, adres=district+streetName+buildingNumber
+    LAdres := ''; LIl := ''; LIlce := '';
+    if LObj.GetValue('addresses') is TJSONArray then begin
+      LActs := TJSONArray(LObj.GetValue('addresses'));
+      if (LActs.Count > 0) and (LActs.Items[0] is TJSONObject) then begin
+        LAkt := TJSONObject(LActs.Items[0]);
+        LIl   := _Str(LAkt, ['city']);
+        LIlce := _Str(LAkt, ['subCity']);
+        LAdres := Trim(_Str(LAkt, ['district']) + ' ' +
+                       _Str(LAkt, ['streetName']) + ' ' +
+                       _Str(LAkt, ['buildingNumber']));
+      end;
+    end;
+
+    // Faaliyet adi -> nota yazilir. Birden fazla varsa EN KISA olani secilir
+    // (uzun aciklamali NACE metni degil, kisa faaliyet adi).
+    LNace := '';
+    if LObj.GetValue('activities') is TJSONArray then begin
+      LActs := TJSONArray(LObj.GetValue('activities'));
+      for i := 0 to LActs.Count - 1 do
+        if LActs.Items[i] is TJSONObject then begin
+          LAkt := TJSONObject(LActs.Items[i]);
+          LParca := _Str(LAkt, ['activityName', 'description']);
+          if (LParca <> '') and ((LNace = '') or (Length(LParca) < Length(LNace))) then
+            LNace := LParca;
+        end;
+    end;
+
+    if Trim(LUnvan) = '' then Exit;   // mukellef bilgisi yok -> sessizce cik
+
+    // 5) Unvani FIRMA'ya yaz (alan + kontrol -> BoslukKontrolu gecsin), kaydet.
+    if not (TabRehber.State in [dsEdit, dsInsert]) then TabRehber.Edit;
+    if Trim(LUnvan) <> '' then begin
+      TabRehber.FieldByName('FIRMA').AsString := LUnvan;
+      EditFIRMA.Text := LUnvan;   // TabRehberBeforePost.BoslukKontrolu bunu okur
+    end;
+    if TabRehber.State in [dsEdit, dsInsert] then TabRehber.Post;
+    RehberID := TabRehber.FieldByName('ID').AsInteger;
+    if RehberID <= 0 then begin
+      ShowMessage('REHBER kaydedilemedi (ID olusmadi). Unvan: ' + LUnvan);
+      Exit;
+    end;
+
+    // 6) Firma duzeyi bilgiler (MODUL=2 -> YERI=2, YER_ID=REHBER.ID)
+    _EkBilgiYazNO(RehVars_Vergi_No,       2, RehberID, LVergiNo);
+    _EkBilgiYazNO(RehVars_Vergi_Dairesi,  2, RehberID, LVD);
+    _EkBilgiYazNO(RehVars_Fatura_Basligi, 2, RehberID, LUnvan);
+
+    // 7) Adres: once REHBERILETISIM satiri ekle, ID'sini al; YERI=1 bilgileri
+    //    (MODUL=1) bu iletisim ID'sine yazilir.
+    if (LAdres <> '') or (LIl <> '') or (LIlce <> '') then begin
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'insert into REHBERILETISIM(REHBERID,AD,VARSAYILAN,AKTIF,SUBEID) ' +
+        'values(&R,&AD,1,1,&S)', ['&R', '&AD', '&S'], [RehberID, 'Merkez', SubeID]);
+      // scope_identity() ayri batch'te NULL doner; yeni rehberde tek iletisim
+      // satiri oldugundan max(ID) guvenli.
+      LIletID := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'select isnull(max(ID),0) from REHBERILETISIM where REHBERID=' +
+        IntToStr(RehberID), [], [], True)), 0);
+      if LIletID > 0 then begin
+        _EkBilgiYazNO(RehVars_Adres,      1, LIletID, LAdres);
+        _EkBilgiYazNO(RehVars_Adres_il,   1, LIletID, LIl);
+        _EkBilgiYazNO(RehVars_Adres_ilce, 1, LIletID, LIlce);
+      end;
+    end;
+
+    // 8) Faaliyet adlarini NOT olarak ekle (GOREVYORUM, REHBER notu TUR=11).
+    if Trim(LNace) <> '' then begin
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'insert into GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,EKLEMETARIHI,TARIH,PERSONEL) ' +
+        'values(&G,11,&Y,&EK,getdate(),getdate(),1)',
+        ['&G', '&Y', '&EK'], [RehberID, LNace, StrToIntDef(Kullanan, 0)]);
+    end;
+
+    // 9) Ekrani tazele (ekrana bilgi/ozet gosterilmez)
+    TabloYenile(TabRehber, [RehberID]);
+    TabloYenile(TabNotlar, [RehberID]);
+  finally
+    LRoot.Free;
+  end;
 end;
 
 procedure TRehberWizardDlg.LabelAltBolgeClick(Sender: TObject);

@@ -23,7 +23,7 @@ The repo also contains a stale `.svn/` directory and many `.rar` source-code sna
 build.bat
 ```
 
-This calls `rsvars.bat` and runs:
+This first runs `ensure_utf8_bom.ps1` (normalizes source encoding to UTF-8 BOM), then calls `rsvars.bat` and runs:
 
 ```cmd
 msbuild Gentegre.dproj /t:Build /p:Config=Debug /p:Platform=Win32
@@ -62,6 +62,7 @@ These are documented in detail in the companion docs — read them before non-tr
 - **`architecture.md`** — module map, dependency layers, tab/frame lifecycle, integration list.
 - **`ui-guidelines.md`** — DevExpress component standards, colors, fonts (Trebuchet MS, `TURKISH_CHARSET`), skin (`London Liquid Sky`), `cxEditRepository1` items, image lists.
 - **`error-handling.md`** — transaction pattern (`StartTransaction` / `try` / `Commit` / `except` / `Rollback if InTransaction` / `raise`), `Veritabani.VeriVarMi` / `BasitKomutCalistir` helpers, `Application.OnException` handler in `UKimlik.pas`, `ShowErrorDialog` from `UHataDialog`.
+- **`ebelge-akis.md`** — GİB e-Belge (e-Fatura / e-Arşiv / e-İrsaliye) flow: encoding schemes (`FATBASLIK.TUR`, `REHBERALIAS.BELGETURU`/`EBELGE.BELGETURU` alias codes), the tables/constants and REST endpoints used, and the decision logic in `UFaturalar.MenuEFatura` / `UOpsiyonFatura` / `UEBelgeOlusturucu`. Read this before touching e-invoice code.
 
 Key patterns to honor without re-deriving:
 
@@ -85,4 +86,4 @@ Key patterns to honor without re-deriving:
 - `.pas` and `.dfm` files come as a pair — keep component names/types in sync between them. DFMs may be text or binary; the binary form is rare but possible.
 - `Utablo.dfm` is multi-megabyte (the central data module). Read specific offsets, do not dump the whole file.
 - Default code-page assumptions in legacy units are Windows-1254 (Turkish). Modern files are UTF-8; PowerShell helpers write UTF-8 explicitly.
-- The git branch normally checked out is `remote-snapshot`. Branches `master` and `local-full-backup` exist as safety copies — confirm with the user before switching.
+- The working tree uses dated snapshot branches named `backup/YYYYMMDD` (e.g. `backup/20260622`); commits are periodic "Backup snapshot" saves of the whole tree. Branches `master`, `remote-snapshot`, and `local-full-backup` exist as safety copies — confirm with the user before switching.

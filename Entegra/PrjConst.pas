@@ -488,7 +488,7 @@ resourcestring
     Irsaliyedefaturaileiptaledilsinmi='Faturaya bağlı irsaliyeler de bu fatura ile birlikte iptal edilsin mi?';
     Secilisatirlarsilinsinmi='Seçili plan satırları silinsin mi?';
     Belgeiptaledilsinmi='Bu Belgeyi iptal etmek istediğinize emin misiniz?';
-    Islemgorenfaturadadegisiklikyapilmaz='İşlem gören efatura üzerinde değişiklik yapılamaz!';
+    Islemgorenfaturadadegisiklikyapilmaz='İşlem gören efatura üzerinde değişiklik/silme yapılamaz!';
     DonusturulmusSilinemez='"Dönüştürülmüş Belge", silinemez!';
     DonusturulmusDegisemez='"Dönüştürülmüş Belge", değişemez!';
     Belgenogirisiyanlis='Belgeno alanına yanlış tipte veri girişi yapıyorsunuz.';
@@ -2399,6 +2399,7 @@ const
     Ops_OpsiyonCari_CallerIDCalistir= -22028;
 
     Ops_OpsiyonCari_NotTuru=-22035;
+    Ops_OpsiyonCari_OtomatikDoldur=-22036;  // Vergi No'dan mukellef bilgisi otomatik getir
 
  //Kasa Opsiyonlar 23___
     Ops_KasaOpsiyon_KDVOrani = -23001;
@@ -2657,6 +2658,15 @@ const
     Ops_FaturaOpsiyon_EIrsaliyeGelenXSLT = -24110;
     // Cari olusturulurken kullanilacak kok HESAPKODU (HESAPPLANI'dan secilir).
     Ops_FaturaOpsiyon_CariKod = -24111;
+    Ops_FaturaOpsiyon_GelenEFaturaAl = -24112;
+    // Sevk bilgisi dialogunda gecmis secimi icin saklanan son sevk bilgileri (GENINI BOLUM)
+    Ops_FaturaOpsiyon_SonSevkBilgileri = -24113;
+    // Cari/kurum ozel e-Belge XSLT'leri (GENINI BOLUM; her satir: DEGER=REHBERID, ANAHTAR=XSLT adi)
+    Ops_KurumXSLT_EFatura = -24114;
+    Ops_KurumXSLT_EArsiv = -24115;
+    Ops_KurumXSLT_EIrsaliye = -24116;
+    Ops_FaturaOpsiyon_GelenEIrsaliyeyiAl = -24117;
+    Ops_FaturaOpsiyon_EArsivGelenURL = -24118; //Gelen e-Arsivler icin URL
 
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;
@@ -2899,6 +2909,8 @@ const
     Ops_HizliSatisKuponlar   = -2329;
 
     Ops_TevkifatOranlari = -2331;
+    Ops_TevkifatNedeni   = -2332; //Tevkifatlı fatura (TIPI=22) tevkifat nedenleri GENINI bölümü
+    Ops_KDVIstisnaNedeni = -2333; //KDV İstisna fatura (TIPI=24) istisna nedenleri GENINI bölümü
 
     //Ops_Kasiyer_Cafe_Sip_Sablon = -238701; -238702; -238703; -238704; -238705
     //Ops_Kasiyer_Cafe_Hesap_Sablon = -238801;-238802;-238803;-238804;-238805;

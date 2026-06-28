@@ -17,7 +17,8 @@ uses
    cxData, cxDataStorage, DB, cxDBData, cxGridLevel, cxGridCustomTableView, cxGridTableView,
     cxGridDBTableView, cxClasses, cxGridCustomView, cxGrid, UKodAgaci,
   cxButtonEdit, cxSpinEdit, cxTimeEdit, ToolWin,DateUtils, cxButtons, cxPC, cxCheckBox,
-  cxLookAndFeels, cxNavigator, dxSkinBlueprint, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinHighContrast, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint;
+  cxLookAndFeels, cxNavigator, dxSkinBlueprint, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinHighContrast, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
+  dxCoreGraphics, cxCustomListBox;
 
 type
   TOpsiyonCariDlg = class(TForm)
@@ -41,6 +42,7 @@ type
     cxCheckBoxCallerID: TcxCheckBox;
     ChZorunluBOLGE: TcxCheckBox;
     ChZorunluALTBOLGE: TcxCheckBox;
+    CheckOtomatikDoldur: TcxCheckBox;
     procedure BitBtn1Click(Sender: TObject);
     procedure GrupKategoriTusClick(Sender: TObject);
     procedure ListBoxBilgiClick(Sender: TObject);
@@ -128,6 +130,7 @@ begin
    cxCheckBoxCallerID.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_CallerIDCalistir,False);
    ChZorunluBOLGE.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_Zorunlu_BOLGE,False);
    ChZorunluALTBOLGE.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_Zorunlu_ALTBOLGE,False);
+   CheckOtomatikDoldur.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_OtomatikDoldur,False);
 end;
 
 procedure TOpsiyonCariDlg.GrupKategoriTusClick(Sender: TObject);
@@ -144,6 +147,7 @@ begin
    Tablo.GENINI.WriteBoolean( StrToInt(inttoStr(Ops_OpsiyonCari_CallerIDCalistir)), cxCheckBoxCallerID.Checked);
    Tablo.GENINI.WriteBoolean(Ops_OpsiyonCari_Zorunlu_BOLGE, ChZorunluBOLGE.Checked);
    Tablo.GENINI.WriteBoolean(Ops_OpsiyonCari_Zorunlu_ALTBOLGE, ChZorunluALTBOLGE.Checked);
+   Tablo.GENINI.WriteBoolean(Ops_OpsiyonCari_OtomatikDoldur, CheckOtomatikDoldur.Checked);
 end;
 
 end.

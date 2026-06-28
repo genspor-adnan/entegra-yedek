@@ -48,9 +48,20 @@ type
       APage, APageSize: Integer; out AYanitJSON: string;
       out AHttpKodu: Integer; out AHata: string): Boolean; static;
 
+    /// e-Arsiv inbox listesi — GET /v1/earchives/inbox
+    class function EArchiveInboxList(const ABaseURL, AAccessToken, AStatus: string;
+      AStartDate, AEndDate: TDate;
+      APage, APageSize: Integer; out AYanitJSON: string;
+      out AHttpKodu: Integer; out AHata: string): Boolean; static;
+
     /// Inbox XML indir - POST /v2/einvoices/inbox/download/xml
     /// AUUIDs: indirilecek Izibiz inbox id listesi
     class function InboxDownloadUBL(const ABaseURL, AAccessToken: string;
+      const AUUIDs: array of string; out AYanitJSON: string;
+      out AHttpKodu: Integer; out AHata: string): Boolean; static;
+
+    /// e-Arsiv XML indir.
+    class function EArchiveInboxDownloadUBL(const ABaseURL, AAccessToken: string;
       const AUUIDs: array of string; out AYanitJSON: string;
       out AHttpKodu: Integer; out AHata: string): Boolean; static;
 
@@ -59,13 +70,20 @@ type
     class function InboxResponse(const ABaseURL, AAccessToken, AID,
       AUUID, AAciklama: string; AKabul: Boolean;
       out ASonuc: TIzibizGonderimSonuc): Boolean; static;
+
+    /// NACE / mukellef sorgu — GET /v2/taxpayers/{vergiNo}
+    /// AAktiviteEkle=True iken ?includeActivities=true eklenir (faaliyet/NACE).
+    /// Donen ham JSON AYanitJSON'da; cagiran taraf parse eder.
+    class function GetTaxpayer(const ABaseURL, AAccessToken, AVergiNo: string;
+      AAktiviteEkle: Boolean; out AYanitJSON: string;
+      out AHttpKodu: Integer; out AHata: string): Boolean; static;
   end;
 
 implementation
 
 uses
   System.Net.HttpClient, System.Net.URLClient, System.Net.HttpClientComponent,
-  System.NetEncoding;
+  System.NetEncoding, System.StrUtils;
 
 class function TIzibizRest.Login(const ABaseURL, AKullanici, ASifre,
   AIdentifier, AName: string; out AAccessToken: string; out AHata: string): Boolean;
@@ -127,6 +145,46 @@ begin
   AAccessToken := '';
   AHata := '';
   LDenenen := '';
+  if ContainsText(ABaseURL, '/IVD/main') or ContainsText(ABaseURL, '/GIB/main') then begin
+    LClient := THTTPClient.Create;
+    LStream := TMemoryStream.Create;
+    try
+      try
+        LURL := ABaseURL;
+        LBody := 'command=login&userID=' + _UrlEncode(AKullanici) +
+                 '&password=' + _UrlEncode(ASifre);
+        LBytes := TEncoding.UTF8.GetBytes(LBody);
+        LStream.WriteBuffer(LBytes, Length(LBytes));
+        LStream.Position := 0;
+
+        LClient.ContentType := 'application/x-www-form-urlencoded';
+        LClient.Accept := 'application/json';
+        LClient.CustomHeaders['disqetAPIKey'] := 'e8764c3b85332ee6ded2b46ddcaa3900';
+        LClient.CustomHeaders['Referer'] := 'https://portal.izibiz.com.tr/';
+        LClient.CustomHeaders['Authorization'] := 'Basic ' +
+          TNetEncoding.Base64.Encode('izibiz:vnqYPXh8gTJrrJUm');
+        LClient.ConnectionTimeout := 30000;
+        LClient.ResponseTimeout := 60000;
+
+        LYanit := LClient.Post(LURL, LStream);
+        LYanitStr := LYanit.ContentAsString(TEncoding.UTF8);
+        if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+          AAccessToken := _YanitParseEt(LYanitStr);
+          if Trim(AAccessToken) <> '' then
+            Exit(True);
+        end;
+        AHata := Format('IVD/GIB login HTTP %d: %s', [LYanit.StatusCode, LYanitStr]);
+      except
+        on E: Exception do
+          AHata := 'IVD/GIB login istisnasi: ' + E.Message;
+      end;
+    finally
+      LStream.Free;
+      LClient.Free;
+    end;
+    Exit;
+  end;
+
   LURL := ABaseURL.TrimRight(['/']) + '/v1/auth/token';
   LBasic := TNetEncoding.Base64.Encode(AKullanici + ':' + ASifre);
   LBasic := StringReplace(LBasic, sLineBreak, '', [rfReplaceAll]);
@@ -313,6 +371,147 @@ begin
   end;
 end;
 
+class function TIzibizRest.GetTaxpayer(const ABaseURL, AAccessToken,
+  AVergiNo: string; AAktiviteEkle: Boolean; out AYanitJSON: string;
+  out AHttpKodu: Integer; out AHata: string): Boolean;
+var
+  LClient: THTTPClient;
+  LYanit: IHTTPResponse;
+  LURL: string;
+begin
+  Result := False;
+  AYanitJSON := '';
+  AHttpKodu := 0;
+  AHata := '';
+  LClient := THTTPClient.Create;
+  try
+    try
+      LURL := ABaseURL.TrimRight(['/']) + '/v2/taxpayers/' + Trim(AVergiNo);
+      if AAktiviteEkle then
+        LURL := LURL + '?includeActivities=true';
+      LClient.Accept := 'application/json';
+      LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+      LClient.CustomHeaders['Client-Type'] := 'REST';
+      LClient.ConnectionTimeout := 30000;
+      LClient.ResponseTimeout := 60000;
+
+      LYanit := LClient.Get(LURL);
+      AHttpKodu := LYanit.StatusCode;
+      AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+      if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then
+        Result := True
+      else
+        AHata := Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+    except
+      on E: Exception do
+        AHata := 'GetTaxpayer istisnasi: ' + E.Message;
+    end;
+  finally
+    LClient.Free;
+  end;
+end;
+
+class function TIzibizRest.EArchiveInboxList(const ABaseURL, AAccessToken,
+  AStatus: string; AStartDate, AEndDate: TDate; APage, APageSize: Integer;
+  out AYanitJSON: string; out AHttpKodu: Integer; out AHata: string): Boolean;
+const
+  LRestPaths: array[0..3] of string = (
+    '/v1/earchives/inbox',
+    '/v1/earchives',
+    '/v2/earchives/inbox',
+    '/v2/earchives'
+  );
+var
+  LClient: THTTPClient;
+  LYanit: IHTTPResponse;
+  LURL, LBody, LQuery, LQueryNoSort, LDenemeler: string;
+  LStream: TMemoryStream;
+  LBytes: TBytes;
+  p: Integer;
+begin
+  Result := False;
+  AYanitJSON := '';
+  AHttpKodu := 0;
+  AHata := '';
+  LClient := THTTPClient.Create;
+  LStream := TMemoryStream.Create;
+  try
+    try
+      if ContainsText(ABaseURL, '/IVD/main') or ContainsText(ABaseURL, '/GIB/main') then begin
+        LURL := ABaseURL;
+        LBody := 'command=getInboxInvoicesIVD&token=' +
+          TNetEncoding.URL.Encode(AAccessToken);
+        if AStartDate > 0 then
+          LBody := LBody + '&startDate=' + FormatDateTime('yyyy-mm-dd', AStartDate);
+        if AEndDate > 0 then
+          LBody := LBody + '&endDate=' + FormatDateTime('yyyy-mm-dd', AEndDate);
+        LBytes := TEncoding.UTF8.GetBytes(LBody);
+        LStream.WriteBuffer(LBytes, Length(LBytes));
+        LStream.Position := 0;
+        LClient.ContentType := 'application/x-www-form-urlencoded';
+        LClient.Accept := 'application/json';
+        LClient.CustomHeaders['disqetAPIKey'] := 'e8764c3b85332ee6ded2b46ddcaa3900';
+        LClient.CustomHeaders['Referer'] := 'https://portal.izibiz.com.tr/';
+        LClient.CustomHeaders['Authorization'] := 'Basic ' +
+          TNetEncoding.Base64.Encode('izibiz:vnqYPXh8gTJrrJUm');
+        LClient.ConnectionTimeout := 30000;
+        LClient.ResponseTimeout := 120000;
+        LYanit := LClient.Post(LURL, LStream);
+      end else begin
+        LQueryNoSort := '?dateType=DOCUMENT';
+        if Trim(AStatus) <> '' then
+          LQueryNoSort := LQueryNoSort + '&status=' + AStatus;
+        if AStartDate > 0 then
+          LQueryNoSort := LQueryNoSort + '&startDate=' + FormatDateTime('yyyy-mm-dd', AStartDate);
+        if AEndDate > 0 then
+          LQueryNoSort := LQueryNoSort + '&endDate=' + FormatDateTime('yyyy-mm-dd', AEndDate);
+        LQueryNoSort := LQueryNoSort +
+          '&page=' + IntToStr(APage) +
+          '&pageSize=' + IntToStr(APageSize);
+        LQuery := LQueryNoSort +
+          '&sort=desc' +
+          '&sortProperty=documentNo';
+        LClient.Accept := 'application/json';
+        LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+        LClient.CustomHeaders['Client-Type'] := 'REST';
+        LClient.ConnectionTimeout := 30000;
+        LClient.ResponseTimeout := 120000;
+
+        for p := Low(LRestPaths) to High(LRestPaths) do begin
+          if (LRestPaths[p] = '/v1/earchives') or (LRestPaths[p] = '/v2/earchives') then
+            LURL := ABaseURL.TrimRight(['/']) + LRestPaths[p] + LQueryNoSort
+          else
+            LURL := ABaseURL.TrimRight(['/']) + LRestPaths[p] + LQuery;
+          LYanit := LClient.Get(LURL);
+          AHttpKodu := LYanit.StatusCode;
+          AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+          if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+            Result := True;
+            Exit;
+          end;
+          if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+          LDenemeler := LDenemeler + 'GET ' + LRestPaths[p] + ' -> ' +
+            Format('HTTP %d: %s', [LYanit.StatusCode, Copy(AYanitJSON, 1, 500)]);
+        end;
+        AHata := LDenemeler;
+        Exit;
+      end;
+      AHttpKodu := LYanit.StatusCode;
+      AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+      if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then
+        Result := True
+      else
+        AHata := Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+    except
+      on E: Exception do
+        AHata := 'EArchiveInboxList istisnasi: ' + E.Message;
+    end;
+  finally
+    LStream.Free;
+    LClient.Free;
+  end;
+end;
+
 class function TIzibizRest.InboxDownloadUBL(const ABaseURL, AAccessToken: string;
   const AUUIDs: array of string; out AYanitJSON: string;
   out AHttpKodu: Integer; out AHata: string): Boolean;
@@ -415,6 +614,119 @@ begin
     except
       on E: Exception do
         AHata := 'InboxDownloadUBL istisnasi: ' + E.Message;
+    end;
+  finally
+    LStream.Free;
+    LClient.Free;
+  end;
+end;
+
+class function TIzibizRest.EArchiveInboxDownloadUBL(const ABaseURL,
+  AAccessToken: string; const AUUIDs: array of string; out AYanitJSON: string;
+  out AHttpKodu: Integer; out AHata: string): Boolean;
+const
+  LPostPaths: array[0..3] of string = (
+    '/v1/earchives/inbox/download/ubl',
+    '/v2/earchives/inbox/download',
+    '/v2/earchives/inbox/download/ubl',
+    '/v2/earchives/inbox/download/xml'
+  );
+  LGetPathFormats: array[0..5] of string = (
+    '/v1/earchives/inbox/%s/xml',
+    '/v1/earchives/inbox/%s/ubl',
+    '/v2/earchives/inbox/%s/xml',
+    '/v2/earchives/inbox/%s/ubl',
+    '/v1/earchives/%s/xml',
+    '/v2/earchives/%s/xml'
+  );
+var
+  LClient: THTTPClient;
+  LStream: TMemoryStream;
+  LBytes: TBytes;
+  LYanit: IHTTPResponse;
+  LURL, LBody, LDenemeler: string;
+  i, p: Integer;
+  LArr: TJSONArray;
+  LObj: TJSONObject;
+begin
+  Result := False;
+  AYanitJSON := '';
+  AHttpKodu := 0;
+  AHata := '';
+  if ContainsText(ABaseURL, '/IVD/main') or ContainsText(ABaseURL, '/GIB/main') then begin
+    AHata := 'IVD/GIB main dokumaninda e-Arsiv XML indirme komutu bulunmuyor.';
+    Exit;
+  end;
+  if Length(AUUIDs) = 0 then begin
+    AHata := 'EArchiveInboxDownloadUBL: id listesi bos.';
+    Exit;
+  end;
+
+  LArr := TJSONArray.Create;
+  try
+    for i := 0 to High(AUUIDs) do begin
+      LObj := TJSONObject.Create;
+      LObj.AddPair('id', AUUIDs[i]);
+      LObj.AddPair('contentType', 'XML');
+      LObj.AddPair('exportType', 'SINGLE');
+      LArr.AddElement(LObj);
+    end;
+    LBody := LArr.ToJSON;
+  finally
+    LArr.Free;
+  end;
+
+  LClient := THTTPClient.Create;
+  LStream := TMemoryStream.Create;
+  try
+    try
+      LClient.ContentType := 'application/json; charset=UTF-8';
+      LClient.Accept := 'application/json';
+      LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+      LClient.CustomHeaders['Client-Type'] := 'REST';
+      LClient.ConnectionTimeout := 30000;
+      LClient.ResponseTimeout := 120000;
+
+      for p := Low(LPostPaths) to High(LPostPaths) do begin
+        LBytes := TEncoding.UTF8.GetBytes(LBody);
+        LStream.Size := 0;
+        LStream.WriteBuffer(LBytes, Length(LBytes));
+        LStream.Position := 0;
+
+        LURL := ABaseURL.TrimRight(['/']) + LPostPaths[p];
+        LYanit := LClient.Post(LURL, LStream);
+        AHttpKodu := LYanit.StatusCode;
+        AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+        if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+          Result := True;
+          Exit;
+        end;
+
+        if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+        LDenemeler := LDenemeler + 'POST ' + LPostPaths[p] + ' -> ' +
+          Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+      end;
+
+      for p := Low(LGetPathFormats) to High(LGetPathFormats) do begin
+        for i := 0 to High(AUUIDs) do begin
+          LURL := ABaseURL.TrimRight(['/']) + Format(LGetPathFormats[p], [AUUIDs[i]]);
+          LYanit := LClient.Get(LURL);
+          AHttpKodu := LYanit.StatusCode;
+          AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+          if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+            Result := True;
+            Exit;
+          end;
+
+          if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+          LDenemeler := LDenemeler + 'GET ' + Format(LGetPathFormats[p], [AUUIDs[i]]) + ' -> ' +
+            Format('HTTP %d: %s', [LYanit.StatusCode, AYanitJSON]);
+        end;
+      end;
+      AHata := LDenemeler;
+    except
+      on E: Exception do
+        AHata := 'EArchiveInboxDownloadUBL istisnasi: ' + E.Message;
     end;
   finally
     LStream.Free;
@@ -565,4 +877,3 @@ begin
 end;
 
 end.
-

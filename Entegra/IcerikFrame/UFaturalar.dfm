@@ -151,9 +151,9 @@
   end
   object GridFatListe: TcxGrid
     Left = 0
-    Top = 73
+    Top = 97
     Width = 1231
-    Height = 184
+    Height = 160
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -370,6 +370,18 @@
             Tag = 9
             Value = 9
           end>
+      end
+      object GridFatListeTviewEFATURADURUM: TcxGridDBColumn
+        Caption = 'E-Fatura Durumu'
+        DataBinding.FieldName = 'EFATURADURUM'
+        DataBinding.IsNullValueType = True
+        RepositoryItem = Tablo.repEFaturaDurum
+      end
+      object GridFatListeTviewEFATURASONUC: TcxGridDBColumn
+        Caption = 'E-Fatura Sonu'#231
+        DataBinding.FieldName = 'EFATURASONUC'
+        DataBinding.IsNullValueType = True
+        RepositoryItem = Tablo.repEFaturaSonuc
       end
       object GridFatListeTviewFATURATARIH: TcxGridDBColumn
         Caption = 'Tarih'
@@ -627,18 +639,6 @@
         DataBinding.FieldName = 'ONAYLAYAN'
         DataBinding.IsNullValueType = True
         RepositoryItem = Tablo.repGenelPersonelListesi
-      end
-      object GridFatListeTviewEFATURADURUM: TcxGridDBColumn
-        Caption = 'E-Fatura Durumu'
-        DataBinding.FieldName = 'EFATURADURUM'
-        DataBinding.IsNullValueType = True
-        RepositoryItem = Tablo.repEFaturaDurum
-      end
-      object GridFatListeTviewEFATURASONUC: TcxGridDBColumn
-        Caption = 'E-Fatura Sonu'#231
-        DataBinding.FieldName = 'EFATURASONUC'
-        DataBinding.IsNullValueType = True
-        RepositoryItem = Tablo.repEFaturaSonuc
       end
     end
     object GridFatListeLevel1: TcxGridLevel
@@ -1225,6 +1225,21 @@
       ImageIndex = 0
     end
   end
+  object PageControlAlt: TcxPageControl
+    Left = 0
+    Top = 73
+    Width = 1231
+    Height = 24
+    Align = alTop
+    TabOrder = 7
+    Visible = False
+    Properties.CustomButtons.Buttons = <>
+    Properties.Style = 3
+    OnChange = PageControlAltChange
+    ClientRectBottom = 24
+    ClientRectRight = 1231
+    ClientRectTop = 0
+  end
   object FATBASLIK: TFDQuery
     AutoCalcFields = False
     AfterOpen = FATBASLIKAfterOpen
@@ -1386,8 +1401,8 @@
     DataSet = FATBASLIK
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 83
-    Top = 182
+    Left = 75
+    Top = 158
   end
   object pmFatIslemler: TPopupMenu
     Left = 416
@@ -1476,8 +1491,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 53
-    Top = 94
+    Left = 85
+    Top = 54
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick
@@ -1500,7 +1515,7 @@
       end
       object MenuOlustur: TMenuItem
         Tag = 1
-        Caption = 'Olu'#351'tur'
+        Caption = 'Haz'#305'rla'
         ImageIndex = 1
         OnClick = MenuOlusturClick
       end
@@ -1517,9 +1532,9 @@
         ImageIndex = 12
         OnClick = MenuGonderClick
       end
-      object MenuCevapVer: TMenuItem
+      object MenuYanitla: TMenuItem
         Tag = 2
-        Caption = 'Cevap Ver'
+        Caption = 'Yan'#305'tla'
         GroupIndex = 1
         object MenuKabulEt: TMenuItem
           Tag = 2
@@ -1529,6 +1544,27 @@
           Tag = 2
           Caption = 'Red Et'
         end
+      end
+      object MenuSistemeTasi: TMenuItem
+        Tag = 2
+        Caption = #39'Sistem'#39'e Ta'#351#305
+        GroupIndex = 1
+        ImageIndex = 11
+        OnClick = MenuSistemeTasiClick
+      end
+      object MenuGelenKutusunaTasi: TMenuItem
+        Tag = 2
+        Caption = #39'Gelen Kutusu'#39'na Ta'#351#305
+        GroupIndex = 1
+        ImageIndex = 12
+        OnClick = MenuGelenKutusunaTasiClick
+      end
+      object MenuTasnifDisinaTasi: TMenuItem
+        Tag = 2
+        Caption = #39'Tasnif D'#305#351#305#39'na Ta'#351#305
+        GroupIndex = 1
+        ImageIndex = 4
+        OnClick = MenuTasnifDisinaTasiClick
       end
       object N15: TMenuItem
         Caption = '-'
@@ -1563,12 +1599,12 @@
         ImageIndex = 14
         OnClick = MenuSeriDegistirClick
       end
-      object MenuIptalEt: TMenuItem
+      object MenuSifirla: TMenuItem
         Tag = 1
-        Caption = #304'ptal Et'
+        Caption = 'Haz'#305'r'#305' S'#305'f'#305'rla'
         GroupIndex = 1
         ImageIndex = 31
-        OnClick = MenuIptalEtClick
+        OnClick = MenuSifirlaClick
       end
       object N19: TMenuItem
         Caption = '-'
@@ -2085,6 +2121,16 @@
         OnClick = AlSat1Click
       end
     end
+    object EFaturaMenu1: TMenuItem
+      Tag = 22
+      Caption = 'Tevkifatl'#305
+      OnClick = AlSat1Click
+    end
+    object MenuKDVIstisna: TMenuItem
+      Tag = 24
+      Caption = 'KDV '#304'stisna'
+      OnClick = AlSat1Click
+    end
     object KurFark1: TMenuItem
       Tag = 5
       Caption = 'Kur Fark'#305
@@ -2098,7 +2144,21 @@
     object IhracatMenu: TMenuItem
       Tag = 26
       Caption = #304'hracat'
-      OnClick = AlSat1Click
+      object Menu_Ihr_Istisna: TMenuItem
+        Tag = 124
+        Caption = #304'stisna'
+        OnClick = AlSat1Click
+      end
+      object Menu_Ihr_Satis: TMenuItem
+        Tag = 101
+        Caption = 'Sat'#305#351
+        OnClick = AlSat1Click
+      end
+      object Menu_Ihr_Iade: TMenuItem
+        Tag = 102
+        Caption = #304'ade'
+        OnClick = AlSat1Click
+      end
     end
     object IhracKayitliMenu: TMenuItem
       Tag = 9
@@ -2107,11 +2167,6 @@
     end
     object CizgiMenu1: TMenuItem
       Caption = '-'
-    end
-    object EFaturaMenu1: TMenuItem
-      Tag = -1
-      Caption = 'E-Fatura'
-      OnClick = AlSat1Click
     end
   end
   object TabImaj: TFDQuery
