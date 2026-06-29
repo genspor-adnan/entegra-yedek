@@ -22,3 +22,7 @@ Release/
 Entegra_D11/
 ComponentXE3yeni/
 .svn/
+
+# Buyuk yedek arsivleri (GitHub 100MB siniri) - git disinda tut
+_backup/
+*.tar
