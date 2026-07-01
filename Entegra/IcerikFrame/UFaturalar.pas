@@ -354,7 +354,8 @@ type
     procedure MenuSistemeTasiClick(Sender: TObject);
     procedure MenuTasnifDisinaTasiClick(Sender: TObject);
     procedure MenuGelenKutusunaTasiClick(Sender: TObject);
-    procedure _GelenDurumDegistir(AYeniEfat, AYeniEArsiv: Integer);
+    procedure _GelenDurumDegistir(AYeniEfat, AYeniEArsiv: Integer;
+      ATutarSifirla: Boolean = False; ATutarUBLdenDoldur: Boolean = False);
     procedure MenuOnizleClick(Sender: TObject);
     procedure MenuSifirlaClick(Sender: TObject);
     procedure MenuHTMLKaydetClick(Sender: TObject);
@@ -1027,7 +1028,8 @@ begin
  // if (FATBASLIK.Active)and(FATBASLIK.RecordCount>0) then
 //      LocateID := FATBASLIK.FieldByName('ID').AsInteger;
    gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
-   BtnBelgeZarfi.Visible := gf.FAltTur=11; //SQLEk=' and F.TUR = 11 ';
+   // Belge Zarfi e-Belge ozelligidir: gelen fatura (11) + e-Fatura kullanimda ise.
+   BtnBelgeZarfi.Visible := (gf.FAltTur=11) and (EFaturaKullanimda>0);
 
    SubeIDList := Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme);
    if SubeIDList = '-999' then
@@ -1399,6 +1401,8 @@ begin
 
   EFaturaMenu1.Visible := EFaturaKullanimda>0;
    CizgiMenu1.Visible := EFaturaKullanimda>0;
+   // e-Fatura kullanimda master anahtar: kapaliysa e-Belge arac cubugu butonu da gizli.
+   BtnEFaturaGuncelle.Visible := EFaturaKullanimda>0;
 
    GridFatListeTviewSUBEID.Visible := SubeVarmi;
    if not DovizTakibi then begin
@@ -2574,22 +2578,29 @@ begin
       EBelgeTuruEIrsaliye:
         begin
           MenueFatura.Caption := 'e-İrsaliye';
-          MenueFatura.Visible := EIrsaliyeKullanimda;
+          // e-Fatura kullanimda master anahtardir: kapaliysa e-İrsaliye dahil
+          // hicbir e-Belge menusu gorunmez.
+          MenueFatura.Visible := (EFaturaKullanimda > 0) and EIrsaliyeKullanimda;
           if MenueFatura.Visible then
             _MenuTagFiltrele(MenueFatura, 1);
         end;
       EBelgeTuruEFatura:
         begin
           MenueFatura.Caption := 'e-Fatura';
-          MenueFatura.Visible := True;
-          _MenuTagFiltrele(MenueFatura, 1);
+          // e-Fatura kullanimda degilse menu hic gorunmesin.
+          MenueFatura.Visible := EFaturaKullanimda > 0;
+          if MenueFatura.Visible then
+            _MenuTagFiltrele(MenueFatura, 1);
         end;
       11:
         begin
           MenueFatura.Caption := 'e-Fatura';
-          MenueFatura.Visible := True;
-          _MenuTagFiltrele(MenueFatura, 2);
-          MenuYanitla.Visible := FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 6;
+          // e-Fatura kullanimda degilse menu hic gorunmesin.
+          MenueFatura.Visible := EFaturaKullanimda > 0;
+          if MenueFatura.Visible then begin
+            _MenuTagFiltrele(MenueFatura, 2);
+            MenuYanitla.Visible := FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 6;
+          end;
         end;
     else
       MenueFatura.Visible := False;
@@ -2849,8 +2860,11 @@ begin
 
   case AAltTur of
     10, 11: begin
-      // Gelen fatura (11) her zaman; gelen irsaliye (10) yalniz e-İrsaliye kullanimda.
-      if (AAltTur = 11) or EIrsaliyeKullanimda then begin
+      // e-Fatura kullanimda master anahtardir: kapaliysa hicbir e-Belge sekmesi
+      // gosterilmez (sadece "Tümü"). Acikken: gelen fatura (11); gelen irsaliye (10)
+      // ayrica e-İrsaliye kullanimda ise.
+      if (EFaturaKullanimda > 0) and
+         ((AAltTur = 11) or ((AAltTur = 10) and EIrsaliyeKullanimda)) then begin
         // 3 ana sekme: Sistem | Gelen Kutusu | Kullanım Dışı
         TabSheetTumu.Caption := 'Sistem';   // EFATURADURUM in (0,-2,-12)
         TabSheetTumu.Tag := 1201;
@@ -2862,14 +2876,17 @@ begin
         EkleAltTab('Hata/Red', 1213);
         EkleAltTab('Süresi Geçen', 1214);
       end else begin
-        // e-İrsaliye kapali iken gelen irsaliyede alt sekme gosterilmez; sadece "Tümü".
+        // e-Fatura kapali (veya gelen irsaliyede e-İrsaliye kapali) -> sadece "Tümü".
         TabSheetTumu.Caption := 'Tümü';
         TabSheetTumu.Tag := 0;                          // filtresiz (tüm kayitlar)
       end;
     end;
     14, 15: begin
-      // Giden fatura (15) her zaman; giden e-İrsaliye (14) yalniz e-İrsaliye kullanimda.
-      if (AAltTur = 15) or EIrsaliyeKullanimda then begin
+      // e-Fatura kullanimda master anahtardir: kapaliysa hicbir e-Belge sekmesi yok
+      // (sadece "Tümü"). Acikken: giden fatura (15); giden irsaliye (14) ayrica
+      // e-İrsaliye kullanimda ise.
+      if (EFaturaKullanimda > 0) and
+         ((AAltTur = 15) or ((AAltTur = 14) and EIrsaliyeKullanimda)) then begin
         // 4 ana sekme: Tümü | Taslak | Hazır | Gönderilmiş (alt sekmeli)
         TabSheetTumu.Caption := 'Tümü';
         TabSheetTumu.Tag := 1520;                        // tümü (filtresiz)
@@ -2882,7 +2899,7 @@ begin
         EkleAltTab('Hata/Red', 1533);
         EkleAltTab('S'#$FC'resi Ge'#$E7'en', 1534);      // Suresi Gecen
       end else begin
-        // e-İrsaliye kapali iken giden irsaliyede alt sekme gosterilmez; sadece "Tümü".
+        // e-Fatura (15) / e-İrsaliye (14) kapali iken durum sekmeleri gizli; sadece "Tümü".
         TabSheetTumu.Caption := 'Tümü';
         TabSheetTumu.Tag := 0;                          // filtresiz (tüm kayitlar)
       end;
@@ -3246,9 +3263,11 @@ end;
 //   e-Fatura grubu (EFATURADURUM -1/-2/-3)   -> AYeniEfat
 //   e-Arsiv grubu  (EFATURADURUM -11/-12/-13) -> AYeniEArsiv
 // (Gelen Kutusu=-1/-11, Sistemde=-2/-12, Tasnif Disi=-3/-13)
-procedure TFaturalarDlg._GelenDurumDegistir(AYeniEfat, AYeniEArsiv: Integer);
+procedure TFaturalarDlg._GelenDurumDegistir(AYeniEfat, AYeniEArsiv: Integer;
+  ATutarSifirla: Boolean = False; ATutarUBLdenDoldur: Boolean = False);
 var
   LID, LDurum, LYeni: Integer;
+  LSet: string;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
   LDurum := FATBASLIK.FieldByName('EFATURADURUM').AsInteger;
@@ -3262,9 +3281,19 @@ begin
   end;
   if LDurum = LYeni then Exit;  // zaten hedef durumda
   LID := FATBASLIK.FieldByName('ID').AsInteger;
+  LSet := 'EFATURADURUM=&D';
+  // Kullanim disina alinan gelen belgenin tutarlari toplam/raporlara girmesin
+  // diye sifirlanir.
+  if ATutarSifirla then
+    LSet := LSet +
+      ', FATURA_MATRAHI=0, KDV_TUTARI=0, FATURA_TUTARI=0, DOVIZ_TUTARI=0';
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'UPDATE FATBASLIK SET EFATURADURUM=&D WHERE ID=&ID',
+    'UPDATE FATBASLIK SET ' + LSet + ' WHERE ID=&ID',
     ['&D', '&ID'], [LYeni, LID]);
+  // Kullanim disindan (–3/–13) tekrar sisteme/gelen kutusuna alinirken,
+  // kullanim disina alinirken sifirlanan tutarlari UBL'den geri doldur.
+  if ATutarUBLdenDoldur and ((LDurum = -3) or (LDurum = -13)) then
+    UEBelgeGelen.EBelgeGelenTutarlariUBLdenDoldur(Tablo.FDCnn, LID);
   // Kayit artik bu sekmenin durum filtresine uymadigindan listeyi yenile.
   PageControlTurChange(PageControlTur);
 end;
@@ -3272,19 +3301,22 @@ end;
 procedure TFaturalarDlg.MenuSistemeTasiClick(Sender: TObject);
 begin
   // Sisteme tasi: -1/-3 -> -2,  -11/-13 -> -12
-  _GelenDurumDegistir(-2, -12);
+  // Kullanim disindan geliniyorsa tutarlar UBL'den geri doldurulur.
+  _GelenDurumDegistir(-2, -12, False, True);
 end;
 
 procedure TFaturalarDlg.MenuTasnifDisinaTasiClick(Sender: TObject);
 begin
-  // Tasnif disina tasi: -1/-2 -> -3,  -11/-12 -> -13
-  _GelenDurumDegistir(-3, -13);
+  // Kullanim disina tasi: -1/-2 -> -3,  -11/-12 -> -13
+  // + tutar alanlari sifirlanir (kullanim disi belge toplamlara girmemeli).
+  _GelenDurumDegistir(-3, -13, True);
 end;
 
 procedure TFaturalarDlg.MenuGelenKutusunaTasiClick(Sender: TObject);
 begin
   // Gelen kutusuna tasi: -2/-3 -> -1,  -12/-13 -> -11
-  _GelenDurumDegistir(-1, -11);
+  // Kullanim disindan geliniyorsa tutarlar UBL'den geri doldurulur.
+  _GelenDurumDegistir(-1, -11, False, True);
 end;
 
 procedure TFaturalarDlg.MenuOnizleClick(Sender: TObject);

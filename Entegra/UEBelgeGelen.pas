@@ -33,6 +33,14 @@ type
 /// Boylece "default zip" olsa bile kolon eksikse e-belge bozulmaz.
 function EBelgeUBLSikistir(AConnection: TFDConnection): Boolean;
 
+/// Gelen belgenin saklanan UBL'inden tutarlari (matrah/KDV/dahil) yeniden
+/// hesaplayip FATBASLIK'a yazar. "Kullanim disi"na alinirken sifirlanan
+/// tutarlarin, tekrar sisteme/gelen kutusuna alinirken geri doldurulmasi icin.
+/// EBELGE <-> FATBASLIK bagi: FATBASLIK.GNTPID = EBELGE.ID. UBL yoksa/tutar
+/// cikarilamazsa False doner (FATBASLIK degismez).
+function EBelgeGelenTutarlariUBLdenDoldur(AConnection: TFDConnection;
+  AFatBaslikID: Integer): Boolean;
+
 implementation
 
 uses
@@ -1105,6 +1113,80 @@ type
     APIJSON: string;
     UBLXML: string;
   end;
+
+function EBelgeGelenTutarlariUBLdenDoldur(AConnection: TFDConnection;
+  AFatBaslikID: Integer): Boolean;
+var
+  LSel: TFDQuery;
+  LFmt: TFormatSettings;
+  LUbl, LLMT, LTaxBlok, LMatStr, LDahilStr, LKDVStr: string;
+  LMatrah, LDahil, LKDV: Currency;
+begin
+  Result := False;
+  if AFatBaslikID <= 0 then Exit;
+  LFmt := TFormatSettings.Create;
+  LFmt.DecimalSeparator := '.';
+  LFmt.ThousandSeparator := #0;
+
+  LSel := TFDQuery.Create(nil);
+  try
+    LSel.Connection := AConnection;
+    LSel.SQL.Text :=
+      'SELECT TOP 1 COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
+      '                     CAST(E.UBL_XML AS NVARCHAR(MAX))) AS UBLXML ' +
+      'FROM EBELGE E JOIN FATBASLIK FB ON FB.GNTPID = E.ID ' +
+      'WHERE FB.ID=:F AND E.YON=2 ORDER BY E.ID DESC';
+    LSel.ParamByName('F').AsInteger := AFatBaslikID;
+    LSel.Open;
+    if LSel.Eof then Exit;
+    LUbl := LSel.FieldByName('UBLXML').AsString;
+  finally
+    LSel.Free;
+  end;
+  if Trim(LUbl) = '' then Exit;
+
+  // Ayni parse mantigi OlusturFatbaslikler icinde de var (ilk olusturmada).
+  LLMT := _XMLTagDeger(LUbl,
+    '<cac:LegalMonetaryTotal>', '</cac:LegalMonetaryTotal>');
+  if LLMT <> '' then begin
+    // Matrah: TaxExclusiveAmount (varsa) yoksa LineExtensionAmount
+    LMatStr := _XMLDegerInline(LLMT,
+      '<cbc:TaxExclusiveAmount', '</cbc:TaxExclusiveAmount>');
+    if LMatStr = '' then
+      LMatStr := _XMLDegerInline(LLMT,
+        '<cbc:LineExtensionAmount', '</cbc:LineExtensionAmount>');
+    // Genel toplam: PayableAmount (varsa) yoksa TaxInclusiveAmount
+    LDahilStr := _XMLDegerInline(LLMT,
+      '<cbc:PayableAmount', '</cbc:PayableAmount>');
+    if LDahilStr = '' then
+      LDahilStr := _XMLDegerInline(LLMT,
+        '<cbc:TaxInclusiveAmount', '</cbc:TaxInclusiveAmount>');
+  end;
+  // KDV toplam: root cac:TaxTotal -> ilk cbc:TaxAmount
+  LTaxBlok := _XMLTagDeger(LUbl, '<cac:TaxTotal>', '</cac:TaxTotal>');
+  if LTaxBlok <> '' then
+    LKDVStr := _XMLDegerInline(LTaxBlok,
+      '<cbc:TaxAmount', '</cbc:TaxAmount>');
+
+  LMatrah := _ParseUBLSayi(LMatStr);
+  LDahil := _ParseUBLSayi(LDahilStr);
+  LKDV := _ParseUBLSayi(LKDVStr);
+  if (LKDV = 0) and (LDahil > LMatrah) then
+    LKDV := LDahil - LMatrah;
+  if (LDahil = 0) and (LMatrah > 0) then
+    LDahil := LMatrah + LKDV;
+
+  if (LMatrah > 0) or (LDahil > 0) then begin
+    Veritabani.BasitKomutÇalıştır(AConnection,
+      'UPDATE FATBASLIK SET FATURA_MATRAHI=' + CurrToStr(LMatrah, LFmt) +
+      ', FATURA_TUTARI=' + CurrToStr(LDahil, LFmt) +
+      ', KDV_TUTARI=' + CurrToStr(LKDV, LFmt) +
+      ', DOVIZ_TUTARI=' + CurrToStr(LDahil, LFmt) +
+      ' WHERE ID=&FID',
+      ['&FID'], [AFatBaslikID]);
+    Result := True;
+  end;
+end;
 
 class function TEBelgeGelen.OlusturFatbaslikler(AConnection: TFDConnection;
   out AYeniSayi: Integer; out AHata: string;

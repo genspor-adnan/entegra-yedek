@@ -1582,6 +1582,9 @@ begin
         if Trim(ASatirlar[I].MarkaAdi) <> '' then
           LXML.AppendLine('<cbc:BrandName>' + XMLEscape(ASatirlar[I].MarkaAdi) +
             '</cbc:BrandName>');
+        if Trim(ASatirlar[I].ModelKodu) <> '' then
+          LXML.AppendLine('<cbc:ModelName>' + XMLEscape(ASatirlar[I].ModelKodu) +
+            '</cbc:ModelName>');
         if Trim(SatirAliciKimlik(ASatirlar[I])) <> '' then
           LXML.AppendLine('<cac:BuyersItemIdentification><cbc:ID>' +
             XMLEscape(SatirAliciKimlik(ASatirlar[I])) +
@@ -1593,6 +1596,19 @@ begin
           LXML.AppendLine('<cac:ManufacturersItemIdentification><cbc:ID>' +
             XMLEscape(ASatirlar[I].SutKodu) +
             '</cbc:ID></cac:ManufacturersItemIdentification>');
+        // GTIN (URUNNO -> BARKOD) fatura/arsiv ile ayni sekilde irsaliyede de
+        if Trim(ASatirlar[I].Barkod) <> '' then
+          LXML.AppendLine('<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">' +
+            XMLEscape(ASatirlar[I].Barkod) +
+            '</cbc:ID></cac:StandardItemIdentification>');
+        // Ilac/tibbi cihaz kimligi: yalnizca gercek veri varsa (placeholder uretme).
+        // Sema sirasi: AdditionalItemIdentification, StandardItemIdentification'dan sonra.
+        if Trim(ASatirlar[I].TibbiCihazKimlik) <> '' then
+          TibbiCihazKimlikXMLYaz(LXML, ASatirlar[I].TibbiCihazKimlik);
+        if Trim(ASatirlar[I].LotNo) <> '' then
+          LXML.AppendLine('<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>' +
+            XMLEscape(ASatirlar[I].LotNo) +
+            '</cbc:Value></cac:AdditionalItemProperty>');
         if Trim(ASatirlar[I].SeriNo) <> '' then
           LXML.AppendLine('<cac:ItemInstance><cbc:SerialID>' +
             XMLEscape(ASatirlar[I].SeriNo) +
@@ -3965,9 +3981,13 @@ begin
       // Satir notu: "Lot No: .. Miktar: .." (LOTNO oneki yok, formatla birebir)
       if Trim(LSatir.Notu) <> '' then
         LLine.AddPair('note', Trim(LSatir.Notu));
-      // Ilac/tibbi cihaz kimligi (Senaryo 8) -> Izibiz: additionalItemIdentifications
+      // Ilac/tibbi cihaz kimligi -> Izibiz: additionalItemIdentifications
       // [{schemeID, itemIdentification}]. Yerel UBL TibbiCihazKimlikXMLYaz ile ayni.
-      if (not LIsIrsaliye) and (ABaslik.Senaryo = 8) then
+      // Fatura/arsiv: ILAC_TIBBICIHAZ senaryosu (8). E-Irsaliye: profil sabit
+      // TEMELIRSALIYE oldugundan senaryo=8 gelmez -> satirda gercek kimlik verisi
+      // varsa gonder (bos placeholder '1111111111' uretme).
+      if ((not LIsIrsaliye) and (ABaslik.Senaryo = 8)) or
+         (LIsIrsaliye and (Trim(LSatir.TibbiCihazKimlik) <> '')) then
         LLine.AddPair('additionalItemIdentifications',
           TibbiCihazKimlikJSONDizi(LSatir.TibbiCihazKimlik));
       if Trim(LSatir.LotNo) <> '' then begin

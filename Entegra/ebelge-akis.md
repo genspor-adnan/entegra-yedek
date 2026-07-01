@@ -254,7 +254,7 @@ Temel: `itemName`, `itemPrice`, `quantity`, `unitCode`, `lineExtensionAmount` (+
 - `manufacturerIdentificationId` = SutKodu → `cac:ManufacturersItemIdentification`
 - `brandName` = MarkaAdi, `modelName` = ModelKodu → `cbc:BrandName` / `cbc:ModelName`
 - `note` = satır notu ("Lot No: .. Miktar: ..", öneksiz) → `cbc:Note` (Izibiz InvoiceLine düzeyine koyar; Item içine zorlanamaz)
-- `additionalItemIdentifications` = `[{schemeID, itemIdentification}]` → yalnızca **Senaryo=8** (ilaç/tıbbi cihaz). schemeID tıbbi cihaz için `"TIBBICIHAZ"` (ilaç `"ILAC"`); değer `fn_Efatura_AdditionalItemIdentification` (`{(UNO)..(LNO)..(URT)..}` her adet). `TibbiCihazKimlikParcala` ile parçalanır.
+- `additionalItemIdentifications` = `[{schemeID, itemIdentification}]` → **fatura/arşiv:** yalnızca **Senaryo=8** (ilaç/tıbbi cihaz). **e-İrsaliye:** profil sabit `TEMELIRSALIYE` olduğundan Senaryo=8 gelmez → **satırda gerçek `TibbiCihazKimlik` verisi varsa** gönderilir (boş placeholder `1111111111` üretilmez). schemeID tıbbi cihaz için `"TIBBICIHAZ"` (ilaç `"ILAC"`); değer `fn_Efatura_AdditionalItemIdentification` (`{(UNO)..(LNO)..(URT)..}` her adet). `TibbiCihazKimlikParcala` ile parçalanır.
 - ⚠️ **Nesne/dizi gönderilmez**: `{id:..}`, `notes:[..]`, `additionalItemProperty`(LOTNO), `StandardItemIdentification`/GTIN — Izibiz earchives JSON'u bunları çıktı UBL'e **taşımaz** (GTIN zaten 3 kimlikte var; LOT bilgisi `note`'a konur).
 
 **Kaynak (SP `sp_Prog_EBelge_GidenFaturaDetay`):** BrandName=`MARKA.ANAHTAR` (S.MARKA→GENINI -2701); ModelName=GENINI BOLUM=`'-2701'+S.MARKA`, DEGER=S.MODEL (**model markaya bağlı**); BARKOD/GTIN=`S.URUNNO`. Yerel UBL'de (`UBLXMLUret`) satır `Note` artık `<cac:Item>` içinde ve öneksiz.
@@ -275,7 +275,8 @@ Temel: `itemName`, `itemPrice`, `quantity`, `unitCode`, `lineExtensionAmount` (+
 - `customerParty`: schemeId açıktan; TCKN ise firstName/lastName, VKN ise name+taxOffice.
 - `taxTotal` YOK, `legalMonetaryTotal` YOK
 - `shipment`: `id=1`; `goodsItems=[{currencyId, valueAmount=Matrah}]`; `shipmentStages=[{licensePlateID, driverPerson{firstName, familyName, identifier(TC), title, nationalityID="TR"}}]`; `delivery{deliveryAddress{country,city,subCity,streetName, postalZone(zorunlu)}, despatch{actualDespatchDate, actualDespatchTime}}`
-- Lines: `taxTotal` YOK; `currencyId` eklenir.
+- Lines: `taxTotal` YOK; `currencyId` eklenir. Kalem kimlikleri fatura/arşiv ile **paritede**: `buyerIdentificationId`, `sellerIdentificationId`, `manufacturerIdentificationId`, `brandName`, `modelName`, `note` gönderilir; `additionalItemIdentifications` satırda `TibbiCihazKimlik` doluysa eklenir.
+- **Yerel UBL (`UBLXMLUret`) e-İrsaliye `DespatchLine/Item`**: fatura ile paritede `ModelName`, `StandardItemIdentification`(GTIN=BARKOD), `AdditionalItemIdentification`(TIBBICIHAZ, veri varsa), `AdditionalItemProperty`(LOTNO) UBL şema sırasında yazılır (İTS/ilaç okuması bu dış Item'dan yapılır; iç `GoodsItem/InvoiceLine/Item` legacy).
 
 > **Bilinen hatalar:**
 > - `"query did not return a unique result: 2"` (HTTP 500) → JSON değil, **Izibiz hesabındaki mükerrer SERİ**. Seriyi değiştir / Izibiz'de mükerrer seriyi temizle. (Şablon kabul edildikten SONRA yüzeye çıkar.)
