@@ -36,6 +36,11 @@ BEGIN
             WHEN F.TUR IN (1, 11) THEN S.URUNNO
             ELSE MG.KOD
         END,
+        -- GTIN (StandardItemIdentification) stok kartinda URUNNO
+        BARKOD = CASE
+            WHEN F.TUR IN (1, 11) THEN ISNULL(S.URUNNO, N'')
+            ELSE N''
+        END,
         UnitName = U.ANAHTAR,
         UnitCodeConverted = CASE F.BIRIM
             WHEN 10 THEN 'MIN' -- Dakika
@@ -53,7 +58,7 @@ BEGIN
             ELSE 'C62'
         END,
         ModelName = CASE
-            WHEN F.TUR IN (1, 11) THEN ISNULL(S.SUTKODU, N'')
+            WHEN F.TUR IN (1, 11) THEN ISNULL(MODELG.ANAHTAR, N'')
             ELSE N''
         END,
         BrandName = CASE
@@ -61,6 +66,8 @@ BEGIN
                 THEN ISNULL(S.DMOKODU, N'')
             WHEN FB.TUR = 15 AND R.OZELKOD = N'IHALE' AND F.TUR IN (1, 11)
                 THEN ISNULL(S.IHALESIRANO, N'')
+            WHEN F.TUR IN (1, 11)
+                THEN ISNULL(MARKA.ANAHTAR, N'')
             ELSE N''
         END,
         ManufacturerName = CASE
@@ -69,6 +76,7 @@ BEGIN
         END,
         SERINO = ISNULL(IZLEM.SERINO, N''),
         LOTNO = ISNULL(IZLEM.LOTNO, N''),
+        AdditionalItemIdentification = ISNULL(dbo.fn_Efatura_AdditionalItemIdentification(F.FATBASID, F.ID), ''),
         Note = ISNULL(IZLEM.Note, N'')
     FROM dbo.FATURA F
     INNER JOIN dbo.FATBASLIK FB ON FB.ID = F.FATBASID
@@ -97,6 +105,16 @@ BEGIN
           AND G.DEGER = S.MARKA
         ORDER BY G.SIRA
     ) MARKA
+    OUTER APPLY
+    (
+        -- Model markaya bagli: GENINI bolumu '-2701'+MARKA seklinde
+        SELECT TOP (1) G.ANAHTAR
+        FROM dbo.GENINI G
+        WHERE G.BOLUM = CONVERT(int, N'-2701' + CONVERT(varchar(10), S.MARKA))
+          AND G.DIL = -1
+          AND G.DEGER = S.MODEL
+        ORDER BY G.SIRA
+    ) MODELG
     OUTER APPLY
     (
         SELECT

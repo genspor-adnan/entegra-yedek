@@ -72,6 +72,8 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelUst: TPanel
         Left = 0
         Top = 70

@@ -2667,6 +2667,7 @@ const
     Ops_KurumXSLT_EIrsaliye = -24116;
     Ops_FaturaOpsiyon_GelenEIrsaliyeyiAl = -24117;
     Ops_FaturaOpsiyon_EArsivGelenURL = -24118; //Gelen e-Arsivler icin URL
+    Ops_FaturaOpsiyon_UBL_ZIP = -24119; //EBELGE.UBL_XML'i COMPRESS ile sakla (bool)
 
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;

@@ -85,6 +85,27 @@ uses
   System.Net.HttpClient, System.Net.URLClient, System.Net.HttpClientComponent,
   System.NetEncoding, System.StrUtils;
 
+function _IzibizBaseRoot(const AURL: string): string;
+var
+  LURL: string;
+  P: Integer;
+begin
+  LURL := AURL.TrimRight(['/']);
+  P := Pos('/v1/', LURL);
+  if P = 0 then P := Pos('/v2/', LURL);
+  if P = 0 then P := Pos('/IVD/', LURL);
+  if P = 0 then P := Pos('/GIB/', LURL);
+  if P > 0 then
+    Result := Copy(LURL, 1, P - 1)
+  else
+    Result := LURL;
+end;
+
+function _IzibizEArchiveGibIvdMi(const AURL: string): Boolean;
+begin
+  Result := ContainsText(AURL, '/earchives-gib-ivd/inbox/');
+end;
+
 class function TIzibizRest.Login(const ABaseURL, AKullanici, ASifre,
   AIdentifier, AName: string; out AAccessToken: string; out AHata: string): Boolean;
 // /v1/auth/token endpoint'i 401 dondurdu (digerleri 403=Spring generic).
@@ -185,10 +206,62 @@ begin
     Exit;
   end;
 
-  LURL := ABaseURL.TrimRight(['/']) + '/v1/auth/token';
   LBasic := TNetEncoding.Base64.Encode(AKullanici + ':' + ASifre);
   LBasic := StringReplace(LBasic, sLineBreak, '', [rfReplaceAll]);
 
+  LURL := _IzibizBaseRoot(ABaseURL) + '/v1/auth/api-token';
+  for i := 1 to 2 do begin
+    LClient := THTTPClient.Create;
+    LStream := TMemoryStream.Create;
+    try
+      try
+        case i of
+          1: begin
+            LBody := Format('{"identifier":"%s","name":"%s"}',
+                            [AIdentifier, AName]);
+            LClient.ContentType := 'application/json; charset=UTF-8';
+          end;
+          2: begin
+            LBody := 'identifier=' + _UrlEncode(AIdentifier) +
+                     '&name=' + _UrlEncode(AName);
+            LClient.ContentType := 'application/x-www-form-urlencoded';
+          end;
+        end;
+        LBytes := TEncoding.UTF8.GetBytes(LBody);
+        LStream.WriteBuffer(LBytes, Length(LBytes));
+        LStream.Position := 0;
+
+        LClient.Accept := 'application/json';
+        LClient.CustomHeaders['Authorization'] := 'Basic ' + LBasic;
+        LClient.CustomHeaders['Client-Type'] := 'REST';
+        LClient.ConnectionTimeout := 30000;
+        LClient.ResponseTimeout := 60000;
+
+        LYanit := LClient.Post(LURL, LStream);
+        LYanitStr := LYanit.ContentAsString(TEncoding.UTF8);
+        LDenenen := LDenenen + sLineBreak +
+                    Format('/v1/auth/api-token variant %d -> HTTP %d : %s',
+                           [i, LYanit.StatusCode, Copy(LYanitStr, 1, 150)]);
+
+        if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+          AAccessToken := _YanitParseEt(LYanitStr);
+          if Trim(AAccessToken) <> '' then begin
+            Result := True;
+            Exit;
+          end;
+        end;
+      except
+        on E: Exception do
+          LDenenen := LDenenen + sLineBreak +
+                      Format('/v1/auth/api-token variant %d istisna: %s', [i, E.Message]);
+      end;
+    finally
+      LStream.Free;
+      LClient.Free;
+    end;
+  end;
+
+  LURL := _IzibizBaseRoot(ABaseURL) + '/v1/auth/token';
   for i := 1 to 4 do begin
     LClient := THTTPClient.Create;
     LStream := TMemoryStream.Create;
@@ -252,7 +325,13 @@ begin
     end;
   end;
 
-  AHata := '/v1/auth/token denemeleri basarisiz:' + LDenenen;
+  if _IzibizEArchiveGibIvdMi(ABaseURL) and ContainsText(LDenenen, 'Unauthorized IP') then begin
+    AAccessToken := 'Basic ' + LBasic;
+    Result := True;
+    Exit;
+  end;
+
+  AHata := 'Izibiz REST auth denemeleri basarisiz:' + LDenenen;
 end;
 
 class function TIzibizRest.SendInvoice(const ABaseURL, AAccessToken, AYol,
@@ -415,7 +494,8 @@ class function TIzibizRest.EArchiveInboxList(const ABaseURL, AAccessToken,
   AStatus: string; AStartDate, AEndDate: TDate; APage, APageSize: Integer;
   out AYanitJSON: string; out AHttpKodu: Integer; out AHata: string): Boolean;
 const
-  LRestPaths: array[0..3] of string = (
+  LRestPaths: array[0..4] of string = (
+    '/v1/earchives-gib-ivd/inbox/GIB',
     '/v1/earchives/inbox',
     '/v1/earchives',
     '/v2/earchives/inbox',
@@ -424,10 +504,17 @@ const
 var
   LClient: THTTPClient;
   LYanit: IHTTPResponse;
-  LURL, LBody, LQuery, LQueryNoSort, LDenemeler: string;
+  LURL, LBody, LQuery, LQueryNoSort, LDenemeler, LBaseRoot,
+    LExactURL, LAltURL: string;
   LStream: TMemoryStream;
   LBytes: TBytes;
   p: Integer;
+
+  function _SadeceOutDondu(const AYanit: string): Boolean;
+  begin
+    Result := ContainsText(AYanit, '"direction":"OUT"') and
+              not ContainsText(AYanit, '"direction":"IN"');
+  end;
 begin
   Result := False;
   AYanitJSON := '';
@@ -472,16 +559,60 @@ begin
           '&sort=desc' +
           '&sortProperty=documentNo';
         LClient.Accept := 'application/json';
-        LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
+        if StartsText('Basic ', AAccessToken) then
+          LClient.CustomHeaders['Authorization'] := AAccessToken
+        else
+          LClient.CustomHeaders['Authorization'] := 'Bearer ' + AAccessToken;
         LClient.CustomHeaders['Client-Type'] := 'REST';
         LClient.ConnectionTimeout := 30000;
         LClient.ResponseTimeout := 120000;
 
+        if ContainsText(ABaseURL, '/earchives-gib-ivd/inbox/') then begin
+          LExactURL := ABaseURL.TrimRight(['/']);
+          for p := 0 to 2 do begin
+            case p of
+              0: LURL := LExactURL + LQuery + '&direction=IN';
+              1: LURL := LExactURL + LQuery + '&direction=INBOUND';
+            else begin
+              if ContainsText(LExactURL, '/inbox/GIB') then
+                LAltURL := StringReplace(LExactURL, '/inbox/GIB', '/inbox/IVD',
+                                         [rfIgnoreCase])
+              else if ContainsText(LExactURL, '/inbox/IVD') then
+                LAltURL := StringReplace(LExactURL, '/inbox/IVD', '/inbox/GIB',
+                                         [rfIgnoreCase])
+              else
+                LAltURL := '';
+              if LAltURL = '' then
+                Continue;
+              LURL := LAltURL + LQuery + '&direction=IN';
+            end;
+            end;
+
+            LYanit := LClient.Get(LURL);
+            AHttpKodu := LYanit.StatusCode;
+            AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
+            if (LYanit.StatusCode >= 200) and (LYanit.StatusCode < 300) then begin
+              if not _SadeceOutDondu(AYanitJSON) then begin
+                Result := True;
+                Exit;
+              end;
+            end;
+
+            if LDenemeler <> '' then LDenemeler := LDenemeler + sLineBreak;
+            LDenemeler := LDenemeler + 'GET ' + LURL + ' -> ' +
+              Format('HTTP %d: %s', [LYanit.StatusCode, Copy(AYanitJSON, 1, 500)]);
+          end;
+          AHttpKodu := LYanit.StatusCode;
+          AHata := LDenemeler;
+          Exit;
+        end;
+
+        LBaseRoot := _IzibizBaseRoot(ABaseURL);
         for p := Low(LRestPaths) to High(LRestPaths) do begin
           if (LRestPaths[p] = '/v1/earchives') or (LRestPaths[p] = '/v2/earchives') then
-            LURL := ABaseURL.TrimRight(['/']) + LRestPaths[p] + LQueryNoSort
+            LURL := LBaseRoot + LRestPaths[p] + LQueryNoSort
           else
-            LURL := ABaseURL.TrimRight(['/']) + LRestPaths[p] + LQuery;
+            LURL := LBaseRoot + LRestPaths[p] + LQuery;
           LYanit := LClient.Get(LURL);
           AHttpKodu := LYanit.StatusCode;
           AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
@@ -535,7 +666,7 @@ var
   LStream: TMemoryStream;
   LBytes: TBytes;
   LYanit: IHTTPResponse;
-  LURL, LBody, LDenemeler: string;
+  LURL, LBody, LDenemeler, LBaseRoot: string;
   i, p: Integer;
   LArr: TJSONArray;
   LObj: TJSONObject;
@@ -573,6 +704,7 @@ begin
       LClient.CustomHeaders['Client-Type'] := 'REST';
       LClient.ConnectionTimeout := 30000;
       LClient.ResponseTimeout := 120000;
+      LBaseRoot := _IzibizBaseRoot(ABaseURL);
 
       for p := Low(LPostPaths) to High(LPostPaths) do begin
         LBytes := TEncoding.UTF8.GetBytes(LBody);
@@ -580,7 +712,7 @@ begin
         LStream.WriteBuffer(LBytes, Length(LBytes));
         LStream.Position := 0;
 
-        LURL := ABaseURL.TrimRight(['/']) + LPostPaths[p];
+        LURL := LBaseRoot + LPostPaths[p];
         LYanit := LClient.Post(LURL, LStream);
         AHttpKodu := LYanit.StatusCode;
         AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
@@ -596,7 +728,7 @@ begin
 
       for p := Low(LGetPathFormats) to High(LGetPathFormats) do begin
         for i := 0 to High(AUUIDs) do begin
-          LURL := ABaseURL.TrimRight(['/']) + Format(LGetPathFormats[p], [AUUIDs[i]]);
+          LURL := LBaseRoot + Format(LGetPathFormats[p], [AUUIDs[i]]);
           LYanit := LClient.Get(LURL);
           AHttpKodu := LYanit.StatusCode;
           AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
@@ -644,7 +776,7 @@ var
   LStream: TMemoryStream;
   LBytes: TBytes;
   LYanit: IHTTPResponse;
-  LURL, LBody, LDenemeler: string;
+  LURL, LBody, LDenemeler, LBaseRoot: string;
   i, p: Integer;
   LArr: TJSONArray;
   LObj: TJSONObject;
@@ -686,6 +818,7 @@ begin
       LClient.CustomHeaders['Client-Type'] := 'REST';
       LClient.ConnectionTimeout := 30000;
       LClient.ResponseTimeout := 120000;
+      LBaseRoot := _IzibizBaseRoot(ABaseURL);
 
       for p := Low(LPostPaths) to High(LPostPaths) do begin
         LBytes := TEncoding.UTF8.GetBytes(LBody);
@@ -693,7 +826,7 @@ begin
         LStream.WriteBuffer(LBytes, Length(LBytes));
         LStream.Position := 0;
 
-        LURL := ABaseURL.TrimRight(['/']) + LPostPaths[p];
+        LURL := LBaseRoot + LPostPaths[p];
         LYanit := LClient.Post(LURL, LStream);
         AHttpKodu := LYanit.StatusCode;
         AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);
@@ -709,7 +842,7 @@ begin
 
       for p := Low(LGetPathFormats) to High(LGetPathFormats) do begin
         for i := 0 to High(AUUIDs) do begin
-          LURL := ABaseURL.TrimRight(['/']) + Format(LGetPathFormats[p], [AUUIDs[i]]);
+          LURL := LBaseRoot + Format(LGetPathFormats[p], [AUUIDs[i]]);
           LYanit := LClient.Get(LURL);
           AHttpKodu := LYanit.StatusCode;
           AYanitJSON := LYanit.ContentAsString(TEncoding.UTF8);

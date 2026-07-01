@@ -118,6 +118,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
       OnEnterPage = SiparisEkrEnterPage
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object LabelAd: TcxLabel
         Left = 178
         Top = 37
@@ -217,11 +219,13 @@ object SiparisWizardDlg: TSiparisWizardDlg
         TabOrder = 5
         object Panel2: TPanel
           Left = 1
-          Top = 218
+          Top = 215
           Width = 1278
-          Height = 161
+          Height = 164
           Align = alClient
           TabOrder = 0
+          ExplicitTop = 218
+          ExplicitHeight = 161
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -799,7 +803,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
         end
         object PageUst: TcxPageControl
           Left = 1
-          Top = 36
+          Top = 33
           Width = 1278
           Height = 182
           Align = alTop
@@ -807,6 +811,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
           OnChange = PageUstChange
+          ExplicitTop = 36
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1274
@@ -815,6 +820,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
             Caption = 'Genel Bilgiler'
             ImageIndex = 0
             PopupMenu = PopupMenuFatura
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object PanelUst2: TPanel
               Left = 0
               Top = 0
@@ -1526,6 +1535,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
           object TabSheetEkAlanlar: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object PanelAlt: TPanel
               Left = 0
               Top = -92
@@ -1551,6 +1564,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
           Left = 4
           Top = 4
           Width = 1272
+          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -1649,6 +1663,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object gridFatToplam: TcxGrid
             Left = 963
             Top = 0
@@ -2141,6 +2159,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
         object cxTabSheet2: TcxTabSheet
           Caption = 'Yorum / Medya'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object labelDetayFileName: TcxLabel
             Left = 0
             Top = 115
@@ -2161,6 +2183,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
             Visible = False
+            ExplicitTop = 114
             AnchorX = 1272
           end
           object Panel5: TPanel
@@ -2324,6 +2347,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DetayEkrEnterPage
       OnPage = DetayEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2557,6 +2582,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -2617,6 +2644,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 554
         AnchorX = 1280
       end
       object GridYorum: TcxGrid
@@ -3489,18 +3517,36 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object frxTOPLAMLAR: TfrxDBDataset
     UserName = 'TOPLAMLAR'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'DEGER=DEGER'
-      'KUR=KUR'
-      'DOVIZTUTARI=DOVIZTUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU')
     DataSet = TOPLAMLAR
     BCDToCurrency = False
     DataSetOptions = []
     Left = 697
     Top = 379
+    FieldDefs = <
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'DEGER'
+        FieldAlias = 'DEGER'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZTUTARI'
+        FieldAlias = 'DOVIZTUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end>
   end
   object frxDETAY: TfrxDBDataset
     UserName = 'DETAY'
@@ -3709,22 +3755,22 @@ object SiparisWizardDlg: TSiparisWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 440
     Top = 364
     object MenuKlasordenEkle: TMenuItem
@@ -3785,22 +3831,22 @@ object SiparisWizardDlg: TSiparisWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 671
     Top = 428
     object MenuItem2: TMenuItem

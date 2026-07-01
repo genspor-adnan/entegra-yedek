@@ -11,7 +11,8 @@ uses
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, Vcl.ExtCtrls, cxControls, cxContainer, cxEdit, cxTextEdit,
   cxLabel, cxButtons, cxLookAndFeels, cxLookAndFeelPainters, dxCore,
-  dxCoreGraphics, dxSkinsCore, dxSkinscxPCPainter, dxSkinLondonLiquidSky;
+  dxCoreGraphics, dxSkinsCore, dxSkinscxPCPainter, dxSkinLondonLiquidSky,
+  cxGraphics, Vcl.Menus;
 
 type
   TMailOnayDlg = class(TForm)
@@ -23,6 +24,7 @@ type
     PanelAlt: TPanel;
     BtnOnayla: TcxButton;
     BtnIptal: TcxButton;
+    cxLabel1: TcxLabel;
     procedure BtnOnaylaClick(Sender: TObject);
     procedure BtnIptalClick(Sender: TObject);
   private
@@ -102,9 +104,9 @@ begin
     Dlg.LblCariAdi.Caption := ACariAdi;
     Dlg.EditMail.Text := AMevcutMail;
     if Trim(AMevcutMail) = '' then
-      Dlg.LblMailAciklama.Caption := 'Müşterinin kayıtlı mail adresi yok. Lütfen girin (birden fazla için virgülle ayırın):'
+      Dlg.LblMailAciklama.Caption := 'Müşterinin kayıtlı mail adresi yok. Lütfen girin :'
     else
-      Dlg.LblMailAciklama.Caption := 'Mevcut mail adres(ler)i — onaylayın veya düzenleyin (birden fazla için virgülle):';
+      Dlg.LblMailAciklama.Caption := 'Mevcut mail adres(ler)i — onaylayın veya düzenleyin :';
     if Dlg.ShowModal = mrOk then begin
       AYeniMail := Trim(Dlg.EditMail.Text);
       Result := AYeniMail <> '';

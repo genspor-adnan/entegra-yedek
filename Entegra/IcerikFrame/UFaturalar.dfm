@@ -1267,8 +1267,8 @@
   end
   object DtsFatBaslik: TDataSource
     DataSet = FATBASLIK
-    Left = 200
-    Top = 159
+    Left = 152
+    Top = 103
   end
   object FATURA: TFDQuery
     AutoCalcFields = False
@@ -1401,8 +1401,8 @@
     DataSet = FATBASLIK
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 75
-    Top = 158
+    Left = 19
+    Top = 174
   end
   object pmFatIslemler: TPopupMenu
     Left = 416
@@ -1492,7 +1492,7 @@
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
     Left = 85
-    Top = 54
+    Top = 38
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick
@@ -1561,7 +1561,7 @@
       end
       object MenuTasnifDisinaTasi: TMenuItem
         Tag = 2
-        Caption = #39'Tasnif D'#305#351#305#39'na Ta'#351#305
+        Caption = #39'Kullan'#305'm D'#305#351#305#39'na Ta'#351#305
         GroupIndex = 1
         ImageIndex = 4
         OnClick = MenuTasnifDisinaTasiClick
@@ -1596,14 +1596,14 @@
         Tag = 1
         Caption = 'Seri De'#287'i'#351'tir'
         GroupIndex = 1
-        ImageIndex = 14
+        ImageIndex = 39
         OnClick = MenuSeriDegistirClick
       end
       object MenuSifirla: TMenuItem
         Tag = 1
-        Caption = 'Haz'#305'r'#305' S'#305'f'#305'rla'
+        Caption = 'Haz'#305'r'#305' Geri Al'
         GroupIndex = 1
-        ImageIndex = 31
+        ImageIndex = 17
         OnClick = MenuSifirlaClick
       end
       object N19: TMenuItem

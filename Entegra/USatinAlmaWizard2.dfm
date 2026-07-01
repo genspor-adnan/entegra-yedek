@@ -118,6 +118,8 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelAlt2: TPanel
         Left = 0
         Top = 477
@@ -568,11 +570,13 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
         TabOrder = 1
         object Panel2: TPanel
           Left = 1
-          Top = 218
+          Top = 215
           Width = 1030
-          Height = 188
+          Height = 191
           Align = alClient
           TabOrder = 0
+          ExplicitTop = 218
+          ExplicitHeight = 188
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -1154,13 +1158,14 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
         end
         object PageControlUst: TcxPageControl
           Left = 1
-          Top = 36
+          Top = 33
           Width = 1030
           Height = 182
           Align = alTop
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
+          ExplicitTop = 36
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1026
@@ -1524,6 +1529,10 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
           object TabSheetEkAlanlar: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object PanelAlt: TPanel
               Left = 0
               Top = -92
@@ -1549,6 +1558,7 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
           Left = 4
           Top = 4
           Width = 1024
+          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -1644,6 +1654,8 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DetayEkrEnterPage
       OnPage = DetayEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1876,6 +1888,8 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 576
@@ -1936,6 +1950,7 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 555
         AnchorX = 1032
       end
       object GridYorum: TcxGrid
@@ -2584,18 +2599,36 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
   object frxTOPLAMLAR: TfrxDBDataset
     UserName = 'TOPLAMLAR'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'DEGER=DEGER'
-      'KUR=KUR'
-      'DOVIZTUTARI=DOVIZTUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU')
     DataSet = TOPLAMLAR
     BCDToCurrency = False
     DataSetOptions = []
     Left = 697
     Top = 379
+    FieldDefs = <
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'DEGER'
+        FieldAlias = 'DEGER'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZTUTARI'
+        FieldAlias = 'DOVIZTUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end>
   end
   object frxDETAY: TfrxDBDataset
     UserName = 'DETAY'
@@ -2802,22 +2835,22 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 440
     Top = 364
     object MenuKlasordenEkle: TMenuItem

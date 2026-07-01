@@ -1885,7 +1885,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object TabSonTeklifler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'declare @URUNID int, @URUNTUR int, @RehberID int'
       'set @URUNID = :PUrunID'
@@ -1916,7 +1915,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object TabUretim: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select S.KOD,S.STOKADI,URD.MIKTAR,KALAN=sum(SD.KALAN) '
       'from '
@@ -1936,7 +1934,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object tabMaliyetler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       '--select * from STOKMALIYET where STOKID = PStokID'
       ''
@@ -1961,7 +1958,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object TabStokDurumDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from fn_StokDurumDetay(:PStokID,:PDepoID)')
     Left = 265
@@ -1974,7 +1970,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object TabSonSatislar: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'declare @URUNID int, @URUNTUR int, @RehberID int'
       'set @URUNID = :PUrunID'
@@ -2008,7 +2003,6 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object TabSonAlislar: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'declare @URUNID int, @URUNTUR int, @RehberID int'
       'set @URUNID = :PUrunID'

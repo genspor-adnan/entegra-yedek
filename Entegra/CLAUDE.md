@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Toolchain: **Embarcadero RAD Studio 37.0 (Delphi 13.1)**, VCL framework, Win32 target.
 - Components: **DevExpress (cx*, dx*)**, FastReport, JVCL (Jv*), FireDAC for new data access, ADO in legacy code paths.
-- Database: **Microsoft SQL Server** (60+ tables). Active project DB is `DESKTOP-HL3J3AS\SQLEXPRESS` / **`BILIM`** (sa / FETAGEN — local dev only). Note: `sql_calistir.ps1` is hardcoded to a different DB (`Henmed`); update its `$database` line to `BILIM` before running against this project.
+- Database: **Microsoft SQL Server** (60+ tables). Active project DB is `DESKTOP-HL3J3AS\SQLEXPRESS` / **`BILIM`** (sa / FETAGEN — local dev only). `sql_calistir.ps1` is configured for this DB (`$database = "BILIM"`).
 - Three program entry points: `Gentegre.dpr` (modern, actively developed), `entegra.dpr` (legacy), `Rehber.dpr` (standalone address-book module).
 
 ## Repository layout quirk

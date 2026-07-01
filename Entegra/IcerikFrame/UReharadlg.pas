@@ -30,7 +30,7 @@ uses
   dxDateRanges, dxScrollbarAnnotations, JvExExtCtrls, JvExtComponent, JvPanel,
   frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, dxCoreGraphics;
 
 type
   TRehberAraDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame,IPopupDialog )
@@ -669,7 +669,7 @@ type
     GridBankaDBTableView1IBAN1: TcxGridDBColumn;
     GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn;
     GridBankaLevel1: TcxGridLevel;
-    cxTabSheet4: TcxTabSheet;
+    TabSheetEBelge: TcxTabSheet;
     ToolBar13: TToolBar;
     ToolButton17: TToolButton;
     ToolButton19: TToolButton;
@@ -691,6 +691,15 @@ type
     GridAliasViewILKKAYITTARIHI: TcxGridDBColumn;
     GridAliasViewSONKONTROLTARIHI: TcxGridDBColumn;
     GridAliasViewPASIFTARIHI: TcxGridDBColumn;
+    Panel10: TPanel;
+    cxLabel2: TcxLabel;
+    EditEFaturaXSLT: TcxButtonEdit;
+    EditEArsivXSLT: TcxButtonEdit;
+    cxLabel4: TcxLabel;
+    EditEIrsaliyeXSLT: TcxButtonEdit;
+    cxLabel6: TcxLabel;
+    ButtonFaturaDipNotu: TcxButton;
+    cxLabel7: TcxLabel;
 //    N7: TMenuItem;
     procedure LabelSonArananlarClick(Sender: TObject);
     procedure LabelTumKayitlarClick(Sender: TObject);
@@ -786,6 +795,10 @@ type
     procedure TreeListEkipmanSelectionChanged(Sender: TObject);
     procedure BtnEkipmanDuzenleClick(Sender: TObject);
     procedure cxDBTreeList1cxDBTreeListColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure EditEFaturaXSLTPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure EditEArsivXSLTPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure EditEIrsaliyeXSLTPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure ButtonFaturaDipNotuClick(Sender: TObject);
     procedure IlgiliEkleClick(Sender: TObject);
     procedure TabProjelerBeforeOpen(DataSet: TDataSet);
     procedure lgiliKurumdanAyrld1Click(Sender: TObject);
@@ -890,6 +903,8 @@ type
     FArama : TRehberAramaFrame;
     { IBilgiFrame ?yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
+    procedure KurumXSLTSec(ABolum, ARaporID: Integer; AEdit: TcxButtonEdit; AButtonIndex: Integer);
+    procedure KurumXSLTYukle;
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -3800,6 +3815,131 @@ begin
   PageControlSekmeChange(Self);
 end;
 
+procedure TRehberAraDlg.KurumXSLTSec(ABolum, ARaporID: Integer;
+  AEdit: TcxButtonEdit; AButtonIndex: Integer);
+var
+  LSecim: Variant;
+  LRehberID: Integer;
+  LXSLTAdi: string;
+begin
+  if (not REHBER.Active) or REHBER.IsEmpty then
+    Exit;
+  LRehberID := REHBER.FieldByName('ID').AsInteger;
+  if LRehberID <= 0 then begin
+    ShowMessage('Once bir cari seciniz.');
+    Exit;
+  end;
+
+  // Ikinci buton ( - ) : kuruma ozel XSLT secimini temizle
+  if AButtonIndex = 1 then begin
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'delete from GENINI where BOLUM=&B and DEGER=&D',
+      ['&B', '&D'], [ABolum, LRehberID]);
+    AEdit.Text := '';
+    Exit;
+  end;
+
+  // Ellipsis : DOKUMLER'deki ilgili turdeki XSLT'leri combo ile listele
+  LSecim := Null;
+  if TGirisKutusuEx.BilgiAlEx('XSLT Seciniz', TGirdiDenetimleri.Create
+     .ImageComboBox('XSLT', @LSecim, Tablo.FDCnn,
+       'select RAPORADI,RAPORADI from DOKUMLER where GRUBU=''XSLT'' and RAPORID=' +
+       IntToStr(ARaporID) + ' order by 2', False, nil)) <> mrOk then
+    Exit;
+  LXSLTAdi := Trim(VarToStr(LSecim));
+  if LXSLTAdi = '' then
+    Exit;
+
+  // GENINI'ye upsert: BOLUM=belge tipi, DEGER=REHBERID, ANAHTAR=XSLT adi
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'delete from GENINI where BOLUM=&B and DEGER=&D',
+    ['&B', '&D'], [ABolum, LRehberID]);
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL) values(&B,&A,&D,-1)',
+    ['&B', '&A', '&D'], [ABolum, LXSLTAdi, LRehberID]);
+  AEdit.Text := LXSLTAdi;
+end;
+
+procedure TRehberAraDlg.KurumXSLTYukle;
+  function _Oku(ABolum: Integer): string;
+  begin
+    Result := '';
+    Tablo.TablodanSorguAc(1,
+      'select top 1 ANAHTAR from GENINI where DIL=-1 and BOLUM=' +
+      IntToStr(ABolum) + ' and DEGER=' + REHBER.FieldByName('ID').AsString);
+    if not Tablo.Query1.Eof then
+      Result := Trim(Tablo.Query1.Fields[0].AsString);
+    Tablo.Query1.Close;
+  end;
+begin
+  if (not REHBER.Active) or REHBER.IsEmpty then
+    Exit;
+  EditEFaturaXSLT.Text := _Oku(Ops_KurumXSLT_EFatura);
+  EditEArsivXSLT.Text := _Oku(Ops_KurumXSLT_EArsiv);
+  EditEIrsaliyeXSLT.Text := _Oku(Ops_KurumXSLT_EIrsaliye);
+end;
+
+procedure TRehberAraDlg.EditEFaturaXSLTPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+begin
+  KurumXSLTSec(Ops_KurumXSLT_EFatura, 2, EditEFaturaXSLT, AButtonIndex);
+end;
+
+procedure TRehberAraDlg.EditEArsivXSLTPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+begin
+  KurumXSLTSec(Ops_KurumXSLT_EArsiv, 12, EditEArsivXSLT, AButtonIndex);
+end;
+
+procedure TRehberAraDlg.EditEIrsaliyeXSLTPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+begin
+  KurumXSLTSec(Ops_KurumXSLT_EIrsaliye, 52, EditEIrsaliyeXSLT, AButtonIndex);
+end;
+
+procedure TRehberAraDlg.ButtonFaturaDipNotuClick(Sender: TObject);
+var
+  LMetin: Variant;
+  LRehberID, LID: Integer;
+  LMevcut: string;
+begin
+  if (not REHBER.Active) or REHBER.IsEmpty then
+    Exit;
+  LRehberID := REHBER.FieldByName('ID').AsInteger;
+  if LRehberID <= 0 then begin
+    ShowMessage('Once bir cari seciniz.');
+    Exit;
+  end;
+
+  // Bu cariye ait fatura dip notu varsa hazirda getir (GOREVYORUM TUR=400)
+  LMevcut := '';
+  LID := 0;
+  Tablo.TablodanSorguAc(1,
+    'select top 1 ID, YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
+    IntToStr(LRehberID) + ' order by ID');
+  if not Tablo.Query1.Eof then begin
+    LID := Tablo.Query1.FieldByName('ID').AsInteger;
+    LMevcut := Tablo.Query1.FieldByName('YORUM').AsString;
+  end;
+  Tablo.Query1.Close;
+
+  LMetin := LMevcut;
+  if TGirisKutusuEx.BilgiAlEx('Fatura Dip Notu',
+     TGirdiDenetimleri.Create.Memo('Dip Notu', @LMetin)) <> mrOk then
+    Exit;
+
+  // GOREVYORUM'a kaydet: TUR=400, GOREVID=REHBERID, YORUM=icerik (upsert)
+  if LID > 0 then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update GOREVYORUM set YORUM=&Y, DEGISTIREN=&K, DEGISTIRMETARIHI=getdate() where ID=&ID',
+      ['&Y', '&K', '&ID'], [VarToStr(LMetin), StrToIntDef(Kullanan, 0), LID])
+  else
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'insert into GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,EKLEMETARIHI) ' +
+      'values(&G,400,&Y,&K,getdate())',
+      ['&G', '&Y', '&K'], [LRehberID, VarToStr(LMetin), StrToIntDef(Kullanan, 0)]);
+end;
+
 procedure TRehberAraDlg.PageControlSekmeChange(Sender: TObject);
 var AcKapa:String[1];
     GunSay : Smallint;
@@ -3819,7 +3959,8 @@ begin
   else if PageControlSekme.ActivePage=TabSheetTicari then begin
      TabloYenile(TabTicari,[REHBER.Fields[0].AsInteger]);
      TabloYenile(TabBankaHesaplar,[REHBER.Fields[0].AsInteger]);
-  end else if PageControlSekme.ActivePage = cxTabSheet4 then begin   // Alias Bilgileri
+     KurumXSLTYukle;
+     // Alias grid'i artik Ticari > E-Belge alt sekmesinde; cari degisince yenile.
      TabAlias.Close;
      TabAlias.SQL.Text := 'SELECT * FROM REHBERALIAS WHERE REHBERID = ' +
                           IntToStr(REHBER.Fields[0].AsInteger);

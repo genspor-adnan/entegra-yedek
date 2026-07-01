@@ -242,42 +242,47 @@ ComboEIrsaliyeXSLT     ← DOKUMLER where RAPORID=4
 
 #### Ortak
 - `documentAction=SEND`, `assignNumber` ("true"/"false" string), `seriePrefix=FATURANO[1..3]`.
-- `content`: `profile`, `documentTypeCode`, `documentNo`, `uuid`, `issueDate`, `issueTime`, `currencyCode`, `notes=[]`.
+- `content`: `profile`, `documentTypeCode`, `documentNo`, `uuid`, `issueDate`, `issueTime`, `currencyCode`, `notes=[]` (belge düzeyi notlar).
 - `supplierParty`: name, identifier, schemeId, taxOffice, address (country=TR, city, subCity, streetName, postalCode).
 - TEST modunda supplier VKN, `Ops_FaturaOpsiyon_EBelgeVergiNo` ile override edilir.
+- **Görüntüleme XSLT'si TÜM türlerde belgeye GÖMÜLÜR**: `additionalReferences`'a `{id:UUID, documentType:"XSLT", issueDate, attachment{characterSetCode:UTF-8, encodingCode:Base64, filename, mimeCode:application/xml, content:base64(XSLT)}}`. XSLT: e-Arşiv'de `OrnekEArsivXSLTGetir`, diğerlerinde `BelgeXSLTGetir`. ⚠️ **`xsltName="DEFAULT"` KULLANMA** — kayıtlı "DEFAULT" şablonu olmayan (üretim) hesaplarda `RESOURCE / "imza bilgisi bulunamadı"` hatası verir (2026-07 regresyon, geri alındı).
+
+#### Satır kalemi (Lines) — Izibiz DÜZ (flat) anahtarlar
+Temel: `itemName`, `itemPrice`, `quantity`, `unitCode`, `lineExtensionAmount` (+ fatura/arşivde satır `taxTotal`). Doğrulanmış ek anahtarlar (`_IzibizJSONOlustur`):
+- `buyerIdentificationId` = `SatirAliciKimlik` (SutKodu, yoksa AliciUrunKodu) → `cac:BuyersItemIdentification`
+- `sellerIdentificationId` = `SatirSaticiKimlik` (SutKodu, yoksa UrunKodu) → `cac:SellersItemIdentification`
+- `manufacturerIdentificationId` = SutKodu → `cac:ManufacturersItemIdentification`
+- `brandName` = MarkaAdi, `modelName` = ModelKodu → `cbc:BrandName` / `cbc:ModelName`
+- `note` = satır notu ("Lot No: .. Miktar: ..", öneksiz) → `cbc:Note` (Izibiz InvoiceLine düzeyine koyar; Item içine zorlanamaz)
+- `additionalItemIdentifications` = `[{schemeID, itemIdentification}]` → yalnızca **Senaryo=8** (ilaç/tıbbi cihaz). schemeID tıbbi cihaz için `"TIBBICIHAZ"` (ilaç `"ILAC"`); değer `fn_Efatura_AdditionalItemIdentification` (`{(UNO)..(LNO)..(URT)..}` her adet). `TibbiCihazKimlikParcala` ile parçalanır.
+- ⚠️ **Nesne/dizi gönderilmez**: `{id:..}`, `notes:[..]`, `additionalItemProperty`(LOTNO), `StandardItemIdentification`/GTIN — Izibiz earchives JSON'u bunları çıktı UBL'e **taşımaz** (GTIN zaten 3 kimlikte var; LOT bilgisi `note`'a konur).
+
+**Kaynak (SP `sp_Prog_EBelge_GidenFaturaDetay`):** BrandName=`MARKA.ANAHTAR` (S.MARKA→GENINI -2701); ModelName=GENINI BOLUM=`'-2701'+S.MARKA`, DEGER=S.MODEL (**model markaya bağlı**); BARKOD/GTIN=`S.URUNNO`. Yerel UBL'de (`UBLXMLUret`) satır `Note` artık `<cac:Item>` içinde ve öneksiz.
 
 #### e-Fatura
-- `xsltName="DEFAULT"`
 - `customerParty`: schemeId(VKN), identifier, name, taxOffice, address.
 - `taxTotal`, `legalMonetaryTotal`
-- Lines: `taxTotal` per satır
 
 #### e-Arşiv (`EArsivMi`)
-- `xsltName="DEFAULT"`
 - `profile="EARSIVFATURA"`
-- TCKN ise customerParty: schemeId="TCKN", identifier, **firstName**, **lastName** (cac:Person)
-- VKN ise: name + taxOffice
+- TCKN ise customerParty: schemeId="TCKN", identifier, **firstName**, **lastName** (cac:Person); VKN ise name + taxOffice
 - `customerParty.address.email = AliciAlias` (mail buradan iletilir)
-- `additionalReferences`: `[{documentTypeCode:SendingType, documentType:ELEKTRONIK, id:"1", issueDate}]`
+- `additionalReferences`: SendingType `{documentTypeCode:SendingType, documentType:KAGIT, id:"1", issueDate}` **+ gömülü XSLT** (bkz. Ortak). İki referans da `documentType` taşıdığından belirsizlik olmaz.
 - `taxTotal`, `legalMonetaryTotal` var
 
 #### e-İrsaliye (`Tur=14`)
-- `xsltName` YOK. **`compressed:"false"`** eklenir (base64 parse hatası önler).
-- `profile="TEMELIRSALIYE"`, `documentTypeCode="SEVK"`
+- **`compressed:"false"`** eklenir. `profile="TEMELIRSALIYE"`, `documentTypeCode="SEVK"`
 - `customerParty`: schemeId açıktan; TCKN ise firstName/lastName, VKN ise name+taxOffice.
 - `taxTotal` YOK, `legalMonetaryTotal` YOK
-- `shipment`:
-  - `id=1`
-  - `goodsItems=[{currencyId, valueAmount=Matrah}]`
-  - `shipmentStages=[{licensePlateID, driverPerson{firstName, familyName, identifier(TC), title, nationalityID="TR"}}]`
-  - `delivery`:
-    - `deliveryAddress`: country, city, subCity, streetName, **postalZone (zorunlu)**
-    - `despatch`: actualDespatchDate, actualDespatchTime
-- `additionalReferences=[{documentType:"XSLT", id:UUID, issueDate, attachment{characterSetCode:"UTF-8", encodingCode:"Base64", filename, mimeCode:"application/xml", content:base64(DOKUMLER.SQL)}}]`
-  - XSLT içeriği `VarsayilanEIrsaliyeXSLT > 0` ise DOKUMLER’den okunup base64’lenir.
-- Lines: `taxTotal` YOK; `currencyId` eklenir; itemName, itemPrice, quantity, unitCode, lineExtensionAmount.
+- `shipment`: `id=1`; `goodsItems=[{currencyId, valueAmount=Matrah}]`; `shipmentStages=[{licensePlateID, driverPerson{firstName, familyName, identifier(TC), title, nationalityID="TR"}}]`; `delivery{deliveryAddress{country,city,subCity,streetName, postalZone(zorunlu)}, despatch{actualDespatchDate, actualDespatchTime}}`
+- Lines: `taxTotal` YOK; `currencyId` eklenir.
 
-> **TEST placeholder’lar**: `licensePlateID="34 TEST 0000"`, driver Test/Surucu/11111111111, `postalZone="34000"`. Üretim için FATBASLIK/REHBER alanlarından okuma gerekecek.
+> **Bilinen hatalar:**
+> - `"query did not return a unique result: 2"` (HTTP 500) → JSON değil, **Izibiz hesabındaki mükerrer SERİ**. Seriyi değiştir / Izibiz'de mükerrer seriyi temizle. (Şablon kabul edildikten SONRA yüzeye çıkar.)
+> - `RESOURCE / "imza bilgisi bulunamadı"` (HTTP 400) → mali mühür yok, VEYA `xsltName="DEFAULT"` gönderilip hesapta "DEFAULT" şablonu yok → XSLT'yi gömülü gönder.
+> - `10013 "geçerli şablon bulunamadı"` → XSLT hiç gönderilmemiş.
+
+> **TEST placeholder'lar**: `licensePlateID="34 TEST 0000"`, driver Test/Surucu/11111111111, `postalZone="34000"`. Üretim için FATBASLIK/REHBER alanlarından okuma gerekecek. TEST modunda gönderilen tam JSON `Belgelerim\EBelge_Request_<no>.json`'a yazılır (debug).
 
 ## 6. `UFaturaWizard` Etkileşimi
 

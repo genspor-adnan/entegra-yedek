@@ -49,6 +49,7 @@ BEGIN
         FB.FATURANO,
         FB.KDVDURUM,
         SENARYO = CASE
+            WHEN FB.TUR = 15 AND ISNULL(FB.SENARYO, 1) IN (1, 2, 3, 7, 8) THEN FB.SENARYO
             WHEN FB.EFATURADURUM IN (51, 52) THEN 6
             WHEN FB.EFATURADURUM IN (11, 12, 31, 32) THEN 4
             ELSE ISNULL(FB.SENARYO, 1)
@@ -169,98 +170,4 @@ BEGIN
         ORDER BY A.VARSAYILAN DESC, A.ID
     ) RA
     WHERE FB.ID = @ID;
-
-    /*
-      Ikinci sonuc kumesi: FATURA kalemleri.
-      UBL-TR InvoiceLine / DespatchLine olustururken kullanilir.
-    */
-    SELECT
-        F.ID,
-        F.FATBASID,
-        SATIRNO = ROW_NUMBER() OVER
-        (
-            ORDER BY CASE WHEN ISNULL(F.SIRA, 0) = 0 THEN 2147483647 ELSE F.SIRA END, F.ID
-        ),
-        F.SIRA,
-        F.TUR,
-        F.URUNID,
-        KOD = CASE
-            WHEN F.TUR IN (1, 11) THEN S.KOD
-            ELSE MG.KOD
-        END,
-        URUNNO = CASE
-            WHEN F.TUR IN (1, 11) THEN S.URUNNO
-            ELSE N''
-        END,
-        AD = CASE
-            WHEN F.TUR IN (1, 11) THEN S.STOKADI
-            ELSE MG.AD
-        END,
-        F.ACIKLAMA,
-        BARKOD = CASE
-            WHEN F.TUR IN (1, 11) THEN SB.BARKOD
-            ELSE N''
-        END,
-        F.ADET,
-        F.MF,
-        F.BIRIM,
-        BIRIMAD = BR.ANAHTAR,
-        F.MIKTAR,
-        F.BIRIMFIYAT,
-        BRUTTUTAR = ISNULL(F.ADET, 0) * ISNULL(F.BIRIMFIYAT, 0),
-        F.ISKONTO,
-        F.ISKONTO2,
-        ISKONTOTUTARI =
-            (ISNULL(F.ADET, 0) * ISNULL(F.BIRIMFIYAT, 0)) - ISNULL(F.TUTAR, 0),
-        F.TUTAR,
-        F.KDV,
-        KDVMATRAHI = ISNULL(F.TUTAR, 0),
-        KDVTUTARI = CASE
-            WHEN UPPER(ISNULL(FB.KDVDURUM, N'')) = N'DAHİL'
-                THEN ISNULL(F.TUTAR, 0) -
-                     (ISNULL(F.TUTAR, 0) / NULLIF(1 + (ISNULL(F.KDV, 0) / 100.0), 0))
-            WHEN UPPER(ISNULL(FB.KDVDURUM, N'')) = N'MUAF'
-                THEN 0
-            ELSE ISNULL(F.TUTAR, 0) * ISNULL(F.KDV, 0) / 100.0
-        END,
-        F.OTVYUZDE,
-        F.OTVMIKTAR,
-        F.KUR,
-        F.DOVIZ_BIRIMFIYAT,
-        F.DOVIZ_TUTARI,
-        F.DOVIZKURDEGERI,
-        F.KDVMUHAFIYETI,
-        F.OZELKOD,
-        F.OZELKOD2,
-        GTIP = CASE WHEN F.TUR IN (1, 11) THEN S.GTIP ELSE N'' END,
-        SUTKODU = CASE WHEN F.TUR IN (1, 11) THEN S.SUTKODU ELSE N'' END,
-        GMDN = CASE WHEN F.TUR IN (1, 11) THEN S.GMDN ELSE N'' END,
-        MENSEIULKE = CASE WHEN F.TUR IN (1, 11) THEN S.MENSEIULKE ELSE NULL END
-    FROM dbo.FATURA F
-    INNER JOIN dbo.FATBASLIK FB ON FB.ID = F.FATBASID
-    LEFT JOIN dbo.STOKLAR S
-        ON F.TUR IN (1, 11)
-       AND S.ID = F.URUNID
-    LEFT JOIN dbo.MASRAFGELIR MG
-        ON F.TUR NOT IN (1, 11)
-       AND MG.ID = F.URUNID
-    OUTER APPLY
-    (
-        SELECT TOP (1) G.ANAHTAR
-        FROM dbo.GENINI G
-        WHERE G.BOLUM = -2702
-          AND G.DIL = -1
-          AND G.DEGER = F.BIRIM
-        ORDER BY G.SIRA
-    ) BR
-    OUTER APPLY
-    (
-        SELECT TOP (1) B.BARKOD
-        FROM dbo.STOKBARKOD B
-        WHERE B.STOKID = F.URUNID
-          AND B.VARSAYILAN = 1
-        ORDER BY B.ID
-    ) SB
-    WHERE F.FATBASID = @ID
-    ORDER BY SATIRNO;
 END;

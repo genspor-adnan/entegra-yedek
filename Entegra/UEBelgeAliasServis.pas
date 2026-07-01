@@ -527,21 +527,21 @@ begin
   if LTestModu then begin
     var LMsg: string;
     if LIrsaliyeMi then
-      LMsg := 'TEST MODU - e-�rsaliye se�imi' + sLineBreak + sLineBreak +
+      LMsg := 'TEST MODU - e-İrsaliye seçimi' + sLineBreak + sLineBreak +
               'Cari: ' + ACariAdi + sLineBreak +
               'VKN/TCKN: ' + AVergiNo + sLineBreak + sLineBreak +
-              'Firma e-�rsaliye m�kellefi mi?' + sLineBreak +
+              'Firma e-İrsaliye mükellefi mi?' + sLineBreak +
               '  EVET = Firmaya direkt (141)' + sLineBreak +
-              '  HAYIR = G�B �zerinden (140)' + sLineBreak +
-              '  �PTAL = vazge�'
+              '  HAYIR = GİB üzerinden (140)' + sLineBreak +
+              '  İPTAL = Vazgeç'
     else
-      LMsg := 'TEST MODU - Belge t�r� se�imi' + sLineBreak + sLineBreak +
+      LMsg := 'TEST MODU - Belge türü seçimi' + sLineBreak + sLineBreak +
               'Cari: ' + ACariAdi + sLineBreak +
               'VKN/TCKN: ' + AVergiNo + sLineBreak + sLineBreak +
               'Bu belge ne olarak kesilecek?' + sLineBreak +
-              '  EVET = e-Fatura (m�kellef varsay)' + sLineBreak +
-              '  HAYIR = e-Ar�iv Fatura' + sLineBreak +
-              '  �PTAL = vazge�';
+              '  EVET = e-Fatura (mükellef varsay)' + sLineBreak +
+              '  HAYIR = e-Arşiv Fatura' + sLineBreak +
+              '  İPTAL = Vazgeç';
     case MessageDlg(LMsg, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
       mrYes:    LIzibizAlias := 'urn:mail:defaultpk@izibiz.com.tr';
       mrNo:     LIzibizAlias := '';  // genel branch'ine d�sun (150/140)

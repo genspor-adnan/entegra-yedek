@@ -25,7 +25,7 @@ object MailOnayDlg: TMailOnayDlg
     object LblBaslik: TcxLabel
       Left = 16
       Top = 16
-      Caption = 'M'#252#351'teri Mail Adresi'
+      Caption = 'Al'#305'c'#305' E-Posta Adresi'
       ParentFont = False
       Style.Font.Charset = TURKISH_CHARSET
       Style.Font.Color = clBlack
@@ -50,17 +50,17 @@ object MailOnayDlg: TMailOnayDlg
       Left = 16
       Top = 80
       Caption = 'Mevcut mail adres(ler)i:'
-      Properties.WordWrap = True
-      Style.IsFontAssigned = True
-      Style.Font.Height = -11
-      Style.Font.Name = 'Tahoma'
-      Width = 525
     end
     object EditMail: TcxTextEdit
       Left = 16
       Top = 130
       TabOrder = 0
       Width = 528
+    end
+    object cxLabel1: TcxLabel
+      Left = 16
+      Top = 99
+      Caption = ' (birden fazla i'#231'in virg'#252'lle)'
     end
   end
   object PanelAlt: TPanel

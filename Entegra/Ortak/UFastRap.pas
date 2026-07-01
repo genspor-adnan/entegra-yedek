@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, frxClass, frxExportPDF, frxDesgn, DB, FireDAC.Comp.Client, ExtDlgs,UDokum,
+  Dialogs, frxClass, frBaseGraphicsTypes, frxExportPDF, frxDesgn, DB, FireDAC.Comp.Client, ExtDlgs,UDokum,
   frxExportXLS, frxExportMail, frxExportCSV,  frxExportRTF,
   frxExportHTML, Menus, ImgList,URaporAraclari,FetaClassExtensionsConsts,
   dxSkinsCore,   cxControls, cxContainer, cxEdit, cxTextEdit, cxMemo,
@@ -65,6 +65,7 @@ type
   public
     { Public declarations }
     EkranAdi, RaporAdi : string;
+    FiligranYazi : string; //Tek seferlik taslak/filigran yazisi; FastRapor calistiginda tuketilir ve temizlenir
     procedure DegiskenleriEkle(Frx:TfrxReport = nil);
     function FastRapor(Prev: SmallInt; EkranAdi1, RaporAdi1 : String; PDFYol:String=''):String;
     procedure RaporKaydet(frxReport1: TfrxReport);
@@ -225,6 +226,9 @@ end;
 function TFastRaporDlg.FastRapor(Prev: SmallInt; EkranAdi1, RaporAdi1 : String; PDFYol:String=''):String;
 var
   i: integer;
+  LFiligran: string;
+  WMPage: TfrxReportPage;
+  WMMemo: TfrxMemoView;
   FlNm, DumpDir: string;
   PDFExport: TfrxPDFExport;
   RTFExport: TfrxRTFExport;
@@ -260,6 +264,8 @@ var
   end;
 begin
   Result := '';
+  LFiligran := FiligranYazi;  //tek seferlik kullan; baska raporlara sizmasin diye hemen temizle
+  FiligranYazi := '';
   RaporAdi := RaporAdi1;
   EkranAdi := EkranAdi1;
   AyarTablosunuAc;
@@ -298,6 +304,30 @@ begin
        frxReport1.PrintOptions.Printer := TabYeniAyar.FieldByName('YAZICI').AsString;
        frxReport1.SelectPrinter;
     end;
+    //Taslak filigrani: hazirlanmis sayfalara capraz yazi ekle (yalnizca PDF: 2,11 ve HTML: 7,17)
+    if (LFiligran <> '') and (Prev in [2, 7, 11, 17]) then
+      for i := 0 to frxReport1.PreviewPages.Count - 1 do begin
+        WMPage := frxReport1.PreviewPages.Page[i];
+        WMMemo := TfrxMemoView.Create(WMPage);
+        WMMemo.Parent := WMPage;
+        WMMemo.CreateUniqueName;
+        WMMemo.Left := 0;
+        WMMemo.Top := 0;
+        WMMemo.Width := WMPage.Width;
+        WMMemo.Height := WMPage.Height;
+        WMMemo.Text := LFiligran;
+        WMMemo.Font.Name := 'Arial';
+        WMMemo.Font.Size := 60;
+        WMMemo.Font.Color := clSilver;
+        WMMemo.Font.Style := [fsBold];
+        WMMemo.HAlign := haCenter;
+        WMMemo.VAlign := vaCenter;
+        WMMemo.Rotation := 45;
+        WMMemo.Color := clNone;
+        WMMemo.Frame.Typ := [];
+        frxReport1.PreviewPages.ModifyPage(i, WMPage);
+      end;
+
     case Prev of
       0: try
            frxReport1.ShowReport();

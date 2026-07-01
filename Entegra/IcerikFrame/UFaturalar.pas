@@ -1697,7 +1697,9 @@ begin
 
     if LEbelgeID > 0 then begin
       Tablo.TablodanSorguAc(1,
-        'SELECT TOP 1 ISNULL(GONDERICIALIAS, N''''), ISNULL(CAST(UBL_XML AS NVARCHAR(MAX)), N'''') ' +
+        'SELECT TOP 1 ISNULL(GONDERICIALIAS, N''''), ' +
+        'ISNULL(COALESCE(CAST(DECOMPRESS(UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
+        'CAST(UBL_XML AS NVARCHAR(MAX))), N'''') ' +
         'FROM EBELGE WHERE ID=' + IntToStr(LEbelgeID));
       if not Tablo.Query1.Eof then begin
         LAlias := Trim(Tablo.Query1.Fields[0].AsString);
@@ -2849,16 +2851,20 @@ begin
     10, 11: begin
       // Gelen fatura (11) her zaman; gelen irsaliye (10) yalniz e-İrsaliye kullanimda.
       if (AAltTur = 11) or EIrsaliyeKullanimda then begin
-        // 3 ana sekme: Sistem | Gelen Kutusu | Tasnif Dışı
+        // 3 ana sekme: Sistem | Gelen Kutusu | Kullanım Dışı
         TabSheetTumu.Caption := 'Sistem';   // EFATURADURUM in (0,-2,-12)
         TabSheetTumu.Tag := 1201;
         EkleTab('Gelen Kutusu', 1202);
-        EkleTab('Tasnif Dışı', 1203);                // EFATURADURUM in (-3,-13)
+        EkleTab('Kullanım Dışı', 1203);              // EFATURADURUM in (-3,-13)
         // Gelen Kutusu alt sekmeleri (PageControlAlt)
         EkleAltTab('Alındı', 1211);                  // EFATURADURUM in (-1,-11)
         EkleAltTab('Yanıt Bekleyen', 1212);
         EkleAltTab('Hata/Red', 1213);
         EkleAltTab('Süresi Geçen', 1214);
+      end else begin
+        // e-İrsaliye kapali iken gelen irsaliyede alt sekme gosterilmez; sadece "Tümü".
+        TabSheetTumu.Caption := 'Tümü';
+        TabSheetTumu.Tag := 0;                          // filtresiz (tüm kayitlar)
       end;
     end;
     14, 15: begin
@@ -2876,14 +2882,9 @@ begin
         EkleAltTab('Hata/Red', 1533);
         EkleAltTab('S'#$FC'resi Ge'#$E7'en', 1534);      // Suresi Gecen
       end else begin
-        // Giden e-İrsaliye, e-İrsaliye kapali iken: eski 7 sekme.
-        EkleTab('Yeni', 1501);
-        EkleTab('Haz'#$131'r', 1502);                   // Hazir
-        EkleTab('Ba'#$15F'ar'#$131'l'#$131, 1503);      // Basarili
-        EkleTab('Bekleyen', 1504);
-        EkleTab('Hata/Red', 1505);
-        EkleTab(#$130'ptal', 1506);                     // Iptal
-        EkleTab('S'#$FC'resi Ge'#$E7'en', 1507);        // Suresi Gecen
+        // e-İrsaliye kapali iken giden irsaliyede alt sekme gosterilmez; sadece "Tümü".
+        TabSheetTumu.Caption := 'Tümü';
+        TabSheetTumu.Tag := 0;                          // filtresiz (tüm kayitlar)
       end;
     end;
   end;

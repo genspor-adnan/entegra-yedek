@@ -598,7 +598,7 @@ object RehberAraDlg: TRehberAraDlg
     Height = 259
     Align = alBottom
     TabOrder = 4
-    Properties.ActivePage = TabSheetIlet
+    Properties.ActivePage = TabSheetTicari
     Properties.CustomButtons.Buttons = <>
     OnChange = PageControlSekmeChange
     ClientRectBottom = 255
@@ -1284,7 +1284,7 @@ object RehberAraDlg: TRehberAraDlg
         Height = 228
         Align = alClient
         TabOrder = 0
-        Properties.ActivePage = cxTabSheet1
+        Properties.ActivePage = TabSheetEBelge
         Properties.CustomButtons.Buttons = <>
         Properties.Style = 10
         ClientRectBottom = 228
@@ -1443,8 +1443,8 @@ object RehberAraDlg: TRehberAraDlg
             end
           end
         end
-        object cxTabSheet4: TcxTabSheet
-          Caption = 'Alias Bilgileri'
+        object TabSheetEBelge: TcxTabSheet
+          Caption = 'E-Belge Bilgileri'
           ImageIndex = 2
           object ToolBar13: TToolBar
             AlignWithMargins = True
@@ -1529,12 +1529,35 @@ object RehberAraDlg: TRehberAraDlg
               Visible = False
               OnClick = BtnIptalBHClick
             end
+            object cxLabel7: TcxLabel
+              Left = 238
+              Top = 0
+              Align = alClient
+              Caption = '        Kurum Alias Bilgisi '
+              ParentFont = False
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clBlack
+              Style.Font.Height = -16
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = [fsBold]
+              Style.LookAndFeel.Kind = lfFlat
+              Style.LookAndFeel.NativeStyle = True
+              Style.TransparentBorder = False
+              Style.IsFontAssigned = True
+              StyleDisabled.LookAndFeel.Kind = lfFlat
+              StyleDisabled.LookAndFeel.NativeStyle = True
+              StyleFocused.LookAndFeel.Kind = lfFlat
+              StyleFocused.LookAndFeel.NativeStyle = True
+              StyleHot.LookAndFeel.Kind = lfFlat
+              StyleHot.LookAndFeel.NativeStyle = True
+              Transparent = True
+            end
           end
           object GridAlias: TcxGrid
             Left = 0
             Top = 44
             Width = 1036
-            Height = 162
+            Height = 121
             Align = alClient
             TabOrder = 1
             LookAndFeel.Kind = lfOffice11
@@ -1630,6 +1653,92 @@ object RehberAraDlg: TRehberAraDlg
             end
             object cxGridLevel4: TcxGridLevel
               GridView = GridAliasView
+            end
+          end
+          object Panel10: TPanel
+            Left = 0
+            Top = 165
+            Width = 1036
+            Height = 41
+            Align = alBottom
+            TabOrder = 2
+            object cxLabel2: TcxLabel
+              Left = 16
+              Top = 8
+              Caption = 'E-Fatura XSLT'
+            end
+            object EditEFaturaXSLT: TcxButtonEdit
+              Left = 92
+              Top = 6
+              Properties.Buttons = <
+                item
+                  Default = True
+                  Kind = bkEllipsis
+                end
+                item
+                  Caption = '-'
+                  Hint = 'Temizle'
+                  Kind = bkText
+                end>
+              Properties.ReadOnly = True
+              Properties.OnButtonClick = EditEFaturaXSLTPropertiesButtonClick
+              TabOrder = 1
+              Width = 121
+            end
+            object EditEArsivXSLT: TcxButtonEdit
+              Left = 290
+              Top = 6
+              Properties.Buttons = <
+                item
+                  Default = True
+                  Kind = bkEllipsis
+                end
+                item
+                  Caption = '-'
+                  Hint = 'Temizle'
+                  Kind = bkText
+                end>
+              Properties.ReadOnly = True
+              Properties.OnButtonClick = EditEArsivXSLTPropertiesButtonClick
+              TabOrder = 2
+              Width = 121
+            end
+            object cxLabel4: TcxLabel
+              Left = 216
+              Top = 8
+              Caption = 'E-Ar'#351'iv XSLT'
+            end
+            object EditEIrsaliyeXSLT: TcxButtonEdit
+              Left = 499
+              Top = 6
+              Properties.Buttons = <
+                item
+                  Default = True
+                  Kind = bkEllipsis
+                end
+                item
+                  Caption = '-'
+                  Hint = 'Temizle'
+                  Kind = bkText
+                end>
+              Properties.ReadOnly = True
+              Properties.OnButtonClick = EditEIrsaliyeXSLTPropertiesButtonClick
+              TabOrder = 4
+              Width = 121
+            end
+            object cxLabel6: TcxLabel
+              Left = 416
+              Top = 8
+              Caption = 'E-'#304'rsaliye XSLT'
+            end
+            object ButtonFaturaDipNotu: TcxButton
+              Left = 678
+              Top = 6
+              Width = 147
+              Height = 25
+              Caption = 'Fatura Dip Notu'
+              TabOrder = 6
+              OnClick = ButtonFaturaDipNotuClick
             end
           end
         end
@@ -5549,7 +5658,7 @@ object RehberAraDlg: TRehberAraDlg
   object PopupMenuREHBER: TPopupMenu
     OwnerDraw = True
     OnPopup = PopupMenuREHBERPopup
-    Left = 73
+    Left = 57
     Top = 66
     object info1: TMenuItem
       Caption = 'info'
@@ -5995,8 +6104,8 @@ object RehberAraDlg: TRehberAraDlg
   end
   object PMAksiyonlarMenu: TPopupMenu
     OnPopup = PMAksiyonlarMenuPopup
-    Left = 307
-    Top = 316
+    Left = 323
+    Top = 276
     object Sil1: TMenuItem
       Caption = 'Aksiyon Sil'
       OnClick = Sil1Click
@@ -6485,8 +6594,8 @@ object RehberAraDlg: TRehberAraDlg
     Appearance.FontColor = 7214336
     Appearance.FontDisabledColor = 14599640
     Style = msDefault
-    Left = 328
-    Top = 296
+    Left = 248
+    Top = 264
     object DuzenleMenu: TMenuItem
       Caption = 'D'#252'zenle'
       OnClick = DuzenleMenuClick

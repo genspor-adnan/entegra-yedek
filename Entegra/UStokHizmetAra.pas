@@ -223,7 +223,7 @@ type
     Procedure DagitimAra;
     { Private declarations }
   public
-    FatBasID, RehberID, StokSayimID, stokhizmetaracagirantur: Integer;
+    FatBasID, RehberID, StokSayimID, stokhizmetaracagirantur,stokhizmetaracagirantip: Integer;
     FiyatlariGetir, KalanAdetGetir,KalmayanCheckGoster: Boolean;
     TopAramaSayi, GirisCikis, KopyaStr,islemCopy: string;
     TabDetayGiris,TabGiris: TFDQuery;
@@ -455,7 +455,7 @@ begin
     TeslimTarihi := Tarih;
     EkipmanId:=0;
     //PozNo:=0;
-    if not Tablo.FiyatSor(stokhizmetaracagirantur,RehberId,1, TabStokListe.FieldByName('ID').AsInteger,TabStokListe.FieldByName('BIRIM').AsInteger,
+    if not Tablo.FiyatSor(stokhizmetaracagirantur,stokhizmetaracagirantip,RehberId,1, TabStokListe.FieldByName('ID').AsInteger,TabStokListe.FieldByName('BIRIM').AsInteger,
                Tarih, TeslimTarihi, TabStokListe.FieldByName('KOD').AsString+' '+TabStokListe.FieldByName('AD').AsString,
                AKHBF,AKDBF,ADovKDVH,ADovKDVD,AKDVOran,AAdet,AKur,AKurDegeri,Isk1,Isk2,
                AAciklama,AOzelKod,AOzelKod2,AVade,AKampnyaId,AProjeId,AMasrafId,AMasrafId,AKDVMuaf,EkipmanId,AStokDegis,APersonel,En,Boy,Yuzey,Sayi,ResimGoster,MedyaEkle,[],PozNo) then begin
@@ -871,7 +871,7 @@ begin
     if EsdegerSecilenUrunID>0 then
       AAciklama := EsdegerAciklama;
 
-    if not Tablo.FiyatSor(stokhizmetaracagirantur,RehberId,TabDetayGiris.FieldByName('TUR').AsInteger,TabDetayGiris.FieldByName('URUNID').AsInteger,
+    if not Tablo.FiyatSor(stokhizmetaracagirantur,stokhizmetaracagirantip,RehberId,TabDetayGiris.FieldByName('TUR').AsInteger,TabDetayGiris.FieldByName('URUNID').AsInteger,
        Birim,Tarih,TeslimTarihi, Ad,AKHBF,AKDBF,ADovKDVH,ADovKDVD,AKDVOran,AAdet,AKur,AKurDegeri,Isk1,Isk2,
        AAciklama,AOzelKod,AOzelKod2,AVade,AKampnyaId,AProjeId,MasrafId,MasrafId,AKDVMuaf,EkipmanId,AStokDegis,APersonel,En,Boy,Yuzey,Sayi,ResimGoster,MedyaEkle,[],PozNo) then begin
        TabDetayGiris.Cancel;
@@ -1013,7 +1013,7 @@ Begin
       end;
       TeslimTarihi := Tarih;
       EkipmanId:=0;
-      if not Tablo.FiyatSor(stokhizmetaracagirantur,RehberId,1, UrunID,Birim,Tarih,TeslimTarihi,Ad,AKHBF,AKDBF,ADovKDVH,ADovKDVD,AKDVOran,AAdet,AKur,AKurDegeri,Isk1,Isk2,
+      if not Tablo.FiyatSor(stokhizmetaracagirantur,stokhizmetaracagirantip,RehberId,1, UrunID,Birim,Tarih,TeslimTarihi,Ad,AKHBF,AKDBF,ADovKDVH,ADovKDVD,AKDVOran,AAdet,AKur,AKurDegeri,Isk1,Isk2,
              AAciklama,OzelKod,OzelKod2,AVade,AKampnyaId,AProjeId,AMasrafId,AMasrafId,AKDVMuaf,EkipmanId,AStokDegis,APersonel,En,Boy,Yuzey,Sayi,ResimGoster,MedyaEkle,[],PozNo) then begin
          TabDetayGiris.Cancel;
          if BekletDlg <> nil then

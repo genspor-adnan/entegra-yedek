@@ -442,7 +442,7 @@ procedure TFatTransferWizardDlg.GridFaturaViewCellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
 //  if Kilit then exit;
-   Tablo.SatirGuncelle(TabFatura, Tur, TabFatBaslik.FieldByName('REHBERID').AsInteger, TabFatBaslik.FieldByName('FATURATARIH').AsDateTime,[]);
+   Tablo.SatirGuncelle(TabFatura, Tur,1, TabFatBaslik.FieldByName('REHBERID').AsInteger, TabFatBaslik.FieldByName('FATURATARIH').AsDateTime,[]);
 end;
 
 procedure TFatTransferWizardDlg.SatirEkleClick(Sender: TObject);
@@ -689,6 +689,36 @@ begin
       Abort;
   if (TabFATBASLIK.FieldByName('DURUM').AsInteger<>6)and(TabFATURA.FieldByName('ADET').AsFloat <= 0) then
       raise Exception.create(Adetsifirvesifirdankucukolamaz);
+
+  // Tarih  kontrolu: Transfer tarihinde veya sonrasinda urunun bir giris belgesi
+  // (BELGETUR 3,6,10,11,12) varsa, gecmise donuk transfer yapilamaz. Aksi
+  // halde henuz girisi gelmemis stogu transfer etmis oluruz.
+  LUrunID := TabFATURA.FieldByName('URUNID').AsInteger;
+  LTransferTarihi := TabFatBaslik.FieldByName('FATURATARIH').AsDateTime;
+  if LUrunID > 0 then begin
+    Tablo.TablodanSorguAc(1,
+      'SELECT MAX(FB1.FATURATARIH) AS SonGiris ' +
+      'FROM FATURA F1 INNER JOIN FATBASLIK FB1 ON FB1.ID = F1.FATBASID ' +
+      'WHERE F1.URUNID = ' + IntToStr(LUrunID) +
+      '  AND FB1.TUR IN (3, 6, 10, 11, 12) ' +
+      '  AND (FB1.TUR <> 6 OR F1.ADET > 0)');
+    if (not Tablo.Query1.Eof) and (not Tablo.Query1.Fields[0].IsNull) then begin
+      LSonGiris := Tablo.Query1.Fields[0].AsDateTime;
+      Tablo.Query1.Close;
+      if LTransferTarihi <= LSonGiris then begin
+        ShowMessage('Bu urunun en son giris tarihi ' +
+                    FormatDateTime('dd.mm.yyyy', LSonGiris) +
+                    ' olup transfer tarihinden (' +
+                    FormatDateTime('dd.mm.yyyy', LTransferTarihi) +
+                    ') ileride veya esit. Bu satir transfer edilemez.');
+        TabFATURA.Cancel;
+        Abort;
+      end;
+    end else
+      Tablo.Query1.Close;
+  end;
+
+
   //TabFATURA.FieldByName('MIKTAR').AsFloat :=(TabFATURA.FieldByName('ADET').AsFloat) * Tablo.StokCarpan(TabFATURA.FieldByName('URUNID').AsInteger, TabFATURA.FieldByName('BIRIM').AsInteger);
   miktar := Tablo.StokMiktarHesapla(TabFATURA.FieldByname('URUNID').AsInteger,TabFATURA.FieldByname('ADET').AsFloat,TabFATURA.FieldByname('BIRIM').AsInteger);
   //son ortalama fiyat? transferde birim fiyat olarak kullanal?m
@@ -724,33 +754,6 @@ begin
         Abort;
       end;
     end;
-  end;
-  // Tarih  kontrolu: Transfer tarihinde veya sonrasinda urunun bir giris belgesi
-  // (BELGETUR 3,6,10,11,12) varsa, gecmise donuk transfer yapilamaz. Aksi
-  // halde henuz girisi gelmemis stogu transfer etmis oluruz.
-  LUrunID := TabFATURA.FieldByName('URUNID').AsInteger;
-  LTransferTarihi := TabFatBaslik.FieldByName('FATURATARIH').AsDateTime;
-  if LUrunID > 0 then begin
-    Tablo.TablodanSorguAc(1,
-      'SELECT MAX(FB1.FATURATARIH) AS SonGiris ' +
-      'FROM FATURA F1 INNER JOIN FATBASLIK FB1 ON FB1.ID = F1.FATBASID ' +
-      'WHERE F1.URUNID = ' + IntToStr(LUrunID) +
-      '  AND FB1.TUR IN (3, 6, 10, 11, 12) ' +
-      '  AND (FB1.TUR <> 6 OR F1.ADET > 0)');
-    if (not Tablo.Query1.Eof) and (not Tablo.Query1.Fields[0].IsNull) then begin
-      LSonGiris := Tablo.Query1.Fields[0].AsDateTime;
-      Tablo.Query1.Close;
-      if LTransferTarihi <= LSonGiris then begin
-        ShowMessage('Bu urunun en son giris tarihi ' +
-                    FormatDateTime('dd.mm.yyyy', LSonGiris) +
-                    ' olup transfer tarihinden (' +
-                    FormatDateTime('dd.mm.yyyy', LTransferTarihi) +
-                    ') ileride veya esit. Bu satir transfer edilemez.');
-        TabFATURA.Cancel;
-        Abort;
-      end;
-    end else
-      Tablo.Query1.Close;
   end;
 
   EkleyenDegistiren(DtsFatura);

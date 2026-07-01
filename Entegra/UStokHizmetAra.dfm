@@ -431,10 +431,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         Tag = 1
         Caption = 'Stoklar'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label2: TLabel
           Left = 720
           Top = 107

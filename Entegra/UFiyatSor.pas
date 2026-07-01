@@ -22,7 +22,9 @@ uses
   dxSkinWhiteprint, Vcl.ComCtrls, dxCore, cxDateUtils, dxSkinOffice2016Colorful,
   dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
   dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
-  dxCoreGraphics;
+  dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TFiyatSorDlg = class(TForm)
@@ -230,7 +232,7 @@ type
     { Public declarations }
     var AKur : String;
         AKurDegeri : Extended;
-        AKDV, Tur : Smallint;
+        AKDV, FatTuru,FatTipi : Smallint;
         RehberId,StokId,UrunTur : Integer;
         Trh : TDateTime;
   end;
@@ -459,7 +461,7 @@ end;
 
 procedure TFiyatSorDlg.EditKampanyaPropertiesButtonClick(Sender: TObject;  AButtonIndex: Integer);
 begin
-  EditKampanya.Tag := Tablo.KampanyaSor(RehberId, StokId ,Tur);
+  EditKampanya.Tag := Tablo.KampanyaSor(RehberId, StokId, FatTuru);
   EditKampanya.Text := Tablo.AciklamaGetir('KAMPANYA','ADI', EditKampanya.Tag);
 end;
 
@@ -477,7 +479,7 @@ var
   st: Tstringlist;
   Gelirmi :Smallint;
 begin
-  if Tur in [0, 3, 8, 10, 11, 12] then
+  if FatTuru in [0, 3, 8, 10, 11, 12] then
     Gelirmi := 0
   else
     Gelirmi := 1;
@@ -565,7 +567,7 @@ begin
       ShowMessage(STYanlis_karakter);
       CanClose := False;
   end;
-  if (ModalResult=mrOk)and(EditBirimFiyat.Value=0)and(TUR<>20)and(TUR<>101)and(TUR<>105) then
+  if (ModalResult=mrOk)and(EditBirimFiyat.Value=0)and(FatTuru<>20)and(FatTuru<>101)and(FatTuru<>105) then
       CanClose := Application.MessageBox('Fiyat sıfır olarak eklenecektir. Onaylıyor musunuz?',PChar(Uyari),MB_YESNO+MB_ICONQUESTION)=mrYes;
 end;
 
@@ -595,7 +597,7 @@ begin
   //LabelCoklu.Visible := BelgeGiderKalemi > 3;
   if EditBirimFiyat.EditValue < 0 then
      EditBirimFiyat.EditValue := 0;
-  if (Tur in [12,16]) then  //ilk defa fiş giriliyorsa kdv işaretli olsun, değişimde işaretsiz olsun
+  if (FatTuru in [12,16]) then  //ilk defa fiş giriliyorsa kdv işaretli olsun, değişimde işaretsiz olsun
       CheckKDV.Checked := (KDVDahil_Isaretli)and(EditBirimFiyat.EditValue=0); //
   cxGrid1LevelDepoDurumu.Visible := (UrunTur=1) and (tablo.YetkiVarmi(24801001,YetkiTur_Gorme,False));
   cxGrid1LevelSonAlislar.Visible := (tablo.YetkiVarmi(24801002,YetkiTur_Gorme,False));
@@ -614,6 +616,7 @@ begin
   Tablo.TablodanSorguAc(1,'select ER.EKIPMANID, E.AD, ER.SERINO  from EKIPMANREHBER ER inner join EKIPMANLAR E on E.ID=ER.EKIPMANID where ER.ID='+IntToStr(EditEkipman.Tag));
   EditEkipman.Text := Tablo.Query1.Fields[1].AsString;
 
+  PanelTevkifat.visible := FatTipi=22;
 
     ComboKurPropertiesCloseUp(Self);
  {17.11.2024 AO if PanelUst.Visible then
@@ -627,7 +630,7 @@ begin
 
 
   PanelUst.Visible := DovizTakibi;
-  if(TUR in [20,101,105])or(not Tablo.YetkiVarmi(2431,1,False)) then begin  //stoktalebi veya satınalma talebi veya tutarlar gözükmesin denirse;
+  if(FatTuru in [20,101,105])or(not Tablo.YetkiVarmi(2431,1,False)) then begin  //stoktalebi veya satınalma talebi veya tutarlar gözükmesin denirse;
     PanelUst.Visible := False;
     PanelBirimFiyat.Visible := False;
     PanelIskonto.Visible := False;
@@ -635,9 +638,9 @@ begin
     PanelOzelKod.Visible := False;
   end;
 
-  PanelTeslimTarihi.Visible := TUR in [9,19,20,101,105];
-  PanelEkipman.Visible := TUR in [14,15,19,100];
-  PanelTevkifat.Visible :=TUR in [10,11,12,14,15];
+  PanelTeslimTarihi.Visible := FatTuru in [9,19,20,101,105];
+  PanelEkipman.Visible := FatTuru in [14,15,19,100];
+  PanelTevkifat.Visible :=FatTuru in [10,11,12,14,15];
 
   PanelYuzey.Visible := EnBoyHesaplamaAktif;
 

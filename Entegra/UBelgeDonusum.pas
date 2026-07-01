@@ -684,12 +684,8 @@ Begin
 
   //önce kaynak belge depo ile hedef belge depolar uyuşuyor mu kontrol edelim..
   Tablo.TablodanSorguAc(1, 'select GIRISDEPO, CIKISDEPO from FATBASLIK where ID='+IntToStr(HedefBaslikID));
-  if ((   DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Irsaliye)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fatura)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fis))and
-     (TabKaynakBaslik.FieldByName('GIRISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
-     showmessage(DonusumDepoAyniOlmali);
-     exit;
-  end
-  else if (DonusumTuru = TabNo_DONUSUM_SATIS_IRS_FAT) and
+  if ((   DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Irsaliye)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fatura)
+      or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fis)or (DonusumTuru = TabNo_DONUSUM_SATIS_IRS_FAT))and
      (TabKaynakBaslik.FieldByName('CIKISDEPO').AsString <> Tablo.Query1.FieldByName('CIKISDEPO').AsString) then begin
      showmessage(DonusumDepoAyniOlmali);
      exit;
@@ -1069,7 +1065,7 @@ begin
       TabKaynak.SQL.Add(' KALAN=ADET-isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI '+DonusumStr+' and F1.YERID=F.ID ),0.0)');
       TabKaynak.SQL.Add(' -isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI=416 and F1.YERID=F.ID ),0.0)');//İADE ÇIKARILIR
       TabKaynak.SQL.Add(' ,TESLIMTARIHI=FB.FATURATARIH ');
-      TabKaynak.SQL.Add(' ,SATICI=FB.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when FB.TUR in (10,11,12) then FB.GIRISDEPO else FB.CIKISDEPO end ) ');
+      TabKaynak.SQL.Add(' ,SATICI=FB.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when FB.TUR in (10,11,12, 119) then FB.GIRISDEPO else FB.CIKISDEPO end ) ');
       TabKaynak.SQL.Add(' ,F.PROJEID, F.POZNO, ST.URUNNO, FB.DETAYBOLUMU ');
       TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID) ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=FB.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=F.ID) then 1 else 0 end ');

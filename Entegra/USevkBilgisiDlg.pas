@@ -766,7 +766,9 @@ begin
 
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     'declare @Sira int; ' +
-    'delete from GENINI where BOLUM=&BOLUM and DIL=-1 and DEGER=&DEGER; ' +
+    // Ayni fatura (DEGER) ya da ayni ANAHTAR (sevk etiketi) varsa sil; boylece
+    // tekrarlanan bilgi cogalmaz, yeniden eklenince en uste cikar.
+    'delete from GENINI where BOLUM=&BOLUM and DIL=-1 and (DEGER=&DEGER or ANAHTAR=&ANAHTAR); ' +
     'select @Sira=isnull(max(SIRA),0)+1 from GENINI where BOLUM=&BOLUM and DIL=-1; ' +
     'insert into GENINI(BOLUM,DIL,SIRA,DEGER,ANAHTAR) values(&BOLUM,-1,@Sira,&DEGER,&ANAHTAR); ' +
     'while (select count(*) from GENINI where BOLUM=&BOLUM and DIL=-1) > 10 ' +

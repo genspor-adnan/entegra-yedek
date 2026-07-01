@@ -211,6 +211,9 @@ object TeklifWizardDlg: TTeklifWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnNextButtonClick = TeklifEkrNextButtonClick
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label1: TLabel
         Left = 12
         Top = 44
@@ -242,19 +245,25 @@ object TeklifWizardDlg: TTeklifWizardDlg
         object TabSheetDetay: TcxTabSheet
           Tag = 1
           Caption = 'Detay'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelDetay: TPanel
             Left = 0
-            Top = 187
+            Top = 184
             Width = 1130
-            Height = 352
+            Height = 355
             Align = alClient
             Caption = 'PanelDetay'
             TabOrder = 0
+            ExplicitTop = 187
+            ExplicitHeight = 352
             object GridTeklif: TcxGrid
               Left = 1
               Top = 28
               Width = 1128
-              Height = 170
+              Height = 173
               Align = alClient
               PopupMenu = PopupMenuFatura
               TabOrder = 1
@@ -262,6 +271,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
               LookAndFeel.NativeStyle = True
               LookAndFeel.ScrollbarMode = sbmClassic
               LookAndFeel.SkinName = 'LondonLiquidSky'
+              ExplicitHeight = 170
               object GridTeklifWizardDetayView: TcxGridDBTableView
                 Navigator.Buttons.CustomButtons = <>
                 ScrollbarAnnotations.CustomAnnotations = <>
@@ -693,7 +703,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
             end
             object PanelAlt: TPanel
               Left = 1
-              Top = 198
+              Top = 201
               Width = 1128
               Height = 153
               Align = alBottom
@@ -706,6 +716,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
               ParentBackground = False
               ParentFont = False
               TabOrder = 2
+              ExplicitTop = 198
               DesignSize = (
                 1128
                 153)
@@ -1201,13 +1212,14 @@ object TeklifWizardDlg: TTeklifWizardDlg
           end
           object PageControlAlt: TcxPageControl
             Left = 0
-            Top = 35
+            Top = 32
             Width = 1130
             Height = 152
             Align = alTop
             TabOrder = 1
             Properties.ActivePage = cxTabSheet1
             Properties.CustomButtons.Buttons = <>
+            ExplicitTop = 35
             ClientRectBottom = 148
             ClientRectLeft = 4
             ClientRectRight = 1126
@@ -1749,10 +1761,18 @@ object TeklifWizardDlg: TTeklifWizardDlg
             object TabSheetEkAlanlar: TcxTabSheet
               Caption = 'Ek Alanlar'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object TabSheetFinans: TcxTabSheet
               Caption = 'Finansal Kurumlar'
               ImageIndex = 2
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object ToolBar6: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -1933,6 +1953,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
             Left = 3
             Top = 3
             Width = 1124
+            Height = 29
             Margins.Bottom = 0
             AutoSize = True
             ButtonHeight = 30
@@ -2072,6 +2093,10 @@ object TeklifWizardDlg: TTeklifWizardDlg
           Tag = 1
           Caption = 'Metinler'
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel4: TPanel
             Left = 0
             Top = 0
@@ -2213,6 +2238,10 @@ object TeklifWizardDlg: TTeklifWizardDlg
           Caption = 'Onaylar'
           ImageIndex = 2
           TabVisible = False
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxGrid1: TcxGrid
             Left = 0
             Top = 27
@@ -2442,6 +2471,9 @@ object TeklifWizardDlg: TTeklifWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DokumanEkrEnterPage
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel1: TPanel
         Left = 0
         Top = 599
@@ -2502,6 +2534,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 578
         AnchorX = 1138
       end
       object GridYorum: TcxGrid
@@ -2604,6 +2637,9 @@ object TeklifWizardDlg: TTeklifWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       OnEnterPage = TarihceEkrEnterPage
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 70
@@ -4523,20 +4559,44 @@ object TeklifWizardDlg: TTeklifWizardDlg
   object frxTOPLAMLAR: TfrxDBDataset
     UserName = 'TOPLAMLAR'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'DEGER=DEGER'
-      'KUR=KUR'
-      'DOVIZTUTARI=DOVIZTUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'SECILENTUTAR=SECILENTUTAR'
-      'SECILENKUR=SECILENKUR')
     DataSet = TOPLAMLAR
     BCDToCurrency = False
     DataSetOptions = []
     Left = 817
     Top = 427
+    FieldDefs = <
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'DEGER'
+        FieldAlias = 'DEGER'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZTUTARI'
+        FieldAlias = 'DOVIZTUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'SECILENTUTAR'
+        FieldAlias = 'SECILENTUTAR'
+      end
+      item
+        FieldName = 'SECILENKUR'
+        FieldAlias = 'SECILENKUR'
+      end>
   end
   object frxTEKLIFDETAY: TfrxDBDataset
     UserName = 'TEKLIFDETAY'
@@ -4955,22 +5015,22 @@ object TeklifWizardDlg: TTeklifWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 432
     Top = 348
     object MenuKlasordenEkle: TMenuItem

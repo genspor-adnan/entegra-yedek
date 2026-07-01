@@ -13,7 +13,6 @@
 --   ILCE           : Ilce
 --   IL             : Il
 --   SUBEID         : Sube ID (opsiyonel, default -1)
---   GNTPID         : Kaynak EBELGE.ID (opsiyonel, izleme amaciyla)
 --
 -- Cikti:
 --   SONUC_ID  : Yeni REHBER.ID (basari) veya 0/<0 (hata)
@@ -44,7 +43,6 @@ BEGIN
         @ILCE nvarchar(50),
         @IL nvarchar(50),
         @SUBEID smallint,
-        @GNTPID int,
         @ALIAS nvarchar(200),
         @ALIASBELGETURU tinyint,
         @TEL nvarchar(50),
@@ -69,7 +67,6 @@ BEGIN
             @ILCE         = JSON_VALUE(@jsonData, '$.ILCE'),
             @IL           = JSON_VALUE(@jsonData, '$.IL'),
             @SUBEID       = JSON_VALUE(@jsonData, '$.SUBEID'),
-            @GNTPID       = JSON_VALUE(@jsonData, '$.GNTPID'),
             @ALIAS        = JSON_VALUE(@jsonData, '$.ALIAS'),
             @ALIASBELGETURU = JSON_VALUE(@jsonData, '$.ALIASBELGETURU'),
             @TEL          = JSON_VALUE(@jsonData, '$.TEL'),
@@ -115,8 +112,8 @@ BEGIN
         BEGIN TRANSACTION;
 
         -- 1) REHBER
-        INSERT INTO REHBER (KOD, FIRMA, GRUP, DURUM, EKLEYEN, EKLEMETARIHI, SUBEID, GNTPID)
-        VALUES (@KOD, @FIRMA, @GRUP, 1, @EKLEYEN, GETDATE(), @SUBEID, @GNTPID);
+        INSERT INTO REHBER (KOD, FIRMA, GRUP, DURUM, EKLEYEN, EKLEMETARIHI, SUBEID)
+        VALUES (@KOD, @FIRMA, @GRUP, 1, @EKLEYEN, GETDATE(), @SUBEID);
 
         SET @REHBERID = SCOPE_IDENTITY();
 

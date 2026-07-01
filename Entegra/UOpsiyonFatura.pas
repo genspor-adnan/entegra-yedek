@@ -221,16 +221,16 @@ type
     CheckTestAktif: TcxCheckBox;
     EFaturaDB: TcxTextEdit;
     cxLabel34: TcxLabel;
-    EditSeriEFatura: TcxTextEdit;
+    EditSeriEFatura: TcxButtonEdit;
     cxLabel35: TcxLabel;
     cxLabel36: TcxLabel;
-    EditSeriEArsivFatura: TcxTextEdit;
+    EditSeriEArsivFatura: TcxButtonEdit;
     cxLabel37: TcxLabel;
     cxLabel38: TcxLabel;
-    EditSeriESMM: TcxTextEdit;
+    EditSeriESMM: TcxButtonEdit;
     cxLabel39: TcxLabel;
     cxLabel40: TcxLabel;
-    EditSeriEIrsaliye: TcxTextEdit;
+    EditSeriEIrsaliye: TcxButtonEdit;
     cxLabel41: TcxLabel;
     ButtonSQLBaslik: TcxButton;
     ButtonSQLDetay: TcxButton;
@@ -259,6 +259,11 @@ type
     cxLabel43: TcxLabel;
     ComboCariKod: TcxComboBox;
     cxLabel44: TcxLabel;
+    LabelXSLTKaydet: TcxLabel;
+    CheckGelenEFaturaAl: TcxCheckBox;
+    CheckGelenEIrsaliyeyiAl: TcxCheckBox;
+    cxLabel45: TcxLabel;
+    URLEArsivGelen: TcxTextEdit;
     procedure FormCreate(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure GelenFaturaDetaySablonEkleTusClick(Sender: TObject);
@@ -308,6 +313,9 @@ type
     procedure TabXSLTNewRecord(DataSet: TDataSet);
     procedure TabXSLTBeforePost(DataSet: TDataSet);
     procedure LabelXSLTYukleClick(Sender: TObject);
+    procedure LabelXSLTKaydetClick(Sender: TObject);
+    procedure EditSeriPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
     procedure TabSheetEBelgeShow(Sender: TObject);
     procedure ComboXSLTPropertiesPopup(Sender: TObject);
     procedure XSLTComboEnter(Sender: TObject);
@@ -440,6 +448,15 @@ begin
   GridXSLTView.OptionsData.Deleting := True;
   GridXSLTView.OptionsData.Editing := True;
   GridXSLTView.OptionsData.Inserting := True;
+  LabelXSLTKaydet.OnClick := LabelXSLTKaydetClick;
+  EditSeriEFatura.Properties.ReadOnly := True;
+  EditSeriEArsivFatura.Properties.ReadOnly := True;
+  EditSeriESMM.Properties.ReadOnly := True;
+  EditSeriEIrsaliye.Properties.ReadOnly := True;
+  EditSeriEFatura.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
+  EditSeriEArsivFatura.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
+  EditSeriESMM.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
+  EditSeriEIrsaliye.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   PageControl1.ActivePageIndex:=0;
   CheckFaturaPlaniOlustur.Checked :=Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_ZorunluPlanOlustur,True);  //FaturaOpsiyon  ZorunluPlanOlustur
@@ -493,6 +510,8 @@ begin
   end;
   Tablo.Query1.Close;
   ComboCariKod.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_CariKod, '320.01');
+  CheckGelenEFaturaAl.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_GelenEFaturaAl, False);
+  CheckGelenEIrsaliyeyiAl.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_GelenEIrsaliyeyiAl, False);
   CheckTestAktif.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_EBelgeTestAktif, True);
   EditVergiNo.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeVergiNo, EditVergiNo.Text);
   EditEnt_KullaniciTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeKullanici, EditEnt_KullaniciTest.Text);
@@ -504,6 +523,7 @@ begin
   URLEFaturaTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaTestURL, URLEFaturaTest.Text);
   URLEArsivFaturaTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaTestURL, URLEArsivFaturaTest.Text);
   URLEArsivUretim.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaUretimURL, URLEArsivUretim.Text);
+  URLEArsivGelen.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivGelenURL, URLEArsivGelen.Text);
   URLESMMTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMTestURL, URLESMMTest.Text);
   URLESMMUretim.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMUretimURL, URLESMMUretim.Text);
   URLEIrsaliyeTest.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeTestURL, URLEIrsaliyeTest.Text);
@@ -613,6 +633,8 @@ begin
   Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_ESMMGelenXSLT, ComboGidenESMMXSLT.EditValue);
   Tablo.GENINI.WriteInteger(Ops_FaturaOpsiyon_EIrsaliyeGelenXSLT, ComboGelenEIrsaliyeXSLT.EditValue);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_CariKod, ComboCariKod.Text);
+  Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_GelenEFaturaAl, CheckGelenEFaturaAl.Checked);
+  Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_GelenEIrsaliyeyiAl, CheckGelenEIrsaliyeyiAl.Checked);
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_EBelgeTestAktif, CheckTestAktif.Checked);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EBelgeVergiNo, EditVergiNo.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EBelgeKullanici, EditEnt_KullaniciTest.Text);
@@ -627,6 +649,7 @@ begin
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EFaturaTestURL, URLEFaturaTest.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EArsivFaturaTestURL, URLEArsivFaturaTest.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EArsivFaturaUretimURL, URLEArsivUretim.Text);
+  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EArsivGelenURL, URLEArsivGelen.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_ESMMTestURL, URLESMMTest.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_ESMMUretimURL, URLESMMUretim.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EIrsaliyeTestURL, URLEIrsaliyeTest.Text);
@@ -1085,6 +1108,97 @@ begin
     end;
   finally
     Dlg.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.LabelXSLTKaydetClick(Sender: TObject);
+var
+  Dlg: TSaveDialog;
+  Icerik: TStringList;
+  DosyaAdi, XSLTMetni: string;
+  i: Integer;
+begin
+  if not TabXSLT.Active then
+    TabXSLT.Open;
+
+  if TabXSLT.IsEmpty then begin
+    ShowMessage('Kaydedilecek XSLT kaydı bulunamadı.');
+    Exit;
+  end;
+
+  if TabXSLT.State in [dsEdit, dsInsert] then
+    TabXSLT.Post;
+
+  XSLTMetni := TabXSLT.FieldByName('SQL').AsString;
+  if Trim(XSLTMetni) = '' then begin
+    ShowMessage('Aktif XSLT kaydının SQL / içerik alanı boş.');
+    Exit;
+  end;
+
+  DosyaAdi := Trim(TabXSLT.FieldByName('RAPORADI').AsString);
+  if DosyaAdi = '' then
+    DosyaAdi := 'XSLT_' + TabXSLT.FieldByName('ID').AsString;
+
+  for i := 1 to Length(DosyaAdi) do
+    if CharInSet(DosyaAdi[i], ['\', '/', ':', '*', '?', '"', '<', '>', '|']) then
+      DosyaAdi[i] := '_';
+
+  Dlg := TSaveDialog.Create(nil);
+  try
+    Dlg.Title := 'XSLT Dosyasını Kaydet';
+    Dlg.Filter := 'XSLT Dosyaları (*.xslt;*.xsl)|*.xslt;*.xsl|Tüm Dosyalar (*.*)|*.*';
+    Dlg.DefaultExt := 'xslt';
+    Dlg.FileName := ChangeFileExt(DosyaAdi, '.xslt');
+    Dlg.Options := Dlg.Options + [ofOverwritePrompt, ofPathMustExist];
+    if not Dlg.Execute then Exit;
+
+    Icerik := TStringList.Create;
+    try
+      Icerik.Text := XSLTMetni;
+      Icerik.SaveToFile(Dlg.FileName, TEncoding.UTF8);
+    finally
+      Icerik.Free;
+    end;
+
+    ShowMessage('XSLT kaydedildi: ' + Dlg.FileName);
+  finally
+    Dlg.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.EditSeriPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+var
+  LDeger: Variant;
+  LBaslik, LSeri: string;
+  LOpsiyonID: Integer;
+begin
+  if not (Sender is TcxButtonEdit) then
+    Exit;
+
+  LOpsiyonID := 0;
+  LBaslik := 'Seri Bilgisi';
+  if Sender = EditSeriEFatura then begin
+    LOpsiyonID := Ops_FaturaOpsiyon_EFaturaSeriler;
+    LBaslik := 'E-Fatura Seri Bilgisi';
+  end else if Sender = EditSeriEArsivFatura then begin
+    LOpsiyonID := Ops_FaturaOpsiyon_EArsivFaturaSeriler;
+    LBaslik := 'E-Arşiv Fatura Seri Bilgisi';
+  end else if Sender = EditSeriESMM then begin
+    LOpsiyonID := Ops_FaturaOpsiyon_ESMMSeriler;
+    LBaslik := 'E-SMM Seri Bilgisi';
+  end else if Sender = EditSeriEIrsaliye then begin
+    LOpsiyonID := Ops_FaturaOpsiyon_EIrsaliyeSeriler;
+    LBaslik := 'E-İrsaliye Seri Bilgisi';
+  end;
+
+  LDeger := TcxButtonEdit(Sender).Text;
+  if TGirisKutusuEx.BilgiAlEx(LBaslik,
+     TGirdiDenetimleri.Create.Edit('Seri', @LDeger)) = mrOk then begin
+    LSeri := Trim(VarToStr(LDeger));
+    TcxButtonEdit(Sender).Text := LSeri;
+    if LOpsiyonID <> 0 then
+      Tablo.GENINI.WriteString(LOpsiyonID, LSeri);
   end;
 end;
 

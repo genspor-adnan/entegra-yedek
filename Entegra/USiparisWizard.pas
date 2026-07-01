@@ -1713,7 +1713,7 @@ procedure TSiparisWizardDlg.GridFaturaViewCellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   if Kilit then exit;
-  Tablo.SatirGuncelle(TabSiparisDetay, SiparisTur, TabSiparis.FieldByName('REHBERID').AsInteger, TabSiparis.FieldByName('SIPARISTARIH').AsDateTime,[]);
+  Tablo.SatirGuncelle(TabSiparisDetay, SiparisTur, 1, TabSiparis.FieldByName('REHBERID').AsInteger, TabSiparis.FieldByName('SIPARISTARIH').AsDateTime,[]);
 end;
 
 procedure TSiparisWizardDlg.GridFaturaViewDOKUMANPropertiesButtonClick( Sender: TObject; AButtonIndex: Integer);

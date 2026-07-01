@@ -1108,7 +1108,7 @@ procedure TSatinAlmaWizard2.GridFaturaViewCellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   if Kilit then exit;
-  Tablo.SatirGuncelle(SIPARISDETAY, SiparisTur, SIPARIS.FieldByName('REHBERID').AsInteger, SIPARIS.FieldByName('SIPARISTARIH').AsDateTime,[]);
+  Tablo.SatirGuncelle(SIPARISDETAY, SiparisTur,1, SIPARIS.FieldByName('REHBERID').AsInteger, SIPARIS.FieldByName('SIPARISTARIH').AsDateTime,[]);
 end;
 
 procedure TSatinAlmaWizard2.GridFaturaViewDOKUMANPropertiesButtonClick( Sender: TObject; AButtonIndex: Integer);

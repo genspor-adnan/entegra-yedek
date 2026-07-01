@@ -9,8 +9,8 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, FireDAC.Comp.Client,
-  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls,
+  System.Classes, System.SysUtils, System.Variants, FireDAC.Comp.Client,
+  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Clipbrd,
   Data.DB, Vcl.Graphics,
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator,
@@ -27,6 +27,53 @@ type
 
 implementation
 
+type
+  // "Kopyala" butonu icin yardimci: secili (veya odakli) satir(lar)i
+  // baslik satiriyla birlikte sekme ayracli metin olarak panoya kopyalar.
+  TMesajKopyalaYardimci = class
+  public
+    View: TcxGridDBTableView;
+    procedure Click(Sender: TObject);
+  end;
+
+procedure TMesajKopyalaYardimci.Click(Sender: TObject);
+var
+  i, c: Integer;
+  SB: TStringBuilder;
+
+  procedure SatirEkle(ARec: TcxCustomGridRecord);
+  var k: Integer;
+  begin
+    if ARec = nil then Exit;
+    for k := 0 to View.ColumnCount - 1 do begin
+      if k > 0 then SB.Append(#9);
+      SB.Append(VarToStr(ARec.DisplayTexts[View.Columns[k].Index]));
+    end;
+    SB.AppendLine;
+  end;
+
+begin
+  if (View = nil) or (View.ColumnCount = 0) then Exit;
+  SB := TStringBuilder.Create;
+  try
+    // Baslik satiri
+    for c := 0 to View.ColumnCount - 1 do begin
+      if c > 0 then SB.Append(#9);
+      SB.Append(View.Columns[c].Caption);
+    end;
+    SB.AppendLine;
+    // Secili satirlar; secim yoksa odakli satir
+    if View.Controller.SelectedRecordCount > 0 then begin
+      for i := 0 to View.Controller.SelectedRecordCount - 1 do
+        SatirEkle(View.Controller.SelectedRecords[i]);
+    end else
+      SatirEkle(View.Controller.FocusedRecord);
+    Clipboard.AsText := SB.ToString;
+  finally
+    SB.Free;
+  end;
+end;
+
 class procedure TEBelgeMesajDlg.Goster(AOwner: TComponent;
   AConnection: TFDConnection; AFatBaslikID: Integer;
   const AFaturaNo, ABaslik: string);
@@ -37,10 +84,11 @@ var
   LGrid: TcxGrid;
   LView: TcxGridDBTableView;
   LLevel: TcxGridLevel;
-  LBtn: TButton;
+  LBtn, LBtnKopya: TButton;
   LPnlBaslik, LPnlAlt: TPanel;
   LLblBaslik: TLabel;
   LSatBilgi: string;
+  LKopyala: TMesajKopyalaYardimci;
 
   function AddCol(const AField, ACaption: string; AWidth: Integer): TcxGridDBColumn;
   begin
@@ -86,7 +134,8 @@ begin
     if Trim(ABaslik) <> '' then
       LSatBilgi := LSatBilgi + '   |   ' + ABaslik;
     LSatBilgi := LSatBilgi + sLineBreak +
-                 'Kronolojik islem gecmisi (yeniden eskiye)';
+                 'Kronolojik islem gecmisi (yeniden eskiye) - satir secip Ctrl+C ' +
+                 'veya Kopyala ile panoya alabilirsiniz';
     LLblBaslik.Caption := LSatBilgi;
     LLblBaslik.WordWrap := True;
 
@@ -181,7 +230,21 @@ begin
     LView.OptionsBehavior.AlwaysShowEditor := False;
     LView.OptionsData.Editing := False;
     LView.OptionsData.Deleting := False;
-    LView.OptionsSelection.MultiSelect := False;
+    LView.OptionsSelection.MultiSelect := True;     // birden fazla satir secilebilsin
+    LView.OptionsSelection.CellSelect := True;      // hucre secip Ctrl+C ile kopyalanabilsin
+
+    // "Kopyala" butonu (Kapat'in soluna). Secili satir(lar)i panoya alir.
+    LKopyala := TMesajKopyalaYardimci.Create;
+    LKopyala.View := LView;
+    LBtnKopya := TButton.Create(LForm);
+    LBtnKopya.Parent := LPnlAlt;
+    LBtnKopya.Caption := 'Kopyala';
+    LBtnKopya.Width := 100;
+    LBtnKopya.Height := 28;
+    LBtnKopya.Top := 8;
+    LBtnKopya.Anchors := [akTop, akRight];
+    LBtnKopya.Left := LBtn.Left - LBtnKopya.Width - 8;
+    LBtnKopya.OnClick := LKopyala.Click;
 
     if LQ.Active then begin
       AddCol('TARIH',      'Tarih',      130);
@@ -213,6 +276,8 @@ begin
       LLevel := nil;
       try if Assigned(LGrid) then LGrid.Free; except end;
       LGrid := nil;
+      try LKopyala.Free; except end;
+      LKopyala := nil;
     end;
   finally
     LForm.Free;

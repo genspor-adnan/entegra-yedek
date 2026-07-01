@@ -2,7 +2,7 @@
 # Kullanim: powershell -ExecutionPolicy Bypass -File sql_calistir.ps1
 
 $server = "DESKTOP-HL3J3AS\SQLEXPRESS"
-$database = "Henmed"
+$database = "BILIM"
 $user = "sa"
 $password = "FETAGEN"
 

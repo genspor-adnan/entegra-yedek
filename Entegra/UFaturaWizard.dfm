@@ -139,8 +139,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
-        ExplicitTop = 274
-        ExplicitHeight = 336
         object PanelAlt: TPanel
           Left = 1
           Top = 167
@@ -156,7 +154,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
-          ExplicitTop = 170
           DesignSize = (
             1102
             165)
@@ -702,6 +699,68 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Style.IsFontAssigned = True
               Transparent = True
             end
+            object comboTevkifat: TcxDBImageComboBox
+              Left = 87
+              Top = 138
+              DataBinding.DataField = 'PLANID'
+              DataBinding.DataSource = DtsFatBaslik
+              ParentFont = False
+              Properties.Items = <>
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clBlack
+              Style.Font.Height = -11
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = []
+              Style.IsFontAssigned = True
+              TabOrder = 11
+              Visible = False
+              Width = 281
+            end
+            object LabelTevkifat: TcxLabel
+              Left = 5
+              Top = 135
+              Caption = 'Tevkifat Nedeni'
+              ParentFont = False
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clBlack
+              Style.Font.Height = -11
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = []
+              Style.IsFontAssigned = True
+              Transparent = True
+              Visible = False
+            end
+            object comboIstisna: TcxDBImageComboBox
+              Left = 87
+              Top = 138
+              DataBinding.DataField = 'PLANID'
+              DataBinding.DataSource = DtsFatBaslik
+              ParentFont = False
+              Properties.Items = <>
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clBlack
+              Style.Font.Height = -11
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = []
+              Style.IsFontAssigned = True
+              TabOrder = 12
+              Visible = False
+              Width = 281
+            end
+            object LabelIstisna: TcxLabel
+              Left = 5
+              Top = 135
+              Caption = 'KDV '#304'stisna Nedeni'
+              ParentFont = False
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clBlack
+              Style.Font.Height = -11
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = []
+              Style.IsFontAssigned = True
+              Transparent = True
+              Visible = False
+            end
             object BeditDemirbas: TcxButtonEdit
               Left = 87
               Top = 19
@@ -760,7 +819,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
-          ExplicitHeight = 145
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -1584,8 +1642,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Width = 58
       end
       object LabelAd: TcxLabel
-        Left = 283
-        Top = 4
+        Left = 288
+        Top = 3
         Cursor = crHandPoint
         AutoSize = False
         Caption = 'Ad'
@@ -1627,7 +1685,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         OnChange = PageUstChange
-        ExplicitTop = 102
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -1869,15 +1926,20 @@ object FaturaWizardDlg: TFaturaWizardDlg
               object lblSevkAdresi: TcxLabel
                 Left = 3
                 Top = 116
+                Cursor = crHandPoint
+                Hint = 'Sevk bilgilerini (plaka, s'#252'r'#252'c'#252', ta'#351#305'y'#305'c'#305') girmek i'#231'in t'#305'klay'#305'n'
                 Caption = 'Sevk Adresi'
                 ParentFont = False
+                ParentShowHint = False
+                ShowHint = True
                 Style.Font.Charset = TURKISH_CHARSET
-                Style.Font.Color = clWindowText
+                Style.Font.Color = clHotLight
                 Style.Font.Height = -11
                 Style.Font.Name = 'Trebuchet MS'
-                Style.Font.Style = []
+                Style.Font.Style = [fsUnderline]
                 Style.IsFontAssigned = True
                 Transparent = True
+                OnClick = lblSevkAdresiClick
               end
             end
             object EditSRMMerkezi: TcxButtonEdit
@@ -2569,7 +2631,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ShowCaptions = True
         TabOrder = 8
         Transparent = True
-        ExplicitHeight = 29
         object KaydetTus: TToolButton
           Left = 0
           Top = 0
@@ -2623,7 +2684,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Enabled = False
         PopupMenu = PopupMenuEBelge
         TabOrder = 6
-        Visible = False
         Height = 81
         Width = 157
         object ComboEFATURADURUM: TcxDBImageComboBox
@@ -3279,8 +3339,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object PopupMenuFatura: TPopupMenu
     OnPopup = PopupMenuFaturaPopup
-    Left = 434
-    Top = 238
+    Left = 458
+    Top = 214
     object info1: TMenuItem
       Caption = 'info'
       OnClick = info1Click
@@ -3660,8 +3720,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATURA F'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
-    Left = 37
-    Top = 4
+    Left = 45
+    Top = 20
     ParamData = <
       item
         Name = 'Par'
@@ -4096,8 +4156,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATBASLIK F Left outer join DOVIZCINSLERI D on  '
       'F.DIL=D.DIL and F.DOVIZ_CINSI=D.DOVIZ'
       'WHERE F.ID = :Par')
-    Left = 160
-    Top = 218
+    Left = 128
+    Top = 154
     ParamData = <
       item
         Name = 'Par'
@@ -4161,8 +4221,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 230
-    Top = 38
+    Left = 222
+    Top = 6
   end
   object TabPlan: TFDQuery
     AfterOpen = TabPlanAfterOpen

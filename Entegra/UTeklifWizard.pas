@@ -1605,7 +1605,7 @@ procedure TTeklifWizardDlg.GridTeklifWizardDetayViewCellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   if Kilit then exit;
-  Tablo.SatirGuncelle(TabTeklifDetay, 100, TabTeklif.FieldByName('REHBERID').AsInteger, TabTeklif.FieldByName('TARIH').AsDateTime,[]);
+  Tablo.SatirGuncelle(TabTeklifDetay, 100,1, TabTeklif.FieldByName('REHBERID').AsInteger, TabTeklif.FieldByName('TARIH').AsDateTime,[]);
 end;
 
 procedure TTeklifWizardDlg.GridYorumDBCardView1CellDblClick(

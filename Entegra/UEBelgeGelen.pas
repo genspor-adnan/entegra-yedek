@@ -18,14 +18,20 @@ type
     class function Cek(AConnection: TFDConnection;
       out AYeniSayi, AAtlananSayi: Integer;
       out AHata: string;
-      AIlerleme: TIlerlemeOlay = nil): Boolean; static;
+      AIlerleme: TIlerlemeOlay = nil; AEArsiv: Boolean = False): Boolean; static;
     /// EBELGE.YON=2 olup FATBASLIK linki olmayan kayitlar icin
     /// sp_Grnt_AlisFaturaIslem @TIP=1 cagirarak FATBASLIK olusturur.
     /// FATBASLIK.GNTPID = EBELGE.ID linkajini kurar, EFATURADURUM=-1 (Yeni Gelen).
     class function OlusturFatbaslikler(AConnection: TFDConnection;
       out AYeniSayi: Integer; out AHata: string;
-      AIlerleme: TIlerlemeOlay = nil): Boolean; static;
+      AIlerleme: TIlerlemeOlay = nil; AEArsiv: Boolean = False): Boolean; static;
   end;
+
+/// EBELGE.UBL_XML sikistirma aktif mi? Opsiyon `Ops_FaturaOpsiyon_UBL_ZIP`
+/// (varsayilan AÇIK). Aktifse UBL_XML_ZIP kolonunu oturumda bir kez garantiler +
+/// dogrular; kolon yoksa/acilamiyorsa (yetki vs) False doner -> duz UBL_XML yazilir.
+/// Boylece "default zip" olsa bile kolon eksikse e-belge bozulmaz.
+function EBelgeUBLSikistir(AConnection: TFDConnection): Boolean;
 
 implementation
 
@@ -33,6 +39,42 @@ uses
   System.SysUtils, System.StrUtils, System.JSON, System.NetEncoding,
   System.IOUtils, Data.DB, System.Classes, System.Zip,
   Utablo, PrjConst, FetaKurulusSiniflari, UEBelgeKimlik, UIzibizRest;
+
+var
+  GUblZipKontrolEdildi: Boolean = False;   // oturumda kolon kontrolu yapildi mi
+  GUblZipKullanilabilir: Boolean = False;  // UBL_XML_ZIP kolonu mevcut/kullanilabilir mi
+
+function EBelgeUBLSikistir(AConnection: TFDConnection): Boolean;
+var
+  LQ: TFDQuery;
+begin
+  // Opsiyon varsayilan AÇIK (default zip).
+  if not Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_UBL_ZIP, True) then
+    Exit(False);
+  // Kolonu oturumda bir kez garantile + dogrula. Yoksa/acilamiyorsa duz yaz.
+  if not GUblZipKontrolEdildi then begin
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := AConnection;
+      try
+        LQ.SQL.Text :=
+          'IF COL_LENGTH(''dbo.EBELGE'',''UBL_XML_ZIP'') IS NULL ' +
+          'ALTER TABLE dbo.EBELGE ADD UBL_XML_ZIP varbinary(max) NULL';
+        LQ.ExecSQL;
+      except
+        // yetki yoksa sessiz gec; asagidaki dogrulama sonucu belirler
+      end;
+      LQ.Close;
+      LQ.SQL.Text := 'SELECT COL_LENGTH(''dbo.EBELGE'',''UBL_XML_ZIP'')';
+      LQ.Open;
+      GUblZipKullanilabilir := not LQ.Fields[0].IsNull;
+    finally
+      LQ.Free;
+    end;
+    GUblZipKontrolEdildi := True;
+  end;
+  Result := GUblZipKullanilabilir;
+end;
 
 function _JSONStr(AObj: TJSONObject; const AKey: string): string;
 var
@@ -53,6 +95,14 @@ begin
   LV := AObj.GetValue(AKey);
   if LV is TJSONObject then
     Result := _JSONStr(TJSONObject(LV), AChildKey);
+end;
+
+// JSON null degerleri bazi surumlerde 'null' metni olarak gelir; bos kabul et.
+function _NullBosalt(const S: string): string;
+begin
+  Result := Trim(S);
+  if SameText(Result, 'null') then
+    Result := '';
 end;
 
 procedure _IDAdd(var AArr: TArray<string>; const AID: string);
@@ -223,7 +273,7 @@ begin
 end;
 
 function _EBelgeKayitBul(AConnection: TFDConnection; const AUUID: string;
-  out AEBelgeID: Int64; out AUblVar: Boolean): Boolean;
+  ABelgeTuru: Integer; out AEBelgeID: Int64; out AUblVar: Boolean): Boolean;
 var
   LQry: TFDQuery;
 begin
@@ -234,9 +284,11 @@ begin
   try
     LQry.Connection := AConnection;
     LQry.SQL.Text :=
-      'select top 1 ID, UBLVAR=case when len(isnull(UBL_XML, N''''))>0 then 1 else 0 end ' +
-      'from EBELGE where YON=2 and UUID=:UUID order by ID desc';
+      'select top 1 ID, UBLVAR=case when (UBL_XML_ZIP IS NOT NULL ' +
+      'OR len(isnull(UBL_XML, N''''))>0) then 1 else 0 end ' +
+      'from EBELGE where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc';
     LQry.ParamByName('UUID').AsString := AUUID;
+    LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     LQry.Open;
     Result := not LQry.Eof;
     if Result then begin
@@ -250,7 +302,7 @@ end;
 
 function _EBelgeKaydet(AConnection: TFDConnection; AEBelgeID: Int64;
   const AUUID, ABelgeNo, AGonderici, AAlici, AAPIJSON, AUBLXML: string;
-  ADurum, AKullanan: Integer): Int64;
+  ABelgeTuru, ADurum, AKullanan: Integer): Int64;
 var
   LQry: TFDQuery;
 begin
@@ -258,21 +310,33 @@ begin
   LQry := TFDQuery.Create(nil);
   try
     LQry.Connection := AConnection;
+    // UBL sikistirma opsiyonu (EBELGE.UBL_XML_ZIP = COMPRESS). Acikken UBL_XML=NULL.
+    // BOS UBL sikistirilmaz: COMPRESS('') non-null olurdu, var-mi kontrolu "UBL var"
+    // sanip gercek UBL'in tekrar indirilmesini engellerdi.
+    var LUxUpd, LUxIns: string;
+    if (Trim(AUBLXML) <> '') and EBelgeUBLSikistir(AConnection) then begin
+      LUxUpd := 'UBL_XML=NULL, UBL_XML_ZIP=COMPRESS(cast(:UX as nvarchar(max))), ';
+      LUxIns := 'NULL, COMPRESS(cast(:UX as nvarchar(max)))';
+    end else begin
+      LUxUpd := 'UBL_XML=cast(:UX as nvarchar(max)), UBL_XML_ZIP=NULL, ';
+      LUxIns := 'cast(:UX as nvarchar(max)), NULL';
+    end;
     if AEBelgeID > 0 then begin
       LQry.SQL.Text :=
         'update EBELGE set BELGENO=:BNO, GONDERICIALIAS=:GA, ALICIALIAS=:AA, ' +
         'DURUM=:DURUM, API_JSON=cast(:AJ as nvarchar(max)), ' +
-        'UBL_XML=cast(:UX as nvarchar(max)), DEGISTIREN=:KUL, DEGISTIRMETARIHI=getdate() ' +
+        LUxUpd + 'DEGISTIREN=:KUL, DEGISTIRMETARIHI=getdate() ' +
         'where ID=:ID';
       LQry.ParamByName('ID').AsLargeInt := AEBelgeID;
     end else begin
       LQry.SQL.Text :=
         'insert into EBELGE(FATBASLIKID, REHBERID, BELGETURU, YON, UUID, BELGENO, ' +
-        'GONDERICIALIAS, ALICIALIAS, DURUM, API_JSON, UBL_XML, EKLEYEN, EKLEMETARIHI) values(' +
-        '0, 0, 151, 2, :UUID, :BNO, :GA, :AA, :DURUM, cast(:AJ as nvarchar(max)), ' +
-        'cast(:UX as nvarchar(max)), :KUL, getdate()); ' +
+        'GONDERICIALIAS, ALICIALIAS, DURUM, API_JSON, UBL_XML, UBL_XML_ZIP, EKLEYEN, EKLEMETARIHI) values(' +
+        '0, 0, :BELGETURU, 2, :UUID, :BNO, :GA, :AA, :DURUM, cast(:AJ as nvarchar(max)), ' +
+        LUxIns + ', :KUL, getdate()); ' +
         'select cast(scope_identity() as bigint) as ID';
       LQry.ParamByName('UUID').AsString := AUUID;
+      LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     end;
 
     LQry.ParamByName('BNO').AsString := ABelgeNo;
@@ -537,12 +601,13 @@ end;
 class function TEBelgeGelen.Cek(AConnection: TFDConnection;
   out AYeniSayi, AAtlananSayi: Integer;
   out AHata: string;
-  AIlerleme: TIlerlemeOlay): Boolean;
+  AIlerleme: TIlerlemeOlay; AEArsiv: Boolean): Boolean;
 var
   LKullanici, LSifre, LBaseURL: string;
   LTestMi: Boolean;
   LToken, LIdentifier, LName: string;
-  LYanitJSON, LDownJSON, LXMLContent, LBelgeNo, LGonderici, LAlici, LDownHata: string;
+  LYanitJSON, LDownJSON, LXMLContent, LBelgeNo, LGonderici, LAlici, LDownHata,
+    LEArsivGelenURL: string;
   LDownloadHatalari, LUyari: string;
   LHttpKodu, LDownHttp, i, j, LKullanan, LIndirilemeyen, LGuncellenen: Integer;
   LJSON: TJSONValue;
@@ -550,10 +615,11 @@ var
   LArr: TJSONArray;
   LUUID, LDownloadID: string;
   LDownloadIDs, LSingleID: TArray<string>;
-  LKayitVar, LUblVar, LDownloadOK: Boolean;
+  LKayitVar, LUblVar, LDownloadOK, LIndirmeCagrisiOK, LIVDMain: Boolean;
   LEBelgeID: Int64;
   LPage, LSayfaBoyu, LSayfaSayisi, LMaxSayfa: Integer;
   LBaslangic: TDate;
+  LBelgeTuru: Integer;
 begin
   Result := False;
   AYeniSayi := 0;
@@ -561,8 +627,19 @@ begin
   LIndirilemeyen := 0;
   LGuncellenen := 0;
   AHata := '';
+  if AEArsiv then
+    LBelgeTuru := 150
+  else
+    LBelgeTuru := 151;
 
   TEBelgeKimlik.Yukle(LKullanici, LSifre, LBaseURL, LTestMi);
+  if AEArsiv then begin
+    LEArsivGelenURL := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivGelenURL, ''));
+    if LEArsivGelenURL <> '' then
+      LBaseURL := LEArsivGelenURL;
+  end;
+  LIVDMain := ContainsText(LBaseURL, '/IVD/main') or
+              ContainsText(LBaseURL, '/GIB/main');
   if (Trim(LKullanici) = '') or (Trim(LSifre) = '') or (Trim(LBaseURL) = '') then begin
     AHata := 'Opsiyon ekranindan kullanici/sifre/URL girilmemis.';
     Exit;
@@ -590,11 +667,19 @@ begin
 
   repeat
     // Status filtresi yok: Delivered/New/WaitingForResponse vb. tum kayitlar gelir.
-    if not TIzibizRest.InboxList(LBaseURL, LToken, '',
-                                 LBaslangic, Date,
-                                 LPage, LSayfaBoyu,
-                                 LYanitJSON, LHttpKodu, AHata) then
-      Exit;
+    if AEArsiv then begin
+      if not TIzibizRest.EArchiveInboxList(LBaseURL, LToken, '',
+                                           LBaslangic, Date,
+                                           LPage, LSayfaBoyu,
+                                           LYanitJSON, LHttpKodu, AHata) then
+        Exit;
+    end else begin
+      if not TIzibizRest.InboxList(LBaseURL, LToken, '',
+                                   LBaslangic, Date,
+                                   LPage, LSayfaBoyu,
+                                   LYanitJSON, LHttpKodu, AHata) then
+        Exit;
+    end;
 
     try
       TFile.WriteAllText(TPath.Combine(TPath.GetTempPath,
@@ -638,7 +723,12 @@ begin
       if LUUID = '' then LUUID := _JSONStr(LItem, 'id');
       if LUUID = '' then Continue;
 
-      LKayitVar := _EBelgeKayitBul(AConnection, LUUID, LEBelgeID, LUblVar);
+      if AEArsiv and SameText(_NullBosalt(_JSONStr(LItem, 'direction')), 'OUT') then begin
+        Inc(AAtlananSayi);
+        Continue;
+      end;
+
+      LKayitVar := _EBelgeKayitBul(AConnection, LUUID, LBelgeTuru, LEBelgeID, LUblVar);
 
       // Mevcut kayit varsa, Izibiz statusCode'a gore baglandiysa FATBASLIK'i da
       // guncelle (sync). Bu sayede sonradan degisen GIB durumu yansir.
@@ -647,6 +737,8 @@ begin
         LEskiStatus := _EBelgeMevcutStatusKod(AConnection, LEBelgeID);
         LYeniStatus := StrToIntDef(_JSONStr(LItem, 'statusCode'), 0);
         if _IzibizItemStatusEsle(LItem, LDurum, LSonuc) then begin
+          if AEArsiv then
+            LDurum := -11;
           Veritabani.BasitKomutÇalıştır(AConnection,
             'UPDATE FATBASLIK SET EFATURADURUM=&D, EFATURASONUC=&S ' +
             'WHERE ID IN (SELECT FATBASLIKID FROM EBELGE WHERE ID=&EID AND FATBASLIKID > 0)',
@@ -675,6 +767,9 @@ begin
       LXMLContent := '';
       LDownloadOK := False;
       LDownloadHatalari := '';
+      if AEArsiv and LIVDMain then
+        LDownloadOK := True
+      else begin
       LDownloadIDs := _DownloadIDleri(LItem, LUUID);
       for j := 0 to High(LDownloadIDs) do begin
         LDownloadID := LDownloadIDs[j];
@@ -683,8 +778,13 @@ begin
         LDownJSON := '';
         LDownHata := '';
         LDownHttp := 0;
-        if TIzibizRest.InboxDownloadUBL(LBaseURL, LToken, LSingleID,
-                                        LDownJSON, LDownHttp, LDownHata) then begin
+        if AEArsiv then
+          LIndirmeCagrisiOK := TIzibizRest.EArchiveInboxDownloadUBL(LBaseURL, LToken, LSingleID,
+            LDownJSON, LDownHttp, LDownHata)
+        else
+          LIndirmeCagrisiOK := TIzibizRest.InboxDownloadUBL(LBaseURL, LToken, LSingleID,
+            LDownJSON, LDownHttp, LDownHata);
+        if LIndirmeCagrisiOK then begin
           LXMLContent := _UBLContentCikar(LDownJSON);
           if Trim(LXMLContent) <> '' then begin
             LDownloadOK := True;
@@ -699,10 +799,11 @@ begin
           LDownloadHatalari := LDownloadHatalari + 'ID=' + LDownloadID + ': ' + LDownHata;
         end;
       end;
+      end;
 
       if not LDownloadOK then begin
         LEBelgeID := _EBelgeKaydet(AConnection, LEBelgeID, LUUID, LBelgeNo,
-          LGonderici, LAlici, LItem.ToJSON, '', 9, LKullanan);
+          LGonderici, LAlici, LItem.ToJSON, '', LBelgeTuru, 9, LKullanan);
         _HareketYaz(AConnection, LEBelgeID,
           'Izibiz XML icerigi indirilemedi. Metadata EBELGE kaydina alindi.',
           'UBL_DOWNLOAD', LDownloadHatalari, LDownHttp, LKullanan);
@@ -711,7 +812,7 @@ begin
       end;
 
       LEBelgeID := _EBelgeKaydet(AConnection, LEBelgeID, LUUID, LBelgeNo,
-        LGonderici, LAlici, LItem.ToJSON, LXMLContent, 1, LKullanan);
+        LGonderici, LAlici, LItem.ToJSON, LXMLContent, LBelgeTuru, 1, LKullanan);
       if LKayitVar then
         Inc(LGuncellenen)
       else begin
@@ -1007,7 +1108,7 @@ type
 
 class function TEBelgeGelen.OlusturFatbaslikler(AConnection: TFDConnection;
   out AYeniSayi: Integer; out AHata: string;
-  AIlerleme: TIlerlemeOlay): Boolean;
+  AIlerleme: TIlerlemeOlay; AEArsiv: Boolean): Boolean;
 var
   LSel, LSP: TFDQuery;
   LEBelgeID: Int64;
@@ -1020,6 +1121,7 @@ var
   LSatirlar: TArray<TGelenSatir>;
   LSatir: TGelenSatir;
   LFmt: TFormatSettings;
+  LBelgeTuru, LGelenDurum: Integer;
 begin
   Result := False;
   AYeniSayi := 0;
@@ -1028,6 +1130,13 @@ begin
   LFmt := TFormatSettings.Create;
   LFmt.DecimalSeparator := '.';
   LFmt.ThousandSeparator := #0;
+  if AEArsiv then begin
+    LBelgeTuru := 150;
+    LGelenDurum := -11;
+  end else begin
+    LBelgeTuru := 151;
+    LGelenDurum := -1;
+  end;
 
   LSel := TFDQuery.Create(nil);
   LSP := TFDQuery.Create(nil);
@@ -1039,7 +1148,9 @@ begin
     LToplam := 0;
     LSP.SQL.Text :=
       'SELECT COUNT(*) FROM EBELGE E WHERE E.YON=2 ' +
+      '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
+    LSP.ParamByName('BELGETURU').AsInteger := LBelgeTuru;
     LSP.Open;
     if not LSP.Eof then LToplam := LSP.Fields[0].AsInteger;
     LSP.Close;
@@ -1049,10 +1160,13 @@ begin
     // Cozum: tum satirlari array'e cek, cursor'i kapat, sonra islet.
     LSel.SQL.Text :=
       'SELECT E.ID, E.BELGENO, cast(E.API_JSON as nvarchar(max)) as APIJ, ' +
-      '       cast(E.UBL_XML as nvarchar(max)) as UBLXML ' +
+      '       COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
+      '               CAST(E.UBL_XML AS NVARCHAR(MAX))) as UBLXML ' +
       'FROM EBELGE E ' +
       'WHERE E.YON=2 ' +
+      '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
+    LSel.ParamByName('BELGETURU').AsInteger := LBelgeTuru;
     LSel.Open;
     SetLength(LSatirlar, 0);
     while not LSel.Eof do begin
@@ -1114,6 +1228,29 @@ begin
       else if Trim(LSupplier) = '' then
         LSupplier := LUBLBaslik;
       if Trim(LSupSSN) = '' then LSupSSN := LUBLVNO;
+
+      // e-Arsivde UBL gelmez ve API_JSON'daki supplierName/supplierSSN bos/null
+      // olabilir; taraf bilgisi accountingSupplier/accountingCustomer nesnesinden
+      // tamamlanir (cikan/OUT belgede karsi taraf musteri, gelen/IN'de saticidir).
+      if (Trim(LSupplier) = '') or (Trim(LSupSSN) = '') then begin
+        var LJV2: TJSONValue := TJSONObject.ParseJSONValue(LAPIJSON);
+        if LJV2 is TJSONObject then
+        try
+          var LObj2: TJSONObject := TJSONObject(LJV2);
+          var LParti: string := 'accountingSupplier';
+          if SameText(_NullBosalt(_JSONStr(LObj2, 'direction')), 'OUT') then
+            LParti := 'accountingCustomer';
+          if Trim(LSupplier) = '' then begin
+            LSupplier := _NullBosalt(_JSONChildStr(LObj2, LParti, 'name'));
+            if Trim(LSupplier) = '' then
+              LSupplier := _NullBosalt(_JSONChildStr(LObj2, LParti, 'person'));
+          end;
+          if Trim(LSupSSN) = '' then
+            LSupSSN := _NullBosalt(_JSONChildStr(LObj2, LParti, 'identifier'));
+        finally
+          LJV2.Free;
+        end;
+      end;
 
       // VKN'ye gore REHBER lookup (REHBERBILGI uzerinden, aktif olanlar)
       var LRehberIDPar: string := '';
@@ -1200,8 +1337,10 @@ begin
             LDurumIlk := LDurumJSON;
             LSonucIlk := LSonucJSON;
           end else begin
-            LDurumIlk := -1; LSonucIlk := 0;
+            LDurumIlk := LGelenDurum; LSonucIlk := 0;
           end;
+          if AEArsiv then
+            LDurumIlk := -11;
           Veritabani.BasitKomutÇalıştır(AConnection,
             'UPDATE FATBASLIK SET GNTPID=&EID, EFATURADURUM=&D, EFATURASONUC=&S WHERE ID=&FID',
             ['&EID', '&D', '&S', '&FID'],
