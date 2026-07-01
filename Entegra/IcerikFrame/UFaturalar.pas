@@ -3392,9 +3392,9 @@ procedure TFaturalarDlg.infoMenuClick(Sender: TObject);
 begin
 
   if FATBASLIK.FieldByName('TUR').AsInteger in [ 9,19 ] then
-     Tablo.InfoGoster('SIPARIS',  FATBASLIK.FieldByName('ID').AsInteger)
+     Tablo.InfoGoster('SIPARIS',  FATBASLIK.FieldByName('ID').AsInteger,  TabloNo)
   else
-     Tablo.InfoGoster('FATBASLIK',  FATBASLIK.FieldByName('ID').AsInteger)
+     Tablo.InfoGoster('FATBASLIK',  FATBASLIK.FieldByName('ID').AsInteger, TabloNo)
 end;
 
 procedure TFaturalarDlg.KaynakBelgeyiA1Click(Sender: TObject);

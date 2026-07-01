@@ -4,8 +4,8 @@ object InfoDlg: TInfoDlg
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'info'
-  ClientHeight = 160
-  ClientWidth = 456
+  ClientHeight = 340
+  ClientWidth = 679
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,39 +13,47 @@ object InfoDlg: TInfoDlg
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
+  OnDestroy = FormDestroy
   OnShow = FormShow
   TextHeight = 15
   object Label1: TLabel
     Left = 8
-    Top = 21
+    Top = 13
     Width = 40
     Height = 15
     Caption = 'Ekleyen'
   end
   object Label2: TLabel
     Left = 232
-    Top = 21
+    Top = 13
     Width = 69
     Height = 15
     Caption = 'Ekleme Tarihi'
   end
   object Label3: TLabel
     Left = 8
-    Top = 73
+    Top = 41
     Width = 53
     Height = 15
     Caption = 'De'#287'i'#351'tiren'
   end
   object Label4: TLabel
     Left = 232
-    Top = 73
+    Top = 41
     Width = 88
     Height = 15
     Caption = 'De'#287'i'#351'tirme Tarihi'
   end
+  object LabelGecmis: TLabel
+    Left = 8
+    Top = 66
+    Width = 73
+    Height = 15
+    Caption = 'Islem Gecmisi'
+  end
   object EditEkleyen: TcxTextEdit
     Left = 72
-    Top = 18
+    Top = 10
     Enabled = False
     Properties.ReadOnly = True
     TabOrder = 0
@@ -53,7 +61,7 @@ object InfoDlg: TInfoDlg
   end
   object EditEklemeTrh: TcxDateEdit
     Left = 327
-    Top = 18
+    Top = 10
     Enabled = False
     Properties.ReadOnly = True
     TabOrder = 1
@@ -61,7 +69,7 @@ object InfoDlg: TInfoDlg
   end
   object EditDegistiren: TcxTextEdit
     Left = 72
-    Top = 67
+    Top = 35
     Enabled = False
     Properties.ReadOnly = True
     TabOrder = 2
@@ -69,15 +77,15 @@ object InfoDlg: TInfoDlg
   end
   object EditDegistirmeTrh: TcxDateEdit
     Left = 327
-    Top = 67
+    Top = 35
     Enabled = False
     Properties.ReadOnly = True
     TabOrder = 3
     Width = 121
   end
   object cxButton1: TcxButton
-    Left = 350
-    Top = 128
+    Left = 573
+    Top = 32
     Width = 98
     Height = 29
     Align = alCustom
@@ -106,5 +114,26 @@ object InfoDlg: TInfoDlg
     OptionsImage.ImageIndex = 0
     PaintStyle = bpsCaption
     TabOrder = 4
+  end
+  object LstTarihler: TListBox
+    Left = 8
+    Top = 84
+    Width = 180
+    Height = 242
+    ItemHeight = 15
+    TabOrder = 5
+    OnClick = LstTarihlerClick
+  end
+  object LvDetay: TListView
+    Left = 194
+    Top = 84
+    Width = 477
+    Height = 242
+    Columns = <>
+    GridLines = True
+    ReadOnly = True
+    RowSelect = True
+    TabOrder = 6
+    ViewStyle = vsReport
   end
 end

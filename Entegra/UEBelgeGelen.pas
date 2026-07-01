@@ -64,16 +64,26 @@ begin
     LQ := TFDQuery.Create(nil);
     try
       LQ.Connection := AConnection;
+      // EBELGE synonym olabilir (GENDEPO'ya tasindi). COL_LENGTH/ALTER synonym'i
+      // cozmez; base_object_name ile gercek tabloyu (ör. [GENDEPO].[dbo].[EBELGE])
+      // bulup onun uzerinde kontrol/ALTER yapariz. Synonym yoksa dbo.EBELGE.
       try
         LQ.SQL.Text :=
-          'IF COL_LENGTH(''dbo.EBELGE'',''UBL_XML_ZIP'') IS NULL ' +
-          'ALTER TABLE dbo.EBELGE ADD UBL_XML_ZIP varbinary(max) NULL';
+          'DECLARE @b nvarchar(512);' +
+          'SELECT @b = base_object_name FROM sys.synonyms WHERE object_id = OBJECT_ID(''dbo.EBELGE'');' +
+          'IF @b IS NULL SET @b = ''dbo.EBELGE'';' +
+          'IF COL_LENGTH(@b,''UBL_XML_ZIP'') IS NULL ' +
+          '  EXEC(''ALTER TABLE '' + @b + '' ADD UBL_XML_ZIP varbinary(max) NULL'');';
         LQ.ExecSQL;
       except
         // yetki yoksa sessiz gec; asagidaki dogrulama sonucu belirler
       end;
       LQ.Close;
-      LQ.SQL.Text := 'SELECT COL_LENGTH(''dbo.EBELGE'',''UBL_XML_ZIP'')';
+      LQ.SQL.Text :=
+        'DECLARE @b nvarchar(512);' +
+        'SELECT @b = base_object_name FROM sys.synonyms WHERE object_id = OBJECT_ID(''dbo.EBELGE'');' +
+        'IF @b IS NULL SET @b = ''dbo.EBELGE'';' +
+        'SELECT COL_LENGTH(@b,''UBL_XML_ZIP'');';
       LQ.Open;
       GUblZipKullanilabilir := not LQ.Fields[0].IsNull;
     finally

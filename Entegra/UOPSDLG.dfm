@@ -37,21 +37,21 @@ object OpsiyonDlg: TOpsiyonDlg
       Caption = 'Genel Ayarlar'
       object Label10: TLabel
         Left = 6
-        Top = 359
+        Top = 385
         Width = 107
         Height = 16
         Caption = 'Varsay'#305'lan Para Birimi'
       end
       object Label2: TLabel
-        Left = 6
-        Top = 387
+        Left = 174
+        Top = 385
         Width = 113
         Height = 16
         Caption = 'Varsay'#305'lan D'#246'viz Birimi'
       end
       object GroupBox3: TGroupBox
         Left = 4
-        Top = 79
+        Top = 105
         Width = 444
         Height = 45
         Caption = 'Seyir Defteri'
@@ -105,7 +105,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object GroupBox2: TGroupBox
         Left = 4
-        Top = 40
+        Top = 66
         Width = 444
         Height = 42
         Caption = 'Dok'#252'man Dizini'
@@ -136,7 +136,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object BitBtn1: TBitBtn
         Left = 140
-        Top = 12
+        Top = 2
         Width = 171
         Height = 25
         Caption = 'Gentegre Bilgilerini Ayarlama'
@@ -189,7 +189,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object CheckDovizPanelGor: TCheckBox
         Left = 3
-        Top = 290
+        Top = 316
         Width = 360
         Height = 9
         Caption = 'G'#252'nl'#252'k d'#246'viz kurlar'#305' kasa ekran'#305'nda g'#246'r'#252'ns'#252'n'
@@ -197,7 +197,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object CheckDovizOtoGuncelle: TCheckBox
         Left = 7
-        Top = 331
+        Top = 357
         Width = 432
         Height = 17
         Caption = 'Program a'#231#305'l'#305#351#305'nda d'#246'viz kurlar'#305'n'#305' otomatik olarak g'#252'ncelle'
@@ -205,7 +205,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object cxLabel3: TcxLabel
         Left = 6
-        Top = 306
+        Top = 332
         Caption = 
           'Varsay'#305'lan kur olarak                                           ' +
           '           kullan.'
@@ -213,7 +213,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object ComboDefaultDoviz: TcxImageComboBox
         Left = 115
-        Top = 305
+        Top = 331
         EditValue = '((ALIS+SATIS)/2)'
         Properties.Items = <
           item
@@ -283,7 +283,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object BtnGENINI: TcxButton
         Left = 4
-        Top = 12
+        Top = 2
         Width = 91
         Height = 25
         Caption = '...'
@@ -292,7 +292,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object GroupBox5: TGroupBox
         Left = 4
-        Top = 126
+        Top = 152
         Width = 444
         Height = 48
         Caption = 'Program '#39'Exe'#39'si G'#252'ncelleme'
@@ -326,8 +326,8 @@ object OpsiyonDlg: TOpsiyonDlg
         end
       end
       object GroupBox4: TGroupBox
-        Left = 4
-        Top = 175
+        Left = 3
+        Top = 204
         Width = 444
         Height = 48
         Caption = 'Program '#304#231'i Mesajla'#351'ma'
@@ -393,7 +393,7 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object BTNDiller: TcxButton
         Left = 359
-        Top = 12
+        Top = 2
         Width = 91
         Height = 25
         Caption = 'Diller'
@@ -433,15 +433,15 @@ object OpsiyonDlg: TOpsiyonDlg
       end
       object EditVarsayDoviz: TEdit
         Left = 127
-        Top = 354
+        Top = 380
         Width = 44
         Height = 24
         TabOrder = 20
         Text = 'TL'
       end
       object GroupBox6: TGroupBox
-        Left = 3
-        Top = 222
+        Left = 0
+        Top = 254
         Width = 444
         Height = 48
         Caption = 'Proxy Ayar'
@@ -474,8 +474,8 @@ object OpsiyonDlg: TOpsiyonDlg
         end
       end
       object EditVarsayYabanci: TEdit
-        Left = 127
-        Top = 382
+        Left = 295
+        Top = 380
         Width = 44
         Height = 24
         TabOrder = 22
@@ -513,6 +513,29 @@ object OpsiyonDlg: TOpsiyonDlg
         Left = 239
         Top = 470
         Caption = 'ay'
+      end
+      object GroupBox7: TGroupBox
+        Left = 4
+        Top = 27
+        Width = 444
+        Height = 42
+        Caption = '2.Depo DB Ad'#305
+        TabOrder = 26
+        object EditDepoDBAdi: TcxButtonEdit
+          Left = 93
+          Top = 13
+          Properties.Buttons = <
+            item
+              Default = True
+              Kind = bkEllipsis
+            end>
+          Properties.MaxLength = 0
+          Properties.ReadOnly = False
+          Properties.OnButtonClick = EditDepoDBAdiPropertiesButtonClick
+          TabOrder = 0
+          Text = 'GENDEPO'
+          Width = 210
+        end
       end
     end
     object TabSheet6: TTabSheet
@@ -2770,8 +2793,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object dtsStilKosul: TDataSource
     DataSet = tabStilKosul
     OnStateChange = dtsStilKosulStateChange
-    Left = 276
-    Top = 127
+    Left = 140
+    Top = 71
   end
   object tabStilKosul: TFDQuery
     BeforeOpen = tabStilKosulBeforeOpen

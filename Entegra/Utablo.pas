@@ -563,7 +563,7 @@ type
     procedure UretimSatirMaliyetUpdate(FatBasID: Integer);
     procedure OncekiLogBelirle(Tablo1: TDataSet);
     procedure BelgeLogBelirle(Tablo1: TDataSet);
-    procedure InfoGoster(TabloAd:String; ID:Integer);
+    procedure InfoGoster(TabloAd:String; ID:Integer; ATabloNo: Integer = 0);
     procedure LogIslemleri(TabloID, SatirID: integer; Islem: Integer;Tablo1: TDataSet);
     procedure LogIslemlerBelge(Table1: TDataSet; TabloID, SatirID: integer;Islem: Integer);
     procedure BelgeSil(Table1: TDataSet);
@@ -1511,7 +1511,7 @@ uses UAnaForm, registry, UMesaj,FetaUtil, FetaClassExtensions, UKasaWizard, UTab
   UOPSDLG,UitsBusiness, USatinAlmaWizard, UIzleme, UStokLokasyon, UFiyatSor, IdGlobalProtocols, UDokumanWizard,  GenOutLookInterface, UOpsiyonKasiyer,
   UMailKisiBulma, UDokumanYetki, UGenNotificationUtils, USeyirDefteri, UKaliteToplanti,UKYEgitimWizard, UBarkodYazdir,
   UMailSablon, URehberHareket, UKullaniciDuzenle, Gentegre.UI.EFatura.FirmaAra, UDokumanKaydet, UDemirbasWizard, UHesapKoduPicker, UServisKoduPicker,
-  PrjConst, URehberBilgiDuzenle, UMailSablonDuzenle, UResim, UProjeMaliyet, UGorevDlg,  USatinAlmaWizard2,UIsEmriPersonelZaman, UFirsatWizard,
+  PrjConst, ULog, URehberBilgiDuzenle, UMailSablonDuzenle, UResim, UProjeMaliyet, UGorevDlg,  USatinAlmaWizard2,UIsEmriPersonelZaman, UFirsatWizard,
   cxEditConsts,
   cxExtEditConsts,
   cxFilterControlStrs,
@@ -6434,11 +6434,12 @@ begin
   Result := Format('%d', [tum_toplam]);
 end;
 
-procedure TTablo.InfoGoster(TabloAd:String; ID:Integer);
+procedure TTablo.InfoGoster(TabloAd:String; ID:Integer; ATabloNo: Integer);
 begin
    Application.CreateForm(TInfoDlg, InfoDlg);
    InfoDlg.TabloAd := TabloAd;
    InfoDlg.ID := ID;
+   InfoDlg.TabloNo := ATabloNo;   // ISLEMLOG.TABLO ile eslesir (sayisal TabloID)
    InfoDlg.ShowModal;
    InfoDlg.Destroy;
 end;
@@ -6512,6 +6513,32 @@ begin
         end;
       end;
     end;
+    // ---- YENI islem logu (GENDEPO.ISLEMLOG) : eski sistemle PARALEL ----
+    // Ayni diff verisinden (LogOnceki vs Tablo1) tek JSON kaydi. Kaydetmeyi ASLA bozmaz.
+    try
+      var LTip: TLogIslem;
+      case Islem of
+        5: LTip := liSil;
+        1: LTip := liEkle;
+      else
+        LTip := liDegistir;
+      end;
+      var LK: TLogKurucu := TLogKurucu.Yeni;
+      try
+        for i := 0 to Tablo1.FieldCount - 1 do
+          if (Tablo1.Fields[i].DataType <> ftBlob) and (Tablo1.Fields[i].DataType <> ftMemo) then
+            if Islem = 5 then
+              LK.Deger(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i])
+            else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then
+              LK.Alan(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString);
+        if (Islem = 5) or (not LK.BosMu) then
+          LogYaz(LTip, TabloID, SatirID, LK.JSON, '');
+      finally
+        LK.Free;
+      end;
+    except
+    end;
+
     LogOnceki.Clear;
   end;
 end;

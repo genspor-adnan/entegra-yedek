@@ -343,6 +343,8 @@ type
     cxLabel18: TcxLabel;
     ComboSifreSuresi: TcxImageComboBox;
     cxLabel19: TcxLabel;
+    GroupBox7: TGroupBox;
+    EditDepoDBAdi: TcxButtonEdit;
     procedure KaydetTusClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
@@ -443,6 +445,8 @@ type
     procedure PageControlKilitChange(Sender: TObject);
     procedure DokumanDizinPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
+    procedure EditDepoDBAdiPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
     procedure cxButton1Click(Sender: TObject);
     procedure cxImageComboBox1PropertiesCloseUp(Sender: TObject);
     procedure btnMailSablonClick(Sender: TObject);
@@ -488,6 +492,24 @@ end;
 procedure TOpsiyonDlg.DokumanDizinPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 begin
      DokumanDizin.Text:=ExtractFileDir(OpenDialog1.FileName);
+end;
+
+procedure TOpsiyonDlg.EditDepoDBAdiPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+var
+  LAd: string;
+begin
+  // e-Belge/arsiv 2. DB adini kullanicidan al (MesajStrAl). Bos -> GENDEPO.
+  LAd := Trim(EditDepoDBAdi.Text);
+  if LAd = '' then LAd := 'GENDEPO';
+  if MesajStrAl('e-Belge / Ar'#$15F'iv Deposu',
+       'Depo (ar'#$15F'iv) veritaban'#$131' ad'#$131'n'#$131' giriniz:', 'E', nil, LAd,
+       '', 'E', nil, LAd) then
+  begin
+    LAd := Trim(LAd);
+    if LAd = '' then LAd := 'GENDEPO';
+    EditDepoDBAdi.Text := LAd;
+  end;
 end;
 
 procedure TOpsiyonDlg.BTNDillerClick(Sender: TObject);
@@ -893,6 +915,8 @@ begin
    Degistirme.Checked :=Tablo.GENINI.ReadBoolean(Ops_GenelOpsiyon_LogDegistirme,False); //  GenelOpsiyon','LogDegistirme
 
    DokumanDizin.Text :=  Tablo.GENINI.ReadString(Ops_Dokuman_Dizin,'c:\GenDokuman\'); //  Doküman', 'Dizin'
+   // e-Belge/arsiv 2. DB adi (synonym hedefi). Bos ise varsayilan GENDEPO.
+   EditDepoDBAdi.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO');
 
 
    EditVarsayDoviz.Text := Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayDoviz,'TL'); //   GenelOpsiyon', 'vars döviz'
@@ -1059,6 +1083,10 @@ begin
    if (DokumanDizin.Text<>'')and(DokumanDizin.Text[Length(DokumanDizin.Text)]<>'\') then
        DokumanDizin.Text := DokumanDizin.Text + '\';
    Tablo.GENINI.WriteString(Ops_Dokuman_Dizin,DokumanDizin.Text);
+   // e-Belge/arsiv 2. DB adi. Bos birakilirsa GENDEPO yazilir.
+   if Trim(EditDepoDBAdi.Text) = '' then
+     EditDepoDBAdi.Text := 'GENDEPO';
+   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_DepoDBAdi, Trim(EditDepoDBAdi.Text));
 
 
    if EditVarsayDoviz.Text='' then EditVarsayDoviz.Text:='TL';
