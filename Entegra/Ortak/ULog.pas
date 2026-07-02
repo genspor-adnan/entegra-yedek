@@ -52,13 +52,17 @@ type
   end;
 
 // JSON'u string olarak veren temel cagri. ATabloID = LOG.TABLOID (TabNo_*).
+// AUstTabloID/AUstKayitID: master (ör. FATBASLIK). Verilmezse ust=kendisidir;
+// detay satirlarda (ör. FATURA) master gecirilir -> master+detay birlikte gorulur.
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
-  const ABilgiJSON: string; const AModul: string = ''); overload;
+  const ABilgiJSON: string; const AModul: string = '';
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0); overload;
 
 // TLogKurucu alan pratik cagri. AKurucu'nun SAHIPLIGINI ALIR ve serbest birakir
 // (fluent kullanim icin). Kurucu bos ise BILGI NULL yazilir.
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
-  AKurucu: TLogKurucu; const AModul: string = ''); overload;
+  AKurucu: TLogKurucu; const AModul: string = '';
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0); overload;
 
 implementation
 
@@ -144,7 +148,8 @@ begin
     begin
       if LUnion <> '' then LUnion := LUnion + ' UNION ALL ';
       LUnion := LUnion +
-        'SELECT ID,TARIH,IP,ISTASYON,KULLANICIID,SUBEID,MODUL,ISLEMTIPI,TABLOID,KAYITID,BILGI ' +
+        'SELECT ID,TARIH,IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,' +
+        'USTTABLOID,USTKAYITID,TABLOID,KAYITID,BILGI ' +
         'FROM dbo.' + LQ.Fields[0].AsString;
       LQ.Next;
     end;
@@ -176,9 +181,11 @@ begin
       ' ID bigint IDENTITY(1,1) NOT NULL,' +
       ' TARIH datetime2(3) NOT NULL CONSTRAINT DF_' + LT + '_TARIH DEFAULT(SYSDATETIME()),' +
       ' IP varchar(45) NULL, ISTASYON varchar(64) NULL, KULLANICIID int NULL,' +
-      ' SUBEID smallint NULL, MODUL varchar(64) NULL, ISLEMTIPI tinyint NOT NULL,' +
+      ' SUBEID smallint NULL, ISLEMTIPI tinyint NOT NULL,' +
+      ' USTTABLOID int NULL, USTKAYITID bigint NULL,' +
       ' TABLOID int NULL, KAYITID bigint NULL, BILGI varbinary(max) NULL,' +
       ' CONSTRAINT PK_' + LT + ' PRIMARY KEY CLUSTERED (ID));' +
+      ' CREATE INDEX IX_' + LT + '_UST ON dbo.' + LT + '(USTTABLOID,USTKAYITID);' +
       ' CREATE INDEX IX_' + LT + '_KAYIT ON dbo.' + LT + '(TABLOID,KAYITID);' +
       ' CREATE INDEX IX_' + LT + '_TARIH ON dbo.' + LT + '(TARIH); END';
     LQ.ExecSQL;
@@ -281,15 +288,23 @@ end;
 { LogYaz }
 
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
-  const ABilgiJSON: string; const AModul: string = '');
+  const ABilgiJSON: string; const AModul: string = '';
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
 var
   LQ: TFDQuery;
   LCnn: TFDConnection;
   LBilgiVar: Boolean;
   LTablo: string;
+  LUstT: Integer;
+  LUstK: Int64;
 begin
   // Loglama hicbir kosulda uygulamayi kirmaz/yavaslamaz.
   try
+    // Ust (master) verilmediyse kendisidir (baslik kendi kaydi). Detay satirda
+    // cagiran USTTABLOID/USTKAYITID = master (ör. FATBASLIK) gecirir; boylece
+    // master+detay loglari birlikte sorgulanabilir.
+    LUstT := AUstTabloID; if LUstT = 0 then LUstT := ATabloID;
+    LUstK := AUstKayitID; if LUstK = 0 then LUstK := AKayitID;
     GLock.Enter;
     try
       LCnn := LogBaglantisi;
@@ -298,20 +313,23 @@ begin
       LQ := TFDQuery.Create(nil);
       try
         LQ.Connection := LCnn;
+        // MODUL log tablolarinda TUTULMAZ; TABLOID -> TABLOLAR.MODUL ile alinir.
+        // AModul param'i geriye uyumluluk icin durur (yazilmaz).
         if LBilgiVar then
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,MODUL,ISLEMTIPI,TABLOID,KAYITID,BILGI) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:MDL,:IT,:TID,:KYT, COMPRESS(CAST(:BILGI AS nvarchar(max))))'
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,BILGI) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, COMPRESS(CAST(:BILGI AS nvarchar(max))))'
         else
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,MODUL,ISLEMTIPI,TABLOID,KAYITID) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:MDL,:IT,:TID,:KYT)';
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT)';
         LQ.ParamByName('IP').AsString  := Copy(YerelIP, 1, 45);
         LQ.ParamByName('IST').AsString := Copy(Istasyon, 1, 64);
         LQ.ParamByName('KUL').AsInteger := StrToIntDef(Trim(Kullanan), 0);
         LQ.ParamByName('SUB').AsInteger := StrToIntDef(Trim(SubeIDYazi), 0);
-        LQ.ParamByName('MDL').AsString := Copy(AModul, 1, 64);
         LQ.ParamByName('IT').AsInteger := Ord(AIslemTipi);
+        LQ.ParamByName('UTID').AsInteger := LUstT;
+        LQ.ParamByName('UKYT').AsLargeInt := LUstK;
         LQ.ParamByName('TID').AsInteger := ATabloID;
         LQ.ParamByName('KYT').AsLargeInt := AKayitID;
         if LBilgiVar then
@@ -332,7 +350,8 @@ begin
 end;
 
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
-  AKurucu: TLogKurucu; const AModul: string = '');
+  AKurucu: TLogKurucu; const AModul: string = '';
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
 var
   LJSON: string;
 begin
@@ -343,7 +362,7 @@ begin
       LJSON := ''
     else
       LJSON := AKurucu.JSON;
-    LogYaz(AIslemTipi, ATabloID, AKayitID, LJSON, AModul);
+    LogYaz(AIslemTipi, ATabloID, AKayitID, LJSON, AModul, AUstTabloID, AUstKayitID);
   finally
     AKurucu.Free;  // sahipligi aldik
   end;

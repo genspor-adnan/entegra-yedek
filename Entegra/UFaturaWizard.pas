@@ -9,7 +9,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections,
+  Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, dxSkinsCore, cxGraphics, UStokHizmetAra,
   cxStyles, Fetautil, dxSkinLiquidSky, cxCheckBox, 
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData,
@@ -540,6 +541,11 @@ type
     procedure SatirEkleClick(Sender: TObject);
     procedure SatirSilClick(Sender: TObject);
     procedure LogKaydet;
+    procedure FaturaLogSnapshotAl;
+    procedure FaturaLogDiffKaydet;
+    procedure SatirEkleLogla(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
+      AUstTabNo: Integer; AUstID: Int64);
+    function FaturaLogTabNo: Integer;
     procedure MenuMusTreeDblClick(Sender: TObject);
     procedure FATURAAfterInsert(DataSet: TDataSet);
     procedure FATURABeforeEdit(DataSet: TDataSet);
@@ -729,6 +735,8 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FFaturaSnap: TObjectDictionary<Integer, TStringList>;  // FATURA orijinal satirlar (log diff icin)
+    FFaturaSnapAlindi: Boolean;
     Tur, TabFaturaIDsi, RehberId,ServisID, ProjeId, AktiviteId, MasrafMerkezi, Tipi: Integer;
     iadefis, Kilit: Boolean;
     Cagiran: SmallInt;
@@ -753,7 +761,7 @@ Uses UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
   UOPSDLG, UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame, UFisIrsaliyeAraDlg,
   UGirisKutusuEx, UNakitDlg, URehberAyar, IdGlobalProtocols, LocOnFly,
   UCariFonksiyonlar, UAnaForm, UFaturalar, UFaturaGorevFrame, GenoTIP.eFatura.NativeApi, UGorevDlg, UIsListesi,
-  UUTSKontrol,uUtility_my, UExceldenVeriAl, USevkBilgisiDlg;
+  UUTSKontrol,uUtility_my, UExceldenVeriAl, USevkBilgisiDlg, ULog;
 
 {$R *.dfm}
 
@@ -1180,6 +1188,7 @@ end;
 
 procedure TFaturaWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FreeAndNil(FFaturaSnap);
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K')) and (TabFatbaslik.active) and (TabFatbaslik.Fields[0].AsString <> '')
       and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [0,1,11,21,31,51] )then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgiler silinmesi laz?m
       Tablo.FaturaSil(TabFatbaslik, TabFatura);
@@ -1235,6 +1244,7 @@ var
   MyClass: TComponent;
   ComboOZELKOD: TcxDBComboBox;
 begin
+  FFaturaSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
 
   if not EnBoyHesaplamaAktif then begin
      FreeAndNil(TabFaturaEN);
@@ -1554,6 +1564,15 @@ begin
         Aman_Kilitle;
 
     TabloYenile(TabFatura, [TabFaturaIDsi]);
+
+    // FATURA satir loglama: duzenlemede (D/I) orijinal satir durumunu yakala
+    // (browse durumunda, guvenli). Kaydette bununla diff alinir.
+    FFaturaSnapAlindi := False;
+    if IslemOp in ['D','I'] then
+    begin
+      FaturaLogSnapshotAl;
+      FFaturaSnapAlindi := True;
+    end;
 
     FirmaBilgileri;
 
@@ -3932,6 +3951,151 @@ begin
      //if LogBelge.Count > 0 then begin
      //   Tablo.LogIslemlerBelge(FATURA, TabNo, FaturaIDsi, 4);
      Tablo.LogIslemleri(TabloNo, TabFaturaIDsi, 4, TabFatbaslik)
+  end
+  else if islemOp in ['E','K'] then
+     // Yeni belge / kopya -> baslik EKLEME logu (ust=kendisi).
+     try SatirEkleLogla(TabFatbaslik, TabloNo, TabFaturaIDsi, TabloNo, TabFaturaIDsi); except end;
+  FaturaLogDiffKaydet;   // FATURA satir degisiklik/ekleme/silme (kendi guard'i var)
+end;
+
+// FATURA satir tipi -> TabNo (Utablo silme akisi ~4856 ile ayni esleme)
+function TFaturaWizardDlg.FaturaLogTabNo: Integer;
+begin
+  case TabFatbaslik.FieldByName('TUR').AsInteger of
+    9:                     Result := TabNo_FATURA_AlisSiparis;
+    19:                    Result := TabNo_FATURA_SatisSiparis;
+    4,14,15,16,17,110,119: Result := TabNo_FATURA_GidenFatFisIrs;
+  else
+    Result := TabNo_FATURA_GelenFatFisIrs;   // 8,10,11,12,13,109...
+  end;
+end;
+
+// Bir kaydin (ADataSet mevcut satiri) EKLEME logu: tum dolu fkData alanlari deger olarak.
+procedure TFaturaWizardDlg.SatirEkleLogla(ADataSet: TDataSet; ATabNo: Integer;
+  AID: Int64; AUstTabNo: Integer; AUstID: Int64);
+var
+  LK: TLogKurucu;
+  i: Integer;
+begin
+  LK := TLogKurucu.Yeni;
+  for i := 0 to ADataSet.FieldCount - 1 do
+    if (ADataSet.Fields[i].FieldKind = fkData) and
+       (ADataSet.Fields[i].DataType <> ftBlob) and
+       (ADataSet.Fields[i].DataType <> ftMemo) and
+       (Trim(ADataSet.Fields[i].AsString) <> '') then
+      LK.Deger(ADataSet.Fields[i].FieldName, ADataSet.Fields[i].AsString);
+  LogYaz(liEkle, ATabNo, AID, LK, 'Fatura', AUstTabNo, AUstID);
+end;
+
+// Duzenleme oncesi orijinal FATURA satirlarini (ID -> alan degerleri, alan
+// sirasinda) sakla. Browse durumunda cagrilir; cursor bookmark ile korunur.
+procedure TFaturaWizardDlg.FaturaLogSnapshotAl;
+var
+  LBM: TBookmark;
+  LSL: TStringList;
+  i: Integer;
+begin
+  if not Assigned(FFaturaSnap) then Exit;
+  FFaturaSnap.Clear;
+  if (not Assigned(TabFatura)) or (not TabFatura.Active) then Exit;
+  TabFatura.DisableControls;
+  try
+    LBM := TabFatura.Bookmark;
+    try
+      TabFatura.First;
+      while not TabFatura.Eof do
+      begin
+        LSL := TStringList.Create;
+        for i := 0 to TabFatura.FieldCount - 1 do
+          LSL.Add(TabFatura.Fields[i].AsString);
+        FFaturaSnap.AddOrSetValue(TabFatura.FieldByName('ID').AsInteger, LSL);
+        TabFatura.Next;
+      end;
+    finally
+      if TabFatura.BookmarkValid(LBM) then TabFatura.Bookmark := LBM;
+    end;
+  finally
+    TabFatura.EnableControls;
+  end;
+end;
+
+// Kaydette: snapshot vs mevcut FATURA satirlari diff -> degisen/silinen satirlari
+// USTTABLOID=baslik(TabloNo), USTKAYITID=FATBASLIK id ile logla. Yeni satir (ekle)
+// baslikla tutarli olacak sekilde loglanmaz. Kaydetmeyi ASLA bozmaz.
+procedure TFaturaWizardDlg.FaturaLogDiffKaydet;
+var
+  LTabNo, i, LID: Integer;
+  LSnap: TStringList;
+  LK: TLogKurucu;
+  LGorulen: TList<Integer>;
+  LPair: TPair<Integer, TStringList>;
+  LBM: TBookmark;
+begin
+  // Snapshot alinmadiysa (yeni belge E/K) FFaturaSnap bostur -> tum satirlar
+  // "snapshot'ta yok" sayilir -> EKLEME loglanir. D/I'de snapshot ile diff.
+  if not Assigned(FFaturaSnap) then Exit;
+  if (not Assigned(TabFatura)) or (not TabFatura.Active) then Exit;
+  if not (islemOp in ['E','D','I','K']) then Exit;
+  try
+    LTabNo := FaturaLogTabNo;
+    LGorulen := TList<Integer>.Create;
+    try
+      TabFatura.DisableControls;
+      try
+        LBM := TabFatura.Bookmark;
+        try
+          TabFatura.First;
+          while not TabFatura.Eof do
+          begin
+            LID := TabFatura.FieldByName('ID').AsInteger;
+            LGorulen.Add(LID);
+            if FFaturaSnap.TryGetValue(LID, LSnap) then
+            begin
+              LK := TLogKurucu.Yeni;
+              for i := 0 to TabFatura.FieldCount - 1 do
+                if (TabFatura.Fields[i].FieldKind = fkData) and
+                   (TabFatura.Fields[i].DataType <> ftBlob) and
+                   (TabFatura.Fields[i].DataType <> ftMemo) and
+                   (i < LSnap.Count) and
+                   (TabFatura.Fields[i].AsString <> LSnap[i]) then
+                  LK.Alan(TabFatura.Fields[i].FieldName, LSnap[i],
+                          TabFatura.Fields[i].AsString);
+              if not LK.BosMu then
+                LogYaz(liDegistir, LTabNo, LID, LK, 'Fatura', TabloNo, TabFaturaIDsi)
+              else
+                LK.Free;
+            end
+            else
+              // snapshot'ta yok -> yeni satir -> EKLEME logu
+              SatirEkleLogla(TabFatura, LTabNo, LID, TabloNo, TabFaturaIDsi);
+            TabFatura.Next;
+          end;
+        finally
+          if TabFatura.BookmarkValid(LBM) then TabFatura.Bookmark := LBM;
+        end;
+      finally
+        TabFatura.EnableControls;
+      end;
+
+      // Silinen satirlar: snapshot'ta olup mevcutta olmayanlar. Alan adlari
+      // dataset yapisindan (mevcut TabFatura.Fields) alinir.
+      for LPair in FFaturaSnap do
+        if LGorulen.IndexOf(LPair.Key) < 0 then
+        begin
+          LK := TLogKurucu.Yeni;
+          for i := 0 to TabFatura.FieldCount - 1 do
+            if (TabFatura.Fields[i].FieldKind = fkData) and
+               (TabFatura.Fields[i].DataType <> ftBlob) and
+               (TabFatura.Fields[i].DataType <> ftMemo) and
+               (i < LPair.Value.Count) and (Trim(LPair.Value[i]) <> '') then
+              LK.Deger(TabFatura.Fields[i].FieldName, LPair.Value[i]);
+          LogYaz(liSil, LTabNo, LPair.Key, LK, 'Fatura', TabloNo, TabFaturaIDsi);
+        end;
+    finally
+      LGorulen.Free;
+    end;
+  except
+    // loglama kaydetmeyi bozmaz
   end;
 end;
 
@@ -4570,7 +4734,9 @@ end;
 
 procedure TFaturaWizardDlg.info1Click(Sender: TObject);
 begin
-       Tablo.InfoGoster('FATURA',  TabFatura.FieldByName('ID').AsInteger)
+  // FATURA satirindan da olsa UST (FATBASLIK) bilgisini goster: baslik + tum satir
+  // degisiklikleri birlikte gelir. TabloNo = baslik TabloID (USTTABLOID ile eslesir).
+  Tablo.InfoGoster('FATBASLIK', TabFatbaslik.FieldByName('ID').AsInteger, TabloNo);
 end;
 
 procedure TFaturaWizardDlg.BtnSilPlanClick(Sender: TObject);
