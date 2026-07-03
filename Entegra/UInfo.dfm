@@ -224,6 +224,18 @@ object InfoDlg: TInfoDlg
             HeaderAlignmentHorz = taCenter
             Width = 150
           end
+          object GridLOGViewKOD: TcxGridDBColumn
+            Caption = 'Kod'
+            DataBinding.FieldName = 'KOD'
+            DataBinding.IsNullValueType = True
+            Width = 100
+          end
+          object GridLOGViewAD: TcxGridDBColumn
+            Caption = 'Ad'
+            DataBinding.FieldName = 'AD'
+            DataBinding.IsNullValueType = True
+            Width = 180
+          end
           object GridLOGViewSATIRID: TcxGridDBColumn
             Caption = 'Kay'#305't'
             DataBinding.FieldName = 'KAYITNO'

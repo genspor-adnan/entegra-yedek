@@ -57,6 +57,8 @@ type
     GridLOGViewFIRMA: TcxGridDBColumn;
     GridLOGViewTABLO: TcxGridDBColumn;
     GridLOGViewISLEM: TcxGridDBColumn;
+    GridLOGViewKOD: TcxGridDBColumn;
+    GridLOGViewAD: TcxGridDBColumn;
     GridLOGViewISLEMTIPI: TcxGridDBColumn;   // gizli - satir renklendirme icin
     GridLOGLevel1: TcxGridLevel;
     Panel2: TPanel;
@@ -284,10 +286,15 @@ begin
     ' FIRMA = MAX(ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))),' +
     ' PCADI = MAX(L.ISTASYON),' +
     ' ANAHTAR = MAX(COALESCE(T.MODUL, T.TABLOADI, CAST(L.USTTABLOID AS varchar(20)))),' +
+    // Kod/Ad: log''un bagli oldugu cari/IK (REHBERID) veya stok (STOKID) - LOGREFERANS''tan (guncel)
+    ' KOD = MAX(COALESCE(LRc.KOD, LRs.KOD)),' +
+    ' AD  = MAX(COALESCE(LRc.AD,  LRs.AD)),' +
     ' ADET = COUNT(*)' +
     ' FROM ISLEMLOG L' +
     ' LEFT JOIN REHBER R ON R.ID = L.KULLANICIID' +
     ' LEFT JOIN TABLOLAR T ON T.TABLOID = L.USTTABLOID' +
+    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=L.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC) LRc' +
+    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=L.STOKID   AND TABLOID=88          ORDER BY ID DESC) LRs' +
     LW +
     ' GROUP BY CAST(L.TARIH AS date), L.USTKAYITID, L.USTTABLOID, L.ISLEMTIPI' +
     ' ORDER BY MAX(L.TARIH) DESC';
