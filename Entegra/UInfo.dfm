@@ -413,7 +413,7 @@ object InfoDlg: TInfoDlg
     object cxLabel8: TcxLabel
       Left = 9
       Top = 6
-      Caption = 'Ad/'#304#231'erik ARA'
+      Caption = 'Kod/Ad Ara'
       Transparent = True
     end
     object EditIcerik: TcxButtonEdit

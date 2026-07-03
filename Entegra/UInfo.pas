@@ -78,6 +78,8 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     FJsonlar: TStringList;     // LvGecmis ile paralel: her kaydin BILGI json'u
+    FTiklamaAcik: Boolean;     // button-edit OnClick re-entrancy guard'i
+    procedure ButtonEditTiklama(Sender: TObject);   // edit'e tiklayinca picker'i ac
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
     procedure DetayGoster(const ABilgiJSON: string; ATip: Integer);
@@ -333,11 +335,29 @@ begin
   EditIcerik.Properties.OnButtonClick := BilgiAlButonClick;  // BilgiAl giris + '-' temizle
   EditIcerik.Properties.OnChange := FiltreUygula;             // secim/temizlemede suz
   CheckIcerik.Properties.OnEditValueChanged := FiltreUygula;  // Icerikten Ara: mod degisince suz
+  // Button-edit'lerin herhangi bir yerine tiklayinca giris ekrani (picker) acilsin.
+  Kullanici.OnClick   := ButtonEditTiklama;
+  txtAlan.OnClick     := ButtonEditTiklama;
+  EditKayitNo.OnClick := ButtonEditTiklama;
+  EditIcerik.OnClick  := ButtonEditTiklama;
 end;
 
 procedure TInfoDlg.FiltreUygula(Sender: TObject);
 begin
   if GenelModu then TabLogYukle;
+end;
+
+// Button-edit'in herhangi bir yerine tiklayinca ilgili giris ekranini (picker) acar.
+procedure TInfoDlg.ButtonEditTiklama(Sender: TObject);
+begin
+  if FTiklamaAcik then Exit;   // modal sonrasi tekrar tetiklenmesin
+  FTiklamaAcik := True;
+  try
+    if Sender = Kullanici then KullaniciButonClick(Sender, 0)   // personel listesi
+    else BilgiAlButonClick(Sender, 0);                          // BilgiAl giris
+  finally
+    FTiklamaAcik := False;
+  end;
 end;
 
 // Bolum combo'sunu TABLOLAR'daki modul listesiyle (Fatura/Fiş/İrsaliye/Sipariş...)
