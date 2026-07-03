@@ -360,6 +360,21 @@ begin
     // master+detay loglari birlikte sorgulanabilir.
     LUstT := AUstTabloID; if LUstT = 0 then LUstT := ATabloID;
     LUstK := AUstKayitID; if LUstK = 0 then LUstK := AKayitID;
+    // Varlik anahtari verilmediyse KART tipinden turet: cari/IK (71/73/74) ve stok(88)
+    // kartinin KENDISI -> KAYITID; altindaki DETAY -> USTKAYITID. Boylece bir cari/IK
+    // personelinin (REHBER) veya stokun TUM loglari REHBERID/STOKID ile bulunur.
+    if AREHBERID <= 0 then
+    begin
+      if (ATabloID = TabNo_REHBER) or (ATabloID = TabNo_IK) or (ATabloID = TabNo_IK_POTANSIYEL) then
+        AREHBERID := AKayitID
+      else if (LUstT = TabNo_REHBER) or (LUstT = TabNo_IK) or (LUstT = TabNo_IK_POTANSIYEL) then
+        AREHBERID := LUstK;
+    end;
+    if ASTOKID <= 0 then
+    begin
+      if ATabloID = TabNo_STOKLAR then ASTOKID := AKayitID
+      else if LUstT = TabNo_STOKLAR then ASTOKID := LUstK;
+    end;
     GLock.Enter;
     try
       LCnn := LogBaglantisi;
