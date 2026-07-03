@@ -315,6 +315,8 @@ procedure TInfoDlg.FiltreOlaylariBagla;
 begin
   DateTarihBas.Properties.OnEditValueChanged := FiltreUygula;
   DateTarihBit.Properties.OnEditValueChanged := FiltreUygula;
+  DateTarihBas.Properties.ImmediatePost := True;   // deger degisince ANINDA tetikle
+  DateTarihBit.Properties.ImmediatePost := True;
   CheckEkleme.Properties.OnEditValueChanged := FiltreUygula;
   CheckDegistirme.Properties.OnEditValueChanged := FiltreUygula;
   CheckSilme.Properties.OnEditValueChanged := FiltreUygula;
