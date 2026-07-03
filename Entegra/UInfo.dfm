@@ -192,7 +192,13 @@ object InfoDlg: TInfoDlg
           ScrollbarAnnotations.CustomAnnotations = <>
           OnCustomDrawCell = GridLOGViewCustomDrawCell
           DataController.DataSource = DsTabLog
-          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.DefaultGroupSummaryItems = <
+            item
+              Format = 'Kay'#305't: 0'
+              Kind = skCount
+              Position = spFooter
+              Column = GridLOGViewTARIH
+            end>
           DataController.Summary.FooterSummaryItems = <
             item
               Format = 'Kay'#305't: 0'
@@ -208,6 +214,7 @@ object InfoDlg: TInfoDlg
           OptionsView.ColumnAutoWidth = True
           OptionsView.Footer = True
           OptionsView.GroupByBox = True
+          OptionsView.GroupFooters = gfVisibleWhenExpanded
           OptionsView.Indicator = True
           object GridLOGViewTARIH: TcxGridDBColumn
             Caption = 'Tarih'
