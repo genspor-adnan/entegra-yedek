@@ -3674,6 +3674,14 @@ begin
     if LIsIrsaliye then
       LRoot.AddPair('compressed', 'false');  // irsaliye base64 olarak parse edilmesin
 
+    // ALICI POSTA KUTUSU (alias): RECEIVER_ALIAS request'te GONDERILMEZSE Izibiz ilk
+    // buldugu URN:MAIL etiketine yollar -> coklu subeli/aliasli mukellefte YANLIS
+    // kutuya gidiyor (izibiz teyidi). Secili alias'i (EBELGE.ALICIALIAS) request'e ekle.
+    if Trim(ABaslik.AliciAlias) <> '' then
+      LRoot.AddPair('receiverAlias', ABaslik.AliciAlias);
+    if Trim(ABaslik.GondericiAlias) <> '' then
+      LRoot.AddPair('senderAlias', ABaslik.GondericiAlias);
+
     LContent := TJSONObject.Create;
     LContent.AddPair('profile', LProfil);
     LContent.AddPair('documentTypeCode', LDocTypeCode);

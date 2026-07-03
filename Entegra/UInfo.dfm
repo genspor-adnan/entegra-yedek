@@ -364,9 +364,10 @@ object InfoDlg: TInfoDlg
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = -6
     object cxButton1: TcxButton
-      Left = 658
-      Top = 4
+      Left = 818
+      Top = 6
       Width = 98
       Height = 29
       Align = alCustom
@@ -395,6 +396,26 @@ object InfoDlg: TInfoDlg
       OptionsImage.ImageIndex = 0
       PaintStyle = bpsCaption
       TabOrder = 0
+    end
+    object cxLabel8: TcxLabel
+      Left = 9
+      Top = 6
+      Caption = 'Ad/'#304#231'erik ARA'
+      Transparent = True
+    end
+    object EditIcerik: TcxButtonEdit
+      Left = 100
+      Top = 6
+      Properties.Buttons = <
+        item
+          Kind = bkEllipsis
+        end
+        item
+          Caption = '-'
+          Kind = bkText
+        end>
+      TabOrder = 2
+      Width = 369
     end
   end
   object TabLog: TFDQuery

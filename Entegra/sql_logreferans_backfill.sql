@@ -1,0 +1,93 @@
+-- ============================================================
+-- LOGREFERANS BACKFILL: mevcut (yasayan) kayitlarin GUNCEL adlarini yazar.
+--   - Idempotent: ayni (TABLOID, KAYITID, AD) varsa tekrar eklemez.
+--   - Ana DB'de (BILIM) calisir; GENDEPO.dbo.LOGREFERANS'a cross-DB insert.
+--   - NOT: sadece GUNCEL isim girer. Ozellik oncesi degistirilen ESKI isimler
+--     yasayan tabloda/ISLEMLOG'da olmadigindan geri gelmez (bundan sonrasi gecmis tutar).
+-- ============================================================
+SET NOCOUNT ON;
+
+-- Duzeltme: yanlislikla cari(71) girilmis personel (GRUP=335) satirlarini sil.
+DELETE l FROM GENDEPO.dbo.LOGREFERANS l
+WHERE l.TABLOID=71 AND l.KAYITID IN (SELECT ID FROM REHBER WHERE GRUP=335);
+
+-- Cari (71): REHBER (Ilgili GRUP=334 ve personel GRUP=335 HARIC)
+INSERT INTO GENDEPO.dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)
+SELECT 71, r.ID, LEFT(r.FIRMA,200), LEFT(NULLIF(LTRIM(RTRIM(r.KOD)),''),60), 0, GETDATE()
+FROM REHBER r
+WHERE ISNULL(r.GRUP,0) NOT IN (334, 335)
+  AND LTRIM(RTRIM(ISNULL(r.FIRMA,''))) <> ''
+  AND NOT EXISTS(SELECT 1 FROM GENDEPO.dbo.LOGREFERANS l
+                 WHERE l.TABLOID=71 AND l.KAYITID=r.ID AND l.AD=r.FIRMA COLLATE Turkish_CI_AS);
+
+-- IK personeli (73): REHBER GRUP=335
+INSERT INTO GENDEPO.dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)
+SELECT 73, r.ID, LEFT(r.FIRMA,200), LEFT(NULLIF(LTRIM(RTRIM(r.KOD)),''),60), 0, GETDATE()
+FROM REHBER r
+WHERE r.GRUP = 335
+  AND LTRIM(RTRIM(ISNULL(r.FIRMA,''))) <> ''
+  AND NOT EXISTS(SELECT 1 FROM GENDEPO.dbo.LOGREFERANS l
+                 WHERE l.TABLOID=73 AND l.KAYITID=r.ID AND l.AD=r.FIRMA COLLATE Turkish_CI_AS);
+
+-- Stok (88): STOKLAR
+INSERT INTO GENDEPO.dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)
+SELECT 88, s.ID, LEFT(s.STOKADI,200), LEFT(NULLIF(LTRIM(RTRIM(s.KOD)),''),60), 0, GETDATE()
+FROM STOKLAR s
+WHERE LTRIM(RTRIM(ISNULL(s.STOKADI,''))) <> ''
+  AND NOT EXISTS(SELECT 1 FROM GENDEPO.dbo.LOGREFERANS l
+                 WHERE l.TABLOID=88 AND l.KAYITID=s.ID AND l.AD=s.STOKADI COLLATE Turkish_CI_AS);
+
+-- Gorev (33): GOREVLER
+INSERT INTO GENDEPO.dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)
+SELECT 33, g.ID, LEFT(g.KONUSU,200), NULL, 0, GETDATE()
+FROM GOREVLER g
+WHERE LTRIM(RTRIM(ISNULL(g.KONUSU,''))) <> ''
+  AND NOT EXISTS(SELECT 1 FROM GENDEPO.dbo.LOGREFERANS l
+                 WHERE l.TABLOID=33 AND l.KAYITID=g.ID AND l.AD=g.KONUSU COLLATE Turkish_CI_AS);
+
+-- Proje (70): PROJELER
+INSERT INTO GENDEPO.dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)
+SELECT 70, p.ID, LEFT(p.PROJEADI,200), NULL, 0, GETDATE()
+FROM PROJELER p
+WHERE LTRIM(RTRIM(ISNULL(p.PROJEADI,''))) <> ''
+  AND NOT EXISTS(SELECT 1 FROM GENDEPO.dbo.LOGREFERANS l
+                 WHERE l.TABLOID=70 AND l.KAYITID=p.ID AND l.AD=p.PROJEADI COLLATE Turkish_CI_AS);
+
+SELECT TABLOID, ADET=COUNT(*) FROM GENDEPO.dbo.LOGREFERANS GROUP BY TABLOID ORDER BY TABLOID;
+
+-- ============================================================
+-- ISLEMLOG (LOG<yyyy>) REHBERID/STOKID backfill (mevcut loglar icin):
+--   1) JSON'dan cikar: REHBERID <- $.REHBERID/$.CARIID, STOKID <- $.STOKID/$.URUNID
+--      (ekle/sil loglari tum alanlari icerir; degistir loglarinda genelde yok)
+--   2) Kayit bazinda YAY: bir kaydin ekle logundaki deger -> ayni (TABLOID,KAYITID)
+--      diger loglarina (degistir loglarini da doldurur).
+-- Dinamik: tum LOG<yyyy> tablolarini gezer.
+-- ============================================================
+DECLARE @sql nvarchar(max);
+
+-- 1) JSON'dan
+SET @sql = N'';
+SELECT @sql = @sql +
+  'UPDATE l SET REHBERID=x.reh, STOKID=x.stk FROM GENDEPO.dbo.' + QUOTENAME(name) + ' l ' +
+  'CROSS APPLY(SELECT ' +
+  'NULLIF(COALESCE(TRY_CAST(JSON_VALUE(d.j,''$.REHBERID'') AS bigint),TRY_CAST(JSON_VALUE(d.j,''$.CARIID'') AS bigint)),0) reh,' +
+  'NULLIF(COALESCE(TRY_CAST(JSON_VALUE(d.j,''$.STOKID'') AS bigint),TRY_CAST(JSON_VALUE(d.j,''$.URUNID'') AS bigint)),0) stk ' +
+  'FROM(SELECT CAST(DECOMPRESS(l.BILGI) AS nvarchar(max)) j) d WHERE ISJSON(d.j)=1) x ' +
+  'WHERE l.BILGI IS NOT NULL AND (l.REHBERID IS NULL OR l.STOKID IS NULL);'
+FROM GENDEPO.sys.tables WHERE name LIKE 'LOG[0-9][0-9][0-9][0-9]';
+EXEC(@sql);
+
+-- 2) Kayit bazinda yay
+SET @sql = N'';
+SELECT @sql = @sql +
+  'UPDATE l SET REHBERID=s.v FROM GENDEPO.dbo.'+QUOTENAME(name)+' l ' +
+  'JOIN(SELECT TABLOID,KAYITID,MAX(REHBERID) v FROM GENDEPO.dbo.'+QUOTENAME(name)+' WHERE REHBERID>0 GROUP BY TABLOID,KAYITID) s ' +
+  'ON s.TABLOID=l.TABLOID AND s.KAYITID=l.KAYITID WHERE l.REHBERID IS NULL;' +
+  'UPDATE l SET STOKID=s.v FROM GENDEPO.dbo.'+QUOTENAME(name)+' l ' +
+  'JOIN(SELECT TABLOID,KAYITID,MAX(STOKID) v FROM GENDEPO.dbo.'+QUOTENAME(name)+' WHERE STOKID>0 GROUP BY TABLOID,KAYITID) s ' +
+  'ON s.TABLOID=l.TABLOID AND s.KAYITID=l.KAYITID WHERE l.STOKID IS NULL;'
+FROM GENDEPO.sys.tables WHERE name LIKE 'LOG[0-9][0-9][0-9][0-9]';
+EXEC(@sql);
+
+SELECT ISLEMLOG_TOPLAM=COUNT(*), REHBERID_DOLU=COUNT(REHBERID), STOKID_DOLU=COUNT(STOKID)
+FROM GENDEPO.dbo.ISLEMLOG;

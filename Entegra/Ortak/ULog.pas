@@ -56,13 +56,15 @@ type
 // detay satirlarda (ör. FATURA) master gecirilir -> master+detay birlikte gorulur.
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
   const ABilgiJSON: string; const AModul: string = '';
-  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0); overload;
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0;
+  AREHBERID: Int64 = 0; ASTOKID: Int64 = 0); overload;
 
 // TLogKurucu alan pratik cagri. AKurucu'nun SAHIPLIGINI ALIR ve serbest birakir
 // (fluent kullanim icin). Kurucu bos ise BILGI NULL yazilir.
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
   AKurucu: TLogKurucu; const AModul: string = '';
-  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0); overload;
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0;
+  AREHBERID: Int64 = 0; ASTOKID: Int64 = 0); overload;
 
 // ---- Master/detay snapshot + diff loglama (wizard'lar icin ortak) ----
 // Bir dataset'in tum satirlarini (ID -> alan degerleri, alan index sirali) ASnap'e
@@ -82,6 +84,16 @@ procedure LogDiffKaydet(ADataSet: TDataSet;
 // Bir kaydin (ADataSet mevcut satiri) tum dolu fkData alanlarini EKLEME loglar.
 procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
   AUstTabNo: Integer = 0; AUstID: Int64 = 0);
+
+// Kart (master) ad/kod referansini GENDEPO.LOGREFERANS'a UPSERT eder (hizli arama).
+// Silinen kayit da kalir (ASilindi=True -> SILINDI=1). AD/KOD dataset alanlarindan
+// (FIRMA/STOKADI/ADI/KOD...) cikarilir. Loglama gibi is akisini ASLA kirmaz.
+procedure LogReferansGuncelle(ADataSet: TDataSet; ATabloID: Integer; AKayitID: Int64;
+  ASilindi: Boolean);
+
+// Kaydin varlik anahtarlarini alanlarindan cikarir: cari <- REHBERID/CARIID,
+// stok <- STOKID/URUNID. Bulunamazsa 0. (LogYaz'a REHBERID/STOKID gecmek icin.)
+procedure LogVarlikIDleri(ADataSet: TDataSet; out ARehberID, AStokID: Int64);
 
 implementation
 
@@ -153,29 +165,49 @@ end;
 procedure IslemLogViewKur(ACnn: TFDConnection);
 var
   LQ: TFDQuery;
-  LUnion: string;
+  LUnion, LT: string;
+  LTablolar: TStringList;
+  i: Integer;
 begin
   LQ := TFDQuery.Create(nil);
+  LTablolar := TStringList.Create;
   try
     LQ.Connection := ACnn;
     LQ.SQL.Text := 'SELECT name FROM sys.tables ' +
       'WHERE name LIKE ''LOG[0-9][0-9][0-9][0-9]'' ORDER BY name';
     LQ.Open;
+    while not LQ.Eof do begin LTablolar.Add(LQ.Fields[0].AsString); LQ.Next; end;
+    LQ.Close;
+    if LTablolar.Count = 0 then Exit;
     LUnion := '';
-    while not LQ.Eof do
+    for i := 0 to LTablolar.Count - 1 do
     begin
+      LT := LTablolar[i];
+      // Eski LOG tablolarina REHBERID/STOKID kolonu + indeks (yoksa) ekle.
+      LQ.SQL.Text := 'IF COL_LENGTH(''dbo.' + LT + ''',''REHBERID'') IS NULL' +
+        ' ALTER TABLE dbo.' + LT + ' ADD REHBERID bigint NULL;';
+      LQ.ExecSQL;
+      LQ.SQL.Text := 'IF COL_LENGTH(''dbo.' + LT + ''',''STOKID'') IS NULL' +
+        ' ALTER TABLE dbo.' + LT + ' ADD STOKID bigint NULL;';
+      LQ.ExecSQL;
+      LQ.SQL.Text := 'IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name=''IX_' + LT +
+        '_REHBER'' AND object_id=OBJECT_ID(''dbo.' + LT + ''')) CREATE INDEX IX_' + LT +
+        '_REHBER ON dbo.' + LT + '(REHBERID);';
+      LQ.ExecSQL;
+      LQ.SQL.Text := 'IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name=''IX_' + LT +
+        '_STOK'' AND object_id=OBJECT_ID(''dbo.' + LT + ''')) CREATE INDEX IX_' + LT +
+        '_STOK ON dbo.' + LT + '(STOKID);';
+      LQ.ExecSQL;
       if LUnion <> '' then LUnion := LUnion + ' UNION ALL ';
       LUnion := LUnion +
         'SELECT ID,TARIH,IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,' +
-        'USTTABLOID,USTKAYITID,TABLOID,KAYITID,BILGI ' +
-        'FROM dbo.' + LQ.Fields[0].AsString;
-      LQ.Next;
+        'USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI ' +
+        'FROM dbo.' + LT;
     end;
-    LQ.Close;
-    if LUnion = '' then Exit;
     LQ.SQL.Text := 'CREATE OR ALTER VIEW dbo.ISLEMLOG AS ' + LUnion;
     LQ.ExecSQL;
   finally
+    LTablolar.Free;
     LQ.Free;
   end;
 end;
@@ -201,10 +233,14 @@ begin
       ' IP varchar(45) NULL, ISTASYON varchar(64) NULL, KULLANICIID int NULL,' +
       ' SUBEID smallint NULL, ISLEMTIPI tinyint NOT NULL,' +
       ' USTTABLOID int NULL, USTKAYITID bigint NULL,' +
-      ' TABLOID int NULL, KAYITID bigint NULL, BILGI varbinary(max) NULL,' +
+      ' TABLOID int NULL, KAYITID bigint NULL,' +
+      ' REHBERID bigint NULL, STOKID bigint NULL,' +   // varlik baglantisi (cari/stok)
+      ' BILGI varbinary(max) NULL,' +
       ' CONSTRAINT PK_' + LT + ' PRIMARY KEY CLUSTERED (ID));' +
       ' CREATE INDEX IX_' + LT + '_UST ON dbo.' + LT + '(USTTABLOID,USTKAYITID);' +
       ' CREATE INDEX IX_' + LT + '_KAYIT ON dbo.' + LT + '(TABLOID,KAYITID);' +
+      ' CREATE INDEX IX_' + LT + '_REHBER ON dbo.' + LT + '(REHBERID);' +
+      ' CREATE INDEX IX_' + LT + '_STOK ON dbo.' + LT + '(STOKID);' +
       ' CREATE INDEX IX_' + LT + '_TARIH ON dbo.' + LT + '(TARIH); END';
     LQ.ExecSQL;
   finally
@@ -307,7 +343,8 @@ end;
 
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
   const ABilgiJSON: string; const AModul: string = '';
-  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0;
+  AREHBERID: Int64 = 0; ASTOKID: Int64 = 0);
 var
   LQ: TFDQuery;
   LCnn: TFDConnection;
@@ -335,12 +372,12 @@ begin
         // AModul param'i geriye uyumluluk icin durur (yazilmaz).
         if LBilgiVar then
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,BILGI) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, COMPRESS(CAST(:BILGI AS nvarchar(max))))'
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), COMPRESS(CAST(:BILGI AS nvarchar(max))))'
         else
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT)';
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0))';
         LQ.ParamByName('IP').AsString  := Copy(YerelIP, 1, 45);
         LQ.ParamByName('IST').AsString := Copy(Istasyon, 1, 64);
         LQ.ParamByName('KUL').AsInteger := StrToIntDef(Trim(Kullanan), 0);
@@ -350,6 +387,8 @@ begin
         LQ.ParamByName('UKYT').AsLargeInt := LUstK;
         LQ.ParamByName('TID').AsInteger := ATabloID;
         LQ.ParamByName('KYT').AsLargeInt := AKayitID;
+        LQ.ParamByName('REH').AsLargeInt := AREHBERID;
+        LQ.ParamByName('STK').AsLargeInt := ASTOKID;
         if LBilgiVar then
         begin
           LQ.ParamByName('BILGI').DataType := ftWideMemo;
@@ -367,9 +406,95 @@ begin
   end;
 end;
 
+// Kaydin cari/stok anahtarlarini alanlarindan cikarir (REHBERID/CARIID, STOKID/URUNID).
+procedure LogVarlikIDleri(ADataSet: TDataSet; out ARehberID, AStokID: Int64);
+  function AlanID(const AAlanlar: array of string): Int64;
+  var i: Integer; F: TField;
+  begin
+    Result := 0;
+    if ADataSet = nil then Exit;
+    for i := 0 to High(AAlanlar) do
+    begin
+      F := ADataSet.FindField(AAlanlar[i]);
+      if (F <> nil) and (not F.IsNull) and (F.AsLargeInt > 0) then
+        Exit(F.AsLargeInt);
+    end;
+  end;
+begin
+  ARehberID := AlanID(['REHBERID', 'CARIID']);
+  AStokID   := AlanID(['STOKID', 'URUNID']);
+end;
+
+// AD/KOD'u oncelikli alan listelerinden cikarir; GENDEPO.LOGREFERANS'a upsert eder.
+procedure LogReferansGuncelle(ADataSet: TDataSet; ATabloID: Integer; AKayitID: Int64;
+  ASilindi: Boolean);
+
+  function IlkDolu(const AAlanlar: array of string): string;
+  var i: Integer; F: TField;
+  begin
+    Result := '';
+    if ADataSet = nil then Exit;
+    for i := 0 to High(AAlanlar) do
+    begin
+      F := ADataSet.FindField(AAlanlar[i]);
+      if (F <> nil) and (Trim(F.AsString) <> '') then
+        Exit(Trim(F.AsString));
+    end;
+  end;
+
+var
+  LQ: TFDQuery;
+  LCnn: TFDConnection;
+  LAd, LKod: string;
+begin
+  try
+    LAd  := Copy(IlkDolu(['FIRMA','STOKADI','ADI','ADSOYAD','KONUSU','PROJEADI',
+                          'ACIKLAMA','TANIM','UNVAN','ISIM']), 1, 200);
+    LKod := Copy(IlkDolu(['KOD','STOKKOD','KODU','CARIKOD']), 1, 60);
+    if (LAd = '') and (LKod = '') then Exit;   // referanslanacak ad/kod yok
+    GLock.Enter;
+    try
+      LCnn := LogBaglantisi;
+      LQ := TFDQuery.Create(nil);
+      try
+        LQ.Connection := LCnn;
+        // Son satirin AD/KOD/SILINDI'sini al. DEGISMISSE YENI SATIR ekle -> eski isim
+        // korunur (isim gecmisi); eski isimle de arama yapilabilir.
+        LQ.SQL.Text := 'SELECT TOP 1 AD, KOD, SILINDI FROM dbo.LOGREFERANS' +
+                       ' WHERE TABLOID=:TID AND KAYITID=:KYT ORDER BY ID DESC';
+        LQ.ParamByName('TID').AsInteger  := ATabloID;
+        LQ.ParamByName('KYT').AsLargeInt := AKayitID;
+        LQ.Open;
+        var LAyni: Boolean := (not LQ.IsEmpty)
+                          and (LQ.FieldByName('AD').AsString = LAd)
+                          and (LQ.FieldByName('KOD').AsString = LKod)
+                          and (LQ.FieldByName('SILINDI').AsBoolean = ASilindi);
+        LQ.Close;
+        if LAyni then Exit;   // ad/kod/silindi degismemis -> yeni satir gerekmez
+        LQ.SQL.Text :=
+          'INSERT INTO dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)' +
+          ' VALUES(:TID,:KYT,:AD,:KOD,:SIL,getdate())';
+        LQ.ParamByName('TID').AsInteger  := ATabloID;
+        LQ.ParamByName('KYT').AsLargeInt := AKayitID;
+        LQ.ParamByName('AD').AsString    := LAd;
+        LQ.ParamByName('KOD').AsString   := LKod;
+        LQ.ParamByName('SIL').AsInteger  := Ord(ASilindi);
+        LQ.ExecSQL;
+      finally
+        LQ.Free;
+      end;
+    finally
+      GLock.Leave;
+    end;
+  except
+    // yut
+  end;
+end;
+
 procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
   AKurucu: TLogKurucu; const AModul: string = '';
-  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
+  AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0;
+  AREHBERID: Int64 = 0; ASTOKID: Int64 = 0);
 var
   LJSON: string;
 begin
@@ -380,7 +505,8 @@ begin
       LJSON := ''
     else
       LJSON := AKurucu.JSON;
-    LogYaz(AIslemTipi, ATabloID, AKayitID, LJSON, AModul, AUstTabloID, AUstKayitID);
+    LogYaz(AIslemTipi, ATabloID, AKayitID, LJSON, AModul, AUstTabloID, AUstKayitID,
+           AREHBERID, ASTOKID);
   finally
     AKurucu.Free;  // sahipligi aldik
   end;
@@ -427,6 +553,7 @@ var
   LGorulen: TList<Integer>;
   LPair: TPair<Integer, TStringList>;
   LBM: TBookmark;
+  LReh, LStk: Int64;
 
   // Mevcut satirin tum dolu fkData alanlarini deger olarak iceren kurucu (ekle/sil).
   function DoluAlanlar(ASL: TStringList): TLogKurucu;
@@ -462,6 +589,7 @@ begin
           begin
             LID := ADataSet.FieldByName('ID').AsInteger;
             LGorulen.Add(LID);
+            LogVarlikIDleri(ADataSet, LReh, LStk);   // satirin cari/stok anahtarlari
             if ASnap.TryGetValue(LID, LSnap) then
             begin
               // Mevcut satir snapshot'ta var -> degisen alanlar
@@ -475,13 +603,13 @@ begin
                   LK.Alan(ADataSet.Fields[i].FieldName, LSnap[i],
                           ADataSet.Fields[i].AsString);
               if not LK.BosMu then
-                LogYaz(liDegistir, ADetayTabNo, LID, LK, '', AUstTabNo, AUstID)
+                LogYaz(liDegistir, ADetayTabNo, LID, LK, '', AUstTabNo, AUstID, LReh, LStk)
               else
                 LK.Free;
             end
             else
               // snapshot'ta yok -> yeni satir -> EKLEME
-              LogYaz(liEkle, ADetayTabNo, LID, DoluAlanlar(nil), '', AUstTabNo, AUstID);
+              LogYaz(liEkle, ADetayTabNo, LID, DoluAlanlar(nil), '', AUstTabNo, AUstID, LReh, LStk);
             ADataSet.Next;
           end;
         finally
@@ -509,6 +637,7 @@ procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
 var
   LK: TLogKurucu;
   i: Integer;
+  LReh, LStk: Int64;
 begin
   if (ADataSet = nil) or (not ADataSet.Active) then Exit;
   try
@@ -519,7 +648,11 @@ begin
          (ADataSet.Fields[i].DataType <> ftMemo) and
          (Trim(ADataSet.Fields[i].AsString) <> '') then
         LK.Deger(ADataSet.Fields[i].FieldName, ADataSet.Fields[i].AsString);
-    LogYaz(liEkle, ATabNo, AID, LK, '', AUstTabNo, AUstID);
+    LogVarlikIDleri(ADataSet, LReh, LStk);   // cari/stok anahtarlari
+    LogYaz(liEkle, ATabNo, AID, LK, '', AUstTabNo, AUstID, LReh, LStk);
+    // Master (kart) ise LOGREFERANS'a upsert (hizli ad/kod arama).
+    if (AUstTabNo = 0) or ((AUstTabNo = ATabNo) and (AUstID = AID)) then
+      LogReferansGuncelle(ADataSet, ATabNo, AID, False);
   except
   end;
 end;

@@ -286,9 +286,10 @@ begin
   // iletisim->REHBERILETISIM.ID (Merkez), ilgili->kisi ID, ticari/ozluk->master ID.
   if LLogAktif then
   try
-    if LEkleVar  then LogYaz(liEkle,     LDetayTab, Yeri_Id, LKEkle.JSON,  '', AUstTabloID, AUstKayitID);
-    if LDegisVar then LogYaz(liDegistir, LDetayTab, Yeri_Id, LKDegis.JSON, '', AUstTabloID, AUstKayitID);
-    if LSilVar   then LogYaz(liSil,      LDetayTab, Yeri_Id, LKSil.JSON,   '', AUstTabloID, AUstKayitID);
+    // REHBERID = ust (cari/personel) -> cari bazli log aramasina dahil olur.
+    if LEkleVar  then LogYaz(liEkle,     LDetayTab, Yeri_Id, LKEkle.JSON,  '', AUstTabloID, AUstKayitID, AUstKayitID);
+    if LDegisVar then LogYaz(liDegistir, LDetayTab, Yeri_Id, LKDegis.JSON, '', AUstTabloID, AUstKayitID, AUstKayitID);
+    if LSilVar   then LogYaz(liSil,      LDetayTab, Yeri_Id, LKSil.JSON,   '', AUstTabloID, AUstKayitID, AUstKayitID);
   except
   end;
   if Assigned(LKEkle)  then LKEkle.Free;
@@ -312,7 +313,7 @@ begin
         LK.Deger(Tablo.Query2.FieldByName('ETIKET').AsString, Tablo.Query2.FieldByName('BILGI').AsString);
         Tablo.Query2.Next;
       end;
-      LogYaz(liSil, ADetayTabNo, AKayitID, LK.JSON, '', AUstTabloID, AUstKayitID);
+      LogYaz(liSil, ADetayTabNo, AKayitID, LK.JSON, '', AUstTabloID, AUstKayitID, AUstKayitID);
     finally
       LK.Free;
     end;

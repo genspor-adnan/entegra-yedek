@@ -63,6 +63,8 @@ type
     cxButton1: TcxButton;
     TabLog: TFDQuery;
     DsTabLog: TDataSource;
+    cxLabel8: TcxLabel;
+    EditIcerik: TcxButtonEdit;
     procedure FormShow(Sender: TObject);
     procedure LvGecmisSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure LvGecmisCustomDrawItem(Sender: TCustomListView; Item: TListItem;
@@ -259,6 +261,16 @@ begin
   LW := LW + MetinKosul('CAST(L.USTKAYITID AS varchar(20))', EditKayitNo.Text);
   // Bilgisayar (ISTASYON) - arama turu ile (txtAlan kutusu bu amacla kullaniliyor)
   LW := LW + MetinKosul('L.ISTASYON', txtAlan.Text);
+  // Ad/Icerik (cift yonlu): once LOGREFERANS'ta ad/kod (HIZLI, indeksli, silinmis
+  // kayit dahil), sonra log JSON (BILGI) icerigi (yavas). Ikisinden biri eslesirse gelir.
+  if Trim(EditIcerik.Text) <> '' then
+  begin
+    var LAra: string := Esc(EditIcerik.Text);
+    LW := LW +
+      ' AND ( EXISTS(SELECT 1 FROM LOGREFERANS r WHERE r.TABLOID=L.USTTABLOID' +
+      ' AND r.KAYITID=L.USTKAYITID AND (r.AD LIKE ''%' + LAra + '%'' OR r.KOD LIKE ''%' + LAra + '%''))' +
+      ' OR CAST(DECOMPRESS(L.BILGI) AS nvarchar(max)) LIKE ''%' + LAra + '%'' )';
+  end;
   // Islem tipi (Ekleme=1 / Degistirme=2 / Silme=0). Hicbiri secili degilse tumu.
   LTip := Tipler;
   if LTip <> '' then LW := LW + ' AND L.ISLEMTIPI IN (' + LTip + ')';
@@ -304,6 +316,8 @@ begin
   // Bilgisayar / Kayit No butonlari: giris (BilgiAl) + temizle ('-')
   txtAlan.Properties.OnButtonClick := BilgiAlButonClick;
   EditKayitNo.Properties.OnButtonClick := BilgiAlButonClick;
+  EditIcerik.Properties.OnButtonClick := BilgiAlButonClick;  // BilgiAl giris + '-' temizle
+  EditIcerik.Properties.OnChange := FiltreUygula;             // secim/temizlemede suz
 end;
 
 procedure TInfoDlg.FiltreUygula(Sender: TObject);
@@ -375,6 +389,7 @@ begin
     Exit;
   end;
   if LEdit = EditKayitNo then LBaslik := 'Kay' + #$0131 + 't No'
+  else if LEdit = EditIcerik then LBaslik := 'Ad/' + #$0130 + #$00E7 + 'erik'
   else LBaslik := 'Bilgisayar';
   LDeg := LEdit.Text;
   if TGirisKutusuEx.BilgiAlEx(LBaslik,

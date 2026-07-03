@@ -6547,12 +6547,20 @@ begin
             else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then
               LK.Alan(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString);
         if (Islem = 5) or (not LK.BosMu) then
-          LogYaz(LTip, TabloID, SatirID, LK.JSON, '', AUstTabloID, AUstKayitID);
+        begin
+          var LReh, LStk: Int64;
+          LogVarlikIDleri(Tablo1, LReh, LStk);   // kaydin cari/stok anahtarlari
+          LogYaz(LTip, TabloID, SatirID, LK.JSON, '', AUstTabloID, AUstKayitID, LReh, LStk);
+        end;
       finally
         LK.Free;
       end;
     except
     end;
+
+    // Master (kart) ise LOGREFERANS'a upsert: edit -> guncel ad/kod, sil -> SILINDI=1.
+    if (AUstTabloID = 0) or (AUstTabloID = TabloID) then
+      LogReferansGuncelle(Tablo1, TabloID, SatirID, Islem = 5);
 
     LogOnceki.Clear;
   end;
