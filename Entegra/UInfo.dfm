@@ -31,7 +31,7 @@ object InfoDlg: TInfoDlg
     ClientRectRight = 916
     ClientRectTop = 26
     object cxTabSheet1: TcxTabSheet
-      Caption = 'Genel'
+      Caption = 'Liste'
       ImageIndex = 0
       object PanelUst: TPanel
         Left = 0
@@ -268,7 +268,7 @@ object InfoDlg: TInfoDlg
       end
     end
     object cxTabSheet2: TcxTabSheet
-      Caption = 'Detay'
+      Caption = #$0130#$00E7'erik'
       ImageIndex = 1
       object LvGecmis: TListView
         Left = 0
