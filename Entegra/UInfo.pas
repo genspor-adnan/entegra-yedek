@@ -717,6 +717,9 @@ begin
     1: ACanvas.Font.Color := clGreen;   // Ekleme
     2: ACanvas.Font.Color := clBlue;    // Değiştirme
   end;
+  // Secili satir: koyu zemin renkli yaziyi bogar -> ACIK zemin ver (yazi okunur kalsin).
+  if AViewInfo.GridRecord.Selected then
+    ACanvas.Brush.Color := $00D9F2FF;   // acik krem
 end;
 
 procedure TInfoDlg.FormDestroy(Sender: TObject);
