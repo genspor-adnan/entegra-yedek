@@ -106,6 +106,7 @@ object InfoDlg: TInfoDlg
               Caption = '-'
               Kind = bkText
             end>
+          Properties.ReadOnly = True
           TabOrder = 6
           Width = 94
         end
@@ -125,7 +126,7 @@ object InfoDlg: TInfoDlg
               Default = True
               Kind = bkEllipsis
             end>
-          Properties.ReadOnly = False
+          Properties.ReadOnly = True
           TabOrder = 1
           Width = 179
         end
@@ -140,6 +141,7 @@ object InfoDlg: TInfoDlg
               Caption = '-'
               Kind = bkText
             end>
+          Properties.ReadOnly = True
           TabOrder = 7
           Width = 141
         end
