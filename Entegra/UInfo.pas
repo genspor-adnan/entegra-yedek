@@ -181,11 +181,8 @@ begin
      // MenuYeniLog: 2 sekme, Genel (grupli log listesi) aktif.
      cxTabSheet1.TabVisible := True;
      cxPageControl1.ActivePage := cxTabSheet1;
-     // Bolum combo + tarih varsayilani (BUGUN 00:00-23:59). Olaylardan ONCE ki
-     // ilk deger atamalari erken sorgu tetiklemesin.
+     // Bolum combo yuklenir; tarih filtresi kaldirildi.
      BolumleriYukle;
-     DateTarihBas.Date := Date;
-     DateTarihBit.Date := Date;
      FiltreOlaylariBagla;
      TabLogYukle;
    end
@@ -246,15 +243,7 @@ begin
 
   // --- WHERE: filtre kontrollerinden. Bos alan -> o filtre yok (tum kayitlar). ---
   LW := ' WHERE 1=1';
-  // Tarih: baslama 00:00, bitis 23:59:59. Bos ise ilgili sinir yok.
-  // Kayit No girildiyse tarih araligina BAKMA (o kaydin tum gecmisi gelsin).
-  if Trim(EditKayitNo.Text) = '' then
-  begin
-    if not VarIsNull(DateTarihBas.EditValue) then
-      LW := LW + ' AND L.TARIH >= ''' + FormatDateTime('yyyymmdd', DateTarihBas.Date) + ' 00:00:00''';
-    if not VarIsNull(DateTarihBit.EditValue) then
-      LW := LW + ' AND L.TARIH <= ''' + FormatDateTime('yyyymmdd', DateTarihBit.Date) + ' 23:59:59''';
-  end;
+  // (Tarih filtresi kaldirildi: arama Ad/Icerik + diger filtrelerle yapilir.)
   // Kullanici (REHBER firma) - arama turu ile
   LW := LW + MetinKosul('ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))', Kullanici.Text);
   // Bolum: TABLOLAR modul listesinden secim (tam eslesme). Bos = tumu.
@@ -313,8 +302,6 @@ end;
 // Filtre kontrollerinin olaylarini TabLogYukle'ye baglar (kod ile, bir kez).
 procedure TInfoDlg.FiltreOlaylariBagla;
 begin
-  DateTarihBas.Properties.OnEditValueChanged := FiltreUygula;
-  DateTarihBit.Properties.OnEditValueChanged := FiltreUygula;
   CheckEkleme.Properties.OnEditValueChanged := FiltreUygula;
   CheckDegistirme.Properties.OnEditValueChanged := FiltreUygula;
   CheckSilme.Properties.OnEditValueChanged := FiltreUygula;
