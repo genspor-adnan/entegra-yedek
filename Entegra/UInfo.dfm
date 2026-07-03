@@ -2,7 +2,7 @@ object InfoDlg: TInfoDlg
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMaximize]
-  BorderStyle = bsDialog
+  BorderStyle = bsSizeable
   Caption = 'info'
   ClientHeight = 398
   ClientWidth = 920
