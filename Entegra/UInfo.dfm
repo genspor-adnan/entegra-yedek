@@ -47,7 +47,6 @@ object InfoDlg: TInfoDlg
           StyleDisabled.Color = clWhite
           StyleDisabled.TextColor = clBtnText
           TabOrder = 0
-          Visible = False
           Width = 90
         end
         object cxLabel1: TcxLabel
@@ -156,14 +155,12 @@ object InfoDlg: TInfoDlg
           Top = 2
           Caption = 'Ba'#351'lama'
           Transparent = True
-          Visible = False
         end
         object cxLabel6: TcxLabel
           Left = 96
           Top = 2
           Caption = 'Biti'#351
           Transparent = True
-          Visible = False
         end
         object DateTarihBit: TcxDateEdit
           Left = 96
@@ -172,7 +169,6 @@ object InfoDlg: TInfoDlg
           StyleDisabled.Color = clWhite
           StyleDisabled.TextColor = clBtnText
           TabOrder = 13
-          Visible = False
           Width = 90
         end
       end
