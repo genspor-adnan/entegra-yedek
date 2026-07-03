@@ -383,8 +383,9 @@ object InfoDlg: TInfoDlg
       Width = 98
       Height = 29
       Align = alCustom
+      Anchors = [akTop, akRight]
       Cancel = True
-      Caption = 'Tamam'
+      Caption = 'Kapat'
       ModalResult = 1
       OptionsImage.Glyph.SourceDPI = 96
       OptionsImage.Glyph.Data = {
