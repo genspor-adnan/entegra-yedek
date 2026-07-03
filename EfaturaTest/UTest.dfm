@@ -2,7 +2,7 @@ object Tablo: TTablo
   Left = 0
   Top = 0
   Caption = 'Tablo'
-  ClientHeight = 231
+  ClientHeight = 386
   ClientWidth = 810
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -85,5 +85,14 @@ object Tablo: TTablo
     TabOrder = 8
     Height = 89
     Width = 225
+  end
+  object MemoBilgi: TcxMemo
+    Left = 24
+    Top = 238
+    Lines.Strings = (
+      'aliasirsaliye')
+    TabOrder = 9
+    Height = 107
+    Width = 617
   end
 end

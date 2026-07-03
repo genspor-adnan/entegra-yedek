@@ -21,6 +21,7 @@ type
   TEBelgeAliasKaydi = record
     BelgeTuru: Byte;
     Alias: string;
+    Baslik: string;   // Izibiz 'title' (unvan) - coklu alias seciminde gosterim icin
   end;
 
   TEBelgeAliasKayitlari = array of TEBelgeAliasKaydi;
@@ -62,9 +63,10 @@ implementation
 
 uses
   System.SysUtils, System.Classes, System.JSON, System.Net.HttpClient,
-  System.Net.URLClient, System.DateUtils, System.UITypes,
-  FireDAC.Stan.Param, Vcl.Dialogs,
-  Utablo, FetaKurulusSiniflari, UEBelgeKimlik, UMailOnayDlg, PrjConst;
+  System.Net.URLClient, System.DateUtils, System.UITypes, System.Variants,
+  FireDAC.Stan.Param, Vcl.Dialogs, Vcl.StdCtrls,
+  Utablo, FetaKurulusSiniflari, UEBelgeKimlik, UMailOnayDlg, PrjConst,
+  UGirisKutusuEx;
 
 type
   TIzibizAliasSaglayici = class(TInterfacedObject, IEBelgeAliasSaglayici)
@@ -263,6 +265,7 @@ begin
         Continue;
 
       Result[LKayitSayisi].Alias := LAlias;
+      Result[LKayitSayisi].Baslik := Trim(JSONMetni(LKayit, 'title'));
       LBelgeTuru := UpperCase(JSONMetni(LKayit, 'documentType'));
       if (LBelgeTuru = 'DESPATCHADVICE') or
         (Pos('IRSALIYE', UpperCase(LAlias)) > 0) then
@@ -437,6 +440,43 @@ begin
   end;
 end;
 
+// Birden fazla alias bulundugunda kullanicidan secim ister (combo, index bazli).
+// Iptal -> False. Secilirse ASecilen'e alias yazilir.
+function AliasSec(const AAliaslar, ABasliklar: array of string;
+  out ASecilen: string): Boolean;
+var
+  LListe: TStringList;
+  LSecim: Variant;
+  i: Integer;
+  LSatir: string;
+begin
+  Result := False;
+  ASecilen := '';
+  LListe := TStringList.Create;
+  try
+    for i := 0 to High(AAliaslar) do begin
+      LSatir := AAliaslar[i];
+      if (i <= High(ABasliklar)) and (Trim(ABasliklar[i]) <> '') then
+        LSatir := ABasliklar[i] + '  -  ' + AAliaslar[i];
+      LListe.Add(LSatir);
+    end;
+    // Ilk ogeyi on-secili yap (init TEXT ile eslesir); donus ItemIndex olur.
+    if LListe.Count > 0 then LSecim := LListe[0] else LSecim := '';
+    if TGirisKutusuEx.BilgiAlEx(
+         'Birden fazla alias bulundu - l' + #$00FC + 'tfen se' + #$00E7 + 'in',
+         TGirdiDenetimleri.Create.ComboBox('Alias', @LSecim, LListe,
+           csDropDownList, True, nil, 620)) <> mrOk then   // 620px genis combo
+      Exit;
+    i := LSecim;
+    if (i >= 0) and (i <= High(AAliaslar)) then begin
+      ASecilen := AAliaslar[i];
+      Result := True;
+    end;
+  finally
+    LListe.Free;
+  end;
+end;
+
 { ---------- AliasIslemiYap � 4-branch akis ---------- }
 
 class function TEBelgeAliasServis.AliasIslemiYap(AConnection: TFDConnection;
@@ -555,12 +595,53 @@ begin
     LSaglayici := SaglayiciOlustur;
     LKayitlar := LSaglayici.AliaslariGetir(AVergiNo);
 
-    // Belge t�r�ne g�re alias se�imi (14 i�in EIrsaliye, 15 i�in EFatura)
+    // Belge turune uyan TUM aliaslari topla (14->EIrsaliye, 15->EFatura).
+    var LAdaylar: TArray<string> := [];
+    var LBasliklar: TArray<string> := [];
     for i := 0 to Length(LKayitlar) - 1 do
       if LKayitlar[i].BelgeTuru = LIzibizFiltreTur then begin
-        LIzibizAlias := LKayitlar[i].Alias;
-        Break;
+        LAdaylar := LAdaylar + [LKayitlar[i].Alias];
+        LBasliklar := LBasliklar + [LKayitlar[i].Baslik];
       end;
+
+    if Length(LAdaylar) = 1 then
+      LIzibizAlias := LAdaylar[0]
+    else if Length(LAdaylar) > 1 then begin
+      // Adaylardan biri REHBERALIAS'ta zaten AKTIF ise sormadan onu kullan
+      // (varsayilan/en yeni oncelikli). Yoksa musteriye sor.
+      var LHazirAlias: string := '';
+      var Q2: TFDQuery := TFDQuery.Create(nil);
+      try
+        Q2.Connection := AConnection;
+        Q2.SQL.Text :=
+          'SELECT ALIAS FROM REHBERALIAS WHERE REHBERID=:R AND AKTIF=1 ' +
+          'AND BELGETURU IN (:T1,:T2) ' +
+          'ORDER BY VARSAYILAN DESC, SONKONTROLTARIHI DESC, ID DESC';
+        Q2.ParamByName('R').AsInteger := ARehberID;
+        Q2.ParamByName('T1').AsInteger := LKodMukellef;
+        Q2.ParamByName('T2').AsInteger := LKodGenel;
+        Q2.Open;
+        while (not Q2.Eof) and (LHazirAlias = '') do begin
+          for i := 0 to High(LAdaylar) do
+            if SameText(Trim(Q2.FieldByName('ALIAS').AsString), LAdaylar[i]) then begin
+              LHazirAlias := LAdaylar[i];
+              Break;
+            end;
+          Q2.Next;
+        end;
+      finally
+        Q2.Free;
+      end;
+
+      if LHazirAlias <> '' then
+        LIzibizAlias := LHazirAlias        // REHBERALIAS'taki aktif alias -> sormadan
+      else if not AliasSec(LAdaylar, LBasliklar, LIzibizAlias) then begin
+        Result.Basari := False;
+        Result.Mesaj := 'Alias secimi iptal edildi';
+        Exit;
+      end;
+    end;
+    // 0 ise LIzibizAlias='' kalir -> asagida e-Arsiv/mail (150) ya da 140 branch'i
   except
     on E: Exception do begin
       // Izibiz sorgusu hata � mevcut varsa onu kullan, yoksa hata don

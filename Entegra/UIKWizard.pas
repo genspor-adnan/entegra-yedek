@@ -275,6 +275,8 @@ type
       AItem: TcxCustomGridTableItem);
     procedure TabRehberBeforeEdit(DataSet: TDataSet);
     procedure TabRehberAfterPost(DataSet: TDataSet);
+    procedure DetayBeforeEdit(DataSet: TDataSet);   // IK detay iletisim: log oncesi snapshot
+    procedure DetayAfterPost(DataSet: TDataSet);     // IK detay iletisim: edit/insert log (ust=personel)
     procedure TabRehberAfterScroll(DataSet: TDataSet);
     procedure GridKurIletViewCellClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
@@ -384,7 +386,7 @@ implementation
 uses
   PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle, UCokluSecim,
   Fetautil, UResim, UComboImgDuzenle, UCariFonksiyonlar, UBinarySave, UAnaForm,
-  FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, UGoogleSifre;
+  FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, UGoogleSifre, ULog;
 
 var
   EkleKurIlet,  EklePerOzluk, EklePerIlet, EklePerUcret, BireyselZorunlu: Boolean;
@@ -532,7 +534,7 @@ begin
     begin
       if EkleKurIlet then // daha ?nce giri? yap?ld?ysa ?nce onu kaydedelim
       begin
-        Ekle(TabKurIlet, 1, RehberIletID, Degis);
+        Ekle(TabKurIlet, 1, RehberIletID, Degis, '', TabloNo, RehberID, 75);
       end;
       RehberIletID := TabAdresAd.Fields[0].AsInteger;
 
@@ -609,6 +611,10 @@ procedure TIKWizardDlg.FormCreate(Sender: TObject);
 begin
    LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
+
+   // IK personel iletisim (REHBERILETISIM) detayini ust=personel log'una bagla.
+   TabPerIletisim.BeforeEdit := DetayBeforeEdit;
+   TabPerIletisim.AfterPost  := DetayAfterPost;
 
    // LabelGrup.OnClick := Tablo.LabelClickCombobox;
 
@@ -973,7 +979,7 @@ begin
 
     if TabIlgili.RecordCount > 0 then begin
        if EklePerIlet then // daha ?nce giri? yap?ld?ysa ?nce onu kaydedelim
-          Ekle(TabPerIlet, 1, RehberPerID, Degis);
+          Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabloNo, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString);
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
        TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
@@ -992,7 +998,7 @@ begin
   if TabIlgili.Active then begin
     if TabIlgili.RecordCount > 0 then begin
        if EklePerIlet then // daha ?nce giri? yap?ld?ysa ?nce onu kaydedelim
-          Ekle(TabPerIlet, 1, RehberPerID, Degis);
+          Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabloNo, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString);
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
        TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
@@ -1508,7 +1514,9 @@ begin
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
        ' SUBEID) SELECT YERI=2,YER_ID='+TabRehber.Fields[0].AsString+',SIRA,ETIKET,BILGI='''+KNo+''', EKLEYEN='+Kullanan+
        ', SUBEID='+IntToStr(SubeId)+' FROM REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO and RV.NO=22 ',[], []);
-    //tablo.LogIslemleri(TabNo_REHBER, TabRehber.Fields[0].AsInteger, Degis, TabRehber);
+    if LogGun > 0 then   // yeni IK personeli -> EKLEME (TabloNo=73 IK / 74 potansiyel; cari 71'den ayri)
+      LogKayitEkle(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger,
+                   TabloNo, TabRehber.FieldByName('ID').AsInteger);
   end
   else
   if TabRehber.FieldByName('SINIF').AsInteger<>OncekiSinif then
@@ -1517,7 +1525,28 @@ begin
 
 
   YeniEklenenKayit := False;
-  Tablo.LogIslemleri(TabNo_REHBER,TabRehber.FieldByName('ID').AsInteger,4,TabRehber);
+  Tablo.LogIslemleri(TabloNo,TabRehber.FieldByName('ID').AsInteger,4,TabRehber);  // IK: 73/74
+end;
+
+// IK detay iletisim (REHBERILETISIM) icin ORTAK log. ust=(REHBER, personel ID).
+procedure TIKWizardDlg.DetayBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
+end;
+
+procedure TIKWizardDlg.DetayAfterPost(DataSet: TDataSet);
+var
+  LUstID, LID: Integer;
+begin
+  if LogGun <= 0 then Exit;
+  if DataSet <> TabPerIletisim then Exit;
+  if DataSet.FindField('ID') = nil then Exit;
+  LID := DataSet.FieldByName('ID').AsInteger;
+  LUstID := TabRehber.FieldByName('ID').AsInteger;   // ust = mevcut IK personeli
+  if LogOnceki.Count > 0 then
+    Tablo.LogIslemleri(TabNo_REHBERILETISIM, LID, 4, TFDQuery(DataSet), TabloNo, LUstID)  // ust=IK (73/74)
+  else
+    LogKayitEkle(DataSet, TabNo_REHBERILETISIM, LID, TabloNo, LUstID);
 end;
 
 procedure TIKWizardDlg.TabRehberAfterScroll(DataSet: TDataSet);
@@ -1860,12 +1889,12 @@ begin
         else if TabRehber.State in [dsBrowse] then
         if EkleKurIlet then
         begin
-           Ekle(TabKurIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+           Ekle(TabKurIlet, 1, RehberIletID, Degis, '', TabloNo, RehberID, 75); // KurumIletisimEkle;
         end;
         if EklePerOzluk then
-           Ekle(TabPerOzluk, 3, RehberID, Degis);
+           Ekle(TabPerOzluk, 3, RehberID, Degis, '', TabloNo, RehberID, 86);
         if EklePerIlet then
-           Ekle(TabPerIlet, 1, RehberPerID, Degis);
+           Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabloNo, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString);
         if EklePerUcret then
            UcretEkle(TabPerUcret); // Personel ?cret Ekle;
         // ?leti?im Adres Bilgilerine Default 'Ana' ekleniyor.
@@ -1900,12 +1929,12 @@ begin
 
     1:if EkleKurIlet then
       begin
-        Ekle(TabKurIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+        Ekle(TabKurIlet, 1, RehberIletID, Degis, '', TabloNo, RehberID, 75); // KurumIletisimEkle;
       end;
     3:if EklePerOzluk then
-        Ekle(TabPerOzluk, 3, RehberID, Degis); // Personel ?zl?k Ekle;
+        Ekle(TabPerOzluk, 3, RehberID, Degis, '', TabloNo, RehberID, 86); // Personel ?zl?k Ekle;
     4:if EklePerIlet then
-        Ekle(TabPerIlet, 1, RehberPerID, Degis); // PersonelIletisimEkle;
+        Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabloNo, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString); // PersonelIletisimEkle;
     5:if EklePerUcret then
         UcretEkle(TabPerUcret); // Personel ?cret Ekle;
   end;

@@ -12,7 +12,8 @@ uses
   cxClasses, cxControls, cxGridCustomView, cxGrid, ComCtrls, ToolWin,Fetautil,
   cxMaskEdit, cxContainer, cxTextEdit, StdCtrls, JvExControls, cxButtons,
   ExtCtrls, frxClass, frxDBSet, Grids, Buttons, jpeg, cxImage,FetaClassExtensions,
-  UGentegreFrameYonetimi, cxTreeView, dxSkinLondonLiquidSky, UTablo, cxCheckBox,
+  UGentegreFrameYonetimi, cxTreeView, dxSkinLondonLiquidSky, UTablo, ULog,
+  System.Generics.Collections, cxCheckBox,
   cxExtEditRepositoryItems, cxEditRepositoryItems, cxShellEditRepositoryItems,
   cxDBEditRepository, cxDBExtLookupComboBox, cxGridCustomPopupMenu,DateUtils,
   cxGridPopupMenu, JvComponentBase, JvDragDrop, dxSkinLiquidSky, UStokHizmetAra,
@@ -693,7 +694,11 @@ type
     SiparisTur, SiparisIdsi, RehberId, ProjeId, AktiviteId,MasrafMerkezi,ServisID,SatinAlmaID: Integer;
     iadefis, IptalSecildi: Boolean;
     Cagiran: SmallInt;
-
+    // Loglama: yukleme aninda baslik/detay snapshot; kaydette diff (ULog).
+    FBasSnap, FDetSnap: TObjectDictionary<Integer, TStringList>;
+    function SiparisLogTabNo: Integer;   // 9->91 (Gelen), 19->92 (Giden)
+    procedure SiparisLogSnapshotAl;      // yuklemede (D/I) cagrilir
+    procedure SiparisLogKaydet;          // kaydette baslik+detay diff + snapshot yenile
   end;
 
 var
@@ -1097,6 +1102,8 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, TabSiparis.FieldByName('ID').AsInteger]);
       Tablo.SiparisSil(TabSiparis.FieldByName('ID').AsInteger);
      end;
+  FreeAndNil(FBasSnap);
+  FreeAndNil(FDetSnap);
 end;
 
 procedure TSiparisWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1124,6 +1131,8 @@ var
   Item:TMenuItem;
   i:integer;
 begin
+  FBasSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
      Tablo.WizardTurkcelestir(WizardKontrol);
 
@@ -1497,6 +1506,8 @@ begin
      cxTabSheet1.enabled := False;
   end;
   TabloYenile(TabSiparisDetay,[SiparisIdsi]);
+  // Log: mevcut belge (D/I) yuklendiginde baslik+detay snapshot al (kaydette diff).
+  if IslemOp in ['D','I'] then SiparisLogSnapshotAl;
   if RehberId<=0 then //yeni oluşurken buras? dolu geliyor
      RehberId := TabSiparis.FieldByName('REHBERID').AsInteger;
   FirmaBilgileri;
@@ -2398,6 +2409,44 @@ begin
 
 end;
 
+// SIPARIS baslik TabloID: satis(19)->92, digerleri(alis 9...)->91 (UFaturalar info ile ayni).
+function TSiparisWizardDlg.SiparisLogTabNo: Integer;
+begin
+  if SiparisTur = 19 then Result := TabNo_SIPARIS_Giden
+  else Result := TabNo_SIPARIS_Gelen;
+end;
+
+// Yuklemede baslik + detay snapshot (ULog).
+procedure TSiparisWizardDlg.SiparisLogSnapshotAl;
+begin
+  LogSnapshotAl(TabSiparis, FBasSnap);
+  LogSnapshotAl(TabSiparisDetay, FDetSnap);
+end;
+
+// Kaydette baslik (ust=kendisi) + detay (ust=baslik) diff loglama; sonra mukerrer
+// save'i onlemek icin snapshot'i guncel duruma tazele. Kaydetmeyi ASLA bozmaz.
+procedure TSiparisWizardDlg.SiparisLogKaydet;
+var
+  LTabNo, LID: Integer;
+begin
+  try
+    if not (IslemOp in ['E','D','I','K']) then Exit;
+    if (not Assigned(FBasSnap)) or (not TabSiparis.Active) then Exit;
+    LTabNo := SiparisLogTabNo;
+    LID := TabSiparis.FieldByName('ID').AsInteger;
+    if LID <= 0 then Exit;
+    // BASLIK: EDIT (D/I) zaten KaydetTusClick'teki LogIslemleri ile (TabSiparisBeforeEdit
+    // -> OncekiLogBelirle) ISLEMLOG'a yaziliyor. Cift olmamasi icin burada yalnizca
+    // YENI/kopya (E/K) icin baslik EKLEME logu (LogIslemleri E/K yapmaz).
+    if IslemOp in ['E','K'] then
+      LogDiffKaydet(TabSiparis, FBasSnap, LTabNo, LTabNo, LID);
+    // DETAY: her zaman diff (SIPARISDETAY'i baska hicbir yer loglamiyor).
+    LogDiffKaydet(TabSiparisDetay, FDetSnap, TabNo_SIPARISDETAY, LTabNo, LID);
+    SiparisLogSnapshotAl;   // snapshot'i son duruma tazele
+  except
+  end;
+end;
+
 procedure TSiparisWizardDlg.KaydetTusClick(Sender: TObject);
 begin
   if TabSiparis.State in [dsInsert, dsEdit] then begin
@@ -2418,7 +2467,8 @@ begin
         end;
   end;
   if EkleDetay then
-      Ekle(TabDetay, DetaySablonTipiBul ,SiparisIdsi,'Değiş')
+      Ekle(TabDetay, DetaySablonTipiBul ,SiparisIdsi,'Değiş');
+  SiparisLogKaydet;   // ISLEMLOG: baslik + detay (degistir/ekle/sil)
 end;
 
 procedure TSiparisWizardDlg.KDVHaricTutargir1Click(Sender: TObject);

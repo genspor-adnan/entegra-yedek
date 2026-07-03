@@ -2336,7 +2336,9 @@ object RehberWizardDlg: TRehberWizardDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
-      'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU '
+      
+        'select RB.ID,RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZO' +
+        'RUNLU '
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id'
       'order by  1')
@@ -2362,8 +2364,8 @@ object RehberWizardDlg: TRehberWizardDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       
-        'select RB.SIRA,RB.ETIKET,RB.BILGI,GIRIS=isnull(RA.GIRIS,0),KAYNA' +
-        'K=(RA.KAYNAK,0) ,ZORUNLU=(RA.ZORUNLU,0)'
+        'select RB.ID,RB.SIRA,RB.ETIKET,RB.BILGI,GIRIS=isnull(RA.GIRIS,0)' +
+        ',KAYNAK=(RA.KAYNAK,0) ,ZORUNLU=(RA.ZORUNLU,0)'
       'from REHBERBILGI RB left JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   AND RA.YERI=4'
       'order by  1')
@@ -2382,8 +2384,8 @@ object RehberWizardDlg: TRehberWizardDlg
     SQL.Strings = (
       ''
       
-        'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU ' +
-        ' '
+        'select RB.ID,RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZO' +
+        'RUNLU  '
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
@@ -2414,8 +2416,8 @@ object RehberWizardDlg: TRehberWizardDlg
     SQL.Strings = (
       'select  * from REHBER'
       'where ID=:PAR')
-    Left = 423
-    Top = 96
+    Left = 455
+    Top = 56
     ParamData = <
       item
         Name = 'PAR'
@@ -2520,8 +2522,8 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object PopupIlgili: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 81
-    Top = 31
+    Left = 49
+    Top = 7
     object lgiliKurumdanAyrld1: TMenuItem
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak '
       ImageIndex = 10
@@ -2699,7 +2701,7 @@ object RehberWizardDlg: TRehberWizardDlg
     Appearance.FontColor = 7214336
     Appearance.FontDisabledColor = 14599640
     Style = msDefault
-    Left = 440
+    Left = 408
     Top = 364
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'

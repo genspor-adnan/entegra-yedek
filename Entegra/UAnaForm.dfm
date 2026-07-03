@@ -314,7 +314,14 @@ object AnaForm: TAnaForm
       end
       object SeyirDefteri1: TMenuItem
         Caption = 'Seyir Defteri'
-        OnClick = SeyirDefteri1Click
+        object MenuYeniLog: TMenuItem
+          Caption = 'Yeni'
+          OnClick = MenuYeniLogClick
+        end
+        object Eski1: TMenuItem
+          Caption = 'Eski'
+          OnClick = SeyirDefteri1Click
+        end
       end
     end
     object Yardm1: TMenuItem
@@ -580,6 +587,7 @@ object AnaForm: TAnaForm
     ListenBacklog = 15
     ReqVerLow = 1
     ReqVerHigh = 1
+    WSDebugOptions = []
     SocketErrs = wsErrTech
     Left = 91
     Top = 420
@@ -599,6 +607,7 @@ object AnaForm: TAnaForm
     ListenBacklog = 15
     ReqVerLow = 1
     ReqVerHigh = 1
+    WSDebugOptions = []
     OnDataAvailable = WSocketDataAvailable
     SocketErrs = wsErrTech
     Left = 33
@@ -906,8 +915,8 @@ object AnaForm: TAnaForm
     Enabled = False
     Interval = 5000
     OnTimer = Timer1Timer
-    Left = 64
-    Top = 56
+    Left = 48
+    Top = 48
   end
   object PopupMenuTree: TPopupMenu
     Left = 879

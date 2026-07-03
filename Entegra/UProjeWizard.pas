@@ -419,7 +419,7 @@ implementation
 
 Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
- cxTLExportLink, UFastRap, URaporAraclari;
+ cxTLExportLink, UFastRap, URaporAraclari, ULog;
 
 {$R *.dfm}
   var
@@ -1156,7 +1156,9 @@ procedure TProjeWizardDlg.TabProjelerAfterPost(DataSet: TDataSet);
 begin
   ProjeID := TabProjeler.Fields[0].AsInteger;
   if islemOp='D' then
-    Tablo.LogIslemleri(TabNo_PROJELER,ProjeID, 4, TabProjeler);
+    Tablo.LogIslemleri(TabNo_PROJELER,ProjeID, 4, TabProjeler)
+  else if (LogGun>0) and ((islemOp='E') or (islemOp='K')) then   // yeni proje -> EKLEME
+    LogKayitEkle(TabProjeler, TabNo_PROJELER, ProjeID, TabNo_PROJELER, ProjeID);
 end;
 
 procedure TProjeWizardDlg.TabProjelerAfterScroll(DataSet: TDataSet);

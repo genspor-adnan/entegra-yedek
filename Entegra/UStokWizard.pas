@@ -555,6 +555,8 @@ type
       const FromPage: TJvWizardCustomPage);
     procedure BtnBarkodClick(Sender: TObject);
     procedure TabBarkodAfterPost(DataSet: TDataSet);
+    procedure StokDetayBeforeEdit(DataSet: TDataSet);   // stok detay: log oncesi snapshot
+    procedure StokDetayAfterPost(DataSet: TDataSet);      // stok detay: edit/insert log (ust=stok)
     procedure clmBarkodBirimPropertiesInitPopup(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure IOYeniTusClick(Sender: TObject);
@@ -725,7 +727,7 @@ implementation
 uses
     UAnaForm, FetaClassExtensions, FetaKurulusSiniflari, Utablo, UResim, UBinarySave, UFiyatDegisiklik,
     PrjConst, URehberAyar, UCariFonksiyonlar, UKampanyalar, IdGlobalProtocols, UBarkodYazdir, UKategori,
-     UStokHizmetAra, LocOnFly;
+     UStokHizmetAra, LocOnFly, ULog;
 
 {$R *.dfm}
 
@@ -1733,6 +1735,10 @@ procedure TStokWizardDlg.FormCreate(Sender: TObject);
 begin
   Tablo.WizardTurkcelestir(WizardKontrol);
   Tablo.GridTurkcelestir;
+  // Stok detay dataset'lerini ust=stok log'una bagla (master-detail).
+  TabFiyat.BeforeEdit := StokDetayBeforeEdit;
+  TabFiyat.AfterPost  := StokDetayAfterPost;
+  TabBarkod.BeforeEdit := StokDetayBeforeEdit;   // TabBarkod'un AfterPost'u kendi handler'inda cagrilir
   if Sektor = Sektor_Tekstil then
      BtnBoyut.Caption := 'Renk-Beden'
   else if Sektor = Sektor_Fayans then begin
@@ -2498,6 +2504,7 @@ begin
    SayA:=0;
    if LogBelge.Count > 0 then
    Tablo.LogIslemlerBelge(TabBarkod,TabNo_STOKKOTA,TabBarkod.FieldByName('ID').AsInteger, 4);
+   StokDetayAfterPost(TabBarkod);   // ISLEMLOG master-detail (ust=stok)
 end;
 
 procedure TStokWizardDlg.TabBarkodBeforePost(DataSet: TDataSet);
@@ -2715,7 +2722,10 @@ procedure TStokWizardDlg.TabStokAfterPost(DataSet: TDataSet);
 begin
   if DataSet <> nil then begin
     if islemOp='D' then
-      Tablo.LogIslemleri(TabNo_STOKLAR,TabStok.Fields[0].AsInteger, 4, TabStok);
+      Tablo.LogIslemleri(TabNo_STOKLAR,TabStok.Fields[0].AsInteger, 4, TabStok)
+    else if (LogGun > 0) and (islemOp in ['E','K']) then   // yeni stok -> EKLEME (ust=kendisi)
+      LogKayitEkle(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger,
+                   TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
   end;
 
    //e?er ilk defa stok kart? a??l?yorsa, hemen fiyat eklenir
@@ -2739,6 +2749,30 @@ procedure TStokWizardDlg.TabStokBeforeEdit(DataSet: TDataSet);
 begin
 if LogGun >0 then
    Tablo.OncekiLogBelirle(TabStok);
+end;
+
+// Stok detay dataset'leri (STOKFIYAT, STOKBARKOD...) icin ORTAK log. BeforeEdit'te
+// snapshot, AfterPost'ta edit -> LogIslemleri, yeni satir -> LogKayitEkle. ust=(STOK, stokID).
+procedure TStokWizardDlg.StokDetayBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
+end;
+
+procedure TStokWizardDlg.StokDetayAfterPost(DataSet: TDataSet);
+var
+  LTabNo, LUstID, LID: Integer;
+begin
+  if LogGun <= 0 then Exit;
+  if DataSet = TabFiyat then LTabNo := TabNo_STOKFIYAT
+  else if DataSet = TabBarkod then LTabNo := TabNo_STOKBARKOD
+  else Exit;
+  if DataSet.FindField('ID') = nil then Exit;
+  LID := DataSet.FieldByName('ID').AsInteger;
+  LUstID := TabStok.FieldByName('ID').AsInteger;   // ust = mevcut stok
+  if LogOnceki.Count > 0 then   // duzenleme (BeforeEdit OncekiLog'u doldurdu)
+    Tablo.LogIslemleri(LTabNo, LID, 4, TFDQuery(DataSet), TabNo_STOKLAR, LUstID)
+  else                          // yeni satir -> EKLEME
+    LogKayitEkle(DataSet, LTabNo, LID, TabNo_STOKLAR, LUstID);
 end;
 
 procedure TStokWizardDlg.TabStokBeforePost(DataSet: TDataSet);

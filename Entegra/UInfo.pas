@@ -7,10 +7,37 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, Vcl.ComCtrls, dxCore, cxDateUtils,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, cxMaskEdit, cxDropDownEdit, cxCalendar,  DateUtils,
-  cxTextEdit, System.JSON, Vcl.ExtCtrls, Winapi.CommCtrl, Winapi.UxTheme;
+  cxTextEdit, System.JSON, Vcl.ExtCtrls, Winapi.CommCtrl, Winapi.UxTheme,
+  dxBarBuiltInMenu, cxPC, dxCoreGraphics, cxImageComboBox, cxButtonEdit,
+  cxCheckBox, cxLabel, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage,
+  cxNavigator, dxDateRanges, dxScrollbarAnnotations, Data.DB, cxDBData,
+  cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
+  cxClasses, cxGridCustomView, cxGrid, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
 
 type
   TInfoDlg = class(TForm)
+    cxPageControl1: TcxPageControl;
+    cxTabSheet1: TcxTabSheet;
+    cxTabSheet2: TcxTabSheet;
+    PanelUst: TPanel;
+    DateTarihBas: TcxDateEdit;
+    cxLabel1: TcxLabel;
+    cxLabel2: TcxLabel;
+    CheckSilme: TcxCheckBox;
+    CheckDegistirme: TcxCheckBox;
+    CheckEkleme: TcxCheckBox;
+    EditKayitNo: TcxButtonEdit;
+    cxLabel7: TcxLabel;
+    txtTablo: TcxComboBox;
+    Kullanici: TcxButtonEdit;
+    txtAlan: TcxButtonEdit;
+    cxLabel4: TcxLabel;
+    cxLabel3: TcxLabel;
+    cxLabel6: TcxLabel;
+    DateTarihBit: TcxDateEdit;
     LvGecmis: TListView;
     LvDetay: TListView;
     Panel1: TPanel;
@@ -22,21 +49,45 @@ type
     EditEklemeTrh: TcxDateEdit;
     EditDegistiren: TcxTextEdit;
     EditDegistirmeTrh: TcxDateEdit;
+    GridLOG: TcxGrid;
+    GridLOGView: TcxGridDBTableView;
+    GridLOGViewSATIRID: TcxGridDBColumn;
+    GridLOGViewTARIH: TcxGridDBColumn;
+    GridLOGViewPCADI: TcxGridDBColumn;
+    GridLOGViewFIRMA: TcxGridDBColumn;
+    GridLOGViewTABLO: TcxGridDBColumn;
+    GridLOGViewISLEM: TcxGridDBColumn;
+    GridLOGViewISLEMTIPI: TcxGridDBColumn;   // gizli - satir renklendirme icin
+    GridLOGLevel1: TcxGridLevel;
+    Panel2: TPanel;
     cxButton1: TcxButton;
+    TabLog: TFDQuery;
+    DsTabLog: TDataSource;
     procedure FormShow(Sender: TObject);
     procedure LvGecmisSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure LvGecmisCustomDrawItem(Sender: TCustomListView; Item: TListItem;
       State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure cxPageControl1Change(Sender: TObject);
+    procedure GridLOGViewCustomDrawCell(Sender: TcxCustomGridTableView;
+      ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure FormDestroy(Sender: TObject);
   private
     FJsonlar: TStringList;     // LvGecmis ile paralel: her kaydin BILGI json'u
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
     procedure DetayGoster(const ABilgiJSON: string; ATip: Integer);
+    procedure TabLogYukle;             // Genel grid: LOG (ISLEMLOG) listesi (filtreli)
+    procedure GenelSatirDetayGoster;   // Genel'de secili satirin BILGI'sini LvDetay'a
+    procedure FiltreOlaylariBagla;     // filtre kontrollerinin olaylarini bagla
+    procedure FiltreUygula(Sender: TObject);
+    procedure BolumleriYukle;          // Bolum combo: TABLOLAR modulleri + bos
+    procedure KullaniciButonClick(Sender: TObject; AButtonIndex: Integer);  // personel listesi
+    procedure BilgiAlButonClick(Sender: TObject; AButtonIndex: Integer);    // Bilgisayar/KayitNo: giris + temizle
   public
     TabloAd: String;
     ID: Integer;
     TabloNo: Integer;          // ISLEMLOG.TABLOID filtresi (LOG.TABLOID / TabNo_*)
+    GenelModu: Boolean;        // True: 2 sekme (MenuYeniLog browse); False: sadece Detay (kayit bazli)
   end;
 
 var
@@ -44,7 +95,7 @@ var
 
 implementation
 
-   uses UTablo;
+   uses UTablo, UGirisKutusuEx;
 {$R *.dfm}
 
 function IslemAd(ATip: Integer): string;
@@ -120,18 +171,278 @@ begin
    HeaderGriYap(LvGecmis);   // baslik zemini gri (ikisi de)
    HeaderGriYap(LvDetay);
 
-   // Ust bilgi (ekleyen/degistiren). Tabloda bu kolonlar yoksa sessiz gec (crash yok).
-   try
-     Tablo.TablodanSorguAc(1,'select EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI from '+TabloAd+' where ID ='+IntToStr(ID));
-     EditEkleyen.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('EKLEYEN').AsInteger);
-     EditDegistiren.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('DEGISTIREN').AsInteger);
-     EditEklemeTrh.EditValue := Tablo.Query1.FieldByName('EKLEMETARIHI').AsDateTime;
-     if YearOf(Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime) > 2000  then
-        EditDegistirmeTrh.EditValue := Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime;
-   except
-   end;
+   if GenelModu then
+   begin
+     // MenuYeniLog: 2 sekme, Genel (grupli log listesi) aktif.
+     cxTabSheet1.TabVisible := True;
+     cxPageControl1.ActivePage := cxTabSheet1;
+     // Bolum combo + tarih varsayilani (BUGUN 00:00-23:59). Olaylardan ONCE ki
+     // ilk deger atamalari erken sorgu tetiklemesin.
+     BolumleriYukle;
+     DateTarihBas.Date := Date;
+     DateTarihBit.Date := Date;
+     FiltreOlaylariBagla;
+     TabLogYukle;
+   end
+   else
+   begin
+     // Kayit bazli cagri (InfoGoster): yalnizca Detay sekmesi, o kaydin gecmisi.
+     cxTabSheet1.TabVisible := False;
+     cxPageControl1.ActivePage := cxTabSheet2;
 
-   LogGecmisiYukle;
+     // Ust bilgi (ekleyen/degistiren). Tabloda bu kolonlar yoksa sessiz gec (crash yok).
+     try
+       Tablo.TablodanSorguAc(1,'select EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI from '+TabloAd+' where ID ='+IntToStr(ID));
+       EditEkleyen.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('EKLEYEN').AsInteger);
+       EditDegistiren.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('DEGISTIREN').AsInteger);
+       EditEklemeTrh.EditValue := Tablo.Query1.FieldByName('EKLEMETARIHI').AsDateTime;
+       if YearOf(Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime) > 2000  then
+          EditDegistirmeTrh.EditValue := Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime;
+     except
+     end;
+
+     LogGecmisiYukle;
+   end;
+end;
+
+// Genel sekmesi: ISLEMLOG (LOG<yyyy> birlesimi) listesini TabLog'a yukler.
+// FIRMA=kullanici (REHBER), ANAHTAR=modul/gorunum (TABLOLAR), ISLEM=islem adi.
+// ISLEMTIPI + BILGI_JSON detay sekmesi icin ekstra tasinir (grid'de gosterilmez).
+procedure TInfoDlg.TabLogYukle;
+var
+  LW, LTip: string;
+
+  function Esc(const S: string): string;   // ' -> '' (SQL literal guvenli)
+  begin
+    Result := StringReplace(Trim(S), '''', '''''', [rfReplaceAll]);
+  end;
+
+  // Metin kolonu icin "iceren" (LIKE %v%) kosul. Bos ise ''.
+  function MetinKosul(const ACol, ADeger: string): string;
+  var v: string;
+  begin
+    Result := '';
+    v := Esc(ADeger);
+    if v <> '' then
+      Result := ' AND ' + ACol + ' LIKE ''%' + v + '%''';
+  end;
+
+  function Tipler: string;   // islem checkbox'lari; hicbiri secili degilse '' (=tumu)
+  begin
+    Result := '';
+    if CheckEkleme.Checked     then Result := Result + '1,';
+    if CheckDegistirme.Checked then Result := Result + '2,';
+    if CheckSilme.Checked      then Result := Result + '0,';
+    if Result <> '' then SetLength(Result, Length(Result) - 1);
+  end;
+
+begin
+  TabLog.Close;
+
+  // --- WHERE: filtre kontrollerinden. Bos alan -> o filtre yok (tum kayitlar). ---
+  LW := ' WHERE 1=1';
+  // Tarih: baslama 00:00, bitis 23:59:59. Bos ise ilgili sinir yok.
+  // Kayit No girildiyse tarih araligina BAKMA (o kaydin tum gecmisi gelsin).
+  if Trim(EditKayitNo.Text) = '' then
+  begin
+    if not VarIsNull(DateTarihBas.EditValue) then
+      LW := LW + ' AND L.TARIH >= ''' + FormatDateTime('yyyymmdd', DateTarihBas.Date) + ' 00:00:00''';
+    if not VarIsNull(DateTarihBit.EditValue) then
+      LW := LW + ' AND L.TARIH <= ''' + FormatDateTime('yyyymmdd', DateTarihBit.Date) + ' 23:59:59''';
+  end;
+  // Kullanici (REHBER firma) - arama turu ile
+  LW := LW + MetinKosul('ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))', Kullanici.Text);
+  // Bolum: TABLOLAR modul listesinden secim (tam eslesme). Bos = tumu.
+  if Trim(txtTablo.Text) <> '' then
+    LW := LW + ' AND T.MODUL = ''' + Esc(txtTablo.Text) + '''';
+  // Kayit No (USTKAYITID) - arama turu ile
+  LW := LW + MetinKosul('CAST(L.USTKAYITID AS varchar(20))', EditKayitNo.Text);
+  // Bilgisayar (ISTASYON) - arama turu ile (txtAlan kutusu bu amacla kullaniliyor)
+  LW := LW + MetinKosul('L.ISTASYON', txtAlan.Text);
+  // Islem tipi (Ekleme=1 / Degistirme=2 / Silme=0). Hicbiri secili degilse tumu.
+  LTip := Tipler;
+  if LTip <> '' then LW := LW + ' AND L.ISLEMTIPI IN (' + LTip + ')';
+
+  // Master (USTKAYITID) + islem tipi + GUN bazinda GRUPLU.
+  TabLog.SQL.Text :=
+    'SELECT TARIH = MAX(L.TARIH), GUN = CAST(L.TARIH AS date),' +
+    ' KAYITNO = L.USTKAYITID, USTTABLOID = L.USTTABLOID, L.ISLEMTIPI,' +
+    ' ISLEM = CASE L.ISLEMTIPI WHEN 0 THEN N''Silme'' WHEN 1 THEN N''Ekleme''' +
+    '         WHEN 2 THEN N''De' + #$011F + 'i' + #$015F + 'tirme'' ELSE ''?'' END,' +
+    ' FIRMA = MAX(ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))),' +
+    ' PCADI = MAX(L.ISTASYON),' +
+    ' ANAHTAR = MAX(COALESCE(T.MODUL, T.TABLOADI, CAST(L.USTTABLOID AS varchar(20)))),' +
+    ' ADET = COUNT(*)' +
+    ' FROM ISLEMLOG L' +
+    ' LEFT JOIN REHBER R ON R.ID = L.KULLANICIID' +
+    ' LEFT JOIN TABLOLAR T ON T.TABLOID = L.USTTABLOID' +
+    LW +
+    ' GROUP BY CAST(L.TARIH AS date), L.USTKAYITID, L.USTTABLOID, L.ISLEMTIPI' +
+    ' ORDER BY MAX(L.TARIH) DESC';
+  try
+    TabLog.Open;
+  except
+    // ISLEMLOG view yok / erisim yok -> sessiz gec (grid bos)
+  end;
+end;
+
+// Filtre kontrollerinin olaylarini TabLogYukle'ye baglar (kod ile, bir kez).
+procedure TInfoDlg.FiltreOlaylariBagla;
+begin
+  DateTarihBas.Properties.OnEditValueChanged := FiltreUygula;
+  DateTarihBit.Properties.OnEditValueChanged := FiltreUygula;
+  CheckEkleme.Properties.OnEditValueChanged := FiltreUygula;
+  CheckDegistirme.Properties.OnEditValueChanged := FiltreUygula;
+  CheckSilme.Properties.OnEditValueChanged := FiltreUygula;
+  txtTablo.Properties.OnEditValueChanged := FiltreUygula;   // Bolum combo: secimde
+  // Metin button-edit'ler: yazdikca otomatik suz (OnChange).
+  Kullanici.Properties.OnChange := FiltreUygula;
+  txtAlan.Properties.OnChange := FiltreUygula;
+  EditKayitNo.Properties.OnChange := FiltreUygula;
+  // Kullanici butonu -> personel listesi
+  Kullanici.Properties.OnButtonClick := KullaniciButonClick;
+  // Bilgisayar / Kayit No butonlari: giris (BilgiAl) + temizle ('-')
+  txtAlan.Properties.OnButtonClick := BilgiAlButonClick;
+  EditKayitNo.Properties.OnButtonClick := BilgiAlButonClick;
+end;
+
+procedure TInfoDlg.FiltreUygula(Sender: TObject);
+begin
+  if GenelModu then TabLogYukle;
+end;
+
+// Bolum combo'sunu TABLOLAR'daki modul listesiyle (Fatura/Fiş/İrsaliye/Sipariş...)
+// doldurur; ilk oge BOS (= tum bolumler).
+procedure TInfoDlg.BolumleriYukle;
+begin
+  txtTablo.Properties.Items.Clear;
+  txtTablo.Properties.Items.Add('');   // bos = tumu
+  try
+    Tablo.TablodanSorguAc(1,
+      'select distinct MODUL from TABLOLAR where MODUL is not null and MODUL<>'''' order by MODUL');
+    while not Tablo.Query1.Eof do
+    begin
+      txtTablo.Properties.Items.Add(Tablo.Query1.Fields[0].AsString);
+      Tablo.Query1.Next;
+    end;
+  except
+  end;
+  txtTablo.ItemIndex := 0;   // bos secili
+end;
+
+// Kullanici filtresi butonu: personel listesini (KULLANICI+REHBER) combo diyalogunda
+// gosterir; secilen isim Kullanici kutusuna yazilir (OnChange -> suzer).
+procedure TInfoDlg.KullaniciButonClick(Sender: TObject; AButtonIndex: Integer);
+var
+  LListe: TStringList;
+  LSecim: Variant;
+begin
+  LListe := TStringList.Create;
+  try
+    try
+      Tablo.TablodanSorguAc(1,
+        'select distinct R.FIRMA from KULLANICI K inner join REHBER R on R.ID=K.REHBERID ' +
+        'where R.FIRMA is not null and R.FIRMA<>'''' order by R.FIRMA');
+      while not Tablo.Query1.Eof do
+      begin
+        LListe.Add(Tablo.Query1.Fields[0].AsString);
+        Tablo.Query1.Next;
+      end;
+    except
+    end;
+    if LListe.Count = 0 then Exit;
+    LSecim := Kullanici.Text;
+    if TGirisKutusuEx.BilgiAlEx('Personel se' + #$00E7 + 'in',
+         TGirdiDenetimleri.Create.ComboBox('Kullan' + #$0131 + 'c' + #$0131,
+           @LSecim, LListe, csDropDownList, False, nil, 320)) = mrOk then
+      Kullanici.Text := VarToStr(LSecim);   // OnChange -> suzer
+  finally
+    LListe.Free;
+  end;
+end;
+
+// Bilgisayar / Kayit No butonlari: buton0 = BilgiAl ile deger gir, buton1 ('-') = temizle.
+procedure TInfoDlg.BilgiAlButonClick(Sender: TObject; AButtonIndex: Integer);
+var
+  LEdit: TcxButtonEdit;
+  LDeg: Variant;
+  LBaslik: string;
+begin
+  LEdit := TcxButtonEdit(Sender);
+  if AButtonIndex = 1 then          // '-' temizle
+  begin
+    LEdit.Text := '';               // OnChange -> suzer
+    Exit;
+  end;
+  if LEdit = EditKayitNo then LBaslik := 'Kay' + #$0131 + 't No'
+  else LBaslik := 'Bilgisayar';
+  LDeg := LEdit.Text;
+  if TGirisKutusuEx.BilgiAlEx(LBaslik,
+       TGirdiDenetimleri.Create.Edit(LBaslik, @LDeg)) = mrOk then
+    LEdit.Text := VarToStr(LDeg);   // OnChange -> suzer
+end;
+
+// Genel'de secili GRUBUN (USTKAYITID + ISLEMTIPI + GUN) tum log satirlarini Detay
+// sekmesine yukler: LvGecmis'e liste (o gunku tum degisiklikler), LvDetay'a secili
+// satirin alan detayi. Ornek: 11-12-13'teki 3 degisiklik burada ayri ayri gorulur.
+procedure TInfoDlg.GenelSatirDetayGoster;
+var
+  LSat, LGorunum: string;
+  LTip, LTabloID, LUstT: Integer;
+begin
+  if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
+  FJsonlar.Clear;
+  LvGecmis.Items.Clear;
+  LvDetay.Items.Clear;
+  if (not TabLog.Active) or TabLog.IsEmpty then Exit;
+
+  LUstT := TabLog.FieldByName('USTTABLOID').AsInteger;
+  try
+    Tablo.TablodanSorguAc(1,
+      'select i.TARIH, i.ISLEMTIPI, i.TABLOID, t.GORUNUM, ' +
+      'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
+      'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
+      'where i.USTTABLOID=' + IntToStr(LUstT) +
+      ' and i.USTKAYITID=' + TabLog.FieldByName('KAYITNO').AsString +
+      ' and cast(i.TARIH as date)=' +
+        QuotedStr(FormatDateTime('yyyy-mm-dd', TabLog.FieldByName('GUN').AsDateTime)) +
+      ' and i.ISLEMTIPI=' + TabLog.FieldByName('ISLEMTIPI').AsString +
+      ' order by i.TARIH desc, case when i.TABLOID=i.USTTABLOID then 0 else 1 end, i.ID');
+  except
+    Exit;
+  end;
+
+  while not Tablo.Query1.Eof do
+  begin
+    LTip := Tablo.Query1.FieldByName('ISLEMTIPI').AsInteger;
+    LTabloID := Tablo.Query1.FieldByName('TABLOID').AsInteger;
+    LGorunum := Tablo.Query1.FieldByName('GORUNUM').AsString;
+    LSat := LGorunum;
+    if (LSat = '') and (LTabloID <> LUstT) then
+      LSat := '[' + IntToStr(LTabloID) + ']';
+    with LvGecmis.Items.Add do
+    begin
+      Caption := FormatDateTime('dd.mm.yyyy hh:nn',
+                   Tablo.Query1.FieldByName('TARIH').AsDateTime);
+      SubItems.Add(LSat);
+      SubItems.Add(IslemAd(LTip));
+      Data := TObject(NativeInt(LTip));
+    end;
+    FJsonlar.Add(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
+    Tablo.Query1.Next;
+  end;
+
+  if LvGecmis.Items.Count > 0 then
+    LvGecmis.Items[0].Selected := True;   // OnSelectItem -> LvDetay dolar
+end;
+
+// Detay sekmesine gecince Genel'de duran satirin icerigini goster.
+procedure TInfoDlg.cxPageControl1Change(Sender: TObject);
+begin
+  // Sadece browse (2 sekme) modunda Genel->Detay drill-down. Kayit modunda
+  // Detay zaten kaydin gecmisiyle dolu; dokunma.
+  if GenelModu and (cxPageControl1.ActivePage = cxTabSheet2) then
+    GenelSatirDetayGoster;
 end;
 
 // ISLEMLOG (yillik LOG<yyyy> birlesim view'i) uzerinden bu kaydin islem gecmisini
@@ -142,6 +453,36 @@ var
   LSQL, LSat, LGorunum: string;
   LTip, LTabloID, LUstT: Integer;
   LUstK: Int64;
+  // Bir JSON nesnesinin dis suslu parantezlerini soyar: {"a":1} -> "a":1
+  function _IcJson(const S: string): string;
+  var T: string;
+  begin
+    T := Trim(S);
+    if (Length(T) >= 2) and (T[1] = '{') and (T[Length(T)] = '}') then
+      Result := Trim(Copy(T, 2, Length(T) - 2))
+    else
+      Result := '';
+  end;
+  // Bir grubu (ayni an+tablo+tip) tek LvGecmis satiri yapar; parcalari tek JSON'da birlestirir.
+  procedure _EmitGrup(ATarih: TDateTime; const ASat: string; ATip: Integer; AParts: TStringList);
+  var k: Integer; LMerged: string;
+  begin
+    LMerged := '';
+    for k := 0 to AParts.Count - 1 do
+    begin
+      if k > 0 then LMerged := LMerged + ',';
+      LMerged := LMerged + AParts[k];
+    end;
+    if LMerged <> '' then LMerged := '{' + LMerged + '}';
+    with LvGecmis.Items.Add do
+    begin
+      Caption := FormatDateTime('dd.mm.yyyy hh:nn', ATarih);
+      SubItems.Add(ASat);
+      SubItems.Add(IslemAd(ATip));
+      Data := TObject(NativeInt(ATip));
+    end;
+    FJsonlar.Add(LMerged);
+  end;
 begin
   if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
   FJsonlar.Clear;
@@ -185,14 +526,16 @@ begin
 
   // 2) Ust altindaki TUM loglar. Master (TABLOID=USTTABLOID) USTTE, detaylar altta;
   //    her grup icinde en yeni ustte. TABLOLAR ile TABLOID->GORUNUM (Başlık/Detay).
-  LSQL := 'select i.TARIH, i.ISLEMTIPI, i.TABLOID, t.GORUNUM, ' +
+  LSQL := 'select i.TARIH, i.ISLEMTIPI, i.TABLOID, i.KAYITID, t.GORUNUM, ' +
           'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
           'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
           'where i.USTKAYITID=' + IntToStr(LUstK);
   if LUstT > 0 then
     LSQL := LSQL + ' and i.USTTABLOID=' + IntToStr(LUstT);
   // Tarihe gore AZALAN (en yeni ustte); ayni tarihte master (Başlık) detaydan once.
-  LSQL := LSQL + ' order by i.TARIH desc, case when i.TABLOID=i.USTTABLOID then 0 else 1 end, i.ID desc';
+  // Saniye+tablo+KAYITID+tip bazli sirala ki ayni gruptakiler bitisik gelsin.
+  LSQL := LSQL + ' order by convert(char(19), i.TARIH, 120) desc, ' +
+          'case when i.TABLOID=i.USTTABLOID then 0 else 1 end, i.TABLOID, i.KAYITID, i.ISLEMTIPI, i.ID desc';
 
   try
     Tablo.TablodanSorguAc(1, LSQL);
@@ -200,25 +543,41 @@ begin
     Exit;
   end;
 
-  while not Tablo.Query1.Eof do
-  begin
-    LTip := Tablo.Query1.FieldByName('ISLEMTIPI').AsInteger;
-    LTabloID := Tablo.Query1.FieldByName('TABLOID').AsInteger;
-    LGorunum := Tablo.Query1.FieldByName('GORUNUM').AsString;
-    // Olay = TABLOLAR gorunum adi (Başlık/Detay); yoksa tablo kodu.
-    LSat := LGorunum;
-    if (LSat = '') and (LTabloID <> LUstT) then
-      LSat := '[' + IntToStr(LTabloID) + ']';
-    with LvGecmis.Items.Add do
+  // Ayni (saniye + tablo + islem tipi) satirlari TEK gruba topla; JSON parcalarini birlestir.
+  // Boylece solda tek satir, sagda (LvDetay) o gruptaki tum alan degisiklikleri alt alta gelir.
+  var LCurKey: string := #1;
+  var LParts: TStringList := TStringList.Create;
+  var LGTarih: TDateTime := 0;
+  var LGSat: string := '';
+  var LGTip: Integer := 0;
+  try
+    while not Tablo.Query1.Eof do
     begin
-      Caption := FormatDateTime('dd.mm.yyyy hh:nn',
-                   Tablo.Query1.FieldByName('TARIH').AsDateTime);   // Tarih
-      SubItems.Add(LSat);          // Olay
-      SubItems.Add(IslemAd(LTip)); // Tipi
-      Data := TObject(NativeInt(LTip));
+      LTip := Tablo.Query1.FieldByName('ISLEMTIPI').AsInteger;
+      LTabloID := Tablo.Query1.FieldByName('TABLOID').AsInteger;
+      LGorunum := Tablo.Query1.FieldByName('GORUNUM').AsString;
+      // Olay = TABLOLAR gorunum adi (Başlık/Detay/İletişim...); yoksa tablo kodu.
+      LSat := LGorunum;
+      if (LSat = '') and (LTabloID <> LUstT) then
+        LSat := '[' + IntToStr(LTabloID) + ']';
+      var LTarih: TDateTime := Tablo.Query1.FieldByName('TARIH').AsDateTime;
+      var LKayitID: Int64 := Tablo.Query1.FieldByName('KAYITID').AsLargeInt;
+      var LKey: string := FormatDateTime('yyyymmddhhnnss', LTarih) + '|' +
+                          IntToStr(LTabloID) + '|' + IntToStr(LKayitID) + '|' + IntToStr(LTip);
+      if LKey <> LCurKey then
+      begin
+        if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LParts);
+        LParts.Clear;
+        LCurKey := LKey;
+        LGTarih := LTarih; LGSat := LSat; LGTip := LTip;
+      end;
+      var LIc: string := _IcJson(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
+      if LIc <> '' then LParts.Add(LIc);
+      Tablo.Query1.Next;
     end;
-    FJsonlar.Add(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
-    Tablo.Query1.Next;
+    if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LParts);  // son grup
+  finally
+    LParts.Free;
   end;
 
   if LvGecmis.Items.Count > 0 then
@@ -235,10 +594,25 @@ var
   LVal: TJSONValue;
   LItem: TListItem;
   LOnc, LSon: string;
+  LGorulen: TStringList;   // ayni alan adini (ör. İlgili) tek kez goster
 begin
   LvDetay.Items.BeginUpdate;
+  LGorulen := TStringList.Create;
+  LGorulen.Sorted := True;
   try
     LvDetay.Items.Clear;
+    // Sutun basliklari islem tipine gore: degisme -> Onceki|Sonraki; ekleme/silme -> Bilgisi|(bos)
+    if LvDetay.Columns.Count >= 3 then
+      if ATip = 2 then
+      begin
+        LvDetay.Columns[1].Caption := #$00D6'nceki';
+        LvDetay.Columns[2].Caption := 'Sonraki';
+      end
+      else
+      begin
+        LvDetay.Columns[1].Caption := 'Bilgisi';
+        LvDetay.Columns[2].Caption := '';
+      end;
     if Trim(ABilgiJSON) = '' then Exit;
     LParsed := TJSONObject.ParseJSONValue(ABilgiJSON);
     if not (LParsed is TJSONObject) then
@@ -250,6 +624,8 @@ begin
       LObj := TJSONObject(LParsed);
       for LPair in LObj do
       begin
+        if LGorulen.IndexOf(LPair.JsonString.Value) >= 0 then Continue;  // tekrar eden alan gosterme
+        LGorulen.Add(LPair.JsonString.Value);
         LVal := LPair.JsonValue;
         if LVal is TJSONObject then
         begin
@@ -258,16 +634,9 @@ begin
         end
         else
         begin
-          if ATip = 0 then  // silme -> eski deger Onceki'de
-          begin
-            LOnc := JsonDeger(LVal);
-            LSon := '';
-          end
-          else              // ekleme/diger -> deger Sonraki'de
-          begin
-            LOnc := '';
-            LSon := JsonDeger(LVal);
-          end;
+          // Ekleme ve silme (tek deger): her zaman Onceki kolonda goster.
+          LOnc := JsonDeger(LVal);
+          LSon := '';
         end;
         LItem := LvDetay.Items.Add;
         LItem.Caption := LPair.JsonString.Value;   // Alan
@@ -279,6 +648,7 @@ begin
     end;
   finally
     LvDetay.Items.EndUpdate;
+    LGorulen.Free;
   end;
 end;
 
@@ -305,6 +675,20 @@ begin
     Sender.Canvas.Font.Color := clWindowText;
   end;
   DefaultDraw := True;
+end;
+
+// Genel grid (GridLOG) satir renklendirme: Ekleme yesil, Degistirme mavi, Silme kirmizi.
+procedure TInfoDlg.GridLOGViewCustomDrawCell(Sender: TcxCustomGridTableView;
+  ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  LTip: Integer;
+begin
+  LTip := StrToIntDef(VarToStr(AViewInfo.GridRecord.Values[GridLOGViewISLEMTIPI.Index]), -1);
+  case LTip of
+    0: ACanvas.Font.Color := clRed;     // Silme
+    1: ACanvas.Font.Color := clGreen;   // Ekleme
+    2: ACanvas.Font.Color := clBlue;    // Değiştirme
+  end;
 end;
 
 procedure TInfoDlg.FormDestroy(Sender: TObject);

@@ -305,6 +305,8 @@ type
     procedure EditMUSTEMSILCIPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure TabRehberIletisimNewRecord(DataSet: TDataSet);
+    procedure DetayBeforeEdit(DataSet: TDataSet);   // cari detay: log oncesi snapshot
+    procedure DetayAfterPost(DataSet: TDataSet);     // cari detay: edit/insert log (ust=cari)
     procedure GridAdresAdViewSelectionChanged(Sender: TcxCustomGridTableView);
     procedure YeniAdresTusClick(Sender: TObject);
     procedure MenuItem7Click(Sender: TObject);
@@ -392,7 +394,7 @@ implementation
 uses PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle,
   Fetautil,URehberAramaEkrani,UResim, UComboImgDuzenle, UCariFonksiyonlar, UBinarySave, UAnaForm,
   FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, URehberTemsilci,
-  System.JSON, UEBelgeKimlik, UIzibizRest;
+  System.JSON, UEBelgeKimlik, UIzibizRest, ULog;
 
 var
   EkleKurIlet, EkleTicari, EklePerIlet : Boolean;
@@ -743,7 +745,7 @@ begin
     if TabRehberIletisim.RecordCount > 0 then
     begin
       if EkleKurIlet then // daha ?nce giri? yap?ld?ysa ?nce onu kaydedelim
-        Ekle(TabCariIlet, 1, RehberIletID, Degis);
+        Ekle(TabCariIlet, 1, RehberIletID, Degis, '', TabNo_REHBER, RehberID, 75);
       RehberIletID := TabRehberIletisim.Fields[0].AsInteger;
 
       TabCariIlet.Close;
@@ -781,6 +783,18 @@ begin
   // LabelGrup.OnClick := Tablo.LabelClickCombobox;
   IlkAcilis:=True;
   CariPageControl.ActivePageIndex := 0;
+
+  // Cari detay iletisim dataset'lerini ust=cari log'una bagla (master-detail).
+  TabRehberIletisim.BeforeEdit := DetayBeforeEdit;
+  TabRehberIletisim.AfterPost  := DetayAfterPost;
+  TabPerIletisim.BeforeEdit := DetayBeforeEdit;
+  TabPerIletisim.AfterPost  := DetayAfterPost;
+  TabCariIlet.BeforeEdit := DetayBeforeEdit;
+  TabCariIlet.AfterPost  := DetayAfterPost;
+  TabPerIlet.BeforeEdit := DetayBeforeEdit;
+  TabPerIlet.AfterPost  := DetayAfterPost;
+  TabTicari.BeforeEdit := DetayBeforeEdit;
+  TabTicari.AfterPost  := DetayAfterPost;
 
   LabelGrup.OnClick := tablo.LabelClickCombobox;
   LabelSinif.OnClick := tablo.LabelClickCombobox;
@@ -1794,7 +1808,9 @@ begin
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
        ' SUBEID) SELECT YERI=2,YER_ID='+TabRehber.Fields[0].AsString+',SIRA,ETIKET,BILGI='''+KNo+''', EKLEYEN='+Kullanan+
        ', SUBEID='+IntToStr(SubeId)+' FROM REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO and RV.NO=22 ',[], []);
-    //tablo.LogIslemleri(TabNo_REHBER, TabRehber.Fields[0].AsInteger, Degis, TabRehber);
+    if LogGun > 0 then   // yeni cari -> EKLEME logu (ust=kendisi)
+      LogKayitEkle(TabRehber, TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger,
+                   TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger);
   end;
   YeniEklenenKayit := False;
   //temsilci de?i?irse ge?mi?e ekleme yapal?m..
@@ -1808,6 +1824,33 @@ begin
   end;
 
   Tablo.LogIslemleri(TabNo_REHBER,TabRehber.FieldByName('ID').AsInteger,4,TabRehber);
+end;
+
+// Cari detay dataset'leri (REHBERILETISIM vb.) icin ORTAK log. BeforeEdit'te snapshot,
+// AfterPost'ta edit -> LogIslemleri, yeni satir -> LogKayitEkle. ust=(REHBER, cari ID).
+procedure TRehberWizardDlg.DetayBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
+end;
+
+procedure TRehberWizardDlg.DetayAfterPost(DataSet: TDataSet);
+var
+  LTabNo, LUstID, LID: Integer;
+begin
+  if LogGun <= 0 then Exit;
+  if (DataSet = TabRehberIletisim) or (DataSet = TabPerIletisim) then
+    LTabNo := TabNo_REHBERILETISIM
+  else if (DataSet = TabCariIlet) or (DataSet = TabPerIlet) or (DataSet = TabTicari) then
+    LTabNo :=  TabNo_REHBERBILGI
+  else
+    Exit;
+  if DataSet.FindField('ID') = nil then Exit;
+  LID := DataSet.FieldByName('ID').AsInteger;
+  LUstID := TabRehber.FieldByName('ID').AsInteger;   // ust = mevcut cari
+  if LogOnceki.Count > 0 then   // duzenleme (BeforeEdit OncekiLog'u doldurdu)
+    Tablo.LogIslemleri(LTabNo, LID, 4, TFDQuery(DataSet), TabNo_REHBER, LUstID)
+  else                          // yeni satir -> EKLEME
+    LogKayitEkle(DataSet, LTabNo, LID, TabNo_REHBER, LUstID);
 end;
 
 procedure TRehberWizardDlg.TabRehberAfterScroll(DataSet: TDataSet);
@@ -2112,11 +2155,11 @@ begin
         end
         else if TabRehber.State in [dsBrowse] then
         if EkleKurIlet then
-           Ekle(TabCariIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+           Ekle(TabCariIlet, 1, RehberIletID, Degis, '', TabNo_REHBER, RehberID, 75); // KurumIletisimEkle;
         if EkleTicari then
-           Ekle(TabTicari, 2, RehberID, Degis); // TicariEkle;
+           Ekle(TabTicari, 2, RehberID, Degis, '', TabNo_REHBER, RehberID, 79); // TicariEkle;
         if EklePerIlet then
-           Ekle(TabPerIlet, 1, RehberPerID, Degis);
+           Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabNo_REHBER, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString);
         tablo.TablodanSorguAc(1, 'Select ID from REHBERILETISIM Where REHBERID=' + IntToStr(RehberID) + ' ');
         if (tablo.Query1.RecordCount = 0) then begin
             veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
@@ -2137,11 +2180,11 @@ begin
       end;
 
     1:if EkleKurIlet then
-        Ekle(TabCariIlet, 1, RehberIletID, Degis); // KurumIletisimEkle;
+        Ekle(TabCariIlet, 1, RehberIletID, Degis, '', TabNo_REHBER, RehberID, 75); // KurumIletisimEkle;
     2:if EkleTicari then
-        Ekle(TabTicari, 2, RehberID, Degis); // TicariEkle;
+        Ekle(TabTicari, 2, RehberID, Degis, '', TabNo_REHBER, RehberID, 79); // TicariEkle;
     4:if EklePerIlet then
-        Ekle(TabPerIlet, 1, RehberPerID, Degis); // PersonelIletisimEkle;
+        Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabNo_REHBER, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString); // PersonelIletisimEkle;
   end;
   if RehberID <> SonEklenenCari then
     tablo.SKRehberEkle(RehberID);

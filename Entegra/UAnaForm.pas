@@ -138,6 +138,8 @@ type
     MsgClient: TIdTCPClient;
     ChatTimer: TJvTimer;
     MenuSifreIslemleri: TMenuItem;
+    Eski1: TMenuItem;
+    MenuYeniLog: TMenuItem;
 
     procedure FormShow(Sender: TObject);
     procedure k1Click(Sender: TObject);
@@ -224,6 +226,7 @@ type
     procedure MsgClientConnected(Sender: TObject);
     procedure ChatTimerTimer(Sender: TObject);
     procedure MenuSifreIslemleriClick(Sender: TObject);
+    procedure MenuYeniLogClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -2024,6 +2027,11 @@ begin
     MessageDlg('Excel dosyası oluşturuldu.', mtInformation, [mbOk], 0);
     FormatSettings.CurrencyString := curstr;
   end;
+end;
+
+procedure TAnaForm.MenuYeniLogClick(Sender: TObject);
+begin
+   Tablo.LogEkraniGoster;   // 2 sekmeli (Genel grupli + Detay) log ekrani
 end;
 
 procedure TAnaForm.MenuSifreIslemleriClick(Sender: TObject);

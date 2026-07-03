@@ -564,7 +564,8 @@ type
     procedure OncekiLogBelirle(Tablo1: TDataSet);
     procedure BelgeLogBelirle(Tablo1: TDataSet);
     procedure InfoGoster(TabloAd:String; ID:Integer; ATabloNo: Integer = 0);
-    procedure LogIslemleri(TabloID, SatirID: integer; Islem: Integer;Tablo1: TDataSet);
+    procedure LogEkraniGoster;   // MenuYeniLog: 2 sekmeli browse (kayit bagimsiz)
+    procedure LogIslemleri(TabloID, SatirID: integer; Islem: Integer;Tablo1: TDataSet; AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
     procedure LogIslemlerBelge(Table1: TDataSet; TabloID, SatirID: integer;Islem: Integer);
     procedure BelgeSil(Table1: TDataSet);
     function YeniGeciciBaglantiOlustur: TFDConnection;
@@ -1233,6 +1234,11 @@ const
   TabNo_REHBER_POTANSIYEL = 72;
   TabNo_IK = 73;
   TabNo_IK_POTANSIYEL = 74;
+  TabNo_REHBERILETISIM = 75;   // cari iletisim (detay)
+  TabNo_REHBERBILGI = 76;      // cari bilgi/ticari (detay)
+  TabNo_REHBERTICARI = 79;      // cari bilgi/ticari (detay)
+  TabNo_REHBERILGILI = 81;      // cari bilgi/ticari (detay)
+  TabNo_REHBEROZLUK = 86;      // ik öZLÜK
   TabNo_REHBERPERSONEL = 77;
   TabNo_REHBERPERSONELHAREKET = 78;
   TabNo_ROLLER = 80;
@@ -6444,6 +6450,15 @@ begin
    InfoDlg.Destroy;
 end;
 
+// MenuYeniLog: kayit bagimsiz, 2 sekmeli (Genel grupli liste + Detay) log ekrani.
+procedure TTablo.LogEkraniGoster;
+begin
+   Application.CreateForm(TInfoDlg, InfoDlg);
+   InfoDlg.GenelModu := True;
+   InfoDlg.ShowModal;
+   InfoDlg.Destroy;
+end;
+
 procedure TTablo.BelgeLogBelirle(Tablo1: TDataSet);
 var
   i: Integer;
@@ -6459,7 +6474,7 @@ begin
 end;
 
 procedure TTablo.LogIslemleri(TabloID, SatirID: integer; Islem: Integer;
-  Tablo1: TDataSet);
+  Tablo1: TDataSet; AUstTabloID: Integer; AUstKayitID: Int64);
 var
   i: Integer;
   VLogID: Variant;
@@ -6532,7 +6547,7 @@ begin
             else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then
               LK.Alan(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString);
         if (Islem = 5) or (not LK.BosMu) then
-          LogYaz(LTip, TabloID, SatirID, LK.JSON, '');
+          LogYaz(LTip, TabloID, SatirID, LK.JSON, '', AUstTabloID, AUstKayitID);
       finally
         LK.Free;
       end;
@@ -7558,6 +7573,15 @@ begin
     if StokHareketVarMi(StokID,True) then
       raise Exception.Create(Kartsilinemez)
     else begin
+      // SILME logu: kayit silinmeden once (ISLEMLOG) - ust=kendisi.
+      if LogGun > 0 then begin
+        Tablo.TablodanSorguAc(1, 'select * from STOKLAR where ID='+IntToStr(StokID));
+        if not Tablo.Query1.IsEmpty then begin
+          Tablo.OncekiLogBelirle(Tablo.Query1);
+          Tablo.LogIslemleri(TabNo_STOKLAR, StokID, 5, Tablo.Query1);
+          LogOnceki.Clear;
+        end;
+      end;
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where (YERI between 71 and 72) and YER_ID=&yer_id ', ['&yer_id'], [StokID]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKFIYAT where STOKID=&id ', ['&id'], [StokID]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from ISORTAGI where STOKID=&id ', ['&id'], [StokID]);

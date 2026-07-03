@@ -35,7 +35,26 @@ USING (VALUES
   (131, ''FATURA'',    N''Detay'',  N''Fatura''),
   (132, ''FATURA'',    N''Detay'',  N''Fatura''),
   (133, ''FATURA'',    N''Detay'',  N''Fatura''),
-  (330, ''FATURA'',    N''Detay'',  N''Fatura'')
+  (330, ''FATURA'',    N''Detay'',  N''Fatura''),
+  (91,  ''SIPARIS'',      N''Başlık'', N''Sipariş''),
+  (92,  ''SIPARIS'',      N''Başlık'', N''Sipariş''),
+  (93,  ''SIPARISDETAY'', N''Detay'',  N''Sipariş''),
+  (105, ''FATBASLIK'',    N''Başlık'', N''İrsaliye''),
+  (107, ''FATBASLIK'',    N''Başlık'', N''Fiş''),
+  (71,  ''REHBER'',        N''Kart'',      N''Cari''),
+  (75,  ''REHBERBILGI'',   N''İletişim'',  N''Cari''),
+  (76,  ''REHBERBILGI'',   N''Detay'',     N''Cari''),
+  (79,  ''REHBERBILGI'',   N''Ticari'',    N''Cari''),
+  (81,  ''REHBERBILGI'',   N''İlgili'',    N''Cari''),
+  (88,  ''STOKLAR'',       N''Kart'',  N''Stok''),
+  (340, ''STOKBARKOD'',    N''Detay'', N''Stok''),
+  (346, ''STOKFIYAT'',     N''Detay'', N''Stok''),
+  (33,  ''GOREVLER'',      N''Kart'',  N''Görev''),
+  (70,  ''PROJELER'',      N''Kart'',  N''Proje''),
+  (43,  ''KASA'',          N''Kart'',  N''Nakit''),
+  (73,  ''REHBER'',        N''Kart'',   N''İK''),
+  (74,  ''REHBER'',        N''Kart'',   N''İK Potansiyel''),
+  (86,  ''REHBERBILGI'',   N''Özlük'',  N''İK'')
 ) AS k(TABLOID, TABLOADI, GORUNUM, MODUL)
 ON h.TABLOID = k.TABLOID
 WHEN MATCHED THEN UPDATE SET TABLOADI=k.TABLOADI, GORUNUM=k.GORUNUM, MODUL=k.MODUL

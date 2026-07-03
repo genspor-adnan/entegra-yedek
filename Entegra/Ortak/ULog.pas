@@ -1,4 +1,4 @@
-unit ULog;
+﻿unit ULog;
 
 // ============================================================
 // Islem/audit loglama. Tek tablo: GENDEPO.dbo.ISLEMLOG (ana DB'de synonym).
@@ -22,7 +22,7 @@ unit ULog;
 interface
 
 uses
-  System.JSON;
+  System.JSON, System.Classes, Data.DB, System.Generics.Collections;
 
 type
   // 0=silme 1=ekleme 2=degistirme (ISLEMLOG.ISLEMTIPI ile birebir)
@@ -64,11 +64,29 @@ procedure LogYaz(AIslemTipi: TLogIslem; ATabloID: Integer; AKayitID: Int64;
   AKurucu: TLogKurucu; const AModul: string = '';
   AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0); overload;
 
+// ---- Master/detay snapshot + diff loglama (wizard'lar icin ortak) ----
+// Bir dataset'in tum satirlarini (ID -> alan degerleri, alan index sirali) ASnap'e
+// alir. Duzenleme oncesi (browse) cagrilir; imlec bookmark ile korunur.
+procedure LogSnapshotAl(ADataSet: TDataSet;
+  ASnap: TObjectDictionary<Integer, TStringList>);
+
+// ASnap (yukleme) ile ADataSet (mevcut) farkini loglar:
+//   degisen alan -> liDegistir, snapshot'ta olmayan satir -> liEkle,
+//   mevcutta olmayan snapshot satiri -> liSil.
+// ADetayTabNo = satirin TABLOID'i; AUstTabNo/AUstID = master (ust) anahtari.
+// ASnap bos ise tum satirlar EKLEME sayilir (yeni belge). Kaydetmeyi ASLA bozmaz.
+procedure LogDiffKaydet(ADataSet: TDataSet;
+  ASnap: TObjectDictionary<Integer, TStringList>;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+
+// Bir kaydin (ADataSet mevcut satiri) tum dolu fkData alanlarini EKLEME loglar.
+procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
+  AUstTabNo: Integer = 0; AUstID: Int64 = 0);
+
 implementation
 
 uses
-  System.SysUtils, System.SyncObjs, System.Classes, System.DateUtils, Data.DB,
-  FireDAC.Comp.Client, Winapi.Windows,
+  System.SysUtils, System.SyncObjs, System.DateUtils, FireDAC.Comp.Client, Winapi.Windows,
   Utablo, PrjConst, uUtility_my;
 
 var
@@ -164,7 +182,7 @@ end;
 
 // LOG<yyyy> tablosunu (yoksa) olusturur + ISLEMLOG view'ini gunceller.
 // Oturumda yil basina bir kez calisir (GYillar cache). Tablo adini doner.
-function LogYilTablosu(ACnn: TFDConnection; AYil: Integer): string;
+function  LogYilTablosu(ACnn: TFDConnection; AYil: Integer): string;
 var
   LQ: TFDQuery;
   LT: string;
@@ -192,8 +210,8 @@ begin
   finally
     LQ.Free;
   end;
-  GYillar.Add(LT);
   IslemLogViewKur(ACnn);   // yeni yil tablosu view'e dahil edilsin
+  GYillar.Add(LT);         // view kurulumu BASARILIYSA cache'le (yoksa tekrar denenir)
 end;
 
 { TLogKurucu }
@@ -365,6 +383,144 @@ begin
     LogYaz(AIslemTipi, ATabloID, AKayitID, LJSON, AModul, AUstTabloID, AUstKayitID);
   finally
     AKurucu.Free;  // sahipligi aldik
+  end;
+end;
+
+procedure LogSnapshotAl(ADataSet: TDataSet;
+  ASnap: TObjectDictionary<Integer, TStringList>);
+var
+  LBM: TBookmark;
+  LSL: TStringList;
+  i: Integer;
+begin
+  if ASnap = nil then Exit;
+  ASnap.Clear;
+  if (ADataSet = nil) or (not ADataSet.Active) then Exit;
+  ADataSet.DisableControls;
+  try
+    LBM := ADataSet.Bookmark;
+    try
+      ADataSet.First;
+      while not ADataSet.Eof do
+      begin
+        LSL := TStringList.Create;
+        for i := 0 to ADataSet.FieldCount - 1 do
+          LSL.Add(ADataSet.Fields[i].AsString);
+        ASnap.AddOrSetValue(ADataSet.FieldByName('ID').AsInteger, LSL);
+        ADataSet.Next;
+      end;
+    finally
+      if ADataSet.BookmarkValid(LBM) then ADataSet.Bookmark := LBM;
+    end;
+  finally
+    ADataSet.EnableControls;
+  end;
+end;
+
+procedure LogDiffKaydet(ADataSet: TDataSet;
+  ASnap: TObjectDictionary<Integer, TStringList>;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+var
+  i, LID: Integer;
+  LSnap: TStringList;
+  LK: TLogKurucu;
+  LGorulen: TList<Integer>;
+  LPair: TPair<Integer, TStringList>;
+  LBM: TBookmark;
+
+  // Mevcut satirin tum dolu fkData alanlarini deger olarak iceren kurucu (ekle/sil).
+  function DoluAlanlar(ASL: TStringList): TLogKurucu;
+  var j: Integer;
+  begin
+    Result := TLogKurucu.Yeni;
+    for j := 0 to ADataSet.FieldCount - 1 do
+      if (ADataSet.Fields[j].FieldKind = fkData) and
+         (ADataSet.Fields[j].DataType <> ftBlob) and
+         (ADataSet.Fields[j].DataType <> ftMemo) then
+      begin
+        if ASL <> nil then      // snapshot degeri (silinen satir)
+        begin
+          if (j < ASL.Count) and (Trim(ASL[j]) <> '') then
+            Result.Deger(ADataSet.Fields[j].FieldName, ASL[j]);
+        end
+        else if Trim(ADataSet.Fields[j].AsString) <> '' then   // mevcut satir (ekleme)
+          Result.Deger(ADataSet.Fields[j].FieldName, ADataSet.Fields[j].AsString);
+      end;
+  end;
+
+begin
+  if (ASnap = nil) or (ADataSet = nil) or (not ADataSet.Active) then Exit;
+  try
+    LGorulen := TList<Integer>.Create;
+    try
+      ADataSet.DisableControls;
+      try
+        LBM := ADataSet.Bookmark;
+        try
+          ADataSet.First;
+          while not ADataSet.Eof do
+          begin
+            LID := ADataSet.FieldByName('ID').AsInteger;
+            LGorulen.Add(LID);
+            if ASnap.TryGetValue(LID, LSnap) then
+            begin
+              // Mevcut satir snapshot'ta var -> degisen alanlar
+              LK := TLogKurucu.Yeni;
+              for i := 0 to ADataSet.FieldCount - 1 do
+                if (ADataSet.Fields[i].FieldKind = fkData) and
+                   (ADataSet.Fields[i].DataType <> ftBlob) and
+                   (ADataSet.Fields[i].DataType <> ftMemo) and
+                   (i < LSnap.Count) and
+                   (ADataSet.Fields[i].AsString <> LSnap[i]) then
+                  LK.Alan(ADataSet.Fields[i].FieldName, LSnap[i],
+                          ADataSet.Fields[i].AsString);
+              if not LK.BosMu then
+                LogYaz(liDegistir, ADetayTabNo, LID, LK, '', AUstTabNo, AUstID)
+              else
+                LK.Free;
+            end
+            else
+              // snapshot'ta yok -> yeni satir -> EKLEME
+              LogYaz(liEkle, ADetayTabNo, LID, DoluAlanlar(nil), '', AUstTabNo, AUstID);
+            ADataSet.Next;
+          end;
+        finally
+          if ADataSet.BookmarkValid(LBM) then ADataSet.Bookmark := LBM;
+        end;
+      finally
+        ADataSet.EnableControls;
+      end;
+
+      // Snapshot'ta olup mevcutta olmayan -> SILME
+      for LPair in ASnap do
+        if LGorulen.IndexOf(LPair.Key) < 0 then
+          LogYaz(liSil, ADetayTabNo, LPair.Key, DoluAlanlar(LPair.Value),
+                 '', AUstTabNo, AUstID);
+    finally
+      LGorulen.Free;
+    end;
+  except
+    // loglama kaydetmeyi bozmaz
+  end;
+end;
+
+procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
+  AUstTabNo: Integer = 0; AUstID: Int64 = 0);
+var
+  LK: TLogKurucu;
+  i: Integer;
+begin
+  if (ADataSet = nil) or (not ADataSet.Active) then Exit;
+  try
+    LK := TLogKurucu.Yeni;
+    for i := 0 to ADataSet.FieldCount - 1 do
+      if (ADataSet.Fields[i].FieldKind = fkData) and
+         (ADataSet.Fields[i].DataType <> ftBlob) and
+         (ADataSet.Fields[i].DataType <> ftMemo) and
+         (Trim(ADataSet.Fields[i].AsString) <> '') then
+        LK.Deger(ADataSet.Fields[i].FieldName, ADataSet.Fields[i].AsString);
+    LogYaz(liEkle, ATabNo, AID, LK, '', AUstTabNo, AUstID);
+  except
   end;
 end;
 

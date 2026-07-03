@@ -1267,8 +1267,8 @@
   end
   object DtsFatBaslik: TDataSource
     DataSet = FATBASLIK
-    Left = 152
-    Top = 103
+    Left = 72
+    Top = 119
   end
   object FATURA: TFDQuery
     AutoCalcFields = False
@@ -1491,7 +1491,7 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 85
+    Left = 101
     Top = 38
     object infoMenu: TMenuItem
       Caption = 'info'
@@ -1529,7 +1529,7 @@
         Tag = 1
         Caption = 'G'#246'nder'
         GroupIndex = 1
-        ImageIndex = 12
+        ImageIndex = 50
         OnClick = MenuGonderClick
       end
       object MenuYanitla: TMenuItem

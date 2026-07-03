@@ -230,6 +230,7 @@ type
     procedure ComboILGILI1DblClick(Sender: TObject);
     procedure WhatsappImageClick(Sender: TObject);
     procedure TabGorevAfterPost(DataSet: TDataSet);
+    procedure TabGorevBeforeEdit(DataSet: TDataSet);   // log oncesi snapshot
   private
     { Private declarations }
     sonbasilanctrl:TcxButtonEdit;
@@ -251,7 +252,7 @@ implementation
 {$R *.dfm}
 
 uses FetaKurulusSiniflari, PrjConst, IdGlobalProtocols, UGirisKutusuEx, UIsListesi,
-     UGenNotificationUtils, UServisEkipmanSec, UFastRap, URaporAraclari, URichEdit;
+     UGenNotificationUtils, UServisEkipmanSec, UFastRap, URaporAraclari, URichEdit, ULog;
 
 var PeryotDegisti, OnayRedBasildi, Kapanabilir : Boolean;
     TekrarAdet, TekrarPeryot : SmallInt;
@@ -526,6 +527,7 @@ end;
 
 procedure TGorevDlg.FormCreate(Sender: TObject);
 begin
+   TabGorev.BeforeEdit := TabGorevBeforeEdit;   // log: duzenleme oncesi snapshot
    if Tablo.GENINI.ReadBoolean(Ops_CheckEkipmanGor, True)=False then begin
       PanelEkipman.Destroy;
       BEditEkipman.Destroy;
@@ -781,6 +783,20 @@ begin
    if GoogleTakvimeKaydet then
      //TabGorev.FieldByName('OLAYID').AsString := Tablo.GoogleCalendarKaydet(TabGorev.FieldByName('OLAYID').AsString, TabGorev.FieldByName('REHBERID').AsInteger,False);
       Tablo.GoogleCalendarKaydet(TabGorev.FieldByName('ID').AsInteger,False);
+
+   // ISLEMLOG: BeforeEdit OncekiLog'u doldurduysa duzenleme, yoksa yeni (ekleme).
+   if LogGun > 0 then begin
+     if LogOnceki.Count > 0 then
+       Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev)
+     else
+       LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
+                    TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
+   end;
+end;
+
+procedure TGorevDlg.TabGorevBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TabGorev);
 end;
 
 procedure TGorevDlg.TabGorevBeforePost(DataSet: TDataSet);

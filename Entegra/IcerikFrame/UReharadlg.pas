@@ -1142,13 +1142,15 @@ end;
 procedure TRehberAraDlg.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     Tablo.CariSil( REHBER.Fields[0].AsInteger);
-     TabloYenile(REHBER,[]);
+     // SILME logu: kayit SILINMEDEN once alinmali (aksi halde refresh sonrasi yanlis
+     // kayit loglanir).
      if LogGun>0 then begin
        Tablo.OncekiLogBelirle(REHBER);
        Tablo.LogIslemleri(TabNo_REHBER, REHBER.Fields[0].AsInteger, 5, REHBER);
        LogOnceki.Clear;
      end;
+     Tablo.CariSil( REHBER.Fields[0].AsInteger);
+     TabloYenile(REHBER,[]);
   end;
 end;
 

@@ -991,8 +991,16 @@ begin
     FATBASLIK.ParamByName('SelectList').Value  := SelectList;
     FATBASLIK.ParamByName('TopN').Value  := TopN;
     FATBASLIK.ParamByName('Tur').Value  := Tur;
-    FATBASLIK.ParamByName('StartDate').Value  := StartDate;
-    FATBASLIK.ParamByName('EndDate').Value  := EndDate;
+    // Tarih parametreleri null olabilir (tarih filtresi kapali). FireDAC null
+    // variant'tan tip cikaramaz (-335) -> null ise tipi acikca ver.
+    with FATBASLIK.ParamByName('StartDate') do
+      if VarIsNull(StartDate) or VarIsEmpty(StartDate) then
+      begin DataType := ftWideString; Clear; end
+      else Value := StartDate;
+    with FATBASLIK.ParamByName('EndDate') do
+      if VarIsNull(EndDate) or VarIsEmpty(EndDate) then
+      begin DataType := ftWideString; Clear; end
+      else Value := EndDate;
 //    FATBASLIK.ParamByName('SubeIDList').Value  := [+SubeIDList+];
     FATBASLIK.ParamByName('Faturano').Value  := Faturano;
     FATBASLIK.ParamByName('Baslik').Value  := Baslik;
@@ -3389,10 +3397,16 @@ begin
 end;
 
 procedure TFaturalarDlg.infoMenuClick(Sender: TObject);
+var
+  LTur, LTabNo: Integer;
 begin
-
-  if FATBASLIK.FieldByName('TUR').AsInteger in [ 9,19 ] then
-     Tablo.InfoGoster('SIPARIS',  FATBASLIK.FieldByName('ID').AsInteger,  TabloNo)
+  LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+  if LTur in [ 9,19 ] then
+  begin
+    // SIPARIS baslik TabloID: satis(19)->92, alis(9)->91. USiparisWizard loglama ile ayni.
+    if LTur = 19 then LTabNo := TabNo_SIPARIS_Giden else LTabNo := TabNo_SIPARIS_Gelen;
+    Tablo.InfoGoster('SIPARIS',  FATBASLIK.FieldByName('ID').AsInteger,  LTabNo);
+  end
   else
      Tablo.InfoGoster('FATBASLIK',  FATBASLIK.FieldByName('ID').AsInteger, TabloNo)
 end;

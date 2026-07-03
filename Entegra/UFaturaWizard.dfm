@@ -4156,8 +4156,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATBASLIK F Left outer join DOVIZCINSLERI D on  '
       'F.DIL=D.DIL and F.DOVIZ_CINSI=D.DOVIZ'
       'WHERE F.ID = :Par')
-    Left = 128
-    Top = 154
+    Left = 40
+    Top = 186
     ParamData = <
       item
         Name = 'Par'

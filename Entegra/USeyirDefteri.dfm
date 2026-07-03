@@ -12,11 +12,9 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object ToolBar3: TToolBar
     AlignWithMargins = True
@@ -49,6 +47,7 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitHeight = 29
     object ToolButton1: TToolButton
       Left = 0
       Top = 0
@@ -103,7 +102,6 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
       TabOrder = 3
       Transparent = True
       OnClick = CheckSilmeClick
-      Width = 121
     end
     object CheckDegistirme: TcxCheckBox
       Left = 791
@@ -113,7 +111,6 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
       TabOrder = 4
       Transparent = True
       OnClick = CheckDegistirmeClick
-      Width = 121
     end
     object txtTablo: TcxButtonEdit
       Left = 341
@@ -229,6 +226,7 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
     object DBGrid1DBTableView1: TcxGridDBTableView
       OnDblClick = DBGrid1DBTableView1DblClick
       Navigator.Buttons.CustomButtons = <>
+      ScrollbarAnnotations.CustomAnnotations = <>
       OnFocusedRecordChanged = DBGrid1DBTableView1FocusedRecordChanged
       DataController.DataSource = DsTabLog
       DataController.Summary.DefaultGroupSummaryItems = <>
@@ -245,35 +243,41 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
       object DBGrid1DBTableView1SATIRID: TcxGridDBColumn
         Caption = 'ID'
         DataBinding.FieldName = 'SATIRID'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 57
       end
       object DBGrid1DBTableView1TARIH: TcxGridDBColumn
         Caption = 'Tarih'
         DataBinding.FieldName = 'TARIH'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 93
       end
       object DBGrid1DBTableView1PCADI: TcxGridDBColumn
         Caption = 'Bilgisayar'
         DataBinding.FieldName = 'PCADI'
+        DataBinding.IsNullValueType = True
         Width = 73
       end
       object DBGrid1DBTableView1FIRMA: TcxGridDBColumn
         Caption = 'Kullan'#305'c'#305
         DataBinding.FieldName = 'FIRMA'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 107
       end
       object DBGrid1DBTableView1TABLO: TcxGridDBColumn
         Caption = 'Tablo'
         DataBinding.FieldName = 'ANAHTAR'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 90
       end
       object DBGrid1DBTableView1ISLEM: TcxGridDBColumn
         Caption = #304#351'lem'
         DataBinding.FieldName = 'ISLEM'
+        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         Width = 59
       end
@@ -338,6 +342,7 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
       LookAndFeel.NativeStyle = True
       object cxGridDBTableView1: TcxGridDBTableView
         Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
         DataController.DataSource = DsTabLogHareket
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <>
@@ -352,23 +357,27 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
         OptionsView.Indicator = True
         object cxGridDBTableView1LOGID: TcxGridDBColumn
           DataBinding.FieldName = 'LOGID'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object cxGridDBTableView1TABLOALANADI: TcxGridDBColumn
           Caption = 'Alan'
           DataBinding.FieldName = 'TABLOALANADI'
+          DataBinding.IsNullValueType = True
           HeaderAlignmentHorz = taCenter
           Width = 121
         end
         object cxGridDBTableView1ESKIALANDEGERI: TcxGridDBColumn
           Caption = 'Eski'
           DataBinding.FieldName = 'ESKIALANDEGERI'
+          DataBinding.IsNullValueType = True
           HeaderAlignmentHorz = taCenter
           Width = 146
         end
         object cxGridDBTableView1YENIALANDEGERI: TcxGridDBColumn
           Caption = 'Yeni'
           DataBinding.FieldName = 'YENIALANDEGERI'
+          DataBinding.IsNullValueType = True
           HeaderAlignmentHorz = taCenter
           Width = 157
         end
@@ -395,9 +404,8 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
     Visible = False
   end
   object TabLog: TFDQuery
-    Connection = Tablo.FDCnn
     AfterScroll = TabLogAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT  '
       #9'L.ID, '
@@ -427,7 +435,6 @@ object SeyirDefteriDlg: TSeyirDefteriDlg
   end
   object TabLogHareket: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'Select * from LOGHAR'
       'Where LOGID=:logid'

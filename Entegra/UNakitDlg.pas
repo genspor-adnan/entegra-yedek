@@ -161,7 +161,7 @@ var
 
 implementation
 
-uses FetaKurulusSiniflari,PrjConst,LocOnFly, UIKListeDlg, UFastRap, URaporAraclari, UGenelAnaSekmeFrame;
+uses FetaKurulusSiniflari,PrjConst,LocOnFly, UIKListeDlg, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, ULog;
 
 var OncekiTutar, AvansToplam : Currency;
     OncekiHId, OncekiOdemeTipi, OncekiIzinSay, OncekiProjeId, OncekiMasrafId : Integer;
@@ -235,7 +235,10 @@ end;
 procedure TNakitDlg.TabKasaAfterPost(DataSet: TDataSet);
 begin
   if islemOp='D' then
-     Tablo.LogIslemleri(TabNO_Kasa,TabKasa.FieldByName('ID').AsInteger,4,DataSet);
+     Tablo.LogIslemleri(TabNO_Kasa,TabKasa.FieldByName('ID').AsInteger,4,DataSet)
+  else if (LogGun>0) and ((islemOp='E') or (islemOp='K')) then   // yeni nakit/kasa -> EKLEME
+     LogKayitEkle(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger,
+                  TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger);
 end;
 
 procedure TNakitDlg.IslemTarihiChange(Field: TField);

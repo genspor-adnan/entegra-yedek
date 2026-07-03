@@ -104,6 +104,7 @@ type
     FComboBoxStyle: TComboBoxStyle;
     FComboItemIndexKullan: Boolean;
     FListe: TStrings;
+    FGenislik: Integer;   // 0 => varsayilan 210
     FOnSelectionChanged : TComboSelectionChanged;
     procedure SetComboBoxStyle(const Value: TComboBoxStyle);
     procedure OnComboSelectionChanged(Sender: TObject);
@@ -114,7 +115,8 @@ type
     procedure DeğişkeneAktar; override;
     constructor Create(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
       AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
-      AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil);reintroduce;
+      AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil;
+      AGenislik: Integer = 0);reintroduce;
     procedure HazırlamaBitti; override;
     property ComboŞekli : TComboBoxStyle read FComboBoxStyle write SetComboBoxStyle;
     property ComboItemIndexKullan: Boolean read FComboItemIndexKullan write FComboItemIndexKullan;
@@ -170,7 +172,8 @@ type
     function RichEdit(ABaşlık: string;ABaşlangıçDeğeri : PVariant): TGirdiDenetimleri;
     function ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
         AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
-        AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TGirdiDenetimleri;
+        AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil;
+        AGenislik: Integer = 0): TGirdiDenetimleri;
     function DateTimePicker(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
         ADateTimeTürü : TDateTimeKind = dtkDate; ADateTimeBiçimi : string = '') :
         TGirdiDenetimleri;
@@ -208,7 +211,8 @@ var
   /// <returns>TComboBoxDenetimi</returns>
   function __ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
         AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
-        AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TComboBoxDenetimi;
+        AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil;
+        AGenislik: Integer = 0): TComboBoxDenetimi;
   /// <summary>
   /// Standard DateTimePicker nesnesi ekler
   /// </summary>
@@ -263,9 +267,10 @@ end;
 
 function __ComboBox(ABaşlık: string; ABaşlangıçDeğeri : PVariant;
       AListe : TStrings = nil; AComboŞekli : TComboBoxStyle = csDropDown;
-      AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil): TComboBoxDenetimi;
+      AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil;
+      AGenislik: Integer = 0): TComboBoxDenetimi;
 begin
-  Result := TComboBoxDenetimi.Create(ABaşlık,ABaşlangıçDeğeri,AListe, AComboŞekli,AComboBoxItemIndexKullan, ASelectionChanged);
+  Result := TComboBoxDenetimi.Create(ABaşlık,ABaşlangıçDeğeri,AListe, AComboŞekli,AComboBoxItemIndexKullan, ASelectionChanged, AGenislik);
 end;
 
 
@@ -588,13 +593,15 @@ end;
 constructor TComboBoxDenetimi.Create(ABaşlık: string;
   ABaşlangıçDeğeri : PVariant;AListe : TStrings = nil;
   AComboŞekli : TComboBoxStyle = csDropDown;
-  AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil);
+  AComboBoxItemIndexKullan : Boolean = False;ASelectionChanged : TComboSelectionChanged = nil;
+  AGenislik: Integer = 0);
 begin
   inherited Create(ABaşlık,ABaşlangıçDeğeri);
   FDenetimTürü := dtComboBox;
   FComboBoxStyle := AComboŞekli;
   FComboItemIndexKullan := AComboBoxItemIndexKullan;
   FListe := AListe;
+  FGenislik := AGenislik;
   FOnSelectionChanged := ASelectionChanged;
 end;
 
@@ -619,7 +626,7 @@ begin
   with TComboBox(FGirdiBileşeni) do begin
     Parent := AEvSahibi;
     Align := alLeft;
-    Width := 210;
+    if FGenislik > 0 then Width := FGenislik else Width := 210;
     Style := FComboBoxStyle;
     OnChange := OnComboSelectionChanged;
     if Assigned(FVariant) then
@@ -836,11 +843,12 @@ end;
 function TGirdiDenetimleri.ComboBox(ABaşlık: string;
   ABaşlangıçDeğeri: PVariant; AListe: TStrings;
   AComboŞekli: TComboBoxStyle;
-  AComboBoxItemIndexKullan: Boolean;ASelectionChanged : TComboSelectionChanged): TGirdiDenetimleri;
+  AComboBoxItemIndexKullan: Boolean;ASelectionChanged : TComboSelectionChanged;
+  AGenislik: Integer): TGirdiDenetimleri;
 begin
   Result := Self;
   FGirdiDenetimleri.Add(__ComboBox(ABaşlık,ABaşlangıçDeğeri,
-    AListe,AComboŞekli,AComboBoxItemIndexKullan,ASelectionChanged));
+    AListe,AComboŞekli,AComboBoxItemIndexKullan,ASelectionChanged,AGenislik));
 end;
 
 constructor TGirdiDenetimleri.Create;

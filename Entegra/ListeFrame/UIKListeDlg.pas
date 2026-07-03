@@ -1070,10 +1070,11 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GENINI where BOLUM ='+'-100'+IntToStr(i)+REHBER.Fields[0].AsString+'  ',[],[]);
     end;
 
-    if LogGun>0 then
+    if LogGun>0 then begin
      Tablo.OncekiLogBelirle(REHBER);
-     Tablo.LogIslemleri(TabNo_REHBER,REHBER.FieldByName('ID').AsInteger, 5, REHBER);
+     Tablo.LogIslemleri(TabNo_IK,REHBER.FieldByName('ID').AsInteger, 5, REHBER);  // IK (73) - cari 71'den ayri
      LogOnceki.Clear;
+    end;
     //REHBER.Close;
     //REHBER.open;
     TabloYenile(REHBER,[]);
@@ -3121,7 +3122,7 @@ end;
 procedure TIKListeDlg.iletisimSilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     CariIletisimSil(REHBER.Fields[0].AsInteger,REHBERILETISIM.Fields[0].AsInteger, REHBERILETISIM.FieldByName('VARSAYILAN').AsBoolean);
+     CariIletisimSil(REHBER.Fields[0].AsInteger,REHBERILETISIM.Fields[0].AsInteger, REHBERILETISIM.FieldByName('VARSAYILAN').AsBoolean, TabNo_IK);
      PageControlSekmeChange(Self);
   end;
 end;
@@ -3154,7 +3155,7 @@ end;
 procedure TIKListeDlg.IlgiliSilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     CariIlgiliSil(REHBER.Fields[0].AsInteger,TabRehberIlgili.Fields[0].AsInteger, False); //TabRehberIlgili.FieldByName('VARSAYILAN').AsBoolean
+     CariIlgiliSil(REHBER.Fields[0].AsInteger,TabRehberIlgili.Fields[0].AsInteger, False, TabNo_IK); //TabRehberIlgili.FieldByName('VARSAYILAN').AsBoolean
      PageControlSekmeChange(Self);
   end;
 end;
