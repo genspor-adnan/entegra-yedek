@@ -125,6 +125,10 @@ object InfoDlg: TInfoDlg
             item
               Default = True
               Kind = bkEllipsis
+            end
+            item
+              Caption = '-'
+              Kind = bkText
             end>
           Properties.ReadOnly = True
           TabOrder = 1
@@ -203,7 +207,7 @@ object InfoDlg: TInfoDlg
           OptionsSelection.HideSelection = True
           OptionsView.ColumnAutoWidth = True
           OptionsView.Footer = True
-          OptionsView.GroupByBox = False
+          OptionsView.GroupByBox = True
           OptionsView.Indicator = True
           object GridLOGViewTARIH: TcxGridDBColumn
             Caption = 'Tarih'

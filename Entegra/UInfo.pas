@@ -386,6 +386,11 @@ var
   LListe: TStringList;
   LSecim: Variant;
 begin
+  if AButtonIndex = 1 then   // '-' temizle
+  begin
+    TcxButtonEdit(Sender).Text := '';   // OnChange -> suzer
+    Exit;
+  end;
   LListe := TStringList.Create;
   try
     try
