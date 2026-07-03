@@ -67,6 +67,7 @@ type
     DsTabLog: TDataSource;
     cxLabel8: TcxLabel;
     EditIcerik: TcxButtonEdit;
+    CheckIcerik: TcxCheckBox;
     procedure FormShow(Sender: TObject);
     procedure LvGecmisSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure LvGecmisCustomDrawItem(Sender: TCustomListView; Item: TListItem;
@@ -268,10 +269,14 @@ begin
   if Trim(EditIcerik.Text) <> '' then
   begin
     var LAra: string := Esc(EditIcerik.Text);
-    LW := LW +
-      ' AND ( EXISTS(SELECT 1 FROM LOGREFERANS r WHERE r.TABLOID=L.USTTABLOID' +
-      ' AND r.KAYITID=L.USTKAYITID AND (r.AD LIKE ''%' + LAra + '%'' OR r.KOD LIKE ''%' + LAra + '%''))' +
-      ' OR CAST(DECOMPRESS(L.BILGI) AS nvarchar(max)) LIKE ''%' + LAra + '%'' )';
+    if CheckIcerik.Checked then
+      // "Icerikten Ara" secili: log JSON (BILGI) icinde detayli arama (yavas)
+      LW := LW + ' AND CAST(DECOMPRESS(L.BILGI) AS nvarchar(max)) LIKE ''%' + LAra + '%'''
+    else
+      // Varsayilan: bagli cari/IK (REHBERID) veya stok (STOKID) KOD/AD icinde (hizli)
+      LW := LW + ' AND EXISTS(SELECT 1 FROM LOGREFERANS r WHERE' +
+        ' ((r.KAYITID=L.REHBERID AND r.TABLOID IN (71,73,74)) OR (r.KAYITID=L.STOKID AND r.TABLOID=88))' +
+        ' AND (r.AD LIKE ''%' + LAra + '%'' OR r.KOD LIKE ''%' + LAra + '%''))';
   end;
   // Islem tipi (Ekleme=1 / Degistirme=2 / Silme=0). Hicbiri secili degilse tumu.
   LTip := Tipler;
@@ -325,6 +330,7 @@ begin
   EditKayitNo.Properties.OnButtonClick := BilgiAlButonClick;
   EditIcerik.Properties.OnButtonClick := BilgiAlButonClick;  // BilgiAl giris + '-' temizle
   EditIcerik.Properties.OnChange := FiltreUygula;             // secim/temizlemede suz
+  CheckIcerik.Properties.OnEditValueChanged := FiltreUygula;  // Icerikten Ara: mod degisince suz
 end;
 
 procedure TInfoDlg.FiltreUygula(Sender: TObject);

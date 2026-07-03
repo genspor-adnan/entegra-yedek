@@ -429,6 +429,15 @@ object InfoDlg: TInfoDlg
       TabOrder = 2
       Width = 369
     end
+    object CheckIcerik: TcxCheckBox
+      Left = 478
+      Top = 8
+      Caption = #$0130#$00E7'erikten Ara'
+      ParentFont = False
+      Style.TransparentBorder = False
+      TabOrder = 3
+      Transparent = True
+    end
   end
   object TabLog: TFDQuery
     Connection = Tablo.FDCnn
