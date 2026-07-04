@@ -281,7 +281,7 @@ type
 implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UTeklifWizard,
-  UFastRap, PrjConst,LocOnFly, FetaUtil, UBinarySave;
+  UFastRap, PrjConst,LocOnFly, FetaUtil, UBinarySave, ULog;
 
 {$R *.dfm}
 { TTeklifListeDlg }
@@ -299,6 +299,8 @@ begin
       //varsa dokumanlar?n silinmeli
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
                                      [80, TabTeklif.FieldByName('ID').AsInteger]);
+      // Detay satirlarini SILMEDEN ONCE logla (ust=teklif), sonra sil.
+      LogDetaylariSil('TEKLIFDETAY', 'TEKLIFID', TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       if LogGun>0 then begin

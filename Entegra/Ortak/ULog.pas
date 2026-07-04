@@ -85,6 +85,11 @@ procedure LogDiffKaydet(ADataSet: TDataSet;
 procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
   AUstTabNo: Integer = 0; AUstID: Int64 = 0);
 
+// Bir kart silinirken detay tablosundaki (AUstKolon=AUstID) TUM satirlari SILME loglar.
+// SILMEDEN ONCE cagrilmali (veri hala DB'de). Her satir -> liSil (ust=kart).
+procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+
 // Kart (master) ad/kod referansini GENDEPO.LOGREFERANS'a UPSERT eder (hizli arama).
 // Silinen kayit da kalir (ASilindi=True -> SILINDI=1). AD/KOD dataset alanlarindan
 // (FIRMA/STOKADI/ADI/KOD...) cikarilir. Loglama gibi is akisini ASLA kirmaz.
@@ -673,6 +678,42 @@ begin
     if (AUstTabNo = 0) or ((AUstTabNo = ATabNo) and (AUstID = AID)) then
       LogReferansGuncelle(ADataSet, ATabNo, AID, False);
   except
+  end;
+end;
+
+procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+var
+  LQ: TFDQuery;
+  LK: TLogKurucu;
+  i: Integer;
+  LReh, LStk: Int64;
+begin
+  if (LogGun <= 0) or (Trim(ADetayTablo) = '') then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select * from ' + ADetayTablo + ' where ' + AUstKolon + ' = ' + IntToStr(AUstID);
+      LQ.Open;
+      while not LQ.Eof do
+      begin
+        LK := TLogKurucu.Yeni;
+        for i := 0 to LQ.FieldCount - 1 do
+          if (LQ.Fields[i].FieldKind = fkData) and
+             (LQ.Fields[i].DataType <> ftBlob) and (LQ.Fields[i].DataType <> ftMemo) and
+             (Trim(LQ.Fields[i].AsString) <> '') then
+            LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
+        LogVarlikIDleri(LQ, LReh, LStk);
+        LogYaz(liSil, ADetayTabNo, LQ.FieldByName('ID').AsLargeInt, LK, '',
+               AUstTabNo, AUstID, LReh, LStk);   // LK sahipligi LogYaz'a gecer
+        LQ.Next;
+      end;
+    finally
+      LQ.Free;
+    end;
+  except
+    // loglama silme islemini ASLA bozmaz
   end;
 end;
 
