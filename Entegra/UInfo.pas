@@ -83,7 +83,8 @@ type
     FCozumler: TStringList;    // LOGCOZUM satirlari: 'ALAN|TABLOID' -> 'KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE'
     FCozumCache: TStringList;  // 'TABLOID|ALAN|DEGER' -> ad (tekrarli sorguyu onler)
     procedure CozumleriYukle;  // LOGCOZUM'u bellege al (bir kez)
-    function  DegerCoz(ATabloID: Integer; const AAlan, ADeger: string): string;  // ID -> ad
+    function  DegerCoz(ATabloID: Integer; const AAlan, ADeger: string;
+      AKardesler: TStrings = nil): string;  // ID -> ad ({ALAN} placeholder = kardes alan degeri)
     procedure ButtonEditTiklama(Sender: TObject);   // edit'e tiklayinca picker'i ac
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
@@ -686,7 +687,8 @@ begin
 end;
 
 // Bir alan degerini (ID) LOGCOZUM'a gore ad'a cevirir. Eslesme/sonuc yoksa ADeger doner.
-function TInfoDlg.DegerCoz(ATabloID: Integer; const AAlan, ADeger: string): string;
+function TInfoDlg.DegerCoz(ATabloID: Integer; const AAlan, ADeger: string;
+  AKardesler: TStrings = nil): string;
 var
   LTanim, LKaynak, LIdKol, LAdKol, LFiltre, LCacheKey: string;
   LParts: TArray<string>;
@@ -699,15 +701,25 @@ begin
   LTanim := FCozumler.Values[UpperCase(AAlan) + '|' + IntToStr(ATabloID)];
   if LTanim = '' then LTanim := FCozumler.Values[UpperCase(AAlan) + '|'];
   if LTanim = '' then Exit;   // bu alan cozumlenmez
-  // Cache
-  LCacheKey := IntToStr(ATabloID) + '|' + UpperCase(AAlan) + '|' + ADeger;
-  i := FCozumCache.IndexOfName(LCacheKey);
-  if i >= 0 then Exit(FCozumCache.ValueFromIndex[i]);
   // LTanim = KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE
   LParts := LTanim.Split(['|']);
   if Length(LParts) < 3 then Exit;
   LKaynak := LParts[0]; LIdKol := LParts[1]; LAdKol := LParts[2];
   if Length(LParts) >= 4 then LFiltre := LParts[3] else LFiltre := '';
+  // FILTRE'de {ALAN} placeholder'lari -> ayni kayittaki kardes alan degerleri.
+  // (ör. ALTSEKTOR: 'BOLUM=-2204{SEKTOR}' -> SEKTOR=52 ise 'BOLUM=-220452')
+  if (Pos('{', LFiltre) > 0) then
+  begin
+    if Assigned(AKardesler) then
+      for i := 0 to AKardesler.Count - 1 do
+        LFiltre := StringReplace(LFiltre, '{' + AKardesler.Names[i] + '}',
+                     AKardesler.ValueFromIndex[i], [rfReplaceAll, rfIgnoreCase]);
+    if Pos('{', LFiltre) > 0 then Exit;   // cozulemeyen placeholder -> ID kalir
+  end;
+  // Cache (cozulmus filtre dahil: parent'a gore ad degisebilir)
+  LCacheKey := IntToStr(ATabloID) + '|' + UpperCase(AAlan) + '|' + ADeger + '|' + LFiltre;
+  i := FCozumCache.IndexOfName(LCacheKey);
+  if i >= 0 then Exit(FCozumCache.ValueFromIndex[i]);
   try
     LQ := TFDQuery.Create(nil);
     try
@@ -740,11 +752,13 @@ var
   LItem: TListItem;
   LOnc, LSon, LAlan: string;
   LGorulen: TStringList;   // ayni alan adini (ör. İlgili) tek kez goster
+  LKardes: TStringList;    // ALAN=deger (tum alanlar) -> {ALAN} placeholder cozumu icin
 begin
   CozumleriYukle;
   LvDetay.Items.BeginUpdate;
   LGorulen := TStringList.Create;
   LGorulen.Sorted := True;
+  LKardes := TStringList.Create;
   try
     LvDetay.Items.Clear;
     // Sutun basliklari islem tipine gore: degisme -> Onceki|Sonraki; ekleme/silme -> Bilgisi|(bos)
@@ -768,6 +782,16 @@ begin
     end;
     try
       LObj := TJSONObject(LParsed);
+      // Once TUM alanlarin guncel degerini topla (ALAN=deger): {ALAN} placeholder icin.
+      // Degisiklikte yeni (y), tek degerde deger. Placeholder cozumu (ör. ALTSEKTOR<-SEKTOR).
+      for LPair in LObj do
+      begin
+        LVal := LPair.JsonValue;
+        if LVal is TJSONObject then
+          LKardes.Values[LPair.JsonString.Value] := JsonDeger(TJSONObject(LVal).GetValue('y'))
+        else
+          LKardes.Values[LPair.JsonString.Value] := JsonDeger(LVal);
+      end;
       for LPair in LObj do
       begin
         if LGorulen.IndexOf(LPair.JsonString.Value) >= 0 then Continue;  // tekrar eden alan gosterme
@@ -786,8 +810,8 @@ begin
           LSon := '';
         end;
         // LOGCOZUM: alan degerlerini (ID) anlasilir ada cevir (eslesme yoksa ID kalir).
-        LOnc := DegerCoz(ATabloID, LAlan, LOnc);
-        if LSon <> '' then LSon := DegerCoz(ATabloID, LAlan, LSon);
+        LOnc := DegerCoz(ATabloID, LAlan, LOnc, LKardes);
+        if LSon <> '' then LSon := DegerCoz(ATabloID, LAlan, LSon, LKardes);
         LItem := LvDetay.Items.Add;
         LItem.Caption := LAlan;      // Alan
         LItem.SubItems.Add(LOnc);    // Onceki
@@ -799,6 +823,7 @@ begin
   finally
     LvDetay.Items.EndUpdate;
     LGorulen.Free;
+    LKardes.Free;
   end;
 end;
 
