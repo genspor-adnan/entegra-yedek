@@ -263,7 +263,7 @@ type
 implementation
 
 uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,
-  PrjConst, Utablo, IdGlobalProtocols, UMailKisiBulma,
+  PrjConst, Utablo, ULog, IdGlobalProtocols, UMailKisiBulma,
   UBinarySave, UGirisKutusuEx, URehberAramaEkrani, UDokumanYetki,LocOnFly;
 {$R *.dfm}
 
@@ -936,6 +936,8 @@ begin
       begin
         ID := DokumanTview.Controller.SelectedRecords[i].Values[DokumanTviewID.Index];
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where ID=&DokID', ['&DokID'], [ID]);
+        // Revizyon detayi (IMAJ YERI=1) SILMEDEN ONCE logla (ust=dokuman).
+        LogDetaylariSil('IMAJ', 'YER_ID', TabNo_DOKUMANREVIZE, TabNo_DOKUMAN, StrToInt64Def(VarToStr(ID), 0), 'YERI=1');
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID=&DokID', ['&DokID'], [ID]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANKISAYOL where DOKUMANID=&DokID', ['&DokID'], [ID]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE  FROM ANAHTAR_KELIME WHERE  DOK_ID=&ID ', ['&ID'], [ID]);

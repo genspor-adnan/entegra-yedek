@@ -85,10 +85,12 @@ procedure LogDiffKaydet(ADataSet: TDataSet;
 procedure LogKayitEkle(ADataSet: TDataSet; ATabNo: Integer; AID: Int64;
   AUstTabNo: Integer = 0; AUstID: Int64 = 0);
 
-// Bir kart silinirken detay tablosundaki (AUstKolon=AUstID) TUM satirlari SILME loglar.
-// SILMEDEN ONCE cagrilmali (veri hala DB'de). Her satir -> liSil (ust=kart).
+// Bir kart silinirken detay tablosundaki (AUstKolon=AUstID [AND AEkKosul]) TUM
+// satirlari SILME loglar. SILMEDEN ONCE cagrilmali (veri hala DB'de). Her satir ->
+// liSil (ust=kart). AEkKosul: cok-amacli detay tablolari icin ek WHERE
+// (ör. REHBERBILGI 'YERI=70', IMAJ 'YERI=1', GOREVKULLANICI 'TUR=11').
 procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
-  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64; const AEkKosul: string = '');
 
 // Kart (master) ad/kod referansini GENDEPO.LOGREFERANS'a UPSERT eder (hizli arama).
 // Silinen kayit da kalir (ASilindi=True -> SILINDI=1). AD/KOD dataset alanlarindan
@@ -682,7 +684,7 @@ begin
 end;
 
 procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
-  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64; const AEkKosul: string = '');
 var
   LQ: TFDQuery;
   LK: TLogKurucu;
@@ -695,6 +697,8 @@ begin
     try
       LQ.Connection := Tablo.FDCnn;
       LQ.SQL.Text := 'select * from ' + ADetayTablo + ' where ' + AUstKolon + ' = ' + IntToStr(AUstID);
+      if Trim(AEkKosul) <> '' then
+        LQ.SQL.Text := LQ.SQL.Text + ' and (' + AEkKosul + ')';
       LQ.Open;
       while not LQ.Eof do
       begin

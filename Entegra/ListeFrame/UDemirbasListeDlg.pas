@@ -373,7 +373,7 @@ implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UDemirbasWizard, URaporAraclari, UGenelAnaSekmeFrame,
   UFastRap, PrjConst, UMesaj, UOpsDlg,UGirisKutusuEx,LocOnFly, UGorevDlg, UIsListesi, UResim, UExceldenVeriAl,
-  UBekletme;
+  UBekletme, ULog;
 {$R *.dfm}
 { TDemirbasListeDlg }
 
@@ -1643,6 +1643,8 @@ begin
           Tablo.Query1.Next;
         end;
       end;
+      // Detay satirlarini SILMEDEN ONCE logla (ust=demirbas), sonra sil.
+      LogDetaylariSil('DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID', TabNo_DEMIRBAS_TUTANAK, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
      // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&DEMIRBASID',['&DEMIRBASID'],[DEMIRBAS.FieldByName('ID').AsString])

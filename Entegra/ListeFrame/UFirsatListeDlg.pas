@@ -347,7 +347,7 @@ type
 
 implementation
 
-uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg,
+uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, ULog,
      UIsListesi, UGorevDlg;
 
 {$R *.dfm}
@@ -1010,7 +1010,11 @@ begin
       //varsa proje ba�lant�lar� silinmeli
       //kendisi silinir
       //FIRSATLAR.Delete;
+      // Detay (REHBERBILGI firsat bilgileri, YERI=proje) SILMEDEN ONCE logla.
+      LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_PROJEDETAY, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger, 'YERI=' + IntToStr(TabNo_PROJELER));
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM REHBERBILGI WHERE YERI = &RYer AND YER_ID = &YerId ', ['&RYer','&YerId'],[TabNo_PROJELER, FIRSATLAR.Fields[0].AsInteger]);
+      // Detay satirlarini SILMEDEN ONCE logla (ust=firsat), sonra sil.
+      LogDetaylariSil('PROJEASAMA', 'PROJEID', TabNo_PROJEASAMA, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM PROJEASAMA where PROJEID= &YerId ', ['&YerId'],[ FIRSATLAR.Fields[0].AsInteger]);
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[FIRSATLAR.Fields[0].AsInteger]);

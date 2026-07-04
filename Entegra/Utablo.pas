@@ -8143,7 +8143,11 @@ begin
      //varsa proje bağlantıları silinmeli
       //kendisi silinir
       //PROJELER.Delete;
+      // Detay (REHBERBILGI proje bilgileri, YERI=proje) SILMEDEN ONCE logla.
+      LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_PROJEDETAY, TabNo_PROJELER, ProjeID, 'YERI=' + IntToStr(TabNo_PROJELER));
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM REHBERBILGI WHERE YERI = &RYer AND YER_ID = &YerId ', ['&RYer','&YerId'],[TabNo_PROJELER, ProjeID]);
+      // Detay satirlarini SILMEDEN ONCE logla (ust=proje), sonra sil.
+      LogDetaylariSil('PROJEASAMA', 'PROJEID', TabNo_PROJEASAMA, TabNo_PROJELER, ProjeID);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM PROJEASAMA where PROJEID= &YerId ', ['&YerId'],[ ProjeID]);
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[ProjeID]);
@@ -8668,7 +8672,10 @@ end;
 
 procedure TTablo.UretimEmriSilmeIslemleri(UretimEmriID:integer);
 begin
+  // Detay satirlarini SILMEDEN ONCE logla (ust=uretim emri), sonra sil.
+  LogDetaylariSil('URETIMOPERASYON', 'URETIMEMRIID', TabNo_URETIMOPERASYON, TabNo_URETIMEMRI, UretimEmriID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
+  LogDetaylariSil('URETIMEMRIDETAY', 'URETIMEMRIID', TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, UretimEmriID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where ID=&ID',['&ID'],[UretimEmriID]);
 end;
@@ -9057,9 +9064,13 @@ begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SERVIS, ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISDETAY where SERVISID=&Id ',['&Id'], [ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISBILGI where SERVISID=&Id ',['&Id'], [ServisID]);
+  // Detay satirlarini SILMEDEN ONCE logla (ust=servis), sonra sil.
+  LogDetaylariSil('SERVISDETAYPERSONEL', 'SERVISID', TabNo_SERVISDETAYPERSONEL, TabNo_SERVIS, ServisID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISDETAYPERSONEL where SERVISID = &Id ',['&Id'], [ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISASAMA where SERVISID = &Id ',['&Id'], [ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVKULLANICI where TUR=12 and LISTGOREVID  = &Id ',['&Id'], [ServisID]);
+  // Detay satirlarini SILMEDEN ONCE logla (ust=servis), sonra sil.
+  LogDetaylariSil('SERVISHAREKET', 'SERVISID', TabNo_SERVISHAREKET, TabNo_SERVIS, ServisID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISHAREKET where SERVISID  = &Id ',['&Id'], [ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVIS where ID=&Id ',['&Id'], [ServisID]);
 end;
@@ -9446,7 +9457,11 @@ begin
   Result := False;
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMAN where MODUL='+IntToStr(TabNo_GOREVLER)+' AND MODULID='+IntToStr(ID),[],[]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from ANIMSAT where TUR=1 and ID='+IntToStr(ID),[],[]);
+  // Detay satirlarini SILMEDEN ONCE logla (ust=gorev), sonra sil.
+  LogDetaylariSil('GOREVYORUM', 'GOREVID', Tabno_GOREVYORUM, TabNo_GOREVLER, ID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVYORUM where [GOREVID]='+IntToStr(ID),[],[]);
+  // Atanan personel (GOREVKULLANICI TUR=11) SILMEDEN ONCE logla (ust=gorev).
+  LogDetaylariSil('GOREVKULLANICI', 'LISTGOREVID', TabNo_GOREVLER, TabNo_GOREVLER, ID, 'TUR=11');
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVKULLANICI where [LISTGOREVID]='+IntToStr(ID)+' AND TUR=11 ',[],[]);
   if GoogleTakvimeKaydet then
      GoogleCalendarOlaySil(ID);
