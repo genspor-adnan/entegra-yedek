@@ -711,13 +711,14 @@ begin
     TabNotlar.Post;
 
   // ISLEMLOG: KART loglama TEK SEFER, kaydet/kapat aninda (ID kesinlesmis).
-  // LogOnceki (BeforeEdit->OncekiLogBelirle) doluysa duzenleme, bossa yeni kayit.
+  // NOT: gorev karti hep dsEdit ile geldiginden LogOnceki yeni kayitta da dolu olur;
+  // bu yuzden edit/yeni ayrimi IslOp ile ('E'/'K'=yeni, digeri=duzenleme).
   if LogGun > 0 then begin
-    if LogOnceki.Count > 0 then
-      Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev)
-    else
+    if (IslOp = 'E') or (IslOp = 'K') then
       LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
-                   TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
+                   TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger)
+    else
+      Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev);
   end;
 
   if ComboAnimsatmaZamani.editvalue<>null then
