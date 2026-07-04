@@ -661,7 +661,11 @@ begin
       if (ADataSet.Fields[i].FieldKind = fkData) and
          (ADataSet.Fields[i].DataType <> ftBlob) and
          (ADataSet.Fields[i].DataType <> ftMemo) and
-         (Trim(ADataSet.Fields[i].AsString) <> '') then
+         (Trim(ADataSet.Fields[i].AsString) <> '') and
+         (UpperCase(ADataSet.Fields[i].FieldName) <> 'DEGISTIREN') and
+         (UpperCase(ADataSet.Fields[i].FieldName) <> 'DEGISTIRMETARIHI') and
+         (UpperCase(ADataSet.Fields[i].FieldName) <> 'EKLEYEN') and
+         (UpperCase(ADataSet.Fields[i].FieldName) <> 'EKLEMETARIHI') then
         LK.Deger(ADataSet.Fields[i].FieldName, ADataSet.Fields[i].AsString);
     LogVarlikIDleri(ADataSet, LReh, LStk);   // cari/stok anahtarlari
     LogYaz(liEkle, ATabNo, AID, LK, '', AUstTabNo, AUstID, LReh, LStk);

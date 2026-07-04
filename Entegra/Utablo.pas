@@ -6506,11 +6506,18 @@ begin
       var LK: TLogKurucu := TLogKurucu.Yeni;
       try
         for i := 0 to Tablo1.FieldCount - 1 do
-          if (Tablo1.Fields[i].DataType <> ftBlob) and (Tablo1.Fields[i].DataType <> ftMemo) then
-            if Islem = 5 then
-              LK.Deger(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i])
-            else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then
-              LK.Alan(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString);
+        begin
+          if (Tablo1.Fields[i].DataType = ftBlob) or (Tablo1.Fields[i].DataType = ftMemo) then Continue;
+          // Audit alanlari her Post'ta (sayfa gecisi dahil) otomatik degisir; gercek
+          // kullanici degisikligi degil -> diff'e alma (kisi/tarih zaten altta gosterilir).
+          var LAd: string := UpperCase(Tablo1.Fields[i].FieldName);
+          if (LAd = 'DEGISTIREN') or (LAd = 'DEGISTIRMETARIHI') or
+             (LAd = 'EKLEYEN') or (LAd = 'EKLEMETARIHI') then Continue;
+          if Islem = 5 then
+            LK.Deger(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i])
+          else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then
+            LK.Alan(Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString);
+        end;
         if (Islem = 5) or (not LK.BosMu) then
         begin
           var LReh, LStk: Int64;
