@@ -97,7 +97,8 @@ USING (VALUES
   (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
   (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
   (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  -- Transfer: silme logunda TIPI yok; TUR=20 ISLEMTURLERI'de tek satir -> FILTRE'siz coz.
+  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
   (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
   (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
   (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
