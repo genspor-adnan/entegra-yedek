@@ -1019,7 +1019,7 @@ end;
 procedure TProjeWizardDlg.ProjeEkDetayEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY,ComboBolum.Text);   // detay: proje bilgi (baslik=sablon)
 end;
 
 procedure TProjeWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
@@ -1365,7 +1365,7 @@ begin
    end;
 
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY,ComboBolum.Text);   // detay: proje bilgi (baslik=sablon)
 
    Sontus:='K'; //Kaydet butonu
    ModalResult := mrOk;

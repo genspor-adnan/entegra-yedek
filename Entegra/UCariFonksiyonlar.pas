@@ -59,7 +59,7 @@ begin
               'select FIRMA from REHBER where ID=&id', ['&id'], [Yeri_Id], True));
         end;
     81: LBaslikEtiket := 'İlgili';
-    370: LBaslikEtiket := 'Şablon';   // stok detay: baslik = sablon/bolum adi (ABaslik)
+    370, 372: LBaslikEtiket := 'Şablon';   // stok(370)/proje(372) detay: baslik = sablon/bolum adi (ABaslik)
     86: begin   // ozluk: baslik = personel adi (YER_ID=personel REHBER.ID)
           LBaslikEtiket := 'Özlük';
           if LBaslikDeger = '' then
