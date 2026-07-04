@@ -59,6 +59,7 @@ type
     N3: TMenuItem;
     frxPROJELER: TfrxDBDataset;
     PopupMenu1: TPopupMenu;
+    ProjeInfoMenu: TMenuItem;
     Kopyala1: TMenuItem;
     N4: TMenuItem;
     GrupA1: TMenuItem;
@@ -234,6 +235,7 @@ type
       AInfo: TdxTileControlDragItemInfo; var AAllow: Boolean);
     procedure PageControlUstChange(Sender: TObject);
     procedure PROJELERAfterOpen(DataSet: TDataSet);
+    procedure ProjeInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     ProjeID, RehberId:integer;
@@ -779,6 +781,12 @@ end;
 procedure TProjeListeDlg.PROJELERBeforeOpen(DataSet: TDataSet);
 begin
   // Param degeri TabloYenile ile veriliyor.
+end;
+
+procedure TProjeListeDlg.ProjeInfoMenuClick(Sender: TObject);
+begin
+  if not PROJELER.IsEmpty then
+    Tablo.InfoGoster('PROJELER', PROJELER.FieldByName('ID').AsInteger, 70);
 end;
 
 procedure TProjeListeDlg.ProjeListeDlgKapatEylemi(Sender: TObject);

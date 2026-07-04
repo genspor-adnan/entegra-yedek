@@ -1242,6 +1242,10 @@ object GorevListeDlg: TGorevListeDlg
     style = msDefault
     Left = 344
     Top = 160
+    object GorevInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = GorevInfoMenuClick
+    end
     object BuTariheIsEkleMenu: TMenuItem
       Caption = 'Bu Tarihe '#304#351' Ekle'
       OnClick = GorevEkleTusClick

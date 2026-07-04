@@ -2070,6 +2070,10 @@ object StokListeDlg: TStokListeDlg
     OnPopup = PmStokPopup
     Left = 183
     Top = 127
+    object StokInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = StokInfoMenuClick
+    end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
       OnClick = Kopyala1Click

@@ -1346,6 +1346,10 @@ object ProjeListeDlg: TProjeListeDlg
   object PopupMenu1: TPopupMenu
     Left = 28
     Top = 167
+    object ProjeInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = ProjeInfoMenuClick
+    end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
       OnClick = Kopyala1Click

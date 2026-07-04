@@ -40,6 +40,7 @@ type
     DtsGorevler: TDataSource;
     TabGorevler: TFDQuery;
     GorevlerMenu: TOfficePopupMenu;
+    GorevInfoMenu: TMenuItem;
     DuzenleMenu: TMenuItem;
     TamamlandiIsaretleMenu: TMenuItem;
     Bayraklaretle1: TMenuItem;
@@ -184,6 +185,7 @@ type
     GridGorevViewYORUM_BIT: TcxGridDBColumn;
     CheckZenginMetin: TcxCheckBox;
     procedure AramaYap;
+    procedure GorevInfoMenuClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
     procedure TreeListelerClick(Sender: TObject);
     procedure Bayraklaretle1Click(Sender: TObject);
@@ -850,6 +852,12 @@ procedure TGorevListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
   GorevArama;
+end;
+
+procedure TGorevListeDlg.GorevInfoMenuClick(Sender: TObject);
+begin
+  if not TabGorevler.IsEmpty then
+    Tablo.InfoGoster('GOREVLER', TabGorevler.FieldByName('ID').AsInteger, 33);
 end;
 
 procedure TGorevListeDlg.Kapatiliyor(var AKapansin: Boolean);

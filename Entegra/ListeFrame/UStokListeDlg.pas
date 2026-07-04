@@ -309,6 +309,7 @@ type
     procedure LogoResimClick(Sender: TObject);
     procedure tabStokDurumBeforeOpen(DataSet: TDataSet);
     procedure Kopyala1Click(Sender: TObject);
+    procedure StokInfoMenuClick(Sender: TObject);
     procedure GridStokViewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure AlanYnetimi2Click(Sender: TObject);
     procedure PmStilPopup(Sender: TObject);
@@ -1210,6 +1211,12 @@ begin
     if ID > 0 then
       TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
   end;
+end;
+
+procedure TStokListeDlg.StokInfoMenuClick(Sender: TObject);
+begin
+  if not STOKLAR.IsEmpty then
+    Tablo.InfoGoster('STOKLAR', STOKLAR.FieldByName('ID').AsInteger, 88);
 end;
 
 procedure TStokListeDlg.KritikSeviyeMiktarnGiriniz1Click(Sender: TObject);
