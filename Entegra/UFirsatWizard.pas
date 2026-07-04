@@ -1493,7 +1493,12 @@ var
 begin
 
    if TabFirsatlar.State in [dsInsert, dsEdit] then begin
-      TabFirsatlar.post;
+      // Kart Edit'e cesitli yerlerden/AutoEdit ile girebilir; GERCEK degisiklik yoksa
+      // (Modified=False) Post etme -> DEGISTIREN/tarih guncellenmesin, gereksiz log olmasin.
+      if (TabFirsatlar.State = dsInsert) or TabFirsatlar.Modified then
+         TabFirsatlar.post
+      else
+         TabFirsatlar.Cancel;
       ProjeID := TabFirsatlar.Fields[0].asInteger;
    end;
    if TabDetay.State in [dsInsert, dsEdit] then
