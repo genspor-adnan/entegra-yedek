@@ -120,6 +120,8 @@ type
     GridUretimEmriViewURUNNO: TcxGridDBColumn;
     TreeUretimAgacicxDBTreeListURUNNO: TcxDBTreeListColumn;
     GridUrtOperasyonDBTableView1URUNNO: TcxGridDBColumn;
+    UretimEmriPopup: TPopupMenu;
+    UretimEmriInfoMenu: TMenuItem;
 //    procedure CheckPasiflerClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
@@ -136,8 +138,9 @@ type
     procedure GridUretimEmriViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure JvTimer1Timer(Sender: TObject);
+    procedure UretimEmriInfoMenuClick(Sender: TObject);
   private
-    { Private declarations }    
+    { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TUretimEmriAramaFrame;
     procedure GorunurOlacak;
@@ -363,6 +366,12 @@ begin
      Tablo.GridAyarRestore('UretimEmriGridi',GridUretimEmriView );
      AlanlarOlusturuldu := True;
   end;}
+end;
+
+procedure TUretimEmriListeDlg.UretimEmriInfoMenuClick(Sender: TObject);
+begin
+  if not TabUretimEmri.IsEmpty then
+    Tablo.InfoGoster('URETIMEMRI', TabUretimEmri.FieldByName('ID').AsInteger, TabNo_URETIMEMRI);
 end;
 
 procedure TUretimEmriListeDlg.UretimEmriListeDlgKapatEylemi(Sender: TObject);

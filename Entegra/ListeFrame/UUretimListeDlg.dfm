@@ -662,6 +662,10 @@ object UretimListeDlg: TUretimListeDlg
   object PopupMenuUretim: TPopupMenu
     Left = 70
     Top = 117
+    object UretimFisInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = UretimFisInfoMenuClick
+    end
     object rsaliyeOlutur1: TMenuItem
       Tag = 14
       Caption = #304'rsaliye Olu'#351'tur'

@@ -124,6 +124,7 @@ type
     MenuItem4: TMenuItem;
     TumUrunlerMenu: TMenuItem;
     PopupMenuListe: TPopupMenu;
+    ReceteInfoMenu: TMenuItem;
     Kopyala1: TMenuItem;
     cxDBLabel8: TcxDBLabel;
     cxLabel10: TcxLabel;
@@ -247,6 +248,9 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure TabReceteDetayBeforeEdit(DataSet: TDataSet);
     procedure TabReceteBeforePost(DataSet: TDataSet);
+    procedure TabReceteBeforeEdit(DataSet: TDataSet);
+    procedure TabReceteBeforeScroll(DataSet: TDataSet);
+    procedure ReceteInfoMenuClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CheckPasifClick(Sender: TObject);
     procedure BaskiOnizlemeMenuClick(Sender: TObject);
@@ -306,6 +310,10 @@ type
     FIlkAcilisYukleniyor: Boolean;
     FDetayYukleBekliyor: Boolean;
     FReceteYukleniyor: Boolean;
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // detay (URETIMRECETEDETAY) orijinal satirlar (log diff)
+    FSnapReceteID: Integer;   // FDetSnap'in ait oldugu recete ID (ayni recete tekrar snapshot alinmaz)
+    procedure DetayLogSnapshotAl;   // detay yuklendikten sonra baseline al (recete degistiyse)
+    procedure DetayLogDiffKaydet;   // baseline vs guncel detay farkini logla + baseline tazele
     function EkranAdiAl: string;
     procedure HesaplaClick;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -330,7 +338,7 @@ implementation
 
 uses
   PrjConst, UStokHizmetAra, UGirisKutusuEx, FetaKurulusSiniflari, Fetautil, FetaClassExtensions,
-  LocOnFly, UFastRap, UGenelAnaSekmeFrame,URaporAraclari, UExceldenVeriAl;
+  LocOnFly, UFastRap, UGenelAnaSekmeFrame,URaporAraclari, UExceldenVeriAl, ULog;
 
 var
   BilesenAraDlg,UrunAraDlg: TStokHizmetAraDlg;
@@ -775,7 +783,10 @@ procedure TUretimReceteDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if TabRecete.State = dsEdit then
     TabRecete.Post;
+  // Kapanirken son recetenin detay farkini logla (kaydetmeden cikilsa da yakalanir).
+  DetayLogDiffKaydet;
   FreeAndNil(FStokBilgiCache);
+  FreeAndNil(FDetSnap);
 end;
 
 procedure TUretimReceteDlg.FormCreate(Sender: TObject);
@@ -786,6 +797,8 @@ begin
   RECETE.Connection := Tablo.FDCnn;
   RECETEDETAY.Connection := Tablo.FDCnn;
   FStokBilgiCache := TDictionary<Integer, string>.Create;
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+  FSnapReceteID := 0;
   EnsureCalcField(TabRecete,'MALIYETSON',ftCurrency);
   EnsureCalcField(TabRecete,'MALIYETORT',ftCurrency);
   EnsureCalcField(TabRecete,'LISTE_SATIS',ftCurrency);
@@ -1141,10 +1154,30 @@ begin
 end;
 
 procedure TUretimReceteDlg.ReceteKaydetBtnClick(Sender: TObject);
+var
+  LID: Integer;
+  LYeni: Boolean;
 begin
+  LYeni := TabRecete.State = dsInsert;
   TabRecete.AfterScroll := nil;
-  TabRecete.Post;
+  // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+  if LYeni or TabRecete.Modified then
+    TabRecete.Post
+  else
+    TabRecete.Cancel;
+  LID := TabRecete.FieldByName('ID').AsInteger;
   TabRecete.AfterScroll := TabReceteAfterScroll;
+
+  // KART loglama (terminal kaydet): yeni -> LogKayitEkle, edit -> LogIslemleri.
+  if LogGun > 0 then begin
+    if LYeni then
+      LogKayitEkle(TabRecete, TabNo_URETIMRECETE, LID, TabNo_URETIMRECETE, LID)
+    else
+      Tablo.LogIslemleri(TabNo_URETIMRECETE, LID, 4, TabRecete);
+  end;
+  // DETAY farki (ust=recete) — kaydet aninda ekleme/degisiklik/silme.
+  DetayLogDiffKaydet;
+
   TabReceteAfterScroll(TabRecete);
 end;
 
@@ -1218,6 +1251,8 @@ begin
   if PageControlOpr.ActivePageIndex=1 then
      TabloYenile(TabUretimReceteOpr,[TabRecete.FieldByname('ID').AsInteger]);
 
+  // Detay yuklendi -> log baseline al (recete degistiyse).
+  DetayLogSnapshotAl;
 end;
 
 procedure TUretimReceteDlg.TabReceteBeforePost(DataSet: TDataSet);
@@ -1229,6 +1264,46 @@ begin
   end;
 
   EkleyenDegistiren(DataSet);
+end;
+
+procedure TUretimReceteDlg.TabReceteBeforeEdit(DataSet: TDataSet);
+begin
+  // Kart duzenleme oncesi orijinal alanlari sakla (LogIslemleri diff icin).
+  if LogGun > 0 then
+    Tablo.OncekiLogBelirle(TabRecete);
+end;
+
+procedure TUretimReceteDlg.TabReceteBeforeScroll(DataSet: TDataSet);
+begin
+  // Baska receteye gecmeden ONCE, gidilen recetenin detay degisikliklerini logla
+  // (detay hala eski receteye ait; master henuz kaymadi).
+  DetayLogDiffKaydet;
+end;
+
+procedure TUretimReceteDlg.ReceteInfoMenuClick(Sender: TObject);
+begin
+  if not TabRecete.IsEmpty then
+    Tablo.InfoGoster('URETIMRECETE', TabRecete.FieldByName('ID').AsInteger, TabNo_URETIMRECETE);
+end;
+
+procedure TUretimReceteDlg.DetayLogSnapshotAl;
+begin
+  // Detay yuklendikten sonra baseline al. Ayni recete tekrar yuklenirse (inline
+  // post/dialog reload) baseline korunur -> yapilan degisiklikler diff'te gorulur.
+  if (LogGun <= 0) or (not Assigned(FDetSnap)) or (not TabReceteDetay.Active) then Exit;
+  if TabRecete.FieldByName('ID').AsInteger = FSnapReceteID then Exit;
+  LogSnapshotAl(TabReceteDetay, FDetSnap);
+  FSnapReceteID := TabRecete.FieldByName('ID').AsInteger;
+end;
+
+procedure TUretimReceteDlg.DetayLogDiffKaydet;
+begin
+  // Baseline (FDetSnap) ile guncel detay farkini logla; sonra baseline'i tazele
+  // (mukerrer save engeli). LogDiffKaydet kendi try/except'ini icerir, akisi bozmaz.
+  if (LogGun <= 0) or (not Assigned(FDetSnap)) or (FSnapReceteID <= 0) then Exit;
+  if not TabReceteDetay.Active then Exit;
+  LogDiffKaydet(TabReceteDetay, FDetSnap, TabNo_URETIMRECETEDETAY, TabNo_URETIMRECETE, FSnapReceteID);
+  LogSnapshotAl(TabReceteDetay, FDetSnap);
 end;
 
 procedure TUretimReceteDlg.TabReceteCalcFields(DataSet: TDataSet);

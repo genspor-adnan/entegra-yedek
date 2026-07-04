@@ -80,6 +80,7 @@ type
     JvTimer1: TJvTimer;
     GridUretimViewDURUMNEREDEN: TcxGridDBColumn;
     PopupMenuUretim: TPopupMenu;
+    UretimFisInfoMenu: TMenuItem;
     MenuUretim: TMenuItem;
     KaynakBelgeyiAcMenu: TMenuItem;
     GridUretimViewSATIS: TcxGridDBColumn;
@@ -117,6 +118,7 @@ type
     procedure TabUretimListeAfterClose(DataSet: TDataSet);
     procedure JvTimer1Timer(Sender: TObject);
     procedure KaynakBelgeyiAcMenuClick(Sender: TObject);
+    procedure UretimFisInfoMenuClick(Sender: TObject);
     procedure GridUretimViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure FaturaOlutur1Click(Sender: TObject);
@@ -293,6 +295,12 @@ end;
 procedure TUretimListeDlg.Kapatiliyor(var AKapansin: Boolean);
 begin
 
+end;
+
+procedure TUretimListeDlg.UretimFisInfoMenuClick(Sender: TObject);
+begin
+  if not TabUretimListe.IsEmpty then
+    Tablo.InfoGoster('URETIMFISI', TabUretimListe.FieldByName('ID').AsInteger, TabNo_URETIMFISI);
 end;
 
 procedure TUretimListeDlg.KaynakBelgeyiAcMenuClick(Sender: TObject);

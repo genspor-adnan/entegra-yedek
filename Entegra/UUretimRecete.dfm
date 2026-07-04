@@ -1469,6 +1469,8 @@ object UretimReceteDlg: TUretimReceteDlg
     ParentColor = False
   end
   object TabRecete: TFDQuery
+    BeforeEdit = TabReceteBeforeEdit
+    BeforeScroll = TabReceteBeforeScroll
     BeforePost = TabReceteBeforePost
     AfterScroll = TabReceteAfterScroll
     OnCalcFields = TabReceteCalcFields
@@ -1949,6 +1951,10 @@ object UretimReceteDlg: TUretimReceteDlg
   object PopupMenuListe: TPopupMenu
     Left = 240
     Top = 136
+    object ReceteInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = ReceteInfoMenuClick
+    end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
       OnClick = Kopyala1Click

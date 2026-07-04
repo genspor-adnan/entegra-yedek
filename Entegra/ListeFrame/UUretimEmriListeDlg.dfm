@@ -80,6 +80,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     Width = 1391
     Height = 394
     Align = alClient
+    PopupMenu = UretimEmriPopup
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
@@ -939,6 +940,14 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     OnTimer = JvTimer1Timer
     Left = 479
     Top = 244
+  end
+  object UretimEmriPopup: TPopupMenu
+    Left = 592
+    Top = 152
+    object UretimEmriInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = UretimEmriInfoMenuClick
+    end
   end
 end
 

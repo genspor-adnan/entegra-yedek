@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Utablo, cxGridTableView,
+  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms, Utablo, cxGridTableView,
   Dialogs, JvWizard, JvExControls, cxGraphics, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage,
   cxEdit, DB, cxDBData, cxGridLevel, cxClasses, cxControls, cxGridCustomView, cxGridCustomTableView,
   cxGridDBTableView, cxGrid, cxButtonEdit, cxDropDownEdit, cxImageComboBox, cxDBEdit, cxTextEdit, FireDAC.Comp.Client,
@@ -361,6 +361,7 @@ type
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
     IzlemDlg3 : TIzlemeDlg;
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // URETIMFISDETAY orijinal satirlar (log diff icin)
     procedure IletisimEkleClick(Sender: TObject);
     function MiktarSor(Mik:Variant):Real;
     function BoslukKontrolu: Boolean;
@@ -385,7 +386,7 @@ implementation
 uses
   UGenelAnaSekmeFrame, URaporAraclari, UUretimRecete, UGirisKutusuEx, Fetautil, FetaKurulusSiniflari,
   UKodAgaci, UAnaForm, LocOnFly,PrjConst, UFastRap, UBelgeDonusum, FetaClassExtensions,
-  URehberAyar, UCariFonksiyonlar;
+  URehberAyar, UCariFonksiyonlar, ULog;
 
 {$R *.dfm}
 
@@ -1143,6 +1144,7 @@ end;
 
 procedure TUretimWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FreeAndNil(FDetSnap);
   if dtsUretim.State = dsInsert then
     tabUretim.Cancel
   else begin
@@ -1179,6 +1181,7 @@ procedure TUretimWizardDlg.FormCreate(Sender: TObject);
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   LogID := 0;
   Carpan := 0;
   Tablo.GridTurkcelestir;
@@ -1248,6 +1251,10 @@ begin
       end;
     end;
   end;
+  // Detay log baseline: yeni fis (E) -> bos snapshot (tum satirlar ekleme sayilir);
+  // duzenleme (D/K) -> mevcut satirlar snapshot'a alinir (Finish'te diff).
+  if LogGun > 0 then
+    LogSnapshotAl(TabUretimDetay, FDetSnap);
   if TabUretim.FieldByName('PROJEID').AsString <> '' then begin
     BeditProje.Text := Tablo.AciklamaGetir('PROJELER','PROJEKODU',TabUretim.FieldByName('PROJEID').AsInteger);
     BeditProje.Tag := TabUretim.FieldByName('PROJEID').AsInteger;
@@ -1439,8 +1446,25 @@ procedure TUretimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
   if TabUretimDetay.State in [dsEdit,dsInsert] then
      TabUretimDetay.Post;
-  if TabUretim.State in [dsEdit,dsInsert] then
-     TabUretim.Post;
+  if TabUretim.State in [dsInsert,dsEdit] then begin
+     // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+     if (TabUretim.State = dsInsert) or (IslemOp = 'E') or (IslemOp = 'K') or TabUretim.Modified then
+        TabUretim.Post
+     else
+        TabUretim.Cancel;
+  end;
+  UretimID := TabUretim.FieldByName('ID').AsInteger;
+
+  // KART + DETAY loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+  if LogGun > 0 then begin
+    if IslemOp = 'D' then
+      Tablo.LogIslemleri(TabNo_URETIMFISI, UretimID, 4, TabUretim)
+    else if (IslemOp = 'E') or (IslemOp = 'K') then
+      LogKayitEkle(TabUretim, TabNo_URETIMFISI, UretimID, TabNo_URETIMFISI, UretimID);
+    // Detay satirlari (ust=uretim fisi) diff.
+    LogDiffKaydet(TabUretimDetay, FDetSnap, TabNo_URETIMFISDETAY, TabNo_URETIMFISI, UretimID);
+    LogSnapshotAl(TabUretimDetay, FDetSnap);   // tazele (mukerrer save'i onle)
+  end;
 
   IptalSecildi := False;
   Ciksin:=True;
