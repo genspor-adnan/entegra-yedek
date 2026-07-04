@@ -27,6 +27,15 @@ USING (VALUES
   (NULL, N'CARIID',     N'REHBER',   N'ID', N'FIRMA',    NULL),
   (NULL, N'PROJEID',    N'PROJELER', N'ID', N'PROJEADI', NULL),
   (NULL, N'SUBEID',     N'REHBER',   N'ID', N'FIRMA',    NULL),   -- sube = negatif REHBER.ID
+  -- Genel: stok/depo/masraf-gelir (fatura/siparis/transfer detaylarinda yaygin)
+  (NULL, N'URUNID',     N'STOKLAR',     N'ID', N'STOKADI', NULL),  -- fatura/siparis satirinda stok
+  (NULL, N'MASRAFID',   N'MASRAFGELIR', N'ID', N'AD',      NULL),
+  (NULL, N'GELIRID',    N'MASRAFGELIR', N'ID', N'AD',      NULL),
+  (NULL, N'GIRDEPO',    N'DEPOLAR',     N'ID', N'DEPOADI', NULL),
+  (NULL, N'CIKDEPO',    N'DEPOLAR',     N'ID', N'DEPOADI', NULL),
+  (NULL, N'DEPOID',     N'DEPOLAR',     N'ID', N'DEPOADI', NULL),
+  (NULL, N'TESLIMEDEN', N'REHBER',      N'ID', N'FIRMA',   NULL),
+  (NULL, N'TESLIMALAN', N'REHBER',      N'ID', N'FIRMA',   NULL),
 
   -- ===== STOK (88): GENINI (BOLUM), DIL=-1 dil-bagimsiz =====
   (88,   N'MARKA',          N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2701'),
@@ -68,7 +77,10 @@ USING (VALUES
   (33,   N'MUS_ILGILI', N'REHBER',     N'ID',    N'FIRMA',   NULL),
   (33,   N'MUS_ILGILI2',N'REHBER',     N'ID',    N'FIRMA',   NULL),
   (33,   N'EKIPMANID',  N'EKIPMANLAR', N'ID',    N'AD',      NULL),
-  (33,   N'LISTEID',    N'GOREVLISTE', N'ID',    N'ADI',     NULL)
+  (33,   N'LISTEID',    N'GOREVLISTE', N'ID',    N'ADI',     NULL),
+
+  -- ===== TEKLIF (97): kisi =====
+  (97,   N'HAZIRLAYAN', N'REHBER', N'ID', N'FIRMA', NULL)   -- teklifi hazirlayan kullanici
 ) AS k(TABLOID, ALAN, KAYNAKTABLO, IDKOLON, ADKOLON, FILTRE)
 ON ISNULL(h.TABLOID,-1)=ISNULL(k.TABLOID,-1) AND h.ALAN=k.ALAN COLLATE Turkish_CI_AS
 WHEN MATCHED THEN UPDATE SET KAYNAKTABLO=k.KAYNAKTABLO, IDKOLON=k.IDKOLON, ADKOLON=k.ADKOLON, FILTRE=k.FILTRE, AKTIF=1
