@@ -4857,9 +4857,11 @@ begin
     Tablo.OncekiLogBelirle(TabFatBaslik);
     TurNo := TabFatBaslik.FieldByName('TUR').AsInteger;
     case TurNo of
-      9,10,11,12,13,8,109 : TabNo := TabNo_FATBASLIK_Gelen;
-      19,14,15,16,17,110,119 : TabNo := TabNo_FATBASLIK_Giden;
-      20 : TabNo := TabNo_TRANSFER;   // stok transfer
+      3,12 : TabNo := TabNo_FIS_Gelen;   // giris fisi
+      4,16 : TabNo := TabNo_FIS_Giden;   // cikis fisi
+      20 : TabNo := TabNo_TRANSFER;      // stok transfer
+      9,10,11,13,8,109 : TabNo := TabNo_FATBASLIK_Gelen;
+      19,14,15,17,110,119 : TabNo := TabNo_FATBASLIK_Giden;
     else
       TabNo := TabNo_FATBASLIK;
     end;
@@ -4870,11 +4872,13 @@ begin
     while not TabFatura.Eof do begin
       Tablo.OncekiLogBelirle(TabFatura);
       case TurNo of
+        3,12 : TabNo := TabNo_FATURA;   // giris fisi detay
+        4,16 : TabNo := TabNo_FATURA;   // cikis fisi detay
+        20 : TabNo := TabNo_FATURA;     // transfer detay
         9 : TabNo := TabNo_FATURA_AlisSiparis;
-        10,11,12,13,8,109 : TabNo := TabNo_FATURA_GelenFatFisIrs;
+        10,11,13,8,109 : TabNo := TabNo_FATURA_GelenFatFisIrs;
         19 : TabNo := TabNo_FATURA_SatisSiparis;
-        4,14,15,16,17,110,119 : Tabno := TabNo_FATURA_GidenFatFisIrs;
-        20 : TabNo := TabNo_FATURA;   // transfer detay
+        14,15,17,110,119 : Tabno := TabNo_FATURA_GidenFatFisIrs;
       else TabNo := TabNo_FATURA_GelenFatFisIrs;
       end;
       // Detay -> ust=kart (master-detail); kart gecmisinde tek kart satiri, detaylar altta.
