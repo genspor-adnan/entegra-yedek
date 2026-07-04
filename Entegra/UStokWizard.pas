@@ -3170,7 +3170,9 @@ begin
      DETAY.post;
 
   if EkleDetay then
-     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Değiş');
+     // Stok detay bilgileri (REHBERBILGI YERI=88) -> ISLEMLOG detay 370, ust=(stok, stokID).
+     Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Değiş','',
+          TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,370);
    StokID :=  TabStok.Fields[0].AsInteger;
    //islemKopyala := '';
    Sontus := 'K';//kaydet butonu

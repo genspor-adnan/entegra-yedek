@@ -286,10 +286,10 @@ begin
   // iletisim->REHBERILETISIM.ID (Merkez), ilgili->kisi ID, ticari/ozluk->master ID.
   if LLogAktif then
   try
-    // REHBERID = ust (cari/personel) -> cari bazli log aramasina dahil olur.
-    if LEkleVar  then LogYaz(liEkle,     LDetayTab, Yeri_Id, LKEkle.JSON,  '', AUstTabloID, AUstKayitID, AUstKayitID);
-    if LDegisVar then LogYaz(liDegistir, LDetayTab, Yeri_Id, LKDegis.JSON, '', AUstTabloID, AUstKayitID, AUstKayitID);
-    if LSilVar   then LogYaz(liSil,      LDetayTab, Yeri_Id, LKSil.JSON,   '', AUstTabloID, AUstKayitID, AUstKayitID);
+    // REHBERID/STOKID: LogYaz ust tablodan otomatik turetir (71/73/74->REHBERID, 88->STOKID).
+    if LEkleVar  then LogYaz(liEkle,     LDetayTab, Yeri_Id, LKEkle.JSON,  '', AUstTabloID, AUstKayitID);
+    if LDegisVar then LogYaz(liDegistir, LDetayTab, Yeri_Id, LKDegis.JSON, '', AUstTabloID, AUstKayitID);
+    if LSilVar   then LogYaz(liSil,      LDetayTab, Yeri_Id, LKSil.JSON,   '', AUstTabloID, AUstKayitID);
   except
   end;
   if Assigned(LKEkle)  then LKEkle.Free;
