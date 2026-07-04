@@ -38,6 +38,8 @@ USING (VALUES
   (NULL, N'DEPOID',     N'DEPOLAR',     N'ID', N'DEPOADI', NULL),
   (NULL, N'TESLIMEDEN', N'REHBER',      N'ID', N'FIRMA',   NULL),
   (NULL, N'TESLIMALAN', N'REHBER',      N'ID', N'FIRMA',   NULL),
+  (NULL, N'BIRIM',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2702'),  -- birim (Adet/Kg/Metre...)
+  (NULL, N'BIRIM1',     N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2702'),
 
   -- ===== STOK (88): GENINI (BOLUM), DIL=-1 dil-bagimsiz =====
   (88,   N'MARKA',          N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2701'),
