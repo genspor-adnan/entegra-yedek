@@ -79,13 +79,30 @@ USING (VALUES
   (33,   N'EKIPMANID',  N'EKIPMANLAR', N'ID',    N'AD',      NULL),
   (33,   N'LISTEID',    N'GOREVLISTE', N'ID',    N'ADI',     NULL),
 
-  -- ===== GIRIS/CIKIS FISI (106/107): islem turu = ISLEMTURLERI(TUR,TIP) composite =====
-  -- Kart alanlari TUR + TIPI; ISLEMTURLERI'de TUR+TIP birlikte islem turunu tanimlar.
+  -- ===== BELGE KARTLARI: islem turu = ISLEMTURLERI(TUR,TIP) composite =====
+  -- FATBASLIK/SIPARIS kartlarinda TUR + TIPI birlikte islem turunu tanimlar.
   -- ADKOLON bir SQL ifadesi (AD+' '+ACIKLAMA); FILTRE'de kardes alan placeholder'i.
+  -- Fatura(28/29/30), Irsaliye(105), Fis(106/107), Transfer(134); Siparis(91/92), StokTalep(464).
+  (28,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (28,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (29,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (29,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (30,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (30,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (105,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (105,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
   (106,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
   (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
   (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
   (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (92,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (464,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
 
   -- ===== TEKLIF (97): kisi + GENINI =====
   (97,   N'HAZIRLAYAN', N'REHBER', N'ID',    N'FIRMA',   NULL),   -- teklifi hazirlayan kullanici
