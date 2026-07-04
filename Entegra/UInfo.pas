@@ -197,11 +197,19 @@ begin
      cxTabSheet1.TabVisible := False;
      cxPageControl1.ActivePage := cxTabSheet2;
 
-     // Ust bilgi (ekleyen/degistiren). Tabloda bu kolonlar yoksa sessiz gec (crash yok).
+     // Ust bilgi (ekleyen/degistiren). EKLEYEN/DEGISTIREN = KULLANICI.ID -> REHBERID ->
+     // FIRMA (ad). KULLANICI'da yoksa dogrudan REHBER.ID kabul edilir (fallback).
+     // Tabloda bu kolonlar yoksa sessiz gec (crash yok).
      try
-       Tablo.TablodanSorguAc(1,'select EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI from '+TabloAd+' where ID ='+IntToStr(ID));
-       EditEkleyen.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('EKLEYEN').AsInteger);
-       EditDegistiren.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', Tablo.Query1.FieldByName('DEGISTIREN').AsInteger);
+       Tablo.TablodanSorguAc(1,
+         'select EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI,' +
+         ' EKLEYENAD = COALESCE((select FIRMA from REHBER where ID=(select REHBERID from KULLANICI where ID=T.EKLEYEN)),' +
+         '                      (select FIRMA from REHBER where ID=T.EKLEYEN)),' +
+         ' DEGISTIRENAD = COALESCE((select FIRMA from REHBER where ID=(select REHBERID from KULLANICI where ID=T.DEGISTIREN)),' +
+         '                         (select FIRMA from REHBER where ID=T.DEGISTIREN))' +
+         ' from '+TabloAd+' T where T.ID ='+IntToStr(ID));
+       EditEkleyen.Text := Tablo.Query1.FieldByName('EKLEYENAD').AsString;
+       EditDegistiren.Text := Tablo.Query1.FieldByName('DEGISTIRENAD').AsString;
        EditEklemeTrh.EditValue := Tablo.Query1.FieldByName('EKLEMETARIHI').AsDateTime;
        if YearOf(Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime) > 2000  then
           EditDegistirmeTrh.EditValue := Tablo.Query1.FieldByName('DEGISTIRMETARIHI').AsDateTime;
