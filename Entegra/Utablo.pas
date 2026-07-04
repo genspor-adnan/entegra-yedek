@@ -4953,16 +4953,18 @@ begin
   ///
   ///
   ///
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (' + IntToStr(TabNo_SIPARIS_Gelen) + ',' + IntToStr(TabNo_SIPARIS_Giden) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
-  if LogGun > 0 then begin
-    Tablo.TablodanSorguAc(2,'SELECT * FROM SIPARISDETAY where SIPARISID='+IntToStr(SiparisId));
-    Tablo.Query2.First;
-    while not Tablo.Query2.Eof do begin
-      Tablo.OncekiLogBelirle(Tablo.Query2);
-      Tablo.LogIslemleri(TabNo_SIPARISDETAY,SiparisId,5,Tablo.Query2);
-      Tablo.Query2.Next;
-    end;
+  // Kart tabNo'sunu TUR'a gore belirle -> UInfo'da dogru modul/bolum (Stok Talep/Satinalma/Siparis).
+  case SiparisTur of
+    9:   tabno := TabNo_SIPARIS_Gelen;
+    19:  tabno := TabNo_SIPARIS_Giden;
+    101: tabno := TabNo_SATINALMA;
+    105: tabno := TabNo_STOKTALEP;
+  else   tabno := TabNo_SIPARIS_Gelen;
   end;
+
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (' + IntToStr(TabNo_SIPARIS_Gelen) + ',' + IntToStr(TabNo_SIPARIS_Giden) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+  // Detay (SIPARISDETAY) SILMEDEN ONCE logla (her satir kendi ID, ust=kart).
+  LogDetaylariSil('SIPARISDETAY', 'SIPARISID', TabNo_SIPARISDETAY, tabno, SiparisId);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARISDETAY where SIPARISID=&Id ', ['&Id'], [SiparisId]);
   Tablo.TablodanSorguAc(3,'SELECT * FROM SIPARIS where ID='+IntToStr(SiparisId));
   if Tablo.Query3.FieldByName('YERI').AsString = '83' then //servisten siparişe dönüşmüşse
@@ -4970,7 +4972,7 @@ begin
 
   if LogGun > 0 then begin
     Tablo.OncekiLogBelirle(Tablo.Query3);
-    Tablo.LogIslemleri(TabNo_SIPARIS_Gelen,SiparisId,5,Tablo.Query3);
+    Tablo.LogIslemleri(tabno,SiparisId,5,Tablo.Query3);   // kart SILME, dogru tabNo
   end;
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [SiparisId]);
 end;
