@@ -79,6 +79,7 @@ type
   private
     FJsonlar: TStringList;     // LvGecmis ile paralel: her kaydin BILGI json'u
     FTabloIDler: TStringList;  // FJsonlar ile paralel: her satirin TABLOID'i (deger cozumu icin)
+    FKullaniciAdlari: TStringList;  // FJsonlar ile paralel: islemi yapan kullanici adi
     FTiklamaAcik: Boolean;     // button-edit OnClick re-entrancy guard'i
     FCozumler: TStringList;    // LOGCOZUM satirlari: 'ALAN|TABLOID' -> 'KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE'
     FCozumCache: TStringList;  // 'TABLOID|ALAN|DEGER' -> ad (tekrarli sorguyu onler)
@@ -88,7 +89,7 @@ type
     procedure ButtonEditTiklama(Sender: TObject);   // edit'e tiklayinca picker'i ac
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
-    procedure DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0);
+    procedure DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0; const AKullaniciAd: string = '');
     procedure TabLogYukle;             // Genel grid: LOG (ISLEMLOG) listesi (filtreli)
     procedure GenelSatirDetayGoster;   // Genel'de secili satirin BILGI'sini LvDetay'a
     procedure FiltreOlaylariBagla;     // filtre kontrollerinin olaylarini bagla
@@ -461,8 +462,10 @@ var
 begin
   if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
   if not Assigned(FTabloIDler) then FTabloIDler := TStringList.Create;
+  if not Assigned(FKullaniciAdlari) then FKullaniciAdlari := TStringList.Create;
   FJsonlar.Clear;
   FTabloIDler.Clear;
+  FKullaniciAdlari.Clear;
   LvGecmis.Items.Clear;
   LvDetay.Items.Clear;
   if (not TabLog.Active) or TabLog.IsEmpty then Exit;
@@ -471,6 +474,7 @@ begin
   try
     Tablo.TablodanSorguAc(1,
       'select i.TARIH, i.ISLEMTIPI, i.TABLOID, t.GORUNUM, ' +
+      'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
       'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
       'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
       'where i.USTTABLOID=' + IntToStr(LUstT) +
@@ -501,6 +505,7 @@ begin
     end;
     FJsonlar.Add(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
     FTabloIDler.Add(IntToStr(LTabloID));
+    FKullaniciAdlari.Add(Tablo.Query1.FieldByName('KULLANICIAD').AsString);
     Tablo.Query1.Next;
   end;
 
@@ -536,7 +541,7 @@ var
       Result := '';
   end;
   // Bir grubu (ayni an+tablo+tip) tek LvGecmis satiri yapar; parcalari tek JSON'da birlestirir.
-  procedure _EmitGrup(ATarih: TDateTime; const ASat: string; ATip, ATabloID: Integer; AParts: TStringList);
+  procedure _EmitGrup(ATarih: TDateTime; const ASat: string; ATip, ATabloID: Integer; const AKullanici: string; AParts: TStringList);
   var k: Integer; LMerged: string;
   begin
     LMerged := '';
@@ -555,12 +560,15 @@ var
     end;
     FJsonlar.Add(LMerged);
     FTabloIDler.Add(IntToStr(ATabloID));
+    FKullaniciAdlari.Add(AKullanici);
   end;
 begin
   if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
   if not Assigned(FTabloIDler) then FTabloIDler := TStringList.Create;
+  if not Assigned(FKullaniciAdlari) then FKullaniciAdlari := TStringList.Create;
   FJsonlar.Clear;
   FTabloIDler.Clear;
+  FKullaniciAdlari.Clear;
   LvGecmis.Items.Clear;
   LvDetay.Items.Clear;
   if ID <= 0 then Exit;
@@ -602,6 +610,7 @@ begin
   // 2) Ust altindaki TUM loglar. Master (TABLOID=USTTABLOID) USTTE, detaylar altta;
   //    her grup icinde en yeni ustte. TABLOLAR ile TABLOID->GORUNUM (Başlık/Detay).
   LSQL := 'select i.TARIH, i.ISLEMTIPI, i.TABLOID, i.KAYITID, t.GORUNUM, ' +
+          'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
           'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
           'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
           'where i.USTKAYITID=' + IntToStr(LUstK);
@@ -626,6 +635,7 @@ begin
   var LGSat: string := '';
   var LGTip: Integer := 0;
   var LGTabloID: Integer := 0;
+  var LGKullanici: string := '';
   try
     while not Tablo.Query1.Eof do
     begin
@@ -642,16 +652,17 @@ begin
                           IntToStr(LTabloID) + '|' + IntToStr(LKayitID) + '|' + IntToStr(LTip);
       if LKey <> LCurKey then
       begin
-        if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LParts);
+        if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LGKullanici, LParts);
         LParts.Clear;
         LCurKey := LKey;
         LGTarih := LTarih; LGSat := LSat; LGTip := LTip; LGTabloID := LTabloID;
+        LGKullanici := Tablo.Query1.FieldByName('KULLANICIAD').AsString;
       end;
       var LIc: string := _IcJson(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
       if LIc <> '' then LParts.Add(LIc);
       Tablo.Query1.Next;
     end;
-    if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LParts);  // son grup
+    if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LGKullanici, LParts);  // son grup
   finally
     LParts.Free;
   end;
@@ -743,7 +754,7 @@ end;
 // Secili kaydin BILGI json'unu 3 sutunlu grid'e doker: Alan | Onceki | Sonraki.
 //   Degisiklik: {"ALAN":{"e":..,"y":..}}  Tek deger: ekle->Sonraki, sil->Onceki.
 //   ATabloID: bu kaydin log tablosu -> LOGCOZUM ile deger (ID) -> ad cevrimi icin.
-procedure TInfoDlg.DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0);
+procedure TInfoDlg.DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0; const AKullaniciAd: string = '');
 var
   LParsed: TJSONValue;
   LObj: TJSONObject;
@@ -817,6 +828,18 @@ begin
         LItem.SubItems.Add(LOnc);    // Onceki
         LItem.SubItems.Add(LSon);    // Sonraki
       end;
+      // EN ALTTA: islemi yapan kisi (LOG.KULLANICIID -> ad). Tarih zaten solda listede.
+      if AKullaniciAd <> '' then
+      begin
+        LItem := LvDetay.Items.Add;
+        case ATip of
+          1: LItem.Caption := 'Ekleyen';
+          0: LItem.Caption := 'Silen';
+        else LItem.Caption := 'Değiştiren';
+        end;
+        LItem.SubItems.Add(AKullaniciAd);
+        LItem.SubItems.Add('');
+      end;
     finally
       LParsed.Free;
     end;
@@ -838,7 +861,10 @@ begin
   var LTabloID: Integer := 0;
   if Assigned(FTabloIDler) and (Item.Index < FTabloIDler.Count) then
     LTabloID := StrToIntDef(FTabloIDler[Item.Index], 0);
-  DetayGoster(FJsonlar[Item.Index], Integer(NativeInt(Item.Data)), LTabloID);
+  var LKulAd: string := '';
+  if Assigned(FKullaniciAdlari) and (Item.Index < FKullaniciAdlari.Count) then
+    LKulAd := FKullaniciAdlari[Item.Index];
+  DetayGoster(FJsonlar[Item.Index], Integer(NativeInt(Item.Data)), LTabloID, LKulAd);
 end;
 
 // Satir rengi islem tipine gore: Ekleme yesil, Silme kirmizi, Degistirme mavi.
@@ -874,6 +900,7 @@ end;
 
 procedure TInfoDlg.FormDestroy(Sender: TObject);
 begin
+  FKullaniciAdlari.Free;
   FJsonlar.Free;
   FTabloIDler.Free;
   FCozumler.Free;
