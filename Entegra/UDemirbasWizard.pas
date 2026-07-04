@@ -4,7 +4,7 @@ unit UDemirbasWizard;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, dxSkinsCore,  cxGraphics, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, FireDAC.Comp.Client,
   cxImageComboBox, cxMemo, cxSpinEdit, cxTimeEdit, cxDBEdit, cxCurrencyEdit,
@@ -256,6 +256,7 @@ type
     procedure FormActivate(Sender: TObject);
   private
     { Private declarations }
+    FAmortismanSnap: TObjectDictionary<Integer, TStringList>;   // amortisman detay log snapshot'i
     procedure Kaydet;
     procedure TabDemirbasServisRefresh(Demirbas_ID:integer);
     procedure tabDemirbasTarihceRefresh(Demirbas_ID:integer);
@@ -581,6 +582,7 @@ procedure TDemirbasWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction
 begin
    //ModalResult := mrCancel;
    Action := caFree;
+   FreeAndNil(FAmortismanSnap);
    //DemirbasWizardDlg := nil;
     // varsa dokumanlar?n silinmeli
 end;
@@ -614,6 +616,7 @@ begin
   RehberId := -1;
   cxPageControl1.ActivePageIndex := 0;
   LogID:=0;
+  FAmortismanSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   if (not TabDemirbas.Active) then
      Yenileclick(DemirbasID);
   //ComboStokKodu.Visible:= Tablo.GENINI.ReadBoolean(Ops_OpsiyonDemirbas_Stoktan,False);// StokOpsiyon','OnayliSayimDegistirme'
@@ -736,6 +739,9 @@ begin
   ComboMARKAPropertiesEditValueChanged(ComboMARKA);
   TabSheetMasraf.TabVisible := TabDemirbas.FieldByName('MASRAF').AsBoolean;
   TabSheetAmortisman.TabVisible := TabDemirbas.FieldByName('AMORTISMAN').AsBoolean;
+  // Amortisman detay log baseline: duzenleme modunda TabAmortisman doldu -> snapshot al.
+  if LogGun > 0 then
+    LogSnapshotAl(TabAmortisman, FAmortismanSnap);
 end;
 
 
@@ -1030,12 +1036,17 @@ end;
 procedure TDemirbasWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
   Kaydet;
+  if TabAmortisman.State in [dsEdit, dsInsert] then
+     TabAmortisman.Post;
   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
   if LogGun > 0 then begin
     if IslemOp = 'D' then
       Tablo.LogIslemleri(TabNo_DEMIRBAS, DemirbasID, 4, TabDemirbas)
     else if (IslemOp = 'E') or (IslemOp = 'K') then
       LogKayitEkle(TabDemirbas, TabNo_DEMIRBAS, DemirbasID, TabNo_DEMIRBAS, DemirbasID);
+    // AMORTISMAN detay satirlari (ust=demirbas) diff.
+    LogDiffKaydet(TabAmortisman, FAmortismanSnap, TabNo_DEMIRBASAMORTISMAN, TabNo_DEMIRBAS, DemirbasID);
+    LogSnapshotAl(TabAmortisman, FAmortismanSnap);   // tazele (mukerrer save'i onle)
   end;
   ModalResult := mrOk;
 end;

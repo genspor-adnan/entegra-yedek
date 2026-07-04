@@ -1265,6 +1265,8 @@ const
   TabNo_STOKDETAY=370;
   TabNo_PROJEASAMA=371;   // proje asama satirlari (gorunum: Aşama)
   TabNo_PROJEDETAY=372;   // proje detay bilgileri (gorunum: Detay)
+  TabNo_DEMIRBASAMORTISMAN=373;  // demirbas amortisman plani (gorunum: Amortisman)
+  TabNo_DOKUMANREVIZE=374;       // dokuman revizyonlari (gorunum: Revizyon)
 
 
   TabNo_STOKGUNSONU=90;

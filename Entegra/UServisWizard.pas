@@ -454,6 +454,7 @@ type
     sonbasilanctrl:TcxButtonEdit;
     StateInsert:Boolean;
     SonrakiHareketiEkle:Boolean;
+    FHareketSnap: TObjectDictionary<Integer, TStringList>;   // servis hareket satiri log snapshot'i
     procedure TabloAc;
     procedure ServisNotlaraEkle(Qry: TFDQuery; Tur: Integer);
     procedure FaturaTutarHesapla;
@@ -1293,6 +1294,7 @@ end;
 
 procedure TServisWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FreeAndNil(FHareketSnap);
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K')) then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
     if (TabServis.Active) and (TabServis.Fields[0].AsString <> '') then
       Tablo.ServisSil(TabServis.FieldByName('ID').AsInteger);
@@ -1324,6 +1326,7 @@ end;
 
 procedure TServisWizardDlg.FormCreate(Sender: TObject);
 begin
+  FHareketSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
   ServisID := -1;
@@ -1525,6 +1528,11 @@ begin
 //     PageControl1.ActivePage := SheetHareketlerUst;
   ServisPageControl.ActivePageIndex := 0;
   ServisPageControlChange(self);
+
+  // Servis hareket satirlari log baseline: yeni (E) -> bos snapshot (tum satirlar ekleme);
+  // duzenleme (D) -> mevcut hareket satirlari snapshot'a alinir (Finish'te diff).
+  if LogGun > 0 then
+    LogSnapshotAl(TabHareketler, FHareketSnap);
 end;
 
 procedure TServisWizardDlg.BEBildirimYapanPropertiesButtonClick(Sender:TObject;AButtonIndex:Integer);
@@ -2449,7 +2457,15 @@ begin
      else
        LogKayitEkle(TabServis, TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
    end;
-   Kaydet;
+   Kaydet;   // TabHareketler dahil tum detaylari Post eder
+   // Servis hareket satirlari (detay) diff loglama: snapshot ile karsilastir,
+   // ekleme/degisme/silme kayitlarini yaz, sonra snapshot'i tazele (mukerrer save'i onle).
+   if LogGun > 0 then
+     try
+       LogDiffKaydet(TabHareketler, FHareketSnap, TabNo_SERVISHAREKET, TabNo_SERVIS, ServisID);
+       LogSnapshotAl(TabHareketler, FHareketSnap);
+     except
+     end;
    if TabDetay.State in [dsInsert, dsEdit] then
       TabDetay.post;
    if EkleDetay then

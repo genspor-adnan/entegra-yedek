@@ -7,7 +7,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,FileAssociationDetails,ShellAPI, JvDBControls, DateUtils,
+  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms,FileAssociationDetails,ShellAPI, JvDBControls, DateUtils,
   Dialogs, JvWizard, JvExControls, Menus, cxLookAndFeelPainters, StdCtrls, cxButtons, ExtCtrls, dxSkinsCore, dxSkinLondonLiquidSky,
   dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, cxImageComboBox,UKodAgaci,
   cxTextEdit, cxCheckBox, cxButtonEdit, cxDBEdit, cxMaskEdit, cxDropDownEdit, cxContainer, cxLabel, cxGridLevel, cxGridCustomTableView,
@@ -288,6 +288,8 @@ type
   private
     { Private declarations }
     FFileDetails : TFileAssociationDetails;
+    FRevizeSnap : TObjectDictionary<Integer, TStringList>;   // revize (IMAJ) log snapshot'i
+    FRevizeSnapAlindi : Boolean;                              // baseline yalnizca ilk kez alinsin
     procedure YetkiEkle(Tur, YetkiID : Integer);
     procedure AboneEkle(Tur, RehberID : Integer);
     procedure DetayTablosuAc;
@@ -555,6 +557,11 @@ end;
 procedure TDokumanWizard.RevizeEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    TabloYenile(TabRevize, [TabDokuman.FieldByName('ID').AsInteger]);
+   // Revize log baseline: yalnizca ilk yuklemede (kullanici degisiklik yapmadan) al.
+   if (LogGun > 0) and (not FRevizeSnapAlindi) then begin
+     LogSnapshotAl(TabRevize, FRevizeSnap);
+     FRevizeSnapAlindi := True;
+   end;
 end;
 
 procedure TDokumanWizard.SilBildirimTusClick(Sender: TObject);
@@ -733,10 +740,13 @@ end;
 procedure TDokumanWizard.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FFileDetails.Free;
+  FreeAndNil(FRevizeSnap);
 end;
 
 procedure TDokumanWizard.FormCreate(Sender: TObject);
 begin
+   FRevizeSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+   FRevizeSnapAlindi := False;
    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    FFileDetails := TFileAssociationDetails.Create;
@@ -1052,6 +1062,15 @@ begin
                  Tablo.LogIslemleri(TabNo_DOKUMAN, DokumanID, 4, TabDokuman)
                else
                  LogKayitEkle(TabDokuman, TabNo_DOKUMAN, DokumanID, TabNo_DOKUMAN, DokumanID);
+               // REVIZE (detay=IMAJ revizyonlari, ust=dokuman karti) diff loglama.
+               try
+                 if TabRevize.Active then begin
+                   LogDiffKaydet(TabRevize, FRevizeSnap, TabNo_DOKUMANREVIZE, TabNo_DOKUMAN, DokumanID);
+                   LogSnapshotAl(TabRevize, FRevizeSnap);   // tazele (mukerrer save'i onle)
+                 end;
+               except
+                 // loglama kaydetmeyi bozmaz
+               end;
              end;
 
              Tablo.FileExtensionListesiniDoldur;
