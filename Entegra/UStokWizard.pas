@@ -3171,8 +3171,9 @@ begin
 
   if EkleDetay then
      // Stok detay bilgileri (REHBERBILGI YERI=88) -> ISLEMLOG detay 370, ust=(stok, stokID).
+     // ComboBolum.Text = sablon/bolum -> JSON'da en ustte "Şablon" olarak.
      Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Değiş','',
-          TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,370);
+          TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,370,ComboBolum.Text);
    StokID :=  TabStok.Fields[0].AsInteger;
    //islemKopyala := '';
    Sontus := 'K';//kaydet butonu
