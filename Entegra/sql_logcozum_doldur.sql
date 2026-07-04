@@ -100,11 +100,12 @@ USING (VALUES
   -- Transfer: silme logunda TIPI yok; TUR=20 ISLEMTURLERI'de tek satir -> FILTRE'siz coz.
   (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
   (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  -- Siparis/Satinalma/StokTalep: TUR ISLEMTURLERI'de tek satir + silme'de TIPI yok -> FILTRE'siz.
+  (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
   (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
   (92,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
   (464,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
 
   -- ===== TEKLIF (97): kisi + GENINI =====
