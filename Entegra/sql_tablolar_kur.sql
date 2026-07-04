@@ -54,6 +54,7 @@ USING (VALUES
   (70,  ''PROJELER'',      N''Kart'',   N''Proje''),
   (371, ''PROJEASAMA'',    N''Aşama'',  N''Proje''),
   (372, ''REHBERBILGI'',   N''Detay'',  N''Proje''),
+  (170, ''PROJELER'',      N''Kart'',   N''Satış Fırsatı''),
   (43,  ''KASA'',          N''Kart'',  N''Nakit''),
   (-1,  ''OTURUM'',        N''Oturum'',  N''Oturum''),
   (97,  ''TEKLIF'',        N''Başlık'',  N''Teklif''),

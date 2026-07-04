@@ -1808,6 +1808,10 @@ object FirsatListeDlg: TFirsatListeDlg
     Images = Tablo.KlasorResimleri
     Left = 28
     Top = 167
+    object FirsatInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = FirsatInfoMenuClick
+    end
     object FirsatKapatMenu: TMenuItem
       Caption = 'F'#305'rsat'#305' Kapat'
       ImageIndex = 10

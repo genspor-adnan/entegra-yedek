@@ -424,7 +424,7 @@ implementation
 
 Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
- cxTLExportLink, UFastRap, URaporAraclari, UIsListesi;
+ cxTLExportLink, UFastRap, URaporAraclari, UIsListesi, ULog;
 
 {$R *.dfm}
   var
@@ -1153,7 +1153,7 @@ end;
 procedure TFirsatWizardDlg.ProjeEkDetayEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-     Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?');
+     Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_FIRSAT,ProjeID,TabNo_PROJEDETAY,ComboBolum.Text);   // detay: firsat bilgi (baslik=sablon)
 end;
 
 procedure TFirsatWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
@@ -1218,8 +1218,7 @@ end;
 procedure TFirsatWizardDlg.TabFirsatlarAfterPost(DataSet: TDataSet);
 begin
    ProjeID := TabFirsatlar.Fields[0].AsInteger;
-   if islemOp='D' then
-      Tablo.LogIslemleri(TabNo_PROJELER,ProjeID, 4, TabFirsatlar);
+   // Kart loglamasi buradan KALDIRILDI (AfterPost coklu ateslenir) -> Finish'te tek sefer.
 end;
 
 procedure TFirsatWizardDlg.TabFirsatlarAfterScroll(DataSet: TDataSet);
@@ -1520,7 +1519,15 @@ begin
 
 
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?');
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_FIRSAT,ProjeID,TabNo_PROJEDETAY,ComboBolum.Text);   // detay: firsat bilgi (baslik=sablon)
+
+   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle. TabNo_FIRSAT=170.
+   if LogGun > 0 then begin
+     if islemOp = 'D' then
+       Tablo.LogIslemleri(TabNo_FIRSAT, ProjeID, 4, TabFirsatlar)
+     else if (islemOp = 'E') or (islemOp = 'K') then
+       LogKayitEkle(TabFirsatlar, TabNo_FIRSAT, ProjeID, TabNo_FIRSAT, ProjeID);
+   end;
 
 {   if (OncekiDurum=False)and(TabFirsatlar.FieldByName('DURUM').AsBoolean=True) then //Kapand?ysa opsiyona bak?p teklifleri de kapatal?m
        if Tablo.GENINI.ReadBoolean(Ops_ProjeOpsiyon_ProjeKapatma, True) then begin

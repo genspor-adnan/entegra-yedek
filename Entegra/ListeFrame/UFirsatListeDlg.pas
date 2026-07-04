@@ -233,6 +233,7 @@ type
     cxGridLevel2: TcxGridLevel;
     FTileControl: TdxTileControl;
     FTileControlActionBarItem1: TdxTileControlActionBarItem;
+    FirsatInfoMenu: TMenuItem;
     N5: TMenuItem;
     ProjeOlusturMenu: TMenuItem;
     N6: TMenuItem;
@@ -304,6 +305,7 @@ type
     procedure ProjeOlusturMenuClick(Sender: TObject);
     procedure FirsatKapatMenuClick(Sender: TObject);
     procedure ServisOlusturMenuClick(Sender: TObject);
+    procedure FirsatInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     ProjeID, RehberId:integer;
@@ -731,6 +733,12 @@ end;
 procedure TFirsatListeDlg.FirsatKapatMenuClick(Sender: TObject);
 begin
   FirsatKapat;
+end;
+
+procedure TFirsatListeDlg.FirsatInfoMenuClick(Sender: TObject);
+begin
+  if not FIRSATLAR.IsEmpty then
+    Tablo.InfoGoster('PROJELER', FIRSATLAR.FieldByName('ID').AsInteger, 170);
 end;
 
 function TFirsatListeDlg.GetFrameBilgi: TIcerikFrameBilgi;
