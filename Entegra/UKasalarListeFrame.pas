@@ -155,9 +155,7 @@ type
     MenuItem1: TMenuItem;
     KurFarkGeliri1: TMenuItem;
     KurFarkGideri1: TMenuItem;
-    N7: TMenuItem;
     N8: TMenuItem;
-    SeyirDefteri1: TMenuItem;
 //    procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure KasaYenileTusClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
@@ -185,7 +183,6 @@ type
     procedure MenuItem1Click(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure KurFarkGeliri1Click(Sender: TObject);
-    procedure SeyirDefteri1Click(Sender: TObject);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
   private
     { Private declarations }
@@ -540,11 +537,6 @@ end;
 procedure TKasalarListeFrame.SetFrameBilgi(AValue: TIcerikFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TKasalarListeFrame.SeyirDefteri1Click(Sender: TObject);
-begin
-   Tablo.SeyirDefteriBaslat(TabNo_Kasa, EKSTRE.FieldByName('CEKID').AsInteger);
 end;
 
 procedure TKasalarListeFrame.Sil1Click(Sender: TObject);

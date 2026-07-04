@@ -152,8 +152,6 @@ type
     N7: TMenuItem;
     KurFarkGeliri1: TMenuItem;
     KurFarkGideri1: TMenuItem;
-    N9: TMenuItem;
-    SeyirDefteri1: TMenuItem;
     GridBankaEkstreViewID: TcxGridDBColumn;
     GridTviewID: TcxGridDBColumn;
     ExceldenAlTus2: TToolButton;
@@ -185,7 +183,6 @@ type
     procedure AksiyonlarMenuPopup(Sender: TObject);
     procedure KurFarkGeliri1Click(Sender: TObject);
     procedure Label1Click(Sender: TObject);
-    procedure SeyirDefteri1Click(Sender: TObject);
     procedure GridBankaEkstreViewStylesGetContentStyle(
       Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
@@ -587,11 +584,6 @@ end;
 procedure TBankalarListeFrame.SetFrameBilgi(AValue: TIcerikFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TBankalarListeFrame.SeyirDefteri1Click(Sender: TObject);
-begin
-   Tablo.SeyirDefteriBaslat(TabNo_Kasa, EKSTRE.FieldByName('CEKID').AsInteger);
 end;
 
 procedure TBankalarListeFrame.Sil1Click(Sender: TObject);

@@ -581,7 +581,6 @@ type
     function AcilisiFisiEkraniBaslat(Cagiran, Acilis_Devir: SmallInt; RehberId, Kod, Ad, Kur: string; KasaId:Integer; Tarih:TDateTime): Boolean;
     function FatbaslikBilgileriniAl(var ABaslik: string; var AAdres: string; var AIlce: string; var AIl: string; var AVD: string; var AVNo: string; var AAciklama: string): Boolean;
     function SQLSatiriKopyala(TabloAdi: string; Id: integer; VarsAlanlar: Array of String; VarsDegerler: Array of Variant): integer;
-    procedure SeyirDefteriBaslat(TabloId,SatirId : Integer);
     function MailSablonSihirbazBaslat(ModulId: Integer): Integer;
     function ProjeSihirbazBaslat(IslOp: Char; ProjeID, RehberId: Integer; Trh: TDateTime): Integer;
     function FirsatSihirbazBaslat(IslOp: Char; ProjeID, RehberId: Integer; Trh: TDateTime): Integer;
@@ -1523,7 +1522,7 @@ uses UAnaForm, registry, UMesaj,FetaUtil, FetaClassExtensions, UKasaWizard, UTab
   UMakbuzWizard, URehberAramaEkrani, UMasrafGelirSec, UGenSifre,  UUretimEmriWizard, UVersiyonGuncelle, UServisWizard, UHizliGirisFatBaslikBilgileri,
   UBankaTanimWizard, UFatTransferWizard, UStokSayim, UAcilisKaydi, UGenelAnaSekmeFrame, UCiroEdilecekler, UIKWizard, LocOnFly, GenoTIP.eFatura.NativeApi,
   UOPSDLG,UitsBusiness, USatinAlmaWizard, UIzleme, UStokLokasyon, UFiyatSor, IdGlobalProtocols, UDokumanWizard,  GenOutLookInterface, UOpsiyonKasiyer,
-  UMailKisiBulma, UDokumanYetki, UGenNotificationUtils, USeyirDefteri, UKaliteToplanti,UKYEgitimWizard, UBarkodYazdir,
+  UMailKisiBulma, UDokumanYetki, UGenNotificationUtils, UKaliteToplanti,UKYEgitimWizard, UBarkodYazdir,
   UMailSablon, URehberHareket, UKullaniciDuzenle, Gentegre.UI.EFatura.FirmaAra, UDokumanKaydet, UDemirbasWizard, UHesapKoduPicker, UServisKoduPicker,
   PrjConst, ULog, URehberBilgiDuzenle, UMailSablonDuzenle, UResim, UProjeMaliyet, UGorevDlg,  USatinAlmaWizard2,UIsEmriPersonelZaman, UFirsatWizard,
   cxEditConsts,
@@ -9374,17 +9373,6 @@ begin
 //           Baslik,
 //           Aciklama);
   result:=sonuc;
-end;
-
-procedure TTablo.SeyirDefteriBaslat(TabloId,SatirId:Integer);//,Ekleyen:Integer;EklemeTarihi:TDateTime);
-begin
-  Application.CreateForm(TSeyirDefteriDlg, SeyirDefteriDlg);
-  SeyirDefteriDlg.TabloId:=TabloId;
-  SeyirDefteriDlg.SatirId:=SatirId;
-  //SeyirDefteriDlg.EklemeTarihi := EklemeTarihi;
-  //SeyirDefteriDlg.Ekleyen := Ekleyen;
-  SeyirDefteriDlg.ShowModal;
-  SeyirDefteriDlg.Destroy;
 end;
 
 function TTablo.MailSablonSihirbazBaslat(ModulId: Integer): Integer;

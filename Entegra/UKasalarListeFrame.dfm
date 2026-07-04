@@ -952,13 +952,6 @@ object KasalarListeFrame: TKasalarListeFrame
       Caption = 'Kopyala'
       OnClick = KopyalaMenuClick
     end
-    object N7: TMenuItem
-      Caption = '-'
-    end
-    object SeyirDefteri1: TMenuItem
-      Caption = 'Seyir Defteri'
-      OnClick = SeyirDefteri1Click
-    end
   end
   object frxKasa: TfrxDBDataset
     UserName = 'KASALAR'

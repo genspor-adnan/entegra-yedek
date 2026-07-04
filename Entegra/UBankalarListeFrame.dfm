@@ -1018,13 +1018,6 @@ object BankalarListeFrame: TBankalarListeFrame
       Caption = 'Kopyala'
       OnClick = KopyalaMenuClick
     end
-    object N9: TMenuItem
-      Caption = '-'
-    end
-    object SeyirDefteri1: TMenuItem
-      Caption = 'Seyir Defteri'
-      OnClick = SeyirDefteri1Click
-    end
   end
   object frxBANKA: TfrxDBDataset
     UserName = 'BANKALAR'

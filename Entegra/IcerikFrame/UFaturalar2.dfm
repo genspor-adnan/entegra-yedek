@@ -1535,13 +1535,6 @@ object FaturalarDlg: TFaturalarDlg
         OnClick = Nakit1Click
       end
     end
-    object N11: TMenuItem
-      Caption = '-'
-    end
-    object SeyirDefteriMenu: TMenuItem
-      Caption = 'Seyir Defteri'
-      OnClick = SeyirDefteriMenuClick
-    end
   end
   object PopupMenu1: TPopupMenu
     Left = 560

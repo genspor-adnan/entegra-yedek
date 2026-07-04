@@ -187,8 +187,6 @@ type
     FiatFark1: TMenuItem;
     CizgiMenu1: TMenuItem;
     KurFark1: TMenuItem;
-    N11: TMenuItem;
-    SeyirDefteriMenu: TMenuItem;
     BtnDonusum: TToolButton;
     GridFatListeTviewONAYLAYACAK: TcxGridDBColumn;
     GridFatListeTviewONAYLAYAN: TcxGridDBColumn;
@@ -326,7 +324,6 @@ type
     procedure btnEPostaGonderClick(Sender: TObject);
     procedure HizliGirisTusClick(Sender: TObject);
     procedure AlSat1Click(Sender: TObject);
-    procedure SeyirDefteriMenuClick(Sender: TObject);
     procedure BtnDonusumClick(Sender: TObject);
     function TipSecimi(Tur:integer):integer;
     procedure DokumanTviewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -3583,22 +3580,6 @@ end;
 procedure TFaturalarDlg.SetFrameBilgi(AValue: TIcerikFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TFaturalarDlg.SeyirDefteriMenuClick(Sender: TObject);
-var TabNo:Smallint;
-begin
-     case FATBASLIK.FieldByName('TUR').AsInteger of
-      10 : TabNo := TabNo_IRSALIYE_Gelen;
-      11 : TabNo := TabNo_FATBASLIK_Gelen;
-      3,12 : TabNo := TabNo_FIS_Gelen;
-      14 : TabNo := TabNo_IRSALIYE_Giden;
-      15 : TabNo := TabNo_FATBASLIK_Giden;
-      4,16 : TabNo := TabNo_FIS_Giden;
-      13 : TabNo := TabNo_TAHAKKUK_Alacak;
-      17 : TabNo := TabNo_TAHAKKUK_Borc;
-     end;
-   Tablo.SeyirDefteriBaslat(TabNo, FATBASLIK.FieldByName('ID').AsInteger);
 end;
 
 procedure TFaturalarDlg.SilTusClick(Sender: TObject);
