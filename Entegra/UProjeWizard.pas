@@ -401,10 +401,10 @@ type
     procedure KodOlustur;
   public
     { Public declarations }
-    IslemOp,Sontus : Char;//P:Proje A:Aktivite //// E:Ekleme D:D?zenleme
+    IslemOp,Sontus : Char;//P:Proje A:Aktivite //// E:Ekleme D:Düzenleme
     ProjeID, RehberId : Integer;
     IslemTarih : TDateTime;
-    ///Dok?man
+    ///Doküman
     Yeri:  SmallInt;
     Yer_ID : Integer;
 
@@ -712,12 +712,12 @@ end;
 procedure TProjeWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FAsamaSnap);
-  if  (Sontus='I') and ((IslemOp='E') or (IslemOp='K'))  then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
+  if  (Sontus='I') and ((IslemOp='E') or (IslemOp='K'))  then begin //eğer yeni kayıtsa ve iptal edildiyse kaydedilmiş bilgilir silinmesi lazım
       if (TabProjeler.active)and(TabProjeler.Fields[0].AsString <> '')  then begin
-        //varsa dokumanlar?n silinmeli
+        //varsa dokumanların silinmeli
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_PROJELER, Yer_ID]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where MODUL = &TabNo AND MODULID = &Modulid ',['&TabNo', '&Modulid'],[TabNo_PROJELER, TabProjeler.FieldByName('ID').AsInteger]);
-        //varsa proje ba?lant?lar? silinmeli
+        //varsa proje bağlantıları silinmeli
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update AKTIVITELER set PROJEID=-1   where PROJEID ='+TabProjeler.FieldByName('ID').AsString,[],[]);
         //sonra kendi silinir
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where ID=&Id ',['&Id'], [TabProjeler.FieldByName('ID').AsInteger]);
@@ -733,7 +733,7 @@ begin
   else
     TabProjeButce.SQL.Text := MemoProjeButce.Lines.Text;
 
-   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    Tablo.GridTurkcelestir;
    Sontus:='I';
@@ -773,7 +773,7 @@ Var
   ctrl  : TWinControl;
 begin
   clientPos :=Self.ScreenToClient(Mouse.CursorPos);
-  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bile?en Ekle
+  if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bileşen Ekle
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
@@ -781,7 +781,7 @@ begin
       Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TProjeWizardDlg(Self),DtsProjeler);
     end;
   end
-  else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bile?en D?zenle
+  else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bileşen Düzenle
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
@@ -790,7 +790,7 @@ begin
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
 //      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(PanelAlan.Name),TProjeWizardDlg(Self),DtsProjeler);
     end;
-  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bile?en Sil
+  end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bileşen Sil
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
@@ -863,7 +863,7 @@ begin
   //Tablo.ProjeInit(ComboPRJ_TURU.Properties,ComboPRJ_ASAMA.Properties,ComboPRJ_DURUM.Properties,ComboLISTEKUR.Properties,ComboSATISKUR.Properties);
   Tabloyenile(TabProjeler, [ProjeID]);
 
-    //imgComboboxlar? sola yasla
+    //imgComboboxları sola yasla
    ComboPRJ_ASAMA.RepositoryItem.Properties.Alignment.Horz:=taLeftJustify;
    ComboPRJ_TURU.RepositoryItem.Properties.Alignment.Horz:=taLeftJustify;
    comboPRJ_TIPI.Properties.Alignment.Horz:=taLeftJustify;
@@ -880,7 +880,7 @@ begin
 //  Tablo.AlanOlustur(PanelAlan,TProjeWizardDlg(Self), -1,DtsProjeler);
   Tablo.AlanOlustur(TProjeWizardDlg(Self), -1,DtsProjeler);
 
-  //Admin de?il ise  RolId = -1 ise y?netici demektir..  Yetkili ya da sorumlu de?ilse ?ablonu g?remesin
+  //Admin değil ise  RolId = -1 ise yönetici demektir..  Yetkili ya da sorumlu değilse şablonu göremesin
    if (RolId<>'-1')and(TabProjeler.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
       LabelSablon.Visible := False;
       ComboBolum.Visible := False;
@@ -889,7 +889,7 @@ begin
    if not SubeVarmi then begin
      LblSube.Visible:=False;
      ComboSube.Visible:=False;
-   end else begin //?ube yetkileri ayarlan?r
+   end else begin //şube yetkileri ayarlanır
       (ComboSube.Properties.Items as  TcxImageComboBoxItems).Clear;
       for I := 1 to tablo.RepSubelerOrtakTumSubeler.Properties.Items.Count - 1 do begin
         if tablo.YetkiVarmi(StrToInt('2198'+IntToStr(strtoint(vartostr(tablo.RepSubelerOrtakTumSubeler.Properties.Items[i].Value))*(-1))),YetkiTur_Gorme,False) then
@@ -919,7 +919,7 @@ begin
   // duzenleme (D/K) -> mevcut asamalar snapshot'a alinir (Finish'te diff).
   if LogGun > 0 then
     LogSnapshotAl(TabProjeAsama, FAsamaSnap);
- ///Dok?man
+ ///Doküman
  // Yeri := 41;
    ProjeID := TabProjeler.Fields[0].AsInteger;
    Tabloyenile(TabYorum, [Tabno_Projeler, ProjeID]);
@@ -1103,7 +1103,7 @@ end;
 
 procedure TProjeWizardDlg.TabProjeAsamaBeforeEdit(DataSet: TDataSet);
 begin
-      //Admin de?il ise  RolId = -1 ise y?netici demektir..
+      //Admin değil ise  RolId = -1 ise yönetici demektir..
   if (ProjeShowAsamasi=False)and(RolId<>'-1')and(TabProjeAsama.FieldByName('EKLEYEN').AsString <> Kullanan)
          and(TabProjeler.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
       Application.MessageBox(PChar(AWSorumluHaricindeDegisYapilmaz), PChar(Uyari), MB_OK + MB_ICONERROR);
@@ -1176,7 +1176,7 @@ end;
 
 procedure TProjeWizardDlg.TabProjelerBeforeEdit(DataSet: TDataSet);
 begin
-      //Admin de?il ise  RolId = -1 ise y?netici demektir..
+      //Admin değil ise  RolId = -1 ise yönetici demektir..
    if (ProjeShowAsamasi=False)and(RolId<>'-1')and(TabProjeler.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
        Application.MessageBox(PChar(AWSorumluHaricindeDegisYapilmaz), PChar(Uyari), MB_OK + MB_ICONERROR);
        Abort;
@@ -1243,7 +1243,7 @@ begin
     if Tablo.MasrafMerkeziSecimEkrani(0, MASRAFID, MASRAFKODU, MASRAFMERKEZI,'',True) then begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
        TabProjeler.FieldByName('ID').AsString+','+MASRAFID+','''+CariDoviz+''')',[],[]);
-       //bakal?m bu kodun alt?nda eklenecek ba?ka sat?rlar varsa onlar? da ekleyelim..
+       //bakalım bu kodun altında eklenecek başka satırlar varsa onları da ekleyelim..
        Tablo.TablodanSorguAc(0, 'select ID from MASRAFGELIR where KOD like '''+MASRAFKODU+'.%'' ');
        while not Tablo.Query0.Eof do begin
          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into PROJEBUTCE (PROJEID,MASRAFID,KUR)values('+
@@ -1373,7 +1373,7 @@ begin
    Tablo.TablodanSorguAc(6,'SELECT * FROM PROJELER WHERE ID='+inttostr(ProjeID));
    Tablo.TablodanSorguAc(8,'SELECT count(REHBERID) as MailSayi FROM GOOGLETAKVIMHESAPLARI where KULLANICIID = '+Tablo.Query6.FieldByName('PRJ_SORUMLUSU_ID').AsString);
 
-    if Tablo.InternetVarmi then begin       //internet ba?lantisi kontrol ediliyor.
+    if Tablo.InternetVarmi then begin       //internet bağlantisi kontrol ediliyor.
 
      if (Tablo.query8.FieldByName('MailSayi').AsInteger > 0) then
       begin
@@ -1398,7 +1398,7 @@ begin
         end;
 
         if IslemOp='D'  then  Begin
-          //ba?lama biti? tarihinde degi?iklik varsa aktivite silinip tekrar ekleniyor
+          //başlama bitiş tarihinde degişiklik varsa aktivite silinip tekrar ekleniyor
          if ( (datetostr(GBaslamaTarih) <> DateBASLAMATARIHI.Text)   or (DateToStr(GBitisTarih) <> DateBITISTARIHI.Text)or( ProjeSorumlusu <> tablo.Query6.FieldByName('PRJ_SORUMLUSU_ID').AsInteger))  then  begin
             if (Tablo.Query6.FieldByName('GOOGLEOLAYID').AsString <>'') then begin
                Tablo.GoogleTakvimSil(Tablo.Query6.FieldByName('GOOGLEHESAPID').AsInteger,
