@@ -79,8 +79,27 @@ USING (VALUES
   (33,   N'EKIPMANID',  N'EKIPMANLAR', N'ID',    N'AD',      NULL),
   (33,   N'LISTEID',    N'GOREVLISTE', N'ID',    N'ADI',     NULL),
 
-  -- ===== TEKLIF (97): kisi =====
-  (97,   N'HAZIRLAYAN', N'REHBER', N'ID', N'FIRMA', NULL)   -- teklifi hazirlayan kullanici
+  -- ===== TEKLIF (97): kisi + GENINI =====
+  (97,   N'HAZIRLAYAN', N'REHBER', N'ID',    N'FIRMA',   NULL),   -- teklifi hazirlayan kullanici
+  (97,   N'TURU',       N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2901'),
+  (97,   N'DURUM',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2902'),
+
+  -- ===== SERVIS (83): GENINI =====
+  (83,   N'TURU',       N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-3006'),
+  (83,   N'DURUM',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-3007'),
+
+  -- ===== DEMIRBAS (18): GENINI =====
+  (18,   N'DURUM',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2803'),
+  (18,   N'MARKA',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2804'),
+
+  -- ===== DOKUMAN (321): GENINI + tablo =====
+  (321,  N'DURUM',           N'GENINI',        N'DEGER', N'ANAHTAR',     N'BOLUM=-1001'),
+  (321,  N'YON',             N'GENINI',        N'DEGER', N'ANAHTAR',     N'BOLUM=-3205'),
+  (321,  N'KATEGORI',        N'GENINI',        N'DEGER', N'ANAHTAR',     N'BOLUM=-3204'),
+  (321,  N'GIZLILIKDERECESI',N'GENINI',        N'DEGER', N'ANAHTAR',     N'BOLUM=-3206'),
+  (321,  N'KLASOR',          N'DOKUMANKLASOR', N'ID',    N'AD',          NULL),
+  (321,  N'LOKASYON',        N'LOKASYON',      N'ID',    N'ACIKLAMA',    NULL),
+  (321,  N'DEMIRBASID',      N'DEMIRBAS',      N'ID',    N'DEMIRBASADI', NULL)
 ) AS k(TABLOID, ALAN, KAYNAKTABLO, IDKOLON, ADKOLON, FILTRE)
 ON ISNULL(h.TABLOID,-1)=ISNULL(k.TABLOID,-1) AND h.ALAN=k.ALAN COLLATE Turkish_CI_AS
 WHEN MATCHED THEN UPDATE SET KAYNAKTABLO=k.KAYNAKTABLO, IDKOLON=k.IDKOLON, ADKOLON=k.ADKOLON, FILTRE=k.FILTRE, AKTIF=1
