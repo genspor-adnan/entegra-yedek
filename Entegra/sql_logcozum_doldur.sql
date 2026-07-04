@@ -79,6 +79,14 @@ USING (VALUES
   (33,   N'EKIPMANID',  N'EKIPMANLAR', N'ID',    N'AD',      NULL),
   (33,   N'LISTEID',    N'GOREVLISTE', N'ID',    N'ADI',     NULL),
 
+  -- ===== GIRIS/CIKIS FISI (106/107): islem turu = ISLEMTURLERI(TUR,TIP) composite =====
+  -- Kart alanlari TUR + TIPI; ISLEMTURLERI'de TUR+TIP birlikte islem turunu tanimlar.
+  -- ADKOLON bir SQL ifadesi (AD+' '+ACIKLAMA); FILTRE'de kardes alan placeholder'i.
+  (106,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
+  (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+
   -- ===== TEKLIF (97): kisi + GENINI =====
   (97,   N'HAZIRLAYAN', N'REHBER', N'ID',    N'FIRMA',   NULL),   -- teklifi hazirlayan kullanici
   (97,   N'TURU',       N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2901'),
