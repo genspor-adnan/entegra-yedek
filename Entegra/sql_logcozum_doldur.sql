@@ -98,8 +98,7 @@ USING (VALUES
   (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
   (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),
   (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
-  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),
-  (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
+  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),   -- transfer: TIPI anlamsiz (ACIKLAMA bos) -> eslenmedi
   (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),
   (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
   (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),
