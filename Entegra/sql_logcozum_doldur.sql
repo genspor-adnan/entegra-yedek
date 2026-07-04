@@ -85,28 +85,28 @@ USING (VALUES
   -- FATBASLIK/SIPARIS kartlarinda TUR + TIPI birlikte islem turunu tanimlar.
   -- ADKOLON bir SQL ifadesi (AD+' '+ACIKLAMA); FILTRE'de kardes alan placeholder'i.
   -- Fatura(28/29/30), Irsaliye(105), Fis(106/107), Transfer(134); Siparis(91/92), StokTalep(464).
-  (28,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (28,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (29,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (29,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (30,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (30,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (105,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (105,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (106,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', N'TIP={TIPI}'),
-  (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (28,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (28,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (29,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (29,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (30,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (30,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (105,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (105,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (106,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (106,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (107,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TIP={TIPI}'),
+  (107,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
   -- Transfer: silme logunda TIPI yok; TUR=20 ISLEMTURLERI'de tek satir -> FILTRE'siz coz.
-  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
-  (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (134,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', NULL),
+  (134,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
   -- Siparis/Satinalma/StokTalep: TUR ISLEMTURLERI'de tek satir + silme'de TIPI yok -> FILTRE'siz.
-  (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
-  (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
-  (92,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
-  (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+'' ''+ACIKLAMA', NULL),
-  (464,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+'' ''+ACIKLAMA', N'TUR={TUR}'),
+  (91,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', NULL),
+  (91,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (92,   N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', NULL),
+  (92,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
+  (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD+ISNULL('' ''+ACIKLAMA,'''')', NULL),
+  (464,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'AD+ISNULL('' ''+ACIKLAMA,'''')', N'TUR={TUR}'),
 
   -- ===== TEKLIF (97): kisi + GENINI =====
   (97,   N'HAZIRLAYAN', N'REHBER', N'ID',    N'FIRMA',   NULL),   -- teklifi hazirlayan kullanici
