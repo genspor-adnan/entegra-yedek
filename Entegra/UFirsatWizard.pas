@@ -1263,6 +1263,11 @@ begin
   if IslemOp = 'D' then
      Tablo.ProjeTarihceEkle(TabFirsatlar);
   EkleyenDegistiren(DtsFirsatlar);
+  // Garanti: duzenlemede DEGISTIREN bos kalirsa TabFirsatlar'a dogrudan doldur.
+  if (TabFirsatlar.State in [dsEdit]) and (TabFirsatlar.FieldByName('DEGISTIREN').AsInteger = 0) then begin
+    TabFirsatlar.FieldByName('DEGISTIREN').AsString := Kullanan;
+    TabFirsatlar.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+  end;
 end;
 
 procedure TFirsatWizardDlg.TabFirsatlarNewRecord(DataSet: TDataSet);
