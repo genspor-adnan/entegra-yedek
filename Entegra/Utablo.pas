@@ -566,7 +566,7 @@ type
     procedure InfoGoster(TabloAd:String; ID:Integer; ATabloNo: Integer = 0);
     procedure LogEkraniGoster;   // MenuYeniLog: 2 sekmeli browse (kayit bagimsiz)
     procedure LogIslemleri(TabloID, SatirID: integer; Islem: Integer;Tablo1: TDataSet; AUstTabloID: Integer = 0; AUstKayitID: Int64 = 0);
-    procedure LogIslemlerBelge(Table1: TDataSet; TabloID, SatirID: integer;Islem: Integer);
+    procedure LogIslemlerBelge(Table1: TDataSet; TabloID, SatirID: integer;Islem: Integer; ADetayTabNo: Integer = 0);
     procedure BelgeSil(Table1: TDataSet);
     function YeniGeciciBaglantiOlustur: TFDConnection;
     function IzlemBilgisiKaydet(TabKaynak : TFDQuery; IslemTur,IslemTip, KaynakSatirID, BaslikID, SatirID, IzlemTur, GirDepo, CikDepo : integer; StokDurumDegis:boolean) : integer;
@@ -6480,59 +6480,14 @@ procedure TTablo.LogIslemleri(TabloID, SatirID: integer; Islem: Integer;
   Tablo1: TDataSet; AUstTabloID: Integer; AUstKayitID: Int64);
 var
   i: Integer;
-  VLogID: Variant;
 begin
   if LogOnceki.count = 0 then
     exit;
 
   if (LogGun > 0) and (((Islem = 5) and (LogSilme)) or ((Islem = 4) and (LogDegistirme)) or (Islem in [1,2,3,4,5])) then
   begin
-    Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'insert into [LOG] (TARIH, TABLOID, SATIRID, EKLEYEN, TUR, PCADI) ' +
-      'values (&TARIH, &TABLOID, &SATIRID, &EKLEYEN, &TUR, &PCADI) ' +
-      '',
-      ['&TARIH*datetime*', '&TABLOID', '&SATIRID', '&EKLEYEN', '&TUR', '&PCADI'],
-      [Tablo.GENINI.BugunTrhSaat, TabloID, SatirID, Kullanan, Islem, Tablo.ClientName],
-      False
-    );
-    VLogID := Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'select top 1 ID from [LOG] where TARIH=&TARIH and TABLOID=&TABLOID and SATIRID=&SATIRID and EKLEYEN=&EKLEYEN and TUR=&TUR and PCADI=&PCADI order by ID desc',
-      ['&TARIH*datetime*', '&TABLOID', '&SATIRID', '&EKLEYEN', '&TUR', '&PCADI'],
-      [Tablo.GENINI.BugunTrhSaat, TabloID, SatirID, Kullanan, Islem, Tablo.ClientName],
-      True
-    );
-    if VarIsNull(VLogID) or VarIsEmpty(VLogID) then
-      Exit;
-
-    LogID := VLogID;
-    islemDetay := IntToStr(Islem);
-    for i := 0 to Tablo1.FieldCount - 1 do begin
-      if (Tablo1.Fields[i].DataType <> ftBlob) and (Tablo1.Fields[i].DataType <> ftMemo) then begin
-        if islem = 5 then begin
-          Veritabani.BasitKomutÇalıştır(
-            Tablo.FDCnn,
-            'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
-            'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
-            ['&LOGID', '&TABLOALANADI', '&ESKIALANDEGERI', '&YENIALANDEGERI'],
-            [LogID, Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], ''],
-            False
-          );
-        end else if Tablo1.Fields[i].AsString <> LogOnceki.Strings[i] then begin
-          Veritabani.BasitKomutÇalıştır(
-            Tablo.FDCnn,
-            'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
-            'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
-            ['&LOGID', '&TABLOALANADI', '&ESKIALANDEGERI', '&YENIALANDEGERI'],
-            [LogID, Tablo1.Fields[i].FieldName, LogOnceki.Strings[i], Tablo1.Fields[i].AsString],
-            False
-          );
-        end;
-      end;
-    end;
-    // ---- YENI islem logu (GENDEPO.ISLEMLOG) : eski sistemle PARALEL ----
-    // Ayni diff verisinden (LogOnceki vs Tablo1) tek JSON kaydi. Kaydetmeyi ASLA bozmaz.
+    // ---- ISLEMLOG (GENDEPO): LogOnceki (BeforeEdit snapshot) vs Tablo1 (guncel) diff.
+    // Islem: 5=sil (tum alanlar), diger=degisen alanlar. Tek JSON kaydi.
     try
       var LTip: TLogIslem;
       case Islem of
@@ -14174,37 +14129,20 @@ begin
 end;
 
 procedure TTablo.LogIslemlerBelge(Table1: TDataSet; TabloID, SatirID: integer;
-  islem: Integer);
+  islem: Integer; ADetayTabNo: Integer);
+// Belge (fatura/siparis/teklif...) DETAY satirlarini ISLEMLOG'a yazar. LogBelge =
+// BelgeLogBelirle snapshot'i (satir basina FieldCount deger). LogSatir = satir ID'leri.
+// Her satir icin diff (5=sil tum alanlar / diger=degisen) -> LogYaz(detay, ust=belge).
 var
   i, j: integer;
-  VLogID: Variant;
+  LTip: TLogIslem;
+  LDetayTab: Integer;
 begin
-  if LogBelge.count = 0 then
+  if (LogBelge.count = 0) or (LogGun <= 0) then
     exit;
+  LDetayTab := ADetayTabNo; if LDetayTab = 0 then LDetayTab := TabloID;
+  if islem = 5 then LTip := liSil else LTip := liDegistir;
 
-  if LogID = 0 then
-  begin
-    Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'insert into [LOG] (TARIH, TABLOID, SATIRID, EKLEYEN, TUR, PCADI) ' +
-      'values (&TARIH, &TABLOID, &SATIRID, &EKLEYEN, &TUR, &PCADI) ' +
-      '',
-      ['&TARIH*datetime*', '&TABLOID', '&SATIRID', '&EKLEYEN', '&TUR', '&PCADI'],
-      [Tablo.GENINI.BugunTrhSaat, TabloID, SatirID, Kullanan, Islem, Tablo.ClientName],
-      False
-    );
-    VLogID := Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'select top 1 ID from [LOG] where TARIH=&TARIH and TABLOID=&TABLOID and SATIRID=&SATIRID and EKLEYEN=&EKLEYEN and TUR=&TUR and PCADI=&PCADI order by ID desc',
-      ['&TARIH*datetime*', '&TABLOID', '&SATIRID', '&EKLEYEN', '&TUR', '&PCADI'],
-      [Tablo.GENINI.BugunTrhSaat, TabloID, SatirID, Kullanan, Islem, Tablo.ClientName],
-      True
-    );
-    if VarIsNull(VLogID) or VarIsEmpty(VLogID) then
-      Exit;
-
-    LogID := VLogID;
-  end;
   Table1.Close;
   Table1.Open;
   Table1.First;
@@ -14216,39 +14154,31 @@ begin
     begin
       if Table1.FieldByName('ID').AsString = LogSatir.Strings[j] then
       begin
-        for i := 0 to Table1.FieldCount - 1 do
-        begin
-          if islem = 5 then
+        var LK: TLogKurucu := TLogKurucu.Yeni;
+        var LYazildi: Boolean := False;
+        try
+          for i := 0 to Table1.FieldCount - 1 do
           begin
-            if (Table1.Fields[i].FieldName <> 'BELGE') and (Table1.Fields[i].FieldName <> 'ID') then
-            begin
-              Veritabani.BasitKomutÇalıştır(
-                Tablo.FDCnn,
-                'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
-                'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
-                ['&LOGID', '&TABLOALANADI', '&ESKIALANDEGERI', '&YENIALANDEGERI'],
-                [LogID, Table1.Fields[i].FieldName, LogBelge.Strings[i + SayA], ''],
-                False
-              );
-            end;
-          end
-          else if LogBelge.count > i + SayA then
-          begin
-            if Table1.Fields[i].AsString <> LogBelge.Strings[i + SayA] then
-              if (Table1.Fields[i].FieldName <> 'BELGE') and      (Table1.Fields[i].FieldName <> 'ID') then
-              begin
-                Veritabani.BasitKomutÇalıştır(
-                  Tablo.FDCnn,
-                  'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
-                  'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
-                  ['&LOGID', '&TABLOALANADI', '&ESKIALANDEGERI', '&YENIALANDEGERI'],
-                  [LogID, Table1.Fields[i].FieldName, LogBelge.Strings[i + SayA], Table1.Fields[i].AsString],
-                  False
-                );
-              end;
+            if (Table1.Fields[i].FieldName = 'BELGE') or (Table1.Fields[i].FieldName = 'ID') then Continue;
+            if (Table1.Fields[i].DataType = ftBlob) or (Table1.Fields[i].DataType = ftMemo) then Continue;
+            if islem = 5 then
+              LK.Deger(Table1.Fields[i].FieldName, LogBelge.Strings[i + SayA])
+            else if (LogBelge.count > i + SayA) and
+                    (Table1.Fields[i].AsString <> LogBelge.Strings[i + SayA]) then
+              LK.Alan(Table1.Fields[i].FieldName, LogBelge.Strings[i + SayA], Table1.Fields[i].AsString);
           end;
+          if (islem = 5) or (not LK.BosMu) then
+          begin
+            var LReh, LStk: Int64;
+            LogVarlikIDleri(Table1, LReh, LStk);
+            LogYaz(LTip, LDetayTab, Table1.FieldByName('ID').AsLargeInt, LK, '',
+                   TabloID, SatirID, LReh, LStk);   // LK sahipligi LogYaz'a gecer
+            LYazildi := True;
+          end;
+        except
         end;
-        SayA := SayA + i;
+        if not LYazildi then LK.Free;
+        SayA := SayA + Table1.FieldCount;
       end;
       Table1.Next;
      end;

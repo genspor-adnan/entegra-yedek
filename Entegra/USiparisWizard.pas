@@ -2457,15 +2457,10 @@ begin
           19 :Tablo.LogIslemleri(TabNo_SIPARIS_Giden,SiparisIdsi, 4, TabSiparis);
         end;
   end;
-  if TabSiparisDetay.State in [dsInsert, dsEdit] then begin
+  if TabSiparisDetay.State in [dsInsert, dsEdit] then
      TabSiparisDetay.Post;
-     SayA:=0;
-     if LogBelge.Count > 0 then
-        case SiparisTur of
-         9  :  Tablo.LogIslemlerBelge(TabSiparisDetay,TabNo_SIPARIS_Gelen,SiparisIdsi,4);
-         19 :Tablo.LogIslemlerBelge(TabSiparisDetay,TabNo_SIPARIS_Giden,SiparisIdsi,4);
-        end;
-  end;
+  // NOT: eski LogIslemlerBelge(TabSiparisDetay) kaldirildi -> siparis detayi artik
+  // yalniz SiparisLogKaydet (LogDiffKaydet, TabNo_SIPARISDETAY=93) ile loglanir (cift onlendi).
   if EkleDetay then
       Ekle(TabDetay, DetaySablonTipiBul ,SiparisIdsi,'Değiş');
   SiparisLogKaydet;   // ISLEMLOG: baslik + detay (degistir/ekle/sil)

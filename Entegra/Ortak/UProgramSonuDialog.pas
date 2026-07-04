@@ -36,7 +36,7 @@ type
 
 implementation
 uses
-  UTablo, UYedekCalistir, UBekletme, FetaKurulusSiniflari;
+  UTablo, UYedekCalistir, UBekletme, FetaKurulusSiniflari, ULog;
 
 {$R *.dfm}
 
@@ -66,7 +66,9 @@ procedure TProgramSonuDialog.programdanCikButtonClicked(Sender: TObject);
 begin
   if (Tablo.GetOnlineStatus) then begin  // R Yedekleme-'+kullanan,'Kapanirken', False)
     try
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+      ULog.LogYaz(liEkle, -1, StrToIntDef(Kullanan, 0),
+      TLogKurucu.Yeni.Deger('Olay', 'Çıkış').Deger('Kullanıcı', Kullanan),
+      '', -1, StrToIntDef(Kullanan, 0), StrToIntDef(Kullanan, 0));
       if Tablo.GENINI.ReadBoolean(Ops_Yedekleme_Kapanirken, False) then
          YedekAl;
     except
@@ -81,7 +83,9 @@ end;
 procedure TProgramSonuDialog.ProgramRestartBtnClick(Sender: TObject);
 begin
   try
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+    ULog.LogYaz(liEkle, -1, StrToIntDef(Kullanan, 0),
+      TLogKurucu.Yeni.Deger('Olay', 'Çıkış').Deger('Kullanıcı', Kullanan),
+      '', -1, StrToIntDef(Kullanan, 0), StrToIntDef(Kullanan, 0));
   finally
     RestartProgram := True;
     RestartParameters := '/Kullanici:'+IntToStr(KullaniciID)+' /Sifre:'+SifreliSifre;
@@ -93,7 +97,9 @@ procedure TProgramSonuDialog.baskaKullaniciyaGecButtonClicked(
   Sender: TObject);
 begin
   try
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into LOG(TARIH,TABLOID,SATIRID,EKLEYEN)values(Getdate(),0,'+IntToStr(LoginLogID)+','+Kullanan+') select scope_identity()',[],[]);
+    ULog.LogYaz(liEkle, -1, StrToIntDef(Kullanan, 0),
+      TLogKurucu.Yeni.Deger('Olay', 'Çıkış').Deger('Kullanıcı', Kullanan),
+      '', -1, StrToIntDef(Kullanan, 0), StrToIntDef(Kullanan, 0));
   finally
     RestartProgram := True;
     ModalResult := mrOK;

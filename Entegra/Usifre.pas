@@ -81,7 +81,7 @@ var
   function PasswordEkrani(Modul:String) : Boolean;
 implementation
 
-uses  UCombo, UPaylasim, ULisans, UMesaj, FetaUtil, UGenSifre,UWebServis, FetaKurulusSiniflari,PrjConst;
+uses  UCombo, UPaylasim, ULisans, UMesaj, FetaUtil, UGenSifre,UWebServis, FetaKurulusSiniflari,PrjConst, ULog;
 //, USifDeg;
 const
   RegBasKey = 'Software\GENTEGRE2';
@@ -459,10 +459,11 @@ begin
     ModulYetki_TekSubeTum.IK := StrToIntDef(tablo.YetkiEkVarMi(3401),100);
 
 
-    Tablo.TablodanSorguAc(5,'insert into LOG(TUR,TARIH,TABLOID,SATIRID,EKLEYEN,PCADI)values(1,Getdate(),-1,0,'+Kullanan+','''+Tablo.ClientName+''') select scope_identity()');
-    LoginLogID := Tablo.Query5.Fields[0].AsInteger;
-    Tablo.TablodanSorguAc(6,'insert into LOGHAR(LOGID,TABLOALANADI,ESKIALANDEGERI,YENIALANDEGERI,SUBEID)values('+IntToStr(LoginLogID)+',''LOGIN(GENTEGRE)'','''+ComboAd.Text+''',''Başarılı'','+IntToStr(SubeId)+') select Scope_Identity()');
-    LoginLogHarID := Tablo.Query6.Fields[0].AsInteger;
+    // Oturum acildi -> ISLEMLOG (TABLOID=-1 oturum). Kullanici = REHBER ID (Kullanan).
+    ULog.LogYaz(liEkle, -1, StrToIntDef(Kullanan, 0),
+      TLogKurucu.Yeni.Deger('Olay', 'Giriş').Deger('Sonuç', 'Başarılı').Deger('Kullanıcı', ComboAd.Text),
+      '', -1, StrToIntDef(Kullanan, 0), StrToIntDef(Kullanan, 0));
+    LoginLogID := 0;
     VarsayilanDegerleriAl;
     Tablo.KocanAyarlariInit;
 
@@ -517,9 +518,10 @@ begin
   if not Kapat then begin
     Inc(YanlisSay);
     Password.Text:='';
-    Tablo.TablodanSorguAc(5,'insert into LOG(TUR,TARIH,TABLOID,SATIRID,EKLEYEN,PCADI) values(1,Getdate(),-1,0,0,'''+Tablo.ClientName+''') select scope_identity()');
-    LoginLogID := Tablo.Query5.Fields[0].AsInteger;
-    Tablo.TablodanSorguAc(9,'insert into LOGHAR(LOGID,TABLOALANADI,ESKIALANDEGERI,YENIALANDEGERI,SUBEID)values('+IntToStr(LoginLogID)+',''LOGIN(GENTEGRE)'','''+KullanAdi+''',''Başarısız('+IntToStr(YanlisSay)+')'','+IntToStr(SubeId)+') select Scope_Identity()');
+    // Basarisiz giris -> ISLEMLOG (TABLOID=-1 oturum, kullanici bilinmiyor -> 0).
+    ULog.LogYaz(liEkle, -1, 0,
+      TLogKurucu.Yeni.Deger('Olay', 'Giriş').Deger('Sonuç', 'Başarısız (' + IntToStr(YanlisSay) + ')').Deger('Kullanıcı', KullanAdi),
+      '', -1, 0);
     if YanlisSay<5 then
       MessageDlg('Geçersiz Kullanıcı Adı veya Şifre ('+IntToStr(YanlisSay)+'. başarısız giriş denemesi)', mtInformation, [mbOK], 0)
     else

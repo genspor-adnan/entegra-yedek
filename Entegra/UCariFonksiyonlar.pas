@@ -29,18 +29,6 @@ var
   RehberBilgiID: Integer;
   HedefKayitID: Integer;
   Pic: TJPEGImage;
-  VLogID: Variant;
-  LogTur: Integer;
-  procedure LogHarEkle(const AAlanAdi, AEskiDeger, AYeniDeger: string);
-  begin
-    Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'insert into [LOGHAR] (LOGID, TABLOALANADI, ESKIALANDEGERI, YENIALANDEGERI) ' +
-      'values (&LOGID, &TABLOALANADI, &ESKIALANDEGERI, &YENIALANDEGERI)',
-      ['&LOGID', '&TABLOALANADI', '&ESKIALANDEGERI', '&YENIALANDEGERI'],
-      [LogID, AAlanAdi, AEskiDeger, AYeniDeger]
-    );
-  end;
 begin
   if Table1.State in [dsEdit, dsInsert] then
     Table1.Post;
@@ -51,26 +39,6 @@ begin
     if (Table1.FieldByName('ZORUNLU').AsBoolean) and (Trim(Table1.FieldByName('BILGI').AsString) = '') then
       raise Exception.Create(Table1.FieldByName('ETIKET').AsString + ' girilmesi zorunlu alandır!');
     Table1.Next;
-  end;
-
-  if Logislem = 'Silme' then
-    LogTur := 1
-  else
-    LogTur := 0;
-
-  if LogID = 0 then
-  begin
-    VLogID := Veritabani.BasitKomutÇalıştır(
-      Tablo.FDCnn,
-      'insert into [LOG] (TARIH, TABLOID, SATIRID, EKLEYEN, TUR, PCADI) ' +
-      'values (&TARIH, &TABLOID, &SATIRID, &EKLEYEN, &TUR, &PCADI) ' +
-      'SELECT SCOPE_IDENTITY()',
-      ['&TARIH*datetime*', '&TABLOID', '&SATIRID', '&EKLEYEN', '&TUR', '&PCADI'],
-      [Now, Yeri, Yeri_Id, Kullanan, LogTur, Tablo.ClientName],
-      True
-    );
-    if not (VarIsNull(VLogID) or VarIsEmpty(VLogID)) then
-      LogID := VLogID;
   end;
 
   // ISLEMLOG grup basligi (detayin ustunde gosterilir): iletisim(75)->REHBERILETISIM.AD
@@ -133,11 +101,6 @@ begin
 
     if (bilgi <> orj) or (StrToIntDef(Table1.FieldByName('GIRIS').AsString, 0) in [11, 12]) then
     begin
-      if Logislem = 'Silme' then
-        LogHarEkle(Table1.FieldByName('ETIKET').AsString, orj, '')
-      else
-        LogHarEkle(Table1.FieldByName('ETIKET').AsString, orj, bilgi);
-
       Tablo.Query1.Close;
       if (orj = '') and (bilgi <> '') then
       begin

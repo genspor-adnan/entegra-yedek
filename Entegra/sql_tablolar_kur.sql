@@ -53,6 +53,7 @@ USING (VALUES
   (33,  ''GOREVLER'',      N''Kart'',  N''Görev''),
   (70,  ''PROJELER'',      N''Kart'',  N''Proje''),
   (43,  ''KASA'',          N''Kart'',  N''Nakit''),
+  (-1,  ''OTURUM'',        N''Oturum'',N''Oturum''),
   (73,  ''REHBER'',        N''Kart'',   N''İK''),
   (74,  ''REHBER'',        N''Kart'',   N''İK Potansiyel''),
   (86,  ''REHBERBILGI'',   N''Özlük'',  N''İK'')
