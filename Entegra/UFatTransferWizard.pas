@@ -808,7 +808,7 @@ begin
     TabFatura.Post;
     SayA:=0;
     if LogBelge.Count > 0 then
-     Tablo.LogIslemlerBelge(TabFatura,TabNo_TRANSFER,FatBasId,4);
+     Tablo.LogIslemlerBelge(TabFatura,TabNo_TRANSFER,FatBasId,4,TabNo_FATURA);   // detay: FATURA satir
   end;
 end;
 

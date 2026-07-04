@@ -1651,7 +1651,7 @@ begin
      SIPARISDETAY.Post;
      SayA:=0;
      if LogBelge.Count > 0 then
-        Tablo.LogIslemlerBelge(SIPARISDETAY, TabNo_SATINALMA, SiparisIdsi,4)
+        Tablo.LogIslemlerBelge(SIPARISDETAY, TabNo_SATINALMA, SiparisIdsi,4,TabNo_SIPARISDETAY)   // detay: siparis satir
   end;
   if EkleDetay then
       Ekle(TabDetay, DetaySablonTipiBul ,SiparisIdsi,'Değiş')

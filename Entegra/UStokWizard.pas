@@ -2503,7 +2503,7 @@ begin
 
    SayA:=0;
    if LogBelge.Count > 0 then
-   Tablo.LogIslemlerBelge(TabBarkod,TabNo_STOKKOTA,TabBarkod.FieldByName('ID').AsInteger, 4);
+   Tablo.LogIslemlerBelge(TabBarkod,TabNo_STOKKOTA,TabBarkod.FieldByName('ID').AsInteger, 4, TabNo_STOKBARKOD);   // detay: barkod
    StokDetayAfterPost(TabBarkod);   // ISLEMLOG master-detail (ust=stok)
 end;
 

@@ -1755,7 +1755,7 @@ begin
     TabTeklifDetay.post;
     SayA:=0;
     if LogBelge.Count > 0 then begin
-      Tablo.LogIslemlerBelge(TabTeklifDetay,TabNo_TEKLIF,TeklifID,4)
+      Tablo.LogIslemlerBelge(TabTeklifDetay,TabNo_TEKLIF,TeklifID,4,TabNo_TEKLIFDETAY)   // detay: teklif satir
   end;
   end;
   if TabImaj.State in [dsInsert, dsEdit] then  begin
