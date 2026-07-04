@@ -1366,6 +1366,10 @@ object DokumanListeFrame: TDokumanListeFrame
   object PopupMenu1: TPopupMenu
     Left = 52
     Top = 221
+    object DokumanInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = DokumanInfoMenuClick
+    end
     object Gr1: TMenuItem
       Caption = 'G'#246'r'
       OnClick = GortusClick

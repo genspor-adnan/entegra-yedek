@@ -132,6 +132,7 @@ type
     gridKalibrasyonLevel1: TcxGridLevel;
     SQLMemoTutanak: TcxMemo;
     PopupDemirbasListe: TPopupMenu;
+    DemirbasInfoMenu: TMenuItem;
     GridTarihceViewBELGENO: TcxGridDBColumn;
     GridTarihceViewNOTLAR: TcxGridDBColumn;
     GridTarihceViewFIRMA: TcxGridDBColumn;
@@ -298,6 +299,7 @@ type
     procedure YeniTusClick(Sender: TObject);
     procedure checkGecmisTakipleriGosterPropertiesChange(Sender: TObject);
     procedure PopupDemirbasListePopup(Sender: TObject);
+    procedure DemirbasInfoMenuClick(Sender: TObject);
     procedure KalibrasyonBilgisiGirMenuClick(Sender: TObject);
     procedure TeknikServisSorumlusuAtaMenuClick(Sender: TObject);
     procedure MenuItemTakipGorevClick(Sender: TObject);
@@ -1075,6 +1077,12 @@ end;
 procedure TDemirbasListeDlg.PopupDemirbasListePopup(Sender: TObject);
 begin
   PopupHazirla(DEMIRBAS.FieldByName('DURUM').AsInteger);
+end;
+
+procedure TDemirbasListeDlg.DemirbasInfoMenuClick(Sender: TObject);
+begin
+  if not DEMIRBAS.IsEmpty then
+    Tablo.InfoGoster('DEMIRBAS', DEMIRBAS.FieldByName('ID').AsInteger, TabNo_DEMIRBAS);
 end;
 
 procedure TDemirbasListeDlg.TutanakGorTusClick(Sender: TObject);

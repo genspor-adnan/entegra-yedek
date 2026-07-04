@@ -2017,6 +2017,10 @@ object DemirbasListeDlg: TDemirbasListeDlg
     OnPopup = PopupDemirbasListePopup
     Left = 448
     Top = 96
+    object DemirbasInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = DemirbasInfoMenuClick
+    end
     object N4: TMenuItem
       Tag = -1
       Caption = '-'

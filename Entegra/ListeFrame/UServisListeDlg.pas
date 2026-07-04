@@ -234,6 +234,8 @@ type
     ButtonServis: TToolButton;
     PopupMenuHareket: TPopupMenu;
     MenuItem1: TMenuItem;
+    PopupMenuServis: TPopupMenu;
+    ServisInfoMenu: TMenuItem;
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
@@ -284,6 +286,7 @@ type
     procedure TabHareketlerAfterScroll(DataSet: TDataSet);
     procedure ButtonServisClick(Sender: TObject);
     procedure PopupMenuHareketPopup(Sender: TObject);
+    procedure ServisInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -968,6 +971,12 @@ begin
   Tablo.TablodanSorguAc(1,'select top 1 ID from vServisHareket S  where SERVISID='+IntToStr(TmenuItem(Sender).Tag)+' and PERSONEL='+Kullanan+' order by TARIH desc');
   if Tablo.ServisHareketBaslat('E',1, Tablo.Query1.Fields[0].AsInteger) > 0 then
      YenileTusClick(Self);
+end;
+
+procedure TServisListeDlg.ServisInfoMenuClick(Sender: TObject);
+begin
+  if not SERVIS.IsEmpty then
+    Tablo.InfoGoster('SERVIS', SERVIS.FieldByName('ID').AsInteger, TabNo_SERVIS);
 end;
 
 procedure TServisListeDlg.PopupMenuHareketPopup(Sender: TObject);

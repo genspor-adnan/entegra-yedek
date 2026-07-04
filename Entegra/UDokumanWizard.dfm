@@ -2140,6 +2140,7 @@ object DokumanWizard: TDokumanWizard
   end
   object TabDokuman: TFDQuery
     AfterOpen = TabDokumanAfterOpen
+    BeforeEdit = TabDokumanBeforeEdit
     BeforePost = TabDokumanBeforePost
     AfterPost = TabDokumanAfterPost
     OnNewRecord = TabDokumanNewRecord

@@ -282,7 +282,7 @@ var
 implementation
 
 Uses UCombo,UComboImgDuzenle,FetaClassExtensions,UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra,URaporAraclari, UGenelAnaSekmeFrame,
-     UFastRap, USecForm, UMesaj, UAnaForm, UGirisKutusuEx ,IdGlobalProtocols,LocOnFly, FetaUtil, UUnits, UStokHizmetAra;
+     UFastRap, USecForm, UMesaj, UAnaForm, UGirisKutusuEx ,IdGlobalProtocols,LocOnFly, FetaUtil, UUnits, UStokHizmetAra, ULog;
 
 {$R *.dfm}
 
@@ -873,8 +873,15 @@ end;
 
 procedure TDemirbasWizardDlg.Kaydet;
 begin
-    if DtsDemirbas.State in [dsInsert,dsEdit] then
-       TabDemirbas.post;
+    if DtsDemirbas.State in [dsInsert,dsEdit] then begin
+       // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+       // Yeni kayit (E/K) her zaman kaydedilir.
+       if (TabDemirbas.State = dsInsert) or (IslemOp = 'E') or (IslemOp = 'K') or TabDemirbas.Modified then
+          TabDemirbas.post
+       else
+          TabDemirbas.Cancel;
+       DemirbasID := TabDemirbas.FieldByName('ID').AsInteger;
+    end;
 end;
 
 
@@ -944,8 +951,8 @@ end;
 procedure TDemirbasWizardDlg.TabDemirbasAfterPost(DataSet: TDataSet);
 begin
   DemirbasID := TabDemirbas.Fields[0].AsInteger;
-  if islemOp='D' then
-    Tablo.LogIslemleri(TabNo_DEMIRBAS,DemirbasID, 4, TabDemirbas);
+  // NOT: kart loglamasi buradan KALDIRILDI. AfterPost sayfa gecislerinde birden
+  // cok kez atesleniyor -> loglama Finish'te (WizardKontrolFinishButtonClick) tek sefer yapilir.
   DokumanTus.Enabled := True;
   TarihceTus.Enabled := True;
 end;
@@ -1023,6 +1030,13 @@ end;
 procedure TDemirbasWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
   Kaydet;
+  // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+  if LogGun > 0 then begin
+    if IslemOp = 'D' then
+      Tablo.LogIslemleri(TabNo_DEMIRBAS, DemirbasID, 4, TabDemirbas)
+    else if (IslemOp = 'E') or (IslemOp = 'K') then
+      LogKayitEkle(TabDemirbas, TabNo_DEMIRBAS, DemirbasID, TabNo_DEMIRBAS, DemirbasID);
+  end;
   ModalResult := mrOk;
 end;
 

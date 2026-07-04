@@ -241,6 +241,7 @@ type
     procedure SilIlgiliTusClick(Sender: TObject);
     procedure GorIlgiliTusClick(Sender: TObject);
     procedure TabDokumanBeforePost(DataSet: TDataSet);
+    procedure TabDokumanBeforeEdit(DataSet: TDataSet);
     procedure TabDokumanAfterOpen(DataSet: TDataSet);
     procedure WizardKontrolCancelButtonClick(Sender: TObject);
     procedure YetkiSilTusClick(Sender: TObject);
@@ -309,7 +310,7 @@ var
 implementation
 
 uses Utablo, UCariFonksiyonlar, PrjConst, FetaKurulusSiniflari, URehberAyar, UBinarySave, UDokumanListeFrame, fetautil,
-     IdGlobalProtocols, UGirisKutusuEx, LocOnFly;
+     IdGlobalProtocols, UGirisKutusuEx, LocOnFly, ULog;
 
 procedure HazirlaTabYetki(AQuery: TFDQuery);
 begin
@@ -1017,7 +1018,11 @@ begin
        if tablo.Query8.FieldByName('ADET').AsInteger > 0 then begin
              if TabDokuman.State in [dsInsert, dsEdit] then
               begin
-                TabDokuman.Post ;
+                // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+                if (TabDokuman.State = dsInsert) or (IslemOp = 'E') or (IslemOp = 'X') or (IslemOp = 'K') or TabDokuman.Modified then
+                   TabDokuman.Post
+                else
+                   TabDokuman.Cancel;
                 Tablo.DokumanKlasorYetkileriniAl(KlasorID,Tabdokuman.FieldByName('ID').AsInteger) ;
               end;
              if DETAY.State in [dsInsert, dsEdit] then begin
@@ -1040,6 +1045,15 @@ begin
                 abort;
               end;
              DokumanID :=  TabDokuman.Fields[0].AsInteger;
+
+             // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+             if LogGun > 0 then begin
+               if IslemOp = 'D' then
+                 Tablo.LogIslemleri(TabNo_DOKUMAN, DokumanID, 4, TabDokuman)
+               else
+                 LogKayitEkle(TabDokuman, TabNo_DOKUMAN, DokumanID, TabNo_DOKUMAN, DokumanID);
+             end;
+
              Tablo.FileExtensionListesiniDoldur;
              //sürüm veya tarih değişirse imaj tablosundaki bu bilgiler de update olmalı
 
@@ -1261,6 +1275,12 @@ begin
    TabDokuman.FieldByName('DEGISTIREN').AsString := Kullanan;
    TabDokuman.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
    Tablo.DokumanTarihceEkle(TabDokuman.Fields[0].AsInteger, Form_Kaydedildi, 15);
+end;
+
+procedure TDokumanWizard.TabDokumanBeforeEdit(DataSet: TDataSet);
+begin
+   if LogGun > 0 then
+      Tablo.OncekiLogBelirle(TabDokuman);
 end;
 
 function TDokumanWizard.BoslukKontrolu: Boolean;

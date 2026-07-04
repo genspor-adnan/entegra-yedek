@@ -58,6 +58,7 @@ type
     DokumanTviewLOKASYONAD: TcxGridDBColumn;
     DokumanTviewKURUM: TcxGridDBColumn;
     PopupMenu1: TPopupMenu;
+    DokumanInfoMenu: TMenuItem;
     KesMenu: TMenuItem;
     KopyalaMenu: TMenuItem;
     YapistirMenu: TMenuItem;
@@ -225,6 +226,7 @@ type
     procedure DegistirTusClick(Sender: TObject);
     procedure DokumanTviewSelectionChanged(Sender: TcxCustomGridTableView);
     procedure PageDokumanChange(Sender: TObject);
+    procedure DokumanInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     TutulanYer, TutulanID, TutulanKisayol: Integer;
@@ -363,6 +365,12 @@ end;
 procedure TDokumanListeFrame.GortusClick(Sender: TObject);
 begin
      tablo.Dokuman_Gor_Duzenle(1, Dokuman.Fields[0].AsInteger, Dokuman.FieldByName('AD').AsString);
+end;
+
+procedure TDokumanListeFrame.DokumanInfoMenuClick(Sender: TObject);
+begin
+  if not DOKUMAN.IsEmpty then
+    Tablo.InfoGoster('DOKUMAN', DOKUMAN.FieldByName('ID').AsInteger, TabNo_DOKUMAN);
 end;
 
 procedure TDokumanListeFrame.TabKlasorlerAfterScroll(DataSet: TDataSet);

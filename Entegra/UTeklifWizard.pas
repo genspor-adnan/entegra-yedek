@@ -1744,17 +1744,30 @@ end;
 procedure TTeklifWizardDlg.Kaydet;
 var
   s:String;
+  YeniTeklif:Boolean;
 begin
   if TabTeklif.State in [dsInsert, dsEdit] then  begin
     if BeditProjeKod.Text='' then
         TabTeklif.FieldByName('PROJEID').AsInteger :=-1;
 
-     TabTeklif.post;
-      if LogOnceki.Count>0 then
-       if islemOp='D' then
-          Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.Fields[0].AsInteger, 4, TabTeklif);
-       if islemOp='E' then
+     YeniTeklif := TabTeklif.State = dsInsert;
+     // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+     if YeniTeklif or TabTeklif.Modified then
+        TabTeklif.post
+     else
+        TabTeklif.Cancel;
+
+     if islemOp='E' then
         btnTeklif.Tag:=TabTeklif.Fields[0].AsInteger;
+
+     // KART loglama (TEK SEFER): yeni -> LogKayitEkle, edit -> LogIslemleri.
+     // Detay loglamasi (LogDiffKaydet/FDetSnap) asagida ayrica yapiliyor -> ona dokunma.
+     if LogGun>0 then begin
+        if YeniTeklif then
+           LogKayitEkle(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger)
+        else if LogOnceki.Count>0 then
+           Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.Fields[0].AsInteger, 4, TabTeklif);
+     end;
   end else begin
     s:=YaziciYaz.Caption;
     Delete(s, pos('&',s), 1);
@@ -1982,9 +1995,7 @@ procedure TTeklifWizardDlg.TabTeklifAfterPost(DataSet: TDataSet);
 begin
   if btnTeklif.tag=0 then
      btnTeklif.tag := TabTeklif.FieldByName('ID').AsInteger;
-  if LogOnceki.Count>0 then
-    if islemOp='D' then
-      Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.Fields[0].AsInteger, 4, TabTeklif);
+  // KART loglama Kaydet icinde TEK SEFER yapiliyor (cift log olmasin diye buradan kaldirildi).
   TabloYenile(TOPLAMLAR, [TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
   TabloYenile(TabTeklifOnay, [TabTeklif.FieldByName('ID').AsInteger]);
 

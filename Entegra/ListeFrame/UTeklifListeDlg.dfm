@@ -1176,6 +1176,10 @@ object TeklifListeDlg: TTeklifListeDlg
     OnPopup = PmSiparisedonusturPopup
     Left = 64
     Top = 72
+    object TeklifInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = TeklifInfoMenuClick
+    end
     object eklifiA1: TMenuItem
       Caption = 'Teklifi A'#231
       OnClick = eklifiA1Click

@@ -94,6 +94,7 @@ type
     GridDetayViewTESLIMTARIHI: TcxGridDBColumn;
     GridTeklifViewPROJEKODU: TcxGridDBColumn;
     PmSiparisedonustur: TPopupMenu;
+    TeklifInfoMenu: TMenuItem;
     pmAlinanSiparisedonustur: TMenuItem;
     GridDetayViewID: TcxGridDBColumn;
     pmVerilenSiparisedonustur: TMenuItem;
@@ -235,6 +236,7 @@ type
       AShift: TShiftState; var AHandled: Boolean);
     procedure MenuKlasordenEkleClick(Sender: TObject);
     procedure MenuTarayacidanEkleClick(Sender: TObject);
+    procedure TeklifInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -660,6 +662,12 @@ begin
   AlnanSipariiA1.Enabled := TabTeklif.FieldByName('ALINANSIPARIS').AsString<>'';
   VerilenSipariiA1.Enabled := TabTeklif.FieldByName('VERILENSIPARIS').AsString<>'';
 
+end;
+
+procedure TTeklifListeDlg.TeklifInfoMenuClick(Sender: TObject);
+begin
+  if not TabTeklif.IsEmpty then
+    Tablo.InfoGoster('TEKLIF', TabTeklif.FieldByName('ID').AsInteger, TabNo_TEKLIF);
 end;
 
 procedure TTeklifListeDlg.StokListeDlgEkranAc(Yeni: Boolean);

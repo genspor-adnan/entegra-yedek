@@ -482,7 +482,7 @@ implementation
 Uses UAnaForm,UCombo, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra,URaporAraclari, UTabloGiris,
   UFastRap, USecForm, UGirisKutusuEx,FetaClassExtensions, UServisDetayPersonel, UGenelAnaSekmeFrame,
   UServisEkipmanSec, Fetautil, IdGlobalProtocols, UCariFonksiyonlar, URehberAyar,LocOnFly, USonlandir,
-  UServisListeDlg, UGorevDlg;
+  UServisListeDlg, UGorevDlg, ULog;
 
 {$R *.dfm}
 var
@@ -2190,8 +2190,8 @@ begin
      ServisID := TabServis.FieldByName('ID').AsInteger;
   if RehberId <=0 then
      RehberId := TabServis.FieldByName('REHBERID').AsInteger;
-  if islemOp='D' then
-     Tablo.LogIslemleri(DataSet.Tag,(DataSet as TFDQuery).FieldByName('ID').AsInteger,4,DataSet);
+  // NOT: kart loglamasi buradan KALDIRILDI. AfterPost ara Post'larda birden cok
+  // kez atesleniyor -> loglama Finish'te (WizardKontrolFinishButtonClick) tek sefer yapilir.
 
   if islemOp='E' then begin
     Tablo.TablodanSorguAc(6,'select top 1 DEGER from GENINI where BOLUM=-3007 order by DEGER');
@@ -2432,6 +2432,23 @@ procedure TServisWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
   if (TabServis.FieldByName('ID').AsString<>'') then
      BoslukKontrolleri;
+   // KART Post'u Modified-kontrollu: gercek degisiklik yoksa Post etme
+   // (gereksiz DEGISTIREN/log olusmasin). islemOp='E' -> yeni kayit.
+   if TabServis.State in [dsInsert, dsEdit] then begin
+      if (TabServis.State = dsInsert) or (islemOp = 'E') or TabServis.Modified then
+         TabServis.Post
+      else
+         TabServis.Cancel;
+   end;
+   if ServisID <= 0 then
+      ServisID := TabServis.FieldByName('ID').AsInteger;
+   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+   if LogGun > 0 then begin
+     if islemOp = 'D' then
+       Tablo.LogIslemleri(TabNo_SERVIS, ServisID, 4, TabServis)
+     else
+       LogKayitEkle(TabServis, TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
+   end;
    Kaydet;
    if TabDetay.State in [dsInsert, dsEdit] then
       TabDetay.post;

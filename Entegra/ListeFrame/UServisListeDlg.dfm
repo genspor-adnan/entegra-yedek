@@ -861,6 +861,7 @@ object ServisListeDlg: TServisListeDlg
         Width = 936
         Height = 189
         Align = alClient
+        PopupMenu = PopupMenuServis
         Font.Charset = TURKISH_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -1941,6 +1942,14 @@ object ServisListeDlg: TServisListeDlg
       Tag = 102648
       Caption = 'Kay'#305't Kabul Mod'#252'l'#252' Geli'#351'tirme '#304'ste'#287'i'
       ImageIndex = 0
+    end
+  end
+  object PopupMenuServis: TPopupMenu
+    Left = 231
+    Top = 69
+    object ServisInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = ServisInfoMenuClick
     end
   end
 end
