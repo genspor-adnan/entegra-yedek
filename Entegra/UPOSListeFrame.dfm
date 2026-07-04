@@ -1101,6 +1101,10 @@ object POSListeFrame: TPOSListeFrame
   object PosListeMenu: TPopupMenu
     Left = 297
     Top = 105
+    object POSInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = POSInfoMenuClick
+    end
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'

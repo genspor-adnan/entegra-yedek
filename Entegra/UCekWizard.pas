@@ -28,7 +28,7 @@ uses
   dxBarBuiltInMenu, dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, frCoreClasses,
-  FireDAC.Comp.DataSet;
+  FireDAC.Comp.DataSet, System.Generics.Collections;
 
 type
   TCekWizardDlg = class(TForm, IPopupDialog)
@@ -258,6 +258,7 @@ type
     procedure DateTARIHExit(Sender: TObject);
   private
     { Private declarations }
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // CEKHAREKET (detay) orijinal satirlar (log diff icin)
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     function IBANControl(IBANNo: string): Boolean;
@@ -311,11 +312,23 @@ var
 implementation
 
 uses UAnaForm,FetaClassExtensions,UGenelAnaSekmeFrame, URaporAraclari, UFastRap, UBankaSecimi,
-     FetaUtil,UResim, PrjConst, UBinarySave,FetaKurulusSiniflari, UParaDegisiklik,IdGlobalProtocols, UCiroEdilecekler,LocOnFly;
+     FetaUtil,UResim, PrjConst, UBinarySave,FetaKurulusSiniflari, UParaDegisiklik,IdGlobalProtocols, UCiroEdilecekler,LocOnFly, ULog;
 {$R *.dfm}
 
 Var
   CekID, TabloNo, OncekiProjeId, OncekiMasrafId : Integer;
+
+// CEKLER.CEKSENET degerine gore dogru LOG/INFO TABLOID'ini verir.
+// 101 Alinan Cek->315, 103 Verilen Cek->316, 121 Alinan Senet->318, 321 Verilen Senet->319
+function CekSenetTabloNo(ACekSenet: Integer): Integer;
+begin
+  case ACekSenet of
+    103: Result := TabNo_CEKLER_Verilen;   // 316
+    121: Result := TabNo_SENET_Alinan;     // 318
+    321: Result := TabNo_SENET_Verilen;    // 319
+  else  Result := TabNo_CEKLER_Alinan;     // 315 (101/varsayilan)
+  end;
+end;
 
 function TCekWizardDlg.EkranAdiAl: string;
 begin
@@ -630,10 +643,12 @@ end;
 procedure TCekWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    CiroGirisMi:=False;
+   FreeAndNil(FDetSnap);
 end;
 
 procedure TCekWizardDlg.FormCreate(Sender: TObject);
 begin
+   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
    LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    CekEkr.Title.Text:=jvCek;
@@ -775,6 +790,12 @@ begin
      CekEkr.Title.Text := jvSenet;
      Caption := jvSenetSihirbaz;
      CheckCIROLU.Caption := jvBaskasiSenet;
+  end;
+
+  // Duzenlemede (D) CEKHAREKET (detay) orijinal satirlarini yakala; kaydette diff loglanir.
+  if (LogGun > 0) and (IslemOp = 'D') and (CekID > 0) then begin
+     TabloYenile(TabCekHareketler, [CekID]);
+     LogSnapshotAl(TabCekHareketler, FDetSnap);
   end;
 end;
 
@@ -1017,7 +1038,7 @@ begin
   case islemOp of
    'E' : if CekSenetTur = Sbt_Cek_Giden then
             GenRegIni.RegWriteString('ODEMEYERI', 'CekDlg' , TabCekler.FieldByName('ODEMEYERI').AsString, 'C');
-   'D' : Tablo.LogIslemleri(TabNo_CEKLER,TabCekler.Fields[0].AsInteger, 4, TabCekler);
+   // KART loglama artik finish'te TEK SEFER yapiliyor (WizardKontrolFinishButtonClick).
   end;
   CekID := TabCekler.Fields[0].AsInteger;
   //ilk ?ek hareketini yoksa ekliyoruz..
@@ -1178,9 +1199,30 @@ procedure TCekWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 var
   DovizTutar,TLTutar:currency;
   DovizKur:string;
+  LTabNo, LID: Integer;
 begin
-  if TabCekler.State in [dsInsert, dsEdit] then
-     TabCekler.Post;
+  if TabCekler.State in [dsInsert, dsEdit] then begin
+     // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+     if (TabCekler.State = dsInsert) or TabCekler.Modified then
+        TabCekler.Post
+     else
+        TabCekler.Cancel;
+  end;
+
+  // KART + DETAY loglama (TEK SEFER, Finish'te).
+  if (LogGun > 0) and TabCekler.Active and (not TabCekler.FieldByName('ID').IsNull) then begin
+     LID    := TabCekler.Fields[0].AsInteger;
+     LTabNo := CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger); // 315/316/318/319
+     if IslemOp = 'D' then
+        Tablo.LogIslemleri(LTabNo, LID, 4, TabCekler)               // edit: BeforeEdit snapshot ile diff
+     else if IslemOp in ['E','K'] then
+        LogKayitEkle(TabCekler, LTabNo, LID, LTabNo, LID);          // yeni/kopya: kart ekleme
+     // DETAY (CEKHAREKET): ust TABLOID kart ile ayni (LTabNo). Yeni belge (E/K) -> snapshot bos -> tum satirlar EKLE.
+     if TabCekHareketler.Active then begin
+        LogDiffKaydet(TabCekHareketler, FDetSnap, TabNo_CEKLER_Hareket, LTabNo, LID);
+        LogSnapshotAl(TabCekHareketler, FDetSnap);   // tazele (mukerrer save engeli)
+     end;
+  end;
 
 //  if (OncekiProjeId <> BEditProje.Tag)or(OncekiMasrafId <> EditMM.Tag)then begin//de?i?iklik varsa
 //      Tablo.tablodansorguAc(1,' select min(ID) from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString);

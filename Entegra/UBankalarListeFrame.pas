@@ -160,6 +160,8 @@ type
     BankaHizliGirisTus: TToolButton;
     HesapBakiyesiniGuncelleMenu: TMenuItem;
     N10: TMenuItem;
+    BankaInfoMenu: TMenuItem;
+    procedure BankaInfoMenuClick(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
@@ -235,6 +237,12 @@ uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URa
 {$R *.dfm}
 
 { TBankalarListeFrame }
+
+procedure TBankalarListeFrame.BankaInfoMenuClick(Sender: TObject);
+begin
+   if not BANKALAR.IsEmpty then
+      Tablo.InfoGoster('BANKAHESAPLAR', BANKALAR.FieldByName('ID').AsInteger, TabNo_BANKAHESAPLAR);
+end;
 
 procedure TBankalarListeFrame.YazdirmayaHazirla(AFastReport: TfrxReport);
 var

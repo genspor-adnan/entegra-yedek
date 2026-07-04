@@ -1195,7 +1195,11 @@ const
   TabNo_CEKLER = 15;
   TabNo_CEKLER_Alinan = 315;
   TabNo_CEKLER_Verilen = 316;
-  TabNo_CEKLER_Hareket = 317;
+  TabNo_CEKLER_Hareket = 317;   // cek/senet hareket detayi (CEKHAREKET)
+  TabNo_SENET_Alinan = 318;
+  TabNo_SENET_Verilen = 319;
+  TabNo_KREDIPLAN = 323;        // kredi geri odeme plani (PLANKREDI)
+  TabNo_POSORAN = 324;          // POS komisyon/taksit oranlari (POSORAN)
   TabNo_DBS = 17;
   TabNo_DEMIRBAS = 18;
   TabNo_DEMIRBAS_TUTANAK=182;

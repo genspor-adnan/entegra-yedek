@@ -933,6 +933,10 @@ object BankalarListeFrame: TBankalarListeFrame
   object BankaListeMenu1: TPopupMenu
     Left = 254
     Top = 129
+    object BankaInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = BankaInfoMenuClick
+    end
     object HesaplararasTransferYap1: TMenuItem
       Caption = 'Aksiyonlar'
       OnClick = AksiyonTusClick

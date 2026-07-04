@@ -1760,6 +1760,7 @@ object KredilerDlg: TKredilerDlg
   end
   object KREDILER: TFDQuery
     AfterOpen = KREDILERAfterOpen
+    BeforeEdit = KREDILERBeforeEdit
     BeforePost = KREDILERBeforePost
     AfterPost = KREDILERAfterPost
     BeforeDelete = KREDILERBeforeDelete

@@ -109,6 +109,7 @@ type
     procedure TabKKAfterScroll(DataSet: TDataSet);
     procedure TabKKAfterPost(DataSet: TDataSet);
     procedure TabKKBeforePost(DataSet: TDataSet);
+    procedure TabKKBeforeEdit(DataSet: TDataSet);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -148,7 +149,7 @@ type
 implementation
 
 {$R *.dfm}
-uses FetaClassExtensions, PrjConst, Utablo,LocOnFly ;
+uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog ;
 
 { TKrediKarti }
 
@@ -305,8 +306,35 @@ begin
 end;
 
 procedure TKrediKarti.KaydetTusClick(Sender: TObject);
+var
+  KKId: Integer;
+  Yeni: Boolean;
 begin
-   TabKK.Post;
+  if TabKK.State in [dsInsert, dsEdit] then begin
+    Yeni := TabKK.State = dsInsert;
+    // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+    if Yeni or TabKK.Modified then
+      TabKK.Post
+    else begin
+      TabKK.Cancel;
+      Exit;
+    end;
+    KKId := TabKK.FieldByName('ID').AsInteger;
+    // KART loglama (TEK SEFER, kaydet'te): yeni -> LogKayitEkle, edit -> LogIslemleri.
+    if LogGun > 0 then begin
+      if Yeni then
+        LogKayitEkle(TabKK, TabNo_KREDIKARTI, KKId, TabNo_KREDIKARTI, KKId)
+      else
+        Tablo.LogIslemleri(TabNo_KREDIKARTI, KKId, 4, TabKK);
+    end;
+  end else
+    TabKK.Post;
+end;
+
+procedure TKrediKarti.TabKKBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then
+    Tablo.OncekiLogBelirle(TabKK);
 end;
 
 procedure TKrediKarti.SetFrameBilgi(AValue: TIcerikFrameBilgi);

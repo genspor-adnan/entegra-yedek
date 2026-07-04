@@ -1060,6 +1060,13 @@ object CekListeFrame: TCekListeFrame
     OnPopup = PopupAlinanCeklerPopup
     Left = 480
     Top = 128
+    object CekInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = CekInfoMenuClick
+    end
+    object NInfoA: TMenuItem
+      Caption = '-'
+    end
     object Portfyde2: TMenuItem
       Tag = 130
       Caption = 'Portf'#246'ye Al'
@@ -1128,6 +1135,13 @@ object CekListeFrame: TCekListeFrame
   object PopupVerilenCekler: TPopupMenu
     Left = 480
     Top = 184
+    object CekInfoMenuV: TMenuItem
+      Caption = 'info'
+      OnClick = CekInfoMenuClick
+    end
+    object NInfoV: TMenuItem
+      Caption = '-'
+    end
     object SatcyaVer3: TMenuItem
       Tag = 140
       Caption = 'Sat'#305'c'#305'ya Ver'

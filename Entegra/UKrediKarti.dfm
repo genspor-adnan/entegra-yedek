@@ -950,6 +950,7 @@ object KrediKarti: TKrediKarti
   end
   object TabKK: TFDQuery
     Connection = Tablo.FDCnn
+    BeforeEdit = TabKKBeforeEdit
     BeforePost = TabKKBeforePost
     AfterPost = TabKKAfterPost
     AfterScroll = TabKKAfterScroll

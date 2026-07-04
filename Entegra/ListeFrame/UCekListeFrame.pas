@@ -213,6 +213,10 @@ type
     N5: TMenuItem;
     ExceldenVerilenCekImport: TMenuItem;
     GridTviewBORCLU: TcxGridDBColumn;
+    CekInfoMenu: TMenuItem;
+    NInfoA: TMenuItem;
+    CekInfoMenuV: TMenuItem;
+    NInfoV: TMenuItem;
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure YeniTusClick(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
@@ -261,6 +265,7 @@ type
     procedure ExceldenAlinanCekImportClick(Sender: TObject);
     procedure PopupAlinanCeklerPopup(Sender: TObject);
     procedure PageControlCekChange(Sender: TObject);
+    procedure CekInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -308,6 +313,18 @@ uses
 
 var SQLMemo:string;
     EkranAciliyor:boolean;
+
+// CEKLER.CEKSENET degerine gore dogru LOG/INFO TABLOID'ini verir.
+// 101 Alinan Cek->315, 103 Verilen Cek->316, 121 Alinan Senet->318, 321 Verilen Senet->319
+function CekSenetTabloNo(ACekSenet: Integer): Integer;
+begin
+  case ACekSenet of
+    103: Result := TabNo_CEKLER_Verilen;   // 316
+    121: Result := TabNo_SENET_Alinan;     // 318
+    321: Result := TabNo_SENET_Verilen;    // 319
+  else  Result := TabNo_CEKLER_Alinan;     // 315 (101/varsayilan)
+  end;
+end;
 
 
 procedure TCekListeFrame.ListeDragDrop(Sender: TObject; Pos: TPoint; Value: TStrings);
@@ -390,6 +407,13 @@ begin
     VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKHAREKET set REHBERID='+IntToStr(RehID)+' ,BANKAHESAPLARID='+IntToStr(BnkHesID)+' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
     TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
   end;
+end;
+
+procedure TCekListeFrame.CekInfoMenuClick(Sender: TObject);
+begin
+  if not TabCekler.IsEmpty then
+    Tablo.InfoGoster('CEKLER', TabCekler.FieldByName('ID').AsInteger,
+      CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger));
 end;
 
 procedure TCekListeFrame.BaskiOnizlemeMenuClick(Sender: TObject);

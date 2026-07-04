@@ -8,6 +8,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
+  System.Generics.Collections,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client,ToolWin, ExtCtrls, dxSkinsCore,
    dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData,
   cxDataStorage, cxDBData, cxGridCustomTableView, cxGridTableView,
@@ -137,6 +138,7 @@ type
     cxLabel8: TcxLabel;
     PopupMenuBakiye: TPopupMenu;
     MenuItem1: TMenuItem;
+    POSInfoMenu: TMenuItem;
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
     procedure GridTviewCellDblClick(Sender: TcxCustomGridTableView;
@@ -162,10 +164,14 @@ type
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
     procedure GridPOSViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    procedure POSInfoMenuClick(Sender: TObject);
   private
-    { Private declarations }    
+    { Private declarations }
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // POSORAN (detay) orijinal satirlar (log diff icin)
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
+    procedure PosOranLogSnapshotAl;
+    procedure PosOranLogDiffKaydet;
     function EkranAdiAl: string;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure GorunurOlacak;
@@ -192,13 +198,14 @@ type
 
   public
     { Public declarations }
+    destructor Destroy; override;
     property KapatEylemi : TNotifyEvent read FKapatEylemi write FKapatEylemi;
   end;
 
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, UPOS,UAnaForm, PrjConst, UFastRap, URaporAraclari,
-     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly;
+     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly, ULog;
 
 {$R *.dfm}
 
@@ -235,6 +242,8 @@ end;
 procedure TPOSListeFrame.Baslatildi;
 var ra : string;
 begin
+   if not Assigned(FDetSnap) then
+      FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    GridTviewSUBEID.Visible := SubeVarmi;
    //GridTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\PosTanimlariListeGridi',true,false,[gsoUseFilter],'PosTanimlariListeGridi');
@@ -475,6 +484,9 @@ begin
     TabloYenile(TabPosOran, [POSLAR.FieldByName('ID').AsInteger])
   else
     TabPosOran.Close;
+
+  // Detay (POSORAN) orijinal durum snapshot'i -> log diff icin
+  if LogGun > 0 then PosOranLogSnapshotAl;
 end;
 
 procedure TPOSListeFrame.PosOranIptalClick(Sender: TObject);
@@ -485,6 +497,7 @@ end;
 procedure TPOSListeFrame.PosOranKaydetClick(Sender: TObject);
 begin
   if TabPosOran.Active then TabPosOran.Post;
+  if LogGun > 0 then PosOranLogDiffKaydet;
 end;
 
 procedure TPOSListeFrame.PosOranSilClick(Sender: TObject);
@@ -498,11 +511,44 @@ begin
     if  KayitSayisi > 0 then TabPosOran.Delete
     else ShowMessage(PosSilinecekkayitsec);
   end;
+  if LogGun > 0 then PosOranLogDiffKaydet;
 end;
 
 procedure TPOSListeFrame.PosOranYeniClick(Sender: TObject);
 begin
   if TabPosOran.Active then TabPosOran.Append;
+end;
+
+procedure TPOSListeFrame.POSInfoMenuClick(Sender: TObject);
+begin
+  if not POSLAR.IsEmpty then
+    Tablo.InfoGoster('POS', POSLAR.FieldByName('ID').AsInteger, TabNo_POS);
+end;
+
+destructor TPOSListeFrame.Destroy;
+begin
+  FreeAndNil(FDetSnap);
+  inherited;
+end;
+
+// Detay (POSORAN) satirlarinin mevcut durumunu snapshot alir (log diff baslangici).
+procedure TPOSListeFrame.PosOranLogSnapshotAl;
+begin
+  LogSnapshotAl(TabPosOran, FDetSnap);
+end;
+
+// POSORAN detay satir diff loglama; ust=POS karti (TabNo_POS / POSLAR.ID).
+// Detay TABLOID = TabNo_POSORAN. Kaydetmeyi ASLA bozmaz (LogDiffKaydet kendi
+// try/except'ini icerir). Mukerrer save'i onlemek icin snapshot'i tazeler.
+procedure TPOSListeFrame.PosOranLogDiffKaydet;
+begin
+  try
+    if (not Assigned(FDetSnap)) or (not POSLAR.Active) or (POSLAR.RecordCount = 0) then Exit;
+    LogDiffKaydet(TabPosOran, FDetSnap, TabNo_POSORAN, TabNo_POS,
+                  POSLAR.FieldByName('ID').AsInteger);
+    PosOranLogSnapshotAl;   // snapshot'i son duruma tazele (mukerrer save engeli)
+  except
+  end;
 end;
 
 procedure TPOSListeFrame.SetFrameBilgi(AValue: TIcerikFrameBilgi);

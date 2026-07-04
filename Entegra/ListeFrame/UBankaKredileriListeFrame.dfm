@@ -2116,6 +2116,10 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
   object KrediMenu: TPopupMenu
     Left = 238
     Top = 145
+    object KrediInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = KrediInfoMenuClick
+    end
     object arihSe1: TMenuItem
       Caption = 'Durum Tarihi Se'#231
       OnClick = arihSe1Click

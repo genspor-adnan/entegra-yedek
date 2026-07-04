@@ -80,7 +80,18 @@ USING (VALUES
   (145, ''URETIMFISDETAY'',N''Detay'',  N''Üretim Fişi''),
   (73,  ''REHBER'',        N''Kart'',   N''İK''),
   (74,  ''REHBER'',        N''Kart'',   N''İK Potansiyel''),
-  (86,  ''REHBERBILGI'',   N''Özlük'',  N''İK'')
+  (86,  ''REHBERBILGI'',   N''Özlük'',  N''İK''),
+  (7,   ''BANKAHESAPLAR'', N''Kart'',   N''Banka''),
+  (47,  ''KREDILER'',      N''Kart'',   N''Krediler''),
+  (323, ''PLANKREDI'',     N''Geri Ödeme'', N''Krediler''),
+  (315, ''CEKLER'',        N''Kart'',   N''Alınan Çek''),
+  (316, ''CEKLER'',        N''Kart'',   N''Verilen Çek''),
+  (318, ''CEKLER'',        N''Kart'',   N''Alınan Senet''),
+  (319, ''CEKLER'',        N''Kart'',   N''Verilen Senet''),
+  (317, ''CEKHAREKET'',    N''Hareket'', N''Çek/Senet''),
+  (69,  ''POS'',           N''Kart'',   N''POS''),
+  (324, ''POSORAN'',       N''Oran'',   N''POS''),
+  (46,  ''KREDIKARTI'',    N''Kart'',   N''Kredi Kartı'')
 ) AS k(TABLOID, TABLOADI, GORUNUM, MODUL)
 ON h.TABLOID = k.TABLOID
 WHEN MATCHED THEN UPDATE SET TABLOADI=k.TABLOADI, GORUNUM=k.GORUNUM, MODUL=k.MODUL

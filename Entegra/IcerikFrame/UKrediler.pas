@@ -27,7 +27,8 @@ uses
   System.ImageList, cxImageList, dxCoreGraphics, frCoreClasses,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  System.Generics.Collections;
 
 type
   TKredilerDlg = class(TFrame,IIcerikBilgiFrame,IBilgiFrame,IPopupDialog )//IAracCubuguDestegi)
@@ -272,13 +273,16 @@ type
     procedure EditProjePropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure KREDILERAfterOpen(DataSet: TDataSet);
+    procedure KREDILERBeforeEdit(DataSet: TDataSet);
     procedure PlanTviewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
   private
     { Private declarations }
     { IBilgiFrame �yeleri            }
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // PLANKREDI (detay) orijinal satirlar (log diff icin)
+    FYeniKredi: Boolean;                                // kart EKLEME mi (yeni) yoksa DUZENLEME mi
     FFrameBilgi : TIcerikFrameBilgi;
-    FKapatEylemi: TNotifyEvent;           
+    FKapatEylemi: TNotifyEvent;
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -320,13 +324,14 @@ implementation
 
 {$R *.dfm}
 uses UAnaForm, UKasaWizard, UKrediEkle, FetaClassExtensions, UAramaYokFrame,PrjConst,LocOnFly,
-     FetaKurulusSiniflari, UKrediHesapMakineDlg, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, UBekletme, UExceldenVeriAl;
+     FetaKurulusSiniflari, UKrediHesapMakineDlg, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, UBekletme, UExceldenVeriAl,
+     ULog;
 
 var YeniKayit : Boolean;
 
 destructor TKredilerDlg.Destroy;
 begin
-
+  FreeAndNil(FDetSnap);
   inherited;
 end;
 
@@ -360,6 +365,9 @@ begin
   end else begin
     Tabloyenile(PLANKREDI,[KREDILER.FieldByName('ID').AsInteger]);
     PlanTview.ApplyBestFit(nil);
+    // Kredi yuklendikten sonra (kayit degisimi -> Field=nil) PLANKREDI orijinal snapshot'i.
+    if (Field = nil) and (LogGun > 0) then
+       LogSnapshotAl(PLANKREDI, FDetSnap);
   end;
   if KREDILER.FieldByName('GENELKREDITIPI').AsInteger=11  then begin       //   'Leasing'
     PlanTview.GetColumnByFieldName('TAKSIT').Caption := 'KDV li Kira';
@@ -480,6 +488,7 @@ end;
 constructor TKredilerDlg.Create(AOwner: TComponent);
 begin
   inherited;
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   PageControl1.ActivePageIndex := 0;
 end;
 
@@ -638,6 +647,13 @@ begin
    EditProje.Tag := StrToIntDef(KREDILER.FieldByName('PROJEID').AsString,0);
 end;
 
+procedure TKredilerDlg.KREDILERBeforeEdit(DataSet: TDataSet);
+begin
+   // Duzenleme oncesi orijinal kart degerlerini sakla (LogIslemleri diff icin).
+   if LogGun > 0 then
+      Tablo.OncekiLogBelirle(KREDILER);
+end;
+
 procedure TKredilerDlg.KREDILERAfterPost(DataSet: TDataSet);
 begin
   //Kredi hat�rlatma aktivitesi olu�tural�m
@@ -727,6 +743,7 @@ end;
 
 procedure TKredilerDlg.KREDILERNewRecord(DataSet: TDataSet);
 begin
+   FYeniKredi := True;   // yeni kredi -> kaydette EKLEME loglanacak
    KREDILER.FieldByName('ALINISTARIHI').AsDateTime := Tablo.Genini.BugunTrhSaat;
    KREDILER.FieldByName('GENELKREDITIPI').AsInteger:= 0;
    KREDILER.FieldByName('EKLEYEN').AsString := Kullanan;
@@ -771,8 +788,31 @@ begin
 end;
 
 procedure TKredilerDlg.KaydetTusClick(Sender: TObject);
+var
+  Yeni: Boolean;
+  KID: Integer;
 begin
-   KREDILER.Post;
+   Yeni := FYeniKredi or (KREDILER.State = dsInsert);
+   // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+   if (KREDILER.State = dsInsert) or KREDILER.Modified then
+      KREDILER.Post
+   else if KREDILER.State = dsEdit then
+      KREDILER.Cancel;
+
+   KID := KREDILER.FieldByName('ID').AsInteger;
+
+   // KART loglama (TEK SEFER, kaydette): yeni -> LogKayitEkle, edit -> LogIslemleri.
+   if LogGun > 0 then begin
+      if Yeni then
+         LogKayitEkle(KREDILER, TabNo_KREDILER, KID, TabNo_KREDILER, KID)
+      else
+         Tablo.LogIslemleri(TabNo_KREDILER, KID, 4, KREDILER);
+      // DETAY: PLANKREDI satir ekleme/degisiklik/silme diff (ust = kredi).
+      LogDiffKaydet(PLANKREDI, FDetSnap, TabNo_KREDIPLAN, TabNo_KREDILER, KID);
+      LogSnapshotAl(PLANKREDI, FDetSnap);   // snapshot'i tazele (mukerrer save engeli)
+   end;
+
+   FYeniKredi := False;
 end;
 
 procedure TKredilerDlg.TusAsagi(Sender: TObject; var Key: Word;

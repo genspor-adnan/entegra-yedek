@@ -121,6 +121,7 @@ type
     GridTakvimDBTableView1DURUM: TcxGridDBColumn;
     GridTakvimDBTableView1SUBEADI: TcxGridDBColumn;
     KrediMenu: TPopupMenu;
+    KrediInfoMenu: TMenuItem;
     YeniBanka1: TMenuItem;
     HesabDzenle1: TMenuItem;
     HesabSil1: TMenuItem;
@@ -322,6 +323,7 @@ type
     procedure TabCekKocanNewRecord(DataSet: TDataSet);
     procedure TabCekKocanBeforePost(DataSet: TDataSet);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
+    procedure KrediInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -583,6 +585,12 @@ end;
 procedure TBankaKredileriListeFrame.CheckMasrafGosterClick(Sender: TObject);
 begin
      EkstreGoster(CheckMasrafGoster.checked);
+end;
+
+procedure TBankaKredileriListeFrame.KrediInfoMenuClick(Sender: TObject);
+begin
+   if not KREDILER.IsEmpty then
+      Tablo.InfoGoster('KREDILER', KREDILER.FieldByName('ID').AsInteger, TabNo_KREDILER);
 end;
 
 procedure TBankaKredileriListeFrame.cxCheckBox1PropertiesChange(Sender: TObject);

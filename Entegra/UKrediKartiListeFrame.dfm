@@ -975,6 +975,10 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
   object PmKrediKarti: TPopupMenu
     Left = 510
     Top = 113
+    object KKInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = KKInfoMenuClick
+    end
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'

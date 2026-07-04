@@ -153,6 +153,7 @@ type
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure GridKrediKartiViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    procedure KKInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -474,6 +475,12 @@ begin
             KREDIKARTI.FieldByname('ADI').AsString, KREDIKARTI.FieldByname('KUR').AsString, 0,Tablo.GENINI.BugunTrhSaat) then
       YenileClick;
      //YeniTusClick(Self);
+end;
+
+procedure TKrediKartiListeFrame.KKInfoMenuClick(Sender: TObject);
+begin
+  if not KREDIKARTI.IsEmpty then
+    Tablo.InfoGoster('KREDIKARTI', KREDIKARTI.FieldByName('ID').AsInteger, TabNo_KREDIKARTI);
 end;
 
 procedure TKrediKartiListeFrame.AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
