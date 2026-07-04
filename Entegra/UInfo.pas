@@ -679,9 +679,14 @@ var
   LParts: TArray<string>;
   i: Integer;
   LQ: TFDQuery;
+var
+  LDummy: Int64;
 begin
   Result := ADeger;
   if (Trim(ADeger) = '') or (not Assigned(FCozumler)) then Exit;
+  // Tum lookup IDKOLON'lari sayisal (ID/DEGER/TUR/TIP...). Deger sayisal degilse
+  // (ör. bir alan firma ADI tutuyorsa) cozme -> 'convert to int' hatasi olmaz.
+  if not TryStrToInt64(Trim(ADeger), LDummy) then Exit;
   // Tanim bul: once tabloya ozel (ALAN|TABLOID), yoksa genel (ALAN|).
   LTanim := FCozumler.Values[UpperCase(AAlan) + '|' + IntToStr(ATabloID)];
   if LTanim = '' then LTanim := FCozumler.Values[UpperCase(AAlan) + '|'];
