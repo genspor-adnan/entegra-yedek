@@ -234,11 +234,8 @@ end;
 
 procedure TNakitDlg.TabKasaAfterPost(DataSet: TDataSet);
 begin
-  if islemOp='D' then
-     Tablo.LogIslemleri(TabNO_Kasa,TabKasa.FieldByName('ID').AsInteger,4,DataSet)
-  else if (LogGun>0) and ((islemOp='E') or (islemOp='K')) then   // yeni nakit/kasa -> EKLEME
-     LogKayitEkle(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger,
-                  TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger);
+  // KASA karti loglamasi AfterPost'ta DEGIL, kaydet-kapat noktasinda (tamamButtonClick)
+  // TEK SEFER yapilir. Post birden cok kez tetiklenebildiginden mukerrer log olusmasin.
 end;
 
 procedure TNakitDlg.IslemTarihiChange(Field: TField);
@@ -1157,6 +1154,16 @@ begin
    end;
    if (Tur = 35)or(Tur=350) then
       Tablo.KrediKartiKaydet(Tur, ComboKasa.EditValue, TabKasa.Fields[0].AsInteger, TaksitSay.Value, EditKayitTarih.date, TabKasa.FieldByName(EditTutar.DataBinding.DataField).Value, ComboKur.EditValue, EditAciklama.Text);
+
+   // KASA karti loglama (TEK SEFER, kaydet-kapat noktasinda): edit -> LogIslemleri, yeni/kopya -> LogKayitEkle.
+   if LogGun > 0 then begin
+      if islemOp = 'D' then
+         Tablo.LogIslemleri(TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger, 4, TabKasa)
+      else if (islemOp = 'E') or (islemOp = 'K') then
+         LogKayitEkle(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger,
+                      TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger);
+   end;
+
    ModalResult:=mrOk;
 end;
 

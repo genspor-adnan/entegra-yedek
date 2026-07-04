@@ -709,6 +709,17 @@ begin
     TabGorev.Post;
   if (Trim(MemoNOTLAR.text)<>'')and(TabNotlar.State in [dsEdit, dsInsert]) then
     TabNotlar.Post;
+
+  // ISLEMLOG: KART loglama TEK SEFER, kaydet/kapat aninda (ID kesinlesmis).
+  // LogOnceki (BeforeEdit->OncekiLogBelirle) doluysa duzenleme, bossa yeni kayit.
+  if LogGun > 0 then begin
+    if LogOnceki.Count > 0 then
+      Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev)
+    else
+      LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
+                   TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
+  end;
+
   if ComboAnimsatmaZamani.editvalue<>null then
     Animsat;
   ModalResult := mrOK;
@@ -783,15 +794,7 @@ begin
    if GoogleTakvimeKaydet then
      //TabGorev.FieldByName('OLAYID').AsString := Tablo.GoogleCalendarKaydet(TabGorev.FieldByName('OLAYID').AsString, TabGorev.FieldByName('REHBERID').AsInteger,False);
       Tablo.GoogleCalendarKaydet(TabGorev.FieldByName('ID').AsInteger,False);
-
-   // ISLEMLOG: BeforeEdit OncekiLog'u doldurduysa duzenleme, yoksa yeni (ekleme).
-   if LogGun > 0 then begin
-     if LogOnceki.Count > 0 then
-       Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev)
-     else
-       LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
-                    TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
-   end;
+   // ISLEMLOG loglamasi AfterPost'tan kaldirildi (mukerrer riski) -> KaydetTusClick'te TEK SEFER.
 end;
 
 procedure TGorevDlg.TabGorevBeforeEdit(DataSet: TDataSet);

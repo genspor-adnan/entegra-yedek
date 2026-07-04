@@ -1808,9 +1808,9 @@ begin
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
        ' SUBEID) SELECT YERI=2,YER_ID='+TabRehber.Fields[0].AsString+',SIRA,ETIKET,BILGI='''+KNo+''', EKLEYEN='+Kullanan+
        ', SUBEID='+IntToStr(SubeId)+' FROM REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO and RV.NO=22 ',[], []);
-    if LogGun > 0 then   // yeni cari -> EKLEME logu (ust=kendisi)
-      LogKayitEkle(TabRehber, TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger,
-                   TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger);
+    // NOT: kart (REHBER) EKLEME loglamasi buradan KALDIRILDI. AfterPost wizard
+    // boyunca birden cok kez atesleniyor -> loglama Finish'te (WizardKontrolFinishButtonClick)
+    // tek sefer yapiliyor.
   end;
   YeniEklenenKayit := False;
   //temsilci de?i?irse ge?mi?e ekleme yapal?m..
@@ -1822,8 +1822,8 @@ begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update REHBERTEMSILCI set BITIS   = '''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+
         ''', ACIKLAMA = '''', DEGISTIREN = '+Kullanan+', DEGISTIRMETARIHI=getdate() where REHBERID= '+ TabRehber.FieldByName('ID').AsString+'  and TEMSILCIID='+IntToStr(OncekiTemsilciId)+ ' and BITIS = ''2099-01-01''',[],[]);
   end;
-
-  Tablo.LogIslemleri(TabNo_REHBER,TabRehber.FieldByName('ID').AsInteger,4,TabRehber);
+  // NOT: kart (REHBER) EDIT loglamasi (LogIslemleri) buradan KALDIRILDI ->
+  // Finish'te (WizardKontrolFinishButtonClick) tek sefer yapiliyor.
 end;
 
 // Cari detay dataset'leri (REHBERILETISIM vb.) icin ORTAK log. BeforeEdit'te snapshot,
@@ -2176,6 +2176,15 @@ begin
            TabRehber.Post;
         //uyar? ya da yasak varsa durumu ona g?re de?i?tirir
         Tablo.CariDurumUpdate(RehberID);
+
+        // KART (REHBER) loglama (TEK SEFER, Finish'te): yeni -> LogKayitEkle, edit -> LogIslemleri.
+        // (AfterPost'tan tasindi; YeniKayit = bu oturumda yeni cari eklendi mi -> NewRecord'da set, resetlenmez.)
+        if LogGun > 0 then begin
+          if YeniKayit then
+            LogKayitEkle(TabRehber, TabNo_REHBER, RehberID, TabNo_REHBER, RehberID)
+          else
+            Tablo.LogIslemleri(TabNo_REHBER, RehberID, 4, TabRehber);
+        end;
 
       end;
 

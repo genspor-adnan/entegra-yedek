@@ -1514,9 +1514,6 @@ begin
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'INSERT INTO REHBERBILGI([YERI],[YER_ID],[SIRA],[ETIKET],[BILGI],EKLEYEN, '+
        ' SUBEID) SELECT YERI=2,YER_ID='+TabRehber.Fields[0].AsString+',SIRA,ETIKET,BILGI='''+KNo+''', EKLEYEN='+Kullanan+
        ', SUBEID='+IntToStr(SubeId)+' FROM REHBERAYAR RA inner join REHBERVARSAYILAN RV on RA.VARSAYILAN=RV.NO and RV.NO=22 ',[], []);
-    if LogGun > 0 then   // yeni IK personeli -> EKLEME (TabloNo=73 IK / 74 potansiyel; cari 71'den ayri)
-      LogKayitEkle(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger,
-                   TabloNo, TabRehber.FieldByName('ID').AsInteger);
   end
   else
   if TabRehber.FieldByName('SINIF').AsInteger<>OncekiSinif then
@@ -1525,7 +1522,10 @@ begin
 
 
   YeniEklenenKayit := False;
-  Tablo.LogIslemleri(TabloNo,TabRehber.FieldByName('ID').AsInteger,4,TabRehber);  // IK: 73/74
+  // NOT: KART (master REHBER) loglamasi buradan KALDIRILDI. AfterPost sayfa
+  // gecislerinde birden cok kez atesleniyor -> mukerrer log uretiyordu. Kart
+  // loglamasi Finish'te (WizardKontrolFinishButtonClick) TEK SEFER yapilir.
+  // Detay (DetayAfterPost) loglamasina dokunulmadi.
 end;
 
 // IK detay iletisim (REHBERILETISIM) icin ORTAK log. ust=(REHBER, personel ID).
@@ -1789,6 +1789,7 @@ procedure TIKWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 var
   GenotipaEkle: Boolean;
   Durum, UpdateOldu: SmallInt;
+  KartIslemi: SmallInt;   // 0=degisiklik yok, 1=yeni kart, 2=edit -> Finish'te TEK log
   procedure UcretEkle(Table1: TFDQuery);
   var
     Bilgi, orj: string;
@@ -1868,6 +1869,7 @@ var
 
 begin
   GenotipaEkle := False;
+  KartIslemi := 0;
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im,  3 Personel ?zl?k, 4 Personel ileti?im, i?in ileti?im bilgileri
@@ -1879,12 +1881,14 @@ begin
           TabRehber.Post;
           RehberID := TabRehber.Fields[0].AsInteger;
           GenotipaEkle := true;
+          KartIslemi := 1;   // yeni kart -> LogKayitEkle
         end
         else if TabRehber.State in [dsEdit] then
         begin
           BoslukKontrolu;
           TabRehber.Post;
           RehberID := TabRehber.Fields[0].AsInteger;
+          KartIslemi := 2;   // edit -> LogIslemleri (OncekiLog snapshot ile)
         end
         else if TabRehber.State in [dsBrowse] then
         if EkleKurIlet then
@@ -1924,6 +1928,15 @@ begin
            TabRehber.Edit;
            TabRehber.FieldByName('KOD').AsString:= TabRehber.FieldByName('ID').AsString;
            TabRehber.Post;
+        end;
+        // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+        // AfterPost'tan buraya tasindi (sayfa gecislerinde mukerrer loglamayi onlemek icin).
+        if LogGun > 0 then begin
+          if KartIslemi = 2 then
+            Tablo.LogIslemleri(TabloNo, TabRehber.FieldByName('ID').AsInteger, 4, TabRehber)  // IK: 73/74
+          else if KartIslemi = 1 then
+            LogKayitEkle(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger,
+                         TabloNo, TabRehber.FieldByName('ID').AsInteger);
         end;
       end;
 

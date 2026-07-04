@@ -2720,13 +2720,8 @@ end;
 
 procedure TStokWizardDlg.TabStokAfterPost(DataSet: TDataSet);
 begin
-  if DataSet <> nil then begin
-    if islemOp='D' then
-      Tablo.LogIslemleri(TabNo_STOKLAR,TabStok.Fields[0].AsInteger, 4, TabStok)
-    else if (LogGun > 0) and (islemOp in ['E','K']) then   // yeni stok -> EKLEME (ust=kendisi)
-      LogKayitEkle(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger,
-                   TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
-  end;
+  // KART (STOKLAR) loglamasi burada YAPILMAZ; sayfa gecislerinde mukerrer olurdu.
+  // Tek sefer, terminal kaydette (WizardKontrolFinishButtonClick) yapilir.
 
    //e?er ilk defa stok kart? a??l?yorsa, hemen fiyat eklenir
   StokId := TabStok.FieldByName('ID').AsInteger;
@@ -3175,6 +3170,16 @@ begin
      Ekle(DETAY,TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,'Değiş','',
           TabNo_STOKLAR,TabStok.FieldByName('ID').AsInteger,370,ComboBolum.Text);
    StokID :=  TabStok.Fields[0].AsInteger;
+
+   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+   if LogGun > 0 then begin
+     if islemOp = 'D' then
+       Tablo.LogIslemleri(TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, 4, TabStok)
+     else if (islemOp = 'E') or (islemOp = 'K') then   // yeni stok -> EKLEME (ust=kendisi)
+       LogKayitEkle(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger,
+                    TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
+   end;
+
    //islemKopyala := '';
    Sontus := 'K';//kaydet butonu
    ModalResult := mrOk;
