@@ -13,7 +13,8 @@ uses
   cxLookAndFeels, cxLookAndFeelPainters, cxPCdxBarPopupMenu, dxSkinscxPCPainter, ScktComp, cxNavigator,
   JvNavigationPane, cxTimeEdit, cxGridCardView, cxGridDBCardView, dxBarBuiltInMenu,
   cxGridCustomLayoutView, Vcl.StdCtrls, cxButtons, cxGridCustomPopupMenu,
-  cxGridPopupMenu, OfficePopupMenu, UAnaForm, Fetaclassextensions, UIzleme,
+  cxGridPopupMenu, OfficePopupMenu, UAnaForm, Fetaclassextensions, UIzleme, ULog,
+  System.Generics.Collections,
   dxSkinLiquidSky, cxRadioGroup, dxSkinBlue, dxSkinBlueprint,
   dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinHighContrast,
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2010Black,
@@ -577,6 +578,7 @@ type
       AButtonIndex: Integer);
     procedure TabUretimOperasyonCalcFields(DataSet: TDataSet);
   private
+    FDetSnap: TObjectDictionary<Integer, TStringList>;   // detay log snapshot (ULog)
     BilesenAraDlg,UrunAraDlg:TStokHizmetAraDlg;
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
@@ -1418,6 +1420,8 @@ end;
 
 procedure TUretimEmriWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+   FreeAndNil(FDetSnap);
+
    if TabUretimEmri.FieldByName('ID').AsString='' then
       exit;
 
@@ -1461,6 +1465,7 @@ var Ad:string;
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   LogID := 0;
   Carpan := 0;
   IptalSecildi := true;
@@ -1680,6 +1685,8 @@ begin
               TabUretimEmriDetay.Next;
             end;
           end;
+          // ULog: duzenlemeye acilan emrin detay satirlarini snapshot al (kaydette diff).
+          LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
         end;
   end;
   cbOnaylayacak.Properties.Items := Tablo.imgComboboxInit('select ID=0, FIRMA='''' union all '+StringReplace(OnayYetki, '@YetkiKodu', '330650', []),False).Items;
@@ -1915,6 +1922,14 @@ begin
      TabUretimOperasyon.Post;
   if TabUretimOperasyonDetay.State in [dsEdit,dsInsert] then
      TabUretimOperasyonDetay.Post;
+  // ULog: yalniz DETAY satirlarini ISLEMLOG'a diff olarak yaz; sonra snapshot'i tazele.
+  // Master ID Post'tan sonra kesin bellidir. Kaydetmeyi ASLA bozmaz.
+  try
+    LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI,
+      TabUretimEmri.FieldByName('ID').AsInteger);
+    LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
+  except
+  end;
   IptalSecildi := False;
   ModalResult := mrOk;
 end;

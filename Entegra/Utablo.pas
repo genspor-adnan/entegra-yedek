@@ -1263,6 +1263,8 @@ const
   TabNo_STOKSERINO=348;
   TabNo_STOKUTS=368;
   TabNo_STOKDETAY=370;
+  TabNo_PROJEASAMA=371;   // proje asama satirlari (gorunum: Aşama)
+  TabNo_PROJEDETAY=372;   // proje detay bilgileri (gorunum: Detay)
 
 
   TabNo_STOKGUNSONU=90;

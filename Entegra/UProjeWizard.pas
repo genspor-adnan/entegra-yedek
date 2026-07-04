@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, cxTrackBar,
+  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms, cxTrackBar,
   Dialogs, dxSkinsCore, dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics,
   cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, cxDropDownEdit,URehberAyar,
   StdCtrls, FireDAC.Comp.Client, cxMaskEdit, cxImageComboBox, cxLabel, cxTextEdit, ExtCtrls,
@@ -390,6 +390,7 @@ type
     procedure TabProjelerAfterScroll(DataSet: TDataSet);
   private
     { Private declarations }
+    FAsamaSnap: TObjectDictionary<Integer, TStringList>;   // proje asama log snapshot'i
     FFrameBilgi : TIcerikFrameBilgi;
     GBaslamaTarih,GBitisTarih : TDateTime;
     ProjeSorumlusu:integer;
@@ -710,6 +711,7 @@ end;
 
 procedure TProjeWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FreeAndNil(FAsamaSnap);
   if  (Sontus='I') and ((IslemOp='E') or (IslemOp='K'))  then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabProjeler.active)and(TabProjeler.Fields[0].AsString <> '')  then begin
         //varsa dokumanlar?n silinmeli
@@ -725,6 +727,7 @@ end;
 
 procedure TProjeWizardDlg.FormCreate(Sender: TObject);
 begin
+  FAsamaSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   if Tablo.GENINI.ReadBoolean(Ops_ProjeOpsiyon_ProjeMaliyetEflowKullan, False) then
     TabProjeButce.SQL.Text := MemoProjeButceEFlow.Lines.Text
   else
@@ -911,6 +914,11 @@ begin
 
 
   end;
+
+  // Asama log baseline: yeni proje (E) -> bos snapshot (tum asamalar ekleme sayilir);
+  // duzenleme (D/K) -> mevcut asamalar snapshot'a alinir (Finish'te diff).
+  if LogGun > 0 then
+    LogSnapshotAl(TabProjeAsama, FAsamaSnap);
  ///Dok?man
  // Yeri := 41;
    ProjeID := TabProjeler.Fields[0].AsInteger;
@@ -1011,7 +1019,7 @@ end;
 procedure TProjeWizardDlg.ProjeEkDetayEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?');
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
 end;
 
 procedure TProjeWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
@@ -1155,10 +1163,9 @@ end;
 procedure TProjeWizardDlg.TabProjelerAfterPost(DataSet: TDataSet);
 begin
   ProjeID := TabProjeler.Fields[0].AsInteger;
-  if islemOp='D' then
-    Tablo.LogIslemleri(TabNo_PROJELER,ProjeID, 4, TabProjeler)
-  else if (LogGun>0) and ((islemOp='E') or (islemOp='K')) then   // yeni proje -> EKLEME
-    LogKayitEkle(TabProjeler, TabNo_PROJELER, ProjeID, TabNo_PROJELER, ProjeID);
+  // NOT: kart loglamasi buradan KALDIRILDI. AfterPost sayfa gecislerinde birden
+  // cok kez atesleniyor (3x ekleme) -> loglama Finish'te (WizardKontrolFinishButtonClick)
+  // tek sefer yapilir.
 end;
 
 procedure TProjeWizardDlg.TabProjelerAfterScroll(DataSet: TDataSet);
@@ -1346,8 +1353,19 @@ begin
    if TabProjeAsama.State in [dsEdit,dsinsert] then
       TabProjeAsama.Post;
 
+   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+   if LogGun > 0 then begin
+     if islemOp = 'D' then
+       Tablo.LogIslemleri(TabNo_PROJELER, ProjeID, 4, TabProjeler)
+     else if (islemOp = 'E') or (islemOp = 'K') then
+       LogKayitEkle(TabProjeler, TabNo_PROJELER, ProjeID, TabNo_PROJELER, ProjeID);
+     // ASAMA satirlari (ust=proje) diff.
+     LogDiffKaydet(TabProjeAsama, FAsamaSnap, TabNo_PROJEASAMA, TabNo_PROJELER, ProjeID);
+     LogSnapshotAl(TabProjeAsama, FAsamaSnap);   // tazele (mukerrer save'i onle)
+   end;
+
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?');
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
 
    Sontus:='K'; //Kaydet butonu
    ModalResult := mrOk;

@@ -27,7 +27,8 @@ uses
   dxSkinVisualStudio2013Light, dxScrollbarAnnotations, dxDateRanges,
   dxCoreGraphics, frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  System.Generics.Collections;
 
 type
   TTeklifWizardDlg = class(TForm, IPopupDialog)
@@ -659,6 +660,8 @@ type
     { Private declarations }
     AraDlg:TStokHizmetAraDlg;
     sonbasilanctrl:TcxButtonEdit;
+    // Loglama: yukleme aninda TEKLIFDETAY snapshot; kaydette diff (ULog).
+    FDetSnap: TObjectDictionary<Integer, TStringList>;
     function  BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure Kaydet;
@@ -693,7 +696,8 @@ var
 implementation
 
 Uses UAnaForm,FetaClassExtensions,UCombo, UBinarySave, PrjConst,LocOnFly, FetaKurulusSiniflari,
-     URaporAraclari, UGenelAnaSekmeFrame, UFastRap,UMailDokum,UGirisKutusuEx,Fetautil,IdGlobalProtocols;
+     URaporAraclari, UGenelAnaSekmeFrame, UFastRap,UMailDokum,UGirisKutusuEx,Fetautil,IdGlobalProtocols,
+     ULog;
 
 type
   TcxCustomTabControlAccess = class(TcxCustomTabControlProperties);
@@ -1244,6 +1248,8 @@ begin
       TeklifID := -99
    else
       TeklifID := TabTeklif.FieldByName('ID').AsInteger;
+
+   FreeAndNil(FDetSnap);
 end;
 
 procedure TTeklifWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1266,6 +1272,7 @@ var
   I: Integer;
   Q: TFDQuery;
 begin
+   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    for I := 0 to ComponentCount - 1 do
      if Components[I] is TFDQuery then begin
@@ -1543,6 +1550,9 @@ begin
       TabTeklifDetay.cancel
     end;
   end;
+  // Belge yuklendi: TEKLIFDETAY satirlarinin baseline snapshot'ini al (ULog diff icin).
+  if TabTeklifDetay.Active then
+    LogSnapshotAl(TabTeklifDetay, FDetSnap);
   if TabTeklif.FieldByName('CARIID').AsString <> '' then
       LabelCari.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabTeklif.FieldByName('CARIID').AsInteger);
 
@@ -1754,9 +1764,16 @@ begin
    if TabTeklifDetay.State in [dsInsert, dsEdit] then begin
     TabTeklifDetay.post;
     SayA:=0;
-    if LogBelge.Count > 0 then begin
-      Tablo.LogIslemlerBelge(TabTeklifDetay,TabNo_TEKLIF,TeklifID,4,TabNo_TEKLIFDETAY)   // detay: teklif satir
   end;
+  // ISLEMLOG: TEKLIFDETAY satirlarini diff ile logla (USiparisWizard LogDiffKaydet deseni).
+  // NOT: eski Tablo.LogIslemlerBelge(TabTeklifDetay,...) cagrisi kaldirildi -> LogSatir bos
+  // oldugu icin etkisizdi. Kaydetmeyi ASLA bozmamak icin try icinde; sonra snapshot tazelenir.
+  try
+    if TabTeklifDetay.Active and (TabTeklif.FieldByName('ID').AsInteger > 0) then begin
+      LogDiffKaydet(TabTeklifDetay, FDetSnap, TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
+      LogSnapshotAl(TabTeklifDetay, FDetSnap);
+    end;
+  except
   end;
   if TabImaj.State in [dsInsert, dsEdit] then  begin
     TabImaj.post;
