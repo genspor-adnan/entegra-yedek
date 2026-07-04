@@ -1,0 +1,23 @@
+-- ============================================================
+-- LOGCOZUM baslangic eslemeleri (idempotent). Yeni eslemeler buraya eklenir.
+--   Cozum: SELECT <ADKOLON> FROM <KAYNAKTABLO> WHERE <IDKOLON>=<deger> [AND <FILTRE>]
+--   TABLOID NULL = tum log tablolari (genel alan).
+-- ============================================================
+SET NOCOUNT ON;
+
+MERGE dbo.LOGCOZUM AS h
+USING (VALUES
+  -- Kullanici alanlari (REHBER.ID -> FIRMA). Genel (tum tablolar) + cari temsilci.
+  (NULL, N'EKLEYEN',    N'REHBER', N'ID',    N'FIRMA',   NULL),
+  (NULL, N'DEGISTIREN', N'REHBER', N'ID',    N'FIRMA',   NULL),
+  (71,   N'TEMSILCI',   N'REHBER', N'ID',    N'FIRMA',   NULL),
+  -- Cari lookup (GENINI: BOLUM grup, DEGER=id, ANAHTAR=metin)
+  (71,   N'SEKTOR',     N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2204'),
+  (71,   N'BOLGE',      N'GENINI', N'DEGER', N'ANAHTAR', N'BOLUM=-2210')
+) AS k(TABLOID, ALAN, KAYNAKTABLO, IDKOLON, ADKOLON, FILTRE)
+ON ISNULL(h.TABLOID,-1)=ISNULL(k.TABLOID,-1) AND h.ALAN=k.ALAN COLLATE Turkish_CI_AS
+WHEN MATCHED THEN UPDATE SET KAYNAKTABLO=k.KAYNAKTABLO, IDKOLON=k.IDKOLON, ADKOLON=k.ADKOLON, FILTRE=k.FILTRE, AKTIF=1
+WHEN NOT MATCHED THEN INSERT(TABLOID,ALAN,KAYNAKTABLO,IDKOLON,ADKOLON,FILTRE)
+  VALUES(k.TABLOID,k.ALAN,k.KAYNAKTABLO,k.IDKOLON,k.ADKOLON,k.FILTRE);
+
+SELECT ID, TABLOID, ALAN, KAYNAKTABLO, IDKOLON, ADKOLON, FILTRE FROM dbo.LOGCOZUM ORDER BY ISNULL(TABLOID,0), ALAN;

@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, Vcl.ComCtrls, dxCore, cxDateUtils,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, cxMaskEdit, cxDropDownEdit, cxCalendar,  DateUtils,
-  cxTextEdit, System.JSON, Vcl.ExtCtrls, Winapi.CommCtrl, Winapi.UxTheme,
+  cxTextEdit, System.JSON, System.StrUtils, Vcl.ExtCtrls, Winapi.CommCtrl, Winapi.UxTheme,
   dxBarBuiltInMenu, cxPC, dxCoreGraphics, cxImageComboBox, cxButtonEdit,
   cxCheckBox, cxLabel, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage,
   cxNavigator, dxDateRanges, dxScrollbarAnnotations, Data.DB, cxDBData,
@@ -78,11 +78,16 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     FJsonlar: TStringList;     // LvGecmis ile paralel: her kaydin BILGI json'u
+    FTabloIDler: TStringList;  // FJsonlar ile paralel: her satirin TABLOID'i (deger cozumu icin)
     FTiklamaAcik: Boolean;     // button-edit OnClick re-entrancy guard'i
+    FCozumler: TStringList;    // LOGCOZUM satirlari: 'ALAN|TABLOID' -> 'KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE'
+    FCozumCache: TStringList;  // 'TABLOID|ALAN|DEGER' -> ad (tekrarli sorguyu onler)
+    procedure CozumleriYukle;  // LOGCOZUM'u bellege al (bir kez)
+    function  DegerCoz(ATabloID: Integer; const AAlan, ADeger: string): string;  // ID -> ad
     procedure ButtonEditTiklama(Sender: TObject);   // edit'e tiklayinca picker'i ac
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
-    procedure DetayGoster(const ABilgiJSON: string; ATip: Integer);
+    procedure DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0);
     procedure TabLogYukle;             // Genel grid: LOG (ISLEMLOG) listesi (filtreli)
     procedure GenelSatirDetayGoster;   // Genel'de secili satirin BILGI'sini LvDetay'a
     procedure FiltreOlaylariBagla;     // filtre kontrollerinin olaylarini bagla
@@ -454,7 +459,9 @@ var
   LTip, LTabloID, LUstT: Integer;
 begin
   if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
+  if not Assigned(FTabloIDler) then FTabloIDler := TStringList.Create;
   FJsonlar.Clear;
+  FTabloIDler.Clear;
   LvGecmis.Items.Clear;
   LvDetay.Items.Clear;
   if (not TabLog.Active) or TabLog.IsEmpty then Exit;
@@ -492,6 +499,7 @@ begin
       Data := TObject(NativeInt(LTip));
     end;
     FJsonlar.Add(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
+    FTabloIDler.Add(IntToStr(LTabloID));
     Tablo.Query1.Next;
   end;
 
@@ -527,7 +535,7 @@ var
       Result := '';
   end;
   // Bir grubu (ayni an+tablo+tip) tek LvGecmis satiri yapar; parcalari tek JSON'da birlestirir.
-  procedure _EmitGrup(ATarih: TDateTime; const ASat: string; ATip: Integer; AParts: TStringList);
+  procedure _EmitGrup(ATarih: TDateTime; const ASat: string; ATip, ATabloID: Integer; AParts: TStringList);
   var k: Integer; LMerged: string;
   begin
     LMerged := '';
@@ -545,10 +553,13 @@ var
       Data := TObject(NativeInt(ATip));
     end;
     FJsonlar.Add(LMerged);
+    FTabloIDler.Add(IntToStr(ATabloID));
   end;
 begin
   if not Assigned(FJsonlar) then FJsonlar := TStringList.Create;
+  if not Assigned(FTabloIDler) then FTabloIDler := TStringList.Create;
   FJsonlar.Clear;
+  FTabloIDler.Clear;
   LvGecmis.Items.Clear;
   LvDetay.Items.Clear;
   if ID <= 0 then Exit;
@@ -613,6 +624,7 @@ begin
   var LGTarih: TDateTime := 0;
   var LGSat: string := '';
   var LGTip: Integer := 0;
+  var LGTabloID: Integer := 0;
   try
     while not Tablo.Query1.Eof do
     begin
@@ -629,16 +641,16 @@ begin
                           IntToStr(LTabloID) + '|' + IntToStr(LKayitID) + '|' + IntToStr(LTip);
       if LKey <> LCurKey then
       begin
-        if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LParts);
+        if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LParts);
         LParts.Clear;
         LCurKey := LKey;
-        LGTarih := LTarih; LGSat := LSat; LGTip := LTip;
+        LGTarih := LTarih; LGSat := LSat; LGTip := LTip; LGTabloID := LTabloID;
       end;
       var LIc: string := _IcJson(Tablo.Query1.FieldByName('BILGI_JSON').AsString);
       if LIc <> '' then LParts.Add(LIc);
       Tablo.Query1.Next;
     end;
-    if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LParts);  // son grup
+    if LCurKey <> #1 then _EmitGrup(LGTarih, LGSat, LGTip, LGTabloID, LParts);  // son grup
   finally
     LParts.Free;
   end;
@@ -647,18 +659,89 @@ begin
     LvGecmis.Items[0].Selected := True;   // OnSelectItem -> detay dolar
 end;
 
+// LOGCOZUM haritasini bellege alir (bir kez). Anahtar: 'ALAN|TABLOID' (TABLOID bos=genel).
+procedure TInfoDlg.CozumleriYukle;
+begin
+  if Assigned(FCozumler) then Exit;   // bir kez
+  FCozumler := TStringList.Create;
+  FCozumCache := TStringList.Create;
+  try
+    Tablo.TablodanSorguAc(1,
+      'select ALAN, TABLOID, KAYNAKTABLO, IDKOLON, ADKOLON, ISNULL(FILTRE,'''') FILTRE ' +
+      'from LOGCOZUM where AKTIF=1');
+    while not Tablo.Query1.Eof do
+    begin
+      FCozumler.Add(
+        UpperCase(Tablo.Query1.FieldByName('ALAN').AsString) + '|' +
+        Tablo.Query1.FieldByName('TABLOID').AsString + '=' +
+        Tablo.Query1.FieldByName('KAYNAKTABLO').AsString + '|' +
+        Tablo.Query1.FieldByName('IDKOLON').AsString + '|' +
+        Tablo.Query1.FieldByName('ADKOLON').AsString + '|' +
+        Tablo.Query1.FieldByName('FILTRE').AsString);
+      Tablo.Query1.Next;
+    end;
+  except
+    // LOGCOZUM yoksa sessiz: cozum yapilmaz, degerler ID kalir
+  end;
+end;
+
+// Bir alan degerini (ID) LOGCOZUM'a gore ad'a cevirir. Eslesme/sonuc yoksa ADeger doner.
+function TInfoDlg.DegerCoz(ATabloID: Integer; const AAlan, ADeger: string): string;
+var
+  LTanim, LKaynak, LIdKol, LAdKol, LFiltre, LCacheKey: string;
+  LParts: TArray<string>;
+  i: Integer;
+  LQ: TFDQuery;
+begin
+  Result := ADeger;
+  if (Trim(ADeger) = '') or (not Assigned(FCozumler)) then Exit;
+  // Tanim bul: once tabloya ozel (ALAN|TABLOID), yoksa genel (ALAN|).
+  LTanim := FCozumler.Values[UpperCase(AAlan) + '|' + IntToStr(ATabloID)];
+  if LTanim = '' then LTanim := FCozumler.Values[UpperCase(AAlan) + '|'];
+  if LTanim = '' then Exit;   // bu alan cozumlenmez
+  // Cache
+  LCacheKey := IntToStr(ATabloID) + '|' + UpperCase(AAlan) + '|' + ADeger;
+  i := FCozumCache.IndexOfName(LCacheKey);
+  if i >= 0 then Exit(FCozumCache.ValueFromIndex[i]);
+  // LTanim = KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE
+  LParts := LTanim.Split(['|']);
+  if Length(LParts) < 3 then Exit;
+  LKaynak := LParts[0]; LIdKol := LParts[1]; LAdKol := LParts[2];
+  if Length(LParts) >= 4 then LFiltre := LParts[3] else LFiltre := '';
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select top 1 ' + LAdKol + ' from ' + LKaynak +
+        ' where ' + LIdKol + ' = :PDEGER' +
+        IfThen(Trim(LFiltre) <> '', ' and (' + LFiltre + ')', '');
+      LQ.ParamByName('PDEGER').AsString := ADeger;
+      LQ.Open;
+      if (not LQ.IsEmpty) and (Trim(LQ.Fields[0].AsString) <> '') then
+        Result := Trim(LQ.Fields[0].AsString);
+    finally
+      LQ.Free;
+    end;
+  except
+    // cozum sorgusu patlarsa ID kalir
+  end;
+  FCozumCache.Add(LCacheKey + '=' + Result);   // cache'le (ayni deger tekrar sorgulanmaz)
+end;
+
 // Secili kaydin BILGI json'unu 3 sutunlu grid'e doker: Alan | Onceki | Sonraki.
 //   Degisiklik: {"ALAN":{"e":..,"y":..}}  Tek deger: ekle->Sonraki, sil->Onceki.
-procedure TInfoDlg.DetayGoster(const ABilgiJSON: string; ATip: Integer);
+//   ATabloID: bu kaydin log tablosu -> LOGCOZUM ile deger (ID) -> ad cevrimi icin.
+procedure TInfoDlg.DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0);
 var
   LParsed: TJSONValue;
   LObj: TJSONObject;
   LPair: TJSONPair;
   LVal: TJSONValue;
   LItem: TListItem;
-  LOnc, LSon: string;
+  LOnc, LSon, LAlan: string;
   LGorulen: TStringList;   // ayni alan adini (ör. İlgili) tek kez goster
 begin
+  CozumleriYukle;
   LvDetay.Items.BeginUpdate;
   LGorulen := TStringList.Create;
   LGorulen.Sorted := True;
@@ -689,6 +772,7 @@ begin
       begin
         if LGorulen.IndexOf(LPair.JsonString.Value) >= 0 then Continue;  // tekrar eden alan gosterme
         LGorulen.Add(LPair.JsonString.Value);
+        LAlan := LPair.JsonString.Value;
         LVal := LPair.JsonValue;
         if LVal is TJSONObject then
         begin
@@ -701,10 +785,13 @@ begin
           LOnc := JsonDeger(LVal);
           LSon := '';
         end;
+        // LOGCOZUM: alan degerlerini (ID) anlasilir ada cevir (eslesme yoksa ID kalir).
+        LOnc := DegerCoz(ATabloID, LAlan, LOnc);
+        if LSon <> '' then LSon := DegerCoz(ATabloID, LAlan, LSon);
         LItem := LvDetay.Items.Add;
-        LItem.Caption := LPair.JsonString.Value;   // Alan
-        LItem.SubItems.Add(LOnc);                   // Onceki
-        LItem.SubItems.Add(LSon);                   // Sonraki
+        LItem.Caption := LAlan;      // Alan
+        LItem.SubItems.Add(LOnc);    // Onceki
+        LItem.SubItems.Add(LSon);    // Sonraki
       end;
     finally
       LParsed.Free;
@@ -723,7 +810,10 @@ begin
     LvDetay.Items.Clear;
     Exit;
   end;
-  DetayGoster(FJsonlar[Item.Index], Integer(NativeInt(Item.Data)));
+  var LTabloID: Integer := 0;
+  if Assigned(FTabloIDler) and (Item.Index < FTabloIDler.Count) then
+    LTabloID := StrToIntDef(FTabloIDler[Item.Index], 0);
+  DetayGoster(FJsonlar[Item.Index], Integer(NativeInt(Item.Data)), LTabloID);
 end;
 
 // Satir rengi islem tipine gore: Ekleme yesil, Silme kirmizi, Degistirme mavi.
@@ -760,6 +850,9 @@ end;
 procedure TInfoDlg.FormDestroy(Sender: TObject);
 begin
   FJsonlar.Free;
+  FTabloIDler.Free;
+  FCozumler.Free;
+  FCozumCache.Free;
 end;
 
 end.
