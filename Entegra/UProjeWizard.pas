@@ -797,7 +797,7 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
      if ctrl.Name <> '' then begin
        Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG,TABLO from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+'  ');
-       if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+' alan?n? silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
+       if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+' alanını silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
 
            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
          try
@@ -905,7 +905,7 @@ begin
          Yer_ID := -1;
          TabProjeler.Append;
        end;
-  'D', 'K': begin //De?i?tirme
+  'D', 'K': begin //Değiştirme
          if TabProjeler.FieldByName('ILGILI').AsString<>'' then
             ComboIlgili.Text := Tablo.AciklamaGetir('REHBER','FIRMA', TabProjeler.FieldByName('ILGILI').AsString);
          Yer_ID := TabProjeler.Fields[0].AsInteger;
@@ -1019,7 +1019,7 @@ end;
 procedure TProjeWizardDlg.ProjeEkDetayEkrExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
 end;
 
 procedure TProjeWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
@@ -1365,7 +1365,7 @@ begin
    end;
 
    if EkleDetay then
-      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'De?i?','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
+      Ekle(TabDetay,TabNo_PROJELER,ProjeID,'Değiş','',TabNo_PROJELER,ProjeID,TabNo_PROJEDETAY);   // detay: proje bilgi
 
    Sontus:='K'; //Kaydet butonu
    ModalResult := mrOk;
@@ -1383,7 +1383,7 @@ begin
             GTakvimID:=tablo.GoogleTakvimKaydet(tablo.Query6.FieldByName('PROJEKODU').AsString+' '+tablo.Query6.FieldByName('PROJEADI').AsString,
                           '',
                           'Konusu         : '+tablo.Query6.FieldByName('KONUSU').AsString+#13#10+
-                          'M??teri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
+                          'Müşteri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
                           'Proje Tipi      : ' +comboPRJ_TIPI.EditText+#13#10+
                           'Notlar           : '+tablo.Query6.FieldByName('NOTLAR').AsString,
                           StrToDateTime(formatdatetime('dd/MM/yyyy 00:00:00',tablo.Query6.FieldByName('BASLAMATARIHI').AsDateTime)),
@@ -1408,7 +1408,7 @@ begin
           GTakvimID:=tablo.GoogleTakvimKaydet(tablo.Query6.FieldByName('PROJEKODU').AsString+' '+tablo.Query6.FieldByName('PROJEADI').AsString,
                      '',
                      'Konusu         : '+tablo.Query6.FieldByName('KONUSU').AsString+#13#10+
-                     'M??teri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
+                     'Müşteri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
                      'Proje Tipi      : ' +comboPRJ_TIPI.EditText+#13#10+
                      'Notlar           : '+tablo.Query6.FieldByName('NOTLAR').AsString,
                      StrToDateTime(formatdatetime('dd/MM/yyyy 00:00:00',tablo.Query6.FieldByName('BASLAMATARIHI').AsDateTime)),
@@ -1427,7 +1427,7 @@ begin
                                           Tablo.Query6.FieldByName('GOOGLEOLAYID').AsString,
                                           tablo.Query6.FieldByName('PROJEKODU').AsString+' '+tablo.Query6.FieldByName('PROJEADI').AsString,
                                           'Konusu         : '+tablo.Query6.FieldByName('KONUSU').AsString+#13#10+
-                                          'M??teri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
+                                          'Müşteri ilgili   : '+TABLO.AciklamaGetir('REHBER','FIRMA',tablo.Query6.FieldByName('ILGILI').AsInteger)+#13#10+
                                           'Proje Tipi      : ' +comboPRJ_TIPI.EditText+#13#10+
                                           'Notlar           : '+tablo.Query6.FieldByName('NOTLAR').AsString);
              end;
