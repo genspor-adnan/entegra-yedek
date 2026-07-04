@@ -3129,7 +3129,11 @@ begin
 
    end;
    if TabStok.State in [dsInsert, dsEdit] then
-     TabStok.Post;
+     // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+     if (TabStok.State = dsInsert) or TabStok.Modified then
+       TabStok.Post
+     else
+       TabStok.Cancel;
 
     if (TabUTS.Active)and(TabUTS.State in [dsInsert, dsEdit]) then
        TabUTS.Post;

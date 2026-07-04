@@ -705,8 +705,12 @@ begin
     end;
   end;
 
-  if TabGorev.State in [dsEdit, dsInsert] then
-    TabGorev.Post;
+  // Gercek degisiklik yoksa Post etme (DEGISTIREN/tarih guncellenmesin, gereksiz log olmasin).
+  // Gorev karti hep dsEdit ile geldiginden yeni kayit icin IslOp ('E'=ekleme,'K'=kopyalama) ile ayrilir.
+  if (TabGorev.State = dsInsert) or (IslOp = 'E') or (IslOp = 'K') or TabGorev.Modified then
+    TabGorev.Post
+  else
+    TabGorev.Cancel;
   if (Trim(MemoNOTLAR.text)<>'')and(TabNotlar.State in [dsEdit, dsInsert]) then
     TabNotlar.Post;
 

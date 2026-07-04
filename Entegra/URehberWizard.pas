@@ -2150,7 +2150,12 @@ begin
           GenotipaEkle := true;
         end else if TabRehber.State in [dsEdit] then begin
           BoslukKontrolu;
-          TabRehber.Post;
+          // Gercek degisiklik yoksa Post etme -> DEGISTIREN/tarih ve gereksiz log olusmasin.
+          // Yeni kayit her zaman Post edilmeli (YeniKayit / dsInsert dahil).
+          if (TabRehber.State = dsInsert) or YeniKayit or TabRehber.Modified then
+            TabRehber.Post
+          else
+            TabRehber.Cancel;
           RehberID := TabRehber.Fields[0].AsInteger;
         end
         else if TabRehber.State in [dsBrowse] then

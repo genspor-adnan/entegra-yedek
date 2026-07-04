@@ -1344,7 +1344,11 @@ var
 begin
 
    if TabProjeler.State in [dsInsert, dsEdit] then begin
-      TabProjeler.post;
+      // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
+      if (TabProjeler.State = dsInsert) or TabProjeler.Modified then
+         TabProjeler.post
+      else
+         TabProjeler.Cancel;
       ProjeID := TabProjeler.Fields[0].asInteger;
    end;
    if TabDetay.State in [dsInsert, dsEdit] then

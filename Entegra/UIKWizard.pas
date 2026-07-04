@@ -1886,9 +1886,18 @@ begin
         else if TabRehber.State in [dsEdit] then
         begin
           BoslukKontrolu;
-          TabRehber.Post;
+          // Gercek degisiklik yoksa Post etme: DEGISTIREN/DEGISTIRMETARIHI
+          // guncellenmesin, gereksiz "degisiklik" logu uretilmesin.
+          // NOT: Yeni kart cogu zaman dsEdit ile Finish'e gelir -> onu
+          // kaybetmemek icin YeniKayit=true iken her zaman Post et.
+          if YeniKayit or TabRehber.Modified then
+          begin
+            TabRehber.Post;
+            KartIslemi := 2;   // edit -> LogIslemleri (OncekiLog snapshot ile)
+          end
+          else
+            TabRehber.Cancel;   // degisiklik yok -> KartIslemi=0 kalir, log yazilmaz
           RehberID := TabRehber.Fields[0].AsInteger;
-          KartIslemi := 2;   // edit -> LogIslemleri (OncekiLog snapshot ile)
         end
         else if TabRehber.State in [dsBrowse] then
         if EkleKurIlet then

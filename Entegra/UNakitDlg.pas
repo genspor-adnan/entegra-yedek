@@ -1027,7 +1027,12 @@ begin
 
 
       try
-        TabKasa.Post;
+        // Gercek degisiklik yoksa Post etme (DEGISTIREN/tarih guncellenmesin, gereksiz log olmasin).
+        // Kasa karti hep dsEdit ile geldiginden yeni kayit icin IslemOp ('E'=ekleme,'K'=kopyalama) ile ayrilir.
+        if (TabKasa.State = dsInsert) or (IslemOp = 'E') or (IslemOp = 'K') or TabKasa.Modified then
+          TabKasa.Post
+        else
+          TabKasa.Cancel;
       except
         on E: Exception do begin
           ShowMessage(E.Message);
