@@ -810,6 +810,12 @@ begin
        TabGorev.FieldByName('DURUM').AsInteger := VarsayDurumSonOnay;
 
    EkleyenDegistiren(TabGorev);
+   // Gorev karti hep dsEdit ile geldiginden EkleyenDegistiren'in insert dali calismiyor;
+   // EKLEYEN bossa (yeni kayit) EKLEYEN + EKLEMETARIHI'yi burada garanti et.
+   if Trim(TabGorev.FieldByName('EKLEYEN').AsString) = '' then begin
+     TabGorev.FieldByName('EKLEYEN').AsString := Kullanan;
+     TabGorev.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+   end;
 
   if not BoslukKontrol(EditKONU.text, 'Konu') then Abort;
   if not BoslukKontrol(ComboTURU.text, 'Türü') then Abort;
