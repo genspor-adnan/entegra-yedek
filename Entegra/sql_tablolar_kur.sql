@@ -71,7 +71,7 @@ USING (VALUES
   (-1,  ''OTURUM'',        N''Oturum'',  N''Oturum''),
   (97,  ''TEKLIF'',        N''Başlık'',  N''Teklif''),
   (98,  ''TEKLIFDETAY'',   N''Detay'',   N''Teklif''),
-  (134, ''FATBASLIK'',     N''Başlık'',  N''Transfer''),
+  (134, ''FATBASLIK'',     N''Kart'',    N''Stok Transfer''),
   (140, ''URETIMEMRI'',    N''Başlık'',  N''Üretim''),
   (141, ''URETIMEMRIDETAY'',N''Detay'',  N''Üretim''),
   (144, ''URETIMFISI'',    N''Başlık'',  N''Üretim''),

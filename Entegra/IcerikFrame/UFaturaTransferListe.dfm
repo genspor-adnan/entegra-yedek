@@ -829,6 +829,10 @@ object FatTransferListeDlg: TFatTransferListeDlg
   object PopupMenuTransfer: TPopupMenu
     Left = 446
     Top = 109
+    object TransferInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = TransferInfoMenuClick
+    end
     object MenuUretim: TMenuItem
       Caption = #220'retim Fi'#351'i Olu'#351'tur'
       ImageIndex = 0

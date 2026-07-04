@@ -112,6 +112,7 @@ type
     JvTimer1: TJvTimer;
     PopupMenuTransfer: TPopupMenu;
     MenuUretim: TMenuItem;
+    TransferInfoMenu: TMenuItem;
     GridFatListeTviewKAYNAK: TcxGridDBColumn;
     SQLMemo: TcxMemo;
     GridFatListeTviewOZELKOD: TcxGridDBColumn;
@@ -140,6 +141,7 @@ type
       var AStyle: TcxStyle);
     procedure JvTimer1Timer(Sender: TObject);
     procedure MenuUretimClick(Sender: TObject);
+    procedure TransferInfoMenuClick(Sender: TObject);
     procedure AramaYap;
   private
     { Private declarations }
@@ -452,6 +454,12 @@ begin
       if TabFatBaslik.FieldByName('DURUMNEREYE').AsString='' then
          BelgeDonustur(TabFatBaslik.FieldByName('ID').AsInteger);
 
+end;
+
+procedure TFatTransferListeDlg.TransferInfoMenuClick(Sender: TObject);
+begin
+  if not TabFatBaslik.IsEmpty then
+    Tablo.InfoGoster('FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger, TabNo_TRANSFER);
 end;
 
 procedure TFatTransferListeDlg.SetArama(const Value: TFatTransferAramaFrame);

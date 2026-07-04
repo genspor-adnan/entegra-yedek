@@ -4744,7 +4744,7 @@ end;
 
 procedure TTablo.FaturaSil(TabFatBaslik, TabFatura: TFDQuery; FatbasID:integer =0);
 var
-  TabNo, TurNo :Integer;
+  TabNo, TabNoKart, TurNo :Integer;
   Cik, Silinebilir : boolean;
   LConn: TFDConnection;
 begin
@@ -4859,9 +4859,11 @@ begin
     case TurNo of
       9,10,11,12,13,8,109 : TabNo := TabNo_FATBASLIK_Gelen;
       19,14,15,16,17,110,119 : TabNo := TabNo_FATBASLIK_Giden;
+      20 : TabNo := TabNo_TRANSFER;   // stok transfer
     else
       TabNo := TabNo_FATBASLIK;
     end;
+    TabNoKart := TabNo;   // detay ust'u icin sakla
     Tablo.LogIslemleri(TabNo,TabFatBaslik.FieldByName('ID').AsInteger,5,TabFatBaslik);
 
     TabFatura.First;
@@ -4872,9 +4874,11 @@ begin
         10,11,12,13,8,109 : TabNo := TabNo_FATURA_GelenFatFisIrs;
         19 : TabNo := TabNo_FATURA_SatisSiparis;
         4,14,15,16,17,110,119 : Tabno := TabNo_FATURA_GidenFatFisIrs;
+        20 : TabNo := TabNo_FATURA;   // transfer detay
       else TabNo := TabNo_FATURA_GelenFatFisIrs;
       end;
-      Tablo.LogIslemleri(TabNo,Tabfatura.FieldByName('ID').AsInteger,5,TabFatura);
+      // Detay -> ust=kart (master-detail); kart gecmisinde tek kart satiri, detaylar altta.
+      Tablo.LogIslemleri(TabNo,Tabfatura.FieldByName('ID').AsInteger,5,TabFatura,TabNoKart,FatbasID);
       TabFatura.Next;
     end;
 
