@@ -26,7 +26,7 @@ uses
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
   FireDAC.Comp.DataSet, dxSkinBasic, dxSkinOffice2019Black,
   dxSkinOffice2019Colorful, dxSkinOffice2019DarkGray, dxSkinOffice2019White,
-  dxSkinTheBezier, dxSkinWXI;
+  dxSkinTheBezier, dxSkinWXI, System.Generics.Collections, ULog;
 
 type
   TFatTransferWizardDlg = class(TForm, IPopupDialog)
@@ -244,9 +244,11 @@ type
     procedure TabFaturaBeforeDelete(DataSet: TDataSet);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure UTSdenAdetleriKontrolEtMenuClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
     AraDlg:TStokHizmetAraDlg;
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // FATURA (detay) orijinal satirlar (log diff icin)
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure FaturaTutarHesapla;
@@ -360,6 +362,12 @@ begin
   LocalizerOnFly.ProcessContainer(Self);
    Tablo.WizardTurkcelestir(WizardKontrol);
   LogID:=0;
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+end;
+
+procedure TFatTransferWizardDlg.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(FDetSnap);
 end;
 
 procedure TFatTransferWizardDlg.FormShow(Sender: TObject);
@@ -421,6 +429,8 @@ begin
 //          if TabFatura.Recordcount>0 then
 //            TabFatura.Edit;
         end;
+        // Duzenleme oncesi orijinal FATURA (detay) satirlarini sakla (diff icin).
+        LogSnapshotAl(TabFatura, FDetSnap);
         if IslemOp='K' then
            TabFatBaslik.Edit;
       end;
@@ -800,15 +810,31 @@ begin
   if TabFatBaslik.State in [dsInsert, dsEdit] then begin
     //if TabFatura.RecordCount = 0 then
       //raise Exception.create(Urungirilmedenkadedilmez);
-    TabFatBaslik.Post;
-     if islemOp='D' then
-     Tablo.LogIslemleri(TabNo_TRANSFER,FatBasId, 4, TabFatBaslik);
+    // Gercek degisiklik yoksa (Modified=False, D islemi) Post etme -> gereksiz DEGISTIREN/log olmasin.
+    if (TabFatBaslik.State = dsInsert) or (IslemOp='E') or (IslemOp='K') or TabFatBaslik.Modified then
+      TabFatBaslik.Post
+    else
+      TabFatBaslik.Cancel;
   end;
-  if TabFatura.State in [dsInsert, dsEdit] then begin
+
+  // KART (baslik) loglama (TEK SEFER, terminal Kaydet/Finish): yeni/kopya -> EKLEME, duzenleme -> DEGISTIR.
+  if LogGun > 0 then begin
+    if (IslemOp='E') or (IslemOp='K') then
+      LogKayitEkle(TabFatBaslik, TabNo_TRANSFER, FatBasId, TabNo_TRANSFER, FatBasId)
+    else
+      Tablo.LogIslemleri(TabNo_TRANSFER, FatBasId, 4, TabFatBaslik);
+  end;
+
+  if TabFatura.State in [dsInsert, dsEdit] then
     TabFatura.Post;
-    SayA:=0;
-    if LogBelge.Count > 0 then
-     Tablo.LogIslemlerBelge(TabFatura,TabNo_TRANSFER,FatBasId,4,TabNo_FATURA);   // detay: FATURA satir
+
+  // DETAY (FATURA satir) diff loglama; ust=baslik (TabNo_TRANSFER / FatBasId).
+  try
+    if Assigned(FDetSnap) and TabFatura.Active then begin
+      LogDiffKaydet(TabFatura, FDetSnap, TabNo_FATURA, TabNo_TRANSFER, FatBasId);
+      LogSnapshotAl(TabFatura, FDetSnap);   // snapshot'i tazele (mukerrer save engeli)
+    end;
+  except
   end;
 end;
 

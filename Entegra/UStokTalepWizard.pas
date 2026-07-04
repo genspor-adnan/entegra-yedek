@@ -12,7 +12,8 @@ uses
   cxClasses, cxControls, cxGridCustomView, cxGrid, ComCtrls, ToolWin,Fetautil,
   cxMaskEdit, cxContainer, cxTextEdit, StdCtrls, JvExControls, cxButtons,
   ExtCtrls, frxClass, frxDBSet, Grids, Buttons, jpeg, cxImage,FetaClassExtensions,
-  UGentegreFrameYonetimi, cxTreeView, dxSkinLondonLiquidSky, UTablo, cxCheckBox,
+  UGentegreFrameYonetimi, cxTreeView, dxSkinLondonLiquidSky, UTablo, ULog,
+  System.Generics.Collections, cxCheckBox,
   cxExtEditRepositoryItems, cxEditRepositoryItems, cxShellEditRepositoryItems,
   cxDBEditRepository, cxDBExtLookupComboBox, cxGridCustomPopupMenu,DateUtils,
   cxGridPopupMenu, JvComponentBase, JvDragDrop, dxSkinLiquidSky, UStokHizmetAra,
@@ -354,6 +355,7 @@ type
     AraDlg : TStokHizmetAraDlg;
     sonbasilanctrl :TcxButtonEdit;
     KuraGoreFiyatHesaplamaAlani:integer ; //faturaadetchange olay?nda kullan?l?yor bu de?i?ken
+    FDetSnap: TObjectDictionary<Integer, TStringList>;  // SIPARISDETAY orijinal satirlar (log diff icin)
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure FaturaTutarHesapla(TabloAc:Boolean);
@@ -725,6 +727,8 @@ begin
       GenRegIni.RegWriteString('StokTalepOpsiyon','TalepVarsayilanCikisDepo', SIPARIS.FieldByName('CIKISDEPO').AsString, 'C');
       GenRegIni.RegWriteString('StokTalepOpsiyon','TalepVarsayilanGirisDepo', SIPARIS.FieldByName('GIRISDEPO').AsString, 'C');
   end;
+
+  FreeAndNil(FDetSnap);
 end;
 
 procedure TStokTalepWizard.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -761,6 +765,7 @@ begin
   iadefis:=False;
   IptalSecildi := true;
   LogID:=0;
+  FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
 
   TabloNo := TabNo_SIPARIS_Gelen;
   //cbDovizCinsi.Visible:=DovizTakibi;
@@ -1012,6 +1017,11 @@ begin
 
   if SIPARIS.FieldByName('BOLUM').AsString <> '' then
      EditDepartman.text := Tablo.DepartmanGorevGetir(1, SIPARIS.FieldByName('BOLUM').AsInteger);
+
+  // Log diff icin: yalniz DUZENLEMEDE (D) orijinal detay satirlarini yakala.
+  // E/K (yeni/kopya) icin snapshot bos kalir -> tum satirlar Finish'te EKLEME loglanir.
+  if (LogGun>0) and (IslemOp='D') then
+     LogSnapshotAl(SIPARISDETAY, FDetSnap);
 
   if IslemOp='E' then
      SIPARIS.edit;
@@ -1591,17 +1601,17 @@ end;
 procedure TStokTalepWizard.KaydetTusClick(Sender: TObject);
 begin
   if SIPARIS.State in [dsInsert, dsEdit] then begin
-     SIPARIS.Post;
-     if islemOp='D' then  begin
-        Tablo.LogIslemleri(TabNo_SATINALMA, SiparisIdsi, 4, SIPARIS)
-    end;
+     // Yeni/kopya kayit her zaman Post; duzenlemede yalniz gercek degisiklik varsa.
+     if (SIPARIS.State = dsInsert) or (IslemOp='E') or (IslemOp='K') or SIPARIS.Modified then
+        SIPARIS.Post
+     else
+        SIPARIS.Cancel;
   end;
-  if SIPARISDETAY.State in [dsInsert, dsEdit] then begin
+  if SIPARISDETAY.State in [dsInsert, dsEdit] then
      SIPARISDETAY.Post;
-     SayA:=0;
-     if LogBelge.Count > 0 then
-        Tablo.LogIslemlerBelge(SIPARISDETAY, TabNo_SATINALMA, SiparisIdsi,4,TabNo_SIPARISDETAY)   // detay: siparis satir
-  end;
+  // NOT: eski etkisiz LogIslemleri/LogIslemlerBelge(SIPARISDETAY,...) kaldirildi.
+  // Loglama artik terminal noktada (WizardKontrolFinishButtonClick) yapiliyor:
+  // kart -> LogKayitEkle/LogIslemleri, detay -> LogDiffKaydet(SIPARISDETAY, FDetSnap).
 end;
 
 procedure TStokTalepWizard.KDVHaricTutargir1Click(Sender: TObject);
@@ -1759,6 +1769,20 @@ begin
   KaydetTus.Click;
   if SIPARISDETAY.RecordCount < 1 then
      raise Exception.Create(UrungirilmedenKaydedilemez);
+
+  // --- ISLEMLOG: kart (baslik) + detay satir diff (fatura/siparis wizard deseni) ---
+  // SIPARISDETAY.Post ve SiparisIdsi (SIPARISAfterPost) bu noktada hazir.
+  if LogGun > 0 then
+  try
+    if (IslemOp='E') or (IslemOp='K') then
+       LogKayitEkle(SIPARIS, TabNo_STOKTALEP, SiparisIdsi, TabNo_STOKTALEP, SiparisIdsi)
+    else
+       Tablo.LogIslemleri(TabNo_STOKTALEP, SiparisIdsi, 4, SIPARIS);
+    LogDiffKaydet(SIPARISDETAY, FDetSnap, TabNo_SIPARISDETAY, TabNo_STOKTALEP, SiparisIdsi);
+    LogSnapshotAl(SIPARISDETAY, FDetSnap);   // mukerrer save'i onlemek icin snapshot'i tazele
+  except
+  end;
+
   //Birim Onaylayacak de?i?ti ise onay i?in duyuru yay?nlan?r/de?i?tirilir/silinir
   if OncekiBirimOnaylayacak <> SIPARIS.FieldByName('BIRIMONAYLAYACAK').AsInteger then
      Tablo.OnayYayinIslemleri('SIPARIS', TabNo_Satinalma_Talep, SIPARIS.FieldByName('ID').AsInteger, OncekiBirimOnaylayacak, SIPARIS.FieldByName('BIRIMONAYLAYACAK').AsInteger, -24);

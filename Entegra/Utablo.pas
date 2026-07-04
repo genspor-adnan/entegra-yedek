@@ -1365,6 +1365,7 @@ const
   TabNo_DONUSUM_Giden_Konsinye_Fatura = 462;
   TabNo_DONUSUM_Giden_Konsinye_FIS = 472;
   TabNo_SATINALMA = 463;
+  TabNo_STOKTALEP = 464;   // stok talep basligi (SIPARIS; modul: Stok Talep)
   Tabno_URETIMEMRI_SATINALMATALEP = 465;
   Tabno_URETIMEMRI_STOKTALEP = 467;
   TabNo_URETIMKALITE = 470;

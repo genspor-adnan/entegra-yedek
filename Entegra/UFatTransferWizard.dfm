@@ -15,6 +15,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
   Position = poMainFormCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   TextHeight = 16
   object WizardKontrol: TJvWizard
