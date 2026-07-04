@@ -6045,6 +6045,8 @@ begin
     dsInsert:
       begin
         nesne.DataSet.FieldByName('EKLEYEN').AsString := Kullanan;
+        if nesne.DataSet.FindField('EKLEMETARIHI') <> nil then
+          nesne.DataSet.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
       end;
   end;
 end;
@@ -6060,6 +6062,8 @@ begin
     dsInsert:
       begin
         nesne.FieldByName('EKLEYEN').AsString := Kullanan;
+        if nesne.FindField('EKLEMETARIHI') <> nil then
+          nesne.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
       end;
   end;
 end;
