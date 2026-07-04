@@ -830,6 +830,10 @@ object StokTalepListeDlg: TStokTalepListeDlg
   object PopupMenuTransfer: TPopupMenu
     Left = 446
     Top = 109
+    object TalepInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = TalepInfoMenuClick
+    end
     object MenuTansfereDonustur: TMenuItem
       Caption = 'Transfere D'#246'n'#252#351't'#252'r'
       ImageIndex = 0

@@ -84,6 +84,7 @@ type
     GridStokTalepTviewBIRIMONAYLAYACAKAD: TcxGridDBColumn;
     JvTimer1: TJvTimer;
     PopupMenuTransfer: TPopupMenu;
+    TalepInfoMenu: TMenuItem;
     MenuTansfereDonustur: TMenuItem;
     GridStokTalepTviewBIRIMONAYLAYANAD: TcxGridDBColumn;
     SQLMemo: TcxMemo;
@@ -119,6 +120,7 @@ type
     procedure MenuTansfereDonusturClick(Sender: TObject);
     procedure AramaYap;
     procedure BtnDonusturClick(Sender: TObject);
+    procedure TalepInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -299,6 +301,12 @@ begin
   BDDlg.cxGridKaynakDBTableView1.OnCellDblClick := Nil;
   BDDlg.ShowModal;
   FreeAndNil(BDDlg);
+end;
+
+procedure TStokTalepListeDlg.TalepInfoMenuClick(Sender: TObject);
+begin
+  if not TabStokTalep.IsEmpty then
+    Tablo.InfoGoster('SIPARIS', TabStokTalep.FieldByName('ID').AsInteger, TabNo_STOKTALEP);
 end;
 
 procedure TStokTalepListeDlg.EkranYazdir(Sender: TObject);

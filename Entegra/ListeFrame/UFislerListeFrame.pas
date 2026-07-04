@@ -65,6 +65,8 @@ type
     JvTimer1: TJvTimer;
     SQLMemo: TcxMemo;
     PopupFis: TPopupMenu;
+    PopupFisGrid: TPopupMenu;
+    FisInfoMenu: TMenuItem;
     procedure InitEkran(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
@@ -76,6 +78,7 @@ type
     procedure AraKodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
     procedure GridTviewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    procedure FisInfoMenuClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -197,6 +200,12 @@ end;
 procedure TFislerListeFrame.CalendarBasChange(Sender: TObject);
 begin
    YenileTusClick(self);
+end;
+
+procedure TFislerListeFrame.FisInfoMenuClick(Sender: TObject);
+begin
+  if not TabFisler.IsEmpty then
+    Tablo.InfoGoster('FATBASLIK', TabFisler.FieldByName('ID').AsInteger, 0);
 end;
 
 procedure TFislerListeFrame.JvTimer1Timer(Sender: TObject);

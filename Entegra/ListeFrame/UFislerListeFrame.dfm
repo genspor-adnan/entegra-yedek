@@ -20,6 +20,7 @@ object FislerListeFrame: TFislerListeFrame
     Width = 1086
     Height = 406
     Align = alClient
+    PopupMenu = PopupFisGrid
     TabOrder = 0
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
@@ -321,5 +322,13 @@ object FislerListeFrame: TFislerListeFrame
   object PopupFis: TPopupMenu
     Left = 488
     Top = 208
+  end
+  object PopupFisGrid: TPopupMenu
+    Left = 560
+    Top = 208
+    object FisInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = FisInfoMenuClick
+    end
   end
 end
