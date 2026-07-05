@@ -362,6 +362,7 @@ type
     UretimOncekiBirim,Carpan : Integer;
     IzlemDlg3 : TIzlemeDlg;
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // URETIMFISDETAY orijinal satirlar (log diff icin)
+    FEkleLogland: Boolean;  // kart EKLEME logu (mukerrer onleme: Finish/FormClose tek sefer)
     procedure IletisimEkleClick(Sender: TObject);
     function MiktarSor(Mik:Variant):Real;
     function BoslukKontrolu: Boolean;
@@ -1154,6 +1155,15 @@ begin
         Tablo.FaturaSil(TabUretim, TabUretimDetay);
     if (TabUretim.active)and(TabUretim.Fields[0].AsString <> '')and (TabUretimDetay.active)and(TabUretimDetay.IsEmpty) then // eğer hiç satır yok ise silinmesi gerekiyor..
        Tablo.FaturaSil(TabUretim,TabUretimDetay);
+    // FALLBACK: yeni kart ara-kaydedilip Finish cagrilmadan X ile kapatildiysa EKLEME logu kacmasin.
+    // Sadece kart hala DB'de duruyorsa (FaturaSil silmemisse) ve daha once loglanmadiysa logla (tek sefer).
+    if (LogGun > 0) and ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) and
+       (TabUretim.Active) and (TabUretim.State = dsBrowse) and
+       (TabUretim.FieldByName('ID').AsInteger > 0) and
+       Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 from FATBASLIK where ID=&ID', ['&ID'], [TabUretim.FieldByName('ID').AsInteger]) then begin
+      LogKayitEkle(TabUretim, TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger, TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger);
+      FEkleLogland := True;
+    end;
     if UretimWizardDlg<> nil then
        FreeAndNil(UretimWizardDlg);
   end;
@@ -1187,6 +1197,7 @@ begin
   Carpan := 0;
   Tablo.GridTurkcelestir;
   IptalSecildi := True;
+  FEkleLogland := False;
   YeniMiktar := 1;
   PageControlAlt.ActivePageIndex:=0;
 end;
@@ -1460,8 +1471,10 @@ begin
   if LogGun > 0 then begin
     if IslemOp = 'D' then
       Tablo.LogIslemleri(TabNo_URETIMFISI, UretimID, 4, TabUretim)
-    else if (IslemOp = 'E') or (IslemOp = 'K') then
+    else if ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) then begin
       LogKayitEkle(TabUretim, TabNo_URETIMFISI, UretimID, TabNo_URETIMFISI, UretimID);
+      FEkleLogland := True;
+    end;
     // Detay satirlari (ust=uretim fisi) diff.
     LogDiffKaydet(TabUretimDetay, FDetSnap, TabNo_URETIMFISDETAY, TabNo_URETIMFISI, UretimID);
     LogSnapshotAl(TabUretimDetay, FDetSnap);   // tazele (mukerrer save'i onle)

@@ -281,6 +281,7 @@ type
     { IBilgiFrame �yeleri            }
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // PLANKREDI (detay) orijinal satirlar (log diff icin)
     FYeniKredi: Boolean;                                // kart EKLEME mi (yeni) yoksa DUZENLEME mi
+    FEkleLogland: Boolean;                              // ekleme logu tek sefer (kaydet VEYA kapanis fallback)
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
     procedure GorunurOlacak;
@@ -331,6 +332,16 @@ var YeniKayit : Boolean;
 
 destructor TKredilerDlg.Destroy;
 begin
+  // FALLBACK: yeni kredi (FYeniKredi) DB'ye yazilmis (dsBrowse, ID>0) ama kaydette
+  // loglanmadiysa (kaydedip/kaydetmeden X ile kapanis) ekleme logunu kapanista
+  // TEK SEFER garanti et. FEkleLogland zaten True ise dokunma (mukerrer onleme).
+  if (LogGun > 0) and FYeniKredi and (not FEkleLogland) and
+     KREDILER.Active and (KREDILER.State = dsBrowse) and
+     (KREDILER.FieldByName('ID').AsInteger > 0) then begin
+    LogKayitEkle(KREDILER, TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger,
+                 TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger);
+    FEkleLogland := True;
+  end;
   FreeAndNil(FDetSnap);
   inherited;
 end;
@@ -489,6 +500,7 @@ constructor TKredilerDlg.Create(AOwner: TComponent);
 begin
   inherited;
   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+  FEkleLogland := False;
   PageControl1.ActivePageIndex := 0;
 end;
 
@@ -744,6 +756,7 @@ end;
 procedure TKredilerDlg.KREDILERNewRecord(DataSet: TDataSet);
 begin
    FYeniKredi := True;   // yeni kredi -> kaydette EKLEME loglanacak
+   FEkleLogland := False;   // yeni insert basladi -> ekleme logu (kaydet/fallback) yeniden garanti
    KREDILER.FieldByName('ALINISTARIHI').AsDateTime := Tablo.Genini.BugunTrhSaat;
    KREDILER.FieldByName('GENELKREDITIPI').AsInteger:= 0;
    KREDILER.FieldByName('EKLEYEN').AsString := Kullanan;
@@ -803,8 +816,12 @@ begin
 
    // KART loglama (TEK SEFER, kaydette): yeni -> LogKayitEkle, edit -> LogIslemleri.
    if LogGun > 0 then begin
-      if Yeni then
-         LogKayitEkle(KREDILER, TabNo_KREDILER, KID, TabNo_KREDILER, KID)
+      if Yeni then begin
+         if not FEkleLogland then begin
+            LogKayitEkle(KREDILER, TabNo_KREDILER, KID, TabNo_KREDILER, KID);
+            FEkleLogland := True;
+         end;
+      end
       else
          Tablo.LogIslemleri(TabNo_KREDILER, KID, 4, KREDILER);
       // DETAY: PLANKREDI satir ekleme/degisiklik/silme diff (ust = kredi).

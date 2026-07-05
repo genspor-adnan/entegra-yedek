@@ -104,6 +104,7 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet VEYA kapanis fallback)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -133,6 +134,7 @@ type
     { Public declarations }
     IslemOp:Char;
     procedure POSEkranInit(POSId: Integer);
+    destructor Destroy; override;
     property KapatEylemi : TNotifyEvent read FKapatEylemi write FKapatEylemi;
   end;
 
@@ -143,9 +145,24 @@ implementation
 uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog;
 { TPOS }
 
+destructor TPOS.Destroy;
+begin
+  // FALLBACK: kart EKLEME idi, DB'ye yazilmis (dsBrowse, ID>0) ama kaydette
+  // loglanmadiysa (kaydedip/kaydetmeden X ile kapanis) ekleme logunu kapanista
+  // TEK SEFER garanti et. FEkleLogland zaten True ise dokunma (mukerrer onleme).
+  if (LogGun > 0) and (IslemOp = 'E') and (not FEkleLogland) and
+     TabPOS.Active and (TabPOS.State = dsBrowse) and
+     (TabPOS.Fields[0].AsInteger > 0) then begin
+    LogKayitEkle(TabPOS, TabNo_POS, TabPOS.Fields[0].AsInteger,
+                 TabNo_POS, TabPOS.Fields[0].AsInteger);
+    FEkleLogland := True;
+  end;
+  inherited;
+end;
+
 procedure TPOS.POSEkranInit(POSId: Integer);
 begin
-
+  FEkleLogland := False;
   TabPOS.Close;
   if POSId <> -1 then begin
     if POSId = -2 then
@@ -292,8 +309,12 @@ begin
   end;
   LID := TabPOS.Fields[0].AsInteger;
   if LogGun > 0 then
-     if LYeni then
-        LogKayitEkle(TabPOS, TabNo_POS, LID, TabNo_POS, LID)
+     if LYeni then begin
+        if not FEkleLogland then begin
+           LogKayitEkle(TabPOS, TabNo_POS, LID, TabNo_POS, LID);
+           FEkleLogland := True;
+        end;
+     end
      else
         Tablo.LogIslemleri(TabNo_POS, LID, 4, TabPOS);
 end;
@@ -353,6 +374,8 @@ end;
 
 procedure TPOS.TabPOSNewRecord(DataSet: TDataSet);
 begin
+  IslemOp := 'E';          // yeni POS -> kapanis fallback bunu EKLEME olarak taniyacak
+  FEkleLogland := False;   // yeni insert basladi -> ekleme logu (kaydet/fallback) yeniden garanti
   EdiBANKATICARIHESAPKODUPropertiesButtonClick(Self,0);
   TabPos.FieldByName('DURUM').AsBoolean:=True;
   TabPos.FieldByName('MASRAFCIKIS').AsInteger:=2;

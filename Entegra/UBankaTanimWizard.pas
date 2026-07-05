@@ -95,6 +95,7 @@ type
     procedure TabBankaHesaplarBeforeDelete(DataSet: TDataSet);
     procedure TabBankaHesaplarAfterDelete(DataSet: TDataSet);
     procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     FEkleLogland: Boolean;   // ekleme logu tek sefer (AfterPost mukerrer tetiklenmesin)
@@ -188,6 +189,20 @@ begin
   HesapOlusturmaDuzenlemeEkr.Title.Text:=jvHesapOlusturmaDuzenleme;
   Tablo.GridTurkcelestir;
   ComboKUR.Enabled := DovizTakibi;
+end;
+
+procedure TBankaTanimWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  // FALLBACK: yeni banka hesabi (islemOp='E') DB'ye yazilmis (dsBrowse, ID>0) ama
+  // AfterPost gec kalirsa/tetiklenmezse ekleme logunu kapanista TEK SEFER garanti et.
+  // FEkleLogland zaten True ise dokunma (mukerrer onleme).
+  if (LogGun > 0) and (islemOp = 'E') and (not FEkleLogland) and
+     TabBankaHesaplar.Active and (TabBankaHesaplar.State = dsBrowse) and
+     (TabBankaHesaplar.Fields[0].AsInteger > 0) then begin
+    LogKayitEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger,
+                 TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger);
+    FEkleLogland := True;
+  end;
 end;
 
 procedure TBankaTanimWizardDlg.FormShow(Sender: TObject);

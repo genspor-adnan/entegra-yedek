@@ -583,6 +583,7 @@ type
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
     IzlemDlg3 : TIzlemeDlg;
+    FEkleLogland: Boolean;  // kart EKLEME logu (mukerrer onleme: Finish/FormClose tek sefer)
 
     procedure IletisimEkleClick(Sender: TObject);
     //function UretimNoGetir: string;
@@ -1427,8 +1428,17 @@ begin
 
    if (IptalSecildi) and (IslemOp = 'E')and(ModalResult = mrCancel) then
       Tablo.UretimEmriSilmeIslemleri(TabUretimEmri.FieldByName('ID').AsInteger)
-   else if TabUretimEmri.State = dsEdit then
-      TabUretimEmri.Post;
+   else begin
+      if TabUretimEmri.State = dsEdit then
+         TabUretimEmri.Post;
+      // FALLBACK: yeni kart ara-kaydedilip Finish cagrilmadan X ile kapatildiysa (kart DB'de kaldi)
+      // EKLEME logu kacmasin. Silme kolunda calismaz -> yalnizca hala DB'de olan kart loglanir. Tek sefer.
+      if (LogGun > 0) and ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) and
+         (TabUretimEmri.Active) and (TabUretimEmri.FieldByName('ID').AsInteger > 0) then begin
+         LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, TabUretimEmri.FieldByName('ID').AsInteger, TabNo_URETIMEMRI, TabUretimEmri.FieldByName('ID').AsInteger);
+         FEkleLogland := True;
+      end;
+   end;
 end;
 
 procedure TUretimEmriWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1469,6 +1479,7 @@ begin
   LogID := 0;
   Carpan := 0;
   IptalSecildi := true;
+  FEkleLogland := False;
   Tablo.GridTurkcelestir;
   Tablo.GENINI.ReadImageSection(Ops_AnaKaynak, Tablo.repAnaKaynakTipi.Properties.Items, False);  // 'AktifPasif'
   SekmeIslem(Ops_UEmriEditSekme1,EkAlanlarEkr);
@@ -1942,8 +1953,10 @@ begin
     begin
       if IslemOp = 'D' then
         Tablo.LogIslemleri(TabNo_URETIMEMRI, LID, 4, TabUretimEmri)
-      else
+      else if not FEkleLogland then begin
         LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, LID, TabNo_URETIMEMRI, LID);
+        FEkleLogland := True;
+      end;
     end;
     LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, LID);
     LogSnapshotAl(TabUretimEmriDetay, FDetSnap);

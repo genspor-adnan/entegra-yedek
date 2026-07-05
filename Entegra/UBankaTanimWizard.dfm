@@ -12,6 +12,7 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
   Font.Name = 'Trebuchet MS'
   Font.Style = []
   PopupMenu = CariHesapEkstresi1
+  OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
   TextHeight = 16
