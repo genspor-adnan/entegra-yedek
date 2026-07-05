@@ -470,9 +470,13 @@ var
   LAd, LKod: string;
 begin
   try
+    // ADI/KODU -> POS, Kredi Karti; HESAPADI/HESAPKODU -> Banka; KREDIKODU -> Krediler;
+    // BORCLU/SERINO -> Cek/Senet. (IlkDolu var olmayan alani atlar -> fazla aday zararsiz.)
     LAd  := Copy(IlkDolu(['FIRMA','STOKADI','ADI','ADSOYAD','KONUSU','PROJEADI',
-                          'ACIKLAMA','TANIM','UNVAN','ISIM']), 1, 200);
-    LKod := Copy(IlkDolu(['KOD','STOKKOD','KODU','CARIKOD']), 1, 60);
+                          'ACIKLAMA','TANIM','UNVAN','ISIM','HESAPADI','BANKAADI',
+                          'BORCLU']), 1, 200);
+    LKod := Copy(IlkDolu(['KOD','STOKKOD','KODU','CARIKOD','HESAPKODU','HESAPNO',
+                          'KREDIKODU','SERINO']), 1, 60);
     if (LAd = '') and (LKod = '') then Exit;   // referanslanacak ad/kod yok
     GLock.Enter;
     try

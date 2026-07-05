@@ -97,6 +97,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+    FEkleLogland: Boolean;   // ekleme logu tek sefer (AfterPost mukerrer tetiklenmesin)
   public
     { Public declarations }
     IslemOp:Char;
@@ -108,7 +109,7 @@ var
 
 implementation
 
-uses UAcilisKaydi, Utablo,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly;
+uses UAcilisKaydi, Utablo,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly, ULog;
 
 {$R *.dfm}
 
@@ -181,6 +182,7 @@ end;
 
 procedure TBankaTanimWizardDlg.FormCreate(Sender: TObject);
 begin
+  FEkleLogland := False;
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
   HesapOlusturmaDuzenlemeEkr.Title.Text:=jvHesapOlusturmaDuzenleme;
@@ -244,6 +246,12 @@ begin
                    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update REHBER set FIRMA='''+TabBankaHesaplar.FieldByName('HESAPADI').AsString+''' where ID='+TabBankaHesaplar.FieldByName('ILETREHBERID').AsString,[],[]);
              end;
              Tablo.LogIslemleri(TabNo_BANKAHESAPLAR,TabBankaHesaplar.Fields[0].AsInteger, 4, TabBankaHesaplar);
+          end;
+    'E' : if (LogGun > 0) and (not FEkleLogland) then
+          begin  // yeni banka hesabi: ekleme logu (LogIslemleri LogOnceki bos oldugundan ekleme'yi kacirir)
+            LogKayitEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger,
+                         TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger);
+            FEkleLogland := True;
           end;
    { 'E' : if TabBankaHesaplar.FieldByName('REHBERID').AsInteger < 0 then //Eğer kendi banka bilgimiz ise rehberde kart açsın
           begin //Eğer yeni kayıtsa otomatik olarak 0 miktarlı açılış fişi oluştursun
