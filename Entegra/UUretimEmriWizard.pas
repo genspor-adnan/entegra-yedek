@@ -1917,11 +1917,13 @@ var
   LYeni: Boolean;
   LID: Integer;
 begin
-  LYeni := TabUretimEmri.State = dsInsert;   // Post'tan ONCE yakala
+  // Ekleme/degistirme ayrimi IslemOp'tan (kart Finish'ten ONCE Post edilmis olabilir ->
+  // State guvenilmez; State=dsInsert kullanilirsa ekleme kaydi kaciyordu).
+  LYeni := (IslemOp = 'E') or (IslemOp = 'K');
   if TabUretimEmri.State in [dsEdit,dsInsert] then
   begin
     // Gercek degisiklik yoksa Post etme -> gereksiz DEGISTIREN/log olmasin.
-    if LYeni or TabUretimEmri.Modified then
+    if (TabUretimEmri.State = dsInsert) or LYeni or TabUretimEmri.Modified then
        TabUretimEmri.Post
     else
        TabUretimEmri.Cancel;
@@ -1938,10 +1940,10 @@ begin
   try
     if LogGun > 0 then
     begin
-      if LYeni then
-        LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, LID, TabNo_URETIMEMRI, LID)
+      if IslemOp = 'D' then
+        Tablo.LogIslemleri(TabNo_URETIMEMRI, LID, 4, TabUretimEmri)
       else
-        Tablo.LogIslemleri(TabNo_URETIMEMRI, LID, 4, TabUretimEmri);
+        LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, LID, TabNo_URETIMEMRI, LID);
     end;
     LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, LID);
     LogSnapshotAl(TabUretimEmriDetay, FDetSnap);

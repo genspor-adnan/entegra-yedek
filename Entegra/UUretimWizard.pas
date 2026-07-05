@@ -1465,6 +1465,23 @@ begin
     // Detay satirlari (ust=uretim fisi) diff.
     LogDiffKaydet(TabUretimDetay, FDetSnap, TabNo_URETIMFISDETAY, TabNo_URETIMFISI, UretimID);
     LogSnapshotAl(TabUretimDetay, FDetSnap);   // tazele (mukerrer save'i onle)
+    // Uretilen stok (detay ADET>0) -> LOGREFERANS(144). Silmede FATURA silinince LRuf bos
+    // kalir; LOGREFERANS kalici oldugundan KOD/AD silmede de gelir. (FIRMA/KOD alias ile.)
+    try
+      var LRef := TFDQuery.Create(nil);
+      try
+        LRef.Connection := Tablo.FDCnn;
+        LRef.SQL.Text := 'SELECT TOP 1 s.STOKADI AS FIRMA, s.KOD AS KOD FROM FATURA f' +
+          ' JOIN STOKLAR s ON s.ID=f.URUNID WHERE f.FATBASID=' + IntToStr(UretimID) +
+          ' AND f.ADET>0 ORDER BY f.ID';
+        LRef.Open;
+        if not LRef.IsEmpty then
+          LogReferansGuncelle(LRef, TabNo_URETIMFISI, UretimID, False);
+      finally
+        LRef.Free;
+      end;
+    except
+    end;
   end;
 
   IptalSecildi := False;
