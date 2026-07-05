@@ -883,7 +883,8 @@ begin
   TabloYenile(TabUretimDetay,[TabUretim.FieldByName('ID').AsInteger]);
   TabUretimDetay.FieldByName('DOVIZ_BIRIMFIYAT').OnChange := URETIMADETChange;
   TabUretimDetay.FieldByName('BIRIMFIYAT').OnChange := URETIMADETChange;
-  TabloYenile(TabUretimDetay, [TabUretim.FieldByname('ID').AsInteger]);
+  // (Mukerrer 2. TabloYenile kaldirildi: her satir eklemede detay 2 kez yukleniyordu ->
+  //  yavaslik; ustelik yeni atanan OnChange'leri sifirliyordu.)
   TabUretimDetayAfterScroll(DataSet);
   YeniMiktar := 1.0;
   DepoEnabledAyarla;
