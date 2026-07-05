@@ -91,7 +91,14 @@ USING (VALUES
   (317, ''CEKHAREKET'',    N''Hareket'', N''Çek/Senet''),
   (69,  ''POS'',           N''Kart'',   N''POS''),
   (324, ''POSORAN'',       N''Oran'',   N''POS''),
-  (46,  ''KREDIKARTI'',    N''Kart'',   N''Kredi Kartı'')
+  (46,  ''KREDIKARTI'',    N''Kart'',   N''Kredi Kartı''),
+  (78,  ''PERS_HAREKET'',  N''Hareket'', N''İK''),
+  (104, ''FATBASLIK'',     N''Başlık'', N''İrsaliye''),
+  (108, ''FATBASLIK'',     N''Kart'',   N''Tahakkuk Alacak''),
+  (109, ''FATBASLIK'',     N''Kart'',   N''Tahakkuk Borç''),
+  (180, ''EKIPMANLAR'',    N''Kart'',   N''Ekipman''),
+  (181, ''EKIPMANREHBER'', N''Detay'',  N''Ekipman''),
+  (463, ''SIPARIS'',       N''Başlık'', N''Satın Alma'')
 ) AS k(TABLOID, TABLOADI, GORUNUM, MODUL)
 ON h.TABLOID = k.TABLOID
 WHEN MATCHED THEN UPDATE SET TABLOADI=k.TABLOADI, GORUNUM=k.GORUNUM, MODUL=k.MODUL
