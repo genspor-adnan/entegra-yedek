@@ -4863,6 +4863,7 @@ begin
       3,12 : TabNo := TabNo_FIS_Gelen;   // giris fisi
       4,16 : TabNo := TabNo_FIS_Giden;   // cikis fisi
       20 : TabNo := TabNo_TRANSFER;      // stok transfer
+      6 : TabNo := TabNo_URETIMFISI;     // uretim fisi
       9,10,11,13,8,109 : TabNo := TabNo_FATBASLIK_Gelen;
       19,14,15,17,110,119 : TabNo := TabNo_FATBASLIK_Giden;
     else
@@ -4878,6 +4879,7 @@ begin
         3,12 : TabNo := TabNo_FATURA;   // giris fisi detay
         4,16 : TabNo := TabNo_FATURA;   // cikis fisi detay
         20 : TabNo := TabNo_FATURA;     // transfer detay
+        6 : TabNo := TabNo_URETIMFISDETAY;  // uretim fisi detay
         9 : TabNo := TabNo_FATURA_AlisSiparis;
         10,11,13,8,109 : TabNo := TabNo_FATURA_GelenFatFisIrs;
         19 : TabNo := TabNo_FATURA_SatisSiparis;
