@@ -967,6 +967,24 @@ begin
           Exit('Kart geri eklenemedi: ' + LHata)   // kart basarisiz -> tum islem iptal
         else
           LUyari := LUyari + LTabloAdi + ' ID=' + IntToStr(LRec.KayitID) + ': ' + LHata + #13#10;
+      end
+      else
+      begin
+        // Geri alma basarili -> "Ekleme" logu (kim/ne zaman geri aldi). REHBERID/STOKID JSON'dan.
+        var LReh: Int64 := 0;
+        var LStk: Int64 := 0;
+        var LObj := TJSONObject.ParseJSONValue(LRec.JSON) as TJSONObject;
+        if LObj <> nil then
+        try
+          LReh := StrToInt64Def(GeriJsonDeger(LObj.GetValue('REHBERID')),
+                    StrToInt64Def(GeriJsonDeger(LObj.GetValue('CARIID')), 0));
+          LStk := StrToInt64Def(GeriJsonDeger(LObj.GetValue('STOKID')),
+                    StrToInt64Def(GeriJsonDeger(LObj.GetValue('URUNID')), 0));
+        finally
+          LObj.Free;
+        end;
+        LogYaz(liEkle, LRec.TabloID, LRec.KayitID, LRec.JSON, 'Geri Al',
+               AUstTabloID, AUstKayitID, LReh, LStk);
       end;
     end;
 
