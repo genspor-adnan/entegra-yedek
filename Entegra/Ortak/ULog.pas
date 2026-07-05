@@ -834,9 +834,11 @@ begin
       // Bos sablon dataset (INSERT icin): SELECT * ... WHERE 1=0
       LQ.Connection := Tablo.FDCnn;
       LQ.SQL.Text := 'SELECT * FROM ' + ATabloAdi + ' WHERE 1=0';
-      LQ.Open;
-      // FireDAC ID'yi acikca yazsin: auto-inc alan atlamasini kapat + ID guncellemeye dahil.
+      // AutoIncFields OPEN'DAN ONCE bosaltilmali; yoksa Open ID'yi TFDAutoIncField olarak
+      // olusturur ve INSERT'e dahil etmez ('identity column explicit value' hatasi).
       LQ.UpdateOptions.AutoIncFields := '';
+      LQ.Open;
+      // FireDAC ID'yi acikca yazsin: ID'yi guncellemeye dahil et.
       F := LQ.FindField('ID');
       if F <> nil then
       begin
