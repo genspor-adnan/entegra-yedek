@@ -54,6 +54,7 @@ type
     GridLOGLevel1: TcxGridLevel;
     Panel2: TPanel;
     cxButton1: TcxButton;
+    BtnGeriAl: TcxButton;
     TabLog: TFDQuery;
     DsTabLog: TDataSource;
     cxLabel8: TcxLabel;
@@ -67,6 +68,10 @@ type
     procedure GridLOGViewCustomDrawCell(Sender: TcxCustomGridTableView;
       ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure FormDestroy(Sender: TObject);
+    procedure GridLOGViewFocusedRecordChanged(Sender: TcxCustomGridTableView;
+      APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
+      ANewItemRecordFocusingChanged: Boolean);
+    procedure BtnGeriAlClick(Sender: TObject);
   private
     FJsonlar: TStringList;     // LvGecmis ile paralel: her kaydin BILGI json'u
     FTabloIDler: TStringList;  // FJsonlar ile paralel: her satirin TABLOID'i (deger cozumu icin)
@@ -88,6 +93,7 @@ type
     procedure BolumleriYukle;          // Bolum combo: TABLOLAR modulleri + bos
     procedure KullaniciButonClick(Sender: TObject; AButtonIndex: Integer);  // personel listesi
     procedure BilgiAlButonClick(Sender: TObject; AButtonIndex: Integer);    // Bilgisayar/KayitNo: giris + temizle
+    procedure GeriAlButonGuncelle;   // "Geri Al" butonu gorunurlugu (secili satir SILME mi)
   public
     TabloAd: String;
     ID: Integer;
@@ -100,7 +106,7 @@ var
 
 implementation
 
-   uses UTablo, UGirisKutusuEx;
+   uses UTablo, UGirisKutusuEx, ULog;
 {$R *.dfm}
 
 function IslemAd(ATip: Integer): string;
@@ -304,6 +310,7 @@ begin
   except
     // ISLEMLOG view yok / erisim yok -> sessiz gec (grid bos)
   end;
+  GeriAlButonGuncelle;   // secili satir degisti -> "Geri Al" gorunurlugu
 end;
 
 // Filtre kontrollerinin olaylarini TabLogYukle'ye baglar (kod ile, bir kez).
@@ -499,6 +506,7 @@ begin
   // Detay zaten kaydin gecmisiyle dolu; dokunma.
   if GenelModu and (cxPageControl1.ActivePage = cxTabSheet2) then
     GenelSatirDetayGoster;
+  GeriAlButonGuncelle;   // "Geri Al" yalnizca Liste sekmesinde + SILME satirinda
 end;
 
 // ISLEMLOG (yillik LOG<yyyy> birlesim view'i) uzerinden bu kaydin islem gecmisini
@@ -889,6 +897,49 @@ begin
   FTabloIDler.Free;
   FCozumler.Free;
   FCozumCache.Free;
+end;
+
+// "Geri Al" butonu yalnizca Liste (Genel) sekmesinde ve secili satir SILME (0) ise gorunur.
+procedure TInfoDlg.GeriAlButonGuncelle;
+begin
+  BtnGeriAl.Visible := GenelModu
+    and (cxPageControl1.ActivePage = cxTabSheet1)
+    and TabLog.Active and (not TabLog.IsEmpty)
+    and (TabLog.FieldByName('ISLEMTIPI').AsInteger = 0);
+end;
+
+procedure TInfoDlg.GridLOGViewFocusedRecordChanged(Sender: TcxCustomGridTableView;
+  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
+  ANewItemRecordFocusingChanged: Boolean);
+begin
+  GeriAlButonGuncelle;   // secili satir SILME ise butonu goster
+end;
+
+// Secili SILME grubunu (kart + tum detaylari) log JSON'larindan AYNI ID ile geri ekler.
+procedure TInfoDlg.BtnGeriAlClick(Sender: TObject);
+var
+  LUstTab: Integer;
+  LUstKayit: Int64;
+  LGun: TDateTime;
+  LAd, LSonuc: string;
+begin
+  if (not TabLog.Active) or TabLog.IsEmpty
+     or (TabLog.FieldByName('ISLEMTIPI').AsInteger <> 0) then Exit;
+  LUstTab   := TabLog.FieldByName('USTTABLOID').AsInteger;
+  LUstKayit := TabLog.FieldByName('KAYITNO').AsLargeInt;
+  LGun      := TabLog.FieldByName('GUN').AsDateTime;
+  LAd       := TabLog.FieldByName('AD').AsString;
+  if Application.MessageBox(
+       PChar('Bu silme i'#$015F'lemi geri al'#$0131'ns'#$0131'n m'#$0131'? Kay'#$0131't ayn'#$0131' ID ile geri eklenecek.'#13#10 + LAd),
+       PChar('Geri Al'), MB_YESNO or MB_ICONQUESTION) <> IDYES then Exit;
+  LSonuc := LogGeriAl(LUstTab, LUstKayit, LGun);
+  if LSonuc = '' then
+  begin
+    ShowMessage('Kay'#$0131't geri al'#$0131'nd'#$0131'.');
+    TabLogYukle;   // listeyi tazele (silme kaydi hala loglarda kalir)
+  end
+  else
+    ShowMessage(LSonuc);
 end;
 
 end.

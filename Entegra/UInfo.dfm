@@ -191,6 +191,7 @@ object InfoDlg: TInfoDlg
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           OnCustomDrawCell = GridLOGViewCustomDrawCell
+          OnFocusedRecordChanged = GridLOGViewFocusedRecordChanged
           DataController.DataSource = DsTabLog
           DataController.Summary.DefaultGroupSummaryItems = <
             item
@@ -354,6 +355,18 @@ object InfoDlg: TInfoDlg
       OptionsImage.ImageIndex = 0
       PaintStyle = bpsCaption
       TabOrder = 0
+    end
+    object BtnGeriAl: TcxButton
+      Left = 714
+      Top = 6
+      Width = 98
+      Height = 29
+      Align = alCustom
+      Anchors = [akTop, akRight]
+      Caption = 'Geri Al'
+      TabOrder = 4
+      Visible = False
+      OnClick = BtnGeriAlClick
     end
     object cxLabel8: TcxLabel
       Left = 9

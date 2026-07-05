@@ -102,6 +102,13 @@ procedure LogReferansGuncelle(ADataSet: TDataSet; ATabloID: Integer; AKayitID: I
 // stok <- STOKID/URUNID. Bulunamazsa 0. (LogYaz'a REHBERID/STOKID gecmek icin.)
 procedure LogVarlikIDleri(ADataSet: TDataSet; out ARehberID, AStokID: Int64);
 
+// Bir SILME grubunu (kart + tum detaylari) log JSON'larindan AYNI ID ile geri
+// INSERT eder (silinen kaydin dirilmesi / "Geri Al"). AUstTabloID/AUstKayitID = kart
+// (master) anahtari, AGun = silme islemi tarihi (gun bazli). Kart once, sonra detaylar
+// eklenir (FK). Kart ID'si su an baska bir kayitta kullaniliyorsa hicbir sey eklenmez.
+// Sonuc: '' = tam basari; aksi halde hata (kart) veya uyari (atlanan detay) mesaji.
+function LogGeriAl(AUstTabloID: Integer; AUstKayitID: Int64; AGun: TDateTime): string;
+
 implementation
 
 uses
@@ -722,6 +729,250 @@ begin
     end;
   except
     // loglama silme islemini ASLA bozmaz
+  end;
+end;
+
+{ ---- Geri Al (silinen kaydi dirilt) ---- }
+
+type
+  TGeriKayit = record
+    TabloID: Integer;
+    KayitID: Int64;
+    JSON: string;
+  end;
+
+// ANA DB'de TABLOID -> fiziksel tablo adi (TABLOLAR). Bulunamazsa ''.
+function GeriTabloAdiGetir(ATabloID: Integer): string;
+var LQ: TFDQuery;
+begin
+  Result := '';
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text := 'SELECT TABLOADI FROM TABLOLAR WHERE TABLOID=:t';
+    LQ.ParamByName('t').AsInteger := ATabloID;
+    LQ.Open;
+    if not LQ.IsEmpty then Result := Trim(LQ.Fields[0].AsString);
+  finally
+    LQ.Free;
+  end;
+end;
+
+// ANA DB: <ATablo>'da ID=AID kaydi var mi? (cakisma / mukerrer kontrolu)
+function GeriKayitVarMi(const ATablo: string; AID: Int64): Boolean;
+var LQ: TFDQuery;
+begin
+  Result := False;
+  if Trim(ATablo) = '' then Exit;
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text := 'SELECT 1 FROM ' + ATablo + ' WHERE ID=:id';
+    LQ.ParamByName('id').AsLargeInt := AID;
+    LQ.Open;
+    Result := not LQ.IsEmpty;
+  finally
+    LQ.Free;
+  end;
+end;
+
+// Tablonun IDENTITY kolonu var mi? (IDENTITY_INSERT sadece varsa acilir)
+function GeriIdentityVarMi(const ATablo: string): Boolean;
+var LQ: TFDQuery;
+begin
+  Result := False;
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text := 'SELECT OBJECTPROPERTY(OBJECT_ID(:t), ''TableHasIdentity'')';
+    LQ.ParamByName('t').AsString := ATablo;
+    LQ.Open;
+    if (not LQ.IsEmpty) and (not LQ.Fields[0].IsNull) then
+      Result := LQ.Fields[0].AsInteger = 1;
+  finally
+    LQ.Free;
+  end;
+end;
+
+// JSON degerini duz string'e cevirir (silme JSON'unda degerler string tutulur ama
+// sayi/bool da gelebilir). Nesne/dizi beklenmez (duz key-value).
+function GeriJsonDeger(V: TJSONValue): string;
+begin
+  if V = nil then
+    Result := ''
+  else if V is TJSONString then
+    Result := TJSONString(V).Value
+  else if (V is TJSONNumber) or (V is TJSONBool) then
+    Result := V.Value
+  else
+    Result := V.ToString;
+end;
+
+// Tek bir kaydi (JSON alanlari) ATabloAdi'na AYNI ID ile ekler. Format-guvenli
+// (TField.AsString -> kultur-aware). Sonuc: '' = basari, aksi halde hata mesaji.
+function GeriKayitEkle(const ATabloAdi, AJSON: string): string;
+var
+  LQ: TFDQuery;
+  LParsed: TJSONValue;
+  LObj: TJSONObject;
+  LPair: TJSONPair;
+  F: TField;
+  LDeger: string;
+  LIdentity, LIdentityAcik: Boolean;
+begin
+  Result := '';
+  LIdentityAcik := False;
+  LParsed := nil;
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LParsed := TJSONObject.ParseJSONValue(AJSON);
+      if not (LParsed is TJSONObject) then
+        Exit('JSON cozumlenemedi.');
+      LObj := TJSONObject(LParsed);
+
+      // Bos sablon dataset (INSERT icin): SELECT * ... WHERE 1=0
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'SELECT * FROM ' + ATabloAdi + ' WHERE 1=0';
+      LQ.Open;
+      // FireDAC ID'yi acikca yazsin: auto-inc alan atlamasini kapat + ID guncellemeye dahil.
+      LQ.UpdateOptions.AutoIncFields := '';
+      F := LQ.FindField('ID');
+      if F <> nil then
+        F.ProviderFlags := F.ProviderFlags + [pfInUpdate];
+
+      LIdentity := GeriIdentityVarMi(ATabloAdi);
+      if LIdentity then
+      begin
+        Tablo.FDCnn.ExecSQL('SET IDENTITY_INSERT ' + ATabloAdi + ' ON');
+        LIdentityAcik := True;
+      end;
+
+      LQ.Append;
+      for LPair in LObj do
+      begin
+        F := LQ.FindField(LPair.JsonString.Value);   // computed/olmayan kolon -> nil, atla
+        if F = nil then Continue;
+        LDeger := GeriJsonDeger(LPair.JsonValue);
+        if Trim(LDeger) = '' then
+          F.Clear
+        else
+          F.AsString := LDeger;   // kultur-aware: Turkce ondalik/tarih dogru yorumlanir
+      end;
+      LQ.Post;   // FireDAC parametreli INSERT -> format guvenli
+    except
+      on E: Exception do
+      begin
+        try if LQ.State in [dsInsert, dsEdit] then LQ.Cancel; except end;
+        Result := E.Message;
+      end;
+    end;
+  finally
+    // IDENTITY_INSERT'i ayni connection'da MUTLAKA geri kapat (hata olsa bile)
+    if LIdentityAcik then
+      try Tablo.FDCnn.ExecSQL('SET IDENTITY_INSERT ' + ATabloAdi + ' OFF'); except end;
+    LQ.Free;
+    if LParsed <> nil then LParsed.Free;
+  end;
+end;
+
+function LogGeriAl(AUstTabloID: Integer; AUstKayitID: Int64; AGun: TDateTime): string;
+var
+  LCnn: TFDConnection;
+  LLogQ: TFDQuery;
+  LList: TList<TGeriKayit>;
+  LRec: TGeriKayit;
+  i: Integer;
+  LTabloAdi, LKartTabloAdi, LUyari, LHata: string;
+  LKart: Boolean;
+begin
+  Result := '';
+  LList := TList<TGeriKayit>.Create;
+  try
+    // a. GENDEPO (otonom log baglantisi) - silme grubunu oku, KART ONCE (FK icin).
+    //    Tum satirlar once listeye alinir (ayni conn'da baska sorgu acmamak icin).
+    try
+      GLock.Enter;
+      try
+        LCnn := LogBaglantisi;
+        LLogQ := TFDQuery.Create(nil);
+        try
+          LLogQ.Connection := LCnn;
+          LLogQ.SQL.Text :=
+            'SELECT TABLOID, KAYITID, CAST(DECOMPRESS(BILGI) AS nvarchar(max)) J ' +
+            'FROM ISLEMLOG WHERE USTKAYITID=:u AND USTTABLOID=:ut AND ISLEMTIPI=0 ' +
+            'AND CAST(TARIH AS date)=:g ' +
+            'ORDER BY CASE WHEN TABLOID=:ut2 THEN 0 ELSE 1 END, ID';
+          LLogQ.ParamByName('u').AsLargeInt := AUstKayitID;
+          LLogQ.ParamByName('ut').AsInteger := AUstTabloID;
+          LLogQ.ParamByName('ut2').AsInteger := AUstTabloID;
+          LLogQ.ParamByName('g').AsString := FormatDateTime('yyyy-mm-dd', AGun);
+          LLogQ.Open;
+          while not LLogQ.Eof do
+          begin
+            LRec.TabloID := LLogQ.FieldByName('TABLOID').AsInteger;
+            LRec.KayitID := LLogQ.FieldByName('KAYITID').AsLargeInt;
+            LRec.JSON    := LLogQ.FieldByName('J').AsString;
+            LList.Add(LRec);
+            LLogQ.Next;
+          end;
+        finally
+          LLogQ.Free;
+        end;
+      finally
+        GLock.Leave;
+      end;
+    except
+      on E: Exception do
+        Exit('Log kayitlari okunamadi: ' + E.Message);
+    end;
+
+    if LList.Count = 0 then
+      Exit('Bu silme islemine ait geri alinacak kayit bulunamadi.');
+
+    // b. KART cakisma kontrolu (ANA DB): kart ID'si su an kullaniliyorsa hicbir sey ekleme.
+    LKartTabloAdi := GeriTabloAdiGetir(AUstTabloID);
+    if LKartTabloAdi = '' then
+      Exit('Kart tablosu (TABLOID=' + IntToStr(AUstTabloID) + ') bulunamadi; geri alinamaz.');
+    if GeriKayitVarMi(LKartTabloAdi, AUstKayitID) then
+      Exit('Bu ID (' + IntToStr(AUstKayitID) + ') su an baska bir kayitta kullaniliyor; geri alinamaz.');
+
+    // c. Sirayla INSERT (kart once, sonra detaylar).
+    LUyari := '';
+    for i := 0 to LList.Count - 1 do
+    begin
+      LRec := LList[i];
+      LKart := (LRec.TabloID = AUstTabloID) and (LRec.KayitID = AUstKayitID);
+
+      LTabloAdi := GeriTabloAdiGetir(LRec.TabloID);
+      if LTabloAdi = '' then
+      begin
+        if LKart then Exit('Kart tablosu bulunamadi; geri alinamaz.');
+        LUyari := LUyari + 'TABLOID=' + IntToStr(LRec.TabloID) + ' tablo adi bulunamadi, atlandi.'#13#10;
+        Continue;
+      end;
+
+      // Zaten varsa atla (detaylarda parcali cakisma; kart b'de kontrol edildi).
+      if GeriKayitVarMi(LTabloAdi, LRec.KayitID) then
+      begin
+        if not LKart then
+          LUyari := LUyari + LTabloAdi + ' ID=' + IntToStr(LRec.KayitID) + ' zaten mevcut, atlandi.'#13#10;
+        Continue;
+      end;
+
+      LHata := GeriKayitEkle(LTabloAdi, LRec.JSON);
+      if LHata <> '' then
+      begin
+        if LKart then
+          Exit('Kart geri eklenemedi: ' + LHata)   // kart basarisiz -> tum islem iptal
+        else
+          LUyari := LUyari + LTabloAdi + ' ID=' + IntToStr(LRec.KayitID) + ': ' + LHata + #13#10;
+      end;
+    end;
+
+    Result := LUyari;   // '' = tam basari; aksi halde atlanan detay uyarilari
+  finally
+    LList.Free;
   end;
 end;
 
