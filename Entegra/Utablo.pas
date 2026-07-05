@@ -8692,6 +8692,12 @@ begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
   LogDetaylariSil('URETIMEMRIDETAY', 'URETIMEMRIID', TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, UretimEmriID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
+  // KART (URETIMEMRI) silme logu (silmeden ONCE, kayit dururken)
+  if LogGun > 0 then begin
+    Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where ID='+IntToStr(UretimEmriID));
+    Tablo.OncekiLogBelirle(Tablo.Query1);
+    Tablo.LogIslemleri(TabNo_URETIMEMRI, UretimEmriID, 5, Tablo.Query1);
+  end;
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where ID=&ID',['&ID'],[UretimEmriID]);
 end;
 

@@ -1913,20 +1913,37 @@ begin
 end;
 
 procedure TUretimEmriWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
+var
+  LYeni: Boolean;
+  LID: Integer;
 begin
+  LYeni := TabUretimEmri.State = dsInsert;   // Post'tan ONCE yakala
   if TabUretimEmri.State in [dsEdit,dsInsert] then
-     TabUretimEmri.Post;
+  begin
+    // Gercek degisiklik yoksa Post etme -> gereksiz DEGISTIREN/log olmasin.
+    if LYeni or TabUretimEmri.Modified then
+       TabUretimEmri.Post
+    else
+       TabUretimEmri.Cancel;
+  end;
   if TabUretimEmriDetay.State in [dsEdit,dsInsert] then
      TabUretimEmriDetay.Post;
   if TabUretimOperasyon.State in [dsEdit,dsInsert] then
      TabUretimOperasyon.Post;
   if TabUretimOperasyonDetay.State in [dsEdit,dsInsert] then
      TabUretimOperasyonDetay.Post;
-  // ULog: yalniz DETAY satirlarini ISLEMLOG'a diff olarak yaz; sonra snapshot'i tazele.
-  // Master ID Post'tan sonra kesin bellidir. Kaydetmeyi ASLA bozmaz.
+  LID := TabUretimEmri.FieldByName('ID').AsInteger;
+  // ULog: KART (ekleme->LogKayitEkle, degistirme->LogIslemleri) + DETAY diff. Master ID
+  // Post'tan sonra kesindir. Kaydetmeyi ASLA bozmaz.
   try
-    LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI,
-      TabUretimEmri.FieldByName('ID').AsInteger);
+    if LogGun > 0 then
+    begin
+      if LYeni then
+        LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, LID, TabNo_URETIMEMRI, LID)
+      else
+        Tablo.LogIslemleri(TabNo_URETIMEMRI, LID, 4, TabUretimEmri);
+    end;
+    LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, LID);
     LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
   except
   end;
