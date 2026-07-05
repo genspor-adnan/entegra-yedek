@@ -812,18 +812,22 @@ end;
 // (TField.AsString -> kultur-aware). Sonuc: '' = basari, aksi halde hata mesaji.
 function GeriKayitEkle(const ATabloAdi, AJSON: string): string;
 var
-  LQ: TFDQuery;
+  LQ, LIns: TFDQuery;
   LParsed: TJSONValue;
   LObj: TJSONObject;
   LPair: TJSONPair;
   F: TField;
-  LDeger: string;
+  LDeger, LCols, LVals: string;
+  LKolonlar: TStringList;
+  i: Integer;
   LIdentity, LIdentityAcik: Boolean;
 begin
   Result := '';
   LIdentityAcik := False;
   LParsed := nil;
+  LKolonlar := TStringList.Create;
   LQ := TFDQuery.Create(nil);
+  LIns := TFDQuery.Create(nil);
   try
     try
       LParsed := TJSONObject.ParseJSONValue(AJSON);
@@ -831,22 +835,40 @@ begin
         Exit('JSON cozumlenemedi.');
       LObj := TJSONObject(LParsed);
 
-      // Bos sablon dataset (INSERT icin): SELECT * ... WHERE 1=0
+      // 1) Bos sablon dataset -> JSON degerlerini kultur-aware (Turkce ondalik/tarih) TField'a
+      //    parse etmek icin. (Insert BU dataset'le YAPILMAZ; FireDAC identity kolonu INSERT'e
+      //    almiyor -> asagida dinamik INSERT ile ID dahil acikca yazilir.)
       LQ.Connection := Tablo.FDCnn;
       LQ.SQL.Text := 'SELECT * FROM ' + ATabloAdi + ' WHERE 1=0';
-      // AutoIncFields OPEN'DAN ONCE bosaltilmali; yoksa Open ID'yi TFDAutoIncField olarak
-      // olusturur ve INSERT'e dahil etmez ('identity column explicit value' hatasi).
-      LQ.UpdateOptions.AutoIncFields := '';
       LQ.Open;
-      // FireDAC ID'yi acikca yazsin: ID'yi guncellemeye dahil et.
       F := LQ.FindField('ID');
-      if F <> nil then
+      if F <> nil then begin F.ReadOnly := False; F.Required := False; end;
+      LQ.Append;
+      for LPair in LObj do
       begin
-        F.ProviderFlags := F.ProviderFlags + [pfInUpdate];
-        F.ReadOnly := False;               // identity/auto-inc alan yazilamaz -> ac
-        F.Required := False;
-        F.AutoGenerateValue := arNone;     // otomatik uretimi kapat (ID'yi biz yaziyoruz)
+        F := LQ.FindField(LPair.JsonString.Value);   // computed/olmayan kolon -> nil, atla
+        if F = nil then Continue;
+        if F.ReadOnly then Continue;                 // computed/salt-okunur -> atla
+        LDeger := GeriJsonDeger(LPair.JsonValue);
+        if Trim(LDeger) = '' then F.Clear else F.AsString := LDeger;
+        LKolonlar.Add(F.FieldName);
       end;
+
+      if LKolonlar.Count = 0 then Exit('Yazilacak alan yok.');
+
+      // 2) Dinamik INSERT (ID dahil tum eslenen kolonlar acikca) - param degerleri
+      //    LQ.FieldByName().Value uzerinden (dogru tip, format-guvenli).
+      LCols := ''; LVals := '';
+      for i := 0 to LKolonlar.Count - 1 do
+      begin
+        if LCols <> '' then begin LCols := LCols + ','; LVals := LVals + ','; end;
+        LCols := LCols + '[' + LKolonlar[i] + ']';
+        LVals := LVals + ':P' + IntToStr(i);
+      end;
+      LIns.Connection := Tablo.FDCnn;
+      LIns.SQL.Text := 'INSERT INTO ' + ATabloAdi + ' (' + LCols + ') VALUES (' + LVals + ')';
+      for i := 0 to LKolonlar.Count - 1 do
+        LIns.Params[i].Value := LQ.FieldByName(LKolonlar[i]).Value;   // NULL -> Null (Clear)
 
       LIdentity := GeriIdentityVarMi(ATabloAdi);
       if LIdentity then
@@ -854,20 +876,7 @@ begin
         Tablo.FDCnn.ExecSQL('SET IDENTITY_INSERT ' + ATabloAdi + ' ON');
         LIdentityAcik := True;
       end;
-
-      LQ.Append;
-      for LPair in LObj do
-      begin
-        F := LQ.FindField(LPair.JsonString.Value);   // computed/olmayan kolon -> nil, atla
-        if F = nil then Continue;
-        if F.ReadOnly then Continue;   // computed/salt-okunur alan yazilamaz -> atla (ID yukarida acildi)
-        LDeger := GeriJsonDeger(LPair.JsonValue);
-        if Trim(LDeger) = '' then
-          F.Clear
-        else
-          F.AsString := LDeger;   // kultur-aware: Turkce ondalik/tarih dogru yorumlanir
-      end;
-      LQ.Post;   // FireDAC parametreli INSERT -> format guvenli
+      LIns.ExecSQL;
     except
       on E: Exception do
       begin
@@ -876,10 +885,11 @@ begin
       end;
     end;
   finally
-    // IDENTITY_INSERT'i ayni connection'da MUTLAKA geri kapat (hata olsa bile)
     if LIdentityAcik then
       try Tablo.FDCnn.ExecSQL('SET IDENTITY_INSERT ' + ATabloAdi + ' OFF'); except end;
     LQ.Free;
+    LIns.Free;
+    LKolonlar.Free;
     if LParsed <> nil then LParsed.Free;
   end;
 end;
