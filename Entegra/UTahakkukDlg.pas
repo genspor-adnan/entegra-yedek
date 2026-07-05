@@ -140,7 +140,7 @@ var
 
 implementation
 
-uses FetaKurulusSiniflari, PrjConst, LocOnFly, fetautil, UGenelAnaSekmeFrame,
+uses ULog, FetaKurulusSiniflari, PrjConst, LocOnFly, fetautil, UGenelAnaSekmeFrame,
   URaporAraclari;
 
 var OncekiTutar : Currency;
@@ -211,9 +211,9 @@ begin
 
    if islemOp='D' then  begin
       if Tur in [13] then
-        Tablo.LogIslemleri(TabNo_TAHAKKUK_Alacak,ID, 4, TabFatBaslik)
+        LogKartDegisti(TabFatBaslik, TabNo_TAHAKKUK_Alacak, ID)
       else if Tur in [17] then
-        Tablo.LogIslemleri(TabNo_TAHAKKUK_Borc,ID, 4, TabFatBaslik)
+        LogKartDegisti(TabFatBaslik, TabNo_TAHAKKUK_Borc, ID)
    end;
    Tabloyenile(TabFatBaslik,[TabFatBaslik.FieldByName('ID').AsInteger]);
 end;

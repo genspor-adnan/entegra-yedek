@@ -2453,8 +2453,8 @@ begin
      TabSiparis.Post;
      if islemOp='D' then
         case SiparisTur of
-          9  : Tablo.LogIslemleri(TabNo_SIPARIS_Gelen,SiparisIdsi, 4, TabSiparis);
-          19 :Tablo.LogIslemleri(TabNo_SIPARIS_Giden,SiparisIdsi, 4, TabSiparis);
+          9  : LogKartDegisti(TabSiparis, TabNo_SIPARIS_Gelen, SiparisIdsi);
+          19 : LogKartDegisti(TabSiparis, TabNo_SIPARIS_Giden, SiparisIdsi);
         end;
   end;
   if TabSiparisDetay.State in [dsInsert, dsEdit] then

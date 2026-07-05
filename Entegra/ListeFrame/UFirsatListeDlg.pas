@@ -1019,9 +1019,8 @@ begin
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[FIRSATLAR.Fields[0].AsInteger]);
 
-    if LogGun>0 then
-    Tablo.OncekiLogBelirle(FIRSATLAR);
-    Tablo.LogIslemleri(TabNo_PROJELER, FIRSATLAR.Fields[0].AsInteger, 5, FIRSATLAR);
+    // Kart SILME logu (TabNo_FIRSAT: detay loglariyla tutarli; eskiden yanlislikla TabNo_PROJELER yaziliyordu)
+    LogKartSil(FIRSATLAR, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
 
       FArama.YenileTus.Click;
         /// SQL2005 TE hataya neden oldu�u i�in delete olay�n� kendimiz yap�yoruz

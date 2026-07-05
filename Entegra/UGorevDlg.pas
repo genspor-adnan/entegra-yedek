@@ -722,7 +722,7 @@ begin
       LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
                    TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger)
     else
-      Tablo.LogIslemleri(TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger, 4, TabGorev);
+      LogKartDegisti(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
   end;
 
   if ComboAnimsatmaZamani.editvalue<>null then

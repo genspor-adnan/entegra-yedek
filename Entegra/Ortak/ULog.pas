@@ -113,12 +113,22 @@ function LogKartEkle(ADataSet: TDataSet; ATabNo: Integer;
 
 // Kart DEGISTIRME logu: BeforeEdit'teki OncekiLogBelirle snapshot'ina gore degisen
 // alanlar (LogIslemleri/4). LogGun + try/except guard icerir.
-procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+// AUstTabNo/AUstID: detay satiri loglarken master (kart) anahtari (kart icin 0).
+procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer;
+  AUstTabNo: Integer = 0; AUstID: Int64 = 0);
 
 // Kart SILME logu — SILMEDEN ONCE, imlec silinecek kayittayken cagrilir
 // (OncekiLogBelirle + LogIslemleri/5). Detaylar icin ayrica LogDetaylariSil cagrilir.
 // DIKKAT: liste ekranlarinda DELETE+Yenile'den SONRA cagrilirsa imlec kayar, YANLIS kayit loglanir.
-procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+// AUstTabNo/AUstID: tek detay satiri silinirken master (kart) anahtari (kart icin 0).
+procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer;
+  AUstTabNo: Integer = 0; AUstID: Int64 = 0);
+
+// Detay satiri icin ORTAK AfterPost logu: BeforeEdit'te OncekiLogBelirle cagrilmis
+// olmali (LogOnceki dolu -> DEGISTIRME, bos -> yeni satir EKLEME). ID alani yoksa
+// veya LogGun kapaliysa hicbir sey yapmaz. Cagiran yalnizca DataSet->TabNo esler.
+procedure LogDetaySatirPost(ADataSet: TDataSet; ADetayTabNo, AUstTabNo: Integer;
+  AUstID: Int64);
 
 // Bir SILME grubunu (kart + tum detaylari) log JSON'larindan AYNI ID ile geri
 // INSERT eder (silinen kaydin dirilmesi / "Geri Al"). AUstTabloID/AUstKayitID = kart
@@ -775,21 +785,40 @@ begin
   end;
 end;
 
-procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer;
+  AUstTabNo: Integer; AUstID: Int64);
 begin
   if LogGun <= 0 then Exit;
   try
-    Tablo.LogIslemleri(ATabNo, AKayitID, 4, ADataSet);
+    Tablo.LogIslemleri(ATabNo, AKayitID, 4, ADataSet, AUstTabNo, AUstID);
   except
   end;
 end;
 
-procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer;
+  AUstTabNo: Integer; AUstID: Int64);
 begin
   if LogGun <= 0 then Exit;
   try
     Tablo.OncekiLogBelirle(ADataSet);
-    Tablo.LogIslemleri(ATabNo, AKayitID, 5, ADataSet);
+    Tablo.LogIslemleri(ATabNo, AKayitID, 5, ADataSet, AUstTabNo, AUstID);
+  except
+  end;
+end;
+
+procedure LogDetaySatirPost(ADataSet: TDataSet; ADetayTabNo, AUstTabNo: Integer;
+  AUstID: Int64);
+var
+  LID: Integer;
+begin
+  if LogGun <= 0 then Exit;
+  try
+    if (ADataSet = nil) or (ADataSet.FindField('ID') = nil) then Exit;
+    LID := ADataSet.FieldByName('ID').AsInteger;
+    if LogOnceki.Count > 0 then   // duzenleme (BeforeEdit OncekiLog'u doldurdu)
+      Tablo.LogIslemleri(ADetayTabNo, LID, 4, ADataSet, AUstTabNo, AUstID)
+    else                                // yeni satir -> EKLEME
+      LogKayitEkle(ADataSet, ADetayTabNo, LID, AUstTabNo, AUstID);
   except
   end;
 end;

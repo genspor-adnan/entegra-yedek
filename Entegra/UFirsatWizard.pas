@@ -1534,7 +1534,7 @@ begin
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle. TabNo_FIRSAT=170.
    if LogGun > 0 then begin
      if islemOp = 'D' then
-       Tablo.LogIslemleri(TabNo_FIRSAT, ProjeID, 4, TabFirsatlar)
+       LogKartDegisti(TabFirsatlar, TabNo_FIRSAT, ProjeID)
      else if (islemOp = 'E') or (islemOp = 'K') then
        LogKayitEkle(TabFirsatlar, TabNo_FIRSAT, ProjeID, TabNo_FIRSAT, ProjeID);
    end;

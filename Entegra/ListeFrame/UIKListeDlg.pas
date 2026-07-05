@@ -850,7 +850,7 @@ var
 implementation
 
 uses
-  FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle,
+  ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle,
   FetaClassExtensions,FetaClassExtensionsConsts, PrjConst, UFastRap, UCariFonksiyonlar, UKasaWizard,
   UGenelAnaSekmeFrame, URaporAraclari, UGenSifre,UBekletme,UMaasListe, UGorevDlg,
   UReplikasyon, FetaKurulusSiniflari, UAcilisKaydi, UNakitDlg,UBinarySave,IdGlobalProtocols,
@@ -1070,11 +1070,8 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GENINI where BOLUM ='+'-100'+IntToStr(i)+REHBER.Fields[0].AsString+'  ',[],[]);
     end;
 
-    if LogGun>0 then begin
-     Tablo.OncekiLogBelirle(REHBER);
-     Tablo.LogIslemleri(TabNo_IK,REHBER.FieldByName('ID').AsInteger, 5, REHBER);  // IK (73) - cari 71'den ayri
-     LogOnceki.Clear;
-    end;
+    LogKartSil(REHBER, TabNo_IK, REHBER.FieldByName('ID').AsInteger);  // IK (73) - cari 71'den ayri
+    LogOnceki.Clear;
     //REHBER.Close;
     //REHBER.open;
     TabloYenile(REHBER,[]);
@@ -1270,14 +1267,14 @@ end;
 procedure TIKListeDlg.TBtnHareketlerSilClick(Sender: TObject);
 begin
   if not TabHareketler.Active then Abort;
-  if LogGun > 0 then
-  Tablo.OncekiLogBelirle(TabHareketler);
   if gridPersonelHareketlerDBTableView1.DataController.Controller.SelectedRecordCount > 0 then
   begin
     if Application.MessageBox(PWideChar(PrjConst.RAEPersonelHareketiSilme),PWideChar(PrjConst.Onay),MB_ICONQUESTION+MB_YESNO) = IDYES then
-    if not TabHareketler.FieldByName('ID').IsNullOrEmpty then
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM PERS_HAREKET WHERE ID=&ID',['&ID'],[TabHareketler.FieldByName('ID').AsString]);
-    Tablo.LogIslemleri(TabNo_REHBERPERSONELHAREKET,TabHareketler.FieldByName('ID').AsInteger,5,TabHareketler);
+    if not TabHareketler.FieldByName('ID').IsNullOrEmpty then begin
+      // SILMEDEN ONCE, kayit dururken logla (onay verilmezse loglanmaz)
+      LogKartSil(TabHareketler, TabNo_REHBERPERSONELHAREKET, TabHareketler.FieldByName('ID').AsInteger);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM PERS_HAREKET WHERE ID=&ID',['&ID'],[TabHareketler.FieldByName('ID').AsString]);
+    end;
     TabloYenile(TabHareketler,[REHBER.FieldByName('ID').AsInteger]);
   end;
 end;

@@ -1835,7 +1835,7 @@ end;
 
 procedure TRehberWizardDlg.DetayAfterPost(DataSet: TDataSet);
 var
-  LTabNo, LUstID, LID: Integer;
+  LTabNo: Integer;
 begin
   if LogGun <= 0 then Exit;
   if (DataSet = TabRehberIletisim) or (DataSet = TabPerIletisim) then
@@ -1844,13 +1844,7 @@ begin
     LTabNo :=  TabNo_REHBERBILGI
   else
     Exit;
-  if DataSet.FindField('ID') = nil then Exit;
-  LID := DataSet.FieldByName('ID').AsInteger;
-  LUstID := TabRehber.FieldByName('ID').AsInteger;   // ust = mevcut cari
-  if LogOnceki.Count > 0 then   // duzenleme (BeforeEdit OncekiLog'u doldurdu)
-    Tablo.LogIslemleri(LTabNo, LID, 4, TFDQuery(DataSet), TabNo_REHBER, LUstID)
-  else                          // yeni satir -> EKLEME
-    LogKayitEkle(DataSet, LTabNo, LID, TabNo_REHBER, LUstID);
+  LogDetaySatirPost(DataSet, LTabNo, TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger);
 end;
 
 procedure TRehberWizardDlg.TabRehberAfterScroll(DataSet: TDataSet);
@@ -2188,7 +2182,7 @@ begin
           if YeniKayit then
             LogKayitEkle(TabRehber, TabNo_REHBER, RehberID, TabNo_REHBER, RehberID)
           else
-            Tablo.LogIslemleri(TabNo_REHBER, RehberID, 4, TabRehber);
+            LogKartDegisti(TabRehber, TabNo_REHBER, RehberID);
         end;
 
       end;

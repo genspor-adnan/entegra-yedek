@@ -822,7 +822,7 @@ begin
     if (IslemOp='E') or (IslemOp='K') then
       LogKayitEkle(TabFatBaslik, TabNo_TRANSFER, FatBasId, TabNo_TRANSFER, FatBasId)
     else
-      Tablo.LogIslemleri(TabNo_TRANSFER, FatBasId, 4, TabFatBaslik);
+      LogKartDegisti(TabFatBaslik, TabNo_TRANSFER, FatBasId);
   end;
 
   if TabFatura.State in [dsInsert, dsEdit] then

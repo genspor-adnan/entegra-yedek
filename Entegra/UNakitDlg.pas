@@ -1163,7 +1163,7 @@ begin
    // KASA karti loglama (TEK SEFER, kaydet-kapat noktasinda): edit -> LogIslemleri, yeni/kopya -> LogKayitEkle.
    if LogGun > 0 then begin
       if islemOp = 'D' then
-         Tablo.LogIslemleri(TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger, 4, TabKasa)
+         LogKartDegisti(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger)
       else if (islemOp = 'E') or (islemOp = 'K') then
          LogKayitEkle(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger,
                       TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger);

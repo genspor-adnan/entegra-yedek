@@ -1766,7 +1766,7 @@ begin
         if YeniTeklif then
            LogKayitEkle(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger)
         else if LogOnceki.Count>0 then
-           Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.Fields[0].AsInteger, 4, TabTeklif);
+           LogKartDegisti(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger);
      end;
   end else begin
     s:=YaziciYaz.Caption;

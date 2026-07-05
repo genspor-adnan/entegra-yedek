@@ -173,7 +173,7 @@ var
 
 implementation
 
-uses PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil,
+uses ULog, PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil,
      UKategori, UCariFonksiyonlar,LocOnFly;
 
 {$R *.dfm}
@@ -564,7 +564,7 @@ begin
     EkipmanID := TabEkipman.FieldByName('ID').AsInteger;
   end;
   ComboBolum.Properties.OnEditValueChanged:=nil;
-  Tablo.LogIslemleri(TabNo_EKIPMAN,TabEkipman.FieldByName('ID').AsInteger,4,TabEkipman);
+  LogKartDegisti(TabEkipman, TabNo_EKIPMAN, TabEkipman.FieldByName('ID').AsInteger);
   Tabloyenile(TabEkipman,[EkipmanID]);
   ComboBolum.Properties.OnEditValueChanged:=ComboBolumPropertiesEditValueChanged;
 end;

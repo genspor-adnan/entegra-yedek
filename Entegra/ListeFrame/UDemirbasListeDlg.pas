@@ -1649,10 +1649,7 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
      // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&DEMIRBASID',['&DEMIRBASID'],[DEMIRBAS.FieldByName('ID').AsString])
     end;
-    if LogGun > 0 then
-      Tablo.OncekiLogBelirle(DEMIRBAS);
-
-    Tablo.LogIslemleri(TabNo_DEMIRBAS,DEMIRBAS.FieldByName('ID').AsInteger, 5, DEMIRBAS);
+    LogKartSil(DEMIRBAS, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
     YenileTusClick(Self);
     /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
     Abort;

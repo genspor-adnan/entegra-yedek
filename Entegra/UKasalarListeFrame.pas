@@ -216,7 +216,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,
+uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,
   UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly;
 
 {$R *.dfm}
@@ -575,10 +575,7 @@ end;
 
 procedure TKasalarListeFrame.KASALARBeforeDelete(DataSet: TDataSet);
 begin
-  if LogGun>0 then begin
-     Tablo.OncekiLogBelirle(KASALAR);
-     Tablo.LogIslemleri(TabNo_KASA,KASALAR.FieldByName('ID').AsInteger, 5, KASALAR);
-  end;
+  LogKartSil(KASALAR, TabNo_KASA, KASALAR.FieldByName('ID').AsInteger);
 end;
 
 procedure TKasalarListeFrame.KopyalaMenuClick(Sender: TObject);

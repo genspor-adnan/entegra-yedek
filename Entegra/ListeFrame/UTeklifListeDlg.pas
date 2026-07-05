@@ -301,12 +301,10 @@ begin
                                      [80, TabTeklif.FieldByName('ID').AsInteger]);
       // Detay satirlarini SILMEDEN ONCE logla (ust=teklif), sonra sil.
       LogDetaylariSil('TEKLIFDETAY', 'TEKLIFID', TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
+      // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+      LogKartSil(TabTeklif, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
-      if LogGun>0 then begin
-          Tablo.OncekiLogBelirle(TabTeklif);
-          Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklif.FieldByName('ID').AsInteger, 5, TabTeklif);
-      end;
       Result:=True;
    end else
       Result := False;

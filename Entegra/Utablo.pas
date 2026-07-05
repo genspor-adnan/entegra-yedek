@@ -4857,7 +4857,6 @@ begin
     end;
     Query1.Close;
 
-    Tablo.OncekiLogBelirle(TabFatBaslik);
     TurNo := TabFatBaslik.FieldByName('TUR').AsInteger;
     case TurNo of
       3,12 : TabNo := TabNo_FIS_Gelen;   // giris fisi
@@ -4870,11 +4869,10 @@ begin
       TabNo := TabNo_FATBASLIK;
     end;
     TabNoKart := TabNo;   // detay ust'u icin sakla
-    Tablo.LogIslemleri(TabNo,TabFatBaslik.FieldByName('ID').AsInteger,5,TabFatBaslik);
+    LogKartSil(TabFatBaslik, TabNo, TabFatBaslik.FieldByName('ID').AsInteger);
 
     TabFatura.First;
     while not TabFatura.Eof do begin
-      Tablo.OncekiLogBelirle(TabFatura);
       case TurNo of
         3,12 : TabNo := TabNo_FATURA;   // giris fisi detay
         4,16 : TabNo := TabNo_FATURA;   // cikis fisi detay
@@ -4887,7 +4885,7 @@ begin
       else TabNo := TabNo_FATURA_GelenFatFisIrs;
       end;
       // Detay -> ust=kart (master-detail); kart gecmisinde tek kart satiri, detaylar altta.
-      Tablo.LogIslemleri(TabNo,Tabfatura.FieldByName('ID').AsInteger,5,TabFatura,TabNoKart,FatbasID);
+      LogKartSil(TabFatura, TabNo, Tabfatura.FieldByName('ID').AsInteger, TabNoKart, FatbasID);
       TabFatura.Next;
     end;
 
@@ -4983,10 +4981,7 @@ begin
   if Tablo.Query3.FieldByName('YERI').AsString = '83' then //servisten siparişe dönüşmüşse
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update SERVIS set YERI=null, YERID=null where ID=&Id ', ['&Id'], [Tablo.Query3.FieldByName('YERID').AsInteger]);
 
-  if LogGun > 0 then begin
-    Tablo.OncekiLogBelirle(Tablo.Query3);
-    Tablo.LogIslemleri(tabno,SiparisId,5,Tablo.Query3);   // kart SILME, dogru tabNo
-  end;
+  LogKartSil(Tablo.Query3, tabno, SiparisId);   // kart SILME, dogru tabNo
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [SiparisId]);
 end;
 
@@ -7574,8 +7569,7 @@ begin
       if LogGun > 0 then begin
         Tablo.TablodanSorguAc(1, 'select * from STOKLAR where ID='+IntToStr(StokID));
         if not Tablo.Query1.IsEmpty then begin
-          Tablo.OncekiLogBelirle(Tablo.Query1);
-          Tablo.LogIslemleri(TabNo_STOKLAR, StokID, 5, Tablo.Query1);
+          LogKartSil(Tablo.Query1, TabNo_STOKLAR, StokID);
           LogOnceki.Clear;
         end;
       end;
@@ -8167,9 +8161,7 @@ begin
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[ProjeID]);
 
-    if LogGun>0 then
-    Tablo.OncekiLogBelirle(Tablo1);
-    Tablo.LogIslemleri(TabNo_PROJELER,ProjeID, 5, Tablo1);
+    LogKartSil(Tablo1, TabNo_PROJELER, ProjeID);
     Result:=True;
    end;
 end;
@@ -10514,8 +10506,7 @@ begin
          Tablo.TablodanSorguAc(0,'SELECT * FROM CEKHAREKET WHERE CEKSENETLERID='+IntToStr(CekId));
          Tablo.Query0.First;
          while not Tablo.Query0.Eof do begin
-           Tablo.OncekiLogBelirle(Tablo.Query0);
-           Tablo.LogIslemleri(TabNo_CEKLER_Hareket, Tablo.Query0.Fields[0].AsInteger, 5, Tablo.Query0, LTabNo, CekId);
+           LogKartSil(Tablo.Query0, TabNo_CEKLER_Hareket, Tablo.Query0.Fields[0].AsInteger, LTabNo, CekId);
            Tablo.Query0.Next;
          end;
        end;
@@ -10712,11 +10703,9 @@ begin
            AvansTaksitleriniSil(GeriDonusId);
         end;
         Tablo.TablodanSorguAc(3, ' Select * from KASA (nolock) where ID = ' + IntToStr(GeriDonusId));
-        if LogGun > 0 then
-          Tablo.OncekiLogBelirle(Tablo.Query3);
-
+        // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+        LogKartSil(Tablo.Query3, TabNo_KASA, GeriDonusId);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where ID=' + IntToStr(GeriDonusId), [], []);
-        Tablo.LogIslemleri(TabNo_KASA,GeriDonusId,5,Tablo.Query3);
       end;
     51,52:
       begin // eğer Çek - senet ise durumu portföyde yapalım ve son hareketi silelim
@@ -10764,12 +10753,10 @@ begin
   if (Tur in [0, 1, 2, 13, 17, 21, 22, 25, 26, 28, 29, 31, 32, 35, 36, 38, 39, 51,
     52, 53, 54, 57, 58, 59, 61, 65, 91, 95, 71, 75, 81,87,88,98, 125]) or (Tur in [40 .. 50]) or (Tur = 350) or (Tur > 2600)//2600 ve üzeri Sodexo gibi kuponlar
   then begin
-    if LogGun > 0 then
-     Tablo.OncekiLogBelirle(Tablo.Query8);
-
+    // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+    LogKartSil(Tablo.Query8, TabNo_KASA, Tablo.Query8.FieldByName('ID').AsInteger);
 //    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_KASA)+' and YERID=&SId', ['&SId'], [ID]);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASA where ID=' + IntToStr(Id),[],[]);
-    Tablo.LogIslemleri(TabNo_KASA,tABLO.Query8.FieldByName('ID').AsInteger,5,Tablo.Query8);
     // exception'ın handle olmaması lazım..
     // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASA where ID=&Id', ['&Id'], [Id]);
   end;

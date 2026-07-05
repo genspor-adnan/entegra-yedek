@@ -69,6 +69,8 @@ var
   RehberPersonelHareket: TRehberPersonelHareket;
 
 implementation
+
+uses ULog;
 var
   MeslekKayitVar:Boolean;
 
@@ -252,7 +254,7 @@ end;
 procedure TRehberPersonelHareket.TabHareketAfterPost(DataSet: TDataSet);
 begin
   YeniKayit := True;
-  Tablo.LogIslemleri(TabNo_REHBERPERSONELHAREKET,TabHareket.FieldByName('ID').AsInteger,4,TabHareket);
+  LogKartDegisti(TabHareket, TabNo_REHBERPERSONELHAREKET, TabHareket.FieldByName('ID').AsInteger);
 end;
 
 procedure TRehberPersonelHareket.TabHareketBeforeEdit(DataSet: TDataSet);

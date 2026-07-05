@@ -81,7 +81,7 @@ var
 
 implementation
 
-uses UAcilisKaydi, Utablo,PrjConst,LocOnFly;
+uses UAcilisKaydi, Utablo,PrjConst,LocOnFly, ULog;
 
 {$R *.dfm}
 
@@ -158,7 +158,7 @@ end;
 procedure TKasaTanimWizardDlg.TabKasalarAfterPost(DataSet: TDataSet);
 begin
   if islemOp='D' then
-     Tablo.LogIslemleri(TabNo_KASA,TabKasalar.Fields[0].AsInteger, 4, TabKasalar);
+     LogKartDegisti(TabKasalar, TabNo_KASA, TabKasalar.Fields[0].AsInteger);
 
   // if YeniKayit then  //Eğer yeni kayıtsa otomatik olarak 0 miktarlı açılış fişi oluştursun
   //    Tablo.KasaKaydet(2001,StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açılış Fişi',

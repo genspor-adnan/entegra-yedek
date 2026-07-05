@@ -1505,9 +1505,7 @@ end;
 procedure TStokListeDlg.SilTusClick(Sender: TObject);
 begin
   if Tablo.StokSilmeIslemleri(STOKLAR.Fields[0].AsInteger) then begin
-    if LogGun>0 then
-      Tablo.OncekiLogBelirle(STOKLAR);
-    Tablo.LogIslemleri(TabNo_STOKLAR,STOKLAR.FieldByName('ID').AsInteger, 5, STOKLAR);
+    // SILME logu StokSilmeIslemleri icinde yaziliyor (buradaki MUKERRER log kaldirildi)
     AraTus.Click;
   end;
 end;

@@ -1041,7 +1041,7 @@ begin
   // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
   if LogGun > 0 then begin
     if IslemOp = 'D' then
-      Tablo.LogIslemleri(TabNo_DEMIRBAS, DemirbasID, 4, TabDemirbas)
+      LogKartDegisti(TabDemirbas, TabNo_DEMIRBAS, DemirbasID)
     else if (IslemOp = 'E') or (IslemOp = 'K') then
       LogKayitEkle(TabDemirbas, TabNo_DEMIRBAS, DemirbasID, TabNo_DEMIRBAS, DemirbasID);
     // AMORTISMAN detay satirlari (ust=demirbas) diff.

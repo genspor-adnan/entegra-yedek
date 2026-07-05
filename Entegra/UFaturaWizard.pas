@@ -3949,7 +3949,7 @@ begin
   if islemOp in ['D','I'] then begin
      //if LogBelge.Count > 0 then begin
      //   Tablo.LogIslemlerBelge(FATURA, TabNo, FaturaIDsi, 4);
-     Tablo.LogIslemleri(TabloNo, TabFaturaIDsi, 4, TabFatbaslik)
+     LogKartDegisti(TabFatbaslik, TabloNo, TabFaturaIDsi)
   end
   else if islemOp in ['E','K'] then
      // Yeni belge / kopya -> baslik EKLEME logu (ust=kendisi).

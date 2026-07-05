@@ -2755,19 +2755,13 @@ end;
 
 procedure TStokWizardDlg.StokDetayAfterPost(DataSet: TDataSet);
 var
-  LTabNo, LUstID, LID: Integer;
+  LTabNo: Integer;
 begin
   if LogGun <= 0 then Exit;
   if DataSet = TabFiyat then LTabNo := TabNo_STOKFIYAT
   else if DataSet = TabBarkod then LTabNo := TabNo_STOKBARKOD
   else Exit;
-  if DataSet.FindField('ID') = nil then Exit;
-  LID := DataSet.FieldByName('ID').AsInteger;
-  LUstID := TabStok.FieldByName('ID').AsInteger;   // ust = mevcut stok
-  if LogOnceki.Count > 0 then   // duzenleme (BeforeEdit OncekiLog'u doldurdu)
-    Tablo.LogIslemleri(LTabNo, LID, 4, TFDQuery(DataSet), TabNo_STOKLAR, LUstID)
-  else                          // yeni satir -> EKLEME
-    LogKayitEkle(DataSet, LTabNo, LID, TabNo_STOKLAR, LUstID);
+  LogDetaySatirPost(DataSet, LTabNo, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
 end;
 
 procedure TStokWizardDlg.TabStokBeforePost(DataSet: TDataSet);
@@ -3178,7 +3172,7 @@ begin
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
      if islemOp = 'D' then
-       Tablo.LogIslemleri(TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, 4, TabStok)
+       LogKartDegisti(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger)
      else if (islemOp = 'E') or (islemOp = 'K') then   // yeni stok -> EKLEME (ust=kendisi)
        LogKayitEkle(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger,
                     TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);

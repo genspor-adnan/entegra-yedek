@@ -1360,7 +1360,7 @@ begin
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
      if islemOp = 'D' then
-       Tablo.LogIslemleri(TabNo_PROJELER, ProjeID, 4, TabProjeler)
+       LogKartDegisti(TabProjeler, TabNo_PROJELER, ProjeID)
      else if (islemOp = 'E') or (islemOp = 'K') then
        LogKayitEkle(TabProjeler, TabNo_PROJELER, ProjeID, TabNo_PROJELER, ProjeID);
      // ASAMA satirlari (ust=proje) diff.

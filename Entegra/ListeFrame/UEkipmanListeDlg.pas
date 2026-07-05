@@ -107,7 +107,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
+uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
   UFastRap, PrjConst,LocOnFly;
 
 {$R *.dfm}
@@ -272,11 +272,9 @@ procedure TEkipmanListeDlg.SilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      if not EkipmanHareketVarMi(TabEkipmanlar.FieldByName('ID').AsInteger) then begin
-       if LogGun > 0 then begin
-        Tablo.OncekiLogBelirle(TabEkipmanlar);
-       end;
+       // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+       LogKartSil(TabEkipmanlar, TabNo_EKIPMAN, TabEkipmanlar.FieldByName('ID').AsInteger);
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
-       Tablo.LogIslemleri(TabNo_EKIPMAN,TabEkipmanlar.FieldByName('ID').AsInteger,5,TabEkipmanlar);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
        TabloYenile(TabEkipmanlar,[]);
      end else

@@ -1777,7 +1777,7 @@ begin
     if (IslemOp='E') or (IslemOp='K') then
        LogKayitEkle(SIPARIS, TabNo_STOKTALEP, SiparisIdsi, TabNo_STOKTALEP, SiparisIdsi)
     else
-       Tablo.LogIslemleri(TabNo_STOKTALEP, SiparisIdsi, 4, SIPARIS);
+       LogKartDegisti(SIPARIS, TabNo_STOKTALEP, SiparisIdsi);
     LogDiffKaydet(SIPARISDETAY, FDetSnap, TabNo_SIPARISDETAY, TabNo_STOKTALEP, SiparisIdsi);
     LogSnapshotAl(SIPARISDETAY, FDetSnap);   // mukerrer save'i onlemek icin snapshot'i tazele
   except

@@ -88,7 +88,7 @@ type
 
 implementation
 
-uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap,
+uses ULog, FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap,
 URaporAraclari, UGenelAnaSekmeFrame, UAnaForm,LocOnFly;
 
 {$R *.dfm}
@@ -208,12 +208,10 @@ end;
 procedure TSatinAlmaListeDlg.SilTusClick(Sender: TObject);
 begin
  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-  if LogGun > 0 then begin
-    Tablo.OncekiLogBelirle(TabSatinAlma);
-  end;
+  // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+  LogKartSil(TabSatinAlma, TabNo_SATINALMA, TabSatinAlma.FieldByName('ID').AsInteger);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SATINALMADETAY where SATINALMAID=&id ',['&id'],[TabSatinAlma.Fields[0].AsInteger]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SATINALMA where ID=&id ',['&id'],[TabSatinAlma.Fields[0].AsInteger]);
-  Tablo.LogIslemleri(TabNo_SATINALMA,TabSatinAlma.FieldByName('ID').AsInteger,5,TabSatinAlma);
   YenileTusClick(Self);
     /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
   Abort;

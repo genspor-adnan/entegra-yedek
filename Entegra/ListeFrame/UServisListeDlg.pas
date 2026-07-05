@@ -326,7 +326,7 @@ public
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
+uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
      UFastRap, PrjConst,LocOnFly, UServisHareketEkle, FetaUtil;
 
 {$R *.dfm}
@@ -1046,10 +1046,9 @@ begin
        showmessage(RDServisHarVerisiVarSilinemez);
        exit;
     end;
-    if LogGun > 0 then
-      Tablo.OncekiLogBelirle(SERVIS);
+    // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+    LogKartSil(SERVIS, TabNo_SERVIS, ServisID);
     Tablo.ServisSil(ServisID);
-    Tablo.LogIslemleri(TabNo_SERVIS, ServisID, 5, SERVIS);
     YenileTusClick(Self);
   end;
 end;

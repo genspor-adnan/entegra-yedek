@@ -1059,7 +1059,7 @@ begin
              // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
              if LogGun > 0 then begin
                if IslemOp = 'D' then
-                 Tablo.LogIslemleri(TabNo_DOKUMAN, DokumanID, 4, TabDokuman)
+                 LogKartDegisti(TabDokuman, TabNo_DOKUMAN, DokumanID)
                else
                  LogKayitEkle(TabDokuman, TabNo_DOKUMAN, DokumanID, TabNo_DOKUMAN, DokumanID);
                // REVIZE (detay=IMAJ revizyonlari, ust=dokuman karti) diff loglama.

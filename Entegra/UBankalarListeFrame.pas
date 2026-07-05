@@ -230,7 +230,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
+uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
       UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketleri,
       UBankaHesapGiris;
 
@@ -617,12 +617,10 @@ begin
           Tablo.Query4.SQL.Text := ' = '+ BANKALAR.FieldByName('ID').AsString+' AND TUR in (1,2)';
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''B'' AND TUR in (1,2) ',['&id'], [BANKALAR.Fields[0].AsInteger]);
                //kendisini sil
+          // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+          LogKartSil(BANKALAR, TabNo_BANKAHESAPLAR, BANKALAR.FieldByName('ID').AsInteger);
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER  where KOD=&Kod ',['&Kod'],[BANKALAR.FieldByName('HESAPKODU').AsString]);
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from BANKAHESAPLAR  where ID=&id ',['&id'],[BANKALAR.Fields[0].AsInteger]);
-
-          if LogGun > 0 then
-          Tablo.OncekiLogBelirle(BANKALAR);
-          Tablo.LogIslemleri(TabNo_BANKAHESAPLAR,BANKALAR.FieldByName('ID').AsInteger, 5, BANKALAR);
 
           YenileClick;
         end;

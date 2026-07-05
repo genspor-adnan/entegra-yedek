@@ -1968,7 +1968,7 @@ end;
 procedure TServisWizardDlg.TabEkipmanDetayBeforeDelete(DataSet: TDataSet);
 begin
   if islemOp='D' then
-     Tablo.LogIslemleri(DataSet.Tag,(DataSet as TFDQuery).FieldByName('ID').AsInteger,5,DataSet);
+     LogKartSil(DataSet, DataSet.Tag, (DataSet as TFDQuery).FieldByName('ID').AsInteger);
 end;
 
 procedure TServisWizardDlg.TabEkipmanDetayBeforeEdit(DataSet: TDataSet);
@@ -2453,7 +2453,7 @@ begin
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
      if islemOp = 'D' then
-       Tablo.LogIslemleri(TabNo_SERVIS, ServisID, 4, TabServis)
+       LogKartDegisti(TabServis, TabNo_SERVIS, ServisID)
      else
        LogKayitEkle(TabServis, TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
    end;

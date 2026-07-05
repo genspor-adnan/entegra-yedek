@@ -206,8 +206,8 @@ var
   SatinAlmaWizard: TSatinAlmaWizard;
 
 implementation
-Uses
-UTablo,PrjConst,FetaKurulusSiniflari, UGenSifre,LocOnFly;
+
+uses ULog,UTablo,PrjConst,FetaKurulusSiniflari, UGenSifre,LocOnFly;
 
 {$R *.dfm}
 
@@ -602,7 +602,7 @@ end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaAfterPost(DataSet: TDataSet);
 begin
-  Tablo.LogIslemleri(TabNo_SATINALMA,TabSatinAlma.FieldByName('ID').AsInteger,4,TabSatinAlma);
+  LogKartDegisti(TabSatinAlma, TabNo_SATINALMA, TabSatinAlma.FieldByName('ID').AsInteger);
 end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaBeforeEdit(DataSet: TDataSet);

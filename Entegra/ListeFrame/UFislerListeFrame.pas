@@ -276,12 +276,8 @@ end;
 procedure TFislerListeFrame.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-//     if LogGun>0 then
-//        Tablo.OncekiLogBelirle(TabFisler);
-     if Tur in [3] then
-        Tablo.LogIslemleri(TabNo_FIS_Gelen,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler)
-     else if Tur in [4] then
-        Tablo.LogIslemleri(TabNo_FIS_Giden,TabFisler.FieldByName('ID').AsInteger, 5, TabFisler);
+     // SILME loglari (kart+detay) FaturaSil icinde yaziliyor (TUR->TabNo eslemesi orada);
+     // buradaki cagrilar OncekiLog bos oldugundan zaten ETKISIZDI - kaldirildi.
      Tablo.FaturaSil(TabFisler,TabFisDetay,TabFisler.FieldByName('ID').AsInteger);
      YenileTusClick(self);
   end;

@@ -1535,18 +1535,11 @@ begin
 end;
 
 procedure TIKWizardDlg.DetayAfterPost(DataSet: TDataSet);
-var
-  LUstID, LID: Integer;
 begin
   if LogGun <= 0 then Exit;
   if DataSet <> TabPerIletisim then Exit;
-  if DataSet.FindField('ID') = nil then Exit;
-  LID := DataSet.FieldByName('ID').AsInteger;
-  LUstID := TabRehber.FieldByName('ID').AsInteger;   // ust = mevcut IK personeli
-  if LogOnceki.Count > 0 then
-    Tablo.LogIslemleri(TabNo_REHBERILETISIM, LID, 4, TFDQuery(DataSet), TabloNo, LUstID)  // ust=IK (73/74)
-  else
-    LogKayitEkle(DataSet, TabNo_REHBERILETISIM, LID, TabloNo, LUstID);
+  // ust=IK (73/74)
+  LogDetaySatirPost(DataSet, TabNo_REHBERILETISIM, TabloNo, TabRehber.FieldByName('ID').AsInteger);
 end;
 
 procedure TIKWizardDlg.TabRehberAfterScroll(DataSet: TDataSet);
@@ -1942,7 +1935,7 @@ begin
         // AfterPost'tan buraya tasindi (sayfa gecislerinde mukerrer loglamayi onlemek icin).
         if LogGun > 0 then begin
           if KartIslemi = 2 then
-            Tablo.LogIslemleri(TabloNo, TabRehber.FieldByName('ID').AsInteger, 4, TabRehber)  // IK: 73/74
+            LogKartDegisti(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger)  // IK: 73/74
           else if KartIslemi = 1 then
             LogKayitEkle(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger,
                          TabloNo, TabRehber.FieldByName('ID').AsInteger);

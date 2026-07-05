@@ -950,7 +950,7 @@ var
 
 implementation
 
-uses FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils,
+uses ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils,
   FetaClassExtensions,FetaClassExtensionsConsts, UResim, PrjConst, UFastRap, UCariFonksiyonlar, UKasaWizard,
   UKasalarListeFrame, UGenelAnaSekmeFrame, URaporAraclari, UGenSifre,UBekletme, UGorevDlg,
   UReplikasyon, FetaKurulusSiniflari, UAcilisKaydi, UNakitDlg,UBinarySave,IdGlobalProtocols,UExceldenVeriAl,
@@ -1144,11 +1144,8 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      // SILME logu: kayit SILINMEDEN once alinmali (aksi halde refresh sonrasi yanlis
      // kayit loglanir).
-     if LogGun>0 then begin
-       Tablo.OncekiLogBelirle(REHBER);
-       Tablo.LogIslemleri(TabNo_REHBER, REHBER.Fields[0].AsInteger, 5, REHBER);
-       LogOnceki.Clear;
-     end;
+     LogKartSil(REHBER, TabNo_REHBER, REHBER.Fields[0].AsInteger);
+     LogOnceki.Clear;
      Tablo.CariSil( REHBER.Fields[0].AsInteger);
      TabloYenile(REHBER,[]);
   end;
@@ -1338,12 +1335,10 @@ begin
          [81, TabTeklifler.Fields[0].AsInteger]);
       //varsa proje ba?lant?lar? silinmeli
       //kendisi silinir
+      // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
+      LogKartSil(TabTeklifler, TabNo_TEKLIF, TabTeklifler.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklifler.Fields[0].AsInteger]);
-
-   if LogGun>0 then
-     Tablo.OncekiLogBelirle(TabTeklifler);
-     Tablo.LogIslemleri(TabNo_TEKLIF,TabTeklifler.FieldByName('ID').AsInteger, 5, TabTeklifler);
 
 
       PageControlSekmeChange(Self);

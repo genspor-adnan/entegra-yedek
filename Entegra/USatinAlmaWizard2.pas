@@ -414,7 +414,7 @@ var
 
 implementation
 
-Uses  UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG,
+uses ULog,UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame,UFisIrsaliyeAraDlg,UGirisKutusuEx, UGorevDlg, UIsListesi,
   UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly;
 
@@ -1644,7 +1644,7 @@ begin
   if SIPARIS.State in [dsInsert, dsEdit] then begin
      SIPARIS.Post;
      if islemOp='D' then  begin
-        Tablo.LogIslemleri(TabNo_SATINALMA, SiparisIdsi, 4, SIPARIS)
+        LogKartDegisti(SIPARIS, TabNo_SATINALMA, SiparisIdsi)
     end;
   end;
   if SIPARISDETAY.State in [dsInsert, dsEdit] then begin
