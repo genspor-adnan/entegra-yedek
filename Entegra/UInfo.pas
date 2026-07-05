@@ -284,8 +284,11 @@ begin
     ' ANAHTAR = MAX(COALESCE(T.MODUL, T.TABLOADI, CAST(L.USTTABLOID AS varchar(20)))),' +
     // Kod/Ad: once kaydin KENDI referansi (kart: KAYITID=USTKAYITID, TABLOID=USTTABLOID),
     // yoksa bagli cari/IK (REHBERID) veya stok (STOKID) - LOGREFERANS''tan (guncel).
-    ' KOD = MAX(COALESCE(LRk.KOD, LRc.KOD, LRs.KOD)),' +
-    ' AD  = MAX(COALESCE(LRk.AD,  LRc.AD,  LRs.AD)),' +
+    // Cek/Senet (315/316/318/319): kart kendi muhasebe kodu yerine borclu/alacakli CARI
+    // (REHBERID) kod/adi gelsin -> LRk atlanir, LRc (cari) oncelikli. Diger kartlar kendi ad/kod''u
+    // (NULLIF: bos ise bagli cari/stok''a gec).
+    ' KOD = MAX(COALESCE(CASE WHEN L.USTTABLOID IN (315,316,318,319) THEN NULL ELSE NULLIF(LRk.KOD,'''') END, NULLIF(LRc.KOD,''''), NULLIF(LRs.KOD,''''))),' +
+    ' AD  = MAX(COALESCE(CASE WHEN L.USTTABLOID IN (315,316,318,319) THEN NULL ELSE NULLIF(LRk.AD,'''')  END, NULLIF(LRc.AD,''''),  NULLIF(LRs.AD,''''))),' +
     ' ADET = COUNT(*)' +
     ' FROM ISLEMLOG L' +
     ' LEFT JOIN REHBER R ON R.ID = L.KULLANICIID' +

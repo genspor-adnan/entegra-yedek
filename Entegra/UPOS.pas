@@ -140,7 +140,7 @@ implementation
 
 {$R *.dfm}
 
-uses FetaClassExtensions, PrjConst, Utablo,LocOnFly;
+uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog;
 { TPOS }
 
 procedure TPOS.POSEkranInit(POSId: Integer);
@@ -281,8 +281,21 @@ begin
 end;
 
 procedure TPOS.KaydetTusClick(Sender: TObject);
+var LYeni: Boolean; LID: Integer;
 begin
-  TabPOS.Post;
+  LYeni := TabPOS.State = dsInsert;   // Post'tan ONCE yakala
+  if (TabPOS.State = dsInsert) or TabPOS.Modified then
+     TabPOS.Post
+  else begin
+     TabPOS.Cancel;
+     Exit;
+  end;
+  LID := TabPOS.Fields[0].AsInteger;
+  if LogGun > 0 then
+     if LYeni then
+        LogKayitEkle(TabPOS, TabNo_POS, LID, TabNo_POS, LID)
+     else
+        Tablo.LogIslemleri(TabNo_POS, LID, 4, TabPOS);
 end;
 
 procedure TPOS.SetFrameBilgi(AValue: TIcerikFrameBilgi);
@@ -303,8 +316,7 @@ end;
 
 procedure TPOS.TabPOSAfterPost(DataSet: TDataSet);
 begin
-  if islemOp='D' then
-     Tablo.LogIslemleri(TabNo_POS,TabPOS.Fields[0].AsInteger, 4, TabPOS);
+  // Loglama KaydetTusClick'te (terminal) yapiliyor; islemOp hic set edilmiyordu.
   //TabloYenile(TabPOS,[]);
 end;
 

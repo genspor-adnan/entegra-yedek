@@ -305,7 +305,7 @@ implementation
 
 uses
     UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, UExceldenVeriAl,
-    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay;
+    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay, ULog;
 
 {$R *.dfm}
 
@@ -580,6 +580,12 @@ begin
   end;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Islem := TabCekHareketler.FieldByName('ISLEM').AsInteger;
+     // Manuel silinen CEKHAREKET satirini, silmeden ONCE detay logu olarak yaz (Islem=5=sil; ust=cek karti)
+     if LogGun>0 then begin
+       Tablo.OncekiLogBelirle(TabCekHareketler);
+       Tablo.LogIslemleri(TabNo_CEKLER_Hareket, TabCekHareketler.FieldByName('ID').AsInteger, 5, TabCekHareketler,
+                          CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger), TabCekler.FieldByName('ID').AsInteger);
+     end;
      Tablo.CekHareketiSil(TabCekler.FieldByName('ID').AsInteger,TabCekHareketler.FieldByName('ID').AsInteger);
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select top 1 ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc) where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
      if Islem in [136, 143] then //E?er i?lem tahsil edildi veya ?dendi ise hareket silinince kasadan da silinmeli
@@ -929,6 +935,14 @@ begin
         ')',[],[]);
         veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKLER set TUR='+IntToStr((sender as TMenuItem).Tag)+' where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
         OncedenSoruldu := True;
+        // Manuel eklenen yeni CEKHAREKET satirini detay logu olarak yaz.
+        // Insert direkt SQL ile yapildigindan yeni ID identity max ID'dir (CEKSENETLERID bazinda).
+        if LogGun>0 then begin
+          Tablo.TablodanSorguAc(0,'select top 1 * from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by ID desc');
+          if Tablo.Query0.RecordCount>0 then
+            LogKayitEkle(Tablo.Query0, TabNo_CEKLER_Hareket, Tablo.Query0.FieldByName('ID').AsInteger,
+                         CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger), TabCekler.FieldByName('ID').AsInteger);
+        end;
 
       end else begin
         ShowMessage(CHata_kaydi_sil_ekle);

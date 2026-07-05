@@ -368,7 +368,7 @@ implementation
 
 uses UAnaForm,UKrediler, FetaKurulusSiniflari, FetaClassExtensions, UKasalarListeFrame, PrjConst,UKrediHesapMakineDlg,
      URaporAraclari, UGenelAnaSekmeFrame, UFastRap, UGirisKutusuEx, FetaUtil,LocOnfly,
-  UKrediEkle, UKasaWizard, URotatifDonemFaiz;
+  UKrediEkle, UKasaWizard, URotatifDonemFaiz, ULog;
 
 
 {$R *.dfm}
@@ -1132,6 +1132,11 @@ begin
      Showmessage('Hareket görmüş, silinemez!')
   else begin
      if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
+        if LogGun > 0 then begin  // silmeden ONCE logla (kayit dururken): detay + kart
+           LogDetaylariSil('PLANKREDI','KREDIID',TabNo_KREDIPLAN,TabNo_KREDILER,KREDILER.FieldByName('ID').AsInteger);
+           Tablo.OncekiLogBelirle(KREDILER);
+           Tablo.LogIslemleri(TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger, 5, KREDILER);
+        end;
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KREDILER where ID='+KREDILER.FieldByName('ID').AsString,[],[]);
         YenileTusClick;

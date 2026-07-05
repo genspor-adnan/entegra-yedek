@@ -10479,8 +10479,16 @@ end;
 
 function TTablo.CekSil(CekId: Integer): Boolean;
 var i : smallint;
+    LTabNo: Integer;
 begin
    Tablo.TablodanSorguAc(1,'SELECT * FROM CEKLER WHERE ID='+IntToStr(CekId));
+   // CEKSENET'e gore dogru kart TABLOID'i (Alinan/Verilen Cek/Senet) - ekleme/degistirme ile ayni
+   case Tablo.Query1.FieldByName('CEKSENET').AsInteger of
+     103: LTabNo := TabNo_CEKLER_Verilen;
+     121: LTabNo := TabNo_SENET_Alinan;
+     321: LTabNo := TabNo_SENET_Verilen;
+   else   LTabNo := TabNo_CEKLER_Alinan;
+   end;
    if Tablo.Query1.FieldByName('TUR').AsInteger in [130..139]  then
          i := 23
    else
@@ -10495,12 +10503,12 @@ begin
    end else begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from IMAJ where YERI = 21 and YER_ID=&SId', ['&SId'], [CekId]);
       if LogGun > 0 then begin
+         // hareketler (detay), ust = cek karti (LTabNo); SatirID = hareket ID
          Tablo.TablodanSorguAc(0,'SELECT * FROM CEKHAREKET WHERE CEKSENETLERID='+IntToStr(CekId));
          Tablo.Query0.First;
          while not Tablo.Query0.Eof do begin
-           //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_CEKLER_Hareket)+' and YERID=&SId', ['&SId'], [Tablo.Query0.Fields[0].AsInteger]);
            Tablo.OncekiLogBelirle(Tablo.Query0);
-           Tablo.LogIslemleri(TabNo_CEKLER, CekId, 5, Tablo.Query0);
+           Tablo.LogIslemleri(TabNo_CEKLER_Hareket, Tablo.Query0.Fields[0].AsInteger, 5, Tablo.Query0, LTabNo, CekId);
            Tablo.Query0.Next;
          end;
        end;
@@ -10509,7 +10517,7 @@ begin
        if LogGun > 0 then begin
           Tablo.TablodanSorguAc(1,'SELECT * FROM CEKLER WHERE ID='+IntToStr(CekId));
           Tablo.OncekiLogBelirle(Tablo.Query1);
-          Tablo.LogIslemleri(TabNo_CEKLER, CekId, 5, Tablo.Query1);
+          Tablo.LogIslemleri(LTabNo, CekId, 5, Tablo.Query1);
        end;
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from CEKLER where ID=&SId', ['&SId'], [CekId]);
        Result := True;
