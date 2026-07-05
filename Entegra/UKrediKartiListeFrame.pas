@@ -157,6 +157,7 @@ type
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
+    function HesapKesimBitTar: TDateTime;   // gecerli yil/ay/gun -> smalldatetime out-of-range engeli
     function EkranAdiAl: string;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure GorunurOlacak;
@@ -247,7 +248,7 @@ procedure TKrediKartiListeFrame.CalendarHKBasPropertiesEditValueChanged(Sender: 
 var BitTar:TDateTime;
 begin
   if KREDIKARTI.RecordCount>0 then begin
-    BitTar := EncodeDateTime(SpinHesapKesimYil.EditValue,cbHesapKesimAy.EditValue,KREDIKARTI.FieldByName('HESAP_KESIM_TARIHI').AsInteger,23,59,59,0);
+    BitTar := HesapKesimBitTar;
     TabloYenile(tabHesapKesim,[KREDIKARTI.FieldByName('ID').AsInteger,SysUtils.IncMonth(BitTar,-1),BitTar]);
     Tablo.TablodanSorguAc(1,'SELECT [dbo].[fn_GT_UygunTarihBul](''' + FormatDateTime('yyyy-mm-dd hh:nn', IncDay(BitTar,KREDIKARTI.FieldByName('ODEME_GUN_SAYISI').AsInteger)) + ''',1)');
     LabelSonOdeme.Caption := 'Son Ödeme Tarihi:'+FormatDateTime('YYYY-MM-DD',Tablo.Query1.Fields[0].AsDateTime);
@@ -275,6 +276,25 @@ end;
 function TKrediKartiListeFrame.EkranAdiAl: string;
 begin
    Result := 'KKListeDlg';
+end;
+
+// Hesap kesim bitis tarihi: spin/combo bos veya HESAP_KESIM_TARIHI gecersiz ise
+// gunun degerleriyle guvenli tarih uret (aksi halde EncodeDateTime 1899/tasmali deger
+// -> SQL 'varchar->smalldatetime out-of-range' hatasi).
+function TKrediKartiListeFrame.HesapKesimBitTar: TDateTime;
+var
+  LYil, LAy, LGun: Word;
+  LBugun: TDateTime;
+begin
+  LBugun := Tablo.GENINI.BugunTrh;
+  LYil := StrToIntDef(VarToStr(SpinHesapKesimYil.EditValue), 0);
+  if (LYil < 1900) or (LYil > 2078) then LYil := YearOf(LBugun);
+  LAy := StrToIntDef(VarToStr(cbHesapKesimAy.EditValue), 0);
+  if (LAy < 1) or (LAy > 12) then LAy := MonthOf(LBugun);
+  LGun := KREDIKARTI.FieldByName('HESAP_KESIM_TARIHI').AsInteger;
+  if LGun < 1 then LGun := 1;
+  if LGun > DaysInAMonth(LYil, LAy) then LGun := DaysInAMonth(LYil, LAy);
+  Result := EncodeDateTime(LYil, LAy, LGun, 23, 59, 59, 0);
 end;
 
 procedure TKrediKartiListeFrame.YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -377,7 +397,7 @@ procedure TKrediKartiListeFrame.KREDIKARTIAfterScroll(DataSet: TDataSet);
 var BitTar:TDateTime;
 begin
   if KREDIKARTI.RecordCount>0 then begin
-    BitTar := EncodeDateTime(SpinHesapKesimYil.EditValue,cbHesapKesimAy.EditValue,KREDIKARTI.FieldByName('HESAP_KESIM_TARIHI').AsInteger,23,59,59,0);
+    BitTar := HesapKesimBitTar;
     TabloYenile(tabHesapKesim,[KREDIKARTI.FieldByName('ID').AsInteger,SysUtils.IncMonth(BitTar,-1),BitTar]);
     TabKKEkstre.Close;
     TabKKEkstre.Params.Clear;
@@ -423,6 +443,10 @@ begin
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')
         else begin//yoksa açılış kaydını silelim
+          if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla;
+            Tablo.OncekiLogBelirle(KREDIKARTI);   // delete+YenileClick sonrasi cursor kayardi -> yanlis ID loglaniyordu
+            Tablo.LogIslemleri(TabNo_KREDIKARTI, KREDIKARTI.FieldByName('ID').AsInteger, 5, KREDIKARTI);
+          end;
           Tablo.Query4.SQL.Text := ' = '+ KREDIKARTI.FieldByName('ID').AsString+' AND TUR in (1,2)';
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''V'' AND TUR in (1,2) ',['&id'], [KREDIKARTI.Fields[0].AsInteger]);
                //kendisini sil
@@ -430,10 +454,6 @@ begin
           YenileClick;
         end;
       end;
-
-      if LogGun>0 then
-     Tablo.OncekiLogBelirle(KREDIKARTI);
-     Tablo.LogIslemleri(TabNo_KREDIKARTI,KREDIKARTI.FieldByName('ID').AsInteger, 5, KREDIKARTI);
    end else
       raise Exception.Create(Yetkisiz_Islem);
 
