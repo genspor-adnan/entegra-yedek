@@ -196,13 +196,7 @@ begin
   // FALLBACK: yeni banka hesabi (islemOp='E') DB'ye yazilmis (dsBrowse, ID>0) ama
   // AfterPost gec kalirsa/tetiklenmezse ekleme logunu kapanista TEK SEFER garanti et.
   // FEkleLogland zaten True ise dokunma (mukerrer onleme).
-  if (LogGun > 0) and (islemOp = 'E') and (not FEkleLogland) and
-     TabBankaHesaplar.Active and (TabBankaHesaplar.State = dsBrowse) and
-     (TabBankaHesaplar.Fields[0].AsInteger > 0) then begin
-    LogKayitEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger,
-                 TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger);
-    FEkleLogland := True;
-  end;
+  FEkleLogland := LogKartEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, islemOp = 'E', FEkleLogland) or FEkleLogland;
 end;
 
 procedure TBankaTanimWizardDlg.FormShow(Sender: TObject);
@@ -260,14 +254,10 @@ begin
                 if OncekiAd <> TabBankaHesaplar.FieldByName('HESAPADI').AsString then
                    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update REHBER set FIRMA='''+TabBankaHesaplar.FieldByName('HESAPADI').AsString+''' where ID='+TabBankaHesaplar.FieldByName('ILETREHBERID').AsString,[],[]);
              end;
-             Tablo.LogIslemleri(TabNo_BANKAHESAPLAR,TabBankaHesaplar.Fields[0].AsInteger, 4, TabBankaHesaplar);
+             LogKartDegisti(TabBankaHesaplar, TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger);
           end;
-    'E' : if (LogGun > 0) and (not FEkleLogland) then
-          begin  // yeni banka hesabi: ekleme logu (LogIslemleri LogOnceki bos oldugundan ekleme'yi kacirir)
-            LogKayitEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger,
-                         TabNo_BANKAHESAPLAR, TabBankaHesaplar.Fields[0].AsInteger);
-            FEkleLogland := True;
-          end;
+    'E' : // yeni banka hesabi: ekleme logu (LogIslemleri LogOnceki bos oldugundan ekleme'yi kacirir)
+          FEkleLogland := LogKartEkle(TabBankaHesaplar, TabNo_BANKAHESAPLAR, True, FEkleLogland) or FEkleLogland;
    { 'E' : if TabBankaHesaplar.FieldByName('REHBERID').AsInteger < 0 then //Eğer kendi banka bilgimiz ise rehberde kart açsın
           begin //Eğer yeni kayıtsa otomatik olarak 0 miktarlı açılış fişi oluştursun
              Tablo.KasaKaydet(3001, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açılış Fişi',

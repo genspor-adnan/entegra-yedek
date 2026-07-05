@@ -1142,8 +1142,7 @@ begin
           ['&URID','&StokID'],[YeniReceteID,StokID]);
         TabloYenile(TabRecete, [], YeniReceteID);
         // Yeni recete SQL-insert ile olusuyor (dataset dsInsert degil) -> kart ekleme logu burada.
-        if LogGun > 0 then
-          LogKayitEkle(TabRecete, TabNo_URETIMRECETE, YeniReceteID, TabNo_URETIMRECETE, YeniReceteID);
+        LogKartEkle(TabRecete, TabNo_URETIMRECETE, True, False);
       end;
       TabloYenile(RECETE,[VarsSatisFiyatID]);
       TabRecete.Refresh;
@@ -1178,13 +1177,11 @@ begin
   LID := TabRecete.FieldByName('ID').AsInteger;
   TabRecete.AfterScroll := TabReceteAfterScroll;
 
-  // KART loglama (terminal kaydet): yeni -> LogKayitEkle, edit -> LogIslemleri.
-  if LogGun > 0 then begin
-    if LYeni then
-      LogKayitEkle(TabRecete, TabNo_URETIMRECETE, LID, TabNo_URETIMRECETE, LID)
-    else
-      Tablo.LogIslemleri(TabNo_URETIMRECETE, LID, 4, TabRecete);
-  end;
+  // KART loglama (terminal kaydet): yeni -> LogKartEkle, edit -> LogKartDegisti.
+  if LYeni then
+    LogKartEkle(TabRecete, TabNo_URETIMRECETE, LYeni, False)
+  else
+    LogKartDegisti(TabRecete, TabNo_URETIMRECETE, LID);
   // DETAY farki (ust=recete) — kaydet aninda ekleme/degisiklik/silme.
   DetayLogDiffKaydet;
 
@@ -1203,8 +1200,7 @@ begin
      else begin
         if LogGun > 0 then begin  // silmeden ONCE logla: detay + kart
            LogDetaylariSil('URETIMRECETEDETAY','URETIMRECETEID',TabNo_URETIMRECETEDETAY,TabNo_URETIMRECETE,TabRecete.FieldByName('ID').AsInteger);
-           Tablo.OncekiLogBelirle(TabRecete);
-           Tablo.LogIslemleri(TabNo_URETIMRECETE, TabRecete.FieldByName('ID').AsInteger, 5, TabRecete);
+           LogKartSil(TabRecete, TabNo_URETIMRECETE, TabRecete.FieldByName('ID').AsInteger);
         end;
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from URETIMRECETE where ID=&ID', ['&ID'], [TabRecete.FieldByName('ID').AsInteger]);
      end;

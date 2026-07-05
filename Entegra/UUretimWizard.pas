@@ -1160,10 +1160,8 @@ begin
     if (LogGun > 0) and ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) and
        (TabUretim.Active) and (TabUretim.State = dsBrowse) and
        (TabUretim.FieldByName('ID').AsInteger > 0) and
-       Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 from FATBASLIK where ID=&ID', ['&ID'], [TabUretim.FieldByName('ID').AsInteger]) then begin
-      LogKayitEkle(TabUretim, TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger, TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger);
-      FEkleLogland := True;
-    end;
+       Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 from FATBASLIK where ID=&ID', ['&ID'], [TabUretim.FieldByName('ID').AsInteger]) then
+      FEkleLogland := LogKartEkle(TabUretim, TabNo_URETIMFISI, True, FEkleLogland) or FEkleLogland;
     if UretimWizardDlg<> nil then
        FreeAndNil(UretimWizardDlg);
   end;
@@ -1467,14 +1465,13 @@ begin
   end;
   UretimID := TabUretim.FieldByName('ID').AsInteger;
 
-  // KART + DETAY loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
+  // KART + DETAY loglama (TEK SEFER, Finish'te): edit -> LogKartDegisti, yeni -> LogKartEkle.
   if LogGun > 0 then begin
     if IslemOp = 'D' then
-      Tablo.LogIslemleri(TabNo_URETIMFISI, UretimID, 4, TabUretim)
-    else if ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) then begin
-      LogKayitEkle(TabUretim, TabNo_URETIMFISI, UretimID, TabNo_URETIMFISI, UretimID);
-      FEkleLogland := True;
-    end;
+      LogKartDegisti(TabUretim, TabNo_URETIMFISI, UretimID)
+    else
+      FEkleLogland := LogKartEkle(TabUretim, TabNo_URETIMFISI,
+        (IslemOp = 'E') or (IslemOp = 'K'), FEkleLogland) or FEkleLogland;
     // Detay satirlari (ust=uretim fisi) diff.
     LogDiffKaydet(TabUretimDetay, FDetSnap, TabNo_URETIMFISDETAY, TabNo_URETIMFISI, UretimID);
     LogSnapshotAl(TabUretimDetay, FDetSnap);   // tazele (mukerrer save'i onle)

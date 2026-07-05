@@ -191,7 +191,7 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, UKrediKarti, PrjConst, UFastRap,
-URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame, UAnaForm,LocOnFly;
+URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame, UAnaForm,LocOnFly, ULog;
 
 {$R *.dfm}
 
@@ -443,10 +443,9 @@ begin
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')
         else begin//yoksa açılış kaydını silelim
-          if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla;
-            Tablo.OncekiLogBelirle(KREDIKARTI);   // delete+YenileClick sonrasi cursor kayardi -> yanlis ID loglaniyordu
-            Tablo.LogIslemleri(TabNo_KREDIKARTI, KREDIKARTI.FieldByName('ID').AsInteger, 5, KREDIKARTI);
-          end;
+          // SILMEDEN ONCE, dogru kayit (secili) dururken logla;
+          // delete+YenileClick sonrasi cursor kayardi -> yanlis ID loglaniyordu
+          LogKartSil(KREDIKARTI, TabNo_KREDIKARTI, KREDIKARTI.FieldByName('ID').AsInteger);
           Tablo.Query4.SQL.Text := ' = '+ KREDIKARTI.FieldByName('ID').AsString+' AND TUR in (1,2)';
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''V'' AND TUR in (1,2) ',['&id'], [KREDIKARTI.Fields[0].AsInteger]);
                //kendisini sil

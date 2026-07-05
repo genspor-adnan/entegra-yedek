@@ -8695,8 +8695,7 @@ begin
   // KART (URETIMEMRI) silme logu (silmeden ONCE, kayit dururken)
   if LogGun > 0 then begin
     Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where ID='+IntToStr(UretimEmriID));
-    Tablo.OncekiLogBelirle(Tablo.Query1);
-    Tablo.LogIslemleri(TabNo_URETIMEMRI, UretimEmriID, 5, Tablo.Query1);
+    LogKartSil(Tablo.Query1, TabNo_URETIMEMRI, UretimEmriID);
   end;
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where ID=&ID',['&ID'],[UretimEmriID]);
 end;
@@ -10524,8 +10523,7 @@ begin
 
        if LogGun > 0 then begin
           Tablo.TablodanSorguAc(1,'SELECT * FROM CEKLER WHERE ID='+IntToStr(CekId));
-          Tablo.OncekiLogBelirle(Tablo.Query1);
-          Tablo.LogIslemleri(LTabNo, CekId, 5, Tablo.Query1);
+          LogKartSil(Tablo.Query1, LTabNo, CekId);
        end;
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from CEKLER where ID=&SId', ['&SId'], [CekId]);
        Result := True;

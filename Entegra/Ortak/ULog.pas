@@ -102,6 +102,24 @@ procedure LogReferansGuncelle(ADataSet: TDataSet; ATabloID: Integer; AKayitID: I
 // stok <- STOKID/URUNID. Bulunamazsa 0. (LogYaz'a REHBERID/STOKID gecmek icin.)
 procedure LogVarlikIDleri(ADataSet: TDataSet; out ARehberID, AStokID: Int64);
 
+// ---- KART loglama kisayollari (tum modullerde ayni desen; yeni modul eklerken bunlari kullan) ----
+
+// Kart EKLEME logunu TEK SEFER yazar; hem kaydet hem kapanis-fallback ayni cagriyla:
+// ekleme modunda, kart DB'de (dsBrowse, ID>0) ve daha once loglanmamissa LogKayitEkle.
+// True donerse loglandi -> cagiran flag'ini gunceller:
+//   FEkleLogland := LogKartEkle(Ds, TabNo, IslemOp='E', FEkleLogland) or FEkleLogland;
+function LogKartEkle(ADataSet: TDataSet; ATabNo: Integer;
+  AEklemeModu, AZatenLogland: Boolean): Boolean;
+
+// Kart DEGISTIRME logu: BeforeEdit'teki OncekiLogBelirle snapshot'ina gore degisen
+// alanlar (LogIslemleri/4). LogGun + try/except guard icerir.
+procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+
+// Kart SILME logu — SILMEDEN ONCE, imlec silinecek kayittayken cagrilir
+// (OncekiLogBelirle + LogIslemleri/5). Detaylar icin ayrica LogDetaylariSil cagrilir.
+// DIKKAT: liste ekranlarinda DELETE+Yenile'den SONRA cagrilirsa imlec kayar, YANLIS kayit loglanir.
+procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+
 // Bir SILME grubunu (kart + tum detaylari) log JSON'larindan AYNI ID ile geri
 // INSERT eder (silinen kaydin dirilmesi / "Geri Al"). AUstTabloID/AUstKayitID = kart
 // (master) anahtari, AGun = silme islemi tarihi (gun bazli). Kart once, sonra detaylar
@@ -729,6 +747,50 @@ begin
     end;
   except
     // loglama silme islemini ASLA bozmaz
+  end;
+end;
+
+{ ---- KART loglama kisayollari ---- }
+
+function LogKartEkle(ADataSet: TDataSet; ATabNo: Integer;
+  AEklemeModu, AZatenLogland: Boolean): Boolean;
+var
+  LID: Integer;
+begin
+  Result := False;
+  if (LogGun <= 0) or (not AEklemeModu) or AZatenLogland then Exit;
+  try
+    if (ADataSet <> nil) and ADataSet.Active and (ADataSet.State = dsBrowse) and
+       (ADataSet.FindField('ID') <> nil) then
+    begin
+      LID := ADataSet.FieldByName('ID').AsInteger;
+      if LID > 0 then
+      begin
+        LogKayitEkle(ADataSet, ATabNo, LID, ATabNo, LID);
+        Result := True;
+      end;
+    end;
+  except
+    // loglama is akisini ASLA bozmaz
+  end;
+end;
+
+procedure LogKartDegisti(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+begin
+  if LogGun <= 0 then Exit;
+  try
+    Tablo.LogIslemleri(ATabNo, AKayitID, 4, ADataSet);
+  except
+  end;
+end;
+
+procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer);
+begin
+  if LogGun <= 0 then Exit;
+  try
+    Tablo.OncekiLogBelirle(ADataSet);
+    Tablo.LogIslemleri(ATabNo, AKayitID, 5, ADataSet);
+  except
   end;
 end;
 

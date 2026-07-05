@@ -569,8 +569,7 @@ begin
         else begin//yoksa a??l?? kayd?n? silelim
           if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla; detay+kart
             LogDetaylariSil('POSORAN','POSID',TabNo_POSORAN,TabNo_POS,POSLAR.FieldByName('ID').AsInteger);
-            Tablo.OncekiLogBelirle(POSLAR);
-            Tablo.LogIslemleri(TabNo_POS, POSLAR.FieldByName('ID').AsInteger, 5, POSLAR);
+            LogKartSil(POSLAR, TabNo_POS, POSLAR.FieldByName('ID').AsInteger);
           end;
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
                //kendisini sil

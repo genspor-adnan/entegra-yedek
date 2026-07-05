@@ -335,13 +335,7 @@ begin
   // FALLBACK: yeni kredi (FYeniKredi) DB'ye yazilmis (dsBrowse, ID>0) ama kaydette
   // loglanmadiysa (kaydedip/kaydetmeden X ile kapanis) ekleme logunu kapanista
   // TEK SEFER garanti et. FEkleLogland zaten True ise dokunma (mukerrer onleme).
-  if (LogGun > 0) and FYeniKredi and (not FEkleLogland) and
-     KREDILER.Active and (KREDILER.State = dsBrowse) and
-     (KREDILER.FieldByName('ID').AsInteger > 0) then begin
-    LogKayitEkle(KREDILER, TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger,
-                 TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger);
-    FEkleLogland := True;
-  end;
+  FEkleLogland := LogKartEkle(KREDILER, TabNo_KREDILER, FYeniKredi, FEkleLogland) or FEkleLogland;
   FreeAndNil(FDetSnap);
   inherited;
 end;
@@ -814,16 +808,12 @@ begin
 
    KID := KREDILER.FieldByName('ID').AsInteger;
 
-   // KART loglama (TEK SEFER, kaydette): yeni -> LogKayitEkle, edit -> LogIslemleri.
+   // KART loglama (TEK SEFER, kaydette): yeni -> LogKartEkle, edit -> LogKartDegisti.
    if LogGun > 0 then begin
-      if Yeni then begin
-         if not FEkleLogland then begin
-            LogKayitEkle(KREDILER, TabNo_KREDILER, KID, TabNo_KREDILER, KID);
-            FEkleLogland := True;
-         end;
-      end
+      if Yeni then
+         FEkleLogland := LogKartEkle(KREDILER, TabNo_KREDILER, Yeni, FEkleLogland) or FEkleLogland
       else
-         Tablo.LogIslemleri(TabNo_KREDILER, KID, 4, KREDILER);
+         LogKartDegisti(KREDILER, TabNo_KREDILER, KID);
       // DETAY: PLANKREDI satir ekleme/degisiklik/silme diff (ust = kredi).
       LogDiffKaydet(PLANKREDI, FDetSnap, TabNo_KREDIPLAN, TabNo_KREDILER, KID);
       LogSnapshotAl(PLANKREDI, FDetSnap);   // snapshot'i tazele (mukerrer save engeli)

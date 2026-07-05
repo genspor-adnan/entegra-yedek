@@ -1214,9 +1214,9 @@ begin
      LID    := TabCekler.Fields[0].AsInteger;
      LTabNo := CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger); // 315/316/318/319
      if IslemOp = 'D' then
-        Tablo.LogIslemleri(LTabNo, LID, 4, TabCekler)               // edit: BeforeEdit snapshot ile diff
+        LogKartDegisti(TabCekler, LTabNo, LID)                      // edit: BeforeEdit snapshot ile diff
      else if IslemOp in ['E','K'] then
-        LogKayitEkle(TabCekler, LTabNo, LID, LTabNo, LID);          // yeni/kopya: kart ekleme
+        LogKartEkle(TabCekler, LTabNo, True, False);                // yeni/kopya: kart ekleme
      // DETAY (CEKHAREKET): ust TABLOID kart ile ayni (LTabNo). Yeni belge (E/K) -> snapshot bos -> tum satirlar EKLE.
      if TabCekHareketler.Active then begin
         LogDiffKaydet(TabCekHareketler, FDetSnap, TabNo_CEKLER_Hareket, LTabNo, LID);

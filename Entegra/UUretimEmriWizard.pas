@@ -1433,11 +1433,8 @@ begin
          TabUretimEmri.Post;
       // FALLBACK: yeni kart ara-kaydedilip Finish cagrilmadan X ile kapatildiysa (kart DB'de kaldi)
       // EKLEME logu kacmasin. Silme kolunda calismaz -> yalnizca hala DB'de olan kart loglanir. Tek sefer.
-      if (LogGun > 0) and ((IslemOp = 'E') or (IslemOp = 'K')) and (not FEkleLogland) and
-         (TabUretimEmri.Active) and (TabUretimEmri.FieldByName('ID').AsInteger > 0) then begin
-         LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, TabUretimEmri.FieldByName('ID').AsInteger, TabNo_URETIMEMRI, TabUretimEmri.FieldByName('ID').AsInteger);
-         FEkleLogland := True;
-      end;
+      FEkleLogland := LogKartEkle(TabUretimEmri, TabNo_URETIMEMRI,
+        (IslemOp = 'E') or (IslemOp = 'K'), FEkleLogland) or FEkleLogland;
    end;
 end;
 
@@ -1946,18 +1943,13 @@ begin
   if TabUretimOperasyonDetay.State in [dsEdit,dsInsert] then
      TabUretimOperasyonDetay.Post;
   LID := TabUretimEmri.FieldByName('ID').AsInteger;
-  // ULog: KART (ekleme->LogKayitEkle, degistirme->LogIslemleri) + DETAY diff. Master ID
+  // ULog: KART (ekleme->LogKartEkle, degistirme->LogKartDegisti) + DETAY diff. Master ID
   // Post'tan sonra kesindir. Kaydetmeyi ASLA bozmaz.
   try
-    if LogGun > 0 then
-    begin
-      if IslemOp = 'D' then
-        Tablo.LogIslemleri(TabNo_URETIMEMRI, LID, 4, TabUretimEmri)
-      else if not FEkleLogland then begin
-        LogKayitEkle(TabUretimEmri, TabNo_URETIMEMRI, LID, TabNo_URETIMEMRI, LID);
-        FEkleLogland := True;
-      end;
-    end;
+    if IslemOp = 'D' then
+      LogKartDegisti(TabUretimEmri, TabNo_URETIMEMRI, LID)
+    else
+      FEkleLogland := LogKartEkle(TabUretimEmri, TabNo_URETIMEMRI, True, FEkleLogland) or FEkleLogland;
     LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, LID);
     LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
   except

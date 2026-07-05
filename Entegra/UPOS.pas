@@ -150,13 +150,7 @@ begin
   // FALLBACK: kart EKLEME idi, DB'ye yazilmis (dsBrowse, ID>0) ama kaydette
   // loglanmadiysa (kaydedip/kaydetmeden X ile kapanis) ekleme logunu kapanista
   // TEK SEFER garanti et. FEkleLogland zaten True ise dokunma (mukerrer onleme).
-  if (LogGun > 0) and (IslemOp = 'E') and (not FEkleLogland) and
-     TabPOS.Active and (TabPOS.State = dsBrowse) and
-     (TabPOS.Fields[0].AsInteger > 0) then begin
-    LogKayitEkle(TabPOS, TabNo_POS, TabPOS.Fields[0].AsInteger,
-                 TabNo_POS, TabPOS.Fields[0].AsInteger);
-    FEkleLogland := True;
-  end;
+  FEkleLogland := LogKartEkle(TabPOS, TabNo_POS, IslemOp = 'E', FEkleLogland) or FEkleLogland;
   inherited;
 end;
 
@@ -308,15 +302,10 @@ begin
      Exit;
   end;
   LID := TabPOS.Fields[0].AsInteger;
-  if LogGun > 0 then
-     if LYeni then begin
-        if not FEkleLogland then begin
-           LogKayitEkle(TabPOS, TabNo_POS, LID, TabNo_POS, LID);
-           FEkleLogland := True;
-        end;
-     end
-     else
-        Tablo.LogIslemleri(TabNo_POS, LID, 4, TabPOS);
+  if LYeni then
+     FEkleLogland := LogKartEkle(TabPOS, TabNo_POS, LYeni, FEkleLogland) or FEkleLogland
+  else
+     LogKartDegisti(TabPOS, TabNo_POS, LID);
 end;
 
 procedure TPOS.SetFrameBilgi(AValue: TIcerikFrameBilgi);

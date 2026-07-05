@@ -159,13 +159,7 @@ begin
   // FALLBACK: kart EKLEME idi, DB'ye yazilmis (dsBrowse, ID>0) ama kaydette
   // loglanmadiysa (kaydedip/kaydetmeden X ile kapanis) ekleme logunu kapanista
   // TEK SEFER garanti et. FEkleLogland zaten True ise dokunma (mukerrer onleme).
-  if (LogGun > 0) and (islemOp = 'E') and (not FEkleLogland) and
-     TabKK.Active and (TabKK.State = dsBrowse) and
-     (TabKK.FieldByName('ID').AsInteger > 0) then begin
-    LogKayitEkle(TabKK, TabNo_KREDIKARTI, TabKK.FieldByName('ID').AsInteger,
-                 TabNo_KREDIKARTI, TabKK.FieldByName('ID').AsInteger);
-    FEkleLogland := True;
-  end;
+  FEkleLogland := LogKartEkle(TabKK, TabNo_KREDIKARTI, islemOp = 'E', FEkleLogland) or FEkleLogland;
   inherited;
 end;
 
@@ -330,17 +324,11 @@ begin
       Exit;
     end;
     KKId := TabKK.FieldByName('ID').AsInteger;
-    // KART loglama (TEK SEFER, kaydet'te): yeni -> LogKayitEkle, edit -> LogIslemleri.
-    if LogGun > 0 then begin
-      if Yeni then begin
-        if not FEkleLogland then begin
-          LogKayitEkle(TabKK, TabNo_KREDIKARTI, KKId, TabNo_KREDIKARTI, KKId);
-          FEkleLogland := True;
-        end;
-      end
-      else
-        Tablo.LogIslemleri(TabNo_KREDIKARTI, KKId, 4, TabKK);
-    end;
+    // KART loglama (TEK SEFER, kaydet'te): yeni -> LogKartEkle, edit -> LogKartDegisti.
+    if Yeni then
+      FEkleLogland := LogKartEkle(TabKK, TabNo_KREDIKARTI, Yeni, FEkleLogland) or FEkleLogland
+    else
+      LogKartDegisti(TabKK, TabNo_KREDIKARTI, KKId);
   end else
     TabKK.Post;
 end;
