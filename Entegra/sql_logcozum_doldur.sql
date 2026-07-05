@@ -105,6 +105,8 @@ USING (VALUES
   (92,   N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
   (464,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),
   (464,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
+  (144,  N'TUR',  N'ISLEMTURLERI', N'TUR', N'AD',       NULL),   -- Uretim Fisi
+  (144,  N'TIPI', N'ISLEMTURLERI', N'TIP', N'ACIKLAMA', N'TUR={TUR}'),
 
   -- ===== TEKLIF (97): kisi + GENINI =====
   (97,   N'HAZIRLAYAN', N'REHBER', N'ID',    N'FIRMA',   NULL),   -- teklifi hazirlayan kullanici
