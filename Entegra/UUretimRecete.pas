@@ -1137,6 +1137,9 @@ begin
         'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN)select &URID,1,ID,1,ANABIRIM,1,1,1 from STOKLAR where ID=&StokID',
         ['&URID','&StokID'],[YeniReceteID,StokID]);
       TabloYenile(TabRecete, [], YeniReceteID);
+      // Yeni recete SQL-insert ile olusuyor (dataset dsInsert degil) -> kart ekleme logu burada.
+      if LogGun > 0 then
+        LogKayitEkle(TabRecete, TabNo_URETIMRECETE, YeniReceteID, TabNo_URETIMRECETE, YeniReceteID);
     end;
     TabloYenile(RECETE,[VarsSatisFiyatID]);
     TabRecete.Refresh;
@@ -1190,8 +1193,14 @@ begin
         ShowMessage(URKayitSilinemez)
      else if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMRECETEDETAY where URETIMRECETEID=&UEID and ANAURUN=0',['&UEID'],[TabRecete.FieldByName('ID').AsInteger]) then
         ShowMessage('Önce Reçete detayını silin!')
-     else
+     else begin
+        if LogGun > 0 then begin  // silmeden ONCE logla: detay + kart
+           LogDetaylariSil('URETIMRECETEDETAY','URETIMRECETEID',TabNo_URETIMRECETEDETAY,TabNo_URETIMRECETE,TabRecete.FieldByName('ID').AsInteger);
+           Tablo.OncekiLogBelirle(TabRecete);
+           Tablo.LogIslemleri(TabNo_URETIMRECETE, TabRecete.FieldByName('ID').AsInteger, 5, TabRecete);
+        end;
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from URETIMRECETE where ID=&ID', ['&ID'], [TabRecete.FieldByName('ID').AsInteger]);
+     end;
     TabloYenile(TabRecete, []);
   end;
 end;
