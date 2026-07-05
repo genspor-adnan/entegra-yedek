@@ -567,6 +567,11 @@ begin
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')
         else begin//yoksa a??l?? kayd?n? silelim
+          if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla; detay+kart
+            LogDetaylariSil('POSORAN','POSID',TabNo_POSORAN,TabNo_POS,POSLAR.FieldByName('ID').AsInteger);
+            Tablo.OncekiLogBelirle(POSLAR);
+            Tablo.LogIslemleri(TabNo_POS, POSLAR.FieldByName('ID').AsInteger, 5, POSLAR);
+          end;
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
                //kendisini sil
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from POS  where ID=&id ',['&id'],[POSLAR.Fields[0].AsInteger]);
@@ -574,10 +579,6 @@ begin
           YenileClick;
         end;
       end;
-
-      if LogGun>0 then
-     Tablo.OncekiLogBelirle(POSLAR);
-     Tablo.LogIslemleri(TabNo_POS,POSLAR.FieldByName('ID').AsInteger, 5, POSLAR);
    end else
       raise Exception.Create(Yetkisiz_Islem);
 end;
