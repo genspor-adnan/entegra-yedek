@@ -868,7 +868,18 @@ begin
       LIns.Connection := Tablo.FDCnn;
       LIns.SQL.Text := 'INSERT INTO ' + ATabloAdi + ' (' + LCols + ') VALUES (' + LVals + ')';
       for i := 0 to LKolonlar.Count - 1 do
-        LIns.Params[i].Value := LQ.FieldByName(LKolonlar[i]).Value;   // NULL -> Null (Clear)
+      begin
+        F := LQ.FieldByName(LKolonlar[i]);
+        // Param tipini alandan ver (NULL degerde de belli olsun -> 'data type unknown' engeli).
+        if F.DataType = ftAutoInc then
+          LIns.Params[i].DataType := ftLargeint
+        else
+          LIns.Params[i].DataType := F.DataType;
+        if F.IsNull then
+          LIns.Params[i].Clear
+        else
+          LIns.Params[i].Value := F.Value;
+      end;
 
       LIdentity := GeriIdentityVarMi(ATabloAdi);
       if LIdentity then
