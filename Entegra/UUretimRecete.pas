@@ -1126,23 +1126,30 @@ begin
   Tur:=1;
   StokID := AnaForm.StokAraIdGetir(TabNo_URETIMRECETE, Tur, False);
   if StokID>0 then begin
-    Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI from STOKLAR where ID='+IntToStr(StokID));
-    if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
-      YeniReceteID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'insert into URETIMRECETE(KOD,AD,STOKID,TUR,EKLEYEN,SUBEID) values(&KOD,&AD,&STOKID,2,&EKLEYEN,&SUBEID) select scope_identity()',
-        ['&KOD','&AD','&STOKID','&EKLEYEN','&SUBEID'],
-        [Tablo.Query9.FieldByName('KOD').AsString,Tablo.Query9.FieldByName('STOKADI').AsString,StokID,Kullanan,SubeID],
-        True);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN)select &URID,1,ID,1,ANABIRIM,1,1,1 from STOKLAR where ID=&StokID',
-        ['&URID','&StokID'],[YeniReceteID,StokID]);
-      TabloYenile(TabRecete, [], YeniReceteID);
-      // Yeni recete SQL-insert ile olusuyor (dataset dsInsert degil) -> kart ekleme logu burada.
-      if LogGun > 0 then
-        LogKayitEkle(TabRecete, TabNo_URETIMRECETE, YeniReceteID, TabNo_URETIMRECETE, YeniReceteID);
+    // Ekleme boyunca tekrar eden scroll'lari (her biri detay yukle+snapshot+diff yapardi ->
+    // yavaslik) bastir; sonda TEK AfterScroll ile detay yuklenir + snapshot alinir.
+    FReceteYukleniyor := True;
+    try
+      Tablo.TablodanSorguAc(9,'select ID,KOD,STOKADI from STOKLAR where ID='+IntToStr(StokID));
+      if (Tablo.Query9.Active)and(Tablo.Query9.RecordCount>0) then begin
+        YeniReceteID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'insert into URETIMRECETE(KOD,AD,STOKID,TUR,EKLEYEN,SUBEID) values(&KOD,&AD,&STOKID,2,&EKLEYEN,&SUBEID) select scope_identity()',
+          ['&KOD','&AD','&STOKID','&EKLEYEN','&SUBEID'],
+          [Tablo.Query9.FieldByName('KOD').AsString,Tablo.Query9.FieldByName('STOKADI').AsString,StokID,Kullanan,SubeID],
+          True);
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'insert into URETIMRECETEDETAY(URETIMRECETEID,TUR,URUNID,ADET,BIRIM,MIKTAR,ADETHESAP,ANAURUN)select &URID,1,ID,1,ANABIRIM,1,1,1 from STOKLAR where ID=&StokID',
+          ['&URID','&StokID'],[YeniReceteID,StokID]);
+        TabloYenile(TabRecete, [], YeniReceteID);
+        // Yeni recete SQL-insert ile olusuyor (dataset dsInsert degil) -> kart ekleme logu burada.
+        if LogGun > 0 then
+          LogKayitEkle(TabRecete, TabNo_URETIMRECETE, YeniReceteID, TabNo_URETIMRECETE, YeniReceteID);
+      end;
+      TabloYenile(RECETE,[VarsSatisFiyatID]);
+      TabRecete.Refresh;
+    finally
+      FReceteYukleniyor := False;
     end;
-    TabloYenile(RECETE,[VarsSatisFiyatID]);
-    TabRecete.Refresh;
     if not TabRecete.IsEmpty then
       TabReceteAfterScroll(TabRecete);
   end;
@@ -1284,6 +1291,7 @@ end;
 
 procedure TUretimReceteDlg.TabReceteBeforeScroll(DataSet: TDataSet);
 begin
+  if FReceteYukleniyor then Exit;   // toplu yenileme sirasinda scroll basina diff yapma (yavaslik)
   // Baska receteye gecmeden ONCE, gidilen recetenin detay degisikliklerini logla
   // (detay hala eski receteye ait; master henuz kaymadi).
   DetayLogDiffKaydet;
