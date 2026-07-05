@@ -839,7 +839,12 @@ begin
       LQ.UpdateOptions.AutoIncFields := '';
       F := LQ.FindField('ID');
       if F <> nil then
+      begin
         F.ProviderFlags := F.ProviderFlags + [pfInUpdate];
+        F.ReadOnly := False;               // identity/auto-inc alan yazilamaz -> ac
+        F.Required := False;
+        F.AutoGenerateValue := arNone;     // otomatik uretimi kapat (ID'yi biz yaziyoruz)
+      end;
 
       LIdentity := GeriIdentityVarMi(ATabloAdi);
       if LIdentity then
@@ -853,6 +858,7 @@ begin
       begin
         F := LQ.FindField(LPair.JsonString.Value);   // computed/olmayan kolon -> nil, atla
         if F = nil then Continue;
+        if F.ReadOnly then Continue;   // computed/salt-okunur alan yazilamaz -> atla (ID yukarida acildi)
         LDeger := GeriJsonDeger(LPair.JsonValue);
         if Trim(LDeger) = '' then
           F.Clear
