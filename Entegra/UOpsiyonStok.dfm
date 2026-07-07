@@ -1386,6 +1386,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
   end
   object tabDepolar: TFDQuery
     Connection = Tablo.FDCnn
+    BeforeEdit = tabDepolarBeforeEdit
     BeforePost = tabDepolarBeforePost
     AfterPost = tabDepolarAfterPost
     OnNewRecord = tabDepolarNewRecord

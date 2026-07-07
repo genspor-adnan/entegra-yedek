@@ -93,6 +93,7 @@ type
     procedure SadecePlan1Click(Sender: TObject);
     procedure Pasifler1Click(Sender: TObject);
     procedure TabPlanAfterPost(DataSet: TDataSet);
+    procedure TabPlanBeforeEdit(DataSet: TDataSet);
     procedure TabKartlarBeforeEdit(DataSet: TDataSet);
     procedure Gelir1Click(Sender: TObject);
     procedure Masraf1Click(Sender: TObject);
@@ -114,7 +115,7 @@ var
   HesapPlaniDlg: THesapPlaniDlg;
 
 implementation
-uses Utablo,PrjConst, UResimOlcumleme, jpeg, Fetautil,ComObj,UBekletme,LocOnFly;
+uses ULog, Utablo,PrjConst, UResimOlcumleme, jpeg, Fetautil,ComObj,UBekletme,LocOnFly;
 
 {$R *.dfm}
 
@@ -264,6 +265,11 @@ begin
                 Tablo.TablodanSorguAc(1,'insert into HESAPPLANI(HESAPKODU,HESAPADI,DIGITSAY,DURUM,EKLEYEN,EKLEMETARIHI,VARSAYILAN,SUBEID) values('''+
                 VarToStr(sheet.cells[satir,1])+''','''+ VarToStr(sheet.cells[satir,2])+''',4,1,'''+Kullanan+''','''+
                 FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',1,0) select scope_identity() ');
+                // Excel'den eklenen hesap icin EKLEME logu
+                if (LogGun > 0) and (not Tablo.Query1.IsEmpty) then
+                   LogYaz(liEkle, TabNo_HESAPPLANI, Tablo.Query1.Fields[0].AsInteger,
+                     TLogKurucu.Yeni.Deger('HESAPKODU', VarToStr(sheet.cells[satir,1]))
+                                    .Deger('HESAPADI',  VarToStr(sheet.cells[satir,2])));
 
            end;
       end;
@@ -343,8 +349,11 @@ end;
 
 procedure THesapPlaniDlg.PlanSilClick(Sender: TObject);
 begin
-   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
+   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
+      // SILMEDEN ONCE, kayit dururken logla
+      LogKartSil(TabPlan, TabNo_HESAPPLANI, TabPlan.FieldByName('ID').AsInteger);
       TabPlan.Delete;
+   end;
 end;
 
 procedure THesapPlaniDlg.PopupMenu1Popup(Sender: TObject);
@@ -392,7 +401,16 @@ end;
 
 procedure THesapPlaniDlg.TabPlanAfterPost(DataSet: TDataSet);
 begin
-  KartlariBirlestir;
+  // Hesap plani ekle/degistir logu (LogOnceki dolu -> DEGISTIR, bos -> EKLE).
+  // NOT: eski KartlariBirlestir cagrisi kaldirildi - bu handler dfm'de bagli DEGILDI (olu koddu);
+  // simdi yalnizca loglama icin baglandi, eski davranis degismedi.
+  if DataSet.FieldByName('ID').AsInteger > 0 then
+     LogDetaySatirPost(DataSet, TabNo_HESAPPLANI, TabNo_HESAPPLANI, DataSet.FieldByName('ID').AsInteger);
+end;
+
+procedure THesapPlaniDlg.TabPlanBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
 end;
 
 procedure THesapPlaniDlg.TabPlanBeforePost(DataSet: TDataSet);
@@ -406,6 +424,7 @@ end;
 
 procedure THesapPlaniDlg.TabPlanNewRecord(DataSet: TDataSet);
 begin
+   LogOnceki.Clear;   // iptal edilmis edit kalintisi yeni kaydi DEGISTIR olarak loglamasin
    TabPlan.FieldByName('GIRIS').AsInteger:= 0;
    TabPlan.FieldByName('DIGITSAY').AsInteger:= 0;
    TabPlan.FieldByName('DURUM').AsBoolean:= True;

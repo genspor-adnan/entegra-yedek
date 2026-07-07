@@ -394,6 +394,7 @@ type
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     GBaslamaTarih,GBitisTarih : TDateTime;
     ProjeSorumlusu:integer;
     KodAgaciMasrafDlg:TKodAgaciDlg;
@@ -778,7 +779,9 @@ begin
         //sonra kendi silinir
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where ID=&Id ',['&Id'], [TabFirsatlar.FieldByName('ID').AsInteger]);
       end;
-   end;
+   end else
+      // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+      FEkleLogland := LogKartEkle(TabFirsatlar, TabNo_FIRSAT, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 end;
 
 procedure TFirsatWizardDlg.FormCreate(Sender: TObject);
@@ -1536,7 +1539,7 @@ begin
      if islemOp = 'D' then
        LogKartDegisti(TabFirsatlar, TabNo_FIRSAT, ProjeID)
      else if (islemOp = 'E') or (islemOp = 'K') then
-       LogKayitEkle(TabFirsatlar, TabNo_FIRSAT, ProjeID, TabNo_FIRSAT, ProjeID);
+       FEkleLogland := LogKartEkle(TabFirsatlar, TabNo_FIRSAT, True, FEkleLogland) or FEkleLogland;
    end;
 
 {   if (OncekiDurum=False)and(TabFirsatlar.FieldByName('DURUM').AsBoolean=True) then //Kapand?ysa opsiyona bak?p teklifleri de kapatal?m

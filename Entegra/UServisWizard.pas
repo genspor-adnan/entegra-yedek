@@ -466,6 +466,7 @@ type
   public
     { Public declarations }
     IslemOp : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     ServisID, RehberId : Integer;
     Cagiran:  SmallInt;
     SerKapsam : Boolean;
@@ -1295,9 +1296,13 @@ end;
 procedure TServisWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FHareketSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K')) then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
     if (TabServis.Active) and (TabServis.Fields[0].AsString <> '') then
       Tablo.ServisSil(TabServis.FieldByName('ID').AsInteger);
+   if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K'))) then
+      // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+      FEkleLogland := LogKartEkle(TabServis, TabNo_SERVIS, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
    Action := caFree;
 end;
 
@@ -2438,6 +2443,9 @@ end;
 
 procedure TServisWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
+  // Finish'te alt hareketler (Ekle -> servis detay) ana kartin moduna gore loglansin
+  // -> kart+detaylar tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if (TabServis.FieldByName('ID').AsString<>'') then
      BoslukKontrolleri;
    // KART Post'u Modified-kontrollu: gercek degisiklik yoksa Post etme
@@ -2455,7 +2463,7 @@ begin
      if islemOp = 'D' then
        LogKartDegisti(TabServis, TabNo_SERVIS, ServisID)
      else
-       LogKayitEkle(TabServis, TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
+       FEkleLogland := LogKartEkle(TabServis, TabNo_SERVIS, True, FEkleLogland) or FEkleLogland;
    end;
    Kaydet;   // TabHareketler dahil tum detaylari Post eder
    // Servis hareket satirlari (detay) diff loglama: snapshot ile karsilastir,

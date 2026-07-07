@@ -14,7 +14,7 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
 -- 1) GENDEPO veritabani (ayni instance)
-IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO]');
+IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO] COLLATE SQL_Latin1_General_CP1254_CI_AS');
 
 -- 2) 3 tabloyu yapi + identity + veri ile kopyala (yoksa). Kaynak = mevcut ana DB.
 IF OBJECT_ID('GENDEPO.dbo.EBELGE') IS NULL

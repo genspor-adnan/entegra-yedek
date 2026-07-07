@@ -5,7 +5,7 @@
 -- Ana DB'de LOGREFERANS synonym'i (UInfo bunun uzerinden okur; ISLEMLOG gibi).
 -- Idempotent; EXEC tabanli (GO yok, ps1/SqlClient uyumlu).
 -- ============================================================
-IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO]');
+IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO] COLLATE SQL_Latin1_General_CP1254_CI_AS');
 
 -- NOT: eski tablo DROP edilip yeniden kurulur.
 -- Ad/kod DEGISINCE yeni satir eklenir (eski isim korunur) -> kayit basina COK satir.
@@ -15,8 +15,8 @@ CREATE TABLE dbo.LOGREFERANS(
   ID       bigint        IDENTITY(1,1) NOT NULL CONSTRAINT PK_LOGREFERANS PRIMARY KEY,
   TABLOID  int           NOT NULL,   -- modul/tablo (71 cari, 88 stok, 33 gorev...)
   KAYITID  bigint        NOT NULL,   -- kaydin ID''si
-  AD       nvarchar(200) NULL,       -- gorunen ad (FIRMA / stok adi) - aranan alan
-  KOD      nvarchar(60)  NULL,       -- kod (cari/stok kod)
+  AD       nvarchar(200) COLLATE SQL_Latin1_General_CP1254_CI_AS NULL,   -- gorunen ad (FIRMA / stok adi) - aranan alan
+  KOD      nvarchar(60)  COLLATE SQL_Latin1_General_CP1254_CI_AS NULL,   -- kod (cari/stok kod)
   SILINDI  bit           NOT NULL CONSTRAINT DF_LOGREFERANS_SILINDI DEFAULT(0),
   SONISLEM datetime      NULL        -- bu satirin log zamani
 );

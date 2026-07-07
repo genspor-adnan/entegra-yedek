@@ -166,6 +166,7 @@ type
     procedure BaskiOnizlemeMenuClick(Sender: TObject);
     procedure KASALARAfterOpen(DataSet: TDataSet);
     procedure AcilisKaydiMenuClick(Sender: TObject);
+    procedure KasaInfoMenuClick(Sender: TObject);
     procedure Sil1Click(Sender: TObject);
     procedure GridTviewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure GridKasaEkstreViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
@@ -575,7 +576,13 @@ end;
 
 procedure TKasalarListeFrame.KASALARBeforeDelete(DataSet: TDataSet);
 begin
-  LogKartSil(KASALAR, TabNo_KASA, KASALAR.FieldByName('ID').AsInteger);
+  LogKartSil(KASALAR, TabNo_KASATANIM, KASALAR.FieldByName('ID').AsInteger);   // kasa TANIMI (KASALAR)
+end;
+
+procedure TKasalarListeFrame.KasaInfoMenuClick(Sender: TObject);
+begin
+  if not KASALAR.IsEmpty then
+    Tablo.InfoGoster('KASALAR', KASALAR.FieldByName('ID').AsInteger, TabNo_KASATANIM);
 end;
 
 procedure TKasalarListeFrame.KopyalaMenuClick(Sender: TObject);

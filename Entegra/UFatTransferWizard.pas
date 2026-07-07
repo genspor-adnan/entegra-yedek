@@ -255,6 +255,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     Tur, FatBasId, RehberId: Integer;
     Cagiran: SmallInt;
   end;
@@ -353,6 +354,7 @@ end;
 
 procedure TFatTransferWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   //CanClose := not BoslukKontrolu;
 
 end;
@@ -367,6 +369,8 @@ end;
 
 procedure TFatTransferWizardDlg.FormDestroy(Sender: TObject);
 begin
+  // FALLBACK: yeni transfer kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+  FEkleLogland := LogKartEkle(TabFatBaslik, TabNo_TRANSFER, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
   FreeAndNil(FDetSnap);
 end;
 
@@ -807,6 +811,8 @@ end;
 
 procedure TFatTransferWizardDlg.ToolButton4Click(Sender: TObject);
 begin
+  // Alt hareketler (FATURA/transfer satir diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if TabFatBaslik.State in [dsInsert, dsEdit] then begin
     //if TabFatura.RecordCount = 0 then
       //raise Exception.create(Urungirilmedenkadedilmez);
@@ -820,7 +826,7 @@ begin
   // KART (baslik) loglama (TEK SEFER, terminal Kaydet/Finish): yeni/kopya -> EKLEME, duzenleme -> DEGISTIR.
   if LogGun > 0 then begin
     if (IslemOp='E') or (IslemOp='K') then
-      LogKayitEkle(TabFatBaslik, TabNo_TRANSFER, FatBasId, TabNo_TRANSFER, FatBasId)
+      FEkleLogland := LogKartEkle(TabFatBaslik, TabNo_TRANSFER, True, FEkleLogland) or FEkleLogland
     else
       LogKartDegisti(TabFatBaslik, TabNo_TRANSFER, FatBasId);
   end;

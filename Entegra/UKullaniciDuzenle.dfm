@@ -445,15 +445,15 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
     Width = 204
   end
   object TabKullanici1: TFDQuery
-    Connection = Tablo.FDCnn
+    BeforeEdit = TabKullanici1BeforeEdit
     BeforePost = TabKullanici1BeforePost
     AfterPost = TabKullanici1AfterPost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from KULLANICI '
       'where ID = :Prm1')
-    Left = 76
-    Top = 139
+    Left = 60
+    Top = 91
   end
   object DtsKullanici1: TDataSource
     DataSet = TabKullanici1
@@ -461,4 +461,3 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
     Top = 298
   end
 end
-

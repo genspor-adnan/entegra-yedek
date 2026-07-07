@@ -713,7 +713,7 @@ type
     function DBConnect(Connection: TFDConnection): Boolean;
     procedure DurumBaglantilariniOlustur(Yer,Bolum:integer; Tur:integer=0);
     procedure KopukDurumBaglantilariniSil(Tur,Bolum:integer);
-    procedure OlaylarIslemleri(Tur, KAYNAK, KATEGORI, MESAJ, Durum,BILGINO: SmallInt; Bilgi, KALANGUN: string);
+    procedure OlaylarIslemleri(Tur, KAYNAK, KATEGORI, MESAJ, Durum: SmallInt; BILGINO: Integer; Bilgi, KALANGUN: string);
     procedure OlaylarIslemleriGuncelle(Id, Durum: SmallInt);
     procedure SKIslemEkle(Is_Id: Integer);
     procedure DuyuruAliciekle(KaynakId, HedefId : integer);
@@ -1374,6 +1374,12 @@ const
   Tabno_URETIMEMRI_SATINALMATALEP = 465;
   Tabno_URETIMEMRI_STOKTALEP = 467;
   TabNo_URETIMKALITE = 470;
+  TabNo_KASATANIM = 480;       // kasa tanim karti (KASALAR); 43=TabNo_KASA nakit hareketleri (KASA)
+  TabNo_GELIRKALEM = 481;      // gelir kalemleri (MASRAFGELIR, GELIRMI=1); 58=gider/masraf kalemleri (GELIRMI=0)
+  TabNo_BANKAODEME = 482;      // banka cikis hareketi (KASA, HESAPTURU='B', BORC>0)
+  TabNo_BANKATAHSILAT = 483;   // banka giris hareketi (KASA, HESAPTURU='B', ALACAK>0)
+  TabNo_YETKI = 484;           // rol yetkisi (YETKI: gorsun/eklesin/degistirsin/silsin, ust=ROLLER)
+  TabNo_AYAR = 485;            // opsiyon/ayar (GENINI BOLUM bazli; ust=self)
 
 {$ENDREGION}
 {$REGION 'KasaTür Sabitleri'}
@@ -4863,8 +4869,13 @@ begin
       4,16 : TabNo := TabNo_FIS_Giden;   // cikis fisi
       20 : TabNo := TabNo_TRANSFER;      // stok transfer
       6 : TabNo := TabNo_URETIMFISI;     // uretim fisi
-      9,10,11,13,8,109 : TabNo := TabNo_FATBASLIK_Gelen;
-      19,14,15,17,110,119 : TabNo := TabNo_FATBASLIK_Giden;
+      10 : TabNo := TabNo_IRSALIYE_Gelen;     // wizard (TabloNo) ile ayni eslesme
+      14 : TabNo := TabNo_IRSALIYE_Giden;
+      8,110 : TabNo := Tabno_GIDERPUSULASI;
+      109 : TabNo := TabNo_KONSINYE_GELEN;
+      119 : TabNo := TabNo_KONSINYE_GIDEN;
+      9,11,13 : TabNo := TabNo_FATBASLIK_Gelen;
+      19,15,17 : TabNo := TabNo_FATBASLIK_Giden;
     else
       TabNo := TabNo_FATBASLIK;
     end;
@@ -5492,6 +5503,10 @@ function TTablo.KasaKaydet(Tur: Integer; PlanTarihi, IslemTarihi: TDateTime;
   CekSenetId, GeriDonusId, SubeId1: integer; HesapTuru: Char; Yer: integer = 0;
   YerId: integer = 0; BelgeNo: string = ''; GirisKaynak:SmallInt=1; R:Boolean=False; EkstredeKullan:Boolean=False): Integer;
 begin
+  // Kolon sinirlari (KASA: ACIKLAMA nvarchar(100), BELGENO nvarchar(30)):
+  // uzun deger 'String or binary data would be truncated' hatasiyla kaydi bozmasin.
+  Aciklama := Copy(Aciklama, 1, 100);
+  BelgeNo  := Copy(BelgeNo, 1, 30);
   Tablo.Query7.Close;
   Tablo.Query7.SQL.Text :=
     'Insert Into KASA (TUR, PLANTARIHI, ISLEMTARIHI, REHBERID, HESAPTURU,  ACIKLAMA, HESAPID, '  +
@@ -10450,8 +10465,8 @@ begin
       '(HEDEFDURUM > 0 and HEDEFDURUM not in (select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+'))) ',[],[]);
 end;
 
-procedure TTablo.OlaylarIslemleri(Tur, KAYNAK, KATEGORI, MESAJ, Durum,
-  BILGINO: SmallInt; Bilgi, KALANGUN: string);
+procedure TTablo.OlaylarIslemleri(Tur, KAYNAK, KATEGORI, MESAJ, Durum: SmallInt;
+  BILGINO: Integer; Bilgi, KALANGUN: string);
 begin
   Tablo.Query1.Close;
   Bilgi := StringReplace(Bilgi, '''', ' ', [rfReplaceAll]);

@@ -884,6 +884,10 @@ object KasalarListeFrame: TKasalarListeFrame
   object KasaListeMenu: TPopupMenu
     Left = 49
     Top = 97
+    object KasaInfoMenu: TMenuItem
+      Caption = 'info'
+      OnClick = KasaInfoMenuClick
+    end
     object AksMenu: TMenuItem
       Caption = 'Aksiyonlar'
       OnClick = AksiyonTusClick

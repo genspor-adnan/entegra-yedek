@@ -238,8 +238,13 @@ begin
   Tmp := Detay;
   Hareket.Aciklama := Tmp;
 
-  // IBAN
-  Hareket.KarsiTarafIBAN := IBANCikar(Tmp);
+  // Satir kirilmalarini kaldir: banka 43. kolonda KELIME ORTASINDAN boler;
+  // IBAN ve unvan ancak birlesik metinde butun olarak yakalanir.
+  var Duz: string := StringReplace(StringReplace(Tmp, #13, '', [rfReplaceAll]),
+                                   #10, '', [rfReplaceAll]);
+
+  // IBAN (birlesik metinden - satir ortasinda bolunmus IBAN da yakalanir)
+  Hareket.KarsiTarafIBAN := IBANCikar(Duz);
 
   // ?20=<isim>?  ?32=<IBAN>?  ?108=<açıklama>?
   // SWIFT structured field formatları
@@ -256,6 +261,27 @@ begin
     i := Pos('?', Bnk);
     if i > 0 then Bnk := Copy(Bnk, 1, i - 1);
     Hareket.KarsiTarafBanka := Trim(Bnk);
+  end;
+
+  // Turk bankalari serbest-metin kaliplari (yapisal ?20 tag'i yoksa):
+  //   FAST<ref>-<UNVAN>-<hesap adi>   (FAST odemesi; unvan ilk ve SON '-' arasi)
+  //   EF<ref> <UNVAN>-<hesap adi>     (EFT; unvan ilk '-'a kadar)
+  //   ...-HVL-<isim>  -<ISIM>         (cep sube havalesi; son '-' sonrasi)
+  if Hareket.KarsiTarafAd = '' then begin
+    var M: TMatch := TRegEx.Match(Duz, '^FAST\d+\-(.+)\-');
+    if not M.Success then
+      M := TRegEx.Match(Duz, '^EF\d+\s+(.+?)\-');
+    if M.Success then
+      Hareket.KarsiTarafAd := Trim(M.Groups[1].Value)
+    else begin
+      P := Pos('-HVL-', UpperCase(Duz));
+      if P > 0 then begin
+        Ad := Copy(Duz, P + 5, MaxInt);
+        i := LastDelimiter('-', Ad);
+        if i > 0 then Ad := Copy(Ad, i + 1, MaxInt);
+        if Trim(Ad) <> '' then Hareket.KarsiTarafAd := Trim(Ad);
+      end;
+    end;
   end;
 
   // Fallback — yapısal tag yoksa ilk satırı isim olarak al

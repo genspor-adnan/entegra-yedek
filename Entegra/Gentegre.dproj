@@ -149,13 +149,13 @@
         <DCC_UNSAFE_TYPE>false</DCC_UNSAFE_TYPE>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.7.4.1;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.7.5.1;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <DCC_UnitSearchPath>cxGenYazilim_RepoClasses;C:\comp\DevEx23\GenYazilimEx;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Build>1</VerInfo_Build>
-        <VerInfo_Release>4</VerInfo_Release>
+        <VerInfo_Release>5</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -682,6 +682,9 @@
         </DCCReference>
         <DCCReference Include="UBekletme.pas">
             <Form>BekletmeDlg</Form>
+        </DCCReference>
+        <DCCReference Include="USeyirDefteri.pas">
+            <Form>SeyirDefteriDlg</Form>
         </DCCReference>
         <DCCReference Include="MSS_Sender.pas"/>
         <DCCReference Include="IcerikFrame\UDokumSart.pas">

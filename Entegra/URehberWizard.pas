@@ -381,6 +381,10 @@ type
     UstId : Integer; // 1 Kurum i?in RehberId, 2 Personel i?in PersonelId
     PersIslemTipi : SmallInt; // 1 Yeni pers, 2 D?zenleme, 3 Silme;
     YeniKayit, IlkAcilis, Potansiyel : Boolean;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
+    FKartSnap: TStringList;  // kart (REHBER) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
+    FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si (bayat snapshot'i ayirt etmek icin)
+    destructor Destroy; override;
   end;
 
 var
@@ -783,6 +787,8 @@ begin
   // LabelGrup.OnClick := Tablo.LabelClickCombobox;
   IlkAcilis:=True;
   CariPageControl.ActivePageIndex := 0;
+
+  FKartSnap := TStringList.Create;
 
   // Cari detay iletisim dataset'lerini ust=cari log'una bagla (master-detail).
   TabRehberIletisim.BeforeEdit := DetayBeforeEdit;
@@ -1844,6 +1850,10 @@ begin
     LTabNo :=  TabNo_REHBERBILGI
   else
     Exit;
+  // Detay ISLEMTIPI'si ANA KARTIN modunu izlesin: yeni cari -> ekle(1), mevcut cari -> degis(2).
+  // Boylece kart + tum detaylar ayni ISLEMTIPI'de gruplanir -> UInfo'da TEK satir
+  // (mevcut cariye iletisim/ticari eklenince ayri 'Ekleme' satiri cikmaz).
+  if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
   LogDetaySatirPost(DataSet, LTabNo, TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger);
 end;
 
@@ -1854,8 +1864,16 @@ end;
 
 procedure TRehberWizardDlg.TabRehberBeforeEdit(DataSet: TDataSet);
 begin
-  if LogGun > 0 then
+  if LogGun > 0 then begin
     tablo.OncekiLogBelirle(TabRehber);
+    FKartSnap.Assign(LogOnceki);   // detay logu LogOnceki'yi temizlese de kart diff'i icin sakla
+    FKartSnapID := TabRehber.FieldByName('ID').AsInteger;
+    // Kart snapshot'i FKartSnap'e alindi -> global LogOnceki'yi bosalt. Yoksa duzenleme
+    // sirasinda EKLENEN yeni detay (iletisim/ticari) LogDetaySatirPost'ta LogOnceki dolu
+    // gorunup kart snapshot'ina karsi pozisyonel diff'lenir (cop diff). Kart diff'i Finish'te
+    // FKartSnap'ten geri yuklenir.
+    LogOnceki.Clear;
+  end;
 end;
 
 procedure TRehberWizardDlg.TabRehberBeforePost(DataSet: TDataSet);
@@ -2125,6 +2143,11 @@ var
   Durum, UpdateOldu: SmallInt;
 begin
   GenotipaEkle := False;
+  // Finish'te alt hareketler (Ekle -> ticari/iletisim/ilgili) ana kartin moduna gore
+  // loglansin: yeni cari -> ekle(1), mevcut cari -> degis(2). Boylece kart + detaylar
+  // tek ISLEMTIPI'de gruplanir -> UInfo'da TEK satir. (Detay Ekle icindeki ekle/degis/sil
+  // buffer'lari LogYaz uzerinden yazildigindan LogUstModu override eder.)
+  if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
   //e?er daha ?nce kodu bo? olarak kaydedilmi? varsa kodunu Id yaps?n
   veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE REHBER SET KOD=CONVERT(NVARCHAR(20), ID) WHERE KOD=''''',[],[]);
 
@@ -2180,9 +2203,14 @@ begin
         // (AfterPost'tan tasindi; YeniKayit = bu oturumda yeni cari eklendi mi -> NewRecord'da set, resetlenmez.)
         if LogGun > 0 then begin
           if YeniKayit then
-            LogKayitEkle(TabRehber, TabNo_REHBER, RehberID, TabNo_REHBER, RehberID)
-          else
+            FEkleLogland := LogKartEkle(TabRehber, TabNo_REHBER, True, FEkleLogland) or FEkleLogland
+          else begin
+            // Detay (iletisim) loglamasi LogOnceki'yi ezip/temizleyip kart diff'ini
+            // kaybediyordu -> DOGRU karta ait snapshot'i geri yukle, sonra logla.
+            if (FKartSnapID = RehberID) and (FKartSnap.Count > 0) then
+              LogOnceki.Assign(FKartSnap);
             LogKartDegisti(TabRehber, TabNo_REHBER, RehberID);
+          end;
         end;
 
       end;
@@ -2221,6 +2249,15 @@ begin
     if BosZorunluAlanSay(DtsPerIlet, 'BILGI') > 0 then
       raise Exception.Create(zorunlualanhata);
   end
+end;
+
+destructor TRehberWizardDlg.Destroy;
+begin
+  // FALLBACK: yeni cari kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+  FEkleLogland := LogKartEkle(TabRehber, TabNo_REHBER, YeniKayit, FEkleLogland) or FEkleLogland;
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form kendi modunu set etmezse etkilenmesin)
+  FKartSnap.Free;
+  inherited;
 end;
 
 end.

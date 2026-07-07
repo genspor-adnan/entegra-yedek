@@ -658,7 +658,9 @@ object HesapPlaniDlg: THesapPlaniDlg
   object TabPlan: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
+    BeforeEdit = TabPlanBeforeEdit
     BeforePost = TabPlanBeforePost
+    AfterPost = TabPlanAfterPost
     OnNewRecord = TabPlanNewRecord
     ParamData = <>
     SQL.Strings = (

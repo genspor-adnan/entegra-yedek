@@ -1147,6 +1147,7 @@ end;
 procedure TUretimWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FDetSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if dtsUretim.State = dsInsert then
     tabUretim.Cancel
   else begin
@@ -1454,6 +1455,8 @@ end;
 
 procedure TUretimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
+  // Alt hareketler (URETIMFISDETAY diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if TabUretimDetay.State in [dsEdit,dsInsert] then
      TabUretimDetay.Post;
   if TabUretim.State in [dsInsert,dsEdit] then begin

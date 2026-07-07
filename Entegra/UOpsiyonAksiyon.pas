@@ -336,16 +336,19 @@ begin     //ModulID 2100
   Tablo.GENINI.WriteInteger(Ops_OpsiyonIs_VarsayilanKlasor, ComboKlasor.EditValue);
 
    //m.y. 22.01.2024
-   if (tabSocial.FieldByName('MetaUpdatePeriod').AsString='') or
-      (tabSocial.FieldByName('MetaUpdatePeriod').AsInteger<10) then
-    begin
-      if tabSocial.State = dsBrowse then
-        tabSocial.Edit;
-      tabSocial.FieldByName('MetaUpdatePeriod').AsInteger:= 10;
-    end;
+   // GUARD: tabSocial aktif ve MetaUpdatePeriod alani varsa (SOCIAL_MEDIA kolonu/tablosu
+   // kurulu degilse formu kirmadan atla).
+   if tabSocial.Active and (tabSocial.FindField('MetaUpdatePeriod') <> nil) then
+     if (tabSocial.FieldByName('MetaUpdatePeriod').AsString='') or
+        (tabSocial.FieldByName('MetaUpdatePeriod').AsInteger<10) then
+      begin
+        if tabSocial.State = dsBrowse then
+          tabSocial.Edit;
+        tabSocial.FieldByName('MetaUpdatePeriod').AsInteger:= 10;
+      end;
 
-   //m.y. 15.11.2023
-   if tabSocial.State in [dsEdit, dsInsert] then
+   //m.y. 15.11.2023 (inaktifse State check false -> guvenli)
+   if tabSocial.Active and (tabSocial.State in [dsEdit, dsInsert]) then
      tabSocial.Post;
    //m.y. 06.12.2023
    Tablo.GENINI.WriteBoolean(Ops_SocialMedia_Meta, dxSocialGroupBox.CheckBox.Checked);//

@@ -402,6 +402,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     SiparisTur, SiparisIdsi, RehberId, ProjeId, AktiviteId,MasrafMerkezi,ServisID,SatinAlmaID: Integer;
     iadefis, IptalSecildi: Boolean;
     Cagiran: SmallInt;
@@ -760,6 +761,9 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, SIPARIS.FieldByName('ID').AsInteger]);
       Tablo.SiparisSil(SIPARIS.FieldByName('ID').AsInteger);
      end;
+  if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K'))) then
+     // FALLBACK: yeni satinalma kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+     FEkleLogland := LogKartEkle(SIPARIS, TabNo_SATINALMA, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 end;
 
 procedure TSatinAlmaWizard2.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1645,7 +1649,9 @@ begin
      SIPARIS.Post;
      if islemOp='D' then  begin
         LogKartDegisti(SIPARIS, TabNo_SATINALMA, SiparisIdsi)
-    end;
+    end else if (islemOp='E') or (islemOp='K') then
+        // Yeni/kopya satinalma -> baslik EKLEME logu (TEK SEFER; kapanis fallback ile ortak bayrak).
+        FEkleLogland := LogKartEkle(SIPARIS, TabNo_SATINALMA, True, FEkleLogland) or FEkleLogland;
   end;
   if SIPARISDETAY.State in [dsInsert, dsEdit] then begin
      SIPARISDETAY.Post;

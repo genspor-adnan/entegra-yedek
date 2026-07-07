@@ -158,8 +158,8 @@ object AnaForm: TAnaForm
   object MainMenu1: TMainMenu
     Images = Tablo.ImgListGridResimleri
     OwnerDraw = True
-    Left = 114
-    Top = 210
+    Left = 82
+    Top = 162
     object N1: TMenuItem
       Caption = 'Gen'
       object KasiyerMenu: TMenuItem
@@ -312,16 +312,9 @@ object AnaForm: TAnaForm
         Caption = 'Yedekleme'
         OnClick = YedekAl1Click
       end
-      object SeyirDefteri1: TMenuItem
-        Caption = 'Seyir Defteri'
-        object MenuYeniLog: TMenuItem
-          Caption = 'Yeni'
-          OnClick = MenuYeniLogClick
-        end
-        object Eski1: TMenuItem
-          Caption = 'Eski'
-          OnClick = SeyirDefteri1Click
-        end
+      object MenuGenelInfo: TMenuItem
+        Caption = 'Log info'
+        OnClick = MenuGenelInfoClick
       end
     end
     object Yardm1: TMenuItem
@@ -915,8 +908,8 @@ object AnaForm: TAnaForm
     Enabled = False
     Interval = 5000
     OnTimer = Timer1Timer
-    Left = 48
-    Top = 48
+    Left = 40
+    Top = 8
   end
   object PopupMenuTree: TPopupMenu
     Left = 879
@@ -952,12 +945,12 @@ object AnaForm: TAnaForm
     Host = '192.168.0.18'
     Port = 7777
     ReadTimeout = -1
-    Left = 271
-    Top = 134
+    Left = 215
+    Top = 126
   end
   object ChatTimer: TJvTimer
     OnTimer = ChatTimerTimer
-    Left = 312
-    Top = 56
+    Left = 264
+    Top = 16
   end
 end

@@ -681,6 +681,7 @@ type
     { Public declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     IslemOp : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     TeklifID,SatinAlmaID, RehberId,ProjeID,MasrafMerkezi,ServisID,TeklifTur,TeklifTipi : Integer;
     Cagiran, Yeri,AlternatifNo:  SmallInt;
     RevizeGrideTiklandi :boolean;
@@ -1230,6 +1231,7 @@ end;
 
 procedure TTeklifWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
    if (IptalSecildi) and ((IslemOp='E')or(IslemOp='K')) then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabTeklif.active)and(TabTeklif.Fields[0].AsString <> '')  then begin
       //varsa dokumanlar?n silinmeli
@@ -1240,8 +1242,11 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&Id ',['&Id'], [TabTeklif.FieldByName('ID').AsInteger]);
       end;
-   end else if (IslemOp='D')and(TabTeklifDetay.IsEmpty) then begin
-            raise Exception.Create(UrungirilmedenKaydedilemez);
+   end else begin
+      // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+      FEkleLogland := LogKartEkle(TabTeklif, TabNo_TEKLIF, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+      if (IslemOp='D')and(TabTeklifDetay.IsEmpty) then
+         raise Exception.Create(UrungirilmedenKaydedilemez);
    end;
 
    if IptalSecildi then
@@ -1746,6 +1751,9 @@ var
   s:String;
   YeniTeklif:Boolean;
 begin
+  // Alt hareketler (TEKLIFDETAY diff) ana kartin moduna gore loglansin -> kart+detaylar
+  // tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if TabTeklif.State in [dsInsert, dsEdit] then  begin
     if BeditProjeKod.Text='' then
         TabTeklif.FieldByName('PROJEID').AsInteger :=-1;
@@ -1764,7 +1772,7 @@ begin
      // Detay loglamasi (LogDiffKaydet/FDetSnap) asagida ayrica yapiliyor -> ona dokunma.
      if LogGun>0 then begin
         if YeniTeklif then
-           LogKayitEkle(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger)
+           FEkleLogland := LogKartEkle(TabTeklif, TabNo_TEKLIF, True, FEkleLogland) or FEkleLogland
         else if LogOnceki.Count>0 then
            LogKartDegisti(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger);
      end;

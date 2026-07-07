@@ -2793,8 +2793,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object dtsStilKosul: TDataSource
     DataSet = tabStilKosul
     OnStateChange = dtsStilKosulStateChange
-    Left = 140
-    Top = 71
+    Left = 220
+    Top = 63
   end
   object tabStilKosul: TFDQuery
     BeforeOpen = tabStilKosulBeforeOpen
@@ -3018,6 +3018,6 @@ object OpsiyonDlg: TOpsiyonDlg
     Height = 0
     Width = 0
     Left = 296
-    Top = 296
+    Top = 224
   end
 end

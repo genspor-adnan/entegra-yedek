@@ -44,7 +44,7 @@ function EBelgeGelenTutarlariUBLdenDoldur(AConnection: TFDConnection;
 implementation
 
 uses
-  System.SysUtils, System.StrUtils, System.JSON, System.NetEncoding,
+  ULog, System.SysUtils, System.StrUtils, System.JSON, System.NetEncoding,
   System.IOUtils, Data.DB, System.Classes, System.Zip,
   Utablo, PrjConst, FetaKurulusSiniflari, UEBelgeKimlik, UIzibizRest;
 
@@ -304,7 +304,7 @@ begin
     LQry.SQL.Text :=
       'select top 1 ID, UBLVAR=case when (UBL_XML_ZIP IS NOT NULL ' +
       'OR len(isnull(UBL_XML, N''''))>0) then 1 else 0 end ' +
-      'from EBELGE where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc';
+      'from ' + DepoTablo('EBELGE') + ' where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc';
     LQry.ParamByName('UUID').AsString := AUUID;
     LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     LQry.Open;
@@ -341,14 +341,14 @@ begin
     end;
     if AEBelgeID > 0 then begin
       LQry.SQL.Text :=
-        'update EBELGE set BELGENO=:BNO, GONDERICIALIAS=:GA, ALICIALIAS=:AA, ' +
+        'update ' + DepoTablo('EBELGE') + ' set BELGENO=:BNO, GONDERICIALIAS=:GA, ALICIALIAS=:AA, ' +
         'DURUM=:DURUM, API_JSON=cast(:AJ as nvarchar(max)), ' +
         LUxUpd + 'DEGISTIREN=:KUL, DEGISTIRMETARIHI=getdate() ' +
         'where ID=:ID';
       LQry.ParamByName('ID').AsLargeInt := AEBelgeID;
     end else begin
       LQry.SQL.Text :=
-        'insert into EBELGE(FATBASLIKID, REHBERID, BELGETURU, YON, UUID, BELGENO, ' +
+        'insert into ' + DepoTablo('EBELGE') + '(FATBASLIKID, REHBERID, BELGETURU, YON, UUID, BELGENO, ' +
         'GONDERICIALIAS, ALICIALIAS, DURUM, API_JSON, UBL_XML, UBL_XML_ZIP, EKLEYEN, EKLEMETARIHI) values(' +
         '0, 0, :BELGETURU, 2, :UUID, :BNO, :GA, :AA, :DURUM, cast(:AJ as nvarchar(max)), ' +
         LUxIns + ', :KUL, getdate()); ' +
@@ -388,7 +388,7 @@ begin
   try
     LQry.Connection := AConnection;
     LQry.SQL.Text :=
-      'insert into EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,' +
+      'insert into ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,' +
       'SERVISKODU,HATAKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) values(' +
       ':EID,2,2,:MT,:MSG,:HK,:SERVIS,:HKOD,:HMSG,:KUL,getdate())';
     LQry.ParamByName('EID').AsLargeInt := AEBelgeID;
@@ -421,7 +421,7 @@ begin
   LQ := TFDQuery.Create(nil);
   try
     LQ.Connection := AConn;
-    LQ.SQL.Text := 'select cast(API_JSON as nvarchar(max)) AJ from EBELGE where ID=' + IntToStr(AEBelgeID);
+    LQ.SQL.Text := 'select cast(API_JSON as nvarchar(max)) AJ from ' + DepoTablo('EBELGE') + ' where ID=' + IntToStr(AEBelgeID);
     LQ.Open;
     if not LQ.Eof then begin
       LStr := LQ.Fields[0].AsString;
@@ -474,7 +474,7 @@ begin
   try
     LQ.Connection := AConn;
     LQ.SQL.Text :=
-      'insert into EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,' +
+      'insert into ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,' +
       'SERVISKODU,HATAKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) values(' +
       ':EID,2,2,:MT,:MSG,:SERVIS,:HKOD,:HMSG,:KUL,getdate())';
     LQ.ParamByName('EID').AsLargeInt := AEBelgeID;
@@ -759,12 +759,12 @@ begin
             LDurum := -11;
           Veritabani.BasitKomutÇalıştır(AConnection,
             'UPDATE FATBASLIK SET EFATURADURUM=&D, EFATURASONUC=&S ' +
-            'WHERE ID IN (SELECT FATBASLIKID FROM EBELGE WHERE ID=&EID AND FATBASLIKID > 0)',
+            'WHERE ID IN (SELECT FATBASLIKID FROM ' + DepoTablo('EBELGE') + ' WHERE ID=&EID AND FATBASLIKID > 0)',
             ['&D', '&S', '&EID'], [LDurum, LSonuc, LEBelgeID]);
         end;
         // API_JSON'u da tazele - sonraki sync'ler icin son state korunsun
         Veritabani.BasitKomutÇalıştır(AConnection,
-          'UPDATE EBELGE SET API_JSON=cast(&AJ as nvarchar(max)) WHERE ID=&EID',
+          'UPDATE ' + DepoTablo('EBELGE') + ' SET API_JSON=cast(&AJ as nvarchar(max)) WHERE ID=&EID',
           ['&AJ', '&EID'], [LItem.ToJSON, LEBelgeID]);
         // Status degistiyse mesaj kaydet (kullanici Mesajlar dialogunda gorsun).
         if (LYeniStatus > 0) and (LYeniStatus <> LEskiStatus) then
@@ -1144,7 +1144,7 @@ begin
     LSel.SQL.Text :=
       'SELECT TOP 1 COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
       '                     CAST(E.UBL_XML AS NVARCHAR(MAX))) AS UBLXML ' +
-      'FROM EBELGE E JOIN FATBASLIK FB ON FB.GNTPID = E.ID ' +
+      'FROM ' + DepoTablo('EBELGE') + ' E JOIN FATBASLIK FB ON FB.GNTPID = E.ID ' +
       'WHERE FB.ID=:F AND E.YON=2 ORDER BY E.ID DESC';
     LSel.ParamByName('F').AsInteger := AFatBaslikID;
     LSel.Open;
@@ -1239,7 +1239,7 @@ begin
     // Toplam (ilerleme icin)
     LToplam := 0;
     LSP.SQL.Text :=
-      'SELECT COUNT(*) FROM EBELGE E WHERE E.YON=2 ' +
+      'SELECT COUNT(*) FROM ' + DepoTablo('EBELGE') + ' E WHERE E.YON=2 ' +
       '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
     LSP.ParamByName('BELGETURU').AsInteger := LBelgeTuru;
@@ -1248,13 +1248,13 @@ begin
     LSP.Close;
 
     // FATBASLIK linki olmayan gelen e-belgeler.
-    // Acik cursor + UPDATE EBELGE ayni baglantida lock cakismasi yapip timeout veriyor.
+    // Acik cursor + UPDATE ' + DepoTablo('EBELGE') + ' ayni baglantida lock cakismasi yapip timeout veriyor.
     // Cozum: tum satirlari array'e cek, cursor'i kapat, sonra islet.
     LSel.SQL.Text :=
       'SELECT E.ID, E.BELGENO, cast(E.API_JSON as nvarchar(max)) as APIJ, ' +
       '       COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
       '               CAST(E.UBL_XML AS NVARCHAR(MAX))) as UBLXML ' +
-      'FROM EBELGE E ' +
+      'FROM ' + DepoTablo('EBELGE') + ' E ' +
       'WHERE E.YON=2 ' +
       '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
@@ -1439,7 +1439,7 @@ begin
             [LEBelgeID, LDurumIlk, LSonucIlk, LYeniFatbasID]);
           // EBELGE -> FATBASLIK back-link
           Veritabani.BasitKomutÇalıştır(AConnection,
-            'UPDATE EBELGE SET FATBASLIKID=&FID WHERE ID=&EID',
+            'UPDATE ' + DepoTablo('EBELGE') + ' SET FATBASLIKID=&FID WHERE ID=&EID',
             ['&FID', '&EID'], [LYeniFatbasID, LEBelgeID]);
 
           // UBL detay satirlarini FATURA tablosuna ekle.

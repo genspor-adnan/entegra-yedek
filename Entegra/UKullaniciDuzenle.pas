@@ -9,7 +9,9 @@ uses
   cxDropDownEdit, cxImageComboBox, cxDBEdit, cxGroupBox, cxLabel, cxControls,
   cxContainer, cxEdit, cxTextEdit, GIFImg, cxImage, Menus, StdCtrls, cxButtons,UGenSifre,Utablo,
   cxButtonEdit, cxDBLabel, dxSkinLondonLiquidSky, cxLookAndFeels, dxSkinLiquidSky, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
-  cxCheckBox, cxMemo, Vcl.ExtCtrls;
+  cxCheckBox, cxMemo, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TKullaniciDuzenleDlg = class(TForm)
@@ -46,6 +48,7 @@ type
     procedure btnIptalClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TabKullanici1AfterPost(DataSet: TDataSet);
+    procedure TabKullanici1BeforeEdit(DataSet: TDataSet);
   private
     //function SifreKarisikMi(Sifre: string): Boolean;
     { Private declarations }
@@ -64,7 +67,7 @@ var
 
 implementation
 uses
-PrjConst,Fetautil,FetaKurulusSiniflari,LocOnFly;
+ULog, PrjConst,Fetautil,FetaKurulusSiniflari,LocOnFly;
 
 {$R *.dfm}
 
@@ -171,9 +174,17 @@ Begin
     Result := True;
 end;
 
+procedure TKullaniciDuzenleDlg.TabKullanici1BeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
+end;
+
 procedure TKullaniciDuzenleDlg.TabKullanici1AfterPost(DataSet: TDataSet);
 var  Sube  : String[5];
 begin
+   // Kullanici EKLE/DEGISTIR logu (LogOnceki dolu -> DEGISTIR, bos -> EKLE; sifre sifreli haliyle loglanir)
+   if TabKullanici1.FieldByName('ID').AsInteger > 0 then
+      LogDetaySatirPost(DataSet, TabNo_KULLANICI, TabNo_KULLANICI, TabKullanici1.FieldByName('ID').AsInteger);
    Sube:=Tablo.AciklamaGetir('ROLLER', 'SUBEID', TabKullanici1.FieldByName('ROLID').AsInteger);
    //veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update REHBER set SUBEID='+Sube+', SINIF='+TabKullanici1.FieldByName('ROLID').AsString+' where ID='+TabKullanici1.FieldByName('REHBERID').AsString,[],[]);
 end;
@@ -188,14 +199,22 @@ begin
    if Panel1.Enabled = False then begin //se�enekler kullan ayar �K kullan�yorsa �ifre girmesine gerek yok
        if not Kontrol(ComboSoru.Text,cxLabel7.Caption) then abort;
        if not Kontrol(EditCevap.Text,cxLabel8.Caption) then abort;
-       if Mesaj<>'' then begin
+       // Sifre kural kontrolu YALNIZ sifre gercekten degistirildiyse yapilir.
+       // (FormShow alanlara MEVCUT sifreyi doldurur -> SifreKontrolu 'onceki sifreyle ayni'
+       // uyarisi uretir ve Mesaj hic bosalmazdi; sifreye dokunmadan soru/cevap dahil HICBIR
+       // ayar kaydedilemiyordu.)
+       if (UGenSifre.Sifre(EditSifre1.Text) <> OncekiSifre) and (Mesaj<>'') then begin
           Application.MessageBox(PChar(Mesaj),PChar(Uyari),MB_OK+MB_ICONERROR);
           abort;
        end Else begin
           TabKullanici1.FieldByName('SORU').Value := ComboSoru.EditValue;
           TabKullanici1.FieldByName('CEVAP').Value := UGenSifre.Sifre(EditCevap.Text);
-          TabKullanici1.FieldByName('SIFRE').Value := UGenSifre.Sifre(EditSifre1.Text);
-          TabKullanici1.FieldByName('SIFREDEGISME').AsDateTime := Tablo.GENINI.BugunTrhSaat + (Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_SifreSuresi, 6)*30);
+          // SIFRE ve gecerlilik suresi yalniz sifre DEGISTIYSE yazilir (degismeden
+          // her kaydette surenin uzamasi sifre politikasini bosa cikarir).
+          if UGenSifre.Sifre(EditSifre1.Text) <> OncekiSifre then begin
+             TabKullanici1.FieldByName('SIFRE').Value := UGenSifre.Sifre(EditSifre1.Text);
+             TabKullanici1.FieldByName('SIFREDEGISME').AsDateTime := Tablo.GENINI.BugunTrhSaat + (Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_SifreSuresi, 6)*30);
+          end;
           TabKullanici1.FieldByName('DEGISTIREN').Value := Kullanan;
           TabKullanici1.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
       end;

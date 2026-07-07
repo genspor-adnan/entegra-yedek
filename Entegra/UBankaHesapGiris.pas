@@ -110,6 +110,9 @@ type
     dxMemData1KOMISYON: TCurrencyField;
     dxMemData1ACIKLAMA: TStringField;
     dxMemData1BELGENO: TStringField;
+    dxMemData1IBAN: TStringField;
+    dxMemData1HAMAD: TStringField;
+    dxMemData1ICERIALINDI: TBooleanField;
     dxMemData1KARSILIGI: TBooleanField;
     dxMemData1DOVIZ_TUTARI: TCurrencyField;
     dxMemData1DOVIZ_TIPI: TStringField;
@@ -153,6 +156,7 @@ type
     dxMemData1ONAY: TBooleanField;
     cxGrid1DBTableView1ONAY: TcxGridDBColumn;
     dxMemData1KREDIDETAYID: TIntegerField;
+    ButtonExcelAl: TcxButton;
 
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -180,7 +184,6 @@ type
       Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-    procedure PanelUstDblClick(Sender: TObject);
     procedure cxGrid1DBTableView1StylesGetContentStyle(
       Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
@@ -191,6 +194,7 @@ type
       AItem: TcxCustomGridTableItem; var AAllow: Boolean);
     procedure miBenzerlerineUygulaClick(Sender: TObject);
     procedure btnMT940AlClick(Sender: TObject);
+    procedure ButtonExcelAlClick(Sender: TObject);
   private
     FHESAPID: Integer;
     FBankaAdi, FSubeAdi, FHESAPKODU, FHESAPNO, FBankaDovizi, FHesapAdi: string;
@@ -204,7 +208,12 @@ type
     // Banka kural önbelleği — anahtar formatı "BANKA_KODU:KURAL_TIPI" (ör. "GARANTI:E")
     FKuralCache: TObjectDictionary<string, TBankaKuralListesi>;
     FYuklenenBankalar: TStringList;   // İki kere yüklenip duplicate Add'ı engelle
+    FMT940Dosyalar: TStringList;      // MT940: aynı dosya (tam yol) ikinci kez yüklenmesin
+    FKayitIDleri: TList<Integer>;     // bu oturumda KASA'ya yazılan satırlar → FormClose'da EKLEME logu
     FBankaTipi: TBankaTipi;           // Aktif içeri al akışında kullanılan banka tipi
+    function KayitIzle(AId: Integer): Integer;
+    procedure IbanCariyeYaz(ARehId: Integer);
+    function TurAdiGetir(ATur: Integer): string;
     procedure SatiriUstePanele;
     procedure HesapBilgiGoster;
     procedure TurListesiniDoldur;
@@ -312,7 +321,7 @@ implementation
 
 {$R *.dfm}
 
-uses PrjConst, Utablo, FetaKurulusSiniflari, fetautil, LocOnfly, System.DateUtils,
+uses ULog, PrjConst, Utablo, FetaKurulusSiniflari, fetautil, LocOnfly, System.DateUtils,
   System.IOUtils, System.StrUtils, Winapi.ActiveX, System.Win.ComObj,
   System.RegularExpressions, System.Masks, UMT940Reader, UTabloGiris;
 
@@ -328,6 +337,11 @@ begin
   FYuklenenBankalar := TStringList.Create;
   FYuklenenBankalar.Sorted := True;
   FYuklenenBankalar.Duplicates := dupIgnore;
+  FMT940Dosyalar := TStringList.Create;
+  FMT940Dosyalar.Sorted := True;
+  FMT940Dosyalar.Duplicates := dupIgnore;
+  FMT940Dosyalar.CaseSensitive := False;
+  FKayitIDleri := TList<Integer>.Create;
 
   TurListesiniDoldur;
 
@@ -370,12 +384,84 @@ end;
 procedure TbankaHesapGirisdlg.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(FYuklenenBankalar);
+  FreeAndNil(FMT940Dosyalar);
+  FreeAndNil(FKayitIDleri);
   FreeAndNil(FKuralCache);
   bankaHesapGirisdlg := nil;
 end;
 
+// KASA'ya yazılan satırın ID'sini biriktirir → FormClose'da EKLEME logu TEK SEFER yazılır.
+function TbankaHesapGirisdlg.KayitIzle(AId: Integer): Integer;
+begin
+  Result := AId;
+  if (AId > 0) and Assigned(FKayitIDleri) then
+    FKayitIDleri.Add(AId);
+end;
+
+// TUR ID'sinin ekrandaki adini cbTur listesinden cozer (tek merkez).
+function TbankaHesapGirisdlg.TurAdiGetir(ATur: Integer): string;
+var i: Integer;
+begin
+  Result := '';
+  for i := 0 to cbTur.Properties.Items.Count - 1 do
+    if cbTur.Properties.Items[i].Value = ATur then
+      Exit(cbTur.Properties.Items[i].Description);
+end;
+
+// MT940'tan gelen satirdaki karsi taraf IBAN'ini, secilen carinin IBAN'i BOSSA cariye yazar
+// (onayli). Boylece bir sonraki MT940 yuklemesinde ayni cari IBAN ile otomatik eslesir.
+// Dolu IBAN'in ustune ASLA yazilmaz. Degisiklik ISLEMLOG'a cari DEGISTIRME olarak islenir.
+procedure TbankaHesapGirisdlg.IbanCariyeYaz(ARehId: Integer);
+var
+  LIban, LEski: string;
+begin
+  if ARehId <= 0 then Exit;
+  if not FDuzenlemeKipinde then Exit;                 // yalniz grid satiri duzenlenirken
+  if dxMemData1.RecordCount = 0 then Exit;
+  LIban := Trim(dxMemData1IBAN.AsString);
+  if LIban = '' then Exit;                            // elle giriste / IBAN'siz bankada bos
+  LEski := Trim(Tablo.AciklamaGetir('REHBER', 'IBAN', ARehId));
+  if LEski <> '' then Exit;                           // dolu IBAN'a dokunma
+  if Application.MessageBox(PChar('Seçilen cariye bu IBAN kaydedilsin mi?' + sLineBreak + LIban),
+                            PChar(Onay), MB_ICONQUESTION + MB_YESNO) <> IDYES then Exit;
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'UPDATE REHBER SET IBAN = &I WHERE ID = &ID', ['&I', '&ID'], [LIban, ARehId]);
+  // Cari kartina ISLEMLOG degistirme kaydi
+  LogYaz(liDegistir, TabNo_REHBER, ARehId,
+         TLogKurucu.Yeni.Alan('IBAN', LEski, LIban), 'Cari Kart');
+end;
+
 procedure TbankaHesapGirisdlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  // Bu oturumda kaydedilen banka hareketlerinin EKLEME loglari (TEK SEFER, kapanista).
+  // Kayit guncel halinden loglanir (GERIDONUSID/BELGENO update'leri de yansimis olur).
+  if (LogGun > 0) and (FKayitIDleri.Count > 0) then
+  try
+    var LQ: TFDQuery := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      for var LID in FKayitIDleri do begin
+        LQ.Close;
+        LQ.SQL.Text := 'SELECT * FROM KASA WHERE ID = ' + IntToStr(LID);
+        LQ.Open;
+        if not LQ.IsEmpty then begin
+          // Bölüm: banka satırları yönüne göre 'Banka Ödeme' / 'Banka Tahsilat'
+          var LTab: Integer := TabNo_KASA;
+          if LQ.FieldByName('HESAPTURU').AsString = 'B' then
+            if LQ.FieldByName('BORC').AsCurrency > 0 then
+              LTab := TabNo_BANKAODEME
+            else
+              LTab := TabNo_BANKATAHSILAT;
+          LogKayitEkle(LQ, LTab, LID, LTab, LID);
+        end;
+      end;
+    finally
+      LQ.Free;
+    end;
+    FKayitIDleri.Clear;
+  except
+    // loglama is akisini ASLA bozmaz
+  end;
   Action := caFree;
 end;
 
@@ -783,6 +869,13 @@ begin
         if iTmp > 0 then begin
           FSECIMID := iTmp;
           beSecim.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', iTmp);
+          // MT940 satirinda IBAN varsa ve secilen carinin IBAN'i bossa cariye kaydet
+          IbanCariyeYaz(iTmp);
+          // Öğrenen eşleme: bu MT940 ünvanı için seçilen cariyi hatırla
+          if FDuzenlemeKipinde and (dxMemData1.RecordCount > 0) and
+             (Trim(dxMemData1HAMAD.AsString) <> '') then
+            EslemeKaydet('MT940', 'MTAD:' + AnsiUpperCase(Trim(dxMemData1HAMAD.AsString)),
+                         dxMemData1TURID.AsInteger, iTmp, True);
         end;
       end;
 
@@ -1294,7 +1387,7 @@ var
 begin
   // KASA'ya saniye hassasiyetinde yaz — millisaniyeleri at
   TarihSaniye := RecodeMillisecond(Tarih, 0);
-  Result := Tablo.KasaKaydet(
+  Result := KayitIzle(Tablo.KasaKaydet(
     Tur,
     TarihSaniye,                      // PlanTarihi
     TarihSaniye,                      // IslemTarihi
@@ -1310,12 +1403,15 @@ begin
     0, YerId, BelgeNo,                // Yer, YerId, BelgeNo
     Windows_HizliGiris,               // GirisKaynak — Utablo'da global = 5
     False,                            // R
-    EkstredeKullan);
+    EkstredeKullan));
 end;
 
 procedure TbankaHesapGirisdlg.btnF5KaydetClick(Sender: TObject);
 var
   Tur, RehId, MasId, BankaMasrafMerkeziId, IdBanka, IdKK: Integer;
+  YeniBelgeNo, OzelKodDeger, IdListe: string;
+  SatirBasiIdx, k: Integer;
+  MukerrerVar: Boolean;
   Borc, Alacak, DovizTutar, MasrafTutar: Currency;
   DovizKod: string;
   Tarih: TDateTime;
@@ -1335,6 +1431,8 @@ begin
   // Banka masraf merkezi opsiyon defaultu (UNakitDlg satır 365 ile aynı kaynak)
   BankaMasrafMerkeziId := StrToIntDef(Tablo.GENINI.ReadString(Ops_OpsiyonBanka_MasrafMerkezi, '0'), 0);
 
+  FSatirEkleniyor := True;   // Delete/Next sırasında grid focus eventleri paneli bozmasın
+  try
   dxMemData1.First;
   while not dxMemData1.Eof do begin
     // Excel'den içeri alındıysa (ONAY kolonu görünürse), sadece işaretli satırları kaydet
@@ -1345,6 +1443,13 @@ begin
 
     Tur         := dxMemData1TURID.AsInteger;
     Tarih       := dxMemData1TARIH.AsDateTime;
+    // İçeri alınan (MT940/Excel) satırlarda kaynak belge no -> KASA.OZELKOD ('NONREF' = boş).
+    // Manuel satırlarda BELGENO zaten bizim makbuz serimizden -> OZELKOD'a taşınmaz.
+    if dxMemData1ICERIALINDI.AsBoolean then begin
+      OzelKodDeger := Copy(Trim(dxMemData1BELGENO.AsString), 1, 20);
+      if SameText(OzelKodDeger, 'NONREF') then OzelKodDeger := '';
+    end else
+      OzelKodDeger := '';
     Aciklama    := dxMemData1ACIKLAMA.AsString;
     HesapKuru   := dxMemData1PBIRIMI.AsString;
     EkKullan    := dxMemData1EKSTREDE_KULLAN.AsBoolean;
@@ -1393,6 +1498,43 @@ begin
       DovizKod   := HesapKuru;
     end;
 
+    // MÜKERRER kontrol:
+    //  - kaynak belge no (OZELKOD) doluysa: OZELKOD + tarih + tutar (kesin anahtar)
+    //  - yoksa: aynı gün + tür + tutar (+cari). Borc=Alacak=0 türlerde atlanır.
+    MukerrerVar := False;
+    if OzelKodDeger <> '' then
+      MukerrerVar := Veritabani.VeriVarMi(Tablo.FDCnn,
+        'SELECT TOP 1 ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
+        ' AND HESAPTURU = ''B'' AND OZELKOD = ' + QuotedStr(OzelKodDeger) +
+        ' AND CAST(ISLEMTARIHI AS date) = ''' + FormatDateTime('yyyy-mm-dd', Tarih) + '''' +
+        ' AND BORC = ' + StringReplace(CurrToStr(Borc), ',', '.', [rfReplaceAll]) +
+        ' AND ALACAK = ' + StringReplace(CurrToStr(Alacak), ',', '.', [rfReplaceAll]), [], [])
+    else if Borc + Alacak > 0 then
+      MukerrerVar := Veritabani.VeriVarMi(Tablo.FDCnn,
+        'SELECT TOP 1 ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
+        ' AND HESAPTURU = ''B'' AND TUR = ' + IntToStr(Tur) +
+        ' AND CAST(ISLEMTARIHI AS date) = ''' + FormatDateTime('yyyy-mm-dd', Tarih) + '''' +
+        ' AND BORC = ' + StringReplace(CurrToStr(Borc), ',', '.', [rfReplaceAll]) +
+        ' AND ALACAK = ' + StringReplace(CurrToStr(Alacak), ',', '.', [rfReplaceAll]) +
+        IfThen(RehId > 0, ' AND REHBERID = ' + IntToStr(RehId), ''), [], []);
+    if MukerrerVar then
+      if Application.MessageBox(PChar('Bu hareket zaten kayıtlı görünüyor:' + sLineBreak +
+           FormatDateTime('dd.mm.yyyy', Tarih) + '   ' + dxMemData1SECIM.AsString + '   ' +
+           CurrToStr(dxMemData1TUTAR.AsCurrency) + sLineBreak +
+           'Yine de kaydedilsin mi? (MÜKERRER kayıt riski!)'),
+           PChar(Onay), MB_ICONWARNING + MB_YESNO) <> IDYES then begin
+        dxMemData1.Next;
+        Continue;
+      end;
+
+    // BELGENO: içeri alınan satırlarda bizim makbuz serimizden ÜRET (kaynak belge no
+    // OZELKOD'a gitti); manuel satırlarda kutudaki no (zaten seri) korunur.
+    if dxMemData1ICERIALINDI.AsBoolean then
+      YeniBelgeNo := SiradakiMakbuzNumarasi(Tur)
+    else
+      YeniBelgeNo := dxMemData1BELGENO.AsString;
+    SatirBasiIdx := FKayitIDleri.Count;
+
     if Tur in [TURID_KKODEME, TURID_KKODEMEIADE] then begin
       // KK Ödeme / İade: banka ve kredi kartı arasında karşılıklı bağlı 2 KASA satırı.
       if Tur = TURID_KKODEME then begin
@@ -1403,11 +1545,11 @@ begin
         IdBanka := KasaSatirYaz(Tur, FHESAPID, 0, 0, Tarih, Aciklama,
                                 HesapKuru, DovizKod,
                                 dxMemData1TUTAR.AsCurrency, 0, DovizTutar,
-                                EkKullan, 'B', -1);
+                                EkKullan, 'B', -1, YeniBelgeNo);
         IdKK := KasaSatirYaz(Tur, dxMemData1SECIMID.AsInteger, 0, 0, Tarih, Aciklama,
                              HesapKuru, DovizKod,
                              0, dxMemData1TUTAR.AsCurrency, DovizTutar,
-                             EkKullan, 'V', IdBanka);
+                             EkKullan, 'V', IdBanka, YeniBelgeNo);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdKK) + ' WHERE ID = ' + IntToStr(IdBanka),
           [], []);
@@ -1416,18 +1558,18 @@ begin
           Aciklama := dxMemData1SECIM.AsString + ' > ' + FHesapAdi;
 
         // İade: kredi kartı çıkışı, banka girişi.
-        IdKK := Tablo.KasaKaydet(
+        IdKK := KayitIzle(Tablo.KasaKaydet(
           Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
           0, Aciklama, dxMemData1SECIMID.AsInteger, HesapKuru, DovizKod, 0,
           dxMemData1TUTAR.AsCurrency, 0, DovizTutar,
           -1, -1, -1, 0, -1, -1, 'V',
-          0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
-        IdBanka := Tablo.KasaKaydet(
+          0, 0, YeniBelgeNo, 1, False, EkKullan));
+        IdBanka := KayitIzle(Tablo.KasaKaydet(
           Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
           0, Aciklama, FHESAPID, HesapKuru, DovizKod, 0,
           0, dxMemData1TUTAR.AsCurrency, DovizTutar,
           -1, -1, -1, 0, IdKK, -1, 'B',
-          0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+          0, 0, YeniBelgeNo, 1, False, EkKullan));
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdBanka) + ' WHERE ID = ' + IntToStr(IdKK),
           [], []);
@@ -1483,37 +1625,37 @@ begin
           PosAnaDoviz := DovizTutar * BankayaGiren / AktarimTutari;
       end;
 
-      IdPos := Tablo.KasaKaydet(
+      IdPos := KayitIzle(Tablo.KasaKaydet(
         Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
         0, Aciklama, dxMemData1SECIMID.AsInteger, PosKuru, CariDoviz, 0,
         PosAnaBorc, 0, PosAnaDoviz,
         -1, -1, -1, 0, -1, -1, 'P',
-        0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+        0, 0, YeniBelgeNo, 1, False, EkKullan));
 
       // MASRAFCIKIS=1: komisyon bağlı banka hesabından gider.
       if (MasrafTutar > 0) and (MasrafCikis <> 2) then
-        Tablo.KasaKaydet(
+        KayitIzle(Tablo.KasaKaydet(
           Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
           0, Aciklama, PosBankaHesapID, PosBankaKuru, CariDoviz, KomisyonMasrafID,
           MasrafTutar, 0, MasrafTutar,
           -1, -1, -1, -1, IdPos, -1, 'B',
-          0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+          0, 0, YeniBelgeNo, 1, False, EkKullan));
 
-      IdBanka := Tablo.KasaKaydet(
+      IdBanka := KayitIzle(Tablo.KasaKaydet(
         Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
         0, Aciklama, PosBankaHesapID, PosBankaKuru, CariDoviz, 0,
         0, BankayaGiren, PosAnaDoviz,
         -1, -1, -1, -1, IdPos, -1, 'B',
-        0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+        0, 0, YeniBelgeNo, 1, False, EkKullan));
 
       // MASRAFCIKIS=2: komisyon POS hesabından ayrıca düşer.
       if (MasrafTutar > 0) and (MasrafCikis = 2) then
-        Tablo.KasaKaydet(
+        KayitIzle(Tablo.KasaKaydet(
           Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
           0, Aciklama, dxMemData1SECIMID.AsInteger, PosKuru, CariDoviz, KomisyonMasrafID,
           MasrafTutar, 0, MasrafTutar,
           -1, -1, -1, -1, IdPos, -1, 'P',
-          0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+          0, 0, YeniBelgeNo, 1, False, EkKullan));
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdBanka) + ' WHERE ID = ' + IntToStr(IdPos),
@@ -1535,21 +1677,21 @@ begin
         IdBanka := KasaSatirYaz(Tur, dxMemData1SECIMID.AsInteger, 0, 0, Tarih, Aciklama,
                                 HesapKuru, DovizKod,
                                 dxMemData1TUTAR.AsCurrency, 0, DovizTutar,
-                                EkKullan, 'K', -1);
+                                EkKullan, 'K', -1, YeniBelgeNo);
         IdKK    := KasaSatirYaz(Tur, FHESAPID, 0, 0, Tarih, Aciklama,
                                 HesapKuru, DovizKod,
                                 0, dxMemData1TUTAR.AsCurrency, DovizTutar,
-                                EkKullan, 'B', IdBanka);
+                                EkKullan, 'B', IdBanka, YeniBelgeNo);
       end else begin
         // Para Çekme — para bankadan kasaya. Banka BORC, Kasa ALACAK
         IdBanka := KasaSatirYaz(Tur, FHESAPID, 0, 0, Tarih, Aciklama,
                                 HesapKuru, DovizKod,
                                 dxMemData1TUTAR.AsCurrency, 0, DovizTutar,
-                                EkKullan, 'B', -1);
+                                EkKullan, 'B', -1, YeniBelgeNo);
         IdKK    := KasaSatirYaz(Tur, dxMemData1SECIMID.AsInteger, 0, 0, Tarih, Aciklama,
                                 HesapKuru, DovizKod,
                                 0, dxMemData1TUTAR.AsCurrency, DovizTutar,
-                                EkKullan, 'K', IdBanka);
+                                EkKullan, 'K', IdBanka, YeniBelgeNo);
       end;
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdKK) + ' WHERE ID = ' + IntToStr(IdBanka),
@@ -1576,18 +1718,18 @@ begin
       if Aciklama = '' then
         Aciklama := FHesapAdi + ' > ' + HedefHesapAdi;
 
-      IdBanka := Tablo.KasaKaydet(
+      IdBanka := KayitIzle(Tablo.KasaKaydet(
         Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
         0, Aciklama, FHESAPID, HesapKuru, CariDoviz, 0,
         dxMemData1TUTAR.AsCurrency, 0, YerelDovizTutar,
         -1, -1, -1, 0, -1, -1, 'B',
-        0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
-      IdKK := Tablo.KasaKaydet(
+        0, 0, YeniBelgeNo, 1, False, EkKullan));
+      IdKK := KayitIzle(Tablo.KasaKaydet(
         Tur, RecodeMillisecond(Tarih, 0), RecodeMillisecond(Tarih, 0),
         0, Aciklama, dxMemData1SECIMID.AsInteger, HedefDoviz, CariDoviz, 0,
         0, dxMemData1DOVIZ_TUTARI.AsCurrency, YerelDovizTutar,
         -1, -1, -1, 0, IdBanka, -1, 'B',
-        0, 0, dxMemData1BELGENO.AsString, 1, False, EkKullan);
+        0, 0, YeniBelgeNo, 1, False, EkKullan));
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdKK) + ' WHERE ID = ' + IntToStr(IdBanka),
         [], []);
@@ -1610,12 +1752,12 @@ begin
       IdBanka := KasaSatirYaz(Tur, FHESAPID, 0, 0, Tarih, Aciklama,
                               HesapKuru, DovizKod,
                               dxMemData1TUTAR.AsCurrency, 0, DovizTutar,
-                              EkKullan, 'B', -1);
+                              EkKullan, 'B', -1, YeniBelgeNo);
       // Hedef satırı (HESAPTURU='B', ALACAK=Tutar, GERIDONUSID=kaynak) — para hedef hesaba giriyor
       IdKK    := KasaSatirYaz(Tur, dxMemData1SECIMID.AsInteger, 0, 0, Tarih, Aciklama,
                               HesapKuru, DovizKod,
                               0, dxMemData1TUTAR.AsCurrency, DovizTutar,
-                              EkKullan, 'B', IdBanka);
+                              EkKullan, 'B', IdBanka, YeniBelgeNo);
       // Kaynak satırının GERIDONUSID'i hedef satırın ID'sine güncellensin (karşılıklı bağ)
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'UPDATE KASA SET GERIDONUSID = ' + IntToStr(IdKK) + ' WHERE ID = ' + IntToStr(IdBanka),
@@ -1701,41 +1843,41 @@ begin
           end;
 
           // 1) Kredi hesabına anapara
-          IdKK := Tablo.KasaKaydet(
+          IdKK := KayitIzle(Tablo.KasaKaydet(
             TURID_KREDIODEME, TarihSn, TarihSn, 0, Aciklama + '(Anapara)',
             KrediID, HesapKuru, DovizKod, 0,
             0, Anapara, AnaparaDoviz,
             -1, DetayID, KrediID, -1, -1, -1, 'R',
             TabNo_PLANKREDI, DetayID, KrediBelgeNo,
-            Windows_HizliGiris, False, EkKullan);
+            Windows_HizliGiris, False, EkKullan));
 
           // 2) Bankadan anapara çıkışı
-          IdBanka := Tablo.KasaKaydet(
+          IdBanka := KayitIzle(Tablo.KasaKaydet(
             TURID_KREDIODEME, TarihSn, TarihSn, 0, Aciklama,
             FHESAPID, HesapKuru, DovizKod, 0,
             Anapara, 0, AnaparaDoviz,
             -1, DetayID, KrediID, -1, -1, -1, 'B',
             TabNo_PLANKREDI, DetayID, KrediBelgeNo,
-            Windows_HizliGiris, False, EkKullan);
+            Windows_HizliGiris, False, EkKullan));
 
           if Faiz > 0.01 then begin
             // 3) Bankadan faiz/masraf çıkışı
-            IdFaizBanka := Tablo.KasaKaydet(
+            IdFaizBanka := KayitIzle(Tablo.KasaKaydet(
               TURID_KREDIODEME, TarihSn, TarihSn, 0, Aciklama + ' (Faiz)',
               FHESAPID, HesapKuru, DovizKod, FaizMasrafID,
               Faiz, 0, FaizDoviz,
               -1, DetayID, KrediID, -1, -1, -1, 'B',
               TabNo_PLANKREDI, DetayID, KrediBelgeNo,
-              Windows_HizliGiris, False, EkKullan);
+              Windows_HizliGiris, False, EkKullan));
 
             // 4) Kredi hesabına faiz
-            IdFaizKredi := Tablo.KasaKaydet(
+            IdFaizKredi := KayitIzle(Tablo.KasaKaydet(
               TURID_KREDIODEME, TarihSn, TarihSn, 0, Aciklama + '(Faiz)',
               KrediID, HesapKuru, DovizKod, 0,
               0, Faiz, FaizDoviz,
               -1, DetayID, KrediID, -1, -1, -1, 'R',
               TabNo_PLANKREDI, DetayID, KrediBelgeNo,
-              Windows_HizliGiris, False, EkKullan);
+              Windows_HizliGiris, False, EkKullan));
 
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
               'UPDATE KASA SET BELGENO=''' + TopluMakbuzNo + ''', GERIDONUSID=' + IntToStr(IdBanka) +
@@ -1769,7 +1911,8 @@ begin
       end
       else
         IdBanka := KasaSatirYaz(Tur, FHESAPID, RehId, MasId, Tarih, Aciklama,
-                                HesapKuru, DovizKod, Borc, Alacak, DovizTutar, EkKullan);
+                                HesapKuru, DovizKod, Borc, Alacak, DovizTutar, EkKullan,
+                                'B', -1, YeniBelgeNo);
 
       // 2) Banka masrafı varsa ayrı satır (UNakitDlg satır 1144-1149 deseni)
       //    Masraf banka hesabından çıkıyor → BORC, BELGENO Giden Havale serisinden,
@@ -1783,27 +1926,32 @@ begin
                      IdBanka);
     end;
 
-    dxMemData1.Next;
+    // Kaynak belge no'yu bu satırda yazılan KASA kayıtlarının OZELKOD'una işle
+    if (OzelKodDeger <> '') and (FKayitIDleri.Count > SatirBasiIdx) then begin
+      IdListe := '';
+      for k := SatirBasiIdx to FKayitIDleri.Count - 1 do begin
+        if IdListe <> '' then IdListe := IdListe + ',';
+        IdListe := IdListe + IntToStr(FKayitIDleri[k]);
+      end;
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'UPDATE KASA SET OZELKOD = ' + QuotedStr(OzelKodDeger) +
+        ' WHERE ID IN (' + IdListe + ')', [], []);
+    end;
+
+    // Kaydedilen satır grid'den HEMEN düşer → ikinci F5'te tekrar kaydedilemez.
+    dxMemData1.Delete;
+  end;
+  finally
+    FSatirEkleniyor := False;
   end;
 
   Application.MessageBox(PChar(DKayit_yapildi), PChar(Kaydet), MB_ICONINFORMATION + MB_OK);
-  dxMemData1.Close;
-  dxMemData1.Open;
+  if dxMemData1.RecordCount = 0 then
+    cxGrid1DBTableView1ONAY.Visible := False;
   FDuzenlemeKipinde := False;
 end;
 
 { ---------- Excel/CSV İçeri Al (PanelUst çift tık) ---------- }
-
-procedure TbankaHesapGirisdlg.PanelUstDblClick(Sender: TObject);
-begin
-  if FHESAPID = 0 then begin
-    Application.MessageBox('Önce banka hesabı seçiniz.',
-                           PChar(DBos_alan), MB_ICONINFORMATION + MB_OK);
-    Exit;
-  end;
-  if not Od1.Execute then Exit;
-  HareketleriIceriAl(Od1.FileName);
-end;
 
 procedure TbankaHesapGirisdlg.HareketleriIceriAl(const DosyaYolu: string);
 var
@@ -1875,6 +2023,7 @@ begin
         dxMemData1KOMISYON.AsCurrency := 0;
         dxMemData1ACIKLAMA.AsString   := OnerilenAciklama;
         dxMemData1BELGENO.AsString    := Satir.DekontNo;
+        dxMemData1ICERIALINDI.AsBoolean := True;
         dxMemData1KARSILIGI.AsBoolean := False;
         dxMemData1DOVIZ_TUTARI.AsCurrency := 0;
         dxMemData1DOVIZ_TIPI.AsString     := '';
@@ -3312,7 +3461,12 @@ begin
       Q.ParamByName('BK').AsString := BankaKodu;
       Q.ParamByName('FP').AsString := Fingerprint;
       if Tur > 0 then Q.ParamByName('T').AsInteger := Tur
-      else Q.ParamByName('T').Clear;
+      else begin
+        // NULL yazarken tip belirtilmeli; tipsiz Clear FireDAC -335 'data type
+        // is unknown' hatasi verir (Tur=0 ile ilk cagri MT940 dosya izinde cikti).
+        Q.ParamByName('T').DataType := ftInteger;
+        Q.ParamByName('T').Clear;
+      end;
       Q.ParamByName('R').AsInteger := Max(RehberID, 0);
       Q.ParamByName('K').AsBoolean := KesinMi;
     end;
@@ -3456,16 +3610,18 @@ end;
 { ============================================================ }
 
 procedure TbankaHesapGirisdlg.btnMT940AlClick(Sender: TObject);
-// MT940 dosyasını oku → karşı taraf IBAN ile REHBER lookup → grid'i doldur.
+// MT940 dosyalarını (ÇOKLU seçim) oku → karşı taraf IBAN ile REHBER lookup → grid'i doldur.
 // Mevcut rule motoru/öğrenen cache devreye girmez — IBAN zaten kesin tanımlayıcı.
+// Aynı dosya (tam yol) bu ekranda daha önce yüklendiyse tekrar YÜKLENMEZ (mükerrer engeli).
 var
   Od: TOpenDialog;
   Parser: TMT940Parser;
   Sonuc: TMT940Dosyasi;
   H: TMT940Hareketi;
   Q: TFDQuery;
-  RehID, Tur, Confidence, i: Integer;
-  RehAd: string;
+  RehID, Tur, Confidence, i, d: Integer;
+  RehAd, Dosya, Sorunlular, Ozet: string;
+  ToplamHareket, OkunanDosya, AtlananDosya: Integer;
 begin
   if FHESAPID = 0 then begin
     Application.MessageBox('Önce banka hesabı seçiniz.',
@@ -3477,26 +3633,48 @@ begin
   try
     Od.DefaultExt := 'txt';
     Od.Filter := 'MT940 (*.txt;*.sta;*.940)|*.txt;*.sta;*.940';
-    Od.Options := [ofPathMustExist, ofFileMustExist];
+    Od.Options := [ofPathMustExist, ofFileMustExist, ofAllowMultiSelect];
     if not Od.Execute then Exit;
 
+    ToplamHareket := 0; OkunanDosya := 0; AtlananDosya := 0; Sorunlular := '';
+
     Parser := TMT940Parser.Create;
+    Q := TFDQuery.Create(nil);
     try
-      if not Parser.Parse(Od.FileName, Sonuc) then begin
-        Application.MessageBox('MT940 dosyası okunamadı veya format hatalı.',
-                               PChar(Hata), MB_ICONWARNING + MB_OK);
-        Exit;
-      end;
-      try
-        if Sonuc.Hareketler.Count = 0 then begin
-          Application.MessageBox('MT940 dosyasında hareket bulunamadı.',
-                                 PChar(Hata), MB_ICONINFORMATION + MB_OK);
-          Exit;
+      Q.Connection := Tablo.FDCnn;
+
+      for d := 0 to Od.Files.Count - 1 do begin
+        Dosya := Od.Files[d];
+
+        // Aynı dosya daha önce listeye yüklendiyse ATLA (oturum içi, sessiz)
+        if FMT940Dosyalar.IndexOf(Dosya) >= 0 then begin
+          Inc(AtlananDosya);
+          Continue;
         end;
 
-        Q := TFDQuery.Create(nil);
+        // KALICI kontrol: bu dosya adı bu programda daha önce yüklenmiş mi?
+        // (BANKA_CARI_ESLEME / 'MT940DOSYA' izi; form kapansa da hatırlanır.)
+        var KTur, KReh: Integer;
+        var KKesin: Boolean;
+        if EslemeBul('MT940DOSYA', UpperCase(ExtractFileName(Dosya)), KTur, KReh, KKesin) then
+          if Application.MessageBox(PChar(ExtractFileName(Dosya) +
+               ' daha önce yüklenmiş görünüyor.' + sLineBreak +
+               'Yine de yüklensin mi? (MÜKERRER kayıt riski!)'),
+               PChar(Onay), MB_ICONWARNING + MB_YESNO) <> IDYES then begin
+            Inc(AtlananDosya);
+            Continue;
+          end;
+
+        if not Parser.Parse(Dosya, Sonuc) then begin
+          FreeAndNil(Sonuc.Hareketler);   // Parse basta olusturur; hata yolunda da birak(ilmali)
+          Sorunlular := Sorunlular + '  ' + ExtractFileName(Dosya) + ' (okunamadı/format hatalı)' + sLineBreak;
+          Continue;
+        end;
         try
-          Q.Connection := Tablo.FDCnn;
+          if Sonuc.Hareketler.Count = 0 then begin
+            Sorunlular := Sorunlular + '  ' + ExtractFileName(Dosya) + ' (hareket bulunamadı)' + sLineBreak;
+            Continue;
+          end;
 
           FSatirEkleniyor := True;
           try
@@ -3507,16 +3685,23 @@ begin
               // Tür — borç/alacak yönüne göre temel sınıflandırma
               if H.BorcMu then Tur := TURID_GIDENHAVALE
                          else Tur := TURID_GELENHAVALE;
+              // Açıklamadan tür ipucu: 'K.Kartı Ödeme ...' → KK Ödeme
+              if H.BorcMu and (Pos('K.KART', AnsiUpperCase(H.Aciklama)) > 0) and
+                 (Pos('DEME', AnsiUpperCase(H.Aciklama)) > 0) then
+                Tur := TURID_KKODEME;
 
               // IBAN ile REHBER lookup — eşsiz, yüksek güven
               if H.KarsiTarafIBAN <> '' then begin
                 Q.Close;
-                Q.SQL.Text := 'SELECT TOP 1 ID, FIRMA FROM REHBER WHERE IBAN = :I';
+                Q.SQL.Text := 'SELECT TOP 1 ID, KOD, FIRMA FROM REHBER WHERE IBAN = :I';
                 Q.ParamByName('I').AsString := H.KarsiTarafIBAN;
                 Q.Open;
                 if not Q.IsEmpty then begin
                   RehID := Q.FieldByName('ID').AsInteger;
-                  RehAd := Q.FieldByName('FIRMA').AsString;
+                  // Cari KOD + AD birlikte gosterilsin
+                  RehAd := Trim(Q.FieldByName('KOD').AsString);
+                  if RehAd <> '' then RehAd := RehAd + ' - ';
+                  RehAd := RehAd + Q.FieldByName('FIRMA').AsString;
                   Confidence := 95;
                 end;
               end;
@@ -3524,13 +3709,15 @@ begin
               // IBAN'la bulunmadıysa karşı taraf adıyla dene
               if (RehID = 0) and (H.KarsiTarafAd <> '') then begin
                 Q.Close;
-                Q.SQL.Text := 'SELECT TOP 1 ID, FIRMA FROM REHBER ' +
+                Q.SQL.Text := 'SELECT TOP 1 ID, KOD, FIRMA FROM REHBER ' +
                               'WHERE UPPER(FIRMA) = UPPER(:N)';
                 Q.ParamByName('N').AsString := H.KarsiTarafAd;
                 Q.Open;
                 if not Q.IsEmpty then begin
                   RehID := Q.FieldByName('ID').AsInteger;
-                  RehAd := Q.FieldByName('FIRMA').AsString;
+                  RehAd := Trim(Q.FieldByName('KOD').AsString);
+                  if RehAd <> '' then RehAd := RehAd + ' - ';
+                  RehAd := RehAd + Q.FieldByName('FIRMA').AsString;
                   Confidence := 75;
                 end else begin
                   RehAd := H.KarsiTarafAd;
@@ -3538,11 +3725,69 @@ begin
                 end;
               end;
 
+              // Önek eşleşmesi: :86: ünvanı 43 kolonda KESİK gelir; FIRMA bu kesik
+              // adla BAŞLIYORSA ve TEK aday varsa eşleştir (2+ aday = belirsiz).
+              if (RehID = 0) and (Length(Trim(H.KarsiTarafAd)) >= 8) then begin
+                Q.Close;
+                Q.SQL.Text := 'SELECT TOP 2 ID, KOD, FIRMA FROM REHBER ' +
+                              'WHERE UPPER(FIRMA) LIKE UPPER(:N) + ''%''';
+                Q.ParamByName('N').AsString := Trim(H.KarsiTarafAd);
+                Q.Open;
+                if Q.RecordCount = 1 then begin
+                  RehID := Q.FieldByName('ID').AsInteger;
+                  RehAd := Trim(Q.FieldByName('KOD').AsString);
+                  if RehAd <> '' then RehAd := RehAd + ' - ';
+                  RehAd := RehAd + Q.FieldByName('FIRMA').AsString;
+                  Confidence := 80;
+                end;
+              end;
+
+              // Öğrenen eşleme: bu ünvan için daha önce kullanıcı cari seçtiyse onu kullan
+              if (RehID = 0) and (Trim(H.KarsiTarafAd) <> '') then begin
+                var ETur, ERehID: Integer;
+                var EKesin: Boolean;
+                if EslemeBul('MT940', 'MTAD:' + AnsiUpperCase(Trim(H.KarsiTarafAd)),
+                             ETur, ERehID, EKesin) and (ERehID > 0) then begin
+                  RehID := ERehID;
+                  RehAd := Trim(Tablo.AciklamaGetir('REHBER', 'KOD', ERehID));
+                  if RehAd <> '' then RehAd := RehAd + ' - ';
+                  RehAd := RehAd + Tablo.AciklamaGetir('REHBER', 'FIRMA', ERehID);
+                  if ETur > 0 then Tur := ETur;
+                  Confidence := 90;
+                end;
+              end;
+
+              // Fatura tutari eslesmesi: hala eslesmediyse hareket tutarina BIREBIR esit
+              // kesilmis fatura ara (gelen havale -> satis, giden havale -> alis; son 120 gun).
+              // TEK cari aday sarti: tutar tesadufu riskine karsi 2+ aday alinmaz.
+              if RehID = 0 then begin
+                Q.Close;
+                // NOT: parametre yerine literal — FireDAC currency/date parametre tip
+                // cikarimi '-335 data type is unknown' hatasi verebiliyor.
+                Q.SQL.Text := 'SELECT DISTINCT TOP 2 F.REHBERID FROM FATBASLIK F ' +
+                              'WHERE F.FATURA_TUTARI = ' +
+                                StringReplace(CurrToStr(H.Tutar), ',', '.', [rfReplaceAll]) +
+                              ' AND F.REHBERID > 0 ' +
+                              'AND F.TARIH BETWEEN ''' +
+                                FormatDateTime('yyyy-mm-dd', H.Tarih - 120) + ''' AND ''' +
+                                FormatDateTime('yyyy-mm-dd', H.Tarih + 2) + ' 23:59'' ' +
+                              IfThen(H.BorcMu, 'AND F.TUR IN (9,11,13)',
+                                               'AND F.TUR IN (15,17,19)');
+                Q.Open;
+                if (Q.RecordCount = 1) and (Q.Fields[0].AsInteger > 0) then begin
+                  RehID := Q.Fields[0].AsInteger;
+                  RehAd := Trim(Tablo.AciklamaGetir('REHBER', 'KOD', RehID));
+                  if RehAd <> '' then RehAd := RehAd + ' - ';
+                  RehAd := RehAd + Tablo.AciklamaGetir('REHBER', 'FIRMA', RehID);
+                  Confidence := 70;
+                end;
+              end;
+
               // Grid'e ekle
               dxMemData1.Append;
               dxMemData1TARIH.AsDateTime    := H.Tarih;
               dxMemData1TURID.AsInteger     := Tur;
-              dxMemData1TUR.AsString        := IfThen(H.BorcMu, 'Giden Havale', 'Gelen Havale');
+              dxMemData1TUR.AsString        := TurAdiGetir(Tur);
               dxMemData1SECIMID.AsInteger   := RehID;
               dxMemData1SECIM.AsString      := RehAd;
               dxMemData1TUTAR.AsCurrency    := H.Tutar;
@@ -3550,6 +3795,9 @@ begin
               dxMemData1KOMISYON.AsCurrency := 0;
               dxMemData1ACIKLAMA.AsString   := Trim(H.Aciklama);
               dxMemData1BELGENO.AsString    := H.Referans;
+              dxMemData1ICERIALINDI.AsBoolean := True;
+              dxMemData1IBAN.AsString       := H.KarsiTarafIBAN;
+              dxMemData1HAMAD.AsString      := H.KarsiTarafAd;
               dxMemData1KARSILIGI.AsBoolean := False;
               dxMemData1DOVIZ_TUTARI.AsCurrency := 0;
               dxMemData1DOVIZ_TIPI.AsString     := '';
@@ -3564,26 +3812,48 @@ begin
           finally
             FSatirEkleniyor := False;
           end;
+
+          Inc(ToplamHareket, Sonuc.Hareketler.Count);
+          Inc(OkunanDosya);
+          FMT940Dosyalar.Add(Dosya);   // başarıyla yüklendi → bir daha yüklenmesin
+          // Kalıcı iz: dosya adı kaydedilsin (sonraki günlerde tekrar seçilirse uyarı çıkar)
+          EslemeKaydet('MT940DOSYA', UpperCase(ExtractFileName(Dosya)), 0, FHESAPID, True);
         finally
-          Q.Free;
+          Sonuc.Hareketler.Free;
         end;
-
-        // Onay kolonu görünür yap (yeşil = tıklanabilir)
-        cxGrid1DBTableView1ONAY.Visible := True;
-
-        Application.MessageBox(PChar(IntToStr(Sonuc.Hareketler.Count) +
-                                     ' MT940 hareketi içeri alındı.' + sLineBreak +
-                                     'IBAN ile eşleşenler yeşil, diğerleri sarı/pembe.'),
-                               'MT940 İçeri Al', MB_ICONINFORMATION + MB_OK);
-      finally
-        Sonuc.Hareketler.Free;
       end;
     finally
+      Q.Free;
       Parser.Free;
     end;
+
+    // Onay kolonu görünür yap (yeşil = tıklanabilir)
+    if ToplamHareket > 0 then
+      cxGrid1DBTableView1ONAY.Visible := True;
+
+    Ozet := IntToStr(OkunanDosya) + ' dosyadan ' + IntToStr(ToplamHareket) +
+            ' MT940 hareketi içeri alındı.';
+    if ToplamHareket > 0 then
+      Ozet := Ozet + sLineBreak + 'IBAN ile eşleşenler yeşil, diğerleri sarı/pembe.';
+    if AtlananDosya > 0 then
+      Ozet := Ozet + sLineBreak + IntToStr(AtlananDosya) + ' dosya daha önce yüklendiği için atlandı.';
+    if Sorunlular <> '' then
+      Ozet := Ozet + sLineBreak + 'Sorunlu dosyalar:' + sLineBreak + Sorunlular;
+    Application.MessageBox(PChar(Ozet), 'MT940 İçeri Al', MB_ICONINFORMATION + MB_OK);
   finally
     Od.Free;
   end;
+end;
+
+procedure TbankaHesapGirisdlg.ButtonExcelAlClick(Sender: TObject);
+begin
+  if FHESAPID = 0 then begin
+    Application.MessageBox('Önce banka hesabı seçiniz.',
+                           PChar(DBos_alan), MB_ICONINFORMATION + MB_OK);
+    Exit;
+  end;
+  if not Od1.Execute then Exit;
+  HareketleriIceriAl(Od1.FileName);
 end;
 
 end.

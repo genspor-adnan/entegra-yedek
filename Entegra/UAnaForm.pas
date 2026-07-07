@@ -82,7 +82,7 @@ type
     VeriAlImport1: TMenuItem;
     FirmaBilgileri1: TMenuItem;
     YedekAl1: TMenuItem;
-    SeyirDefteri1: TMenuItem;
+    MenuGenelInfo: TMenuItem;
     pmGridStil: TPopupMenu;
     StilOlutur1: TMenuItem;
     JvDragDrop1: TJvDragDrop;
@@ -138,8 +138,6 @@ type
     MsgClient: TIdTCPClient;
     ChatTimer: TJvTimer;
     MenuSifreIslemleri: TMenuItem;
-    Eski1: TMenuItem;
-    MenuYeniLog: TMenuItem;
 
     procedure FormShow(Sender: TObject);
     procedure k1Click(Sender: TObject);
@@ -175,7 +173,6 @@ type
     procedure KasaOpsMenuClick(Sender: TObject);
     procedure FirmaBilgileri1Click(Sender: TObject);
     procedure YedekAl1Click(Sender: TObject);
-    procedure SeyirDefteri1Click(Sender: TObject);
     procedure StilOlutur1Click(Sender: TObject);
     procedure pmGridStilPopup(Sender: TObject);
     procedure JvDragDrop1Drop(Sender: TObject; Pos: TPoint; Value: TStrings);
@@ -226,7 +223,7 @@ type
     procedure MsgClientConnected(Sender: TObject);
     procedure ChatTimerTimer(Sender: TObject);
     procedure MenuSifreIslemleriClick(Sender: TObject);
-    procedure MenuYeniLogClick(Sender: TObject);
+    procedure MenuGenelInfoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -235,6 +232,7 @@ type
     FOncekiSayfa: TcxTabSheet;
     FClosingAskedToUser : Boolean;
     FStartupDeferredDone: Boolean;
+    procedure AktifFormDegisti(Sender: TObject);   // opsiyon formu aktifken ayar loglamayi ac
     procedure BeforeFrameLoad(AFrameInfo: TXMLItem; Var canLoad: Boolean);
     procedure CID_olay(ASender: TObject; const DeviceID, Line,PhoneNumber, DateTime, OtherText: WideString);
 
@@ -281,7 +279,7 @@ var
 
 implementation
 
-uses Utablo, URehAraDlg, UDokum, UCombo, UPaylasim,
+uses Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
   UKasa, ULogo, UOpsDlg, UListe, UKullaniciDuzenle, UStokHizmetAra,
   GT_RehberAbout, UDoviz, UKullaniciKodYetki, UMailYaz, FetaUtil,
   UTakvim, UKrediler, UKasaWizard, UOpsiyonBanka, UDokumanListeFrame, UStokListeDlg,
@@ -715,6 +713,20 @@ begin
      MesajMenu.Caption := '';
 end;
 
+procedure TAnaForm.AktifFormDegisti(Sender: TObject);
+var
+  LAyar: Boolean;
+begin
+  // Aktif form bir opsiyon formu (TOpsiyon...Dlg) ise GENINI ayar loglamasini ac; degilse kapat.
+  // Boylece opsiyon formu disindaki GENINI yazimlari (lisans/oturum) loglanmaz.
+  LAyar := (Screen.ActiveForm <> nil) and
+           (Copy(Screen.ActiveForm.ClassName, 1, 8) = 'TOpsiyon');
+  // Yeni oturum (kapali->acik gecis): tum save loglarini gruplayacak anahtar (gun-ici saniye).
+  if LAyar and (not LogAyarModu) then
+    LogAyarOturum := 1 + Trunc(Frac(Now) * 86400);
+  LogAyarModu := LAyar;
+end;
+
 procedure TAnaForm.FormShow(Sender: TObject);
 Const
     WM_COPYGLOBALDATA = $0049;
@@ -722,6 +734,8 @@ Const
 var
   i: smallint;
 begin
+  // Opsiyon (TOpsiyon*Dlg) formu aktifken GENINI.Write* degisiklikleri loglansin.
+  Screen.OnActiveFormChange := AktifFormDegisti;
   FrameBasliklariniGuncelle;
   if Assigned(ChangeWindowMessageFilter) then begin
      if not ChangeWindowMessageFilter( Handle, WM_DROPFILES, MSGFLT_ADD ,0) then
@@ -1587,11 +1601,6 @@ begin
   OpsiyonServisDlg.Destroy;
 end;
 
-procedure TAnaForm.SeyirDefteri1Click(Sender: TObject);
-begin
-   Tablo.SeyirDefteriBaslat(0,0);
-end;
-
 procedure TAnaForm.SiralaTusClick(Sender: TObject);
 begin
   Cascade;
@@ -1969,6 +1978,11 @@ begin
   LocalizerOnFly.SwitchTo(1055);
 end;
 
+procedure TAnaForm.MenuGenelInfoClick(Sender: TObject);
+begin
+      Tablo.LogEkraniGoster;   // 2 sekmeli (Genel grupli + Detay) log ekrani
+end;
+
 procedure TAnaForm.MenuItem1Click(Sender: TObject);
 begin
 (((Sender as TMenuitem).GetParentComponent as TPopupMenu).PopupComponent as TcxDBTreeList).Customizing.Visible := True;
@@ -2027,11 +2041,6 @@ begin
     MessageDlg('Excel dosyası oluşturuldu.', mtInformation, [mbOk], 0);
     FormatSettings.CurrencyString := curstr;
   end;
-end;
-
-procedure TAnaForm.MenuYeniLogClick(Sender: TObject);
-begin
-   Tablo.LogEkraniGoster;   // 2 sekmeli (Genel grupli + Detay) log ekrani
 end;
 
 procedure TAnaForm.MenuSifreIslemleriClick(Sender: TObject);

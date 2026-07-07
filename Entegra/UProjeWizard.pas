@@ -391,6 +391,7 @@ type
   private
     { Private declarations }
     FAsamaSnap: TObjectDictionary<Integer, TStringList>;   // proje asama log snapshot'i
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FFrameBilgi : TIcerikFrameBilgi;
     GBaslamaTarih,GBitisTarih : TDateTime;
     ProjeSorumlusu:integer;
@@ -712,6 +713,7 @@ end;
 procedure TProjeWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FAsamaSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if  (Sontus='I') and ((IslemOp='E') or (IslemOp='K'))  then begin //eğer yeni kayıtsa ve iptal edildiyse kaydedilmiş bilgilir silinmesi lazım
       if (TabProjeler.active)and(TabProjeler.Fields[0].AsString <> '')  then begin
         //varsa dokumanların silinmeli
@@ -722,7 +724,9 @@ begin
         //sonra kendi silinir
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where ID=&Id ',['&Id'], [TabProjeler.FieldByName('ID').AsInteger]);
       end;
-   end;
+   end else
+      // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+      FEkleLogland := LogKartEkle(TabProjeler, TabNo_PROJELER, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 end;
 
 procedure TProjeWizardDlg.FormCreate(Sender: TObject);
@@ -1342,6 +1346,9 @@ var
     SonucListe : TStringList;
     TeklifDurum,TeklifSonuc : Smallint;
 begin
+   // Finish'te alt hareketler (Ekle -> proje detay) ana kartin moduna gore loglansin
+   // -> kart+detaylar tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+   if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
 
    if TabProjeler.State in [dsInsert, dsEdit] then begin
       // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
@@ -1362,7 +1369,7 @@ begin
      if islemOp = 'D' then
        LogKartDegisti(TabProjeler, TabNo_PROJELER, ProjeID)
      else if (islemOp = 'E') or (islemOp = 'K') then
-       LogKayitEkle(TabProjeler, TabNo_PROJELER, ProjeID, TabNo_PROJELER, ProjeID);
+       FEkleLogland := LogKartEkle(TabProjeler, TabNo_PROJELER, True, FEkleLogland) or FEkleLogland;
      // ASAMA satirlari (ust=proje) diff.
      LogDiffKaydet(TabProjeAsama, FAsamaSnap, TabNo_PROJEASAMA, TabNo_PROJELER, ProjeID);
      LogSnapshotAl(TabProjeAsama, FAsamaSnap);   // tazele (mukerrer save'i onle)

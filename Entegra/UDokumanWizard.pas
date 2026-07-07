@@ -299,6 +299,7 @@ type
   public
     { Public declarations }
     IslemOp  : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     DokumanID ,DokumanYetkiID,DokumanYetkiTur ,Cagiran ,KlasorID,anahtarKontrol,YeniKayit,Modul,ModulID,RehberID: Integer;
     Yenianahtar,BelgeYolu:string;
 
@@ -741,6 +742,9 @@ procedure TDokumanWizard.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FFileDetails.Free;
   FreeAndNil(FRevizeSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
+  // FALLBACK: yeni dokuman kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+  FEkleLogland := LogKartEkle(TabDokuman, TabNo_DOKUMAN, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 end;
 
 procedure TDokumanWizard.FormCreate(Sender: TObject);
@@ -1012,13 +1016,17 @@ end;
 procedure TDokumanWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
 //   Eğer yeni kayıt eklenirken iptal edildiyse kayır edilmiş tüm bilgiler silinir
-   if IslemOp='E' then
+   if IslemOp='E' then begin
       Tablo.DokumanSil(True, TabDokuman.Fields[0].AsInteger, 1, 0);
+      FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
+   end;
 end;
 
 procedure TDokumanWizard.WizardKontrolFinishButtonClick(Sender: TObject);
 var s:string;
 begin
+    // Alt hareketler (DOKUMANREVIZE diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+    if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
     if LabelID.Caption <> '' then
     begin
        if (TabSozlesme.Active)and(TabSozlesme.State in [dsInsert, dsEdit])  then
@@ -1061,7 +1069,7 @@ begin
                if IslemOp = 'D' then
                  LogKartDegisti(TabDokuman, TabNo_DOKUMAN, DokumanID)
                else
-                 LogKayitEkle(TabDokuman, TabNo_DOKUMAN, DokumanID, TabNo_DOKUMAN, DokumanID);
+                 FEkleLogland := LogKartEkle(TabDokuman, TabNo_DOKUMAN, True, FEkleLogland) or FEkleLogland;
                // REVIZE (detay=IMAJ revizyonlari, ust=dokuman karti) diff loglama.
                try
                  if TabRevize.Active then begin

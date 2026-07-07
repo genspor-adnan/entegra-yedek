@@ -781,6 +781,7 @@ end;
 
 procedure TUretimReceteDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if TabRecete.State = dsEdit then
     TabRecete.Post;
   // Kapanirken son recetenin detay farkini logla (kaydetmeden cikilsa da yakalanir).
@@ -1314,6 +1315,8 @@ begin
   // Baseline (FDetSnap) ile guncel detay farkini logla; sonra baseline'i tazele
   // (mukerrer save engeli). LogDiffKaydet kendi try/except'ini icerir, akisi bozmaz.
   if (LogGun <= 0) or (not Assigned(FDetSnap)) or (FSnapReceteID <= 0) then Exit;
+  // Alt hareketler (RECETEDETAY diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if not TabReceteDetay.Active then Exit;
   LogDiffKaydet(TabReceteDetay, FDetSnap, TabNo_URETIMRECETEDETAY, TabNo_URETIMRECETE, FSnapReceteID);
   LogSnapshotAl(TabReceteDetay, FDetSnap);

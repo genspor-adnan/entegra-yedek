@@ -544,8 +544,12 @@ procedure TPOSListeFrame.PosOranLogDiffKaydet;
 begin
   try
     if (not Assigned(FDetSnap)) or (not POSLAR.Active) or (POSLAR.RecordCount = 0) then Exit;
+    // POS oranlari duzenlemesi = POS kartinin degistirilmesi -> detay hep 'degis' (tek grup).
+    // LogDiffKaydet kendi try/except'ini icerdiginden reset daima calisir.
+    LogUstModu := 2;
     LogDiffKaydet(TabPosOran, FDetSnap, TabNo_POSORAN, TabNo_POS,
                   POSLAR.FieldByName('ID').AsInteger);
+    LogUstModu := -1;
     PosOranLogSnapshotAl;   // snapshot'i son duruma tazele (mukerrer save engeli)
   except
   end;

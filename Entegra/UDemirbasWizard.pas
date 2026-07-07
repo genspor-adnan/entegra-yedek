@@ -269,6 +269,7 @@ type
     { Public declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     IslemOp : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     DemirbasID, RehberId, Yer_ID, BaslangicDurumu, Cagiran, Yeri : Integer;
     OncekiStokMiktar: Real;
   end;
@@ -583,6 +584,11 @@ begin
    //ModalResult := mrCancel;
    Action := caFree;
    FreeAndNil(FAmortismanSnap);
+   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
+   // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer);
+   // iptalde kayit FormCloseQuery'de silindiginden o durumda loglama.
+   if not ((ModalResult = mrCancel) and ((IslemOp='E') or (IslemOp='K'))) then
+      FEkleLogland := LogKartEkle(TabDemirbas, TabNo_DEMIRBAS, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
    //DemirbasWizardDlg := nil;
     // varsa dokumanlar?n silinmeli
 end;
@@ -1035,6 +1041,9 @@ end;
 
 procedure TDemirbasWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
 begin
+  // Alt hareketler (AMORTISMAN diff) ana kartin moduna gore loglansin -> kart+detaylar
+  // tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   Kaydet;
   if TabAmortisman.State in [dsEdit, dsInsert] then
      TabAmortisman.Post;
@@ -1043,7 +1052,7 @@ begin
     if IslemOp = 'D' then
       LogKartDegisti(TabDemirbas, TabNo_DEMIRBAS, DemirbasID)
     else if (IslemOp = 'E') or (IslemOp = 'K') then
-      LogKayitEkle(TabDemirbas, TabNo_DEMIRBAS, DemirbasID, TabNo_DEMIRBAS, DemirbasID);
+      FEkleLogland := LogKartEkle(TabDemirbas, TabNo_DEMIRBAS, True, FEkleLogland) or FEkleLogland;
     // AMORTISMAN detay satirlari (ust=demirbas) diff.
     LogDiffKaydet(TabAmortisman, FAmortismanSnap, TabNo_DEMIRBASAMORTISMAN, TabNo_DEMIRBAS, DemirbasID);
     LogSnapshotAl(TabAmortisman, FAmortismanSnap);   // tazele (mukerrer save'i onle)

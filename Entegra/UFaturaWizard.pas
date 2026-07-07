@@ -734,6 +734,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // FATURA (detay) orijinal satirlar (log diff icin)
     FFaturaSnapAlindi: Boolean;
     Tur, TabFaturaIDsi, RehberId,ServisID, ProjeId, AktiviteId, MasrafMerkezi, Tipi: Integer;
@@ -1188,9 +1189,14 @@ end;
 procedure TFaturaWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FDetSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K')) and (TabFatbaslik.active) and (TabFatbaslik.Fields[0].AsString <> '')
       and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [0,1,11,21,31,51] )then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgiler silinmesi laz?m
       Tablo.FaturaSil(TabFatbaslik, TabFatura);
+
+  if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K'))) then
+     // FALLBACK: yeni belge kaydedilip loglanmadan kapatildiysa baslik EKLEME logu kacmasin (tek sefer).
+     FEkleLogland := LogKartEkle(TabFatbaslik, TabloNo, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 
   if StokHizmetAraDlg <> nil then
       FreeAndNil(StokHizmetAraDlg);
@@ -3946,14 +3952,20 @@ end;
 
 procedure TFaturaWizardDlg.LogKaydet;
 begin
+  // Alt hareketler (FATURA satir diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (islemOp='E') or (islemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if islemOp in ['D','I'] then begin
      //if LogBelge.Count > 0 then begin
      //   Tablo.LogIslemlerBelge(FATURA, TabNo, FaturaIDsi, 4);
      LogKartDegisti(TabFatbaslik, TabloNo, TabFaturaIDsi)
   end
-  else if islemOp in ['E','K'] then
-     // Yeni belge / kopya -> baslik EKLEME logu (ust=kendisi).
-     try SatirEkleLogla(TabFatbaslik, TabloNo, TabFaturaIDsi, TabloNo, TabFaturaIDsi); except end;
+  else if islemOp in ['E','K'] then begin
+     // Yeni belge / kopya -> baslik EKLEME logu (ust=kendisi; TEK SEFER, kapanis fallback ile ortak bayrak).
+     if not FEkleLogland then begin
+        try SatirEkleLogla(TabFatbaslik, TabloNo, TabFaturaIDsi, TabloNo, TabFaturaIDsi); except end;
+        FEkleLogland := True;
+     end;
+  end;
   FaturaLogDiffKaydet;   // FATURA satir degisiklik/ekleme/silme (kendi guard'i var)
 end;
 
@@ -3963,6 +3975,7 @@ procedure TFaturaWizardDlg.SatirEkleLogla(ADataSet: TDataSet; ATabNo: Integer;
 var
   LK: TLogKurucu;
   i: Integer;
+  LReh, LStk: Int64;
 begin
   LK := TLogKurucu.Yeni;
   for i := 0 to ADataSet.FieldCount - 1 do
@@ -3971,7 +3984,9 @@ begin
        (ADataSet.Fields[i].DataType <> ftMemo) and
        (Trim(ADataSet.Fields[i].AsString) <> '') then
       LK.Deger(ADataSet.Fields[i].FieldName, ADataSet.Fields[i].AsString);
-  LogYaz(liEkle, ATabNo, AID, LK, 'Fatura', AUstTabNo, AUstID);
+  // Varlik anahtarlari (REHBERID/STOKID) loga gecsin -> UInfo KOD/AD cari cozumu calisir
+  LogVarlikIDleri(ADataSet, LReh, LStk);
+  LogYaz(liEkle, ATabNo, AID, LK, 'Fatura', AUstTabNo, AUstID, LReh, LStk);
 end;
 
 // Duzenleme oncesi orijinal FATURA (detay) satirlarini sakla (ID -> alan degerleri).

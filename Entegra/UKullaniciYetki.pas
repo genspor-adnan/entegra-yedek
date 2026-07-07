@@ -148,6 +148,8 @@ type
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TabYetkiEkNewRecord(DataSet: TDataSet);
     procedure TabYetkiEkBeforeClose(DataSet: TDataSet);
+    procedure TabYetkiEkBeforeEdit(DataSet: TDataSet);   // gorme kapsami log: eski deger yakala
+    procedure TabYetkiEkAfterPost(DataSet: TDataSet);     // gorme kapsami log: degistiyse logla
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure mGurubuSe1Click(Sender: TObject);
     procedure mGurubuKaldr1Click(Sender: TObject);
@@ -163,8 +165,10 @@ type
   private
     checktag:Integer;
     FormCaption:string;
+    FEskiKapsam: string;   // gorme kapsami (YETKIEK.BILGI) BeforeEdit'te alinan eski deger
     { Private declarations }
     procedure YetkiEkHazirla;
+    function KapsamAd(const ADeger: string): string;   // BILGI (1/5/10/100) -> okunur ad
 
   public
     { Public declarations }
@@ -189,7 +193,7 @@ var
 
 implementation
 
-uses PrjConst, FetaKurulusSiniflari, UKullaniciDuzenle, LocOnFly, UYetkiKategori;
+uses PrjConst, FetaKurulusSiniflari, UKullaniciDuzenle, LocOnFly, UYetkiKategori, ULog;
 
 {$R *.dfm}
 
@@ -197,7 +201,24 @@ procedure TKullaniciYetkiDlg.CheckGroupHaklarPropertiesChange(Sender: TObject);
 var
   I:Integer;
   Hak:string;
+  LEski, LYeni: array[1..4] of string;   // TUR 1..4 (gorsun/eklesin/degistirsin/silsin) Var/Yok
+  LTur: Integer;
+  LDegisti: Boolean;
+  LK: TLogKurucu;
 begin
+  // LOG: degisiklik ONCESI yetki durumunu al (ana dongu Query1'i yeniden acar -> once yakala).
+  for LTur := 1 to 4 do begin LEski[LTur] := 'Yok'; LYeni[LTur] := 'Yok'; end;
+  if LogGun > 0 then begin
+    Tablo.TablodanSorguAc(1, 'select TUR,HAK from YETKI where ROLID='+
+      TabRol.FieldByName('ID').AsString+' and MODULID='+TabModul.FieldByName('MODULID').AsString);
+    while not Tablo.Query1.Eof do begin
+      LTur := Tablo.Query1.FieldByName('TUR').AsInteger;
+      if (LTur >= 1) and (LTur <= 4) and (Tablo.Query1.FieldByName('HAK').AsBoolean) then
+        LEski[LTur] := 'Var';
+      Tablo.Query1.Next;
+    end;
+  end;
+
   for I := 0 to CheckGroupHaklar.Properties.Items.Count - 1 do  begin
      Hak:=Copy(CheckGroupHaklar.EditingValue,I+1,1) ;
      Tablo.Query1.Close;
@@ -228,6 +249,28 @@ begin
          Tablo.Query1.Delete;
        end;
      end;
+  end;
+
+  // LOG: yeni durumu CheckGroup'tan al; degisiklik varsa rol (ROLLER) altinda YETKI logu.
+  if LogGun > 0 then begin
+    for I := 0 to CheckGroupHaklar.Properties.Items.Count - 1 do begin
+      LTur := CheckGroupHaklar.Properties.Items[I].Tag;
+      if (LTur >= 1) and (LTur <= 4) and (Copy(CheckGroupHaklar.EditingValue, I+1, 1) = '1') then
+        LYeni[LTur] := 'Var';
+    end;
+    LDegisti := False;
+    for LTur := 1 to 4 do if LEski[LTur] <> LYeni[LTur] then LDegisti := True;
+    if LDegisti then begin
+      LK := TLogKurucu.Yeni;
+      LK.Deger('Modül', TabModul.FieldByName('MODULADI').AsString);
+      LK.Alan(gorsun,      LEski[1], LYeni[1]);
+      LK.Alan(eklesin,     LEski[2], LYeni[2]);
+      LK.Alan(degistirsin, LEski[3], LYeni[3]);
+      LK.Alan(silsin,      LEski[4], LYeni[4]);
+      // ust=ROLLER(rol), detay=YETKI(modul) -> UInfo'da rol altinda tek satir gruplanir.
+      LogYaz(liDegistir, TabNo_YETKI, TabModul.FieldByName('MODULID').AsInteger,
+             LK, '', TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger);
+    end;
   end;
 end;
 
@@ -288,6 +331,11 @@ begin
 
   TabYetki.Open;
   TabYetkiEk.Open;
+  // Gorme kapsami baseline: bu modulun mevcut degeri (degisiklik buna gore olculur).
+  if not TabYetkiEk.IsEmpty then
+    FEskiKapsam := TabYetkiEk.FieldByName('BILGI').AsString
+  else
+    FEskiKapsam := '';
   HaklariOlustur;
   HaklariDoldur;
   YetkiEkHazirla;
@@ -321,6 +369,9 @@ begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
 
   Tablo.GridTurkcelestir;
+  // Gorme kapsami (YETKIEK.BILGI) loglamasi icin olaylari bagla.
+  TabYetkiEk.BeforeEdit := TabYetkiEkBeforeEdit;
+  TabYetkiEk.AfterPost  := TabYetkiEkAfterPost;
 end;
 
 procedure TKullaniciYetkiDlg.FormKeyUp(Sender: TObject; var Key: Word;
@@ -363,8 +414,15 @@ begin
      End else begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text:=' INSERT INTO ROLLER(DEPARTMAN,GOREVID,DURUM,EKLEYEN,SUBEID) '
-         +' VALUES('+VarToStr(Departman)+','+VarToStr(Gorev)+',''1'','''+kullanan+''','+VarToStr(Subesi)+') ';
-        Tablo.Query1.ExecSQL;
+         +' VALUES('+VarToStr(Departman)+','+VarToStr(Gorev)+',''1'','''+kullanan+''','+VarToStr(Subesi)+'); SELECT SCOPE_IDENTITY() ';
+        Tablo.Query1.Open;
+        rid := StrToIntDef(Tablo.Query1.Fields[0].AsString, 0);
+        // ISLEMLOG: rol/bolum EKLEME (departman/gorev/sube). ID scope_identity ile alindi.
+        if (LogGun > 0) and (rid > 0) then
+          LogYaz(liEkle, TabNo_ROLLER, rid,
+            TLogKurucu.Yeni.Deger('DEPARTMAN', VarToStr(Departman))
+                           .Deger('GOREVID', VarToStr(Gorev))
+                           .Deger('SUBEID', VarToStr(Subesi)));
         TabRol.Close;
         TabRol.Open;
      end;
@@ -385,10 +443,16 @@ Var
    Gorev,TamYetki,Departman,Subesi : Variant;
    ctrls : TGirdiDenetimleri;
    rid : Integer;
+   LOldDep, LOldGorev, LOldSube, LOldTY : string;   // log: eski degerler (diff icin)
 begin
    Subesi:= TabRol.FieldByName('SUBEID').AsString;
    Departman := TabRol.FieldByName('DEPARTMAN').AsString;
    Gorev := TabRol.FieldByName('GOREVID').AsString;
+   // Log diff icin eski degerleri sakla (dialog Subesi/Departman/Gorev'i EZER).
+   LOldSube  := TabRol.FieldByName('SUBEID').AsString;
+   LOldDep   := TabRol.FieldByName('DEPARTMAN').AsString;
+   LOldGorev := TabRol.FieldByName('GOREVID').AsString;
+   LOldTY    := IntToStr(TabRol.FieldByName('TY').AsInteger);
 //   bilgi := TabRol.FieldByName('ROL').AsString;
    if TabRol.FieldByName('TY').AsBoolean then
      TamYetki := 1
@@ -418,6 +482,13 @@ begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text:=' UPDATE ROLLER SET DEPARTMAN='+vartostr(Departman)+',GOREVID = '+VarToStr(Gorev)+',TY='+VarToStr(TamYetki)+',SUBEID='+VarToStr(Subesi)+' where ID = '+TabRol.FieldByName('ID').AsString;
         Tablo.Query1.ExecSQL;
+        // ISLEMLOG: rol/bolum DEGISTIRME (yalniz degisen alanlar; esitse atlanir).
+        if LogGun > 0 then
+          LogYaz(liDegistir, TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger,
+            TLogKurucu.Yeni.Alan('DEPARTMAN', LOldDep, VarToStr(Departman))
+                           .Alan('GOREVID', LOldGorev, VarToStr(Gorev))
+                           .Alan('SUBEID', LOldSube, VarToStr(Subesi))
+                           .Alan('TY', LOldTY, VarToStr(TamYetki)));
         TabloYenile(TabRol,[]);
      end;
    end;
@@ -526,6 +597,11 @@ begin
                           'set @RolID='+TabRol.FieldByName('ID').AsString+' '+
                           'set @ModulID='''+TabModul.FieldByName('MODULID').AsString+''' '+
                           'delete from YETKI where ROLID = @RolID and MODULID like @ModulID+''%'' ',[],[]);
+  if LogGun > 0 then
+    LogYaz(liDegistir, TabNo_YETKI, TabModul.FieldByName('MODULID').AsInteger,
+      TLogKurucu.Yeni.Deger('Modül', TabModul.FieldByName('MODULADI').AsString)
+                     .Deger('İşlem', 'Grup yetkisi kaldırıldı'),
+      '', TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger);
   cxDBTreeList1Click(Self);
 end;
 
@@ -536,6 +612,11 @@ begin
   Tablo.Query3.Params[0].AsInteger := TabRol.FieldByName('ID').AsInteger;
   Tablo.Query3.Params[1].AsString := TabModul.FieldByName('MODULID').AsString;
   Tablo.Query3.ExecSQL;
+  if LogGun > 0 then
+    LogYaz(liDegistir, TabNo_YETKI, TabModul.FieldByName('MODULID').AsInteger,
+      TLogKurucu.Yeni.Deger('Modül', TabModul.FieldByName('MODULADI').AsString)
+                     .Deger('İşlem', 'Grup yetkisi verildi'),
+      '', TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger);
   cxDBTreeList1Click(Self);
 end;
 
@@ -552,6 +633,11 @@ begin
     Tablo.Query3.SQL.Add('insert into YETKI(ROLID,MODULID,HAK,TUR,SUBEID) ');
     Tablo.Query3.SQL.Add('select @HedefRolID,MODULID,HAK,TUR,SUBEID from YETKI where ROLID=@KaynakRolID  ');
     Tablo.Query3.ExecSQL;
+    if LogGun > 0 then
+      LogYaz(liDegistir, TabNo_YETKI, TabRol.FieldByName('ID').AsInteger,
+        TLogKurucu.Yeni.Deger('İşlem', 'Başka rolden yetki kopyalandı')
+                       .Deger('Kaynak Rol ID', st[0]),
+        '', TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger);
     cxDBTreeList1Click(Self);
   end;
   st.Free;
@@ -600,6 +686,13 @@ begin
     raise Exception.Create(KUYonetici_silinemez);
 
     if Application.MessageBox(PChar(KURol_sil +TabRol.FieldByName('ROL').AsString), PChar('Siliniyor'), MB_YESNO) = IDYES then  begin
+      // ISLEMLOG: rol/bolum SILME (silmeden ONCE, kayit dururken).
+      if LogGun > 0 then
+        LogYaz(liSil, TabNo_ROLLER, TabRol.FieldByName('ID').AsInteger,
+          TLogKurucu.Yeni.Deger('ROL', TabRol.FieldByName('ROL').AsString)
+                         .Deger('DEPARTMAN', TabRol.FieldByName('DEPARTMAN').AsString)
+                         .Deger('GOREVID', TabRol.FieldByName('GOREVID').AsString)
+                         .Deger('SUBEID', TabRol.FieldByName('SUBEID').AsString));
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text:='delete from YETKIEK where ROLID = '+inttostr(TabRol.FieldByName('ID').AsInteger);
       Tablo.Query1.ExecSQL;
@@ -632,6 +725,44 @@ procedure TKullaniciYetkiDlg.TabYetkiEkNewRecord(DataSet: TDataSet);
 begin
   TabYetkiEk.FieldByName('ROLID').AsInteger := TabRol.FieldByName('ID').AsInteger;
   TabYetkiEk.FieldByName('MODULID').AsInteger := TabModul.FieldByName('MODULID').AsInteger;
+  FEskiKapsam := '';   // yeni kayit: gorme kapsami oncesi bos
+end;
+
+function TKullaniciYetkiDlg.KapsamAd(const ADeger: string): string;
+begin
+  case StrToIntDef(Trim(ADeger), -1) of
+    1:   Result := 'Sadece Kendisinin';
+    5:   Result := 'Kendi Departmanındaki Herkesin';
+    10:  Result := 'Kendi Şubesindeki Herkesin';
+    100: Result := 'Tüm Şubelerde Herkesin';
+  else   Result := Trim(ADeger);   // bilinmeyen/bos
+  end;
+end;
+
+procedure TKullaniciYetkiDlg.TabYetkiEkBeforeEdit(DataSet: TDataSet);
+begin
+  FEskiKapsam := TabYetkiEk.FieldByName('BILGI').AsString;   // eski gorme kapsami
+end;
+
+procedure TKullaniciYetkiDlg.TabYetkiEkAfterPost(DataSet: TDataSet);
+var
+  LYeni: string;
+begin
+  if LogGun > 0 then
+  try
+    LYeni := TabYetkiEk.FieldByName('BILGI').AsString;
+    // DEGISTIYSE ve yeni deger GERCEK kapsam (1/5/10/100) ise logla (Append default 0
+    // sahte log uretmesin).
+    if (Trim(LYeni) <> Trim(FEskiKapsam)) and
+       ((StrToIntDef(Trim(LYeni),0)=1) or (StrToIntDef(Trim(LYeni),0)=5) or
+        (StrToIntDef(Trim(LYeni),0)=10) or (StrToIntDef(Trim(LYeni),0)=100)) then
+      LogYaz(liDegistir, TabNo_YETKI, TabYetkiEk.FieldByName('MODULID').AsInteger,
+        TLogKurucu.Yeni.Deger('Modül', TabModul.FieldByName('MODULADI').AsString)
+                       .Alan('Görme Kapsamı', KapsamAd(FEskiKapsam), KapsamAd(LYeni)),
+        '', TabNo_ROLLER, TabYetkiEk.FieldByName('ROLID').AsInteger);
+    FEskiKapsam := LYeni;   // baseline'i guncelle
+  except
+  end;
 end;
 
 procedure TKullaniciYetkiDlg.TreeListRollerDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);

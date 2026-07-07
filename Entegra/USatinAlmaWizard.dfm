@@ -490,8 +490,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'TeklifEkr'
       OnEnterPage = TeklifEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PngSpeedButton1: TPngSpeedButton
         Left = 480
         Top = 368
@@ -768,8 +766,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
       Header.Subtitle.Text = ''
       Caption = 'Sipari'#351'ler'
       OnEnterPage = SiparisEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridSiparisler: TcxGrid
         Left = 0
         Top = 94
@@ -893,8 +889,6 @@ object SatinAlmaWizard: TSatinAlmaWizard
       Header.Subtitle.Font.Style = []
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3

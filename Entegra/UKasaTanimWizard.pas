@@ -73,6 +73,7 @@ type
   public
     { Public declarations }
     IslemOp:Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (AfterPost tekrarina karsi)
     Cagiran, KasaID : Integer
   end;
 
@@ -157,8 +158,13 @@ end;
 
 procedure TKasaTanimWizardDlg.TabKasalarAfterPost(DataSet: TDataSet);
 begin
+  // Kasa TANIMI karti (KASALAR) -> TabNo_KASATANIM (43=nakit hareketleri degil!)
   if islemOp='D' then
-     LogKartDegisti(TabKasalar, TabNo_KASA, TabKasalar.Fields[0].AsInteger);
+     LogKartDegisti(TabKasalar, TabNo_KASATANIM, TabKasalar.Fields[0].AsInteger)
+  else
+     // yeni kasa tanimi -> EKLEME logu (TEK SEFER; AfterPost tekrarlansa da bayrak korur)
+     FEkleLogland := LogKartEkle(TabKasalar, TabNo_KASATANIM,
+       (islemOp='E') or (islemOp='K'), FEkleLogland) or FEkleLogland;
 
   // if YeniKayit then  //Eğer yeni kayıtsa otomatik olarak 0 miktarlı açılış fişi oluştursun
   //    Tablo.KasaKaydet(2001,StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açılış Fişi',

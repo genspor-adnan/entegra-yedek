@@ -54,7 +54,9 @@
       "PowerShell(powershell -ExecutionPolicy Bypass -NoProfile -File \"C:\\\\Users\\\\HP\\\\Entegra\\\\Entegra\\\\sql_calistir.ps1\"; Get-Content \"C:\\\\Users\\\\HP\\\\Entegra\\\\Entegra\\\\sql_sonuc.txt\" -Encoding UTF8)",
       "Bash(awk 'NR>=3547 && NR<=3870' UEBelgeOlusturucu.pas)",
       "Read(//c/Users/HP/Documents/**)",
-      "Bash([ -f \"$o\" ])"
+      "Bash([ -f \"$o\" ])",
+      "PowerShell(cmd /c \"cd /d C:\\\\Users\\\\HP\\\\Entegra\\\\Entegra && call rsvars.bat && msbuild Gentegre.dproj /t:Build /p:Config=Debug /p:Platform=Win32 /clp:ErrorsOnly /nologo\" 2>&1 | Select-Object -Last 30)",
+      "Bash(python *)"
     ]
   }
 }

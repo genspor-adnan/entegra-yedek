@@ -439,7 +439,7 @@ var
 
 implementation
 
-uses  System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
+uses  ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
   Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
   UEBelgeAliasServis, UEBelgeOlusturucu, UEBelgeMesajDlg, UIzibizRest,
@@ -1709,7 +1709,7 @@ begin
         'SELECT TOP 1 ISNULL(GONDERICIALIAS, N''''), ' +
         'ISNULL(COALESCE(CAST(DECOMPRESS(UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
         'CAST(UBL_XML AS NVARCHAR(MAX))), N'''') ' +
-        'FROM EBELGE WHERE ID=' + IntToStr(LEbelgeID));
+        'FROM ' + DepoTablo('EBELGE') + ' WHERE ID=' + IntToStr(LEbelgeID));
       if not Tablo.Query1.Eof then begin
         LAlias := Trim(Tablo.Query1.Fields[0].AsString);
         LUBL := Tablo.Query1.Fields[1].AsString;
@@ -2496,6 +2496,7 @@ end;
 procedure TFaturalarDlg.pmBelgeDonusturPopup(Sender: TObject);
 var
   gf : TFaturaGorevFrame;
+  LTur: Integer;
 begin
   gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
   MenuYanitla.Visible := False;
@@ -2578,40 +2579,27 @@ begin
   //   TUR=11 (alis/gelen)  -> Tag=2 olan alt menuler gorunur
   //   TUR=14/15 (giden)    -> Tag=1 olan alt menuler gorunur
   //   Tag=0 olanlar (ayraclar/genel) her zaman gorunur
+  // Tek akis: TUR 14 -> 'e-İrsaliye' (e-Fatura MASTER anahtar + e-İrsaliye anahtari),
+  // TUR 15/11 -> 'e-Fatura'. Gelen (11) Tag=2 alt menuleri + kosullu Yanitla;
+  // giden (14/15) Tag=1 alt menuleri gorur.
+  MenueFatura.Visible := False;
   if FATBASLIK.Active and not FATBASLIK.IsEmpty then begin
-    case FATBASLIK.FieldByName('TUR').AsInteger of
-      EBelgeTuruEIrsaliye:
-        begin
-          MenueFatura.Caption := 'e-İrsaliye';
-          // e-Fatura kullanimda master anahtardir: kapaliysa e-İrsaliye dahil
-          // hicbir e-Belge menusu gorunmez.
-          MenueFatura.Visible := (EFaturaKullanimda > 0) and EIrsaliyeKullanimda;
-          if MenueFatura.Visible then
-            _MenuTagFiltrele(MenueFatura, 1);
-        end;
-      EBelgeTuruEFatura:
-        begin
-          MenueFatura.Caption := 'e-Fatura';
-          // e-Fatura kullanimda degilse menu hic gorunmesin.
-          MenueFatura.Visible := EFaturaKullanimda > 0;
-          if MenueFatura.Visible then
-            _MenuTagFiltrele(MenueFatura, 1);
-        end;
-      11:
-        begin
-          MenueFatura.Caption := 'e-Fatura';
-          // e-Fatura kullanimda degilse menu hic gorunmesin.
-          MenueFatura.Visible := EFaturaKullanimda > 0;
-          if MenueFatura.Visible then begin
-            _MenuTagFiltrele(MenueFatura, 2);
-            MenuYanitla.Visible := FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 6;
-          end;
-        end;
-    else
-      MenueFatura.Visible := False;
+    LTur := FATBASLIK.FieldByName('TUR').AsInteger;
+    if LTur in [EBelgeTuruEIrsaliye, EBelgeTuruEFatura, 11] then begin
+      if LTur = EBelgeTuruEIrsaliye then
+        MenueFatura.Caption := 'e-İrsaliye'
+      else
+        MenueFatura.Caption := 'e-Fatura';
+      MenueFatura.Visible := (EFaturaKullanimda > 0) and
+        ((LTur <> EBelgeTuruEIrsaliye) or EIrsaliyeKullanimda);
+      if MenueFatura.Visible then
+        if LTur = 11 then begin
+          _MenuTagFiltrele(MenueFatura, 2);
+          MenuYanitla.Visible := FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 6;
+        end else
+          _MenuTagFiltrele(MenueFatura, 1);
     end;
-  end else
-    MenueFatura.Visible := False;
+  end;
 //  if gf.FAltTur in [15,16] then
 //        POSMenu.Tag := 25
 //     else

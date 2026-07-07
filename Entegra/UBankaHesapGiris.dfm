@@ -30,7 +30,6 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     Color = clSkyBlue
     ParentBackground = False
     TabOrder = 0
-    OnDblClick = PanelUstDblClick
     DesignSize = (
       1180
       50)
@@ -104,6 +103,16 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       Style.Font.Style = [fsBold]
       Style.IsFontAssigned = True
       Transparent = True
+    end
+    object ButtonExcelAl: TcxButton
+      Left = 906
+      Top = 11
+      Width = 130
+      Height = 28
+      Anchors = [akTop, akRight]
+      Caption = 'Excel '#304#231'eri Al'
+      TabOrder = 6
+      OnClick = ButtonExcelAlClick
     end
   end
   object PanelGiris: TPanel
@@ -301,6 +310,7 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     Height = 408
     Align = alClient
     TabOrder = 3
+    LookAndFeel.ScrollbarMode = sbmClassic
     object cxGrid1DBTableView1: TcxGridDBTableView
       PopupMenu = PopupMenu1
       Navigator.Buttons.CustomButtons = <>
@@ -310,13 +320,19 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       OnFocusedRecordChanged = cxGrid1DBTableView1FocusedRecordChanged
       DataController.DataSource = DataSource1
       DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <
+        item
+          Format = 'Kay'#305't: 0'
+          Kind = skCount
+          Column = cxGrid1DBTableView1TARIH
+        end>
       DataController.Summary.SummaryGroups = <>
       Filtering.ColumnAddValueItems = False
       Filtering.ColumnMRUItemsList = False
       OptionsCustomize.ColumnsQuickCustomization = True
       OptionsData.Deleting = False
       OptionsData.Inserting = False
+      OptionsView.Footer = True
       OptionsView.GroupByBox = False
       Styles.OnGetContentStyle = cxGrid1DBTableView1StylesGetContentStyle
       object cxGrid1DBTableView1ONAY: TcxGridDBColumn
@@ -487,7 +503,7 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     Indexes = <>
     SortOptions = []
     Left = 40
-    Top = 184
+    Top = 160
     object dxMemData1TARIH: TDateTimeField
       FieldName = 'TARIH'
     end
@@ -524,6 +540,17 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     object dxMemData1BELGENO: TStringField
       FieldName = 'BELGENO'
       Size = 30
+    end
+    object dxMemData1IBAN: TStringField
+      FieldName = 'IBAN'
+      Size = 34
+    end
+    object dxMemData1HAMAD: TStringField
+      FieldName = 'HAMAD'
+      Size = 150
+    end
+    object dxMemData1ICERIALINDI: TBooleanField
+      FieldName = 'ICERIALINDI'
     end
     object dxMemData1KARSILIGI: TBooleanField
       FieldName = 'KARSILIGI'
@@ -562,8 +589,8 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
   end
   object DataSource1: TDataSource
     DataSet = dxMemData1
-    Left = 168
-    Top = 176
+    Left = 48
+    Top = 232
   end
   object PopupMenu1: TPopupMenu
     Left = 320

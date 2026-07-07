@@ -173,6 +173,7 @@ type
     procedure tabDepolarBeforePost(DataSet: TDataSet);
     procedure KaydetTusClick(Sender: TObject);
     procedure tabDepolarAfterPost(DataSet: TDataSet);
+    procedure tabDepolarBeforeEdit(DataSet: TDataSet);
     procedure FormShow(Sender: TObject);
     procedure StokSayTusClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -227,7 +228,7 @@ implementation
 
 {$R *.dfm}
 
-uses UCombo, Utablo, UStokSayim, UFiyatDegisiklik, PrjConst, FetaKurulusSiniflari,
+uses ULog, UCombo, Utablo, UStokSayim, UFiyatDegisiklik, PrjConst, FetaKurulusSiniflari,
   UKampanyalar, UGirisKutusuEx,LocOnFly;
 
 procedure TOpsiyonStokDlg.BtnFiyatListeleriClick(Sender: TObject);
@@ -271,6 +272,8 @@ begin
     raise Exception.Create(STDepo_servisHareketi_silinemez);
  if Application.MessageBox(Pchar(tabDepolar.FieldByName(STDepo_adi).AsString + STDepo_silinsinmi),PChar(Uyari),MB_YESNO ) <> mrYes then
    Abort;
+ // SILMEDEN ONCE, kayit dururken logla
+ LogKartSil(tabDepolar, TabNo_DEPOLAR, tabDepolar.FieldByName('ID').AsInteger);
  tabDepolar.Delete;
 end;
 
@@ -544,6 +547,14 @@ end;
 procedure TOpsiyonStokDlg.tabDepolarAfterPost(DataSet: TDataSet);
 begin
   tabDepolar.Refresh;
+  // Depo tanimi ekle/degistir logu (LogOnceki dolu -> DEGISTIR, bos -> EKLE)
+  if DataSet.FieldByName('ID').AsInteger > 0 then
+     LogDetaySatirPost(DataSet, TabNo_DEPOLAR, TabNo_DEPOLAR, DataSet.FieldByName('ID').AsInteger);
+end;
+
+procedure TOpsiyonStokDlg.tabDepolarBeforeEdit(DataSet: TDataSet);
+begin
+  if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
 end;
 
 procedure TOpsiyonStokDlg.tabDepolarBeforePost(DataSet: TDataSet);
@@ -586,6 +597,7 @@ end;
 
 procedure TOpsiyonStokDlg.tabDepolarNewRecord(DataSet: TDataSet);
 begin
+  LogOnceki.Clear;   // iptal edilmis edit kalintisi yeni kaydi DEGISTIR olarak loglamasin
   tabDepolar.FieldByName('EKLEYEN').AsString:= Kullanan;
   tabDepolar.FieldByName('DURUM').AsInteger:= 1;
   tabDepolar.FieldByName('MALIYETI_ETKILESIN').AsBoolean:= True;

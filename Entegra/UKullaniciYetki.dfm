@@ -815,8 +815,8 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     end
   end
   object PopupMenuRoller: TPopupMenu
-    Left = 84
-    Top = 186
+    Left = 76
+    Top = 154
     object Yeni1: TMenuItem
       Caption = 'Yeni'
       OnClick = RolYeniTusClick

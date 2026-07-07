@@ -372,6 +372,10 @@ type
     UstId: Integer; // 1 Kurum i?in RehberId, 2 Personel i?in PersonelId
     PersIslemTipi: SmallInt; // 1 Yeni pers, 2 D?zenleme, 3 Silme;
     YeniKayit, Potansiyel:Boolean;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
+    FKartSnap: TStringList;  // kart (REHBER) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
+    FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si
+    destructor Destroy; override;
   end;
 
 var
@@ -611,6 +615,8 @@ procedure TIKWizardDlg.FormCreate(Sender: TObject);
 begin
    LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
+
+   FKartSnap := TStringList.Create;
 
    // IK personel iletisim (REHBERILETISIM) detayini ust=personel log'una bagla.
    TabPerIletisim.BeforeEdit := DetayBeforeEdit;
@@ -1538,6 +1544,9 @@ procedure TIKWizardDlg.DetayAfterPost(DataSet: TDataSet);
 begin
   if LogGun <= 0 then Exit;
   if DataSet <> TabPerIletisim then Exit;
+  // Detay ISLEMTIPI'si ANA KARTIN modunu izlesin: yeni personel -> ekle(1), mevcut -> degis(2)
+  // -> kart+detaylar tek ISLEMTIPI'de gruplanir (UInfo'da tek satir).
+  if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
   // ust=IK (73/74)
   LogDetaySatirPost(DataSet, TabNo_REHBERILETISIM, TabloNo, TabRehber.FieldByName('ID').AsInteger);
 end;
@@ -1553,8 +1562,16 @@ begin
   OncekiGirisTarih := DateGIRISTARIHI.Text;
   OncekiCikisTarih := DateCIKISTARIHI.Text;
   OncekiSinif := TabRehber.FieldByName('SINIF').AsInteger;
-  if LogGun > 0 then
+  if LogGun > 0 then begin
     tablo.OncekiLogBelirle(TabRehber);
+    FKartSnap.Assign(LogOnceki);   // detay logu LogOnceki'yi temizlese de kart diff'i icin sakla
+    FKartSnapID := TabRehber.FieldByName('ID').AsInteger;
+    // Kart snapshot'i FKartSnap'e alindi -> global LogOnceki'yi bosalt. Yoksa duzenleme
+    // sirasinda EKLENEN yeni detay (personel iletisim) LogDetaySatirPost'ta LogOnceki
+    // dolu gorunup 'degisiklik' sanilir ve kart snapshot'ina karsi pozisyonel diff'lenir
+    // (cop diff). Kart diff'i Finish'te FKartSnap'ten geri yuklenir.
+    LogOnceki.Clear;
+  end;
 end;
 
 procedure TIKWizardDlg.TabRehberBeforePost(DataSet: TDataSet);
@@ -1863,6 +1880,9 @@ var
 begin
   GenotipaEkle := False;
   KartIslemi := 0;
+  // Finish'te alt hareketler (Ekle -> iletisim/ilgili) ana kartin moduna gore loglansin
+  // -> kart+detaylar tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+  if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im,  3 Personel ?zl?k, 4 Personel ileti?im, i?in ileti?im bilgileri
@@ -1934,11 +1954,15 @@ begin
         // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
         // AfterPost'tan buraya tasindi (sayfa gecislerinde mukerrer loglamayi onlemek icin).
         if LogGun > 0 then begin
-          if KartIslemi = 2 then
+          if KartIslemi = 2 then begin
+            // Detay (iletisim) loglamasi LogOnceki'yi ezip/temizleyip kart diff'ini
+            // kaybediyordu -> DOGRU karta ait snapshot'i geri yukle, sonra logla.
+            if (FKartSnapID = TabRehber.FieldByName('ID').AsInteger) and (FKartSnap.Count > 0) then
+              LogOnceki.Assign(FKartSnap);
             LogKartDegisti(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger)  // IK: 73/74
+          end
           else if KartIslemi = 1 then
-            LogKayitEkle(TabRehber, TabloNo, TabRehber.FieldByName('ID').AsInteger,
-                         TabloNo, TabRehber.FieldByName('ID').AsInteger);
+            FEkleLogland := LogKartEkle(TabRehber, TabloNo, True, FEkleLogland) or FEkleLogland;
         end;
       end;
 
@@ -1986,6 +2010,15 @@ begin
     if BosZorunluAlanSay(DtsPerUcret, 'TUTAR') > 0 then
       raise Exception.Create(zorunlualanhata);
   end;
+end;
+
+destructor TIKWizardDlg.Destroy;
+begin
+  // FALLBACK: yeni personel karti kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+  FEkleLogland := LogKartEkle(TabRehber, TabloNo, YeniKayit, FEkleLogland) or FEkleLogland;
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
+  FKartSnap.Free;
+  inherited;
 end;
 
 end.

@@ -368,6 +368,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     SiparisTur, SiparisIdsi, RehberId, ProjeId, AktiviteId,MasrafMerkezi,ServisID,SatinAlmaID: Integer;
     iadefis, IptalSecildi: Boolean;
     Cagiran: SmallInt;
@@ -717,6 +718,7 @@ end;
 
 procedure TStokTalepWizard.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K')) then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (SIPARIS.Active) and (SIPARIS.Fields[0].AsString <> '') then begin
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, SIPARIS.FieldByName('ID').AsInteger]);
@@ -727,6 +729,10 @@ begin
       GenRegIni.RegWriteString('StokTalepOpsiyon','TalepVarsayilanCikisDepo', SIPARIS.FieldByName('CIKISDEPO').AsString, 'C');
       GenRegIni.RegWriteString('StokTalepOpsiyon','TalepVarsayilanGirisDepo', SIPARIS.FieldByName('GIRISDEPO').AsString, 'C');
   end;
+
+  if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K'))) then
+     // FALLBACK: yeni talep kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+     FEkleLogland := LogKartEkle(SIPARIS, TabNo_STOKTALEP, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 
   FreeAndNil(FDetSnap);
 end;
@@ -1766,6 +1772,8 @@ procedure TStokTalepWizard.WizardKontrolFinishButtonClick(Sender: TObject);
 var
   Kota,Bakiye:currency;
 begin
+  // Alt hareketler (SIPARISDETAY diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   KaydetTus.Click;
   if SIPARISDETAY.RecordCount < 1 then
      raise Exception.Create(UrungirilmedenKaydedilemez);
@@ -1775,7 +1783,7 @@ begin
   if LogGun > 0 then
   try
     if (IslemOp='E') or (IslemOp='K') then
-       LogKayitEkle(SIPARIS, TabNo_STOKTALEP, SiparisIdsi, TabNo_STOKTALEP, SiparisIdsi)
+       FEkleLogland := LogKartEkle(SIPARIS, TabNo_STOKTALEP, True, FEkleLogland) or FEkleLogland
     else
        LogKartDegisti(SIPARIS, TabNo_STOKTALEP, SiparisIdsi);
     LogDiffKaydet(SIPARISDETAY, FDetSnap, TabNo_SIPARISDETAY, TabNo_STOKTALEP, SiparisIdsi);

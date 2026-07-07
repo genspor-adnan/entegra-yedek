@@ -237,6 +237,7 @@ type
   public
     { Public declarations }
     IslOp : char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     GorevId : Integer;
     AtamaYapildi, YorumYapildi: Boolean;
   end;
@@ -514,7 +515,10 @@ end;
 procedure TGorevDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    if (IslOp='E')and(ModalResult = mrCancel) then
-       Tablo.GorevSil(TabGorev.Fields[0].asInteger);
+       Tablo.GorevSil(TabGorev.Fields[0].asInteger)
+   else
+      // FALLBACK: yeni gorev kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+      FEkleLogland := LogKartEkle(TabGorev, TabNo_GOREVLER, (IslOp='E') or (IslOp='K'), FEkleLogland) or FEkleLogland;
 
    if OnayRedBasildi then
       YorumYapildi := False;
@@ -719,8 +723,7 @@ begin
   // bu yuzden edit/yeni ayrimi IslOp ile ('E'/'K'=yeni, digeri=duzenleme).
   if LogGun > 0 then begin
     if (IslOp = 'E') or (IslOp = 'K') then
-      LogKayitEkle(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger,
-                   TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger)
+      FEkleLogland := LogKartEkle(TabGorev, TabNo_GOREVLER, True, FEkleLogland) or FEkleLogland
     else
       LogKartDegisti(TabGorev, TabNo_GOREVLER, TabGorev.FieldByName('ID').AsInteger);
   end;

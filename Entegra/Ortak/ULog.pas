@@ -137,6 +137,38 @@ procedure LogDetaySatirPost(ADataSet: TDataSet; ADetayTabNo, AUstTabNo: Integer;
 // Sonuc: '' = tam basari; aksi halde hata (kart) veya uyari (atlanan detay) mesaji.
 function LogGeriAl(AUstTabloID: Integer; AUstKayitID: Int64; AGun: TDateTime): string;
 
+// ---- Depo (log/e-belge) DB adi ----
+// Depo DB adi — opsiyon Ops_FaturaOpsiyon_DepoDBAdi (default 'GENDEPO'). Log otonom
+// baglantisi bu ada baglanir; ayni zamanda EBELGE* tablolari da bu DB'de.
+function DepoDBAdi: string;
+
+// Depo tablosunun TAM NITELIKLI adi: DepoDBAdi + '.dbo.' + ATablo
+// (ör. DepoTablo('EBELGEMESAJ') -> 'GENDEPO.dbo.EBELGEMESAJ').
+// DEPODA bulunan tablolarla (EBELGE / EBELGEMESAJ / EBELGEKUYRUK / ISLEMLOG /
+// LOGREFERANS / LOGCOZUM ...) ANA baglantidan calisirken sabit 'GENDEPO' yazmak
+// yerine BUNU onek olarak kullan -> depo DB adi degisince kod kirilmaz.
+function DepoTablo(const ATablo: string): string;
+
+var
+  // Ana kart islem modu: DETAY log satirlari bu moda gore ISLEMTIPI yazar
+  //   -1 = kapali (detayin kendi modu: yeni->ekle, degisen->degis, silinen->sil)
+  //    0 = sil, 1 = ekle, 2 = degis  (TLogIslem ile birebir)
+  // Form/wizard ACILISTA set eder (yeni->1, duzenleme->2, silme->0), KAPANISTA -1.
+  // Amac: tek kaydette kart + tum alt hareketler AYNI ISLEMTIPI'de -> UInfo'da tek satir
+  // (ör. cari DEGIS modunda eklenen iletisim de 'degistir' loglanir, ayri 'ekleme' cikmaz).
+  LogUstModu: Integer = -1;
+
+  // Ayar (GENINI) loglama bayragi: opsiyon formu ACIK iken True. GENINI.Write* bayrak
+  // aciksa degisen opsiyonu (BOLUM, eski->yeni) loglar. Form acilista True, kapanista False.
+  // Amac: GENINI HER YERDEN yazildigi icin (lisans/oturum) yalniz opsiyon formundaki
+  // kullanici degisiklikleri loglansin.
+  LogAyarModu: Boolean = False;
+
+  // Ayar (opsiyon) kaydet-oturumu anahtari: opsiyon formu ACILINCA (kapali->acik gecis)
+  // set edilir; o form boyunca yazilan TUM opsiyon loglari bunu USTKAYITID yapar ->
+  // UInfo'da tek save = TEK satirda gruplanir (KAYITID=BOLUM detay/bolum icin kalir).
+  LogAyarOturum: Integer = 0;
+
 implementation
 
 uses
@@ -147,6 +179,7 @@ var
   GLogCnn: TFDConnection = nil;   // otonom log baglantisi (GENDEPO'ya baglanir, cache)
   GLock: TCriticalSection = nil;  // log yazimlarini seri yapar
   GIP: string = #1;               // #1 = henuz hesaplanmadi
+  GDepoDBAdi: string = '';        // depo DB adi cache (INI'den 1 kez okunur)
   GIstasyon: string = #1;
   GYillar: TStringList = nil;     // bu oturumda garantilenen LOG<yyyy> tablolari
 
@@ -176,12 +209,24 @@ end;
 
 function DepoDBAdi: string;
 begin
-  try
-    Result := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
-  except
-    Result := '';
+  // INI'den YALNIZ 1 KEZ oku, sonra cache (DepoTablo ~50 sorguda cagriliyor).
+  // Ad degisirse uygulama yeniden baslatilmali (log baglantisi de cache'li).
+  if GDepoDBAdi = '' then
+  begin
+    try
+      GDepoDBAdi := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
+    except
+      GDepoDBAdi := '';
+    end;
+    if GDepoDBAdi = '' then GDepoDBAdi := 'GENDEPO';
   end;
-  if Result = '' then Result := 'GENDEPO';
+  Result := GDepoDBAdi;
+end;
+
+function DepoTablo(const ATablo: string): string;
+begin
+  // Ad koseli parantezle kacisli (bosluk/ozel karakter guvenli); ATablo ham gecirilir.
+  Result := '[' + DepoDBAdi + '].dbo.' + ATablo;
 end;
 
 function LogBaglantisi: TFDConnection;
@@ -232,6 +277,11 @@ begin
       LQ.SQL.Text := 'IF COL_LENGTH(''dbo.' + LT + ''',''STOKID'') IS NULL' +
         ' ALTER TABLE dbo.' + LT + ' ADD STOKID bigint NULL;';
       LQ.ExecSQL;
+      // ALTISLEMTIPI: satirin GERCEK islem tipi (ISLEMTIPI grup/kart moduna override
+      // edilmis olabilir; UInfo Icerik gercek tipi bundan gosterir).
+      LQ.SQL.Text := 'IF COL_LENGTH(''dbo.' + LT + ''',''ALTISLEMTIPI'') IS NULL' +
+        ' ALTER TABLE dbo.' + LT + ' ADD ALTISLEMTIPI tinyint NULL;';
+      LQ.ExecSQL;
       LQ.SQL.Text := 'IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name=''IX_' + LT +
         '_REHBER'' AND object_id=OBJECT_ID(''dbo.' + LT + ''')) CREATE INDEX IX_' + LT +
         '_REHBER ON dbo.' + LT + '(REHBERID);';
@@ -242,7 +292,7 @@ begin
       LQ.ExecSQL;
       if LUnion <> '' then LUnion := LUnion + ' UNION ALL ';
       LUnion := LUnion +
-        'SELECT ID,TARIH,IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,' +
+        'SELECT ID,TARIH,IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,' +
         'USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI ' +
         'FROM dbo.' + LT;
     end;
@@ -271,9 +321,10 @@ begin
       'IF OBJECT_ID(''dbo.' + LT + ''',''U'') IS NULL BEGIN ' +
       'CREATE TABLE dbo.' + LT + '(' +
       ' ID bigint IDENTITY(1,1) NOT NULL,' +
-      ' TARIH datetime2(3) NOT NULL CONSTRAINT DF_' + LT + '_TARIH DEFAULT(SYSDATETIME()),' +
-      ' IP varchar(45) NULL, ISTASYON varchar(64) NULL, KULLANICIID int NULL,' +
-      ' SUBEID smallint NULL, ISLEMTIPI tinyint NOT NULL,' +
+      ' TARIH datetime2(0) NOT NULL CONSTRAINT DF_' + LT + '_TARIH DEFAULT(SYSDATETIME()),' +
+      ' IP varchar(45) COLLATE SQL_Latin1_General_CP1254_CI_AS NULL,' +
+      ' ISTASYON varchar(64) COLLATE SQL_Latin1_General_CP1254_CI_AS NULL, KULLANICIID int NULL,' +
+      ' SUBEID smallint NULL, ISLEMTIPI tinyint NOT NULL, ALTISLEMTIPI tinyint NULL,' +
       ' USTTABLOID int NULL, USTKAYITID bigint NULL,' +
       ' TABLOID int NULL, KAYITID bigint NULL,' +
       ' REHBERID bigint NULL, STOKID bigint NULL,' +   // varlik baglantisi (cari/stok)
@@ -394,6 +445,7 @@ var
   LTablo: string;
   LUstT: Integer;
   LUstK: Int64;
+  LIslem: TLogIslem;
 begin
   // Loglama hicbir kosulda uygulamayi kirmaz/yavaslamaz.
   try
@@ -402,6 +454,12 @@ begin
     // master+detay loglari birlikte sorgulanabilir.
     LUstT := AUstTabloID; if LUstT = 0 then LUstT := ATabloID;
     LUstK := AUstKayitID; if LUstK = 0 then LUstK := AKayitID;
+    // ISLEMTIPI: DETAY satiri (master kendisi degil) + ana kart modu set edilmisse,
+    // detayin kendi tipi yerine ANA KARTIN modunu izler -> kart+detaylar tek grup.
+    // Kart (master) satiri kendi modunu korur (LogKartEkle/Degisti/Sil zaten dogru verir).
+    LIslem := AIslemTipi;
+    if (LogUstModu >= 0) and ((LUstT <> ATabloID) or (LUstK <> AKayitID)) then
+      LIslem := TLogIslem(LogUstModu);
     // Varlik anahtari verilmediyse KART tipinden turet: cari/IK (71/73/74) ve stok(88)
     // kartinin KENDISI -> KAYITID; altindaki DETAY -> USTKAYITID. Boylece bir cari/IK
     // personelinin (REHBER) veya stokun TUM loglari REHBERID/STOKID ile bulunur.
@@ -429,17 +487,18 @@ begin
         // AModul param'i geriye uyumluluk icin durur (yazilmaz).
         if LBilgiVar then
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), COMPRESS(CAST(:BILGI AS nvarchar(max))))'
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), COMPRESS(CAST(:BILGI AS nvarchar(max))))'
         else
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0))';
+            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0))';
         LQ.ParamByName('IP').AsString  := Copy(YerelIP, 1, 45);
         LQ.ParamByName('IST').AsString := Copy(Istasyon, 1, 64);
         LQ.ParamByName('KUL').AsInteger := StrToIntDef(Trim(Kullanan), 0);
         LQ.ParamByName('SUB').AsInteger := StrToIntDef(Trim(SubeIDYazi), 0);
-        LQ.ParamByName('IT').AsInteger := Ord(AIslemTipi);
+        LQ.ParamByName('IT').AsInteger := Ord(LIslem);        // ISLEMTIPI = grup/kart modu (override edilmis olabilir)
+        LQ.ParamByName('AIT').AsInteger := Ord(AIslemTipi);   // ALTISLEMTIPI = satirin GERCEK tipi
         LQ.ParamByName('UTID').AsInteger := LUstT;
         LQ.ParamByName('UKYT').AsLargeInt := LUstK;
         LQ.ParamByName('TID').AsInteger := ATabloID;
@@ -506,12 +565,13 @@ var
 begin
   try
     // ADI/KODU -> POS, Kredi Karti; HESAPADI/HESAPKODU -> Banka; KREDIKODU -> Krediler;
-    // BORCLU/SERINO -> Cek/Senet. (IlkDolu var olmayan alani atlar -> fazla aday zararsiz.)
+    // BORCLU/SERINO -> Cek/Senet; KASAADI/KASAKODU -> Kasa tanimi.
+    // (IlkDolu var olmayan alani atlar -> fazla aday zararsiz.)
     LAd  := Copy(IlkDolu(['FIRMA','STOKADI','ADI','ADSOYAD','KONUSU','PROJEADI',
                           'ACIKLAMA','TANIM','UNVAN','ISIM','HESAPADI','BANKAADI',
-                          'BORCLU']), 1, 200);
+                          'BORCLU','KASAADI','DEPOADI','AD']), 1, 200);
     LKod := Copy(IlkDolu(['KOD','STOKKOD','KODU','CARIKOD','HESAPKODU','HESAPNO',
-                          'KREDIKODU','SERINO']), 1, 60);
+                          'KREDIKODU','SERINO','KASAKODU']), 1, 60);
     if (LAd = '') and (LKod = '') then Exit;   // referanslanacak ad/kod yok
     GLock.Enter;
     try

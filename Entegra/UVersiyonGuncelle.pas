@@ -4,7 +4,7 @@
 interface
 
 const
-  KomutNo  =  32864; // 17733;
+  KomutNo  =  32865; // 17733;
 
 var
   VersBaslNo  : SmallInt;

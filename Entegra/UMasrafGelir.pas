@@ -370,7 +370,7 @@ type
 
 implementation
 
-uses UAnaForm,Umesaj,UHesapKoduPicker , UKasaWizard, URehAraDlg, UComboImgDuzenle, UResim,UBekletme,
+uses ULog, UAnaForm,Umesaj,UHesapKoduPicker , UKasaWizard, URehAraDlg, UComboImgDuzenle, UResim,UBekletme,
       FetaKurulusSiniflari,FetaClassExtensions, UFastRap,  URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame,
       UMasrafAnaliz,LocOnFly,PrjConst, UUnits, UExceldenVeriAl, UKodAgaci;
 
@@ -1174,9 +1174,22 @@ begin
   TabloYenile(MASRAFGELIR,[]);
 end;
 
+// Log TabNo: kayittaki GELIRMI alanina gore (1=Gelir kalemi 481, 0=Masraf kalemi 58).
+// DIKKAT: form degiskeni GELIRMI'nin yorumu ters; DB'de GELIRMI=1 GELIR demektir (679.x hesaplar).
+function MasrafGelirLogTabNo(ADataSet: TDataSet): Integer;
+begin
+  if ADataSet.FieldByName('GELIRMI').AsBoolean then
+    Result := TabNo_GELIRKALEM
+  else
+    Result := TabNo_MASRAFGELIR;
+end;
+
 procedure TMasrafGelirDlg.TabMasrafGelirAfterPost(DataSet: TDataSet);
 var YeniId:Integer;
 begin         //   and(GELIRMI)      and (cxDBTreeList1.Selections[0].HasChildren=False)
+  // Masraf/Gelir kalemi ekle/degistir logu (LogOnceki dolu -> DEGISTIR, bos -> EKLE)
+  if DataSet.FieldByName('ID').AsInteger > 0 then
+     LogDetaySatirPost(DataSet, MasrafGelirLogTabNo(DataSet), MasrafGelirLogTabNo(DataSet), DataSet.FieldByName('ID').AsInteger);
 //   if (YeniKayit)  then begin
      //  TabFiyatlar.Append;
      //  TabFiyatlar.Post;
@@ -1202,10 +1215,13 @@ end;
 procedure TMasrafGelirDlg.TabMasrafGelirBeforeDelete(DataSet: TDataSet);
 begin
   // Tablo.SilmeKontrolu('MASRAFSOZLESME ', 'MASRAFID', TabMasrafGelir.Fields[0].AsString, 'Sözleşme');
+  // SILMEDEN ONCE, kayit dururken logla (GELIRMI'ye gore 58/481)
+  LogKartSil(TabMasrafGelir, MasrafGelirLogTabNo(TabMasrafGelir), TabMasrafGelir.FieldByName('ID').AsInteger);
 end;
 
 procedure TMasrafGelirDlg.TabMasrafGelirBeforeEdit(DataSet: TDataSet);
 begin
+   if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
    YeniKayit := False;
    OncekiKod := TabMasrafGelir.FieldByName('KOD').AsString;
    OncekiAd :=  TabMasrafGelir.FieldByName('AD').AsString;
@@ -1229,6 +1245,7 @@ end;
 
 procedure TMasrafGelirDlg.TabMasrafGelirNewRecord(DataSet: TDataSet);
 begin
+   LogOnceki.Clear;   // iptal edilmis edit kalintisi yeni kaydi DEGISTIR olarak loglamasin
    YeniKayit := True;
    TabMasrafGelir.FieldByName('GELIRMI').AsBoolean := GELIRMI;
    TabMasrafGelir.FieldByName('DURUM').AsBoolean := True;//ComboDURUM.Items[0];

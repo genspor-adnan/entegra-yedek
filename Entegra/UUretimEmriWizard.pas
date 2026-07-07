@@ -1422,6 +1422,7 @@ end;
 procedure TUretimEmriWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    FreeAndNil(FDetSnap);
+   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
 
    if TabUretimEmri.FieldByName('ID').AsString='' then
       exit;
@@ -1928,6 +1929,8 @@ begin
   // Ekleme/degistirme ayrimi IslemOp'tan (kart Finish'ten ONCE Post edilmis olabilir ->
   // State guvenilmez; State=dsInsert kullanilirsa ekleme kaydi kaciyordu).
   LYeni := (IslemOp = 'E') or (IslemOp = 'K');
+  // Alt hareketler (URETIMEMRIDETAY diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if LYeni then LogUstModu := 1 else LogUstModu := 2;
   if TabUretimEmri.State in [dsEdit,dsInsert] then
   begin
     // Gercek degisiklik yoksa Post etme -> gereksiz DEGISTIREN/log olmasin.

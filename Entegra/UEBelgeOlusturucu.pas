@@ -62,7 +62,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes,
+  ULog, Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes,
   System.JSON, System.NetEncoding, System.IOUtils, System.Variants,
   System.DateUtils, Data.DB, Vcl.Dialogs, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   System.StrUtils, ComObj, Utablo, PrjConst, FetaKurulusSiniflari,
@@ -677,6 +677,26 @@ begin
   else
     Result := 'Sevk/tasima bilgileri eksik: tasiyici unvani ve vergi no, ' +
       'VEYA sofor adi soyadi ve TC no girilmelidir.';
+end;
+
+// Sofor ad/soyadini GIB DriverPerson icin AYIRIR (FirstName + FamilyName ZORUNLU).
+// - Soyad doluysa: ad->First, soyad->Family.
+// - Soyad bossa: tam adi SON bosluktan ayir (sirket adi "... A.S" gibi).
+// - Tek kelime ise: sema gecerliligi icin FamilyName=FirstName (nil/eksik olmasin).
+procedure SoforAdSoyadAyir(const AAd, ASoyad: string; out AFirst, AFamily: string);
+var
+  P: Integer;
+begin
+  AFirst := Trim(AAd);
+  AFamily := Trim(ASoyad);
+  if AFamily = '' then begin
+    P := LastDelimiter(' ', AFirst);
+    if (P > 1) and (P < Length(AFirst)) then begin
+      AFamily := Trim(Copy(AFirst, P + 1, MaxInt));
+      AFirst  := Trim(Copy(AFirst, 1, P - 1));
+    end else
+      AFamily := AFirst;   // tek kelime -> FamilyName zorunlu oldugundan First ile ayni
+  end;
 end;
 
 procedure VerileriOku(AFatBaslikID: Integer; out ABaslik: TEBelgeBaslik;
@@ -1425,12 +1445,11 @@ begin
       if (Trim(LSevk.SoforAdi) <> '') or (Trim(LSevk.SoforSoyadi) <> '') or
          (Trim(LSevk.SoforTckn) <> '') then begin
         LXML.AppendLine('<cac:DriverPerson>');
-        if Trim(LSevk.SoforAdi) <> '' then
-          LXML.AppendLine('<cbc:FirstName>' + XMLEscape(LSevk.SoforAdi) +
-            '</cbc:FirstName>');
-        if Trim(LSevk.SoforSoyadi) <> '' then
-          LXML.AppendLine('<cbc:FamilyName>' + XMLEscape(LSevk.SoforSoyadi) +
-            '</cbc:FamilyName>');
+        var LDFirst, LDFamily: string;
+        SoforAdSoyadAyir(LSevk.SoforAdi, LSevk.SoforSoyadi, LDFirst, LDFamily);
+        // GIB: FirstName + FamilyName ZORUNLU (ikisi de daima yazilir).
+        LXML.AppendLine('<cbc:FirstName>' + XMLEscape(LDFirst) + '</cbc:FirstName>');
+        LXML.AppendLine('<cbc:FamilyName>' + XMLEscape(LDFamily) + '</cbc:FamilyName>');
         LXML.AppendLine('<cbc:Title>Şoför</cbc:Title>');
         if Trim(LSevk.SoforTckn) <> '' then
           LXML.AppendLine('<cbc:NationalityID>' + XMLEscape(LSevk.SoforTckn) +
@@ -1601,9 +1620,10 @@ begin
           LXML.AppendLine('<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">' +
             XMLEscape(ASatirlar[I].Barkod) +
             '</cbc:ID></cac:StandardItemIdentification>');
-        // Ilac/tibbi cihaz kimligi: yalnizca gercek veri varsa (placeholder uretme).
-        // Sema sirasi: AdditionalItemIdentification, StandardItemIdentification'dan sonra.
-        if Trim(ASatirlar[I].TibbiCihazKimlik) <> '' then
+        // Ilac/tibbi cihaz kimligi: YALNIZ ilac/tibbi cihaz senaryosunda (Senaryo=8).
+        // e-Irsaliye ilac/tibbi cihaz DEGILSE AdditionalItemIdentification yazilmaz
+        // (SP ilac-disi urunlerde de deger dondurdugunden Senaryo ile gate edilir).
+        if (ABaslik.Senaryo = 8) and (Trim(ASatirlar[I].TibbiCihazKimlik) <> '') then
           TibbiCihazKimlikXMLYaz(LXML, ASatirlar[I].TibbiCihazKimlik);
         if Trim(ASatirlar[I].LotNo) <> '' then
           LXML.AppendLine('<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>' +
@@ -1627,12 +1647,8 @@ begin
           XMLEscape(ABaslik.ParaBirimi) + '">0.00</cbc:LineExtensionAmount>');
         LXML.AppendLine('<cac:Item>');
         LXML.AppendLine('<cbc:Name>' + XMLEscape(ASatirlar[I].UrunAdi) + '</cbc:Name>');
-        if Trim(ASatirlar[I].MarkaAdi) <> '' then
-          LXML.AppendLine('<cbc:BrandName>' + XMLEscape(ASatirlar[I].MarkaAdi) +
-            '</cbc:BrandName>');
-        if Trim(ASatirlar[I].ModelKodu) <> '' then
-          LXML.AppendLine('<cbc:ModelName>' + XMLEscape(ASatirlar[I].ModelKodu) +
-            '</cbc:ModelName>');
+        // BrandName/ModelName YALNIZ dis DespatchLine/Item'da yazilir (GIB/ITS oradan
+        // okur); ic GoodsItem/InvoiceLine/Item legacy -> mukerrer yazilmaz.
         if Trim(ASatirlar[I].SeriNo) <> '' then
           LXML.AppendLine('<cac:ItemInstance><cbc:SerialID>' +
             XMLEscape(ASatirlar[I].SeriNo) +
@@ -2347,7 +2363,7 @@ begin
     else
       LUblSet := 'UBL_XML=cast(:UBL_XML as nvarchar(max)), UBL_XML_ZIP=NULL, ';
     LQuery.SQL.Text :=
-      'update EBELGE set REHBERID=:REHBERID, UUID=:UUID, BELGENO=:BELGENO, ' +
+      'update ' + DepoTablo('EBELGE') + ' set REHBERID=:REHBERID, UUID=:UUID, BELGENO=:BELGENO, ' +
       'GONDERICIALIAS=:GONDERICIALIAS, ALICIALIAS=:ALICIALIAS, DURUM=1, ' +
       'API_JSON=cast(:API_JSON as nvarchar(max)), ' +
       LUblSet + 'DEGISTIREN=:DEGISTIREN, ' +
@@ -2387,7 +2403,7 @@ begin
     else
       LUblVals := 'cast(:UBL_XML as nvarchar(max)),NULL';
     LQuery.SQL.Text :=
-      'insert into EBELGE(FATBASLIKID,REHBERID,BELGETURU,YON,UUID,BELGENO,' +
+      'insert into ' + DepoTablo('EBELGE') + '(FATBASLIKID,REHBERID,BELGETURU,YON,UUID,BELGENO,' +
       'GONDERICIALIAS,ALICIALIAS,DURUM,API_JSON,UBL_XML,UBL_XML_ZIP,EKLEYEN) values(' +
       ':FATBASLIKID,:REHBERID,:BELGETURU,1,:UUID,:BELGENO,:GONDERICIALIAS,' +
       ':ALICIALIAS,1,cast(:API_JSON as nvarchar(max)),' +
@@ -2581,7 +2597,7 @@ begin
     else
       LBelgeTuruList := '150,151';
     Tablo.TablodanSorguAc(1,
-      'select ADET=count(*) from EBELGE where YON=1' +
+      'select ADET=count(*) from ' + DepoTablo('EBELGE') + ' where YON=1' +
       ' and BELGETURU in (' + LBelgeTuruList + ')' +
       ' and len(BELGENO)=16 and BELGENO like ''' + ASeri + '%''');
     LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
@@ -2646,7 +2662,7 @@ begin
         try
           LQ.Connection := AConnection;
           LQ.SQL.Text :=
-            'SELECT TOP 1 ALICIALIAS FROM EBELGE WHERE FATBASLIKID=:ID ORDER BY ID DESC';
+            'SELECT TOP 1 ALICIALIAS FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=:ID ORDER BY ID DESC';
           LQ.ParamByName('ID').AsInteger := AFatBaslikID;
           LQ.Open;
           if not LQ.Eof then
@@ -2705,13 +2721,49 @@ begin
   end;
 end;
 
+{ ---- Menu ortak yardimcilari ---- }
+
+// Gonderilmis (EFATURADURUM 2/12/52) belge islem engeli; True = engellendi (mesaj gosterilir).
+function GonderilmisEngeli(AEFaturaDurum: Integer; const AMesaj: string = ''): Boolean;
+begin
+  Result := AEFaturaDurum in [2, 12, 52];
+  if Result then
+    if AMesaj <> '' then
+      ShowMessage(AMesaj)
+    else
+      ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+end;
+
+// Virgullu seri listesinden ILK seriyi dondurur ('GNT,GNY' -> 'GNT').
+function IlkSeri(const ASeriler: string): string;
+var
+  P: Integer;
+begin
+  P := Pos(',', ASeriler);
+  if P > 0 then
+    Result := Trim(Copy(ASeriler, 1, P - 1))
+  else
+    Result := Trim(ASeriler);
+end;
+
+// 16 karakterlik belge no: SERI(3) + YIL(4) + 9 haneli sira numarasi.
+function BelgeNoUret(const ASeri: string; AYil: Integer; ASiraNo: Int64): string;
+var
+  LNo: string;
+begin
+  LNo := IntToStr(ASiraNo);
+  while Length(LNo) < 9 do
+    LNo := '0' + LNo;
+  Result := ASeri + IntToStr(AYil) + LNo;
+end;
+
 class function TEBelgeOlusturucu.MenuHazirla(AConnection: TFDConnection;
   AFatBaslikID: Integer): Boolean;
 var
   LBaslik: TEBelgeMenuBaslik;
-  LSeri, LSeriler, LOnEk, LNumara, LNumaraBolumu, LAlias, LVergiNo,
+  LSeri, LNumara, LAlias, LVergiNo,
   LAliasUyari, LMesaj, LCariAdi, LRehberMail: string;
-  LNumaraYili, LVirgul: Integer;
+  LNumaraYili: Integer;
   LSonrakiNo, LEBelgeID: Int64;
   LOwnTransaction: Boolean;
   LAliasSonuc: TAliasYonetimSonuc;
@@ -2724,10 +2776,8 @@ begin
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
     Exit;
 
-  if LBaslik.EFaturaDurum in [2, 12, 52] then begin
-    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+  if GonderilmisEngeli(LBaslik.EFaturaDurum) then
     Exit;
-  end;
   if LBaslik.EFaturaDurum > 0 then begin
     ShowMessage('eBelge zaten olusturulmus.');
     Exit;
@@ -2793,26 +2843,16 @@ begin
     LAliasUyari := LAliasSonuc.Mesaj;
 
     if Trim(LBaslik.FaturaNo) = '0' then begin
-      LSeriler := EBelgeSerileri(LBaslik.Tur, LAliasSonuc.BelgeTuru);
-      LVirgul := Pos(',', LSeriler);
-      if LVirgul > 0 then
-        LSeri := Trim(Copy(LSeriler, 1, LVirgul - 1))
-      else
-        LSeri := Trim(LSeriler);
+      LSeri := IlkSeri(EBelgeSerileri(LBaslik.Tur, LAliasSonuc.BelgeTuru));
       if Length(LSeri) <> 3 then begin
         ShowMessage('Bu belge turu icin gecerli ilk seri tanimi yok (3 karakter olmali).');
         Exit;
       end;
 
       LNumaraYili := YearOf(LBaslik.FaturaTarih);
-      LOnEk := LSeri + IntToStr(LNumaraYili);
       if not SonrakiSiraNo(LBaslik.ID, LBaslik.Tur, LSeri, LNumaraYili, LSonrakiNo) then
         Exit;
-
-      LNumaraBolumu := IntToStr(LSonrakiNo);
-      while Length(LNumaraBolumu) < 9 do
-        LNumaraBolumu := '0' + LNumaraBolumu;
-      LNumara := LOnEk + LNumaraBolumu;
+      LNumara := BelgeNoUret(LSeri, LNumaraYili, LSonrakiNo);
 
       LOwnTransaction := not AConnection.InTransaction;
       if LOwnTransaction then
@@ -2904,10 +2944,8 @@ begin
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
     Exit;
 
-  if LBaslik.EFaturaDurum in [2, 12, 52] then begin
-    ShowMessage('Gonderilmis eBelge geri alinamaz!');
+  if GonderilmisEngeli(LBaslik.EFaturaDurum, 'Gonderilmis eBelge geri alinamaz!') then
     Exit;
-  end;
   if LBaslik.EFaturaDurum = 0 then begin
     ShowMessage('Henuz eBelge olusmamis!');
     Exit;
@@ -2922,15 +2960,15 @@ begin
     AConnection.StartTransaction;
   try
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'DELETE FROM EBELGEKUYRUK WHERE FATBASLIKID=&ID OR EBELGEID IN ' +
-      '(SELECT ID FROM EBELGE WHERE FATBASLIKID=&ID)',
+      'DELETE FROM ' + DepoTablo('EBELGEKUYRUK') + ' WHERE FATBASLIKID=&ID OR EBELGEID IN ' +
+      '(SELECT ID FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=&ID)',
       ['&ID'], [LBaslik.ID]);
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'DELETE FROM EBELGEMESAJ WHERE EBELGEID IN ' +
-      '(SELECT ID FROM EBELGE WHERE FATBASLIKID=&ID)',
+      'DELETE FROM ' + DepoTablo('EBELGEMESAJ') + ' WHERE EBELGEID IN ' +
+      '(SELECT ID FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=&ID)',
       ['&ID'], [LBaslik.ID]);
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'DELETE FROM EBELGE WHERE FATBASLIKID=&ID',
+      'DELETE FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=&ID',
       ['&ID'], [LBaslik.ID]);
     Veritabani.BasitKomutÇalıştır(AConnection,
       'UPDATE FATBASLIK SET EFATURADURUM=0, EFATURASONUC=0, FATURANO=''0'' WHERE ID=&ID',
@@ -2952,8 +2990,8 @@ class function TEBelgeOlusturucu.MenuSeriDegistir(AConnection: TFDConnection;
   AFatBaslikID: Integer): Boolean;
 var
   LBaslik: TEBelgeMenuBaslik;
-  LYil, LVirgul, LBelgeTuru: Integer;
-  LMevcutSeri, LYeniSeri, LYeniNo, LFatNo, LSeriler: string;
+  LYil, LBelgeTuru: Integer;
+  LMevcutSeri, LYeniSeri, LYeniNo, LFatNo: string;
   LSonrakiSeq: Int64;
   LFatNoYok: Boolean;
 begin
@@ -2975,19 +3013,12 @@ begin
     ShowMessage('Bu islem yalnizca e-Fatura/e-Irsaliye belgeleri icin kullanilabilir.');
     Exit;
   end;
-  if LBaslik.EFaturaDurum in [2, 12, 52] then begin
-    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+  if GonderilmisEngeli(LBaslik.EFaturaDurum) then
     Exit;
-  end;
 
-  if LFatNoYok then begin
-    LSeriler := EBelgeSerileri(LBaslik.Tur, LBelgeTuru);
-    LVirgul := Pos(',', LSeriler);
-    if LVirgul > 0 then
-      LMevcutSeri := Trim(Copy(LSeriler, 1, LVirgul - 1))
-    else
-      LMevcutSeri := Trim(LSeriler);
-  end else if Length(LFatNo) >= 3 then
+  if LFatNoYok then
+    LMevcutSeri := IlkSeri(EBelgeSerileri(LBaslik.Tur, LBelgeTuru))
+  else if Length(LFatNo) >= 3 then
     LMevcutSeri := Copy(LFatNo, 1, 3)
   else
     LMevcutSeri := Trim(LBaslik.FaturaSeri);
@@ -2997,10 +3028,7 @@ begin
   if not SonrakiSiraNo(LBaslik.ID, LBaslik.Tur, LYeniSeri, LYil, LSonrakiSeq) then
     Exit;
 
-  LYeniNo := IntToStr(LSonrakiSeq);
-  while Length(LYeniNo) < 9 do
-    LYeniNo := '0' + LYeniNo;
-  LYeniNo := LYeniSeri + IntToStr(LYil) + LYeniNo;
+  LYeniNo := BelgeNoUret(LYeniSeri, LYil, LSonrakiSeq);
 
   Veritabani.BasitKomutÇalıştır(AConnection,
     'update FATBASLIK set FATURANO=&NO, FATURASERI=&SERI where ID=&ID',
@@ -3012,6 +3040,19 @@ begin
     ShowMessage('Yeni Belge No: ' + LYeniNo);
     Result := True;
   end;
+end;
+
+// Kuyruk kaydini hataya (DURUM=9) ceker, 5 dk sonraya erteler; FATBASLIK
+// EFATURASONUC=3 (hata) yapilir. else/except dallarindaki ortak SQL cifti.
+procedure KuyrukHataYaz(AConnection: TFDConnection; AQueueID, AFatBaslikID: Integer;
+  const AHata: string);
+begin
+  Veritabani.BasitKomutÇalıştır(AConnection,
+    'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
+    'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
+    ['&HATA', '&KUL', '&ID'], [Copy(AHata, 1, 1000), StrToIntDef(Kullanan, 0), AQueueID]);
+  Veritabani.BasitKomutÇalıştır(AConnection,
+    'UPDATE FATBASLIK SET EFATURASONUC=3 WHERE ID=&ID', ['&ID'], [AFatBaslikID]);
 end;
 
 procedure MenuDosyaKaydet(AConnection: TFDConnection; AFatBaslikID: Integer;
@@ -3132,12 +3173,12 @@ begin
   try
     LQ.Connection := AConnection;
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'update EBELGEKUYRUK set DURUM=0 ' +
+      'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=0 ' +
       'where ISLEMTURU=1 and DURUM=1 ' +
       '  and (SON_DENEME_TARIHI is null or SON_DENEME_TARIHI<dateadd(minute,-5,getdate()))',
       [], []);
 
-    LSQL := 'select ID,FATBASLIKID from EBELGEKUYRUK ' +
+    LSQL := 'select ID,FATBASLIKID from ' + DepoTablo('EBELGEKUYRUK') + ' ' +
       'where ISLEMTURU=1 and DURUM in (0,9) ';
     if AFatBaslikID > 0 then
       LSQL := LSQL + 'and FATBASLIKID=' + IntToStr(AFatBaslikID) + ' '
@@ -3164,7 +3205,7 @@ begin
         AIlerleme(i + 1, LListe.Count, 'Kuyruk gonderiliyor');
 
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'update EBELGEKUYRUK set DURUM=1,SON_DENEME_TARIHI=getdate(), ' +
+        'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=1,SON_DENEME_TARIHI=getdate(), ' +
         'DENEME_SAYISI=DENEME_SAYISI+1,DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
         ['&KUL', '&ID'], [StrToIntDef(Kullanan, 0), LQueueID]);
       Veritabani.BasitKomutÇalıştır(AConnection,
@@ -3174,29 +3215,19 @@ begin
         if TEBelgeOlusturucu.Gonder(AConnection, LFatBaslikID, LUser, LSifre, LURL, LTest, LYan) then begin
           Inc(AGonderildi);
           Veritabani.BasitKomutÇalıştır(AConnection,
-            'delete from EBELGEKUYRUK where ID=&ID', ['&ID'], [LQueueID]);
+            'delete from ' + DepoTablo('EBELGEKUYRUK') + ' where ID=&ID', ['&ID'], [LQueueID]);
         end else begin
           Inc(AHata);
           if AHataMesaj = '' then
             AHataMesaj := LYan;
-          Veritabani.BasitKomutÇalıştır(AConnection,
-            'update EBELGEKUYRUK set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
-            'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
-            ['&HATA', '&KUL', '&ID'], [Copy(LYan, 1, 1000), StrToIntDef(Kullanan, 0), LQueueID]);
-          Veritabani.BasitKomutÇalıştır(AConnection,
-            'UPDATE FATBASLIK SET EFATURASONUC=3 WHERE ID=&ID', ['&ID'], [LFatBaslikID]);
+          KuyrukHataYaz(AConnection, LQueueID, LFatBaslikID, LYan);
         end;
       except
         on E: Exception do begin
           Inc(AHata);
           if AHataMesaj = '' then
             AHataMesaj := E.Message;
-          Veritabani.BasitKomutÇalıştır(AConnection,
-            'update EBELGEKUYRUK set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
-            'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
-            ['&HATA', '&KUL', '&ID'], [Copy(E.Message, 1, 1000), StrToIntDef(Kullanan, 0), LQueueID]);
-          Veritabani.BasitKomutÇalıştır(AConnection,
-            'UPDATE FATBASLIK SET EFATURASONUC=3 WHERE ID=&ID', ['&ID'], [LFatBaslikID]);
+          KuyrukHataYaz(AConnection, LQueueID, LFatBaslikID, E.Message);
         end;
       end;
     end;
@@ -3219,10 +3250,8 @@ begin
   Result := False;
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
     Exit;
-  if LBaslik.EFaturaDurum in [2, 12, 52] then begin
-    ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
+  if GonderilmisEngeli(LBaslik.EFaturaDurum) then
     Exit;
-  end;
   if LBaslik.EFaturaDurum = 0 then begin
     ShowMessage('Henuz eBelge olusmamis!');
     Exit;
@@ -3260,7 +3289,7 @@ begin
     end;
 
     LQ.SQL.Text :=
-      'select top 1 ID,BELGETURU from EBELGE where FATBASLIKID=:ID and YON=1 order by ID desc';
+      'select top 1 ID,BELGETURU from ' + DepoTablo('EBELGE') + ' where FATBASLIKID=:ID and YON=1 order by ID desc';
     LQ.ParamByName('ID').AsInteger := AFatBaslikID;
     LQ.Open;
     if LQ.Eof then begin
@@ -3272,19 +3301,19 @@ begin
     LQ.Close;
 
     LQ.SQL.Text :=
-      'select top 1 DURUM from EBELGEKUYRUK where EBELGEID=:EID and ISLEMTURU=1 and DURUM in (0,1,9)';
+      'select top 1 DURUM from ' + DepoTablo('EBELGEKUYRUK') + ' where EBELGEID=:EID and ISLEMTURU=1 and DURUM in (0,1,9)';
     LQ.ParamByName('EID').AsLargeInt := LEBelgeID;
     LQ.Open;
     if LQ.Eof then begin
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'INSERT INTO EBELGEKUYRUK(EBELGEID,FATBASLIKID,BELGETURU,YON,ISLEMTURU,DURUM,ONCELIK,EKLEYEN,EKLEMETARIHI) ' +
+        'INSERT INTO ' + DepoTablo('EBELGEKUYRUK') + '(EBELGEID,FATBASLIKID,BELGETURU,YON,ISLEMTURU,DURUM,ONCELIK,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&EID,&FID,&BT,1,1,0,5,&KUL,GETDATE())',
         ['&EID', '&FID', '&BT', '&KUL'], [LEBelgeID, AFatBaslikID, LBelgeTuru, StrToIntDef(Kullanan, 0)]);
       Veritabani.BasitKomutÇalıştır(AConnection,
         'UPDATE FATBASLIK SET EFATURASONUC=6 WHERE ID=&ID',
         ['&ID'], [AFatBaslikID]);
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+        'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&EID,1,1,1,&MSG,&KUL,GETDATE())',
         ['&EID', '&MSG', '&KUL'],
         [LEBelgeID, 'Gonderim isi EBELGEKUYRUK tablosuna alindi.', StrToIntDef(Kullanan, 0)]);
@@ -3383,7 +3412,7 @@ begin
     LQ.Connection := AConnection;
     LQ.SQL.Text :=
       'select top 1 ID, UUID, cast(API_JSON as nvarchar(max)) API_JSON ' +
-      'from EBELGE where YON=2 and FATBASLIKID=:FID order by ID desc';
+      'from ' + DepoTablo('EBELGE') + ' where YON=2 and FATBASLIKID=:FID order by ID desc';
     LQ.ParamByName('FID').AsInteger := AFatBaslikID;
     LQ.Open;
     if not LQ.Eof then begin
@@ -3436,7 +3465,7 @@ begin
       Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EBelgeVergiNo, ''),
       KURUMADI, LToken, LHata) then begin
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+        'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&EID,2,3,9,&MSG,&KUL,GETDATE())',
         ['&EID','&MSG','&KUL'],
         [LEBelgeID, 'Cevap login hatasi: ' + Copy(LHata, 1, 3500), StrToIntDef(Kullanan, 0)]);
@@ -3456,13 +3485,13 @@ begin
         LMesaj := 'Gelen fatura red edildi.';
 
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,EKLEYEN,EKLEMETARIHI) ' +
+        'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&EID,2,3,2,&MSG,&HK,&SRV,&KUL,GETDATE())',
         ['&EID','&MSG','&HK','&SRV','&KUL'],
         [LEBelgeID, LMesaj + ' ' + Copy(LSonuc.YanitJSON, 1, 2500),
          LSonuc.HttpKodu, 'IZIBIZ', LKullanan]);
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'UPDATE EBELGE SET DURUM=&D, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
+        'UPDATE ' + DepoTablo('EBELGE') + ' SET DURUM=&D, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
         ['&D','&KUL','&EID'], [2 + Ord(not AKabul), LKullanan, LEBelgeID]);
       Veritabani.BasitKomutÇalıştır(AConnection,
         'UPDATE FATBASLIK SET EFATURASONUC=&S WHERE ID=&ID',
@@ -3472,7 +3501,7 @@ begin
     end else begin
       LHttpKodu := LSonuc.HttpKodu;
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) ' +
+        'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) ' +
         'VALUES(&EID,2,3,9,&MSG,&HK,&SRV,&HATA,&KUL,GETDATE())',
         ['&EID','&MSG','&HK','&SRV','&HATA','&KUL'],
         [LEBelgeID, 'Izibiz cevap gonderilemedi.', LHttpKodu, 'IZIBIZ',
@@ -3541,7 +3570,7 @@ begin
       raise Exception.Create('EBELGE kayit ID bilgisi alinamadi.');
 
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'insert into EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,' +
+      'insert into ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,' +
       'EKLEYEN) values(~P1~,1,1,1,~P2~,~P3~)',
       ['~P1~', '~P2~', '~P3~'],
       [Result, 'UBL/XML ve Izibiz kuyruk JSON bilgisi olusturuldu.',
@@ -3917,14 +3946,15 @@ begin
       if (Trim(LSevk.SoforAdi) <> '') or (Trim(LSevk.SoforSoyadi) <> '') or
          (Trim(LSevk.SoforTckn) <> '') then begin
         var LDriver: TJSONObject := TJSONObject.Create;
-        if Trim(LSevk.SoforAdi) <> '' then
-          LDriver.AddPair('firstName', Trim(LSevk.SoforAdi + ' ' + LSevk.SoforSoyadi));
-        if Trim(LSevk.SoforTckn) <> '' then begin
-          LDriver.AddPair('identifier', LSevk.SoforTckn);
-          LDriver.AddPair('identifierSchemeID', 'TCKN');
-        end;
+        var LDFirst, LDFamily: string;
+        SoforAdSoyadAyir(LSevk.SoforAdi, LSevk.SoforSoyadi, LDFirst, LDFamily);
+        // GIB DriverPerson: FirstName + FamilyName ZORUNLU (eksikse xsi:nil -> sematron reddi).
+        LDriver.AddPair('firstName', LDFirst);
+        LDriver.AddPair('familyName', LDFamily);
         LDriver.AddPair('title', 'Surucu');
-        LDriver.AddPair('nationalityID', 'TR');
+        // GIB'de kimlik no NationalityID elementinde tasinir (ornek: <cbc:NationalityID>TCKN</...>).
+        if Trim(LSevk.SoforTckn) <> '' then
+          LDriver.AddPair('nationalityID', LSevk.SoforTckn);
         LStage.AddPair('driverPerson', LDriver);
       end;
       if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then begin
@@ -3991,11 +4021,10 @@ begin
         LLine.AddPair('note', Trim(LSatir.Notu));
       // Ilac/tibbi cihaz kimligi -> Izibiz: additionalItemIdentifications
       // [{schemeID, itemIdentification}]. Yerel UBL TibbiCihazKimlikXMLYaz ile ayni.
-      // Fatura/arsiv: ILAC_TIBBICIHAZ senaryosu (8). E-Irsaliye: profil sabit
-      // TEMELIRSALIYE oldugundan senaryo=8 gelmez -> satirda gercek kimlik verisi
-      // varsa gonder (bos placeholder '1111111111' uretme).
-      if ((not LIsIrsaliye) and (ABaslik.Senaryo = 8)) or
-         (LIsIrsaliye and (Trim(LSatir.TibbiCihazKimlik) <> '')) then
+      // YALNIZ ilac/tibbi cihaz senaryosunda (8) VE gercek kimlik verisi varsa.
+      // e-Irsaliye ilac/tibbi cihaz DEGILSE (Senaryo<>8) yazilmaz -- SP ilac-disi
+      // urunlerde de deger dondurdugunden fatura ile ayni sekilde Senaryo ile gate.
+      if (ABaslik.Senaryo = 8) and (Trim(LSatir.TibbiCihazKimlik) <> '') then
         LLine.AddPair('additionalItemIdentifications',
           TibbiCihazKimlikJSONDizi(LSatir.TibbiCihazKimlik));
       if Trim(LSatir.LotNo) <> '' then begin
@@ -4089,7 +4118,7 @@ begin
                            LSessionID, LHata) then begin
     AYanitMesaj := 'Login basarisiz: ' + LHata;
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+      'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
       'VALUES(&EID,1,2,9,&MSG,&KUL,GETDATE())',
       ['&EID', '&MSG', '&KUL'], [LEBelgeID, AYanitMesaj, LKullanan]);
     Exit;
@@ -4115,7 +4144,7 @@ begin
 
   // Login log
   Veritabani.BasitKomutÇalıştır(AConnection,
-    'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+    'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
     'VALUES(&EID,1,2,1,&MSG,&KUL,GETDATE())',
     ['&EID', '&MSG', '&KUL'],
     [LEBelgeID,
@@ -4135,7 +4164,7 @@ begin
         LReqDosya := 'YAZILAMADI (' + E.Message + ')';
     end;
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
+      'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,EKLEYEN,EKLEMETARIHI) ' +
       'VALUES(&EID,1,2,3,&MSG,&KUL,GETDATE())',
       ['&EID', '&MSG', '&KUL'],
       [LEBelgeID, 'REQUEST BODY dosyasi: ' + LReqDosya + sLineBreak +
@@ -4145,7 +4174,7 @@ begin
   if not TIzibizRest.SendInvoice(ABaseURL, LSessionID, LYol, LBody, LSonuc) then begin
     AYanitMesaj := 'SendInvoice basarisiz: ' + LSonuc.Mesaj;
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,EKLEYEN,EKLEMETARIHI) ' +
+      'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,EKLEYEN,EKLEMETARIHI) ' +
       'VALUES(&EID,1,2,9,&MSG,&HK,&KUL,GETDATE())',
       ['&EID', '&MSG', '&HK', '&KUL'],
       [LEBelgeID, AYanitMesaj, LSonuc.HttpKodu, LKullanan]);
@@ -4160,7 +4189,7 @@ begin
   if LOwnTransaction then AConnection.StartTransaction;
   try
     Veritabani.BasitKomutÇalıştır(AConnection,
-      'INSERT INTO EBELGEMESAJ(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,EKLEYEN,EKLEMETARIHI) ' +
+      'INSERT INTO ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,SERVISKODU,EKLEYEN,EKLEMETARIHI) ' +
       'VALUES(&EID,1,2,2,&MSG,&HK,&SRV,&KUL,GETDATE())',
       ['&EID', '&MSG', '&HK', '&SRV', '&KUL'],
       [LEBelgeID, 'Gonderim basarili. UUID: ' + LSonuc.UUID,
@@ -4168,11 +4197,11 @@ begin
 
     if Trim(LSonuc.UUID) <> '' then
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'UPDATE EBELGE SET UUID=&U, DURUM=2, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
+        'UPDATE ' + DepoTablo('EBELGE') + ' SET UUID=&U, DURUM=2, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
         ['&U', '&KUL', '&EID'], [LSonuc.UUID, LKullanan, LEBelgeID])
     else
       Veritabani.BasitKomutÇalıştır(AConnection,
-        'UPDATE EBELGE SET DURUM=2, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
+        'UPDATE ' + DepoTablo('EBELGE') + ' SET DURUM=2, DEGISTIREN=&KUL, DEGISTIRMETARIHI=GETDATE() WHERE ID=&EID',
         ['&KUL', '&EID'], [LKullanan, LEBelgeID]);
 
     // Gonderim sonrasi durum: 1->2 (eFatura), 11->12 (eArsiv), 51->52 (eIrsaliye)
@@ -4209,7 +4238,7 @@ begin
     LQry.SQL.Text :=
       'SELECT TOP 1 ' + C_UBL_OKU + ' as UBLX, ' +
       '  isnull(FB.REHBERID, 0) as RID ' +
-      'FROM EBELGE E ' +
+      'FROM ' + DepoTablo('EBELGE') + ' E ' +
       ' INNER JOIN FATBASLIK FB ON FB.ID = E.FATBASLIKID ' +
       'WHERE E.YON = 2 AND E.FATBASLIKID = :FID ' +
       'ORDER BY E.ID DESC';

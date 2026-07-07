@@ -1,7 +1,9 @@
 -- ============================================================
--- LOGCOZUM baslangic eslemeleri (idempotent). Yeni eslemeler buraya eklenir.
+-- GenDepoKur9 : LOGCOZUM baslangic eslemeleri (cozum kurallari)
 --   Cozum: SELECT <ADKOLON> FROM <KAYNAKTABLO> WHERE <IDKOLON>=<deger> [AND <FILTRE>]
 --   TABLOID NULL = tum log tablolari (genel alan).
+-- SIRA: GenDepoKur7'den (LOGCOZUM tablosu + synonym) SONRA. Ana baglantidan
+--   calisir; dbo.LOGCOZUM synonym -> GENDEPO.dbo.LOGCOZUM. Idempotent (MERGE).
 -- ============================================================
 SET NOCOUNT ON;
 
@@ -138,7 +140,7 @@ USING (VALUES
   (321,  N'LOKASYON',        N'LOKASYON',      N'ID',    N'ACIKLAMA',    NULL),
   (321,  N'DEMIRBASID',      N'DEMIRBAS',      N'ID',    N'DEMIRBASADI', NULL)
 ) AS k(TABLOID, ALAN, KAYNAKTABLO, IDKOLON, ADKOLON, FILTRE)
-ON ISNULL(h.TABLOID,-1)=ISNULL(k.TABLOID,-1) AND h.ALAN=k.ALAN COLLATE Turkish_CI_AS
+ON ISNULL(h.TABLOID,-1)=ISNULL(k.TABLOID,-1) AND h.ALAN=k.ALAN COLLATE SQL_Latin1_General_CP1254_CI_AS
 WHEN MATCHED THEN UPDATE SET KAYNAKTABLO=k.KAYNAKTABLO, IDKOLON=k.IDKOLON, ADKOLON=k.ADKOLON, FILTRE=k.FILTRE, AKTIF=1
 WHEN NOT MATCHED THEN INSERT(TABLOID,ALAN,KAYNAKTABLO,IDKOLON,ADKOLON,FILTRE)
   VALUES(k.TABLOID,k.ALAN,k.KAYNAKTABLO,k.IDKOLON,k.ADKOLON,k.FILTRE);

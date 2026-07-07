@@ -2,7 +2,6 @@ object InfoDlg: TInfoDlg
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMaximize]
-  BorderStyle = bsSizeable
   Caption = 'info'
   ClientHeight = 398
   ClientWidth = 920
@@ -214,7 +213,6 @@ object InfoDlg: TInfoDlg
           OptionsSelection.HideSelection = True
           OptionsView.ColumnAutoWidth = True
           OptionsView.Footer = True
-          OptionsView.GroupByBox = True
           OptionsView.GroupFooters = gfVisibleWhenExpanded
           OptionsView.Indicator = True
           object GridLOGViewTARIH: TcxGridDBColumn
@@ -282,13 +280,13 @@ object InfoDlg: TInfoDlg
       end
     end
     object cxTabSheet2: TcxTabSheet
-      Caption = #$0130#$00E7'erik'
+      Caption = #304#231'erik'
       ImageIndex = 1
       object LvGecmis: TListView
         Left = 0
-        Top = 73
+        Top = 0
         Width = 270
-        Height = 260
+        Height = 333
         Align = alLeft
         Columns = <>
         GridLines = True
@@ -301,9 +299,9 @@ object InfoDlg: TInfoDlg
       end
       object LvDetay: TListView
         Left = 270
-        Top = 73
+        Top = 0
         Width = 642
-        Height = 260
+        Height = 333
         Align = alClient
         Columns = <>
         GridLines = True
@@ -322,7 +320,6 @@ object InfoDlg: TInfoDlg
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = -6
     object cxButton1: TcxButton
       Left = 818
       Top = 6
@@ -386,27 +383,27 @@ object InfoDlg: TInfoDlg
           Kind = bkText
         end>
       Properties.ReadOnly = True
-      TabOrder = 2
+      TabOrder = 1
       Width = 369
     end
     object CheckIcerik: TcxCheckBox
       Left = 478
       Top = 8
-      Caption = #$0130#$00E7'erikten Ara'
+      Caption = #304#231'erikten Ara'
       ParentFont = False
       Style.TransparentBorder = False
-      TabOrder = 3
+      TabOrder = 2
       Transparent = True
     end
   end
   object TabLog: TFDQuery
     Connection = Tablo.FDCnn
-    Left = 24
-    Top = 120
+    Left = 16
+    Top = 152
   end
   object DsTabLog: TDataSource
     DataSet = TabLog
-    Left = 272
-    Top = 152
+    Left = 328
+    Top = 144
   end
 end

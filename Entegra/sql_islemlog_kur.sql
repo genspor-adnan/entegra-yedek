@@ -15,11 +15,22 @@
 
 -- 1) GENDEPO (yoksa). ALTER'lar YALNIZCA yeni olustururken (kimse bagli degilken;
 --    mevcut DB'de ALTER DATABASE deadlock yapabilir).
+-- COLLATE: musteri sunucusunun default'u ne olursa olsun GENDEPO CP1254 (ana DB BILIM
+-- ile ayni) olusur -> cross-DB 'collation conflict' bastan onlenir.
 IF DB_ID('GENDEPO') IS NULL
 BEGIN
-    EXEC('CREATE DATABASE [GENDEPO]');
+    EXEC('CREATE DATABASE [GENDEPO] COLLATE SQL_Latin1_General_CP1254_CI_AS');
     EXEC('ALTER DATABASE [GENDEPO] SET AUTO_CLOSE OFF');    -- surekli yazim: kapanmasin
     EXEC('ALTER DATABASE [GENDEPO] SET RECOVERY SIMPLE');   -- log DB'si: tran-log sismesin
+END
+ELSE
+-- Mevcut GENDEPO farkli collation'da ise (eski musteri kurulumu Turkish_CI_AS) UYAR.
+-- Tam donusum icin: sql_gendepo_collation.sql (idempotent, filtreli index'leri yonetir).
+BEGIN
+    DECLARE @col sysname = CONVERT(sysname, DATABASEPROPERTYEX('GENDEPO','Collation'));
+    IF @col <> 'SQL_Latin1_General_CP1254_CI_AS'
+        RAISERROR('UYARI: GENDEPO collation''i %s (beklenen SQL_Latin1_General_CP1254_CI_AS). Tam donusum icin sql_gendepo_collation.sql calistirin.',
+                  10, 1, @col) WITH NOWAIT;
 END
 
 -- 2) Eski GENDEPO.dbo.ISLEMLOG TABLOSU (artik view olacak)
@@ -33,7 +44,7 @@ BEGIN
 CREATE TABLE dbo.LOG' + @yil + '(
  ID bigint IDENTITY(1,1) NOT NULL,
  TARIH datetime2(3) NOT NULL CONSTRAINT DF_LOG' + @yil + '_TARIH DEFAULT(SYSDATETIME()),
- IP varchar(45) NULL, ISTASYON varchar(64) NULL, KULLANICIID int NULL,
+ IP varchar(45) COLLATE SQL_Latin1_General_CP1254_CI_AS NULL, ISTASYON varchar(64) COLLATE SQL_Latin1_General_CP1254_CI_AS NULL, KULLANICIID int NULL,
  SUBEID smallint NULL, ISLEMTIPI tinyint NOT NULL,
  USTTABLOID int NULL, USTKAYITID bigint NULL,
  TABLOID int NULL, KAYITID bigint NULL, BILGI varbinary(max) NULL,

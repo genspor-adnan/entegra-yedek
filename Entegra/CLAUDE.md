@@ -35,6 +35,8 @@ msbuild Gentegre.dproj /t:Build /p:Config=Debug /p:Platform=Win32
 
 There is **no automated test suite**. Validate changes by building and exercising the affected screen in the running app.
 
+In practice the user compiles from the RAD Studio IDE — write the code and let them build unless they explicitly ask you to run the build. If you do run it, note that `build.bat` ends with `pause` (blocks non-interactive shells) and hardcodes the `.dproj` path; prefer calling `rsvars.bat` + `msbuild` directly.
+
 ## Key directories (inside this folder)
 
 | Path | Role |
@@ -71,6 +73,7 @@ Key patterns to honor without re-deriving:
 - **Event bus:** Cross-module notification goes through `Ortak/UMultiCastEvent.pas`, not direct form references.
 - **Wizards:** Multi-step business flows use the `JvWizard`-based pattern (`UFaturaWizard`, `UStokWizard`, `UProjeWizard`...).
 - **ADO → FireDAC:** Legacy code uses `TADOQuery`/`TADOConnection`; new/modernized code uses `TFDQuery`/`TFDConnection`. The Python helpers in the parent folder (`convert_dfm.py`, `fix_dfm.py`, `fix_binary_dfm.py`) exist to assist this conversion on `.dfm` form files.
+- **ISLEMLOG audit logging:** Card/detail changes are audited into `GENDEPO.ISLEMLOG` via the central helpers in `Ortak/ULog.pas` (`LogKartEkle` / `LogKartDegisti` / `LogKartSil`, lower-level `LogKayitEkle` / `LogDiffKaydet` / `LogDetaylariSil`). Non-obvious rules: the **insert** log is written once when the form/wizard closes (guarded by an `FEkleLogland` flag), *not* in `AfterPost` (that produces duplicates); **delete** logging must run *before* the SQL `DELETE`; on wizard finish, `Cancel` the card dataset if it isn't `Modified` instead of posting (AutoEdit otherwise logs an empty "change"). Follow the existing pattern in an already-logged module when adding logging to a new one.
 
 ## Tooling in this folder
 

@@ -711,6 +711,9 @@ type
   public
     { Public declarations }
     IslemOp,Sontus  : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
+    FKartSnap: TStringList;  // kart (STOK) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
+    FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si
     KodAl:String;
     StokID , Cagiran,SayAlisSatis,IsOrtagi,Kategori : Integer;
     ///Dok?man
@@ -1716,11 +1719,15 @@ end;
 
 procedure TStokWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FreeAndNil(FKartSnap);
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (Sontus='I') and ((IslemOp='E')or (IslemOp='K')) and(TabStok.Fields[0].AsString <> '')and(TabStok.Fields[0].AsInteger > 0) then begin
     //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
     Tablo.StoksilmeIslemleri(StokID);
     //islemKopyala:='';
-  end;
+  end else
+    // FALLBACK: yeni stok kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
+    FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 end;
 
 procedure TStokWizardDlg.FormCreate(Sender: TObject);
@@ -1735,6 +1742,7 @@ procedure TStokWizardDlg.FormCreate(Sender: TObject);
 begin
   Tablo.WizardTurkcelestir(WizardKontrol);
   Tablo.GridTurkcelestir;
+  FKartSnap := TStringList.Create;
   // Stok detay dataset'lerini ust=stok log'una bagla (master-detail).
   TabFiyat.BeforeEdit := StokDetayBeforeEdit;
   TabFiyat.AfterPost  := StokDetayAfterPost;
@@ -2537,6 +2545,8 @@ end;
 
 procedure TStokWizardDlg.TabBarkodNewRecord(DataSet: TDataSet);
 begin
+  // YENI satir: kartin LogOnceki snapshot'i kalmasin (cop diff'i onle).
+  if LogGun > 0 then LogOnceki.Clear;
   //TABLO al?? sat?? a g?re a??ld??? i?in stok kart?na ait t?m barkodlar? kontrol edip varsay?lan var m? bak?yoruz.
   Tablo.Query2.Close;
   Tablo.Query2.SQL.Text:= 'select top 1 * from STOKBARKOD WHERE STOKID ='+TabStok.FieldByName('ID').AsString+' AND VARSAYILAN=1 ';
@@ -2642,6 +2652,9 @@ end;
 
 procedure TStokWizardDlg.TabFiyatNewRecord(DataSet: TDataSet);
 begin
+   // YENI satir: kartin (veya iptal edilmis edit'in) LogOnceki snapshot'i kalmasin ->
+   // yoksa LogDetaySatirPost bunu 'degisiklik' sanip pozisyonel diff yapar (cop diff).
+   if LogGun > 0 then LogOnceki.Clear;
    TabFiyat.FieldByName('STOKID').AsInteger := TabStok.FieldByName('ID').AsInteger;
    TabFiyat.FieldByName('EKLEYEN').AsString := Kullanan;
    TabFiyat.FieldByName('KUR').AsString := CariDoviz;
@@ -2742,8 +2755,17 @@ end;
 
 procedure TStokWizardDlg.TabStokBeforeEdit(DataSet: TDataSet);
 begin
-if LogGun >0 then
+if LogGun >0 then begin
    Tablo.OncekiLogBelirle(TabStok);
+   if Assigned(FKartSnap) then begin
+     FKartSnap.Assign(LogOnceki);  // detay logu ezse de kart diff'i icin sakla
+     FKartSnapID := TabStok.FieldByName('ID').AsInteger;
+   end;
+   // Kart snapshot'i FKartSnap'e alindi -> global LogOnceki'yi bosalt ki duzenleme sirasinda
+   // EKLENEN yeni detay (fiyat/barkod) kart snapshot'ina karsi pozisyonel diff'lenmesin (cop
+   // diff). Kart diff'i Finish'te FKartSnap'ten geri yuklenir.
+   LogOnceki.Clear;
+end;
 end;
 
 // Stok detay dataset'leri (STOKFIYAT, STOKBARKOD...) icin ORTAK log. BeforeEdit'te
@@ -2761,6 +2783,9 @@ begin
   if DataSet = TabFiyat then LTabNo := TabNo_STOKFIYAT
   else if DataSet = TabBarkod then LTabNo := TabNo_STOKBARKOD
   else Exit;
+  // Detay ISLEMTIPI'si ana kartin modunu izlesin: yeni stok -> ekle(1), mevcut -> degis(2)
+  // -> kart+detaylar tek ISLEMTIPI (UInfo'da tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   LogDetaySatirPost(DataSet, LTabNo, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
 end;
 
@@ -3118,6 +3143,9 @@ var
   StokID:Integer;
   Kritik,Maksimum,Minimum:Variant;
 begin
+   // Finish'te alt hareketler (Ekle -> stok detay) ana kartin moduna gore loglansin
+   // -> kart+detaylar tek ISLEMTIPI (UInfo'da tek satir). LogYaz override eder.
+   if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
    SeviyeBilgisiZorunlu := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_StokSeviyeleriGiris,False);
    if CheckPaket.Checked then begin
 
@@ -3171,11 +3199,15 @@ begin
 
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
-     if islemOp = 'D' then
+     if islemOp = 'D' then begin
+       // Detay (fiyat/barkod) loglamasi LogOnceki'yi ezip/temizleyip kart diff'ini
+       // kaybediyordu -> DOGRU karta ait snapshot'i geri yukle, sonra logla.
+       if Assigned(FKartSnap) and (FKartSnapID = TabStok.FieldByName('ID').AsInteger)
+          and (FKartSnap.Count > 0) then LogOnceki.Assign(FKartSnap);
        LogKartDegisti(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger)
+     end
      else if (islemOp = 'E') or (islemOp = 'K') then   // yeni stok -> EKLEME (ust=kendisi)
-       LogKayitEkle(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger,
-                    TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger);
+       FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, True, FEkleLogland) or FEkleLogland;
    end;
 
    //islemKopyala := '';

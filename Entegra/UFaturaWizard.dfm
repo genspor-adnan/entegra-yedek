@@ -3720,7 +3720,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'FROM FATURA F'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
-    Left = 45
+    Left = 29
     Top = 20
     ParamData = <
       item

@@ -145,6 +145,7 @@ type
     ID, RehberId : Integer;
     Cagiran, Tur : SmallInt;   //Cagiran 1: kasa aksiyon; 2:cari;  3:kasa;  4:banka 5:IK
     IslemOp, HesapTuru : Char;
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     MakbuzNo, Kur: String[10];
     Aciklama : String[100];
     MakbuzTarih : TDateTime;
@@ -153,6 +154,7 @@ type
     KasaYer, KasaFatBasId : Integer;
     KasaYer_id : string;
     Kilit:Boolean;
+    destructor Destroy; override;
     { Public declarations }
   end;
 
@@ -966,7 +968,8 @@ begin
 
    if (IslemOp in ['E','K'])and(TabKasa.Fields[0].AsString<>'') then begin//Yeni veya Kopyalama ise
   //     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJEMALIYET where YER=&Yer and YERID=&KerId ',['&Yer','&KerId'],[Tabno_Kasa, TabKasa.Fields[0].AsInteger]);
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&kid ',['&kid'],[TabKasa.Fields[0].AsInteger])
+       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&kid ',['&kid'],[TabKasa.Fields[0].AsInteger]);
+       FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
    end else if TabKasa.State in [dsEdit, dsInsert] then begin
       TabKasa.Cancel;
       BoslukVar:=False;
@@ -1165,11 +1168,17 @@ begin
       if islemOp = 'D' then
          LogKartDegisti(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger)
       else if (islemOp = 'E') or (islemOp = 'K') then
-         LogKayitEkle(TabKasa, TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger,
-                      TabNO_Kasa, TabKasa.FieldByName('ID').AsInteger);
+         FEkleLogland := LogKartEkle(TabKasa, TabNO_Kasa, True, FEkleLogland) or FEkleLogland;
    end;
 
    ModalResult:=mrOk;
+end;
+
+destructor TNakitDlg.Destroy;
+begin
+  // FALLBACK: yeni kasa hareketi kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+  FEkleLogland := LogKartEkle(TabKasa, TabNO_Kasa, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+  inherited;
 end;
 
 end.

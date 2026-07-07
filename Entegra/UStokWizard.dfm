@@ -4686,12 +4686,12 @@ object StokWizardDlg: TStokWizardDlg
       #9'STOKLAR'
       'where '
       #9'ID = :pID')
-    Left = 51
-    Top = 6
+    Left = 43
+    Top = 62
   end
   object DtsStok: TDataSource
     DataSet = TabStok
-    Left = 5
+    Left = 21
     Top = 1
   end
   object DtsFiyat: TDataSource

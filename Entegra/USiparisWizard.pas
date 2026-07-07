@@ -1096,6 +1096,7 @@ end;
 
 procedure TSiparisWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K') or (Cagiran=9)) then// eğer yeni kayıtsa ve iptal edildiyse kaydedilmiş bilgiler silinmesi lazım
     if (TabSiparis.Active) and (TabSiparis.Fields[0].AsString <> '') then
      begin
@@ -2431,6 +2432,8 @@ var
 begin
   try
     if not (IslemOp in ['E','D','I','K']) then Exit;
+    // Alt hareketler (SIPARISDETAY diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+    if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
     if (not Assigned(FBasSnap)) or (not TabSiparis.Active) then Exit;
     LTabNo := SiparisLogTabNo;
     LID := TabSiparis.FieldByName('ID').AsInteger;

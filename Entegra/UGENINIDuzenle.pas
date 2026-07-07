@@ -111,6 +111,7 @@ type
     function DegerGetir(Bolum,Dil:Integer;Anahtar:string;Deger:integer=0):integer;
     function BugunTrh: TDateTime;
     function BugunTrhSaat: TDateTime;
+    procedure AyarLogla(Bolum: Integer; const AYeni: string);   // opsiyon degisikligi ISLEMLOG (LogAyarModu ise)
     { Public declarations }
   end;
 var
@@ -118,7 +119,7 @@ var
 
 implementation
 
-uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst;
+uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst,ULog;
 
 {$R *.dfm}
 
@@ -647,9 +648,44 @@ Begin
     Result := Varsayilan;
 End;
 
+procedure TGENINIDuzenleDlg.AyarLogla(Bolum: Integer; const AYeni: string);
+var
+  LQ: TFDQuery;
+  LEski, LEN, LYN: string;
+  LUst: Integer;
+begin
+  if (not LogAyarModu) or (LogGun <= 0) then Exit;
+  try
+    LEski := '';
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := TabKomutCalistir.Connection;
+      LQ.SQL.Text := 'select ISNULL(NULLIF(ANAHTAR,''''), CAST(DEGER AS varchar(50))) V ' +
+                     'from GENINI where BOLUM=' + IntToStr(Bolum) + ' and DIL=0';
+      LQ.Open;
+      if not LQ.IsEmpty then LEski := Trim(LQ.Fields[0].AsString);
+    finally
+      LQ.Free;
+    end;
+    // '' ve '0' esdeger (kapali/sifir) -> form bunlari birbirine cevirince SAHTE log olmasin.
+    LEN := LEski; if LEN = '' then LEN := '0';
+    LYN := Trim(AYeni); if LYN = '' then LYN := '0';
+    if LYN <> LEN then
+    begin
+      // USTKAYITID = kaydet-oturumu (tek save tek satirda gruplanir); KAYITID = BOLUM.
+      LUst := LogAyarOturum; if LUst <= 0 then LUst := Bolum;
+      LogYaz(liDegistir, TabNo_AYAR, Bolum,
+        TLogKurucu.Yeni.Deger('Ayar No', IntToStr(Bolum)).Alan('Değer', LEski, Trim(AYeni)),
+        '', TabNo_AYAR, LUst);
+    end;
+  except
+  end;
+end;
+
 function TGENINIDuzenleDlg.WriteBoolean(Bolum:Integer;Deger:Boolean):Boolean;
 Begin
   try
+    if Deger then AyarLogla(Bolum, '1') else AyarLogla(Bolum, '0');
     TabKomutCalistir.Close;
     TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
     TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
@@ -667,6 +703,7 @@ End;
 function TGENINIDuzenleDlg.WriteInteger(Bolum:Integer;Deger:Integer):Boolean;
 Begin
   try
+    AyarLogla(Bolum, IntToStr(Deger));
     TabKomutCalistir.Close;
     TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
     TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
@@ -709,6 +746,7 @@ End;
 function TGENINIDuzenleDlg.WriteString(Bolum:Integer;Deger:string):Boolean;
 Begin
   try
+    AyarLogla(Bolum, Deger);
     TabKomutCalistir.Close;
     TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
     TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');

@@ -27,6 +27,8 @@ type
 
 implementation
 
+uses ULog;
+
 type
   // "Kopyala" butonu icin yardimci: secili (veya odakli) satir(lar)i
   // baslik satiriyla birlikte sekme ayracli metin olarak panoya kopyalar.
@@ -176,8 +178,8 @@ begin
       '    HTTPKODU = CAST(M.HTTPKODU AS NVARCHAR(10)), ' +
       '    HATAKODU = CAST(M.HATAKODU AS NVARCHAR(50)), ' +
       '    SERVISKODU = CAST(M.SERVISKODU AS NVARCHAR(50)) ' +
-      '  FROM EBELGEMESAJ M ' +
-      '    INNER JOIN EBELGE E ON E.ID = M.EBELGEID ' +
+      '  FROM ' + DepoTablo('EBELGEMESAJ') + ' M ' +
+      '    INNER JOIN ' + DepoTablo('EBELGE') + ' E ON E.ID = M.EBELGEID ' +
       '  WHERE E.FATBASLIKID = :FID1 ' +
       '  UNION ALL ' +
       '  SELECT ' +
@@ -192,8 +194,8 @@ begin
       '    CAST(NULL AS NVARCHAR(10)) AS HTTPKODU, ' +
       '    CAST(NULL AS NVARCHAR(50)) AS HATAKODU, ' +
       '    CAST(NULL AS NVARCHAR(50)) AS SERVISKODU ' +
-      '  FROM EBELGEKUYRUK K ' +
-      '    INNER JOIN EBELGE E ON E.ID = K.EBELGEID ' +
+      '  FROM ' + DepoTablo('EBELGEKUYRUK') + ' K ' +
+      '    INNER JOIN ' + DepoTablo('EBELGE') + ' E ON E.ID = K.EBELGEID ' +
       '  WHERE E.FATBASLIKID = :FID2 ' +
       ') T ' +
       'ORDER BY TARIH DESC, KAYNAK';

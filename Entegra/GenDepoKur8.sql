@@ -1,11 +1,12 @@
 -- ============================================================
--- TABLOLAR: genel tablo kaydi (registry).
+-- GenDepoKur8 : TABLOLAR - modul/tablo kaydi (registry)
 --   TABLOID  -> TabNo_* sabiti (Utablo.pas) ile ayni sayi
 --   TABLOADI -> fiziksel tablo adi (FATBASLIK, FATURA...)
 --   GORUNUM  -> arayuzde gosterilecek ad (Başlık, Detay...)
 --   MODUL    -> modul adi (Fatura, Cari, Stok...)
--- Ana DB'de. Idempotent; veri korunur. MERGE/SELECT EXEC icinde (rename/ALTER
--- ayni batch'te once calissin diye).
+-- NOT: TABLOLAR ANA DB tablosudur (GENDEPO'da DEGIL) - UInfo ISLEMLOG ile ana
+--   baglantidan JOIN eder. Log cozumlemesi (Bolum/modul adi) icin gerekli.
+-- Idempotent; veri korunur. MERGE/SELECT EXEC icinde (rename/ALTER once calissin).
 -- ============================================================
 IF OBJECT_ID('dbo.TABLOLAR','U') IS NULL
 CREATE TABLE dbo.TABLOLAR(

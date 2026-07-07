@@ -259,6 +259,7 @@ type
   private
     { Private declarations }
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // CEKHAREKET (detay) orijinal satirlar (log diff icin)
+    FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     function IBANControl(IBANNo: string): Boolean;
@@ -643,6 +644,11 @@ end;
 procedure TCekWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    CiroGirisMi:=False;
+   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
+   // FALLBACK: yeni cek/senet kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
+   if TabCekler.Active then
+      FEkleLogland := LogKartEkle(TabCekler, CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger),
+        IslemOp in ['E','K'], FEkleLogland) or FEkleLogland;
    FreeAndNil(FDetSnap);
 end;
 
@@ -1186,6 +1192,7 @@ begin
   if IslemOp in ['E','K'] then begin // e?er yeni kay?tsa ve TabCekler edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabCekler.Active) and (TabCekler.FieldByName('ID').AsString <> '') then
            Tablo.CekSil(TabCekler.FieldByName('ID').AsInteger);
+      FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
   end;
   if CiroGirisMi then begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set CIROLU=0 ,DURUM=1,CIROREHBERID=0,CIROMAKBUZNO=0,CIROMASRAFID=0 Where ID=&ID and TUR=130 and DURUM=4 ',['&ID'],[TabCekler.FieldByName('ID').AsInteger]);
@@ -1201,6 +1208,8 @@ var
   DovizKur:string;
   LTabNo, LID: Integer;
 begin
+  // Alt hareketler (CEKHAREKET diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
+  if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
   if TabCekler.State in [dsInsert, dsEdit] then begin
      // Gercek degisiklik yoksa (Modified=False) Post etme -> gereksiz DEGISTIREN/log olmasin.
      if (TabCekler.State = dsInsert) or TabCekler.Modified then
@@ -1216,7 +1225,7 @@ begin
      if IslemOp = 'D' then
         LogKartDegisti(TabCekler, LTabNo, LID)                      // edit: BeforeEdit snapshot ile diff
      else if IslemOp in ['E','K'] then
-        LogKartEkle(TabCekler, LTabNo, True, False);                // yeni/kopya: kart ekleme
+        FEkleLogland := LogKartEkle(TabCekler, LTabNo, True, FEkleLogland) or FEkleLogland;  // yeni/kopya: kart ekleme (TEK SEFER)
      // DETAY (CEKHAREKET): ust TABLOID kart ile ayni (LTabNo). Yeni belge (E/K) -> snapshot bos -> tum satirlar EKLE.
      if TabCekHareketler.Active then begin
         LogDiffKaydet(TabCekHareketler, FDetSnap, TabNo_CEKLER_Hareket, LTabNo, LID);
