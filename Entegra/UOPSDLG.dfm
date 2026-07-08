@@ -536,6 +536,15 @@ object OpsiyonDlg: TOpsiyonDlg
           Text = 'GENDEPO'
           Width = 210
         end
+        object btnDepoKopyala: TcxButton
+          Left = 313
+          Top = 14
+          Width = 75
+          Height = 25
+          Caption = 'Kopyala'
+          TabOrder = 1
+          OnClick = btnDepoKopyalaClick
+        end
       end
     end
     object TabSheet6: TTabSheet
@@ -2793,8 +2802,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object dtsStilKosul: TDataSource
     DataSet = tabStilKosul
     OnStateChange = dtsStilKosulStateChange
-    Left = 220
-    Top = 63
+    Left = 52
+    Top = 111
   end
   object tabStilKosul: TFDQuery
     BeforeOpen = tabStilKosulBeforeOpen

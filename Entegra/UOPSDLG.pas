@@ -345,6 +345,7 @@ type
     cxLabel19: TcxLabel;
     GroupBox7: TGroupBox;
     EditDepoDBAdi: TcxButtonEdit;
+    btnDepoKopyala: TcxButton;
     procedure KaydetTusClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
@@ -447,6 +448,7 @@ type
       AButtonIndex: Integer);
     procedure EditDepoDBAdiPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
+    procedure btnDepoKopyalaClick(Sender: TObject);
     procedure cxButton1Click(Sender: TObject);
     procedure cxImageComboBox1PropertiesCloseUp(Sender: TObject);
     procedure btnMailSablonClick(Sender: TObject);
@@ -470,7 +472,7 @@ var
 implementation
 
 uses UTablo, UCombo, UGrid, UGirdi, Umesaj, UAnaform, UStokHizmetAra,PrjConst,UYilSonuDevirIslemleri,UGENINIDuzenle,
-     UDilDuzenle, UYeniDil, UGirisKutusuEx, LocOnFly;
+     UDilDuzenle, UYeniDil, UGirisKutusuEx, LocOnFly, ULog;
 
 {$R *.DFM}
 
@@ -509,6 +511,292 @@ begin
     LAd := Trim(LAd);
     if LAd = '' then LAd := 'GENDEPO';
     EditDepoDBAdi.Text := LAd;
+  end;
+end;
+
+function DepoAdiGecerliMi(const S: string): Boolean;
+var
+  i: Integer;
+begin
+  // DB adi injection'a kapali olsun diye: yalniz harf/rakam/alt cizgi.
+  Result := (S <> '') and (Length(S) <= 100);
+  if Result then
+    for i := 1 to Length(S) do
+      if not CharInSet(S[i], ['A'..'Z', 'a'..'z', '0'..'9', '_']) then
+      begin
+        Result := False;
+        Break;
+      end;
+end;
+
+// Klon sonrasi: yeni depodaki LOGREFERANS'i ana DB'nin KART tablolarindan doldurur.
+// TABLOLAR'da GORUNUM='Kart' olan her TABLOID icin ilgili tablodan (AD/KOD kolonlari
+// LogReferansGuncelle onceligiyle otomatik secilir) INSERT eder. ACnn ANA DB'ye baglidir.
+procedure LogReferansSeed(ACnn: TFDConnection; const AHedef: string);
+const
+  Q = '''';
+  ADPRI = '(''FIRMA'',1),(''STOKADI'',2),(''ADI'',3),(''ADSOYAD'',4),(''KONUSU'',5),' +
+          '(''PROJEADI'',6),(''ACIKLAMA'',7),(''TANIM'',8),(''UNVAN'',9),(''ISIM'',10),' +
+          '(''HESAPADI'',11),(''BANKAADI'',12),(''BORCLU'',13),(''KASAADI'',14),' +
+          '(''DEPOADI'',15),(''AD'',16)';
+  KODPRI = '(''KOD'',1),(''STOKKOD'',2),(''KODU'',3),(''CARIKOD'',4),(''HESAPKODU'',5),' +
+           '(''HESAPNO'',6),(''KREDIKODU'',7),(''SERINO'',8),(''KASAKODU'',9)';
+var
+  LQ: TFDQuery;
+  LList: TStringList;
+  i, LTid, LP: Integer;
+  LTbl, LAdCol, LKodCol, LAdExpr, LKodExpr: string;
+  LHasId: Boolean;
+begin
+  LQ := TFDQuery.Create(nil);
+  LList := TStringList.Create;
+  try
+    try
+      LQ.Connection := ACnn;
+      // 1) Kart TABLOID -> tablo listesini once TOPLA (non-MARS baglanti; tek dataset).
+      // SADECE su kaynak kartlar (kullanici istegi 2026-07-08): rehber, stok,
+      // kasa (=KASALAR = kasa KARTI; KASA=nakit hareket DEGIL), pos, kredi, kredikarti.
+      // Her tablo TEK TABLOID (MIN) -> ayni tablodan tekrarli satir olmaz.
+      LQ.SQL.Text := 'SELECT MIN(TABLOID) AS TABLOID, TABLOADI FROM dbo.TABLOLAR ' +
+        'WHERE GORUNUM=' + Q + 'Kart' + Q + ' AND TABLOID>0 ' +
+        'AND TABLOADI IN (' + Q + 'REHBER' + Q + ',' + Q + 'STOKLAR' + Q + ',' +
+          Q + 'KASALAR' + Q + ',' + Q + 'POS' + Q + ',' + Q + 'KREDILER' + Q + ',' +
+          Q + 'KREDIKARTI' + Q + ') ' +
+        'GROUP BY TABLOADI';
+      LQ.Open;
+      while not LQ.Eof do
+      begin
+        LList.Add(LQ.FieldByName('TABLOID').AsString + '|' +
+                  Trim(LQ.FieldByName('TABLOADI').AsString));
+        LQ.Next;
+      end;
+      LQ.Close;
+
+      // 2) Her kart icin: AD/KOD kolonu tespit + INSERT ... SELECT.
+      for i := 0 to LList.Count - 1 do
+      begin
+        LP := Pos('|', LList[i]);
+        LTid := StrToIntDef(Copy(LList[i], 1, LP - 1), 0);
+        LTbl := Copy(LList[i], LP + 1, MaxInt);
+        if (LTid <= 0) or (LTbl = '') then Continue;
+
+        // Kolon adlarini oncelik listesinden sec + ID var mi (tek sorgu).
+        LQ.SQL.Text :=
+          'DECLARE @t sysname=' + Q + 'dbo.' + LTbl + Q + '; ' +
+          'SELECT ' +
+          '(SELECT TOP 1 c.name FROM sys.columns c JOIN (VALUES' + ADPRI + ') p(n,o) ' +
+            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o) ADCOL, ' +
+          '(SELECT TOP 1 c.name FROM sys.columns c JOIN (VALUES' + KODPRI + ') p(n,o) ' +
+            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o) KODCOL, ' +
+          'COL_LENGTH(@t,' + Q + 'ID' + Q + ') IDLEN';
+        try
+          LQ.Open;
+          LAdCol  := Trim(LQ.FieldByName('ADCOL').AsString);
+          LKodCol := Trim(LQ.FieldByName('KODCOL').AsString);
+          LHasId  := not LQ.FieldByName('IDLEN').IsNull;
+          LQ.Close;
+        except
+          if LQ.Active then LQ.Close;
+          Continue;
+        end;
+        if (not LHasId) or ((LAdCol = '') and (LKodCol = '')) then Continue;
+
+        if LAdCol <> '' then
+          LAdExpr := 'LEFT(NULLIF(LTRIM(RTRIM(CAST(s.[' + LAdCol + '] AS nvarchar(200)))),' + Q + Q + '),200)'
+        else
+          LAdExpr := 'CAST(NULL AS nvarchar(200))';
+        if LKodCol <> '' then
+          LKodExpr := 'LEFT(NULLIF(LTRIM(RTRIM(CAST(s.[' + LKodCol + '] AS nvarchar(200)))),' + Q + Q + '),60)'
+        else
+          LKodExpr := 'CAST(NULL AS nvarchar(60))';
+
+        try
+          LQ.SQL.Text :=
+            'INSERT INTO [' + AHedef + '].dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM) ' +
+            'SELECT ' + IntToStr(LTid) + ', s.ID, ' + LAdExpr + ', ' + LKodExpr + ', 0, getdate() ' +
+            'FROM dbo.[' + LTbl + '] s ' +
+            'WHERE s.ID IS NOT NULL AND (' + LAdExpr + ' IS NOT NULL OR ' + LKodExpr + ' IS NOT NULL)';
+          LQ.ExecSQL;
+        except
+          // tek tablonun hatasi (ID yok, izin, tip...) digerlerini durdurmasin.
+        end;
+      end;
+    except
+      // seed genelinde hata -> yut (klon zaten tamamlandi).
+    end;
+  finally
+    LList.Free;
+    LQ.Free;
+  end;
+end;
+
+procedure TOpsiyonDlg.btnDepoKopyalaClick(Sender: TObject);
+const
+  Q = ''''; // tek tirnak (SQL string literal icin)
+var
+  LHedef, LKaynak, LDataPath, LBak, LMove, LLogical, LTip, LPhys: string;
+  LDataIdx: Integer;
+  LQ: TFDQuery;
+  LCnn: TFDConnection;
+begin
+  // Hedef depo = bu alandaki ad. Kaynak depo, HEDEF adiyla klonlanir (BACKUP + RESTORE
+  //   WITH MOVE -> dosya adi cakismasi olmaz), sonra LOGCOZUM HARIC tum tablolar bosaltilir.
+  //   (DBCC CLONEDATABASE bu ortamda klon dosyalarini kaynak adiyla acmaya calisip
+  //    RECOVERY_PENDING birakiyordu; o yuzden BACKUP/RESTORE'a gecildi.)
+  LHedef := Trim(EditDepoDBAdi.Text);
+  if not DepoAdiGecerliMi(LHedef) then
+  begin
+    MessageDlg('Once bu alana gecerli bir HEDEF depo adi yazin '+
+      '(yalniz harf, rakam, _).', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  // BACKUP/RESTORE MARS baglantida sorunlu -> MARS'siz ayri baglanti ac.
+  LCnn := TFDConnection.Create(nil);
+  LQ := TFDQuery.Create(nil);
+  try
+    LCnn.Params.Assign(Tablo.FDCnn.Params);
+    LCnn.Params.Values['MARS'] := 'No';
+    LCnn.Params.Values['MARS_Connection'] := 'No';
+    LCnn.LoginPrompt := False;
+    LCnn.Connected := True;
+    LQ.Connection := LCnn;
+
+    // Bu isimde DB zaten varsa: uyar ve cik.
+    LQ.SQL.Text := 'SELECT CASE WHEN DB_ID('+Q+LHedef+Q+') IS NULL THEN 0 ELSE 1 END';
+    LQ.Open;
+    if LQ.Fields[0].AsInteger = 1 then
+    begin
+      LQ.Close;
+      MessageDlg('"'+LHedef+'" ad'#$131'nda bir veritaban'#$131' zaten var.'#13#10+
+        'Klonlama iptal edildi. Once silin ya da farkl'#$131' ad girin.',
+        mtWarning, [mbOK], 0);
+      Exit;
+    end;
+    LQ.Close;
+
+    // Kaynak depo adini EDIT ile al.
+    LKaynak := 'GENDEPO';
+    if not MesajStrAl('Depo Klonla', 'Kaynak Depo Ad'#$131'n'#$131' Girin:',
+         'E', nil, LKaynak, '', 'E', nil, LKaynak) then Exit;
+    LKaynak := Trim(LKaynak);
+    if not DepoAdiGecerliMi(LKaynak) then
+    begin
+      MessageDlg('Kaynak depo ad'#$131' gecersiz (yalniz harf, rakam, _).',
+        mtWarning, [mbOK], 0);
+      Exit;
+    end;
+    if SameText(LKaynak, LHedef) then
+    begin
+      MessageDlg('Kaynak ve hedef depo ad'#$131' ayn'#$131' olamaz.', mtWarning, [mbOK], 0);
+      Exit;
+    end;
+
+    if MessageDlg('"'+LKaynak+'" deposu, BO'#$15E' veri + dolu LOGCOZUM olarak '+
+         '"'+LHedef+'" ad'#$131'yla olu'#$15F'turulacak.'#13#10+
+         'Devam edilsin mi?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
+
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        // 1) On kontrol: kaynak var mi, hedef yok mu.
+        LQ.SQL.Text :=
+          'SET NOCOUNT ON; ' +
+          'IF DB_ID('+Q+LHedef+Q+') IS NOT NULL THROW 50002, '+
+             Q+'Hedef depo zaten var.'+Q+', 1; ' +
+          'IF DB_ID('+Q+LKaynak+Q+') IS NULL THROW 50001, '+
+             Q+'Kaynak depo bulunamadi.'+Q+', 1;';
+        LQ.ExecSQL;
+
+        // 2) Varsayilan veri klasoru + yedek dosya yolu.
+        LQ.SQL.Text := 'SELECT CAST(SERVERPROPERTY('+Q+'InstanceDefaultDataPath'+Q+') AS nvarchar(4000))';
+        LQ.Open; LDataPath := Trim(LQ.Fields[0].AsString); LQ.Close;
+        if LDataPath = '' then
+        begin
+          // Fallback: master veri dosyasinin klasoru.
+          LQ.SQL.Text :=
+            'SELECT LEFT(physical_name, LEN(physical_name)-CHARINDEX('+Q+'\'+Q+',REVERSE(physical_name))+1) '+
+            'FROM sys.master_files WHERE database_id=1 AND type=0';
+          LQ.Open; LDataPath := Trim(LQ.Fields[0].AsString); LQ.Close;
+        end;
+        LBak := LDataPath + LHedef + '_clone.bak';
+
+        // 3) Kaynaktan COPY_ONLY yedek al.
+        LQ.SQL.Text := 'BACKUP DATABASE ['+LKaynak+'] TO DISK='+Q+LBak+Q+
+          ' WITH INIT, COPY_ONLY, FORMAT';
+        LQ.ExecSQL;
+
+        // 4) Yedekteki logical dosya adlarindan MOVE listesi kur (dosyalar HEDEF adiyla
+        //    -> kaynak dosyalariyla cakisma olmaz; DBCC'nin sorunu buydu).
+        LQ.SQL.Text := 'RESTORE FILELISTONLY FROM DISK='+Q+LBak+Q;
+        LQ.Open;
+        LMove := '';
+        LDataIdx := 0;
+        while not LQ.Eof do
+        begin
+          LLogical := LQ.FieldByName('LogicalName').AsString;
+          LTip := UpperCase(Trim(LQ.FieldByName('Type').AsString));
+          if LTip = 'L' then
+            LPhys := LDataPath + LHedef + '_log.ldf'
+          else
+          begin
+            if LDataIdx = 0 then LPhys := LDataPath + LHedef + '.mdf'
+            else LPhys := LDataPath + LHedef + '_' + IntToStr(LDataIdx) + '.ndf';
+            Inc(LDataIdx);
+          end;
+          if LMove <> '' then LMove := LMove + ', ';
+          LMove := LMove + 'MOVE '+Q+LLogical+Q+' TO '+Q+LPhys+Q;
+          LQ.Next;
+        end;
+        LQ.Close;
+
+        // 5) Hedefi restore et (tam kopya; dosyalar hedef adiyla).
+        LQ.SQL.Text := 'RESTORE DATABASE ['+LHedef+'] FROM DISK='+Q+LBak+Q+
+          ' WITH '+LMove+', RECOVERY, REPLACE';
+        LQ.ExecSQL;
+
+        // 6) Musteri datasini BOSALT (LOGCOZUM HARIC). FK'lari kapat -> DELETE -> geri ac.
+        //    USE dinamik EXEC(@s) ICINDE -> baglam yalniz o cocuk batch'te degisir;
+        //    LCnn ana DB'de kalir (LogReferansSeed dbo.* ana DB'yi gorsun). ALTER TABLE
+        //    3-part ad kabul etmedigi icin hedef baglami sart -> bu yuzden USE gerekli.
+        LQ.SQL.Text :=
+          'DECLARE @s nvarchar(max)=N'+Q+'USE ['+LHedef+'];'+Q+'; '+
+          'SELECT @s=@s+'+Q+'ALTER TABLE '+Q+'+QUOTENAME(SCHEMA_NAME(schema_id))+'+Q+'.'+Q+
+            '+QUOTENAME(name)+'+Q+' NOCHECK CONSTRAINT ALL;'+Q+' FROM ['+LHedef+'].sys.tables; '+
+          'SELECT @s=@s+'+Q+'DELETE FROM '+Q+'+QUOTENAME(SCHEMA_NAME(schema_id))+'+Q+'.'+Q+
+            '+QUOTENAME(name)+'+Q+';'+Q+' FROM ['+LHedef+'].sys.tables WHERE name<>'+Q+'LOGCOZUM'+Q+'; '+
+          'SELECT @s=@s+'+Q+'ALTER TABLE '+Q+'+QUOTENAME(SCHEMA_NAME(schema_id))+'+Q+'.'+Q+
+            '+QUOTENAME(name)+'+Q+' WITH CHECK CHECK CONSTRAINT ALL;'+Q+' FROM ['+LHedef+'].sys.tables; '+
+          'EXEC(@s);';
+        LQ.ExecSQL;
+
+        // 7) Yedek dosyasini (mumkunse, ayni makinede) temizle.
+        try if FileExists(LBak) then System.SysUtils.DeleteFile(LBak); except end;
+
+        // 8) LOGREFERANS'i ana DB kartlarindan doldur (rehber/stok/kasa/pos/kredi/
+        //    kredikarti... TABLOLAR'da GORUNUM='Kart' olan tum TABLOID'ler). Seed hata
+        //    verse bile klon tamamlandi -> yutulur.
+        try LogReferansSeed(LCnn, LHedef); except end;
+
+        // 4) Sistemi ANINDA yeni depoya gecir: opsiyon + synonym'ler + cache.
+        EditDepoDBAdi.Text := LHedef;
+        ULog.DepoyaGec(LHedef);
+      finally
+        Screen.Cursor := crDefault;
+      end;
+
+      MessageDlg('"'+LHedef+'" deposu olu'#$15F'turuldu ve ARTIK KULLANIMDA.'#13#10+
+        'Musteri verisi bo'#$15F'; LOGCOZUM + kart LOGREFERANS dolduruldu; '+
+        'synonym'+Q+'ler yeni depoya cevrildi.'#13#10#13#10+
+        'Not: A'#$E7'ik ekranlar'#$131'n tam yenilenmesi i'#$E7'in program'#$131' '+
+        'yeniden ba'#$15F'latman'#$131'z onerilir.', mtInformation, [mbOK], 0);
+    except
+      on E: Exception do
+        MessageDlg('Depo klonlama hatas'#$131':'#13#10 + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    LQ.Free;
+    LCnn.Free;
   end;
 end;
 
@@ -1086,7 +1374,8 @@ begin
    // e-Belge/arsiv 2. DB adi. Bos birakilirsa GENDEPO yazilir.
    if Trim(EditDepoDBAdi.Text) = '' then
      EditDepoDBAdi.Text := 'GENDEPO';
-   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_DepoDBAdi, Trim(EditDepoDBAdi.Text));
+   // Opsiyonu yaz + (degistiyse) synonym'leri yeni depoya cevir + cache sifirla.
+   ULog.DepoyaGec(Trim(EditDepoDBAdi.Text));
 
 
    if EditVarsayDoviz.Text='' then EditVarsayDoviz.Text:='TL';

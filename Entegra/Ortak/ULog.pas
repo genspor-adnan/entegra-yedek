@@ -149,6 +149,14 @@ function DepoDBAdi: string;
 // yerine BUNU onek olarak kullan -> depo DB adi degisince kod kirilmaz.
 function DepoTablo(const ATablo: string): string;
 
+// Depo DB adi cache'ini sifirla (ad degisince cagir; log baglantisi da yeniden acilir).
+procedure DepoAdiSifirla;
+
+// ORTAK: verilen depoya ANINDA gec - opsiyonu yaz, ana DB synonym'lerini (eski
+// depoyu gosterenler) yeni depoya cevir, runtime cache'i sifirla. Kopyala sonrasi
+// VE opsiyon Kaydet'te cagrilir. Yeniden baslatmaya gerek kalmadan aktif olur.
+procedure DepoyaGec(const AYeniDepo: string);
+
 var
   // Ana kart islem modu: DETAY log satirlari bu moda gore ISLEMTIPI yazar
   //   -1 = kapali (detayin kendi modu: yeni->ekle, degisen->degis, silinen->sil)
@@ -227,6 +235,74 @@ function DepoTablo(const ATablo: string): string;
 begin
   // Ad koseli parantezle kacisli (bosluk/ozel karakter guvenli); ATablo ham gecirilir.
   Result := '[' + DepoDBAdi + '].dbo.' + ATablo;
+end;
+
+procedure DepoAdiSifirla;
+begin
+  // Cache'i bosalt -> DepoDBAdi bir dahaki cagride INI'den yeniden okur.
+  GDepoDBAdi := '';
+  // Otonom log baglantisi eski depoya bagli; kapat/bosalt -> LogBaglantisi yeniden acar.
+  if GLogCnn <> nil then
+  begin
+    try
+      GLogCnn.Connected := False;
+    except
+    end;
+    FreeAndNil(GLogCnn);
+  end;
+end;
+
+procedure DepoyaGec(const AYeniDepo: string);
+var
+  LQ: TFDQuery;
+  LSyn: TStringList;
+  LEski, LAd, LTbl: string;
+  i, p: Integer;
+begin
+  if Trim(AYeniDepo) = '' then Exit;
+  LEski := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
+
+  // 1) Opsiyonu yaz.
+  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_DepoDBAdi, Trim(AYeniDepo));
+
+  // Ad degismediyse synonym/cache ile ugrasma.
+  if not SameText(LEski, Trim(AYeniDepo)) then
+  begin
+    // 2) Ana DB synonym'lerini (ESKI depoyu gosterenleri) YENI depoya cevir.
+    LQ := TFDQuery.Create(nil);
+    LSyn := TStringList.Create;
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text :=
+        'SELECT name, PARSENAME(base_object_name,1) FROM sys.synonyms ' +
+        'WHERE PARSENAME(base_object_name,2)=''dbo'' AND PARSENAME(base_object_name,3)=:E';
+      LQ.ParamByName('E').AsString := LEski;
+      LQ.Open;
+      while not LQ.Eof do
+      begin
+        LSyn.Add(LQ.Fields[0].AsString + '|' + LQ.Fields[1].AsString);
+        LQ.Next;
+      end;
+      LQ.Close;
+
+      for i := 0 to LSyn.Count - 1 do
+      begin
+        p := Pos('|', LSyn[i]);
+        LAd := Copy(LSyn[i], 1, p - 1);
+        LTbl := Copy(LSyn[i], p + 1, MaxInt);
+        LQ.SQL.Text :=
+          'DROP SYNONYM dbo.[' + LAd + ']; ' +
+          'CREATE SYNONYM dbo.[' + LAd + '] FOR [' + Trim(AYeniDepo) + '].dbo.[' + LTbl + ']';
+        LQ.ExecSQL;
+      end;
+    finally
+      LSyn.Free;
+      LQ.Free;
+    end;
+
+    // 3) Runtime cache'i sifirla -> yeni depo aninda kullanilir.
+    DepoAdiSifirla;
+  end;
 end;
 
 function LogBaglantisi: TFDConnection;

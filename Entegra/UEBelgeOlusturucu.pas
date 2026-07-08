@@ -148,6 +148,8 @@ type
     Faks: string;
     EPosta: string;
     Web: string;
+    MersisNo: string;
+    TicaretSicilNo: string;
   end;
   TSevkBilgisi = record
     TasiyanTipi: string;
@@ -597,6 +599,65 @@ begin
   if not Tablo.Query1.Eof then
     Result := Tablo.Query1.Fields[0].AsString;
 end;
+
+// e-Arsiv alicinin e-posta adresi REHBERALIAS'ta tutulur: BELGETURU=RAlias_EArsiv(150),
+// ALIAS = duz mail (ör 'muhasebe@an-ka.com.tr'). Contact/ElectronicMail'e yazilir.
+// Local query (XML uretim sirasinda Query1 mesgul olabilir).
+function AliciEArsivEPostaGetir(ARehberID: Integer): string;
+var
+  LQ: TFDQuery;
+begin
+  Result := '';
+  if ARehberID <= 0 then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.TabBizim.Connection;
+      LQ.SQL.Text :=
+        'select top 1 ALIAS from REHBERALIAS where REHBERID=:r and BELGETURU=:b ' +
+        'and AKTIF=1 order by VARSAYILAN desc, ID';
+      LQ.ParamByName('r').AsInteger := ARehberID;
+      LQ.ParamByName('b').AsInteger := RAlias_EArsiv;
+      LQ.Open;
+      if not LQ.IsEmpty then Result := Trim(LQ.Fields[0].AsString);
+    finally
+      LQ.Free;
+    end;
+  except
+    Result := '';
+  end;
+end;
+
+// Alici (cari) iletisim: REHBER.EMAIL + REHBER.ISTEL (dolu ise). izibiz JSON
+// customerParty.address email/telephone alanlarina gider.
+procedure AliciIletisimGetir(ARehberID: Integer; out AEPosta, ATelefon: string);
+var
+  LQ: TFDQuery;
+begin
+  AEPosta := '';
+  ATelefon := '';
+  if ARehberID <= 0 then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.TabBizim.Connection;
+      LQ.SQL.Text :=
+        'SELECT TOP 1 ISNULL(EMAIL,'''') AS EMAIL, ISNULL(ISTEL,'''') AS ISTEL ' +
+        'FROM REHBER WHERE ID=:r';
+      LQ.ParamByName('r').AsInteger := ARehberID;
+      LQ.Open;
+      if not LQ.IsEmpty then begin
+        AEPosta := Trim(LQ.FieldByName('EMAIL').AsString);
+        ATelefon := Trim(LQ.FieldByName('ISTEL').AsString);
+      end;
+    finally
+      LQ.Free;
+    end;
+  except
+    AEPosta := '';
+    ATelefon := '';
+  end;
+end;
 function JSONNesneStr(AObj: TJSONObject; const AAd: string): string;
 var
   LVal: TJSONValue;
@@ -824,6 +885,13 @@ begin
       LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="' +
         KimlikSemasi(ATaraf.VergiNo) + '">' + XMLEscape(ATaraf.VergiNo) +
         '</cbc:ID></cac:PartyIdentification>');
+    // MERSIS No / Ticaret Sicil No (REHBERBILGI ticari bilgiler) -> ek PartyIdentification.
+    if Trim(ATaraf.MersisNo) <> '' then
+      LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="MERSISNO">' +
+        XMLEscape(ATaraf.MersisNo) + '</cbc:ID></cac:PartyIdentification>');
+    if Trim(ATaraf.TicaretSicilNo) <> '' then
+      LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">' +
+        XMLEscape(ATaraf.TicaretSicilNo) + '</cbc:ID></cac:PartyIdentification>');
     LXML.AppendLine('<cac:PartyName><cbc:Name>' + XMLEscape(ATaraf.Unvan) +
       '</cbc:Name></cac:PartyName>');
     LXML.AppendLine('<cac:PostalAddress>');
@@ -964,6 +1032,34 @@ begin
   end;
 end;
 
+// REHBERBILGI (etiket-deger tablosu) firma/cari ek bilgisi okur.
+// "Ticari bilgiler": YER_ID=REHBERID (bizim firma=-1), YERI=2, ETIKET (ör 'Mersis No').
+// ETIKET'e gore eslesir (SIRA'dan bagimsiz, sagliklidir).
+function RehberBilgiGetir(AYerID: Integer; const AEtiketLike: string): string;
+var
+  LQ: TFDQuery;
+begin
+  Result := '';
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.TabBizim.Connection;
+      LQ.SQL.Text :=
+        'SELECT TOP 1 BILGI FROM REHBERBILGI ' +
+        'WHERE YER_ID=:y AND YERI=2 AND ETIKET LIKE :e AND ISNULL(BILGI,'''')<>'''' ' +
+        'ORDER BY SIRA';
+      LQ.ParamByName('y').AsInteger := AYerID;
+      LQ.ParamByName('e').AsString := AEtiketLike;
+      LQ.Open;
+      if not LQ.IsEmpty then Result := Trim(LQ.Fields[0].AsString);
+    finally
+      LQ.Free;
+    end;
+  except
+    Result := '';
+  end;
+end;
+
 function BizimTarafGetir(const AVergiNo, AUnvan: string): TEBelgeTaraf;
 begin
   Result := Default(TEBelgeTaraf);
@@ -989,6 +1085,11 @@ begin
   Result.Faks := AlanStr(Tablo.TabBizim, 'FAX');
   Result.EPosta := AlanStr(Tablo.TabBizim, 'EMAIL');
   Result.Web := AlanStr(Tablo.TabBizim, 'WEB');
+
+  // Ticari bilgiler (REHBERBILGI, bizim firma=-1): Mersis / Ticaret Sicil No.
+  // Mersis 16 hane -> bosluklar atilir; Ticaret Sicil ham (ör '918211-0').
+  Result.MersisNo := StringReplace(RehberBilgiGetir(-1, '%ersis%'), ' ', '', [rfReplaceAll]);
+  Result.TicaretSicilNo := RehberBilgiGetir(-1, '%icil%');
 
   if Trim(Result.VergiNo) = '' then
     Result.VergiNo := AVergiNo;
@@ -1270,6 +1371,9 @@ begin
   LAlici.Ilce := ABaslik.Ilce;
   LAlici.Il := ABaslik.Il;
   LAlici.Ulke := 'Turkiye';
+  // e-Arsiv: alici e-postasi (REHBERALIAS 150) -> Contact/ElectronicMail
+  if ABaslik.EArsivMi then
+    LAlici.EPosta := AliciEArsivEPostaGetir(ABaslik.RehberID);
   LTevkifatVar := (ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar);
   if LTevkifatVar then
     TevkifatNedeniKontrolEt(ABaslik, ASatirlar);
@@ -1403,7 +1507,9 @@ begin
         LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
           ABaslik.Tarih) + '</cbc:IssueDate>');
         LXML.AppendLine('<cbc:DocumentTypeCode>SendingType</cbc:DocumentTypeCode>');
-        LXML.AppendLine('<cbc:DocumentType>KAGIT</cbc:DocumentType>');
+        LXML.AppendLine('<cbc:DocumentType>' +
+          IfThen(Trim(ABaslik.AliciAlias) <> '', 'ELEKTRONIK', 'KAGIT') +
+          '</cbc:DocumentType>');
         LXML.AppendLine('</cac:AdditionalDocumentReference>');
       end;
       if ABaslik.EArsivMi and
@@ -3751,15 +3857,49 @@ begin
       LSupplierAdr.AddPair('streetName', AGondericiTaraf.Adres);
     if Trim(AGondericiTaraf.PostaKodu) <> '' then
       LSupplierAdr.AddPair('postalCode', AGondericiTaraf.PostaKodu);
+    // Gonderici iletisim: izibiz adres objesi 'email' alanini destekliyor (musteri tarafinda
+    // LCustomerAdr'da kullaniliyor). telephone/webSite izibiz'de kabul edilmezse yok sayilir.
+    if Trim(AGondericiTaraf.EPosta) <> '' then
+      LSupplierAdr.AddPair('email', AGondericiTaraf.EPosta);
+    if Trim(AGondericiTaraf.Telefon) <> '' then
+      LSupplierAdr.AddPair('telephone', AGondericiTaraf.Telefon);
+    if Trim(AGondericiTaraf.Web) <> '' then
+      LSupplierAdr.AddPair('webSite', AGondericiTaraf.Web);
     LSupplier.AddPair('address', LSupplierAdr);
+    // MERSIS / Ticaret Sicil No -> izibiz 'identifications' dizisi (scheme/value).
+    // Yerel UBL bunlari <cac:PartyIdentification> olarak yaziyordu; izibiz JSON'una
+    // da eklenir ki izibiz'in urettigi UBL'de de gozuksun.
+    if (Trim(AGondericiTaraf.MersisNo) <> '') or (Trim(AGondericiTaraf.TicaretSicilNo) <> '') then
+    begin
+      var LSupIds: TJSONArray := TJSONArray.Create;
+      if Trim(AGondericiTaraf.MersisNo) <> '' then
+      begin
+        var LMersis: TJSONObject := TJSONObject.Create;
+        LMersis.AddPair('scheme', 'MERSISNO');
+        LMersis.AddPair('value', Trim(AGondericiTaraf.MersisNo));
+        LSupIds.AddElement(LMersis);
+      end;
+      if Trim(AGondericiTaraf.TicaretSicilNo) <> '' then
+      begin
+        var LSicil: TJSONObject := TJSONObject.Create;
+        LSicil.AddPair('scheme', 'TICARETSICILNO');
+        LSicil.AddPair('value', Trim(AGondericiTaraf.TicaretSicilNo));
+        LSupIds.AddElement(LSicil);
+      end;
+      LSupplier.AddPair('identifications', LSupIds);
+    end;
     LContent.AddPair('supplierParty', LSupplier);
 
-    // EArsiv'e ozel: additionalReferences ? gonderim tipi ELEKTRONIK
+    // EArsiv'e ozel: additionalReferences -> SendingType. Alici e-postasi (AliciAlias =
+    // REHBERALIAS 150) varsa ELEKTRONIK gonder -> izibiz e-postayi yollar (SOAP'taki
+    // EARSIV_EMAIL_FLAG=Y karsiligi). E-posta yoksa KAGIT. Email adresi asagida
+    // customerParty.address.email'e yazilir (EARSIV_EMAIL karsiligi).
     if LIsArsiv then begin
       LAddRefs := TJSONArray.Create;
       LAddRefSend := TJSONObject.Create;
       LAddRefSend.AddPair('documentTypeCode', 'SendingType');
-      LAddRefSend.AddPair('documentType', 'KAGIT');
+      LAddRefSend.AddPair('documentType',
+        IfThen(Trim(ABaslik.AliciAlias) <> '', 'ELEKTRONIK', 'KAGIT'));
       LAddRefSend.AddPair('id', '1');
       LAddRefSend.AddPair('issueDate',
                           FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
@@ -3845,6 +3985,17 @@ begin
     // EArsiv: aliciAlias mail adresidir, Izibiz buradan iletim yapar
     if LIsArsiv and (Trim(ABaslik.AliciAlias) <> '') then
       LCustomerAdr.AddPair('email', Trim(ABaslik.AliciAlias));
+    // Alici iletisim: cari REHBER'den e-posta + telefon (dolu ise). e-Arsiv'de email
+    // zaten alias'tan set edildiyse ustune yazma.
+    begin
+      var LAliciMail: string := '';
+      var LAliciTel: string := '';
+      AliciIletisimGetir(ABaslik.RehberID, LAliciMail, LAliciTel);
+      if (LAliciMail <> '') and (LCustomerAdr.GetValue('email') = nil) then
+        LCustomerAdr.AddPair('email', LAliciMail);
+      if LAliciTel <> '' then
+        LCustomerAdr.AddPair('telephone', LAliciTel);
+    end;
     LCustomer.AddPair('address', LCustomerAdr);
     LContent.AddPair('customerParty', LCustomer);
 
