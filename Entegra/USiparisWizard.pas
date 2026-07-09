@@ -693,6 +693,7 @@ type
     IslemOp: Char;
     SiparisTur, SiparisIdsi, RehberId, ProjeId, AktiviteId,MasrafMerkezi,ServisID,SatinAlmaID: Integer;
     iadefis, IptalSecildi: Boolean;
+    FOturumID: string;   // geri-alinabilir oturum (D modu SNAPSHOT OTURUMID); '' = yok
     Cagiran: SmallInt;
     // Loglama: yukleme aninda baslik/detay snapshot; kaydette diff (ULog).
     FBasSnap, FDetSnap: TObjectDictionary<Integer, TStringList>;
@@ -1100,9 +1101,23 @@ begin
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K') or (Cagiran=9)) then// eğer yeni kayıtsa ve iptal edildiyse kaydedilmiş bilgiler silinmesi lazım
     if (TabSiparis.Active) and (TabSiparis.Fields[0].AsString <> '') then
      begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, TabSiparis.FieldByName('ID').AsInteger]);
+      //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, TabSiparis.FieldByName('ID').AsInteger]);
       Tablo.SiparisSil(TabSiparis.FieldByName('ID').AsInteger);
      end;
+  // Geri-alinabilir oturum (D): iptal -> ilk hale don; kaydet -> snapshot temizle.
+  // (Cagiran=9 iptalinde ustteki blok zaten SiparisSil ile sildi -> yalniz snapshot temizle.)
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if IptalSecildi and (Cagiran <> 9) then
+    begin
+      if TabSiparisDetay.State in [dsEdit, dsInsert] then TabSiparisDetay.Cancel;
+      if TabSiparis.State in [dsEdit, dsInsert] then TabSiparis.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
   FreeAndNil(FBasSnap);
   FreeAndNil(FDetSnap);
 end;
@@ -1509,6 +1524,15 @@ begin
   TabloYenile(TabSiparisDetay,[SiparisIdsi]);
   // Log: mevcut belge (D/I) yuklendiginde baslik+detay snapshot al (kaydette diff).
   if IslemOp in ['D','I'] then SiparisLogSnapshotAl;
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don, Finish'te temizle. (IMAJ blob + DOKUMAN dosya ilk pilotta KAPSAM DISI.)
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('SIPARIS', SiparisIdsi,
+      [ ULog.SnapTablo(1, 'SIPARIS',      'ID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'SIPARISDETAY', 'SIPARISID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(DetaySablonTipiBul) + ' and YER_ID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi)) ]);
   if RehberId<=0 then //yeni oluşurken buras? dolu geliyor
      RehberId := TabSiparis.FieldByName('REHBERID').AsInteger;
   FirmaBilgileri;
@@ -2654,6 +2678,9 @@ end;
 
 procedure TSiparisWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Close;
 end;
 
@@ -2905,7 +2932,8 @@ begin
     if (i>0) and (Application.MessageBox(PChar(PWHepsiSilinecektirUyari),pchar(Uyari), MB_YESNO + MB_ICONWARNING)=mrNo) then begin
       TabSiparis.Cancel
     end else begin
-      TabSiparis.Post;
+      if TabSiparis.state in [dsEdit, dsInsert] then
+         TabSiparis.Post;
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from REHBERBILGI where YERI=&Yeri and YER_ID=&YerID ',['&Yeri','&YerID'],[DetaySablonTipiBul,TabSiparis.FieldByName('ID').AsInteger]);
       DetayEkrPage(Self);
     end;

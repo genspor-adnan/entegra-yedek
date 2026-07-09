@@ -165,6 +165,7 @@ type
     Cagiran:Integer;
     StokID:Integer;
     IslemOp:Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     { Public declarations }
   end;
 
@@ -438,6 +439,15 @@ begin
          end;
    end;
 
+   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+   // ilk hale don. TabBelge(belge/blob) kapsam disi.
+   FOturumID := '';
+   if IslemOp = 'D' then
+     FOturumID := ULog.OturumBaslat('EKIPMANLAR', TabEkipman.FieldByName('ID').AsInteger,
+       [ ULog.SnapTablo(1, 'EKIPMANLAR',   'ID=' + TabEkipman.FieldByName('ID').AsString),
+         ULog.SnapTablo(2, 'EKIPMANDETAY', 'USTEKIPMANID=' + TabEkipman.FieldByName('ID').AsString),
+         ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(TabNo_EKIPMAN) + ' and YER_ID=' + TabEkipman.FieldByName('ID').AsString) ]);
+
    if TabEkipman.FieldByName('KATEGORI').AsString <>'' then begin
        EditKategori.Text := Tablo.AciklamaGetir('KATEGORI', 'KOD', TabEkipman.FieldByName('KATEGORI').AsInteger);
        LabelKategori.caption:= Tablo.AciklamaGetir('KATEGORI', 'AD', TabEkipman.FieldByName('KATEGORI').AsInteger);
@@ -655,8 +665,18 @@ end;
 
 procedure TEkipmanWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if FOturumID <> '' then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
   if IslemOp='E' then
     Sil;
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don (kapanis ButtonCancel.ModalResult=mrCancel).
+  if (IslemOp='D') and (FOturumID <> '') then
+  begin
+    if TabEkipman.State in [dsEdit, dsInsert] then TabEkipman.Cancel;
+    ULog.OturumGeriAl(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 procedure TEkipmanWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);
@@ -672,6 +692,13 @@ begin
      Veritabani.BasitKomutçalıştır(Tablo.FDcnn,'update STOKLAR set EKIPMAN=1 where ID=&ID and isnull(EKIPMAN,0)<>1 ',['&ID'],[TabEkipman.FieldByName('URUNID').AsInteger]);
 
   ModalResult := mrOk;
+
+  // Geri-alinabilir oturum (D=degistir): kaydedildi -> snapshot temizle.
+  if (IslemOp='D') and (FOturumID <> '') then
+  begin
+    ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 end.

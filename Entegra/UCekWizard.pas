@@ -260,6 +260,7 @@ type
     { Private declarations }
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // CEKHAREKET (detay) orijinal satirlar (log diff icin)
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
+    FOturumID: string;       // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     function IBANControl(IBANNo: string): Boolean;
@@ -803,6 +804,15 @@ begin
      TabloYenile(TabCekHareketler, [CekID]);
      LogSnapshotAl(TabCekHareketler, FDetSnap);
   end;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ(blob)/DOKUMAN kapsam disi.
+  FOturumID := '';
+  if (IslemOp = 'D') and (CekID > 0) then
+    FOturumID := ULog.OturumBaslat('CEKLER', CekID,
+      [ ULog.SnapTablo(1, 'CEKLER',     'ID=' + IntToStr(CekID)),
+        ULog.SnapTablo(2, 'CEKHAREKET', 'CEKSENETLERID=' + IntToStr(CekID)),
+        ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + IntToStr(CekID)) ]);
 end;
 
 procedure TCekWizardDlg.GridYorumDBCardView1CellDblClick(
@@ -1189,10 +1199,20 @@ end;
 
 procedure TCekWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if FOturumID <> '' then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
   if IslemOp in ['E','K'] then begin // e?er yeni kay?tsa ve TabCekler edildiyse kaydedilmi? bilgilir silinmesi laz?m
       if (TabCekler.Active) and (TabCekler.FieldByName('ID').AsString <> '') then
            Tablo.CekSil(TabCekler.FieldByName('ID').AsInteger);
       FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
+  end;
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if TabCekler.State in [dsEdit, dsInsert] then TabCekler.Cancel;
+    ULog.OturumGeriAl(FOturumID);
+    FOturumID := '';
   end;
   if CiroGirisMi then begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set CIROLU=0 ,DURUM=1,CIROREHBERID=0,CIROMAKBUZNO=0,CIROMASRAFID=0 Where ID=&ID and TUR=130 and DURUM=4 ',['&ID'],[TabCekler.FieldByName('ID').AsInteger]);
@@ -1239,6 +1259,13 @@ begin
 //  end;
 
   ModalResult := mrOk;
+
+  // Geri-alinabilir oturum (D=degistir): kaydedildi -> snapshot temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 end.

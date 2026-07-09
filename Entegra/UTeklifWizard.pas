@@ -683,6 +683,7 @@ type
     IslemOp : Char;
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     TeklifID,SatinAlmaID, RehberId,ProjeID,MasrafMerkezi,ServisID,TeklifTur,TeklifTipi : Integer;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     Cagiran, Yeri,AlternatifNo:  SmallInt;
     RevizeGrideTiklandi :boolean;
   end;
@@ -1249,6 +1250,20 @@ begin
          raise Exception.Create(UrungirilmedenKaydedilemez);
    end;
 
+   // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+   if (IslemOp = 'D') and (FOturumID <> '') then
+   begin
+     if IptalSecildi then
+     begin
+       if TabTeklifDetay.State in [dsEdit, dsInsert] then TabTeklifDetay.Cancel;
+       if TabTeklif.State in [dsEdit, dsInsert] then TabTeklif.Cancel;
+       ULog.OturumGeriAl(FOturumID);
+     end
+     else
+       ULog.OturumBitir(FOturumID);
+     FOturumID := '';
+   end;
+
    if IptalSecildi then
       TeklifID := -99
    else
@@ -1558,6 +1573,14 @@ begin
   // Belge yuklendi: TEKLIFDETAY satirlarinin baseline snapshot'ini al (ULog diff icin).
   if TabTeklifDetay.Active then
     LogSnapshotAl(TabTeklifDetay, FDetSnap);
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ(blob)+DOKUMAN kapsam disi. (TEKLIF + TEKLIFDETAY + yorum.)
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('TEKLIF', TabTeklif.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'TEKLIF',      'ID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'TEKLIFDETAY', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString) ]);
   if TabTeklif.FieldByName('CARIID').AsString <> '' then
       LabelCari.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabTeklif.FieldByName('CARIID').AsInteger);
 
@@ -2469,6 +2492,9 @@ end;
 
 procedure TTeklifWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Close;
 end;
 

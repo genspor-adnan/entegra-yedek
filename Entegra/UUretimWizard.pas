@@ -374,6 +374,7 @@ type
   public
     UretimID,Cagiran,RehberId:Integer;
     IslemOp : Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     YeniMiktar:Real;
     function RecetedenEkle(ReceteID:integer;Miktar:extended;UrunudeEkle:Boolean):boolean;
     { Public declarations }
@@ -1166,6 +1167,20 @@ begin
     if UretimWizardDlg<> nil then
        FreeAndNil(UretimWizardDlg);
   end;
+
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if IptalSecildi then
+    begin
+      if TabUretimDetay.State in [dsEdit, dsInsert] then TabUretimDetay.Cancel;
+      if TabUretim.State in [dsEdit, dsInsert] then TabUretim.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 procedure TUretimWizardDlg.FormCloseQuery(Sender: TObject;  var CanClose: Boolean);
@@ -1244,6 +1259,15 @@ begin
   // Tablo.FaturaInit(Tur,ComboDURUM.Properties, TcxImageComboBoxProperties(GridFaturaViewTUR.Properties), TcxImageComboBoxProperties(GridFaturaViewBIRIM1.Properties));
   TabloYenile(TabUretim, [UretimID]);
   TabloYenile(TabUretimDetay, [UretimID]);
+
+  // Geri-alinabilir oturum (yalniz D=degistir): uretim fisi FATBASLIK/FATURA altyapisini kullanir.
+  FOturumID := '';
+  if (IslemOp = 'D') and (UretimID > 0) then
+    FOturumID := ULog.OturumBaslat('FATBASLIK', UretimID,
+      [ ULog.SnapTablo(1, 'FATBASLIK',  'ID=' + IntToStr(UretimID)),
+        ULog.SnapTablo(2, 'FATURA',     'FATBASID=' + IntToStr(UretimID)),
+        ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID)) ]);
+
   if (IslemOp='E') and (UretimID < 1) then begin
     TabUretim.Append;
     FirmaBilgileri(RehberId);
@@ -1450,7 +1474,9 @@ end;
 
 procedure TUretimWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-//
+  if FOturumID <> '' then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
 end;
 
 procedure TUretimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);

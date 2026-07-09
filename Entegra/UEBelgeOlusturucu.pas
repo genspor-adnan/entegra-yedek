@@ -3802,6 +3802,27 @@ begin
   LRoot := TJSONObject.Create;
   try
     LRoot.AddPair('documentAction', 'SEND');
+    // EArsiv: alici e-postasina iletim izibiz REST'te mailFlag+mailAdress ile TETIKLENIR
+    // (documentAction:SEND altinda; customerParty.address.email/SendingType tek basina
+    // posta gondermiyor). E-posta = AliciAlias (e-arsiv'de mail adresi), yoksa cari REHBER.
+    if LIsArsiv then begin
+      var LArsivMail: string := Trim(ABaslik.AliciAlias);
+      if LArsivMail = '' then begin
+        var LArsivTel: string := '';
+        AliciIletisimGetir(ABaslik.RehberID, LArsivMail, LArsivTel);
+      end;
+      if LArsivMail <> '' then begin
+        LRoot.AddPair('mailFlag', TJSONBool.Create(True));
+        var LMailArr: TJSONArray := TJSONArray.Create;
+        // Birden fazla e-posta (; , veya satir ile ayrilmis) -> her biri ayri element.
+        for var LM in LArsivMail.Split([';', ',', #13, #10]) do
+          if Trim(LM) <> '' then
+            LMailArr.Add(Trim(LM));
+        if LMailArr.Count = 0 then
+          LMailArr.Add(Trim(LArsivMail));
+        LRoot.AddPair('mailAdress', LMailArr);
+      end;
+    end;
     // Postman ornegine gore string "true"/"false" gonderiliyor (bool degil)
     LRoot.AddPair('assignNumber',
                   IfThen(Trim(ABaslik.FaturaNo) = '', 'true', 'false'));

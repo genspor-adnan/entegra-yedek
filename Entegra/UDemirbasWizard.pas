@@ -269,6 +269,7 @@ type
     { Public declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     IslemOp : Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     DemirbasID, RehberId, Yer_ID, BaslangicDurumu, Cagiran, Yeri : Integer;
     OncekiStokMiktar: Real;
@@ -589,6 +590,19 @@ begin
    // iptalde kayit FormCloseQuery'de silindiginden o durumda loglama.
    if not ((ModalResult = mrCancel) and ((IslemOp='E') or (IslemOp='K'))) then
       FEkleLogland := LogKartEkle(TabDemirbas, TabNo_DEMIRBAS, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+
+   // Geri-alinabilir oturum (D=degistir): iptal(mrCancel/X) -> ilk hale don; kaydet(mrOk) -> temizle.
+   if (IslemOp = 'D') and (FOturumID <> '') then
+   begin
+     if ModalResult = mrOk then
+       ULog.OturumBitir(FOturumID)
+     else
+     begin
+       if TabDemirbas.State in [dsEdit, dsInsert] then TabDemirbas.Cancel;
+       ULog.OturumGeriAl(FOturumID);
+     end;
+     FOturumID := '';
+   end;
    //DemirbasWizardDlg := nil;
     // varsa dokumanlar?n silinmeli
 end;
@@ -748,6 +762,21 @@ begin
   // Amortisman detay log baseline: duzenleme modunda TabAmortisman doldu -> snapshot al.
   if LogGun > 0 then
     LogSnapshotAl(TabAmortisman, FAmortismanSnap);
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ/DOKUMAN + DEMIRBASTARIHCE(history) KAPSAM DISI. OturumBaslat tablo-basina
+  // korumali (olmayan/ID'siz tablo otomatik atlanir).
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('DEMIRBAS', TabDemirbas.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'DEMIRBAS',               'ID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'AMORTISMAN',             'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'DEMIRBASMASRAF',         'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'KALIBRASYON',            'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'DEMIRBASTAKIP',          'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'REHBERBILGI',            'YERI=' + IntToStr(TabNo_DEMIRBAS) + ' and YER_ID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'GOREVYORUM',             'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString) ]);
 end;
 
 
@@ -1036,6 +1065,9 @@ end;
 
 procedure TDemirbasWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    ModalResult := mrCancel;
 end;
 

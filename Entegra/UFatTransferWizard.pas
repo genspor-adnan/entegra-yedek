@@ -255,6 +255,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     Tur, FatBasId, RehberId: Integer;
     Cagiran: SmallInt;
@@ -439,6 +440,13 @@ begin
            TabFatBaslik.Edit;
       end;
   end;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): FATBASLIK/FATURA. IMAJ/DOKUMAN kapsam disi.
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'FATBASLIK', 'ID=' + TabFatBaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'FATURA',    'FATBASID=' + TabFatBaslik.FieldByName('ID').AsString) ]);
 
   if KilitKontrolEt(2,Tur,TabFatBaslik.FieldByName('FATURATARIH').AsDateTime,2) then begin
      Kilit := True;
@@ -895,10 +903,21 @@ end;
 
 procedure TFatTransferWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if FOturumID <> '' then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
   if (IslemOp = 'E')or(IslemOp = 'K') then begin
     // e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
     if (TabFatBaslik.active) and (TabFatBaslik.Fields[0].AsString <> '') then
         Tablo.FaturaSil(TabFatBaslik, TabFatura);
+  end;
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if TabFatura.State in [dsEdit, dsInsert] then TabFatura.Cancel;
+    if TabFatBaslik.State in [dsEdit, dsInsert] then TabFatBaslik.Cancel;
+    ULog.OturumGeriAl(FOturumID);
+    FOturumID := '';
   end;
   Close;
 end;
@@ -911,6 +930,13 @@ begin
    end;
   KaydetTus.Click;
   ModalResult := mrOk;
+
+  // Geri-alinabilir oturum (D=degistir): kaydedildi -> snapshot temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 function TFatTransferWizardDlg.BoslukKontrolu: Boolean;

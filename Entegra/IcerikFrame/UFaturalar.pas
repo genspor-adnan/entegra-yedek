@@ -1487,6 +1487,7 @@ var
   LKGonderildi, LKHata, LKToplam: Integer;
   LKHataMesaj: string;
 begin
+  LogSistemIslem('E-Fatura güncelleme basıldı');
   LEskiCaption := LabelKayitSayisi.Caption;
   LIlerleme :=
     procedure(const AMevcut, ATotal: Integer; const ABilgi: string)
@@ -3249,7 +3250,10 @@ begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
   if TEBelgeOlusturucu.MenuHazirla(Tablo.FDCnn,
     FATBASLIK.FieldByName('ID').AsInteger) then
+  begin
+    LogEBelgeIslem(TabloNo, FATBASLIK.FieldByName('ID').AsInteger, 'Hazırla', FATBASLIK.FieldByName('REHBERID').AsInteger);
     TabloYenile(FATBASLIK, [], FATBASLIK.FieldByName('ID').AsInteger, 'ID');
+  end;
 end;
 
 // Gelen faturanin durumunu hedef duruma tasir:
@@ -3320,7 +3324,10 @@ begin
     Exit;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
   if TEBelgeOlusturucu.MenuOnizle(Tablo.FDCnn, LID) then
+  begin
+    LogEBelgeIslem(TabloNo, LID, 'Önizle', FATBASLIK.FieldByName('REHBERID').AsInteger);
     TabloYenile(FATBASLIK, [], LID, 'ID');
+  end;
 end;
 
 procedure TFaturalarDlg.MenuSifirlaClick(Sender: TObject);
@@ -3331,7 +3338,10 @@ begin
     Exit;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
   if TEBelgeOlusturucu.MenuSifirla(Tablo.FDCnn, LID) then
+  begin
+    LogEBelgeIslem(TabloNo, LID, 'Hazırı Geri Al', FATBASLIK.FieldByName('REHBERID').AsInteger);
     TabloYenile(FATBASLIK, [], LID, 'ID');
+  end;
 end;
 
 procedure TFaturalarDlg.MenuSeriDegistirClick(Sender: TObject);
@@ -3342,7 +3352,10 @@ begin
     Exit;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
   if TEBelgeOlusturucu.MenuSeriDegistir(Tablo.FDCnn, LID) then
+  begin
+    LogEBelgeIslem(TabloNo, LID, 'Seri Değiştir', FATBASLIK.FieldByName('REHBERID').AsInteger);
     TabloYenile(FATBASLIK, [], LID, 'ID');
+  end;
 end;
 
 procedure TFaturalarDlg.MenuHTMLKaydetClick(Sender: TObject);
@@ -3351,6 +3364,7 @@ begin
   TEBelgeOlusturucu.MenuHTMLKaydet(Tablo.FDCnn,
     FATBASLIK.FieldByName('ID').AsInteger,
     FATBASLIK.FieldByName('CARIAD').AsString);
+  LogEBelgeIslem(TabloNo, FATBASLIK.FieldByName('ID').AsInteger, 'HTML Kaydet', FATBASLIK.FieldByName('REHBERID').AsInteger);
 end;
 
 
@@ -3360,6 +3374,7 @@ begin
   TEBelgeOlusturucu.MenuXMLKaydet(Tablo.FDCnn,
     FATBASLIK.FieldByName('ID').AsInteger,
     FATBASLIK.FieldByName('CARIAD').AsString);
+  LogEBelgeIslem(TabloNo, FATBASLIK.FieldByName('ID').AsInteger, 'XML Kaydet', FATBASLIK.FieldByName('REHBERID').AsInteger);
 end;
 
 procedure TFaturalarDlg.MenuPDFKaydetClick(Sender: TObject);
@@ -3368,6 +3383,7 @@ begin
   TEBelgeOlusturucu.MenuPDFKaydet(Tablo.FDCnn,
     FATBASLIK.FieldByName('ID').AsInteger,
     FATBASLIK.FieldByName('CARIAD').AsString);
+  LogEBelgeIslem(TabloNo, FATBASLIK.FieldByName('ID').AsInteger, 'PDF Kaydet', FATBASLIK.FieldByName('REHBERID').AsInteger);
 end;
 
 procedure TFaturalarDlg.MenuGonderClick(Sender: TObject);
@@ -3377,7 +3393,10 @@ begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
   LID := FATBASLIK.FieldByName('ID').AsInteger;
   if TEBelgeOlusturucu.MenuGonder(Tablo.FDCnn, LID) then
+  begin
+    LogEBelgeIslem(TabloNo, LID, 'Gönder', FATBASLIK.FieldByName('REHBERID').AsInteger);
     TabloYenile(FATBASLIK, [], LID, 'ID');
+  end;
 
 end;
 

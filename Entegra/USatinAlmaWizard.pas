@@ -200,6 +200,7 @@ type
     { Public declarations }
     IslemOp : Char;
     SatinAlmaAsama,SatinAlmaID,Cagiran : Integer;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
   end;
 
 var
@@ -412,6 +413,13 @@ begin
   TabSatinAlma.Close;
   TabSatinAlma.SQL.text:='Select * from SATINALMA where ID='+IntToStr(SatinAlmaID)+' ';
   TabSatinAlma.Open;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don.
+  FOturumID := '';
+  if (IslemOp = 'D') and (SatinAlmaID > 0) then
+    FOturumID := ULog.OturumBaslat('SATINALMA', SatinAlmaID,
+      [ ULog.SnapTablo(1, 'SATINALMA',      'ID=' + IntToStr(SatinAlmaID)),
+        ULog.SnapTablo(2, 'SATINALMADETAY', 'SATINALMAID=' + IntToStr(SatinAlmaID)) ]);
 
 
   case IslemOp of
@@ -681,6 +689,16 @@ end;
 
 procedure TSatinAlmaWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if FOturumID <> '' then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if TabSatinAlma.State in [dsEdit, dsInsert] then TabSatinAlma.Cancel;
+    if TabSatinAlmaDetay.State in [dsEdit, dsInsert] then TabSatinAlmaDetay.Cancel;
+    ULog.OturumGeriAl(FOturumID);
+    FOturumID := '';
+  end;
   Close;
 end;
 
@@ -697,6 +715,12 @@ begin
 
     SatinAlmaID := TabSatinAlma.Fields[0].AsInteger;
     ModalResult := mrOk;
+
+    if (IslemOp = 'D') and (FOturumID <> '') then
+    begin
+      ULog.OturumBitir(FOturumID);
+      FOturumID := '';
+    end;
 end;
 
 procedure TSatinAlmaWizard.SatirEkleClick(Sender: TObject);

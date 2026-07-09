@@ -1321,6 +1321,7 @@ const
   TabNo_DOKUMANKLASOR=322;
   TabNo_KLASOR=322;
   TabNo_BARKODAYARLAR=339;
+  TabNo_SISTEM = 900;   // kayit-bagimsiz SISTEM olaylari (e-fatura guncelle, login...) -> UInfo genel log "Sistem" altinda
 
 
   TabNo_DEPOLAR=349;
@@ -4957,7 +4958,9 @@ end;
   ///
   ///
 procedure TTablo.SiparisSil(SiparisId: Integer; SiparisTur: Integer=0; Tarih : TDateTime = 39895);
-var tur, tabno : integer;
+var
+  tur, tabno : integer;
+  LYorumQ : TFDQuery;
 begin
 
    if KilitKontrolEt(2, SiparisTur, Tarih, 2) then
@@ -4984,7 +4987,30 @@ begin
   else   tabno := TabNo_SIPARIS_Gelen;
   end;
 
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (' + IntToStr(TabNo_SIPARIS_Gelen) + ',' + IntToStr(TabNo_SIPARIS_Giden) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+  //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (' + IntToStr(TabNo_SIPARIS_Gelen) + ',' + IntToStr(TabNo_SIPARIS_Giden) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+
+  // REHBERBILGI (siparis detay sablon bilgileri): YER_ID=siparis, YERI=alis/satis siparis sablon tipi.
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI in (' + IntToStr(TabNo_FATURA_AlisSiparis) + ',' + IntToStr(TabNo_FATURA_SatisSiparis) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+
+  // GOREVYORUM (siparis yorumlari) + her yoruma EKLI DOKUMAN. Yorum: TUR=TabNo_SIPARIS_Gelen,
+  // GOREVID=siparis. Once ekli dokumanlari DokumanSil ile temizle (DOKUMAN + IMAJ/yetki/gecmis...),
+  // sonra yorum satirlarini sil. (GridYorumuSil ile ayni desen.)
+  LYorumQ := TFDQuery.Create(nil);
+  try
+    LYorumQ.Connection := Tablo.FDCnn;
+    LYorumQ.SQL.Text := 'select D.ID from DOKUMAN D inner join GOREVYORUM GY on D.MODULID = GY.ID where GY.TUR=91 and GOREVID=' + IntToStr(SiparisId);
+    LYorumQ.Open;
+    while not LYorumQ.Eof do begin
+      if LYorumQ.FieldByName('ID').AsInteger > 0 then
+        Tablo.DokumanSil(True, LYorumQ.FieldByName('ID').AsInteger, 1, -1);
+      LYorumQ.Next;
+    end;
+     LYorumQ.Close;
+  finally
+     LYorumQ.Free;
+  end;
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVYORUM where TUR=&tur and GOREVID=&gid ',['&tur','&gid'], [TabNo_SIPARIS_Gelen, SiparisId]);
+
   // Detay (SIPARISDETAY) SILMEDEN ONCE logla (her satir kendi ID, ust=kart).
   LogDetaylariSil('SIPARISDETAY', 'SIPARISID', TabNo_SIPARISDETAY, tabno, SiparisId);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARISDETAY where SIPARISID=&Id ', ['&Id'], [SiparisId]);
@@ -11696,6 +11722,11 @@ end;
 
 procedure TTablo.AcilisIslemleri;
 begin
+  // Giriste: BILINEN depo synonym'leri ini'deki depoya (DepoDBAdi=GENINI ANAHTAR) esitle.
+  // Klon/opsiyon degisiminden sonra synonym bayat kalmis olabilir -> onek'siz (SP) yazimlar
+  // yanlis depoya gitmesin. (Hedef depo yoksa dokunmaz; best-effort.)
+  DepoSynonymDenetle;
+  SnapshotEskiTemizle;   // 10 gunden eski yetim SNAPSHOT kayitlarini temizle
   PosAktarim;
 end;
 

@@ -695,6 +695,7 @@ type
     procedure MenuKolonEslestirClick(Sender: TObject);
     procedure MenuExcelDosyaSecClick(Sender: TObject);
     procedure TabFaturaCalcFields(DataSet: TDataSet);
+    procedure FormActivate(Sender: TObject);
 
   private
     { Private declarations }
@@ -734,6 +735,7 @@ type
   public
     { Public declarations }
     IslemOp: Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // FATURA (detay) orijinal satirlar (log diff icin)
     FFaturaSnapAlindi: Boolean;
@@ -1186,6 +1188,12 @@ begin
     DetayTablosuAc
 end;
 
+procedure TFaturaWizardDlg.FormActivate(Sender: TObject);
+begin
+   if (IslemOp = 'K')and(TabFatbaslik.FieldByName('RAPORDOVIZ').AsString <> CariDoviz ) then
+      BtnDoviz.Click;
+end;
+
 procedure TFaturaWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(FDetSnap);
@@ -1193,6 +1201,20 @@ begin
   if (IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K')) and (TabFatbaslik.active) and (TabFatbaslik.Fields[0].AsString <> '')
       and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [0,1,11,21,31,51] )then// e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgiler silinmesi laz?m
       Tablo.FaturaSil(TabFatbaslik, TabFatura);
+
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if IptalSecildi then
+    begin
+      if TabFatura.State in [dsEdit, dsInsert] then TabFatura.Cancel;
+      if TabFatbaslik.State in [dsEdit, dsInsert] then TabFatbaslik.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 
   if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp = 'K'))) then
      // FALLBACK: yeni belge kaydedilip loglanmadan kapatildiysa baslik EKLEME logu kacmasin (tek sefer).
@@ -1557,6 +1579,12 @@ begin
     LabelKod.Caption := Tablo.AciklamaGetir('REHBER', 'KOD', RehberId);
     LabelAd.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', RehberId);
     TabloYenile(TabFatbaslik, [TabFaturaIDsi]);
+    if IslemOp = 'K' then begin
+       if TabFatbaslik.State = dsBrowse then
+          TabFatbaslik.edit;
+       TabFatbaslik.FieldByName('EFATURADURUM').AsInteger := 0;
+       TabFatbaslik.FieldByName('EFATURASONUC').AsInteger := 0;
+    end;
     if (IslemOp <> 'K')and(
         //Gönderilmiş e-fat veya e-arşiv ise kilitli olması lazım
        ((IslemOp = 'D')and((KilitKontrolEt(2,Tur,TabFatbaslik.FieldByName('FATURATARIH').AsDateTime,2))or (IadeKontrolEt) ))or
@@ -1791,6 +1819,16 @@ begin
     110: TabloNo := Tabno_GIDERPUSULASI;
     119: TabloNo := TabNo_KONSINYE_GIDEN;
   end;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ(blob)+DOKUMAN(dosya) KAPSAM DISI. (FATBASLIK + FATURA + REHBERBILGI + yorum.)
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('FATBASLIK', TabFatbaslik.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'FATBASLIK',   'ID=' + TabFatbaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'FATURA',      'FATBASID=' + TabFatbaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'REHBERBILGI', 'YERI=' + IntToStr(Tablo.FaturaDetaySablonTipiBul(Tur)) + ' and YER_ID=' + TabFatbaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString) ]);
 
   case Tur of
     0, 3, 8, 10, 11, 12, 109:
@@ -4256,6 +4294,9 @@ end;
 
 procedure TFaturaWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Close;
 end;
 

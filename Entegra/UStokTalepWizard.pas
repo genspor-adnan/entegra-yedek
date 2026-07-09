@@ -369,6 +369,7 @@ type
     { Public declarations }
     IslemOp: Char;
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
+    FOturumID: string;       // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     SiparisTur, SiparisIdsi, RehberId, ProjeId, AktiviteId,MasrafMerkezi,ServisID,SatinAlmaID: Integer;
     iadefis, IptalSecildi: Boolean;
     Cagiran: SmallInt;
@@ -734,6 +735,20 @@ begin
      // FALLBACK: yeni talep kaydedilip loglanmadan kapatildiysa EKLEME logu kacmasin (tek sefer).
      FEkleLogland := LogKartEkle(SIPARIS, TabNo_STOKTALEP, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
 
+  // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if IptalSecildi then
+    begin
+      if SIPARISDETAY.State in [dsEdit, dsInsert] then SIPARISDETAY.Cancel;
+      if SIPARIS.State in [dsEdit, dsInsert] then SIPARIS.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
+
   FreeAndNil(FDetSnap);
 end;
 
@@ -1028,6 +1043,16 @@ begin
   // E/K (yeni/kopya) icin snapshot bos kalir -> tum satirlar Finish'te EKLEME loglanir.
   if (LogGun>0) and (IslemOp='D') then
      LogSnapshotAl(SIPARISDETAY, FDetSnap);
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ/DOKUMAN kapsam disi.
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('SIPARIS', SiparisIdsi,
+      [ ULog.SnapTablo(1, 'SIPARIS',      'ID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'SIPARISDETAY', 'SIPARISID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(DetaySablonTipiBul) + ' and YER_ID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + IntToStr(SiparisIdsi)) ]);
 
   if IslemOp='E' then
      SIPARIS.edit;
@@ -1765,6 +1790,9 @@ end;
 
 procedure TStokTalepWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Close;
 end;
 

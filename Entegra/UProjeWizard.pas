@@ -403,6 +403,7 @@ type
   public
     { Public declarations }
     IslemOp,Sontus : Char;//P:Proje A:Aktivite //// E:Ekleme D:Düzenleme
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     ProjeID, RehberId : Integer;
     IslemTarih : TDateTime;
     ///Doküman
@@ -727,6 +728,19 @@ begin
    end else
       // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
       FEkleLogland := LogKartEkle(TabProjeler, TabNo_PROJELER, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+
+  // Geri-alinabilir oturum (D=degistir): iptal(Sontus='I') -> ilk hale don; kaydet(Sontus='K') -> temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if Sontus = 'I' then
+    begin
+      if TabProjeler.State in [dsEdit, dsInsert] then TabProjeler.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 procedure TProjeWizardDlg.FormCreate(Sender: TObject);
@@ -927,6 +941,19 @@ begin
  // Yeri := 41;
    ProjeID := TabProjeler.Fields[0].AsInteger;
    Tabloyenile(TabYorum, [Tabno_Projeler, ProjeID]);
+
+   // Geri-alinabilir oturum (yalniz D=degistir; K=kopya yeni kayittir, FormClose siler).
+   // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ/DOKUMAN kapsam disi.
+   FOturumID := '';
+   if IslemOp = 'D' then
+     FOturumID := ULog.OturumBaslat('PROJELER', ProjeID,
+       [ ULog.SnapTablo(1, 'PROJELER',     'ID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(2, 'PROJEASAMA',   'PROJEID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(2, 'PROJEMALIYET', 'PROJEID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(2, 'PROJEBUTCE',   'PROJEID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(TabNo_PROJELER) + ' and YER_ID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_PROJELER) + ' and GOREVID=' + IntToStr(ProjeID)) ]);
+
    EditSORUMLU.text := tablo.AciklamaGetir('REHBER', 'FIRMA',TabProjeler.FieldByName('PRJ_SORUMLUSU_ID').AsString);
    GBaslamaTarih := TabProjeler.FieldByName('BASLAMATARIHI').AsDateTime;
    GBitisTarih := TabProjeler.FieldByName('BITISTARIHI').AsDateTime;
@@ -1336,6 +1363,9 @@ end;
 
 procedure TProjeWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Sontus:='I'; //iptal butonu
    Close;
 end;

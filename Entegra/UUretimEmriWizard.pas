@@ -621,6 +621,7 @@ uses
 var
 
   EkAlanOlustu,EkAlanOlustu2,EkAlanOlustu3, IptalSecildi : boolean;
+  FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
   DokumAdi : string;
   LotNoKaynak : smallint;
 
@@ -1437,6 +1438,20 @@ begin
       FEkleLogland := LogKartEkle(TabUretimEmri, TabNo_URETIMEMRI,
         (IslemOp = 'E') or (IslemOp = 'K'), FEkleLogland) or FEkleLogland;
    end;
+
+   // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+   if (IslemOp = 'D') and (FOturumID <> '') then
+   begin
+     if IptalSecildi then
+     begin
+       if TabUretimEmriDetay.State in [dsEdit, dsInsert] then TabUretimEmriDetay.Cancel;
+       if TabUretimEmri.State in [dsEdit, dsInsert] then TabUretimEmri.Cancel;
+       ULog.OturumGeriAl(FOturumID);
+     end
+     else
+       ULog.OturumBitir(FOturumID);
+     FOturumID := '';
+   end;
 end;
 
 procedure TUretimEmriWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1698,6 +1713,31 @@ begin
           LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
         end;
   end;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): emri AGACI (FK'lar dogrulandi 2026-07-09).
+  //   URETIMEMRI < DETAY(URETIMEMRIID) ; < OPERASYON(URETIMEMRIID DOGRUDAN) <
+  //   MALIYET/FASON(URETIMOPERASYONID) + PERSONEL(OPERASYONID=URETIMOPERASYON.ID) + yorum ;
+  //   PERSONEL < URETIMOLCUM(OPERASYONPERSONELID) < URETIMOLCUMDETAY(URETIMOLCUMID).
+  //   SIRA cocuk-once (delete DESC) -> FK korunur.
+  FOturumID := '';
+  if IslemOp = 'D' then
+  begin
+    var LEid: string := TabUretimEmri.FieldByName('ID').AsString;
+    var LOp: string := '(select ID from URETIMOPERASYON where URETIMEMRIID=' + LEid + ')';
+    var LPers: string := '(select ID from URETIMOPERASYONPERSONEL where OPERASYONID in ' + LOp + ')';
+    var LOlcum: string := '(select ID from URETIMOLCUM where OPERASYONPERSONELID in ' + LPers + ')';
+    FOturumID := ULog.OturumBaslat('URETIMEMRI', TabUretimEmri.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'URETIMEMRI',              'ID=' + LEid),
+        ULog.SnapTablo(2, 'URETIMEMRIDETAY',         'URETIMEMRIID=' + LEid),
+        ULog.SnapTablo(3, 'URETIMOPERASYON',         'URETIMEMRIID=' + LEid),
+        ULog.SnapTablo(4, 'URETIMOPERASYONMALIYET',  'URETIMOPERASYONID in ' + LOp),
+        ULog.SnapTablo(4, 'URETIMOPERASYONFASON',    'URETIMOPERASYONID in ' + LOp),
+        ULog.SnapTablo(4, 'URETIMOPERASYONPERSONEL', 'OPERASYONID in ' + LOp),
+        ULog.SnapTablo(4, 'GOREVYORUM',              'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp),
+        ULog.SnapTablo(5, 'URETIMOLCUM',             'OPERASYONPERSONELID in ' + LPers),
+        ULog.SnapTablo(6, 'URETIMOLCUMDETAY',        'URETIMOLCUMID in ' + LOlcum) ]);
+  end;
+
   cbOnaylayacak.Properties.Items := Tablo.imgComboboxInit('select ID=0, FIRMA='''' union all '+StringReplace(OnayYetki, '@YetkiKodu', '330650', []),False).Items;
   FirmaBilgileri(TabUretimEmri.FieldByName('REHBERID').AsInteger);
   if TabUretimEmri.FieldByName('PROJEID').AsString<>'' then
@@ -1716,7 +1756,7 @@ begin
 
    //TreeUretimAgaci.TreeUretimAgacicxDBTreeListAd.width := 225;
    if IslemOp <> 'E' then
-      JvWizardInteriorPage1.VisibleButtons := [bkFinish]//,bkCancel]//[bkFinish, bkCancel]
+      JvWizardInteriorPage1.VisibleButtons := [bkFinish, bkCancel]   // Iptal geri-eklendi: D'de geri-alinabilir oturum icin gerekli
    //else
    //   JvWizardInteriorPage1.VisibleButtons := [bkcancel];
 end;
@@ -1918,6 +1958,9 @@ end;
 
 procedure TUretimEmriWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Close;
 end;
 

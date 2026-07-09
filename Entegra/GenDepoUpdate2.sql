@@ -22,20 +22,18 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
--- ---- Depo DB adini CALISIRKEN coz ----
-DECLARE @depo sysname =
-  PARSENAME((SELECT base_object_name FROM sys.synonyms WHERE name = 'EBELGE'), 3);
-IF @depo IS NULL OR @depo = ''
-  SET @depo = PARSENAME((SELECT base_object_name FROM sys.synonyms WHERE name = 'ISLEMLOG'), 3);
-IF @depo IS NULL OR @depo = ''
-  SET @depo = NULLIF((SELECT DEGER FROM dbo.GENINI WHERE BOLUM = -24120), '');
+-- ---- Depo DB adini GENINI'den al (ReadString ile AYNI kaynak: ANAHTAR, DIL=0) ----
+--   NOT: depo adi ANAHTAR'da tutulur (DEGER=0'dir). Synonym'den okumaya gerek yok;
+--   uygulama da depoyu buradan okur -> tek dogruluk kaynagi.
+DECLARE @depo sysname = NULLIF((SELECT ANAHTAR FROM dbo.GENINI WHERE BOLUM = -24120 AND DIL = 0), '');
 IF @depo IS NULL OR @depo = ''
   SET @depo = 'GENDEPO';
 
--- Guvenlik agi: cozulen depo gercekten var mi? Yoksa YANLIS DB'ye yazmaktansa
--- gurultulu dur (update log'una TUR=3 hata olarak duser; operator gorur, duzeltir).
-IF DB_ID(@depo) IS NULL
-  RAISERROR('GenDepoUpdate2: cozulen depo DB (%s) bulunamadi. Synonym / GENINI(-24120) kontrol edin.', 16, 1, @depo);
+-- @depo YALNIZ depo maddeleri icin gerekli. Depo yoksa depo maddeleri atlanir; ANA DB
+-- maddeleri yine calismali -> HARD dur YOK, sadece sev-10 bilgi (WITH NOWAIT).
+DECLARE @depoVar bit = CASE WHEN DB_ID(@depo) IS NOT NULL THEN 1 ELSE 0 END;
+IF @depoVar = 0
+  RAISERROR('GenDepoUpdate2: depo DB (%s) yok -> depo maddeleri atlandi (ANA DB maddeleri calisti).', 10, 1, @depo) WITH NOWAIT;
 
 DECLARE @sql nvarchar(max);
 
@@ -69,3 +67,38 @@ DECLARE @sql nvarchar(max);
 -- >>> GERCEK GUNCELLEMELER BURADAN ASAGIYA, SIRAYLA EKLENIR <<<
 -- (tarih + kisa aciklama ile; her madde idempotent olsun)
 -- ============================================================
+
+-- 2026-07-09: SNAPSHOT tablosu — GERI-ALINABILIR form/wizard oturumlari icin acilis
+--   satir goruntuleri. Duzenleme acilisinda ilgili tablolarin satirlari buraya (tam
+--   JSON) yazilir; Cancel'da geri yuklenir (delete + IDENTITY_INSERT), Finish'te silinir.
+--   OTURUMID=oturum, SIRA=geri-yukleme sirasi (ust once), FILTRE=o oturumun satirlarini
+--   secen kosul (subquery olabilir -> REHBER>REHBERILETISIM>REHBERBILGI gibi hiyerarsi).
+--   KAYITID/SATIRJSON NULL = "kapsam satiri" (acilista bos tabloya eklenenleri silmek icin).
+IF @depoVar = 1 AND OBJECT_ID(QUOTENAME(@depo)+'.dbo.SNAPSHOT') IS NULL
+BEGIN
+  SET @sql = N'USE '+QUOTENAME(@depo)+N';
+CREATE TABLE dbo.SNAPSHOT(
+  ID          bigint           IDENTITY(1,1) NOT NULL CONSTRAINT PK_SNAPSHOT PRIMARY KEY,
+  OTURUMID    nvarchar(36)     COLLATE SQL_Latin1_General_CP1254_CI_AS NOT NULL,
+  ANATABLOADI nvarchar(128)    COLLATE SQL_Latin1_General_CP1254_CI_AS NULL,
+  ANAID       bigint           NULL,
+  SIRA        smallint         NOT NULL,
+  TABLOADI    nvarchar(128)    COLLATE SQL_Latin1_General_CP1254_CI_AS NOT NULL,
+  FILTRE      nvarchar(1000)   COLLATE SQL_Latin1_General_CP1254_CI_AS NOT NULL,
+  KAYITID     bigint           NULL,
+  SATIRJSON   nvarchar(max)    COLLATE SQL_Latin1_General_CP1254_CI_AS NULL,
+  TARIH       datetime2(0)     NOT NULL CONSTRAINT DF_SNAPSHOT_TARIH DEFAULT(SYSDATETIME())
+);
+CREATE INDEX IX_SNAPSHOT_OTURUM ON dbo.SNAPSHOT(OTURUMID, SIRA, ID);
+CREATE INDEX IX_SNAPSHOT_ANA    ON dbo.SNAPSHOT(ANATABLOADI, ANAID);';
+  EXEC(@sql);
+END;
+
+-- 2026-07-09: TABLOLAR'a "Sistem" kategorisi (TABLOID=900). Kayit-bagimsiz sistem/login
+--   olaylari (ULog.LogSistemIslem -> e-fatura guncelle butonu vb.) UInfo GENEL log ekraninda
+--   "Sistem" altinda gruplansin (yoksa COALESCE ile ham "900" gorunurdu). ANA DB (synonym).
+MERGE dbo.TABLOLAR AS h
+USING (VALUES (900, N'SISTEM', N'Sistem', N'Sistem')) AS k(TABLOID, TABLOADI, GORUNUM, MODUL)
+ON h.TABLOID = k.TABLOID
+WHEN MATCHED THEN UPDATE SET TABLOADI = k.TABLOADI, GORUNUM = k.GORUNUM, MODUL = k.MODUL
+WHEN NOT MATCHED THEN INSERT (TABLOID, TABLOADI, GORUNUM, MODUL) VALUES (k.TABLOID, k.TABLOADI, k.GORUNUM, k.MODUL);

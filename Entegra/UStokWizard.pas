@@ -711,6 +711,7 @@ type
   public
     { Public declarations }
     IslemOp,Sontus  : Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FKartSnap: TStringList;  // kart (STOK) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
     FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si
@@ -1728,6 +1729,19 @@ begin
   end else
     // FALLBACK: yeni stok kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
     FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+
+  // Geri-alinabilir oturum (D=degistir): iptal(Sontus='I'/X) -> ilk hale don; kaydet(Sontus='K') -> temizle.
+  if (IslemOp = 'D') and (FOturumID <> '') then
+  begin
+    if Sontus = 'I' then
+    begin
+      if TabStok.State in [dsEdit, dsInsert] then TabStok.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+    end
+    else
+      ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
 end;
 
 procedure TStokWizardDlg.FormCreate(Sender: TObject);
@@ -1951,6 +1965,26 @@ begin
            TabloYenile(TabStok, [StokID]);
          end;
    end;
+
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ(blob)+DOKUMAN+EKIPMANLAR(capraz) KAPSAM DISI. OturumBaslat tablo-basina
+  // korumali -> ID PK'si olmayan tablo otomatik atlanir (acilis bozulmaz).
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('STOKLAR', StokID,
+      [ ULog.SnapTablo(1, 'STOKLAR',              'ID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKFIYAT',            'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'ISORTAGI',             'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKESDEGER',          'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKBARKOD',           'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKBOYUTKOMBINASYON', 'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKSEVIYE',           'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKMUHASEBE',         'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'STOKCEVRIM',           'STOKID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'PAKETDETAY',           'PAKETID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'REHBERBILGI',          'YERI=' + IntToStr(TabNo_Stoklar) + ' and YER_ID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'GOREVYORUM',           'TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID)) ]);
+
   Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStok);
   if StokID > 0  then begin
     TabloYenile(TabFiyat,[TabStok.FieldByName('ID').AsInteger,ComboSatis.ItemIndex]);
@@ -3133,6 +3167,9 @@ end;
 
 procedure TStokWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    Sontus := 'I'; //?ptale bas?ld?
    Close;
 end;

@@ -372,6 +372,7 @@ type
     UstId: Integer; // 1 Kurum i?in RehberId, 2 Personel i?in PersonelId
     PersIslemTipi: SmallInt; // 1 Yeni pers, 2 D?zenleme, 3 Silme;
     YeniKayit, Potansiyel:Boolean;
+    FOturumID: string;   // geri-alinabilir oturum (Cagiran=0 personel duzenleme); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FKartSnap: TStringList;  // kart (REHBER) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
     FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si
@@ -766,6 +767,27 @@ begin
        TabloNo := TabNo_IK_POTANSIYEL
   else
        TabloNo := TabNo_IK;
+
+  // Geri-alinabilir oturum (yalniz Cagiran=0 + MEVCUT personel; GiristekiRehberId dolu).
+  // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ(blob)+ucret/rol KAPSAM DISI.
+  FOturumID := '';
+  if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
+    FOturumID := ULog.OturumBaslat('REHBER', RehberID,
+      [ // --- Ana personel ---
+        ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'PERS_HAREKET',   'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=4 and YER_ID in (select ID from REHBERPERSONEL where REHBERID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI in (2,3) and YER_ID=' + IntToStr(RehberID)),
+        // --- Ilgili kisiler (alt REHBER: GRUP=334, BAGID) + kendi iletisim/bilgi ---
+        ULog.SnapTablo(6, 'REHBERBILGI',    'YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + '))'),
+        ULog.SnapTablo(5, 'REHBERILETISIM', 'REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(4, 'REHBER',         'GRUP=334 and BAGID=' + IntToStr(RehberID)),
+        // --- Not + Yorum (GOREVYORUM: not TUR 11-13, yorum TUR=TabloNo=TabNo_IK) ---
+        ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')') ]);
+
   if (EditKOD.Visible)and(EditKOD.Enabled) then
      EditKOD.SetFocus;
 
@@ -1755,6 +1777,10 @@ end;
 
 procedure TIKWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if (((Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId))
+      or (FOturumID <> '')) then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
   if (Ust = 2) and (DtsPers.DataSet.State in [dsEdit, dsInsert]) then
       DtsPers.DataSet.Cancel;
 
@@ -1766,6 +1792,13 @@ begin
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+  end
+  else if FOturumID <> '' then
+  begin
+      // DUZENLEME iptali -> ilk hale don (snapshot geri yukle). Bekleyen edit'i iptal et.
+      if TabRehber.State in [dsEdit, dsInsert] then TabRehber.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+      FOturumID := '';
   end;
   Close;
 end;
@@ -2014,6 +2047,12 @@ end;
 
 destructor TIKWizardDlg.Destroy;
 begin
+  // Geri-alinabilir oturum artigi (Finish/X): kalan snapshot varsa sil (Cancel zaten temizler).
+  if FOturumID <> '' then
+  begin
+    ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
   // FALLBACK: yeni personel karti kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
   FEkleLogland := LogKartEkle(TabRehber, TabloNo, YeniKayit, FEkleLogland) or FEkleLogland;
   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)

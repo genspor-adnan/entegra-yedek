@@ -466,6 +466,7 @@ type
   public
     { Public declarations }
     IslemOp : Char;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     ServisID, RehberId : Integer;
     Cagiran:  SmallInt;
@@ -1303,6 +1304,19 @@ begin
    if not ((IptalSecildi) and ((IslemOp = 'E') or (IslemOp='K'))) then
       // FALLBACK: yeni kart kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
       FEkleLogland := LogKartEkle(TabServis, TabNo_SERVIS, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+
+   // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don; kaydet -> snapshot temizle.
+   if (IslemOp = 'D') and (FOturumID <> '') then
+   begin
+     if IptalSecildi then
+     begin
+       if TabServis.State in [dsEdit, dsInsert] then TabServis.Cancel;
+       ULog.OturumGeriAl(FOturumID);
+     end
+     else
+       ULog.OturumBitir(FOturumID);
+     FOturumID := '';
+   end;
    Action := caFree;
 end;
 
@@ -1538,6 +1552,19 @@ begin
   // duzenleme (D) -> mevcut hareket satirlari snapshot'a alinir (Finish'te diff).
   if LogGun > 0 then
     LogSnapshotAl(TabHareketler, FHareketSnap);
+  // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
+  // ilk hale don. IMAJ(blob)+DOKUMAN+GOREVKULLANICI(PK belirsiz) KAPSAM DISI.
+  // GOREVYORUM servis HAREKET'ine bagli (TUR=SERVISHAREKET, GOREVID in hareket ids).
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('SERVIS', TabServis.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'SERVIS',              'ID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'SERVISDETAY',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'SERVISBILGI',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'SERVISHAREKET',       'SERVISID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'SERVISASAMA',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'SERVISDETAYPERSONEL', 'SERVISID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'GOREVYORUM',          'TUR=' + IntToStr(TabNo_SERVISHAREKET) + ' and GOREVID in (select ID from SERVISHAREKET where SERVISID=' + TabServis.FieldByName('ID').AsString + ')') ]);
 end;
 
 procedure TServisWizardDlg.BEBildirimYapanPropertiesButtonClick(Sender:TObject;AButtonIndex:Integer);
@@ -2438,6 +2465,9 @@ end;
 
 procedure TServisWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
    ModalResult := mrCancel;
 end;
 

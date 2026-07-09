@@ -403,6 +403,7 @@ uses PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle,
 var
   EkleKurIlet, EkleTicari, EklePerIlet : Boolean;
   KNo, GiristekiRehberId : String[15];
+  FOturumID : string;   // geri-alinabilir oturum (Cagiran=0 mevcut cari duzenleme); '' = yok
   TabloNo, OncekiTemsilciId : Integer;
 
 procedure TRehberWizardDlg.AdresDegistirClick(Sender: TObject);
@@ -950,6 +951,28 @@ begin
   end;
   OncekiTemsilciId := TabRehber.FieldByName('TEMSILCI').AsInteger;
   GiristekiRehberId:= TabRehber.Fields[0].AsString;
+
+  // Geri-alinabilir oturum (yalniz Cagiran=0 + MEVCUT cari; GiristekiRehberId dolu = yuklendi).
+  // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ (blob) KAPSAM DISI.
+  // REHBERBILGI 3 YERI: 1=iletisim (REHBERILETISIM uzerinden), 4=personel (REHBERPERSONEL),
+  // 2-3=firma dogrudan (YER_ID=REHBER.ID). SIRA: ust once (REHBER<ILETISIM/PERSONEL<BILGI).
+  FOturumID := '';
+  if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
+    FOturumID := ULog.OturumBaslat('REHBER', RehberID,
+      [ // --- Ana cari ---
+        ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=4 and YER_ID in (select ID from REHBERPERSONEL where REHBERID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(3, 'REHBERBILGI',    'YERI in (2,3) and YER_ID=' + IntToStr(RehberID)),
+        // --- Ilgili kisiler (alt REHBER: GRUP=334, BAGID=ana) + kendi iletisim/bilgi ---
+        //     (SIRA ana REHBER'den BUYUK -> once cocuk silinir, sonra ana; FK korunur.)
+        ULog.SnapTablo(6, 'REHBERBILGI',    'YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + '))'),
+        ULog.SnapTablo(5, 'REHBERILETISIM', 'REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ')'),
+        ULog.SnapTablo(4, 'REHBER',         'GRUP=334 and BAGID=' + IntToStr(RehberID)),
+        // --- Not (TUR 11-13) + Yorum (TUR=TabloNo) = GOREVYORUM, GOREVID=ana cari ---
+        ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')') ]);
 
   EkleKurIlet := False;
   EkleTicari := False;
@@ -2110,6 +2133,10 @@ end;
 
 procedure TRehberWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  if (((Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId))
+      or (FOturumID <> '')) then
+    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
   if (Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. Onun i?in kayd? silece?iz
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERILETISIM RI WHERE RI.ID=REHBERBILGI.YER_ID AND RI.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=1 )',[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERILETISIM where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
@@ -2118,6 +2145,13 @@ begin
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+  end
+  else if FOturumID <> '' then
+  begin
+      // DUZENLEME iptali -> ilk hale don (snapshot geri yukle). Bekleyen edit'i iptal et.
+      if TabRehber.State in [dsEdit, dsInsert] then TabRehber.Cancel;
+      ULog.OturumGeriAl(FOturumID);
+      FOturumID := '';
   end;
   Close;
 end;
@@ -2253,6 +2287,13 @@ end;
 
 destructor TRehberWizardDlg.Destroy;
 begin
+  // Geri-alinabilir oturum artigi: Finish/X ile kapandiysa snapshot kalmis olabilir (Cancel
+  // ise OturumGeriAl icinde zaten temizlendi + FOturumID sifirlandi) -> kalani sil.
+  if FOturumID <> '' then
+  begin
+    ULog.OturumBitir(FOturumID);
+    FOturumID := '';
+  end;
   // FALLBACK: yeni cari kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
   FEkleLogland := LogKartEkle(TabRehber, TabNo_REHBER, YeniKayit, FEkleLogland) or FEkleLogland;
   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form kendi modunu set etmezse etkilenmesin)
