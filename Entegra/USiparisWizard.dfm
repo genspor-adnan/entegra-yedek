@@ -118,8 +118,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       OnEnterPage = SiparisEkrEnterPage
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object LabelAd: TcxLabel
         Left = 178
         Top = 37
@@ -219,13 +217,11 @@ object SiparisWizardDlg: TSiparisWizardDlg
         TabOrder = 5
         object Panel2: TPanel
           Left = 1
-          Top = 215
+          Top = 218
           Width = 1278
-          Height = 164
+          Height = 161
           Align = alClient
           TabOrder = 0
-          ExplicitTop = 218
-          ExplicitHeight = 161
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -803,7 +799,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
         end
         object PageUst: TcxPageControl
           Left = 1
-          Top = 33
+          Top = 36
           Width = 1278
           Height = 182
           Align = alTop
@@ -811,7 +807,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
           OnChange = PageUstChange
-          ExplicitTop = 36
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1274
@@ -820,10 +815,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
             Caption = 'Genel Bilgiler'
             ImageIndex = 0
             PopupMenu = PopupMenuFatura
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelUst2: TPanel
               Left = 0
               Top = 0
@@ -1535,10 +1526,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
           object TabSheetEkAlanlar: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelAlt: TPanel
               Left = 0
               Top = -92
@@ -1564,7 +1551,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
           Left = 4
           Top = 4
           Width = 1272
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -1663,10 +1649,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object gridFatToplam: TcxGrid
             Left = 963
             Top = 0
@@ -2159,10 +2141,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         object cxTabSheet2: TcxTabSheet
           Caption = 'Yorum / Medya'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object labelDetayFileName: TcxLabel
             Left = 0
             Top = 115
@@ -2183,7 +2161,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
             Visible = False
-            ExplicitTop = 114
             AnchorX = 1272
           end
           object Panel5: TPanel
@@ -2347,8 +2324,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DetayEkrEnterPage
       OnPage = DetayEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2582,8 +2557,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -2644,7 +2617,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 554
         AnchorX = 1280
       end
       object GridYorum: TcxGrid
@@ -3711,7 +3683,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object PopupYorumlar: TPopupMenu
     OnPopup = PopupYorumlarPopup
-    Left = 16
+    Left = 48
     Top = 8
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'

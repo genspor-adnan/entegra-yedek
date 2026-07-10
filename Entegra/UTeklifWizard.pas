@@ -1578,9 +1578,10 @@ begin
   FOturumID := '';
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslat('TEKLIF', TabTeklif.FieldByName('ID').AsInteger,
-      [ ULog.SnapTablo(1, 'TEKLIF',      'ID=' + TabTeklif.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'TEKLIFDETAY', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString) ]);
+      [ ULog.SnapTablo(1, 'TEKLIF',         'ID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'TEKLIFDETAY',    'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'TEKLIFFINANSAL', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'GOREVYORUM',     'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString) ]);
   if TabTeklif.FieldByName('CARIID').AsString <> '' then
       LabelCari.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabTeklif.FieldByName('CARIID').AsInteger);
 

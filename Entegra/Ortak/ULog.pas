@@ -200,6 +200,21 @@ procedure DepoAdiSifirla;
 // VE opsiyon Kaydet'te cagrilir. Yeniden baslatmaya gerek kalmadan aktif olur.
 procedure DepoyaGec(const AYeniDepo: string);
 
+// ---- DOSYA: belge/resim/medya ICERIK deposu (GENDEPO.DOSYA, FILESTREAM, hash-dedup) ----
+// AStream'i DOSYA'ya kaydeder. Ayni icerik (SHA-256) zaten varsa YENIDEN EKLEMEZ ->
+// mevcut satirin REFSAYAC'ini artirir ve o ID'yi doner (tekillestirme). Yeni ise ekler.
+// AUzanti ('.pdf') / AMimeType opsiyonel. 0 = hata. IMAJ.DOSYAID'e bu ID yazilir.
+function DosyaKaydet(AStream: TStream; const AUzanti: string = ''; const AMimeType: string = ''): Int64;
+// DOSYA.ID'nin icerigini ADest stream'e yazar (pozisyon 0'a alinir). True = bulundu.
+function DosyaGetir(AID: Int64; ADest: TStream): Boolean;
+// Referansi azaltir; REFSAYAC 0'a inince satiri (ve FILESTREAM dosyasini) siler. (Belge silmede.)
+procedure DosyaReferansAzalt(AID: Int64);
+// Mevcut IMAJ satirinin ICERIGINI dosyadan okuyup DOSYA'ya (yeni/dedup) yazar, satiri
+//  referansa cevirir (DOSYAID/BOYUT/ICDIS=0/BELGE=NULL; eski DOSYAID varsa ref azaltilir).
+//  Dokuman DUZENLE-KAYDET (uzerine yaz) yolu icin. False = DOSYA yazilamadi -> cagiran
+//  eski IMAJ.BELGE yoluna dusmeli.
+function DosyaIleImajGuncelle(AImajID: Integer; const AFileName: string; const ADegistiren: string = ''): Boolean;
+
 var
   // Ana kart islem modu: DETAY log satirlari bu moda gore ISLEMTIPI yazar
   //   -1 = kapali (detayin kendi modu: yeni->ekle, degisen->degis, silinen->sil)
@@ -224,7 +239,7 @@ implementation
 
 uses
   System.SysUtils, System.SyncObjs, System.DateUtils, FireDAC.Comp.Client, Winapi.Windows,
-  Utablo, PrjConst, uUtility_my;
+  Utablo, PrjConst, uUtility_my,  System.Hash;
 
 var
   GLogCnn: TFDConnection = nil;   // otonom log baglantisi (GENDEPO'ya baglanir, cache)
@@ -278,6 +293,177 @@ function DepoTablo(const ATablo: string): string;
 begin
   // Ad koseli parantezle kacisli (bosluk/ozel karakter guvenli); ATablo ham gecirilir.
   Result := '[' + DepoDBAdi + '].dbo.' + ATablo;
+end;
+
+function DosyaKaydet(AStream: TStream; const AUzanti: string; const AMimeType: string): Int64;
+var
+  LBuf, LHash: TBytes;
+  LSHA: THashSHA2;
+  LQ: TFDQuery;
+  LTbl: string;
+  LHashStream: TBytesStream;
+begin
+  Result := 0;
+  if AStream = nil then Exit;
+  try
+    // Icerigi oku + SHA-256 (1-2 MB dosyalar; hash TBytes uzerinden).
+    AStream.Position := 0;
+    SetLength(LBuf, AStream.Size);
+    if Length(LBuf) > 0 then AStream.ReadBuffer(LBuf[0], Length(LBuf));
+    LSHA := THashSHA2.Create(SHA256);
+    LSHA.Update(LBuf);
+    LHash := LSHA.HashAsBytes;
+
+    LTbl := DepoTablo('DOSYA');
+    LQ := TFDQuery.Create(nil);
+    LHashStream := TBytesStream.Create(LHash);   // HASH param'i stream ile set (AsBytes yok)
+    try
+      LQ.Connection := Tablo.FDCnn;
+      // 1) Ayni HASH varsa REFSAYAC++ ve mevcut ID'yi don (TEKILLESTIRME).
+      LQ.SQL.Text := 'UPDATE ' + LTbl +
+        ' SET REFSAYAC = REFSAYAC + 1 OUTPUT INSERTED.ID WHERE HASH = :H';
+      LHashStream.Position := 0;
+      LQ.ParamByName('H').LoadFromStream(LHashStream, ftVarBytes);
+      LQ.Open;
+      if not LQ.IsEmpty then
+      begin
+        Result := LQ.Fields[0].AsLargeInt;
+        LQ.Close;
+        Exit;
+      end;
+      LQ.Close;
+      // 2) Yok -> yeni satir (ICERIK = FILESTREAM blob).
+      LQ.SQL.Text := 'INSERT INTO ' + LTbl +
+        '(HASH, BOYUT, UZANTI, MIMETYPE, ICERIK) OUTPUT INSERTED.ID ' +
+        'VALUES(:H, :B, :U, :M, :I)';
+      LHashStream.Position := 0;
+      LQ.ParamByName('H').LoadFromStream(LHashStream, ftVarBytes);
+      LQ.ParamByName('B').AsLargeInt := Length(LBuf);
+      LQ.ParamByName('U').DataType := ftWideString;   // NULL'da tip bilinmesin diye
+      if Trim(AUzanti) = '' then LQ.ParamByName('U').Clear
+        else LQ.ParamByName('U').AsString := AUzanti;
+      LQ.ParamByName('M').DataType := ftWideString;
+      if Trim(AMimeType) = '' then LQ.ParamByName('M').Clear
+        else LQ.ParamByName('M').AsString := AMimeType;
+      AStream.Position := 0;
+      LQ.ParamByName('I').LoadFromStream(AStream, ftBlob);
+      LQ.Open;
+      if not LQ.IsEmpty then Result := LQ.Fields[0].AsLargeInt;
+      LQ.Close;
+    finally
+      LHashStream.Free;
+      LQ.Free;
+    end;
+  except
+    Result := 0;
+  end;
+end;
+
+function DosyaGetir(AID: Int64; ADest: TStream): Boolean;
+var
+  LQ: TFDQuery;
+begin
+  Result := False;
+  if (AID <= 0) or (ADest = nil) then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'SELECT ICERIK FROM ' + DepoTablo('DOSYA') + ' WHERE ID = :I';
+      LQ.ParamByName('I').AsLargeInt := AID;
+      LQ.Open;
+      if (not LQ.IsEmpty) and (not LQ.Fields[0].IsNull) then
+      begin
+        TBlobField(LQ.Fields[0]).SaveToStream(ADest);
+        ADest.Position := 0;
+        Result := True;
+      end;
+      LQ.Close;
+    finally
+      LQ.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+procedure DosyaReferansAzalt(AID: Int64);
+var
+  LQ: TFDQuery;
+  LTbl: string;
+begin
+  if AID <= 0 then Exit;
+  try
+    LTbl := DepoTablo('DOSYA');
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      // REFSAYAC-- ; 0'a inince gercek sil (FILESTREAM dosyasi da GC ile gider).
+      LQ.SQL.Text :=
+        'UPDATE ' + LTbl + ' SET REFSAYAC = REFSAYAC - 1 WHERE ID = :I; ' +
+        'DELETE FROM ' + LTbl + ' WHERE ID = :I AND REFSAYAC <= 0;';
+      LQ.ParamByName('I').AsLargeInt := AID;
+      LQ.ExecSQL;
+    finally
+      LQ.Free;
+    end;
+  except
+  end;
+end;
+
+function DosyaIleImajGuncelle(AImajID: Integer; const AFileName: string; const ADegistiren: string): Boolean;
+var
+  LFs: TFileStream;
+  LDosyaID, LEskiID: Int64;
+  LBoyutKB: Integer;
+  LQ: TFDQuery;
+  LDeg: string;
+begin
+  Result := False;
+  if (AImajID <= 0) or (not FileExists(AFileName)) then Exit;
+  try
+    // 1) icerigi dosyadan oku -> DOSYA'ya (ham, hash-dedup) yaz
+    LFs := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+    try
+      LBoyutKB := (LFs.Size + 1023) div 1024;   // IMAJ.BOYUT = KB
+      LFs.Position := 0;
+      LDosyaID := DosyaKaydet(LFs, LowerCase(ExtractFileExt(AFileName)), '');
+    finally
+      LFs.Free;
+    end;
+    if LDosyaID <= 0 then Exit;   // DOSYA yazilamadi -> cagiran eski IMAJ.BELGE yoluna dusmeli
+
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      // 2) eski DOSYAID (ref azaltmak icin)
+      LQ.SQL.Text := 'SELECT DOSYAID FROM IMAJ WHERE ID=' + IntToStr(AImajID);
+      LQ.Open;
+      LEskiID := 0;
+      if (not LQ.IsEmpty) and (not LQ.Fields[0].IsNull) then LEskiID := LQ.Fields[0].AsLargeInt;
+      LQ.Close;
+
+      // 3) IMAJ'i yeni icerige referansla (BELGE=NULL -> gorutuleme DOSYAID'den okur)
+      if Trim(ADegistiren) = '' then LDeg := 'NULL' else LDeg := ADegistiren;
+      LQ.SQL.Text := 'UPDATE IMAJ SET DOSYAID=' + IntToStr(LDosyaID) +
+        ', BOYUT=' + IntToStr(LBoyutKB) + ', ICDIS=0, BELGE=NULL' +
+        ', DEGISTIRMETARIHI=getdate(), DEGISTIREN=' + LDeg +
+        ' WHERE ID=' + IntToStr(AImajID);
+      LQ.ExecSQL;
+    finally
+      LQ.Free;
+    end;
+
+    // 4) eski icerik referansini azalt. Her durumda dogru:
+    //  - icerik DEGISTI (LEskiID<>LDosyaID): IMAJ artik eskiyi gostermiyor -> eski ref--
+    //  - icerik AYNI (LEskiID=LDosyaID): DosyaKaydet dedup ile ref++ etmisti -> geri al (net 0)
+    if LEskiID > 0 then
+      DosyaReferansAzalt(LEskiID);
+
+    Result := True;
+  except
+    Result := False;
+  end;
 end;
 
 procedure DepoAdiSifirla;
@@ -372,7 +558,7 @@ begin
       LQ.SQL.Text :=
         'SELECT name, PARSENAME(base_object_name,1) FROM sys.synonyms ' +
         'WHERE name IN (''EBELGE'',''EBELGEMESAJ'',''EBELGEKUYRUK'',''ISLEMLOG'',' +
-        '''LOGREFERANS'',''LOGCOZUM'',''SNAPSHOT'') ' +
+        '''LOGREFERANS'',''LOGCOZUM'',''SNAPSHOT'',''DOSYA'') ' +
         'AND PARSENAME(base_object_name,2)=''dbo'' ' +
         'AND ISNULL(PARSENAME(base_object_name,3),'''') <> :Y';
       LQ.ParamByName('Y').AsString := LYeni;

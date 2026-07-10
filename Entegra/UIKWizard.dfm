@@ -2070,7 +2070,7 @@ object IKWizardDlg: TIKWizardDlg
         'select RB.SIRA,RB.ETIKET,RB.BILGI,RA.GIRIS,RA.KAYNAK,RA.ZORUNLU ' +
         'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA ' +
         'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   order by  1')
-    Left = 43
+    Left = 35
     Top = 12
   end
   object DtsKurIlet: TDataSource

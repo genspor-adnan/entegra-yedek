@@ -95,20 +95,30 @@ procedure ImajTablosunaResimKaydet(DosyaAdi: string; Rsm:TcxImage; RehberId, Yer
 implementation
 
 {$R *.dfm}
-uses Utablo,PrjConst, FetaKurulusSiniflari, Fetautil, UBinarySave,LocOnFly;
+uses Utablo,PrjConst, FetaKurulusSiniflari, Fetautil, UBinarySave,LocOnFly, ULog;
 
 
 procedure ResimGetir(RehberId, Yer, YerId:Integer; Rsm:TcxImage);
 var Pic : TJpegImage;
 begin
-   Tablo.TablodanSorguAc(1, ' select BELGE from IMAJ where REHBERID='+IntToStr(RehberId)+' and YERI='+IntToStr(Yer)+' and YER_ID='+IntToStr(YerId)+' and VARSAYILAN = 1');
+   Tablo.TablodanSorguAc(1, ' select BELGE, DOSYAID from IMAJ where REHBERID='+IntToStr(RehberId)+' and YERI='+IntToStr(Yer)+' and YER_ID='+IntToStr(YerId)+' and VARSAYILAN = 1');
    if Tablo.Query1.RecordCount=0 then
       Rsm.Picture.Graphic:= nil
    else begin
       Pic := TJpegImage.Create;
-      Pic.LoadFromStream(Tablo.Query1.CreateBlobStream(Tablo.Query1.FieldByName('BELGE'),bmread));
-      Rsm.Picture.Graphic := Pic;
-      Pic.Free;
+      try
+         if Tablo.Query1.FieldByName('DOSYAID').AsLargeInt > 0 then
+         begin // YENI: icerik DOSYA deposunda (FILESTREAM); eski davranis: IMAJ.BELGE
+            Tablo.TablodanSorguAc(0, 'select ICERIK from '+DepoTablo('DOSYA')+' where ID='+Tablo.Query1.FieldByName('DOSYAID').AsString);
+            if (Tablo.Query0.RecordCount>0) and (not Tablo.Query0.FieldByName('ICERIK').IsNull) then
+               Pic.LoadFromStream(Tablo.Query0.CreateBlobStream(Tablo.Query0.FieldByName('ICERIK'),bmread));
+         end
+         else
+            Pic.LoadFromStream(Tablo.Query1.CreateBlobStream(Tablo.Query1.FieldByName('BELGE'),bmread));
+         Rsm.Picture.Graphic := Pic;
+      finally
+         Pic.Free;
+      end;
    end;
 end;
 
@@ -197,26 +207,55 @@ procedure ImajTablosunaResimKaydet(DosyaAdi: string; Rsm:TcxImage; RehberId, Yer
 var
   Pic : TJpegImage;
   bmp: TBitmap;
+  LMs: TMemoryStream;
+  LDosyaID: Int64;
+  LBoyutKB: Integer;
 begin
   Pic := TJpegImage.Create;
-  if DosyaAdi = '' then //yapıştırma
-     Pic.Assign(Rsm.Picture.Bitmap)
-  else begin
-    bmp := TBitmap.Create;
-    DetectImage(DosyaAdi,bmp);
-    Pic.Assign(bmp)
-  end;
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := ' insert into IMAJ (REHBERID,ICDIS,YERI,YER_ID,BELGEADI,BELGE,VARSAYILAN,EKLEYEN,SUBEID)values('+IntToStr(RehberId)+','+ IntToStr(Dokuman_Kayit_Yeri) + ','+IntToStr(Yeri)+','+IntToStr(Yer_ID)+
-          ',''Resim.jpg'',:Prm1,1,'''+Kullanan+''','+IntToStr(SubeId)+') select scope_identity()';
-  Tablo.Query1.ParamByName('Prm1').Assign(Pic);
-  Tablo.Query1.Open;
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update IMAJ set VARSAYILAN=0 where YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(Yer_ID)+' and ID<>&YeniId',['&YeniId'],[Tablo.Query1.Fields[0].AsInteger]);
-//  KutugeYaz(Tablo.Query1, DosyaAdi);
+  try
+    if DosyaAdi = '' then //yapıştırma
+       Pic.Assign(Rsm.Picture.Bitmap)
+    else begin
+      bmp := TBitmap.Create;
+      try
+        DetectImage(DosyaAdi,bmp);
+        Pic.Assign(bmp);
+      finally
+        bmp.Free;
+      end;
+    end;
 
-  if Yeri in [18, 58, 71, 88] then   //Demirbaş, masraf,Rehber, stoksa
-     XTablosunaResimKaydet(Yeri, Yer_ID, Pic);
-  Pic.Free;
+    // YENI: JPEG'i DOSYA deposuna (ham, hash-dedup) kaydet. Basarili ise IMAJ.BELGE'ye YAZMA.
+    LDosyaID := 0; LBoyutKB := 0;
+    LMs := TMemoryStream.Create;
+    try
+      Pic.SaveToStream(LMs);
+      LBoyutKB := (LMs.Size + 1023) div 1024;   // IMAJ.BOYUT = KB
+      LMs.Position := 0;
+      LDosyaID := ULog.DosyaKaydet(LMs, '.jpg', 'image/jpeg');
+    finally
+      LMs.Free;
+    end;
+
+    Tablo.Query1.Close;
+    if LDosyaID > 0 then
+      // YENI: icerik DOSYA deposunda; IMAJ sadece referans (BELGE bos).
+      Tablo.Query1.SQL.Text := ' insert into IMAJ (REHBERID,ICDIS,YERI,YER_ID,BELGEADI,DOSYAID,BOYUT,VARSAYILAN,EKLEYEN,SUBEID) values('+
+        IntToStr(RehberId)+',0,'+IntToStr(Yeri)+','+IntToStr(Yer_ID)+',''Resim.jpg'','+IntToStr(LDosyaID)+','+IntToStr(LBoyutKB)+',1,'''+Kullanan+''','+IntToStr(SubeId)+') select scope_identity()'
+    else begin
+      // FALLBACK (DOSYA yok/hata): eski davranis - IMAJ.BELGE inline.
+      Tablo.Query1.SQL.Text := ' insert into IMAJ (REHBERID,ICDIS,YERI,YER_ID,BELGEADI,BELGE,VARSAYILAN,EKLEYEN,SUBEID)values('+IntToStr(RehberId)+','+ IntToStr(Dokuman_Kayit_Yeri) + ','+IntToStr(Yeri)+','+IntToStr(Yer_ID)+
+            ',''Resim.jpg'',:Prm1,1,'''+Kullanan+''','+IntToStr(SubeId)+') select scope_identity()';
+      Tablo.Query1.ParamByName('Prm1').Assign(Pic);
+    end;
+    Tablo.Query1.Open;
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update IMAJ set VARSAYILAN=0 where YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(Yer_ID)+' and ID<>&YeniId',['&YeniId'],[Tablo.Query1.Fields[0].AsInteger]);
+
+    if Yeri in [18, 58, 71, 88] then   //Demirbaş, masraf,Rehber, stoksa
+       XTablosunaResimKaydet(Yeri, Yer_ID, Pic);
+  finally
+    Pic.Free;
+  end;
 end;
 
 
@@ -237,6 +276,7 @@ end;
 
 procedure ResmiVarsayilanyap(TabRsm:TFDQuery; Yeri, Yer_ID: Integer);
 var Pic : TJPEGImage;
+    LMs : TMemoryStream;
 begin
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := ' update IMAJ set VARSAYILAN=0 where YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(Yer_ID)+' and VARSAYILAN=1';
@@ -247,9 +287,29 @@ begin
       //IMAJ tablosunda varsayılan olarak işaretlendi. Şimdi de bu resmi stok tablosuna kaydedelim
       if Yeri in [18, 58, 71, 88]  then begin
          Pic := TJpegImage.Create;
-         Pic.Assign(TabRsm.FieldByName('BELGE'));
-         XTablosunaResimKaydet(Yeri, Yer_ID, Pic);
-         Pic.Free;
+         try
+            if TabRsm.FieldByName('DOSYAID').AsLargeInt > 0 then
+            begin // YENI: icerik DOSYA deposunda
+               LMs := TMemoryStream.Create;
+               try
+                  if ULog.DosyaGetir(TabRsm.FieldByName('DOSYAID').AsLargeInt, LMs) and (LMs.Size > 0) then
+                  begin
+                     LMs.Position := 0;
+                     Pic.LoadFromStream(LMs);
+                     XTablosunaResimKaydet(Yeri, Yer_ID, Pic);
+                  end;
+               finally
+                  LMs.Free;
+               end;
+            end
+            else if not TabRsm.FieldByName('BELGE').IsNull then
+            begin
+               Pic.Assign(TabRsm.FieldByName('BELGE'));
+               XTablosunaResimKaydet(Yeri, Yer_ID, Pic);
+            end;
+         finally
+            Pic.Free;
+         end;
       end;
 end;
 
@@ -336,20 +396,47 @@ end;
 
 procedure TResimDlg.TabResimAfterScroll(DataSet: TDataSet);
 var Pic : TJpegImage;
+    LMs : TMemoryStream;
 begin
    if TabResim.RecordCount=0 then
       LogoResim.Picture.Graphic:= nil
    else begin
       Pic := TJpegImage.Create;
-      Pic.LoadFromStream(TabResim.CreateBlobStream(TabResim.FieldByName('BELGE'),bmread));
-      LogoResim.Picture.Graphic := Pic;
-      Pic.Free;
+      try
+         if TabResim.FieldByName('DOSYAID').AsLargeInt > 0 then
+         begin // YENI: icerik DOSYA deposunda (FILESTREAM)
+            LMs := TMemoryStream.Create;
+            try
+               if ULog.DosyaGetir(TabResim.FieldByName('DOSYAID').AsLargeInt, LMs) and (LMs.Size > 0) then
+               begin
+                  LMs.Position := 0;
+                  Pic.LoadFromStream(LMs);
+                  LogoResim.Picture.Graphic := Pic;
+               end
+               else
+                  LogoResim.Picture.Graphic := nil;
+            finally
+               LMs.Free;
+            end;
+         end
+         else if not TabResim.FieldByName('BELGE').IsNull then
+         begin
+            Pic.LoadFromStream(TabResim.CreateBlobStream(TabResim.FieldByName('BELGE'),bmread));
+            LogoResim.Picture.Graphic := Pic;
+         end
+         else
+            LogoResim.Picture.Graphic := nil;
+      finally
+         Pic.Free;
+      end;
    end;
 end;
 
 procedure TResimDlg.TabResimBeforeOpen(DataSet: TDataSet);
 begin //eğer resimler dizine kayıt yapılıyorsa önce dizinden tabloya almak gerekir.
-    Tablo.TablodanSorguAc(1, '  select ID, convert(binary(1), BELGE) from IMAJ where YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
+    // DOSYA deposundaki satirlar (DOSYAID>0) klasorden OKUNMAZ (icerik DOSYA'da, .OBJ yok)
+    //  -> haric tut; yoksa null BELGE'de eski folder-load fn'i cagrilir ('dbo.' syntax hatasi).
+    Tablo.TablodanSorguAc(1, '  select ID, convert(binary(1), BELGE) from IMAJ where (DOSYAID is null or DOSYAID=0) and YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
     while not Tablo.Query1.eof do begin
        if Tablo.Query1.Fields[1].isnull then //eğer dosyada tutuluyorsa
           veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' dbo.fn_Imaj_KayitliObjNesnesiniOku ' + Tablo.Query1.Fields[0].AsString, [],[]);

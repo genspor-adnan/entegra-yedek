@@ -13,6 +13,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   Font.Style = []
   KeyPreview = True
   Position = poScreenCenter
+  OnActivate = FormActivate
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -139,6 +140,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
+        ExplicitTop = 274
+        ExplicitHeight = 336
         object PanelAlt: TPanel
           Left = 1
           Top = 167
@@ -154,6 +157,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
+          ExplicitTop = 170
           DesignSize = (
             1102
             165)
@@ -819,6 +823,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
+          ExplicitHeight = 145
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -1685,6 +1690,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         OnChange = PageUstChange
+        ExplicitTop = 102
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -2631,6 +2637,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ShowCaptions = True
         TabOrder = 8
         Transparent = True
+        ExplicitHeight = 29
         object KaydetTus: TToolButton
           Left = 0
           Top = 0
@@ -4601,7 +4608,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object DtsYorum: TDataSource
     DataSet = TabYorum
-    Left = 587
+    Left = 515
     Top = 428
   end
   object PopupYorumlar: TPopupMenu

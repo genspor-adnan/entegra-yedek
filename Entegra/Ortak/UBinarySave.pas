@@ -15,10 +15,13 @@ uses DB, Classes, Graphics, OleCtnrs, MSS_Sender,
   procedure OLEOku(OleContainer1: TOleContainer;Tablo1:TFDQuery; AlanAdi:string);
   function KutuktenOku(Tablo1:TFDQuery; AlanAdi, Uzanti:string; DokumaniAc:Boolean; DokumanAd:String='') : string;
   function KutugeYaz(Tablo1:TFDQuery; DosyaAdi:string):boolean;
+  // IMAJ blob'unu (sikisik VEYA ham) HAM icerige cevirip ADest'e yazar. Zlib header'i
+  //  ONCEDEN kontrol eder -> ham icerikte ZDecompress DENEMEZ (exception olusmaz).
+  procedure HamIcerikYaz(ASource, ADest: TStream);
 
 
 implementation
-uses FetaKurulusSiniflari, PrjConst, FetaUtil;
+uses FetaKurulusSiniflari, PrjConst, FetaUtil, ULog;
 (*
 Question/Problem/Abstract:
 
@@ -146,6 +149,37 @@ end;
 
 // 2/3/2010
 //Emreden aldığım yeni yöntem
+procedure HamIcerikYaz(ASource, ADest: TStream);
+// ASource: IMAJ blob (sikisik dokuman VEYA ham resim/DOSYA). ADest: HAM icerik yazilir.
+// Zlib header'i ONCEDEN kontrol -> ham icerikte ZDecompress DENEMEZ (EZDecompressionError
+//  olusmaz; eskiden except toparliyordu ama IDE/handler hatayi gosteriyordu).
+// Zlib: ilk byte low-nibble=8 (deflate) VE (b0*256+b1) mod 31 = 0.
+var
+  LB0, LB1: Byte;
+begin
+  ADest.Size := 0;
+  LB0 := 0; LB1 := 0;
+  ASource.Position := 0;
+  if ASource.Size >= 2 then
+  begin
+    ASource.Read(LB0, 1);
+    ASource.Read(LB1, 1);
+  end;
+  ASource.Position := 0;
+  try
+    if (ASource.Size >= 2) and ((LB0 and $0F) = 8) and (((LB0 * 256 + LB1) mod 31) = 0) then
+      ZDecompressStream( ASource, ADest )       // sikisik (eski IMAJ.BELGE / .OBJ dokuman)
+    else
+      ADest.CopyFrom( ASource, ASource.Size );  // HAM (resim / DOSYA icerigi)
+  except
+    // beklenmedik durumda yine ham dene (BU DA BASARIDIR)
+    ADest.Size := 0;
+    ASource.Position := 0;
+    ADest.CopyFrom( ASource, ASource.Size );
+  end;
+  ADest.Position := 0;
+end;
+
 function KutuktenOku(Tablo1:TFDQuery; AlanAdi, Uzanti:string; DokumaniAc : Boolean; DokumanAd:String='') : string;
 var
   Stream_ :TStream;
@@ -175,16 +209,7 @@ begin
   DokumanAd := GetEnvironmentVariable('Temp')+'\'+DokumanAd;
 
   tempfile:= TFileStream.Create(DokumanAd, fmCreate );
-  try
-    ZDecompressStream( Stream_, tempfile);
-  except
-    Stream_.Position:=0;
-    tempfile.CopyFrom( Stream_, Stream_.Size);
-    Stream_.Free;
-    tempfile.Free;
-    result := '';
-    exit;
-  end;
+  HamIcerikYaz( Stream_, tempfile );  // header-kontrollu decompress-veya-ham (ortak yardimci)
   Stream_.Free;
   tempfile.Free;
   if DokumaniAc then
@@ -198,7 +223,47 @@ var
   fs : TFileStream;
   tempfile : TFileStream;
   ImajID : integer;
+  LDosyaID: Int64;
+  LFs2: TFileStream;
+  LBoyutKB: Integer;
+  LSQLUp: string;
 begin
+  // YENI: IMAJ dokuman INSERT'i (INSERT ... IMAJ ... :PBELGE; ID donusu scope_identity VEYA
+  //  OUTPUT INSERTED.ID INTO @NewID + SELECT olabilir -> Tablo1.Open sonrasi Fields[0]=yeni ID)
+  //  ise icerigi DOSYA deposuna (ham, hash-dedup) al + IMAJ'i referansa cevir (BELGE=NULL, DOSYAID).
+  //  Non-IMAJ blob (BANKAFTP UPDATE gibi) DOKUNULMAZ -> eski yol. DOSYA basarisiz -> eski yola dus.
+  LSQLUp := UpperCase(Tablo1.SQL.Text);
+  if (Pos('INSERT', LSQLUp) > 0) and (Pos('IMAJ', LSQLUp) > 0)
+     and (Tablo1.FindParam('PBELGE') <> nil) then
+  begin
+    LDosyaID := 0; LBoyutKB := 0;
+    try
+      LFs2 := TFileStream.Create(DosyaAdi, fmOpenRead);
+      try
+        LBoyutKB := (LFs2.Size + 1023) div 1024;   // IMAJ.BOYUT = KB
+        LDosyaID := DosyaKaydet(LFs2, ExtractFileExt(DosyaAdi), '');
+      finally
+        LFs2.Free;
+      end;
+    except
+      LDosyaID := 0;
+    end;
+    if LDosyaID > 0 then
+    try
+      Tablo1.ParamByName('PBELGE').DataType := ftBlob;   // NULL'da tip bilinsin
+      Tablo1.ParamByName('PBELGE').Clear;   // BELGE = NULL (icerik DOSYA'da)
+      Tablo1.Open;                          // IMAJ insert (BELGE NULL) + yeni ID (scope_identity/OUTPUT)
+      ImajID := Tablo1.Fields[0].AsInteger;
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'update IMAJ set DOSYAID=&D, BOYUT=&B, ICDIS=0, BELGE=NULL where ID=&I',
+        ['&D','&B','&I'], [LDosyaID, LBoyutKB, ImajID]);
+      Result := True;
+      Exit;
+    except
+      // DOSYA yolu patlarsa asagidaki eski (compress) yola dus.
+    end;
+  end;
+
   CompressedStream_:= TMemoryStream.Create;
   CompressedStream_.Position:=0;
   fs:= TFileStream.Create(DosyaAdi, fmOpenRead );

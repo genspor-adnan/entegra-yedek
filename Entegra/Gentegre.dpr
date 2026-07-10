@@ -292,6 +292,7 @@ uses
   UMesajGrup in 'UMesajGrup.pas' {MesajGrupDlg},
   UGorevDlg in 'UGorevDlg.pas' {GorevDlg},
   UOpsiyonDokuman in 'UOpsiyonDokuman.pas' {OpsiyonDokumanDlg},
+  UDosyaMigrasyon in 'UDosyaMigrasyon.pas' {DosyaMigrasyonDlg},
   UScanner in 'UScanner.pas' {ScannerDlg},
   UYazarKasa_Ingenico in 'UYazarKasa_Ingenico.pas',
   UProgramSonuDialog in 'Ortak\UProgramSonuDialog.pas' {ProgramSonuDialog},

@@ -301,6 +301,7 @@ type
     IslemOp  : Char;
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     DokumanID ,DokumanYetkiID,DokumanYetkiTur ,Cagiran ,KlasorID,anahtarKontrol,YeniKayit,Modul,ModulID,RehberID: Integer;
+    FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     Yenianahtar,BelgeYolu:string;
 
 
@@ -803,6 +804,18 @@ begin
   HazirlaTabYetki(TabYetki);
   DokumanYetkiHepsiGor(DokumanYetkiTur,DokumanYetkiID);
 
+  // Geri-alinabilir oturum (yalniz D=degistir): DOKUMAN karti + alt tablolar. Revize (IMAJ blob)
+  // + DOKUMANTARIHCE(history) KAPSAM DISI. OturumBaslat tablo-basina korumali (ID PK'si olmayan
+  // link tablosu -orn. DOKUMANILGILI composite- otomatik atlanir; o alt kayit undo edilmez).
+  FOturumID := '';
+  if IslemOp = 'D' then
+    FOturumID := ULog.OturumBaslat('DOKUMAN', DokumanID,
+      [ ULog.SnapTablo(1, 'DOKUMAN',         'ID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(2, 'DOKUMANILGILI',   'DOKUMANID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(2, 'DOKUMANBILDIRIM', 'DOKUMANID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(2, 'DOKUMANYETKI',    'YERI=' + IntToStr(TabNo_DOKUMAN) + ' and YERID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(2, 'SOZLESMELER',     'YERI=' + IntToStr(TabNo_DOKUMAN) + ' and YER_ID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(2, 'REHBERBILGI',     'YERI=' + IntToStr(TabNo_DOKUMAN) + ' and YER_ID=' + IntToStr(DokumanID)) ]);
 
    case IslemOp of
      'E','X': begin
@@ -1015,10 +1028,20 @@ end;
 
 procedure TDokumanWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   if FOturumID <> '' then
+     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
+          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
 //   Eğer yeni kayıt eklenirken iptal edildiyse kayır edilmiş tüm bilgiler silinir
    if IslemOp='E' then begin
       Tablo.DokumanSil(True, TabDokuman.Fields[0].AsInteger, 1, 0);
       FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
+   end;
+   // Geri-alinabilir oturum (D=degistir): iptal -> ilk hale don.
+   if (IslemOp = 'D') and (FOturumID <> '') then
+   begin
+     if TabDokuman.State in [dsEdit, dsInsert] then TabDokuman.Cancel;
+     ULog.OturumGeriAl(FOturumID);
+     FOturumID := '';
    end;
 end;
 
@@ -1096,6 +1119,13 @@ begin
                  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, s, [],[]);
               end;
              ModalResult := mrOk;
+
+             // Geri-alinabilir oturum (D=degistir): kaydedildi -> snapshot temizle.
+             if (IslemOp = 'D') and (FOturumID <> '') then
+             begin
+               ULog.OturumBitir(FOturumID);
+               FOturumID := '';
+             end;
          end
        else
          ShowMessage(DOKEklenmis_dok_bulunamadi);

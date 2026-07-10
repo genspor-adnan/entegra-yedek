@@ -635,7 +635,7 @@ const
   Q = ''''; // tek tirnak (SQL string literal icin)
 var
   LHedef, LKaynak, LDataPath, LBak, LMove, LLogical, LTip, LPhys: string;
-  LDataIdx: Integer;
+  LDataIdx, LFsIdx: Integer;
   LQ: TFDQuery;
   LCnn: TFDConnection;
 begin
@@ -732,12 +732,21 @@ begin
         LQ.Open;
         LMove := '';
         LDataIdx := 0;
+        LFsIdx := 0;
         while not LQ.Eof do
         begin
           LLogical := LQ.FieldByName('LogicalName').AsString;
           LTip := UpperCase(Trim(LQ.FieldByName('Type').AsString));
           if LTip = 'L' then
             LPhys := LDataPath + LHedef + '_log.ldf'
+          else if LTip = 'S' then
+          begin
+            // FILESTREAM container = DIZIN (uzantisiz), .ndf DEGIL. GenDepoUpdate3 ile ayni
+            //  konvansiyon: <veri klasoru>\<hedef>_FS. Hedef yeni ad -> dizin yok, RESTORE olusturur.
+            if LFsIdx = 0 then LPhys := LDataPath + LHedef + '_FS'
+            else LPhys := LDataPath + LHedef + '_FS' + IntToStr(LFsIdx);
+            Inc(LFsIdx);
+          end
           else
           begin
             if LDataIdx = 0 then LPhys := LDataPath + LHedef + '.mdf'

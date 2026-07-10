@@ -8284,13 +8284,15 @@ var
    Ad, AcilanDosya:string;
 begin
    AcilanDosya := '';
-      Tablo.TablodanSorguAc(1, 'select top 1 ID, ICDIS from IMAJ where YERI=' +  inttostr(Yeri) + ' and YER_ID=' +  inttostr(DokumanID) + ' order by ID desc');
+      Tablo.TablodanSorguAc(1, 'select top 1 ID, ICDIS, DOSYAID from IMAJ where YERI=' +  inttostr(Yeri) + ' and YER_ID=' +  inttostr(DokumanID) + ' order by ID desc');
       Tablo.TablodanSorguAc(2,'select * from DOKUMAN WHERE ID= '+ inttostr(DokumanID));
       Ad := Tablo.Query2.FieldByName('AD').AsString;
-      if Tablo.Query1.FieldByName('ICDIS').AsString = 'True' then // eğer dosyada tutuluyorsa
+      if Tablo.Query1.FieldByName('DOSYAID').AsLargeInt > 0 then // YENI: icerik DOSYA deposunda (FILESTREAM, ham) -> KutuktenOku decompress'i basarisiz olup ham kopyalar
+         Tablo.TablodanSorguAc(5, 'select BELGE=ICERIK from ' + DepoTablo('DOSYA') + ' where ID=' + Tablo.Query1.FieldByName('DOSYAID').AsString)
+      else if Tablo.Query1.FieldByName('ICDIS').AsString = 'True' then // eski: dosyada (dis)
          Tablo.TablodanSorguAc(5, ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma ' + Tablo.Query1.FieldByName('ID').AsString + ' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI=''' + ExtractFileExt(Ad) + '''')
       else
-         Tablo.TablodanSorguAc(5, 'select ID,ICDIS,BELGE,BELGEADI from IMAJ where ID=' + Tablo.Query1.Fields[0].AsString); // eğer doküman tabloda BELGE alanında ise
+         Tablo.TablodanSorguAc(5, 'select ID,ICDIS,BELGE,BELGEADI from IMAJ where ID=' + Tablo.Query1.Fields[0].AsString); // eski: IMAJ.BELGE kolonu
       if Tablo.Query5.Active then
           AcilanDosya := KutuktenOku(Tablo.Query5, 'BELGE', ExtractFileExt(Ad), DokumaniAc,DokumanAd)
       else begin

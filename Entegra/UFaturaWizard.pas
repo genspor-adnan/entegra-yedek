@@ -1821,14 +1821,20 @@ begin
   end;
 
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
-  // ilk hale don. IMAJ(blob)+DOKUMAN(dosya) KAPSAM DISI. (FATBASLIK + FATURA + REHBERBILGI + yorum.)
+  // ilk hale don. IMAJ(blob)+DOKUMAN(dosya) KAPSAM DISI.
+  // (FATBASLIK + FATURA + REHBERBILGI + yorum + STOKIZLEME.)
+  // NOT: STOKIZLEMEDEPO ve STOK_ORT_MALIYET ID kolonu OLMADIGINDAN motor bunlari alamaz
+  //   (OturumBaslat capture ID ister -> atlar). STOKSERILOT/STOKLAR trigger-turevli
+  //   (FATURA/STOKIZLEMEDEPO trigger'lari). STOKIZLEME.SIRA=3 (FATURA'nin cocugu -> silme
+  //   DESC'te FATURA'dan once, geri-ekleme ASC'te FATURA'dan sonra).
   FOturumID := '';
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslat('FATBASLIK', TabFatbaslik.FieldByName('ID').AsInteger,
       [ ULog.SnapTablo(1, 'FATBASLIK',   'ID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'FATURA',      'FATBASID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'REHBERBILGI', 'YERI=' + IntToStr(Tablo.FaturaDetaySablonTipiBul(Tur)) + ' and YER_ID=' + TabFatbaslik.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString) ]);
+        ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'STOKIZLEME',  'BASLIKID=' + TabFatbaslik.FieldByName('ID').AsString) ]);
 
   case Tur of
     0, 3, 8, 10, 11, 12, 109:

@@ -74,8 +74,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       Caption = 'JvWizardInteriorPage1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelUst: TPanel
         Left = 0
         Top = 70
@@ -97,7 +95,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           Left = 3
           Top = 3
           Width = 1190
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -163,7 +160,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         end
         object PageControlUst: TcxPageControl
           Left = 0
-          Top = 32
+          Top = 35
           Width = 1196
           Height = 230
           Align = alTop
@@ -174,7 +171,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           Properties.ActivePage = cxTabSheet1
           Properties.CustomButtons.Buttons = <>
           OnChange = PageControlUstChange
-          ExplicitTop = 35
           ClientRectBottom = 226
           ClientRectLeft = 4
           ClientRectRight = 1192
@@ -183,10 +179,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
             AllowCloseButton = False
             Caption = 'Genel'
             ImageIndex = 0
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object PanelGenelUst: TPanel
               Left = 0
               Top = 0
@@ -642,26 +634,14 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
           object EkAlanlarEkr2: TcxTabSheet
             Caption = 'Ek Alanlar2'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
           object EkAlanlarEkr3: TcxTabSheet
             Caption = 'EkAlanlarEkr3'
             ImageIndex = 3
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
         end
       end
@@ -682,10 +662,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetUretimAgaci: TcxTabSheet
           Caption = #220'retim A'#287'ac'#305
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar5: TToolBar
             Left = 0
             Top = 0
@@ -1006,10 +982,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetOperasyonlar: TcxTabSheet
           Caption = 'Operasyon'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Panel2: TPanel
             Left = 0
             Top = 0
@@ -1310,10 +1282,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetIsZaman: TcxTabSheet
                 Caption = #304#351' Zaman Personel'
                 ImageIndex = 2
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridIsZaman: TcxGrid
                   Left = 0
                   Top = 23
@@ -1606,10 +1574,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetPlanlama: TcxTabSheet
                 Caption = 'Malzeme Planlama'
                 ImageIndex = 4
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridPlanlama: TcxGrid
                   Left = 0
                   Top = 25
@@ -1837,10 +1801,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetOpIslemler: TcxTabSheet
                 Caption = 'T'#252'ketilenler'
                 ImageIndex = 0
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object GridUrtOpDetay: TcxGrid
                   Left = 0
                   Top = 0
@@ -1929,10 +1889,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetOpMaliyet: TcxTabSheet
                 Caption = 'Ekstra Maliyet'
                 ImageIndex = 1
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object ToolBar2: TToolBar
                   Left = 0
                   Top = 0
@@ -2090,10 +2046,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object cxTabSheet2: TcxTabSheet
                 Caption = 'D'#305#351' Kaynak Kullan'#305'm'#305' (Fason)'
                 ImageIndex = 5
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object ToolBar6: TToolBar
                   Left = 0
                   Top = 0
@@ -2287,10 +2239,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               object SheetYorumMedya: TcxTabSheet
                 Caption = 'Yorum/Medya'
                 ImageIndex = 3
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
                 object Panel4: TPanel
                   Left = 0
                   Top = 54
@@ -2351,7 +2299,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
                   Properties.Alignment.Horz = taRightJustify
                   Transparent = True
                   Visible = False
-                  ExplicitTop = 94
                   AnchorX = 1178
                 end
                 object GridYorum: TcxGrid
@@ -2441,10 +2388,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetMaliyet: TcxTabSheet
           Caption = 'Maliyet'
           ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object cxGrid1: TcxGrid
             Left = 0
             Top = 0
@@ -2548,10 +2491,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         object SheetGereksinim: TcxTabSheet
           Caption = 'Gereksinim'
           ImageIndex = 3
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridGereksinim: TcxGrid
             Left = 0
             Top = 0
@@ -2790,7 +2729,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         Control = PanelGenelUst
         Color = clNavy
         ParentColor = False
-        ExplicitWidth = 8
       end
     end
   end
@@ -3305,8 +3243,8 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
   end
   object PopupOperasyonOlustur: TPopupMenu
     OnPopup = PopupOperasyonOlusturPopup
-    Left = 48
-    Top = 120
+    Left = 24
+    Top = 128
     object SeiliOperasyonuOlutur1: TMenuItem
       Caption = 'Se'#231'ili Operasyonu Olu'#351'tur'
       OnClick = SeiliOperasyonuOlutur1Click
@@ -3448,22 +3386,22 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 719
     Top = 364
     object MenuKlasordenEkle: TMenuItem

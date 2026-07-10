@@ -2176,8 +2176,8 @@ object DokumanWizard: TDokumanWizard
   end
   object DtsRevize: TDataSource
     DataSet = TabRevize
-    Left = 292
-    Top = 19
+    Left = 172
+    Top = 43
   end
   object TabIlgili: TFDQuery
     AfterPost = TabDokumanAfterPost
@@ -2231,8 +2231,8 @@ object DokumanWizard: TDokumanWizard
       'FROM'
       #9'DOKUMANKLASOR DK inner join'
       #9'Liste p on p.ID=DK.USTID')
-    Left = 352
-    Top = 173
+    Left = 344
+    Top = 101
   end
   object TabYetki: TFDQuery
     BeforeEdit = TabYetkiBeforeEdit

@@ -51,6 +51,8 @@ type
     CancelBtn: TBitBtn;
     ComboRevizeMiktar: TcxComboBox;
     cxLabel14: TcxLabel;
+    DosyaMigrasyonTus: TcxButton;
+    procedure DosyaMigrasyonTusClick(Sender: TObject);
     procedure DokumanDizinPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure DokumanOrtamiPropertiesChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -72,9 +74,16 @@ var
 
 implementation
 
-uses Utablo,PrjConst,FetaKurulusSiniflari ;
+uses Utablo,PrjConst,FetaKurulusSiniflari, UDosyaMigrasyon ;
 
 {$R *.dfm}
+
+procedure TOpsiyonDokumanDlg.DosyaMigrasyonTusClick(Sender: TObject);
+begin
+   if DosyaMigrasyonDlg = nil then
+      Application.CreateForm(TDosyaMigrasyonDlg, DosyaMigrasyonDlg);
+   DosyaMigrasyonDlg.ShowModal;
+end;
 
 procedure TOpsiyonDokumanDlg.cxButton1Click(Sender: TObject);
 const komut =

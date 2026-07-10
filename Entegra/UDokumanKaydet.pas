@@ -43,7 +43,7 @@ var
 implementation
 
 {$R *.dfm}
-uses prjconst, FetaKurulusSiniflari, UBinarySave;
+uses prjconst, FetaKurulusSiniflari, UBinarySave, ULog;
 
 procedure TDokumanKaydetDlg.RevizeKaydetTusClick(Sender: TObject);
 var Kayit : boolean;
@@ -107,12 +107,18 @@ begin
         Tablo.TablodanSorguAc(1, 'select max(ID) from IMAJ where YERI=1 and YER_ID='+IntToStr(DokumanId)); //revizeler varsa son dokümana kayıt etsin
 
         Tablo.Query0.Close;
-        if Dokuman_Kayit_Yeri=0 then begin
-           Tablo.Query0.SQL.Text := 'update IMAJ set ICDIS=0, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+', BELGE=:PBelge where ID='+ Tablo.Query1.Fields[0].AsString;
-           KutugeYaz(Tablo.Query0, DokumanAdi);
-        end else begin
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update IMAJ set ICDIS=1, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+' where ID='+ Tablo.Query1.Fields[0].AsString, [], []);
-           Tablo.BelgeEkleme(DokumanAdi, -99, 1, Tablo.Query1.Fields[0].AsInteger, nil);
+        // YENI: icerigi ONCE DOSYA deposuna guncelle (mode'dan BAGIMSIZ; ekleme de her modda
+        //  DOSYA'ya gidiyor -> duzenleme de gitmeli). UstuneKaydet UPDATE oldugundan KutugeYaz
+        //  DOSYA'ya yonlenmez; klasor modunda ise DOSYAID'yi bayat birakip eski icerigi
+        //  gosterirdi. DOSYA yoksa (FILESTREAM kapali) eski mode-bazli yola dus.
+        if not ULog.DosyaIleImajGuncelle(Tablo.Query1.Fields[0].AsInteger, DokumanAdi, Kullanan) then begin
+           if Dokuman_Kayit_Yeri=0 then begin
+              Tablo.Query0.SQL.Text := 'update IMAJ set ICDIS=0, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+', BELGE=:PBelge, DOSYAID=NULL where ID='+ Tablo.Query1.Fields[0].AsString;
+              KutugeYaz(Tablo.Query0, DokumanAdi);
+           end else begin
+              Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update IMAJ set ICDIS=1, DEGISTIRMETARIHI=getdate(), DEGISTIREN='+Kullanan+', DOSYAID=NULL where ID='+ Tablo.Query1.Fields[0].AsString, [], []);
+              Tablo.BelgeEkleme(DokumanAdi, -99, 1, Tablo.Query1.Fields[0].AsInteger, nil);
+           end;
         end;
 //        Tablo.DokumanTarihceEkle(DokumanId,'Belge değiştirildi',5);
 //        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANGECMIS where DOKUMANID=' + IntToStr(DokumanId) + ' and TUR=0 ', [], []);

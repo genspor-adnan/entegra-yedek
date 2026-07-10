@@ -37,6 +37,15 @@ object OpsiyonDokumanDlg: TOpsiyonDokumanDlg
         Align = alBottom
         Alignment = taLeftJustify
         TabOrder = 0
+        object DosyaMigrasyonTus: TcxButton
+          Left = 8
+          Top = 8
+          Width = 240
+          Height = 27
+          Caption = 'Belgeleri DOSYA deposuna ta'#351#305' (Migrasyon)'
+          TabOrder = 0
+          OnClick = DosyaMigrasyonTusClick
+        end
       end
       object LabelDosyaToplam: TcxLabel
         Left = 420

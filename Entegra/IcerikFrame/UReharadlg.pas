@@ -3645,6 +3645,13 @@ end;
 procedure TRehberAraDlg.Kopyala2Click(Sender: TObject);
 var FaturaIDsi : integer;
 begin
+  if not (TabCariListe.FieldByName('TUR').AsInteger in [9,19,101]) then begin //sipariş ise kontrole gerek yok
+      Tablo.TablodanSorguAc(1,'select * from FATURA F where F.IZLEME <> 0 and F.FATBASID='+TabCariListe.FieldByName('CEKID').AsString);
+      if Tablo.Query1.RecordCount > 0 then begin
+          Tablo.UyariGoster(Uyari,'Belge içeriğinde izlem bilgisi aktif ürünler var, bu işlem gerçekleştirilemez.');
+          Exit;
+      end;
+  end;
   FaturaIDsi := Tablo.BelgeKopyala(TabCariListe.FieldByName('CEKID').AsInteger, TabCariListe.FieldByName('TUR').AsInteger,
                  TabCariListe.FieldByName('REHBERID').AsInteger, TabCariListe.FieldByName('AKSIYONTARIH').AsDateTime);
 

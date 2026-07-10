@@ -375,6 +375,7 @@ type
     UretimID,Cagiran,RehberId:Integer;
     IslemOp : Char;
     FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
+    FIptalOnaylandi: Boolean;   // Iptal onayi verildi -> FormCloseQuery ayrica "Kaydet?" sormasin
     YeniMiktar:Real;
     function RecetedenEkle(ReceteID:integer;Miktar:extended;UrunudeEkle:Boolean):boolean;
     { Public declarations }
@@ -1186,7 +1187,7 @@ end;
 procedure TUretimWizardDlg.FormCloseQuery(Sender: TObject;  var CanClose: Boolean);
 begin
    Ciksin := True;
-   if KaydetTus.Visible then
+   if KaydetTus.Visible and (not FIptalOnaylandi) then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1212,6 +1213,7 @@ begin
   Tablo.GridTurkcelestir;
   IptalSecildi := True;
   FEkleLogland := False;
+  FIptalOnaylandi := False;
   YeniMiktar := 1;
   PageControlAlt.ActivePageIndex:=0;
 end;
@@ -1474,9 +1476,21 @@ end;
 
 procedure TUretimWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-  if FOturumID <> '' then
+  // Degisiklik kaybi uyarisi. Eskiden yalniz FOturumID<>'' (D-mod geri-alinabilir) iken
+  //  cikiyordu; AMA yeni fiste (E/K) FOturumID bos + baslik Post edilince KaydetTus gizlenip
+  //  FormCloseQuery "Kaydet?" de sormuyordu -> Iptal SESSIZCE kapatip siliyordu. Bu yuzden
+  //  yeni/kopya kayit ve aktif kart/detay duzenleme durumlarini da kapsadik.
+  if (FOturumID <> '') or (IslemOp = 'E') or (IslemOp = 'K') or
+     (TabUretim.State in [dsEdit, dsInsert]) or
+     (TabUretimDetay.State in [dsEdit, dsInsert]) then
     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then
+    begin
+      ModalResult := mrNone;
+      Exit;
+    end;
+  // Onaylandi -> FormCloseQuery ayrica "Kaydet?" sormasin (cift uyari olmasin).
+  FIptalOnaylandi := True;
 end;
 
 procedure TUretimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);

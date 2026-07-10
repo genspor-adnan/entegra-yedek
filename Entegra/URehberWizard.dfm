@@ -2522,7 +2522,7 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object PopupIlgili: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 65
+    Left = 25
     Top = 15
     object lgiliKurumdanAyrld1: TMenuItem
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak '

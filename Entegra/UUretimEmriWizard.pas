@@ -1756,7 +1756,7 @@ begin
 
    //TreeUretimAgaci.TreeUretimAgacicxDBTreeListAd.width := 225;
    if IslemOp <> 'E' then
-      JvWizardInteriorPage1.VisibleButtons := [bkFinish, bkCancel]   // Iptal geri-eklendi: D'de geri-alinabilir oturum icin gerekli
+      JvWizardInteriorPage1.VisibleButtons := [JvWizard.bkFinish, JvWizard.bkCancel]   // Iptal geri-eklendi: D'de geri-alinabilir oturum icin gerekli (bkCancel Vcl.Buttons'ta da var -> JvWizard ile nitele)
    //else
    //   JvWizardInteriorPage1.VisibleButtons := [bkcancel];
 end;
