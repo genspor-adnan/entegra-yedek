@@ -10267,6 +10267,7 @@ begin
   if Sender is TFDConnection then
   begin
     C := TFDConnection(Sender);
+    if AktifVeriMotor <> vmPG then   // PG'de 'SET NOCOUNT ON' gecersiz
     try
       C.ExecSQL('SET NOCOUNT ON');
     except
