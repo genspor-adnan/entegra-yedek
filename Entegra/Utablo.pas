@@ -1544,7 +1544,7 @@ uses UAnaForm, registry, UMesaj,FetaUtil, FetaClassExtensions, UKasaWizard, UTab
   cxGridPopupMenuConsts,
   cxLibraryStrs, UInfo,
   UStokTalepWizard, UFastRap, UServisHareketEkle, GenGoogleCalenderService,GoogleApis.Calendar,
-  UTahakkukDlg;  //  UGoogleSyncBus,
+  UTahakkukDlg, UVeriMotor;  //  UGoogleSyncBus,
 {$R *.DFM}
 
 var
@@ -12152,6 +12152,9 @@ begin
   GenYazilimIPAdress :=GENINI.ReadString(Ops_GenelOpsiyon_GenYazilimIPAdress,'genupdate.genyazilim.com');//  GenelOpsiyon','GenYazilimIPAdress', 'genupdate.genyazilim.com');
 
   //Lisans Kontrrol//
+  // PG (pilot): MSSQL-ozel SID/lisans/web-servis blogu ATLANIR (sys.sysservers/HashBytes/@@version yok).
+  if AktifVeriMotor <> vmPG then
+  begin
   //öncelikle server değişmiş mi diye bakacağız..
   try
     ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT top 1 SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(convert(nvarchar(23),schemadate)))) FROM sys.sysservers order by srvid ',[],[],True);
@@ -12275,12 +12278,18 @@ begin
     UyariGoster(Uyari,Lisansyenileme,1);
     DenemeKullan;
   end;
+  end;  // PG (pilot): lisans-atla blogu sonu
 
   Dilislemleri;
   DilislemleriCeviri;
 
-  Tablo.TablodanSorguAc(1,'select @@version');
-  SQLVersion2008 := pos('2008', Tablo.Query1.Fields[0].AsString)>1;
+  if AktifVeriMotor <> vmPG then
+  begin
+    Tablo.TablodanSorguAc(1,'select @@version');
+    SQLVersion2008 := pos('2008', Tablo.Query1.Fields[0].AsString)>1;
+  end
+  else
+    SQLVersion2008 := False;
 
   // Burada güncellemeleri otomatik yapıyoruz
   // UVerssiyonGuncelledeki KomutNo ya bakarak eklenen varsa
@@ -12300,6 +12309,7 @@ begin
   EnBoyHesaplamaAktif := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_EnBoyAktif, False);
   PozNoAktif := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_PozNoVar, False);
   PozNoAralik := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_PozNoAralik, 10);
+  if AktifVeriMotor <> vmPG then   // PG (pilot): web-servis surum guncelleme atla (MSSQL komutlari)
   if VersBaslNo < KomutNo then begin
     try
       VersiyonGuncelle;
@@ -12332,13 +12342,20 @@ begin
      LocalizerOnFly.Init;
   end;
 //todo buradaki sayıyı kontrol et!!
-  i := VeritabaniSonYedekKontrolu;
-  if i > 3 then
-     UyariGoster(Uyari,intTostr(i)+LocalizedString(@Yedeklemeyap),1);
+  if AktifVeriMotor <> vmPG then   // PG (pilot): yedek kontrolu MSSQL msdb'ye bakar -> atla
+  begin
+    i := VeritabaniSonYedekKontrolu;
+    if i > 3 then
+       UyariGoster(Uyari,intTostr(i)+LocalizedString(@Yedeklemeyap),1);
+  end;
 
   Dokum_Degis_Yetki := GENINI.ReadBoolean(Ops_Dokum_Degis,False);
 
-  TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= year(getdate())');
+  // getdate()/year() diyalekt farki: PG'de extract(year from now())
+  if AktifVeriMotor = vmPG then
+    TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= extract(year from now())')
+  else
+    TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= year(getdate())');
   YeniYilDevriVar := Query1.RecordCount>0;
 
   Sektor := GENINI.ReadInteger(Ops_Sektor,0);
