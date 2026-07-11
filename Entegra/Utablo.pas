@@ -4389,7 +4389,7 @@ Begin
     9: QueryX := Query9;
   end;
   QueryX.Close;
-  QueryX.SQL.Text := SQLText;
+  QueryX.SQL.Text := PgSqlCevir(SQLText);   // PG'de diyalekt cevir (MSSQL'de aynen)
   try
     QueryX.Open;
     Result := True;

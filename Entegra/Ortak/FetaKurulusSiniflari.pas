@@ -270,7 +270,7 @@ type
 
 implementation
 uses
-  JclStrings, SynRegExpr, Registry, StrUtils, FetaClassExtensions, NB30;
+  JclStrings, SynRegExpr, Registry, StrUtils, FetaClassExtensions, NB30, UVeriMotor;
 
 var
   PixPerInch: TPoint;
@@ -1768,6 +1768,8 @@ begin
     LSQL := ASQL
   else
     LSQL := 'SET NOCOUNT ON; ' + ASQL;
+
+  LSQL := PgSqlCevir(LSQL);   // PG'de diyalekt cevir + SET NOCOUNT sil (MSSQL'de aynen)
 
   LQry := SorguBaslat(cnn,LSQL,AParamAdları,AParamDeğerleri,AUseDataSource);
 

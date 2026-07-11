@@ -42,6 +42,14 @@ function DbGun(const AIfade: string): string;       // day(x)   | extract(day fr
 procedure MotorBaglantisiKur(ACnn: TFDConnection; AMotor: TVeriMotor;
   const ASunucu, AVeritabani, AKullanici, ASifre: string; APort: Integer = 0);
 
+// MERKEZI DIYALEKT CEVIRICI: vmPG iken bir SQL metnindeki GUVENLI/net T-SQL kaliplarini
+//   PG karsiligiyla degistirir (getdate()->now(), isnull(->coalesce( ...). Merkezi sorgu
+//   noktalarinda (TablodanSorguAc, BasitKomutCalistir) cagrilir -> 1000+ cagri yerine
+//   dokunmadan cogu sorgu calisir. vmMSSQL iken metni AYNEN dondurur (davranis-korur).
+//   NOT: yalniz BELIRSIZ OLMAYAN degisimler burada; konumsal/riskli olanlar (top/scope_
+//   identity/+/[]/charindex arg-sirasi) seam yardimcilariyla cagri yerinde yapilir.
+function PgSqlCevir(const ASql: string): string;
+
 // GENINI/opsiyondan motor secimi (string <-> enum yardimci)
 function MotorMetne(AMotor: TVeriMotor): string;
 function MetinMotor(const AMetin: string): TVeriMotor;
@@ -102,6 +110,21 @@ function DbGun(const AIfade: string): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'extract(day from ' + AIfade + ')'
   else Result := 'day(' + AIfade + ')';
+end;
+
+function PgSqlCevir(const ASql: string): string;
+begin
+  Result := ASql;
+  if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur)
+  // SET NOCOUNT ON (MSSQL batch direktifi) PG'de gecersiz -> sil.
+  Result := StringReplace(Result, 'SET NOCOUNT ON;', '', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'SET NOCOUNT ON',  '', [rfReplaceAll, rfIgnoreCase]);
+  // Sadece GUVENLI, belirsiz-olmayan fonksiyon degisimleri (buyuk/kucuk harf duyarsiz):
+  Result := StringReplace(Result, 'getdate()',     'now()',        [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'getutcdate()',  'now()',        [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'sysdatetime()', 'now()',        [rfReplaceAll, rfIgnoreCase]);
+  // NOT: top/scope_identity/charindex/[]/+  -> BURADA DEGIL (belirsiz/konumsal); seam ile.
 end;
 
 function MotorMetne(AMotor: TVeriMotor): string;
