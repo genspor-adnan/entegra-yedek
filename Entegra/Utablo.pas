@@ -5215,10 +5215,15 @@ begin
       Result := 1;
       Exit;
   end;
-  // Seçili günde döviz kuru yoksa en yakın tarih
+  // Seçili günde döviz kuru yoksa en yakın tarih. TOP/isnull/DATEDIFF -> motor dali.
   Tablo.ADOQryGENEL.Close;
-  Tablo.ADOQryGENEL.SQL.Text := 'SELECT TOP 1 ' + Fiyatadi + ' FROM DOVIZ ' +
-    ' WHERE CINSI=''' + Kur + ''' and isnull(ALIS,0.0)>0.0  ORDER BY ABS(DATEDIFF(HOUR,''' + Tarih +''',TARIH))';
+  if AktifVeriMotor = vmPG then
+    Tablo.ADOQryGENEL.SQL.Text := 'SELECT ' + Fiyatadi + ' FROM DOVIZ ' +
+      ' WHERE CINSI=''' + Kur + ''' and coalesce(ALIS,0.0)>0.0 ' +
+      ' ORDER BY ABS(EXTRACT(EPOCH FROM (TARIH - ''' + Tarih + '''::timestamp))) LIMIT 1'
+  else
+    Tablo.ADOQryGENEL.SQL.Text := 'SELECT TOP 1 ' + Fiyatadi + ' FROM DOVIZ ' +
+      ' WHERE CINSI=''' + Kur + ''' and isnull(ALIS,0.0)>0.0  ORDER BY ABS(DATEDIFF(HOUR,''' + Tarih +''',TARIH))';
   Tablo.ADOQryGENEL.Open;
   if Tablo.ADOQryGENEL.RecordCount=1 then
     Result := Tablo.ADOQryGENEL.Fields[0].AsCurrency
