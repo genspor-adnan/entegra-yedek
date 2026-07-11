@@ -113,7 +113,7 @@ function imgComboboxInit (komut: string): TcxImageComboBoxProperties;
 {$ENDIF}
 
 implementation
-uses UListe,FetaUtil,LocOnFly,PrjConst,
+uses UListe,FetaUtil,LocOnFly,PrjConst,UVeriMotor,
 {$IFNDEF NO_UTABLO}
 UTablo, UMesaj,
 {$ENDIF}
@@ -393,7 +393,7 @@ end;
 function TIni.SistemTrh : TDateTime;
 begin
   IniSQL.Close;
-  IniSQL.SQL.Text := 'select GetDate()';
+  IniSQL.SQL.Text := 'select '+DbSimdi;   // MSSQL: getdate() | PG: now()
   IniSQL.Open;
   SistemTrh := IniSQL.Fields[0].AsDateTime;
 end;

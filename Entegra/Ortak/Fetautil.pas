@@ -1812,7 +1812,7 @@ begin
   tempQuery := TFDQuery.Create(nil);
   try
     tempQuery.Connection := Tablo.FDCnn;
-    tempQuery.SQL.Text := 'select GetDate()';
+    tempQuery.SQL.Text := 'select '+DbSimdi;   // MSSQL: getdate() | PG: now()
     tempQuery.Open;
     Result := tempQuery.Fields[0].AsDateTime;
   finally

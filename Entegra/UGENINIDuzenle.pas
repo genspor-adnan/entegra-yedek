@@ -119,7 +119,7 @@ var
 
 implementation
 
-uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst,ULog;
+uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst,ULog,UVeriMotor;
 
 {$R *.dfm}
 
@@ -163,7 +163,7 @@ function TGENINIDuzenleDlg.BugunTrh : TDateTime;
 var trh : TDateTime;
 begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select GetDate()';
+  TabKomutCalistir.SQL.Text := 'select '+DbSimdi;   // MSSQL: getdate() | PG: now()
   TabKomutCalistir.Open;
   Trh := TabKomutCalistir.Fields[0].AsDateTime;
   Result := StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Trh));
@@ -178,7 +178,7 @@ begin
        Trh := Tablo.GENINI.BugunTrhSaat
     else begin
       TabKomutCalistir.Close;
-      TabKomutCalistir.SQL.Text := 'select GetDate()';
+      TabKomutCalistir.SQL.Text := 'select '+DbSimdi;   // MSSQL: getdate() | PG: now()
       TabKomutCalistir.Open;
       Trh := TabKomutCalistir.Fields[0].AsDateTime;
     end;

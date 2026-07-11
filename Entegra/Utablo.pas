@@ -12396,7 +12396,7 @@ begin
   KURUMADI := GENINI.ReadString(Ops_GenelOpsiyon_KURUMADI,'Gen Tıp Merkezi'); //  GenelOpsiyon KURUMADI
 
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := 'select GetDate()';
+  Tablo.Query1.SQL.Text := 'select '+DbSimdi;   // MSSQL: getdate() | PG: now()
   Tablo.Query1.Open;
   BugunTrh := Tablo.Query1.Fields[0].AsDateTime;
 
