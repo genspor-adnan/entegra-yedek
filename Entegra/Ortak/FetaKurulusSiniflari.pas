@@ -1860,7 +1860,7 @@ begin
   Result := TADOQuery.Create(nil);
   Result.Connection := cnn;
   Result.CommandTimeout := 12000;
-  Result.InitSql(Sql,paramNames,params,UseDataSource);
+  Result.InitSql(PgSqlCevir(Sql),paramNames,params,UseDataSource);   // PG diyalekt cevir
 end;
 
 class function Veritabani.SqlTarihAralığı(ABaşlangıç, ABitiş: TDateTime;
