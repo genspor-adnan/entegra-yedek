@@ -204,7 +204,7 @@ type
 
 implementation
 
-uses Dialogs{$IFNDEF NO_UTABLO},oPENsqlsERVER,UMesaj{$ENDIF},Registry, SynRegExpr, StrUtils, Prjconst, UGenSifre;
+uses Dialogs{$IFNDEF NO_UTABLO},oPENsqlsERVER,UMesaj{$ENDIF},Registry, SynRegExpr, StrUtils, Prjconst, UGenSifre, UVeriMotor;
 
 var
   PixPerInch: TPoint;
@@ -2221,12 +2221,34 @@ begin
     end;
 
 // burada ortak parser ile baglanti parametrelerini uyguluyoruz
+    // YENI (Asama 2 - PG gecis): veri motoru secimi REGISTRY'den okunur (baglanti-oncesi
+    //   kaynak; GENINI veritabaninin ICINDE oldugundan oradan OKUNAMAZ). Varsayilan 'MSSQL'
+    //   -> MEVCUT davranis BIREBIR aynidir. Yalniz 'PG' secilirse Postgres'e baglanir (pilot).
+    //   PG parametreleri de registry'den (varsayilanlar dev Docker'a gore: localhost:5433).
+    AktifVeriMotor := MetinMotor(GenRegIni.RegReadString('', 'VeriMotor', 'MSSQL', 'C'));
+    // KOMUT SATIRI override: iki-exe diferansiyel testi icin (biri normal MSSQL, otekini
+    //   "Gentegre.exe -PG" ile calistir -> registry paylasimli oldugundan tek yol bu).
+    if FindCmdLineSwitch('PG', True) then AktifVeriMotor := vmPG
+    else if FindCmdLineSwitch('MSSQL', True) then AktifVeriMotor := vmMSSQL;
+    if AktifVeriMotor = vmPG then
+    begin
+      Ser_Name := GenRegIni.RegReadString('', 'PgSunucu', 'localhost', 'C');
+      DB_Name  := GenRegIni.RegReadString('', 'PgVeritabani', 'gentegre', 'C');
+      if Assigned(Tablo) then Tablo.Database_Name := DB_Name;
+    end;
+
     if Assigned(cnn) then
     begin
       if cnn.Connected then
         cnn.Connected := False;
       cnn.LoginPrompt := False;
-      ApplyFireDACConnectionString(cnn, cst);
+      if AktifVeriMotor = vmPG then
+        MotorBaglantisiKur(cnn, vmPG, Ser_Name, DB_Name,
+          GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'),
+          GenRegIni.RegReadString('', 'PgSifre', 'FETAGEN', 'C'),
+          StrToIntDef(GenRegIni.RegReadString('', 'PgPort', '5433', 'C'), 5433))
+      else
+        ApplyFireDACConnectionString(cnn, cst);
     end;
 
     if Assigned(Tablo) and Assigned(Tablo.FDCnn) and (Tablo.FDCnn <> cnn) then
@@ -2234,7 +2256,13 @@ begin
       if Tablo.FDCnn.Connected then
         Tablo.FDCnn.Connected := False;
       Tablo.FDCnn.LoginPrompt := False;
-      ApplyFireDACConnectionString(Tablo.FDCnn, cst);
+      if AktifVeriMotor = vmPG then
+        MotorBaglantisiKur(Tablo.FDCnn, vmPG, Ser_Name, DB_Name,
+          GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'),
+          GenRegIni.RegReadString('', 'PgSifre', 'FETAGEN', 'C'),
+          StrToIntDef(GenRegIni.RegReadString('', 'PgPort', '5433', 'C'), 5433))
+      else
+        ApplyFireDACConnectionString(Tablo.FDCnn, cst);
     end;
 
     try
