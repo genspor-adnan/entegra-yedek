@@ -93,6 +93,7 @@ uses
   UDokumAramaFrame in 'AramaFrame\UDokumAramaFrame.pas' {DokumAramaFrame: TFrame},
   PrjConst in 'PrjConst.pas',
   UBinarySave in 'Ortak\UBinarySave.pas',
+  UVeriMotor in 'Ortak\UVeriMotor.pas',
   UTakvimIslemleri in 'UTakvimIslemleri.pas',
   UBelgeIslemleri in 'UBelgeIslemleri.pas' {BelgeIslemleriDlg},
   UKasaWizard in 'UKasaWizard.pas' {KasaWizardDlg},

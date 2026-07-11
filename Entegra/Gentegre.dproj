@@ -426,6 +426,7 @@
         </DCCReference>
         <DCCReference Include="PrjConst.pas"/>
         <DCCReference Include="Ortak\UBinarySave.pas"/>
+        <DCCReference Include="Ortak\UVeriMotor.pas"/>
         <DCCReference Include="UTakvimIslemleri.pas"/>
         <DCCReference Include="UBelgeIslemleri.pas">
             <Form>BelgeIslemleriDlg</Form>
