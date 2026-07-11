@@ -29,6 +29,11 @@ function DbAd(const AAd: string): string;           // [AAd]          | "AAd"  (
 //   'select '+DbUst(1)+' ... '+DbSinir(1)  ->  MSSQL: 'select top 1 ... '  |  PG: 'select ... limit 1'
 function DbUst(ASayi: Integer): string;             // 'top N '       | ''
 function DbSinir(ASayi: Integer): string;           // ''             | 'limit N'
+// Tarih parcalari: verilen ifadeyi (ör. DbSimdi) motora uygun sararlar.
+//   Ornek:  '... DEGER= ' + DbYil(DbSimdi)   -> MSSQL: year(getdate())  | PG: extract(year from now())
+function DbYil(const AIfade: string): string;       // year(x)  | extract(year from x)
+function DbAy(const AIfade: string): string;        // month(x) | extract(month from x)
+function DbGun(const AIfade: string): string;       // day(x)   | extract(day from x)
 
 // ---- Baglanti ----
 // Secili motora gore FDConnection'i yapilandirir. PG icin makinede libpq (PostgreSQL
@@ -79,6 +84,24 @@ end;
 function DbSinir(ASayi: Integer): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'limit ' + IntToStr(ASayi) else Result := '';
+end;
+
+function DbYil(const AIfade: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'extract(year from ' + AIfade + ')'
+  else Result := 'year(' + AIfade + ')';
+end;
+
+function DbAy(const AIfade: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'extract(month from ' + AIfade + ')'
+  else Result := 'month(' + AIfade + ')';
+end;
+
+function DbGun(const AIfade: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'extract(day from ' + AIfade + ')'
+  else Result := 'day(' + AIfade + ')';
 end;
 
 function MotorMetne(AMotor: TVeriMotor): string;

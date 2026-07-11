@@ -12351,11 +12351,8 @@ begin
 
   Dokum_Degis_Yetki := GENINI.ReadBoolean(Ops_Dokum_Degis,False);
 
-  // getdate()/year() diyalekt farki: PG'de extract(year from now())
-  if AktifVeriMotor = vmPG then
-    TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= extract(year from now())')
-  else
-    TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= year(getdate())');
+  // Diyalekt seam ile tek satir (year(getdate()) | extract(year from now())):
+  TablodanSorguAc(1,'select * from GENINI where BOLUM=-3301 and ANAHTAR=''2'' and DEGER= '+DbYil(DbSimdi));
   YeniYilDevriVar := Query1.RecordCount>0;
 
   Sektor := GENINI.ReadInteger(Ops_Sektor,0);
