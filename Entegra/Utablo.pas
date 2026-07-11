@@ -10392,6 +10392,14 @@ begin
   if Sender is TFDConnection then
   begin
     C := TFDConnection(Sender);
+    if AktifVeriMotor = vmPG then
+    begin
+      // PG: MSSQL-ozel MARS / master-cozumleme / 'dbo' YOK. Sema 'public'.
+      C.Params.Values['MetaCurSchema'] := 'public';
+      C.Params.Values['MetaDefSchema'] := 'public';
+    end
+    else
+    begin
     C.Params.Values['MARS_Connection'] := 'Yes';
     C.Params.Values['MultipleActiveResultSets'] := 'True';
 
@@ -10415,6 +10423,7 @@ begin
       if Pos('MARS_CONNECTION', UpperCase(CS)) = 0 then
         CS := CS + ';MARS_Connection=Yes';
       C.ConnectionString := CS;
+    end;
     end;
   end;
 end;
