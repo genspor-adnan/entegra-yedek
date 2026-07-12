@@ -11768,7 +11768,7 @@ end;
 procedure TTablo.CariDurumUpdate(ID:Integer);
 var s:string;
 begin
-   // TEK query: konumsal TOP -> seam (DbUst basta, DbSinir sonda); isnull/getdate/SET NOCOUNT
+   //  TEK query: konumsal TOP -> seam (DbUst basta, DbSinir sonda); isnull/getdate/SET NOCOUNT
    //   merkezi cevirici (BasitKomut->PgSqlCevir) halleder. MSSQL'de DbUst='top 1 '/DbSinir=''
    //   -> orijinal metin BIREBIR; PG'de DbUst=''/DbSinir='limit 1' + coalesce/now.
    s := ' update REHBER set DURUM = isnull((select '+DbUst(1)+'TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
@@ -12393,7 +12393,7 @@ begin
   DokumDegiskenListesi := TStringList.Create;
 
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := ' select @@SPID ';
+  Tablo.Query1.SQL.Text := PgSqlCevir(' select @@SPID ');   // MSSQL: @@SPID | PG: pg_backend_pid()
   Tablo.Query1.Open;
   SPID := Tablo.Query1.Fields[0].AsInteger;
 

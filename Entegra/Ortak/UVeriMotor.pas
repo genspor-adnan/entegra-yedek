@@ -124,6 +124,7 @@ begin
   Result := StringReplace(Result, 'getutcdate()',  'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'sysdatetime()', 'now()',        [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@@spid',        'pg_backend_pid()', [rfReplaceAll, rfIgnoreCase]);
   // NOT: top/scope_identity/charindex/[]/+  -> BURADA DEGIL (belirsiz/konumsal); seam ile.
 end;
 
