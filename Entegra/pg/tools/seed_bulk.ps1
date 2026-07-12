@@ -8,6 +8,7 @@
 # ============================================================
 param(
   [int]$MaxRows = 20000,
+  [string]$ExcludePattern = '',        # regex: eslesen tablolar ATLANIR (transaction/log/yedek)
   [string[]]$Exclude = @(),
   [string]$MssqlServer='DESKTOP-HL3J3AS\SQLEXPRESS', [string]$MssqlDb='BILIM',
   [string]$MssqlUser='sa', [string]$MssqlPass='FETAGEN',
@@ -35,6 +36,7 @@ $cn.Open();$c=$cn.CreateCommand()
 $c.CommandText="SELECT t.name, SUM(p.rows) r FROM sys.tables t JOIN sys.partitions p ON p.object_id=t.object_id AND p.index_id IN(0,1) WHERE t.schema_id=SCHEMA_ID('dbo') GROUP BY t.name HAVING SUM(p.rows) BETWEEN 1 AND $MaxRows ORDER BY r"
 $rd=$c.ExecuteReader();$tabs=@();while($rd.Read()){$tabs+=[string]$rd[0]};$rd.Close()
 $tabs=$tabs|?{$Exclude -notcontains $_}
+if($ExcludePattern -ne ''){ $tabs=$tabs|?{$_ -notmatch $ExcludePattern} }
 Write-Host ("Seed edilecek: {0} tablo (<= {1} satir)" -f $tabs.Count,$MaxRows) -ForegroundColor Cyan
 $ok=0;$fail=@();$seqTabs=@()
 foreach($t in $tabs){
@@ -70,9 +72,23 @@ foreach($t in $tabs){
   else { $fail+="$t : "+(($res|Select-Object -First 1)); Write-Host ("  HATA {0}" -f $t) -ForegroundColor Yellow }
 }
 $cn.Close()
-# identity sequence'lari duzelt
-foreach($tl in $seqTabs){
-  docker exec -e "PGPASSWORD=$PgPass" $PgContainer psql -U $PgUser -d $PgDb -tAc "SELECT setval(pg_get_serial_sequence('$tl','id'), GREATEST((SELECT COALESCE(MAX(id),0) FROM $tl),1)) WHERE pg_get_serial_sequence('$tl','id') IS NOT NULL" 2>&1 | Out-Null
-}
+# identity sequence'lari duzelt (TUM identity kolonlari; 'id' varsaymaz)
+$seqSql=@"
+DO `$`$ DECLARE r record; seq text; mx bigint;
+BEGIN
+  FOR r IN SELECT table_name, column_name FROM information_schema.columns
+           WHERE table_schema='$PgSchema' AND is_identity='YES' LOOP
+    seq := pg_get_serial_sequence('$PgSchema.'||quote_ident(r.table_name), r.column_name);
+    IF seq IS NOT NULL THEN
+      EXECUTE format('SELECT COALESCE(MAX(%I),0) FROM %I', r.column_name, r.table_name) INTO mx;
+      PERFORM setval(seq, GREATEST(mx,1));
+    END IF;
+  END LOOP;
+END `$`$;
+"@
+$st=[System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($st,$seqSql,(New-Object System.Text.UTF8Encoding($false)))
+docker cp $st "${PgContainer}:/tmp/seqfix.sql" | Out-Null
+docker exec -e "PGPASSWORD=$PgPass" $PgContainer psql -U $PgUser -d $PgDb -f /tmp/seqfix.sql 2>&1 | Out-Null
+Remove-Item $st -Force
 Write-Host ("`n=== BITTI: {0} basarili, {1} hata ===" -f $ok,$fail.Count) -ForegroundColor Green
 if($fail){Write-Host "HATALAR:" -ForegroundColor Yellow; $fail|Select-Object -First 30|%{Write-Host ("  "+$_)}}
