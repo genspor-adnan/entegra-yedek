@@ -116,6 +116,9 @@ JOIN sys.columns col ON col.object_id=ic.object_id AND col.column_id=ic.column_i
 WHERE i.object_id=OBJECT_ID('dbo.$Table') AND i.is_primary_key=1 ORDER BY ic.key_ordinal
 "@
 $rd = $cmd.ExecuteReader(); $pk = @(); while ($rd.Read()) { $pk += LI $rd['name'] }; $rd.Close()
+# PK constraint ADI = MSSQL PK adi (app TFDTable IndexName='PK_X_1' bekliyor) -> kucuk harf
+$cmd.CommandText = "SELECT name FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.$Table') AND is_primary_key=1"
+$pkName = $cmd.ExecuteScalar(); if ($pkName) { $pkName = LI $pkName } else { $pkName = 'pk_'+(LI $Table) }
 $cn.Close()
 
 # --- PG DDL uret ---
@@ -135,7 +138,7 @@ foreach ($c in $cols) {
   if (-not $c.Nullable) { $line += " NOT NULL" }
   $lines += $line
 }
-if ($pk.Count -gt 0) { $lines += "  CONSTRAINT pk_$tl PRIMARY KEY (" + (($pk | ForEach-Object { '"' + $_ + '"' }) -join ', ') + ")" }
+if ($pk.Count -gt 0) { $lines += "  CONSTRAINT ""$pkName"" PRIMARY KEY (" + (($pk | ForEach-Object { '"' + $_ + '"' }) -join ', ') + ")" }
 
 $ddl = "-- $MssqlDb.dbo.$Table -> $PgSchema.$tl`n"
 $ddl += "DROP TABLE IF EXISTS $PgSchema.$tl CASCADE;`n"

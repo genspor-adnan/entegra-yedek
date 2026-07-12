@@ -71,6 +71,8 @@ WHERE c.object_id=OBJECT_ID('dbo.$t') ORDER BY c.column_id
   if(-not $cols){continue}
   $c.CommandText = "SELECT col.name FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id=i.object_id AND ic.index_id=i.index_id JOIN sys.columns col ON col.object_id=ic.object_id AND col.column_id=ic.column_id WHERE i.object_id=OBJECT_ID('dbo.$t') AND i.is_primary_key=1 ORDER BY ic.key_ordinal"
   $rd=$c.ExecuteReader(); $pk=@(); while($rd.Read()){$pk+=LI $rd['name']}; $rd.Close()
+  $c.CommandText="SELECT name FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.$t') AND is_primary_key=1"
+  $pkName=$c.ExecuteScalar(); if($pkName){$pkName=LI $pkName}else{$pkName='pk_'+(LI $t)}
 
   $tl=LI $t; $lines=@()
   foreach($col in $cols){
@@ -81,7 +83,7 @@ WHERE c.object_id=OBJECT_ID('dbo.$t') ORDER BY c.column_id
     if(-not $col.Nullable){$ln+=" NOT NULL"}
     $lines+=$ln
   }
-  if($pk.Count -gt 0){$lines+="  CONSTRAINT pk_$tl PRIMARY KEY ("+(($pk|ForEach-Object{'"'+$_+'"'}) -join ', ')+")"}
+  if($pk.Count -gt 0){$lines+="  CONSTRAINT ""$pkName"" PRIMARY KEY ("+(($pk|ForEach-Object{'"'+$_+'"'}) -join ', ')+")"}
   [void]$all.AppendLine("DROP TABLE IF EXISTS $PgSchema.$tl CASCADE;")
   [void]$all.AppendLine("CREATE TABLE $PgSchema.$tl (")
   [void]$all.AppendLine(($lines -join ",`n"))
