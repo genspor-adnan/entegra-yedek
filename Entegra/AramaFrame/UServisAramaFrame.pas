@@ -121,7 +121,7 @@ begin
 
    // 1:sadece kendi  5:departman 10:şube --100:tüm
    Tablo.TablodanSorguAc(2, 'select isnull((select BILGI from YETKIEK Y inner join ROLLER R on R.ID=Y.ROLID inner join KULLANICI K on R.ID=K.ROLID '+
-                            ' WHERE Y.MODULID = 3001 and K.REHBERID='+Kullanan+'),0)');
+                            ' WHERE Y.MODULID = 3001 and K.REHBERID='+Kullanan+'),''0'')');
    Ekle(0, 1, 'Aktif Servislerim');
    Ekle(1, 2, 'İlgili Olduklarım');
    if (TamYetkili)or(Tablo.Query2.Fields[0].AsInteger>1) then
