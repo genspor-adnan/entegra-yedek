@@ -371,7 +371,7 @@ function DBGunTarihi :TDate;
 var
   res : TADOQuery;
 begin
-  res := Query('Select convert(datetime,convert(varchar(10),GETDATE(),103),103)');
+  res := Query('Select '+DbConv(DbConv('GETDATE()','varchar(10)',103),'datetime',103));
   try
     result := res.Fields[0].AsDateTime;
   finally

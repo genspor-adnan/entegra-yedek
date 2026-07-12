@@ -246,7 +246,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,FetaClassExtensionsConsts, UExceldenVeriAl,
+uses UVeriMotor, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,FetaClassExtensionsConsts, UExceldenVeriAl,
   UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, UGirisKutusuEx,LocOnFly;
 
 {$R *.dfm}
@@ -875,8 +875,8 @@ begin
    else
       Sql1 := Sql1 + ' and PP.REHBERID <> 0  ';
 
-  Sql1 := Sql1 + ' AND (PP.GIRIS between CONVERT(DATETIME,''' + FormatDateTime('mm-dd-yyyy', TarihBas.Date) + ' 00:00:00'',102) ' +
-       ' and CONVERT(DATETIME,''' + FormatDateTime('mm-dd-yyyy', TarihBit.Date)+ ' 23:59'',102))';
+  Sql1 := Sql1 + ' AND (PP.GIRIS between '+DbConv('''' + FormatDateTime('mm-dd-yyyy', TarihBas.Date) + ' 00:00:00''','DATETIME',102)+' ' +
+       ' and '+DbConv('''' + FormatDateTime('mm-dd-yyyy', TarihBit.Date)+ ' 23:59''','DATETIME',102)+'))';
 
   if RbGirisTumu.Checked = False then begin
      if RbGirisErken.Checked  then

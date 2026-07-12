@@ -1909,10 +1909,10 @@ begin
 
             Paramst :=Paramst + ' ,R.EKLEMETARIHI, SONAKTIVITEKONUSU = (SELECT '+DbUst(1)+'KONUSU FROM GOREVLER A WHERE A.REHBERID=R.ID ORDER BY BITISTARIHI DESC   '+DbSinir(1)+')';
 //        if CariGridViewSONAKTIVITETARIHI.Visible then
-            Paramst :=Paramst + ' ,SONAKTIVITETARIHI =  (SELECT '+DbUst(1)+'convert(DateTime,(BITISTARIHI),101) AS BITISTARIHI FROM GOREVLER A  '+
+            Paramst :=Paramst + ' ,SONAKTIVITETARIHI =  (SELECT '+DbUst(1)+DbConv('(BITISTARIHI)','DateTime',101)+' AS BITISTARIHI FROM GOREVLER A  '+
             'WHERE  A.REHBERID =R.ID  ORDER BY BITISTARIHI DESC '+DbSinir(1)+')';
   //      if CariGridViewSONSATBELGETARIHI.Visible then
-            Paramst :=Paramst + ' ,SONSATBELGETARIHI = (SELECT '+DbUst(1)+' convert(DateTime,(FATURATARIH),103) as FATURATARIH FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC '+DbSinir(1)+') ';
+            Paramst :=Paramst + ' ,SONSATBELGETARIHI = (SELECT '+DbUst(1)+' '+DbConv('(FATURATARIH)','DateTime',103)+' as FATURATARIH FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC '+DbSinir(1)+') ';
     //    if CariGridViewSONSATTUTARI.Visible then
             Paramst :=Paramst + ' ,SONSATTUTARI = (SELECT '+DbUst(1)+' FATURA_TUTARI FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC '+DbSinir(1)+') ';
   end;

@@ -113,7 +113,7 @@ var
 
 
 implementation
-uses UAnaForm,Banka_ING,Fetautil,FetaKurulusSiniflari,UHesapHareketleriAktarimAyarlari, prjconst,LocOnFly;
+uses UAnaForm,Banka_ING,Fetautil,FetaKurulusSiniflari,UHesapHareketleriAktarimAyarlari, prjconst,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
 
@@ -171,7 +171,7 @@ begin
   end;
   if not TabAktarimEslestirme.Active then begin
     TabAktarimEslestirme.Close; //rehberid ve tarihe göre tutarı karşılaştırıcaz...
-    TabAktarimEslestirme.SQL.Text:='SELECT TARIH=Convert(datetime,Convert(varchar(10),T.ODEMETARIHI,103),103),TD.TALIMATID,K.REHBERID,TUTAR=SUM(BORC-ALACAK)';
+    TabAktarimEslestirme.SQL.Text:='SELECT TARIH='+DbConv(DbConv('T.ODEMETARIHI','varchar(10)',103),'datetime',103)+',TD.TALIMATID,K.REHBERID,TUTAR=SUM(BORC-ALACAK)';
     TabAktarimEslestirme.SQL.Add(' FROM TALIMATDETAY TD INNER JOIN KASA K ON TD.KASAID=K.ID INNER JOIN TALIMATLAR T ON T.ID=TD.TALIMATID');
     TabAktarimEslestirme.SQL.Add(' WHERE TD.DURUM=1 and K.TUR in(61,71) GROUP BY T.ODEMETARIHI,TD.TALIMATID,K.REHBERID');
     TabAktarimEslestirme.Open;

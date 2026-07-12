@@ -100,7 +100,7 @@ implementation
 
 {$R *.DFM}
 
-uses UTablo, DB, DateUtils, FetaUtil;
+uses UTablo, DB, DateUtils, FetaUtil, UVeriMotor;
 var s1, s2, LisansNo, LisansTar: string[30];
   BilgisayarAdi:array [0..127] of char;
   i, uz: smallint;
@@ -150,7 +150,7 @@ begin
 
   // Sistemde var olan Açık Lisans Bilgisi alınıyor.
     Tablo.Query3.Close;
-    Tablo.Query3.SQL.Text := 'select *, convert(datetime,convert(varchar(10),GETDATE(),103),103) as BUGUN from GENOTIP WHERE SABIT = ''50''';
+    Tablo.Query3.SQL.Text := 'select *, '+DbConv(DbConv('GETDATE()','varchar(10)',103),'datetime',103)+' as BUGUN from GENOTIP WHERE SABIT = ''50''';
     Tablo.Query3.Open;
 
   // Sistemde var olan Açık Lisans Bilgisi alınıyor.

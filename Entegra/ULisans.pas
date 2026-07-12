@@ -281,7 +281,7 @@ end;
 
 function DBGunTarihi :TDate;
 begin
-  result := Query('Select convert(datetime,convert(varchar(10),GETDATE(),103),103)').Fields[0].AsDateTime;
+  result := Query('Select '+DbConv(DbConv('GETDATE()','varchar(10)',103),'datetime',103)).Fields[0].AsDateTime;
 end;
 
 function DBAcikLisans :string;

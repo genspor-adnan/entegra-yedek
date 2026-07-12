@@ -130,7 +130,7 @@ var
   _Hata : string;
    //İşlem Türleri  = G : giriş, C: Çıkış, D: Düzelt , S:Sil  , GD: GirişDüzel, CD : Çıkış Düzelt
 implementation
- Uses Utablo,PrjConst,UItsAraclari,UitsBusiness;//,LocOnFly;
+ Uses Utablo,PrjConst,UItsAraclari,UitsBusiness,UVeriMotor;//,LocOnFly;
 
 {$R *.dfm}
 function TKareKodDlg.IsInteger(S: String) : Boolean;
@@ -148,7 +148,7 @@ if (Serino<>'') and (UrunKodu<>'') then
 begin
 Tablo.Query6.close;
 Tablo.Query6.SQL.Text:= '';
-Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+convert(varchar(20),FB.TARIH,120)+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
+Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+'+DbConv('FB.TARIH','varchar(20)',120)+'+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
 Tablo.Query6.SQL.add(' (SELECT * FROM KAREKOD KK WHERE KK.SERINO = '''+SeriNo+''' AND KK.URUNKOD = '''+UrunKodu+''' ) AS DD ');
 Tablo.Query6.SQL.add(' ,FATURA F,FATBASLIK FB ,REHBER R WHERE DD.GIRFATURAID = F.ID AND FB.ID=DD.GIRFATBASID AND FB.ID=F.FATBASID AND R.ID=FB.REHBERID ');
 tablo.Query6.Open;

@@ -282,19 +282,19 @@ var
 begin
         Sql1 :='SELECT' + #13#10 +
                 'PP.ID,R.FIRMA,PV.GUNADI,PP.GIRIS,PP.CIKIS,PP.SUBEID,PP.DURUM,' + #13#10 +
-                '(convert(varchar,PV.GIRIS,108) +'' / ''+convert(varchar,PV.CIKIS,108)) as VARGIRISCIKIS,' + #13#10 +
-                'GIRFARK=isnull(dbo.fn_GIRFARK(convert(varchar,PV.GIRIS,108),PP.GIRIS),''00:00''),' + #13#10 +
+                '('+DbConv('PV.GIRIS','varchar',108)+' +'' / ''+'+DbConv('PV.CIKIS','varchar',108)+') as VARGIRISCIKIS,' + #13#10 +
+                'GIRFARK=isnull(dbo.fn_GIRFARK('+DbConv('PV.GIRIS','varchar',108)+',PP.GIRIS),''00:00''),' + #13#10 +
                 'CALSURE=isnull(dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS)),''00:00''),' + #13#10 +
                 'CALFARK= CASE WHEN charindex(''*'',dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS)))=0' + #13#10 +
                 'THEN dbo.fn_CALFARK(dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS))) ELSE ''00:00'' END,' + #13#10 +
-                'CIKFARK=isnull(dbo.fn_CIKFARK(convert(varchar,PV.GIRIS,108),dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),PP.GIRIS,PP.CIKIS),''00:00'')' + #13#10 +
+                'CIKFARK=isnull(dbo.fn_CIKFARK('+DbConv('PV.GIRIS','varchar',108)+',dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),PP.GIRIS,PP.CIKIS),''00:00'')' + #13#10 +
                 'from PERS_PDKS PP' + #13#10 +
                 'LEFT OUTER JOIN REHBER R on R.ID=PP.REHBERID' + #13#10 +
                 'left outer join PERS_VARDIYATANIM PV on' + #13#10 +
                 'PV.REHBERID=CASE WHEN EXISTS(SELECT '+DbUst(1)+'ISNULL(REHBERID,-1) FROM dbo.PERS_VARDIYATANIM WHERE REHBERID=PP.REHBERID '+DbSinir(1)+')THEN' + #13#10 +
                 'PP.REHBERID ELSE -1 END and PV.GUN=DATEPART(WEEKDAY,PP.GIRIS) Where PP.REHBERID <> 0 ';
-      Sql1 := Sql1 + ' AND (PP.GIRIS between CONVERT(DATETIME,''' + FormatDateTime('yyyy-mm-dd', DateTarih.Date) + ' 00:00:00'',102) ' +
-      ' and CONVERT(DATETIME,''' + FormatDateTime('yyy-mm-dd', DateTarih.Date)+ ' 23:59'',102))';
+      Sql1 := Sql1 + ' AND (PP.GIRIS between '+DbConv(''''+FormatDateTime('yyyy-mm-dd', DateTarih.Date)+' 00:00:00''','DATETIME',102)+' ' +
+      ' and '+DbConv(''''+FormatDateTime('yyy-mm-dd', DateTarih.Date)+' 23:59''','DATETIME',102)+')';
     if ComboSube.EditValue <> 0 then begin
       Sql1 := Sql1 + ' and PP.SUBEID = '+VarToStr(ComboSube.EditValue)+'  ';
       TabPDKS.Close;

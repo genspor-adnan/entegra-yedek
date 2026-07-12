@@ -1282,12 +1282,12 @@ begin
   Application.CreateForm(TTabloGirisDlg, TabloGirisDlg);
   TabloGirisDlg.Caption := 'İleti Geçmişi';
   TabloGirisDlg.Komut :=
-    'select TARIH=CONVERT(VARCHAR(10), TARIH, 103),SAAT=CONVERT(VARCHAR(10), TARIH, 108), KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
+    'select TARIH='+DbConv('TARIH','VARCHAR(10)',103)+',SAAT='+DbConv('TARIH','VARCHAR(10)',108)+', KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
     #13#10 + 'from MESAJLOG ML' + #13#10 + 'inner join MESAJLOGKULLANICI MKUL on MKUL.MESAJLOGID=ML.ID' +
     #13#10
     + 'inner join REHBER RG on RG.ID=ML.GONDERENID' + #13#10 + 'inner join REHBER RA on RA.ID=MKUL.ALICIID' +
     #13#10 + 'where ML.GONDERENID = '+IntToStr(ActiveChatWindow.FUserId)+' and MKUL.ALICIID = '+Kullanan+' ' + #13#10 + 'union all' +
-    #13#10 + 'select TARIH=CONVERT(VARCHAR(10), TARIH, 103),SAAT=CONVERT(VARCHAR(10), TARIH, 108), KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
+    #13#10 + 'select TARIH='+DbConv('TARIH','VARCHAR(10)',103)+',SAAT='+DbConv('TARIH','VARCHAR(10)',108)+', KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
     #13#10 + 'from MESAJLOG ML' + #13#10 + 'inner join MESAJLOGKULLANICI MKUL on MKUL.MESAJLOGID=ML.ID' + #13#10 +
     'inner join REHBER RG on RG.ID=ML.GONDERENID' + #13#10 + 'inner join REHBER RA on RA.ID=MKUL.ALICIID' + #13#10 +
     'where ML.GONDERENID = '+Kullanan+' and MKUL.ALICIID = '+IntToStr(ActiveChatWindow.FUserId)+'' + #13#10 + 'order by 1,2';
@@ -3326,8 +3326,8 @@ begin
          TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar günlerini listelele
        end;
        -1,3:begin
-         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112)  from GRAFIKPLAN_SPID'+
-         ' Where TARIH=CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112) and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 23:59',DateGrafikBitTar)+''' '+
+         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
+         ' Where TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 23:59',DateGrafikBitTar)+''' '+
          ' Order by TARIH');
        end;
     end;
@@ -3528,8 +3528,8 @@ end else begin
          end;
        3:begin
            DateGrafikBitTar := Tablo.GENINI.BugunTrh+365;
-           TabGrafik.SQL.Text:=' select GUN,AY,BAKIYE,TARIH,CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112)  from GRAFIKPLAN_SPID where '+
-                               ' TARIH=CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH)),112) and ';
+           TabGrafik.SQL.Text:=' select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID where '+
+                               ' TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and ';
          end;
     end;
     TabGrafik.SQL.Add( '  TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+

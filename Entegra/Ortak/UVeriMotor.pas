@@ -51,6 +51,10 @@ function DbTarihTipi: string;
 // Alt-metin konumu (1-tabanli, yoksa 0). MSSQL CHARINDEX(needle,haystack) |
 //   PG strpos(haystack,needle) -- ARG SIRASI TERS (konumsal) -> seam.
 function DbBul(const ANeedle, AHaystack: string): string;
+// MSSQL 3-arg CONVERT(tip, expr, style) - tarih<->metin (stil kodlu). ATip 'varchar(10)' gibi
+//   uzunluk tasir (stil+uzunluk PG format'ini belirler; 120+len10=tarih). tip=char/varchar ->
+//   FORMAT yonu (to_char); tip=datetime/date -> PARSE yonu (to_timestamp). MSSQL'de aynen.
+function DbConv(const AExpr, ATip: string; AStyle: Integer): string;
 // Log BILGI kolonu: MSSQL varbinary = COMPRESS(json) | PG jsonb (native). Yaz/oku seam.
 function DbLogBilgiYaz(const AParam: string): string;   // deger ifadesi (INSERT VALUES)
 function DbLogBilgiOku(const AKolon: string): string;   // okuma ifadesi (SELECT); JSON metnini doner
@@ -180,6 +184,52 @@ function DbBul(const ANeedle, AHaystack: string): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'strpos(' + AHaystack + ',' + ANeedle + ')'
   else Result := 'CHARINDEX(' + ANeedle + ',' + AHaystack + ')';
+end;
+
+function PgTarihFmt(AStyle, ALen: Integer): string;   // MSSQL stil kodu -> PG to_char/to_timestamp format
+begin
+  case AStyle of
+    108: Result := 'HH24:MI:SS';                       // saat
+    101: Result := 'MM/DD/YYYY';
+    102: Result := 'YYYY.MM.DD';
+    103: Result := 'DD/MM/YYYY';
+    104: Result := 'DD.MM.YYYY';
+    105: Result := 'DD-MM-YYYY';
+    111: Result := 'YYYY/MM/DD';
+    112: Result := 'YYYYMMDD';
+    113, 121: Result := 'DD Mon YYYY HH24:MI:SS';
+    120:                                               // yyyy-mm-dd hh:mi:ss; uzunluga gore kirp
+      if (ALen > 0) and (ALen <= 10) then Result := 'YYYY-MM-DD'
+      else if (ALen > 0) and (ALen <= 16) then Result := 'YYYY-MM-DD HH24:MI'
+      else Result := 'YYYY-MM-DD HH24:MI:SS';
+  else
+    if (ALen > 0) and (ALen <= 10) then Result := 'YYYY-MM-DD'
+    else Result := 'YYYY-MM-DD HH24:MI:SS';
+  end;
+end;
+
+function DbConv(const AExpr, ATip: string; AStyle: Integer): string;
+var
+  low: string;
+  len, p1, p2: Integer;
+begin
+  if AktifVeriMotor <> vmPG then
+  begin
+    Result := 'convert(' + ATip + ',' + AExpr + ',' + IntToStr(AStyle) + ')';
+    Exit;
+  end;
+  low := LowerCase(Trim(ATip));
+  len := 0;
+  p1 := Pos('(', low);
+  if p1 > 0 then
+  begin
+    p2 := Pos(')', low);
+    if p2 > p1 then len := StrToIntDef(Copy(low, p1 + 1, p2 - p1 - 1), 0);
+  end;
+  if Pos('char', low) > 0 then                          // char/varchar/nchar/nvarchar -> FORMAT
+    Result := 'to_char(' + AExpr + ',''' + PgTarihFmt(AStyle, len) + ''')'
+  else                                                  // datetime/date -> PARSE (metin->zaman)
+    Result := '(to_timestamp(' + AExpr + ',''' + PgTarihFmt(AStyle, 0) + ''')::timestamp)';
 end;
 
 function DbLogBilgiYaz(const AParam: string): string;

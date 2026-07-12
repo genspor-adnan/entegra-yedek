@@ -4333,11 +4333,11 @@ begin
   SQLTxt := SQLTxt + '	select ID=KAMPANYAID from KAMPANYACARI KC where KC.REHBERID=' + inttostr(RehberId) + ') ';
   SQLTxt := SQLTxt + ' and 1=(case ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=70 and KK1.KAMPANYAID=K.ID) is null then 1 ';
-  SQLTxt := SQLTxt + '	when convert(datetime,(select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=70 and KK1.KAMPANYAID=K.ID),103)<GetDate() then 1 ';
+  SQLTxt := SQLTxt + '	when '+DbConv('(select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=70 and KK1.KAMPANYAID=K.ID)','datetime',103)+'<GetDate() then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + ' and 1=(case  ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=80 and KK1.KAMPANYAID=K.ID) is null then 1 ';
-  SQLTxt := SQLTxt + '	when convert(datetime,(select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=80 and KK1.KAMPANYAID=K.ID),103)>GetDate() then 1 ';
+  SQLTxt := SQLTxt + '	when '+DbConv('(select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=80 and KK1.KAMPANYAID=K.ID)','datetime',103)+'>GetDate() then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + ' and 1=(case   ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=90 and KK1.KAMPANYAID=K.ID) is null then 1 ';
@@ -4345,11 +4345,11 @@ begin
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + ' and 1=(case   ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) is null then 1  ';
-  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) < cast(CONVERT(varchar(10),getdate(),108) as datetime) then 1 ';
+  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) < cast('+DbConv('getdate()','varchar(10)',108)+' as datetime) then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + 'and 1=(case    ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) is null then 1  ';
-  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) > cast(CONVERT(varchar(10),getdate(),108) as datetime) then 1 ';
+  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) > cast('+DbConv('getdate()','varchar(10)',108)+' as datetime) then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
 
   TablodanSorguAc(4, SQLTxt);
@@ -7529,7 +7529,7 @@ var
 
   procedure FaturaIslemleri;
   begin
-     Tablo.tablodanSorguAc(0,'SELECT distinct cast(convert(varchar(10),TARIH,120) as datetime)-1, CIKISDEPO, '+
+     Tablo.tablodanSorguAc(0,'SELECT distinct cast('+DbConv('TARIH','varchar(10)',120)+' as datetime)-1, CIKISDEPO, '+
                              ' SUBEID=CASE WHEN S.CIKISDEPO=0 THEN -1 ELSE (SELECT D.SUBEID FROM DEPOLAR D WHERE D.ID=S.CIKISDEPO) END,REHBERID  FROM  SATIS S '+
                              ' where TARIH<GETDATE()-'+IntToStr(GunOnce)+' and isnull(AKTAR,0)=0 order by 1,2');
 
@@ -7549,12 +7549,12 @@ var
   begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO KASA (TUR,[PLANTARIHI] ,[ISLEMTARIHI],BELGENO,REHBERID,HESAPID,BORC,ALACAK,'+
        ' KUR,HESAPTURU,DOVIZ_TUTARI,DOVIZ_KURU,SUBEID,EKLEYEN,EKLEMETARIHI,EKSTREDEKULLAN,GIRISKAYNAK,MASRAFID,R) '+
-       ' SELECT TUR, [PLANTARIHI]=cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),[ISLEMTARIHI]=cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),'+
+       ' SELECT TUR, [PLANTARIHI]=cast('+DbConv('TARIH','varchar(10)',120)+'+'' 23:50'' as datetime),[ISLEMTARIHI]=cast('+DbConv('TARIH','varchar(10)',120)+'+'' 23:50'' as datetime),'+
        ' BELGENO='''', REHBERID,HESAPID,BORC= 0.0,ALACAK=sum(TUTAR),KUR='''+String(CariDoviz)+''',HESAPTURU=CASE TUR WHEN 21 THEN ''K'' WHEN 22 THEN ''B'' WHEN 25 THEN ''P'' ELSE ''H'' END, '+
        ' DOVIZ_TUTARI=sum(TUTAR),DOVIZ_KURU='''+CariDoviz+''',SUBEID,EKLEYEN=0,EKLEMETARIHI=GETDATE(),0,GIRISKAYNAK=4,MASRAFID=0, R=0 '+
-       ' from SATISKASA WHERE isnull(AKTAR,0)=0  AND cast(convert(varchar(10),TARIH,120) as datetime) < GETDATE()-'+IntToStr(GunOnce)+
-       ' GROUP BY TUR,cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),REHBERID,HESAPID,SUBEID ORDER BY 2,1',[],[]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' UPDATE SATISKASA SET AKTAR = 1 WHERE cast(convert(varchar(10),TARIH,120) as datetime) < GETDATE()-'+IntToStr(GunOnce),[],[]);
+       ' from SATISKASA WHERE isnull(AKTAR,0)=0  AND cast('+DbConv('TARIH','varchar(10)',120)+' as datetime) < GETDATE()-'+IntToStr(GunOnce)+
+       ' GROUP BY TUR,cast('+DbConv('TARIH','varchar(10)',120)+'+'' 23:50'' as datetime),REHBERID,HESAPID,SUBEID ORDER BY 2,1',[],[]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' UPDATE SATISKASA SET AKTAR = 1 WHERE cast('+DbConv('TARIH','varchar(10)',120)+' as datetime) < GETDATE()-'+IntToStr(GunOnce),[],[]);
   end;
 
 begin
@@ -12122,8 +12122,8 @@ label
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text:=
          'SELECT sdb.Name AS DatabaseName,' + #13#10 +
-         'CONVERT(DATETIME,COALESCE(CONVERT(VARCHAR(10), MAX(bus.backup_finish_date), 120),''1900-01-01''),120) AS LastBackUpTime,' + #13#10 +
-         'SONYEDEKKACGUNONCE= DATEDIFF(DAY,CONVERT(DATETIME,COALESCE(CONVERT(VARCHAR(10), MAX(bus.backup_finish_date), 120),''1900-01-01''),120),GETDATE() )' + #13#10 +
+         DbConv('COALESCE('+DbConv('MAX(bus.backup_finish_date)','VARCHAR(10)',120)+',''1900-01-01'')','DATETIME',120)+' AS LastBackUpTime,' + #13#10 +
+         'SONYEDEKKACGUNONCE= DATEDIFF(DAY,'+DbConv('COALESCE('+DbConv('MAX(bus.backup_finish_date)','VARCHAR(10)',120)+',''1900-01-01'')','DATETIME',120)+',GETDATE() )' + #13#10 +
          'FROM sys.sysdatabases sdb' + #13#10 +
          'LEFT OUTER JOIN msdb.dbo.backupset bus ON bus.database_name = sdb.name' + #13#10 +
          '' + #13#10 +

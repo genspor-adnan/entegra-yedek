@@ -625,7 +625,7 @@ begin
 
       Tablo.Query4.Close;
       Tablo.Query4.SQL.Text:='SELECT '+DbUst(1)+'MAX(G.GELISNO) AS GELISNO, '+
-                        'GIRISTARIH = CASE WHEN G.GIRISTARIH IS NULL THEN CONVERT (DATETIME , ''' + DateTimeToStr(GiykimbilDlg.Calendar1.DateTime) + ''' , 103) '+
+                        'GIRISTARIH = CASE WHEN G.GIRISTARIH IS NULL THEN '+DbConv(''''+DateTimeToStr(GiykimbilDlg.Calendar1.DateTime)+'''','DATETIME',103)+' '+
                         ' else G.GIRISTARIH '+
                         'END ,ODA '+
                         'FROM GELISLER G LEFT OUTER JOIN SERVIS S ON G.DOSYANO = S.DOSYANO AND G.GELISNO = S.GELISNO '+
@@ -646,11 +646,11 @@ begin
                         'NufusCilt, NufusAileSira, NufusSiraNo, Cinsiyet, '+
                         'MedeniHali, Isi, IkametAdresi, GelisTarihi, VerilenOdano, DOSYANO)'+#13#10+
 //                        'SELECT  CONVERT (DATETIME , ''' + songelistarihi + ''' , 103), '+''+inttostr(maxsirano)+
-                        'SELECT  CONVERT (DATETIME , ''' + DateTimeToStr(GiykimbilDlg.Calendar1.DateTime) + ''' , 103), '+''+inttostr(maxsirano)+
+                        'SELECT  '+DbConv(''''+DateTimeToStr(GiykimbilDlg.Calendar1.DateTime)+'''','DATETIME',103)+', '+''+inttostr(maxsirano)+
                         '     , K.VATANDASLIKNO,  K.AD, K.SOYAD , BABA_ADI, ANA_ADI,    '+
                         '      K.DOGUMYER,K.DOGUMTARIH, KB.UYRUK,KB.BELGETURU,KB.SERINO,KB.IL, '+
                         '      KB.ILCE, KB.MAHALLE_KOY, KB.CILTNO, KB.AILESIRANO,KB.SIRANO,    '+
-                        '      K.CINSIYET,K.MEDENIHAL, K.MESLEK,K.ADRES,CONVERT(DATETIME,'''+songelistarihi+''',103),'''+oda+'''  ,K.DOSYANO  '+
+                        '      K.CINSIYET,K.MEDENIHAL, K.MESLEK,K.ADRES,'+DbConv(''''+songelistarihi+'''','DATETIME',103)+','''+oda+'''  ,K.DOSYANO  '+
                         'FROM                                                                  '+
                         '  KIMLIK K LEFT OUTER JOIN KIMLIKBELGESI KB ON K.DOSYANO = KB.DOSYANO '+
                         'WHERE K.DOSYANO= '''+dosyano+'''';

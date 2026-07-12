@@ -643,7 +643,7 @@ begin
     LSQL := LSQL + ' and i.USTTABLOID=' + IntToStr(LUstT);
   // Tarihe gore AZALAN (en yeni ustte); ayni tarihte master (Başlık) detaydan once.
   // Saniye+tablo+KAYITID+tip bazli sirala ki ayni gruptakiler bitisik gelsin.
-  LSQL := LSQL + ' order by convert(char(19), i.TARIH, 120) desc, ' +
+  LSQL := LSQL + ' order by '+DbConv('i.TARIH','char(19)',120)+' desc, ' +
           'case when i.TABLOID=i.USTTABLOID then 0 else 1 end, i.TABLOID, i.KAYITID, i.ISLEMTIPI, i.ID desc';
 
   try

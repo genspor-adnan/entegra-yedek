@@ -313,7 +313,7 @@ if (Serino<>'') and (UrunKodu<>'') then
 begin
 Tablo.Query6.close;
 Tablo.Query6.SQL.Text:= '';
-Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+convert(varchar(20),FB.TARIH,120)+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
+Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+'+DbConv('FB.TARIH','varchar(20)',120)+'+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
 Tablo.Query6.SQL.add(' (SELECT * FROM STOKID KK WHERE KK.SIRANO = '''+SeriNo+''' AND KK.URUNBARKOD = '''+UrunKodu+''' ) AS DD ');
 Tablo.Query6.SQL.add(' ,FATURA F,FATBASLIK FB ,REHBER R WHERE DD.GIRFATURAID = F.ID AND FB.ID=DD.GIRFATBASID AND FB.ID=F.FATBASID AND R.ID=FB.REHBERID ');
 tablo.Query6.Open;
@@ -802,7 +802,7 @@ var
 Barkod : string;
 begin
   Tablo.Query4.Close;
-  Tablo.Query4.SQL.Text:='SELECT GTIN,LOTNUMARASI,SUBSTRING(CONVERT(VARCHAR(10),convert(datetime,SONKULLANIMTARIHI,102),112),3,6) AS BARKODTARIH,SIRANO FROM ITS_PTS_GELEN_URUN ' +
+  Tablo.Query4.SQL.Text:='SELECT GTIN,LOTNUMARASI,SUBSTRING('+DbConv(DbConv('SONKULLANIMTARIHI','datetime',102),'VARCHAR(10)',112)+',3,6) AS BARKODTARIH,SIRANO FROM ITS_PTS_GELEN_URUN ' +
                        'WHERE  LOTNUMARASI = '''+TakipCagiranLotno+''' and  GIRFATBASID ='+IntToStr(TakipCagiranBaslikId)+'  ';
   Tablo.Query4.Open;
 
