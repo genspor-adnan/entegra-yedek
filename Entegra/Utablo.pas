@@ -11663,7 +11663,7 @@ var DuyID :integer;
       Result := s;
     end;
 begin
-    TablodanSorguAc(5,'SELECT KONU,D.EPOSTA,DUYURU=DY.YORUM from DUYURU D inner join DUYURUYORUM DY on D.ID=DY.DUYURUID and DY.TUR=1 WHERE D.ID='+IntToStr(SablonDuyuruId));
+    TablodanSorguAc(5,'SELECT KONU,D.EPOSTA,DY.YORUM AS DUYURU from DUYURU D inner join DUYURUYORUM DY on D.ID=DY.DUYURUID and DY.TUR=1 WHERE D.ID='+IntToStr(SablonDuyuruId));
 
     DuyID := SQLSatiriKopyala('DUYURU', SablonDuyuruId,[ 'GECERLILIKTARIHI','TUR','SISTEM','SABLONID','KONU', 'EKLEYEN', 'EKLEMETARIHI','OLAYZAMANI'],
               [ GENINI.BugunTrhSaat,2, 1, SablonDuyuruId,
