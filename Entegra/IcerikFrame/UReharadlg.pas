@@ -1777,7 +1777,7 @@ begin
   if AktifSekme='TAksiyonlarGorevFrame' then
      REHBER.SQL.Add(' and R.GRUP = 1 ')
   else
-     REHBER.SQL.Add(' and R.GRUP > 1 ');
+     REHBER.SQL.Add(' and  R.GRUP > 1 ');
 
   REHBER.SQL.Add(' and R.GRUP <> 334 order by 1');
   if FArama.AraYetkili.Text <> '' then

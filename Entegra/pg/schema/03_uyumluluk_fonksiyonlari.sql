@@ -16,9 +16,12 @@ CREATE OR REPLACE FUNCTION public.sysdatetime() RETURNS timestamp
 CREATE OR REPLACE FUNCTION public.getutcdate() RETURNS timestamp
   LANGUAGE sql STABLE AS $$ SELECT (now() AT TIME ZONE 'UTC')::timestamp $$;
 
--- isnull(a,b): MSSQL 2-arg null-degistir -> coalesce. anyelement (ayni tip; MSSQL de tip
---   uyumu ister). Karisik tip (nvarchar,int) nadir -> o cagrida CAST gerekebilir.
-CREATE OR REPLACE FUNCTION public.isnull(anyelement, anyelement) RETURNS anyelement
+-- isnull(a,b): MSSQL 2-arg null-degistir -> coalesce. anycompatible (PG 13+): iki arg FARKLI
+--   ama uyumlu tip olabilir (or. smallint + integer -> integer). anyelement ISE ayni tipi
+--   zorlar (isnull(smallint,1) -> "function isnull(smallint,integer) does not exist"). MSSQL
+--   isnull hedef-tipe implicit cast yapar -> anycompatible bu davranisa en yakin.
+DROP FUNCTION IF EXISTS public.isnull(anyelement, anyelement);
+CREATE OR REPLACE FUNCTION public.isnull(anycompatible, anycompatible) RETURNS anycompatible
   LANGUAGE sql IMMUTABLE AS $$ SELECT coalesce($1, $2) $$;
 
 -- charindex(needle, haystack [, start]): 1-tabanli konum, yoksa 0.
