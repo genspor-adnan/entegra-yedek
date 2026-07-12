@@ -12637,7 +12637,7 @@ begin
       RepMedikalSinif.Properties.items := Tablo.imgComboboxInit(' select DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM = '+IntToStr(Ops_StokKart_MedikalSinif)).items;
   GENINI.ReadImageSection(Ops_Adisyon_Durumlar, RepAdisyon.Properties.Items, False);
   RepCariRoller.Properties.Items := Tablo.imgComboboxInit('select ID, CONCAT((SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),''/'','+
-      '(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+')) AS ROL FROM ROLLER ROL WHERE ID>-1').Items; //Cari Pozisyon Türü
+       '(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+')) AS ROL FROM ROLLER ROL WHERE ID>-1').Items; //Cari Pozisyon Türü
   GENINI.ReadImageSection(Ops_DepoVarsayilan, RepDepoVarsayilanListesi.Properties.Items, False);  // 'DepoVarsayilan'
   GENINI.ReadImageSection(Ops_FiyatListeAdi, RepFiyatAdlari.Properties.Items, False);  // 'FiyatListeAdi'
   GENINI.ReadImageSection(Ops_FiyatListeAdiAlis, RepFiyatAdlariAlis.Properties.Items, False);  // 'FiyatListeAdiAlis'
@@ -12796,7 +12796,7 @@ begin
     GENINI.ReadImageSection(Ops_KampanyaTurleri, repKampanyaTur.Properties.Items, False);    // Kampanya Türleri
     GENINI.ReadImageSection(Ops_KampanyaKosulTurleri, repKampanyaKosulTur.Properties.Items,  False); // Kampanya Koşul Türleri
     GENINI.ReadImageSection(Ops_KampanyaSonucTurleri, repKampanyaSonucTur.Properties.Items,  False); // Kampanya Sonuc Türleri
-    RepStokBoyutlar.Properties.Items := tablo.imgComboboxInit('select DEGER,ANAHTAR from GENINI where BOLUM=0 and DEGER like ''-2799____'' and DIL='+IntToStr(Dil)).Items;
+    RepStokBoyutlar.Properties.Items := tablo.imgComboboxInit('select DEGER,ANAHTAR from GENINI where BOLUM=0 and CAST(DEGER AS varchar(20)) like ''-2799____'' and DIL='+IntToStr(Dil)).Items;
     RepStokBoyutKombinasyonlar.Properties.Items := tablo.imgComboboxInit('select 0 AS ID,'''' AS ADI union all select ID,ADI from STOKBOYUTGRUPLARI where isnull(BOYUT1,0)<>0 ').Items;
 
     GENINI.ReadImageSection(Ops_IsEmri_Durum, repIsEmriDurum.Properties.Items, False);
