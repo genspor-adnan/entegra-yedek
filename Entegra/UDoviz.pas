@@ -105,7 +105,7 @@ var
 
 implementation
 
-uses UTablo, UCombo, PrjConst, LocOnFly, FetaKurulusSiniflari;
+uses UTablo, UCombo, PrjConst, LocOnFly, FetaKurulusSiniflari, UVeriMotor;
 
 {$R *.DFM}
 var
@@ -258,7 +258,7 @@ var
 
   end;
 begin
-  SQLResult := 'delete from DOVIZ where TARIH='''+FormatdateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+''' and CINSI IN (select ANAHTAR from GENINI (nolock) WHERE DIL='+IntToStr(Dil)+'AND BOLUM='+IntToStr(Ops_DovizEslestir)+') ';    //  DovizEslestir
+  SQLResult := PgSqlCevir('delete from DOVIZ where TARIH='''+FormatdateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+''' and CINSI IN (select ANAHTAR from GENINI (nolock) WHERE DIL='+IntToStr(Dil)+' AND BOLUM='+IntToStr(Ops_DovizEslestir)+') ');    //  DovizEslestir
   tablo.FDCnn.ExecSQL(SQLResult);
 
    //Okunacak dosya yolu
