@@ -53,7 +53,7 @@ implementation
 
 {$R *.dfm}
 
-uses Utablo, ULog, UBinarySave, PrjConst, FetaKurulusSiniflari;
+uses Utablo, ULog, UBinarySave, PrjConst, FetaKurulusSiniflari, UVeriMotor;
 
 function MimeAl(const AUzanti: string): string;
 begin

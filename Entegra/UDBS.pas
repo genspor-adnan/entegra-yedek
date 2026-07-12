@@ -136,7 +136,7 @@ type
 
 implementation
 
-uses  FetaClassExtensions, URehAraDlg,PrjConst,LocOnFly;
+uses  FetaClassExtensions, URehAraDlg,PrjConst,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
