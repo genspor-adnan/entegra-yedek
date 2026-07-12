@@ -340,6 +340,14 @@ begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
 
   Tablo.GridTurkcelestir;
+  if AktifVeriMotor = vmPG then begin
+    // PG: cok-ifadeli batch (DELETE;INSERT / DROP;CREATE;INSERT) prepared statement'ta
+    //   calismaz ("cannot insert multiple commands...") -> DirectExecute = simple protocol
+    //   (inline-degerli, param yok -> sorun degil).
+    TabKomutCalistir.ResourceOptions.DirectExecute := True;
+    TabGenIni.ResourceOptions.DirectExecute := True;
+    TabBolumler.ResourceOptions.DirectExecute := True;
+  end;
 end;
 
 procedure TGENINIDuzenleDlg.FormKeyUp(Sender: TObject; var Key: Word;
