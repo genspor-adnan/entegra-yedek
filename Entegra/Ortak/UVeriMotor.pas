@@ -29,6 +29,12 @@ function DbAd(const AAd: string): string;           // [AAd]          | "AAd"  (
 //   'select '+DbUst(1)+' ... '+DbSinir(1)  ->  MSSQL: 'select top 1 ... '  |  PG: 'select ... limit 1'
 function DbUst(ASayi: Integer): string;             // 'top N '       | ''
 function DbSinir(ASayi: Integer): string;           // ''             | 'limit N'
+// OUTER APPLY (MSSQL, korele lateral alt-sorgu) -> PG: LEFT JOIN LATERAL (...) alias ON TRUE.
+//   Iki parca: DbDisApply APPLY yerine, DbApplyKosul ALIAS'tan SONRA (ON TRUE) gelir.
+//   '... '+DbDisApply+' ( SELECT ... ) X1 '+DbApplyKosul+' '+DbDisApply+' ( ... ) K '+DbApplyKosul
+//   MSSQL: 'OUTER APPLY ( ... ) X1  OUTER APPLY ( ... ) K ' (aynen) | PG: 'LEFT JOIN LATERAL (...) X1 ON TRUE ...'
+function DbDisApply: string;                         // 'OUTER APPLY'  | 'LEFT JOIN LATERAL'
+function DbApplyKosul: string;                       // ''             | ' ON TRUE '
 // Tarih parcalari: verilen ifadeyi (ör. DbSimdi) motora uygun sararlar.
 //   Ornek:  '... DEGER= ' + DbYil(DbSimdi)   -> MSSQL: year(getdate())  | PG: extract(year from now())
 function DbYil(const AIfade: string): string;       // year(x)  | extract(year from x)
@@ -132,6 +138,16 @@ end;
 function DbSinir(ASayi: Integer): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'limit ' + IntToStr(ASayi) else Result := '';
+end;
+
+function DbDisApply: string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'LEFT JOIN LATERAL' else Result := 'OUTER APPLY';
+end;
+
+function DbApplyKosul: string;
+begin
+  if AktifVeriMotor = vmPG then Result := ' ON TRUE ' else Result := '';
 end;
 
 function DbYil(const AIfade: string): string;

@@ -13,17 +13,15 @@ object RehberAraDlg: TRehberAraDlg
   TabOrder = 0
   object CariGrid: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1044
-    Height = 250
+    Height = 253
     Align = alClient
     PopupMenu = PopupMenuREHBER
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 32
-    ExplicitHeight = 253
     object CariGridView: TcxGridDBTableView
       OnDblClick = CariGridDBTableView1DblClick
       Navigator.Buttons.CustomButtons = <>
@@ -412,6 +410,7 @@ object RehberAraDlg: TRehberAraDlg
     Left = 3
     Top = 3
     Width = 1038
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -608,6 +607,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetIlet: TcxTabSheet
       Caption = #304'leti'#351'im'
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1297,6 +1300,9 @@ object RehberAraDlg: TRehberAraDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Temel Bilgiler'
           ImageIndex = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar7: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1749,6 +1755,9 @@ object RehberAraDlg: TRehberAraDlg
         object cxTabSheet3: TcxTabSheet
           Caption = 'Banka Bilgileri'
           ImageIndex = 1
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar3: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -2553,6 +2562,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetGorev: TcxTabSheet
       Caption = #304#351' Listesi'
       ImageIndex = 10
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TreeListGorev: TcxDBTreeList
         Left = 0
         Top = 41
@@ -3014,6 +3027,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetTeklifler: TcxTabSheet
       Caption = 'Teklif'
       ImageIndex = 6
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar12: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3881,6 +3898,9 @@ object RehberAraDlg: TRehberAraDlg
         object SheetRakipEkipman: TcxTabSheet
           Caption = 'Rakip Ekipmanlar'
           ImageIndex = 1
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar8: TToolBar
             AlignWithMargins = True
             Left = 3

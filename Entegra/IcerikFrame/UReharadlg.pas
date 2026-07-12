@@ -1856,16 +1856,16 @@ end;   *)
 function TRehberAraDlg.SorguyaTabloEkle(SQL:String):string;
 begin
     SQL := SQL +'LEFT OUTER JOIN REHBER R2 WITH (NOLOCK) ON R2.ID = R.TEMSILCI ' +
-    'OUTER APPLY ( ' +
+    DbDisApply+' ( ' +
     '    SELECT '+DbUst(1)+'RB.BILGI FROM REHBERBILGI RB WITH (NOLOCK) ' +
     '    INNER JOIN REHBERAYAR RA WITH (NOLOCK) ON RA.YERI = 2 AND RA.SIRA = RB.SIRA AND RA.YERI = RB.YERI AND RA.VARSAYILAN = 10 ' +
     '    WHERE RB.YER_ID = R.ID ' +
-    DbSinir(1)+') X1 ' +
-    'OUTER APPLY ( ' +
+    DbSinir(1)+') X1 '+DbApplyKosul +
+    DbDisApply+' ( ' +
     '    SELECT '+DbUst(1)+'K_Inner.SAY,K_Inner.DEGISTIRMETARIHI FROM KULLANICI_REHBER K_Inner WITH (NOLOCK) ' +
     '    WHERE K_Inner.REHBERID = R.ID AND K_Inner.KULID = 2 ' +
     '    ORDER BY K_Inner.DEGISTIRMETARIHI DESC ' +
-    DbSinir(1)+') K ';
+    DbSinir(1)+') K '+DbApplyKosul;
 
     SQL := SQL + ' where R.GRUP<>334 and R.GRUP<>335 and R.ID > 1 ';
 
@@ -3613,7 +3613,7 @@ begin
      Param := 1
   else
      Param := 0;
-  //REHBER.open;
+  // REHBER.open;
   TabloYenile(REHBER,[Param]);
 //  if FArama.ComboCariAnaliz.ItemIndex<3 then
 //    CariGridView.ApplyBestFit(nil);
