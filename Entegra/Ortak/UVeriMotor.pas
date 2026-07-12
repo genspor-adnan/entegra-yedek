@@ -47,6 +47,13 @@ function DbGunEkleS(const AIfade, AGunIfade: string): string;
 procedure MotorBaglantisiKur(ACnn: TFDConnection; AMotor: TVeriMotor;
   const ASunucu, AVeritabani, AKullanici, ASifre: string; APort: Integer = 0);
 
+// PG'de bit-kokenli (artik smallint) kolonlari FireDAC'a BOOLEAN field olarak sunar
+//   (kolon-adi listesi + dtInt16->dtBoolean MapRule). Boylece DB'de smallint kalir
+//   ('= 1'/'= 0' SQL calisir) AMA Delphi .AsBoolean (oku+yaz) da calisir. Cakisan/0-1-disi
+//   deger tutan 8 ad (DURUM,GRUP,HAK,VARSAYILAN,ANIMSAT,OKUNDU,MUHAKTAR,SONUC) HARIC tutuldu.
+//   vmMSSQL'de etkisiz. Her PG FDConnection icin baglanti kurulumunda cagrilir.
+procedure PgBitMapKur(ACnn: TFDConnection);
+
 // MERKEZI DIYALEKT CEVIRICI: vmPG iken bir SQL metnindeki GUVENLI/net T-SQL kaliplarini
 //   PG karsiligiyla degistirir (getdate()->now(), isnull(->coalesce( ...). Merkezi sorgu
 //   noktalarinda (TablodanSorguAc, BasitKomutCalistir) cagrilir -> 1000+ cagri yerine
@@ -61,7 +68,8 @@ function MetinMotor(const AMetin: string): TVeriMotor;
 
 implementation
 
-uses SysUtils, System.RegularExpressions,
+uses SysUtils, Classes, System.RegularExpressions,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option,   // MapRules / dtInt16 / dtBoolean
   FireDAC.Phys.PG;   // PG surucusunu LINK et (yoksa DriverID='PG' runtime'da bulunamaz)
 
 function DbSimdi: string;
@@ -245,6 +253,59 @@ begin
     Result := vmMSSQL;
 end;
 
+const
+  // PG'de BOOLEAN field olarak sunulacak bit-kokenli kolon adlari (ToLowerInvariant;
+  //   schema_port ile AYNI donusum -> PG kolon adlariyla birebir eslesir). 8 riskli ad HARIC.
+  CPgBitAdlari =
+    'acik_kapali;acil;acilis;ackapa;active;aktar;aktif;altcizgi;amortisman;anaurun;atac;' +
+    'atayan_eposta;atayan_sms;bankaislendi;baskasinin;baslasec;baslik;bayrak;bilgi_eposta;' +
+    'bilgi_sms;bitissec;bold;cekhesabi;cirolu;cuma;cumartesi;çarşamba;degisti;degistir;' +
+    'demirbas;detay;detaysorgusu;disservis;efatura;ekipman;ekle;ekstredekullan;' +
+    'ekstreherseferindesor;eposta;excelislendi;fb_support;friday;ftp_authentication;gecmesin;' +
+    'gelir;gelirmi;genotip_gunsonu;genotip_kurumfat;genotip_rehber;genotip_stokgiris;' +
+    'genotip_stokkart;girişsayfasıparçası;gor;gruplanabilsin;gunlukaksiyondagoster;haftaİçi;' +
+    'hastayacikis;herkeseacik;icdis;import;insta_support;internet_satis;iptalvar;irsaliyeli;' +
+    'isgunu;iskontodahil;iskontosuz;italik;kalibrasyon;kalite;kapanis;kasaislendi;' +
+    'kasaya_detayli;katildi;kayit;kdvdahil;kdvdurum;kesin_mi;kilitguncel;kilitleme;kilityeni;' +
+    'kimlikdogrulama;kocanayari;kocankullan;kredieklimitvar;kredikarti;kredilihesap;' +
+    'kullanici;kullanici_onayi;maashesabi;maliyeti_etkilesin;masraf;medyavar;mobil;monday;' +
+    'odemeplani;odemetipi;odenmis;onay;onemli;onlinehesaphareketi;onlinetalimat;otokapat;' +
+    'otomatik_odeme;otvyuzde;paket;panel;pazar;pazartesi;personel;perşembe;pivotkullanılsın;' +
+    'planturu;posta;r;resimgoster;resmi;revizyonuyar;sahip;salı;sanal;satis;satisdurumu;' +
+    'saturday;sec;secili;senelik_yenileme;servis;sil;silindi;silme;sistem;sms;sonsuz;' +
+    'sorgularkendionizlemesinikullansin;sorgularkendiönİzlemesinikullansın;sorumlu_eposta;' +
+    'sorumlu_sms;standart;statu;stok;stokdurumdegis;success;sunday;surec;tahakkukislendi;' +
+    'takip;takipci_eposta;takipci_sms;talimat_email;talimat_imzala;talimat_olustur;' +
+    'tamamlanma;tarihidesor;temdit;text_email;text_imzala;text_olustur;thursday;tuesday;ty;' +
+    'uruntipi;uyar;uygulandi;valor;wednesday;whatsapp;whatsapp_support;zamanisareti;' +
+    'zarfmaliyetdurumu;zenginmetin;zorunlu';
+
+procedure PgBitMapKur(ACnn: TFDConnection);
+var
+  L: TStringList;
+  i: Integer;
+begin
+  if AktifVeriMotor <> vmPG then Exit;   // MSSQL: dokunma (davranis-korur)
+  ACnn.FormatOptions.OwnMapRules := True;
+  ACnn.FormatOptions.MapRules.Clear;
+  L := TStringList.Create;
+  try
+    L.StrictDelimiter := True;
+    L.Delimiter := ';';
+    L.DelimitedText := CPgBitAdlari;
+    for i := 0 to L.Count - 1 do
+      if Trim(L[i]) <> '' then
+        with ACnn.FormatOptions.MapRules.Add do
+        begin
+          NameMask := Trim(L[i]);   // PG field adi (kucuk) ile eslesir
+          SourceDataType := dtInt16;   // PG smallint
+          TargetDataType := dtBoolean; // Delphi'ye boolean field olarak sun
+        end;
+  finally
+    L.Free;
+  end;
+end;
+
 procedure MotorBaglantisiKur(ACnn: TFDConnection; AMotor: TVeriMotor;
   const ASunucu, AVeritabani, AKullanici, ASifre: string; APort: Integer);
 begin
@@ -260,6 +321,7 @@ begin
     ACnn.Params.Values['User_Name']    := AKullanici;
     ACnn.Params.Values['Password']     := ASifre;
     ACnn.Params.Values['CharacterSet'] := 'UTF8';
+    PgBitMapKur(ACnn);   // bit-kokenli smallint kolonlari -> boolean field (.AsBoolean icin)
   end
   else
   begin
