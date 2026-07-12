@@ -11677,7 +11677,7 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into DUYURUKULLANICI (DUYURUID,TUR,ALICIID)values('+inttostr(DuyID)+',0,'+IntToStr(DuyuruAlici)+')',[],[])
     end else
        //Şablondaki alıcı listesi
-       DuyuruAliciekle(SablonDuyuruId, DuyID);//Şablondaki kullanıcılar yeni oluşacak duyuruya kopyalanır
+        DuyuruAliciekle(SablonDuyuruId, DuyID);//Şablondaki kullanıcılar yeni oluşacak duyuruya kopyalanır
     veritabani.BasitKomutÇalıştır(FDCnn, 'insert into DUYURUIMAJ ([DUYURUID],[IMAJID])  '+
                              ' select [DUYURUID]='+inttostr(DuyID)+',[IMAJID] from [DUYURUIMAJ] where [DUYURUID]='+IntToStr(SablonDuyuruId),[],[]);
     if Query5.FieldByName('EPOSTA').AsBoolean then
@@ -11708,6 +11708,7 @@ procedure TTablo.DuyuruMotoru(TaraTarih : TDateTime);
       end;
    end;
 begin
+   if AktifVeriMotor = vmPG then Exit;   // duyuru motoru (cok sorgu + DuyuruYayinEkle/sablon TVF) PG'ye tam port ayri is; pilotta atla
    Tablo.TablodanSorguAc(0, 'select ID,KOD,ZAMAN,ZAMANISARETI, SABLONDUYURUID from UYARIAYAR where DURUM=1 and isnull(SABLONDUYURUID,0)<>0 ');
    while not Tablo.Query0.eof do begin
       case Tablo.Query0.Fields[1].asinteger of
