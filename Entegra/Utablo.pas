@@ -12789,7 +12789,7 @@ begin
     GENINI.ReadImageSection(Ops_StokKart_KaynakUretimYeri, RepStokKaynakUretimYeri.Properties.Items, True);    // 'StokKart_KaynakUretimYeri'
     RepStokKategori.Properties.Items := Tablo.imgComboboxInit('select -1 AS ID,'''' AS AD union all select ID,AD from KATEGORI').Items;
     RepStokTumDepolar.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR').Items;
-     //   RepStokDepolar şifre ekranında set olmaktadır.
+     //     RepStokDepolar şifre ekranında set olmaktadır.
 
     GENINI.ReadImageSection(Ops_StokKart_EkstraTur, RepStokKartEkstraTUR.Properties.Items,False);
     GENINI.ReadImageSection(Ops_StokKart_Icerik, repStokIcerik.Properties.Items, True);    // 'SayımTutanakTipi'
@@ -12939,7 +12939,7 @@ var
 begin
   repFileExtensionList.Properties.Items.Clear;
   try
-    TablodanSorguAc(1,'select distinct ''.''+LOWER(REVERSE(SUBSTRING(REVERSE(BELGEADI),1,CHARINDEX(''.'',REVERSE(BELGEADI),1)-1))) from IMAJ where isnull(BELGEADI,'''')<>'''' and BELGEADI like ''%_._%''  ');
+    TablodanSorguAc(1,'select distinct CONCAT(''.'',LOWER(REVERSE(SUBSTRING(REVERSE(BELGEADI),1,'+DbBul('''.''','REVERSE(BELGEADI)')+'-1)))) from IMAJ where isnull(BELGEADI,'''')<>'''' and BELGEADI like ''%_._%''  ');
   except
     exit;
   end;

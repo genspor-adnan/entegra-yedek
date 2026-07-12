@@ -48,6 +48,9 @@ function DbGeciciCreate: string;                    // 'create table ' | 'create
 function DbMetinKolon(ALen: Integer): string;
 // Tarih tip adi (CAST icin): 'datetime' | 'timestamp'.
 function DbTarihTipi: string;
+// Alt-metin konumu (1-tabanli, yoksa 0). MSSQL CHARINDEX(needle,haystack) |
+//   PG strpos(haystack,needle) -- ARG SIRASI TERS (konumsal) -> seam.
+function DbBul(const ANeedle, AHaystack: string): string;
 
 // ---- Baglanti ----
 // Secili motora gore FDConnection'i yapilandirir. PG icin makinede libpq (PostgreSQL
@@ -168,6 +171,12 @@ end;
 function DbTarihTipi: string;
 begin
   if AktifVeriMotor = vmPG then Result := 'timestamp' else Result := 'datetime';
+end;
+
+function DbBul(const ANeedle, AHaystack: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'strpos(' + AHaystack + ',' + ANeedle + ')'
+  else Result := 'CHARINDEX(' + ANeedle + ',' + AHaystack + ')';
 end;
 
 // Yalniz TIRNAK-DISI metne uygulanan diyalekt degisimleri (guvenli/belirsiz-olmayan).
