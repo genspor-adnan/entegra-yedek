@@ -239,7 +239,7 @@ implementation
 
 uses
   System.SysUtils, System.SyncObjs, System.DateUtils, FireDAC.Comp.Client, Winapi.Windows,
-  Utablo, PrjConst, uUtility_my,  System.Hash;
+  Utablo, PrjConst, uUtility_my,  System.Hash, UVeriMotor;
 
 var
   GLogCnn: TFDConnection = nil;   // otonom log baglantisi (GENDEPO'ya baglanir, cache)
@@ -291,8 +291,12 @@ end;
 
 function DepoTablo(const ATablo: string): string;
 begin
-  // Ad koseli parantezle kacisli (bosluk/ozel karakter guvenli); ATablo ham gecirilir.
-  Result := '[' + DepoDBAdi + '].dbo.' + ATablo;
+  if AktifVeriMotor = vmPG then
+    // PG: cross-DB yok -> ayri GENDEPO yerine 'depo' SCHEMA (01_depo.sql). Ad kucuk harf.
+    Result := 'depo.' + LowerCase(ATablo)
+  else
+    // Ad koseli parantezle kacisli (bosluk/ozel karakter guvenli); ATablo ham gecirilir.
+    Result := '[' + DepoDBAdi + '].dbo.' + ATablo;
 end;
 
 function DosyaKaydet(AStream: TStream; const AUzanti: string; const AMimeType: string): Int64;
@@ -541,6 +545,7 @@ var
   LYeni, LAd, LTbl: string;
   i, p: Integer;
 begin
+  if AktifVeriMotor = vmPG then Exit;   // PG: cross-DB synonym mekanizmasi yok ('depo' schema)
   try
     LYeni := Trim(DepoDBAdi);
     if LYeni = '' then Exit;
@@ -607,6 +612,7 @@ end;
 
 function LogBaglantisi: TFDConnection;
 begin
+  if AktifVeriMotor = vmPG then Exit(Tablo.FDCnn);  // PG: ayri GENDEPO DB yok -> ana baglanti ('depo' schema ayni DB'de)
   if GLogCnn = nil then
   begin
     // Otonom baglanti dogrudan DEPO DB'ye (GENDEPO) baglanir; yillik tablolar
