@@ -4373,7 +4373,7 @@ end;
 
 function TTablo.TablodanSorguAc(SorguNo: Integer; SQLText: String; HataGoster:boolean=False): Boolean;
 var
-  QueryX: TFDQuery;
+  QueryX : TFDQuery;
 Begin
   Result := False;
   case SorguNo of
@@ -4550,11 +4550,11 @@ end;
 function TTablo.imgComboboxInit(Komut: string; Tag:Boolean=False; Image:Boolean=False): TcxImageComboBoxProperties;
 var
   i: integer;
-  cmblist: TcxImageComboBoxProperties;
+  cmblist : TcxImageComboBoxProperties;
 begin
   i := 0;
   Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := Komut;
+  Tablo.Query1.SQL.Text := PgSqlCevir(Komut);
   Tablo.Query1.Open;
   cmblist := TcxImageComboBoxProperties.Create(Self);
   cmblist.ImmediatePost := True;
@@ -11523,7 +11523,7 @@ var
 begin
   // Günü gelmiş pos ödemeler varsa onlar pos hesabından normal hesaba aktarılır
   Query5.Close;
-  Query5.SQL.Text := PgSqlCevir(
+  Query5.SQL.Text  := PgSqlCevir(
     'select K.ID,PLANTARIHI AS TARIH,K.HESAPID,KLR.KASAKODU AS HESAPKODU ,KLR.KASAADI AS HESAPADI,K.BORC, K.KUR , GERIDONUSHESAPNO from KASA K inner join BANKAHESAPLAR B on K.HESAPID = B.ID'
     + ' inner join KASALAR KLR on KLR.ID=K.HESAPID where KREDIKARTI = 1 and PLANTARIHI < '
     + DbGunEkleS(DbSimdi, '-GERIDONUSGUNSAY') + ' and isnull(GERIDONUSID,-1)<1 ');
@@ -12498,7 +12498,7 @@ begin
   Tablo.TablodanSorguAc(1,'select top 1 * from STOKESDEGER where TUR=2 ');
   StokZorunluSecimVar := Tablo.Query1.RecordCount>0;
 
-  EskiTarihKayit := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_EskiTarihKayit,2);
+  EskiTarihKayit  := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_EskiTarihKayit,2);
   IleriTarihKayit := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_IleriTarihKayit,2);
   CekKesilmemis := 0;
   BelgeGiderKalemi:= GENINI.ReadInteger(Ops_KasaOpsiyon_BelgeGiderMerkezi,3); //  KasaOpsiyon', 'BelgeGiderMerkezi', 2);
@@ -12629,15 +12629,15 @@ begin
   //ReherIni.ReadImageSection('Kasa Türleri', RepKasaTurleriReadOnly.Properties,  True, True, True);
 //  GENINI.ReadImageSection(Ops_KasaTurleri, RepKasaTurleriReadOnly.Properties.Items, False);  //   Kasa Türleri
   RepKasaTurleriReadOnly.Properties.items := Tablo.imgComboboxInit(' select DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM = '+IntToStr(Ops_KasaTurleri)+
-      ' union all select DEGER+2600,ANAHTAR + '' tahsilatı '' from GENINI where DIL='+IntToStr(Dil)+ ' and BOLUM ='+IntToStr(Ops_HizliSatisKuponlar)+
-      ' union all select DEGER+3600,ANAHTAR + '' Ödemesi '' from GENINI where DIL='+IntToStr(Dil)+ ' and BOLUM ='+IntToStr(Ops_HizliSatisKuponlar)).items; // Belge_DurumS
+      ' union all select DEGER+2600,CONCAT(ANAHTAR,'' tahsilatı '') from GENINI where DIL='+IntToStr(Dil)+ ' and BOLUM ='+IntToStr(Ops_HizliSatisKuponlar)+
+      ' union all select DEGER+3600,CONCAT(ANAHTAR,'' Ödemesi '') from GENINI where DIL='+IntToStr(Dil)+ ' and BOLUM ='+IntToStr(Ops_HizliSatisKuponlar)).items; // Belge_DurumS
   (RepKasaTurleri.Properties as TcxImageComboBoxProperties).Items := (RepKasaTurleriReadOnly.Properties as TcxImageComboBoxProperties).Items;
 
   if UTSKullanimda then
      RepMedikalSinif.Properties.items := Tablo.imgComboboxInit(' select DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM = '+IntToStr(Ops_StokKart_MedikalSinif)).items;
   GENINI.ReadImageSection(Ops_Adisyon_Durumlar, RepAdisyon.Properties.Items, False);
-  RepCariRoller.Properties.Items := Tablo.imgComboboxInit('select ID, ROL=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 )+''/''+ '+
-      ' (SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1) FROM ROLLER ROL WHERE ID>-1').Items; //Cari Pozisyon Türü
+  RepCariRoller.Properties.Items := Tablo.imgComboboxInit('select ID, CONCAT((SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),''/'','+
+      '(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+')) AS ROL FROM ROLLER ROL WHERE ID>-1').Items; //Cari Pozisyon Türü
   GENINI.ReadImageSection(Ops_DepoVarsayilan, RepDepoVarsayilanListesi.Properties.Items, False);  // 'DepoVarsayilan'
   GENINI.ReadImageSection(Ops_FiyatListeAdi, RepFiyatAdlari.Properties.Items, False);  // 'FiyatListeAdi'
   GENINI.ReadImageSection(Ops_FiyatListeAdiAlis, RepFiyatAdlariAlis.Properties.Items, False);  // 'FiyatListeAdiAlis'
