@@ -12105,6 +12105,7 @@ label
   LisansAl;
   procedure IndexKontrolu(IndeksAdi: string);
   begin
+    if AktifVeriMotor = vmPG then Exit;   // PG'de SYSOBJECTS yok; bu PK-var kontrolu MSSQL-ozel (sadece uyari)
     Ad := ' NAME ';
     Dosya := 'SYSOBJECTS';
     Query1.Close;
@@ -12390,7 +12391,7 @@ begin
   Eksiskontoya := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_Eksiskontoya, False);
   StilYukle;
 
-  DokumDegiskenListesi := TStringList.Create;
+  DokumDegiskenListesi  := TStringList.Create;
 
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := PgSqlCevir(' select @@SPID ');   // MSSQL: @@SPID | PG: pg_backend_pid()
