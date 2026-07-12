@@ -35,7 +35,7 @@ $coll = if ($NoCollation) { '' } else { ' COLLATE depo.tr_ci' }
 function PgTip($tip, $maxlen, $prec, $scale) {
   $t = $tip.ToLowerInvariant()
   switch ($t) {
-    'bit'              { return 'boolean' }
+    'bit'              { return 'smallint' }   # MSSQL bit=0/1; smallint -> app'in '= 1'/'= 0' karsilastirmalari calisir (boolean degil)
     'tinyint'          { return 'smallint' }
     'smallint'         { return 'smallint' }
     'int'              { return 'integer' }

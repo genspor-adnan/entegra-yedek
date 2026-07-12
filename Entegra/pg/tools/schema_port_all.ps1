@@ -24,7 +24,7 @@ $coll = if ($NoCollation) { '' } else { ' COLLATE depo.tr_ci' }
 
 function PgTip($tip,$maxlen,$prec,$scale){
   switch ($tip.ToLowerInvariant()) {
-    'bit' {return 'boolean'} 'tinyint' {return 'smallint'} 'smallint' {return 'smallint'}
+    'bit' {return 'smallint'} 'tinyint' {return 'smallint'} 'smallint' {return 'smallint'}
     'int' {return 'integer'} 'bigint' {return 'bigint'} 'real' {return 'real'}
     'float' {return 'double precision'} 'money' {return 'numeric(19,4)'} 'smallmoney' {return 'numeric(10,4)'}
     {$_ -in @('decimal','numeric')} {return "numeric($prec,$scale)"}
