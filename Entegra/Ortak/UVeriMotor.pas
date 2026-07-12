@@ -374,15 +374,77 @@ begin
     Result := Result + ' limit ' + sayi;
 end;
 
+// T-SQL yerel degiskenleri (DECLARE @x / SET @x = deger / ...@x...) PG'de YOK.
+//   Cozum: 'set @x = deger' satirindan degeri yakala, DECLARE ve SET satirlarini SIL,
+//   sonra @x kullanimlarini degerle degistir (inline). Deger genelde bir FireDAC
+//   parametresi (:P1) veya sabit -> @x -> :P1 olur, sorgu tek SELECT'e duser.
+//   Ornek (Rehber/IK listeleri): 'DECLARE @ILGILIARAMA INT / SET @ILGILIARAMA = :P1 /
+//   ... CASE WHEN @ILGILIARAMA = 1 ...'  ->  '... CASE WHEN :P1 = 1 ...'.
+//   Not: :P1 birden fazla gecerse FireDAC ayni parametreye baglar (ad-esli).
+function PgDeclareCevir(const S: string): string;
+var
+  Satirlar, Adlar, Degerler: TStringList;
+  i, j: Integer;
+  t, tl, ad, deger, tad: string;
+  m: TMatch;
+begin
+  Result := S;
+  if Pos('@', S) = 0 then Exit;                 // hizli cikis: T-SQL degiskeni yok
+  // Yalniz GERCEK T-SQL degisken blogu (DECLARE @x ...) islensin -> INSERT verisindeki
+  //   tesadufi 'set @..' metni bozulmasin (guvenli kapi).
+  if not TRegEx.IsMatch(S, 'declare\s+@', [roIgnoreCase]) then Exit;
+  Satirlar := TStringList.Create;
+  Adlar := TStringList.Create;
+  Degerler := TStringList.Create;
+  try
+    Satirlar.Text := S;
+    for i := Satirlar.Count - 1 downto 0 do
+    begin
+      t := Trim(Satirlar[i]);
+      tl := LowerCase(t);
+      if Pos('declare', tl) = 1 then            // DECLARE @x INT [, @y ...] -> sil
+        Satirlar.Delete(i)
+      else if Pos('set', tl) = 1 then
+      begin
+        m := TRegEx.Match(t, '^set\s+(@\w+)\s*=\s*(.+)$', [roIgnoreCase]);
+        if m.Success then
+        begin
+          ad := m.Groups[1].Value;
+          deger := Trim(m.Groups[2].Value);
+          if (deger <> '') and (deger[Length(deger)] = ';') then
+            deger := Trim(Copy(deger, 1, Length(deger) - 1));
+          Adlar.Add(ad); Degerler.Add(deger);
+          Satirlar.Delete(i);                   // SET @x = ... satirini sil
+        end;
+      end;
+    end;
+    Result := Satirlar.Text;                    // DECLARE/SET satirlari cikarilmis metin
+    // Uzun adlar ONCE (@DILEK, @DIL'den once) -> prefix cakismasi olmasin
+    for i := 0 to Adlar.Count - 2 do
+      for j := i + 1 to Adlar.Count - 1 do
+        if Length(Adlar[j]) > Length(Adlar[i]) then
+        begin
+          tad := Adlar[i]; Adlar[i] := Adlar[j]; Adlar[j] := tad;
+          tad := Degerler[i]; Degerler[i] := Degerler[j]; Degerler[j] := tad;
+        end;
+    for i := 0 to Adlar.Count - 1 do
+      Result := StringReplace(Result, Adlar[i], Degerler[i], [rfReplaceAll, rfIgnoreCase]);
+  finally
+    Degerler.Free; Adlar.Free; Satirlar.Free;
+  end;
+end;
+
 function PgSqlCevir(const ASql: string): string;
 var
   i, n: Integer;
   ch: Char;
   strIci: Boolean;
   disari, sonuc: TStringBuilder;
+  src: string;
 begin
   Result := ASql;
   if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
+  src := PgDeclareCevir(ASql);           // T-SQL yerel degisken (DECLARE/SET @x) -> inline
   // LITERAL-FARKINDALI: tek-tirnakli string literalleri ('...') atla, YALNIZ tirnak-disi
   //   metni cevir. Boylece merkezi cagri (TablodanSorguAc/VeriVarMi/BasitKomutCalistir/
   //   SorguBaslat) INSERT/UPDATE'teki kullanici verisini bozmaz ('%isnull(%' vb. korunur).
@@ -390,16 +452,16 @@ begin
   disari := TStringBuilder.Create;
   try
     strIci := False;
-    i := 1; n := Length(ASql);
+    i := 1; n := Length(src);
     while i <= n do
     begin
-      ch := ASql[i];
+      ch := src[i];
       if strIci then
       begin
         sonuc.Append(ch);
         if ch = '''' then
         begin
-          if (i < n) and (ASql[i + 1] = '''') then   // '' kacisi -> literal icinde kal
+          if (i < n) and (src[i + 1] = '''') then   // '' kacisi -> literal icinde kal
           begin sonuc.Append(''''); Inc(i); end
           else
             strIci := False;                          // literal kapandi

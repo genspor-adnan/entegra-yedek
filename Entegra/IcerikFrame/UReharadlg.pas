@@ -1147,7 +1147,7 @@ begin
      LogKartSil(REHBER, TabNo_REHBER, REHBER.Fields[0].AsInteger);
      LogOnceki.Clear;
      Tablo.CariSil( REHBER.Fields[0].AsInteger);
-     if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[]);
+     TabloYenile(REHBER,[]);
   end;
 end;
 
@@ -1714,7 +1714,7 @@ begin
   else
      Param := 0;
   //   REHBER.open;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+  TabloYenile(REHBER,[Param]);
   SonAranan:=False;
 end;
 
@@ -1785,7 +1785,7 @@ begin
   else
      Param := 0;
   //REHBER.open;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+  TabloYenile(REHBER,[Param]);
 end;
 
 procedure TRehberAraDlg.letiimaddeitir1Click(Sender: TObject);
@@ -2947,7 +2947,7 @@ begin
   if Tablo.RehberSihirbazBaslat(0,REHBER.Fields[0].AsInteger,-100,-100,AktifSekme='TAksiyonlarGorevFrame') > 0 then begin
      //REHBER.Close;
      //REHBER.open;
-     if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[],ID);
+     TabloYenile(REHBER,[],ID);
   end;
   //CariGridView.Controller.FocusRecord( CariGridView.DataController.GetRowIndexByRecordIndex(<DataSet>.RecNo, false), true);
   //REHBER.Locate('ID', ID, []);
@@ -3041,7 +3041,7 @@ begin
       else
          Param := 0;
       //REHBER.open;
-      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+      TabloYenile(REHBER,[Param]);
   end;
   CariGridView.DataController.FocusedRecordIndex:=0;
  // CariGridView.ViewData.Records[0].Selected := True;
@@ -3614,7 +3614,7 @@ begin
   else
      Param := 0;
   //REHBER.open;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+  TabloYenile(REHBER,[Param]);
 //  if FArama.ComboCariAnaliz.ItemIndex<3 then
 //    CariGridView.ApplyBestFit(nil);
 
