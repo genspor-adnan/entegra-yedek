@@ -29,7 +29,8 @@ $tblLower = LI $Table
 
 function PgLit([object]$v) {
   if ($null -eq $v -or $v -is [DBNull]) { return 'NULL' }
-  if ($v -is [bool])     { if ($v) { return 'TRUE' } else { return 'FALSE' } }
+  if ($v -is [bool])     { if ($v) { return '1' } else { return '0' } }   # bit->smallint (PG'de 0/1)
+  if ($v -is [byte[]])   { return "decode('" + ([System.BitConverter]::ToString($v).Replace('-','')) + "','hex')" }  # varbinary->bytea
   if ($v -is [datetime]) { return "'" + $v.ToString('yyyy-MM-dd HH:mm:ss') + "'" }
   if ($v -is [int] -or $v -is [long] -or $v -is [decimal] -or $v -is [double] -or $v -is [single] -or $v -is [byte] -or $v -is [int16]) {
     return ([string]$v).Replace(',', '.')
