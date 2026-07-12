@@ -1678,11 +1678,11 @@ begin
       try
         Tutar := Tutar*SIPARIS.FieldByName('DOVIZKUR').AsCurrency;
       except
-        Tablo.TablodanSorguAc(0,'select '+DbUst(1)+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)') + ' FROM DOVIZ WHERE CINSI='''+Kur+'''  ORDER BY ABS(DATEDIFF(HOUR,''' + FormatDateTime('yyyy-mm-dd 00:00', SIPARIS.FieldByName('SIPARISTARIH').AsDateTime) +''',TARIH)) '+DbSinir(1));
+        Tablo.TablodanSorguAc(0,'select '+DbUst(1)+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)') + ' FROM DOVIZ WHERE CINSI='''+Kur+'''  ORDER BY ABS('+DbTarihFark('HOUR', ''''+FormatDateTime('yyyy-mm-dd 00:00', SIPARIS.FieldByName('SIPARISTARIH').AsDateTime)+'''', 'TARIH')+') '+DbSinir(1));
         Tutar := Tutar*Tablo.Query0.FieldByName(Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)')).AsCurrency;
       end;
     end else begin
-      Tablo.TablodanSorguAc(0,'select '+DbUst(1)+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)') + ' FROM DOVIZ WHERE CINSI='''+Kur+'''  ORDER BY ABS(DATEDIFF(HOUR,''' + FormatDateTime('yyyy-mm-dd 00:00', SIPARIS.FieldByName('SIPARISTARIH').AsDateTime) +''',TARIH)) '+DbSinir(1));
+      Tablo.TablodanSorguAc(0,'select '+DbUst(1)+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)') + ' FROM DOVIZ WHERE CINSI='''+Kur+'''  ORDER BY ABS('+DbTarihFark('HOUR', ''''+FormatDateTime('yyyy-mm-dd 00:00', SIPARIS.FieldByName('SIPARISTARIH').AsDateTime)+'''', 'TARIH')+') '+DbSinir(1));
       Tutar := Tutar*Tablo.Query0.FieldByName(Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'((ALIS+SATIS)/2)')).AsCurrency;
     end;
   end;

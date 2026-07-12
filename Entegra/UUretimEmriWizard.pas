@@ -1576,7 +1576,7 @@ begin
   Tablo.Query1.SQL.Add(' (URETIMEMRIID,URETIMEMRIDETAYID,HEDEFOPERASYON,STOKID,RECETEID,RECETEDETAYID,LOKASYON,ISMERKEZI,PERSONEL,BASTAR,BITTAR ');
   Tablo.Query1.SQL.Add(' ,ADET,BIRIM,MIKTAR,ACIKLAMA,YERI,YERID,GIRISDEPO,CIKISDEPO,URETIMPLANID,URETIMPLANDETAYID ) ');
   Tablo.Query1.SQL.Add('select UD.URETIMEMRIID,UD.ID,0,UD.URUNID,KAYNAKRECETEID,KAYNAKRECETEDETAYID, ');
-  Tablo.Query1.SQL.Add('0,0,'+Kullanan+',GetDate(),DateAdd(hour,1,GetDate()),'+AAdet+','+ABirim+','+AMiktar+',ACIKLAMA,141,UD.ID,'+IntToStr(Depo)+','+IntToStr(Depo));
+  Tablo.Query1.SQL.Add('0,0,'+Kullanan+',GetDate(),'+DbTarihEkle('hour','1','GetDate()')+','+AAdet+','+ABirim+','+AMiktar+',ACIKLAMA,141,UD.ID,'+IntToStr(Depo)+','+IntToStr(Depo));
   Tablo.Query1.SQL.Add(','+VarToStr(UretimPlanID)+','+VarToStr(UretimPlanDetayID)+' ');
   Tablo.Query1.SQL.Add('from URETIMEMRIDETAY UD ');
   Tablo.Query1.SQL.Add('where ID='+IntToStr(UretimEmriDetayID));

@@ -3326,8 +3326,8 @@ begin
          TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar günlerini listelele
        end;
        -1,3:begin
-         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
-         ' Where TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 23:59',DateGrafikBitTar)+''' '+
+         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,'+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
+         ' Where TARIH='+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 23:59',DateGrafikBitTar)+''' '+
          ' Order by TARIH');
        end;
     end;
@@ -3528,8 +3528,8 @@ end else begin
          end;
        3:begin
            DateGrafikBitTar := Tablo.GENINI.BugunTrh+365;
-           TabGrafik.SQL.Text:=' select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID where '+
-                               ' TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and ';
+           TabGrafik.SQL.Text:=' select GUN,AY,BAKIYE,TARIH,'+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID where '+
+                               ' TARIH='+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+' and ';
          end;
     end;
     TabGrafik.SQL.Add( '  TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',DateGrafikBasTar)+'''  and TARIH <= '''+

@@ -5191,14 +5191,14 @@ begin
       Tablo.ADOQryGENEL.Close;
       if (CikanDovizKuru <> CariDoviz) and (GirenDovizKuru <> CariDoviz) then begin
         Tablo.ADOQryGENEL.SQL.Text := 'select (SELECT '+DbUst(1)+ Opsiyon +  ' FROM DOVIZ D1 WHERE CINSI=''' + GirenDovizKuru +
-          ''' order by ABS(DATEDIFF(DAY,''' + FormatDateTime('yyyy-mm-dd hh:nn', Tarih) + ''',TARIH+0.5)) '+DbSinir(1)+')' +
-           '/(SELECT '+DbUst(1)+ Opsiyon + ' FROM DOVIZ D2 WHERE CINSI=''' + CikanDovizKuru + ''' order by ABS(DATEDIFF(DAY,''' + FormatDateTime('yyyy-mm-dd hh:nn', Tarih) + ''',TARIH+0.5)) '+DbSinir(1)+')';
+          ''' order by ABS('+DbTarihFark('DAY',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+')' +
+           '/(SELECT '+DbUst(1)+ Opsiyon + ' FROM DOVIZ D2 WHERE CINSI=''' + CikanDovizKuru + ''' order by ABS('+DbTarihFark('DAY',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+')';
       end else if (CikanDovizKuru = CariDoviz) and (GirenDovizKuru <> CariDoviz) then begin // faturalar bu bölümde geliyor..
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT '+DbUst(1)+'(' + Opsiyon + ') FROM DOVIZ  WHERE CINSI=''' + GirenDovizKuru +
-          ''' order by ABS(DATEDIFF(HOUR,''' + FormatDateTime('yyyy-mm-dd hh:nn', Tarih) + ''',TARIH+0.5)) '+DbSinir(1)+';
+          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+';
       end else if (CikanDovizKuru <> CariDoviz) and (GirenDovizKuru = CariDoviz) then begin
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT '+DbUst(1)+'1/(' + Opsiyon +') FROM DOVIZ  WHERE CINSI=''' + CikanDovizKuru +
-          ''' order by ABS(DATEDIFF(HOUR,''' + FormatDateTime('yyyy-mm-dd hh:nn', Tarih) + ''',TARIH+0.5)) '+DbSinir(1)+';
+          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+';
       end else if (CikanDovizKuru = CariDoviz) and (GirenDovizKuru = CariDoviz) then begin
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT 1 ';
       end;
@@ -5223,7 +5223,7 @@ begin
       ' ORDER BY ABS(EXTRACT(EPOCH FROM (TARIH - ''' + Tarih + '''::timestamp))) LIMIT 1'
   else
     Tablo.ADOQryGENEL.SQL.Text := 'SELECT TOP 1 ' + Fiyatadi + ' FROM DOVIZ ' +
-      ' WHERE CINSI=''' + Kur + ''' and isnull(ALIS,0.0)>0.0  ORDER BY ABS(DATEDIFF(HOUR,''' + Tarih +''',TARIH))';
+      ' WHERE CINSI=''' + Kur + ''' and isnull(ALIS,0.0)>0.0  ORDER BY ABS('+DbTarihFark('HOUR',''''+Tarih+'''','TARIH')+')';
   Tablo.ADOQryGENEL.Open;
   if Tablo.ADOQryGENEL.RecordCount=1 then
     Result := Tablo.ADOQryGENEL.Fields[0].AsCurrency
@@ -6830,7 +6830,7 @@ end;
 procedure TTablo.UretimSatirMaliyetUpdate(FatBasID: Integer);
 begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATURA set DOVIZ_KURU='''+VarsDoviz+''', '+
-    ' DOVIZKURDEGERI=(select '+DbUst(1)+'ALIS from DOVIZ D where CINSI='''+VarsDoviz+''' order by abs(datediff(DAY,D.TARIH,FATURATARIH)) '+DbSinir(1)+')'+
+    ' DOVIZKURDEGERI=(select '+DbUst(1)+'ALIS from DOVIZ D where CINSI='''+VarsDoviz+''' order by abs('+DbTarihFark('DAY','D.TARIH','FATURATARIH')+') '+DbSinir(1)+')'+
     ' from FATBASLIK FB where  FB.ID=FATURA.FATBASID and FB.TUR=6 and FATBASID='+IntToStr(FatBasID),[],[]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATURA set '+
     ' BIRIMFIYAT = (select '+DbUst(1)+'SF.FIYAT from STOKFIYAT SF where FATURA.URUNID=SF.STOKID and SF.FIYATADI=-1 '+DbSinir(1)+'), '+
@@ -6845,7 +6845,7 @@ begin
     ' DOVIZ_TUTARI = -1 * isnull((select sum(F.MIKTAR*F.DOVIZ_TUTARI) from FATURA F where F.FATBASID=FATURA.FATBASID and F.MIKTAR<0.0),0.0)/(select sum(F.MIKTAR) from FATURA F where F.FATBASID=FATURA.FATBASID and F.MIKTAR>0.0) '+
     ' from FATBASLIK FB where MIKTAR>0 and FB.ID=FATURA.FATBASID and FB.TUR=6 and FATBASID='+IntToStr(FatBasID),[],[]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATBASLIK set DOVIZ_CINSI='''+VarsDoviz+''', '+
-    ' DOVIZKUR=(select '+DbUst(1)+'ALIS from DOVIZ D where CINSI='''+VarsDoviz+''' order by abs(datediff(DAY,D.TARIH,FATURATARIH)) '+DbSinir(1)+'),'+
+    ' DOVIZKUR=(select '+DbUst(1)+'ALIS from DOVIZ D where CINSI='''+VarsDoviz+''' order by abs('+DbTarihFark('DAY','D.TARIH','FATURATARIH')+') '+DbSinir(1)+'),'+
     ' FATURA_MATRAHI=-1 * isnull((select sum(F.MIKTAR*F.BIRIMFIYAT) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR<0.0),0.0)/(select sum(F.MIKTAR) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR>0.0), '+
     ' FATURA_TUTARI= -1 * isnull((select sum(F.MIKTAR*F.TUTAR) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR<0.0),0.0)/(select sum(F.MIKTAR) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR>0.0), '+
     ' KDV_TUTARI = -1 * isnull((select sum(F.MIKTAR*F.DOVIZ_BIRIMFIYAT) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR<0.0),0.0)/(select sum(F.MIKTAR) from FATURA F where F.FATBASID=FATBASLIK.ID and F.MIKTAR>0.0),'+
@@ -12123,7 +12123,7 @@ label
       Tablo.Query1.SQL.Text:=
          'SELECT sdb.Name AS DatabaseName,' + #13#10 +
          DbConv('COALESCE('+DbConv('MAX(bus.backup_finish_date)','VARCHAR(10)',120)+',''1900-01-01'')','DATETIME',120)+' AS LastBackUpTime,' + #13#10 +
-         'SONYEDEKKACGUNONCE= DATEDIFF(DAY,'+DbConv('COALESCE('+DbConv('MAX(bus.backup_finish_date)','VARCHAR(10)',120)+',''1900-01-01'')','DATETIME',120)+',GETDATE() )' + #13#10 +
+         'SONYEDEKKACGUNONCE= '+DbTarihFark('DAY',DbConv('COALESCE('+DbConv('MAX(bus.backup_finish_date)','VARCHAR(10)',120)+',''1900-01-01'')','DATETIME',120),'GETDATE() ')+'' + #13#10 +
          'FROM sys.sysdatabases sdb' + #13#10 +
          'LEFT OUTER JOIN msdb.dbo.backupset bus ON bus.database_name = sdb.name' + #13#10 +
          '' + #13#10 +

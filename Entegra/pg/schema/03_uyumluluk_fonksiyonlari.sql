@@ -52,3 +52,15 @@ DO $$ BEGIN
   IF to_regtype('tinyint') IS NULL THEN CREATE DOMAIN tinyint AS smallint; END IF;
   IF to_regtype('smallmoney') IS NULL THEN CREATE DOMAIN smallmoney AS numeric(10,4); END IF;
 END $$;
+
+-- DAY/MONTH/YEAR (MSSQL tarih parcasi fonksiyonlari) -> extract. Nested DATEADD/DAY idiom + her yerde.
+CREATE OR REPLACE FUNCTION public.day(timestamp)   RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(day from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.month(timestamp) RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(month from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.year(timestamp)  RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(year from $1)::int $$;
+-- timestamptz + date asiri yuklemeleri (now()/getutcdate()/date kolon):
+CREATE OR REPLACE FUNCTION public.day(timestamptz)   RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(day from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.month(timestamptz) RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(month from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.year(timestamptz)  RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(year from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.day(date)   RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(day from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.month(date) RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(month from $1)::int $$;
+CREATE OR REPLACE FUNCTION public.year(date)  RETURNS int LANGUAGE sql IMMUTABLE AS $$ SELECT extract(year from $1)::int $$;

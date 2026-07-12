@@ -60,7 +60,7 @@ implementation
 {$R *.dfm}
 
 Uses
- Utablo,FetaKurulusSiniflari,PrjConst,LocOnFly, UGorevDlg;
+ Utablo,FetaKurulusSiniflari,PrjConst,LocOnFly, UGorevDlg, UVeriMotor;
 
 
 procedure TAlarmDlg.cxButton1Click(Sender: TObject);
@@ -81,9 +81,9 @@ var
   Komut:String;
 begin
    case ComboAnimsatmaZamani.editvalue of
-     100..199: Komut:= 'DATEADD(MINUTE,'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',GETDATE())';
-     200..299: Komut:= 'DATEADD(HOUR,'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',GETDATE())';
-     300..399: Komut:= 'DATEADD(DAY,'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',GETDATE())';
+     100..199: Komut:= DbTarihEkle('MINUTE',copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'GETDATE()');
+     200..299: Komut:= DbTarihEkle('HOUR',copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'GETDATE()');
+     300..399: Komut:= DbTarihEkle('DAY',copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'GETDATE()');
    end;
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update ANIMSAT set TARIH='+Komut+'  where TUR=1 and ID=&AktiviteID and PERSONEL=&Personel ',['&AktiviteID','&Personel'],[AktiviteID,Kullanan]);
 

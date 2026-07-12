@@ -2101,8 +2101,8 @@ begin
 
   BtnNumComma.Caption := FormatSettings.Decimalseparator;
   TusBasili := False;
-  Tablo.TablodanSorguAc(5, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
-  Tablo.TablodanSorguAc(6, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
+  Tablo.TablodanSorguAc(5, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''€'' order by '+DbTarihFark('DAY','TARIH','GETDATE()')+' '+DbSinir(1));
+  Tablo.TablodanSorguAc(6, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''$'' order by '+DbTarihFark('DAY','TARIH','GETDATE()')+' '+DbSinir(1));
 
   StatusBar1.Panels[1].Text := '$ : '+Tablo.Query6.Fields[0].AsString+'  € : '+Tablo.Query5.Fields[0].AsString;
   StatusBar1.Panels[2].Text := HizliGirisAnaMenu.VarsKasaAdi;

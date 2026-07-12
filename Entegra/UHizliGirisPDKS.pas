@@ -284,10 +284,10 @@ begin
                 'PP.ID,R.FIRMA,PV.GUNADI,PP.GIRIS,PP.CIKIS,PP.SUBEID,PP.DURUM,' + #13#10 +
                 '('+DbConv('PV.GIRIS','varchar',108)+' +'' / ''+'+DbConv('PV.CIKIS','varchar',108)+') as VARGIRISCIKIS,' + #13#10 +
                 'GIRFARK=isnull(dbo.fn_GIRFARK('+DbConv('PV.GIRIS','varchar',108)+',PP.GIRIS),''00:00''),' + #13#10 +
-                'CALSURE=isnull(dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS)),''00:00''),' + #13#10 +
-                'CALFARK= CASE WHEN charindex(''*'',dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS)))=0' + #13#10 +
-                'THEN dbo.fn_CALFARK(dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS))) ELSE ''00:00'' END,' + #13#10 +
-                'CIKFARK=isnull(dbo.fn_CIKFARK('+DbConv('PV.GIRIS','varchar',108)+',dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),PP.GIRIS,PP.CIKIS),''00:00'')' + #13#10 +
+                'CALSURE=isnull(dbo.fn_SaatOlarak('+DbTarihFark('mi','PP.GIRIS','PP.CIKIS')+'),''00:00''),' + #13#10 +
+                'CALFARK= CASE WHEN charindex(''*'',dbo.fn_SaatOlarak('+DbTarihFark('mi','PP.GIRIS','PP.CIKIS')+'))=0' + #13#10 +
+                'THEN dbo.fn_CALFARK(dbo.fn_SaatOlarak('+DbTarihFark('mi','PV.GIRIS','PV.CIKIS')+'),dbo.fn_SaatOlarak('+DbTarihFark('mi','PP.GIRIS','PP.CIKIS')+')) ELSE ''00:00'' END,' + #13#10 +
+                'CIKFARK=isnull(dbo.fn_CIKFARK('+DbConv('PV.GIRIS','varchar',108)+',dbo.fn_SaatOlarak('+DbTarihFark('mi','PV.GIRIS','PV.CIKIS')+'),PP.GIRIS,PP.CIKIS),''00:00'')' + #13#10 +
                 'from PERS_PDKS PP' + #13#10 +
                 'LEFT OUTER JOIN REHBER R on R.ID=PP.REHBERID' + #13#10 +
                 'left outer join PERS_VARDIYATANIM PV on' + #13#10 +

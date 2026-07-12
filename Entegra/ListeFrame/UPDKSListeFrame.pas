@@ -687,8 +687,8 @@ begin
              Recordindex := PDKSListeTV.DataController.DataControllerInfo.Selection[i]^.RecordIndex;
              PERSID := PDKSListeTV.DataController.Values[Recordindex,PDKSListeTVID.Index];
              //tarihteki saat sıfırlanır
-             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update PERS_PDKS set DURUM = '+IntToStr(Tags)+', GIRIS=DATEADD(dd, DATEDIFF(dd,0,GIRIS), 0),'+
-               'CIKIS=DATEADD(dd, DATEDIFF(dd,0,CIKIS), 0)  Where ID ='+IntToStr(PERSID)+' ',[],[]);
+             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update PERS_PDKS set DURUM = '+IntToStr(Tags)+', GIRIS='+DbTarihEkle('dd',DbTarihFark('dd','0','GIRIS'),'0')+','+
+               'CIKIS='+DbTarihEkle('dd',DbTarihFark('dd','0','CIKIS'),'0')+'  Where ID ='+IntToStr(PERSID)+' ',[],[]);
           end;
           YenileClick(Self);
       end;

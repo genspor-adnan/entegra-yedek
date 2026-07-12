@@ -3154,7 +3154,7 @@ procedure KuyrukHataYaz(AConnection: TFDConnection; AQueueID, AFatBaslikID: Inte
   const AHata: string);
 begin
   Veritabani.BasitKomutÇalıştır(AConnection,
-    'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI=dateadd(minute,5,getdate()), ' +
+    'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=9,SON_HATA=&HATA,SONRAKI_DENEME_TARIHI='+DbTarihEkle('minute','5','getdate()')+', ' +
     'DEGISTIREN=&KUL,DEGISTIRMETARIHI=getdate() where ID=&ID',
     ['&HATA', '&KUL', '&ID'], [Copy(AHata, 1, 1000), StrToIntDef(Kullanan, 0), AQueueID]);
   Veritabani.BasitKomutÇalıştır(AConnection,
@@ -3281,7 +3281,7 @@ begin
     Veritabani.BasitKomutÇalıştır(AConnection,
       'update ' + DepoTablo('EBELGEKUYRUK') + ' set DURUM=0 ' +
       'where ISLEMTURU=1 and DURUM=1 ' +
-      '  and (SON_DENEME_TARIHI is null or SON_DENEME_TARIHI<dateadd(minute,-5,getdate()))',
+      '  and (SON_DENEME_TARIHI is null or SON_DENEME_TARIHI<'+DbTarihEkle('minute','-5','getdate()')+')',
       [], []);
 
     LSQL := 'select ID,FATBASLIKID from ' + DepoTablo('EBELGEKUYRUK') + ' ' +

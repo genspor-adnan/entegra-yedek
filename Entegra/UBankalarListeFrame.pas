@@ -509,7 +509,7 @@ end;
 procedure TBankalarListeFrame.HesapBakiyesiniGuncelleMenuClick(Sender: TObject);
 begin
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update  BANKAHESAPLAR set BAKIYE=(select SUM(K1.ALACAK-K1.BORC)'+
-    ' from KASA K1 where K1.HESAPID='+BANKALAR.FieldByName('ID').AsString+' AND K1.ISLEMTARIHI >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE()), 0)'+
+    ' from KASA K1 where K1.HESAPID='+BANKALAR.FieldByName('ID').AsString+' AND K1.ISLEMTARIHI >= '+DbTarihEkle('yy', DbTarihFark('yy','0','GETDATE()'), '0')+
     ' and K1.HESAPTURU=''B'') where ID='+BANKALAR.FieldByName('ID').AsString, [],[]);
     YenileClick;
 end;

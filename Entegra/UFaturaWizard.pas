@@ -4319,7 +4319,7 @@ var
     //  if Tablo.Query8.RecordCount>0  then exit;
 
       Tablo.TablodanSorguAc(8,'select E.ID,FB.REHBERID,EKLEYEN='+Kullanan+',USTID=0,SERINO=0,GARANTIBITTAR=case when isnull(S.GARANTISURESI,0)>0 then  '+
-          ' DATEADD(month, GARANTISURESI, FB.FATURATARIH) else null end, SATISTARIHI=FB.FATURATARIH ,SATISNO=FB.FATURANO,E.SAHIP,' +
+          ' '+DbTarihEkle('month','GARANTISURESI','FB.FATURATARIH')+' else null end, SATISTARIHI=FB.FATURATARIH ,SATISNO=FB.FATURANO,E.SAHIP,' +
           ' MARKA=isnull(E.MARKA,''-999''), MODEL=isnull(E.MODEL,''-999''), F.ADET, S.STOKADI  '+
           ' from FATBASLIK FB inner join FATURA F on FB.ID=F.FATBASID inner join STOKLAR S on F.URUNID=S.ID inner join EKIPMANLAR E on S.ID = E.URUNID '+
           ' where FB.ID='+TabFatbaslik.FieldByName('ID').AsString+' and E.ID not in (select ER.EKIPMANID from EKIPMANREHBER ER where ER.REHBERID='+TabFatbaslik.FieldByName('REHBERID').AsString+' and SATISNO='''+TabFatbaslik.FieldByName('FATURANO').AsString+''')');

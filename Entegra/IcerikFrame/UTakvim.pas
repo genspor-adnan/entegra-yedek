@@ -425,8 +425,8 @@ begin
          TabGrafik.SQL.Add('Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ');//Pazar günlerini listelele
        end;
        -1,3:begin
-         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
-         ' Where TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBasTar.Date)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBitTar.Date)+''' '+
+         TabGrafik.SQL.Add('select GUN,AY,BAKIYE,TARIH,'+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
+         ' Where TARIH='+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBasTar.Date)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBitTar.Date)+''' '+
          ' Order by TARIH');
        end;
     end;
@@ -844,8 +844,8 @@ end else begin
     case AylikHaftalikGunluk  of
        0:TabGrafik.SQL.Text:='select * from GRAFIKPLAN_SPID ORDER by TARIH';
        2:TabGrafik.SQL.Text:='Select * from GRAFIKPLAN_SPID Where datename(dw,TARIH)=''Sunday'' order by TARIH  ';//Pazar günlerini listelele
-       3:TabGrafik.SQL.Text:='select GUN,AY,BAKIYE,TARIH,'+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
-         ' Where TARIH='+DbConv('DATEADD(dd,-(DAY(DATEADD(mm,1,TARIH))),DATEADD(mm,1,TARIH))','VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBasTar.Date)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBitTar.Date)+''' '+
+       3:TabGrafik.SQL.Text:='select GUN,AY,BAKIYE,TARIH,'+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+'  from GRAFIKPLAN_SPID'+
+         ' Where TARIH='+DbConv(DbTarihEkle('dd','-(DAY('+DbTarihEkle('mm','1','TARIH')+'))',DbTarihEkle('mm','1','TARIH')),'VARCHAR(10)',112)+' and TARIH >='''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBasTar.Date)+'''  and TARIH <= '''+FormatDateTime('yyyy-mm-dd 00:00',TakvimAksiyonlar.DateGrafikBitTar.Date)+''' '+
          ' Order by TARIH';
     end;
     TabloYenile(TabGrafik,[]);

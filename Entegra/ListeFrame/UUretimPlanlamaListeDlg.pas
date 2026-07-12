@@ -223,7 +223,7 @@ type
 
 implementation
 
-uses FetaKurulusSiniflari, FetaClassExtensions,Utablo, PrjConst, UUretimRecete, UAnaForm,LocOnFly;
+uses FetaKurulusSiniflari, FetaClassExtensions,Utablo, PrjConst, UUretimRecete, UAnaForm,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
@@ -661,7 +661,7 @@ begin
       Tablo.Query6.SQL.Add('(URETIMEMRIID,URETIMEMRIDETAYID,HEDEFOPERASYON,STOKID,RECETEID,RECETEDETAYID,LOKASYON,ISMERKEZI,PERSONEL,BASTAR,BITTAR ');
       Tablo.Query6.SQL.Add(',ADET,BIRIM,MIKTAR,ACIKLAMA,YERI,YERID,GIRISDEPO,CIKISDEPO,URETIMPLANID,URETIMPLANDETAYID) ');
       Tablo.Query6.SQL.Add('select UD.URETIMEMRIID,UD.ID,0,UD.URUNID,UD.KAYNAKRECETEID,UD.KAYNAKRECETEDETAYID, ');
-      Tablo.Query6.SQL.Add('0,0,'+Kullanan+',GetDate(),DateAdd(hour,1,GetDate()),UD.ADET-isnull((select isnull(sum(uo2.ADET),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0), ');
+      Tablo.Query6.SQL.Add('0,0,'+Kullanan+',GetDate(),'+DbTarihEkle('hour','1','GetDate()')+',UD.ADET-isnull((select isnull(sum(uo2.ADET),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0), ');
       Tablo.Query6.SQL.Add('UD.BIRIM,UD.MIKTAR-isnull((select isnull(sum(uo2.MIKTAR),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0),UD.ACIKLAMA,141,UD.ID, ');
       Tablo.Query6.SQL.Add(VarToStrDef(FArama.cbDepo.EditValue,GenRegIni.RegReadString('StokOpsiyon', 'StokVarsayilanDepo', '1', 'C'))+','+VarToStrDef(FArama.cbDepo.EditValue,GenRegIni.RegReadString('StokOpsiyon', 'StokVarsayilanDepo', '1', 'C'))+',UE.URETIMPLANID,UE.URETIMPLANDETAYID ');
       Tablo.Query6.SQL.Add('from URETIMEMRIDETAY UD inner join URETIMEMRI UE on UE.ID=UD.URETIMEMRIID ');
@@ -1017,7 +1017,7 @@ begin
       Tablo.Query6.SQL.Add('(URETIMEMRIID,URETIMEMRIDETAYID,HEDEFOPERASYON,STOKID,RECETEID,RECETEDETAYID,LOKASYON,ISMERKEZI,PERSONEL,BASTAR,BITTAR ');
       Tablo.Query6.SQL.Add(',ADET,BIRIM,MIKTAR,ACIKLAMA,YERI,YERID,GIRISDEPO,CIKISDEPO,URETIMPLANID,URETIMPLANDETAYID) ');
       Tablo.Query6.SQL.Add('select UD.URETIMEMRIID,UD.ID,0,UD.URUNID,UD.KAYNAKRECETEID,UD.KAYNAKRECETEDETAYID, ');
-      Tablo.Query6.SQL.Add('0,0,'+Kullanan+',GetDate(),DateAdd(hour,1,GetDate()),UD.ADET-isnull((select isnull(sum(uo2.ADET),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0), ');
+      Tablo.Query6.SQL.Add('0,0,'+Kullanan+',GetDate(),'+DbTarihEkle('hour','1','GetDate()')+',UD.ADET-isnull((select isnull(sum(uo2.ADET),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0), ');
       Tablo.Query6.SQL.Add('UD.BIRIM,UD.MIKTAR-isnull((select isnull(sum(uo2.MIKTAR),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0),UD.ACIKLAMA,141,UD.ID, ');
       Tablo.Query6.SQL.Add(VarToStrDef(FArama.cbDepo.EditValue,GenRegIni.RegReadString('StokOpsiyon', 'StokVarsayilanDepo', '1', 'C'))+','+VarToStrDef(FArama.cbDepo.EditValue,GenRegIni.RegReadString('StokOpsiyon', 'StokVarsayilanDepo', '1', 'C'))+',UE.URETIMPLANID,UE.URETIMPLANDETAYID ');
       Tablo.Query6.SQL.Add('from URETIMEMRIDETAY UD inner join URETIMEMRI UE on UE.ID=UD.URETIMEMRIID ');

@@ -295,7 +295,7 @@ uses Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
   UHaklar,IdGlobalProtocols, UOpsiyonKalite, UOpsiyonKasiyer, UOpsiyonDemirbas, UMesaj, UgenSifre,
   Ubelgegiris, UOpsiyonIK, UMekanMasaGor,LocOnFly, UIKListeDlg, cidv5_tlb, UCallerId, UHizliGiris, UMesajlasma,
   uFrameYoneticisi, //my.15.05.2025
-  UOpsiyonUretimDlg, UProjeListeDlg, UGorevListeDlg, UBankaKredileriListeFrame,UCekListeFrame;//,UOpsiyonITS;
+  UOpsiyonUretimDlg, UProjeListeDlg, UGorevListeDlg, UBankaKredileriListeFrame,UCekListeFrame, UVeriMotor;//,UOpsiyonITS;
 
 {$R *.DFM}
 var CIDnesne: TCIDv5;
@@ -1765,7 +1765,7 @@ begin
   begin
     TimerGorevAnimsat.Enabled := Tablo.GENINI.ReadBoolean( Ops_UyariOpsiyon_Aktif,True);
     TimerGorevAnimsat.Interval := StrToIntDef(Tablo.GENINI.ReadString( Ops_UyariOpsiyon_YenilemeSuresi,'0'), 1) * 1000;
-    StringReplace(TabGorevAnimsat.SQL.Text, 'DATEDIFF(DAY,7,BITISTARIHI)', 'DATEDIFF(DAY,' + Tablo.GENINI.ReadString( Ops_UyariOpsiyon_YeniKayitSuresi,'0') + ',BITISTARIHI)', [rfReplaceAll]);
+    StringReplace(TabGorevAnimsat.SQL.Text, 'DATEDIFF(DAY,7,BITISTARIHI)', DbTarihFark('DAY', Tablo.GENINI.ReadString( Ops_UyariOpsiyon_YeniKayitSuresi,'0'), 'BITISTARIHI'), [rfReplaceAll]);
 
    (* FserverAddr := WSocketResolveHost('0.0.0.0');
     if FserverAddr.S_Addr = htonl(INADDR_LOOPBACK) then

@@ -615,15 +615,15 @@ var
   Tarih: string;
 begin
   if ComboZamanAraligi.text = RWBirAy then
-    Tarih := ' Where TARIH > DATEADD(month,-1,''' + FormatDateTime('yyyy-mm-dd 00:00:00', Now) + ''')'
+    Tarih := ' Where TARIH > '+DbTarihEkle('month','-1',''''+FormatDateTime('yyyy-mm-dd 00:00:00', Now)+'''')
   else if ComboZamanAraligi.text = RWUcAy then
-    Tarih := ' Where TARIH > DATEADD(month,-3,''' + FormatDateTime('yyyy-mm-dd 00:00:00', Now) + ''')'
+    Tarih := ' Where TARIH > '+DbTarihEkle('month','-3',''''+FormatDateTime('yyyy-mm-dd 00:00:00', Now)+'''')
   else if ComboZamanAraligi.text = RWAltiAy then
-    Tarih := ' Where TARIH > DATEADD(month,-6,''' + FormatDateTime('yyyy-mm-dd 00:00:00', Now) + ''')'
+    Tarih := ' Where TARIH > '+DbTarihEkle('month','-6',''''+FormatDateTime('yyyy-mm-dd 00:00:00', Now)+'''')
   else if ComboZamanAraligi.text = RWBirYil then
-    Tarih := ' Where TARIH > DATEADD(year,-1,''' +  FormatDateTime('yyyy-mm-dd 00:00:00', Now) + ''')'
+    Tarih := ' Where TARIH > '+DbTarihEkle('year','-1',''''+FormatDateTime('yyyy-mm-dd 00:00:00', Now)+'''')
   else if ComboZamanAraligi.text = RWikiYil then
-    Tarih := ' Where TARIH > DATEADD(year,-2,''' +  FormatDateTime('yyyy-mm-dd 00:00:00', Now) + ''')'
+    Tarih := ' Where TARIH > '+DbTarihEkle('year','-2',''''+FormatDateTime('yyyy-mm-dd 00:00:00', Now)+'''')
   else if ComboZamanAraligi.text = RWTumKayitlar then
     Tarih := ' ';
   TabCRMEkstre.Close;

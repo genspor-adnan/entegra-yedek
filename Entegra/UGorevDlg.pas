@@ -651,9 +651,9 @@ var ID:Integer;
     begin
        case ComboAnimsatmaZamani.editvalue of
            0: Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from ANIMSAT where ID='+TabGorev.FieldByName('ID').AsString, [], []);
-         100..199: Komut:= 'DATEADD(MINUTE,-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',BASLAMATARIHI)';
-         200..299: Komut:= 'DATEADD(HOUR,-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',BASLAMATARIHI)';
-         300..399: Komut:= 'DATEADD(DAY,-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2)+',BASLAMATARIHI)';
+         100..199: Komut:= DbTarihEkle('MINUTE','-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'BASLAMATARIHI');
+         200..299: Komut:= DbTarihEkle('HOUR','-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'BASLAMATARIHI');
+         300..399: Komut:= DbTarihEkle('DAY','-'+copy(IntToStr(ComboAnimsatmaZamani.editvalue),2,2),'BASLAMATARIHI');
        end;
        if ComboAnimsatmaZamani.editvalue>0 then begin
          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from ANIMSAT where ID='+TabGorev.FieldByName('ID').AsString, [], []);

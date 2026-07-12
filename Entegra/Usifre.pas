@@ -417,7 +417,7 @@ begin
     end;
     if KullaniciID <> 2 then begin
         //şifre doğru giriş yaptı.. şimdi şifre süresi dolmuş mu bakalım
-        Tablo.TablodanSorguAc(1,'select DATEDIFF(DAY, GETDATE(), isnull(SIFREDEGISME,getdate()-2)) AS GunSayisi from KULLANICI where REHBERID='+Kullanan);
+        Tablo.TablodanSorguAc(1,'select '+DbTarihFark('DAY','GETDATE()','isnull(SIFREDEGISME,getdate()-2)')+' AS GunSayisi from KULLANICI where REHBERID='+Kullanan);
         if Tablo.Query1.Fields[0].AsInteger < 1 then begin
            if TabKullanici.FieldByName('SORU').AsString = '' then begin//güvenlik sorusu yoksa o ekranı açalım
               if Tablo.KullaniciSihirbazBaslat(TabKullanici.Fields[0].AsInteger, TabKullanici.FieldByName('REHBERID').AsInteger, TabKullanici.FieldByName('ROLID').AsInteger)=False then begin
@@ -480,10 +480,10 @@ begin
       '	end)) as liste1').items;
 
     if AktifVeriMotor <> vmPG then begin  // eszamanli-kullanici/lisans takibi (master.dbo.GLogins, Scope_Identity) MSSQL-ozel; PG'de atla
-    if not Tablo.TablodanSorguAc(7,'select distinct COMPUTERNAME,SESSIONNAME,LOGONSERVER,USERNAME,USERDOMAIN from master.dbo.GLogins where Dateadd(minute,2,SOOT) > Getdate() '+
+    if not Tablo.TablodanSorguAc(7,'select distinct COMPUTERNAME,SESSIONNAME,LOGONSERVER,USERNAME,USERDOMAIN from master.dbo.GLogins where '+DbTarihEkle('minute','2','SOOT')+' > Getdate()'+
                                    ' and COMPUTERNAME+SESSIONNAME+LOGONSERVER+USERNAME+USERDOMAIN <> '''+Tablo.GetEnvVarValue('COMPUTERNAME')+Tablo.GetEnvVarValue('SESSIONNAME')+Tablo.GetEnvVarValue('LOGONSERVER')+Tablo.GetEnvVarValue('USERNAME')+Tablo.GetEnvVarValue('USERDOMAIN')+''' ') then begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'create table master.dbo.GLogins(ID int IDENTITY(1,1),SOOT datetime,COMPUTERNAME nvarchar(50),SESSIONNAME nvarchar(50),LOGONSERVER nvarchar(50),USERNAME nvarchar(50),USERDOMAIN nvarchar(50),CONSTRAINT [PK_GLgn] PRIMARY KEY CLUSTERED (ID DESC) ON [PRIMARY])',[],[]);
-      Tablo.TablodanSorguAc(7,'select distinct COMPUTERNAME,SESSIONNAME,LOGONSERVER,USERNAME,USERDOMAIN from master.dbo.GLogins where Dateadd(minute,2,SOOT) > Getdate() ');
+      Tablo.TablodanSorguAc(7,'select distinct COMPUTERNAME,SESSIONNAME,LOGONSERVER,USERNAME,USERDOMAIN from master.dbo.GLogins where '+DbTarihEkle('minute','2','SOOT')+' > Getdate()');
     end;
     KulSay := StrToIntDef(UGenSifre.Desifre(Tablo.GENINI.ReadString(Ops_LsnsKulSay,'AA')),30);
     if Tablo.Query7.RecordCount>=KulSay then begin

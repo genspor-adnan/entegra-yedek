@@ -55,6 +55,11 @@ function DbBul(const ANeedle, AHaystack: string): string;
 //   uzunluk tasir (stil+uzunluk PG format'ini belirler; 120+len10=tarih). tip=char/varchar ->
 //   FORMAT yonu (to_char); tip=datetime/date -> PARSE yonu (to_timestamp). MSSQL'de aynen.
 function DbConv(const AExpr, ATip: string; AStyle: Integer): string;
+// MSSQL DATEADD(datepart, sayi, tarih) -> PG interval aritmetigi. datepart string (mm/dd/hh...).
+function DbTarihEkle(const ADatepart, ASayi, ATarih: string): string;
+// MSSQL DATEDIFF(datepart, tarih1, tarih2) -> PG. gun/ay/yil takvim-siniri BIREBIR; dakika/saat/
+//   saniye SURE-tabanli (floor; "ne kadar once" esikleri icin yeterli).
+function DbTarihFark(const ADatepart, ATarih1, ATarih2: string): string;
 // Log BILGI kolonu: MSSQL varbinary = COMPRESS(json) | PG jsonb (native). Yaz/oku seam.
 function DbLogBilgiYaz(const AParam: string): string;   // deger ifadesi (INSERT VALUES)
 function DbLogBilgiOku(const AKolon: string): string;   // okuma ifadesi (SELECT); JSON metnini doner
@@ -230,6 +235,67 @@ begin
     Result := 'to_char(' + AExpr + ',''' + PgTarihFmt(AStyle, len) + ''')'
   else                                                  // datetime/date -> PARSE (metin->zaman)
     Result := '(to_timestamp(' + AExpr + ',''' + PgTarihFmt(AStyle, 0) + ''')::timestamp)';
+end;
+
+function PgAralikBirim(const ADatepart: string): string;   // MSSQL datepart -> PG interval birimi
+var d: string;
+begin
+  d := LowerCase(Trim(ADatepart));
+  if (d = 'mm') or (d = 'm') or (d = 'month') then Result := 'month'
+  else if (d = 'yy') or (d = 'yyyy') or (d = 'year') or (d = 'yyy') then Result := 'year'
+  else if (d = 'hh') or (d = 'hour') then Result := 'hour'
+  else if (d = 'mi') or (d = 'n') or (d = 'minute') then Result := 'minute'
+  else if (d = 'ss') or (d = 's') or (d = 'second') then Result := 'second'
+  else if (d = 'wk') or (d = 'ww') or (d = 'week') then Result := 'week'
+  else if (d = 'qq') or (d = 'q') or (d = 'quarter') then Result := 'quarter'
+  else Result := 'day';   // dd/d/day/dw/dy/... -> gun
+end;
+
+function PgTarihArg(const A: string): string;   // MSSQL '0' baz tarihi (1900-01-01) -> PG
+begin
+  if Trim(A) = '0' then Result := '''1900-01-01''::timestamp' else Result := A;
+end;
+
+function DbTarihEkle(const ADatepart, ASayi, ATarih: string): string;
+var birim, t: string;
+begin
+  if AktifVeriMotor <> vmPG then
+  begin
+    Result := 'dateadd(' + ADatepart + ',' + ASayi + ',' + ATarih + ')';
+    Exit;
+  end;
+  birim := PgAralikBirim(ADatepart);
+  t := PgTarihArg(ATarih);
+  if birim = 'quarter' then   // PG'de quarter interval yok -> 3 ay
+    Result := '(' + t + ' + ((' + ASayi + ')*3) * interval ''1 month'')'
+  else
+    Result := '(' + t + ' + (' + ASayi + ') * interval ''1 ' + birim + ''')';
+end;
+
+function DbTarihFark(const ADatepart, ATarih1, ATarih2: string): string;
+var birim, s1, s2: string;
+begin
+  if AktifVeriMotor <> vmPG then
+  begin
+    Result := 'datediff(' + ADatepart + ',' + ATarih1 + ',' + ATarih2 + ')';
+    Exit;
+  end;
+  birim := PgAralikBirim(ADatepart);
+  s1 := '(' + PgTarihArg(ATarih1) + ')'; s2 := '(' + PgTarihArg(ATarih2) + ')';
+  if birim = 'day' then       // takvim gun farki (MSSQL DATEDIFF(day) = tarih siniri)
+    Result := '(' + s2 + '::date - ' + s1 + '::date)'
+  else if birim = 'year' then
+    Result := '(extract(year from ' + s2 + ')-extract(year from ' + s1 + '))::int'
+  else if birim = 'month' then
+    Result := '(((extract(year from ' + s2 + ')-extract(year from ' + s1 + '))*12)+extract(month from ' + s2 + ')-extract(month from ' + s1 + '))::int'
+  else if birim = 'hour' then
+    Result := 'floor(extract(epoch from (' + s2 + '::timestamp - ' + s1 + '::timestamp))/3600)::int'
+  else if birim = 'minute' then
+    Result := 'floor(extract(epoch from (' + s2 + '::timestamp - ' + s1 + '::timestamp))/60)::int'
+  else if birim = 'week' then
+    Result := 'floor((' + s2 + '::date - ' + s1 + '::date)/7)::int'
+  else   // second (ve digerleri)
+    Result := 'floor(extract(epoch from (' + s2 + '::timestamp - ' + s1 + '::timestamp)))::int';
 end;
 
 function DbLogBilgiYaz(const AParam: string): string;
