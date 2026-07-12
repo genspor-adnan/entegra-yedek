@@ -61,7 +61,7 @@ function MetinMotor(const AMetin: string): TVeriMotor;
 
 implementation
 
-uses SysUtils,
+uses SysUtils, System.RegularExpressions,
   FireDAC.Phys.PG;   // PG surucusunu LINK et (yoksa DriverID='PG' runtime'da bulunamaz)
 
 function DbSimdi: string;
@@ -149,7 +149,34 @@ begin
   Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'sysdatetime()', 'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '@@spid',        'pg_backend_pid()', [rfReplaceAll, rfIgnoreCase]);
-  // NOT: top/scope_identity/charindex/[]/+  -> BURADA DEGIL (belirsiz/konumsal); seam ile.
+  // NOT: dis SELECT TOP -> PgTopCevir (asagida). scope_identity/charindex/[]/+ ve nested/UNION
+  //   TOP -> BURADA DEGIL (belirsiz/konumsal); seam ile (DbUst/DbSinir/DbKimlikAl...).
+end;
+
+// DIS SELECT'teki 'TOP n' -> sona 'LIMIT n'. Yalniz sorgu BASINDAKI
+//   'SELECT [DISTINCT] TOP n' (veya 'TOP (n)') yakalanir; bu konumsal donusum guvenlidir.
+//   Nested (alt-sorgu) TOP, UNION ve TOP n PERCENT/WITH TIES'a DOKUNMAZ -> onlar seam ile
+//   (DbUst/DbSinir). Boylece TablodanSorguAc'tan gecen inline TOP sorgulari otomatik calisir.
+function PgTopCevir(const S: string): string;
+var
+  m: TMatch;
+  ls, sayi, kalan: string;
+begin
+  Result := S;
+  ls := LowerCase(S);                       // ASCII fold (SQL anahtar kelimeleri; Turkce I sorunu yok)
+  if Pos('top', ls) = 0 then Exit;          // hizli cikis
+  m := TRegEx.Match(S, '^(\s*select\s+(distinct\s+)?)top\s*\(?\s*(\d+)\s*\)?\s+', [roIgnoreCase]);
+  if not m.Success then Exit;
+  sayi := m.Groups[3].Value;
+  kalan := LowerCase(Copy(S, m.Index + m.Length, 12));
+  if (Pos('percent', kalan) = 1) or (Pos('with ties', kalan) = 1) then Exit;  // nadir -> seam
+  if Pos(' union ', ls) > 0 then Exit;      // UNION'da LIMIT semantigi farkli -> dokunma (seam)
+  // 'top n ' parcasini cikar (Groups[1]=select[+distinct] korunur), sona ' limit n' ekle
+  Result := TrimRight(m.Groups[1].Value + Copy(S, m.Index + m.Length, MaxInt));
+  if (Result <> '') and (Result[Length(Result)] = ';') then
+    Result := Copy(Result, 1, Length(Result) - 1) + ' limit ' + sayi + ';'
+  else
+    Result := Result + ' limit ' + sayi;
 end;
 
 function PgSqlCevir(const ASql: string): string;
@@ -201,6 +228,7 @@ begin
   finally
     disari.Free; sonuc.Free;
   end;
+  Result := PgTopCevir(Result);   // dis SELECT TOP n -> LIMIT n (anchored; literal-disi)
 end;
 
 function MotorMetne(AMotor: TVeriMotor): string;
