@@ -1580,10 +1580,10 @@ begin
   inherited;
   KulID := StrToIntDef(Kullanan, 1);
   TabSK.Close;
-  TabSK.SQL.Text := PgSqlCevir(
-    ' select top 10 M.MODULID, M.MODULADI from KULLANICI_ISLEM K ' +
+  TabSK.SQL.Text :=
+    ' select ' + DbUst(10) + ' M.MODULID, M.MODULADI from KULLANICI_ISLEM K ' +
     ' inner join MODUL M on K.ISLEMID=M.MODULID ' +
-    ' where KULID=' + IntToStr(KulID) + ' order by [SAY] desc ');
+    ' where KULID=' + IntToStr(KulID) + ' order by SAY desc ' + DbSinir(10);
   TabSK.Open;
   FChatWindows := TObjectList<TChatWindow>.Create;
   FOnlineUsers := TStringList.Create;
