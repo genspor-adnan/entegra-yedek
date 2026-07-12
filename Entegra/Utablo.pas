@@ -1714,7 +1714,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
     str2 := TMemoryStream.Create();
 
     if AyarID>0 then
-      TablodanSorguAc(5,'select 1 AS SIRA,REHBERID,BILGI,FILTRE from AYAR where ID='+IntToStr(AyarID))
+       TablodanSorguAc(5,'select 1 AS SIRA,REHBERID,BILGI,FILTRE from AYAR where ID='+IntToStr(AyarID))
     else
       {TablodanSorguAc(5,'select top 1 * from('+
         ' select top 1 SIRA=1,REHBERID,BILGI,FILTRE from AYAR where REHBERID = '+IntTostr(Kullanan_Ayar)+' and ADI='''+GridAdi+''' '+
@@ -6003,6 +6003,11 @@ begin
 
     if TabloAdi.Prepared then
       TabloAdi.Unprepare;
+
+    // PG: DFM/kod ile atanmis SQL'i diyalekt cevir (dis TOP/NOLOCK/[ident]/getdate/isnull).
+    //   :param'lara dokunmaz. Nested TOP/convert/declare iceren query'ler yine per-frame ele alinir.
+    if AktifVeriMotor = vmPG then
+      TabloAdi.SQL.Text := PgSqlCevir(TabloAdi.SQL.Text);
 
     ParamNames := CollectColonParams(TabloAdi.SQL.Text);
     try

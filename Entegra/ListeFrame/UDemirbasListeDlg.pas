@@ -464,7 +464,8 @@ begin
     DegisTus.Tag := -1;
   if not Tablo.YetkiVarmi(2801,YetkiTur_Silme) then
     SilTus.Tag := -1;
-  TabloYenile(DEMIRBAS,[]);
+  if AktifVeriMotor <> vmPG then   // DEMIRBAS DFM query'si nested TOP+convert (DFM statik) -> PG rewrite ayri is; pilotta bos grid
+    TabloYenile(DEMIRBAS,[]);
   //16/01/2023 AO burada kullanıcının hangi kategorileri göreceğine dair yetki kontrolü yapmamız gerekiyor
   if TamYetkili then
      KategoriYetki := 1 ///herşeyi
