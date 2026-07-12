@@ -451,7 +451,7 @@ begin
       if Trim(ADegistiren) = '' then LDeg := 'NULL' else LDeg := ADegistiren;
       LQ.SQL.Text := 'UPDATE IMAJ SET DOSYAID=' + IntToStr(LDosyaID) +
         ', BOYUT=' + IntToStr(LBoyutKB) + ', ICDIS=0, BELGE=NULL' +
-        ', DEGISTIRMETARIHI=getdate(), DEGISTIREN=' + LDeg +
+        ', DEGISTIRMETARIHI=' + DbSimdi + ', DEGISTIREN=' + LDeg +
         ' WHERE ID=' + IntToStr(AImajID);
       LQ.ExecSQL;
     finally
@@ -598,7 +598,7 @@ begin
   try
     LQ := TFDQuery.Create(nil);
     try
-      LQ.Connection := Tablo.FDCnn;
+      LQ.Connection  := Tablo.FDCnn;
       LQ.SQL.Text := 'DELETE FROM ' + DepoTablo('SNAPSHOT') +
         ' WHERE TARIH < ' + DbGunEkle(DbSimdi, -AGun);
       LQ.ExecSQL;
@@ -871,11 +871,11 @@ begin
         // AModul param'i geriye uyumluluk icin durur (yazilmaz).
         if LBilgiVar then
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), COMPRESS(CAST(:BILGI AS nvarchar(max))))'
+            'INSERT INTO ' + DepoTablo(LTablo) + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
+            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), ' + DbLogBilgiYaz(':BILGI') + ')'
         else
           LQ.SQL.Text :=
-            'INSERT INTO dbo.' + LTablo + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
+            'INSERT INTO ' + DepoTablo(LTablo) + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
             'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0))';
         LQ.ParamByName('IP').AsString  := Copy(YerelIP, 1, 45);
         LQ.ParamByName('IST').AsString := Copy(Istasyon, 1, 64);
@@ -965,8 +965,8 @@ begin
         LQ.Connection := LCnn;
         // Son satirin AD/KOD/SILINDI'sini al. DEGISMISSE YENI SATIR ekle -> eski isim
         // korunur (isim gecmisi); eski isimle de arama yapilabilir.
-        LQ.SQL.Text := 'SELECT TOP 1 AD, KOD, SILINDI FROM dbo.LOGREFERANS' +
-                       ' WHERE TABLOID=:TID AND KAYITID=:KYT ORDER BY ID DESC';
+        LQ.SQL.Text := 'SELECT ' + DbUst(1) + 'AD, KOD, SILINDI FROM ' + DepoTablo('LOGREFERANS') +
+                       ' WHERE TABLOID=:TID AND KAYITID=:KYT ORDER BY ID DESC ' + DbSinir(1);
         LQ.ParamByName('TID').AsInteger  := ATabloID;
         LQ.ParamByName('KYT').AsLargeInt := AKayitID;
         LQ.Open;
@@ -977,8 +977,8 @@ begin
         LQ.Close;
         if LAyni then Exit;   // ad/kod/silindi degismemis -> yeni satir gerekmez
         LQ.SQL.Text :=
-          'INSERT INTO dbo.LOGREFERANS(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)' +
-          ' VALUES(:TID,:KYT,:AD,:KOD,:SIL,getdate())';
+          'INSERT INTO ' + DepoTablo('LOGREFERANS') + '(TABLOID,KAYITID,AD,KOD,SILINDI,SONISLEM)' +
+          ' VALUES(:TID,:KYT,:AD,:KOD,:SIL,' + DbSimdi + ')';
         LQ.ParamByName('TID').AsInteger  := ATabloID;
         LQ.ParamByName('KYT').AsLargeInt := AKayitID;
         LQ.ParamByName('AD').AsString    := LAd;
@@ -1752,8 +1752,8 @@ begin
         try
           LLogQ.Connection := LCnn;
           LLogQ.SQL.Text :=
-            'SELECT TABLOID, KAYITID, CAST(DECOMPRESS(BILGI) AS nvarchar(max)) J ' +
-            'FROM ISLEMLOG WHERE USTKAYITID=:u AND USTTABLOID=:ut AND ISLEMTIPI=0 ' +
+            'SELECT TABLOID, KAYITID, ' + DbLogBilgiOku('BILGI') + ' J ' +
+            'FROM ' + DepoTablo('ISLEMLOG') + ' WHERE USTKAYITID=:u AND USTTABLOID=:ut AND ISLEMTIPI=0 ' +
             'AND CAST(TARIH AS date)=:g ' +
             'ORDER BY CASE WHEN TABLOID=:ut2 THEN 0 ELSE 1 END, ID';
           LLogQ.ParamByName('u').AsLargeInt := AUstKayitID;

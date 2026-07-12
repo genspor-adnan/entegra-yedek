@@ -51,6 +51,9 @@ function DbTarihTipi: string;
 // Alt-metin konumu (1-tabanli, yoksa 0). MSSQL CHARINDEX(needle,haystack) |
 //   PG strpos(haystack,needle) -- ARG SIRASI TERS (konumsal) -> seam.
 function DbBul(const ANeedle, AHaystack: string): string;
+// Log BILGI kolonu: MSSQL varbinary = COMPRESS(json) | PG jsonb (native). Yaz/oku seam.
+function DbLogBilgiYaz(const AParam: string): string;   // deger ifadesi (INSERT VALUES)
+function DbLogBilgiOku(const AKolon: string): string;   // okuma ifadesi (SELECT); JSON metnini doner
 
 // ---- Baglanti ----
 // Secili motora gore FDConnection'i yapilandirir. PG icin makinede libpq (PostgreSQL
@@ -177,6 +180,18 @@ function DbBul(const ANeedle, AHaystack: string): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'strpos(' + AHaystack + ',' + ANeedle + ')'
   else Result := 'CHARINDEX(' + ANeedle + ',' + AHaystack + ')';
+end;
+
+function DbLogBilgiYaz(const AParam: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'CAST(' + AParam + ' AS jsonb)'
+  else Result := 'COMPRESS(CAST(' + AParam + ' AS nvarchar(max)))';
+end;
+
+function DbLogBilgiOku(const AKolon: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'CAST(' + AKolon + ' AS text)'
+  else Result := 'CAST(DECOMPRESS(' + AKolon + ') AS nvarchar(max))';
 end;
 
 // Yalniz TIRNAK-DISI metne uygulanan diyalekt degisimleri (guvenli/belirsiz-olmayan).
