@@ -24,6 +24,7 @@ object ServisListeDlg: TServisListeDlg
     Control = cxPageControl1
     Color = clBlue
     ParentColor = False
+    ExplicitWidth = 8
   end
   object cxPageControl1: TcxPageControl
     Left = 0
@@ -43,6 +44,10 @@ object ServisListeDlg: TServisListeDlg
       Caption = 'Bilgi/A'#231#305'klama'
       ImageIndex = 0
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -178,6 +183,10 @@ object ServisListeDlg: TServisListeDlg
     object cxTabSheet2: TcxTabSheet
       Caption = 'Hareketler'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridHareketler: TcxGrid
         Left = 0
         Top = 0
@@ -334,6 +343,7 @@ object ServisListeDlg: TServisListeDlg
           Properties.Alignment.Horz = taRightJustify
           Transparent = True
           Visible = False
+          ExplicitTop = 140
           AnchorX = 438
         end
         object GridYorum: TcxGrid
@@ -421,6 +431,10 @@ object ServisListeDlg: TServisListeDlg
     object TabSheetGenel: TcxTabSheet
       Caption = 'Genel'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GenelTreeList: TcxDBTreeList
         Left = 0
         Top = 0
@@ -611,6 +625,10 @@ object ServisListeDlg: TServisListeDlg
     object cxTabSheet3: TcxTabSheet
       Caption = 'Belgeler'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGridBelgeler: TcxGrid
         Left = 0
         Top = 0
@@ -771,11 +789,16 @@ object ServisListeDlg: TServisListeDlg
     object TabServis: TcxTabSheet
       Caption = 'Servis'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 930
+        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -802,7 +825,6 @@ object ServisListeDlg: TServisListeDlg
         ShowCaptions = True
         TabOrder = 0
         Transparent = True
-        ExplicitHeight = 29
         object YeniTus: TToolButton
           Left = 0
           Top = 0
@@ -861,13 +883,13 @@ object ServisListeDlg: TServisListeDlg
         Width = 936
         Height = 189
         Align = alClient
-        PopupMenu = PopupMenuServis
         Font.Charset = TURKISH_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Trebuchet MS'
         Font.Style = []
         ParentFont = False
+        PopupMenu = PopupMenuServis
         TabOrder = 1
         LookAndFeel.Kind = lfOffice11
         LookAndFeel.NativeStyle = True
@@ -1194,6 +1216,10 @@ object ServisListeDlg: TServisListeDlg
     object Tabhareket: TcxTabSheet
       Caption = 'Hareket'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1889,22 +1915,22 @@ object ServisListeDlg: TServisListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 207
     Top = 404
     object MenuKlasordenEkle: TMenuItem

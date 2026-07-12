@@ -800,7 +800,7 @@ begin
 
 
   end;
-  //TabloYenile(Tablo1,[],LocateID,'ID');
+  //  TabloYenile(Tablo1,[],LocateID,'ID');
   TabloYenile(Tablo1,[]);
   if (Tablo1.Name='SERVIS')and(not ServisAlanlarOlusturuldu) then begin
       GridServisView.DataController.CreateAllItems(True);
