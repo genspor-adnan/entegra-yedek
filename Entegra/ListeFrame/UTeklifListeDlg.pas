@@ -281,7 +281,7 @@ type
 implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UTeklifWizard,
-  UFastRap, PrjConst,LocOnFly, FetaUtil, UBinarySave, ULog;
+  UFastRap, PrjConst,LocOnFly, FetaUtil, UBinarySave, ULog, UVeriMotor;
 
 {$R *.dfm}
 { TTeklifListeDlg }
@@ -436,6 +436,7 @@ Var
   TID:integer;
 begin
   JvTimer1.Enabled := False;
+  if AktifVeriMotor = vmPG then Exit; // TEKLIF DFM sorgusu (CARIKOD/nested) pilot disi - Depolar hedefi degil
   if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date))>0 then
     exit;
   if (TabTeklif.Active) and (TabTeklif.RecordCount>0) then
