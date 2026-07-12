@@ -20,7 +20,7 @@ param(
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 function LI([string]$s) { return $s.ToLowerInvariant() }
-$coll = if ($NoCollation) { '' } else { ' COLLATE depo.tr_ci' }
+$coll = ''  # deterministic collation (tr_ci non-deterministic LIKE'i bozuyor; kullanici karari 2026-07). -NoCollation etkisiz.
 
 function PgTip($tip,$maxlen,$prec,$scale){
   switch ($tip.ToLowerInvariant()) {

@@ -29,7 +29,7 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $inv = [System.Globalization.CultureInfo]::InvariantCulture
 function LI([string]$s) { return $s.ToLowerInvariant() }
-$coll = if ($NoCollation) { '' } else { ' COLLATE depo.tr_ci' }
+$coll = ''  # deterministic collation (tr_ci non-deterministic LIKE'i bozuyor; kullanici karari 2026-07). -NoCollation etkisiz.
 
 # MSSQL tipi -> PG tipi
 function PgTip($tip, $maxlen, $prec, $scale) {
