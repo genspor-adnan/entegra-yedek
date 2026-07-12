@@ -195,11 +195,9 @@ var
 
 implementation
 
-uses UVeriMotor;
-
 {$R *.dfm}
 
-uses PrjConst,Utablo, FetaKurulusSiniflari, fetautil,LocOnfly, UGirisKutusuEx;
+uses PrjConst,Utablo, FetaKurulusSiniflari, fetautil,LocOnfly, UGirisKutusuEx, UVeriMotor;
 
 var
   k:smallint;

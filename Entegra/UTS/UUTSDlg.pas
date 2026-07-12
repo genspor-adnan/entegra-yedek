@@ -234,11 +234,9 @@ var
 
 implementation
 
-uses UVeriMotor;
-
 {$R *.dfm}
 
-uses FetaKurulusSiniflari,RestUTS, UTablo, prjConst, UExceldenVeriAl, UBekletme, UGirisKutusuEx, UAnaForm;
+uses FetaKurulusSiniflari,RestUTS, UTablo, prjConst, UExceldenVeriAl, UBekletme, UGirisKutusuEx, UAnaForm, UVeriMotor;
 
 const
    TokenFeta = 'Systemaf2caff3-8f10-473e-95f1-0196058f6e96';
