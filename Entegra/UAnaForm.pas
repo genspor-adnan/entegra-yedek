@@ -1310,6 +1310,7 @@ end;
 
 Function TAnaForm.GorevHatirlatilacak: Integer;
 Begin
+  if AktifVeriMotor = vmPG then Exit(0);   // sp_Prg_IsListesiHatirlatma + fn_TarihFarki...Text TVF/skaler portu ayri is; pilotta hatirlatma yok
   TabGorevAnimsat.Close;
   TabGorevAnimsat.SQL.Text := 'EXEC [dbo].[sp_Prg_IsListesiHatirlatma] ' + IntToStr(StrToIntDef(Kullanan, 0));
   TabGorevAnimsat.Open;
