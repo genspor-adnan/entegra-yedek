@@ -1714,7 +1714,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
     str2 := TMemoryStream.Create();
 
     if AyarID>0 then
-      TablodanSorguAc(5,'select SIRA=1,REHBERID,BILGI,FILTRE from AYAR where ID='+IntToStr(AyarID))
+      TablodanSorguAc(5,'select 1 AS SIRA,REHBERID,BILGI,FILTRE from AYAR where ID='+IntToStr(AyarID))
     else
       {TablodanSorguAc(5,'select top 1 * from('+
         ' select top 1 SIRA=1,REHBERID,BILGI,FILTRE from AYAR where REHBERID = '+IntTostr(Kullanan_Ayar)+' and ADI='''+GridAdi+''' '+
@@ -1723,7 +1723,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
         ' order by SIRA,REHBERID'+
         ' ) as zz'); }
        //önce kişiye özel varsayılan varsa o yüklenir yoksa tüm kullanıcılar için genel ayarlar yüklenir
-       TablodanSorguAc(5,'select '+DbUst(1)+'SIRA=1,REHBERID,BILGI,FILTRE from AYAR where ADI='''+GridAdi+''' and  isnull(AYARADI,'''')='''' and REHBERID in (0,'+Kullanan+') order by REHBERID desc '+DbSinir(1));
+       TablodanSorguAc(5,'select '+DbUst(1)+'1 AS SIRA,REHBERID,BILGI,FILTRE from AYAR where ADI='''+GridAdi+''' and  isnull(AYARADI,'''')='''' and REHBERID in (0,'+Kullanan+') order by REHBERID desc '+DbSinir(1));
 
     if Query5.RecordCount>0 then begin
        TBlobField(Query5.FieldByName('BILGI')).SaveToStream(str);
