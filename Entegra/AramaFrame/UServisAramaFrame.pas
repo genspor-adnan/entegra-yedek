@@ -19,7 +19,7 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint;
+  dxSkinWhiteprint, dxCoreGraphics;
 
 type
   TServisAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -132,8 +132,8 @@ begin
       Ekle(4, 9, 'Bütün Servisler');
 
 
-   //EditSorumlu.Tag := StrToIntDef(GenRegIni.RegReadString('ServisOpsiyon', 'EditSorumluTag', '0', 'C'), 0);
-   //EditSorumlu.Text := GenRegIni.RegReadString('ServisOpsiyon', 'EditSorumluText', '', 'C');
+    //EditSorumlu.Tag := StrToIntDef(GenRegIni.RegReadString('ServisOpsiyon', 'EditSorumluTag', '0', 'C'), 0);
+    //EditSorumlu.Text := GenRegIni.RegReadString('ServisOpsiyon', 'EditSorumluText', '', 'C');
 end;
 
 procedure TServisAramaFrame.CheckKapaliPropertiesChange(Sender: TObject);

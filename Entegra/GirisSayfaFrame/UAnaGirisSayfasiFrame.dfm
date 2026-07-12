@@ -1821,6 +1821,10 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         object SheetNakitAkisi: TcxTabSheet
           Caption = 'Nakit Ak'#305#351#305
           ImageIndex = 9
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PageControl: TcxPageControl
             Left = 0
             Top = 33
@@ -1876,7 +1880,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Storage = SchedulerDBStorage
                 TabOrder = 0
                 OnDblClick = SchedulerDblClick
-                Selection = 119
+                Selection = 133
                 Splitters = {
                   87020000FB000000A503000000010000820200000100000087020000F8010000}
                 StoredClientBounds = {0100000001000000A5030000F8010000}
@@ -2916,8 +2920,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
               end
               object FGrid: TcxGrid
                 AlignWithMargins = True
-                Left = 2048
-                Top = 1900
+                Left = 2063
+                Top = 1915
                 Width = 443
                 Height = 128
                 Align = alCustom
@@ -2931,8 +2935,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Visible = False
                 LookAndFeel.Kind = lfOffice11
                 LookAndFeel.NativeStyle = False
-                ExplicitLeft = 2042
-                ExplicitTop = 1894
+                ExplicitLeft = 2057
+                ExplicitTop = 1909
                 object FGridTableView: TcxGridDBTableView
                   Navigator.Buttons.CustomButtons = <>
                   ScrollbarAnnotations.CustomAnnotations = <>
@@ -3634,6 +3638,10 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             object TabSheetListe: TcxTabSheet
               Caption = 'Liste'
               ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Panel6: TPanel
                 Left = 0
                 Top = 0
@@ -11645,8 +11653,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
   end
   object DtsKDR: TDataSource
     DataSet = TabKDR
-    Left = 377
-    Top = 77
+    Left = 409
+    Top = 69
   end
   object SchedulerDBStorage: TcxSchedulerDBStorage
     UseActualTimeRange = True

@@ -2193,8 +2193,8 @@ end;
 procedure TAnaGirisSayfasiFrame.DuyuruYenileTusClick(Sender: TObject);
 begin
    if AktifVeriMotor = vmPG then begin
-     // Duyuru sorgusu agir T-SQL script (declare @var/set/fn_prg_IsListesiBanaAtananlar TVF/
-     //   convert/OLAYZAMANI-@Bugun). PG'ye tam portu ayri is -> pilotta duyuru paneli atlanir.
+      // Duyuru sorgusu agir T-SQL script (declare @var/set/fn_prg_IsListesiBanaAtananlar TVF/
+      //   convert/OLAYZAMANI-@Bugun). PG'ye tam portu ayri is -> pilotta duyuru paneli atlanir.
      TabDuyuruListe.Close;
      Exit;
    end;

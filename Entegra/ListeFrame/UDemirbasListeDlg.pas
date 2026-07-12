@@ -465,7 +465,7 @@ begin
   if not Tablo.YetkiVarmi(2801,YetkiTur_Silme) then
     SilTus.Tag := -1;
   if AktifVeriMotor <> vmPG then   // DEMIRBAS DFM query'si nested TOP+convert (DFM statik) -> PG rewrite ayri is; pilotta bos grid
-    TabloYenile(DEMIRBAS,[]);
+     TabloYenile(DEMIRBAS,[]);
   //16/01/2023 AO burada kullanıcının hangi kategorileri göreceğine dair yetki kontrolü yapmamız gerekiyor
   if TamYetkili then
      KategoriYetki := 1 ///herşeyi
@@ -605,7 +605,7 @@ begin
      srid := DEMIRBAS.Fields[0].AsInteger;
      if Tablo.DemirbasSihirbazBaslat('D', 0, DEMIRBAS.FieldByName('ID').AsInteger) > 0 then begin
         //YenileTusClick(Self);
-        TabloYenile(DEMIRBAS,[]);
+        if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
         PgAltDetayChange(Self);
         DEMIRBAS.Locate('ID', srid, []);
         GridDemirbasView.DataController.SetFocus;
@@ -833,7 +833,7 @@ begin
 
   s := s + ' order by D.EKLEMETARIHI desc';
   DEMIRBAS.SQL.Add(s);
-  TabloYenile(DEMIRBAS,[]);
+  if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
   if not AlanlarOlusturuldu then begin
      GridDemirbasView.DataController.CreateAllItems(True);
      Tablo.GridAyarRestore('DemirbasGridi',GridDemirbasView );
@@ -968,7 +968,7 @@ begin
             ', LOKASYONID=  '+TabDemirbasTutanak.FieldByName('LOKASYONID').AsString+
             ', ZIMMETLIPERSONELID=0'+TabDemirbasTutanak.FieldByName('ALANID').AsString+
             ' where ID=&Id', ['&Id'],[DEMIRBAS.Fields[0].AsInteger]); }
-     TabloYenile(DEMIRBAS,[]);
+     if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
   end;
 end;
 
@@ -1559,7 +1559,7 @@ end;
 procedure TDemirbasListeDlg.StokListeDlgKapatEylemi(Sender: TObject);
 begin
    FFrameBilgi.Git;
-   TabloYenile(DEMIRBAS,[]);
+   if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
 end;
 
 procedure TDemirbasListeDlg.YeniTusClick(Sender: TObject);
@@ -1567,7 +1567,7 @@ var DID:integer;
 begin
   DID := Tablo.DemirbasSihirbazBaslat('E',0,-1,11);
   if DID > 0 then begin
-    TabloYenile(DEMIRBAS,[],DID);
+    if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[],DID);
     if PgAltDetay.ActivePage <> TabSheetHareketler then
       PgAltDetay.ActivePage := TabSheetHareketler;
     PgAltDetayChange(PgAltDetay);
@@ -1687,7 +1687,7 @@ end;
 
 procedure TDemirbasListeDlg.TabDemirbaslarRefresh;
 begin
-  TabloYenile(DEMIRBAS,[]);
+  if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
 end;
 
 procedure TDemirbasListeDlg.TabDemirbasTutanakAfterScroll(DataSet: TDataSet);

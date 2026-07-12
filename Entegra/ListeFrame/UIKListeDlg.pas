@@ -3256,7 +3256,7 @@ begin
   end;
 
 
-//  if FArama.Arailler.Text  <> '' then     //il aramasi
+//   if FArama.Arailler.Text  <> '' then     //il aramasi
 //     s := s + ' and  X.BILGI = '''+Arama.Arailler.Text+''' ';
   if SubeVarmi then
      s := s + ' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ';
@@ -3279,7 +3279,7 @@ begin
 //  if FArama.AraYetkili.Text <> '' then
 //     Param := 1
 //  else
-     Param := 0;
+      Param := 0;
   TabloYenile(REHBER,[Param]);
 end;
 

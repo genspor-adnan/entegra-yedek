@@ -19,6 +19,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Left = 3
     Top = 3
     Width = 1086
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -133,6 +134,10 @@ object DemirbasListeDlg: TDemirbasListeDlg
       Tag = 1
       Caption = 'Hareketler'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridTarihce: TcxGrid
         Left = 0
         Top = 27
@@ -579,6 +584,10 @@ object DemirbasListeDlg: TDemirbasListeDlg
       Tag = 3
       Caption = 'Kalibrasyon'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         Left = 0
         Top = 0
@@ -743,6 +752,10 @@ object DemirbasListeDlg: TDemirbasListeDlg
       Tag = 4
       Caption = 'Takip / Uyar'#305
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TreeListGorev: TcxDBTreeList
         Left = 0
         Top = 41
@@ -1316,15 +1329,17 @@ object DemirbasListeDlg: TDemirbasListeDlg
   end
   object GridDemirbas: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1092
-    Height = 369
+    Height = 372
     Align = alClient
     PopupMenu = PopupDemirbasListe
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 369
     object GridDemirbasView: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -1667,49 +1682,160 @@ object DemirbasListeDlg: TDemirbasListeDlg
   object frxDemirbas: TfrxDBDataset
     UserName = 'Demirbas'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'STOKID=STOKID'
-      'STOKKODU=STOKKODU'
-      'SERINO=SERINO'
-      'MARKA=MARKA'
-      'MODEL=MODEL'
-      'DURUM=DURUM'
-      'NOTLAR=NOTLAR'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'KATEGORIID=KATEGORIID'
-      'RFID=RFID'
-      'BARKOD=BARKOD'
-      'REHBERID=REHBERID'
-      'SKT=SKT'
-      'SUBEID=SUBEID'
-      'DEMIRBASNO=DEMIRBASNO'
-      'DEMIRBASADI=DEMIRBASADI'
-      'TAKIP=TAKIP'
-      'KALIBRASYON=KALIBRASYON'
-      'SERVIS=SERVIS'
-      'AMORTISMANORANID=AMORTISMANORANID'
-      'R=R'
-      'SERVISDURUM=SERVISDURUM'
-      'TEKNIKSORUMLU=TEKNIKSORUMLU'
-      'TEKNIKBILGI=TEKNIKBILGI'
-      'MASRAF=MASRAF'
-      'AMORTISMAN=AMORTISMAN'
-      'ZIMMETLI=ZIMMETLI'
-      'LOKASYONADI=LOKASYONADI'
-      'SERVISILGILI=SERVISILGILI'
-      'KATEGORIADI=KATEGORIADI'
-      'MODELADI=MODELADI'
-      'SUBEADI=SUBEADI'
-      'KALBITTARIH=KALBITTARIH')
     DataSet = DEMIRBAS
     BCDToCurrency = False
     DataSetOptions = []
     Left = 258
     Top = 101
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'STOKID'
+        FieldAlias = 'STOKID'
+      end
+      item
+        FieldName = 'STOKKODU'
+        FieldAlias = 'STOKKODU'
+      end
+      item
+        FieldName = 'SERINO'
+        FieldAlias = 'SERINO'
+      end
+      item
+        FieldName = 'MARKA'
+        FieldAlias = 'MARKA'
+      end
+      item
+        FieldName = 'MODEL'
+        FieldAlias = 'MODEL'
+      end
+      item
+        FieldName = 'DURUM'
+        FieldAlias = 'DURUM'
+      end
+      item
+        FieldName = 'NOTLAR'
+        FieldAlias = 'NOTLAR'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'KATEGORIID'
+        FieldAlias = 'KATEGORIID'
+      end
+      item
+        FieldName = 'RFID'
+        FieldAlias = 'RFID'
+      end
+      item
+        FieldName = 'BARKOD'
+        FieldAlias = 'BARKOD'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'SKT'
+        FieldAlias = 'SKT'
+      end
+      item
+        FieldName = 'SUBEID'
+        FieldAlias = 'SUBEID'
+      end
+      item
+        FieldName = 'DEMIRBASNO'
+        FieldAlias = 'DEMIRBASNO'
+      end
+      item
+        FieldName = 'DEMIRBASADI'
+        FieldAlias = 'DEMIRBASADI'
+      end
+      item
+        FieldName = 'TAKIP'
+        FieldAlias = 'TAKIP'
+      end
+      item
+        FieldName = 'KALIBRASYON'
+        FieldAlias = 'KALIBRASYON'
+      end
+      item
+        FieldName = 'SERVIS'
+        FieldAlias = 'SERVIS'
+      end
+      item
+        FieldName = 'AMORTISMANORANID'
+        FieldAlias = 'AMORTISMANORANID'
+      end
+      item
+        FieldName = 'R'
+        FieldAlias = 'R'
+      end
+      item
+        FieldName = 'SERVISDURUM'
+        FieldAlias = 'SERVISDURUM'
+      end
+      item
+        FieldName = 'TEKNIKSORUMLU'
+        FieldAlias = 'TEKNIKSORUMLU'
+      end
+      item
+        FieldName = 'TEKNIKBILGI'
+        FieldAlias = 'TEKNIKBILGI'
+      end
+      item
+        FieldName = 'MASRAF'
+        FieldAlias = 'MASRAF'
+      end
+      item
+        FieldName = 'AMORTISMAN'
+        FieldAlias = 'AMORTISMAN'
+      end
+      item
+        FieldName = 'ZIMMETLI'
+        FieldAlias = 'ZIMMETLI'
+      end
+      item
+        FieldName = 'LOKASYONADI'
+        FieldAlias = 'LOKASYONADI'
+      end
+      item
+        FieldName = 'SERVISILGILI'
+        FieldAlias = 'SERVISILGILI'
+      end
+      item
+        FieldName = 'KATEGORIADI'
+        FieldAlias = 'KATEGORIADI'
+      end
+      item
+        FieldName = 'MODELADI'
+        FieldAlias = 'MODELADI'
+      end
+      item
+        FieldName = 'SUBEADI'
+        FieldAlias = 'SUBEADI'
+      end
+      item
+        FieldName = 'KALBITTARIH'
+        FieldAlias = 'KALBITTARIH'
+      end>
   end
   object cxStyleRepository1: TcxStyleRepository
     Left = 616
@@ -1936,41 +2062,128 @@ object DemirbasListeDlg: TDemirbasListeDlg
   object frxDemirbasTutanak: TfrxDBDataset
     UserName = 'DemirbasTutanak'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'TIP=TIP'
-      'TARIH=TARIH'
-      'VERENID=VERENID'
-      'ALANID=ALANID'
-      'LOKASYONID=LOKASYONID'
-      'BELGENO=BELGENO'
-      'NOTLAR=NOTLAR'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'SUBEID=SUBEID'
-      'BELGETIPI=BELGETIPI'
-      'BELGETARIH=BELGETARIH'
-      'REHBERID=REHBERID'
-      'TUTAR=TUTAR'
-      'KUR=KUR'
-      'REHBERPERSONELID=REHBERPERSONELID'
-      'TUTANAK=TUTANAK'
-      'LOKASYON=LOKASYON'
-      'FIRMA=FIRMA'
-      'ALANADI=ALANADI'
-      'ALANROL=ALANROL'
-      'VERENADI=VERENADI'
-      'VERENROL=VERENROL'
-      'ALANTC=ALANTC'
-      'VERENTC=VERENTC'
-      'DEMIRBASID=DEMIRBASID')
     DataSet = TabDemirbasTutanak
     BCDToCurrency = False
     DataSetOptions = []
     Left = 305
     Top = 246
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'TIP'
+        FieldAlias = 'TIP'
+      end
+      item
+        FieldName = 'TARIH'
+        FieldAlias = 'TARIH'
+      end
+      item
+        FieldName = 'VERENID'
+        FieldAlias = 'VERENID'
+      end
+      item
+        FieldName = 'ALANID'
+        FieldAlias = 'ALANID'
+      end
+      item
+        FieldName = 'LOKASYONID'
+        FieldAlias = 'LOKASYONID'
+      end
+      item
+        FieldName = 'BELGENO'
+        FieldAlias = 'BELGENO'
+      end
+      item
+        FieldName = 'NOTLAR'
+        FieldAlias = 'NOTLAR'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'SUBEID'
+        FieldAlias = 'SUBEID'
+      end
+      item
+        FieldName = 'BELGETIPI'
+        FieldAlias = 'BELGETIPI'
+      end
+      item
+        FieldName = 'BELGETARIH'
+        FieldAlias = 'BELGETARIH'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'TUTAR'
+        FieldAlias = 'TUTAR'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'REHBERPERSONELID'
+        FieldAlias = 'REHBERPERSONELID'
+      end
+      item
+        FieldName = 'TUTANAK'
+        FieldAlias = 'TUTANAK'
+      end
+      item
+        FieldName = 'LOKASYON'
+        FieldAlias = 'LOKASYON'
+      end
+      item
+        FieldName = 'FIRMA'
+        FieldAlias = 'FIRMA'
+      end
+      item
+        FieldName = 'ALANADI'
+        FieldAlias = 'ALANADI'
+      end
+      item
+        FieldName = 'ALANROL'
+        FieldAlias = 'ALANROL'
+      end
+      item
+        FieldName = 'VERENADI'
+        FieldAlias = 'VERENADI'
+      end
+      item
+        FieldName = 'VERENROL'
+        FieldAlias = 'VERENROL'
+      end
+      item
+        FieldName = 'ALANTC'
+        FieldAlias = 'ALANTC'
+      end
+      item
+        FieldName = 'VERENTC'
+        FieldAlias = 'VERENTC'
+      end
+      item
+        FieldName = 'DEMIRBASID'
+        FieldAlias = 'DEMIRBASID'
+      end>
   end
   object JvTimer1: TJvTimer
     Enabled = False
@@ -2093,19 +2306,40 @@ object DemirbasListeDlg: TDemirbasListeDlg
   object frxDemirbasTutanakIcerik: TfrxDBDataset
     UserName = 'DemirbasTutanakIcerik'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'DEMIRBASNO=DEMIRBASNO'
-      'DEMIRBASADI=DEMIRBASADI'
-      'SERINO=SERINO'
-      'SKT=SKT'
-      'RFID=RFID'
-      'NOTLAR=NOTLAR')
     DataSet = tabDemirbasTutanakIcerik
     BCDToCurrency = False
     DataSetOptions = []
     Left = 465
     Top = 246
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'DEMIRBASNO'
+        FieldAlias = 'DEMIRBASNO'
+      end
+      item
+        FieldName = 'DEMIRBASADI'
+        FieldAlias = 'DEMIRBASADI'
+      end
+      item
+        FieldName = 'SERINO'
+        FieldAlias = 'SERINO'
+      end
+      item
+        FieldName = 'SKT'
+        FieldAlias = 'SKT'
+      end
+      item
+        FieldName = 'RFID'
+        FieldAlias = 'RFID'
+      end
+      item
+        FieldName = 'NOTLAR'
+        FieldAlias = 'NOTLAR'
+      end>
   end
   object PopupMenuYeniTakip: TPopupMenu
     Left = 169
@@ -2124,22 +2358,22 @@ object DemirbasListeDlg: TDemirbasListeDlg
   object GorevlerMenu: TOfficePopupMenu
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 840
     Top = 244
     object DuzenleMenu: TMenuItem
@@ -2320,22 +2554,22 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 423
     Top = 276
     object MenuKlasordenEkle: TMenuItem

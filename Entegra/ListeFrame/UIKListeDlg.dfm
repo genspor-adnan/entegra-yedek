@@ -28,6 +28,10 @@ object IKListeDlg: TIKListeDlg
     object TabSheetTek: TcxTabSheet
       Caption = 'Tek'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object IKGrid: TcxGrid
         Left = 0
         Top = 35
@@ -1041,6 +1045,10 @@ object IKListeDlg: TIKListeDlg
         object TabYorumMedya: TcxTabSheet
           Caption = 'Yorum/Medya'
           ImageIndex = 12
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel7: TPanel
             Left = 0
             Top = 187
@@ -1101,6 +1109,7 @@ object IKListeDlg: TIKListeDlg
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
             Visible = False
+            ExplicitTop = 166
             AnchorX = 954
           end
           object GridYorum: TcxGrid
@@ -1190,6 +1199,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetGorev: TcxTabSheet
           Caption = #304#351' Listesi'
           ImageIndex = 11
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object SQLGorevMemo: TcxMemo
             Left = 75
             Top = 46
@@ -2750,6 +2763,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetDemirbas: TcxTabSheet
           Caption = 'Demirba'#351' Bilgileri'
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridDemirbas: TcxGrid
             Left = 0
             Top = 0
@@ -3720,8 +3737,6 @@ object IKListeDlg: TIKListeDlg
               ColorFrom = 14540253
               ColorTo = 11776947
               ImageIndex = 0
-              ExplicitLeft = 147
-              ExplicitWidth = 806
               object Label1: TcxLabel
                 Left = 3
                 Top = 8
@@ -3904,6 +3919,7 @@ object IKListeDlg: TIKListeDlg
         Control = PageControlSekme
         Color = clAqua
         ParentColor = False
+        ExplicitWidth = 8
       end
       object ToolBar1: TToolBar
         AlignWithMargins = True
@@ -3937,7 +3953,6 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 5
         Transparent = True
         Wrapable = False
-        ExplicitHeight = 29
         object YeniTus: TToolButton
           Left = 0
           Top = 0
@@ -4021,6 +4036,10 @@ object IKListeDlg: TIKListeDlg
     object TabSheetGrup: TcxTabSheet
       Caption = 'Grup'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar13: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -4053,7 +4072,6 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 0
         Transparent = True
         Wrapable = False
-        ExplicitHeight = 29
         object YeniGrup: TToolButton
           Left = 0
           Top = 0
@@ -5476,22 +5494,22 @@ object IKListeDlg: TIKListeDlg
   object GorevlerMenu: TOfficePopupMenu
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 336
     Top = 364
     object DuzenleMenu: TMenuItem
@@ -5647,22 +5665,22 @@ object IKListeDlg: TIKListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 448
     Top = 228
     object MenuKlasordenEkle: TMenuItem

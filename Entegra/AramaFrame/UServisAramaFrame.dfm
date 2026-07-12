@@ -393,5 +393,3 @@ object ServisAramaFrame: TServisAramaFrame
     end
   end
 end
-
-
