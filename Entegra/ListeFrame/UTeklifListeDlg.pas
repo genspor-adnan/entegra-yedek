@@ -26,7 +26,9 @@ uses
   dxSkinWhiteprint, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
   dxSkinVisualStudio2013Light, cxRichEdit, dxDateRanges, dxScrollbarAnnotations,
-  frCoreClasses;
+  frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TTeklifListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog )//IAracCubuguDestegi)
@@ -526,7 +528,7 @@ begin
     10: s := s + ' AND T.SUBEID='+IntToStr(SubeId);//sadece kendi ?ube  g?r?r
   end;
 //   if Length(SQLEk) > 24 then
-    s := s + ' and T.TEKLIFTUR = 80 ';// SQLEk;
+  s := s + ' and T.TEKLIFTUR = 80 ';// SQLEk;
   s:=s +' Order by TARIH';
   TabTeklif.SQL.Add(s);
   TabloYenile(TabTeklif,[],TID,'ID');

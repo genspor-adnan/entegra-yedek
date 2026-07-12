@@ -16,17 +16,15 @@ object TeklifListeDlg: TTeklifListeDlg
   TabOrder = 0
   object GridTeklif: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1174
-    Height = 191
+    Height = 194
     Align = alClient
     PopupMenu = PmSiparisedonustur
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 32
-    ExplicitHeight = 194
     object GridTeklifView: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -387,6 +385,7 @@ object TeklifListeDlg: TTeklifListeDlg
     Left = 3
     Top = 3
     Width = 1168
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -413,7 +412,6 @@ object TeklifListeDlg: TTeklifListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -490,6 +488,10 @@ object TeklifListeDlg: TTeklifListeDlg
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -776,6 +778,10 @@ object TeklifListeDlg: TTeklifListeDlg
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum/Medya'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 169
@@ -836,6 +842,7 @@ object TeklifListeDlg: TTeklifListeDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 209
         AnchorX = 1166
       end
       object GridYorum: TcxGrid
@@ -983,10 +990,9 @@ object TeklifListeDlg: TTeklifListeDlg
     Top = 121
   end
   object TabTeklif: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabTeklifAfterOpen
     AfterScroll = TabTeklifAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select  T.*,'
       'P.PROJEKODU,P.PROJEADI,'
@@ -1124,53 +1130,176 @@ object TeklifListeDlg: TTeklifListeDlg
   object frxTEKLIFDETAY: TfrxDBDataset
     UserName = 'TEKLIFDETAY'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'SIRALAMA=SIRALAMA'
-      'TEKLIFID=TEKLIFID'
-      'REHBERID=REHBERID'
-      'TUR=TUR'
-      'URUNID=URUNID'
-      'KOD=KOD'
-      'ACIKLAMA=ACIKLAMA'
-      'ADET=ADET'
-      'BIRIM=BIRIM'
-      'MIKTAR=MIKTAR'
-      'BIRIMFIYAT=BIRIMFIYAT'
-      'TUTAR=TUTAR'
-      'ISKONTO=ISKONTO'
-      'KDV=KDV'
-      'OZELKOD=OZELKOD'
-      'MUHKODU=MUHKODU'
-      'KASA=KASA'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'MALIYET=MALIYET'
-      'KAR_YUZDE=KAR_YUZDE'
-      'ALTERNATIFNO=ALTERNATIFNO'
-      'KUR=KUR'
-      'DOVIZ_TUTARI=DOVIZ_TUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'ISKONTO2=ISKONTO2'
-      'TESLIMTARIHI=TESLIMTARIHI'
-      'YERI=YERI'
-      'YERID=YERID'
-      'DOVIZ_BIRIMFIYAT=DOVIZ_BIRIMFIYAT'
-      'KAMPANYAID=KAMPANYAID'
-      'VADE=VADE'
-      'AD=AD'
-      'PROJEKODU=PROJEKODU'
-      'MASRAFKOD=MASRAFKOD'
-      'MASRAFAD=MASRAFAD'
-      'GRUBU=GRUBU'
-      'STOKDURUM=STOKDURUM')
     DataSet = TabTeklifDetay
     BCDToCurrency = False
     DataSetOptions = []
     Left = 91
     Top = 200
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'SIRALAMA'
+        FieldAlias = 'SIRALAMA'
+      end
+      item
+        FieldName = 'TEKLIFID'
+        FieldAlias = 'TEKLIFID'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'URUNID'
+        FieldAlias = 'URUNID'
+      end
+      item
+        FieldName = 'KOD'
+        FieldAlias = 'KOD'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'ADET'
+        FieldAlias = 'ADET'
+      end
+      item
+        FieldName = 'BIRIM'
+        FieldAlias = 'BIRIM'
+      end
+      item
+        FieldName = 'MIKTAR'
+        FieldAlias = 'MIKTAR'
+      end
+      item
+        FieldName = 'BIRIMFIYAT'
+        FieldAlias = 'BIRIMFIYAT'
+      end
+      item
+        FieldName = 'TUTAR'
+        FieldAlias = 'TUTAR'
+      end
+      item
+        FieldName = 'ISKONTO'
+        FieldAlias = 'ISKONTO'
+      end
+      item
+        FieldName = 'KDV'
+        FieldAlias = 'KDV'
+      end
+      item
+        FieldName = 'OZELKOD'
+        FieldAlias = 'OZELKOD'
+      end
+      item
+        FieldName = 'MUHKODU'
+        FieldAlias = 'MUHKODU'
+      end
+      item
+        FieldName = 'KASA'
+        FieldAlias = 'KASA'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'MALIYET'
+        FieldAlias = 'MALIYET'
+      end
+      item
+        FieldName = 'KAR_YUZDE'
+        FieldAlias = 'KAR_YUZDE'
+      end
+      item
+        FieldName = 'ALTERNATIFNO'
+        FieldAlias = 'ALTERNATIFNO'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZ_TUTARI'
+        FieldAlias = 'DOVIZ_TUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'ISKONTO2'
+        FieldAlias = 'ISKONTO2'
+      end
+      item
+        FieldName = 'TESLIMTARIHI'
+        FieldAlias = 'TESLIMTARIHI'
+      end
+      item
+        FieldName = 'YERI'
+        FieldAlias = 'YERI'
+      end
+      item
+        FieldName = 'YERID'
+        FieldAlias = 'YERID'
+      end
+      item
+        FieldName = 'DOVIZ_BIRIMFIYAT'
+        FieldAlias = 'DOVIZ_BIRIMFIYAT'
+      end
+      item
+        FieldName = 'KAMPANYAID'
+        FieldAlias = 'KAMPANYAID'
+      end
+      item
+        FieldName = 'VADE'
+        FieldAlias = 'VADE'
+      end
+      item
+        FieldName = 'AD'
+        FieldAlias = 'AD'
+      end
+      item
+        FieldName = 'PROJEKODU'
+        FieldAlias = 'PROJEKODU'
+      end
+      item
+        FieldName = 'MASRAFKOD'
+        FieldAlias = 'MASRAFKOD'
+      end
+      item
+        FieldName = 'MASRAFAD'
+        FieldAlias = 'MASRAFAD'
+      end
+      item
+        FieldName = 'GRUBU'
+        FieldAlias = 'GRUBU'
+      end
+      item
+        FieldName = 'STOKDURUM'
+        FieldAlias = 'STOKDURUM'
+      end>
   end
   object PmSiparisedonustur: TPopupMenu
     OnPopup = PmSiparisedonusturPopup
@@ -1239,75 +1368,220 @@ object TeklifListeDlg: TTeklifListeDlg
   object frxTeklifDetayIlkUrun: TfrxDBDataset
     UserName = 'TEKLIFDETAYILKURUN'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'TEKLIFID=TEKLIFID'
-      'ALTERNATIFNO=ALTERNATIFNO'
-      'REHBERID=REHBERID'
-      'SIRALAMA=SIRALAMA'
-      'SEC=SEC'
-      'URUNID=URUNID'
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'ADET=ADET'
-      'BIRIM=BIRIM'
-      'MIKTAR=MIKTAR'
-      'BIRIMFIYAT=BIRIMFIYAT'
-      'ISKONTO=ISKONTO'
-      'KDV=KDV'
-      'TUTAR=TUTAR'
-      'MALIYET=MALIYET'
-      'KUR=KUR'
-      'KAR_YUZDE=KAR_YUZDE'
-      'OZELKOD=OZELKOD'
-      'MUHKODU=MUHKODU'
-      'KASA=KASA'
-      'ONAY=ONAY'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'DOVIZ_TUTARI=DOVIZ_TUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'ISKONTO2=ISKONTO2'
-      'YERI=YERI'
-      'YERID=YERID'
-      'KOD_2=KOD_2'
-      'AD_2=AD_2'
-      'TESLIMTARIHI=TESLIMTARIHI'
-      'DOVIZ_BIRIMFIYAT=DOVIZ_BIRIMFIYAT'
-      'KAMPANYAID=KAMPANYAID'
-      'VADE=VADE'
-      'SUBEID=SUBEID'
-      'SIPBIRIMFIYAT=SIPBIRIMFIYAT'
-      'SIPTUTAR=SIPTUTAR'
-      'MASRAFID=MASRAFID'
-      'PROJEID=PROJEID'
-      'DOVIZKURDEGERI=DOVIZKURDEGERI'
-      'KOD=KOD'
-      'AD=AD'
-      'BIRIMAD=BIRIMAD'
-      'MARKA_AD=MARKA_AD'
-      'MODEL_AD=MODEL_AD'
-      'STOK_NOTLAR=STOK_NOTLAR'
-      'RESIM=RESIM')
     DataSet = TabTeklifDetayIlkUrun
     BCDToCurrency = False
     DataSetOptions = []
     Left = 621
     Top = 217
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'TEKLIFID'
+        FieldAlias = 'TEKLIFID'
+      end
+      item
+        FieldName = 'ALTERNATIFNO'
+        FieldAlias = 'ALTERNATIFNO'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'SIRALAMA'
+        FieldAlias = 'SIRALAMA'
+      end
+      item
+        FieldName = 'SEC'
+        FieldAlias = 'SEC'
+      end
+      item
+        FieldName = 'URUNID'
+        FieldAlias = 'URUNID'
+      end
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'ADET'
+        FieldAlias = 'ADET'
+      end
+      item
+        FieldName = 'BIRIM'
+        FieldAlias = 'BIRIM'
+      end
+      item
+        FieldName = 'MIKTAR'
+        FieldAlias = 'MIKTAR'
+      end
+      item
+        FieldName = 'BIRIMFIYAT'
+        FieldAlias = 'BIRIMFIYAT'
+      end
+      item
+        FieldName = 'ISKONTO'
+        FieldAlias = 'ISKONTO'
+      end
+      item
+        FieldName = 'KDV'
+        FieldAlias = 'KDV'
+      end
+      item
+        FieldName = 'TUTAR'
+        FieldAlias = 'TUTAR'
+      end
+      item
+        FieldName = 'MALIYET'
+        FieldAlias = 'MALIYET'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'KAR_YUZDE'
+        FieldAlias = 'KAR_YUZDE'
+      end
+      item
+        FieldName = 'OZELKOD'
+        FieldAlias = 'OZELKOD'
+      end
+      item
+        FieldName = 'MUHKODU'
+        FieldAlias = 'MUHKODU'
+      end
+      item
+        FieldName = 'KASA'
+        FieldAlias = 'KASA'
+      end
+      item
+        FieldName = 'ONAY'
+        FieldAlias = 'ONAY'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'DOVIZ_TUTARI'
+        FieldAlias = 'DOVIZ_TUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'ISKONTO2'
+        FieldAlias = 'ISKONTO2'
+      end
+      item
+        FieldName = 'YERI'
+        FieldAlias = 'YERI'
+      end
+      item
+        FieldName = 'YERID'
+        FieldAlias = 'YERID'
+      end
+      item
+        FieldName = 'KOD_2'
+        FieldAlias = 'KOD_2'
+      end
+      item
+        FieldName = 'AD_2'
+        FieldAlias = 'AD_2'
+      end
+      item
+        FieldName = 'TESLIMTARIHI'
+        FieldAlias = 'TESLIMTARIHI'
+      end
+      item
+        FieldName = 'DOVIZ_BIRIMFIYAT'
+        FieldAlias = 'DOVIZ_BIRIMFIYAT'
+      end
+      item
+        FieldName = 'KAMPANYAID'
+        FieldAlias = 'KAMPANYAID'
+      end
+      item
+        FieldName = 'VADE'
+        FieldAlias = 'VADE'
+      end
+      item
+        FieldName = 'SUBEID'
+        FieldAlias = 'SUBEID'
+      end
+      item
+        FieldName = 'SIPBIRIMFIYAT'
+        FieldAlias = 'SIPBIRIMFIYAT'
+      end
+      item
+        FieldName = 'SIPTUTAR'
+        FieldAlias = 'SIPTUTAR'
+      end
+      item
+        FieldName = 'MASRAFID'
+        FieldAlias = 'MASRAFID'
+      end
+      item
+        FieldName = 'PROJEID'
+        FieldAlias = 'PROJEID'
+      end
+      item
+        FieldName = 'DOVIZKURDEGERI'
+        FieldAlias = 'DOVIZKURDEGERI'
+      end
+      item
+        FieldName = 'KOD'
+        FieldAlias = 'KOD'
+      end
+      item
+        FieldName = 'AD'
+        FieldAlias = 'AD'
+      end
+      item
+        FieldName = 'BIRIMAD'
+        FieldAlias = 'BIRIMAD'
+      end
+      item
+        FieldName = 'MARKA_AD'
+        FieldAlias = 'MARKA_AD'
+      end
+      item
+        FieldName = 'MODEL_AD'
+        FieldAlias = 'MODEL_AD'
+      end
+      item
+        FieldName = 'STOK_NOTLAR'
+        FieldAlias = 'STOK_NOTLAR'
+      end
+      item
+        FieldName = 'RESIM'
+        FieldAlias = 'RESIM'
+      end>
   end
   object TabTeklifDetayIlkUrun: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'SELECT * FROM'
       '('
@@ -1341,16 +1615,18 @@ object TeklifListeDlg: TTeklifListeDlg
       ' order by ID')
     Left = 621
     Top = 159
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object TabTeklifYaz: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PTid'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       'SELECT '
       #9'T.*,R1.FIRMA as HAZIRLAYAN,RP.ADSOYAD,'
@@ -1389,16 +1665,16 @@ object TeklifListeDlg: TTeklifListeDlg
       'where T.ID=:PTid')
     Left = 479
     Top = 177
+    ParamData = <
+      item
+        Name = 'PTid'
+        Size = -1
+        Value = Null
+      end>
   end
   object TabTeklifDetayYaz: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       'SELECT * FROM'
       '('
@@ -1432,6 +1708,12 @@ object TeklifListeDlg: TTeklifListeDlg
       '')
     Left = 389
     Top = 157
+    ParamData = <
+      item
+        Name = 'Par'
+        Size = -1
+        Value = Null
+      end>
   end
   object frxTEKLIF2: TfrxDBDataset
     UserName = 'TEKLIF'
@@ -1445,69 +1727,240 @@ object TeklifListeDlg: TTeklifListeDlg
   object frxTEKLIFDETAY2: TfrxDBDataset
     UserName = 'TEKLIFDETAY'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'TEKLIFID=TEKLIFID'
-      'ALTERNATIFNO=ALTERNATIFNO'
-      'REHBERID=REHBERID'
-      'SIRALAMA=SIRALAMA'
-      'SEC=SEC'
-      'URUNID=URUNID'
-      'TUR=TUR'
-      'ACIKLAMA=ACIKLAMA'
-      'ADET=ADET'
-      'BIRIM=BIRIM'
-      'MIKTAR=MIKTAR'
-      'BIRIMFIYAT=BIRIMFIYAT'
-      'ISKONTO=ISKONTO'
-      'KDV=KDV'
-      'TUTAR=TUTAR'
-      'MALIYET=MALIYET'
-      'KUR=KUR'
-      'KAR_YUZDE=KAR_YUZDE'
-      'OZELKOD=OZELKOD'
-      'MUHKODU=MUHKODU'
-      'KASA=KASA'
-      'ONAY=ONAY'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'DOVIZ_TUTARI=DOVIZ_TUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'ISKONTO2=ISKONTO2'
-      'YERI=YERI'
-      'YERID=YERID'
-      'TESLIMTARIHI=TESLIMTARIHI'
-      'DOVIZ_BIRIMFIYAT=DOVIZ_BIRIMFIYAT'
-      'KAMPANYAID=KAMPANYAID'
-      'VADE=VADE'
-      'SUBEID=SUBEID'
-      'SIPBIRIMFIYAT=SIPBIRIMFIYAT'
-      'SIPTUTAR=SIPTUTAR'
-      'MASRAFID=MASRAFID'
-      'PROJEID=PROJEID'
-      'DOVIZKURDEGERI=DOVIZKURDEGERI'
-      'RESIMGOSTER=RESIMGOSTER'
-      'TEKLIFONAY=TEKLIFONAY'
-      'IZLEME=IZLEME'
-      'MERKEZID=MERKEZID'
-      'STOKDURUM=STOKDURUM'
-      'EKIPMANID=EKIPMANID'
-      'KOD=KOD'
-      'AD=AD'
-      'BIRIMAD=BIRIMAD'
-      'MARKA_AD=MARKA_AD'
-      'MODEL_AD=MODEL_AD'
-      'STOK_NOTLAR=STOK_NOTLAR'
-      'EKIPMANAD=EKIPMANAD'
-      'EKIPMANSERINO=EKIPMANSERINO'
-      'RESIM=RESIM')
     DataSet = TabTeklifDetayYaz
     BCDToCurrency = False
     DataSetOptions = []
     Left = 95
     Top = 260
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'TEKLIFID'
+        FieldAlias = 'TEKLIFID'
+      end
+      item
+        FieldName = 'ALTERNATIFNO'
+        FieldAlias = 'ALTERNATIFNO'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'SIRALAMA'
+        FieldAlias = 'SIRALAMA'
+      end
+      item
+        FieldName = 'SEC'
+        FieldAlias = 'SEC'
+      end
+      item
+        FieldName = 'URUNID'
+        FieldAlias = 'URUNID'
+      end
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'ADET'
+        FieldAlias = 'ADET'
+      end
+      item
+        FieldName = 'BIRIM'
+        FieldAlias = 'BIRIM'
+      end
+      item
+        FieldName = 'MIKTAR'
+        FieldAlias = 'MIKTAR'
+      end
+      item
+        FieldName = 'BIRIMFIYAT'
+        FieldAlias = 'BIRIMFIYAT'
+      end
+      item
+        FieldName = 'ISKONTO'
+        FieldAlias = 'ISKONTO'
+      end
+      item
+        FieldName = 'KDV'
+        FieldAlias = 'KDV'
+      end
+      item
+        FieldName = 'TUTAR'
+        FieldAlias = 'TUTAR'
+      end
+      item
+        FieldName = 'MALIYET'
+        FieldAlias = 'MALIYET'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'KAR_YUZDE'
+        FieldAlias = 'KAR_YUZDE'
+      end
+      item
+        FieldName = 'OZELKOD'
+        FieldAlias = 'OZELKOD'
+      end
+      item
+        FieldName = 'MUHKODU'
+        FieldAlias = 'MUHKODU'
+      end
+      item
+        FieldName = 'KASA'
+        FieldAlias = 'KASA'
+      end
+      item
+        FieldName = 'ONAY'
+        FieldAlias = 'ONAY'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'DOVIZ_TUTARI'
+        FieldAlias = 'DOVIZ_TUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'ISKONTO2'
+        FieldAlias = 'ISKONTO2'
+      end
+      item
+        FieldName = 'YERI'
+        FieldAlias = 'YERI'
+      end
+      item
+        FieldName = 'YERID'
+        FieldAlias = 'YERID'
+      end
+      item
+        FieldName = 'TESLIMTARIHI'
+        FieldAlias = 'TESLIMTARIHI'
+      end
+      item
+        FieldName = 'DOVIZ_BIRIMFIYAT'
+        FieldAlias = 'DOVIZ_BIRIMFIYAT'
+      end
+      item
+        FieldName = 'KAMPANYAID'
+        FieldAlias = 'KAMPANYAID'
+      end
+      item
+        FieldName = 'VADE'
+        FieldAlias = 'VADE'
+      end
+      item
+        FieldName = 'SUBEID'
+        FieldAlias = 'SUBEID'
+      end
+      item
+        FieldName = 'SIPBIRIMFIYAT'
+        FieldAlias = 'SIPBIRIMFIYAT'
+      end
+      item
+        FieldName = 'SIPTUTAR'
+        FieldAlias = 'SIPTUTAR'
+      end
+      item
+        FieldName = 'MASRAFID'
+        FieldAlias = 'MASRAFID'
+      end
+      item
+        FieldName = 'PROJEID'
+        FieldAlias = 'PROJEID'
+      end
+      item
+        FieldName = 'DOVIZKURDEGERI'
+        FieldAlias = 'DOVIZKURDEGERI'
+      end
+      item
+        FieldName = 'RESIMGOSTER'
+        FieldAlias = 'RESIMGOSTER'
+      end
+      item
+        FieldName = 'TEKLIFONAY'
+        FieldAlias = 'TEKLIFONAY'
+      end
+      item
+        FieldName = 'IZLEME'
+        FieldAlias = 'IZLEME'
+      end
+      item
+        FieldName = 'MERKEZID'
+        FieldAlias = 'MERKEZID'
+      end
+      item
+        FieldName = 'STOKDURUM'
+        FieldAlias = 'STOKDURUM'
+      end
+      item
+        FieldName = 'EKIPMANID'
+        FieldAlias = 'EKIPMANID'
+      end
+      item
+        FieldName = 'KOD'
+        FieldAlias = 'KOD'
+      end
+      item
+        FieldName = 'AD'
+        FieldAlias = 'AD'
+      end
+      item
+        FieldName = 'BIRIMAD'
+        FieldAlias = 'BIRIMAD'
+      end
+      item
+        FieldName = 'MARKA_AD'
+        FieldAlias = 'MARKA_AD'
+      end
+      item
+        FieldName = 'MODEL_AD'
+        FieldAlias = 'MODEL_AD'
+      end
+      item
+        FieldName = 'STOK_NOTLAR'
+        FieldAlias = 'STOK_NOTLAR'
+      end
+      item
+        FieldName = 'EKIPMANAD'
+        FieldAlias = 'EKIPMANAD'
+      end
+      item
+        FieldName = 'EKIPMANSERINO'
+        FieldAlias = 'EKIPMANSERINO'
+      end
+      item
+        FieldName = 'RESIM'
+        FieldAlias = 'RESIM'
+      end>
   end
   object frxStokDetay: TfrxDBDataset
     UserName = 'StokDetay1'
@@ -1521,18 +1974,6 @@ object TeklifListeDlg: TTeklifListeDlg
   object TabStokDetay: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PTeklifID'
-        Size = -1
-        Value = Null
-      end
-      item
-        Name = 'PKolonSayisi'
-        Size = -1
-        Value = Null
-      end>
-    Prepared = True
     SQL.Strings = (
       'DECLARE '
       #9'@SQL '#9#9#9'VARCHAR(5000),'
@@ -1694,18 +2135,21 @@ object TeklifListeDlg: TTeklifListeDlg
       '')
     Left = 545
     Top = 145
+    ParamData = <
+      item
+        Name = 'PTeklifID'
+        Size = -1
+        Value = Null
+      end
+      item
+        Name = 'PKolonSayisi'
+        Size = -1
+        Value = Null
+      end>
   end
   object TabTeklifDetayResimli: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'Par'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'SELECT * FROM'
       '('
@@ -1740,6 +2184,14 @@ object TeklifListeDlg: TTeklifListeDlg
       ' order by ID')
     Left = 192
     Top = 158
+    ParamData = <
+      item
+        Name = 'Par'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object frxTeklifDetayResimli: TfrxDBDataset
     UserName = 'TEKLIFDETAYRESIMLI'
@@ -1753,25 +2205,27 @@ object TeklifListeDlg: TTeklifListeDlg
   object frxTOPLAMLAR: TfrxDBDataset
     UserName = 'TOPLAMLAR'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ACIKLAMA=ACIKLAMA'
-      'DEGER=DEGER'
-      'KUR=KUR')
     BCDToCurrency = False
     DataSetOptions = []
     Left = 777
     Top = 235
+    FieldDefs = <
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'DEGER'
+        FieldAlias = 'DEGER'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end>
   end
   object TabHazirlayanDetay: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PRehID'
-        Size = -1
-        Value = Null
-      end>
-    Prepared = True
     SQL.Strings = (
       'Declare @IletisimID integer, @RehberID integer'
       'set @RehberID = :PRehID'
@@ -1867,6 +2321,12 @@ object TeklifListeDlg: TTeklifListeDlg
       '      WHERE ID = @RehberID')
     Left = 298
     Top = 169
+    ParamData = <
+      item
+        Name = 'PRehID'
+        Size = -1
+        Value = Null
+      end>
   end
   object frxHazirlayanDetay: TfrxDBDataset
     UserName = 'HazirlayanDetay'
@@ -1886,13 +2346,6 @@ object TeklifListeDlg: TTeklifListeDlg
   end
   object TabTeklifDetay: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PTid'
-        DataType = ftInteger
-        Size = -1
-        Value = 0
-      end>
     SQL.Strings = (
       ' SELECT * FROM'
       '('
@@ -1921,17 +2374,16 @@ object TeklifListeDlg: TTeklifListeDlg
       '')
     Left = 92
     Top = 156
+    ParamData = <
+      item
+        Name = 'PTid'
+        DataType = ftInteger
+        Size = -1
+        Value = 0
+      end>
   end
   object TabFinansalYaz: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PTEKLIFID'
-        DataType = ftWord
-        Precision = 3
-        Size = 1
-        Value = 1
-      end>
     SQL.Strings = (
       'select'
       'KURUMKODU=R.KOD,KURUMADI=R.FIRMA,'
@@ -1976,6 +2428,14 @@ object TeklifListeDlg: TTeklifListeDlg
       'where TF.TEKLIFID=:PTeklifId')
     Left = 698
     Top = 140
+    ParamData = <
+      item
+        Name = 'PTEKLIFID'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = 1
+      end>
   end
   object frxFINANSMAN: TfrxDBDataset
     UserName = 'FINANSMAN'
@@ -1988,6 +2448,12 @@ object TeklifListeDlg: TTeklifListeDlg
   end
   object TabHesapOzeti: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      
+        'SELECT * from [dbo].[fn_CARIHESAPOZETI] (:PRehID,:PBirim,:FatTut' +
+        'ari) ')
+    Left = 864
+    Top = 137
     ParamData = <
       item
         Name = 'PRehID'
@@ -2004,12 +2470,6 @@ object TeklifListeDlg: TTeklifListeDlg
         Size = -1
         Value = Null
       end>
-    SQL.Strings = (
-      
-        'SELECT * from [dbo].[fn_CARIHESAPOZETI] (:PRehID,:PBirim,:FatTut' +
-        'ari) ')
-    Left = 864
-    Top = 137
   end
   object DtsHesapOzeti: TDataSource
     DataSet = TabHesapOzeti
@@ -2027,12 +2487,6 @@ object TeklifListeDlg: TTeklifListeDlg
   end
   object TabSmsEPosta: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PRehID'
-        Size = -1
-        Value = Null
-      end>
     SQL.Strings = (
       'DECLARE @REHID int'
       'SET @REHID= :PRehID'
@@ -2058,6 +2512,12 @@ object TeklifListeDlg: TTeklifListeDlg
       'REHID=@REHID')
     Left = 509
     Top = 320
+    ParamData = <
+      item
+        Name = 'PRehID'
+        Size = -1
+        Value = Null
+      end>
   end
   object DtsSmsEPosta: TDataSource
     DataSet = TabSmsEPosta
@@ -2099,21 +2559,6 @@ object TeklifListeDlg: TTeklifListeDlg
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PYer'
-        DataType = ftWord
-        Precision = 3
-        Size = 1
-        Value = Null
-      end
-      item
-        Name = 'PYerId'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -2132,6 +2577,21 @@ object TeklifListeDlg: TTeklifListeDlg
       'order by 2 DESC')
     Left = 419
     Top = 377
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object cxGridPopupYorumlar: TcxGridPopupMenu
     Grid = GridYorum
@@ -2184,6 +2644,10 @@ object TeklifListeDlg: TTeklifListeDlg
   end
   object TOPLAMLAR: TFDQuery
     Connection = Tablo.FDCnn
+    SQL.Strings = (
+      'EXEC SP_PRG_TeklifDipToplami :PRM1, :PRM2')
+    Left = 679
+    Top = 313
     ParamData = <
       item
         Name = 'PRM1'
@@ -2197,13 +2661,5 @@ object TeklifListeDlg: TTeklifListeDlg
         Size = 1
         Value = '1'
       end>
-    SQL.Strings = (
-      'EXEC SP_PRG_TeklifDipToplami :PRM1, :PRM2')
-    Left = 679
-    Top = 313
   end
 end
-
-
-
-

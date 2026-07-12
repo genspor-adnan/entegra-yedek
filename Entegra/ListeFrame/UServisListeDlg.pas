@@ -664,6 +664,7 @@ var
   LocateID:integer;
 begin
   JvTimer1.Enabled := False;
+  if AktifVeriMotor = vmPG then Exit; // vServisListesi view + DFM nested TOP pilot disi - Depolar hedefi degil
   if (Tablo1.Active)and(Tablo1.RecordCount>0) then
     LocateID := Tablo1.FieldByName('ID').AsInteger;
   Tablo1.Close;
