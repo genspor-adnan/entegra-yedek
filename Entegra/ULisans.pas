@@ -232,7 +232,7 @@ end;
 
 function GenoTIPMACAdresiMi :Boolean;
 begin
-  result := Query('select * from GENOTIP WHERE CONVERT(INT,SABIT) >= ''10000'' AND convert(varchar(2000),DEGER) = ''' + sifre(GetMACAdress )+ '''').RecordCount <> 0;
+  result := Query('select * from GENOTIP WHERE cast(SABIT as INT) >= ''10000'' AND cast(DEGER as varchar(2000)) = ''' + sifre(GetMACAdress )+ '''').RecordCount <> 0;
 end;
 
 function DBSonLisansSorgulamaTarihi :TDateTime;
@@ -260,7 +260,7 @@ begin
        raise ELisansHatasi.Create('Terminal Limitiniz Dolu',  'Lütfen Lisanslama modülünden aktif terminal sayısını ayarlayınız.',lhHata,ldHataVerBitir,nil);
    end;
 
-  with Query('SELECT * FROM GENOTIP WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre(GetMACAdress ) + ''')') do
+  with Query('SELECT * FROM GENOTIP WHERE SABIT >= ''1000'' AND	cast(DEGER as varchar(250)) = cast(''' + Sifre(GetMACAdress ) + ''' as varchar(250))') do
   begin
     Result := recordcount <> 0;
     if FieldbyName('DURUM').AsString = '0' then
@@ -605,7 +605,7 @@ begin
   try
     if LisansBilgileri.LisansSayisi > q1.FieldByName('SAYI').AsInteger then
     begin
-      q2 := Query('Select * from GENOTIP WHERE SABIT between 1000 and 9999 AND convert(varchar(1000),SABITTEXT) = ''' + Sifre(TxtTerminal.Text) + ''' and durum = ''1'' ');
+      q2 := Query('Select * from GENOTIP WHERE SABIT between 1000 and 9999 AND cast(SABITTEXT as varchar(1000)) = ''' + Sifre(TxtTerminal.Text) + ''' and durum = ''1'' ');
       try
         if q2.RecordCount <> 0 then
         begin

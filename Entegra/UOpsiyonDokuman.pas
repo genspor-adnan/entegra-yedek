@@ -175,7 +175,7 @@ begin
            end;
       end else begin
         Tablo.Query5.Close;
-        Tablo.Query5.SQL.Text:='DECLARE @BELGE varbinary(MAX) SELECT @BELGE=CONVERT(VARBINARY(MAX), :PBELGE)  '+
+        Tablo.Query5.SQL.Text:='DECLARE @BELGE varbinary(MAX) SELECT @BELGE=cast(:PBELGE as VARBINARY(MAX))'+
              ' EXEC [sp_Imaj_Kaydetme] '+Tablo.Query1.Fields[0].AsString+',@BELGE ';
              //' update IMAJ set BELGE=null, ICDIS=1 where ID=' + Tablo.Query1.Fields[0].AsString;
 //        Tablo.Query5.Params[0].LoadFromStream(CompressedStream_ , ftBlob);

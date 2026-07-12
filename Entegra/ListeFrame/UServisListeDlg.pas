@@ -733,7 +733,7 @@ begin
           if FArama.CheckKapali.Checked then
               case FArama.ComboTamamlanan.EditValue of
                   1 : //bugün ise
-                      Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (round(convert(float,BASLAMATARIHI),0,1)=round(convert(float,Getdate()),0,1))) ');
+                      Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (round(cast(BASLAMATARIHI as float),0,1)=round(cast(Getdate() as float),0,1))) ');
                   19000 : //iki tarih arası
                       Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (BASLAMATARIHI between '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date)+''' '+
                                                                                        ' and '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date)+''')) ');
@@ -767,7 +767,7 @@ begin
               GridHareketViewBITISSEC.Visible := True;
               case FArama.ComboTamamlanan.EditValue of
                   1 : //bugün ise
-                      Tablo1.SQL.Add(' or round(convert(float,BASLAMATARIHI),0,1)=round(convert(float,Getdate()),0,1) ');
+                      Tablo1.SQL.Add(' or round(cast(BASLAMATARIHI as float),0,1)=round(cast(Getdate() as float),0,1) ');
                   9999 : //başlangıçtan beri
                       Tablo1.SQL.Add(' or BASLAMATARIHI > ''2000-01-01'' ');
                   19000 : //iki tarih arası
@@ -897,7 +897,7 @@ begin
       if FArama.CheckKapali.Checked then
           case FArama.ComboTamamlanan.EditValue of
               1 : //bugün ise
-                  SERVIS.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (round(convert(float,BASLAMATARIHI),0,1)=round(convert(float,Getdate()),0,1))) ');
+                  SERVIS.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (round(cast(BASLAMATARIHI as float),0,1)=round(cast(Getdate() as float),0,1))) ');
               19000 : //iki tarih arası
                   SERVIS.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (BASLAMATARIHI between '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date)+''' '+
                                                                                    ' and '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date)+''')) ');

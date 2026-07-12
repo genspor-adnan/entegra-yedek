@@ -2558,9 +2558,9 @@ var
   i : Integer;
 begin
   if Cagiran = 2 then //sipariş
-     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(CONVERT(INT,SIPARISNO)) SIPARISNO from SIPARIS where TUR=20 and SIPARISTARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1))
+     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(cast(SIPARISNO as INT)) SIPARISNO from SIPARIS where TUR=20 and SIPARISTARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1))
   else begin             //transfer
-     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=20 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
+     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(cast(FATURANO as INT)) FATURANO from FATBASLIK where TUR=20 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
      cxGridDBCardViewKartlarADET.Visible := False;
   end;
 

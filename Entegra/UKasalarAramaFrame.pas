@@ -57,7 +57,7 @@ begin
    ComboSube.Visible := SubeVarmi;
    LabelSube.Visible := ComboSube.Visible;
    if ComboSube.Visible then begin
-      ComboSube.Properties.Items := Tablo.imgComboboxInit('Select ID=0,FIRMA='''' union all select R.ID,R.FIRMA from REHBER R inner join YETKI Y on convert(int,(''2398''+convert(varchar(10),-R.ID)))=Y.MODULID where R.ID<0 and Y.ROLID='+RolId+' and Y.HAK=1 ').Items;
+      ComboSube.Properties.Items := Tablo.imgComboboxInit('Select ID=0,FIRMA='''' union all select R.ID,R.FIRMA from REHBER R inner join YETKI Y on cast((''2398''+cast(-R.ID as varchar(10))) as int)=Y.MODULID where R.ID<0 and Y.ROLID='+RolId+' and Y.HAK=1 ').Items;
       ComboSube.EditValue := SubeId;
    end;
 end;

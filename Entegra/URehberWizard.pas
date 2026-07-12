@@ -1458,10 +1458,10 @@ begin
       Application.MessageBox(PChar(STMarka_sec),PChar(HataPrj),MB_OK+ MB_ICONERROR);
       abort;
   end else begin
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2210%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2210%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2210''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2210)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2210%'' and len(BOLUM)>5 and cast(BOLUM as varchar(30)) not in (select ''-2210''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2210)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2210%'' and len(DEGER)>5 and cast(BOLUM as varchar(30)) not in (select ''-2210''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2210)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboAltBolge.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_CariKart_Bolge)+' and DEGER='+VarToStr(ComboBolge.EditValue),[],[]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,cast(BOLUM as varchar(10))+cast(DEGER as varchar(10)),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_CariKart_Bolge)+' and DEGER='+VarToStr(ComboBolge.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;
@@ -1784,7 +1784,7 @@ end;
 
 procedure TRehberWizardDlg.TabIlgiliAfterPost(DataSet: TDataSet);
 begin
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set KOD=CONVERT(varchar(15), ID) Where ID=&ID',['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set KOD=cast(ID as varchar(15)) Where ID=&ID',['&ID'],[TabIlgili.FieldByName('ID').AsInteger]);
 end;
 
 procedure TRehberWizardDlg.TabIlgiliAfterScroll(DataSet: TDataSet);
@@ -2183,7 +2183,7 @@ begin
   // buffer'lari LogYaz uzerinden yazildigindan LogUstModu override eder.)
   if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
   //e?er daha ?nce kodu bo? olarak kaydedilmi? varsa kodunu Id yaps?n
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE REHBER SET KOD=CONVERT(NVARCHAR(20), ID) WHERE KOD=''''',[],[]);
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE REHBER SET KOD=cast(ID as varchar(20)) WHERE KOD=''''',[],[]);
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im,  2 Ticari, 3 Personel ?zl?k, 4 Personel ileti?im, i?in ileti?im bilgileri

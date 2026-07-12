@@ -233,7 +233,7 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çıkış fatura 2: sayım tutana�
     if cbStokDepo.EditValue=null then
        raise Exception.Create('Önce Depo Seçin!');
     if FiyatGoster then
-      FiyatG := ', convert(varchar(18), convert(money, isnull(FIYAT,0.0)))+'' ''+isnull(DOVIZ,'' TL'')AS FIYAT  '
+      FiyatG := ', cast(cast(isnull(FIYAT,0.0) as money) as varchar(18))+'' ''+isnull(DOVIZ,'' TL'')AS FIYAT  '
     else
       FiyatG := '';
 
@@ -250,8 +250,8 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çıkış fatura 2: sayım tutana�
              ' 0 AS ADET,ANABIRIM, BIRIM2, isnull(MINSTOK,0) as MINSTOK,MASRAFID,KDV, SF.FIYAT, ' +
              ' SF.KUR, S.IZLEME, TIPI, StokMarka.ANAHTAR STOKMARKA, StokModel.ANAHTAR STOKMODEL '+
              ' From STOKLAR S (nolock) left outer join STOKFIYAT SF on S.ID=SF.STOKID and FIYATADI=' + FiyatAdTut +' '+
-             ' LEFT OUTER JOIN GENINI StokMarka ON  StokMarka.DEGER = CONVERT(VARCHAR(10),S.MARKA) AND StokMarka.BOLUM ='+inttostr(Ops_StokKart_Marka)+' '+
-             ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,'+inttostr(Ops_StokKart_Marka)+'+convert(varchar(10),S.MARKA)) '+
+             ' LEFT OUTER JOIN GENINI StokMarka ON  StokMarka.DEGER = cast(S.MARKA as VARCHAR(10)) AND StokMarka.BOLUM ='+inttostr(Ops_StokKart_Marka)+' '+
+             ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast('+inttostr(Ops_StokKart_Marka)+'+cast(S.MARKA as varchar(10)) as int) '+
              ' where S.DURUM=1 and (SF.BIRIM='+vartostr(comboBirim.EditValue)+') ';
           StokSorguTamamla;
         end;
@@ -263,8 +263,8 @@ begin  //   HizmetAraCagiran 0 : giren fat, 1 çıkış fatura 2: sayım tutana�
             ' KUR=isnull(SF.KUR,'''+CariDoviz+'''), S.IZLEME, TIPI ,StokMarka.ANAHTAR STOKMARKA, StokModel.ANAHTAR STOKMODEL'+
             ' From STOKLAR S (nolock) LEFT OUTER JOIN STOKFIYAT SF (nolock) on S.ID = SF.STOKID ' +
             ' LEFT OUTER JOIN STOKDURUM SD ON SD.STOKID = S.ID '+
-            ' LEFT OUTER JOIN GENINI StokMarka ON  StokMarka.DEGER = CONVERT(VARCHAR(10),S.MARKA) AND StokMarka.BOLUM ='+inttostr(Ops_StokKart_Marka)+' '+
-            ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,'+inttostr(Ops_StokKart_Marka)+'+convert(varchar(10),S.MARKA)) '+
+            ' LEFT OUTER JOIN GENINI StokMarka ON  StokMarka.DEGER = cast(S.MARKA as VARCHAR(10)) AND StokMarka.BOLUM ='+inttostr(Ops_StokKart_Marka)+' '+
+            ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast('+inttostr(Ops_StokKart_Marka)+'+cast(S.MARKA as varchar(10)) as int) '+
             ' where S.DURUM=1 and SF.BIRIM='+vartostr(comboBirim.EditValue)+' ' +
             ' AND SD.DEPOID = ' + inttostr(cbStokDepo.EditValue) + ' ' + ' AND FIYATADI = ' + FiyatAdTut +' '+
             '  ';

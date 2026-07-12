@@ -77,7 +77,7 @@ begin
       if TamYetkili then
          s:=s+' where R.ID<0'
       else
-         s:=s+'inner join YETKI Y on convert(int,(''2398''+convert(varchar(10),-R.ID)))=Y.MODULID where R.ID<0 and Y.ROLID='+RolId+' and Y.HAK=1 ';
+         s:=s+'inner join YETKI Y on cast((''2398''+cast(-R.ID as varchar(10))) as int)=Y.MODULID where R.ID<0 and Y.ROLID='+RolId+' and Y.HAK=1 ';
       ComboSube.Properties.Items := Tablo.imgComboboxInit(S).Items;
       ComboSube.EditValue := SubeId;
    end;

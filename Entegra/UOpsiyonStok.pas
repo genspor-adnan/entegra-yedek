@@ -686,7 +686,7 @@ procedure TOpsiyonStokDlg.ToolButton1Click(Sender: TObject);
 var BAd: Variant;
 begin
   if TGirisKutusuEx.BilgiAlEx(BGBoyut_tanimi, TGirdiDenetimleri.Create.Edit(BGBoyut_adi, @BAd)) = mrOk then begin
-    Tablo.TablodanSorguAc(9,'select convert(nvarchar(9),(isnull(min(DEGER),-27990000)-1)) from GENINI where BOLUM = 0 and DEGER like ''-2799____''');
+    Tablo.TablodanSorguAc(9,'select cast((isnull(min(DEGER),-27990000)-1) as varchar(9)) from GENINI where BOLUM = 0 and DEGER like ''-2799____''');
 
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL)values(0,'''+BAd+''','+Tablo.Query9.Fields[0].AsString+','+IntToStr(Dil)+')  ',[],[]);
     if not Tablo.GeniniBaslat(Tablo.Query9.Fields[0].asInteger) then begin

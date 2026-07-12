@@ -2803,7 +2803,7 @@ begin
       'select '+DbUst(1)+'ID,FATURATARIH from FATBASLIK ' +
       'where ID<>:ID and TUR=:TUR and isnull(EFATURADURUM,0)=0 ' +
       'and ltrim(rtrim(isnull(FATURANO,'''')))=''0'' ' +
-      'and convert(date,FATURATARIH)<convert(date,:TARIH) ' +
+      'and cast(FATURATARIH as date)<cast(:TARIH as date) ' +
       'order by FATURATARIH,ID '+DbSinir(1);
     LQ.ParamByName('ID').AsInteger := ABaslik.ID;
     LQ.ParamByName('TUR').AsInteger := ABaslik.Tur;

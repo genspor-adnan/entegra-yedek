@@ -295,7 +295,7 @@ function ENTEGRA_MAC_AdresiMi :Boolean;
 var
   res : TADOQuery;
 begin
-  res := Query('select * from ENTEGRA WHERE CONVERT(INT,SABIT) >= ''10000'' AND convert(varchar(2000),DEGER) = ''' + sifre(GetMACAdress )+ '''');
+  res := Query('select * from ENTEGRA WHERE CAST(SABIT as INT) >= ''10000'' AND cast(DEGER as varchar(2000)) = ''' + sifre(GetMACAdress )+ '''');
   try
     result := res.RecordCount <> 0;
   finally
@@ -341,7 +341,7 @@ begin
      end;
    end;
 
-  with Query('SELECT * FROM ENTEGRA WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre(GetMACAdress ) + ''')') do
+  with Query('SELECT * FROM ENTEGRA WHERE SABIT >= ''1000'' AND	cast(DEGER as varchar(250)) = cast(''' + Sifre(GetMACAdress ) + ''' as varchar(250))') do
   begin
     try
       Result := recordcount <> 0;
@@ -355,7 +355,7 @@ begin
   end;
 
   //with Query('SELECT * FROM ENTEGRA WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre('1  ' + GetMACAdress + '  ' + GetSID) + ''')') do
-  with Query('SELECT * FROM ENTEGRA WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre(GetMACAdress ) + ''')') do
+  with Query('SELECT * FROM ENTEGRA WHERE SABIT >= ''1000'' AND	cast(DEGER as varchar(250)) = cast(''' + Sifre(GetMACAdress ) + ''' as varchar(250))') do
   begin
     try
       Result := recordcount <> 0;
@@ -488,7 +488,7 @@ begin
   try
     if LisansBilgileri.LisansSayisi > q1.FieldByName('SAYI').AsInteger then
     begin
-      q2 := Query('Select * from ENTEGRA WHERE SABIT between 1000 and 9999 AND convert(varchar(1000),SABITTEXT) = ''' + Sifre(TxtTerminal.Text) + ''' and durum = ''1'' ');
+      q2 := Query('Select * from ENTEGRA WHERE SABIT between 1000 and 9999 AND cast(SABITTEXT as varchar(1000)) = ''' + Sifre(TxtTerminal.Text) + ''' and durum = ''1'' ');
       try
         if q2.RecordCount <> 0 then
         begin

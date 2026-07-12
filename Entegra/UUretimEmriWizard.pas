@@ -2219,7 +2219,7 @@ var
   digitsay : SmallInt;
   i : Integer;
 begin
-  Tablo.TablodanSorguAc(9, ' select  '+DbUst(1)+'MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=6 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
+  Tablo.TablodanSorguAc(9, ' select  '+DbUst(1)+'MAX(cast(FATURANO as INT)) FATURANO from FATBASLIK where TUR=6 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
   if Tablo.Query9.Fields[0].AsString <> '0' then begin
     i := StrToIntDef(Tablo.Query9.Fields[0].AsString, 0);
     Inc(i);

@@ -1627,7 +1627,7 @@ begin
   sql:=' SELECT '+DbUst(100)+'S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],TIPI AS [Tip],MARKA AS Marka,'+
   ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ızleme] '+
   ' FROM STOKLAR S '+
-  ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))   '+
+  ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as varchar(10)) as int)   '+
   ' Where S.STOKADI like ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' '+DbSinir(100);
   //Ayn? Tipe sahip ?r?nler e?de?er olarak se?ilebilir.
   st := Tstringlist.create;
@@ -1777,7 +1777,7 @@ begin
   Tablo.Query1.ExecSQL; }
 
   Tablo.GENINI.ReadImageSection(Ops_StokKart_Kullanim, ComboKULLANIM.Properties.Items, False);
-  ComboOTVYUZDE.Properties.items := Tablo.imgComboboxInit( 'select convert(bit,DEGER), ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_StokKart_OTV)).items;
+  ComboOTVYUZDE.Properties.items := Tablo.imgComboboxInit( 'select cast(DEGER as smallint), ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_StokKart_OTV)).items;
 
   Sontus := 'I';
  // FArama := TStokAramaFrame(uTablo.AnaFrameYoneticisi.AktifFrame.AktifArama.Ornek);
@@ -2307,10 +2307,10 @@ begin
       Application.MessageBox(PChar(STMarka_sec),PChar(HataPrj),MB_OK+ MB_ICONERROR);
       abort;
   end else begin
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2701%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2701%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2701''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2701)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2701%'' and len(BOLUM)>5 and cast(BOLUM as varchar(30)) not in (select ''-2701''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2701)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0  and DEGER like ''-2701%'' and len(DEGER)>5 and cast(BOLUM as varchar(30)) not in (select ''-2701''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2701)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(ComboMODEL.Tag),[],[]) then begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_StokKart_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,cast(BOLUM as varchar(10))+cast(DEGER as varchar(10)),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_StokKart_Marka)+' and DEGER='+VarToStr(ComboMARKA.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;

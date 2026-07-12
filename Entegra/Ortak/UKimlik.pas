@@ -509,7 +509,7 @@ end;
 Function Protokolno:Integer;
 begin
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text := 'Select MAX(CONVERT(INT,PROTOKOLNO))   from GELISLER ';
+   Tablo.Query1.SQL.Text := 'Select MAX(CAST(PROTOKOLNO as INT))   from GELISLER ';
    Tablo.Query1.Open;
    if Tablo.Query1.Fields[0].AsString = '' then
       Protokolno := 1

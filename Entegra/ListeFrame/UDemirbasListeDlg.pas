@@ -826,7 +826,7 @@ begin
          s := s + ' AND D.KATEGORIID=0 '
       else
          if KategoriYetki=2 then
-            s := s + ' AND D.KATEGORIID in (select convert(int, isnull(Y.BILGI,0)) from YETKIEK Y where Y.ROLID='+RolId+' and Y.MODULID=280105) ';
+            s := s + ' AND D.KATEGORIID in (select cast(isnull(Y.BILGI,0) as int) from YETKIEK Y where Y.ROLID='+RolId+' and Y.MODULID=280105) ';
   end;
 
 

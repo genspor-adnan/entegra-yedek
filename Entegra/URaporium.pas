@@ -267,10 +267,10 @@ procedure TRaporiumDlg.TamamTusClick(Sender: TObject);
 begin
    //Şimdi yeni eklenen raporlar için yetki verelim
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into YETKI(MODULID,ROLID,TUR,HAK)'+
-      ' select MODULID=convert(int,(convert(nvarchar(4),M.MODULID)+convert(nvarchar(10),D.ID))),-1,1,1'+
+      ' select MODULID=cast((cast(M.MODULID as varchar(4))+cast(D.ID as varchar(10))) as int),-1,1,1'+
       ' from MODUL M inner join DOKUMLER D on M.DOKUMTUR=D.MODUL'+
       ' where LEN(M.MODULID)=4 and M.MODULID like ''__99'' '+
-      ' and convert(int,(convert(nvarchar(4),M.MODULID)+convert(nvarchar(10),D.ID))) not in (select MODULID from YETKI where ROLID=-1 and MODULID like ''__99%'') ', [],[]);
+      ' and cast((cast(M.MODULID as varchar(4))+cast(D.ID as varchar(10))) as int) not in (select MODULID from YETKI where ROLID=-1 and MODULID like ''__99%'') ', [],[]);
    close;
 end;
 

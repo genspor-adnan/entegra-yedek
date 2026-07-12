@@ -323,12 +323,12 @@ begin
     TabStokHizmetListesi.Close;
     TabStokHizmetListesi.SQL.Text:='';
     TabStokHizmetListesi.SQL.Add(' SELECT S.ID, S.KOD, AD=S.STOKADI,S.KDV,S.SUBEID,BIRIM=S.ANABIRIM,S.MARKA,S.GRUBU,MODEL=StokModel.ANAHTAR '+AlanAlis+AlanSatis+'  FROM STOKLAR S'+
-    ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))'+
+    ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as varchar(10)) as int)'+
     FiyatAdiAlis+FiyatAdiSatis+
     ' where isnull(S.ANABIRIM,0)>0 '+AnaBirim+' and isnull(S.PAKET,0)=0'+AramaSql+
     ' union all'+
     ' SELECT S.ID, S.KOD, AD=S.STOKADI,S.KDV,S.SUBEID,BIRIM=S.BIRIM2,S.MARKA,S.GRUBU,MODEL=StokModel.ANAHTAR '+AlanAlis + AlanSatis+' FROM STOKLAR S'+
-    ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA)) '+
+    ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as varchar(10)) as int) '+
     FiyatAdiAlis+FiyatAdiSatis+
     ' where S.ANABIRIM<>S.BIRIM2 and isnull(S.BIRIM2,0)>0 '+Birim2+' and isnull(S.PAKET,0)=0 '+AramaSql);
     TabStokHizmetListesi.Open;

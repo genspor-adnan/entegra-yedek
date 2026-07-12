@@ -1772,7 +1772,7 @@ begin
 
     //?nce bakal?m bu kullan?c? i?in depo yetkisi var m? (hi? yoksa hepsi gelecek)
     if (TamYetkili=False)and(Veritabani.VeriVarMi(Tablo.FDCnn,'select * from  YETKI where ROLID ='+RolID+' and LEN(MODULID)>4 and MODULID like ''2470%'' ',[],[])) then
-       cbStokDepo.Properties.items := Tablo.imgComboboxInit('select D.ID, D.DEPOADI from DEPOLAR D inner join YETKI Y on Y.MODULID=''2470''+CONVERT(VARCHAR(20), D.ID) '+
+       cbStokDepo.Properties.items := Tablo.imgComboboxInit('select D.ID, D.DEPOADI from DEPOLAR D inner join YETKI Y on Y.MODULID=''2470''+cast(D.ID as VARCHAR(20))'+
         'where D.DURUM=1 and D.VARSAYILAN<>'+Vars+' and (Y.ROLID ='+RolID+' or -1='+RolID+')' ).items
      else
        cbStokDepo.Properties.items := Tablo.imgComboboxInit( 'select ID,DEPOADI from DEPOLAR where DURUM=1 and VARSAYILAN<>'+Vars).items;
@@ -4401,7 +4401,7 @@ begin
   //daha ?nce var m? denetimi
   Say :=  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select SAY=count(*) from FATBASLIK where DURUM <> 6 '
                 +' and TUR='+ TabFatbaslik.FieldByName('TUR').AsString
-                +' and floor(convert(float,FATURATARIH))+2='+IntToStr(Trunc(TabFatbaslik.FieldByName('FATURATARIH').AsDateTime))
+                +' and floor(cast(FATURATARIH as float))+2='+IntToStr(Trunc(TabFatbaslik.FieldByName('FATURATARIH').AsDateTime))
                 +' and REHBERID='+ TabFatbaslik.FieldByName('REHBERID').AsString
                 +' and FATURA_TUTARI='+FCurrToStr(TabFatbaslik.FieldByName('FATURA_TUTARI').AsCurrency)
           ,[],[],True);

@@ -288,7 +288,7 @@ begin
         Tablo1.Open;
         ImajID := Tablo.Query1.Fields[0].AsInteger;
         Tablo.Query5.Close;
-        Tablo.Query5.SQL.Text:='DECLARE @BELGE varbinary(MAX) SELECT @BELGE=CONVERT(VARBINARY(MAX), :PBELGE)  EXEC [sp_Imaj_Kaydetme] '+IntToStr(ImajID)+',@BELGE ';  //  Tablo1.Fields[0].AsString
+        Tablo.Query5.SQL.Text:='DECLARE @BELGE varbinary(MAX) SELECT @BELGE=CAST(:PBELGE AS VARBINARY(MAX))  EXEC [sp_Imaj_Kaydetme] '+IntToStr(ImajID)+',@BELGE ';  //  Tablo1.Fields[0].AsString
         Tablo.Query5.Params[0].LoadFromStream(CompressedStream_ , ftBlob);
         Tablo.Query5.ExecSQL;
         ///Burada kütüğe yazılan okunabiliyor mu kontrol edelim

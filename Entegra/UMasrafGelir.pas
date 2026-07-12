@@ -571,8 +571,8 @@ begin
 
     MASRAFGELIR.SQL.Text :=  '';
     MASRAFGELIR.SQL.Add(' select ROOTKOD=REVERSE(SUBSTRING(REPLACE(REVERSE(KOD),'' '',''''),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(REPLACE(KOD,'' '','''')'+
-    ')-(CHARINDEX(''.'',REVERSE(REPLACE(KOD,'' '','''')),1)-1)))+convert(varchar(10),SUBEID), ');
-    MASRAFGELIR.SQL.Add(' SUBKOD=REPLACE(KOD,'' '','''')+convert(varchar(10),SUBEID), '+
+    ')-(CHARINDEX(''.'',REVERSE(REPLACE(KOD,'' '','''')),1)-1)))+cast(SUBEID as varchar(10)), ');
+    MASRAFGELIR.SQL.Add(' SUBKOD=REPLACE(KOD,'' '','''')+cast(SUBEID as varchar(10)), '+
                                 '  ID,KOD,AD,DURUM,VARSAYILAN,YER,YER_ID from MASRAFGELIR WHERE GELIRMI = '+Turu );
    if (SubeVarmi)and(cbSubeSecimi.Text <> '')and(ComboSube.EditValue<1) then
 //       MASRAFGELIR.SQL.Add(' and SUBEID in(' +Tablo.YetkiliSubeleriGetir(23,YetkiTur_Gorme)+ ') ');
@@ -848,8 +848,8 @@ begin
   if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi,ctrls) = mrOK then begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'delete from BUTCE where MASRAFID= '+TabMasrafGelir.FieldByName('ID').AsString +
-      ' and convert(datetime,(CONVERT(Varchar(4),YIL)+''-''+CONVERT(Varchar(2),AY)+''-''+CONVERT(Varchar(2),GUN)+'' 00:00''))> '''+FormatDateTime('yyyy-mm-dd hh:nn',BasTar)+''''+
-      ' and convert(datetime,(CONVERT(Varchar(4),YIL)+''-''+CONVERT(Varchar(2),AY)+''-''+CONVERT(Varchar(2),GUN)+'' 00:00''))< '''+FormatDateTime('yyyy-mm-dd hh:nn',BitTar)+'''';
+      ' and cast((cast(YIL as Varchar(4))+''-''+cast(AY as Varchar(2))+''-''+cast(GUN as Varchar(2))+'' 00:00'') as datetime)> '''+FormatDateTime('yyyy-mm-dd hh:nn',BasTar)+''''+
+      ' and cast((cast(YIL as Varchar(4))+''-''+cast(AY as Varchar(2))+''-''+cast(GUN as Varchar(2))+'' 00:00'') as datetime)< '''+FormatDateTime('yyyy-mm-dd hh:nn',BitTar)+'''';
     Tablo.Query1.ExecSQL;
     Toplam := StrToCurrDef(AylikButce, 0);
     Tarih:=BasTar;

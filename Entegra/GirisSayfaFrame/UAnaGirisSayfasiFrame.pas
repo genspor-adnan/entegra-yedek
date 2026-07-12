@@ -756,7 +756,7 @@ procedure TAnaGirisSayfasiFrame.AraTusClick(Sender: TObject);
         else  if TrimRight(Tablo.Query5.fields[4].AsString) = 'MASRAFGELIR' then
           s := ' select Modul=''Alış/Satış'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''Masraf-Gelir'',Aranan = MG.AD FROM FATBASLIK FB INNER JOIN MASRAFGELIR MG ON FB.' + Tablo.Query5.fields[3].AsString + ' = MG.ID WHERE MG.AD LIKE ''%' + Trim(EditAra.text) + '%'' '
         else  if TrimRight(Tablo.Query5.fields[4].AsString) = 'STOKLAR' then
-          s := ' select Modul=''Alış/Satış'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''FATURAID = '' + convert(nvarchar(10),FB.ID),Aranan = S.STOKADI FROM FATBASLIK FB INNER JOIN FATURA F on FB.ID=F.FATBASID INNER JOIN STOKLAR S ON F.' + Tablo.Query5.fields[3].AsString + ' = S.ID WHERE S.STOKADI LIKE ''%' + Trim(EditAra.text) + '%'' '
+          s := ' select Modul=''Alış/Satış'',' + Tablo.Query5.fields[0].AsString + ',ArananId = FB.ID,Kod=''Kod'',Ad=''FATURAID = '' + cast(FB.ID as varchar(10)),Aranan = S.STOKADI FROM FATBASLIK FB INNER JOIN FATURA F on FB.ID=F.FATBASID INNER JOIN STOKLAR S ON F.' + Tablo.Query5.fields[3].AsString + ' = S.ID WHERE S.STOKADI LIKE ''%' + Trim(EditAra.text) + '%'' '
         else if TrimRight(Tablo.Query5.fields[4].AsString) = '' then
           s := ' select Modul=''Alış/Satış'',' + Tablo.Query5.fields[0].AsString + ', ArananId = FB.ID,Kod=''Kod'',Ad=''Fatura Başlık Bilgisi'',Aranan=' + Tablo.Query5.fields[3].AsString +' FROM FATBASLIK FB  WHERE FB.' + Tablo.Query5.fields[3].AsString + ' LIKE ''%' + Trim(EditAra.text) + '%'' ';
 

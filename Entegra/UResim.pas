@@ -436,7 +436,7 @@ procedure TResimDlg.TabResimBeforeOpen(DataSet: TDataSet);
 begin //eğer resimler dizine kayıt yapılıyorsa önce dizinden tabloya almak gerekir.
     // DOSYA deposundaki satirlar (DOSYAID>0) klasorden OKUNMAZ (icerik DOSYA'da, .OBJ yok)
     //  -> haric tut; yoksa null BELGE'de eski folder-load fn'i cagrilir ('dbo.' syntax hatasi).
-    Tablo.TablodanSorguAc(1, '  select ID, convert(binary(1), BELGE) from IMAJ where (DOSYAID is null or DOSYAID=0) and YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
+    Tablo.TablodanSorguAc(1, '  select ID, cast(BELGE as binary(1)) from IMAJ where (DOSYAID is null or DOSYAID=0) and YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
     while not Tablo.Query1.eof do begin
        if Tablo.Query1.Fields[1].isnull then //eğer dosyada tutuluyorsa
           veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' dbo.fn_Imaj_KayitliObjNesnesiniOku ' + Tablo.Query1.Fields[0].AsString, [],[]);

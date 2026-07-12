@@ -272,9 +272,9 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
                   ' delete from YETKI where MODULID like ''__98%'' and ROLID=-1 and SUBEID='+IntToStr(YeniID)+
                   ' insert into YETKI(ROLID,MODULID,HAK,TUR,SUBEID) '+
-                  ' select -1,convert(varchar(4),M.MODULID)+convert(varchar(5),-1*('+IntToStr(YeniID)+')),1,1,'+IntToStr(YeniID)+' ' +
+                  ' select -1,cast(M.MODULID as varchar(4))+cast(-1*('+IntToStr(YeniID)+') as varchar(5)),1,1,'+IntToStr(YeniID)+' ' +
                   ' from MODUL M where LEN(M.MODULID)=4 and M.MODULID like ''__98'' '+
-                  ' and not exists (select 1 from YETKI Y where Y.ROLID=-1 and Y.MODULID=convert(bigint,convert(varchar(4),M.MODULID)+convert(varchar(5),-1*('+IntToStr(YeniID)+'))) and Y.TUR=1 and Y.SUBEID='+IntToStr(YeniID)+') ',[],[]);
+                  ' and not exists (select 1 from YETKI Y where Y.ROLID=-1 and Y.MODULID=cast(cast(M.MODULID as varchar(4))+cast(-1*('+IntToStr(YeniID)+') as varchar(5)) as bigint) and Y.TUR=1 and Y.SUBEID='+IntToStr(YeniID)+') ',[],[]);
     end;
   end else if IslemTuru='Baglantilar' then begin
     ctrls := TGirdiDenetimleri.Create.Edit((AWYeniFirmaAdi),@eskiad);

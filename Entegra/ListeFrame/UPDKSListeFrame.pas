@@ -880,16 +880,16 @@ begin
 
   if RbGirisTumu.Checked = False then begin
      if RbGirisErken.Checked  then
-        Sql1 := Sql1 + ' and convert(Time,PV.GIRIS) > CONVERT(Time,PP.GIRIS) and convert(Time,PP.GIRIS) <> ''00:00'''
+        Sql1 := Sql1 + ' and cast(PV.GIRIS as Time) > cast(PP.GIRIS as Time) and cast(PP.GIRIS as Time) <> ''00:00'''
      else if RbGirisGec.Checked Then
-             Sql1 := Sql1 + ' and convert(Time,PV.GIRIS) < CONVERT(Time,PP.GIRIS)';
+             Sql1 := Sql1 + ' and cast(PV.GIRIS as Time) < cast(PP.GIRIS as Time)';
   end;
 
   if RbCikisTumu.Checked =False then begin
      if RbCikisErken.Checked  then
-        Sql1 := Sql1 + ' and convert(Time,PV.CIKIS) > CONVERT(Time,PP.CIKIS)'
+        Sql1 := Sql1 + ' and cast(PV.CIKIS as Time) > cast(PP.CIKIS as Time)'
      else if RbCikisGec.Checked  then
-        Sql1 := Sql1 + ' and convert(Time,PV.CIKIS) < CONVERT(Time,PP.CIKIS)';
+        Sql1 := Sql1 + ' and cast(PV.CIKIS as Time) < cast(PP.CIKIS as Time)';
   end;
 
   if CbCikisNull.Checked then

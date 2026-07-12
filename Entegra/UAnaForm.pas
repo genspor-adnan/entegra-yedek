@@ -1791,7 +1791,7 @@ begin
   if Veritabani.VeriVarMi(Tablo.FDCnn,'Select ID from KILITLER Where OTOGUN > 0 and KILITLEME = 1 ',[],[]) then begin
      SonKilitUpdateTarihi := Tablo.GENINI.ReadString( Ops_SonKilitUpdateTarihi,'01' + FormatSettings.DateSeparator + '01' + FormatSettings.DateSeparator + '1900');
      if SonKilitUpdateTarihi <> Formatdatetime('dd' + FormatSettings.DateSeparator + 'mm' + FormatSettings.DateSeparator + 'yyyy', Tablo.GENINI.BugunTrh) then begin
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update KILITLER set GUNCELTARIH=Convert(SmallDateTime,'''+FormatDateTime('yyyy-mm-dd',Tablo.GENINI.BugunTrh)+''')-OTOGUN Where OTOGUN > 0',[],[]);
+       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update KILITLER set GUNCELTARIH=cast('''+FormatDateTime('yyyy-mm-dd',Tablo.GENINI.BugunTrh)+''' as SmallDateTime)-OTOGUN Where OTOGUN > 0',[],[]);
        Tablo.GENINI.WriteString(Ops_SonKilitUpdateTarihi,Formatdatetime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh));
      end;
   end;
@@ -2171,7 +2171,7 @@ begin  Tablo.TabYetki.Close;
   Tablo.TabYetkiEk.ParamByName('PRolID').Value := RolID;
   Tablo.TabYetkiEk.Open;
   if SubeVarmi then begin
-    if TGirisKutusuEx.BilgiAlEx(BGYeni_sube, TGirdiDenetimleri.Create.ImageComboBox(BGSube_Ad, @SubeDegeri,Tablo.FDCnn,'select convert(int,(''-''+substring(convert(varchar(10),Y.MODULID),5,4))),R.FIRMA from YETKI Y inner join REHBER R on convert(int,(''-''+substring(convert(varchar(10),Y.MODULID),5,4)))=R.ID where MODULID like ''1198%'' and Y.HAK=1 and ROLID='+RolID,False,nil)) = mrOk then begin
+    if TGirisKutusuEx.BilgiAlEx(BGYeni_sube, TGirdiDenetimleri.Create.ImageComboBox(BGSube_Ad, @SubeDegeri,Tablo.FDCnn,'select cast((''-''+substring(cast(Y.MODULID as varchar(10)),5,4)) as int),R.FIRMA from YETKI Y inner join REHBER R on cast((''-''+substring(cast(Y.MODULID as varchar(10)),5,4)) as int)=R.ID where MODULID like ''1198%'' and Y.HAK=1 and ROLID='+RolID,False,nil)) = mrOk then begin
       SubeId := SubeDegeri;
       VarsayilanDegerleriAl;
       LblSube.Caption := Tablo.AciklamaGetir('REHBER','FIRMA',SubeDegeri);

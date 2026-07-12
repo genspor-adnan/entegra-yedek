@@ -1882,7 +1882,7 @@ begin
   if (FArama.ComboCariAnaliz.Visible)and(FArama.ComboCariAnaliz.Itemindex in [1..5]) then
         Paramst :=Paramst + ' ,TOPLAM_BORC,TOPLAM_ALACAK,KUR,BAKIYE=TOPLAM_BORC-TOPLAM_ALACAK, TAKIPTE,IRSALIYE '
   else if FArama.CheckDetay.Checked then begin
-        Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=convert(int,''-2204''+convert(varchar(10),R.SEKTOR))),TEMSILCIAD = R2.FIRMA,ILLER= X1.BILGI, '+
+        Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=cast(''-2204''+cast(R.SEKTOR as varchar(10)) as int)),TEMSILCIAD = R2.FIRMA,ILLER= X1.BILGI, '+
           ' ADRES = (SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
           '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=2 '+DbSinir(1)+'), '+
@@ -1904,7 +1904,7 @@ begin
           '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=R.ID AND RA.VARSAYILAN=22 '+DbSinir(1)+'), '+
 
 
-          ' R.BOLGE,ALTBOLGE=  (select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTBOLGE AND G.BOLUM=convert(int,''-2210''+convert(varchar(10),R.BOLGE))),'+
+          ' R.BOLGE,ALTBOLGE=  (select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTBOLGE AND G.BOLUM=cast(''-2210''+cast(R.BOLGE as varchar(10)) as int)),'+
           ' R.SUBEID,NOTLAR=(Select '+DbUst(1)+'GY.YORUM from GOREVYORUM GY where R.ID=GY.GOREVID and GY.TUR=11 order by GY.TARIH desc '+DbSinir(1)+'), R.YETKIKODU, R.MUHKODU';
 
             Paramst :=Paramst + ' ,R.EKLEMETARIHI, SONAKTIVITEKONUSU = (SELECT '+DbUst(1)+'KONUSU FROM GOREVLER A WHERE A.REHBERID=R.ID ORDER BY BITISTARIHI DESC   '+DbSinir(1)+')';
@@ -2260,8 +2260,8 @@ begin
     'select ID,KOD,AD,SAHIBI=(case when SAHIP=0 then ''Rakip'' else ''Kendi'' end),'+
     '  MARKASI = (case when E.SAHIP=0 then (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=-2727 and DEGER=E.MARKA and DIL=-1 '+DbSinir(1)+')'+
     '        else (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=-2701 and DEGER=E.MARKA and DIL=-1 '+DbSinir(1)+') end) ,'+
-    '  MODELI = (case when E.SAHIP=0 then (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=convert(int,''-2727''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') '+
-    '        else (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=convert(int,''-2701''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') end), '+
+    '  MODELI = (case when E.SAHIP=0 then (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=cast(''-2727''+cast(E.MARKA as varchar(10)) as int) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') '+
+    '        else (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=cast(''-2701''+cast(E.MARKA as varchar(10)) as int) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') end), '+
     ' SAHIP, MARKA, MODEL'+
     ' from EKIPMANLAR E where DURUM=1 and EKIPMANTUR=0 and AD like ''%<ara>%'' order by 2',Sonuclar,[nil,nil,nil,nil,nil,nil,nil,nil,nil],'RehAraDlgServisEkipman') then try
     Tablo.TablodanSorguAc(1,StringReplace(MemoEkipmanEkleListe.Text,':PEkipmanID',Sonuclar[0],[rfReplaceAll]));
@@ -3585,10 +3585,10 @@ begin
      else if FArama.ComboCariAnaliz.ItemIndex in [2,4] then
         s := s + ' and  isnull(R.ID,'''')<>'''' and (ISNULL(TOPLAM_ALACAK,0.0) - ISNULL(TOPLAM_BORC,0.0)) > 1.0 ';
      if FArama.ComboCariAnaliz.ItemIndex =3 then begin
-        REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'GUN=0','GUN=Convert(int, isnull(dbo.fn_BorcluYaslandirma(R.ID, DSA.KUR,'+IntToStr(YearOf(Tablo.GENINI.BugunTrh))+'),0))',[rfReplaceAll]);
+        REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'GUN=0','GUN=cast(isnull(dbo.fn_BorcluYaslandirma(R.ID, DSA.KUR,'+IntToStr(YearOf(Tablo.GENINI.BugunTrh))+'),0) as int)',[rfReplaceAll]);
         REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'VADE=0','VADE=isnull(dbo.fn_RehberEkBilgisiGetir(2,R.ID, 78,0),0)',[rfReplaceAll]);
      end else if FArama.ComboCariAnaliz.ItemIndex =4 then begin
-        REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'GUN=0','GUN=Convert(int,isnull(dbo.fn_AlacakliYaslandirma(R.ID,DSA.KUR,'+IntToStr(YearOf(Tablo.GENINI.BugunTrh))+'),0))',[rfReplaceAll]);
+        REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'GUN=0','GUN=cast(isnull(dbo.fn_AlacakliYaslandirma(R.ID,DSA.KUR,'+IntToStr(YearOf(Tablo.GENINI.BugunTrh))+'),0) as int)',[rfReplaceAll]);
         REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'VADE=0','VADE=isnull(dbo.fn_RehberEkBilgisiGetir(2,R.ID,78,0),0)',[rfReplaceAll]);
      end;
      order := 'ORDER BY KUR ';

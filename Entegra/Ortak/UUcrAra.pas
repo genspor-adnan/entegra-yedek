@@ -299,7 +299,7 @@ begin
       TutAranan := AraKod;
    end;
                                            //varchar(8) ', convert(money,KATSAYI*isnull(CARPAN,1.0))+isnull(SEC,'''') AS FIYAT '
-   if FiyatGoster then FiyatG :=', convert(varchar(18), convert(money, KATSAYI*isnull(CARPAN,1.0)))+isnull(SEC,'''')AS FIYAT  '
+   if FiyatGoster then FiyatG :=', cast(cast(KATSAYI*isnull(CARPAN,1.0) as money) as varchar(18))+isnull(SEC,'''')AS FIYAT  '
    else FiyatG:='';
 
    QueryIslem.Close;
@@ -318,7 +318,7 @@ begin
 
 
    if StokVar then begin
-      if FiyatGoster then FiyatG :=',convert(varchar(8),FIYAT)'
+      if FiyatGoster then FiyatG :=',cast(FIYAT as varchar(8))'
       else FiyatG:='';
 
       st := '';

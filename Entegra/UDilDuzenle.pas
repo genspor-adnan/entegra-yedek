@@ -154,10 +154,10 @@ begin
    Tablo.Query6.SQL.Text:='DELETE from ##GENINI_' + IntToStr(SPID) + '_ WHERE BOLUM= -1013';
     Tablo.Query6.ExecSQL;
   TabBolumler.Close;
-   TabBolumler.SQL.Text:='select *,GRUP=CONVERT(VARCHAR(10),BOLUM)+''-''+CONVERT(VARCHAR(10),DEGER) from ##GENINI_' + IntToStr(SPID) + '_ WHERE BOLUM= 0 order by  DEGER  ';
+   TabBolumler.SQL.Text:='select *,GRUP=cast(BOLUM as VARCHAR(10))+''-''+cast(DEGER as VARCHAR(10)) from ##GENINI_' + IntToStr(SPID) + '_ WHERE BOLUM= 0 order by  DEGER  ';
     TabBolumler.Open;
   TabGenIniDiller.Close;
-    TabGenIniDiller.sql.Text := 'select  *,GRUP=CONVERT(VARCHAR(10),BOLUM)+''-''+CONVERT(VARCHAR(10),DEGER) from ##GENINI_' + IntToStr(SPID) + '_ WHERE BOLUM <> 0   order by  BOLUM ';
+    TabGenIniDiller.sql.Text := 'select  *,GRUP=cast(BOLUM as VARCHAR(10))+''-''+cast(DEGER as VARCHAR(10)) from ##GENINI_' + IntToStr(SPID) + '_ WHERE BOLUM <> 0   order by  BOLUM ';
   TabGenIniDiller.Open;
    GridGenIniDillerDBTableView1.DataController.CreateAllItems(True);
    GridGenIniDillerDBTableView2.DataController.CreateAllItems(True);
@@ -235,8 +235,8 @@ begin
      begin
       TabKomutCalistir.SQL.Text:='INSERT INTO GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) '+
                                   'select    BOLUM,ANAHTAR,DEGER,'+inttostr(DillerCeviri[i])+',SIRA  from GENINI G '+
-                                   'where G.DIL=-1 and BOLUM <> -1013 and convert(varchar(20),G.BOLUM)+convert(varchar(20),G.DEGER) not in( '+
-                                    'SELECT convert(varchar(20),G1.BOLUM)+convert(varchar(20),G1.DEGER) '+
+                                   'where G.DIL=-1 and BOLUM <> -1013 and cast(G.BOLUM as varchar(20))+cast(G.DEGER as varchar(20)) not in( '+
+                                    'SELECT cast(G1.BOLUM as varchar(20))+cast(G1.DEGER as varchar(20)) '+
                                      'FROM GENINI G1 '+
                                       'inner join GENINI G2 on G1.BOLUM=G2.BOLUM and G1.DEGER=G2.DEGER '+
                                        'WHERE '+

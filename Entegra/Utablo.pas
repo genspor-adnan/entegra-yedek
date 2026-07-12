@@ -4341,15 +4341,15 @@ begin
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + ' and 1=(case   ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=90 and KK1.KAMPANYAID=K.ID) is null then 1 ';
-  SQLTxt := SQLTxt + '    when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=90 and KK1.KAMPANYAID=K.ID) like ''%''+convert(varchar(1),DatePart(WEEKDAY,GetDate()))+''%'' then 1 ';
+  SQLTxt := SQLTxt + '    when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=90 and KK1.KAMPANYAID=K.ID) like ''%''+cast(DatePart(WEEKDAY,GetDate()) as varchar(1))+''%'' then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + ' and 1=(case   ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) is null then 1  ';
-  SQLTxt := SQLTxt + '	when (select convert(datetime,KK1.KOSUL) from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) < convert(datetime,CONVERT(varchar(10),getdate(),108)) then 1 ';
+  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=95 and KK1.KAMPANYAID=K.ID) < cast(CONVERT(varchar(10),getdate(),108) as datetime) then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
   SQLTxt := SQLTxt + 'and 1=(case    ';
   SQLTxt := SQLTxt + '	when (select KK1.KOSUL from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) is null then 1  ';
-  SQLTxt := SQLTxt + '	when (select convert(datetime,KK1.KOSUL) from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) > convert(datetime,CONVERT(varchar(10),getdate(),108)) then 1 ';
+  SQLTxt := SQLTxt + '	when (select cast(KK1.KOSUL as datetime) from KAMPANYAKOSUL KK1 where KK1.TUR=96 and KK1.KAMPANYAID=K.ID) > cast(CONVERT(varchar(10),getdate(),108) as datetime) then 1 ';
   SQLTxt := SQLTxt + '	else 0 end ) ';
 
   TablodanSorguAc(4, SQLTxt);
@@ -7529,7 +7529,7 @@ var
 
   procedure FaturaIslemleri;
   begin
-     Tablo.tablodanSorguAc(0,'SELECT distinct convert(datetime, convert(varchar(10),TARIH,120))-1, CIKISDEPO, '+
+     Tablo.tablodanSorguAc(0,'SELECT distinct cast(convert(varchar(10),TARIH,120) as datetime)-1, CIKISDEPO, '+
                              ' SUBEID=CASE WHEN S.CIKISDEPO=0 THEN -1 ELSE (SELECT D.SUBEID FROM DEPOLAR D WHERE D.ID=S.CIKISDEPO) END,REHBERID  FROM  SATIS S '+
                              ' where TARIH<GETDATE()-'+IntToStr(GunOnce)+' and isnull(AKTAR,0)=0 order by 1,2');
 
@@ -7549,12 +7549,12 @@ var
   begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO KASA (TUR,[PLANTARIHI] ,[ISLEMTARIHI],BELGENO,REHBERID,HESAPID,BORC,ALACAK,'+
        ' KUR,HESAPTURU,DOVIZ_TUTARI,DOVIZ_KURU,SUBEID,EKLEYEN,EKLEMETARIHI,EKSTREDEKULLAN,GIRISKAYNAK,MASRAFID,R) '+
-       ' SELECT TUR, [PLANTARIHI]=convert(datetime, convert(varchar(10),TARIH,120)+'' 23:50''),[ISLEMTARIHI]=convert(datetime, convert(varchar(10),TARIH,120)+'' 23:50''),'+
+       ' SELECT TUR, [PLANTARIHI]=cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),[ISLEMTARIHI]=cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),'+
        ' BELGENO='''', REHBERID,HESAPID,BORC= 0.0,ALACAK=sum(TUTAR),KUR='''+String(CariDoviz)+''',HESAPTURU=CASE TUR WHEN 21 THEN ''K'' WHEN 22 THEN ''B'' WHEN 25 THEN ''P'' ELSE ''H'' END, '+
        ' DOVIZ_TUTARI=sum(TUTAR),DOVIZ_KURU='''+CariDoviz+''',SUBEID,EKLEYEN=0,EKLEMETARIHI=GETDATE(),0,GIRISKAYNAK=4,MASRAFID=0, R=0 '+
-       ' from SATISKASA WHERE isnull(AKTAR,0)=0  AND convert(datetime, convert(varchar(10),TARIH,120)) < GETDATE()-'+IntToStr(GunOnce)+
-       ' GROUP BY TUR,convert(datetime, convert(varchar(10),TARIH,120)+'' 23:50''),REHBERID,HESAPID,SUBEID ORDER BY 2,1',[],[]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' UPDATE SATISKASA SET AKTAR = 1 WHERE convert(datetime, convert(varchar(10),TARIH,120)) < GETDATE()-'+IntToStr(GunOnce),[],[]);
+       ' from SATISKASA WHERE isnull(AKTAR,0)=0  AND cast(convert(varchar(10),TARIH,120) as datetime) < GETDATE()-'+IntToStr(GunOnce)+
+       ' GROUP BY TUR,cast(convert(varchar(10),TARIH,120)+'' 23:50'' as datetime),REHBERID,HESAPID,SUBEID ORDER BY 2,1',[],[]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' UPDATE SATISKASA SET AKTAR = 1 WHERE cast(convert(varchar(10),TARIH,120) as datetime) < GETDATE()-'+IntToStr(GunOnce),[],[]);
   end;
 
 begin
@@ -9182,14 +9182,14 @@ begin
     if TurBilgisi='' then
        Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,0 from  GENINI G where G.BOLUM=-3007 and G.DIL=-1 '+s,True).Items
     else //servis türüne göre ise
-       Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,convert(int,KAPANIS) from DURUMBAGLANTI DB inner join GENINI G on DB.BOLUM=G.BOLUM '+s+' and (DB.HEDEFDURUM=G.DEGER or DB.KAYNAKDURUM=G.DEGER ) where DB.AKTIF=1 and DB.YERI=83 '+TurBilgisi,True).Items;
+       Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,cast(KAPANIS as int) from DURUMBAGLANTI DB inner join GENINI G on DB.BOLUM=G.BOLUM '+s+' and (DB.HEDEFDURUM=G.DEGER or DB.KAYNAKDURUM=G.DEGER ) where DB.AKTIF=1 and DB.YERI=83 '+TurBilgisi,True).Items;
   end else begin
     if TurBilgisi='' then
        Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,0 from  GENINI G where G.BOLUM=-3007 and G.DIL=-1 ',True).Items
     else begin
        Tablo.Query8.Last;
        OncekiHareketDurumu := Tablo.Query8.FieldByName('DURUM').AsInteger;
-       Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,convert(int,KAPANIS) from DURUMBAGLANTI DB inner join GENINI G on DB.BOLUM=G.BOLUM and '+
+       Result := Tablo.imgComboboxInit('select G.DEGER,G.ANAHTAR,cast(KAPANIS as int) from DURUMBAGLANTI DB inner join GENINI G on DB.BOLUM=G.BOLUM and '+
         ' (DB.HEDEFDURUM=G.DEGER or DB.KAYNAKDURUM=G.DEGER) where DB.AKTIF=1 and DB.YERI=83 '+TurBilgisi+' and DB.KAYNAKDURUM='+IntToStr(OncekiHareketDurumu),True).Items;
     end;
   end;
@@ -12177,7 +12177,7 @@ begin
   begin
   //öncelikle server değişmiş mi diye bakacağız..
   try
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(convert(nvarchar(23),schemadate)))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
   except
     UyariGoster(Uyari,'Server Sid Number cannot be found!',1);
   end;
@@ -12216,7 +12216,7 @@ begin
               GENINI.WriteInteger(Ops_DenemeLoginSay,0);
 
               VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L='''' ',[],[]);
-              VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+convert(nvarchar(20),MODULID)) where (((MODULID like ''10%'') or (MODULID like ''11%'')or (MODULID in (20,2001)))and(MODULID <> ''1102''))',[],[]);
+              VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+cast(MODULID as varchar(20))) where (((MODULID like ''10%'') or (MODULID like ''11%'')or (MODULID in (20,2001)))and(MODULID <> ''1102''))',[],[]);
               for I := 0 to Length(LisansliModuller.ModulListesi)-1 do begin
                 if LisansliModuller.ModulListesi[I].ModulDurumu then begin
                   case StrToIntDef(LisansliModuller.ModulListesi[I].OzelKod,0) of
@@ -12266,7 +12266,7 @@ begin
                     3403:s2:=' MODULID like ''3403%'' ';//Maaş İşlemleri
                     180216:s2:=' MODULID like ''180216%'' ';//Cafe/Rest
                   end;
-                  VeriTabani.BasitKomutÇalıştır(FDCnn,' update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+convert(nvarchar(20),MODULID)) where '+s2 ,[],[]);
+                  VeriTabani.BasitKomutÇalıştır(FDCnn,' update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+cast(MODULID as varchar(20))) where '+s2 ,[],[]);
                   GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('-1'));
                   GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('-1'));
                 end;
@@ -12576,7 +12576,7 @@ begin
   Kullanilan := StrToIntDef(UGenSifre.Desifre(GENINI.ReadString(Ops_DenemeLoginSay,'AA')),-1);
   if (Kalan=-1)and(Kullanilan=-1) then begin
     UyariGoster(Uyari,LisansyenilemeMaksimum19girisyapilabilir,1);
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(convert(nvarchar(23),schemadate)))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
     //VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+convert(nvarchar(20),MODULID))  ',[],[]);
     GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('19'));
     GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('1'));

@@ -331,7 +331,7 @@ begin
   PaketAnaUrun := True;
   if (StokZorunluSecimVar)and(stokhizmetaracagirantur in [9,19,100]) and (PageControl1.ActivePage.Name='SheetStok') then begin//Bu ?r?n yerine se?ilmesi gereken ba?ka ?r?nler var m?
     if EsdegerUrunlerListelendi=False then begin
-      Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=convert(nvarchar(10),STOKESDEGERID)+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
+      Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=cast(STOKESDEGERID as varchar(10))+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
       if (Tablo.Query0.Fields[0].AsString<>'')and(Tablo.Query0.Fields[0].AsString<>TabStokListe.FieldByName('ID').AsString) then begin
         EsdegerSecilenUrunID:=TabStokListe.FieldByName('ID').AsInteger;
         EsdegerAciklama := TabStokListe.FieldByName('KOD').AsString+' ürün &Yeniürün& ürün olarak değişmiştir.';
@@ -1327,7 +1327,7 @@ begin
   TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokModel ON   ');
   TabStokListe.SQL.Add(' 		StokModel.DEGER=S.MODEL AND        ');
   TabStokListe.SQL.Add(' 		StokModel.DIL='+IntToStr(Dil)+' AND ');
-  TabStokListe.SQL.Add(' 		StokModel.BOLUM=convert(int,''-2701''+CONVERT(VARCHAR(10),S.MARKA))');
+  TabStokListe.SQL.Add(' 		StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as VARCHAR(10)) as int)');
   TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokGrubu ON   ');
   TabStokListe.SQL.Add('    S.GRUBU = StokGrubu.DEGER AND      ');
   TabStokListe.SQL.Add(' 		StokGrubu.DIL='+IntToStr(Dil)+' AND ');
@@ -1436,7 +1436,7 @@ begin
     TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokModel ON   ');
     TabStokListe.SQL.Add(' 		StokModel.DEGER=S.MODEL AND        ');
     TabStokListe.SQL.Add(' 		StokModel.DIL='+IntToStr(Dil)+' AND ');
-    TabStokListe.SQL.Add(' 		StokModel.BOLUM=convert(int,''-2701''+CONVERT(VARCHAR(10),S.MARKA))');
+    TabStokListe.SQL.Add(' 		StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as VARCHAR(10)) as int)');
     TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokGrubu ON   ');
     TabStokListe.SQL.Add('    S.GRUBU = StokGrubu.DEGER AND      ');
     TabStokListe.SQL.Add(' 		StokGrubu.DIL='+IntToStr(Dil)+' AND ');
@@ -1492,7 +1492,7 @@ begin
     TabHizmetListe.SQL.Add(' select ID,KOD=HESAPKODU, ');
     TabHizmetListe.SQL.Add(' ROOTKOD= case when HESAPKODU = REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1))) then ''.'' ');
     TabHizmetListe.SQL.Add(' else REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1)))end, ');
-    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Başlık'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=convert(bit,0),IZLEME=convert(bit,0), BIRIM=null ');
+    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Başlık'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=cast(0 as smallint),IZLEME=cast(0 as smallint), BIRIM=null ');
     TabHizmetListe.SQL.Add(', STOKGRUBU=NULL,MASRAFID=NULL,OZELKOD=NULL ');
     if GirisCikis = FWGiris then
       TabHizmetListe.SQL.Add(' from HESAPPLANI where VARSAYILAN = 2 ')

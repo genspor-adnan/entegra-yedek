@@ -133,7 +133,7 @@ begin
 
   // Makinenin MAC i Şirkete ait Bir MAC olarak kayıtlı mı?
   Tablo.Query3.Close;
-  Tablo.Query3.SQL.Text := 'select * from GENOTIP WHERE CONVERT(INT,SABIT) >= ''10000'' AND convert(varchar(2000),DEGER) = ''' + Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])) + '''';
+  Tablo.Query3.SQL.Text := 'select * from GENOTIP WHERE CAST(SABIT as INT) >= ''10000'' AND cast(DEGER as varchar(2000)) = ''' + Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])) + '''';
   Tablo.Query3.Open;
 
   // Şirkete ait herhangi bir MAC adresi mi?
@@ -179,7 +179,7 @@ begin
     if Items.Values['YazilimCalissin'] = '1' then
     begin
       Tablo.Query4.Close;
-      Tablo.Query4.SQL.Text := 'SELECT * FROM GENOTIP WHERE SABIT >= ''1000'' AND	convert(varchar(250),DEGER) = convert(varchar(250),''' + Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])) + ''') AND DURUM <> ''0''';
+      Tablo.Query4.SQL.Text := 'SELECT * FROM GENOTIP WHERE SABIT >= ''1000'' AND	cast(DEGER as varchar(250)) = cast(''' + Sifre(StringReplace(GetMACAdress, '-', '', [rfReplaceAll])) + ''' as varchar(250)) AND DURUM <> ''0''';
       Tablo.Query4.Open;
       Tablo.Query4.First;
 
@@ -489,7 +489,7 @@ begin
   if lisansSayisi > Tablo.Query2.FieldByName('SAYI').AsInteger then
   begin
     Tablo.Query3.Close;
-    Tablo.Query3.SQL.Text := 'Select * from GENOTIP WHERE SABIT >= ''1000'' AND convert(varchar(1000),SABITTEXT) = ''' + Sifre(TxtTerminal.Text) + '''';
+    Tablo.Query3.SQL.Text := 'Select * from GENOTIP WHERE SABIT >= ''1000'' AND cast(SABITTEXT as varchar(1000)) = ''' + Sifre(TxtTerminal.Text) + '''';
     Tablo.Query3.Open;
 
 

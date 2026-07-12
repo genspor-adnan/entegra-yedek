@@ -1333,11 +1333,11 @@ begin
     ShowMessage(PWTurSec);
     abort;
   end else begin
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2132%'' and len(BOLUM)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER like ''-2132%'' and len(DEGER)>5 and convert(varchar(30),BOLUM) not in (select ''-2132''+convert(varchar(30),DEGER) from GENINI where BOLUM=-2132)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM like ''-2132%'' and len(BOLUM)>5 and cast(BOLUM as varchar(30)) not in (select ''-2132''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2132)',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GENINI where BOLUM=0 and DEGER like ''-2132%'' and len(DEGER)>5 and cast(BOLUM as varchar(30)) not in (select ''-2132''+cast(DEGER as varchar(30)) from GENINI where BOLUM=-2132)',[],[]);
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DEGER='+IntToStr(comboPRJ_TIPI.Tag),[],[]) then begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,convert(varchar(10),BOLUM)+convert(varchar(10),DEGER),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_Proje_Turu)+' and DEGER='+VarToStr(ComboPRJ_TURU.EditValue),[],[]);
+        'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) select 0,ANAHTAR,cast(BOLUM as varchar(10))+cast(DEGER as varchar(10)),DIL,0 from GENINI where BOLUM='+IntToStr(Ops_Proje_Turu)+' and DEGER='+VarToStr(ComboPRJ_TURU.EditValue),[],[]);
     end;
     Tablo.LabelClickCombobox(Sender);
   end;

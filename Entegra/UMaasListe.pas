@@ -294,7 +294,7 @@ begin
     end;
     S:=S+' KESTOPLAM=0.0,TOPLAM=0.0, BANKA=cast(isnull((SELECT '+DbUst(1)+'isnull(TUTAR,0.0) ';
     S:=S+' FROM PLANMAAS PM where R.ID=PM.YERID and YER=51 '+DbSinir(1)+'),0.0) as float),KASA=0.0,DEGIS=0.0, ';
-    S:=S+' TCNO=(select convert(nvarchar(15),BILGI) from REHBERBILGI where YERI=3 and SIRA=22 and YER_ID=R.ID)';
+    S:=S+' TCNO=(select cast(BILGI as varchar(15)) from REHBERBILGI where YERI=3 and SIRA=22 and YER_ID=R.ID)';
     S:=S+' from REHBER R inner join ROLLER ROL on ROL.ID=R.SINIF where R.GRUP=335 and R.DURUM=1 ) as TT   where 1=1 ';
     if PanelPrim.Visible then
        S:=S+' and ISEGIRIS<='''+FormatDateTime('yyyy-mm-dd 23:59', CalendarEkstreBit.Date)+''' ';

@@ -1044,7 +1044,7 @@ begin
   sql:=' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],S.TIPI AS [Tip],S.MARKA AS Marka,'+
   ' StokModel.ANAHTAR AS Model, S.GRUBU AS Grubu,S.OZELLIK AS [Özellik],S.IZLEME AS [İzleme] FROM'+
   ' STOKLAR AS S '+
-  ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))'+
+  ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as varchar(10)) as int)'+
   ' Where S.TIPI='+Tablo.Query2.FieldByName('TIPI').AsString+' and S.ID <> '+STOKLAR.FieldByName('ID').AsString+' ';
   //Aynı Tipe sahip ürünler eşdeğer olarak seçilebilir.
   st := Tstringlist.create;
