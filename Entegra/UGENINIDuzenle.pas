@@ -26,7 +26,10 @@ uses
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TGENINIDuzenleDlg = class(TForm)
@@ -202,26 +205,26 @@ end;
 
 procedure TGENINIDuzenleDlg.BolumleriAc;
 var
-  SQLSubText,tut:string;
+  SQLSubText,tut,TT:string;
   i:Integer;
 begin
-  TabBolumler.sql.Text := ' IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE name LIKE ''##GENINIBolumler_'+IntToStr(SPID)+'_%'') ';
-  TabBolumler.sql.Add(' DROP TABLE ##GENINIBolumler_'+IntToStr(SPID)+'_ ');
-  TabBolumler.sql.Add(' CREATE TABLE ##GENINIBolumler_'+IntToStr(SPID)+'_ ( ');
+  TT := DbGeciciAd('GENINIBolumler_'+IntToStr(SPID)+'_');   // MSSQL:##.. | PG:oturum-yerel TEMP
+  TabBolumler.sql.Text := ' DROP TABLE IF EXISTS '+TT+'; ';  // her iki motor (MSSQL 2016+/PG)
+  TabBolumler.sql.Add(DbGeciciCreate+TT+' ( ');
   for I := 0 to Length(DilAdlari) - 1 do
     if i=Length(DilAdlari)-1 then
-      TabBolumler.sql.Add(' ['+DilAdlari[i]+'] nvarchar(100) collate SQL_Latin1_General_CP1254_CI_AS )')
+      TabBolumler.sql.Add(' '+DbAd(DilAdlari[i])+' '+DbMetinKolon(100)+' );')
     else
-      TabBolumler.sql.Add(' ['+DilAdlari[i]+'] nvarchar(100) collate SQL_Latin1_General_CP1254_CI_AS ,');
+      TabBolumler.sql.Add(' '+DbAd(DilAdlari[i])+' '+DbMetinKolon(100)+' ,');
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select * from GENINI where BOLUM=0 and DEGER <> 0 and DEGER='+IntToStr(Bolum);
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select * from GENINI where BOLUM=0 and DEGER <> 0 and DEGER='+IntToStr(Bolum));
   TabKomutCalistir.Open;
-  SQLSubText := ' insert into ##GENINIBolumler_'+IntToStr(SPID)+'_ (';
+  SQLSubText := ' insert into '+TT+' (';
   for I := 0 to Length(DilAdlari) - 1 do
     if i=Length(DilAdlari)-1 then
-      SQLSubText := SQLSubText + '['+DilAdlari[i]+']) VALUES ('
+      SQLSubText := SQLSubText + DbAd(DilAdlari[i])+') VALUES ('
     else
-      SQLSubText := SQLSubText + '['+DilAdlari[i]+'],';
+      SQLSubText := SQLSubText + DbAd(DilAdlari[i])+',';
   for I := 0 to Length(Diller) - 1 do begin
     if TabKomutCalistir.Locate('DIL',Diller[i],[]) then begin
        if i=0 then //2.bir dil varsa ve henüz değer yoksa türkçe değerler oraya koyalanır
@@ -239,7 +242,7 @@ begin
   TabBolumler.sql.Add(SQLSubText);
   TabBolumler.ExecSQL;
   TabBolumler.Close;
-  TabBolumler.SQL.Text:='select * from ##GENINIBolumler_'+IntToStr(SPID)+'_ ';
+  TabBolumler.SQL.Text:='select * from '+TT+' ';
   TabBolumler.Open;
   GridBolumlerDBTableView1.DataController.CreateAllItems(True);
   CheckAlfabetik.Properties.OnEditValueChanged := Nil;
@@ -250,21 +253,21 @@ end;
 
 procedure TGENINIDuzenleDlg.GenIniAc;
 var
-  SQLSubText,Tut:string;
+  SQLSubText,Tut,TT:string;
   i:Integer;
 begin
   TabGenIni.Close;
-  TabGenIni.sql.Text := ' IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE name LIKE ''##GENINI_'+IntToStr(SPID)+'_%'') ';
-  TabGenIni.sql.Add(' DROP TABLE ##GENINI_'+IntToStr(SPID)+'_ ');
-  TabGenIni.sql.Add(' CREATE TABLE ##GENINI_'+IntToStr(SPID)+'_ ( ');
+  TT := DbGeciciAd('GENINI_'+IntToStr(SPID)+'_');   // MSSQL:##.. | PG:oturum-yerel TEMP
+  TabGenIni.sql.Text := ' DROP TABLE IF EXISTS '+TT+'; ';
+  TabGenIni.sql.Add(DbGeciciCreate+TT+' ( ');
   for I := 0 to Length(DilAdlari) - 1 do
-    TabGenIni.sql.Add(' ['+DilAdlari[i]+'] nvarchar(300) collate SQL_Latin1_General_CP1254_CI_AS,');
-  TabGenIni.sql.Add(' SIRA float, DEGER int )');
+    TabGenIni.sql.Add(' '+DbAd(DilAdlari[i])+' '+DbMetinKolon(300)+',');
+  TabGenIni.sql.Add(' SIRA float, DEGER int );');
   GENINIKullanimdakiDil.First;
   while not GENINIKullanimdakiDil.Eof do begin
-    SQLSubText := ' insert into ##GENINI_'+IntToStr(SPID)+'_ (';
+    SQLSubText := ' insert into '+TT+' (';
     for I := 0 to Length(DilAdlari) - 1 do
-      SQLSubText := SQLSubText + '['+DilAdlari[i]+'],';
+      SQLSubText := SQLSubText + DbAd(DilAdlari[i])+',';
     SQLSubText := SQLSubText + 'SIRA,DEGER) VALUES (';
     for I := 0 to Length(Diller) - 1 do
       if GENINITumDiller.Locate('DEGER;DIL',VarArrayOf([GENINIKullanimdakiDil.FieldByName('DEGER').Value,Diller[i]]),[]) then begin
@@ -275,16 +278,16 @@ begin
          SQLSubText := SQLSubText +''''+GENINITumDiller.FieldByName('ANAHTAR').AsString+''',';
       end else
         SQLSubText := SQLSubText +''''+Tut+''',';
-    SQLSubText := SQLSubText+VarToStrDef(GENINIKullanimdakiDil.FieldByName('SIRA').Value,'null')+','+VarToStrDef(GENINIKullanimdakiDil.FieldByName('DEGER').Value,'null')+')';
+    SQLSubText := SQLSubText+VarToStrDef(GENINIKullanimdakiDil.FieldByName('SIRA').Value,'null')+','+VarToStrDef(GENINIKullanimdakiDil.FieldByName('DEGER').Value,'null')+');';
     TabGenIni.sql.Add(SQLSubText);
     GENINIKullanimdakiDil.Next;
   end;
   TabGenIni.ExecSQL;
   TabGenIni.Close;
   if CheckAlfabetik.Checked then
-    TabGenIni.SQL.Text:='select * from ##GENINI_'+IntToStr(SPID)+'_ '
+    TabGenIni.SQL.Text:='select * from '+TT+' '
   else
-    TabGenIni.SQL.Text:='select * from ##GENINI_'+IntToStr(SPID)+'_ order by SIRA ';
+    TabGenIni.SQL.Text:='select * from '+TT+' order by SIRA ';
   Tabloyenile(TabGenIni,[]);
   GridGenIniDBTableView1.DataController.CreateAllItems(True);
   for I := 2 to GridGenIniDBTableView1.ColumnCount - 1 do
@@ -321,8 +324,8 @@ begin
               YeniSira := (BirakilanSira+GridGenIniDBTableView1.DataController.Values[ARow+1,ACol])/2
           end;
           TabKomutCalistir.Close;
-          TabKomutCalistir.SQL.Add(' update ##GENINI_'+IntToStr(SPID)+'_ set SIRA= '+FExtToStr(YeniSira)
-                                  +' where SIRA = '+FExtToStr(TutulanSira));
+          TabKomutCalistir.SQL.Text := ' update '+DbGeciciAd('GENINI_'+IntToStr(SPID)+'_')+' set SIRA= '+FExtToStr(YeniSira)
+                                  +' where SIRA = '+FExtToStr(TutulanSira);
           TabKomutCalistir.ExecSQL;
           TabGenIni.Close;
           Tabloyenile(TabGenIni,[]);
@@ -354,7 +357,7 @@ end;
 procedure TGENINIDuzenleDlg.FormShow(Sender: TObject);
 begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select isnull(max(DEGER),0) from GENINI where BOLUM='+IntToStr(Bolum);
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select isnull(max(DEGER),0) from GENINI where BOLUM='+IntToStr(Bolum));
   TabKomutCalistir.Open;
   MaxDeger := TabKomutCalistir.Fields[0].AsInteger;;
   TabloYenile(GENINITumDiller,[Bolum]);
@@ -403,13 +406,13 @@ var
   i:Integer;
   Siralama:string;
 begin
-  TabKomutCalistir.SQL.Text:='delete from GENINI where BOLUM=0 and DEGER='+IntToStr(Bolum);
+  TabKomutCalistir.SQL.Text:=PgSqlCevir('delete from GENINI where BOLUM=0 and DEGER='+IntToStr(Bolum));
   if CheckAlfabetik.Checked then
      Siralama := '1'
   else
      Siralama := '0';
   for I := 0 to TabBolumler.FieldCount - 1 do begin
-    TabKomutCalistir.SQL.Add('insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)values(0,'''
+    TabKomutCalistir.SQL.Add(';insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)values(0,'''
               +TabBolumler.Fields[i].AsString+''','
               +inttostr(Bolum)+','
               +inttostr(DilIDsiGetir(TabGenIni.Fields[i].FieldName))+','+Siralama+')');
@@ -431,23 +434,22 @@ begin
     end;
     TabGenIni.Next;
   end;
-  TabKomutCalistir.SQL.Text:='delete from GENINI where DIL<>0 and BOLUM='+IntToStr(Bolum);
+  TabKomutCalistir.SQL.Text:=PgSqlCevir('delete from GENINI where DIL<>0 and BOLUM='+IntToStr(Bolum));
   if CheckAlfabetik.Checked then begin
     for I := 0 to TabGenIni.FieldCount - 3 do begin//son iki field anahtar değil.. onlara gitmeye gerek yok!!
-      TabKomutCalistir.SQL.Add('insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)'
+      TabKomutCalistir.SQL.Add(';insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)'
                 +' select '
-                +inttostr(Bolum)+',['
-                +TabGenIni.Fields[i].FieldName+'],'
+                +inttostr(Bolum)+','+DbAd(TabGenIni.Fields[i].FieldName)+','
                 +'DEGER,'
                 +inttostr(DilIDsiGetir(TabGenIni.Fields[i].FieldName))+','
-                +'ROW_NUMBER() OVER(ORDER BY ['+TabGenIni.Fields[i].FieldName+']) AS [SIRA] '
-                +'from ##GENINI_'+IntToStr(SPID)+'_ ');
+                +'ROW_NUMBER() OVER(ORDER BY '+DbAd(TabGenIni.Fields[i].FieldName)+') AS '+DbAd('SIRA')+' '
+                +'from '+DbGeciciAd('GENINI_'+IntToStr(SPID)+'_')+' ');
     end;
   end else begin
     TabGenIni.First;
     while not TabGenIni.Eof do begin
       for I := 0 to TabGenIni.FieldCount - 3 do begin//son iki field anahtar değil.. onlara gitmeye gerek yok!!
-        TabKomutCalistir.SQL.Add('insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)values('
+        TabKomutCalistir.SQL.Add(';insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA)values('
                   +inttostr(Bolum)+','''
                   +TabGenIni.Fields[i].AsString+''','
                   +IntToStr(StrToIntDef(TabGenIni.FieldByName('DEGER').AsString,TabGenIni.RecNo))+','
@@ -463,7 +465,7 @@ end;
 function TGENINIDuzenleDlg.YeniBolumBul:Integer;
 begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select max(BOLUM) from GENINI';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select max(BOLUM) from GENINI');
   TabKomutCalistir.Open;
   Result := TabKomutCalistir.Fields[0].AsInteger+1;
 end;
@@ -543,7 +545,7 @@ end;
 function TGENINIDuzenleDlg.ReadBoolean(Bolum:Integer;Varsayilan:Boolean=True):Boolean;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
   if (TabKomutCalistir.RecordCount=1) and (TabKomutCalistir.Fields[0].AsString='0') then
     Result := False
@@ -556,7 +558,7 @@ End;
 function TGENINIDuzenleDlg.ReadInteger(Bolum: Integer; Varsayilan: Integer=0): Integer;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
   if (TabKomutCalistir.RecordCount=1) and (StrToIntDef(TabKomutCalistir.Fields[0].AsString,-MaxInt)<>-MaxInt) then
     Result := TabKomutCalistir.Fields[0].AsInteger
@@ -567,7 +569,7 @@ End;
 function TGENINIDuzenleDlg.ReadDateTime(Bolum: Integer; Varsayilan: TDateTime): TDateTime;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select convert(datetime,ANAHTAR) from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select CAST(ANAHTAR AS '+DbTarihTipi+') from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   try
     TabKomutCalistir.Open;
   except
@@ -584,7 +586,7 @@ var //Şifreli yazılmış olan tarihi veritabanından okur..
   AYear,AMonth,ADay,AHour,AMin,ASec,AMiliSec:Word;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   try
     TabKomutCalistir.Open;
   except
@@ -607,7 +609,7 @@ End;
 function TGENINIDuzenleDlg.ReadString(Bolum:Integer;Varsayilan:string=''):String;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
   if TabKomutCalistir.RecordCount = 1 then
     Result := TabKomutCalistir.Fields[0].AsString
@@ -618,7 +620,7 @@ End;
 function TGENINIDuzenleDlg.AnahtarGetir(Bolum,Deger,Dil:Integer;Varsayilan:string=''):String;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DEGER='+IntToStr(Deger)+' and DIL='+IntToStr(Dil);
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DEGER='+IntToStr(Deger)+' and DIL='+IntToStr(Dil));
   TabKomutCalistir.Open;
   if TabKomutCalistir.RecordCount = 1 then
     Result := TabKomutCalistir.Fields[0].AsString
@@ -629,7 +631,7 @@ End;
 function TGENINIDuzenleDlg.DegerGetir(Bolum,Dil:Integer;Anahtar:string;Deger:integer=0):integer;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and ANAHTAR='''+Anahtar+''' and DIL='+IntToStr(Dil);
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and ANAHTAR='''+Anahtar+''' and DIL='+IntToStr(Dil));
   TabKomutCalistir.Open;
   if TabKomutCalistir.RecordCount = 1 then
     Result := TabKomutCalistir.Fields[0].AsInteger
@@ -640,7 +642,7 @@ End;
 function TGENINIDuzenleDlg.ReadStringUser(Bolum:Integer;Varsayilan:string=''):String;
 Begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0 and DEGER='+Kullanan;
+  TabKomutCalistir.SQL.Text := PgSqlCevir('select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0 and DEGER='+Kullanan);
   TabKomutCalistir.Open;
   if TabKomutCalistir.RecordCount=1 then
     Result := TabKomutCalistir.Fields[0].AsString
@@ -660,8 +662,8 @@ begin
     LQ := TFDQuery.Create(nil);
     try
       LQ.Connection := TabKomutCalistir.Connection;
-      LQ.SQL.Text := 'select ISNULL(NULLIF(ANAHTAR,''''), CAST(DEGER AS varchar(50))) V ' +
-                     'from GENINI where BOLUM=' + IntToStr(Bolum) + ' and DIL=0';
+      LQ.SQL.Text := PgSqlCevir('select ISNULL(NULLIF(ANAHTAR,''''), CAST(DEGER AS varchar(50))) V ' +
+                     'from GENINI where BOLUM=' + IntToStr(Bolum) + ' and DIL=0');
       LQ.Open;
       if not LQ.IsEmpty then LEski := Trim(LQ.Fields[0].AsString);
     finally
@@ -687,8 +689,8 @@ Begin
   try
     if Deger then AyarLogla(Bolum, '1') else AyarLogla(Bolum, '0');
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     if Deger then
       TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+',null,1,0,null)')
     else
@@ -705,8 +707,8 @@ Begin
   try
     AyarLogla(Bolum, IntToStr(Deger));
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','+IntToStr(Deger)+','+IntToStr(Deger)+',0,null)');
     TabKomutCalistir.ExecSQL;
     Result := True;
@@ -719,8 +721,8 @@ function TGENINIDuzenleDlg.WriteDateTime(Bolum: Integer; Deger: TDateTime):Boole
 Begin
   try
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+FormatDateTime('yyyy-MM-dd hh:nn:ss.zzz',Deger)+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
     Result := True;
@@ -733,8 +735,8 @@ function TGENINIDuzenleDlg.WriteDateTimeS(Bolum: Integer; Deger: TDateTime):Bool
 Begin //tarihi veritabanına şifreli olarak yazar..
   try
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+UGenSifre.Sifre(FormatDateTime('yyyy-MM-dd hh:nn:ss.zzz',Deger))+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
     Result := True;
@@ -748,8 +750,8 @@ Begin
   try
     AyarLogla(Bolum, Deger);
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+StringReplace(Deger,'''','''''',[rfReplaceAll])+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
     Result := True;
@@ -765,7 +767,7 @@ Begin
    for I := 0 to Length(Diller) - 1 do
      if Sonuc=0 then begin
        TabKomutCalistir.Close;
-       TabKomutCalistir.SQL.Text := 'select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and ANAHTAR='''+Anahtar+''' and DIL = '+IntToStr(Diller[i]);
+       TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and ANAHTAR='''+Anahtar+''' and DIL = '+IntToStr(Diller[i]));
        TabKomutCalistir.Open;
        if TabKomutCalistir.RecordCount = 1 then
           Sonuc := TabKomutCalistir.Fields[0].AsInteger;
@@ -797,8 +799,8 @@ function TGENINIDuzenleDlg.WriteStringUser(Bolum:Integer;Deger:string):Boolean;
 Begin
   try
     TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text := 'DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0';
-    TabKomutCalistir.SQL.Add(' insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
+    TabKomutCalistir.SQL.Text := PgSqlCevir('DELETE FROM GENINI WHERE BOLUM='+IntToStr(Bolum)+' AND DIL=0');
+    TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+StringReplace(Deger,'''','''''',[rfReplaceAll])+''','+Kullanan+',0,null)');
     TabKomutCalistir.ExecSQL;
     Result := True;
@@ -810,7 +812,7 @@ End;
 function TGENINIDuzenleDlg.ReadSection(Bolum:Integer;Properties:TcxCustomComboBoxProperties;BosEkle:Boolean=False):Boolean;
 begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := PgSqlCevir('Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
+  TabKomutCalistir.SQL.Text :=  PgSqlCevir('Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
   TabKomutCalistir.Open;
   Properties.Items.Clear;
   if BosEkle then
@@ -836,7 +838,7 @@ begin
     TabKomutCalistir.SQL.Text:='';
     if BosEkle then
       TabKomutCalistir.SQL.Text:= ' SELECT '''' AS ANAHTAR, 0 AS DEGER, 0 AS SIRA UNION ALL ';
-    TabKomutCalistir.SQL.Text := TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ';
+    TabKomutCalistir.SQL.Text := PgSqlCevir(TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
     TabKomutCalistir.Open;
     while not TabKomutCalistir.eof do begin
       with Items.Add do begin
@@ -865,7 +867,7 @@ begin
     TabKomutCalistir.SQL.Text:='';
     if BosEkle then
       TabKomutCalistir.SQL.Text:= ' SELECT '''' AS ANAHTAR, 0 AS DEGER, 0 AS SIRA UNION ALL ';
-    TabKomutCalistir.SQL.Text := TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ';
+    TabKomutCalistir.SQL.Text  := PgSqlCevir(TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
     TabKomutCalistir.Open;
     while not TabKomutCalistir.eof do begin
       with Items.Add do begin

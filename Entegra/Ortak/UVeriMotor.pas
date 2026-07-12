@@ -40,6 +40,15 @@ function DbGunEkle(const AIfade: string; AGun: Integer): string;
 // Gun sayisi bir IFADE/KOLON oldugunda ( or. '-GERIDONUSGUNSAY'):
 function DbGunEkleS(const AIfade, AGunIfade: string): string;
 
+// ---- Gecici (temp) tablo + tip seam'leri ----
+// Gecici tablo adi: MSSQL global-temp '##ad' | PG oturum-yerel TEMP 'ad' (## yok).
+function DbGeciciAd(const ABaz: string): string;    // '##'+ABaz | ABaz
+function DbGeciciCreate: string;                    // 'create table ' | 'create temp table '
+// Metin kolon tipi: MSSQL nvarchar+CP1254 collate | PG varchar (collate'siz).
+function DbMetinKolon(ALen: Integer): string;
+// Tarih tip adi (CAST icin): 'datetime' | 'timestamp'.
+function DbTarihTipi: string;
+
 // ---- Baglanti ----
 // Secili motora gore FDConnection'i yapilandirir. PG icin makinede libpq (PostgreSQL
 //   istemci DLL) gerekir. vmMSSQL dali yalniz test/tamlik icin; gercek app MSSQL'de
@@ -136,6 +145,29 @@ end;
 function DbGunEkle(const AIfade: string; AGun: Integer): string;
 begin
   Result := DbGunEkleS(AIfade, IntToStr(AGun));
+end;
+
+function DbGeciciAd(const ABaz: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := ABaz else Result := '##' + ABaz;
+end;
+
+function DbGeciciCreate: string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'create temp table ' else Result := 'create table ';
+end;
+
+function DbMetinKolon(ALen: Integer): string;
+begin
+  if AktifVeriMotor = vmPG then
+    Result := 'varchar(' + IntToStr(ALen) + ')'
+  else
+    Result := 'nvarchar(' + IntToStr(ALen) + ') collate SQL_Latin1_General_CP1254_CI_AS';
+end;
+
+function DbTarihTipi: string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'timestamp' else Result := 'datetime';
 end;
 
 // Yalniz TIRNAK-DISI metne uygulanan diyalekt degisimleri (guvenli/belirsiz-olmayan).
