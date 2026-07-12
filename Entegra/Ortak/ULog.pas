@@ -600,7 +600,7 @@ begin
     try
       LQ.Connection := Tablo.FDCnn;
       LQ.SQL.Text := 'DELETE FROM ' + DepoTablo('SNAPSHOT') +
-        ' WHERE TARIH < DATEADD(day, -' + IntToStr(AGun) + ', SYSDATETIME())';
+        ' WHERE TARIH < ' + DbGunEkle(DbSimdi, -AGun);
       LQ.ExecSQL;
     finally
       LQ.Free;
@@ -638,6 +638,7 @@ var
   LTablolar: TStringList;
   i: Integer;
 begin
+  if AktifVeriMotor = vmPG then Exit;  // PG: depo.islemlog view + depo.log<yyyy> onceden var (01_depo.sql)
   LQ := TFDQuery.Create(nil);
   LTablolar := TStringList.Create;
   try
@@ -696,6 +697,7 @@ begin
   LT := 'LOG' + IntToStr(AYil);
   Result := LT;
   if GYillar.IndexOf(LT) >= 0 then Exit;
+  if AktifVeriMotor = vmPG then begin GYillar.Add(LT); Exit; end;  // PG: depo.log<yyyy> onceden var; DDL yok
   LQ := TFDQuery.Create(nil);
   try
     LQ.Connection := ACnn;
