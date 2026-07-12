@@ -11768,19 +11768,14 @@ end;
 procedure TTablo.CariDurumUpdate(ID:Integer);
 var s:string;
 begin
-   // Alt-sorgularda TOP 1 (konumsal) -> PG'de sonda LIMIT 1; isnull/getdate merkezi cevirici.
-   if AktifVeriMotor = vmPG then
-     s := ' update REHBER set DURUM = coalesce((select TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
-       ' and GY.TARIH<now() and GY.GOREVID=REHBER.ID ORDER BY 1 desc LIMIT 1),DURUM) '+
-       ' where DURUM>0 '+
-       ' and DURUM<>(select TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
-       ' and GY.TARIH<now() and GY.GOREVID=REHBER.ID ORDER BY 1 desc LIMIT 1) '
-   else
-     s := ' update REHBER set DURUM =  isnull((select top 1 TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
-       ' and GY.TARIH<GETDATE() and GY.GOREVID=REHBER.ID  ORDER BY 1 desc),DURUM)  '+
-       ' where DURUM>0 '+
-       ' and DURUM<>(select top 1 TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13  '+
-       ' and GY.TARIH<GETDATE() and GY.GOREVID=REHBER.ID ORDER BY 1 desc) ';
+   // TEK query: konumsal TOP -> seam (DbUst basta, DbSinir sonda); isnull/getdate/SET NOCOUNT
+   //   merkezi cevirici (BasitKomut->PgSqlCevir) halleder. MSSQL'de DbUst='top 1 '/DbSinir=''
+   //   -> orijinal metin BIREBIR; PG'de DbUst=''/DbSinir='limit 1' + coalesce/now.
+   s := ' update REHBER set DURUM = isnull((select '+DbUst(1)+'TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
+     ' and GY.TARIH<GETDATE() and GY.GOREVID=REHBER.ID ORDER BY 1 desc '+DbSinir(1)+'),DURUM) '+
+     ' where DURUM>0 '+
+     ' and DURUM<>(select '+DbUst(1)+'TUR-10 from GOREVYORUM GY where GY.TUR between 12 and 13 '+
+     ' and GY.TARIH<GETDATE() and GY.GOREVID=REHBER.ID ORDER BY 1 desc '+DbSinir(1)+') ';
    if ID > 0 then
       s := s + ' and REHBER.ID='+IntToStr(ID);
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, s, [],[]);
