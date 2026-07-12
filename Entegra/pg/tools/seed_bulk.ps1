@@ -24,7 +24,10 @@ function PgLit([object]$v){
   if($v -is [datetime]){return "'"+$v.ToString('yyyy-MM-dd HH:mm:ss.fff')+"'"}
   if($v -is [int] -or $v -is [long] -or $v -is [decimal] -or $v -is [double] -or $v -is [single] -or $v -is [byte] -or $v -is [int16]){return ([string]$v).Replace(',','.')}
   if($v -is [Guid]){return "'"+$v.ToString()+"'"}
-  return "'"+([string]$v).Replace("'","''")+"'"
+  # PG escape-string E'...': deger TEK satira (gercek newline yok -> psql '\' meta-komut yanilmaz).
+  #   RTF/cok-satirli metin guvenli. Sira: \ once, sonra CR/LF, sonra '.
+  $s=([string]$v).Replace('\','\\').Replace("`r",'\r').Replace("`n",'\n').Replace("'","\'")
+  return "E'"+$s+"'"
 }
 $cn=New-Object System.Data.SqlClient.SqlConnection("Server=$MssqlServer;Database=$MssqlDb;User Id=$MssqlUser;Password=$MssqlPass;TrustServerCertificate=True;")
 $cn.Open();$c=$cn.CreateCommand()
