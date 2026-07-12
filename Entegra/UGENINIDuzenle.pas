@@ -810,7 +810,7 @@ End;
 function TGENINIDuzenleDlg.ReadSection(Bolum:Integer;Properties:TcxCustomComboBoxProperties;BosEkle:Boolean=False):Boolean;
 begin
   TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text := 'Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ';
+  TabKomutCalistir.SQL.Text := PgSqlCevir('Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
   TabKomutCalistir.Open;
   Properties.Items.Clear;
   if BosEkle then

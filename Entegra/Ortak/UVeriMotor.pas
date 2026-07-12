@@ -137,6 +137,11 @@ begin
   // SET NOCOUNT ON (MSSQL batch direktifi) PG'de gecersiz -> sil.
   Result := StringReplace(Result, 'SET NOCOUNT ON;', '', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'SET NOCOUNT ON',  '', [rfReplaceAll, rfIgnoreCase]);
+  // WITH (NOLOCK)/(NOLOCK): MSSQL kilit ipucu (dirty read). PG MVCC'de okuyucu yaziciyi
+  //   hic bloklamaz -> ipucu gereksiz, SIL. (WITH (NOLOCK), WITH(NOLOCK), bare (NOLOCK))
+  Result := StringReplace(Result, 'WITH (NOLOCK)', '', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'WITH(NOLOCK)',  '', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(NOLOCK)',      '', [rfReplaceAll, rfIgnoreCase]);
   // Sadece GUVENLI, belirsiz-olmayan fonksiyon degisimleri (buyuk/kucuk harf duyarsiz):
   Result := StringReplace(Result, 'getdate()',     'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'getutcdate()',  'now()',        [rfReplaceAll, rfIgnoreCase]);
