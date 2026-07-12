@@ -9,6 +9,8 @@
 # ============================================================
 param(
   [Parameter(Mandatory=$true)][string]$Table,
+  [string]$Where = '',                  # opsiyonel MSSQL WHERE filtresi (kolon adlari MSSQL case)
+  [switch]$Append,                      # verilirse TRUNCATE etmez (uzerine ekler)
   [string]$MssqlServer = 'DESKTOP-HL3J3AS\SQLEXPRESS',
   [string]$MssqlDb   = 'BILIM',
   [string]$MssqlUser = 'sa',
@@ -53,7 +55,8 @@ $colList = ($cols -join ', ')
 $msSelect = ($cols | ForEach-Object { "[$($cmap[$_])]" }) -join ', '
 
 # MSSQL satirlarini oku -> PG literal
-$cmd = $cn.CreateCommand(); $cmd.CommandText = "SELECT $msSelect FROM dbo.$Table"; $rd = $cmd.ExecuteReader()
+$whereClause = if ($Where -ne '') { " WHERE $Where" } else { "" }
+$cmd = $cn.CreateCommand(); $cmd.CommandText = "SELECT $msSelect FROM dbo.$Table$whereClause"; $rd = $cmd.ExecuteReader()
 $values = @()
 while ($rd.Read()) {
   $vals = for ($i=0; $i -lt $rd.FieldCount; $i++) { PgLit $rd.GetValue($i) }
@@ -63,7 +66,7 @@ $rd.Close(); $cn.Close()
 if (-not $values) { Write-Host "MSSQL $Table bos." -ForegroundColor Yellow; return }
 
 # PG: bosalt + insert (ayni ID) + sequence resetle
-$sql  = "TRUNCATE $PgSchema.$tblLower RESTART IDENTITY CASCADE;`n"
+$sql  = if ($Append) { "" } else { "TRUNCATE $PgSchema.$tblLower RESTART IDENTITY CASCADE;`n" }
 $sql += "INSERT INTO $PgSchema.$tblLower ($colList) VALUES`n" + ($values -join ",`n") + ";`n"
 if ($cols -contains 'id') {
   $sql += "SELECT setval(pg_get_serial_sequence('$PgSchema.$tblLower','id'), COALESCE((SELECT MAX(id) FROM $PgSchema.$tblLower),1));`n"
