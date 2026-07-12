@@ -1049,7 +1049,7 @@ begin
   btnServis.Caption := AGS_Servis;
   btnAktivite.Caption := AGS_Aktivite;
   if btnGorev.Visible then begin
-     Tablo.TablodanSorguAc(1,' exec sp_Prg_Sayi_BanaIsListesi '+Kullanan+',0,9999');
+     Tablo.TablodanSorguAc(1,DbExec('sp_Prg_Sayi_BanaIsListesi',Kullanan+',0,9999'));
      if Tablo.Query1.Fields[0].AsInteger>0 then
         btnGorev.Caption := AGS_Gorevler+' ('+Tablo.Query1.Fields[0].AsString+')'
      else

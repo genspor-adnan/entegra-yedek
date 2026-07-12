@@ -1,4 +1,4 @@
-unit UVeriMotor;
+﻿unit UVeriMotor;
 // ============================================================
 // Veri motoru soyutlama (MSSQL <-> PostgreSQL) — Asama 1 (cift-yetenekli mimari)
 // ------------------------------------------------------------
@@ -60,6 +60,9 @@ function DbTarihEkle(const ADatepart, ASayi, ATarih: string): string;
 // MSSQL DATEDIFF(datepart, tarih1, tarih2) -> PG. gun/ay/yil takvim-siniri BIREBIR; dakika/saat/
 //   saniye SURE-tabanli (floor; "ne kadar once" esikleri icin yeterli).
 function DbTarihFark(const ADatepart, ATarih1, ATarih2: string): string;
+// MSSQL saklı yordam cagrisi: 'exec AProc AArgs' | PG 'select * from AProc(AArgs)'. Yordam PG'ye
+//   fonksiyon olarak portlanmali (pg/schema/04_proc_portlari.sql). AArgs virgullu arg listesi.
+function DbExec(const AProc, AArgs: string): string;
 // Log BILGI kolonu: MSSQL varbinary = COMPRESS(json) | PG jsonb (native). Yaz/oku seam.
 function DbLogBilgiYaz(const AParam: string): string;   // deger ifadesi (INSERT VALUES)
 function DbLogBilgiOku(const AKolon: string): string;   // okuma ifadesi (SELECT); JSON metnini doner
@@ -296,6 +299,14 @@ begin
     Result := 'floor((' + s2 + '::date - ' + s1 + '::date)/7)::int'
   else   // second (ve digerleri)
     Result := 'floor(extract(epoch from (' + s2 + '::timestamp - ' + s1 + '::timestamp)))::int';
+end;
+
+function DbExec(const AProc, AArgs: string): string;
+begin
+  if AktifVeriMotor = vmPG then
+    Result := 'select * from ' + AProc + '(' + AArgs + ')'
+  else
+    Result := 'exec ' + AProc + ' ' + AArgs;
 end;
 
 function DbLogBilgiYaz(const AParam: string): string;
