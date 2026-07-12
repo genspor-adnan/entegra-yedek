@@ -3198,6 +3198,8 @@ begin
   //cxSplitter1.CloseSplitter;
   { Arama k?sm? hen?z ba?lat?lmad? ise ??k }
   if not Assigned(FArama) then Exit;
+  // SQL_IK_Memo declare @ILGILIARAMA/@DIL + set (T-SQL script) -> PG'ye rewrite ayri is; pilotta atla
+  if AktifVeriMotor = vmPG then Exit;
   //Animate1.Play(1,23,0);
 //  if (FArama.AraFirma.Text='')and(FArama.AraYetkili.Text='')  and(FArama.Arailler.Text='') and(FArama.AraKod.Text='')and(not IKGridViewBORC.Visible) then exit;
   s := '';
