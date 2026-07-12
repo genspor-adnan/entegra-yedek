@@ -1713,7 +1713,7 @@ begin
      Param := 1
   else
      Param := 0;
-  //REHBER.open;
+  //   REHBER.open;
   if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
   SonAranan:=False;
 end;

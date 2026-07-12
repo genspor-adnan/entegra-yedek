@@ -1074,7 +1074,7 @@ begin
     LogOnceki.Clear;
     //REHBER.Close;
     //REHBER.open;
-    TabloYenile(REHBER,[]);
+    if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[]);
   end;
 end;
 
@@ -1259,7 +1259,7 @@ begin
           ,['&REHBERID', '&TUR', '&ROLID', '&ACIKLAMA'], [REHBER.FieldByName('ID').AsInteger,2, ROLID, VarToStr(ACIKLAMA)]);
 
         PageControlSekmeChange(Self);
-        TabloYenile(REHBER,[0]);
+        if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
      end;
   end;
 end;
@@ -1611,7 +1611,7 @@ begin
 //  else
      Param := 0;
   //REHBER.open;
-  TabloYenile(REHBER,[Param]);
+  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
   SonAranan:=False;
 end;
 
@@ -1670,7 +1670,7 @@ begin
 //  else
      Param := 0;
   //REHBER.open;
-  TabloYenile(REHBER,[Param]);
+  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
 end;
 
 procedure TIKListeDlg.letiimaddeitir1Click(Sender: TObject);
@@ -2443,7 +2443,7 @@ begin
   if (not REHBER.Active)or(REHBER.Active and REHBER.IsEmpty) then
       raise Exception.Create(RDOnceAramaYapin);
   if Tablo.IKSihirbazBaslat(0,REHBER.Fields[0].AsInteger,-100,-100, Potansiyel) > 0 then begin
-     TabloYenile(REHBER,[]);
+     if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[]);
   end;
 end;
 
@@ -2630,7 +2630,7 @@ begin
       else
          REHBER.SQL.Text:= StringReplace(SQL_IK_Memo.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);;
 
-      TabloYenile(REHBER,[0]);
+      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
       REHBER.Locate('ID', ID, []);}
   end;
 end;
@@ -2707,7 +2707,7 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [PERS_HAREKET] (REHBERID,TARIH,TUR,ACIKLAMA,ROLID)values(&REHBERID,'''+FormatDateTime('yyyy-mm-dd', Trh)+''' ,&TUR,&ACIKLAMA,&ROLID)'
           ,['&REHBERID','&TUR','&ACIKLAMA','&ROLID'], [REHBER.FieldByName('ID').AsInteger,99, Tablo.Query1.Fields[0].AsString, Tablo.Query2.Fields[0].AsInteger]);
       //DuyuruYayinla(3402);
-      TabloYenile(REHBER,[0]);
+      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
    end;
 end;
 
@@ -2727,7 +2727,7 @@ procedure TIKListeDlg.IstenCikisIptalMenuClick(Sender: TObject);
 begin
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update REHBER set DURUM=1 where ID='+REHBER.FieldByName('ID').AsString,[],[]);
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from PERS_HAREKET where TUR=99 and REHBERID='+REHBER.FieldByName('ID').AsString,[],[]);
-   TabloYenile(REHBER,[0]);
+   if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
 end;
 
 procedure TIKListeDlg.ProjeAktarm1Click(Sender: TObject);
@@ -3280,7 +3280,7 @@ begin
 //     Param := 1
 //  else
       Param := 0;
-  TabloYenile(REHBER,[Param]);
+  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
 end;
 
 procedure TIKListeDlg.Kapatiliyor(var AKapansin: Boolean);
