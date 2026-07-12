@@ -397,6 +397,7 @@ var
       end;
   end;
 begin
+  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN sorgusu (SQLMemo: nested TOP + alias=expr, DFM statik) -> PG rewrite ayri is; pilotta bos grid
   if TamYetkili then
   begin
     DOKUMAN.Close;
