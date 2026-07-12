@@ -81,7 +81,7 @@ var
   function PasswordEkrani(Modul:String) : Boolean;
 implementation
 
-uses  UCombo, UPaylasim, ULisans, UMesaj, FetaUtil, UGenSifre,UWebServis, FetaKurulusSiniflari,PrjConst, ULog;
+uses  UCombo, UPaylasim, ULisans, UMesaj, FetaUtil, UGenSifre,UWebServis, FetaKurulusSiniflari,PrjConst, ULog, UVeriMotor;
 //, USifDeg;
 const
   RegBasKey = 'Software\GENTEGRE2';
@@ -325,7 +325,7 @@ begin
     if TamYetkili then
        Tablo.TablodanSorguAc(1,'select R.ID,R.FIRMA from REHBER R WHERE R.ID<0')
     else
-       Tablo.TablodanSorguAc(1,'select R.ID,R.FIRMA from REHBER R inner join YETKI Y on convert(int,(''1198''+convert(varchar(10),-R.ID)))=Y.MODULID where R.ID<0 and Y.ROLID='+IntToStr(Rol)+' and Y.HAK=1');
+       Tablo.TablodanSorguAc(1,'select R.ID,R.FIRMA from REHBER R inner join YETKI Y on CAST(CONCAT(''1198'',CAST(-R.ID AS varchar(10))) AS int)=Y.MODULID where R.ID<0 and Y.ROLID='+IntToStr(Rol)+' and Y.HAK=1');
     ComboSube.Properties.Items.Clear;
     ComboSube.EditValue := 0;
     while not Tablo.Query1.eof do begin
@@ -390,7 +390,7 @@ begin
   Tablo.RepSubelerKendiSubesi.Properties.Items := Tablo.imgComboboxInit('Select ID,FIRMA from REHBER Where ID = '+IntToStr(SubeId)+' ').Items;
   Tablo.RepSubelerOrtakKendiSubesi.Properties.Items := Tablo.imgComboboxInit('Select 0,''Ortak'' union all Select ID,FIRMA from REHBER Where ID = '+IntToStr(SubeId)+' ').Items;
   Tablo.RepSubelerOrtakTumSubeler.Properties.Items := Tablo.imgComboboxInit('Select 1,''''  union all Select 0,''Ortak'' union all Select ID,FIRMA from REHBER Where ID < 0').Items;
-  Tablo.RepStokDepolarAktif.Properties.Items := Tablo.imgComboboxInit('select ID=0,DEPOADI='''' union all select ID,DEPOADI from DEPOLAR where DURUM=1 ').Items;//and SUBEID='+IntToStr(SubeId)
+  Tablo.RepStokDepolarAktif.Properties.Items := Tablo.imgComboboxInit('select 0 AS ID,'''' AS DEPOADI union all select ID,DEPOADI from DEPOLAR where DURUM=1 ').Items;//and SUBEID='+IntToStr(SubeId)
   Tablo.RepStokDepolarTumu.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR').Items;//and SUBEID='+IntToStr(SubeId)
   Tablo.RepStokUretimDepolar.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR where DURUM=1 and VARSAYILAN=9').Items;
     if Tablo.RepStokUretimDepolar.Properties.Items.Count=0 then
@@ -479,6 +479,7 @@ begin
       '	when GK.TUR=4 and GK.REHBERID='+IntToStr(SubeId)+' then 1' + #13#10 +
       '	end)) as liste1').items;
 
+    if AktifVeriMotor <> vmPG then begin  // eszamanli-kullanici/lisans takibi (master.dbo.GLogins, Scope_Identity) MSSQL-ozel; PG'de atla
     if not Tablo.TablodanSorguAc(7,'select distinct COMPUTERNAME,SESSIONNAME,LOGONSERVER,USERNAME,USERDOMAIN from master.dbo.GLogins where Dateadd(minute,2,SOOT) > Getdate() '+
                                    ' and COMPUTERNAME+SESSIONNAME+LOGONSERVER+USERNAME+USERDOMAIN <> '''+Tablo.GetEnvVarValue('COMPUTERNAME')+Tablo.GetEnvVarValue('SESSIONNAME')+Tablo.GetEnvVarValue('LOGONSERVER')+Tablo.GetEnvVarValue('USERNAME')+Tablo.GetEnvVarValue('USERDOMAIN')+''' ') then begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'create table master.dbo.GLogins(ID int IDENTITY(1,1),SOOT datetime,COMPUTERNAME nvarchar(50),SESSIONNAME nvarchar(50),LOGONSERVER nvarchar(50),USERNAME nvarchar(50),USERDOMAIN nvarchar(50),CONSTRAINT [PK_GLgn] PRIMARY KEY CLUSTERED (ID DESC) ON [PRIMARY])',[],[]);
@@ -499,6 +500,7 @@ begin
 
     UserSessionID := Tablo.Query8.Fields[0].AsInteger;
     Tablo.TimerUserSession.Enabled := True;
+    end;  // AktifVeriMotor <> vmPG (GLogins bloku)
 
     //AO 25.06.2025 UTablodan buraya al�nd�.. duyuru i�eri�i
     Suan := Tablo.GENINI.BugunTrh;
