@@ -208,6 +208,10 @@ begin
   Result := StringReplace(Result, 'WITH(NOLOCK)',  '', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(NOLOCK)',      '', [rfReplaceAll, rfIgnoreCase]);
   // Sadece GUVENLI, belirsiz-olmayan fonksiyon degisimleri (buyuk/kucuk harf duyarsiz):
+  // MSSQL [identifier] -> PG (tirnaksiz; schema_port kolonlari kucuk harf -> PG folding ile
+  //   eslesir. "X" OLMAZ: kolon 'x'). Literal-disi oldugu icin LIKE '[0-9]' desenlerine dokunmaz.
+  Result := StringReplace(Result, '[', '', [rfReplaceAll]);
+  Result := StringReplace(Result, ']', '', [rfReplaceAll]);
   Result := StringReplace(Result, 'getdate()',     'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'getutcdate()',  'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);

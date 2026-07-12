@@ -673,6 +673,7 @@ var
 implementation
 
 uses
+  UVeriMotor,
   UAnaForm, JvJVCLUtils, Utablo, Fetautil, PrjConst, UKasaWizard, FetaClassExtensions, UDokumSart, UFastRap, UGenelAnaSekmeFrame,
   UGirisKutusuEx, URaporAraclari, UResim, UTabloGiris, UResimOlcumleme, IdIOHandlerSocket,LocOnFly,
   UAksiyonlarGorevFrame, UServisGorevFrame, UGorevDlg, UIsListesi, UDokumGirisFrame, GenoTIP.Ortak.GridPivotUtils, ShellApi,
@@ -1579,10 +1580,10 @@ begin
   inherited;
   KulID := StrToIntDef(Kullanan, 1);
   TabSK.Close;
-  TabSK.SQL.Text :=
+  TabSK.SQL.Text := PgSqlCevir(
     ' select top 10 M.MODULID, M.MODULADI from KULLANICI_ISLEM K ' +
     ' inner join MODUL M on K.ISLEMID=M.MODULID ' +
-    ' where KULID=' + IntToStr(KulID) + ' order by [SAY] desc ';
+    ' where KULID=' + IntToStr(KulID) + ' order by [SAY] desc ');
   TabSK.Open;
   FChatWindows := TObjectList<TChatWindow>.Create;
   FOnlineUsers := TStringList.Create;
