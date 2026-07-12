@@ -151,7 +151,7 @@ implementation
 
 uses UAnaForm,Utablo, Fetautil,FetaClassExtensions,UBekletme,
   FetaKurulusSiniflari, FetaClassExtensionsConsts, UGirisKutusuEx,
-  PrjConst,LocOnFly;
+  PrjConst,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
   var aralist : TStringlist;
@@ -200,7 +200,7 @@ end;
 
 procedure TBankaSecimDlg.BankaSilMenuClick(Sender: TObject);
 begin
-   Tablo.TablodanSorguAc(1,'select top 1 * from BANKASUBELER where BANKAKODU= ' + TabBankalar.FieldByName('BANKAKODU').AsString);
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from BANKASUBELER where BANKAKODU= ' + TabBankalar.FieldByName('BANKAKODU').AsString+' '+DbSinir(1));
    if not Tablo.Query1.IsEmpty then
       raise Exception.Create(BSube_var_silinemez)
    else begin

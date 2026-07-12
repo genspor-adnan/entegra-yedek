@@ -87,7 +87,7 @@ var
 
 implementation
 uses
-PrjConst,FetaKurulusSiniflari,UAnaForm,FetaClassExtensions;
+PrjConst,FetaKurulusSiniflari,UAnaForm,FetaClassExtensions,UVeriMotor;
 
 {$R *.dfm}
 
@@ -118,7 +118,7 @@ begin
          if (GetValue(Gezici,GridYENISIPARISADET.Index) > 0) and (GetValue(Gezici,GridFIRMA.Index) <> '') then  begin
            belgeno:= SiradakiBelgeNumarasi(Tur,Tablo.GENINI.BugunTrhSaat);
            RehID:= GetValue(Gezici,GridRehberID.Index);
-           Tablo.TablodanSorguAc(6,'Select top 1 * from SIPARISDETAY SD LEFT OUTER JOIN SIPARIS S on S.ID=SD.SIPARISID Where S.TUR='+inttoStr(Tur)+' and SD.EKLEMETARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' and SD.REHBERID='+IntToStr(RehID)+' order by SD.ID desc');
+           Tablo.TablodanSorguAc(6,'Select '+DbUst(1)+'* from SIPARISDETAY SD LEFT OUTER JOIN SIPARIS S on S.ID=SD.SIPARISID Where S.TUR='+inttoStr(Tur)+' and SD.EKLEMETARIHI='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''' and SD.REHBERID='+IntToStr(RehID)+' order by SD.ID desc '+DbSinir(1));
 
            if Tablo.Query6.RecordCount > 0 then  begin
              // birbirine eşit ise aynı teklif noyu kullanacak.

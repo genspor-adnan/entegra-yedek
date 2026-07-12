@@ -106,6 +106,8 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.DFM}
 var
    c : Char;
@@ -431,7 +433,7 @@ begin
    if not MesajStrAl('', 'Listeye Yeni Bilgiyi Giriniz..', 'E', nil,MesajOkunan, '', 'E', nil,MesajOkunan) then exit;
 
    Query1.Close;
-   Query1.SQL.Text := 'select TOP 1 ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR= ''' +MesajOkunan+'''';
+   Query1.SQL.Text := 'select '+DbUst(1)+'ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR= ''' +MesajOkunan+''' '+DbSinir(1);
    Query1.Open;
    if Query1.RecordCount>0 then begin
       ShowMessage('Daha �nceden eklenmi� grup ad�..');
@@ -487,7 +489,7 @@ end;
 procedure TKullaniciDlg.AltTusClick(Sender: TObject);
 begin
    Query1.Close;
-   Query1.SQL.Text := 'select TOP 1 ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR< ''' +EditGrup.Text+''' order by ANAHTAR DESC';
+   Query1.SQL.Text := 'select '+DbUst(1)+'ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR< ''' +EditGrup.Text+''' order by ANAHTAR DESC '+DbSinir(1);
    Query1.Open;
    if Query1.RecordCount>0 then
       EditGrup.Text := Query1.Fields[0].AsString;
@@ -497,7 +499,7 @@ end;
 procedure TKullaniciDlg.UstTusClick(Sender: TObject);
 begin
    Query1.Close;
-   Query1.SQL.Text := 'select TOP 1 ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR> ''' +EditGrup.Text+'%'' order by ANAHTAR';
+   Query1.SQL.Text := 'select '+DbUst(1)+'ANAHTAR From GENOTIPINI where BOLUM=''KulGruplari'' and ANAHTAR> ''' +EditGrup.Text+'%'' order by ANAHTAR '+DbSinir(1);
    Query1.Open;
    if Query1.RecordCount>0 then
       EditGrup.Text := Query1.Fields[0].AsString;

@@ -94,7 +94,7 @@ var
    function AdetGetir(Baslik,Miktar : string; UrunId, Anabirim :Integer;Stokmu:boolean ):Real;
 
 implementation
-Uses UHizliGiris, UHizliGirisAnaMenu,prjconst,LocOnFly;
+Uses UVeriMotor, UHizliGiris, UHizliGirisAnaMenu,prjconst,LocOnFly;
 {$R *.dfm}
 
 function AdetGetir(Baslik,Miktar : string; UrunId, Anabirim :Integer;Stokmu:boolean ):Real;
@@ -290,7 +290,7 @@ begin
       Tablo.TablodanSorguAc(1,'select ANAHTAR from GENINI where BOLUM=-2702 and DEGER = '+IntToStr(Anabirim));
       LabelAdet.Caption:= Tablo.Query1.Fields[0].AsString;
     if Satista2birimGelsin then begin
-      Tablo.TablodanSorguAc(1,'select BIRIM2, BIRIM2MIKTAR, BIRIM2AD=(select top 1 ANAHTAR from GENINI where BOLUM=-2702 and BIRIM2=DEGER and DIL=-1) '+
+      Tablo.TablodanSorguAc(1,'select BIRIM2, BIRIM2MIKTAR, BIRIM2AD=(select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=-2702 and BIRIM2=DEGER and DIL=-1 '+DbSinir(1)+') '+
                  '  from STOKLAR  where ID= '+IntToStr(UrunId));
       if Anabirim<>Tablo.Query1.FieldByName('BIRIM2').AsInteger then begin
         LabelAdet2.Visible := True;

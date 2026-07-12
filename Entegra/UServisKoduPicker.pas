@@ -43,6 +43,8 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.dfm}
 
 procedure TServisKoduPicker.cxDBTreeList1Click(Sender: TObject);
@@ -106,12 +108,12 @@ begin
    MemoKodlar.Lines.Add(Kod+' - '+Tablo.Query1.Fields[1].AsString);
    Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text := 'Select top 1 '
+   Tablo.Query1.SQL.Text := 'Select '+DbUst(1)
      +'SONKISIM=CASE WHEN ISNULL(CHARINDEX(''.'','+Alani+'),0)<1 THEN '+Alani+' ELSE  REVERSE( SUBSTRING(REVERSE('+Alani+'),1,CHARINDEX(''.'',REVERSE('+Alani+'),1)-1)) END,'
      +'ROOTKOD=REVERSE( SUBSTRING(REVERSE('+Alani+'),CHARINDEX(''.'',REVERSE('+Alani+'),1)+1,LEN('+Alani+')-(CHARINDEX(''.'',REVERSE('+Alani+'),1)-1))),'
      +Alani+',BASLIK from '+Tablosu+' where '+Alani+' like '''+Kod+'%''  and BASLIK = 0 and '
      +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+Alani+'),0)<1 THEN '+Alani+' ELSE  REVERSE( SUBSTRING(REVERSE('+Alani+'),1,CHARINDEX(''.'',REVERSE('+Alani+'),1)-1)) END) >= '+inttostr(Digit)
-     +' order by LEN('+Alani+') desc , 1 desc';
+     +' order by LEN('+Alani+') desc , 1 desc '+DbSinir(1);
    Tablo.Query1.Open;
    //yeni kayıt için düzeltme
 

@@ -218,7 +218,7 @@ implementation
 
 {$R *.dfm}
 
-uses Utablo,UBinarySave,LocOnFly,PrjConst, UKodAgaci;
+uses Utablo,UBinarySave,LocOnFly,PrjConst, UKodAgaci, UVeriMotor;
 
 procedure TDuyuruOkuDlg.MenuBolumClick(Sender: TObject);
 var  Kullanicilar   : TStringList;
@@ -231,8 +231,8 @@ begin
      TabloYenile( TabDuyuruKullanici, [TabDuyurular.FieldByName('ID').asinteger]);
 
   sqltext:=' select ROOTKOD=USTID, KOD=ID,  SUBE=(SELECT FIRMA FROM REHBER WHERE ID=ROL.SUBEID),'+
-           ' DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-           ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ), ID  from ROLLER ROL';
+           ' DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+           ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+'), ID  from ROLLER ROL';
   Kullanicilar := TStringList.Create;
   Tablo.KodAgacindanSec(KodAgaciDlg,sqltext,True,True,False,True,ID,Kod,Aciklama,Kullanicilar,[],[],[],[],[],True, False,True);
 
@@ -579,7 +579,7 @@ begin
   sqltext := ' select D.AD, K.AD, D.ID from DOKUMAN D inner join DOKUMANKLASOR K on D.KLASOR = K.ID where ' + ' K.ID>0 and D.DURUM>0 and D.AD like ''%<ara>%'' order by 1';
   if Tablo.ListedenBilgiGetir('Doküman Listesi', sqltext, st, []) then
   begin
-    Tablo.TablodanSorguAc(7,'select top 1 ID from IMAJ where YERI=1 and YER_ID='+st.Strings[2]+' order by ID desc');
+    Tablo.TablodanSorguAc(7,'select '+DbUst(1)+'ID from IMAJ where YERI=1 and YER_ID='+st.Strings[2]+' order by ID desc '+DbSinir(1));
     Tablo.TablodanSorguAc(2,'insert into DUYURUIMAJ(DUYURUID,IMAJID,DUYURUYORUMID)values('+TabDuyurular.Fields[0].AsString+','+Tablo.Query7.Fields[0].AsString+',0) select scope_identity()');
     Tabloyenile(TabDuyuruImaj,[TabDuyurular.Fields[0].AsInteger]);
   end;

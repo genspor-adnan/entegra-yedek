@@ -106,7 +106,7 @@ var
 
 implementation
 
-   uses UTablo, UGirisKutusuEx, ULog;
+   uses UVeriMotor, UTablo, UGirisKutusuEx, ULog;
 {$R *.dfm}
 
 function IslemAd(ATip: Integer): string;
@@ -322,23 +322,23 @@ begin
     ' FROM ISLEMLOG L' +
     ' LEFT JOIN REHBER R ON R.ID = L.KULLANICIID' +
     ' LEFT JOIN TABLOLAR T ON T.TABLOID = L.USTTABLOID' +
-    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=L.USTKAYITID AND TABLOID=L.USTTABLOID ORDER BY ID DESC) LRk' +
-    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=L.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC) LRc' +
-    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=L.STOKID   AND TABLOID=88          ORDER BY ID DESC) LRs' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.USTKAYITID AND TABLOID=L.USTTABLOID ORDER BY ID DESC '+DbSinir(1)+') LRk' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC '+DbSinir(1)+') LRc' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.STOKID   AND TABLOID=88          ORDER BY ID DESC '+DbSinir(1)+') LRs' +
     // CANLI fallback: LOGREFERANS (cache) bu cariyi/stogu henuz icermiyorsa (hic duzenlenmemis
     // ve backfill'e girmemis) ad/kod dogrudan REHBER/STOKLAR'dan gelsin -> fatura vb. bos kalmasin.
-    ' OUTER APPLY (SELECT TOP 1 AD=FIRMA,   KOD FROM REHBER  WHERE ID=L.REHBERID AND L.REHBERID>0) RL' +
-    ' OUTER APPLY (SELECT TOP 1 AD=STOKADI, KOD FROM STOKLAR WHERE ID=L.STOKID   AND L.STOKID>0)   RS' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD=FIRMA,   KOD FROM REHBER  WHERE ID=L.REHBERID AND L.REHBERID>0 '+DbSinir(1)+') RL' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD=STOKADI, KOD FROM STOKLAR WHERE ID=L.STOKID   AND L.STOKID>0 '+DbSinir(1)+')   RS' +
     // Opsiyon/ayar (485): KAYITID=BOLUM (USTKAYITID kaydet-oturumu!). SEKSIYON = opsiyon bolumu
     // (Fatura/Stok/İK...) -> AD''ye gelir; KOD sabit ''Opsiyon''.
-    ' OUTER APPLY (SELECT TOP 1 SEKSIYON, AD FROM AYARADI WHERE BOLUM=L.KAYITID AND L.USTTABLOID=485) AYS' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'SEKSIYON, AD FROM AYARADI WHERE BOLUM=L.KAYITID AND L.USTTABLOID=485 '+DbSinir(1)+') AYS' +
     // Belge (FATBASLIK) tabanli gruplar (144/209/219): grupta KART satiri yoksa (yalniz detay
     // degisti) KOD/AD yine belge CARIsinden gelsin -> canli FATBASLIK.REHBERID -> LOGREFERANS.
-    ' OUTER APPLY (SELECT TOP 1 REHBERID FROM FATBASLIK WHERE ID=L.USTKAYITID AND L.USTTABLOID IN (144,209,219)) FB' +
-    ' OUTER APPLY (SELECT TOP 1 AD, KOD FROM LOGREFERANS WHERE KAYITID=FB.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC) LRcb' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'REHBERID FROM FATBASLIK WHERE ID=L.USTKAYITID AND L.USTTABLOID IN (144,209,219) '+DbSinir(1)+') FB' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=FB.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC '+DbSinir(1)+') LRcb' +
     // Uretim Fisi (144): uretilen stok = detay (FATURA) ADET>0 olan URUNID -> STOKLAR kod/ad
-    ' OUTER APPLY (SELECT TOP 1 KOD=s.KOD, AD=s.STOKADI FROM FATURA f JOIN STOKLAR s ON s.ID=f.URUNID' +
-    '   WHERE L.USTTABLOID=144 AND f.FATBASID=L.USTKAYITID AND f.ADET>0 ORDER BY f.ID) LRuf' +
+    ' OUTER APPLY (SELECT '+DbUst(1)+'KOD=s.KOD, AD=s.STOKADI FROM FATURA f JOIN STOKLAR s ON s.ID=f.URUNID' +
+    '   WHERE L.USTTABLOID=144 AND f.FATBASID=L.USTKAYITID AND f.ADET>0 ORDER BY f.ID '+DbSinir(1)+') LRuf' +
     LW +
     ' GROUP BY CAST(L.TARIH AS date), L.USTKAYITID, L.USTTABLOID, L.ISLEMTIPI' +
     ' ORDER BY MAX(L.TARIH) DESC';
@@ -618,9 +618,9 @@ begin
   LUstK := ID;
   try
     Tablo.TablodanSorguAc(1,
-      'select top 1 USTTABLOID, USTKAYITID from ISLEMLOG ' +
+      'select '+DbUst(1)+'USTTABLOID, USTKAYITID from ISLEMLOG ' +
       'where TABLOID=' + IntToStr(TabloNo) + ' and KAYITID=' + IntToStr(ID) +
-      ' order by ID desc');
+      ' order by ID desc '+DbSinir(1));
     if not Tablo.Query1.Eof then
     begin
       if not Tablo.Query1.FieldByName('USTTABLOID').IsNull then
@@ -765,9 +765,9 @@ begin
     LQ := TFDQuery.Create(nil);
     try
       LQ.Connection := Tablo.FDCnn;
-      LQ.SQL.Text := 'select top 1 ' + LAdKol + ' from ' + LKaynak +
+      LQ.SQL.Text := 'select '+DbUst(1) + LAdKol + ' from ' + LKaynak +
         ' where ' + LIdKol + ' = :PDEGER' +
-        IfThen(Trim(LFiltre) <> '', ' and (' + LFiltre + ')', '');
+        IfThen(Trim(LFiltre) <> '', ' and (' + LFiltre + ')', '') + ' ' + DbSinir(1);
       LQ.ParamByName('PDEGER').AsString := ADeger;
       LQ.Open;
       if (not LQ.IsEmpty) and (Trim(LQ.Fields[0].AsString) <> '') then

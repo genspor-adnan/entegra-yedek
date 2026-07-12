@@ -373,7 +373,7 @@ implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UDemirbasWizard, URaporAraclari, UGenelAnaSekmeFrame,
   UFastRap, PrjConst, UMesaj, UOpsDlg,UGirisKutusuEx,LocOnFly, UGorevDlg, UIsListesi, UResim, UExceldenVeriAl,
-  UBekletme, ULog;
+  UBekletme, ULog, UVeriMotor;
 {$R *.dfm}
 { TDemirbasListeDlg }
 
@@ -941,8 +941,8 @@ begin
        21 :  //eğer zimmet aksiyonu silindiyse tablodaki zimmetli adı boşa gelecek
              s:=',REHBERID=0';
        22 :  //eğer zimmet iade aksiyonu silindiyse tablodaki son zimmetli adı alan kişiye gelecek
-             s:= ',REHBERID=(select top 1 DT.ALANID from DEMIRBAS_TUTANAK DT inner join DEMIRBAS_TUTANAK_DETAY DTD on DT.ID=DTD.TUTANAKID '+
-                 ' where DTD.DEMIRBASID='+DEMIRBAS.Fields[0].AsString+' and TIP = 21  order by DT.TARIH desc)';
+             s:= ',REHBERID=(select '+DbUst(1)+'DT.ALANID from DEMIRBAS_TUTANAK DT inner join DEMIRBAS_TUTANAK_DETAY DTD on DT.ID=DTD.TUTANAKID '+
+                 ' where DTD.DEMIRBASID='+DEMIRBAS.Fields[0].AsString+' and TIP = 21  order by DT.TARIH desc '+DbSinir(1)+')';
        else  s:='';
     end;
 
@@ -1300,9 +1300,9 @@ end;
 function TDemirbasListeDlg.DurumGetir(Aksiyon:Integer):Integer;
 begin
       if Aksiyon in [24,26] then  //eğer servis iade veya arıza giderildi gibi bir durum varsa arıza servis öncesi duruma geçirmemiz lazım
-         Tablo.TablodanSorguAc(6,'select top 1 DURUM = (select DURUM from DURUMBAGLANTI where YERI=18 and BOLUM=-2801 and KAYNAKDURUM=DT.TIP)'+
+         Tablo.TablodanSorguAc(6,'select '+DbUst(1)+'DURUM = (select DURUM from DURUMBAGLANTI where YERI=18 and BOLUM=-2801 and KAYNAKDURUM=DT.TIP)'+
                                  ' from DEMIRBAS_TUTANAK DT inner join DEMIRBAS_TUTANAK_DETAY DTD on DT.ID=DTD.TUTANAKID '+
-                                 ' where DTD.DEMIRBASID='+Demirbas.FieldByName('ID').AsString+' and (not TIP between 23 and 26)  order by DT.TARIH desc')
+                                 ' where DTD.DEMIRBASID='+Demirbas.FieldByName('ID').AsString+' and (not TIP between 23 and 26)  order by DT.TARIH desc '+DbSinir(1)+')')
       else
          Tablo.TablodanSorguAc(6,'select DURUM from DURUMBAGLANTI where YERI=18 and BOLUM=-2801 and KAYNAKDURUM='+IntToStr(Aksiyon));//TabDemirbasTutanak.FieldByName('TIP').AsString);
 
@@ -1427,7 +1427,7 @@ begin
         DemirbasDurumDegisDlg.BeditAlanPersonel.Tag := StrToInt(Kullanan);
         DemirbasDurumDegisDlg.BeditAlanPersonel.Text := Tablo.AciklamaGetir('REHBER','FIRMA',StrToInt(Kullanan));
       end;
-      Tablo.TablodanSorguAc(5,'select top 1 ALANID,LOKASYONID from DEMIRBAS_TUTANAK DT inner join DEMIRBAS_TUTANAK_DETAY DTD on DT.ID=DTD.TUTANAKID where DTD.DEMIRBASID='+DEMIRBAS.FieldByName('ID').AsString+' order by DT.ID desc');
+      Tablo.TablodanSorguAc(5,'select '+DbUst(1)+'ALANID,LOKASYONID from DEMIRBAS_TUTANAK DT inner join DEMIRBAS_TUTANAK_DETAY DTD on DT.ID=DTD.TUTANAKID where DTD.DEMIRBASID='+DEMIRBAS.FieldByName('ID').AsString+' order by DT.ID desc '+DbSinir(1));
 
 
       if (Tablo.Query5.RecordCount>0)and(Tablo.Query5.FieldByName('ALANID').AsInteger>0) then begin

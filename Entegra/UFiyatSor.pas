@@ -243,7 +243,7 @@ var
 implementation
 
 uses
-  Fetautil,FetaKurulusSiniflari,FetaClassExtensions,PrjCOnst,LocOnFLy, UGirisKutusuEx, math;
+  UVeriMotor,Fetautil,FetaKurulusSiniflari,FetaClassExtensions,PrjCOnst,LocOnFLy, UGirisKutusuEx, math;
 
 {$R *.dfm}
 var
@@ -499,7 +499,7 @@ begin
   if AButtonIndex = 0 then begin
     //eğer proje seçilmişse ve o projeye girilmiş bütçe var ise o bütçe kalemlerinden masraf kalemi seçilir
      if (EditProje.Tag > 0)and
-        (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM PROJEBUTCE WHERE PROJEID='+IntToStr(EditProje.Tag),[],[])) then
+        (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM PROJEBUTCE WHERE PROJEID='+IntToStr(EditProje.Tag)+' '+DbSinir(1),[],[])) then
         SqlText := SqlMemoMasrafKalemi.Text+ ' and PROJEID='+IntToStr( EditProje.Tag )
      else
         SqlText := '';

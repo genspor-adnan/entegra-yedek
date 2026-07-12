@@ -326,7 +326,7 @@ uses
   UAnaForm, UHizliGirisIsk, UHizliGirisTahsilat, UHizliGirisBaski, UYazarKasa_Ingenico,
   UHizliGirisKKTahsilat, UHizliGirisKasaSay, UGiderPusulasi,UBarkod,UHizliSiparisSecim,
   Fetautil, FetaKurulusSiniflari, UKullaniciGiris, PrjConst, UHizliGirisDokumDlg, UGirisKutusuEx,
-  UGenSifre,  UGENINIDuzenle, UTerazi, UFastRap,UHizliGirisAnaMenu, USiparisPivot,LocOnFly;//,;
+  UGenSifre,  UGENINIDuzenle, UTerazi, UFastRap,UHizliGirisAnaMenu, USiparisPivot,LocOnFly, UVeriMotor;//,;
 
 
 var
@@ -941,7 +941,7 @@ var
 begin
   Gratis := 0;
   //Tablo.RehberBilgisiGetir(RehID, RehKod, RehAd);
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehId)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.TabCariBilgileri, [RehId,Tablo.Query1.Fields[0].AsInteger]);
 
   EditRehID.Text := IntToStr(RehID);
@@ -1323,7 +1323,7 @@ begin
    //sırayla tüm yazıcılara bakalım  mutfak, bar,fastfood gibi
    for i := 0 to SiparisYazdirList.Items.Count - 1 do begin
        TabDetayYaz.close;                               //ACIKLAMA2=ACIKLAMA
-       TabDetayYaz.SQL.Text:= 'select F.*,AD=S.STOKADI, ACIKLAMA, BIRIMAD=(select top 1 ANAHTAR from GENINI G where BOLUM=-2702 and G.DEGER=F.BIRIM and DIL=-1),'+
+       TabDetayYaz.SQL.Text:= 'select F.*,AD=S.STOKADI, ACIKLAMA, BIRIMAD=(select '+DbUst(1)+'ANAHTAR from GENINI G where BOLUM=-2702 and G.DEGER=F.BIRIM and DIL=-1 '+DbSinir(1)+'),'+
           ' EKLEYENAD=(select FIRMA from REHBER R where R.ID=F.EKLEYEN)  from FATURA F inner join STOKLAR S on F.URUNID=S.ID '+
           ' where F.FATBASID= '+IntToStr(AdisyonNo)+' and F.IZLEME < 2 and ('+
           '''0'' in ( SELECT KATEGORI=DEGER  FROM KOSULLAR K inner join DOKUMLER D on K.DOKUMID=D.ID '+  //sıfır varsa hep yazdırır
@@ -1944,7 +1944,7 @@ begin
     if cagiran = 7 then begin
         //AcabaBu masa daha önce tabletten açılmış mı
         if (AdisyonNo < 1)and(MasaId > 0) then begin
-           Tablo.TablodanSorguAc(8, 'select top 1 FB.ID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM not in('+IntToStr(DefSiparisIptal)+','+IntToStr(DefSiparisTahsil)+') order by 1 desc ');
+           Tablo.TablodanSorguAc(8, 'select '+DbUst(1)+'FB.ID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM not in('+IntToStr(DefSiparisIptal)+','+IntToStr(DefSiparisTahsil)+') order by 1 desc '+DbSinir(1));
            if Tablo.Query8.RecordCount > 0 then //açılmış adisyon var listeleyelim
               AdisyonNo := Tablo.Query8.Fields[0].AsInteger;
            AdisyonSeansNo := 1;//İlk seans
@@ -2356,8 +2356,8 @@ begin
 
   BtnNumComma.Caption := FormatSettings.Decimalseparator;
   TusBasili := False;
-  Tablo.TablodanSorguAc(5, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE())');
-  Tablo.TablodanSorguAc(6, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE())');
+  Tablo.TablodanSorguAc(5, 'select '+DbUst(1)+' ' + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
+  Tablo.TablodanSorguAc(6, 'select '+DbUst(1)+' ' + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
 
   StatusBar1.Panels[1].Text := '$ : '+Tablo.Query6.Fields[0].AsString+'  € : '+Tablo.Query5.Fields[0].AsString;
   StatusBar1.Panels[2].Text := VarsKasaAdi;
@@ -2710,9 +2710,9 @@ begin
 
           //ÖNCE BAKALIM AÇILMIŞ ADİSYON VAR MI
               //masa açılıyorsa
-          Tablo.TablodanSorguAc(8, 'select top 1 FB.ID, FB.REHBERID, FB.FATURATARIH, FB.FATURANO, FB.DURUM, FB.FATURASERI, FB.KOCANNO, FB.KASA,'+
+          Tablo.TablodanSorguAc(8, 'select '+DbUst(1)+'FB.ID, FB.REHBERID, FB.FATURATARIH, FB.FATURANO, FB.DURUM, FB.FATURASERI, FB.KOCANNO, FB.KASA,'+
                     ' MASANO=FB.OZELKOD, KISISAY=FB.ZARFID, ACIKLAMA, DEGISTIRENAD=(select FIRMA from REHBER R where R.ID=FB.DEGISTIREN) from FATBASLIK FB where FB.TUR=110 and '+
-                    ' FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM not in ('+IntToStr(DefSiparisIptal)+','+IntToStr(DefSiparisTahsil)+') order by 1 desc ');
+                    ' FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM not in ('+IntToStr(DefSiparisIptal)+','+IntToStr(DefSiparisTahsil)+') order by 1 desc '+DbSinir(1));
           if Tablo.Query8.RecordCount > 0 then begin //açılmış adisyon var listeleyelim
               AdisyonNo := Tablo.Query8.Fields[0].AsInteger;
               TabFatBasDetay.Edit;
@@ -2903,7 +2903,7 @@ begin
   TabDetay.Close;
   TabDetay.SQL.Text := ' select YENIAD = BARKOD+'' ''+AD,*, ROW_NUMBER() OVER(ORDER BY ID ) AS SIRANUMARASI ';
   if Tablo.GENINI.ReadBoolean(Ops_Kasiyer_UrunBirimleriniTopla, False) then
-    TabDetay.SQL.Add(' ,DONUSENMIKTAR=isnull((select top 1 Tmp.MIKTAR*(SC.ADET2/SC.ADET1) from STOKCEVRIM SC where SC.STOKID=Tmp.URUNID and Tmp.TUR=1 and Tmp.BIRIM=SC.BIRIM1 and SC.BIRIM2='+Tablo.GENINI.ReadString(Ops_Kasiyer_UrunBirimleriniToplamaID,'0')+' ),0.0)  ');
+    TabDetay.SQL.Add(' ,DONUSENMIKTAR=isnull((select '+DbUst(1)+'Tmp.MIKTAR*(SC.ADET2/SC.ADET1) from STOKCEVRIM SC where SC.STOKID=Tmp.URUNID and Tmp.TUR=1 and Tmp.BIRIM=SC.BIRIM1 and SC.BIRIM2='+Tablo.GENINI.ReadString(Ops_Kasiyer_UrunBirimleriniToplamaID,'0')+' '+DbSinir(1)+'),0.0)  ');
 
 
   TabDetay.SQL.Add(' from ' + StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + ' Tmp');

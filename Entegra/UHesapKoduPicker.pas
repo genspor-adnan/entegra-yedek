@@ -58,7 +58,7 @@ var
   HesapKoduPicker : THesapKoduPicker;
 
 implementation
-  Uses LocOnFly,PrjConst;
+  Uses UVeriMotor,LocOnFly,PrjConst;
 {$R *.dfm}
 
 
@@ -140,12 +140,12 @@ begin
    _Log(AKod+' - '+Tablo.Query1.Fields[1].AsString);
    Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text := 'Select top 1 '
+   Tablo.Query1.SQL.Text := 'Select '+DbUst(1)
      +'SONKISIM=CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END,'
      +'ROOTKOD=REVERSE( SUBSTRING(REVERSE('+AAlani+'),CHARINDEX(''.'',REVERSE('+AAlani+'),1)+1,LEN('+AAlani+')-(CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1))),'
      +AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
      +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END) >= '+inttostr(Digit)
-     +' order by LEN('+AAlani+') desc , 1 desc';
+     +' order by LEN('+AAlani+') desc , 1 desc '+DbSinir(1);
    Tablo.Query1.Open;
    //yeni kayıt için düzeltme
    if Tablo.Query1.RecordCount=0 then begin

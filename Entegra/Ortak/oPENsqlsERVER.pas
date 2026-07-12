@@ -132,7 +132,7 @@ SQLNCLI.1  --> Sql Native Client (2005)
 SQLNCLI10.1 --> Sql Native Client 10 (2008)
 }
 
-uses Variants, WinSock, Fetautil// ,AsyncCalls
+uses Variants, WinSock, Fetautil, UVeriMotor// ,AsyncCalls
 {$IFNDEF NO_UTABLO}
 , UTablo
 {$ENDIF};
@@ -160,9 +160,9 @@ begin
 
       LLookupQuery.Connection := LLookupConnection;
       LLookupQuery.SQL.Text :=
-        'select top 1 name ' +
+        'select '+DbUst(1)+'name ' +
         'from sys.databases ' +
-        'where lower(name) = lower(:DBName)';
+        'where lower(name) = lower(:DBName) '+DbSinir(1);
       LLookupQuery.ParamByName('DBName').AsString := Result;
       LLookupQuery.Open;
       if not LLookupQuery.IsEmpty then

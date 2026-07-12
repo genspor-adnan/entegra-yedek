@@ -77,7 +77,7 @@ var
 
 implementation
 
-uses  UTablo, prjconst, FetaKurulusSiniflari;
+uses  UTablo, prjconst, FetaKurulusSiniflari, UVeriMotor;
 
 {$R *.dfm}
 
@@ -126,7 +126,7 @@ begin
 
     //eğer proje seçilmişse ve o projeye girilmiş bütçe var ise o bütçe kalemlerinden masraf kalemi seçilir
     if (TabMaliyet.FieldByName('PROJEID').AsString<>'')and
-       (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM PROJEBUTCE WHERE PROJEID='+TabMaliyet.FieldByName('PROJEID').AsString,[],[])) then
+       (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM PROJEBUTCE WHERE PROJEID='+TabMaliyet.FieldByName('PROJEID').AsString+' '+DbSinir(1),[],[])) then
         SqlText := SqlMemoMasrafKalemi.Text+ ' and PROJEID='+TabMaliyet.FieldByName('PROJEID').AsString
      else
         SqlText := '';

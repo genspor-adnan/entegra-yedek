@@ -25,6 +25,8 @@ object DovizDlg: TDovizDlg
     BorderWidth = 4
     Caption = 'Panel2'
     TabOrder = 0
+    ExplicitTop = 32
+    ExplicitHeight = 477
     object DBGrid1: TcxGrid
       Left = 6
       Top = 33

@@ -50,7 +50,7 @@ var
   DepoTanimDlg: TDepoTanimDlg;
 
 implementation
-Uses UTablo;
+Uses UTablo, UVeriMotor;
 
 {$R *.dfm}
 
@@ -89,7 +89,7 @@ end;
 procedure TDepoTanimDlg.TabDepolarBeforeDelete(DataSet: TDataSet);
 begin
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text:= 'SELECT TOP 1 * FROM STOKDURUM WHERE YER='''+ TabDepolar.Fieldbyname('DEPOADI').AsString+''' ';
+   Tablo.Query1.SQL.Text:= 'SELECT '+DbUst(1)+'* FROM STOKDURUM WHERE YER='''+ TabDepolar.Fieldbyname('DEPOADI').AsString+''' '+DbSinir(1);
    Tablo.Query1.Open;
 
    if Tablo.Query1.RecordCount>=1 then

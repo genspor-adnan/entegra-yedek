@@ -478,7 +478,7 @@ implementation
 
 uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,
   PrjConst, Utablo, IdGlobalProtocols, UMailKisiBulma,
-  uEvrakModule,
+  uEvrakModule, UVeriMotor,
   {$IFDEF 3Dparty}
   uUtility_my,
   Logix.Logger,
@@ -1473,7 +1473,7 @@ end;
 
 procedure TEvrakListeFrame.DuyuruOlarakYaynla1Click(Sender: TObject);
 begin
-  Tablo.TablodanSorguAc(7,'select top 1 ID from IMAJ where YERI=1 and YER_ID='+DOKUMAN.FieldByName('ID').AsString+' order by ID desc');
+  Tablo.TablodanSorguAc(7,'select '+DbUst(1)+'ID from IMAJ where YERI=1 and YER_ID='+DOKUMAN.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
   Tablo.DuyuruAc('E',0,Tablo.Query7.FieldByName('ID').AsInteger);
 end;
 

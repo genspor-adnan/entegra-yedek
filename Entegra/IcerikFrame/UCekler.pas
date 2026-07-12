@@ -164,7 +164,7 @@ type
 implementation
 
 {$R *.dfm}
-Uses Utablo, UReharadlg, UAnaForm, FetaClassExtensions, UAramaYokFrame,
+Uses UVeriMotor, Utablo, UReharadlg, UAnaForm, FetaClassExtensions, UAramaYokFrame,
   UFastRap, UBankaSecimi,PrjConst, UKasaWizard, UResim,UCekWizard,UCekKocanWizard,UCekHareketWizard,
   FetaKurulusSiniflari,UGenelAnaSekmeFrame;
 
@@ -265,13 +265,13 @@ begin
   TabCekler.Close;
   if ACekId <> -1 then begin
     if ACekId = -2 then
-      TabCekler.SQL.Text := 'SELECT TOP 1 *  FROM CEKLER ORDER BY ID DESC'
+      TabCekler.SQL.Text := 'SELECT '+DbUst(1)+'*  FROM CEKLER ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabCekler.SQL.Text := 'SELECT *   FROM CEKLER WHERE ID = :ID';
       TabCekler.Params.ParamByName('ID').AsInteger := ACekId;
     end;
   end else { Yani -1 -> Boş Çek senet ekranı için boş bir query }
-    TabCekler.SQL.Text := 'SELECT TOP 0  * FROM CEKLER ';
+    TabCekler.SQL.Text := 'SELECT '+DbUst(0)+' * FROM CEKLER '+DbSinir(0);
   TabCekler.Open;
 end;
 

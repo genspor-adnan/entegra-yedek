@@ -151,7 +151,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
       Properties.OnEditValueChanged = CheckAlfabetikPropertiesEditValueChanged
       TabOrder = 2
       Transparent = True
-      ExplicitWidth = 121
     end
   end
   object cxGroupBox1: TcxGroupBox
@@ -160,8 +159,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
     Align = alClient
     Caption = 'De'#287'er'
     TabOrder = 1
-    ExplicitWidth = 784
-    ExplicitHeight = 356
     Height = 355
     Width = 780
     object GridGenIni: TcxGrid
@@ -202,12 +199,14 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
         object GridGenIniDBTableView1DEGER: TcxGridDBColumn
           Caption = 'De'#287'er'
           DataBinding.FieldName = 'DEGER'
+          DataBinding.IsNullValueType = True
           Visible = False
           Width = 40
         end
         object GridGenIniDBTableView1SIRA: TcxGridDBColumn
           Caption = 'S'#305'ra'
           DataBinding.FieldName = 'SIRA'
+          DataBinding.IsNullValueType = True
           Visible = False
           Width = 30
         end
@@ -246,9 +245,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
       ShowCaptions = True
       TabOrder = 0
       Transparent = True
-      ExplicitLeft = 3
-      ExplicitTop = 16
-      ExplicitWidth = 778
       object BtnYeni: TToolButton
         Left = 0
         Top = 0
@@ -292,7 +288,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
     Align = alTop
     Caption = 'B'#246'l'#252'm'
     TabOrder = 0
-    ExplicitWidth = 784
     Height = 64
     Width = 780
     object GridBolumler: TcxGrid
@@ -332,11 +327,10 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
     end
   end
   object TabGenIni: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabGenIniAfterOpen
     AfterScroll = TabGenIniAfterScroll
     OnNewRecord = TabGenIniNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from GENINI')
     Left = 30
@@ -350,7 +344,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
   end
   object GENINITumDiller: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select '
       '  * '
@@ -366,7 +359,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
   end
   object GENINIKullanimdakiDil: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select '
       '  * '
@@ -389,7 +381,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
   end
   object TabBolumler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select * from GENINI')
     Left = 30
@@ -405,7 +396,6 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
   end
   object TabKomutCalistir: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 327
     Top = 182
   end

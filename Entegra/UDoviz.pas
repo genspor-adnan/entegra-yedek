@@ -262,7 +262,7 @@ begin
   tablo.FDCnn.ExecSQL(SQLResult);
 
    //Okunacak dosya yolu
-  XMLDocument1.FileName := ExtractFileDir( Application.ExeName)+'\doviz.xml';
+  XMLDocument1.FileName :=  ExtractFileDir( Application.ExeName)+'\doviz.xml';
   XMLDocument1.Active := true;
 
   nd := XMLDocument1.DocumentElement;
@@ -358,7 +358,7 @@ begin
 
     if Veritabani.VeriVarMi(
       Tablo.FDCnn,
-      'select top 1 1 from DOVIZ where CINSI = &CINSI and cast(TARIH as date) = &TARIH',
+      'select '+DbUst(1)+'1 from DOVIZ where CINSI = &CINSI and cast(TARIH as date) = &TARIH '+DbSinir(1),
       ['&CINSI', '&TARIH*datetime*'],
       [Trim(TabDoviz.FieldByName('CINSI').AsString), TabDoviz.FieldByName('TARIH').AsDateTime]
     ) then

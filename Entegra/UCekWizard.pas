@@ -314,7 +314,7 @@ var
 implementation
 
 uses UAnaForm,FetaClassExtensions,UGenelAnaSekmeFrame, URaporAraclari, UFastRap, UBankaSecimi,
-     FetaUtil,UResim, PrjConst, UBinarySave,FetaKurulusSiniflari, UParaDegisiklik,IdGlobalProtocols, UCiroEdilecekler,LocOnFly, ULog;
+     FetaUtil,UResim, PrjConst, UBinarySave,FetaKurulusSiniflari, UParaDegisiklik,IdGlobalProtocols, UCiroEdilecekler,LocOnFly, ULog, UVeriMotor;
 {$R *.dfm}
 
 Var
@@ -375,7 +375,7 @@ begin
   s:= FormatDateTime('yyyy-MM-dd',VarToDateTime(Tarih))+' '+FormatDateTime('HH:mm:ss',VarToDateTime(Saat));
 //  VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKHAREKET set TARIH='''+FormatDateTime('yyyy-MM-dd HH:mm:ss',VarToDateTime(Tarih))+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
   VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKHAREKET set ACIKLAMA='''+VarToStr(Aciklama)+''', TARIH='''+s+''', BELGENO='''+VarToStr(MakbuzNo)+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select top 1 ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc) where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)+') where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
 //  TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
   TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
 end;
@@ -580,7 +580,7 @@ end;
 
 procedure TCekWizardDlg.FirmaBilgileri;
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   lblAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;
@@ -832,7 +832,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Islem := TabCekHareketler.FieldByName('ISLEM').AsInteger;
      Tablo.CekHareketiSil(TabCekler.FieldByName('ID').AsInteger,TabCekHareketler.FieldByName('ID').AsInteger);
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select top 1 ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc) where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)+') where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
      if Islem in [136, 143] then //E?er i?lem tahsil edildi veya ?dendi ise hareket silinince kasadan da silinmeli
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where TUR in (51,53) and CEKSENETID='+TabCekler.FieldByName('ID').AsString, [], []);
      //TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
@@ -1030,7 +1030,7 @@ begin
      MasrafID:=0;
      EditMM.Text := '';
   end else begin
-     Tablo.tablodansorguAc(1,' select top 1 PROJEID,MASRAFID from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by ID desc');
+     Tablo.tablodansorguAc(1,' select '+DbUst(1)+'PROJEID,MASRAFID from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
      ProjeID :=Tablo.Query1.FieldByName('PROJEID').AsInteger;
      //AO 21/12/2021  MasrafID:=Tablo.Query1.FieldByName('MASRAFID').AsInteger;
      MasrafID := TabCekler.FieldByName('MASRAFID').AsInteger;

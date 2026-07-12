@@ -175,7 +175,7 @@ implementation
 
 uses UTablo, FetaUtil, UCombo, umESAJ, UParaBilgi, Udoktor, UTetkik,
      Udokhak, TDetay, Utabrap, UDokum, UAyar, UTabDok, UListe, UGelis,
-  UPaketKart;
+  UPaketKart, UVeriMotor;
 
 {$R *.DFM}
 
@@ -308,8 +308,8 @@ begin
            'CAST('''' AS VARCHAR(8)) as ANABIRIM'+FiyatG+' From ISLEMLER,FIYATLAR'+
            ' where FIYATLAR.KOD='+TabloAdi+'.KOD and'+
            ' (FIYATLAR.FIYATADI = '''+FiyatAdTut+'''';
-   if KurumIskeBak then QueryIslem.SQL.Add(' or  FIYATLAR.FIYATADI =( select top 1 FIYAT from KURUMISK where KURUM='''+ //Kastamonu için eklendi...
-                                 Tablo.TabGelisler.FieldByName('KURUM').AsString+''' and charindex(KURUMISK.KOD,ISLEMLER.KOD)=1) ');
+   if KurumIskeBak then QueryIslem.SQL.Add(' or  FIYATLAR.FIYATADI =( select '+DbUst(1)+'FIYAT from KURUMISK where KURUM='''+ //Kastamonu için eklendi...
+                                 Tablo.TabGelisler.FieldByName('KURUM').AsString+''' and charindex(KURUMISK.KOD,ISLEMLER.KOD)=1 '+DbSinir(1)+') ');
    QueryIslem.SQL.Add(' ) ');
 
    if not UcretDuzenleme then

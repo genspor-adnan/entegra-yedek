@@ -12,7 +12,7 @@ procedure CariIletisimSil(RehberId, IletId: Integer; Varsayilan: Boolean; AUstTa
 
 implementation
 
-uses Utablo, PrjConst, ULog;
+uses Utablo, PrjConst, ULog, UVeriMotor;
 
 procedure PersonelVarsayilanYap(RehberId, RehberPerId: Integer);
 begin
@@ -104,7 +104,7 @@ begin
       Tablo.Query1.Close;
       if (orj = '') and (bilgi <> '') then
       begin
-        Tablo.Query1.SQL.Text := 'select top 1 ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID';
+        Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID '+DbSinir(1);
         Tablo.Query1.ParamByName('PYERI').AsInteger := Yeri;
         Tablo.Query1.ParamByName('PYERID').AsInteger := Yeri_Id;
         Tablo.Query1.ParamByName('PSIRA').AsInteger := Table1.FieldByName('SIRA').AsInteger;
@@ -162,7 +162,7 @@ begin
         else
         begin
           HedefKayitID := 0;
-          Tablo.Query1.SQL.Text := 'select top 1 ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID';
+          Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ID from REHBERBILGI where YERI=:PYERI and YER_ID=:PYERID and SIRA=:PSIRA and ETIKET=:PETIKET order by ID '+DbSinir(1);
           Tablo.Query1.ParamByName('PYERI').AsInteger := Yeri;
           Tablo.Query1.ParamByName('PYERID').AsInteger := Yeri_Id;
           Tablo.Query1.ParamByName('PSIRA').AsInteger := Table1.FieldByName('SIRA').AsInteger;
@@ -298,8 +298,8 @@ begin
   if Varsayilan then
   begin
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := ' select top 1 ID from REHBERILETISIM where REHBERID=' +
-      IntToStr(RehberId) + ' and ID<>' + IntToStr(IletId) + ' order by 1';
+    Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID=' +
+      IntToStr(RehberId) + ' and ID<>' + IntToStr(IletId) + ' order by 1 '+DbSinir(1);
     Tablo.Query1.Open;
     ID := Tablo.Query1.Fields[0].AsInteger;
   end
@@ -337,7 +337,7 @@ begin
 
   if Varsayilan then
   begin
-    Tablo.TablodanSorguAc(1, ' select top 1 ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberId) + ' and ID<>' + IntToStr(PerId) + ' order by 1');
+    Tablo.TablodanSorguAc(1, ' select '+DbUst(1)+'ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberId) + ' and ID<>' + IntToStr(PerId) + ' order by 1 '+DbSinir(1));
     ID := Tablo.Query1.Fields[0].AsInteger;
   end
   else

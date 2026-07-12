@@ -324,7 +324,7 @@ var
 implementation
 
 {$R *.dfm}
-uses UAnaForm, UKasaWizard, UKrediEkle, FetaClassExtensions, UAramaYokFrame,PrjConst,LocOnFly,
+uses UVeriMotor, UAnaForm, UKasaWizard, UKrediEkle, FetaClassExtensions, UAramaYokFrame,PrjConst,LocOnFly,
      FetaKurulusSiniflari, UKrediHesapMakineDlg, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, UBekletme, UExceldenVeriAl,
      ULog;
 
@@ -864,13 +864,13 @@ begin
   KREDILER.Close;
   if AKrediId <> -1 then begin
     if AKrediId = -2 then
-      KREDILER.SQL.Text := 'SELECT TOP 1 * FROM KREDILER ORDER BY ID DESC'
+      KREDILER.SQL.Text := 'SELECT '+DbUst(1)+'* FROM KREDILER ORDER BY ID DESC '+DbSinir(1)
     else begin
       KREDILER.SQL.Text := 'SELECT * FROM KREDILER WHERE ID = :ID';
       KREDILER.Params.ParamByName('ID').AsInteger := AKrediId;
     end;
   end else { Yani -1 -> Bo� Kredi Ekran� i�in bo� bir query }
-    KREDILER.SQL.Text := 'SELECT TOP 0 * FROM KREDILER';
+    KREDILER.SQL.Text := 'SELECT '+DbUst(0)+'* FROM KREDILER '+DbSinir(0);
   KREDILER.Open;
 end;
 
@@ -1066,7 +1066,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM AKTIVITELER WHERE YERI=250205 and YER_ID=&YERID',['&YERID'],[KREDILER.FieldByName('ID').AsString]);
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := 'select top 1 ISLEMTARIHI from KASA where TUR = 58 and KREDIID ='+KREDILER.FieldByName('ID').AsString;
+    Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ISLEMTARIHI from KASA where TUR = 58 and KREDIID ='+KREDILER.FieldByName('ID').AsString+' '+DbSinir(1);
     Tablo.Query1.Open;
     if Tablo.Query1.RecordCount > 0 then
        raise Exception.Create(KBuKredinin+Tablo.Query1.Fields[0].AsString+KTarihindeOdemesiVarSilinemez);

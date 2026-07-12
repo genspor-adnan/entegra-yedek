@@ -13,6 +13,8 @@ function ServisPostaGonder(ServisID,HareketID:integer;IcMail:boolean=True):strin
 
 implementation
 
+uses UVeriMotor;
+
 
 function PostayiGonder(Baslik,Icerik:string; EpostaAlicilar,EPostaAlicilarCC:TList<TEpostaAlici>; EkliDosyalar:TList<string>; Yer,YerID,RehberID:integer):string;
 var
@@ -51,7 +53,7 @@ begin
   Tablo.TablodanSorguAc(1,'select *,EKIPMANAD=case when S.DEMIRBAS=1 then (select DEMIRBASADI from DEMIRBAS D where D.ID=S.EKIPMANID) else (select AD from EKIPMANLAR E  where E.ID=S.EKIPMANID) end from SERVIS S where ID='+IntToStr(ServisID));
   Tablo.TablodanSorguAc(2,'select * from SERVISHAREKET where ID='+IntToStr(HareketID));
   Tablo.TablodanSorguAc(3,'select SB.ID,SERVISID,SB.SERVISLISTEID, KOD = cast(SB.SERVISTUR as varchar(5))+''.''+(select KOD from SERVISLISTE SL where SL.ID=SB.SERVISLISTEID), '+
-                          'GRUP=(select top 1 ANAHTAR from GENINI G WHERE BOLUM=-3015 and DEGER=SB.SERVISTUR), '+
+                          'GRUP=(select '+DbUst(1)+'ANAHTAR from GENINI G WHERE BOLUM=-3015 and DEGER=SB.SERVISTUR '+DbSinir(1)+'), '+
                           'AD=(select AD from SERVISLISTE SL where SL.ID=SB.SERVISLISTEID), '+
                           'SB.ACIKLAMA, SB.COZUM ,SB.USTID, SB.SNO '+
                           'from SERVISBILGI SB '+

@@ -314,7 +314,7 @@ var
 implementation
 
 uses Utablo, UCariFonksiyonlar, PrjConst, FetaKurulusSiniflari, URehberAyar, UBinarySave, UDokumanListeFrame, fetautil,
-     IdGlobalProtocols, UGirisKutusuEx, LocOnFly, ULog;
+     IdGlobalProtocols, UGirisKutusuEx, LocOnFly, ULog, UVeriMotor;
 
 procedure HazirlaTabYetki(AQuery: TFDQuery);
 begin
@@ -836,7 +836,7 @@ begin
 
 
                     //IMAJ tablosundan bilgileri alalım
-                    Tablo.TablodanSorguAc(0, 'select TOP 1 REHBERID,ONAYLAYACAK, ONAY,DEGISTIRMETARIHI,SURUM from IMAJ WHERE YERI=1 AND YER_ID='+TabDokuman.FieldByName('ID').AsString+' ORDER BY ID DESC');
+                    Tablo.TablodanSorguAc(0, 'select '+DbUst(1)+'REHBERID,ONAYLAYACAK, ONAY,DEGISTIRMETARIHI,SURUM from IMAJ WHERE YERI=1 AND YER_ID='+TabDokuman.FieldByName('ID').AsString+' ORDER BY ID DESC '+DbSinir(1));
                     EditSurum.Text := Tablo.Query0.FieldByName('SURUM').AsString;
                     LabelSurumTarihi.Caption := FormatDateTime('dd/mm/yyyy', Tablo.Query0.FieldByName('DEGISTIRMETARIHI').AsDateTime);
                     //DateTarih.Date:= Tablo.Query0.FieldByName('DEGISTIRMETARIHI').AsDateTime;
@@ -1115,7 +1115,7 @@ begin
                  s:=s+', ONAYLAYACAK='+IntToStr(EditOnaylayacak.Tag);
                  s:=s+', ONAY='+IntToStr(EditOnaylayan.Tag);
                  s:=s+', DEGISTIRMETARIHI= '''+FormatDateTime('yyyy-mm-dd hh:nn', DateTarih.Date)+''''+
-                      ' where ID = (select top 1 ID from IMAJ where YERI =1 and YER_ID = '+IntToStr(DokumanID)+ ' order by ID desc)';
+                      ' where ID = (select '+DbUst(1)+'ID from IMAJ where YERI =1 and YER_ID = '+IntToStr(DokumanID)+ ' order by ID desc '+DbSinir(1)+')';
                  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, s, [],[]);
               end;
              ModalResult := mrOk;

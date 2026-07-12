@@ -424,7 +424,7 @@ var
 
 implementation
 
-Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
+Uses  UVeriMotor, UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
  cxTLExportLink, UFastRap, URaporAraclari, UIsListesi, ULog;
 
@@ -648,7 +648,7 @@ begin
        LabelSonTeklif.Caption := 'Son Teklif';
        LabelSonTeklif.tag:=0;
    end;
-   Tablo.TablodanSorguAc(1,'select top 1 TARIH, TEKLIF_MATRAHI,KUR from TEKLIF T where PROJEID = '+IntToStr(ProjeID)+' order by '+s);
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'TARIH, TEKLIF_MATRAHI,KUR from TEKLIF T where PROJEID = '+IntToStr(ProjeID)+' order by '+s+' '+DbSinir(1));
    SonTeklifTutari.Value := Tablo.Query1.Fields[1].AsCurrency;
    SonTeklifTutari.Properties.DisplayFormat := ',0.00 '+Tablo.Query1.Fields[2].AsString+';(,0.00 '+Tablo.Query1.Fields[2].AsString+')';
    if Tablo.Query1.Fields[0].AsDateTime > StrToDate('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+'2000') then
@@ -883,7 +883,7 @@ end;
 
 procedure TFirsatWizardDlg.FirmaBilgileri;
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   LabelAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;

@@ -195,7 +195,7 @@ var
 
 // EczaDepoGLN :string[13] =  '8680049300013' ; PANATES
 implementation
-uses FetaKurulusSiniflari;
+uses FetaKurulusSiniflari, UVeriMotor;
    function XMLGelenIsle (GelenYanit : TGenelYanit;GidenUrunler : TObjectList<TUrun> ):string;
    var
    UrunDurum :array of  TUrunDurum;
@@ -342,7 +342,7 @@ uses FetaKurulusSiniflari;
    end;
    function ITSHesapBilgileriGetir(HesapId:integer): TITSHesapAyarlari;
    begin
-   with Veritabani.SorguBaslat( Tablo.FDCnn, 'SELECT TOP 1 * FROM ITSHESAPLARI WHERE GONDEREN =''PTS'' ',[],[] ) do
+   with Veritabani.SorguBaslat( Tablo.FDCnn, 'SELECT '+DbUst(1)+'* FROM ITSHESAPLARI WHERE GONDEREN =''PTS'' '+DbSinir(1),[],[] ) do
    try
     ResourceOptions.CmdExecTimeout :=0;
     Open;

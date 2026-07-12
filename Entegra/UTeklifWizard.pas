@@ -697,7 +697,7 @@ var
 
 implementation
 
-Uses UAnaForm,FetaClassExtensions,UCombo, UBinarySave, PrjConst,LocOnFly, FetaKurulusSiniflari,
+Uses UVeriMotor,UAnaForm,FetaClassExtensions,UCombo, UBinarySave, PrjConst,LocOnFly, FetaKurulusSiniflari,
      URaporAraclari, UGenelAnaSekmeFrame, UFastRap,UMailDokum,UGirisKutusuEx,Fetautil,IdGlobalProtocols,
      ULog;
 
@@ -1219,7 +1219,7 @@ end;
 
 procedure TTeklifWizardDlg.FirmaBilgileri;
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   LabelAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;
@@ -1539,7 +1539,7 @@ begin
                 btnSevkAdresi.Hint :=Tablo.Query1.FieldByName('BILGI').AsString;
             end;
             if TabTeklif.FieldByName('DURUM').AsInteger = 6 then begin //Onaylanmad? ise
-               Tablo.TablodanSorguAc(5,'Select top 1 ACIKLAMA from TEKLIFHAREKET Where TEKLIFID='+IntToStr(TeklifID)+' Order by  EKLEMETARIHI desc');
+               Tablo.TablodanSorguAc(5,'Select '+DbUst(1)+'ACIKLAMA from TEKLIFHAREKET Where TEKLIFID='+IntToStr(TeklifID)+' Order by  EKLEMETARIHI desc '+DbSinir(1));
                Tablo.Query5.FetchAll;
                if Tablo.Query5.RecordCount = 1 then
                  OnaylanmadiNotu.Caption:=Tablo.Query5.FieldByName('ACIKLAMA').AsString;
@@ -1759,7 +1759,7 @@ begin
       if TabTeklif.State = dsBrowse then
          TabTeklif.Edit;
       TabTeklif.FieldByName('REHBERID').AsInteger := RehberId;
-      Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+      Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
       TabTeklif.FieldByName('REHBERILETID').AsInteger := tablo.Query1.Fields[0].AsInteger;
 
       FirmaBilgileri;
@@ -1836,7 +1836,7 @@ begin
       TabTeklifDetay.Next;
    end;
    //Kopyalanm?? sat?rlar?n stok durumunu g?ncelleyelim
-   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update TEKLIFDETAY set STOKDURUM = (select top 1 isnull(KALAN,0) from STOKDURUM where STOKDURUM.STOKID=TEKLIFDETAY.URUNID)'+
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update TEKLIFDETAY set STOKDURUM = (select '+DbUst(1)+'isnull(KALAN,0) from STOKDURUM where STOKDURUM.STOKID=TEKLIFDETAY.URUNID '+DbSinir(1)+')'+
       ' where TEKLIFID='+IntToStr(ID)+' and TUR>0',[],[]);
 end;
 
@@ -1887,7 +1887,7 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update TEKLIF set DURUM=1, REVIZEID='+IntToStr(RevID+1)+', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',HAZIRLAYAN='+Kullanan+' where Id=&id ',['&id'],[YeniTeklifID]);
    end else begin //Kopyalama
        belgeno := SiradakiBelgeNumarasi(80,TabTeklif.FieldByName('TARIH').AsDateTime);
-       RehIletID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select top 1 ID from REHBERILETISIM where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc ',[],[],true);
+       RehIletID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc '+DbSinir(1)+' ',[],[],true);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update TEKLIF set REHBERID=&RID, REHBERILETID=&RIlet, TEKLIFNO=&TNo , TEKLIFSERI=&TSeri, KOCANNO=&KcnNo, TARIH='''+Formatdatetime('yyyy-mm-dd hh:mm:nn.zzz', Tablo.GENINI.BugunTrhSaat)+''',DURUM=&Drm,REVIZEID=&Rvz,HAZIRLAYAN=&Hzr where Id=&id '
                                   ,['&RID','&RIlet','&TNo','&TSeri','&KcnNo','&Drm','&Rvz','&Hzr','&id']
                                   ,[RehberId,RehIletID,belgeno.belgeno,belgeno.SeriNo,KocannoBul(80),1,1,Kullanan, YeniTeklifID]);
@@ -2293,11 +2293,11 @@ begin
     try
       st:=TStringList.Create;
       SQLText:='select ID,AD,'+
-        ' ADRES=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2),'+
-        ' ILCE=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6),'+
-        ' IL=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8),'+
-        ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
-        ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
+        ' ADRES=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2 '+DbSinir(1)+'),'+
+        ' ILCE=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6 '+DbSinir(1)+'),'+
+        ' IL=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8 '+DbSinir(1)+'),'+
+        ' ID_VERGIDAI=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20 '+DbSinir(1)+'),'+
+        ' ID_VERGINO=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22 '+DbSinir(1)+')'+
         ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
       if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'',TNotifyEvent(nil),Tablo.FDCnn,IletisimEkleClick) then begin
         tabTeklif.Edit;
@@ -2336,18 +2336,18 @@ begin
   Tablo.TablodanSorguAc(1,'INSERT INTO REHBERILETISIM (REHBERID,AD,VARSAYILAN ,AKTIF,SUBEID) values('+IntToStr(RehberId)+','''+AD+''',0,1,'+IntToStr(SubeId)+' )  Select SCOPE_IDENTITY() ');
   //Adres i?in
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
-  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'+
-  ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=2),'''+ADRES+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )  ',[],[]);
+  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select '+DbUst(1)+'SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=2 '+DbSinir(1)+'),'+
+  ' (Select '+DbUst(1)+'ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=2 '+DbSinir(1)+'),'''+ADRES+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )  ',[],[]);
 
   //?l?e i?in
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
-  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'+
-  ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=6),'''+ILCE+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
+  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select '+DbUst(1)+'SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=6 '+DbSinir(1)+'),'+
+  ' (Select '+DbUst(1)+'ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=6 '+DbSinir(1)+'),'''+ILCE+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
   //?l i?in
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,EKLEMETARIHI,SUBEID) '+
-  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select top 1 SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'+
-  ' (Select top 1 ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=8),'''+IL+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
+  ' values(1,'+Tablo.Query1.Fields[0].AsString+',(Select '+DbUst(1)+'SIRA from REHBERAYAR Where YERI=1 and VARSAYILAN=8 '+DbSinir(1)+'),'+
+  ' (Select '+DbUst(1)+'ETIKET from REHBERAYAR Where YERI=1 and VARSAYILAN=8 '+DbSinir(1)+'),'''+IL+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+' )',[],[]);
 
   tabTeklif.FieldByName(sonbasilanctrl.TextHint).AsString:=Tablo.Query1.Fields[0].AsString;
   sonbasilanctrl.Text:=AD;

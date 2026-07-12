@@ -86,7 +86,7 @@ type
 
 implementation
 uses
-  UTablo;
+  UTablo, UVeriMotor;
 
 { TLogger }
 
@@ -198,7 +198,7 @@ begin
   Result := TADOQuery.Create(nil);
   with TADOQuery(Result) do begin
     Connection := FConnection;
-    SQL.Text := 'SELECT TOP 0 * FROM ' + ATableName;
+    SQL.Text := 'SELECT '+DbUst(0)+'* FROM ' + ATableName+' '+DbSinir(0);
     Open;
   end;
 end;

@@ -218,7 +218,7 @@ type
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,
-  UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly;
+  UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
@@ -554,7 +554,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
      //Önce açılış kaydı harici girilmiş bilgi var mı
      Tablo.Query4.Close;
-     Tablo.Query4.SQL.Text := 'Select top 1 ISLEMTARIHI From KASA Where HESAPTURU=''K'' AND HESAPID = '+ KASALAR.Fields[0].AsString+' AND TUR<>1';
+     Tablo.Query4.SQL.Text := 'Select '+DbUst(1)+'ISLEMTARIHI From KASA Where HESAPTURU=''K'' AND HESAPID = '+ KASALAR.Fields[0].AsString+' AND TUR<>1 '+DbSinir(1);
      Tablo.Query4.Open;
 
      if Tablo.Query4.RecordCount> 0 then

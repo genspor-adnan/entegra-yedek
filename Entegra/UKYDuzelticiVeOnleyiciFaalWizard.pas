@@ -134,7 +134,7 @@ var
 implementation
 
 uses PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar,
-     UKYDuzelticiVeOnleyiciFaalListeDlg, UAnaForm;
+     UKYDuzelticiVeOnleyiciFaalListeDlg, UAnaForm, UVeriMotor;
 {$R *.dfm}
 
 procedure TKYDuzelticiVeOnleyiciFaalWizardDlg.BeditProjePropertiesButtonClick(  Sender: TObject; AButtonIndex: Integer);
@@ -301,8 +301,8 @@ begin
         if TabDOF.FieldByName('DOFSORUMLU').AsString <> '' then
            EditDOFSorumlu.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabDOF.FieldByName('DOFSORUMLU').AsInteger);
         if TabDOF.FieldByName('DEPARTMAN').AsString <> '' then begin
-           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-              ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ) '+
+           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+              ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+') '+
               ' from ROLLER ROL where ROL.ID='+TabDOF.FieldByName('DEPARTMAN').AsString);
            EditDepartman.text := Tablo.Query1.Fields[1].AsString+' / '+Tablo.Query1.Fields[2].AsString;
         end;
@@ -405,7 +405,7 @@ begin
   if TabDOF.Active then
   begin
    TabDOF.Close;
-   TabDOF.SQL.Text:='Select TOP 1 * from KALITEDOF ORDER BY ID DESC';
+   TabDOF.SQL.Text:='Select '+DbUst(1)+'* from KALITEDOF ORDER BY ID DESC '+DbSinir(1);
    TabDOF.Open;
 
    if TabDOF.State in [dsEdit, dsInsert] then

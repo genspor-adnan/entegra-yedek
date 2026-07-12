@@ -24,7 +24,7 @@ procedure Excel2FaturaSatir(FatSatirID : Integer);
 
 implementation
 
-uses UTablo, PrjConst, FetaKurulusSiniflari, UBekletme, UGirisKutusuEx, FetaUtil;
+uses UTablo, PrjConst, FetaKurulusSiniflari, UBekletme, UGirisKutusuEx, FetaUtil, UVeriMotor;
 
 var
     book:variant;
@@ -1492,7 +1492,7 @@ var
                if DepoId = 0 then
                   DepoId := VarsDepo;
                //Fatura başlık bilgileri
-               Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+               Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
                TabloYenile(Tablo.tabCariBilgileri, [RehberId, Tablo.Query1.Fields[0].AsInteger]);
                Baslik := Tablo.tabCariBilgileri.FieldByName('FATURABASLIK').AsString;
                if Baslik = '' then begin // eğer ticari bilgiler kısmında başlık yoksa firma adını alsın

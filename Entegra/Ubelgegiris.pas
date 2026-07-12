@@ -195,6 +195,8 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.dfm}
 
 uses PrjConst,Utablo, FetaKurulusSiniflari, fetautil,LocOnfly, UGirisKutusuEx;
@@ -834,7 +836,7 @@ end;
 
 procedure Tbelgegirisdlg.FormShow(Sender: TObject);
 begin
-  Tablo.TablodanSorguAc(1,'select top 1 ID from DEPOLAR where VARSAYILAN=1 and SUBEID=-1');
+  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ID from DEPOLAR where VARSAYILAN=1 and SUBEID=-1 '+DbSinir(1));
   VarsDepo := Tablo.Query1.Fields[0].AsInteger;
   s_no:=0;
   cxcombobox1.ItemIndex:=0;

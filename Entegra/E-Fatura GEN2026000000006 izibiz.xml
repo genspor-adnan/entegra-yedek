@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TEMELFATURA</cbc:ProfileID>
+<cbc:ID>GEN2026000000006</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>8AECCC92-04FD-40F3-A475-A6F552E3934A</cbc:UUID>
+<cbc:IssueDate>2026-06-30</cbc:IssueDate>
+<cbc:IssueTime>18:37:30</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız İkiYüzYetmişBeş Türk Lirası</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:Note>EFATURANOTU</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cbc:WebsiteURI>www.bilimplant.com</cbc:WebsiteURI>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">7330884158</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>Dudullu OSB. Mah. İmes San. Sit. C Blok 305.Sok. No:3</cbc:StreetName>
+<cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cbc:PostalZone>34775</cbc:PostalZone>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>Yenikapı</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Contact>
+<cbc:Telephone>0216 999 5041</cbc:Telephone>
+<cbc:ElectronicMail>ooooooooo</cbc:ElectronicMail>
+</cac:Contact>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4840847211</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>izibiz</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>LATİFAĞA CAD. GÜRÜN ÇIKMAZI no:155/3 </cbc:StreetName>
+<cbc:CitySubdivisionName>avcılar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>MECİDİYEKÖY </cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>izibiz</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">25.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">250.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">25.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">250.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">250.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">275.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="TRY">275.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:InvoicedQuantity unitCode="C62">5</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">250.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">25.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">250.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">25.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>RN-TL Açık Ölçü Postu </cbc:Name>
+<cbc:Note>Lot No: IP0035232222 Miktar: 2.000000
+Lot No: IP0035234215 Miktar: 3.000000</cbc:Note>
+<cbc:BrandName>Bilimplant</cbc:BrandName>
+<cbc:ModelName>Açık Ölçü Postu</cbc:ModelName>
+<cac:BuyersItemIdentification><cbc:ID>8681489704508</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>8681489704508</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489704508</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489704508</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>IP0035232222, IP0035234215</cbc:Value></cac:AdditionalItemProperty>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">50.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

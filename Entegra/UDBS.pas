@@ -156,13 +156,13 @@ begin
   TabDBS.Close;
   if ADBSId <> -1 then begin
     if ADBSId = -2 then
-      TabDBS.SQL.Text := 'SELECT TOP 1 * FROM DBS ORDER BY ID DESC'
+      TabDBS.SQL.Text := 'SELECT '+DbUst(1)+'* FROM DBS ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabDBS.SQL.Text := 'SELECT * FROM DBS WHERE ID = :ID';
       TabDBS.Params.ParamByName('ID').AsInteger := ADBSId;
     end;
   end else { Yani -1 -> Boş Çek senet ekranı için boş bir query }
-    TabDBS.SQL.Text := 'SELECT TOP 0 * FROM DBS ';
+    TabDBS.SQL.Text := 'SELECT '+DbUst(0)+'* FROM DBS '+DbSinir(0);
   TabDBS.Open;
 end;
 

@@ -66,7 +66,7 @@ uses
   System.JSON, System.NetEncoding, System.IOUtils, System.Variants,
   System.DateUtils, Data.DB, Vcl.Dialogs, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   System.StrUtils, ComObj, Utablo, PrjConst, FetaKurulusSiniflari,
-  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx;
+  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor;
 
 type
   TEBelgeBaslik = record
@@ -448,8 +448,8 @@ begin
   try
     LQuery.Connection := Tablo.FDCnn;
     LQuery.SQL.Text :=
-      'select top 1 ANAHTAR, DEGER from GENINI where BOLUM=:BOLUM and DIL=-1 ' +
-      'and DEGER=:DEGER order by SIRA, ANAHTAR';
+      'select '+DbUst(1)+'ANAHTAR, DEGER from GENINI where BOLUM=:BOLUM and DIL=-1 ' +
+      'and DEGER=:DEGER order by SIRA, ANAHTAR '+DbSinir(1);
     LQuery.ParamByName('BOLUM').AsInteger := Ops_TevkifatNedeni;
     LQuery.ParamByName('DEGER').AsInteger := ATevkifatNedeniID;
     LQuery.Open;
@@ -488,8 +488,8 @@ begin
   try
     LQuery.Connection := Tablo.FDCnn;
     LQuery.SQL.Text :=
-      'select top 1 ANAHTAR, DEGER from GENINI where BOLUM=:BOLUM and DIL=-1 ' +
-      'and DEGER=:DEGER order by SIRA, ANAHTAR';
+      'select '+DbUst(1)+'ANAHTAR, DEGER from GENINI where BOLUM=:BOLUM and DIL=-1 ' +
+      'and DEGER=:DEGER order by SIRA, ANAHTAR '+DbSinir(1);
     LQuery.ParamByName('BOLUM').AsInteger := Ops_KDVIstisnaNedeni;
     LQuery.ParamByName('DEGER').AsInteger := AIstisnaNedeniID;
     LQuery.Open;
@@ -594,8 +594,8 @@ function GondericiAliasGetir(ABelgeTuru: Integer): string;
 begin
   Result := '';
   Tablo.TablodanSorguAc(1,
-    'select top 1 ALIAS from REHBERALIAS where REHBERID=-1 and BELGETURU=' +
-    IntToStr(ABelgeTuru) + ' and AKTIF=1 order by VARSAYILAN desc, ID');
+    'select '+DbUst(1)+'ALIAS from REHBERALIAS where REHBERID=-1 and BELGETURU=' +
+    IntToStr(ABelgeTuru) + ' and AKTIF=1 order by VARSAYILAN desc, ID '+DbSinir(1));
   if not Tablo.Query1.Eof then
     Result := Tablo.Query1.Fields[0].AsString;
 end;
@@ -614,8 +614,8 @@ begin
     try
       LQ.Connection := Tablo.TabBizim.Connection;
       LQ.SQL.Text :=
-        'select top 1 ALIAS from REHBERALIAS where REHBERID=:r and BELGETURU=:b ' +
-        'and AKTIF=1 order by VARSAYILAN desc, ID';
+        'select '+DbUst(1)+'ALIAS from REHBERALIAS where REHBERID=:r and BELGETURU=:b ' +
+        'and AKTIF=1 order by VARSAYILAN desc, ID '+DbSinir(1);
       LQ.ParamByName('r').AsInteger := ARehberID;
       LQ.ParamByName('b').AsInteger := RAlias_EArsiv;
       LQ.Open;
@@ -642,8 +642,8 @@ begin
     try
       LQ.Connection := Tablo.TabBizim.Connection;
       LQ.SQL.Text :=
-        'SELECT TOP 1 ISNULL(EMAIL,'''') AS EMAIL, ISNULL(ISTEL,'''') AS ISTEL ' +
-        'FROM REHBER WHERE ID=:r';
+        'SELECT '+DbUst(1)+'ISNULL(EMAIL,'''') AS EMAIL, ISNULL(ISTEL,'''') AS ISTEL ' +
+        'FROM REHBER WHERE ID=:r '+DbSinir(1);
       LQ.ParamByName('r').AsInteger := ARehberID;
       LQ.Open;
       if not LQ.IsEmpty then begin
@@ -1045,9 +1045,9 @@ begin
     try
       LQ.Connection := Tablo.TabBizim.Connection;
       LQ.SQL.Text :=
-        'SELECT TOP 1 BILGI FROM REHBERBILGI ' +
+        'SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI ' +
         'WHERE YER_ID=:y AND YERI=2 AND ETIKET LIKE :e AND ISNULL(BILGI,'''')<>'''' ' +
-        'ORDER BY SIRA';
+        'ORDER BY SIRA '+DbSinir(1);
       LQ.ParamByName('y').AsInteger := AYerID;
       LQ.ParamByName('e').AsString := AEtiketLike;
       LQ.Open;
@@ -1247,8 +1247,8 @@ begin
   LSablon := '';
   if ABaslik.RehberID > 0 then begin
     Tablo.TablodanSorguAc(1,
-      'select top 1 YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
-      IntToStr(ABaslik.RehberID) + ' order by ID');
+      'select '+DbUst(1)+'YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
+      IntToStr(ABaslik.RehberID) + ' order by ID '+DbSinir(1));
     if not Tablo.Query1.Eof then
       LSablon := Trim(Tablo.Query1.FieldByName('YORUM').AsString);
     Tablo.Query1.Close;
@@ -2107,15 +2107,15 @@ begin
     else
       LBolum := Ops_KurumXSLT_EFatura;
     Tablo.TablodanSorguAc(1,
-      'select top 1 ANAHTAR from GENINI where DIL=-1 and BOLUM=' +
-      IntToStr(LBolum) + ' and DEGER=' + IntToStr(ARehberID));
+      'select '+DbUst(1)+'ANAHTAR from GENINI where DIL=-1 and BOLUM=' +
+      IntToStr(LBolum) + ' and DEGER=' + IntToStr(ARehberID) + ' '+DbSinir(1));
     if not Tablo.Query1.Eof then
       LXSLTAdi := Trim(Tablo.Query1.Fields[0].AsString);
     Tablo.Query1.Close;
     if LXSLTAdi <> '' then begin
       Tablo.TablodanSorguAc(1,
-        'select top 1 SQL from DOKUMLER where GRUBU=''XSLT'' and RAPORADI=' +
-        QuotedStr(LXSLTAdi) + ' order by ID desc');
+        'select '+DbUst(1)+'SQL from DOKUMLER where GRUBU=''XSLT'' and RAPORADI=' +
+        QuotedStr(LXSLTAdi) + ' order by ID desc '+DbSinir(1));
       if not Tablo.Query1.Eof then
         AXSLT := TurkceMojibakeDuzelt(Tablo.Query1.Fields[0].AsString);
       Tablo.Query1.Close;
@@ -2768,7 +2768,7 @@ begin
         try
           LQ.Connection := AConnection;
           LQ.SQL.Text :=
-            'SELECT TOP 1 ALICIALIAS FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=:ID ORDER BY ID DESC';
+            'SELECT '+DbUst(1)+'ALICIALIAS FROM ' + DepoTablo('EBELGE') + ' WHERE FATBASLIKID=:ID ORDER BY ID DESC '+DbSinir(1);
           LQ.ParamByName('ID').AsInteger := AFatBaslikID;
           LQ.Open;
           if not LQ.Eof then
@@ -2800,11 +2800,11 @@ begin
   try
     LQ.Connection := AConnection;
     LQ.SQL.Text :=
-      'select top 1 ID,FATURATARIH from FATBASLIK ' +
+      'select '+DbUst(1)+'ID,FATURATARIH from FATBASLIK ' +
       'where ID<>:ID and TUR=:TUR and isnull(EFATURADURUM,0)=0 ' +
       'and ltrim(rtrim(isnull(FATURANO,'''')))=''0'' ' +
       'and convert(date,FATURATARIH)<convert(date,:TARIH) ' +
-      'order by FATURATARIH,ID';
+      'order by FATURATARIH,ID '+DbSinir(1);
     LQ.ParamByName('ID').AsInteger := ABaslik.ID;
     LQ.ParamByName('TUR').AsInteger := ABaslik.Tur;
     LQ.ParamByName('TARIH').AsDateTime := ABaslik.FaturaTarih;
@@ -3373,13 +3373,13 @@ begin
       LCurSeq := StrToInt64Def(Copy(LFaturaNo, 8, 9), 0);
       if LCurSeq > 1 then begin
         LQ.SQL.Text :=
-          'select top 1 FATURANO from FATBASLIK where FATURASERI=' + QuotedStr(LSeri) +
+          'select '+DbUst(1)+'FATURANO from FATBASLIK where FATURASERI=' + QuotedStr(LSeri) +
           ' and TUR=' + IntToStr(LBaslik.Tur) +
           ' and EFATURADURUM in (1,11,51)' +
           ' and len(FATURANO)=16 and left(FATURANO,7)=' + QuotedStr(LSeriYil) +
           ' and try_convert(bigint,right(FATURANO,9)) is not null' +
           ' and try_convert(bigint,right(FATURANO,9))<' + IntToStr(LCurSeq) +
-          ' order by try_convert(bigint,right(FATURANO,9))';
+          ' order by try_convert(bigint,right(FATURANO,9)) '+DbSinir(1);
         LQ.Open;
         if not LQ.Eof then
           LBekleyen := LQ.Fields[0].AsString
@@ -3395,7 +3395,7 @@ begin
     end;
 
     LQ.SQL.Text :=
-      'select top 1 ID,BELGETURU from ' + DepoTablo('EBELGE') + ' where FATBASLIKID=:ID and YON=1 order by ID desc';
+      'select '+DbUst(1)+'ID,BELGETURU from ' + DepoTablo('EBELGE') + ' where FATBASLIKID=:ID and YON=1 order by ID desc '+DbSinir(1);
     LQ.ParamByName('ID').AsInteger := AFatBaslikID;
     LQ.Open;
     if LQ.Eof then begin
@@ -3407,7 +3407,7 @@ begin
     LQ.Close;
 
     LQ.SQL.Text :=
-      'select top 1 DURUM from ' + DepoTablo('EBELGEKUYRUK') + ' where EBELGEID=:EID and ISLEMTURU=1 and DURUM in (0,1,9)';
+      'select '+DbUst(1)+'DURUM from ' + DepoTablo('EBELGEKUYRUK') + ' where EBELGEID=:EID and ISLEMTURU=1 and DURUM in (0,1,9) '+DbSinir(1);
     LQ.ParamByName('EID').AsLargeInt := LEBelgeID;
     LQ.Open;
     if LQ.Eof then begin
@@ -3517,8 +3517,8 @@ begin
   try
     LQ.Connection := AConnection;
     LQ.SQL.Text :=
-      'select top 1 ID, UUID, cast(API_JSON as nvarchar(max)) API_JSON ' +
-      'from ' + DepoTablo('EBELGE') + ' where YON=2 and FATBASLIKID=:FID order by ID desc';
+      'select '+DbUst(1)+'ID, UUID, cast(API_JSON as nvarchar(max)) API_JSON ' +
+      'from ' + DepoTablo('EBELGE') + ' where YON=2 and FATBASLIKID=:FID order by ID desc '+DbSinir(1);
     LQ.ParamByName('FID').AsInteger := AFatBaslikID;
     LQ.Open;
     if not LQ.Eof then begin
@@ -4408,12 +4408,12 @@ begin
   try
     LQry.Connection := AConnection;
     LQry.SQL.Text :=
-      'SELECT TOP 1 ' + C_UBL_OKU + ' as UBLX, ' +
+      'SELECT '+DbUst(1) + C_UBL_OKU + ' as UBLX, ' +
       '  isnull(FB.REHBERID, 0) as RID ' +
       'FROM ' + DepoTablo('EBELGE') + ' E ' +
       ' INNER JOIN FATBASLIK FB ON FB.ID = E.FATBASLIKID ' +
       'WHERE E.YON = 2 AND E.FATBASLIKID = :FID ' +
-      'ORDER BY E.ID DESC';
+      'ORDER BY E.ID DESC '+DbSinir(1);
     LQry.ParamByName('FID').AsInteger := AFatBaslikID;
     LQry.Open;
     if not LQry.Eof then begin

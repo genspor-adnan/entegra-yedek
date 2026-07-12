@@ -205,7 +205,7 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, UPOS,UAnaForm, PrjConst, UFastRap, URaporAraclari,
-     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly, ULog;
+     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly, ULog, UVeriMotor;
 
 {$R *.dfm}
 
@@ -566,7 +566,7 @@ begin
       if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
         //?nce a??l?? kayd? harici girilmi? bilgi var m?
         Tablo.Query4.Close;
-        Tablo.Query4.SQL.Text := 'Select top 1 ISLEMTARIHI From KASA Where HESAPTURU=''P'' AND HESAPID = '+ POSLAR.FieldByName('ID').AsString+' AND TUR<>1';
+        Tablo.Query4.SQL.Text := 'Select '+DbUst(1)+'ISLEMTARIHI From KASA Where HESAPTURU=''P'' AND HESAPID = '+ POSLAR.FieldByName('ID').AsString+' AND TUR<>1 '+DbSinir(1);
         Tablo.Query4.Open;
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')

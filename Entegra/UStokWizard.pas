@@ -729,7 +729,7 @@ var
 implementation
 
 uses
-    UAnaForm, FetaClassExtensions, FetaKurulusSiniflari, Utablo, UResim, UBinarySave, UFiyatDegisiklik,
+    UVeriMotor, UAnaForm, FetaClassExtensions, FetaKurulusSiniflari, Utablo, UResim, UBinarySave, UFiyatDegisiklik,
     PrjConst, URehberAyar, UCariFonksiyonlar, UKampanyalar, IdGlobalProtocols, UBarkodYazdir, UKategori,
      UStokHizmetAra, LocOnFly, ULog;
 
@@ -1624,11 +1624,11 @@ procedure TStokWizardDlg.EkleStokEsdegerClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
-  sql:=' SELECT top 100 S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],TIPI AS [Tip],MARKA AS Marka,'+
+  sql:=' SELECT '+DbUst(100)+'S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],TIPI AS [Tip],MARKA AS Marka,'+
   ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ızleme] '+
   ' FROM STOKLAR S '+
   ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,''-2701''+convert(varchar(10),S.MARKA))   '+
-  ' Where S.STOKADI like ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' ';
+  ' Where S.STOKADI like ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' '+DbSinir(100);
   //Ayn? Tipe sahip ?r?nler e?de?er olarak se?ilebilir.
   st := Tstringlist.create;
     if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[nil,nil,Tablo.repStokTipi,Tablo.repStokMarka,nil,Tablo.repStokGrubu,Tablo.repStokOzellik,Tablo.RepStokIzleme]) then begin
@@ -2386,7 +2386,7 @@ begin
    ctrls := TGirdiDenetimleri.Create.ComboBox((BGYeni_birim),@eskiad,tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_Anabirim)+' ').items); //Anabirim listesi
    TGirisKutusuEx.BilgiAlEx(BGYeni_birim_gir,ctrls);
    YeniBirim := eskiad;
-   Tablo.TablodanSorguAc(1,'select top 1 DEGER from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_Anabirim)+' and ANAHTAR= '''+YeniBirim+''' ');
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'DEGER from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_Anabirim)+' and ANAHTAR= '''+YeniBirim+''' '+DbSinir(1));
    YeniBirim := Tablo.Query1.Fields[0].AsString;
    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set ANABIRIM='+YeniBirim+',BIRIM2='+YeniBirim+'  where ID='+TabStok.FieldByName('ID').AsString,[],[]);
    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKFIYAT set BIRIM='+YeniBirim+' where STOKID='+TabStok.FieldByName('ID').AsString+' and BIRIM='+TabStok.FieldByName('ANABIRIM').AsString,[],[]);
@@ -2583,7 +2583,7 @@ begin
   if LogGun > 0 then LogOnceki.Clear;
   //TABLO al?? sat?? a g?re a??ld??? i?in stok kart?na ait t?m barkodlar? kontrol edip varsay?lan var m? bak?yoruz.
   Tablo.Query2.Close;
-  Tablo.Query2.SQL.Text:= 'select top 1 * from STOKBARKOD WHERE STOKID ='+TabStok.FieldByName('ID').AsString+' AND VARSAYILAN=1 ';
+  Tablo.Query2.SQL.Text:= 'select '+DbUst(1)+'* from STOKBARKOD WHERE STOKID ='+TabStok.FieldByName('ID').AsString+' AND VARSAYILAN=1 '+DbSinir(1);
   Tablo.Query2.Open;
   TabBarkod.FieldByName('VARSAYILAN').Value:= Tablo.Query2.IsEmpty;
 

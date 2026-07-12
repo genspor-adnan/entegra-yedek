@@ -72,7 +72,7 @@ var
 
 implementation
 
-uses Utablo, UMesaj, UAnaForm,FetaKurulusSiniflari,PrjConst,LocOnFly;
+uses Utablo, UMesaj, UAnaForm,FetaKurulusSiniflari,PrjConst,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
 
@@ -116,16 +116,16 @@ begin
 
    case Cagiran of
      0 : begin  // Mutabakat kaydı
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' REHBERID = '+LabelId.Caption);
 
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
          end;
      1 : begin  // Müşteri açılışı
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR, isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else begin
@@ -134,59 +134,59 @@ begin
               else
                  TabAcilis.SQL.Add(' REHBERID = '+LabelId.Caption);
            end;
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
          end;
      2 : begin // 2-Kasa
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''K'' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''K'' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
          end;
      3 : begin // 3-Banka açılışı
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''B'' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''B'' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
          end;
      4 :begin   //Kredi Kartı açılışı
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''V'' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''V'' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
         end;
      5 :begin   //POS açılışı
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''P'' and ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where K.TUR='+IntToStr(Acilis_Devir)+' and HESAPTURU=''P'' and ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' HESAPID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
         end;
      6 :begin   //Rotatif Kredi açılışı
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC=ALACAK,ALACAK=BORC,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' K.ID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
         end;
      7 :begin   //masrafgelir açılışı
           // ComboKur.RepositoryItem.Properties.ReadOnly:=True;
-           TabAcilis.SQL.Text := 'select top 1 isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
+           TabAcilis.SQL.Text := 'select '+DbUst(1)+'isnull(ID,0), KUR,isnull(ISLEMTARIHI,'''+IntToStr(CariYil)+'-01-01''),BORC,ALACAK,DOVIZ_TUTARI,ACIKLAMA,ID from KASA K where ';
            if KasaId > 0 then
               TabAcilis.SQL.Add(' K.ID = '+IntToStr(KasaId))
            else
               TabAcilis.SQL.Add(' MASRAFID  = '+LabelId.Caption);
-           TabAcilis.SQL.Add(' order by 3 desc ');
+           TabAcilis.SQL.Add(' order by 3 desc '+DbSinir(1));
         end;
    end;
    TabAcilis.Open;

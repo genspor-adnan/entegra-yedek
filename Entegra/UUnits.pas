@@ -11,7 +11,7 @@ function MasrafSilmeIslemi(MasrafId:Integer):Boolean;
 
 implementation
 
-uses UGirisKutusuEx, UTablo, PrjConst, FetaKurulusSiniflari;
+uses UGirisKutusuEx, UTablo, PrjConst, FetaKurulusSiniflari, UVeriMotor;
 
 procedure YorumEkleIslemi(TabRehber,TabNotlar : TFDQuery; RehberID:Integer);
 var MemoNot, Tarih, Tur:Variant;
@@ -66,13 +66,13 @@ begin
   Result := False;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
     //Önce girilmiş hizmet var mı bakalım
-     Tablo.TablodanSorguAc(1,' select top 1 ID from KASA where MASRAFID='+IntToStr(MasrafId));
+     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from KASA where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
      if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select top 1 ID from FATBASLIK where MASRAFID='+IntToStr(MasrafId));
+     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from FATBASLIK where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
      if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select top 1 ID from FATURA where TUR=0 and URUNID='+IntToStr(MasrafId));
+     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from FATURA where TUR=0 and URUNID='+IntToStr(MasrafId)+' '+DbSinir(1));
      if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select top 1 ID from BUTCE where MASRAFID='+IntToStr(MasrafId));
+     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from BUTCE where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
      if Tablo.Query1.RecordCount>0 then raise Exception.Create(sButce_Silin);
 
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'Delete From FIYATLAR Where HIZMETID='+IntToStr(MasrafId), [],[]);

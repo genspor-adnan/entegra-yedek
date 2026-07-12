@@ -79,7 +79,7 @@ var
 
 implementation
 Uses
-UHizliGirisPDKSDurum,FetaKurulusSiniflari,FetaClassExtensions,UGirisKutusuEx,PrjConst,UAnaForm,UOpsDlg,LocOnFly;
+UVeriMotor,UHizliGirisPDKSDurum,FetaKurulusSiniflari,FetaClassExtensions,UGirisKutusuEx,PrjConst,UAnaForm,UOpsDlg,LocOnFly;
 {$R *.dfm}
 
 procedure THizliGirisPDKSDlg.FormCreate(Sender: TObject);
@@ -291,7 +291,7 @@ begin
                 'from PERS_PDKS PP' + #13#10 +
                 'LEFT OUTER JOIN REHBER R on R.ID=PP.REHBERID' + #13#10 +
                 'left outer join PERS_VARDIYATANIM PV on' + #13#10 +
-                'PV.REHBERID=CASE WHEN EXISTS(SELECT TOP 1 ISNULL(REHBERID,-1) FROM dbo.PERS_VARDIYATANIM WHERE REHBERID=PP.REHBERID)THEN' + #13#10 +
+                'PV.REHBERID=CASE WHEN EXISTS(SELECT '+DbUst(1)+'ISNULL(REHBERID,-1) FROM dbo.PERS_VARDIYATANIM WHERE REHBERID=PP.REHBERID '+DbSinir(1)+')THEN' + #13#10 +
                 'PP.REHBERID ELSE -1 END and PV.GUN=DATEPART(WEEKDAY,PP.GIRIS) Where PP.REHBERID <> 0 ';
       Sql1 := Sql1 + ' AND (PP.GIRIS between CONVERT(DATETIME,''' + FormatDateTime('yyyy-mm-dd', DateTarih.Date) + ' 00:00:00'',102) ' +
       ' and CONVERT(DATETIME,''' + FormatDateTime('yyy-mm-dd', DateTarih.Date)+ ' 23:59'',102))';

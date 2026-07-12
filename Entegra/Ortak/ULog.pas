@@ -871,10 +871,10 @@ begin
         // AModul param'i geriye uyumluluk icin durur (yazilmaz).
         if LBilgiVar then
           LQ.SQL.Text :=
-            'INSERT INTO ' + DepoTablo(LTablo) + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
-            'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), ' + DbLogBilgiYaz(':BILGI') + ')'
+             'INSERT INTO ' + DepoTablo(LTablo) + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI) ' +
+             'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0), ' + DbLogBilgiYaz(':BILGI') + ')'
         else
-          LQ.SQL.Text :=
+           LQ.SQL.Text :=
             'INSERT INTO ' + DepoTablo(LTablo) + '(IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID) ' +
             'VALUES(:IP,:IST,:KUL,:SUB,:IT,:AIT,:UTID,:UKYT,:TID,:KYT, NULLIF(:REH,0), NULLIF(:STK,0))';
         LQ.ParamByName('IP').AsString  := Copy(YerelIP, 1, 45);

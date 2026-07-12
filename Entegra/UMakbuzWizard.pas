@@ -178,7 +178,7 @@ implementation
 
 Uses UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UNakitDlg, FetaClassExtensions,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame, UFisIrsaliyeAraDlg, Fetautil, LocOnFly,
-  UGirisKutusuEx;
+  UGirisKutusuEx, UVeriMotor;
 {$R *.dfm}
 
 var
@@ -617,7 +617,7 @@ begin
    else begin  Tur := 321; Tipi := 140 end;                                                            //verilen senet
 
 {   if Tur = 140 then begin
-     if Veritabani.VeriVarMi(Tablo.FDCnn,'Select top 1 ID from CEKLER  Where TUR=23 and DURUM=1 and isnull(CIROLU,0) <> 1',[],[]) then begin
+     if Veritabani.VeriVarMi(Tablo.FDCnn,'Select '+DbUst(1)+'ID from CEKLER  Where TUR=23 and DURUM=1 and isnull(CIROLU,0) <> 1 '+DbSinir(1),[],[]) then begin
        Tablo.CiroEdileceklerBaslat('M',Tipi,Tur,0,-1,RehberId,-1,EditFatTarih.Date,'');
      end else begin
        Tablo.CekSihirbazBaslat('E', Tur, Tipi, 0, -1, RehberId,-99,EditFatTarih.Date, Trim(EditMakbuzNo.Text));

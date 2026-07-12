@@ -53,11 +53,13 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.dfm}
 
 procedure TDestekdlg.FormShow(Sender: TObject);
 begin
-  Tablo.TablodanSorguAc(1,'SELECT TOP 1 DEGER, ANAHTAR FROM GENINI WHERE BOLUM=' + IntToStr(Destekdlg_MusteriKodu) + ' ORDER BY SIRA DESC');
+  Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'DEGER, ANAHTAR FROM GENINI WHERE BOLUM=' + IntToStr(Destekdlg_MusteriKodu) + ' ORDER BY SIRA DESC '+DbSinir(1));
   if not Tablo.Query1.IsEmpty then
   begin
     ComboFirma.Properties.Items.Add;

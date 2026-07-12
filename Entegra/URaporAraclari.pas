@@ -44,7 +44,7 @@ type
 
 implementation
 
-uses FetaClassExtensionsConsts;
+uses FetaClassExtensionsConsts, UVeriMotor;
 
 function SqlWithParams(const ASQL: string; const AParamNames: array of string;
   const AParamValues: array of Variant): string;
@@ -111,14 +111,14 @@ begin
   if DokumVarMi(AHedefDokumAdi) then
     raise Exception.Create('Bu adla kayıtlı döküm var!!!');
   { İlk önce alt tablolar kopyalanıyor }
-  with NewFDQuery('SELECT TOP 0 * FROM KOSULLAR',[],[]) do
+  with NewFDQuery('SELECT '+DbUst(0)+'* FROM KOSULLAR '+DbSinir(0),[],[]) do
   try
     Open;
     Tasi('KOSULLAR','RAPORADI', AKaynakDokumAdi, AHedefDokumAdi, TFDQuery(CurrentInstance));
   finally
     Free;
   end;
-  with NewFDQuery('Select TOP 0 * from AYARLARYENI',[],[]) do
+  with NewFDQuery('Select '+DbUst(0)+'* from AYARLARYENI '+DbSinir(0),[],[]) do
   try
     Open;
     Tasi('AYARLARYENI','RAPORADI', AKaynakDokumAdi, AHedefDokumAdi, TFDQuery(CurrentInstance));
@@ -231,7 +231,7 @@ end;
 class procedure TRaporAraclari.YeniRapor(AEkranAdi, ARaporAdi: string);
 var RaporId : Integer;
 begin
-  with NewFDQuery('SELECT TOP 0 * FROM DOKUMLER',[],[]) do
+  with NewFDQuery('SELECT '+DbUst(0)+'* FROM DOKUMLER '+DbSinir(0),[],[]) do
   try
     Open;
     Append;
@@ -247,7 +247,7 @@ begin
     Free;
   end;
 
-  with NewFDQuery('SELECT TOP 0 * FROM AYARLARYENI',[],[]) do
+  with NewFDQuery('SELECT '+DbUst(0)+'* FROM AYARLARYENI '+DbSinir(0),[],[]) do
   try
     Open;
     Append;

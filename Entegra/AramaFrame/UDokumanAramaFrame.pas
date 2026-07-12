@@ -144,7 +144,7 @@ implementation
 
 {$R *.dfm}
 
-uses UGirisKutusuEx, PrjConst, FetaKurulusSiniflari, UDokumanListeFrame, UDokumanYetki,LocOnFly;
+uses UGirisKutusuEx, PrjConst, FetaKurulusSiniflari, UDokumanListeFrame, UDokumanYetki,LocOnFly, UVeriMotor;
 { TDokumanAramaFrame }
 
 var
@@ -441,7 +441,7 @@ begin
   if DYetkisonuc.Degistir = True  then begin
     Bilgi := TabKlasorler.FieldByName('AD').AsString;
     Resim := TabKlasorler.FieldByName('RESIM').AsInteger;
-    ctrls := TGirdiDenetimleri.Create.Edit(TKlasorAdiniGirin, @Bilgi).ImageComboBox(TKlasorResiminiSeciniz,@Resim,Tablo.FDCnn,'SELECT top 15 A=ROW_NUMBER()OVER(ORDER BY ID)-1,B=''''  FROM BANKASUBELER order by ID',True,Tablo.KlasorResimleri);
+    ctrls := TGirdiDenetimleri.Create.Edit(TKlasorAdiniGirin, @Bilgi).ImageComboBox(TKlasorResiminiSeciniz,@Resim,Tablo.FDCnn,'SELECT '+DbUst(15)+'A=ROW_NUMBER()OVER(ORDER BY ID)-1,B=''''  FROM BANKASUBELER order by ID '+DbSinir(15),True,Tablo.KlasorResimleri);
     if (TGirisKutusuEx.BilgiAlEx('', ctrls) = mrOk)and(trim(Bilgi) <> '') then
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update DOKUMANKLASOR set AD='''+trim(string(Bilgi))+''', RESIM='+IntToStr(Integer(Resim))+' where ID='+TabKlasorler.FieldByName('ID').AsString,[],[]);
     TabloYenile(TabKlasorler,[]);
@@ -584,7 +584,7 @@ var
 begin
   Bilgi := '';
   Resim := 0;
-  ctrls := TGirdiDenetimleri.Create.Edit(TKlasorAdiniGirin, @Bilgi).ImageComboBox(TKlasorResiminiSeciniz,@Resim,Tablo.FDCnn,'SELECT top 15 ROW_NUMBER() OVER(ORDER BY ID)-1,'''' FROM BANKASUBELER order by ID',True,Tablo.KlasorResimleri);
+  ctrls := TGirdiDenetimleri.Create.Edit(TKlasorAdiniGirin, @Bilgi).ImageComboBox(TKlasorResiminiSeciniz,@Resim,Tablo.FDCnn,'SELECT '+DbUst(15)+'ROW_NUMBER() OVER(ORDER BY ID)-1,'''' FROM BANKASUBELER order by ID '+DbSinir(15),True,Tablo.KlasorResimleri);
   if (TGirisKutusuEx.BilgiAlEx('', ctrls) = mrOk)and(trim(Bilgi) <> '') then begin
     if TToolButton(Sender).Tag = 0 then
        UstId := TabKlasorler.FieldByName('USTID').AsInteger
@@ -593,7 +593,7 @@ begin
     Tablo.TablodanSorguAc(4, 'insert into DOKUMANKLASOR (AD,RESIM,USTID,SUBEID,DURUM)values('''+trim(string(Bilgi))+''','+IntToStr(Integer(Resim))+','+IntToStr(UstId)+','+IntToStr(SubeID)+',1) SELECT SCOPE_IDENTITY() AS InsertedRowId ');
     Tablo.Query4.open;
     LocateID := Tablo.Query4.Fields[0].AsInteger;
-    Tablo.TablodanSorguAc(8,'SELECT top 1 * FROM dokumanklasor order by ID desc');
+    Tablo.TablodanSorguAc(8,'SELECT '+DbUst(1)+'* FROM dokumanklasor order by ID desc '+DbSinir(1));
     Tablo.Query8.Open;
     if ustId = 0 then begin
       Tablo.Query5.SQL.Text:='INSERT INTO DOKUMANYETKI(REHBERID,YERI,YERID,GOR,EKLE,SIL,DEGISTIR,TUR) '+

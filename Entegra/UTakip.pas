@@ -282,7 +282,7 @@ var
   TakipCagiranLotno : string;
   RehberId : Integer;
 implementation
- Uses LocOnFly,UTablo;
+ Uses LocOnFly,UTablo,UVeriMotor;
 {$R *.dfm}
 
 procedure TTakipDlg.BekletmeyiIlerlet(i: Integer; DlgBaslik,LabelText: string; Dlg: TBekletmeDlg);
@@ -935,7 +935,7 @@ begin
 	  '  SELECT itb.ID,itb.USTID FROM ITS_TASIMA_BIRIMI itb  '+
     ' INNER JOIN AltKirilim t ON (itb.USTID = t.ID) AND (t.ID <> t.USTID) ) '+
     ' SELECT S.ID,S.SIRANO,S.STOKID,  '+
-    ' (SELECT TOP 1 SSCC FROM ITS_TASIMA_BIRIMI TB WHERE TB.ID=S.TASIMA_BIRIMI_ID) FROM STOKID S '+
+    ' (SELECT '+DbUst(1)+'SSCC FROM ITS_TASIMA_BIRIMI TB WHERE TB.ID=S.TASIMA_BIRIMI_ID '+DbSinir(1)+') FROM STOKID S '+
 		'	INNER JOIN ITS_PAKET P ON P.ID = S.PAKETID '+
 		'	WHERE ISNULL(S.CIKFATBASID,0)=0 ' +
 		'	AND S.TASIMA_BIRIMI_ID IN       ' +

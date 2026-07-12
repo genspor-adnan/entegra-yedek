@@ -232,7 +232,7 @@ implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
       UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketleri,
-      UBankaHesapGiris;
+      UBankaHesapGiris, UVeriMotor;
 
 {$R *.dfm}
 
@@ -609,7 +609,7 @@ begin
       if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
         //Önce açılış kaydı harici girilmiş bilgi var mı
         Tablo.Query4.Close;
-        Tablo.Query4.SQL.Text := 'Select top 1 ISLEMTARIHI From KASA Where HESAPTURU=''B'' AND HESAPID = '+ BANKALAR.FieldByName('ID').AsString+' AND TUR<>1';
+        Tablo.Query4.SQL.Text := 'Select '+DbUst(1)+'ISLEMTARIHI From KASA Where HESAPTURU=''B'' AND HESAPID = '+ BANKALAR.FieldByName('ID').AsString+' AND TUR<>1 '+DbSinir(1);
         Tablo.Query4.Open;
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')

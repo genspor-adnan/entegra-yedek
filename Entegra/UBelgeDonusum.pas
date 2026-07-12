@@ -172,7 +172,7 @@ var
 implementation
 
 uses
-   FetaKurulusSiniflari, FetaClassExtensions, UUretimWizard, UAnaForm, PrjConst;
+   FetaKurulusSiniflari, FetaClassExtensions, UUretimWizard, UAnaForm, PrjConst, UVeriMotor;
 
 {$R *.dfm}
 
@@ -936,7 +936,7 @@ begin
       TabKaynak.SQL.Add(' ,SATICI=S.HAZIRLAYAN ');
       TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO ');
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID) ');
+      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID '+DbSinir(1)+') ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=99 and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
       if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
          TabKaynak.SQL.Add(',SD.EN,SD.BOY,SD.YUZEY,SD.SAYI, SD.POZNO, SD.ACIKLAMA');
@@ -998,7 +998,7 @@ begin
       TabKaynak.SQL.Add(' ,SD.TESLIMTARIHI, S.REHBERILETID, SEVK = (SELECT AD FROM  REHBERILETISIM WHERE ID=S.REHBERILETID) ');
       TabKaynak.SQL.Add(' ,SATICI=S.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when S.TUR = 19 then S.CIKISDEPO else S.GIRISDEPO end ) ');
       TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO, S.DETAYBOLUMU ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID) ');
+      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID '+DbSinir(1)+') ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=S.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
       if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
@@ -1067,7 +1067,7 @@ begin
       TabKaynak.SQL.Add(' ,TESLIMTARIHI=FB.FATURATARIH ');
       TabKaynak.SQL.Add(' ,SATICI=FB.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when FB.TUR in (10,11,12, 119) then FB.GIRISDEPO else FB.CIKISDEPO end ) ');
       TabKaynak.SQL.Add(' ,F.PROJEID, F.POZNO, ST.URUNNO, FB.DETAYBOLUMU ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select top 1 P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID) ');
+      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID '+DbSinir(1)+') ');
       TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=FB.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=F.ID) then 1 else 0 end ');
       TabKaynak.SQL.Add(' ,DETAY_OZELKOD=F.OZELKOD, DETAY_OZELKOD2=F.OZELKOD2 ');
       if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then

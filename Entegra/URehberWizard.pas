@@ -395,7 +395,7 @@ implementation
 
 {$R *.dfm}
 
-uses PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle,
+uses UVeriMotor, PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle,
   Fetautil,URehberAramaEkrani,UResim, UComboImgDuzenle, UCariFonksiyonlar, UBinarySave, UAnaForm,
   FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, URehberTemsilci,
   System.JSON, UEBelgeKimlik, UIzibizRest, ULog;
@@ -911,24 +911,24 @@ begin
     TabloYenile(TabRehber, [RehberID]);
     TabRehber.Edit;
     if TabRehber.FieldByName('SEKTOR').AsString <> '' then begin
-        Tablo. TablodanSorguAc(1, 'Select top 1 ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
-          ' AND  BOLUM=' + IntToStr(Ops_CariKart_Sektor) + ' and DEGER=' + TabRehber.FieldByName('SEKTOR').AsString);
+        Tablo. TablodanSorguAc(1, 'Select '+DbUst(1)+'ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
+          ' AND  BOLUM=' + IntToStr(Ops_CariKart_Sektor) + ' and DEGER=' + TabRehber.FieldByName('SEKTOR').AsString + ' '+DbSinir(1));
         EditSEKTOR.text := tablo.Query1.Fields[0].AsString;
         if TabRehber.FieldByName('ALTSEKTOR').AsString <> '' then begin
-           Tablo. TablodanSorguAc(1, 'Select top 1 ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
-             ' AND  BOLUM=' + IntToStr(Ops_CariKart_Sektor)+TabRehber.FieldByName('SEKTOR').AsString + ' and DEGER=' + TabRehber.FieldByName('ALTSEKTOR').AsString);
+           Tablo. TablodanSorguAc(1, 'Select '+DbUst(1)+'ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
+             ' AND  BOLUM=' + IntToStr(Ops_CariKart_Sektor)+TabRehber.FieldByName('SEKTOR').AsString + ' and DEGER=' + TabRehber.FieldByName('ALTSEKTOR').AsString + ' '+DbSinir(1));
            EditAltSEKTOR.text := tablo.Query1.Fields[0].AsString;
         end;
     end;
     if TabRehber.FieldByName('KATEGORI').AsString <> '' then begin
-       Tablo. TablodanSorguAc(1, 'Select top 1 ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
-         ' AND  BOLUM=' + IntToStr(Ops_CariKart_Kategori) + ' and DEGER=' + TabRehber.FieldByName('KATEGORI').AsString);
+       Tablo. TablodanSorguAc(1, 'Select '+DbUst(1)+'ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
+         ' AND  BOLUM=' + IntToStr(Ops_CariKart_Kategori) + ' and DEGER=' + TabRehber.FieldByName('KATEGORI').AsString + ' '+DbSinir(1));
        EditKATEGORI.text := tablo.Query1.Fields[0].AsString;
     end;
 
     if TabRehber.FieldByName('TEMAS').AsString<>'' then begin
-        Tablo. TablodanSorguAc(1, 'Select top 1 ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
-          ' AND  BOLUM=' + IntToStr(Ops_CariKart_Temas) + ' and DEGER=' + TabRehber.FieldByName('TEMAS').AsString);
+        Tablo. TablodanSorguAc(1, 'Select '+DbUst(1)+'ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
+          ' AND  BOLUM=' + IntToStr(Ops_CariKart_Temas) + ' and DEGER=' + TabRehber.FieldByName('TEMAS').AsString + ' '+DbSinir(1));
         EditTEMAS.text := tablo.Query1.Fields[0].AsString;
     end;
     EditTEMSILCI.text := tablo.AciklamaGetir('REHBER', 'FIRMA',TabRehber.FieldByName('TEMSILCI').AsString);
@@ -1309,11 +1309,11 @@ begin
 
   // 1.5) Bu vergi/T.C. no ile zaten kayit var mi? Varsa onay iste.
   LMevcutFirma := VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'select top 1 R.FIRMA from REHBERBILGI RB ' +
+    'select '+DbUst(1)+'R.FIRMA from REHBERBILGI RB ' +
     'inner join REHBER R on R.ID=RB.YER_ID ' +
     'where RB.YERI=2 and RB.BILGI=&V and RB.ETIKET in ' +
     '(select RA.ETIKET from REHBERAYAR RA inner join REHBERVARSAYILAN RV ' +
-    ' on RA.VARSAYILAN=RV.NO where RV.NO=22 and RA.YERI=2)',
+    ' on RA.VARSAYILAN=RV.NO where RV.NO=22 and RA.YERI=2) '+DbSinir(1),
     ['&V'], [LVergiNo], True));
   if Trim(LMevcutFirma) <> '' then
     if Application.MessageBox(PChar('Bu vergi/T.C. no ile zaten kayit var:' +
@@ -1525,11 +1525,11 @@ begin
   begin
     if Tablo.UyariGoster(Uyari,'Bu kişideki eski bilgiler silinecektir. Yine de devam etmek istiyor musunuz?',2) = mrYes then begin
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'delete from REHBERBILGI where YERI=1 and YER_ID=(select top 1 RI.ID from REHBERILETISIM RI where RI.REHBERID=&YerID)', ['&YerID'],
+        'delete from REHBERBILGI where YERI=1 and YER_ID=(select '+DbUst(1)+'RI.ID from REHBERILETISIM RI where RI.REHBERID=&YerID '+DbSinir(1)+')', ['&YerID'],
         [TabIlgili.FieldByName('ID').AsInteger]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
         'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI) ' +
-        'select 1, YER_ID=(select top 1 ID from REHBERILETISIM where REHBERID = &RehPersID), SIRA, ETIKET, BILGI from REHBERBILGI RB ' +
+        'select 1, YER_ID=(select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID = &RehPersID '+DbSinir(1)+'), SIRA, ETIKET, BILGI from REHBERBILGI RB ' +
         'where RB.YERI=1 AND RB.YER_ID=&RehIletID', ['&RehPersID', '&RehIletID'],
         [TabIlgili.FieldByName('ID').AsInteger, Bilgi]);
     end;
@@ -1686,7 +1686,7 @@ begin
      TabRehberIletisim.FieldByName('VARSAYILAN').AsBoolean := TabRehberIletisim.RecordCount < 1;
      TabRehberIletisim.Post;
      IletID := TabRehberIletisim.FieldByName('ID').AsInteger;
-     tablo.TablodanSorguAc(1, 'Select top 1 * from REHBERILETISIM where REHBERID=' + IntToStr(RehberID));
+     tablo.TablodanSorguAc(1, 'Select '+DbUst(1)+'* from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ' '+DbSinir(1));
 
      if tablo.Query1.RecordCount < 1 then
         PersonelVarsayilanYap(RehberID, TabRehberIletisim.FieldByName('ID').AsInteger);

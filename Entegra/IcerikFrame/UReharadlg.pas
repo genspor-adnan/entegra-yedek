@@ -950,7 +950,7 @@ var
 
 implementation
 
-uses ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils,
+uses UVeriMotor, ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils,
   FetaClassExtensions,FetaClassExtensionsConsts, UResim, PrjConst, UFastRap, UCariFonksiyonlar, UKasaWizard,
   UKasalarListeFrame, UGenelAnaSekmeFrame, URaporAraclari, UGenSifre,UBekletme, UGorevDlg,
   UReplikasyon, FetaKurulusSiniflari, UAcilisKaydi, UNakitDlg,UBinarySave,IdGlobalProtocols,UExceldenVeriAl,
@@ -1728,8 +1728,8 @@ begin
   Tablo.TablodanSorguAc(1,'SELECT * FROM dbo.PLANMAAS WHERE YER=61 AND YERID='+RehberID);
   if not Tablo.Query1.IsEmpty then
   begin
-    OdemeKaynagi := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
-    Tutar := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
+    OdemeKaynagi := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT '+DbUst(1)+'TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID '+DbSinir(1),['&YERID'],[RehberID],True);
+    Tutar := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT '+DbUst(1)+'TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID '+DbSinir(1),['&YERID'],[RehberID],True);
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
     .ImageComboBox('�deme kayna��',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
     .CurrencyEdit('�denecek avans miktar�',@Tutar,2));
@@ -1857,15 +1857,15 @@ function TRehberAraDlg.SorguyaTabloEkle(SQL:String):string;
 begin
     SQL := SQL +'LEFT OUTER JOIN REHBER R2 WITH (NOLOCK) ON R2.ID = R.TEMSILCI ' +
     'OUTER APPLY ( ' +
-    '    SELECT TOP (1) RB.BILGI FROM REHBERBILGI RB WITH (NOLOCK) ' +
+    '    SELECT '+DbUst(1)+'RB.BILGI FROM REHBERBILGI RB WITH (NOLOCK) ' +
     '    INNER JOIN REHBERAYAR RA WITH (NOLOCK) ON RA.YERI = 2 AND RA.SIRA = RB.SIRA AND RA.YERI = RB.YERI AND RA.VARSAYILAN = 10 ' +
     '    WHERE RB.YER_ID = R.ID ' +
-    ') X1 ' +
+    DbSinir(1)+') X1 ' +
     'OUTER APPLY ( ' +
-    '    SELECT TOP (1) K_Inner.SAY,K_Inner.DEGISTIRMETARIHI FROM KULLANICI_REHBER K_Inner WITH (NOLOCK) ' +
+    '    SELECT '+DbUst(1)+'K_Inner.SAY,K_Inner.DEGISTIRMETARIHI FROM KULLANICI_REHBER K_Inner WITH (NOLOCK) ' +
     '    WHERE K_Inner.REHBERID = R.ID AND K_Inner.KULID = 2 ' +
     '    ORDER BY K_Inner.DEGISTIRMETARIHI DESC ' +
-    ') K ';
+    DbSinir(1)+') K ';
 
     SQL := SQL + ' where R.GRUP<>334 and R.GRUP<>335 and R.ID > 1 ';
 
@@ -1883,38 +1883,38 @@ begin
         Paramst :=Paramst + ' ,TOPLAM_BORC,TOPLAM_ALACAK,KUR,BAKIYE=TOPLAM_BORC-TOPLAM_ALACAK, TAKIPTE,IRSALIYE '
   else if FArama.CheckDetay.Checked then begin
         Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=convert(int,''-2204''+convert(varchar(10),R.SEKTOR))),TEMSILCIAD = R2.FIRMA,ILLER= X1.BILGI, '+
-          ' ADRES = (SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          ' ADRES = (SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=2), '+
-          ' ILCE=(SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=2 '+DbSinir(1)+'), '+
+          ' ILCE=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=6), '+
-          ' IL=(SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=6 '+DbSinir(1)+'), '+
+          ' IL=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=8), '+
-          ' ULKE=(SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=8 '+DbSinir(1)+'), '+
+          ' ULKE=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=9), '+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=9 '+DbSinir(1)+'), '+
 
-          ' GSM=(SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          ' GSM=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=42), '+
-          ' VERGINO=(SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock)'+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=42 '+DbSinir(1)+'), '+
+          ' VERGINO=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=2 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
-          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=R.ID AND RA.VARSAYILAN=22), '+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=R.ID AND RA.VARSAYILAN=22 '+DbSinir(1)+'), '+
 
 
           ' R.BOLGE,ALTBOLGE=  (select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTBOLGE AND G.BOLUM=convert(int,''-2210''+convert(varchar(10),R.BOLGE))),'+
-          ' R.SUBEID,NOTLAR=(Select top 1 GY.YORUM from GOREVYORUM GY where R.ID=GY.GOREVID and GY.TUR=11 order by GY.TARIH desc), R.YETKIKODU, R.MUHKODU';
+          ' R.SUBEID,NOTLAR=(Select '+DbUst(1)+'GY.YORUM from GOREVYORUM GY where R.ID=GY.GOREVID and GY.TUR=11 order by GY.TARIH desc '+DbSinir(1)+'), R.YETKIKODU, R.MUHKODU';
 
-            Paramst :=Paramst + ' ,R.EKLEMETARIHI, SONAKTIVITEKONUSU = (SELECT TOP 1 KONUSU FROM GOREVLER A WHERE A.REHBERID=R.ID ORDER BY BITISTARIHI DESC   )';
+            Paramst :=Paramst + ' ,R.EKLEMETARIHI, SONAKTIVITEKONUSU = (SELECT '+DbUst(1)+'KONUSU FROM GOREVLER A WHERE A.REHBERID=R.ID ORDER BY BITISTARIHI DESC   '+DbSinir(1)+')';
 //        if CariGridViewSONAKTIVITETARIHI.Visible then
-            Paramst :=Paramst + ' ,SONAKTIVITETARIHI =  (SELECT TOP 1 convert(DateTime,(BITISTARIHI),101) AS BITISTARIHI FROM GOREVLER A  '+
-            'WHERE  A.REHBERID =R.ID  ORDER BY BITISTARIHI DESC)';
+            Paramst :=Paramst + ' ,SONAKTIVITETARIHI =  (SELECT '+DbUst(1)+'convert(DateTime,(BITISTARIHI),101) AS BITISTARIHI FROM GOREVLER A  '+
+            'WHERE  A.REHBERID =R.ID  ORDER BY BITISTARIHI DESC '+DbSinir(1)+')';
   //      if CariGridViewSONSATBELGETARIHI.Visible then
-            Paramst :=Paramst + ' ,SONSATBELGETARIHI = (SELECT TOP 1  convert(DateTime,(FATURATARIH),103) as FATURATARIH FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC) ';
+            Paramst :=Paramst + ' ,SONSATBELGETARIHI = (SELECT '+DbUst(1)+' convert(DateTime,(FATURATARIH),103) as FATURATARIH FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC '+DbSinir(1)+') ';
     //    if CariGridViewSONSATTUTARI.Visible then
-            Paramst :=Paramst + ' ,SONSATTUTARI = (SELECT TOP 1  FATURA_TUTARI FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC ) ';
+            Paramst :=Paramst + ' ,SONSATTUTARI = (SELECT '+DbUst(1)+' FATURA_TUTARI FROM FATBASLIK F  WHERE  F.TUR  in (10,11,12,14,15,16) and F.REHBERID =R.ID  ORDER BY FATURATARIH DESC '+DbSinir(1)+') ';
   end;
   Uzunluk := Length(Paramst)-4;
   Kesilen := Copy(Paramst,Uzunluk,5);
@@ -1985,7 +1985,7 @@ procedure TRehberAraDlg.BankaSilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
-     Tablo.Query1.SQL.Text := ' select top 1 ISLEMTARIHI from KASA where HESAPTURU=''B'' and HESAPID='+TabBankaHesaplar.Fields[0].AsString+' AND TUR<>1 ';
+     Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ISLEMTARIHI from KASA where HESAPTURU=''B'' and HESAPID='+TabBankaHesaplar.Fields[0].AsString+' AND TUR<>1 '+DbSinir(1);
      Tablo.Query1.Open;
      if not Tablo.Query1.IsEmpty then
         raise Exception.Create(Tablo.Query1.Fields[0].AsString+RDGirilmisBankaBilgisiVarSilinemez);
@@ -2258,10 +2258,10 @@ begin
   UstIDID := 0;
   if Tablo.ListedenBilgiGetir(SERWServis_Ekipman,
     'select ID,KOD,AD,SAHIBI=(case when SAHIP=0 then ''Rakip'' else ''Kendi'' end),'+
-    '  MARKASI = (case when E.SAHIP=0 then (select top 1 ANAHTAR from GENINI where BOLUM=-2727 and DEGER=E.MARKA and DIL=-1)'+
-    '        else (select top 1 ANAHTAR from GENINI where BOLUM=-2701 and DEGER=E.MARKA and DIL=-1) end) ,'+
-    '  MODELI = (case when E.SAHIP=0 then (select top 1 ANAHTAR from GENINI where BOLUM=convert(int,''-2727''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1) '+
-    '        else (select top 1 ANAHTAR from GENINI where BOLUM=convert(int,''-2701''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1) end), '+
+    '  MARKASI = (case when E.SAHIP=0 then (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=-2727 and DEGER=E.MARKA and DIL=-1 '+DbSinir(1)+')'+
+    '        else (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=-2701 and DEGER=E.MARKA and DIL=-1 '+DbSinir(1)+') end) ,'+
+    '  MODELI = (case when E.SAHIP=0 then (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=convert(int,''-2727''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') '+
+    '        else (select '+DbUst(1)+'ANAHTAR from GENINI where BOLUM=convert(int,''-2701''+convert(varchar(10),E.MARKA)) and DEGER=E.MODEL and DIL=-1 '+DbSinir(1)+') end), '+
     ' SAHIP, MARKA, MODEL'+
     ' from EKIPMANLAR E where DURUM=1 and EKIPMANTUR=0 and AD like ''%<ara>%'' order by 2',Sonuclar,[nil,nil,nil,nil,nil,nil,nil,nil,nil],'RehAraDlgServisEkipman') then try
     Tablo.TablodanSorguAc(1,StringReplace(MemoEkipmanEkleListe.Text,':PEkipmanID',Sonuclar[0],[rfReplaceAll]));
@@ -2272,7 +2272,7 @@ begin
         UstIDID := Tablo.Query6.FieldByName('ID').AsInteger
       else
         UstIDID := 0;//burada ekipman tablo idsini bulduk.. bize gereken az ?nce insert etti?imizdi..
-      Tablo.TablodanSorguAc(5,'select top 1 ID from EKIPMANREHBER where EKIPMANID='+IntToStr(UstIDID)+' and EKLEYEN='+Kullanan+' order by ID desc');
+      Tablo.TablodanSorguAc(5,'select '+DbUst(1)+'ID from EKIPMANREHBER where EKIPMANID='+IntToStr(UstIDID)+' and EKLEYEN='+Kullanan+' order by ID desc '+DbSinir(1));
       Tablo.Query5.FetchAll;
       if Tablo.Query5.RecordCount=1 then//de?ilse zaten ilk item ?n ?st idsi 0 gelmeli.
         UstIDID := Tablo.Query5.FieldByName('ID').AsInteger;
@@ -2327,7 +2327,7 @@ procedure TRehberAraDlg.BtnKotaClick(Sender: TObject);
 //var str:TStringList;
 var Sonuc:variant;
 begin
-  Sonuc := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select isnull((select top 1 TUTAR from REHBER_KOTA Where REHBERID=&RehID),0.0) ',['&RehID'],[REHBER.FieldByName('ID').AsInteger],True);
+  Sonuc := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select isnull((select '+DbUst(1)+'TUTAR from REHBER_KOTA Where REHBERID=&RehID '+DbSinir(1)+'),0.0) ',['&RehID'],[REHBER.FieldByName('ID').AsInteger],True);
   if TGirisKutusuEx.BilgiAlEx('Risk Limiti Bilgisi Giriniz.',TGirdiDenetimleri.Create.CurrencyEdit(CariDoviz+' : ',@Sonuc,2)) = mrOk then begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from REHBER_KOTA Where REHBERID=&RehID ',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into REHBER_KOTA(REHBERID,TUTAR,KUR) values (&RehID,&Tutar,&Kur) ',
@@ -3869,8 +3869,8 @@ procedure TRehberAraDlg.KurumXSLTYukle;
   begin
     Result := '';
     Tablo.TablodanSorguAc(1,
-      'select top 1 ANAHTAR from GENINI where DIL=-1 and BOLUM=' +
-      IntToStr(ABolum) + ' and DEGER=' + REHBER.FieldByName('ID').AsString);
+      'select '+DbUst(1)+'ANAHTAR from GENINI where DIL=-1 and BOLUM=' +
+      IntToStr(ABolum) + ' and DEGER=' + REHBER.FieldByName('ID').AsString + ' '+DbSinir(1));
     if not Tablo.Query1.Eof then
       Result := Trim(Tablo.Query1.Fields[0].AsString);
     Tablo.Query1.Close;
@@ -3919,8 +3919,8 @@ begin
   LMevcut := '';
   LID := 0;
   Tablo.TablodanSorguAc(1,
-    'select top 1 ID, YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
-    IntToStr(LRehberID) + ' order by ID');
+    'select '+DbUst(1)+'ID, YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
+    IntToStr(LRehberID) + ' order by ID '+DbSinir(1));
   if not Tablo.Query1.Eof then begin
     LID := Tablo.Query1.FieldByName('ID').AsInteger;
     LMevcut := Tablo.Query1.FieldByName('YORUM').AsString;

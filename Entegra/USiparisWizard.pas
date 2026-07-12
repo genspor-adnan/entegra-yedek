@@ -710,7 +710,7 @@ implementation
 
 Uses  UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame,UFisIrsaliyeAraDlg,UGirisKutusuEx, UGorevDlg, UIsListesi,
-  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly;
+  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
@@ -1841,7 +1841,7 @@ begin
          TabSiparis.Edit;
       TabSiparisNewRecord(TabSiparis);
       TabSiparis.FieldByName('REHBERID').AsInteger := RehberId;
-      Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+      Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
       TabSiparis.FieldByName('REHBERILETID').AsInteger := tablo.Query1.Fields[0].AsInteger;
       FirmaBilgileri;
     if SiparisTur =19 then begin
@@ -1959,8 +1959,8 @@ begin
    if PageUst.Pages[PageUst.ActivePageIndex].Name = 'SheetGenotip' then begin
       EditAd.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabSiparis.FieldByName('REHBERID_HASTA').AsInteger);
       if TabSiparis.FieldByName('REHBERID_HASTA').AsString<>'' then begin
-         Tablo.TablodanSorguAc(1,'SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock) INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=2 and RA.SIRA=RB.SIRA '+
-         ' AND RA.YERI=RB.YERI WHERE RB.YER_ID='+TabSiparis.FieldByName('REHBERID_HASTA').AsString+' AND RA.VARSAYILAN=22');
+         Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock) INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=2 and RA.SIRA=RB.SIRA '+
+         ' AND RA.YERI=RB.YERI WHERE RB.YER_ID='+TabSiparis.FieldByName('REHBERID_HASTA').AsString+' AND RA.VARSAYILAN=22 '+DbSinir(1));
          if not Tablo.Query1.IsEmpty then
             EditTCKN.Text := Tablo.Query1.Fields[0].AsString;
       end;
@@ -2147,7 +2147,7 @@ end;
 
 procedure TSiparisWizardDlg.FirmaBilgileri;
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   LabelAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;
@@ -2703,7 +2703,7 @@ begin
   end;
 
   if SiparisTur = 19 then begin
-     Kota := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select TUTAR=isnull((select top 1 TUTAR from REHBER_KOTA where REHBERID=:PRehberID and KUR=:PKur),0.0)',[':PRehberID',':PKur'],[TabSiparis.FieldByName('REHBERID').AsInteger,CariDoviz],True);
+     Kota := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select TUTAR=isnull((select '+DbUst(1)+'TUTAR from REHBER_KOTA where REHBERID=:PRehberID and KUR=:PKur '+DbSinir(1)+'),0.0)',[':PRehberID',':PKur'],[TabSiparis.FieldByName('REHBERID').AsInteger,CariDoviz],True);
      if Kota>0.0 then begin
         Bakiye := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select TUTAR=isnull((select TUTAR=sum(DOVIZ_TUTARI) from REHBER_BAKIYE where REHBERID=:PRehberID),0.0)',[':PRehberID'],[TabSiparis.FieldByName('REHBERID').AsInteger],True);
         if Kota<(Bakiye+TabSiparis.FieldByName('SIPARIS_TUTARI').AsCurrency) then
@@ -2845,11 +2845,11 @@ begin
   try
     st:=TStringList.Create;
     SQLText:='select ID,AD,'+
-      ' ADRES=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2),'+
-      ' ILCE=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6),'+
-      ' IL=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8),'+
-      ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
-      ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
+      ' ADRES=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2 '+DbSinir(1)+'),'+
+      ' ILCE=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6 '+DbSinir(1)+'),'+
+      ' IL=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8 '+DbSinir(1)+'),'+
+      ' ID_VERGIDAI=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20 '+DbSinir(1)+'),'+
+      ' ID_VERGINO=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22 '+DbSinir(1)+')'+
       ' FROM REHBERILETISIM Firma where REHBERID='+IntToStr(RehberId)+' ';
     if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
        TabSiparis.FieldByName('REHBERILETID').AsString := st.Strings[0];

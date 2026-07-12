@@ -252,7 +252,7 @@ implementation
 
 {$R *.dfm}
 
-uses FetaKurulusSiniflari, PrjConst, IdGlobalProtocols, UGirisKutusuEx, UIsListesi,
+uses UVeriMotor, FetaKurulusSiniflari, PrjConst, IdGlobalProtocols, UGirisKutusuEx, UIsListesi,
      UGenNotificationUtils, UServisEkipmanSec, UFastRap, URaporAraclari, URichEdit, ULog;
 
 var PeryotDegisti, OnayRedBasildi, Kapanabilir : Boolean;
@@ -391,7 +391,7 @@ begin
                                                ['Id','Ad','Görev','Departman','Şube','Kategori','Tür']);
     if Kullanicilar.Count>0 then begin
        for I := 0 to Kullanicilar.Count - 1 do
-          if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(GorevId)+' and TUR=11 and REHBERID='+copy(Kullanicilar[i],2,8),[],[]) then
+          if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(GorevId)+' and TUR=11 and REHBERID='+copy(Kullanicilar[i],2,8)+' '+DbSinir(1),[],[]) then
              Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])'+
              ' values('+IntToStr(GorevId)+','+IntToStr(TcxButton(Sender).Tag)+','+copy(Kullanicilar[i],2,8)+','+Kullanan+')', [],[]);
        if TcxButton(Sender).Tag=12 then

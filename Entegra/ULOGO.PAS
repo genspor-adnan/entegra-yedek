@@ -45,7 +45,7 @@ end;
 
 procedure TLogoDlg.Label3Click(Sender: TObject);
 begin
-   openhtm('mailto:feta@feta.com.tr');
+    openhtm('mailto:feta@feta.com.tr');
 end;
 
 procedure TLogoDlg.LabelAdresClick(Sender: TObject);

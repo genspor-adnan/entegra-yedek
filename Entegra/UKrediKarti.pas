@@ -150,7 +150,7 @@ type
 implementation
 
 {$R *.dfm}
-uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog ;
+uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog, UVeriMotor ;
 
 { TKrediKarti }
 
@@ -170,13 +170,13 @@ begin
   TabKK.Close;
   if KKId <> -1 then begin
     if KKId = -2 then
-      TabKK.SQL.Text := 'SELECT TOP 1 * FROM KREDIKARTI ORDER BY ID DESC'
+      TabKK.SQL.Text := 'SELECT '+DbUst(1)+'* FROM KREDIKARTI ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabKK.SQL.Text := 'SELECT * FROM KREDIKARTI WHERE ID = :ID';
       TabKK.Params.ParamByName('ID').AsInteger := KKId;
     end;
   end else
-    TabKK.SQL.Text := 'SELECT TOP 0 * FROM KREDIKARTI';
+    TabKK.SQL.Text := 'SELECT '+DbUst(0)+'* FROM KREDIKARTI '+DbSinir(0);
   TabKK.Open;
 //  FFrameBilgi.Baslik := IIf(
 end;

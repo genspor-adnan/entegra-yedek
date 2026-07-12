@@ -103,7 +103,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Utablo, UStokHizmetAra, FetaKurulusSiniflari;
+  Utablo, UStokHizmetAra, FetaKurulusSiniflari, UVeriMotor;
 
 class procedure TStokEslestirmeDlg.Goster(AOwner: TComponent;
   AConnection: TFDConnection; ARehberID: Integer; const ACariAdi: string);
@@ -374,9 +374,9 @@ begin
 
   // KDV Gruplu eslesme var mi?
   Tablo.TablodanSorguAc(1,
-    'SELECT TOP 1 TIP, URUNID FROM STOK_ESLESTIRME ' +
+    'SELECT '+DbUst(1)+'TIP, URUNID FROM STOK_ESLESTIRME ' +
     'WHERE REHBERID=' + IntToStr(ARehberID) +
-    ' AND ESLESME_TURU=2 AND AKTIF=1 ORDER BY ID DESC');
+    ' AND ESLESME_TURU=2 AND AKTIF=1 ORDER BY ID DESC '+DbSinir(1));
   if Tablo.Query1.Eof then begin
     Tablo.Query1.Close;
     AMesaj := 'Bu cari icin KDV Gruplu eslesme tanimi yok.';
@@ -489,7 +489,7 @@ begin
       'UPDATE F SET F.TUR = M.TIP, F.URUNID = M.URUNID ' +
       'FROM FATURA F ' +
       'CROSS APPLY ( ' +
-      '  SELECT TOP 1 E.TIP, E.URUNID ' +
+      '  SELECT '+DbUst(1)+'E.TIP, E.URUNID ' +
       '  FROM STOK_ESLESTIRME E ' +
       '  WHERE E.REHBERID = :REHBERID AND E.AKTIF = 1 ' +
       '    AND ( ' +
@@ -504,7 +504,7 @@ begin
       '      WHEN 1 THEN 1 WHEN 4 THEN 2 WHEN 3 THEN 3 WHEN 0 THEN 4 ' +
       '      ELSE 99 END, ' +
       '    E.EKLEMETARIHI DESC ' +
-      ') M ' +
+      ' '+DbSinir(1)+') M ' +
       'WHERE F.FATBASID = :FATBASID ' +
       '  AND (ISNULL(F.URUNID, 0) = 0)';
     LQ.ParamByName('REHBERID').AsInteger := ARehberID;

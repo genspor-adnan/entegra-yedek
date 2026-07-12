@@ -110,7 +110,7 @@ var
 
 implementation
 
-uses UAcilisKaydi, Utablo,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly, ULog;
+uses UAcilisKaydi, Utablo,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly, ULog, UVeriMotor;
 
 {$R *.dfm}
 
@@ -382,7 +382,7 @@ begin
       MessageDlg((BTWBankaAdiBosOlamaz), mtError, [mbOK], 0);
       Exit;
     End else begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into BANKALAR(BANKAKODU,BANKAADI)values( (Select top 1 BANKAKODU+1 from BANKALAR order by BANKAKODU desc),'''+Bilgi+''')',[],[]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into BANKALAR(BANKAKODU,BANKAADI)values( (Select '+DbUst(1)+'BANKAKODU+1 from BANKALAR order by BANKAKODU desc '+DbSinir(1)+'),'''+Bilgi+''')',[],[]);
     end;
   end;
 end;

@@ -346,7 +346,7 @@ var
 
 implementation
 
-uses  UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport,
+uses  UVeriMotor, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
   Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl;
 
@@ -535,9 +535,9 @@ begin
   RehberId := FATBASLIK.FieldByName('REHBERID').AsInteger;
 
   ///Tekliflerde ?ncelik: ilgilinin maili varsa ona gider,ilgili yoksa kuruma gider,ikisindede yoksa girin uyar?s? verilir.
-  Tablo.TablodanSorguAc(1,'SELECT  TOP 1 RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
+  Tablo.TablodanSorguAc(1,'SELECT  '+DbUst(1)+'RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
       ' INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA  AND RA.YERI=RB.YERI WHERE RI.REHBERID = '+inttostr(RehberId)+'  AND RB.YERI = 1'+
-      ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 ');
+      ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 '+DbSinir(1));
 
    if Tablo.Query1.RecordCount > 0 then
      GidecekMail := Tablo.Query1.FieldByName('BILGI').AsString
@@ -618,7 +618,7 @@ begin
   if Length(SQLEk)>10 then begin
     if (FArama.Calendar2.Text = '')or(FArama.Calendar1.Text = '')then  // DOVIZ_FATURA_MATRAHI=((FATURA_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0))
        exit;
-    SQLPart1 :=  'SELECT distinct TOP '+VarToStr(FArama.SpinKayitSayisi.EditValue)+' F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
+    SQLPart1 :=  'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
 //        ' FATURA_MATRAHI=FATURA_TUTARI-KDV_TUTARI,KDV_TUTARI,FATURA_TUTARI,F.KUR,FATURA_MALIYETI_ORT,'+
         ' FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, F.KUR, FATURA_MALIYETI_ORT,'+
         ' ORTKARORAN=round((FATURA_MATRAHI-FATURA_MALIYETI_ORT)/nullif(FATURA_MALIYETI_ORT,0)*100.0,2),'+
@@ -669,7 +669,7 @@ begin
            else
               SQLPart11 := SQLPart11+' and ISNULL(FATURANO,'''')  like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' ';
         end;
-    SQLPart2 :=   'SELECT distinct TOP '+VarToStr(FArama.SpinKayitSayisi.EditValue)+' F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
+    SQLPart2 :=   'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
         ' FATURA_MATRAHI=SIPARIS_TUTARI-KDV_TUTARI,'+
         ' KDV_TUTARI,FATURA_TUTARI=SIPARIS_TUTARI,F.KUR,KURFATURA_MALIYETI_ORT=0.0,ORTKARORAN=0.0, ORTKAR=0.0  ,F.ACIKLAMA,F.OZELKOD,F.OZELKOD2,CARIKOD=R.KOD,CARIAD=R.FIRMA,F.DOVIZ_CINSI,F.DOVIZKUR,DOVIZ_TUTARI=(SIPARIS_TUTARI/nullif(DOVIZKUR,0.0)), '+
         ' DOVIZ_FATURA_MATRAHI=((SIPARIS_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0)),DOVIZ_KDV_TUTARI=(convert(float,KDV_TUTARI)/nullif(convert(float,DOVIZKUR),0.0)) '+
@@ -790,7 +790,7 @@ begin
 //                'FATURA_MATRAHI-ISNULL(FATURA_MALIYETI_ORT,0),F.ACIKLAMA,F.OZELKOD, R.KOD, R.FIRMA,F.DOVIZ_CINSI,F.DOVIZ_TUTARI,F.BAGLIFATURAID,F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO ,' + #13#10 +
 //                'F.SATICIKODU, F.DETAYBOLUMU, SATICIBILGI.FIRMA, F.VADE, F.BASLIK,FATURA_GON_TARIHI,F.ZARFID,'+EkAlanlar+'F.YAZDIRILDI';
     end;
-    FATBASLIK.SQL.Add(' ORDER BY F.ID desc,F.TUR,F.KUR ');
+    FATBASLIK.SQL.Add(' ORDER BY F.ID desc,F.TUR,F.KUR '+DbSinir(FArama.SpinKayitSayisi.EditValue));
     TabloYenile(FATBASLIK,[],LocateID,'ID');
 
     case gf.FAltTur of
@@ -1398,7 +1398,7 @@ begin
         Tablo.TablodanSorguAc(1, 'select TUR, REHBERID from FATBASLIK where ID='+IntToStr(yeniid));
 
      if donustipi = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN then begin //sat?? sipari?i ?retim fi?ine d?n??t?yse ba?l??a ?r?n id ve adet yazal?m
-        Tablo.TablodanSorguAc(3,'select top 1 URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID));
+        Tablo.TablodanSorguAc(3,'select '+DbUst(1)+'URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID) + ' '+DbSinir(1));
         if Tablo.Query1.RecordCount > 0 then
            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+Tablo.Query3.Fields[1].AsString+
                                                     ' where ID='+IntToStr(yeniid), [],[])

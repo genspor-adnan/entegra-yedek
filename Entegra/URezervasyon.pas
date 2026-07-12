@@ -50,7 +50,7 @@ var
 
 implementation
 
-uses Utablo;
+uses Utablo, UVeriMotor;
 
 {$R *.dfm}
 //Durumlar
@@ -59,11 +59,11 @@ uses Utablo;
 procedure TRezervasyonDlg.FormShow(Sender: TObject);
 begin
    TabRezervasyon.Close;
-   TabRezervasyon.SQL.Text := 'select top 1 * from REZERVASYON where ';
+   TabRezervasyon.SQL.Text := 'select '+DbUst(1)+'* from REZERVASYON where ';
    if RezID = 0 then  //önceki rez. bilgileri açılır
-      TabRezervasyon.SQL.Add(' MASAID='+IntToStr(MasaID)+' and DURUM=2 order by ID desc')//and TARIH between '''+FormatDateTime('yyyy-mm-dd 00:00', Tarih)+''' and '''+FormatDateTime('yyyy-mm-dd 23:59', Tarih)+'''')
+      TabRezervasyon.SQL.Add(' MASAID='+IntToStr(MasaID)+' and DURUM=2 order by ID desc '+DbSinir(1))//and TARIH between '''+FormatDateTime('yyyy-mm-dd 00:00', Tarih)+''' and '''+FormatDateTime('yyyy-mm-dd 23:59', Tarih)+'''')
    else
-      TabRezervasyon.SQL.Add(' 1=2');
+      TabRezervasyon.SQL.Add(' 1=2 '+DbSinir(1));
 
    TabRezervasyon.Open;
 

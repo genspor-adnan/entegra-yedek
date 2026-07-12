@@ -273,7 +273,7 @@ implementation
 
 uses FetaUtil, {$IFNDEF AGENT} UAnaForm, {$ENDIF} UListe, UGrid, UMesaj, UFastRap,
      UMultiDataSetEvent, UDokumAramaFrame, FetaKurulusSiniflari, UDokumSart, UVersiyonGuncelle,
-     FetaClassExtensions, URaporAraclari, JvJVCLUtils, UGenelAnaSekmeFrame, UDokumGirisFrame, PrjConst, uKosulDetayAra,LocOnFly;
+     FetaClassExtensions, URaporAraclari, JvJVCLUtils, UGenelAnaSekmeFrame, UDokumGirisFrame, PrjConst, uKosulDetayAra,LocOnFly, UVeriMotor;
 
 {$R *.DFM}
 
@@ -348,7 +348,7 @@ begin
       ') AND (MONTH(' + TabAd + '.' + FIELD + ') =' + copy(VALUE, Pos('/', VALUE) + 1, Length(VALUE)) + ')'
   else
     kom := kom + TabAd + '.' + FIELD + EQUAL;
-  with Veritabani.SorguBaslat(Tablo.FDCnn,'Select TOP 0 '+Field+' FROM ' + TabAd,[],[]) do
+  with Veritabani.SorguBaslat(Tablo.FDCnn,'Select '+DbUst(0)+Field+' FROM ' + TabAd+' '+DbSinir(0),[],[]) do
   try
     FieldTipi := FieldByName(FIELD).DataType;
   finally

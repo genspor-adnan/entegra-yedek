@@ -66,7 +66,7 @@ uses
   System.Net.URLClient, System.DateUtils, System.UITypes, System.Variants,
   FireDAC.Stan.Param, Vcl.Dialogs, Vcl.StdCtrls,
   Utablo, FetaKurulusSiniflari, UEBelgeKimlik, UMailOnayDlg, PrjConst,
-  UGirisKutusuEx;
+  UGirisKutusuEx, UVeriMotor;
 
 type
   TIzibizAliasSaglayici = class(TInterfacedObject, IEBelgeAliasSaglayici)
@@ -311,10 +311,10 @@ class function TEBelgeAliasServis.VarsayilanAliasGetir(
 begin
   Result := '';
   Tablo.TablodanSorguAc(1,
-    'select top 1 ALIAS from REHBERALIAS ' +
+    'select '+DbUst(1)+'ALIAS from REHBERALIAS ' +
     'where REHBERID=' + IntToStr(ARehberID) +
     ' and BELGETURU=' + IntToStr(ABelgeTuru) + ' and AKTIF=1 ' +
-    'order by VARSAYILAN desc, SONKONTROLTARIHI desc, ID');
+    'order by VARSAYILAN desc, SONKONTROLTARIHI desc, ID '+DbSinir(1));
   if Tablo.Query1.RecordCount > 0 then
     Result := Tablo.Query1.Fields[0].AsString;
 end;
@@ -349,10 +349,10 @@ begin
 
     for I := 0 to Length(LAliaslar) - 1 do begin
       Tablo.TablodanSorguAc(1,
-        'select top 1 ID from REHBERALIAS where REHBERID=' +
+        'select '+DbUst(1)+'ID from REHBERALIAS where REHBERID=' +
         IntToStr(ARehberID) + ' and BELGETURU=' +
         IntToStr(LAliaslar[I].BelgeTuru) + ' and ALIAS=' +
-        QuotedStr(LAliaslar[I].Alias));
+        QuotedStr(LAliaslar[I].Alias) + ' '+DbSinir(1));
       if Tablo.Query1.RecordCount > 0 then begin
         LAliasID := Tablo.Query1.Fields[0].AsInteger;
         Veritabani.BasitKomutÇalıştır(AConnection,
@@ -369,9 +369,9 @@ begin
 
     for LBelgeTuru := EBelgeTuruEIrsaliye to EBelgeTuruEFatura do begin
       Tablo.TablodanSorguAc(1,
-        'select top 1 ID from REHBERALIAS where REHBERID=' +
+        'select '+DbUst(1)+'ID from REHBERALIAS where REHBERID=' +
         IntToStr(ARehberID) + ' and BELGETURU=' + IntToStr(LBelgeTuru) +
-        ' and AKTIF=1 order by ID');
+        ' and AKTIF=1 order by ID '+DbSinir(1));
       if Tablo.Query1.RecordCount > 0 then
         Veritabani.BasitKomutÇalıştır(AConnection,
           'update REHBERALIAS set VARSAYILAN=1 where ID=&ID',
@@ -408,9 +408,9 @@ var
 begin
   LExistingID := 0;
   Tablo.TablodanSorguAc(1,
-    'SELECT TOP 1 ID FROM REHBERALIAS WHERE REHBERID=' + IntToStr(ARehberID) +
+    'SELECT '+DbUst(1)+'ID FROM REHBERALIAS WHERE REHBERID=' + IntToStr(ARehberID) +
     ' AND BELGETURU=' + IntToStr(ABelgeTuru) +
-    ' AND ALIAS=' + QuotedStr(AAlias));
+    ' AND ALIAS=' + QuotedStr(AAlias) + ' '+DbSinir(1));
   if not Tablo.Query1.IsEmpty then
     LExistingID := Tablo.Query1.Fields[0].AsInteger;
   Tablo.Query1.Close;
@@ -516,11 +516,11 @@ begin
   try
     Q.Connection := AConnection;
     Q.SQL.Text :=
-      'SELECT TOP 1 ID, BELGETURU, ALIAS, SONKONTROLTARIHI ' +
+      'SELECT '+DbUst(1)+'ID, BELGETURU, ALIAS, SONKONTROLTARIHI ' +
       'FROM REHBERALIAS ' +
       'WHERE REHBERID = :REHBERID AND AKTIF = 1 ' +
       '  AND BELGETURU IN (:T1, :T2) ' +
-      'ORDER BY VARSAYILAN DESC, ID DESC';
+      'ORDER BY VARSAYILAN DESC, ID DESC '+DbSinir(1);
     Q.ParamByName('REHBERID').AsInteger := ARehberID;
     Q.ParamByName('T1').AsInteger := LKodMukellef;
     Q.ParamByName('T2').AsInteger := LKodGenel;

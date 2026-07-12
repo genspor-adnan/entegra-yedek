@@ -372,7 +372,7 @@ implementation
 
 uses ULog, UAnaForm,Umesaj,UHesapKoduPicker , UKasaWizard, URehAraDlg, UComboImgDuzenle, UResim,UBekletme,
       FetaKurulusSiniflari,FetaClassExtensions, UFastRap,  URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame,
-      UMasrafAnaliz,LocOnFly,PrjConst, UUnits, UExceldenVeriAl, UKodAgaci;
+      UMasrafAnaliz,LocOnFly,PrjConst, UUnits, UExceldenVeriAl, UKodAgaci, UVeriMotor;
 
 var OncekiKod, OncekiAd : string;
 {$R *.dfm}
@@ -1236,8 +1236,8 @@ begin
       EditKASAADI.SetFocus; Abort;
    end;
 
-   Tablo.TablodanSorguAc(1,'select top 1 ID from MASRAFGELIR where KOD ='''+TabMasrafGelir.FieldByName('KOD').AsString+''' and '+
-   ' GELIRMI='+IntToStr(Abs(StrToInt(BoolToStr(TabMasrafGelir.FieldByName('GELIRMI').AsBoolean))))+' and SUBEID='+TabMasrafGelir.FieldByName('SUBEID').AsString);
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ID from MASRAFGELIR where KOD ='''+TabMasrafGelir.FieldByName('KOD').AsString+''' and '+
+   ' GELIRMI='+IntToStr(Abs(StrToInt(BoolToStr(TabMasrafGelir.FieldByName('GELIRMI').AsBoolean))))+' and SUBEID='+TabMasrafGelir.FieldByName('SUBEID').AsString+' '+DbSinir(1));
    if (Tablo.Query1.RecordCount>0)and(TabMasrafGelir.FieldByName('ID').AsString<>Tablo.Query1.FieldByName('ID').AsString) then
        raise Exception.Create(MGKodvar);
 

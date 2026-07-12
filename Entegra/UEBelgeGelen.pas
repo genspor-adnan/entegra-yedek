@@ -46,7 +46,7 @@ implementation
 uses
   ULog, System.SysUtils, System.StrUtils, System.JSON, System.NetEncoding,
   System.IOUtils, Data.DB, System.Classes, System.Zip,
-  Utablo, PrjConst, FetaKurulusSiniflari, UEBelgeKimlik, UIzibizRest;
+  Utablo, PrjConst, FetaKurulusSiniflari, UEBelgeKimlik, UIzibizRest, UVeriMotor;
 
 var
   GUblZipKontrolEdildi: Boolean = False;   // oturumda kolon kontrolu yapildi mi
@@ -302,9 +302,9 @@ begin
   try
     LQry.Connection := AConnection;
     LQry.SQL.Text :=
-      'select top 1 ID, UBLVAR=case when (UBL_XML_ZIP IS NOT NULL ' +
+      'select '+DbUst(1)+'ID, UBLVAR=case when (UBL_XML_ZIP IS NOT NULL ' +
       'OR len(isnull(UBL_XML, N''''))>0) then 1 else 0 end ' +
-      'from ' + DepoTablo('EBELGE') + ' where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc';
+      'from ' + DepoTablo('EBELGE') + ' where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc '+DbSinir(1);
     LQry.ParamByName('UUID').AsString := AUUID;
     LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     LQry.Open;
@@ -1142,10 +1142,10 @@ begin
   try
     LSel.Connection := AConnection;
     LSel.SQL.Text :=
-      'SELECT TOP 1 COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
+      'SELECT '+DbUst(1)+'COALESCE(CAST(DECOMPRESS(E.UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
       '                     CAST(E.UBL_XML AS NVARCHAR(MAX))) AS UBLXML ' +
       'FROM ' + DepoTablo('EBELGE') + ' E JOIN FATBASLIK FB ON FB.GNTPID = E.ID ' +
-      'WHERE FB.ID=:F AND E.YON=2 ORDER BY E.ID DESC';
+      'WHERE FB.ID=:F AND E.YON=2 ORDER BY E.ID DESC '+DbSinir(1);
     LSel.ParamByName('F').AsInteger := AFatBaslikID;
     LSel.Open;
     if LSel.Eof then Exit;
@@ -1348,11 +1348,11 @@ begin
       var LRehberIDPar: string := '';
       if Trim(LSupSSN) <> '' then begin
         LSP.SQL.Text :=
-          'SELECT TOP 1 R.ID FROM REHBER R ' +
+          'SELECT '+DbUst(1)+'R.ID FROM REHBER R ' +
           'INNER JOIN REHBERBILGI RB ON RB.YER_ID = R.ID ' +
           ' AND RB.YERI = 2 AND RB.ETIKET = N''Vergi No'' ' +
           'WHERE R.DURUM = 1 ' +
-          '  AND REPLACE(RB.BILGI, '' '', '''') = :VKN ORDER BY R.ID';
+          '  AND REPLACE(RB.BILGI, '' '', '''') = :VKN ORDER BY R.ID '+DbSinir(1);
         LSP.ParamByName('VKN').AsString := StringReplace(LSupSSN, ' ', '', [rfReplaceAll]);
         LSP.Open;
         if not LSP.Eof then
@@ -1413,8 +1413,8 @@ begin
         // SP yeni FATBASLIK olusturdu - GNTP_FATBASID = EBELGE.ID ile bulunur
         LYeniFatbasID := 0;
         LSP.SQL.Text :=
-          'SELECT TOP 1 ID FROM FATBASLIK ' +
-          'WHERE GNTP_FATBASID = :EID AND TUR = 11 ORDER BY ID DESC';
+          'SELECT '+DbUst(1)+'ID FROM FATBASLIK ' +
+          'WHERE GNTP_FATBASID = :EID AND TUR = 11 ORDER BY ID DESC '+DbSinir(1);
         LSP.ParamByName('EID').AsLargeInt := LEBelgeID;
         LSP.Open;
         if not LSP.Eof then
@@ -1446,7 +1446,7 @@ begin
           // REHBERID FATBASLIK'tan yeniden okunur (SP icinde default 0 =
           // "Tanimsiz Cari").
           var LRehberIDDetay: Integer := 0;
-          LSP.SQL.Text := 'SELECT TOP 1 ISNULL(REHBERID,0) FROM FATBASLIK WHERE ID=:F';
+          LSP.SQL.Text := 'SELECT '+DbUst(1)+'ISNULL(REHBERID,0) FROM FATBASLIK WHERE ID=:F '+DbSinir(1);
           LSP.ParamByName('F').AsInteger := LYeniFatbasID;
           LSP.Open;
           if not LSP.Eof then LRehberIDDetay := LSP.Fields[0].AsInteger;

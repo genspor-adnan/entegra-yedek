@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>ILAC_TIBBICIHAZ</cbc:ProfileID>
+<cbc:ID>MAE2026000000001</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>B7F7FAD1-C1FA-4720-AEB2-F65C797112D3</cbc:UUID>
+<cbc:IssueDate>2026-06-29</cbc:IssueDate>
+<cbc:IssueTime>13:27:34</cbc:IssueTime>
+<cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız İkiBinYüzAltmış Türk Lirası</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">6132160725</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>MAYA GRUP TIBBİ CİHAZLAR SANAYİ VE TİCARET LİMİTED ŞİRKETİ</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>AKPINAR MAH. SANAYİ CAD. ÇALIŞKAN IŞ MERKEZI NO: 398 İÇ KAPI NO: 211</cbc:StreetName>
+<cbc:CitySubdivisionName>OSMANGAZİ</cbc:CitySubdivisionName>
+<cbc:CityName>BURSA</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>OSMANGAZİ</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>MAYA GRUP TIBBİ CİHAZLAR SANAYİ VE TİCARET LİMİTED ŞİRKETİ</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4110052107</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Granit Bilgisayar İletişim ve Destek Hiz. San. Tic. Ltd. Şti.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>Eğitim Mh. Muratpaşa Cd. Çakmakcı Ap. No7/8 Ziverbey</cbc:StreetName>
+<cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>GÖZTEPE</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Granit Bilgisayar İletişim ve Destek Hiz. San. Tic. Ltd. Şti.</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">200.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">2000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">200.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:WithholdingTaxTotal><cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">2000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount><cbc:Percent>20</cbc:Percent><cac:TaxCategory><cbc:TaxExemptionReasonCode>626</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>Diğer Teslimler [KDVGUT-(I/C-2.1.3.3.7)] (2/10)</cbc:TaxExemptionReason><cac:TaxScheme><cbc:Name>KDV Tevkifatı</cbc:Name><cbc:TaxTypeCode>9015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:WithholdingTaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">2000.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">2000.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">2200.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="TRY">2160.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:InvoicedQuantity unitCode="NIU">2</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">2000.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">200.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">2000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">200.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:WithholdingTaxTotal><cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">2000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount><cbc:Percent>20</cbc:Percent><cac:TaxCategory><cbc:TaxExemptionReasonCode>626</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>Diğer Teslimler [KDVGUT-(I/C-2.1.3.3.7)] (2/10)</cbc:TaxExemptionReason><cac:TaxScheme><cbc:Name>KDV Tevkifatı</cbc:Name><cbc:TaxTypeCode>9015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:WithholdingTaxTotal>
+<cbc:Note>( 1 Adet 262049 ÜRT: 06.05.2026 )
+( 1 Adet 262133 ÜRT: 11.05.2026 )</cbc:Note>
+<cac:Item>
+<cbc:Description></cbc:Description>
+<cbc:Name>BL Açılı Dayanak A15° Gh2 AH7 RP</cbc:Name>
+<cac:SellersItemIdentification><cbc:ID>8681489703457</cbc:ID></cac:SellersItemIdentification>
+<cac:BuyersItemIdentification><cbc:ID>8681489703457</cbc:ID></cac:BuyersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489703457</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)8681489703457(LNO)262049(URT)260506</cbc:ID>
+</cac:AdditionalItemIdentification>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)8681489703457(LNO)262133(URT)260511</cbc:ID>
+</cac:AdditionalItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">1000.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

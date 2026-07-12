@@ -92,7 +92,7 @@ var
 implementation
 
 {$R *.dfm}
-uses PrjConst, Utablo, UCombo,UComboImgDuzenle,FetaKurulusSiniflari,LocOnFly;
+uses PrjConst, Utablo, UCombo,UComboImgDuzenle,FetaKurulusSiniflari,LocOnFly, UVeriMotor;
 
 procedure TRehberAyarDlg.btnKapatClick(Sender: TObject);
 begin
@@ -231,9 +231,9 @@ begin
    if TabAyar.FieldByName('VARSAYILAN').AsString <> '' then begin
       Tablo.Query1.Close;    //resimleri silinir
       if Yer=5 then //İK Tahakkuk
-         Tablo.Query1.SQL.Text := ' select top 1 ID from PLANMAAS where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString
+         Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ID from PLANMAAS where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString+' '+DbSinir(1)
       else
-         Tablo.Query1.SQL.Text := ' select top 1 ID from REHBERBILGI where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString;
+         Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ID from REHBERBILGI where YERI='+IntToStr(Yer)+' and SIRA ='+TabAyar.FieldByName('SIRA').AsString+' '+DbSinir(1);
       Tablo.Query1.Open;
       if Tablo.Query1.RecordCount>0 then
          raise Exception.Create(RGirilmisBilgiVar);

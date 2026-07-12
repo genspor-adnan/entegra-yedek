@@ -234,6 +234,8 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.dfm}
 
 uses FetaKurulusSiniflari,RestUTS, UTablo, prjConst, UExceldenVeriAl, UBekletme, UGirisKutusuEx, UAnaForm;
@@ -2049,8 +2051,8 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
            GirisDepoId := DepoId;
         end;
 
-        Tablo.TablodanSorguAc(5, 'select top 1 ID from STOKSERILOT where STOKID='+IntToStr(StokID)+
-          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' ');
+        Tablo.TablodanSorguAc(5, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+IntToStr(StokID)+
+          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' '+DbSinir(1));
         if not Tablo.Query5.IsEmpty then
            SeriLotId := Tablo.Query5.Fields[0].AsInteger
         else begin

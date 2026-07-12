@@ -42,7 +42,7 @@ function ComboImgDuzenle(TabloveAlan, AnahtarKelime1: string; Ini1: TIni): Boole
 implementation
 
 uses
-  Umesaj, Utablo,PrjConst,LocOnFly;
+  Umesaj, Utablo,PrjConst,LocOnFly,UVeriMotor;
 var
   AnahtarKelime, TabloAdi,AlanAdi: string;
   Ini: TIni;
@@ -97,7 +97,7 @@ begin
     if StrToIntDef(s,-98)<>-98 then begin
       if (TABLOADI <> '') and (ALANADI <> '') then begin
         Tablo.Query1.Close;
-        Tablo.Query1.SQL.Text := 'select top 1 ID from '+TABLOADI+' where '+ALANADI+' = '+s;
+        Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ID from '+TABLOADI+' where '+ALANADI+' = '+s+' '+DbSinir(1);
         Tablo.Query1.Open;
         if Tablo.Query1.RecordCount > 0 then
            raise Exception.Create(IKSilinemez);

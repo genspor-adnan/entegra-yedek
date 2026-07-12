@@ -176,7 +176,7 @@ type
 
 implementation
 
-uses  FetaKurulusSiniflari, FetaClassExtensions, UAramaYokFrame, UAnaForm,LocOnFly,PrjConst;
+uses  UVeriMotor, FetaKurulusSiniflari, FetaClassExtensions, UAramaYokFrame, UAnaForm,LocOnFly,PrjConst;
 
 {$R *.dfm}
 
@@ -588,13 +588,13 @@ begin
   TabVadeliHesap.Close;
   if AVadeliHesapId <> -1 then begin
     if AVadeliHesapId = -2 then
-      TabVadeliHesap.SQL.Text := 'SELECT TOP 1 * FROM VADELIHESAP ORDER BY ID DESC'
+      TabVadeliHesap.SQL.Text := 'SELECT '+DbUst(1)+'* FROM VADELIHESAP ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabVadeliHesap.SQL.Text := 'SELECT * FROM VADELIHESAP WHERE ID = :ID';
       TabVadeliHesap.Params.ParamByName('ID').AsInteger := AVadeliHesapId;
     end;
   end else { Yani -1 -> Boş vadeli hesap ekranı için boş bir query }
-    TabVadeliHesap.SQL.Text := 'SELECT TOP 0 * FROM VADELIHESAP';
+    TabVadeliHesap.SQL.Text := 'SELECT '+DbUst(0)+'* FROM VADELIHESAP '+DbSinir(0);
   TabVadeliHesap.Open;
 end;
 

@@ -123,7 +123,7 @@ var
 
 implementation
 
-uses UTablo, UGenSifre, FetaUtil, UGirisKutusuEx, LisansWs,PrjConst,LocOnFly;
+uses UTablo, UGenSifre, FetaUtil, UGirisKutusuEx, LisansWs,PrjConst,LocOnFly,UVeriMotor;
 
 {$R *.DFM}
 
@@ -280,7 +280,7 @@ begin
       Free;
     end;
   end;
-  with Query('select top 1 * from ENTEGRA') do
+  with Query('select '+DbUst(1)+'* from ENTEGRA '+DbSinir(1)) do
   begin
     try
       if recordcount = 0 then

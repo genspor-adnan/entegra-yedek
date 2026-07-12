@@ -156,6 +156,7 @@
         <DCC_UnitSearchPath>cxGenYazilim_RepoClasses;C:\comp\DevEx23\GenYazilimEx;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Build>1</VerInfo_Build>
         <VerInfo_Release>10</VerInfo_Release>
+        <Debugger_RunParams>-PG</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>

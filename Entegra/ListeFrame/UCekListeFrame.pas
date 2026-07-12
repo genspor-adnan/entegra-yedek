@@ -305,7 +305,7 @@ implementation
 
 uses
     UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, UExceldenVeriAl,
-    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay, ULog;
+    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay, ULog, UVeriMotor;
 
 {$R *.dfm}
 
@@ -370,7 +370,7 @@ begin
   s:= FormatDateTime('yyyy-MM-dd',VarToDateTime(Tarih))+' '+FormatDateTime('HH:mm:ss',VarToDateTime(Saat));
 //  VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKHAREKET set TARIH='''+FormatDateTime('yyyy-MM-dd HH:mm:ss',VarToDateTime(Tarih))+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
   VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKHAREKET set ACIKLAMA='''+VarToStr(Aciklama)+''', TARIH='''+s+''', BELGENO='''+VarToStr(MakbuzNo)+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select top 1 ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc) where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)+') where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
 //  TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
   YenileTusClick(Self);
 end;
@@ -584,7 +584,7 @@ begin
      LogKartSil(TabCekHareketler, TabNo_CEKLER_Hareket, TabCekHareketler.FieldByName('ID').AsInteger,
                 CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger), TabCekler.FieldByName('ID').AsInteger);
      Tablo.CekHareketiSil(TabCekler.FieldByName('ID').AsInteger,TabCekHareketler.FieldByName('ID').AsInteger);
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select top 1 ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc) where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)+') where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
      if Islem in [136, 143] then //E?er i?lem tahsil edildi veya ?dendi ise hareket silinince kasadan da silinmeli
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where TUR in (51,52,53,54) and CEKSENETID='+TabCekler.FieldByName('ID').AsString, [], []);
      //TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
@@ -744,7 +744,7 @@ begin
   IslemDetayiSor := (Tablo.GENINI.ReadBoolean(Ops_Cekler_KurBilgisiSor,False))and(Tablo.UyariGoster('??lem Detay?','Bu i?lem i?in kur bilgilerini de?i?tirmek ister misiniz?',2) = MrYes);
   for I := 0 to IDlist.Count-1 do begin
     if TabCekler.locate('ID',IDlist[i],[]) then begin
-      Tablo.TablodanSorguAc(0,'select top 1 * from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc'); //son g?rd??? hareket..
+      Tablo.TablodanSorguAc(0,'select '+DbUst(1)+'* from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)); //son g?rd??? hareket..
       if Tablo.Query0.RecordCount>0 then begin
         if TarihAl<=Tablo.Query0.FieldByName('TARIH').AsDatetime then begin
           ShowMessage(CBu_Tarih_oncesi_islem_kaydi_yapamazsiniz +Tablo.Query0.FieldByName('TARIH').AsString+' ');
@@ -793,7 +793,7 @@ begin
           136:begin //tahsilat
             Tarih:=TarihAl;
              //?nce ?ek takasta m? bakal?m. Evetse o bankaya direk tahsilat yapar?z.
-            Tablo.TablodanSorguAc(1,'select top 1 ID,ISLEM,BANKAHESAPLARID from CEKHAREKET WHERE CEKSENETLERID = '+TabCekler.FieldByName('ID').AsString+' order by TARIH desc'); //son harekete bakal?m
+            Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ID,ISLEM,BANKAHESAPLARID from CEKHAREKET WHERE CEKSENETLERID = '+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)); //son harekete bakal?m
             if Tablo.Query1.Fields[1].AsInteger=133 then begin
                RehID := 0;
                BnkHesID := Tablo.Query1.Fields[2].AsInteger;
@@ -935,7 +935,7 @@ begin
         // Manuel eklenen yeni CEKHAREKET satirini detay logu olarak yaz.
         // Insert direkt SQL ile yapildigindan yeni ID identity max ID'dir (CEKSENETLERID bazinda).
         if LogGun>0 then begin
-          Tablo.TablodanSorguAc(0,'select top 1 * from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by ID desc');
+          Tablo.TablodanSorguAc(0,'select '+DbUst(1)+'* from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
           if Tablo.Query0.RecordCount>0 then
             LogKayitEkle(Tablo.Query0, TabNo_CEKLER_Hareket, Tablo.Query0.FieldByName('ID').AsInteger,
                          CekSenetTabloNo(TabCekler.FieldByName('CEKSENET').AsInteger), TabCekler.FieldByName('ID').AsInteger);

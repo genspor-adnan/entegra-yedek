@@ -175,7 +175,7 @@ var
 
 
 implementation
- Uses UHizliGirisAnaMenu,UHizliGiris, UAnaForm, FetaClassExtensions,LocOnFly,Prjconst;
+ Uses UVeriMotor, UHizliGirisAnaMenu,UHizliGiris, UAnaForm, FetaClassExtensions,LocOnFly,Prjconst;
 {$R *.dfm}
 
 procedure THizliGirisKasaSayDlg.FormCreate(Sender: TObject);
@@ -381,9 +381,9 @@ begin
       tabKasaTakip.Open;
    end else begin //yetki yoksa son kasa kaydını getiriyoruz.
       tabKasaTakip.Close;
-      tabKasaTakip.SQL.Text:=' SELECT TOP 1 * FROM KASATAKIP WHERE HESAPID = '+inttostr(VarsKasa)+' '+
+      tabKasaTakip.SQL.Text:=' SELECT '+DbUst(1)+'* FROM KASATAKIP WHERE HESAPID = '+inttostr(VarsKasa)+' '+
                              '  AND ACILISTARIHI < '''+FormatDateTime('yyyy-mm-dd hh:nn:ss', Tablo.GENINI.BugunTrhSaat)+''' '+
-                             '  AND TUR = 1 ORDER BY ACILISTARIHI DESC ';
+                             '  AND TUR = 1 ORDER BY ACILISTARIHI DESC '+DbSinir(1);
       tabKasaTakip.Open;
    end;
 end;
@@ -416,7 +416,7 @@ procedure THizliGirisKasaSayDlg.tabKasaTakipBeforeEdit(DataSet: TDataSet);
 begin
   if not(tabKasaTakip.FieldByName('KAPANISTARIHI').IsNull) then begin
     if not( Tablo.YetkiVarmi(180212,YetkiTur_Degistirme) ) then begin
-      Tablo.TablodanSorguAc(2,'SELECT TOP 1 ID FROM KASATAKIP WHERE HESAPID = '+inttostr(VarsKasa)+' AND TUR = 1 AND ACILISTARIHI>'''+FormatDateTime('YYYY-MM-DD hh:nn:ss',tabKasaTakip.FieldByName('ACILISTARIHI').AsDateTime)+''' ');
+      Tablo.TablodanSorguAc(2,'SELECT '+DbUst(1)+'ID FROM KASATAKIP WHERE HESAPID = '+inttostr(VarsKasa)+' AND TUR = 1 AND ACILISTARIHI>'''+FormatDateTime('YYYY-MM-DD hh:nn:ss',tabKasaTakip.FieldByName('ACILISTARIHI').AsDateTime)+''' '+DbSinir(1));
       if Tablo.Query2.RecordCount=1 then begin
          Application.MessageBox(PChar(HGdegistirme_yetkiniz_yok),PChar(Uyari),MB_OK+ MB_ICONERROR);
          abort;

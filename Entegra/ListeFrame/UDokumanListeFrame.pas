@@ -264,7 +264,7 @@ implementation
 
 uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,
   PrjConst, Utablo, ULog, IdGlobalProtocols, UMailKisiBulma,
-  UBinarySave, UGirisKutusuEx, URehberAramaEkrani, UDokumanYetki,LocOnFly;
+  UBinarySave, UGirisKutusuEx, URehberAramaEkrani, UDokumanYetki,LocOnFly, UVeriMotor;
 {$R *.dfm}
 
 { TDokumanListeFrame }
@@ -834,7 +834,7 @@ end;
 
 procedure TDokumanListeFrame.DuyuruOlarakYaynla1Click(Sender: TObject);
 begin
-  Tablo.TablodanSorguAc(7,'select top 1 ID from IMAJ where YERI=1 and YER_ID='+DOKUMAN.FieldByName('ID').AsString+' order by ID desc');
+  Tablo.TablodanSorguAc(7,'select '+DbUst(1)+'ID from IMAJ where YERI=1 and YER_ID='+DOKUMAN.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
   Tablo.DuyuruAc('E',0,Tablo.Query7.FieldByName('ID').AsInteger);
 end;
 

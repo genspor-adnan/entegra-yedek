@@ -327,7 +327,7 @@ public
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
-     UFastRap, PrjConst,LocOnFly, UServisHareketEkle, FetaUtil;
+     UFastRap, PrjConst,LocOnFly, UServisHareketEkle, FetaUtil, UVeriMotor;
 
 {$R *.dfm}
 { TServisListeDlg }
@@ -876,7 +876,7 @@ begin
     LocateID := SERVIS.FieldByName('ID').AsInteger;
   SERVIS.Close;
   if not Tablo.GENINI.ReadBoolean(Ops_ServisBirdenFazlaSorumluPers,False) then
-    SERVIS.SQL.Text := StringReplace(SQLMemo.Text, 'SORUMLUAD=(SELECT [dbo].[fn_ServisKisiler](S.DURUM, S.ID)),', 'SORUMLUAD=(SELECT R3.FIRMA from REHBER R3 where R3.ID=(select top 1 SH3.PERSONEL from SERVISHAREKET SH3 where SH3.SERVISID=S.ID order by SH3.ID desc)),', [rfReplaceAll])
+    SERVIS.SQL.Text := StringReplace(SQLMemo.Text, 'SORUMLUAD=(SELECT [dbo].[fn_ServisKisiler](S.DURUM, S.ID)),', 'SORUMLUAD=(SELECT R3.FIRMA from REHBER R3 where R3.ID=(select '+DbUst(1)+'SH3.PERSONEL from SERVISHAREKET SH3 where SH3.SERVISID=S.ID order by SH3.ID desc '+DbSinir(1)+')),', [rfReplaceAll])
   else
     SERVIS.SQL.Text := SQLMemo.Text;
   SERVIS.SQL.Text := SERVIS.SQL.Text+' where 1=1 ';
@@ -968,7 +968,7 @@ end;
 procedure TServisListeDlg.MenuItem1Click(Sender: TObject);
 begin
   //önce seçilmiş satırdan servis bilgisi (ID) alıp ona hareket eklemeliyiz
-  Tablo.TablodanSorguAc(1,'select top 1 ID from vServisHareket S  where SERVISID='+IntToStr(TmenuItem(Sender).Tag)+' and PERSONEL='+Kullanan+' order by TARIH desc');
+  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ID from vServisHareket S  where SERVISID='+IntToStr(TmenuItem(Sender).Tag)+' and PERSONEL='+Kullanan+' order by TARIH desc '+DbSinir(1));
   if Tablo.ServisHareketBaslat('E',1, Tablo.Query1.Fields[0].AsInteger) > 0 then
      YenileTusClick(Self);
 end;
@@ -981,8 +981,8 @@ end;
 
 procedure TServisListeDlg.PopupMenuHareketPopup(Sender: TObject);
 begin
-   Tablo.TablodanSorguAc(2,'select distinct top 10 SERVISID,SERVISNO+'' ''+SUBSTRING (FIRMA,0,CHARINDEX('' '',FIRMA))+'' ''+KONUSU,TARIH  from vServisHareket S '+
-                           ' where PERSONEL='+Kullanan+' order by TARIH desc');
+   Tablo.TablodanSorguAc(2,'select distinct '+DbUst(10)+'SERVISID,SERVISNO+'' ''+SUBSTRING (FIRMA,0,CHARINDEX('' '',FIRMA))+'' ''+KONUSU,TARIH  from vServisHareket S '+
+                           ' where PERSONEL='+Kullanan+' order by TARIH desc '+DbSinir(10));
    PopupMenuHareket.Items.Clear;
    while not Tablo.Query2.eof do begin
       PopUpMenuIslemleri(PopupMenuHareket, MenuItem1Click, 'Ekle', Tablo.Query2.Fields[1].AsString,'', Tablo.Query2.Fields[0].AsInteger);

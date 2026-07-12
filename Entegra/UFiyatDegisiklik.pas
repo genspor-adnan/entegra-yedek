@@ -178,7 +178,7 @@ var
 implementation
 
 uses
-  UAnaForm, PrjConst, FetaKurulusSiniflari, FetaClassExtensions,
+  UVeriMotor, UAnaForm, PrjConst, FetaKurulusSiniflari, FetaClassExtensions,
   URaporAraclari, UFastRap, UGenelAnaSekmeFrame,LocOnFly;
 {$R *.dfm}
 
@@ -444,8 +444,8 @@ begin
       TabFiyatSatis.Open;
 
       TabFiyatAlis.Close;
-      TabFiyatAlis.SQL.Text := ' Select ID=STOKID,FIYATADI, FIYATAD=(select top 1case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
-          ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI),FIYAT,KUR,KDVDURUM,DEGISTIRMETARIHI from STOKFIYAT Where STOKID='+StokID +' and SATIS=0';
+      TabFiyatAlis.SQL.Text := ' Select ID=STOKID,FIYATADI, FIYATAD=(select '+DbUst(1)+'case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
+          ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI '+DbSinir(1)+'),FIYAT,KUR,KDVDURUM,DEGISTIRMETARIHI from STOKFIYAT Where STOKID='+StokID +' and SATIS=0';
       TabFiyatAlis.Open;
 
     end else begin
@@ -455,8 +455,8 @@ begin
       TabFiyatSatis.Open;
 
       TabFiyatAlis.Close;
-      TabFiyatAlis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYATAD=(select top 1 case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
-          ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI),FIYAT,KUR,KDVDURUM,SATIS,DEGISTIRMETARIHI from FIYATLAR Where HIZMETID='+StokID +' and SATIS=0 ';
+      TabFiyatAlis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYATAD=(select '+DbUst(1)+'case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
+          ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI '+DbSinir(1)+'),FIYAT,KUR,KDVDURUM,SATIS,DEGISTIRMETARIHI from FIYATLAR Where HIZMETID='+StokID +' and SATIS=0 ';
       TabFiyatAlis.Open;
     end;
 end;

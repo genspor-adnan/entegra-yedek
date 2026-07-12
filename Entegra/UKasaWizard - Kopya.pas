@@ -432,7 +432,7 @@ implementation
 {$R *.dfm}
 
 uses UTablo, UCekSenetArama, UMesaj, UKasa, UAnaForm, UReharadlg,UFIRMALAR ,
-  UBankaSecimi, Fetautil, UFastRap;
+  UBankaSecimi, Fetautil, UFastRap, UVeriMotor;
 
 var
    GeldigiEkranAdi : string[25];
@@ -1009,8 +1009,8 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject;
 
        // son tarihi alalım
        Tablo.Query1.Close;
-       Tablo.Query1.SQL.Text := 'select top 1 TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
-                   ' and KREDIREFERANSNO='''+Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+''' order by ID desc ';
+       Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
+                   ' and KREDIREFERANSNO='''+Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+''' order by ID desc '+DbSinir(1);
        Tablo.Query1.Open;
        if Tablo.Query1.RecordCount>0 then begin
            BasTarih := Tablo.Query1.Fields[0].AsDateTime;

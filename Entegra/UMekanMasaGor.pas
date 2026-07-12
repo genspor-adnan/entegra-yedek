@@ -166,7 +166,7 @@ var
 implementation
 
 uses UMekanMasaDizayn, UMasaSor, Utablo, UHizliGiris,FetaKurulusSiniflari, PrjConst, UHizliGirisAnaMenu,
-     URezervasyon, Fetautil,UKullaniciGiris, UCallerId, UResim, UGirisKutusuEx;
+     URezervasyon, Fetautil,UKullaniciGiris, UCallerId, UResim, UGirisKutusuEx, UVeriMotor;
 
 {$R *.dfm}
 
@@ -270,7 +270,7 @@ begin
          end else begin
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MASALAR set DURUM=1 where ID='+IntToStr(SeciliSekil.Tag),[],[]);
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MASALAR set DURUM=0 where ID='+IntToStr(OncekiMasaId),[],[]);
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK set FATURATARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',DURUM=0, LOKASYON='+IntToStr(SeciliSekil.Tag)+',OZELKOD='''+SeciliSekil.Hint+''' where ID=(select top 1 ID from FATBASLIK where TUR=110 and LOKASYON='+IntToStr(OncekiMasaId)+' order by ID desc) ',[],[]);
+            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK set FATURATARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',Tablo.GENINI.BugunTrhSaat)+''',DURUM=0, LOKASYON='+IntToStr(SeciliSekil.Tag)+',OZELKOD='''+SeciliSekil.Hint+''' where ID=(select '+DbUst(1)+'ID from FATBASLIK where TUR=110 and LOKASYON='+IntToStr(OncekiMasaId)+' order by ID desc '+DbSinir(1)+') ',[],[]);
             //EskiSeciliSekil.Brush.Color := RenkMasaBos; //me?gul
             //?imdiki masan?n rengini dolu yapal?m
             SeciliSekil.Brush.Color := RenkMasaDolu; //me?gul
@@ -314,7 +314,7 @@ begin
             StatusBar1.Panels[3].Text := '';
             if SeciliSekil.HelpContext > 0 then begin //masa birle?ikse
                //ayr?lan masa en k???k ID olan m?, e?er enk???kse hesap bir b?y?k masa ?zerine ge?meli
-               Tablo.TablodanSorguAc(1,'select top 2 ID, MASANO from MASALAR where BIRLESIM='+IntToStr(SeciliSekil.HelpContext)+' order by ID');
+               Tablo.TablodanSorguAc(1,'select '+DbUst(2)+'ID, MASANO from MASALAR where BIRLESIM='+IntToStr(SeciliSekil.HelpContext)+' order by ID '+DbSinir(2));
                if Tablo.Query1.Recordcount>1 then begin //tek masadan fazla ise
                    if Tablo.Query1.Fields[0].asInteger=SeciliSekil.Tag then begin //en k???kse
                       Tablo.Query1.next;//bir sonraki masa

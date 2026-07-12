@@ -389,7 +389,7 @@ implementation
 {$R *.dfm}
 
 uses
-  PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle, UCokluSecim,
+  UVeriMotor, PrjConst, UGirisKutusuEx, UCombo, FetaKurulusSiniflari, UGENINIDuzenle, UCokluSecim,
   Fetautil, UResim, UComboImgDuzenle, UCariFonksiyonlar, UBinarySave, UAnaForm,
   FetaClassExtensions, IdGlobalProtocols, UGenSifre,LocOnFly, UUnits, UGoogleSifre, ULog;
 
@@ -569,8 +569,8 @@ begin
   if ID<>-99 then begin
      TabRehber.Edit;
      TabRehber.FieldByName('SINIF').AsInteger := ID;
-     Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-        ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ) '+
+     Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+        ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+') '+
         ' from ROLLER ROL where ROL.ID='+IntToStr(ID));
      ComboSube.EditValue := Tablo.Query1.Fields[0].AsInteger;
      ComboSube.PostEditValue;
@@ -836,22 +836,22 @@ begin
   Tabloyenile(TabNotlar,[RehberID]);
 
   if TabRehber.FieldByName('SINIF').AsString <> '' then begin
-     Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-        ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ) '+
+     Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+        ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+') '+
         ' from ROLLER ROL where ROL.ID='+TabRehber.FieldByName('SINIF').AsString);
      EditDepartman.text := Tablo.Query1.Fields[1].AsString;
      EditGorevi.text := Tablo.Query1.Fields[2].AsString;
   end;
 
   if TabRehber.FieldByName('ID').AsString <> '' then begin
-      Tablo.TablodanSorguAc(1,'select top 1 BILGI from REHBERBILGI where YERI=3 AND YER_ID='+TabRehber.FieldByName('ID').AsString+' AND SIRA=22');
+      Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'BILGI from REHBERBILGI where YERI=3 AND YER_ID='+TabRehber.FieldByName('ID').AsString+' AND SIRA=22 '+DbSinir(1));
       if Tablo.Query1.recordcount>0 then
          EditVKNO.Text := Tablo.Query1.Fields[0].AsString;
 
-      Tablo.TablodanSorguAc(1,'select top 1 TARIH from PERS_HAREKET where REHBERID='+TabRehber.FieldByName('ID').AsString+' and TUR=1 order by 1 desc');
+      Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'TARIH from PERS_HAREKET where REHBERID='+TabRehber.FieldByName('ID').AsString+' and TUR=1 order by 1 desc '+DbSinir(1));
       if Tablo.Query1.recordcount>0 then
          DateGIRISTARIHI.Date :=Tablo.Query1.Fields[0].asdatetime;
-      Tablo.TablodanSorguAc(1,'select top 1 TARIH from PERS_HAREKET where REHBERID='+TabRehber.FieldByName('ID').AsString+' and TUR=99 order by 1 desc');
+      Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'TARIH from PERS_HAREKET where REHBERID='+TabRehber.FieldByName('ID').AsString+' and TUR=99 order by 1 desc '+DbSinir(1));
       if Tablo.Query1.recordcount>0 then
          DateCIKISTARIHI.Date :=Tablo.Query1.Fields[0].asdatetime;
 
@@ -1352,8 +1352,8 @@ begin
       TabAdresAd.RecordCount < 1;
     TabAdresAd.Post;
     tablo.TablodanSorguAc(1,
-      'Select top 1 * from REHBERILETISIM where REHBERID=' +
-      IntToStr(RehberID));
+      'Select '+DbUst(1)+'* from REHBERILETISIM where REHBERID=' +
+      IntToStr(RehberID)+' '+DbSinir(1));
 
     if tablo.Query1.RecordCount < 1 then
       PersonelVarsayilanYap(RehberID, TabAdresAd.FieldByName('ID').AsInteger);

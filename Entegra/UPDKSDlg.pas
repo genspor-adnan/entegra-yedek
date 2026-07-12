@@ -205,7 +205,7 @@ var
 implementation
 
 Uses
-   PrjConst, UFastRap, URaporAraclari, UAnaForm, FetaClassExtensions,FetaClassExtensionsConsts, UGenelAnaSekmeFrame, FetaKurulusSiniflari, UGirisKutusuEx;
+   PrjConst, UFastRap, URaporAraclari, UAnaForm, FetaClassExtensions,FetaClassExtensionsConsts, UGenelAnaSekmeFrame, FetaKurulusSiniflari, UGirisKutusuEx, UVeriMotor;
 {$R *.dfm}
 var
   KartNoKontrol : boolean;
@@ -1020,7 +1020,7 @@ begin
               'from PERS_PDKS PP' + #13#10 +
               'LEFT OUTER JOIN REHBER R on R.ID=PP.REHBERID' + #13#10 +
               'left outer join PERS_VARDIYATANIM PV on' + #13#10 +
-              'PV.REHBERID=CASE WHEN EXISTS(SELECT TOP 1 ISNULL(REHBERID,-1) FROM dbo.PERS_VARDIYATANIM WHERE REHBERID=PP.REHBERID)THEN' + #13#10 +
+              'PV.REHBERID=CASE WHEN EXISTS(SELECT '+DbUst(1)+'ISNULL(REHBERID,-1) FROM dbo.PERS_VARDIYATANIM WHERE REHBERID=PP.REHBERID '+DbSinir(1)+')THEN' + #13#10 +
               'PP.REHBERID ELSE -1 END and PV.GUN=DATEPART(WEEKDAY,PP.GIRIS) Where AY = 0 ';
    if ComboPersonel.Text <> '' then
       Sql1 := Sql1 + ' and PP.REHBERID = ' + IntToStr(ComboPersonel.Tag) + '  '

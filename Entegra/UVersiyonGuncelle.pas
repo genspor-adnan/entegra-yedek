@@ -24,7 +24,7 @@ procedure VersiyonGuncelle;
 var
   i,j,yapilmayanKomut,AltSorguHataSay,ToplamHataSay:integer;
 begin
-  yapilmayanKomut := 0;
+  yapilmayanKomut   := 0;
   Tablo.TablodanSorguAc(1,'select DEGER from GENINI where BOLUM='+IntToStr(Ops_GenelOpsiyon_VersiyonNo)+' ');
 
   GResult:=Guncelleme.guncelleme(1,Tablo.Query1.FieldByName('DEGER').AsInteger+1,KomutNo);

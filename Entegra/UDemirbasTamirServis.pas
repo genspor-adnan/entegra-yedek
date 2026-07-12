@@ -117,7 +117,7 @@ implementation
 
 uses
   UCombo, UDemirbasWizard,UGenelAnaSekmeFrame,URaporAraclari, UServisListeDlg,UAnaform,
-  UFastRap,PRJConst,FetaKurulusSiniflari,FetaClassExtensions,LocOnFly;
+  UFastRap,PRJConst,FetaKurulusSiniflari,FetaClassExtensions,LocOnFly,UVeriMotor;
 {$R *.dfm}
 
 procedure TDemirbasTamirServisDLG.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -597,8 +597,8 @@ end;
 `r`n
 procedure TDemirbasTamirServisDLG.TabGenelAfterOpen(DataSet: TDataSet);
 begin
-   Tablo.TablodanSorguAc(1,'select top 1 sl.AD from SERVISBILGI SB inner join SERVISLISTE SL on SB.SERVISTUR=210 '+
-      ' and SB.SERVISLISTEID=SL.ID and SB.SERVISID='+TabServis.Fields[0].AsString);
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'sl.AD from SERVISBILGI SB inner join SERVISLISTE SL on SB.SERVISTUR=210 '+
+      ' and SB.SERVISLISTEID=SL.ID and SB.SERVISID='+TabServis.Fields[0].AsString+' '+DbSinir(1));
    EditProblem.Text := Tablo.Query1.Fields[0].AsString;
    memoServiseGonderimNedeni.Enabled := True;
 end;

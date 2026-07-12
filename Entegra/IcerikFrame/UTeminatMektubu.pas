@@ -175,7 +175,7 @@ type
 
 implementation
 
-uses  FetaClassExtensions, FetaKurulusSiniflari, UAramaYokFrame,PrjConst,LocOnFly;
+uses  UVeriMotor, FetaClassExtensions, FetaKurulusSiniflari, UAramaYokFrame,PrjConst,LocOnFly;
 
 {$R *.dfm}
 
@@ -469,13 +469,13 @@ begin
   TabTeminatMektubu.Close;
   if ATeminatMektubuId <> -1 then begin
     if ATeminatMektubuId = -2 then
-      TabTeminatMektubu.SQL.Text := 'SELECT TOP 1 * FROM TEMINATMEKTUBU ORDER BY ID DESC'
+      TabTeminatMektubu.SQL.Text := 'SELECT '+DbUst(1)+'* FROM TEMINATMEKTUBU ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabTeminatMektubu.SQL.Text := 'SELECT * FROM TEMINATMEKTUBU WHERE ID = :ID';
       TabTeminatMektubu.Params.ParamByName('ID').AsInteger := ATeminatMektubuId;
     end;
   end else { Yani -1 -> Boş Teminat mektubu ekranı için boş bir query }
-    TabTeminatMektubu.SQL.Text := 'SELECT TOP 0 * FROM TEMINATMEKTUBU';
+    TabTeminatMektubu.SQL.Text := 'SELECT '+DbUst(0)+'* FROM TEMINATMEKTUBU '+DbSinir(0);
   TabTeminatMektubu.Open;
 end;
 

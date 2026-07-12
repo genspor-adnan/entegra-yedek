@@ -307,7 +307,7 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst,LocOnFly, UGenNotificationUtils,
-   UGorevDlg, FetaUtil, UIslistesi, UAnaForm, UAksiyonlarGorevFrame;
+   UGorevDlg, FetaUtil, UIslistesi, UAnaForm, UAksiyonlarGorevFrame, UVeriMotor;
 
 {$R *.dfm}
 { TGorevListeDlg }
@@ -411,7 +411,7 @@ begin
           ServisUpdate(MenuGorevId, 'SORUMLU='+copy(Kullanicilar[i],2,8))
        else begin // Görev
          for I := 0 to Kullanicilar.Count - 1 do
-           if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(MenuGorevId)+' and TUR=11 and REHBERID='+copy(Kullanicilar[i],2,8),[],[]) then begin
+           if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(MenuGorevId)+' and TUR=11 and REHBERID='+copy(Kullanicilar[i],2,8)+' '+DbSinir(1),[],[]) then begin
              Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])'+
                    ' values('+IntToStr(MenuGorevId)+',11,'+copy(Kullanicilar[i],2,8)+','+Kullanan+')', [],[]);
              if (AktifMail>0)and(TabGorevler.Fieldbyname('EKLEYEN').Asstring <> copy(Kullanicilar[i],2,8)) then
@@ -1120,7 +1120,7 @@ begin
          DragID:= aRealGridView.DataController.Values[aRealGridView.DataController.FocusedRecordIndex, GridPersonelViewID.Index];
          if Scheduler.CurrentView.HitTest.HitAtEvent then begin
             DropID := Scheduler.CurrentView.HitTest.Event.GetCustomFieldValueByName('GOREV_ID');//Görev
-            if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR=11 and REHBERID='+IntToStr(DragID),[],[]) then begin
+            if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR=11 and REHBERID='+IntToStr(DragID)+' '+DbSinir(1),[],[]) then begin
                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])'+
                    ' values('+IntToStr(DropID)+',11,'+IntToStr(DragID)+','+Kullanan+')', [],[]);
                if (AktifMail>0) then begin
@@ -1298,7 +1298,7 @@ begin
 //0101                ListeTuru := 12 //servis için tür
 //0101             else
                 ListeTuru := 11; //görev için tür
-               if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR='+IntToStr(ListeTuru)+' and REHBERID='+IntToStr(DragID),[],[]) then begin
+               if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR='+IntToStr(ListeTuru)+' and REHBERID='+IntToStr(DragID)+' '+DbSinir(1),[],[]) then begin
                   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])'+
                       ' values('+IntToStr(DropID)+','+IntToStr(ListeTuru)+','+IntToStr(DragID)+','+Kullanan+')', [],[]);
                   if (AktifMail>0) then begin
@@ -1691,7 +1691,7 @@ begin
             ListeTuru := 12 //servis için tür
          else
             ListeTuru := 11; }//görev için tür
-         if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR='+IntToStr(ListeTuru)+' and REHBERID='+IntToStr(DragID),[],[]) then begin
+         if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVKULLANICI where LISTGOREVID='+IntToStr(DropID)+' and TUR='+IntToStr(ListeTuru)+' and REHBERID='+IntToStr(DragID)+' '+DbSinir(1),[],[]) then begin
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [GOREVKULLANICI] ([LISTGOREVID],[TUR],[REHBERID],[EKLEYEN])'+
                 ' values('+IntToStr(DropID)+','+IntToStr(ListeTuru)+','+IntToStr(DragID)+','+Kullanan+')', [],[]);
             if (AktifMail>0) then begin

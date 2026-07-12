@@ -43,7 +43,7 @@ var
 implementation
 
 {$R *.dfm}
-uses prjconst, FetaKurulusSiniflari, UBinarySave, ULog;
+uses prjconst, FetaKurulusSiniflari, UBinarySave, ULog, UVeriMotor;
 
 procedure TDokumanKaydetDlg.RevizeKaydetTusClick(Sender: TObject);
 var Kayit : boolean;
@@ -52,7 +52,7 @@ begin
        showmessage('Dokümanda değişiklik yapılıp kaydedilmemiş!')
     else begin
         Tablo.TablodanSorguAc(8,' select D.ID, D.AD, I.SURUM, TARIH=I.DEGISTIRMETARIHI, SORUMLU=I.REHBERID, I.ONAYLAYACAK, I.ONAY from DOKUMAN D '+
-            ' INNER JOIN IMAJ I ON I.ID = (select top 1 ID from IMAJ where YERI=1 AND YER_ID=D.ID order by ID desc) where D.ID='+IntToStr(DokumanId) );
+            ' INNER JOIN IMAJ I ON I.ID = (select '+DbUst(1)+'ID from IMAJ where YERI=1 AND YER_ID=D.ID order by ID desc '+DbSinir(1)+') where D.ID='+IntToStr(DokumanId) );
         Kayit := Tablo.RevizeIslemleri(Tablo.Query8, DokumanAdi, Tablo.Query8.FieldByName('AD').asstring);
 //        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANGECMIS where DOKUMANID=' + IntToStr(DokumanId) + ' and TUR=0 ', [], []);
 

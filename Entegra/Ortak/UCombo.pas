@@ -692,7 +692,7 @@ begin
   with IniSQL do
     begin
       Close;
-      SQL.Text := Format('SELECT TOP 1 BOLUM,ANAHTAR,DEGER FROM %s WITH (NOLOCK)',[Dosya]);
+      SQL.Text := Format('SELECT '+DbUst(1)+'BOLUM,ANAHTAR,DEGER FROM %s WITH (NOLOCK) '+DbSinir(1),[Dosya]);
       Open;
       for i := 0 to KeysValues.Count - 1 do
         begin
@@ -808,7 +808,7 @@ begin
   AnahtarSil(Bolum,Anahtar);
   tmpTable := TFDQuery.Create(nil);
   tmpTable.Connection := IniSql.Connection;
-  tmpTable.SQL.Text := 'SELECT TOP 0 * FROM ' + Dosya;
+  tmpTable.SQL.Text := 'SELECT '+DbUst(0)+'* FROM ' + Dosya+' '+DbSinir(0);
   with tmpTable do
   try
     Open;

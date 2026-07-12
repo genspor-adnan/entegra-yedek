@@ -368,7 +368,7 @@ implementation
 
 uses UAnaForm,UKrediler, FetaKurulusSiniflari, FetaClassExtensions, UKasalarListeFrame, PrjConst,UKrediHesapMakineDlg,
      URaporAraclari, UGenelAnaSekmeFrame, UFastRap, UGirisKutusuEx, FetaUtil,LocOnfly,
-  UKrediEkle, UKasaWizard, URotatifDonemFaiz, ULog;
+  UKrediEkle, UKasaWizard, URotatifDonemFaiz, ULog, UVeriMotor;
 
 
 {$R *.dfm}
@@ -793,11 +793,11 @@ begin
    KREDIROTATIF.FieldByName('BAKIYE').AsCurrency := KREDIROTATIF.FieldByName('TUTAR').AsCurrency;
    //Yeni kredi al?nd? eski toplama eklenecek
    Tablo.Query1.Close;
-   Tablo.Query1.SQL.Text := ' select top 1 isnull(BAKIYE,0.0) from  KREDIROTATIF where KREDIID=' +KREDIROTATIF.FieldByName('KREDIID').AsString+
+   Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'isnull(BAKIYE,0.0) from  KREDIROTATIF where KREDIID=' +KREDIROTATIF.FieldByName('KREDIID').AsString+
                             ' and KREDIREFERANSNO='''+KREDIROTATIF.FieldByName('KREDIREFERANSNO').AsString+'''  ';
    if KREDIROTATIF.FieldByName('ID').AsString<>'' then //eski kay?t ?st?nde d?zeltme yap?l?yorsa ID doludur yeniyse bo?tur
       Tablo.Query1.SQL.Add(' and ID<'+KREDIROTATIF.FieldByName('ID').AsString);
-   Tablo.Query1.SQL.Add(' order by TARIH,ID desc');
+   Tablo.Query1.SQL.Add(' order by TARIH,ID desc '+DbSinir(1));
    Tablo.Query1.Open;
    if Tablo.Query1.RecordCount>0 then
       tut := Tablo.Query1.Fields[0].AsCurrency
@@ -895,10 +895,10 @@ end;
 
 function TBankaKredileriListeFrame.RotatifBaslamaTarihGetir(var BasAy : smallint; var BasYil : smallint) : TDateTime;
 begin
-  Tablo.TablodanSorguAc(1,'select top 1 * from ('+
+  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from ('+
                        ' select  TUR=1,GUN=DATEPART(DD, min(PLANTARIHI)),AY=DATEPART(MM, min(PLANTARIHI)), YIL=DATEPART(YYYY, min(PLANTARIHI))  from  KASA where TUR = 59 and HESAPTURU=''R'' and HESAPID='+KREDILER.FieldByName('ID').AsString+
                        ' union all'+
-                       ' select  TUR=2,GUN=DATEPART(DD, TARIH),AY=DATEPART(MM, TARIH), YIL=DATEPART(YYYY, TARIH)  from FATBASLIK where TUR=13 and YERI=47 and YERID='+KREDILER.FieldByName('ID').AsString+' and LOKASYON=131 )as cc order by 1 desc,4 desc,3 desc,2 desc  ');
+                       ' select  TUR=2,GUN=DATEPART(DD, TARIH),AY=DATEPART(MM, TARIH), YIL=DATEPART(YYYY, TARIH)  from FATBASLIK where TUR=13 and YERI=47 and YERID='+KREDILER.FieldByName('ID').AsString+' and LOKASYON=131 )as cc order by 1 desc,4 desc,3 desc,2 desc  '+DbSinir(1));
   if Tablo.Query1.Fields[0].AsInteger = 1 then
      BasAy := Tablo.Query1.Fields[2].AsInteger - 1
   else
@@ -970,7 +970,7 @@ begin
            ' from  KASA where TUR in (58,59)and HESAPTURU=''R'' and HESAPID='+KREDILER.FieldByName('ID').AsString+' and ISLEMTARIHI between '+
            ''''+FormatDateTime('yyyy-mm-dd 00:00', BasTarihi)+''' and '''+FormatDateTime('yyyy-mm-dd 23:59', DonemTarihi)+''' '+
             ' union all '+//son d?nem tahakkuku da alal?m
-           ' select VALOR, ANAPARA from( select top 1 VALOR = TARIH, ANAPARA=FATURA_MATRAHI from FATBASLIK where TUR=13 and YERI=47 and YERID='+KREDILER.FieldByName('ID').AsString+' and LOKASYON=131 order by 1 desc) as liste';
+           ' select VALOR, ANAPARA from( select '+DbUst(1)+'VALOR = TARIH, ANAPARA=FATURA_MATRAHI from FATBASLIK where TUR=13 and YERI=47 and YERID='+KREDILER.FieldByName('ID').AsString+' and LOKASYON=131 order by 1 desc '+DbSinir(1)+') as liste';
        Tablo.Query0.Open;
        SimdikiFaizTut := 0.0;
        while not Tablo.Query0.eof do begin

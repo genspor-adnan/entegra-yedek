@@ -79,7 +79,7 @@ var
 
 implementation
 
-uses UCombo, UTablo, FetaUtil, UMesaj;// {$IFNDEF AGENT} , UTabDok{$ENDIF};
+uses UCombo, UTablo, FetaUtil, UMesaj, UVeriMotor;// {$IFNDEF AGENT} , UTabDok{$ENDIF};
 
 {$R *.DFM}
 
@@ -210,7 +210,7 @@ procedure TAraDlg.ParcaAraTusClick(Sender: TObject);
          s := s + CB3;
 
       Tablo.Query1.Close;
-      Tablo.Query1.SQL.Text := 'select top 1 * from '+CB1;
+      Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'* from '+CB1+' '+DbSinir(1);
       Tablo.Query1.Open;
 
       FieldTipi := Tablo.Query1.FieldByName(CB2).DataType;
@@ -234,9 +234,9 @@ procedure TAraDlg.ParcaAraTusClick(Sender: TObject);
         ' ON GELISLER.DOSYANO = KIMLIK.DOSYANO '+
          ' WHERE ((GELISLER.GELISNO IS NULL '+
          ' OR GELISLER.GELISNO IN '+
-         ' (SELECT TOP '+IntToStr(SonGelisSay)+' GELISNO FROM GELISLER G1 '+
+         ' (SELECT '+DbUst(SonGelisSay)+'GELISNO FROM GELISLER G1 '+
        ' WHERE KIMLIK.DOSYANO = G1.DOSYANO '+
-         ' ORDER BY 1 DESC ))  ')
+         ' ORDER BY 1 DESC '+DbSinir(SonGelisSay)+'))  ')
   end;
 
 begin
@@ -369,7 +369,7 @@ end;
 procedure TAraDlg.ComboBox2DropDown(Sender: TObject);
 begin
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := 'select top 1 * from '+ComboBox1.Text;
+    Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'* from '+ComboBox1.Text+' '+DbSinir(1);
     Tablo.Query1.Open;
     ComboBox2.Clear;
     Tablo.Query1.GetFieldNames(ComboBox2.Items);

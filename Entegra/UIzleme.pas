@@ -140,7 +140,7 @@ var
 
 implementation
 
-uses UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm;
+uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm;
 
 
 
@@ -1162,8 +1162,8 @@ var Fark : Real;
     begin
          Result := True;
          //sonra önceki girişlere de bakalım bu lotnodan girilmiş mi
-         Tablo.TablodanSorguAc(1,'select top 1 * from STOKSERILOT SI where SI.STOKID='+IntToStr(StokID)+
-             ' and LOTNO='''+TabIzlem.FieldByName('LOTNO').AsString+''' ');
+         Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from STOKSERILOT SI where SI.STOKID='+IntToStr(StokID)+
+             ' and LOTNO='''+TabIzlem.FieldByName('LOTNO').AsString+''' '+DbSinir(1));
          if (Tablo.Query1.RecordCount > 0) and //daha önceden girilmiş lot bulundu
             (Tablo.Query1.FieldByName('SKT').AsDateTime-TabIzlem.FieldByName('SKT').AsDateTime<>0)and
             (Tablo.Query1.FieldByName('URT').AsDateTime-TabIzlem.FieldByName('URT').AsDateTime<>0) then begin
@@ -1315,8 +1315,8 @@ var s:string;  //Komut
                 //Komut := 'insert into STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,IZLEMTUR,KALAN,ADET,SERINO,' +
                 //                            'EKLEYEN,LOTNO,SKT,URT,DONUSID)';
                 //daha önce bu serilotlar var mı bakalım yoksa tabloya ekleyelim
-                Tablo.TablodanSorguAc(1, 'select top 1 ID from STOKSERILOT where STOKID='+Tablo.Query8.FieldByName('STOKID').AsString+
-                  ' and SERINO='''+Tablo.Query8.FieldByName('SERINO').AsString+''' and LOTNO='''+Tablo.Query8.FieldByName('LOTNO').AsString+''' ');
+                Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+Tablo.Query8.FieldByName('STOKID').AsString+
+                  ' and SERINO='''+Tablo.Query8.FieldByName('SERINO').AsString+''' and LOTNO='''+Tablo.Query8.FieldByName('LOTNO').AsString+''' '+DbSinir(1));
                 if Tablo.Query1.RecordCount>0 then
                     SeriLotId := Tablo.Query1.Fields[0].AsInteger
                 else begin

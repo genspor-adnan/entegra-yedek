@@ -331,6 +331,8 @@ var
 
 implementation
 
+uses UVeriMotor;
+
 {$R *.dfm}
 
 uses
@@ -1289,7 +1291,7 @@ begin
 //       TabDetayYaz.SQL.Text:= 'select * from '+StringReplace(AktifFatTabloAdi, '&', '', [rfReplaceAll]) + '  where IZLEME < 2 and CAST(KATEGORI AS VARCHAR(10))  in ('+
 //           ' SELECT KATEGORI=DEGER FROM KOSULLAR K inner join DOKUMLER D on K.DOKUMID=D.ID '+
 //           ' WHERE D.RAPORADI = '''+SiparisYazdirList.Items[i]+''' and D.GRUBU = '''+EkranAdiAl+''') ';
-       TabDetayYaz.SQL.Text:= 'select F.*,AD=S.STOKADI, ACIKLAMA2=ACIKLAMA,BIRIMAD=(select top 1 ANAHTAR from GENINI G where BOLUM=-2702 and G.DEGER=F.BIRIM and DIL=-1)  from FATURA F inner join STOKLAR S on F.URUNID=S.ID '+
+       TabDetayYaz.SQL.Text:= 'select F.*,AD=S.STOKADI, ACIKLAMA2=ACIKLAMA,BIRIMAD=(select '+DbUst(1)+'ANAHTAR from GENINI G where BOLUM=-2702 and G.DEGER=F.BIRIM and DIL=-1 '+DbSinir(1)+')  from FATURA F inner join STOKLAR S on F.URUNID=S.ID '+
           ' where F.FATBASID= '+IntToStr(AdisyonNo)+' and F.IZLEME < 2 and CAST(S.KATEGORI AS VARCHAR(10)) '+
           '  in ( SELECT KATEGORI=DEGER  FROM KOSULLAR K inner join DOKUMLER D on K.DOKUMID=D.ID '+
           ' WHERE D.RAPORADI = '''+SiparisYazdirList.Items[i]+''' and D.GRUBU = '''+EkranAdiAl+''') ';
@@ -2099,8 +2101,8 @@ begin
 
   BtnNumComma.Caption := FormatSettings.Decimalseparator;
   TusBasili := False;
-  Tablo.TablodanSorguAc(5, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE())');
-  Tablo.TablodanSorguAc(6, 'select top 1 ' + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE())');
+  Tablo.TablodanSorguAc(5, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''€'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
+  Tablo.TablodanSorguAc(6, 'select '+DbUst(1) + DovizTuru + ' from DOVIZ where CINSI=''$'' order by datediff(DAY,TARIH,GETDATE()) '+DbSinir(1));
 
   StatusBar1.Panels[1].Text := '$ : '+Tablo.Query6.Fields[0].AsString+'  € : '+Tablo.Query5.Fields[0].AsString;
   StatusBar1.Panels[2].Text := HizliGirisAnaMenu.VarsKasaAdi;
@@ -2347,7 +2349,7 @@ begin
          //varsa daha önceki ürünleri ekleyelim
           EkranTemizleYeniKayitAc;
           //ÖNCE BAKALIM AÇILMIŞ ADİSYON VAR MI
-          Tablo.TablodanSorguAc(8, 'select top 1 FB.ID, FB.REHBERID, FB.FATURATARIH, FB.FATURANO,  FB.FATURASERI, FB.KOCANNO, MASANO=FB.OZELKOD, KISISAY=FB.ZARFID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM=0 order by 1 desc ');
+          Tablo.TablodanSorguAc(8, 'select '+DbUst(1)+'FB.ID, FB.REHBERID, FB.FATURATARIH, FB.FATURANO,  FB.FATURASERI, FB.KOCANNO, MASANO=FB.OZELKOD, KISISAY=FB.ZARFID from FATBASLIK FB where FB.TUR=110 and FB.LOKASYON='+IntToStr(MasaID)+' and FB.DURUM=0 order by 1 desc '+DbSinir(1));
           if Tablo.Query8.RecordCount > 0 then begin //açılmış adisyon var listeleyelim
               AdisyonNo := Tablo.Query8.Fields[0].AsInteger;
               TabFatBasDetay.Edit;
@@ -2516,7 +2518,7 @@ begin
   TabDetay.Close;
   TabDetay.SQL.Text := ' select YENIAD = BARKOD+'' ''+AD,*, ROW_NUMBER() OVER(ORDER BY ID ) AS SIRANUMARASI ';
   if Tablo.GENINI.ReadBoolean(Ops_Kasiyer_UrunBirimleriniTopla, False) then
-    TabDetay.SQL.Add(' ,DONUSENMIKTAR=isnull((select top 1 Tmp.MIKTAR*(SC.ADET2/SC.ADET1) from STOKCEVRIM SC where SC.STOKID=Tmp.URUNID and Tmp.TUR=1 and Tmp.BIRIM=SC.BIRIM1 and SC.BIRIM2='+Tablo.GENINI.ReadString(Ops_Kasiyer_UrunBirimleriniToplamaID,'0')+' ),0.0)  ');
+    TabDetay.SQL.Add(' ,DONUSENMIKTAR=isnull((select '+DbUst(1)+'Tmp.MIKTAR*(SC.ADET2/SC.ADET1) from STOKCEVRIM SC where SC.STOKID=Tmp.URUNID and Tmp.TUR=1 and Tmp.BIRIM=SC.BIRIM1 and SC.BIRIM2='+Tablo.GENINI.ReadString(Ops_Kasiyer_UrunBirimleriniToplamaID,'0')+' '+DbSinir(1)+'),0.0)  ');
 
 
   TabDetay.SQL.Add(' from ' + StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + ' Tmp');
@@ -2556,9 +2558,9 @@ var
   i : Integer;
 begin
   if Cagiran = 2 then //sipariş
-     Tablo.TablodanSorguAc(1, ' select  TOP 1 MAX(CONVERT(INT,SIPARISNO)) SIPARISNO from SIPARIS where TUR=20 and SIPARISTARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' ')
+     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(CONVERT(INT,SIPARISNO)) SIPARISNO from SIPARIS where TUR=20 and SIPARISTARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1))
   else begin             //transfer
-     Tablo.TablodanSorguAc(1, ' select  TOP 1 MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=20 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' ');
+     Tablo.TablodanSorguAc(1, ' select  '+DbUst(1)+'MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=20 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
      cxGridDBCardViewKartlarADET.Visible := False;
   end;
 

@@ -31,7 +31,7 @@ procedure Menu_Bayrak(Sender: TObject; View1 :TcxDBTreeList; Scheduler:TcxSchedu
 
 implementation
 
-uses UGorevDlg,UGorevListeDlg, UBinarySave, Vcl.Dialogs, UAnaForm;
+uses UGorevDlg,UGorevListeDlg, UBinarySave, Vcl.Dialogs, UAnaForm, UVeriMotor;
 
 function PlayWavFromResource(ResID: PChar): Boolean;
 var buffer: array[0..2] of char;
@@ -94,7 +94,7 @@ var
        Sahibi := StrToInt(Kullanan);
        SahibiAd := KullanAdi;
        if KonuTur=3 then begin //eğer yorum yapıldıysa ve yorum yapan görev sahibi değilse, görev sahibine direkt mail diğerleri cc olacak
-          Tablo.TablodanSorguAc(8, 'select top 1 EKLEYEN from GOREVLER where ID='+IntToStr(GorevId)+' order by ID desc');
+          Tablo.TablodanSorguAc(8, 'select '+DbUst(1)+'EKLEYEN from GOREVLER where ID='+IntToStr(GorevId)+' order by ID desc '+DbSinir(1));
           if Kullanan <> Tablo.Query8.Fields[0].AsString then
              AliciTur := 11;
              Sahibi := Tablo.Query8.Fields[0].AsInteger;
@@ -152,8 +152,8 @@ begin
     'CARI=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.REHBERID),' + #13#10 +
     //'TARIH=CONVERT(VARCHAR(20), G.BASLAMATARIHI,113),' + #13#10 +
     ' G.BASLAMATARIHI,G.BITISTARIHI, ' + #13#10 +
-	  ' DURUM=(SELECT top 1 ANAHTAR FROM GENINI where BOLUM=-21042 and DIL=-1 and DEGER=G.DURUM), ' + #13#10 +
-   	' TURU=(SELECT top 1 ANAHTAR FROM GENINI where BOLUM=-21044 and DIL=-1 and DEGER=G.TURU), ' + #13#10 +
+	  ' DURUM=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI where BOLUM=-21042 and DIL=-1 and DEGER=G.DURUM '+DbSinir(1)+'), ' + #13#10 +
+   	' TURU=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI where BOLUM=-21044 and DIL=-1 and DEGER=G.TURU '+DbSinir(1)+'), ' + #13#10 +
     ' PROJE=(select P.PROJEKODU FROM PROJELER P where P.ID=G.PROJEID), ' + #13#10 +
     ' EKIPMANAD = (select AD from EKIPMANLAR E where E.ID=G.EKIPMANID), ' + #13#10 +
     'ILGILI1=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.MUS_ILGILI),' + #13#10 +

@@ -173,7 +173,7 @@ var
 
 implementation
 
-uses PrjConst,  UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar,
+uses UVeriMotor, PrjConst,  UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar,
      UKYDuzelticiVeOnleyiciFaalListeDlg, UAnaForm;
 {$R *.dfm}
 
@@ -369,8 +369,8 @@ begin
         if TabDenetim.FieldByName('SORUMLU').AsString <> '' then
            EditSorumlu.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabDenetim.FieldByName('SORUMLU').AsInteger);
         if TabDenetim.FieldByName('DEPARTMAN').AsString <> '' then begin
-           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-              ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ) '+
+           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+              ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+') '+
               ' from ROLLER ROL where ROL.ID='+TabDenetim.FieldByName('DEPARTMAN').AsString);
            EditDepartman.text := Tablo.Query1.Fields[1].AsString+' / '+Tablo.Query1.Fields[2].AsString;
         end;

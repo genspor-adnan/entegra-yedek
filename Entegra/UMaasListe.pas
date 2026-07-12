@@ -100,7 +100,7 @@ implementation
 {$R *.dfm}
 
 uses UTablo, FetaKurulusSiniflari, UAnaForm, UBekletme, ComObj, PrjConst, UPOS, fetautil,
-  FetaClassExtensions;
+  FetaClassExtensions, UVeriMotor;
 
 const BasSutunu=8;
 var Basladi, OdemeEksiOlamaz: Boolean;
@@ -118,7 +118,7 @@ var i : SmallInt;
               s:='';
         if Tutar>0 then begin
              //önce bakalım daha önce kayıtlı mı
-             Tablo.TablodanSorguAc(1,'SELECT TOP 1 ID  FROM dbo.PLANMAAS WHERE YER='+IntToStr(Yer)+' AND YERID='+IntToStr(YerId)+s);
+             Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'ID  FROM dbo.PLANMAAS WHERE YER='+IntToStr(Yer)+' AND YERID='+IntToStr(YerId)+s+' '+DbSinir(1));
              if Tablo.Query1.RecordCount > 0 then
                 Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update PLANMAAS set TUTAR='+Float_ToStr(Tutar)+',DEGISTIREN='+Kullanan+' where ID='+Tablo.Query1.Fields[0].AsString,[],[])
              else
@@ -274,26 +274,26 @@ begin
 //      ' POZISYON=(SELECT TOP 1 POZISYON FROM PERS_HAREKET PH WHERE PH.REHBERID=R.ID ORDER BY ID DESC),'+
       ' SUBE=R.SUBEID, '+
      // ' POZISYON=R.SINIF,'+
-      ' DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-      ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ),'+
-      ' ISEGIRIS=(SELECT TOP 1 TARIH FROM PERS_HAREKET PH WHERE PH.REHBERID=R.ID AND TUR=1 ),PERYOT,';
+      ' DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+      ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+'),'+
+      ' ISEGIRIS=(SELECT '+DbUst(1)+'TARIH FROM PERS_HAREKET PH WHERE PH.REHBERID=R.ID AND TUR=1 '+DbSinir(1)+'),PERYOT,';
 //      ' ISEGIRIS=R.GIRISTARIHI,';
 
 
    while not Tablo.Query1.EOF do begin
       //MAAS=(select isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=0 and SIRA=10),
-      S:=S+' ['+Tablo.Query1.FieldByName('ETIKET').AsString+']=cast(isnull((select top 1 isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=0 and SIRA='+Tablo.Query1.FieldByName('SIRA').AsString+'),0.0) as money),';
+      S:=S+' ['+Tablo.Query1.FieldByName('ETIKET').AsString+']=cast(isnull((select '+DbUst(1)+'isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=0 and SIRA='+Tablo.Query1.FieldByName('SIRA').AsString+' '+DbSinir(1)+'),0.0) as money),';
       Tablo.Query1.Next;
     end;
     S:=S+' TAHTOPLAM=0.0,';
    Tablo.TablodanSorguAc(1, 'select SIRA,ETIKET,VARSAYILAN from REHBERAYAR where YERI=6  order by  3'); //kesinti     and VARSAYILAN =33
    while not Tablo.Query1.EOF do begin
       //MAAS=(select isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=0 and SIRA=10),
-      S:=S+' ['+Tablo.Query1.FieldByName('ETIKET').AsString+']=cast(isnull((select top 1 isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=91 and SIRA='+Tablo.Query1.FieldByName('SIRA').AsString+'),0.0) as money),';
+      S:=S+' ['+Tablo.Query1.FieldByName('ETIKET').AsString+']=cast(isnull((select '+DbUst(1)+'isnull(TUTAR,0) from PLANMAAS PM where R.ID=PM.YERID and YER=91 and SIRA='+Tablo.Query1.FieldByName('SIRA').AsString+' '+DbSinir(1)+'),0.0) as money),';
       Tablo.Query1.Next;
     end;
-    S:=S+' KESTOPLAM=0.0,TOPLAM=0.0, BANKA=cast(isnull((SELECT TOP 1 isnull(TUTAR,0.0) ';
-    S:=S+' FROM PLANMAAS PM where R.ID=PM.YERID and YER=51),0.0) as float),KASA=0.0,DEGIS=0.0, ';
+    S:=S+' KESTOPLAM=0.0,TOPLAM=0.0, BANKA=cast(isnull((SELECT '+DbUst(1)+'isnull(TUTAR,0.0) ';
+    S:=S+' FROM PLANMAAS PM where R.ID=PM.YERID and YER=51 '+DbSinir(1)+'),0.0) as float),KASA=0.0,DEGIS=0.0, ';
     S:=S+' TCNO=(select convert(nvarchar(15),BILGI) from REHBERBILGI where YERI=3 and SIRA=22 and YER_ID=R.ID)';
     S:=S+' from REHBER R inner join ROLLER ROL on ROL.ID=R.SINIF where R.GRUP=335 and R.DURUM=1 ) as TT   where 1=1 ';
     if PanelPrim.Visible then

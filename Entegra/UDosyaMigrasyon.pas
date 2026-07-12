@@ -297,8 +297,8 @@ begin
       // sonraki grup (FSonID: basarisiz satirda takilmadan ilerle)
       FQBatch.Close;
       FQBatch.SQL.Text :=
-        'select top 25 ID from IMAJ where (DOSYAID is null or DOSYAID=0) and ID>' +
-        IntToStr(FSonID) + ' order by ID';
+        'select '+DbUst(25)+'ID from IMAJ where (DOSYAID is null or DOSYAID=0) and ID>' +
+        IntToStr(FSonID) + ' order by ID '+DbSinir(25);
       FQBatch.Open;
       if FQBatch.IsEmpty then
       begin

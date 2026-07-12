@@ -472,7 +472,7 @@ var
 implementation
 
 uses UTablo, UCombo, UGrid, UGirdi, Umesaj, UAnaform, UStokHizmetAra,PrjConst,UYilSonuDevirIslemleri,UGENINIDuzenle,
-     UDilDuzenle, UYeniDil, UGirisKutusuEx, LocOnFly, ULog;
+     UDilDuzenle, UYeniDil, UGirisKutusuEx, LocOnFly, ULog, UVeriMotor;
 
 {$R *.DFM}
 
@@ -584,10 +584,10 @@ begin
         LQ.SQL.Text :=
           'DECLARE @t sysname=' + Q + 'dbo.' + LTbl + Q + '; ' +
           'SELECT ' +
-          '(SELECT TOP 1 c.name FROM sys.columns c JOIN (VALUES' + ADPRI + ') p(n,o) ' +
-            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o) ADCOL, ' +
-          '(SELECT TOP 1 c.name FROM sys.columns c JOIN (VALUES' + KODPRI + ') p(n,o) ' +
-            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o) KODCOL, ' +
+          '(SELECT '+DbUst(1)+'c.name FROM sys.columns c JOIN (VALUES' + ADPRI + ') p(n,o) ' +
+            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o '+DbSinir(1)+') ADCOL, ' +
+          '(SELECT '+DbUst(1)+'c.name FROM sys.columns c JOIN (VALUES' + KODPRI + ') p(n,o) ' +
+            'ON c.name COLLATE DATABASE_DEFAULT=p.n WHERE c.object_id=OBJECT_ID(@t) ORDER BY p.o '+DbSinir(1)+') KODCOL, ' +
           'COL_LENGTH(@t,' + Q + 'ID' + Q + ') IDLEN';
         try
           LQ.Open;

@@ -1809,7 +1809,7 @@ end;
 
 class function Veritabani.BoşDataSet(ABağlantı: TFDConnection;ATabloAdi: string): TADOQuery;
 begin
-  Result := SorguBaslat(ABağlantı,'SELECT TOP 0 * FROM ' + ATabloAdi,[],[]);
+  Result := SorguBaslat(ABağlantı,'SELECT '+DbUst(0)+'* FROM ' + ATabloAdi+' '+DbSinir(0),[],[]);
 end;
 
 class function Veritabani.IntegerListGetir(cnn: TFDConnection; ASql: string;

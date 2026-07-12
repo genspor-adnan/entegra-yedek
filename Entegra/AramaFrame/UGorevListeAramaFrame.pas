@@ -127,7 +127,7 @@ type
   end;
 
 implementation
-    Uses LocOnFly, UGorevListePaylasim, FetaKurulusSiniflari, ComObj, UBekletme, UGorevListeDlg, UIsListesi;
+    Uses LocOnFly, UGorevListePaylasim, FetaKurulusSiniflari, ComObj, UBekletme, UGorevListeDlg, UIsListesi, UVeriMotor;
 {$R *.dfm}
 
 { TGorevListeAramaFrame }
@@ -492,7 +492,7 @@ end;
 
 procedure TGorevListeAramaFrame.ListeyiSilMenuClick(Sender: TObject);
 begin
-   if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM GOREVLER WHERE LISTEID='+TabListe.Fields[0].AsString,[],[]) then
+   if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM GOREVLER WHERE LISTEID='+TabListe.Fields[0].AsString+' '+DbSinir(1),[],[]) then
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update GOREVLISTE set DURUM = 0 where ID='+TabListe.Fields[0].AsString,[],[])
    else begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from GOREVKULLANICI where LISTGOREVID='+TabListe.Fields[0].AsString+' and TUR<=5',[],[]);

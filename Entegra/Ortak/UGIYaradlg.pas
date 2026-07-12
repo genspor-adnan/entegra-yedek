@@ -78,7 +78,7 @@ var
 
 implementation
 
-uses UCombo, UTablo, FetaUtil, UMesaj, UTabDok, UAnaliste, UAnaform ;
+uses UCombo, UTablo, FetaUtil, UMesaj, UTabDok, UAnaliste, UAnaform, UVeriMotor ;
 
 {$R *.DFM}
 
@@ -279,9 +279,9 @@ begin
 	       ' ON GELISLER.DOSYANO = KIMLIK.DOSYANO '+
                ' WHERE ((GELISLER.GELISNO IS NULL '+
                ' OR GELISLER.GELISNO IN '+
-               ' (SELECT TOP '+IntToStr(SonGelisSay)+' GELISNO FROM GELISLER G1 '+
+               ' (SELECT '+DbUst(SonGelisSay)+'GELISNO FROM GELISLER G1 '+
 	       ' WHERE KIMLIK.DOSYANO = G1.DOSYANO '+
-               ' ORDER BY 1 DESC )) AND ')
+               ' ORDER BY 1 DESC '+DbSinir(SonGelisSay)+')) AND ')
 //               ' AND K.AD LIKE 'Ali%' '+
       else
          AraQuery1.SQL.Add(' FROM KIMLIK where (');
@@ -624,13 +624,13 @@ begin
       dosyano:= AraQuery1.Fields[0].AsString;
 
       Tablo.Query4.Close;
-      Tablo.Query4.SQL.Text:='SELECT TOP 1 MAX(G.GELISNO) AS GELISNO, '+
+      Tablo.Query4.SQL.Text:='SELECT '+DbUst(1)+'MAX(G.GELISNO) AS GELISNO, '+
                         'GIRISTARIH = CASE WHEN G.GIRISTARIH IS NULL THEN CONVERT (DATETIME , ''' + DateTimeToStr(GiykimbilDlg.Calendar1.DateTime) + ''' , 103) '+
                         ' else G.GIRISTARIH '+
                         'END ,ODA '+
                         'FROM GELISLER G LEFT OUTER JOIN SERVIS S ON G.DOSYANO = S.DOSYANO AND G.GELISNO = S.GELISNO '+
                         'WHERE G.DOSYANO='''+dosyano+''' GROUP BY G.GIRISTARIH,ODA '+
-                        'ORDER BY GELISNO DESC ';
+                        'ORDER BY GELISNO DESC '+DbSinir(1);
       Tablo.Query4.Open;
       songelistarihi := Tablo.Query4.fieldbyname('GIRISTARIH').AsString;
       oda := Tablo.Query4.fieldbyname('ODA').AsString;

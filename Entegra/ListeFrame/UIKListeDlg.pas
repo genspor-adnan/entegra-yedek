@@ -855,7 +855,7 @@ uses
   UGenelAnaSekmeFrame, URaporAraclari, UGenSifre,UBekletme,UMaasListe, UGorevDlg,
   UReplikasyon, FetaKurulusSiniflari, UAcilisKaydi, UNakitDlg,UBinarySave,IdGlobalProtocols,
   UVardiyaTanimlariDlg,UFaturaKapama,LocOnFly, UIslistesi, UIKGorevFrame, UExceldenVeriAl,
-  UResim;
+  UResim, UVeriMotor;
 
 {$R *.DFM}
 
@@ -1036,7 +1036,7 @@ begin
 
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
-     Tablo.Query1.SQL.Text := 'select top 1 ISLEMTARIHI,ID from KASA where REHBERID = '+ REHBER.FieldByName('ID').asstring;
+     Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ISLEMTARIHI,ID from KASA where REHBERID = '+ REHBER.FieldByName('ID').asstring+' '+DbSinir(1);
      Tablo.Query1.Open;
      if not Tablo.Query1.IsEmpty then
         raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query1.Fields[0].AsDateTime)+RDPlanVerisiVarSilinemez);
@@ -1546,7 +1546,7 @@ procedure TIKListeDlg.ButtonVardiyalarClick(Sender: TObject);
 var
   VardiyaTuru :String;
 begin
-  Tablo.TablodanSorguAc(1,'SELECT TOP 1 BILGI FROM REHBERBILGI RB (nolock) INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=3 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID='+REHBER.FieldByName('ID').AsString+' AND RA.VARSAYILAN=91 ');
+  Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock) INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=3 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID='+REHBER.FieldByName('ID').AsString+' AND RA.VARSAYILAN=91 '+DbSinir(1));
   if Tablo.Query1.IsEmpty then begin
      VardiyaTuru:='Sabit'
   end else  begin
@@ -1625,8 +1625,8 @@ begin
   Tablo.TablodanSorguAc(1,'SELECT * FROM dbo.PLANMAAS WHERE YER=61 AND YERID='+RehberID);
   if not Tablo.Query1.IsEmpty then
   begin
-    OdemeKaynagi := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT TOP 1 TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
-    Tutar := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT TOP 1 TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID',['&YERID'],[RehberID],True);
+    OdemeKaynagi := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT '+DbUst(1)+'TUR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID '+DbSinir(1),['&YERID'],[RehberID],True);
+    Tutar := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'SELECT '+DbUst(1)+'TUTAR FROM PLANMAAS WHERE YER=61 AND YERID=&YERID '+DbSinir(1),['&YERID'],[RehberID],True);
     mResult := TGirisKutusuEx.BilgiAlEx(BGAvans_miktari,TGirdiDenetimleri.Create
     .ImageComboBox('ödeme kaynağı',@OdemeKaynagi,Tablo.FDCnn,'SELECT ''B'' TUR, ''Banka'' ADI UNION ALL SELECT ''K'' TUR, ''Kasa''')
     .CurrencyEdit('ödenecek avans miktarı',@Tutar,2));
@@ -1731,12 +1731,12 @@ procedure TIKListeDlg.BankaTusClick(Sender: TObject);
 var Tur:char;
     ID:Integer;
 begin
-  Tablo.TablodanSorguAc(5, 'SELECT top 1 BH.ID,VARSAYILAN, BS.BANKAKODU, BANKAADI,SUBEKODU,SUBEADI,LOGO,HESAPNO,HESAPADI,IBAN,'+
+  Tablo.TablodanSorguAc(5, 'SELECT '+DbUst(1)+'BH.ID,VARSAYILAN, BS.BANKAKODU, BANKAADI,SUBEKODU,SUBEADI,LOGO,HESAPNO,HESAPADI,IBAN,'+
   'KUR,TIPI,HESAPACIKLAMA,DURUM '+
   'FROM BANKAHESAPLAR BH '+
 	'inner join BANKASUBELER BS on BS.ID = BH.BANKASUBELERID '+
 	'inner join BANKALAR B on B.BANKAKODU=BS.BANKAKODU '+
-  'WHERE REHBERID  = '+REHBER.Fields[0].AsString);
+  'WHERE REHBERID  = '+REHBER.Fields[0].AsString+' '+DbSinir(1));
   if not Tablo.Query5.IsEmpty then begin
      Tur := 'D';
      ID:=Tablo.Query5.Fields[0].AsInteger;
@@ -1845,7 +1845,7 @@ procedure HakedilenIzinGunSayisiniGetir(RehberId, BuYil:Integer; var IzinTarihi:
 var  IseGiris : TDateTime;
      GecenYil : Smallint;
 begin
-   Tablo.TablodanSorguAc(1,'select top 1 TARIH from PERS_HAREKET where REHBERID='+IntToStr(RehberId)+' and TUR=1 order by 1 desc');
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'TARIH from PERS_HAREKET where REHBERID='+IntToStr(RehberId)+' and TUR=1 order by 1 desc '+DbSinir(1));
 //   Tablo.TablodanSorguAc(1,'select GIRISTARIHI from REHBER where ID='+IntToStr(RehberId));
   ////işe giriş tarihi boş ise girilmesi istenir.
    Gun := 0;
@@ -1927,7 +1927,7 @@ var
   Trh:String[10];
   IseGiris,IzinTrh : TDateTime;
 begin
-   Tablo.TablodanSorguAc(1,'select top 1 TARIH from PERS_HAREKET where REHBERID='+REHBER.FieldByName('ID').AsString+' and TUR=1 order by 1 desc');
+   Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'TARIH from PERS_HAREKET where REHBERID='+REHBER.FieldByName('ID').AsString+' and TUR=1 order by 1 desc '+DbSinir(1));
 //   Tablo.TablodanSorguAc(1,'select GIRISTARIHI from REHBER where ID='+REHBER.FieldByName('ID').AsString);
    if Tablo.Query1.IsEmpty then
       raise exception.create( IKEksik_bilgi);
@@ -2143,7 +2143,7 @@ var
   mResult:TModalResult;
 begin
   RehberID := REHBER.FieldByName('ID').AsString;
-  Tablo.TablodanSorguAc(1,'SELECT TOP 1 isnull(TUTAR,0.0)  FROM dbo.PLANMAAS WHERE YER=51 AND YERID='+RehberID);
+  Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'isnull(TUTAR,0.0)  FROM dbo.PLANMAAS WHERE YER=51 AND YERID='+RehberID+' '+DbSinir(1));
   if not Tablo.Query1.IsEmpty then
   begin
     Tutar := Tablo.Query1.Fields[0].AsCurrency;
@@ -3544,7 +3544,7 @@ begin
   end else if PageControlSekme.ActivePage=TabSheetMaas then begin
       TabloYenile(TabUcret,[REHBER.Fields[0].AsInteger]);
       TabloYenile(TabKesinti, [REHBER.Fields[0].AsInteger]);
-      Tablo.TablodanSorguAc(1,'SELECT TOP 1 TUTAR, KUR FROM PLANMAAS WHERE YER=51 AND YERID='+REHBER.Fields[0].AsString);
+      Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'TUTAR, KUR FROM PLANMAAS WHERE YER=51 AND YERID='+REHBER.Fields[0].AsString+' '+DbSinir(1));
       Tablo.TablodanSorguAc(4,'SELECT TUTAR FROM PLANMAAS WHERE YER=61 AND YERID='+REHBER.Fields[0].AsString);
       if not Tablo.Query1.IsEmpty then
         LabelBankadanOdeme.Caption := Tablo.Query1.Fields[0].AsString + ' ' + CariDoviz

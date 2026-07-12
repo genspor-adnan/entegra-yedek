@@ -141,7 +141,7 @@ var
 implementation
 
 uses ULog, FetaKurulusSiniflari, PrjConst, LocOnFly, fetautil, UGenelAnaSekmeFrame,
-  URaporAraclari;
+  URaporAraclari, UVeriMotor;
 
 var OncekiTutar : Currency;
     OncekiHId, OncekiProjeId, OncekiMasrafId : Integer;
@@ -373,7 +373,7 @@ begin
   if AButtonIndex = 0 then begin
      //eğer proje seçilmişse ve o projeye girilmiş bütçe var ise o bütçe kalemlerinden masraf kalemi seçilir
     if (TabFatBaslik.FieldByName('PROJEID').AsString<>'')and
-       (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT top 1 * FROM PROJEBUTCE WHERE PROJEID='+TabFatBaslik.FieldByName('PROJEID').AsString,[],[])) then
+       (Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM PROJEBUTCE WHERE PROJEID='+TabFatBaslik.FieldByName('PROJEID').AsString+' '+DbSinir(1),[],[])) then
         SqlText := SqlMemoMasrafKalemi.Text+ ' and PROJEID='+IntToStr( EditProje.Tag )
      else
         SqlText := '';
@@ -756,7 +756,7 @@ end;
 
 procedure TTahakkukDlg.FirmaBilgileri(IDS:Integer);
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(IDS)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(IDS)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [IDS,tablo.Query1.Fields[0].AsInteger]);
   TabloYenile(Tablo.tabCariBilgileri, [IDS,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;

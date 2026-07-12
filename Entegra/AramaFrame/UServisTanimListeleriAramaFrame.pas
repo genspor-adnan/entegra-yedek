@@ -56,7 +56,7 @@ implementation
 
 {$R *.dfm}
 
-uses UServisListeDlg,UEkipmanListeDlg,FetaKurulusSiniflari, FetaClassExtensions, UDokum, UDokumGirisFrame, UAnaform,
+uses UVeriMotor, UServisListeDlg,UEkipmanListeDlg,FetaKurulusSiniflari, FetaClassExtensions, UDokum, UDokumGirisFrame, UAnaform,
 JclSysInfo,UGirisKutusuEx,UServisIslemDetaylari,LocOnFly,PrjConst;
 { TServisTanimListeleriAramaFrame }
 
@@ -186,7 +186,7 @@ begin
   liste.Add('Başlık');
   liste.Add('Detay');
   ComDeger:='Detay';
-  Tablo.TablodanSorguAc(1,'select top 1 KOD from SERVISLISTE where SERVISTUR='+VarsHint+'  order by LEN(KOD)');
+  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'KOD from SERVISLISTE where SERVISTUR='+VarsHint+'  order by LEN(KOD) '+DbSinir(1));
   BaslangicStr := Tablo.Query1.Fields[0].AsString;
   if BaslangicStr='' then
     BaslangicStr:='Yok'

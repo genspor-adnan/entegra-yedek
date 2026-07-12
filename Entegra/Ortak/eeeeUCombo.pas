@@ -106,7 +106,7 @@ function ComboIniDuzenle(AnahtarKelime1: string; Ini1: TIni): integer;
 {$ENDIF}
 
 implementation
-uses UListe,FetaUtil,
+uses UListe,FetaUtil,UVeriMotor,
 {$IFNDEF NO_UTABLO}
 UTablo, UMesaj,
 {$ENDIF}
@@ -568,7 +568,7 @@ begin
   with IniSQL do
     begin
       Close;
-      SQL.Text := Format('SELECT TOP 1 BOLUM,ANAHTAR,DEGER FROM %s WITH (NOLOCK)',[Dosya]);
+      SQL.Text := Format('SELECT '+DbUst(1)+'BOLUM,ANAHTAR,DEGER FROM %s WITH (NOLOCK) '+DbSinir(1),[Dosya]);
       Open;
       for i := 0 to KeysValues.Count - 1 do
         begin
@@ -673,7 +673,7 @@ begin
   end;
   if i = 0 then Exit;
   AnahtarSil(Bolum,Anahtar);
-  tmpTable := _query_exec(IniSql.Connection,'SELECT TOP 0 * FROM ' + Dosya,[],[]);
+  tmpTable := _query_exec(IniSql.Connection,'SELECT '+DbUst(0)+'* FROM ' + Dosya+' '+DbSinir(0),[],[]);
   with tmpTable do
   try
     Open;

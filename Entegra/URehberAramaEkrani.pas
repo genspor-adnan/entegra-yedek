@@ -95,7 +95,7 @@ var
 
 implementation
 
-uses Utablo,PrjConst,LocOnFly, UGirisKutusuEx, UListe;
+uses Utablo,PrjConst,LocOnFly, UGirisKutusuEx, UListe, UVeriMotor;
 
 {$R *.dfm}
 var Aramayeri : String;
@@ -116,20 +116,20 @@ procedure TRehberAramaEkrani.LabelSonClick(Sender: TObject);
 begin
    AraQuery1.Close;
    AraQuery1.SQL.Text :=
-      'select top 50 R.ID, R.KOD, R.FIRMA, R.GRUP, ADSOYAD = P.FIRMA, P.ID as PERID, R.DURUM ' +
+      'select '+DbUst(50)+'R.ID, R.KOD, R.FIRMA, R.GRUP, ADSOYAD = P.FIRMA, P.ID as PERID, R.DURUM ' +
       'from REHBER R ' +
       'outer apply ( ' +
-      '   select top 1 K.SAY, K.DEGISTIRMETARIHI ' +
+      '   select '+DbUst(1)+'K.SAY, K.DEGISTIRMETARIHI ' +
       '   from KULLANICI_REHBER K with (nolock) ' +
       '   where K.REHBERID = R.ID and K.KULID = :KULID ' +
       '   order by K.DEGISTIRMETARIHI desc ' +
-      ') K ' +
+      DbSinir(1)+') K ' +
       'outer apply ( ' +
-      '   select top 1 P.ID, P.FIRMA ' +
+      '   select '+DbUst(1)+'P.ID, P.FIRMA ' +
       '   from REHBER P with (nolock) ' +
       '   where P.GRUP = 334 and P.BAGID = R.ID and isnull(P.STATU,1) = 1 ' +
       '   order by P.DEGISTIRMETARIHI desc, P.ID desc ' +
-      ') P ' +
+      DbSinir(1)+') P ' +
       'where R.ID > 0 and R.DURUM > 0 ';
    AraQuery1.ParamByName('KULID').AsInteger := StrToIntDef(Kullanan, 0);
    if (AramaGrup = 335) or (AramaGrup = 336) then
@@ -154,6 +154,7 @@ begin
    else
       AraQuery1.SQL.Add(' order by K.SAY desc ');
 
+   AraQuery1.SQL.Add(' '+DbSinir(50)+' ');
    AraQuery1.Open;
 end;
 procedure TRehberAramaEkrani.FormClose(Sender: TObject; var Action: TCloseAction);

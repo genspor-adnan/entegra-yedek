@@ -61,7 +61,7 @@ var
 
 implementation
 
-uses Utablo,PrjConst,FetaKurulusSiniflari,FetaClassExtensions,LocOnFly;
+uses Utablo,PrjConst,FetaKurulusSiniflari,FetaClassExtensions,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
@@ -162,10 +162,10 @@ var
   alis,satis,efal,efsat:Extended;
 Begin
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text:='SELECT TOP 1 FARK=ABS(DATEDIFF(HOUR,GETDATE(),TARIH)),* from DOVIZ where CINSI = '''+ComboKur.Text+''' order by 1';
+    Tablo.Query1.SQL.Text:='SELECT '+DbUst(1)+'FARK=ABS(DATEDIFF(HOUR,GETDATE(),TARIH)),* from DOVIZ where CINSI = '''+ComboKur.Text+''' order by 1 '+DbSinir(1);
     Tablo.Query1.Open;
     Tablo.Query2.Close;
-    Tablo.Query2.SQL.Text:='SELECT TOP 1 FARK=ABS(DATEDIFF(HOUR,GETDATE(),TARIH)),* from DOVIZ where CINSI = '''+ComboDovKur.Text+''' order by 1';
+    Tablo.Query2.SQL.Text:='SELECT '+DbUst(1)+'FARK=ABS(DATEDIFF(HOUR,GETDATE(),TARIH)),* from DOVIZ where CINSI = '''+ComboDovKur.Text+''' order by 1 '+DbSinir(1);
     Tablo.Query2.Open;
   if Tablo.Query1.RecordCount=0 then  Begin
     if Tablo.Query2.RecordCount=0 then  Begin

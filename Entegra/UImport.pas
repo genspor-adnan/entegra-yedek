@@ -135,7 +135,7 @@ var
   ImportDlg: TImportDlg;
 
 implementation
-uses Utablo, ComObj, Variants, FetaKurulusSiniflari, PrjConst, UBekletme,UGirisKutusuEx;
+uses UVeriMotor, Utablo, ComObj, Variants, FetaKurulusSiniflari, PrjConst, UBekletme,UGirisKutusuEx;
 {$R *.dfm}
 
 var
@@ -160,7 +160,7 @@ var s,Zorunlu : string;
    var  i : Integer;
    begin
          Tablo.Query1.Close;
-         Tablo.Query1.SQL.Text := 'select top 1 * from '+s;
+         Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'* from '+s+' '+DbSinir(1);
          Tablo.Query1.Open;
          for i := 1 to Tablo.Query1.FieldCount - 1 do begin
              TabDetay.Append;
@@ -329,7 +329,7 @@ var
            tut := '0'
         else begin
             Tablo.Query4.Close;
-            Tablo.Query4.SQL.Text:='select top 1 ID from REHBER RA where FIRMA='''+tut+'''';
+            Tablo.Query4.SQL.Text:='select '+DbUst(1)+'ID from REHBER RA where FIRMA='''+tut+''''+' '+DbSinir(1);
             Tablo.Query4.Open;
             if Tablo.Query4.RecordCount>0 then //ekleyelim
                Tut := Tablo.Query4.fields[0].AsString
@@ -658,7 +658,7 @@ var
           Tablo.TablodanSorguAc(1,'select KOLON, VARSAYILAN from IMPORTDETAY where ALAN=''FATURANO'' and IMPORTID='+TabDetay.FieldByName('IMPORTID').AsString);
           FatNoKolonu := StrToIntDef(Tablo.Query1.Fields[0].AsString, 0);
           FaturaNo := Tablo.Query1.Fields[1].AsString;
-          Tablo.TablodanSorguAc(1,'select top 1 KOLON, VARSAYILAN from IMPORTDETAY where ALAN=''REHBERID'' and IMPORTID='+TabDetay.FieldByName('IMPORTID').AsString);
+          Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'KOLON, VARSAYILAN from IMPORTDETAY where ALAN=''REHBERID'' and IMPORTID='+TabDetay.FieldByName('IMPORTID').AsString+' '+DbSinir(1));
           RehberId := Tablo.Query1.Fields[0].AsInteger;
           cxPageControl1.ActivePageIndex := 0;
       end;
@@ -1240,11 +1240,11 @@ end;
       end;
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update REHBERPERSONEL set VARSAYILAN=1 where ID in( '+
                   'select ID from( select distinct RP1.REHBERID, '+
-                  'ID=(select top 1 RP2.ID from REHBERPERSONEL RP2 where RP2.REHBERID=RP1.REHBERID order by VARSAYILAN desc) '+
+                  'ID=(select '+DbUst(1)+'RP2.ID from REHBERPERSONEL RP2 where RP2.REHBERID=RP1.REHBERID order by VARSAYILAN desc '+DbSinir(1)+') '+
                   'from REHBERPERSONEL RP1 )as asd )',[],[]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update REHBERPERSONEL set VARSAYILAN=0 where ID not in( '+
                   'select ID from( select distinct RP1.REHBERID, '+
-                  'ID=(select top 1 RP2.ID from REHBERPERSONEL RP2 where RP2.REHBERID=RP1.REHBERID order by VARSAYILAN desc) '+
+                  'ID=(select '+DbUst(1)+'RP2.ID from REHBERPERSONEL RP2 where RP2.REHBERID=RP1.REHBERID order by VARSAYILAN desc '+DbSinir(1)+') '+
                   'from REHBERPERSONEL RP1 )as asd )',[],[]);
       excel.DisplayAlerts := False;
       excel.quit;

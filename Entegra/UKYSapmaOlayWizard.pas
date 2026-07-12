@@ -239,7 +239,7 @@ var
 implementation
 
 uses PrjConst,  UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar,
-     UKYDuzelticiVeOnleyiciFaalListeDlg, UAnaForm, UFastRap, UGenelAnaSekmeFrame, URaporAraclari;
+     UKYDuzelticiVeOnleyiciFaalListeDlg, UAnaForm, UFastRap, UGenelAnaSekmeFrame, URaporAraclari, UVeriMotor;
 {$R *.dfm}
 
 function TKYSapmaOlayWizardDlg.EkranAdiAl: string;
@@ -528,8 +528,8 @@ begin
         if TabSapmaOlay.FieldByName('KALITECI_ONAYLAYAN').AsString <> '' then
            EditOnaylayanKaliteci.Text := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabSapmaOlay.FieldByName('KALITECI_ONAYLAYAN').AsInteger);
         if TabSapmaOlay.FieldByName('DEPARTMAN').AsString <> '' then begin
-           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
-              ' GOREV=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 ) '+
+           Tablo.TablodanSorguAc(1,'select SUBEID,DEPARTMAN=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),'+
+              ' GOREV=(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+') '+
               ' from ROLLER ROL where ROL.ID='+TabSapmaOlay.FieldByName('DEPARTMAN').AsString);
            EditDepartman.text := Tablo.Query1.Fields[1].AsString+' / '+Tablo.Query1.Fields[2].AsString;
         end;
@@ -614,7 +614,7 @@ begin
   //if not BoslukKontrol(EditADI.text, 'Denetim Adı') then Abort;
   if not BoslukKontrol(editREFERANSNO.text, 'Referans No') then Abort;
 
-  if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT TOP 1 * FROM KY_SAPMAOLAY WHERE ID<>'+TabSapmaOlay.FieldByName('ID').AsString+' and REFERANSNO='''+editREFERANSNO.text+'''',[],[]) then begin
+  if Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT '+DbUst(1)+'* FROM KY_SAPMAOLAY WHERE ID<>'+TabSapmaOlay.FieldByName('ID').AsString+' and REFERANSNO='''+editREFERANSNO.text+''''+' '+DbSinir(1),[],[]) then begin
      showmessage(TAyniKodaSahipKayitOlamaz);
      Abort;
   end;

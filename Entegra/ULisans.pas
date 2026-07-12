@@ -123,7 +123,7 @@ procedure LisansKntrl;
 
 implementation
 
-uses UTablo, UGenSifre, FetaUtil;
+uses UTablo, UGenSifre, FetaUtil, UVeriMotor;
 
 {$R *.DFM}
 
@@ -223,7 +223,7 @@ begin
     if recordcount = 0 then
       raise ELisansHatasi.Create('Öncelikle GenLisanslama Modülünü Çalıştırmalısınız', '', lhHata, ldHataVerBitir, nil);
   end;
-  with Query('select top 1 * from GENOTIP') do
+  with Query('select '+DbUst(1)+'* from GENOTIP '+DbSinir(1)) do
   begin
     if recordcount = 0 then
       raise ELisansHatasi.Create('Öncelikle GenLisanslama Modülünü Çalıştırmalısınız', '', lhHata, ldHataVerBitir, nil);

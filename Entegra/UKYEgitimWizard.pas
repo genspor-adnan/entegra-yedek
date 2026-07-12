@@ -129,7 +129,7 @@ var
 
 implementation
 
-uses PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar, UKYDuzelticiVeOnleyiciFaalListeDlg;
+uses PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil, UCariFonksiyonlar, UKYDuzelticiVeOnleyiciFaalListeDlg, UVeriMotor;
 {$R *.dfm}
 
 procedure TKYEgitimWizardDlg.BelgeEkleTusClick(Sender: TObject);
@@ -407,7 +407,7 @@ begin
   if Tabegitim.Active then
   begin
    Tabegitim.Close;
-   Tabegitim.SQL.Text:='Select TOP 1 * from KALITEEGITIM ORDER BY ID DESC';
+   Tabegitim.SQL.Text:='Select '+DbUst(1)+'* from KALITEEGITIM ORDER BY ID DESC '+DbSinir(1);
    Tabegitim.Open;
 
     if Tabegitim.State in [dsEdit, dsInsert] then

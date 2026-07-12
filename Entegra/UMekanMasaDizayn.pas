@@ -109,7 +109,7 @@ var
 
 implementation
 
-uses UMekanMasaGor, Utablo,FetaKurulusSiniflari, UGirisKutusuEx, PrjConst, UResim;
+uses UMekanMasaGor, Utablo,FetaKurulusSiniflari, UGirisKutusuEx, PrjConst, UResim, UVeriMotor;
 
 var
   secili : string;
@@ -545,7 +545,7 @@ end;
 procedure TMekanMasaDizaynDlg.iletisimSilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
-     Tablo.TablodanSorguAc(1,'select top 1 ID  from MASALAR where MEKAN='''+TabMekan.FieldByName('ID').AsString+''' ');
+     Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ID  from MASALAR where MEKAN='''+TabMekan.FieldByName('ID').AsString+''' '+DbSinir(1));
      if Tablo.Query1.RecordCount>=1 then begin
         showmessage('Önce Kayıtlı Masaları Siliniz');
         exit;

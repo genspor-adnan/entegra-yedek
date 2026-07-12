@@ -399,7 +399,7 @@ implementation
 {$R *.dfm}
 
 uses  UMesaj, UKasa, UAnaForm, UReharadlg,UCombo, UBankaSecimi, Fetautil, UFastRap,
-      PrjConst,UHizmetAra, UParaDegisiklik, FetaKurulusSiniflari,LocOnFly, URaporAraclari, UGenelAnaSekmeFrame;
+      PrjConst,UHizmetAra, UParaDegisiklik, FetaKurulusSiniflari,LocOnFly, URaporAraclari, UGenelAnaSekmeFrame, UVeriMotor;
 
 const
     MasrafGelir=0;
@@ -1014,8 +1014,8 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject; const FromPage: T
 
        // son tarihi alal?m
        Tablo.Query1.Close;
-       Tablo.Query1.SQL.Text := ' select top 1 TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
-                                ' and KREDIREFERANSNO='''+CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString+''' order by ID desc ';
+       Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
+                                ' and KREDIREFERANSNO='''+CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString+''' order by ID desc '+DbSinir(1);
        Tablo.Query1.Open;
        if Tablo.Query1.RecordCount>0 then
           SimdikiFaizTut := RotatifHesapla(CekSenetKrediQuery.FieldByName('KREDIID').AsInteger ,Tablo.Query1.FieldByName('VALOR').AsBoolean,Valor,BakiyeAnaparaTut,Tablo.Query1.Fields[0].AsDateTime,KasaTarihi.Date)
@@ -1299,7 +1299,7 @@ begin
    VirmanNerdenQuery.Close;
    case Secim of
      44:begin   //POS Aktar?m?
-        VirmanNerdenQuery.SQL.Text := ' SELECT top 50 ID, KASAKODU=KODU, KASAADI=ADI,BAKIYE, KUR, BANKAHESAPID FROM POS WHERE DURUM=1 ';
+        VirmanNerdenQuery.SQL.Text := ' SELECT '+DbUst(50)+'ID, KASAKODU=KODU, KASAADI=ADI,BAKIYE, KUR, BANKAHESAPID FROM POS WHERE DURUM=1 '+DbSinir(50);
         if EditKaynakKod.Text<>'' then
           VirmanNerdenQuery.SQL.Add(' and KOD like '''+EditKaynakKod.Text+'%'' ');
         if EditKaynakAd.Text<>'' then
@@ -1307,7 +1307,7 @@ begin
         VirmanNerdenQuery.SQL.Add('order by 2,3 ');
      end;
      49:begin
-        VirmanNerdenQuery.SQL.Text := ' SELECT top 50 ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '; // , BAKIYE=0, KUR='''+CariDoviz+'''
+        VirmanNerdenQuery.SQL.Text := ' SELECT '+DbUst(50)+'ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '+DbSinir(50); // , BAKIYE=0, KUR='''+CariDoviz+'''
         VirmanNerdenQuery.SQL.Add(' WHERE ID>0 and DURUM>0  and KOD not in (select  isnull(HESAPKODU,'''') from BANKAHESAPLAR)  ');
         if EditKaynakKod.Text<>'' then
           VirmanNerdenQuery.SQL.Add(' and KOD like ''%'+EditKaynakKod.Text+'%'' ');
@@ -1425,7 +1425,7 @@ begin
        VirmanNereyeQuery.SQL.Add(' order by 2,3 ');
      end;
      49: if IslemOp = 'E' then begin
-             VirmanNereyeQuery.SQL.Text := ' SELECT top 50 ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER K '; //  , KUR='''+CariDoviz+''''+Sube+'
+             VirmanNereyeQuery.SQL.Text := ' SELECT '+DbUst(50)+'ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER K '+DbSinir(50); //  , KUR='''+CariDoviz+''''+Sube+'
              VirmanNereyeQuery.SQL.Add(' WHERE ID>0 and DURUM>0 and KOD not in (select  isnull(HESAPKODU,'''') from BANKAHESAPLAR) ');
              if EditHedefKod.Text<>'' then
                VirmanNereyeQuery.SQL.Add(' and KOD like '''+EditHedefKod.Text+'%'' ');
@@ -1558,13 +1558,13 @@ var Key: Word;
 
      if SecIslem = 49 then begin //cari virman
          VirmanNerdenQuery.Close;
-         VirmanNerdenQuery.SQL.Text := ' SELECT top 50 ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '+     //   , KUR='''+CariDoviz+'''
-            ' WHERE ID='+NereyeQuery.FieldByName('HESAPID').AsString;
+         VirmanNerdenQuery.SQL.Text := ' SELECT '+DbUst(50)+'ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '+     //   , KUR='''+CariDoviz+'''
+            ' WHERE ID='+NereyeQuery.FieldByName('HESAPID').AsString+' '+DbSinir(50);
          TabloYenile(VirmanNerdenQuery, []);
 
          VirmanNereyeQuery.close;
-         VirmanNereyeQuery.SQL.Text := ' SELECT top 50 ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '+    // , KUR='''+CariDoviz+'''
-            ' WHERE ID='+NerdenQuery.FieldByName('HESAPID').AsString;
+         VirmanNereyeQuery.SQL.Text := ' SELECT '+DbUst(50)+'ID, KASAKODU=KOD, KASAADI=FIRMA FROM REHBER '+    // , KUR='''+CariDoviz+'''
+            ' WHERE ID='+NerdenQuery.FieldByName('HESAPID').AsString+' '+DbSinir(50);
          TabloYenile(VirmanNereyeQuery, []);
      end; {else begin
          VirmanNeredenAc(SecIslem);

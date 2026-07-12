@@ -323,7 +323,7 @@ implementation
 
 uses ULog, PrjConst, Utablo, FetaKurulusSiniflari, fetautil, LocOnfly, System.DateUtils,
   System.IOUtils, System.StrUtils, Winapi.ActiveX, System.Win.ComObj,
-  System.RegularExpressions, System.Masks, UMT940Reader, UTabloGiris;
+  System.RegularExpressions, System.Masks, UMT940Reader, UTabloGiris, UVeriMotor;
 
 { ---------- Yardımcı kurulum ---------- }
 
@@ -1504,19 +1504,19 @@ begin
     MukerrerVar := False;
     if OzelKodDeger <> '' then
       MukerrerVar := Veritabani.VeriVarMi(Tablo.FDCnn,
-        'SELECT TOP 1 ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
+        'SELECT '+DbUst(1)+'ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
         ' AND HESAPTURU = ''B'' AND OZELKOD = ' + QuotedStr(OzelKodDeger) +
         ' AND CAST(ISLEMTARIHI AS date) = ''' + FormatDateTime('yyyy-mm-dd', Tarih) + '''' +
         ' AND BORC = ' + StringReplace(CurrToStr(Borc), ',', '.', [rfReplaceAll]) +
-        ' AND ALACAK = ' + StringReplace(CurrToStr(Alacak), ',', '.', [rfReplaceAll]), [], [])
+        ' AND ALACAK = ' + StringReplace(CurrToStr(Alacak), ',', '.', [rfReplaceAll])+' '+DbSinir(1), [], [])
     else if Borc + Alacak > 0 then
       MukerrerVar := Veritabani.VeriVarMi(Tablo.FDCnn,
-        'SELECT TOP 1 ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
+        'SELECT '+DbUst(1)+'ID FROM KASA WHERE HESAPID = ' + IntToStr(FHESAPID) +
         ' AND HESAPTURU = ''B'' AND TUR = ' + IntToStr(Tur) +
         ' AND CAST(ISLEMTARIHI AS date) = ''' + FormatDateTime('yyyy-mm-dd', Tarih) + '''' +
         ' AND BORC = ' + StringReplace(CurrToStr(Borc), ',', '.', [rfReplaceAll]) +
         ' AND ALACAK = ' + StringReplace(CurrToStr(Alacak), ',', '.', [rfReplaceAll]) +
-        IfThen(RehId > 0, ' AND REHBERID = ' + IntToStr(RehId), ''), [], []);
+        IfThen(RehId > 0, ' AND REHBERID = ' + IntToStr(RehId), '')+' '+DbSinir(1), [], []);
     if MukerrerVar then
       if Application.MessageBox(PChar('Bu hareket zaten kayıtlı görünüyor:' + sLineBreak +
            FormatDateTime('dd.mm.yyyy', Tarih) + '   ' + dxMemData1SECIM.AsString + '   ' +
@@ -2759,8 +2759,8 @@ begin
   Result := 0;
   if Trim(Isim) = '' then Exit;
   Tablo.TablodanSorguAc(1,
-    'SELECT TOP 1 ID FROM REHBER WHERE UPPER(FIRMA) = ''' +
-    StringReplace(UpperCase(Isim), '''', '''''', [rfReplaceAll]) + '''');
+    'SELECT '+DbUst(1)+'ID FROM REHBER WHERE UPPER(FIRMA) = ''' +
+    StringReplace(UpperCase(Isim), '''', '''''', [rfReplaceAll]) + ''''+' '+DbSinir(1));
   if not Tablo.Query1.IsEmpty then
     Result := Tablo.Query1.Fields[0].AsInteger;
 end;
@@ -2884,7 +2884,7 @@ begin
   Q := TFDQuery.Create(nil);
   try
     Q.Connection := Tablo.FDCnn;
-    Q.SQL.Text := 'SELECT TOP 1 ID FROM KREDIKARTI WHERE NOSU LIKE :P';
+    Q.SQL.Text := 'SELECT '+DbUst(1)+'ID FROM KREDIKARTI WHERE NOSU LIKE :P '+DbSinir(1);
     i := 1;
     while i <= Length(Aciklama) do begin
       if (Aciklama[i] >= '0') and (Aciklama[i] <= '9') then begin
@@ -2931,7 +2931,7 @@ begin
         StringReplace(UpperCase(Tk), '''', '''''', [rfReplaceAll]) + '%''';
     end;
   if Kosul = '' then Exit;
-  Tablo.TablodanSorguAc(1, 'SELECT TOP 1 ID FROM REHBER WHERE ' + Kosul);
+  Tablo.TablodanSorguAc(1, 'SELECT '+DbUst(1)+'ID FROM REHBER WHERE ' + Kosul+' '+DbSinir(1));
   if not Tablo.Query1.IsEmpty then
     Result := Tablo.Query1.Fields[0].AsInteger;
 end;
@@ -3433,8 +3433,8 @@ begin
   Q := TFDQuery.Create(nil);
   try
     Q.Connection := Tablo.FDCnn;
-    Q.SQL.Text := 'SELECT TOP 1 ID FROM BANKA_CARI_ESLEME ' +
-                  'WHERE BANKA_KODU = :BK AND FINGERPRINT = :FP';
+    Q.SQL.Text := 'SELECT '+DbUst(1)+'ID FROM BANKA_CARI_ESLEME ' +
+                  'WHERE BANKA_KODU = :BK AND FINGERPRINT = :FP '+DbSinir(1);
     Q.ParamByName('BK').AsString := BankaKodu;
     Q.ParamByName('FP').AsString := Fingerprint;
     Q.Open;
@@ -3486,9 +3486,9 @@ begin
   Q := TFDQuery.Create(nil);
   try
     Q.Connection := Tablo.FDCnn;
-    Q.SQL.Text := 'SELECT TOP 1 TUR, REHBERID, KESIN_MI FROM BANKA_CARI_ESLEME ' +
+    Q.SQL.Text := 'SELECT '+DbUst(1)+'TUR, REHBERID, KESIN_MI FROM BANKA_CARI_ESLEME ' +
                   'WHERE BANKA_KODU = :BK AND FINGERPRINT = :FP ' +
-                  'ORDER BY KESIN_MI DESC, KULLANIM DESC';
+                  'ORDER BY KESIN_MI DESC, KULLANIM DESC '+DbSinir(1);
     Q.ParamByName('BK').AsString := BankaKodu;
     Q.ParamByName('FP').AsString := Fingerprint;
     Q.Open;
@@ -3693,7 +3693,7 @@ begin
               // IBAN ile REHBER lookup — eşsiz, yüksek güven
               if H.KarsiTarafIBAN <> '' then begin
                 Q.Close;
-                Q.SQL.Text := 'SELECT TOP 1 ID, KOD, FIRMA FROM REHBER WHERE IBAN = :I';
+                Q.SQL.Text := 'SELECT '+DbUst(1)+'ID, KOD, FIRMA FROM REHBER WHERE IBAN = :I '+DbSinir(1);
                 Q.ParamByName('I').AsString := H.KarsiTarafIBAN;
                 Q.Open;
                 if not Q.IsEmpty then begin
@@ -3709,8 +3709,8 @@ begin
               // IBAN'la bulunmadıysa karşı taraf adıyla dene
               if (RehID = 0) and (H.KarsiTarafAd <> '') then begin
                 Q.Close;
-                Q.SQL.Text := 'SELECT TOP 1 ID, KOD, FIRMA FROM REHBER ' +
-                              'WHERE UPPER(FIRMA) = UPPER(:N)';
+                Q.SQL.Text := 'SELECT '+DbUst(1)+'ID, KOD, FIRMA FROM REHBER ' +
+                              'WHERE UPPER(FIRMA) = UPPER(:N) '+DbSinir(1);
                 Q.ParamByName('N').AsString := H.KarsiTarafAd;
                 Q.Open;
                 if not Q.IsEmpty then begin
@@ -3729,8 +3729,8 @@ begin
               // adla BAŞLIYORSA ve TEK aday varsa eşleştir (2+ aday = belirsiz).
               if (RehID = 0) and (Length(Trim(H.KarsiTarafAd)) >= 8) then begin
                 Q.Close;
-                Q.SQL.Text := 'SELECT TOP 2 ID, KOD, FIRMA FROM REHBER ' +
-                              'WHERE UPPER(FIRMA) LIKE UPPER(:N) + ''%''';
+                Q.SQL.Text := 'SELECT '+DbUst(2)+'ID, KOD, FIRMA FROM REHBER ' +
+                              'WHERE UPPER(FIRMA) LIKE UPPER(:N) + ''%'' '+DbSinir(2);
                 Q.ParamByName('N').AsString := Trim(H.KarsiTarafAd);
                 Q.Open;
                 if Q.RecordCount = 1 then begin
@@ -3764,7 +3764,7 @@ begin
                 Q.Close;
                 // NOT: parametre yerine literal — FireDAC currency/date parametre tip
                 // cikarimi '-335 data type is unknown' hatasi verebiliyor.
-                Q.SQL.Text := 'SELECT DISTINCT TOP 2 F.REHBERID FROM FATBASLIK F ' +
+                Q.SQL.Text := 'SELECT DISTINCT '+DbUst(2)+'F.REHBERID FROM FATBASLIK F ' +
                               'WHERE F.FATURA_TUTARI = ' +
                                 StringReplace(CurrToStr(H.Tutar), ',', '.', [rfReplaceAll]) +
                               ' AND F.REHBERID > 0 ' +
@@ -3772,7 +3772,7 @@ begin
                                 FormatDateTime('yyyy-mm-dd', H.Tarih - 120) + ''' AND ''' +
                                 FormatDateTime('yyyy-mm-dd', H.Tarih + 2) + ' 23:59'' ' +
                               IfThen(H.BorcMu, 'AND F.TUR IN (9,11,13)',
-                                               'AND F.TUR IN (15,17,19)');
+                                               'AND F.TUR IN (15,17,19)')+' '+DbSinir(2);
                 Q.Open;
                 if (Q.RecordCount = 1) and (Q.Fields[0].AsInteger > 0) then begin
                   RehID := Q.Fields[0].AsInteger;

@@ -174,7 +174,7 @@ implementation
 
 {$R *.dfm}
 
-uses UTablo, UExceldenVeriAl, PrjConst, UGirisKutusuEx, FetaKurulusSiniflari, UAnaForm;
+uses UTablo, UExceldenVeriAl, PrjConst, UGirisKutusuEx, FetaKurulusSiniflari, UAnaForm, UVeriMotor;
 
 var
    KuralUygulaniyor : Boolean;
@@ -501,7 +501,7 @@ var bulundu : boolean;
           ind:=0;                   //a��klamadan 2 kelime alarak rehber tablosunda aramaya ba�l�yoruz..
           CariAd := YeniCiftKelime;
           while (Result=0)and(ind<=Liste.Count-1) do begin
-             Tablo.TablodanSorguAc(1, 'select top 2 ID from REHBER where ID>0 and GRUP in (120,320) and FIRMA like '''+CariAd+'%'''); //sadece al�c� ve sat�c�lara bakar
+             Tablo.TablodanSorguAc(1, 'select '+DbUst(2)+'ID from REHBER where ID>0 and GRUP in (120,320) and FIRMA like '''+CariAd+'%'' '+DbSinir(2)); //sadece al�c� ve sat�c�lara bakar
              Tablo.Query1.FetchAll;
              case Tablo.query1.RecordCount of
                  0 : CariAd := YeniCiftKelime;
@@ -537,7 +537,7 @@ var bulundu : boolean;
 
       ind:=0; Result:=0;
       while (Result=0)and(ind<=Liste.Count-1) do begin
-         Tablo.TablodanSorguAc(7, 'select top 2 ID, SERINO, REHBERID from CEKLER where SERINO = '''+Liste.Strings[ind]+'''');
+         Tablo.TablodanSorguAc(7, 'select '+DbUst(2)+'ID, SERINO, REHBERID from CEKLER where SERINO = '''+Liste.Strings[ind]+''' '+DbSinir(2));
          Tablo.Query7.FetchAll;
          case Tablo.query7.RecordCount of
              0 : inc(ind);
@@ -554,7 +554,7 @@ var bulundu : boolean;
       Listeyi_Doldur(0,100, True);
       ind:=0; Result:=0;
       while (Result=0)and(ind<=Liste.Count-1) do begin
-         Tablo.TablodanSorguAc(1, 'select top 2 ID from KREDIKARTI where NOSU = '''+Liste.Strings[ind]+'''');
+         Tablo.TablodanSorguAc(1, 'select '+DbUst(2)+'ID from KREDIKARTI where NOSU = '''+Liste.Strings[ind]+''' '+DbSinir(2));
          Tablo.Query1.FetchAll;
          case Tablo.query1.RecordCount of
              0 : inc(ind);
@@ -571,7 +571,7 @@ var bulundu : boolean;
       Listeyi_Doldur(0,100, True);
       ind:=0; Result:=0;
       while (Result=0)and(ind<=Liste.Count-1) do begin
-         Tablo.TablodanSorguAc(1, 'select top 2 ID from POS where NOSU = '''+Liste.Strings[ind]+'''');
+         Tablo.TablodanSorguAc(1, 'select '+DbUst(2)+'ID from POS where NOSU = '''+Liste.Strings[ind]+''' '+DbSinir(2));
          Tablo.Query1.FetchAll;
          case Tablo.query1.RecordCount of
              0 : inc(ind);
@@ -588,7 +588,7 @@ var bulundu : boolean;
        begin
           ind:=0; Result:=0;
           while (Result=0)and(ind<=Liste.Count-1) do begin
-             Tablo.TablodanSorguAc(1, 'select top 2 ID from KREDILER where SOZLESMENO = '''+Liste.Strings[ind]+'''');
+             Tablo.TablodanSorguAc(1, 'select '+DbUst(2)+'ID from KREDILER where SOZLESMENO = '''+Liste.Strings[ind]+''' '+DbSinir(2));
              Tablo.Query1.FetchAll;
              case Tablo.query1.RecordCount of
                  0 : inc(ind);

@@ -24,7 +24,7 @@ interface
 implementation
 
 uses
-  SysUtils,Classes,Controls,Variants,ComCtrls,UTablo,FetaUtil,FetaKurulusSiniflari,UGirisKutusuEx;
+  SysUtils,Classes,Controls,Variants,ComCtrls,UTablo,FetaUtil,FetaKurulusSiniflari,UGirisKutusuEx,UVeriMotor;
 
 var
   i:integer;
@@ -410,7 +410,7 @@ Begin
     try
       if I=1 then begin
         TableName := 'UNITTEST';
-        SatirID := StrToInt(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' Select top 1 ID from UNITTEST order by ID desc ',[],[],True)));
+        SatirID := StrToInt(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' Select '+DbUst(1)+'ID from UNITTEST order by ID desc '+DbSinir(1)+' ',[],[],True)));
       end else if I=2 then begin
         TableName := 'UNITTEST';
         SatirID := -99;

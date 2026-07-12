@@ -72,7 +72,7 @@ var
   CekListeDlg: TCekListeDlg;
      cekturu , cekdurum : string;
 implementation
-Uses UTablo,LocOnFly;
+Uses UTablo,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
 
@@ -107,7 +107,7 @@ begin
    0 : begin   // Tüm cekleri göster seçili ise
           TabCekListesi.Close;
           TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                   ' ,SIRANO, ODEMETARIH = ( SELECT top 1 TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )  '+
+                                   ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+'TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')  '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''101%'' OR HESAPKODU LIKE ''103%'' ) AND '+
@@ -126,7 +126,7 @@ begin
           0: begin      // VERİLEN ÇEKLERİN TÜMÜ GÖRÜNSÜN
                  TabCekListesi.Close;
                  TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                   ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )    '+
+                                   ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+' TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')    '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' HESAPKODU LIKE ''103%'' AND '+
@@ -143,7 +143,7 @@ begin
           1: begin     // VERİLEN ÇEKLERİN ÖDENMİŞLERİ GÖRÜNSÜN
           TabCekListesi.Close;
           TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                   ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )     '+
+                                   ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+' TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')     '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''103%'' ) AND '+
@@ -161,7 +161,7 @@ begin
           2: begin     // VERİLEN CEKLERİN ÖDENMEMİŞLERİ GÖRÜNSÜN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                   ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )    '+
+                                   ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+' TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')    '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''103%'' ) AND '+
@@ -184,7 +184,7 @@ begin
           0: begin    // ALINAN ÇEKLERİN TÜMÜ GÖRÜNSÜN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                         ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )      '+
+                                         ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+' TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')      '+
                                          ' FROM KASA K'+
                                          ' WHERE '+
                                          ' (HESAPKODU LIKE ''101%'' ) AND '+
@@ -202,7 +202,7 @@ begin
           1: begin          // ALINAN ÇEKLERİN TAHSİL EDİLMİŞLERİ GÖRÜNSÜN
                TabCekListesi.Close;
                TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                         ' ,SIRANO, ODEMETARIH = ( SELECT top 1  TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )     '+
+                                         ' ,SIRANO, ODEMETARIH = ( SELECT '+DbUst(1)+' TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')     '+
                                          ' FROM KASA K'+
                                          ' WHERE '+
                                          ' (HESAPKODU LIKE ''101%'' ) AND '+
@@ -220,7 +220,7 @@ begin
           2: begin     // ALINAN CEKLERİN TAHSİL EDİLMEMİŞLERİ GÖRÜNSÜN.
               TabCekListesi.Close;
               TabCekListesi.SQL.Text:= 'SELECT TARIH, CARIKOD, CARIAD, ACIKLAMA, BORC, ALACAK, HESAPKODU, HESAPADI, KUR, MASRAFKOD, MASRAFAD,VADE '+
-                                   ' ,SIRANO, ODEMETARIH = ( SELECT  top 1 TARIH FROM KASA WHERE CEKSENETID = K.SIRANO )       '+
+                                   ' ,SIRANO, ODEMETARIH = ( SELECT  '+DbUst(1)+'TARIH FROM KASA WHERE CEKSENETID = K.SIRANO '+DbSinir(1)+')       '+
                                    ' FROM KASA K'+
                                    ' WHERE '+
                                    ' (HESAPKODU LIKE ''101%'' ) AND '+

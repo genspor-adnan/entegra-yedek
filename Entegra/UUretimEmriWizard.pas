@@ -613,7 +613,7 @@ var
 implementation
 
 uses
-  UGenelAnaSekmeFrame, URaporAraclari, UUretimRecete, UGirisKutusuEx, Fetautil, FetaKurulusSiniflari, UKodAgaci,
+  UVeriMotor, UGenelAnaSekmeFrame, URaporAraclari, UUretimRecete, UGirisKutusuEx, Fetautil, FetaKurulusSiniflari, UKodAgaci,
   LocOnFly ,PrjConst, UUretimEmriListeDlg,   UIsEmriPersonelZaman,UFastRap, UBelgeDonusum;
 
 {$R *.dfm}
@@ -998,7 +998,7 @@ begin
                 end;
               end;
 
-              Tablo.TablodanSorguAc(2,'select top 1 MIKTAR from URETIMEMRIDETAY where URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString+' order by ID desc');
+              Tablo.TablodanSorguAc(2,'select '+DbUst(1)+'MIKTAR from URETIMEMRIDETAY where URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
               Carpan := Tablo.Query2.FieldByName('MIKTAR').AsFloat;
                      }
               Tablo.Query4.Close;
@@ -1117,7 +1117,7 @@ begin
                 end;
               end;
 
-              Tablo.TablodanSorguAc(2,'select top 1 MIKTAR from URETIMEMRIDETAY where URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString+' order by ID desc');
+              Tablo.TablodanSorguAc(2,'select '+DbUst(1)+'MIKTAR from URETIMEMRIDETAY where URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString+' order by ID desc '+DbSinir(1));
               Carpan := Tablo.Query2.FieldByName('MIKTAR').AsFloat;
                      }
               Tablo.Query4.Close;
@@ -1211,7 +1211,7 @@ begin
      TabUretimEmri.FieldByName('REHBERID').AsInteger := SecilenRehberId;
      TabUretimEmri.FieldByName('SIPARIS_NO').AsString := SecilenBelgeNo;
      TabUretimEmri.FieldByName('TERMINTARIHI').AsDateTime := SecilenBelgeTeslimTr;
-     Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(SecilenRehberId)+' order by VARSAYILAN desc');
+     Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(SecilenRehberId)+' order by VARSAYILAN desc '+DbSinir(1));
      TabUretimEmri.FieldByName('REHBERILETID').AsInteger := tablo.Query1.Fields[0].AsInteger;
      FirmaBilgileri(SecilenRehberId);
      UretimAgaciOlustur(Tablo.Query9.Fields[0].AsInteger, 0, TabNo_SIPARISDETAY, SecilenSatirId, SecilenAdet);
@@ -2219,7 +2219,7 @@ var
   digitsay : SmallInt;
   i : Integer;
 begin
-  Tablo.TablodanSorguAc(9, ' select  TOP 1 MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=6 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' ');
+  Tablo.TablodanSorguAc(9, ' select  '+DbUst(1)+'MAX(CONVERT(INT,FATURANO)) FATURANO from FATBASLIK where TUR=6 and FATURATARIH >= '''+IntToStr(CariYil)+'-01-01 00:00'' '+DbSinir(1));
   if Tablo.Query9.Fields[0].AsString <> '0' then begin
     i := StrToIntDef(Tablo.Query9.Fields[0].AsString, 0);
     Inc(i);
@@ -2257,7 +2257,7 @@ begin
      s := ' VARSAYILAN = 1 ';
 
 
-  Tablo.TablodanSorguAc(1,'Select top 1 ID, AD from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and  '+s);
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID, AD from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and  '+s+' '+DbSinir(1));
   LabelSevk.Caption := Tablo.Query1.FieldByName('AD').AsString;
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
@@ -2276,7 +2276,7 @@ begin
       if TabUretimEmri.State = dsBrowse then
          TabUretimEmri.Edit;
       TabUretimEmri.FieldByName('REHBERID').AsInteger := Id;
-      Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(Id)+' order by VARSAYILAN desc');
+      Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(Id)+' order by VARSAYILAN desc '+DbSinir(1));
       TabUretimEmri.FieldByName('REHBERILETID').AsInteger := tablo.Query1.Fields[0].AsInteger;
       FirmaBilgileri(id);
    end;
@@ -2293,11 +2293,11 @@ begin
     try
       st:=TStringList.Create;
       SQLText:='select ID,AD,'+
-        ' ADRES=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2),'+
-        ' ILCE=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6),'+
-        ' IL=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8),'+
-        ' ID_VERGIDAI=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20),'+
-        ' ID_VERGINO=(SELECT TOP 1 BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22)'+
+        ' ADRES=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=2 '+DbSinir(1)+'),'+
+        ' ILCE=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=6 '+DbSinir(1)+'),'+
+        ' IL=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=1 AND RA.VARSAYILAN=8 '+DbSinir(1)+'),'+
+        ' ID_VERGIDAI=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=20 '+DbSinir(1)+'),'+
+        ' ID_VERGINO=(SELECT '+DbUst(1)+'BILGI FROM REHBERAYAR RA INNER JOIN REHBERBILGI RB ON RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI WHERE RB.YER_ID=Firma.ID AND RB.YERI=2 AND RA.VARSAYILAN=22 '+DbSinir(1)+')'+
         ' FROM REHBERILETISIM Firma where REHBERID='+TabUretimEmri.FieldByName('REHBERID').AsString;
       if Tablo.ListedenBilgiGetir('Adres Seçiniz.',SQLText,st,[],'FWizardAdresSecimi',IletisimEkleClick,Tablo.FDCnn,IletisimEkleClick) then begin
          //FATBASLIK.FieldByName('REHBERILETID').AsString:=st.Strings[0];
@@ -2779,14 +2779,14 @@ begin
   Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where ID='+IntToStr(UEID));
   if Tablo.Query1.FieldByName('MALIYETHESAPLAMA').AsString='1' then begin
     Tablo.Query2.SQL.Text := 'update URETIMEMRIDETAY set';
-    Tablo.Query2.SQL.Add(' BIRIMMALIYET=isnull((select TOP 1 F.TUTAR/F.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
-    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc ),0.0),');
-    Tablo.Query2.SQL.Add(' BIRIMURETIMMALIYETI=isnull((select TOP 1 (F.TUTAR/F.MIKTAR)*URETIMEMRIDETAY.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
-    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc),0.0)/'+StringReplace(Tablo.Query1.FieldByName('ADET').AsString,',','.',[])+',');
-    Tablo.Query2.SQL.Add(' TOPLAMMALIYET=isnull((select TOP 1 (F.TUTAR/F.MIKTAR)*URETIMEMRIDETAY.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
-    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc),0.0),');
-    Tablo.Query2.SQL.Add(' KUR=isnull((select TOP 1 F.KUR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
-    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc),'''+CariDoviz+''')');
+    Tablo.Query2.SQL.Add(' BIRIMMALIYET=isnull((select '+DbUst(1)+'F.TUTAR/F.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
+    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc '+DbSinir(1)+'),0.0),');
+    Tablo.Query2.SQL.Add(' BIRIMURETIMMALIYETI=isnull((select '+DbUst(1)+'(F.TUTAR/F.MIKTAR)*URETIMEMRIDETAY.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
+    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc '+DbSinir(1)+'),0.0)/'+StringReplace(Tablo.Query1.FieldByName('ADET').AsString,',','.',[])+',');
+    Tablo.Query2.SQL.Add(' TOPLAMMALIYET=isnull((select '+DbUst(1)+'(F.TUTAR/F.MIKTAR)*URETIMEMRIDETAY.MIKTAR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
+    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc '+DbSinir(1)+'),0.0),');
+    Tablo.Query2.SQL.Add(' KUR=isnull((select '+DbUst(1)+'F.KUR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
+    Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc '+DbSinir(1)+'),'''+CariDoviz+''')');
     Tablo.Query2.SQL.Add('where URETIMEMRIID='+IntToStr(UEID));
     Tablo.Query2.ExecSQL;
   end;

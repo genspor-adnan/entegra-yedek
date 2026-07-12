@@ -439,7 +439,7 @@ var
 
 implementation
 
-uses  ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
+uses  UVeriMotor, ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
   Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
   UEBelgeAliasServis, UEBelgeOlusturucu, UEBelgeMesajDlg, UIzibizRest,
@@ -681,9 +681,9 @@ begin
   RehberId := FATBASLIK.FieldByName('REHBERID').AsInteger;
 
   ///Tekliflerde öncelik: ilgilinin maili varsa ona gider, ilgili yoksa kuruma gider, ikisinde de yoksa girin uyarısı verilir.
-  Tablo.TablodanSorguAc(1,'SELECT  TOP 1 RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
+  Tablo.TablodanSorguAc(1,'SELECT  '+DbUst(1)+'RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
       ' INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA  AND RA.YERI=RB.YERI WHERE RI.REHBERID = '+inttostr(RehberId)+'  AND RB.YERI = 1'+
-      ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 ');
+      ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 '+DbSinir(1));
 
    if Tablo.Query1.RecordCount > 0 then
      GidecekMail := Tablo.Query1.FieldByName('BILGI').AsString
@@ -764,7 +764,7 @@ begin
   if Length(SQLEk)>10 then begin
     if (FArama.Calendar2.Text = '')or(FArama.Calendar1.Text = '')then  // DOVIZ_FATURA_MATRAHI=((FATURA_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0))
        exit;
-    SQLPart1 :=  'SELECT distinct TOP '+VarToStr(FArama.SpinKayitSayisi.EditValue)+' F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
+    SQLPart1 :=  'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
 //        ' FATURA_MATRAHI=FATURA_TUTARI-KDV_TUTARI,KDV_TUTARI,FATURA_TUTARI,F.KUR,FATURA_MALIYETI_ORT,'+
         ' FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, F.KUR, FATURA_MALIYETI_ORT,'+
         ' ORTKARORAN=round((FATURA_MATRAHI-FATURA_MALIYETI_ORT)/nullif(FATURA_MALIYETI_ORT,0)*100.0,2),'+
@@ -815,7 +815,7 @@ begin
            else
               SQLPart11 := SQLPart11+' and ISNULL(FATURANO,'''')  like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' ';
         end;
-    SQLPart2 :=   'SELECT distinct TOP '+VarToStr(FArama.SpinKayitSayisi.EditValue)+' F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
+    SQLPart2 :=   'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
         ' FATURA_MATRAHI=SIPARIS_TUTARI-KDV_TUTARI,'+
         ' KDV_TUTARI,FATURA_TUTARI=SIPARIS_TUTARI,F.KUR,KURFATURA_MALIYETI_ORT=0.0,ORTKARORAN=0.0, ORTKAR=0.0  ,F.ACIKLAMA,F.OZELKOD,F.OZELKOD2,CARIKOD=R.KOD,CARIAD=R.FIRMA,DOVIZ_CINSI=F.RAPORDOVIZ,F.DOVIZKUR,DOVIZ_TUTARI=(SIPARIS_TUTARI/nullif(DOVIZKUR,0.0)), '+
         ' DOVIZ_FATURA_MATRAHI=((SIPARIS_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0)),DOVIZ_KDV_TUTARI=(convert(float,KDV_TUTARI)/nullif(convert(float,DOVIZKUR),0.0)) '+
@@ -936,7 +936,7 @@ begin
 //                'FATURA_MATRAHI-ISNULL(FATURA_MALIYETI_ORT,0),F.ACIKLAMA,F.OZELKOD, R.KOD, R.FIRMA,F.DOVIZ_CINSI,F.DOVIZ_TUTARI,F.BAGLIFATURAID,F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO ,' + #13#10 +
 //                'F.SATICIKODU, F.DETAYBOLUMU, SATICIBILGI.FIRMA, F.VADE, F.BASLIK,FATURA_GON_TARIHI,F.ZARFID,'+EkAlanlar+'F.YAZDIRILDI';
     end;
-    FATBASLIK.SQL.Add(' ORDER BY F.ID desc,F.TUR,F.KUR ');
+    FATBASLIK.SQL.Add(' ORDER BY F.ID desc,F.TUR,F.KUR '+DbSinir(FArama.SpinKayitSayisi.EditValue));
     TabloYenile(FATBASLIK,[],LocateID,'ID');
 
     case gf.FAltTur of
@@ -1663,11 +1663,11 @@ begin
   LRehberID := 0;
   if LVNO <> '' then begin
     Tablo.TablodanSorguAc(1,
-      'SELECT TOP 1 R.ID FROM REHBER R ' +
+      'SELECT '+DbUst(1)+'R.ID FROM REHBER R ' +
       'INNER JOIN REHBERBILGI RB ON RB.YER_ID=R.ID AND RB.YERI=2 ' +
       ' AND RB.ETIKET=N''Vergi No'' ' +
       'WHERE R.DURUM=1 AND REPLACE(RB.BILGI,'' '','''')=' + QuotedStr(LVNO) +
-      ' ORDER BY R.ID');
+      ' ORDER BY R.ID '+DbSinir(1));
     if not Tablo.Query1.Eof then
       LRehberID := Tablo.Query1.Fields[0].AsInteger;
     Tablo.Query1.Close;
@@ -1707,10 +1707,10 @@ begin
 
     if LEbelgeID > 0 then begin
       Tablo.TablodanSorguAc(1,
-        'SELECT TOP 1 ISNULL(GONDERICIALIAS, N''''), ' +
+        'SELECT '+DbUst(1)+'ISNULL(GONDERICIALIAS, N''''), ' +
         'ISNULL(COALESCE(CAST(DECOMPRESS(UBL_XML_ZIP) AS NVARCHAR(MAX)),' +
         'CAST(UBL_XML AS NVARCHAR(MAX))), N'''') ' +
-        'FROM ' + DepoTablo('EBELGE') + ' WHERE ID=' + IntToStr(LEbelgeID));
+        'FROM ' + DepoTablo('EBELGE') + ' WHERE ID=' + IntToStr(LEbelgeID) + ' '+DbSinir(1));
       if not Tablo.Query1.Eof then begin
         LAlias := Trim(Tablo.Query1.Fields[0].AsString);
         LUBL := Tablo.Query1.Fields[1].AsString;
@@ -1808,8 +1808,8 @@ begin
 
         // Ayni IBAN/REHBER zaten varsa atla.
         Tablo.TablodanSorguAc(1,
-          'SELECT TOP 1 ID FROM BANKAHESAPLAR WHERE REHBERID=' + IntToStr(LRehberID) +
-          ' AND REPLACE(IBAN,'' '','''')=' + QuotedStr(LIBANTrim));
+          'SELECT '+DbUst(1)+'ID FROM BANKAHESAPLAR WHERE REHBERID=' + IntToStr(LRehberID) +
+          ' AND REPLACE(IBAN,'' '','''')=' + QuotedStr(LIBANTrim) + ' '+DbSinir(1));
         var LMevcut: Boolean;
         LMevcut := not Tablo.Query1.Eof;
         Tablo.Query1.Close;
@@ -1824,7 +1824,7 @@ begin
         if LBankaKodu > 0 then begin
           // Once BANKALAR'da kayitli mi kontrol et.
           Tablo.TablodanSorguAc(1,
-            'SELECT TOP 1 BANKAKODU FROM BANKALAR WHERE BANKAKODU=' + IntToStr(LBankaKodu));
+            'SELECT '+DbUst(1)+'BANKAKODU FROM BANKALAR WHERE BANKAKODU=' + IntToStr(LBankaKodu) + ' '+DbSinir(1));
           var LBankaVar: Boolean;
           LBankaVar := not Tablo.Query1.Eof;
           Tablo.Query1.Close;
@@ -1833,16 +1833,16 @@ begin
             // Sube adina gore esleme dene; bulamazsa TOP 1.
             if Trim(LSubeAd) <> '' then begin
               Tablo.TablodanSorguAc(1,
-                'SELECT TOP 1 ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
-                ' AND ISNULL(SUBEADI,N'''') LIKE ' + QuotedStr('%' + Trim(LSubeAd) + '%'));
+                'SELECT '+DbUst(1)+'ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
+                ' AND ISNULL(SUBEADI,N'''') LIKE ' + QuotedStr('%' + Trim(LSubeAd) + '%') + ' '+DbSinir(1));
               if not Tablo.Query1.Eof then
                 LSubeID := Tablo.Query1.Fields[0].AsInteger;
               Tablo.Query1.Close;
             end;
             if LSubeID = 0 then begin
               Tablo.TablodanSorguAc(1,
-                'SELECT TOP 1 ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
-                ' ORDER BY SUBEKODU');
+                'SELECT '+DbUst(1)+'ID FROM BANKASUBELER WHERE BANKAKODU=' + IntToStr(LBankaKodu) +
+                ' ORDER BY SUBEKODU '+DbSinir(1));
               if not Tablo.Query1.Eof then
                 LSubeID := Tablo.Query1.Fields[0].AsInteger;
               Tablo.Query1.Close;
@@ -2260,7 +2260,7 @@ begin
         Tablo.TablodanSorguAc(1, 'select TUR, REHBERID from FATBASLIK where ID='+IntToStr(yeniid));
 
      if donustipi = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN then begin //satış siparişi üretim fişine dönüştüyse başlığa ürün id ve adet yazalım
-        Tablo.TablodanSorguAc(3,'select top 1 URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID));
+        Tablo.TablodanSorguAc(3,'select '+DbUst(1)+'URUNID, ADET from SIPARISDETAY where SIPARISID = ' + IntToStr(ID) + ' '+DbSinir(1));
         if Tablo.Query3.RecordCount > 0 then
            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update FATBASLIK set AKTIVITEID='+Tablo.Query3.Fields[0].AsString+',STOKISK='+StringReplace(Tablo.Query3.Fields[1].AsString,',','.',[])+
                                                     ' where ID='+IntToStr(yeniid), [],[])

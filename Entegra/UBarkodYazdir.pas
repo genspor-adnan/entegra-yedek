@@ -75,7 +75,7 @@ var
 implementation
 
 uses
-  UFastRap, UGenelAnaSekmeFrame, URaporAraclari, Fetautil, FetaKurulusSiniflari,LocOnFly;
+  UFastRap, UGenelAnaSekmeFrame, URaporAraclari, Fetautil, FetaKurulusSiniflari,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
 
@@ -193,7 +193,7 @@ begin
       TabBarkodYazdir.sql.Text := ' select ID,ACIKLAMA,BARKOD,MIKTAR from BARKODYAZDIR where TARIHID='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',TarihID)+''' and EKLEYEN='+Kullanan;
       TabBarkodYazdir.Open;
     end;
-    Sonuc := veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select top 1 BARKODTIPI from STOKBARKOD where STOKID=&StokID order by  VARSAYILAN desc',['&StokID'],[StokID],True);
+    Sonuc := veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'select '+DbUst(1)+'BARKODTIPI from STOKBARKOD where STOKID=&StokID order by  VARSAYILAN desc '+DbSinir(1),['&StokID'],[StokID],True);
     if (VarToStr(Sonuc)<>'')and(VarToStr(ComboBoyutKategoriler.EditValue)='') then begin
       ComboBoyutKategoriler.EditValue := Sonuc;
       ComboBoyutKategoriler.PostEditValue;

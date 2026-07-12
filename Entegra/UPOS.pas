@@ -142,7 +142,7 @@ implementation
 
 {$R *.dfm}
 
-uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog;
+uses FetaClassExtensions, PrjConst, Utablo,LocOnFly, ULog, UVeriMotor;
 { TPOS }
 
 destructor TPOS.Destroy;
@@ -160,13 +160,13 @@ begin
   TabPOS.Close;
   if POSId <> -1 then begin
     if POSId = -2 then
-      TabPOS.SQL.Text := 'select top 1 P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P ORDER BY ID DESC'
+      TabPOS.SQL.Text := 'select '+DbUst(1)+'P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabPOS.SQL.Text := 'select P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P where P.ID = :ID';
       TabPOS.ParamByName('ID').AsInteger := POSId;
     end;
   end else
-    TabPOS.SQL.Text := 'select top 0 P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P ';
+    TabPOS.SQL.Text := 'select '+DbUst(0)+'P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P '+DbSinir(0);
   TabPOS.Open;
 //  FFrameBilgi.Baslik := IIf(
 end;

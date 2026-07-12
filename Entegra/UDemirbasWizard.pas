@@ -285,7 +285,7 @@ var
 implementation
 
 Uses UCombo,UComboImgDuzenle,FetaClassExtensions,UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra,URaporAraclari, UGenelAnaSekmeFrame,
-     UFastRap, USecForm, UMesaj, UAnaForm, UGirisKutusuEx ,IdGlobalProtocols,LocOnFly, FetaUtil, UUnits, UStokHizmetAra, ULog;
+     UFastRap, USecForm, UMesaj, UAnaForm, UGirisKutusuEx ,IdGlobalProtocols,LocOnFly, FetaUtil, UUnits, UStokHizmetAra, ULog, UVeriMotor;
 
 {$R *.dfm}
 
@@ -856,7 +856,7 @@ begin
           kod1 := MASRAFKODU;
 
 
-      Tablo.TablodanSorguAc(2, 'select top 1 reverse(substring(reverse(isnull(KOD,''0'')),1,charindex(''.'',KOD)-2))  from MASRAFGELIR where KOD like '''+kod1+'%'' and YER=18 and YER_ID='+TabDemirbas.Fields[0].AsString+' order by KOD desc');
+      Tablo.TablodanSorguAc(2, 'select '+DbUst(1)+'reverse(substring(reverse(isnull(KOD,''0'')),1,charindex(''.'',KOD)-2))  from MASRAFGELIR where KOD like '''+kod1+'%'' and YER=18 and YER_ID='+TabDemirbas.Fields[0].AsString+' order by KOD desc '+DbSinir(1));
       if not Tablo.Query2.IsEmpty then
          i := Tablo.Query2.Fields[0].AsInteger
       else

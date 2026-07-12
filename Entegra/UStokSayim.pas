@@ -195,7 +195,7 @@ type
 
 implementation
 
-Uses  UAnaForm,UHizmetAra, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,FetaClassExtensions,UGirisKutusuEx,LocOnFly,UKategori, UExceldenVeriAl;
+Uses  UAnaForm,UHizmetAra, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,FetaClassExtensions,UGirisKutusuEx,LocOnFly,UKategori, UExceldenVeriAl, UVeriMotor;
 {$R *.dfm}
 
 procedure TStokSayimDlg.SayimlariListele;
@@ -934,7 +934,7 @@ end;
 
 procedure TStokSayimDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  Tablo.TablodanSorguAc(1,'SELECT TOP 1 ID FROM STOKSAYIM WHERE ISNULL(SAYIMONAY,0)=0 ');
+  Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'ID FROM STOKSAYIM WHERE ISNULL(SAYIMONAY,0)=0 '+DbSinir(1));
   if Tablo.Query1.RecordCount=1 then
    begin
      if Application.MessageBox(PChar(STOnaylanmamis_sayim_ekran_kapansinmi),PChar(Uyari),MB_YESNO+ MB_ICONQUESTION) = ID_YES then

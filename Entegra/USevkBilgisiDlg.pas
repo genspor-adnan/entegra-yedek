@@ -84,7 +84,7 @@ type
 implementation
 
 uses
-  UTablo, PrjConst, FetaKurulusSiniflari;
+  UTablo, PrjConst, FetaKurulusSiniflari, UVeriMotor;
 
 {$R *.dfm}
 
@@ -115,9 +115,9 @@ begin
   try
     LSQL :=
       'select cast(T.DEGER as int) as ID, T.ANAHTAR ' +
-      'from (select top 10 DEGER, ANAHTAR, SIRA from GENINI ' +
+      'from (select '+DbUst(10)+'DEGER, ANAHTAR, SIRA from GENINI ' +
       'where BOLUM=' + IntToStr(Ops_FaturaOpsiyon_SonSevkBilgileri) + ' and DIL=-1 and isnull(ANAHTAR,'''')<>'''' ' +
-      'order by SIRA desc) T ' +
+      'order by SIRA desc '+DbSinir(10)+') T ' +
       'order by T.SIRA desc';
     if not Tablo.ListedenBilgiGetir('Son Sevk Bilgileri', LSQL, LSecim, [], '') then
       Exit;
@@ -156,7 +156,7 @@ begin
       'if exists(select 1 from FATBASLIK_USER where ID=:HEDEFID) ' +
       'begin ' +
       '  update FATBASLIK_USER ' +
-      '  set SEVKBILGISI=(select top 1 SEVKBILGISI from FATBASLIK_USER where ID=:KAYNAKID), ' +
+      '  set SEVKBILGISI=(select '+DbUst(1)+'SEVKBILGISI from FATBASLIK_USER where ID=:KAYNAKID '+DbSinir(1)+'), ' +
       '      DEGISTIREN=:KULLANAN, DEGISTIRMETARIHI=getdate() ' +
       '  where ID=:HEDEFID and exists(select 1 from FATBASLIK_USER where ID=:KAYNAKID and isnull(SEVKBILGISI,'''')<>'''') ' +
       'end ' +
@@ -398,10 +398,10 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text :=
-      'select top 10 DEGER, ANAHTAR ' +
+      'select '+DbUst(10)+'DEGER, ANAHTAR ' +
       'from GENINI ' +
       'where BOLUM=:BOLUM and DIL=-1 and isnull(ANAHTAR,'''')<>'''' ' +
-      'order by SIRA desc';
+      'order by SIRA desc '+DbSinir(10);
     LQry.ParamByName('BOLUM').AsInteger := Ops_FaturaOpsiyon_SonSevkBilgileri;
     LQry.Open;
     while not LQry.Eof do begin
@@ -473,9 +473,9 @@ begin
   try
     LSQL :=
       'select cast(T.DEGER as int) as ID, T.ANAHTAR ' +
-      'from (select top 10 DEGER, ANAHTAR, SIRA from GENINI ' +
+      'from (select '+DbUst(10)+'DEGER, ANAHTAR, SIRA from GENINI ' +
       'where BOLUM=' + IntToStr(Ops_FaturaOpsiyon_SonSevkBilgileri) + ' and DIL=-1 and isnull(ANAHTAR,'''')<>'''' ' +
-      'order by SIRA desc) T ' +
+      'order by SIRA desc '+DbSinir(10)+') T ' +
       'order by T.SIRA desc';
     if not Tablo.ListedenBilgiGetir('Son Sevk Bilgileri', LSQL, LSecim, [], '') then
       Exit;
@@ -517,13 +517,13 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LSQL :=
-      'select top 1 FU.SEVKBILGISI ' +
+      'select '+DbUst(1)+'FU.SEVKBILGISI ' +
       'from FATBASLIK_USER FU ' +
       'inner join FATBASLIK FB on FB.ID=FU.ID ' +
       'where FU.ID<:ID and isnull(FU.SEVKBILGISI,'''')<>'''' and FB.TUR=14 ';
     if ABuCariIcin then
       LSQL := LSQL + 'and FB.REHBERID=:REHBERID ';
-    LSQL := LSQL + 'order by FU.ID desc';
+    LSQL := LSQL + 'order by FU.ID desc '+DbSinir(1);
     LQry.SQL.Text := LSQL;
     LQry.ParamByName('ID').AsInteger := FFatBaslikID;
     if ABuCariIcin then
@@ -559,10 +559,10 @@ begin
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text :=
       'select R.FIRMA, ' +
-      'VNO=replace(replace(ltrim(rtrim(isnull((select top 1 RB.BILGI ' +
+      'VNO=replace(replace(ltrim(rtrim(isnull((select '+DbUst(1)+'RB.BILGI ' +
       '  from REHBERAYAR RA ' +
       '  inner join REHBERBILGI RB on RA.SIRA=RB.SIRA and RA.YERI=RB.YERI ' +
-      '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22), ''''))),'' '',''''),''-'','''') ' +
+      '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22 '+DbSinir(1)+'), ''''))),'' '',''''),''-'','''') ' +
       'from REHBER R where R.ID=:ID';
     LQry.ParamByName('ID').AsInteger := ATasiyiciID;
     LQry.Open;
@@ -599,16 +599,16 @@ begin
     if rbTasiyanKendimiz.Checked then
       LQry.SQL.Text :=
         'select R.FIRMA, ' +
-        'TCKN=replace(replace(ltrim(rtrim(isnull((select top 1 BILGI ' +
-        '  from REHBERBILGI where YERI=3 and YER_ID=R.ID and SIRA=22), ''''))),'' '',''''),''-'','''') ' +
+        'TCKN=replace(replace(ltrim(rtrim(isnull((select '+DbUst(1)+'BILGI ' +
+        '  from REHBERBILGI where YERI=3 and YER_ID=R.ID and SIRA=22 '+DbSinir(1)+'), ''''))),'' '',''''),''-'','''') ' +
         'from REHBER R where R.ID=:ID'
     else
       LQry.SQL.Text :=
         'select R.FIRMA, ' +
-        'VNO=replace(replace(ltrim(rtrim(isnull((select top 1 RB.BILGI ' +
+        'VNO=replace(replace(ltrim(rtrim(isnull((select '+DbUst(1)+'RB.BILGI ' +
         '  from REHBERAYAR RA ' +
         '  inner join REHBERBILGI RB on RA.SIRA=RB.SIRA and RA.YERI=RB.YERI ' +
-        '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22), ''''))),'' '',''''),''-'','''') ' +
+        '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22 '+DbSinir(1)+'), ''''))),'' '',''''),''-'','''') ' +
         'from REHBER R where R.ID=:ID';
     LQry.ParamByName('ID').AsInteger := ASoforID;
     LQry.Open;
@@ -671,12 +671,12 @@ begin
     end;
     LSt := TStringList.Create;
     try
-      LSQL := 'SELECT ID,FIRMA,GOREVI=(select top 1 RB.BILGI from REHBERBILGI RB ' +
+      LSQL := 'SELECT ID,FIRMA,GOREVI=(select '+DbUst(1)+'RB.BILGI from REHBERBILGI RB ' +
         'INNER JOIN REHBERAYAR RA ON RA.ETIKET=RB.ETIKET AND RA.YERI=RB.YERI ' +
-        'WHERE RA.YERI=1 and RA.VARSAYILAN=175 and RB.YER_ID=(select top 1 ID from REHBERILETISIM where REHBERID = RP.ID)), ' +
-        'ILETISIMI=(select top 1 RB.BILGI from REHBERBILGI RB ' +
+        'WHERE RA.YERI=1 and RA.VARSAYILAN=175 and RB.YER_ID=(select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID = RP.ID '+DbSinir(1)+') '+DbSinir(1)+'), ' +
+        'ILETISIMI=(select '+DbUst(1)+'RB.BILGI from REHBERBILGI RB ' +
         'INNER JOIN REHBERAYAR RA ON RA.ETIKET=RB.ETIKET AND RA.YERI=RB.YERI ' +
-        'WHERE RA.YERI=1 and RA.VARSAYILAN=88 and RB.YER_ID=(select top 1 ID from REHBERILETISIM where REHBERID = RP.ID)), ' +
+        'WHERE RA.YERI=1 and RA.VARSAYILAN=88 and RB.YER_ID=(select '+DbUst(1)+'ID from REHBERILETISIM where REHBERID = RP.ID '+DbSinir(1)+') '+DbSinir(1)+'), ' +
         'NOTLAR, DURUM=case when RP.DURUM=3 then ''Pasif'' else ''Aktif'' end ' +
         'FROM REHBER RP WHERE RP.FIRMA like ''%<ara>%'' and GRUP=334 and BAGID=' +
         IntToStr(edTasiyiciUnvan.Tag);

@@ -112,7 +112,7 @@ var
   ESHesapIni: TIni;
 implementation
 
-uses Math, UTablo;
+uses Math, UTablo, UVeriMotor;
 
 
 function TelFormatla(Tel: string ): string;
@@ -401,11 +401,11 @@ begin
         '    SEC = ''1'' AND ' +
         '    ILETKANALI = ''SMS'' and  ' +
         '    ISNULL(MSGREFERANS,''0'') =''0'' and CEPTEL<>''0'' and [ID] IN (' +
-        '       Select TOP 1000 [ID] from CAGRI ' +
+        '       Select '+DbUst(1000)+'[ID] from CAGRI ' +
         '       Where  SEC= 1 AND  ' +
         '         ILETKANALI = ''SMS''  AND ' +
         '         STATU = 0 ' +
-        '       ORDER BY [ID] ' + ')';
+        '       ORDER BY [ID] '+DbSinir(1000)+ ')';
 
       Tablo.Query3.ExecSQL;
       Tablo.Query3.Close;
@@ -418,11 +418,11 @@ begin
         '    SEC = ''1'' AND ' +
         '    ILETKANALI = ''SMS'' and  ' +
         '    CEPTEL=''0'' and [ID] IN (' +
-        '       Select TOP 1000 [ID] from CAGRI ' +
+        '       Select '+DbUst(1000)+'[ID] from CAGRI ' +
         '       Where  SEC= 1 AND  ' +
         '         ILETKANALI = ''SMS''  AND ' +
         '         STATU = 0 ' +
-        '       ORDER BY [ID] ' + ')';
+        '       ORDER BY [ID] '+DbSinir(1000)+ ')';
 
       Tablo.Query3.ExecSQL;
 
@@ -542,11 +542,11 @@ begin
         '    SEC = ''1'' AND ' +
         '    ILETKANALI = ''SMS'' and  ' +
         '    ISNULL(MSGREFERANS,''0'') =''0'' and CEPTEL<>''0'' and [ID] IN (' +
-        '       Select TOP 1000 [ID] from CAGRI ' +
+        '       Select '+DbUst(1000)+'[ID] from CAGRI ' +
         '       Where  SEC= 1 AND  ' +
         '         ILETKANALI = ''SMS''  AND ' +
         '         STATU = 0 ' +
-        '       ORDER BY [ID] ' + ')';
+        '       ORDER BY [ID] '+DbSinir(1000)+ ')';
 
       Tablo.Query3.ExecSQL;
       Tablo.Query3.Close;
@@ -559,11 +559,11 @@ begin
         '    SEC = ''1'' AND ' +
         '    ILETKANALI = ''SMS'' and  ' +
         '    CEPTEL=''0'' and [ID] IN (' +
-        '       Select TOP 1000 [ID] from CAGRI ' +
+        '       Select '+DbUst(1000)+'[ID] from CAGRI ' +
         '       Where  SEC= 1 AND  ' +
         '         ILETKANALI = ''SMS''  AND ' +
         '         STATU = 0 ' +
-        '       ORDER BY [ID] ' + ')';
+        '       ORDER BY [ID] '+DbSinir(1000)+ ')';
 
       Tablo.Query3.ExecSQL;
 

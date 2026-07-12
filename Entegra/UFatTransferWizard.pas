@@ -267,7 +267,7 @@ var
 
 implementation
 
-Uses  UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
+Uses  UVeriMotor, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame, UAnaForm, LocOnFly,
   UGirisKutusuEx,UBelgeDonusum, UUTSKontrol;
 {$R *.dfm}
@@ -541,7 +541,7 @@ begin
     if VFatNo <> '' then
       YeniID := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(
         Tablo.FDCnn,
-        'select top 1 ID from FATBASLIK where FATURANO=&NO and FATURASERI=&SERI and TUR=&TUR and SUBEID=&SUBE order by ID desc',
+        'select '+DbUst(1)+'ID from FATBASLIK where FATURANO=&NO and FATURASERI=&SERI and TUR=&TUR and SUBEID=&SUBE order by ID desc '+DbSinir(1),
         ['&NO','&SERI','&TUR','&SUBE'],
         [VFatNo, VSeri, TabFatBaslik.FieldByName('TUR').AsInteger, TabFatBaslik.FieldByName('SUBEID').AsInteger],
         True

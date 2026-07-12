@@ -721,7 +721,7 @@ Begin
     TabKomutCalistir.ExecSQL;
     Result := True;
   except
-    Result := False;
+    Result :=  False;
   end;
 End;
 

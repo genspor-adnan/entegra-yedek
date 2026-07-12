@@ -70,7 +70,7 @@ var
 
 implementation
 
-uses ULog;
+uses ULog, UVeriMotor;
 var
   MeslekKayitVar:Boolean;
 
@@ -177,10 +177,10 @@ begin
 //      Tablo.TablodanSorguAc(3,' SELECT TOP 1 * FROM PERS_HAREKET '+
 //                              ' WHERE REHBERID='+IntToStr(RehberID));
 //      KayitDurumu := (Tablo.Query3.RecordCount > 0);
-      Tablo.TablodanSorguAc(4,' SELECT TOP 1 * ' +
+      Tablo.TablodanSorguAc(4,' SELECT '+DbUst(1)+'* ' +
                               ' FROM PERS_HAREKET ' +
                               ' WHERE REHBERID='+TabHareket.FieldByName('REHBERID').AsString+
-                              ' ORDER BY TARIH,ID DESC');
+                              ' ORDER BY TARIH,ID DESC '+DbSinir(1));
 
       TurNo := TabHareket.FieldByName('TUR').AsInteger;
       if (TurNo = 99) and (YeniKayit) then   //son kayıt çıkış ancak yeniden giriş yapılacak
@@ -213,7 +213,7 @@ begin
   else
     pnlSube.Visible := SubeVarmi;
 
-  MeslekKayitVar := Tablo.TablodanSorguAc(1,'SELECT TOP 1 * FROM MESLEKKODLARI');
+  MeslekKayitVar := Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'* FROM MESLEKKODLARI '+DbSinir(1));
 
   //lblMeslekZorunluGosterge.Visible := MeslekKayitVar;
 
@@ -386,7 +386,7 @@ begin
 
   if RehberID > 0 then
   begin
-    Tablo.TablodanSorguAc(4,'SELECT TOP 1 TUR,POZISYON,ACIKLAMA,SUBEID,MESLEKID FROM PERS_HAREKET WHERE REHBERID='+ IntToStr(RehberID) +' ORDER BY ID DESC');
+    Tablo.TablodanSorguAc(4,'SELECT '+DbUst(1)+'TUR,POZISYON,ACIKLAMA,SUBEID,MESLEKID FROM PERS_HAREKET WHERE REHBERID='+ IntToStr(RehberID) +' ORDER BY ID DESC '+DbSinir(1));
 
     if not Tablo.Query4.IsEmpty then
     begin

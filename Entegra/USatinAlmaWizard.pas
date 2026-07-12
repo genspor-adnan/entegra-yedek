@@ -208,7 +208,7 @@ var
 
 implementation
 
-uses ULog,UTablo,PrjConst,FetaKurulusSiniflari, UGenSifre,LocOnFly;
+uses ULog,UTablo,PrjConst,FetaKurulusSiniflari, UGenSifre,LocOnFly, UVeriMotor;
 
 {$R *.dfm}
 
@@ -296,14 +296,14 @@ begin
     ' [KOCANNO],[SIPARISNO],'+DepoField+',[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[SIPARIS_MATRAHI],[KDV_TUTARI],'+
     ' [SIPARIS_TUTARI],[KUR],[DOVIZ_TUTARI],[DOVIZ_CINSI],[KASA],[ONAY],[ACIKLAMA],[DURUM],[EKLEYEN],[EKLEMETARIHI],'+
     ' [DEGISTIREN],[DEGISTIRMETARIHI],[FIYAT_LISTESI],[TESLIM_SEKLI],[ODEME],[VADE],[MUS_ILGILI],[YERI],[YERID],[TEKLIFNO],[SATICIKODU],DOVIZKUR,[REHBERILETID],[SUBEID])'+
-    ' SELECT top 1  [TARIH],'+IntToStr(Tur)+',1,'+IntToStr(RehID)+',[PROJEID],-1,'''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','''+belgeno.Serino+''','+IntToStr(//KocannoBul(Tur))+','''+belgeno.BelgeNo+''','+IntToStr(VarsDepoID)+','+
+    ' SELECT '+DbUst(1)+' [TARIH],'+IntToStr(Tur)+',1,'+IntToStr(RehID)+',[PROJEID],-1,'''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','''+belgeno.Serino+''','+IntToStr(//KocannoBul(Tur))+','''+belgeno.BelgeNo+''','+IntToStr(VarsDepoID)+','+
     ' BASLIK='''+Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString+''', ADRES='''+Tablo.tabCariBilgileri.FieldByName('ADRES').AsString+''','+
     ' ILCE='''+Tablo.tabCariBilgileri.FieldByName('ILCE').AsString+''', IL='''+Tablo.tabCariBilgileri.FieldByName('IL').AsString+''', '+
     ' VD='''+Tablo.tabCariBilgileri.FieldByName('VERGIDAI').AsString+''', VNO='''+Tablo.tabCariBilgileri.FieldByName('VERGINO').AsString+''','+
     ' [KDVDURUM],[TEKLIF_MATRAHI],[KDV_TUTARI],'+
     ' [TEKLIF_TUTARI],''TL'',[DOVIZ_TUTARI],[KUR],[KASA],[ONAY],[NOTLAR],1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''',T.[DEGISTIREN],T.[DEGISTIRMETARIHI],'+
     ' [FIYAT_LISTESI],[TESLIM_SEKLI],[ODEME],[VADE],[MUS_ILGILI],'+IntToStr(DonusTipi)+',T.ID,TEKLIFNO,HAZIRLAYAN,1,[REHBERILETID],T.SUBEID '+
-    ' FROM [TEKLIF] T left outer join REHBERBILGI RB on T.REHBERID=RB.YER_ID Where T.ID='+IntToStr(TeklifID) +' select scope_identity() ';
+    ' FROM [TEKLIF] T left outer join REHBERBILGI RB on T.REHBERID=RB.YER_ID Where T.ID='+IntToStr(TeklifID) +' '+DbSinir(1)+' select scope_identity() ';
     Tablo.Query1.Open;
     //SiparişDetay tablosuna kayıt
     Tablo.Query2.Close;

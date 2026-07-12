@@ -422,7 +422,7 @@ implementation
 
 Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
- cxTLExportLink, UFastRap, URaporAraclari, ULog;
+ cxTLExportLink, UFastRap, URaporAraclari, ULog, UVeriMotor;
 
 {$R *.dfm}
   var
@@ -596,7 +596,7 @@ begin
   PrjAsamaID:= TabProjeAsama.FieldByName('ID').AsInteger;
   if TabProjeAsama.State in [dsEdit,dsInsert] then
      TabProjeAsama.Post;
-  Tablo.TablodanSorguAc(1,'Select top 1 * from PROJEASAMA Where PROJEID='+inttostr(ProjeID)+' and ID > '+IntToStr(PrjAsamaID)+' and isnull(BITTAR,0)=0');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'* from PROJEASAMA Where PROJEID='+inttostr(ProjeID)+' and ID > '+IntToStr(PrjAsamaID)+' and isnull(BITTAR,0)=0 '+DbSinir(1));
   if Tablo.Query1.RecordCount > 0 then begin
     TabProjeler.Edit;
     TabProjeler.FieldByName('ASAMA').AsInteger:=Tablo.Query1.FieldByName('ASAMA').AsInteger;
@@ -858,7 +858,7 @@ end;
 
 procedure TProjeWizardDlg.FirmaBilgileri;
 begin
-  Tablo.TablodanSorguAc(1,'Select top 1 ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 ');
+  Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   LabelAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;
