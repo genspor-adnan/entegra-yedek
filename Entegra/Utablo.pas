@@ -11523,9 +11523,10 @@ var
 begin
   // Günü gelmiş pos ödemeler varsa onlar pos hesabından normal hesaba aktarılır
   Query5.Close;
-  Query5.SQL.Text :=
-    'select K.ID,PLANTARIHI AS TARIH,K.HESAPID,HESAPKODU=KLR.KASAKODU ,HESAPADI=KLR.KASAADI,K.BORC, K.KUR , GERIDONUSHESAPNO from KASA K inner join BANKAHESAPLAR B on K.HESAPID = B.ID'
-    + ' inner join KASALAR KLR on KLR.ID=K.HESAPID where KREDIKARTI = 1 and PLANTARIHI < (GETDATE()- GERIDONUSGUNSAY) and isnull(GERIDONUSID,-1)<1 ';
+  Query5.SQL.Text := PgSqlCevir(
+    'select K.ID,PLANTARIHI AS TARIH,K.HESAPID,KLR.KASAKODU AS HESAPKODU ,KLR.KASAADI AS HESAPADI,K.BORC, K.KUR , GERIDONUSHESAPNO from KASA K inner join BANKAHESAPLAR B on K.HESAPID = B.ID'
+    + ' inner join KASALAR KLR on KLR.ID=K.HESAPID where KREDIKARTI = 1 and PLANTARIHI < '
+    + DbGunEkleS(DbSimdi, '-GERIDONUSGUNSAY') + ' and isnull(GERIDONUSID,-1)<1 ');
   Query5.Open;
   while not Query5.Eof do begin
     // önce postan çıkacak
@@ -12105,7 +12106,7 @@ label
   LisansAl;
   procedure IndexKontrolu(IndeksAdi: string);
   begin
-    if AktifVeriMotor = vmPG then Exit;   // PG'de SYSOBJECTS yok; bu PK-var kontrolu MSSQL-ozel (sadece uyari)
+    if AktifVeriMotor =  vmPG then Exit;   // PG'de SYSOBJECTS yok; bu PK-var kontrolu MSSQL-ozel (sadece uyari)
     Ad := ' NAME ';
     Dosya := 'SYSOBJECTS';
     Query1.Close;

@@ -37,6 +37,8 @@ function DbGun(const AIfade: string): string;       // day(x)   | extract(day fr
 // Tarihe gun ekle/cikar (AGun negatif olabilir). MSSQL DATEADD konumsal -> seam.
 //   DbGunEkle(DbSimdi,-10) -> MSSQL: dateadd(day,-10,getdate()) | PG: (now()+ -10*interval '1 day')
 function DbGunEkle(const AIfade: string; AGun: Integer): string;
+// Gun sayisi bir IFADE/KOLON oldugunda ( or. '-GERIDONUSGUNSAY'):
+function DbGunEkleS(const AIfade, AGunIfade: string): string;
 
 // ---- Baglanti ----
 // Secili motora gore FDConnection'i yapilandirir. PG icin makinede libpq (PostgreSQL
@@ -115,12 +117,17 @@ begin
   else Result := 'day(' + AIfade + ')';
 end;
 
-function DbGunEkle(const AIfade: string; AGun: Integer): string;
+function DbGunEkleS(const AIfade, AGunIfade: string): string;
 begin
   if AktifVeriMotor = vmPG then
-    Result := '(' + AIfade + ' + ' + IntToStr(AGun) + ' * interval ''1 day'')'
+    Result := '(' + AIfade + ' + (' + AGunIfade + ') * interval ''1 day'')'
   else
-    Result := 'dateadd(day, ' + IntToStr(AGun) + ', ' + AIfade + ')';
+    Result := 'dateadd(day, (' + AGunIfade + '), ' + AIfade + ')';
+end;
+
+function DbGunEkle(const AIfade: string; AGun: Integer): string;
+begin
+  Result := DbGunEkleS(AIfade, IntToStr(AGun));
 end;
 
 function PgSqlCevir(const ASql: string): string;
