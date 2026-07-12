@@ -1723,7 +1723,7 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
         ' order by SIRA,REHBERID'+
         ' ) as zz'); }
        //önce kişiye özel varsayılan varsa o yüklenir yoksa tüm kullanıcılar için genel ayarlar yüklenir
-       TablodanSorguAc(5,'select '+DbUst(1)+'SIRA=1,REHBERID,BILGI,FILTRE from AYAR where ADI='''+GridAdi+''' and  isnull(AYARADI,'''')='''' and REHBERID in (0,'+Kullanan+') order by REHBERID desc '+DbSinir(1)+');
+       TablodanSorguAc(5,'select '+DbUst(1)+'SIRA=1,REHBERID,BILGI,FILTRE from AYAR where ADI='''+GridAdi+''' and  isnull(AYARADI,'''')='''' and REHBERID in (0,'+Kullanan+') order by REHBERID desc '+DbSinir(1));
 
     if Query5.RecordCount>0 then begin
        TBlobField(Query5.FieldByName('BILGI')).SaveToStream(str);
@@ -2454,7 +2454,7 @@ begin
 
       if Tablo.Query2.RecordCount = 0 then begin
          if IseGirisiKontrol then begin //eski tarihe eklemede işe giriş tarihinden önceyse eklenmemeli
-            Tablo.TablodanSorguAc(3,' Select '+DbUst(1)+'ID,TARIH FROM PERS_HAREKET WHERE REHBERID='+Tablo.TabPdksKontrol.FieldByName('ID').AsString+' And TUR=1 order by TARIH desc '+DbSinir(1)+'); //işe giriş tarihini alalım..
+            Tablo.TablodanSorguAc(3,' Select '+DbUst(1)+'ID,TARIH FROM PERS_HAREKET WHERE REHBERID='+Tablo.TabPdksKontrol.FieldByName('ID').AsString+' And TUR=1 order by TARIH desc '+DbSinir(1)); //işe giriş tarihini alalım..
             if Query3.RecordCount=0 then begin
                Tarih:=EklenecekTarih;
                Sube := SubeId;
@@ -3241,7 +3241,7 @@ begin
        'FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID  '+
        ' WHERE RI.REHBERID ='+ inttostr(rehberid ) +' AND RB.YERI = 1 AND rb.BILGI like '+ '''%@%''' );
    2: Tablo.TablodanSorguAc(8,' SELECT '+DbUst(1)+'RB.BILGI,RA.YERI FROM REHBERBILGI RB (nolock) INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=4 and RA.SIRA=RB.SIRA'+
-       ' AND RA.YERI = RB.YERI WHERE RB.YER_ID=(Select '+DbUst(1)+'ID from REHBER Where ID='+inttostr(RehberId)+' '+DbSinir(1)+') AND RA.VARSAYILAN=46 '+DbSinir(1)+');
+       ' AND RA.YERI = RB.YERI WHERE RB.YER_ID=(Select '+DbUst(1)+'ID from REHBER Where ID='+inttostr(RehberId)+' '+DbSinir(1)+') AND RA.VARSAYILAN=46 '+DbSinir(1));
   end;                                                                                   // REHBERID='+inttostr(RehberId)+' and VARSAYILAN=1
   if Tablo.Query8.RecordCount > 0 then
      Result := Tablo.Query8.FieldByName('BILGI').AsString
@@ -4531,7 +4531,7 @@ begin
   if TabloAdi='' then
     exit(False)
   else begin
-    if Veritabani.BasitKomutÇalıştır(FDCnn,'select '+DbUst(1)+'1 from '+TabloAdi+' where TUR=2 and '+TarihAdi+' >= '''+FormatDateTime('yyyy-mm-dd hh:nn:ss', TARIH)+' '' '+DbSinir(1)+',[],[],true) <> null then
+    if Veritabani.BasitKomutÇalıştır(FDCnn,'select '+DbUst(1)+'1 from '+TabloAdi+' where TUR=2 and '+TarihAdi+' >= '''+FormatDateTime('yyyy-mm-dd hh:nn:ss', TARIH)+' '' '+DbSinir(1),[],[],true) <> null then
       exit(true)
     else
       exit(false);
@@ -5195,10 +5195,10 @@ begin
            '/(SELECT '+DbUst(1)+ Opsiyon + ' FROM DOVIZ D2 WHERE CINSI=''' + CikanDovizKuru + ''' order by ABS('+DbTarihFark('DAY',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+')';
       end else if (CikanDovizKuru = CariDoviz) and (GirenDovizKuru <> CariDoviz) then begin // faturalar bu bölümde geliyor..
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT '+DbUst(1)+'(' + Opsiyon + ') FROM DOVIZ  WHERE CINSI=''' + GirenDovizKuru +
-          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+';
+          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1);
       end else if (CikanDovizKuru <> CariDoviz) and (GirenDovizKuru = CariDoviz) then begin
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT '+DbUst(1)+'1/(' + Opsiyon +') FROM DOVIZ  WHERE CINSI=''' + CikanDovizKuru +
-          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1)+';
+          ''' order by ABS('+DbTarihFark('HOUR',''''+FormatDateTime('yyyy-mm-dd hh:nn', Tarih)+'''','TARIH+0.5')+') '+DbSinir(1);
       end else if (CikanDovizKuru = CariDoviz) and (GirenDovizKuru = CariDoviz) then begin
         Tablo.ADOQryGENEL.SQL.Text := 'SELECT 1 ';
       end;
@@ -5312,7 +5312,7 @@ var
   Etktler, Blgiler: TArrayOfString;
 begin
   Tablo1.Edit;
-  TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1)+');
+  TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' and VARSAYILAN = 1 '+DbSinir(1));
   TabloYenile(tabCariBilgileri, [RehberId,Query1.Fields[0].AsInteger]);
   Tablo1.FieldByName('BASLIK').AsString := tabCariBilgileri.FieldByName('FATURABASLIK').AsString;
   Tablo1.FieldByName('ADRES').AsString :=tabCariBilgileri.FieldByName('ADRES').AsString;
@@ -6292,7 +6292,7 @@ begin
                 //daha önce bu serilotlar var mı bakalım yoksa tabloya ekleyelim
         if (TabKaynak.FieldByName('DURUM').AsFloat > 0.0) or (TabKaynak.FieldByName('KALAN').AsFloat > 0.0) then begin
                 Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+TabKaynak.FieldByName('STOKID').AsString+
-                  ' and SERINO='''+TabKaynak.FieldByName('SERINO').AsString+''' and LOTNO='''+TabKaynak.FieldByName('LOTNO').AsString+''' '+DbSinir(1)+');
+                  ' and SERINO='''+TabKaynak.FieldByName('SERINO').AsString+''' and LOTNO='''+TabKaynak.FieldByName('LOTNO').AsString+''' '+DbSinir(1));
                 if Tablo.Query1.RecordCount>0 then
                     SeriLotId := Tablo.Query1.Fields[0].AsInteger
                 else begin
@@ -8289,7 +8289,7 @@ var
    Ad, AcilanDosya:string;
 begin
    AcilanDosya := '';
-      Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID, ICDIS, DOSYAID from IMAJ where YERI=' +  inttostr(Yeri) + ' and YER_ID=' +  inttostr(DokumanID) + ' order by ID desc'+DbSinir(1)+');
+      Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID, ICDIS, DOSYAID from IMAJ where YERI=' +  inttostr(Yeri) + ' and YER_ID=' +  inttostr(DokumanID) + ' order by ID desc'+DbSinir(1));
       Tablo.TablodanSorguAc(2,'select * from DOKUMAN WHERE ID= '+ inttostr(DokumanID));
       Ad := Tablo.Query2.FieldByName('AD').AsString;
       if Tablo.Query1.FieldByName('DOSYAID').AsLargeInt > 0 then // YENI: icerik DOSYA deposunda (FILESTREAM, ham) -> KutuktenOku decompress'i basarisiz olup ham kopyalar
@@ -8425,7 +8425,7 @@ begin
 
       if Tamam then begin
           ad := AdDokuman;
-          Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID,ICDIS from IMAJ where YERI = 1 and  YER_ID=' + IntToStr(ID)+' order by ID desc'+DbSinir(1)+');
+          Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID,ICDIS from IMAJ where YERI = 1 and  YER_ID=' + IntToStr(ID)+' order by ID desc'+DbSinir(1));
           ad := AdDokuman;
           if Tablo.Query1.FieldByName('ICDIS').AsString = 'True' then // eğer dosyada tutuluyorsa
              Tablo.TablodanSorguAc(5, ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma ' + Tablo.Query1.FieldByName('ID').AsString + ' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI=''' + copy(ad, Pos('.', ad) + 1, 10) + '''')
@@ -9176,7 +9176,7 @@ begin
   if Tablo.Query8.RecordCount=0 then begin //ilk kayıt eklenecek yada düzenlenecek, durumlar buna göre dolmalı
     OncekiHareketDurumu := 0; //burada en küçük değerli durumu ekliyoruz
     //eğer ekside birden fazla varsa ilk değer olarak hepsi değişebilir
-    if Veritabani.VeriVarMi(Tablo.FDCnn, 'select '+DbUst(1)+'G.DEGER,G.ANAHTAR,0 from  GENINI G where G.BOLUM=-3007 and DEGER<0 and G.DIL=-1 '+DbSinir(1)+',[],[]) then
+    if Veritabani.VeriVarMi(Tablo.FDCnn, 'select '+DbUst(1)+'G.DEGER,G.ANAHTAR,0 from  GENINI G where G.BOLUM=-3007 and DEGER<0 and G.DIL=-1 '+DbSinir(1),[],[]) then
        s:=' and G.DEGER<0 '
     else s:='';
     if TurBilgisi='' then
@@ -11048,7 +11048,7 @@ var
    PId, RId : string[15];
    procedure  KurumVePersonelIdGetir(MailAdr:string);
    begin
-       Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'YERI,YER_ID from REHBERBILGI B where BILGI = '''+MailAdr+''' order by 1 desc'+DbSinir(1)+');
+       Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'YERI,YER_ID from REHBERBILGI B where BILGI = '''+MailAdr+''' order by 1 desc'+DbSinir(1));
        Tablo.Query1.open;    //bakıyoruz kurum iletişimde bir mail adresi mi yoksa ilgililerde mi
        if Tablo.Query1.RecordCount>0 then begin
            case Tablo.Query1.Fields[0].AsInteger of
@@ -12177,7 +12177,7 @@ begin
   begin
   //öncelikle server değişmiş mi diye bakacağız..
   try
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
   except
     UyariGoster(Uyari,'Server Sid Number cannot be found!',1);
   end;
@@ -12495,7 +12495,7 @@ begin
   CekSenetOpsiyonUygula;
 
   //EFaturaKullan := Veritabani.VeriVarMi(FDCnn,'SELECT * FROM master.dbo.sysdatabases WHERE name=''EFATURA'' ',[],[]);
-  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from STOKESDEGER where TUR=2 '+DbSinir(1)+');
+  Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'* from STOKESDEGER where TUR=2 '+DbSinir(1));
   StokZorunluSecimVar := Tablo.Query1.RecordCount>0;
 
   EskiTarihKayit  := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_EskiTarihKayit,2);
@@ -12533,7 +12533,7 @@ begin
   if tablo.Query5.RecordCount >0 then
     SMSHesapId:=Tablo.Query5.FieldByName('ID').AsInteger
   else begin
-    Tablo.TablodanSorguAc(5,'select '+DbUst(1)+'ID from SMSHESAPLARI order by ID '+DbSinir(1)+');
+    Tablo.TablodanSorguAc(5,'select '+DbUst(1)+'ID from SMSHESAPLARI order by ID '+DbSinir(1));
     SMSHesapId:=Tablo.Query5.FieldByName('ID').AsInteger;
   end;
    ////////////////////////////////
@@ -12541,7 +12541,7 @@ begin
   if tablo.Query6.RecordCount >0 then
    EpostaHesapID:=Tablo.Query6.FieldByName('ID').AsInteger
   else begin
-   Tablo.TablodanSorguAc(6,'select '+DbUst(1)+'ID from EPOSTAHESAPLARI order by ID '+DbSinir(1)+');
+   Tablo.TablodanSorguAc(6,'select '+DbUst(1)+'ID from EPOSTAHESAPLARI order by ID '+DbSinir(1));
    EpostaHesapID:=Tablo.Query6.FieldByName('ID').AsInteger;
   end;
   //SMSHesapId := GENINI.ReadInteger(Ops_GenelOpsiyon_SMSHesapID,1); //    GenelOpsiyon', 'SMSHesapID', -1);
@@ -12576,7 +12576,7 @@ begin
   Kullanilan := StrToIntDef(UGenSifre.Desifre(GENINI.ReadString(Ops_DenemeLoginSay,'AA')),-1);
   if (Kalan=-1)and(Kullanilan=-1) then begin
     UyariGoster(Uyari,LisansyenilemeMaksimum19girisyapilabilir,1);
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1)+',[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
     //VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+convert(nvarchar(20),MODULID))  ',[],[]);
     GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('19'));
     GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('1'));
@@ -13666,7 +13666,7 @@ begin
   TablodanSorguAc(7,'select * from BARKODAYARLAR where ID='+inttostr(BarkodAyarID));
   Baslangic := Tablo.Query7.FieldByName('BASLANGIC').AsString;
   //benzer barkodlardaki max barkodu bulalım..
-  TablodanSorguAc(8,'select '+DbUst(1)+'* from STOKBARKOD where BARKOD like '''+Baslangic+'%'' order by BARKOD desc '+DbSinir(1)+');
+  TablodanSorguAc(8,'select '+DbUst(1)+'* from STOKBARKOD where BARKOD like '''+Baslangic+'%'' order by BARKOD desc '+DbSinir(1));
   MaxBarkod := Tablo.Query8.FieldByName('BARKOD').AsString;
   //sabit alan ve büyütülecek alanı birbirinden ayıralım
   DegiskenKisim := '';
