@@ -130,10 +130,11 @@ begin
   Result := DbGunEkleS(AIfade, IntToStr(AGun));
 end;
 
-function PgSqlCevir(const ASql: string): string;
+// Yalniz TIRNAK-DISI metne uygulanan diyalekt degisimleri (guvenli/belirsiz-olmayan).
+//   String literalleri (veri) KORUNUR -> '%isnull(%' gibi arama metni BOZULMAZ.
+function PgParcaCevir(const S: string): string;
 begin
-  Result := ASql;
-  if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur)
+  Result := S;
   // SET NOCOUNT ON (MSSQL batch direktifi) PG'de gecersiz -> sil.
   Result := StringReplace(Result, 'SET NOCOUNT ON;', '', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'SET NOCOUNT ON',  '', [rfReplaceAll, rfIgnoreCase]);
@@ -149,6 +150,57 @@ begin
   Result := StringReplace(Result, 'sysdatetime()', 'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '@@spid',        'pg_backend_pid()', [rfReplaceAll, rfIgnoreCase]);
   // NOT: top/scope_identity/charindex/[]/+  -> BURADA DEGIL (belirsiz/konumsal); seam ile.
+end;
+
+function PgSqlCevir(const ASql: string): string;
+var
+  i, n: Integer;
+  ch: Char;
+  strIci: Boolean;
+  disari, sonuc: TStringBuilder;
+begin
+  Result := ASql;
+  if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
+  // LITERAL-FARKINDALI: tek-tirnakli string literalleri ('...') atla, YALNIZ tirnak-disi
+  //   metni cevir. Boylece merkezi cagri (TablodanSorguAc/VeriVarMi/BasitKomutCalistir/
+  //   SorguBaslat) INSERT/UPDATE'teki kullanici verisini bozmaz ('%isnull(%' vb. korunur).
+  sonuc := TStringBuilder.Create;
+  disari := TStringBuilder.Create;
+  try
+    strIci := False;
+    i := 1; n := Length(ASql);
+    while i <= n do
+    begin
+      ch := ASql[i];
+      if strIci then
+      begin
+        sonuc.Append(ch);
+        if ch = '''' then
+        begin
+          if (i < n) and (ASql[i + 1] = '''') then   // '' kacisi -> literal icinde kal
+          begin sonuc.Append(''''); Inc(i); end
+          else
+            strIci := False;                          // literal kapandi
+        end;
+      end
+      else
+      begin
+        if ch = '''' then
+        begin
+          sonuc.Append(PgParcaCevir(disari.ToString)); disari.Clear;  // birikmis tirnak-disini cevir
+          sonuc.Append(ch);
+          strIci := True;                             // literal basladi
+        end
+        else
+          disari.Append(ch);
+      end;
+      Inc(i);
+    end;
+    sonuc.Append(PgParcaCevir(disari.ToString));
+    Result := sonuc.ToString;
+  finally
+    disari.Free; sonuc.Free;
+  end;
 end;
 
 function MotorMetne(AMotor: TVeriMotor): string;
