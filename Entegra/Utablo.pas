@@ -12634,7 +12634,7 @@ begin
   (RepKasaTurleri.Properties as TcxImageComboBoxProperties).Items := (RepKasaTurleriReadOnly.Properties as TcxImageComboBoxProperties).Items;
 
   if UTSKullanimda then
-     RepMedikalSinif.Properties.items := Tablo.imgComboboxInit(' select DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM = '+IntToStr(Ops_StokKart_MedikalSinif)).items;
+      RepMedikalSinif.Properties.items := Tablo.imgComboboxInit(' select DEGER,ANAHTAR from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM = '+IntToStr(Ops_StokKart_MedikalSinif)).items;
   GENINI.ReadImageSection(Ops_Adisyon_Durumlar, RepAdisyon.Properties.Items, False);
   RepCariRoller.Properties.Items := Tablo.imgComboboxInit('select ID, CONCAT((SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 '+DbSinir(1)+'),''/'','+
       '(SELECT '+DbUst(1)+'ANAHTAR FROM GENINI WHERE BOLUM=-2252 AND DEGER = ROL.GOREVID AND DIL=-1 '+DbSinir(1)+')) AS ROL FROM ROLLER ROL WHERE ID>-1').Items; //Cari Pozisyon Türü
@@ -12655,7 +12655,7 @@ begin
   Repiller.Properties.items := Tablo.imgComboboxInit( ' select null as ILNO, null as ILADI union all select ILNO , ILADI from ILLER where ILNO<100 order by 1 ').items;
   RepSubeler.Properties.Items := Tablo.imgComboboxInit('Select ID,FIRMA from REHBER where ID<0 and DURUM=1 ').Items;
 //  repKasaVarlikTipi.Properties.Items := Tablo.imgComboboxInit('Select ID=0,ADI=''Hepsi'' union all Select ID=1,ADI=''Nakit'' union all Select ID=2,ADI=''Havale/EFT''union all Select ID=-1,ADI=''Hediye Çeki'' union all Select ID=-2,ADI=''İade Çeki'' union all select ID,ADI from PARA_KUPON where TUR = 26 and DURUM = 1').Items;
-  repKasaVarlikTipi.Properties.Items := Tablo.imgComboboxInit('Select ID=0,ADI=''Nakit''  union all Select ID=-1,ADI=''Hediye Çeki'' union all Select ID=-2,ADI=''İade Çeki'' union all select ID,ADI from PARA_KUPON where TUR = 26 and DURUM = 1').Items;
+  repKasaVarlikTipi.Properties.Items := Tablo.imgComboboxInit('Select 0 AS ID,''Nakit'' AS ADI  union all Select -1 AS ID,''Hediye Çeki'' AS ADI union all Select -2 AS ID,''İade Çeki'' AS ADI union all select ID,ADI from PARA_KUPON where TUR = 26 and DURUM = 1').Items;
   GENINI.ReadImageSection(Ops_KasaTurleri, RepBelge_Turu.Properties.Items, False);  //    Belge_Türü
 //  GENINI.ReadImageSection(ops_Fatura_Durumu, Rep_Fatura_Durumu.Properties.Items, False);  //    Belge_Türü
 
@@ -12689,10 +12689,10 @@ begin
   GENINI.ReadImageSection(Ops_CariKart_Kategori, RepCariKategori.Properties.Items, True);  // 'CariKart_Kategori
   GENINI.ReadImageSection(Ops_CariKart_Durum, RepCariDurum.Properties.Items, False);  // 'CariKart_Durum
   GENINI.ReadImageSection(Ops_IK_Statu, tablo.RepIKStatu.Properties.Items);
-  repUyariTurleri.Properties.items := Tablo.imgComboboxInit( 'select ID=0 ,SABLONADI='''',TAG=0, IMAGE=-1 union all '+
-     'select ID=-1 ,SABLONADI=''SMS'',TAG=0, IMAGE=7 union all '+
-     'select ID=-2 ,SABLONADI=''Duyuru'',TAG=0, IMAGE=12 union all '+
-     'select ID ,SABLONADI,TAG=0, IMAGE=4 from MAILSABLON where MODULID='+IntToStr(Tabno_Servis)+' ORDER BY 1,2 ', False, True).items;
+  repUyariTurleri.Properties.items := Tablo.imgComboboxInit( 'select 0 AS ID,'''' AS SABLONADI,0 AS TAG,-1 AS IMAGE union all '+
+     'select -1 AS ID,''SMS'' AS SABLONADI,0 AS TAG,7 AS IMAGE union all '+
+     'select -2 AS ID,''Duyuru'' AS SABLONADI,0 AS TAG,12 AS IMAGE union all '+
+     'select ID,SABLONADI,0 AS TAG,4 AS IMAGE from MAILSABLON where MODULID='+IntToStr(Tabno_Servis)+' ORDER BY 1,2 ', False, True).items;
 
   GENINI.ReadImageSection(Ops_CariKart_Gorev, RepCariGorev.Properties.Items, True);  // 'CariKart_Görev
   GENINI.ReadImageSection(Ops_Bizim_Gorev, RepBizimGorev.Properties.Items, True);  // 'CariKart_Görev
@@ -12722,7 +12722,7 @@ begin
   GENINI.ReadImageSection(-2403, RepFaturaGelenDurum.Properties.Items); // 'FaturaGelen_Durum
   GENINI.ReadImageSection(-2405, RepFaturaGidenDurum.Properties.Items); // 'FaturaGiden_Durum
 
-  RepHizliGirisKisayolGruplari.Properties.Items := imgComboboxInit('select 23036+BOLUM,ANAHTAR+''(F''+CONVERT(varchar(2),23036+BOLUM)+'')'' from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM between -23035 and -23024').Items;
+  RepHizliGirisKisayolGruplari.Properties.Items := imgComboboxInit('select 23036+BOLUM,CONCAT(ANAHTAR,''(F'',CAST(23036+BOLUM AS varchar(2)),'')'') from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM between -23035 and -23024').Items;
 
   RepCariHareketTur.Properties.Items := Tablo.imgComboboxInit('SELECT DEGER, ANAHTAR FROM GENINI WHERE BOLUM='+IntToStr(Ops_OpsiyonCari_PersonelHareketTur)).Items;
 
@@ -12780,14 +12780,14 @@ begin
     //RepStokKategori.Properties.Items:=tablo.imgComboboxInit('SELECT ID,RAPORADI FROM DOKUMLER where GRUBU= '+'''AktiviteWizardDlg''').Items;
     //GENINI.ReadImageSection(Ops_StokKart_BarkodTipi, repStokKartBarkodTipi.Properties.Items, True); // 'StokKart_BarkodTipi' bu opsiyonu sabitledik.. tipleri programa gömdüm..
 
-    repStokKartBarkodTipi.Properties.Items := Tablo.imgComboboxInit('select distinct BA.ID,BA.AD from (select ID=0,AD=''Kullanıcı'',BASLANGIC='''' '+
-                 ' union all select ID=100,AD=''Karekod'',BASLANGIC='''''+
+    repStokKartBarkodTipi.Properties.Items := Tablo.imgComboboxInit('select distinct BA.ID,BA.AD from (select 0 AS ID,''Kullanıcı'' AS AD,'''' AS BASLANGIC '+
+                 ' union all select 100 AS ID,''Karekod'' AS AD,'''' AS BASLANGIC'+
                  ' union all select ID,AD,BASLANGIC from BARKODAYARLAR) BA ').Items;
 
     RepStokKartBarkodAyarlar.Properties.Items := tablo.imgComboboxInit('select 0,''Kullanıcı'' union all select ID,AD from BARKODAYARLAR').Items;
     GENINI.ReadImageSection(Ops_StokKart_SayimTutanakTipi, repSayimTutanakTipi.Properties.Items, True);    // 'SayımTutanakTipi'
     GENINI.ReadImageSection(Ops_StokKart_KaynakUretimYeri, RepStokKaynakUretimYeri.Properties.Items, True);    // 'StokKart_KaynakUretimYeri'
-    RepStokKategori.Properties.Items := Tablo.imgComboboxInit('select ID=-1,AD='''' union all select ID,AD from KATEGORI').Items;
+    RepStokKategori.Properties.Items := Tablo.imgComboboxInit('select -1 AS ID,'''' AS AD union all select ID,AD from KATEGORI').Items;
     RepStokTumDepolar.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR').Items;
      //   RepStokDepolar şifre ekranında set olmaktadır.
 
@@ -12797,7 +12797,7 @@ begin
     GENINI.ReadImageSection(Ops_KampanyaKosulTurleri, repKampanyaKosulTur.Properties.Items,  False); // Kampanya Koşul Türleri
     GENINI.ReadImageSection(Ops_KampanyaSonucTurleri, repKampanyaSonucTur.Properties.Items,  False); // Kampanya Sonuc Türleri
     RepStokBoyutlar.Properties.Items := tablo.imgComboboxInit('select DEGER,ANAHTAR from GENINI where BOLUM=0 and DEGER like ''-2799____'' and DIL='+IntToStr(Dil)).Items;
-    RepStokBoyutKombinasyonlar.Properties.Items := tablo.imgComboboxInit('select ID=0,ADI='''' union all select ID,ADI from STOKBOYUTGRUPLARI where isnull(BOYUT1,0)<>0 ').Items;
+    RepStokBoyutKombinasyonlar.Properties.Items := tablo.imgComboboxInit('select 0 AS ID,'''' AS ADI union all select ID,ADI from STOKBOYUTGRUPLARI where isnull(BOYUT1,0)<>0 ').Items;
 
     GENINI.ReadImageSection(Ops_IsEmri_Durum, repIsEmriDurum.Properties.Items, False);
     GENINI.ReadImageSection(Ops_IsEmri_Tur, repIsEmriTur.Properties.Items, False);
