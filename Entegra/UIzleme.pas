@@ -74,6 +74,8 @@ type
     LblKalanMiktar: TcxLabel;
     SQLDonusCikanHedef: TMemo;
     BtnLotNoVer: TToolButton;
+    LabelRafOmru: TcxLabel;
+    EditRafOmru: TcxLabel;
     procedure FormShow(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
@@ -102,6 +104,7 @@ type
     procedure TabIzlemBeforeDelete(DataSet: TDataSet);
     procedure TabIzlemBeforeEdit(DataSet: TDataSet);
     procedure cxLabel1DblClick(Sender: TObject);
+    procedure EditRafOmruClick(Sender: TObject);
     procedure ComboBarkodPropertiesInitPopup(Sender: TObject);
     procedure EditBarkodKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -124,8 +127,8 @@ type
     { Private declarations }
     procedure SayiGetir;
   public
-    { Public declarations }
-    StokID,IzlemTur,IslemTur,IslemTip,BaslikID,SatirID, KaynakBaslikID, KaynakSatirID, RehberId,GirDepo,CikDepo:Integer;
+    { Public  declarations }
+    StokID,IzlemTur,IslemTur,IslemTip,BaslikID,SatirID, KaynakBaslikID, KaynakSatirID, RehberId,GirDepo,CikDepo,RafOmruSure:Integer;
     GerekliMiktar,KALAN : real;
     UretimNo : string;
     IslemOp:char;
@@ -230,6 +233,8 @@ begin
      //TcxCurrencyEditProperties(GridFatIzlemViewDURUM).DecimalPlaces := OndalikDijitSayMik;
      Tablo.OndalikKisimAyarla(GridFatIzlemViewDURUM, OndalikDijitSayMik);
   Caption := Caption + ' : ' +Tablo.AciklamaGetir('STOKLAR','KOD+'' ''+STOKADI',StokID)+' '+Caption;
+  RafOmruSure := StrToIntDef(Tablo.AciklamaGetir('STOKLAR','RAFOMRU_SURE', StokID), 0);
+  EditRafOmru.Caption := IntToStr(RafOmruSure) + ' Yıl';
   BarkoddanMiktarGetir;
 
 end;
@@ -639,6 +644,21 @@ begin
    //    '  WHERE ID = '+TabIzlem.FieldByName('IZLEMID').AsString,[],[]);
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKIZLEMEDEPO SET ADET=CASE WHEN ADET<0 THEN -1*'+VarToStr(Adet)+
       ' ELSE '+VarToStr(Adet)+' END  WHERE IZLEMID = '+TabIzlem.FieldByName('UPDID').AsString,[],[]);
+end;
+
+procedure TIzlemeDlg.EditRafOmruClick(Sender: TObject);
+var RafOmru : Variant;
+    Yil : Integer;
+begin
+   RafOmru := Tablo.AciklamaGetir('STOKLAR','RAFOMRU_SURE', StokID);   // mevcut degeri on-doldur
+   if TGirisKutusuEx.BilgiAlEx('Raf Ömrü',TGirdiDenetimleri.Create.Edit('Raf Ömrü Kaç Yıl?',@RafOmru)) <> mrOk then
+        Exit;
+   Yil := StrToIntDef(Trim(VarToStr(RafOmru)),0);
+   RafOmruSure := Yil;   // ekrandan alinan degeri degiskene de yaz (BeforePost SKT/URT hesabinda kullanilir)
+   // RAFOMRU_SURE = girilen yil, RAFOMRU_BIRIM = 3 (sabit)
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set RAFOMRU_SURE='+IntToStr(Yil)+
+      ', RAFOMRU_BIRIM=3 where ID='+IntToStr(StokID),[],[]);
+   EditRafOmru.Caption := IntToStr(Yil)+' Yıl';
 end;
 
 procedure TIzlemeDlg.DtsIzlemStateChange(Sender: TObject);
@@ -1156,6 +1176,7 @@ end;
 
 procedure TIzlemeDlg.TabIzlemBeforePost(DataSet: TDataSet);
 var Fark : Real;
+    Skt, Urt : TDateTime;
     function LotNoKontrolu : boolean;
     //var I,say : integer;
         //Lotno, Girilen : string;
@@ -1208,6 +1229,27 @@ begin
       Showmessage(IZBilgi_gir);
       Abort;
    end;
+
+   // Raf omru (yil): miktar (KALAN) girilmis satirda SKT<->URT'yi esitle. Kural: SKT ile URT'den
+   //   BUYUK (gec) olani baz al -> SKT>=URT ise URT:=SKT-rafomru, degilse SKT:=URT+rafomru.
+   //   Pascal/IncYear kullanir (SQL yok) -> hem MSSQL hem PG'de aynen calisir.
+   if TabIzlem.FieldByName('KALAN').AsFloat <> 0 then begin
+      Skt := TabIzlem.FieldByName('SKT').AsDateTime;
+      Urt := TabIzlem.FieldByName('URT').AsDateTime;
+      if Skt <= EncodeDate(1990,1,1) then Skt := 0;   // bos/sentinel (1990-01-01) -> yok say
+      if Urt <= EncodeDate(1990,1,1) then Urt := 0;
+      if (Skt > 0) or (Urt > 0) then begin            // en az bir gercek tarih var
+         if RafOmruSure <= 0 then begin
+            ShowMessage('Bu stok için raf ömrü tanımlı değil! Önce raf ömrünü giriniz.');
+            Abort;
+         end;
+         if Skt >= Urt then
+            TabIzlem.FieldByName('URT').AsDateTime := IncYear(Skt, -RafOmruSure)   // SKT baz -> URT
+         else
+            TabIzlem.FieldByName('SKT').AsDateTime := IncYear(Urt,  RafOmruSure);  // URT baz -> SKT
+      end;
+   end;
+
    if (IzlemTur in [izl_SKT, izl_LotNo_SKT])and (IslemTur <> KasaTur_Gelen_Konsinye)
        and(IslemTur <> KasaTur_DigerCikisFisi)and(IslemTur <> KasaTur_StokTransferi) then begin //iade konsinye ise konsinyeden çıkış anadepoya giriş olmalı
       if TabIzlem.FieldByName('SKT').AsString='' then begin

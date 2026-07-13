@@ -473,6 +473,22 @@ object IzlemeDlg: TIzlemeDlg
       Transparent = True
       OnClick = LblKalanMiktarClick
     end
+    object LabelRafOmru: TcxLabel
+      Left = 888
+      Top = 42
+      Cursor = crHandPoint
+      Caption = 'Raf '#214'mr'#252' : '
+      Transparent = True
+      OnClick = LblKalanMiktarClick
+    end
+    object EditRafOmru: TcxLabel
+      Left = 952
+      Top = 42
+      Cursor = crHandPoint
+      Caption = '----'
+      Transparent = True
+      OnClick = EditRafOmruClick
+    end
   end
   object SQLGiren: TMemo
     Left = 42

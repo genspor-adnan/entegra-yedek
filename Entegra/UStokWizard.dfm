@@ -4875,8 +4875,8 @@ object StokWizardDlg: TStokWizardDlg
   object DtsStokEsdeger: TDataSource
     DataSet = TabStokEsdeger
     OnStateChange = DtsStokEsdegerStateChange
-    Left = 373
-    Top = 258
+    Left = 381
+    Top = 186
   end
   object DETAY: TFDQuery
     BeforePost = DETAYBeforePost
@@ -4969,8 +4969,8 @@ object StokWizardDlg: TStokWizardDlg
       'where STOKID=:PStokID'
       ''
       'order by DEGER1,DEGER2,DEGER3')
-    Left = 460
-    Top = 285
+    Left = 404
+    Top = 413
   end
   object DtsStokBoyut: TDataSource
     DataSet = TabStokBoyut
@@ -5005,8 +5005,8 @@ object StokWizardDlg: TStokWizardDlg
     Top = 221
   end
   object PopupStokBoyutBarkod: TPopupMenu
-    Left = 499
-    Top = 254
+    Left = 539
+    Top = 230
     object ret1: TMenuItem
       Caption = 'Numerik Barkod '#220'ret'
       object Bo1: TMenuItem
@@ -5230,12 +5230,12 @@ object StokWizardDlg: TStokWizardDlg
       'WHERE'
       'STOKID=:SID')
     Left = 138
-    Top = 312
+    Top = 216
   end
   object DtsUTS: TDataSource
     DataSet = TabUTS
     Left = 206
-    Top = 312
+    Top = 240
   end
   object TabYDil: TFDQuery
     BeforePost = TabYDilBeforePost

@@ -371,7 +371,7 @@ begin
   Tablo.RepositoryDuzenle;
   if (SubeVarmi)and(ComboSube.Text='') then
      raise Exception.Create(Sube);
-  if SubeVarmi then begin
+  if SubeVarmi then  begin
      SubeAdi   := ComboSube.Text;
      SubeId    := ComboSube.EditValue;
   end Else
