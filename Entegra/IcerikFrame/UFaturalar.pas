@@ -2748,7 +2748,7 @@ procedure TFaturalarDlg.GridYorumDBCardView1CellDblClick(
   Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled);
+  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, TabloNo);
 end;
 
 procedure TFaturalarDlg.HedefBelgeyiA1Click(Sender: TObject);

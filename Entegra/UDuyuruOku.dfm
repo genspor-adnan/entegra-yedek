@@ -292,10 +292,7 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
           end
           object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
             DataBinding.FieldName = 'YORUM'
-            PropertiesClassName = 'TcxMemoProperties'
-            Properties.MaxLength = 5
-            Properties.ReadOnly = True
-            Properties.ScrollBars = ssVertical
+            PropertiesClassName = 'TcxRichEditProperties'
             Options.Editing = False
             Options.ShowCaption = False
             Position.BeginsLayer = False

@@ -631,7 +631,7 @@ procedure TServisListeDlg.GridYorumDBCardView1CellDblClick(
   Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled);
+  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, Tabno_Servis);
 end;
 
 procedure TServisListeDlg.HAREKETAfterOpen(DataSet: TDataSet);
