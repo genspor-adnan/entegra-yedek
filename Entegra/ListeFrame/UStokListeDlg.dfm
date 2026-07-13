@@ -393,52 +393,6 @@ object StokListeDlg: TStokListeDlg
     AlignSplitter = salBottom
     Control = Panel1
   end
-  object SQLMemo: TcxMemo
-    Left = 54
-    Top = 120
-    Lines.Strings = (
-      '--SELECT  TOP 200    '
-      
-        ' S.ID, S.KOD, S.STOKADI, K.AD, S.TIPI, S.MARKA, S.GRUBU, S.OZELL' +
-        'IK,S.ICERIK, S.OZELKOD,S.SUBEID, S.URUNNO,'
-      
-        ' S.MUHKODU, S.ANABIRIM, S.BIRIM2, S.BIRIM2MIKTAR, S.MINSTOK, S.K' +
-        'DV, S.DURUM, S.HUCRE,'
-      ' S.IZLEME,S.BILDIRIM, S.NOTLAR,StokModel.ANAHTAR AS STOKMODEL,'#9#9
-      
-        '-- SDGIREN=ISNULL(SUM(SDGIREN),0.0),SDCIKAN=ISNULL(SUM(SDCIKAN),' +
-        '0.0),SDKALAN=ISNULL(SUM(SDKALAN),0.0),'
-      
-        'SDKALAN=(select sum(KALAN) from STOKDURUM SD where S.ID=SD.STOKI' +
-        'D),'
-      
-        'RECETEVAR=isnull((select top 1 1 from URETIMRECETE UR where UR.S' +
-        'TOKID=S.ID),0)'
-      '--EKALANLAR--'
-      'FROM STOKLAR S'
-      ' LEFT OUTER JOIN KATEGORI K on K.ID=S.KATEGORI'
-      
-        ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DIL<0 and StokMod' +
-        'el.DEGER = S.MODEL AND StokModel.BOLUM=convert(int,'#39'-2701'#39'+conve' +
-        'rt(varchar(10),S.MARKA))'
-      
-        '-- LEFT OUTER JOIN (select SD1.STOKID,SD1.DEPOID,SDGIREN=ISNULL(' +
-        'SUM(SD1.GIREN),0),SDCIKAN=ISNULL(SUM(SD1.CIKAN),0),'
-      
-        '--SDKALAN=ISNULL(SUM(SD1.KALAN),0) from STOKDURUM SD1 group by S' +
-        'D1.STOKID,SD1.DEPOID) as SD on S.ID=SD.STOKID'
-      
-        ' --LEFT OUTER JOIN DEPOLAR D on D.ID=SD.DEPOID and D.SUBEID=:PSu' +
-        'beID'
-      ' LEFT OUTER JOIN STOKBARKOD StokBarkod on S.ID=StokBarkod.STOKID'
-      ''
-      '')
-    Properties.WordWrap = False
-    TabOrder = 4
-    Visible = False
-    Height = 41
-    Width = 588
-  end
   object Panel1: TPanel
     Left = 0
     Top = 179
@@ -612,10 +566,6 @@ object StokListeDlg: TStokListeDlg
       object TabYorumMedya: TcxTabSheet
         Caption = 'Yorum / Medya'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel4: TPanel
           Left = 0
           Top = 260
@@ -676,7 +626,6 @@ object StokListeDlg: TStokListeDlg
           Properties.Alignment.Horz = taRightJustify
           Transparent = True
           Visible = False
-          ExplicitTop = 239
           AnchorX = 779
         end
         object GridYorum: TcxGrid
@@ -988,10 +937,6 @@ object StokListeDlg: TStokListeDlg
             object TabSheetSeriLot: TcxTabSheet
               Caption = 'Seri / Lot'
               ImageIndex = 1
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object GridSeriLot: TcxGrid
                 Left = 0
                 Top = 27
@@ -1116,10 +1061,6 @@ object StokListeDlg: TStokListeDlg
       object tshHareketler: TcxTabSheet
         Caption = 'Hareketler'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridHareket: TcxGrid
           Left = 0
           Top = 0
@@ -1374,10 +1315,6 @@ object StokListeDlg: TStokListeDlg
           object cxTabSheet4: TcxTabSheet
             Caption = 'Seri / Lot'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object GridSeriLotHareket: TcxGrid
               Left = 0
               Top = 0
@@ -1448,10 +1385,6 @@ object StokListeDlg: TStokListeDlg
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3

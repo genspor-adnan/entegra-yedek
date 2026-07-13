@@ -84,7 +84,6 @@ type
     Kopyala1: TMenuItem;
     GridStokViewID: TcxGridDBColumn;
     GridStokViewSDKALAN: TcxGridDBColumn;
-    SQLMemo: TcxMemo;
     TabStokHareketler: TFDQuery;
     DtsStokHareketler: TDataSource;
     Panel1: TPanel;
@@ -293,6 +292,8 @@ type
     GridFiyatViewDEGISTIRMETARIHI: TcxGridDBColumn;
     GridSeriLotViewURT: TcxGridDBColumn;
     procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure AraStokAdiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CheckPasiflerClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
@@ -334,6 +335,7 @@ type
     procedure ReceteyiDuzenleMenuClick(Sender: TObject);
     procedure ReceteyiSilMenuClick(Sender: TObject);
     procedure JvTimer1Timer(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt; ACokKullanBolum: Integer = 0);  // sunucu-tarafi listeleme (sp_Prog_Stok_Liste)
     procedure CokKullanlanlarListeleMenuClick(Sender: TObject);
     procedure ResimDosyadanTusClick(Sender: TObject);
     procedure ResimYapistirTusClick(Sender: TObject);
@@ -440,14 +442,7 @@ end;
 
 procedure TStokListeDlg.CokKullanlanlarListeleMenuClick(Sender: TObject);
 begin
-   STOKLAR.Close;
-   STOKLAR.SQL.Text :='SELECT '+ SQLMemo.Text;
-   STOKLAR.SQL.Add(' where S.KOD in (select G.ANAHTAR from GENINI G where G.BOLUM='+IntToStr(TMenuItem(Sender).Tag)+' and G.ANAHTAR = S.KOD and DIL=-1) ');
-   if SubeVarmi then
-    STOKLAR.SQL.Add(' and S.SUBEID in('+Tablo.YetkiliSubeleriGetir(27,YetkiTur_Gorme)+') ');
-   STOKLAR.SQL.Add(' group by S.ID, S.KOD, S.STOKADI,K.AD, S.ICERIK, S.TIPI, S.MARKA, S.MODEL, S.GRUBU, S.OZELLIK, S.OZELKOD, S.MUHKODU, S.ANABIRIM, S.BIRIM2,'+
-                   ' S.BIRIM2MIKTAR, S.MINSTOK, S.KDV, S.DURUM,S.HUCRE, S.IZLEME, S.BILDIRIM, S.NOTLAR, StokModel.ANAHTAR ,S.SUBEID, S.URUNNO ');
-   TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
+   Liste_SP_Cagir(2, TMenuItem(Sender).Tag);   // Cok kullanilanlar (GENINI bolum) -> sunucu-tarafi SP
 end;
 
 procedure TStokListeDlg.CoKullanlanlarEkleMenuClick(Sender: TObject);
@@ -567,108 +562,78 @@ Begin
   JvTimer1.Enabled := True;
 End;
 
-procedure TStokListeDlg.JvTimer1Timer(Sender: TObject);
- function KayitSayisiBelirle:string;
-  begin
-    if ( Trim(FArama.AraBarkod.Text) <>'' ) or
-       ( Trim(FArama.EditKategori.Text)<>'') or
-       ( Trim(FArama.ComboMARKA.EditText)<>'') or
-       ( Trim(FArama.ComboMODEL.EditText)<>'') or
-       ( Trim(FArama.ComboGRUBU.EditText)<>'') or
-       ( Trim(FArama.ComboAnaliz.EditText)<>'') or
-       ( Trim(FArama.ComboSUBE.EditText)<>'') then
-       Result:= 'SELECT '
-    else begin
-      FArama.SpinKayitSayisi.EditValue := GenRegIni.RegReadString('StokOpsiyon','StokAraKayitSayisi','200','C');
-      if not AlanlarOlusturuldu then
-        Result:= 'SELECT TOP 1 '
-      else
-        Result:= 'SELECT TOP '+VarToStr(FArama.SpinKayitSayisi.EditValue)+' ';
-
-    end;
-  end;
+procedure TStokListeDlg.Liste_SP_Cagir(AMod: SmallInt; ACokKullanBolum: Integer);
+// Stok listesini sunucu-tarafi SP ile getirir (sp_Prog_Stok_Liste).
+//   AMod: 1=Tum (TOP yok, order by 1), 2=Cok Kullanilan (ACokKullanBolum=GENINI.BOLUM), 4=Filtre.
+//   Ek alanlar/pasif/topN/arama filtreleri SP'ye parametre olarak gider (enjeksiyon guvenli).
 var
-  s,EkAlanlarSelect,EkAlanlarGroupBy : string;
-  i:integer;
+  EkAlanlar, Barkod, SubeYetki: string;
+  i, TopN: Integer;
 begin
-  JvTimer1.Enabled := False;
-  EkAlanlarSelect := '';
-  EkAlanlarGroupBy := '';
-  if Length(FieldList)>0 then begin
-    for I := 0 to Length(FieldList)-1 do begin
-      EkAlanlarSelect := EkAlanlarSelect+',['+CaptionList[i]+']='+FieldList[i];
-      EkAlanlarGroupBy := EkAlanlarGroupBy+','+FieldList[i];
-    end;
+  // @SelectList: ek (ozel) alanlar -> ',[Cap]=Field' (SP'de GROUP BY yok -> group listesi gerekmez)
+  EkAlanlar := '';
+  for i := 0 to Length(FieldList) - 1 do
+    EkAlanlar := EkAlanlar + ',[' + CaptionList[i] + ']=' + FieldList[i];
+
+  if AMod = 1 then TopN := 0                                            // Tum: hepsi
+  else TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 200);
+
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(27, YetkiTur_Gorme)
+  else SubeYetki := '';
+
+  Barkod := '';                                                        // karekod cozumu app tarafinda
+  if Trim(FArama.AraBarkod.Text) <> '' then
+  begin
+    OkunanBarkod := Trim(FArama.AraBarkod.Text);
+    if (Pos('01', OkunanBarkod) = 1) and (Pos('17', OkunanBarkod) = 17) then
+      OkunanBarkod := Copy(OkunanBarkod, 3, 14)
+    else if Pos('(01)', OkunanBarkod) > 0 then
+      OkunanBarkod := Tablo.KarekodOku(1, OkunanBarkod);
+    Barkod := OkunanBarkod;
   end;
-//  STOKLAR.SQL.Text := SQLMemo.Text;  EkAlanlarSelect
+
   STOKLAR.Close;
-  STOKLAR.SQL.Text:= KayitSayisiBelirle+ ' '+StringReplace(SQLMemo.Text,'--EKALANLAR--',EkAlanlarSelect,[rfReplaceAll]);
-  s:=' where 1=1 ';
-//  if SubeVarmi then
-//    s := s + ' and (S.SUBEID = 0 or S.SUBEID ='+inttostr(SubeId)+') ';
-  if Trim(FArama.AraStokAdi.Text) <>'' then
-    s := s+' and S.STOKADI like ''%'+Trim(FArama.AraStokAdi.Text) +'%'' ';
-  if Trim(FArama.AraKod.Text) <>'' then
-    s := s + ' and ( S.KOD like ''%'+Trim(FArama.AraKod.Text) +'%'' or  S.URUNNO like ''%'+Trim(FArama.AraKod.Text) +'%'') ';
-  if FArama.EditKategori.Tag>0 then
-    s := s + ' and S.KATEGORI = '+IntToStr(FArama.EditKategori.Tag);
-  if FArama.ComboMarka.EditValue>0 then
-    s := s + ' and S.MARKA = '+IntToStr(FArama.ComboMarka.EditValue);
-  if FArama.ComboMODEL.EditValue>0 then
-    s := s + ' and S.MODEL = '+IntToStr(FArama.ComboMODEL.EditValue);
-  if FArama.ComboGrubu.EditValue > 0 then
-    s := s + ' and S.GRUBU = '+IntToStr(FArama.ComboGRUBU.EditValue);
-  if (FArama.ComboSUBE.EditValue<>null)and(FArama.ComboSUBE.EditValue < 1) then
-    s := s + ' and S.SUBEID = '+IntToStr(FArama.ComboSUBE.EditValue);
-  if FArama.AraBarkod.Text<>'' then begin
-     OkunanBarkod := Trim(FArama.AraBarkod.Text);
-     if (pos('01', OkunanBarkod)=1)and(pos('17', OkunanBarkod)=17) then //Karekod 01 ile başlayıp 14 karakter stokkodu
-         OkunanBarkod := copy(OkunanBarkod,3,14)
-     else if (pos('(01)', OkunanBarkod)>0) then //Karekod ör : (10) BL005222511       (01) 8681489704423
-         OkunanBarkod := Tablo.KarekodOku(1, OkunanBarkod)
-     else
-         OkunanBarkod :=  OkunanBarkod;  //yoksa kendisi
+  STOKLAR.SQL.Text :=
+    'EXEC dbo.sp_Prog_Stok_Liste ' +
+    '@SelectList=:SelectList, @TopN=:TopN, @Mod=:Mod, @Pasif=:Pasif, ' +
+    '@StokAdi=:StokAdi, @Kod=:Kod, @KategoriID=:KategoriID, @MarkaID=:MarkaID, ' +
+    '@ModelID=:ModelID, @GrubuID=:GrubuID, @SubeID=:SubeID, @Barkod=:Barkod, ' +
+    '@SubeYetkiList=:SubeYetki, @CokKullanBolum=:CokKullanBolum, ' +
+    '@KulId=:KulId, @Modul=:Modul, @OrderBy=:OrderBy';
 
+  STOKLAR.ParamByName('SelectList').AsString      := EkAlanlar;
+  STOKLAR.ParamByName('TopN').AsInteger           := TopN;
+  STOKLAR.ParamByName('Mod').AsInteger            := AMod;
+  STOKLAR.ParamByName('Pasif').AsInteger          := Ord(FArama.CheckPasifler.Checked);
+  STOKLAR.ParamByName('StokAdi').AsString         := Trim(FArama.AraStokAdi.Text);
+  STOKLAR.ParamByName('Kod').AsString             := Trim(FArama.AraKod.Text);
+  STOKLAR.ParamByName('KategoriID').AsInteger     := FArama.EditKategori.Tag;
+  STOKLAR.ParamByName('MarkaID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboMarka.EditValue), 0);
+  STOKLAR.ParamByName('ModelID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboMODEL.EditValue), 0);
+  STOKLAR.ParamByName('GrubuID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboGrubu.EditValue), 0);
+  STOKLAR.ParamByName('SubeID').AsInteger         := StrToIntDef(VarToStr(FArama.ComboSUBE.EditValue), 1);
+  STOKLAR.ParamByName('Barkod').AsString          := Barkod;
+  STOKLAR.ParamByName('SubeYetki').AsString       := SubeYetki;
+  STOKLAR.ParamByName('CokKullanBolum').AsInteger := ACokKullanBolum;
+  STOKLAR.ParamByName('KulId').AsInteger          := StrToIntDef(Kullanan, 0);      // Son/Sik icin kullanici
+  STOKLAR.ParamByName('Modul').AsInteger          := MODUL_Stok;                    // KULLANICI_ARAMA.MODUL
+  if AMod = 1 then STOKLAR.ParamByName('OrderBy').AsString := '1'
+  else STOKLAR.ParamByName('OrderBy').AsString :=  '';
 
-    if Uppercase(OkunanBarkod)='' then
-      s := s + ' and StokBarkod.BARKOD is NULL'
-    else if Uppercase(OkunanBarkod)='NULL' then
-      s := s + ' and StokBarkod.BARKOD is NULL'
-    else if Uppercase(OkunanBarkod)='NOT NULL' then
-      s := s + ' and StokBarkod.BARKOD is NOT NULL'
-    else
-      s := s + ' and StokBarkod.BARKOD like '''+OkunanBarkod+'%''';
-  end;
+  TabloYenile(STOKLAR, []);
 
-  if not FArama.CheckPasifler.Checked then
-    s := s + ' and S.DURUM=1 ';
-  if SubeVarmi then begin
-    s := s + ' and S.SUBEID in(0,'+Tablo.YetkiliSubeleriGetir(27,YetkiTur_Gorme)+') ';
-    //s := s + ' and D.SUBEID = '+IntToStr(SubeId)+' ';
-  end;
-
-  if FArama.ComboAnaliz.Text<>'' then  begin
-    if (FArama.DateBas.Text <> '') and (FArama.DateBitis.Text <> '') then
-      s := stringreplace(s,' where F.TUR=1',' where F.TUR=1 and (FB.FATURATARIH between '''+FormatDateTime('yyyy-mm-dd', FArama.DateBas.Date)+''' and '''+FormatDateTime('yyyy-mm-dd', FArama.DateBitis.Date)+''' )',[rfReplaceAll]);
-      //s := s + ' and (FB.FATURATARIH between '''+FormatDateTime('yyyy-mm-dd', FArama.DateBas.Date)+''' and '''+FormatDateTime('yyyy-mm-dd', FArama.DateBitis.Date)+''' )';
-  end;
-  STOKLAR.SQL.Add(s);
-  STOKLAR.SQL.Add(' group by S.ID, S.KOD, S.STOKADI,K.AD, S.ICERIK, S.TIPI, S.MARKA, S.MODEL, S.GRUBU, S.OZELLIK,'+
-     'S.OZELKOD, S.MUHKODU, S.ANABIRIM, S.BIRIM2, S.BIRIM2MIKTAR, S.MINSTOK, S.KDV, S.DURUM,S.HUCRE, S.IZLEME,S.BILDIRIM,');
-  STOKLAR.SQL.Add('   S.NOTLAR,  StokModel.ANAHTAR,S.SUBEID, S.URUNNO,S.MINSTOK ');
-  STOKLAR.SQL.Add(EkAlanlarGroupBy);
-  if FArama.ComboAnaliz.Text <> '' then  begin
-    if FArama.AraAdet.Text <> '' then
-     STOKLAR.SQL.Add('HAVING ISNULL( SUM( SD.CIKAN ),0) >= '''+FArama.AraAdet.Text+''' ');
-  end;
-//   TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
-   TabloYenile(STOKLAR,[VarsDepo]);
-  if not AlanlarOlusturuldu then begin
+  if not AlanlarOlusturuldu then                                       // ilk yuklemede grid kolonlari
+  begin
     GridStokView.DataController.CreateAllItems(True);
-    //GridStokView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\StokListeGridi',true,false,[gsoUseFilter],'StokListeGridi');
     Tablo.GridAyarRestore('StokListeGridi', GridStokView);
     AlanlarOlusturuldu := True;
   end;
+end;
+
+procedure TStokListeDlg.JvTimer1Timer(Sender: TObject);
+begin
+  JvTimer1.Enabled := False;
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (grid kolonlari + post-load helper icinde)
 
 //  STOKLAR.Params[0].Value:=FArama.ComboPeriyot.EditValue;
 //  STOKLAR.Open;
@@ -817,6 +782,12 @@ var
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   AlanlarOlusturuldu := False;
+  // Tum/Son/Sik Aranan label'larini list frame handler'larina bagla (SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
   Tablo.EkAlanlariBul('','StokWizardDlg','STOKLAR',CaptionList,FieldList);
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
   YaziciYaz.Caption := ra;
@@ -990,6 +961,7 @@ begin
     begin
       //srid:=GridStokView.DataController.FocusedRecordIndex;
       ID := STOKLAR.Fields[0].AsInteger;
+      Tablo.AramaKaydet(MODUL_Stok, ID);   // Son/Sik Aranan takibi (kart acilinca upsert)
       if Tablo.StokSihirbazBaslat('D', 0, STOKLAR.Fields[0].AsInteger,-1,0) > 0 then begin
          //AraTusClick(nil);
          JvTimer1Timer(Self);
@@ -1388,17 +1360,17 @@ end;
 
 procedure TStokListeDlg.LabelTumKayitlarClick(Sender: TObject);
 begin
-   STOKLAR.Close;
-   STOKLAR.SQL.Text :='SELECT '+ SQLMemo.Text;
-   if not FArama.CheckPasifler.Checked then
-      STOKLAR.SQL.Add(' where S.DURUM=1 ');
-   if SubeVarmi then
-    STOKLAR.SQL.Add(' and S.SUBEID in('+Tablo.YetkiliSubeleriGetir(27,YetkiTur_Gorme)+') ');
-   STOKLAR.SQL.Add(' group by S.ID, S.KOD, S.STOKADI,K.AD, S.ICERIK, S.TIPI, S.MARKA, S.MODEL, S.GRUBU, S.OZELLIK, S.OZELKOD, S.MUHKODU, S.ANABIRIM, S.BIRIM2, S.BIRIM2MIKTAR, S.MINSTOK, S.KDV, S.DURUM,S.HUCRE, S.IZLEME,S.BILDIRIM, S.NOTLAR, StokModel.ANAHTAR,S.SUBEID, S.URUNNO ');
-   STOKLAR.SQL.Add(' order by 1 ');
-   TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
-//   STOKLAR.Params[0].Value:=FArama.ComboPeriyot.EditValue;
-//   STOKLAR.open;
+   Liste_SP_Cagir(1);   // Tum kayitlar (TOP yok, order by 1) -> sunucu-tarafi SP
+end;
+
+procedure TStokListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TStokListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 
@@ -1630,16 +1602,9 @@ begin
   ID := Tablo.StokSihirbazBaslat('E', 0, -1,-1,0);
   if ID > 0 then
   begin
-    STOKLAR.Close;
-    STOKLAR.SQL.Text:= 'SELECT '+SQLMemo.Text;
-    STOKLAR.SQL.Text := STOKLAR.SQL.Text+ ' where S.ID='+inttostr(ID);
-    if SubeVarmi then
-      STOKLAR.SQL.Add('and S.SUBEID in('+Tablo.YetkiliSubeleriGetir(27,YetkiTur_Gorme)+') ');
-    STOKLAR.SQL.Add(' group by S.ID, S.KOD, S.STOKADI,K.AD, S.ICERIK, S.TIPI, S.MARKA, S.MODEL, S.GRUBU, S.OZELLIK, S.OZELKOD, S.MUHKODU, S.ANABIRIM, S.BIRIM2, S.BIRIM2MIKTAR, S.MINSTOK, S.KDV, S.DURUM,S.HUCRE, S.IZLEME,S.BILDIRIM, S.NOTLAR, StokModel.ANAHTAR,S.SUBEID, S.URUNNO ');
     AramayiSifirla;
-
-    //STOKLAR.Params[0].Value:=FArama.ComboPeriyot.EditValue;
-    //STOKLAR.Open;
+    Liste_SP_Cagir(4);              // listeyi yenile (sunucu-tarafi SP)
+    STOKLAR.Locate('ID', ID, []);   // yeni olusturulan stoka git
   end;
 end;
 

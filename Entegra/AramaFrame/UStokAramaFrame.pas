@@ -14,7 +14,7 @@ uses
   cxButtonEdit, dxSkinMetropolis, dxSkinMetropolisDark,
   dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxSkinOffice2016Colorful,
   dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light;
+  dxSkinVisualStudio2013Light, dxCoreGraphics, Vcl.ToolWin;
 
 type
   TStokAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -46,7 +46,10 @@ type
     cxLabel4: TcxLabel;
     cxLabel5: TcxLabel;
     ComboPeriyot: TcxImageComboBox;
-    LabelTumKayitlar: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     SpinKayitSayisi: TcxSpinEdit;
     cxLabel6: TcxLabel;
     EditKategori: TcxButtonEdit;
