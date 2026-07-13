@@ -1878,9 +1878,11 @@ var
   Kesilen:string;
   Uzunluk:integer;
 begin
-  Paramst :=' R.ID, R.KOD, R.FIRMA, ADSOYAD=R2.FIRMA, FATBASLIK=X1.BILGI, R.GRUP, R.TEMAS, R.SEKTOR, R.KATEGORI, R.SINIF, R.DURUM, R.OZELKOD, TEMSILCIAD=R2.FIRMA ';
+  // NOT: T-SQL 'ALIAS=expr' -> standart 'expr AS ALIAS' (her iki motorda da gecerli; PG
+  //   'ALIAS=expr'i esitlik saniyor -> "column adsoyad does not exist"). Kaynakta cozuldu.
+  Paramst :=' R.ID, R.KOD, R.FIRMA, R2.FIRMA AS ADSOYAD, X1.BILGI AS FATBASLIK, R.GRUP, R.TEMAS, R.SEKTOR, R.KATEGORI, R.SINIF, R.DURUM, R.OZELKOD, R2.FIRMA AS TEMSILCIAD ';
   if (FArama.ComboCariAnaliz.Visible)and(FArama.ComboCariAnaliz.Itemindex in [1..5]) then
-        Paramst :=Paramst + ' ,TOPLAM_BORC,TOPLAM_ALACAK,KUR,BAKIYE=TOPLAM_BORC-TOPLAM_ALACAK, TAKIPTE,IRSALIYE '
+        Paramst :=Paramst + ' ,TOPLAM_BORC,TOPLAM_ALACAK,KUR,TOPLAM_BORC-TOPLAM_ALACAK AS BAKIYE, TAKIPTE,IRSALIYE '
   else if FArama.CheckDetay.Checked then begin
         Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=cast(''-2204''+cast(R.SEKTOR as varchar(10)) as int)),TEMSILCIAD = R2.FIRMA,ILLER= X1.BILGI, '+
           ' ADRES = (SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
@@ -3609,14 +3611,14 @@ begin
      REHBER.SQL.Add(') as cc ') // where SONAKTIVITEKONUSU is not null or SONAKTIVITETARIHI is not null or SONSATBELGETARIHI is not null or SONSATTUTARI  is not null');
   end;
   REHBER.SQL.Add(order);
-  if FArama.AraYetkili.Text <> '' then
+  if FArama.AraYetkili.Text <> ''  then
      Param := 1
   else
      Param := 0;
   // REHBER.open;
   TabloYenile(REHBER,[Param]);
 //  if FArama.ComboCariAnaliz.ItemIndex<3 then
-//    CariGridView.ApplyBestFit(nil);
+//      CariGridView.ApplyBestFit(nil);
 
 end;
 
