@@ -135,6 +135,18 @@ UPDATE dbo.MODUL
     WHERE L IS NOT NULL;   -- << KISITLI: birak | TAM lisansli: bu satiri sil
 GO
 
+-- 2b) Stored @Sid'i (GENINI -10092.ANAHTAR) style-121 @Sid'e esitle -> uygulama acilista
+--     'server degisti' TESPITINI TETIKLEMEZ -> otomatik re-lisans calismaz -> L bozulmaz.
+--     (App'in ServerSidNumber'i da nvarchar/style-121 hesapliyor -> ayni deger.)
+DECLARE @SidG NVARCHAR(200);
+SELECT TOP 1 @SidG = master.dbo.fn_varbintohexstr(HashBytes('MD5', convert(nvarchar(23), schemadate, 121)))
+    FROM sys.sysservers ORDER BY srvid;
+IF EXISTS (SELECT 1 FROM dbo.GENINI WHERE BOLUM = -10092)
+    UPDATE dbo.GENINI SET ANAHTAR = @SidG WHERE BOLUM = -10092;
+ELSE
+    INSERT INTO dbo.GENINI (BOLUM, ANAHTAR, DEGER, DIL) VALUES (-10092, @SidG, N'0', 0);
+GO
+
 -- 3) DOGRULAMA: 11 degil yuzlerce donmeli
 SELECT COUNT(*) AS MODUL_SAYISI FROM dbo.fn_ModulListesi();
 SELECT TUR, COUNT(*) AS ADET FROM dbo.fn_ModulListesi() GROUP BY TUR ORDER BY TUR;
