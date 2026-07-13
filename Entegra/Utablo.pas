@@ -12183,7 +12183,7 @@ begin
   begin
   //öncelikle server değişmiş mi diye bakacağız..
   try
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(convert(nvarchar(23),schemadate,121)))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
   except
     UyariGoster(Uyari,'Server Sid Number cannot be found!',1);
   end;
@@ -12582,7 +12582,7 @@ begin
   Kullanilan := StrToIntDef(UGenSifre.Desifre(GENINI.ReadString(Ops_DenemeLoginSay,'AA')),-1);
   if (Kalan=-1)and(Kullanilan=-1) then begin
     UyariGoster(Uyari,LisansyenilemeMaksimum19girisyapilabilir,1);
-    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(cast(schemadate as varchar(23))))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
+    ServerSidNumber := Veritabani.BasitKomutÇalıştır(FDCnn,'SELECT '+DbUst(1)+'SID=master.dbo.fn_varbintohexstr(HashBytes(''MD5'',(convert(nvarchar(23),schemadate,121)))) FROM sys.sysservers order by srvid '+DbSinir(1),[],[],True);
     //VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+convert(nvarchar(20),MODULID))  ',[],[]);
     GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('19'));
     GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('1'));
