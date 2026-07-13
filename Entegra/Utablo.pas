@@ -722,6 +722,7 @@ type
     procedure DuyuruYayinEkle(SablonDuyuruId:Integer; OlayZamani:TDateTime; DuyuruAlici:integer=0; Yer:integer=0; YerId:integer=0);
     procedure DuyuruMotoru(TaraTarih : TDateTime);
     procedure SKRehberEkle(Rehber_Id: Integer);
+    procedure AramaKaydet(AModul, AKayitID: Integer);  // Son/Sik Aranan: KULLANICI_ARAMA upsert (generic, MODUL bazli)
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -11767,6 +11768,20 @@ begin
   SonEklenenCari := Rehber_Id;
 end;
 
+procedure TTablo.AramaKaydet(AModul, AKayitID: Integer);
+// Kullanicinin bir karti acmasini KULLANICI_ARAMA'ya yazar (Son/Sik Aranan icin).
+//   Generic: AModul = MODUL.MODULID (MODUL_Cari/Stok/Demirbas...), AKayitID = kayit ID.
+//   Upsert: varsa SAY+1 & tarih guncelle, yoksa ekle (SKRehberEkle deseni).
+begin
+  if (AModul <= 0) or (AKayitID <= 0) then Exit;
+  if Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+       ' update KULLANICI_ARAMA set SAY=SAY+1, DEGISTIRMETARIHI=getdate() where KULID=&Kul and MODUL=&Mod and KAYITID=&Kayit ',
+       ['&Kul', '&Mod', '&Kayit'], [StrToInt(Kullanan), AModul, AKayitID]) < 1 then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+       ' insert into KULLANICI_ARAMA (KULID,MODUL,KAYITID,SAY,DEGISTIRMETARIHI) values (&Kul,&Mod,&Kayit,1,getdate()) ',
+       ['&Kul', '&Mod', '&Kayit'], [StrToInt(Kullanan), AModul, AKayitID]);
+end;
+
 procedure TTablo.CekSenetOpsiyonUygula;
 begin
   SeriNoKontrol := GENINI.ReadBoolean(Ops_Cekler_CekSeriNoKontrolu,False); //       ÇekSeriNoKontrolü
@@ -12222,7 +12237,7 @@ begin
               GENINI.WriteInteger(Ops_DenemeLoginSay,0);
 
               VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L='''' ',[],[]);
-              VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+cast(MODULID as varchar(20))) where (((MODULID like ''10%'') or (MODULID like ''11%'')or (MODULID in (20,2001)))and(MODULID <> ''1102''))',[],[]);
+              VeriTabani.BasitKomutÇalıştır(FDCnn,'update MODUL set L=HashBytes(''SHA1'', N'''+ServerSidNumber+'''+convert(nvarchar(20),MODULID)) where (((MODULID like ''10%'') or (MODULID like ''11%'')or (MODULID in (20,2001)))and(MODULID <> ''1102''))',[],[]);
               for I := 0 to Length(LisansliModuller.ModulListesi)-1 do begin
                 if LisansliModuller.ModulListesi[I].ModulDurumu then begin
                   case StrToIntDef(LisansliModuller.ModulListesi[I].OzelKod,0) of
@@ -12272,7 +12287,7 @@ begin
                     3403:s2:=' MODULID like ''3403%'' ';//Maaş İşlemleri
                     180216:s2:=' MODULID like ''180216%'' ';//Cafe/Rest
                   end;
-                  VeriTabani.BasitKomutÇalıştır(FDCnn,' update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+cast(MODULID as varchar(20))) where '+s2 ,[],[]);
+                  VeriTabani.BasitKomutÇalıştır(FDCnn,' update MODUL set L=HashBytes(''SHA1'', N'''+ServerSidNumber+'''+convert(nvarchar(20),MODULID)) where '+s2 ,[],[]);
                   GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('-1'));
                   GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('-1'));
                 end;

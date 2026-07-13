@@ -175,7 +175,7 @@ begin
           Tablo.GENINI.WriteInteger(Ops_DenemeLoginSay,0);
           for I := 0 to Length(LisansliModuller.ModulListesi)-1 do begin
             if LisansliModuller.ModulListesi[I].ModulDurumu then begin
-              VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'update MODUL set L=HashBytes(''SHA1'', '''+ServerSidNumber+'''+cast(MODULID as varchar(20))) where MODULID like '''+LisansliModuller.ModulListesi[I].OzelKod+'%'' ',[],[]);
+              VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'update MODUL set L=HashBytes(''SHA1'', N'''+ServerSidNumber+'''+convert(nvarchar(20),MODULID)) where MODULID like '''+LisansliModuller.ModulListesi[I].OzelKod+'%'' ',[],[]);
               Tablo.GENINI.WriteString(Ops_DenemeLoginKalan,UGenSifre.Sifre('-1'));
               Tablo.GENINI.WriteString(Ops_DenemeLoginSay,UGenSifre.Sifre('-1'));
             end else
