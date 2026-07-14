@@ -70,43 +70,6 @@ object RehberAramaFrame: TRehberAramaFrame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object LabelSonArananlar2: TcxLabel
-    Tag = 4
-    Left = 312
-    Top = 148
-    Cursor = crHandPoint
-    HelpType = htKeyword
-    HelpKeyword = 'K.DEGISTIRMETARIHI'
-    Caption = 'Son Arananlar'
-    FocusControl = AraFirma
-    ParentFont = False
-    Style.BorderStyle = ebsNone
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clRed
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = [fsBold]
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object LabelSIKArananlar2: TcxLabel
-    Tag = 3
-    Left = 312
-    Top = 176
-    Cursor = crHandPoint
-    HelpType = htKeyword
-    HelpKeyword = 'K.SAY'
-    Caption = 'S'#305'k Arananlar'
-    FocusControl = AraFirma
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clRed
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = [fsBold]
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object Label6: TcxLabel
     Left = -1
     Top = 169
@@ -158,38 +121,6 @@ object RehberAramaFrame: TRehberAramaFrame
     Top = 367
     Caption = 'Pasifleri de g'#246'ster'
     TabOrder = 9
-    Transparent = True
-  end
-  object LabelTumKayitlar2: TcxLabel
-    Tag = 3
-    Left = 312
-    Top = 126
-    Cursor = crHandPoint
-    HelpType = htKeyword
-    HelpKeyword = 'K.SAY'
-    Caption = 'T'#252'm Kay'#305'tlar'
-    FocusControl = AraFirma
-    ParentFont = False
-    Style.BorderStyle = ebsNone
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clRed
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = [fsBold]
-    Style.LookAndFeel.Kind = lfStandard
-    Style.LookAndFeel.NativeStyle = False
-    Style.LookAndFeel.SkinName = 'Office2010Blue'
-    Style.Shadow = False
-    Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.Kind = lfStandard
-    StyleDisabled.LookAndFeel.NativeStyle = False
-    StyleDisabled.LookAndFeel.SkinName = 'Office2010Blue'
-    StyleFocused.LookAndFeel.Kind = lfStandard
-    StyleFocused.LookAndFeel.NativeStyle = False
-    StyleFocused.LookAndFeel.SkinName = 'Office2010Blue'
-    StyleHot.LookAndFeel.Kind = lfStandard
-    StyleHot.LookAndFeel.NativeStyle = False
-    StyleHot.LookAndFeel.SkinName = 'Office2010Blue'
     Transparent = True
   end
   object ComboGrup: TcxImageComboBox

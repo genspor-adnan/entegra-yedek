@@ -20,7 +20,6 @@ object POSListeFrame: TPOSListeFrame
       Left = 4
       Top = 4
       Width = 1213
-      Height = 29
       Margins.Bottom = 0
       AutoSize = True
       ButtonHeight = 30
@@ -47,6 +46,7 @@ object POSListeFrame: TPOSListeFrame
       ShowCaptions = True
       TabOrder = 0
       Transparent = True
+      ExplicitHeight = 29
       object YeniTus: TToolButton
         Left = 0
         Top = 0
@@ -56,7 +56,7 @@ object POSListeFrame: TPOSListeFrame
         OnClick = YeniTusClick
       end
       object SilTus: TToolButton
-        Left = 74
+        Left = 92
         Top = 0
         Caption = 'Sil'
         ImageIndex = 8
@@ -64,7 +64,7 @@ object POSListeFrame: TPOSListeFrame
         OnClick = SilTusClick
       end
       object ToolButton1: TToolButton
-        Left = 148
+        Left = 184
         Top = 0
         Width = 8
         Caption = 'ToolButton1'
@@ -73,7 +73,7 @@ object POSListeFrame: TPOSListeFrame
         Style = tbsSeparator
       end
       object DegisTus: TToolButton
-        Left = 156
+        Left = 192
         Top = 0
         Caption = 'D'#252'zenle'
         ImageIndex = 9
@@ -81,12 +81,44 @@ object POSListeFrame: TPOSListeFrame
         Style = tbsTextButton
         OnClick = DegisTusClick
       end
+      object ToolButton2: TToolButton
+        Left = 284
+        Top = 0
+        Width = 8
+        Caption = 'ToolButton2'
+        ImageIndex = 10
+        Style = tbsSeparator
+      end
+      object LabelTumKayitlar: TToolButton
+        Left = 292
+        Top = 0
+        Caption = 'T'#252'm Liste'
+        ImageIndex = 20
+        Style = tbsTextButton
+        OnClick = LabelTumKayitlarClick
+      end
+      object LabelSonArananlar: TToolButton
+        Left = 384
+        Top = 0
+        Caption = 'Son Aranan'
+        ImageIndex = 21
+        Style = tbsTextButton
+        OnClick = LabelSonArananlarClick
+      end
+      object LabelSikArananlar: TToolButton
+        Left = 476
+        Top = 0
+        Caption = 'S'#305'k Aranan'
+        ImageIndex = 6
+        Style = tbsTextButton
+        OnClick = LabelSikArananlarClick
+      end
     end
     object cxGrid: TcxGrid
       Left = 1
-      Top = 33
+      Top = 36
       Width = 1219
-      Height = 133
+      Height = 130
       Align = alClient
       BevelInner = bvNone
       BevelOuter = bvNone
@@ -95,8 +127,6 @@ object POSListeFrame: TPOSListeFrame
       LookAndFeel.Kind = lfOffice11
       LookAndFeel.NativeStyle = True
       LookAndFeel.ScrollbarMode = sbmClassic
-      ExplicitTop = 36
-      ExplicitHeight = 130
       object GridTview: TcxGridDBTableView
         PopupMenu = PosListeMenu
         Navigator.Buttons.CustomButtons = <>
@@ -281,16 +311,11 @@ object POSListeFrame: TPOSListeFrame
       object cxTabSheet2: TcxTabSheet
         Caption = 'Komisyon'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object ToolBar2: TToolBar
           AlignWithMargins = True
           Left = 3
           Top = 3
           Width = 1205
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -317,6 +342,7 @@ object POSListeFrame: TPOSListeFrame
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
+          ExplicitHeight = 29
           object PosOranYeni: TToolButton
             Left = 0
             Top = 0
@@ -417,10 +443,6 @@ object POSListeFrame: TPOSListeFrame
       object TabSheetEkstre: TcxTabSheet
         Caption = 'Ekstre'
         ImageIndex = 6
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridPOS: TcxGrid
           Left = 0
           Top = 44
@@ -937,7 +959,6 @@ object POSListeFrame: TPOSListeFrame
       HotZoneClassName = 'TcxMediaPlayer8Style'
       AlignSplitter = salBottom
       Control = PageControlSekme
-      ExplicitWidth = 8
     end
     object SqlMemo: TMemo
       Left = 209
@@ -1099,8 +1120,8 @@ object POSListeFrame: TPOSListeFrame
     Top = 240
   end
   object PosListeMenu: TPopupMenu
-    Left = 297
-    Top = 105
+    Left = 249
+    Top = 81
     object POSInfoMenu: TMenuItem
       Caption = 'info'
       OnClick = POSInfoMenuClick

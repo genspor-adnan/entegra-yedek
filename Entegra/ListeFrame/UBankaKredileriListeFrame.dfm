@@ -1712,6 +1712,36 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
         ImageName = 'PngImage18'
         OnClick = ToolButton2Click
       end
+      object ToolButton10: TToolButton
+        Left = 571
+        Top = 0
+        Width = 8
+        Caption = 'ToolButton10'
+        Style = tbsSeparator
+      end
+      object LabelTumKayitlar: TToolButton
+        Left = 579
+        Top = 0
+        Caption = 'T'#252'm'
+        Style = tbsTextButton
+        OnClick = LabelTumKayitlarClick
+      end
+      object LabelSonArananlar: TToolButton
+        Tag = 5
+        Left = 690
+        Top = 0
+        Caption = 'Son Aranan'
+        Style = tbsTextButton
+        OnClick = LabelSonArananlarClick
+      end
+      object LabelSikArananlar: TToolButton
+        Tag = 3
+        Left = 801
+        Top = 0
+        Caption = 'S'#305'k Aranan'
+        Style = tbsTextButton
+        OnClick = LabelSikArananlarClick
+      end
     end
     object JvNavPanelHeader1: TJvNavPanelHeader
       Left = 572
@@ -1760,6 +1790,13 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     DataSet = KREDILER
     Left = 169
     Top = 136
+  end
+  object JvTimer1: TJvTimer
+    Enabled = False
+    Threaded = False
+    OnTimer = JvTimer1Timer
+    Left = 169
+    Top = 192
   end
   object KREDILER: TFDQuery
     AfterScroll = KREDILERAfterScroll

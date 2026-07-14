@@ -926,61 +926,6 @@ object TeklifListeDlg: TTeklifListeDlg
       end
     end
   end
-  object SQLMemo: TcxMemo
-    Left = 159
-    Top = 110
-    Lines.Strings = (
-      'select  T.*,'
-      'P.PROJEKODU,P.PROJEADI,'
-      'CARIKOD=R1.KOD , R1.FIRMA,'
-      'HAZIRLAYAN,R2.FIRMA as HAZIRLAYANAD,'
-      'RP.FIRMA  as MUS_ILGILIAD,'
-      
-        'VERILENSIPARIS = case when 412 in (select YERI from SIPARISDETAY' +
-        ' where YERID in (select ID from TEKLIFDETAY where TEKLIFID=T.ID)' +
-        ') then '#39'Var'#39' else '#39#39' end ,'
-      
-        'ALINANSIPARIS = case when 413 in (select YERI from SIPARISDETAY ' +
-        'where YERID in (select ID from TEKLIFDETAY where TEKLIFID=T.ID))' +
-        ' then '#39'Var'#39' else '#39#39' end ,'
-      'TEKLIFGUNSAYISI=DATEDIFF(day,T.TARIH,GETDATE()),'
-      'DURUMGUNSAYISI=DATEDIFF(day,DURUMTARIHI,GETDATE()),'
-      
-        'TESLIMTARIHI =(Select Min(TESLIMTARIHI) from TEKLIFDETAY Where T' +
-        'EKLIFID=T.ID ),'
-      
-        'TESLIMTARIHI =(Select Min(TESLIMTARIHI) from TEKLIFDETAY Where T' +
-        'EKLIFID=T.ID ),'
-      'ONAYLAYACAK2=R3.FIRMA,'
-      
-        'GECERLILIK_KALAN=case when ISNULL(T.GECERLILIK_SURESI,0)=0 then ' +
-        '0 else DATEDIFF(day,GETDATE(),T.TARIH+GECERLILIK_SURESI) end,'
-      'ONAYLAYAN =R4.FIRMA,'
-      'DISONAYCI =RP2.FIRMA,'
-      ''
-      
-        'SONUCAD=(select ANAHTAR from GENINI where BOLUM=-2911 and DEGER=' +
-        'T.SONUC and DIL=-1),'
-      
-        'SEBEBIAD= (select ANAHTAR from GENINI where BOLUM=-2912 and DEGE' +
-        'R=T.SEBEBI and DIL=-1),'
-      'PRJ_DURUM=P.DURUM,PRJ_SONUC=P.SONUC,PRJ_SEBEBI=P.SEBEBI'
-      'from TEKLIF T'
-      'left outer join REHBER R1 on R1.ID=T.REHBERID'
-      'left outer join REHBER R2 on R2.ID=T.HAZIRLAYAN'
-      'left outer join REHBER RP on RP.ID=T.MUS_ILGILI'
-      'left outer join PROJELER P on P.ID=T.PROJEID'
-      'left outer join REHBER R3 on T.ONAYLAYACAK=R3.ID'
-      'left outer join REHBER R4 on T.ONAYLAYAN=R4.ID'
-      'left outer join REHBER RP2 on T.DISONAY=RP2.ID'
-      ''
-      '')
-    Properties.WordWrap = False
-    TabOrder = 4
-    Visible = False
-    Height = 73
-    Width = 588
-  end
   object DtsTeklifler: TDataSource
     DataSet = TabTeklif
     Left = 29

@@ -6,11 +6,14 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, dxSkinsCore, UFrameYoneticisi,
-  cxDropDownEdit, cxCalendar, cxLabel, Menus, cxLookAndFeelPainters, cxButtons,
+  cxDropDownEdit, cxCalendar, cxLabel, Menus, cxLookAndFeelPainters, cxButtons, ToolWin,
   dxSkinLondonLiquidSky, cxGraphics, cxLookAndFeels, dxCore, cxDateUtils,
   Data.DB, FireDAC.Comp.Client, cxSpinEdit, cxImageComboBox, cxCheckBox, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
   dxSkinscxPCPainter, dxBarBuiltInMenu, cxPC, dxSkinMetropolis,
-  dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray;
+  dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
+  dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TIKDlgGenelAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -22,23 +25,21 @@ type
     cxTabSheet2: TcxTabSheet;
     LabelPNO: TcxLabel;
     Label3: TcxLabel;
-    LabelSonArananlar: TcxLabel;
-    LabelSIKArananlar: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     AraFirma: TcxTextEdit;
     AraKod: TcxTextEdit;
     CheckPasifler: TcxCheckBox;
-    LabelTumKayitlar: TcxLabel;
     SpinKayitSayisi: TcxSpinEdit;
     cxLabel6: TcxLabel;
     cxLabel2: TcxLabel;
     cxLabel3: TcxLabel;
-    LabelSonArananlar2: TcxLabel;
-    LabelSIKArananlar2: TcxLabel;
     cxLabel7: TcxLabel;
     AraFirma2: TcxTextEdit;
     EditUcret: TcxTextEdit;
     CheckPasifler2: TcxCheckBox;
-    LabelTumKayitlar2: TcxLabel;
     ComboIl: TcxImageComboBox;
     ComboCinsiyet: TcxImageComboBox;
     cxSpinEdit1: TcxSpinEdit;

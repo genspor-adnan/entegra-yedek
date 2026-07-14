@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
+  Dialogs, ComCtrls, ToolWin, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
   dxSkinsCore, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCalendar, UTablo,
   cxControls, cxContainer, cxEdit, cxCheckBox, Buttons, dxSkinLondonLiquidSky,
   cxGraphics, cxLabel, cxButtonEdit, cxImageComboBox, cxLookAndFeels,
@@ -14,7 +14,7 @@ uses
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light;
+  dxSkinVisualStudio2013Light, dxCoreGraphics;
 
 type
   TFirsatListeAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -35,6 +35,10 @@ type
     checkKapaliGoster: TcxCheckBox;
     AraProjeKodu: TcxTextEdit;
     cxLabel4: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure EditSorumluPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure checkTarihPropertiesEditValueChanged(Sender: TObject);
     procedure AraFirmaPropertiesButtonClick(Sender: TObject;

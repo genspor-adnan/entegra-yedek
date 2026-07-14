@@ -306,6 +306,10 @@ type
     procedure FirsatKapatMenuClick(Sender: TObject);
     procedure ServisOlusturMenuClick(Sender: TObject);
     procedure FirsatInfoMenuClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Firsat_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     ProjeID, RehberId:integer;
@@ -348,7 +352,7 @@ type
 implementation
 
 uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, ULog,
-     UIsListesi, UGorevDlg;
+     UIsListesi, UGorevDlg, System.JSON, UVeriMotor;
 
 {$R *.dfm}
 
@@ -382,55 +386,90 @@ begin
 end;
 
 procedure TFirsatListeDlg.JvTimer1Timer(Sender: TObject);
-var
-  PID:integer;
 begin
   JvTimer1.Enabled := False;
-  ///  Gridde alan kontrolu
-  if (FIRSATLAR.Active)and(FIRSATLAR.RecordCount>0) then
-    PID := FIRSATLAR.FieldByName('ID').AsInteger;
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Firsat_Liste)
+end;
+
+procedure TFirsatListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Firsat listesini sunucu-tarafi SP ile getirir (2 PARAM JSON: sp_Prog_Firsat_Liste_Json2).
+//   @Baslik   = SELECT ek kolonlari (ham SQL, GUVENILIR; Firsat'ta bos, P.* zaten tum kolonlari getirir).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; TJSONObject ile guvenli escape).
+//   AMod: 1=Tum, 3=Sik Aranan (KULLANICI_ARAMA), 4=Filtre/Normal, 5=Son Aranan.
+//   Firsat, PROJELER tablosunda MODUL=1; KULLANICI_ARAMA.MODUL = TabNo_FIRSAT (170).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); Pasif 0/1 sayi (TRY_CAST AS BIT).
+var
+  PID, SorumluID, TuruVal, AsamaVal: Integer;
+  SubeYetki: string;
+  j: TJSONObject;
+begin
+  if AktifVeriMotor = vmPG then Exit;   // Json2 (JSON_VALUE) MSSQL'e ozgu
+
+  // Gridde ozel (ek) PROJELER alanlarini olustur - eski JvTimer ile ayni
+  if (FIRSATLAR.Active) and (FIRSATLAR.RecordCount > 0) then
+    PID := FIRSATLAR.FieldByName('ID').AsInteger
+  else
+    PID := 0;
   Tablo.GrideAlanEkle('PROJELER', 'FirsatWizardDlg', GridFirsatView);
 
-  FIRSATLAR.Close;
-  FIRSATLAR.SQL.Text:= SQLMemo.Text;
-  if FArama.checkTarih.Checked then
-   begin
-     //FArama.dateProjeBaslangic.PostEditValue;
-     //FArama.dateProjeBitis.PostEditValue;
-     FIRSATLAR.SQL.Add(' AND P.BASLAMATARIHI >= '''+FormatDateTime('yyyy-mm-dd 00:00',FArama.dateProjeBaslangic.Date) +''' ');
-     FIRSATLAR.SQL.Add(' AND P.BASLAMATARIHI <= '''+FormatDateTime('yyyy-mm-dd 23:59',FArama.dateProjeBitis.Date) +''' ');
-   end;
-  if StringReplace(FArama.AraFirma.Text,' ','',[rfReplaceAll])<>'' then
-     FIRSATLAR.SQL.Add(' AND ISNULL(R1.FIRMA,'''') LIKE ''%'+FArama.AraFirma.Text+'%'' ');
-  if StringReplace(FArama.AraProjeKodu.Text,' ','',[rfReplaceAll])<>'' then
-     FIRSATLAR.SQL.Add(' AND ISNULL(P.PROJEKODU,'''') LIKE ''%'+FArama.AraProjeKodu.Text+'%'' ');
-  if StringReplace(FArama.ComboSorumlu.Text,' ','',[rfReplaceAll])<>'' then
-     FIRSATLAR.SQL.Add(' AND P.PRJ_SORUMLUSU_ID = '+IntToStr(FArama.ComboSorumlu.Tag)+' ');
-  if StringReplace(FArama.ComboKonusu.Text,' ','',[rfReplaceAll])<>'' then
-     FIRSATLAR.SQL.Add(' AND ISNULL(P.KONUSU,'''') LIKE ''%'+FArama.ComboKonusu.Text+'%'' ');
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(21, YetkiTur_Gorme)
+  else SubeYetki := '';
 
-  if FArama.ComboTuru.EditValue>0 then
-     FIRSATLAR.SQL.Add(' AND P.TURU ='+VarToStr(FArama.ComboTuru.EditValue)+' ');
+  // ComboSorumlu: yalnizca metin doluysa Tag'i uygula (eski davranis)
+  if StringReplace(FArama.ComboSorumlu.Text, ' ', '', [rfReplaceAll]) <> '' then
+    SorumluID := FArama.ComboSorumlu.Tag
+  else
+    SorumluID := 0;
 
-  if FArama.comboAsama.EditValue>0 then
-     FIRSATLAR.SQL.Add(' AND P.ASAMA='+VarToStr(FArama.comboAsama.EditValue)+'');
+  TuruVal  := StrToIntDef(VarToStr(FArama.ComboTuru.EditValue), 0);
+  AsamaVal := StrToIntDef(VarToStr(FArama.comboAsama.EditValue), 0);
 
-  if not(FArama.checkKapaliGoster.Checked) then
-     FIRSATLAR.SQL.Add(' AND P.DURUM <> 2 ');
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN', TJSONNumber.Create(0));                              // Firsat orijinalinde limit yoktu
+    j.AddPair('Mod',  TJSONNumber.Create(AMod));
+    j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.checkKapaliGoster.Checked)));  // kapali goster=hepsi
+    if Trim(FArama.AraFirma.Text)     <> '' then j.AddPair('Firma',     Trim(FArama.AraFirma.Text));
+    if Trim(FArama.AraProjeKodu.Text) <> '' then j.AddPair('ProjeKodu', Trim(FArama.AraProjeKodu.Text));
+    if Trim(FArama.ComboKonusu.Text)  <> '' then j.AddPair('Konusu',    Trim(FArama.ComboKonusu.Text));
+    if SorumluID > 0 then j.AddPair('SorumluID', TJSONNumber.Create(SorumluID));
+    if TuruVal   > 0 then j.AddPair('Turu',      TJSONNumber.Create(TuruVal));
+    if AsamaVal  > 0 then j.AddPair('Asama',     TJSONNumber.Create(AsamaVal));
+    if FArama.checkTarih.Checked then begin
+      j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd hh:nn:ss', FArama.dateProjeBaslangic.Date));
+      j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd hh:nn:ss', FArama.dateProjeBitis.Date + EncodeTime(23, 59, 0, 0)));
+    end;
+    j.AddPair('TekSubeTum', TJSONNumber.Create(ModulYetki_TekSubeTum.Proje));  // 1=kendi, 10=kendi sube
+    j.AddPair('SubeKisit',  TJSONNumber.Create(SubeId));
+    if SubeVarmi and (SubeYetki <> '') then j.AddPair('SubeYetkiList', SubeYetki);
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));      // Son/Sik + TekSube=1
+    j.AddPair('Modul', TJSONNumber.Create(TabNo_FIRSAT));                  // KULLANICI_ARAMA.MODUL
+    if not (AMod in [3, 5]) then j.AddPair('OrderBy', 'P.SATISKUR');       // Son/Sik: SP kendi siralar
 
-  case ModulYetki_TekSubeTum.Proje of
-     1: FIRSATLAR.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi projelerini g�r�r
-    10: FIRSATLAR.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi �ube projelerini g�r�r
+    // Generic helper: @Baslik='' (Firsat ek-alan yok) + @Kosullar=j (JSON);
+    //   helper j'yi Free eder + TabloYenile(FIRSATLAR, [], PID, 'ID') yapar.
+    Tablo.ListeSPJson(FIRSATLAR, 'sp_Prog_Firsat_Liste_Json2', '', j, PID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
 
-  if SubeVarmi then
-     FIRSATLAR.SQL.Text:=FIRSATLAR.SQL.Text+ ' and P.SUBEID in('+Tablo.YetkiliSubeleriGetir(21,YetkiTur_Gorme)+') ';
-
-  FIRSATLAR.SQL.Add(' ORDER BY P.SATISKUR ');
-  //ProjeID := PID;
-  TabloYenile(FIRSATLAR,[],PID,'ID');
-  //RehberId:= FIRSATLAR.FieldByName('REHBERID').AsInteger;
   GridFirsatView.ViewData.Expand(True);
+end;
+
+procedure TFirsatListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar -> sunucu-tarafi SP
+end;
+
+procedure TFirsatListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TFirsatListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 function TFirsatListeDlg.EkranAdiAl: string;
@@ -473,6 +512,12 @@ procedure TFirsatListeDlg.Baslatildi;
 var ra : string;
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
+  // Tum/Son/Sik Aranan buttonlarini list frame handler'larina bagla (sunucu-tarafi SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
   //GridFirsatView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\ProjelerGridi',true,false,[gsoUseFilter],'ProjelerGridi');
    Tablo.GridAyarRestore('FirsatGridi',GridFirsatView );
   //GridTeklifView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\ProjeTekliflerGridi',true,false,[gsoUseFilter],'ProjeTekliflerGridi');
@@ -806,6 +851,7 @@ var
   PID:integer;
 begin
    PID := FIRSATLAR.Fields[0].AsInteger;
+   Tablo.AramaKaydet(TabNo_FIRSAT, PID);   // Son/Sik Aranan takibi (kart acilinca upsert)
    if PageControlUst.ActivePage=TabSheetGrup then begin
       Tablo.FirsatSihirbazBaslat('D',  PID, FIRSATLAR.FieldByName('REHBERID').AsInteger,Tablo.GENINI.BugunTrh);
       //tekrar g�sterelim, bunun i�in silip ekleyelim
@@ -934,7 +980,8 @@ end;
 
 procedure TFirsatListeDlg.FIRSATLARBeforeOpen(DataSet: TDataSet);
 begin
-  FIRSATLAR.SQL.Text:=StringReplace(FIRSATLAR.SQL.Text,':PKullanan',Kullanan,[rfReplaceAll]);
+  // Kullanan artik EXEC @KulId parametresiyle gonderiliyor; :PKullanan yer degistirmesi
+  // gereksiz (ustelik SQL.Text yeniden atamasi ayarlanmis SP parametrelerini sifirlar).
 end;
 
 procedure TFirsatListeDlg.FirsatListeDlgKapatEylemi(Sender: TObject);

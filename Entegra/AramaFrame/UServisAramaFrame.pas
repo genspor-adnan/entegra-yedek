@@ -19,7 +19,7 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint, dxCoreGraphics;
+  dxSkinWhiteprint, dxCoreGraphics, Vcl.ToolWin;
 
 type
   TServisAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -49,6 +49,10 @@ type
     AraTarihBit: TcxDateEdit;
     cxLabel5: TcxLabel;
     cxLabel7: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure AraMusteriPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure cxLabel7Click(Sender: TObject);

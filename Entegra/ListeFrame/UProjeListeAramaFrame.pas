@@ -14,7 +14,7 @@ uses
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxCoreGraphics;
+  dxSkinVisualStudio2013Light, dxCoreGraphics, Vcl.ToolWin;
 
 type
   TProjeListeAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -41,6 +41,10 @@ type
     AraYetkili: TcxButtonEdit;
     AraProjeAdi: TcxTextEdit;
     cxLabel2: TcxLabel;
+    ToolBarAranan: TToolBar;                 // Tum/Son/Sik Aranan (sunucu-tarafi listeleme)
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure EditSorumluPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure checkTarihPropertiesEditValueChanged(Sender: TObject);
     procedure AraFirmaPropertiesButtonClick(Sender: TObject;

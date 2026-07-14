@@ -33,6 +33,9 @@ object UTSDlg: TUTSDlg
     object cxTabSheet2: TcxTabSheet
       Caption = 'Sorgula / G'#246'nder'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
@@ -146,6 +149,10 @@ object UTSDlg: TUTSDlg
       object TabSheetSorgu: TcxTabSheet
         Caption = 'Sorgu Listesi'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridSorgu: TcxGrid
           Left = 0
           Top = 0

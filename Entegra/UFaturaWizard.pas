@@ -1846,7 +1846,7 @@ begin
        // LabelMasrafMerkezi.Caption := MasrafMerkeziPrj;
         //GridFaturaViewMASRAFAD.Caption := MasrafAdi;
         ComboFIYAT_LISTESI.RepositoryItem := Tablo.RepFiyatAdlariAlis;
-        lbSatici.Caption := 'Satışn Alan';
+        lbSatici.Caption := 'Satın Alan';
       end;
     1, 4, 14, 15, 16,110, 119:
       begin

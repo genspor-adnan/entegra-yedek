@@ -370,9 +370,11 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
         Color = clSilver
         ParentBackground = False
         TabOrder = 0
+        ExplicitLeft = 88
+        ExplicitTop = 3
         object lblPNO: TcxLabel
-          Left = 5
-          Top = 39
+          Left = 6
+          Top = 77
           Caption = 'M'#252#351'teri'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -384,8 +386,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Transparent = True
         end
         object lbl4: TcxLabel
-          Left = 5
-          Top = 10
+          Left = 6
+          Top = 48
           Caption = 'Konu/Notlar'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -397,8 +399,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Transparent = True
         end
         object lbl6: TcxLabel
-          Left = 5
-          Top = 179
+          Left = 6
+          Top = 217
           Caption = 'Atanan'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -410,8 +412,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Transparent = True
         end
         object LabelAtayan: TcxLabel
-          Left = 5
-          Top = 151
+          Left = 6
+          Top = 189
           Caption = 'Olu'#351'turan'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -423,8 +425,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Transparent = True
         end
         object dateAktBitis: TcxDateEdit
-          Left = 77
-          Top = 120
+          Left = 78
+          Top = 158
           Enabled = False
           Properties.ClearKey = 46
           Properties.ImmediatePost = True
@@ -433,8 +435,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object dateAktBaslangic: TcxDateEdit
-          Left = 77
-          Top = 92
+          Left = 78
+          Top = 130
           Enabled = False
           Properties.ClearKey = 46
           Properties.ImmediatePost = True
@@ -443,14 +445,14 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object ComboKonusu: TcxTextEdit
-          Left = 77
-          Top = 8
+          Left = 78
+          Top = 46
           TabOrder = 5
           Width = 115
         end
         object AraFirma: TcxButtonEdit
-          Left = 77
-          Top = 36
+          Left = 78
+          Top = 74
           HelpContext = -1
           ParentShowHint = False
           Properties.Buttons = <
@@ -470,8 +472,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object EditAtanan: TcxButtonEdit
-          Left = 77
-          Top = 176
+          Left = 78
+          Top = 214
           HelpContext = 335
           ParentShowHint = False
           Properties.Buttons = <
@@ -491,8 +493,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object checkTarih: TcxCheckBox
-          Left = 5
-          Top = 107
+          Left = 6
+          Top = 145
           Caption = 'Tarih'
           Properties.ImmediatePost = True
           Properties.NullStyle = nssUnchecked
@@ -542,8 +544,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object EditOlusturan: TcxButtonEdit
-          Left = 77
-          Top = 148
+          Left = 78
+          Top = 186
           HelpContext = 335
           ParentShowHint = False
           Properties.Buttons = <
@@ -563,8 +565,8 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Width = 115
         end
         object CheckTemas: TcxCheckBox
-          Left = 69
-          Top = 238
+          Left = 78
+          Top = 236
           Caption = 'Temas Kurulacaklar'
           Properties.NullStyle = nssUnchecked
           TabOrder = 14
@@ -573,14 +575,14 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           OnClick = CheckTemasClick
         end
         object EditID: TcxTextEdit
-          Left = 77
-          Top = 64
+          Left = 78
+          Top = 102
           TabOrder = 7
           Width = 115
         end
         object cxLabel2: TcxLabel
-          Left = 5
-          Top = 66
+          Left = 6
+          Top = 104
           Caption = #304#351' ID'
           ParentFont = False
           Style.Font.Charset = TURKISH_CHARSET
@@ -590,6 +592,81 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
           Style.Font.Style = []
           Style.IsFontAssigned = True
           Transparent = True
+        end
+        object ToolBarAranan: TToolBar
+          Left = 1
+          Top = 1
+          Width = 359
+          Height = 43
+          AutoSize = True
+          ButtonHeight = 39
+          ButtonWidth = 61
+          Caption = 'AletCubugu'
+          Color = clTeal
+          DrawingStyle = dsGradient
+          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          HotTrackColor = 65408
+          Images = Tablo.PNGImageList2
+          ParentColor = False
+          ParentFont = False
+          ShowCaptions = True
+          TabOrder = 15
+          Transparent = True
+          ExplicitLeft = 212
+          ExplicitTop = 19
+          ExplicitWidth = 187
+          object LabelTumKayitlar: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'T'#252'm Liste'
+            ImageIndex = 20
+            ImageName = 'PngImage20'
+          end
+          object LabelSonArananlar: TToolButton
+            Tag = 5
+            Left = 61
+            Top = 0
+            Caption = 'Son Aranan'
+            ImageIndex = 21
+            ImageName = 'PngImage21'
+          end
+          object LabelSikArananlar: TToolButton
+            Tag = 3
+            Left = 122
+            Top = 0
+            Caption = 'S'#305'k Aranan'
+            ImageIndex = 6
+            ImageName = 'PngImage6'
+          end
+        end
+        object cxLabelKayit: TcxLabel
+          Left = 5
+          Top = 318
+          Caption = 'Kay'#305't#'
+          ParentFont = False
+          Style.Font.Charset = TURKISH_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.IsFontAssigned = True
+          Transparent = True
+        end
+        object SpinKayitSayisi: TcxSpinEdit
+          Left = 101
+          Top = 316
+          Properties.ImmediatePost = True
+          TabOrder = 16
+          Value = 200
+          OnKeyUp = SpinKayitSayisiKeyUp
+          Width = 91
         end
       end
     end
@@ -601,7 +678,6 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
   end
   object TabListe: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 50
     Top = 305
   end
@@ -679,6 +755,3 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
     end
   end
 end
-
-
-

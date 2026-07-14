@@ -135,6 +135,10 @@ type
     GridKrediKartiViewYERELBAKIYE: TcxGridDBColumn;
     GridKrediKartiViewALACAKBAKIYE: TcxGridDBColumn;
     GridKrediKartiViewBORCBAKIYE: TcxGridDBColumn;
+    ToolButtonArama: TToolButton;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -154,9 +158,13 @@ type
     procedure GridKrediKartiViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure KKInfoMenuClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_KrediKarti_Liste_Json2)
     function HesapKesimBitTar: TDateTime;   // gecerli yil/ay/gun -> smalldatetime out-of-range engeli
     function EkranAdiAl: string;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -191,7 +199,8 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, UKrediKarti, PrjConst, UFastRap,
-URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame, UAnaForm,LocOnFly, ULog, UVeriMotor;
+URaporAraclari, UGenelAnaSekmeFrame, UKasalarListeFrame, UAnaForm,LocOnFly, ULog, UVeriMotor,
+System.JSON;
 
 {$R *.dfm}
 
@@ -411,6 +420,8 @@ end;
 
 procedure TKrediKartiListeFrame.KrediKartiEkranAc(Yeni: Boolean);
 begin
+  if (not Yeni) and (KREDIKARTI.Active) and (KREDIKARTI.RecordCount > 0) then
+    Tablo.AramaKaydet(MODUL_KrediKarti, KREDIKARTI.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
   with FFrameBilgi.IcerikGit(TKrediKarti).Git do begin
    with TKrediKarti(Ornek) do begin
      KapatEylemi := KrediKartiKapatEylemi;
@@ -524,12 +535,54 @@ begin
 end;
 
 procedure TKrediKartiListeFrame.YenileClick;
-var SQLText:string;
 begin
-  KREDIKARTI.SQL.Text := SqlMemo.Text;
-  if SubeVarmi then
-    KREDIKARTI.SQL.Text := KREDIKARTI.SQL.Text + ' and KK.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ';
-  TabloYenile(KREDIKARTI,[]);
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_KrediKarti_Liste_Json2)
+end;
+
+procedure TKrediKartiListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// Kredi Karti listesini sunucu-tarafi SP ile getirir (sp_Prog_KrediKarti_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (KrediKarti'da BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski KREDIKARTI sorgusuyla BIREBIR ayni; Son/Sik icin KULLANICI_ARAMA (MODUL_KrediKarti).
+//   Sube-yetki filtresi yalniz SubeVarmi ise gonderilir (eski YenileClick paritesi: KK.SUBEID in(...)).
+var
+  LocateID: Integer;
+  j: TJSONObject;
+begin
+  if (KREDIKARTI.Active) and (KREDIKARTI.RecordCount > 0) then
+    LocateID := KREDIKARTI.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
+    if SubeVarmi then
+      j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme));  // eski: KK.SUBEID in(...)
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));              // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_KrediKarti));                      // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (KrediKarti'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(KREDIKARTI, 'sp_Prog_KrediKarti_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TKrediKartiListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TKrediKartiListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TKrediKartiListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 procedure TKrediKartiListeFrame.YeniTusClick(Sender: TObject);

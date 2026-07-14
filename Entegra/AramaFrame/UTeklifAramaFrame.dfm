@@ -2,7 +2,7 @@ object TeklifAramaFrame: TTeklifAramaFrame
   Left = 0
   Top = 0
   Width = 451
-  Height = 304
+  Height = 445
   Align = alClient
   Color = clWhite
   Font.Charset = TURKISH_CHARSET
@@ -16,8 +16,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 3
-    Top = 1
+    Left = 198
+    Top = 45
     Width = 69
     Height = 22
     Caption = 'Yenile'
@@ -77,8 +77,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
       0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
   end
   object Label1: TcxLabel
-    Left = 0
-    Top = 137
+    Left = 2
+    Top = 152
     Caption = 'M'#252#351'teri'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -90,8 +90,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Transparent = True
   end
   object Label4: TcxLabel
-    Left = 0
-    Top = 110
+    Left = 2
+    Top = 125
     Caption = 'Haz'#305'rlayan'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -104,28 +104,28 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraRevize: TcxCheckBox
     Left = 0
-    Top = 271
+    Top = 286
     Caption = 'Revizeleri de g'#246'ster'
     TabOrder = 0
     Transparent = True
   end
   object AraTarihBas: TcxDateEdit
     Left = 77
-    Top = 31
+    Top = 46
     Properties.ImmediatePost = True
     TabOrder = 1
     Width = 115
   end
   object AraTarihBit: TcxDateEdit
     Left = 77
-    Top = 57
+    Top = 72
     Properties.ImmediatePost = True
     TabOrder = 2
     Width = 115
   end
   object AraMusteri: TcxButtonEdit
     Left = 77
-    Top = 136
+    Top = 151
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -146,7 +146,7 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraHazirlayan: TcxButtonEdit
     Left = 77
-    Top = 109
+    Top = 124
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -166,8 +166,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Width = 115
   end
   object cxLabel28: TcxLabel
-    Left = 0
-    Top = 243
+    Left = 2
+    Top = 260
     Caption = 'T'#252'r'#252
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -179,8 +179,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Transparent = True
   end
   object cxLabel22: TcxLabel
-    Left = 0
-    Top = 217
+    Left = 2
+    Top = 232
     Caption = 'Konusu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -192,8 +192,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Transparent = True
   end
   object cxLabel1: TcxLabel
-    Left = 0
-    Top = 191
+    Left = 2
+    Top = 206
     Caption = 'Durumu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -206,7 +206,7 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraDurumu: TcxImageComboBox
     Left = 77
-    Top = 189
+    Top = 204
     RepositoryItem = Tablo.repTeklifDurumu
     Properties.ClearKey = 46
     Properties.Items = <>
@@ -215,7 +215,7 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraTuru: TcxImageComboBox
     Left = 77
-    Top = 241
+    Top = 256
     RepositoryItem = Tablo.repTeklifTuru
     Properties.Items = <>
     TabOrder = 11
@@ -223,21 +223,21 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraKabulEdilenler: TcxCheckBox
     Left = 0
-    Top = 297
+    Top = 306
     Caption = 'Kabul edilenleri de g'#246'ster'
     TabOrder = 12
     Transparent = True
   end
   object AraReddedilenler: TcxCheckBox
     Left = 0
-    Top = 325
+    Top = 326
     Caption = 'Reddedilenleri de g'#246'ster'
     TabOrder = 13
     Transparent = True
   end
   object AraKonusu: TcxLookupComboBox
     Left = 77
-    Top = 215
+    Top = 230
     Hint = 'Teklif_Konusu'
     Properties.ClearKey = 46
     Properties.DropDownListStyle = lsFixedList
@@ -253,8 +253,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Width = 115
   end
   object cxLabel2: TcxLabel
-    Left = 0
-    Top = 163
+    Left = 2
+    Top = 181
     Caption = #220'r'#252'n'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -267,15 +267,15 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraStok: TcxTextEdit
     Left = 77
-    Top = 162
+    Top = 177
     TabOrder = 16
     OnKeyUp = AraStokKeyUp
     OnMouseUp = AraStokMouseUp
     Width = 115
   end
   object LabelPNO: TcxLabel
-    Left = 0
-    Top = 84
+    Left = 2
+    Top = 99
     Caption = '&Belge No'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -288,15 +288,15 @@ object TeklifAramaFrame: TTeklifAramaFrame
   end
   object AraFaturaNo: TcxTextEdit
     Left = 77
-    Top = 83
+    Top = 98
     TabOrder = 18
     OnKeyUp = AraFaturaNoKeyUp
     OnMouseUp = AraFaturaNoMouseUp
     Width = 115
   end
   object cxLabel3: TcxLabel
-    Left = 0
-    Top = 32
+    Left = 2
+    Top = 47
     Caption = '&Ba'#351'lama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -308,8 +308,8 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Transparent = True
   end
   object cxLabel4: TcxLabel
-    Left = 0
-    Top = 58
+    Left = 2
+    Top = 76
     Caption = '&Biti'#351
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -320,9 +320,53 @@ object TeklifAramaFrame: TTeklifAramaFrame
     Style.IsFontAssigned = True
     Transparent = True
   end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 19
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
+  end
   object TabSK: TFDQuery
     Connection = Tablo.FDCnn
-        ParamData = <>
     SQL.Strings = (
       'select null as ID, null as KONUSU'
       'union all '
@@ -330,14 +374,11 @@ object TeklifAramaFrame: TTeklifAramaFrame
         'select SIRANO as ID, ANAHTAR as KONUSU from REHBERINI where BOLU' +
         'M='#39'Teklif_Konusu'#39' order by 2')
     Left = 247
-    Top = 155
+    Top = 170
   end
   object DtsSK: TDataSource
     DataSet = TabSK
     Left = 246
-    Top = 69
+    Top = 84
   end
 end
-
-
-

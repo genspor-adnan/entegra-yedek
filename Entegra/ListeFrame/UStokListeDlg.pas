@@ -417,7 +417,8 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst,UGirisKutusuEx, UFastRap, URaporAraclari,
-     UGenelAnaSekmeFrame, UResim, UOpsDlg, UBarkodYazdir, LocOnFly, UExceldenVeriAl, UUTSDlg;
+     UGenelAnaSekmeFrame, UResim, UOpsDlg, UBarkodYazdir, LocOnFly, UExceldenVeriAl, UUTSDlg,
+     System.JSON;
 {$R *.dfm}
 
 var
@@ -569,6 +570,7 @@ procedure TStokListeDlg.Liste_SP_Cagir(AMod: SmallInt; ACokKullanBolum: Integer)
 var
   EkAlanlar, Barkod, SubeYetki: string;
   i, TopN: Integer;
+  j: TJSONObject;
 begin
   // @SelectList: ek (ozel) alanlar -> ',[Cap]=Field' (SP'de GROUP BY yok -> group listesi gerekmez)
   EkAlanlar := '';
@@ -592,35 +594,28 @@ begin
     Barkod := OkunanBarkod;
   end;
 
-  STOKLAR.Close;
-  STOKLAR.SQL.Text :=
-    'EXEC dbo.sp_Prog_Stok_Liste ' +
-    '@SelectList=:SelectList, @TopN=:TopN, @Mod=:Mod, @Pasif=:Pasif, ' +
-    '@StokAdi=:StokAdi, @Kod=:Kod, @KategoriID=:KategoriID, @MarkaID=:MarkaID, ' +
-    '@ModelID=:ModelID, @GrubuID=:GrubuID, @SubeID=:SubeID, @Barkod=:Barkod, ' +
-    '@SubeYetkiList=:SubeYetki, @CokKullanBolum=:CokKullanBolum, ' +
-    '@KulId=:KulId, @Modul=:Modul, @OrderBy=:OrderBy';
+  // @Kosullar: filtreler JSON (anahtarlar = tipli SP param adlari, @ olmadan). @Baslik = EkAlanlar.
+  //   Bos metinler eklenmez (SP absent key'i NULL sayar -> filtre uygulanmaz).
+  j := TJSONObject.Create;
+  j.AddPair('TopN', TJSONNumber.Create(TopN));
+  j.AddPair('Mod',  TJSONNumber.Create(AMod));
+  j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler.Checked)));
+  if Trim(FArama.AraStokAdi.Text) <> '' then j.AddPair('StokAdi', Trim(FArama.AraStokAdi.Text));
+  if Trim(FArama.AraKod.Text)     <> '' then j.AddPair('Kod',     Trim(FArama.AraKod.Text));
+  j.AddPair('KategoriID', TJSONNumber.Create(FArama.EditKategori.Tag));
+  j.AddPair('MarkaID',    TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboMarka.EditValue), 0)));
+  j.AddPair('ModelID',    TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboMODEL.EditValue), 0)));
+  j.AddPair('GrubuID',    TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboGrubu.EditValue), 0)));
+  j.AddPair('SubeID',     TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSUBE.EditValue), 1)));
+  if Barkod    <> '' then j.AddPair('Barkod',        Barkod);
+  if SubeYetki <> '' then j.AddPair('SubeYetkiList', SubeYetki);
+  j.AddPair('CokKullanBolum', TJSONNumber.Create(ACokKullanBolum));
+  j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+  j.AddPair('Modul', TJSONNumber.Create(MODUL_Stok));                 // KULLANICI_ARAMA.MODUL
+  if AMod = 1 then j.AddPair('OrderBy', '1');                         // Tum modda order by 1; Mod 3/5 SP icinde override
 
-  STOKLAR.ParamByName('SelectList').AsString      := EkAlanlar;
-  STOKLAR.ParamByName('TopN').AsInteger           := TopN;
-  STOKLAR.ParamByName('Mod').AsInteger            := AMod;
-  STOKLAR.ParamByName('Pasif').AsInteger          := Ord(FArama.CheckPasifler.Checked);
-  STOKLAR.ParamByName('StokAdi').AsString         := Trim(FArama.AraStokAdi.Text);
-  STOKLAR.ParamByName('Kod').AsString             := Trim(FArama.AraKod.Text);
-  STOKLAR.ParamByName('KategoriID').AsInteger     := FArama.EditKategori.Tag;
-  STOKLAR.ParamByName('MarkaID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboMarka.EditValue), 0);
-  STOKLAR.ParamByName('ModelID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboMODEL.EditValue), 0);
-  STOKLAR.ParamByName('GrubuID').AsInteger        := StrToIntDef(VarToStr(FArama.ComboGrubu.EditValue), 0);
-  STOKLAR.ParamByName('SubeID').AsInteger         := StrToIntDef(VarToStr(FArama.ComboSUBE.EditValue), 1);
-  STOKLAR.ParamByName('Barkod').AsString          := Barkod;
-  STOKLAR.ParamByName('SubeYetki').AsString       := SubeYetki;
-  STOKLAR.ParamByName('CokKullanBolum').AsInteger := ACokKullanBolum;
-  STOKLAR.ParamByName('KulId').AsInteger          := StrToIntDef(Kullanan, 0);      // Son/Sik icin kullanici
-  STOKLAR.ParamByName('Modul').AsInteger          := MODUL_Stok;                    // KULLANICI_ARAMA.MODUL
-  if AMod = 1 then STOKLAR.ParamByName('OrderBy').AsString := '1'
-  else STOKLAR.ParamByName('OrderBy').AsString :=  '';
-
-  TabloYenile(STOKLAR, []);
+  // Helper: EXEC dbo.sp_Prog_Stok_Liste_Json2 @Baslik/@Kosullar; j.Free + TabloYenile helper icinde
+  Tablo.ListeSPJson(STOKLAR, 'sp_Prog_Stok_Liste_Json2', EkAlanlar, j);
 
   if not AlanlarOlusturuldu then                                       // ilk yuklemede grid kolonlari
   begin

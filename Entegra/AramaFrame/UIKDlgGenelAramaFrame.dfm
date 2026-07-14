@@ -18,6 +18,51 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
     Left = 0
     Top = 24
   end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 3
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
+  end
   object cxLabel28: TcxLabel
     Left = 0
     Top = 193
@@ -33,24 +78,24 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
   end
   object PageControlArama: TcxPageControl
     Left = 0
-    Top = 0
+    Top = 43
     Width = 451
-    Height = 304
+    Height = 261
     Align = alClient
-    TabOrder = 2
+    TabOrder = 1
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
     Properties.Options = [pcoAlwaysShowGoDialogButton, pcoCloseButton, pcoFixedTabWidthWhenRotated, pcoGradient, pcoGradientClientArea, pcoRedrawOnResize]
-    ClientRectBottom = 303
-    ClientRectLeft = 1
-    ClientRectRight = 450
-    ClientRectTop = 1
+    ClientRectBottom = 257
+    ClientRectLeft = 4
+    ClientRectRight = 447
+    ClientRectTop = 4
     object cxTabSheet1: TcxTabSheet
       ImageIndex = 0
       object LabelPNO: TcxLabel
-        Left = 8
-        Top = 110
+        Left = -2
+        Top = 36
         Caption = 'Ad Soyad'
         FocusControl = AraFirma
         ParentFont = False
@@ -65,8 +110,8 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Width = 48
       end
       object Label3: TcxLabel
-        Left = 8
-        Top = 138
+        Left = -2
+        Top = 64
         Caption = '&Kod'
         FocusControl = AraKod
         ParentFont = False
@@ -78,91 +123,36 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Style.IsFontAssigned = True
         Transparent = True
       end
-      object LabelSonArananlar: TcxLabel
-        Tag = 4
-        Left = 8
-        Top = 27
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.DEGISTIRMETARIHI'
-        Caption = 'Son Arananlar'
-        FocusControl = AraFirma
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
-        Transparent = True
-      end
-      object LabelSIKArananlar: TcxLabel
-        Tag = 3
-        Left = 8
-        Top = 51
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.SAY'
-        Caption = 'S'#305'k Arananlar'
-        FocusControl = AraFirma
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
-        Transparent = True
-      end
       object AraFirma: TcxTextEdit
-        Left = 85
-        Top = 108
-        TabOrder = 4
+        Left = 59
+        Top = 34
+        TabOrder = 2
         Width = 115
       end
       object AraKod: TcxTextEdit
-        Left = 85
-        Top = 136
-        TabOrder = 5
+        Left = 59
+        Top = 62
+        TabOrder = 4
         Width = 115
       end
       object CheckPasifler: TcxCheckBox
-        Left = 85
-        Top = 168
+        Left = 59
+        Top = 94
         Caption = 'Pasifleri de g'#246'ster'
         TabOrder = 6
         Transparent = True
-        Width = 132
-      end
-      object LabelTumKayitlar: TcxLabel
-        Tag = 3
-        Left = 8
-        Top = 4
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.SAY'
-        Caption = 'T'#252'm Kay'#305'tlar'
-        FocusControl = AraFirma
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
-        Transparent = True
       end
       object SpinKayitSayisi: TcxSpinEdit
-        Left = 134
-        Top = 77
+        Left = 108
+        Top = 3
         Properties.ImmediatePost = True
-        TabOrder = 8
+        TabOrder = 3
         Value = 200
         Width = 66
       end
       object cxLabel6: TcxLabel
-        Left = 85
-        Top = 79
+        Left = 59
+        Top = 5
         Caption = 'Kay'#305't#'
         ParentFont = False
         Style.Font.Charset = TURKISH_CHARSET
@@ -207,42 +197,6 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Style.IsFontAssigned = True
         Transparent = True
       end
-      object LabelSonArananlar2: TcxLabel
-        Tag = 4
-        Left = 0
-        Top = 27
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.DEGISTIRMETARIHI'
-        Caption = 'Son Arananlar'
-        FocusControl = AraFirma2
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
-        Transparent = True
-      end
-      object LabelSIKArananlar2: TcxLabel
-        Tag = 3
-        Left = 0
-        Top = 51
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.SAY'
-        Caption = 'S'#305'k Arananlar'
-        FocusControl = AraFirma2
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
-        Transparent = True
-      end
       object cxLabel7: TcxLabel
         Left = 0
         Top = 124
@@ -260,39 +214,20 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
       object AraFirma2: TcxTextEdit
         Left = 77
         Top = 94
-        TabOrder = 5
+        TabOrder = 3
         Width = 115
       end
       object EditUcret: TcxTextEdit
         Left = 77
         Top = 334
-        TabOrder = 6
+        TabOrder = 4
         Width = 60
       end
       object CheckPasifler2: TcxCheckBox
         Left = 77
         Top = 361
         Caption = 'Pasifleri de g'#246'ster'
-        TabOrder = 8
-        Transparent = True
-        Width = 132
-      end
-      object LabelTumKayitlar2: TcxLabel
-        Tag = 3
-        Left = 0
-        Top = 4
-        Cursor = crHandPoint
-        HelpType = htKeyword
-        HelpKeyword = 'K.SAY'
-        Caption = 'T'#252'm Kay'#305'tlar'
-        FocusControl = AraFirma2
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clRed
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = [fsBold]
-        Style.IsFontAssigned = True
+        TabOrder = 6
         Transparent = True
       end
       object ComboIl: TcxImageComboBox
@@ -300,7 +235,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 253
         RepositoryItem = Tablo.Repiller
         Properties.Items = <>
-        TabOrder = 10
+        TabOrder = 7
         Width = 115
       end
       object ComboCinsiyet: TcxImageComboBox
@@ -308,7 +243,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 120
         RepositoryItem = Tablo.RepIKCinsiyet
         Properties.Items = <>
-        TabOrder = 11
+        TabOrder = 9
         Width = 115
       end
       object cxSpinEdit1: TcxSpinEdit
@@ -380,7 +315,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 172
         RepositoryItem = Tablo.RepCariSektor
         Properties.Items = <>
-        TabOrder = 17
+        TabOrder = 14
         Width = 115
       end
       object ComboDepartman: TcxImageComboBox
@@ -388,7 +323,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 199
         RepositoryItem = Tablo.RepCariBolum
         Properties.Items = <>
-        TabOrder = 18
+        TabOrder = 15
         Width = 115
       end
       object ComboGorev: TcxImageComboBox
@@ -396,7 +331,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 226
         RepositoryItem = Tablo.RepCariGorev
         Properties.Items = <>
-        TabOrder = 19
+        TabOrder = 17
         Width = 115
       end
       object cxLabel12: TcxLabel
@@ -418,7 +353,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 146
         RepositoryItem = Tablo.RepIKOgrenim
         Properties.Items = <>
-        TabOrder = 21
+        TabOrder = 19
         Width = 115
       end
       object cxLabel10: TcxLabel
@@ -438,7 +373,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
       object EditUcret2: TcxTextEdit
         Left = 136
         Top = 334
-        TabOrder = 7
+        TabOrder = 5
         Width = 60
       end
       object ComboDil1: TcxImageComboBox
@@ -468,7 +403,7 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         Top = 306
         RepositoryItem = Tablo.RepIKDiller
         Properties.Items = <>
-        TabOrder = 25
+        TabOrder = 20
         Width = 56
       end
       object cxLabel4: TcxLabel
@@ -494,28 +429,24 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
           end>
         Properties.ReadOnly = True
         Properties.OnButtonClick = EditUyrukPropertiesButtonClick
-        TabOrder = 27
+        TabOrder = 24
         Width = 115
       end
     end
   end
   object TabSK: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         ' select top 15 R.ID,R.FIRMA from KULLANICI_REHBER K inner join R' +
         'EHBER R on K.REHBERID=R.ID where KULID=5'
       ' order by K.DEGISTIRMETARIHI desc')
     Left = 223
-    Top = 50
+    Top = 42
   end
   object DtsSK: TDataSource
     DataSet = TabSK
-    Left = 174
-    Top = 39
+    Left = 206
+    Top = 7
   end
 end
-
-
-

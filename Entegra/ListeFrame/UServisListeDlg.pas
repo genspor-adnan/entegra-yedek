@@ -287,6 +287,10 @@ type
     procedure ButtonServisClick(Sender: TObject);
     procedure PopupMenuHareketPopup(Sender: TObject);
     procedure ServisInfoMenuClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Servis_Liste)
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -327,7 +331,7 @@ public
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
-     UFastRap, PrjConst,LocOnFly, UServisHareketEkle, FetaUtil, UVeriMotor;
+     UFastRap, PrjConst,LocOnFly, UServisHareketEkle, FetaUtil, UVeriMotor, System.JSON;
 
 {$R *.dfm}
 { TServisListeDlg }
@@ -405,6 +409,12 @@ begin
 
   ServisAlanlarOlusturuldu := False;
   HareketAlanlarOlusturuldu := False;
+  // Tum/Son/Sik Aranan butonlarini SP listeleme handler'larina bagla (sunucu-tarafi SP)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
 //  Tablo.GridAyarRestore('ServislerlerGridi',GridServisView );
   Tablo.GridAyarRestore('ServislerKabulGridi',GridKabulView );
   Tablo.EkAlanlariGrideEkle(GridHareketlerDBTableView1,'ServisSonlandirDlg');
@@ -524,7 +534,9 @@ procedure TServisListeDlg.DegisTusClick(Sender: TObject);
 var ID : Integer;
 begin
   if GridServisView.Controller.SelectedRecordCount > 0 then begin
-    if Tablo.ServisSihirbazBaslat(SERVIS.FieldByName('DEMIRBAS').AsBoolean, 'D',0,SERVIS.Fields[0].AsInteger, SERVIS.FieldByName('REHBERID').AsInteger) > 0 then
+    ID := SERVIS.Fields[0].AsInteger;
+    Tablo.AramaKaydet(MODUL_Servis, ID);   // Son/Sik Aranan takibi (kart acilinca upsert)
+    if Tablo.ServisSihirbazBaslat(SERVIS.FieldByName('DEMIRBAS').AsBoolean, 'D',0, ID, SERVIS.FieldByName('REHBERID').AsInteger) > 0 then
        JvTimer1Timer(Self);
   end;
 end;
@@ -664,7 +676,6 @@ var
   LocateID:integer;
 begin
   JvTimer1.Enabled := False;
-  if AktifVeriMotor = vmPG then Exit; // vServisListesi view + DFM nested TOP pilot disi - Depolar hedefi degil
   if (Tablo1.Active)and(Tablo1.RecordCount>0) then
     LocateID := Tablo1.FieldByName('ID').AsInteger;
   Tablo1.Close;
@@ -705,46 +716,9 @@ begin
    100;//herkesin
   end;   *)
 
-  if Tablo1.Name='SERVIS' then begin
-      if FArama.EditSerino.Text <>'' then
-         Tablo1.SQL.Text := Tablo1.SQL.Text + ' and S.SERINO like '''+FArama.EditSerino.Text+'%''';
-      if FArama.cbListe.EditValue = 1 then //aktif servislerim
-         Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where isnull(SH.BITISSEC,0)=0  and SH.SERVISID=S.ID and SH.PERSONEL='+Kullanan+') ')
-      else if FArama.cbListe.EditValue = 2 then //tüm servislerim
-            Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where SH.SERVISID=S.ID and SH.PERSONEL='+Kullanan+') ')
-      else if FArama.cbListe.EditValue = 5 then begin//Departman Tablo1leri
-         Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where SH.SERVISID=S.ID and SH.PERSONEL in ' +
-                           ' (select R.ID from REHBER R inner join ROLLER ROL on R.SINIF=ROL.ID ');
-         Tablo1.SQL.Add(' where ROL.DEPARTMAN=(select ROL.DEPARTMAN from REHBER R inner join ROLLER ROL on R.SINIF=ROL.ID '+
-                           ' where R.ID='+Kullanan+'))')//sadece kendi departmanım görür
-      end
-      else if FArama.cbListe.EditValue = 8 then //şube servislerim
-         Tablo1.SQL.Add(' AND S.SUBEID='+IntToStr(SubeID));
-
-      if FArama.AraDurumu.Text <> '' then
-         Tablo1.SQL.Add(' AND S.DURUM='+IntToStr(FArama.AraDurumu.EditValue));
-      if (FArama.AraDurumu.Text <> '')and (FArama.EditSorumlu.Tag > 0) then
-         Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where SH.SERVISID=S.ID and SH.DURUM='+vartostr(FArama.AraDurumu.EditValue)+' and SH.PERSONEL='+IntToStr(FArama.EditSorumlu.Tag)+') ')
-      else if (FArama.AraDurumu.Text = '')and (FArama.EditSorumlu.Tag > 0) then
-         Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where SH.SERVISID=S.ID and SH.PERSONEL='+IntToStr(FArama.EditSorumlu.Tag)+') ')
-      else if (FArama.AraDurumu.Text <> '')and (FArama.EditSorumlu.Tag = 0) then
-         Tablo1.SQL.Add(' AND exists (select 1 from vServisHareket SH where SH.SERVISID=S.ID and SH.DURUM='+vartostr(FArama.AraDurumu.EditValue)+') ');
-      //kapananları da göster
-      if FArama.EditNo.Text = '' then begin //eğer no araması yapılıyorsa geçmiş kayıtlara da bakılır
-          if FArama.CheckKapali.Checked then
-              case FArama.ComboTamamlanan.EditValue of
-                  1 : //bugün ise
-                      Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (round(cast(BASLAMATARIHI as float),0,1)=round(cast(Getdate() as float),0,1))) ');
-                  19000 : //iki tarih arası
-                      Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (BASLAMATARIHI between '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date)+''' '+
-                                                                                       ' and '''+FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date)+''')) ');
-                  else //son 1 ay, 1 yıl vb. ise
-                      Tablo1.SQL.Add(' and ((isnull(S.ACKAPA,0)=0) or (BASLAMATARIHI>='''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh-FArama.ComboTamamlanan.EditValue)+''')) ');;
-              end
-          else
-            Tablo1.SQL.Text := Tablo1.SQL.Text + ' and S.ACKAPA = 0 ';
-      end;
-  end else begin //SERVISHAREKET sekmesinde arama
+  // NOT: Servis listesi (SERVIS) artik sunucu-tarafi SP ile geliyor (Liste_SP_Cagir/sp_Prog_Servis_Liste).
+  //      HareketListele yalnizca SERVISHAREKET (vServisHareket) sekmesi icin kullaniliyor.
+  begin //SERVISHAREKET sekmesinde arama
       case FArama.cbListe.EditValue of
         1 : //aktif servislerim
          Tablo1.SQL.Add(' AND PERSONEL='+Kullanan);
@@ -802,16 +776,11 @@ begin
   end;
   //  TabloYenile(Tablo1,[],LocateID,'ID');
   TabloYenile(Tablo1,[]);
-  if (Tablo1.Name='SERVIS')and(not ServisAlanlarOlusturuldu) then begin
-      GridServisView.DataController.CreateAllItems(True);
-      Tablo.GridAyarRestore('ServislerGridi', GridServisView);
-      ServisAlanlarOlusturuldu := True;
-  end
-  else if (Tablo1.Name='HAREKET')and(not HareketAlanlarOlusturuldu) then begin
+  if (not HareketAlanlarOlusturuldu) then begin
        //GridHareketView.DataController.CreateAllItems(True);
        Tablo.GridAyarRestore('ServisHareketGridi', GridHareketView);
        HareketAlanlarOlusturuldu := True;
-    end;
+  end;
 
   (*  if (Tablo1.Name='SERVIS')and(not ServisAlanlarOlusturuldu) then begin
     Tablo.GridAyarRestore('ServislerGridi', GridServisView);
@@ -868,10 +837,11 @@ var
   s : string;
   LocateID:integer;
 begin
+  JvTimer1.Enabled := False;   // ONEMLI: kacak timer'i durdur (yoksa her 700ms tekrar tetiklenir - surekli kum saati)
   if PageControlServis.ActivePage=Tabhareket then
      HareketListele(HAREKET, GridHareketView, 'vServisHareket')
   else
-     HareketListele(SERVIS, GridServisView, 'vServislistesi')
+     Liste_SP_Cagir(4);   // Servis listesi -> sunucu-tarafi SP (sp_Prog_Servis_Liste)
 (*  JvTimer1.Enabled := False;
   if (SERVIS.Active)and(SERVIS.RecordCount>0) then
     LocateID := SERVIS.FieldByName('ID').AsInteger;
@@ -1017,6 +987,10 @@ procedure TServisListeDlg.SetArama(const Value: TServisAramaFrame);
 var k : word;
 begin
   FArama := Value;
+  // Tum/Son/Sik Aranan butonlarini SP listeleme handler'larina bagla (init sirasindan bagimsiz garanti)
+  FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+  FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+  FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   with FArama do begin
     YenileTus.Click;
     { Arama olay ataması }
@@ -1091,6 +1065,91 @@ end;
 procedure TServisListeDlg.YorumDzenle1Click(Sender: TObject);
 begin
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Servis);
+end;
+
+procedure TServisListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar (TOP yok) -> sunucu-tarafi SP
+end;
+
+procedure TServisListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TServisListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
+end;
+
+procedure TServisListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Servis listesini sunucu-tarafi SP ile getirir (2 PARAM JSON: sp_Prog_Servis_Liste_Json2).
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, GUVENILIR; Servis'te bos).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   AMod: 1=Tum (TOP yok), 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
+//   Bos metin filtreleri JSON'a EKLENMEZ (SP absent=NULL=filtre yok); bit/sayilar TJSONNumber.
+//   Sonuc kumesi eski 'select * from VServisListesi ...' ile BIREBIR aynidir (SELECT S.* view'den).
+var
+  TopN, LocateID, ServisNoId, cbListeVal: Integer;
+  ServisNo, SubeYetki: string;
+  j: TJSONObject;
+begin
+  if (SERVIS.Active) and (SERVIS.RecordCount > 0) then
+    LocateID := SERVIS.FieldByName('ID').AsInteger
+  else
+    LocateID := 0;
+
+  if AMod in [3, 5] then TopN := 200   // Son/Sik Aranan: sinirli (yeni islev)
+  else TopN := 0;                      // Tum/Filtre: eski davranis (limitsiz)
+
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(30, YetkiTur_Gorme)
+  else SubeYetki := '';
+
+  ServisNo   := Trim(FArama.EditNo.Text);
+  ServisNoId := StrToIntDef(FArama.EditNo.Text, 0);
+  cbListeVal := StrToIntDef(VarToStr(FArama.cbListe.EditValue), 9);
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN',  TJSONNumber.Create(TopN));
+    j.AddPair('Mod',   TJSONNumber.Create(AMod));
+    j.AddPair('Pasif', TJSONNumber.Create(0));                             // rezerve (servis'te aktif/pasif yok)
+    if ServisNo <> '' then j.AddPair('ServisNo', ServisNo);
+    if ServisNoId <> 0 then j.AddPair('ServisNoId', TJSONNumber.Create(ServisNoId));
+    if (FArama.EditKategori.Tag > 0) and (Trim(FArama.EditKategori.Text) <> '') then
+      j.AddPair('KategoriAd', FArama.EditKategori.Text);
+    if Trim(FArama.AraKonusu.Text)  <> '' then j.AddPair('Konusu',  Trim(FArama.AraKonusu.Text));
+    if Trim(FArama.editUrun.Text)   <> '' then j.AddPair('Urun',    Trim(FArama.editUrun.Text));
+    if Trim(FArama.AraMusteri.Text) <> '' then j.AddPair('Musteri', Trim(FArama.AraMusteri.Text));
+    if Trim(FArama.EditSerino.Text) <> '' then j.AddPair('SeriNo',  Trim(FArama.EditSerino.Text));
+    if SubeYetki <> '' then j.AddPair('SubeYetkiList', SubeYetki);
+    j.AddPair('cbListe',    TJSONNumber.Create(cbListeVal));
+    j.AddPair('Kullanan',   TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+    j.AddPair('SubeID',     TJSONNumber.Create(SubeID));
+    j.AddPair('Durum',      TJSONNumber.Create(StrToIntDef(VarToStr(FArama.AraDurumu.EditValue), 0)));
+    j.AddPair('DurumVar',   TJSONNumber.Create(Ord(Trim(FArama.AraDurumu.Text) <> '')));
+    j.AddPair('SorumluTag', TJSONNumber.Create(FArama.EditSorumlu.Tag));
+    j.AddPair('Kapali',     TJSONNumber.Create(Ord(FArama.CheckKapali.Checked)));
+    j.AddPair('Tamamlanan', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboTamamlanan.EditValue), 0)));
+    j.AddPair('KapaliTarih', FormatDateTime('yyyy-mm-dd',
+                               Tablo.GENINI.BugunTrh - StrToIntDef(VarToStr(FArama.ComboTamamlanan.EditValue), 0)));
+    j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date));
+    j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date));
+    j.AddPair('KulId',    TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul',    TJSONNumber.Create(MODUL_Servis));               // KULLANICI_ARAMA.MODUL
+
+    // Generic helper: @Baslik='' (Servis ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(SERVIS, 'sp_Prog_Servis_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+
+  if not ServisAlanlarOlusturuldu then begin                               // ilk yuklemede grid kolonlari
+    GridServisView.DataController.CreateAllItems(True);
+    Tablo.GridAyarRestore('ServislerGridi', GridServisView);
+    ServisAlanlarOlusturuldu := True;
+  end;
 end;
 
 initialization

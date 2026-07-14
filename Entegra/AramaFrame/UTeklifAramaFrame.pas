@@ -5,14 +5,17 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
-  Dialogs, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ComCtrls, ToolWin, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
   dxSkinsCore, cxCheckBox, cxMaskEdit, cxDropDownEdit, cxCalendar,UTablo,
   ExtCtrls, cxControls, cxContainer, cxEdit, cxTextEdit, cxGraphics, cxLabel,
   cxImageComboBox, cxDBEdit, cxButtonEdit, Buttons, dxSkinLondonLiquidSky, cxLookupEdit,
   cxDBLookupEdit, cxDBLookupComboBox, DB, FireDAC.Comp.Client, dxSkinLiquidSky, cxLookAndFeels, cxLookAndFeelPainters, dxCore, cxDateUtils, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010,
   dxSkinWhiteprint, dxSkinXmas2008Blue, dxSkinMetropolis, dxSkinMetropolisDark,
-  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray;
+  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxCoreGraphics,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TTeklifAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -40,6 +43,10 @@ type
     AraFaturaNo: TcxTextEdit;
     cxLabel3: TcxLabel;
     cxLabel4: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure AraMusteriPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure AraHazirlayanPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure AraKonusuLokPropertiesInitPopup(Sender: TObject);

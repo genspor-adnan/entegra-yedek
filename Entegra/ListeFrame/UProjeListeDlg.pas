@@ -38,7 +38,6 @@ type
     SilTus: TToolButton;
     ToolButton1: TToolButton;
     GorTus: TToolButton;
-    SQLMemo: TcxMemo;
     PROJELER: TFDQuery;
     YaziciYaz: TToolButton;
     ToolButton2: TToolButton;
@@ -198,6 +197,10 @@ type
     procedure PROJELERBeforeOpen(DataSet: TDataSet);
     procedure GrupA1Click(Sender: TObject);
     procedure JvTimer1Timer(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Proje_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure cxGridProjelerSelectionChanged(Sender: TcxCustomGridTableView);
     procedure TamamlandiIsaretleMenuClick(Sender: TObject);
     procedure PageControlSekmeChange(Sender: TObject);
@@ -276,9 +279,12 @@ type
 
 implementation
 
-uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, UIsListesi, UGorevDlg;
+uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, UIsListesi, UGorevDlg, System.JSON;
 
 {$R *.dfm}
+
+const
+  MODUL_Proje = 2111;   // MODUL.MODULID = 'Projeler Liste' (KULLANICI_ARAMA.MODUL; Stok'ta MODUL_Stok=27 karsiligi)
 
 { TProjeListeDlg }
 
@@ -312,53 +318,101 @@ end;
 procedure TProjeListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
-  ///  Gridde alan kontrolu
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Proje_Liste)
+end;
+
+procedure TProjeListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// 2 PARAM JSON: sp_Prog_Proje_Liste_Json2 @Baslik + @Kosullar (MSSQL-ONLY).
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR; Proje'de bos).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   Sonuc kumesi tipli-param SP (sp_Prog_Proje_Liste) ile birebir aynidir (parite dogrulandi).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); bool/sayi TJSONNumber.
+var
+  Sorumlu, Turu, Asama, Sonuc, KendiKul, KendiSube, TID: Integer;
+  SubeYetki: string;
+  j: TJSONObject;
+begin
+  // Grid ozel alanlari (orijinal davranis - SELECT'e dokunmaz)
   Tablo.GrideAlanEkle('PROJELER', 'ProjeWizardDlg', cxGridProjeler);
 
-  PROJELER.Close;
-  PROJELER.SQL.Text:= SQLMemo.Text;
-  if FArama.checkTarih.Checked then
-   begin
-     PROJELER.SQL.Add(' AND P.BASLAMATARIHI >= '''+FormatDateTime('yyyy-mm-dd 00:00',FArama.dateProjeBaslangic.Date) +''' ');
-     PROJELER.SQL.Add(' AND P.BASLAMATARIHI <= '''+FormatDateTime('yyyy-mm-dd 23:59',FArama.dateProjeBitis.Date) +''' ');
-   end;
-  if StringReplace(FArama.AraFirma.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND ISNULL(R1.FIRMA,'''') LIKE ''%'+FArama.AraFirma.Text+'%'' ');
-  if StringReplace(FArama.AraProjeKodu.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND ISNULL(P.PROJEKODU,'''') LIKE ''%'+FArama.AraProjeKodu.Text+'%'' ');
-  if StringReplace(FArama.AraProjeAdi.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND ISNULL(P.PROJEADI,'''') LIKE ''%'+FArama.AraProjeAdi.Text+'%'' ');
-  if StringReplace(FArama.ComboSorumlu.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND P.PRJ_SORUMLUSU_ID = '+IntToStr(FArama.ComboSorumlu.Tag)+' ');
-  if StringReplace(FArama.AraYetkili.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND ISNULL(RP.FIRMA,'''') LIKE ''%'+FArama.AraYetkili.Text+'%'' ');
-  if StringReplace(FArama.ComboKonusu.Text,' ','',[rfReplaceAll])<>'' then
-     PROJELER.SQL.Add(' AND ISNULL(P.KONUSU,'''') LIKE ''%'+FArama.ComboKonusu.Text+'%'' ');
+  // Sayisal filtreler (orijinal: EditValue>0 ise uygula)
+  Turu  := StrToIntDef(VarToStr(FArama.ComboTuru.EditValue), 0);
+  Asama := StrToIntDef(VarToStr(FArama.comboAsama.EditValue), 0);
+  Sonuc := StrToIntDef(VarToStr(FArama.comboSonuc.EditValue), 0);
+  if Trim(FArama.ComboSorumlu.Text) <> '' then Sorumlu := FArama.ComboSorumlu.Tag
+  else Sorumlu := 0;
 
-  if FArama.ComboTuru.EditValue>0 then
-     PROJELER.SQL.Add(' AND P.TURU ='+VarToStr(FArama.ComboTuru.EditValue)+' ');
-
-  if FArama.comboAsama.EditValue>0 then
-     PROJELER.SQL.Add(' AND P.ASAMA='+VarToStr(FArama.comboAsama.EditValue)+'');
-  if FArama.comboSonuc.EditValue>0 then
-     PROJELER.SQL.Add(' AND P.SONUC='+VarToStr(FArama.comboSonuc.EditValue)+'');
-
-  if not(FArama.checkKapaliGoster.Checked) then
-     PROJELER.SQL.Add(' AND P.DURUM <> 2 ');
-
+  // Modul yetkisi (ModulYetki_TekSubeTum.Proje: 1=kendi projeleri, 10=kendi sube)
+  KendiKul := 0; KendiSube := 0;
   case ModulYetki_TekSubeTum.Proje of
-     1: PROJELER.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi projelerini g?r?r
-    10: PROJELER.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi ?ube projelerini g?r?r
+     1: KendiKul  := StrToIntDef(Kullanan, 0);
+    10: KendiSube := SubeId;
   end;
 
-  if SubeVarmi then
-     PROJELER.SQL.Text:=PROJELER.SQL.Text+ ' and P.SUBEID in('+Tablo.YetkiliSubeleriGetir(21,YetkiTur_Gorme)+') ';
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(21, YetkiTur_Gorme)
+  else SubeYetki := '';
 
-  PROJELER.SQL.Add(' ORDER BY SATISKUR ');
-  TabloYenile(PROJELER,[Kullanan],ProjeID,'ID');
-  ProjeID := ProjeID;
-  RehberId:= PROJELER.FieldByName('REHBERID').AsInteger;
+  // Yenileme sonrasi ayni satiri sec (LocateID)
+  if (PROJELER.Active) and (PROJELER.RecordCount > 0) then
+    TID := PROJELER.FieldByName('ID').AsInteger
+  else
+    TID := -1;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN',  TJSONNumber.Create(0));                                  // orijinalde TOP yoktu
+    j.AddPair('Mod',   TJSONNumber.Create(AMod));
+    j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.checkKapaliGoster.Checked)));
+    if Trim(FArama.AraFirma.Text)     <> '' then j.AddPair('Firma',     Trim(FArama.AraFirma.Text));
+    if Trim(FArama.AraProjeKodu.Text) <> '' then j.AddPair('ProjeKodu', Trim(FArama.AraProjeKodu.Text));
+    if Trim(FArama.AraProjeAdi.Text)  <> '' then j.AddPair('ProjeAdi',  Trim(FArama.AraProjeAdi.Text));
+    if Trim(FArama.AraYetkili.Text)   <> '' then j.AddPair('Yetkili',   Trim(FArama.AraYetkili.Text));
+    if Trim(FArama.ComboKonusu.Text)  <> '' then j.AddPair('Konusu',    Trim(FArama.ComboKonusu.Text));
+    if Sorumlu > 0 then j.AddPair('Sorumlu', TJSONNumber.Create(Sorumlu));
+    if Turu    > 0 then j.AddPair('Turu',    TJSONNumber.Create(Turu));
+    if Asama   > 0 then j.AddPair('Asama',   TJSONNumber.Create(Asama));
+    if Sonuc   > 0 then j.AddPair('Sonuc',   TJSONNumber.Create(Sonuc));
+    if FArama.checkTarih.Checked then begin
+      // ISO 8601 ('T' ayirici) -> TRY_CAST AS DATETIME dil-bagimsiz
+      j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd"T"hh:nn:ss', Int(FArama.dateProjeBaslangic.Date)));
+      j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd"T"hh:nn:ss', Int(FArama.dateProjeBitis.Date) + EncodeTime(23, 59, 0, 0)));
+    end;
+    if KendiKul  > 0 then j.AddPair('KendiKul',  TJSONNumber.Create(KendiKul));
+    if KendiSube > 0 then j.AddPair('KendiSube', TJSONNumber.Create(KendiSube));
+    if SubeYetki <> '' then j.AddPair('SubeYetkiList', SubeYetki);
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Proje));               // KULLANICI_ARAMA.MODUL
+    if not (AMod in [3, 5]) then
+      j.AddPair('OrderBy', 'SATISKUR');   // orijinal: ORDER BY SATISKUR; Son/Sik SP icinde ezilir
+
+    // Generic helper: @Baslik='' (Proje ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(PROJELER, 'sp_Prog_Proje_Liste_Json2', '', j, TID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+
+  if not PROJELER.IsEmpty then begin
+    ProjeID  := PROJELER.Fields[0].AsInteger;
+    RehberId := PROJELER.FieldByName('REHBERID').AsInteger;
+  end;
   cxGridProjeler.ViewData.Expand(True);
+end;
+
+procedure TProjeListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum Liste -> sunucu-tarafi SP
+end;
+
+procedure TProjeListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TProjeListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 function TProjeListeDlg.EkranAdiAl: string;
@@ -398,6 +452,13 @@ var ra : string;
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   Tablo.GridAyarRestore('ProjelerGridi',cxGridProjeler );
+
+  // Tum/Son/Sik Aranan butonlarini list frame handler'larina bagla (sunucu-tarafi SP)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
 
   Tablo.GridTurkcelestir;
 
@@ -670,6 +731,7 @@ end;
 procedure TProjeListeDlg.GorTusClick(Sender: TObject);
 begin
    if PageControlUst.ActivePage=TabSheetGrup then begin
+      Tablo.AramaKaydet(MODUL_Proje, ProjeID);   // Son/Sik Aranan takibi (kart acilinca upsert)
       Tablo.ProjeSihirbazBaslat('D',  ProjeID, RehberId ,Tablo.GENINI.BugunTrh);
       //tekrar g?sterelim, bunun i?in silip ekleyelim
       FTileControl.DeleteItem(SecilenItem);
@@ -682,6 +744,7 @@ begin
    end else begin
        ProjeID := PROJELER.Fields[0].AsInteger;
        RehberId:= PROJELER.FieldByName('REHBERID').AsInteger;
+       Tablo.AramaKaydet(MODUL_Proje, ProjeID);   // Son/Sik Aranan takibi (kart acilinca upsert)
        if Tablo.ProjeSihirbazBaslat('D',  ProjeID, RehberId, Tablo.GENINI.BugunTrh) > 0 then
           FArama.YenileTus.Click;
        Sleep(1000);

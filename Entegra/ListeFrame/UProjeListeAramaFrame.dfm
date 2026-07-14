@@ -2,7 +2,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   Left = 0
   Top = 0
   Width = 451
-  Height = 304
+  Height = 396
   Align = alClient
   Color = clWhite
   Font.Charset = TURKISH_CHARSET
@@ -16,8 +16,8 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 2
-    Top = 2
+    Left = 198
+    Top = 51
     Width = 67
     Height = 20
     Caption = 'Yenile'
@@ -78,7 +78,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object lbl6: TcxLabel
     Left = 0
-    Top = 308
+    Top = 331
     Caption = 'Sorumlu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -91,7 +91,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object lbl4: TcxLabel
     Left = 0
-    Top = 223
+    Top = 246
     Caption = 'Konusu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -104,7 +104,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object lbl3: TcxLabel
     Left = 0
-    Top = 138
+    Top = 161
     Caption = 'T'#252'r'#252
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -117,7 +117,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object lblPNO: TcxLabel
     Left = 0
-    Top = 166
+    Top = 189
     Caption = 'M'#252#351'teri'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -130,7 +130,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object lbl1: TcxLabel
     Left = 0
-    Top = 196
+    Top = 219
     Caption = #304'lgili'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -143,7 +143,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object dateProjeBitis: TcxDateEdit
     Left = 77
-    Top = 50
+    Top = 73
     Enabled = False
     Properties.ImmediatePost = True
     TabOrder = 1
@@ -151,7 +151,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object dateProjeBaslangic: TcxDateEdit
     Left = 77
-    Top = 24
+    Top = 47
     Enabled = False
     Properties.ImmediatePost = True
     TabOrder = 0
@@ -159,7 +159,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object ComboTuru: TcxImageComboBox
     Left = 77
-    Top = 134
+    Top = 157
     RepositoryItem = Tablo.repProjeTuru
     Properties.Items = <>
     TabOrder = 4
@@ -167,14 +167,14 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object ComboKonusu: TcxComboBox
     Left = 77
-    Top = 219
+    Top = 242
     RepositoryItem = Tablo.repProjeKonu
     TabOrder = 5
     Width = 115
   end
   object comboSorumlu: TcxButtonEdit
     Left = 77
-    Top = 304
+    Top = 327
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -196,7 +196,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object checkTarih: TcxCheckBox
     Left = -2
-    Top = 40
+    Top = 63
     Caption = 'Tarih'
     Properties.ImmediatePost = True
     Properties.NullStyle = nssUnchecked
@@ -206,7 +206,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object comboAsama: TcxImageComboBox
     Left = 77
-    Top = 248
+    Top = 271
     RepositoryItem = Tablo.repProjeAsama
     Properties.Items = <>
     TabOrder = 6
@@ -214,7 +214,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object cxLabel1: TcxLabel
     Left = 0
-    Top = 252
+    Top = 275
     Caption = 'A'#351'ama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -227,7 +227,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object AraFirma: TcxButtonEdit
     Left = 77
-    Top = 162
+    Top = 185
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -248,7 +248,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object checkKapaliGoster: TcxCheckBox
     Left = 0
-    Top = 331
+    Top = 354
     Caption = 'Kapal'#305' Projeleri de g'#246'ster'
     Properties.ImmediatePost = True
     Properties.NullStyle = nssUnchecked
@@ -258,14 +258,14 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object comboSonuc: TcxImageComboBox
     Left = 77
-    Top = 276
+    Top = 299
     Properties.Items = <>
     TabOrder = 7
     Width = 115
   end
   object cxLabel3: TcxLabel
     Left = 0
-    Top = 280
+    Top = 303
     Caption = 'Sonu'#231
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -278,13 +278,13 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object AraProjeKodu: TcxTextEdit
     Left = 77
-    Top = 78
+    Top = 101
     TabOrder = 2
     Width = 115
   end
   object cxLabel4: TcxLabel
     Left = 0
-    Top = 79
+    Top = 102
     Caption = 'Proje Kodu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -299,7 +299,7 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object AraYetkili: TcxButtonEdit
     Left = 77
-    Top = 192
+    Top = 215
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -320,13 +320,13 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
   end
   object AraProjeAdi: TcxTextEdit
     Left = 77
-    Top = 106
+    Top = 129
     TabOrder = 20
     Width = 115
   end
   object cxLabel2: TcxLabel
     Left = 0
-    Top = 110
+    Top = 133
     Caption = 'Proje Ad'#305
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -338,5 +338,56 @@ object ProjeListeAramaFrame: TProjeListeAramaFrame
     Properties.WordWrap = True
     Transparent = True
     Width = 47
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 21
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Tag = 1
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
 end

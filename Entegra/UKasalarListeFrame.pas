@@ -30,7 +30,9 @@ uses
   dxSkinOffice2016Dark, dxSkinSevenClassic, dxSkinSharpPlus,
   dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
   dxSkinVisualStudio2013Light, dxSkinVS2010, dxSkinWhiteprint, dxDateRanges,
-  dxScrollbarAnnotations, frCoreClasses;
+  dxScrollbarAnnotations, frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TKasalarListeFrame = class(TFrame, IIcerikBilgiFrame, IBilgiFrame,IPopupDialog)
@@ -156,6 +158,10 @@ type
     KurFarkGeliri1: TMenuItem;
     KurFarkGideri1: TMenuItem;
     N8: TMenuItem;
+    ToolButtonSSSAyrac: TToolButton;           // ayrac (Tum/Son/Sik butonlari icin)
+    LabelTumKayitlar: TToolButton;             // Tum Liste (Liste_SP_Cagir 1)
+    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
+    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
 //    procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure KasaYenileTusClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
@@ -185,10 +191,14 @@ type
     procedure Label1Click(Sender: TObject);
     procedure KurFarkGeliri1Click(Sender: TObject);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TKasalarAramaFrame;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Kasalar_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -218,7 +228,7 @@ type
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,
-  UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly, UVeriMotor;
+  UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly, UVeriMotor, System.JSON;
 
 {$R *.dfm}
 
@@ -422,6 +432,8 @@ begin
   if GridTview.Controller.SelectedRecordCount > 0 then
   begin
     srid:=GridTview.DataController.FocusedRecordIndex;
+    if (KASALAR.Active) and (KASALAR.RecordCount > 0) then
+      Tablo.AramaKaydet(MODUL_Kasalar, KASALAR.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
      if Tablo.KasaTanimSihirbazBaslat('D', 0, KASALAR.Fields[0].AsInteger) > 0 then begin
         YenileTusClick;
      end;
@@ -646,16 +658,63 @@ end;
 
 procedure TKasalarListeFrame.YenileTusClick;
 begin
-   KASALAR.Close;
-   KASALAR.SQL.Text:=SqlMemo.Text;
-   if SubeVarmi then begin
+   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Kasalar_Liste_Json2)
+end;
+
+procedure TKasalarListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// Kasa tanim listesini sunucu-tarafi SP ile getirir (sp_Prog_Kasalar_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (Kasalar'da BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski YenileTusClick sorgusuyla BIREBIR; Son/Sik icin KULLANICI_ARAMA (MODUL_Kasalar).
+//   Sube suzgeci (SubeVarmi): eski kod ComboSube.EditValue >= 0 -> yetki listesi (Tum Subeler=0),
+//   < 0 -> tek sube (belirli sube REHBER.ID<0 negatif ID). Parite icin ayni dallanma korunur.
+var
+  LocateID, SubeDeg: Integer;
+  j: TJSONObject;
+begin
+  if (KASALAR.Active) and (KASALAR.RecordCount > 0) then
+    LocateID := KASALAR.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
+    if SubeVarmi then begin
       if FArama.ComboSube.EditValue >= 0 then
-         KASALAR.SQL.Add(' and SUBEID in('+Tablo.YetkiliSubeleriGetir(23,YetkiTur_Gorme)+') ')
-      else
-         KASALAR.SQL.add(' and SUBEID ='+IntToStr(FArama.ComboSube.EditValue)+' ');
-   end;
-   KASALAR.SQL.Add(' order by KASAKODU');
-   TabloYenile(KASALAR,[]);
+        // Tum Subeler (ComboSube=0) -> yetkili subeler (app-uretimi tam-sayi listesi, GUVENILIR)
+        j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(23, YetkiTur_Gorme))
+      else begin
+        // Belirli sube (ComboSube negatif ID) -> tek sube
+        SubeDeg := FArama.ComboSube.EditValue;
+        j.AddPair('SubeId', TJSONNumber.Create(SubeDeg));
+      end;
+    end;
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Kasalar));             // KULLANICI_ARAMA.MODUL
+    j.AddPair('OrderBy', 'KASAKODU');                                  // eski: order by KASAKODU
+
+    // @Baslik='' (Kasalar'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(KASALAR, 'sp_Prog_Kasalar_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TKasalarListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TKasalarListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TKasalarListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

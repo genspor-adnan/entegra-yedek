@@ -1,2 +1,1 @@
-SET NOCOUNT ON;
-SELECT i.name AS pk_name FROM BILIM.sys.indexes i WHERE i.object_id=OBJECT_ID('BILIM.dbo.BANKALAR') AND i.is_primary_key=1;
+SELECT o.name, o.create_date, o.modify_date FROM sys.objects o WHERE o.name='sp_Prog_Firsat_Liste';

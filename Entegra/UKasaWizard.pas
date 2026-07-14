@@ -1022,7 +1022,7 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject; const FromPage: T
        else
           SimdikiFaizTut := 0.0;
 
-      ComboBoxTahAciklama.text := Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+' Ref. ?deme';
+      ComboBoxTahAciklama.text := Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+' Ref. Ödeme';
       if Pos('Anapara',OdemeTuru)>0 then
          EditTahsilatTutar.Value := BakiyeAnaparaTut
       else
@@ -2284,19 +2284,19 @@ var     j : SmallInt;
                    else
                       HesapTuru := 'B';
                    if Turu=51 then begin
-                      Acikla:=Tablo.AciklamaGetir('CEKLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu ?ek Tahsilat?';
+                      Acikla:=Tablo.AciklamaGetir('CEKLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Çek Tahsilatı';
                       BorcTutar := 0;
                       AlacakTutar := CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency;
                    end else if Turu=52 then begin
-                      Acikla:=Tablo.AciklamaGetir('SENETLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Senet Tahsilat?';
+                      Acikla:=Tablo.AciklamaGetir('SENETLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Senet Tahsilatı';
                       BorcTutar := 0;
                       AlacakTutar := CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency;
                    end else if Turu=53 then begin
-                      Acikla:=Tablo.AciklamaGetir('CEKLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu ?ek ?demesi';
+                      Acikla:=Tablo.AciklamaGetir('CEKLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Çek Ödemesi';
                       BorcTutar := CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency;
                       AlacakTutar := 0;
                    end else if Turu=54 then begin
-                      Acikla:=Tablo.AciklamaGetir('SENETLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Senet ?demesi';
+                      Acikla:=Tablo.AciklamaGetir('SENETLER','SERINO',CekSenetKrediQuery.FieldByName('ID').AsInteger)+' Nolu Senet Ödemesi';
                       BorcTutar := CekSenetKrediQuery.FieldByName('TUTAR').AsCurrency;
                       AlacakTutar := 0;
                    end;

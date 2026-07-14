@@ -2,7 +2,7 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
   Left = 0
   Top = 0
   Width = 451
-  Height = 304
+  Height = 436
   Align = alClient
   Color = clWhite
   Font.Charset = TURKISH_CHARSET
@@ -16,8 +16,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 2
-    Top = 2
+    Left = 206
+    Top = 49
     Width = 67
     Height = 20
     Caption = 'Yenile'
@@ -77,8 +77,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
       0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
   end
   object lbl6: TcxLabel
-    Left = 0
-    Top = 79
+    Left = 8
+    Top = 104
     Caption = 'Sorumlu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -90,8 +90,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object lbl4: TcxLabel
-    Left = 0
-    Top = 105
+    Left = 8
+    Top = 130
     Caption = 'Ad'#305' / Konusu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -103,8 +103,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object lbl3: TcxLabel
-    Left = 0
-    Top = 130
+    Left = 8
+    Top = 155
     Caption = 'T'#252'r'#252
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -116,8 +116,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object lblPNO: TcxLabel
-    Left = 0
-    Top = 180
+    Left = 8
+    Top = 205
     Caption = 'M'#252#351'teri'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -129,39 +129,39 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object dateProjeBitis: TcxDateEdit
-    Left = 77
-    Top = 49
+    Left = 85
+    Top = 74
     Enabled = False
     Properties.ImmediatePost = True
     TabOrder = 1
     Width = 115
   end
   object dateProjeBaslangic: TcxDateEdit
-    Left = 77
-    Top = 24
+    Left = 85
+    Top = 49
     Enabled = False
     Properties.ImmediatePost = True
     TabOrder = 0
     Width = 115
   end
   object ComboTuru: TcxImageComboBox
-    Left = 77
-    Top = 126
+    Left = 85
+    Top = 151
     RepositoryItem = Tablo.repFirsatTuru
     Properties.Items = <>
     TabOrder = 4
     Width = 115
   end
   object ComboKonusu: TcxComboBox
-    Left = 77
-    Top = 101
+    Left = 85
+    Top = 126
     RepositoryItem = Tablo.repFirsatKonu
     TabOrder = 5
     Width = 115
   end
   object comboSorumlu: TcxButtonEdit
-    Left = 77
-    Top = 75
+    Left = 85
+    Top = 100
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -182,8 +182,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Width = 115
   end
   object checkTarih: TcxCheckBox
-    Left = -2
-    Top = 40
+    Left = 6
+    Top = 65
     Caption = 'Tarih'
     Properties.ImmediatePost = True
     Properties.NullStyle = nssUnchecked
@@ -192,16 +192,16 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object comboAsama: TcxImageComboBox
-    Left = 77
-    Top = 151
+    Left = 85
+    Top = 176
     RepositoryItem = Tablo.RepFirsatAsama
     Properties.Items = <>
     TabOrder = 6
     Width = 115
   end
   object cxLabel1: TcxLabel
-    Left = 0
-    Top = 155
+    Left = 8
+    Top = 180
     Caption = 'A'#351'ama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -213,8 +213,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object AraFirma: TcxButtonEdit
-    Left = 77
-    Top = 176
+    Left = 85
+    Top = 201
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -234,8 +234,8 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Width = 115
   end
   object checkKapaliGoster: TcxCheckBox
-    Left = 43
-    Top = 228
+    Left = 8
+    Top = 253
     Caption = 'Kapal'#305' f'#305'rsatlar'#305' da g'#246'ster'
     Properties.ImmediatePost = True
     Properties.NullStyle = nssUnchecked
@@ -244,14 +244,14 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Transparent = True
   end
   object AraProjeKodu: TcxTextEdit
-    Left = 77
-    Top = 201
+    Left = 85
+    Top = 226
     TabOrder = 2
     Width = 115
   end
   object cxLabel4: TcxLabel
-    Left = 0
-    Top = 202
+    Left = 8
+    Top = 227
     Caption = 'F'#305'rsat Kodu'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -263,5 +263,56 @@ object FirsatListeAramaFrame: TFirsatListeAramaFrame
     Properties.WordWrap = True
     Transparent = True
     Width = 61
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 15
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Tag = 1
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
 end

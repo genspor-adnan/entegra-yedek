@@ -158,7 +158,9 @@ end;
 
 procedure TStokAramaFrame.Gorunur;
 begin
-//  Tablo.StokInit(TcxImageComboBoxProperties(ComboMarka.Properties), nil, TcxImageComboBoxProperties(ComboKategori.Properties), TcxImageComboBoxProperties(ComboGRUBU.Properties), TcxImageComboBoxProperties(ComboSUBE.Properties), nil, nil, nil, TcxImageComboBoxProperties(ComboAnaliz.Properties),nil);
+  // Marka combosu ID yerine isim gostersin: kullandigi repStokMarka.Items'ini GENINI'den tazele.
+  //   (Paylasilan repStokMarka baska ekranda temizlenmis/gec dolmus olabilir; StokInit kaldirilmis.)
+  Tablo.GENINI.ReadImageSection(Ops_StokKart_Marka, Tablo.repStokMarka.Properties.Items, True);
 end;
 
 

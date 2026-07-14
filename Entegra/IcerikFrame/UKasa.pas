@@ -1,4 +1,4 @@
-﻿unit UKasa;
+﻿unit  UKasa;
 //tcxintl not found cxintl1
 interface
 
@@ -269,7 +269,7 @@ uses
   URehAraDlg, UGrid, UQuantGrid, FetaUtil, UListe, UListeCheck,
   UVadesiGelmisler, UCekSenetArama, Math, DateUtils, UCxUtils,    //UCekListe
   UKasaWizard, FetaKurulusSiniflari, FetaClassExtensions,PrjConst,
-  FetaClassExtensionsConsts,UMakbuzWizard, UNakitDlg,LocOnFly;
+  FetaClassExtensionsConsts,UMakbuzWizard, UNakitDlg,LocOnFly, System.JSON;
 
 {$R *.DFM}
 var
@@ -602,6 +602,9 @@ begin
 end;
 
 procedure TKasaDlg.Calendar1Change(Sender :TObject);
+var
+  j : TJSONObject;
+  subeId : Integer;
 begin
 //  if not Tablo.TabRehber.Active then exit;
   FArama.CheckTop.Checked := False;
@@ -610,72 +613,30 @@ begin
   if FArama.Calendar1.Date<StrToDate('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+'2000') then exit;
   if FArama.Calendar2.Date<StrToDate('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+'2000') then exit;
 
-  KASA.Close;
-  KASA.SQL.Text := SQLKasa.Text+
-    ' Where ' +
-    ' K.ISLEMTARIHI >= ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + ' '+' '+KasaBasZamani+''' and' +
-    ' K.ISLEMTARIHI < ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar2.Date+KasaEkleGun) + ' '+KasaBitZamani+''' ';
-    if SubeVarmi then begin
-      if FArama.ComboSube.EditValue = 0 then
-         KASA.SQL.add(' and K.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ')
-      else
-         KASA.SQL.add(' and K.SUBEID ='+IntToStr(FArama.ComboSube.EditValue)+' ');
-    end;
-
-//  if not CheckTah.Checked then
-//     KASA.SQL.Add(' and not(TUR between 11 and 19) ');
-  if not FArama.CheckKasa.Checked then
-     KASA.SQL.Add(' and not(K.TUR between 21 and 39) ');
-  if not FArama.CheckPlan.Checked then
-     KASA.SQL.Add(' and not(K.TUR between 61 and 79) ');
-
-
-  //if FArama.CheckFat.Checked then
-{  begin
-    KASA.SQL.add(SQLPersonel.Text+
-    ' Where TARIH >= ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + ' '+KasaBasZamani+' and' +
-    ' TARIH < ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + KasaBitZamani+' '+
-    '      group by P.ID,REHBERID,TARIH,R.KOD,R.FIRMA,P.EKLEYEN, P.KUR, D.ACIKLAMA ' );
-  end;  }
-
-  if FArama.CheckFat.Checked then  begin
-    KASA.SQL.add(SQLFatura.Text+
-    ' Where F.TUR not in (2,6,10,14,20) and isnull(F.DURUM,0)<>6 and ' +
-    ' FATURATARIH >= ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + ' '+KasaBasZamani+''' and' +
-    ' FATURATARIH < ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar2.Date+KasaEkleGun) + ' '+KasaBitZamani+''' ');
-    if SubeVarmi then begin
-       if FArama.ComboSube.EditValue = 0 then
-          KASA.SQL.add(' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ')
-       else
-          KASA.SQL.add(' and F.SUBEID ='+IntToStr(FArama.ComboSube.EditValue)+' ');
-    end;
-  end;
-  if FArama.CheckCekSenet.Checked then
-  begin
-    KASA.SQL.add(SQLCek.Text+
-    ' Where CH.ISLEM in(130,131,132,133,134,135,137,138,140,141) and ' +
-    ' CH.TARIH >= ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + ' '+KasaBasZamani+''' and' +
-    ' CH.TARIH < ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar2.Date+KasaEkleGun) + ' '+KasaBitZamani+''' ');
-    if SubeVarmi then begin
-       if FArama.ComboSube.EditValue = 0 then
-          KASA.SQL.add(' and C.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ')
-       else
-          KASA.SQL.add(' and C.SUBEID ='+IntToStr(FArama.ComboSube.EditValue)+' ');
-    end;
-
-    KASA.SQL.add(SQLSenet.Text+
-    ' Where ' +
-    ' C.TARIH >= ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date) + ' '+KasaBasZamani+''' and' +
-    ' C.TARIH < ''' + FormatDateTime('yyyy-mm-dd', FArama.Calendar2.Date+KasaEkleGun) + ' '+KasaBitZamani+''' ');
-    if SubeVarmi then begin
-       if FArama.ComboSube.EditValue = 0 then
-          KASA.SQL.add(' and C.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ')
-       else
-          KASA.SQL.add(' and C.SUBEID ='+IntToStr(FArama.ComboSube.EditValue)+' ');
+  // Cok-kaynakli KASA sorgusu artik sunucu-tarafi SP'de kuruluyor (sp_Prog_Kasa_Hareket_Json2).
+  // Eski dinamik SQL ile BIREBIR ayni UNION ALL sonucu; filtreler JSON ile gecirilir.
+  j := TJSONObject.Create;
+  j.AddPair('Cal1', FormatDateTime('yyyy-mm-dd', FArama.Calendar1.Date));
+  j.AddPair('Cal2', FormatDateTime('yyyy-mm-dd', FArama.Calendar2.Date));
+  j.AddPair('BasZaman', string(KasaBasZamani));
+  j.AddPair('BitZaman', string(KasaBitZamani));
+  j.AddPair('EkleGun', TJSONNumber.Create(KasaEkleGun));
+  j.AddPair('CheckKasa', TJSONNumber.Create(Ord(FArama.CheckKasa.Checked)));
+  j.AddPair('CheckPlan', TJSONNumber.Create(Ord(FArama.CheckPlan.Checked)));
+  j.AddPair('CheckFat', TJSONNumber.Create(Ord(FArama.CheckFat.Checked)));
+  j.AddPair('CheckCekSenet', TJSONNumber.Create(Ord(FArama.CheckCekSenet.Checked)));
+  if SubeVarmi then begin
+    if FArama.ComboSube.EditValue = 0 then begin
+      // ComboSube=0 -> yetkili sube listeleri (kasa+fatura: modul 24, cek+senet: modul 25)
+      j.AddPair('SubeKasaList', Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme));
+      j.AddPair('SubeCekList', Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme));
+    end else begin
+      subeId := FArama.ComboSube.EditValue;
+      j.AddPair('SubeId', TJSONNumber.Create(subeId));
     end;
   end;
 
-  TabloYenile(KASA,[]);
+  Tablo.ListeSPJson(KASA, 'sp_Prog_Kasa_Hareket_Json2', '', j, 0); // j sahipligi devralinir
 
   if GenRegIni.RegReadString('GrupAcKapa', 'KasaDlg' , '0', 'C')='1' then begin
     CbGroupAcKapa.Checked:=True;

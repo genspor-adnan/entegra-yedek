@@ -510,10 +510,10 @@ begin
   End;
   if gf.FMenuTur = 0 then begin //Giren faturalar görünecek
     Caption := 'Alış Belgeleri Listesi';
-    TahsilOdemeMenu.Caption := '?deme Yap';
+    TahsilOdemeMenu.Caption := 'Ödeme Yap';
     TahsilOdemeMenu.tag := 10;
     KrediKartiMenu.Visible:=True;
-    //GridFatListeTviewDURUM.Caption := '?deme Durumu';
+    //GridFatListeTviewDURUM.Caption := 'Ödeme Durumu';
   end else begin
     Caption := 'Satış Belgeleri Listesi';
     TahsilOdemeMenu.Caption := 'Tahsil Et';
@@ -727,7 +727,7 @@ begin
     maill.bilgi := TStringList.Create;
 
     if Bilgiler[0] ='' then begin
-      //ShowMessage('Mail adresi bulunamad?!');
+      //ShowMessage('Mail adresi bulunamadı!');
       maill.kime.add('');
       maill.bilgi.Add('');
       maill.kime.Add(bilgiler[0]);
@@ -958,10 +958,10 @@ begin
     end;
 
     if gf.FMenuTur=1  then begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Ad?';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Adı';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Gelir Kodu';
     end else begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Ad?';
+      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Adı';
       GridFatDBTableView1MASRAFKOD.Caption:= 'Masraf Kodu';
     end;
   end;
@@ -1085,10 +1085,10 @@ begin
     end;
 
     if gf.FMenuTur=1  then begin
-      GridFatViewMASRAFAD.Caption:= 'Gelir Ad?';
+      GridFatViewMASRAFAD.Caption:= 'Gelir Adı';
       GridFatViewMASRAFKOD.Caption:= 'Gelir Kodu';
     end else begin
-      GridFatViewMASRAFAD.Caption:= 'Masraf Ad?';
+      GridFatViewMASRAFAD.Caption:= 'Masraf Adı';
       GridFatViewMASRAFKOD.Caption:= 'Masraf Kodu';
     end;
 

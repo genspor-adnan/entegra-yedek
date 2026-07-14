@@ -15,11 +15,14 @@ uses
   cxTLdxBarBuiltInMenu, OfficePopupMenu, cxInplaceContainer, cxDBTL, cxTLData,
   cxButtons, JvExControls, JvNavigationPane, Data.DB, FireDAC.Comp.Client,
   cxImageComboBox, cxButtonEdit, cxCheckBox, cxLabel, cxPC, cxMemo, DateUtils,
-  Vcl.ExtCtrls, cxGridCustomView, dxBarBuiltInMenu, dxSkinMetropolis,
+  cxSpinEdit, Vcl.ToolWin, Vcl.ExtCtrls, cxGridCustomView, dxBarBuiltInMenu, dxSkinMetropolis,
   dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, cxFilter, dxCoreGraphics, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 type
   TGorevListeAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -76,6 +79,13 @@ type
     JvNavPanelHeader2: TJvNavPanelHeader;
     EditAraProje: TcxTextEdit;
     JvNavPanelHeader3: TJvNavPanelHeader;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
+    SpinKayitSayisi: TcxSpinEdit;
+    cxLabelKayit: TcxLabel;
+    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ListeyiSilMenuClick(Sender: TObject);
     procedure ListeMenuPopup(Sender: TObject);
     procedure ExceldenBilgiAl1Click(Sender: TObject);
@@ -188,6 +198,11 @@ end;
 procedure TGorevListeAramaFrame.EditAraIslerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
    Listele;
+end;
+
+procedure TGorevListeAramaFrame.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  SpinKayitSayisi.PostEditValue;
 end;
 
 procedure TGorevListeAramaFrame.ListeEkleTusClick(Sender: TObject);

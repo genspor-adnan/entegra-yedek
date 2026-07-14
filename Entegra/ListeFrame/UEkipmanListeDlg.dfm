@@ -88,6 +88,34 @@ object EkipmanListeDlg: TEkipmanListeDlg
       ImageIndex = 16
       ImageName = 'PngImage15'
     end
+    object ToolButton2: TToolButton
+      Left = 304
+      Top = 0
+      Width = 8
+      Caption = 'ToolButton2'
+      Style = tbsSeparator
+    end
+    object LabelTumKayitlar: TToolButton
+      Left = 312
+      Top = 0
+      Caption = 'T'#252'm'
+      Style = tbsTextButton
+      OnClick = LabelTumKayitlarClick
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 386
+      Top = 0
+      Caption = 'Son Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSonArananlarClick
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 460
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSikArananlarClick
+    end
   end
   object TreeListEkipman: TcxDBTreeList
     Left = 0

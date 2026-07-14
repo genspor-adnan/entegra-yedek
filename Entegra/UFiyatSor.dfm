@@ -1479,6 +1479,9 @@ object FiyatSorDlg: TFiyatSorDlg
         RootLevelOptions.DetailTabsPosition = dtpTop
         OnActiveTabChanged = cxGrid1ActiveTabChanged
         object cxGrid1DBTableViewDurum: TcxGridDBTableView
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsStokDurumDetay
@@ -1509,6 +1512,9 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBCardViewAlislar: TcxGridDBCardView
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonAlislar
@@ -1595,6 +1601,9 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBCardViewSatislar: TcxGridDBCardView
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonSatislar
@@ -1738,6 +1747,9 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBTableViewUretim: TcxGridDBTableView
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsUretim
@@ -1769,6 +1781,9 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBTableViewTeklif: TcxGridDBTableView
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonTeklifler
@@ -1905,8 +1920,8 @@ object FiyatSorDlg: TFiyatSorDlg
       #9#9#9'when @RehberID=FB.REHBERID then 1'
       #9#9#9'else 0 end'
       'order by FB.TARIH desc) as dd')
-    Left = 372
-    Top = 33
+    Left = 380
+    Top = 17
   end
   object DtsSonTeklifler: TDataSource
     DataSet = TabSonTeklifler
@@ -1925,7 +1940,7 @@ object FiyatSorDlg: TFiyatSorDlg
       'where URD.MIKTAR<0.0 and UR.STOKID=:PStokID '
       'group by S.KOD,S.STOKADI,URD.MIKTAR')
     Left = 316
-    Top = 23
+    Top = 7
   end
   object DtsUretim: TDataSource
     DataSet = TabUretim
@@ -1998,8 +2013,8 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object DtsSonSatislar: TDataSource
     DataSet = TabSonSatislar
-    Left = 143
-    Top = 44
+    Left = 135
+    Top = 4
   end
   object TabSonAlislar: TFDQuery
     Connection = Tablo.FDCnn
@@ -2025,8 +2040,8 @@ object FiyatSorDlg: TFiyatSorDlg
       #9#9#9'when @RehberID=FB.REHBERID then 1'
       #9#9#9'else 0 end'
       'order by FB.FATURATARIH desc) as dd')
-    Left = 224
-    Top = 17
+    Left = 232
+    Top = 65529
   end
   object DtsSonAlislar: TDataSource
     DataSet = TabSonAlislar

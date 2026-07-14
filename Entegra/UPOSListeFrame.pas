@@ -139,6 +139,10 @@ type
     PopupMenuBakiye: TPopupMenu;
     MenuItem1: TMenuItem;
     POSInfoMenu: TMenuItem;
+    ToolButton2: TToolButton;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
     procedure GridTviewCellDblClick(Sender: TcxCustomGridTableView;
@@ -165,11 +169,15 @@ type
     procedure GridPOSViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure POSInfoMenuClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // POSORAN (detay) orijinal satirlar (log diff icin)
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_POS_Liste_Json2)
     procedure PosOranLogSnapshotAl;
     procedure PosOranLogDiffKaydet;
     function EkranAdiAl: string;
@@ -205,7 +213,7 @@ type
 implementation
 
 uses FetaKurulusSiniflari, FetaClassExtensions, UPOS,UAnaForm, PrjConst, UFastRap, URaporAraclari,
-     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly, ULog, UVeriMotor;
+     UGenelAnaSekmeFrame, UKasalarListeFrame,LocOnfly, ULog, UVeriMotor, System.JSON;
 
 {$R *.dfm}
 
@@ -230,14 +238,53 @@ end;
 procedure TPOSListeFrame.YenileClick;
 begin
    Tablo.GridAyarRestore('POSEkstreGridi', GridPOSView );
+   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_POS_Liste_Json2)
+end;
 
-    //     POSLAR.Close;
-    POSLAR.SQL.Text:=SqlMemo.Text;
-    POSLAR.SQL.Add(' Where 1=1 ');
+procedure TPOSListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// POS listesini sunucu-tarafi SP ile getirir (sp_Prog_POS_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (POS'ta BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski YenileClick sorgusuyla BIREBIR; Son/Sik icin KULLANICI_ARAMA (MODUL_POS).
+//   Sube-yetki suzgeci yalniz SubeVarmi ise gonderilir (eski: and P.SUBEID in(...)).
+var
+  LocateID: Integer;
+  j: TJSONObject;
+begin
+  if (POSLAR.Active) and (POSLAR.RecordCount > 0) then
+    LocateID := POSLAR.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
     if SubeVarmi then
-       POSLAR.SQL.Add(' and P.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ');
-    //POSLAR.Open;
-    TabloYenile(POSLAR, []);
+      j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme));  // app-uretimi tam-sayi listesi (GUVENILIR)
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));              // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_POS));                             // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (POS'ta ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(POSLAR, 'sp_Prog_POS_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TPOSListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TPOSListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TPOSListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 procedure TPOSListeFrame.Baslatildi;
 var ra : string;
@@ -456,6 +503,8 @@ end;
 
 procedure TPOSListeFrame.POSEkranAc(Yeni: Boolean);
 begin
+  if (not Yeni) and (POSLAR.Active) and (POSLAR.RecordCount > 0) then
+    Tablo.AramaKaydet(MODUL_POS, POSLAR.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
   with FFrameBilgi.IcerikGit(TPOS).Git do begin
     with TPOS(Ornek) do begin
       KapatEylemi := POSKapatEylemi;

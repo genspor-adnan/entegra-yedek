@@ -94,6 +94,36 @@ object FatTransferListeDlg: TFatTransferListeDlg
       ImageIndex = 16
       ImageName = 'PngImage15'
     end
+    object ToolButtonSSAyrac: TToolButton
+      Left = 312
+      Top = 0
+      Width = 8
+      Caption = 'ToolButtonSSAyrac'
+      Style = tbsSeparator
+    end
+    object LabelTumKayitlar: TToolButton
+      Left = 320
+      Top = 0
+      Caption = 'T'#252'm'
+      Style = tbsTextButton
+      OnClick = LabelTumKayitlarClick
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 394
+      Top = 0
+      Caption = 'Son Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSonArananlarClick
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 468
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSikArananlarClick
+    end
   end
   object GridFatListe: TcxGrid
     Left = 0

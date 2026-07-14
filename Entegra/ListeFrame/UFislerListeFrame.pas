@@ -67,6 +67,10 @@ type
     PopupFis: TPopupMenu;
     PopupFisGrid: TPopupMenu;
     FisInfoMenu: TMenuItem;
+    ToolButton2: TToolButton;         // ayrac (Tum/Son/Sik butonlari icin)
+    LabelTumKayitlar: TToolButton;    // Tum kayitlar (Liste_SP_Cagir 1)
+    LabelSonArananlar: TToolButton;   // Son Aranan (Liste_SP_Cagir 5)
+    LabelSikArananlar: TToolButton;   // Sik Aranan (Liste_SP_Cagir 3)
     procedure InitEkran(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
@@ -79,10 +83,14 @@ type
     procedure GridTviewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure FisInfoMenuClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TFislerAramaFrame;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Fisler_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -112,7 +120,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, Utablo,UGirisKutusuEx,LocOnFly, FetaUtil;
+uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, Utablo,UGirisKutusuEx,LocOnFly, FetaUtil, System.JSON;
 
 {$R *.dfm}
 
@@ -133,6 +141,7 @@ end;
 procedure TFislerListeFrame.DegisTusClick(Sender: TObject);
 begin
   if TabFisler.RecordCount>0 then begin
+    Tablo.AramaKaydet(MODUL_Fisler, TabFisler.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
     Tablo.FaturaSihirbazBaslat('D',Tur,1,TabFisler.FieldByName('ID').AsInteger,SubeId);
     YenileTusClick(self);
   end;
@@ -209,34 +218,12 @@ begin
 end;
 
 procedure TFislerListeFrame.JvTimer1Timer(Sender: TObject);
-var s:string[20];
 begin
+  // Debounce suresi doldu -> tek listeleme (sunucu-tarafi SP). Onceki ham SQL-uretimi
+  //   (SQLMemo/join/where-append) kaldirildi; tum suzgecler Liste_SP_Cagir icinde JSON'a yazilir.
   JvTimer1.Enabled := False;
-  if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.CalendarBas.Date))>0 then exit;
-//  if (FArama.CalendarBit.Text = '')or(FArama.CalendarBas.Text = '')then exit;
-
-
-  TabFisler.Close;
-  TabFisler.SQL.Text :=  SQLMemo.Text;
-  if FArama.AraStok.text<>'' then
-     TabFisler.SQL.Add(' inner join FATURA FT on FT.FATBASID=FB.ID '+
-                          ' left outer join STOKLAR S on FT.URUNID=S.ID ');
-  TabFisler.SQL.Add(' where FB.TUR = '+IntToStr(Tur));
-  TabFisler.SQL.Add(' and FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.CalendarBas.Date)+''' and '+
-                    ' FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', FArama.CalendarBit.Date)+''' ');
-  if FArama.ComboSube.text<>'' then
-     TabFisler.SQL.Add(' and FB.SUBE = '+IntToStr(FArama.ComboSube.EditValue));
-  if FArama.ComboDepo.text<>'' then begin
-     if Tur=3 then s:='FB.GIRISDEPO' else s:='FB.CIKISDEPO';
-     TabFisler.SQL.Add(' and '+s+' = '+IntToStr(FArama.ComboDepo.EditValue));
-  end;
-  if FArama.ComboTipi.text<>'' then
-     TabFisler.SQL.Add(' and FB.TIPI = '+IntToStr(FArama.ComboTipi.EditValue));
-  if FArama.AraStok.text<>'' then
-     TabFisler.SQL.Add(' and S.STOKADI like ''%'+FArama.AraStok.text+'%''  ');
-  TabFisler.SQL.Add(' order by FATURATARIH desc ');
-
-  Tabloyenile( TabFisler, []);
+  if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.CalendarBas.Date))>0 then exit;  // gecersiz/bos takvim korumasi
+  Liste_SP_Cagir(4);
 end;
 
 procedure TFislerListeFrame.AraKodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
@@ -245,8 +232,12 @@ begin
     GridTview.DataController. DataSource.DataSet.Prior
  else if Key = 40 then
     GridTview.DataController.DataSource.DataSet.next
- else
-    YenileTusClick(self);
+ else begin
+    // Debounce: her karakterde aninda arama yerine timer'i sifirla; yazma bitince JvTimer1Timer listeler.
+    JvTimer1.Enabled := False;
+    JvTimer1.Interval := 700;
+    JvTimer1.Enabled := True;
+ end;
 end;
 
 procedure TFislerListeFrame.Kapatiliyor(var AKapansin: Boolean);
@@ -336,9 +327,69 @@ end;
 
 procedure TFislerListeFrame.YenileTusClick(Sender: TObject);
 begin
-   JvTimer1.Enabled := False;
-   JvTimer1.Interval := 700;
-   JvTimer1.Enabled := True;
+   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Fisler_Liste_Json2)
+end;
+
+procedure TFislerListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// Fis listesini sunucu-tarafi SP ile getirir (sp_Prog_Fisler_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (Fisler'de BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski JvTimer1Timer sorgusuyla BIREBIR (Tur/tarih/sube/depo/tipi/stok);
+//   Son/Sik icin KULLANICI_ARAMA (MODUL_Fisler), PK = FATBASLIK.ID.
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok). FArama tip-esdes GUVENLI.
+var
+  LocateID, LSubeId, LDepoId, LTipi: Integer;
+  LStok: string;
+  j: TJSONObject;
+begin
+  if (TabFisler.Active) and (TabFisler.RecordCount > 0) then
+    LocateID := TabFisler.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  LStok := Trim(FArama.AraStok.Text);
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
+    j.AddPair('Tur', TJSONNumber.Create(Tur));                             // HER ZAMAN FB.TUR=@Tur
+    j.AddPair('FaturaJoin', TJSONNumber.Create(Ord(LStok <> '')));         // stok aramasi -> FATURA/STOKLAR join
+    if LStok <> '' then j.AddPair('StokAra', LStok);
+    j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd 00:00', FArama.CalendarBas.Date));  // eski 00:00 BIREBIR
+    j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd 23:59', FArama.CalendarBit.Date));  // eski 23:59 BIREBIR
+    LSubeId := StrToIntDef(VarToStr(FArama.ComboSube.EditValue), 0);
+    if SubeVarmi and (FArama.ComboSube.Text <> '') and (LSubeId > 0) then
+      j.AddPair('SubeId', TJSONNumber.Create(LSubeId));                    // FB.SUBEID (eski hatali FB.SUBE yerine gercek kolon)
+    LDepoId := StrToIntDef(VarToStr(FArama.ComboDepo.EditValue), 0);
+    if (FArama.ComboDepo.Text <> '') and (LDepoId > 0) then
+      j.AddPair('DepoId', TJSONNumber.Create(LDepoId));                    // SP: Tur=3->GIRISDEPO, degilse CIKISDEPO
+    LTipi := StrToIntDef(VarToStr(FArama.ComboTipi.EditValue), 0);
+    if (FArama.ComboTipi.Text <> '') and (LTipi > 0) then
+      j.AddPair('Tipi', TJSONNumber.Create(LTipi));
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));      // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Fisler));                  // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (Fisler'de ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(TabFisler, 'sp_Prog_Fisler_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TFislerListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TFislerListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TFislerListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

@@ -1550,14 +1550,18 @@ begin
 // else
 //    Durum := ' ='+IntToStr(Sayfa);
 
- Komut := 'select top '+IntToStr(EditAdet.Value)+' U.*, UM.*, R.FIRMA,STOKKODU=S.KOD,S.STOKADI, ONAYLAYAN=UM.ONAY   '+   //, ONAYLAYAN = R2.FIRMA
-    ' from UTSBILDIRIM U '+
-    ' inner join UTSBILDIRIMMESAJ UM on U.ID=UM.ID '+
-    ' left join REHBERBILGI RB on UM.KURUMNO=RB.BILGI and YERI=2 AND SIRA=40 '+
-    ' left join REHBER R on R.ID=RB.YER_ID '+
-    //' left join REHBER R2 on R2.ID=UM.ONAY '+
-    ' inner join STOKLAR S on S.URUNNO=UM.URUNNO '+
-    ' where U.DURUM = '+IntToStr(Sayfa)+' ';
+ Komut := 'select top '+IntToStr(EditAdet.Value)+
+          ' U.*,UM.ID,UM.KURUMNO,CASE WHEN ISNULL(UM.BELGENO,'''') = '''' THEN FATURASERI+FB.FATURANO ELSE UM.BELGENO END AS BELGENO, '+
+          ' UM.URUNNO,UM.SERINO,UM.LOTNO,UM.JSON,UM.SONUCKODU,UM.SONUCMESAJI,UM.EKLEYEN,UM.EKLEMETARIHI,UM.URT,UM.SKT,UM.ONAY, '+
+          ' R.FIRMA,STOKKODU=S.KOD,S.STOKADI, ONAYLAYAN=UM.ONAY '+
+          ' from UTSBILDIRIM U '+
+          '  inner join UTSBILDIRIMMESAJ UM on U.ID=UM.ID '+
+          '  INNER JOIN STOKIZLEME SI ON SI.ID = U.YERID '+
+          '  INNER JOIN FATBASLIK FB ON FB.ID = SI.BASLIKID '+
+          '  INNER JOIN REHBER R ON R.ID = FB.REHBERID '+
+          '  left join REHBERBILGI RB on R.ID=RB.YER_ID and RB.YERI=2 AND SIRA=40 '+
+          '  inner join STOKLAR S on S.URUNNO=UM.URUNNO  '+
+          ' where U.DURUM = '+IntToStr(Sayfa)+' ';
 
 
    if EditUNO.Text <> '' then

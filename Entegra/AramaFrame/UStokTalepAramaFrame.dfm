@@ -10,8 +10,8 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 1
-    Top = -2
+    Left = 77
+    Top = 213
     Width = 79
     Height = 22
     Caption = 'Yenile'
@@ -72,7 +72,7 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object Label1: TcxLabel
     Left = 0
-    Top = 136
+    Top = 158
     Caption = 'Kod/'#220'nvan'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -87,24 +87,24 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object AraKod: TcxTextEdit
     Left = 77
-    Top = 135
+    Top = 157
     TabOrder = 4
     Visible = False
     Width = 117
   end
   object EditCARIID: TcxLabel
     Left = 0
-    Top = 3
+    Top = 19
   end
   object AraStok: TcxTextEdit
     Left = 77
-    Top = 162
+    Top = 184
     TabOrder = 5
     Width = 117
   end
   object cxLabel2: TcxLabel
     Left = 0
-    Top = 163
+    Top = 185
     Caption = #220'r'#252'n'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -117,21 +117,21 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object CalendarBas: TcxDateEdit
     Left = 77
-    Top = 25
+    Top = 47
     Properties.ImmediatePost = True
     TabOrder = 0
     Width = 115
   end
   object CalendarBit: TcxDateEdit
     Left = 77
-    Top = 52
+    Top = 74
     Properties.ImmediatePost = True
     TabOrder = 1
     Width = 115
   end
   object Label2: TcxLabel
     Left = 0
-    Top = 26
+    Top = 48
     Caption = 'Ba'#351'lama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -144,7 +144,7 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object Label3: TcxLabel
     Left = 0
-    Top = 53
+    Top = 75
     Caption = 'Biti'#351
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -157,12 +157,12 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object LabelSube: TcxLabel
     Left = 0
-    Top = 84
+    Top = 106
     Caption = #199#305'k'#305#351' '#350'ube'
   end
   object ComboSubeCikis: TcxImageComboBox
     Left = 77
-    Top = 81
+    Top = 103
     RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
     Properties.Alignment.Horz = taLeftJustify
     Properties.ImmediatePost = True
@@ -174,7 +174,7 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object ComboSubeGiris: TcxImageComboBox
     Left = 77
-    Top = 108
+    Top = 130
     RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
     Properties.Alignment.Horz = taLeftJustify
     Properties.ImmediatePost = True
@@ -186,7 +186,61 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object cxLabel1: TcxLabel
     Left = 0
-    Top = 112
+    Top = 134
     Caption = 'Giri'#351' '#350'ube'
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 6
+    Transparent = True
+    ExplicitLeft = 232
+    ExplicitTop = 25
+    ExplicitWidth = 187
+    object LabelTumKayitlar: TToolButton
+      Tag = 3
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
 end

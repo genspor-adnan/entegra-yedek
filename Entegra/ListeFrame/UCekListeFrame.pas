@@ -15,7 +15,7 @@ uses
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxClasses,
   cxGridCustomView, cxGrid, cxPC, cxSplitter, PrjConst, DateUtils, frxClass,
   dxSkinLondonLiquidSky, dxSkinscxPCPainter, cxCustomData, UFrameYoneticisi,
-  cxDropDownEdit, cxGridLevel, JvExControls, cxPCdxBarPopupMenu, cxCheckGroup,
+  cxDropDownEdit, cxGridLevel, JvExControls, JvTimer, cxPCdxBarPopupMenu, cxCheckGroup,
   Utablo, JvNavigationPane, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,
   cxMemo, cxGridCustomPopupMenu, cxGridPopupMenu, cxGridCardView,
   cxGridDBCardView, cxGridCustomLayoutView, cxLabel, OfficePopupMenu,
@@ -36,6 +36,7 @@ type
     DtsCekler: TDataSource;
     TabCekler: TFDQuery;
     ToolBar1: TToolBar;
+    JvTimer1: TJvTimer;
     YeniTus: TToolButton;
     DegisTus: TToolButton;
     SilTus: TToolButton;
@@ -218,8 +219,13 @@ type
     CekInfoMenuV: TMenuItem;
     NInfoV: TMenuItem;
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure JvTimer1Timer(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     function IslemTurleriOlustur:string;
     procedure DegisTusClick(Sender: TObject);
     procedure TabCeklerAfterOpen(DataSet: TDataSet);
@@ -305,7 +311,8 @@ implementation
 
 uses
     UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, UExceldenVeriAl,
-    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay, ULog, UVeriMotor;
+    UBankaSecimi, UGirisKutusuEx, LocOnFly, FetaUtil, UBinarySave, UCekHareketDetay, ULog, UVeriMotor,
+    System.JSON;
 
 {$R *.dfm}
 
@@ -342,7 +349,20 @@ begin
   else if Key = 40 then
     TabCekler.next
   else if Key = 13 then
-    YenileTusClick(Sender);
+    YenileTusClick(Sender)
+  else begin
+    // Debounce: her karakterde aninda arama yerine timer'i sifirla;
+    // yazma bitince 700ms sonra JvTimer1Timer tek listeleme yapar.
+    JvTimer1.Enabled := False;
+    JvTimer1.Interval := 700;
+    JvTimer1.Enabled := True;
+  end;
+end;
+
+procedure TCekListeFrame.JvTimer1Timer(Sender: TObject);
+begin
+  JvTimer1.Enabled := False;
+  Liste_SP_Cagir(4);   // debounce suresi doldu -> tek listeleme (parite: YenileTusClick)
 end;
 
 function TCekListeFrame.EkranAdiAl: string;
@@ -472,6 +492,8 @@ var
   srid:integer;
 begin
   if (GridTview.Controller.SelectedRecordCount > 0)and(TabCekHareketler.Active)and(TabCekHareketler.RecordCount>0) then begin
+    if not TabCekler.IsEmpty then
+      Tablo.AramaKaydet(MODUL_Cek, TabCekler.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
     TabCekHareketler.First;
     srid:=GridTview.DataController.FocusedRecordIndex;
     Tablo.MakbuzSihirbazBaslat('D', TabCekHareketler.FieldByName('ISLEM').AsInteger,0,TabCekHareketler.FieldByName('ID').AsInteger,TabCekHareketler.FieldByName('REHBERID').AsInteger,TabCekHareketler.FieldByName('TARIH').AsDateTime,TabCekHareketler.FieldByName('BELGENO').AsString);
@@ -741,7 +763,7 @@ begin
     if GridTview.ViewInfo.RecordsViewInfo[i].Selected then
       IDlist.Add(VarToStr(GridTview.ViewInfo.RecordsViewInfo[i].GridRecord.Values[GridTviewCEKSENETID.Index]));
   end;
-  IslemDetayiSor := (Tablo.GENINI.ReadBoolean(Ops_Cekler_KurBilgisiSor,False))and(Tablo.UyariGoster('??lem Detay?','Bu i?lem i?in kur bilgilerini de?i?tirmek ister misiniz?',2) = MrYes);
+  IslemDetayiSor := (Tablo.GENINI.ReadBoolean(Ops_Cekler_KurBilgisiSor,False))and(Tablo.UyariGoster('İşlem Detayı','Bu işlem için kur bilgilerini değiştirmek ister misiniz?',2) = MrYes);
   for I := 0 to IDlist.Count-1 do begin
     if TabCekler.locate('ID',IDlist[i],[]) then begin
       Tablo.TablodanSorguAc(0,'select '+DbUst(1)+'* from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)); //son g?rd??? hareket..
@@ -801,13 +823,13 @@ begin
                if TabCekler.FieldByName('KUR').AsString <> CariDoviz then
                   DovizTutar1 := DovizTutar1*DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00', TarihAl), TabCekler.FieldByName('KUR').AsString, Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'));
 
-               Tablo.KasaKaydet(51, Tarih,Tarih,0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu ?ekin Tahsilat?',
+               Tablo.KasaKaydet(51, Tarih,Tarih,0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu çekin Tahsilatı',
                                        BnkHesID,   TabCekler.FieldByName('KUR').AsString,CariDoviz,CekMasrafID,0,TabCekler.FieldByName('TUTAR').Ascurrency,DovizTutar1,1-1, -1,-1, TabCekler.FieldByName('ID').AsInteger,-1, SubeId,'B');
             end else begin  //kasay? sorup kasa kaydetmemiz gerekiyor
               Tarih:=TarihAl;
               if not OncedenSoruldu then begin
                 KasalarSonuc := TStringList.Create;
-                if not Tablo.ListedenBilgiGetir('Kasa Se?imi','select ID,TUR=''K'',KASAKODU,KASAADI,KUR from KASALAR where DURUM=1 union all select ID,TUR=''B'',HESAPKODU,HESAPADI,KUR from BANKAHESAPLAR where DURUM=1',KasalarSonuc,[],'') then
+                if not Tablo.ListedenBilgiGetir('Kasa Seçimi','select ID,TUR=''K'',KASAKODU,KASAADI,KUR from KASALAR where DURUM=1 union all select ID,TUR=''B'',HESAPKODU,HESAPADI,KUR from BANKAHESAPLAR where DURUM=1',KasalarSonuc,[],'') then
                   Abort;
                 BnkHesID := StrToInt(KasalarSonuc[0]);
                 if KasalarSonuc[1] = 'K' then
@@ -820,7 +842,7 @@ begin
              if TabCekler.FieldByName('KUR').AsString <> CariDoviz then
                 DovizTutar1 := DovizTutar1*DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00', TarihAl), TabCekler.FieldByName('KUR').AsString, Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'));
 
-              Tablo.KasaKaydet(51, Tarih,Tarih,0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu ?ekin Tahsilat?',
+              Tablo.KasaKaydet(51, Tarih,Tarih,0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu çekin Tahsilatı',
                         BnkHesID,TabCekler.FieldByName('KUR').AsString,CariDoviz,CekMasrafID,0,TabCekler.FieldByName('TUTAR').Ascurrency,DovizTutar1,-1, -1,-1, TabCekler.FieldByName('ID').AsInteger,-1, SubeId,HesTur);
             end;
           end;
@@ -828,7 +850,7 @@ begin
              RehID := 0;
              if TabCekler.FieldByName('HESAPID').AsString='' then begin
                 KasalarSonuc := TStringList.Create;
-                if not Tablo.ListedenBilgiGetir('Kasa Se?imi','select ID,TUR=''K'',KASAKODU,KASAADI,KUR from KASALAR where DURUM=1 union all select ID,TUR=''B'',HESAPKODU,HESAPADI,KUR from BANKAHESAPLAR where DURUM=1',KasalarSonuc,[],'') then
+                if not Tablo.ListedenBilgiGetir('Kasa Seçimi','select ID,TUR=''K'',KASAKODU,KASAADI,KUR from KASALAR where DURUM=1 union all select ID,TUR=''B'',HESAPKODU,HESAPADI,KUR from BANKAHESAPLAR where DURUM=1',KasalarSonuc,[],'') then
                   Abort;
                 BnkHesID := StrToInt(KasalarSonuc[0]);
                 if KasalarSonuc[1] = 'K' then
@@ -847,7 +869,7 @@ begin
              DovizTutar1 := DovizTutar1*DovKurDegeri;
              if CekTurAd='Senet' then
                 j:=54 else j:=53; //?ek ?demesi 53 senet ise 54
-             Tablo.KasaKaydet(j, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', TarihAl)),StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', TarihAl)),0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu '+CekTurAd+'in ?demesi',
+             Tablo.KasaKaydet(j, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', TarihAl)),StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', TarihAl)),0,TabCekler.FieldByName('SERINO').AsString+' Seri Nolu '+CekTurAd+'in Ödemesi',
                                     BnkHesID , TabCekler.FieldByName('KUR').AsString,CariDoviz,CekMasrafID,TabCekler.FieldByName('TUTAR').Ascurrency,0,DovizTutar1,-1, -1,-1, TabCekler.FieldByName('ID').AsInteger,-1, SubeId, HesTur);
           end;
         else
@@ -895,7 +917,7 @@ begin
               DovizTutar1 := CekHareketDetayDlg.EdTutar.EditValue;
               DovizKuru1 := CekHareketDetayDlg.cbKur.EditValue;
             end else begin
-              Tablo.UyariGoster(uyari,'En az bir '+caridoviz+' kuru se?ilmelidir.');
+              Tablo.UyariGoster(uyari,'En az bir '+caridoviz+' kuru seçilmelidir.');
               FreeAndNil(CekHareketDetayDlg);
               abort;
             end;
@@ -1199,6 +1221,12 @@ begin
     DateVadeBas.Date := StrToDateTime('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+IntToStr(CariYil));
     DateVadeBit.Date := StrToDateTime('31'+FormatSettings.DateSeparator+'12'+FormatSettings.DateSeparator+IntToStr(CariYil));
   end;
+  // Tum/Son/Sik Aranan butonlarini SP listeleme handler'larina bagla
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
   EkranAciliyor := False;
 end;
 
@@ -1314,42 +1342,78 @@ end;
 
 procedure TCekListeFrame.YenileTusClick(Sender: TObject);
 begin
+  // Tarih editorunden gelen degisiklikte, Vade filtresi kapali ise listeleme yapma (eski davranis).
   if (Sender.ClassName='TcxDateEdit')and(FArama.CheckVadeGor.Checked=False) then
       exit;
-
   if EkranAciliyor then
     Exit;
-  TabCekler.Close;
-  if SQLMemo='' then
-     SQLMemo := TabCekler.SQL.Text;
-  TabCekler.SQL.Text:= SQLMemo;
-  TabCekler.SQL.Text:=  TabCekler.SQL.Text + ' Where CEKSENET='+IntToStr(CekSenetTur);
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Cek_Liste_Json2)
+end;
 
-  if FArama.AraKod.Text<>'' then begin
-    TabCekler.SQL.Text:=  TabCekler.SQL.Text + ' and ((R1.KOD like '''+FArama.AraKod.Text+'%'' or R1.FIRMA like '''+FArama.AraKod.Text+'%'') ';
-    TabCekler.SQL.Text:=  TabCekler.SQL.Text + ' or (R2.KOD like '''+FArama.AraKod.Text+'%'' or R2.FIRMA like '''+FArama.AraKod.Text+'%'')) ';
-  end;
-  if FArama.AraSeriNo.Text<>'' then
-     TabCekler.SQL.Text:=  TabCekler.SQL.Text + ' and C.SERINO  like  ''%'+FArama.AraSeriNo.Text+'%'' ';
-  TabCekler.SQL.Text:=  TabCekler.SQL.Text + ' and CH.ISLEM in ('+IslemTurleriOlustur+') ';
+procedure TCekListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// Cek listesini sunucu-tarafi SP ile getirir (sp_Prog_Cek_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (Cek'te BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski YenileTusClick sorgusuyla BIREBIR ayni (parite dogrulandi);
+//   Son/Sik icin KULLANICI_ARAMA (MODUL_Cek). Bos/opsiyonel filtre JSON'a EKLENMEZ.
+var
+  j: TJSONObject;
+  LocateID: Integer;
+  Islem, SubeList: string;
+begin
+  if TabCekler.Active and (TabCekler.RecordCount > 0) then
+    LocateID := TabCekler.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
 
-  if FArama.CheckVadeGor.Checked  then begin
-    if FArama.DateVadeBas.Text<>'' then
-       TabCekler.SQL.Text:=TabCekler.SQL.Text+ ' and VADE >= '''+FormatDateTime('yyyy-mm-dd',FArama.DateVadeBas.Date)+'''';
-    if FArama.DateVadeBit.Text<>'' then
-       TabCekler.SQL.Text:=TabCekler.SQL.Text+ ' and VADE <= '''+FormatDateTime('yyyy-mm-dd',FArama.DateVadeBit.Date)+'''';
+  Islem := IslemTurleriOlustur;   // her zaman (en az '0'); eski akista da zorunluydu
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod',          TJSONNumber.Create(AMod));
+    j.AddPair('CekSenet',     TJSONNumber.Create(CekSenetTur));   // HER ZAMAN: Where CEKSENET=
+    if Trim(FArama.AraKod.Text)   <> '' then j.AddPair('AraKod', Trim(FArama.AraKod.Text));
+    if Trim(FArama.AraSeriNo.Text)<> '' then j.AddPair('SeriNo', Trim(FArama.AraSeriNo.Text));
+    j.AddPair('IslemTurleri', Islem);
+    if FArama.CheckVadeGor.Checked then begin
+      if FArama.DateVadeBas.Text <> '' then j.AddPair('VadeBas', FormatDateTime('yyyy-mm-dd', FArama.DateVadeBas.Date));
+      if FArama.DateVadeBit.Text <> '' then j.AddPair('VadeBit', FormatDateTime('yyyy-mm-dd', FArama.DateVadeBit.Date));
+    end;
+    if SubeVarmi then begin
+      SubeList := Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme);
+      if SubeList <> '' then j.AddPair('SubeYetkiList', SubeList);
+    end;
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Cek));                  // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (Cek'te ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(TabCekler, 'sp_Prog_Cek_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-  if SubeVarmi then
-    TabCekler.SQL.Text:=TabCekler.SQL.Text+ ' and C.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ';
-  TabloYenile(TabCekler, []) ;
+
   GridTview.ViewData.Expand(True);
-
-     if True then
 
   if FArama.PCCekTurleri.ActivePage = FArama.SheetVerilenCekler then
      AksiyonEkleTus.DropdownMenu := PopupVerilenCekler
   else
      AksiyonEkleTus.DropdownMenu := PopupAlinanCekler;
+end;
+
+procedure TCekListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TCekListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TCekListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

@@ -125,6 +125,10 @@ type
     TabFaturaBASTAR: TSQLTimeStampField;
     TabFaturaIZLEME: TSmallintField;
     GridFatListeTviewEMIRNO: TcxGridDBColumn;
+    ToolButtonSSAyrac: TToolButton;            // ayrac (Tum/Son/Sik butonlari icin)
+    LabelTumKayitlar: TToolButton;             // Tum kayitlar (Liste_SP_Cagir 1)
+    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
+    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
     procedure GridFatListeTviewDblClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -168,6 +172,10 @@ type
     procedure SetFrameBilgi(AValue : TIcerikFrameBilgi);
 
     procedure FaturaAc(ID : Integer);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_FatTransfer_Liste_Json2)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure SetArama(const Value: TFatTransferAramaFrame);
     procedure PopUpDynamicSubMenuClick(Sender: TObject);
     //
@@ -193,7 +201,7 @@ var
 implementation
 
 uses  UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,
-  UFastRap, UGenelAnaSekmeFrame, URaporAraclari,LocOnfly;
+  UFastRap, UGenelAnaSekmeFrame, URaporAraclari,LocOnfly, System.JSON;
 
 {$R *.dfm}
 
@@ -223,27 +231,62 @@ end;
 procedure TFatTransferListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
-  if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.CalendarBas.Date))>0 then exit;
-//  if (FArama.CalendarBit.Text = '')or(FArama.CalendarBas.Text = '')then exit;
+  Liste_SP_Cagir(4);   // debounce doldu -> tek listeleme (filtre/normal, parite: eski JvTimer sorgusu)
+end;
 
+procedure TFatTransferListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Fatura Transfer listesini sunucu-tarafi SP ile getirir (sp_Prog_FatTransfer_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (FatTransfer'de BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski TabFatBaslik sorgusuyla BIREBIR; Son/Sik icin KULLANICI_ARAMA (MODUL_FatTransfer).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); tarih araligi her zaman gonderilir.
+var
+  LocateID: Integer;
+  j: TJSONObject;
+begin
+  // Bos/gecersiz tarih -> listeleme yok (orijinal guard)
+  if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.CalendarBas.Date)) > 0 then exit;
 
-  TabFatBaslik.Close;
-  TabFatBaslik.SQL.Text :=  SQLMemo.Text;
-  if FArama.AraStok.text<>'' then
-     TabFatBaslik.SQL.Add(' inner join FATURA FT on FT.FATBASID=FB.ID '+
-                          ' left outer join STOKLAR S on FT.URUNID=S.ID ');
-  TabFatBaslik.SQL.Add(' where FB.TUR =20 ');
-  TabFatBaslik.SQL.Add(' and FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.CalendarBas.Date)+''' and '+
-                          ' FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', FArama.CalendarBit.Date)+''' ');
-  if FArama.ComboSubeCikis.text<>'' then
-     TabFatBaslik.SQL.Add(' and FB.SUBE = '+IntToStr(FArama.ComboSubeCikis.EditValue));
-  if FArama.ComboSubeGiris.text<>'' then
-     TabFatBaslik.SQL.Add(' and FB.GIRISSUBE = '+IntToStr(FArama.ComboSubeGiris.EditValue));
-  if FArama.AraStok.text<>'' then
-     TabFatBaslik.SQL.Add(' and S.STOKADI like ''%'+FArama.AraStok.text+'%''  ');
-  TabFatBaslik.SQL.Add(' order by FATURATARIH desc ');
+  if (TabFatBaslik.Active) and (TabFatBaslik.RecordCount > 0) then
+    LocateID := TabFatBaslik.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
 
-  Tabloyenile( TabFatBaslik,[]);
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod',    TJSONNumber.Create(AMod));
+    j.AddPair('BasTrh', FormatDateTime('yyyy-mm-dd"T"00:00:00', FArama.CalendarBas.Date));
+    j.AddPair('BitTrh', FormatDateTime('yyyy-mm-dd"T"23:59:59', FArama.CalendarBit.Date));
+    if FArama.ComboSubeCikis.Text <> '' then
+       j.AddPair('SubeCikis', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSubeCikis.EditValue), 0)));  // orijinal FB.SUBE (yok) -> SP dogru kolon FB.SUBEID
+    if FArama.ComboSubeGiris.Text <> '' then
+       j.AddPair('SubeGiris', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSubeGiris.EditValue), 0)));
+    if Trim(FArama.AraStok.Text) <> '' then
+       j.AddPair('Stok', Trim(FArama.AraStok.Text));                       // FATURA/STOKLAR join tetikler
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));      // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_FatTransfer));             // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(TabFatBaslik, 'sp_Prog_FatTransfer_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TFatTransferListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TFatTransferListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TFatTransferListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 
@@ -408,6 +451,7 @@ var
 begin
   if GridFatListeTview.Controller.SelectedRecordCount > 0 then begin
      srid:=GridFatListeTview.DataController.FocusedRecordIndex;
+     Tablo.AramaKaydet(MODUL_FatTransfer, TabFatBaslik.AsInteger['ID']);  // Son/Sik Aranan takibi (kart acilinca upsert)
      //FaturaAc(TabFatBaslik.AsInteger['ID']);
      Tablo.FatTransferSihirbazBaslat('D',TabFatBaslik.AsInteger['TUR'], 0, TabFatBaslik.AsInteger['ID'], -999);
      AramaYap;

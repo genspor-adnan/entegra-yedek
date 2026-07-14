@@ -1021,6 +1021,13 @@ object CekListeFrame: TCekListeFrame
     Left = 81
     Top = 152
   end
+  object JvTimer1: TJvTimer
+    Enabled = False
+    Threaded = False
+    OnTimer = JvTimer1Timer
+    Left = 24
+    Top = 152
+  end
   object TabCekHareketler: TFDQuery
     AfterScroll = TabCekHareketlerAfterScroll
     Connection = Tablo.FDCnn

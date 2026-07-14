@@ -12,7 +12,7 @@ uses
   cxControls, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, ToolWin, UPirim,
   cxMaskEdit, cxDropDownEdit, cxContainer, UGentegreFrameYonetimi, UMultiCastEvent,
   URehberAramaFrame, dxSkinsCore, dxSkinscxPCPainter,UFrameYoneticisi, cxCheckBox,
-  cxImageComboBox, cxMemo, cxButtonEdit, cxTimeEdit, cxCurrencyEdit,Variants,
+  cxImageComboBox, cxMemo, cxButtonEdit, cxTimeEdit, cxCurrencyEdit,Variants, System.JSON,
   cxLookAndFeelPainters, cxGroupBox, cxImage, cxLabel, cxButtons, cxPC,ComObj,
   cxSplitter, frxClass, frxDBSet, cxGridCustomPopupMenu, cxGridPopupMenu,
   cxCalendar, dxSkinLondonLiquidSky, DateUtils, cxRadioGroup, OfficePopupMenu,
@@ -601,6 +601,8 @@ type
 //    N7: TMenuItem;
     procedure LabelSonArananlarClick(Sender: TObject);
     procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_IK_Liste)
     procedure AraTusClick(Sender :TObject);
     procedure ComboBox1DropDown(Sender :TObject);
     procedure AraFirmaKeyUp(Sender :TObject; var Key :Word;  Shift :TShiftState);
@@ -1594,25 +1596,12 @@ end;
 
 procedure TIKListeDlg.LabelSonArananlarClick(Sender: TObject);
 begin
-  SonAranan :=True;
-  REHBER.Close;
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc) -> sunucu-tarafi SP
+end;
 
-
-  if Potansiyel then
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Aday.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll])
-  else
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Memo.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);;
-
-  if SubeVarmi then
-     REHBER.SQL.Add(' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ');
-//  REHBER.SQL.Add(' order by '+tcxLabel(sender).HelpKeyword+' desc');
-//  if FArama.AraYetkili.Text <> '' then
-//     Param := 1
-//  else
-     Param := 0;
-  //REHBER.open;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
-  SonAranan:=False;
+procedure TIKListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc) -> sunucu-tarafi SP
 end;
 
 procedure TIKListeDlg.LabelStandartAvansDblClick(Sender: TObject);
@@ -1655,22 +1644,7 @@ end;
 
 procedure TIKListeDlg.LabelTumKayitlarClick(Sender: TObject);
 begin
-  REHBER.Close;
-  if Potansiyel then
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Aday.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll])
-  else
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Memo.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);;
-  if not FArama.CheckPasifler.Checked then
-     REHBER.SQL.Add(' and R.DURUM>0 ');
-  if SubeVarmi then
-     REHBER.SQL.Add(' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ');
-  REHBER.SQL.Add(' order by 1');
-//  if FArama.AraYetkili.Text <> '' then
-//     Param := 1
-//  else
-     Param := 0;
-  //REHBER.open;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+   Liste_SP_Cagir(1);   // Tum kayitlar (order by 1) -> sunucu-tarafi SP
 end;
 
 procedure TIKListeDlg.letiimaddeitir1Click(Sender: TObject);
@@ -1688,7 +1662,7 @@ end;
 procedure TIKListeDlg.AraTusClick(Sender :TObject);
 begin
   JvTimer1.Enabled := False;
-  JvTimer1.Interval := 750;
+  JvTimer1.Interval := 700;
   JvTimer1.Enabled := True;
 end;
 
@@ -1762,6 +1736,12 @@ procedure TIKListeDlg.Baslatildi;
 var ra : string;
 begin
    LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+   // Tum/Son/Sik toolbar butonlarini SP listeleme handler'larina bagla
+   if Assigned(FArama) then begin
+     FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+   end;
    IKGridViewSUBEID.Visible := SubeVarmi;
    Tablo.GridAyarRestore('PersonelOZGridi',GridPerTemelView );
    Tablo.GridAyarRestore('PersDemirbasGridi', GridDemirbasView);
@@ -2442,6 +2422,7 @@ procedure TIKListeDlg.DegisTusClick(Sender: TObject);
 begin
   if (not REHBER.Active)or(REHBER.Active and REHBER.IsEmpty) then
       raise Exception.Create(RDOnceAramaYapin);
+  Tablo.AramaKaydet(MODUL_IK, REHBER.FieldByName('ID').AsInteger);   // Son/Sik Aranan takibi (kart acilinca upsert)
   if Tablo.IKSihirbazBaslat(0,REHBER.Fields[0].AsInteger,-100,-100, Potansiyel) > 0 then begin
      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[]);
   end;
@@ -3192,95 +3173,108 @@ begin
 end;
 
 procedure TIKListeDlg.JvTimer1Timer(Sender: TObject);
-var Grup, order : String;
 begin
   JvTimer1.Enabled := False;
-  //cxSplitter1.CloseSplitter;
-  { Arama k?sm? hen?z ba?lat?lmad? ise ??k }
   if not Assigned(FArama) then Exit;
-  // SQL_IK_Memo declare @ILGILIARAMA/@DIL + set (T-SQL script) -> PG'ye rewrite ayri is; pilotta atla
-  if AktifVeriMotor = vmPG then Exit;
-  //Animate1.Play(1,23,0);
-//  if (FArama.AraFirma.Text='')and(FArama.AraYetkili.Text='')  and(FArama.Arailler.Text='') and(FArama.AraKod.Text='')and(not IKGridViewBORC.Visible) then exit;
-  s := '';
-  Fir := ' R.FIRMA ';
-  Yet := ' P.FIRMA ';
-  Kod := ' R.KOD ';
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_IK_Liste)
+end;
 
-  //Pasifleri de arayacak m?y?z?
-  s := '';
-  order := ' ORDER BY R.SUBEID,R.FIRMA';
+procedure TIKListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// IK listesini sunucu-tarafi SP ile getirir (sp_Prog_IK_Liste_Json2 - tek JSON parametre).
+//   AMod: 1=Tum (order by 1), 3=Sik (KA.SAY desc), 4=Filtre (JvTimer), 5=Son (KA.tarih desc).
+//   IKI PARAM: @Baslik = SELECT ek kolonlari (IK'da bos); @Kosullar = filtreler JSON (guvenli escape).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); sayilar TJSONNumber.
+//   Alan filtreleri yalniz AMod=4'te; personel/aday ayrimini Aday (=Potansiyel) belirler.
+var
+  SubeYetki, Firma, Kod: string;
+  Aday, Filtre: Boolean;
+  LocateID: Integer;
+  j: TJSONObject;
 
-  if Potansiyel then begin
-     TFirma := '%'+Trim(FArama.AraFirma2.Text) + '%';
-     if FArama.AraFirma2.Text <> '' then
-        s := s + ' and '+ Fir + ' LIKE ''' + TFirma +'''';
-     if FArama.ComboCinsiyet.Text <> '' then
-        s := s + ' and  R.STATU='+IntToStr(FArama.ComboCinsiyet.EditValue);
-     if FArama.ComboOgrenim.Text <> '' then
-        s := s + ' and  R.KATEGORI='+IntToStr(FArama.ComboOgrenim.EditValue);
-     //PERS_DENEYIM tablosundan aranacak
-     if FArama.ComboSektor.Text <> '' then
-        s := s + ' and  PD.SEKTOR='+IntToStr(FArama.ComboSektor.EditValue);
-     if FArama.ComboDepartman.Text <> '' then
-        s := s + ' and  PD.DEPARTMAN='+IntToStr(FArama.ComboDepartman.EditValue);
-     if FArama.ComboGorev.Text <> '' then
-        s := s + ' and  PD.GOREV='+IntToStr(FArama.ComboGorev.EditValue);
-     if FArama.ComboDil1.Text <> '' then
-        s := s + ' and exists(select 1 from PERS_DIL DIL where DIL.REHBERID=R.ID and DIL='+IntToStr(FArama.ComboDil1.EditValue)+')';
-     if FArama.ComboDil2.Text <> '' then
-        s := s + ' and exists(select 1 from PERS_DIL DIL where DIL.REHBERID=R.ID and DIL='+IntToStr(FArama.ComboDil2.EditValue)+')';;
-     if FArama.ComboIl.Text <> '' then
-        s := s + ' and  PD.IL='+IntToStr(FArama.ComboIl.EditValue);
-     if FArama.EditUyruk.Tag > 0 then
-        s := s + ' and  R.ALTBOLGE='+IntToStr(FArama.EditUyruk.Tag);
-     if (FArama.EditUcret.Text <> '')and(FArama.EditUcret2.Text <> '') then
-        s := s + ' and  PD.TUR=0 and PD.UCRET_ALT between '+FArama.EditUcret.Text +' and '+FArama.EditUcret2.Text;
-
-     if not FArama.CheckPasifler2.Checked then
-        s := s + ' and R.DURUM>0 ';
-  end else begin
-     TFirma := '%'+Trim(FArama.AraFirma.Text) + '%';
-//     TYet := '%'+Trim(FArama.AraYetkili.Text) + '%';
-     TKod := '%'+Trim(FArama.AraKod.Text) + '%';
-     if FArama.AraFirma.Text <> '' then
-        s := s + ' and '+ Fir + ' LIKE ''' + TFirma +'''';
-//     if FArama.AraYetkili.Text <> '' then
-//        s := s + ' and '+ Yet + ' LIKE ''' + TYet +'''';
-     if FArama.AraKod.Text <> '' then begin
-        s := s + ' and '+ Kod + ' LIKE ''' + TKod+'''' ;
-        order :=  '  ORDER BY R.SUBEID,' + Kod;     // and gorulmeyecekkod
-     end;
-     if not FArama.CheckPasifler.Checked then
-        s := s + ' and R.DURUM>0 ';
+  function ComboDeger(Combo: TcxImageComboBox): Integer;
+  begin
+    Result := StrToIntDef(VarToStr(Combo.EditValue), 0);
   end;
 
-
-//   if FArama.Arailler.Text  <> '' then     //il aramasi
-//     s := s + ' and  X.BILGI = '''+Arama.Arailler.Text+''' ';
-  if SubeVarmi then
-     s := s + ' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ';
-
-  case ModulYetki_TekSubeTum.IK of
-     1: s := s + ' AND R.TEMSILCI='+Kullanan;//sadece kendi  g?r?r
-    10: s := s + ' AND R.SUBEID='+IntToStr(SubeId);//sadece kendi şube  g?r?r
+  // Aday sayisal combo filtresi: yalniz Filtre+Aday+kutu dolu ise JSON'a eklenir
+  procedure ComboEkle(const Ad: string; Combo: TcxImageComboBox);
+  begin
+    if Filtre and Aday and (Combo.Text <> '') then
+      j.AddPair(Ad, TJSONNumber.Create(ComboDeger(Combo)));
   end;
 
-    //s := s + 'and (R.SUBEID ='+IntToStr(SubeId)+' or R.SUBEID = 0) ';
+begin
+  if not Assigned(FArama) then Exit;
+  if AktifVeriMotor = vmPG then Exit;   // JSON SP su an MSSQL (PG pilot ayri yol)
 
-  REHBER.Close;
-  if Potansiyel then
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Aday.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll])
+  Aday   := Potansiyel;
+  Filtre := (AMod = 4);
+
+  if (REHBER.Active) and (REHBER.RecordCount > 0) then
+    LocateID := REHBER.FieldByName('ID').AsInteger
   else
-      REHBER.SQL.Text:= StringReplace(SQL_IK_Memo.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);;
+    LocateID := -1;
 
-  //REHBER.SQL.Text:=StringReplace(REHBER.SQL.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);
-  REHBER.SQL.Add(s+order);
-//  if FArama.AraYetkili.Text <> '' then
-//     Param := 1
-//  else
-      Param := 0;
-  if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[Param]);
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(22, YetkiTur_Gorme)
+  else SubeYetki := '';
+
+  // Firma/Kod metin filtreleri (yalniz Filtre modu; digerlerinde bos -> JSON'a eklenmez)
+  Firma := '';  Kod := '';
+  if Filtre then begin
+    if Aday then Firma := Trim(FArama.AraFirma2.Text)
+    else begin
+      Firma := Trim(FArama.AraFirma.Text);
+      Kod   := Trim(FArama.AraKod.Text);
+    end;
+  end;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Aday', TJSONNumber.Create(Ord(Aday)));
+    j.AddPair('TopN', TJSONNumber.Create(0));                 // IK'da TOP yok
+    j.AddPair('Mod',  TJSONNumber.Create(AMod));
+    if Aday then
+      j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler2.Checked)))
+    else
+      j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler.Checked)));
+    j.AddPair('Dil', TJSONNumber.Create(Dil));                // eski memo DIL=-1 yerine parametre
+    j.AddPair('IlgiliArama', TJSONNumber.Create(0));          // eski @ILGILIARAMA (hep 0)
+
+    // Metin filtreleri (bos ise eklenmez)
+    if Firma <> '' then j.AddPair('Firma', Firma);
+    if Kod   <> '' then j.AddPair('Kod',   Kod);
+
+    // Aday sayisal filtreleri (yalniz Filtre + Aday + kutu dolu ise)
+    ComboEkle('Cinsiyet',  FArama.ComboCinsiyet);
+    ComboEkle('Ogrenim',   FArama.ComboOgrenim);
+    ComboEkle('Sektor',    FArama.ComboSektor);
+    ComboEkle('Departman', FArama.ComboDepartman);
+    ComboEkle('Gorev',     FArama.ComboGorev);
+    ComboEkle('Dil1',      FArama.ComboDil1);
+    ComboEkle('Dil2',      FArama.ComboDil2);
+    ComboEkle('Il',        FArama.ComboIl);
+    if Filtre and Aday and (FArama.EditUyruk.Tag > 0) then
+      j.AddPair('Uyruk', TJSONNumber.Create(FArama.EditUyruk.Tag));
+
+    // Ucret araligi (aday) - alt+ust ikisi de dolu ise
+    if Filtre and Aday and (FArama.EditUcret.Text <> '') and (FArama.EditUcret2.Text <> '') then begin
+      j.AddPair('UcretAlt', TJSONNumber.Create(StrToCurrDef(FArama.EditUcret.Text,  0)));
+      j.AddPair('UcretUst', TJSONNumber.Create(StrToCurrDef(FArama.EditUcret2.Text, 0)));
+    end;
+
+    if SubeVarmi and (SubeYetki <> '') then j.AddPair('SubeYetkiList', SubeYetki);
+    // TekSube/temsilci yetkisi yalniz Filtre modunda (eski JvTimer davranisi)
+    if Filtre then j.AddPair('TekSubeTum', TJSONNumber.Create(ModulYetki_TekSubeTum.IK));
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));  // KULLANICI_ARAMA + temsilci
+    j.AddPair('SubeId', TJSONNumber.Create(SubeId));
+    j.AddPair('Modul',  TJSONNumber.Create(MODUL_IK));                 // KULLANICI_ARAMA.MODUL (34)
+
+    // @Baslik='' (IK ek-alan yok) + @Kosullar=j; helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(REHBER, 'sp_Prog_IK_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
 end;
 
 procedure TIKListeDlg.Kapatiliyor(var AKapansin: Boolean);

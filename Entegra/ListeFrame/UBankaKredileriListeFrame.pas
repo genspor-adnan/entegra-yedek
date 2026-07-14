@@ -27,7 +27,7 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxRichEdit,
-  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  dxDateRanges, dxScrollbarAnnotations, JvTimer, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, frCoreClasses,
   FireDAC.Comp.DataSet;
@@ -42,6 +42,7 @@ type
     GridTakvimDBTableView1ALINISTARIHI1: TcxGridDBColumn;
     GridTakvimLevel1: TcxGridLevel;
     DtsKrediler: TDataSource;
+    JvTimer1: TJvTimer;
     KREDILER: TFDQuery;
     GridTakvimDBTableView1BANKAADI: TcxGridDBColumn;
     EKSTRE: TFDQuery;
@@ -146,6 +147,10 @@ type
     GridTakvimDBTableView1KALAN_ANAPARA: TcxGridDBColumn;
     GridTakvimDBTableView1KALAN_GIDER: TcxGridDBColumn;
     ToolButton2: TToolButton;
+    ToolButton10: TToolButton;                 // ayrac (Son/Sik butonlari icin)
+    LabelTumKayitlar: TToolButton;             // Tum kayitlar (Liste_SP_Cagir 1)
+    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
+    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
     TabYorumMedya: TcxTabSheet;
     TabYorum: TFDQuery;
     DtsYorum: TDataSource;
@@ -267,6 +272,7 @@ type
     GridCekKocanViewKOCANNO: TcxGridDBColumn;
     GridCekKocanViewACIKLAMA: TcxGridDBColumn;
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure JvTimer1Timer(Sender: TObject);
     procedure GridTakvimDBTableView1DblClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
@@ -351,6 +357,10 @@ type
     procedure KrediKapatEylemi(Sender: TObject);
     procedure KrediEkranAc(Yeni : Boolean);
     procedure SetArama(const Value: TBankaKredileriAramaFrame);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Banka_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure EkstreGoster(Goster:Boolean);
     function RotatifBaslamaTarihGetir(var BasAy : smallint; var BasYil : smallint) : TDateTime;
@@ -368,7 +378,7 @@ implementation
 
 uses UAnaForm,UKrediler, FetaKurulusSiniflari, FetaClassExtensions, UKasalarListeFrame, PrjConst,UKrediHesapMakineDlg,
      URaporAraclari, UGenelAnaSekmeFrame, UFastRap, UGirisKutusuEx, FetaUtil,LocOnfly,
-  UKrediEkle, UKasaWizard, URotatifDonemFaiz, ULog, UVeriMotor;
+  UKrediEkle, UKasaWizard, URotatifDonemFaiz, ULog, UVeriMotor, System.JSON;
 
 
 {$R *.dfm}
@@ -423,15 +433,26 @@ end;
 procedure TBankaKredileriListeFrame.AraKodKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if Key = 38 then
-    KREDILER.Prior
+  if Key = 13 then
+    DegisTus.Click               // Enter -> hemen (kart ac)
+  else if Key = 38 then
+    KREDILER.Prior               // yukari ok -> gez
   else if Key = 40 then
-    KREDILER.next
-  else
-  begin
-      YenileTusClick;
-      DegisTus.visible := KREDILER.RecordCount>0;
+    KREDILER.next                // asagi ok -> gez
+  else begin
+    // Debounce: her karakterde aninda arama yerine timer'i sifirla;
+    // yazma bitince 700ms sonra JvTimer1Timer tek listeleme yapar.
+    JvTimer1.Enabled := False;
+    JvTimer1.Interval := 700;
+    JvTimer1.Enabled := True;
   end;
+end;
+
+procedure TBankaKredileriListeFrame.JvTimer1Timer(Sender: TObject);
+begin
+  JvTimer1.Enabled := False;
+  Liste_SP_Cagir(4);   // debounce suresi doldu -> tek listeleme (parite: YenileTusClick)
+  DegisTus.Visible := KREDILER.RecordCount > 0;
 end;
 
 procedure TBankaKredileriListeFrame.arihSe1Click(Sender: TObject);
@@ -445,9 +466,21 @@ begin
 end;
 
 procedure TBankaKredileriListeFrame.YenileTusClick;
+begin
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Banka_Liste)
+end;
+
+procedure TBankaKredileriListeFrame.Liste_SP_Cagir(AMod: SmallInt);
+// Kredi listesini sunucu-tarafi SP ile getirir (sp_Prog_Banka_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (Banka'da BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski KREDILER sorgusuyla BIREBIR ayni; Son/Sik icin KULLANICI_ARAMA (MODUL_Banka).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); @Trh her zaman gonderilir.
 var
-  P: TFDParam;
   LAfterScroll: TDataSetNotifyEvent;
+  LocateID: Integer;
+  KodVal: string;
+  j: TJSONObject;
 begin
   if EdKrediTrh.EditValue = Null then begin
     EdKrediTrh.EditValue := EndOfTheDay(Tablo.GENINI.BugunTrh);
@@ -455,28 +488,55 @@ begin
     EdKrediTrh.Properties.OnEditValueChanged := cxCheckBox1PropertiesChange;
   end;
 
+  if (KREDILER.Active) and (KREDILER.RecordCount > 0) then
+    LocateID := KREDILER.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  // DIKKAT: bu sekmede runtime arama frame'i TBankaKredilerilisteTanimlariFrame (paylasilan),
+  //   FArama tipi TBankaKredileriAramaFrame ile UYUSMAZ -> FArama.AraKod yanlis-tip erisimi AV verir.
+  //   'is' ile gercek tip dogrulanir (nil ve yanlis-tip icin False) -> yoksa filtre yok.
+  if (FArama is TBankaKredileriAramaFrame) then KodVal := Trim(FArama.AraKod.Text) else KodVal := '';
+
   LAfterScroll := KREDILER.AfterScroll;
   KREDILER.AfterScroll := nil;
   try
-    KREDILER.Close;
-    KREDILER.Params.Clear;
-    P := KREDILER.Params.Add;
-    P.Name := 'PDrm';
-    P.DataType := ftInteger;
-    P.ParamType := ptInput;
-    P.AsInteger := Ord(not CheckAktifPasif.Checked);
-    P := KREDILER.Params.Add;
-    P.Name := 'PTrh';
-    P.DataType := ftDateTime;
-    P.ParamType := ptInput;
-    P.AsDateTime := EndOfTheDay(EdKrediTrh.Date);
-    KREDILER.Open;
+    j := TJSONObject.Create;
+    try
+      j.AddPair('Mod',   TJSONNumber.Create(AMod));
+      j.AddPair('Pasif', TJSONNumber.Create(Ord(CheckAktifPasif.Checked)));         // orijinal PDrm=Ord(not Checked) esdegeri
+      j.AddPair('Trh',   FormatDateTime('yyyy-mm-dd"T"hh:nn:ss.zzz', EndOfTheDay(EdKrediTrh.Date)));
+      if KodVal <> '' then j.AddPair('Kod', KodVal);
+      j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));             // Son/Sik icin kullanici
+      j.AddPair('Modul', TJSONNumber.Create(MODUL_Banka));                          // KULLANICI_ARAMA.MODUL
+
+      // @Baslik='' (Banka'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+      Tablo.ListeSPJson(KREDILER, 'sp_Prog_Banka_Liste_Json2', '', j, LocateID);
+      j := nil;   // sahiplik helper'a gecti
+    finally
+      j.Free;     // AddPair sirasinda hata olursa temizle
+    end;
   finally
     KREDILER.AfterScroll := LAfterScroll;
   end;
 
   if Assigned(LAfterScroll) then
     LAfterScroll(KREDILER);
+end;
+
+procedure TBankaKredileriListeFrame.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TBankaKredileriListeFrame.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TBankaKredileriListeFrame.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 procedure TBankaKredileriListeFrame.AnaparaOdemeTusClick(Sender: TObject);
@@ -488,7 +548,7 @@ var
   KalanAnaPara : currency;
 begin
    if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT * FROM KREDIROTATIFFAIZ where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]) then begin
-      Showmessage('?nce faiz oranlar?n? girin!');
+      Showmessage('Önce faiz oranlarını girin!');
       exit;
    end;
 
@@ -499,10 +559,10 @@ begin
   Tarih := Tablo.GENINI.BugunTrhSaat;
   Valor := Tarih;
   Tutar := KalanAnaPara;
-  ctrls := TGirdiDenetimleri.Create.DateTimePicker(BGIslem_tarih_gir, @Tarih, dtkDate).DateTimePicker('Val?r', @Valor, dtkDate).Edit('Referans No', @RefNo).CurrencyEdit('?denen Tutar', @Tutar,2).Edit('A??klama', @Aciklama);
+  ctrls := TGirdiDenetimleri.Create.DateTimePicker(BGIslem_tarih_gir, @Tarih, dtkDate).DateTimePicker('Valör', @Valor, dtkDate).Edit('Referans No', @RefNo).CurrencyEdit('Ödenen Tutar', @Tutar,2).Edit('Açıklama', @Aciklama);
   if TGirisKutusuEx.BilgiAlEx(BGKredi_odemesi, ctrls) = mrOk then begin
      if StrToFloatDef(VarToStr(Tutar),0)-KalanAnaPara>1 then
-        raise Exception.Create('Kalan Anaparadan daha fazla ?deme yap?lamaz!');
+        raise Exception.Create('Kalan Anaparadan daha fazla ödeme yapılamaz!');
      //giri? veya ??k?? yaparken arada d?nem var m? bakal?m
      if EKSTRE.RecordCount >0 then
         while RotatifDonemVar(VarToDateTime(Valor)) do
@@ -543,6 +603,10 @@ var ra : string;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    //GridTviewSUBEID.Visible := SubeVarmi;
+   // NOT: bu sekmenin calisma-zamani arama frame'i TBankaKredileriListeTanimlariFrame'dir
+   //   (SekmeConfig AramaTipi), FArama tipi TBankaKredileriAramaFrame ile UYUSMAZ (akraba degil).
+   //   Yanlis-tip FArama.<buton> erisimi AV veriyordu. Tum/Son/Sik butonlari liste frame'inin
+   //   kendi ToolBar1'ine tasindi (DFM'de OnClick dogrudan handler'lara bagli) -> FArama'ya dokunma.
    TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,
    TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
    YaziciYaz.Caption := ra;
@@ -595,7 +659,10 @@ end;
 
 procedure TBankaKredileriListeFrame.cxCheckBox1PropertiesChange(Sender: TObject);
 begin
- YenileTusClick;
+  // Aktif/Pasif filtresi (ve EdKrediTrh tarih) degisince de debounce -> timer-restart
+  JvTimer1.Enabled := False;
+  JvTimer1.Interval := 700;
+  JvTimer1.Enabled := True;
 end;
 
 procedure TBankaKredileriListeFrame.cxGridHareketlerCanFocusRecord(
@@ -749,6 +816,8 @@ end;
 
 procedure TBankaKredileriListeFrame.KrediEkranAc(Yeni: Boolean);
 begin
+  if (not Yeni) and (KREDILER.Active) and (KREDILER.RecordCount > 0) then
+    Tablo.AramaKaydet(MODUL_Banka, KREDILER.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
   with FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TKredilerDlg).Git do begin
    with TKredilerDlg(Ornek) do begin
      KapatEylemi := KrediKapatEylemi;
@@ -886,7 +955,7 @@ end;
 procedure TBankaKredileriListeFrame.RotatifFaizrMasrafEkleMenuClick(Sender: TObject);
 begin
    if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT * FROM KREDIROTATIFFAIZ where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]) then begin
-      Showmessage('?nce faiz oranlar?n? girin!');
+      Showmessage('Önce faiz oranlarını girin!');
       exit;
    end;
    if EKSTRE.RecordCount >0 then
@@ -963,7 +1032,7 @@ begin
  //?nce en son ne zaman ekleme yap?lm?? ona g?re bir sonraki d?nemi bulmal?y?<
   IslemTarih := DonemTarihi;
   //?nce faiz biti? tarihini alal?m
-  if TGirisKutusuEx.BilgiAlEx(hesap1, TGirdiDenetimleri.Create.DateTimePicker('Biti? ??lem Tarihi', @IslemTarih, dtkDate).DateTimePicker('Val?r Tarihi', @ValorTarih, dtkDate)) = mrOk then begin
+  if TGirisKutusuEx.BilgiAlEx(hesap1, TGirdiDenetimleri.Create.DateTimePicker('Bitiş İşlem Tarihi', @IslemTarih, dtkDate).DateTimePicker('Valör Tarihi', @ValorTarih, dtkDate)) = mrOk then begin
        // son i?lem tarihi alal?m
        Tablo.Query0.Close;//ba?lama ve biti? aras?ndaki t?m giren ve ??kan ?demeler i?in faiz hesaplan?r
        Tablo.Query0.SQL.Text := 'select VALOR = PLANTARIHI, ANAPARA=BORC-ALACAK '+
@@ -980,8 +1049,8 @@ begin
        end;
        FaizTutar := SimdikiFaizTut;
        BSMVTutar := SimdikiFaizTut*BSMV;
-       if TGirisKutusuEx.BilgiAlEx(hesap1, TGirdiDenetimleri.Create.CurrencyEdit('Kredi Faizi Tutar?', @FaizTutar,2).Edit('Faiz A??klama', @FaizAciklama)
-                         .CurrencyEdit('BSMV Tutar?', @BSMVTutar,2).Edit('BSMV A??klama', @BSMVAciklama)) = mrOk then
+       if TGirisKutusuEx.BilgiAlEx(hesap1, TGirdiDenetimleri.Create.CurrencyEdit('Kredi Faizi Tutarı', @FaizTutar,2).Edit('Faiz Açıklama', @FaizAciklama)
+                         .CurrencyEdit('BSMV Tutarı', @BSMVTutar,2).Edit('BSMV Açıklama', @BSMVAciklama)) = mrOk then
        Ekle(FaizAciklama,  FStrToCurrDef(VarToStr(FaizTutar),0),131);
        OdemeYap(FStrToCurrDef(VarToStr(FaizTutar),0));
        Ekle(BSMVAciklama,  FStrToCurrDef(VarToStr(BSMVTutar),0),132);
@@ -1183,7 +1252,7 @@ var
   Tutar2 : currency;
 begin
   Tarih := Tablo.GENINI.BugunTrhSaat;
-  ctrls := TGirdiDenetimleri.Create.DateTimePicker('??lem Tarihi', @Tarih, dtkDate).Edit('Referans No', @RefNo).CurrencyEdit('Tutar', @Tutar,2).Edit('A??klama', @Aciklama);
+  ctrls := TGirdiDenetimleri.Create.DateTimePicker('İşlem Tarihi', @Tarih, dtkDate).Edit('Referans No', @RefNo).CurrencyEdit('Tutar', @Tutar,2).Edit('Açıklama', @Aciklama);
   if TGirisKutusuEx.BilgiAlEx(BGKredi_giris, ctrls) = mrOk then begin
 
      //giri? veya ??k?? yaparken arada d?nem var m? bakal?m

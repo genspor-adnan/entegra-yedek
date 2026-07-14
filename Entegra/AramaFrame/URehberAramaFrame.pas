@@ -24,13 +24,10 @@ type
     Label3: TcxLabel;
     LabelGrup: TcxLabel;
     CheckPasifler: TcxCheckBox;
-    LabelSonArananlar2: TcxLabel;
-    LabelSIKArananlar2: TcxLabel;
     TabSK: TFDQuery;
     DtsSK: TDataSource;
     Label6: TcxLabel;
     Label7: TcxLabel;
-    LabelTumKayitlar2: TcxLabel;
     ComboGrup: TcxImageComboBox;
     ComboKategori: TcxImageComboBox;
     ComboSinif: TcxImageComboBox;

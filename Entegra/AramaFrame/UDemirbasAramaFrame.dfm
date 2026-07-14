@@ -16,9 +16,9 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 76
-    Top = 0
-    Width = 115
+    Left = 113
+    Top = 228
+    Width = 79
     Height = 22
     Caption = 'Yenile'
     Flat = True
@@ -77,8 +77,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
       0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
   end
   object LabelPNO: TcxLabel
-    Left = 0
-    Top = 52
+    Left = -1
+    Top = 68
     AutoSize = False
     Caption = 'Demirba'#351' Ad'#305
     FocusControl = AraDemirbasNo
@@ -95,8 +95,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 70
   end
   object Label2: TcxLabel
-    Left = 0
-    Top = 183
+    Left = -1
+    Top = 199
     AutoSize = False
     Caption = '&Seri No'
     FocusControl = AraSeriNo
@@ -112,8 +112,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 70
   end
   object Label6: TcxLabel
-    Left = 0
-    Top = 157
+    Left = -1
+    Top = 173
     AutoSize = False
     Caption = '&Kategori'
     ParentFont = False
@@ -128,8 +128,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 70
   end
   object Label8: TcxLabel
-    Left = 0
-    Top = 105
+    Left = -1
+    Top = 121
     AutoSize = False
     Caption = '&Zimmet Alan'
     ParentFont = False
@@ -145,8 +145,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 70
   end
   object Label7: TcxLabel
-    Left = 0
-    Top = 26
+    Left = -1
+    Top = 42
     AutoSize = False
     Caption = 'Demirba'#351' No'
     FocusControl = AraDemirbasAdi
@@ -163,8 +163,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 70
   end
   object cxLabel7: TcxLabel
-    Left = 77
-    Top = 28
+    Left = 76
+    Top = 44
     Cursor = crHandPoint
     Caption = 'Temizle'
     ParentFont = False
@@ -177,20 +177,20 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     OnClick = cxLabel7Click
   end
   object AraSeriNo: TcxTextEdit
-    Left = 77
-    Top = 182
+    Left = 76
+    Top = 198
     TabOrder = 1
     Width = 115
   end
   object AraDemirbasNo: TcxTextEdit
-    Left = 77
-    Top = 25
+    Left = 76
+    Top = 41
     TabOrder = 2
     Width = 115
   end
   object cxLabel13: TcxLabel
-    Left = 0
-    Top = 131
+    Left = -1
+    Top = 147
     Hint = 'CariKart_B'#246'l'#252'm'
     HelpType = htKeyword
     HelpKeyword = 'DEMIRBAS_LOKASYON.ID'
@@ -207,8 +207,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Transparent = True
   end
   object cxLabel1: TcxLabel
-    Left = 0
-    Top = 79
+    Left = -1
+    Top = 95
     Hint = 'Demirbas_Durum'
     HelpType = htKeyword
     HelpKeyword = 'DEMIRBAS.DURUM'
@@ -224,8 +224,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Transparent = True
   end
   object AraLokasyonbtne: TcxButtonEdit
-    Left = 77
-    Top = 130
+    Left = 76
+    Top = 146
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -245,8 +245,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 115
   end
   object AraZimmetAlanbtne: TcxButtonEdit
-    Left = 77
-    Top = 104
+    Left = 76
+    Top = 120
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -266,8 +266,8 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 115
   end
   object AraKategoribtne: TcxButtonEdit
-    Left = 77
-    Top = 156
+    Left = 76
+    Top = 172
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -289,24 +289,74 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Width = 115
   end
   object AraDurumu: TcxImageComboBox
-    Left = 77
-    Top = 77
+    Left = 76
+    Top = 93
     RepositoryItem = Tablo.RepDemirbas_Durum
     Properties.Items = <>
     TabOrder = 8
     Width = 115
   end
   object AraDemirbasAdi: TcxTextEdit
-    Left = 77
-    Top = 51
+    Left = 76
+    Top = 67
     TabOrder = 9
     Width = 115
   end
   object cbPasiflerideGoster: TcxCheckBox
-    Left = 77
-    Top = 212
+    Left = 0
+    Top = 229
     Caption = 'Pasifleri de g'#246'ster'
     Properties.ImmediatePost = True
     TabOrder = 15
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 39
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 16
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Tag = 1
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
 end

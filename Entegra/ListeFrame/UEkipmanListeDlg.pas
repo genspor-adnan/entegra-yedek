@@ -56,6 +56,12 @@ type
     cxDBTreeList1cxDBTreeListMARKA: TcxDBTreeListColumn;
     cxDBTreeList1cxDBTreeListMODEL: TcxDBTreeListColumn;
     TreeListEkipmancxDBTreeListSTOKLU: TcxDBTreeListColumn;
+    // Own-toolbar Tum/Son/Sik butonlari (arama-frame'siz; FArama'ya DOKUNULMAZ).
+    // Published ALANLAR method'lardan ONCE bildirilir (E2169 engeli).
+    ToolButton2: TToolButton;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure BaskiOnizlemeMenuClick(Sender: TObject);
     procedure GridServisViewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem;
       var AStyle: TcxStyle);
@@ -69,10 +75,14 @@ type
     procedure YeniTusClick(Sender: TObject);
     procedure TreeListEkipmanDblClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TServisAramaFrame;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Ekipman_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -108,7 +118,7 @@ type
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
-  UFastRap, PrjConst,LocOnFly;
+  UFastRap, PrjConst,LocOnFly, System.JSON;
 
 {$R *.dfm}
 { TEkipmanListeDlg }
@@ -139,7 +149,7 @@ end;
 
 procedure TEkipmanListeDlg.Baslatildi;
 begin
-  TabloYenile(TabEkipmanlar,[]);
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Ekipman_Liste_Json2)
 end;
 
 procedure TEkipmanListeDlg.TreeListEkipmanDblClick(Sender: TObject);
@@ -151,8 +161,10 @@ procedure TEkipmanListeDlg.DegisTusClick(Sender: TObject);
 var
   LocateEkipmanID:Integer;
 begin
+  if (TabEkipmanlar.Active) and (TabEkipmanlar.RecordCount > 0) then
+    Tablo.AramaKaydet(MODUL_Ekipman, TabEkipmanlar.FieldByName('ID').AsInteger);  // Son/Sik Aranan takibi (kart acilinca upsert)
   LocateEkipmanID := Tablo.EkipmanSihirbazBaslat('D',0,TabEkipmanlar.FieldByName('ID').AsInteger,0);
-  TabloYenile(TabEkipmanlar,[]);
+  Liste_SP_Cagir(4);
   //locate olacak...
 end;
 
@@ -276,7 +288,7 @@ begin
        LogKartSil(TabEkipmanlar, TabNo_EKIPMAN, TabEkipmanlar.FieldByName('ID').AsInteger);
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
-       TabloYenile(TabEkipmanlar,[]);
+       Liste_SP_Cagir(4);
      end else
        showmessage(EHareketli_silinemez);
    end;
@@ -310,7 +322,53 @@ var
   YeniEkipmanID : Integer;
 begin
   YeniEkipmanID := Tablo.EkipmanSihirbazBaslat('E',0,0,0);
-  TabloYenile(TabEkipmanlar,[]);
+  Liste_SP_Cagir(4);
+end;
+
+procedure TEkipmanListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Ekipman listesini sunucu-tarafi SP ile getirir (sp_Prog_Ekipman_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (Ekipman'da BOS) + @Kosullar = filtreler (JSON).
+//   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Sonuc kumesi eski TabEkipmanlar.SQL (DFM agac sorgusu) ile BIREBIR; Son/Sik icin KULLANICI_ARAMA (MODUL_Ekipman).
+//   Sube-yetki filtresi yalniz SubeVarmi ise gonderilir (EKIPMANLAR.SUBEID).
+var
+  LocateID: Integer;
+  j: TJSONObject;
+begin
+  if (TabEkipmanlar.Active) and (TabEkipmanlar.RecordCount > 0) then
+    LocateID := TabEkipmanlar.FieldByName('ID').AsInteger
+  else
+    LocateID := -1;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
+    if SubeVarmi then
+      j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme));  // app-uretimi tam-sayi listesi (GUVENILIR)
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));              // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Ekipman));                         // KULLANICI_ARAMA.MODUL
+
+    // @Baslik='' (Ekipman'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
+    Tablo.ListeSPJson(TabEkipmanlar, 'sp_Prog_Ekipman_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TEkipmanListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TEkipmanListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TEkipmanListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

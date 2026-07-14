@@ -2,7 +2,7 @@
 
 interface
 
-uses Windows, DB, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSky, dxSkinsDefaultPainters, //HKMTab,
+uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSky, dxSkinsDefaultPainters, //HKMTab,
   IdBaseComponent, IdComponent, UKodAgaci, cxGridDBTableView, cxButtonEdit,cxmemo,cxbuttons, IdTCPConnection, IdTCPClient,
   IdHTTP, cxLookAndFeels, cxImageComboBox,XMLDoc, ImgList, Controls, cxStyles, Classes, AppEvnts,
   Forms, sysutils, dbctrls, UCombo, ComCtrls, Types,  EntegraActivityAutomationWebService,cxRichEdit, cxLabel, //DBTables,
@@ -723,6 +723,7 @@ type
     procedure DuyuruMotoru(TaraTarih : TDateTime);
     procedure SKRehberEkle(Rehber_Id: Integer);
     procedure AramaKaydet(AModul, AKayitID: Integer);  // Son/Sik Aranan: KULLANICI_ARAMA upsert (generic, MODUL bazli)
+    procedure ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string; AKosullar: TJSONObject; ALocateID: Integer = 0; const AIDTur: string = 'ID');  // generic 2-param JSON liste SP cagrisi (@Baslik ham SQL + @Kosullar JSON); AKosullar SAHIPLIGI devralinir (Free edilir)
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -1510,12 +1511,24 @@ const
   MODUL_Alinan_Siparis=241111;
   MODUL_Banka = 25;
   MODUL_Stok = 27;
+  MODUL_StokTalep = 2709;   // KULLANICI_ARAMA.MODUL - Stok Talep listesi (MODUL 'Stoktan Talep')
   MODUL_Demirbas = 28;
   MODUL_Teklif = 29;
   MODUL_Servis = 30;
   MODUL_Dokuman = 32;
   MODUL_Uretim = 33;
   MODUL_IK = 34;
+  // KULLANICI_ARAMA.MODUL icin ayri (yetki MODULID'siyle cakismasin diye MODUL tablosundan gercek ID):
+  MODUL_Gorev = 2008;        // MODUL 'Gorev' - Gorev listesi Son/Sik Aranan
+  MODUL_UretimEmri = 3306;   // MODUL 'Uretim Emirleri' - (MODUL_Uretim=33 yetki icin; bu ayri partition)
+  MODUL_UretimFisi = 3316;   // MODUL 'Uretim Fisleri'
+  MODUL_Cek = 2551;          // MODUL 'Cek Senet' - Cek listesi (UCekListeFrame) Son/Sik Aranan
+  MODUL_POS = 2521;          // MODUL 'Pos Tanimlari' - POS listesi (UPOSListeFrame) Son/Sik Aranan
+  MODUL_KrediKarti = 253130; // MODUL 'Kredi Karti' - Kredi Karti listesi (UKrediKartiListeFrame) Son/Sik Aranan
+  MODUL_Ekipman = 3011;      // MODUL 'Ekipman Tanimlari' - Ekipman listesi (UEkipmanListeDlg) Son/Sik Aranan
+  MODUL_Kasalar = 2301;      // MODUL 'Kasa Listesi' - Kasa tanim listesi (UKasalarListeFrame) Son/Sik Aranan
+  MODUL_Fisler = 240141;     // MODUL 'Fisler' - Fis listesi (UFislerListeFrame) Son/Sik Aranan
+  MODUL_FatTransfer = 2711;  // MODUL 'Transferler' - Fatura Transfer listesi (UFaturaTransferListe) Son/Sik Aranan
 {$ENDREGION}
 {$REGION 'Diger Sabitleri'}
   Sbt_Cek_Gelen = 101;
@@ -11771,15 +11784,42 @@ end;
 procedure TTablo.AramaKaydet(AModul, AKayitID: Integer);
 // Kullanicinin bir karti acmasini KULLANICI_ARAMA'ya yazar (Son/Sik Aranan icin).
 //   Generic: AModul = MODUL.MODULID (MODUL_Cari/Stok/Demirbas...), AKayitID = kayit ID.
-//   Upsert: varsa SAY+1 & tarih guncelle, yoksa ekle (SKRehberEkle deseni).
+//   Idempotent upsert TEK atomik batch: varsa SAY+1 & tarih guncelle, yoksa ekle.
+//   NOT: BasitKomutÇalıştır ExecSQL'de Null doner (RowsAffected DEGIL) -> eski
+//   "update ... <1 then insert" deseni UPDATE'i saymaz, her cagride INSERT dener ->
+//   unique index UX_KULLANICI_ARAMA (KULID,MODUL,KAYITID) mukerrer key hatasi verirdi.
+//   Cozum: UPDATE + INSERT..WHERE NOT EXISTS (portable ANSI, MSSQL & PG). Kul/Mod/Kayit
+//   integer oldugu icin inline (enjeksiyon guvenli, param-tekrar sorunu yok).
+var Kul: Integer;
 begin
-  if (AModul <= 0) or (AKayitID <= 0) then Exit;
-  if Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-       ' update KULLANICI_ARAMA set SAY=SAY+1, DEGISTIRMETARIHI=getdate() where KULID=&Kul and MODUL=&Mod and KAYITID=&Kayit ',
-       ['&Kul', '&Mod', '&Kayit'], [StrToInt(Kullanan), AModul, AKayitID]) < 1 then
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-       ' insert into KULLANICI_ARAMA (KULID,MODUL,KAYITID,SAY,DEGISTIRMETARIHI) values (&Kul,&Mod,&Kayit,1,getdate()) ',
-       ['&Kul', '&Mod', '&Kayit'], [StrToInt(Kullanan), AModul, AKayitID]);
+  Kul := StrToIntDef(Kullanan, 0);
+  if (Kul <= 0) or (AModul <= 0) or (AKayitID <= 0) then Exit;
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    ' update KULLANICI_ARAMA set SAY=SAY+1, DEGISTIRMETARIHI=getdate()' +
+    '  where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID)+'; ' +
+    ' insert into KULLANICI_ARAMA (KULID,MODUL,KAYITID,SAY,DEGISTIRMETARIHI)' +
+    '  select '+IntToStr(Kul)+','+IntToStr(AModul)+','+IntToStr(AKayitID)+',1,getdate()' +
+    '  where not exists (select 1 from KULLANICI_ARAMA' +
+    '                    where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID)+')',
+    [], []);
+end;
+
+procedure TTablo.ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string;
+  AKosullar: TJSONObject; ALocateID: Integer; const AIDTur: string);
+// Generic 2-param JSON liste SP cagrisi:  EXEC dbo.<ASPAdi> @Baslik=..., @Kosullar=<AKosullar>.
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR).
+//   @Kosullar = filtreler (JSON; degerler SP'de cast/parametreli). Liste kendi FArama'sindan JSON kurar.
+//   AKosullar SAHIPLIGI devralinir -> burada Free edilir (cagiran Free ETMEZ).
+begin
+  try
+    ATab.Close;
+    ATab.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
+    ATab.ParamByName('Baslik').AsString   := ABaslik;
+    ATab.ParamByName('Kosullar').AsString := AKosullar.ToJSON;
+  finally
+    FreeAndNil(AKosullar);
+  end;
+  TabloYenile(ATab, [], ALocateID, AIDTur);
 end;
 
 procedure TTablo.CekSenetOpsiyonUygula;

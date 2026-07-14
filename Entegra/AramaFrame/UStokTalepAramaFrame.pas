@@ -9,6 +9,7 @@ uses
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
   cxLookAndFeelPainters, cxButtons, dxSkinsCore, UFrameYoneticisi,
+  Vcl.ToolWin, Utablo,
   cxCheckBox, cxDropDownEdit, cxCalendar, ExtCtrls, cxLabel,
   dxSkinLondonLiquidSky, cxGraphics, cxLookAndFeels, dxCore, cxDateUtils, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
   Vcl.Buttons, cxImageComboBox, dxSkinMetropolis, dxSkinMetropolisDark,
@@ -30,6 +31,10 @@ type
     ComboSubeGiris: TcxImageComboBox;
     cxLabel1: TcxLabel;
     YenileTus: TSpeedButton;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure btnSilClick(Sender: TObject);
   private
     { Private declarations }

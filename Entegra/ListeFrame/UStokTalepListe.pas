@@ -121,6 +121,10 @@ type
     procedure AramaYap;
     procedure BtnDonusturClick(Sender: TObject);
     procedure TalepInfoMenuClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);   // sunucu-tarafi listeleme (sp_Prog_StokTalep_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -170,7 +174,7 @@ var
 implementation
 
 uses  UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,
-  UFastRap, UGenelAnaSekmeFrame, URaporAraclari,LocOnfly, UBelgeDonusum;
+  UFastRap, UGenelAnaSekmeFrame, URaporAraclari,LocOnfly, UBelgeDonusum, System.JSON;
 
 {$R *.dfm}
 
@@ -201,22 +205,69 @@ procedure TStokTalepListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
   if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.CalendarBas.Date))>0 then exit;
-//  if (FArama.CalendarBit.Text = '')or(FArama.CalendarBas.Text = '')then exit;
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_StokTalep_Liste)
+end;
 
+procedure TStokTalepListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Stok Talep listesini sunucu-tarafi SP ile getirir (sp_Prog_StokTalep_Liste_Json2).
+//   2 PARAM: @Baslik = SELECT ek kolonlari (StokTalep'te bos) + @Kosullar = filtreler JSON.
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok).
+//   AMod: 1=Tum (TOP yok), 3=Sik Aranan, 4=Filtre (tarih+sube), 5=Son Aranan.
+//   Filtre modunda tarih araligi + (secili ise) sube filtreleri JSON'a girer.
+//   Tum/Son/Sik modunda tarih yok (tarihten bagimsiz); Son/Sik icin KULLANICI_ARAMA join.
+var
+  TopN, SubeC, SubeG: Integer;
+  j: TJSONObject;
+begin
+  if AMod = 1 then TopN := 0 else TopN := 200;
 
-  TabStokTalep.Close;
-  TabStokTalep.SQL.Text :=  SQLMemo.Text;
-  TabStokTalep.SQL.Add(' and SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.CalendarBas.Date)+''' and '+
-                          ' SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', FArama.CalendarBit.Date)+''' ');
-  if FArama.ComboSubeCikis.text<>'' then
-     TabStokTalep.SQL.Add(' and S.SUBE = '+IntToStr(FArama.ComboSubeCikis.EditValue));
-  if FArama.ComboSubeGiris.text<>'' then
-     TabStokTalep.SQL.Add(' and S.GIRISSUBE = '+IntToStr(FArama.ComboSubeGiris.EditValue));
-  //if FArama.AraStok.text<>'' then
-  //   TabStokTalep.SQL.Add(' and S.STOKADI like ''%'+FArama.AraStok.text+'%''  ');
-  TabStokTalep.SQL.Add(' order by SIPARISTARIH desc ');
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
+    j.AddPair('Mod',  TJSONNumber.Create(AMod));
 
-  Tabloyenile( TabStokTalep,[]);
+    // Tarih araligi yalnizca Filtre modunda (orijinal davranis); diger modlarda absent=NULL
+    if AMod = 4 then begin
+      j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd', Trunc(FArama.CalendarBas.Date)));
+      j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', Trunc(FArama.CalendarBit.Date)) + ' 23:59:00');
+    end;
+
+    // Sube filtreleri: orijinaldeki gibi yalnizca secili ise (Text<>''), aksi halde absent=NULL
+    if (AMod = 4) and (FArama.ComboSubeCikis.Text <> '') then begin
+      SubeC := FArama.ComboSubeCikis.EditValue;   // Variant -> Integer (orijinal AsInteger paritesi)
+      j.AddPair('SubeCikis', TJSONNumber.Create(SubeC));
+    end;
+    if (AMod = 4) and (FArama.ComboSubeGiris.Text <> '') then begin
+      SubeG := FArama.ComboSubeGiris.EditValue;
+      j.AddPair('SubeGiris', TJSONNumber.Create(SubeG));
+    end;
+
+    // Son (5) / Sik (3) Aranan icin kullanici + modul (KULLANICI_ARAMA)
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_StokTalep));
+    // OrderBy JSON'a eklenmez -> SP default: SIPARISTARIH desc (Son/Sik icinde belirlenir)
+
+    // Generic helper: @Baslik='' (StokTalep ek-alan yok) + @Kosullar=j; helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(TabStokTalep, 'sp_Prog_StokTalep_Liste_Json2', '', j);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
+  end;
+end;
+
+procedure TStokTalepListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum kayitlar (TOP yok) -> sunucu-tarafi SP
+end;
+
+procedure TStokTalepListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA DEGISTIRMETARIHI desc)
+end;
+
+procedure TStokTalepListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 
@@ -246,12 +297,14 @@ end;
 
 procedure TStokTalepListeDlg.AraKodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
 begin
- if Key = 38 then
+ if Key = 13 then                                     // Enter: hemen kart ac (Demirbas paritesi)
+    DegisTus.Click
+ else if Key = 38 then                                // Yukari ok: gez
     GridStokTalepTview.DataController. DataSource.DataSet.Prior
- else if Key = 40 then
+ else if Key = 40 then                                // Asagi ok: gez
     GridStokTalepTview.DataController.DataSource.DataSet.next
  else
-    AramaYap;
+    AramaYap;                                          // aksi halde: debounce (700ms timer-reset)
 end;
 
 
@@ -278,6 +331,13 @@ LogID:=0;
 
    FArama.CalendarBit.Date := Tablo.GENINI.BugunTrh;
    FArama.CalendarBas.Date := FArama.CalendarBit.Date;
+
+   // Tum/Son/Sik Aranan butonlarini list frame handler'larina bagla (SP listeleme)
+   if Assigned(FArama) then begin
+     FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+   end;
 
    Tablo.GENINI.ReadImageSection(Ops_StokKart_Anabirim,(GridDetayViewBIRIM1.Properties as TcxImageComboBoxProperties).Items);   //   StokKart_Anabirim
  // GridStokTalepTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\FatTransferGridi',true,false,[gsoUseFilter],'FatTransferGridi');
@@ -402,6 +462,7 @@ var srid:integer;
 begin
   if GridStokTalepTview.Controller.SelectedRecordCount > 0 then begin
      srid:=GridStokTalepTview.DataController.FocusedRecordIndex;
+     Tablo.AramaKaydet(MODUL_StokTalep, TabStokTalep.AsInteger['ID']);   // Son/Sik Aranan takibi (kart acilinca upsert)
      Tablo.StokTalepSihirbazBaslat('D', 105, 1, TabStokTalep.AsInteger['ID'], -1);
      AramaYap;
      GridStokTalepTview.DataController.FocusedRecordIndex:=srid;

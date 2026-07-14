@@ -13,7 +13,8 @@ uses
   cxGraphics, cxImageComboBox, cxDBEdit, Buttons,DateUtils, cxLookAndFeels, dxCore, cxDateUtils,
   dxSkinLiquidSky, dxSkinscxPCPainter, cxPCdxBarPopupMenu, Vcl.ExtCtrls, cxGroupBox, cxCheckGroup, cxPC, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint,
   dxSkinXmas2008Blue, dxBarBuiltInMenu, dxSkinMetropolis, dxSkinMetropolisDark,
-  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray;
+  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxCoreGraphics,
+  Vcl.ToolWin;
 
 type
   TCekAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -31,6 +32,10 @@ type
     AraSeriNo: TcxTextEdit;
     cxLabel1: TcxLabel;
     YenileTus: TSpeedButton;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure btnSilClick(Sender: TObject);
     procedure CheckVadeGorPropertiesEditValueChanged(Sender: TObject);
     procedure CheckVadeGorClick(Sender: TObject);

@@ -16,9 +16,9 @@ object ServisAramaFrame: TServisAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 62
-    Top = 7
-    Width = 137
+    Left = 1
+    Top = 307
+    Width = 57
     Height = 20
     Caption = 'Yenile'
     Flat = True
@@ -77,8 +77,8 @@ object ServisAramaFrame: TServisAramaFrame
       0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
   end
   object CheckKapali: TcxCheckBox
-    Left = 3
-    Top = 266
+    Left = 2
+    Top = 279
     Caption = 'Kapal'#305' servisleri de g'#246'ster'
     ParentFont = False
     Properties.OnChange = CheckKapaliPropertiesChange
@@ -93,7 +93,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object AraMusteri: TcxButtonEdit
     Left = 62
-    Top = 110
+    Top = 127
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -111,11 +111,11 @@ object ServisAramaFrame: TServisAramaFrame
     ShowHint = True
     TabOrder = 2
     OnKeyDown = AraMusteriKeyDown
-    Width = 137
+    Width = 130
   end
   object cxLabel22: TcxLabel
     Left = 0
-    Top = 162
+    Top = 179
     Cursor = crHandPoint
     Caption = 'Konusu'
     FocusControl = AraKonusu
@@ -130,7 +130,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object cxLabel1: TcxLabel
     Left = 0
-    Top = 215
+    Top = 232
     Cursor = crHandPoint
     Caption = 'Durumu'
     ParentFont = False
@@ -144,21 +144,21 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object EditSerino: TcxTextEdit
     Left = 62
-    Top = 83
+    Top = 100
     TabOrder = 1
-    Width = 137
+    Width = 130
   end
   object AraKonusu: TcxComboBox
     Left = 62
-    Top = 161
+    Top = 178
     Hint = 'Servis_Konusu'
     Properties.ClearKey = 46
     TabOrder = 4
-    Width = 137
+    Width = 130
   end
   object LabelSeriNo: TcxLabel
     Left = 0
-    Top = 84
+    Top = 101
     Cursor = crHandPoint
     Caption = 'Seri No'
     FocusControl = EditSerino
@@ -173,7 +173,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object cxLabel3: TcxLabel
     Left = 0
-    Top = 137
+    Top = 154
     Cursor = crHandPoint
     Caption = 'Kategori'
     ParentFont = False
@@ -187,13 +187,13 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object EditNo: TcxTextEdit
     Left = 62
-    Top = 57
+    Top = 74
     TabOrder = 0
-    Width = 137
+    Width = 130
   end
   object cxLabel4: TcxLabel
     Left = 0
-    Top = 58
+    Top = 75
     Cursor = crHandPoint
     Caption = 'Servis No'
     FocusControl = EditNo
@@ -208,7 +208,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object cxLabel6: TcxLabel
     Left = 0
-    Top = 188
+    Top = 205
     Cursor = crHandPoint
     Caption = 'Ekipman'
     ParentFont = False
@@ -222,22 +222,22 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object AraDurumu: TcxImageComboBox
     Left = 62
-    Top = 213
+    Top = 230
     RepositoryItem = Tablo.repServisDurum
     Properties.ClearKey = 46
     Properties.Items = <>
     TabOrder = 3
-    Width = 137
+    Width = 130
   end
   object editUrun: TcxTextEdit
     Left = 62
-    Top = 187
+    Top = 204
     TabOrder = 5
-    Width = 137
+    Width = 130
   end
   object cxLabel8: TcxLabel
     Left = 0
-    Top = 111
+    Top = 128
     Cursor = crHandPoint
     Caption = 'M'#252#351'teri'
     ParentFont = False
@@ -251,7 +251,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object EditKategori: TcxButtonEdit
     Left = 62
-    Top = 135
+    Top = 152
     HelpType = htKeyword
     HelpKeyword = 'MASRAFID'
     Properties.Buttons = <
@@ -267,11 +267,11 @@ object ServisAramaFrame: TServisAramaFrame
     Properties.ReadOnly = True
     Properties.OnButtonClick = EditKategoriPropertiesButtonClick
     TabOrder = 14
-    Width = 137
+    Width = 130
   end
   object lbl6: TcxLabel
     Left = 0
-    Top = 238
+    Top = 255
     Caption = 'Personel'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -284,7 +284,7 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object EditSorumlu: TcxButtonEdit
     Left = 62
-    Top = 238
+    Top = 255
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -301,11 +301,11 @@ object ServisAramaFrame: TServisAramaFrame
     ShowHint = True
     TabOrder = 16
     OnKeyDown = EditSorumluKeyDown
-    Width = 137
+    Width = 130
   end
   object ComboTamamlanan: TcxImageComboBox
     Left = 62
-    Top = 289
+    Top = 306
     RepositoryItem = Tablo.RepGorevSonKac
     ParentColor = True
     Properties.Items = <>
@@ -313,22 +313,22 @@ object ServisAramaFrame: TServisAramaFrame
     Style.TransparentBorder = True
     TabOrder = 17
     Visible = False
-    Width = 137
+    Width = 130
   end
   object cbListe: TcxImageComboBox
     Left = 62
-    Top = 31
+    Top = 48
     EditValue = 1
     Properties.ClearKey = 46
     Properties.ImmediatePost = True
     Properties.ImmediateUpdateText = True
     Properties.Items = <>
     TabOrder = 18
-    Width = 137
+    Width = 130
   end
   object cxLabel2: TcxLabel
     Left = 0
-    Top = 33
+    Top = 50
     Cursor = crHandPoint
     Caption = 'Liste'
     FocusControl = EditNo
@@ -343,8 +343,8 @@ object ServisAramaFrame: TServisAramaFrame
   end
   object PanelTarih: TPanel
     Left = 3
-    Top = 319
-    Width = 196
+    Top = 336
+    Width = 191
     Height = 58
     Align = alCustom
     TabOrder = 20
@@ -354,14 +354,14 @@ object ServisAramaFrame: TServisAramaFrame
       Top = 3
       Properties.ImmediatePost = True
       TabOrder = 0
-      Width = 137
+      Width = 130
     end
     object AraTarihBit: TcxDateEdit
       Left = 59
       Top = 30
       Properties.ImmediatePost = True
       TabOrder = 1
-      Width = 137
+      Width = 130
     end
     object cxLabel5: TcxLabel
       Left = 0
@@ -390,6 +390,57 @@ object ServisAramaFrame: TServisAramaFrame
       Style.Font.Style = []
       Style.IsFontAssigned = True
       Transparent = True
+    end
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 21
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Tag = 1
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
     end
   end
 end

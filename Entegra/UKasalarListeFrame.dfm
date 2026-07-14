@@ -93,6 +93,34 @@ object KasalarListeFrame: TKasalarListeFrame
       ImageName = 'PngImage3'
       Style = tbsSeparator
     end
+    object ToolButtonSSSAyrac: TToolButton
+      Left = 360
+      Top = 0
+      Width = 8
+      Caption = 'ToolButtonSSSAyrac'
+      Style = tbsSeparator
+    end
+    object LabelTumKayitlar: TToolButton
+      Left = 368
+      Top = 0
+      Caption = 'T'#252'm'
+      Style = tbsTextButton
+      OnClick = LabelTumKayitlarClick
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 454
+      Top = 0
+      Caption = 'Son Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSonArananlarClick
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 540
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSikArananlarClick
+    end
   end
   object cxGrid: TcxGrid
     Left = 0
@@ -291,6 +319,10 @@ object KasalarListeFrame: TKasalarListeFrame
       Caption = 'Ekstre'
       ImageIndex = 6
       OnShow = TabSheetEkstreShow
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridKasaEkstre: TcxGrid
         Left = 0
         Top = 44
@@ -713,10 +745,9 @@ object KasalarListeFrame: TKasalarListeFrame
     Top = 136
   end
   object KASALAR: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = KASALARAfterOpen
     BeforeDelete = KASALARBeforeDelete
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from KASALAR order by KASAKODU')
     Left = 103
@@ -800,7 +831,6 @@ object KasalarListeFrame: TKasalarListeFrame
   end
   object TabCariListe1: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 387
     Top = 245
     object DateTimeField1: TDateTimeField
@@ -853,7 +883,6 @@ object KasalarListeFrame: TKasalarListeFrame
   end
   object EKSTRE: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'Select CEKID=ID,TARIH,TUR, REHBERID,  CARIKOD AS KOD, CARIUNVAN ' +
@@ -968,7 +997,6 @@ object KasalarListeFrame: TKasalarListeFrame
   end
   object TOPLAMLAR: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'SELECT SUM(DEVIR) AS DEVIR,SUM(ALACAK) AS BORC,SUM(BORC) AS ALAC' +

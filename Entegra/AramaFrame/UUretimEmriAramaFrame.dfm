@@ -16,8 +16,8 @@ object UretimEmriAramaFrame: TUretimEmriAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 0
-    Top = 1
+    Left = 95
+    Top = 261
     Width = 78
     Height = 22
     Caption = 'Yenile'
@@ -76,21 +76,52 @@ object UretimEmriAramaFrame: TUretimEmriAramaFrame
       0D0D0D0D0D04060D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D
       0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
   end
-  object LabelTumKayitlar: TcxLabel
-    Tag = 3
+  object ToolBarAranan: TToolBar
     Left = 0
-    Top = 26
-    Cursor = crHandPoint
-    HelpType = htKeyword
-    Caption = 'T'#252'm Kay'#305'tlar'
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    Images = Tablo.PNGImageList2
+    ParentColor = False
     ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clRed
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = [fsBold]
-    Style.IsFontAssigned = True
+    ShowCaptions = True
+    TabOrder = 0
     Transparent = True
+    ExplicitTop = 26
+    ExplicitWidth = 243
+    object LabelTumKayitlar: TToolButton
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
   object DateBas: TcxDateEdit
     Left = 95

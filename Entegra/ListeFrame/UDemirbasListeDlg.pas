@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, Menus,
+  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, Menus, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, UGentegreFrameYonetimi, DB,
   cxLookAndFeelPainters, cxButtons, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxLookAndFeels,
   UDemirbasAramaFrame, dxSkinsCore, dxSkinscxPCPainter, cxStyles, cxCustomData,
@@ -288,6 +288,10 @@ type
     procedure SilTakipTusClick(Sender: TObject);
     procedure Kopyala1Click(Sender: TObject);
     procedure JvTimer1Timer(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Demirbas_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure TutanakSilTusClick(Sender: TObject);
     procedure KalEkleTusClick(Sender: TObject);
     procedure KalDuzenTusClick(Sender: TObject);
@@ -464,8 +468,6 @@ begin
     DegisTus.Tag := -1;
   if not Tablo.YetkiVarmi(2801,YetkiTur_Silme) then
     SilTus.Tag := -1;
-  if AktifVeriMotor <> vmPG then   // DEMIRBAS DFM query'si nested TOP+convert (DFM statik) -> PG rewrite ayri is; pilotta bos grid
-     TabloYenile(DEMIRBAS,[]);
   //16/01/2023 AO burada kullanıcının hangi kategorileri göreceğine dair yetki kontrolü yapmamız gerekiyor
   if TamYetkili then
      KategoriYetki := 1 ///herşeyi
@@ -475,6 +477,14 @@ begin
         KategoriYetki := Tablo.Query1.Fields[0].AsInteger
      else
         KategoriYetki := 1;
+  end;
+
+  // Tum/Son/Sik Aranan butonlarini list frame handler'larina bagla (SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+    Liste_SP_Cagir(4);   // ilk listeleme -> sunucu-tarafi SP (KategoriYetki hesaplandiktan SONRA)
   end;
 end;
 
@@ -603,9 +613,10 @@ begin
   if GridDemirbasView.Controller.SelectedRecordCount > 0 then begin
      // := GridDemirbasView.DataController.FocusedRecordIndex;
      srid := DEMIRBAS.Fields[0].AsInteger;
+     Tablo.AramaKaydet(MODUL_Demirbas, DEMIRBAS.FieldByName('ID').AsInteger);   // Son/Sik Aranan takibi (kart acilinca upsert)
      if Tablo.DemirbasSihirbazBaslat('D', 0, DEMIRBAS.FieldByName('ID').AsInteger) > 0 then begin
         //YenileTusClick(Self);
-        if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
+        TabloYenile(DEMIRBAS,[]);
         PgAltDetayChange(Self);
         DEMIRBAS.Locate('ID', srid, []);
         GridDemirbasView.DataController.SetFocus;
@@ -776,75 +787,106 @@ begin
 end;
 
 procedure TDemirbasListeDlg.JvTimer1Timer(Sender: TObject);
-var
-  s : string;
-  locateid : integer;
-  AfterScroll : TDataSetNotifyEvent;
 begin
   JvTimer1.Enabled := False;
-  if (DEMIRBAS.Active)and(DEMIRBAS.RecordCount>0) then
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP
+end;
+
+procedure TDemirbasListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Demirbas listesini sunucu-tarafi SP ile getirir (sp_Prog_Demirbas_Liste_Json2 - 2 PARAM JSON).
+//   @Baslik   = SELECT ek kolonlari (ham SQL, app-uretimi/GUVENILIR; Demirbas'ta bos '').
+//   @Kosullar = filtreler + yetki kisitlari JSON (cast/parametreli DEGERLER; guvenli escape).
+//   AMod: 1=Tum (TOP yok), 3=Sik Aranan, 4=Filtre/normal, 5=Son Aranan.
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL/varsayilan=filtre yok); bool 0/1 (TRY_CAST AS BIT).
+var
+  SubeYetki: string;
+  KullaniciKisit, SubeIdP, RolIdP, KategoriYetkiP, locateid: Integer;
+  j: TJSONObject;
+begin
+  locateid := 0;
+  if (DEMIRBAS.Active) and (DEMIRBAS.RecordCount > 0) then
     locateid := DEMIRBAS.FieldByName('ID').AsInteger;
-  DEMIRBAS.Close;
-  DEMIRBAS.AfterScroll := Nil;
 
-  DEMIRBAS.SQL.Text := SQLMemo.Text;
-  s := '';
+  // Sube yetkisi (JvTimer eski mantigi birebir)
+  if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(28, YetkiTur_Gorme)
+  else SubeYetki := '';
 
-  if FArama.AraDurumu.Text <> '' then
-    s := s + ' and D.DURUM = ' + IntToStr(FArama.AraDurumu.EditValue)
-  else if not FArama.cbPasiflerideGoster.Checked then
-    s := s + ' and D.DURUM < 30 ';
-  if FArama.AraKategoribtne.Text <> '' then
-    s := s + ' and DU.STOKADI like ''%'+ FArama.AraKategoribtne.Text+'%'' ';
-  if FArama.AraLokasyonbtne.Text <> '' then
-    s := s + ' and L.ACIKLAMA like ''%'+ FArama.AraLokasyonbtne.Text +'%'' ' ;
-  if FArama.AraZimmetAlanbtne.Text <> '' then
-    s := s + ' and R.FIRMA like ''%'+ FArama.AraZimmetAlanbtne.Text +'%''';
-  if FArama.AraDemirbasNo.Text <> '' then
-    s := s + ' and (D.DEMIRBASNO like ''%'+ FArama.AraDemirbasNo.Text + '%'')';
-  if FArama.AraDemirbasAdi.Text <> '' then
-    s := s + ' and (D.DEMIRBASADI like ''%'+ FArama.AraDemirbasAdi.Text + '%'')';
-  if FArama.AraSeriNo.Text <> '' then
-    s := s + ' and D.SERINO like ''%' + FArama.AraSeriNo.Text + '%''';
-
-  if SubeVarmi then
-    s := s + ' and D.SUBEID in('+Tablo.YetkiliSubeleriGetir(28,YetkiTur_Gorme)+') ';
-
-  if not TamYetkili then begin
-      case ModulYetki_TekSubeTum.Demirbas of
-         1: s := s + ' AND D.REHBERID='+Kullanan;//sadece kendi görür
-         5: begin
-              //önce bu kullanıcının departmanını bulalım
-              //bu departmandaki kişileri ve onların demirbaşlarını listeleyelim
-              s := s + ' AND D.REHBERID in (select R.ID from REHBER R inner join ROLLER ROL on R.SINIF=ROL.ID '+
-                       ' where ROL.DEPARTMAN=(select ROL.DEPARTMAN from REHBER R inner join ROLLER ROL on R.SINIF=ROL.ID '+
-                       ' where R.ID='+Kullanan+'))';//sadece kendi şube görür
-            end;
-        10: s := s + ' AND D.SUBEID='+IntToStr(SubeId);//sadece kendi şube görür
-      end;
-      ///
-      if KategoriYetki=0 then     //  KategoriYetki : 0 hiç bir şeyi görmesin 1 : herşeyi görsün  2:parçalı görsün
-         s := s + ' AND D.KATEGORIID=0 '
-      else
-         if KategoriYetki=2 then
-            s := s + ' AND D.KATEGORIID in (select cast(isnull(Y.BILGI,0) as int) from YETKIEK Y where Y.ROLID='+RolId+' and Y.MODULID=280105) ';
+  // Kullanici/kategori yetkisi (TamYetkili degilse); app varsayilan gonderince SP no-op
+  KullaniciKisit := 0; SubeIdP := 0; KategoriYetkiP := 1; RolIdP := 0;
+  if not TamYetkili then
+  begin
+    case ModulYetki_TekSubeTum.Demirbas of
+      1:  KullaniciKisit := 1;                                   // sadece kendi
+      5:  KullaniciKisit := 5;                                   // sadece kendi departman
+      10: begin KullaniciKisit := 10; SubeIdP := SubeId; end;    // sadece kendi sube
+    end;
+    KategoriYetkiP := KategoriYetki;                             // Baslatildi'da hesaplandi
+    RolIdP := StrToIntDef(RolId, 0);
   end;
 
+  DEMIRBAS.AfterScroll := nil;
 
-  s := s + ' order by D.EKLEMETARIHI desc';
-  DEMIRBAS.SQL.Add(s);
-  if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
-  if not AlanlarOlusturuldu then begin
-     GridDemirbasView.DataController.CreateAllItems(True);
-     Tablo.GridAyarRestore('DemirbasGridi',GridDemirbasView );
-     AlanlarOlusturuldu := True;
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod',   TJSONNumber.Create(AMod));
+    j.AddPair('TopN',  TJSONNumber.Create(0));                          // orijinalde TOP yoktu
+    j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.cbPasiflerideGoster.Checked)));
+    if Trim(FArama.AraDurumu.Text) <> '' then
+      j.AddPair('DurumID', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.AraDurumu.EditValue), 0)));
+    if Trim(FArama.AraKategoribtne.Text)  <> '' then j.AddPair('KategoriAdi',   Trim(FArama.AraKategoribtne.Text));
+    if Trim(FArama.AraLokasyonbtne.Text)  <> '' then j.AddPair('LokasyonAdi',   Trim(FArama.AraLokasyonbtne.Text));
+    if Trim(FArama.AraZimmetAlanbtne.Text)<> '' then j.AddPair('ZimmetAlanAdi', Trim(FArama.AraZimmetAlanbtne.Text));
+    if Trim(FArama.AraDemirbasNo.Text)    <> '' then j.AddPair('DemirbasNo',    Trim(FArama.AraDemirbasNo.Text));
+    if Trim(FArama.AraDemirbasAdi.Text)   <> '' then j.AddPair('DemirbasAdi',   Trim(FArama.AraDemirbasAdi.Text));
+    if Trim(FArama.AraSeriNo.Text)        <> '' then j.AddPair('SeriNo',        Trim(FArama.AraSeriNo.Text));
+    if SubeYetki <> '' then j.AddPair('SubeYetkiList', SubeYetki);
+
+    // Kullanici kisiti (TamYetkili degilse; varsayilan 0 -> JSON'a eklenmez -> SP no-op)
+    if KullaniciKisit <> 0 then
+    begin
+      j.AddPair('KullaniciKisit', TJSONNumber.Create(KullaniciKisit));
+      if KullaniciKisit in [1, 5] then j.AddPair('KullaniciId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+      if KullaniciKisit = 10 then       j.AddPair('SubeId',      TJSONNumber.Create(SubeIdP));
+    end;
+
+    // Kategori yetkisi (varsayilan 1 -> JSON'a eklenmez -> SP no-op)
+    if KategoriYetkiP <> 1 then
+    begin
+      j.AddPair('KategoriYetki', TJSONNumber.Create(KategoriYetkiP));
+      if KategoriYetkiP = 2 then j.AddPair('RolId', TJSONNumber.Create(RolIdP));
+    end;
+
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Demirbas));            // KULLANICI_ARAMA.MODUL
+
+    // Generic helper: @Baslik='' (Demirbas ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(DEMIRBAS, 'sp_Prog_Demirbas_Liste_Json2', '', j, locateid);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
 
+  if not AlanlarOlusturuldu then
+  begin
+    GridDemirbasView.DataController.CreateAllItems(True);
+    Tablo.GridAyarRestore('DemirbasGridi', GridDemirbasView);
+    AlanlarOlusturuldu := True;
+  end;
+end;
 
-  if LocateID<>0 then
-    DEMIRBAS.Locate('ID',LocateID,[]);
-  //DEMIRBAS.AfterScroll := DEMIRBASAfterScroll;
-  //DEMIRBASAfterScroll(DEMIRBAS);
+procedure TDemirbasListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum (TOP yok) -> sunucu-tarafi SP
+end;
+
+procedure TDemirbasListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TDemirbasListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA say desc)
 end;
 
 procedure TDemirbasListeDlg.KalDuzenTusClick(Sender: TObject);
@@ -968,7 +1010,7 @@ begin
             ', LOKASYONID=  '+TabDemirbasTutanak.FieldByName('LOKASYONID').AsString+
             ', ZIMMETLIPERSONELID=0'+TabDemirbasTutanak.FieldByName('ALANID').AsString+
             ' where ID=&Id', ['&Id'],[DEMIRBAS.Fields[0].AsInteger]); }
-     if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
+     TabloYenile(DEMIRBAS,[]);
   end;
 end;
 
@@ -1559,7 +1601,7 @@ end;
 procedure TDemirbasListeDlg.StokListeDlgKapatEylemi(Sender: TObject);
 begin
    FFrameBilgi.Git;
-   if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
+   TabloYenile(DEMIRBAS,[]);
 end;
 
 procedure TDemirbasListeDlg.YeniTusClick(Sender: TObject);
@@ -1567,7 +1609,7 @@ var DID:integer;
 begin
   DID := Tablo.DemirbasSihirbazBaslat('E',0,-1,11);
   if DID > 0 then begin
-    if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[],DID);
+    TabloYenile(DEMIRBAS,[],DID);
     if PgAltDetay.ActivePage <> TabSheetHareketler then
       PgAltDetay.ActivePage := TabSheetHareketler;
     PgAltDetayChange(PgAltDetay);
@@ -1687,7 +1729,7 @@ end;
 
 procedure TDemirbasListeDlg.TabDemirbaslarRefresh;
 begin
-  if AktifVeriMotor <> vmPG then TabloYenile(DEMIRBAS,[]);
+  TabloYenile(DEMIRBAS,[]);
 end;
 
 procedure TDemirbasListeDlg.TabDemirbasTutanakAfterScroll(DataSet: TDataSet);

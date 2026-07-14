@@ -554,7 +554,8 @@ end;
 
 function TAnaFrameBilgi.IcerikGit(ABaslik: string): TIcerikFrameBilgi;
 begin
-  Result := IcerikFrameYoneticisi.FrameBul(ABaslik).Git;
+  if ABaslik <> '' then
+     Result := IcerikFrameYoneticisi.FrameBul(ABaslik).Git;
 end;
 
 function TAnaFrameBilgi.IcerikGit(AFrameClass: TFrameClass): TIcerikFrameBilgi;
@@ -1110,7 +1111,8 @@ procedure TFrameOlayBaglamaBilgisi.Bagla(AHedefOrnek, AKaynakOrnek: TFrame);
           raise Exception.Create('Bileşen nil -> ' + ABilesenAdi);
         SetMethodProp(p,AOlay,AAtanacak);
       end else
-        SetMethodProp(AOrnek,AOlay,AAtanacak);
+        if AOrnek <> nil then
+           SetMethodProp(AOrnek,AOlay,AAtanacak);
     end;
   end;  
 var

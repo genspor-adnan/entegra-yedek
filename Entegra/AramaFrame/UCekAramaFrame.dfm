@@ -18,13 +18,13 @@ object CekAramaFrame: TCekAramaFrame
     Left = 0
     Top = 0
     Width = 552
-    Height = 125
+    Height = 153
     Align = alTop
     TabOrder = 1
     object YenileTus: TSpeedButton
       Tag = 4
-      Left = 120
-      Top = 0
+      Left = -4
+      Top = 124
       Width = 72
       Height = 20
       Caption = 'Yenile'
@@ -84,14 +84,14 @@ object CekAramaFrame: TCekAramaFrame
         0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D}
     end
     object Label1: TcxLabel
-      Left = 0
-      Top = 16
+      Left = 1
+      Top = 42
       Caption = 'Cari'#13#10'Kod/Ad'#305
       Transparent = True
     end
     object DateVadeBas: TcxDateEdit
       Left = 77
-      Top = 72
+      Top = 98
       Enabled = False
       Properties.ImmediatePost = True
       TabOrder = 1
@@ -99,15 +99,15 @@ object CekAramaFrame: TCekAramaFrame
     end
     object DateVadeBit: TcxDateEdit
       Left = 77
-      Top = 97
+      Top = 123
       Enabled = False
       Properties.ImmediatePost = True
       TabOrder = 2
       Width = 115
     end
     object CheckVadeGor: TcxCheckBox
-      Left = 0
-      Top = 86
+      Left = 3
+      Top = 97
       Caption = 'Vade'
       Properties.OnEditValueChanged = CheckVadeGorPropertiesEditValueChanged
       TabOrder = 3
@@ -116,7 +116,7 @@ object CekAramaFrame: TCekAramaFrame
     end
     object AraKod: TcxButtonEdit
       Left = 77
-      Top = 22
+      Top = 48
       ParentShowHint = False
       Properties.Buttons = <
         item
@@ -137,33 +137,89 @@ object CekAramaFrame: TCekAramaFrame
     end
     object AraSeriNo: TcxTextEdit
       Left = 77
-      Top = 47
+      Top = 73
       TabOrder = 5
       Width = 115
     end
     object cxLabel1: TcxLabel
-      Left = 0
-      Top = 51
+      Left = 1
+      Top = 77
       Caption = 'Seri No'
       Transparent = True
+    end
+    object ToolBarAranan: TToolBar
+      Left = 1
+      Top = 1
+      Width = 550
+      Height = 43
+      AutoSize = True
+      ButtonHeight = 39
+      ButtonWidth = 61
+      Caption = 'AletCubugu'
+      Color = clTeal
+      DrawingStyle = dsGradient
+      EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Trebuchet MS'
+      Font.Style = []
+      GradientEndColor = 11776947
+      GradientStartColor = 14540253
+      HotTrackColor = 65408
+      Images = Tablo.PNGImageList2
+      ParentColor = False
+      ParentFont = False
+      ShowCaptions = True
+      TabOrder = 6
+      Transparent = True
+      ExplicitLeft = 329
+      ExplicitTop = 47
+      ExplicitWidth = 187
+      object LabelTumKayitlar: TToolButton
+        Left = 0
+        Top = 0
+        Caption = 'T'#252'm Liste'
+        ImageIndex = 20
+        ImageName = 'PngImage20'
+      end
+      object LabelSonArananlar: TToolButton
+        Tag = 5
+        Left = 61
+        Top = 0
+        Caption = 'Son Aranan'
+        ImageIndex = 21
+        ImageName = 'PngImage21'
+      end
+      object LabelSikArananlar: TToolButton
+        Tag = 3
+        Left = 122
+        Top = 0
+        Caption = 'S'#305'k Aranan'
+        ImageIndex = 6
+        ImageName = 'PngImage6'
+      end
     end
   end
   object PCCekTurleri: TcxPageControl
     Left = 0
-    Top = 125
+    Top = 153
     Width = 552
-    Height = 277
+    Height = 249
     Align = alClient
     TabOrder = 0
     Properties.ActivePage = SheetAlinanCekler
     Properties.CustomButtons.Buttons = <>
-    ClientRectBottom = 273
+    ExplicitTop = 125
+    ExplicitHeight = 277
+    ClientRectBottom = 245
     ClientRectLeft = 4
     ClientRectRight = 548
     ClientRectTop = 27
     object SheetAlinanCekler: TcxTabSheet
       Caption = 'Al'#305'nan '#199'ekler'
       ImageIndex = 0
+      ExplicitHeight = 246
       object cgAlinanCekler: TcxCheckGroup
         Left = 0
         Top = 0
@@ -211,13 +267,15 @@ object CekAramaFrame: TCekAramaFrame
           end>
         TabOrder = 0
         Transparent = True
-        Height = 246
+        ExplicitHeight = 246
+        Height = 218
         Width = 544
       end
     end
     object SheetVerilenCekler: TcxTabSheet
       Caption = 'Verilen '#199'ekler'
       ImageIndex = 1
+      ExplicitHeight = 246
       object cgVerilenCekler: TcxCheckGroup
         Left = 0
         Top = 0
@@ -245,7 +303,8 @@ object CekAramaFrame: TCekAramaFrame
           end>
         TabOrder = 0
         Transparent = True
-        Height = 246
+        ExplicitHeight = 246
+        Height = 218
         Width = 544
       end
     end

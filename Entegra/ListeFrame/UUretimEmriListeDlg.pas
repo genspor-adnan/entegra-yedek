@@ -6,6 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  System.JSON,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls,Utablo,
@@ -167,6 +168,10 @@ type
     function UretimEmriSilinebilir(UretimEmriID: integer): Boolean;
     function EkranAdiAl: string;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_UretimEmri_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   public
     { Public declarations }
   published
@@ -189,6 +194,12 @@ var
 procedure TUretimEmriListeDlg.Baslatildi;
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  // Tum/Son/Sik Aranan butonlarini list frame handler'larina bagla (SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
   AramaYap(nil);
   Tablo.GridTurkcelestir;
   Tablo.GridAyarRestore('UretimEmriGridi', GridUretimEmriView);
@@ -218,7 +229,15 @@ end;
 
 procedure TUretimEmriListeDlg.EditUretimNoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  AramaYap(nil);
+  // Demirbas ile ayni davranis: Enter=hemen ac / oklar=grid gez / diger=700ms debounce
+  if Key = 13 then
+     GorTusClick(Sender)              // Enter: secili uretim emrini hemen ac
+  else if Key = 38 then
+     TabUretimEmri.Prior              // yukari ok: listede gez
+  else if Key = 40 then
+     TabUretimEmri.Next               // asagi ok: listede gez
+  else
+     AramaYap(Sender);                // yazma: timer-reset (700ms sonra 1 kez ara)
 end;
      {
 procedure TUretimEmriListeDlg.CheckPasiflerClick(Sender: TObject);
@@ -257,8 +276,13 @@ begin
 end;
 
 procedure TUretimEmriListeDlg.GorTusClick(Sender: TObject);
+var
+  ID: Integer;
 begin
-  Tablo.UretimEmriSihirbazBaslat('D',0,TabUretimEmri.FieldByName('ID').AsInteger);
+  if TabUretimEmri.IsEmpty then Exit;
+  ID := TabUretimEmri.FieldByName('ID').AsInteger;
+  Tablo.AramaKaydet(MODUL_UretimEmri, ID);   // Son/Sik Aranan takibi (kart acilinca upsert)
+  Tablo.UretimEmriSihirbazBaslat('D',0,ID);
   AramaYap(nil);
 end;
 
@@ -315,57 +339,65 @@ begin
 end;
 
 procedure TUretimEmriListeDlg.JvTimer1Timer(Sender: TObject);
-var
-  UEID:integer;
 begin
   JvTimer1.Enabled := False;
-  if (TabUretimEmri.Active) and (TabUretimEmri.RecordCount>0) then
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_UretimEmri_Liste)
+end;
+
+procedure TUretimEmriListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// Uretim Emri listesini sunucu-tarafi SP ile getirir (sp_Prog_UretimEmri_Liste_Json2).
+//   IKI PARAM: @Baslik = SELECT ek kolonlari (ham SQL, GUVENILIR; burada bos);
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   AMod: 1=Tum (filtresiz, sadece pasif), 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok). Eski sorguda TOP yoktu -> TopN=0.
+//   Sonuc kumesi eski JvTimer sorgusu ile BIREBIR (parite: sp_Prog_UretimEmri_Liste ile dogrulandi).
+var
+  UEID: Integer;
+  j: TJSONObject;
+begin
+  UEID := 0;
+  if (TabUretimEmri.Active) and (TabUretimEmri.RecordCount > 0) then
     UEID := TabUretimEmri.FieldByName('ID').AsInteger;
-  TabUretimEmri.Close;
-  TabUretimEmri.SQL.Text := 'SELECT  U.*, ' +
-  'S.KOD AS STOKKODU, S.STOKADI, S.URUNNO, ' +
-  'P.PROJEKODU, ' +
-  'L.ACIKLAMA AS ANAKAYNAKAD, ' +
-  'R.FIRMA AS FIRMAAD ' +
-  'FROM URETIMEMRI U ' +
-  'LEFT JOIN STOKLAR S ON S.ID = U.STOKID ' +
-  'LEFT JOIN PROJELER P ON P.ID = U.PROJEID ' +
-  'LEFT JOIN LOKASYON L ON L.ID = U.ANAKAYNAK ' +
-  'LEFT JOIN REHBER R ON R.ID = U.REHBERID';
-//  if FArama.EditUretimNo.Text<>'' then //detayda da arama yapacaksak
-//   TabUretimEmri.SQL.Add(' INNER JOIN URETIMEMRIDETAY UED ON UED.URETIMEMRIID = U.ID '+
-//                          ' LEFT JOIN STOKLAR S2 ON S.ID = UED.URUNID ');
-  TabUretimEmri.SQL.Add(' where 1=1 ');
-  if Sender<>FArama.LabelTumKayitlar then begin
-    if FArama.DateBas.EditValue > 0 then
-      TabUretimEmri.SQL.Add(' and U.BASTAR >='''+FormatDateTime('yyyy-mm-dd hh:nn',FArama.DateBas.Date)+'''');
-    if FArama.DateBitis.EditValue > 0 then
-      TabUretimEmri.SQL.Add(' and U.BASTAR <='''+FormatDateTime('yyyy-mm-dd hh:nn',FArama.DateBitis.Date)+'''');
-    if FArama.EditUretimID.Text<>'' then
-      TabUretimEmri.SQL.Add(' and (U.ID like ''%'+FArama.EditUretimID.Text+'%'' or U.EMIRNO like ''%'+FArama.EditUretimID.Text+'%'')');
-//    if FArama.EditUretimNo.Text<>'' then
-//      TabUretimEmri.SQL.Add(' and U.EMIRNO like ''%'+FArama.EditUretimNo.Text+'%''');
-    if FArama.EditStokKodu.Text<>'' then
-       TabUretimEmri.SQL.Add(' and ((S.KOD like ''%'+FArama.EditStokKodu.Text+'%'')or(S.URUNNO like ''%'+FArama.EditStokKodu.Text+'%'')) ');
-    if FArama.EditStokAdi.Text<>'' then
-       TabUretimEmri.SQL.Add(' and S.STOKADI like ''%'+FArama.EditStokAdi.Text+'%''');
-    if FArama.EditUretimNo.Text<>'' then //detayda da arama yapacaksak
-       TabUretimEmri.SQL.Add(' AND EXISTS ( SELECT 1 FROM URETIMEMRIDETAY UED '+
-                             ' INNER JOIN STOKLAR S2 ON S2.ID = UED.URUNID '+
-                             ' WHERE UED.URETIMEMRIID = U.ID '+
-                             ' and (S2.KOD like ''%'+FArama.EditUretimNo.Text+'%'' or S2.URUNNO like ''%'+FArama.EditUretimNo.Text+'%'')) ');
 
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN',  TJSONNumber.Create(0));                                // eski sorgu TOP'suzdu
+    j.AddPair('Mod',   TJSONNumber.Create(AMod));
+    j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler.Checked)));
+
+    if AMod <> 1 then begin                                                   // Tum: eski davranis -> filtresiz
+      if Trim(FArama.EditUretimID.Text) <> '' then j.AddPair('UretimID',  Trim(FArama.EditUretimID.Text));
+      if Trim(FArama.EditStokKodu.Text) <> '' then j.AddPair('StokKodu',  Trim(FArama.EditStokKodu.Text));
+      if Trim(FArama.EditStokAdi.Text)  <> '' then j.AddPair('StokAdi',   Trim(FArama.EditStokAdi.Text));
+      if Trim(FArama.EditUretimNo.Text) <> '' then j.AddPair('DetayUrun', Trim(FArama.EditUretimNo.Text));
+      if FArama.DateBas.EditValue   > 0 then j.AddPair('BasTar', FormatDateTime('yyyy-mm-dd', FArama.DateBas.Date));
+      if FArama.DateBitis.EditValue > 0 then j.AddPair('BitTar', FormatDateTime('yyyy-mm-dd', FArama.DateBitis.Date));
+    end;
+
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));         // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_UretimEmri));                 // KULLANICI_ARAMA.MODUL
+
+    // Generic helper: @Baslik='' (ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(TabUretimEmri, 'sp_Prog_UretimEmri_Liste_Json2', '', j, UEID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
+end;
 
-  if not FArama.CheckPasifler.Checked then
-      TabUretimEmri.SQL.Add( ' and U.DURUM > 0 ');
-  TabUretimEmri.SQL.Add('Order By U.BASTAR ');
-  TabloYenile(TabUretimEmri,[],UEID,'ID');
- { if not AlanlarOlusturuldu then begin
-     GridUretimEmriView.DataController.CreateAllItems(True);
-     Tablo.GridAyarRestore('UretimEmriGridi',GridUretimEmriView );
-     AlanlarOlusturuldu := True;
-  end;}
+procedure TUretimEmriListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum kayitlar (filtresiz) -> sunucu-tarafi SP
+end;
+
+procedure TUretimEmriListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TUretimEmriListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 procedure TUretimEmriListeDlg.UretimEmriInfoMenuClick(Sender: TObject);

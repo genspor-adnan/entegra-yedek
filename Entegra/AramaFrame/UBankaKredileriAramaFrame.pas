@@ -18,7 +18,11 @@ type
     btnSil: TcxButton;
     AraKod: TcxTextEdit;
     cxLabel1: TcxLabel;
-    procedure btnSilClick(Sender: TObject);  
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
+    procedure btnSilClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TAramaFrameBilgi;

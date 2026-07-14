@@ -5364,6 +5364,8 @@ object IKListeDlg: TIKListeDlg
       end>
   end
   object JvTimer1: TJvTimer
+    Enabled = False
+    Threaded = False
     OnTimer = JvTimer1Timer
     Left = 472
     Top = 168

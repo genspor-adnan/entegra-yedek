@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Utablo,
-  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
+  System.JSON, Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxInplaceContainer,
   UGorevListeAramaFrame, dxSkinsCore,  dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics,
@@ -185,6 +185,10 @@ type
     GridGorevViewYORUM_BIT: TcxGridDBColumn;
     CheckZenginMetin: TcxCheckBox;
     procedure AramaYap;
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Gorev_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure GorevInfoMenuClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
     procedure TreeListelerClick(Sender: TObject);
@@ -495,6 +499,13 @@ begin
   Tablo.GridTurkcelestir;
 //0101  Tablo.GridAyarRestore('TreeListGorev',nil,TreeListGorev);
 
+  // Tum/Son/Sik Aranan label'larini list frame handler'larina bagla (SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
+
   PanelTakvim.Visible := Tablo.YetkiVarmi(2132,YetkiTur_Gorme);
   cxSplitterTakvim.Visible := PanelTakvim.Visible;
 
@@ -650,6 +661,7 @@ VAR
   ID:integer;
 begin
   ID := TabGorevler.FieldByName('ID').AsInteger;
+  Tablo.AramaKaydet(MODUL_Gorev, ID);   // Son/Sik Aranan takibi (kart acilinca upsert)
   if PageControlUst.ActivePage=TabSheetGrup then begin
     //Tablo.ServisSihirbazBaslat(False, 'D',0, AktifGorevId, AktifRehberId);
     Tablo.GorevSihirbazBaslat(GorevDlg1, 'D', AktifGorevId,AtamaYapildi, YorumYapildi);
@@ -1398,62 +1410,95 @@ begin
 end;
 
 procedure TGorevListeDlg.GorevArama;
-var AcKapa:String[1];
-    ARecIndex : Integer;
-    Ara : String;
 begin
-   if not FArama.TabListe.active then
-      exit;
+  // Filtre/arama listeleme -> sunucu-tarafi SP (sp_Prog_Gorev_Liste).
+  //   Eski SQLGorevMemo + string-concat sorgu kurma Liste_SP_Cagir'a tasindi.
+  Liste_SP_Cagir(4);
+end;
 
-   if FArama.PageListeler.ActivePageIndex = 0 then
-      Ara := Trim(FArama.EditAraIsler.Text)
-   else
-      Ara := Trim(FArama.ComboKonusu.Text);
+procedure TGorevListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum (TOP yok)
+end;
 
-{//adn  TreeListGorev.OptionsView.GroupByBox := True;
-  TreeListGorev.OptionsView.Header := TreeListGorev.OptionsView.GroupByBox ;
-  GorevGridDBTableView1ID.visible := TreeListGorev.OptionsView.GroupByBox ;
-  GorevGridDBTableView1EKLEYENAD.visible := TreeListGorev.OptionsView.GroupByBox ;
-  GorevGridDBTableView1DURUM.visible := TreeListGorev.OptionsView.GroupByBox ;
-  GorevGridDBTableView1TURU.visible := TreeListGorev.OptionsView.GroupByBox ;
-  GorevGridDBTableView1PROJEKODU.visible := TreeListGorev.OptionsView.GroupByBox ;
-}
-  TabGorevler.Close;
-  AcKapa:=IntToStr(Abs(StrToInt(BoolToStr(CheckTamamlanan.Checked))));
+procedure TGorevListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA.DEGISTIRMETARIHI)
+end;
 
-  if FArama.EditAtanan.Text <> '' then
-     TabGorevler.SQL.Text := StringReplace(SQLGorevMemo.Text,'--GK', ' LEFT JOIN GOREVKULLANICI GK ON GK.LISTGOREVID=G.ID and GK.TUR=11 ', [])
+procedure TGorevListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA.SAY)
+end;
+
+procedure TGorevListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// JSON (2 PARAM): sp_Prog_Gorev_Liste_Json2 @Baslik + @Kosullar.
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR; Gorev'de bos -> @SelectList bos).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   Tipli ~15 param yerine tek JSON; guvenlik siniri net (baslik=ham SQL / kosullar=deger).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); bool'lar 0/1 sayi (TRY_CAST AS BIT).
+//   AMod: 1=Tum (TOP yok), 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
+//   NOT: Ana liste TVF yolu (Listele) DEGISMEZ; bu yalnizca arama/filtre listelemesidir.
+var
+  Ara: string;
+  TopN, FirmaID, OlusturanID, AtananID, GorevID, LocateID: Integer;
+  j: TJSONObject;
+begin
+  if not FArama.TabListe.Active then
+     Exit;
+
+  // Konu/Notlar arama metni: liste sekmesinde EditAraIsler, arama sekmesinde ComboKonusu
+  if FArama.PageListeler.ActivePageIndex = 0 then
+     Ara := Trim(FArama.EditAraIsler.Text)
   else
-     TabGorevler.SQL.Text := SQLGorevMemo.Text;
+     Ara := Trim(FArama.ComboKonusu.Text);
 
-  if Ara<>'' then
-     TabGorevler.SQL.Add(' and (G.KONUSU LIKE ''%'+Ara+'%'' OR GY.YORUM LIKE ''%'+Ara+'%'')');
-  //if (not CheckTamamlanan.Checked)or(not FArama.checkTamamlanmisGoster.Checked) then
-  //   TabGorevler.SQL.Add(' and ACKAPA=0');
-  if FArama.checkTarih.Checked then begin
-     TabGorevler.SQL.Add(' and G.BASLAMATARIHI >''' + formatdatetime('yyyy-mm-dd', FArama.dateAktBaslangic.Date) + ' 00:00'' ');
-     TabGorevler.SQL.Add(' and G.BASLAMATARIHI <''' + formatdatetime('yyyy-mm-dd', FArama.dateAktBitis.Date) + ' 23:59'' ');
+  if AMod in [3, 5] then                                                // Son/Sik: kayit sayisi ile sinirla
+     TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 200)
+  else
+     TopN := 0;                                                         // Tum/Filtre: sinirsiz (orijinal GorevArama gibi)
+
+  // Metin dolu degilse ID gonderilmez (SP >0 kontrolu ile filtreyi atlar)
+  if FArama.AraFirma.Text <> '' then FirmaID := FArama.AraFirma.Tag else FirmaID := 0;
+  if FArama.EditOlusturan.Text <> '' then OlusturanID := FArama.EditOlusturan.Tag else OlusturanID := 0;
+  if FArama.EditAtanan.Text <> '' then AtananID := FArama.EditAtanan.Tag else AtananID := 0;
+  GorevID := StrToIntDef(Trim(FArama.EditID.Text), 0);
+
+  if (TabGorevler.Active) and (TabGorevler.RecordCount > 0) then
+     LocateID := TabGorevler.FieldByName('ID').AsInteger
+  else
+     LocateID := 0;
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
+    j.AddPair('Mod',  TJSONNumber.Create(AMod));
+    j.AddPair('Pasif', TJSONNumber.Create(Ord(CheckTamamlanan.Checked)));  // 0=sadece acik (ACKAPA=0)
+    if Ara <> '' then j.AddPair('Ara', Ara);
+    j.AddPair('Tarih', TJSONNumber.Create(Ord(FArama.checkTarih.Checked)));
+    j.AddPair('BasTarih', FormatDateTime('yyyy-mm-dd', FArama.dateAktBaslangic.Date));
+    j.AddPair('BitTarih', FormatDateTime('yyyy-mm-dd', FArama.dateAktBitis.Date));
+    if FirmaID > 0     then j.AddPair('FirmaID',     TJSONNumber.Create(FirmaID));
+    if OlusturanID > 0 then j.AddPair('OlusturanID', TJSONNumber.Create(OlusturanID));
+    if AtananID > 0    then j.AddPair('AtananID',    TJSONNumber.Create(AtananID));
+    if GorevID > 0     then j.AddPair('GorevID',     TJSONNumber.Create(GorevID));
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Gorev));               // KULLANICI_ARAMA.MODUL
+    if not (AMod in [3, 5]) then                                        // Son/Sik'te SP override eder
+       j.AddPair('OrderBy', '3,2,G.EKLEYEN desc');                     // orijinal GorevArama sirasi
+
+    // Generic helper: @Baslik='' (Gorev ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(TabGorevler, 'sp_Prog_Gorev_Liste_Json2', '', j, LocateID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-  if FArama.AraFirma.Text <> '' then
-     TabGorevler.SQL.Add(' and G.REHBERID =' + IntToStr(FArama.AraFirma.Tag));
-  if FArama.EditOlusturan.Text <> '' then
-     TabGorevler.SQL.Add(' and G.EKLEYEN=' + IntToStr(FArama.EditOlusturan.Tag));
-  if FArama.EditAtanan.Text <> '' then
-     TabGorevler.SQL.Add(' and GK.REHBERID =' + IntToStr(FArama.EditAtanan.Tag));
-  if FArama.EditID.Text <> '' then
-     TabGorevler.SQL.Add(' and G.ID =' + FArama.EditID.Text);
-  //if FArama.EditProje.Text <> '' then
-  //   TabGorevler.SQL.Add(' and G.PROJE=' + IntToStr(FArama.EditProje.Tag));
-  if CheckTamamlanan.Checked = False then
-     TabGorevler.SQL.Add(' and G.ACKAPA = 0');
 
-  TabGorevler.SQL.Add(' order by 3,2,G.EKLEYEN desc');// order by GL.ID,ACKAPA,G.ID desc');
-  TabloYenile(TabGorevler,[]);
-//adn  TreeListGorev.ViewData.Expand(True);
-{  if CheckTamamlanan.Checked then
-     for ARecIndex := 0 to TreeListGorev.DataController.RecordCount-1 do
-         TreeListGorev.DataController.Values[ARecIndex, GorevGridDBTableView1ACKAPASECIM.Index] :=
-         TreeListGorev.DataController.Values[ARecIndex, GorevGridDBTableView1ACKAPA.Index];  }
+  if not AlanlarOlusturuldu then begin                                 // ilk yuklemede grid kolonlari
+     GridGorevView.DataController.CreateAllItems(True);
+     Tablo.GridAyarRestore('IsListesiGridi', GridGorevView);
+     AlanlarOlusturuldu := True;
+  end;
 end;
 
 procedure TGorevListeDlg.GorevEkleTusClick(Sender: TObject);

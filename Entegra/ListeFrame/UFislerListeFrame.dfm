@@ -272,6 +272,34 @@ object FislerListeFrame: TFislerListeFrame
       Style = tbsTextButton
       OnClick = DegisTusClick
     end
+    object ToolButton2: TToolButton
+      Left = 230
+      Top = 0
+      Width = 8
+      Caption = 'ToolButton2'
+      Style = tbsSeparator
+    end
+    object LabelTumKayitlar: TToolButton
+      Left = 238
+      Top = 0
+      Caption = 'T'#252'm'
+      Style = tbsTextButton
+      OnClick = LabelTumKayitlarClick
+    end
+    object LabelSonArananlar: TToolButton
+      Left = 312
+      Top = 0
+      Caption = 'Son Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSonArananlarClick
+    end
+    object LabelSikArananlar: TToolButton
+      Left = 386
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      Style = tbsTextButton
+      OnClick = LabelSikArananlarClick
+    end
   end
   object SQLMemo: TcxMemo
     Left = 111

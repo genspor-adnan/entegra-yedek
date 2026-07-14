@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, DateUtils,
+  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, DateUtils, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxDBEdit, cxGraphics,
   UTeklifAramaFrame, dxSkinsCore, dxSkinscxPCPainter, cxStyles, cxCustomData, cxMemo,
@@ -152,7 +152,6 @@ type
     JvTimer1: TJvTimer;
     GridTeklifViewSONUCAD: TcxGridDBColumn;
     GridTeklifViewSEBEBIAD: TcxGridDBColumn;
-    SQLMemo: TcxMemo;
     GridTeklifViewPRJ_DURUM: TcxGridDBColumn;
     GridTeklifViewPRJ_SONUC: TcxGridDBColumn;
     GridTeklifViewPRJ_SEBEBI: TcxGridDBColumn;
@@ -239,6 +238,10 @@ type
     procedure MenuKlasordenEkleClick(Sender: TObject);
     procedure MenuTarayacidanEkleClick(Sender: TObject);
     procedure TeklifInfoMenuClick(Sender: TObject);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Teklif_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -394,6 +397,12 @@ procedure TTeklifListeDlg.Baslatildi;
 var ra : string;
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+  // Tum/Son/Sik Aranan butonlarini list frame handler'larina bagla (SP listeleme)
+  if Assigned(FArama) then begin
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+    FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+  end;
   GridTeklifViewSUBEID.Visible := SubeVarmi;
   if not DovizTakibi then
      FreeAndNil(GridTeklifViewDOVIZ_TUTARI);
@@ -433,111 +442,87 @@ begin
 end;
 
 procedure TTeklifListeDlg.JvTimer1Timer(Sender: TObject);
-Var
-  s,a,Dr,Virgul:string;
-  TID:integer;
 begin
   JvTimer1.Enabled := False;
-  if AktifVeriMotor = vmPG then Exit; // TEKLIF DFM sorgusu (CARIKOD/nested) pilot disi - Depolar hedefi degil
-  if pos('0000', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date))>0 then
-    exit;
-  if (TabTeklif.Active) and (TabTeklif.RecordCount>0) then
-    TID := TabTeklif.FieldByName('ID').AsInteger;
-  TabTeklif.Close;
-  TabTeklif.SQL.Text:=SQLMemo.Text;
-  if FArama.AraStok.Text<> '' then
-    s:=' inner join TEKLIFDETAY TD on T.ID=TD.TEKLIFID '+
-       ' left outer join STOKLAR S on S.ID=TD.URUNID and TD.TUR=1 '+
-       ' left outer join MASRAFGELIR MG on MG.ID=TD.URUNID and TD.TUR=0 where 1=1 '
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP
+end;
+
+procedure TTeklifListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum liste (tarih araligi + durum filtresi disinda sinir yok)
+end;
+
+procedure TTeklifListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA.DEGISTIRMETARIHI)
+end;
+
+procedure TTeklifListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA.SAY)
+end;
+
+procedure TTeklifListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// PILOT (2 PARAM): sp_Prog_Teklif_Liste_Json2 @Baslik + @Kosullar.
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR; Teklif'te bos).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   Tipli ~21 param yerine tek JSON; guvenlik siniri net (baslik=ham SQL / kosullar=deger).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); bool'lar 0/1 sayi (TRY_CAST AS BIT).
+var
+  KonusuVal, TuruVal, DurumuVal, TopN, TID: Integer;
+  j: TJSONObject;
+begin
+  if AktifVeriMotor = vmPG then Exit;   // JSON SP su an MSSQL (PG pilot: fn_prog_teklif_liste)
+  if Pos('0000', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date)) > 0 then Exit;
+
+  if (TabTeklif.Active) and (TabTeklif.RecordCount > 0) then
+    TID := TabTeklif.FieldByName('ID').AsInteger
   else
-    s:=' where 1=1 ';
+    TID := -1;
 
+  if AMod in [3, 5] then TopN := 200 else TopN := 0;   // Son/Sik icin makul limit
 
-//  if (FArama.AraTarihBas.Text <> '') and (FArama.AraTarihBit.Text <> '') then
-   s := s + ' and (T.TARIH between ''' + FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date) + ''' and '+
-        ' ''' + FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date) + ''')';
+  KonusuVal := StrToIntDef(VarToStr(FArama.AraKonusu.EditValue), 0);
+  TuruVal   := StrToIntDef(VarToStr(FArama.AraTuru.EditValue), 0);
+  DurumuVal := StrToIntDef(VarToStr(FArama.AraDurumu.EditValue), 0);
 
-   if Trim(FArama.AraHazirlayan.Text) <>'' then
-      s := s+' and R2.FIRMA like ''' + FArama.AraHazirlayan.Text+'%'' ';
-   if Trim(FArama.AraMusteri.Text) <>'' then
-      s := s+' and R1.FIRMA like ''' + FArama.AraMusteri.Text+'%'' ';
-//   if FArama.AraDurumu.EditValue>0 then
-//      s := s + ' and T.DURUM = '+IntToStr(FArama.AraDurumu.EditValue);
-   if FArama.AraKonusu.EditValue>0 then
-      s := s + ' and T.KONUSU like ''' + FArama.AraKonusu.Text+'%'' ';// = '+ IntToStr(FArama.AraKonusu.EditValue) + '';
-   if FArama.AraTuru.EditValue>0 then
-      s := s + ' and T.TURU = '+IntToStr(FArama.AraTuru.EditValue);
-
-   if Trim(FArama.AraFaturaNo.Text) <>'' then
-      s := s + ' and ISNULL(TEKLIFNO,'''') like ''%'+FArama.AraFaturaNo.Text+'%'' ';
-   if FArama.AraStok.Text<> '' then
-      s := s + ' and (S.STOKADI like ''%'+FArama.AraStok.Text+'%'' or S.KOD like ''%'+FArama.AraStok.Text+'%'' or MG.AD like ''%'+FArama.AraStok.Text+'%'' or MG.KOD like ''%'+FArama.AraStok.Text+'%''  )';
-
-
-     Virgul:='';
-  if FArama.AraDurumu.EditValue > 0 then begin
-    Dr:=IntToStr(FArama.AraDurumu.EditValue);
-
-    if not FArama.AraRevize.Checked then begin //5
-      a:='5';
-      Virgul:=','
-    end else begin
-      Dr:=Dr + ',5';
-      Virgul:=','
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
+    j.AddPair('Mod',  TJSONNumber.Create(AMod));
+    j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date));
+    j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBit.Date));
+    if Trim(FArama.AraHazirlayan.Text) <> '' then j.AddPair('Hazirlayan', Trim(FArama.AraHazirlayan.Text));
+    if Trim(FArama.AraMusteri.Text)  <> '' then j.AddPair('Musteri',    Trim(FArama.AraMusteri.Text));
+    if KonusuVal > 0 then j.AddPair('Konusu', Trim(FArama.AraKonusu.Text));
+    if TuruVal > 0 then j.AddPair('Turu',   TJSONNumber.Create(TuruVal));
+    if Trim(FArama.AraFaturaNo.Text) <> '' then j.AddPair('BelgeNo', Trim(FArama.AraFaturaNo.Text));
+    if Trim(FArama.AraStok.Text)     <> '' then j.AddPair('Stok',    Trim(FArama.AraStok.Text));
+    if DurumuVal > 0 then j.AddPair('Durumu', TJSONNumber.Create(DurumuVal));
+    j.AddPair('Revize',        TJSONNumber.Create(Ord(FArama.AraRevize.Checked)));
+    j.AddPair('Kabul',         TJSONNumber.Create(Ord(FArama.AraKabulEdilenler.Checked)));
+    j.AddPair('Reddedilenler', TJSONNumber.Create(Ord(FArama.AraReddedilenler.Checked)));
+    if SubeVarmi then j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(29, YetkiTur_Gorme));
+    case ModulYetki_TekSubeTum.Teklif of
+      1:  j.AddPair('HazirlayanZorunlu', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+      10: j.AddPair('SubeZorunlu',       TJSONNumber.Create(SubeId));
     end;
-    if not FArama.AraKabulEdilenler.Checked then begin  // 7
-      a:=a + Virgul +'7';
-      Virgul:=','
-    end else begin
-      Dr:=Dr + Virgul +'7';
-      Virgul:=','
-    end;
-    if not FArama.AraReddedilenler.Checked then  begin   //6
-      a:=a + Virgul +'6';
-    end else begin
-      Dr:=Dr + Virgul +'6';
-    end;
-    if Dr<>'' then
-      s:=  s + ' and T.DURUM in('+ Dr +') '
-    else if a <> '' then
-      s:=  s + ' and T.DURUM not in('+ a +') '
-    else
-      s:=  s + ' and T.DURUM not in(''-1'') ';
-  end else begin
-    if not FArama.AraRevize.Checked then begin
-      a:='5';
-      Virgul:=','
-    end;
-    if not FArama.AraKabulEdilenler.Checked then begin
-      a:=a + Virgul +'7';
-      Virgul:=','
-    end;
-    if not FArama.AraReddedilenler.Checked then
-      a:=a + Virgul +'6';
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Teklif));              // KULLANICI_ARAMA.MODUL
 
-    if a<>'' then
-      s:=  s + ' and T.DURUM not in('+ a +') '
-    else
-      s:=  s + ' and T.DURUM not in(''-1'') ';
+    // Generic helper: @Baslik='' (Teklif ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(TabTeklif, 'sp_Prog_Teklif_Liste_Json2', '', j, TID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-  if SubeVarmi then
-    s := s + ' and T.SUBEID in('+Tablo.YetkiliSubeleriGetir(29,YetkiTur_Gorme)+') ';
-
-  case ModulYetki_TekSubeTum.Teklif of
-     1: s := s + ' AND T.HAZIRLAYAN='+Kullanan;//sadece kendi  g?r?r
-    10: s := s + ' AND T.SUBEID='+IntToStr(SubeId);//sadece kendi ?ube  g?r?r
-  end;
-//   if Length(SQLEk) > 24 then
-  s := s + ' and T.TEKLIFTUR = 80 ';// SQLEk;
-  s:=s +' Order by TARIH';
-  TabTeklif.SQL.Add(s);
-  TabloYenile(TabTeklif,[],TID,'ID');
 end;
 
 procedure TTeklifListeDlg.DegisTusClick(Sender: TObject);
 var ID : Integer;
 begin
    ID := TabTeklif.Fields[0].AsInteger;
+   Tablo.AramaKaydet(MODUL_Teklif, ID);   // Son/Sik Aranan gecmisi (KULLANICI_ARAMA)
    if Tablo.TeklifSihirbazBaslat('D', 80, 0, TabTeklif.Fields[0].AsInteger, TabTeklif.FieldByName('REHBERID').AsInteger,-1)>0 then
       JvTimer1Timer(Self);
    //TabTeklif.Locate('ID', ID, []);

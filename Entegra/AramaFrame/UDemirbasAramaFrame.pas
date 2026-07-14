@@ -19,7 +19,7 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint;
+  dxSkinWhiteprint, dxCoreGraphics, Vcl.ToolWin;
 type
   TDemirbasAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
     YenileTus: TSpeedButton;
@@ -39,6 +39,10 @@ type
     Label7: TcxLabel;
     AraDemirbasAdi: TcxTextEdit;
     cbPasiflerideGoster: TcxCheckBox;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
 
     procedure AraKabuledenPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);

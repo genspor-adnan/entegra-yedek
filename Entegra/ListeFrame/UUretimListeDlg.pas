@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
+  Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxGraphics,
   UUretimAramaFrame, dxSkinsCore,  dxSkinscxPCPainter, cxStyles, cxCustomData,
@@ -151,6 +151,10 @@ type
     procedure SetFrameBilgi(AValue : TIcerikFrameBilgi);    
     procedure UretimListeDlgKapatEylemi(Sender: TObject);
     procedure SetArama(const Value: TUretimAramaFrame);
+    procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Uretim_Liste)
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   public
     { Public declarations }
   published
@@ -176,6 +180,12 @@ begin
     Tablo.GridAyarRestore('UretimFisiGridi', GridUretimView);
     Tablo.GridAyarRestore('UretimListeDetayGridi', GridUretimDetayView);
 
+    // Tum/Son/Sik Aranan label'larini list frame handler'larina bagla (SP listeleme)
+    if Assigned(FArama) then begin
+      FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+      FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
+      FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
+    end;
 end;
 
 procedure TUretimListeDlg.btnDonusumClick(Sender: TObject);
@@ -215,7 +225,16 @@ end;
 
 procedure TUretimListeDlg.EditUretimNoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  AramaYap(nil);
+  if Key = 13 then                    // Enter: karti hemen ac (Demirbas/UretimEmri ile tutarli)
+    GorTusClick(Sender)
+  else if Key = 38 then begin         // Yukari ok: listede gez
+    if TabUretimListe.Active then TabUretimListe.Prior;
+  end
+  else if Key = 40 then begin         // Asagi ok: listede gez
+    if TabUretimListe.Active then TabUretimListe.Next;
+  end
+  else                                // diger tuslar: yazma bitince 700ms sonra 1 kez
+    AramaYap(nil);
 end;
 
 procedure TUretimListeDlg.AramaYap(Sender: TObject);
@@ -268,6 +287,7 @@ end;
 
 procedure TUretimListeDlg.GorTusClick(Sender: TObject);
 begin
+  Tablo.AramaKaydet(MODUL_UretimFisi, TabUretimListe.FieldByName('ID').AsInteger);   // Son/Sik Aranan takibi (kart acilinca upsert; ID<=0 ise no-op)
   Tablo.UretimSihirbazBaslat('D',0,TabUretimListe.FieldByName('ID').AsInteger, TabUretimListe.FieldByName('REHBERID').AsInteger);
   AramaYap(nil);
 end;
@@ -404,34 +424,71 @@ begin
 end;
 
 procedure TUretimListeDlg.JvTimer1Timer(Sender: TObject);
-var
-  locateID:integer;
 begin
   JvTimer1.Enabled := False;
-  if (TabUretimListe.Active)and(TabUretimListe.RecordCount>0) then
+  Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP
+end;
+
+procedure TUretimListeDlg.Liste_SP_Cagir(AMod: SmallInt);
+// JSON (2 PARAM): sp_Prog_Uretim_Liste_Json2 @Baslik + @Kosullar.
+//   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR; Uretim'de bos).
+//   @Kosullar = filtreler JSON (cast/parametreli DEGERLER; app TJSONObject ile guvenli escape).
+//   AMod: 1=Tum (filtresiz), 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
+//   Arama kutusu filtreleri (tarih/no/stok/sube) SADECE AMod=4'te SP tarafinda uygulanir;
+//   Son/Sik'te KULLANICI_ARAMA gecmisi + SP kendi siralamasi kullanilir (enjeksiyon guvenli).
+//   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok).
+var
+  locateID: Integer;
+  j: TJSONObject;
+begin
+  if (TabUretimListe.Active) and (TabUretimListe.RecordCount > 0) then
     locateID := TabUretimListe.FieldByName('ID').AsInteger
   else
     locateID := 0;
-  TabUretimListe.Close;
-  TabUretimListe.SQL.Text := SQLMemo.Text;
-  if Sender<>FArama.LabelTumKayitlar then begin
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('Mod', TJSONNumber.Create(AMod));
+
+    // Tarih filtreleri: sadece EditValue>0 iken (eski davranis); yoksa JSON'a eklenmez -> SP filtrelemez
     if FArama.DateBas.EditValue > 0 then
-       TabUretimListe.SQL.Add(' and FB.TARIH>'''+FormatDateTime('yyyy-mm-dd hh:nn',FArama.DateBas.Date)+'''');
+      j.AddPair('DateBas', FormatDateTime('yyyy-mm-dd', FArama.DateBas.Date));
     if FArama.DateBitis.EditValue > 0 then
-       TabUretimListe.SQL.Add(' and FB.TARIH<'''+FormatDateTime('yyyy-mm-dd 23:59:59',FArama.DateBitis.Date)+'''');
-    if FArama.EditUretimID.Text<>'' then
-       TabUretimListe.SQL.Add(' and FB.ID like ''%'+FArama.EditUretimID.Text+'%''');
-    if FArama.EditUretimNo.Text<>'' then
-       TabUretimListe.SQL.Add(' and FB.FATURANO like ''%'+FArama.EditUretimNo.Text+'%''');
-    if FArama.EditStokKodu.Text<>'' then
-       TabUretimListe.SQL.Add(' and S.KOD like ''%'+FArama.EditStokKodu.Text+'%''');
-    if FArama.EditStokAdi.Text<>'' then
-       TabUretimListe.SQL.Add(' and S.STOKADI like ''%'+FArama.EditStokAdi.Text+'%''');
-    if (SubeVarmi)and(FArama.ComboSube.Text<>'') then
-       TabUretimListe.SQL.Add(' and FB.SUBEID = '+IntToStr(FArama.ComboSube.EditValue));
+      j.AddPair('DateBitis', FormatDateTime('yyyy-mm-dd', FArama.DateBitis.Date));
+
+    if Trim(FArama.EditUretimID.Text) <> '' then j.AddPair('UretimID', Trim(FArama.EditUretimID.Text));
+    if Trim(FArama.EditUretimNo.Text) <> '' then j.AddPair('UretimNo', Trim(FArama.EditUretimNo.Text));
+    if Trim(FArama.EditStokKodu.Text) <> '' then j.AddPair('StokKodu', Trim(FArama.EditStokKodu.Text));
+    if Trim(FArama.EditStokAdi.Text)  <> '' then j.AddPair('StokAdi',  Trim(FArama.EditStokAdi.Text));
+
+    if (SubeVarmi) and (FArama.ComboSube.Text <> '') then
+      j.AddPair('SubeID', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSube.EditValue), 0)));
+
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));   // Son/Sik icin kullanici
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_UretimFisi));           // KULLANICI_ARAMA.MODUL
+    j.AddPair('OrderBy', 'FB.TARIH');                                   // Son/Sik'te SP override eder
+
+    // Generic helper: @Baslik='' (Uretim ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
+    Tablo.ListeSPJson(TabUretimListe, 'sp_Prog_Uretim_Liste_Json2', '', j, locateID);
+    j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+  finally
+    j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-  TabUretimListe.SQL.Add('Order By FB.TARIH');
-  TabloYenile(TabUretimListe,[],locateID,'ID');
+end;
+
+procedure TUretimListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(1);   // Tum kayitlar (filtresiz) -> sunucu-tarafi SP
+end;
+
+procedure TUretimListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TUretimListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 procedure TUretimListeDlg.UretimListeDlgKapatEylemi(Sender: TObject);
