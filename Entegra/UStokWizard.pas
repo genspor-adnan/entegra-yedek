@@ -1147,6 +1147,11 @@ end;
 procedure TStokWizardDlg.ComboBolumPropertiesEditValueChanged(Sender: TObject);
 var i:Integer;
 begin
+  // Yalniz kullanici combo'yu BIZZAT degistirdiginde (odakliyken) uyar. Programatik/
+  // veri-yenileme kaynakli EditValue degisiminde ( or. resim dialog'u kapaninca DETAY
+  // yenilenip combo re-read olunca) sablon-silme uyarisi BOSUNA cikiyordu.
+  if not ComboBolum.Focused then
+    Exit;
   if (DETAY.Active)  then begin
     if DETAY.State=dsEdit then
       DETAY.Post;
@@ -1737,6 +1742,9 @@ begin
     begin
       if TabStok.State in [dsEdit, dsInsert] then TabStok.Cancel;
       ULog.OturumGeriAl(FOturumID);
+      // STOKLAR.RESIM (LogoResim kaynagi) bir blob -> snapshot'lanmaz; iptalde IMAJ geri gelse de
+      // bayat/bos kalir. Varsayilan IMAJ'dan RESIM cache'ini yeniden uret ki LogoResim dogru olsun.
+      VarsayilanResimTazele(TabNo_STOKLAR, StokID);
     end
     else
       ULog.OturumBitir(FOturumID);
@@ -1967,8 +1975,10 @@ begin
    end;
 
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
-  // ilk hale don. IMAJ(blob)+DOKUMAN+EKIPMANLAR(capraz) KAPSAM DISI. OturumBaslat tablo-basina
-  // korumali -> ID PK'si olmayan tablo otomatik atlanir (acilis bozulmaz).
+  // ilk hale don. DOKUMAN+EKIPMANLAR(capraz) KAPSAM DISI. IMAJ (resim) DAHIL: snapshot blob
+  // BELGE alanini zaten atlar; oturumda EKLENEN resim iptalde silinir, DOSYAID referansi
+  // (FILESTREAM icerik degismez) geri yuklenir. OturumBaslat tablo-basina korumali ->
+  // ID PK'si olmayan tablo otomatik atlanir (acilis bozulmaz).
   FOturumID := '';
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslat('STOKLAR', StokID,
@@ -1983,7 +1993,13 @@ begin
         ULog.SnapTablo(2, 'STOKCEVRIM',           'STOKID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'PAKETDETAY',           'PAKETID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'REHBERBILGI',          'YERI=' + IntToStr(TabNo_Stoklar) + ' and YER_ID=' + IntToStr(StokID)),
-        ULog.SnapTablo(2, 'GOREVYORUM',           'TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID)) ]);
+        ULog.SnapTablo(2, 'IMAJ',                 'YERI=' + IntToStr(TabNo_Stoklar) + ' and YER_ID=' + IntToStr(StokID)),
+        ULog.SnapTablo(2, 'GOREVYORUM',           'TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID)),
+        // Yorum EKLERI (dosya): GOREVYORUM <-(MODULID)- DOKUMAN(MODUL=210) <-(YER_ID)- IMAJ(YERI=1, icerik DOSYA).
+        // SIRA 3/4: GOREVYORUM'dan (SIRA 2) SONRA geri yuklenir (baglanti dogru); IMAJ.DOSYAID icerigi
+        // OturumBaslat pin'i ile korunur. Yoksa iptalde yorum gelir ama dosya gelmez.
+        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + ')'),
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + '))') ]);
 
   Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStok);
   if StokID > 0  then begin
@@ -3167,10 +3183,19 @@ end;
 
 procedure TStokWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   // Iptal onayi (UFaturaWizard deseni): "Gentegre Onay / Yapilan islemleri kaydetmek
+   // ister misiniz?" Evet=Kaydet(finish), Hayir=Kaydetme(geri al), Iptal=Geri Don(kalma).
    if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
-   Sontus := 'I'; //?ptale bas?ld?
+     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
+       IDYES:    begin
+                   ModalResult := mrNone;                  // finish validasyonu Abort ederse form KALSIN
+                   WizardKontrolFinishButtonClick(Self);   // basarili -> Sontus:='K' + ModalResult:=mrOk (kapatir)
+                   Exit;
+                 end;
+       IDCANCEL: begin ModalResult := mrNone; Exit; end;                  // Geri Don -> kalma
+       // IDNO: Kaydetme -> asagi devam (Sontus='I' + Close -> OturumGeriAl restore)
+     end;
+   Sontus := 'I'; //iptale basildi
    Close;
 end;
 

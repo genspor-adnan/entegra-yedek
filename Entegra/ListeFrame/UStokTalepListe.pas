@@ -216,7 +216,7 @@ procedure TStokTalepListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   Filtre modunda tarih araligi + (secili ise) sube filtreleri JSON'a girer.
 //   Tum/Son/Sik modunda tarih yok (tarihten bagimsiz); Son/Sik icin KULLANICI_ARAMA join.
 var
-  TopN, SubeC, SubeG: Integer;
+  TopN, DepoC, DepoG: Integer;
   j: TJSONObject;
 begin
   if AMod = 1 then TopN := 0 else TopN := 200;
@@ -232,14 +232,37 @@ begin
       j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', Trunc(FArama.CalendarBit.Date)) + ' 23:59:00');
     end;
 
-    // Sube filtreleri: orijinaldeki gibi yalnizca secili ise (Text<>''), aksi halde absent=NULL
-    if (AMod = 4) and (FArama.ComboSubeCikis.Text <> '') then begin
-      SubeC := FArama.ComboSubeCikis.EditValue;   // Variant -> Integer (orijinal AsInteger paritesi)
-      j.AddPair('SubeCikis', TJSONNumber.Create(SubeC));
-    end;
-    if (AMod = 4) and (FArama.ComboSubeGiris.Text <> '') then begin
-      SubeG := FArama.ComboSubeGiris.EditValue;
-      j.AddPair('SubeGiris', TJSONNumber.Create(SubeG));
+    // Yeni filtreler yalnizca Filtre modunda (AMod=4); secili/dolu degilse JSON'a EKLENMEZ (absent=NULL=filtre yok)
+    if AMod = 4 then begin
+      // Talep Eden (REHBER/personel) -> S.SATICIKODU; secildiyse Tag=REHBER.ID
+      if FArama.EditTalepEden.Tag > 0 then
+        j.AddPair('TalepEden', TJSONNumber.Create(FArama.EditTalepEden.Tag));
+
+      // Cikis Depo -> S.CIKISDEPO (0=Tumu=filtre yok); Null-guvenli Variant->Integer
+      DepoC := StrToIntDef(VarToStr(FArama.ComboCikisDepo.EditValue), 0);
+      if DepoC > 0 then
+        j.AddPair('CikisDepo', TJSONNumber.Create(DepoC));
+
+      // Giris Depo -> S.GIRISDEPO
+      DepoG := StrToIntDef(VarToStr(FArama.ComboGirisDepo.EditValue), 0);
+      if DepoG > 0 then
+        j.AddPair('GirisDepo', TJSONNumber.Create(DepoG));
+
+      // Talep No -> S.SIPARISNO LIKE
+      if Trim(FArama.AraTalepNo.Text) <> '' then
+        j.AddPair('TalepNo', FArama.AraTalepNo.Text);
+
+      // Uretim Emir No -> S.DETAYBOLUMU LIKE
+      if Trim(FArama.AraUretimEmirNo.Text) <> '' then
+        j.AddPair('UretimEmirNo', FArama.AraUretimEmirNo.Text);
+
+      // Ozel Kod -> S.OZELKOD LIKE
+      if Trim(FArama.AraOzelKod.Text) <> '' then
+        j.AddPair('OzelKod', FArama.AraOzelKod.Text);
+      if Trim(FArama.AraKod.Text) <> '' then
+        j.AddPair('Kod', FArama.AraKod.Text);                              // AraKod -> STOKLAR.KOD veya URUNNO LIKE
+      if Trim(FArama.AraStok.Text) <> '' then
+        j.AddPair('Stok', FArama.AraStok.Text);                           // AraStok -> STOKLAR.STOKADI LIKE
     end;
 
     // Son (5) / Sik (3) Aranan icin kullanici + modul (KULLANICI_ARAMA)

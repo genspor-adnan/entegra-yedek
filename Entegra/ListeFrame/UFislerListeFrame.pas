@@ -355,6 +355,7 @@ begin
     j.AddPair('Tur', TJSONNumber.Create(Tur));                             // HER ZAMAN FB.TUR=@Tur
     j.AddPair('FaturaJoin', TJSONNumber.Create(Ord(LStok <> '')));         // stok aramasi -> FATURA/STOKLAR join
     if LStok <> '' then j.AddPair('StokAra', LStok);
+    if Trim(FArama.AraKod.Text) <> '' then j.AddPair('Kod', Trim(FArama.AraKod.Text));   // AraKod -> STOKLAR.KOD veya URUNNO LIKE
     j.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd 00:00', FArama.CalendarBas.Date));  // eski 00:00 BIREBIR
     j.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd 23:59', FArama.CalendarBit.Date));  // eski 23:59 BIREBIR
     LSubeId := StrToIntDef(VarToStr(FArama.ComboSube.EditValue), 0);

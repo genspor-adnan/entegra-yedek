@@ -18,13 +18,13 @@
 		<IcerikSekme Adi="AktiviteListe" Tip="TAktiviteListeDlg" AramaTipi="TAktiviteListeAramaFrame" AramaPropertyAdi="Arama"/>
 		<IcerikSekme Adi="ProjeListe" Tip="TProjeListeDlg" AramaTipi="TProjeListeAramaFrame" AramaPropertyAdi="Arama"/>
 		<IcerikSekme Adi="FirsatListe" Tip="TFirsatListeDlg" AramaTipi="TFirsatListeAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Gï¿½revTakvim" Tip="TGorevTakvimDlg" AramaTipi="TGorevTakvimAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Gï¿½revListe" Tip="TGorevListeDlg" AramaTipi="TGorevListeAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+		<IcerikSekme Adi="GörevTakvim" Tip="TGorevTakvimDlg" AramaTipi="TGorevTakvimAramaFrame" AramaPropertyAdi="Arama"/>
+		<IcerikSekme Adi="GörevListe" Tip="TGorevListeDlg" AramaTipi="TGorevListeAramaFrame" AramaPropertyAdi="Arama"/>
+		<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
 		<IcerikSekme Adi="Cari Hareketler" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-		<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+		<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+		<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+		<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 		</IcerikSekmeleri>
 		<AramaSekmeleri>
 			<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/> 
@@ -46,7 +46,7 @@
 				</OlayBaglamalar> 
 			</AramaSekme> 			
 				
-			<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TProjeListeAramaFrame">
+			<AramaSekme Adi="Günlük Aksiyon" Tip="TProjeListeAramaFrame">
 				<OlayBaglamalar> 
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="dateProjeBaslangic.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
@@ -61,7 +61,7 @@
 					<OlayBagla hedefBilesen="ComboSonuc.Properties" hedefOlay="OnChange" kaynakMethod="AramaYap"/>
 				</OlayBaglamalar>
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½nlï¿½k Firsat" Tip="TFirsatListeAramaFrame">
+			<AramaSekme Adi="Günlük Firsat" Tip="TFirsatListeAramaFrame">
 				<OlayBaglamalar> 
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="dateProjeBaslangic.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
@@ -73,7 +73,7 @@
 					<OlayBagla hedefBilesen="ComboAsama.Properties" hedefOlay="OnChange" kaynakMethod="AramaYap"/>
 				</OlayBaglamalar>
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TAktiviteListeAramaFrame">
+			<AramaSekme Adi="Günlük Aksiyon" Tip="TAktiviteListeAramaFrame">
 				<OlayBaglamalar>
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="comboTuru.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="ComboTuruPropertiesEditValueChanged"/>
@@ -89,13 +89,13 @@
 					<OlayBagla hedefBilesen="editAraNot.Properties" hedefOlay="OnChange" kaynakMethod="YenileTusClick"/>
 				</OlayBaglamalar>
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½rev Ara" Tip="TGorevTakvimAramaFrame"> 
+			<AramaSekme Adi="Görev Ara" Tip="TGorevTakvimAramaFrame"> 
 					<OlayBaglamalar>
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="ComboKonusu.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
 				    </OlayBaglamalar>
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TGorevListeAramaFrame"> 
+			<AramaSekme Adi="Günlük Aksiyon" Tip="TGorevListeAramaFrame"> 
 				<OlayBaglamalar> 
 					<OlayBagla hedefBilesen="TreeListeler" hedefOlay="OnClick" kaynakMethod="TreeListelerClick"/>
 					<OlayBagla hedefBilesen="TreeProjeler" hedefOlay="OnClick" kaynakMethod="TreeListelerClick"/>
@@ -110,7 +110,7 @@
 					<OlayBagla hedefBilesen="EditProje.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
 				</OlayBaglamalar> 
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TTakvimAktiviteAramaFrame" > 
+			<AramaSekme Adi="Günlük Aksiyon" Tip="TTakvimAktiviteAramaFrame" > 
 				<OlayBaglamalar> 
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="comboTuru.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="ComboTuruPropertiesEditValueChanged"/>
@@ -126,7 +126,7 @@
 					<OlayBagla hedefBilesen="editAraNot.Properties" hedefOlay="OnChange" kaynakMethod="YenileTusClick"/>
 				</OlayBaglamalar> 
 			</AramaSekme> 
-			<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TTakvimProjeAramaFrame" >
+			<AramaSekme Adi="Günlük Aksiyon" Tip="TTakvimProjeAramaFrame" >
 				<OlayBaglamalar> 
 					<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					<OlayBagla hedefBilesen="dateProjeBaslangic.Properties" hedefOlay="OnCloseUp" kaynakMethod="YenileTusClick"/>
@@ -165,7 +165,7 @@
 						<OlayBagla hedefBilesen="btnAksiyonGir" hedefOlay="OnClick" kaynakMethod="AksiyonEkle"/>
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -186,10 +186,10 @@
 				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Kurum Bilgileri" Tip="TKurumDlg" AramaTipi="TCariKartAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/> 
 				<IcerikSekme Adi="Cari Hareketler" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/> 
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
 			</IcerikSekmeleri> 
 			<AramaSekmeleri> 
 				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame">
@@ -230,7 +230,7 @@
 						<OlayBagla hedefBilesen="btnAcilisKaydi" hedefOlay="OnClick" kaynakMethod="AcilisKaydiMenu"/> 
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -250,22 +250,22 @@
 			<IcerikSekmeleri> 
 				<IcerikSekme Adi="Kasa" Tip="TKasaDlg" AramaTipi="TGunlukAksiyonAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="TakvimFinans" Tip="TTakvimDlg" AramaTipi="TTakvimAksiyonFrame" AramaPropertyAdi="TakvimAksiyonlar"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Kasa Hareketleri" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame" AramaPropertyAdi="Arama" />
-				<IcerikSekme Adi="Kasa Tanï¿½m" Tip="TKasalarListeFrame" AramaTipi="TKasalarAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Kasa Tanï¿½mlarï¿½" Tip="TKasalarDlg" AramaTipi="TKasalarAksiyonFrame" AramaPropertyAdi="Arama" />
+				<IcerikSekme Adi="Kasa Taným" Tip="TKasalarListeFrame" AramaTipi="TKasalarAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Kasa Tanýmlarý" Tip="TKasalarDlg" AramaTipi="TKasalarAksiyonFrame" AramaPropertyAdi="Arama" />
 				<IcerikSekme Adi="Masraf Gelir Merkezi" Tip="TMasrafGelirDlg" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Sorumluluk Merkezi" Tip="TSorumlulukMerkezListeDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Daï¿½ï¿½tï¿½m Anahtarlarï¿½" Tip="TDagitimAnahtarlariDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Maaï¿½ Dï¿½zenleme" Tip="TMaasTabloDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Daðýtým Anahtarlarý" Tip="TDagitimAnahtarlariDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Maaþ Düzenleme" Tip="TMaasTabloDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri> 
 			<AramaSekmeleri> 
 				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/> 
-				<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TGunlukAksiyonAramaFrame">
+				<AramaSekme Adi="Günlük Aksiyon" Tip="TGunlukAksiyonAramaFrame">
 					<OlayBaglamalar> 
 						<OlayBagla hedefBilesen="CheckFat" hedefOlay="OnClick" kaynakMethod="CheckFatClick"/> 
 						<OlayBagla hedefBilesen="CheckKasa" hedefOlay="OnClick" kaynakMethod="CheckKasaClick"/> 
@@ -279,7 +279,7 @@
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="Calendar1Change"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="Gï¿½nlï¿½k Aksiyon" Tip="TTakvimAksiyonFrame" >
+				<AramaSekme Adi="Günlük Aksiyon" Tip="TTakvimAksiyonFrame" >
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="CheckGroupSecim.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
@@ -326,7 +326,7 @@
 					<PropertyBaglamalari>  
 					</PropertyBaglamalari>  
 				</AramaSekme>  
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame">  
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame">  
 					<OlayBaglamalar>  
 					</OlayBaglamalar>  
 					<PropertyBaglamalari>  
@@ -347,12 +347,12 @@
 			<IcerikSekmeleri>  
 				<IcerikSekme Adi="Fatura" Tip="TFaturalarDlg" AramaTipi="TFaturalarAramaFrame" AramaPropertyAdi="Arama" />  
 				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Fatura Dï¿½zenleyici" Tip="TFaturaDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Maliyet Hesaplamasï¿½" Tip="TMaliyetlerListeFrame" AramaTipi="TMaliyetAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>  
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Fatura Düzenleyici" Tip="TFaturaDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Maliyet Hesaplamasý" Tip="TMaliyetlerListeFrame" AramaTipi="TMaliyetAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>  
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
 			</IcerikSekmeleri>
 			<AramaSekmeleri>  
 				<AramaSekme Adi="Rehber Arama" Tip="TRehberAramaFrame" >
@@ -400,7 +400,7 @@
 
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame">  
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame">  
 					<OlayBaglamalar>  
 					</OlayBaglamalar>  
 					<PropertyBaglamalari>  
@@ -420,36 +420,36 @@
         GirisSayfasiTipi="TGenelGirisSayfasiFrame">
 
 			<IcerikSekmeleri>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Banka Tanï¿½mlarï¿½" Tip="TBankalarDlg" AramaTipi="TBankalarAksiyonFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Banka Tanï¿½mlarï¿½ Liste" Tip="TBankalarListeFrame" AramaTipi="TBankalarAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Banka Tanýmlarý" Tip="TBankalarDlg" AramaTipi="TBankalarAksiyonFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Banka Tanýmlarý Liste" Tip="TBankalarListeFrame" AramaTipi="TBankalarAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Banka Hareketleri" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Banka Hareketleri Liste" Tip="TKrediKartiListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Kredi Kartï¿½" Tip="TKrediKarti" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Kredi Kartý" Tip="TKrediKarti" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Teminat Mektubu" Tip="TTeminatMektubuDlg" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Kredi ve Leasing Hesaplama" Tip="TKrediHesapMakinasi" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Banka Kredileri Ekle" Tip="TKredilerDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Vadeli Hesap Tanï¿½mlarï¿½" Tip="TVadeliHesapDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="ï¿½ek Koï¿½anï¿½" Tip="TBankaCekleriDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Doï¿½rudan Borï¿½lanma Sistemi Ekle" Tip="TDBSDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Vadeli Hesap Tanýmlarý" Tip="TVadeliHesapDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Çek Koçaný" Tip="TBankaCekleriDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Doðrudan Borçlanma Sistemi Ekle" Tip="TDBSDlg" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"  AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Banka Kredileri Liste" Tip="TBankaKredileriListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Banka Kredileri Tanï¿½mlama" Tip="TGenelGirisSayfasiFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" />
-				<IcerikSekme Adi="Teminat Mektuplarï¿½" Tip="TTeminatMektuplariListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Banka Kredileri Tanýmlama" Tip="TGenelGirisSayfasiFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" />
+				<IcerikSekme Adi="Teminat Mektuplarý" Tip="TTeminatMektuplariListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Vadeli Hesaplar" Tip="TVadeliHesaplarListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Banka ï¿½ekleri" Tip="TBankaCekleriListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Doï¿½rudan Borï¿½lanma Sistemi Liste" Tip="TDBSListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="POS Tanï¿½mlarï¿½" Tip="TPOS" AramaTipi="TBankaKredileriListeTanimlariFrame"/>
-				<IcerikSekme Adi="POS Tanï¿½mlarï¿½ Liste" Tip="TPOSListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Banka Çekleri" Tip="TBankaCekleriListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Doðrudan Borçlanma Sistemi Liste" Tip="TDBSListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="POS Tanýmlarý" Tip="TPOS" AramaTipi="TBankaKredileriListeTanimlariFrame"/>
+				<IcerikSekme Adi="POS Tanýmlarý Liste" Tip="TPOSListeFrame" AramaTipi="TBankaKredileriListeTanimlariFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Cari Hareketler" Tip="TCariDlg" AramaTipi="TCariDlgGenelAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Kurum Bilgileri" Tip="TKurumDlg" AramaTipi="TCariKartAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
-				<IcerikSekme Adi="ï¿½ek Tanï¿½mlarï¿½" Tip="TCekDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Senet Tanï¿½mlarï¿½" Tip="TSenetDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Çek Tanýmlarý" Tip="TCekDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Senet Tanýmlarý" Tip="TSenetDlg" AramaTipi="TAramaYokFrame"/>
 				<IcerikSekme Adi="Rehberde Ara" Tip="TRehberAraDlg" AramaTipi="TRehberAramaFrame"  AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="ï¿½ek Listesi" Tip="TCekListeFrame" AramaTipi="TCekAramaFrame" AramaPropertyAdi="Arama" />
+				<IcerikSekme Adi="Çek Listesi" Tip="TCekListeFrame" AramaTipi="TCekAramaFrame" AramaPropertyAdi="Arama" />
 				<IcerikSekme Adi="Senet Listesi" Tip="TSenetListeFrame" AramaTipi="TSenetAramaFrame" AramaPropertyAdi="Arama" />
 			</IcerikSekmeleri>
 
@@ -470,7 +470,7 @@
 
 				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
 
-				<AramaSekme Adi="ï¿½ek Arama" Tip="TCekAramaFrame" >
+				<AramaSekme Adi="Çek Arama" Tip="TCekAramaFrame" >
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="AraKod.Properties" hedefOlay="OnChange" kaynakMethod="YenileTusClick"/>
@@ -515,7 +515,7 @@
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="Banka Kredi Arama Tanï¿½mlama" Tip="TBankaKredileriListeTanimlariFrame">
+				<AramaSekme Adi="Banka Kredi Arama Tanýmlama" Tip="TBankaKredileriListeTanimlariFrame">
 					<OlayBaglamalar>
 					</OlayBaglamalar>
 				</AramaSekme>
@@ -534,12 +534,12 @@
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/> 
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Banka ï¿½ekleri Arama" Tip="TBankaCekleriAramaFrame"> 
+				<AramaSekme Adi="Banka Çekleri Arama" Tip="TBankaCekleriAramaFrame"> 
 					<OlayBaglamalar> 
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari>  
@@ -597,12 +597,12 @@
 				<IcerikSekme Adi="Transfer" Tip="TFatTransferListeDlg" AramaTipi="TFatTransferAramaFrame" AramaPropertyAdi="Arama" />
 				<IcerikSekme Adi="Talepler" Tip="TStokTalepListeDlg" AramaTipi="TStokTalepAramaFrame" AramaPropertyAdi="Arama" />
 				<IcerikSekme Adi="Stokda Ara" Tip="TStokListeDlg" AramaTipi="TStokAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Fiï¿½lerde Ara" Tip="TFislerListeFrame" AramaTipi="TFislerAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Fiþlerde Ara" Tip="TFislerListeFrame" AramaTipi="TFislerAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Stok Bilgileri" Tip="TStokDlg" AramaTipi="TStokAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri>
 
 			<AramaSekmeleri>
@@ -628,12 +628,16 @@
 				<AramaSekme Adi="Fisler Arama" Tip="TFislerAramaFrame">
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="AraStok" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="CalendarBas.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
 						<OlayBagla hedefBilesen="CalendarBit.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
 						<OlayBagla hedefBilesen="ComboSube.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="ComboDepo.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="ComboTipi.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
+						<OlayBagla hedefBilesen="LabelTumKayitlar" hedefOlay="OnClick" kaynakMethod="LabelTumKayitlarClick"/>
+						<OlayBagla hedefBilesen="LabelSonArananlar" hedefOlay="OnClick" kaynakMethod="LabelSonArananlarClick"/>
+						<OlayBagla hedefBilesen="LabelSikArananlar" hedefOlay="OnClick" kaynakMethod="LabelSikArananlarClick"/>
 					</OlayBaglamalar>
 				</AramaSekme>
 
@@ -643,11 +647,17 @@
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="AraStok" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraTransferNo" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraUretimEmirNo" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraOzelKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="CalendarBas.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
 						<OlayBagla hedefBilesen="CalendarBit.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
-						<OlayBagla hedefBilesen="ComboSubeCikis.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
-						<OlayBagla hedefBilesen="ComboSubeGiris.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="EditTeslimEden.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="EditTeslimAlan.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="LabelTumKayitlar" hedefOlay="OnClick" kaynakMethod="LabelTumKayitlarClick"/>
+						<OlayBagla hedefBilesen="LabelSonArananlar" hedefOlay="OnClick" kaynakMethod="LabelSonArananlarClick"/>
+						<OlayBagla hedefBilesen="LabelSikArananlar" hedefOlay="OnClick" kaynakMethod="LabelSikArananlarClick"/>
 					</OlayBaglamalar>
 				</AramaSekme>
 
@@ -657,8 +667,12 @@
 						<OlayBagla hedefBilesen="AraStok" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="CalendarBas.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
 						<OlayBagla hedefBilesen="CalendarBit.Properties" hedefOlay="OnChange" kaynakMethod="CalendarBasChange"/>
-						<OlayBagla hedefBilesen="ComboSubeCikis.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
-						<OlayBagla hedefBilesen="ComboSubeGiris.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="EditTalepEden.Properties" hedefOlay="OnChange" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="ComboCikisDepo.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="ComboGirisDepo.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
+						<OlayBagla hedefBilesen="AraTalepNo" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraUretimEmirNo" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
+						<OlayBagla hedefBilesen="AraOzelKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="AramaYap"/>
 					</OlayBaglamalar>
 				</AramaSekme>
@@ -670,7 +684,7 @@
 					</OlayBaglamalar> 
 				</AramaSekme>
 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -689,17 +703,17 @@
 		GorevPanelBoyu="312"
 		GirisSayfasiTipi="TGenelGirisSayfasiFrame">
 			<IcerikSekmeleri>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="ï¿½retim Emirleri" Tip="TUretimEmriListeDlg" AramaTipi="TUretimEmriAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="ï¿½retim Fiï¿½leri" Tip="TUretimListeDlg" AramaTipi="TUretimAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="ï¿½retim Planlama" Tip="TUretimPlanlamaListeDlg" AramaTipi="TUretimPlanlamaAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Üretim Emirleri" Tip="TUretimEmriListeDlg" AramaTipi="TUretimEmriAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Üretim Fiþleri" Tip="TUretimListeDlg" AramaTipi="TUretimAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Üretim Planlama" Tip="TUretimPlanlamaListeDlg" AramaTipi="TUretimPlanlamaAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri>
 			<AramaSekmeleri>
 				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
-				<AramaSekme Adi="ï¿½retim Arama" Tip="TUretimAramaFrame" >
+				<AramaSekme Adi="Üretim Arama" Tip="TUretimAramaFrame" >
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="EditUretimID" hedefOlay="OnKeyUp" kaynakMethod="EditUretimNoKeyUp"/>
 						<OlayBagla hedefBilesen="EditUretimNo" hedefOlay="OnKeyUp" kaynakMethod="EditUretimNoKeyUp"/>
@@ -712,12 +726,12 @@
 						<OlayBagla hedefBilesen="ComboSube.Properties" hedefOlay="OnCloseUp" kaynakMethod="AramaYap"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="ï¿½retim Planlama Arama" Tip="TUretimPlanlamaAramaFrame" >
+				<AramaSekme Adi="Üretim Planlama Arama" Tip="TUretimPlanlamaAramaFrame" >
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="TabPlanlar" hedefOlay="AfterScroll" kaynakMethod="AramaYap"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="ï¿½retim Emri Arama" Tip="TUretimEmriAramaFrame" >
+				<AramaSekme Adi="Üretim Emri Arama" Tip="TUretimEmriAramaFrame" >
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="EditUretimID" hedefOlay="OnKeyUp" kaynakMethod="EditUretimNoKeyUp"/>
 						<OlayBagla hedefBilesen="EditUretimNo" hedefOlay="OnKeyUp" kaynakMethod="EditUretimNoKeyUp"/>
@@ -730,7 +744,7 @@
 						<OlayBagla hedefBilesen="CheckPasifler" hedefOlay="OnClick" kaynakMethod="AramaYap"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame">
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame">
 					<OlayBaglamalar>
 					</OlayBaglamalar>
 					<PropertyBaglamalari>
@@ -748,12 +762,12 @@
         GirisSayfasiTipi="TGenelGirisSayfasiFrame">
 			<IcerikSekmeleri>
 				<IcerikSekme Adi="IK Ara" Tip="TIKListeDlg" AramaTipi="TIKDlgGenelAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="PDKS Dï¿½zenleme" Tip="TPDKSListeFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Maaï¿½ Dï¿½zenleme" Tip="TMaasTabloDlg" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="PDKS Düzenleme" Tip="TPDKSListeFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Maaþ Düzenleme" Tip="TMaasTabloDlg" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri>
 			<AramaSekmeleri>
 				<AramaSekme Adi="IK Arama" Tip="TIKDlgGenelAramaFrame">
@@ -784,7 +798,7 @@
 					</OlayBaglamalar>
 				</AramaSekme>
 				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame">
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame">
 					<OlayBaglamalar>
 					</OlayBaglamalar>
 					<PropertyBaglamalari>
@@ -805,10 +819,10 @@
 			<IcerikSekmeleri>
 				<IcerikSekme Adi="Demirbasta Ara" Tip="TDemirbasListeDlg" AramaTipi="TDemirbasAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Demirbas Bilgileri" Tip="TDemirbasDlg" AramaTipi="TDemirbasAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri>
 
 			<AramaSekmeleri>
@@ -831,7 +845,7 @@
 						<OlayBagla hedefBilesen="btnAcilisKaydi" hedefOlay="OnClick" kaynakMethod="AcilisKaydiMenu"/> 
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -851,12 +865,12 @@
 
 			<IcerikSekmeleri> 
 				<IcerikSekme Adi="Teklifte Ara" Tip="TTeklifListeDlg" AramaTipi="TTeklifAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Satï¿½nAlma" Tip="TSatinAlmaListeDlg" AramaTipi="TSatinAlmaAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="SatýnAlma" Tip="TSatinAlmaListeDlg" AramaTipi="TSatinAlmaAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Teklif Bilgileri" Tip="TTeklifDlg" AramaTipi="TTeklifAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/> 
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
 			</IcerikSekmeleri> 
 
 			<AramaSekmeleri> 
@@ -877,7 +891,7 @@
 						<OlayBagla hedefBilesen="AraTarihBit.Properties" hedefOlay="OnChange" kaynakMethod="YenileTusClick"/>
 					</OlayBaglamalar> 
 				</AramaSekme>
-				<AramaSekme Adi="Satï¿½nAlma Arama" Tip="TSatinAlmaAramaFrame">
+				<AramaSekme Adi="SatýnAlma Arama" Tip="TSatinAlmaAramaFrame">
 					<OlayBaglamalar>
 						<OlayBagla hedefBilesen="YenileTus" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 						<OlayBagla hedefBilesen="AraHazirlayan.Properties" hedefOlay="OnChange" kaynakMethod="YenileTusClick"/>
@@ -899,7 +913,7 @@
 						<OlayBagla hedefBilesen="btnAcilisKaydi" hedefOlay="OnClick" kaynakMethod="AcilisKaydiMenu"/> 
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -919,12 +933,12 @@
 			<IcerikSekmeleri> 
 				<IcerikSekme Adi="Serviste Ara" Tip="TServisListeDlg" AramaTipi="TServisAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Ekipman Ara" Tip="TEkipmanListeDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Tanï¿½m Listeleri" Tip="TGenelGirisSayfasiFrame" AramaTipi="TServisTanimListeleriAramaFrame"/>
+				<IcerikSekme Adi="Taným Listeleri" Tip="TGenelGirisSayfasiFrame" AramaTipi="TServisTanimListeleriAramaFrame"/>
 				<IcerikSekme Adi="Servis Bilgileri" Tip="TServisDlg" AramaTipi="TServisAksiyonFrame" AramaPropertyAdi="Aksiyonlar"/>
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/>
 			</IcerikSekmeleri>
 			<AramaSekmeleri>
 				<AramaSekme Adi="Servis Arama" Tip="TServisAramaFrame">
@@ -945,7 +959,7 @@
 						<OlayBagla hedefBilesen="CheckKapali" hedefOlay="OnClick" kaynakMethod="YenileTusClick"/>
 					</OlayBaglamalar>
 				</AramaSekme>
-				<AramaSekme Adi="Tanï¿½m Listeleri Arama" Tip="TServisTanimListeleriAramaFrame">
+				<AramaSekme Adi="Taným Listeleri Arama" Tip="TServisTanimListeleriAramaFrame">
 					<OlayBaglamalar>
 					</OlayBaglamalar>
 				</AramaSekme>
@@ -955,7 +969,7 @@
 						<OlayBagla hedefBilesen="btnAcilisKaydi" hedefOlay="OnClick" kaynakMethod="AcilisKaydiMenu"/> 
 					</OlayBaglamalar> 
 				</AramaSekme> 
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
@@ -974,17 +988,17 @@
 			<IcerikSekmeleri>
 				<IcerikSekme Adi="Dokumanda Ara" Tip="TDokumanListeFrame" AramaTipi="TDokumanAramaFrame" AramaPropertyAdi="Arama"/>
 				<IcerikSekme Adi="Evrakta Ara" Tip="TEvrakListeFrame" AramaTipi="TEvrakAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Kalite Yï¿½netim Listeleri" Tip="TGenelGirisSayfasiFrame" AramaTipi="TKaliteYonetimAramaFrame" />
-				<IcerikSekme Adi="Giriï¿½ Sayfasï¿½" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
-				<IcerikSekme Adi="KY Dï¿½zeltici Ve ï¿½nleyici Faaliyet" Tip="TKYDuzelticiVeOnleyiciFaalListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
+				<IcerikSekme Adi="Kalite Yönetim Listeleri" Tip="TGenelGirisSayfasiFrame" AramaTipi="TKaliteYonetimAramaFrame" />
+				<IcerikSekme Adi="Giriþ Sayfasý" Tip="TGenelGirisSayfasiFrame" AramaTipi="TAramaYokFrame"/>
+				<IcerikSekme Adi="KY Düzeltici Ve Önleyici Faaliyet" Tip="TKYDuzelticiVeOnleyiciFaalListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
 				<IcerikSekme Adi="KY Sapma Olay" Tip="TKYSapmaOlayListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
 				<IcerikSekme Adi="KY Denetim" Tip="TKYDenetimListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
-				<IcerikSekme Adi="KY Eï¿½itim" Tip="TKYEgitimListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
+				<IcerikSekme Adi="KY Eðitim" Tip="TKYEgitimListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
 				<IcerikSekme Adi="KY Kontrol" Tip="TKYKontrolListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
-				<IcerikSekme Adi="KY Toplantï¿½" Tip="TKYToplantiListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
-				<IcerikSekme Adi="Dï¿½kï¿½mler Giriï¿½ Sayfasï¿½" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
-				<IcerikSekme Adi="Dï¿½kï¿½m Ekranï¿½" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
-				<IcerikSekme Adi="Dï¿½kï¿½m ï¿½artlarï¿½" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="KY Toplantý" Tip="TKYToplantiListeDlg" AramaTipi="TKaliteYonetimAramaFrame"/>
+				<IcerikSekme Adi="Dökümler Giriþ Sayfasý" Tip="TDokumGirisFrame" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/>
+				<IcerikSekme Adi="Döküm Ekraný" Tip="TDokumDlg" AramaTipi="TDokumAramaFrame" AramaPropertyAdi="Arama"/> 
+				<IcerikSekme Adi="Döküm Þartlarý" Tip="TDokumSartDlg" AramaTipi="TAramaYokFrame" AramaPropertyAdi="Arama"/> 
 			</IcerikSekmeleri>
 			<AramaSekmeleri>
 				<AramaSekme Adi="Dokuman Arama" Tip="TDokumanAramaFrame">
@@ -1028,13 +1042,13 @@
 					</OlayBaglamalar>
 				</AramaSekme>
 				<AramaSekme Adi="Arama Yok" Tip="TAramaYokFrame"/>
-				<AramaSekme Adi="Dï¿½kï¿½m Arama" Tip="TDokumAramaFrame"> 
+				<AramaSekme Adi="Döküm Arama" Tip="TDokumAramaFrame"> 
 					<OlayBaglamalar> 
 					</OlayBaglamalar> 
 					<PropertyBaglamalari> 
 					</PropertyBaglamalari>
 				</AramaSekme>
-				<AramaSekme Adi="Kalite Yï¿½netim Liste Arama" Tip="TKaliteYonetimAramaFrame">
+				<AramaSekme Adi="Kalite Yönetim Liste Arama" Tip="TKaliteYonetimAramaFrame">
 					<OlayBaglamalar>
 					</OlayBaglamalar>
 					<PropertyBaglamalari>

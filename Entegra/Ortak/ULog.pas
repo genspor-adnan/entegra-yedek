@@ -415,6 +415,27 @@ begin
   end;
 end;
 
+// DOSYA referansini ARTIRIR (ID ile). Snapshot 'pin'i: undo-able oturumda snapshot'lanan
+// IMAJ/STOKSAYIMKALEMLERI satirinin DOSYA icerigi, oturum icinde son referans silinse bile
+// FIZIKSEL SILINMESIN diye +1 tutulur (OturumBaslat). Oturum bitince (OturumBitir) geri birakilir.
+procedure DosyaReferansArtir(AID: Int64);
+var LQ: TFDQuery;
+begin
+  if AID <= 0 then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'UPDATE ' + DepoTablo('DOSYA') + ' SET REFSAYAC = REFSAYAC + 1 WHERE ID = :I';
+      LQ.ParamByName('I').AsLargeInt := AID;
+      LQ.ExecSQL;
+    finally
+      LQ.Free;
+    end;
+  except
+  end;
+end;
+
 function DosyaIleImajGuncelle(AImajID: Integer; const AFileName: string; const ADegistiren: string): Boolean;
 var
   LFs: TFileStream;
@@ -1469,8 +1490,53 @@ begin
 end;
 
 procedure OturumBitir(const AOturum: string);
-var LQ: TFDQuery;
+var
+  LQ, LRelQ: TFDQuery;
+  LParsed: TJSONValue;
+  LObj: TJSONObject;
+  LVal: TJSONValue;
+  LDosyaID: Int64;
 begin
+  // 1) DOSYA 'pin'lerini geri birak: OturumBaslat'ta snapshot'lanan her DOSYAID icin REFSAYAC+1
+  //    yapilmisti. Simdi -1 (0'a inince fiziksel sil). Boylece oturumda SILINIP kaydedilen
+  //    resmin icerigi burada temizlenir; GERI ALINAN (OturumGeriAl->GeriKayitYaz yeniden
+  //    referansladi) resmin icerigi ise REFSAYAC>0 kaldigi icin KORUNUR.
+  LRelQ := TFDQuery.Create(nil);
+  try
+    try
+      LRelQ.Connection := Tablo.FDCnn;
+      LRelQ.SQL.Text := 'SELECT SATIRJSON FROM ' + DepoTablo('SNAPSHOT') +
+        ' WHERE OTURUMID=:O AND KAYITID IS NOT NULL';
+      LRelQ.ParamByName('O').AsString := AOturum;
+      LRelQ.Open;
+      while not LRelQ.Eof do
+      begin
+        LParsed := TJSONObject.ParseJSONValue(LRelQ.FieldByName('SATIRJSON').AsString);
+        try
+          if LParsed is TJSONObject then
+          begin
+            LObj := TJSONObject(LParsed);
+            LVal := LObj.GetValue('DOSYAID');
+            if LVal <> nil then
+            begin
+              LDosyaID := StrToInt64Def(GeriJsonDeger(LVal), 0);
+              if LDosyaID > 0 then DosyaReferansAzalt(LDosyaID);
+            end;
+          end;
+        finally
+          if LParsed <> nil then LParsed.Free;
+        end;
+        LRelQ.Next;
+      end;
+      LRelQ.Close;
+    except
+      // pin-birakma hatasi snapshot temizligini engellemesin
+    end;
+  finally
+    LRelQ.Free;
+  end;
+
+  // 2) Snapshot satirlarini sil (oturum kapandi).
   LQ := TFDQuery.Create(nil);
   try
     LQ.Connection := Tablo.FDCnn;
@@ -1490,6 +1556,7 @@ var
   i, j: Integer;
   LRowQ, LInsQ: TFDQuery;
   LK: TLogKurucu;
+  LDFld: TField;
 
   procedure ParamlariYaz(AKapsam: Boolean);
   begin
@@ -1550,6 +1617,12 @@ begin
           end;
           ParamlariYaz(False);   // KAYITID = LRowQ.ID (yoksa burada hata -> tablo atlanir)
           LInsQ.ExecSQL;
+          // DOSYA 'pin': satir bir DOSYA icerigine referans veriyorsa (DOSYAID>0), oturum boyunca
+          // icerik FIZIKSEL SILINMESIN diye REFSAYAC+1 (OturumBitir'de geri birakilir). Boylece
+          // oturumda silinip IPTAL edilen resmin icerigi kaybolmaz (dangling DOSYAID onlenir).
+          LDFld := LRowQ.FindField('DOSYAID');
+          if (LDFld <> nil) and (LDFld.AsLargeInt > 0) then
+            DosyaReferansArtir(LDFld.AsLargeInt);
           LRowQ.Next;
         end;
         LRowQ.Close;
@@ -1621,6 +1694,14 @@ begin
       begin
         LStmt.Close;
         Result := GeriKayitEkle(ATabloAdi, AJSON);   // yok (oturumda silinmisti) -> ayni ID INSERT
+        // Silinen satir geri eklendi: DOSYA referansini YENIDEN kur (INSERT REFSAYAC'i bump ETMEZ);
+        // yoksa OturumBitir'deki pin-birakma icerigi hala referansliyken siler -> dangling.
+        if Result = '' then
+        begin
+          LVal := LObj.GetValue('DOSYAID');
+          if (LVal <> nil) and (StrToInt64Def(GeriJsonDeger(LVal), 0) > 0) then
+            DosyaReferansArtir(StrToInt64Def(GeriJsonDeger(LVal), 0));
+        end;
         Exit;
       end;
       LStmt.Close;

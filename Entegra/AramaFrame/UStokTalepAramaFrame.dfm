@@ -2,7 +2,7 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   Left = 0
   Top = 0
   Width = 451
-  Height = 304
+  Height = 409
   Align = alClient
   Color = clWhite
   ParentBackground = False
@@ -10,8 +10,8 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 77
-    Top = 213
+    Left = 79
+    Top = 320
     Width = 79
     Height = 22
     Caption = 'Yenile'
@@ -72,7 +72,7 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
   end
   object Label1: TcxLabel
     Left = 0
-    Top = 158
+    Top = 157
     Caption = 'Kod/'#220'nvan'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -86,48 +86,34 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
     Width = 59
   end
   object AraKod: TcxTextEdit
-    Left = 77
-    Top = 157
+    Left = 80
+    Top = 183
     TabOrder = 4
-    Visible = False
-    Width = 117
+    Width = 105
   end
   object EditCARIID: TcxLabel
     Left = 0
     Top = 19
   end
   object AraStok: TcxTextEdit
-    Left = 77
-    Top = 184
+    Left = 80
+    Top = 211
     TabOrder = 5
-    Width = 117
-  end
-  object cxLabel2: TcxLabel
-    Left = 0
-    Top = 185
-    Caption = #220'r'#252'n'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
+    Width = 105
   end
   object CalendarBas: TcxDateEdit
-    Left = 77
+    Left = 80
     Top = 47
     Properties.ImmediatePost = True
     TabOrder = 0
-    Width = 115
+    Width = 105
   end
   object CalendarBit: TcxDateEdit
-    Left = 77
+    Left = 80
     Top = 74
     Properties.ImmediatePost = True
     TabOrder = 1
-    Width = 115
+    Width = 105
   end
   object Label2: TcxLabel
     Left = 0
@@ -155,39 +141,143 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object LabelSube: TcxLabel
+  object LabelTalepEden: TcxLabel
     Left = 0
-    Top = 106
-    Caption = #199#305'k'#305#351' '#350'ube'
+    Top = 101
+    Caption = 'Talep Eden'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
   end
-  object ComboSubeCikis: TcxImageComboBox
-    Left = 77
-    Top = 103
-    RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
-    Properties.Alignment.Horz = taLeftJustify
-    Properties.ImmediatePost = True
-    Properties.Items = <>
-    StyleDisabled.Color = clWhite
-    StyleDisabled.TextColor = clBlack
+  object EditTalepEden: TcxButtonEdit
+    Left = 80
+    Top = 100
+    ParentShowHint = False
+    Properties.Buttons = <
+      item
+        Default = True
+        Kind = bkEllipsis
+      end
+      item
+        Caption = '-'
+        Hint = 'Temizle'
+        Kind = bkText
+      end>
+    Properties.ReadOnly = False
+    Properties.OnButtonClick = EditTalepEdenPropertiesButtonClick
+    ShowHint = True
     TabOrder = 2
-    Width = 117
+    Width = 105
   end
-  object ComboSubeGiris: TcxImageComboBox
-    Left = 77
-    Top = 130
-    RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
+  object LabelCikisDepo: TcxLabel
+    Left = 0
+    Top = 129
+    Caption = #199#305'k'#305#351' Depo'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object ComboCikisDepo: TcxImageComboBox
+    Left = 80
+    Top = 127
     Properties.Alignment.Horz = taLeftJustify
     Properties.ImmediatePost = True
     Properties.Items = <>
     StyleDisabled.Color = clWhite
     StyleDisabled.TextColor = clBlack
     TabOrder = 3
-    Width = 117
+    Width = 105
   end
-  object cxLabel1: TcxLabel
+  object LabelGirisDepo: TcxLabel
     Left = 0
-    Top = 134
-    Caption = 'Giri'#351' '#350'ube'
+    Top = 155
+    Caption = 'Giri'#351' Depo'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object ComboGirisDepo: TcxImageComboBox
+    Left = 80
+    Top = 154
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.ImmediatePost = True
+    Properties.Items = <>
+    StyleDisabled.Color = clWhite
+    StyleDisabled.TextColor = clBlack
+    TabOrder = 7
+    Width = 105
+  end
+  object LabelTalepNo: TcxLabel
+    Left = 2
+    Top = 239
+    Caption = 'Talep No'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object AraTalepNo: TcxTextEdit
+    Left = 80
+    Top = 238
+    TabOrder = 8
+    Width = 105
+  end
+  object LabelUretimEmirNo: TcxLabel
+    Left = 2
+    Top = 266
+    Caption = #220'retim Emir No'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object AraUretimEmirNo: TcxTextEdit
+    Left = 80
+    Top = 265
+    TabOrder = 9
+    Width = 105
+  end
+  object LabelOzelKod: TcxLabel
+    Left = 2
+    Top = 293
+    Caption = #214'zel Kod'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object AraOzelKod: TcxTextEdit
+    Left = 80
+    Top = 292
+    TabOrder = 10
+    Width = 105
   end
   object ToolBarAranan: TToolBar
     Left = 0
@@ -215,9 +305,6 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
     ShowCaptions = True
     TabOrder = 6
     Transparent = True
-    ExplicitLeft = 232
-    ExplicitTop = 25
-    ExplicitWidth = 187
     object LabelTumKayitlar: TToolButton
       Tag = 3
       Left = 0
@@ -242,5 +329,32 @@ object StokTalepAramaFrame: TStokTalepAramaFrame
       ImageIndex = 6
       ImageName = 'PngImage6'
     end
+  end
+  object cxLabel2: TcxLabel
+    Left = 0
+    Top = 210
+    Caption = #220'r'#252'n Ad'#305
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object cxLabel1: TcxLabel
+    Left = 0
+    Top = 183
+    Caption = #220'r'#252'n Kodu/No'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Properties.WordWrap = True
+    Width = 74
   end
 end

@@ -1,3 +1,13 @@
+﻿-- ============================================================
+-- GenDepoUpdate27 : sp_Prog_EBelge_GidenFaturaDetay  (GTIP kolonu eklendi)
+--   ANA DB SP'si. e-Belge (giden) satir detayina GTIP=STOKLAR.GTIP eklendi
+--   (ihracat delivery/goodsItems requiredCustomsID icin). SET QUOTED_IDENTIFIER ON
+--   header'i ONEMLI (QI OFF filtered-index'te patlar). IDEMPOTENT: CREATE OR ALTER.
+-- ============================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE OR ALTER PROCEDURE dbo.sp_Prog_EBelge_GidenFaturaDetay
     @invoiceId int
 AS
@@ -77,7 +87,8 @@ BEGIN
         SERINO = ISNULL(IZLEM.SERINO, N''),
         LOTNO = ISNULL(IZLEM.LOTNO, N''),
         AdditionalItemIdentification = ISNULL(dbo.fn_Efatura_AdditionalItemIdentification(F.FATBASID, F.ID), ''),
-        Note = ISNULL(IZLEM.Note, N'')
+        Note = ISNULL(IZLEM.Note, N''),
+        GTIP = ISNULL(S.GTIP, N'')   -- ihracat: satir bazli GTIP (yalniz urun satiri; STOKLAR join F.TUR IN(1,11))
     FROM dbo.FATURA F
     INNER JOIN dbo.FATBASLIK FB ON FB.ID = F.FATBASID
     INNER JOIN dbo.REHBER R ON R.ID = FB.REHBERID

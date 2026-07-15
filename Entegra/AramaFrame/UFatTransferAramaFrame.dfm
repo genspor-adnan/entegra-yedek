@@ -10,8 +10,8 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
   TabOrder = 0
   object YenileTus: TSpeedButton
     Tag = 4
-    Left = 1
-    Top = -2
+    Left = 82
+    Top = 295
     Width = 79
     Height = 22
     Caption = 'Yenile'
@@ -72,8 +72,8 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
   end
   object Label1: TcxLabel
     Left = 0
-    Top = 136
-    Caption = 'Kod/'#220'nvan'
+    Top = 159
+    Caption = #220'r'#252'n Kodu/No'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -82,30 +82,28 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
     Style.Font.Style = []
     Style.IsFontAssigned = True
     Properties.WordWrap = True
-    Visible = False
-    Width = 59
+    Width = 74
   end
   object AraKod: TcxTextEdit
-    Left = 77
-    Top = 135
+    Left = 82
+    Top = 158
     TabOrder = 4
-    Visible = False
-    Width = 117
+    Width = 105
   end
   object EditCARIID: TcxLabel
     Left = 0
     Top = 3
   end
   object AraStok: TcxTextEdit
-    Left = 77
-    Top = 162
+    Left = 82
+    Top = 185
     TabOrder = 5
-    Width = 117
+    Width = 105
   end
   object cxLabel2: TcxLabel
     Left = 0
-    Top = 163
-    Caption = #220'r'#252'n'
+    Top = 186
+    Caption = #220'r'#252'n Ad'#305
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -116,22 +114,22 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
     Transparent = True
   end
   object CalendarBas: TcxDateEdit
-    Left = 77
-    Top = 25
+    Left = 82
+    Top = 48
     Properties.ImmediatePost = True
     TabOrder = 0
-    Width = 115
+    Width = 105
   end
   object CalendarBit: TcxDateEdit
-    Left = 77
-    Top = 52
+    Left = 82
+    Top = 75
     Properties.ImmediatePost = True
     TabOrder = 1
-    Width = 115
+    Width = 105
   end
   object Label2: TcxLabel
     Left = 0
-    Top = 26
+    Top = 49
     Caption = 'Ba'#351'lama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -144,7 +142,7 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
   end
   object Label3: TcxLabel
     Left = 0
-    Top = 53
+    Top = 76
     Caption = 'Biti'#351
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -155,38 +153,171 @@ object FatTransferAramaFrame: TFatTransferAramaFrame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object LabelSube: TcxLabel
+  object LabelTeslimEden: TcxLabel
     Left = 0
-    Top = 84
-    Caption = #199#305'k'#305#351' '#350'ube'
+    Top = 107
+    Caption = 'Teslim Eden'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
   end
-  object ComboSubeCikis: TcxImageComboBox
-    Left = 77
-    Top = 81
-    RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
+  object EditTeslimEden: TcxButtonEdit
+    Left = 82
+    Top = 104
     Properties.Alignment.Horz = taLeftJustify
-    Properties.ImmediatePost = True
-    Properties.Items = <>
-    StyleDisabled.Color = clWhite
-    StyleDisabled.TextColor = clBlack
+    Properties.Buttons = <
+      item
+        Default = True
+        Kind = bkEllipsis
+      end
+      item
+        Caption = '-'
+        Hint = 'Temizle'
+        Kind = bkText
+      end>
+    Properties.ReadOnly = True
+    Properties.OnButtonClick = EditTeslimPropertiesButtonClick
     TabOrder = 2
-    Width = 117
+    Width = 105
   end
-  object ComboSubeGiris: TcxImageComboBox
-    Left = 77
-    Top = 108
-    RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
-    Properties.Alignment.Horz = taLeftJustify
-    Properties.ImmediatePost = True
-    Properties.Items = <>
-    StyleDisabled.Color = clWhite
-    StyleDisabled.TextColor = clBlack
-    TabOrder = 3
-    Width = 117
-  end
-  object cxLabel1: TcxLabel
+  object LabelTeslimAlan: TcxLabel
     Left = 0
-    Top = 112
-    Caption = 'Giri'#351' '#350'ube'
+    Top = 135
+    Caption = 'Teslim Alan'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+  end
+  object EditTeslimAlan: TcxButtonEdit
+    Left = 82
+    Top = 131
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.Buttons = <
+      item
+        Default = True
+        Kind = bkEllipsis
+      end
+      item
+        Caption = '-'
+        Hint = 'Temizle'
+        Kind = bkText
+      end>
+    Properties.ReadOnly = True
+    Properties.OnButtonClick = EditTeslimPropertiesButtonClick
+    TabOrder = 3
+    Width = 105
+  end
+  object LabelTransferNo: TcxLabel
+    Left = 0
+    Top = 213
+    Caption = 'Transfer No'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+  end
+  object AraTransferNo: TcxTextEdit
+    Left = 82
+    Top = 212
+    TabOrder = 6
+    Width = 105
+  end
+  object LabelUretimEmirNo: TcxLabel
+    Left = 0
+    Top = 240
+    Caption = #220'retim Emir No'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+  end
+  object AraUretimEmirNo: TcxTextEdit
+    Left = 82
+    Top = 239
+    TabOrder = 7
+    Width = 105
+  end
+  object LabelOzelKod: TcxLabel
+    Left = 0
+    Top = 267
+    Caption = #214'zel Kod'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+  end
+  object AraOzelKod: TcxTextEdit
+    Left = 82
+    Top = 266
+    TabOrder = 8
+    Width = 105
+  end
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 451
+    Height = 43
+    AutoSize = True
+    ButtonHeight = 39
+    ButtonWidth = 61
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    ParentColor = False
+    ParentFont = False
+    ShowCaptions = True
+    TabOrder = 19
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Tag = 3
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm Liste'
+      ImageIndex = 20
+      ImageName = 'PngImage20'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 61
+      Top = 0
+      Caption = 'Son Aranan'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 122
+      Top = 0
+      Caption = 'S'#305'k Aranan'
+      ImageIndex = 6
+      ImageName = 'PngImage6'
+    end
   end
 end

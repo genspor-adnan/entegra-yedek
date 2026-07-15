@@ -382,6 +382,23 @@
         DataBinding.FieldName = 'EFATURASONUC'
         DataBinding.IsNullValueType = True
         RepositoryItem = Tablo.repEFaturaSonuc
+        Width = 82
+      end
+      object GridFatListeTviewSENARYO: TcxGridDBColumn
+        Caption = 'Senaryo'
+        DataBinding.FieldName = 'SENARYO'
+        DataBinding.IsNullValueType = True
+        PropertiesClassName = 'TcxImageComboBoxProperties'
+        Properties.Items = <>
+        RepositoryItem = Tablo.RepSenaryo
+      end
+      object GridFatListeTviewTIPI: TcxGridDBColumn
+        Caption = 'Tipi'
+        DataBinding.FieldName = 'TIPI'
+        DataBinding.IsNullValueType = True
+        PropertiesClassName = 'TcxImageComboBoxProperties'
+        Properties.Items = <>
+        RepositoryItem = Tablo.RepFatTipi
       end
       object GridFatListeTviewFATURATARIH: TcxGridDBColumn
         Caption = 'Tarih'
@@ -570,14 +587,6 @@
         PropertiesClassName = 'TcxImageComboBoxProperties'
         Properties.Items = <>
         RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
-      end
-      object GridFatListeTviewTIPI: TcxGridDBColumn
-        Caption = 'Tipi'
-        DataBinding.FieldName = 'TIPI'
-        DataBinding.IsNullValueType = True
-        PropertiesClassName = 'TcxImageComboBoxProperties'
-        Properties.Items = <>
-        RepositoryItem = Tablo.RepFatTipi
       end
       object GridFatListeTviewSAYFASAY: TcxGridDBColumn
         Caption = 'Sayfa Say'#305's'#305
@@ -1254,8 +1263,8 @@
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 307
-    Top = 60
+    Left = 219
+    Top = 44
     ParamData = <
       item
         Name = 'Par'
@@ -1320,8 +1329,8 @@
     Top = 262
   end
   object PopupMenuYaz: TPopupMenu
-    Left = 478
-    Top = 104
+    Left = 446
+    Top = 72
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0
@@ -1405,8 +1414,8 @@
     Top = 174
   end
   object pmFatIslemler: TPopupMenu
-    Left = 416
-    Top = 104
+    Left = 320
+    Top = 72
     object mnIrsaliyeyeDonustur: TMenuItem
       Tag = 1
       Caption = 'Se'#231'ilenleri '#304'rsaliyeye D'#246'n'#252#351't'#252'r'
@@ -1474,7 +1483,7 @@
       ''
       'EXEC SP_PRG_Siparis_DipToplami  @FATBASID')
     Left = 325
-    Top = 143
+    Top = 191
     ParamData = <
       item
         Name = 'PFATBASID'
@@ -1491,8 +1500,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 101
-    Top = 38
+    Left = 109
+    Top = 70
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick
@@ -1787,7 +1796,7 @@
   end
   object PopupMenu1: TPopupMenu
     Left = 560
-    Top = 104
+    Top = 72
   end
   object OpenDialog1: TOpenDialog
     Left = 616
@@ -2078,8 +2087,8 @@
     Top = 249
   end
   object PopupFatGiris: TPopupMenu
-    Left = 632
-    Top = 104
+    Left = 648
+    Top = 72
     object AlSat1: TMenuItem
       Tag = 1
       Caption = 'Al'#305#351' / Sat'#305#351
@@ -2137,11 +2146,6 @@
     object IhracatMenu: TMenuItem
       Tag = 26
       Caption = #304'hracat'
-      object Menu_Ihr_Istisna: TMenuItem
-        Tag = 124
-        Caption = #304'stisna'
-        OnClick = AlSat1Click
-      end
       object Menu_Ihr_Satis: TMenuItem
         Tag = 101
         Caption = 'Sat'#305#351
@@ -2150,6 +2154,11 @@
       object Menu_Ihr_Iade: TMenuItem
         Tag = 102
         Caption = #304'ade'
+        OnClick = AlSat1Click
+      end
+      object Menu_Ihr_Istisna: TMenuItem
+        Tag = 124
+        Caption = #304'stisna'
         OnClick = AlSat1Click
       end
     end
@@ -2343,8 +2352,8 @@
     end
   end
   object PopupKonsGiris: TPopupMenu
-    Left = 712
-    Top = 104
+    Left = 776
+    Top = 72
     object MenuItem2: TMenuItem
       Tag = 1
       Caption = 'Al'#305#351

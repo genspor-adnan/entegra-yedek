@@ -105,6 +105,13 @@ type
     EFaturaDurum: Integer;     // FATBASLIK.EFATURADURUM (1/11/51 vs 2/12/52)
     EArsivMi: Boolean;         // EFATURADURUM in [11,12] olunca True
     EBelgeBelgeTuru: Integer;  // EBELGE.BELGETURU ? RAlias kodu (140/141/150/151)
+    // Ihracat (Senaryo=3) 'İhracat' detay sablonundan (REHBERBILGI) okunur:
+    IhracatVar: Boolean;
+    TeslimSartiKodu: string;   // INCOTERMS kodu (FOB, DDP...) - deliveryTerms.id
+    TasimaSekliKodu: string;   // tasima modu kodu (1-8) - transportModeCode
+    KapCinsiKodu: string;      // paket/kap kodu (CT, BX...) - packagingTypeCode
+    FOBDeger: Currency;        // freeOnBoardValueAmount
+    KapAdedi: Integer;         // actualPackage.quantity
   end;
 
   TEBelgeSatir = record
@@ -131,6 +138,7 @@ type
     TevkifatKodu: string;
     TevkifatNedeni: string;
     Notu: string;
+    GTIP: string;              // ihracat: satir GTIP (STOKLAR.GTIP)
   end;
 
   TEBelgeSatirlar = array of TEBelgeSatir;
@@ -551,6 +559,20 @@ begin
     KDVIstisnaNedeni(ABaslik);
 end;
 
+// Tevkifatli faturada dip nota eklenecek aciklama: sadece tevkifat nedeni
+// (kod - neden). Tevkifat yoksa '' doner. (KDVIstisnaNotu deseni.)
+function TevkifatNotu(const ABaslik: TEBelgeBaslik;
+  const ASatirlar: TEBelgeSatirlar): string;
+begin
+  Result := '';
+  if not ((ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar)) then
+    Exit;
+  if Trim(TevkifatNedeni(ABaslik)) = '' then
+    Exit;
+  Result := 'Tevkifat Nedeni: ' + Trim(TevkifatKodu(ABaslik)) + ' - ' +
+    Trim(TevkifatNedeni(ABaslik));
+end;
+
 procedure TevkifatNedeniKontrolEt(const ABaslik: TEBelgeBaslik;
   const ASatirlar: TEBelgeSatirlar);
 var
@@ -628,8 +650,10 @@ begin
   end;
 end;
 
-// Alici (cari) iletisim: REHBER.EMAIL + REHBER.ISTEL (dolu ise). izibiz JSON
-// customerParty.address email/telephone alanlarina gider.
+// Alici (cari) iletisim: e-posta + telefon REHBERILETISIM/REHBERBILGI (YERI=1)
+// iletisim sisteminden okunur (REHBER'de EMAIL/telefon kolonu YOK; EPOSTA bit'tir).
+// izibiz JSON customerParty.address email/telephone alanlarina gider (e-Arsiv'de
+// posta iletimi icin gerekli; e-Fatura'da opsiyonel).
 procedure AliciIletisimGetir(ARehberID: Integer; out AEPosta, ATelefon: string);
 var
   LQ: TFDQuery;
@@ -642,8 +666,16 @@ begin
     try
       LQ.Connection := Tablo.TabBizim.Connection;
       LQ.SQL.Text :=
-        'SELECT '+DbUst(1)+'ISNULL(EMAIL,'''') AS EMAIL, ISNULL(ISTEL,'''') AS ISTEL ' +
-        'FROM REHBER WHERE ID=:r '+DbSinir(1);
+        'SELECT ' +
+        '(SELECT '+DbUst(1)+'RB.BILGI FROM REHBERBILGI RB ' +
+        'INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID ' +
+        'WHERE RI.REHBERID=R.ID AND RB.YERI=1 AND RB.BILGI LIKE ''%@%'' '+DbSinir(1)+') AS EMAIL, ' +
+        '(SELECT '+DbUst(1)+'RB.BILGI FROM REHBERBILGI RB ' +
+        'INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID ' +
+        'INNER JOIN REHBERAYAR RA ON RA.YERI=1 AND RA.SIRA=RB.SIRA ' +
+        'WHERE RI.REHBERID=R.ID AND RB.YERI=1 AND ' +
+        '(RA.ETIKET LIKE ''%Tel%'' OR RA.ETIKET LIKE ''%GSM%'') '+DbSinir(1)+') AS ISTEL ' +
+        'FROM REHBER R WHERE R.ID=:r';
       LQ.ParamByName('r').AsInteger := ARehberID;
       LQ.Open;
       if not LQ.IsEmpty then begin
@@ -760,6 +792,125 @@ begin
   end;
 end;
 
+// "KOD - Aciklama" formatindaki REHBERBILGI degerinden kodu ("KOD") ayiklar.
+function IhracatKodOnEk(const S: string): string;
+var
+  P: Integer;
+begin
+  Result := Trim(S);
+  P := Pos(' - ', Result);
+  if P > 0 then
+    Result := Trim(Copy(Result, 1, P - 1));
+end;
+
+// REHBERBILGI sayi degerini locale-bagimsiz ayristir. Grid (GIRIS=13) degeri
+// "12345.67" gibi NOKTA ondalik ile saklar; sistem locale ',' ise StrToCurr
+// bunu bozar. Once '.' ondalik, sonra ',' ondalik dener.
+function IhracatSayiParse(const S: string): Currency;
+var
+  LFS: TFormatSettings;
+  LS: string;
+begin
+  Result := 0;
+  LS := Trim(S);
+  if LS = '' then
+    Exit;
+  LFS := TFormatSettings.Invariant;       // '.' ondalik, ',' binlik
+  if TryStrToCurr(LS, Result, LFS) then
+    Exit;
+  LFS.DecimalSeparator := ',';
+  LFS.ThousandSeparator := '.';
+  if TryStrToCurr(LS, Result, LFS) then
+    Exit;
+  Result := StrToCurrDef(LS, 0);          // son care: sistem locale
+end;
+
+// Ihracat detay sablonu (REHBERAYAR/REHBERBILGI YERI=132 BOLUM='İhracat')
+// degerlerini okur. Alanlar KAYNAK (liste adi) ile kesin ayirt edilir; kod,
+// BILGI'nin " - " on ekinden alinir (combo ANAHTAR metnini saklar).
+procedure IhracatBilgisiOku(AFatBaslikID: Integer; var ABaslik: TEBelgeBaslik);
+var
+  LQ: TFDQuery;
+  LKaynak, LEtiket, LBilgi: string;
+begin
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text :=
+      'select RA.KAYNAK, RB.ETIKET, RB.BILGI from REHBERBILGI RB ' +
+      'inner join REHBERAYAR RA on RA.YERI=RB.YERI and RA.SIRA=RB.SIRA ' +
+      'and RA.ETIKET=RB.ETIKET and RA.BOLUM=:BOLUM ' +
+      'where RB.YERI=:YERI and RB.YER_ID=:YERID';
+    LQ.ParamByName('BOLUM').AsString := 'İhracat';
+    LQ.ParamByName('YERI').AsInteger := Tablo.FaturaDetaySablonTipiBul(ABaslik.Tur);
+    LQ.ParamByName('YERID').AsInteger := AFatBaslikID;
+    LQ.Open;
+    while not LQ.Eof do begin
+      LKaynak := Trim(LQ.FieldByName('KAYNAK').AsString);
+      LEtiket := Trim(LQ.FieldByName('ETIKET').AsString);
+      LBilgi := Trim(LQ.FieldByName('BILGI').AsString);
+      if LKaynak = 'İhracat_Teslim_Şartı' then
+        ABaslik.TeslimSartiKodu := IhracatKodOnEk(LBilgi)
+      else if LKaynak = 'İhracat_Taşıma_Şekli' then
+        ABaslik.TasimaSekliKodu := IhracatKodOnEk(LBilgi)
+      else if LKaynak = 'İhracat_Paket_Kap' then
+        ABaslik.KapCinsiKodu := IhracatKodOnEk(LBilgi)
+      else if LEtiket = 'FOB Değeri' then
+        ABaslik.FOBDeger := IhracatSayiParse(LBilgi)
+      else if LEtiket = 'Kap Adedi' then
+        ABaslik.KapAdedi := StrToIntDef(LBilgi, 0);
+      LQ.Next;
+    end;
+    ABaslik.IhracatVar := (ABaslik.TeslimSartiKodu <> '') or
+      (ABaslik.TasimaSekliKodu <> '') or (ABaslik.KapCinsiKodu <> '') or
+      (ABaslik.FOBDeger > 0);
+    // Ihracat KDV istisna kodu (KDV%=0 icin taxExemptionCode) yoksa varsayilan:
+    // 301 = 11/1-a Mal ihracati (GENINI BOLUM=-2333). Hizmet ihracatinda 302
+    // faturada KDV istisna nedeni secilerek override edilir.
+    if Trim(ABaslik.KDVIstisnaKodu) = '' then begin
+      ABaslik.KDVIstisnaKodu := '301';
+      ABaslik.KDVIstisnaNedeni := '11/1-a Mal ihracatı';
+    end;
+  finally
+    LQ.Free;
+  end;
+end;
+
+// Ihracat faturasi icin zorunlu alanlarin eksik olanlarini satir satir dondurur
+// (bos = tumu tamam). Hazirla asamasinda uyari + durdurma icin kullanilir.
+function IhracatEksikAlanlar(const ABaslik: TEBelgeBaslik;
+  const ASatirlar: TEBelgeSatirlar): string;
+var
+  LEksik: TStringList;
+  I: Integer;
+  LGtipYok: string;
+begin
+  LEksik := TStringList.Create;
+  try
+    if Trim(ABaslik.TeslimSartiKodu) = '' then
+      LEksik.Add('- Teslim Şartı (INCOTERMS)');
+    if Trim(ABaslik.TasimaSekliKodu) = '' then
+      LEksik.Add('- Taşıma Şekli');
+    if Trim(ABaslik.KapCinsiKodu) = '' then
+      LEksik.Add('- Kap / Ambalaj Cinsi');
+    if ABaslik.FOBDeger <= 0 then
+      LEksik.Add('- FOB Değeri');
+    // Urun satirlarinda GTIP zorunlu (ihracatta gumruk); bos olanlari topla.
+    LGtipYok := '';
+    for I := 0 to High(ASatirlar) do
+      if (Trim(ASatirlar[I].UrunKodu) <> '') and (Trim(ASatirlar[I].GTIP) = '') then begin
+        if LGtipYok <> '' then
+          LGtipYok := LGtipYok + ', ';
+        LGtipYok := LGtipYok + ASatirlar[I].UrunKodu;
+      end;
+    if LGtipYok <> '' then
+      LEksik.Add('- GTIP (ürün: ' + LGtipYok + ')');
+    Result := TrimRight(LEksik.Text);
+  finally
+    LEksik.Free;
+  end;
+end;
+
 procedure VerileriOku(AFatBaslikID: Integer; out ABaslik: TEBelgeBaslik;
   out ASatirlar: TEBelgeSatirlar);
 var
@@ -784,7 +935,9 @@ begin
   ABaslik.PlanID := AlanInt(Tablo.Query1, 'PLANID');
   TevkifatBilgisiGetir(ABaslik.PlanID, ABaslik.TevkifatKodu,
     ABaslik.TevkifatNedeni);
-  if ABaslik.Tipi = 24 then
+  // KDV istisna kodu: Tipi=24 (KDV istisna faturasi) veya Senaryo=3 (ihracat)
+  // -> izibiz KDV%=0'da taxExemptionCode zorunlu kilar.
+  if (ABaslik.Tipi = 24) or (ABaslik.Senaryo = 3) then
     KDVIstisnaBilgisiGetir(ABaslik.PlanID, ABaslik.KDVIstisnaKodu,
       ABaslik.KDVIstisnaNedeni);
   ABaslik.RehberID := AlanInt(Tablo.Query1, 'REHBERID');
@@ -813,6 +966,11 @@ begin
   ABaslik.Matrah := AlanCurrency(Tablo.Query1, 'FATURA_MATRAHI');
   ABaslik.KDV := AlanCurrency(Tablo.Query1, 'KDV_TUTARI');
   ABaslik.Toplam := AlanCurrency(Tablo.Query1, 'FATURA_TUTARI');
+
+  // Ihracat faturasi (Senaryo=3): 'İhracat' detay sablonundan teslim sarti,
+  // tasima, kap, FOB, kap adedi oku (JSON delivery/shipment icin).
+  if ABaslik.Senaryo = 3 then
+    IhracatBilgisiOku(AFatBaslikID, ABaslik);
 
   Tablo.TablodanSorguAc(1,
     'exec dbo.sp_Prog_EBelge_GidenFaturaDetay @invoiceId=' +
@@ -861,6 +1019,7 @@ begin
       LSatir.Iskonto2Orani := AlanFloat(Tablo.Query1, 'ISKONTO2');
       LSatir.TevkifatOrani := AlanFloat(Tablo.Query1, 'KDVMUHAFIYETI');
       LSatir.Notu := AlanStr(Tablo.Query1, 'Note');
+      LSatir.GTIP := AlanStr(Tablo.Query1, 'GTIP');
       SetLength(ASatirlar, Length(ASatirlar) + 1);
       ASatirlar[High(ASatirlar)] := LSatir;
       Tablo.Query1.Next;
@@ -1456,6 +1615,9 @@ begin
     if LIstisnaNotu <> '' then
       LXML.AppendLine('<cbc:Note>' + XMLEscape(LIstisnaNotu) +
         '</cbc:Note>');
+    var LTevkNotu: string := TevkifatNotu(ABaslik, ASatirlar);  // dip nota tevkifat nedeni
+    if LTevkNotu <> '' then
+      LXML.AppendLine('<cbc:Note>' + XMLEscape(LTevkNotu) + '</cbc:Note>');
     if ABaslik.Tur <> EBelgeTuruEIrsaliye then
       LXML.AppendLine('<cbc:DocumentCurrencyCode>' +
         XMLEscape(ABaslik.ParaBirimi) + '</cbc:DocumentCurrencyCode>');
@@ -1615,13 +1777,23 @@ begin
             LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
             LGrupVergi := LGrupVergi + SatirKDVBrut(ASatirlar[J]);
           end;
+        // KDV=0 (istisna/ihracat) satir grubunda GIB TaxExemptionReasonCode/Reason ZORUNLU (cac:TaxCategory icinde, TaxScheme'den ONCE).
+        var LIstisnaXml: string := '';
+        if (ASatirlar[I].KDVOrani < 0.001) and
+           ((ABaslik.Tipi = 24) or (SenaryoProfilKodu(ABaslik) = 'IHRACAT')) then begin
+          var LIstKodX: string := KDVIstisnaKodu(ABaslik);
+          if LIstKodX <> '' then
+            LIstisnaXml :=
+              '<cbc:TaxExemptionReasonCode>' + XMLEscape(LIstKodX) + '</cbc:TaxExemptionReasonCode>' +
+              '<cbc:TaxExemptionReason>' + XMLEscape(LIstKodX + ' ' + KDVIstisnaNedeni(ABaslik)) + '</cbc:TaxExemptionReason>';
+        end;
         LXML.AppendLine('<cac:TaxSubtotal><cbc:TaxableAmount currencyID="' +
           ABaslik.ParaBirimi + '">' + Ondalik(LGrupMatrah, '0.00##') +
           '</cbc:TaxableAmount><cbc:TaxAmount currencyID="' +
           ABaslik.ParaBirimi + '">' + Ondalik(LGrupVergi, '0.00##') +
           '</cbc:TaxAmount><cbc:Percent>' +
           Ondalik(ASatirlar[I].KDVOrani, '0.##') +
-          '</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name>' +
+          '</cbc:Percent><cac:TaxCategory>' + LIstisnaXml + '<cac:TaxScheme><cbc:Name>KDV</cbc:Name>' +
           '<cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory>' +
           '</cac:TaxSubtotal>');
       end;
@@ -1645,7 +1817,7 @@ begin
           LGrupTevkifat := 0;
           for J := I to High(ASatirlar) do
             if Abs(ASatirlar[J].TevkifatOrani - ASatirlar[I].TevkifatOrani) < 0.001 then begin
-              LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
+              LGrupMatrah := LGrupMatrah + SatirKDVBrut(ASatirlar[J]);  // tevkifat matrahi = KDV tutari (net degil; izibiz sematron)
               LGrupTevkifat := LGrupTevkifat + SatirTevkifatTutar(ASatirlar[J]);
             end;
           LXML.AppendLine('<cac:TaxSubtotal><cbc:TaxableAmount currencyID="' +
@@ -1806,7 +1978,7 @@ begin
           LXML.AppendLine('<cac:WithholdingTaxTotal><cbc:TaxAmount currencyID="' +
             ABaslik.ParaBirimi + '">' + Ondalik(LSatirTevkifat, '0.00##') +
             '</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="' +
-            ABaslik.ParaBirimi + '">' + Ondalik(ASatirlar[I].Tutar,
+            ABaslik.ParaBirimi + '">' + Ondalik(SatirKDVBrut(ASatirlar[I]),
             '0.00##') + '</cbc:TaxableAmount><cbc:TaxAmount currencyID="' +
             ABaslik.ParaBirimi + '">' + Ondalik(LSatirTevkifat, '0.00##') +
             '</cbc:TaxAmount><cbc:Percent>' +
@@ -2674,15 +2846,17 @@ begin
   LGonderilmisAdet := Tablo.Query1.FieldByName('GONDERILMIS').AsInteger;
   LIlkBosluk := Tablo.Query1.FieldByName('ILKBOSLUK').AsLargeInt;
   LSonraki := Tablo.Query1.FieldByName('SONRAKI').AsLargeInt;
-  ASeq := LIlkBosluk;
+  // Varsayilan: en son numaradan 1 fazlasi (SONRAKI = max+1). Boslugu OTOMATIK
+  // doldurmaz; bosluk doldurma yalnizca (gonderilmis belge yoksa) diyalogla secilir.
+  ASeq := LSonraki;
   Tablo.Query1.Close;
 
   if (LAdet > 0) and (LGonderilmisAdet = 0) and (LIlkBosluk <> LSonraki) then begin
     LSecenekler := TStringList.Create;
     try
-      LSecenekler.Add(IntToStr(LIlkBosluk));
-      LSecenekler.Add(IntToStr(LSonraki));
-      LSecim := IntToStr(LIlkBosluk);
+      LSecenekler.Add(IntToStr(LSonraki));    // varsayilan: en son numaradan +1 (append)
+      LSecenekler.Add(IntToStr(LIlkBosluk));  // alternatif: ilk bos numarayi doldur
+      LSecim := IntToStr(LSonraki);
       LCtrls := TGirdiDenetimleri.Create.ComboBox('Belge sira no seciniz:', @LSecim,
         LSecenekler, csDropDownList);
       if TGirisKutusuEx.BilgiAlEx('Belge No Secimi - ' + LSeriYil, LCtrls) <> mrOk then
@@ -2901,6 +3075,20 @@ begin
     if (LOnBaslik.Tipi = 22) or SatirlardaTevkifatVar(LOnSatirlar) then
       TevkifatNedeniKontrolEt(LOnBaslik, LOnSatirlar);
 
+    // TEVKIFAT faturasi (Tipi=22): en az bir satirda GECERLI tevkifat (>0) olmali.
+    // Satirin KDV orani 0 ise tevkifat tutari da 0 olur (tevkifat = KDV'nin yuzdesi)
+    // -> izibiz "en az bir satira tevkifat uygulanmali" reddeder. Numara tuketmeden dur.
+    if LOnBaslik.Tipi = 22 then begin
+      var LTevkToplam: Currency := 0;
+      for var LTS in LOnSatirlar do
+        LTevkToplam := LTevkToplam + SatirTevkifatTutar(LTS);
+      if LTevkToplam <= 0 then
+        raise Exception.Create(
+          'Tevkifat faturasında hiçbir satırda geçerli tevkifat yok. ' +
+          'Tevkifat, KDV''nin bir yüzdesidir; satırların KDV oranının 0 olmadığından ' +
+          've tevkifat oranının girildiğinden emin olun.');
+    end;
+
     // KDV İstisna fatura (TIPI=24): istisna nedeni (PLANID) secilmemisse durdur.
     if (LOnBaslik.Tipi = 24) and (LOnBaslik.PlanID <= 0) then
       raise Exception.Create('KDV Istisna faturasinda istisna nedeni secilmemis ' +
@@ -2913,6 +3101,17 @@ begin
       if LOnSevkHata <> '' then
         raise Exception.Create(LOnSevkHata + sLineBreak +
           'Sevk bilgilerini "Sevk Adresi" alanindan girebilirsiniz.');
+    end;
+
+    // Ihracat faturasi (Senaryo=3): İhracat detay sablonu + urun GTIP zorunlu.
+    // Eksikse numara/alias tuketmeden UYAR ve DUR.
+    if LOnBaslik.Senaryo = 3 then begin
+      var LIhrEksik: string := IhracatEksikAlanlar(LOnBaslik, LOnSatirlar);
+      if LIhrEksik <> '' then
+        raise Exception.Create(
+          'İhracat faturası hazırlanamaz. Aşağıdaki zorunlu alanlar eksik:' +
+          sLineBreak + LIhrEksik + sLineBreak + sLineBreak +
+          'Fatura detayında "İhracat" şablonunu doldurun; ürün kartında GTIP girin.');
     end;
 
     if not EskiBosFaturaOnayi(AConnection, LBaslik) then
@@ -2939,8 +3138,19 @@ begin
     except
     end;
 
-    LAliasSonuc := TEBelgeAliasServis.AliasIslemiYap(AConnection,
-      LBaslik.RehberID, LBaslik.Tur, LVergiNo, LCariAdi, LRehberMail);
+    if LOnBaslik.Senaryo = 3 then begin
+      // IHRACAT: alici Gumruk'tur; yurt disi gercek alici GIB mukellefi DEGIL.
+      // Alici alias sorgusu YAPILMAZ (yoksa alias bulunamayip e-Arsiv'e duser veya
+      // "iptal" olur). Belge her zaman e-Fatura; alias bos (gonderimde IHRACAT'ta
+      // receiverAlias gonderilmez, izibiz Gumruk'e customerParty'den yonlendirir).
+      LAliasSonuc := Default(TAliasYonetimSonuc);
+      LAliasSonuc.Basari := True;
+      LAliasSonuc.BelgeTuru := RAlias_EFatura;
+      LAliasSonuc.Alias := '';
+      LAliasSonuc.Mesaj := '';
+    end else
+      LAliasSonuc := TEBelgeAliasServis.AliasIslemiYap(AConnection,
+        LBaslik.RehberID, LBaslik.Tur, LVergiNo, LCariAdi, LRehberMail);
     if not LAliasSonuc.Basari then begin
       ShowMessage('e-Belge olusturma iptal: ' + LAliasSonuc.Mesaj);
       Exit;
@@ -3759,13 +3969,110 @@ begin
 end;
 
 // ---- Izibiz JSON body uretici (sadelestirilmis) ----
+// Ihracat e-Faturasi muhasebe alicisi (customerParty) = Gumruk. GIB kurali:
+// ProfileID=IHRACAT iken customerParty Gumruk ve Ticaret Bakanligi (VKN 1460415308);
+// gercek yurt disi alici buyerCustomerParty (PARTYTYPE=EXPORT) olarak yazilir.
+function GumrukCustomerPartyOlustur: TJSONObject;
+var
+  LAdr: TJSONObject;
+begin
+  Result := TJSONObject.Create;
+  Result.AddPair('schemeId', 'VKN');
+  Result.AddPair('identifier', '1460415308');
+  Result.AddPair('name',
+    'Gümrük ve Ticaret Bakanlığı Gümrükler Genel Müdürlüğü- Bilgi İşlem Dairesi Başkanlığı');
+  Result.AddPair('taxOffice', 'ULUS');
+  LAdr := TJSONObject.Create;
+  LAdr.AddPair('city', 'ANKARA');
+  LAdr.AddPair('country', 'TÜRKİYE');
+  Result.AddPair('address', LAdr);
+end;
+
+// Ihracat satir duzeyi delivery JSON'u (izibiz IHRACAT ornegi): deliveryAddress +
+// deliveryTerms(INCOTERMS) + shipment(FOB, GTIP, tasima modu, kap). Baslik alanlari
+// 'İhracat' sablonundan (IhracatBilgisiOku okur), GTIP satirdan gelir.
+function IhracatSatirDeliveryOlustur(const ABaslik: TEBelgeBaslik;
+  const ASatir: TEBelgeSatir): TJSONObject;
+var
+  LDelAdr, LTerms, LShip, LGood, LStage, LThu, LPkg: TJSONObject;
+  LGoodsArr, LStagesArr, LThuArr: TJSONArray;
+begin
+  Result := TJSONObject.Create;
+  // GIB schematron: IHRACAT'ta en az bir satirda Delivery/DeliveryAddress olmali.
+  LDelAdr := TJSONObject.Create;
+  if Trim(ABaslik.Il) <> '' then
+    LDelAdr.AddPair('city', ABaslik.Il);
+  if Trim(ABaslik.Ilce) <> '' then
+    LDelAdr.AddPair('subCity', ABaslik.Ilce);
+  if Trim(ABaslik.Adres) <> '' then
+    LDelAdr.AddPair('streetName', ABaslik.Adres);
+  LDelAdr.AddPair('country', 'TR');
+  Result.AddPair('deliveryAddress', LDelAdr);
+  if ABaslik.TeslimSartiKodu <> '' then begin
+    LTerms := TJSONObject.Create;
+    LTerms.AddPair('schemeID', 'INCOTERMS');
+    LTerms.AddPair('id', ABaslik.TeslimSartiKodu);
+    Result.AddPair('deliveryTerms', LTerms);
+  end;
+  LShip := TJSONObject.Create;
+  if ABaslik.FOBDeger > 0 then
+    LShip.AddPair('freeOnBoardValueAmount', Ondalik(ABaslik.FOBDeger, '0.00##'));
+  if Trim(ASatir.GTIP) <> '' then begin
+    LGoodsArr := TJSONArray.Create;
+    LGood := TJSONObject.Create;
+    LGood.AddPair('requiredCustomsID', Trim(ASatir.GTIP));  // GTIP - string (bastaki 0 korunur)
+    LGoodsArr.AddElement(LGood);
+    LShip.AddPair('goodsItems', LGoodsArr);
+  end;
+  if ABaslik.TasimaSekliKodu <> '' then begin
+    LStagesArr := TJSONArray.Create;
+    LStage := TJSONObject.Create;
+    LStage.AddPair('transportModeCode',
+      TJSONNumber.Create(StrToIntDef(ABaslik.TasimaSekliKodu, 0)));
+    LStagesArr.AddElement(LStage);
+    LShip.AddPair('shipmentStages', LStagesArr);
+  end;
+  if ABaslik.KapCinsiKodu <> '' then begin
+    LThuArr := TJSONArray.Create;
+    LThu := TJSONObject.Create;
+    LPkg := TJSONObject.Create;
+    LPkg.AddPair('id', IntToStr(ASatir.SatirNo));
+    if ABaslik.KapAdedi > 0 then
+      LPkg.AddPair('quantity', IntToStr(ABaslik.KapAdedi));
+    LPkg.AddPair('packagingTypeCode', ABaslik.KapCinsiKodu);
+    LThu.AddPair('actualPackage', LPkg);
+    LThuArr.AddElement(LThu);
+    LShip.AddPair('transportHandlingUnits', LThuArr);
+  end;
+  Result.AddPair('shipment', LShip);
+end;
+
+// Tevkifat withholding taxSubTotal JSON ogesi (header + satir ORTAK yapisi):
+// taxableAmount/taxAmount/calculationSequenceNumeric/percent(integer)/taxScheme.
+// AMatrah=KDV tutari (net degil), AOran=tevkifat orani (%). izibiz: percent integer.
+function TevkifatSubOlustur(AMatrah, ATevkifat: Currency; AOran: Double;
+  const ABaslik: TEBelgeBaslik): TJSONObject;
+var
+  LScheme: TJSONObject;
+begin
+  Result := TJSONObject.Create;
+  Result.AddPair('taxableAmount', TJSONNumber.Create(AMatrah));
+  Result.AddPair('taxAmount', TJSONNumber.Create(ATevkifat));
+  Result.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
+  Result.AddPair('percent', TJSONNumber.Create(Round(AOran)));   // integer (izibiz "50.0" degil "50")
+  LScheme := TJSONObject.Create;
+  LScheme.AddPair('name', TevkifatNedeni(ABaslik));
+  LScheme.AddPair('typeCode', TevkifatKodu(ABaslik));
+  Result.AddPair('taxScheme', LScheme);
+end;
+
 function _IzibizJSONOlustur(const ABaslik: TEBelgeBaslik;
   const ASatirlar: TEBelgeSatirlar;
   const AGondericiTaraf: TEBelgeTaraf): string;
 var
   LRoot, LContent, LSupplier, LSupplierAdr, LCustomer, LTax, LTaxSub, LTaxScheme,
     LMonetary, LLine, LLineTax, LLineTaxSub, LLineTaxScheme,
-    LWithholdingTax, LWithholdingSub, LWithholdingScheme: TJSONObject;
+    LWithholdingTax, LWithholdingSub: TJSONObject;
   LNotes, LLines, LTaxSubArr, LLineTaxSubArr, LAddRefs,
     LWithholdingSubArr: TJSONArray;
   LAddRefSend: TJSONObject;
@@ -3788,6 +4095,10 @@ begin
     LDocTypeCode := FaturaTipKodu(ABaslik);
   end;
   LProfil := SenaryoProfilKodu(ABaslik);
+  // Ihracat faturasi: izibiz IHRACAT ornegi profile=IHRACAT + documentTypeCode=ISTISNA kullanir
+  // (belge tipi ISTISNA, senaryo/profil IHRACAT). Belge tipi zaten ISTISNA degilse ISTISNA'ya cek.
+  if (LProfil = 'IHRACAT') and (LDocTypeCode <> 'ISTISNA') then
+    LDocTypeCode := 'ISTISNA';
   LTevkifatVar := (not LIsIrsaliye) and
     ((ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar));
   if LTevkifatVar then
@@ -3833,7 +4144,10 @@ begin
     // ALICI POSTA KUTUSU (alias): RECEIVER_ALIAS request'te GONDERILMEZSE Izibiz ilk
     // buldugu URN:MAIL etiketine yollar -> coklu subeli/aliasli mukellefte YANLIS
     // kutuya gidiyor (izibiz teyidi). Secili alias'i (EBELGE.ALICIALIAS) request'e ekle.
-    if Trim(ABaslik.AliciAlias) <> '' then
+    // IHRACAT: alici Gumruk oldugu icin gercek alicinin alias'i GONDERILMEZ (yurt disi
+    // alici GIB kullanicisi degil -> RECEIVER_COULD_NOT_FOUND). Izibiz customerParty
+    // (Gumruk VKN 1460415308) uzerinden otomatik yonlendirir.
+    if (LProfil <> 'IHRACAT') and (Trim(ABaslik.AliciAlias) <> '') then
       LRoot.AddPair('receiverAlias', ABaslik.AliciAlias);
     if Trim(ABaslik.GondericiAlias) <> '' then
       LRoot.AddPair('senderAlias', ABaslik.GondericiAlias);
@@ -3857,6 +4171,9 @@ begin
     for i := 0 to High(LSabitNotlar) do
       LNotes.Add(LSabitNotlar[i]);
     LTrimmed := KDVIstisnaNotu(ABaslik);
+    if LTrimmed <> '' then
+      LNotes.Add(LTrimmed);
+    LTrimmed := TevkifatNotu(ABaslik, ASatirlar);   // tevkifatli faturada dip nota tevkifat aciklamasi
     if LTrimmed <> '' then
       LNotes.Add(LTrimmed);
     LContent.AddPair('currencyCode', IfThen(Trim(ABaslik.ParaBirimi) = '', 'TRY', ABaslik.ParaBirimi));
@@ -3973,8 +4290,16 @@ begin
     LCustomer := TJSONObject.Create;
     LCustSeli := KimlikSemasi(ABaslik.VergiNo);
     // EIrsaliye'de de schemeId aciktan yazilir (yoksa Izibiz uzunluktan tahmin eder)
-    LCustomer.AddPair('schemeId', LCustSeli);
-    LCustomer.AddPair('identifier', ABaslik.VergiNo);
+    if LProfil = 'IHRACAT' then begin
+      // Ihracat: gercek alici buyerCustomerParty olur; GIB schematron PARTYTYPE=EXPORT
+      // kimligi ister (customerParty ise asagida Gumruk'e cevrilir).
+      LCustomer.AddPair('schemeId', 'PARTYTYPE');
+      LCustomer.AddPair('partyType', 'EXPORT');
+      LCustomer.AddPair('identifier', ABaslik.VergiNo);
+    end else begin
+      LCustomer.AddPair('schemeId', LCustSeli);
+      LCustomer.AddPair('identifier', ABaslik.VergiNo);
+    end;
     if SameText(LCustSeli, 'TCKN') and (LIsArsiv or LIsIrsaliye) then begin
       // Baslik'tan ad/soyad ayir: ilk kelime AD, gerisi SOYAD
       LTrimmed := Trim(ABaslik.Baslik);
@@ -4006,9 +4331,9 @@ begin
     // EArsiv: aliciAlias mail adresidir, Izibiz buradan iletim yapar
     if LIsArsiv and (Trim(ABaslik.AliciAlias) <> '') then
       LCustomerAdr.AddPair('email', Trim(ABaslik.AliciAlias));
-    // Alici iletisim: cari REHBER'den e-posta + telefon (dolu ise). e-Arsiv'de email
-    // zaten alias'tan set edildiyse ustune yazma.
-    begin
+    // Alici iletisim (e-posta + telefon): yalniz e-Arsiv'de gerekli (posta iletimi).
+    // e-Fatura GIB posta kutusuna gider; email/telefon opsiyonel oldugundan cekilmez.
+    if LIsArsiv then begin
       var LAliciMail: string := '';
       var LAliciTel: string := '';
       AliciIletisimGetir(ABaslik.RehberID, LAliciMail, LAliciTel);
@@ -4018,7 +4343,13 @@ begin
         LCustomerAdr.AddPair('telephone', LAliciTel);
     end;
     LCustomer.AddPair('address', LCustomerAdr);
-    LContent.AddPair('customerParty', LCustomer);
+    if LProfil = 'IHRACAT' then begin
+      // Ihracat: gercek alici buyerCustomerParty; muhasebe alicisi (customerParty)
+      // = Gumruk ve Ticaret Bakanligi (GIB kurali, VKN 1460415308).
+      LContent.AddPair('buyerCustomerParty', LCustomer);
+      LContent.AddPair('customerParty', GumrukCustomerPartyOlustur);
+    end else
+      LContent.AddPair('customerParty', LCustomer);
 
     // Tax / Monetary ? sadece fatura/arsiv icin (irsaliyede yok)
     if not LIsIrsaliye then begin
@@ -4043,12 +4374,18 @@ begin
       LTaxSub.AddPair('taxableAmount', TJSONNumber.Create(LToplamMatrah));
       LTaxSub.AddPair('percent', TJSONNumber.Create(LRootPercent));
       LTaxSub.AddPair('taxAmount', TJSONNumber.Create(LToplamKDV));
+      // KDV istisnasi (Tipi=24) veya ihracat (profile IHRACAT): KDV%=0 iken izibiz taxExemptionCode/Reason ZORUNLU kilar.
+      // Header taxSubtotal'da olmali (satirda DEGIL - izibiz ISTISNA ornegi). Reason format: "kod aciklama" (izibiz: "101 Ihracat Istisnasi").
+      if (LRootPercent < 0.001) and ((LDocTypeCode = 'ISTISNA') or (LProfil = 'IHRACAT')) then begin
+        var LIstKod: string := KDVIstisnaKodu(ABaslik);
+        if LIstKod <> '' then begin
+          LTaxSub.AddPair('taxExemptionCode', LIstKod);
+          LTaxSub.AddPair('taxExemptionReason', LIstKod + ' ' + KDVIstisnaNedeni(ABaslik));
+        end;
+      end;
       LTaxScheme := TJSONObject.Create;
       LTaxScheme.AddPair('name', 'KDV');
-      if LRootPercent < 0.001 then
-        LTaxScheme.AddPair('typeCode', '9015')
-      else
-        LTaxScheme.AddPair('typeCode', '0015');
+      LTaxScheme.AddPair('typeCode', '0015');   // izibiz KDV her zaman 0015 (KDV=0/istisna dahil; 9015 gecersiz - koleksiyonda 0 gecis)
       LTaxSub.AddPair('taxScheme', LTaxScheme);
       LTaxSubArr.AddElement(LTaxSub);
       LTax.AddPair('taxSubTotal', LTaxSubArr);
@@ -4073,22 +4410,18 @@ begin
           LGrupTevkifat := 0;
           for J := i to High(ASatirlar) do
             if Abs(ASatirlar[J].TevkifatOrani - ASatirlar[i].TevkifatOrani) < 0.001 then begin
-              LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
+              LGrupMatrah := LGrupMatrah + SatirKDVBrut(ASatirlar[J]);  // tevkifat matrahi = KDV tutari (net degil; izibiz sematron)
               LGrupTevkifat := LGrupTevkifat + SatirTevkifatTutar(ASatirlar[J]);
             end;
-          LWithholdingSub := TJSONObject.Create;
-          LWithholdingSub.AddPair('taxableAmount', TJSONNumber.Create(LGrupMatrah));
-          LWithholdingSub.AddPair('taxAmount', TJSONNumber.Create(LGrupTevkifat));
-          LWithholdingSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
-          LWithholdingSub.AddPair('percent', TJSONNumber.Create(ASatirlar[i].TevkifatOrani));
-          LWithholdingScheme := TJSONObject.Create;
-          LWithholdingScheme.AddPair('name', TevkifatNedeni(ABaslik));
-          LWithholdingScheme.AddPair('typeCode', TevkifatKodu(ABaslik));
-          LWithholdingSub.AddPair('taxScheme', LWithholdingScheme);
+          LWithholdingSub := TevkifatSubOlustur(LGrupMatrah, LGrupTevkifat,
+            ASatirlar[i].TevkifatOrani, ABaslik);
           LWithholdingSubArr.AddElement(LWithholdingSub);
         end;
         LWithholdingTax.AddPair('taxSubTotal', LWithholdingSubArr);
-        LContent.AddPair('withholdingTaxTotal', LWithholdingTax);
+        // izibiz FATURA (content) duzeyinde 'withHoldingTax' anahtarini bekler
+        // (satirda 'withholdingTaxTotal'). Yanlis anahtar -> fatura tevkifati kurulmaz
+        // -> "satirda tevkifat yok" schematron hatasi.
+        LContent.AddPair('withHoldingTax', LWithholdingTax);
       end;
 
       LMonetary := TJSONObject.Create;
@@ -4226,10 +4559,7 @@ begin
       LLineTaxSub.AddPair('percent', TJSONNumber.Create(LSatir.KDVOrani));
       LLineTaxScheme := TJSONObject.Create;
       LLineTaxScheme.AddPair('name', 'KDV');
-      if LSatir.KDVOrani < 0.001 then
-        LLineTaxScheme.AddPair('typeCode', '9015')
-      else
-        LLineTaxScheme.AddPair('typeCode', '0015');
+      LLineTaxScheme.AddPair('typeCode', '0015');   // izibiz KDV her zaman 0015 (KDV=0 dahil; 9015 gecersiz)
       LLineTaxSub.AddPair('taxScheme', LLineTaxScheme);
       LLineTaxSubArr.AddElement(LLineTaxSub);
       LLineTax.AddPair('taxSubTotal', LLineTaxSubArr);
@@ -4238,19 +4568,15 @@ begin
         LWithholdingTax := TJSONObject.Create;
         LWithholdingTax.AddPair('taxAmount', TJSONNumber.Create(LSatirTevkifat));
         LWithholdingSubArr := TJSONArray.Create;
-        LWithholdingSub := TJSONObject.Create;
-        LWithholdingSub.AddPair('taxableAmount', TJSONNumber.Create(LSatir.Tutar));
-        LWithholdingSub.AddPair('taxAmount', TJSONNumber.Create(LSatirTevkifat));
-        LWithholdingSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
-        LWithholdingSub.AddPair('percent', TJSONNumber.Create(LSatir.TevkifatOrani));
-        LWithholdingScheme := TJSONObject.Create;
-        LWithholdingScheme.AddPair('name', TevkifatNedeni(ABaslik));
-        LWithholdingScheme.AddPair('typeCode', TevkifatKodu(ABaslik));
-        LWithholdingSub.AddPair('taxScheme', LWithholdingScheme);
+        LWithholdingSub := TevkifatSubOlustur(SatirKDVBrut(LSatir), LSatirTevkifat,
+          LSatir.TevkifatOrani, ABaslik);
         LWithholdingSubArr.AddElement(LWithholdingSub);
         LWithholdingTax.AddPair('taxSubTotal', LWithholdingSubArr);
         LLine.AddPair('withholdingTaxTotal', LWithholdingTax);
       end;
+      // IHRACAT: satir duzeyi delivery (deliveryAddress + deliveryTerms + shipment).
+      if (LProfil = 'IHRACAT') and ABaslik.IhracatVar then
+        LLine.AddPair('delivery', IhracatSatirDeliveryOlustur(ABaslik, LSatir));
       LLines.AddElement(LLine);
     end;
     LContent.AddPair('lines', LLines);

@@ -1276,7 +1276,7 @@ procedure TTeklifWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or((IslemOp='D')and(BtnKaydetTus.Visible))) then
+   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or((IslemOp='D')and(BtnKaydetTus.Visible or (FOturumID<>'')))) then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1581,7 +1581,9 @@ begin
       [ ULog.SnapTablo(1, 'TEKLIF',         'ID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFDETAY',    'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFFINANSAL', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'GOREVYORUM',     'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString) ]);
+        ULog.SnapTablo(2, 'GOREVYORUM',     'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString + ')'),
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString + '))') ]);
   if TabTeklif.FieldByName('CARIID').AsString <> '' then
       LabelCari.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', TabTeklif.FieldByName('CARIID').AsInteger);
 
@@ -2493,9 +2495,8 @@ end;
 
 procedure TTeklifWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-   if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+   // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+   // TEKRAR sorMA (cift onay kaldirildi). Close -> FormCloseQuery -> KaydetmeSorusu.
    Close;
 end;
 

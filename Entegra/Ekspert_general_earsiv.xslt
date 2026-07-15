@@ -1195,18 +1195,8 @@
 										<br />
 									</xsl:if>
 								</xsl:for-each>
-								
-								
-								<xsl:for-each select="//n1:Invoice/cac:InvoiceLine/cac:WithholdingTaxTotal/cac:TaxSubtotal/cac:TaxCategory/cac:TaxScheme">
-										<xsl:text>Tevkifat Sebebi:</xsl:text>
-										
-										<xsl:value-of select="cbc:Name"></xsl:value-of>
-										<xsl:text>&#10;</xsl:text>
-										
 
-								</xsl:for-each>
-								
-								<xsl:for-each select="//n1:Invoice/cbc:Note">								
+								<xsl:for-each select="//n1:Invoice/cbc:Note">
 									<xsl:value-of select="."></xsl:value-of>
 									<br />
 								</xsl:for-each>

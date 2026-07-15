@@ -91,6 +91,11 @@ procedure ResimEkleme(DosyaAdi: string; RehberId, Yeri, Yer_ID: Integer);
 procedure ResimYapistir(Rs:TcxImage; RehberId, Yeri, Yer_ID: Integer);
 procedure ResmiVarsayilanyap(TabRsm:TFDQuery; Yeri, Yer_ID: Integer);
 procedure ImajTablosunaResimKaydet(DosyaAdi: string; Rsm:TcxImage; RehberId, Yeri, Yer_ID: Integer);
+// Varsayilan (VARSAYILAN=1) IMAJ resminden X-tablosu (STOKLAR/DEMIRBAS/REHBER/MASRAFGELIR)
+// RESIM cache'ini yeniden uretir. RESIM bir blob'tur ve snapshot'lanmaz; iptal/geri-alma
+// sonrasi IMAJ geri gelse de RESIM bayat kalir -> LogoResim (TcxDBImage, DataField=RESIM)
+// bos gorunur. Bu cagri cache'i default IMAJ'dan (DOSYA veya BELGE) yeniden kurar.
+procedure VarsayilanResimTazele(Yeri, YerId: Integer);
 
 implementation
 
@@ -137,6 +142,48 @@ begin
    JPGKucult(Pic,128);
    Tablo.Query1.ParamByName('PR0').Assign(Pic);
    Tablo.Query1.ExecSQL;
+end;
+
+procedure VarsayilanResimTazele(Yeri, YerId: Integer);
+var Pic: TJpegImage; X: string; LYuklendi: Boolean;
+begin
+  case Yeri of
+    18: X := 'DEMIRBAS';
+    58: X := 'MASRAFGELIR';
+    71: X := 'REHBER';
+    88: X := 'STOKLAR';
+  else Exit;   // RESIM cache'i olmayan yer -> yapacak bir sey yok
+  end;
+  Tablo.TablodanSorguAc(1, 'select BELGE, DOSYAID from IMAJ where YERI='+IntToStr(Yeri)+
+    ' and YER_ID='+IntToStr(YerId)+' and VARSAYILAN=1');
+  if Tablo.Query1.RecordCount = 0 then
+  begin
+    // Varsayilan resim yok -> cache'i temizle (LogoResim bos gorunsun, bayat resim kalmasin).
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+X+' set RESIM=null where ID='+IntToStr(YerId), [], []);
+    Exit;
+  end;
+  Pic := TJpegImage.Create;
+  try
+    LYuklendi := False;
+    if Tablo.Query1.FieldByName('DOSYAID').AsLargeInt > 0 then
+    begin // icerik DOSYA deposunda (FILESTREAM)
+      Tablo.TablodanSorguAc(0, 'select ICERIK from '+DepoTablo('DOSYA')+' where ID='+Tablo.Query1.FieldByName('DOSYAID').AsString);
+      if (Tablo.Query0.RecordCount > 0) and (not Tablo.Query0.FieldByName('ICERIK').IsNull) then
+      begin
+        Pic.LoadFromStream(Tablo.Query0.CreateBlobStream(Tablo.Query0.FieldByName('ICERIK'), bmread));
+        LYuklendi := True;
+      end;
+    end
+    else if not Tablo.Query1.FieldByName('BELGE').IsNull then
+    begin // eski davranis: IMAJ.BELGE inline
+      Pic.LoadFromStream(Tablo.Query1.CreateBlobStream(Tablo.Query1.FieldByName('BELGE'), bmread));
+      LYuklendi := True;
+    end;
+    if LYuklendi then
+      XTablosunaResimKaydet(Yeri, YerId, Pic);   // JPGKucult(128) + update X.RESIM
+  finally
+    Pic.Free;
+  end;
 end;
 
 function BMPtoJPG

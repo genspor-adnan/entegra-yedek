@@ -54,14 +54,14 @@ type
     GridFatListeTviewPLAN: TcxGridDBColumn;
     GridFatListeTviewKUR: TcxGridDBColumn;
     cxPageControl1: TcxPageControl;
-    SheetDetay: TcxTabSheet;
+    SheetDetay:  TcxTabSheet;
     cxSplitter1: TcxSplitter;
     FATURA: TFDQuery;
     DtsDetay: TDataSource;
     Panel4: TPanel;
     GridFaturaToplam: TStringGrid;
     GridFat: TcxGrid;
-    GridFatView: TcxGridDBTableView;
+    GridFatView:  TcxGridDBTableView;
     GridFatLevel1: TcxGridLevel;
     SilTus: TToolButton;
     ToolButton2: TToolButton;
@@ -135,6 +135,7 @@ type
     GridFatListeTviewDETAYBOLUMU: TcxGridDBColumn;
     GridFatListeTviewSUBEID: TcxGridDBColumn;
     GridFatListeTviewTIPI: TcxGridDBColumn;
+    GridFatListeTviewSENARYO: TcxGridDBColumn;
     N6: TMenuItem;
     IptalIsaretleMenu: TMenuItem;
     GridFatViewTESLIMTARIHI: TcxGridDBColumn;
@@ -764,7 +765,7 @@ begin
   if Length(SQLEk)>10 then begin
     if (FArama.Calendar2.Text = '')or(FArama.Calendar1.Text = '')then  // DOVIZ_FATURA_MATRAHI=((FATURA_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0))
        exit;
-    SQLPart1 :=  'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
+    SQLPart1 :=  'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.SENARYO,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
 //        ' FATURA_MATRAHI=FATURA_TUTARI-KDV_TUTARI,KDV_TUTARI,FATURA_TUTARI,F.KUR,FATURA_MALIYETI_ORT,'+
         ' FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, F.KUR, FATURA_MALIYETI_ORT,'+
         ' ORTKARORAN=round((FATURA_MATRAHI-FATURA_MALIYETI_ORT)/nullif(FATURA_MALIYETI_ORT,0)*100.0,2),'+
@@ -815,7 +816,7 @@ begin
            else
               SQLPart11 := SQLPart11+' and ISNULL(FATURANO,'''')  like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' ';
         end;
-    SQLPart2 :=   'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
+    SQLPart2 :=   'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,SENARYO=CAST(NULL AS smallint),F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
         ' FATURA_MATRAHI=SIPARIS_TUTARI-KDV_TUTARI,'+
         ' KDV_TUTARI,FATURA_TUTARI=SIPARIS_TUTARI,F.KUR,KURFATURA_MALIYETI_ORT=0.0,ORTKARORAN=0.0, ORTKAR=0.0  ,F.ACIKLAMA,F.OZELKOD,F.OZELKOD2,CARIKOD=R.KOD,CARIAD=R.FIRMA,DOVIZ_CINSI=F.RAPORDOVIZ,F.DOVIZKUR,DOVIZ_TUTARI=(SIPARIS_TUTARI/nullif(DOVIZKUR,0.0)), '+
         ' DOVIZ_FATURA_MATRAHI=((SIPARIS_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0)),DOVIZ_KDV_TUTARI=(cast(KDV_TUTARI as float)/nullif(cast(DOVIZKUR as float),0.0)) '+
@@ -970,41 +971,33 @@ end;
 
 procedure TFaturalarDlg.Liste_SP_Cagir(const SP_Adi, SelectList: string; const TopN: Integer;const Tur: SmallInt;const StartDate, EndDate : variant;
    const SubeIDList, Faturano, Baslik, CariFirma, Aciklama, Stok : string);
+// Diger liste SP'leri gibi 2-param JSON cagrisi: @Baslik (SELECT ek kolonlari,
+// =eski SelectList) + @Kosullar (JSON filtreler). SP adi *_Json2 gelir.
+var
+  LKosullar: TJSONObject;
 begin
-    FATBASLIK.SQL.Text :=   'EXEC  ' + SP_Adi +
-      ' @SelectList=:SelectList, ' +
-      ' @TopN=:TopN, ' +
-      ' @Tur=:Tur, ' +
-      ' @StartDate=:StartDate, ' +
-      ' @EndDate=:EndDate, ' +
-      ' @SubeIDList=['+SubeIDList+'],'+
-      ' @Faturano=:Faturano, ' +
-      ' @Baslik=:Baslik, ' +
-      ' @CariFirma=:CariFirma, ' +
-      ' @Aciklama=:Aciklama, ' +
-      ' @Stok=:Stok';
+    LKosullar := TJSONObject.Create;
+    try
+      LKosullar.AddPair('TopN', TJSONNumber.Create(TopN));
+      LKosullar.AddPair('Tur', TJSONNumber.Create(Tur));
+      // Tarihler yalniz filtre aciksa (null degilse) eklenir -> absent = filtre yok.
+      if not (VarIsNull(StartDate) or VarIsEmpty(StartDate)) then
+        LKosullar.AddPair('StartDate', VarToStr(StartDate));
+      if not (VarIsNull(EndDate) or VarIsEmpty(EndDate)) then
+        LKosullar.AddPair('EndDate', VarToStr(EndDate));
+      LKosullar.AddPair('SubeIDList', SubeIDList);       // duz comma-sep (ornek: '-1,0,1,2')
+      LKosullar.AddPair('Faturano', Faturano);
+      LKosullar.AddPair('Baslik', Baslik);               // fatura basligi aramasi (eski @Baslik)
+      LKosullar.AddPair('CariFirma', CariFirma);
+      LKosullar.AddPair('Aciklama', Aciklama);
+      LKosullar.AddPair('Stok', Stok);
 
-    // Parametreleri ata
-    FATBASLIK.ParamByName('SelectList').Value  := SelectList;
-    FATBASLIK.ParamByName('TopN').Value  := TopN;
-    FATBASLIK.ParamByName('Tur').Value  := Tur;
-    // Tarih parametreleri null olabilir (tarih filtresi kapali). FireDAC null
-    // variant'tan tip cikaramaz (-335) -> null ise tipi acikca ver.
-    with FATBASLIK.ParamByName('StartDate') do
-      if VarIsNull(StartDate) or VarIsEmpty(StartDate) then
-      begin DataType := ftWideString; Clear; end
-      else Value := StartDate;
-    with FATBASLIK.ParamByName('EndDate') do
-      if VarIsNull(EndDate) or VarIsEmpty(EndDate) then
-      begin DataType := ftWideString; Clear; end
-      else Value := EndDate;
-//    FATBASLIK.ParamByName('SubeIDList').Value  := [+SubeIDList+];
-    FATBASLIK.ParamByName('Faturano').Value  := Faturano;
-    FATBASLIK.ParamByName('Baslik').Value  := Baslik;
-    FATBASLIK.ParamByName('CariFirma').Value  := CariFirma;
-    FATBASLIK.ParamByName('Aciklama').Value  := Aciklama;
-    FATBASLIK.ParamByName('Stok').Value  := Stok;
-
+      FATBASLIK.SQL.Text := 'EXEC ' + SP_Adi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
+      FATBASLIK.ParamByName('Baslik').Value := SelectList;   // SELECT ek kolonlari
+      FATBASLIK.ParamByName('Kosullar').Value := LKosullar.ToJSON;
+    finally
+      LKosullar.Free;
+    end;
 
     FATBASLIK.DisableControls;
     TabloYenile(FATBASLIK,[]);
@@ -1058,10 +1051,10 @@ begin
    end;
 
    if gf.FAltTur in [9, 19, 101] then // al sat sipariş ve satınalma talebi
-      Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis', SipEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
+      Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis_Json2', SipEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
       SubeIDList, Trim(FArama.AraFaturaNo.Text), Trim(FArama.AraBaslik.Text),Trim(FArama.AraKod.Text),Trim(FArama.AraAciklama.Text),Trim(FArama.AraStok.Text))
    else
-      Liste_SP_Cagir('sp_Prog_AlisSatis_IrsFatFisKons', FatEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
+      Liste_SP_Cagir('sp_Prog_AlisSatis_IrsFatFisKons_Json2', FatEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
       SubeIDList, Trim(FArama.AraFaturaNo.Text), Trim(FArama.AraBaslik.Text),Trim(FArama.AraKod.Text),Trim(FArama.AraAciklama.Text),Trim(FArama.AraStok.Text));
 
 
@@ -2658,6 +2651,15 @@ var
    Kilit:Boolean;
    LGelenKutusu: Boolean;
 begin
+  // EFATURASONUC = "Hata/Red" (3) hucresine cift tikla: faturayi acmak yerine
+  // e-belge mesaj gecmisini goster (gonderim/red mesajlarini gormek icin).
+  if (GridFatListeTview.Controller.FocusedColumn = GridFatListeTviewEFATURASONUC) and
+     FATBASLIK.Active and (not FATBASLIK.IsEmpty) and
+     (FATBASLIK.FieldByName('EFATURASONUC').AsInteger = 3) then begin
+    MenuMesajlarGosterClick(nil);
+    Exit;
+  end;
+
   // Gelen faturalar sekmelerinde (tag 1201-1203) cift tikla: sadece faturayi ac,
   // sonrasinda TarihDegisti vb. listeyi tazeleme/yan etki tetikleme.
   LGelenKutusu := (PageControlTur.ActivePage <> nil) and

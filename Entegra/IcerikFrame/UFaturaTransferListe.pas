@@ -147,6 +147,9 @@ type
     procedure MenuUretimClick(Sender: TObject);
     procedure TransferInfoMenuClick(Sender: TObject);
     procedure AramaYap;
+    procedure LabelTumKayitlarClick(Sender: TObject);   // own-toolbar Tum/Son/Sik (DFM OnClick -> PUBLISHED olmali)
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -173,9 +176,6 @@ type
 
     procedure FaturaAc(ID : Integer);
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_FatTransfer_Liste_Json2)
-    procedure LabelTumKayitlarClick(Sender: TObject);
-    procedure LabelSonArananlarClick(Sender: TObject);
-    procedure LabelSikArananlarClick(Sender: TObject);
     procedure SetArama(const Value: TFatTransferAramaFrame);
     procedure PopUpDynamicSubMenuClick(Sender: TObject);
     //
@@ -257,12 +257,20 @@ begin
     j.AddPair('Mod',    TJSONNumber.Create(AMod));
     j.AddPair('BasTrh', FormatDateTime('yyyy-mm-dd"T"00:00:00', FArama.CalendarBas.Date));
     j.AddPair('BitTrh', FormatDateTime('yyyy-mm-dd"T"23:59:59', FArama.CalendarBit.Date));
-    if FArama.ComboSubeCikis.Text <> '' then
-       j.AddPair('SubeCikis', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSubeCikis.EditValue), 0)));  // orijinal FB.SUBE (yok) -> SP dogru kolon FB.SUBEID
-    if FArama.ComboSubeGiris.Text <> '' then
-       j.AddPair('SubeGiris', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.ComboSubeGiris.EditValue), 0)));
+    if FArama.EditTeslimEden.Tag > 0 then
+       j.AddPair('TeslimEden', TJSONNumber.Create(FArama.EditTeslimEden.Tag));   // FB.SATICIKODU = REHBER id
+    if FArama.EditTeslimAlan.Tag > 0 then
+       j.AddPair('TeslimAlan', TJSONNumber.Create(FArama.EditTeslimAlan.Tag));   // FB.REHBERID = REHBER id
+    if Trim(FArama.AraTransferNo.Text) <> '' then
+       j.AddPair('TransferNo', Trim(FArama.AraTransferNo.Text));                 // FB.FATURANO LIKE
+    if Trim(FArama.AraOzelKod.Text) <> '' then
+       j.AddPair('OzelKod', Trim(FArama.AraOzelKod.Text));                       // FB.OZELKOD LIKE
+    if Trim(FArama.AraUretimEmirNo.Text) <> '' then
+       j.AddPair('UretimEmirNo', Trim(FArama.AraUretimEmirNo.Text));            // Transfer->Talep->Uretim Emri EXISTS
     if Trim(FArama.AraStok.Text) <> '' then
        j.AddPair('Stok', Trim(FArama.AraStok.Text));                       // FATURA/STOKLAR join tetikler
+    if Trim(FArama.AraKod.Text) <> '' then
+       j.AddPair('Kod', Trim(FArama.AraKod.Text));                         // AraKod -> STOKLAR.KOD veya URUNNO LIKE
     j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));      // Son/Sik icin kullanici
     j.AddPair('Modul', TJSONNumber.Create(MODUL_FatTransfer));             // KULLANICI_ARAMA.MODUL
 

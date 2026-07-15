@@ -1324,7 +1324,7 @@ procedure TServisWizardDlg.FormCloseQuery(Sender: TObject;  var CanClose: Boolea
 var Ciksin : Boolean;
 begin
   Ciksin := True;
-  if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(TabServis.State in [dsEdit, dsInsert])))then //
+  if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and((TabServis.State in [dsEdit, dsInsert]) or (FOturumID<>''))))then //
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
      IDYES : begin
               //Ciksin := False;
@@ -1564,7 +1564,9 @@ begin
         ULog.SnapTablo(2, 'SERVISHAREKET',       'SERVISID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISASAMA',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(3, 'SERVISDETAYPERSONEL', 'SERVISID=' + TabServis.FieldByName('ID').AsString),
-        ULog.SnapTablo(3, 'GOREVYORUM',          'TUR=' + IntToStr(TabNo_SERVISHAREKET) + ' and GOREVID in (select ID from SERVISHAREKET where SERVISID=' + TabServis.FieldByName('ID').AsString + ')') ]);
+        ULog.SnapTablo(3, 'GOREVYORUM',          'TUR=' + IntToStr(TabNo_SERVISHAREKET) + ' and GOREVID in (select ID from SERVISHAREKET where SERVISID=' + TabServis.FieldByName('ID').AsString + ')'),
+        ULog.SnapTablo(4, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_SERVISHAREKET) + ' and GOREVID in (select ID from SERVISHAREKET where SERVISID=' + TabServis.FieldByName('ID').AsString + ')' + ')'),
+        ULog.SnapTablo(5, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_SERVISHAREKET) + ' and GOREVID in (select ID from SERVISHAREKET where SERVISID=' + TabServis.FieldByName('ID').AsString + ')' + '))') ]);
 end;
 
 procedure TServisWizardDlg.BEBildirimYapanPropertiesButtonClick(Sender:TObject;AButtonIndex:Integer);
@@ -2465,9 +2467,8 @@ end;
 
 procedure TServisWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-   if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+   // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+   // TEKRAR sorMA (cift onay kaldirildi). ModalResult:=mrCancel -> FormCloseQuery -> KaydetmeSorusu.
    ModalResult := mrCancel;
 end;
 

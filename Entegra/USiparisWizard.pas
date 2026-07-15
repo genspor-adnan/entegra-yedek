@@ -1126,7 +1126,7 @@ procedure TSiparisWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolea
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible)))then
+   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible or (FOturumID<>''))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1532,7 +1532,9 @@ begin
       [ ULog.SnapTablo(1, 'SIPARIS',      'ID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'SIPARISDETAY', 'SIPARISID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(DetaySablonTipiBul) + ' and YER_ID=' + IntToStr(SiparisIdsi)),
-        ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi)) ]);
+        ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi) + ')'),
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi) + '))') ]);
   if RehberId<=0 then //yeni oluşurken buras? dolu geliyor
      RehberId := TabSiparis.FieldByName('REHBERID').AsInteger;
   FirmaBilgileri;
@@ -2678,9 +2680,8 @@ end;
 
 procedure TSiparisWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-   if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+   // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+   // TEKRAR sorMA (cift onay kaldirildi). Close -> FormCloseQuery -> KaydetmeSorusu.
    Close;
 end;
 

@@ -15,7 +15,7 @@ uses
   dxSkinHighContrast, dxSkinOffice2010Black, dxSkinOffice2010Blue,
   dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
-  dxCore, cxDateUtils;
+  dxCore, cxDateUtils, Vcl.ToolWin;
 
 type
   TFislerAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
@@ -32,6 +32,12 @@ type
     cxLabel1: TcxLabel;
     ComboTipi: TcxImageComboBox;
     cxLabel3: TcxLabel;
+    AraKod: TcxTextEdit;
+    cxLabel4: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
   private
     { Private declarations }
     FFrameBilgi : TAramaFrameBilgi;

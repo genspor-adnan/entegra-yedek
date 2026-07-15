@@ -689,9 +689,13 @@ end;
 
 procedure TSatinAlmaWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
   if FOturumID <> '' then
-    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+    case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
+      IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
+      IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
+      // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
+    end;
   if (IslemOp = 'D') and (FOturumID <> '') then
   begin
     if TabSatinAlma.State in [dsEdit, dsInsert] then TabSatinAlma.Cancel;

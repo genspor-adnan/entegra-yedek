@@ -105,9 +105,9 @@ var
    i:Integer;
   st:string;
 begin
-  with TServisListeDlg(FFrameBilgi.IcerikGit('Tanım Listeleri').Ornek) do begin
-    //    KayitErisimTamamlandi := RehberKayitErisimTamamlandi;
-  end;
+  // Navigasyon: 'Tanim Listeleri' sekmesi SekmeConfig'de KAYITLI DEGIL -> IcerikGit nil-guard ile
+  //   no-op (eski kod 'nil.Git/nil.Ornek' ile AV veriyordu). Dogru sekme adi belli olunca guncellenmeli.
+  FFrameBilgi.IcerikGit('Tanım Listeleri');
   btnUpAndDown(Sender);
 end;
 

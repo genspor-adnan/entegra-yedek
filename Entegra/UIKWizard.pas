@@ -775,6 +775,7 @@ begin
     FOturumID := ULog.OturumBaslat('REHBER', RehberID,
       [ // --- Ana personel ---
         ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'IMAJ',           'YERI=71 and YER_ID=' + IntToStr(RehberID)),   // 71=REHBER: profil resmi (LogoResim/RESIM cache); DOSYA icerigi pin ile korunur
         ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'PERS_HAREKET',   'REHBERID=' + IntToStr(RehberID)),
@@ -786,7 +787,9 @@ begin
         ULog.SnapTablo(5, 'REHBERILETISIM', 'REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID) + ')'),
         ULog.SnapTablo(4, 'REHBER',         'GRUP=334 and BAGID=' + IntToStr(RehberID)),
         // --- Not + Yorum (GOREVYORUM: not TUR 11-13, yorum TUR=TabloNo=TabNo_IK) ---
-        ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')') ]);
+        ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')'),
+        ULog.SnapTablo(8, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + ')'),
+        ULog.SnapTablo(9, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + '))') ]);
 
   if (EditKOD.Visible)and(EditKOD.Enabled) then
      EditKOD.SetFocus;
@@ -1777,10 +1780,14 @@ end;
 
 procedure TIKWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+  // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
   if (((Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId))
       or (FOturumID <> '')) then
-    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+    case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
+      IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
+      IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
+      // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
+    end;
   if (Ust = 2) and (DtsPers.DataSet.State in [dsEdit, dsInsert]) then
       DtsPers.DataSet.Cancel;
 
@@ -1798,6 +1805,7 @@ begin
       // DUZENLEME iptali -> ilk hale don (snapshot geri yukle). Bekleyen edit'i iptal et.
       if TabRehber.State in [dsEdit, dsInsert] then TabRehber.Cancel;
       ULog.OturumGeriAl(FOturumID);
+      VarsayilanResimTazele(71, RehberID);   // 71=REHBER profil RESIM cache'i (blob, snapshot disi) tazele
       FOturumID := '';
   end;
   Close;

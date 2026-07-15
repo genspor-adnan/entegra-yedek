@@ -1187,7 +1187,9 @@ end;
 procedure TUretimWizardDlg.FormCloseQuery(Sender: TObject;  var CanClose: Boolean);
 begin
    Ciksin := True;
-   if KaydetTus.Visible and (not FIptalOnaylandi) then
+   // Iptal (IptalSecildi=True) -> sor; Finish (WizardKontrolFinishButtonClick IptalSecildi:=False
+   // yapar) -> SORMA (kaydet yolunda cift onay olmasin). FOturumID<>'' D-mod bosluğunu kapsar.
+   if (IptalSecildi) and (KaydetTus.Visible or (FOturumID<>'')) then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1268,7 +1270,9 @@ begin
     FOturumID := ULog.OturumBaslat('FATBASLIK', UretimID,
       [ ULog.SnapTablo(1, 'FATBASLIK',  'ID=' + IntToStr(UretimID)),
         ULog.SnapTablo(2, 'FATURA',     'FATBASID=' + IntToStr(UretimID)),
-        ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID)) ]);
+        ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID)),
+        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + ')'),
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + '))') ]);
 
   if (IslemOp='E') and (UretimID < 1) then begin
     TabUretim.Append;
@@ -1476,21 +1480,9 @@ end;
 
 procedure TUretimWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-  // Degisiklik kaybi uyarisi. Eskiden yalniz FOturumID<>'' (D-mod geri-alinabilir) iken
-  //  cikiyordu; AMA yeni fiste (E/K) FOturumID bos + baslik Post edilince KaydetTus gizlenip
-  //  FormCloseQuery "Kaydet?" de sormuyordu -> Iptal SESSIZCE kapatip siliyordu. Bu yuzden
-  //  yeni/kopya kayit ve aktif kart/detay duzenleme durumlarini da kapsadik.
-  if (FOturumID <> '') or (IslemOp = 'E') or (IslemOp = 'K') or
-     (TabUretim.State in [dsEdit, dsInsert]) or
-     (TabUretimDetay.State in [dsEdit, dsInsert]) then
-    if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-         PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then
-    begin
-      ModalResult := mrNone;
-      Exit;
-    end;
-  // Onaylandi -> FormCloseQuery ayrica "Kaydet?" sormasin (cift uyari olmasin).
-  FIptalOnaylandi := True;
+  // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+  // TEKRAR sorMA (cift onay kaldirildi). FIptalOnaylandi ARTIK set edilmiyor ki
+  // FormCloseQuery tek onayi verebilsin. Iptal -> ModalResult=mrCancel -> FormCloseQuery.
 end;
 
 procedure TUretimWizardDlg.WizardKontrolFinishButtonClick(Sender: TObject);

@@ -776,7 +776,9 @@ begin
         ULog.SnapTablo(2, 'DEMIRBASTAKIP',          'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'REHBERBILGI',            'YERI=' + IntToStr(TabNo_DEMIRBAS) + ' and YER_ID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'GOREVYORUM',             'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString) ]);
+        ULog.SnapTablo(2, 'GOREVYORUM',             'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + ')'),
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + '))') ]);
 end;
 
 
@@ -1065,9 +1067,13 @@ end;
 
 procedure TDemirbasWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
    if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
+       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
+       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
+       // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
+     end;
    ModalResult := mrCancel;
 end;
 

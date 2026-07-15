@@ -1458,7 +1458,7 @@ procedure TUretimEmriWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boo
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible)))then
+   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible or (FOturumID<>''))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1734,6 +1734,8 @@ begin
         ULog.SnapTablo(4, 'URETIMOPERASYONFASON',    'URETIMOPERASYONID in ' + LOp),
         ULog.SnapTablo(4, 'URETIMOPERASYONPERSONEL', 'OPERASYONID in ' + LOp),
         ULog.SnapTablo(4, 'GOREVYORUM',              'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp),
+        ULog.SnapTablo(5, 'DOKUMAN',                 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp + ')'),
+        ULog.SnapTablo(6, 'IMAJ',                    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp + '))'),
         ULog.SnapTablo(5, 'URETIMOLCUM',             'OPERASYONPERSONELID in ' + LPers),
         ULog.SnapTablo(6, 'URETIMOLCUMDETAY',        'URETIMOLCUMID in ' + LOlcum) ]);
   end;
@@ -1958,9 +1960,8 @@ end;
 
 procedure TUretimEmriWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-   if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+   // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+   // TEKRAR sorMA (cift onay kaldirildi). Close -> FormCloseQuery -> KaydetmeSorusu.
    Close;
 end;
 

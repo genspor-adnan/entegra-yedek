@@ -952,7 +952,9 @@ begin
          ULog.SnapTablo(2, 'PROJEMALIYET', 'PROJEID=' + IntToStr(ProjeID)),
          ULog.SnapTablo(2, 'PROJEBUTCE',   'PROJEID=' + IntToStr(ProjeID)),
          ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(TabNo_PROJELER) + ' and YER_ID=' + IntToStr(ProjeID)),
-         ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_PROJELER) + ' and GOREVID=' + IntToStr(ProjeID)) ]);
+         ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_PROJELER) + ' and GOREVID=' + IntToStr(ProjeID)),
+         ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_PROJELER) + ' and GOREVID=' + IntToStr(ProjeID) + ')'),
+         ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_PROJELER) + ' and GOREVID=' + IntToStr(ProjeID) + '))') ]);
 
    EditSORUMLU.text := tablo.AciklamaGetir('REHBER', 'FIRMA',TabProjeler.FieldByName('PRJ_SORUMLUSU_ID').AsString);
    GBaslamaTarih := TabProjeler.FieldByName('BASLAMATARIHI').AsDateTime;
@@ -1363,9 +1365,13 @@ end;
 
 procedure TProjeWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
+   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
    if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
+       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
+       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
+       // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
+     end;
    Sontus:='I'; //iptal butonu
    Close;
 end;

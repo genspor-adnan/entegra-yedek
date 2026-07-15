@@ -1248,7 +1248,10 @@ begin
       Exit;
    end;
 
-   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled)))then
+   // D-modda geri-alinabilir oturum aktifse (FOturumID<>'') degisiklik DB'ye islenip
+   // KaydetTus disi kalabilir -> onu da kapsa ki iptal onayi ATLANMASIN (cift onay
+   // kaldirildigi icin tek onay noktasi burasi).
+   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled or (FOturumID<>''))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1711,14 +1714,15 @@ begin
   //   if Assigned(RepItem) then
   //      ComboSENARYO.Properties.Items.Assign(RepItem.Items);
      ComboSENARYO.Properties.Items.Assign(TcxEditRepositoryImageComboBoxItem(Tablo.RepSenaryo).Properties.Items);
-     if (UTSKullanimda)and(TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [0, 1, 2, 21, 22]) then begin//efatura ise tıbbi cihaz da ekleyelim
+{     if (UTSKullanimda)and(TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [0, 1, 2, 21, 22]) then begin//efatura ise tıbbi cihaz da ekleyelim
         NewItem := ComboSENARYO.Properties.Items.Add;
         NewItem.Description := 'ilaç_TıbbiCihaz';
         NewItem.Value := 8;
-    end;
+    end;        }
     // ComboSENARYO.Properties.Items.Assign(RepSenaryo.Properties.Items);
      LabelSenaryo.Visible := True;
      LabelSorgu.Visible :=True;
+     ComboSENARYO.Enabled := TabFatbaslik.FieldByName('SENARYO').AsInteger <> 3;
   end;
 
   TahsilatAlindi:=False;
@@ -1834,6 +1838,8 @@ begin
         ULog.SnapTablo(2, 'FATURA',      'FATBASID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'REHBERBILGI', 'YERI=' + IntToStr(Tablo.FaturaDetaySablonTipiBul(Tur)) + ' and YER_ID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'DOKUMAN',     'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString + ')'),
+        ULog.SnapTablo(4, 'IMAJ',        'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString + '))'),
         ULog.SnapTablo(3, 'STOKIZLEME',  'BASLIKID=' + TabFatbaslik.FieldByName('ID').AsString) ]);
 
   case Tur of
@@ -4300,9 +4306,8 @@ end;
 
 procedure TFaturaWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
-   if FOturumID <> '' then
-     if Application.MessageBox(PChar('Yapılan değişiklikler kaybolacaktır. Devam edilsin mi?'),
-          PChar('Onay'), MB_YESNO or MB_ICONWARNING) <> IDYES then begin ModalResult := mrNone; Exit; end;
+   // Iptal onayi FormCloseQuery'de (KaydetmeSorusu / Gentegre Onay) soruluyor -> burada
+   // TEKRAR sorMA (cift onay kaldirildi). Close -> FormCloseQuery -> KaydetmeSorusu.
    Close;
 end;
 
@@ -4372,7 +4377,7 @@ begin
    end;
 
 //AO 05.10.2025 ?TS kullan?mda ve bildirimi olan ürün varsa senaryo yu otomatik ilaç_t?bbicihaz yapacağız..
-  if (UTSKullanimda)and (EFaturaKullanimda>0) and (TabFatbaslik.FieldByName('TUR').AsInteger=15)and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger=0) then begin
+  if (UTSKullanimda)and (ComboSenaryo.enabled)and (EFaturaKullanimda>0) and (TabFatbaslik.FieldByName('TUR').AsInteger=15)and (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger=0) then begin
      if Veritabani.VeriVarMi(Tablo.FDCnn,'select  F.ID, F.IZLEME, S.BILDIRIM from FATURA F inner join STOKLAR S on S.ID = F.URUNID '+
                          ' where FATBASID = '+TabFatbaslik.Fields[0].AsString+' and F.TUR>0 and S.BILDIRIM=2 ',[],[])then begin
         if TabFatbaslik.FieldByName('SENARYO').AsInteger<>8 then begin  //ilaç t?bbicihaz de?ilse

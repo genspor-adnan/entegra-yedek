@@ -12778,6 +12778,7 @@ begin
   GENINI.ReadImageSection(Ops_KYSapmaOlayDurum, RepKYSapmaOlayDurum.Properties.Items, False);
 
   GENINI.ReadImageSection(Ops_FaturaTipi, RepFatTipi.Properties.Items, True);    // 'Fat Tipi
+  GENINI.ReadImageSection(EFatura_Senaryo, RepSenaryo.Properties.Items, True);   // e-Fatura Senaryo (grid + wizard combosu)
   repOnlinePersonel.Properties.items := Tablo.imgComboboxInit( 'select K.REHBERID ,R.FIRMA from KULLANICI K INNER JOIN REHBER R ON K.REHBERID = R.ID where R.DURUM>0 and K.DURUM=1 ORDER BY 2 ').items;
 
   GENINI.ReadImageSection(-2403, RepFaturaGelenDurum.Properties.Items); // 'FaturaGelen_Durum

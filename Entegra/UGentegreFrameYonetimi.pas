@@ -553,14 +553,23 @@ begin
 end;
 
 function TAnaFrameBilgi.IcerikGit(ABaslik: string): TIcerikFrameBilgi;
+var LBilgi: TIcerikFrameBilgi;
 begin
-  if ABaslik <> '' then
-     Result := IcerikFrameYoneticisi.FrameBul(ABaslik).Git;
+  Result := nil;
+  if ABaslik <> '' then begin
+    // Sekme adi kayitli degilse FrameBul nil doner -> eski kod 'nil.Git' ile AV veriyordu.
+    LBilgi := IcerikFrameYoneticisi.FrameBul(ABaslik);
+    if Assigned(LBilgi) then Result := LBilgi.Git;
+  end;
 end;
 
 function TAnaFrameBilgi.IcerikGit(AFrameClass: TFrameClass): TIcerikFrameBilgi;
+var LBilgi: TIcerikFrameBilgi;
 begin
- Result := IcerikFrameYoneticisi.FrameBul(AFrameClass).Git;
+  Result := nil;
+  // Frame tipi kayitli degilse FrameBul nil doner -> 'nil.Git' AV'sini onle.
+  LBilgi := IcerikFrameYoneticisi.FrameBul(AFrameClass);
+  if Assigned(LBilgi) then Result := LBilgi.Git;
 end;
 
 procedure TAnaFrameBilgi.SetAktifArama(const Value: TAramaFrameBilgi);

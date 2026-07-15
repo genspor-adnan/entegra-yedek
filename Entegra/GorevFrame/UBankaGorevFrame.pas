@@ -55,8 +55,8 @@ uses UBankaKredileriListeFrame, UTeminatMektuplariListeFrame,UPOSListeFrame, UKr
 
 procedure TBankaGorevFrame.btnBankaKredileriClick(Sender: TObject);
 begin
-  with TBankalarListeFrame(FFrameBilgi.IcerikGit('Banka Kredileri Tanımlama').Ornek) do begin
-  end;
+  // Navigasyon (bos 'with .Ornek' gövdesi yerine): sekme yoksa IcerikGit nil-guard ile no-op, AV yok.
+  FFrameBilgi.IcerikGit('Banka Kredileri Tanımlama');
   btnUpAndDown(Sender);
 end;
 

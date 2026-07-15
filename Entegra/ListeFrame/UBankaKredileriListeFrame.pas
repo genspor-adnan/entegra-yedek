@@ -330,6 +330,9 @@ type
     procedure TabCekKocanBeforePost(DataSet: TDataSet);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
     procedure KrediInfoMenuClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);   // own-toolbar Tum/Son/Sik (DFM OnClick -> PUBLISHED olmali)
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -358,9 +361,6 @@ type
     procedure KrediEkranAc(Yeni : Boolean);
     procedure SetArama(const Value: TBankaKredileriAramaFrame);
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Banka_Liste)
-    procedure LabelTumKayitlarClick(Sender: TObject);
-    procedure LabelSonArananlarClick(Sender: TObject);
-    procedure LabelSikArananlarClick(Sender: TObject);
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure EkstreGoster(Goster:Boolean);
     function RotatifBaslamaTarihGetir(var BasAy : smallint; var BasYil : smallint) : TDateTime;
