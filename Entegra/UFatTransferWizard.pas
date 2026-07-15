@@ -444,7 +444,7 @@ begin
   // Geri-alinabilir oturum (yalniz D=degistir): FATBASLIK/FATURA. IMAJ/DOKUMAN kapsam disi.
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger,
+    FOturumID := ULog.OturumBaslatPlan('FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'FATBASLIK', 'ID=' + TabFatBaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'FATURA',    'FATBASID=' + TabFatBaslik.FieldByName('ID').AsString) ]);
 
@@ -502,6 +502,7 @@ end;
 procedure TFatTransferWizardDlg.SatirSilClick(Sender: TObject);
 var Silinebilir : boolean;
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
    //?retimde sarf sat?r? ise kontrole alm?yoruz..
    Silinebilir := True;
    if TabFatura.FieldByName('ADET').Value > 0 then begin
@@ -558,6 +559,7 @@ end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikBeforeDelete(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi silme -> yakala
   if TabFatura.RecordCount>0 then
     begin
        Application.MessageBox(PChar(FTWTransferleriSil),PChar(HataPrj), MB_OK+ MB_ICONERROR);
@@ -567,6 +569,7 @@ end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi ilk degisikligi -> yakala
   if LogGun>0 then begin
     Tablo.OncekiLogBelirle(TabFatBaslik);
   end;
@@ -574,6 +577,7 @@ end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
    if TabFatBaslik.FieldByName('CIKISDEPO').AsInteger<=0 then
    begin
        Application.MessageBox(PChar(FTWCikisDeposuBosOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
@@ -668,11 +672,13 @@ end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforeDelete(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where BASLIKID=&BID and SATIRID=&SID',['&BID','&SID'],[TABFATBASLIK.FieldByName('ID').AsString,TABFATURA.FieldByName('ID').AsString]);
 end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir duzenleme -> yakala
    OncekiStokMiktar  :=  TabFATURA.FieldByName('MIKTAR').AsFloat;
 end;
 
@@ -687,6 +693,7 @@ var
   LUrunID: Integer;
   LTransferTarihi, LSonGiris: TDateTime;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir post -> yakala
   if FATURA.Active then
      FATURA.Close;
 
@@ -904,7 +911,7 @@ end;
 procedure TFatTransferWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-  if FOturumID <> '' then
+  if ULog.OturumYakalandiMi(FOturumID) or ((TabFatBaslik.State in [dsEdit, dsInsert]) and TabFatBaslik.Modified) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don

@@ -440,6 +440,7 @@ Uses  UVeriMotor, UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClas
   TabProjeAsama.FieldByName('EKLEYEN').AsString:= Kullanan;}
 procedure TFirsatWizardDlg.AsamalariEkleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: asama ekleme -> yakala
   if TabFirsatlar.State=dsEdit then
      TabFirsatlar.Post;
 
@@ -457,6 +458,7 @@ end;
 
 procedure TFirsatWizardDlg.BtnAsamaEkleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: asama ekleme -> yakala
   if TabFirsatlar.State in [dsInsert, dsEdit] then
      TabFirsatlar.Post;
   TabProjeAsama.Append;
@@ -474,12 +476,14 @@ end;
 
 procedure TFirsatWizardDlg.BtnAsamaSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: asama silme -> yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
      TabProjeAsama.Delete;
 end;
 
 procedure TFirsatWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
    if TabFirsatlar.State in [dsEdit,dsInsert] then
       TabFirsatlar.Post;
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabNo_PROJELER, TabFirsatlar.FieldByName('ID').AsInteger, TabFirsatlar.FieldByName('REHBERID').AsInteger,TabYorum, CheckZenginMetin.Checked);
@@ -504,6 +508,7 @@ end;
 
 procedure TFirsatWizardDlg.ButtonSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: silme -> yakala
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
       TabLojistik.Delete;
 end;
@@ -685,6 +690,7 @@ end;
 
 procedure TFirsatWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (TabYorum.RecordCount>0)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum,[Tabno_projeler,TabFirsatlar.FieldByName('ID').AsInteger]);
@@ -977,7 +983,7 @@ begin
    // Geri-alinabilir oturum (yalniz D=degistir): firsat PROJELER tablosunda tutulur.
    FOturumID := '';
    if IslemOp = 'D' then
-     FOturumID := ULog.OturumBaslat('PROJELER', ProjeID,
+     FOturumID := ULog.OturumBaslatPlan('PROJELER', ProjeID,   // LAZY: plan bellekte
        [ ULog.SnapTablo(1, 'PROJELER',     'ID=' + IntToStr(ProjeID)),
          ULog.SnapTablo(2, 'PROJEASAMA',   'PROJEID=' + IntToStr(ProjeID)),
          ULog.SnapTablo(2, 'PROJEMALIYET', 'PROJEID=' + IntToStr(ProjeID)),
@@ -1152,6 +1158,7 @@ end;
 
 procedure TFirsatWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(Tabno_projeler, TabFirsatlar.FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1259,6 +1266,7 @@ end;
 
 procedure TFirsatWizardDlg.TabFirsatlarBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: firsat ilk degisikligi -> yakala
       //Admin de?il ise  RolId = -1 ise y?netici demektir..
    if (RolId<>'-1')and(TabFirsatlar.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
        Application.MessageBox(PChar(AWSorumluHaricindeDegisYapilmaz), PChar(Uyari), MB_OK + MB_ICONERROR);
@@ -1270,6 +1278,7 @@ end;
 
 procedure TFirsatWizardDlg.TabFirsatlarBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: firsat post -> yakala
 {  if (TabFirsatlar.FieldByName('DURUM').AsBoolean=True) and (TabFirsatlar.FieldByName('SONUC').AsString='') then
    begin
      ShowMessage(PWSonucBilgisiGir);
@@ -1371,6 +1380,7 @@ end;
 
 procedure TFirsatWizardDlg.TabProjeAsamaBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: asama detay duzenleme -> yakala
 //   TabProjeAsama.Edit;
 //   TabProjeAsama.FieldByName('DEGISTIREN').AsString:= Kullanan;
 //   TabProjeAsama.FieldByName('DEGISTIRMETARIHI').AsDateTime:= Tablo.GENINI.BugunTrhSaat;
@@ -1430,6 +1440,7 @@ end;
 
 procedure TFirsatWizardDlg.GorevDuzenleTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: gorev ekleme -> yakala
    Menu_Duzenle(Sender, TabGorevler);
    IsListesiTabloAc
 end;
@@ -1454,6 +1465,7 @@ end;
 
 procedure TFirsatWizardDlg.GorevSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: gorev silme -> yakala
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) = ID_OK then begin
      Tablo.GorevSil(TabGorevler.Fields[0].AsInteger);
      IsListesiTabloAc
@@ -1477,6 +1489,7 @@ end;
 
 procedure TFirsatWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
    if TabFirsatlar.State in [dsEdit,dsInsert] then
       TabFirsatlar.Post;
   Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
@@ -1484,6 +1497,7 @@ end;
 
 procedure TFirsatWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -1513,7 +1527,7 @@ end;
 procedure TFirsatWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
    // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-   if FOturumID <> '' then
+   if ULog.OturumYakalandiMi(FOturumID) or ((TabFirsatlar.State in [dsEdit, dsInsert]) and TabFirsatlar.Modified) then
      case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
        IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
