@@ -405,6 +405,7 @@ end;
 
 procedure TStokTalepWizard.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (TabYorum.RecordCount>0)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum, [TabloNo,siparis.FieldByName('ID').AsInteger]);
@@ -500,6 +501,7 @@ end;
 
 procedure TStokTalepWizard.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Siparisdetay);
 end;
 
@@ -756,7 +758,7 @@ procedure TStokTalepWizard.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled or (FOturumID<>''))))then
+   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled or ULog.OturumYakalandiMi(FOturumID) or ((SIPARIS.State in [dsEdit,dsInsert]) and SIPARIS.Modified))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1048,7 +1050,7 @@ begin
   // ilk hale don. IMAJ/DOKUMAN kapsam disi.
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('SIPARIS', SiparisIdsi,
+    FOturumID := ULog.OturumBaslatPlan('SIPARIS', SiparisIdsi,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'SIPARIS',      'ID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'SIPARISDETAY', 'SIPARISID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(DetaySablonTipiBul) + ' and YER_ID=' + IntToStr(SiparisIdsi)),
@@ -1219,6 +1221,7 @@ end;
 
 procedure TStokTalepWizard.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
@@ -1229,6 +1232,7 @@ end;
 
 procedure TStokTalepWizard.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -1263,6 +1267,7 @@ end;
 
 procedure TStokTalepWizard.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(TabloNo, SIPARIS .FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1297,6 +1302,7 @@ end;
 
 procedure TStokTalepWizard.SatirSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
   if SIPARISDETAY.RecordCount<=0 then abort;
   if Application.MessageBox(PCHAR(Sil_Onay),pchar(Onay), MB_YESNO + MB_ICONQUESTION) = ID_YES then begin
     SIPARISDETAY.Delete;
@@ -1321,6 +1327,7 @@ end;
 
 procedure TStokTalepWizard.SIPARISBeforeEdit(DataSet: TDataSet);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: stok talep ilk degisikligi -> yakala
    OncekiKDVDurumu := SIPARIS.FieldByName('KDVDURUM').AsString;
    OncekiSubeID :=SIPARIS.FieldByName('SUBEID').AsInteger;
    if LogGun>0 then begin
@@ -1331,6 +1338,7 @@ end;
 
 procedure TStokTalepWizard.SIPARISBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: stok talep post -> yakala
   BoslukKontrolu;
   //Bu cariden bu sipari? no ile daha ?nce sipari? al?nm?? m? kontrol? yapal?m
   //Tablo.TablodanSorguAc(2,'select ID from SIPARIS where ')
@@ -1505,6 +1513,7 @@ var
      end;
   end;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: stok talep satiri post -> yakala
   if StrToIntDef(SIPARIS.FieldByName('ONAYLAYAN').AsString,0) <> 0 then begin
     if Tablo.UyariGoster(Uyari,'Yaptığınız değişiklik sipariş onayını kaldıracaktır, devam etmek ister misiniz?',2)=mrYes then
       EditBirimOnaylayanPropertiesButtonClick(Nil,1)
@@ -1937,6 +1946,7 @@ end;
 
 procedure TStokTalepWizard.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, SIPARIS.FieldByName('ID').AsInteger, SIPARIS.FieldByName('REHBERID').AsInteger,TabYorum);
 end;
 

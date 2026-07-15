@@ -355,6 +355,7 @@ end;
 
 procedure TCekWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
 end;
 
@@ -478,6 +479,7 @@ end;
 
 procedure TCekWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, TabCekler.FieldByName('ID').AsInteger, TabCekler.FieldByName('REHBERID').AsInteger,TabYorum);
 end;
 
@@ -540,6 +542,7 @@ end;
 
 procedure TCekWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum,[TabloNo,TabCekler.FieldByName('ID').AsInteger]);
@@ -809,7 +812,7 @@ begin
   // ilk hale don. IMAJ(blob)/DOKUMAN kapsam disi.
   FOturumID := '';
   if (IslemOp = 'D') and (CekID > 0) then
-    FOturumID := ULog.OturumBaslat('CEKLER', CekID,
+    FOturumID := ULog.OturumBaslatPlan('CEKLER', CekID,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'CEKLER',     'ID=' + IntToStr(CekID)),
         ULog.SnapTablo(2, 'CEKHAREKET', 'CEKSENETLERID=' + IntToStr(CekID)),
         ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + IntToStr(CekID)),
@@ -827,6 +830,7 @@ end;
 procedure TCekWizardDlg.HareketiSil1Click(Sender: TObject);
 var Islem : Smallint;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: cek hareketi silme -> yakala
   if TabCekHareketler.FieldByName('GERIDONUSID').Value=Null then begin
     ShowMessage(CCek_kayit_silinemez_ceki_sil);
     Abort;
@@ -922,11 +926,13 @@ end;
 
 procedure TCekWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
 procedure TCekWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -939,6 +945,7 @@ end;
 
 procedure TCekWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(TabloNo, TabCekler.FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1105,6 +1112,7 @@ end;
 
 procedure TCekWizardDlg.TabCeklerBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: cek ilk degisikligi -> yakala
   if LogGun >0 then
    Tablo.OncekiLogBelirle(TabCekler);
 end;
@@ -1113,6 +1121,7 @@ procedure TCekWizardDlg.TabCeklerBeforePost(DataSet: TDataSet);
 var s : string[50];
     i : smallint;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: cek post -> yakala
   BoslukKontrolu;
 
    //Daha ?nce eklendi kontrol? yapal?m
@@ -1202,7 +1211,7 @@ end;
 procedure TCekWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-  if FOturumID <> '' then
+  if ULog.OturumYakalandiMi(FOturumID) or ((TabCekler.State in [dsEdit, dsInsert]) and TabCekler.Modified) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
