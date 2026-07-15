@@ -645,6 +645,7 @@ end;
 
 procedure TServisWizardDlg.BtnBelgelerSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: belge silme -> yakala
   if (not TabServisBelge.IsEmpty)and(Application.MessageBox(PChar(SSilmeSorusu),PChar(SGenotipOnay), MB_YESNO) = IDYES) then begin
     case TabServisBelge.FieldByName('TUR').AsInteger of
       80:Tablo.TeklifSil(TabServisBelge.FieldByName('ID').AsInteger);
@@ -733,6 +734,7 @@ end;
 
 procedure TServisWizardDlg.GenelSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: genel silme -> yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
 //     if islemOp='D' then
 //        Tablo.LogIslemleri(DatasetinTabNosunuBul(TabServisUygulama),(TabServisUygulama.FieldByName('ID').AsInteger),5,TabServisUygulama);
@@ -954,11 +956,13 @@ end;
 
 procedure TServisWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
   Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
 procedure TServisWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -983,6 +987,7 @@ end;
 
 procedure TServisWizardDlg.btnEkipmanDetaySilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ekipman detay silme -> yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDNO then
      Abort
 end;
@@ -1005,6 +1010,7 @@ end;
 
 procedure TServisWizardDlg.BtnHareketlerSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: hareket silme -> yakala
   TabHareketler.FetchAll;
   if TabHareketler.RecNo = TabHareketler.RecordCount then
      if not TabYorum.IsEmpty then begin
@@ -1173,6 +1179,7 @@ end;
 
 procedure TServisWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger, TabServis.FieldByName('REHBERID').AsInteger,TabYorum);
 end;
 
@@ -1324,7 +1331,7 @@ procedure TServisWizardDlg.FormCloseQuery(Sender: TObject;  var CanClose: Boolea
 var Ciksin : Boolean;
 begin
   Ciksin := True;
-  if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and((TabServis.State in [dsEdit, dsInsert]) or (FOturumID<>''))))then //
+  if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(((TabServis.State in [dsEdit, dsInsert]) and TabServis.Modified) or ULog.OturumYakalandiMi(FOturumID))))then //
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
      IDYES : begin
               //Ciksin := False;
@@ -1557,7 +1564,7 @@ begin
   // GOREVYORUM servis HAREKET'ine bagli (TUR=SERVISHAREKET, GOREVID in hareket ids).
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('SERVIS', TabServis.FieldByName('ID').AsInteger,
+    FOturumID := ULog.OturumBaslatPlan('SERVIS', TabServis.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'SERVIS',              'ID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISDETAY',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISBILGI',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
@@ -2001,12 +2008,14 @@ end;
 
 procedure TServisWizardDlg.TabEkipmanDetayBeforeDelete(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ekipman/detay silme -> yakala
   if islemOp='D' then
      LogKartSil(DataSet, DataSet.Tag, (DataSet as TFDQuery).FieldByName('ID').AsInteger);
 end;
 
 procedure TServisWizardDlg.TabEkipmanDetayBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ekipman/detay duzenleme -> yakala
   if LogGun >0 then
      Tablo.OncekiLogBelirle(DataSet);
 end;
@@ -2250,6 +2259,7 @@ end;
 
 procedure TServisWizardDlg.TabServisBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: servis ilk degisikligi -> yakala
 //  OncekiKdvDurumu := TabServis.FieldByName('KDVDURUM').AsString;
   if LogGun >0  then
      Tablo.OncekiLogBelirle(TabServis);
@@ -2277,6 +2287,7 @@ end;
 
 procedure TServisWizardDlg.TabServisBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: servis/detay post -> yakala
   EkleyenDegistiren(TabServis);
 end;
 
@@ -2528,6 +2539,7 @@ end;
 
 procedure TServisWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
    Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabNo_SERVISHAREKET);
    //Tabloyenile(TabYorum,[TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger]);
    TabHareketlerAfterScroll( TabHareketler);
@@ -2540,6 +2552,7 @@ end;
 
 procedure TServisWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
    if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
        Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
        Tabloyenile(TabYorum,[TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger]);
@@ -2548,6 +2561,7 @@ end;
 
 procedure TServisWizardDlg.YorumEkleTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum ekleme -> yakala
    YorumEkleIslemi(TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger, TabYorum);
    //Tabloyenile(TabYorum,[TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger]);
    TabHareketlerAfterScroll( TabHareketler);
@@ -2555,6 +2569,7 @@ end;
 
 procedure TServisWizardDlg.YorumSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(TabNo_SERVISHAREKET, TabHareketler.FieldByName('ID').AsInteger, TabYorum);
 end;
 

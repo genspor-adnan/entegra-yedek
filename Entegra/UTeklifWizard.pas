@@ -764,6 +764,7 @@ end;
 
 procedure TTeklifWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Teklif);
 end;
 
@@ -1017,11 +1018,13 @@ end;
 
 procedure TTeklifWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
 procedure TTeklifWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -1098,6 +1101,7 @@ end;
 
 procedure TTeklifWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(Tabno_teklif,TabTeklif .FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1200,6 +1204,7 @@ end;
 
 procedure TTeklifWizardDlg.FinSilTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: finansal/plan silme -> yakala
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) <> ID_OK then
     Abort;
   TabFinansal.Delete;
@@ -1276,7 +1281,7 @@ procedure TTeklifWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or((IslemOp='D')and(BtnKaydetTus.Visible or (FOturumID<>'')))) then
+   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or((IslemOp='D')and(BtnKaydetTus.Visible or ULog.OturumYakalandiMi(FOturumID) or ((TabTeklif.State in [dsEdit,dsInsert]) and TabTeklif.Modified)))) then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1577,7 +1582,7 @@ begin
   // ilk hale don. IMAJ(blob)+DOKUMAN kapsam disi. (TEKLIF + TEKLIFDETAY + yorum.)
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('TEKLIF', TabTeklif.FieldByName('ID').AsInteger,
+    FOturumID := ULog.OturumBaslatPlan('TEKLIF', TabTeklif.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'TEKLIF',         'ID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFDETAY',    'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFFINANSAL', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
@@ -1849,6 +1854,7 @@ end;
 
 procedure TTeklifWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum,[Tabno_teklif,tabteklif.FieldByName('ID').AsInteger]);
@@ -1995,6 +2001,7 @@ end;
 
 procedure TTeklifWizardDlg.SatirSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
   if Kilit then begin
      Application.MessageBox(PChar(Butarihoncesiislemyapilmaz),PChar(Uyari),0);
      Abort
@@ -2055,6 +2062,7 @@ end;
 
 procedure TTeklifWizardDlg.TabTeklifBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: teklif ilk degisikligi -> yakala
   OncekiKDVDurumu := TabTeklif.FieldByName('KDVDURUM').AsString;
   OncekiDurum := TabTeklif.FieldByName('DURUM').AsInteger;
   OncekiSubeId := TabTeklif.FieldByName('SUBEID').AsInteger;
@@ -2067,6 +2075,7 @@ var
   Aciklama:Variant;
   RehID:Integer;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: teklif post -> yakala
   BoslukKontrolu;
   if TabTeklif.FieldByName('TEKLIF_DOVIZI').AsString='' then
      TabTeklif.FieldByName('TEKLIF_DOVIZI').AsString:=CariDoviz;
@@ -2144,6 +2153,7 @@ var
                 Tablo.KusuratAyarla(OndalikDijitSayTut,TabTeklifDetay.FieldByName('ADET').Value*TabTeklifDetay.FieldByName('BIRIMFIYAT').AsExtended));
   end;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: teklif satiri post -> yakala
   if TabTeklifDetay.FindField('TEKLIFID') <> nil then
     TabTeklifDetay.FieldByName('TEKLIFID').AsInteger := TabTeklif.FieldByName('ID').AsInteger;
 
@@ -2275,6 +2285,7 @@ end;
 
 procedure TTeklifWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, tabno_Teklif, tabTeklif.FieldByName('ID').AsInteger,tabTeklif.FieldByName('REHBERID').AsInteger, TabYorum);
 end;
 
