@@ -214,6 +214,7 @@ end;
 
 procedure TEkipmanWizardDlg.IcerikSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: icerik/detay silme -> yakala
   TabEkipmanDetay.Delete;
 end;
 
@@ -239,6 +240,7 @@ end;
 
 procedure TEkipmanWizardDlg.BelgeSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: belge silme -> yakala
   if TabBelge.RecordCount>0 then
     Tablo.BelgeSil(TabBelge);
 end;
@@ -443,7 +445,7 @@ begin
    // ilk hale don. TabBelge(belge/blob) kapsam disi.
    FOturumID := '';
    if IslemOp = 'D' then
-     FOturumID := ULog.OturumBaslat('EKIPMANLAR', TabEkipman.FieldByName('ID').AsInteger,
+     FOturumID := ULog.OturumBaslatPlan('EKIPMANLAR', TabEkipman.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
        [ ULog.SnapTablo(1, 'EKIPMANLAR',   'ID=' + TabEkipman.FieldByName('ID').AsString),
          ULog.SnapTablo(2, 'EKIPMANDETAY', 'USTEKIPMANID=' + TabEkipman.FieldByName('ID').AsString),
          ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(TabNo_EKIPMAN) + ' and YER_ID=' + TabEkipman.FieldByName('ID').AsString) ]);
@@ -581,6 +583,7 @@ end;
 
 procedure TEkipmanWizardDlg.TabEkipmanBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ekipman ilk degisikligi -> yakala
   LogBelge.Clear;
   if LogGun > 0 then begin
    Tablo.OncekiLogBelirle(TabEkipman);
@@ -589,6 +592,7 @@ end;
 
 procedure TEkipmanWizardDlg.TabEkipmanBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ekipman/detay post -> yakala
   EkleyenDegistiren(DataSet);
 end;
 
@@ -666,7 +670,7 @@ end;
 procedure TEkipmanWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-  if FOturumID <> '' then
+  if ULog.OturumYakalandiMi(FOturumID) or ((TabEkipman.State in [dsEdit, dsInsert]) and TabEkipman.Modified) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don

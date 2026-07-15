@@ -568,12 +568,14 @@ end;
 
 procedure TDokumanWizard.SilBildirimTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: bildirim silme -> yakala
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay),MB_YESNO) = IDYES then
       TabAbone.Delete;
 end;
 
 procedure TDokumanWizard.SilIlgiliTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilgili silme -> yakala
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANILGILI where DOKUMANID='+TabDokuman.Fields[0].AsString+ ' and DOKUMANILGILIID='+ TabIlgili.Fields[0].AsString,[],[]);
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANILGILI where DOKUMANID='+ TabIlgili.Fields[0].AsString + ' and DOKUMANILGILIID='+TabDokuman.Fields[0].AsString,[],[]);
    TabIlgili.Close;
@@ -590,6 +592,7 @@ procedure TDokumanWizard.SilTusClick(Sender: TObject);
 var
    I,ID,Surum:Integer;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: silme -> yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay),MB_YESNO) = IDYES then begin
     for I := GridRevizeView.Controller.SelectedRecordCount -1  downto 0 do begin
       ID:=GridRevizeView.Controller.SelectedRecords[i].Values[GridRevizeViewID.Index];
@@ -809,7 +812,7 @@ begin
   // link tablosu -orn. DOKUMANILGILI composite- otomatik atlanir; o alt kayit undo edilmez).
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('DOKUMAN', DokumanID,
+    FOturumID := ULog.OturumBaslatPlan('DOKUMAN', DokumanID,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'DOKUMAN',         'ID=' + IntToStr(DokumanID)),
         ULog.SnapTablo(2, 'DOKUMANILGILI',   'DOKUMANID=' + IntToStr(DokumanID)),
         ULog.SnapTablo(2, 'DOKUMANBILDIRIM', 'DOKUMANID=' + IntToStr(DokumanID)),
@@ -1029,7 +1032,7 @@ end;
 procedure TDokumanWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
    // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-   if FOturumID <> '' then
+   if ULog.OturumYakalandiMi(FOturumID) or ((TabDokuman.State in [dsEdit, dsInsert]) and TabDokuman.Modified) then
      case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
        IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
@@ -1294,6 +1297,7 @@ begin
 
 procedure TDokumanWizard.YetkiSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yetki silme -> yakala
 { if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay),MB_YESNO) = IDYES then begin
    case tabyetki.FieldByName('TUR').AsInteger of
     1: if tabyetki.FieldByName('REHBERID').AsInteger = tabDokuman.FieldByName('EKLEYEN').AsInteger then
@@ -1332,6 +1336,7 @@ end;
 
 procedure TDokumanWizard.TabDokumanBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: dokuman post -> yakala
    BoslukKontrolu;
    TabDokuman.FieldByName('DEGISTIREN').AsString := Kullanan;
    TabDokuman.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
@@ -1340,6 +1345,7 @@ end;
 
 procedure TDokumanWizard.TabDokumanBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: dokuman ilk degisikligi -> yakala
    if LogGun > 0 then
       Tablo.OncekiLogBelirle(TabDokuman);
 end;
@@ -1390,6 +1396,7 @@ end;
 
 procedure TDokumanWizard.TabSozlesmeBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: sozlesme detay post -> yakala
    if TabSozlesme.FieldByName('BITIS_TARIHI').AsDateTime < TabSozlesme.FieldByName('BASLAMA_TARIHI').AsDateTime then begin
       ShowMessage(GWBitTarihKucukSecilemez);
       abort;
@@ -1420,6 +1427,7 @@ end;
 
 procedure TDokumanWizard.TabYetkiBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yetki detay duzenleme -> yakala
    if (tabyetki.FieldByName('TUR').AsInteger=1)and //kişisel
       (tabyetki.FieldByName('REHBERID').AsInteger = tabDokuman.FieldByName('EKLEYEN').AsInteger) then begin //ve ekleyense
        showmessage('Doküman ekleyen yetkisi değişemez!');
