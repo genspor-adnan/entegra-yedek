@@ -167,6 +167,12 @@ function OturumBaslat(const AAnaTabloAdi: string; AAnaID: Int64;
 procedure OturumGeriAl(const AOturum: string);
 // Finish: oturum snapshot'ini sil (kayit kalici oldu, geri-alma gerekmez).
 procedure OturumBitir(const AOturum: string);
+// LAZY oturum: OturumBaslatPlan sadece PLANI yazar (ucuz, bakmada is YOK); ilk gercek
+// degisiklikte OturumYakala veriyi yakalar. Hic degismezse OturumYakalandiMi=False ->
+// konfirmasyon + geri-yukleme YOK. Eager OturumBaslat da yakalanmis sayilir (basta capture eder).
+function OturumBaslatPlan(const AAnaTabloAdi: string; AAnaID: Int64; const ATablolar: array of TSnapshotTablo): string;
+procedure OturumYakala(const AOturum: string);
+function OturumYakalandiMi(const AOturum: string): Boolean;
 // Config yardimcisi: tek TSnapshotTablo uretir (OturumBaslat cagrilarini sadelestirir).
 function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string): TSnapshotTablo;
 
@@ -1489,6 +1495,22 @@ begin
   Result.Filtre := AFiltre;
 end;
 
+// LAZY oturum: VERISI YAKALANMIS oturum ID'leri (in-memory, tek proses). Eager OturumBaslat da
+// ekler (basta capture eder); OturumBaslatPlan EKLEMEZ; OturumYakala ilk degisiklikte ekler.
+// OturumGeriAl bu listede YOKSA geri-yukleme YAPMAZ (bos snapshot'la "eklenenleri sil" = tum veri
+// silinirdi -> FELAKET onlenir). OturumBitir kapanista listeden cikarir.
+type
+  TOturumPlanKaydi = record
+    AnaTabloAdi: string;
+    AnaID: Int64;
+    Tablolar: array of TSnapshotTablo;
+  end;
+var
+  FYakalanmisOturumlar: TStringList = nil;
+  // LAZY: plan (tablo/filtre/sira) DB'ye DEGIL BELLEKTE tutulur -> bakmada SNAPSHOT tamamen BOS.
+  // Ilk gercek degisiklikte OturumYakala plani+veriyi DB'ye yazar ve bellekten cikarir.
+  FOturumPlanlari: TDictionary<string, TOturumPlanKaydi> = nil;
+
 procedure OturumBitir(const AOturum: string);
 var
   LQ, LRelQ: TFDQuery;
@@ -1546,6 +1568,12 @@ begin
   finally
     LQ.Free;
   end;
+  if FYakalanmisOturumlar <> nil then
+  begin
+    var LIdx := FYakalanmisOturumlar.IndexOf(AOturum);
+    if LIdx >= 0 then FYakalanmisOturumlar.Delete(LIdx);
+  end;
+  if FOturumPlanlari <> nil then FOturumPlanlari.Remove(AOturum);   // yakalanmamis oturumun bellek plani
 end;
 
 function OturumBaslat(const AAnaTabloAdi: string; AAnaID: Int64;
@@ -1637,6 +1665,115 @@ begin
     LRowQ.Free;
     LInsQ.Free;
   end;
+  // Eager oturum: basta capture edildi -> YAKALANMIS isaretle (OturumGeriAl calisabilsin).
+  if FYakalanmisOturumlar = nil then FYakalanmisOturumlar := TStringList.Create;
+  FYakalanmisOturumlar.Add(Result);
+end;
+
+// ==================== LAZY OTURUM (copy-on-write) ====================
+function OturumYakalandiMi(const AOturum: string): Boolean;
+begin
+  Result := (AOturum <> '') and (FYakalanmisOturumlar <> nil) and (FYakalanmisOturumlar.IndexOf(AOturum) >= 0);
+end;
+
+// Sadece PLANI (kapsam satirlari) yazar - VERI/pin YOK. Ucuz: bakmada is yapilmaz. FOturumID doner
+// (armed). Ilk gercek degisiklikte OturumYakala cagrilmali (yoksa iptalde geri-yukleme OLMAZ).
+function OturumBaslatPlan(const AAnaTabloAdi: string; AAnaID: Int64;
+  const ATablolar: array of TSnapshotTablo): string;
+var
+  LGuid: TGUID;
+  LKayit: TOturumPlanKaydi;
+  i: Integer;
+begin
+  CreateGUID(LGuid);
+  Result := Copy(GUIDToString(LGuid), 2, 36);
+  // Plani SADECE BELLEGE al -> DB'ye HICBIR SEY yazilmaz (bakmada SNAPSHOT bos). Ilk gercek
+  // degisiklikte OturumYakala bu plani okuyup plan+veriyi DB'ye yazar.
+  LKayit.AnaTabloAdi := AAnaTabloAdi;
+  LKayit.AnaID := AAnaID;
+  SetLength(LKayit.Tablolar, Length(ATablolar));
+  for i := 0 to High(ATablolar) do
+    LKayit.Tablolar[i] := ATablolar[i];
+  if FOturumPlanlari = nil then FOturumPlanlari := TDictionary<string, TOturumPlanKaydi>.Create;
+  FOturumPlanlari.AddOrSetValue(Result, LKayit);
+end;
+
+// Ilk gercek degisiklikte (before edit/insert/delete) plan tablolarinin O ANKI halini yakalar
+// (+ DOSYA pin). Idempotent - HER degisiklik noktasindan guvenle cagrilabilir; sonraki cagrilar
+// hizli cikar. Yakalamadan once "yakalandi" isaretler (yakalarken tekrar tetikleme -> no-op).
+procedure OturumYakala(const AOturum: string);
+var
+  LKayit: TOturumPlanKaydi;
+  LRowQ, LInsQ: TFDQuery;
+  LJson: string;
+  j, p: Integer;
+  LK: TLogKurucu;
+  LDFld: TField;
+begin
+  if (AOturum = '') or OturumYakalandiMi(AOturum) then Exit;
+  // Plan BELLEKTE (OturumBaslatPlan koydu). Yoksa armed degil -> hicbir sey yapma.
+  if (FOturumPlanlari = nil) or (not FOturumPlanlari.TryGetValue(AOturum, LKayit)) then Exit;
+  if FYakalanmisOturumlar = nil then FYakalanmisOturumlar := TStringList.Create;
+  FYakalanmisOturumlar.Add(AOturum);   // hemen isaretle (yakalarken tekrar tetiklenmesin)
+
+  LRowQ := TFDQuery.Create(nil);
+  LInsQ := TFDQuery.Create(nil);
+  try
+    LRowQ.Connection := Tablo.FDCnn;
+    LInsQ.Connection := Tablo.FDCnn;
+    LInsQ.SQL.Text := 'INSERT INTO ' + DepoTablo('SNAPSHOT') +
+      '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) VALUES(:O,:AT,:AI,:S,:T,:F,:K,:J)';
+    LInsQ.ParamByName('K').DataType := ftLargeint;
+    LInsQ.ParamByName('J').DataType := ftWideMemo;
+    for p := 0 to High(LKayit.Tablolar) do
+    begin
+      try
+        LRowQ.SQL.Text := 'SELECT * FROM ' + LKayit.Tablolar[p].TabloAdi + ' WHERE ' + LKayit.Tablolar[p].Filtre;
+        LRowQ.Open;
+        while not LRowQ.Eof do
+        begin
+          LK := TLogKurucu.Yeni;
+          try
+            for j := 0 to LRowQ.FieldCount - 1 do
+              if (LRowQ.Fields[j].FieldKind = fkData) and (LRowQ.Fields[j].DataType <> ftBlob) then
+                LK.Deger(LRowQ.Fields[j].FieldName, LRowQ.Fields[j].AsString);
+            LJson := LK.JSON;
+          finally
+            LK.Free;
+          end;
+          LInsQ.ParamByName('O').AsString := AOturum;
+          LInsQ.ParamByName('AT').AsString := LKayit.AnaTabloAdi;
+          LInsQ.ParamByName('AI').AsLargeInt := LKayit.AnaID;
+          LInsQ.ParamByName('S').AsInteger := LKayit.Tablolar[p].Sira;
+          LInsQ.ParamByName('T').AsString := LKayit.Tablolar[p].TabloAdi;
+          LInsQ.ParamByName('F').AsString := LKayit.Tablolar[p].Filtre;
+          LInsQ.ParamByName('K').AsLargeInt := LRowQ.FieldByName('ID').AsLargeInt;
+          LInsQ.ParamByName('J').AsWideMemo := LJson;
+          LInsQ.ExecSQL;
+          LDFld := LRowQ.FindField('DOSYAID');
+          if (LDFld <> nil) and (LDFld.AsLargeInt > 0) then DosyaReferansArtir(LDFld.AsLargeInt);
+          LRowQ.Next;
+        end;
+        LRowQ.Close;
+        // Kapsam satiri (KAYITID NULL) - "eklenen satirlari sil" adimi icin (lazy'de burada yazilir).
+        LInsQ.ParamByName('O').AsString := AOturum;
+        LInsQ.ParamByName('AT').AsString := LKayit.AnaTabloAdi;
+        LInsQ.ParamByName('AI').AsLargeInt := LKayit.AnaID;
+        LInsQ.ParamByName('S').AsInteger := LKayit.Tablolar[p].Sira;
+        LInsQ.ParamByName('T').AsString := LKayit.Tablolar[p].TabloAdi;
+        LInsQ.ParamByName('F').AsString := LKayit.Tablolar[p].Filtre;
+        LInsQ.ParamByName('K').Clear;
+        LInsQ.ParamByName('J').Clear;
+        LInsQ.ExecSQL;
+      except
+        try if LRowQ.Active then LRowQ.Close; except end;   // bu tabloyu atla, devam
+      end;
+    end;
+  finally
+    LRowQ.Free;
+    LInsQ.Free;
+  end;
+  if FOturumPlanlari <> nil then FOturumPlanlari.Remove(AOturum);   // plan artik DB'de -> bellekten cikar
 end;
 
 // Snapshot satirini geri yazar: kayit VARSA UPDATE (SILMEZ -> dis FK guvenli), YOKSA INSERT
@@ -1746,6 +1883,13 @@ var
   LPlanQ, LDataQ, LDelQ: TFDQuery;
   LSnap, LErr: string;
 begin
+  // FAIL-SAFE: oturum YAKALANMADIYSA (lazy plan var ama hic degisiklik olmadi) geri-yukleme YAPMA.
+  // Veri satiri yok -> "eklenenleri sil" (ID NOT IN bos) TUM veriyi silerdi. Sadece plani temizle.
+  if not OturumYakalandiMi(AOturum) then
+  begin
+    OturumBitir(AOturum);
+    Exit;
+  end;
   LSnap := DepoTablo('SNAPSHOT');
   LPlanQ := TFDQuery.Create(nil);
   LDataQ := TFDQuery.Create(nil);

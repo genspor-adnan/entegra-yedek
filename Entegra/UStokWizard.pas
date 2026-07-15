@@ -742,6 +742,7 @@ var
 
 procedure TStokWizardDlg.FiyatEkleTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: fiyat ekleme -> yakala
    if TabStok.State = dsInsert then begin
       TabStok.Post;
       StokID := TabStok.FieldByName('ID').AsInteger;
@@ -769,6 +770,7 @@ end;
 
 procedure TStokWizardDlg.FiyatSilTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: fiyat silme -> yakala
    TabFiyat.delete;
 end;
 
@@ -814,6 +816,7 @@ var
   Brkd,Brm: Variant;
   Varsayilanmi:integer;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: barkod ekleme -> yakala
   Brkd := 0;
   Brm := TabStok.FieldByName('ANABIRIM').AsInteger;
   ctrls := TGirdiDenetimleri.Create.ImageComboBox('Barkod Tipi Seçimi',@Brkd,Tablo.FDCnn,'select 0,''Kullanıcı'' union all select ID,AD from BARKODAYARLAR ')
@@ -871,6 +874,7 @@ end;
 
 procedure TStokWizardDlg.BarkodSilTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: barkod silme -> yakala
   TabBarkod.Delete;
 end;
 
@@ -891,6 +895,7 @@ end;
 
 procedure TStokWizardDlg.BtnKotaSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: kota silme -> yakala
   TabKota.Delete;
 end;
 
@@ -906,6 +911,7 @@ end;
 
 procedure TStokWizardDlg.BtnSilPaketKartClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: paket kart silme -> yakala
   if (TabPaketKartlar.RecordCount>1) and (TabPaketKartlar.FieldbyName('URUNID').AsInteger<>TabStok.FieldbyName('ID').AsInteger)then begin
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM PAKETDETAY WHERE PAKETID=&StokID and URUNID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM STOKFIYAT WHERE PAKETID=&StokID and STOKID=&KartID ',['&StokID','&KartID'],[StokID,TabPaketKartlar.FieldByName('URUNID').AsInteger]);
@@ -1223,6 +1229,7 @@ end;
 
 procedure TStokWizardDlg.BtnStkKtgrSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: stok kategori silme -> yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
     if not Veritabani.VeriVarMi(Tablo.FDCnn,'select ID from STOKBOYUTHAREKET where STOKBOYUTKOMBINASYONID=&SBKID',['&SBKID'],[TabStokBoyut.FieldByName('ID').AsInteger]) then
       TabStokBoyut.Delete
@@ -1362,6 +1369,7 @@ end;
 
 procedure TStokWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(Tabno_Stoklar,TabStok .FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1372,6 +1380,7 @@ end;
 
 procedure TStokWizardDlg.BtnDokumanClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
    WizardKontrol.ActivePage := DokumanEkr;
 end;
 
@@ -1459,6 +1468,7 @@ end;
 
 procedure TStokWizardDlg.cxDBImage1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: resim sihirbazi = degisiklik olabilir -> yakala
    if TabStok.State in [dsEdit, dsInsert] then
       TabStok.Post;
    Tablo.ResimSihirbazBaslat(Tabno_Stoklar, TabStok.Fields[0].AsInteger);
@@ -1629,6 +1639,7 @@ procedure TStokWizardDlg.EkleStokEsdegerClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: esdeger ekleme -> yakala
   sql:=' SELECT '+DbUst(100)+'S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],TIPI AS [Tip],MARKA AS Marka,'+
   ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ızleme] '+
   ' FROM STOKLAR S '+
@@ -1663,6 +1674,7 @@ procedure TStokWizardDlg.EkstraEkleTusClick(Sender: TObject);
 var st : Tstringlist;
   sql,Tipi:string;
 begin
+    ULog.OturumYakala(FOturumID);   // LAZY: ekstra/secim ekleme -> yakala
     sql := ' select ID,TIPI=case when TUR=1 then ''Tek'' else ''çok'' end, SECIMADI from SECIMLER where BAGID=0 and SECIMADI like ''<ara>%''  order by 2,3 ';
     st := Tstringlist.create;
       if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
@@ -1694,6 +1706,7 @@ end;
 
 procedure TStokWizardDlg.EkstraSilTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: ekstra silme -> yakala
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) <> ID_OK then
      Abort;
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKSECIM where STOKID=&ID and SECIMID=&SECIMID',['&ID','&SECIMID'],[StokId, TabSecim.FieldByName('SECIMID').AsInteger]);
@@ -1741,10 +1754,10 @@ begin
     if Sontus = 'I' then
     begin
       if TabStok.State in [dsEdit, dsInsert] then TabStok.Cancel;
-      ULog.OturumGeriAl(FOturumID);
-      // STOKLAR.RESIM (LogoResim kaynagi) bir blob -> snapshot'lanmaz; iptalde IMAJ geri gelse de
-      // bayat/bos kalir. Varsayilan IMAJ'dan RESIM cache'ini yeniden uret ki LogoResim dogru olsun.
-      VarsayilanResimTazele(TabNo_STOKLAR, StokID);
+      var LDegisti := ULog.OturumYakalandiMi(FOturumID);   // geri-yukleme ONCE (OturumGeriAl temizler)
+      ULog.OturumGeriAl(FOturumID);   // LAZY: yakalanmadiysa no-op (sadece plan temizlenir)
+      // STOKLAR.RESIM (LogoResim kaynagi) blob -> snapshot'lanmaz; degisiklik olduysa RESIM cache'i tazele.
+      if LDegisti then VarsayilanResimTazele(TabNo_STOKLAR, StokID);
     end
     else
       ULog.OturumBitir(FOturumID);
@@ -1981,7 +1994,7 @@ begin
   // ID PK'si olmayan tablo otomatik atlanir (acilis bozulmaz).
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('STOKLAR', StokID,
+    FOturumID := ULog.OturumBaslatPlan('STOKLAR', StokID,   // LAZY: plan bellekte, bakmada SNAPSHOT bos
       [ ULog.SnapTablo(1, 'STOKLAR',              'ID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'STOKFIYAT',            'STOKID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'ISORTAGI',             'STOKID=' + IntToStr(StokID)),
@@ -2211,6 +2224,7 @@ end;
 
 procedure TStokWizardDlg.JvDragDrop1Drop(Sender: TObject; Pos: TPoint;  Value: TStrings);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: kampanya ekleme -> yakala
    labelFileName.Visible := True;
    labelFileName.Caption := ExtractFileName(Value.Strings[0]);
    labelFileName.Hint := Value.Strings[0];
@@ -2243,6 +2257,7 @@ end;
 
 procedure TStokWizardDlg.KampanyaSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: kampanya silme -> yakala
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from KAMPANYAURUN Where KAMPANYAID='+TabKampanya.FieldByName('ID').AsString+' and URUNID='+IntToStr(StokID)+' ',[],[]);
   TabloYenile(TabKampanya,[StokID]);
 end;
@@ -2420,11 +2435,13 @@ end;
 
 procedure TStokWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
   Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
 procedure TStokWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -2505,6 +2522,7 @@ end;
 
 procedure TStokWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
    if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
        Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
        Tabloyenile(TabYorum,[Tabno_Stoklar,tabstok.FieldByName('ID').AsInteger]);
@@ -2805,6 +2823,7 @@ end;
 
 procedure TStokWizardDlg.TabStokBeforeEdit(DataSet: TDataSet);
 begin
+ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek alan degisikliginde snapshot'i yakala
 if LogGun >0 then begin
    Tablo.OncekiLogBelirle(TabStok);
    if Assigned(FKartSnap) then begin
@@ -2841,6 +2860,7 @@ end;
 
 procedure TStokWizardDlg.TabStokBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ana kart post -> snapshot'i yakala
   if not BoslukKontrol(EditKOD.text, KontrolStokKodu) then Abort;
 
   if EditKOD.Text='0' then begin
@@ -2887,6 +2907,7 @@ end;
 
 procedure TStokWizardDlg.TabStokEsdegerBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: esdeger detay degisikligi -> yakala
   EkleyenDegistiren(DtsStokEsdeger);
 end;
 
@@ -2937,6 +2958,7 @@ end;
 
 procedure TStokWizardDlg.TabStokBoyutBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: boyut detay degisikligi -> yakala
   EkleyenDegistiren(DataSet);
 end;
 
@@ -3185,7 +3207,8 @@ procedure TStokWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
    // Iptal onayi (UFaturaWizard deseni): "Gentegre Onay / Yapilan islemleri kaydetmek
    // ister misiniz?" Evet=Kaydet(finish), Hayir=Kaydetme(geri al), Iptal=Geri Don(kalma).
-   if FOturumID <> '' then
+   // LAZY: konfirmasyon SADECE gercek degisiklik yakalandiysa (veya post-edilmemis buffer degisikligi).
+   if ULog.OturumYakalandiMi(FOturumID) or ((TabStok.State in [dsEdit, dsInsert]) and TabStok.Modified) then
      case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES:    begin
                    ModalResult := mrNone;                  // finish validasyonu Abort ederse form KALSIN

@@ -1,9 +1,9 @@
-﻿unit URehberWizard;
+﻿unit  URehberWizard;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,  Messages, SysUtils,  Variants, Classes, Graphics, Controls, Forms,
   Dialogs, dxSkinsCore, dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics,
   cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, cxGridLevel, cxClasses,
   cxControls, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
@@ -271,6 +271,7 @@ type
     procedure GridTicariViewEditChanged(Sender: TcxCustomGridTableView;
       AItem: TcxCustomGridTableItem);
     procedure TabRehberBeforeEdit(DataSet: TDataSet);
+    procedure DtsRehberDataChange(Sender: TObject; Field: TField);   // LAZY: ana kart alan degisimi -> OturumYakala
     procedure TabRehberAfterPost(DataSet: TDataSet);
     procedure TabRehberAfterScroll(DataSet: TDataSet);
     procedure GridKurIletViewCellClick(Sender: TcxCustomGridTableView;
@@ -423,6 +424,7 @@ end;
 
 procedure TRehberWizardDlg.AdresSilTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: silme = degisiklik -> snapshot'i yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO)
     = IDYES then
   begin
@@ -598,6 +600,8 @@ end;
 
 procedure TRehberWizardDlg.EditSektorPropertiesEditValueChanged(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: UI-only ButtonEdit (DB-bound degil, TabRehber.Modified'e
+                                  // yansimaz, BeforePost'ta senklenir) -> degisince snapshot'i yakala
   EditAltSektor.Enabled := EditSektor.Text<>'';
   LabelAltSektor.Enabled := EditAltSektor.Enabled;
 end;
@@ -909,7 +913,8 @@ begin
   begin
     RehberPerID := -11;
     TabloYenile(TabRehber, [RehberID]);
-    TabRehber.Edit;
+    // LAZY: kart dsBrowse ACILIR (Edit KALDIRILDI). Ilk gercek alan degisikliginde AutoEdit ->
+    // TabRehberBeforeEdit -> OturumYakala yakalar. Sadece bakma/sayfa gezme YAKALAMAZ, konfirmasyon sormaz.
     if TabRehber.FieldByName('SEKTOR').AsString <> '' then begin
         Tablo. TablodanSorguAc(1, 'Select '+DbUst(1)+'ANAHTAR from GENINI where DIL=' + IntToStr(Dil) +
           ' AND  BOLUM=' + IntToStr(Ops_CariKart_Sektor) + ' and DEGER=' + TabRehber.FieldByName('SEKTOR').AsString + ' '+DbSinir(1));
@@ -958,7 +963,9 @@ begin
   // 2-3=firma dogrudan (YER_ID=REHBER.ID). SIRA: ust once (REHBER<ILETISIM/PERSONEL<BILGI).
   FOturumID := '';
   if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
-    FOturumID := ULog.OturumBaslat('REHBER', RehberID,
+    // LAZY: sadece PLANI yaz (bakmada is YOK). Ilk gercek degisiklikte OturumYakala(FOturumID)
+    // tetiklenir (dataset Before* + Sil butonlari). Hic degismezse konfirmasyon+geri-yukleme YOK.
+    FOturumID := ULog.OturumBaslatPlan('REHBER', RehberID,
       [ // --- Ana cari ---
         ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'IMAJ',           'YERI=71 and YER_ID=' + IntToStr(RehberID)),   // 71=REHBER: profil resmi (LogoResim/RESIM cache); DOSYA icerigi pin ile korunur
@@ -976,6 +983,8 @@ begin
         ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')'),
         ULog.SnapTablo(8, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + ')'),
         ULog.SnapTablo(9, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + '))') ]);
+  // (OnDataChange KALDIRILDI: kart artik dsBrowse acildigi icin ilk degisiklik BeforeEdit'i tetikler;
+  //  OnDataChange navigasyonda over-tetikliyordu. DtsRehberDataChange metodu kullanilmiyor.)
 
   EkleKurIlet := False;
   EkleTicari := False;
@@ -1589,6 +1598,7 @@ end;
 
 procedure TRehberWizardDlg.LogoResimClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: resim sihirbazi = degisiklik olabilir -> snapshot'i yakala
    if TabRehber.State in [dsEdit, dsInsert] then
       TabRehber.Post;
    Tablo.ResimSihirbazBaslat(Tabno_Rehber,TabRehber.Fields[0].AsInteger);
@@ -1614,11 +1624,13 @@ end;
 
 procedure TRehberWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+ ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya dosya ekleme = degisiklik -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
 procedure TRehberWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme = degisiklik -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -1661,11 +1673,13 @@ end;
 
 procedure TRehberWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: silme = degisiklik -> snapshot'i yakala
    Tablo.GridYorumuSil(TabloNo, TabRehber.FieldByName('ID').AsInteger, TabYorum);
 end;
 
 procedure TRehberWizardDlg.SilPerTusClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: silme = degisiklik -> snapshot'i yakala
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO)= IDYES then begin
       CariIlgiliSil(TabRehber.Fields[0].AsInteger, TabIlgili.Fields[0].AsInteger,TabIlgili.FieldByName('STATU').AsBoolean);
 //      TabIlgili.Close;
@@ -1748,16 +1762,19 @@ end;
 procedure TRehberWizardDlg.YorumDuzenleClick(Sender: TObject);
 begin
    if not YorumDuzenle.Visible then exit;
+   ULog.OturumYakala(FOturumID);   // LAZY: not duzenleme = degisiklik -> snapshot'i yakala
    YorumDuzenleIslemi(TabNotlar, TabRehber.Fields[0].AsInteger);
 end;
 
 procedure TRehberWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme = degisiklik -> snapshot'i yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
 end;
 
 procedure TRehberWizardDlg.YorumEkleTusClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: not/yorum ekleme = degisiklik -> snapshot'i yakala
    if TabRehber.State in [dsEdit, dsInsert] then begin
       TabRehber.Post;
       RehberID := TabRehber.Fields[0].AsInteger;
@@ -1768,6 +1785,7 @@ end;
 
 procedure TRehberWizardDlg.YorumSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: silme = degisiklik -> snapshot'i yakala
    YorumSilIslemi(TabNotlar, TabNotlar.Fields[0].AsInteger);
 end;
 
@@ -1807,6 +1825,7 @@ end;
 
 procedure TRehberWizardDlg.TabIlgiliBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
   TabIlgili.FieldByName('DEGISTIREN').AsString := Kullanan;
   TabIlgili.FieldByName('DEGISTIRMETARIHI').AsDateTime := tablo.GENINI.BugunTrh;
 end;
@@ -1862,6 +1881,7 @@ end;
 // AfterPost'ta edit -> LogIslemleri, yeni satir -> LogKayitEkle. ust=(REHBER, cari ID).
 procedure TRehberWizardDlg.DetayBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
   if LogGun > 0 then Tablo.OncekiLogBelirle(TFDQuery(DataSet));
 end;
 
@@ -1888,8 +1908,18 @@ begin
   TabloYenile(TabSonAktivite, [TabRehber.FieldByName('ID').AsInteger]);
 end;
 
+procedure TRehberWizardDlg.DtsRehberDataChange(Sender: TObject; Field: TField);
+begin
+  // LAZY: TabRehber acilista dsEdit'te oldugu icin alan degisikligi BeforeEdit'i tetiklemez.
+  // OnDataChange her alan degisiminde tetiklenir. Field<>nil = belirli bir alan degisti (navigasyon
+  // degil); dsEdit/dsInsert = gercek duzenleme. Idempotent -> ilk degisiklikte yakalar.
+  if (Field <> nil) and (TabRehber.State in [dsEdit, dsInsert]) then
+    ULog.OturumYakala(FOturumID);
+end;
+
 procedure TRehberWizardDlg.TabRehberBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
   if LogGun > 0 then begin
     tablo.OncekiLogBelirle(TabRehber);
     FKartSnap.Assign(LogOnceki);   // detay logu LogOnceki'yi temizlese de kart diff'i icin sakla
@@ -1904,6 +1934,7 @@ end;
 
 procedure TRehberWizardDlg.TabRehberBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
   BoslukKontrolu;
   TabRehber.FieldByName('DEGISTIREN').AsString := Kullanan;
   TabRehber.FieldByName('DEGISTIRMETARIHI').AsDateTime := tablo.GENINI.BugunTrh;
@@ -1944,6 +1975,7 @@ procedure TRehberWizardDlg.TabTicariBeforePost(DataSet: TDataSet);
 var
   YetkiEk: string;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
   if TabTicari.FieldByName('VARSAYILAN').Value <> null then
     case TabTicari.FieldByName('VARSAYILAN').Value of
       95:
@@ -2036,6 +2068,7 @@ end;
 
 procedure TRehberWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya yorum/mesaj ekleme = degisiklik -> yakala
    Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, TabRehber.FieldByName('ID').AsInteger, TabRehber.FieldByName('ID').AsInteger,TabYorum);
 end;
 
@@ -2089,6 +2122,7 @@ end;
 
 procedure TRehberWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+    ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme = degisiklik -> snapshot'i yakala
     if (TabYorum.RecordCount>0)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
         Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
         Tabloyenile(TabYorum,[TabloNo, TabRehber.FieldByName('ID').AsInteger]);
@@ -2137,8 +2171,13 @@ end;
 procedure TRehberWizardDlg.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
+  // LAZY: D-modda konfirmasyon SADECE gercek degisiklik varsa (sadece bakista sorma).
+  // TabRehber ACILISTA dsEdit'te (load'da Edit); combo/alan degisikligi BeforeEdit'i TEKRAR
+  // tetiklemez -> post olana kadar YAKALANMAZ. Bu yuzden onay icin TabRehber.Modified'i de kontrol
+  // et (post edilmemis buffer degisikligi). Post olan degisiklik zaten OturumYakalandiMi=True.
   if (((Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId))
-      or (FOturumID <> '')) then
+      or ULog.OturumYakalandiMi(FOturumID)
+      or ((TabRehber.State in [dsEdit, dsInsert]) and TabRehber.Modified)) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
@@ -2157,8 +2196,9 @@ begin
   begin
       // DUZENLEME iptali -> ilk hale don (snapshot geri yukle). Bekleyen edit'i iptal et.
       if TabRehber.State in [dsEdit, dsInsert] then TabRehber.Cancel;
-      ULog.OturumGeriAl(FOturumID);
-      VarsayilanResimTazele(71, RehberID);   // 71=REHBER profil RESIM cache'i (blob, snapshot disi) tazele
+      var LDegisti := ULog.OturumYakalandiMi(FOturumID);   // geri-yukleme ONCE (OturumGeriAl temizler)
+      ULog.OturumGeriAl(FOturumID);   // yakalanmadiysa (sadece bakildi) no-op: sadece plan temizlenir
+      if LDegisti then VarsayilanResimTazele(71, RehberID); // RESIM cache'i yalniz degisiklik olduysa tazele
       FOturumID := '';
   end;
   Close;

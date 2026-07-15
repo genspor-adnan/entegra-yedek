@@ -46,7 +46,7 @@ object AnaForm: TAnaForm
         Width = 150
       end
       item
-        Width = 300
+        Width = 460
       end
       item
         Width = 300

@@ -902,6 +902,7 @@ end;
 
 procedure TFaturaWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
    Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
 end;
 
@@ -1164,6 +1165,7 @@ end;
 
 procedure TFaturaWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum,[TabloNo, TabFatbaslik.FieldByName('ID').AsInteger]);
@@ -1251,7 +1253,7 @@ begin
    // D-modda geri-alinabilir oturum aktifse (FOturumID<>'') degisiklik DB'ye islenip
    // KaydetTus disi kalabilir -> onu da kapsa ki iptal onayi ATLANMASIN (cift onay
    // kaldirildigi icin tek onay noktasi burasi).
-   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled or (FOturumID<>''))))then
+   if (IptalSecildi)and((IslemOp='E')or(IslemOp='K')or( (IslemOp='D')and(KaydetTus.enabled or ULog.OturumYakalandiMi(FOturumID) or ((TabFatbaslik.State in [dsEdit,dsInsert]) and TabFatbaslik.Modified))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1833,7 +1835,7 @@ begin
   //   DESC'te FATURA'dan once, geri-ekleme ASC'te FATURA'dan sonra).
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('FATBASLIK', TabFatbaslik.FieldByName('ID').AsInteger,
+    FOturumID := ULog.OturumBaslatPlan('FATBASLIK', TabFatbaslik.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'FATBASLIK',   'ID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'FATURA',      'FATBASID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'REHBERBILGI', 'YERI=' + IntToStr(Tablo.FaturaDetaySablonTipiBul(Tur)) + ' and YER_ID=' + TabFatbaslik.FieldByName('ID').AsString),
@@ -2749,6 +2751,7 @@ end;
 
 procedure TFaturaWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
@@ -2765,6 +2768,7 @@ end;
 
 procedure TFaturaWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -2879,6 +2883,7 @@ end;
 
 procedure TFaturaWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(TabloNo, TabFatbaslik.FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -3257,6 +3262,7 @@ end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi ilk degisikligi -> yakala
    {efat }
 { 01/11/2022 AO satıcı ve özelkod alanlarınınn değişebilmesi için burası iptal edildi
   if not(KilitKaldirildi)and(FATBASLIK.FieldByName('EFATURADURUM').AsInteger in [2, 52]) then begin  //işlem gören fat veya giden e-irs ise işlem yapılamaz
@@ -3281,6 +3287,7 @@ end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
   if (TabFatbaslik.State <> dsInsert)and(cbIrsaliyeli.Checked)and(TabFatbaslik.FieldByName('IRSALIYELI').OldValue<>TabFatbaslik.FieldByName('IRSALIYELI').NewValue) then
       Tablo.BelgeNoIslemleri(TabFatbaslik, Tur, cbIrsaliyeli.Checked);
   BoslukKontrolu;
@@ -3542,6 +3549,7 @@ end;
 
 procedure TFaturaWizardDlg.FATURABeforeDelete(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
 {efat } if not(KilitKaldirildi)and(TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [2,52]) then begin
      ShowMessage(Islemgorenfaturadadegisiklikyapilmaz);
      Abort;
@@ -3595,6 +3603,7 @@ end;
 
 procedure TFaturaWizardDlg.FATURABeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir duzenleme -> yakala
 {efat } if not(KilitKaldirildi)and(TabFatbaslik.FieldByName('EFATURADURUM').AsInteger in [2, 52]) then begin
      ShowMessage(Islemgorenfaturadadegisiklikyapilmaz);
      Abort;
@@ -3656,6 +3665,7 @@ var
   end;
 
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satir ekleme/duzenleme post -> yakala
   // Keep clone dataset closed during post to avoid ODBC trigger/resultset conflicts on the same connection.
   if FATURA.Active then
     FATURA.Close;
@@ -4556,6 +4566,7 @@ end;
 
 procedure TFaturaWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, TabFatbaslik.FieldByName('ID').AsInteger, TabFatbaslik.FieldByName('REHBERID').AsInteger,TabYorum);
 end;
 

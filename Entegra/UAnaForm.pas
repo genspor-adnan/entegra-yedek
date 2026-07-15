@@ -1720,10 +1720,11 @@ begin
   GorevxGunGoster:= Tablo.GENINI.ReadInteger( StrToInt(inttoStr(Ops_GorevXgungoster)+Kullanan),0); //  GorevXgungoster',Kullanan, 0);
 
   StatusBar1.Panels[0].Text := KullanAdi + ' (' + Kullanan + ')';
-  StatusBar1.Panels[1].Text := ServerAdi;
+  // Bilgisayar / DB / DEPO. ServerAdi'ye (yedek onu '/' ile parse ediyor) DOKUNMA -> sadece gosterim.
+  StatusBar1.Panels[1].Text := ServerAdi + ' / ' + ULog.DepoDBAdi;
 
   StatusBar1.Panels[3].Text := 'SPID:' + IntToStr(SPID);
-  StatusBar1.Panels[2].Text := 'Dosya Sürümü: ' + GetFileVersion(Application.ExeName);
+  StatusBar1.Panels[2].Text := 'Ver.: ' + GetFileVersion(Application.ExeName);
   LblSube.Parent := StatusBar1;
   //my.15.05.2025 //SendMessage(StatusBar1.Handle, SB_GETRECT, 4, Integer(@PanelRect));
   SendMessage(StatusBar1.Handle, SB_GETRECT, 4, NativeInt(@PanelRect));
