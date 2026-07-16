@@ -64,7 +64,9 @@ These are documented in detail in the companion docs — read them before non-tr
 - **`architecture.md`** — module map, dependency layers, tab/frame lifecycle, integration list.
 - **`ui-guidelines.md`** — DevExpress component standards, colors, fonts (Trebuchet MS, `TURKISH_CHARSET`), skin (`London Liquid Sky`), `cxEditRepository1` items, image lists.
 - **`error-handling.md`** — transaction pattern (`StartTransaction` / `try` / `Commit` / `except` / `Rollback if InTransaction` / `raise`), `Veritabani.VeriVarMi` / `BasitKomutCalistir` helpers, `Application.OnException` handler in `UKimlik.pas`, `ShowErrorDialog` from `UHataDialog`.
-- **`ebelge-akis.md`** — GİB e-Belge (e-Fatura / e-Arşiv / e-İrsaliye) flow: encoding schemes (`FATBASLIK.TUR`, `REHBERALIAS.BELGETURU`/`EBELGE.BELGETURU` alias codes), the tables/constants and REST endpoints used, and the decision logic in `UFaturalar.MenuEFatura` / `UOpsiyonFatura` / `UEBelgeOlusturucu`. Read this before touching e-invoice code.
+- **`ebelge-akis.md`** — GİB e-Belge (e-Fatura / e-Arşiv / e-İrsaliye) flow: encoding schemes (`FATBASLIK.TUR`, `REHBERALIAS.BELGETURU`/`EBELGE.BELGETURU` alias codes), the tables/constants and REST endpoints used, and the decision logic in `UFaturalar.MenuEFatura` / `UOpsiyonFatura` / `UEBelgeOlusturucu`. Read this before touching e-invoice code. (`IHRACAT_DAGITIM.md` covers the İhracat/export e-Fatura specifics on top of it.)
+- **`loglama-sistemi.md`** — the full ISLEMLOG audit system: `Ortak/ULog.pas` helpers, the yearly `GENDEPO.LOG<yyyy>` tables + self-healing `ISLEMLOG` view, the `LOGCOZUM`/`LOGREFERANS` decode path behind the UInfo screen, and the delete→"Geri Al" undo. Read before touching audit logging (expands the summary in "Key patterns" below).
+- **`belge-depolama.md`** — document/media storage: the three layers (business record → `IMAJ` metadata → content), the migration from `IMAJ.BELGE`/on-disk `.OBJ` to `GENDEPO.DOSYA` (FILESTREAM, hash-dedup), and `IMAJ.YERI` context codes. Read before touching attachments, images, or document content.
 
 Key patterns to honor without re-deriving:
 
@@ -74,6 +76,15 @@ Key patterns to honor without re-deriving:
 - **Wizards:** Multi-step business flows use the `JvWizard`-based pattern (`UFaturaWizard`, `UStokWizard`, `UProjeWizard`...).
 - **ADO → FireDAC:** Legacy code uses `TADOQuery`/`TADOConnection`; new/modernized code uses `TFDQuery`/`TFDConnection`. The Python helpers in the parent folder (`convert_dfm.py`, `fix_dfm.py`, `fix_binary_dfm.py`) exist to assist this conversion on `.dfm` form files.
 - **ISLEMLOG audit logging:** Card/detail changes are audited into `GENDEPO.ISLEMLOG` via the central helpers in `Ortak/ULog.pas` (`LogKartEkle` / `LogKartDegisti` / `LogKartSil`, lower-level `LogKayitEkle` / `LogDiffKaydet` / `LogDetaylariSil`). Non-obvious rules: the **insert** log is written once when the form/wizard closes (guarded by an `FEkleLogland` flag), *not* in `AfterPost` (that produces duplicates); **delete** logging must run *before* the SQL `DELETE`; on wizard finish, `Cancel` the card dataset if it isn't `Modified` instead of posting (AutoEdit otherwise logs an empty "change"). Follow the existing pattern in an already-logged module when adding logging to a new one.
+
+## PostgreSQL migration (dual-engine discipline)
+
+An in-progress effort ports the app from SQL Server to PostgreSQL. It is **isolated** to the `pg/` folder and the `pg-migration` branch; customer/release builds ship from stable `backup/…` branches and nothing in `pg/` reaches production. See `postgres-gecis-maliyeti.md` (cost/inventory) and `pg/README.md` (workspace + golden rules). This shapes how *all* new code is written today:
+
+- **Every change must work on both engines.** MSSQL always keeps working (dual-capable code); a customer can stay on or revert to MSSQL at any time. There is no big-bang cutover.
+- **Prefer Pascal over SQL** for engine-divergent logic (e.g. `IncYear` instead of `DATEADD`), and portable ANSI (`AS`, `CAST`) in the SQL you do write. For genuine dialect gaps use the central `PgSqlCevir` (getdate/isnull) plus the per-call **seam helper** pattern (top/date) rather than duplicating queries.
+- **Known dialect traps:** MSSQL `bit` maps to PG `smallint` (not `boolean`) — otherwise `= 1`/`= 0` comparisons break en masse. `TOP 1 <col>` static ports become `MAX(CAST(col AS int))` on bit columns. Static `DECLARE`/`SET @var` in DFM SQL is inlined via `PgDeclareCevir`. Large/gnarly queries are *not* hand-rewritten to be portable — keep an MSSQL-original TVF and a PG-native TVF, call once from the app, and compare.
+- **No test suite → differential testing is the safety net:** run the same input on both engines and compare tables with `pg/tools/db_diff.ps1` (seed a PG copy from MSSQL with `pg/tools/seed_from_mssql.ps1`). PG string columns are deterministic (case-sensitive) collation in the pilot; `GLogins`/license-hash gate is disabled in the PG pilot and will be redesigned for real cutover.
 
 ## Tooling in this folder
 
@@ -89,4 +100,4 @@ Key patterns to honor without re-deriving:
 - `.pas` and `.dfm` files come as a pair — keep component names/types in sync between them. DFMs may be text or binary; the binary form is rare but possible.
 - `Utablo.dfm` is multi-megabyte (the central data module). Read specific offsets, do not dump the whole file.
 - Default code-page assumptions in legacy units are Windows-1254 (Turkish). Modern files are UTF-8; PowerShell helpers write UTF-8 explicitly.
-- The working tree uses dated snapshot branches named `backup/YYYYMMDD` (e.g. `backup/20260622`); commits are periodic "Backup snapshot" saves of the whole tree. Branches `master`, `remote-snapshot`, and `local-full-backup` exist as safety copies — confirm with the user before switching.
+- Commits are frequent whole-tree checkpoints, not curated changesets — messages like `LAZY snapshot: …`, `WIP restore point: …`, or `Backup snapshot`. Dated `backup/YYYYMMDD` branches (e.g. `backup/20260622`) are periodic safety copies, as are `master`, `remote-snapshot`, and `local-full-backup`. Development currently happens on the `pg-migration` branch (see the PostgreSQL section); **customer/release builds ship from stable `backup/…` branches, never from `pg-migration`**. Confirm with the user before switching branches.
