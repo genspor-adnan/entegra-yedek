@@ -109,6 +109,7 @@ type
     GridFaturaView: TcxGridDBTableView;
     GridFaturaViewKOD1: TcxGridDBColumn;
     GridFaturaViewACIKLAMA1: TcxGridDBColumn;
+    GridFaturaViewHUCRE: TcxGridDBColumn;
     GridFaturaViewADET1: TcxGridDBColumn;
     GridFaturaViewBIRIM1: TcxGridDBColumn;
     GridFaturaLevel1: TcxGridLevel;
@@ -162,6 +163,7 @@ type
     TabFaturaDOVIZKURDEGERI: TCurrencyField;
     TabFaturaAD: TWideStringField;
     TabFaturaKOD: TWideStringField;
+    TabFaturaHUCRE: TWideStringField;
     TabFaturaPROJEID: TIntegerField;
     TabFaturaKAMPANYAID: TIntegerField;
     TabFaturaVADE: TByteField;
@@ -620,6 +622,7 @@ procedure TFatTransferWizardDlg.TabFaturaCalcFields(DataSet: TDataSet);
 begin
   TabFaturaAD.Clear;
   TabFaturaKOD.Clear;
+  TabFaturaHUCRE.Clear;
   TabFaturaPROJEKODU.Clear;
 
   if not FATURA.Active then
@@ -630,6 +633,7 @@ begin
   if FATURA.Locate('ID', TabFaturaID.AsInteger, []) then begin
     TabFaturaAD.AsString := FATURA.FieldByName('AD').AsString;
     TabFaturaKOD.AsString := FATURA.FieldByName('KOD').AsString;
+    TabFaturaHUCRE.AsString := FATURA.FieldByName('HUCRE').AsString;
     TabFaturaPROJEKODU.AsString := FATURA.FieldByName('PROJEKODU').AsString;
   end;
 end;
@@ -690,8 +694,8 @@ var
   miktar : extended;
   mik : variant;
   MiktarInt : real;
-  LUrunID: Integer;
-  LTransferTarihi, LSonGiris: TDateTime;
+  LSatirID: Integer;
+  LKalan: Double;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: satir post -> yakala
   if FATURA.Active then
@@ -717,36 +721,30 @@ begin
   if (TabFATBASLIK.FieldByName('DURUM').AsInteger<>6)and(not SifirKontrol(TabFATURA.FieldByName('ADET').AsFloat, KontrolFaturaAdet)) then
       Abort;
   if (TabFATBASLIK.FieldByName('DURUM').AsInteger<>6)and(TabFATURA.FieldByName('ADET').AsFloat <= 0) then
-      raise Exception.create(Adetsifirvesifirdankucukolamaz);
+       raise Exception.create(Adetsifirvesifirdankucukolamaz);
 
-  // Tarih  kontrolu: Transfer tarihinde veya sonrasinda urunun bir giris belgesi
-  // (BELGETUR 3,6,10,11,12) varsa, gecmise donuk transfer yapilamaz. Aksi
-  // halde henuz girisi gelmemis stogu transfer etmis oluruz.
-  LUrunID := TabFATURA.FieldByName('URUNID').AsInteger;
-  LTransferTarihi := TabFatBaslik.FieldByName('FATURATARIH').AsDateTime;
-  if LUrunID > 0 then begin
-    Tablo.TablodanSorguAc(1,
-      'SELECT MAX(FB1.FATURATARIH) AS SonGiris ' +
-      'FROM FATURA F1 INNER JOIN FATBASLIK FB1 ON FB1.ID = F1.FATBASID ' +
-      'WHERE F1.URUNID = ' + IntToStr(LUrunID) +
-      '  AND FB1.TUR IN (3, 6, 10, 11, 12) ' +
-      '  AND (FB1.TUR <> 6 OR F1.ADET > 0)');
-    if (not Tablo.Query1.Eof) and (not Tablo.Query1.Fields[0].IsNull) then begin
-      LSonGiris := Tablo.Query1.Fields[0].AsDateTime;
-      Tablo.Query1.Close;
-      if LTransferTarihi <= LSonGiris then begin
-        ShowMessage('Bu urunun en son giris tarihi ' +
-                    FormatDateTime('dd.mm.yyyy', LSonGiris) +
-                    ' olup transfer tarihinden (' +
-                    FormatDateTime('dd.mm.yyyy', LTransferTarihi) +
-                    ') ileride veya esit. Bu satir transfer edilemez.');
-        TabFATURA.Cancel;
-        Abort;
-      end;
-    end else
-      Tablo.Query1.Close;
+  // Kaynak depoda, transfer TARIHINDE yeterli stok var mi? Ortak helper (transfer + fatura/fis
+  // cikista da ayni SP'ler). ileri tarihli cikis hareketi OLSA BILE sadece o tarihe kadarki
+  // bakiye bakilir (eski "sonraki hareket varsa geri tarihli transfer yapilamaz" kontrolu kalkti).
+  // Izlemli -> urun+depo TOPLAM lot bakiyesi (ASeriLotID=0; secili lot per-lot gerekiyorsa
+  // StokIzlemBilgisi diyalogunda ASeriLotID>0 ile ayni SP). Izlemsiz -> adet.
+  // Yeni satirda FATURA.ID yok -> ASatirID=0; model commit'li STOKDURUM/STOKDURUMIZLEME'ye
+  // demirli (KALAN_simdi - T sonrasi hareketler) oldugu icin BeforePost'ta dogru calisir.
+  LSatirID := TabFATURA.FieldByName('ID').AsInteger;
+  if LSatirID <= 0 then
+     LSatirID := 0;
+  if not Tablo.StokCikisYeterliMi(
+       TabFATURA.FieldByName('URUNID').AsInteger,
+       TabFatBaslik.FieldByName('CIKISDEPO').AsInteger,
+       LSatirID,
+       TabFatBaslik.FieldByName('FATURATARIH').AsDateTime,
+       TabFATURA.FieldByName('ADET').AsFloat,
+       (TabFATURA.FieldByName('TUR').AsInteger = 1) and (TabFATURA.FieldByName('IZLEME').AsInteger > 0),
+       0, LKalan) then begin
+    // Yetersizse mesaj + StokDurumKontrolKurali StokCikisYeterliMi icinde gosterildi/uygulandi.
+    TabFATURA.Cancel;
+    Abort;
   end;
-
 
   //TabFATURA.FieldByName('MIKTAR').AsFloat :=(TabFATURA.FieldByName('ADET').AsFloat) * Tablo.StokCarpan(TabFATURA.FieldByName('URUNID').AsInteger, TabFATURA.FieldByName('BIRIM').AsInteger);
   miktar := Tablo.StokMiktarHesapla(TabFATURA.FieldByname('URUNID').AsInteger,TabFATURA.FieldByname('ADET').AsFloat,TabFATURA.FieldByname('BIRIM').AsInteger);
@@ -756,10 +754,13 @@ begin
      TabFATURA.FieldByname('BIRIMFIYAT').AsFloat := Tablo.Query1.Fields[0].AsFloat;
   TabFATURA.FieldByname('MIKTAR').AsFloat := miktar;
   TabFATURA.FieldByname('ADET').AsFloat := miktar;
+
+  (* AO 18.07.2026  üstteki yeni kontrol geldiği için çıkardım
   if not Tablo.StokVarmi( TabFATURA.FieldByName('URUNID').AsInteger,TabFatBaslik.FieldByName('CIKISDEPO').AsInteger, TabFATURA.FieldByName('MIKTAR').AsFloat - OncekiStokMiktar) then begin
      TabFATURA.Cancel;
      abort;
   end;
+
   // depoda c?k?? i?in yeterli ?r?n var m? kontrol ediliyor.
   if (Tur in [1, 14, 15, 16]) and (VarToStr(TabFATURA.FieldByName('MIKTAR').OldValue) <> VarToStr(TabFATURA.FieldByName('MIKTAR').NewValue)) then begin
     if not(Tablo.StokCikisYapilabilirmi(TabFATURA.FieldByName('MIKTAR').NewValue - TabFATURA.FieldByName('MIKTAR').OldValue, Tablo.DepodakiStokMiktari
@@ -767,7 +768,9 @@ begin
       TabFATURA.Cancel;
       Abort;
     end;
-  end;                                                       //
+  end;
+  *)
+                                                   //
   if (TabFATURA.State=dsInsert)or(VarToStr(TabFATURA.FieldByName('MIKTAR').OldValue)<>VarToStr(TabFATURA.FieldByName('MIKTAR').NewValue)) then begin
     if (TabFATURA.FieldByName('TUR').AsInteger=1)and(TabFATURA.FieldByName('IZLEME').AsInteger > 0)and(TabFATURA.FieldByName('STOKDURUMDEGIS').AsBoolean=True) then begin
       if TabFATURA.FieldByName('ID').Value <> null then

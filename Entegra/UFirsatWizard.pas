@@ -188,12 +188,12 @@ type
     TabLojistikKAYNAKULKE: TSmallintField;
     TabLojistikKAYNAKLOKASYON: TSmallintField;
     TabLojistikHEDEFLOKASYON: TSmallintField;
-    TabLojistikTARIH: TDateTimeField;
+    TabLojistikTARIH: TSQLTimeStampField;
     TabLojistikACIKLAMA: TStringField;
     TabLojistikEKLEYEN: TIntegerField;
-    TabLojistikEKLEMETARIHI: TDateTimeField;
+    TabLojistikEKLEMETARIHI: TSQLTimeStampField;
     TabLojistikDEGISTIREN: TIntegerField;
-    TabLojistikDEGISTIRMETARIHI: TDateTimeField;
+    TabLojistikDEGISTIRMETARIHI: TSQLTimeStampField;
     GridLojistikViewTIPI: TcxGridDBColumn;
     GridLojistikViewKAYNAKULKE: TcxGridDBColumn;
     GridLojistikViewKAYNAKLOKASYON: TcxGridDBColumn;

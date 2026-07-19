@@ -3,7 +3,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   Top = 0
   Caption = 'Belge Opsiyonlar'
   ClientHeight = 518
-  ClientWidth = 497
+  ClientWidth = 501
   Color = clBtnFace
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
@@ -17,7 +17,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 497
+    Width = 501
     Height = 492
     ActivePage = TabSheetGenel
     Align = alClient
@@ -971,19 +971,21 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
-        Width = 489
+        Width = 512
         Height = 464
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = TabGenel
         Properties.CustomButtons.Buttons = <>
         Properties.Style = 8
+        ExplicitWidth = 493
         ClientRectBottom = 464
-        ClientRectRight = 489
+        ClientRectRight = 512
         ClientRectTop = 24
         object TabGenel: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 0
+          ExplicitWidth = 493
           object GroupEFaturaBag: TcxGroupBox
             Left = 3
             Top = 71
@@ -1228,6 +1230,86 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             end
           end
         end
+        object TabSeri: TcxTabSheet
+          Caption = 'Seri Bilgileri'
+          ImageIndex = 5
+          object GridEFaturaSeriKurallari: TcxGrid
+            Left = 3
+            Top = 47
+            Width = 650
+            Height = 352
+            TabOrder = 0
+            object GridEFaturaSeriKurallariView: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              Navigator.Visible = True
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataSource = DtsEFaturaSeriKurallari
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.Appending = True
+              OptionsView.GroupByBox = False
+              object GridEFaturaSeriKurallariViewBOLUM: TcxGridDBColumn
+                Caption = 'E-Belge T'#252'r'#252
+                DataBinding.FieldName = 'BOLUM'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'E-Fatura'
+                    Value = -24130
+                  end
+                  item
+                    Description = 'E-Ar'#351'iv'
+                    Value = -24131
+                  end
+                  item
+                    Description = 'E-'#304'rsaliye'
+                    Value = -24133
+                  end>
+                Width = 110
+              end
+              object GridEFaturaSeriKurallariViewANAHTAR: TcxGridDBColumn
+                Caption = 'Seri'
+                DataBinding.FieldName = 'SERI'
+                DataBinding.IsNullValueType = True
+                Width = 47
+              end
+              object GridEFaturaSeriKurallariViewDEGER: TcxGridDBColumn
+                Caption = 'Senaryo'
+                DataBinding.FieldName = 'SENARYO'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <>
+                Width = 116
+              end
+              object GridEFaturaSeriKurallariViewKULLANICI: TcxGridDBColumn
+                Caption = 'Kullan'#305'c'#305
+                DataBinding.FieldName = 'KULLANICI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxButtonEditProperties'
+                Properties.Buttons = <
+                  item
+                    Default = True
+                    Kind = bkEllipsis
+                  end
+                  item
+                  end>
+                Properties.OnButtonClick = GridEFaturaSeriKurallariViewKULLANICIPropertiesButtonClick
+                Width = 160
+              end
+              object GridEFaturaSeriKurallariViewONCELIK: TcxGridDBColumn
+                Caption = 'S'#305'ra'
+                DataBinding.FieldName = 'SIRA'
+                DataBinding.IsNullValueType = True
+                Width = 40
+              end
+            end
+            object GridEFaturaSeriKurallariLevel: TcxGridLevel
+              GridView = GridEFaturaSeriKurallariView
+            end
+          end
+        end
         object TabEFatura: TcxTabSheet
           Caption = 'E-Fatura'
           ImageIndex = 1
@@ -1240,8 +1322,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Transparent = True
           end
           object cxLabel9: TcxLabel
-            Left = 15
-            Top = 128
+            Left = 14
+            Top = 136
             Caption = 'Varsay'#305'lan Senaryo'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1249,8 +1331,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Width = 96
           end
           object ComboSENARYO: TcxImageComboBox
-            Left = 122
-            Top = 126
+            Left = 121
+            Top = 134
             Properties.Alignment.Horz = taLeftJustify
             Properties.ImageAlign = iaRight
             Properties.ImmediatePost = True
@@ -1275,7 +1357,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object ComboEFaturaXSLT: TcxImageComboBox
             Tag = 2
             Left = 122
-            Top = 174
+            Top = 214
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1287,7 +1369,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object cxLabel18: TcxLabel
             Left = 15
-            Top = 176
+            Top = 216
             Caption = 'Giden E-Fatura XSLT'
             Properties.WordWrap = True
             Transparent = True
@@ -1340,38 +1422,9 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Text = 'https://efaturaws.izibiz.com.tr/EInvoiceWS'
             Width = 356
           end
-          object cxLabel34: TcxLabel
-            Left = 15
-            Top = 200
-            Caption = 'Seri Bilgileri'
-            Transparent = True
-          end
-          object EditSeriEFatura: TcxButtonEdit
-            Left = 122
-            Top = 199
-            Properties.Buttons = <
-              item
-                Default = True
-                Kind = bkEllipsis
-              end>
-            Properties.ReadOnly = True
-            Properties.OnButtonClick = EditSeriPropertiesButtonClick
-            TabOrder = 12
-            Width = 197
-          end
-          object cxLabel35: TcxLabel
-            Left = 121
-            Top = 226
-            Caption = 
-              'Araya virg'#252'l koyarak birden fazla girebilirsiniz. En ba'#351'takini v' +
-              'arsay'#305'lan olarak kullan'#305'r.'
-            Properties.WordWrap = True
-            Transparent = True
-            Width = 226
-          end
           object cxLabel12: TcxLabel
             Left = 15
-            Top = 152
+            Top = 192
             Caption = 'Gelen E-Fatura XSLT'
             Properties.WordWrap = True
             Transparent = True
@@ -1380,7 +1433,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object ComboGelenXSLT: TcxImageComboBox
             Tag = 1
             Left = 122
-            Top = 150
+            Top = 190
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1403,7 +1456,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Properties.ReadOnly = False
             Properties.OnCloseUp = ComboDijitBrPropertiesCloseUp
             Properties.OnPopup = ComboDijitBrPropertiesPopup
-            TabOrder = 16
+            TabOrder = 12
             Width = 197
           end
           object cxLabel44: TcxLabel
@@ -1414,10 +1467,10 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object CheckGelenEFaturaAl: TcxCheckBox
             Left = 122
-            Top = 39
+            Top = 31
             Caption = 'Gelen Faturay'#305' Al'
             Style.TransparentBorder = False
-            TabOrder = 18
+            TabOrder = 14
             Transparent = True
           end
         end
@@ -1426,7 +1479,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           ImageIndex = 2
           object CheckEArsivFaturaAktif: TcxCheckBox
             Left = 113
-            Top = 43
+            Top = 35
             Caption = 'Gelen E-Ar'#351'ivi Al'
             Style.TransparentBorder = False
             TabOrder = 0
@@ -1435,7 +1488,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object ComboEArsivFaturaXSLT: TcxImageComboBox
             Tag = 12
             Left = 113
-            Top = 185
+            Top = 209
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1447,7 +1500,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object cxLabel19: TcxLabel
             Left = 16
-            Top = 187
+            Top = 211
             Caption = 'Giden E-Ar'#351'iv XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1501,39 +1554,10 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Text = 'https://earsivws.izibiz.com.tr/EIArchiveWS/EFaturaArchive'
             Width = 356
           end
-          object cxLabel36: TcxLabel
-            Left = 16
-            Top = 211
-            Caption = 'Seri Bilgileri'
-            Transparent = True
-          end
-          object EditSeriEArsivFatura: TcxButtonEdit
-            Left = 113
-            Top = 210
-            Properties.Buttons = <
-              item
-                Default = True
-                Kind = bkEllipsis
-              end>
-            Properties.ReadOnly = True
-            Properties.OnButtonClick = EditSeriPropertiesButtonClick
-            TabOrder = 10
-            Width = 197
-          end
-          object cxLabel37: TcxLabel
-            Left = 112
-            Top = 236
-            Caption = 
-              'Araya virg'#252'l koyarak birden fazla girebilirsiniz. En ba'#351'takini v' +
-              'arsay'#305'lan olarak kullan'#305'r.'
-            Properties.WordWrap = True
-            Transparent = True
-            Width = 226
-          end
           object ComboGelenEArsivXSLT: TcxImageComboBox
             Tag = 11
             Left = 112
-            Top = 161
+            Top = 185
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1545,7 +1569,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object cxLabel33: TcxLabel
             Left = 15
-            Top = 163
+            Top = 187
             Caption = 'Gelen E-Ar'#351'iv XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1561,7 +1585,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object URLEArsivGelen: TcxTextEdit
             Left = 112
             Top = 125
-            TabOrder = 15
+            TabOrder = 11
             Text = 'https://api.izibiz.com.tr/v1/earchives-gib-ivd/inbox/GIB'
             Width = 356
           end
@@ -1570,8 +1594,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Caption = 'E-SMM'
           ImageIndex = 3
           object CheckESMMAktif: TcxCheckBox
-            Left = 17
-            Top = 16
+            Left = 119
+            Top = 24
             Caption = 'Aktif'
             Style.TransparentBorder = False
             TabOrder = 0
@@ -1580,7 +1604,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object ComboESMMXSLT: TcxImageComboBox
             Tag = 32
             Left = 119
-            Top = 140
+            Top = 164
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1592,7 +1616,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object cxLabel20: TcxLabel
             Left = 17
-            Top = 141
+            Top = 165
             Caption = 'Giden E-SMM XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1646,51 +1670,22 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Text = 'https://smmws.izibiz.com.tr/SmmWS'
             Width = 356
           end
-          object cxLabel38: TcxLabel
-            Left = 17
-            Top = 165
-            Caption = 'Seri Bilgileri'
-            Transparent = True
-          end
-          object EditSeriESMM: TcxButtonEdit
-            Left = 119
-            Top = 164
-            Properties.Buttons = <
-              item
-                Default = True
-                Kind = bkEllipsis
-              end>
-            Properties.ReadOnly = True
-            Properties.OnButtonClick = EditSeriPropertiesButtonClick
-            TabOrder = 10
-            Width = 197
-          end
-          object cxLabel39: TcxLabel
-            Left = 118
-            Top = 186
-            Caption = 
-              'Araya virg'#252'l koyarak birden fazla girebilirsiniz. En ba'#351'takini v' +
-              'arsay'#305'lan olarak kullan'#305'r.'
-            Properties.WordWrap = True
-            Transparent = True
-            Width = 226
-          end
           object ComboGidenESMMXSLT: TcxImageComboBox
             Tag = 31
             Left = 119
-            Top = 116
+            Top = 140
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
             Properties.Items = <>
             Properties.OnPopup = ComboXSLTPropertiesPopup
             Style.Color = clWhite
-            TabOrder = 12
+            TabOrder = 9
             Width = 197
           end
           object cxLabel42: TcxLabel
             Left = 17
-            Top = 117
+            Top = 141
             Caption = 'Giden E-SMM XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1711,8 +1706,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           end
           object ComboEIrsaliyeXSLT: TcxImageComboBox
             Tag = 52
-            Left = 121
-            Top = 172
+            Left = 122
+            Top = 204
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
@@ -1723,8 +1718,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Width = 197
           end
           object cxLabel21: TcxLabel
-            Left = 16
-            Top = 173
+            Left = 17
+            Top = 205
             Caption = 'Giden E-'#304'rsaliye XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1794,51 +1789,22 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Text = 'irsaliyepk@gib.gov.tr'
             Width = 356
           end
-          object cxLabel40: TcxLabel
-            Left = 16
-            Top = 188
-            Caption = 'Seri Bilgileri'
-            Transparent = True
-          end
-          object EditSeriEIrsaliye: TcxButtonEdit
-            Left = 122
-            Top = 197
-            Properties.Buttons = <
-              item
-                Default = True
-                Kind = bkEllipsis
-              end>
-            Properties.ReadOnly = True
-            Properties.OnButtonClick = EditSeriPropertiesButtonClick
-            TabOrder = 10
-            Width = 197
-          end
-          object cxLabel41: TcxLabel
-            Left = 121
-            Top = 224
-            Caption = 
-              'Araya virg'#252'l koyarak birden fazla girebilirsiniz. En ba'#351'takini v' +
-              'arsay'#305'lan olarak kullan'#305'r.'
-            Properties.WordWrap = True
-            Transparent = True
-            Width = 226
-          end
           object ComboGelenEIrsaliyeXSLT: TcxImageComboBox
             Tag = 51
-            Left = 121
-            Top = 148
+            Left = 122
+            Top = 180
             EditValue = 0
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
             Properties.Items = <>
             Properties.OnPopup = ComboXSLTPropertiesPopup
             Style.Color = clWhite
-            TabOrder = 14
+            TabOrder = 11
             Width = 197
           end
           object cxLabel43: TcxLabel
-            Left = 16
-            Top = 149
+            Left = 17
+            Top = 181
             Caption = 'Gelen E-'#304'rsaliye XSLT'
             FocusControl = ComboSENARYO
             Properties.WordWrap = True
@@ -1850,7 +1816,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Top = 36
             Caption = 'Gelen E-'#304'rsaliyeyi Al'
             Style.TransparentBorder = False
-            TabOrder = 16
+            TabOrder = 13
             Transparent = True
           end
         end
@@ -1862,29 +1828,32 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
       object PCSiparis: TcxPageControl
         Left = 0
         Top = 73
-        Width = 489
+        Width = 512
         Height = 391
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = SheetAlinanSip
         Properties.CustomButtons.Buttons = <>
         OnPageChanging = PCSiparisPageChanging
+        ExplicitWidth = 493
         ClientRectBottom = 387
         ClientRectLeft = 4
-        ClientRectRight = 485
+        ClientRectRight = 508
         ClientRectTop = 24
         object SheetAlinanSip: TcxTabSheet
           Tag = 19
           Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 0
+          ExplicitWidth = 485
           object GridDurumBaglanti: TcxGrid
             Left = 0
             Top = 0
-            Width = 481
+            Width = 504
             Height = 363
             Align = alClient
             PopupMenu = PopupDurumBglanti
             TabOrder = 0
+            ExplicitWidth = 485
             object GridDurumBaglantiDBTableView1: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
@@ -1974,15 +1943,17 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 9
           Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 1
+          ExplicitWidth = 485
         end
       end
       object Panel2: TPanel
         Left = 0
         Top = 0
-        Width = 489
+        Width = 512
         Height = 73
         Align = alTop
         TabOrder = 1
+        ExplicitWidth = 493
         object AlSiparisTus: TcxButton
           Left = 292
           Top = 11
@@ -2015,7 +1986,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   object Panel1: TPanel
     Left = 0
     Top = 492
-    Width = 497
+    Width = 501
     Height = 26
     Align = alBottom
     Alignment = taLeftJustify
@@ -2158,8 +2129,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object DtsListeDuzenle: TDataSource
     DataSet = TabListeDuzenle
-    Left = 452
-    Top = 141
+    Left = 308
+    Top = 29
   end
   object TabListeDetayDuzenle: TFDQuery
     Connection = Tablo.FDCnn
@@ -2168,8 +2139,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         'select * from GENINI where BOLUM=0 and DIL=:PDil and LEN(ABS(DEG' +
         'ER))=4 and DEGER like '#39'-21__'#39' and ANAHTAR like :PAnahtar+'#39'%'#39' '
       '')
-    Left = 274
-    Top = 113
+    Left = 258
+    Top = 185
   end
   object DtsTabListeDetayDuzenle: TDataSource
     DataSet = TabListeDetayDuzenle
@@ -2183,17 +2154,47 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         'select * from DURUMBAGLANTI where YERI = :PYeri and BOLUM= :PBol' +
         'um'
       'order by ACILIS DESC, KAYNAKDURUM,HEDEFDURUM')
-    Left = 448
-    Top = 32
+    Left = 408
+    Top = 8
   end
   object DtsDurumBaglanti: TDataSource
     DataSet = TabDurumBaglanti
-    Left = 32
-    Top = 48
+    Left = 48
+    Top = 80
+  end
+  object TabEFaturaSeriKurallari: TFDQuery
+    AfterOpen = TabEFaturaSeriKurallariAfterOpen
+    BeforePost = TabEFaturaSeriKurallariBeforePost
+    OnNewRecord = TabEFaturaSeriKurallariNewRecord
+    Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'GENINI'
+    UpdateOptions.KeyFields = 'BOLUM;DEGER;DIL'
+    SQL.Strings = (
+      'select *,'
+      'BELGETURU=case BOLUM'
+      ' when -24130 then '#39'E-Fatura'#39
+      ' when -24131 then '#39'E-Ar'#351'iv'#39
+      ' when -24133 then '#39'E-'#304'rsaliye'#39
+      ' else '#39#39' end,'
+      'SERI=left(ANAHTAR, charindex('#39','#39', ANAHTAR+'#39','#39')-1),'
+      'SENARYO=try_convert(int, parsename(replace(ANAHTAR,'#39','#39','#39'.'#39'),2)),'
+      
+        'KULLANICIID=try_convert(int, parsename(replace(ANAHTAR,'#39','#39','#39'.'#39'),' +
+        '1))'
+      'from GENINI'
+      'where BOLUM in (-24130,-24131,-24133) and DIL=-1'
+      'order by BOLUM, SIRA, ANAHTAR')
+    Left = 584
+    Top = 96
+  end
+  object DtsEFaturaSeriKurallari: TDataSource
+    DataSet = TabEFaturaSeriKurallari
+    Left = 704
+    Top = 96
   end
   object PopupDurumBglanti: TPopupMenu
-    Left = 448
-    Top = 88
+    Left = 464
+    Top = 24
     object ServisDurumlarnDzenle1: TMenuItem
       Caption = 'Servis Durumlar'#305'n'#305' D'#252'zenle'
       OnClick = ServisDurumlarnDzenle1Click

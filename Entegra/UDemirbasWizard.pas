@@ -4,7 +4,7 @@ unit UDemirbasWizard;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms,
+  Windows,    Messages, SysUtils, Variants, Classes, System.Generics.Collections, Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, dxSkinsCore,  cxGraphics, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, FireDAC.Comp.Client,
   cxImageComboBox, cxMemo, cxSpinEdit, cxTimeEdit, cxDBEdit, cxCurrencyEdit,
@@ -262,6 +262,7 @@ type
     procedure tabDemirbasTarihceRefresh(Demirbas_ID:integer);
     procedure TabDemirbasRefresh(Demirbas_ID:integer);
     procedure AmortismanGetir(DemirbasID, AmortismanID: Integer);
+    function VeritabaniTabloVarMi(const ATabloAdi: string): Boolean;
 
 
 
@@ -317,6 +318,23 @@ end;
 function TDemirbasWizardDlg.EkranAdiAl: string;
 begin
   Result := 'DemirbasWizardDlg';
+end;
+
+function TDemirbasWizardDlg.VeritabaniTabloVarMi(const ATabloAdi: string): Boolean;
+var
+  LQry: TFDQuery;
+begin
+  Result := False;
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    LQry.SQL.Text := 'select ID=object_id(:TABLO, ''U'')';
+    LQry.ParamByName('TABLO').AsString := 'dbo.' + ATabloAdi;
+    LQry.Open;
+    Result := not LQry.Fields[0].IsNull;
+  finally
+    LQry.Free;
+  end;
 end;
 
 procedure TDemirbasWizardDlg.BELokasyonPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -550,7 +568,7 @@ var
  component: TComponent;
 begin
  if (PageControl1.ActivePage = EkAlanlarEkr)and(EkAlanOlustu=False) then begin
-     Tablo.AlanOlustur(DemirbasWizardDlg, -1,DtsDemirbas);
+     Tablo.AlanOlustur(DemirbasWizardDlg, -1,Tablo.UserDataSourceHazirla(DemirbasWizardDlg, DtsDemirbas, 'DEMIRBAS_USER'));
      EkAlanOlustu:=True;
      for i := 0 to TWinControl(EkAlanlarEkr).ControlCount-1 do
        if (FindComponent(TWinControl(EkAlanlarEkr).Controls[i].Name).ClassType <> TcxLabel) and (FindComponent(TWinControl(EkAlanlarEkr).Controls[i].Name).ClassType <> TcxDBLabel) then
@@ -620,6 +638,8 @@ begin
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&ID',['&ID'],[TabDemirbas.FieldByName('ID').AsInteger]);
         //Son olarak demirba? kayd?n?n asl? siliniyor.
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM DEMIRBAS_TUTANAK_DETAY WHERE DEMIRBASID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
+        // _USER satiri (varsa) once silinmeli (FK: DEMIRBAS_USER.ID -> DEMIRBAS.ID). Iptal -> log yok.
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM DEMIRBAS_USER WHERE ID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM DEMIRBAS WHERE ID=&ID ',['&ID'],  [TabDemirbas.FieldByName('ID').AsInteger]);
       end;
    end;
@@ -662,7 +682,7 @@ begin
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),DemirbasWizardDlg,DtsDemirbas);
+      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),DemirbasWizardDlg,Tablo.UserDataSourceHazirla(DemirbasWizardDlg, DtsDemirbas, 'DEMIRBAS_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bile?en D?zenle
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -671,7 +691,7 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
 
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
-      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(EkAlanlarEkr.Name),DemirbasWizardDlg,DtsDemirbas);
+      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(EkAlanlarEkr.Name),DemirbasWizardDlg,Tablo.UserDataSourceHazirla(DemirbasWizardDlg, DtsDemirbas, 'DEMIRBAS_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bile?en Sil
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -689,7 +709,7 @@ begin
           end;
            ctrl.Visible := False;
            //Tablo.AlanOlustur(FindComponent(PanelUst.Name),DemirbasWizardDlg,-1,DtsDemirbas);
-           Tablo.AlanOlustur(DemirbasWizardDlg,-1,DtsDemirbas);
+           Tablo.AlanOlustur(DemirbasWizardDlg,-1,Tablo.UserDataSourceHazirla(DemirbasWizardDlg, DtsDemirbas, 'DEMIRBAS_USER'));
         end;
       end;
     end;
@@ -763,22 +783,22 @@ begin
   if LogGun > 0 then
     LogSnapshotAl(TabAmortisman, FAmortismanSnap);
 
+  // _USER (ek kullanici alanlari) audit baseline: acilistaki _USER halini sakla -> finish'te diff.
+  if LogGun > 0 then
+    ULog.LogUserAcilis('DEMIRBAS_USER', TabDemirbas.FieldByName('ID').AsInteger);
+
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
   // ilk hale don. IMAJ/DOKUMAN + DEMIRBASTARIHCE(history) KAPSAM DISI. OturumBaslat tablo-basina
   // korumali (olmayan/ID'siz tablo otomatik atlanir).
   FOturumID := '';
   if IslemOp = 'D' then
-    FOturumID := ULog.OturumBaslat('DEMIRBAS', TabDemirbas.FieldByName('ID').AsInteger,
-      [ ULog.SnapTablo(1, 'DEMIRBAS',               'ID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'AMORTISMAN',             'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'DEMIRBASMASRAF',         'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'KALIBRASYON',            'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'DEMIRBASTAKIP',          'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'REHBERBILGI',            'YERI=' + IntToStr(TabNo_DEMIRBAS) + ' and YER_ID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'GOREVYORUM',             'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString),
-        ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + ')'),
-        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + '))') ]);
+    FOturumID := ULog.OturumBaslatPlan('DEMIRBAS', TabDemirbas.FieldByName('ID').AsInteger,
+      [ ULog.SnapTablo(1, 'DEMIRBAS',   'ID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(1, 'DEMIRBAS_USER','ID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'REHBERBILGI','YERI=' + IntToStr(TabNo_DEMIRBAS) + ' and YER_ID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString),
+        ULog.SnapTablo(3, 'DOKUMAN',    'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + ')'),
+        ULog.SnapTablo(4, 'IMAJ',       'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_DEMIRBAS) + ' and GOREVID=' + TabDemirbas.FieldByName('ID').AsString + '))') ]);
 end;
 
 
@@ -925,6 +945,7 @@ begin
           TabDemirbas.Cancel;
        DemirbasID := TabDemirbas.FieldByName('ID').AsInteger;
     end;
+    Tablo.UserDataSourceKaydet(DemirbasWizardDlg, 'DEMIRBAS_USER');
 end;
 
 
@@ -1094,6 +1115,9 @@ begin
     // AMORTISMAN detay satirlari (ust=demirbas) diff.
     LogDiffKaydet(TabAmortisman, FAmortismanSnap, TabNo_DEMIRBASAMORTISMAN, TabNo_DEMIRBAS, DemirbasID);
     LogSnapshotAl(TabAmortisman, FAmortismanSnap);   // tazele (mukerrer save'i onle)
+    // _USER (ek alan) audit: yeni kart -> EKLE, duzenleme -> alan diff (kart grubuna baglanir).
+    ULog.LogUserKaydet('DEMIRBAS_USER', TabNo_DEMIRBAS_USER, TabNo_DEMIRBAS, DemirbasID,
+      (IslemOp = 'E') or (IslemOp = 'K'));
   end;
   ModalResult := mrOk;
 end;

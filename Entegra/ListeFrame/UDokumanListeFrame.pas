@@ -936,6 +936,8 @@ begin
       if DokumanTview.Controller.SelectedRecords[i].Values[DokumanTviewTIP.Index] = 1 then
       begin
         ID := DokumanTview.Controller.SelectedRecords[i].Values[DokumanTviewID.Index];
+        // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+        LogDetaylariSil('DOKUMAN_USER', 'ID', TabNo_DOKUMAN_USER, TabNo_DOKUMAN, ID);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where ID=&DokID', ['&DokID'], [ID]);
         // Revizyon detayi (IMAJ YERI=1) SILMEDEN ONCE logla (ust=dokuman).
         LogDetaylariSil('IMAJ', 'YER_ID', TabNo_DOKUMANREVIZE, TabNo_DOKUMAN, StrToInt64Def(VarToStr(ID), 0), 'YERI=1');

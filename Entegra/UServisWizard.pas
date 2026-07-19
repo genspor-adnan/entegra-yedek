@@ -1391,12 +1391,12 @@ begin
       if Assigned(ctrl) then begin
          OutputDebugString(PChar(ctrl.Name));
          ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TServisWizardDlg(Self),DtsServis);
-         Tablo.AlanOlustur(TServisWizardDlg(Self), -1,DtsServis);
+         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TServisWizardDlg(Self),Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
+         Tablo.AlanOlustur(TServisWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
       end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bile?en D?zenle
-      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name),TServisWizardDlg(Self),DtsServis);
-      Tablo.AlanOlustur(TServisWizardDlg(Self), -1,DtsServis);
+      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name),TServisWizardDlg(Self),Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
+      Tablo.AlanOlustur(TServisWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
   end;
 end;
 
@@ -1497,7 +1497,7 @@ begin
   if (not TabServis.Active) then begin
     TabloYenile(TabServis,[ServisID]);
     if EkAlanlarEkr.TabVisible then
-     Tablo.AlanOlustur(TServisWizardDlg(Self), -1,DtsServis);
+     Tablo.AlanOlustur(TServisWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
     case IslemOp of
     'E':begin
           if RehberID<=0 then
@@ -1562,10 +1562,13 @@ begin
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
   // ilk hale don. IMAJ(blob)+DOKUMAN+GOREVKULLANICI(PK belirsiz) KAPSAM DISI.
   // GOREVYORUM servis HAREKET'ine bagli (TUR=SERVISHAREKET, GOREVID in hareket ids).
+  if LogGun > 0 then
+    ULog.LogUserAcilis('SERVIS_USER', TabServis.FieldByName('ID').AsInteger);
   FOturumID := '';
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('SERVIS', TabServis.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'SERVIS',              'ID=' + TabServis.FieldByName('ID').AsString),
+        ULog.SnapTablo(1, 'SERVIS_USER',         'ID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISDETAY',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISBILGI',         'SERVISID=' + TabServis.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'SERVISHAREKET',       'SERVISID=' + TabServis.FieldByName('ID').AsString),
@@ -1908,6 +1911,7 @@ var
 begin
   if TabServis.State in [dsInsert, dsEdit] then
      TabServis.post;
+  Tablo.UserDataSourceKaydet(TServisWizardDlg(Self), 'SERVIS_USER');
   if TabHareketler.State in [dsInsert, dsEdit] then
      TabHareketler.post;
   if TabGenel.State in [dsInsert, dsEdit] then
@@ -2508,6 +2512,9 @@ begin
        FEkleLogland := LogKartEkle(TabServis, TabNo_SERVIS, True, FEkleLogland) or FEkleLogland;
    end;
    Kaydet;   // TabHareketler dahil tum detaylari Post eder
+   // _USER (ek alan) audit: Kaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
+   if LogGun > 0 then
+     ULog.LogUserKaydet('SERVIS_USER', TabNo_SERVIS_USER, TabNo_SERVIS, ServisID, (IslemOp='E') or (IslemOp='K'));
    // Servis hareket satirlari (detay) diff loglama: snapshot ile karsilastir,
    // ekleme/degisme/silme kayitlarini yaz, sonra snapshot'i tazele (mukerrer save'i onle).
    if LogGun > 0 then

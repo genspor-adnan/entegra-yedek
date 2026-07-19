@@ -843,6 +843,7 @@ var
   IKListeDlg :TIKListeDlg;
   rehberdetayaktif : Boolean;
   SonAranan : Boolean;
+  FIlkSonAranan : Boolean;   // ilk acilista Son Aranan (5) goster (JvTimer'de)
   dene1,dene2 : string;
 
   procedure IzinSatirInsert(RehberId,Tur:integer; Miktar:Real; Tarih:TdateTime; Aciklama,Donem:string; Ekleme:Boolean);
@@ -1065,6 +1066,8 @@ begin
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KULLANICI where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=2 and YER_ID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
     //kendisini sil
+    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+    LogDetaylariSil('REHBER_USER', 'ID', TabNo_REHBER_USER, TabNo_IK, REHBER.Fields[0].AsInteger);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER where ID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
      //GENINI' den sil
     for I := 54 to 69 do begin       ///-10054...-10069 yedekleme ops aras?.bu aradakiler silinir.
@@ -1775,6 +1778,7 @@ begin
   //SilTus.visible := DegisTus.visible;
   CalendarEkstreBas.Date := StrToDateTime('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+IntToStr(CariYil));
   CalendarEkstreBit.Date := StrToDateTime('31'+FormatSettings.DateSeparator+'12'+FormatSettings.DateSeparator+IntToStr(CariYil));
+  FIlkSonAranan := True;   // ilk acilis: JvTimer'de Son Aranan (5) yuklensin
 end;
 
 procedure TIKListeDlg.Bayraklaretle1Click(Sender: TObject);
@@ -2604,7 +2608,9 @@ var
 begin
    ID := Tablo.IKSihirbazBaslat(0,-100,-100,-100, Potansiyel);
    if ID > 0 then begin
-      AraTusClick(Self);
+      Tablo.AramaKaydet(MODUL_IK, ID);   // yeni personel -> Son Aranan
+      Liste_SP_Cagir(5);                  // Son Aranan (en yeni ustte)
+      REHBER.Locate('ID', ID, []);
 {     REHBER.Close;
       if Potansiyel then
          REHBER.SQL.Text:= StringReplace(SQL_IK_Aday.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll])
@@ -3176,6 +3182,7 @@ procedure TIKListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
   if not Assigned(FArama) then Exit;
+  if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;   // ilk acilis: Son Aranan
   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_IK_Liste)
 end;
 

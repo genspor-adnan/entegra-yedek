@@ -16,13 +16,15 @@ object AlanlarDlg: TAlanlarDlg
   TextHeight = 13
   object gridaAlanTanim: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 902
-    Height = 569
+    Height = 572
     Align = alClient
     TabOrder = 0
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
+    ExplicitTop = 35
+    ExplicitHeight = 569
     object tvAlanlTanim: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -190,6 +192,7 @@ object AlanlarDlg: TAlanlarDlg
     Left = 3
     Top = 3
     Width = 896
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -286,8 +289,8 @@ object AlanlarDlg: TAlanlarDlg
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-    Left = 16
-    Top = 104
+    Left = 64
+    Top = 64
   end
   object DsTabAlanlar: TDataSource
     DataSet = TabAlanlar

@@ -1,4 +1,4 @@
-﻿unit UStokWizard;
+﻿unit  UStokWizard;
 
 interface
 
@@ -46,6 +46,8 @@ type
     OpenDialog1: TOpenDialog;
     TabStok: TFDQuery;
     DtsStok: TDataSource;
+    TabStokUser: TFDQuery;
+    DtsStokUser: TDataSource;
     DtsFiyat: TDataSource;
     TabFiyat: TFDQuery;
     Label11: TcxLabel;
@@ -446,7 +448,6 @@ type
     TabSheetUTS: TcxTabSheet;
     ComboBILDIRIM: TcxDBImageComboBox;
     LabelBildirim: TcxLabel;
-    TabUTS: TFDQuery;
     DtsUTS: TDataSource;
     CheckKota: TcxDBCheckBox;
     CheckPaket: TcxDBCheckBox;
@@ -690,7 +691,8 @@ type
     procedure ToolButton11Click(Sender: TObject);
     procedure ToolButton13Click(Sender: TObject);
     procedure ComboBILDIRIMPropertiesChange(Sender: TObject);
-    procedure TabUTSNewRecord(DataSet: TDataSet);
+    procedure TabStokUserNewRecord(DataSet: TDataSet);
+    procedure TabStokUserBeforePost(DataSet: TDataSet);
     procedure LabelSablonClick(Sender: TObject);
     procedure ComboKALITEKONTROLPropertiesInitPopup(Sender: TObject);
     procedure TabYDilNewRecord(DataSet: TDataSet);
@@ -1832,21 +1834,21 @@ begin
   PageControlUst.ActivePageIndex := 0;
   PageControlAlt.ActivePageIndex := 0;
   if UTSKullanimda then begin
-      EditSUTKODU.DataBinding.DataSource := DtsStok;
-      EditBRANSKODU.DataBinding.DataSource := DtsStok;
-      EditGMDN.DataBinding.DataSource := DtsStok;
-      EditGMDNADI.DataBinding.DataSource := DtsStok;
-      ComboMEDIKALSINIF.DataBinding.DataSource := DtsStok;
-      ComboITHALIMAL.DataBinding.DataSource := DtsStok;
-      ComboMENSEIULKE.DataBinding.DataSource := DtsStok;
+      EditSUTKODU.DataBinding.DataSource := DtsStokUser;
+      EditBRANSKODU.DataBinding.DataSource := DtsStokUser;
+      EditGMDN.DataBinding.DataSource := DtsStokUser;
+      EditGMDNADI.DataBinding.DataSource := DtsStokUser;
+      ComboMEDIKALSINIF.DataBinding.DataSource := DtsStokUser;
+      ComboITHALIMAL.DataBinding.DataSource := DtsStokUser;
+      ComboMENSEIULKE.DataBinding.DataSource := DtsStokUser;
       ComboMENSEIULKE.Properties.Items := tablo.imgComboboxInit(
           'select ILNO, ILADI from ILLER where ILNO >= 100 Order by 2 ').Items ;
-      EditUTSREF.DataBinding.DataSource := DtsStok;
-      EditFTN.DataBinding.DataSource := DtsStok;
-      EditDIGERURUNADI.DataBinding.DataSource := DtsStok;
-      EditIHALESIRANO.DataBinding.DataSource := DtsStok;
-      EditDMOKODU.DataBinding.DataSource := DtsStok;
-      EditSMKODU.DataBinding.DataSource := DtsStok;
+      EditUTSREF.DataBinding.DataSource := DtsStokUser;
+      EditFTN.DataBinding.DataSource := DtsStokUser;
+      EditDIGERURUNADI.DataBinding.DataSource := DtsStokUser;
+      EditIHALESIRANO.DataBinding.DataSource := DtsStokUser;
+      EditDMOKODU.DataBinding.DataSource := DtsStokUser;
+      EditSMKODU.DataBinding.DataSource := DtsStokUser;
   end;
 end;
 
@@ -1870,12 +1872,12 @@ begin
       if Assigned(ctrl) then begin
          OutputDebugString(PChar(ctrl.Name));
          ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TStokWizardDlg(Self),DtsStok);
-         Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStok);
+         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TStokWizardDlg(Self),DtsStokUser);
+         Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStokUser);
       end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bile?en D?zenle
-      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name),TStokWizardDlg(Self),DtsStok);
-      Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStok);
+      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name),TStokWizardDlg(Self),DtsStokUser);
+      Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStokUser);
   end;
 end;
 
@@ -1993,9 +1995,13 @@ begin
   // (FILESTREAM icerik degismez) geri yuklenir. OturumBaslat tablo-basina korumali ->
   // ID PK'si olmayan tablo otomatik atlanir (acilis bozulmaz).
   FOturumID := '';
+  // _USER (ek alan) audit baseline: acilistaki STOKLAR_USER halini sakla -> finish'te diff.
+  if LogGun > 0 then
+    ULog.LogUserAcilis('STOKLAR_USER', StokID);
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('STOKLAR', StokID,   // LAZY: plan bellekte, bakmada SNAPSHOT bos
       [ ULog.SnapTablo(1, 'STOKLAR',              'ID=' + IntToStr(StokID)),
+        ULog.SnapTablo(1, 'STOKLAR_USER',         'ID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'STOKFIYAT',            'STOKID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'ISORTAGI',             'STOKID=' + IntToStr(StokID)),
         ULog.SnapTablo(2, 'STOKESDEGER',          'STOKID=' + IntToStr(StokID)),
@@ -2014,7 +2020,7 @@ begin
         ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + ')'),
         ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + '))') ]);
 
-  Tablo.AlanOlustur(TStokWizardDlg(Self), -1,DtsStok);
+  Tablo.AlanOlustur(TStokWizardDlg(Self),  -1,DtsStokUser);
   if StokID > 0  then begin
     TabloYenile(TabFiyat,[TabStok.FieldByName('ID').AsInteger,ComboSatis.ItemIndex]);
     TabloYenile(TabKampanya,[TabStok.FieldByName('ID').AsInteger]);
@@ -2555,8 +2561,13 @@ end;
 
 procedure TStokWizardDlg.StokKartEkrExitPage(Sender: TObject;  const FromPage: TJvWizardCustomPage);
 begin
+  // Gercek degisiklik yoksa (AutoEdit ile acilmis bos edit) Post etme -> gereksiz
+  // DEGISTIREN/log ve snapshot olusmasin (Finish'teki desenle ayni). [[kart-modified-degilse-post-etme]]
   if DtsStok.State in [dsEdit,dsInsert] then
-     TabStok.Post;
+    if (DtsStok.State = dsInsert) or TabStok.Modified then
+      TabStok.Post
+    else
+      TabStok.Cancel;
 end;
 
 procedure TStokWizardDlg.StokKartEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
@@ -2823,7 +2834,10 @@ end;
 
 procedure TStokWizardDlg.TabStokBeforeEdit(DataSet: TDataSet);
 begin
-ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek alan degisikliginde snapshot'i yakala
+// NOT: snapshot'i BURADA yakalama. dsEdit'e girmek (AutoEdit) gercek degisiklik degildir;
+// or. Yorum/Medya sayfasina gecerken bos edit acilip snapshot aliniyordu. Yakalama gercek
+// degisiklikte olur: kart icin TabStokBeforePost (Modified guard), detaylar icin ilgili
+// ekle/sil aksiyon handler'lari. [[kart-modified-degilse-post-etme]]
 if LogGun >0 then begin
    Tablo.OncekiLogBelirle(TabStok);
    if Assigned(FKartSnap) then begin
@@ -2860,7 +2874,10 @@ end;
 
 procedure TStokWizardDlg.TabStokBeforePost(DataSet: TDataSet);
 begin
-  ULog.OturumYakala(FOturumID);   // LAZY: ana kart post -> snapshot'i yakala
+  // Yalniz GERCEK degisiklikte yakala: AutoEdit ile acilip degistirilmeden edilen bos post
+  // (or. sayfa gecisi/ExitPage) snapshot almasin.
+  if TabStok.Modified then
+    ULog.OturumYakala(FOturumID);   // LAZY: ana kart gercek degisikligi -> snapshot'i yakala
   if not BoslukKontrol(EditKOD.text, KontrolStokKodu) then Abort;
 
   if EditKOD.Text='0' then begin
@@ -2907,7 +2924,10 @@ end;
 
 procedure TStokWizardDlg.TabStokEsdegerBeforePost(DataSet: TDataSet);
 begin
-  ULog.OturumYakala(FOturumID);   // LAZY: esdeger detay degisikligi -> yakala
+  // Yalniz GERCEK degisiklikte yakala: AutoEdit ile grid'e tiklayip degistirmeden sayfa
+  // gecisi bos post uretir; bos post snapshot almasin. [[snapshot-yakala-modified-degil-edit]]
+  if (DataSet.State = dsInsert) or DataSet.Modified then
+    ULog.OturumYakala(FOturumID);   // LAZY: esdeger detay gercek degisikligi -> yakala
   EkleyenDegistiren(DtsStokEsdeger);
 end;
 
@@ -2925,13 +2945,18 @@ begin
        TabloYenile(TabStokMuhasebe, [TabStok.FieldByName('ID').AsInteger]);
     end;
   end else if PageControlUst.ActivePage=EkAlanlarEkr then begin
+    TabloYenile(TabStokUser, [TabStok.FieldByName('ID').AsInteger]);
+    if TabStokUser.IsEmpty then
+      TabStokUser.Append;
     for I := 0 to EkAlanlarEkr.ControlCount-1 do begin
       (EkAlanlarEkr.Controls[i] as TcxControl).Refresh;
       if (EkAlanlarEkr.Controls[i] as TcxControl).ClassName='TcxDBTextEdit' then
         (EkAlanlarEkr.Controls[i] as TcxDBTextEdit).SetFocus;
     end;
   end else if PageControlUst.ActivePage=TabSheetUTS then begin
-    //TabloYenile(TabUTS, [StokId]);
+    TabloYenile(TabStokUser, [TabStok.FieldByName('ID').AsInteger]);
+    if TabStokUser.IsEmpty then
+      TabStokUser.Append;
   end;
 
 end;
@@ -2958,7 +2983,10 @@ end;
 
 procedure TStokWizardDlg.TabStokBoyutBeforePost(DataSet: TDataSet);
 begin
-  ULog.OturumYakala(FOturumID);   // LAZY: boyut detay degisikligi -> yakala
+  // Yalniz GERCEK degisiklikte yakala: AutoEdit ile grid'e tiklayip degistirmeden sayfa
+  // gecisi bos post uretir; bos post snapshot almasin. [[snapshot-yakala-modified-degil-edit]]
+  if (DataSet.State = dsInsert) or DataSet.Modified then
+    ULog.OturumYakala(FOturumID);   // LAZY: boyut detay gercek degisikligi -> yakala
   EkleyenDegistiren(DataSet);
 end;
 
@@ -3001,9 +3029,24 @@ begin
 end;
 
 
-procedure TStokWizardDlg.TabUTSNewRecord(DataSet: TDataSet);
+procedure TStokWizardDlg.TabStokUserNewRecord(DataSet: TDataSet);
 begin
-   TabUTS.FieldByName('STOKID').AsInteger := StokId;
+   if DataSet.State = dsInsert then begin
+      DataSet.FieldByName('ID').AsInteger := TabStok.FieldByName('ID').AsInteger;
+      DataSet.FieldByName('EKLEYEN').AsInteger := StrToIntDef(Kullanan, 0);
+      DataSet.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+   end;
+end;
+
+procedure TStokWizardDlg.TabStokUserBeforePost(DataSet: TDataSet);
+begin
+   if DataSet.State = dsInsert then begin
+      DataSet.FieldByName('ID').AsInteger := TabStok.FieldByName('ID').AsInteger;
+      DataSet.FieldByName('EKLEYEN').AsInteger := StrToIntDef(Kullanan, 0);
+      DataSet.FieldByName('EKLEMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
+   end;
+   DataSet.FieldByName('DEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);
+   DataSet.FieldByName('DEGISTIRMETARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
 end;
 
 procedure TStokWizardDlg.TabYDilBeforePost(DataSet: TDataSet);
@@ -3242,8 +3285,8 @@ begin
      else
        TabStok.Cancel;
 
-    if (TabUTS.Active)and(TabUTS.State in [dsInsert, dsEdit]) then
-       TabUTS.Post;
+    if (TabStokUser.Active)and(TabStokUser.State in [dsInsert, dsEdit]) then
+       TabStokUser.Post;
 
    if TabIsOrtagi.State in [dsInsert, dsEdit] then
       TabIsOrtagi.Post
@@ -3293,6 +3336,9 @@ begin
      end
      else if (islemOp = 'E') or (islemOp = 'K') then   // yeni stok -> EKLEME (ust=kendisi)
        FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, True, FEkleLogland) or FEkleLogland;
+     // _USER (ek alan) audit: yeni kart -> EKLE, duzenleme -> alan diff (kart grubuna baglanir).
+     ULog.LogUserKaydet('STOKLAR_USER', TabNo_STOKLAR_USER, TabNo_STOKLAR,
+       TabStok.FieldByName('ID').AsInteger, (IslemOp='E') or (IslemOp='K'));
    end;
 
    //islemKopyala := '';

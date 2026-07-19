@@ -220,18 +220,8 @@ type
     EditEIrsaliyeGIBAlias: TcxTextEdit;
     CheckTestAktif: TcxCheckBox;
     EFaturaDB: TcxTextEdit;
-    cxLabel34: TcxLabel;
-    EditSeriEFatura: TcxButtonEdit;
-    cxLabel35: TcxLabel;
-    cxLabel36: TcxLabel;
-    EditSeriEArsivFatura: TcxButtonEdit;
-    cxLabel37: TcxLabel;
-    cxLabel38: TcxLabel;
-    EditSeriESMM: TcxButtonEdit;
-    cxLabel39: TcxLabel;
-    cxLabel40: TcxLabel;
-    EditSeriEIrsaliye: TcxButtonEdit;
-    cxLabel41: TcxLabel;
+    TabEFaturaSeriKurallari: TFDQuery;
+    DtsEFaturaSeriKurallari: TDataSource;
     ButtonSQLBaslik: TcxButton;
     ButtonSQLDetay: TcxButton;
     cxGroupBox10: TcxGroupBox;
@@ -264,6 +254,15 @@ type
     CheckGelenEIrsaliyeyiAl: TcxCheckBox;
     cxLabel45: TcxLabel;
     URLEArsivGelen: TcxTextEdit;
+    TabSeri: TcxTabSheet;
+    GridEFaturaSeriKurallari: TcxGrid;
+    GridEFaturaSeriKurallariView: TcxGridDBTableView;
+    GridEFaturaSeriKurallariViewBOLUM: TcxGridDBColumn;
+    GridEFaturaSeriKurallariViewANAHTAR: TcxGridDBColumn;
+    GridEFaturaSeriKurallariViewDEGER: TcxGridDBColumn;
+    GridEFaturaSeriKurallariViewKULLANICI: TcxGridDBColumn;
+    GridEFaturaSeriKurallariViewONCELIK: TcxGridDBColumn;
+    GridEFaturaSeriKurallariLevel: TcxGridLevel;
     procedure FormCreate(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure GelenFaturaDetaySablonEkleTusClick(Sender: TObject);
@@ -314,13 +313,21 @@ type
     procedure TabXSLTBeforePost(DataSet: TDataSet);
     procedure LabelXSLTYukleClick(Sender: TObject);
     procedure LabelXSLTKaydetClick(Sender: TObject);
-    procedure EditSeriPropertiesButtonClick(Sender: TObject;
-      AButtonIndex: Integer);
+    procedure TabEFaturaSeriKurallariNewRecord(DataSet: TDataSet);
+    procedure TabEFaturaSeriKurallariAfterOpen(DataSet: TDataSet);
+    procedure TabEFaturaSeriKurallariBeforePost(DataSet: TDataSet);
+    procedure GridEFaturaSeriKurallariViewKULLANICIPropertiesButtonClick(
+      Sender: TObject; AButtonIndex: Integer);
     procedure TabSheetEBelgeShow(Sender: TObject);
     procedure ComboXSLTPropertiesPopup(Sender: TObject);
     procedure XSLTComboEnter(Sender: TObject);
   private
     DoChange:boolean;
+    FSeriKurallari: TFDMemTable;
+    procedure SeriKuraliKullaniciYaz(AKullaniciID: Integer);
+    procedure SeriKurallariDatasetHazirla;
+    procedure SeriKurallariYukle;
+    procedure SeriKurallariKaydet;
     procedure XSLTCombosYenile;
     procedure XSLTComboYukle(ACombo: TcxImageComboBox);
     procedure XSLTIcerikDuzenle;
@@ -443,20 +450,22 @@ begin
   TabXSLT.UpdateOptions.UpdateTableName := 'DOKUMLER';
   TabXSLT.UpdateOptions.KeyFields := 'ID';
   TabXSLT.UpdateOptions.AutoIncFields := 'ID';
+  TabEFaturaSeriKurallari.UpdateOptions.UpdateTableName := 'GENINI';
+  TabEFaturaSeriKurallari.UpdateOptions.KeyFields := 'BOLUM;DEGER;DIL';
+  SeriKurallariDatasetHazirla;
+  DtsEFaturaSeriKurallari.DataSet := FSeriKurallari;
   GridXSLTView.Navigator.Visible := True;
   GridXSLTView.OptionsData.Appending := True;
   GridXSLTView.OptionsData.Deleting := True;
   GridXSLTView.OptionsData.Editing := True;
   GridXSLTView.OptionsData.Inserting := True;
+  GridEFaturaSeriKurallariView.Navigator.Visible := True;
+  GridEFaturaSeriKurallariView.OptionsData.Appending := True;
+  GridEFaturaSeriKurallariView.OptionsData.Deleting := True;
+  GridEFaturaSeriKurallariView.OptionsData.Editing := True;
+  GridEFaturaSeriKurallariView.OptionsData.Inserting := True;
+  GridEFaturaSeriKurallariViewDEGER.RepositoryItem := Tablo.RepSenaryo;
   LabelXSLTKaydet.OnClick := LabelXSLTKaydetClick;
-  EditSeriEFatura.Properties.ReadOnly := True;
-  EditSeriEArsivFatura.Properties.ReadOnly := True;
-  EditSeriESMM.Properties.ReadOnly := True;
-  EditSeriEIrsaliye.Properties.ReadOnly := True;
-  EditSeriEFatura.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
-  EditSeriEArsivFatura.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
-  EditSeriESMM.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
-  EditSeriEIrsaliye.Properties.OnButtonClick := EditSeriPropertiesButtonClick;
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   PageControl1.ActivePageIndex:=0;
   CheckFaturaPlaniOlustur.Checked :=Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_ZorunluPlanOlustur,True);  //FaturaOpsiyon  ZorunluPlanOlustur
@@ -530,10 +539,7 @@ begin
   URLEIrsaliyeUretim.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeUretimURL, URLEIrsaliyeUretim.Text);
   EditEIrsaliyeGIBAlias.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeGIBAlias, EditEIrsaliyeGIBAlias.Text);
 
-  EditSeriEFatura.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaSeriler, EditSeriEFatura.Text);
-  EditSeriEArsivFatura.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaSeriler, EditSeriEArsivFatura.Text);
-  EditSeriESMM.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_ESMMSeriler, EditSeriESMM.Text);
-  EditSeriEIrsaliye.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeSeriler, EditSeriEIrsaliye.Text);
+  SeriKurallariYukle;
 
   MemoEFaturaNotlar.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaSabitNotlar, MemoEFaturaNotlar.Text);
   MemoEArsivFaturaNotlar.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaSabitNotlar, MemoEArsivFaturaNotlar.Text);
@@ -585,6 +591,7 @@ procedure TOpsiyonFaturaDlg.KaydetTusClick(Sender: TObject);
 begin
   if TabXSLT.State in [dsEdit, dsInsert] then
     TabXSLT.Post;
+  SeriKurallariKaydet;
 
   //Modul 2400
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_ZorunluPlanOlustur,CheckFaturaPlaniOlustur.Checked);   //ZorunluPlanOlustur
@@ -656,10 +663,6 @@ begin
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EIrsaliyeUretimURL, URLEIrsaliyeUretim.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EIrsaliyeGIBAlias, EditEIrsaliyeGIBAlias.Text);
 
-  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EFaturaSeriler, EditSeriEFatura.Text);
-  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EArsivFaturaSeriler, EditSeriEArsivFatura.Text);
-  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_ESMMSeriler, EditSeriESMM.Text);
-  Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EIrsaliyeSeriler, EditSeriEIrsaliye.Text);
 
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EFaturaSabitNotlar, MemoEFaturaNotlar.Text);
   Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_EArsivFaturaSabitNotlar, MemoEArsivFaturaNotlar.Text);
@@ -1057,6 +1060,173 @@ begin
   XSLTCombosYenile;
 end;
 
+procedure TOpsiyonFaturaDlg.SeriKurallariDatasetHazirla;
+begin
+  if FSeriKurallari <> nil then
+    Exit;
+
+  FSeriKurallari := TFDMemTable.Create(Self);
+  FSeriKurallari.FieldDefs.Add('BOLUM', ftInteger);
+  FSeriKurallari.FieldDefs.Add('SERI', ftString, 30);
+  FSeriKurallari.FieldDefs.Add('SENARYO', ftInteger);
+  FSeriKurallari.FieldDefs.Add('KULLANICIID', ftInteger);
+  FSeriKurallari.FieldDefs.Add('KULLANICI', ftString, 120);
+  FSeriKurallari.FieldDefs.Add('SIRA', ftInteger);
+  FSeriKurallari.FieldDefs.Add('DEGER', ftInteger);
+  FSeriKurallari.FieldDefs.Add('DIL', ftInteger);
+  FSeriKurallari.CreateDataSet;
+  FSeriKurallari.OnNewRecord := TabEFaturaSeriKurallariNewRecord;
+  FSeriKurallari.BeforePost := TabEFaturaSeriKurallariBeforePost;
+end;
+
+procedure TOpsiyonFaturaDlg.SeriKurallariYukle;
+var
+  LKullaniciID: Integer;
+begin
+  SeriKurallariDatasetHazirla;
+  if TabEFaturaSeriKurallari.Active then
+    TabEFaturaSeriKurallari.Close;
+  TabEFaturaSeriKurallari.Open;
+
+  FSeriKurallari.DisableControls;
+  try
+    FSeriKurallari.BeforePost := nil;
+    FSeriKurallari.EmptyDataSet;
+    TabEFaturaSeriKurallari.First;
+    while not TabEFaturaSeriKurallari.Eof do begin
+      LKullaniciID := TabEFaturaSeriKurallari.FieldByName('KULLANICIID').AsInteger;
+      if Trim(TabEFaturaSeriKurallari.FieldByName('SERI').AsString) <> '' then begin
+        FSeriKurallari.Append;
+        FSeriKurallari.FieldByName('BOLUM').AsInteger := TabEFaturaSeriKurallari.FieldByName('BOLUM').AsInteger;
+        FSeriKurallari.FieldByName('SERI').AsString := TabEFaturaSeriKurallari.FieldByName('SERI').AsString;
+        FSeriKurallari.FieldByName('SENARYO').AsInteger := TabEFaturaSeriKurallari.FieldByName('SENARYO').AsInteger;
+        FSeriKurallari.FieldByName('KULLANICIID').AsInteger := LKullaniciID;
+        if LKullaniciID > 0 then
+          FSeriKurallari.FieldByName('KULLANICI').AsString := Tablo.AciklamaGetir('REHBER', 'FIRMA', LKullaniciID);
+        FSeriKurallari.FieldByName('SIRA').AsInteger := TabEFaturaSeriKurallari.FieldByName('SIRA').AsInteger;
+        FSeriKurallari.FieldByName('DEGER').AsInteger := TabEFaturaSeriKurallari.FieldByName('DEGER').AsInteger;
+        FSeriKurallari.FieldByName('DIL').AsInteger := -1;
+        FSeriKurallari.Post;
+      end;
+      TabEFaturaSeriKurallari.Next;
+    end;
+  finally
+    FSeriKurallari.BeforePost := TabEFaturaSeriKurallariBeforePost;
+    FSeriKurallari.EnableControls;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.SeriKurallariKaydet;
+var
+  LQry : TFDQuery;
+  LDeger: Integer;
+begin
+  SeriKurallariDatasetHazirla;
+  if (FSeriKurallari.State = dsInsert) and (Trim(FSeriKurallari.FieldByName('SERI').AsString) = '') then
+    FSeriKurallari.Cancel
+  else if FSeriKurallari.State in [dsEdit, dsInsert] then
+    FSeriKurallari.Post;
+
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    LQry.SQL.Text := 'delete from GENINI where BOLUM in (:B1,:B2,:B3) and DIL=-1';
+    LQry.ParamByName('B1').AsInteger := Ops_FaturaOpsiyon_EFaturaSeriKurallari;
+    LQry.ParamByName('B2').AsInteger := Ops_FaturaOpsiyon_EArsivSeriKurallari;
+    LQry.ParamByName('B3').AsInteger := Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari;
+    LQry.ExecSQL;
+
+    LQry.SQL.Text := 'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) values (:BOLUM,:ANAHTAR,:DEGER,-1,:SIRA)';
+    LDeger := 1;
+    FSeriKurallari.First;
+    while not FSeriKurallari.Eof do begin
+      if Trim(FSeriKurallari.FieldByName('SERI').AsString) <> '' then begin
+        LQry.ParamByName('BOLUM').AsInteger := FSeriKurallari.FieldByName('BOLUM').AsInteger;
+        LQry.ParamByName('ANAHTAR').AsString :=
+          Trim(FSeriKurallari.FieldByName('SERI').AsString) + ',' +
+          IntToStr(FSeriKurallari.FieldByName('SENARYO').AsInteger) + ',' +
+          IntToStr(FSeriKurallari.FieldByName('KULLANICIID').AsInteger);
+        LQry.ParamByName('DEGER').AsInteger := LDeger;
+        LQry.ParamByName('SIRA').AsInteger := FSeriKurallari.FieldByName('SIRA').AsInteger;
+        LQry.ExecSQL;
+        Inc(LDeger);
+      end;
+      FSeriKurallari.Next;
+    end;
+  finally
+    LQry.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.TabEFaturaSeriKurallariNewRecord(DataSet: TDataSet);
+begin
+  DataSet.FieldByName('BOLUM').AsInteger := Ops_FaturaOpsiyon_EFaturaSeriKurallari;
+  DataSet.FieldByName('DIL').AsInteger := -1;
+  DataSet.FieldByName('SENARYO').AsInteger := 0;
+  DataSet.FieldByName('KULLANICIID').AsInteger := 0;
+  DataSet.FieldByName('SIRA').AsInteger := DataSet.RecordCount + 1;
+end;
+
+procedure TOpsiyonFaturaDlg.TabEFaturaSeriKurallariAfterOpen(DataSet: TDataSet);
+  procedure AlanGuncellemeDisiBirak(const AAlanAdi: string);
+  begin
+    if DataSet.FindField(AAlanAdi) <> nil then
+      DataSet.FieldByName(AAlanAdi).ProviderFlags := [];
+  end;
+begin
+  AlanGuncellemeDisiBirak('BELGETURU');
+  AlanGuncellemeDisiBirak('SERI');
+  AlanGuncellemeDisiBirak('SENARYO');
+  AlanGuncellemeDisiBirak('KULLANICIID');
+end;
+
+procedure TOpsiyonFaturaDlg.TabEFaturaSeriKurallariBeforePost(DataSet: TDataSet);
+var
+  LDeger: Integer;
+begin
+  if Trim(DataSet.FieldByName('SERI').AsString) = '' then
+    raise Exception.Create('Seri boş olamaz.');
+
+  if (DataSet.FieldByName('BOLUM').AsInteger <> Ops_FaturaOpsiyon_EFaturaSeriKurallari) and
+     (DataSet.FieldByName('BOLUM').AsInteger <> Ops_FaturaOpsiyon_EArsivSeriKurallari) and
+     (DataSet.FieldByName('BOLUM').AsInteger <> Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari) then
+    raise Exception.Create('E-Belge türü seçilmelidir.');
+  DataSet.FieldByName('DIL').AsInteger := -1;
+  if DataSet.FieldByName('DEGER').AsInteger = 0 then begin
+    LDeger := DataSet.RecNo;
+    if LDeger <= 0 then
+      LDeger := DataSet.RecordCount + 1;
+    DataSet.FieldByName('DEGER').AsInteger := LDeger;
+  end;
+  if DataSet.FieldByName('SIRA').AsInteger = 0 then
+    DataSet.FieldByName('SIRA').AsInteger := DataSet.FieldByName('DEGER').AsInteger;
+end;
+
+procedure TOpsiyonFaturaDlg.SeriKuraliKullaniciYaz(AKullaniciID: Integer);
+begin
+  if (FSeriKurallari = nil) or (not FSeriKurallari.Active) then
+    Exit;
+
+  if not (FSeriKurallari.State in [dsEdit, dsInsert]) then
+    FSeriKurallari.Edit;
+  FSeriKurallari.FieldByName('KULLANICIID').AsInteger := AKullaniciID;
+  if AKullaniciID > 0 then
+    FSeriKurallari.FieldByName('KULLANICI').AsString := Tablo.AciklamaGetir('REHBER', 'FIRMA', AKullaniciID)
+  else
+    FSeriKurallari.FieldByName('KULLANICI').Clear;
+end;
+
+procedure TOpsiyonFaturaDlg.GridEFaturaSeriKurallariViewKULLANICIPropertiesButtonClick(
+  Sender: TObject; AButtonIndex: Integer);
+var
+  LKullaniciID: Integer;
+begin
+  LKullaniciID := Tablo.EditButtonaREHBERGonder(TcxButtonEdit(Sender), 335, AButtonIndex, nil, '');
+  if AButtonIndex = 1 then
+    LKullaniciID := 0;
+  SeriKuraliKullaniciYaz(LKullaniciID);
+end;
+
 procedure TOpsiyonFaturaDlg.TabXSLTBeforePost(DataSet: TDataSet);
 begin
   if Trim(DataSet.FieldByName('RAPORADI').AsString) = '' then
@@ -1163,42 +1333,6 @@ begin
     ShowMessage('XSLT kaydedildi: ' + Dlg.FileName);
   finally
     Dlg.Free;
-  end;
-end;
-
-procedure TOpsiyonFaturaDlg.EditSeriPropertiesButtonClick(Sender: TObject;
-  AButtonIndex: Integer);
-var
-  LDeger: Variant;
-  LBaslik, LSeri: string;
-  LOpsiyonID: Integer;
-begin
-  if not (Sender is TcxButtonEdit) then
-    Exit;
-
-  LOpsiyonID := 0;
-  LBaslik := 'Seri Bilgisi';
-  if Sender = EditSeriEFatura then begin
-    LOpsiyonID := Ops_FaturaOpsiyon_EFaturaSeriler;
-    LBaslik := 'E-Fatura Seri Bilgisi';
-  end else if Sender = EditSeriEArsivFatura then begin
-    LOpsiyonID := Ops_FaturaOpsiyon_EArsivFaturaSeriler;
-    LBaslik := 'E-Arşiv Fatura Seri Bilgisi';
-  end else if Sender = EditSeriESMM then begin
-    LOpsiyonID := Ops_FaturaOpsiyon_ESMMSeriler;
-    LBaslik := 'E-SMM Seri Bilgisi';
-  end else if Sender = EditSeriEIrsaliye then begin
-    LOpsiyonID := Ops_FaturaOpsiyon_EIrsaliyeSeriler;
-    LBaslik := 'E-İrsaliye Seri Bilgisi';
-  end;
-
-  LDeger := TcxButtonEdit(Sender).Text;
-  if TGirisKutusuEx.BilgiAlEx(LBaslik,
-     TGirdiDenetimleri.Create.Edit('Seri', @LDeger)) = mrOk then begin
-    LSeri := Trim(VarToStr(LDeger));
-    TcxButtonEdit(Sender).Text := LSeri;
-    if LOpsiyonID <> 0 then
-      Tablo.GENINI.WriteString(LOpsiyonID, LSeri);
   end;
 end;
 

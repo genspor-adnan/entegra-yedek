@@ -382,6 +382,7 @@ type
     FArama: TStokAramaFrame;
     CaptionList,FieldList : TArrayofstring;
     AlanlarOlusturuldu : Boolean;
+    FIlkSonAranan : Boolean;   // ilk acilista Son Aranan (5) goster (JvTimer'de)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -628,6 +629,7 @@ end;
 procedure TStokListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
+  if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;   // ilk acilis: Son Aranan
   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (grid kolonlari + post-load helper icinde)
 
 //  STOKLAR.Params[0].Value:=FArama.ComboPeriyot.EditValue;
@@ -662,7 +664,10 @@ begin
   FArama.ComboMarka.PostEditValue;
   FArama.ComboGRUBU.PostEditValue;
   FArama.ComboSUBE.PostEditValue;
-  TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
+  // STOKLAR artik SP-tabanli (ListeSPJson: EXEC ... @Baslik=:Baslik, @Kosullar=:Kosullar).
+  // Eski TabloYenile(STOKLAR,[periyot]) periyot degerini :Baslik'e baglayip SP'yi bozuyordu
+  // ('Incorrect syntax near 1') -> SP yoluyla yenile.
+  Liste_SP_Cagir(4);
 end;
 
 procedure TStokListeDlg.EkipmanListesineEkle1Click(Sender: TObject);
@@ -825,6 +830,7 @@ begin
     GridStokViewOZELKOD.Caption := 'Ölçü';
   end;
 
+  FIlkSonAranan := True;   // ilk acilis: JvTimer'de Son Aranan (5) yuklensin
 end;
 
 procedure TStokListeDlg.BirUrunMaliyetGuncelleMenuClick(Sender: TObject);
@@ -1176,7 +1182,7 @@ begin
     islemKopyala:='K';
     ID := Tablo.StokSihirbazBaslat('K', 0, STOKLAR.Fields[0].AsInteger,-1,0);
     if ID > 0 then
-      TabloYenile(STOKLAR,[FArama.ComboPeriyot.EditValue]);
+      Liste_SP_Cagir(4);   // STOKLAR SP-tabanli -> TabloYenile(STOKLAR,[periyot]) SP'yi bozuyordu
   end;
 end;
 
@@ -1597,9 +1603,9 @@ begin
   ID := Tablo.StokSihirbazBaslat('E', 0, -1,-1,0);
   if ID > 0 then
   begin
-    AramayiSifirla;
-    Liste_SP_Cagir(4);              // listeyi yenile (sunucu-tarafi SP)
-    STOKLAR.Locate('ID', ID, []);   // yeni olusturulan stoka git
+    Tablo.AramaKaydet(MODUL_Stok, ID);   // yeni stok -> Son Aranan
+    Liste_SP_Cagir(5);                    // Son Aranan (en yeni ustte)
+    STOKLAR.Locate('ID', ID, []);         // yeni olusturulan stoka git
   end;
 end;
 

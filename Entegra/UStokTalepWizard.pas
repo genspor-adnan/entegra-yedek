@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, dxSkinsCore, cxGraphics, dxSkinscxPCPainter, cxStyles,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, FireDAC.Comp.Client,
   cxImageComboBox, cxMemo, cxSpinEdit, cxTimeEdit, cxDBEdit, cxCurrencyEdit,
@@ -127,6 +127,7 @@ type
     GridFaturaViewTESLIMTARIHI: TcxGridDBColumn;
     GridFaturaViewKOD1: TcxGridDBColumn;
     GridFaturaViewAD: TcxGridDBColumn;
+    GridFaturaViewHUCRE: TcxGridDBColumn;
     GridFaturaViewACIKLAMA1: TcxGridDBColumn;
     GridFaturaViewADET1: TcxGridDBColumn;
     GridFaturaViewBIRIM1: TcxGridDBColumn;

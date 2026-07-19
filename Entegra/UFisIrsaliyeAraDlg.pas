@@ -174,10 +174,16 @@ begin
     donusumayarlari:= Tablo.BelgeDonustur_BilgiAyarlari(DonusTuru, HedefBaslikTuru, basliktablosu, detaytablosu, depoalani);
     if tabDonusumSepet.FieldByName('TUR').AsInteger=1 then begin
        //çıkış türü fatura ise stok kontrol durumuna bakılıyor
-      if donusumayarlari.Baslikturu in [KasaTur_SatisIrsaliyesi, KasaTur_SatisFaturasi] then
-        stokyeterli:= Tablo.StokVarmi( tabDonusumSepet.FieldByName('URUNID').AsInteger,
-                            tabDonusumSepet.FieldByName(donusumayarlari.depoalani).AsInteger,
-                            tabDonusumSepet.FieldByName('MIKTAR').AsFloat )
+      if donusumayarlari.Baslikturu in [KasaTur_SatisIrsaliyesi, KasaTur_SatisFaturasi] then begin
+        //19.07.2026 AO: StokVarmi -> StokCikisYeterliMi (tarih-bazli; StokDurumKontrolKurali + mesaj helper icinde)
+        //stokyeterli:= Tablo.StokVarmi( tabDonusumSepet.FieldByName('URUNID').AsInteger,
+        //                    tabDonusumSepet.FieldByName(donusumayarlari.depoalani).AsInteger,
+        //                    tabDonusumSepet.FieldByName('MIKTAR').AsFloat )
+        var LKalan: Double;
+        stokyeterli:= Tablo.StokCikisYeterliMi( tabDonusumSepet.FieldByName('URUNID').AsInteger,
+                            tabDonusumSepet.FieldByName(donusumayarlari.depoalani).AsInteger, 0,
+                            Tablo.GENINI.BugunTrh, tabDonusumSepet.FieldByName('MIKTAR').AsFloat, False, 0, LKalan);
+      end
       else
         stokyeterli:=True; // alış belgelerinde stok kontrolüne takılmadan işlemin devam etmesi için
       if stokyeterli then begin

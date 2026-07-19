@@ -407,7 +407,7 @@ object StokListeDlg: TStokListeDlg
       Height = 332
       Align = alClient
       TabOrder = 0
-      Properties.ActivePage = tshStokDurum
+      Properties.ActivePage = tshFiyatlar
       Properties.CustomButtons.Buttons = <>
       Properties.MultiLine = True
       OnPageChanging = PageControl1PageChanging
@@ -566,6 +566,10 @@ object StokListeDlg: TStokListeDlg
       object TabYorumMedya: TcxTabSheet
         Caption = 'Yorum / Medya'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Panel4: TPanel
           Left = 0
           Top = 260
@@ -626,6 +630,7 @@ object StokListeDlg: TStokListeDlg
           Properties.Alignment.Horz = taRightJustify
           Transparent = True
           Visible = False
+          ExplicitTop = 239
           AnchorX = 779
         end
         object GridYorum: TcxGrid
@@ -937,6 +942,10 @@ object StokListeDlg: TStokListeDlg
             object TabSheetSeriLot: TcxTabSheet
               Caption = 'Seri / Lot'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object GridSeriLot: TcxGrid
                 Left = 0
                 Top = 27
@@ -1061,6 +1070,10 @@ object StokListeDlg: TStokListeDlg
       object tshHareketler: TcxTabSheet
         Caption = 'Hareketler'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridHareket: TcxGrid
           Left = 0
           Top = 0
@@ -1315,6 +1328,10 @@ object StokListeDlg: TStokListeDlg
           object cxTabSheet4: TcxTabSheet
             Caption = 'Seri / Lot'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object GridSeriLotHareket: TcxGrid
               Left = 0
               Top = 0
@@ -1385,6 +1402,10 @@ object StokListeDlg: TStokListeDlg
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -1652,7 +1673,7 @@ object StokListeDlg: TStokListeDlg
   end
   object DtsStoklar: TDataSource
     DataSet = STOKLAR
-    Left = 89
+    Left = 137
     Top = 59
   end
   object STOKLAR: TFDQuery

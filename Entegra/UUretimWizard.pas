@@ -423,6 +423,7 @@ end;
 
 procedure TUretimWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum duzenleme = degisiklik -> snapshot'i yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabNo_URETIMFISI);
 end;
 
@@ -648,6 +649,7 @@ end;
 
 procedure TUretimWizardDlg.TabUretimBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek kart degisikligi -> snapshot'i yakala
   if LogGun>0 then begin
     Tablo.OncekiLogBelirle(TabUretim);
   end;
@@ -715,6 +717,7 @@ end;
 procedure TUretimWizardDlg.BtnMesajGonderClick(Sender: TObject);
 var ID : Integer;
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme = degisiklik -> yakala
    ID := Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName,  TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger, 0,TabYorum);
    //eğer dosya eklendiyse konusuna stok kod ve adını yazalım
    TabYorum.Last;
@@ -811,6 +814,7 @@ end;
 
 procedure TUretimWizardDlg.TabUretimBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: kart post = gercek degisiklik -> snapshot'i yakala
   BoslukKontrolu;
   if TabUretim.FieldByName('GIRISDEPO').AsInteger<=0 then begin
     Application.MessageBox(PChar(FTWGirisDeposuBosOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
@@ -922,6 +926,7 @@ end;
 procedure TUretimWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
    if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
+       ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme = degisiklik -> snapshot'i yakala
        Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
        Tabloyenile(TabYorum,[TabNo_URETIMFISI,TabUretim.FieldByName('ID').AsInteger]);
    end;
@@ -958,6 +963,7 @@ end;
 
 procedure TUretimWizardDlg.TabUretimDetayBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek detay degisikligi -> snapshot'i yakala
   UretimOncekiStokMiktar := TabUretimDetay.FieldByName('MIKTAR').AsFloat;
   UretimOncekiBirim := TabUretimDetay.FieldByName('BIRIM').AsInteger;
 end;
@@ -967,6 +973,7 @@ procedure TUretimWizardDlg.TabUretimDetayBeforePost(DataSet: TDataSet);
 var
   PasifIzleme:boolean;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: detay post = gercek degisiklik -> snapshot'i yakala
   //if not BoslukKontrol(TabUretimDetay.FieldByname('ADET').AsString, 'Fatura adet') then
     //Abort;
   //if not BoslukKontrol(TabUretimDetay.FieldByname('BIRIMFIYAT').AsString, 'Birim Fiyat') then
@@ -1053,6 +1060,7 @@ end;
 
 procedure TUretimWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme = degisiklik -> yakala
   Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder);
 end;
 
@@ -1066,6 +1074,7 @@ end;
 
 procedure TUretimWizardDlg.MenuTarayacidanEkleClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme = degisiklik -> yakala
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
@@ -1117,6 +1126,7 @@ end;
 
 procedure TUretimWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme = degisiklik -> snapshot'i yakala
    Tablo.GridYorumuSil(TabNo_URETIMFISI, TabUretim.FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -1189,7 +1199,9 @@ begin
    Ciksin := True;
    // Iptal (IptalSecildi=True) -> sor; Finish (WizardKontrolFinishButtonClick IptalSecildi:=False
    // yapar) -> SORMA (kaydet yolunda cift onay olmasin). FOturumID<>'' D-mod bosluğunu kapsar.
-   if (IptalSecildi) and (KaydetTus.Visible or (FOturumID<>'')) then
+   // LAZY: "kaydet?" sorusu yalniz GERCEK degisiklikte (yakalanmis snapshot ya da bekleyen
+   // duzenleme) -> sadece bakip cikinca sorMA. (FOturumID<>'' artik her D-modda dolu.)
+   if (IptalSecildi) and (KaydetTus.Visible or ULog.OturumYakalandiMi(FOturumID)) then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1234,12 +1246,12 @@ begin
       if Assigned(ctrl) then begin
          OutputDebugString(PChar(ctrl.Name));
          ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name), TUretimWizardDlg(Self), DtsUretim);
-         Tablo.AlanOlustur(TUretimWizardDlg(Self), -1,DtsUretim);
+         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name), TUretimWizardDlg(Self), Tablo.UserDataSourceHazirla(TUretimWizardDlg(Self), DtsUretim, 'FATBASLIK_USER'));
+         Tablo.AlanOlustur(TUretimWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TUretimWizardDlg(Self), DtsUretim, 'FATBASLIK_USER'));
       end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bileşen Düzenle
-      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name), TUretimWizardDlg(Self), DtsUretim);
-      Tablo.AlanOlustur(TUretimWizardDlg(Self), -1, DtsUretim);
+      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(EkAlanlarEkr.Name), TUretimWizardDlg(Self), Tablo.UserDataSourceHazirla(TUretimWizardDlg(Self), DtsUretim, 'FATBASLIK_USER'));
+      Tablo.AlanOlustur(TUretimWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TUretimWizardDlg(Self), DtsUretim, 'FATBASLIK_USER'));
   end;
 end;
 
@@ -1265,14 +1277,21 @@ begin
   TabloYenile(TabUretimDetay, [UretimID]);
 
   // Geri-alinabilir oturum (yalniz D=degistir): uretim fisi FATBASLIK/FATURA altyapisini kullanir.
+  // LAZY: sadece PLANI yaz (girmede snapshot ALINMAZ); ilk gercek degisiklikte OturumYakala
+  // yakalar (kart/detay Before* + Sil/dosya butonlari). Hic degismezse geri-yukleme YOK.
+  // [[snapshot-yakala-modified-degil-edit]]
   FOturumID := '';
-  if (IslemOp = 'D') and (UretimID > 0) then
-    FOturumID := ULog.OturumBaslat('FATBASLIK', UretimID,
+  if (IslemOp = 'D') and (UretimID > 0) then begin
+    if LogGun > 0 then
+      ULog.LogUserAcilis('FATBASLIK_USER', UretimID);
+    FOturumID := ULog.OturumBaslatPlan('FATBASLIK', UretimID,
       [ ULog.SnapTablo(1, 'FATBASLIK',  'ID=' + IntToStr(UretimID)),
+        ULog.SnapTablo(1, 'FATBASLIK_USER','ID=' + IntToStr(UretimID)),
         ULog.SnapTablo(2, 'FATURA',     'FATBASID=' + IntToStr(UretimID)),
         ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID)),
         ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + ')'),
         ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + '))') ]);
+  end;
 
   if (IslemOp='E') and (UretimID < 1) then begin
     TabUretim.Append;
@@ -1301,7 +1320,7 @@ begin
     BeditProje.Tag := TabUretim.FieldByName('PROJEID').AsInteger;
   end;
 
-  Tablo.AlanOlustur(TUretimWizardDlg(Self), -1, DtsUretim);
+  Tablo.AlanOlustur(TUretimWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TUretimWizardDlg(Self), DtsUretim, 'FATBASLIK_USER'));
 
 
   if (IslemOp='D')and(KilitKontrolEt(2, 6, TabUretim.FieldByName('TARIH').AsDateTime,2)) then begin
@@ -1498,6 +1517,7 @@ begin
      else
         TabUretim.Cancel;
   end;
+  Tablo.UserDataSourceKaydet(TUretimWizardDlg(Self), 'FATBASLIK_USER');
   UretimID := TabUretim.FieldByName('ID').AsInteger;
 
   // KART + DETAY loglama (TEK SEFER, Finish'te): edit -> LogKartDegisti, yeni -> LogKartEkle.
@@ -1507,6 +1527,7 @@ begin
     else
       FEkleLogland := LogKartEkle(TabUretim, TabNo_URETIMFISI,
         (IslemOp = 'E') or (IslemOp = 'K'), FEkleLogland) or FEkleLogland;
+    ULog.LogUserKaydet('FATBASLIK_USER', TabNo_FATBASLIK_USER, TabNo_URETIMFISI, UretimID, (IslemOp='E') or (IslemOp='K'));
     // Detay satirlari (ust=uretim fisi) diff.
     LogDiffKaydet(TabUretimDetay, FDetSnap, TabNo_URETIMFISDETAY, TabNo_URETIMFISI, UretimID);
     LogSnapshotAl(TabUretimDetay, FDetSnap);   // tazele (mukerrer save'i onle)
@@ -1716,7 +1737,11 @@ begin
   Tablo.Query2.open;
   Yetersiz:=False;
   while not Tablo.Query2.eof do begin
-    if not Tablo.StokVarmi( Tablo.Query2.Fields[0].AsInteger, TabUretim.FieldByName('CIKISDEPO').AsInteger, abs(Tablo.Query2.Fields[1].AsFloat), Tablo.Query2.Fields[2].AsString) then begin
+    //19.07.2026 AO: StokVarmi -> StokCikisYeterliMi (tarih-bazli; StokDurumKontrolKurali + mesaj helper icinde)
+    //if not Tablo.StokVarmi( Tablo.Query2.Fields[0].AsInteger, TabUretim.FieldByName('CIKISDEPO').AsInteger, abs(Tablo.Query2.Fields[1].AsFloat), Tablo.Query2.Fields[2].AsString) then begin
+    var LKalan: Double;
+    if not Tablo.StokCikisYeterliMi(Tablo.Query2.Fields[0].AsInteger, TabUretim.FieldByName('CIKISDEPO').AsInteger, 0,
+         TabUretim.FieldByName('FATURATARIH').AsDateTime, abs(Tablo.Query2.Fields[1].AsFloat), False, 0, LKalan) then begin
        Yetersiz := True;
        //TabFATURA.Cancel;
     end;
@@ -1998,6 +2023,7 @@ begin
 
    end;
    if (Silinebilir) and (Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_YES) then begin
+         ULog.OturumYakala(FOturumID);   // LAZY: satir silme = degisiklik -> snapshot'i yakala (SQL'den ONCE)
          if TabUretimDetay.FieldByName('ADET').AsFloat > 0 then
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' DELETE SL FROM FATURA F ' +
            		' INNER JOIN STOKIZLEME SI ON SI.BASLIKID = F.FATBASID AND SI.SATIRID = F.ID AND SI.BELGETUR = 6 '+

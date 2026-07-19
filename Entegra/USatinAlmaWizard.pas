@@ -326,6 +326,7 @@ end;
  }
 procedure TSatinAlmaWizard.btnSiparisSilClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: siparis silme -> yakala
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
       //varsa dokumanların silinmeli
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (19) and YER_ID=&yer_id ',['&yer_id'], [TabSiparisler.FieldbyName('ID').AsInteger]);
@@ -417,7 +418,7 @@ begin
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don.
   FOturumID := '';
   if (IslemOp = 'D') and (SatinAlmaID > 0) then
-    FOturumID := ULog.OturumBaslat('SATINALMA', SatinAlmaID,
+    FOturumID := ULog.OturumBaslatPlan('SATINALMA', SatinAlmaID,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'SATINALMA',      'ID=' + IntToStr(SatinAlmaID)),
         ULog.SnapTablo(2, 'SATINALMADETAY', 'SATINALMAID=' + IntToStr(SatinAlmaID)) ]);
 
@@ -615,24 +616,28 @@ end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satinalma ilk degisikligi -> yakala
   if LogGun > 0 then
     Tablo.OncekiLogBelirle(TabSatinAlma);
 end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: satinalma post -> yakala
   BoslukKontrolu;
   EkleyenDegistiren(DtsTabSatinAlma);
 end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaDetayBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: detay duzenleme -> yakala
   if TabSatinAlma.State in [dsEdit,dsInsert] then
     TabSatinAlma.Post;
 end;
 
 procedure TSatinAlmaWizard.TabSatinAlmaDetayBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: detay post -> yakala
   EkleyenDegistiren(DtsTabSatinAlmaDetay);
 end;
 
@@ -664,6 +669,7 @@ end;
 
 procedure TSatinAlmaWizard.TabTekliflerBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: teklif detay post -> yakala
   EkleyenDegistiren(DtsTabTeklifler);
 end;
 
@@ -690,7 +696,7 @@ end;
 procedure TSatinAlmaWizard.WizardKontrolCancelButtonClick(Sender: TObject);
 begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
-  if FOturumID <> '' then
+  if ULog.OturumYakalandiMi(FOturumID) or ((TabSatinAlma.State in [dsEdit, dsInsert]) and TabSatinAlma.Modified) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
       IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don

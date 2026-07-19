@@ -69,6 +69,7 @@ type
     procedure TvAlanTuruPropertiesCloseUp(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
+    function UserTabloAdi(const ATablo: string): string;
 
 
     { Private declarations }
@@ -85,7 +86,7 @@ type
   end;
 
 var
-  AlanlarDlg: TAlanlarDlg;
+  AlanlarDlg:  TAlanlarDlg;
 
 implementation
 Uses
@@ -193,6 +194,38 @@ begin
   end;
 end;
 
+function TAlanlarDlg.UserTabloAdi(const ATablo: string): string;
+var
+  LTablo, LUserTablo: string;
+  LQry: TFDQuery;
+begin
+  LTablo := UpperCase(Trim(ATablo));
+  Result := Trim(ATablo);
+  if (LTablo = '') or ((Length(LTablo) >= 5) and (Copy(LTablo, Length(LTablo) - 4, 5) = '_USER')) then
+    Exit;
+
+  if LTablo = 'STOK' then
+    LUserTablo := 'STOKLAR_USER'
+  else if LTablo = 'STOKLAR' then
+    LUserTablo := 'STOKLAR_USER'
+  else if LTablo = 'URETIMOPERASYONPERSONEL' then
+    LUserTablo := 'URETIMOPERASYONPERSONEL_USER'
+  else
+    LUserTablo := LTablo + '_USER';
+
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    LQry.SQL.Text := 'select ID=object_id(:TABLO, ''U'')';
+    LQry.ParamByName('TABLO').AsString := 'dbo.' + LUserTablo;
+    LQry.Open;
+    if not LQry.Fields[0].IsNull then
+      Result := LUserTablo;
+  finally
+    LQry.Free;
+  end;
+end;
+
 procedure TAlanlarDlg.TabAlanlarBeforePost(DataSet: TDataSet);
 begin
   if trim(TabAlanlar.FieldByName('TUR').AsString) = '' then begin
@@ -214,6 +247,8 @@ begin
      TabAlanlar.FieldByName('ARKARENK').Value:=clWhite;
   if trim(TabAlanlar.FieldByName('ALANADI').AsString)='' then
      TabAlanlar.FieldByName('ALANADI').Value:=Tablo.TurNameGetir(Tablo.TurkceHarfYokEt(TabAlanlar.FieldByName('CAPTION').AsString),TabAlanlar.FieldByName('TUR').Value);
+  if trim(TabAlanlar.FieldByName('TABLO').AsString)<>'' then
+     TabAlanlar.FieldByName('TABLO').AsString := UserTabloAdi(TabAlanlar.FieldByName('TABLO').AsString);
 
 end;
 

@@ -84,6 +84,8 @@ Yeni bir modülü loglarken **ham `OncekiLogBelirle`+`LogIslemleri` çağırma**
 | `LogDiffKaydet(DetayDs, FDetSnap, DetayTabNo, UstTabNo, UstID)` | Detay dataset'in açılış snapshot'ına göre diff'i |
 | `LogSnapshotAl(DetayDs, FDetSnap)` | Detay snapshot al/tazele (mükerrer save'i önler) |
 | `LogDetaylariSil(detayTablo, ustKolon, detayTabNo, ustTabNo, ustID)` | Detayları silmeden önce topluca logla |
+| `LogKayitSil(tablo, tabNo, kayitID, ustTabNo, ustID)` | Tek kaydı sil-logla; **WHERE anahtarı (kayitID) ≠ grup anahtarı (ustID)** (ör. karta dolaylı bağlı master). Silmeden önce |
+| `LogUserAcilis(userTablo, kartID)` / `LogUserKaydet(userTablo, userTabNo, ustTabNo, kartID, yeniMi)` | Kart ek-alan (`_USER`) audit: açılışta baseline, finish'te ekle/diff (bkz. §11) |
 
 Alt seviye: `LogYaz`, `LogKayitEkle`, `OncekiLogBelirle`, `LogIslemleri`, `LogReferansGuncelle`.
 
@@ -172,6 +174,65 @@ amaçlıdır. Ayrıntı: [[geri-alinabilir-oturum-snapshot]].
 
 ---
 
+## 11. `_USER` (kart ek kullanıcı alanları) + ID'siz/bileşik detaylar
+
+Kullanıcı-tanımlı ek alanlar artık kartın gövdesinde değil, `<KART>_USER` yan tablosunda tutulur
+(kart ile **1:1**, `_USER.ID = kart.ID`). Formda `CodexDts<TABLO>USER` dataseti
+(`Utablo.UserDataSourceHazirla` açar/oluşturur, `UserDataSourceKaydet` post eder).
+
+**Tablolar & TABLOID (500–512 bloğu):** DEMIRBAS_USER=500, DOKUMAN=501, FATBASLIK=502, FATURA=503,
+REHBER=504, SERVIS=505, SERVISHAREKET=506, SIPARIS=507, STOKLAR=508, TEKLIF=509, URETIMEMRI=510,
+URETIMOPERASYONPERSONEL=511, **DEMIRBAS_TUTANAK (master, hareket) = 512**.
+`Utablo.TabNo_*_USER` sabitleri + `TABLOLAR` kaydı (`sql_tablolar_kur.sql` / `GenDepoUpdate41.sql`).
+FK `_USER.ID → kart.ID ON DELETE CASCADE` (`GenDepoUpdate40.sql`) → kart silinince `_USER` otomatik gider.
+
+### Wizard entegrasyonu (kart-seviye `_USER`, demirbaş referans deseni)
+
+- **Açılış (edit):** `LogUserAcilis('<T>_USER', kartID)` — baseline (pozisyonel snapshot).
+- **İptal geri-al:** `OturumBaslatPlan([...])` dizisine `SnapTablo(1,'<T>_USER','ID='+kartID)`.
+- **Finish:** `UserDataSourceKaydet` `_USER`'i post ettikten **SONRA**, `LogUstModu` set iken:
+  `LogUserKaydet('<T>_USER', TabNo_<T>_USER, kartTabNo, kartID, yeniMi)` → yeni kart=tam EKLE,
+  düzenleme=açılış↔son **alan diff**. Kart grubuna bağlanır (UInfo'da kartla tek satır).
+- **Silme (kart delete'inden ÖNCE):** `LogDetaylariSil('<T>_USER','ID',TabNo_<T>_USER,kartTabNo,kartID)`.
+
+> **KRİTİK:** `LogUserKaydet` MUTLAKA `UserDataSourceKaydet`'ten **sonra** çalışmalı (yoksa DB'de eski
+> değeri okur, değişikliği kaçırır). Save ayrı metotta olan wizard'larda (Fatura `KaydetTusClick`→`LogKaydet`,
+> Servis `Kaydet`) çağrı save'den sonra gelir; Rehber/IK'da **Destroy fallback'e değil finish'e** koy.
+
+### ID'siz / bileşik anahtarlı detaylar (ör. `DEMIRBAS_TUTANAK_DETAY` = TUTANAKID+DEMIRBASID, ID yok)
+
+- `LogDetaylariSil` `FindField('ID')` ile toleranslı → ID kolonu yoksa `KAYITID=0`, **çökmez**
+  (eskiden `Field 'ID' not found` atıyordu).
+- `GeriKayitVarMi` `COL_LENGTH(tablo,'ID')` ile ID yoksa `False` döner → `GeriKayitEkle` (dinamik INSERT,
+  JSON kolonlarını yazar, IDENTITY sadece varsa) satırı geri ekler.
+- **Master kayıt** (ID'li ama karta doğrudan kolonla bağlı DEĞİL): `LogKayitSil` — `WHERE ID=kayitID`
+  ama grup `ustID`. Örnek: demirbaş silinince `DEMIRBAS_TUTANAK` master'ı (512, ID=tutanakID) demirbaş
+  grubuna loglanır. Geri Al sırası: **kart → master → detay-link → `_USER`** (master detaydan ÖNCE
+  loglandığı için log-ID sırası FK'yı korur).
+
+### Delete-audit yayılımı ve KAPSAM
+
+Kart-seviye `_USER`'in "Geri Al"da dirilmesi için **her silme yolunda** `LogDetaylariSil('<T>_USER',...)`
+gerekir (FK cascade satırı siler → **log fiziksel DELETE'ten ÖNCE** yazılmalı).
+
+**Sıralama kuralı (kritik):** `_USER` logu, parent tablosunun DELETE'inden önce çalışmalı. Kart-seviye
+`_USER` (parent = kart, en son silinir) için log satırını kartın kendi `delete from <KART>`'ından hemen
+öncesine koy → güvenli. **Satır-seviye** `_USER` (FATURA_USER→FATURA satırı gibi) parent satır ERKEN bir
+döngüde siliniyorsa, loglama o silmeden önceye alınmalı (bkz. `TTablo.FaturaSil`: kart+satır+FATURA_USER
+loglaması `delete from FATURA` döngüsünden önce; sıra **satır → satır-`_USER`** ki restore'da FK korunsun).
+Kural bozulursa `_USER` DB sorgusu boş döner (cascade gitmiştir) → sessizce loglanmaz.
+
+**Kapsanan (birincil, kullanıcı-yüzü silme yolları):** merkezi `Utablo` helper'ları
+(Stok/Fatura[FATBASLIK+FATURA_USER]/Sipariş/ÜretimEmri, cari REHBER, ServisSil→SERVISHAREKET_USER,
+FATBASLIK ikincil: tahakkuk/kasa/KASA-toplu) + liste-frame'ler (IK, Servis[+hareket], Teklif, Doküman)
++ demirbaş (liste + DEMIRBAS_TUTANAK master + wizard FormCloseQuery).
+
+**KAPSAM DIŞI (bilerek):** ~25 **toplu/anahtar-bazlı** (REHBER by KOD, FATBASLIK günsonu/sayım/MODUL,
+URETIMEMRI by URETIMPLANID, DOKUMAN by MODUL), **cascade/alt-silme** (UKasa2, banka-REHBER, UMekanMasaGor,
+UTahakkukDlg) ve **ölü/kopya** (`UReharadlg.adnan/.my`) silme yolları. Bunlar nadir + ek alan olası değil +
+toplu-grup semantiği audit modeline oturmuyor. **Yeni bir birincil silme yolu eklenince** `_USER` (ve
+gerekiyorsa kart) log satırını unutma; sıralama kuralına dikkat et.
+
 ## Modül loglama kontrol listesi (yeni modül eklerken)
 
 1. `TABLOLAR`'a TABLOID→ad (dev + GenDepoKur + sql_tablolar) + gerekiyorsa `LOGCOZUM` ID→ad.
@@ -181,4 +242,5 @@ amaçlıdır. Ayrıntı: [[geri-alinabilir-oturum-snapshot]].
 5. Detay: `FDetSnap` + `LogSnapshotAl` (açılışta) + `LogDiffKaydet`+`LogSnapshotAl` (finish);
    veya grid-tanım deseninde `LogDetaySatirPost` (BeforeEdit'te OncekiLogBelirle, NewRecord'da Clear).
 6. Grup tutarlılığı: metot başında `LogUstModu:=yeniMi?1:2`, FormClose'da `-1`.
-7. Test: UInfo Liste'de tek satır mı, İçerik doğru ad/tip mi, Geri Al çalışıyor mu.
+7. `_USER` ek-alan tablosu varsa (bkz. §11): açılış `LogUserAcilis`, finish `LogUserKaydet` (UserDataSourceKaydet'ten SONRA), İptal için `SnapTablo('<T>_USER')`, silmede `LogDetaylariSil('<T>_USER',...)`. TABLOLAR'a `<T>_USER` TABLOID'i ekle.
+8. Test: UInfo Liste'de tek satır mı, İçerik doğru ad/tip mi, Geri Al çalışıyor mu (kart + `_USER` + detaylar geri geliyor mu).

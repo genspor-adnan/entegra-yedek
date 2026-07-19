@@ -360,8 +360,11 @@ type
     FFrameBilgi: TIcerikFrameBilgi;
     KurIletZorunlu, PerIletZorunlu, PerOzlukZorunlu,
       PerUcretZorunlu: SmallInt;
+    FEkAlanKuruldu: Boolean;   // ek-alan (REHBER_USER) kontrolleri kuruldu mu (yeni kartta ID gelince kurulur)
+    FEkAlanKuruluyor: Boolean; // re-entry guard (Post/AlanOlustur sekme degisimini tekrar tetiklerse)
     // bo? kalan zorunlu alanlar? sayfalara g?re sayal?m.. next ve finish tu?lar?n?n visible lar?n? ayarlayal?m..
     function BoslukKontrolu: Boolean;
+    procedure CariPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
 
   public
     { Public declarations }
@@ -447,6 +450,16 @@ begin
   // if not BoslukKontrol(ComboKATEGORI.text, 'Kategori') then Abort;
   // if not BoslukKontrol(ComboSINIF.text, 'S?n?f') then Abort;
   BoslukKontrolu := False;
+end;
+
+procedure TIKWizardDlg.CariPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
+begin
+  // Yeni kart + ek-alan sekmesine gecis: personel (REHBER) kaydedilmemisse once kaydet (ID al),
+  // sonra ek-alan (REHBER_USER) kontrollerini kur. Zorunlu alan bos ise Post Abort eder -> gecme.
+  // Ortak mantik Tablo.EkAlanSekmeHazirla'da (re-entry/abort/kur).
+  if NewPage = SheetEkAlanlar then
+    Tablo.EkAlanSekmeHazirla(Self, TabRehber, DtsRehber, PanelEkAlanlar, 'REHBER_USER',
+      RehberID, FEkAlanKuruldu, FEkAlanKuruluyor, AllowChange);
 end;
 
 procedure TIKWizardDlg.ComboCinsiyetPropertiesCloseUp(Sender: TObject);
@@ -670,7 +683,8 @@ begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
       tablo.AlanlarDlgBaslat('E', 1, -1, ctrlPos.X, ctrlPos.Y, -1,
-        FindComponent(ctrl.Name), TIKWizardDlg(Self), DtsRehber);
+        FindComponent(ctrl.Name), TIKWizardDlg(Self), Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+      tablo.AlanOlustur(TIKWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
     end;
   end
   else if (Shift = [ssAlt, ssCtrl]) and (Key = Ord('D')) then
@@ -683,7 +697,8 @@ begin
 
       Tur := tablo.ComponentTurGetir(ctrl.ClassName);
       tablo.AlanlarDlgBaslat('D', 1, Tur, ctrlPos.X, ctrlPos.Y, ctrl.Tag,
-        FindComponent(PanelEkAlanlar.Name), TIKWizardDlg(Self), DtsRehber);
+        FindComponent(PanelEkAlanlar.Name), TIKWizardDlg(Self), Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+      tablo.AlanOlustur(TIKWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
     end;
   end
   else if (Shift = [ssAlt, ssCtrl]) and (Key = Ord('S')) then
@@ -714,7 +729,7 @@ begin
           end;
           ctrl.Visible := False;
           //tablo.AlanOlustur(FindComponent(PanelEkAlanlar.Name),TIKWizardDlg(Self), -1, DtsRehber);
-          tablo.AlanOlustur(TIKWizardDlg(Self), -1, DtsRehber);
+          tablo.AlanOlustur(TIKWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
         end;
       end;
     end;
@@ -739,9 +754,6 @@ begin
 
   KNo :='';
 
-//a  if PanelEkAlanlar <> nil then
-//a     tablo.AlanOlustur(TIKWizardDlg(Self), -1, DtsRehber);
-
   //if  then begin // CariOpsiyon  CariKodGirisi
   KodAgaciTus.Visible := (not Potansiyel)and(tablo.GENINI.ReadInteger(Ops_OpsiyonCari_PersKodGirisi, 2) = 2);
   EditKOD.Enabled := (not Potansiyel)and(not KodAgaciTus.Visible);
@@ -763,6 +775,19 @@ begin
       //ResimGetir(RehberID, 11, RehberID, LogoResim);
   end;
 
+  // Ek alan (REHBER_USER): MEVCUT kartta (ID>0) hemen kur. YENI kartta ID yok -> ek-alan sekmesine
+  // gecince personel kaydedilip ID alinca kurulur (CariPageControlPageChanging).
+  if CariPageControl <> nil then
+     CariPageControl.OnPageChanging := CariPageControlPageChanging;
+  if (PanelEkAlanlar <> nil) and (RehberID > 0) then
+  begin
+     tablo.AlanOlustur(TIKWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+     FEkAlanKuruldu := True;
+  end;
+  // Ek alan olusturulunca SheetEkAlanlar aktiflesiyor -> varsayilan Notlar sekmesine dondur.
+  if (CariPageControl <> nil) and (SheetNotlar <> nil) then
+     CariPageControl.ActivePage := SheetNotlar;
+
   GiristekiRehberId:= TabRehber.Fields[0].AsString;
 
   if Potansiyel then
@@ -774,9 +799,13 @@ begin
   // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ(blob)+ucret/rol KAPSAM DISI.
   FOturumID := '';
   if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
+  begin
+    if LogGun > 0 then
+      ULog.LogUserAcilis('REHBER_USER', RehberID);
     FOturumID := ULog.OturumBaslatPlan('REHBER', RehberID,   // LAZY: plan bellekte, bakmada SNAPSHOT bos
       [ // --- Ana personel ---
         ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(1, 'REHBER_USER','ID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'IMAJ',           'YERI=71 and YER_ID=' + IntToStr(RehberID)),   // 71=REHBER: profil resmi (LogoResim/RESIM cache); DOSYA icerigi pin ile korunur
         ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
@@ -792,6 +821,7 @@ begin
         ULog.SnapTablo(7, 'GOREVYORUM',     'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')'),
         ULog.SnapTablo(8, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + ')'),
         ULog.SnapTablo(9, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'GOREVID=' + IntToStr(RehberID) + ' and (TUR between 11 and 13 or TUR=' + IntToStr(TabloNo) + ')' + '))') ]);
+  end;
 
   if (EditKOD.Visible)and(EditKOD.Enabled) then
      EditKOD.SetFocus;
@@ -1808,13 +1838,18 @@ begin
   if (Ust = 2) and (DtsPers.DataSet.State in [dsEdit, dsInsert]) then
       DtsPers.DataSet.Cancel;
 
-  if (Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. Onun i?in kayd? silece?iz
+  if (Cagiran=0)and(TabRehber.Fields[0].AsInteger>0)and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. ID>0: -1/0 placeholder'da REHBERID=-1 mesru kayitlari SILME
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERILETISIM RI WHERE RI.ID=REHBERBILGI.YER_ID AND RI.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=1 )',[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERILETISIM where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERPERSONEL RP WHERE RP.ID=REHBERBILGI.YER_ID AND RP.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=4 )',[],[]);
+     veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER_USER WHERE ID in (SELECT ID FROM REHBER where GRUP=334 and BAGID = '+TabRehber.Fields[0].AsString+')',[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER where GRUP=334 and BAGID = '+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
+     veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER_USER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+     // Personel'e bagli FATBASLIK (ucret/tahakkuk) + FATURA satirlari -> REHBER silinmeden once (FK).
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM FATURA WHERE FATBASID IN (SELECT ID FROM FATBASLIK WHERE REHBERID='+TabRehber.Fields[0].AsString+')',[],[]);
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM FATBASLIK WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
   end
   else if FOturumID <> '' then
@@ -2010,6 +2045,10 @@ begin
            TabRehber.FieldByName('KOD').AsString:= TabRehber.FieldByName('ID').AsString;
            TabRehber.Post;
         end;
+        Tablo.UserDataSourceKaydet(TIKWizardDlg(Self), 'REHBER_USER');
+        // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
+        if LogGun > 0 then
+          ULog.LogUserKaydet('REHBER_USER', TabNo_REHBER_USER, TabloNo, TabRehber.FieldByName('ID').AsInteger, KartIslemi = 1);
         // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
         // AfterPost'tan buraya tasindi (sayfa gecislerinde mukerrer loglamayi onlemek icin).
         if LogGun > 0 then begin

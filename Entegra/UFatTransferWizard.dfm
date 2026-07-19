@@ -73,8 +73,6 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       OnNextButtonClick = FaturaEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelUst: TPanel
         Left = 0
         Top = 70
@@ -591,6 +589,12 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
               Options.Editing = False
               Styles.Header = cxStyle8
               Width = 194
+            end
+            object GridFaturaViewHUCRE: TcxGridDBColumn
+              Caption = 'Raf'
+              DataBinding.FieldName = 'HUCRE'
+              Options.Editing = False
+              Width = 70
             end
             object GridFaturaViewADET1: TcxGridDBColumn
               Caption = 'Adet'
@@ -1221,6 +1225,12 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
       FieldName = 'KOD'
       Calculated = True
     end
+    object TabFaturaHUCRE: TWideStringField
+      FieldKind = fkCalculated
+      FieldName = 'HUCRE'
+      Size = 50
+      Calculated = True
+    end
     object TabFaturaPROJEID: TIntegerField
       FieldName = 'PROJEID'
     end
@@ -1330,6 +1340,9 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
         '   KOD =  CASE WHEN F.TUR =0 THEN (SELECT KOD FROM MASRAFGELIR W' +
         'HERE ID= F.URUNID ) ELSE (SELECT KOD FROM STOKLAR WHERE ID = F.U' +
         'RUNID )  END,'
+
+        '   HUCRE = CASE WHEN F.TUR =0 THEN '#39#39' ELSE (SELECT HUCRE FROM ST' +
+        'OKLAR WHERE ID = F.URUNID ) END,'
       
         'PROJEKODU=(Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJE' +
         'ID)'

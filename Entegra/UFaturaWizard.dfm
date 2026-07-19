@@ -140,8 +140,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
-        ExplicitTop = 274
-        ExplicitHeight = 336
         object PanelAlt: TPanel
           Left = 1
           Top = 167
@@ -157,7 +155,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
-          ExplicitTop = 170
           DesignSize = (
             1102
             165)
@@ -823,7 +820,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
-          ExplicitHeight = 145
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -896,6 +892,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             OptionsData.Deleting = False
             OptionsData.DeletingConfirmation = False
             OptionsData.Inserting = False
+            OptionsSelection.MultiSelect = True
             OptionsSelection.HideFocusRectOnExit = False
             OptionsSelection.InvertSelect = False
             OptionsSelection.UnselectFocusedRecordOnExit = False
@@ -938,6 +935,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Caption = #220'r'#252'n No'
               DataBinding.FieldName = 'URUNNO'
               Width = 80
+            end
+            object GridFaturaViewHUCRE: TcxGridDBColumn
+              Caption = 'Raf'
+              DataBinding.FieldName = 'HUCRE'
+              Options.Editing = False
+              Width = 70
             end
             object GridFaturaViewAD: TcxGridDBColumn
               Caption = 'Ad'
@@ -1690,7 +1693,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         OnChange = PageUstChange
-        ExplicitTop = 102
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -2597,10 +2599,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2641,7 +2639,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ShowCaptions = True
         TabOrder = 8
         Transparent = True
-        ExplicitHeight = 29
         object KaydetTus: TToolButton
           Left = 0
           Top = 0
@@ -2999,8 +2996,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = PlanlamaEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3357,8 +3352,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object PopupMenuFatura: TPopupMenu
     OnPopup = PopupMenuFaturaPopup
-    Left = 498
-    Top = 142
+    Left = 458
+    Top = 110
     object info1: TMenuItem
       Caption = 'info'
       OnClick = info1Click
@@ -3564,13 +3559,9 @@ object FaturaWizardDlg: TFaturaWizardDlg
     object N5: TMenuItem
       Caption = '-'
     end
-    object MalFazlasDzenle1: TMenuItem
-      Caption = 'Mal Fazlas'#305' D'#252'zenle'
-      OnClick = MalFazlasDzenle1Click
-    end
-    object KampanyaDzenle1: TMenuItem
-      Caption = 'Kampanya D'#252'zenle'
-      OnClick = KampanyaDzenle1Click
+    object IhracatBilgileriMenu: TMenuItem
+      Caption = #304'hracat Bilgilerini D'#252'zenle'
+      OnClick = IhracatBilgileriMenuClick
     end
     object IzlemBilgileriniDzenleMenu: TMenuItem
       Caption = #304'zlem Bilgilerini D'#252'zenle'
@@ -4075,6 +4066,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Size = 100
       Calculated = True
     end
+    object TabFaturaHUCRE: TWideStringField
+      FieldKind = fkCalculated
+      FieldName = 'HUCRE'
+      Size = 50
+      Calculated = True
+    end
     object TabFaturaMALIYET: TCurrencyField
       FieldKind = fkCalculated
       FieldName = 'MALIYET'
@@ -4239,8 +4236,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 222
-    Top = 6
+    Left = 198
+    Top = 14
   end
   object TabPlan: TFDQuery
     AfterOpen = TabPlanAfterOpen
@@ -4624,8 +4621,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object PopupYorumlar: TPopupMenu
     OnPopup = PopupYorumlarPopup
-    Left = 864
-    Top = 144
+    Left = 928
+    Top = 152
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       OnClick = YorumDzenle1Click
@@ -4976,8 +4973,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object PopupMenuTipDegis: TPopupMenu
     OnPopup = PopupMenuTipDegisPopup
-    Left = 621
-    Top = 98
+    Left = 581
+    Top = 82
     object MenuTipiIade: TMenuItem
       Caption = 'Tipini '#304'ade Yap'
       ImageIndex = 0
@@ -5008,6 +5005,9 @@ object FaturaWizardDlg: TFaturaWizardDlg
       
         'URUNNO = CASE WHEN F.TUR = 0 THEN '#39#39' ELSE (SELECT S.URUNNO FROM ' +
         'STOKLAR S WHERE S.ID = F.URUNID) END,'
+      
+        'HUCRE = CASE WHEN F.TUR = 0 THEN '#39#39' ELSE (SELECT S.HUCRE FROM ST' +
+        'OKLAR S WHERE S.ID = F.URUNID) END,'
       
         'MALIYET = F.MIKTAR * (SELECT TOP 1 SOM.BIRIMMALIYET FROM STOK_OR' +
         'T_MALIYET SOM WHERE F.ID = SOM.FATURAID),'

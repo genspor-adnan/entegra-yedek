@@ -1,4 +1,4 @@
-﻿unit  URehberWizard;
+﻿unit URehberWizard;
 
 interface
 
@@ -367,8 +367,11 @@ type
     { Private declarations }
     FFrameBilgi: TIcerikFrameBilgi;
     KurIletZorunlu, TicariZorunlu, PerIletZorunlu : SmallInt;
+    FEkAlanKuruldu: Boolean;   // ek-alan (REHBER_USER) kontrolleri kuruldu mu (yeni kartta ID gelince kurulur)
+    FEkAlanKuruluyor: Boolean; // re-entry guard (Post/AlanOlustur sekme degisimini tekrar tetiklerse)
     // bo? kalan zorunlu alanlar? sayfalara g?re sayal?m.. next ve finish tu?lar?n?n visible lar?n? ayarlayal?m..
     function BoslukKontrolu: Boolean;
+    procedure CariPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     // Vergi No sorup izibiz NACE/mukellef bilgisini ceker, REHBER.ID olusturup
     // donen bilgileri ilgili alanlara (FIRMA + REHBERBILGI) yazar.
     procedure VeriAlNACE;
@@ -467,6 +470,15 @@ begin
   if (Tablo.GENINI.ReadBoolean(Ops_OpsiyonCari_Zorunlu_ALTBOLGE,False))and(not BoslukKontrol(ComboAltBolge.Text,KontrolAltBolge)) then
     Abort;
   BoslukKontrolu := False;
+end;
+
+procedure TRehberWizardDlg.CariPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
+begin
+  // Yeni kart + ek-alan sekmesine gecis: kart kaydedilmemisse Post et (ID al), ek-alani kur.
+  // Ortak mantik Tablo.EkAlanSekmeHazirla'da (re-entry/abort/kur).
+  if NewPage = SheetEkAlanlar then
+    Tablo.EkAlanSekmeHazirla(Self, TabRehber, DtsRehber, PanelEkAlanlar, 'REHBER_USER',
+      RehberID, FEkAlanKuruldu, FEkAlanKuruluyor, AllowChange);
 end;
 
 procedure TRehberWizardDlg.CheckPersonelClick(Sender: TObject);
@@ -869,14 +881,14 @@ begin
       begin
         OutputDebugString(PChar(ctrl.Name));
         ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-        tablo.AlanlarDlgBaslat('E', 1, -1, ctrlPos.X, ctrlPos.Y, -1,FindComponent(ctrl.Name), TRehberWizardDlg(Self), DtsRehber);
-        tablo.AlanOlustur(TRehberWizardDlg(Self), -1, DtsRehber);
+        tablo.AlanlarDlgBaslat('E', 1, -1, ctrlPos.X, ctrlPos.Y, -1,FindComponent(ctrl.Name), TRehberWizardDlg(Self), Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+        tablo.AlanOlustur(TRehberWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
       end;
   end
   else if (Shift = [ssAlt, ssCtrl]) and (Key = Ord('D')) then begin
       tablo.AlanlarDlgBaslat('D', 1, 0, ctrlPos.X, ctrlPos.Y, 0,
-                              FindComponent(PanelEkAlanlar.Name), TRehberWizardDlg(Self), DtsRehber);
-      tablo.AlanOlustur(TRehberWizardDlg(Self), -1, DtsRehber);
+                              FindComponent(PanelEkAlanlar.Name), TRehberWizardDlg(Self), Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+      tablo.AlanOlustur(TRehberWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
   end;
 end;
 
@@ -894,10 +906,6 @@ begin
       BtnDosyaGonder.OnClick := MenuKlasordenEkleClick;
       BtnDosyaGonder.DropDownMenu := nil;
    end;
-
-  if PanelEkAlanlar <> nil then
-//    tablo.AlanOlustur(FindComponent(PanelEkAlanlar.Name),TRehberWizardDlg(Self), -1, DtsRehber);
-    tablo.AlanOlustur(TRehberWizardDlg(Self), -1, DtsRehber);
 
   if (not Potansiyel)and(tablo.GENINI.ReadInteger(Ops_OpsiyonCari_CariKodGirisi, 2) <> 2) then begin // CariOpsiyon  CariKodGirisi
      KodAgaciTus.Visible := False;
@@ -954,6 +962,20 @@ begin
     //ResimGetir(RehberID, Tabno_Rehber, RehberID, LogoResim);
 
   end;
+
+  // Ek alan (REHBER_USER): MEVCUT kartta (ID>0) hemen kur. YENI kartta ID yok -> ek-alan sekmesine
+  // gecince REHBER kaydedilip ID alinca kurulur (CariPageControlPageChanging).
+  if CariPageControl <> nil then
+     CariPageControl.OnPageChanging := CariPageControlPageChanging;
+  if (PanelEkAlanlar <> nil) and (RehberID > 0) then
+  begin
+    tablo.AlanOlustur(TRehberWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
+    FEkAlanKuruldu := True;
+  end;
+  // Ek alan olusturulunca SheetEkAlanlar aktiflesiyor -> varsayilan Notlar sekmesine dondur.
+  if (CariPageControl <> nil) and (SheetNotlar <> nil) then
+     CariPageControl.ActivePage := SheetNotlar;
+
   OncekiTemsilciId := TabRehber.FieldByName('TEMSILCI').AsInteger;
   GiristekiRehberId:= TabRehber.Fields[0].AsString;
 
@@ -961,6 +983,8 @@ begin
   // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ (blob) KAPSAM DISI.
   // REHBERBILGI 3 YERI: 1=iletisim (REHBERILETISIM uzerinden), 4=personel (REHBERPERSONEL),
   // 2-3=firma dogrudan (YER_ID=REHBER.ID). SIRA: ust once (REHBER<ILETISIM/PERSONEL<BILGI).
+  if LogGun > 0 then
+    ULog.LogUserAcilis('REHBER_USER', RehberID);
   FOturumID := '';
   if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
     // LAZY: sadece PLANI yaz (bakmada is YOK). Ilk gercek degisiklikte OturumYakala(FOturumID)
@@ -968,6 +992,7 @@ begin
     FOturumID := ULog.OturumBaslatPlan('REHBER', RehberID,
       [ // --- Ana cari ---
         ULog.SnapTablo(1, 'REHBER',         'ID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(1, 'REHBER_USER',    'ID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'IMAJ',           'YERI=71 and YER_ID=' + IntToStr(RehberID)),   // 71=REHBER: profil resmi (LogoResim/RESIM cache); DOSYA icerigi pin ile korunur
         ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
@@ -2183,14 +2208,17 @@ begin
       IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
       // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
     end;
-  if (Cagiran=0)and(TabRehber.Fields[0].AsString<>'')and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. Onun i?in kayd? silece?iz
+  if (Cagiran=0)and(TabRehber.Fields[0].AsInteger>0)and(TabRehber.Fields[0].AsString<>GiristekiRehberId) then begin//?ptal edildi ama kay?t olmu?. ID>0: -1/0 placeholder'da REHBERID=-1 mesru kayitlari SILME
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERILETISIM RI WHERE RI.ID=REHBERBILGI.YER_ID AND RI.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=1 )',[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERILETISIM where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERPERSONEL RP WHERE RP.ID=REHBERBILGI.YER_ID AND RP.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=4 )',[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERPERSONEL where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
-      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+      if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from FATBASLIK where REHBERID=&ID', ['&ID'], [TabRehber.Fields[0].AsInteger]) then begin
+        veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER_USER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+        veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);
+      end;
   end
   else if FOturumID <> '' then
   begin
@@ -2278,6 +2306,10 @@ begin
         end;  }
         if TabRehber.state in [dsEdit, dsInsert] then
            TabRehber.Post;
+        Tablo.UserDataSourceKaydet(TRehberWizardDlg(Self), 'REHBER_USER');
+        // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
+        if LogGun > 0 then
+          ULog.LogUserKaydet('REHBER_USER', TabNo_REHBER_USER, TabNo_REHBER, RehberID, YeniKayit);
         //uyar? ya da yasak varsa durumu ona g?re de?i?tirir
         Tablo.CariDurumUpdate(RehberID);
 

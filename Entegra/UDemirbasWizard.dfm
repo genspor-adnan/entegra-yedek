@@ -125,8 +125,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         Properties.CustomButtons.Buttons = <>
         LookAndFeel.Kind = lfStandard
         OnChange = cxPageControl1Change
-        ExplicitTop = 214
-        ExplicitHeight = 329
         ClientRectBottom = 322
         ClientRectLeft = 4
         ClientRectRight = 811
@@ -134,7 +132,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Genel '#214'zellikler'
           ImageIndex = 0
-          ExplicitHeight = 298
           object Label1: TcxLabel
             Tag = 21
             Left = 323
@@ -593,6 +590,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object TabSheetMasraf: TcxTabSheet
           Caption = 'Masraf Kalemi'
           ImageIndex = 2
+          ExplicitHeight = 298
           object ToolBar4: TToolBar
             Left = 0
             Top = 0
@@ -682,6 +680,10 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object TabSheetAmortisman: TcxTabSheet
           Caption = 'Amortisman'
           ImageIndex = 6
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxLabel21: TcxLabel
             Left = 3
             Top = 83
@@ -834,7 +836,6 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         ShowCaptions = True
         TabOrder = 2
         Transparent = True
-        ExplicitHeight = 29
         object YaziciYaz: TToolButton
           Left = 0
           Top = 0
@@ -1191,6 +1192,10 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alan'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -1215,6 +1220,8 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 502
@@ -1275,6 +1282,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 481
         AnchorX = 815
       end
       object GridYorum: TcxGrid
@@ -1633,23 +1641,56 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
   object frxDemirbasTarihce: TfrxDBDataset
     UserName = 'DemirbasTarihce'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'TARIH=TARIH'
-      'TIP=TIP'
-      'TUTANAK=TUTANAK'
-      'LOKASYONID=LOKASYONID'
-      'LOKASYON=LOKASYON'
-      'ZIMMETALAN=ZIMMETALAN'
-      'ALANID=ALANID'
-      'ZIMMETVEREN=ZIMMETVEREN'
-      'VERENID=VERENID'
-      'DEMIRBASID=DEMIRBASID')
     DataSet = tabDemirbasTarihce
     BCDToCurrency = False
     DataSetOptions = []
     Left = 23
     Top = 324
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'TARIH'
+        FieldAlias = 'TARIH'
+      end
+      item
+        FieldName = 'TIP'
+        FieldAlias = 'TIP'
+      end
+      item
+        FieldName = 'TUTANAK'
+        FieldAlias = 'TUTANAK'
+      end
+      item
+        FieldName = 'LOKASYONID'
+        FieldAlias = 'LOKASYONID'
+      end
+      item
+        FieldName = 'LOKASYON'
+        FieldAlias = 'LOKASYON'
+      end
+      item
+        FieldName = 'ZIMMETALAN'
+        FieldAlias = 'ZIMMETALAN'
+      end
+      item
+        FieldName = 'ALANID'
+        FieldAlias = 'ALANID'
+      end
+      item
+        FieldName = 'ZIMMETVEREN'
+        FieldAlias = 'ZIMMETVEREN'
+      end
+      item
+        FieldName = 'VERENID'
+        FieldAlias = 'VERENID'
+      end
+      item
+        FieldName = 'DEMIRBASID'
+        FieldAlias = 'DEMIRBASID'
+      end>
   end
   object TabDemirbasfrx: TFDQuery
     Connection = Tablo.FDCnn
@@ -1862,22 +1903,22 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 488
     Top = 292
     object MenuKlasordenEkle: TMenuItem

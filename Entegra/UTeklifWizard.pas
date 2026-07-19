@@ -1384,7 +1384,8 @@ begin
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TTeklifWizardDlg(Self),DtsTeklif);
+      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TTeklifWizardDlg(Self),Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
+      Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bile?en D?zenle
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -1393,7 +1394,8 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
 
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
-      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(TabSheetEkAlanlar.Name),TTeklifWizardDlg(Self),DtsTeklif);
+      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(TabSheetEkAlanlar.Name),TTeklifWizardDlg(Self),Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
+      Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bile?en Sil
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -1410,7 +1412,7 @@ begin
          end;
            ctrl.Visible := False;
            //Tablo.AlanOlustur(FindComponent(TabSheetEkAlanlar.Name),TTeklifWizardDlg(Self),-1,DtsTeklif);
-           Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,DtsTeklif);
+           Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
        end;
      end;
     end;
@@ -1487,8 +1489,6 @@ begin
      LblSube.Visible:=False;
      ComboSube.Visible:=False;
   end;
-  if TabSheetEkAlanlar<>nil then
-     Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,DtsTeklif);
   TarihceTabloAc;
   Kilit := False;
   case IslemOp of
@@ -1554,6 +1554,8 @@ begin
            RevizeTus.Visible:=true;
          end;
   end;
+  if TabSheetEkAlanlar<>nil then
+     Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
   Skroll;
   FirmaBilgileri;
 ////////TekliF Detay bilgileri
@@ -1581,9 +1583,12 @@ begin
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
   // ilk hale don. IMAJ(blob)+DOKUMAN kapsam disi. (TEKLIF + TEKLIFDETAY + yorum.)
   FOturumID := '';
+  if LogGun > 0 then
+    ULog.LogUserAcilis('TEKLIF_USER', TabTeklif.FieldByName('ID').AsInteger);
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('TEKLIF', TabTeklif.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'TEKLIF',         'ID=' + TabTeklif.FieldByName('ID').AsString),
+        ULog.SnapTablo(1, 'TEKLIF_USER',    'ID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFDETAY',    'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'TEKLIFFINANSAL', 'TEKLIFID=' + TabTeklif.FieldByName('ID').AsString),
         ULog.SnapTablo(2, 'GOREVYORUM',     'TUR=' + IntToStr(TabNo_TEKLIF) + ' and GOREVID=' + TabTeklif.FieldByName('ID').AsString),
@@ -1812,6 +1817,10 @@ begin
     Delete(s, pos('&',s), 1);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update TEKLIF Set SABLONID = (Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ) Where ID='+TabTeklif.Fields[0].AsString+' ',[],[]);
   end;
+  Tablo.UserDataSourceKaydet(TTeklifWizardDlg(Self), 'TEKLIF_USER');
+  // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
+  if LogGun > 0 then
+    ULog.LogUserKaydet('TEKLIF_USER', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger, (IslemOp='E') or (IslemOp='K'));
 
    if TabTeklifDetay.State in [dsInsert, dsEdit] then begin
     TabTeklifDetay.post;

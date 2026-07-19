@@ -3320,15 +3320,6 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
       Size = 5
       Calculated = True
     end
-    object TabUretimOperasyonPersonelADET: TFloatField
-      FieldName = 'ADET'
-    end
-    object TabUretimOperasyonPersonelBIRIM: TIntegerField
-      FieldName = 'BIRIM'
-    end
-    object TabUretimOperasyonPersonelMIKTAR: TFloatField
-      FieldName = 'MIKTAR'
-    end
     object TabUretimOperasyonPersonelKONUSU: TWideStringField
       FieldName = 'KONUSU'
       Size = 100

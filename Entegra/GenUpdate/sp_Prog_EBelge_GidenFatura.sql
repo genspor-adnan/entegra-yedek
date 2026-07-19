@@ -61,6 +61,7 @@ BEGIN
         ACIKLAMA2 = ISNULL(FB.ACIKLAMA2, N''),
         KUR = ISNULL(NULLIF(FB.KUR, N''), N'TL'),
         FB.TIPI,
+        FB.PLANID,   -- tevkifat/istisna nedeni (Tipi=22 tevkifat, Tipi=24 KDV istisna); UEBelgeOlusturucu ABaslik.PlanID okur
         FB.REHBERID,
         FB.DOVIZ_TUTARI,
         FB.DOVIZ_CINSI,

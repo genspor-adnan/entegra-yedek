@@ -3,7 +3,7 @@
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils,   WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
   StdCtrls, Forms, DBCtrls, DB, DBGrids, Grids, ExtCtrls, dxCore,
   Dialogs, Buttons, Mask, Menus, IniFiles, ComCtrls, FireDAC.Comp.Client, cxStyles,
   cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, cxDBData,
@@ -948,6 +948,7 @@ var
   RehberAraDlg :TRehberAraDlg;
   rehberdetayaktif : Boolean;
   SonAranan : Boolean;
+  FIlkSonAranan : Boolean;   // ilk acilista Son Aranan (5) goster (JvTimer'de)
   dene1,dene2 : string;
 
 implementation
@@ -2201,6 +2202,9 @@ begin
   end;
   if Sektor = Sektor_OtomotivServis then
     cxDBTreeList1cxDBTreeListSERINO.Caption.Text := 'Plaka No';
+  FIlkSonAranan := True;   // ilk acilis: JvTimer'de Son Aranan (5) yuklensin
+  JvTimer1.Interval := 700;
+  JvTimer1.Enabled := True;   // Cari acilista JvTimer kendiliginden tetiklenmiyor -> tetikle
 end;
 
 procedure TRehberAraDlg.Bayraklaretle1Click(Sender: TObject);
@@ -3010,18 +3014,9 @@ var
 begin
    ID := Tablo.RehberSihirbazBaslat(0,-100,-100,-100, AktifSekme='TAksiyonlarGorevFrame');
    if ID > 0 then begin
-      REHBER.Close;
-      SubSelectGetir;
-      SQL := SorguyaTabloEkle(StringReplace(SQLMemo.Text,'<Param>',' '+Paramst+' ',[rfReplaceAll]));
-      REHBER.SQL.Text := SQL +' and R.ID='+IntToStr(ID);
-      if SubeVarmi then
-        REHBER.SQL.Add(' and R.SUBEID in('+Tablo.YetkiliSubeleriGetir(22,YetkiTur_Gorme)+') ');
-      if FArama.AraYetkili.Text <> '' then
-         Param := 1
-      else
-         Param := 0;
-      //REHBER.open;
-      TabloYenile(REHBER,[Param]);
+      Tablo.AramaKaydet(MODUL_Cari, ID);   // yeni cari -> Son Aranan
+      Liste_SP_Cagir(5);                    // Son Aranan (en yeni ustte)
+      REHBER.Locate('ID', ID, []);
   end;
   CariGridView.DataController.FocusedRecordIndex:=0;
  // CariGridView.ViewData.Records[0].Selected := True;
@@ -3122,11 +3117,11 @@ begin
      TabloNo := TabNo_REHBER;
      FArama.CheckPotansiyel.caption := 'Potansiyelde de Ara';
   end;
-  Rehber.Close;
+//  Rehber.Close;
 
 
   FArama.AraFirma.SetFocus;
-  if (FArama.AraFirma.Text <> '') or (FArama.AraYetkili.Text <> '') or (FArama.AraKod.Text <> '') then //10012008HA
+  if  (FArama.AraFirma.Text <> '') or (FArama.AraYetkili.Text <> '') or (FArama.AraKod.Text <> '') then //10012008HA
       AraTusClick(nil);
 end;
 
@@ -3482,6 +3477,7 @@ begin
   JvTimer1.Enabled := False;
   { Arama kismi henuz baslatilmadi ise cik }
   if not Assigned(FArama) then Exit;
+  if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;   // ilk acilis: Son Aranan
   { ilk acildiginda butun kayitlar listelenmesin (Adnan) - hicbir filtre yoksa cik }
   if (FArama.AraFirma.Text='')and(FArama.AraYetkili.Text='') and(FArama.comboTemsilci.Text='') and(FArama.Arailler.Text='')and(FArama.AraOzelKod.Text='')
       and(FArama.AraKod.Text='')and(FArama.ComboGrup.Text='')and(FArama.ComboKategori.Text='')and(FArama.ComboSinif.Text='')
@@ -3517,9 +3513,9 @@ begin
 
   // TopN: yalniz normal filtre (ItemIndex=0) TOP uygular; digerleri TOP'suz
   if (AMod = 4) and (AnalizIdx = 0) then
-     TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 0)
+     TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 100)
   else
-     TopN := 0;
+     TopN := 100;
 
   if FArama.AraKod.Text <> '' then OrderCol := 1 else OrderCol := 0;  // KOD / FIRMA
   if FArama.ComboGrup.Text  <> '' then GrupID  := StrToIntDef(VarToStr(FArama.ComboGrup.EditValue), 0)  else GrupID  := 0;

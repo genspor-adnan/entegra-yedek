@@ -78,6 +78,8 @@ object RehberWizardDlg: TRehberWizardDlg
       OnPage = GirisEkrPage
       OnNextButtonClick = GirisEkrNextButtonClick
       WaterMark.Visible = False
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel1: TPanel
         Left = 0
         Top = 70
@@ -812,6 +814,10 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -849,6 +855,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1161,6 +1169,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = TicariEkrEnterPage
       OnPage = TicariEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1358,6 +1368,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1663,6 +1675,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 491
@@ -1723,6 +1737,7 @@ object RehberWizardDlg: TRehberWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 470
         AnchorX = 755
       end
       object GridYorum: TcxGrid
@@ -1829,6 +1844,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'CRMEkstreEkr'
       OnEnterPage = CRMEkstreEkrEnterPage
       OnPage = CRMEkstreEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar7: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2413,8 +2430,8 @@ object RehberWizardDlg: TRehberWizardDlg
     SQL.Strings = (
       'select  * from REHBER'
       'where ID=:PAR')
-    Left = 455
-    Top = 56
+    Left = 311
+    Top = 32
     ParamData = <
       item
         Name = 'PAR'

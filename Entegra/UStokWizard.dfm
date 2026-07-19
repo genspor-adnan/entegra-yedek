@@ -275,6 +275,8 @@ object StokWizardDlg: TStokWizardDlg
       Font.Style = []
       OnExitPage = StokKartEkrExitPage
       OnNextButtonClick = StokKartEkrNextButtonClick
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControlUst: TcxPageControl
         Left = 0
         Top = 70
@@ -295,6 +297,10 @@ object StokWizardDlg: TStokWizardDlg
           ImageIndex = 0
           ParentColor = False
           PopupMenu = PopupMenuStok
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxLabel2: TcxLabel
             Left = 420
             Top = 134
@@ -884,6 +890,10 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheerNotlar: TcxTabSheet
               Caption = 'Notlar'
               ImageIndex = 0
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object MemoNOTLAR: TcxDBMemo
                 Left = 0
                 Top = 0
@@ -2464,6 +2474,10 @@ object StokWizardDlg: TStokWizardDlg
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -3320,6 +3334,8 @@ object StokWizardDlg: TStokWizardDlg
       Font.Name = 'Trebuchet MS'
       Font.Style = []
       OnEnterPage = DokumanEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel6: TPanel
         Left = 0
         Top = 496
@@ -3380,6 +3396,7 @@ object StokWizardDlg: TStokWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 475
         AnchorX = 916
       end
       object GridYorum: TcxGrid
@@ -3840,6 +3857,8 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Font.Style = []
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridKurIlet: TcxGrid
         Left = 0
         Top = 97
@@ -4688,8 +4707,25 @@ object StokWizardDlg: TStokWizardDlg
   end
   object DtsStok: TDataSource
     DataSet = TabStok
-    Left = 21
-    Top = 1
+    Left = 37
+    Top = 9
+  end
+  object TabStokUser: TFDQuery
+    BeforePost = TabStokUserBeforePost
+    OnNewRecord = TabStokUserNewRecord
+    Connection = Tablo.FDCnn
+    UpdateOptions.UpdateTableName = 'STOKLAR_USER'
+    UpdateOptions.KeyFields = 'ID'
+    SQL.Strings = (
+      'SELECT * FROM STOKLAR_USER'
+      'WHERE ID=:PAR')
+    Left = 112
+    Top = 134
+  end
+  object DtsStokUser: TDataSource
+    DataSet = TabStokUser
+    Left = 112
+    Top = 9
   end
   object DtsFiyat: TDataSource
     DataSet = TabFiyat
@@ -5219,18 +5255,8 @@ object StokWizardDlg: TStokWizardDlg
       OnClick = MenuTarayacidanEkleClick
     end
   end
-  object TabUTS: TFDQuery
-    OnNewRecord = TabUTSNewRecord
-    Connection = Tablo.FDCnn
-    SQL.Strings = (
-      'SELECT  *  FROM  STOKUTS'
-      'WHERE'
-      'STOKID=:SID')
-    Left = 138
-    Top = 216
-  end
   object DtsUTS: TDataSource
-    DataSet = TabUTS
+    DataSet = TabStokUser
     Left = 206
     Top = 240
   end

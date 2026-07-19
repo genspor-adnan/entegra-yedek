@@ -2642,6 +2642,9 @@ const
     Ops_FaturaOpsiyon_EArsivFaturaSeriler = -24094;
     Ops_FaturaOpsiyon_ESMMSeriler = -24095;
     Ops_FaturaOpsiyon_EIrsaliyeSeriler = -24096;
+    Ops_FaturaOpsiyon_EFaturaSeriKurallari = -24130;
+    Ops_FaturaOpsiyon_EArsivSeriKurallari = -24131;
+    Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari = -24133;
     Ops_FaturaOpsiyon_EFaturaSabitNotlar = -24097;
     Ops_FaturaOpsiyon_EArsivFaturaSabitNotlar = -24098;
     Ops_FaturaOpsiyon_ESMMSabitNotlar = -24099;
@@ -2669,7 +2672,6 @@ const
     Ops_FaturaOpsiyon_EArsivGelenURL = -24118; //Gelen e-Arsivler icin URL
     Ops_FaturaOpsiyon_UBL_ZIP = -24119; //EBELGE.UBL_XML'i COMPRESS ile sakla (bool)
     Ops_FaturaOpsiyon_DepoDBAdi = -24120; //e-Belge/arsiv 2. DB adi (string, default GENDEPO)
-
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;
 

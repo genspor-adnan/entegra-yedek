@@ -523,7 +523,7 @@ begin
      Durum := TabDokuman.State;   //durum u alalım
      if Durum in [dsEdit, dsInsert] then
         TabDokuman.Post;
-     Tablo.AlanOlustur(DokumanWizard, -1, DtsDokuman);// DtsDokuman
+     Tablo.AlanOlustur(DokumanWizard, -1, Tablo.UserDataSourceHazirla(DokumanWizard, DtsDokuman, 'DOKUMAN_USER'));// DtsDokuman
      if Durum in [dsEdit, dsInsert] then //eğer durum edit moddaysa tekrar edite getirelim
         TabDokuman.Edit;
      //TabDokuman.FieldByName('KONU').AsString := Konu;
@@ -773,7 +773,7 @@ begin
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),DokumanWizard,DtsDokuman);
+      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),DokumanWizard,Tablo.UserDataSourceHazirla(DokumanWizard, DtsDokuman, 'DOKUMAN_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D'))and(PageControl1.ActivePage = EkAlanlarEkr) then begin   //Bileşen Düzenle
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -782,7 +782,7 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
 
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
-      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(EkAlanlarEkr.Name),DokumanWizard,DtsDokuman);
+      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(EkAlanlarEkr.Name),DokumanWizard,Tablo.UserDataSourceHazirla(DokumanWizard, DtsDokuman, 'DOKUMAN_USER'));
     end;
   end;
 end;
@@ -811,9 +811,12 @@ begin
   // + DOKUMANTARIHCE(history) KAPSAM DISI. OturumBaslat tablo-basina korumali (ID PK'si olmayan
   // link tablosu -orn. DOKUMANILGILI composite- otomatik atlanir; o alt kayit undo edilmez).
   FOturumID := '';
+  if LogGun > 0 then
+    ULog.LogUserAcilis('DOKUMAN_USER', DokumanID);
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('DOKUMAN', DokumanID,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'DOKUMAN',         'ID=' + IntToStr(DokumanID)),
+        ULog.SnapTablo(1, 'DOKUMAN_USER',    'ID=' + IntToStr(DokumanID)),
         ULog.SnapTablo(2, 'DOKUMANILGILI',   'DOKUMANID=' + IntToStr(DokumanID)),
         ULog.SnapTablo(2, 'DOKUMANBILDIRIM', 'DOKUMANID=' + IntToStr(DokumanID)),
         ULog.SnapTablo(2, 'DOKUMANYETKI',    'YERI=' + IntToStr(TabNo_DOKUMAN) + ' and YERID=' + IntToStr(DokumanID)),
@@ -1073,6 +1076,7 @@ begin
                    TabDokuman.Cancel;
                 Tablo.DokumanKlasorYetkileriniAl(KlasorID,Tabdokuman.FieldByName('ID').AsInteger) ;
               end;
+             Tablo.UserDataSourceKaydet(DokumanWizard, 'DOKUMAN_USER');
              if DETAY.State in [dsInsert, dsEdit] then begin
                 DETAY.CachedUpdates := True;
                 DETAY.UpdateOptions.UpdateTableName := '';
@@ -1100,6 +1104,7 @@ begin
                  LogKartDegisti(TabDokuman, TabNo_DOKUMAN, DokumanID)
                else
                  FEkleLogland := LogKartEkle(TabDokuman, TabNo_DOKUMAN, True, FEkleLogland) or FEkleLogland;
+               ULog.LogUserKaydet('DOKUMAN_USER', TabNo_DOKUMAN_USER, TabNo_DOKUMAN, DokumanID, (IslemOp='E') or (IslemOp='K'));
                // REVIZE (detay=IMAJ revizyonlari, ust=dokuman karti) diff loglama.
                try
                  if TabRevize.Active then begin

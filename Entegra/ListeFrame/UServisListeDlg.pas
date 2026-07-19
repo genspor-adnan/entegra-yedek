@@ -820,9 +820,16 @@ begin
     end;
     ServisID := HAREKET.FieldByName('SERVISID').AsInteger;
     Tablo.TablodanSorguAc(1,  ' SELECT count(*) from VServisHareket where SERVISID  = '+ IntToStr(ServisID));
+    // Hareket satiri + SERVISHAREKET_USER SILMEDEN ONCE logla (Geri Al).
+    LogKartSil(HAREKET, TabNo_SERVISHAREKET, ID, TabNo_SERVIS, ServisID);
+    LogKayitSil('SERVISHAREKET_USER', TabNo_SERVISHAREKET_USER, ID, TabNo_SERVIS, ServisID);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISHAREKET where ID  = &Id ',['&Id'], [ID]);
-    if Tablo.Query1.Fields[0].AsInteger=1 then
+    if Tablo.Query1.Fields[0].AsInteger=1 then begin
+       // Son hareket -> servis de siliniyor: kart + SERVIS_USER logla (ServisSil kalan detaylari loglar).
+       LogKayitSil('SERVIS', TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
+       LogDetaylariSil('SERVIS_USER', 'ID', TabNo_SERVIS_USER, TabNo_SERVIS, ServisID);
        Tablo.ServisSil(ServisID); //tek hareket olduğu zaman hem servis hem hareket silinir
+    end;
 
     //if LogGun > 0 then
     //  Tablo.OncekiLogBelirle(SERVIS);
@@ -1023,6 +1030,8 @@ begin
     end;
     // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
     LogKartSil(SERVIS, TabNo_SERVIS, ServisID);
+    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+    LogDetaylariSil('SERVIS_USER', 'ID', TabNo_SERVIS_USER, TabNo_SERVIS, ServisID);
     Tablo.ServisSil(ServisID);
     YenileTusClick(Self);
   end;

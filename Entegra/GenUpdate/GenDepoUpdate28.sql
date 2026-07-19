@@ -1,27 +1,25 @@
 ﻿-- ============================================================
--- GenDepoUpdate28 : Ihracat e-Fatura kod listeleri + detay sablonu + Senaryo GENINI
+-- GenDepoUpdate28 : Ihracat e-Fatura kod listeleri + Senaryo GENINI
 --   ANA DB. GENINI (Ihracat_Teslim_Sarti/Tasima_Sekli/Paket_Kap 3 liste + registry;
---   EFatura_Senaryo -11009) + REHBERAYAR 'Ihracat' detay sablonu (YERI=132, 5 alan).
+--   EFatura_Senaryo -11009).
 --   IDEMPOTENT (kayitli liste BOLUM'u reuse; insert-if-missing). -f 65001 ile calistir.
 -- ============================================================
 /* ============================================================================
-   İHRACAT e-Fatura DETAY ŞABLONU + GİB KOD LİSTELERİ KURULUM SCRIPTİ
+   İHRACAT e-Fatura GİB KOD LİSTELERİ KURULUM SCRIPTİ
    ----------------------------------------------------------------------------
    Ne yapar:
      1) GİB UBL-TR kod listelerini (Teslim Şartı/INCOTERMS, Taşıma Şekli,
         Paket/Kap Cinsi) GENINI'ye yazar (registry BOLUM=0 + liste öğeleri).
-     2) Fatura detay şablonu 'İhracat'ı (YERI=132, giden fatura) 3 combo +
-        FOB alanı ile yeniden kurar; combo KAYNAK'ları GENINI listelerine bağlar.
+     2) e-Fatura Senaryo GENINI listesini doldurur.
 
-   Mekanizma: REHBERAYAR.KAYNAK = liste adı  ->  GENINI(BOLUM=0,ANAHTAR=ad).DEGER
-              = liste BOLUM'u  ->  o BOLUM'daki öğeler combo'ya yüklenir.
-              Combo Description=ANAHTAR (görünen), Value=DEGER (REHBERBILGI'ye
-              saklanan). Harfli kodlar (FOB, CT) DEGER'e sığmadığından kod,
-              ANAHTAR'ın " - " öncesi ön ekinden okunur (emisyon tarafı).
+   Mekanizma: GENINI(BOLUM=0,ANAHTAR=ad).DEGER = liste BOLUM'u; o BOLUM'daki
+              öğeler combo içeriklerinde kullanılır. Harfli kodlar (FOB, CT)
+              DEGER'e sığmadığından kod, ANAHTAR'ın " - " öncesi ön ekinden
+              okunur (emisyon tarafı).
 
    İDEMPOTENT: tekrar çalıştırılabilir; kayıtlı liste BOLUM'u varsa yeniden
    kullanır. Ana uygulama DB'sinde (BILIM/müşteri DB) çalışır — GENDEPO'da DEĞİL.
-   sqlcmd ile UTF-8 çalıştır:  sqlcmd -S .. -d <DB> -C -f 65001 -i ihracat_sablon_kur.sql
+   sqlcmd ile UTF-8 çalıştır:  sqlcmd -S .. -d <DB> -C -f 65001 -i GenDepoUpdate28.sql
    ============================================================================ */
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
@@ -107,18 +105,7 @@ INSERT INTO GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) VALUES
   (@KapB, N'VL - Dökme sıvı',   26, -1, 26),
   (@KapB, N'VO - Dökme katı',   27, -1, 27);
 
-/* ---- 4) REHBERAYAR: 'İhracat' detay şablonu (YERI=132) yeniden kur ---- */
-/* Eski partial şablon adlarını da temizle (İhracat) ; SIRA'lar korunur ki
-   varsa REHBERBILGI değerleri (YERI,SIRA) hizada kalsın. */
-DELETE FROM REHBERAYAR WHERE YERI=132 AND BOLUM=N'İhracat';
-INSERT INTO REHBERAYAR(YERI,SIRA,ETIKET,GIRIS,KAYNAK,VARSAYILAN,ZORUNLU,BOLUM,SUBEID) VALUES
-  (132,  5, N'Teslim Şartı - INCOTERMS', 4,  N'İhracat_Teslim_Şartı', NULL, 1, N'İhracat', -1),
-  (132, 10, N'Taşıma Şekli',             4,  N'İhracat_Taşıma_Şekli', NULL, 1, N'İhracat', -1),
-  (132, 15, N'Kap / Ambalaj Cinsi',      4,  N'İhracat_Paket_Kap',    NULL, 1, N'İhracat', -1),
-  (132, 20, N'FOB Değeri',              13,  NULL,                    NULL, 1, N'İhracat', -1),
-  (132, 25, N'Kap Adedi',               13,  NULL,                    NULL, 0, N'İhracat', -1);
-
-/* ---- 5) GENINI EFatura_Senaryo listesi (grid "Senaryo" kolonu + wizard combosu) ---- */
+/* ---- 4) GENINI EFatura_Senaryo listesi (grid "Senaryo" kolonu + wizard combosu) ---- */
 /* RepSenaryo runtime'da GENINI.ReadImageSection(EFatura_Senaryo=-11009) ile buradan
    dolar; deger yoksa combo bos kalir. Idempotent: eksik olani ekler, mevcuda dokunmaz.
    Not: RepSenaryo sabitinde 4 vardi (Temel/Ticari/İhracat/Kamu); veride 8=İlaç da
@@ -146,4 +133,3 @@ SELECT N'Registry' AS Tur, ANAHTAR, DEGER FROM GENINI WHERE BOLUM=0
 SELECT N'Teslim' AS Liste, COUNT(*) Adet FROM GENINI WHERE BOLUM=@TeslimB
 UNION ALL SELECT N'Taşıma', COUNT(*) FROM GENINI WHERE BOLUM=@TasimaB
 UNION ALL SELECT N'Kap',    COUNT(*) FROM GENINI WHERE BOLUM=@KapB;
-SELECT SIRA, ETIKET, GIRIS, KAYNAK FROM REHBERAYAR WHERE YERI=132 AND BOLUM=N'İhracat' ORDER BY SIRA;

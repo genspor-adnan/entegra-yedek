@@ -308,6 +308,12 @@ object SiparisWizardDlg: TSiparisWizardDlg
                 DataBinding.FieldName = 'URUNNO'
                 Width = 80
               end
+              object GridFaturaViewHUCRE: TcxGridDBColumn
+                Caption = 'Raf'
+                DataBinding.FieldName = 'HUCRE'
+                Options.Editing = False
+                Width = 70
+              end
               object GridFaturaViewEN: TcxGridDBColumn
                 Caption = 'En'
                 DataBinding.FieldName = 'EN'
@@ -2699,13 +2705,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
         end
       end
     end
-    object cxImageComboBox1: TcxImageComboBox
-      Left = 128
-      Top = 277
-      Properties.Items = <>
-      TabOrder = 8
-      Width = 121
-    end
   end
   object dsAra: TDataSource
     AutoEdit = False
@@ -3035,8 +3034,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
       'select ID,KOD,FIRMA'
       '   from REHBER'
       'where ID = :PID')
-    Left = 427
-    Top = 315
+    Left = 395
+    Top = 243
     ParamData = <
       item
         Name = 'PID'
@@ -3048,8 +3047,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object DtsRehber: TDataSource
     DataSet = TabRehber
-    Left = 427
-    Top = 304
+    Left = 451
+    Top = 240
   end
   object TabSiparisDetay: TFDQuery
     AutoCalcFields = False
@@ -3075,6 +3074,9 @@ object SiparisWizardDlg: TSiparisWizardDlg
       
         'URUNNO= CASE WHEN F.TUR =0 THEN  '#39#39' ELSE (select S.URUNNO from S' +
         'TOKLAR S where S.ID=F.URUNID) END,'
+      
+        'HUCRE= CASE WHEN F.TUR =0 THEN '#39#39' ELSE (select S.HUCRE from STOK' +
+        'LAR S where S.ID=F.URUNID) END,'
       
         'RESIM=CASE WHEN F.TUR =0 THEN 0 ELSE (select case when S.RESIM i' +
         's null then 0 else 1 end from STOKLAR S where S.ID=F.URUNID) END' +
@@ -3111,6 +3113,11 @@ object SiparisWizardDlg: TSiparisWizardDlg
     object TabSiparisDetayURUNNO: TWideStringField
       FieldName = 'URUNNO'
       ReadOnly = True
+    end
+    object TabSiparisDetayHUCRE: TWideStringField
+      FieldName = 'HUCRE'
+      ReadOnly = True
+      Size = 50
     end
     object TabSiparisDetayRESIM: TIntegerField
       FieldName = 'RESIM'
@@ -3434,8 +3441,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
-    Left = 366
-    Top = 320
+    Left = 326
+    Top = 328
     ParamData = <
       item
         Name = 'Yeri'
@@ -3455,7 +3462,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object DtsDetay: TDataSource
     DataSet = TabDetay
     Left = 365
-    Top = 275
+    Top = 227
   end
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
@@ -3538,7 +3545,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
         'SELECT * from [dbo].[fn_CARIHESAPOZETI] (:PRehID,:PBirim,:FatTut' +
         'ari) ')
     Left = 264
-    Top = 273
+    Top = 201
     ParamData = <
       item
         Name = 'PRehID'

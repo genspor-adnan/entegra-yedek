@@ -41,7 +41,6 @@ type
     WizardKontrol: TJvWizard;
     SiparisEkr: TJvWizardInteriorPage;
     DetayEkr: TJvWizardInteriorPage;
-    cxImageComboBox1: TcxImageComboBox;
     dsAra: TDataSource;
     OpenDialog1: TOpenDialog;
     PopupMenuFatura: TPopupMenu;
@@ -132,6 +131,7 @@ type
     GridFaturaViewTESLIMTARIHI: TcxGridDBColumn;
     GridFaturaViewKOD1: TcxGridDBColumn;
     GridFaturaViewAD: TcxGridDBColumn;
+    GridFaturaViewHUCRE: TcxGridDBColumn;
     GridFaturaViewACIKLAMA1: TcxGridDBColumn;
     GridFaturaViewADET1: TcxGridDBColumn;
     GridFaturaViewBIRIM1: TcxGridDBColumn;
@@ -290,6 +290,7 @@ type
     TabSiparisDetayAD: TWideStringField;
     TabSiparisDetayKOD: TWideStringField;
     TabSiparisDetayURUNNO: TWideStringField;
+    TabSiparisDetayHUCRE: TWideStringField;
     TabSiparisDetayRESIM: TIntegerField;
     TabSiparisDetayDOKUMAN: TIntegerField;
     TabSiparisDetayBIRIMAD: TWideStringField;
@@ -747,6 +748,22 @@ end;
 procedure TSiparisWizardDlg.DokumanEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
    Tabloyenile(TabYorum,[TabloNo, TabSiparis.FieldByName('ID').AsInteger]);
+
+   // TANI (RAD Studio Event Log'da gorunur): kontrollerin GERCEK runtime durumu.
+   OutputDebugString(PChar(Format(
+     'YORUM-TANI | DokumanEkr vis=%d %dx%d | GridYorum parent=%s vis=%d b=%d,%d,%d,%d | Panel4 parent=%s vis=%d b=%d,%d,%d,%d',
+     [Ord(DokumanEkr.Visible), DokumanEkr.Width, DokumanEkr.Height,
+      GridYorum.Parent.Name, Ord(GridYorum.Visible), GridYorum.Left, GridYorum.Top, GridYorum.Width, GridYorum.Height,
+      Panel4.Parent.Name, Ord(Panel4.Visible), Panel4.Left, Panel4.Top, Panel4.Width, Panel4.Height])));
+
+   // DUZELTME DENEMESI: parent/gorunurluk/hizalamayi garanti et (kontroller cizilmiyorsa).
+   GridYorum.Parent := DokumanEkr;
+   Panel4.Parent := DokumanEkr;
+   labelFileName.Parent := DokumanEkr;
+   Panel4.Visible := True;
+   GridYorum.Visible := True;
+   MemoChat.Visible := True;
+   DokumanEkr.Realign;
 end;
 
 procedure TSiparisWizardDlg.DokumanFormunuA1Click(Sender: TObject);
@@ -1359,7 +1376,8 @@ begin
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TSiparisWizardDlg(Self),DtsTabSiparis);
+      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TSiparisWizardDlg(Self),Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
+      Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
     end;
   end
   else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bileşen Düzenle
@@ -1369,7 +1387,8 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
 
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
-      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(PanelUst.Name),TSiparisWizardDlg(Self),DtsTabSiparis);
+      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(PanelUst.Name),TSiparisWizardDlg(Self),Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
+      Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bileşen Sil
     ctrl := FindVCLWindow(Mouse.CursorPos);
@@ -1386,7 +1405,7 @@ begin
           end;
           ctrl.Visible := False;
           //Tablo.AlanOlustur(FindComponent(PanelAlt.Name),TSiparisWizardDlg(Self),-1,DtsTabSiparis);
-          Tablo.AlanOlustur(TSiparisWizardDlg(Self),-1,DtsTabSiparis);
+          Tablo.AlanOlustur(TSiparisWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
         end;
       end;
     end;
@@ -1413,11 +1432,6 @@ begin
   try
   SiparisWizardDlg.Height:= Screen.Height- round(Screen.Height*0.1);
   EkleDetay := False;
-  if not EkAlanOlustu then begin
-     Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1,DtsTabSiparis);
-     EkAlanOlustu:=True;
-     PageUst.ActivePageIndex := 0;
-  end;
 
   PageControlAlt.ActivePageIndex := 0;
    if not TarayiciKullanimda then begin
@@ -1514,6 +1528,10 @@ begin
   BeditBagliGorev.Visible := Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme);
   DetayEkr.EnableButton(bkNext,Tablo.YetkiVarmi(MODUL_Kasa,YetkiTur_Gorme));
   TabloYenile(TabSiparis, [SiparisIdsi]);
+  if not EkAlanOlustu then begin
+     Tablo.AlanOlustur(TSiparisWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TSiparisWizardDlg(Self), DtsTabSiparis, 'SIPARIS_USER'));
+     EkAlanOlustu:=True;
+  end;
   Kilit := False;
   if (IslemOp='D')and(KilitKontrolEt(2, SiparisTur,TabSiparis.FieldByName('SIPARISTARIH').AsDateTime,2)) then begin
      Kilit := True;
@@ -1529,9 +1547,13 @@ begin
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da
   // ilk hale don, Finish'te temizle. (IMAJ blob + DOKUMAN dosya ilk pilotta KAPSAM DISI.)
   FOturumID := '';
+  // _USER (ek alan) audit baseline: acilistaki SIPARIS_USER halini sakla -> finish'te diff.
+  if LogGun > 0 then
+    ULog.LogUserAcilis('SIPARIS_USER', SiparisIdsi);
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('SIPARIS', SiparisIdsi,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'SIPARIS',      'ID=' + IntToStr(SiparisIdsi)),
+        ULog.SnapTablo(1, 'SIPARIS_USER', 'ID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'SIPARISDETAY', 'SIPARISID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'REHBERBILGI',  'YERI=' + IntToStr(DetaySablonTipiBul) + ' and YER_ID=' + IntToStr(SiparisIdsi)),
         ULog.SnapTablo(2, 'GOREVYORUM',   'TUR=' + IntToStr(TabNo_SIPARIS_Gelen) + ' and GOREVID=' + IntToStr(SiparisIdsi)),
@@ -2495,6 +2517,14 @@ begin
           9  : LogKartDegisti(TabSiparis, TabNo_SIPARIS_Gelen, SiparisIdsi);
           19 : LogKartDegisti(TabSiparis, TabNo_SIPARIS_Giden, SiparisIdsi);
         end;
+  end;
+  Tablo.UserDataSourceKaydet(TSiparisWizardDlg(Self), 'SIPARIS_USER');
+  // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
+  if LogGun > 0 then
+  begin
+    var LSipTabNo: Integer := TabNo_SIPARIS_Gelen;
+    if SiparisTur = 19 then LSipTabNo := TabNo_SIPARIS_Giden;
+    ULog.LogUserKaydet('SIPARIS_USER', TabNo_SIPARIS_USER, LSipTabNo, SiparisIdsi, (IslemOp='E') or (IslemOp='K'));
   end;
   if TabSiparisDetay.State in [dsInsert, dsEdit] then
      TabSiparisDetay.Post;

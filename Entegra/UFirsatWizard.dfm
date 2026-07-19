@@ -2693,7 +2693,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
     object TabLojistikHEDEFLOKASYON: TSmallintField
       FieldName = 'HEDEFLOKASYON'
     end
-    object TabLojistikTARIH: TDateTimeField
+    object TabLojistikTARIH: TSQLTimeStampField
       FieldName = 'TARIH'
     end
     object TabLojistikACIKLAMA: TStringField
@@ -2703,13 +2703,13 @@ object FirsatWizardDlg: TFirsatWizardDlg
     object TabLojistikEKLEYEN: TIntegerField
       FieldName = 'EKLEYEN'
     end
-    object TabLojistikEKLEMETARIHI: TDateTimeField
+    object TabLojistikEKLEMETARIHI: TSQLTimeStampField
       FieldName = 'EKLEMETARIHI'
     end
     object TabLojistikDEGISTIREN: TIntegerField
       FieldName = 'DEGISTIREN'
     end
-    object TabLojistikDEGISTIRMETARIHI: TDateTimeField
+    object TabLojistikDEGISTIRMETARIHI: TSQLTimeStampField
       FieldName = 'DEGISTIRMETARIHI'
     end
     object TabLojistikKAYNAKULKEAD: TStringField

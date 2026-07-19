@@ -172,6 +172,7 @@ type
     GridStokViewURUNNO: TcxGridDBColumn;
     cxGrid1DBCardViewAlislarBELGETIPI: TcxGridDBCardViewRow;
     cxGrid1DBCardViewSatislarBELGETIPI: TcxGridDBCardViewRow;
+    LabelSonAranan: TLabel;
     procedure cxDBTreeList1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);

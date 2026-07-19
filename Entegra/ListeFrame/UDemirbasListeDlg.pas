@@ -384,6 +384,7 @@ uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UDemirbasWizard, URapor
 var
   OncekiSayfaIndex, KategoriYetki: SmallInt;
   KalibrasyonYetkisi, TeknikServisYetkisi, AlanlarOlusturuldu : Boolean;
+  FIlkSonAranan : Boolean;   // ilk acilista Son Aranan (5) goster (JvTimer'de)
 
 
 
@@ -484,7 +485,7 @@ begin
     FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
-    Liste_SP_Cagir(4);   // ilk listeleme -> sunucu-tarafi SP (KategoriYetki hesaplandiktan SONRA)
+    FIlkSonAranan := True;   // ilk acilis: JvTimer'de Son Aranan (5) yuklensin (KategoriYetki'den SONRA)
   end;
 end;
 
@@ -789,6 +790,7 @@ end;
 procedure TDemirbasListeDlg.JvTimer1Timer(Sender: TObject);
 begin
   JvTimer1.Enabled := False;
+  if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;   // ilk acilis: Son Aranan
   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP
 end;
 
@@ -1609,7 +1611,9 @@ var DID:integer;
 begin
   DID := Tablo.DemirbasSihirbazBaslat('E',0,-1,11);
   if DID > 0 then begin
-    TabloYenile(DEMIRBAS,[],DID);
+    Tablo.AramaKaydet(MODUL_Demirbas, DID);   // yeni demirbas -> Son Aranan
+    Liste_SP_Cagir(5);                         // Son Aranan (en yeni ustte)
+    DEMIRBAS.Locate('ID', DID, []);
     if PgAltDetay.ActivePage <> TabSheetHareketler then
       PgAltDetay.ActivePage := TabSheetHareketler;
     PgAltDetayChange(PgAltDetay);
@@ -1682,6 +1686,8 @@ begin
       Tablo.TablodanSorguAc(1,'Select * from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID='+DEMIRBAS.FieldByName('ID').AsString+' ');
       if Tablo.Query1.RecordCount>0 then begin
         while not Tablo.Query1.Eof do begin
+          // Master tutanak'i (DEMIRBAS_TUTANAK, ID'li) SILMEDEN ONCE logla -> Geri Al ile dirilir.
+          LogKayitSil('DEMIRBAS_TUTANAK', TabNo_DEMIRBAS_TUTANAK_KART, Tablo.Query1.FieldByName('TUTANAKID').AsInteger, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK where ID=&id ', ['&id'], [Tablo.Query1.FieldByName('TUTANAKID').AsInteger]);
           Tablo.Query1.Next;
         end;
@@ -1689,6 +1695,9 @@ begin
       // Detay satirlarini SILMEDEN ONCE logla (ust=demirbas), sonra sil.
       LogDetaylariSil('DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID', TabNo_DEMIRBAS_TUTANAK, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
+      // _USER (ek alan) satirini SILMEDEN ONCE logla, sonra sil (FK: kart silinmeden once _USER).
+      LogDetaylariSil('DEMIRBAS_USER', 'ID', TabNo_DEMIRBAS_USER, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_USER where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
      // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&DEMIRBASID',['&DEMIRBASID'],[DEMIRBAS.FieldByName('ID').AsString])
     end;

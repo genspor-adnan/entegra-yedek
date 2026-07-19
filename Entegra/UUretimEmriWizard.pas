@@ -189,9 +189,6 @@ type
     TabUretimOperasyonPersonelKAYNAK: TIntegerField;
     TabUretimOperasyonPersonelBASLAMA: TSQLTimeStampField;
     TabUretimOperasyonPersonelBITIS: TSQLTimeStampField;
-    TabUretimOperasyonPersonelADET: TFloatField;
-    TabUretimOperasyonPersonelBIRIM: TIntegerField;
-    TabUretimOperasyonPersonelMIKTAR: TFloatField;
     TabUretimOperasyonPersonelKONUSU: TWideStringField;
     TabUretimOperasyonPersonelDURUM: TWordField;
     TabUretimOperasyonPersonelEKLEYEN: TSmallintField;
@@ -464,6 +461,7 @@ type
     procedure TabUretimEmriDetayAfterScroll(DataSet: TDataSet);
     procedure TabUretimEmriDetayBeforeEdit(DataSet: TDataSet);
     procedure TabUretimEmriDetayBeforePost(DataSet: TDataSet);
+    procedure OturumYakalaChange(DataSet: TDataSet);   // LAZY: capture-hook'u olmayan operasyon dataset'leri icin ortak yakalama
     procedure TabUretimEmriDetayNewRecord(DataSet: TDataSet);
     procedure SatirKaydetClick(Sender: TObject);
     procedure SatirIptalClick(Sender: TObject);
@@ -660,6 +658,7 @@ end;
 procedure TUretimEmriWizardDlg.DkmanSil1Click(Sender: TObject);
 begin
   if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
+    ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme = degisiklik -> snapshot'i yakala
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
     Tabloyenile(TabYorum,[TabNo_URETIMOPERASYON, TabUretimOperasyon.FieldByName('ID').AsInteger]);
   end;
@@ -723,6 +722,7 @@ end;
 
 procedure TUretimEmriWizardDlg.TabUretimEmriBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek kart degisikligi -> snapshot'i yakala
   if LogGun>0 then begin
     Tablo.OncekiLogBelirle(TabUretimEmri);
   end;
@@ -1220,8 +1220,10 @@ end;
 
 procedure TUretimEmriWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
-  if not TabUretimOperasyon.IsEmpty then
+  if not TabUretimOperasyon.IsEmpty then begin
+     ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme = degisiklik -> yakala
      Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabNo_URETIMOPERASYON, TabUretimOperasyon.FieldByName('ID').AsInteger, -99, TabYorum)
+  end
   else
      Showmessage(UROnceOperasyonEkle);
 end;
@@ -1307,7 +1309,7 @@ procedure TUretimEmriWizardDlg.PageControlUstChange(Sender: TObject);
     i:integer;
     component: TComponent;
  begin
-       Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1, DtsUretimEmri);
+       Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TUretimEmriWizardDlg(Self), DtsUretimEmri, 'URETIMEMRI_USER'));
        EkOlustu:=True;
        for i := 0 to TWinControl(EkEkr).ControlCount-1 do
            if (FindComponent(TWinControl(EkEkr).Controls[i].Name).ClassType <> TcxLabel) and (FindComponent(TWinControl(EkEkr).Controls[i].Name).ClassType <> TcxDBLabel) then
@@ -1333,6 +1335,7 @@ procedure TUretimEmriWizardDlg.TabUretimEmriBeforePost(DataSet: TDataSet);
 var s:string;
     belgeno : Tbelgeno;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: kart post = gercek degisiklik -> snapshot'i yakala
   BoslukKontrolu;
   TabUretimEmri.FieldByName('MIKTAR').AsFloat := TabUretimEmri.FieldByName('ADET').AsFloat;
 
@@ -1385,6 +1388,7 @@ end;
 
 procedure TUretimEmriWizardDlg.TabUretimEmriDetayBeforeEdit(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek detay degisikligi -> snapshot'i yakala
   UretimOncekiStokMiktar := TabUretimEmriDetay.FieldByName('MIKTAR').AsFloat;
   UretimOncekiBirim := TabUretimEmriDetay.FieldByName('BIRIM').AsInteger;
 end;
@@ -1396,6 +1400,7 @@ end;
 
 procedure TUretimEmriWizardDlg.TabUretimEmriDetayBeforePost(DataSet: TDataSet);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: detay post = gercek degisiklik -> snapshot'i yakala
   if not BoslukKontrol(TabUretimEmriDetay.FieldByname('ADET').AsString, 'Fatura adet') then
     Abort;
   if Carpan<>0  then begin
@@ -1458,7 +1463,9 @@ procedure TUretimEmriWizardDlg.FormCloseQuery(Sender: TObject; var CanClose: Boo
 var Ciksin : Boolean;
 begin
    Ciksin := True;
-   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible or (FOturumID<>''))))then
+   // LAZY: "kaydet?" sorusu yalniz GERCEK degisiklikte (yakalanmis snapshot ya da bekleyen
+   // duzenleme) -> sadece bakip cikinca sorMA. (FOturumID<>'' artik her D-modda dolu.)
+   if (IptalSecildi)and((IslemOp='E')or (IslemOp='K')or( (IslemOp='D')and(KaydetTus.Visible or ULog.OturumYakalandiMi(FOturumID))))then
       case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
        IDYES : begin
                 Ciksin := False;
@@ -1530,12 +1537,12 @@ begin
       if Assigned(ctrl) then begin
          OutputDebugString(PChar(ctrl.Name));
 
-         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TUretimEmriWizardDlg(Self),DtsUretimEmri);
-         Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1,DtsUretimEmri);
+         Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TUretimEmriWizardDlg(Self),Tablo.UserDataSourceHazirla(TUretimEmriWizardDlg(Self), DtsUretimEmri, 'URETIMEMRI_USER'));
+         Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TUretimEmriWizardDlg(Self), DtsUretimEmri, 'URETIMEMRI_USER'));
       end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bile?en D?zenle
-      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(ctrl.Name),TUretimEmriWizardDlg(Self),DtsUretimEmri);
-      Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1,DtsUretimEmri);
+      Tablo.AlanlarDlgBaslat('D',1,0,ctrlPos.X,ctrlPos.Y,0,FindComponent(ctrl.Name),TUretimEmriWizardDlg(Self),Tablo.UserDataSourceHazirla(TUretimEmriWizardDlg(Self), DtsUretimEmri, 'URETIMEMRI_USER'));
+      Tablo.AlanOlustur(TUretimEmriWizardDlg(Self), -1,Tablo.UserDataSourceHazirla(TUretimEmriWizardDlg(Self), DtsUretimEmri, 'URETIMEMRI_USER'));
   end;
 end;
 
@@ -1545,6 +1552,7 @@ var
   Depo:Integer;
   UretimPlanID,UretimPlanDetayID:variant;
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: operasyon olusturma = degisiklik -> snapshot'i yakala (INSERT'ten ONCE)
   if Tablo.RepStokUretimDepolar.Properties.Items.Count=1 then
      Depo := Tablo.RepStokUretimDepolar.Properties.Items[0].Value
   else
@@ -1589,6 +1597,7 @@ procedure TUretimEmriWizardDlg.OperasyonSilClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
     if OperasyonSilinebilir(TabUretimOperasyon.FieldByName('ID').AsInteger) then begin
+      ULog.OturumYakala(FOturumID);   // LAZY: operasyon silme = degisiklik -> snapshot'i yakala (SQL'den ONCE)
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMOPERASYON where ID=&UOID ',['&UOID'],[TabUretimOperasyon.FieldByName('ID').AsInteger]);
       TabloYenile(TabUretimOperasyon,[TabUretimEmri.FieldByName('ID').AsInteger]);
     end;
@@ -1719,6 +1728,9 @@ begin
   //   MALIYET/FASON(URETIMOPERASYONID) + PERSONEL(OPERASYONID=URETIMOPERASYON.ID) + yorum ;
   //   PERSONEL < URETIMOLCUM(OPERASYONPERSONELID) < URETIMOLCUMDETAY(URETIMOLCUMID).
   //   SIRA cocuk-once (delete DESC) -> FK korunur.
+  // LAZY: sadece PLANI yaz (girmede snapshot ALINMAZ); ilk gercek degisiklikte OturumYakala
+  // yakalar (kart/detay/operasyon Before* + Sil/dosya butonlari). Hic degismezse geri-yukleme YOK.
+  // [[snapshot-yakala-modified-degil-edit]]
   FOturumID := '';
   if IslemOp = 'D' then
   begin
@@ -1726,8 +1738,11 @@ begin
     var LOp: string := '(select ID from URETIMOPERASYON where URETIMEMRIID=' + LEid + ')';
     var LPers: string := '(select ID from URETIMOPERASYONPERSONEL where OPERASYONID in ' + LOp + ')';
     var LOlcum: string := '(select ID from URETIMOLCUM where OPERASYONPERSONELID in ' + LPers + ')';
-    FOturumID := ULog.OturumBaslat('URETIMEMRI', TabUretimEmri.FieldByName('ID').AsInteger,
+    if LogGun > 0 then
+      ULog.LogUserAcilis('URETIMEMRI_USER', TabUretimEmri.FieldByName('ID').AsInteger);
+    FOturumID := ULog.OturumBaslatPlan('URETIMEMRI', TabUretimEmri.FieldByName('ID').AsInteger,
       [ ULog.SnapTablo(1, 'URETIMEMRI',              'ID=' + LEid),
+        ULog.SnapTablo(1, 'URETIMEMRI_USER',        'ID=' + LEid),
         ULog.SnapTablo(2, 'URETIMEMRIDETAY',         'URETIMEMRIID=' + LEid),
         ULog.SnapTablo(3, 'URETIMOPERASYON',         'URETIMEMRIID=' + LEid),
         ULog.SnapTablo(4, 'URETIMOPERASYONMALIYET',  'URETIMOPERASYONID in ' + LOp),
@@ -1738,6 +1753,18 @@ begin
         ULog.SnapTablo(6, 'IMAJ',                    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMOPERASYON) + ' and GOREVID in ' + LOp + '))'),
         ULog.SnapTablo(5, 'URETIMOLCUM',             'OPERASYONPERSONELID in ' + LPers),
         ULog.SnapTablo(6, 'URETIMOLCUMDETAY',        'URETIMOLCUMID in ' + LOlcum) ]);
+
+    // Operasyon agacinin capture-hook'u OLMAYAN plan dataset'lerine ORTAK yakalama tak: inline
+    // edit (BeforePost) veya dataset Delete (BeforeDelete) ilk gercek degisikligi yakalasin.
+    // (Fason BeforePost'u zaten var; ona sadece BeforeDelete eklenir. Direkt-SQL silmeler
+    //  handler icinde ayrica yakalanir.) [[snapshot-yakala-modified-degil-edit]]
+    TabUretimOperasyon.BeforePost         := OturumYakalaChange;
+    TabUretimOperasyon.BeforeDelete       := OturumYakalaChange;
+    TabOperasyonEkMaliyet.BeforePost      := OturumYakalaChange;
+    TabOperasyonEkMaliyet.BeforeDelete    := OturumYakalaChange;
+    TabUretimOperasyonPersonel.BeforePost := OturumYakalaChange;
+    TabUretimOperasyonPersonel.BeforeDelete := OturumYakalaChange;
+    TabOperasyonFason.BeforeDelete        := OturumYakalaChange;
   end;
 
   cbOnaylayacak.Properties.Items := Tablo.imgComboboxInit('select ID=0, FIRMA='''' union all '+StringReplace(OnayYetki, '@YetkiKodu', '330650', []),False).Items;
@@ -1983,6 +2010,7 @@ begin
     else
        TabUretimEmri.Cancel;
   end;
+  Tablo.UserDataSourceKaydet(TUretimEmriWizardDlg(Self), 'URETIMEMRI_USER');
   if TabUretimEmriDetay.State in [dsEdit,dsInsert] then
      TabUretimEmriDetay.Post;
   if TabUretimOperasyon.State in [dsEdit,dsInsert] then
@@ -1997,6 +2025,7 @@ begin
       LogKartDegisti(TabUretimEmri, TabNo_URETIMEMRI, LID)
     else
       FEkleLogland := LogKartEkle(TabUretimEmri, TabNo_URETIMEMRI, True, FEkleLogland) or FEkleLogland;
+    ULog.LogUserKaydet('URETIMEMRI_USER', TabNo_URETIMEMRI_USER, TabNo_URETIMEMRI, LID, LYeni);
     LogDiffKaydet(TabUretimEmriDetay, FDetSnap, TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, LID);
     LogSnapshotAl(TabUretimEmriDetay, FDetSnap);
   except
@@ -2110,7 +2139,11 @@ begin
     //if not Tablo.StokVarmi( Tablo.Query2.FieldByName('URUNID').AsInteger, TabUretimOperasyon.FieldByName('CIKISDEPO').AsInteger, abs(Tablo.Query2.FieldByName('ADET').AsFloat), Tablo.Query2.FieldByName('KOD').AsString) then begin
     //23.04.2024 AO Miktar ile de?i?tirildi
     Gereken :=  (Miktar * Tablo.Query2.FieldByName('ADET').AsFloat) / Tablo.Query2.FieldByName('BAZADET').AsFloat;               //abs(Miktar)
-    if not Tablo.StokVarmi( Tablo.Query2.FieldByName('URUNID').AsInteger, TabUretimOperasyon.FieldByName('CIKISDEPO').AsInteger, abs(Gereken), Tablo.Query2.FieldByName('KOD').AsString) then begin
+    //19.07.2026 AO: StokVarmi -> StokCikisYeterliMi (tarih-bazli; StokDurumKontrolKurali + mesaj helper icinde)
+    //if not Tablo.StokVarmi( Tablo.Query2.FieldByName('URUNID').AsInteger, TabUretimOperasyon.FieldByName('CIKISDEPO').AsInteger, abs(Gereken), Tablo.Query2.FieldByName('KOD').AsString) then begin
+    var LKalan: Double;
+    if not Tablo.StokCikisYeterliMi(Tablo.Query2.FieldByName('URUNID').AsInteger, TabUretimOperasyon.FieldByName('CIKISDEPO').AsInteger, 0,
+         TabUretimEmri.FieldByName('BASTAR').AsDateTime, abs(Gereken), False, 0, LKalan) then begin
        Yetersiz := True;
        //TabFATURA.Cancel;
     end;
@@ -2323,8 +2356,10 @@ end;
 
 procedure TUretimEmriWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
 begin
-  if not TabUretimOperasyon.IsEmpty then
+  if not TabUretimOperasyon.IsEmpty then begin
+     ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme = degisiklik -> yakala
      Tablo.GridYorumBtnDosyaGonder(labelFileName, BtnMesajGonder)
+  end
   else
      Showmessage(UROnceOperasyonEkle);
 end;
@@ -2402,6 +2437,7 @@ end;
 
 procedure TUretimEmriWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum silme = degisiklik -> snapshot'i yakala
    Tablo.GridYorumuSil(TabNo_URETIMOPERASYON, TabUretimOperasyon.FieldByName('ID').AsInteger, TabYorum);
 end;
 
@@ -2467,6 +2503,7 @@ begin
    if not TabUretimOperasyon.IsEmpty then
       raise Exception.Create(UROnceOperasyonlariSil);
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
+      ULog.OturumYakala(FOturumID);   // LAZY: detay satiri silme = degisiklik -> snapshot'i yakala (SQL'den ONCE)
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[TabUretimEmri.FieldByName('ID').AsInteger]);
       TabloYenile(TabUretimEmriDetay,[TabUretimEmri.FieldByName('ID').AsInteger]);
    end;
@@ -2501,8 +2538,16 @@ begin
     TabOperasyonEkMaliyet.Cancel;
 end;
 
+procedure TUretimEmriWizardDlg.OturumYakalaChange(DataSet: TDataSet);
+begin
+  // Capture-hook'u olmayan operasyon dataset'lerine (Operasyon/EkMaliyet/Personel) ortak takilir:
+  // inline edit (BeforePost) veya dataset Delete (BeforeDelete) = ilk gercek degisiklik -> yakala.
+  ULog.OturumYakala(FOturumID);
+end;
+
 procedure TUretimEmriWizardDlg.TabOperasyonFasonBeforePost(DataSet: TDataSet);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: operasyon fason degisikligi = gercek -> snapshot'i yakala
    if (TabOperasyonFason.FieldByName('OLAY').AsInteger=0)and(TabOperasyonFason.FieldByName('GIREN').AsFloat<>0.0) then  begin//??k??
        ShowMessage(CikanAdetUyari);
        abort;
@@ -2714,6 +2759,7 @@ end;
 
 procedure TUretimEmriWizardDlg.IsZamanDuzenleClick(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: is-zamani/olcum duzenleme = degisiklik -> yakala
   Tablo.IsEmriPersonelZamanSihirbaz('D', 1, TabUretimOperasyon.FieldByName('ID').AsInteger, TabUretimOperasyonPersonel.FieldByName('ID').AsInteger,0);
   CheckTamamlananlarClick(self);
 end;
@@ -2739,13 +2785,16 @@ begin
           Id := 0;
        SonucListe.Free;
        if Id>0 then begin
+          ULog.OturumYakala(FOturumID);   // LAZY: is-zamani/personel ekleme = degisiklik -> yakala (ekleme ONCE)
           // OprPerId := KonularEkle(Id);
           OprPerId := Tablo.KonularEkleOrtak(TabUretimOperasyon, ID, TabNo_URETIMRECETEOPR, TabUretimOperasyon.FieldByName('RECETEID').AsInteger);
           CheckTamamlananlarClick(self);
           Tablo.IsEmriPersonelZamanSihirbaz('D', 1, TabUretimOperasyon.FieldByName('ID').AsInteger, OprPerId, 0);
        end
-       else
+       else begin
+          ULog.OturumYakala(FOturumID);   // LAZY: is-zamani ekleme (konu yok) = degisiklik -> yakala
           Tablo.IsEmriPersonelZamanSihirbaz('E', 1, TabUretimOperasyon.FieldByName('ID').AsInteger, 0,0);
+       end;
      CheckTamamlananlarClick(self);
   end;
 end;
@@ -2807,6 +2856,7 @@ end;
 
 procedure TUretimEmriWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
+  ULog.OturumYakala(FOturumID);   // LAZY: yorum duzenleme = degisiklik -> snapshot'i yakala
   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabNo_URETIMOPERASYON);
 end;
 

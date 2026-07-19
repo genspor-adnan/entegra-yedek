@@ -103,6 +103,17 @@ procedure LogSistemIslem(const AIslem: string);
 procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
   ADetayTabNo, AUstTabNo: Integer; AUstID: Int64; const AEkKosul: string = '');
 
+// Tam WHERE (subquery olabilir) ile detaylari sil-logla. Satir-seviye _USER icin:
+// ör. 'ID in (select ID from FATURA where FATBASID=...)'. ID'siz tabloya toleransli.
+procedure LogDetaylariSilSorgu(const ADetayTablo, AWhere: string;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
+
+// Tek kaydi (ATablo, ID=AKayitID) silme-loguna yaz; VERILEN kart grubuna (AUstTabNo/AUstID)
+// bagla. WHERE anahtari grup anahtarindan FARKLI olabilir (ör. demirbasa bagli DEMIRBAS_TUTANAK
+// master'i). Silmeden ONCE cagir.
+procedure LogKayitSil(const ATablo: string; ATabNo: Integer; AKayitID: Int64;
+  AUstTabNo: Integer; AUstID: Int64);
+
 // Kart (master) ad/kod referansini GENDEPO.LOGREFERANS'a UPSERT eder (hizli arama).
 // Silinen kayit da kalir (ASilindi=True -> SILINDI=1). AD/KOD dataset alanlarindan
 // (FIRMA/STOKADI/ADI/KOD...) cikarilir. Loglama gibi is akisini ASLA kirmaz.
@@ -140,6 +151,16 @@ procedure LogKartSil(ADataSet: TDataSet; ATabNo, AKayitID: Integer;
 // veya LogGun kapaliysa hicbir sey yapmaz. Cagiran yalnizca DataSet->TabNo esler.
 procedure LogDetaySatirPost(ADataSet: TDataSet; ADetayTabNo, AUstTabNo: Integer;
   AUstID: Int64);
+
+// _USER (kart ek kullanici alanlari) audit: kart ile 1:1 (_USER.ID = kart ID).
+// Kart duzenleme ACILISINDA LogUserAcilis (baseline snapshot); FINISH'te LogUserKaydet
+// (AYeniKart -> tam satir EKLE, aksi halde acilis<->son alan diff -> DEGISTIR). Satir
+// kart grubuna (USTTABLOID/USTKAYITID) baglanir -> UInfo'da kartla ayni satir.
+// SILME icin ayri helper yok: kart silinmeden ONCE LogDetaylariSil(<user>,'ID',
+// <user TabNo>, <kart TabNo>, kartID) cagir (FK icin _USER kart'tan once silinmeli).
+procedure LogUserAcilis(const AUserTablo: string; AKartID: Int64);
+procedure LogUserKaydet(const AUserTablo: string; AUserTabNo, AUstTabNo: Integer;
+  AUstID: Int64; AYeniKart: Boolean);
 
 // Bir SILME grubunu (kart + tum detaylari) log JSON'larindan AYNI ID ile geri
 // INSERT eder (silinen kaydin dirilmesi / "Geri Al"). AUstTabloID/AUstKayitID = kart
@@ -254,6 +275,7 @@ var
   GDepoDBAdi: string = '';        // depo DB adi cache (INI'den 1 kez okunur)
   GIstasyon: string = #1;
   GYillar: TStringList = nil;     // bu oturumda garantilenen LOG<yyyy> tablolari
+  GUserSnaplar: TDictionary<string, TStringList> = nil;  // _USER acilis snapshot'i (key=TABLO#id -> pozisyonel deger)
 
 { ---- yardimcilar ---- }
 
@@ -1212,22 +1234,23 @@ begin
   end;
 end;
 
-procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
-  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64; const AEkKosul: string = '');
+// Verilen tam WHERE ile detay satirlarini SILMEDEN ONCE topluca sil-logla. WHERE subquery
+// icerebilir (ör. satir-seviye _USER: ID in (select ID from FATURA where FATBASID=...)).
+// 'ID' kolonu yoksa (bilesik anahtar) KAYITID=0 yazar (cakmaz).
+procedure LogDetaylariSilSorgu(const ADetayTablo, AWhere: string;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64);
 var
   LQ: TFDQuery;
   LK: TLogKurucu;
   i: Integer;
   LReh, LStk: Int64;
 begin
-  if (LogGun <= 0) or (Trim(ADetayTablo) = '') then Exit;
+  if (LogGun <= 0) or (Trim(ADetayTablo) = '') or (Trim(AWhere) = '') then Exit;
   try
     LQ := TFDQuery.Create(nil);
     try
       LQ.Connection := Tablo.FDCnn;
-      LQ.SQL.Text := 'select * from ' + ADetayTablo + ' where ' + AUstKolon + ' = ' + IntToStr(AUstID);
-      if Trim(AEkKosul) <> '' then
-        LQ.SQL.Text := LQ.SQL.Text + ' and (' + AEkKosul + ')';
+      LQ.SQL.Text := 'select * from ' + ADetayTablo + ' where ' + AWhere;
       LQ.Open;
       while not LQ.Eof do
       begin
@@ -1238,7 +1261,10 @@ begin
              (Trim(LQ.Fields[i].AsString) <> '') then
             LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
         LogVarlikIDleri(LQ, LReh, LStk);
-        LogYaz(liSil, ADetayTabNo, LQ.FieldByName('ID').AsLargeInt, LK, '',
+        // 'ID' kolonu olmayan (bilesik anahtarli) detay tablolarinda cakma (Field 'ID' not found).
+        var LDetayID: Int64 := 0;
+        if LQ.FindField('ID') <> nil then LDetayID := LQ.FieldByName('ID').AsLargeInt;
+        LogYaz(liSil, ADetayTabNo, LDetayID, LK, '',
                AUstTabNo, AUstID, LReh, LStk);   // LK sahipligi LogYaz'a gecer
         LQ.Next;
       end;
@@ -1248,6 +1274,160 @@ begin
   except
     // loglama silme islemini ASLA bozmaz
   end;
+end;
+
+procedure LogDetaylariSil(const ADetayTablo, AUstKolon: string;
+  ADetayTabNo, AUstTabNo: Integer; AUstID: Int64; const AEkKosul: string = '');
+var LWhere: string;
+begin
+  LWhere := AUstKolon + ' = ' + IntToStr(AUstID);
+  if Trim(AEkKosul) <> '' then LWhere := LWhere + ' and (' + AEkKosul + ')';
+  LogDetaylariSilSorgu(ADetayTablo, LWhere, ADetayTabNo, AUstTabNo, AUstID);
+end;
+
+// Tek bir kaydi (ATablo, ID=AKayitID) silme-loguna yazar; VERILEN kart grubuna
+// (AUstTabNo/AUstID) baglar. WHERE anahtari (AKayitID) ile grup anahtari (AUstID) FARKLI
+// olabilir -> ör. demirbas silinince ona bagli DEMIRBAS_TUTANAK master'ini (ID'si tutanakID,
+// grubu demirbasID) loglamak. Silmeden ONCE cagir (kayit hala dururken).
+procedure LogKayitSil(const ATablo: string; ATabNo: Integer; AKayitID: Int64;
+  AUstTabNo: Integer; AUstID: Int64);
+var
+  LQ: TFDQuery;
+  LK: TLogKurucu;
+  i: Integer;
+  LReh, LStk: Int64;
+begin
+  if (LogGun <= 0) or (Trim(ATablo) = '') or (AKayitID <= 0) then Exit;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select * from ' + ATablo + ' where ID=' + IntToStr(AKayitID);
+      LQ.Open;
+      if LQ.IsEmpty then Exit;
+      LK := TLogKurucu.Yeni;
+      for i := 0 to LQ.FieldCount - 1 do
+        if (LQ.Fields[i].FieldKind = fkData) and
+           (LQ.Fields[i].DataType <> ftBlob) and (LQ.Fields[i].DataType <> ftMemo) and
+           (Trim(LQ.Fields[i].AsString) <> '') then
+          LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
+      LogVarlikIDleri(LQ, LReh, LStk);
+      LogYaz(liSil, ATabNo, AKayitID, LK, '', AUstTabNo, AUstID, LReh, LStk);
+    finally
+      LQ.Free;
+    end;
+  except
+    // loglama silme islemini ASLA bozmaz
+  end;
+end;
+
+{ ---- _USER (kart ek kullanici alanlari) loglama ---- }
+
+function UserSnapAnahtar(const AUserTablo: string; AID: Int64): string;
+begin
+  Result := UpperCase(Trim(AUserTablo)) + '#' + IntToStr(AID);
+end;
+
+// _USER'de loglanacak veri kolonu mu? (teknik/audit kolonlari haric)
+function UserAlanLoglanir(AField: TField): Boolean;
+var LAd: string;
+begin
+  Result := False;
+  if (AField.FieldKind <> fkData) or (AField.DataType = ftBlob) or
+     (AField.DataType = ftMemo) then Exit;
+  LAd := UpperCase(AField.FieldName);
+  Result := (LAd <> 'DEGISTIREN') and (LAd <> 'DEGISTIRMETARIHI') and
+            (LAd <> 'EKLEYEN') and (LAd <> 'EKLEMETARIHI');
+end;
+
+// Kart duzenleme acilisinda _USER satirinin O ANKI halini (pozisyonel, TUM alanlar)
+// bellege alir -> finish'te diff icin baseline. Satir yoksa bos liste (Count=0) saklar.
+procedure LogUserAcilis(const AUserTablo: string; AKartID: Int64);
+var
+  LQ: TFDQuery;
+  LSL, LEski: TStringList;
+  i: Integer;
+  LKey: string;
+begin
+  if (LogGun <= 0) or (Trim(AUserTablo) = '') or (AKartID <= 0) then Exit;
+  if GUserSnaplar = nil then GUserSnaplar := TDictionary<string, TStringList>.Create;
+  LKey := UserSnapAnahtar(AUserTablo, AKartID);
+  LSL := TStringList.Create;   // Count=0 -> acilista _USER satiri yoktu
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select * from ' + AUserTablo + ' where ID=' + IntToStr(AKartID);
+      LQ.Open;
+      if not LQ.IsEmpty then
+        for i := 0 to LQ.FieldCount - 1 do   // TUM alanlar pozisyonel (blob/memo -> bos, hizalama korunsun)
+          if (LQ.Fields[i].DataType = ftBlob) or (LQ.Fields[i].DataType = ftMemo) then
+            LSL.Add('')
+          else
+            LSL.Add(LQ.Fields[i].AsString);
+    finally
+      LQ.Free;
+    end;
+  except
+  end;
+  if GUserSnaplar.TryGetValue(LKey, LEski) then LEski.Free;
+  GUserSnaplar.AddOrSetValue(LKey, LSL);
+end;
+
+// Finish'te _USER satirini logla: yeni kart (veya acilista satir yoktu) -> tam satir
+// EKLE; aksi halde acilis snapshot'ina gore alan diff -> DEGISTIR. Kart grubuna baglanir.
+procedure LogUserKaydet(const AUserTablo: string; AUserTabNo, AUstTabNo: Integer;
+  AUstID: Int64; AYeniKart: Boolean);
+var
+  LQ: TFDQuery;
+  LSnap: TStringList;
+  LK: TLogKurucu;
+  i: Integer;
+  LReh, LStk: Int64;
+  LKey: string;
+  LYeni: Boolean;
+begin
+  if (LogGun <= 0) or (Trim(AUserTablo) = '') or (AUstID <= 0) then Exit;
+  LKey := UserSnapAnahtar(AUserTablo, AUstID);
+  if (GUserSnaplar = nil) or (not GUserSnaplar.TryGetValue(LKey, LSnap)) then
+    LSnap := nil;
+  try
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select * from ' + AUserTablo + ' where ID=' + IntToStr(AUstID);
+      LQ.Open;
+      if LQ.IsEmpty then Exit;   // _USER satiri yok -> loglanacak sey yok
+      LogVarlikIDleri(LQ, LReh, LStk);
+      LYeni := AYeniKart or (LSnap = nil) or (LSnap.Count = 0);
+      LK := TLogKurucu.Yeni;
+      if LYeni then
+      begin
+        for i := 0 to LQ.FieldCount - 1 do
+          if UserAlanLoglanir(LQ.Fields[i]) and (Trim(LQ.Fields[i].AsString) <> '') then
+            LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
+        if not LK.BosMu then
+          LogYaz(liEkle, AUserTabNo, AUstID, LK, '', AUstTabNo, AUstID, LReh, LStk)
+        else
+          LK.Free;
+      end
+      else
+      begin
+        for i := 0 to LQ.FieldCount - 1 do
+          if UserAlanLoglanir(LQ.Fields[i]) and (i < LSnap.Count) and
+             (LQ.Fields[i].AsString <> LSnap[i]) then
+            LK.Alan(LQ.Fields[i].FieldName, LSnap[i], LQ.Fields[i].AsString);
+        if not LK.BosMu then
+          LogYaz(liDegistir, AUserTabNo, AUstID, LK, '', AUstTabNo, AUstID, LReh, LStk)
+        else
+          LK.Free;
+      end;
+    finally
+      LQ.Free;
+    end;
+  except
+  end;
+  LogUserAcilis(AUserTablo, AUstID);   // baseline tazele (mukerrer save tekrar diff etmesin)
 end;
 
 { ---- KART loglama kisayollari ---- }
@@ -1348,6 +1528,13 @@ begin
   LQ := TFDQuery.Create(nil);
   try
     LQ.Connection := Tablo.FDCnn;
+    // 'ID' kolonu olmayan (bilesik anahtarli, ör. DEMIRBAS_TUTANAK_DETAY) tabloda ID ile
+    // cakisma kontrolu yapilamaz -> False don (silinmis kayit zaten yok, insert denensin).
+    LQ.SQL.Text := 'SELECT COL_LENGTH(:t, ''ID'')';
+    LQ.ParamByName('t').AsString := ATablo;
+    LQ.Open;
+    if LQ.Fields[0].IsNull then Exit;   // ID kolonu yok -> Result=False
+    LQ.Close;
     LQ.SQL.Text := 'SELECT 1 FROM ' + ATablo + ' WHERE ID=:id';
     LQ.ParamByName('id').AsLargeInt := AID;
     LQ.Open;
@@ -2083,6 +2270,11 @@ finalization
     GLogCnn := nil;
   end;
   GYillar.Free;
+  if GUserSnaplar <> nil then
+  begin
+    for var LSL in GUserSnaplar.Values do LSL.Free;
+    GUserSnaplar.Free;
+  end;
   GLock.Free;
 
 end.

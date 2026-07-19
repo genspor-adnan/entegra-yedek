@@ -1263,8 +1263,8 @@
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 219
-    Top = 44
+    Left = 235
+    Top = 28
     ParamData = <
       item
         Name = 'Par'
@@ -1300,7 +1300,7 @@
         'HERE ID = F.URUNID ) ELSE  '#39#39'  END,  '
       
         ' SUTKODU =  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR' +
-        ' WHERE ID = F.URUNID ) ELSE  '#39#39'  END,   '
+        '_USER WHERE ID = F.URUNID ) ELSE  '#39#39'  END,   '
       
         'PROJEKODU=(Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJE' +
         'ID),'#39' '#39' as TESLIMTARIHI'
@@ -1446,8 +1446,8 @@
         'URUNNO =  CASE WHEN F.TUR =1 THEN (SELECT URUNNO FROM STOKLAR WH' +
         'ERE ID = F.URUNID ) ELSE  '#39#39'  END,'
       
-        'SUTKODU =  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR ' +
-        'WHERE ID = F.URUNID ) ELSE  '#39#39'  END,  '
+        'SUTKODU =  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR_' +
+        'USER WHERE ID = F.URUNID ) ELSE  '#39#39'  END,  '
       
         'BIRIMAD = (SELECT ANAHTAR FROM GENINI WHERE BOLUM=-2702 and DIL=' +
         '-1 and DEGER = F.BIRIM),'
@@ -1500,8 +1500,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 109
-    Top = 70
+    Left = 117
+    Top = 38
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick

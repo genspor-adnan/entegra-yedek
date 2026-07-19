@@ -19,7 +19,6 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Left = 3
     Top = 3
     Width = 1086
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -584,10 +583,6 @@ object DemirbasListeDlg: TDemirbasListeDlg
       Tag = 3
       Caption = 'Kalibrasyon'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         Left = 0
         Top = 0
@@ -752,10 +747,6 @@ object DemirbasListeDlg: TDemirbasListeDlg
       Tag = 4
       Caption = 'Takip / Uyar'#305
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object TreeListGorev: TcxDBTreeList
         Left = 0
         Top = 41
@@ -1329,17 +1320,15 @@ object DemirbasListeDlg: TDemirbasListeDlg
   end
   object GridDemirbas: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 1092
-    Height = 372
+    Height = 369
     Align = alClient
     PopupMenu = PopupDemirbasListe
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 35
-    ExplicitHeight = 369
     object GridDemirbasView: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>

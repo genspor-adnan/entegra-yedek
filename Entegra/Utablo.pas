@@ -518,6 +518,13 @@ type
     procedure EkAlanlariGrideEkle(GridView:TcxGridDBTableView;EkranAdi:String);
     function TurNameGetir(Caption: String; Tur: integer): string;
     procedure AlanOlustur(FormName:TComponent;Tag:integer;DtSource:TDataSource);
+    function UserDataSourceHazirla(FormName:TComponent; AnaDataSource:TDataSource; const UserTablo:String):TDataSource;
+    procedure UserDataSourceKaydet(FormName:TComponent; const UserTablo:String);
+    // Yeni kart + ek-alan sekmesine gecis: kart kaydedilmemisse (ID<=0) Post et (zorunlu alan bos ->
+    // Abort, sekmeye gecme), ID gelince ek-alan (_USER) kontrollerini kur. Re-entry korumali.
+    procedure EkAlanSekmeHazirla(AForm: TComponent; ATabRehber: TDataSet; ADtsRehber: TDataSource;
+      APanelEkAlanlar: TWinControl; const AUserTablo: String;
+      var ARehberID: Integer; var AKuruldu, AKuruluyor, AAllowChange: Boolean);
     procedure TimerUserSessionTimer(Sender: TObject);
     procedure JvAppEvents1Exception(Sender: TObject; E: Exception);
     procedure TabYetkiAfterOpen(DataSet: TDataSet);
@@ -723,6 +730,10 @@ type
     procedure DuyuruMotoru(TaraTarih : TDateTime);
     procedure SKRehberEkle(Rehber_Id: Integer);
     procedure AramaKaydet(AModul, AKayitID: Integer);  // Son/Sik Aranan: KULLANICI_ARAMA upsert (generic, MODUL bazli)
+    // Liste ilk-acilis "Son Aranan" deseni: bayragi kontrol edip kapatir. True donerse liste
+    // frame'i Liste_SP_Cagir(5) (Son Aranan) gostermeli. Kullanim (JvTimer1Timer'de):
+    //   if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;
+    function IlkAcilisSonArananMi(var AIlkYukleme: Boolean): Boolean;
     procedure ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string; AKosullar: TJSONObject; ALocateID: Integer = 0; const AIDTur: string = 'ID');  // generic 2-param JSON liste SP cagrisi (@Baslik ham SQL + @Kosullar JSON); AKosullar SAHIPLIGI devralinir (Free edilir)
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
@@ -824,7 +835,9 @@ type
     function DonusTipiBul(DonusTuru: integer): integer;
     procedure IletisimEkle(RehberId:integer; var YeniId:integer; var YeniAd : string);
     function FaturaTutarGuncelle(baslikid: Integer): integer;
-    function StokVarmi(urunid, depoid: integer; gereken: Double; Aciklama:string=''): Boolean;
+//    function StokVarmi(urunid, depoid: integer; gereken: Double; Aciklama:string=''): Boolean;
+    function StokCikisYeterliMi(AUrunID, ADepoID, ASatirID: Integer; ATarih: TDateTime;
+      AAdet: Double; AIzlemli: Boolean; ASeriLotID: Integer; out AKalan: Double): Boolean;
     function FaturaDetaySablonTipiBul(Tur: SmallInt): integer;
     procedure OndalikKisimAyarla(kolon : TcxGridDBColumn; DijitSay:smallint);
     procedure EPostaAlimIslemleri(MailAdresi:string; Tarih:TDateTime);
@@ -1204,7 +1217,21 @@ const
   TabNo_POSORAN = 324;          // POS komisyon/taksit oranlari (POSORAN)
   TabNo_DBS = 17;
   TabNo_DEMIRBAS = 18;
-  TabNo_DEMIRBAS_TUTANAK=182;
+  // _USER: kart ek kullanici alanlari (kart ile 1:1, ID=kart ID). TABLOLAR 500-511 blogu.
+  TabNo_DEMIRBAS_USER = 500;    // DEMIRBAS_USER
+  TabNo_DOKUMAN_USER = 501;     // DOKUMAN_USER
+  TabNo_FATBASLIK_USER = 502;   // FATBASLIK_USER (fatura/uretim fisi karti)
+  TabNo_FATURA_USER = 503;      // FATURA_USER (fatura satiri - satir seviyesi)
+  TabNo_REHBER_USER = 504;      // REHBER_USER (cari/IK karti)
+  TabNo_SERVIS_USER = 505;      // SERVIS_USER
+  TabNo_SERVISHAREKET_USER = 506; // SERVISHAREKET_USER (servis hareket satiri)
+  TabNo_SIPARIS_USER = 507;     // SIPARIS_USER
+  TabNo_STOKLAR_USER = 508;     // STOKLAR_USER
+  TabNo_TEKLIF_USER = 509;      // TEKLIF_USER
+  TabNo_URETIMEMRI_USER = 510;  // URETIMEMRI_USER
+  TabNo_URETIMOPERASYONPERSONEL_USER = 511; // URETIMOPERASYONPERSONEL_USER
+  TabNo_DEMIRBAS_TUTANAK_KART = 512; // DEMIRBAS_TUTANAK master (hareket/tutanak; ID'li)
+  TabNo_DEMIRBAS_TUTANAK=182;      // DEMIRBAS_TUTANAK_DETAY (link: TUTANAKID+DEMIRBASID, ID yok)
   TabNo_DEMIRBAS_KATEGORI=184;
   TabNo_FATBASLIK_Gelen = 28;
   TabNo_FATBASLIK_Giden = 29;
@@ -1272,6 +1299,7 @@ const
   TabNo_PROJEDETAY=372;   // proje detay bilgileri (gorunum: Detay)
   TabNo_DEMIRBASAMORTISMAN=373;  // demirbas amortisman plani (gorunum: Amortisman)
   TabNo_DOKUMANREVIZE=374;       // dokuman revizyonlari (gorunum: Revizyon)
+  TabNo_STOKIZLEMEDEPO=375;      // stok izleme depo kirilimi (IZLEMID->STOKIZLEME.ID); restore -> TG_StokIzlemeDurumEkle STOKDURUMIZLEME'yi kurar
 
 
   TabNo_STOKGUNSONU=90;
@@ -2259,7 +2287,7 @@ begin
     [FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, DOVIZ_TUTARI, MALIYETORT, FatBasID]
   );
 end;
-
+(*
 function TTablo.StokVarmi(urunid, depoid: integer; gereken: Double; Aciklama:string=''): Boolean;
 var fark : Real;
 begin
@@ -2287,6 +2315,64 @@ begin
       end;
   end;
 
+end;  *)
+
+// Cikis/transfer icin: ATarih'te ADepoID kaynak deposunda yeterli stok var mi? SONUC = islem
+// DEVAM edebilir mi (True) yoksa engellenmeli mi (False). Yetersizse StokDurumKontrolKurali
+// UYGULANIR (0=engelle+uyar->False, 1=sor->kullanici yanitina gore, 2=izin ver->True) ve
+// mesaj burada gosterilir (StokVarmi ile ayni kural/mesaj deseni). AKalan = o tarihteki bakiye.
+// Izlemli -> sp_Prog_Kontrol_Adet_Izlemli (ASeriLotID=0 = urun+depo TOPLAM lot bakiyesi),
+// izlemsiz -> sp_Prog_Kontrol_Adet_Izlemsiz. Model commit'li STOKDURUM/STOKDURUMIZLEME'ye
+// demirli (KALAN_simdi - T sonrasi hareketler); yeni satirin FATURA.ID/STOKIZLEME'si OLMADAN
+// BeforePost'ta dogru calisir. ileri tarihli cikis OLSA BILE sadece o tarihe kadarki bakiye.
+// Transfer + fatura/fis cikisin ORTAK noktasi (per-lot gerekiyorsa ASeriLotID>0 ile ayni SP).
+function TTablo.StokCikisYeterliMi(AUrunID, ADepoID, ASatirID: Integer; ATarih: TDateTime;
+  AAdet: Double; AIzlemli: Boolean; ASeriLotID: Integer; out AKalan: Double): Boolean;
+var
+  Q: TFDQuery;
+  LYeterli: Boolean;
+  LMsg: string;
+begin
+  AKalan := 0;
+  LYeterli := True;
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := FDCnn;
+    if AIzlemli then
+      Q.SQL.Text := 'exec dbo.sp_Prog_Kontrol_Adet_Izlemli :URUNID,:DEPOID,:TARIH,:ADET,:SATIRID,:SERILOTID'
+    else
+      Q.SQL.Text := 'exec dbo.sp_Prog_Kontrol_Adet_Izlemsiz :URUNID,:DEPOID,:TARIH,:ADET,:SATIRID';
+    Q.ParamByName('URUNID').AsInteger := AUrunID;
+    Q.ParamByName('DEPOID').AsInteger := ADepoID;
+    Q.ParamByName('TARIH').AsDateTime := ATarih;
+    Q.ParamByName('ADET').AsFloat := AAdet;
+    Q.ParamByName('SATIRID').AsInteger := ASatirID;
+    if AIzlemli then
+      Q.ParamByName('SERILOTID').AsInteger := ASeriLotID;
+    Q.Open;
+    if not Q.Eof then begin
+      AKalan := Q.FieldByName('KALAN').AsFloat;
+      LYeterli := Q.FieldByName('YETERLI').AsInteger = 1;
+    end;
+  finally
+    Q.Free;
+  end;
+
+  if LYeterli then
+    Exit(True);
+
+  // Yetersiz -> StokDurumKontrolKurali (0=engelle, 1=sor, 2=izin ver).
+  LMsg := ' (' + FormatDateTime('dd.mm.yyyy', ATarih) + ' tarihinde mevcut: ' +
+          FloatToStr(AKalan) + ', istenen: ' + FloatToStr(AAdet) + ')';
+  case StokDurumKontrolKurali of
+    2: Result := True;
+    1: Result := UyariGoster(Uyari, TCikmakIstediginizKadarUrunYokYinedeCik + LMsg, 2) = mrYes;
+  else
+    begin
+      UyariGoster(Uyari, TCikmakIstediginizKadarUrunYok + LMsg, 1);
+      Result := False;
+    end;
+  end;
 end;
 
 function TTablo.SubeGetir(OpsDeger, ComboDeger: integer): integer;
@@ -3182,7 +3268,13 @@ begin
             TabNo_DONUSUM_SATINALMATALEP_SIPARIS:stokyeterli := True;
             TabNo_DONUSUM_STOKTALEP_TRANSFER:stokyeterli := True;
           else
-            stokyeterli := StokVarmi(tabDonusturulecekBelge.FieldByName('URUNID').AsInteger,tabDonusturulecekBelge.FieldByName('DEPOID').AsInteger, tabDonusturulecekBelge.FieldByName('MIKTAR').AsFloat - tabDonusturulecekBelge.FieldByName('DONUSENMIKTAR').AsFloat);
+            begin
+              //19.07.2026 AO: StokVarmi -> StokCikisYeterliMi (tarih-bazli; StokDurumKontrolKurali + mesaj helper icinde)
+              //stokyeterli := StokVarmi(tabDonusturulecekBelge.FieldByName('URUNID').AsInteger,tabDonusturulecekBelge.FieldByName('DEPOID').AsInteger, tabDonusturulecekBelge.FieldByName('MIKTAR').AsFloat - tabDonusturulecekBelge.FieldByName('DONUSENMIKTAR').AsFloat);
+              var LKalan: Double;
+              stokyeterli := StokCikisYeterliMi(tabDonusturulecekBelge.FieldByName('URUNID').AsInteger, tabDonusturulecekBelge.FieldByName('DEPOID').AsInteger, 0,
+                GENINI.BugunTrh, tabDonusturulecekBelge.FieldByName('MIKTAR').AsFloat - tabDonusturulecekBelge.FieldByName('DONUSENMIKTAR').AsFloat, False, 0, LKalan);
+            end;
           end;
 
           if stokyeterli then begin
@@ -4403,6 +4495,10 @@ Begin
     9: QueryX := Query9;
   end;
   QueryX.Close;
+  if QueryX.Prepared then
+    QueryX.Unprepare;
+  QueryX.Params.Clear;
+  QueryX.SQL.Clear;
   QueryX.SQL.Text  := PgSqlCevir(SQLText);   // PG'de diyalekt cevir (MSSQL'de aynen)
   try
     QueryX.Open;
@@ -4859,25 +4955,9 @@ begin
          '   AND NOT EXISTS(SELECT SI1.* FROM STOKIZLEME SI1 WHERE SI1.STOKID = SI.STOKID AND SI1.SERILOTID = SL.ID AND SI1.ID <> SI.ID) ',[],[]);
     end;
   ///
-    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKIZLEME where BASLIKID='+TabFatBaslik.FieldByName('ID').AsString,[],[]);
-    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKLOKASYON where BASLIKID='+TabFatBaslik.FieldByName('ID').AsString,[],[]);
-  ///
-    TablodanSorguAc(1,'SElect FBTUR=FB.TUR,FB.GIRISDEPO,FB.CIKISDEPO,FID=F.ID,FTUR=F.TUR,F.IZLEME,F.URUNID,F.ADET,F.IADEFATURAID,F.YERI from FATBASLIK FB '+
-                      ' left outer join FATURA F on FB.ID=F.FATBASID Where FB.ID='+inttoStr(FatbasID)+'');
-    Query1.First;
-    While not Query1.Eof do begin
-      /// Faturayı seyir defterine at...
-      // Tablo.LogIslemleri('Fatura', 'Silme', TabFatura, True);
-      // Eğer daha önce stoktan düşülmüşse tekrar artırılır
-
-      // eğer silinen kayıt gider pusulası ise ilgili fatura satırının iade miktar alanı güncellenmeli
-      if Query1.FieldByName('FBTUR').AsInteger = 8 then
-        IadeMiktarGuncelle(Query1.FieldByName('IADEFATURAID').AsInteger, Query1.FieldByName('ADET').AsString);
-      Veritabani.BasitKomutÇalıştır(LConn, ' delete from FATURA where ID=&Id ', ['&Id'], [Query1.FieldByName('FID').AsInteger]);
-      Query1.Next;
-    end;
-    Query1.Close;
-
+    // ---- LOGLAMA, FATURA satirlari SILINMEDEN ONCE (Geri Al icin). FATURA silininde FATURA_USER
+    // (satir ek alan) FK cascade ile gider -> once burada logla. Sira: kart -> her satir (once
+    // FATURA, sonra FATURA_USER) -> restore'da satir _USER'dan once eklenir (FK dogru).
     TurNo := TabFatBaslik.FieldByName('TUR').AsInteger;
     case TurNo of
       3,12 : TabNo := TabNo_FIS_Gelen;   // giris fisi
@@ -4910,10 +4990,37 @@ begin
         14,15,17,110,119 : Tabno := TabNo_FATURA_GidenFatFisIrs;
       else TabNo := TabNo_FATURA_GelenFatFisIrs;
       end;
-      // Detay -> ust=kart (master-detail); kart gecmisinde tek kart satiri, detaylar altta.
+      // Detay -> ust=kart. Once FATURA satiri, sonra FATURA_USER (restore FK sirasi icin).
       LogKartSil(TabFatura, TabNo, Tabfatura.FieldByName('ID').AsInteger, TabNoKart, FatbasID);
+      LogKayitSil('FATURA_USER', TabNo_FATURA_USER, Tabfatura.FieldByName('ID').AsInteger, TabNoKart, FatbasID);
       TabFatura.Next;
     end;
+    // STOKIZLEME (stok izleme/seri-lot; BASLIKID=FATBASLIK, SATIRID=FATURA) -> SILINMEDEN ONCE logla
+    // (Geri Al), sonra sil. FATURA'dan ONCE silinmeli (FK: SATIRID->FATURA). STOKLOKASYON loglanmaz.
+    // STOKIZLEMEDEPO (IZLEMID->STOKIZLEME.ID): STOKIZLEME delete trigger'i (TG_StokIzlemeDurumSil)
+    // bunu ve STOKDURUMIZLEME'yi siler. STOKIZLEME insert'inin durum trigger'i YOK -> restore'da
+    // izleme agregatlari tutmaz. Cozum: STOKIZLEMEDEPO'yu da logla (STOKIZLEME'den SONRA -> restore'da
+    // STOKIZLEME once gelir/FK, sonra STOKIZLEMEDEPO insert'i TG_StokIzlemeDurumEkle'yi tetikler ->
+    // STOKDURUMIZLEME yeniden kurulur). STOKDURUMIZLEME turetilmis, loglanmaz.
+    LogDetaylariSil('STOKIZLEME', 'BASLIKID', TabNo_STOKIZLEME, TabNoKart, FatbasID);
+    LogDetaylariSilSorgu('STOKIZLEMEDEPO',
+      'IZLEMID in (select ID from STOKIZLEME where BASLIKID='+IntToStr(FatbasID)+')',
+      TabNo_STOKIZLEMEDEPO, TabNoKart, FatbasID);
+    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKIZLEME where BASLIKID='+IntToStr(FatbasID),[],[]);
+    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKLOKASYON where BASLIKID='+IntToStr(FatbasID),[],[]);
+
+    // ---- Loglama bitti; simdi FATURA satirlarini FIZIKSEL sil (FATURA_USER cascade gider).
+    TablodanSorguAc(1,'SElect FBTUR=FB.TUR,FB.GIRISDEPO,FB.CIKISDEPO,FID=F.ID,FTUR=F.TUR,F.IZLEME,F.URUNID,F.ADET,F.IADEFATURAID,F.YERI from FATBASLIK FB '+
+                      ' left outer join FATURA F on FB.ID=F.FATBASID Where FB.ID='+inttoStr(FatbasID)+'');
+    Query1.First;
+    While not Query1.Eof do begin
+      // eğer silinen kayıt gider pusulası ise ilgili fatura satırının iade miktar alanı güncellenmeli
+      if Query1.FieldByName('FBTUR').AsInteger = 8 then
+        IadeMiktarGuncelle(Query1.FieldByName('IADEFATURAID').AsInteger, Query1.FieldByName('ADET').AsString);
+      Veritabani.BasitKomutÇalıştır(LConn, ' delete from FATURA where ID=&Id ', ['&Id'], [Query1.FieldByName('FID').AsInteger]);
+      Query1.Next;
+    end;
+    Query1.Close;
 
     if Assigned(TabFatura) and TabFatura.Active then
       TabFatura.Close;
@@ -4925,6 +5032,9 @@ begin
     Veritabani.BasitKomutÇalıştır(LConn, ' delete from REHBERBILGI where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'], [FaturaDetaySablonTipiBul(TurNo), FatbasID]);
     Veritabani.BasitKomutÇalıştır(LConn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ', ['&yeri', '&yer_id'], [31, FatbasID]);
     Veritabani.BasitKomutÇalıştır(LConn, ' delete from KASA where TUR in (61,71) and FATURAID=&Id ', ['&Id'], [FatbasID]);
+    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+    // TabNo yukaridaki FATURA satir dongusunde ezildi -> kart grubu icin TabNoKart kullan.
+    LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, TabNoKart, FatbasID);
     Veritabani.BasitKomutÇalıştır(LConn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[FatbasID]);
   finally
     FreeAndNil(LConn);
@@ -5033,6 +5143,8 @@ begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update SERVIS set YERI=null, YERID=null where ID=&Id ', ['&Id'], [Tablo.Query3.FieldByName('YERID').AsInteger]);
 
   LogKartSil(Tablo.Query3, tabno, SiparisId);   // kart SILME, dogru tabNo
+  // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+  LogDetaylariSil('SIPARIS_USER', 'ID', TabNo_SIPARIS_USER, tabno, SiparisId);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [SiparisId]);
 end;
 
@@ -7649,6 +7761,8 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKBOYUTKOMBINASYON where STOKID=&id ', ['&id'], [StokID]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKSEVIYE where STOKID=&id ', ['&id'], [StokID]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKMUHASEBE where STOKID=&id ', ['&id'], [StokID]);
+      // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+      LogDetaylariSil('STOKLAR_USER', 'ID', TabNo_STOKLAR_USER, TabNo_STOKLAR, StokID);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKLAR where ID=&id ', ['&id'], [StokID]);
       Result := True;
     end;
@@ -8756,6 +8870,8 @@ begin
     Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where ID='+IntToStr(UretimEmriID));
     LogKartSil(Tablo.Query1, TabNo_URETIMEMRI, UretimEmriID);
   end;
+  // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+  LogDetaylariSil('URETIMEMRI_USER', 'ID', TabNo_URETIMEMRI_USER, TabNo_URETIMEMRI, UretimEmriID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where ID=&ID',['&ID'],[UretimEmriID]);
 end;
 
@@ -9150,6 +9266,10 @@ begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVKULLANICI where TUR=12 and LISTGOREVID  = &Id ',['&Id'], [ServisID]);
   // Detay satirlarini SILMEDEN ONCE logla (ust=servis), sonra sil.
   LogDetaylariSil('SERVISHAREKET', 'SERVISID', TabNo_SERVISHAREKET, TabNo_SERVIS, ServisID);
+  // SERVISHAREKET_USER (satir ek alan, ID=hareket ID) -> subquery ile kart grubuna sil-logla (Geri Al).
+  LogDetaylariSilSorgu('SERVISHAREKET_USER',
+    'ID in (select ID from SERVISHAREKET where SERVISID=' + IntToStr(ServisID) + ')',
+    TabNo_SERVISHAREKET_USER, TabNo_SERVIS, ServisID);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISHAREKET where SERVISID  = &Id ',['&Id'], [ServisID]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVIS where ID=&Id ',['&Id'], [ServisID]);
 end;
@@ -10688,6 +10808,9 @@ begin
     //ticari sil
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KULLANICI where REHBERID=&id ',['&id'],[RehberId]);
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=2 and YER_ID=&id ',['&id'],[RehberId]);
+    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin).
+    LogDetaylariSil('REHBER_USER', 'ID', TabNo_REHBER_USER, TabNo_REHBER, RehberId);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER_USER where ID=&id ',['&id'],[RehberId]);
     //kendisini sil
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER where ID=&id ',['&id'],[RehberId]);
      //GENINI' den sil
@@ -10727,6 +10850,9 @@ begin
         end;
      //
 //     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_FATBASLIK)+' and YERID=&SId', ['&SId'], [Id]);
+     // Tahakkuk (FATBASLIK) kart + FATBASLIK_USER SILMEDEN ONCE logla (Geri Al).
+     LogKayitSil('FATBASLIK', TabNo_FATBASLIK, Id, TabNo_FATBASLIK, Id);
+     LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, TabNo_FATBASLIK, Id);
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[Id]);
      Exit;
   end else if Tur in [4, 6, 8, 10,11,12,14,15,16,109,110,119] then begin //110:adisyon
@@ -10756,10 +10882,18 @@ begin
         //KASA (Banka) tablosundaki gider/gelir silinirse ve GERIDONUSID = -9 ise YER ve YERID'deki tablodaki bilgiler silinir.
          if Tablo.Query8.FieldByName('GERIDONUSID').AsInteger=-9 then
           case Tablo.Query8.FieldByName('YERI').AsInteger of
-            TabNo_FATBASLIK : Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[Tablo.Query8.FieldByName('YERID').AsInteger]);
+            TabNo_FATBASLIK : begin
+                // Bagli FATBASLIK kart + _USER SILMEDEN ONCE logla (Geri Al).
+                LogKayitSil('FATBASLIK', TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger, TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger);
+                LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger);
+                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[Tablo.Query8.FieldByName('YERID').AsInteger]);
+              end;
           end
          else if Tur = 32 then begin
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from KASA Where YERID=' + IntToStr(Id) + '', [], []);
+            // Bagli FATBASLIK(ler) + FATBASLIK_USER SILMEDEN ONCE logla (KASA=Id; Geri Al icin veri).
+            LogDetaylariSilSorgu('FATBASLIK', 'KASA=' + IntToStr(Id), TabNo_FATBASLIK, TabNo_FATBASLIK, Id);
+            LogDetaylariSilSorgu('FATBASLIK_USER', 'ID in (select ID from FATBASLIK where KASA=' + IntToStr(Id) + ')', TabNo_FATBASLIK_USER, TabNo_FATBASLIK, Id);
             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from FATBASLIK Where KASA=' + IntToStr(Id) + '', [], []);
          end;
     end;
@@ -11802,6 +11936,12 @@ begin
     '  where not exists (select 1 from KULLANICI_ARAMA' +
     '                    where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID)+')',
     [], []);
+end;
+
+function TTablo.IlkAcilisSonArananMi(var AIlkYukleme: Boolean): Boolean;
+begin
+  Result := AIlkYukleme;
+  AIlkYukleme := False;   // tek sefer: sonraki yuklemeler normal (Liste_SP_Cagir(4))
 end;
 
 procedure TTablo.ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string;
@@ -13187,6 +13327,164 @@ begin
     Result :='Lbl2'+Caption;
 end;
 
+function TTablo.UserDataSourceHazirla(FormName:TComponent; AnaDataSource:TDataSource; const UserTablo:String):TDataSource;
+var
+  LQuery: TFDQuery;
+  LDataSource: TDataSource;
+  LName: string;
+  LID: Integer;
+begin
+  Result := AnaDataSource;
+  if (FormName = nil) or (AnaDataSource = nil) or (AnaDataSource.DataSet = nil) or
+     (Trim(UserTablo) = '') or (AnaDataSource.DataSet.FindField('ID') = nil) then
+    Exit;
+
+  LID := AnaDataSource.DataSet.FieldByName('ID').AsInteger;
+  if LID <= 0 then
+    Exit;
+
+  LName := 'CodexDts' + StringReplace(UserTablo, '_', '', [rfReplaceAll]);
+  LDataSource := FormName.FindComponent(LName) as TDataSource;
+  if LDataSource = nil then begin
+    LQuery := TFDQuery.Create(FormName);
+    LQuery.Name := 'CodexQry' + StringReplace(UserTablo, '_', '', [rfReplaceAll]);
+    LQuery.Connection := FDCnn;
+    LQuery.UpdateOptions.UpdateTableName := UserTablo;
+    LQuery.UpdateOptions.KeyFields := 'ID';
+    LQuery.SQL.Text := 'select * from ' + UserTablo + ' where ID=-1';
+
+    LDataSource := TDataSource.Create(FormName);
+    LDataSource.Name := LName;
+    LDataSource.DataSet := LQuery;
+    LDataSource.AutoEdit := True;
+  end else begin
+    LDataSource.AutoEdit := True;
+    LQuery := TFDQuery(LDataSource.DataSet);
+  end;
+
+  if LQuery.Active then
+    LQuery.Close;
+  LQuery.SQL.Text := 'select * from ' + UserTablo + ' where ID=' + IntToStr(LID);
+  LQuery.Tag := LID;
+  LQuery.Open;
+  if LQuery.IsEmpty then begin
+    LQuery.Append;
+    LQuery.FieldByName('ID').AsInteger := LID;
+    if LQuery.FindField('EKLEYEN') <> nil then
+      LQuery.FieldByName('EKLEYEN').AsInteger := StrToIntDef(Kullanan, 0);
+    if LQuery.FindField('EKLEMETARIHI') <> nil then
+      LQuery.FieldByName('EKLEMETARIHI').AsDateTime := GENINI.BugunTrhSaat;
+  end else if not (LQuery.State in [dsEdit, dsInsert]) then
+    LQuery.Edit;
+  Result := LDataSource;
+end;
+
+procedure TTablo.UserDataSourceKaydet(FormName:TComponent; const UserTablo:String);
+var
+  LDataSource: TDataSource;
+  LName: string;
+  LID: Integer;
+
+  function KullaniciAlaniDoluMu(ADataSet:TDataSet):Boolean;
+  var
+    I: Integer;
+    F: TField;
+  begin
+    Result := False;
+    if ADataSet = nil then
+      Exit;
+
+    for I := 0 to ADataSet.FieldCount - 1 do begin
+      F := ADataSet.Fields[I];
+      if SameText(F.FieldName, 'ID') or
+         SameText(F.FieldName, 'EKLEYEN') or
+         SameText(F.FieldName, 'EKLEMETARIHI') or
+         SameText(F.FieldName, 'DEGISTIREN') or
+         SameText(F.FieldName, 'DEGISTIRMETARIHI') then
+        Continue;
+
+      if F.IsNull then
+        Continue;
+
+      case F.DataType of
+        ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo, ftWideMemo:
+          if Trim(F.AsString) <> '' then begin
+            Result := True;
+            Exit;
+          end;
+      else
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+begin
+  if (FormName = nil) or (Trim(UserTablo) = '') then
+    Exit;
+
+  LName := 'CodexDts' + StringReplace(UserTablo, '_', '', [rfReplaceAll]);
+  LDataSource := FormName.FindComponent(LName) as TDataSource;
+  if (LDataSource = nil) or (LDataSource.DataSet = nil) then
+    Exit;
+
+  if not KullaniciAlaniDoluMu(LDataSource.DataSet) then begin
+    if LDataSource.DataSet.State = dsInsert then
+      LDataSource.DataSet.Cancel
+    else begin
+      if LDataSource.DataSet.State = dsEdit then
+        LDataSource.DataSet.Post;
+      if not LDataSource.DataSet.IsEmpty then
+        LDataSource.DataSet.Delete;
+    end;
+    Exit;
+  end;
+
+  if LDataSource.DataSet.State in [dsEdit, dsInsert] then begin
+    if LDataSource.DataSet.FindField('ID') <> nil then begin
+      LID := LDataSource.DataSet.FieldByName('ID').AsInteger;
+      if (LID <= 0) and (LDataSource.DataSet is TFDQuery) then begin
+        LID := TFDQuery(LDataSource.DataSet).Tag;
+        if LID > 0 then
+          LDataSource.DataSet.FieldByName('ID').AsInteger := LID;
+      end;
+    end;
+    if LDataSource.DataSet.FindField('DEGISTIREN') <> nil then
+      LDataSource.DataSet.FieldByName('DEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);
+    if LDataSource.DataSet.FindField('DEGISTIRMETARIHI') <> nil then
+      LDataSource.DataSet.FieldByName('DEGISTIRMETARIHI').AsDateTime := GENINI.BugunTrhSaat;
+    LDataSource.DataSet.Post;
+  end;
+end;
+
+procedure TTablo.EkAlanSekmeHazirla(AForm: TComponent; ATabRehber: TDataSet; ADtsRehber: TDataSource;
+  APanelEkAlanlar: TWinControl; const AUserTablo: String;
+  var ARehberID: Integer; var AKuruldu, AKuruluyor, AAllowChange: Boolean);
+begin
+  if AKuruluyor or AKuruldu then Exit;   // re-entry / tek sefer
+  AKuruluyor := True;
+  try
+    if ARehberID <= 0 then
+    begin
+      try
+        if ATabRehber.State in [dsInsert, dsEdit] then
+          ATabRehber.Post;   // BeforePost -> zorunlu alan (FIRMA/KOD) bos ise Abort (mesaj)
+      except
+        on E: EAbort do begin AAllowChange := False; Exit; end;   // bos -> sekmeye gecme
+      end;
+      ARehberID := ATabRehber.FieldByName('ID').AsInteger;
+    end;
+    if (ARehberID > 0) and (APanelEkAlanlar <> nil) then
+    begin
+      AlanOlustur(AForm, -1, UserDataSourceHazirla(AForm, ADtsRehber, AUserTablo));
+      AKuruldu := True;
+    end
+    else
+      AAllowChange := False;
+  finally
+    AKuruluyor := False;
+  end;
+end;
+
 procedure TTablo.CreatePropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 begin                                                                            // ButtonAd:TCxButtonEdit; Tablo1:TFDQuery; SQL:string
    Tablo.EditButtonStandart(TcxButtonEdit(Sender), AButtonIndex,TFDQuery( TcxDBButtonEdit(Sender).DataBinding.datasource.dataset), TcxButtonEdit(Sender).HelpKeyword);
@@ -13640,6 +13938,9 @@ begin
       end;
 
     DataSourceExt.DataSet.Open;
+    if (not DataSourceExt.DataSet.IsEmpty) and DataSourceExt.DataSet.CanModify and
+       (not (DataSourceExt.DataSet.State in [dsEdit, dsInsert])) then
+      DataSourceExt.DataSet.Edit;
   except
     UyariGoster(Uyari,'Liste Açılırken Bir Hata Oluşmuş Olabilir.');
   end;

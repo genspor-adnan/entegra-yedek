@@ -107,8 +107,6 @@ object StokTalepWizard: TStokTalepWizard
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelAlt2: TPanel
         Left = 0
         Top = 477
@@ -576,13 +574,11 @@ object StokTalepWizard: TStokTalepWizard
         TabOrder = 1
         object Panel2: TPanel
           Left = 1
-          Top = 215
+          Top = 218
           Width = 1030
-          Height = 191
+          Height = 188
           Align = alClient
           TabOrder = 0
-          ExplicitTop = 218
-          ExplicitHeight = 188
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -673,6 +669,13 @@ object StokTalepWizard: TStokTalepWizard
                 Properties.ReadOnly = True
                 Options.Editing = False
                 Width = 87
+              end
+              object GridFaturaViewHUCRE: TcxGridDBColumn
+                Caption = 'Raf'
+                DataBinding.FieldName = 'HUCRE'
+                DataBinding.IsNullValueType = True
+                Options.Editing = False
+                Width = 70
               end
               object GridFaturaViewADET1: TcxGridDBColumn
                 Caption = 'Adet'
@@ -961,14 +964,13 @@ object StokTalepWizard: TStokTalepWizard
         end
         object PageControlUst: TcxPageControl
           Left = 1
-          Top = 33
+          Top = 36
           Width = 1030
           Height = 182
           Align = alTop
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
-          ExplicitTop = 36
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1026
@@ -1420,7 +1422,6 @@ object StokTalepWizard: TStokTalepWizard
           Left = 4
           Top = 4
           Width = 1024
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -2017,6 +2018,9 @@ object StokTalepWizard: TStokTalepWizard
         'KOD= CASE WHEN F.TUR =0 THEN  (select MG.KOD from MASRAFGELIR MG' +
         ' where MG.ID=F.URUNID) '
       #9' ELSE (select S.KOD from STOKLAR S where S.ID=F.URUNID) END,'
+      
+        'HUCRE= CASE WHEN F.TUR =0 THEN '#39#39' ELSE (select S.HUCRE from STOK' +
+        'LAR S where S.ID=F.URUNID) END,'
       
         'BIRIMAD = (SELECT ANAHTAR FROM GENINI WHERE BOLUM=-2702 and DIL=' +
         '-1 and DEGER = F.BIRIM),'

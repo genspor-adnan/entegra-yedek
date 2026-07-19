@@ -74,6 +74,8 @@ object DokumanWizard: TDokumanWizard
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       WaterMark.Width = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 593
         Top = 70
@@ -171,6 +173,10 @@ object DokumanWizard: TDokumanWizard
           object cxTabSheet1: TcxTabSheet
             Caption = 'cxTabSheet1'
             ImageIndex = 0
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object GridDokuman: TcxGrid
               Left = 0
               Top = 0
@@ -1342,6 +1348,10 @@ object DokumanWizard: TDokumanWizard
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alan'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -1808,6 +1818,8 @@ object DokumanWizard: TDokumanWizard
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'TarihceEkr'
       OnPage = TarihceEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGrid1: TcxGrid
         Left = 0
         Top = 70

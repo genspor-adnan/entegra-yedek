@@ -105,7 +105,7 @@ type
     EFaturaDurum: Integer;     // FATBASLIK.EFATURADURUM (1/11/51 vs 2/12/52)
     EArsivMi: Boolean;         // EFATURADURUM in [11,12] olunca True
     EBelgeBelgeTuru: Integer;  // EBELGE.BELGETURU ? RAlias kodu (140/141/150/151)
-    // Ihracat (Senaryo=3) 'İhracat' detay sablonundan (REHBERBILGI) okunur:
+    // Ihracat (Senaryo=3) FATURA_USER.IHRACAT JSON alanindan okunur:
     IhracatVar: Boolean;
     TeslimSartiKodu: string;   // INCOTERMS kodu (FOB, DDP...) - deliveryTerms.id
     TasimaSekliKodu: string;   // tasima modu kodu (1-8) - transportModeCode
@@ -175,6 +175,7 @@ type
   TEBelgeMenuBaslik = record
     ID: Integer;
     Tur: Integer;
+    Senaryo: Integer;
     EFaturaDurum: Integer;
     EFaturaSonuc: Integer;
     RehberID: Integer;
@@ -792,7 +793,7 @@ begin
   end;
 end;
 
-// "KOD - Aciklama" formatindaki REHBERBILGI degerinden kodu ("KOD") ayiklar.
+// "KOD - Aciklama" formatindaki ihracat JSON degerinden kodu ("KOD") ayiklar.
 function IhracatKodOnEk(const S: string): string;
 var
   P: Integer;
@@ -803,7 +804,7 @@ begin
     Result := Trim(Copy(Result, 1, P - 1));
 end;
 
-// REHBERBILGI sayi degerini locale-bagimsiz ayristir. Grid (GIRIS=13) degeri
+// Ihracat JSON sayi degerini locale-bagimsiz ayristir. Grid degeri
 // "12345.67" gibi NOKTA ondalik ile saklar; sistem locale ',' ise StrToCurr
 // bunu bozar. Once '.' ondalik, sonra ',' ondalik dener.
 function IhracatSayiParse(const S: string): Currency;
@@ -825,54 +826,59 @@ begin
   Result := StrToCurrDef(LS, 0);          // son care: sistem locale
 end;
 
-// Ihracat detay sablonu (REHBERAYAR/REHBERBILGI YERI=132 BOLUM='İhracat')
-// degerlerini okur. Alanlar KAYNAK (liste adi) ile kesin ayirt edilir; kod,
-// BILGI'nin " - " on ekinden alinir (combo ANAHTAR metnini saklar).
+// Ihracat bilgilerini FATURA_USER.IHRACAT JSON alanindan okur. Kodlar combo
+// metninin " - " on ekinden alinir (ornegin "FCA - Tasıyıcıya Masrafsız").
 procedure IhracatBilgisiOku(AFatBaslikID: Integer; var ABaslik: TEBelgeBaslik);
 var
   LQ: TFDQuery;
-  LKaynak, LEtiket, LBilgi: string;
+  LJson: string;
+  LVal: TJSONValue;
+  LObj: TJSONObject;
 begin
+  LJson := '';
   LQ := TFDQuery.Create(nil);
   try
     LQ.Connection := Tablo.FDCnn;
     LQ.SQL.Text :=
-      'select RA.KAYNAK, RB.ETIKET, RB.BILGI from REHBERBILGI RB ' +
-      'inner join REHBERAYAR RA on RA.YERI=RB.YERI and RA.SIRA=RB.SIRA ' +
-      'and RA.ETIKET=RB.ETIKET and RA.BOLUM=:BOLUM ' +
-      'where RB.YERI=:YERI and RB.YER_ID=:YERID';
-    LQ.ParamByName('BOLUM').AsString := 'İhracat';
-    LQ.ParamByName('YERI').AsInteger := Tablo.FaturaDetaySablonTipiBul(ABaslik.Tur);
-    LQ.ParamByName('YERID').AsInteger := AFatBaslikID;
+      'select top 1 FU.IHRACAT ' +
+      'from FATURA_USER FU ' +
+      'inner join FATURA F on F.ID=FU.ID ' +
+      'where F.FATBASID=:ID and isnull(cast(FU.IHRACAT as nvarchar(max)),'''')<>'''' ' +
+      'order by isnull(F.SIRA,2147483647), F.ID';
+    LQ.ParamByName('ID').AsInteger := AFatBaslikID;
     LQ.Open;
-    while not LQ.Eof do begin
-      LKaynak := Trim(LQ.FieldByName('KAYNAK').AsString);
-      LEtiket := Trim(LQ.FieldByName('ETIKET').AsString);
-      LBilgi := Trim(LQ.FieldByName('BILGI').AsString);
-      if LKaynak = 'İhracat_Teslim_Şartı' then
-        ABaslik.TeslimSartiKodu := IhracatKodOnEk(LBilgi)
-      else if LKaynak = 'İhracat_Taşıma_Şekli' then
-        ABaslik.TasimaSekliKodu := IhracatKodOnEk(LBilgi)
-      else if LKaynak = 'İhracat_Paket_Kap' then
-        ABaslik.KapCinsiKodu := IhracatKodOnEk(LBilgi)
-      else if LEtiket = 'FOB Değeri' then
-        ABaslik.FOBDeger := IhracatSayiParse(LBilgi)
-      else if LEtiket = 'Kap Adedi' then
-        ABaslik.KapAdedi := StrToIntDef(LBilgi, 0);
-      LQ.Next;
-    end;
-    ABaslik.IhracatVar := (ABaslik.TeslimSartiKodu <> '') or
-      (ABaslik.TasimaSekliKodu <> '') or (ABaslik.KapCinsiKodu <> '') or
-      (ABaslik.FOBDeger > 0);
-    // Ihracat KDV istisna kodu (KDV%=0 icin taxExemptionCode) yoksa varsayilan:
-    // 301 = 11/1-a Mal ihracati (GENINI BOLUM=-2333). Hizmet ihracatinda 302
-    // faturada KDV istisna nedeni secilerek override edilir.
-    if Trim(ABaslik.KDVIstisnaKodu) = '' then begin
-      ABaslik.KDVIstisnaKodu := '301';
-      ABaslik.KDVIstisnaNedeni := '11/1-a Mal ihracatı';
-    end;
+    if not LQ.IsEmpty then
+      LJson := Trim(LQ.FieldByName('IHRACAT').AsString);
   finally
     LQ.Free;
+  end;
+
+  if LJson <> '' then begin
+    LVal := TJSONObject.ParseJSONValue(LJson);
+    if LVal is TJSONObject then begin
+      LObj := TJSONObject(LVal);
+      try
+        ABaslik.TeslimSartiKodu := IhracatKodOnEk(JSONNesneStr(LObj, 'TeslimSarti'));
+        ABaslik.TasimaSekliKodu := IhracatKodOnEk(JSONNesneStr(LObj, 'TasimaSekli'));
+        ABaslik.KapCinsiKodu := IhracatKodOnEk(JSONNesneStr(LObj, 'KapAmbalajCinsi'));
+        ABaslik.FOBDeger := IhracatSayiParse(JSONNesneStr(LObj, 'FOBDegeri'));
+        ABaslik.KapAdedi := Round(IhracatSayiParse(JSONNesneStr(LObj, 'KapAdedi')));
+      finally
+        LObj.Free;
+      end;
+    end else
+      LVal.Free;
+  end;
+
+  ABaslik.IhracatVar := (ABaslik.TeslimSartiKodu <> '') or
+    (ABaslik.TasimaSekliKodu <> '') or (ABaslik.KapCinsiKodu <> '') or
+    (ABaslik.FOBDeger > 0);
+  // Ihracat KDV istisna kodu (KDV%=0 icin taxExemptionCode) yoksa varsayilan:
+  // 301 = 11/1-a Mal ihracati (GENINI BOLUM=-2333). Hizmet ihracatinda 302
+  // faturada KDV istisna nedeni secilerek override edilir.
+  if Trim(ABaslik.KDVIstisnaKodu) = '' then begin
+    ABaslik.KDVIstisnaKodu := '301';
+    ABaslik.KDVIstisnaNedeni := '11/1-a Mal ihracatı';
   end;
 end;
 
@@ -883,7 +889,8 @@ function IhracatEksikAlanlar(const ABaslik: TEBelgeBaslik;
 var
   LEksik: TStringList;
   I: Integer;
-  LGtipYok: string;
+  LGtipYok, LIhracatYok, LSatirKod: string;
+  LQ: TFDQuery;
 begin
   LEksik := TStringList.Create;
   try
@@ -895,6 +902,35 @@ begin
       LEksik.Add('- Kap / Ambalaj Cinsi');
     if ABaslik.FOBDeger <= 0 then
       LEksik.Add('- FOB Değeri');
+
+    LIhracatYok := '';
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text :=
+        'select F.ID, ' +
+        'coalesce(nullif(S.KOD,''''), nullif(MG.KOD,''''), convert(nvarchar(20),F.ID)) as SATIRKOD ' +
+        'from FATURA F ' +
+        'left join FATURA_USER FU on FU.ID=F.ID ' +
+        'left join STOKLAR S on S.ID=F.URUNID and F.TUR in (1,11) ' +
+        'left join MASRAFGELIR MG on MG.ID=F.URUNID and F.TUR not in (1,11) ' +
+        'where F.FATBASID=:ID and isnull(cast(FU.IHRACAT as nvarchar(max)),'''')='''' ' +
+        'order by isnull(F.SIRA,2147483647), F.ID';
+      LQ.ParamByName('ID').AsInteger := ABaslik.ID;
+      LQ.Open;
+      while not LQ.Eof do begin
+        LSatirKod := Trim(LQ.FieldByName('SATIRKOD').AsString);
+        if LIhracatYok <> '' then
+          LIhracatYok := LIhracatYok + ', ';
+        LIhracatYok := LIhracatYok + LSatirKod;
+        LQ.Next;
+      end;
+    finally
+      LQ.Free;
+    end;
+    if LIhracatYok <> '' then
+      LEksik.Add('- İhracat bilgileri JSON (satır: ' + LIhracatYok + ')');
+
     // Urun satirlarinda GTIP zorunlu (ihracatta gumruk); bos olanlari topla.
     LGtipYok := '';
     for I := 0 to High(ASatirlar) do
@@ -967,8 +1003,8 @@ begin
   ABaslik.KDV := AlanCurrency(Tablo.Query1, 'KDV_TUTARI');
   ABaslik.Toplam := AlanCurrency(Tablo.Query1, 'FATURA_TUTARI');
 
-  // Ihracat faturasi (Senaryo=3): 'İhracat' detay sablonundan teslim sarti,
-  // tasima, kap, FOB, kap adedi oku (JSON delivery/shipment icin).
+  // Ihracat faturasi (Senaryo=3): FATURA_USER.IHRACAT JSON alanindan teslim
+  // sarti, tasima, kap, FOB, kap adedi oku (JSON delivery/shipment icin).
   if ABaslik.Senaryo = 3 then
     IhracatBilgisiOku(AFatBaslikID, ABaslik);
 
@@ -1476,6 +1512,9 @@ end;
 function BelgeXSLTGetir(ARehberID, ABelgeTuru: Integer;
   AEArsivMi, AGelenMi: Boolean; out AXSLT: string): Boolean; forward;
 function OrnekEArsivXSLTGetir(out AXSLT: string): Boolean; forward;
+function GumrukPartyXML(const ARol: string): string; forward;
+function IhracatSatirDeliveryXML(const ABaslik: TEBelgeBaslik;
+  const ASatir: TEBelgeSatir): string; forward;
 
 function Base64TekSatir(const ABytes: TBytes): string;
 begin
@@ -1593,6 +1632,8 @@ begin
       ABaslik.Tarih) + '</cbc:IssueTime>');
     if ABaslik.Tur = EBelgeTuruEIrsaliye then
       LXML.AppendLine('<cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>')
+    else if LProfil = 'IHRACAT' then
+      LXML.AppendLine('<cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>')
     else
       LXML.AppendLine('<cbc:InvoiceTypeCode>' + FaturaTipKodu(ABaslik) +
         '</cbc:InvoiceTypeCode>');
@@ -1749,7 +1790,11 @@ begin
       LXML.AppendLine('</cac:Shipment>');
     end else begin
       LXML.Append(PartyXML('AccountingSupplierParty', LGonderici));
-      LXML.Append(PartyXML('AccountingCustomerParty', LAlici));
+      if LProfil = 'IHRACAT' then begin
+        LXML.Append(GumrukPartyXML('AccountingCustomerParty'));
+        LXML.Append(PartyXML('BuyerCustomerParty', LAlici));
+      end else
+        LXML.Append(PartyXML('AccountingCustomerParty', LAlici));
       if LToplamIskonto > 0.0001 then begin
         LXML.AppendLine('<cac:AllowanceCharge>');
         LXML.AppendLine('<cbc:ChargeIndicator>false</cbc:ChargeIndicator>');
@@ -1944,6 +1989,8 @@ begin
         LXML.AppendLine('<cbc:LineExtensionAmount currencyID="' +
           ABaslik.ParaBirimi + '">' + Ondalik(ASatirlar[I].Tutar,
           '0.00##') + '</cbc:LineExtensionAmount>');
+        if (LProfil = 'IHRACAT') and ABaslik.IhracatVar then
+          LXML.Append(IhracatSatirDeliveryXML(ABaslik, ASatirlar[I]));
         LSatirVergi := SatirKDVBrut(ASatirlar[I]);
         LSatirTevkifat := SatirTevkifatTutar(ASatirlar[I]);
         LSatirIskonto := SatirIskontoTutar(ASatirlar[I]);
@@ -2720,7 +2767,7 @@ begin
     LQ.Connection := AConnection;
     LQ.SQL.Text :=
       'select ID,TUR,isnull(EFATURADURUM,0) EFATURADURUM,' +
-      'isnull(EFATURASONUC,0) EFATURASONUC,REHBERID,FATURATARIH,' +
+      'isnull(EFATURASONUC,0) EFATURASONUC,isnull(SENARYO,0) SENARYO,REHBERID,FATURATARIH,' +
       'isnull(FATURANO,'''') FATURANO,isnull(FATURASERI,'''') FATURASERI,' +
       'isnull(VNO,'''') VNO,isnull(BASLIK,'''') BASLIK ' +
       'from FATBASLIK where ID=:ID';
@@ -2730,6 +2777,7 @@ begin
       Exit;
     ABaslik.ID := LQ.FieldByName('ID').AsInteger;
     ABaslik.Tur := LQ.FieldByName('TUR').AsInteger;
+    ABaslik.Senaryo := LQ.FieldByName('SENARYO').AsInteger;
     ABaslik.EFaturaDurum := LQ.FieldByName('EFATURADURUM').AsInteger;
     ABaslik.EFaturaSonuc := LQ.FieldByName('EFATURASONUC').AsInteger;
     ABaslik.RehberID := LQ.FieldByName('REHBERID').AsInteger;
@@ -2754,8 +2802,66 @@ begin
     Result := Trim(EFaturaSerileri);
 end;
 
-function SeriSecimi(ATur, ABelgeTuru: Integer; const AExcludeSeri: string;
-  out AYeniSeri: string): Boolean;
+function EBelgeSeriKuralBolumu(ATur, ABelgeTuru: Integer): Integer;
+begin
+  if ATur = EBelgeTuruEIrsaliye then
+    Result := Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari
+  else if ABelgeTuru = RAlias_EArsiv then
+    Result := Ops_FaturaOpsiyon_EArsivSeriKurallari
+  else
+    Result := Ops_FaturaOpsiyon_EFaturaSeriKurallari;
+end;
+
+function EBelgeSerileriYeni(AConnection: TFDConnection; ATur, ABelgeTuru,
+  ASenaryo, AKullaniciID: Integer): string;
+var
+  LQ: TFDQuery;
+  LListe: TStringList;
+  LSeri: string;
+begin
+  Result := '';
+  LListe := TStringList.Create;
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := AConnection;
+    LQ.SQL.Text :=
+      'with K as (' +
+      'select SERI=left(ANAHTAR, charindex('','', ANAHTAR+'','')-1), ' +
+      'SENARYO=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),2)), ' +
+      'KULLANICIID=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),1)), ' +
+      'SIRA ' +
+      'from GENINI where BOLUM=:BOLUM and DIL=-1) ' +
+      'select SERI from K ' +
+      'where isnull(SERI,'''')<>'''' ' +
+      'and isnull(SENARYO,0) in (0,:SENARYO) ' +
+      'and isnull(KULLANICIID,0) in (0,:KULLANICIID) ' +
+      'order by case ' +
+      'when SENARYO=:SENARYO and KULLANICIID=:KULLANICIID then 1 ' +
+      'when SENARYO=0 and KULLANICIID=:KULLANICIID then 2 ' +
+      'when SENARYO=:SENARYO and KULLANICIID=0 then 3 ' +
+      'else 4 end, isnull(SIRA,0), SERI';
+    LQ.ParamByName('BOLUM').AsInteger := EBelgeSeriKuralBolumu(ATur, ABelgeTuru);
+    LQ.ParamByName('SENARYO').AsInteger := ASenaryo;
+    LQ.ParamByName('KULLANICIID').AsInteger := AKullaniciID;
+    LQ.Open;
+    while not LQ.Eof do begin
+      LSeri := Trim(LQ.FieldByName('SERI').AsString);
+      if (LSeri <> '') and (LListe.IndexOf(LSeri) < 0) then
+        LListe.Add(LSeri);
+      LQ.Next;
+    end;
+    if LListe.Count > 0 then
+      Result := LListe.CommaText
+    else
+      Result := EBelgeSerileri(ATur, ABelgeTuru);
+  finally
+    LQ.Free;
+    LListe.Free;
+  end;
+end;
+
+function SeriSecimi(AConnection: TFDConnection; ATur, ABelgeTuru, ASenaryo,
+  AKullaniciID: Integer; const AExcludeSeri: string; out AYeniSeri: string): Boolean;
 var
   i: Integer;
   LSeriler: string;
@@ -2765,7 +2871,7 @@ var
 begin
   Result := False;
   AYeniSeri := '';
-  LSeriler := EBelgeSerileri(ATur, ABelgeTuru);
+  LSeriler := EBelgeSerileriYeni(AConnection, ATur, ABelgeTuru, ASenaryo, AKullaniciID);
   if LSeriler = '' then begin
     ShowMessage('Bu belge turu icin seri tanimi bulunamadi (Opsiyon ekranindan tanimlayin).');
     Exit;
@@ -3103,7 +3209,7 @@ begin
           'Sevk bilgilerini "Sevk Adresi" alanindan girebilirsiniz.');
     end;
 
-    // Ihracat faturasi (Senaryo=3): İhracat detay sablonu + urun GTIP zorunlu.
+    // Ihracat faturasi (Senaryo=3): FATURA_USER.IHRACAT + urun GTIP zorunlu.
     // Eksikse numara/alias tuketmeden UYAR ve DUR.
     if LOnBaslik.Senaryo = 3 then begin
       var LIhrEksik: string := IhracatEksikAlanlar(LOnBaslik, LOnSatirlar);
@@ -3111,7 +3217,7 @@ begin
         raise Exception.Create(
           'İhracat faturası hazırlanamaz. Aşağıdaki zorunlu alanlar eksik:' +
           sLineBreak + LIhrEksik + sLineBreak + sLineBreak +
-          'Fatura detayında "İhracat" şablonunu doldurun; ürün kartında GTIP girin.');
+          'Grid sağ tuş menüsünden "İhracat Bilgilerini Düzenle" alanını doldurun; ürün kartında GTIP girin.');
     end;
 
     if not EskiBosFaturaOnayi(AConnection, LBaslik) then
@@ -3159,7 +3265,8 @@ begin
     LAliasUyari := LAliasSonuc.Mesaj;
 
     if Trim(LBaslik.FaturaNo) = '0' then begin
-      LSeri := IlkSeri(EBelgeSerileri(LBaslik.Tur, LAliasSonuc.BelgeTuru));
+      LSeri := IlkSeri(EBelgeSerileriYeni(AConnection, LBaslik.Tur,
+        LAliasSonuc.BelgeTuru, LOnBaslik.Senaryo, StrToIntDef(Kullanan, 0)));
       if Length(LSeri) <> 3 then begin
         ShowMessage('Bu belge turu icin gecerli ilk seri tanimi yok (3 karakter olmali).');
         Exit;
@@ -3333,13 +3440,15 @@ begin
     Exit;
 
   if LFatNoYok then
-    LMevcutSeri := IlkSeri(EBelgeSerileri(LBaslik.Tur, LBelgeTuru))
+    LMevcutSeri := IlkSeri(EBelgeSerileriYeni(AConnection, LBaslik.Tur,
+      LBelgeTuru, LBaslik.Senaryo, StrToIntDef(Kullanan, 0)))
   else if Length(LFatNo) >= 3 then
     LMevcutSeri := Copy(LFatNo, 1, 3)
   else
     LMevcutSeri := Trim(LBaslik.FaturaSeri);
 
-  if not SeriSecimi(LBaslik.Tur, LBelgeTuru, LMevcutSeri, LYeniSeri) then
+  if not SeriSecimi(AConnection, LBaslik.Tur, LBelgeTuru, LBaslik.Senaryo,
+    StrToIntDef(Kullanan, 0), LMevcutSeri, LYeniSeri) then
     Exit;
   if not SonrakiSiraNo(LBaslik.ID, LBaslik.Tur, LYeniSeri, LYil, LSonrakiSeq) then
     Exit;
@@ -3986,6 +4095,85 @@ begin
   LAdr.AddPair('city', 'ANKARA');
   LAdr.AddPair('country', 'TÜRKİYE');
   Result.AddPair('address', LAdr);
+end;
+
+function GumrukPartyXML(const ARol: string): string;
+var
+  LXML: TStringBuilder;
+begin
+  LXML := TStringBuilder.Create;
+  try
+    LXML.AppendLine('<cac:' + ARol + '>');
+    LXML.AppendLine('<cac:Party>');
+    LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="VKN">1460415308</cbc:ID></cac:PartyIdentification>');
+    LXML.AppendLine('<cac:PartyName><cbc:Name>Gümrük ve Ticaret Bakanlığı Gümrükler Genel Müdürlüğü- Bilgi İşlem Dairesi Başkanlığı</cbc:Name></cac:PartyName>');
+    LXML.AppendLine('<cac:PostalAddress>');
+    LXML.AppendLine('<cbc:CityName>ANKARA</cbc:CityName>');
+    LXML.AppendLine('<cac:Country><cbc:Name>TÜRKİYE</cbc:Name></cac:Country>');
+    LXML.AppendLine('</cac:PostalAddress>');
+    LXML.AppendLine('<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>ULUS</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>');
+    LXML.AppendLine('<cac:PartyLegalEntity><cbc:RegistrationName>Gümrük ve Ticaret Bakanlığı Gümrükler Genel Müdürlüğü- Bilgi İşlem Dairesi Başkanlığı</cbc:RegistrationName></cac:PartyLegalEntity>');
+    LXML.AppendLine('</cac:Party>');
+    LXML.AppendLine('</cac:' + ARol + '>');
+    Result := LXML.ToString;
+  finally
+    LXML.Free;
+  end;
+end;
+
+function IhracatSatirDeliveryXML(const ABaslik: TEBelgeBaslik;
+  const ASatir: TEBelgeSatir): string;
+var
+  LXML: TStringBuilder;
+begin
+  LXML := TStringBuilder.Create;
+  try
+    LXML.AppendLine('<cac:Delivery>');
+    LXML.AppendLine('<cac:DeliveryAddress>');
+    if Trim(ABaslik.Adres) <> '' then
+      LXML.AppendLine('<cbc:StreetName>' + XMLEscape(ABaslik.Adres) + '</cbc:StreetName>');
+    if Trim(ABaslik.Ilce) <> '' then
+      LXML.AppendLine('<cbc:CitySubdivisionName>' + XMLEscape(ABaslik.Ilce) + '</cbc:CitySubdivisionName>');
+    if Trim(ABaslik.Il) <> '' then
+      LXML.AppendLine('<cbc:CityName>' + XMLEscape(ABaslik.Il) + '</cbc:CityName>');
+    LXML.AppendLine('<cac:Country><cbc:Name>TR</cbc:Name></cac:Country>');
+    LXML.AppendLine('</cac:DeliveryAddress>');
+    if Trim(ABaslik.TeslimSartiKodu) <> '' then begin
+      LXML.AppendLine('<cac:DeliveryTerms>');
+      LXML.AppendLine('<cbc:ID schemeID="INCOTERMS">' + XMLEscape(ABaslik.TeslimSartiKodu) + '</cbc:ID>');
+      LXML.AppendLine('</cac:DeliveryTerms>');
+    end;
+    LXML.AppendLine('<cac:Shipment>');
+    LXML.AppendLine('<cbc:ID>' + IntToStr(ASatir.SatirNo) + '</cbc:ID>');
+    if ABaslik.FOBDeger > 0 then
+      LXML.AppendLine('<cbc:FreeOnBoardValueAmount currencyID="' + XMLEscape(ABaslik.ParaBirimi) + '">' +
+        Ondalik(ABaslik.FOBDeger, '0.00##') + '</cbc:FreeOnBoardValueAmount>');
+    if Trim(ASatir.GTIP) <> '' then begin
+      LXML.AppendLine('<cac:GoodsItem>');
+      LXML.AppendLine('<cbc:RequiredCustomsID>' + XMLEscape(Trim(ASatir.GTIP)) + '</cbc:RequiredCustomsID>');
+      LXML.AppendLine('</cac:GoodsItem>');
+    end;
+    if Trim(ABaslik.TasimaSekliKodu) <> '' then begin
+      LXML.AppendLine('<cac:ShipmentStage>');
+      LXML.AppendLine('<cbc:TransportModeCode>' + XMLEscape(ABaslik.TasimaSekliKodu) + '</cbc:TransportModeCode>');
+      LXML.AppendLine('</cac:ShipmentStage>');
+    end;
+    if Trim(ABaslik.KapCinsiKodu) <> '' then begin
+      LXML.AppendLine('<cac:TransportHandlingUnit>');
+      LXML.AppendLine('<cac:ActualPackage>');
+      LXML.AppendLine('<cbc:ID>' + IntToStr(ASatir.SatirNo) + '</cbc:ID>');
+      if ABaslik.KapAdedi > 0 then
+        LXML.AppendLine('<cbc:Quantity>' + IntToStr(ABaslik.KapAdedi) + '</cbc:Quantity>');
+      LXML.AppendLine('<cbc:PackagingTypeCode>' + XMLEscape(ABaslik.KapCinsiKodu) + '</cbc:PackagingTypeCode>');
+      LXML.AppendLine('</cac:ActualPackage>');
+      LXML.AppendLine('</cac:TransportHandlingUnit>');
+    end;
+    LXML.AppendLine('</cac:Shipment>');
+    LXML.AppendLine('</cac:Delivery>');
+    Result := LXML.ToString;
+  finally
+    LXML.Free;
+  end;
 end;
 
 // Ihracat satir duzeyi delivery JSON'u (izibiz IHRACAT ornegi): deliveryAddress +

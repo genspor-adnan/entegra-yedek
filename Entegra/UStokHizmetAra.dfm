@@ -337,6 +337,21 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       ParentFont = False
       Transparent = True
     end
+    object LabelSonAranan: TLabel
+      Left = 563
+      Top = 19
+      Width = 61
+      Height = 16
+      Cursor = crHandPoint
+      Caption = 'Son Aranan'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Trebuchet MS'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
     object EditKodu: TcxTextEdit
       Left = 192
       Top = 16
@@ -654,10 +669,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       object SheetHizmet: TcxTabSheet
         Caption = 'Hizmetler'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
@@ -886,10 +897,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       object SheetDagitim: TcxTabSheet
         Caption = 'Da'#287#305't'#305'm'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0

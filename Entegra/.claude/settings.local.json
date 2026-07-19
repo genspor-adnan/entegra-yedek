@@ -5,7 +5,10 @@
       "PowerShell",
       "Read(//c/Users/HP/Entegra/**)",
       "Read(//c/Users/HP/Documents/**)",
-      "Read(//c/bin/**)"
+      "Read(//c/bin/**)",
+      "WebSearch",
+      "WebFetch(domain:bap.sdu.edu.tr)",
+      "WebFetch(domain:www.dengeakademi.com)"
     ]
   }
 }

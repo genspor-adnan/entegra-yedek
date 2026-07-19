@@ -308,6 +308,8 @@ begin
       LogDetaylariSil('TEKLIFDETAY', 'TEKLIFID', TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
       LogKartSil(TabTeklif, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
+      // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
+      LogDetaylariSil('TEKLIF_USER', 'ID', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
       Result:=True;
