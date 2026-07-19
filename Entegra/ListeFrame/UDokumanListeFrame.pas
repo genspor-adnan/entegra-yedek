@@ -81,7 +81,6 @@ type
     GridDokumanDBCardView1: TcxGridDBCardView;
     GridDokumanDBCardView1AD: TcxGridDBCardViewRow;
     GridDokumanDBCardView1EXT: TcxGridDBCardViewRow;
-    SQLMemo: TMemo;
     DokumanTviewMODUL: TcxGridDBColumn;
     Yeni1: TMenuItem;
     ara1: TMenuItem;
@@ -92,7 +91,6 @@ type
     EPostaTus: TToolButton;
     BurayaKisayololusturMenu: TMenuItem;
     Baskayerekisayololustur1: TMenuItem;
-    SQLMemo2: TMemo;
     DokumanTviewTip: TcxGridDBColumn;
     popcop: TPopupMenu;
     Sil1: TMenuItem;
@@ -176,8 +174,6 @@ type
     ComboGizlilik: TcxDBImageComboBox;
     GridRevizeViewREHBERID: TcxGridDBColumn;
     GridRevizeViewONAY: TcxGridDBColumn;
-    SQLMemo_SAP: TMemo;
-    SQLMemo2_SAP: TMemo;
     cxLabel1: TcxLabel;
     cxDBLabel3: TcxDBLabel;
     DokumanTviewEKLEYEN: TcxGridDBColumn;
@@ -262,7 +258,7 @@ type
 
 implementation
 
-uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,
+uses System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,
   PrjConst, Utablo, ULog, IdGlobalProtocols, UMailKisiBulma,
   UBinarySave, UGirisKutusuEx, URehberAramaEkrani, UDokumanYetki,LocOnFly, UVeriMotor;
 {$R *.dfm}
@@ -307,13 +303,6 @@ begin
   //Tablo.GridAyarRestore('DokumanListeGridi',DokumanTview );
   Tablo.GridTurkcelestir;
   PageDokuman.ActivePageIndex := 0;
-
-  if KaynakDB = 'SAP' then begin
-     SQLMemo.Text := StringReplace(SQLMemo_SAP.Text, 'SAP_DB_AD', SAP_DBAd, [rfReplaceAll]);
-     SQLMemo2.Text := StringReplace(SQLMemo2_SAP.Text, 'SAP_DB_AD', SAP_DBAd, [rfReplaceAll]);
-     YenileKlasorClick(FArama.TabKlasorler.FieldByName('ID').AsInteger);
-  end;
-
 end;
 
 procedure TDokumanListeFrame.DokumanTviewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
@@ -386,8 +375,9 @@ end;
 
 Procedure TDokumanListeFrame.YenileKlasorClick(KlasorId: Integer);
 var
-  yetkisorgu,GD: string;
+  GD: string;
   etiketler,bilgiler: TArrayOfString;
+  jP: TJSONObject;
   Procedure AlanlarOlustur;
   begin
       if not AlanlarOlusturuldu then begin
@@ -397,19 +387,19 @@ var
       end;
   end;
 begin
-  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN sorgusu (SQLMemo: nested TOP + alias=expr, DFM statik) -> PG rewrite ayri is; pilotta bos grid
+  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN sorgusu (SP: WITH ozyineleme + top1 + REVERSE) -> PG rewrite ayri is; pilotta bos grid
+  // STANDART SISTEM: sp_Prog_Dokuman_Liste_Json2 (Mod=1 klasor-agac). Ortak jP tek yerde;
+  //   yalniz yetki-bazli parametreler dallaniyor.
+  DOKUMAN.Close;
+  // TamYetki + coklu-secim: grid bosaltilir, listeleme yapilmaz (orijinal davranis).
+  if TamYetkili and (FArama.TreeKlasorler.SelectionCount > 1) then Exit;
+
+  jP := TJSONObject.Create;
+  jP.AddPair('Mod', TJSONNumber.Create(1));
+  jP.AddPair('KlasorId', TJSONNumber.Create(KlasorId));
+  jP.AddPair('TabNo', TJSONNumber.Create(TabNo_DOKUMAN));
   if TamYetkili then
-  begin
-    DOKUMAN.Close;
-    if FArama.TreeKlasorler.SelectionCount<=1 then begin
-        DOKUMAN.SQL.Text := SQLMemo.Text + ' Where D.KLASOR =' + IntToStr(KlasorId) +
-        ' union all ' + SQLMemo2.Text + ' Where DK.YER='+IntToStr(TabNo_DOKUMAN)+' and DK.YER_ID =' + IntToStr(KlasorId);
-        TabloYenile(DOKUMAN,[]);
-        AlanlarOlustur;
-        PageDokuman.Visible := False;
-        cxSplitter1.Visible := False;
-    end;
-  end
+    jP.AddPair('TamYetki', TJSONNumber.Create(1))
   else
   begin
     SetLength(bilgiler,1);
@@ -419,14 +409,17 @@ begin
        GD:='1'
     else
        GD:=bilgiler[0];
-    DOKUMAN.Close;
-    DOKUMAN.SQL.Text := SQLMemo.Text + ' Where D.GIZLILIKDERECESI <= '+GD+'  AND D.KLASOR ='+IntToStr(KlasorId) +
-        ' AND GOR = 1 AND (DY.REHBERID=0 OR DY.REHBERID= ' + Kullanan + ' ) union all ' +
-        SQLMemo2.Text + ' Where DK.YER='+IntToStr(TabNo_DOKUMAN)+' and DK.YER_ID =' + IntToStr(KlasorId);
-    TabloYenile(DOKUMAN,[]);
-    AlanlarOlustur;
-  end
-
+    jP.AddPair('TamYetki', TJSONNumber.Create(0));
+    jP.AddPair('GD', TJSONNumber.Create(StrToIntDef(GD, 1)));
+    jP.AddPair('Kullanan', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+  end;
+  Tablo.ListeSPJson(DOKUMAN, 'sp_Prog_Dokuman_Liste_Json2', '', jP);
+  AlanlarOlustur;
+  if TamYetkili then
+  begin
+    PageDokuman.Visible := False;
+    cxSplitter1.Visible := False;
+  end;
 end;
 
 procedure TDokumanListeFrame.YenileTusClick;
@@ -451,72 +444,73 @@ procedure TDokumanListeFrame.JvTimer1Timer(Sender: TObject);
 
   end; }
 var
-  s,s1,GD: string;
+  GD: string;
   etiketler,bilgiler: TArrayOfString;
+  jP: TJSONObject;
 begin
 //  if FArama.Tasiniyor then
 //    Exit;
   JvTimer1.Enabled := False;
-  SetLength(bilgiler,1);  //Kullanıcı gizlilik derecesi Kontrol Ediliyor
-  SetLength(etiketler,1);
-  Tablo.TablodanSorguAc(4, 'select * from kullanıcı where REHBERID = ' + Kullanan);
-  Tablo.RehberEkBilgileriniGetir(Tablo.Query4.FieldByName('REHBERID').AsInteger,3,[79],etiketler,bilgiler);
+  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN SP'si PG'ye portlanmadi (vmPG'de bos grid)
 
-  s := ' where 1=1 '; // D.KLASOR > 0
+  // STANDART SISTEM: arama-SQL -> sp_Prog_Dokuman_Liste_Json2 (Mod=2 arama-formu).
+  //   Ayni filtre iki kola (arm1 DTIP=1 / arm2 DTIP=0) SP govdesinde uygulanir.
+  jP := TJSONObject.Create;
+  jP.AddPair('Mod', TJSONNumber.Create(2));
   if Trim(FArama.AraDokuman.Text) <> '' then
-    s := s + ' and D.AD like ''%'+Trim(FArama.AraDokuman.Text) + '%'' ';
+    jP.AddPair('AraDokuman', Trim(FArama.AraDokuman.Text));
   if Trim(FArama.AraKonusu.Text) <> '' then
-    s := s + ' and  D.KONU like ''%'+Trim(FArama.AraKonusu.Text) + '%'' ';
+    jP.AddPair('AraKonu', Trim(FArama.AraKonusu.Text));
   if Trim(FArama.AraAnahtar.Text) <> '' then
-    //s := 'LEFT OUTER JOIN ANAHTAR_KELIME ANAHTAR ON ANAHTAR.DOK_ID=D.ID' + s + ' and  ANAHTAR.KELIME like ''%'+Trim(FArama.AraAnahtar.Text) + '%'' ';
-    s := s + ' and  D.ANAHTAR like ''%'+Trim(FArama.AraAnahtar.Text) + '%'' ';
+    jP.AddPair('AraAnahtar', Trim(FArama.AraAnahtar.Text));
   if FArama.AraKurum.Text <> '' then
-    s := s + ' and Firma.FIRMA like ''%'+Trim(FArama.AraKurum.Text) + '%'' ';
+    jP.AddPair('AraKurum', Trim(FArama.AraKurum.Text));
   if FArama.AraSorumlu.Text <> '' then
-    s := s + ' and Sorumlu.FIRMA like ''%'+Trim(FArama.AraSorumlu.Text) + '%'' ';
+    jP.AddPair('AraSorumlu', Trim(FArama.AraSorumlu.Text));
   if FArama.AraLokasyon.Text <> '' then
-    s := s + ' and Lokasyon.ACIKLAMA like ''%'+Trim(FArama.AraLokasyon.Text) + '%'' ';
+    jP.AddPair('AraLokasyon', Trim(FArama.AraLokasyon.Text));
   if FArama.AraBolumu.EditValue > 0 then
-    s := s + ' and D.BOLUM = ' + IntToStr(FArama.AraBolumu.EditValue);
+    jP.AddPair('Bolum', TJSONNumber.Create(Integer(FArama.AraBolumu.EditValue)));
   if FArama.AraModul.EditValue > 0 then
-    s := s + ' and D.MODUL = ' + IntToStr(FArama.AraModul.EditValue);
+    jP.AddPair('Modul', TJSONNumber.Create(Integer(FArama.AraModul.EditValue)));
   if FArama.AraKategori.Text <> '' then
-    s := s + ' and D.KATEGORI = '+IntToStr(FArama.AraKategori.EditValue) ;
-  if FArama.checkPasif.Checked=false then
-   s := s + '  AND D.DURUM = 1 ';
-  if TamYetkili=False then
+    jP.AddPair('Kategori', TJSONNumber.Create(Integer(FArama.AraKategori.EditValue)));
+  if FArama.checkPasif.Checked then
+    jP.AddPair('Pasif', TJSONNumber.Create(1));
+  if TamYetkili then
+    jP.AddPair('TamYetki', TJSONNumber.Create(1))
+  else
   begin
+    // gizlilik derecesi yalniz yetkisiz kullanicida gerekli -> I/O burada (sicak yolda kosulsuz degil)
+    SetLength(bilgiler,1);
+    SetLength(etiketler,1);
+    Tablo.RehberEkBilgileriniGetir(StrToInt(Kullanan),3,[79],etiketler,bilgiler);
     if bilgiler[0]='' then
        GD:='1'
      else
        GD:=bilgiler[0];
-    s := s + ' AND D.GIZLILIKDERECESI <= '+GD ;
+    jP.AddPair('TamYetki', TJSONNumber.Create(0));
+    jP.AddPair('GD', TJSONNumber.Create(StrToIntDef(GD, 1)));
   end;
-
   if FArama.checkTarih.Checked then begin
-     s := s + ' AND D.TARIH >= ''' + FormatDateTime('yyyy-mm-dd 00:00', FArama.dateDokumanBas.Date) + ''' ';
-     s := s + ' AND D.TARIH <= ''' + FormatDateTime('yyyy-mm-dd 00:00', FArama.dateDokumanBit.Date) + ''' ';
+    jP.AddPair('TarihVar', TJSONNumber.Create(1));
+    jP.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd 00:00:00', FArama.dateDokumanBas.Date));
+    jP.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd 00:00:00', FArama.dateDokumanBit.Date));
   end;
   DOKUMAN.Close;
-  //if KaynakDB = 'SAP' then
-//     DOKUMAN.SQL.Text :=  SQLMemo_SAP.Text
-//  else
-     DOKUMAN.SQL.Text :=  SQLMemo.Text;     //  KayitSayisiBelirle + ' ' +     SAP_DB_AD
-  DOKUMAN.SQL.Add(s);
-  DOKUMAN.SQL.Add(' union all ');
-//  if KaynakDB = 'SAP' then
-//     DOKUMAN.SQL.Add(SQLMemo2_SAP.Text)
-//  else
-     DOKUMAN.SQL.Add(SQLMemo2.Text);   //KayitSayisiBelirle + ' ' +
-  DOKUMAN.SQL.Add(s);
-  TabloYenile(DOKUMAN,[]);
+  Tablo.ListeSPJson(DOKUMAN, 'sp_Prog_Dokuman_Liste_Json2', '', jP);
 end;
 
 procedure TDokumanListeFrame.LabelTumKayitlarClick(Sender: TObject);
+var
+  jP: TJSONObject;
 begin
+  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN SP'si PG'ye portlanmadi (vmPG'de bos grid)
   DOKUMAN.Close;
-  DOKUMAN.SQL.Text := SQLMemo.Text + ' union all ' + SQLMemo2.Text;
-  TabloYenile(DOKUMAN,[]);
+  // STANDART SISTEM: union-all -> sp_Prog_Dokuman_Liste_Json2 (Mod=3 tum-kayitlar).
+  jP := TJSONObject.Create;
+  jP.AddPair('Mod', TJSONNumber.Create(3));
+  Tablo.ListeSPJson(DOKUMAN, 'sp_Prog_Dokuman_Liste_Json2', '', jP);
 end;
 
 procedure TDokumanListeFrame.UstuneKaydettusClick(Sender: TObject);
@@ -664,8 +658,6 @@ begin
         if Tablo.DokumanSihirbazBaslat('D', 0, DOKUMAN.Fields[0].AsInteger, FArama.TabKlasorler.FieldByName('ID').AsInteger,0,0,0,0) > 0 then
           case FArama.PageArama.ActivePageIndex of
             0 : begin
-                  //DOKUMAN.SQL.Text := ' SELECT   ' + SQLMemo.Text + ' Where D.ARSIVSURESI > GETDATE() AND  D.KLASOR =' + FArama.TabKlasorler.FieldByName('ID').AsString + ' union all ' + ' SELECT ' + SQLMemo2.Text + ' Where DK.KLASOR =' + FArama.TabKlasorler.FieldByName('ID').AsString;
-                  //TabloYenile(DOKUMAN,[]);
                   YenileKlasorClick(FArama.TabKlasorler.FieldByName('ID').AsInteger)
                end;
             1 : YenileTusClick;

@@ -165,7 +165,6 @@ type
     ExceldenVeriAlMenu1: TMenuItem;
     ExcelAyarlarSifirlaMenu: TMenuItem;
     PDKSListeTVACIKLAMA: TcxGridDBColumn;
-    SQLMemo: TMemo;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ToolButton4: TToolButton;
@@ -246,7 +245,7 @@ type
 
 implementation
 
-uses UVeriMotor, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,FetaClassExtensionsConsts, UExceldenVeriAl,
+uses System.JSON, UVeriMotor, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,FetaClassExtensionsConsts, UExceldenVeriAl,
   UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame, UGirisKutusuEx,LocOnFly;
 
 {$R *.dfm}
@@ -851,7 +850,7 @@ end;
 
 procedure TPDKSListeFrame.YenileClick(Sender: TObject);
 var
-  Sql1 : String;
+  jP : TJSONObject;
 begin
    case Cagiran of
     0:begin         ///RehAraDlgden çağırılıyor.
@@ -869,40 +868,28 @@ begin
       End;
    end;
 
-   Sql1 := SQLMemo.Text;
+   // STANDART SISTEM: inline SQL -> sp_Prog_PDKS_Liste_Json2 (@Baslik+@Kosullar JSON).
+   //   Dialect (DATEADD/CONVERT 108/DATEPART/dbo.fn_*) SP govdesinde; filtreler JSON'da.
+   jP := TJSONObject.Create;
    if ComboPersonel.Text <> '' then
-      Sql1 := Sql1 + ' and PP.REHBERID = ' + IntToStr(ComboPersonel.Tag) + '  '
-   else
-      Sql1 := Sql1 + ' and PP.REHBERID <> 0  ';
-
-  Sql1 := Sql1 + ' AND (PP.GIRIS between '+DbConv('''' + FormatDateTime('mm-dd-yyyy', TarihBas.Date) + ' 00:00:00''','DATETIME',102)+' ' +
-       ' and '+DbConv('''' + FormatDateTime('mm-dd-yyyy', TarihBit.Date)+ ' 23:59''','DATETIME',102)+'))';
-
-  if RbGirisTumu.Checked = False then begin
-     if RbGirisErken.Checked  then
-        Sql1 := Sql1 + ' and cast(PV.GIRIS as Time) > cast(PP.GIRIS as Time) and cast(PP.GIRIS as Time) <> ''00:00'''
-     else if RbGirisGec.Checked Then
-             Sql1 := Sql1 + ' and cast(PV.GIRIS as Time) < cast(PP.GIRIS as Time)';
-  end;
-
-  if RbCikisTumu.Checked =False then begin
-     if RbCikisErken.Checked  then
-        Sql1 := Sql1 + ' and cast(PV.CIKIS as Time) > cast(PP.CIKIS as Time)'
-     else if RbCikisGec.Checked  then
-        Sql1 := Sql1 + ' and cast(PV.CIKIS as Time) < cast(PP.CIKIS as Time)';
-  end;
-
-  if CbCikisNull.Checked then
-     Sql1 := Sql1 + ' and PP.CIKIS <> '''' ';
-
-  if (SubeVarmi)and(ComboSube.EditValue < 0) then
-      Sql1 := Sql1 + ' and R.SUBEID = '+VarToStr(ComboSube.EditValue)+'  ';
-
-  if (VarToStr(ComboDurum.EditValue)<>'')and(VarToStr(ComboDurum.EditValue)<>'0') then
-     Sql1:=Sql1+ ' and PP.DURUM = '+VarToStr(ComboDurum.EditValue)+' ';
-
-  TabPDKS.Sql.Text := Sql1 + ' ORDER BY R.FIRMA,PP.GIRIS,PP.CIKIS ';
-  TabloYenile(TabPDKS, []);
+      jP.AddPair('RehberID', TJSONNumber.Create(ComboPersonel.Tag));
+   jP.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd', TarihBas.Date) + ' 00:00:00');
+   jP.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', TarihBit.Date) + ' 23:59:59');
+   if not RbGirisTumu.Checked then begin
+      if RbGirisErken.Checked then jP.AddPair('GirisTur', TJSONNumber.Create(1))
+      else if RbGirisGec.Checked then jP.AddPair('GirisTur', TJSONNumber.Create(2));
+   end;
+   if not RbCikisTumu.Checked then begin
+      if RbCikisErken.Checked then jP.AddPair('CikisTur', TJSONNumber.Create(1))
+      else if RbCikisGec.Checked then jP.AddPair('CikisTur', TJSONNumber.Create(2));
+   end;
+   if CbCikisNull.Checked then
+      jP.AddPair('CikisNull', TJSONNumber.Create(1));
+   if (SubeVarmi) and (ComboSube.EditValue < 0) then
+      jP.AddPair('SubeID', TJSONNumber.Create(StrToIntDef(VarToStr(ComboSube.EditValue), 0)));
+   if (VarToStr(ComboDurum.EditValue) <> '') and (VarToStr(ComboDurum.EditValue) <> '0') then
+      jP.AddPair('Durum', TJSONNumber.Create(StrToIntDef(VarToStr(ComboDurum.EditValue), 0)));
+   Tablo.ListeSPJson(TabPDKS, 'sp_Prog_PDKS_Liste_Json2', '', jP);
 
   TOPLAM.close;
   TOPLAM.SQL.Text := 'select DURUM, SAYI=count(ID) from PERS_PDKS where GIRIS between '''+FormatDateTime('yyyy-mm-dd 00:00', TarihBas.Date)+''' and '+

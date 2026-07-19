@@ -452,93 +452,6 @@ object DokumanListeFrame: TDokumanListeFrame
       OnClick = EPostaMenuClick
     end
   end
-  object SQLMemo: TMemo
-    Left = 27
-    Top = 163
-    Width = 629
-    Height = 57
-    Lines.Strings = (
-      ' '
-      'WITH Dizin AS'
-      '('
-      '    SELECT ID,USTID,AD=CAST(AD AS NVARCHAR(260))'
-      '    FROM DOKUMANKLASOR'
-      '    WHERE USTID=0'
-      '    UNION ALL'
-      '    SELECT A.ID'
-      '    , A.USTID,'
-      '    AD=CAST(V.AD+'#39'\'#39'+A.AD AS NVARCHAR(260))'
-      '    FROM DOKUMANKLASOR A'
-      '    INNER JOIN Dizin V ON'
-      '        V.ID = A.USTID'
-      ')'
-      ''
-      'select distinct'
-      ' D.*,'
-      
-        'DTIP=1,KISAYOLID=0,Firma.FIRMA as KURUM,Lokasyon.ACIKLAMA as LOK' +
-        'ASYONAD,'
-      'Sorumlu.FIRMA as SORUMLUAD,'
-      'EXT='#39'.'#39'+I.BELGETURU,I.SURUM,'
-      'I.BOYUT,'
-      'KLASORAD=(SELECT AD FROM Dizin where ID=D.KLASOR),'
-      'ONAYLAYACAKAD=(SELECT FIRMA FROM REHBER where ID=I.ONAYLAYACAK),'
-      'ONAYLAYANAD=(SELECT FIRMA FROM REHBER where ID=I.ONAY),'
-      'EKLEYENAD=(SELECT FIRMA FROM REHBER where ID=D.EKLEYEN),'
-      'DEGISTIRENAD=(SELECT FIRMA FROM REHBER where ID=D.DEGISTIREN)'
-      'from DOKUMAN D'
-      
-        ' INNER JOIN IMAJ I ON I.ID = (select top 1 ID from IMAJ where YE' +
-        'RI=1 AND YER_ID=D.ID order by ID desc)'
-      ' LEFT OUTER JOIN REHBER Firma on Firma.ID=D.REHBERID'
-      
-        ' LEFT OUTER JOIN LOKASYON AS Lokasyon ON Lokasyon.ID=D.LOKASYON ' +
-        ' '
-      ' LEFT OUTER JOIN REHBER AS Sorumlu ON Sorumlu.ID = I.REHBERID'
-      
-        ' LEFT OUTER JOIN DOKUMANYETKI DY ON DY.YERI=321 AND DY.YERID = D' +
-        '.ID '
-      ' '
-      ' ')
-    TabOrder = 2
-    Visible = False
-  end
-  object SQLMemo2: TMemo
-    Left = 27
-    Top = 223
-    Width = 621
-    Height = 66
-    Lines.Strings = (
-      ''
-      'select '
-      
-        '  distinct   D.*,DTIP=0,KISAYOLID=DK.ID,Firma.FIRMA as KURUM,Lok' +
-        'asyon.ACIKLAMA as LOKASYONAD,Sorumlu.FIRMA as '
-      'SORUMLUAD,'
-      
-        'EXT=case when D.AD like '#39'%.%'#39' then '#39'.'#39'+REVERSE( SUBSTRING(REVERS' +
-        'E(isnull(D.AD,'#39'.'#39')),1,CHARINDEX('#39'.'#39',REVERSE(isnull'
-      '(D.AD,'#39'.'#39')),1)-1)) else '#39#39' end,I.SURUM,'
-      'I.BOYUT,'
-      'KLASORAD=(SELECT AD FROM Dizin where ID=D.KLASOR),'
-      'ONAYLAYACAKAD=(SELECT FIRMA FROM REHBER where ID=I.ONAYLAYACAK),'
-      'ONAYLAYANAD=(SELECT FIRMA FROM REHBER where ID=I.ONAY),'
-      'EKLEYENAD=(SELECT FIRMA FROM REHBER where ID=D.EKLEYEN),'
-      'DEGISTIRENAD=(SELECT FIRMA FROM REHBER where ID=D.DEGISTIREN)'
-      'from '
-      #9'DOKUMANKISAYOL DK '
-      #9'inner join DOKUMAN D on DK.DOKUMANID=D.ID'
-      
-        #9'INNER JOIN IMAJ I ON I.ID = (select top 1 ID from IMAJ where YE' +
-        'RI=1 AND YER_ID=D.ID order by ID desc)'
-      ' '#9'LEFT OUTER JOIN REHBER Firma on Firma.ID=D.REHBERID'
-      
-        ' '#9'LEFT OUTER JOIN LOKASYON AS Lokasyon ON  Lokasyon.ID=D.LOKASYO' +
-        'N  '
-      ' '#9'LEFT OUTER JOIN REHBER AS Sorumlu ON Sorumlu.ID = I.REHBERID')
-    TabOrder = 3
-    Visible = False
-  end
   object cxSplitter1: TcxSplitter
     Left = 0
     Top = 283
@@ -555,7 +468,7 @@ object DokumanListeFrame: TDokumanListeFrame
     Width = 1037
     Height = 193
     Align = alBottom
-    TabOrder = 5
+    TabOrder = 3
     Properties.ActivePage = TabSheetGenel
     Properties.CustomButtons.Buttons = <>
     Properties.Style = 8
@@ -1250,100 +1163,6 @@ object DokumanListeFrame: TDokumanListeFrame
       end
     end
   end
-  object SQLMemo_SAP: TMemo
-    Left = 419
-    Top = 91
-    Width = 629
-    Height = 57
-    Lines.Strings = (
-      ' '
-      'WITH Dizin AS'
-      '('
-      '    SELECT ID,USTID,AD=CAST(AD AS NVARCHAR(260))'
-      '    FROM DOKUMANKLASOR'
-      '    WHERE USTID=0'
-      '    UNION ALL'
-      '    SELECT A.ID'
-      '    , A.USTID,'
-      '    AD=CAST(V.AD+'#39'\'#39'+A.AD AS NVARCHAR(260))'
-      '    FROM DOKUMANKLASOR A'
-      '    INNER JOIN Dizin V ON'
-      '        V.ID = A.USTID'
-      ')'
-      ''
-      'select distinct'
-      ' D.*,'
-      
-        'DTIP=1,KISAYOLID=0,Firma.CardName as KURUM,Lokasyon.ACIKLAMA as ' +
-        'LOKASYONAD,'
-      'Sorumlu.FIRMA as SORUMLUAD,'
-      'EXT='#39'.'#39'+I.BELGETURU,I.SURUM,'
-      'I.BOYUT,'
-      'KLASORAD=(SELECT AD FROM Dizin where ID=D.KLASOR),'
-      'ONAYLAYACAKAD=(SELECT FIRMA FROM REHBER where ID=I.ONAYLAYACAK),'
-      'ONAYLAYANAD=(SELECT FIRMA FROM REHBER where ID=I.ONAY),'
-      'EKLEYENAD=(SELECT FIRMA FROM REHBER where ID=D.EKLEYEN),'
-      'DEGISTIRENAD=(SELECT FIRMA FROM REHBER where ID=D.DEGISTIREN)'
-      'from DOKUMAN D'
-      
-        ' INNER JOIN IMAJ I ON I.ID = (select top 1 ID from IMAJ where YE' +
-        'RI=1 AND YER_ID=D.ID order by ID desc)'
-      ' --LEFT OUTER JOIN REHBER Firma on Firma.ID=D.REHBERID'
-      
-        ' LEFT OUTER JOIN [SAP_DB_AD].dbo.[OCRD] Firma on Firma.DocEntry=' +
-        'D.REHBERID'
-      ''
-      
-        ' LEFT OUTER JOIN LOKASYON AS Lokasyon ON Lokasyon.ID=D.LOKASYON ' +
-        ' '
-      ' LEFT OUTER JOIN REHBER AS Sorumlu ON Sorumlu.ID = I.REHBERID'
-      
-        ' LEFT OUTER JOIN DOKUMANYETKI DY ON DY.YERI=321 AND DY.YERID = D' +
-        '.ID  '
-      ' '
-      ' ')
-    TabOrder = 6
-    Visible = False
-  end
-  object SQLMemo2_SAP: TMemo
-    Left = 419
-    Top = 226
-    Width = 621
-    Height = 66
-    Lines.Strings = (
-      ''
-      'select '
-      
-        '  distinct   D.*,DTIP=0,KISAYOLID=DK.ID, Firma.CardName as KURUM' +
-        ',Lokasyon.ACIKLAMA as LOKASYONAD,Sorumlu.FIRMA '
-      'as '
-      'SORUMLUAD,'
-      
-        'EXT=case when D.AD like '#39'%.%'#39' then '#39'.'#39'+REVERSE( SUBSTRING(REVERS' +
-        'E(isnull(D.AD,'#39'.'#39')),1,CHARINDEX('#39'.'#39',REVERSE(isnull'
-      '(D.AD,'#39'.'#39')),1)-1)) else '#39#39' end,I.SURUM,'
-      'I.BOYUT,'
-      'KLASORAD=(SELECT AD FROM Dizin where ID=D.KLASOR),'
-      'ONAYLAYACAKAD=(SELECT FIRMA FROM REHBER where ID=I.ONAYLAYACAK),'
-      'ONAYLAYANAD=(SELECT FIRMA FROM REHBER where ID=I.ONAY),'
-      'EKLEYENAD=(SELECT FIRMA FROM REHBER where ID=D.EKLEYEN),'
-      'DEGISTIRENAD=(SELECT FIRMA FROM REHBER where ID=D.DEGISTIREN)'
-      'from '
-      #9'DOKUMANKISAYOL DK '
-      #9'inner join DOKUMAN D on DK.DOKUMANID=D.ID'
-      
-        #9'INNER JOIN IMAJ I ON I.ID = (select top 1 ID from IMAJ where YE' +
-        'RI=1 AND YER_ID=D.ID order by ID desc)'
-      
-        ' '#9'LEFT OUTER JOIN [SAP_DB_AD].dbo.[OCRD] Firma on Firma.DocEntry' +
-        '=D.REHBERID'
-      
-        ' '#9'LEFT OUTER JOIN LOKASYON AS Lokasyon ON  Lokasyon.ID=D.LOKASYO' +
-        'N  '
-      ' '#9'LEFT OUTER JOIN REHBER AS Sorumlu ON Sorumlu.ID = I.REHBERID')
-    TabOrder = 7
-    Visible = False
-  end
   object DtsDokuman: TDataSource
     AutoEdit = False
     DataSet = DOKUMAN
@@ -1595,8 +1414,8 @@ object DokumanListeFrame: TDokumanListeFrame
     Enabled = False
     Threaded = False
     OnTimer = JvTimer1Timer
-    Left = 230
-    Top = 221
+    Left = 222
+    Top = 173
   end
   object PNGImageList1: TPngImageList
     ShareImages = True

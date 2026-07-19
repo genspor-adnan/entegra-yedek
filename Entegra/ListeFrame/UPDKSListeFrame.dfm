@@ -391,62 +391,6 @@ object PDKSListeFrame: TPDKSListeFrame
           GridView = PDKSToplamGrid
         end
       end
-      object SQLMemo: TMemo
-        Left = 55
-        Top = 160
-        Width = 764
-        Height = 57
-        Lines.Strings = (
-          'SELECT'
-          'PP.ID,R.FIRMA,R.ID AS REHBERID,'
-          'TARIH=DATEADD(dd, 0, DATEDIFF(dd, 0, PP.GIRIS)),'
-          'PV.GUNADI,'
-          'GIRIS = convert(varchar,PP.GIRIS,108),'
-          'CIKIS = convert(varchar,PP.CIKIS,108) ,'
-          'MOLA = convert(varchar,PP.MOLA,108) ,'
-          'PP.SUBEID,PP.DURUM,PP.ACIKLAMA,'
-          
-            'VARGIRISCIKIS=(convert(varchar,PV.GIRIS,108) +'#39' / '#39'+convert(varc' +
-            'har,PV.CIKIS,108)),'
-          ''
-          
-            'GIRFARK=case when PP.DURUM<>1 then '#39#39' else isnull(dbo.fn_GIRFARK' +
-            '(convert(varchar,PV.GIRIS,108),PP.GIRIS),'#39'00:00'#39') end,'
-          ''
-          
-            'CALSURE=  isnull(dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,DATEADD(' +
-            'second,-DATEDIFF(second,0,cast(PP.MOLA as time(0))),PP.CIKIS))),' +
-            ' '
-          #39'00:00'#39'),'
-          ''
-          
-            'CALFARK= CASE WHEN  charindex('#39'*'#39',dbo.fn_SaatOlarak(DATEDIFF(mi,' +
-            'PP.GIRIS,PP.CIKIS)))=0 THEN'
-          
-            'dbo.fn_CALFARK(dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS))' +
-            ',dbo.fn_SaatOlarak(DATEDIFF(mi,PP.GIRIS,PP.CIKIS))) ELSE '#39'00:00'#39 +
-            ' END,'
-          ''
-          
-            'CIKFARK=case when PP.DURUM<>1 then '#39#39' else isnull(dbo.fn_CIKFARK' +
-            '(convert(varchar,PV.GIRIS,108),'
-          
-            'dbo.fn_SaatOlarak(DATEDIFF(mi,PV.GIRIS,PV.CIKIS)),PP.GIRIS,PP.CI' +
-            'KIS),'#39'00:00'#39') end'
-          ''
-          'from PERS_PDKS PP'
-          'LEFT OUTER JOIN REHBER R on R.ID=PP.REHBERID'
-          'left outer join PERS_VARDIYATANIM PV on'
-          
-            'PV.REHBERID=CASE WHEN EXISTS(SELECT TOP 1 ISNULL(REHBERID,-1) FR' +
-            'OM dbo.PERS_VARDIYATANIM WHERE '
-          'REHBERID=PP.REHBERID)THEN'
-          
-            'PP.REHBERID ELSE -1 END and PV.GUN=DATEPART(WEEKDAY,PP.GIRIS) Wh' +
-            'ere AY = 0 ')
-        TabOrder = 3
-        Visible = False
-      end
     end
     object TabSheetGrafik: TcxTabSheet
       Caption = 'Grafik'
