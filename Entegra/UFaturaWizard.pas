@@ -4413,6 +4413,11 @@ begin
            TabFatbaslik.FieldByName('VD').AsString := VarToStr(VD);
            Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,2,22,VarToStr(VNO));
      end;
+     // ESKI KOD (comment'e alindi): yeni fatura OLUSURKEN izibiz'e canli mukellef sorgusu
+     //   (Tablo.EFaturami -> TEFaturaFirmaAra.FirmaVarMi). Hazirla/gonder akisi DEGIL; kayit
+     //   acilista sorgu yapiyordu. e-belge durumu hazirla/gonder'de belirlenir; asagida
+     //   EFATURADURUM zaten 0 (yeni) atanir.
+     (*
      if (EFaturaKullanimda>0)or(EIrsaliyeKullanimda)or
         Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_GelenEIrsaliyeyiAl, False) then begin
          EFat := Tablo.EFaturami(TabFatbaslik.FieldByName('REHBERID').AsInteger, CarideEFatura, TabFatbaslik.FieldByName('VNO').AsString, TabFatbaslik.FieldByName('TIPI').AsInteger);
@@ -4421,6 +4426,7 @@ begin
          else
             EFaturaIslem(EFat, True);
      end;
+     *)
   end;
   // DOKUMLER'de XSLT tanimli varsa EFATURADURUM=0 (yeni), yoksa 1 (hazir)
   if TabFatbaslik.State in [dsInsert, dsEdit] then begin

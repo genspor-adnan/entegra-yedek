@@ -275,6 +275,7 @@ type
     MenuTarayacidanEkle: TMenuItem;
     BtnDosyaGonder: TcxButton;
     EditOZELKOD: TcxDBTextEdit;
+    ComboOZELKOD: TcxDBComboBox;
     GridFaturaViewRESIM: TcxGridDBColumn;
     GridFaturaViewDOKUMAN: TcxGridDBColumn;
     btnEPosta: TToolButton;
@@ -282,6 +283,7 @@ type
     SeiliSatra1: TMenuItem;
     Tumune1: TMenuItem;
     EditOZELKOD2: TcxDBTextEdit;
+    ComboOZELKOD2: TcxDBComboBox;
     GridFaturaViewOZELKOD2: TcxGridDBColumn;
     N6: TMenuItem;
     BirSatrAdetiKadarSatrlaraBolMenu: TMenuItem;
@@ -1673,6 +1675,21 @@ begin
 
   WizardKontrol.SelectFirstPage;
   PageUst.ActivePageIndex := 0;
+  // opsiyonlardan özelkod edit mi combo mu ayarlanması (UFaturaWizard ile ayni)
+  if Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_Ozelkod1,0) = 0 then
+     ComboOZELKOD.Visible := False
+  else begin
+     EditOZELKOD.Visible := False;
+     Tablo.GENINI.ReadSection(Ops_FaturaOpsiyon_Ozelkod1_Liste, ComboOZELKOD.Properties, False);
+  end;
+
+  if Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_Ozelkod2,0) = 0 then
+     ComboOZELKOD2.Visible := False
+  else begin
+     EditOZELKOD2.Visible := False;
+     Tablo.GENINI.ReadSection(Ops_FaturaOpsiyon_Ozelkod2_Liste, ComboOZELKOD2.Properties, False);
+  end;
+
   if SiparisTur=9 then
     cbOnaylayacak.Properties.Items := Tablo.imgComboboxInit('select ID=0, FIRMA='''' union all '+StringReplace(OnayYetki, '@YetkiKodu', '24011150', []),False).Items
   else

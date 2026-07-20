@@ -118,6 +118,8 @@ type
     edUrunNo: TcxTextEdit;
     cxGridKaynakDBTableView1DETAY_OZELKOD: TcxGridDBColumn;
     cxGridKaynakDBTableView1DETAY_OZELKOD2: TcxGridDBColumn;
+    cxGridKaynakDBTableView1BASLIK_OZELKOD: TcxGridDBColumn;
+    cxGridKaynakDBTableView1BASLIK_OZELKOD2: TcxGridDBColumn;
     cxGridKaynakDBTableView1OZELKOD2: TcxGridDBColumn;
     cxGridKaynakDBTableView1EMIRNO: TcxGridDBColumn;
     cxGridKaynakDBTableView1DEPOAD: TcxGridDBColumn;
@@ -172,7 +174,7 @@ var
 implementation
 
 uses
-   FetaKurulusSiniflari, FetaClassExtensions, UUretimWizard, UAnaForm, PrjConst, UVeriMotor;
+   System.JSON, FetaKurulusSiniflari, FetaClassExtensions, UUretimWizard, UAnaForm, PrjConst, UVeriMotor;
 
 {$R *.dfm}
 
@@ -906,7 +908,8 @@ End;
 procedure TBelgeDonusumDlg.AramaYap;
 var
   locateID:integer;
-  DonusumStr : string[20];
+  Kaynak : Integer;
+  jP : TJSONObject;
   function BarkodOku(OkunanBarkod : string): string;
   begin
      OkunanBarkod := Trim(OkunanBarkod);
@@ -921,205 +924,60 @@ var
 begin
   JvTimer1.Enabled := False;
   DonusTipiGuncelle;
+  locateID := 0;
   if (TabKaynak.Active)and(TabKaynak.RecordCount>0) then
     locateID := TabKaynak.FieldByName('SATIRID').AsInteger;
-  if DonusumTuru<>0 then begin
-    if StrToIntDef(VarToStr(cbTur.EditValue),0) = 99 then begin //alış siparişi , satış siparişi
-      // verilen sipariş HedefBaslikTur(9) için tüm carilerin kayıtları gelmeli!!
-      TabKaynak.SQL.Text := 'select BASLIKID=S.ID,SATIRID=SD.ID,STOKID=ST.ID,REHBERID=R.ID, R.FIRMA,S.TARIH,BELGENO=S.TEKLIFNO,ST.KOD,ST.STOKADI,ST.ANABIRIM,SD.ACIKLAMA,ST.IZLEME,ST.OZELKOD,ST.OZELKOD2, ST.MUHKODU,SD.KDV,SD.KUR,SD.DOVIZ_KURU,';
-      TabKaynak.SQL.Add(' SD.ADET,SD.MIKTAR,SD.BIRIM,SD.BIRIMFIYAT,SD.ISKONTO,SD.ISKONTO2,SD.TUTAR,SD.DOVIZ_BIRIMFIYAT,SD.DOVIZ_KURU,SD.DOVIZKURDEGERI,SD.DOVIZ_TUTARI,SD.MASRAFID,SD.MERKEZID,SD.KAMPANYAID,');
-      TabKaynak.SQL.Add(' DONUSEN=isnull((select sum(F1.ADET) from SIPARISDETAY F1  where F1.YERI=428 and F1.YERID=SD.ID ),0.0),');
-      TabKaynak.SQL.Add(' IADE=0.0,');
-      TabKaynak.SQL.Add(' KALAN=ADET-isnull((select sum(F1.ADET) from SIPARISDETAY F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0)');
-      TabKaynak.SQL.Add(' -isnull((select sum(F1.ADET) from SIPARISDETAY F1 where F1.YERI=416 and F1.YERID=SD.ID ),0.0)');//İADE ÇIKARILIR
-      TabKaynak.SQL.Add(' ,SD.TESLIMTARIHI ');
-      TabKaynak.SQL.Add(' ,SATICI=S.HAZIRLAYAN ');
-      TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO ');
-      TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID '+DbSinir(1)+') ');
-      TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=99 and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
-      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
-         TabKaynak.SQL.Add(',SD.EN,SD.BOY,SD.YUZEY,SD.SAYI, SD.POZNO, SD.ACIKLAMA');
-      TabKaynak.SQL.Add(' from TEKLIF S inner join TEKLIFDETAY SD on S.ID=SD.TEKLIFID inner join');
-      TabKaynak.SQL.Add(' STOKLAR ST on SD.TUR=1 and SD.URUNID=ST.ID inner join REHBER R on R.ID=S.REHBERID');
-      // 20-09-2023 AO  S.ONAYLAYAN>0 and   onaylayan kaldırıldı
-      TabKaynak.SQL.Add(' where  S.TARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', DtBas.Date)+''' ');
-      TabKaynak.SQL.Add(' and S.TARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', DtBit.Date)+''' ');
-      if VarToStrDef(cbTur.EditValue,'0')<>'99' then
-        TabKaynak.SQL.Add(' and S.TUR='+VarToStrDef(cbTur.EditValue,'0'));
-      if (RehID>0) and (HedefBaslikTur<>9) then
-        TabKaynak.SQL.Add(' and R.ID='+IntToStr(RehID));
-      if VarToStrDef(EdBelgeNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and S.TEKLIFNONO like ''%'+VarToStr(EdBelgeNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokKod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.KOD like ''%'+VarToStr(edStokKod.EditValue)+'%'' ');
-      if VarToStrDef(edUrunNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.URUNNO like ''%'+VarToStr(edUrunNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokAd.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.STOKADI like ''%'+VarToStr(edStokAd.EditValue)+'%'' ');
-      if VarToStrDef(edBarkod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.ID in( select STOKID from STOKBARKOD where BARKOD like ''%'+BarkodOku(VarToStr(edBarkod.EditValue))+'%'' )');
-      if checkKalmayanGoster.Checked <> True then
-        TabKaynak.SQL.Add(' and SD.ADET > isnull((select sum(F1.ADET) from SIPARISDETAY F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0)');
-      if checkGizlenenGoster.Checked <> True then
-        TabKaynak.SQL.Add(' and not exists (select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=99 and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) ');
-      (*if PanelDetayliAra.Visible then begin
-        if GrpSerino.Visible then begin //serino=1
-          TabKaynak.SQL.Add(' and ST.IZLEME = 1 ');
-          if EditSerino.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditSerino.Text+'%'') ');
-        end else if GrpSKT.Visible then begin //skt=2
-          TabKaynak.SQL.Add(' and ST.IZLEME = 2 ');
-          if DateSKT.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.SKT = '''+FormatDateTime('yyyy-mm-dd',DateSKT.Date)+'''+'' 00:00'') ');
-          if EditAciklama.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.ACIKLAMA like ''%'+EditAciklama.Text+'%'') ');
-        end else if GrpKarekod.Visible then begin //karekod=3
-          TabKaynak.SQL.Add(' and ST.IZLEME = 3 ');
-          if EditKarekod.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditKarekod.Text+'%'') ');
-        end else if GrpBoyut.Visible then begin //boyut=4
-          TabKaynak.SQL.Add(' and ST.IZLEME = 4 ');
-          if cbBoyutKombinasyon.Text <> '' then begin
-            if EditKarekod.Text <> '' then
-              TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+cbBoyut1.Text+'%'+cbBoyut2.Text+'%'+cbBoyut3.Text+'%'') ');
-          end;
-        end;
-      end; *)
-      TabloYenile(TabKaynak,[],locateID,'SATIRID');
-    end else if StrToIntDef(VarToStr(cbTur.EditValue),0) in[9,19,101,105] then begin //alış siparişi , satış siparişi
-      TabKaynak.SQL.Text := 'select BASLIKID=S.ID,SATIRID=SD.ID,STOKID=ST.ID, REHBERID=R.ID, R.FIRMA,TARIH=S.SIPARISTARIH,BELGENO=S.SIPARISNO,ST.KOD,ST.STOKADI,ST.ANABIRIM,SD.ACIKLAMA,ST.IZLEME,ST.OZELKOD,ST.OZELKOD2,ST.MUHKODU,SD.KDV,SD.KUR,SD.DOVIZ_KURU,';
-      TabKaynak.SQL.Add(' SD.ADET,SD.MIKTAR,SD.BIRIM,SD.BIRIMFIYAT,SD.ISKONTO,SD.ISKONTO2,SD.TUTAR,SD.DOVIZ_BIRIMFIYAT,SD.DOVIZ_KURU,SD.DOVIZKURDEGERI,SD.DOVIZ_TUTARI,SD.MASRAFID,SD.MERKEZID,SD.KAMPANYAID,');
-      TabKaynak.SQL.Add(' DONUSEN=isnull((select sum(F1.ADET) from SIPARISDETAY F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0) ' +
-                        '        + isnull((select sum(F1.ADET) from '+HedefTablo+' F1 where F1.URUNID=SD.URUNID and F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0),');
-      TabKaynak.SQL.Add(' IADE=0.0,');
-      TabKaynak.SQL.Add(' KALAN=ADET-(ABS(isnull((select sum(F1.ADET) from SIPARISDETAY F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0)) ' +
-                        ' + ABS(isnull((select sum(F1.ADET) from '+HedefTablo+' F1 where F1.URUNID=SD.URUNID and F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0)))');
-      TabKaynak.SQL.Add(' ,SD.TESLIMTARIHI, S.REHBERILETID, SEVK = (SELECT AD FROM  REHBERILETISIM WHERE ID=S.REHBERILETID) ');
-      TabKaynak.SQL.Add(' ,SATICI=S.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when S.TUR = 19 then S.CIKISDEPO else S.GIRISDEPO end ) ');
-      TabKaynak.SQL.Add(' ,SD.PROJEID, SD.POZNO, ST.URUNNO, S.DETAYBOLUMU ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=SD.PROJEID '+DbSinir(1)+') ');
-      TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=S.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) then 1 else 0 end ');
-      TabKaynak.SQL.Add(' ,DETAY_OZELKOD = SD.OZELKOD, DETAY_OZELKOD2 = SD.OZELKOD2 ');
-      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
-         TabKaynak.SQL.Add(',SD.EN,SD.BOY,SD.YUZEY,SD.SAYI,SD.POZNO, SD.ACIKLAMA');
-      TabKaynak.SQL.Add(' from SIPARIS S inner join SIPARISDETAY SD on S.ID=SD.SIPARISID inner join');
-      TabKaynak.SQL.Add(' STOKLAR ST on SD.TUR=1 and SD.URUNID=ST.ID inner join REHBER R on R.ID=S.REHBERID');
-      TabKaynak.SQL.Add(' where S.SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', DtBas.Date)+''' ');
-      TabKaynak.SQL.Add(' and S.SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', DtBit.Date)+''' ');
-      if (RehID<>0)and(StrToIntDef(VarToStr(cbTur.EditValue),0) <> 101) then
-        TabKaynak.SQL.Add(' and R.ID='+IntToStr(RehID));
-      TabKaynak.SQL.Add(' and S.TUR='+VarToStrDef(cbTur.EditValue,'0'));
-      if VarToStrDef(EdBelgeNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and S.SIPARISNO like ''%'+VarToStr(EdBelgeNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokKod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.KOD like ''%'+VarToStr(edStokKod.EditValue)+'%'' ');
-      if VarToStrDef(edUrunNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.URUNNO like ''%'+VarToStr(edUrunNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokAd.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.STOKADI like ''%'+VarToStr(edStokAd.EditValue)+'%'' ');
-      if VarToStrDef(edBarkod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.ID in( select STOKID from STOKBARKOD where BARKOD like ''%'+BarkodOku(VarToStr(edBarkod.EditValue))+'%'' )');
-
-      if checkKalmayanGoster.Checked <> True then begin
-         if HedefBaslikTur=66 then   //Üretim Emri ise
-            TabKaynak.SQL.Add(' and SD.ADET > ABS(isnull((select sum(S1.ADET) from SIPARISDETAY S1 where S1.YERI='+IntToStr(DonusumTuru)+' and S1.YERID=SD.ID ),0.0)) + ABS(isnull((select sum(F1.ADET) from URETIMEMRIDETAY F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0))')
-         else
-            TabKaynak.SQL.Add(' and SD.ADET > ABS(isnull((select sum(S1.ADET) from SIPARISDETAY S1 where S1.YERI='+IntToStr(DonusumTuru)+' and S1.YERID=SD.ID ),0.0)) + ABS(isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI='+IntToStr(DonusumTuru)+' and F1.YERID=SD.ID ),0.0))');
-      end;
-      if checkGizlenenGoster.Checked <> True then
-        TabKaynak.SQL.Add(' and not exists (select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=S.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=SD.ID) ');
-      if PanelDetayliAra.Visible then begin
-        if GrpSerino.Visible then begin //serino=1
-          TabKaynak.SQL.Add(' and ST.IZLEME = 1 ');
-          if EditSerino.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditSerino.Text+'%'') ');
-        end else if GrpSKT.Visible then begin //skt=2
-          TabKaynak.SQL.Add(' and ST.IZLEME = 2 ');
-          if DateSKT.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.SKT = '''+FormatDateTime('yyyy-mm-dd',DateSKT.Date)+'''+'' 00:00'') ');
-          if EditAciklama.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.ACIKLAMA like ''%'+EditAciklama.Text+'%'') ');
-        end else if GrpKarekod.Visible then begin //karekod=3
-          TabKaynak.SQL.Add(' and ST.IZLEME = 3 ');
-          if EditKarekod.Text <> '' then
-            TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditKarekod.Text+'%'') ');
-        end else if GrpBoyut.Visible then begin //boyut=4
-          TabKaynak.SQL.Add(' and ST.IZLEME = 4 ');
-          if cbBoyutKombinasyon.Text <> '' then begin
-            if EditKarekod.Text <> '' then
-              TabKaynak.SQL.Add(' and SD.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+cbBoyut1.Text+'%'+cbBoyut2.Text+'%'+cbBoyut3.Text+'%'') ');
-          end;
-        end;
-      end;
-      TabloYenile(TabKaynak,[],locateID,'SATIRID');
-    end else if StrToIntDef(VarToStr(cbTur.EditValue),0) in[6,10,14,109,110,119] then begin  //alış irsaliyesi,satış irsaliyesi,giden konsinye,adisyon,gelen konsinye
-      if DonusumTuru = 411 then
-         DonusumStr := ' in (411,424) '
-      else
-         DonusumStr := ' = '+IntToStr(DonusumTuru);
-      TabKaynak.SQL.Text := 'select BASLIKID=FB.ID,SATIRID=F.ID,STOKID=ST.ID,REHBERID=R.ID,R.FIRMA,TARIH=FB.FATURATARIH,BELGENO=FB.FATURANO,ST.KOD,ST.STOKADI,ST.ANABIRIM,F.ACIKLAMA,ST.IZLEME,ST.OZELKOD,ST.OZELKOD2,ST.MUHKODU,F.KDV,F.KUR,F.DOVIZ_KURU,';
-      TabKaynak.SQL.Add(' F.ADET,F.MIKTAR,F.BIRIM,F.BIRIMFIYAT,F.ISKONTO,F.ISKONTO2,F.TUTAR,F.DOVIZ_BIRIMFIYAT,F.DOVIZ_KURU,F.DOVIZKURDEGERI,F.DOVIZ_TUTARI,F.MASRAFID,F.MERKEZID,F.KAMPANYAID,');
-      TabKaynak.SQL.Add(' DONUSEN=isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI '+DonusumStr+' and F1.YERID=F.ID ),0.0),');
-      TabKaynak.SQL.Add(' IADE=isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI=416 and F1.YERID=F.ID ),0.0),');
-      TabKaynak.SQL.Add(' KALAN=ADET-isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI '+DonusumStr+' and F1.YERID=F.ID ),0.0)');
-      TabKaynak.SQL.Add(' -isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI=416 and F1.YERID=F.ID ),0.0)');//İADE ÇIKARILIR
-      TabKaynak.SQL.Add(' ,TESLIMTARIHI=FB.FATURATARIH ');
-      TabKaynak.SQL.Add(' ,SATICI=FB.SATICIKODU,  DEPOAD = (select DEPOADI from DEPOLAR where ID= case when FB.TUR in (10,11,12, 119) then FB.GIRISDEPO else FB.CIKISDEPO end ) ');
-      TabKaynak.SQL.Add(' ,F.PROJEID, F.POZNO, ST.URUNNO, FB.DETAYBOLUMU ');
-      TabKaynak.SQL.Add(' ,PROJEKODU=(Select '+DbUst(1)+'P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID '+DbSinir(1)+') ');
-      TabKaynak.SQL.Add(' ,GIZLE= case when exists(select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=FB.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=F.ID) then 1 else 0 end ');
-      TabKaynak.SQL.Add(' ,DETAY_OZELKOD=F.OZELKOD, DETAY_OZELKOD2=F.OZELKOD2 ');
-      if (EnBoyHesaplamaAktif)and(DonusumTuru<>TabNo_DONUSUM_STOKTALEP_TRANSFER)  then
-         TabKaynak.SQL.Add(',F.EN,F.BOY,F.YUZEY,F.SAYI, F.POZNO, F.ACIKLAMA');
-      TabKaynak.SQL.Add(' from FATBASLIK FB inner join FATURA F on FB.ID=F.FATBASID inner join');
-      TabKaynak.SQL.Add(' STOKLAR ST on F.TUR=1 and F.URUNID=ST.ID inner join REHBER R on R.ID=FB.REHBERID');
-      TabKaynak.SQL.Add(' where FB.FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', DtBas.Date)+''' ');
-      TabKaynak.SQL.Add(' and FB.FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59', DtBit.Date)+''' ');
-      if RehID<>0 then
-        TabKaynak.SQL.Add(' and R.ID='+IntToStr(RehID));
-      TabKaynak.SQL.Add(' and FB.TUR='+VarToStrDef(cbTur.EditValue,'0'));
-      if VarToStrDef(EdBelgeNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and FB.FATURANO like ''%'+VarToStr(EdBelgeNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokKod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.KOD like ''%'+VarToStr(edStokKod.EditValue)+'%'' ');
-      if VarToStrDef(edUrunNo.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.URUNNO like ''%'+VarToStr(edUrunNo.EditValue)+'%'' ');
-      if VarToStrDef(edStokAd.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.STOKADI like ''%'+VarToStr(edStokAd.EditValue)+'%'' ');
-      if VarToStrDef(edBarkod.EditValue,'') <> '' then
-        TabKaynak.SQL.Add(' and ST.ID in( select STOKID from STOKBARKOD where BARKOD like ''%'+BarkodOku(VarToStr(edBarkod.EditValue))+'%'' )');
-      if checkKalmayanGoster.Checked <> True then
-        TabKaynak.SQL.Add(' and ADET > isnull((select sum(F1.ADET) from FATURA F1 where F1.YERI '+DonusumStr+' and F1.YERID=F.ID ),0.0)');
-      if checkGizlenenGoster.Checked <> True then
-        TabKaynak.SQL.Add(' and not exists (select ID from DONUSUMBILGISIGIZLE where KAYNAKTUR=FB.TUR and HEDEFTUR='+IntToStr(HedefBaslikTur)+' and KAYNAKID=F.ID) ');
-      if PanelDetayliAra.Visible then begin
-        if GrpSerino.Visible then begin //serino=1
-          TabKaynak.SQL.Add(' and ST.IZLEME = 1 ');
-          if EditSerino.Text <> '' then
-            TabKaynak.SQL.Add(' and F.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditSerino.Text+'%'') ');
-        end else if GrpSKT.Visible then begin //skt=2
-          TabKaynak.SQL.Add(' and ST.IZLEME = 2 ');
-          if DateSKT.Text <> '' then
-            TabKaynak.SQL.Add(' and F.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.SKT = '''+FormatDateTime('yyyy-mm-dd',DateSKT.Date)+'''+'' 00:00'') ');
-          if EditAciklama.Text <> '' then
-            TabKaynak.SQL.Add(' and F.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.ACIKLAMA like ''%'+EditAciklama.Text+'%'') ');
-        end else if GrpKarekod.Visible then begin //karekod=3
-          TabKaynak.SQL.Add(' and ST.IZLEME = 3 ');
-          if EditKarekod.Text <> '' then
-            TabKaynak.SQL.Add(' and F.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+EditKarekod.Text+'%'') ');
-        end else if GrpBoyut.Visible then begin //boyut=4
-          TabKaynak.SQL.Add(' and ST.IZLEME = 4 ');
-          if cbBoyutKombinasyon.Text <> '' then begin
-            if EditKarekod.Text <> '' then
-              TabKaynak.SQL.Add(' and F.ID in(select SI.SATIRID from STOKIZLEME SI where SI.BELGETUR='+VarToStr(cbTur.EditValue)+' and SI.IZLEM like ''%'+cbBoyut1.Text+'%'+cbBoyut2.Text+'%'+cbBoyut3.Text+'%'') ');
-          end;
-        end;
-      end;
-      TabloYenile(TabKaynak,[],locateID,'SATIRID');
-    end else
-      TabKaynak.Close;
+  if AktifVeriMotor = vmPG then begin   // sp_Prog_BelgeDonusum_Kaynak_Json2 PG'ye portlanmadi (bos grid)
+    TabKaynak.Close;
+    Exit;
   end;
+  // cbTur -> kaynak belge tipi
+  case StrToIntDef(VarToStr(cbTur.EditValue), 0) of
+    99:                  Kaynak := 1;   // TEKLIF
+    9, 19, 101, 105:     Kaynak := 2;   // SIPARIS
+    6, 10, 14, 109, 110, 119: Kaynak := 3;   // FATBASLIK
+  else
+    Kaynak := 0;
+  end;
+  if (DonusumTuru = 0) or (Kaynak = 0) then begin
+    TabKaynak.Close;
+    Exit;
+  end;
+  // STANDART SISTEM: 3 inline dal (TEKLIF/SIPARIS/FATBASLIK) -> sp_Prog_BelgeDonusum_Kaynak_Json2.
+  jP := TJSONObject.Create;
+  jP.AddPair('Kaynak', TJSONNumber.Create(Kaynak));
+  jP.AddPair('CbTur', TJSONNumber.Create(StrToIntDef(VarToStr(cbTur.EditValue), 0)));
+  jP.AddPair('DonusumTuru', TJSONNumber.Create(DonusumTuru));
+  jP.AddPair('HedefBaslikTur', TJSONNumber.Create(HedefBaslikTur));
+  if HedefTablo = 'URETIMEMRIDETAY' then
+    jP.AddPair('HedefUretim', TJSONNumber.Create(1))
+  else
+    jP.AddPair('HedefUretim', TJSONNumber.Create(0));
+  jP.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd 00:00:00', DtBas.Date));
+  jP.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd 23:59:59', DtBit.Date));
+  if RehID > 0 then
+    jP.AddPair('RehID', TJSONNumber.Create(RehID));
+  if VarToStrDef(EdBelgeNo.EditValue, '') <> '' then
+    jP.AddPair('BelgeNo', VarToStr(EdBelgeNo.EditValue));
+  if VarToStrDef(edStokKod.EditValue, '') <> '' then
+    jP.AddPair('StokKod', VarToStr(edStokKod.EditValue));
+  if VarToStrDef(edUrunNo.EditValue, '') <> '' then
+    jP.AddPair('UrunNo', VarToStr(edUrunNo.EditValue));
+  if VarToStrDef(edStokAd.EditValue, '') <> '' then
+    jP.AddPair('StokAd', VarToStr(edStokAd.EditValue));
+  if VarToStrDef(edBarkod.EditValue, '') <> '' then
+    jP.AddPair('Barkod', BarkodOku(VarToStr(edBarkod.EditValue)));
+  if checkKalmayanGoster.Checked then
+    jP.AddPair('KalmayanGoster', TJSONNumber.Create(1));
+  if checkGizlenenGoster.Checked then
+    jP.AddPair('GizlenenGoster', TJSONNumber.Create(1));
+  if PanelDetayliAra.Visible then begin
+    if GrpSerino.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(1))
+    else if GrpSKT.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(2))
+    else if GrpKarekod.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(3))
+    else if GrpBoyut.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(4));
+  end;
+  Tablo.ListeSPJson(TabKaynak,  'sp_Prog_BelgeDonusum_Kaynak_Json2', '', jP, locateID, 'SATIRID');
 end;
 
 end.

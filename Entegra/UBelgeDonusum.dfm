@@ -84,6 +84,18 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
           DataBinding.IsNullValueType = True
           Width = 154
         end
+        object cxGridKaynakDBTableView1BASLIK_OZELKOD: TcxGridDBColumn
+          Caption = 'Ba'#351'l'#305'k '#214'zel Kod'
+          DataBinding.FieldName = 'BASLIK_OZELKOD'
+          DataBinding.IsNullValueType = True
+          Width = 74
+        end
+        object cxGridKaynakDBTableView1BASLIK_OZELKOD2: TcxGridDBColumn
+          Caption = 'Ba'#351'l'#305'k '#214'zel Kod2'
+          DataBinding.FieldName = 'BASLIK_OZELKOD2'
+          DataBinding.IsNullValueType = True
+          Width = 70
+        end
         object cxGridKaynakDBTableView1BIRIMFIYAT: TcxGridDBColumn
           Caption = 'Birim Fiyat'
           DataBinding.FieldName = 'BIRIMFIYAT'
@@ -247,6 +259,10 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridSeriLotHareket: TcxGrid
           Left = 0
           Top = 0

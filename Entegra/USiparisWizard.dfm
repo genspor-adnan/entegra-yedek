@@ -1395,6 +1395,50 @@ object SiparisWizardDlg: TSiparisWizardDlg
                 TabOrder = 31
                 Width = 109
               end
+              object ComboOZELKOD: TcxDBComboBox
+                Left = 452
+                Top = 126
+                DataBinding.DataField = 'OZELKOD'
+                DataBinding.DataSource = DtsTabSiparis
+                Properties.DropDownListStyle = lsFixedList
+                Properties.ImmediatePost = True
+                Properties.MaxLength = 0
+                Properties.OnCloseUp = cbKdvDurumPropertiesCloseUp
+                Style.LookAndFeel.NativeStyle = False
+                Style.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleDisabled.LookAndFeel.NativeStyle = False
+                StyleDisabled.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleFocused.LookAndFeel.NativeStyle = False
+                StyleFocused.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleHot.LookAndFeel.NativeStyle = False
+                StyleHot.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleReadOnly.LookAndFeel.NativeStyle = False
+                StyleReadOnly.LookAndFeel.SkinName = 'LondonLiquidSky'
+                TabOrder = 32
+                Width = 109
+              end
+              object ComboOZELKOD2: TcxDBComboBox
+                Left = 562
+                Top = 126
+                DataBinding.DataField = 'OZELKOD2'
+                DataBinding.DataSource = DtsTabSiparis
+                Properties.DropDownListStyle = lsFixedList
+                Properties.ImmediatePost = True
+                Properties.MaxLength = 0
+                Properties.OnCloseUp = cbKdvDurumPropertiesCloseUp
+                Style.LookAndFeel.NativeStyle = False
+                Style.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleDisabled.LookAndFeel.NativeStyle = False
+                StyleDisabled.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleFocused.LookAndFeel.NativeStyle = False
+                StyleFocused.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleHot.LookAndFeel.NativeStyle = False
+                StyleHot.LookAndFeel.SkinName = 'LondonLiquidSky'
+                StyleReadOnly.LookAndFeel.NativeStyle = False
+                StyleReadOnly.LookAndFeel.SkinName = 'LondonLiquidSky'
+                TabOrder = 33
+                Width = 109
+              end
             end
           end
           object SheetGenotip: TcxTabSheet
@@ -3687,8 +3731,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   end
   object PopupYorumlar: TPopupMenu
     OnPopup = PopupYorumlarPopup
-    Left = 48
-    Top = 8
+    Left = 96
+    Top = 16
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       OnClick = YorumDzenle1Click
