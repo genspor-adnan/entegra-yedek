@@ -1149,9 +1149,7 @@ object POSListeFrame: TPOSListeFrame
       'BORC=SUM(K.BORC),ALACAK=SUM(K.ALACAK)'
       'FROM KASA K'
       
-        'WHERE HESAPID=:Prm1 AND ISLEMTARIHI BETWEEN cast(year(getdate())' +
-        ' as varchar(4))+'#39'-01-01 00:00'#39
-      'AND cast(year(getdate()) as varchar(4))+'#39'-12-31 23:59'#39
+      'WHERE HESAPID=:Prm1 AND year(ISLEMTARIHI)=year(getdate())'
       'and HESAPTURU='#39'P'#39
       'UNION ALL'
       'SELECT'
@@ -1159,8 +1157,7 @@ object POSListeFrame: TPOSListeFrame
       'BORC=0,ALACAK=0'
       'FROM KASA K'
       
-        'WHERE HESAPID=:Prm2 AND ISLEMTARIHI >=cast(year(getdate()) as va' +
-        'rchar(4))+'#39'-01-01 00:00'#39' AND TUR<=2'
+      'WHERE HESAPID=:Prm2 AND year(ISLEMTARIHI)>=year(getdate()) AND TUR<=2'
       'and HESAPTURU='#39'P'#39
       ') AS X')
     Left = 551

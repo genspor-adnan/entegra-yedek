@@ -927,10 +927,7 @@ begin
   locateID := 0;
   if (TabKaynak.Active)and(TabKaynak.RecordCount>0) then
     locateID := TabKaynak.FieldByName('SATIRID').AsInteger;
-  if AktifVeriMotor = vmPG then begin   // sp_Prog_BelgeDonusum_Kaynak_Json2 PG'ye portlanmadi (bos grid)
-    TabKaynak.Close;
-    Exit;
-  end;
+  // MOTOR SEAM: PG'de Tablo.ListeSPJson fn_prog_belgedonusum_kaynak_json2 cagirir (vmPG-Exit kaldirildi).
   // cbTur -> kaynak belge tipi
   case StrToIntDef(VarToStr(cbTur.EditValue), 0) of
     99:                  Kaynak := 1;   // TEKLIF
@@ -953,6 +950,11 @@ begin
     jP.AddPair('HedefUretim', TJSONNumber.Create(1))
   else
     jP.AddPair('HedefUretim', TJSONNumber.Create(0));
+  // EnBoy: opsiyonla (EnBoyHesaplamaAktif) -> SP kolon-listesine EN/BOY/YUZEY/SAYI ekler
+  if EnBoyHesaplamaAktif and (DonusumTuru <> TabNo_DONUSUM_STOKTALEP_TRANSFER) then
+    jP.AddPair('EnBoy', TJSONNumber.Create(1))
+  else
+    jP.AddPair('EnBoy', TJSONNumber.Create(0));
   jP.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd 00:00:00', DtBas.Date));
   jP.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd 23:59:59', DtBit.Date));
   if RehID > 0 then
@@ -971,11 +973,25 @@ begin
     jP.AddPair('KalmayanGoster', TJSONNumber.Create(1));
   if checkGizlenenGoster.Checked then
     jP.AddPair('GizlenenGoster', TJSONNumber.Create(1));
+  // izleme detayli-arama: alt-arama STOKSERILOT (SERINO/SKT) uzerinden SP'de
   if PanelDetayliAra.Visible then begin
-    if GrpSerino.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(1))
-    else if GrpSKT.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(2))
-    else if GrpKarekod.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(3))
-    else if GrpBoyut.Visible then jP.AddPair('IzlemeTur', TJSONNumber.Create(4));
+    if GrpSerino.Visible then begin
+      jP.AddPair('IzlemeTur', TJSONNumber.Create(1));
+      if EditSerino.Text <> '' then jP.AddPair('Serino', EditSerino.Text);
+    end
+    else if GrpSKT.Visible then begin
+      jP.AddPair('IzlemeTur', TJSONNumber.Create(2));
+      if DateSKT.Text <> '' then jP.AddPair('SktTarih', FormatDateTime('yyyy-mm-dd 00:00:00', DateSKT.Date));
+    end
+    else if GrpKarekod.Visible then begin
+      jP.AddPair('IzlemeTur', TJSONNumber.Create(3));
+      if EditKarekod.Text <> '' then jP.AddPair('Karekod', EditKarekod.Text);
+    end
+    else if GrpBoyut.Visible then begin
+      jP.AddPair('IzlemeTur', TJSONNumber.Create(4));
+      if (cbBoyutKombinasyon.Text <> '') and (EditKarekod.Text <> '') then
+        jP.AddPair('BoyutPattern', '%'+cbBoyut1.Text+'%'+cbBoyut2.Text+'%'+cbBoyut3.Text+'%');
+    end;
   end;
   Tablo.ListeSPJson(TabKaynak,  'sp_Prog_BelgeDonusum_Kaynak_Json2', '', jP, locateID, 'SATIRID');
 end;

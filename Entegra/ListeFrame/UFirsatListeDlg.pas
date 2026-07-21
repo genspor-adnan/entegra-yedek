@@ -403,7 +403,6 @@ var
   SubeYetki: string;
   j: TJSONObject;
 begin
-  if AktifVeriMotor = vmPG then Exit;   // Json2 (JSON_VALUE) MSSQL'e ozgu
 
   // Gridde ozel (ek) PROJELER alanlarini olustur - eski JvTimer ile ayni
   if (FIRSATLAR.Active) and (FIRSATLAR.RecordCount > 0) then

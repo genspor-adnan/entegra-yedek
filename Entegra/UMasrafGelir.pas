@@ -502,7 +502,7 @@ end;
 
 procedure TMasrafGelirDlg.cxGridDBTableView1CanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
 begin
-   AnaForm.cxGridPopupMenu1.Grid:=cxGrid1;
+   AnaForm.cxGridPopupMenu1.Grid :=cxGrid1;
    AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=cxGridDBTableView1;
    AnaForm.pmGridStil.Tags.Values[cxGrid1.Name]:='MasrafGelirBütçeGridi';
 end;
@@ -577,7 +577,7 @@ begin
    if (SubeVarmi)and(cbSubeSecimi.Text <> '')and(ComboSube.EditValue<1) then
 //       MASRAFGELIR.SQL.Add(' and SUBEID in(' +Tablo.YetkiliSubeleriGetir(23,YetkiTur_Gorme)+ ') ');
        MASRAFGELIR.SQL.Add(' and SUBEID = ' + VarToStr(cbSubeSecimi.EditValue) + ' ');
-    if not CheckPasif.Checked then
+    if not  CheckPasif.Checked then
        MASRAFGELIR.SQL.Add(' and DURUM = 1 ');
 
     if Trim(AraKod.Text)<>'' then MASRAFGELIR.SQL.Add(' and AD like ''%' + Trim(AraKod.Text) + '%''  ');

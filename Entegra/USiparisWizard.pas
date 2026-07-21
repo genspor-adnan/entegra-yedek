@@ -1168,6 +1168,9 @@ var
   Item:TMenuItem;
   i:integer;
 begin
+  // PG: DFM-statik SQL'i dogrudan .Open eden sorgulari (SIPARISDETAY/TabSiparisDetay vb.)
+  //   bir kez diyalekt cevir (TOP1/alias=/isnull/convert/APPLY...). Idempotent.
+  PgTumSorgulariCevir(Self);
   FBasSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.

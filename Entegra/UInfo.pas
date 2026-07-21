@@ -343,6 +343,10 @@ begin
     ' GROUP BY CAST(L.TARIH AS date), L.USTKAYITID, L.USTTABLOID, L.ISLEMTIPI' +
     ' ORDER BY MAX(L.TARIH) DESC';
   try
+    // PG: TabLog.Open dogrudan (TabloYenile/TablodanSorguAc yolu degil) -> diyalekt cevir
+    //   (OUTER APPLY->LATERAL, ISNULL, N'', COLLATE, alias=). DbUst/DbSinir zaten seam.
+    if AktifVeriMotor = vmPG then
+      TabLog.SQL.Text   := PgSqlCevir(TabLog.SQL.Text);
     TabLog.Open;
   except
     // ISLEMLOG view yok / erisim yok -> sessiz gec (grid bos)

@@ -424,7 +424,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
           end
           object ComboSatis: TcxImageComboBox
             Left = 82
-            Top = 7
+            Top = 0
             EditValue = '1'
             Properties.ImmediatePost = True
             Properties.Items = <
@@ -533,6 +533,10 @@ object MasrafGelirDlg: TMasrafGelirDlg
       object TabSheetButce: TcxTabSheet
         Caption = 'B'#252't'#231'e Bilgileri'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -600,7 +604,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
           end
           object SEditButceYil: TcxSpinEdit
             Left = 204
-            Top = 7
+            Top = 0
             Properties.ImmediatePost = True
             Properties.MaxValue = 2049.000000000000000000
             Properties.MinValue = 1990.000000000000000000
@@ -779,6 +783,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       object TabSheetYDil: TcxTabSheet
         Caption = 'Yabanc'#305' Dil'
         ImageIndex = 4
+        ExplicitHeight = 345
         object ToolBar4: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -1439,6 +1444,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       object cxTabSheetMuhKod: TcxTabSheet
         Caption = 'Muhasebe Hesaplar'#305
         ImageIndex = 4
+        ExplicitHeight = 345
         object v: TcxGrid
           Left = 0
           Top = 24
@@ -1656,7 +1662,6 @@ object MasrafGelirDlg: TMasrafGelirDlg
       ShowCaptions = True
       TabOrder = 2
       Transparent = True
-      ExplicitHeight = 29
       object EkleTus: TToolButton
         Left = 0
         Top = 0

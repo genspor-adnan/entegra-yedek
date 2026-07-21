@@ -42,8 +42,6 @@ type
     BtnSec: TJvNavPanelButton;
     Panel3: TPanel;
     JvNavPanelButton1: TJvNavPanelButton;
-    PmKopyala: TPopupMenu;
-    Kopyala1: TMenuItem;
     DtsStokDurumDetay: TDataSource;
     TabStokDurumDetay: TFDQuery;
     PanelDetayliArama: TPanel;
@@ -196,7 +194,6 @@ type
     Procedure FocusDuzenle;
     procedure BirimFiyatIslemleri(Ad:String; fiyat:extended; Kur:string; FiyatAdi, Birim, Kdv:integer; UrunKdvDurum:boolean; Adet:extended;var MasrafId:integer;
               var AOzelKod:String;var AOzelKod2:String; var En:extended;var Boy:extended; var Yuzey:extended; var Sayi:extended);
-    procedure Kopyala1Click(Sender: TObject);
     procedure rdMusteriClick(Sender: TObject);
     procedure LabelDetayliAramaClick(Sender: TObject);
     procedure ComboMARKAPropertiesEditValueChanged(Sender: TObject);
@@ -208,6 +205,7 @@ type
     procedure cxGrid1DBTableViewDurumStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure TreeListKategoriClick(Sender: TObject);
     procedure GridStokViewDblClick(Sender: TObject);
+    procedure LabelSonArananClick(Sender: TObject);
     procedure TabStokListeAfterScroll(DataSet: TDataSet);
     procedure GridStokViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
@@ -219,6 +217,7 @@ type
     Key1: string;
     AdetBirimi: Integer;
     BekletDlg: TBekletmeDlg;
+    FSonAranan: Boolean;   // Son Aranan modu (LabelSonAranan tiklandi -> Mod=5)
     procedure StokAra;
     procedure HizmetAra;
     Procedure DagitimAra;
@@ -226,7 +225,7 @@ type
   public
     FatBasID, RehberID, StokSayimID, stokhizmetaracagirantur,stokhizmetaracagirantip: Integer;
     FiyatlariGetir, KalanAdetGetir,KalmayanCheckGoster: Boolean;
-    TopAramaSayi, GirisCikis, KopyaStr,islemCopy: string;
+    TopAramaSayi, GirisCikis: string;
     TabDetayGiris,TabGiris: TFDQuery;
     ReceteMiktarCarpani: Integer;
 
@@ -238,7 +237,7 @@ var
 
 implementation
 
-uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly;
+uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON;
 
 var
   UserInitiated:Boolean=True;
@@ -330,6 +329,9 @@ begin
     exit;
   UserInitiated := False;
   PaketAnaUrun := True;
+  // Aranip EKLENEN stok -> Son Aranan listesine yaz (KULLANICI_ARAMA; MODUL_Stok)
+  if PageControl1.ActivePage.Name = 'SheetStok' then
+    Tablo.AramaKaydet(MODUL_Stok, TabStokListe.FieldByName('ID').AsInteger);
   if (StokZorunluSecimVar)and(stokhizmetaracagirantur in [9,19,100]) and (PageControl1.ActivePage.Name='SheetStok') then begin//Bu ?r?n yerine se?ilmesi gereken ba?ka ?r?nler var m?
     if EsdegerUrunlerListelendi=False then begin
       Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=cast(STOKESDEGERID as varchar(10))+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
@@ -548,12 +550,10 @@ end;
 procedure TStokHizmetAraDlg.PageControl1PageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
 begin
   JvNavPanelButton1.Visible := True;
-  Kopyala1.Visible := True;
   if NewPage = SheetStok then begin
     JvNavPanelButton1.Enabled := True;
     JvNavPanelButton1.Caption := 'Yeni Stok';
     JvNavPanelButton1.Visible := Tablo.YetkiVarmi(2701,YetkiTur_Ekleme);
-    Kopyala1.Visible := Tablo.YetkiVarmi(2701,YetkiTur_Ekleme);
   end else if NewPage=SheetHizmet then begin
     JvNavPanelButton1.Enabled := True;
     JvNavPanelButton1.Caption := 'Yeni Hizmet';
@@ -1270,277 +1270,82 @@ begin
   end;
 end;
 
-procedure TStokHizmetAraDlg.StokAra;
-var
-  SifirGelmesin: string;
+procedure TStokHizmetAraDlg.LabelSonArananClick(Sender: TObject);
+// Son Aranan: KULLANICI_ARAMA (bu kullanici, MODUL_Stok, tarih desc) -> Mod=5
 begin
-  TabStokListe.Close;
-  TabStokListe.SQL.Clear;
-  TabStokListe.SQL.Add(' declare @FiyatAdi int ');
-  TabStokListe.SQL.Add(' declare @Depo int     ');
-  TabStokListe.SQL.Add(' declare @RehberID int');
-  TabStokListe.SQL.Add(' set @FiyatAdi=' + IntToStr(cbFiyatAdi.EditValue));
-  TabStokListe.SQL.Add(' set @Depo=' + VarToStrDef(cbStokDepo.EditValue,'0'));
-  TabStokListe.SQL.Add(' set @RehberID=' + IntToStr(RehberID));
-  TabStokListe.SQL.Add(' select TOP '+VarToStr(SpinKayitSayisi.EditValue)+'  ');
-  TabStokListe.SQL.Add(' 	S.ID,                                ');
-  TabStokListe.SQL.Add(' 	S.KOD, S.URUNNO,                     ');
-  TabStokListe.SQL.Add(' 	AD=STOKADI,                          ');
-  TabStokListe.SQL.Add(' 	TUR=''Stok'',                        ');
-  if GirisCikis = FWGiris then begin
-    TabStokListe.SQL.Add(' 	KALAN=isnull((select sum(KALAN) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0),');
+  FSonAranan := True;
+  StokAra;
+end;
+
+procedure TStokHizmetAraDlg.StokAra;
+// STANDART SISTEM: inline SQL -> sp_Prog_StokHizmetAra_Stok_Json2 (@Baslik+@Kosullar JSON).
+//   Mod=4 normal/filtre, Mod=5 Son Aranan (LabelSonAranan). Filtreler JSON'da (parametreli/guvenli).
+var j: TJSONObject;
+begin
+  j := TJSONObject.Create;
+  j.AddPair('Depo',       TJSONNumber.Create(StrToIntDef(VarToStr(cbStokDepo.EditValue), 0)));
+  j.AddPair('FiyatAdi',   TJSONNumber.Create(StrToIntDef(VarToStr(cbFiyatAdi.EditValue), 0)));
+  j.AddPair('RehberID',   TJSONNumber.Create(RehberID));
+  j.AddPair('Satis',      TJSONNumber.Create(Ord(GirisCikis = FWCikis)));
+  j.AddPair('Dil',        TJSONNumber.Create(Dil));
+  j.AddPair('CariDoviz',  CariDoviz);
+  j.AddPair('AdetBirimi', TJSONNumber.Create(AdetBirimi));
+  j.AddPair('TopN',       TJSONNumber.Create(StrToIntDef(VarToStr(SpinKayitSayisi.EditValue), 200)));
+  j.AddPair('Olmayanlar', TJSONNumber.Create(Ord(cbOlmayanlar.Checked)));
+  j.AddPair('BuFirma',    TJSONNumber.Create(Ord(cbBuFirma.Checked)));
+  if not (stokhizmetaracagirantur in [99, TabNo_URETIMRECETE]) then
+    j.AddPair('Birim2Getir', TJSONNumber.Create(1))
+  else
+    j.AddPair('Birim2Getir', TJSONNumber.Create(0));
+  if stokhizmetaracagirantur = 99 then begin
+    j.AddPair('Sayim',   TJSONNumber.Create(1));
+    j.AddPair('SayimID', TJSONNumber.Create(TabGiris.FieldByName('ID').AsInteger));
+  end;
+  if FSonAranan then begin
+    j.AddPair('Mod',   TJSONNumber.Create(5));
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Stok));
   end else begin
-    TabStokListe.SQL.Add(' 	KALAN=isnull((select sum(KALAN) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0),');
-    SifirGelmesin :=' and isnull((select sum(KALAN) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0) > 0';
-  end;
-
-  TabStokListe.SQL.Add(' 	FIYAT=isnull(SF.FIYAT,-1),         ');
-  TabStokListe.SQL.Add(' 	KUR=isnull(SF.KUR,''' + CariDoviz + '''),');
-  TabStokListe.SQL.Add(' 	STOKMARKA=StokMarka.ANAHTAR ,        ');
-  TabStokListe.SQL.Add(' 	STOKMODEL=StokModel.ANAHTAR ,        ');
-  TabStokListe.SQL.Add(' 	KDV=S.KDV, S.OTVYUZDE,S.OTVMIKTAR,   ');
-  TabStokListe.SQL.Add(' 	KDVDURUM=SF.KDVDURUM,                ');
-  TabStokListe.SQL.Add(' 	PAKET=isnull(S.PAKET,0),             ');
-  TabStokListe.SQL.Add(' 	IZLEME=isnull(S.IZLEME,0),           ');
-  TabStokListe.SQL.Add(' 	BIRIM=isnull(S.ANABIRIM,' + IntToStr(AdetBirimi) + '),');
-  TabStokListe.SQL.Add('  STOKGRUBU=StokGrubu.ANAHTAR ');
-  if GirisCikis = FWGiris then
-      TabStokListe.SQL.Add(',S.MASRAFID AS MASRAFID')
-  else
-      TabStokListe.SQL.Add(',S.GELIRID AS MASRAFID');
-
-  TabStokListe.SQL.Add(',S.OZELKOD ');
-  TabStokListe.SQL.Add(' From                                  ');
-  TabStokListe.SQL.Add(' 	STOKLAR S (nolock) LEFT OUTER JOIN   ');
-  TabStokListe.SQL.Add(' 	STOKFIYAT SF (nolock) on             ');
-  TabStokListe.SQL.Add(' 		S.ID = SF.STOKID and               ');
-  TabStokListe.SQL.Add(' 		SF.BIRIM = ANABIRIM and            ');
-  TabStokListe.SQL.Add(' 		SF.FIYATADI=@Fiyatadi and          ');
-  TabStokListe.SQL.Add(' 		SF.PAKETID=0 and                   ');
-  if GirisCikis = FWGiris then
-    TabStokListe.SQL.Add(' 		SF.SATIS=0                       ')
-  else
-    TabStokListe.SQL.Add(' 		SF.SATIS=1                       ');
-  TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokMarka ON   ');
-  TabStokListe.SQL.Add(' 		StokMarka.DEGER = S.MARKA AND      ');
-  TabStokListe.SQL.Add(' 		StokMarka.DIL='+IntToStr(Dil)+' AND ');
-  TabStokListe.SQL.Add(' 		StokMarka.BOLUM =-2701             ');
-  TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokModel ON   ');
-  TabStokListe.SQL.Add(' 		StokModel.DEGER=S.MODEL AND        ');
-  TabStokListe.SQL.Add(' 		StokModel.DIL='+IntToStr(Dil)+' AND ');
-  TabStokListe.SQL.Add(' 		StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as VARCHAR(10)) as int)');
-  TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokGrubu ON   ');
-  TabStokListe.SQL.Add('    S.GRUBU = StokGrubu.DEGER AND      ');
-  TabStokListe.SQL.Add(' 		StokGrubu.DIL='+IntToStr(Dil)+' AND ');
-  TabStokListe.SQL.Add('    StokGrubu.BOLUM=-2704               ');
-  if cbBuFirma.Checked then
-    TabStokListe.SQL.Add(' INNER JOIN ISORTAGI IO ON S.ID = IO.STOKID AND IO.REHBERID = @RehberID ');
-  if OkunanBarkod <> '' then
-    TabStokListe.SQL.Add(' INNER JOIN STOKBARKOD STB ON S.ID = STB.STOKID AND S.ANABIRIM = STB.BARKODBIRIMI ');
-  TabStokListe.SQL.Add(' where S.DURUM=1 ');
-  //if stokhizmetaracagirantur = 6 then
-    //TabStokListe.SQL.Add(' and S.ID not in (select URUNID from FATURA where FATBASID='+IntToStr(FatBasID)+') ');
-  //if stokhizmetaracagirantur=TabNo_URETIMRECETE then
-    //TabStokListe.SQL.Add(' and S.ID not in (select URUNID from URETIMRECETEDETAY where URETIMRECETEID='+IntToStr(FatBasID)+') ');
-  if not cbOlmayanlar.Checked then
-    TabStokListe.SQL.Add(SifirGelmesin);
-  // TabStokListe.SQL.Add(' 	and S.PAKET <>1 ');
-  if AramaModu=1 then begin
-      if EditKodu.Text <> '' then
-        TabStokListe.SQL.Add(' and (S.KOD like''%'+ EditKodu.Text + '%''  or  S.URUNNO like ''%'+Trim(EditKodu.Text) +'%'') ');
-      if EditAdi.Text <> '' then
-        TabStokListe.SQL.Add(' and S.STOKADI like''%'+ EditAdi.Text + '%''');
-      if OkunanBarkod <> '' then begin
-        TabStokListe.SQL.Add(' and ( (STB.BARKOD like ''%'+ OkunanBarkod + '%'' ) ');  //normal barkoda g?re arama
-        TabStokListe.SQL.Add(' or ( '''+OkunanBarkod+''' like replace(replace(replace(STB.BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') )');   //boyuta g?re arama
-        TabStokListe.SQL.Add(' )');
-      end;
-      if EditSerino.Text <> '' then
-        TabStokListe.SQL.Add(' and S.ID in ( select SBI.STOKID from STOKIZLEME SBI where SBI.SERINO =  '''+EditSerino.Text+''' )');
+    j.AddPair('Mod', TJSONNumber.Create(4));
+    if AramaModu = 1 then begin
+      if Trim(EditKodu.Text)   <> '' then j.AddPair('Kod',    Trim(EditKodu.Text));
+      if Trim(EditAdi.Text)    <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
+      if OkunanBarkod          <> '' then j.AddPair('Barkod', OkunanBarkod);
+      if Trim(EditSerino.Text) <> '' then j.AddPair('Serino', Trim(EditSerino.Text));
       if PanelDetayliArama.Visible then begin
-          if ComboGRUBU.Text <> '' then
-            TabStokListe.SQL.Add(' and S.GRUBU=' + IntToStr(ComboGRUBU.EditValue));
-          if ComboOZELLIK.Text <> '' then
-            TabStokListe.SQL.Add(' and S.OZELLIK=' + IntToStr(ComboOZELLIK.EditValue));
-          if ComboMARKA.Text <> '' then
-            TabStokListe.SQL.Add(' and S.MARKA=' + IntToStr(ComboMARKA.EditValue));
-          if ComboMODEL.Text <> '' then
-            TabStokListe.SQL.Add(' and S.MODEL=' + IntToStr(ComboMODEL.EditValue));
-          if ComboIcerik.Text <> '' then
-            TabStokListe.SQL.Add(' and S.ICERIK=' + IntToStr(ComboMODEL.EditValue));
-      end;
-  end else //Kategoriye g?re arama
-     TabStokListe.SQL.Add(' and S.KATEGORI=' + TabKategori.FieldByName('ID').AsString);
-  if EsdegerUrunlerListelendi then
-     TabStokListe.SQL.Add(' and S.ID in('+TumEsdegerler+')');
-
-
-  if islemCopy='K' then    //i?lem kopyala ise kopyalanan ?r?ne locate oluyor.
-    TabStokListe.SQL.Add(KopyaStr);
-  if stokhizmetaracagirantur=99 then begin//say?m ise
-    TabStokListe.SQL.Add(' and S.KULLANIM=1 and S.ID not in (select SSK.STOKID from STOKSAYIMKALEMLERI SSK where SSK.SAYIMID='+TabGiris.FieldByName('ID').AsString+') ');
-  end;
-  if not (stokhizmetaracagirantur in[99,TabNo_URETIMRECETE]) then begin // say?m de?il ise
-    TabStokListe.SQL.Add(' union all ');
-    TabStokListe.SQL.Add(' select TOP '+VarToStr(SpinKayitSayisi.EditValue)+'  ');
-    TabStokListe.SQL.Add(' 	S.ID,                                ');
-    TabStokListe.SQL.Add(' 	KOD=S.KOD+''#'',  S.URUNNO,                    ');
-    TabStokListe.SQL.Add(' 	AD=STOKADI,                          ');
-    TabStokListe.SQL.Add(' 	TUR=''Stok'',                        ');
-    if GirisCikis = FWGiris then begin
-        TabStokListe.SQL.Add(' 	KALAN=isnull((select ROUND(sum(KALAN) / S.BIRIM2MIKTAR,0,1 ) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0),');
-//        TabStokListe.SQL.Add(' 	KALAN=99999999,                ');
-   //   cxDBTreeList1cxDBTreeListColumnKalan.Visible := False;
-    end else begin
-      cxDBTreeList1cxDBTreeListColumnKalan.Visible := True;
-      TabStokListe.SQL.Add(' 	KALAN=isnull((select ROUND(sum(KALAN) / S.BIRIM2MIKTAR,0,1 ) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0),');
-      SifirGelmesin :=' and isnull((select sum(KALAN) from STOKDURUM SD where SD.STOKID=S.ID and SD.DEPOID=@Depo ),0) > 0';
-    end;
-  { al?? sat?? fiyat? cari karta g?re ayarl? gelece?i i?in iptal edildi
-    if GirisCikis = FWGiris then
-      TabStokListe.SQL.Add(' 	FIYAT=-1,                ')
-    else
-   }
-    TabStokListe.SQL.Add(' 	FIYAT=isnull(SF.FIYAT,-1),         ');
-    TabStokListe.SQL.Add(' 	KUR=isnull(SF.KUR,''' + CariDoviz + '''),');
-    TabStokListe.SQL.Add(' 	STOKMARKA=StokMarka.ANAHTAR ,        ');
-    TabStokListe.SQL.Add(' 	STOKMODEL=StokModel.ANAHTAR ,        ');
-    TabStokListe.SQL.Add(' 	KDV=S.KDV, S.OTVYUZDE,S.OTVMIKTAR,   ');
-    TabStokListe.SQL.Add(' 	KDVDURUM=SF.KDVDURUM,                ');
-    TabStokListe.SQL.Add(' 	PAKET=isnull(S.PAKET,0),             ');
-    TabStokListe.SQL.Add(' 	IZLEME=isnull(S.IZLEME,0),           ');
-    TabStokListe.SQL.Add(' 	BIRIM=isnull(S.BIRIM2,' + IntToStr(AdetBirimi) + ')');
-    TabStokListe.SQL.Add(' 	,STOKGRUBU=StokGrubu.ANAHTAR         ');
-    if GirisCikis = FWGiris then
-      TabStokListe.SQL.Add(',S.MASRAFID AS MASRAFID')
-    else
-      TabStokListe.SQL.Add(',S.GELIRID AS MASRAFID');
-    TabStokListe.SQL.Add(',S.OZELKOD ');
-    TabStokListe.SQL.Add(' From                                  ');
-    TabStokListe.SQL.Add(' 	STOKLAR S (nolock) LEFT OUTER JOIN   ');
-    TabStokListe.SQL.Add(' 	STOKFIYAT SF (nolock) on             ');
-    TabStokListe.SQL.Add(' 		S.ID = SF.STOKID and               ');
-    TabStokListe.SQL.Add(' 		SF.BIRIM = S.BIRIM2 and            ');
-    TabStokListe.SQL.Add(' 		SF.FIYATADI=@Fiyatadi and          ');
-    TabStokListe.SQL.Add(' 		SF.PAKETID=0 and S.DURUM=1 and     ');
-    if GirisCikis = FWGiris then
-      TabStokListe.SQL.Add(' 		SF.SATIS=0                       ')
-    else
-      TabStokListe.SQL.Add(' 		SF.SATIS=1                       ');
-//      TabStokListe.SQL.Add(' LEFT JOIN STOKBARKOD SB ON S.ID = SB.STOKID ');
-//      TabStokListe.SQL.Add('   AND S.BIRIM2 = SB.BARKODBIRIMI      ');
-//      TabStokListe.SQL.Add('   AND SB.VARSAYILAN=1                 ');
-    TabStokListe.SQL.Add(' LEFT OUTER JOIN 	GENINI StokMarka ON  ');
-    TabStokListe.SQL.Add(' 		StokMarka.DEGER = S.MARKA AND      ');
-    TabStokListe.SQL.Add(' 		StokMarka.DIL='+IntToStr(Dil)+' AND ');
-    TabStokListe.SQL.Add(' 		StokMarka.BOLUM =-2701             ');
-    TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokModel ON   ');
-    TabStokListe.SQL.Add(' 		StokModel.DEGER=S.MODEL AND        ');
-    TabStokListe.SQL.Add(' 		StokModel.DIL='+IntToStr(Dil)+' AND ');
-    TabStokListe.SQL.Add(' 		StokModel.BOLUM=cast(''-2701''+cast(S.MARKA as VARCHAR(10)) as int)');
-    TabStokListe.SQL.Add(' LEFT OUTER JOIN GENINI StokGrubu ON   ');
-    TabStokListe.SQL.Add('    S.GRUBU = StokGrubu.DEGER AND      ');
-    TabStokListe.SQL.Add(' 		StokGrubu.DIL='+IntToStr(Dil)+' AND ');
-    TabStokListe.SQL.Add('    StokGrubu.BOLUM=-2704              ');
-    if cbBuFirma.Checked then
-      TabStokListe.SQL.Add(' INNER JOIN ISORTAGI IO ON S.ID = IO.STOKID AND IO.REHBERID = @RehberID ');
-    if OkunanBarkod <> '' then
-      TabStokListe.SQL.Add(' INNER JOIN STOKBARKOD STB ON S.ID = STB.STOKID AND S.BIRIM2 = STB.BARKODBIRIMI ');
-    TabStokListe.SQL.Add(' where S.DURUM=1 and ');
-    TabStokListe.SQL.Add(' 	(S.ANABIRIM<>isnull(S.BIRIM2,ANABIRIM))   ');
-    if not cbOlmayanlar.Checked then
-      TabStokListe.SQL.Add(SifirGelmesin);
-    // TabStokListe.SQL.Add(' 	and S.PAKET <>1 ');
-    if AramaModu=1 then begin
-      if EditKodu.Text <> '' then
-        TabStokListe.SQL.Add(' and	S.KOD like''%'+ EditKodu.Text + '%''');
-      if EditAdi.Text <> '' then
-        TabStokListe.SQL.Add(' and	S.STOKADI like''%'+ EditAdi.Text + '%''');
-      if OkunanBarkod <> '' then begin
-        TabStokListe.SQL.Add(' and ( (STB.BARKOD = '''+OkunanBarkod+''' ) ');  //normal barkoda g?re arama
-        TabStokListe.SQL.Add(' or ( '''+OkunanBarkod+''' like replace(replace(replace(STB.BARKOD,''O'',''_''),''P'',''_''),''Q'',''_'') )');   //boyuta g?re arama
-        TabStokListe.SQL.Add(' )');
-      end;
-      if EditSerino.Text <> '' then
-        TabStokListe.SQL.Add(' and ''' + EditSerino.Text + ''' in ( select SBI.SERINO from STOKIZLEME SBI where SBI.STOKID=S.ID )');
-      if PanelDetayliArama.Visible then begin
-        if ComboGRUBU.Text <> '' then
-          TabStokListe.SQL.Add(' and	S.GRUBU=' + IntToStr(ComboGRUBU.EditValue));
-        if ComboOZELLIK.Text <> '' then
-          TabStokListe.SQL.Add(' and	S.OZELLIK=' + IntToStr(ComboOZELLIK.EditValue));
-        if ComboMARKA.Text <> '' then
-          TabStokListe.SQL.Add(' and	S.MARKA=' + IntToStr(ComboMARKA.EditValue));
-        if ComboMODEL.Text <> '' then
-          TabStokListe.SQL.Add(' and	S.MODEL=' + IntToStr(ComboMODEL.EditValue));
-        if ComboIcerik.Text <> '' then
-          TabStokListe.SQL.Add(' and	S.ICERIK=' + IntToStr(ComboMODEL.EditValue));
+        if ComboGRUBU.Text   <> '' then j.AddPair('GrubuID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboGRUBU.EditValue), 0)));
+        if ComboOZELLIK.Text <> '' then j.AddPair('OzellikID', TJSONNumber.Create(StrToIntDef(VarToStr(ComboOZELLIK.EditValue), 0)));
+        if ComboMARKA.Text   <> '' then j.AddPair('MarkaID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboMARKA.EditValue), 0)));
+        if ComboMODEL.Text   <> '' then j.AddPair('ModelID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboMODEL.EditValue), 0)));
+        if ComboIcerik.Text  <> '' then j.AddPair('IcerikID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboMODEL.EditValue), 0)));
       end;
     end
-    else //Kategoriye g?re arama
-     TabStokListe.SQL.Add(' and S.KATEGORI=' + TabKategori.FieldByName('ID').AsString);
-
-    if islemCopy = 'K' then    //i?lem kopyala ise kopyalanan ?r?ne locate oluyor.
-       TabStokListe.SQL.Add(KopyaStr);
+    else  begin
+      j.AddPair('KategoriArama', TJSONNumber.Create(1));
+      j.AddPair('KategoriID',    TJSONNumber.Create(TabKategori.FieldByName('ID').AsInteger));
+    end;
+    if EsdegerUrunlerListelendi and (TumEsdegerler <> '') then j.AddPair('Esdeger', TumEsdegerler);
   end;
-  TabStokListe.SQL.Add(' order by 2 ');
-  TabloYenile(TabStokListe,[]);
+  Tablo.ListeSPJson(TabStokListe, 'sp_Prog_StokHizmetAra_Stok_Json2', '', j);
+  FSonAranan := False;
 end;
 
 Procedure TStokHizmetAraDlg.HizmetAra;
+// STANDART SISTEM: inline SQL -> sp_Prog_StokHizmetAra_Hizmet_Json2 (@Baslik+@Kosullar JSON).
+var j: TJSONObject;
 begin
-  TabHizmetListe.SQL.Clear;
-  if (EditKodu.Text = '') and (EditAdi.Text = '') and (OkunanBarkod = '') then begin
-    TabHizmetListe.SQL.Add(' select ID,KOD=HESAPKODU, ');
-    TabHizmetListe.SQL.Add(' ROOTKOD= case when HESAPKODU = REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1))) then ''.'' ');
-    TabHizmetListe.SQL.Add(' else REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE(HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1)))end, ');
-    TabHizmetListe.SQL.Add(' AD=HESAPADI,TUR=''Başlık'',KALAN=null,FIYAT=null,KUR=null,STOKMARKA=null,STOKMODEL=null,KDV=null,OTVYUZDE=null,OTVMIKTAR=null,KDVDURUM=null,PAKET=cast(0 as smallint),IZLEME=cast(0 as smallint), BIRIM=null ');
-    TabHizmetListe.SQL.Add(', STOKGRUBU=NULL,MASRAFID=NULL,OZELKOD=NULL ');
-    if GirisCikis = FWGiris then
-      TabHizmetListe.SQL.Add(' from HESAPPLANI where VARSAYILAN = 2 ')
-    else
-      TabHizmetListe.SQL.Add(' from HESAPPLANI where VARSAYILAN = 3 ');
-    TabHizmetListe.SQL.Add(' union all  ');
+  j := TJSONObject.Create;
+  j.AddPair('FiyatAdi',   TJSONNumber.Create(StrToIntDef(VarToStr(cbFiyatAdi.EditValue), 0)));
+  j.AddPair('Satis',      TJSONNumber.Create(Ord(GirisCikis = FWCikis)));
+  j.AddPair('AdetBirimi', TJSONNumber.Create(AdetBirimi));
+  if Trim(EditKodu.Text) <> '' then j.AddPair('Kod',    Trim(EditKodu.Text));
+  if Trim(EditAdi.Text)  <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
+  if OkunanBarkod        <> '' then j.AddPair('Barkod', OkunanBarkod);
+  if SubeVarmi and (ComboSube.EditValue <> null) then begin
+    j.AddPair('SubeVar', TJSONNumber.Create(1));
+    j.AddPair('SubeID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboSube.EditValue), 0)));
   end;
-  TabHizmetListe.SQL.Add(' select M.ID,KOD=M.KOD,');
-  TabHizmetListe.SQL.Add('   ROOTKOD=case when M.KOD=REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) then ''.''   ');
-  TabHizmetListe.SQL.Add('   else REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))) end,   ');
-  TabHizmetListe.SQL.Add('   M.AD,               ');
-  TabHizmetListe.SQL.Add('   TUR=case when M.BASLIK=0 then ''Hizmet'' else ''Başlık'' end,     ');
-  TabHizmetListe.SQL.Add('   KALAN=null,         ');
-  TabHizmetListe.SQL.Add(' 	 FIYAT=case when M.BASLIK=1 then null else isnull(F.FIYAT,-1) end,');
-  TabHizmetListe.SQL.Add('   KUR=case when M.BASLIK=1 then null else F.KUR end,             ');
-  TabHizmetListe.SQL.Add('   STOKMARKA=null,     ');
-  TabHizmetListe.SQL.Add('   STOKMODEL=null,     ');
-  TabHizmetListe.SQL.Add('   KDV=case when M.BASLIK=1 then null else M.KDV end, OTVYUZDE=null,OTVMIKTAR=null,         ');
-  TabHizmetListe.SQL.Add('   KDVDURUM=case when M.BASLIK=1 then null else F.KDVDURUM end,');
-  TabHizmetListe.SQL.Add('   PAKET=0,        ');
-  TabHizmetListe.SQL.Add('   IZLEME=0,        ');
-  TabHizmetListe.SQL.Add('   BIRIM=case when M.BASLIK=1 then null else ISNULL(M.BIRIM,'+IntToStr(AdetBirimi)+') end  ');//=' + IntToStr(AdetBirimi));
-  TabHizmetListe.SQL.Add('   ,STOKGRUBU= NULL,MASRAFID=NULL,M.OZELKOD ');
-  TabHizmetListe.SQL.Add(' from                  ');
-  TabHizmetListe.SQL.Add('   MASRAFGELIR M left outer join ');
-  TabHizmetListe.SQL.Add('   FIYATLAR F on                 ');
-  TabHizmetListe.SQL.Add('    M.ID=F.HIZMETID and          ');
-  TabHizmetListe.SQL.Add('    F.FIYATADI='+IntToStr(cbFiyatAdi.EditValue)+' and            ');
-  TabHizmetListe.SQL.Add('    F.PAKETID=0 and              ');
-  if GirisCikis = FWGiris then
-    TabHizmetListe.SQL.Add(' 		F.SATIS=0                  ')
-  else
-    TabHizmetListe.SQL.Add(' 		F.SATIS=1                  ');
-  if GirisCikis = FWGiris then
-    TabHizmetListe.SQL.Add(' WHERE  GELIRMI = 0 and DURUM>0   ')
-  else
-    TabHizmetListe.SQL.Add(' WHERE  GELIRMI = 1 and DURUM>0   ');
-  if EditKodu.Text <> '' then
-    TabHizmetListe.SQL.Add(' and	M.KOD like''%'+ EditKodu.Text + '%''');
-  if EditAdi.Text <> '' then
-    TabHizmetListe.SQL.Add(' and	M.AD like''%'+ EditAdi.Text + '%''');
-  if OkunanBarkod <> '' then
-    TabHizmetListe.SQL.Add(' and	isnull(M.BARKOD,'''') like ''%'+ OkunanBarkod + '%''');
-  if (SubeVarmi)and(ComboSube.EditValue<>null) then
-    TabHizmetListe.SQL.Add(' and M.SUBEID in (0,'+IntToStr(ComboSube.EditValue)+')');
-  TabHizmetListe.SQL.Add(' order by 2 ');
-  TabloYenile(TabHizmetListe,[]);
+  Tablo.ListeSPJson(TabHizmetListe, 'sp_Prog_StokHizmetAra_Hizmet_Json2', '', j);
 end;
 
 Procedure TStokHizmetAraDlg.DagitimAra;
@@ -1591,21 +1396,6 @@ begin
   else if PageControl1.ActivePage = SheetDagitim then
      DagitimAra;
 
-end;
-
-procedure TStokHizmetAraDlg.Kopyala1Click(Sender: TObject);
-var
-ID:integer;
-begin
-//  islemKopyala:='K';    //Stok Wizardda kontrol i?in
-  cbOlmayanlar.Checked:=True;
-  islemCopy:='K';            //ListeAc(1) ?al???rken kopyalam? oldu?u kontrol ediliyor.
-  ID := Tablo.StokSihirbazBaslat('K', 0, TabStokListe.FieldByName('ID').AsInteger,-1,0);
-  if ID > 0 then begin
-    KopyaStr:=' and S.ID='+IntToStr(ID)+' ';
-    ListeAc(1);
-    islemCopy:='';
-  end;
 end;
 
 function TStokHizmetAraDlg.ITSPaketEkle(UrunID: Integer): Boolean;

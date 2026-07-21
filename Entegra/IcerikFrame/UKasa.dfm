@@ -244,7 +244,7 @@ object KasaDlg: TKasaDlg
     end
     object CbGroupAcKapa: TcxCheckBox
       Left = 449
-      Top = 7
+      Top = 0
       Caption = 'A'#231#305'k'
       ParentBackground = False
       ParentColor = False
@@ -738,6 +738,7 @@ object KasaDlg: TKasaDlg
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PanelToplam
+    ExplicitWidth = 8
   end
   object DtsKasa: TDataSource
     DataSet = KASA

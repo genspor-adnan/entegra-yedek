@@ -10,7 +10,7 @@
 // ============================================================
 interface
 
-uses FireDAC.Comp.Client;
+uses System.Classes, FireDAC.Comp.Client;
 
 type
   TVeriMotor = (vmMSSQL, vmPG);
@@ -93,7 +93,12 @@ procedure PgBitMapKur(ACnn: TFDConnection);
 //   dokunmadan cogu sorgu calisir. vmMSSQL iken metni AYNEN dondurur (davranis-korur).
 //   NOT: yalniz BELIRSIZ OLMAYAN degisimler burada; konumsal/riskli olanlar (top/scope_
 //   identity/+/[]/charindex arg-sirasi) seam yardimcilariyla cagri yerinde yapilir.
-function PgSqlCevir(const ASql: string): string;
+function  PgSqlCevir(const ASql: string): string;
+
+// vmPG iken AOwner (form/frame) uzerindeki TUM TFDQuery.SQL'ini bir kez PgSqlCevir'den gecirir.
+//   DFM-statik SQL'i DOGRUDAN .Open eden ekranlar icin (TabloYenile/TablodanSorguAc yolu DISI).
+//   FormShow/FormCreate'te cagrilir; idempotent (tekrar cagrilabilir). :param/@Dil KORUNUR.
+procedure PgTumSorgulariCevir(AOwner: TComponent);
 
 // GENINI/opsiyondan motor secimi (string <-> enum yardimci)
 function MotorMetne(AMotor: TVeriMotor): string;
@@ -101,7 +106,7 @@ function MetinMotor(const AMetin: string): TVeriMotor;
 
 implementation
 
-uses SysUtils, Classes, System.RegularExpressions,
+uses SysUtils, System.RegularExpressions,
   FireDAC.Stan.Intf, FireDAC.Stan.Option,   // MapRules / dtInt16 / dtBoolean
   FireDAC.Phys.PG;   // PG surucusunu LINK et (yoksa DriverID='PG' runtime'da bulunamaz)
 
@@ -355,6 +360,20 @@ begin
   //   eslesir. "X" OLMAZ: kolon 'x'). Literal-disi oldugu icin LIKE '[0-9]' desenlerine dokunmaz.
   Result := StringReplace(Result, '[', '', [rfReplaceAll]);
   Result := StringReplace(Result, ']', '', [rfReplaceAll]);
+  // MSSQL 'dbo.' sema oneki PG'de YOK (tablolar public'te) -> sil. Literal-disi (veri korunur).
+  Result := StringReplace(Result, 'dbo.', '', [rfReplaceAll, rfIgnoreCase]);
+  // MSSQL 'COLLATE DATABASE_DEFAULT' PG'de YOK -> sil (bosluk varyantlariyla).
+  if Pos('collate', LowerCase(Result)) > 0 then
+    Result := TRegEx.Replace(Result, 'collate\s+database_default', '', [roIgnoreCase]);
+  // MSSQL '(n)varchar(max)' PG'de YOK -> text.
+  if Pos('max', LowerCase(Result)) > 0 then
+    Result := TRegEx.Replace(Result, '(n?varchar)\s*\(\s*max\s*\)', 'text', [roIgnoreCase]);
+  // MSSQL DECOMPRESS/COMPRESS: PG'de icerik jsonb (sikistirilmamis) -> wrapper'i kaldir.
+  Result := StringReplace(Result, 'DECOMPRESS(', '(', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'COMPRESS(',   '(', [rfReplaceAll, rfIgnoreCase]);
+  // MSSQL nvarchar/nchar PG'de YOK -> varchar/char (literal-disi; cast/CONVERT tipleri icin).
+  Result := StringReplace(Result, 'nvarchar', 'varchar', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'nchar',    'char',    [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'getdate()',     'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'getutcdate()',  'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);
@@ -450,17 +469,528 @@ begin
   end;
 end;
 
+// -- Yardimci: identifier karakteri mi --
+function PgKimlikKar(c: Char): Boolean;
+begin
+  Result := CharInSet(c, ['A'..'Z', 'a'..'z', '0'..'9', '_']);
+end;
+
+// -- Yardimci: pos'ta (1-tabanli) word anahtar-kelimesi kelime-siniriyla var mi (buyuk/kucuk duyarsiz) --
+function PgKwVar(const s: string; pos: Integer; const word: string): Boolean;
+var L: Integer; before, after: Char;
+begin
+  Result := False;
+  L := Length(word);
+  if (pos < 1) or (pos + L - 1 > Length(s)) then Exit;
+  if not SameText(Copy(s, pos, L), word) then Exit;
+  if pos > 1 then before := s[pos - 1] else before := ' ';
+  if pos + L <= Length(s) then after := s[pos + L] else after := ' ';
+  Result := (not PgKimlikKar(before)) and (not PgKimlikKar(after));
+end;
+
+// -- Yardimci: ust-duzey (paren-0, literal-disi) virgullerle bol --
+function PgUstVirgulBol(const s: string): TArray<string>;
+var i, n, depth: Integer; inStr: Boolean; cur: string; lst: TStringList;
+begin
+  lst := TStringList.Create;
+  try
+    depth := 0; inStr := False; cur := ''; i := 1; n := Length(s);
+    while i <= n do
+    begin
+      if inStr then
+      begin
+        cur := cur + s[i];
+        if s[i] = '''' then
+          if (i < n) and (s[i + 1] = '''') then begin cur := cur + ''''; Inc(i); end
+          else inStr := False;
+      end
+      else if s[i] = '''' then begin inStr := True; cur := cur + s[i]; end
+      else if s[i] = '(' then begin Inc(depth); cur := cur + s[i]; end
+      else if s[i] = ')' then begin Dec(depth); cur := cur + s[i]; end
+      else if (s[i] = ',') and (depth = 0) then begin lst.Add(cur); cur := ''; end
+      else cur := cur + s[i];
+      Inc(i);
+    end;
+    lst.Add(cur);
+    Result := lst.ToStringArray;
+  finally
+    lst.Free;
+  end;
+end;
+
+// -- EXEC [dbo.]proc [args] -> SELECT * FROM fn_proc(args). @ad=deger -> pozisyonel deger. --
+//    fn adi: 'sp_' onekli -> fn_+sonrasi; degilse fn_+tumu (hepsi kucuk). Liste seam ile ayni kural.
+function PgExecCevir(const S: string): string;
+var m, nm: TMatch; proc, args, fn, low, birles, a: string; parcalar: TArray<string>; i: Integer;
+begin
+  Result := S;
+  m := TRegEx.Match(S, '^\s*exec\s+(?:dbo\.)?(\w+)\s*(.*)$', [roIgnoreCase, roSingleLine]);
+  if not m.Success then Exit;
+  proc := m.Groups[1].Value;
+  args := Trim(m.Groups[2].Value);
+  while (args <> '') and (args[Length(args)] = ';') do args := Trim(Copy(args, 1, Length(args) - 1));
+  low := LowerCase(proc);
+  if Copy(low, 1, 3) = 'sp_' then fn := 'fn_' + Copy(low, 4, MaxInt) else fn := 'fn_' + low;
+  birles := '';
+  if args <> '' then
+  begin
+    parcalar := PgUstVirgulBol(args);
+    for i := 0 to High(parcalar) do
+    begin
+      a := Trim(parcalar[i]);
+      nm := TRegEx.Match(a, '^@\w+\s*=\s*(.+)$', [roIgnoreCase, roSingleLine]);
+      if nm.Success then a := Trim(nm.Groups[1].Value);
+      if birles <> '' then birles := birles + ', ';
+      birles := birles + a;
+    end;
+  end;
+  Result := 'SELECT * FROM ' + fn + '(' + birles + ')';
+end;
+
+// -- CONVERT(tip, ifade [, stil]) -> to_char(ifade,'fmt') (stil eslesirse) veya cast(ifade as tip). Literal-farkindali. --
+function PgStilFmt(const stil: string): string;
+begin
+  if stil = '103' then Result := 'DD/MM/YYYY'
+  else if stil = '104' then Result := 'DD.MM.YYYY'
+  else if stil = '105' then Result := 'DD-MM-YYYY'
+  else if stil = '101' then Result := 'MM/DD/YYYY'
+  else if stil = '102' then Result := 'YYYY.MM.DD'
+  else if stil = '111' then Result := 'YYYY/MM/DD'
+  else if stil = '23'  then Result := 'YYYY-MM-DD'
+  else if stil = '108' then Result := 'HH24:MI:SS'
+  else if (stil = '120') or (stil = '121') then Result := 'YYYY-MM-DD HH24:MI:SS'
+  else Result := '';
+end;
+
+function PgPgTip(const t: string): string;
+var tl: string;
+begin
+  tl := LowerCase(Trim(t));
+  if (Copy(tl,1,7)='varchar') or (Copy(tl,1,8)='nvarchar') or (Copy(tl,1,4)='char') or (Copy(tl,1,5)='nchar') then Result := 'varchar'
+  else if Copy(tl,1,3)='int' then Result := 'integer'
+  else if (Copy(tl,1,5)='float') or (Copy(tl,1,4)='real') then Result := 'double precision'
+  else if (Copy(tl,1,7)='decimal') or (Copy(tl,1,7)='numeric') then Result := 'numeric'
+  else if (Copy(tl,1,8)='datetime') or (Copy(tl,1,4)='date') then Result := 'timestamp'
+  else Result := tl;
+end;
+
+function PgConvertCevir(const S: string): string;
+var i, n, start, j, k: Integer; inStr: Boolean; sb: TStringBuilder; ic, fmt, pgt: string;
+    oncekar: Char; args: TArray<string>;
+  function ParenOku(var idx: Integer): string;  // idx '(' konumunda; ici dondurur, idx ')'-sonrasina
+  var d: Integer; iss: Boolean;
+  begin
+    d := 0; iss := False; start := idx + 1;
+    while idx <= n do
+    begin
+      if iss then begin if S[idx] = '''' then if (idx < n) and (S[idx+1]='''') then Inc(idx) else iss := False; end
+      else if S[idx] = '''' then iss := True
+      else if S[idx] = '(' then Inc(d)
+      else if S[idx] = ')' then begin Dec(d); if d = 0 then begin Result := Copy(S, start, idx - start); Inc(idx); Exit; end; end;
+      Inc(idx);
+    end;
+    Result := Copy(S, start, MaxInt);
+  end;
+begin
+  if Pos('convert', LowerCase(S)) = 0 then Exit(S);
+  sb := TStringBuilder.Create;
+  try
+    i := 1; n := Length(S); inStr := False;
+    while i <= n do
+    begin
+      if inStr then
+      begin
+        sb.Append(S[i]);
+        if S[i] = '''' then
+          if (i < n) and (S[i+1] = '''') then begin sb.Append(''''); Inc(i); end
+          else inStr := False;
+        Inc(i); Continue;
+      end;
+      if S[i] = '''' then begin inStr := True; sb.Append(S[i]); Inc(i); Continue; end;
+      if PgKwVar(S, i, 'CONVERT') then
+      begin
+        j := i + 7;
+        while (j <= n) and CharInSet(S[j], [' ', #9, #10, #13]) do Inc(j);
+        if (j <= n) and (S[j] = '(') then
+        begin
+          ic := ParenOku(j);   // j '(' -> ')'-sonrasi
+          args := PgUstVirgulBol(ic);
+          if Length(args) >= 2 then
+          begin
+            if Length(args) >= 3 then fmt := PgStilFmt(Trim(args[2])) else fmt := '';
+            pgt := PgPgTip(args[0]);
+            // string-tipe CONVERT + karsilastirma baglami (onceki non-space '='/'<'/'>')
+            //   -> cast'i DUS: 'DEGER = CONVERT(VARCHAR,F.BIRIM)' -> 'DEGER = F.BIRIM' (int=varchar onle).
+            k := sb.Length - 1;
+            while (k >= 0) and CharInSet(sb.Chars[k], [' ', #9, #10, #13]) do Dec(k);
+            if k >= 0 then oncekar := sb.Chars[k] else oncekar := ' ';
+            if fmt <> '' then
+              sb.Append('to_char(' + Trim(args[1]) + ',''' + fmt + ''')')
+            else if ((pgt = 'varchar') or (pgt = 'char')) and CharInSet(oncekar, ['=', '<', '>']) then
+              sb.Append(Trim(args[1]))
+            else
+              sb.Append('cast(' + Trim(args[1]) + ' as ' + pgt + ')');
+            i := j; Continue;
+          end;
+        end;
+      end;
+      sb.Append(S[i]); Inc(i);
+    end;
+    Result := sb.ToString;
+  finally
+    sb.Free;
+  end;
+end;
+
+// -- SELECT listesinde 'alias=ifade' -> 'ifade AS alias' + string '+' concat -> '||'. --
+//    YALNIZ SELECT ile baslayan ifadeye uygulanir (UPDATE/INSERT SET col=val KORUNUR).
+//    Literal + paren-derinlik farkindali; select-liste baglami yigin ile izlenir.
+type
+  TPgSelCtx = record d: Integer; alias: string; end;
+
+// -- '+' concat tespiti: operand string-uretici mi (literal / cast-as-string / string-fonksiyon) --
+function PgStrFuncMu(const fn: string): Boolean;
+var f: string;
+begin
+  f := LowerCase(fn);
+  Result := (f='reverse') or (f='replace') or (f='substring') or (f='substr') or
+    (f='left') or (f='right') or (f='ltrim') or (f='rtrim') or (f='trim') or
+    (f='upper') or (f='lower') or (f='stuff') or (f='concat') or (f='to_char') or
+    (f='str') or (f='space') or (f='format');
+end;
+
+function PgCastStrMu(const inner: string): Boolean;
+begin
+  Result := TRegEx.IsMatch(inner, '\bas\s+(n?varchar|n?char|text)\b', [roIgnoreCase]);
+end;
+
+function PgParenIleri(const S: string; j: Integer; out sonrasi: Integer): string;
+// j = '(' konumu (1-tabanli); ic-metni dondurur, sonrasi = ')'-sonrasi
+var d, i, start: Integer; ins: Boolean;
+begin
+  d := 0; ins := False; i := j; start := j + 1;
+  while i <= Length(S) do
+  begin
+    if ins then begin if S[i]='''' then if (i<Length(S)) and (S[i+1]='''') then Inc(i) else ins:=False; end
+    else if S[i]='''' then ins:=True
+    else if S[i]='(' then Inc(d)
+    else if S[i]=')' then begin Dec(d); if d=0 then begin sonrasi := i+1; Exit(Copy(S, start, i-start)); end; end;
+    Inc(i);
+  end;
+  sonrasi := Length(S)+1; Result := Copy(S, start, MaxInt);
+end;
+
+function PgParenGeri(const S: string; kapanis: Integer): Integer;
+// kapanis = ')' konumu; eslesen '(' konumu (-1 yoksa)
+var d, i: Integer;
+begin
+  d := 0; i := kapanis;
+  while i >= 1 do
+  begin
+    if S[i]=')' then Inc(d)
+    else if S[i]='(' then begin Dec(d); if d=0 then Exit(i); end;
+    Dec(i);
+  end;
+  Result := -1;
+end;
+
+function PgSagStr(const S: string; i: Integer): Boolean;
+// i = '+' sonrasi konum; sonraki token string-uretici mi
+var j, sonrasi: Integer; m: TMatch; fn: string;
+begin
+  Result := False;
+  j := i;
+  while (j <= Length(S)) and CharInSet(S[j], [' ', #9, #10, #13]) do Inc(j);
+  if j > Length(S) then Exit;
+  if S[j] = '''' then Exit(True);
+  m := TRegEx.Match(Copy(S, j, MaxInt), '^([A-Za-z_]\w*)\s*\(', [roIgnoreCase]);
+  if m.Success then
+  begin
+    fn := LowerCase(m.Groups[1].Value);
+    if (fn='cast') or (fn='convert') then
+      Result := PgCastStrMu(PgParenIleri(S, j + m.Length - 1, sonrasi)) or (fn='convert')
+    else
+      Result := PgStrFuncMu(fn);
+  end;
+end;
+
+function PgSolStr(const S: string; plusPos: Integer): Boolean;
+// plusPos = '+' konumu; onceki token string-uretici mi
+var k, op, e, st, sonrasi: Integer; fn: string;
+begin
+  Result := False;
+  k := plusPos - 1;
+  while (k >= 1) and CharInSet(S[k], [' ', #9, #10, #13]) do Dec(k);
+  if k < 1 then Exit;
+  if S[k] = '''' then Exit(True);
+  if S[k] = ')' then
+  begin
+    op := PgParenGeri(S, k);
+    if op >= 1 then
+    begin
+      e := op - 1;
+      while (e >= 1) and CharInSet(S[e], [' ', #9, #10, #13]) do Dec(e);
+      st := e;
+      while (st >= 1) and PgKimlikKar(S[st]) do Dec(st);
+      fn := LowerCase(Copy(S, st+1, e - st));
+      if (fn='cast') or (fn='convert') then
+        Result := PgCastStrMu(PgParenIleri(S, op, sonrasi)) or (fn='convert')
+      else
+        Result := PgStrFuncMu(fn);
+    end;
+  end;
+end;
+
+function PgSelectAliasCevir(const S: string): string;
+var
+  i, n, depth, selN: Integer;
+  inStr, itemStart: Boolean;
+  c: Char;
+  sb: TStringBuilder;
+  sel: array of TPgSelCtx;
+  m: TMatch; kalan: string;
+
+  function AtSelDepth: Boolean;
+  begin
+    Result := (selN > 0) and (depth = sel[selN - 1].d);
+  end;
+  procedure FlushAlias;
+  begin
+    if (selN > 0) and (sel[selN - 1].alias <> '') then
+    begin
+      sb.Append(' AS ' + sel[selN - 1].alias + ' ');
+      sel[selN - 1].alias := '';
+    end;
+  end;
+  procedure PushSel;
+  begin
+    if selN = Length(sel) then SetLength(sel, selN + 8);
+    sel[selN].d := depth; sel[selN].alias := ''; Inc(selN);
+  end;
+
+begin
+  Result := S;
+  // SELECT ile baslayan VEYA INSERT..SELECT (select-listesinde alias=). UPDATE/DELETE SET col=val
+  //   yigin-derinlik takibiyle zaten korunur (SELECT anahtar-kelimesi yoksa donusum olmaz).
+  if not (TRegEx.IsMatch(S, '^\s*select\b', [roIgnoreCase]) or
+          TRegEx.IsMatch(S, '^\s*insert\b', [roIgnoreCase])) then Exit;
+  n := Length(S); i := 1; depth := 0; selN := 0;
+  inStr := False; itemStart := False;
+  SetLength(sel, 8);
+  sb := TStringBuilder.Create;
+  try
+    while i <= n do
+    begin
+      c := S[i];
+      if inStr then
+      begin
+        sb.Append(c);
+        if c = '''' then
+          if (i < n) and (S[i+1] = '''') then begin sb.Append(''''); Inc(i); end
+          else inStr := False;
+        Inc(i); Continue;
+      end;
+      if c = '''' then begin inStr := True; sb.Append(c); itemStart := False; Inc(i); Continue; end;
+      if PgKwVar(S, i, 'SELECT') then
+      begin
+        sb.Append(Copy(S, i, 6)); Inc(i, 6); PushSel; itemStart := True; Continue;
+      end;
+      if PgKwVar(S, i, 'FROM') and AtSelDepth then
+      begin
+        FlushAlias; Dec(selN); sb.Append(Copy(S, i, 4)); Inc(i, 4); itemStart := False; Continue;
+      end;
+      // UNION/INTERSECT/EXCEPT: FROM'suz select-listesini de sonlandirir (alias flush + pop)
+      if AtSelDepth and (PgKwVar(S, i, 'UNION') or PgKwVar(S, i, 'INTERSECT') or PgKwVar(S, i, 'EXCEPT')) then
+      begin
+        FlushAlias; Dec(selN);
+        if PgKwVar(S, i, 'UNION') then begin sb.Append(Copy(S, i, 5)); Inc(i, 5); end
+        else if PgKwVar(S, i, 'INTERSECT') then begin sb.Append(Copy(S, i, 9)); Inc(i, 9); end
+        else begin sb.Append(Copy(S, i, 6)); Inc(i, 6); end;
+        itemStart := False; Continue;
+      end;
+      if c = '(' then begin Inc(depth); sb.Append(c); Inc(i); Continue; end;
+      if c = ')' then
+      begin
+        if (selN > 0) and (depth = sel[selN - 1].d) then begin FlushAlias; Dec(selN); end;
+        Dec(depth); sb.Append(c); Inc(i); itemStart := False; Continue;
+      end;
+      if (c = ',') and AtSelDepth then
+      begin
+        FlushAlias; sb.Append(','); Inc(i); itemStart := True; Continue;
+      end;
+      if c = '+' then
+      begin
+        // string concat mi (operand string-uretici: literal/cast-as-str/string-fonksiyon) -> '||'
+        if PgSolStr(S, i) or PgSagStr(S, i + 1) then
+          sb.Append('||')
+        else
+          sb.Append('+');   // numerik toplama KORUNUR
+        Inc(i); itemStart := False; Continue;
+      end;
+      if CharInSet(c, [' ', #9, #10, #13]) then begin sb.Append(c); Inc(i); Continue; end;
+      // SELECT on-eki: DISTINCT / ALL / TOP n -> itemStart korunur
+      if itemStart and AtSelDepth then
+      begin
+        if PgKwVar(S, i, 'DISTINCT') then begin sb.Append(Copy(S, i, 8)); Inc(i, 8); Continue; end;
+        if PgKwVar(S, i, 'ALL') then begin sb.Append(Copy(S, i, 3)); Inc(i, 3); Continue; end;
+        if PgKwVar(S, i, 'TOP') then
+        begin
+          m := TRegEx.Match(Copy(S, i, 24), '^TOP\s*\(?\s*\d+\s*\)?', [roIgnoreCase]);
+          if m.Success then begin sb.Append(m.Value); Inc(i, m.Length); Continue; end;
+        end;
+      end;
+      // alias=ifade tespiti (item basi, select-derinligi, henuz alias yok)
+      if itemStart and AtSelDepth and (sel[selN - 1].alias = '') then
+      begin
+        kalan := Copy(S, i, MaxInt);
+        m := TRegEx.Match(kalan, '^([A-Za-z_]\w*)\s*=', []);
+        if m.Success and not ((i + m.Length <= n) and (S[i + m.Length] = '=')) then
+        begin
+          sel[selN - 1].alias := m.Groups[1].Value;
+          Inc(i, m.Length); itemStart := False; Continue;
+        end;
+      end;
+      itemStart := False; sb.Append(c); Inc(i);
+    end;
+    while selN > 0 do begin FlushAlias; Dec(selN); end;
+    Result := sb.ToString;
+  finally
+    sb.Free;
+  end;
+end;
+
+// -- Nested (alt-sorgu, derinlik>=1) SELECT [DISTINCT] TOP n -> 'TOP n' sil, kapanis ')'-den ONCE ' LIMIT n'. --
+//    Dis (derinlik 0) SELECT TOP'a DOKUNMAZ (PgTopCevir isi). Literal+paren farkindali.
+type
+  TPgTopCtx = record d: Integer; lim: string; end;
+
+function PgNestedTopCevir(const S: string): string;
+var
+  i, n, depth, pN, j: Integer;
+  inStr: Boolean;
+  sb: TStringBuilder;
+  pend: array of TPgTopCtx;
+  m: TMatch;
+begin
+  if Pos('top', LowerCase(S)) = 0 then Exit(S);
+  n := Length(S); i := 1; depth := 0; pN := 0; inStr := False;
+  SetLength(pend, 8);
+  sb := TStringBuilder.Create;
+  try
+    while i <= n do
+    begin
+      if inStr then
+      begin
+        sb.Append(S[i]);
+        if S[i] = '''' then
+          if (i < n) and (S[i+1] = '''') then begin sb.Append(''''); Inc(i); end
+          else inStr := False;
+        Inc(i); Continue;
+      end;
+      if S[i] = '''' then begin inStr := True; sb.Append(S[i]); Inc(i); Continue; end;
+      if S[i] = '(' then begin Inc(depth); sb.Append('('); Inc(i); Continue; end;
+      if S[i] = ')' then
+      begin
+        if (pN > 0) and (pend[pN-1].d = depth) then
+        begin sb.Append(' LIMIT ' + pend[pN-1].lim + ' '); Dec(pN); end;
+        Dec(depth); sb.Append(')'); Inc(i); Continue;
+      end;
+      if PgKwVar(S, i, 'SELECT') and (depth >= 1) then
+      begin
+        sb.Append(Copy(S, i, 6)); Inc(i, 6);
+        j := i;
+        while (j <= n) and CharInSet(S[j], [' ', #9, #10, #13]) do Inc(j);
+        if PgKwVar(S, j, 'DISTINCT') then
+        begin
+          sb.Append(Copy(S, i, j - i)); sb.Append(Copy(S, j, 8)); i := j + 8;
+          j := i;
+          while (j <= n) and CharInSet(S[j], [' ', #9, #10, #13]) do Inc(j);
+        end;
+        m := TRegEx.Match(Copy(S, j, 32), '^TOP\s*\(?\s*(\d+)\s*\)?\s*', [roIgnoreCase]);
+        if m.Success then
+        begin
+          sb.Append(Copy(S, i, j - i));            // SELECT ile TOP arasi bosluk
+          if pN = Length(pend) then SetLength(pend, pN + 8);
+          pend[pN].d := depth; pend[pN].lim := m.Groups[1].Value; Inc(pN);
+          Inc(i, (j - i) + m.Length);              // 'bosluk+TOP n ' atla
+        end;
+        Continue;
+      end;
+      sb.Append(S[i]); Inc(i);
+    end;
+    while pN > 0 do begin sb.Append(' LIMIT ' + pend[pN-1].lim); Dec(pN); end;
+    Result := sb.ToString;
+  finally
+    sb.Free;
+  end;
+end;
+
+// -- MSSQL OUTER/CROSS APPLY -> PG LATERAL. --
+//    'OUTER APPLY (subq) alias' -> 'LEFT JOIN LATERAL (subq) alias ON true'
+//    'CROSS APPLY ...'          -> 'CROSS JOIN LATERAL ...' (ON gerekmez)
+function PgApplyCevir(const S: string): string;
+var i, n, sonrasi, j: Integer; inStr: Boolean; sb: TStringBuilder; m: TMatch; sub: string;
+begin
+  if Pos('apply', LowerCase(S)) = 0 then Exit(S);
+  n := Length(S); i := 1; inStr := False;
+  sb := TStringBuilder.Create;
+  try
+    while i <= n do
+    begin
+      if inStr then
+      begin
+        sb.Append(S[i]);
+        if S[i] = '''' then
+          if (i < n) and (S[i+1] = '''') then begin sb.Append(''''); Inc(i); end
+          else inStr := False;
+        Inc(i); Continue;
+      end;
+      if S[i] = '''' then begin inStr := True; sb.Append(S[i]); Inc(i); Continue; end;
+      m := TRegEx.Match(Copy(S, i, 40), '^cross\s+apply\b', [roIgnoreCase]);
+      if m.Success then begin sb.Append('CROSS JOIN LATERAL'); Inc(i, m.Length); Continue; end;
+      m := TRegEx.Match(Copy(S, i, 40), '^outer\s+apply\s*', [roIgnoreCase]);
+      if m.Success then
+      begin
+        sb.Append('LEFT JOIN LATERAL ');
+        j := i + m.Length;
+        while (j <= n) and CharInSet(S[j], [' ', #9, #10, #13]) do Inc(j);
+        if (j <= n) and (S[j] = '(') then
+        begin
+          sub := PgParenIleri(S, j, sonrasi);            // ic; sonrasi = ')'-sonrasi
+          sb.Append('(' + PgApplyCevir(sub) + ')');      // nested APPLY icin recursion
+          j := sonrasi;
+          while (j <= n) and CharInSet(S[j], [' ', #9, #10, #13]) do begin sb.Append(S[j]); Inc(j); end;
+          m := TRegEx.Match(Copy(S, j, MaxInt), '^(\w+)', []);   // alias
+          if m.Success then begin sb.Append(m.Groups[1].Value); Inc(j, m.Length); end;
+          sb.Append(' ON true ');
+          i := j; Continue;
+        end;
+        Continue;
+      end;
+      sb.Append(S[i]); Inc(i);
+    end;
+    Result := sb.ToString;
+  finally
+    sb.Free;
+  end;
+end;
+
 function PgSqlCevir(const ASql: string): string;
 var
   i, n: Integer;
   ch: Char;
   strIci: Boolean;
   disari, sonuc: TStringBuilder;
-  src: string;
+  src, ds: string;
 begin
   Result := ASql;
   if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
-  src := PgDeclareCevir(ASql);           // T-SQL yerel degisken (DECLARE/SET @x) -> inline
+  src := PgDeclareCevir(ASql);           // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
+  src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
+  src := PgConvertCevir(src);            // CONVERT(tip,ifade,stil) -> to_char/cast
+  src := PgNestedTopCevir(src);          // nested SELECT TOP n -> alt-sorgu sonuna LIMIT n
+  src := PgApplyCevir(src);              // OUTER/CROSS APPLY -> LEFT JOIN/CROSS JOIN LATERAL
+  src := PgSelectAliasCevir(src);        // alias=ifade -> ifade AS alias + string '+' -> '||'
   // LITERAL-FARKINDALI: tek-tirnakli string literalleri ('...') atla, YALNIZ tirnak-disi
   //   metni cevir. Boylece merkezi cagri (TablodanSorguAc/VeriVarMi/BasitKomutCalistir/
   //   SorguBaslat) INSERT/UPDATE'teki kullanici verisini bozmaz ('%isnull(%' vb. korunur).
@@ -487,7 +1017,12 @@ begin
       begin
         if ch = '''' then
         begin
-          sonuc.Append(PgParcaCevir(disari.ToString)); disari.Clear;  // birikmis tirnak-disini cevir
+          ds := disari.ToString;
+          // N'...' unicode oneki: hemen onceki standalone N/n -> at (bosluk KORUNUR)
+          if (Length(ds) >= 1) and CharInSet(ds[Length(ds)], ['N', 'n']) and
+             ((Length(ds) = 1) or (not PgKimlikKar(ds[Length(ds) - 1]))) then
+            ds := Copy(ds, 1, Length(ds) - 1);
+          sonuc.Append(PgParcaCevir(ds)); disari.Clear;  // birikmis tirnak-disini cevir
           sonuc.Append(ch);
           strIci := True;                             // literal basladi
         end
@@ -502,6 +1037,19 @@ begin
     disari.Free; sonuc.Free;
   end;
   Result := PgTopCevir(Result);   // dis SELECT TOP n -> LIMIT n (anchored; literal-disi)
+end;
+
+procedure PgTumSorgulariCevir(AOwner: TComponent);
+var i: Integer; q: TFDQuery;
+begin
+  if (AktifVeriMotor <> vmPG) or (AOwner = nil) then Exit;
+  for i := 0 to AOwner.ComponentCount - 1 do
+    if AOwner.Components[i] is TFDQuery then
+    begin
+      q := TFDQuery(AOwner.Components[i]);
+      if Trim(q.SQL.Text) <> '' then
+        q.SQL.Text := PgSqlCevir(q.SQL.Text);
+    end;
 end;
 
 function MotorMetne(AMotor: TVeriMotor): string;
@@ -531,7 +1079,7 @@ const
     'genotip_stokkart;girişsayfasıparçası;gor;gruplanabilsin;gunlukaksiyondagoster;haftaİçi;' +
     'hastayacikis;herkeseacik;icdis;import;insta_support;internet_satis;iptalvar;irsaliyeli;' +
     'isgunu;iskontodahil;iskontosuz;italik;kalibrasyon;kalite;kapanis;kasaislendi;' +
-    'kasaya_detayli;katildi;kayit;kdvdahil;kdvdurum;kesin_mi;kilitguncel;kilitleme;kilityeni;' +
+    'kasaya_detayli;katildi;kayit;kdvdahil;kdvdurum;kesin_mi;kilit;kilitguncel;kilitleme;kilityeni;' +
     'kimlikdogrulama;kocanayari;kocankullan;kredieklimitvar;kredikarti;kredilihesap;' +
     'kullanici;kullanici_onayi;maashesabi;maliyeti_etkilesin;masraf;medyavar;mobil;monday;' +
     'odemeplani;odemetipi;odenmis;onay;onemli;onlinehesaphareketi;onlinetalimat;otokapat;' +
@@ -544,6 +1092,17 @@ const
     'tamamlanma;tarihidesor;temdit;text_email;text_imzala;text_olustur;thursday;tuesday;ty;' +
     'uruntipi;uyar;uygulandi;valor;wednesday;whatsapp;whatsapp_support;zamanisareti;' +
     'zarfmaliyetdurumu;zenginmetin;zorunlu';
+
+  // PG numeric -> Delphi Currency map'lenecek kolon adlari (DFM'de TCurrencyField).
+  //   YALNIZ Currency-only kolonlar; hem Currency hem FMTBCD gecen (tutar/doviz_tutari/
+  //   gerceklesen) DISARIDA -> onlar PG varsayilani FMTBcd kalir (TabSiparisDetay.TUTAR).
+  CPgCurrencyAdlari =
+    'alismaliyetort;alismaliyetson;b_fiyat;birim2miktar;brmmaliyetort;brmmaliyetson;' +
+    'ckdvtut;ctoplam;ctutar;depocubirimfiyat;dovizkur;dovizkurdegeri;doviztutari;' +
+    'eczanebirimfiyat;ekmaliyet;ekvergi;fark;fatura_matrahi;fatura_tutari;gercekode;' +
+    'gercektah;imalatcibirimfiyat;kdv_tutari;kdvtutar;komisyon;kur;kurdegeri;liste_satis;' +
+    'maliyet;maliyetort;maliyetson;planlanan;sipbirimfiyat;siptutar;stokmaliyet;tavsiye_ort;' +
+    'tavsiye_satis_orani;tavsiye_son;tplmaliyetort;tplmaliyetson;ucret_alt;ucret_ust';
 
 procedure PgBitMapKur(ACnn: TFDConnection);
 var
@@ -566,6 +1125,22 @@ begin
           SourceDataType := dtInt16;   // PG smallint
           TargetDataType := dtBoolean; // Delphi'ye boolean field olarak sun
         end;
+    // PG numeric -> Currency: YALNIZ DFM'de TCurrencyField olan kolon adlari (isim-bazli).
+    //   Global tip-map DEGIL (TFMTBCDField kolonlari -tutar vb.- "expecting FMTBcd actual
+    //   Currency" verir). Her ad icin dtFmtBCD + dtBCD -> dtCurrency.
+    L.DelimitedText := CPgCurrencyAdlari;
+    for i := 0 to L.Count - 1 do
+      if Trim(L[i]) <> '' then
+      begin
+        with ACnn.FormatOptions.MapRules.Add do
+        begin
+          NameMask := Trim(L[i]); SourceDataType := dtFmtBCD; TargetDataType := dtCurrency;
+        end;
+        with ACnn.FormatOptions.MapRules.Add do
+        begin
+          NameMask := Trim(L[i]); SourceDataType := dtBCD; TargetDataType := dtCurrency;
+        end;
+      end;
   finally
     L.Free;
   end;

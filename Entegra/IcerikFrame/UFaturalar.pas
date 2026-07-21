@@ -992,7 +992,12 @@ begin
       LKosullar.AddPair('Aciklama', Aciklama);
       LKosullar.AddPair('Stok', Stok);
 
-      FATBASLIK.SQL.Text := 'EXEC ' + SP_Adi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
+      // MOTOR SEAM (Utablo.ListeSPJson ile ayni): MSSQL EXEC dbo.sp_Prog_X ;
+      //   PG SELECT * FROM fn_prog_x (ayni @Baslik+@Kosullar). fn adi = 'fn_'+lower(sp_'den-sonrasi).
+      if AktifVeriMotor = vmPG then
+        FATBASLIK.SQL.Text := 'SELECT * FROM fn_' + LowerCase(Copy(SP_Adi, 4, MaxInt)) + '(:Baslik, :Kosullar)'
+      else
+        FATBASLIK.SQL.Text := 'EXEC dbo.' + SP_Adi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
       FATBASLIK.ParamByName('Baslik').Value := SelectList;   // SELECT ek kolonlari
       FATBASLIK.ParamByName('Kosullar').Value := LKosullar.ToJSON;
     finally
@@ -1194,12 +1199,18 @@ begin
    if FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101] then begin
       DtsDetay.DataSet:= SIPARISDETAY;
       TabloYenile(SIPARISDETAY, [FATBASLIK.Fields[0].AsInteger]);
-      //TOPLAMLAR.SQL.Text:= MemoSiparisToplamlar.Text;
-      TOPLAMLAR.SQL.Text:= 'EXEC SP_PRG_Siparis_DipToplami '+IntToStr(FATBASLIK.Fields[0].AsInteger); //MemoFaturaToplamlar.Text;
+      // MOTOR SEAM: MSSQL EXEC dbo.SP ; PG SELECT * FROM fn_prg_...(id).
+      if AktifVeriMotor = vmPG then
+        TOPLAMLAR.SQL.Text:= 'SELECT * FROM fn_prg_siparis_diptoplami('+IntToStr(FATBASLIK.Fields[0].AsInteger)+')'
+      else
+        TOPLAMLAR.SQL.Text:= 'EXEC SP_PRG_Siparis_DipToplami '+IntToStr(FATBASLIK.Fields[0].AsInteger);
    end else begin
       DtsDetay.DataSet:= FATURA;
       TabloYenile(FATURA, [FATBASLIK.Fields[0].AsInteger]);
-      TOPLAMLAR.SQL.Text:= 'EXEC SP_PRG_FaturaDipToplami '+IntToStr(FATBASLIK.Fields[0].AsInteger); //MemoFaturaToplamlar.Text;
+      if AktifVeriMotor = vmPG then
+        TOPLAMLAR.SQL.Text:= 'SELECT * FROM fn_prg_faturadiptoplami('+IntToStr(FATBASLIK.Fields[0].AsInteger)+')'
+      else
+        TOPLAMLAR.SQL.Text:= 'EXEC SP_PRG_FaturaDipToplami '+IntToStr(FATBASLIK.Fields[0].AsInteger);
    end;
    TabloYenile(TOPLAMLAR, []);
    //btnEPostaGonder.Visible := True;;

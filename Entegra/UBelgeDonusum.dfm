@@ -259,10 +259,6 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridSeriLotHareket: TcxGrid
           Left = 0
           Top = 0
@@ -787,8 +783,8 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
         PopupMenu = PopupGrid
       end>
     AlwaysFireOnPopup = True
-    Left = 528
-    Top = 120
+    Left = 328
+    Top = 104
   end
   object TabSeriLotHareket: TFDQuery
     Connection = Tablo.FDCnn

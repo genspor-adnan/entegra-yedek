@@ -351,6 +351,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Font.Style = [fsBold]
       ParentFont = False
       Transparent = True
+      OnClick = LabelSonArananClick
     end
     object EditKodu: TcxTextEdit
       Left = 192
@@ -522,7 +523,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
           Width = 529
           Height = 476
           Align = alClient
-          PopupMenu = PmKopyala
           TabOrder = 1
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = True
@@ -689,7 +689,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
           OptionsSelection.InvertSelect = False
           OptionsView.CellEndEllipsis = True
           OptionsView.Indicator = True
-          PopupMenu = PmKopyala
           RootValue = -1
           ScrollbarAnnotations.CustomAnnotations = <>
           TabOrder = 0
@@ -1668,14 +1667,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
     Left = 412
     Top = 324
   end
-  object PmKopyala: TPopupMenu
-    Left = 592
-    Top = 192
-    object Kopyala1: TMenuItem
-      Caption = 'Kopyala'
-      OnClick = Kopyala1Click
-    end
-  end
   object DtsStokDurumDetay: TDataSource
     DataSet = TabStokDurumDetay
     Left = 201
@@ -1684,40 +1675,18 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object TabStokDurumDetay: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'select * from fn_StokDurumDetay(:PStokID,:PDepoID)')
+      
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=1, @StokID=:' +
+        'PStokID, @DepoID=:PDepoID')
     Left = 201
     Top = 136
   end
   object TabSonSatislar: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      '--sat'#305#351
-      'declare @URUNID int, @URUNTUR int, @RehberID int'
-      'set @URUNID = :PUrunID'
-      'set @URUNTUR = :PUrunTur'
-      'set @REHBERID = :PRehberID'
-      ''
-      'select * from ('
-      'select top 10 FB.FATURATARIH,'
-      'BELGETIPI= case when FB.TUR = 16 '
-      '    then '#39'Fi'#351#39' else '#39'Fatura'#39' end,'
-      'BASLIK=R.FIRMA, '
-      'BIRIMTUTAR=F.TUTAR/F.MIKTAR,F.KUR,'
-      'BIRIMTUTARDOVIZ=F.DOVIZ_TUTARI/F.MIKTAR,F.DOVIZ_KURU,'
-      'F.MIKTAR,'
-      'FB.TARIH,FB.TUR,FB.ID'
-      'from FATBASLIK FB '
-      'inner join FATURA F on FB.ID=F.FATBASID'
-      'inner join REHBER R on R.ID=FB.REHBERID'
-      'where '
-      #9'(FB.TUR = 15 or  FB.TUR = 16) and'
-      #9'F.TUR = @URUNTUR and '
-      #9'F.MIKTAR > 0 and'
-      #9'F.URUNID = @URUNID and '
-      #9'1 = case when @RehberID=0 then 1'
-      #9#9#9'when @RehberID=FB.REHBERID then 1 '
-      #9#9#9'else 0 end'
-      'order by FB.FATURATARIH desc) as dd')
+      
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=3, @StokID=:' +
+        'PUrunID, @Tur=:PUrunTur, @RehberID=:PRehberID')
     Left = 112
     Top = 134
   end
@@ -1729,31 +1698,9 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object TabSonAlislar: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      '--al'#305#351
-      'declare @URUNID int, @URUNTUR int, @RehberID int'
-      'set @URUNID = :PUrunID'
-      'set @URUNTUR = :PUrunTur'
-      'set @REHBERID = :PRehberID'
-      'select * from ('
-      'select top 10 FB.FATURATARIH,'
-      'BELGETIPI= case when FB.TUR = 12 then '#39'Fi'#351#39' else '#39'Fatura'#39' end,'
-      'BASLIK=R.FIRMA, '
-      'BIRIMTUTAR=F.TUTAR/F.MIKTAR,F.KUR,'
-      'BIRIMTUTARDOVIZ=F.DOVIZ_TUTARI/F.MIKTAR,F.DOVIZ_KURU,'
-      'F.MIKTAR,'
-      'FB.TARIH,FB.TUR,FB.ID'
-      'from FATBASLIK FB '
-      'inner join FATURA F on FB.ID=F.FATBASID'
-      'inner join REHBER R on R.ID=FB.REHBERID'
-      'where'
-      #9'(FB.TUR = 11 or FB.TUR = 12) and'
-      #9'F.TUR = @URUNTUR and'
-      #9'F.MIKTAR > 0 and'
-      #9'F.URUNID = @URUNID'
-      #9'and 1 = case when @RehberID=0 then 1'
-      #9#9#9'when @RehberID=FB.REHBERID then 1'
-      #9#9#9'else 0 end'
-      'order by FB.FATURATARIH desc) as dd')
+      
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=2, @StokID=:' +
+        'PUrunID, @Tur=:PUrunTur, @RehberID=:PRehberID')
     Left = 32
     Top = 137
   end
@@ -1772,19 +1719,9 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object tabMaliyetler: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      '--select * from STOKMALIYET where STOKID = PStokID'
-      ''
-      'Select distinct ID=STOKID,FIYATADI,'
       
-        'TUR=(select top 1 case when DEGER=-2 then ANAHTAR +'#39' (Son'#39'+cast(' +
-        'PAKETID as varchar(5))+'#39')'#39' '
-      
-        'else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATAD' +
-        'I),'
-      'MALIYET=FIYAT,KUR,KDVDURUM from STOKFIYAT Where STOKID=:PrmId '
-      'and SATIS=0 and FIYATADI < 0 '
-      ''
-      '')
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=4, @StokID=:' +
+        'PrmId')
     Left = 296
     Top = 134
   end
@@ -1911,14 +1848,9 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object TabUretim: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'select S.KOD,S.STOKADI,URD.MIKTAR,KALAN=sum(SD.KALAN) '
-      'from '
-      #9'URETIMRECETE UR inner join '
-      #9'URETIMRECETEDETAY URD on UR.ID=URD.URETIMRECETEID inner join '
-      #9'STOKLAR S on S.ID=URD.URUNID inner join '
-      #9'STOKDURUM SD on S.ID=SD.STOKID'
-      'where URD.MIKTAR<0.0 and UR.STOKID=:PStokID '
-      'group by S.KOD,S.STOKADI,URD.MIKTAR')
+      
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=5, @StokID=:' +
+        'PStokID')
     Left = 438
     Top = 135
   end
@@ -1930,25 +1862,9 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object TabSonTeklifler: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'declare @URUNID int, @URUNTUR int, @RehberID int'
-      'set @URUNID = :PUrunID'
-      'set @URUNTUR = :PUrunTur'
-      'set @REHBERID = :PRehberID'
-      'select * from ('
-      'select top 10 FB.TARIH,'
-      'BASLIK=(select R.FIRMA from REHBER R where R.ID=FB.REHBERID),'
-      'BIRIMTUTAR=F.TUTAR/F.MIKTAR,F.KUR,'
-      'BIRIMTUTARDOVIZ=F.DOVIZ_TUTARI/F.MIKTAR,F.DOVIZ_KURU,'
-      'F.MIKTAR,FB.ID'
-      'from TEKLIF FB inner join TEKLIFDETAY F on FB.ID=F.TEKLIFID'
-      'where'
-      #9'F.TUR = @URUNTUR and'
-      #9'F.MIKTAR > 0 and'
-      #9'F.URUNID = @URUNID'
-      #9'and 1 = case when @RehberID=0 then 1'
-      #9#9#9'when @RehberID=FB.REHBERID then 1'
-      #9#9#9'else 0 end'
-      'order by FB.TARIH desc) as dd')
+      
+        'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=6, @StokID=:' +
+        'PUrunID, @Tur=:PUrunTur, @RehberID=:PRehberID')
     Left = 496
     Top = 137
   end

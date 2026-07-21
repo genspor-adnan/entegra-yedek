@@ -387,7 +387,7 @@ var
       end;
   end;
 begin
-  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN sorgusu (SP: WITH ozyineleme + top1 + REVERSE) -> PG rewrite ayri is; pilotta bos grid
+  // MOTOR SEAM: PG'de Tablo.ListeSPJson fn_prog_dokuman_liste_json2 cagirir (vmPG-Exit kaldirildi).
   // STANDART SISTEM: sp_Prog_Dokuman_Liste_Json2 (Mod=1 klasor-agac). Ortak jP tek yerde;
   //   yalniz yetki-bazli parametreler dallaniyor.
   DOKUMAN.Close;
@@ -451,7 +451,7 @@ begin
 //  if FArama.Tasiniyor then
 //    Exit;
   JvTimer1.Enabled := False;
-  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN SP'si PG'ye portlanmadi (vmPG'de bos grid)
+  // MOTOR SEAM: PG'de fn_prog_dokuman_liste_json2 (vmPG-Exit kaldirildi).
 
   // STANDART SISTEM: arama-SQL -> sp_Prog_Dokuman_Liste_Json2 (Mod=2 arama-formu).
   //   Ayni filtre iki kola (arm1 DTIP=1 / arm2 DTIP=0) SP govdesinde uygulanir.
@@ -505,7 +505,7 @@ procedure TDokumanListeFrame.LabelTumKayitlarClick(Sender: TObject);
 var
   jP: TJSONObject;
 begin
-  if AktifVeriMotor = vmPG then Exit;   // DOKUMAN SP'si PG'ye portlanmadi (vmPG'de bos grid)
+  // MOTOR SEAM: PG'de fn_prog_dokuman_liste_json2 (vmPG-Exit kaldirildi).
   DOKUMAN.Close;
   // STANDART SISTEM: union-all -> sp_Prog_Dokuman_Liste_Json2 (Mod=3 tum-kayitlar).
   jP := TJSONObject.Create;

@@ -22,7 +22,7 @@ CREATE TABLE depo.logcozum (
   idkolon      varchar(128) NOT NULL,
   adkolon      varchar(128) NOT NULL,
   filtre       varchar(800),
-  aktif        boolean     NOT NULL DEFAULT true                           -- bit
+  aktif        smallint    NOT NULL DEFAULT 1                              -- bit (MSSQL bit->smallint; app 0/1 yazar)
 );
 CREATE INDEX ix_logcozum_alan ON depo.logcozum (alan, tabloid);
 
@@ -33,7 +33,7 @@ CREATE TABLE depo.logreferans (
   kayitid   bigint       NOT NULL,
   ad        varchar(400) COLLATE depo.tr_ci,
   kod       varchar(120) COLLATE depo.tr_ci,
-  silindi   boolean      NOT NULL DEFAULT false,
+  silindi   smallint     NOT NULL DEFAULT 0,                                -- bit (MSSQL bit->smallint; app 0/1 yazar)
   sonislem  timestamp(3)                                                   -- datetime
 );
 CREATE INDEX ix_logreferans_ad    ON depo.logreferans (ad);

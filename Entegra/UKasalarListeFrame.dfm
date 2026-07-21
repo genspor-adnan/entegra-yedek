@@ -16,7 +16,7 @@ object KasalarListeFrame: TKasalarListeFrame
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
-    ButtonWidth = 86
+    ButtonWidth = 89
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -39,7 +39,6 @@ object KasalarListeFrame: TKasalarListeFrame
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -49,7 +48,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
-      Left = 86
+      Left = 89
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
@@ -58,7 +57,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = SilTusClick
     end
     object ToolButton3: TToolButton
-      Left = 172
+      Left = 178
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -67,7 +66,7 @@ object KasalarListeFrame: TKasalarListeFrame
       Style = tbsSeparator
     end
     object DegisTus: TToolButton
-      Left = 180
+      Left = 186
       Top = 0
       Caption = 'D'#252'zenle'
       ImageIndex = 9
@@ -77,7 +76,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = DegisTusClick
     end
     object AksiyonTus: TToolButton
-      Left = 266
+      Left = 275
       Top = 0
       Caption = 'Aksiyonlar'
       ImageIndex = 1
@@ -85,7 +84,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = AksiyonTusClick
     end
     object ToolButton1: TToolButton
-      Left = 352
+      Left = 364
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -94,28 +93,28 @@ object KasalarListeFrame: TKasalarListeFrame
       Style = tbsSeparator
     end
     object ToolButtonSSSAyrac: TToolButton
-      Left = 360
+      Left = 372
       Top = 0
       Width = 8
       Caption = 'ToolButtonSSSAyrac'
       Style = tbsSeparator
     end
     object LabelTumKayitlar: TToolButton
-      Left = 368
+      Left = 380
       Top = 0
       Caption = 'T'#252'm'
       Style = tbsTextButton
       OnClick = LabelTumKayitlarClick
     end
     object LabelSonArananlar: TToolButton
-      Left = 454
+      Left = 469
       Top = 0
       Caption = 'Son Aranan'
       Style = tbsTextButton
       OnClick = LabelSonArananlarClick
     end
     object LabelSikArananlar: TToolButton
-      Left = 540
+      Left = 558
       Top = 0
       Caption = 'S'#305'k Aranan'
       Style = tbsTextButton
@@ -225,6 +224,7 @@ object KasalarListeFrame: TKasalarListeFrame
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
+    ExplicitWidth = 8
   end
   object PageControlSekme: TcxPageControl
     Left = 0
@@ -319,10 +319,6 @@ object KasalarListeFrame: TKasalarListeFrame
       Caption = 'Ekstre'
       ImageIndex = 6
       OnShow = TabSheetEkstreShow
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridKasaEkstre: TcxGrid
         Left = 0
         Top = 44
@@ -1005,10 +1001,7 @@ object KasalarListeFrame: TKasalarListeFrame
       'DEVIR = 0,'
       'BORC=SUM(K.BORC),ALACAK=SUM(K.ALACAK)'
       'FROM KASA K'
-      
-        'WHERE HESAPID=:Prm1 AND ISLEMTARIHI BETWEEN cast(year(getdate())' +
-        ' as varchar(4))+'#39'-01-01 00:00'#39
-      'AND cast(year(getdate()) as varchar(4))+'#39'-12-31 23:59'#39
+      'WHERE HESAPID=:Prm1 AND year(ISLEMTARIHI)=year(getdate())'
       'and HESAPTURU='#39'K'#39
       'UNION ALL'
       'SELECT'
@@ -1016,8 +1009,8 @@ object KasalarListeFrame: TKasalarListeFrame
       'BORC=0,ALACAK=0'
       'FROM KASA K'
       
-        'WHERE HESAPID=:Prm2 AND ISLEMTARIHI >=cast(year(getdate()) as va' +
-        'rchar(4))+'#39'-01-01 00:00'#39' AND TUR<=2'
+        'WHERE HESAPID=:Prm2 AND year(ISLEMTARIHI)>=year(getdate()) AND T' +
+        'UR<=2'
       'and HESAPTURU='#39'K'#39
       ') AS X'
       ''

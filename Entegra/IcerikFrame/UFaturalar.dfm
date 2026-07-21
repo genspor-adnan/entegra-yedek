@@ -1286,24 +1286,24 @@
       'select * from ('
       ''
       'Select '
-      #9'F.*, MASRAFKOD=MG.KOD,MASRAFAD=MG.AD,'
+      '  F.*, MG.KOD AS MASRAFKOD, MG.AD AS MASRAFAD,'
       
-        '  AD = CASE WHEN F.TUR =0 THEN  (SELECT AD FROM MASRAFGELIR WHER' +
-        'E ID = F.URUNID)  ELSE (SELECT STOKADI FROM STOKLAR WHERE ID = F' +
-        '.URUNID ) END,'
+        '  CASE WHEN F.TUR =0 THEN (SELECT AD FROM MASRAFGELIR WHERE ID =' +
+        ' F.URUNID) ELSE (SELECT STOKADI FROM STOKLAR WHERE ID = F.URUNID' +
+        ') END AS AD,'
       
-        '  KOD = CASE WHEN F.TUR =0 THEN (SELECT KOD FROM MASRAFGELIR WHE' +
-        'RE ID= F.URUNID ) ELSE (SELECT KOD FROM STOKLAR WHERE ID = F.URU' +
-        'NID )   END,'
+        '  CASE WHEN F.TUR =0 THEN (SELECT KOD FROM MASRAFGELIR WHERE ID=' +
+        ' F.URUNID) ELSE (SELECT KOD FROM STOKLAR WHERE ID = F.URUNID) EN' +
+        'D AS KOD,'
       
-        ' URUNNO =  CASE WHEN F.TUR =1 THEN (SELECT URUNNO FROM STOKLAR W' +
-        'HERE ID = F.URUNID ) ELSE  '#39#39'  END,  '
+        '  CASE WHEN F.TUR =1 THEN (SELECT URUNNO FROM STOKLAR WHERE ID =' +
+        ' F.URUNID) ELSE '#39#39' END AS URUNNO,'
       
-        ' SUTKODU =  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR' +
-        '_USER WHERE ID = F.URUNID ) ELSE  '#39#39'  END,   '
+        '  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR_USER WHER' +
+        'E ID = F.URUNID) ELSE '#39#39' END AS SUTKODU,'
       
-        'PROJEKODU=(Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJE' +
-        'ID),'#39' '#39' as TESLIMTARIHI'
+        '  (Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID) AS P' +
+        'ROJEKODU,'#39' '#39' as TESLIMTARIHI'
       'from '
       #9'FATURA F left outer join '
       #9'MASRAFGELIR MG on'
@@ -1433,28 +1433,28 @@
       'select * from ('
       ''
       'Select '
-      'F.*, MASRAFKOD=MG.KOD,MASRAFAD=MG.AD,'
+      'F.*, MG.KOD AS MASRAFKOD, MG.AD AS MASRAFAD,'
       
-        'AD =  CASE WHEN F.TUR =1 THEN (SELECT STOKADI FROM STOKLAR WHERE' +
-        ' ID = F.URUNID ) ELSE  (SELECT AD FROM MASRAFGELIR WHERE ID = F.' +
-        'URUNID)  END,'
+        'CASE WHEN F.TUR =1 THEN (SELECT STOKADI FROM STOKLAR WHERE ID = ' +
+        'F.URUNID) ELSE (SELECT AD FROM MASRAFGELIR WHERE ID = F.URUNID) ' +
+        'END AS AD,'
       
-        'KOD =  CASE WHEN F.TUR =1 THEN (SELECT KOD FROM STOKLAR WHERE ID' +
-        ' = F.URUNID ) ELSE  (SELECT KOD FROM MASRAFGELIR WHERE ID= F.URU' +
-        'NID )  END,'
+        'CASE WHEN F.TUR =1 THEN (SELECT KOD FROM STOKLAR WHERE ID = F.UR' +
+        'UNID) ELSE (SELECT KOD FROM MASRAFGELIR WHERE ID= F.URUNID) END ' +
+        'AS KOD,'
       
-        'URUNNO =  CASE WHEN F.TUR =1 THEN (SELECT URUNNO FROM STOKLAR WH' +
-        'ERE ID = F.URUNID ) ELSE  '#39#39'  END,'
+        'CASE WHEN F.TUR =1 THEN (SELECT URUNNO FROM STOKLAR WHERE ID = F' +
+        '.URUNID) ELSE '#39#39' END AS URUNNO,'
       
-        'SUTKODU =  CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR_' +
-        'USER WHERE ID = F.URUNID ) ELSE  '#39#39'  END,  '
+        'CASE WHEN F.TUR =1 THEN (SELECT SUTKODU FROM STOKLAR_USER WHERE ' +
+        'ID = F.URUNID) ELSE '#39#39' END AS SUTKODU,'
       
-        'BIRIMAD = (SELECT ANAHTAR FROM GENINI WHERE BOLUM=-2702 and DIL=' +
-        '-1 and DEGER = F.BIRIM),'
+        '(SELECT ANAHTAR FROM GENINI WHERE BOLUM=-2702 and DIL=-1 and DEG' +
+        'ER = F.BIRIM) AS BIRIMAD,'
       
-        'PROJEKODU=(Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJE' +
-        'ID),'
-      'EKIPMAN = E.AD,SERINO= ER.SERINO'
+        '(Select P.PROJEKODU from PROJELER P Where P.ID=F.PROJEID) AS PRO' +
+        'JEKODU,'
+      'E.AD AS EKIPMAN, ER.SERINO AS SERINO'
       'from'
       'SIPARISDETAY F '
       'left outer join MASRAFGELIR MG on F.MASRAFID=MG.ID'
@@ -1500,8 +1500,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 117
-    Top = 38
+    Left = 85
+    Top = 22
     object infoMenu: TMenuItem
       Caption = 'info'
       OnClick = infoMenuClick

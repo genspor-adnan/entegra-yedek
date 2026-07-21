@@ -1035,23 +1035,9 @@ object RehberWizardDlg: TRehberWizardDlg
         Left = 220
         Top = 183
         Lines.Strings = (
-          'IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE '
-          'name LIKE '
-          #39'#KURILET_:SPID_%'#39')'
-          'DROP TABLE #KURILET_:SPID_'
-          ''
-          'CREATE TABLE #KURILET_:SPID_('
-          #9'[SIRA] [smallint] NULL,'
-          #9'[ETIKET] [nvarchar](100) NULL,'
-          #9'[BILGI] [nvarchar](1000) NULL,'
-          #9'[ORJINAL] [nvarchar](1000) NULL,'
-          #9'[GIRIS] [nvarchar](50) NULL,'
-          #9'[KAYNAK] [nvarchar](255) NULL,'
-          '                [ZORUNLU] [bit] NULL'
-          ')'
-          'INSERT INTO #KURILET_:SPID_'
+          'select * from ('
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
+          'RB.SIRA,RB.ETIKET,RB.BILGI,RB.BILGI as ORJINAL,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR RA ON '
           'RB.ETIKET=RA.ETIKET AND RB.YERI=RA.YERI'
@@ -1059,15 +1045,13 @@ object RehberWizardDlg: TRehberWizardDlg
           ''
           'union all'
           ''
-          
-            'select  SIRA, ETIKET, BILGI='#39#39', ORJINAL='#39#39' ,GIRIS,KAYNAK,ZORUNLU' +
-            '  '
+
+            'select  SIRA, ETIKET, '#39#39' as BILGI, '#39#39' as ORJINAL ,GIRIS,KAYNAK,ZOR' +
+            'UNLU  '
           ' from REHBERAYAR  where  YERI=1  '
           'and ETIKET not in (select ETIKET from REHBERBILGI '
           'where  YERI=1 and YER_ID= :Yeri_Id2)'
-          'order by 1'
-          ''
-          'select * from #KURILET_:SPID_'
+          ') X'
           'order by SIRA')
         TabOrder = 3
         Visible = False
@@ -1303,25 +1287,9 @@ object RehberWizardDlg: TRehberWizardDlg
         Left = 143
         Top = 137
         Lines.Strings = (
-          'IF EXISTS (SELECT 1 FROM tempdb..sysobjects '
-          'WHERE '
-          'name LIKE '
-          #39'#TICARI_:SPID_%'#39')'
-          'DROP TABLE #TICARI_:SPID_'
-          ''
-          'CREATE TABLE #TICARI_:SPID_('
-          #9'[SIRA] [smallint] NULL,'
-          #9'[ETIKET] [nvarchar](100) NULL,'
-          #9'[BILGI] [nvarchar](1000) NULL,'
-          #9'[ORJINAL] [nvarchar](1000) NULL,'
-          #9'[GIRIS] [nvarchar](50) NULL,'
-          #9'[KAYNAK] [nvarchar](255) NULL,'
-          '                [ZORUNLU] [bit] NULL,'
-          '                [VARSAYILAN] [int] NULL'
-          ')'
-          'INSERT INTO #TICARI_:SPID_'
+          'select * from ('
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,'
+          'RB.SIRA,RB.ETIKET,RB.BILGI,RB.BILGI as ORJINAL,'
           'RA.GIRIS,RA.KAYNAK,RA.ZORUNLU ,RA.VARSAYILAN'
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR '
           'RA ON '
@@ -1331,14 +1299,12 @@ object RehberWizardDlg: TRehberWizardDlg
           'union all'
           ''
           'select  SIRA, ETIKET, '
-          'BILGI='#39#39', ORJINAL='#39#39' '
-          ',GIRIS,KAYNAK,ZORUNLU,VARSAYILAN from'
+          #39#39' as BILGI, '#39#39' as ORJINAL '
+          ',GIRIS,KAYNAK,ZORUNLU,VARSAYILAN from '
           'REHBERAYAR  where  YERI=2  '
           'and ETIKET not in (select ETIKET from REHBERBILGI '
           'where  YERI=2  and YER_ID= :Yeri_Id2)'
-          'order by 1'
-          ''
-          'select * from #TICARI_:SPID_'
+          ') X'
           'order by SIRA')
         TabOrder = 2
         Visible = False
@@ -1534,23 +1500,9 @@ object RehberWizardDlg: TRehberWizardDlg
         Left = 305
         Top = 208
         Lines.Strings = (
-          'IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE '
-          'name LIKE '
-          #39'#KURILET_:SPID_%'#39')'
-          'DROP TABLE #KURILET_:SPID_'
-          ''
-          'CREATE TABLE #KURILET_:SPID_('
-          #9'[SIRA] [smallint] NULL,'
-          #9'[ETIKET] [nvarchar](100) NULL,'
-          #9'[BILGI] [nvarchar](1000) NULL,'
-          #9'[ORJINAL] [nvarchar](1000) NULL,'
-          #9'[GIRIS] [nvarchar](50) NULL,'
-          #9'[KAYNAK] [nvarchar](255) NULL,'
-          '                [ZORUNLU] [bit] NULL'
-          ')'
-          'INSERT INTO #KURILET_:SPID_'
+          'select * from ('
           'select '
-          'RB.SIRA,RB.ETIKET,RB.BILGI,ORJINAL=RB.BILGI,RA.GIRIS,'
+          'RB.SIRA,RB.ETIKET,RB.BILGI,RB.BILGI as ORJINAL,RA.GIRIS,'
           'RA.KAYNAK,RA.ZORUNLU  '
           'from REHBERBILGI RB LEFT OUTER JOIN REHBERAYAR RA '
           'ON '
@@ -1559,14 +1511,12 @@ object RehberWizardDlg: TRehberWizardDlg
           ''
           'union all'
           ''
-          'select  SIRA, ETIKET, BILGI='#39#39', ORJINAL='#39#39' '
+          'select  SIRA, ETIKET, '#39#39' as BILGI, '#39#39' as ORJINAL '
           ',GIRIS,KAYNAK,ZORUNLU  '
           ' from REHBERAYAR  where  YERI=1  '
           'and ETIKET not in (select ETIKET from REHBERBILGI '
           'where  YERI=1 and YER_ID= :Yeri_Id2)'
-          'order by 1'
-          ''
-          'select * from #KURILET_:SPID_'
+          ') X'
           'order by SIRA'
           '')
         TabOrder = 3

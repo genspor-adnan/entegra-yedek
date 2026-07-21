@@ -11928,9 +11928,14 @@ var Kul: Integer;
 begin
   Kul := StrToIntDef(Kullanan, 0);
   if (Kul <= 0) or (AModul <= 0) or (AKayitID <= 0) then Exit;
+  // UPDATE + INSERT..WHERE NOT EXISTS AYRI iki komut (portable ANSI). Tek batch'te ';'
+  // ile birlestirmek PG'de "cannot insert multiple commands into a prepared statement"
+  // verir (FireDAC prepared) -> iki ayri BasitKomut cagrisi (idempotent, iki motorda da calisir).
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     ' update KULLANICI_ARAMA set SAY=SAY+1, DEGISTIRMETARIHI=getdate()' +
-    '  where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID)+'; ' +
+    '  where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID),
+    [], []);
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     ' insert into KULLANICI_ARAMA (KULID,MODUL,KAYITID,SAY,DEGISTIRMETARIHI)' +
     '  select '+IntToStr(Kul)+','+IntToStr(AModul)+','+IntToStr(AKayitID)+',1,getdate()' +
     '  where not exists (select 1 from KULLANICI_ARAMA' +
@@ -11953,7 +11958,13 @@ procedure TTablo.ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string;
 begin
   try
     ATab.Close;
-    ATab.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
+    // MOTOR SEAM: MSSQL EXEC dbo.sp_Prog_X ; PG SELECT * FROM fn_prog_x (ayni @Baslik+@Kosullar).
+    //   PG fn adi = 'fn_' + lower(sp adinin 'sp_' sonrasi) -> sp_Prog_Dokuman_Liste_Json2
+    //   -> fn_prog_dokuman_liste_json2. (pg/schema/10-13)
+    if AktifVeriMotor = vmPG then
+      ATab.SQL.Text := 'SELECT * FROM fn_' + LowerCase(Copy(ASPAdi, 4, MaxInt)) + '(:Baslik, :Kosullar)'
+    else
+      ATab.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
     ATab.ParamByName('Baslik').AsString   := ABaslik;
     ATab.ParamByName('Kosullar').AsString := AKosullar.ToJSON;
   finally

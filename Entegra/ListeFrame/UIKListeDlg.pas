@@ -3212,7 +3212,6 @@ var
 
 begin
   if not Assigned(FArama) then Exit;
-  if AktifVeriMotor = vmPG then Exit;   // JSON SP su an MSSQL (PG pilot ayri yol)
 
   Aday   := Potansiyel;
   Filtre := (AMod = 4);

@@ -282,6 +282,10 @@ object InfoDlg: TInfoDlg
     object cxTabSheet2: TcxTabSheet
       Caption = #304#231'erik'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object LvGecmis: TListView
         Left = 0
         Top = 0

@@ -45,7 +45,6 @@ object StokListeDlg: TStokListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -716,6 +715,10 @@ object StokListeDlg: TStokListeDlg
       end
       object tshStokDurum: TcxTabSheet
         Caption = 'Stok Durum'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Panel8: TPanel
           Left = 0
           Top = 0
@@ -890,6 +893,10 @@ object StokListeDlg: TStokListeDlg
             object cxTabSheet1: TcxTabSheet
               Caption = 'Da'#287#305'l'#305'm'
               ImageIndex = 0
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object cxGrid2: TcxGrid
                 Left = 0
                 Top = 0
@@ -942,10 +949,6 @@ object StokListeDlg: TStokListeDlg
             object TabSheetSeriLot: TcxTabSheet
               Caption = 'Seri / Lot'
               ImageIndex = 1
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object GridSeriLot: TcxGrid
                 Left = 0
                 Top = 27
@@ -1402,10 +1405,6 @@ object StokListeDlg: TStokListeDlg
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3
