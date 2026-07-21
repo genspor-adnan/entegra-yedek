@@ -69,6 +69,12 @@ uses
   UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor;
 
 type
+  // Iade faturasi (Tipi=2): iade edilen orijinal fatura referansi (cac:BillingReference)
+  TEBelgeIadeRef = record
+    FaturaNo: string;
+    Tarih: TDateTime;
+  end;
+
   TEBelgeBaslik = record
     ID: Integer;
     Tur: Integer;
@@ -112,6 +118,8 @@ type
     KapCinsiKodu: string;      // paket/kap kodu (CT, BX...) - packagingTypeCode
     FOBDeger: Currency;        // freeOnBoardValueAmount
     KapAdedi: Integer;         // actualPackage.quantity
+    // Iade faturasi (Tipi=2): iade edilen orijinal fatura(lar) -> cac:BillingReference
+    IadeReferanslari: TArray<TEBelgeIadeRef>;
   end;
 
   TEBelgeSatir = record
@@ -947,6 +955,34 @@ begin
   end;
 end;
 
+// Iade faturasinin (Tipi=2) iade edilen ORIJINAL fatura(lari) -> cac:BillingReference.
+//   Iade satirlari FATURA.YERI in (416,417 = alis/satis iade), YERID = orijinal FATURA satir ID.
+//   O satirdan orijinal FATBASLIK'a gidip FATURANO+FATURATARIH toplanir (mukerrer DISTINCT).
+function IadeReferanslariGetir(AFatBasID: Integer): TArray<TEBelgeIadeRef>;
+var LRef: TEBelgeIadeRef;
+begin
+  SetLength(Result, 0);
+  //   Belge no: fatura -> FATURANO; irsaliye -> IRSALIYENO (COALESCE ile ikisini de karsilar).
+  Tablo.TablodanSorguAc(3,
+    'SELECT DISTINCT COALESCE(NULLIF(FB.FATURANO, ''''), FB.IRSALIYENO) AS BELGENO, ' +
+    'FB.FATURATARIH ' +
+    'FROM FATURA F ' +
+    'INNER JOIN FATURA OF2 ON OF2.ID = F.YERID ' +
+    'INNER JOIN FATBASLIK FB ON FB.ID = OF2.FATBASID ' +
+    'WHERE F.FATBASID = ' + IntToStr(AFatBasID) +
+    ' AND F.YERI IN (' + IntToStr(TabNo_IADE_ALISBELGE) + ',' +
+      IntToStr(TabNo_IADE_SATISBELGE) + ')' +
+    ' AND FB.ID <> ' + IntToStr(AFatBasID) +
+    ' AND COALESCE(NULLIF(FB.FATURANO, ''''), FB.IRSALIYENO, '''') <> ''''');
+  while not Tablo.Query3.Eof do begin
+    LRef.FaturaNo := Tablo.Query3.FieldByName('BELGENO').AsString;
+    LRef.Tarih := Tablo.Query3.FieldByName('FATURATARIH').AsDateTime;
+    Result := Result + [LRef];
+    Tablo.Query3.Next;
+  end;
+  Tablo.Query3.Close;
+end;
+
 procedure VerileriOku(AFatBaslikID: Integer; out ABaslik: TEBelgeBaslik;
   out ASatirlar: TEBelgeSatirlar);
 var
@@ -967,6 +1003,9 @@ begin
   ABaslik.ID := AlanInt(Tablo.Query1, 'ID');
   ABaslik.Tur := AlanInt(Tablo.Query1, 'TUR');
   ABaslik.Tipi := AlanInt(Tablo.Query1, 'TIPI');
+  // Iade faturasi: iade edilen orijinal fatura referans(lar)i (cac:BillingReference)
+  if ABaslik.Tipi = 2 then
+    ABaslik.IadeReferanslari := IadeReferanslariGetir(AFatBaslikID);
   ABaslik.Senaryo := AlanInt(Tablo.Query1, 'SENARYO');
   ABaslik.PlanID := AlanInt(Tablo.Query1, 'PLANID');
   TevkifatBilgisiGetir(ABaslik.PlanID, ABaslik.TevkifatKodu,
@@ -1538,6 +1577,7 @@ var
   LSevk: TSevkBilgisi;
   LTevkifatVar, LOranIslendi: Boolean;
   LSabitNotlar: TArray<string>;
+  LNotlar: TArray<string>;
 begin
   if ABaslik.Tur = EBelgeTuruEIrsaliye then begin
     LRoot := 'DespatchAdvice';
@@ -1637,35 +1677,64 @@ begin
     else
       LXML.AppendLine('<cbc:InvoiceTypeCode>' + FaturaTipKodu(ABaslik) +
         '</cbc:InvoiceTypeCode>');
-    // Dipnotlar: Opsiyonlarda belge tipine gore tanimli "sabit notlar"
-    // (yer tutuculari islenmis) varsa onlar yazilir; yoksa ACIKLAMA/ACIKLAMA2.
+    // Dipnotlari TOPLA: sabit notlar (yer tutuculu) varsa onlar; yoksa ACIKLAMA/ACIKLAMA2
+    //   + KDV istisna + tevkifat notu. YAZIM YERI belge turune gore:
+    //   e-FATURA -> burada (InvoiceTypeCode sonrasi). e-IRSALIYE -> DespatchLine SONRASI (GIB kilavuzu).
+    LNotlar := [];
     LSabitNotlar := SabitNotlariGetir(ABaslik);
     if Length(LSabitNotlar) > 0 then begin
       for I := 0 to High(LSabitNotlar) do
-        LXML.AppendLine('<cbc:Note>' + XMLEscape(LSabitNotlar[I]) +
-          '</cbc:Note>');
+        LNotlar := LNotlar + [LSabitNotlar[I]];
     end else begin
       if Trim(ABaslik.Aciklama) <> '' then
-        LXML.AppendLine('<cbc:Note>' + XMLEscape(ABaslik.Aciklama) +
-          '</cbc:Note>');
+        LNotlar := LNotlar + [ABaslik.Aciklama];
       if Trim(ABaslik.Aciklama2) <> '' then
-        LXML.AppendLine('<cbc:Note>' + XMLEscape(ABaslik.Aciklama2) +
-          '</cbc:Note>');
+        LNotlar := LNotlar + [ABaslik.Aciklama2];
     end;
     LIstisnaNotu := KDVIstisnaNotu(ABaslik);
     if LIstisnaNotu <> '' then
-      LXML.AppendLine('<cbc:Note>' + XMLEscape(LIstisnaNotu) +
-        '</cbc:Note>');
+      LNotlar := LNotlar + [LIstisnaNotu];
     var LTevkNotu: string := TevkifatNotu(ABaslik, ASatirlar);  // dip nota tevkifat nedeni
     if LTevkNotu <> '' then
-      LXML.AppendLine('<cbc:Note>' + XMLEscape(LTevkNotu) + '</cbc:Note>');
+      LNotlar := LNotlar + [LTevkNotu];
+    if ABaslik.Tur <> EBelgeTuruEIrsaliye then
+      for I := 0 to High(LNotlar) do
+        LXML.AppendLine('<cbc:Note>' + XMLEscape(LNotlar[I]) + '</cbc:Note>');
     if ABaslik.Tur <> EBelgeTuruEIrsaliye then
       LXML.AppendLine('<cbc:DocumentCurrencyCode>' +
         XMLEscape(ABaslik.ParaBirimi) + '</cbc:DocumentCurrencyCode>');
     LXML.AppendLine('<cbc:LineCountNumeric>' + IntToStr(Length(ASatirlar)) +
       '</cbc:LineCountNumeric>');
 
+    // Iade (Tipi=2) referansi: e-FATURA -> cac:BillingReference (DespatchAdvice'ta GECERSIZ).
+    //   e-Irsaliye -> asagida cac:DespatchDocumentReference (irsaliye dalinda).
+    if (ABaslik.Tipi = 2) and (ABaslik.Tur <> EBelgeTuruEIrsaliye) then
+      for J := 0 to High(ABaslik.IadeReferanslari) do begin
+        LXML.AppendLine('<cac:BillingReference>');
+        LXML.AppendLine('<cac:InvoiceDocumentReference>');
+        LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.IadeReferanslari[J].FaturaNo) +
+          '</cbc:ID>');
+        LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+          ABaslik.IadeReferanslari[J].Tarih) + '</cbc:IssueDate>');
+        LXML.AppendLine('<cbc:DocumentTypeCode>IADE</cbc:DocumentTypeCode>');
+        LXML.AppendLine('<cbc:DocumentType>İade Edilen Fatura</cbc:DocumentType>');
+        LXML.AppendLine('</cac:InvoiceDocumentReference>');
+        LXML.AppendLine('</cac:BillingReference>');
+      end;
+
     if ABaslik.Tur = EBelgeTuruEIrsaliye then begin
+      // Iade irsaliyesi (Tipi=2): iade edilen orijinal irsaliye(ler)e cac:DespatchDocumentReference.
+      if ABaslik.Tipi = 2 then
+        for J := 0 to High(ABaslik.IadeReferanslari) do begin
+          LXML.AppendLine('<cac:DespatchDocumentReference>');
+          LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.IadeReferanslari[J].FaturaNo) +
+            '</cbc:ID>');
+          LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+            ABaslik.IadeReferanslari[J].Tarih) + '</cbc:IssueDate>');
+          LXML.AppendLine('<cbc:DocumentTypeCode>IADE</cbc:DocumentTypeCode>');
+          LXML.AppendLine('<cbc:DocumentType>İade Edilen İrsaliye</cbc:DocumentType>');
+          LXML.AppendLine('</cac:DespatchDocumentReference>');
+        end;
       if BelgeXSLTGetir(ABaslik.RehberID, ABaslik.Tur, ABaslik.EArsivMi, False, LXSLT) then begin
         LXML.AppendLine('<cac:AdditionalDocumentReference>');
         LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.UUID) + '</cbc:ID>');
@@ -2082,6 +2151,10 @@ begin
           '0.00######') + '</cbc:PriceAmount></cac:Price>');
       LXML.AppendLine('</cac:' + LSatirTuru + '>');
     end;
+    // e-IRSALIYE: dipnotlar DespatchLine SONRASI yazilir (GIB e-Irsaliye kilavuzu).
+    if ABaslik.Tur = EBelgeTuruEIrsaliye then
+      for I := 0 to High(LNotlar) do
+        LXML.AppendLine('<cbc:Note>' + XMLEscape(LNotlar[I]) + '</cbc:Note>');
     LXML.AppendLine('</' + LRoot + '>');
     Result := LXML.ToString;
   finally
