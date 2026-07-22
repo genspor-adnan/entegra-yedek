@@ -962,9 +962,10 @@ function IadeReferanslariGetir(AFatBasID: Integer): TArray<TEBelgeIadeRef>;
 var LRef: TEBelgeIadeRef;
 begin
   SetLength(Result, 0);
-  //   Belge no: fatura -> FATURANO; irsaliye -> IRSALIYENO (COALESCE ile ikisini de karsilar).
+  //   Belge no GIB sematron: 16 hane = FATURASERI(3) + FATURANO(13). Seri+no birlestir.
+  //   (e-belge numaralari; irsaliye de FATBASLIK.FATURASERI/FATURANO'da tutulur.)
   Tablo.TablodanSorguAc(3,
-    'SELECT DISTINCT COALESCE(NULLIF(FB.FATURANO, ''''), FB.IRSALIYENO) AS BELGENO, ' +
+    'SELECT DISTINCT COALESCE(FB.FATURASERI, '''') + COALESCE(FB.FATURANO, '''') AS BELGENO, ' +
     'FB.FATURATARIH ' +
     'FROM FATURA F ' +
     'INNER JOIN FATURA OF2 ON OF2.ID = F.YERID ' +
@@ -973,7 +974,7 @@ begin
     ' AND F.YERI IN (' + IntToStr(TabNo_IADE_ALISBELGE) + ',' +
       IntToStr(TabNo_IADE_SATISBELGE) + ')' +
     ' AND FB.ID <> ' + IntToStr(AFatBasID) +
-    ' AND COALESCE(NULLIF(FB.FATURANO, ''''), FB.IRSALIYENO, '''') <> ''''');
+    ' AND COALESCE(FB.FATURANO, '''') <> ''''');
   while not Tablo.Query3.Eof do begin
     LRef.FaturaNo := Tablo.Query3.FieldByName('BELGENO').AsString;
     LRef.Tarih := Tablo.Query3.FieldByName('FATURATARIH').AsDateTime;
@@ -1679,7 +1680,7 @@ begin
         '</cbc:InvoiceTypeCode>');
     // Dipnotlari TOPLA: sabit notlar (yer tutuculu) varsa onlar; yoksa ACIKLAMA/ACIKLAMA2
     //   + KDV istisna + tevkifat notu. YAZIM YERI belge turune gore:
-    //   e-FATURA -> burada (InvoiceTypeCode sonrasi). e-IRSALIYE -> DespatchLine SONRASI (GIB kilavuzu).
+    //   Header'da yazilir (standart UBL): fatura InvoiceTypeCode sonrasi, irsaliye DespatchAdviceTypeCode sonrasi.
     LNotlar := [];
     LSabitNotlar := SabitNotlariGetir(ABaslik);
     if Length(LSabitNotlar) > 0 then begin
@@ -1697,9 +1698,10 @@ begin
     var LTevkNotu: string := TevkifatNotu(ABaslik, ASatirlar);  // dip nota tevkifat nedeni
     if LTevkNotu <> '' then
       LNotlar := LNotlar + [LTevkNotu];
-    if ABaslik.Tur <> EBelgeTuruEIrsaliye then
-      for I := 0 to High(LNotlar) do
-        LXML.AppendLine('<cbc:Note>' + XMLEscape(LNotlar[I]) + '</cbc:Note>');
+    // Belge (dip) notu header'da: fatura InvoiceTypeCode sonrasi, irsaliye
+    //   DespatchAdviceTypeCode sonrasi (standart UBL Note konumu; satir-notundan bagimsiz).
+    for I := 0 to High(LNotlar) do
+      LXML.AppendLine('<cbc:Note>' + XMLEscape(LNotlar[I]) + '</cbc:Note>');
     if ABaslik.Tur <> EBelgeTuruEIrsaliye then
       LXML.AppendLine('<cbc:DocumentCurrencyCode>' +
         XMLEscape(ABaslik.ParaBirimi) + '</cbc:DocumentCurrencyCode>');
@@ -1974,10 +1976,10 @@ begin
       LXML.AppendLine('<cac:' + LSatirTuru + '>');
       LXML.AppendLine('<cbc:ID>' + IntToStr(ASatirlar[I].SatirNo) +
         '</cbc:ID>');
-      // Satir notu InvoiceLine seviyesinde, LOTNO oneksiz. Izibiz ciktisi da notu
-      // burada (InvoiceLine) tuttugundan XSLT ikisinde ayni yerden okur -> onizleme
-      // ile Izibiz belgesi ayni gorunur.
-      if (ABaslik.Tur <> EBelgeTuruEIrsaliye) and (Trim(ASatirlar[I].Notu) <> '') then
+      // Satir notu (Lot/SKT/Miktar) cbc:ID'den HEMEN SONRA: fatura -> InvoiceLine/Note,
+      //   irsaliye -> DespatchLine/Note (GIB e-Irsaliye kilavuz diyagrami 2.3.22: ID sonrasi).
+      //   Izibiz de irsaliyede notu DespatchLine seviyesinde tutar (ic InvoiceLine'da DEGIL).
+      if Trim(ASatirlar[I].Notu) <> '' then
         LXML.AppendLine('<cbc:Note>' + XMLEscape(ASatirlar[I].Notu) + '</cbc:Note>');
       LXML.AppendLine('<cbc:' + LMiktarTuru + ' unitCode="' +
         XMLEscape(IfThen((ABaslik.Tur = EBelgeTuruEIrsaliye) and
@@ -2031,8 +2033,8 @@ begin
         LXML.AppendLine('<cac:GoodsItem>');
         LXML.AppendLine('<cac:InvoiceLine>');
         LXML.AppendLine('<cbc:ID>' + IntToStr(ASatirlar[I].SatirNo) + '</cbc:ID>');
-        if Trim(ASatirlar[I].Notu) <> '' then
-          LXML.AppendLine('<cbc:Note>' + XMLEscape(ASatirlar[I].Notu) + '</cbc:Note>');
+        // NOT: satir notu artik DIS DespatchLine/cbc:ID sonrasi yaziliyor (kilavuz+izibiz);
+        //   ic InvoiceLine'da mukerrer yazilmaz.
         LXML.AppendLine('<cbc:InvoicedQuantity>' +
           Ondalik(ASatirlar[I].Miktar, '0.00##') + '</cbc:InvoicedQuantity>');
         LXML.AppendLine('<cbc:LineExtensionAmount currencyID="' +
@@ -2151,10 +2153,6 @@ begin
           '0.00######') + '</cbc:PriceAmount></cac:Price>');
       LXML.AppendLine('</cac:' + LSatirTuru + '>');
     end;
-    // e-IRSALIYE: dipnotlar DespatchLine SONRASI yazilir (GIB e-Irsaliye kilavuzu).
-    if ABaslik.Tur = EBelgeTuruEIrsaliye then
-      for I := 0 to High(LNotlar) do
-        LXML.AppendLine('<cbc:Note>' + XMLEscape(LNotlar[I]) + '</cbc:Note>');
     LXML.AppendLine('</' + LRoot + '>');
     Result := LXML.ToString;
   finally

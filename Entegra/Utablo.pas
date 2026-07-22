@@ -5466,8 +5466,18 @@ begin
     t := Tur;
   belgeno := SiradakiBelgeNumarasi(t,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
   FATBASLIK.FieldByName('FATURASERI').AsString := belgeno.SeriNo; // seri
-  FATBASLIK.FieldByName('FATURANO').AsString := belgeno.belgeno; // FatNo;
-  FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(Tur); // KOCAN numarası
+  // e-Fatura (Tur=15) / e-Irsaliye (Tur=14) aktifse numarayi GIB/izibiz atar ->
+  //   FATURANO=0, kocan da gereksiz (KOCANNO=0). Kagit belgede kocandan gelir.
+  if ((Tur = 15) and (EFaturaKullanimda > 0)) or ((Tur = 14) and EIrsaliyeKullanimda) then
+  begin
+    FATBASLIK.FieldByName('FATURANO').AsString := '0';
+    FATBASLIK.FieldByName('KOCANNO').AsInteger := 0;
+  end
+  else
+  begin
+    FATBASLIK.FieldByName('FATURANO').AsString := belgeno.belgeno; // FatNo;
+    FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(Tur); // KOCAN numarası
+  end;
 end;
 
 procedure TTablo.FATBASLIKYeniKayit(FATBASLIK: TFDQuery; RehberId,Tur,Tipi: Integer; GirDepo: Integer=-1; CikDepo: Integer=-1; Irsaliyeli:boolean=False;
