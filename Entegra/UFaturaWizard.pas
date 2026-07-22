@@ -1827,7 +1827,7 @@ begin
     if (TUR in [3,4]) and (TabFatbaslik.FieldByName('TIPI').AsInteger in [16,17]) and (TabFatbaslik.FieldByName('YERI').AsInteger=99) then
         Aman_Kilitle;
 
-    TabloYenile(TabFatura, [TabFaturaIDsi]);
+    TabloYenile(TabFatura,   [TabFaturaIDsi]);
 
     // FATURA satir loglama: duzenlemede (D/I) orijinal satir durumunu yakala
     // (browse durumunda, guvenli). Kaydette bununla diff alinir.
@@ -4106,7 +4106,8 @@ begin
   SQLStr[5] := '			UrunNo=CASE WHEN F.TUR IN(1,11)THEN(SELECT URUNNO FROM STOKLAR WHERE ID=F.URUNID )ELSE '''' END, ';
   SQLStr[6] := '			Ad=CASE WHEN F.TUR IN(1,11)THEN(SELECT STOKADI FROM STOKLAR WHERE ID=F.URUNID )ELSE(SELECT AD FROM MASRAFGELIR WHERE ID=F.URUNID)END, ';
   SQLStr[7] := '			Barkod=CASE WHEN F.TUR IN(1,11)THEN(SELECT '+DbUst(1)+'BARKOD FROM STOKBARKOD SB WHERE SB.VARSAYILAN=1 and SB.STOKID=F.URUNID '+DbSinir(1)+')ELSE '''' END, ';
-  SQLStr[8] := '			BelgeNo=FB.FATURASERI+FB.FATURANO,SS=FB.SAYFASAY,Tarih=FB.FATURATARIH, Adet=F.ADET, ';
+  // BelgeNo: FATURANO zaten seri ile basliyorsa cift-seri olmasin -> sadece FATURANO (kocanno DEGIL)
+  SQLStr[8] := '			BelgeNo=CASE WHEN ISNULL(FB.FATURASERI,'''')<>'''' AND FB.FATURANO LIKE FB.FATURASERI+''%'' THEN FB.FATURANO ELSE ISNULL(FB.FATURASERI,'''')+ISNULL(FB.FATURANO,'''') END,SS=FB.SAYFASAY,Tarih=FB.FATURATARIH, Adet=F.ADET, ';
   //SQLStr[8] := '		  Adet=F.ADET-isnull((select sum(F2.ADET) from FATURA F2 inner join FATBASLIK FB2 on F2.FATBASID=FB2.ID where FB2.TIPI=2 and F2.TUR=1 and F2.YERI in (416,417) and F2.YERID=F.ID),0.0), ';
   SQLStr[9] := '      Birim=F.BIRIM,Birimfiyat=F.BIRIMFIYAT,Isk1=ISKONTO,Isk2=ISKONTO2,MF,Tutar=F.TUTAR,  FBID=FB.ID, FID=F.ID, Personel=(select R3.FIRMA from REHBER R3 where R3.ID=F.SATICIKODU), ';
   SQLStr[10] := ' DepoID=FB.CIKISDEPO, Depo = (select DEPOADI from DEPOLAR where ID=FB.CIKISDEPO)';
@@ -4202,6 +4203,21 @@ begin
       //adeti 0 giriyoruz altta gerçek adet girilecek amaçı izlem bilgisini almaktır
       YeniFatSatirID := Tablo.SQLSatiriKopyala('FATURA',FatSatirID,['FATBASID','ADET','MIKTAR','YERI','YERID','STOKDURUMDEGIS', 'EKLEYEN','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
                   [TabFatbaslik.FieldByName('ID').AsInteger,-1,-1,DonusumYeri,FatSatirID,StkDurumDegis,Kullanan, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
+
+      // VALIDASYON: iade edilen belgenin GIB e-belge no'su 3 seri(harf) + 13 rakam = 16 hane.
+      //   Gelen fatura/irsaliyede faturano harf de icerebilir (seri kismi); bu yuzden toplam
+      //   uzunluk degil RAKAM sayisi kontrol edilir. Rakam 13 degilse schematron reddi -> uyar.
+      if (EFaturaKullanimda > 0) or EIrsaliyeKullanimda then begin
+        var LBelgeNo := Trim(st[4]);
+        var LRakamSay := 0;
+        for var K := Low(string) to High(LBelgeNo) do
+          if CharInSet(LBelgeNo[K], ['0'..'9']) then Inc(LRakamSay);
+        if LRakamSay <> 13 then
+          Application.MessageBox(
+            PChar('İade edilen belge numarası "' + st[4] + '" GİB formatında değil (' +
+              IntToStr(LRakamSay) + ' rakam var, 13 olmalı). e-Belge gönderiminde GİB reddedebilir.'),
+            PChar('Uyarı'), MB_ICONWARNING or MB_OK);
+      end;
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
                       'UPDATE FATBASLIK SET YERI=&Yeri,YERID=&Yer_ID,ANAKAYITID=&Yer_ID '
@@ -4803,7 +4819,12 @@ begin
   ComboEFATURADURUM.PostEditValue;
   if not BoslukKontrol(TabFatbaslik.FieldByName('FATURANO').AsString, Belge + KontrolNo) then
      Abort;
-  if (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger = 0)and(StrToInt64Def(TabFatbaslik.FieldByName('FATURANO').AsString, -999999) = -999999) then begin
+  // Gelen (alis) belgelerde faturano TEDARIKCININ numarasi -> alfanumerik olabilir
+  // (orn. XXS2026000000111). Numerik zorunlulugu yalnizca kendi kestigimiz (giden)
+  // belgeler icin gecerli. Tur 10/11/12/109 = alis (bkz EkranAdiAl).
+  if (TabFatbaslik.FieldByName('EFATURADURUM').AsInteger = 0)
+     and not (Tur in [10, 11, 12, 109])
+     and (StrToInt64Def(TabFatbaslik.FieldByName('FATURANO').AsString, -999999) = -999999) then begin
      ShowMessage(Belgenogirisiyanlis);
      Abort;
   end;

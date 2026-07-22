@@ -772,6 +772,8 @@ begin
       TabCariIlet.Close;
       TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
         IntToStr(SPID), [rfReplaceAll]);
+      if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
+        TabCariIlet.SQL.Text := PgSqlCevir(TabCariIlet.SQL.Text);
       TabCariIlet.Params[0].Value := 1;
       TabCariIlet.Params[1].Value := RehberIletID; // RehberPerID;
       TabCariIlet.Params[2].Value := RehberIletID; // RehberPerI;
@@ -1155,6 +1157,8 @@ begin
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
        TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+       if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
+         TabPerIlet.SQL.Text := PgSqlCevir(TabPerIlet.SQL.Text);
        TabPerIlet.Params[0].Value := 1;
        TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
        TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
@@ -1172,6 +1176,8 @@ begin
       TabCariIlet.Close;
       TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
         IntToStr(SPID), [rfReplaceAll]);
+      if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
+        TabCariIlet.SQL.Text := PgSqlCevir(TabCariIlet.SQL.Text);
       TabCariIlet.Params[0].Value := 1;
       TabCariIlet.Params[1].Value := RehberIletID; // RehberPerID;
       TabCariIlet.Params[2].Value := RehberIletID; // RehberPerI;
@@ -2032,6 +2038,8 @@ begin
     TabTicari.Close;
     TabTicari.SQL.text := StringReplace(SQLTicari.text, ':SPID', IntToStr(SPID),
       [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
+      TabTicari.SQL.Text := PgSqlCevir(TabTicari.SQL.Text);
     TabTicari.Params[0].Value := 2;
     TabTicari.Params[1].Value := RehberID;
     TabTicari.Params[2].Value := RehberID;
@@ -2270,7 +2278,7 @@ begin
            TabRehber.FieldByName('DURUM').AsInteger := 1;
         end;
 
-        if TabRehber.State in [dsInsert] then begin
+        if TabRehber.State  in [dsInsert] then begin
           BoslukKontrolu;
           TabRehber.Post;
           RehberID := TabRehber.Fields[0].AsInteger;

@@ -7466,8 +7466,10 @@ begin
 
         Tablo.TablodanSorguAc(3,'select * from FATURA where FATBASID=' + Tablo1.FieldByName('ID').AsString);
 
-        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','TIPI','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN', 'FATURANO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM'],
-            [ 11,2,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan, VarToStr(YeniFatNo),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0]);
+        // ANAKAYITID = iade edilen ORIJINAL fatura FATBASLIK.ID (guvenilir referans; ACIKLAMA
+        //   metni hatali olabiliyor). IadeKontrolEt ve e-belge BillingReference bunu kullanir.
+        FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', Tablo1.FieldByName('ID').AsInteger,[ 'TUR','TIPI','GIRISDEPO','CIKISDEPO','FATURATARIH', 'EKLEYEN', 'FATURANO','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','EFATURADURUM','ANAKAYITID'],
+            [ 11,2,Tablo1.FieldByName('CIKISDEPO').AsInteger,0,Tablo.GENINI.BugunTrhSaat, Kullanan, VarToStr(YeniFatNo),Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0,Tablo1.FieldByName('ID').AsInteger]);
 
        while not Tablo.Query3.Eof do begin
         Tablo.SQLSatiriKopyala('FATURA', Tablo.Query3.FieldByName('ID').AsInteger, ['EKLEYEN', 'FATBASID','YERI','YERID', 'EKLEMETARIHI','DEGISTIREN', 'DEGISTIRMETARIHI','STOKDURUMDEGIS'],

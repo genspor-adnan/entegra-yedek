@@ -955,26 +955,39 @@ begin
   end;
 end;
 
-// Iade faturasinin (Tipi=2) iade edilen ORIJINAL fatura(lari) -> cac:BillingReference.
-//   Iade satirlari FATURA.YERI in (416,417 = alis/satis iade), YERID = orijinal FATURA satir ID.
-//   O satirdan orijinal FATBASLIK'a gidip FATURANO+FATURATARIH toplanir (mukerrer DISTINCT).
+// Iade faturasinin (Tipi=2) iade edilen ORIJINAL fatura(sini) -> cac:BillingReference.
+//   GUVENILIR kaynak: iade FATBASLIK.ANAKAYITID = orijinal FATBASLIK.ID (FaturaIadeAl set eder).
+//   Eski iade'de (ANAKAYITID yok) FATURA satir YERID -> orijinal FATBASLIK fallback.
 function IadeReferanslariGetir(AFatBasID: Integer): TArray<TEBelgeIadeRef>;
 var LRef: TEBelgeIadeRef;
+  // 16-hane belge no = FATURASERI+FATURANO; ama FATURANO zaten seri ile basliyorsa
+  //   cift-seri olmasin -> sadece FATURANO. (kocanno/kocanseri DEGIL, FATURANO.)
+  function BelgeNoIfade(const A: string): string;
+  begin
+    Result := 'CASE WHEN COALESCE(' + A + '.FATURASERI, '''') <> '''' AND ' +
+      A + '.FATURANO LIKE ' + A + '.FATURASERI + ''%'' THEN ' + A + '.FATURANO ' +
+      'ELSE COALESCE(' + A + '.FATURASERI, '''') + COALESCE(' + A + '.FATURANO, '''') END';
+  end;
 begin
   SetLength(Result, 0);
-  //   Belge no GIB sematron: 16 hane = FATURASERI(3) + FATURANO(13). Seri+no birlestir.
-  //   (e-belge numaralari; irsaliye de FATBASLIK.FATURASERI/FATURANO'da tutulur.)
+  // 1) ANAKAYITID (guvenilir): iade FATBASLIK.ANAKAYITID -> orijinal FATBASLIK.
   Tablo.TablodanSorguAc(3,
-    'SELECT DISTINCT COALESCE(FB.FATURASERI, '''') + COALESCE(FB.FATURANO, '''') AS BELGENO, ' +
-    'FB.FATURATARIH ' +
-    'FROM FATURA F ' +
-    'INNER JOIN FATURA OF2 ON OF2.ID = F.YERID ' +
-    'INNER JOIN FATBASLIK FB ON FB.ID = OF2.FATBASID ' +
-    'WHERE F.FATBASID = ' + IntToStr(AFatBasID) +
-    ' AND F.YERI IN (' + IntToStr(TabNo_IADE_ALISBELGE) + ',' +
-      IntToStr(TabNo_IADE_SATISBELGE) + ')' +
-    ' AND FB.ID <> ' + IntToStr(AFatBasID) +
-    ' AND COALESCE(FB.FATURANO, '''') <> ''''');
+    'SELECT ' + BelgeNoIfade('ORI') + ' AS BELGENO, ORI.FATURATARIH ' +
+    'FROM FATBASLIK IADE INNER JOIN FATBASLIK ORI ON ORI.ID = IADE.ANAKAYITID ' +
+    'WHERE IADE.ID = ' + IntToStr(AFatBasID) +
+    ' AND COALESCE(IADE.ANAKAYITID, 0) > 0' +
+    ' AND COALESCE(ORI.FATURANO, '''') <> ''''');
+  // 2) Fallback (eski iade): FATURA satir YERID -> orijinal FATBASLIK (DISTINCT).
+  if Tablo.Query3.Eof then
+    Tablo.TablodanSorguAc(3,
+      'SELECT DISTINCT ' + BelgeNoIfade('FB') + ' AS BELGENO, FB.FATURATARIH ' +
+      'FROM FATURA F INNER JOIN FATURA OF2 ON OF2.ID = F.YERID ' +
+      'INNER JOIN FATBASLIK FB ON FB.ID = OF2.FATBASID ' +
+      'WHERE F.FATBASID = ' + IntToStr(AFatBasID) +
+      ' AND F.YERI IN (' + IntToStr(TabNo_IADE_ALISBELGE) + ',' +
+        IntToStr(TabNo_IADE_SATISBELGE) + ')' +
+      ' AND FB.ID <> ' + IntToStr(AFatBasID) +
+      ' AND COALESCE(FB.FATURANO, '''') <> ''''');
   while not Tablo.Query3.Eof do begin
     LRef.FaturaNo := Tablo.Query3.FieldByName('BELGENO').AsString;
     LRef.Tarih := Tablo.Query3.FieldByName('FATURATARIH').AsDateTime;
@@ -4486,6 +4499,30 @@ begin
       LSupplier.AddPair('identifications', LSupIds);
     end;
     LContent.AddPair('supplierParty', LSupplier);
+
+    // Iade (Tipi=2): iade edilen orijinal belge referans(lar)i. izibiz JSON-native:
+    //   e-Fatura   -> "billingReference":[{id,issueDate,documentTypeCode:IADE,documentType}]
+    //   e-Irsaliye -> "despatchDocumentReference":[{...}]
+    // GIB schematron 10003 bu elemani 16-hane ID + documentTypeCode=IADE ile ZORUNLU tutar;
+    // JSON'da yoksa izibiz UBL'i referanssiz kurar -> "10003" reddi. (UBLXMLUret'teki
+    // cac:BillingReference yalnizca base64-UBL gonderiminde islerdi; asil gonderim buradan.)
+    if (ABaslik.Tipi = 2) and (Length(ABaslik.IadeReferanslari) > 0) then begin
+      var LIadeRefArr: TJSONArray := TJSONArray.Create;
+      for J := 0 to High(ABaslik.IadeReferanslari) do begin
+        var LIadeRef: TJSONObject := TJSONObject.Create;
+        LIadeRef.AddPair('id', ABaslik.IadeReferanslari[J].FaturaNo);
+        LIadeRef.AddPair('issueDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.IadeReferanslari[J].Tarih));
+        LIadeRef.AddPair('documentTypeCode', 'IADE');
+        LIadeRef.AddPair('documentType',
+          IfThen(LIsIrsaliye, 'İade Edilen İrsaliye', 'İade Edilen Fatura'));
+        LIadeRefArr.AddElement(LIadeRef);
+      end;
+      if LIsIrsaliye then
+        LContent.AddPair('despatchDocumentReference', LIadeRefArr)
+      else
+        LContent.AddPair('billingReference', LIadeRefArr);
+    end;
 
     // EArsiv'e ozel: additionalReferences -> SendingType. Alici e-postasi (AliciAlias =
     // REHBERALIAS 150) varsa ELEKTRONIK gonder -> izibiz e-postayi yollar (SOAP'taki

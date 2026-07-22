@@ -132,17 +132,23 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
-        Top = 277
+        Top = 274
         Width = 1104
-        Height = 333
+        Height = 336
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
+        ExplicitTop = 277
+        ExplicitHeight = 333
         object PanelAlt: TPanel
           Left = 1
-          Top = 167
+          Top = 170
           Width = 1102
           Height = 165
           Align = alBottom
@@ -155,6 +161,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           ParentBackground = False
           ParentFont = False
           TabOrder = 2
+          ExplicitTop = 167
           DesignSize = (
             1102
             165)
@@ -812,7 +819,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           Left = 1
           Top = 25
           Width = 1102
-          Height = 142
+          Height = 145
           Align = alClient
           PopupMenu = PopupMenuFatura
           TabOrder = 1
@@ -820,6 +827,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           LookAndFeel.SkinName = 'LondonLiquidSky'
+          ExplicitHeight = 142
           object GridFaturaView: TcxGridDBTableView
             OnDblClick = GridFaturaViewDblClick
             OnKeyUp = GridFaturaViewKeyUp
@@ -1685,7 +1693,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       end
       object PageUst: TcxPageControl
         Left = 0
-        Top = 105
+        Top = 102
         Width = 1104
         Height = 172
         Align = alTop
@@ -1693,6 +1701,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         OnChange = PageUstChange
+        ExplicitTop = 105
         ClientRectBottom = 168
         ClientRectLeft = 4
         ClientRectRight = 1100
@@ -1700,6 +1709,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2599,6 +2612,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2614,6 +2631,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Left = 3
         Top = 73
         Width = 1098
+        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -2996,6 +3014,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = PlanlamaEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3

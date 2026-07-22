@@ -1015,7 +1015,7 @@ end;
 procedure TFaturalarDlg.JvTimer1Timer(Sender: TObject);
 var
  // SQLPart1,SQLPart2,SQLPart11,SQLPart21,SQLPart12,SQLPart22 : string;
-  gf : TFaturaGorevFrame;
+  gf :  TFaturaGorevFrame;
   SubeIDList : string;
   TarihBas, TarihBit : variant;
  // LocateID:integer;
