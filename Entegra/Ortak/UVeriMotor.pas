@@ -975,6 +975,28 @@ begin
   end;
 end;
 
+// -- MSSQL temp-tablo batch'i -> tek portable SELECT. --
+//    'IF EXISTS(..tempdb..sysobjects..#X..) DROP #X; CREATE TABLE #X(...); INSERT INTO #X <body>;
+//     select * from #X <tail>'  ->  'select * from (<body>) __t <tail>'.
+//    Ayrica @param -> :param (bu batch'ler MSSQL-native @ marker kullanir; @@ haric).
+//    Ek-alan (#DETAY) + KurIlet/GENINI desenleri; DetayTablosuAc vb. TabloYenile ile PgSqlCevir'e ugrar.
+function PgTempTabloCevir(const S: string): string;
+var mi, mf: TMatch; tname, body, tail, res: string;
+begin
+  Result := S;
+  if Pos('tempdb..sysobjects', LowerCase(S)) = 0 then Exit;
+  mi := TRegEx.Match(S, 'insert\s+into\s+(#\w+)', [roIgnoreCase]);
+  if not mi.Success then Exit;
+  tname := mi.Groups[1].Value;
+  mf := TRegEx.Match(S, 'select\s+\*\s+from\s+' + TRegEx.Escape(tname) + '\b', [roIgnoreCase]);
+  if not mf.Success then Exit;
+  body := Trim(Copy(S, mi.Index + mi.Length, mf.Index - mi.Index - mi.Length));
+  tail := Trim(Copy(S, mf.Index + mf.Length, MaxInt));
+  res := 'select * from (' + body + ') __t ' + tail;
+  res := TRegEx.Replace(res, '(?<!@)@(\w+)', ':$1', [roIgnoreCase]);   // @yeri -> :yeri (@@ haric)
+  Result := res;
+end;
+
 function PgSqlCevir(const ASql: string): string;
 var
   i, n: Integer;
@@ -985,7 +1007,8 @@ var
 begin
   Result := ASql;
   if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
-  src := PgDeclareCevir(ASql);           // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
+  src := PgTempTabloCevir(ASql);         // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
+  src := PgDeclareCevir(src);            // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
   src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
   src := PgConvertCevir(src);            // CONVERT(tip,ifade,stil) -> to_char/cast
   src := PgNestedTopCevir(src);          // nested SELECT TOP n -> alt-sorgu sonuna LIMIT n

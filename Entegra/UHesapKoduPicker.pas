@@ -146,6 +146,7 @@ begin
      +AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
      +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END) >= '+inttostr(Digit)
      +' order by LEN('+AAlani+') desc , 1 desc '+DbSinir(1);
+   Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);   // PG: alias=/isnull/charindex diyalekt
    Tablo.Query1.Open;
    //yeni kayıt için düzeltme
    if Tablo.Query1.RecordCount=0 then begin
@@ -202,8 +203,7 @@ begin
 
   end;
   TabPlan.Close;
-  //TabPlan.SQL.Text:= 'Select ROOTKOD=REVERSE( SUBSTRING(REVERSE('+RefKod+'),CHARINDEX(''.'',REVERSE('+RefKod+'),1)+1,LEN('+RefKod+')-(CHARINDEX(''.'',REVERSE('+RefKod+'),1)-1))),'
-  //  +' '+RefKod+','+RefAd+',isnull(DIGITSAY,2) as DIGITSAY from '+RefTablo+' where DURUM=1 and ('+RefKod+' LIKE '''+KodGurubu+'%'' )order by 1 ' ;
+  TabPlan.SQL.Text := PgSqlCevir(TabPlan.SQL.Text);   // PG: ROOTKOD=alias/CHARINDEX/LEN diyalekt (dogrudan .Open)
   TabPlan.Open;
   cxDBTreeList1Click(Self);
   Result := TabPlan.RecordCount;

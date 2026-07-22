@@ -1045,9 +1045,10 @@ object RehberWizardDlg: TRehberWizardDlg
           ''
           'union all'
           ''
-
-            'select  SIRA, ETIKET, '#39#39' as BILGI, '#39#39' as ORJINAL ,GIRIS,KAYNAK,ZOR' +
-            'UNLU  '
+          
+            'select  SIRA, ETIKET, '#39#39' as BILGI, '#39#39' as ORJINAL ,GIRIS,KAYNAK,Z' +
+            'ORUNLU '
+          ' '
           ' from REHBERAYAR  where  YERI=1  '
           'and ETIKET not in (select ETIKET from REHBERBILGI '
           'where  YERI=1 and YER_ID= :Yeri_Id2)'

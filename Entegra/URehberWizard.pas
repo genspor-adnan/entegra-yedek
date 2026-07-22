@@ -1037,7 +1037,7 @@ begin
       CRMEkstreEkr.VisibleButtons := [bkFinish];
   end;
 
-  Tabloyenile(TabNotlar,[RehberID]);
+  Tabloyenile(TabNotlar, [RehberID]);
 
   CheckPersonel.Checked := (TabRehber.FieldByName('BAGID').AsString <> '')and(TabRehber.FieldByName('BAGID').AsString <> '0');
   EditTEMSILCI.enabled := ModulYetki_TekSubeTum.Cari <> 1;
