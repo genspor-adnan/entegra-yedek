@@ -387,6 +387,15 @@ begin
     TabIzlem.SQL.Add('SERILOTID [int] NULL)');
   end;
   TabIzlem.ExecSQL;
+  // PG: SEC kolonu smallint ama maprule ('sec'->boolean) field'i boolean yapar. FireDAC Post
+  //   varsayilan upWhereAll'da WHERE'e SEC=:eski(boolean) koyar -> PG "smallint = boolean". Cozum:
+  //   WHERE yalniz ID (upWhereKeyOnly) -> SEC WHERE'den cikar, smallint kolon + 'where SEC=1' korunur.
+  //   (MSSQL yolu degismez.)
+  if AktifVeriMotor = vmPG then
+  begin
+    TabIzlem.UpdateOptions.KeyFields := 'ID';
+    TabIzlem.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  end;
 
 //  KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @GirDepoID int, @CikDepoID int, @Dil int, @RehberId int, @IzlemTur int'+
   KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @RehberId int, @IzlemTur int, @DepoID int '+sLineBreak+
@@ -458,7 +467,7 @@ begin
      end;
   //çıkışlar
   end else begin
-     if KaynakSatirID <= 0 then begin //direk çıkış varsa
+     if KaynakSatirID <= 0  then begin //direk çıkış varsa
         { if DonusumKaynak then begin //dönüşmüş belge (Kons.Çıkış veya İrsaliye çıkış) ise kaynak görüntülenir.
             TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []);
             TabIzlem.ExecSQL;
