@@ -143,7 +143,7 @@ var
 
 implementation
 
-uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, System.RegularExpressions;
+uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, UDFMPG;
 
 
 
@@ -345,18 +345,13 @@ var s, KomutDeclare, KomutInsert:String;
     if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(ASql) else Q.SQL.Text := ASql;
     Q.ExecSQL;
   end;
-  // Memo UPDATE...FROM'u PG'ye cevir + :TabloAdi degistir. MSSQL 'UPDATE Tmp SET .. FROM <tablo>
-  //   Tmp INNER JOIN (subq) as x ON cond' -> PG 'UPDATE <tablo> tmp SET .. FROM (subq) as x
-  //   WHERE cond'. Dis-join ON'u ') as x ON' ile ayirt edilir (ic-subquery ON'una dokunma).
-  //   COLLATE PgSqlCevir'de silinir. (MSSQL'de sadece :TabloAdi degisir.)
-  function PgUpd(const AMemo: string): string;
+  // Cetrefil UPDATE...FROM memo: PG'de UDFMPG'deki ELLE-YAZILMIS + PG'ye-KARSI-TEST-EDILMIS PG
+  //   karsiligi kullanilir (kirilgan regex-transform yerine); MSSQL'de DFM memo. :TabloAdi degisir,
+  //   @var/alias= sonrasi ExecC->PgSqlCevir'de islenir.
+  function MemoSec(const AMssql, APg: string): string;
   begin
-    Result := StringReplace(AMemo, ':TabloAdi', TabloAdi, [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then begin
-      Result := TRegEx.Replace(Result, '\bupdate\s+tmp\b', 'update '+TabloAdi+' tmp', [roIgnoreCase]);
-      Result := TRegEx.Replace(Result, '\bfrom\s+'+TRegEx.Escape(TabloAdi)+'\s+tmp\s+inner\s+join', 'from', [roIgnoreCase]);
-      Result := TRegEx.Replace(Result, '\)\s*as\s+x\s+on\b', ') as x WHERE', [roIgnoreCase]);
-    end;
+    if AktifVeriMotor = vmPG then Result := APg else Result := AMssql;
+    Result := StringReplace(Result, ':TabloAdi', TabloAdi, [rfReplaceAll]);
   end;
 begin
   if AktifVeriMotor = vmPG then
@@ -443,14 +438,14 @@ begin
         end
         else begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
             ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLGiren.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLCikanUpdate.text));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate));
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
-         ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLDonusCikanHedefUpdate.text));
+         ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
      end;
   //çıkışlar
   end else begin
@@ -461,14 +456,14 @@ begin
          end else }
          begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
             ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLCikan.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLCikanUpdate.text));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate));
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          // 11/05/2022 AO kaldırıldı
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
-         ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLDonusCikanHedefUpdate.text));
+         ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
      end;
   end;
 
