@@ -338,20 +338,26 @@ begin
 end;   *)
 procedure TIzlemeDlg.TempTabloOlustur;
 var s, KomutDeclare, KomutInsert:String;
-  // PG'de SQL diyalekt-cevir + calistir (MSSQL'de aynen). declare/set @var inline,
-  //   isnull/top/bit/getdate vb. + memo SQL'leri PgSqlCevir'den gecer.
-  procedure ExecC(Q: TFDQuery; const ASql: string);
+  // Izleme SQL'ini calistir. PG: UDFMPG PG-native sabiti (APgSql), degerler Pascal'da inline
+  //   (converter/KomutDeclare/@var-batch YOK) -> UIzleme PG yolu diyalekt-cevirici'ye HIC girmez.
+  //   MSSQL: bugunku yol AYNEN (enclosing KomutDeclare + DFM memo, :TabloAdi degisir) -> bit-identik.
+  //   ABaslikID/ASatirID branch-ozel (direk=ana deger, donusum=Kaynak*). @DepoID cikis branch'inde
+  //   CikDepo, aksi GirDepo (KomutDeclare @DepoID mantigiyla ayni).
+  procedure ExecMemo(Q: TFDQuery; const AMssqlMemo, APgSql: string; ABaslikID, ASatirID: Integer);
+  var depoDeg: Integer;
   begin
-    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(ASql) else Q.SQL.Text := ASql;
+    if AktifVeriMotor = vmPG then
+    begin
+      if IslemTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,
+                      KasaTur_Giden_Konsinye,KasaTur_StokSayimIslemi,KasaTur_Uretim_Sarf,KasaTur_StokTransferi] then
+        depoDeg := CikDepo
+      else
+        depoDeg := GirDepo;
+      Q.SQL.Text := UDFMPG.IzlemePGKur(APgSql, TabloAdi, StokID, IzlemTur, ABaslikID, ASatirID, IslemTur, depoDeg);
+    end
+    else
+      Q.SQL.Text := KomutDeclare + StringReplace(AMssqlMemo, ':TabloAdi', TabloAdi, [rfReplaceAll]);
     Q.ExecSQL;
-  end;
-  // Cetrefil UPDATE...FROM memo: PG'de UDFMPG'deki ELLE-YAZILMIS + PG'ye-KARSI-TEST-EDILMIS PG
-  //   karsiligi kullanilir (kirilgan regex-transform yerine); MSSQL'de DFM memo. :TabloAdi degisir,
-  //   @var/alias= sonrasi ExecC->PgSqlCevir'de islenir.
-  function MemoSec(const AMssql, APg: string): string;
-  begin
-    if AktifVeriMotor = vmPG then Result := APg else Result := AMssql;
-    Result := StringReplace(Result, ':TabloAdi', TabloAdi, [rfReplaceAll]);
   end;
 begin
   if AktifVeriMotor = vmPG then
@@ -437,18 +443,18 @@ begin
            TabIzlem.ExecSQL;
         end
         else }if DonusumKaynak then begin
-           ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []));
+           ExecMemo(TabIzlem, SQLDonusKaynak.text, SQL_PG_IzlemDonusKaynak, BaslikID, SatirID);
         end
         else begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLGiren.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate));
+            ExecMemo(TabIzlem, SQLGiren.text, SQL_PG_IzlemGiren, BaslikID, SatirID);
+            ExecMemo(Tablo.Query1, SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate, BaslikID, SatirID);
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
-         ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
+         ExecMemo(TabIzlem, SQLDonusCikanHedef.text, SQL_PG_IzlemDonusCikanHedef, KaynakBaslikID, KaynakSatirID);
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
-         ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
+         ExecMemo(Tablo.Query1, SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate, BaslikID, SatirID);
      end;
   //çıkışlar
   end else begin
@@ -458,15 +464,15 @@ begin
             TabIzlem.ExecSQL;
          end else }
          begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLCikan.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate));
+            ExecMemo(TabIzlem, SQLCikan.text, SQL_PG_IzlemCikan, BaslikID, SatirID);
+            ExecMemo(Tablo.Query1, SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate, BaslikID, SatirID);
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
-         ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
+         ExecMemo(TabIzlem, SQLDonusCikanHedef.text, SQL_PG_IzlemDonusCikanHedef, KaynakBaslikID, KaynakSatirID);
          // 11/05/2022 AO kaldırıldı
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
-         ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
+         ExecMemo(Tablo.Query1, SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate, BaslikID, SatirID);
      end;
   end;
 

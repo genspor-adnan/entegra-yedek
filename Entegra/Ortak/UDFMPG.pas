@@ -34,6 +34,13 @@ uses System.Classes, FireDAC.Comp.Client;
 //   Override eklemek: RegKur icinde Ekle('FormClassName-T''siz.ComponentAdi', <PG-native, :param'li SQL>).
 function DFMPGSqlGetir(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string;
 
+// UIzleme izleme-snapshot SQL'lerinin PG-native karsiligini deger-inline'li dondurur. PG modunda
+//   UIzleme converter'a HIC girmez: @StokID/@BaslikID/... ve :TabloAdi Pascal'da inline edilir
+//   (KomutDeclare/@var-batch/PgSqlCevir YOK). MSSQL yolu ayri (DFM memo, degismez). APgSql = asagidaki
+//   SQL_PG_Izlem* sabitlerinden biri. Kullanilmayan @token bulunmazsa StringReplace no-op.
+function IzlemePGKur(const APgSql, ATabloAdi: string;
+  AStokID, AIzlemTur, ABaslikID, ASatirID, ABaslikTur, ADepoID: Integer): string;
+
 const
   // (2) MemoSec/@var-inline yolu icin — REGISTRY'YE EKLENMEZ. @StokID/@BaslikID/@SatirID cagiranin
   //   KomutDeclare'iyle inline edilir (FireDAC :param DEGIL). PG_MARK almaz.
@@ -66,6 +73,74 @@ const
     'WHERE (X.SERINO = TMP.SERINO OR (X.SERINO IS NULL AND TMP.SERINO IS NULL))'#13#10 +
     '  AND (X.LOTNO  = TMP.LOTNO  OR (X.LOTNO  IS NULL AND TMP.LOTNO  IS NULL))'#13#10 +
     '  AND (X.SKT    = TMP.SKT    OR (X.SKT    IS NULL AND TMP.SKT    IS NULL))';
+
+  // UIzleme.SQLGiren PG: giren izlemleri temp'e ekler (giris belgesi direkt). insert kolon-listeli
+  //   (PG serial 'id' otomatik atlanmaz). alias=->AS, [ ]->yok, unqualified SERINO/LOTNO/SKT/URT=SSL.
+  SQL_PG_IzlemGiren =
+    'insert into :TabloAdi'#13#10 +
+    '(STOKID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT, SERILOTID)'#13#10 +
+    'SELECT SI1.STOKID, SERINO, 0.0 AS DURUM, SUM(KALAN) AS KALAN, 1 AS SEC, LOTNO, SKT, URT, SERILOTID'#13#10 +
+    ' from STOKIZLEME SI1'#13#10 +
+    ' INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID = SSL.ID'#13#10 +
+    ' where SI1.STOKID=@StokID and SI1.IZLEMTUR=@IzlemTur'#13#10 +
+    '   and SI1.BASLIKID=@BaslikID and SI1.SATIRID=@SatirID'#13#10 +
+    ' group by SI1.STOKID, SERILOTID, SERINO, LOTNO, SKT, URT';
+
+  // UIzleme.SQLCikan PG: cikan izlemler (cikis belgesi direkt). STOKDURUMIZLEME su-anki durum UNION
+  //   STOKIZLEMEDEPO satir-etkisi. insert kolon-listeli.
+  SQL_PG_IzlemCikan =
+    '  insert into :TabloAdi'#13#10 +
+    '(STOKID, SERILOTID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT, IZLEMID, BASLIKID, SATIRID)'#13#10 +
+    'select Toplam.STOKID, SERILOTID, SERINO, SUM(DURUM) AS DURUM, 0.0 AS KALAN, 0 AS SEC, LOTNO, SKT, URT,'#13#10 +
+    '       0 AS IZLEMID, 0 AS BASLIKID, 0 AS SATIRID'#13#10 +
+    'from ('#13#10 +
+    '  select SD.STOKID, SERILOTID, SD.KALAN AS DURUM'#13#10 +
+    '  from STOKDURUMIZLEME SD'#13#10 +
+    '  where SD.STOKID=@StokID and DEPOID = @DepoID'#13#10 +
+    '    and ((@BaslikTur<>99 and SD.KALAN <> 0) or (@BaslikTur=99 and 1=1))'#13#10 +
+    '  union all'#13#10 +
+    '  SELECT SI1.STOKID, SERILOTID, -1.0*SUM(SD.ADET) AS DURUM'#13#10 +
+    '  from STOKIZLEME SI1'#13#10 +
+    '  inner join STOKIZLEMEDEPO SD ON SI1.ID=SD.IZLEMID'#13#10 +
+    '  where SI1.SATIRID=@SatirID and DEPOID = @DepoID'#13#10 +
+    '  group by SI1.STOKID, SERILOTID'#13#10 +
+    ') as Toplam'#13#10 +
+    'inner join STOKSERILOT SSL ON Toplam.SERILOTID=SSL.ID'#13#10 +
+    'group by Toplam.STOKID, SERILOTID, SERINO, LOTNO, SKT, URT';
+
+  // UIzleme.SQLDonusKaynak PG: donusum kaynagindaki izlemleri (goruntuleme) temp'e ekler.
+  //   insert kolon-listeli (orijinal MSSQL kolon-listesizdi -> PG icin acik liste sart).
+  SQL_PG_IzlemDonusKaynak =
+    '  insert into :TabloAdi'#13#10 +
+    '(STOKID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT, IZLEMID, BASLIKID, SATIRID, UPDID, SERILOTID)'#13#10 +
+    'SELECT STOKID, SERINO, sum(DURUM) AS DURUM, sum(KALAN) AS KALAN, 0 AS SEC, LOTNO, SKT, URT,'#13#10 +
+    '       0 AS IZLEMID, 0 AS BASLIKID, 0 AS SATIRID, 0 AS UPDID, 0 AS SERILOTID from'#13#10 +
+    '('#13#10 +
+    '  SELECT SI1.STOKID, SSL.SERINO, abs(SI1.KALAN) AS DURUM, abs(SI1.KALAN) AS KALAN, 0 AS SEC,'#13#10 +
+    '         SSL.LOTNO, SSL.SKT, SSL.URT, SSL.ID AS SERILOTID'#13#10 +
+    '  from STOKIZLEME SI1'#13#10 +
+    '  INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID=SSL.ID'#13#10 +
+    '  where SI1.SATIRID=@SatirID'#13#10 +
+    '  union all'#13#10 +
+    '  SELECT SI1.STOKID, SSL.SERINO, abs(SI2.KALAN) AS DURUM, abs(SI2.KALAN) AS KALAN, 0 AS SEC,'#13#10 +
+    '         SSL.LOTNO, SSL.SKT, SSL.URT, SSL.ID AS SERILOTID'#13#10 +
+    '  from STOKIZLEME SI1'#13#10 +
+    '  INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID=SSL.ID'#13#10 +
+    '  left join STOKIZLEME SI2 on SI1.ID=SI2.DONUSID'#13#10 +
+    '  where SI1.SATIRID=@SatirID'#13#10 +
+    ') as Liste'#13#10 +
+    'where DURUM>0.0'#13#10 +
+    'group by STOKID, SERINO, KALAN, SEC, LOTNO, SKT, URT';
+
+  // UIzleme.SQLDonusCikanHedef PG: donusum hedef belgesine kaynak izlemleri ekler. insert kolon-listeli.
+  SQL_PG_IzlemDonusCikanHedef =
+    'insert into :TabloAdi'#13#10 +
+    '(STOKID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT, IZLEMID, BASLIKID, SATIRID, UPDID, SERILOTID)'#13#10 +
+    ' SELECT SI1.STOKID, SSL.SERINO, abs(SI1.KALAN) AS DURUM, 0.0 AS KALAN, 0 AS SEC, SSL.LOTNO, SSL.SKT, SSL.URT,'#13#10 +
+    ' SI1.ID, SI1.BASLIKID, SI1.SATIRID, SI1.DONUSID, SSL.ID AS SERILOTID'#13#10 +
+    ' from STOKIZLEME SI1'#13#10 +
+    ' INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID=SSL.ID'#13#10 +
+    ' where SI1.SATIRID=@SatirID';
 
 implementation
 
@@ -124,6 +199,20 @@ begin
     end;
   end;
   Result := PgSqlCevir(ADefaultSql);               // override yok -> merkezi cevirici (kendi isaretler)
+end;
+
+function IzlemePGKur(const APgSql, ATabloAdi: string;
+  AStokID, AIzlemTur, ABaslikID, ASatirID, ABaslikTur, ADepoID: Integer): string;
+begin
+  // Token'lar tam-kelime, biri digerinin oneki DEGIL (@BaslikTur vs @BaslikID: T<>I) -> sira onemsiz.
+  Result := APgSql;
+  Result := StringReplace(Result, ':TabloAdi', ATabloAdi,          [rfReplaceAll]);
+  Result := StringReplace(Result, '@StokID',   IntToStr(AStokID),   [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@IzlemTur', IntToStr(AIzlemTur), [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@BaslikTur',IntToStr(ABaslikTur),[rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@BaslikID', IntToStr(ABaslikID), [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@SatirID',  IntToStr(ASatirID),  [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '@DepoID',   IntToStr(ADepoID),   [rfReplaceAll, rfIgnoreCase]);
 end;
 
 initialization
