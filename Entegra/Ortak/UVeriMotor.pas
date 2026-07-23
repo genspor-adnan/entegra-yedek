@@ -1041,6 +1041,11 @@ begin
   src := PgTempTabloCevir(ASql);         // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
   src := PgDeclareCevir(src);            // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
   src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
+  // MSSQL 'insert ...[;] select scope_identity()' identity-getir idiom -> PG 'insert ... returning ID'
+  //   (identity PK evrensel 'ID'; insert kolonlarinda id YOK -> GENERATED). Kalan bare scope_identity()
+  //   -> lastval(). scope_identity string-literalde beklenmez; PG_MARK ile idempotent.
+  src := TRegEx.Replace(src, ';?\s*\bselect\s+scope_identity\s*\(\s*\)', ' returning ID', [roIgnoreCase]);
+  src := TRegEx.Replace(src, '\bscope_identity\s*\(\s*\)', 'lastval()', [roIgnoreCase]);
   src := PgConvertCevir(src);            // CONVERT(tip,ifade,stil) -> to_char/cast
   src := PgNestedTopCevir(src);          // nested SELECT TOP n -> alt-sorgu sonuna LIMIT n
   src := PgApplyCevir(src);              // OUTER/CROSS APPLY -> LEFT JOIN/CROSS JOIN LATERAL
