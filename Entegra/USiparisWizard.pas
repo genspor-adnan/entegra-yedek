@@ -713,7 +713,7 @@ implementation
 
 Uses  UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame,UFisIrsaliyeAraDlg,UGirisKutusuEx, UGorevDlg, UIsListesi,
-  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly, UVeriMotor;
+  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 
@@ -1063,8 +1063,8 @@ var Yeri : SmallInt;
 begin
 
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabDetay.Params[0].Value := DetaySablonTipiBul;
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;
@@ -1085,8 +1085,8 @@ procedure TSiparisWizardDlg.DetayEkrPage(Sender: TObject);
 begin
   ButtonDuzenle;
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabDetay.Params[0].Value := DetaySablonTipiBul;
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;

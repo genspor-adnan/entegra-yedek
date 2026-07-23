@@ -424,7 +424,7 @@ var
 
 implementation
 
-Uses  UVeriMotor, UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
+Uses  UVeriMotor, UDFMPG, UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
  cxTLExportLink, UFastRap, URaporAraclari, UIsListesi, ULog;
 
@@ -1197,7 +1197,8 @@ end;
 procedure TFirsatWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
 begin
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabloYenile(TabDetay, [TabNo_PROJELER,ProjeID,ComboBolum.Text]);
     if TabDetay.Active then
     begin

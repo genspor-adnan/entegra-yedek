@@ -54,7 +54,7 @@ var
 
 implementation
 
-uses Utablo,UCariFonksiyonlar,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly;
+uses Utablo,UCariFonksiyonlar,UGirisKutusuEx,FetaKurulusSiniflari,PrjConst,LocOnFly, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 
@@ -77,7 +77,9 @@ begin
   EkleDetay:=False;
   TabDetay.Close;
   TabDetay.CachedUpdates := True;
-  TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);  TabDetay.Params[0].Value := Yeri;
+  if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay88
+  else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+  TabDetay.Params[0].Value := Yeri;
   TabDetay.Params[1].Value := YerID;
   TabDetay.Params[2].Value := Bolum;
   TabDetay.Open;

@@ -731,7 +731,7 @@ var
 implementation
 
 uses
-    UVeriMotor, UAnaForm, FetaClassExtensions, FetaKurulusSiniflari, Utablo, UResim, UBinarySave, UFiyatDegisiklik,
+    UVeriMotor, UDFMPG, UAnaForm, FetaClassExtensions, FetaKurulusSiniflari, Utablo, UResim, UBinarySave, UFiyatDegisiklik,
     PrjConst, URehberAyar, UCariFonksiyonlar, UKampanyalar, IdGlobalProtocols, UBarkodYazdir, UKategori,
      UStokHizmetAra, LocOnFly, ULog;
 
@@ -2498,7 +2498,8 @@ end;
 procedure TStokWizardDlg.DetayTablosuAc;
 begin
   DETAY.Close;
-  DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then DETAY.SQL.Text := SQL_PG_RehberDetayStok
+  else DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
   TabloYenile(DETAY, [TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, ComboBolum.Text]);
   DETAY.UpdateOptions.UpdateTableName := 'REHBERBILGI';
 

@@ -175,7 +175,7 @@ var
 implementation
 
 uses ULog, PrjConst, Utablo, UResim, UBinarySave, URehberAyar, FetaKurulusSiniflari, Fetautil,
-     UKategori, UCariFonksiyonlar,LocOnFly;
+     UKategori, UCariFonksiyonlar,LocOnFly, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 
@@ -531,7 +531,8 @@ end;
 procedure TEkipmanWizardDlg.PageEkipmanBilgiPage(Sender: TObject);
 begin
   TabDetay.Close;
-  TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay88
+  else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
   TabDetay.Params[0].Value := TabNo_EKIPMAN;
   TabDetay.Params[1].Value := TabEkipman.FieldByName('ID').AsInteger;
   TabDetay.Params[2].Value := ComboBolum.Text;

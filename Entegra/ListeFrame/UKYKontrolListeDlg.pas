@@ -206,7 +206,7 @@ type
 implementation
 
 uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, UServisWizard, URaporAraclari, UGenelAnaSekmeFrame,
-  UFastRap, PrjConst, UCariFonksiyonlar, UPOS;
+  UFastRap, PrjConst, UCariFonksiyonlar, UPOS, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 { TEkipmanListeDlg }
@@ -435,7 +435,8 @@ begin
   else
      TabNo:= TabNo_URETIMKALITE; }
   DETAY.Close;
-  DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then DETAY.SQL.Text := SQL_PG_RehberDetayLimit
+  else DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
   TabloYenile(DETAY, [TabNo_STOKKALITE, Secili_SatirId, Secili_Sablon]);
 end;
 

@@ -417,7 +417,7 @@ implementation
 
 uses ULog,UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap, UOPSDLG,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame,UFisIrsaliyeAraDlg,UGirisKutusuEx, UGorevDlg, UIsListesi,
-  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly, UVeriMotor;
+  UCariFonksiyonlar, UAnaForm, URehberAyar ,IdGlobalProtocols,LocOnFly, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 
@@ -686,7 +686,8 @@ procedure TSatinAlmaWizard2.DetayEkrEnterPage(Sender: TObject; const FromPage: T
 var Yeri : SmallInt;
 begin
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     Tabloyenile(TabDetay, [DetaySablonTipiBul, SIPARIS.FieldByName('ID').AsInteger, ComboBolum.Text])
 end;
 

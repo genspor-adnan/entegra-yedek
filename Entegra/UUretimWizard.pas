@@ -387,7 +387,7 @@ var
 implementation
 
 uses
-  UVeriMotor, UGenelAnaSekmeFrame, URaporAraclari, UUretimRecete, UGirisKutusuEx, Fetautil, FetaKurulusSiniflari,
+  UVeriMotor, UDFMPG, UGenelAnaSekmeFrame, URaporAraclari, UUretimRecete, UGirisKutusuEx, Fetautil, FetaKurulusSiniflari,
   UKodAgaci, UAnaForm, LocOnFly,PrjConst, UFastRap, UBelgeDonusum, FetaClassExtensions,
   URehberAyar, UCariFonksiyonlar, ULog;
 
@@ -1462,7 +1462,8 @@ var
   EskiAfter:  TDataSetNotifyEvent;
 begin
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabDetay.Params[0].Value := TabNo_URETIMFISI;
     TabDetay.Params[1].Value := tabUretim.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;

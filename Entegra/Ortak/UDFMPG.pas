@@ -142,6 +142,80 @@ const
     ' INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID=SSL.ID'#13#10 +
     ' where SI1.SATIRID=@SatirID';
 
+  // Wizard/form 'SQLDetay' PG karsiligi: MSSQL declare @var + '#DETAY temp (IF EXISTS/CREATE/INSERT
+  //   union/select)' batch'i cevirici-disi ve @-hatasi verir. Temp gereksiz -> sonuc = union select
+  //   order by SIRA. REHBERBILGI(mevcut deger)+REHBERAYAR(sablon alan). Named param :Yeri(3x)/:Yerid/
+  //   :Bolum (FireDAC ayni-adli param'lari BIRLESTIRIR). PG'de dogrulandi (rehberbilgi.yer_id/
+  //   rehberayar.zorunlu/bolum). Cagiran motor'a gore MSSQL memo | bu sabit secer, param bind eder.
+  SQL_PG_RehberDetay =
+    'select RB.SIRA, RB.ETIKET, NULLIF(RB.BILGI,'''') as BILGI, RB.BILGI as ORJINAL,'#13#10 +
+    '       RA.GIRIS, RA.KAYNAK, RA.ZORUNLU'#13#10 +
+    'from REHBERBILGI RB'#13#10 +
+    'INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'#13#10 +
+    'where RB.YERI = :Yeri and YER_ID = :Yerid and coalesce(RA.BOLUM,'''') = :Bolum'#13#10 +
+    'union all'#13#10 +
+    'select SIRA, ETIKET, cast(null as varchar(1000)) as BILGI, '''' as ORJINAL,'#13#10 +
+    '       GIRIS, KAYNAK, ZORUNLU'#13#10 +
+    'from REHBERAYAR'#13#10 +
+    'where YERI = :Yeri and coalesce(BOLUM,'''') = :Bolum'#13#10 +
+    '  and ETIKET not in (select ETIKET from REHBERBILGI where YERI = :Yeri and YER_ID = :Yerid)'#13#10 +
+    'order by SIRA';
+
+  // Varyant: REHBERAYAR (sablon) tarafi SABIT YERI=88 (Ekipman/RehberBilgiDuzenle). RB.YERI=:Yeri.
+  SQL_PG_RehberDetay88 =
+    'select RB.SIRA, RB.ETIKET, RB.BILGI, RB.BILGI as ORJINAL, RA.GIRIS, RA.KAYNAK, RA.ZORUNLU'#13#10 +
+    'from REHBERBILGI RB'#13#10 +
+    'INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA AND RA.YERI=88'#13#10 +
+    'where RB.YERI = :Yeri and YER_ID = :Yerid and coalesce(RA.BOLUM,'''') = :Bolum'#13#10 +
+    'union all'#13#10 +
+    'select SIRA, ETIKET, '''' as BILGI, '''' as ORJINAL, GIRIS, KAYNAK, ZORUNLU'#13#10 +
+    'from REHBERAYAR'#13#10 +
+    'where YERI=88 and coalesce(BOLUM,'''') = :Bolum'#13#10 +
+    '  and ETIKET not in (select ETIKET from REHBERBILGI where YERI = :Yeri and YER_ID = :Yerid)'#13#10 +
+    'order by SIRA';
+
+  // Varyant: StokWizard -> +RBID/RESIM/ESKIRESIM (REHBERBILGIRESIM join) + GIRIS=3 (tarih) null-lama.
+  SQL_PG_RehberDetayStok =
+    'select RB.SIRA, RB.ETIKET,'#13#10 +
+    '  case when RA.GIRIS=3 and coalesce(RB.BILGI,'''')='''' then null else RB.BILGI end as BILGI,'#13#10 +
+    '  case when RA.GIRIS=3 and coalesce(RB.BILGI,'''')='''' then null else RB.BILGI end as ORJINAL,'#13#10 +
+    '  RA.GIRIS, RA.KAYNAK, RA.ZORUNLU, RB.ID as RBID, RR.RESIM as RESIM, RR.RESIM as ESKIRESIM'#13#10 +
+    'from REHBERBILGI RB'#13#10 +
+    'INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'#13#10 +
+    'left outer join REHBERBILGIRESIM RR on RB.ID=RR.REHBERBILGIID'#13#10 +
+    'where RB.YERI = :Yeri and YER_ID = :Yerid and coalesce(RA.BOLUM,'''') = :Bolum'#13#10 +
+    'union all'#13#10 +
+    'select SIRA, ETIKET,'#13#10 +
+    '  case when GIRIS=3 then null else '''' end as BILGI,'#13#10 +
+    '  case when GIRIS=3 then null else '''' end as ORJINAL,'#13#10 +
+    '  GIRIS, KAYNAK, ZORUNLU, null::int as RBID, null::bytea as RESIM, null::bytea as ESKIRESIM'#13#10 +
+    'from REHBERAYAR'#13#10 +
+    'where YERI = :Yeri and coalesce(BOLUM,'''') = :Bolum'#13#10 +
+    '  and ETIKET not in (select ETIKET from REHBERBILGI where YERI = :Yeri and YER_ID = :Yerid)'#13#10 +
+    'order by SIRA';
+
+  // Varyant: UKYKontrolListeDlg -> +LIMIT/LIMITBIRIM/LIMITNOT. LIMIT PG'de REZERVE -> "LIMIT" tirnakli;
+  //   LIMITALT/UST double -> cast varchar; MSSQL convert+isnull yerine PG cast+coalesce.
+  SQL_PG_RehberDetayLimit =
+    'select RB.SIRA, RB.ETIKET, RB.BILGI, RB.BILGI as ORJINAL, RA.GIRIS, RA.KAYNAK, RA.ZORUNLU,'#13#10 +
+    '  case when coalesce(RA.LIMIT,'''')<>'''' then RA.LIMIT'#13#10 +
+    '       when RA.LIMITALT is not null and RA.LIMITUST is not null'#13#10 +
+    '         then cast(RA.LIMITALT as varchar)||''-''||cast(RA.LIMITUST as varchar)'#13#10 +
+    '       else '''' end as "LIMIT", RA.LIMITBIRIM, RA.LIMITNOT'#13#10 +
+    'from REHBERBILGI RB'#13#10 +
+    'INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA AND RB.YERI=RA.YERI'#13#10 +
+    'where RB.YERI = :Yeri and YER_ID = :Yerid and coalesce(RA.BOLUM,'''') = :Bolum'#13#10 +
+    'union all'#13#10 +
+    'select SIRA, ETIKET, '''' as BILGI, '''' as ORJINAL, GIRIS, KAYNAK, ZORUNLU,'#13#10 +
+    '  case when coalesce(RA.LIMIT,'''')<>'''' then RA.LIMIT'#13#10 +
+    '       when RA.LIMITALT is not null and RA.LIMITUST is not null'#13#10 +
+    '         then cast(RA.LIMITALT as varchar)||''-''||cast(RA.LIMITUST as varchar)'#13#10 +
+    '       else '''' end as "LIMIT", RA.LIMITBIRIM, RA.LIMITNOT'#13#10 +
+    'from REHBERAYAR RA'#13#10 +
+    'where YERI = :Yeri and coalesce(BOLUM,'''') = :Bolum'#13#10 +
+    '  and ETIKET not in (select ETIKET from REHBERBILGI where YERI = :Yeri and YER_ID = :Yerid)'#13#10 +
+    'order by SIRA';
+
 implementation
 
 uses SysUtils, System.Generics.Collections, UVeriMotor;

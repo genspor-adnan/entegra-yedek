@@ -485,7 +485,7 @@ implementation
 Uses UAnaForm,UCombo, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra,URaporAraclari, UTabloGiris,
   UFastRap, USecForm, UGirisKutusuEx,FetaClassExtensions, UServisDetayPersonel, UGenelAnaSekmeFrame,
   UServisEkipmanSec, Fetautil, IdGlobalProtocols, UCariFonksiyonlar, URehberAyar,LocOnFly, USonlandir,
-  UServisListeDlg, UGorevDlg, ULog, UVeriMotor;
+  UServisListeDlg, UGorevDlg, ULog, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
 var
@@ -599,7 +599,8 @@ procedure TServisWizardDlg.DetayEkrPage(Sender: TObject);
 var Yeri : SmallInt;
 begin
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabloYenile(TabDetay, [TabNo_SERVIS,ServisID,ComboBolum.Text]);
     TabDetay.CachedUpdates := True;
     TabDetay.UpdateOptions.UpdateTableName := '';

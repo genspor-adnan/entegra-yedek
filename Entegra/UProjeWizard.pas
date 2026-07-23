@@ -422,7 +422,7 @@ implementation
 
 Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
  UCombo,UGenelAnaSekmeFrame ,IdGlobalProtocols,LocOnFly, UExceldenVeriAl,
- cxTLExportLink, UFastRap, URaporAraclari, ULog, UVeriMotor;
+ cxTLExportLink, UFastRap, URaporAraclari, ULog, UVeriMotor, UDFMPG;
 
 {$R *.dfm}
   var
@@ -1066,8 +1066,8 @@ procedure TProjeWizardDlg.ProjeEkDetayEkrPage(Sender: TObject);
 var Yeri : SmallInt;
 begin
     TabDetay.Close;
-    TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := SQL_PG_RehberDetay
+    else TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabDetay.Params[0].Value := TabNo_PROJELER;
     TabDetay.Params[1].Value := ProjeID;
     TabDetay.Params[2].Value := ComboBolum.Text;

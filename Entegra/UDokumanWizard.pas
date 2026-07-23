@@ -314,7 +314,7 @@ var
 implementation
 
 uses Utablo, UCariFonksiyonlar, PrjConst, FetaKurulusSiniflari, URehberAyar, UBinarySave, UDokumanListeFrame, fetautil,
-     IdGlobalProtocols, UGirisKutusuEx, LocOnFly, ULog, UVeriMotor;
+     IdGlobalProtocols, UGirisKutusuEx, LocOnFly, ULog, UVeriMotor, UDFMPG;
 
 procedure HazirlaTabYetki(AQuery: TFDQuery);
 begin
@@ -631,7 +631,8 @@ end;
 
 procedure TDokumanWizard.DetayTablosuAc;
 begin
-  DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then DETAY.SQL.Text := SQL_PG_RehberDetay
+  else DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
   TabloYenile(DETAY, [TabNo_DOKUMAN, TabDokuman.FieldByName('ID').AsInteger, ComboKATEGORI.Text]);
   DETAY.CachedUpdates := True;
   DETAY.UpdateOptions.UpdateTableName := '';

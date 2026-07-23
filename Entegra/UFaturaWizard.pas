@@ -766,7 +766,7 @@ var
 
 implementation
 
-Uses UVeriMotor, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
+Uses UVeriMotor, UDFMPG, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
   UOPSDLG, UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame, UFisIrsaliyeAraDlg,
   UGirisKutusuEx, UNakitDlg, URehberAyar, IdGlobalProtocols, LocOnFly,
   UCariFonksiyonlar, UAnaForm, UFaturalar, UFaturaGorevFrame, GenoTIP.eFatura.NativeApi, UGorevDlg, UIsListesi,
@@ -1368,10 +1368,18 @@ end;
 procedure TFaturaWizardDlg.DetayTablosuAc;
 begin
   DETAY.Close;
-  DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID),[rfReplaceAll]);
-  DETAY.Params[0].Value := Tablo.FaturaDetaySablonTipiBul(Tur);
-  DETAY.Params[1].Value := TabFatbaslik.FieldByName('ID').AsInteger;
-  DETAY.Params[2].Value := ComboBolum.Text;
+  // PG: cetrefil temp-batch SQLDetay yerine UDFMPG PG-native union select (isimle bind). MSSQL: DFM memo.
+  if AktifVeriMotor =  vmPG then begin
+    DETAY.SQL.Text :=  SQL_PG_RehberDetay;
+    DETAY.ParamByName('Yeri').Value  := Tablo.FaturaDetaySablonTipiBul(Tur);
+    DETAY.ParamByName('Yerid').Value := TabFatbaslik.FieldByName('ID').AsInteger;
+    DETAY.ParamByName('Bolum').Value := ComboBolum.Text;
+  end else begin
+    DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID),[rfReplaceAll]);
+    DETAY.Params[0].Value := Tablo.FaturaDetaySablonTipiBul(Tur);
+    DETAY.Params[1].Value := TabFatbaslik.FieldByName('ID').AsInteger;
+    DETAY.Params[2].Value := ComboBolum.Text;
+  end;
   DETAY.Open;
   if DETAY.FindField('GIRIS') <> nil then
     DETAY.FieldByName('GIRIS').ProviderFlags := [];
@@ -3527,7 +3535,7 @@ end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforeOpen(DataSet: TDataSet);
 begin
-  TabFatbaslik.SQL.Text := StringReplace(TabFatbaslik.SQL.Text,'@Dil',IntToStr(Dil),[rfReplaceAll]);
+   TabFatbaslik.SQL.Text := StringReplace(TabFatbaslik.SQL.Text,'@Dil',IntToStr(Dil),[rfReplaceAll]);
 end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforePost(DataSet: TDataSet);
