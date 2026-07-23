@@ -1918,14 +1918,20 @@ begin
   KocanNo := KocannoBul(BaslikTur);
   if DonusTuru=TabNo_DONUSUM_SATINALMATALEP_SIPARIS then begin
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); INSERT INTO SIPARIS (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,SIPARISTARIH,TARIH,KOCANNO,SIPARISNO, ACIKLAMA,';
-    Tablo.Query1.SQL.Add('GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,SIPARISSERI,FIYAT_LISTESI,');
-    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,KUR,REHBERILETID,SUBEID,SERVISID,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
-    Tablo.Query1.SQL.Add('SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,');
-    Tablo.Query1.SQL.Add('REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','); //
-    Tablo.Query1.SQL.Add('ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''',');
-    Tablo.Query1.SQL.Add('FIYAT_LISTESI,VADE,DOVIZKUR,'''+CariDoviz+''',KUR,REHBERILETID,SUBEID,SERVISID,OZELKOD ');
-    Tablo.Query1.SQL.Add('FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId)+'; SELECT ID FROM @Yeni');
+    var LSipKol: string := 'INSERT INTO SIPARIS (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,SIPARISTARIH,TARIH,KOCANNO,SIPARISNO, ACIKLAMA,'+
+      'GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,SIPARISSERI,FIYAT_LISTESI,'+
+      'VADE,DOVIZKUR,DOVIZ_CINSI,KUR,REHBERILETID,SUBEID,SERVISID,OZELKOD)';
+    var LSipBody: string := ' SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,'+
+      'REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','+
+      'ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''','+
+      'FIYAT_LISTESI,VADE,DOVIZKUR,'''+CariDoviz+''',KUR,REHBERILETID,SUBEID,SERVISID,OZELKOD '+
+      'FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId);
+    // MSSQL OUTPUT INSERTED.ID INTO @Yeni + SELECT | PG 'returning ID' (:param yok -> PgSqlCevir re-set
+    //   guvenli; alias=/getdate PgSqlCevir'de cevrilir). id Fields[0]'dan okunur.
+    if AktifVeriMotor = vmPG then
+      Tablo.Query1.SQL.Text := PgSqlCevir(LSipKol + LSipBody + ' returning ID')
+    else
+      Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); '+LSipKol+' OUTPUT INSERTED.ID INTO @Yeni '+LSipBody+'; SELECT ID FROM @Yeni';
     Tablo.Query1.Open;
   end else begin
     if (DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_IRS)or(DonusTuru = TabNo_DONUSUM_ALIS_SIPARIS_IRS)or(DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN) then begin
@@ -1947,15 +1953,19 @@ begin
     else
         EfatSonuc := 0;
     Tablo.Query1.Close;
-    Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); INSERT INTO FATBASLIK (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,FATURATARIH,TARIH,KOCANNO,FATURANO, ACIKLAMA,';
-    Tablo.Query1.SQL.Add('GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,FATURASERI,FIYAT_LISTESI,');
-    Tablo.Query1.SQL.Add('VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,DETAYBOLUMU,OZELKOD) OUTPUT INSERTED.ID INTO @Yeni');
-    Tablo.Query1.SQL.Add('SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,');
-    Tablo.Query1.SQL.Add('REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','); //
-    Tablo.Query1.SQL.Add('ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''',');
-    Tablo.Query1.SQL.Add('FIYAT_LISTESI,VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+KaynakDoviz+'KUR,REHBERILETID,SUBEID,'+'0'+','+
-         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,DETAYBOLUMU,OZELKOD ');
-    Tablo.Query1.SQL.Add('FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId)+'; SELECT ID FROM @Yeni');
+    var LFatKol: string := 'INSERT INTO FATBASLIK (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,FATURATARIH,TARIH,KOCANNO,FATURANO, ACIKLAMA,'+
+      'GIRISDEPO,CIKISDEPO,BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,EKLEYEN,FATURASERI,FIYAT_LISTESI,'+
+      'VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+HedefDoviz+'KUR,REHBERILETID,SUBEID,EFATURADURUM,EFATURASONUC,SENARYO,SERVISID,DETAYBOLUMU,OZELKOD)';
+    var LFatBody: string := ' SELECT TUR='+inttostr(BaslikTur)+',TIPI=1,'+
+      'REHBERID,PROJEID,AKTIVITEID,FATURATARIH=GETDATE(),TARIH=GETDATE(),'+inttostr(KocanNo)+','''+BelgeNo.BelgeNo+''','+
+      'ACIKLAMA,'+KaynakGirDepo+','+KaynakCikDepo+',BASLIK,ADRES,ILCE,IL,VD,VNO,KDVDURUM,SATICIKODU,DURUM,'''+Kullanan+''','''+BelgeNo.Serino+''','+
+      'FIYAT_LISTESI,VADE,DOVIZKUR,DOVIZ_CINSI,RAPORDOVIZ,'+KaynakDoviz+'KUR,REHBERILETID,SUBEID,'+'0'+','+
+         IntToStr(EfatSonuc)+','+ tablo.GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo,'1')+',SERVISID,DETAYBOLUMU,OZELKOD '+
+      'FROM '+basliktablosu+' WHERE ID='+IntToStr(KaynakBaslikId);
+    if AktifVeriMotor = vmPG then
+      Tablo.Query1.SQL.Text := PgSqlCevir(LFatKol + LFatBody + ' returning ID')
+    else
+      Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); '+LFatKol+' OUTPUT INSERTED.ID INTO @Yeni '+LFatBody+'; SELECT ID FROM @Yeni';
     Tablo.Query1.Open;
   end;
   Result := Tablo.Query1.Fields[0].AsInteger;
@@ -1971,6 +1981,18 @@ var
   ADT: String[5];
   SonucListe : TStringList;
   IzlemDlg : TIzlemeDlg;
+
+  // MSSQL 'SET NOCOUNT; DECLARE @Yeni; INSERT..OUTPUT INSERTED.ID INTO @Yeni SELECT..[; SELECT ID FROM @Yeni]'
+  //   klon batch'i -> PG insert-select (SIPARISDETAY: + returning ID; FATURA: yok, ExecSQL). isnull/alias=/
+  //   getdate PgSqlCevir'de. :param yok -> re-set guvenli. (Sadece vmPG'de cagrilir.)
+  function PgDonusCevir(const S: string): string;
+  begin
+    Result := StringReplace(S, 'SET NOCOUNT ON; DECLARE @Yeni TABLE(ID INT); ', '', [rfReplaceAll, rfIgnoreCase]);
+    Result := StringReplace(Result, ' OUTPUT INSERTED.ID INTO @Yeni ', ' ', [rfReplaceAll, rfIgnoreCase]);
+    Result := StringReplace(Result, '; SELECT ID FROM @Yeni', ' returning ID', [rfReplaceAll, rfIgnoreCase]);
+    Result := PgSqlCevir(Result);
+  end;
+
 begin
   //iki kez stoktan düşme olmasın diye kontrol .. iki kez seri no da sormayalım..
   case DonusTuru of
@@ -2028,6 +2050,7 @@ begin
       if EnBoyHesaplamaAktif then
          Tablo.Query5.SQL.Add(',EN,BOY,YUZEY,SAYI');
       Tablo.Query5.SQL.Add('FROM '+KaynakDetayTabloAdi+' WHERE ID='+IntToStr(kaynaksatirid)+'; SELECT ID FROM @Yeni');
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgDonusCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
     end else begin
       Tablo.Query5.Close;
@@ -2052,6 +2075,7 @@ begin
       if (DonusTuru = TabNo_DONUSUM_ALIS_IRS_FAT)or(DonusTuru = TabNo_DONUSUM_ALIS_IRS_FIS)or(DonusTuru = TabNo_DONUSUM_SATIS_IRS_FAT)or(DonusTuru = TabNo_DONUSUM_SATIS_IRS_FIS)then
          Tablo.Query5.SQL.Add(',KDVMUHAFIYETI');
       Tablo.Query5.SQL.Add('FROM '+KaynakDetayTabloAdi+' WHERE ID='+IntToStr(kaynaksatirid));
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgDonusCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.ExecSQL;
       Tablo.Query5.Close;
       if DonusTuru=TabNo_DONUSUM_SATINALMATALEP_SIPARIS then
