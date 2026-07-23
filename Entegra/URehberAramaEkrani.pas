@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, dxSkinsCore, dxSkinLondonLiquidSky, dxSkinscxPCPainter, cxStyles,
   cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, DB,
   cxDBData, cxImageComboBox, cxMaskEdit, cxDropDownEdit, cxContainer,
@@ -131,12 +131,10 @@ begin
       '   order by P.DEGISTIRMETARIHI desc, P.ID desc ' +
       DbSinir(1)+') P ' +
       'where R.ID > 0 and R.DURUM > 0 ';
-   AraQuery1.ParamByName('KULID').AsInteger := StrToIntDef(Kullanan, 0);
+   // Param'lar (KULID, GRUP) asagida TabloYenile'ye p dizisiyle SIRAYLA gecilir
+   // (TabloYenile SQL.Text'i PgSqlCevir'den gecirir -> inline ParamByName sifirlanirdi).
    if (AramaGrup = 335) or (AramaGrup = 336) then
-   begin
-      AraQuery1.SQL.Add(' and R.GRUP = :GRUP ');
-      AraQuery1.ParamByName('GRUP').AsInteger := AramaGrup;
-   end
+      AraQuery1.SQL.Add(' and R.GRUP = :GRUP ')
    else if AramaGrup = 337 then
       AraQuery1.SQL.Add(' and R.GRUP between 335 and 336 ')
    else
@@ -155,7 +153,13 @@ begin
       AraQuery1.SQL.Add(' order by K.SAY desc ');
 
    AraQuery1.SQL.Add(' '+DbSinir(50)+' ');
-   AraQuery1.Open;
+   // Converter'a bagli ac: TabloYenile vmPG'de PgSqlCevir uygular (OUTER APPLY->LATERAL,
+   // WITH(NOLOCK) strip, isnull vb.); MSSQL'de cevirici cagrilmaz -> .Open ile ayni.
+   // Param'lar SIRAYLA: :KULID (once), :GRUP (varsa, [335,336] dalinda).
+   if (AramaGrup = 335) or (AramaGrup = 336) then
+      TabloYenile(AraQuery1, [StrToIntDef(Kullanan, 0), AramaGrup])
+   else
+      TabloYenile(AraQuery1, [StrToIntDef(Kullanan, 0)]);
 end;
 procedure TRehberAramaEkrani.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -229,7 +233,7 @@ begin
        if AramaGrup = 335 then
           JvTimer1Timer(Self)
        else
-          LabelSonClick(Self);
+          LabelSonClick(LabelSon);  // acilista SON arananlar (Tag=1, DEGISTIRMETARIHI desc); Self=form Tag=0 SIK getiriyordu
    end;
 
     GridCariAramaDBTableView1FATBASLIK.Visible := False;

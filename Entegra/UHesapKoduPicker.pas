@@ -140,13 +140,18 @@ begin
    _Log(AKod+' - '+Tablo.Query1.Fields[1].AsString);
    Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
    Tablo.Query1.Close;
+   // ROOTKOD/SONKISIM = son '.' oncesi/sonrasi. CHARINDEX/LEN motor-farkli -> DbBul/DbUzunluk
+   //   seam; isnull->COALESCE, alias 'AS' -> tam portable (PgSqlCevir gerekmez).
+   var LNokta: string := QuotedStr('.');
+   var LCharRA: string := DbBul(LNokta, 'REVERSE('+AAlani+')');   // son '.' konumu (tersten)
+   var LSonExpr: string := 'CASE WHEN COALESCE('+DbBul(LNokta, AAlani)+',0)<1 THEN '+AAlani+
+     ' ELSE REVERSE(SUBSTRING(REVERSE('+AAlani+'),1,'+LCharRA+'-1)) END';
    Tablo.Query1.SQL.Text := 'Select '+DbUst(1)
-     +'SONKISIM=CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END,'
-     +'ROOTKOD=REVERSE( SUBSTRING(REVERSE('+AAlani+'),CHARINDEX(''.'',REVERSE('+AAlani+'),1)+1,LEN('+AAlani+')-(CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1))),'
-     +AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
-     +'LEN(CASE WHEN ISNULL(CHARINDEX(''.'','+AAlani+'),0)<1 THEN '+AAlani+' ELSE  REVERSE( SUBSTRING(REVERSE('+AAlani+'),1,CHARINDEX(''.'',REVERSE('+AAlani+'),1)-1)) END) >= '+inttostr(Digit)
-     +' order by LEN('+AAlani+') desc , 1 desc '+DbSinir(1);
-   Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);   // PG: alias=/isnull/charindex diyalekt
+     + LSonExpr + ' AS SONKISIM,'
+     + 'REVERSE(SUBSTRING(REVERSE('+AAlani+'),'+LCharRA+'+1,'+DbUzunluk(AAlani)+'-('+LCharRA+'-1))) AS ROOTKOD,'
+     + AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
+     + DbUzunluk('('+LSonExpr+')')+' >= '+IntToStr(Digit)
+     + ' order by '+DbUzunluk(AAlani)+' desc , 1 desc '+DbSinir(1);
    Tablo.Query1.Open;
    //yeni kayıt için düzeltme
    if Tablo.Query1.RecordCount=0 then begin
@@ -191,6 +196,11 @@ begin
     TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefAd',RefAd,[rfReplaceAll,rfIgnoreCase]);
     TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefTablo',RefTablo,[rfReplaceAll,rfIgnoreCase]);
     TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&KodGrubu',IntToStr(KodGurubu),[rfReplaceAll,rfIgnoreCase]);
+    // NOT: Memo1 sablonu MSSQL'e ozel (declare @sql / if exists INFORMATION_SCHEMA / exec dinamik
+    //   SQL + CHARINDEX/LEN). PgSqlCevir isnull/alias'i cevirir ama dinamik-SQL'i ceviremez ->
+    //   bu dal (Varsayilan=0) PG'de PG-native rewrite bekliyor (buyuk/cetrefil kategori).
+    if AktifVeriMotor = vmPG then
+      TabPlan.SQL.Text := PgSqlCevir(TabPlan.SQL.Text);
 
   end else begin
 
@@ -199,11 +209,16 @@ begin
     cxDBLabel1.DataBinding.DataField := RefKod;
     cxDBLabel2.DataBinding.DataField := RefAd;
     cxDBTreeList1.DataController.KeyField := RefKod;
-    TabPlan.SQL.Text := 'select ROOTKOD=REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX(''.'',REVERSE (HESAPKODU),1)+1,LEN(HESAPKODU)-(CHARINDEX(''.'',REVERSE(HESAPKODU),1)-1))),HESAPKODU,HESAPADI,DIGITSAY from HESAPPLANI where VARSAYILAN='+IntToStr(Varsayilan);
+    // ROOTKOD = HESAPKODU'nun son '.' oncesi. CHARINDEX/LEN -> DbBul/DbUzunluk seam, alias 'AS'
+    //   -> tam portable (PgSqlCevir gerekmez).
+    var LN: string := QuotedStr('.');
+    var LCRH: string := DbBul(LN, 'REVERSE(HESAPKODU)');
+    TabPlan.SQL.Text := 'select REVERSE(SUBSTRING(REVERSE(HESAPKODU),'+LCRH+'+1,'+
+      DbUzunluk('HESAPKODU')+'-('+LCRH+'-1))) AS ROOTKOD,'+
+      'HESAPKODU,HESAPADI,DIGITSAY from HESAPPLANI where VARSAYILAN='+IntToStr(Varsayilan);
 
   end;
   TabPlan.Close;
-  TabPlan.SQL.Text := PgSqlCevir(TabPlan.SQL.Text);   // PG: ROOTKOD=alias/CHARINDEX/LEN diyalekt (dogrudan .Open)
   TabPlan.Open;
   cxDBTreeList1Click(Self);
   Result := TabPlan.RecordCount;

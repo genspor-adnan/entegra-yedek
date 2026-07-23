@@ -374,6 +374,12 @@ function SatirIskontoTutar(const ASatir: TEBelgeSatir): Currency;
 var
   LBrut: Currency;
 begin
+  // GERCEK iskonto orani (ISKONTO/ISKONTO2) yoksa BirimFiyat*Miktar ile yuvarlanmis Tutar
+  // arasindaki minik fark yuvarlama artigidir (SAHTE iskonto degil) -> 0 don. LineExtension
+  // (=Tutar=round(Miktar*BirimFiyat)) GIB yuvarlama toleransi icinde kalir; PriceAmount ham
+  // BirimFiyat olarak emit edilir (kullanici birim fiyatta ondalik gormesin).
+  if (ASatir.IskontoOrani <= 0.001) and (ASatir.Iskonto2Orani <= 0.001) then
+    Exit(0);
   LBrut := SatirBrutTutar(ASatir);
   if LBrut > ASatir.Tutar then
     Result := LBrut - ASatir.Tutar
@@ -1887,6 +1893,14 @@ begin
           '">' + Ondalik(LToplamIskonto, '0.00##') + '</cbc:Amount>');
         LXML.AppendLine('</cac:AllowanceCharge>');
       end;
+      // Fatura tek KDV oranli mi? Oyleyse TaxSubtotal dip-toplam (ABaslik.Matrah/KDV) ile emit
+      //   edilir (Σ-satir=sum-of-rounded yerine round-of-sum). JSON gonderim de boyle yapiyor ->
+      //   UBL export = JSON = izibiz PDF (header ile tutarli). Cok-oranli: per-satir grup korunur.
+      var LTekOran: Boolean := True;
+      for I := 1 to High(ASatirlar) do
+        if Abs(ASatirlar[I].KDVOrani - ASatirlar[0].KDVOrani) > 0.001 then begin
+          LTekOran := False; Break;
+        end;
       LXML.AppendLine('<cac:TaxTotal>');
       LXML.AppendLine('<cbc:TaxAmount currencyID="' + ABaslik.ParaBirimi +
         '">' + Ondalik(LToplamVergi, '0.00##') + '</cbc:TaxAmount>');
@@ -1906,6 +1920,11 @@ begin
             LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
             LGrupVergi := LGrupVergi + SatirKDVBrut(ASatirlar[J]);
           end;
+        // Tek oranli: dip-toplam (round-of-sum) ile hizala -> Σ-satir yerine ABaslik.Matrah/KDV
+        if LTekOran then begin
+          LGrupMatrah := ABaslik.Matrah;
+          LGrupVergi := ABaslik.KDV;
+        end;
         // KDV=0 (istisna/ihracat) satir grubunda GIB TaxExemptionReasonCode/Reason ZORUNLU (cac:TaxCategory icinde, TaxScheme'den ONCE).
         var LIstisnaXml: string := '';
         if (ASatirlar[I].KDVOrani < 0.001) and
@@ -4597,9 +4616,9 @@ begin
       LCustomer.AddPair('identifier', ABaslik.VergiNo);
     end;
     if SameText(LCustSeli, 'TCKN') and (LIsArsiv or LIsIrsaliye) then begin
-      // Baslik'tan ad/soyad ayir: ilk kelime AD, gerisi SOYAD
+      // Baslik'tan ad/soyad ayir: SON kelime SOYAD, oncesi AD (orn "Mehmet Ali Ay" -> Ad="Mehmet Ali", Soyad="Ay")
       LTrimmed := Trim(ABaslik.Baslik);
-      LBosluk := Pos(' ', LTrimmed);
+      LBosluk := LastDelimiter(' ', LTrimmed);
       if LBosluk > 0 then begin
         LAd := Trim(Copy(LTrimmed, 1, LBosluk - 1));
         LSoyad := Trim(Copy(LTrimmed, LBosluk + 1, MaxInt));
@@ -4614,6 +4633,24 @@ begin
       // EIrsaliye taxOffice'i de gonderebilir
       if Trim(ABaslik.VergiDairesi) <> '' then
         LCustomer.AddPair('taxOffice', ABaslik.VergiDairesi);
+      // Sahis firma (TCKN=11 hane) e-Fatura: GIB kilavuzu (2.2.13) alicinin sahis
+      // olmasi durumunda cac:Person (Ad/Soyad) ister. izibiz JSON-native'de
+      // firstName/lastName yoksa "Belge gönderici/alıcı Ad boş olamaz" (kod 816).
+      // name (unvan->PartyName) + taxOffice (vergi dairesi->TaxScheme) yaninda Person
+      // de gonder (ornek: YILDIRIM ALÜMİNYUM XML, schemeID=TCKN + PartyName + TaxScheme).
+      if SameText(LCustSeli, 'TCKN') then begin
+        LTrimmed := Trim(ABaslik.Baslik);
+        LBosluk := LastDelimiter(' ', LTrimmed);  // SON kelime = soyad, oncesi = ad
+        if LBosluk > 0 then begin
+          LAd := Trim(Copy(LTrimmed, 1, LBosluk - 1));
+          LSoyad := Trim(Copy(LTrimmed, LBosluk + 1, MaxInt));
+        end else begin
+          LAd := LTrimmed;
+          LSoyad := LTrimmed;
+        end;
+        LCustomer.AddPair('firstName', LAd);
+        LCustomer.AddPair('lastName', LSoyad);
+      end;
     end;
     // Address ? Postman ornegine gore VARSAYILAN olarak gonderilir (Izibiz NPE atmasin)
     var LCustomerAdr: TJSONObject := TJSONObject.Create;

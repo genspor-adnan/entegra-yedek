@@ -57,6 +57,9 @@ function DbTarihTipi: string;
 // Alt-metin konumu (1-tabanli, yoksa 0). MSSQL CHARINDEX(needle,haystack) |
 //   PG strpos(haystack,needle) -- ARG SIRASI TERS (konumsal) -> seam.
 function DbBul(const ANeedle, AHaystack: string): string;
+// Metin uzunlugu. MSSQL LEN(x) (trailing bosluk saymaz) | PG length(x). Kod/anahtar gibi
+//   trailing-boslugsuz alanlarda esdeger -> seam.
+function DbUzunluk(const AExpr: string): string;
 // MSSQL 3-arg CONVERT(tip, expr, style) - tarih<->metin (stil kodlu). ATip 'varchar(10)' gibi
 //   uzunluk tasir (stil+uzunluk PG format'ini belirler; 120+len10=tarih). tip=char/varchar ->
 //   FORMAT yonu (to_char); tip=datetime/date -> PARSE yonu (to_timestamp). MSSQL'de aynen.
@@ -213,6 +216,12 @@ function DbBul(const ANeedle, AHaystack: string): string;
 begin
   if AktifVeriMotor = vmPG then Result := 'strpos(' + AHaystack + ',' + ANeedle + ')'
   else Result := 'CHARINDEX(' + ANeedle + ',' + AHaystack + ')';
+end;
+
+function DbUzunluk(const AExpr: string): string;
+begin
+  if AktifVeriMotor = vmPG then Result := 'length(' + AExpr + ')'
+  else Result := 'LEN(' + AExpr + ')';
 end;
 
 function PgTarihFmt(AStyle, ALen: Integer): string;   // MSSQL stil kodu -> PG to_char/to_timestamp format

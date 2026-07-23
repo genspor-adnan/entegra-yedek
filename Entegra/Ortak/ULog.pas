@@ -1802,10 +1802,12 @@ begin
   try
     LRowQ.Connection := Tablo.FDCnn;
     LInsQ.Connection := Tablo.FDCnn;
+    var LJDeger: string := ':J';
+    if AktifVeriMotor = vmPG then LJDeger := 'CAST(:J AS jsonb)';   // PG: jsonb kolonuna text -> cast
     LInsQ.SQL.Text :=
       'INSERT INTO ' + LSnap +
       '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) ' +
-      'VALUES(:O,:AT,:AI,:S,:T,:F,:K,:J)';
+      'VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
     // NULL gelebilen K/J param tiplerini acikca ver (cross-DB describe garantisi yok ->
     // "data type unknown" engeli).
     LInsQ.ParamByName('K').DataType := ftLargeint;
@@ -1908,8 +1910,10 @@ begin
   try
     LRowQ.Connection := Tablo.FDCnn;
     LInsQ.Connection := Tablo.FDCnn;
+    var LJDeger: string := ':J';
+    if AktifVeriMotor = vmPG then LJDeger := 'CAST(:J AS jsonb)';   // PG: jsonb kolonuna text -> cast
     LInsQ.SQL.Text := 'INSERT INTO ' + DepoTablo('SNAPSHOT') +
-      '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) VALUES(:O,:AT,:AI,:S,:T,:F,:K,:J)';
+      '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
     LInsQ.ParamByName('K').DataType := ftLargeint;
     LInsQ.ParamByName('J').DataType := ftWideMemo;
     for p := 0 to High(LKayit.Tablolar) do

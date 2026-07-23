@@ -1505,6 +1505,11 @@ var
 begin
   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
 
+  // PG: FATURA klon query'si (hesaplanan kolonlar) yalniz .Open ile acilir, TabloYenile'ye
+  // girmez -> DFM'deki MSSQL SQL'i (nested top 1 vb.) converter'i hic gormezdi. Bir kez cevir.
+  if (AktifVeriMotor = vmPG) and Assigned(FATURA) and (Trim(FATURA.SQL.Text) <> '') then
+    FATURA.SQL.Text := PgSqlCevir(FATURA.SQL.Text);
+
   if not EnBoyHesaplamaAktif then begin
      FreeAndNil(TabFaturaEN);
      FreeAndNil(TabFaturaBOY);
@@ -1523,6 +1528,10 @@ begin
     Tablo.FDCnn2.ConnectionString := Tablo.FDCnn.ConnectionString;
     Tablo.FDCnn2.Params.Values['MARS_Connection'] := 'Yes';
     Tablo.FDCnn2.Params.Values['MultipleActiveResultSets'] := 'True';
+    // PG: FDCnn2 params/connstr'i FDCnn'den kopyalar ama FormatOptions.MapRules'u DEGIL;
+    // maprule olmadan numeric kolonlar (DOVIZKURDEGERI vb.) FMTBcd gelir, DFM TCurrencyField
+    // ile "Type mismatch" verir. Ana baglantidaki bit->boolean + Currency maprule'lerini kur.
+    PgBitMapKur(Tablo.FDCnn2);   // vmPG self-guard; MSSQL'de no-op
     Tablo.FDCnn2.Connected := True;
   end;
   TabFatbaslik.Connection := Tablo.FDCnn2;
@@ -1827,7 +1836,7 @@ begin
     if (TUR in [3,4]) and (TabFatbaslik.FieldByName('TIPI').AsInteger in [16,17]) and (TabFatbaslik.FieldByName('YERI').AsInteger=99) then
         Aman_Kilitle;
 
-    TabloYenile(TabFatura,   [TabFaturaIDsi]);
+    TabloYenile(TabFatura, [TabFaturaIDsi]);
 
     // FATURA satir loglama: duzenlemede (D/I) orijinal satir durumunu yakala
     // (browse durumunda, guvenli). Kaydette bununla diff alinir.
@@ -1877,10 +1886,10 @@ begin
 
 
     if TabFatbaslik.FieldByName('MERKEZID').AsString <> '' then
-      EditSRMMerkezi.Text := Tablo.AciklamaGetir('SRMMERKEZI', 'MERKEZADI',TabFatbaslik.FieldByName('MERKEZID').AsInteger);
+       EditSRMMerkezi.Text := Tablo.AciklamaGetir('SRMMERKEZI', 'MERKEZADI',TabFatbaslik.FieldByName('MERKEZID').AsInteger);
 
     if TabFatbaslik.FieldByName('PROJEID').AsString <> '' then
-      BeditProje.Text := Tablo.AciklamaGetir('PROJELER','PROJEKODU+'' / ''+PROJEADI', TabFatbaslik.FieldByName('PROJEID').AsInteger);
+        BeditProje.Text := Tablo.AciklamaGetir('PROJELER','PROJEKODU+'' / ''+PROJEADI', TabFatbaslik.FieldByName('PROJEID').AsInteger);
   end;
 
   if IslemOp ='I' then
@@ -3597,10 +3606,27 @@ begin
 end;
 
 procedure TFaturaWizardDlg.FirmaBilgileri;
+var LIletID: Integer;
 begin
   Tablo.TablodanSorguAc(1,'Select '+DbUst(1)+'ID from REHBERILETISIM Where REHBERID='+IntToStr(RehberId)+' order by VARSAYILAN desc '+DbSinir(1));
+  LIletID := Tablo.Query1.Fields[0].AsInteger;
 
-  TabloYenile(Tablo.tabCariBilgileri, [RehberId,tablo.Query1.Fields[0].AsInteger]);
+  // tabCariBilgileri DECLARE/SET @var kullanir.
+  if AktifVeriMotor = vmPG then begin
+    // PG: PgDeclareCevir @var'lari KULLANILDIKLARI yere inline eder -> :param GORUNUM sirasi
+    // MSSQL'den farkli (PG: IletID,RehID). TabloYenile POZISYONEL baglar -> PG'de yer degisir/
+    // tip-hatasi. Bu yuzden PG'de ISIMLE baglariz (PgSqlCevir SQL.Text'i re-set ederken :param'lari
+    // da olusturur).
+    Tablo.tabCariBilgileri.Close;
+    if Pos('@', Tablo.tabCariBilgileri.SQL.Text) > 0 then
+      Tablo.tabCariBilgileri.SQL.Text := PgSqlCevir(Tablo.tabCariBilgileri.SQL.Text);
+    Tablo.tabCariBilgileri.ParamByName('RehID').AsInteger := RehberId;
+    Tablo.tabCariBilgileri.ParamByName('IletID').AsInteger := LIletID;
+    Tablo.tabCariBilgileri.Open;
+  end else
+    // MSSQL: TabloYenile pozisyonel (SET sirasi RehID,IletID). Param'lari KENDI olusturur;
+    // direkt ParamByName param yoksa "REHID not found" verir -> TabloYenile'de kal.
+    TabloYenile(Tablo.tabCariBilgileri, [RehberId, LIletID]);
   LabelKod.Caption := Tablo.tabCariBilgileri.FieldByName('KOD').AsString;
   LabelAd.Caption := Tablo.tabCariBilgileri.FieldByName('FIRMA').AsString;
   CarideEFatura := Tablo.tabCariBilgileri.FieldByName('EFATURA').AsString='True';
@@ -3877,7 +3903,7 @@ begin
   end;    *)
 
   // Hesaplanan kolonlari kaynak SQL'den almak icin clone query'yi ayni Param ile aciyoruz
-  if FATURA.Active then
+  if FATURA.Active  then
     FATURA.Close;
   if TabFatura.Params.FindParam('Par') <> nil then
     FATURA.ParamByName('Par').Value := TabFatura.ParamByName('Par').Value

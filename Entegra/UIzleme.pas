@@ -338,23 +338,40 @@ begin
 end;   *)
 procedure TIzlemeDlg.TempTabloOlustur;
 var s, KomutDeclare, KomutInsert:String;
+  // PG'de SQL diyalekt-cevir + calistir (MSSQL'de aynen). declare/set @var inline,
+  //   isnull/top/bit/getdate vb. + memo SQL'leri PgSqlCevir'den gecer.
+  procedure ExecC(Q: TFDQuery; const ASql: string);
+  begin
+    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(ASql) else Q.SQL.Text := ASql;
+    Q.ExecSQL;
+  end;
 begin
-  TabloAdi := '##TmpIzleme_'+IntToStr(SPID)+'_'+FormatDateTime('yyyymmddhhnnsszzz',Tablo.GENINI.BugunTrhSaat);
-  TabIzlem.SQL.Text := 'create table '+TabloAdi+'(';
-  TabIzlem.SQL.Add('[ID] [int] IDENTITY(1,1) NOT NULL,');
-  TabIzlem.SQL.Add('[STOKID] [int] NOT NULL,');
-  TabIzlem.SQL.Add('[SERINO] [nvarchar](64) NULL,');
-  TabIzlem.SQL.Add('[DURUM] [float] NULL,');
-  TabIzlem.SQL.Add('[KALAN] [float] NULL,');
-  TabIzlem.SQL.Add('[SEC] [bit] NULL ,');
-  TabIzlem.SQL.Add('[LOTNO] [nvarchar](50) NULL,');
-  TabIzlem.SQL.Add('[SKT] datetime NULL,');
-  TabIzlem.SQL.Add('[URT] datetime NULL,');
-  TabIzlem.SQL.Add('[IZLEMID] [int] NULL,');
-  TabIzlem.SQL.Add('[BASLIKID] [int] NULL,');
-  TabIzlem.SQL.Add('[SATIRID] [int] NULL,');
-  TabIzlem.SQL.Add('[UPDID] [int] NULL,');
-  TabIzlem.SQL.Add('SERILOTID [int] NULL)');
+  if AktifVeriMotor = vmPG then
+    TabloAdi := 'tmpizleme_'+IntToStr(SPID)+'_'+FormatDateTime('yyyymmddhhnnsszzz',Tablo.GENINI.BugunTrhSaat)
+  else
+    TabloAdi := '##TmpIzleme_'+IntToStr(SPID)+'_'+FormatDateTime('yyyymmddhhnnsszzz',Tablo.GENINI.BugunTrhSaat);
+  if AktifVeriMotor = vmPG then
+    TabIzlem.SQL.Text :=
+      'CREATE TEMP TABLE '+TabloAdi+'(ID serial, STOKID int NOT NULL, SERINO varchar(64),'+
+      ' DURUM double precision, KALAN double precision, SEC smallint, LOTNO varchar(50),'+  // SEC bit->smallint (maprule ''sec''->boolean okumada)
+      ' SKT timestamp, URT timestamp, IZLEMID int, BASLIKID int, SATIRID int, UPDID int, SERILOTID int)'
+  else begin
+    TabIzlem.SQL.Text := 'create table '+TabloAdi+'(';
+    TabIzlem.SQL.Add('[ID] [int] IDENTITY(1,1) NOT NULL,');
+    TabIzlem.SQL.Add('[STOKID] [int] NOT NULL,');
+    TabIzlem.SQL.Add('[SERINO] [nvarchar](64) NULL,');
+    TabIzlem.SQL.Add('[DURUM] [float] NULL,');
+    TabIzlem.SQL.Add('[KALAN] [float] NULL,');
+    TabIzlem.SQL.Add('[SEC] [bit] NULL ,');
+    TabIzlem.SQL.Add('[LOTNO] [nvarchar](50) NULL,');
+    TabIzlem.SQL.Add('[SKT] datetime NULL,');
+    TabIzlem.SQL.Add('[URT] datetime NULL,');
+    TabIzlem.SQL.Add('[IZLEMID] [int] NULL,');
+    TabIzlem.SQL.Add('[BASLIKID] [int] NULL,');
+    TabIzlem.SQL.Add('[SATIRID] [int] NULL,');
+    TabIzlem.SQL.Add('[UPDID] [int] NULL,');
+    TabIzlem.SQL.Add('SERILOTID [int] NULL)');
+  end;
   TabIzlem.ExecSQL;
 
 //  KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @GirDepoID int, @CikDepoID int, @Dil int, @RehberId int, @IzlemTur int'+
@@ -409,23 +426,18 @@ begin
            TabIzlem.ExecSQL;
         end
         else }if DonusumKaynak then begin
-           TabIzlem.SQL.Text := KomutDeclare+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []);
-           TabIzlem.ExecSQL;
+           ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []));
         end
         else begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            TabIzlem.SQL.Text := KomutDeclare+ StringReplace(SQLGiren.text, ':TabloAdi', TabloAdi, []);
-            TabIzlem.ExecSQL;
-            Tablo.Query1.SQL.Text := KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []);
-            Tablo.Query1.ExecSQL;
+            ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLGiren.text, ':TabloAdi', TabloAdi, []));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []));
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
-         TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []);
-         TabIzlem.ExecSQL;
+         ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          KomutDeclare := ' declare @SatirID int set @SatirID='+IntToStr(SatirID);
-         Tablo.Query1.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []);
-         Tablo.Query1.ExecSQL;
+         ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
      end;
   //çıkışlar
   end else begin
@@ -435,25 +447,21 @@ begin
             TabIzlem.ExecSQL;
          end else }
          begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            TabIzlem.SQL.Text := KomutDeclare+ StringReplace(SQLCikan.text, ':TabloAdi', TabloAdi, []);
-            TabIzlem.ExecSQL;
-            Tablo.Query1.SQL.Text := KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []);
-            Tablo.Query1.ExecSQL;
+            ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLCikan.text, ':TabloAdi', TabloAdi, []));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []));
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
-         TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []);
-         TabIzlem.ExecSQL;
+         ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          // 11/05/2022 AO kaldırıldı
          KomutDeclare := ' declare @SatirID int set @SatirID='+IntToStr(SatirID);
-         Tablo.Query1.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []);
-         Tablo.Query1.ExecSQL;
+         ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
      end;
   end;
 
 
   if IslemTur=KasaTur_StokSayimIslemi then //99 ise hepsini işaretleyelim tüm satırların şu anki değerlerini girsinler
-     veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+TabloAdi+' set SEC=1' ,[],[]);
+     veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+TabloAdi+' set SEC=1' ,[],[]);  // SEC smallint
 
   TabIzlem.SQL.Text := 'select * from '+TabloAdi;
 

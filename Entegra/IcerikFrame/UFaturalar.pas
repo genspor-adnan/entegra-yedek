@@ -1001,7 +1001,7 @@ begin
       FATBASLIK.ParamByName('Baslik').Value := SelectList;   // SELECT ek kolonlari
       FATBASLIK.ParamByName('Kosullar').Value := LKosullar.ToJSON;
     finally
-      LKosullar.Free;
+       LKosullar.Free;
     end;
 
     FATBASLIK.DisableControls;
@@ -3736,7 +3736,7 @@ end;
 
 procedure TFaturalarDlg.YeniTusClick(Sender: TObject);
 var ID,i,Tur : Integer;
-HesapTuru : Char;
+HesapTuru :  Char;
  Tutar : Currency;
   gf : TFaturaGorevFrame;
 begin

@@ -237,7 +237,7 @@ var
 
 implementation
 
-uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON;
+uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON, UVeriMotor;
 
 var
   UserInitiated:Boolean=True;
@@ -536,10 +536,16 @@ procedure TStokHizmetAraDlg.PageControl1Change(Sender: TObject);
 begin
     TabKategori.Close;
     if Assigned(PageControl1.ActivePage) then begin
-      if PageControl1.ActivePage.Name='SheetStok' then
-         TabKategori.SQL.Text := ' select ROOTKOD=REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))), '+
-                ' ID,KOD,AD,DURUM from KATEGORI order by KOD'
-
+      if PageControl1.ActivePage.Name='SheetStok' then begin
+         // ROOTKOD = KOD'un son '.' oncesi (ust kategori kodu). CHARINDEX/LEN MSSQL'e ozel;
+         // PG'de strpos (ARG SIRASI TERS: haystack,needle) / LENGTH. Alias 'AS' ile portable.
+         var LRootKod: string;
+         if AktifVeriMotor = vmPG then
+           LRootKod := 'REVERSE(SUBSTRING(REVERSE(KOD), strpos(REVERSE(KOD),''.'')+1, LENGTH(KOD)-(strpos(REVERSE(KOD),''.'')-1)))'
+         else
+           LRootKod := 'REVERSE(SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1)))';
+         TabKategori.SQL.Text := ' select '+LRootKod+' AS ROOTKOD, ID,KOD,AD,DURUM from KATEGORI order by KOD';
+      end
       else TabKategori.SQL.Text := ' select ID from KATEGORI where 1=2';
       TabKategori.Open;
       TreeListKategori.Visible := TabKategori.RecordCount>0;
@@ -795,14 +801,14 @@ var
 //          if TabStokListe.FieldByName('PAKET').AsBoolean then
 //            Tablo.TablodanSorguAc(1,'sp_Prg_FiyatGetir_Stok '+IntToStr(RehberId)+','+ IntToStr(UrunID)+','+ IntToStr(FiyatAdi)+','+ IntToStr(Birim)+','+ IntToStr(UrunID))
 //          else
-          Tablo.TablodanSorguAc(1,'sp_Prg_FiyatGetir_Stok '+IntToStr(RehberId)+','+ IntToStr(UrunID)+','+ IntToStr(FiyatAdi)+','+ IntToStr(Birim))
+          Tablo.TablodanSorguAc(1,'exec sp_Prg_FiyatGetir_Stok '+IntToStr(RehberId)+','+ IntToStr(UrunID)+','+ IntToStr(FiyatAdi)+','+ IntToStr(Birim))
        end else begin
           if GirisCikis = FWGiris then
              SATIS:='0'
           else
              SATIS:='1';
 
-            Tablo.TablodanSorguAc(1,'sp_Prg_FiyatGetir_Hizmet '+IntToStr(RehberId)+','+ IntToStr(UrunID)+','+ IntToStr(FiyatAdi)+','+ SATIS);
+            Tablo.TablodanSorguAc(1,'exec sp_Prg_FiyatGetir_Hizmet '+IntToStr(RehberId)+','+ IntToStr(UrunID)+','+ IntToStr(FiyatAdi)+','+ SATIS);
        end;
        Isk1 := Tablo.Query1.FieldByName('ISKONTO').AsFloat;
        Fiyat := Tablo.Query1.FieldByName('FIYAT').AsFloat;
@@ -1342,7 +1348,7 @@ begin
   if Trim(EditAdi.Text)  <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
   if OkunanBarkod        <> '' then j.AddPair('Barkod', OkunanBarkod);
   if SubeVarmi and (ComboSube.EditValue <> null) then begin
-    j.AddPair('SubeVar', TJSONNumber.Create(1));
+    j.AddPair('SubeVar',  TJSONNumber.Create(1));
     j.AddPair('SubeID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboSube.EditValue), 0)));
   end;
   Tablo.ListeSPJson(TabHizmetListe, 'sp_Prog_StokHizmetAra_Hizmet_Json2', '', j);

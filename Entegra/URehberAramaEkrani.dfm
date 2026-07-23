@@ -353,8 +353,8 @@ object RehberAramaEkrani: TRehberAramaEkrani
     end
     object ToolBar1: TToolBar
       AlignWithMargins = True
-      Left = 20019
-      Top = 19456
+      Left = 20028
+      Top = 19465
       Width = 60
       Height = 33
       Margins.Bottom = 0

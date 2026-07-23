@@ -5639,6 +5639,8 @@ begin
       Qry.Close;
       Qry.SQL.Text := 'SELECT ' + AciklamaAlani + ' FROM ' + TabloAdi +
         ' WHERE '+IDAlani+'=' + VarToStr(Id);
+      if AktifVeriMotor = vmPG then   // string '+' concat -> '||', dbo/isnull vb.
+        Qry.SQL.Text := PgSqlCevir(Qry.SQL.Text);
       Qry.Open;
       Result := Qry.Fields[0].AsString
     except
