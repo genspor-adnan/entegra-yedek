@@ -8598,6 +8598,7 @@ Begin
 //turler   0 tüm 1 Görme  2 değiş  3 Revizyon  4 silme 5 Revizyon silme  6 E-Posta 7 Ver (Export) 11 ekleme  15 form kaydedildi
   Tablo.Query7.SQL.Text:='INSERT INTO DOKUMANGECMIS  (DOKUMANID,TUR,EKLEMETARIHI,EKLEYEN,ACIKLAMA)'+
                                      'VALUES ('+IntToStr(DokumanId)+','+IntToStr(Tur)+',GETDATE(),'+Kullanan+','+''''+Aciklama+''''+')  select scope_identity()';
+  if AktifVeriMotor = vmPG then Tablo.Query7.SQL.Text := PgSqlCevir(Tablo.Query7.SQL.Text);  // getdate->now, scope_identity->returning ID
   Tablo.Query7.Open;
   Result := Tablo.Query7.fields[0].asInteger;
 End;
@@ -11446,6 +11447,7 @@ begin
    //Result := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN)VALUES('+IntToStr(AYerId)+','+IntToStr(AYeri)+',:MemoYorum,'+Kullanan+') select scope_identity() ',[],[],True);
 
    Tablo.Query1.SQL.Text := 'INSERT INTO GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,ZENGINMETIN)VALUES('+IntToStr(AYerId)+','+IntToStr(AYeri)+',:MemoYorum,'+Kullanan+','+IntToStr(Abs(StrToInt(BoolToStr(ZenginMetin))))+') select scope_identity()';
+   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);  // scope_identity->returning ID
    Tablo.Query1.Params[0].value := AMsg;
    Tablo.Query1.Open;
    Result := Tablo.Query1.Fields[0].AsInteger;

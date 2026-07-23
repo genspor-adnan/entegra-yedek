@@ -21,7 +21,7 @@ uses DB, Classes, Graphics, OleCtnrs, MSS_Sender,
 
 
 implementation
-uses FetaKurulusSiniflari, PrjConst, FetaUtil, ULog;
+uses FetaKurulusSiniflari, PrjConst, FetaUtil, ULog, UVeriMotor;
 (*
 Question/Problem/Abstract:
 
@@ -228,6 +228,9 @@ var
   LBoyutKB: Integer;
   LSQLUp: string;
 begin
+  // PG: IMAJ/blob insert 'select scope_identity()' -> 'returning ID' (PgSqlCevir). Direkt Tablo1.Open
+  //   ediliyor (converter bypass) -> burada bir kez cevir. MSSQL'de aynen. :PBELGE/INSERT/IMAJ korunur.
+  if AktifVeriMotor = vmPG then Tablo1.SQL.Text := PgSqlCevir(Tablo1.SQL.Text);
   // YENI: IMAJ dokuman INSERT'i (INSERT ... IMAJ ... :PBELGE; ID donusu scope_identity VEYA
   //  OUTPUT INSERTED.ID INTO @NewID + SELECT olabilir -> Tablo1.Open sonrasi Fields[0]=yeni ID)
   //  ise icerigi DOSYA deposuna (ham, hash-dedup) al + IMAJ'i referansa cevir (BELGE=NULL, DOSYAID).
