@@ -4762,6 +4762,11 @@ begin
       LMonetary.AddPair('taxExclusiveAmount', TJSONNumber.Create(LToplamMatrah));
       LMonetary.AddPair('taxInclusiveAmount', TJSONNumber.Create(LToplamMatrah + LToplamKDV));
       LMonetary.AddPair('payableAmount', TJSONNumber.Create(ABaslik.Toplam));
+      // Toplam satir iskontosu -> izibiz legalMonetaryTotal.allowanceTotalAmount (UBL AllowanceTotalAmount
+      //   aynasi). Eksikse izibiz belge duzeyinde iskontoyu gostermez.
+      var LTopIsk: Currency := SatirlarIskontoToplami(ASatirlar);
+      if LTopIsk > 0.0001 then
+        LMonetary.AddPair('allowanceTotalAmount', TJSONNumber.Create(LTopIsk));
       LContent.AddPair('legalMonetaryTotal', LMonetary);
     end else begin
       // E-Irsaliye: shipment blogu
@@ -4837,6 +4842,26 @@ begin
       LLine.AddPair('lineExtensionAmount', TJSONNumber.Create(LSatir.Tutar));
       LLine.AddPair('itemName', LSatir.UrunAdi);
       LLine.AddPair('itemPrice', TJSONNumber.Create(LSatir.BirimFiyat));
+      // Satir iskontosu -> izibiz JSON 'allowanceCharge' dizisi (UBL cac:AllowanceCharge aynasi).
+      //   Eksikse izibiz iskonto=0 gosterir + mal/hizmet'i iskonto-sonrasi (net) sanar. lineExtension
+      //   NET kalir; baseAmount=brut, amount=iskonto. multiplierFactorNumeric = PERCENT (izibiz ornegi:
+      //   base*mfn/100=amount; UBL'de /100'lu kesir, JSON'da tam yuzde). YALNIZ fatura (irsaliye'de yok).
+      if (not LIsIrsaliye) then begin
+        var LSIskonto: Currency := SatirIskontoTutar(LSatir);
+        if LSIskonto > 0.0001 then begin
+          var LAllowArr: TJSONArray := TJSONArray.Create;
+          var LAllow: TJSONObject := TJSONObject.Create;
+          LAllow.AddPair('chargeIndicator', TJSONBool.Create(False));
+          LAllow.AddPair('reason', 'Iskonto');
+          LAllow.AddPair('multiplierFactorNumeric', TJSONNumber.Create(SatirIskontoOrani(LSatir)));
+          LAllow.AddPair('amount', TJSONNumber.Create(LSIskonto));
+          var LSBrut: Currency := SatirBrutTutar(LSatir);
+          if LSBrut > 0.0001 then
+            LAllow.AddPair('baseAmount', TJSONNumber.Create(LSBrut));
+          LAllowArr.AddElement(LAllow);
+          LLine.AddPair('allowanceCharge', LAllowArr);
+        end;
+      end;
       // Item kimlikleri: Izibiz earchives JSON'unda DUZ string alan bekliyor
       // (nesne {id:..} DEGIL). Dogru anahtarlar Izibiz tarafindan bildirildi:
       //   buyerIdentificationId / sellerIdentificationId / manufacturerIdentificationId
