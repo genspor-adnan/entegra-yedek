@@ -352,8 +352,13 @@ begin
     try
       LQ.Connection := Tablo.FDCnn;
       // 1) Ayni HASH varsa REFSAYAC++ ve mevcut ID'yi don (TEKILLESTIRME).
-      LQ.SQL.Text := 'UPDATE ' + LTbl +
-        ' SET REFSAYAC = REFSAYAC + 1 OUTPUT INSERTED.ID WHERE HASH = :H';
+      // MSSQL OUTPUT INSERTED.ID (SET-WHERE arasi) -> PG 'returning ID' (sonda). :param'li direkt-Open
+      //   -> motor-kosullu TEK atama (PgSqlCevir re-set :H param'ini bozar). id getir.
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := 'UPDATE ' + LTbl + ' SET REFSAYAC = REFSAYAC + 1 WHERE HASH = :H returning ID'
+      else
+        LQ.SQL.Text := 'UPDATE ' + LTbl +
+          ' SET REFSAYAC = REFSAYAC + 1 OUTPUT INSERTED.ID WHERE HASH = :H';
       LHashStream.Position := 0;
       LQ.ParamByName('H').LoadFromStream(LHashStream, ftVarBytes);
       LQ.Open;
@@ -365,9 +370,13 @@ begin
       end;
       LQ.Close;
       // 2) Yok -> yeni satir (ICERIK = FILESTREAM blob).
-      LQ.SQL.Text := 'INSERT INTO ' + LTbl +
-        '(HASH, BOYUT, UZANTI, MIMETYPE, ICERIK) OUTPUT INSERTED.ID ' +
-        'VALUES(:H, :B, :U, :M, :I)';
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := 'INSERT INTO ' + LTbl +
+          '(HASH, BOYUT, UZANTI, MIMETYPE, ICERIK) VALUES(:H, :B, :U, :M, :I) returning ID'
+      else
+        LQ.SQL.Text := 'INSERT INTO ' + LTbl +
+          '(HASH, BOYUT, UZANTI, MIMETYPE, ICERIK) OUTPUT INSERTED.ID ' +
+          'VALUES(:H, :B, :U, :M, :I)';
       LHashStream.Position := 0;
       LQ.ParamByName('H').LoadFromStream(LHashStream, ftVarBytes);
       LQ.ParamByName('B').AsLargeInt := Length(LBuf);
