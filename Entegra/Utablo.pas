@@ -2342,6 +2342,8 @@ begin
       Q.SQL.Text := 'exec dbo.sp_Prog_Kontrol_Adet_Izlemli :URUNID,:DEPOID,:TARIH,:ADET,:SATIRID,:SERILOTID'
     else
       Q.SQL.Text := 'exec dbo.sp_Prog_Kontrol_Adet_Izlemsiz :URUNID,:DEPOID,:TARIH,:ADET,:SATIRID';
+    if AktifVeriMotor = vmPG then   // exec sp_ -> select * from fn_ (:param'lar korunur)
+      Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     Q.ParamByName('URUNID').AsInteger := AUrunID;
     Q.ParamByName('DEPOID').AsInteger := ADepoID;
     Q.ParamByName('TARIH').AsDateTime := ATarih;
@@ -13533,7 +13535,7 @@ Var
 //      c.Style.Font.Size := Tablo.Query8.FieldByName('FONTSIZE').AsInteger;
 //      c.Style.Font.Color:= StringToColor(Tablo.Query8.FieldByName('FONTCOLOR').AsString);
 //      c.Style.Color:= StringToColor(Tablo.Query8.FieldByName('ARKARENK').AsString);
-      if TPanel(c.Parent).Visible then
+      if (c.Parent <> nil) and TPanel(c.Parent).Visible then  // Konum panel bulunamazsa (nil) AV olmasin
         c.Show;
     end;
 
@@ -13970,7 +13972,7 @@ begin
     UyariGoster(Uyari,'Liste Açılırken Bir Hata Oluşmuş Olabilir.');
   end;
   while not Tablo.Query8.Eof do begin
-    Konum:= FormName.FindComponent(Tablo.Query8.FieldByName('KONUM').AsString);
+    Konum:= FormName.FindComponent(Trim(Tablo.Query8.FieldByName('KONUM').AsString));  // Trim: PG char(n) padding -> FindComponent bulsun
     if Konum<>nil then
       case Tablo.Query8.FieldByName('TUR').AsInteger of
         1 :begin                                        //TcxTextEdit
