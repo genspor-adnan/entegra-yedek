@@ -445,7 +445,10 @@ begin
   Adlar := TStringList.Create;
   Degerler := TStringList.Create;
   try
-    Satirlar.Text := S;
+    // Kod-uretimi 'declare @x int set @x=1 set @y=2' TEK SATIRDA gelebilir -> her set/declare'i
+    //   kendi satirina ayir (yoksa 'declare'li tek satir komple silinir, SET'ler kaybolur, @var
+    //   inline olmaz). Satir-bazli isleme icin normalize et.
+    Satirlar.Text := TRegEx.Replace(S, '\b(set|declare)\s+(@)', sLineBreak + '$1 $2', [roIgnoreCase]);
     for i := Satirlar.Count - 1 downto 0 do
     begin
       t := Trim(Satirlar[i]);

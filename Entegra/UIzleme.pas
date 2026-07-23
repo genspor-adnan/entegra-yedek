@@ -375,8 +375,8 @@ begin
   TabIzlem.ExecSQL;
 
 //  KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @GirDepoID int, @CikDepoID int, @Dil int, @RehberId int, @IzlemTur int'+
-  KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @RehberId int, @IzlemTur int, @DepoID int '+
-                 ' set @StokID='+IntToStr(StokID)+
+  KomutDeclare := ' declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @RehberId int, @IzlemTur int, @DepoID int '+sLineBreak+
+                 ' set @StokID='+IntToStr(StokID)+sLineBreak+
 
   //Bakalım bu fatura ve irsaliyeden dönüştürülmüş ise irsaliye ID sinden izlemeaçılacak
 {  if IslemTur in [11,15] then begin
@@ -389,19 +389,19 @@ begin
       end;
   end; }
 
-  ' set @BaslikTur='+IntToStr(IslemTur)+
-  ' set @BaslikID='+IntToStr(BaslikID)+
-  ' set @SatirID='+IntToStr(SatirID)+
+  sLineBreak+' set @BaslikTur='+IntToStr(IslemTur)+
+  sLineBreak+' set @BaslikID='+IntToStr(BaslikID)+
+  sLineBreak+' set @SatirID='+IntToStr(SatirID)+
 //  ' set @GirDepoID='+IntToStr(GirDepo)+
 //  ' set @CikDepoID='+IntToStr(CikDepo)+
 //  ' set @Dil='+IntToStr(Dil)+
 
-  ' set @RehberId='+IntToStr(RehberId)+
-  ' set @IzlemTur='+IntToStr(IzlemTur);
+  sLineBreak+' set @RehberId='+IntToStr(RehberId)+
+  sLineBreak+' set @IzlemTur='+IntToStr(IzlemTur);
   if (IslemTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,KasaTur_Giden_Konsinye,KasaTur_StokSayimIslemi,KasaTur_Uretim_Sarf, KasaTur_StokTransferi]) then
-     KomutDeclare:=KomutDeclare+' set @DepoID='+IntToStr(CikDepo)
+     KomutDeclare:=KomutDeclare+sLineBreak+' set @DepoID='+IntToStr(CikDepo)
   else
-     KomutDeclare:=KomutDeclare+' set @DepoID='+IntToStr(GirDepo);
+     KomutDeclare:=KomutDeclare+sLineBreak+' set @DepoID='+IntToStr(GirDepo);
 {  KomutInsert := ' insert into '+TabloAdi+ ' (STOKID,SERINO,DURUM,KALAN,SEC,LOTNO,SKT)';
 
   //üretim, irs ve fat giriş ise satır boş gelir
@@ -434,9 +434,9 @@ begin
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
+         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
-         KomutDeclare := ' declare @SatirID int set @SatirID='+IntToStr(SatirID);
+         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
          ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
      end;
   //çıkışlar
@@ -451,10 +451,10 @@ begin
             ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []));
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
+         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          // 11/05/2022 AO kaldırıldı
-         KomutDeclare := ' declare @SatirID int set @SatirID='+IntToStr(SatirID);
+         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
          ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
      end;
   end;
