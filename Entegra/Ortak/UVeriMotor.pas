@@ -34,6 +34,7 @@ var
 // ---- Diyalekt yardimcilari (vmMSSQL -> bugunku T-SQL ile BIREBIR) ----
 function DbSimdi: string;                          // getdate()      | now()
 function DbKimlikAl: string;                       // scope_identity()| lastval()
+function DbKimlikDonus: string;                     // 'select scope_identity()' | 'returning ID' (INSERT ID getir, build-time)
 function DbAcTirnak: string;                        // '['            | '"'
 function DbKapaTirnak: string;                      // ']'            | '"'
 function DbAd(const AAd: string): string;           // [AAd]          | "AAd"  (tanimlayici kacisi)
@@ -133,6 +134,14 @@ end;
 function DbKimlikAl: string;
 begin
   if AktifVeriMotor = vmPG then Result := 'lastval()' else Result := 'scope_identity()';
+end;
+
+function DbKimlikDonus: string;
+begin
+  // INSERT sonrasi yeni ID getir: MSSQL 'select scope_identity()' | PG 'returning ID'. Build-time seam --
+  //   :param (blob vb.) tasiyan DIREKT-Open query'lerinde PgSqlCevir SQL.Text'i re-set edip param'i
+  //   bozdugundan (PBELGE not found), tail'i cagiranin TEK atamasi icinde motor'a gore uret.
+  if AktifVeriMotor = vmPG then Result := 'returning ID' else Result := 'select scope_identity()';
 end;
 
 function DbAcTirnak: string;

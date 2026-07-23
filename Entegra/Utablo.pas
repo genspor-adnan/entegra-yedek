@@ -7020,16 +7020,21 @@ begin
     + ',' + Tablo.Query2.Fields[0].AsString + ',''' + copy(DosyaAdi, RevPos('.', DosyaAdi)+1,5)+''','+Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi)
     + ''',:PBELGE,' + Kullanan + ','''+FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat)+''','+inttostr(SubeID)+') select scope_identity()';*)
   Tablo.Query1.Close;                                                                                        //FExtToStr
-  Tablo.Query1.SQL.Text :=
-    'SET NOCOUNT ON; ' +
-    'DECLARE @NewID TABLE (ID INT); ' +
-    'INSERT INTO IMAJ (SURUM,DURUM,ICDIS,REHBERID,YERI,YER_ID,BELGENO,BELGETURU,BOYUT,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) ' +
-    'OUTPUT INSERTED.ID INTO @NewID(ID) ' +
+  // Kolon + VALUES ortak; ID-getir motora gore: MSSQL OUTPUT INSERTED.ID INTO @NewID + SELECT,
+  //   PG 'returning ID'. Tek SQL.Text atamasi -> :PBELGE param'i korunur (PgSqlCevir re-set param'i bozardi).
+  var LImajKol: string :=
+    'INSERT INTO IMAJ (SURUM,DURUM,ICDIS,REHBERID,YERI,YER_ID,BELGENO,BELGETURU,BOYUT,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) ';
+  var LImajVal: string :=
     'VALUES(''1.0'',1,' + IntToStr(Dokuman_Kayit_Yeri) + ',' + Kullanan + ',''' + IntToStr(Yeri) + ''',' +
-  IntToStr(Yer_ID) + ',' + Tablo.Query2.Fields[0].AsString + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
+    IntToStr(Yer_ID) + ',' + Tablo.Query2.Fields[0].AsString + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
     Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi) +
     ''',:PBELGE,' + Kullanan + ',''' + FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat) + ''',' +
-  IntToStr(SubeID) + '); ' + 'SELECT ID FROM @NewID;';
+    IntToStr(SubeID) + ')';
+  if AktifVeriMotor = vmPG then
+    Tablo.Query1.SQL.Text := LImajKol + LImajVal + ' returning ID'
+  else
+    Tablo.Query1.SQL.Text := 'SET NOCOUNT ON; DECLARE @NewID TABLE (ID INT); ' +
+      LImajKol + 'OUTPUT INSERTED.ID INTO @NewID(ID) ' + LImajVal + '; SELECT ID FROM @NewID;';
 
 
   try
@@ -8249,7 +8254,7 @@ begin
      Tablo.Query1.SQL.Text:= ' INSERT INTO IMAJ (REHBERID,ICDIS,YERI,YER_ID,SURUM,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) '+
             'VALUES('+IntToStr(YerId)+',1,'+IntToStr(Yer)+','+IntToStr(YerId)+','+
             '''1.0'','''+Dosya+''',:PBELGE,'''+Kullanan+''','+
-            ''''+FormatDateTime('yyyy-mm-dd hh:nn', Tablo.Genini.BugunTrhSaat)+''','+ IntToStr(SubeId)+') select scope_identity() ';
+            ''''+FormatDateTime('yyyy-mm-dd hh:nn', Tablo.Genini.BugunTrhSaat)+''','+ IntToStr(SubeId)+') ' + DbKimlikDonus;
      if not KutugeYaz(Tablo.Query1, Dosya) then begin
         Result := False;
         exit;
@@ -8503,7 +8508,7 @@ begin
    Tablo.Query1.SQL.Text:= ' INSERT INTO IMAJ (REHBERID, ONAYLAYACAK, ONAY, ICDIS, YERI, YER_ID, BELGETURU, BOYUT, BELGEADI, ACIKLAMA, BELGE, EKLEYEN, SURUM, DEGISTIRMETARIHI,SUBEID) '+
            'VALUES('+VarToStr(Sorumlu)+','+VarToStr(Onaylayacak)+',-99,'+ IntToStr(Dokuman_Kayit_Yeri) +',1,'+TabDokuman.FieldByName('ID').AsString+
            ','''+ copy(YazilanDosyaAdi, RevPos('.', YazilanDosyaAdi)+1,5)+''','+Float_ToStr(FileSizeByName(YazilanDosyaAdi) / 1024)+
-           ','''+YazilanDosyaAdi+''','''+Aciklama+''',:PBELGE,'''+Kullanan+''','''+VersNo+''','''+FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat)+''','+IntToStr(SubeId)+') select scope_identity() ';
+           ','''+YazilanDosyaAdi+''','''+Aciklama+''',:PBELGE,'''+Kullanan+''','''+VersNo+''','''+FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat)+''','+IntToStr(SubeId)+') ' + DbKimlikDonus;
   //yeni revizyon olduğu için dokümanın tarihini de revizyon tarihi yaparız
   //Veritabani.BasitKomutÇalıştır(tablo.FDCnn,'update DOKUMAN set TARIH = '''+FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat)+''''+
   //                  ' where ID = '+TabDokuman.FieldByName('ID').AsString, [],[]);
@@ -11446,8 +11451,7 @@ begin
 
    //Result := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN)VALUES('+IntToStr(AYerId)+','+IntToStr(AYeri)+',:MemoYorum,'+Kullanan+') select scope_identity() ',[],[],True);
 
-   Tablo.Query1.SQL.Text := 'INSERT INTO GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,ZENGINMETIN)VALUES('+IntToStr(AYerId)+','+IntToStr(AYeri)+',:MemoYorum,'+Kullanan+','+IntToStr(Abs(StrToInt(BoolToStr(ZenginMetin))))+') select scope_identity()';
-   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);  // scope_identity->returning ID
+   Tablo.Query1.SQL.Text := 'INSERT INTO GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,ZENGINMETIN)VALUES('+IntToStr(AYerId)+','+IntToStr(AYeri)+',:MemoYorum,'+Kullanan+','+IntToStr(Abs(StrToInt(BoolToStr(ZenginMetin))))+') '+DbKimlikDonus;  // ID getir: scope_identity|returning (seam, :MemoYorum param korunur)
    Tablo.Query1.Params[0].value := AMsg;
    Tablo.Query1.Open;
    Result := Tablo.Query1.Fields[0].AsInteger;
