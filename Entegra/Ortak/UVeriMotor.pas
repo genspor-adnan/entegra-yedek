@@ -375,9 +375,11 @@ begin
   //   saymaz, PG length sayar; kod/anahtar alanlarinda (trailing-boslugsuz) esdeger. CHARINDEX
   //   arg-tersligi nedeniyle burada DEGIL, DbBul seam'inde ele alinir.
   Result := TRegEx.Replace(Result, '\bLEN\s*\(', 'length(', [roIgnoreCase]);
-  // MSSQL 'COLLATE DATABASE_DEFAULT' PG'de YOK -> sil (bosluk varyantlariyla).
+  // MSSQL 'COLLATE <ad>' (DATABASE_DEFAULT / SQL_Latin1_General_CP1254_CI_AS vb.) PG'de YOK ->
+  //   sil. PG deterministic collation (pilot: case-sensitive). PG-tirnakli COLLATE "x" \w degil,
+  //   dokunulmaz (app MSSQL-adi kullanir).
   if Pos('collate', LowerCase(Result)) > 0 then
-    Result := TRegEx.Replace(Result, 'collate\s+database_default', '', [roIgnoreCase]);
+    Result := TRegEx.Replace(Result, 'collate\s+\w+', '', [roIgnoreCase]);
   // MSSQL '(n)varchar(max)' PG'de YOK -> text.
   if Pos('max', LowerCase(Result)) > 0 then
     Result := TRegEx.Replace(Result, '(n?varchar)\s*\(\s*max\s*\)', 'text', [roIgnoreCase]);

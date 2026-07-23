@@ -143,7 +143,7 @@ var
 
 implementation
 
-uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm;
+uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, System.RegularExpressions;
 
 
 
@@ -345,6 +345,19 @@ var s, KomutDeclare, KomutInsert:String;
     if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(ASql) else Q.SQL.Text := ASql;
     Q.ExecSQL;
   end;
+  // Memo UPDATE...FROM'u PG'ye cevir + :TabloAdi degistir. MSSQL 'UPDATE Tmp SET .. FROM <tablo>
+  //   Tmp INNER JOIN (subq) as x ON cond' -> PG 'UPDATE <tablo> tmp SET .. FROM (subq) as x
+  //   WHERE cond'. Dis-join ON'u ') as x ON' ile ayirt edilir (ic-subquery ON'una dokunma).
+  //   COLLATE PgSqlCevir'de silinir. (MSSQL'de sadece :TabloAdi degisir.)
+  function PgUpd(const AMemo: string): string;
+  begin
+    Result := StringReplace(AMemo, ':TabloAdi', TabloAdi, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then begin
+      Result := TRegEx.Replace(Result, '\bupdate\s+tmp\b', 'update '+TabloAdi+' tmp', [roIgnoreCase]);
+      Result := TRegEx.Replace(Result, '\bfrom\s+'+TRegEx.Escape(TabloAdi)+'\s+tmp\s+inner\s+join', 'from', [roIgnoreCase]);
+      Result := TRegEx.Replace(Result, '\)\s*as\s+x\s+on\b', ') as x WHERE', [roIgnoreCase]);
+    end;
+  end;
 begin
   if AktifVeriMotor = vmPG then
     TabloAdi := 'tmpizleme_'+IntToStr(SPID)+'_'+FormatDateTime('yyyymmddhhnnsszzz',Tablo.GENINI.BugunTrhSaat)
@@ -430,14 +443,14 @@ begin
         end
         else begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
             ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLGiren.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLCikanUpdate.text));
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
-         ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
+         ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLDonusCikanHedefUpdate.text));
      end;
   //çıkışlar
   end else begin
@@ -448,14 +461,14 @@ begin
          end else }
          begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
             ExecC(TabIzlem, KomutDeclare+ StringReplace(SQLCikan.text, ':TabloAdi', TabloAdi, []));
-            ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLCikanUpdate.text, ':TabloAdi', TabloAdi, []));
+            ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLCikanUpdate.text));
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
          KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          // 11/05/2022 AO kaldırıldı
          KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
-         ExecC(Tablo.Query1, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedefUpdate.text, ':TabloAdi', TabloAdi, []));
+         ExecC(Tablo.Query1, KomutDeclare+' '+ PgUpd(SQLDonusCikanHedefUpdate.text));
      end;
   end;
 
@@ -463,7 +476,7 @@ begin
   if IslemTur=KasaTur_StokSayimIslemi then //99 ise hepsini işaretleyelim tüm satırların şu anki değerlerini girsinler
      veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+TabloAdi+' set SEC=1' ,[],[]);  // SEC smallint
 
-  TabIzlem.SQL.Text := 'select * from '+TabloAdi;
+  TabIzlem.SQL.Text :=  'select * from '+TabloAdi;
 
   TabIzlem.Open;
   case TabIzlem.RecordCount of
