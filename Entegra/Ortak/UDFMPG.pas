@@ -17,13 +17,26 @@ interface
 
 uses System.Classes, FireDAC.Comp.Client;
 
-// DFM component SQL cozucusu (FormAdi.ComponentAdi anahtarli). vmPG'de: once override registry,
+// ============================================================
+// IKI AYRI MEKANIZMA — KARISTIRMA:
+//  (1) RESOLVER / REGISTRY (DFMPGSqlGetir + RegKur.Ekle): DFM'e dusen TFDQuery component'lerinin
+//      SQL override'i. Override PG_MARK ile doner -> PgSqlCevir CALISMAZ. Dolayisiyla parametreler
+//      FireDAC-native `:param` OLMALI; `@param` YASAK (cevrilmez, PG'de "parametre" hatasi verir).
+//  (2) CETREFIL SABITLER (SQL_PG_Izleme* + UIzleme.MemoSec): DFM MEMO/batch UPDATE'ler. Cagiran
+//      basa KomutDeclare (declare/set @var) ekler ve ExecC->PgSqlCevir->PgDeclareCevir @var'i INLINE
+//      eder. Bunlar PG_MARK ALMAZ (MemoSec ham dondurur). Bu yolda `@StokID` vb. DOGRU, gereklidir.
+//  ==> Kural: registry override'inda :param; MemoSec sabitinde @var. Sabitleri registry'ye EKLEME.
+// ============================================================
+
+// (1) DFM component SQL cozucusu (FormAdi.ComponentAdi anahtarli). vmPG'de: once override registry,
 //   yoksa PgSqlCevir(ADefaultSql). vmMSSQL'de: ADefaultSql AYNEN (dokunmaz). Zaten-cevrili (PG_MARK)
 //   metni aynen dondurur. UVeriMotor.DFMPGCozucuHook bu fonksiyona baglanir (initialization).
-//   Override eklemek: RegKur icinde Ekle('FormClassName-T''siz.ComponentAdi', <PG-native SQL>).
+//   Override eklemek: RegKur icinde Ekle('FormClassName-T''siz.ComponentAdi', <PG-native, :param'li SQL>).
 function DFMPGSqlGetir(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string;
 
 const
+  // (2) MemoSec/@var-inline yolu icin — REGISTRY'YE EKLENMEZ. @StokID/@BaslikID/@SatirID cagiranin
+  //   KomutDeclare'iyle inline edilir (FireDAC :param DEGIL). PG_MARK almaz.
   // UIzleme.SQLCikanUpdate PG: MSSQL 'UPDATE Tmp SET .. FROM :TabloAdi Tmp INNER JOIN (subq) x ON c'
   //   -> PG 'UPDATE :TabloAdi tmp SET .. FROM (subq) x WHERE c'. Secili cikis izlemlerini isaretler.
   SQL_PG_IzlemeCikanUpdate =
@@ -72,16 +85,25 @@ end;
 
 procedure RegKur;
   procedure Ekle(const AKey, ASql: string);
+  var j: Integer;
   begin
+    // Registry override PG_MARK ile doner -> PgSqlCevir CALISMAZ. Param FireDAC-native :param
+    //   olmali; @param cevrilmeden kalir -> fail-fast (runtime FireDAC hatasindan iyi).
+    for j := 1 to Length(ASql) - 1 do
+      if (ASql[j] = '@') and CharInSet(ASql[j + 1], ['A'..'Z', 'a'..'z', '_']) then
+        raise Exception.CreateFmt(
+          'UDFMPG override "%s": @param yasak, :param kullan '+
+          '(PG_MARK''li override PgSqlCevir''den gecmez, @->: cevrilmez).', [AKey]);
     FReg.AddOrSetValue(LowerCase(AKey), ASql);
   end;
 begin
   FReg := TDictionary<string,string>.Create;
-  // --- DFM component SQL override'lari ---
+  // --- (1) DFM component SQL override'lari (registry) ---
   //   YALNIZ otomatik ceviricinin (PgSqlCevir) bozdugu/karmasik DFM sorgulari buraya alinir.
   //   Cogu DFM SQL PgSqlCevir'den gecer; burasi bos kalmasi NORMAL. Ornek (sirasi gelince):
-  //   Ekle('USiparisWizard.TabSiparisDetay', 'select ... from ... where x=:P1');
-  //   Kural: PG-native yaz (limit/||/AS), :param KORU, deploy oncesi PG'ye karsi test et.
+  //   Ekle('USiparisWizard.TabSiparisDetay', 'select ... from ... where x=:StokID');
+  //   Kural: PG-native yaz (limit/||/AS), FireDAC :param KULLAN (@param YASAK), deploy oncesi
+  //   PG'ye karsi test et. (SQL_PG_Izleme* sabitleri BURAYA GIRMEZ -> bkz. ust blok, @var'li.)
 end;
 
 function DFMPGSqlGetir(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string;
