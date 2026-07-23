@@ -554,7 +554,8 @@ function PgExecCevir(const S: string): string;
 var m, nm: TMatch; proc, args, fn, low, birles, a: string; parcalar: TArray<string>; i: Integer;
 begin
   Result := S;
-  m := TRegEx.Match(S, '^\s*exec\s+(?:dbo\.)?(\w+)\s*(.*)$', [roIgnoreCase, roSingleLine]);
+  // [dbo].[proc] / dbo.proc / [proc] / proc — kose parantezli sema+ad formlari da eslessin.
+  m := TRegEx.Match(S, '^\s*exec\s+(?:\[?dbo\]?\.)?\[?(\w+)\]?\s*(.*)$', [roIgnoreCase, roSingleLine]);
   if not m.Success then Exit;
   proc := m.Groups[1].Value;
   args := Trim(m.Groups[2].Value);
