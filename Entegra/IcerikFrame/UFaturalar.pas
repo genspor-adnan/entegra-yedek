@@ -631,6 +631,7 @@ var
     frxSIPARIS.DataSet := SIPARIS;
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
@@ -2048,6 +2049,7 @@ begin
     recordIndex := GridFatListeTview.DataController.DataControllerInfo.Selection[i]^.RecordIndex;
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'update FATBASLIK set DURUM='+inttostr(Item.Tag)+' where ID='+IntToStr(GridFatListeTview.DataController.Values[recordIndex,0]); //GetRecordId(recordIndex);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
   end;
   FATBASLIK.DisableControls;
@@ -2136,6 +2138,7 @@ var
           Tablo.Query8.SQL.Add(' where FATBASID='+FATBASLIK.FieldByName('ID').AsString+' and ');
           Tablo.Query8.SQL.Add(' 	YERI between 406 and 413 ');
       end;
+      if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
       Tablo.Query8.Open;
   end;
   //
@@ -2159,6 +2162,7 @@ var
         Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
         Tablo.Query1.SQL.Add(' where F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
       end;
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.Open;
       while not Tablo.Query1.Eof do begin
         BelgeIptalEt(Tablo.Query1.FieldByName('TUR').AsInteger,Tablo.Query1.FieldByName('ID').AsInteger);
@@ -2333,6 +2337,7 @@ begin
                       ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD],OZELKOD2 '+
                       ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],[SIPARISSERI],[IRSALIYENO]'+
                       ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID] FROM SIPARIS Where ID=:A0 SELECT SCOPE_IDENTITY() ';
+                   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
                    Tablo.Query1.Params[0].Value:=FATBASLIK.FieldByName('ID').AsInteger ;
                    Tablo.Query1.Open;
                    Tablo.Query2.Close;
@@ -2342,12 +2347,14 @@ begin
                     ' SELECT :A0,[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
                     ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
                     ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],'''','''',[SUBEID]  FROM SIPARISDETAY where SIPARISID=:A1 ';
+                    if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
                     Tablo.Query2.Params[0].Value:= Tablo.Query1.Fields[0].AsInteger;
                     Tablo.Query2.Params[1].Value:=FATBASLIK.FieldByName('ID').AsInteger;
                     Tablo.Query2.ExecSQL;
 
                     Tablo.Query3.Close;
                     Tablo.Query3.SQL.Text:='Update SIPARIS set ANAKAYITID:=A0 Where ID:=A1';
+                    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
                     Tablo.Query3.Params[0].Value:=Tablo.Query1.Fields[0].AsInteger;;
                     Tablo.Query3.Params[0].Value:=FATBASLIK.FieldByName('ID').AsInteger;
                     Tablo.Query3.ExecSQL;
@@ -2381,6 +2388,7 @@ begin
                           ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD] '+
                           ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],:A2,[IRSALIYENO]'+
                           ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID] FROM SIPARIS Where ID=:A3 SELECT SCOPE_IDENTITY() ';
+                       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
                        Tablo.Query1.Params[0].Value:=KocanNo;
                        Tablo.Query1.Params[1].Value:=FaturaNo ;
                        Tablo.Query1.Params[2].Value:= FaturaSeriNo;
@@ -2393,12 +2401,14 @@ begin
                         ' SELECT :A0,[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
                         ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
                         ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],'''','''',[SUBEID]  FROM SIPARISDETAY where SIPARISID=:A1 ';
+                        if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
                         Tablo.Query2.Params[0].Value:= Tablo.Query1.Fields[0].AsInteger;
                         Tablo.Query2.Params[1].Value:=FATBASLIK.FieldByName('ID').AsInteger;
                         Tablo.Query2.ExecSQL;
 
                         Tablo.Query3.Close;
                         Tablo.Query3.SQL.Text:='Update SIPARIS set ANAKAYITID:=A0 , IRSALIYENO:=A1 Where ID:=A2';
+                        if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
                         Tablo.Query3.Params[0].Value:=Tablo.Query1.Fields[0].AsInteger;
                         Tablo.Query3.Params[1].Value:=FaturaNo;
                         Tablo.Query3.Params[2].Value:=FATBASLIK.FieldByName('ID').AsInteger;
@@ -2794,6 +2804,7 @@ begin
     Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
     Tablo.Query1.SQL.Add(' where F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
   end;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   case Tablo.Query1.RecordCount of
     0: Abort;
@@ -3244,6 +3255,7 @@ begin
     ' ORDER BY F.FATURATARIH DESC';
   FATBASLIK.Close;
   FATBASLIK.SQL.Text := LSQL;
+  if AktifVeriMotor = vmPG then FATBASLIK.SQL.Text := PgSqlCevir(FATBASLIK.SQL.Text);
   FATBASLIK.Open;
   FATBASLIK.Filter := '';
   FATBASLIK.Filtered := False;
@@ -3487,6 +3499,7 @@ begin
     Tablo.Query1.SQL.Add(' where FATBASID='+FATBASLIK.FieldByName('ID').AsString+' and ');
     Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,424,425,427,429,461,462,468,473) ');
   end;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   case Tablo.Query1.RecordCount of
     0: Abort;
@@ -3567,6 +3580,7 @@ begin
          yeniid := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index];
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text:= 'EXEC TM_SiparisDurumGuncelle ' + IntToStr(yeniid);
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.ExecSQL;
     end;
     JvTimer1Timer(Self);

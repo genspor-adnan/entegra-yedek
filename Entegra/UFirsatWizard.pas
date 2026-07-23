@@ -1639,6 +1639,7 @@ begin
           if GTakvimID <>'' then
             begin
              Tablo.Query8.SQL.Text:='update PROJELER SET GOOGLEHESAPID ='+inttostr(GoogleHesapID)+', GOOGLEOLAYID = '''+GTakvimID + ''' where ID ='+inttostr(ProjeID);
+             if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
              Tablo.Query8.ExecSQL;
             end
           else ShowMessage(AKCalendar_kayit_edilemedi);
@@ -1664,6 +1665,7 @@ begin
 
               if GTakvimID <>'' then begin
                   Tablo.Query8.SQL.Text:='update PROJELER SET GOOGLEHESAPID ='+inttostr(GoogleHesapID)+', GOOGLEOLAYID = '''+GTakvimID + ''' where ID ='+inttostr(ProjeID);
+                  if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
                   Tablo.Query8.ExecSQL;
                end
               else ShowMessage(AKCalendar_kayit_edilemedi);
@@ -1699,6 +1701,7 @@ begin
        //Proje eklendi ba??n? da ekleyelim
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'update TEKLIF set PROJEID='+IntToStr(ProjeID)+' WHERE ID = '+inttostr(ID);
+       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
        Tablo.Query1.ExecSQL;
        ProjebagTeklifEnterPage(Self, ProjebagTeklif);
        //ekran? yenileyelim

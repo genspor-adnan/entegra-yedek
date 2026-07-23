@@ -144,7 +144,7 @@ Resourcestring
                 }
 
 implementation
-      Uses PrjConst,LocOnFly;
+      Uses PrjConst,LocOnFly,UVeriMotor;
 {$R *.dfm}
 
 procedure TTakvimVirmanDlg.BelgeTusClick(Sender: TObject);
@@ -169,6 +169,7 @@ begin
              +' from KASA K INNER JOIN BANKAHESAPLAR BH on K.HESAPID=BH.ID INNER JOIN '
              +' BANKASUBELER BS ON BH.BANKASUBELERID=BS.ID INNER JOIN BANKALAR B ON BS.BANKAKODU=B.BANKAKODU '
              +' WHERE K.ID= '+ TabBorcluKasa.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then TabBorcluAyrinti.SQL.Text := PgSqlCevir(TabBorcluAyrinti.SQL.Text);
        LabelGonBanka.DataBinding.DataField := 'BANKA';
        LabelGonSube.DataBinding.DataField := 'SUBE';
        LabelGonHesap.DataBinding.DataField := 'HESAP';
@@ -187,6 +188,7 @@ begin
        TabBorcluAyrinti.SQL.Text:= 'SELECT KS.KASAKODU,KS.KASAADI,ACIKLAMA=KS.HESAPACIKLAMA,KS.KUR,LOGO='''' '
              +' FROM KASA K INNER JOIN KASALAR KS ON K.HESAPID=KS.ID '
              +' WHERE K.ID= '+ TabBorcluKasa.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then TabBorcluAyrinti.SQL.Text := PgSqlCevir(TabBorcluAyrinti.SQL.Text);
        LabelGonBanka.DataBinding.DataField := 'KASAADI';
        LabelGonSube.DataBinding.DataField := 'KASAKODU';
        LabelGonHesap.DataBinding.DataField := '';
@@ -206,6 +208,7 @@ begin
              +' FROM KASA K INNER JOIN POS P ON K.HESAPID=P.ID LEFT OUTER JOIN BANKAHESAPLAR BH ON BH.ID=P.BANKAHESAPID LEFT OUTER JOIN '
              +' BANKASUBELER BS ON BH.BANKASUBELERID=BS.ID LEFT OUTER JOIN BANKALAR B ON BS.BANKAKODU=B.BANKAKODU '
              +' WHERE K.ID= '+ TabBorcluKasa.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then TabBorcluAyrinti.SQL.Text := PgSqlCevir(TabBorcluAyrinti.SQL.Text);
        LabelGonBanka.DataBinding.DataField := 'ADI';
        LabelGonSube.DataBinding.DataField := 'KODU';
        LabelGonHesap.DataBinding.DataField := 'BANKASI';
@@ -252,6 +255,7 @@ begin
              +' from KASA K INNER JOIN BANKAHESAPLAR BH on K.HESAPID=BH.ID INNER JOIN '
              +' BANKASUBELER BS ON BH.BANKASUBELERID=BS.ID INNER JOIN BANKALAR B ON BS.BANKAKODU=B.BANKAKODU '
              +' WHERE K.ID= '+ TabAlacakliKasa.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then TabAlacakliAyrinti.SQL.Text := PgSqlCevir(TabAlacakliAyrinti.SQL.Text);
        LabelAlBanka.DataBinding.DataField := 'BANKA';
        LabelAlSube.DataBinding.DataField := 'SUBE';
        LabelAlHesap.DataBinding.DataField := 'HESAP';
@@ -270,6 +274,7 @@ begin
        TabAlacakliAyrinti.SQL.Text:= 'SELECT KS.KASAKODU,KS.KASAADI,ACIKLAMA=KS.HESAPACIKLAMA,KS.KUR,LOGO='''' '
              +' FROM KASA K INNER JOIN KASALAR KS ON K.HESAPID=KS.ID '
              +' WHERE K.ID= '+ TabAlacakliKasa.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then TabAlacakliAyrinti.SQL.Text := PgSqlCevir(TabAlacakliAyrinti.SQL.Text);
        LabelAlBanka.DataBinding.DataField := 'KASAADI';
        LabelAlSube.DataBinding.DataField := 'KASAKODU';
        LabelAlHesap.DataBinding.DataField := '';
@@ -336,23 +341,28 @@ begin
    kontrol := 0;
    tablo.query1.Close;
    tablo.query1.SQL.text:='SELECT * FROM KASA WHERE ID = '+ IntToStr(ID);
+   if AktifVeriMotor = vmPG then tablo.query1.SQL.Text := PgSqlCevir(tablo.query1.SQL.Text);
    tablo.query1.Open;
    //kayıt kontrolü ve querylerin açılması
    if tablo.query1.FieldByName('BORC').AsCurrency > 0.1 Then Begin  //borçlu
      Inc(kontrol);
      TabBorcluKasa.Close;
+     if AktifVeriMotor = vmPG then TabBorcluKasa.SQL.Text := PgSqlCevir(TabBorcluKasa.SQL.Text);
      TabBorcluKasa.Params[0].Value:=ID;
      TabBorcluKasa.Open;
      TabAlacakliKasa.Close;
+     if AktifVeriMotor = vmPG then TabAlacakliKasa.SQL.Text := PgSqlCevir(TabAlacakliKasa.SQL.Text);
      TabAlacakliKasa.Params[0].Value:=Tablo.Query1.FieldByName('GERIDONUSID').AsInteger;;
      TabAlacakliKasa.Open;
    End;
    if tablo.query1.FieldByName('ALACAK').AsInteger > 0 then Begin   //alacaklı
      Inc(kontrol);
      TabBorcluKasa.Close;
+     if AktifVeriMotor = vmPG then TabBorcluKasa.SQL.Text := PgSqlCevir(TabBorcluKasa.SQL.Text);
      TabBorcluKasa.Params[0].Value:=Tablo.Query1.FieldByName('GERIDONUSID').AsInteger;
      TabBorcluKasa.Open;
      TabAlacakliKasa.Close;
+     if AktifVeriMotor = vmPG then TabAlacakliKasa.SQL.Text := PgSqlCevir(TabAlacakliKasa.SQL.Text);
      TabAlacakliKasa.Params[0].Value:=ID;
      TabAlacakliKasa.Open;
    End;

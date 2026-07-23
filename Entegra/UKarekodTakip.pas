@@ -151,6 +151,7 @@ Tablo.Query6.SQL.Text:= '';
 Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+'+DbConv('FB.TARIH','varchar(20)',120)+'+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
 Tablo.Query6.SQL.add(' (SELECT * FROM KAREKOD KK WHERE KK.SERINO = '''+SeriNo+''' AND KK.URUNKOD = '''+UrunKodu+''' ) AS DD ');
 Tablo.Query6.SQL.add(' ,FATURA F,FATBASLIK FB ,REHBER R WHERE DD.GIRFATURAID = F.ID AND FB.ID=DD.GIRFATBASID AND FB.ID=F.FATBASID AND R.ID=FB.REHBERID ');
+if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
 tablo.Query6.Open;
 Result :=Tablo.Query6.FieldByName('MESAJ').AsString;
 end else Result := '';
@@ -252,6 +253,7 @@ begin
        tabKareKodListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) > 0 AND ISNULL(CIKFATURAID,0) = '+inttostr(KarekodTakipCagiranSatirId))
       else if (KareKodTakipislemturu = 'GD') and ( KareKodTakipCagiranTur in [10, 11, 12] ) then // Girilen KareKodlar üzerinde düzeltme yapılacaksa
        tabKareKodListesi.SQL.Add(' AND ISNULL(GIRISTURU,0) > 0 AND ISNULL(GIRFATURAID,0) = '+inttostr(KarekodTakipCagiranSatirId));
+      if AktifVeriMotor = vmPG then tabKareKodListesi.SQL.Text := PgSqlCevir(tabKareKodListesi.SQL.Text);
       tabKareKodListesi.Open;
    end;
 end;  //Eklendi
@@ -356,6 +358,7 @@ begin
    begin
       Tablo.Query5.Close;
       Tablo.Query5.SQL.Text:= 'SELECT * FROM KAREKOD WHERE STOKID = '+IntToStr(KareKodTakipCagiranUrunId)+' AND SERINO = '''+TreeListKareKod.Items[i].Texts[1]+''' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
       if Tablo.Query5.RecordCount>=1 then
        begin
@@ -627,6 +630,7 @@ begin
    Tablo.Query5.sql.Clear;
    Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE ALIM_DURUM = ''00000-Doğru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND URUNKOD = '''+oncekiUrunKod+''' AND SERINO = '''+oncekiKareKod+''' ');
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.Open;
    if Tablo.Query5.RecordCount>0 then
     begin
@@ -640,6 +644,7 @@ begin
    Tablo.Query5.sql.Clear;
    Tablo.Query5.SQL.Add('SELECT * FROM KAREKOD WHERE SATIS_DURUM = ''00000-Doğru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND URUNKOD = '''+oncekiUrunKod+''' AND SERINO = '''+oncekiKareKod+''' ');
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.Open;
    if Tablo.Query5.RecordCount>0 then
     begin
@@ -659,6 +664,7 @@ begin
                               ' SERINO = '''+tabKareKodListesi.FieldByName('SERINO').AsString+''' '+
                               ' AND URUNKOD = '''+tabKareKodListesi.FieldByName('URUNKOD').AsString+''' '+
                               ' AND ID <>'+tabKareKodListesi.FieldByName('ID').AsString+' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
      if Tablo.Query5.RecordCount>0 then
       begin

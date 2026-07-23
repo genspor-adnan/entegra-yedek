@@ -339,6 +339,7 @@ begin
   Tablo.Query1.SQL.Add('  VERILENSIPARIS = VERILENSIPARIS + isnull((select SUM(MIKTAR)from SIPARISDETAY SD where SD.ID in ('+VarilenStr+') and SD.TUR=1 and SD.URUNID=S.ID and SD.URETIMPLANDETAYID is null),0.0)');
   Tablo.Query1.SQL.Add(' from STOKLAR S inner join URETIMRECETE UR on S.ID=UR.STOKID ');
   Tablo.Query1.SQL.Add(' where URETIMPLANLAMADETAY.STOKID=S.ID and URETIMPLANLAMADETAY.URETIMPLANLAMAID='+FArama.TabPlanlar.FieldByName('ID').AsString);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   //detay satırlarını ekleyelim.. sadece uretimplan alanı null olan satırlar..
   Tablo.Query1.Close;
@@ -351,16 +352,19 @@ begin
   Tablo.Query1.SQL.Add(' from STOKLAR S inner join URETIMRECETE UR on S.ID=UR.STOKID ');
   Tablo.Query1.SQL.Add(' where S.ID not in (select STOKID from URETIMPLANLAMADETAY where URETIMPLANLAMAID='+FArama.TabPlanlar.FieldByName('ID').AsString+')');
   Tablo.Query1.SQL.Add('   ');
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   //siparişleri güncelleyelim.. dahil oldukları planın işaretini koyup daha sonra sormayalım..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'update SIPARISDETAY set URETIMPLANID=UPD.URETIMPLANLAMAID , URETIMPLANDETAYID=UPD.ID ';
   Tablo.Query1.SQL.Add('  from SIPARISDETAY SD inner join URETIMPLANLAMADETAY UPD on SD.TUR=1 and SD.URUNID=UPD.STOKID ');
   Tablo.Query1.SQL.Add('  where UPD.URETIMPLANLAMAID='+IntToStr(FArama.TabPlanlar.FieldByName('ID').AsInteger)+' AND SD.ID in ('+AlinanStr+','+VarilenStr+') and isnull(SD.URETIMPLANDETAYID,0)<1 ');
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli üretimi hesaplayalım..
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'update URETIMPLANLAMADETAY set GEREKLIURETIM = ALINANSIPARIS+MINIMUMSTOK-VERILENSIPARIS-DEPODURUMU where URETIMPLANLAMAID='+IntToStr(FArama.TabPlanlar.FieldByName('ID').AsInteger);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
 
   AramaYap(nil);
@@ -470,6 +474,7 @@ begin
     Tablo.Query8.SQL.Text :=  'select *,URETIMEMRIMIKTAR=isnull((select sum(MIKTAR) from URETIMEMRI where URETIMPLANDETAYID=UPD.ID),0.0) '+
                               ' from URETIMPLANLAMADETAY UPD where GEREKLIURETIM-isnull((select sum(MIKTAR) from URETIMEMRI '+
                               ' where URETIMPLANDETAYID=UPD.ID),0.0)>0.0 and ID='+TabUretimPlanlama.FieldByName('ID').AsString;
+    if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
@@ -494,6 +499,7 @@ begin
             Tablo.Query7.SQL.Add(IntToStr(StokID)+','+StringReplace(FormatFloat('########0.000000',Miktar),',','.',[])+','+Tablo.Query3.FieldByName('ANABIRIM').AsString+',');
             Tablo.Query7.SQL.Add(IntToStr(ReceteID)+','+FArama.TabPlanlar.FieldByName('ID').AsString+','+Tablo.Query8.FieldByName('ID').AsString+')');
             Tablo.Query7.SQL.Add('select scope_identity()');
+            if AktifVeriMotor = vmPG then Tablo.Query7.SQL.Text := PgSqlCevir(Tablo.Query7.SQL.Text);
             Tablo.Query7.Open;
             UretimEmriID := Tablo.Query7.Fields[0].AsInteger;
 
@@ -505,6 +511,7 @@ begin
             Tablo.Query4.SQL.Add(' '+Kullanan+','+inttostr(TabNo_URETIMRECETEDETAY)+',URD.ID,0,0,URD.URETIMRECETEID,URD.ID ');
             Tablo.Query4.SQL.Add(' from URETIMRECETEDETAY URD where ID='+Tablo.Query2.FieldByName('ID').AsString);
             Tablo.Query4.SQL.Add(' select scope_identity() ');
+            if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
             Tablo.Query4.Open;
 
             //detay aşağı şekilde insert edilecek.. döngüye girip kitlenmemesi için en fazla 20 kademe olacak.....
@@ -539,6 +546,7 @@ begin
                   Tablo.Query4.SQL.Add(' from URETIMRECETEDETAY URD where URD.URETIMRECETEID='+Tablo.Query1.FieldByName('RECETEID').AsString);
                   Tablo.Query4.SQL.Add(' and 1 = (case when URD.TUR=1 and URD.URUNID='+Tablo.Query1.FieldByName('STOKID').AsString+' then 0 else 1 end) ');
                   Tablo.Query4.SQL.Add(' select scope_identity() ');
+                  if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
                   Tablo.Query4.Open;
 
                   Tablo.Query1.Next;
@@ -554,6 +562,7 @@ begin
             Tablo.Query5.SQL.Add(' from URETIMEMRIDETAY inner join URETIMEMRIDETAY KU on URETIMEMRIDETAY.ID=KU.USTID  ');
             Tablo.Query5.SQL.Add(' inner join URETIMRECETEDETAY URD on KU.HEDEFRECETEID=URD.URETIMRECETEID and URETIMEMRIDETAY.TUR=URD.TUR and URETIMEMRIDETAY.URUNID=URD.URUNID  ');
             Tablo.Query5.SQL.Add(' where URETIMEMRIDETAY.URETIMEMRIID='+IntToStr(UretimEmriID));
+            if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
             Tablo.Query5.ExecSQL;
 
           end;
@@ -594,6 +603,7 @@ begin
           Tablo.Query1.SQL.Add(' VALUES(Getdate(),Getdate(),6,1,-1,'+Tablo.Query4.FieldByName('GIRISDEPO').AsString+','+Tablo.Query4.FieldByName('CIKISDEPO').AsString+',');
           Tablo.Query1.SQL.Add(' 0.0,0.0,0.0,0.0,'''+CariDoviz+''',0.0,'''+CariDoviz+''',1.0,');
           Tablo.Query1.SQL.Add(' '''+Tablo.Query4.FieldByName('ACIKLAMA').AsString+''','+Kullanan+',''Muaf'','+IntToStr(SubeId)+','+IntToStr(TabNo_URETIMOPERASYON)+','+Tablo.Query4.FieldByName('ID').AsString+','+Tablo.Query4.FieldByName('LOKASYON').AsString+','+Tablo.Query4.FieldByName('ISMERKEZI').AsString+') SELECT SCOPE_IDENTITY()');
+          if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
           Tablo.Query1.Open;
           if TabUretimEmri.FieldByName('URETIMPLANID').Value = null then
             UretimPlanID := 'null'
@@ -612,6 +622,7 @@ begin
           Tablo.Query2.SQL.Add(','+VarToStr(UretimPlanID)+','+VarToStr(UretimPlanDetayID)+' ');
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and KAYNAKRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
+          if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
           Tablo.Query2.ExecSQL; //aynı reçeteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir çapraz tablo gerekiyor..
           //Reçeteden Hedefler eklenir.. - ile çarpılarak.. ustid nin kaynak olması da gerekiyor..
           Tablo.Query2.Close;
@@ -623,6 +634,7 @@ begin
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and UE.HEDEFRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
           Tablo.Query2.SQL.Add(' and UE.USTID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
+          if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
           Tablo.Query2.ExecSQL;
           //Tablo.UretimSihirbazBaslat('D',0,Tablo.Query1.Fields[0].AsInteger);
           Tablo.UretimSatirMaliyetUpdate(Tablo.Query1.Fields[0].AsInteger);
@@ -651,6 +663,7 @@ begin
     //buradan sonra listemizi açıp gerekli üretimi 0 dan büyük olan tüm satırlar için üretim operasyonu oluşturmamız gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text := 'select UE.ID from URETIMPLANLAMADETAY UPD inner join URETIMEMRI UE on UPD.ID=UE.URETIMPLANDETAYID where UPD.GEREKLIURETIM>0.0 and UPD.ID='+TabUretimPlanlama.FieldByName('ID').AsString;
+    if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
@@ -667,6 +680,7 @@ begin
       Tablo.Query6.SQL.Add('from URETIMEMRIDETAY UD inner join URETIMEMRI UE on UE.ID=UD.URETIMEMRIID ');
       Tablo.Query6.SQL.Add('where isnull(KAYNAKRECETEID,0)>0 and URETIMEMRIID='+Tablo.Query8.FieldByName('ID').AsString);
       Tablo.Query6.SQL.Add(' and UD.MIKTAR>isnull((select isnull(sum(uo2.MIKTAR),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0)');
+      if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
       Tablo.Query6.ExecSQL;
       //-----------------------------------------------------------\\
       Tablo.Query8.Next;
@@ -779,6 +793,7 @@ begin
   TabUretimEmriDetay.Close;
   if TabUretimEmri.FieldByName('ID').AsString <> '' then begin
     TabUretimEmriDetay.SQL.Text := 'select * from URETIMEMRIDETAY where URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString;
+    if AktifVeriMotor = vmPG then TabUretimEmriDetay.SQL.Text := PgSqlCevir(TabUretimEmriDetay.SQL.Text);
     TabUretimEmriDetay.Open;
   end;
 end;
@@ -860,16 +875,19 @@ begin
     Tablo.Query1.SQL.Add('  VERILENSIPARIS = isnull((select SUM(MIKTAR)from SIPARISDETAY SD where SD.ID in ('+VarilenStr+') and SD.TUR=1 and SD.URUNID=S.ID and SD.URETIMPLANDETAYID is null),0.0),');
     Tablo.Query1.SQL.Add('  MINSTOK=isnull(S.MINSTOK,0),0,'+Kullanan+',UR.ID');
     Tablo.Query1.SQL.Add('  from STOKLAR S inner join URETIMRECETE UR on S.ID=UR.STOKID ');
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
     //siparişleri güncelleyelim.. dahil oldukları planın işaretini koyup daha sonra sormayalım..
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'update SIPARISDETAY set URETIMPLANID=UPD.URETIMPLANLAMAID , URETIMPLANDETAYID=UPD.ID ';
     Tablo.Query1.SQL.Add('  from SIPARISDETAY SD inner join URETIMPLANLAMADETAY UPD on SD.TUR=1 and SD.URUNID=UPD.STOKID ');
     Tablo.Query1.SQL.Add('  where UPD.URETIMPLANLAMAID='+IntToStr(Result)+' AND SD.ID in ('+AlinanStr+','+VarilenStr+') and isnull(SD.URETIMPLANDETAYID,0)<1 ');
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
     //son olarak da URETIMPLANLAMADETAY tablosundaki gerekli üretimi hesaplayalım..
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'update URETIMPLANLAMADETAY set GEREKLIURETIM = ALINANSIPARIS+MINIMUMSTOK-VERILENSIPARIS-DEPODURUMU where URETIMPLANLAMAID='+IntToStr(Result);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
   end else
     ShowMessage(URSiparissizIslemOlmaz);
@@ -893,6 +911,7 @@ begin
     Tablo.Query8.SQL.Text :=  'select *,URETIMEMRIMIKTAR=isnull((select sum(MIKTAR) from URETIMEMRI where URETIMPLANDETAYID=UPD.ID),0.0) '+
                               ' from URETIMPLANLAMADETAY UPD where GEREKLIURETIM-isnull((select sum(MIKTAR) from URETIMEMRI '+
                               ' where URETIMPLANDETAYID=UPD.ID),0.0)>0.0 and URETIMPLANLAMAID='+IntToStr(PlanID);
+    if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
@@ -917,6 +936,7 @@ begin
             Tablo.Query7.SQL.Add(IntToStr(StokID)+','+StringReplace(FormatFloat('########0.000000',Miktar),',','.',[])+','+Tablo.Query3.FieldByName('ANABIRIM').AsString+',');
             Tablo.Query7.SQL.Add(IntToStr(ReceteID)+','+IntToStr(PlanID)+','+Tablo.Query8.FieldByName('ID').AsString+')');
             Tablo.Query7.SQL.Add('select scope_identity()');
+            if AktifVeriMotor = vmPG then Tablo.Query7.SQL.Text := PgSqlCevir(Tablo.Query7.SQL.Text);
             Tablo.Query7.Open;
             UretimEmriID := Tablo.Query7.Fields[0].AsInteger;
 
@@ -928,6 +948,7 @@ begin
             Tablo.Query4.SQL.Add(' '+Kullanan+','+inttostr(TabNo_URETIMRECETEDETAY)+',URD.ID,0,0,URD.URETIMRECETEID,URD.ID ');
             Tablo.Query4.SQL.Add(' from URETIMRECETEDETAY URD where ID='+Tablo.Query2.FieldByName('ID').AsString);
             Tablo.Query4.SQL.Add(' select scope_identity() ');
+            if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
             Tablo.Query4.Open;
 
             //detay aşağı şekilde insert edilecek.. döngüye girip kitlenmemesi için en fazla 20 kademe olacak.....
@@ -962,6 +983,7 @@ begin
                   Tablo.Query4.SQL.Add(' from URETIMRECETEDETAY URD where URD.URETIMRECETEID='+Tablo.Query1.FieldByName('RECETEID').AsString);
                   Tablo.Query4.SQL.Add(' and 1 = (case when URD.TUR=1 and URD.URUNID='+Tablo.Query1.FieldByName('STOKID').AsString+' then 0 else 1 end) ');
                   Tablo.Query4.SQL.Add(' select scope_identity() ');
+                  if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
                   Tablo.Query4.Open;
 
                   Tablo.Query1.Next;
@@ -977,6 +999,7 @@ begin
             Tablo.Query5.SQL.Add(' from URETIMEMRIDETAY inner join URETIMEMRIDETAY KU on URETIMEMRIDETAY.ID=KU.USTID  ');
             Tablo.Query5.SQL.Add(' inner join URETIMRECETEDETAY URD on KU.HEDEFRECETEID=URD.URETIMRECETEID and URETIMEMRIDETAY.TUR=URD.TUR and URETIMEMRIDETAY.URUNID=URD.URUNID  ');
             Tablo.Query5.SQL.Add(' where URETIMEMRIDETAY.URETIMEMRIID='+IntToStr(UretimEmriID));
+            if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
             Tablo.Query5.ExecSQL;
 
           end;
@@ -1007,6 +1030,7 @@ begin
     //buradan sonra listemizi açıp gerekli üretimi 0 dan büyük olan tüm satırlar için üretim operasyonu oluşturmamız gerekiyor..
     Tablo.Query8.Close;
     Tablo.Query8.SQL.Text := 'select UE.ID from URETIMPLANLAMADETAY UPD inner join URETIMEMRI UE on UPD.ID=UE.URETIMPLANDETAYID where UPD.GEREKLIURETIM>0.0 and URETIMPLANLAMAID='+IntToStr(PlanID);
+    if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
     Tablo.Query8.Open;
     Tablo.Query8.FetchAll;
     BekletDlg.Refresh;
@@ -1023,6 +1047,7 @@ begin
       Tablo.Query6.SQL.Add('from URETIMEMRIDETAY UD inner join URETIMEMRI UE on UE.ID=UD.URETIMEMRIID ');
       Tablo.Query6.SQL.Add('where isnull(KAYNAKRECETEID,0)>0 and URETIMEMRIID='+Tablo.Query8.FieldByName('ID').AsString);
       Tablo.Query6.SQL.Add(' and UD.MIKTAR>isnull((select isnull(sum(uo2.MIKTAR),0.0) from URETIMOPERASYON uo2 where uo2.URETIMEMRIDETAYID=UD.ID),0.0)');
+      if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
       Tablo.Query6.ExecSQL;
       //-----------------------------------------------------------\\
       Tablo.Query8.Next;
@@ -1071,6 +1096,7 @@ begin
           Tablo.Query1.SQL.Add(' VALUES(Getdate(),Getdate(),6,1,-1,'+Tablo.Query4.FieldByName('GIRISDEPO').AsString+','+Tablo.Query4.FieldByName('CIKISDEPO').AsString+',');
           Tablo.Query1.SQL.Add(' 0.0,0.0,0.0,0.0,'''+CariDoviz+''',0.0,'''+CariDoviz+''',1.0,');
           Tablo.Query1.SQL.Add(' '''+Tablo.Query4.FieldByName('ACIKLAMA').AsString+''','+Kullanan+',''Muaf'','+IntToStr(SubeId)+','+IntToStr(TabNo_URETIMOPERASYON)+','+Tablo.Query4.FieldByName('ID').AsString+','+Tablo.Query4.FieldByName('LOKASYON').AsString+','+Tablo.Query4.FieldByName('ISMERKEZI').AsString+') SELECT SCOPE_IDENTITY()');
+          if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
           Tablo.Query1.Open;
           if TabUretimEmri.FieldByName('URETIMPLANID').Value = null then
             UretimPlanID := 'null'
@@ -1089,6 +1115,7 @@ begin
           Tablo.Query2.SQL.Add(','+VarToStr(UretimPlanID)+','+VarToStr(UretimPlanDetayID)+' ');
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and KAYNAKRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
+          if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
           Tablo.Query2.ExecSQL; //aynı reçeteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir çapraz tablo gerekiyor..
           //Reçeteden Hedefler eklenir.. - ile çarpılarak.. ustid nin kaynak olması da gerekiyor..
           Tablo.Query2.Close;
@@ -1100,6 +1127,7 @@ begin
           Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
           Tablo.Query2.SQL.Add(' and UE.HEDEFRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
           Tablo.Query2.SQL.Add(' and UE.USTID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
+          if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
           Tablo.Query2.ExecSQL;
           Tablo.UretimSatirMaliyetUpdate(Tablo.Query1.Fields[0].AsInteger);
           //Tablo.UretimSihirbazBaslat('D',0,Tablo.Query1.Fields[0].AsInteger);

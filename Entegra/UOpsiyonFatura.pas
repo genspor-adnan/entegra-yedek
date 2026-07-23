@@ -341,7 +341,7 @@ var
 
 implementation
 
-uses UCombo, Utablo, URehberAyar, UGirisKutusuEx,UExcelKolonAyar, UGenSifre,PrjConst,LocOnFly,UEBelgeKimlik;
+uses UCombo, Utablo, URehberAyar, UGirisKutusuEx,UExcelKolonAyar, UGenSifre,PrjConst,LocOnFly,UEBelgeKimlik,UVeriMotor;
 
 
 {$R *.dfm}
@@ -724,22 +724,26 @@ begin
     GridListeDuzenle.Parent := GBGidFatListe;
     TabListeDuzenle.Close;
     TabListeDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FaturaGiden_%''';
+    if AktifVeriMotor = vmPG then TabListeDuzenle.SQL.Text := PgSqlCevir(TabListeDuzenle.SQL.Text);
     TabListeDuzenle.Open;
 
     GridListeDetayDuzenle.Parent := GBGidFatDetay;
     TabListeDetayDuzenle.Close;
     TabListeDetayDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FatGitDetay_%''';
+    if AktifVeriMotor = vmPG then TabListeDetayDuzenle.SQL.Text := PgSqlCevir(TabListeDetayDuzenle.SQL.Text);
     TabListeDetayDuzenle.Open;
   end else  if PageControl1.ActivePage=GelenFaturaPage then begin
 
     GridListeDuzenle.Parent := GBGelFatListe;
     TabListeDuzenle.Close;
     TabListeDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FaturaGelen_%''';
+    if AktifVeriMotor = vmPG then TabListeDuzenle.SQL.Text := PgSqlCevir(TabListeDuzenle.SQL.Text);
     TabListeDuzenle.Open;
 
     GridListeDetayDuzenle.Parent := GBGelFatDetay;
     TabListeDetayDuzenle.Close;
     TabListeDetayDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FatGelDetay_%''';
+    if AktifVeriMotor = vmPG then TabListeDetayDuzenle.SQL.Text := PgSqlCevir(TabListeDetayDuzenle.SQL.Text);
     TabListeDetayDuzenle.Open;
 
   end;
@@ -1086,6 +1090,7 @@ begin
   SeriKurallariDatasetHazirla;
   if TabEFaturaSeriKurallari.Active then
     TabEFaturaSeriKurallari.Close;
+  if AktifVeriMotor = vmPG then TabEFaturaSeriKurallari.SQL.Text := PgSqlCevir(TabEFaturaSeriKurallari.SQL.Text);
   TabEFaturaSeriKurallari.Open;
 
   FSeriKurallari.DisableControls;
@@ -1240,8 +1245,10 @@ end;
 procedure TOpsiyonFaturaDlg.TabSheetEBelgeShow(Sender: TObject);
 // E-Belge sekmesine girince XSLT grid datasetini hazirla
 begin
-  if not TabXSLT.Active then
+  if not TabXSLT.Active then begin
+    if AktifVeriMotor = vmPG then TabXSLT.SQL.Text := PgSqlCevir(TabXSLT.SQL.Text);
     TabXSLT.Open;
+  end;
 end;
 
 procedure TOpsiyonFaturaDlg.LabelXSLTYukleClick(Sender: TObject);
@@ -1288,8 +1295,10 @@ var
   DosyaAdi, XSLTMetni: string;
   i: Integer;
 begin
-  if not TabXSLT.Active then
+  if not TabXSLT.Active then begin
+    if AktifVeriMotor = vmPG then TabXSLT.SQL.Text := PgSqlCevir(TabXSLT.SQL.Text);
     TabXSLT.Open;
+  end;
 
   if TabXSLT.IsEmpty then begin
     ShowMessage('Kaydedilecek XSLT kaydı bulunamadı.');

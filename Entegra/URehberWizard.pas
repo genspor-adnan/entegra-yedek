@@ -1216,6 +1216,7 @@ begin
   // e?er bir ilgili ?zerinde ?ift t?k yap?p de?i?iklik olacaksa
      TabRehberIletisim.SQL.Add(' and ID=' + IntToStr(RehberIletID));
   TabRehberIletisim.SQL.Add(' order by VARSAYILAN  desc');
+  if AktifVeriMotor = vmPG then TabRehberIletisim.SQL.Text := PgSqlCevir(TabRehberIletisim.SQL.Text);
   TabRehberIletisim.Open;
   GridKurIlet.Visible := TabRehberIletisim.RecordCount > 0;
   if (RehberIletID = -1) and (Cagiran = 1) then // yeni tu?una bas?lm?? demektir
@@ -1649,6 +1650,7 @@ begin
   TabRehberIletisim.SQL.text := 'select * from REHBERILETISIM where REHBERID=' +
     TabRehber.Fields[0].AsString;
   TabRehberIletisim.SQL.Add(' order by STATU  desc');
+  if AktifVeriMotor = vmPG then TabRehberIletisim.SQL.Text := PgSqlCevir(TabRehberIletisim.SQL.Text);
   TabRehberIletisim.Open;
   GridAdresAdViewSelectionChanged(nil);
 end;
@@ -1742,6 +1744,7 @@ begin
      TabRehberIletisim.Close;
      TabRehberIletisim.SQL.text := 'select * from REHBERILETISIM where REHBERID=' + IntToStr(RehberID);
      //TabRehberIletisim.SQL.Add(' and ID in (Select MAX(ID) from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ' )');
+     if AktifVeriMotor = vmPG then TabRehberIletisim.SQL.Text := PgSqlCevir(TabRehberIletisim.SQL.Text);
      TabRehberIletisim.Open;
      TabRehberIletisim.Locate('ID',IletID,[]);
      GridKurIlet.Visible := true;

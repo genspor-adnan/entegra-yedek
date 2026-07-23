@@ -373,6 +373,7 @@ function THizliGirisDlg.KasadakiMiktariBul(baslangictarihi: TDateTime): Currency
 begin
   Tablo.Query2.Close;
   Tablo.Query2.SQL.Text := 'SELECT SUM(ALACAK) AS GIREN FROM KASA WHERE ISLEMTARIHI >=''' + FormatDateTime('yyyy-mm-dd hh:nn:ss', baslangictarihi) + ''' ' + ' AND HESAPID =' + inttostr(VarsKasa) + ' ' + ' AND HESAPTURU =''K'' ';
+  if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
   Tablo.Query2.Open;
   Result := Tablo.Query2.Fields[0].AsCurrency;
 end;
@@ -421,6 +422,7 @@ procedure THizliGirisDlg.DetayTabloAc(St:String; Prm:Integer);
 begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := StringReplace(St, 'TABLOADI', StringReplace(AktifFatTabloAdi, '&', '', [rfReplaceAll]), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.Params[0].Value := Prm;
     Tablo.Query1.ExecSQL;
     TabDetay.Close;
@@ -541,6 +543,7 @@ begin
   if EditRehID.Text <> '' then begin
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', EditRehID.Text, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
     if TabFatBasDetay.FieldByName('REHBERILETID').Value <> null then begin
@@ -1330,6 +1333,7 @@ begin
           '    WHERE D.RAPORADI = '''+SiparisYazdirList.Items[i]+''' and D.GRUBU = '''+EkranAdiAl+''') '+
           ' or CAST(S.KATEGORI AS VARCHAR(10)) in ( SELECT KATEGORI=DEGER  FROM KOSULLAR K inner join DOKUMLER D on K.DOKUMID=D.ID '+
           '    WHERE D.RAPORADI = '''+SiparisYazdirList.Items[i]+''' and D.GRUBU = '''+EkranAdiAl+''')) ';
+       if AktifVeriMotor = vmPG then TabDetayYaz.SQL.Text := PgSqlCevir(TabDetayYaz.SQL.Text);
        TabDetayYaz.Open;
        if TabDetayYaz.RecordCount > 0 then
           Yazdir(SiparisYazdirList.Items[i], 1);
@@ -1963,6 +1967,7 @@ begin
         Tablo.TabFatbaslik.SQL.Text := 'select * from FATBASLIK where '+s;
      end;
   end;
+  if AktifVeriMotor = vmPG then Tablo.TabFatbaslik.SQL.Text := PgSqlCevir(Tablo.TabFatbaslik.SQL.Text);
   Tablo.TabFatbaslik.Open;
   if (SipId > 0)or(AdisyonNo > 0) then
      Tablo.TabFatbaslik.Edit
@@ -1987,6 +1992,7 @@ begin
   BaslikEkle;
   Tablo.TabFatura.Close;
   Tablo.TabFatura.SQL.Text := 'select * from '+s3+' where 1=2';
+  if AktifVeriMotor = vmPG then Tablo.TabFatura.SQL.Text := PgSqlCevir(Tablo.TabFatura.SQL.Text);
   Tablo.TabFatura.Open;
   TabDetay.First;
   while not TabDetay.Eof do begin
@@ -2002,6 +2008,7 @@ begin
   else
      Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(BIRIMFIYAT*ADET,2)),0.0) AS ARATOPLAM, isnull(ROUND(SUM(TUTAR*(KDV/100.0)),2),0.0) AS KDVTOPLAM, '+
        ' isnull(SUM(ROUND(TUTAR,2)),0.0) AS NETTOPLAM '+Maliyet+' from '+s3+' where '+s2+'=' + Tablo.TabFatbaslik.Fields[0].AsString;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   Tablo.TabFatbaslik.Edit;
   //if s = 'FATURA' then begin
@@ -2077,6 +2084,7 @@ begin
                               //' isnull(SUM(ROUND((BIRIMFIYAT*(DOVIZ_BIRIMFIYAT/BIRIMFIYAT))*ADET,2)),0) as TEKLIFTUTAR,'+
                               ' (isnull(SUM(ROUND(DOVIZ_BIRIMFIYAT-DOVIZ_BIRIMFIYAT * ((100-ISKONTO)/100.0)*((100-ISKONTO2)/100.0),2)),0)) AS DOVIZISKTOPLAM  ' +
                               ' from TEKLIFDETAY where TEKLIFID=' + IntToStr(TeklifID);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   Tablo.TablodanSorguAc(2,'select * from TEKLIF where ID='+IntToStr(TeklifID));
   Tablo.Query2.Edit;
@@ -2303,6 +2311,7 @@ var
   DovizTuru : string;
   i:Integer;
 begin
+  if AktifVeriMotor = vmPG then PgTumSorgulariCevir(Self);   // DFM-kaynakli sorgu SQL'leri (TabYetki param-bagli vb.) bir kez PG diyalektine
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   if Sektor in [Sektor_Cafe, Sektor_Rest] then
      Logo.Picture.Assign(tablo.cxImageCollection1.Items[0].Picture)
@@ -2597,6 +2606,7 @@ var ra : string;
              Tablo.Query2.SQL.Text:=' select ID from POS where DURUM=1 ';
              if SubeVarmi then
                 Tablo.Query2.SQL.Add(' and SUBEID in (0,'+IntToStr(SubeId)+') ');
+             if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
              Tablo.Query2.Open;
              if Tablo.Query2.RecordCount=0 then
                 ShowMessage(POSBulunamadi)
@@ -2790,17 +2800,23 @@ Function THizliGirisDlg.TempTabloOlustur: String;
 var
   TmpTabAd: string;
 begin // DROP EDİLMEYECEK!!!!!
+  // UYARI (PG): ##global-temp CREATE TABLE DDL (identity/bit/money/image/nvarchar + ## ad + oturum-geneli
+  //   yasam) PgSqlCevir ile TAM PG DDL'e cevrilmez; ## ad-tutarliligi icin route edildi, ancak PG'de bu
+  //   gecici-tablo alt-sistemi elle yeniden tasarlanmali (bkz. UGENINIDuzenle DbGeciciCreate/DbMetinKolon deseni).
   Result := '##Fat_' + IntToStr(SPID) + '_' + FormatDateTime('YYYYMMDDHHNNSSZZ', Tablo.GENINI.BugunTrhSaat);
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' CREATE TABLE ' + Result + '(ID int identity(1,1),FID int,REHBERID int,TUR smallint,DURUM smallint,URUNID int,KOD nvarchar(25),AD nvarchar(200),  ';
   Tablo.Query1.SQL.Add(' KATEGORI smallint, ADET float, MF float,BIRIM smallint, BIRIMAD nvarchar(10),MIKTAR float,BIRIMFIYAT numeric(18,6),TUTAR money,KUR nvarchar(5),OZELKOD nvarchar(50), ');
   Tablo.Query1.SQL.Add(' DOVIZ_TUTARI money,DOVIZ_KURU nvarchar(5),ISKONTO float,ISKONTO2 float,KDV smallint,IADEADET float,IADEFATURAID int,  RESIM image, BARKOD nvarchar(50), ACIKLAMA nvarchar(200), ');
   Tablo.Query1.SQL.Add('  SUBEID SMALLINT, IZLEME SMALLINT, IZLEMEYERI INT, IZLEMEYERID INT, ACIKLAMA2 nvarchar(200),YERI int,YERID int,URETICIID int,RECETEID int, EKLEYEN int, EKLEYENAD nvarchar(50)) ');
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   Tablo.Query1.SQL.Text := ' ALTER TABLE ' + Result + ' ADD  CONSTRAINT DET_'+ FormatDateTime('YYYYMMDDHHNNSSZZ', Tablo.GENINI.BugunTrhSaat)+'  DEFAULT ((0)) FOR [MF]';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' CREATE TABLE ' + Result + 'KAS (ID int identity(1,1),TUR smallint,HESAPID int,MUSTERIHESAPID int,TUTAR money,KUR nvarchar(5),TAHSILAD nvarchar(25),CEKSENETID int, ACIKLAMA nvarchar(25)) ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' CREATE TABLE ' + Result + 'FATBAS (ID int identity(1,1),TARIH smalldatetime,TUR smallint,TIPI smallint,REHBERID int,FATURATARIH datetime,';
@@ -2809,9 +2825,11 @@ begin // DROP EDİLMEYECEK!!!!!
   Tablo.Query1.SQL.Add(' ACIK_KAPALI tinyint,FATURA_MATRAHI money,KDV_TUTARI money,EKVERGI money,FATURA_TUTARI money,KUR nvarchar(5),  DURUM smallint,  ');
   Tablo.Query1.SQL.Add(' MASRAFID smallint,ACIKLAMA nvarchar(100),SATICIKODU int,FIYAT_LISTESI smallint,ODEME smallint,KASA smallint, AGIRLIK float, ');
   Tablo.Query1.SQL.Add(' KASATAKIPID int,DETAYBOLUMU nvarchar(20), DOVIZ_TUTARI MONEY, DOVIZ_CINSI VARCHAR(5), DOVIZKUR MONEY, REHBERILETID INT, SUBEID SMALLINT, DEGISTIRENAD nvarchar(50)     ) ');
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' CREATE TABLE ' + Result + 'SECIM (FATURAID int ,SECIMBASID int,SECIMALTID int,SECILI bit, TUTAR money,KUR nvarchar(5)) ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
 end;
 
@@ -2910,8 +2928,10 @@ begin
   TabFatBasDetay.Close;
   TabFatBasDetay.SQL.Text := ' select * from ' + StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'FATBAS';
   try
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
     TabDetay.Open;
 
+    if AktifVeriMotor = vmPG then TabFatBasDetay.SQL.Text := PgSqlCevir(TabFatBasDetay.SQL.Text);
     TabFatBasDetay.Open;
     AktifFatTabloAdi := StringReplace(TabloAdi, '&', '', [rfReplaceAll]);
     AktifTahTabloAdi := StringReplace(TabloAdi, '&', '', [rfReplaceAll]) + 'KAS';
@@ -3117,6 +3137,7 @@ begin
 
   Tablo.Query5.Close;
   Tablo.Query5.SQL := MemoPaketBul.Lines;
+  if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
   Tablo.Query5.Params[0].Value := Stokmu;
   Tablo.Query5.Params[1].Value := ID;
   Tablo.Query5.Open;
@@ -3129,6 +3150,7 @@ begin
     if not Stokmu then begin // hizmet
       Tablo.Query3.SQL.Text := StringReplace(MemoHizmetler.Lines.Text,'&Kur',KurDegeri,[rfReplaceAll]);
       Tablo.Query3.SQL.Add(' where M.ID=' + IntToStr(ID));
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
     end else begin // stok
       //eğer 2 ayrı birim kullanılıyorsa bardak ve şişe gibi, hangi birim olduğunu soralım
       if DtsKartlar.DataSet.FieldByName('ANABIRIM').AsInteger<>DtsKartlar.DataSet.FieldByName('BIRIM2').AsInteger then
@@ -3141,6 +3163,7 @@ begin
       end else
          Tablo.Query3.SQL.Text := StringReplace(MemoStoklarANABIRIM.Lines.Text,'&Kur',KurDegeri,[rfReplaceAll]);
       Tablo.Query3.SQL.Add(' where S.ID=' + IntToStr(ID) +' and F.BIRIM='+IntToStr(UrunBirimi));
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Params[3].Value := Tablo.Query5.FieldByName('PAKETID').AsInteger;
     end;
     Tablo.Query3.Params[0].Value := Adet * Tablo.Query5.Fields[2].AsInteger; // set @Adet=:PAdet
@@ -3402,6 +3425,7 @@ begin
           Tablo.Query8.SQL.Add('GENINI G2 on G2.BOLUM=S.BOLUM2 and G2.DEGER=S.DEGER2 and G2.DIL=-1 left outer join');
           Tablo.Query8.SQL.Add('GENINI G3 on G3.BOLUM=S.BOLUM3 and G3.DEGER=S.DEGER3 and G3.DIL=-1');
           Tablo.Query8.SQL.Add('where S.ID='+IntToStr(izlemeYerID));
+          if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
           Tablo.Query8.Open;
           Aciklama := Tablo.Query8.Fields[0].AsString;
         except

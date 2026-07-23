@@ -316,6 +316,7 @@ Tablo.Query6.SQL.Text:= '';
 Tablo.Query6.SQL.add(' SELECT R.FIRMA+'' dan ''+'+DbConv('FB.TARIH','varchar(20)',120)+'+'' tarihli alınan faturada ''+AD+'' isimli ürün aynı karekod a sahipdir.'' as MESAJ FROM ');
 Tablo.Query6.SQL.add(' (SELECT * FROM STOKID KK WHERE KK.SIRANO = '''+SeriNo+''' AND KK.URUNBARKOD = '''+UrunKodu+''' ) AS DD ');
 Tablo.Query6.SQL.add(' ,FATURA F,FATBASLIK FB ,REHBER R WHERE DD.GIRFATURAID = F.ID AND FB.ID=DD.GIRFATBASID AND FB.ID=F.FATBASID AND R.ID=FB.REHBERID ');
+if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
 tablo.Query6.Open;
 Result :=Tablo.Query6.FieldByName('MESAJ').AsString;
 end else Result := '';
@@ -347,6 +348,7 @@ begin
         begin
            Tablo.Query1.Close;
            Tablo.Query1.SQL.Text:= 'SELECT ID FROM STOKID WHERE  ISNULL(CIKFATBASID,0)=0 AND   URUNBARKOD = '''+KareKodlar[i].UrunNumarası+''' AND SIRANO = '''+KareKodlar[i].UrunSeriNumarası+''' ';
+           if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
            Tablo.Query1.Open;
             if not tablo.Query1.IsEmpty then
               begin
@@ -589,6 +591,7 @@ begin
    Tablo.Query5.sql.Clear;
    Tablo.Query5.SQL.Add('SELECT * FROM STOKID SI INNER JOIN KAREKOD KD ON KD.STOKIDID=SI.ID  WHERE KD.ALIM_DURUM = ''00000-Doğru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND SI.URUNBARKOD + SI.SIRANO  = '''+OncekiUnique+''' ');
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.Open;
    if not Tablo.Query5.IsEmpty then
     begin
@@ -602,6 +605,7 @@ begin
    Tablo.Query5.sql.Clear;
    Tablo.Query5.SQL.Add('SELECT * FROM STOKID SI INNER JOIN KAREKOD KD ON KD.STOKIDID=SI.ID  WHERE SATIS_DURUM = ''00000-Doğru Bildirim.'' ');
    Tablo.Query5.SQL.Add(' AND SI.URUNBARKOD + SI.SIRANO  = '''+OncekiUnique+'''  ');
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.Open;
    if not Tablo.Query5.IsEmpty then
     begin
@@ -621,6 +625,7 @@ begin
                               ' SI.SIRANO = '''+tabKareKodListesi.FieldByName('SIRANO').AsString+''' '+
                               ' AND SI.URUNBARKOD = '''+tabKareKodListesi.FieldByName('URUNBARKOD').AsString+''' '+
                               ' AND SI.ID <>'+tabKareKodListesi.FieldByName('ID').AsString+' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
      if not Tablo.Query5.IsEmpty then
       begin
@@ -662,6 +667,7 @@ begin
    if IsInteger(EdtUrunAdet.Text)  then
    begin
      TabAyniKayit.Close;
+     if AktifVeriMotor = vmPG then TabAyniKayit.SQL.Text := PgSqlCevir(TabAyniKayit.SQL.Text);
      TabAyniKayit.ParamByName('BARKOD').Value:=EdtUrunBarkodNumarasi.Text;
      TabAyniKayit.ParamByName('SIRABASLA').Value:=EdtUrunSiraNoBaslangic.Text;
      TabAyniKayit.ParamByName('ADET').Value:=StrToInt(EdtUrunAdet.Text);
@@ -672,6 +678,7 @@ begin
      if TabAyniKayit.Eof then
      begin
      TabUretim.Close;
+     if AktifVeriMotor = vmPG then TabUretim.SQL.Text := PgSqlCevir(TabUretim.SQL.Text);
      TabUretim.ParamByName('GIRISTURU').Value:=TakipCagiranTur;
      TabUretim.ParamByName('STOKID').Value:=TakipCagiranUrunId;
      TabUretim.ParamByName('SONKULLANIM').Value:=DtUrunSonKullanim.Date;
@@ -697,9 +704,11 @@ procedure TTakipDlg.BtnCikarClick(Sender: TObject);
 begin
 Tablo.Query1.Close;
 Tablo.Query1.SQL.Text:='DELETE FROM GECICI_EKLENECEK_KAREKOD WHERE STOKIDID = '+TabUretimSatis.FieldByName('ID').AsString+' ';
+if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
 Tablo.Query1.ExecSQL;
 
 TabUretimSatis.Close;
+if AktifVeriMotor = vmPG then TabUretimSatis.SQL.Text := PgSqlCevir(TabUretimSatis.SQL.Text);
 TabUretimSatis.Open;
 end;
 
@@ -709,13 +718,16 @@ if TakipizlemTuru = 3 then
   begin
     Tablo.Query5.Close;
     Tablo.Query5.SQL.Text := 'DELETE FROM KAREKOD WHERE  STOKIDID IN (SELECT ID FROM STOKID WHERE GIRFATBASID=99999)';
+    if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
     Tablo.Query5.ExecSQL;
     Tablo.Query5.Close;
     Tablo.Query5.SQL.Text := 'DELETE FROM STOKID WHERE GIRFATBASID=99999';
+    if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
     Tablo.Query5.ExecSQL;
     Tablo.Query5.Close;
     Tablo.Query5.SQL.Text := '  IF EXISTS (select * from sys.objects where type =''U'' AND name =''GECICI_EKLENECEK_KAREKOD'')';
     Tablo.Query5.SQL.add('BEGIN   DROP TABLE GECICI_EKLENECEK_KAREKOD END');
+    if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
     Tablo.Query5.ExecSQL;
   end;
   ModalResult:= mrCancel;
@@ -804,6 +816,7 @@ begin
   Tablo.Query4.Close;
   Tablo.Query4.SQL.Text:='SELECT GTIN,LOTNUMARASI,SUBSTRING('+DbConv(DbConv('SONKULLANIMTARIHI','datetime',102),'VARCHAR(10)',112)+',3,6) AS BARKODTARIH,SIRANO FROM ITS_PTS_GELEN_URUN ' +
                        'WHERE  LOTNUMARASI = '''+TakipCagiranLotno+''' and  GIRFATBASID ='+IntToStr(TakipCagiranBaslikId)+'  ';
+  if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
   Tablo.Query4.Open;
 
  Tablo.Query4.First;
@@ -861,6 +874,7 @@ begin
        tabKareKodListesi.SQL.Add(' AND ISNULL(CIKISTURU,0) > 0 AND ISNULL(CIKFATURAID,0) = '+inttostr(TakipCagiranSatirId))
       else if (Takipislemturu = 'GD') and ( TakipCagiranTur in [10, 11, 12] ) then // Girilen KareKodlar üzerinde düzeltme yapılacaksa
        tabKareKodListesi.SQL.Add(' AND ISNULL(GIRISTURU,0) > 0 AND ISNULL(GIRFATBASID,0) = '+inttostr(TakipCagiranBaslikId)+' AND ISNULL(GIRFATURAID,0) = '+inttostr(TakipCagiranSatirId));
+      if AktifVeriMotor = vmPG then tabKareKodListesi.SQL.Text := PgSqlCevir(tabKareKodListesi.SQL.Text);
       tabKareKodListesi.Open;
     end;
 end;
@@ -893,6 +907,7 @@ begin
       else if (Takipislemturu = 'GD') and ( TakipCagiranTur = 7 ) then // Sayım  düzenleme yapılacaksa
        tabSeriNoListesi.SQL.Add(' AND ISNULL(GIRISTURU,0) > 0 ');
 
+      if AktifVeriMotor = vmPG then tabSeriNoListesi.SQL.Text := PgSqlCevir(tabSeriNoListesi.SQL.Text);
       tabSeriNoListesi.Open;
    end;
 end;
@@ -904,10 +919,12 @@ begin
  if (Key=#13) and (Length(EdtSiraNoEkleme.Text) <= 20) then
    begin
     TabSatisEkle.Close;
+    if AktifVeriMotor = vmPG then TabSatisEkle.SQL.Text := PgSqlCevir(TabSatisEkle.SQL.Text);
     TabSatisEkle.ParamByName('SIRANO').Value :=  EdtSiraNoEkleme.Text;
     TabSatisEkle.ParamByName('STOKID').Value :=  TakipCagiranUrunId;
     TabSatisEkle.ExecSQL;
     TabUretimSatis.Close;
+    if AktifVeriMotor = vmPG then TabUretimSatis.SQL.Text := PgSqlCevir(TabUretimSatis.SQL.Text);
     TabUretimSatis.Open;
    end;
  if (Key=#13) and (Length(EdtSiraNoEkleme.Text) > 20) then
@@ -915,10 +932,12 @@ begin
     Karekod := KareKodParcala(EdtSiraNoEkleme.Text);
     EdtSiraNoEkleme.Text:='';
     TabSatisEkle.Close;
+    if AktifVeriMotor = vmPG then TabSatisEkle.SQL.Text := PgSqlCevir(TabSatisEkle.SQL.Text);
     TabSatisEkle.ParamByName('SIRANO').Value :=  Karekod.UrunSeriNumarası;
     TabSatisEkle.ParamByName('BARKOD').Value :=  Karekod.UrunNumarası;
     TabSatisEkle.ExecSQL;
     TabUretimSatis.Close;
+    if AktifVeriMotor = vmPG then TabUretimSatis.SQL.Text := PgSqlCevir(TabUretimSatis.SQL.Text);
     TabUretimSatis.Open;
    end;
 end;
@@ -940,6 +959,7 @@ begin
 		'	WHERE ISNULL(S.CIKFATBASID,0)=0 ' +
 		'	AND S.TASIMA_BIRIMI_ID IN       ' +
     '  (SELECT DISTINCT itb.ID FROM ITS_TASIMA_BIRIMI itb INNER JOIN AltKirilim a ON itb.ID = a.ID)  ';
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.Open;
 
     if Tablo.Query1.IsEmpty then
@@ -950,12 +970,14 @@ begin
     Tablo.Query1.First;
     while not Tablo.Query1.Eof   do Begin
       TabSatisEkle.Close;
+      if AktifVeriMotor = vmPG then TabSatisEkle.SQL.Text := PgSqlCevir(TabSatisEkle.SQL.Text);
       TabSatisEkle.ParamByName('SIRANO').Value := Tablo.Query1.FieldByName('SIRANO').AsString ;
       TabSatisEkle.ParamByName('STOKID').Value := Tablo.Query1.FieldByName('STOKID').AsString ;
       TabSatisEkle.ExecSQL;
       Tablo.Query1.Next;
     End;
     TabUretimSatis.Close;
+    if AktifVeriMotor = vmPG then TabUretimSatis.SQL.Text := PgSqlCevir(TabUretimSatis.SQL.Text);
     TabUretimSatis.Open;
   end;
 end;
@@ -1016,6 +1038,7 @@ begin
      btnKaydet.Caption:=' Çıkar';
     if TakipizlemTuru=3 then begin
       TabKarekodSatilacakListesi.Close;
+      if AktifVeriMotor = vmPG then TabKarekodSatilacakListesi.SQL.Text := PgSqlCevir(TabKarekodSatilacakListesi.SQL.Text);
       TabKarekodSatilacakListesi.ParamByName('STOKID').Value :=  TakipCagiranUrunId;
       TabKarekodSatilacakListesi.Open;
       BtnPaket.Visible := True;
@@ -1024,11 +1047,13 @@ begin
     end;
     Tablo.Query6.Close;
     Tablo.Query6.SQL := MemoTempOlustur.Lines;
+    if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
     Tablo.Query6.ExecSQL;
   end else begin
     btnKaydet.Caption:=' Kaydet';
     tablo.Query3.Close;
     Tablo.Query3.SQL.Text:='SELECT SIRANO FROM STOKID ORDER BY ID DESC';
+    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
     Tablo.Query3.Open;
     shtSeriNoDuzeltSil.TabVisible := True;
     LblEnSonSira.Caption:=Tablo.Query3.FieldByName('SIRANO').AsString;
@@ -1038,12 +1063,14 @@ begin
   if TakipizlemTuru=1 then begin
     Tablo.Query6.Close;
     Tablo.Query6.SQL.Text:= 'SELECT GARANTISURESI FROM STOKLAR WHERE ID='+inttostr(TakipCagiranUrunId)+' ';
+    if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
     Tablo.Query6.Open;
     edGarantiSure.Value:= Tablo.Query6.Fields[0].AsInteger;
   end;
   if TakipizlemTuru=3 then begin
     Tablo.Query6.Close;
     Tablo.Query6.SQL := MemoCreate.Lines;
+    if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
     Tablo.Query6.ExecSQL;
     DtUrunUretimTarihi.Date:= Now;
     BtnUretim.Visible := True;
@@ -1095,6 +1122,7 @@ begin
         KareKodlar[i] := KareKodParcala(memoKareKodlar.Lines[i]);
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text:= 'SELECT ID FROM STOKID WHERE  ISNULL(CIKFATBASID,0)=0 AND URUNBARKOD = '''+KareKodlar[i].UrunNumarası+''' AND SIRANO = '''+KareKodlar[i].UrunSeriNumarası+''' ';
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.Open;
         NewNode := TreeListKareKod.Add;
         NewNode.Texts[0] := KareKodlar[i].UrunNumarası;
@@ -1345,6 +1373,7 @@ begin
    begin
       Tablo.Query5.Close;
       Tablo.Query5.SQL.Text:= 'SELECT * FROM STOKID WHERE STOKID = '+IntToStr(TakipCagiranUrunId)+' AND SERINO = '''+memoSeriNolar.Lines[i]+''' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
       if not Tablo.Query5.IsEmpty then
        begin
@@ -1359,6 +1388,7 @@ begin
    begin
       Tablo.Query5.Close;
       Tablo.Query5.SQL.Text:= 'SELECT * FROM STOKID WHERE STOKID = '+IntToStr(TakipCagiranUrunId)+' AND  URUNBARKOD = '''+TreeListKareKod.Items[i].Texts[0]+'''  AND SIRANO = '''+TreeListKareKod.Items[i].Texts[1]+''' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
       if not Tablo.Query5.IsEmpty then
        begin
@@ -1387,6 +1417,7 @@ begin
       Tablo.Query5.SQL.Text:= 'SELECT * FROM STOKID WHERE '+
                               ' STOKID = '+IntToStr(TakipCagiranUrunId)+' AND SERINO = '''+tabSeriNoListesi.FieldByName('SERINO').AsString+''' '+
                               ' AND ID <>'+tabSeriNoListesi.FieldByName('ID').AsString+' ';
+      if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
       Tablo.Query5.Open;
      if not Tablo.Query5.IsEmpty then
       begin

@@ -276,7 +276,7 @@ var
   ITSEzcaDepoDlg: TITSEzcaDepoDlg;
   GridDC: TcxGridDBDataController; // cxGridDBDataDefinitions
   implementation
-Uses  ECXMLParser, UItsAraclari,Utablo,LocOnFly;
+Uses  ECXMLParser, UItsAraclari,Utablo,LocOnFly, UVeriMotor;
 
 
 {$R *.dfm}
@@ -558,6 +558,7 @@ procedure TITSEzcaDepoDlg.GecmisGetir;
 begin
 TabGecmis.Close;
 TabGecmis.sql.Text := 'select * from ITS_URUNLER order by BILDIRIM_TARIH DESC';
+if AktifVeriMotor = vmPG then TabGecmis.SQL.Text := PgSqlCevir(TabGecmis.SQL.Text);
 TabGecmis.Open;
 end;
 
@@ -640,6 +641,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabDogrulama.sql.Add('FROM KAREKOD K,FATBASLIK FB ,STOKID SI  WHERE (SI.ID=K.STOKIDID) AND (SI.GIRFATBASID = FB.ID) AND ');
       TabDogrulama.sql.Add('SUBSTRING(ISNULL(DOGRULAMA_DURUM,''''),0,6) <> ''00000'' ');
       TabDogrulama.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabDogrulama.SQL.Text := PgSqlCevir(TabDogrulama.SQL.Text);
       TabDogrulama.Open;
       end;
     end;
@@ -654,6 +656,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalAlim.sql.Add('( SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) = '''+DurumDogru+'''  ');
       TabMalAlim.sql.Add('OR SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) = '''+AlimDurumUzerinde+'''  )');
       TabMalAlim.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabMalAlim.SQL.Text := PgSqlCevir(TabMalAlim.SQL.Text);
       TabMalAlim.Open;
       end
     else        //Mal Alim Hatali Kayıtlar
@@ -665,6 +668,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalAlim.sql.Add('( SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) <> '''+DurumDogru+''' ');
       TabMalAlim.sql.Add('AND SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) <> '''+AlimDurumUzerinde+'''  )');
       TabMalAlim.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabMalAlim.SQL.Text := PgSqlCevir(TabMalAlim.SQL.Text);
       TabMalAlim.Open;
       end;
     end;
@@ -681,6 +685,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabMalIade.sql.Add('AND SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) <> '''+Durumdogru+''' ');
       TabMalIade.sql.Add('AND SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) <> '''+SatimDurumOnceden+''' ');
       TabMalIade.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabMalIade.SQL.Text := PgSqlCevir(TabMalIade.SQL.Text);
       TabMalIade.Open;
       end;
     end;
@@ -695,6 +700,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabSatis.sql.Add('(SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) = '''+DurumDogru+''' ');
       TabSatis.sql.Add('OR SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) = '''+SatimDurumOnceden+''' ) ');
       TabSatis.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabSatis.SQL.Text := PgSqlCevir(TabSatis.SQL.Text);
       TabSatis.Open;
       end
     else    //Satış durum daha önceden satılmış olmayacak ve alım durum doğru olacak
@@ -708,6 +714,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabSatis.sql.Add('AND (SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) = '''+DurumDogru+''' ');
       TabSatis.sql.Add('OR SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) ='''+AlimDurumUzerinde+''' ) ');
       TabSatis.sql.Add('AND MALSATILANGLN <>'''' AND SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabSatis.SQL.Text := PgSqlCevir(TabSatis.SQL.Text);
       TabSatis.Open;
       end;
     end;
@@ -721,6 +728,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabSatisIptal.sql.Add('FROM KAREKOD K,FATBASLIK FB ,STOKID SI  WHERE (SI.ID=K.STOKIDID) AND (SI.GIRFATBASID = FB.ID) AND  ');
       TabSatisIptal.sql.Add('SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) = '''+DurumDogru+''' or SUBSTRING(ISNULL(SATIS_DURUM,''''),0,6) = '''+SatimDurumOnceden+''' ');
       TabSatisIptal.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabSatisIptal.SQL.Text := PgSqlCevir(TabSatisIptal.SQL.Text);
       TabSatisIptal.Open;
       end;
     end;
@@ -736,6 +744,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabDeAktivasyon.sql.Add('AND (SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) = '''+DurumDogru+''' ');
       TabDeAktivasyon.sql.Add('OR SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) ='''+AlimDurumUzerinde+''' ) ');
       TabDeAktivasyon.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabDeAktivasyon.SQL.Text := PgSqlCevir(TabDeAktivasyon.SQL.Text);
       TabDeAktivasyon.Open;
       end
     else
@@ -748,6 +757,7 @@ UrunSeri := '%'+TxtUrunSeriNo.Text+'%';
       TabDeAktivasyon.sql.Add('AND (SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) = '''+DurumDogru+''' ');
       TabDeAktivasyon.sql.Add('OR SUBSTRING(ISNULL(ALIM_DURUM,''''),0,6) ='''+AlimDurumUzerinde+''' ) ');
       TabDeAktivasyon.sql.Add('AND  SI.URUNBARKOD LIKE '''+Urunkod+''' AND SI.SIRANO LIKE '''+UrunSeri+''' ');
+      if AktifVeriMotor = vmPG then TabDeAktivasyon.SQL.Text := PgSqlCevir(TabDeAktivasyon.SQL.Text);
       TabDeAktivasyon.Open;
       end;
     end;

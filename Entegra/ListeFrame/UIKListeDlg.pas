@@ -1040,6 +1040,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ISLEMTARIHI,ID from KASA where REHBERID = '+ REHBER.FieldByName('ID').asstring+' '+DbSinir(1);
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Open;
      if not Tablo.Query1.IsEmpty then
         raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query1.Fields[0].AsDateTime)+RDPlanVerisiVarSilinemez);
@@ -1172,6 +1173,7 @@ end;
 procedure TIKListeDlg.PERSONELIZINAfterPost(DataSet: TDataSet);
 begin
   PERSONELIZIN.Close;
+  if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
   PERSONELIZIN.Open;
 end;
 
@@ -1428,6 +1430,7 @@ procedure TIKListeDlg.BtnDuzenlePerizinClick(Sender: TObject);
     Tablo.Query6.SQL.Text := 'UPDATE PERSONELIZIN SET  IZINLIGUNSAYISI=:IZINLIGUNSAYISI, IZINBASLANGIC=:IZINBASLANGIC, ACIKLAMA=:ACIKLAMA,'+
                              'HAK=:HAK, IZINVERENREHBERID=:IZINVERENREHBERID, IZINBITIS=:IZINBITIS,DONEM=:DONEM, DEGISTIREN=:DEGISTIREN, '+
                              'DEGISTIRMETARIHI=:DEGISTIRMETARIHI WHERE ID='+IntToStr(IzinID);
+    if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
     izinliGunSayisi := 0;
     Tablo.Query6.ParamByName('ACIKLAMA').Value := Aciklama;
     if Tur = -1 then begin
@@ -1446,6 +1449,7 @@ procedure TIKListeDlg.BtnDuzenlePerizinClick(Sender: TObject);
     Tablo.Query6.ParamByName('DEGISTIRMETARIHI').value := Tablo.GENINI.BugunTrh;
     Tablo.Query6.ExecSQL;
     PERSONELIZIN.Close;
+    if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
     PERSONELIZIN.Open;
   end;
 var
@@ -1809,6 +1813,7 @@ begin
     if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PERSONELIZIN where ID=&DokID',['&DokID'],[PERSONELIZIN.FieldByName('ID').AsInteger]);
        PERSONELIZIN.Close;
+       if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
        PERSONELIZIN.Open;
     end;
 end;
@@ -1862,6 +1867,7 @@ begin
   begin
     Tablo.Query6.SQL.Text := 'INSERT INTO PERSONELIZIN(EKLEYEN, EKLEMETARIHI, IZINTURU, BIRIM, IZINLIGUNSAYISI, IZINBASLANGIC, ACIKLAMA, HAK, IZINVERENREHBERID, REHBERID, SUBEID, DONEM, IZINBITIS) '+
                              'VALUES(:EKLEYEN, :EKLEMETARIHI, :IZINTURU, :BIRIM, :IZINLIGUNSAYISI, :IZINBASLANGIC, :ACIKLAMA, :HAK, :IZINVERENREHBERID, :REHBERID, :SUBEID, :DONEM, :IZINBITIS)';
+    if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
     Tablo.Query6.ParamByName('IZINTURU').Value := Tur;
     Tablo.Query6.ParamByName('BIRIM').Value := 3; //gün
     izinliGunSayisi := 0;
@@ -2266,6 +2272,7 @@ begin
       8,15 :begin
         Tablo.Query9.Close;
         Tablo.Query9.SQL.Text := 'Select * from FATBASLIK Where ID='+TabCariListe.FieldByName('CEKID').AsString+' ';
+        if AktifVeriMotor = vmPG then Tablo.Query9.SQL.Text := PgSqlCevir(Tablo.Query9.SQL.Text);
         Tablo.Query9.Open;
 
         Tablo.FaturaIadeAl(Tablo.Query9,TMenuItem(Sender).Tag );
@@ -2664,6 +2671,7 @@ begin
     ' select  STR=''Servis - Onaylayacak'',SAYI=count(*) from SERVIS where ACKAPA = 0 and ONAYLAYACAK = @rehID '  +
     ' union all ' +
     ' select  STR=''Servis - Onaylayan'',SAYI=count(*) from SERVIS where ACKAPA = 0 and ONAYLAYAN = @rehID ';
+  if AktifVeriMotor = vmPG then Tablo.Query7.SQL.Text := PgSqlCevir(Tablo.Query7.SQL.Text);
   Tablo.Query7.Open;
   Tablo.Query7.First;
   ShowWarning := False;

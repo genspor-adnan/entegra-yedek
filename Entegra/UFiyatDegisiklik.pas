@@ -228,6 +228,7 @@ begin
 
     Tablo.Query3.Close;
     Tablo.Query3.SQL.Text := 'Update ' + Database + ' SET KDVDURUM=' + IntToStr(KDVTag) + ' WHERE ' + IDisim + '=:A0 and FIYATADI=:A1 and SATIS=:A2 ';
+    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
     Tablo.Query3.Params[0].Value := StokID;
     Tablo.Query3.Params[1].Value := Tablo.Query1.Fields[0].Value;  // FiyatAdıID
     Tablo.Query3.Params[2].Value := AlismiSatismi;
@@ -441,22 +442,26 @@ begin
 
       TabFiyatSatis.Close;
       TabFiyatSatis.SQL.Text := 'Select ID=STOKID,FIYATADI,FIYAT,KUR,KDVDURUM,DEGISTIRMETARIHI from STOKFIYAT Where STOKID='+StokID +' and SATIS=1 ';
+      if AktifVeriMotor = vmPG then TabFiyatSatis.SQL.Text := PgSqlCevir(TabFiyatSatis.SQL.Text);
       TabFiyatSatis.Open;
 
       TabFiyatAlis.Close;
       TabFiyatAlis.SQL.Text := ' Select ID=STOKID,FIYATADI, FIYATAD=(select '+DbUst(1)+'case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
           ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI '+DbSinir(1)+'),FIYAT,KUR,KDVDURUM,DEGISTIRMETARIHI from STOKFIYAT Where STOKID='+StokID +' and SATIS=0';
+      if AktifVeriMotor = vmPG then TabFiyatAlis.SQL.Text := PgSqlCevir(TabFiyatAlis.SQL.Text);
       TabFiyatAlis.Open;
 
     end else begin
 
       TabFiyatSatis.Close;
       TabFiyatSatis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYAT,KUR,KDVDURUM,SATIS,DEGISTIRMETARIHI from FIYATLAR Where HIZMETID='+StokID+' and SATIS=1 ';
+      if AktifVeriMotor = vmPG then TabFiyatSatis.SQL.Text := PgSqlCevir(TabFiyatSatis.SQL.Text);
       TabFiyatSatis.Open;
 
       TabFiyatAlis.Close;
       TabFiyatAlis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYATAD=(select '+DbUst(1)+'case when DEGER=-2 then ANAHTAR +'' (Son''+cast(PAKETID as varchar(5))+'')'' '+
           ' else ANAHTAR end from GENINI where BOLUM=-1008 and DEGER=FIYATADI '+DbSinir(1)+'),FIYAT,KUR,KDVDURUM,SATIS,DEGISTIRMETARIHI from FIYATLAR Where HIZMETID='+StokID +' and SATIS=0 ';
+      if AktifVeriMotor = vmPG then TabFiyatAlis.SQL.Text := PgSqlCevir(TabFiyatAlis.SQL.Text);
       TabFiyatAlis.Open;
     end;
 end;
@@ -483,10 +488,12 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
 
   Tablo.Query1.Close;//Yeni Oluşturulan FiyatAdı için Deger bulunuyor
   Tablo.Query1.SQL.Text := ' Select ENBUYUK=max(DEGER+1) from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM= ' +  BolumFiyatAdi;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
 
   Tablo.Query2.Close;  // Seçilen FiyatAdının Degeri bulunuyor.
   Tablo.Query2.SQL.Text :=  'Select DEGER from GENINI Where  DIL='+IntToStr(Dil)+' AND BOLUM= ' + BolumFiyatAdi +  ' and ANAHTAR=''' + SubCaption + ''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
   Tablo.Query2.Open;
   case TMenuItem(Sender).Tag of
     1: begin // Kopyala
@@ -508,6 +515,7 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
         + ' ,[DEGISTIREN],[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS]) ' +
         ' Select [HIZMETID],''' + Tablo.Query1.Fields[0].AsString + ''',[SEC],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI] ' +
         ' ,[DEGISTIREN],[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS] from FIYATLAR Where FIYATADI=:FiyatID and SATIS='+AlisSatis+' ';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Params[0].Value := Tablo.Query2.Fields[0].AsString;
       Tablo.Query3.ExecSQL;
 
@@ -515,6 +523,7 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
       Tablo.Query3.SQL.Text := 'INSERT INTO STOKFIYAT ([STOKID],[FIYATADI],[BIRIM],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN] '+
         ' ,[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS]) Select [STOKID],''' +  Tablo.Query1.Fields[0].AsString +''',[BIRIM],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN] ' +
         ' ,[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS] from STOKFIYAT Where PAKETID=0 and FIYATADI=:FiyatID and SATIS='+AlisSatis+'  ';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Params[0].Value := Tablo.Query2.Fields[0].AsString;
       Tablo.Query3.ExecSQL;
 
@@ -563,6 +572,7 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
 
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := ' Select ENBUYUK=max(DEGER+1) from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM= ' + BolumFiyatAdiTersi;
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.Open;
 
       Tablo.TablodanSorguAc(4,'Select * from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM=' + BolumFiyatAdiTersi +' and ANAHTAR=''' + SubCaption + ''' ');
@@ -579,6 +589,7 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
       ' ,[DEGISTIREN],[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS]) ' +
         ' Select [HIZMETID],''' + Tablo.Query1.Fields[0].AsString + ''',[SEC],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI] ' +
         ' ,[DEGISTIREN],[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],''' +  AlisSatisTersi + ''' from FIYATLAR Where PAKETID=0 and FIYATADI=:FiyatID and SATIS='+AlisSatis+' ';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Params[0].Value := Tablo.Query2.Fields[0].AsString;
       Tablo.Query3.ExecSQL;
 
@@ -586,6 +597,7 @@ begin  //eksik fiyatlar ekleneekse seçime gerek yok
       Tablo.Query3.SQL.Text :=  'INSERT INTO STOKFIYAT ([STOKID],[FIYATADI],[BIRIM],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN] ' +
         ' ,[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],[SATIS]) Select [STOKID],''' + Tablo.Query1.Fields[0].AsString + ''',[BIRIM],[FIYAT],[KUR],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN] ' +
         ' ,[DEGISTIRMETARIHI],[KDVDURUM],[PAKETID],''' + AlisSatisTersi + ''' from STOKFIYAT Where PAKETID=0 and FIYATADI=:FiyatID and SATIS='+AlisSatis+'';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Params[0].Value := Tablo.Query2.Fields[0].AsString;
       Tablo.Query3.ExecSQL;
 
@@ -704,6 +716,7 @@ begin
 
           Tablo.Query3.Close;
           Tablo.Query3.SQL.Text := 'Update ' + Database + ' SET FIYAT=:A0 WHERE ' + IDisim +'=:A1 and FIYATADI=:A2 and SATIS=:A3 ';
+          if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
           Tablo.Query3.Params[0].Value := StrToFloat(YeniFiyatsonstr);
           Tablo.Query3.Params[1].Value := StokID;
           Tablo.Query3.Params[2].Value := Tablo.Query1.Fields[0].Value;
@@ -738,6 +751,7 @@ begin
 
           Tablo.Query3.Close;
           Tablo.Query3.SQL.Text := 'Update ' + Database + ' SET FIYAT=:A0 WHERE ' + IDisim +'=:A1 and FIYATADI=:A2 and SATIS=:A3 ';
+          if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
           Tablo.Query3.Params[0].Value := Tutar;
           Tablo.Query3.Params[1].Value := StokID;
           Tablo.Query3.Params[2].Value := Tablo.Query1.Fields[0].Value;  // FiyatAdıID
@@ -778,6 +792,7 @@ begin
 
           Tablo.Query3.Close;
           Tablo.Query3.SQL.Text := 'Update ' + Database + ' SET FIYAT=:A0 WHERE ' + IDisim +'=:A1 and FIYATADI=:A2 and SATIS=:A3 ';
+          if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
           Tablo.Query3.Params[0].Value := Tutar;
           Tablo.Query3.Params[1].Value := StokID;
           Tablo.Query3.Params[2].Value := Tablo.Query1.Fields[0].Value;  // FiyatAdıID
@@ -830,6 +845,7 @@ begin
 
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text :='Select * from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM= ' + BolumFiyatAdi +' and ANAHTAR=''' + YeniFiyat + ''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   if Tablo.Query1.RecordCount > 0 then begin
     Application.MessageBox(PCHAR(STFiyatadi_kayitli), PCHAR(Uyari), MB_OK);
@@ -838,6 +854,7 @@ begin
 
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text :=' Select ENBUYUK=max(DEGER+1) from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM= ' + BolumFiyatAdi;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
 
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI(BOLUM,ANAHTAR,DEGER,DIL,SIRA) values(' + BolumFiyatAdi +',&anahtar,&deger,'+IntToStr(Dil)+',1)', ['&anahtar', '&deger'],[YeniFiyat, Tablo.Query1.Fields[0].AsString]);
@@ -1002,16 +1019,20 @@ begin
   if RbStoklar.Checked then begin
     TabFiyatSatis.Close;
     TabFiyatSatis.SQL.Text := 'Select ID=STOKID,FIYATADI,FIYAT,KUR,KDVDURUM from STOKFIYAT Where STOKID='+TabStokHizmetListesi.FieldByName('ID').AsString +' and SATIS=1 ';
+    if AktifVeriMotor = vmPG then TabFiyatSatis.SQL.Text := PgSqlCevir(TabFiyatSatis.SQL.Text);
     TabFiyatSatis.Open;
     TabFiyatAlis.Close;
     TabFiyatAlis.SQL.Text := 'Select ID=STOKID,FIYATADI,FIYAT,KUR,KDVDURUM from STOKFIYAT Where STOKID='+TabStokHizmetListesi.FieldByName('ID').AsString +' and SATIS=0 ';
+    if AktifVeriMotor = vmPG then TabFiyatAlis.SQL.Text := PgSqlCevir(TabFiyatAlis.SQL.Text);
     TabFiyatAlis.Open;
   end else begin
     TabFiyatSatis.Close;
     TabFiyatSatis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYAT,KUR,KDVDURUM,SATIS from FIYATLAR Where HIZMETID='+TabStokHizmetListesi.FieldByName('ID').AsString +' and SATIS=1 ';
+    if AktifVeriMotor = vmPG then TabFiyatSatis.SQL.Text := PgSqlCevir(TabFiyatSatis.SQL.Text);
     TabFiyatSatis.Open;
     TabFiyatAlis.Close;
     TabFiyatAlis.SQL.Text := ' Select ID=HIZMETID,FIYATADI,FIYAT,KUR,KDVDURUM,SATIS from FIYATLAR Where HIZMETID='+TabStokHizmetListesi.FieldByName('ID').AsString +' and SATIS=0 ';
+    if AktifVeriMotor = vmPG then TabFiyatAlis.SQL.Text := PgSqlCevir(TabFiyatAlis.SQL.Text);
     TabFiyatAlis.Open;
   end;
 end;

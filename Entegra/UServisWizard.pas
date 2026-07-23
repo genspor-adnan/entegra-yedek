@@ -557,6 +557,7 @@ begin
    AFastReport.EnabledDataSets.Add(frxServisNotlar);
    Tablo.TabMusteri.Close;
    Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+   if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
    Tablo.TabMusteri.Open;
    AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
 end;
@@ -930,6 +931,7 @@ begin
     Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
     Tablo.Query1.SQL.Add(' where F.FATBASID='+TabServisBelge.FieldByName('ID').AsString);
   end;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   case Tablo.Query1.RecordCount of
     0: Abort;
@@ -1104,6 +1106,7 @@ begin
       try
         LAlanlar.Connection := Tablo.FDCnn;
         LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+        if AktifVeriMotor = vmPG then LAlanlar.SQL.Text := PgSqlCevir(LAlanlar.SQL.Text);
         LAlanlar.Open;
         TabHareketler.Append;
         LAlanlar.First;
@@ -1605,6 +1608,7 @@ var
   i:integer;
 begin
   Table1.Close;
+  if AktifVeriMotor = vmPG then Table1.SQL.Text := PgSqlCevir(Table1.SQL.Text);
 
   if Table1.Params.FindParam('PSerID') = nil then begin
     with Table1.Params.Add do begin
@@ -1712,6 +1716,7 @@ begin
   try
     LAlanlar.Connection := Tablo.FDCnn;
     LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+    if AktifVeriMotor = vmPG then LAlanlar.SQL.Text := PgSqlCevir(LAlanlar.SQL.Text);
     LAlanlar.Open;
     LAlanlar.First;
     while not LAlanlar.Eof do begin
@@ -1769,6 +1774,7 @@ begin
     try
       LAlanlar.Connection := Tablo.FDCnn;
       LAlanlar.SQL.Text := 'select * from ALANLAR where EKRANADI=''ServisSonlandirDlg'' and TUR not in (11,12)';
+      if AktifVeriMotor = vmPG then LAlanlar.SQL.Text := PgSqlCevir(LAlanlar.SQL.Text);
       LAlanlar.Open;
       LAlanlar.First;
       while not LAlanlar.Eof do begin
@@ -1975,6 +1981,7 @@ begin
     Tablo.Query1.SQL.Add(' where FATBASID='+TabServisBelge.FieldByName('ID').AsString+' and ');
     Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,461,462) ');
   end;
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   case Tablo.Query1.RecordCount of
     0: Abort;

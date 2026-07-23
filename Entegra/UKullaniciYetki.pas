@@ -193,7 +193,7 @@ var
 
 implementation
 
-uses PrjConst, FetaKurulusSiniflari, UKullaniciDuzenle, LocOnFly, UYetkiKategori, ULog;
+uses PrjConst, FetaKurulusSiniflari, UKullaniciDuzenle, LocOnFly, UYetkiKategori, ULog, UVeriMotor;
 
 {$R *.dfm}
 
@@ -226,6 +226,7 @@ begin
                 +' ROLID = '+TabRol.FieldByName('ID').AsString+' and '
                 +' MODULID = '+TabModul.FieldByName('MODULID').AsString+' and '
                 +' TUR = '+inttostr(CheckGroupHaklar.Properties.Items.Items[I].Tag);
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Open;
      case Tablo.Query1.RecordCount of
        0:begin
@@ -236,6 +237,7 @@ begin
            +Hak+' , '
            +inttostr(CheckGroupHaklar.Properties.Items[I].Tag)+' , '''
            +Kullanan+''','+IntToStr(SubeId)+')' ;
+         if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
          Tablo.Query2.ExecSQL;
        end;
        1:begin
@@ -384,6 +386,7 @@ end;
 procedure TKullaniciYetkiDlg.FormShow(Sender: TObject);
 begin
   FormCaption := KullaniciYetkiDlg.Caption;
+  if AktifVeriMotor = vmPG then TabRol.SQL.Text := PgSqlCevir(TabRol.SQL.Text);
   TabRol.Open;
   PageControlSec.ActivePageIndex := 0;
 end;
@@ -415,6 +418,7 @@ begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text:=' INSERT INTO ROLLER(DEPARTMAN,GOREVID,DURUM,EKLEYEN,SUBEID) '
          +' VALUES('+VarToStr(Departman)+','+VarToStr(Gorev)+',''1'','''+kullanan+''','+VarToStr(Subesi)+'); SELECT SCOPE_IDENTITY() ';
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.Open;
         rid := StrToIntDef(Tablo.Query1.Fields[0].AsString, 0);
         // ISLEMLOG: rol/bolum EKLEME (departman/gorev/sube). ID scope_identity ile alindi.
@@ -424,6 +428,7 @@ begin
                            .Deger('GOREVID', VarToStr(Gorev))
                            .Deger('SUBEID', VarToStr(Subesi)));
         TabRol.Close;
+        if AktifVeriMotor = vmPG then TabRol.SQL.Text := PgSqlCevir(TabRol.SQL.Text);
         TabRol.Open;
      end;
    end;
@@ -481,6 +486,7 @@ begin
         //rol1 := bilgi;
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text:=' UPDATE ROLLER SET DEPARTMAN='+vartostr(Departman)+',GOREVID = '+VarToStr(Gorev)+',TY='+VarToStr(TamYetki)+',SUBEID='+VarToStr(Subesi)+' where ID = '+TabRol.FieldByName('ID').AsString;
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.ExecSQL;
         // ISLEMLOG: rol/bolum DEGISTIRME (yalniz degisen alanlar; esitse atlanir).
         if LogGun > 0 then
@@ -509,6 +515,7 @@ begin
     raise Exception.Create(rolyonsilinemez);  }
   Tablo.Query2.Close;
   Tablo.Query2.SQL.Text:='Select * From KULLANICI where ROLID = '+TabRol.FieldByName('ID').AsString;
+  if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
   Tablo.Query2.Open;
   if Tablo.Query2.RecordCount > 0 then
     raise Exception.Create(rolsilinemez)
@@ -609,6 +616,7 @@ procedure TKullaniciYetkiDlg.mGurubuSe1Click(Sender: TObject);
 begin
   Tablo.Query3.Close;
   Tablo.Query3.SQL.Text := cxMemo1.text;
+  if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
   Tablo.Query3.Params[0].AsInteger := TabRol.FieldByName('ID').AsInteger;
   Tablo.Query3.Params[1].AsString := TabModul.FieldByName('MODULID').AsString;
   Tablo.Query3.ExecSQL;
@@ -632,6 +640,7 @@ begin
     Tablo.Query3.SQL.Add('delete from YETKI where ROLID = @HedefRolID  ');
     Tablo.Query3.SQL.Add('insert into YETKI(ROLID,MODULID,HAK,TUR,SUBEID) ');
     Tablo.Query3.SQL.Add('select @HedefRolID,MODULID,HAK,TUR,SUBEID from YETKI where ROLID=@KaynakRolID  ');
+    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
     Tablo.Query3.ExecSQL;
     if LogGun > 0 then
       LogYaz(liDegistir, TabNo_YETKI, TabRol.FieldByName('ID').AsInteger,
@@ -695,9 +704,11 @@ begin
                          .Deger('SUBEID', TabRol.FieldByName('SUBEID').AsString));
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text:='delete from YETKIEK where ROLID = '+inttostr(TabRol.FieldByName('ID').AsInteger);
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ExecSQL;
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text:='delete from YETKI where ROLID = '+inttostr(TabRol.FieldByName('ID').AsInteger);
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ExecSQL;
     end Else
       Abort;
@@ -785,6 +796,7 @@ begin
   TabloYenile(TabKullanici,[TabRol.FieldByName('ID').AsInteger]);
   if not TabModul.Active then begin
     TabModul.DisableControls;
+    if AktifVeriMotor = vmPG then TabModul.SQL.Text := PgSqlCevir(TabModul.SQL.Text);
     TabModul.Open;
     TabModul.EnableControls;
   end;

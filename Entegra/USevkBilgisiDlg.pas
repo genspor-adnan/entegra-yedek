@@ -166,6 +166,7 @@ begin
       '  select :HEDEFID, SEVKBILGISI, :KULLANAN, getdate() ' +
       '  from FATBASLIK_USER where ID=:KAYNAKID and isnull(SEVKBILGISI,'''')<>'''' ' +
       'end';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('HEDEFID').AsInteger := AFatBaslikID;
     LQry.ParamByName('KAYNAKID').AsInteger := AGecmisID;
     LQry.ParamByName('KULLANAN').AsInteger := StrToIntDef(Kullanan, 0);
@@ -188,6 +189,7 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text := 'select ID from FATBASLIK_USER where ID=:ID and isnull(SEVKBILGISI,'''''''')<>''''''''';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := AFatBaslikID;
     LQry.Open;
     Result := not LQry.Eof;
@@ -272,6 +274,7 @@ begin
       '    constraint FK_FATBASLIK_USER_FATBASLIK foreign key(ID) references dbo.FATBASLIK(ID)' +
       '  )' +
       'end';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ExecSQL;
   finally
     LQry.Free;
@@ -294,6 +297,7 @@ begin
     try
       LQry.Connection := Tablo.FDCnn;
       LQry.SQL.Text := 'select SEVKBILGISI from FATBASLIK_USER where ID=:ID';
+      if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
       LQry.ParamByName('ID').AsInteger := FFatBaslikID;
       LQry.Open;
       if not LQry.Eof then
@@ -362,6 +366,7 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text := 'select ID from FATBASLIK where ID=:ID';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := FFatBaslikID;
     LQry.Open;
     Result := not LQry.Eof;
@@ -379,6 +384,7 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text := 'select REHBERID from FATBASLIK where ID=:ID';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := FFatBaslikID;
     LQry.Open;
     if not LQry.Eof then
@@ -402,6 +408,7 @@ begin
       'from GENINI ' +
       'where BOLUM=:BOLUM and DIL=-1 and isnull(ANAHTAR,'''')<>'''' ' +
       'order by SIRA desc '+DbSinir(10);
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('BOLUM').AsInteger := Ops_FaturaOpsiyon_SonSevkBilgileri;
     LQry.Open;
     while not LQry.Eof do begin
@@ -452,6 +459,7 @@ begin
   try
     LQry.Connection := Tablo.FDCnn;
     LQry.SQL.Text := 'select SEVKBILGISI from FATBASLIK_USER where ID=:ID';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := AGecmisID;
     LQry.Open;
     if not LQry.Eof then
@@ -525,6 +533,7 @@ begin
       LSQL := LSQL + 'and FB.REHBERID=:REHBERID ';
     LSQL := LSQL + 'order by FU.ID desc '+DbSinir(1);
     LQry.SQL.Text := LSQL;
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := FFatBaslikID;
     if ABuCariIcin then
       LQry.ParamByName('REHBERID').AsInteger := LRehberID;
@@ -564,6 +573,7 @@ begin
       '  inner join REHBERBILGI RB on RA.SIRA=RB.SIRA and RA.YERI=RB.YERI ' +
       '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22 '+DbSinir(1)+'), ''''))),'' '',''''),''-'','''') ' +
       'from REHBER R where R.ID=:ID';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := ATasiyiciID;
     LQry.Open;
     if not LQry.Eof then
@@ -610,6 +620,7 @@ begin
         '  inner join REHBERBILGI RB on RA.SIRA=RB.SIRA and RA.YERI=RB.YERI ' +
         '  where RB.YER_ID=R.ID and RB.YERI=2 and RA.VARSAYILAN=22 '+DbSinir(1)+'), ''''))),'' '',''''),''-'','''') ' +
         'from REHBER R where R.ID=:ID';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := ASoforID;
     LQry.Open;
     if not LQry.Eof then
@@ -809,6 +820,7 @@ begin
       '  insert into FATBASLIK_USER(ID,SEVKBILGISI,EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI) ' +
       '  values(:ID,cast(:SEVKBILGISI as nvarchar(max)),:EKLEYEN,getdate(),:DEGISTIREN,getdate()) ' +
       'end';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('ID').AsInteger := FFatBaslikID;
     LQry.ParamByName('SEVKBILGISI').DataType := ftWideMemo;
     LQry.ParamByName('SEVKBILGISI').AsWideMemo := LJSON;

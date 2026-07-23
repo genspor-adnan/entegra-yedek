@@ -484,6 +484,7 @@ begin
     AFastReport.EnabledDataSets.Add(frxSIPARISDETAY);
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     if SIPARIS.FieldByName('REHBERILETID').Value <> null then begin
       TabloYenile(Tablo.TabSevkAdresi,[RehberId,SIPARIS.FieldByName('REHBERILETID').AsInteger]);
@@ -500,12 +501,14 @@ begin
     MusIlgiliID := IIF(SIPARIS.FieldByName('MUS_ILGILI').AsString='','-99',SIPARIS.FieldByName('MUS_ILGILI').AsString);
     Tablo.TabMusteriIlgili.Close;
     Tablo.TabMusteriIlgili.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',MusIlgiliID, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteriIlgili.SQL.Text := PgSqlCevir(Tablo.TabMusteriIlgili.SQL.Text);
     Tablo.TabMusteriIlgili.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteriIlgili);
 
     PersonelID := IIF(SIPARIS.FieldByName('SATICIKODU').AsString='','-99',SIPARIS.FieldByName('SATICIKODU').AsString);
     Tablo.TabPersonel.Close;
     Tablo.TabPersonel.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',PersonelID, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabPersonel.SQL.Text := PgSqlCevir(Tablo.TabPersonel.SQL.Text);
     Tablo.TabPersonel.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxPersonel);
 

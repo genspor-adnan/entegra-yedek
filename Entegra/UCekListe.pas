@@ -116,6 +116,7 @@ begin
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' order BY HESAPKODU,VADE ';
+         if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
          TabCekListesi.Open;
          LabelSayi.Caption:= 'Toplam Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
          cekturu:='Bütün Çekler';
@@ -135,6 +136,7 @@ begin
                                    ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' order BY HESAPKODU,VADE ';
+                 if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
                  TabCekListesi.Open;
                  LabelSayi.Caption:= 'Toplam Verilen Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
                  cekturu:='Verilen Çekler';
@@ -153,6 +155,7 @@ begin
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO  IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
+         if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
          TabCekListesi.Open;
          LabelSayi.Caption:= 'Ödenmiş Verilen Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
          cekdurum:= 'Ödenmiş';
@@ -171,6 +174,7 @@ begin
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO  NOT IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
+              if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
               TabCekListesi.Open;
               LabelSayi.Caption:= 'Ödenmemiş Verilen Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
               cekdurum:= 'Ödenmemiş';
@@ -193,6 +197,7 @@ begin
                                          ' ISNULL(VADE,''1900-01-01'') BETWEEN '''+ FormatDateTime('yyyy-mm-dd 00:00',datebaslangic.date)+''' AND '+
                                          ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                          ' order BY HESAPKODU,VADE ';
+               if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
                TabCekListesi.Open;
                LabelSayi.Caption:= 'Alınan Toplam Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
                cekturu:='Alınan Çekler';
@@ -212,6 +217,7 @@ begin
                                          ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                          ' AND SIRANO IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                          ' order BY HESAPKODU,VADE ';
+               if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
                TabCekListesi.Open;
                LabelSayi.Caption:= 'Tahsil Edilmiş Alınan Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
                cekdurum:= 'Tahsil Edilmiş';
@@ -230,6 +236,7 @@ begin
                                    ' ''' + FormatDateTime('yyyy-mm-dd 23:59',datebitis.date)+ ''' ' +
                                    ' AND SIRANO NOT IN (SELECT DISTINCT CEKSENETID FROM KASA WHERE CEKSENETID IS NOT NULL ) '+
                                    ' order BY HESAPKODU,VADE ';
+              if AktifVeriMotor = vmPG then TabCekListesi.SQL.Text := PgSqlCevir(TabCekListesi.SQL.Text);
               TabCekListesi.Open;
               LabelSayi.Caption:= 'Tahsil Edilmemiş Alınan Çek Sayısı : '+ inttostr(TabCekListesi.RecordCount);
               cekdurum:= 'Tahsil Edilmemiş';

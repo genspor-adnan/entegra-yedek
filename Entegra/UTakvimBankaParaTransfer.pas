@@ -147,7 +147,7 @@ var
 
 implementation
 uses
-  PrjConst,Fetautil,LocOnFly;
+  PrjConst,Fetautil,LocOnFly,UVeriMotor;
 
 {$R *.dfm}
 
@@ -211,10 +211,12 @@ begin
   end ;
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text:='UPDATE KASA SET TUR = '+inttostr(Isturu)+' WHERE ID = ' + IntToStr(ID);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   if HesapTuru <> '' then begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text:='UPDATE KASA SET HESAPTURU = '''+HesapTuru+''' WHERE ID = ' + IntToStr(ID);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
   end;
  // FormShow(Self);
@@ -236,8 +238,11 @@ procedure TTakvimBankaParaTransferDLG.FormShow(Sender: TObject);
 
 begin
   TabMusteriBilgileri.Close;
+  if AktifVeriMotor = vmPG then TabMusteriBilgileri.SQL.Text := PgSqlCevir(TabMusteriBilgileri.SQL.Text);
   TabBizimBilgiler.Close;
+  if AktifVeriMotor = vmPG then TabBizimBilgiler.SQL.Text := PgSqlCevir(TabBizimBilgiler.SQL.Text);
   TabKasa.Close;
+  if AktifVeriMotor = vmPG then TabKasa.SQL.Text := PgSqlCevir(TabKasa.SQL.Text);
   TabKasa.Params[0].Value := ID;
   TabKasa.Open;
   if IslemOp = 'E' then begin
@@ -522,6 +527,7 @@ begin
       LabelTutarClick(Self);
       Tablo.query1.Close;
       Tablo.query1.SQL.Text := 'select ID from KASALAR where DURUM=1 and KUR = '''+TabKasa.FieldByName('KUR').AsString+''' ';
+      if AktifVeriMotor = vmPG then Tablo.query1.SQL.Text := PgSqlCevir(Tablo.query1.SQL.Text);
       Tablo.query1.Open;
       TabKasa.FieldByName('HESAPID').AsString := Tablo.query1.Fields[0].AsString;
       TabBizimBilgiler.Params[0].Value := -1;
@@ -626,6 +632,7 @@ begin
        if Tablo.ListedenBilgiGetir('Lütfen İşlem Yapılacak Kasanızı Seçiniz.','SELECT ID,KASAKODU,KASAADI,KUR FROM KASALAR WHERE KASAADI like ''%<ara>%'' and DURUM = 1',st1,[]) then  Begin
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''K'' WHERE ID= '+inttostr(ID);
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.ExecSQL;
        End;
        st1.free;
@@ -637,6 +644,7 @@ begin
          if MessageDlg('Bilgileri temizlemek ister misiniz?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then Begin
            tablo.query1.close;
            tablo.query1.SQL.Text:='UPDATE KASA SET MUSTERIHESAPID = NULL WHERE ID = '+inttostr(ID);
+           if AktifVeriMotor = vmPG then tablo.query1.SQL.Text := PgSqlCevir(tablo.query1.SQL.Text);
            tablo.query1.ExecSQL;
            TabMusteriBilgileri.Close;
            TabMusteriBilgileri.Params[0].Value := ID;
@@ -675,12 +683,14 @@ begin
          if Tablo.ListedenBilgiGetir('Lütfen İşlem Yapılacak Pos Cihazını Seçiniz.','SELECT ID,KODU,ADI,NOSU FROM POS --WHERE DURUM = 1',st1,[]) then  Begin
            Tablo.Query1.Close;
            Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''P'' WHERE ID= '+inttostr(ID);
+           if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
            Tablo.Query1.ExecSQL;
          End;
        End Else if IsTuru in [35,71] then begin
           if Tablo.ListedenBilgiGetir('Lütfen İşlem Yapılacak Kredi Kartını Seçiniz.','SELECT ID,KODU,ADI,HAMILI FROM KREDIKARTI --WHERE DURUM = 1',st1,[]) then  Begin
            Tablo.Query1.Close;
            Tablo.Query1.SQL.Text := 'UPDATE KASA SET HESAPID='''+st1.strings[0]+''' , HESAPTURU=''V'' WHERE ID= '+inttostr(ID);
+           if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
            Tablo.Query1.ExecSQL;
          End;
        end;
@@ -693,6 +703,7 @@ begin
          if MessageDlg('Bilgileri temizlemek ister misiniz?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then Begin
            tablo.query1.close;
            tablo.query1.SQL.Text:='UPDATE KASA SET MUSTERIHESAPID = NULL WHERE ID = '+inttostr(ID);
+           if AktifVeriMotor = vmPG then tablo.query1.SQL.Text := PgSqlCevir(tablo.query1.SQL.Text);
            tablo.query1.ExecSQL;
            TabMusteriBilgileri.Close;
            TabMusteriBilgileri.Params[0].Value := ID;

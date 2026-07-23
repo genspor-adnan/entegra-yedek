@@ -169,7 +169,7 @@ implementation
 
 {$R *.dfm}
 
-uses UHizliGirisAnaMenu;
+uses UHizliGirisAnaMenu, UVeriMotor;
 
 procedure THizliGirisKasaOzet.KasaOzetikiTarihAralikBulma(BaslangicTarih,
   BitisTarih: TDateTime);
@@ -191,6 +191,7 @@ begin
     'INNER JOIN dbo.REHBER RB ON RB.ID=K.KAPATAN_KISI' + #13#10 +
     'INNER JOIN REHBER RBS ON RBS.ID=K.SUBEID' + #13#10 + 'WHERE KASAID='''+IntToStr(VarsKasa)+'''' +
     #13#10 + 'AND KAPANIS_TARIH IS NOT NULL ORDER BY ACILIS_TARIH DESC';
+  if AktifVeriMotor = vmPG then TabKasaAcKapatSuzmeList.SQL.Text := PgSqlCevir(TabKasaAcKapatSuzmeList.SQL.Text);
   TabKasaAcKapatSuzmeList.Open;
   GridKasaAcKapatSuzmeListTableView.ApplyBestFit(nil);
 end;
@@ -199,6 +200,7 @@ function THizliGirisKasaOzet.KasaKayitKontrol(): Boolean;
 begin
   TabFunction.Close;
   TabFunction.SQL.Text := 'SELECT * FROM KASAACKAPAT WHERE KASAID=''' +IntToStr(VarsKasa) + ''' AND KAPANIS_TARIH IS NULL';
+  if AktifVeriMotor = vmPG then TabFunction.SQL.Text := PgSqlCevir(TabFunction.SQL.Text);
   TabFunction.Open;
   if TabFunction.RecordCount > 0 then
     result := True
@@ -209,6 +211,7 @@ procedure THizliGirisKasaOzet.AcikKasaninBilgileriniAlma();
 begin
   TabAcikKasaBilgi.Close;
   TabAcikKasaBilgi.SQL.Text:='SELECT * FROM KASAACKAPAT WHERE KASAID=''' +IntToStr(VarsKasa) + ''' AND KAPANIS_TARIH IS NULL';
+  if AktifVeriMotor = vmPG then TabAcikKasaBilgi.SQL.Text := PgSqlCevir(TabAcikKasaBilgi.SQL.Text);
   TabAcikKasaBilgi.Open;
 end;
 
@@ -216,6 +219,7 @@ function THizliGirisKasaOzet.KasaIslemIDAl(): integer;
 begin
   TabFunction.Close;
   TabFunction.SQL.Text := 'SELECT * FROM KASAACKAPAT WHERE KASAID=''' +IntToStr(VarsKasa) + ''' AND KAPANIS_TARIH IS NULL';
+  if AktifVeriMotor = vmPG then TabFunction.SQL.Text := PgSqlCevir(TabFunction.SQL.Text);
   TabFunction.Open;
   result := TabFunction.FieldByName('ID').AsInteger;
 end;
@@ -239,6 +243,7 @@ begin
                                'FROM dbo.KASAACKAPAT_DETAY KD' + #13#10 +
                                'INNER JOIN POS P ON KD.HESAP_ID=P.BANKAHESAPID' + #13#10 +
                                'WHERE KASAACKAPAT_ID=:ID2 AND KD.YER=11';
+    if AktifVeriMotor = vmPG then TabCihazBilgisi.SQL.Text := PgSqlCevir(TabCihazBilgisi.SQL.Text);
     TabCihazBilgisi.Params[0].Value := TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
     TabCihazBilgisi.Params[1].Value := TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
     TabCihazBilgisi.Params[2].Value := TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
@@ -261,6 +266,7 @@ begin
                               'FROM dbo.KASAACKAPAT_DETAY KD' + #13#10 +
                               'INNER JOIN PARA_KUPON PK ON KD.HESAP_ID=PK.ID' + #13#10 +
                               'WHERE KASAACKAPAT_ID=:ID1 AND KD.YER=30';
+    if AktifVeriMotor = vmPG then TabSayimBilgisi.SQL.Text := PgSqlCevir(TabSayimBilgisi.SQL.Text);
     TabSayimBilgisi.Params[0].Value :=TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
     TabSayimBilgisi.Params[1].Value :=TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
     TabSayimBilgisi.Params[2].Value :=TabKasaAcKapatSuzmeList.FieldByName('ID').AsInteger;
@@ -285,6 +291,7 @@ begin
                             'UPDATE ##TEMPPOS SET BANKAHESAPID=0 WHERE YER=6' + #13#10 +
                             'UPDATE ##TEMPPOS SET BANKAHESAPID=0 WHERE YER=7' + #13#10 +
                             'SELECT * FROM ##TEMPPOS';
+  if AktifVeriMotor = vmPG then TabCihazBilgisi.SQL.Text := PgSqlCevir(TabCihazBilgisi.SQL.Text);   // UYARI: ##global-temp + SELECT INTO/ALTER batch — PG'de elle gozden gecirilmeli
   TabCihazBilgisi.Open;
 
   TabSayimBilgisi.Close;
@@ -301,6 +308,7 @@ begin
                             'UPDATE ##TEMPKUP SET KUR=''TL''' + #13#10 +
                             'UPDATE ##TEMPKUP SET YER=30 WHERE TUR=26' + #13#10 +
                             'SELECT * FROM ##TEMPKUP';
+  if AktifVeriMotor = vmPG then TabSayimBilgisi.SQL.Text := PgSqlCevir(TabSayimBilgisi.SQL.Text);   // UYARI: ##global-temp + SELECT INTO/ALTER batch — PG'de elle gozden gecirilmeli
   TabSayimBilgisi.Open;
 end;
 
@@ -308,6 +316,7 @@ procedure THizliGirisKasaOzet.TabCihazBilgisiBeforePost(DataSet: TDataSet);
 begin
   TabTempCihazIslem.Close;
   TabTempCihazIslem.SQL.Text :='UPDATE ##TEMPPOS SET TUTAR_KAPANIS=:FIYAT WHERE KASAACKAPAT_ID=:ID';
+  if AktifVeriMotor = vmPG then TabTempCihazIslem.SQL.Text := PgSqlCevir(TabTempCihazIslem.SQL.Text);   // UYARI: ##global-temp — PG'de elle gozden gecirilmeli
   TabTempCihazIslem.Params[0].Value := TabCihazBilgisi.FieldByName('TUTAR_KAPANIS').AsCurrency;
   TabTempCihazIslem.Params[1].Value := TabCihazBilgisi.FieldByName('KASAACKAPAT_ID').AsInteger;
   TabTempCihazIslem.ExecSQL;
@@ -329,6 +338,7 @@ procedure THizliGirisKasaOzet.TabSayimBilgisiBeforePost(DataSet: TDataSet);
 begin
   TabTempSayimIslem.Close;
   TabTempSayimIslem.SQL.Text := 'UPDATE ##TEMPKUP SET TUTAR_KAPANIS=:FIYAT WHERE KASAACKAPAT_ID=:ID';
+  if AktifVeriMotor = vmPG then TabTempSayimIslem.SQL.Text := PgSqlCevir(TabTempSayimIslem.SQL.Text);   // UYARI: ##global-temp — PG'de elle gozden gecirilmeli
   TabTempSayimIslem.Params[0].Value := TabSayimBilgisi.FieldByName('TUTAR_KAPANIS').AsCurrency;
   TabTempSayimIslem.Params[1].Value := TabSayimBilgisi.FieldByName('KASAACKAPAT_ID').AsInteger;
   TabTempSayimIslem.ExecSQL;
@@ -365,6 +375,7 @@ begin
       TabGenelSorgu.Close;
       TabGenelSorgu.SQL.Text := 'INSERT INTO KASAACKAPAT (KASAID,ACILIS_TARIH,ACAN_KISI,ACIKLAMA,SUBEID,DURUM,ACILISTUTAR)'
         + 'VALUES (:KASAID,:ACILIS_TARIH,:ACAN_KISI,:ACIKLAMA,:SUBEID,:DURUM,:ACILISTUTAR)select scope_identity()';
+      if AktifVeriMotor = vmPG then TabGenelSorgu.SQL.Text := PgSqlCevir(TabGenelSorgu.SQL.Text);   // UYARI: INSERT ... select scope_identity() PG'de RETURNING gerektirir — elle gozden gecirilmeli
       TabGenelSorgu.Params[0].Value := Kasa;
       TabGenelSorgu.Params[1].Value := dtpKasaOzetTarih.Date;
       TabGenelSorgu.Params[2].Value := cmbAcan.EditValue;
@@ -485,6 +496,7 @@ begin
   begin
     TabGenelSorgu.Close;
     TabGenelSorgu.SQL.Text :='UPDATE KASAACKAPAT SET KAPANIS_TARIH=:KAPANISTARIH,KAPATAN_KISI=:KAPATANKISI,ACIKLAMA=:ACIKLAMA WHERE ID=:ID';
+    if AktifVeriMotor = vmPG then TabGenelSorgu.SQL.Text := PgSqlCevir(TabGenelSorgu.SQL.Text);
     TabGenelSorgu.Params[0].Value := Tablo.GENINI.BugunTrhSaat;
     TabGenelSorgu.Params[1].Value := cmbAcan.EditValue;
     TabGenelSorgu.Params[2].Value := Trim(edtAciklama.Text);
@@ -496,6 +508,7 @@ begin
     KasaIslem := KasaIslemIDAl;
     TabGenelSorgu.Close;
     TabGenelSorgu.SQL.Text := 'UPDATE KASAACKAPAT SET KAPANIS_TARIH=:KAPANISTARIH,KAPATAN_KISI=:KAPATANKISI,ACIKLAMA=:ACIKLAMA WHERE ID=:ID';
+    if AktifVeriMotor = vmPG then TabGenelSorgu.SQL.Text := PgSqlCevir(TabGenelSorgu.SQL.Text);
     TabGenelSorgu.Params[0].Value := Tablo.GENINI.BugunTrhSaat;
     TabGenelSorgu.Params[1].Value := cmbAcan.EditValue;
     TabGenelSorgu.Params[2].Value := Trim(edtAciklama.Text);
@@ -505,6 +518,7 @@ begin
   // KASA KAPATMA TEMP AKTARIMLAR
   TabTempCihazIslem.Close;
   TabTempCihazIslem.SQL.Text := 'SELECT * FROM ##TEMPPOS';
+  if AktifVeriMotor = vmPG then TabTempCihazIslem.SQL.Text := PgSqlCevir(TabTempCihazIslem.SQL.Text);   // UYARI: ##global-temp — PG'de elle gozden gecirilmeli
   TabTempCihazIslem.Open;
   for I := 0 to TabTempCihazIslem.RecordCount - 1 do
   begin
@@ -513,6 +527,7 @@ begin
       TabGenelSorgu.SQL.Text :=
         'INSERT INTO KASAACKAPAT_DETAY(KASAACKAPAT_ID,YER,HESAP_ID,TUTAR_SISTEM,TUTAR_KAPANIS,KUR)'
         + 'VALUES (:KASAACKAPAT_ID,:YER,:HESAP_ID,:TUTAR_SISTEM,:TUTAR_KAPANIS,:KUR)';
+      if AktifVeriMotor = vmPG then TabGenelSorgu.SQL.Text := PgSqlCevir(TabGenelSorgu.SQL.Text);
       TabGenelSorgu.Params[0].Value := KasaIslem;
       TabGenelSorgu.Params[1].Value := TabTempCihazIslem.FieldByName('YER')
         .AsInteger;
@@ -536,6 +551,7 @@ begin
 
   TabTempSayimIslem.Close;
   TabTempSayimIslem.SQL.Text := 'SELECT * FROM ##TEMPKUP';
+  if AktifVeriMotor = vmPG then TabTempSayimIslem.SQL.Text := PgSqlCevir(TabTempSayimIslem.SQL.Text);   // UYARI: ##global-temp — PG'de elle gozden gecirilmeli
   TabTempSayimIslem.Open;
   for I := 0 to TabTempSayimIslem.RecordCount - 1 do
   begin
@@ -544,6 +560,7 @@ begin
       TabGenelSorgu.SQL.Text :=
         'INSERT INTO KASAACKAPAT_DETAY(KASAACKAPAT_ID,YER,HESAP_ID,TUTAR_SISTEM,TUTAR_KAPANIS,KUR)'
         + 'VALUES (:KASAACKAPAT_ID,:YER,:HESAP_ID,:TUTAR_SISTEM,:TUTAR_KAPANIS,:KUR)';
+      if AktifVeriMotor = vmPG then TabGenelSorgu.SQL.Text := PgSqlCevir(TabGenelSorgu.SQL.Text);
       TabGenelSorgu.Params[0].Value := KasaIslem;
       TabGenelSorgu.Params[1].Value := TabTempSayimIslem.FieldByName('YER')
         .AsInteger;
@@ -580,6 +597,7 @@ procedure THizliGirisKasaOzet.FormCreate(Sender: TObject);
 var
   KasaAcilmaKayit: Boolean;
 begin
+  if AktifVeriMotor = vmPG then PgTumSorgulariCevir(Self);   // DFM-kaynakli param-bagli sorgular (TabKasaOzet vb.) bir kez PG diyalektine
   GridKasaAcKapatSuzmeListTableView.ApplyBestFit(nil);
   WindowState := wsMaximized;
   cxSplitter1.CloseSplitter;

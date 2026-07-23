@@ -371,6 +371,10 @@ begin
   Result := StringReplace(Result, ']', '', [rfReplaceAll]);
   // MSSQL 'dbo.' sema oneki PG'de YOK (tablolar public'te) -> sil. Literal-disi (veri korunur).
   Result := StringReplace(Result, 'dbo.', '', [rfReplaceAll, rfIgnoreCase]);
+  // MSSQL LEN( -> PG length( (kelime-siniri; COLUMN_LEN vb. dokunmaz). MSSQL LEN trailing-bosluk
+  //   saymaz, PG length sayar; kod/anahtar alanlarinda (trailing-boslugsuz) esdeger. CHARINDEX
+  //   arg-tersligi nedeniyle burada DEGIL, DbBul seam'inde ele alinir.
+  Result := TRegEx.Replace(Result, '\bLEN\s*\(', 'length(', [roIgnoreCase]);
   // MSSQL 'COLLATE DATABASE_DEFAULT' PG'de YOK -> sil (bosluk varyantlariyla).
   if Pos('collate', LowerCase(Result)) > 0 then
     Result := TRegEx.Replace(Result, 'collate\s+database_default', '', [roIgnoreCase]);

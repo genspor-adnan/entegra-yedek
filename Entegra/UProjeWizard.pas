@@ -856,6 +856,7 @@ begin
     AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
   end;
@@ -1066,6 +1067,7 @@ var Yeri : SmallInt;
 begin
     TabDetay.Close;
     TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
     TabDetay.Params[0].Value := TabNo_PROJELER;
     TabDetay.Params[1].Value := ProjeID;
     TabDetay.Params[2].Value := ComboBolum.Text;
@@ -1455,6 +1457,7 @@ begin
           if GTakvimID <>'' then
             begin
              Tablo.Query8.SQL.Text:='update PROJELER SET GOOGLEHESAPID ='+inttostr(GoogleHesapID)+', GOOGLEOLAYID = '''+GTakvimID + ''' where ID ='+inttostr(ProjeID);
+             if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
              Tablo.Query8.ExecSQL;
             end
           else ShowMessage(AKCalendar_kayit_edilemedi);
@@ -1480,6 +1483,7 @@ begin
 
               if GTakvimID <>'' then begin
                   Tablo.Query8.SQL.Text:='update PROJELER SET GOOGLEHESAPID ='+inttostr(GoogleHesapID)+', GOOGLEOLAYID = '''+GTakvimID + ''' where ID ='+inttostr(ProjeID);
+                  if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
                   Tablo.Query8.ExecSQL;
                end
               else ShowMessage(AKCalendar_kayit_edilemedi);

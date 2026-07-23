@@ -1200,6 +1200,7 @@ procedure TOpsiyonDlg.FormCreate(Sender: TObject);
 var i,j : SmallInt;
     nod : TTreeNode;
 begin
+   if AktifVeriMotor = vmPG then PgTumSorgulariCevir(Self);   // DFM-kaynakli sorgu SQL'leri (tab* + param-bagli) bir kez PG diyalektine
 
    Tablo.GridTurkcelestir;
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
@@ -1801,7 +1802,8 @@ begin
   if cagirangrid = '' then
     tabStilKosul.SQL.Text := 'SELECT * FROM STILKOSUL ORDER BY GRIDADI'
   else
-    tabStilKosul.SQL.Text := 'SELECT * FROM STILKOSUL where GRIDADI like ''%'+cagirangrid+'%'' ORDER BY GRIDADI'
+    tabStilKosul.SQL.Text := 'SELECT * FROM STILKOSUL where GRIDADI like ''%'+cagirangrid+'%'' ORDER BY GRIDADI';
+  if AktifVeriMotor = vmPG then tabStilKosul.SQL.Text := PgSqlCevir(tabStilKosul.SQL.Text);
 end;
 
 procedure TOpsiyonDlg.tabStilKosulNewRecord(DataSet: TDataSet);

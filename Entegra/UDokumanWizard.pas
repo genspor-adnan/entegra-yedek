@@ -1214,6 +1214,7 @@ var
 Altid,AltDokuman:Integer;
 
 begin
+  if AktifVeriMotor = vmPG then TabAltKlasor.SQL.Text := PgSqlCevir(TabAltKlasor.SQL.Text);
   TabAltKlasor.Params[0].Value:=yerID;
   TabAltKlasor.Close;
   TabAltKlasor.open;
@@ -1224,9 +1225,11 @@ begin
    tablo.query5.sql.Text:='INSERT INTO  DOKUMANYETKI (REHBERID,YERI,YERID,GOR,EKLE,SIL,DEGISTIR,TUR)' +
                           ' select                     REHBERID,YERI,'+inttostr(Altid)+',GOR,EKLE,SIL,DEGISTIR,TUR  from DOKUMANYETKI'+
                           ' WHERE yerID = '+inttostr(yerID);
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.ExecSQL;
    //alt klasorlerde bulunan dokumanların yetkilerini atiyoruz
    Tablo.Query2.SQL.Text:='SELECT * FROM Dokuman WHERE KLASOR='+inttostr(Altid);
+   if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
    Tablo.Query2.Close;
    Tablo.Query2.Open;
    Tablo.Query2.First;
@@ -1236,12 +1239,14 @@ begin
    tablo.query6.sql.Text:='INSERT INTO  DOKUMANYETKI (REHBERID,YERI,YERID,GOR,EKLE,SIL,DEGISTIR,TUR)' +
                           ' select                    REHBERID,321,'+inttostr(AltDokuman)+',GOR,EKLE,SIL,DEGISTIR,TUR  from DOKUMANYETKI'+
                           ' WHERE yerID = '+inttostr(yerID);
+   if AktifVeriMotor = vmPG then Tablo.Query6.SQL.Text := PgSqlCevir(Tablo.Query6.SQL.Text);
    Tablo.Query6.ExecSQL;
    Tablo.Query2.Next;
    end;
 
    // klasor içinde  bulunan dokumanların yetkilerini atiyoruz
    Tablo.Query4.SQL.Text:='SELECT * FROM Dokuman WHERE KLASOR='+inttostr(yerID);
+   if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
    Tablo.Query4.Close;
    Tablo.Query4.Open;
    Tablo.Query4.First;
@@ -1251,6 +1256,7 @@ begin
    tablo.query1.sql.Text:='INSERT INTO  DOKUMANYETKI (REHBERID,YERI,YERID,GOR,EKLE,SIL,DEGISTIR,TUR)' +
                           ' select                    REHBERID,321,'+inttostr(AltDokuman)+',GOR,EKLE,SIL,DEGISTIR,TUR  from DOKUMANYETKI'+
                           ' WHERE yerID = '+inttostr(yerID);
+   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
    Tablo.Query1.ExecSQL;
    Tablo.Query4.Next;
    end;

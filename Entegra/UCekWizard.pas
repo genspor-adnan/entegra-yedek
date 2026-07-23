@@ -344,6 +344,7 @@ procedure TCekWizardDlg.YazdirmayaHazirla(AFastReport: TfrxReport);
 begin
    Tablo.TabMusteri.Close;
    Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+   if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
    Tablo.TabMusteri.Open;
    if dtsCekler.State in [dsEdit,dsInsert] then
      TabCekler.Post;
@@ -449,6 +450,7 @@ begin
       if DtsCekler.State=dsInsert then begin
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text:=' select * from CEKLER where SERINO = '+inttostr(StrToIntDef(EditCekSERINO.Text, 0));
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.Open;
          if not Tablo.Query1.IsEmpty then
             raise Exception.Create(kullanilmisserino);
@@ -764,6 +766,7 @@ begin
             [ 0, Kullanan, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
       CekID := YeniCekIDsi;
       TabCekler.Close;
+      if AktifVeriMotor = vmPG then TabCekler.SQL.Text := PgSqlCevir(TabCekler.SQL.Text);
       TabCekler.ParamByName('PID').AsInteger := CekID;
       TabCekler.Open;
       EditCekSERINO.Text := '';
@@ -959,6 +962,7 @@ begin
    if (not TabCekler.Active) or TabCekler.FieldByName('ID').IsNull or (TabCekler.FieldByName('ID').AsInteger <= 0) then
       Exit;
    TabCekHareketler.Close;
+   if AktifVeriMotor = vmPG then TabCekHareketler.SQL.Text := PgSqlCevir(TabCekHareketler.SQL.Text);
    if TabCekHareketler.Params.Count = 0 then Exit;
    TabCekHareketler.ParamByName('PCSID').AsInteger := TabCekler.FieldByName('ID').AsInteger;
    TabCekHareketler.Open;
@@ -992,6 +996,7 @@ begin
            ' from KREDILER CK inner join CEKKOCAN CKK on CKK.KREDIID=CK.ID' + #13#10 +
            ' where CK.DURUM=1 and CK.BANKATICARIHESAPID= '+LabelCekBankaHesapID.Caption +' AND CK.GENELKREDITIPI=31' + #13#10 +
            ' group by CK.ID,CKK.ID,CK.KREDILIMIT,CK.KREDIKODU,CK.ADI,CKK.ACIKLAMA,CKK.BASSERINO,CKK.BITSERINO';
+   if AktifVeriMotor = vmPG then Tablo.query1.SQL.Text := PgSqlCevir(Tablo.query1.SQL.Text);
    Tablo.query1.Open;
    Tablo.Query1.FetchAll;
    if Tablo.query1.RecordCount = 1 then begin
@@ -1019,6 +1024,7 @@ begin
    if (TabCekler.FieldByName('SERINO').AsString<>'')and(EditCekBORDRO.Text='') then begin
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := 'select ID,KOCANNO from CEKKOCAN where '+EditCekSERINO.Text+' between BASSERINO and BITSERINO ' ;
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Open;
      EditCekKocanNo.Text := Tablo.Query1.Fields[1].AsString;
      TabCekler.FieldByName('CEKKOCANID').Value:=Tablo.Query1.Fields[0].AsString;

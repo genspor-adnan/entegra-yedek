@@ -608,6 +608,7 @@ procedure TFatTransferWizardDlg.FaturaTutarHesapla;
 begin
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + IntToStr(FatBasId);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   TabFatBaslik.Edit;
   TabFatBaslik.FieldByname('FATURA_MATRAHI').AsCurrency := Tablo.Query1.FieldByname('ARATOPLAM').AsCurrency;

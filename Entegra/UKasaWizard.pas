@@ -912,6 +912,7 @@ begin
 
 
    end;
+   if AktifVeriMotor = vmPG then KasaQuery.SQL.Text := PgSqlCevir(KasaQuery.SQL.Text);
    KasaQuery.Open;
    if KasaQuery.RecordCount = 1 then begin //e?er tek kasa varsa se?meye gerek yok sonraki sayfaya atlas?n
       if GeldigiEkranAdi = 'TahsilatEkr' then
@@ -1016,6 +1017,7 @@ procedure TKasaWizardDlg.TahsilatEkrEnterPage(Sender: TObject; const FromPage: T
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'TARIH, VALOR from  KREDIROTATIF where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +
                                 ' and KREDIREFERANSNO='''+CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString+''' order by ID desc '+DbSinir(1);
+       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
        Tablo.Query1.Open;
        if Tablo.Query1.RecordCount>0 then
           SimdikiFaizTut := RotatifHesapla(CekSenetKrediQuery.FieldByName('KREDIID').AsInteger ,Tablo.Query1.FieldByName('VALOR').AsBoolean,Valor,BakiyeAnaparaTut,Tablo.Query1.Fields[0].AsDateTime,KasaTarihi.Date)
@@ -1163,6 +1165,7 @@ begin
 
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := 'select isnull(MIN(TARIH), getdate()) from PLANMAAS where REHBERID='+IntToStr(RehberId)+' and SIRA = 10 and TARIH>GETDATE()';
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.Open; //diyelim ki 5 ve 10 geldi
     if Tablo.Query1.RecordCount < 1 then
        //?deme yap?lacak tarihi girin
@@ -1181,6 +1184,7 @@ begin
     ' SET @ONCESONRA = 1';               //  -1 : onceki g?nlere gider, 1: sonraki g?nlere gider
     TabAvansTakvimi.SQL.Text := StringReplace(SQLAvanGeriOdeme.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
     TabAvansTakvimi.SQL.Text := StringReplace(TabAvansTakvimi.SQL.text,'SQLKOMUT',Param, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabAvansTakvimi.SQL.Text := PgSqlCevir(TabAvansTakvimi.SQL.Text);
     TabAvansTakvimi.Open;
 end;
 
@@ -1214,6 +1218,7 @@ begin
        // hesap kesim tarihi + son ?deme ne zaman
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'select isnull(HESAP_KESIM_TARIHI,1)+ isnull(ODEME_GUN_SAYISI,1) as SOT from  KREDIKARTI where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString;
+       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
        Tablo.Query1.Open; //diyelim ki 5 ve 10 geldi
        DatePesinat.Date := StrToDateDef(Tablo.Query1.Fields[0].AsString+FormatDateTime(FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh), StrToDate('01'+FormatSettings.DateSeparator+'01'+FormatSettings.DateSeparator+'1900'));
        //5 i ge?tiyse gelecek ay ge?mediyse bu ay
@@ -1265,6 +1270,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := ' delete from KASA where ID = '+TabTakvimPlan.FieldByName('ID').AsString;
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.ExecSQL;
      if SecilenOdeme = '' then
         WizardKontrol.SelectNextPage;
@@ -2030,6 +2036,7 @@ begin
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := 'Insert Into PLANKREDIKARTI (KASAID, KKID, TARIH, TAKSITNO, TAKSITSAY, TUTAR, KUR, ACIKLAMA, ODENMIS, EKLEYEN,ANIMSAT,SUBEID) values(' +
                  ':KASAID,:KKID,:TARIH,:TAKSITNO,:TAKSITSAY,:TUTAR,:KUR,:ACIKLAMA,:ODENMIS,:EKLEYEN, 0,:SUBEID)';
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ParamByName('KASAID').Value := KasaId;
       Tablo.Query1.ParamByName('KKID').Value := CekSenetKrediQuery.FieldByName('ID').AsInteger;
       Tablo.Query1.ParamByName('TARIH').Value := TabOdemeTakvimi.Fieldbyname('TARIH').Asdatetime;
@@ -2076,6 +2083,7 @@ begin
     TabOdemeTakvimi.Close;
     if not CheckTaksit.Checked then begin //pe?inse
        TabOdemeTakvimi.SQL.Text:= StringReplace(SQLPlan.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+       if AktifVeriMotor = vmPG then TabOdemeTakvimi.SQL.Text := PgSqlCevir(TabOdemeTakvimi.SQL.Text);
        with TabOdemeTakvimi.ParamByName('PTAKSIT') do begin DataType := ftSmallint; AsSmallInt := 1; end;
        with TabOdemeTakvimi.ParamByName('PBASLANGIC') do begin DataType := ftDateTime; AsDateTime := DatePesinat.Date; end;
        with TabOdemeTakvimi.ParamByName('PTUTAR') do begin DataType := ftCurrency; AsCurrency := EditTutar.Value; end;
@@ -2099,6 +2107,7 @@ begin
         ' set @UYARIGUN='+ SpinUYARIGUN.Text+
         ' SET @ONCESONRA = '+ IntToStr(OnceSonra);               //  -1 : onceki g?nlere gider, 1: sonraki g?nlere gider
        TabOdemeTakvimi.SQL.Text:= StringReplace(SQLPesin.text,'SQLKOMUT',Param, [rfReplaceAll]);
+       if AktifVeriMotor = vmPG then TabOdemeTakvimi.SQL.Text := PgSqlCevir(TabOdemeTakvimi.SQL.Text);
     end;
    if CheckTaksit.Checked then
       TabOdemeTakvimi.Open;
@@ -2118,6 +2127,7 @@ var     j : SmallInt;
       Tablo.Query1.Close;
       Tablo.Query1.SQL.Text := 'Insert Into PLANAVANS (KASAID,REHBERID,ODENECEKTARIH,TAKSITNO,TAKSITSAY,TUTAR,KUR,ACIKLAMA,ODENMIS,EKLEYEN,SUBEID)values(' +
                                                 ':KASAID,:REHBERID,:ODENECEKTARIH,:TAKSITNO,:TAKSITSAY,:TUTAR,:KUR,:ACIKLAMA,0,:EKLEYEN,:SUBEID)';
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ParamByName('KASAID').Value := KasaId;
       Tablo.Query1.ParamByName('REHBERID').Value := RehberId;
       Tablo.Query1.ParamByName('ODENECEKTARIH').Value := Tarih;
@@ -2348,6 +2358,7 @@ var     j : SmallInt;
                          (Application.MessageBox(PChar(KWKrediKapandiOlarakIsaretlensinmi), PChar(Onay), MB_YESNO) = IDYES) then begin
                           Tablo.Query1.Close;
                           Tablo.Query1.SQL.Text := 'update KREDIROTATIF set ODENMIS=1 where KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString +' and KREDIREFERANSNO=''' +Trim(CekSenetKrediQuery.FieldByName('KREDIREFERANSNO').AsString)+''' ';
+                          if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
                           Tablo.Query1.ExecSQL;
                       end;
                    end else begin //Di?er kredilerin t?m?
@@ -2412,6 +2423,7 @@ var     j : SmallInt;
                       // ?dendi update edilecek
                        Tablo.Query1.Close;
                        Tablo.Query1.SQL.Text := 'update PLANKREDI set ODENMIS=1 where ID=' +CekSenetKrediQuery.FieldByName('DETAYID').AsString +' and KREDIID=' +CekSenetKrediQuery.FieldByName('KREDIID').AsString;
+                       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
                        Tablo.Query1.ExecSQL;
                    end;
                    //son ?deme de yap?lm??sa sonland?rma i?lemleri yap?l?r..
@@ -2441,6 +2453,7 @@ begin
                  s := 'BORC';
             Tablo.Query1.SQL.Text := 'update KASA set '+s+' = '+s+' - '+FExtToStr(EditTahsilatTutar.Value)+' where ID=' +TabTakvimPlan.FieldByName('ID').AsString;
          end;
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.ExecSQL;
       end;
    end;

@@ -413,6 +413,7 @@ begin
 
   TabSatinAlma.Close;
   TabSatinAlma.SQL.text:='Select * from SATINALMA where ID='+IntToStr(SatinAlmaID)+' ';
+  if AktifVeriMotor = vmPG then TabSatinAlma.SQL.Text := PgSqlCevir(TabSatinAlma.SQL.Text);
   TabSatinAlma.Open;
 
   // Geri-alinabilir oturum (yalniz D=degistir): acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don.
@@ -435,6 +436,7 @@ begin
        SatirSil.Visible := False;
 
       TabSatinAlmaDetay.Close;
+      if AktifVeriMotor = vmPG then TabSatinAlmaDetay.SQL.Text := PgSqlCevir(TabSatinAlmaDetay.SQL.Text);
       if TabSatinAlmaDetay.FindParam('Par1') = nil then
         TabSatinAlmaDetay.Params.Add.Name := 'Par1';
       TabSatinAlmaDetay.ParamByName('Par1').Value := SatinAlmaID;

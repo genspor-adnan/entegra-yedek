@@ -443,6 +443,7 @@ begin
       for var LID in FKayitIDleri do begin
         LQ.Close;
         LQ.SQL.Text := 'SELECT * FROM KASA WHERE ID = ' + IntToStr(LID);
+        if AktifVeriMotor = vmPG then LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
         LQ.Open;
         if not LQ.IsEmpty then begin
           // Bölüm: banka satırları yönüne göre 'Banka Ödeme' / 'Banka Tahsilat'
@@ -1598,6 +1599,7 @@ begin
           'FROM POS P INNER JOIN BANKAHESAPLAR BH ON BH.ID=P.BANKAHESAPID ' +
           'WHERE P.ID=:POSID AND P.DURUM=1 AND BH.DURUM=1 ' +
           'AND P.KUR=BH.KUR';
+        if AktifVeriMotor = vmPG then QPos.SQL.Text := PgSqlCevir(QPos.SQL.Text);
         QPos.ParamByName('POSID').AsInteger := dxMemData1SECIMID.AsInteger;
         QPos.Open;
         if QPos.IsEmpty then
@@ -1825,6 +1827,7 @@ begin
             'K.FAIZMASRAFID, K.PROJEID ' +
             'FROM PLANKREDI P INNER JOIN KREDILER K ON K.ID=P.KREDIID ' +
             'WHERE P.ID=:DETAYID AND P.KREDIID=:KREDIID';
+          if AktifVeriMotor = vmPG then QKredi.SQL.Text := PgSqlCevir(QKredi.SQL.Text);
           QKredi.ParamByName('DETAYID').AsInteger := DetayID;
           QKredi.ParamByName('KREDIID').AsInteger := KrediID;
           QKredi.Open;
@@ -2537,6 +2540,7 @@ begin
       'FROM BANKA_KURAL ' +
       'WHERE BANKA_KODU = :BK AND AKTIF = 1 ' +
       'ORDER BY KURAL_TIPI, CONFIDENCE DESC';
+    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     Q.ParamByName('BK').AsString := BankaKodu;
     Q.Open;
     while not Q.Eof do begin
@@ -2885,6 +2889,7 @@ begin
   try
     Q.Connection := Tablo.FDCnn;
     Q.SQL.Text := 'SELECT '+DbUst(1)+'ID FROM KREDIKARTI WHERE NOSU LIKE :P '+DbSinir(1);
+    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     i := 1;
     while i <= Length(Aciklama) do begin
       if (Aciklama[i] >= '0') and (Aciklama[i] <= '9') then begin
@@ -3435,6 +3440,7 @@ begin
     Q.Connection := Tablo.FDCnn;
     Q.SQL.Text := 'SELECT '+DbUst(1)+'ID FROM BANKA_CARI_ESLEME ' +
                   'WHERE BANKA_KODU = :BK AND FINGERPRINT = :FP '+DbSinir(1);
+    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     Q.ParamByName('BK').AsString := BankaKodu;
     Q.ParamByName('FP').AsString := Fingerprint;
     Q.Open;
@@ -3449,6 +3455,7 @@ begin
       SQLText := SQLText + 'KESIN_MI = :K, KULLANIM = KULLANIM + 1, ' +
                  'SON_KULLANIM = GETDATE() WHERE ID = :I';
       Q.SQL.Text := SQLText;
+      if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
       Q.ParamByName('K').AsBoolean := KesinMi;
       Q.ParamByName('I').AsInteger := VarId;
       if Tur > 0 then Q.ParamByName('T').AsInteger := Tur;
@@ -3458,6 +3465,7 @@ begin
       Q.SQL.Text := 'INSERT INTO BANKA_CARI_ESLEME ' +
                     '(BANKA_KODU, FINGERPRINT, TUR, REHBERID, KESIN_MI) ' +
                     'VALUES (:BK, :FP, :T, :R, :K)';
+      if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
       Q.ParamByName('BK').AsString := BankaKodu;
       Q.ParamByName('FP').AsString := Fingerprint;
       if Tur > 0 then Q.ParamByName('T').AsInteger := Tur
@@ -3489,6 +3497,7 @@ begin
     Q.SQL.Text := 'SELECT '+DbUst(1)+'TUR, REHBERID, KESIN_MI FROM BANKA_CARI_ESLEME ' +
                   'WHERE BANKA_KODU = :BK AND FINGERPRINT = :FP ' +
                   'ORDER BY KESIN_MI DESC, KULLANIM DESC '+DbSinir(1);
+    if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     Q.ParamByName('BK').AsString := BankaKodu;
     Q.ParamByName('FP').AsString := Fingerprint;
     Q.Open;
@@ -3694,6 +3703,7 @@ begin
               if H.KarsiTarafIBAN <> '' then begin
                 Q.Close;
                 Q.SQL.Text := 'SELECT '+DbUst(1)+'ID, KOD, FIRMA FROM REHBER WHERE IBAN = :I '+DbSinir(1);
+                if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
                 Q.ParamByName('I').AsString := H.KarsiTarafIBAN;
                 Q.Open;
                 if not Q.IsEmpty then begin
@@ -3711,6 +3721,7 @@ begin
                 Q.Close;
                 Q.SQL.Text := 'SELECT '+DbUst(1)+'ID, KOD, FIRMA FROM REHBER ' +
                               'WHERE UPPER(FIRMA) = UPPER(:N) '+DbSinir(1);
+                if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
                 Q.ParamByName('N').AsString := H.KarsiTarafAd;
                 Q.Open;
                 if not Q.IsEmpty then begin
@@ -3731,6 +3742,7 @@ begin
                 Q.Close;
                 Q.SQL.Text := 'SELECT '+DbUst(2)+'ID, KOD, FIRMA FROM REHBER ' +
                               'WHERE UPPER(FIRMA) LIKE UPPER(:N) + ''%'' '+DbSinir(2);
+                if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
                 Q.ParamByName('N').AsString := Trim(H.KarsiTarafAd);
                 Q.Open;
                 if Q.RecordCount = 1 then begin
@@ -3773,6 +3785,7 @@ begin
                                 FormatDateTime('yyyy-mm-dd', H.Tarih + 2) + ' 23:59'' ' +
                               IfThen(H.BorcMu, 'AND F.TUR IN (9,11,13)',
                                                'AND F.TUR IN (15,17,19)')+' '+DbSinir(2);
+                if AktifVeriMotor = vmPG then Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
                 Q.Open;
                 if (Q.RecordCount = 1) and (Q.Fields[0].AsInteger > 0) then begin
                   RehID := Q.Fields[0].AsInteger;

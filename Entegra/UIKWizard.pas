@@ -1046,6 +1046,7 @@ begin
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
        TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+       if AktifVeriMotor = vmPG then TabPerIlet.SQL.Text := PgSqlCevir(TabPerIlet.SQL.Text);
        TabPerIlet.Params[0].Value := 1;
        TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
        TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
@@ -1130,6 +1131,7 @@ begin
   // e?er bir ilgili ?zerinde ?ift t?k yap?p de?i?iklik olacaksa
     TabAdresAd.SQL.Add(' and ID=' + IntToStr(RehberIletID));
   TabAdresAd.SQL.Add(' order by VARSAYILAN  desc');
+  if AktifVeriMotor = vmPG then TabAdresAd.SQL.Text := PgSqlCevir(TabAdresAd.SQL.Text);
   TabAdresAd.Open;
   GridKurIlet.Visible := TabAdresAd.RecordCount > 0;
   if (RehberIletID = -1) and (Cagiran = 1) then // yeni tu?una bas?lm?? demektir
@@ -1270,6 +1272,7 @@ begin
   TabAdresAd.Close;
   TabAdresAd.SQL.text := 'select * from REHBERILETISIM where REHBERID=' +TabRehber.Fields[0].AsString;
   TabAdresAd.SQL.Add(' order by VARSAYILAN  desc');
+  if AktifVeriMotor = vmPG then TabAdresAd.SQL.Text := PgSqlCevir(TabAdresAd.SQL.Text);
   TabAdresAd.Open;
   GridAdresAdViewSelectionChanged(nil);
 end;
@@ -1402,6 +1405,7 @@ begin
     TabAdresAd.SQL.Add
       (' and ID in (Select MAX(ID) from REHBERILETISIM where REHBERID=' +
       IntToStr(RehberID) + ' )');
+    if AktifVeriMotor = vmPG then TabAdresAd.SQL.Text := PgSqlCevir(TabAdresAd.SQL.Text);
     TabAdresAd.Open;
 
     GridKurIlet.Visible := true;
@@ -1930,6 +1934,7 @@ var
             tablo.Query5.Close;
             tablo.Query5.SQL.text :=
               'Select * from PLANMAAS  where YER=0 and YERID =:A0 and SIRA=:A2';
+            if AktifVeriMotor = vmPG then tablo.Query5.SQL.Text := PgSqlCevir(tablo.Query5.SQL.Text);
             tablo.Query5.Params[0].Value := RehberID;
             tablo.Query5.Params[1].Value := Table1.FieldByName('SIRA').AsString;
             tablo.Query5.Open;
@@ -1952,6 +1957,7 @@ var
               UpdateOldu := 1;
             end;
           end;
+          if AktifVeriMotor = vmPG then tablo.Query1.SQL.Text := PgSqlCevir(tablo.Query1.SQL.Text);
           tablo.Query1.ExecSQL;
         end;
         Table1.Next;

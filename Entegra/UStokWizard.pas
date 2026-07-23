@@ -1070,6 +1070,7 @@ begin
       Tablo.Query1.SQL.Add(' and G3.DEGER in('+Snc3.Join(',')+') ');
   end;
 
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   TabloYenile(TabStokBoyut,[StokID]);
   PopUpBarkodDuzenle;
@@ -1285,6 +1286,7 @@ begin
           Tablo.Query8.SQL.Add('GENINI G2 on G2.BOLUM=S.BOLUM2 and G2.DEGER=S.DEGER2 and G2.DIL=-1 left outer join');
           Tablo.Query8.SQL.Add('GENINI G3 on G3.BOLUM=S.BOLUM3 and G3.DEGER=S.DEGER3 and G3.DIL=-1');
           Tablo.Query8.SQL.Add('where S.STOKID='+IntToStr(StokID));
+          if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
           Tablo.Query8.Open;
 
       Tablo.Query8.First;
@@ -2220,6 +2222,7 @@ begin
        TabIsOrtagi.Close;
        TabIsOrtagi.SQL.Text:=' Select I.STOKID,I.REHBERID, I.EKLEYEN, I.EKLEMETARIHI, I.DEGISTIREN, I.DEGISTIRMETARIHI, I.ILISKI,FIRMA=R.FIRMA from ISORTAGI I '+
         ' left outer join REHBER R on R.ID=I.REHBERID Where I.STOKID='+IntToStr(StokID)+' and I.REHBERID='+IntToStr(IsOrtagi)+'';
+       if AktifVeriMotor = vmPG then TabIsOrtagi.SQL.Text := PgSqlCevir(TabIsOrtagi.SQL.Text);
        TabIsOrtagi.Open;
     end else
        TabloYenile(TabIsOrtagi, [StokID]);
@@ -2629,6 +2632,7 @@ begin
   //TABLO al?? sat?? a g?re a??ld??? i?in stok kart?na ait t?m barkodlar? kontrol edip varsay?lan var m? bak?yoruz.
   Tablo.Query2.Close;
   Tablo.Query2.SQL.Text:= 'select '+DbUst(1)+'* from STOKBARKOD WHERE STOKID ='+TabStok.FieldByName('ID').AsString+' AND VARSAYILAN=1 '+DbSinir(1);
+  if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
   Tablo.Query2.Open;
   TabBarkod.FieldByName('VARSAYILAN').Value:= Tablo.Query2.IsEmpty;
 
@@ -3139,6 +3143,7 @@ begin
     end else begin
       Tablo.Query1.SQL.Add('null,null)');
     end;
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
     TabloYenile(TabStokBoyut,[]);
   end;
@@ -3189,6 +3194,7 @@ begin
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text:='insert into KAMPANYA(KODU,ADI,DURUM,EKLEYEN,EKLEMETARIHI,DEGISTIREN,DEGISTIRMETARIHI,SUBEID) '+
     ' values('''+KKodi+''','''+KAdi+''',1,'+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+Kullanan+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(SubeId)+') Select scope_identity()';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
 
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into KAMPANYAURUN(KAMPANYAID,TUR,URUNID,DURUM,EKLEYEN,EKLEMETARIHI,SUBEID) '+

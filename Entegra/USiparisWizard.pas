@@ -804,6 +804,7 @@ begin
     AFastReport.EnabledDataSets.Add(frxTabSiparisDetay);
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     if TabSiparis.FieldByName('REHBERILETID').Value <> null then begin
       TabloYenile(Tablo.TabSevkAdresi,[RehberId,TabSiparis.FieldByName('REHBERILETID').AsInteger]);
@@ -820,12 +821,14 @@ begin
     MusIlgiliID := IIF(TabSiparis.FieldByName('MUS_ILGILI').AsString='','-99',TabSiparis.FieldByName('MUS_ILGILI').AsString);
     Tablo.TabMusteriIlgili.Close;
     Tablo.TabMusteriIlgili.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',MusIlgiliID, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteriIlgili.SQL.Text := PgSqlCevir(Tablo.TabMusteriIlgili.SQL.Text);
     Tablo.TabMusteriIlgili.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteriIlgili);
 
     PersonelID := IIF(TabSiparis.FieldByName('SATICIKODU').AsString='','-99',TabSiparis.FieldByName('SATICIKODU').AsString);
     Tablo.TabPersonel.Close;
     Tablo.TabPersonel.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',PersonelID, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabPersonel.SQL.Text := PgSqlCevir(Tablo.TabPersonel.SQL.Text);
     Tablo.TabPersonel.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxPersonel);
 
@@ -1061,6 +1064,7 @@ begin
 
     TabDetay.Close;
     TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
     TabDetay.Params[0].Value := DetaySablonTipiBul;
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;
@@ -1082,6 +1086,7 @@ begin
   ButtonDuzenle;
     TabDetay.Close;
     TabDetay.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then TabDetay.SQL.Text := PgSqlCevir(TabDetay.SQL.Text);
     TabDetay.Params[0].Value := DetaySablonTipiBul;
     TabDetay.Params[1].Value := TabSiparis.FieldByName('ID').AsInteger;
     TabDetay.Params[2].Value := ComboBolum.Text;
@@ -1296,6 +1301,7 @@ begin
       'select ' +
       'RESIM=(select case when S.RESIM is null then 0 else 1 end from STOKLAR S where S.ID = :PID), ' +
       'DOKUMAN=(select case when exists(select GY.ID from GOREVYORUM GY inner join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID where GY.TUR=88 and GOREVID=:PID) then 1 else 0 end)';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('PID').AsInteger := AUrunID;
     LQry.Open;
     AResim := LQry.FieldByName('RESIM').AsInteger;
@@ -2962,6 +2968,7 @@ begin
       else
          s:= '/';
       Tablo.Query1.SQL.Text:=' Update SIPARISDETAY set BIRIMFIYAT=BIRIMFIYAT'+s+'((100.0+KDV)/100.0), TUTAR = (100.0 - ISKONTO) * ADET * (BIRIMFIYAT'+s+'((100.0+KDV)/100.0)) / 100 Where SIPARISID='+TabSiparis.Fields[0].AsString;
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ExecSQL;
       TabSiparisDetay.Close;
       TabSiparisDetay.Open;

@@ -256,7 +256,7 @@ type
 
 implementation
 uses Umesaj, UCombo, Fetautil, UAnaForm, UAramaYokFrame, UFastRap, UGenelAnaSekmeFrame, URaporAraclari,
-      FetaClassExtensions,FetaKurulusSiniflari,UGirisKutusuEx,PrjConst,UMaasListe,LocOnFly;
+      FetaClassExtensions,FetaKurulusSiniflari,UGirisKutusuEx,PrjConst,UMaasListe,LocOnFly, UVeriMotor;
 {$R *.dfm}
 var
    BasTarihi, BitTarihi: TDateTime;
@@ -353,6 +353,7 @@ begin
   Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
   if ComboOdemeTuru.ItemIndex = 2  then //'İşten çıkış'
      Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, '--REHBERID', ' and REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
   Tablo.Query4.Params[0].Value:=ComboOdemeTuru.ItemIndex;
   Tablo.Query4.ExecSQL;
   //tahakkukların ikinci aşamasını yapıyoruz. Prim ya da maaş çalışan varsa ya prime ya da maaşa göre tahakkuk update ediliyor
@@ -361,6 +362,7 @@ begin
   Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
   if ComboOdemeTuru.ItemIndex = 2  then //'İşten çıkış'
      Tablo.Query4.SQL.Text := StringReplace(Tablo.Query4.SQL.Text, '--REHBERID', ' and REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.Query4.SQL.Text := PgSqlCevir(Tablo.Query4.SQL.Text);
   Tablo.Query4.Params[0].Value:=ComboOdemeTuru.ItemIndex;
   Tablo.Query4.ExecSQL;
 end;
@@ -487,6 +489,7 @@ var Excel, kitap, sayfa: variant;
           if PLANMTABLO.FieldByName('SEC').AsBoolean then begin
              Tablo.Query1.Close;
              Tablo.Query1.SQL.Text := 'select BANKA, SUBENO, SUBE, HESAPNO from REHBERBANKA where REHBERID='+PLANMTABLO.FieldByName('REHBERID').AsString+' and VARSAYILAN=1';
+             if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
              Tablo.Query1.Open;
              if Tablo.Query1.RecordCount>0 then begin
                 if (PLANMTABLO.FieldByName('EXCELISLENDI').AsBoolean=False)and(Tablo.Query5.FieldByName('BANKA').AsString = Tablo.Query1.FieldByName('BANKA').AsString) then begin
@@ -539,6 +542,7 @@ begin
    //Hangi excel tablosu açılacak ona bakalım
    Tablo.Query5.Close;
    Tablo.Query5.SQL.Text := ' select distinct BORCLUBNK from PLANMTABLO where TARIH >=:T1 and TARIH<:T2 AND SEC=1 AND DURUM=1';
+   if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
    Tablo.Query5.Params[0].Value := BasTarihi;
    Tablo.Query5.Params[1].Value := BitTarihi;
    Tablo.Query5.Open;
@@ -648,6 +652,7 @@ begin
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' update PLANMTABLO set BORCLUBNK='+HESAPID+
         ' where SEC=1 and BANKAISLENDI = 0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   ComboAyPropertiesChange(Self);
 end;
@@ -778,6 +783,7 @@ var   Excel, kitap, sayfa: variant;
                ' from REHBERBILGI RB left outer join BANKAHESAPLAR BH on RB.YER_ID=BH.REHBERID'+
                ' where YERI= 3  and  BILGI = '''+TCNo+''' '+
                ' order by BH.VARSAYILAN desc  ';
+       if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
        Tablo.Query2.Open;
        if Tablo.Query2.RecordCount < 1 then
           ShowMessage(TCNo+MTPersonelListesindeBulunamadi)
@@ -879,6 +885,7 @@ var Excel, kitap, sayfa: variant;
                ' from REHBERBILGI RB left outer join BANKAHESAPLAR BH on RB.YER_ID=BH.REHBERID'+
                ' where YERI= 3  and  BILGI = '''+TCNo+''' '+
                ' order by BH.VARSAYILAN desc  ';
+       if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
        Tablo.Query2.Open;
        if Tablo.Query2.RecordCount < 1 then
           ShowMessage(TCNo+MTPersonelListesindeBulunamadi)
@@ -892,6 +899,7 @@ var Excel, kitap, sayfa: variant;
                        'values('+ Tablo.Query2.Fields[0].AsString + ', cast('''+IntToStr(ComboAy.ItemIndex+1)+'/'+FormatDateTime('dd', Tablo.GENINI.BugunTrh)+'/'+IntToStr(ComboYil.Value)+''' as datetime), '+
                        '0,'+Kontrol( Maas)+','+Kontrol( Banka)+','+Kontrol( Agi)+','+Kontrol(Kasa)+','+Kontrol( AvBanka)+','+Kontrol( AvKasa)+','+
                        Kontrol( OdeBanka)+','+Kontrol( OdeKasa)+','+Tablo.Query2.Fields[1].asstring+',0,0,0,0,'''+CariDoviz+''','''+Kullanan+''','+Kontrol(Maas)+'+'+Kontrol(Agi)+','+IntToStr(SubeId)+')';
+           if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
            Tablo.Query1.execsql;
            ComboAyPropertiesChange(Self);
        end;
@@ -975,6 +983,7 @@ begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := ' update PLANMTABLO set '+s+' where TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' '+
         ' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
     ComboAyPropertiesChange(Self);
 end;
@@ -1114,6 +1123,7 @@ begin
                            ' from PLANMTABLO T inner join REHBER R on R.ID=T.REHBERID       '+
                            ' where SEC=1 and '+SQL+
                            ' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   if Tablo.Query1.RecordCount>0 then begin
       MemoUyari.Visible := True;
@@ -1139,6 +1149,7 @@ begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text := ' update PLANMTABLO set BORCLUKASA='+st.Strings[2]+
           ' where SEC=1 and KASAISLENDI = 0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
   end;
   st.Free;
@@ -1178,11 +1189,13 @@ begin
         ',R=0, EKSTREDEKULLAN = 0, GIRISKAYNAK = '+IntToStr(Windows_Sekme_Giris)+', BELGENO ='''' '+
         ' from PLANMTABLO T inner join REHBER R on R.ID=T.REHBERID'+
         ' where SEC=1 and ODEBANKA>0 and BANKAISLENDI=0 AND T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   //durumunu değiştir
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' update PLANMTABLO set BANKAISLENDI=1'+
         ' where SEC=1 and BANKAISLENDI=0 AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND ODEBANKA>0.1 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   ComboAyPropertiesChange(Self);
 end;
@@ -1213,6 +1226,7 @@ begin
       ' FROM PLANMTABLO T WHERE T.ID='+PlanID+' AND SEC=1 AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA) > 0 AND (T.BANKAISLENDI=0 AND T.KASAISLENDI=0) AND'+
       ' TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''''+
       ' SELECT SCOPE_IDENTITY()';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Open;
 
       //Insert'in id'si alınıp geni dönüş id olarak kullanılacak.
@@ -1229,6 +1243,7 @@ begin
       ' FROM PLANMTABLO T WHERE T.ID='+PlanID+' AND SEC=1 AND T.DURUM=0 AND (T.ODEBANKA+T.ODEKASA) > 0 AND '+
       ' (T.BANKAISLENDI=0 AND T.KASAISLENDI=0) AND TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<'''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''''+
       ' SELECT SCOPE_IDENTITY()';
+      if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
       Tablo.Query3.Open;
 
       //Insert'in id'si alınıp geri dönüş id olarak kullanılacak.
@@ -1296,6 +1311,7 @@ begin
                Tablo.Query1.Close;
                Tablo.Query1.SQL.Text := SQLKomutugetir;
                Tablo.Query1.SQL.Add(' and T.ID='+PLANMTABLO.FieldByName('ID').AsString);
+               if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
                Tablo.Query1.ExecSQL;
             end;
             PLANMTABLO.Next;
@@ -1307,11 +1323,13 @@ begin
          Tablo.Query1.SQL.Text := SQLKomutugetir;
          Tablo.Query1.SQL.Add(' and SEC=1 and ODEKASA>0.1 and KASAISLENDI=0'+
                       ' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ');
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.ExecSQL;
         //durumunu değiştir
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text := ' update PLANMTABLO set KASAISLENDI=1'+
             ' where SEC = 1 and ODEKASA>0.1 AND KASAISLENDI=0 and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
          Tablo.Query1.ExecSQL;
       end;
       ComboAyPropertiesChange(Self);
@@ -1344,18 +1362,21 @@ procedure TMaasTabloDlg.SeilileriTahakkukolarakile1Click(Sender: TObject);
     +',T.DURUM,KASA='+IntToStr(Kasa)+',YERI='+IntToStr(TabNo_PLANMTABLO)+',YERID=T.ID, EKLEYEN='''+Kullanan+''','+IntToStr(SubeId)
     +'from PLANMTABLO T inner join REHBER R on R.ID=T.REHBERID   '
     +'where T.SEC=1 and TAHAKKUKISLENDI=0 and T.DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' AND T.TAHAKKUK>0 AND TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
   //durumunu değiştir
   //Burada alınmış olan avanslar maaştan düşülür.
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := StringReplace(AvansMaasIsle.Text, 'BAŞLANGIÇTARİHİ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
   Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
 
 
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' update PLANMTABLO set TAHAKKUKISLENDI=1'+
         ' where SEC=1 and TAHAKKUKISLENDI=0 AND TAHAKKUK>0 AND DURUM='+IntToStr(ComboOdemeTuru.ItemIndex)+' and TARIH >= '''+FormatDateTime('yyyy-mm-dd', BasTarihi)+''' and TARIH<='''+FormatDateTime('yyyy-mm-dd', BitTarihi)+''' ';
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.ExecSQL;
   ComboAyPropertiesChange(Self);
 end;
@@ -1405,6 +1426,7 @@ begin
      Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
      if ComboOdemeTuru.ItemIndex = 2  then //'İşten çıkış'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--R.ID', ' and R.ID='+IntToStr(PersonelID), [rfReplaceAll]);
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Params[0].Value:=ComboOdemeTuru.ItemIndex;
      Tablo.Query1.ExecSQL;
     //Burada personelin sayfasındaki tahakkukları getiririz.
@@ -1413,6 +1435,7 @@ begin
      Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
      if ComboOdemeTuru.ItemIndex = 2  then //'İşten çıkış'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--M.YERID', ' and M.YERID='+IntToStr(PersonelID), [rfReplaceAll]);
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Params[0].Value:=11;
      Tablo.Query1.Params[1].Value:=0;
      Tablo.Query1.ExecSQL;
@@ -1427,6 +1450,7 @@ begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := StringReplace(SQLMesaiGetir.Text, 'BAŞLANGIÇTARİHİ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.ExecSQL;
      end;
      PlanMTabloGuncelle;
@@ -1435,6 +1459,7 @@ begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := StringReplace(SQLKesDevir.Text, 'BAŞLANGIÇTARİHİ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.ExecSQL;
     end;
     //Burada personelin sayfasındaki kesintileri getiririz. Eğer ayarlarda "Gelmediği gün" varsa pdks'den bakılarak onlar da eklenir
@@ -1443,12 +1468,14 @@ begin
     Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
     if ComboOdemeTuru.ItemIndex = 2  then //'İşten çıkış'
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, '--T.REHBERID', ' and T.REHBERID='+IntToStr(PersonelID), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
     Tablo.TablodanSorguAc(1, 'select * from REHBERAYAR where YERI=6 and VARSAYILAN=35');
     if Tablo.Query1.RecordCount>0 then begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := StringReplace(SQLDevamsizlikGetir.Text, 'BAŞLANGIÇTARİHİ', FormatDateTime('yyyy-mm-dd', BasTarihi), [rfReplaceAll]);
         Tablo.Query1.SQL.Text := StringReplace(Tablo.Query1.SQL.Text, 'BİTİŞTARİHİ', FormatDateTime('yyyy-mm-dd', BitTarihi), [rfReplaceAll]);
+        if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
         Tablo.Query1.ExecSQL;
     end;
     PlanMTabloGuncelle;
@@ -1484,6 +1511,7 @@ begin
   end else if ComboOdemeTuru.Text = 'Avans Ödemesi' then begin
     Tablo.Query1.SQL.Text := StringReplace(AvansInsert.Text, ':PTRH', FormatDateTime('yyyy-mm-dd', StrToDateDef(IntToStr(AvansGunu)+FormatSettings.DateSeparator+
               IntToStr(ComboAy.ItemIndex+1)+FormatSettings.DateSeparator+ComboYil.Text,Tablo.GENINI.BugunTrh )), [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.ExecSQL;
 
     Tablo.Query3.Close;
@@ -1491,6 +1519,7 @@ begin
     ' AVANS=(SELECT ISNULL(SUM(TUTAR),0) FROM dbo.PLANMAAS PM WHERE PM.YER=61 AND PM.YERID=R.ID)'+
     ' from REHBER R'+
     ' where R.DURUM > 0 AND R.GRUP = 335';
+    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
     Tablo.Query3.Open;
     while not Tablo.Query3.Eof do begin
       YerID := Tablo.Query3.Fields[0].AsString;
@@ -1579,6 +1608,7 @@ begin
              ' inner join BANKASUBELER BS on B.BANKAKODU=BS.BANKAKODU '+
              ' inner join BANKAHESAPLAR BH on BH.BANKASUBELERID=BS.ID '+
              ' where BH.ID='+ID;
+   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
    Tablo.Query1.Open;
    Result := Tablo.Query1.Fields[0].AsString;
 end;

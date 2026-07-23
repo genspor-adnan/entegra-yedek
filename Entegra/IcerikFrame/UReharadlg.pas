@@ -1229,6 +1229,7 @@ begin
   Tablo.Query8.SQL.Add(' where ER.SERINO in (SELECT SERINO FROM EKIPMANREHBER group by SERINO,EKIPMANID having count(*)>1) and ');
   Tablo.Query8.SQL.Add(' ER.SERINO= '''+TabEkipmanlar.FieldByName('SERINO').AsString+''' and ');
   Tablo.Query8.SQL.Add(' ER.EKIPMANID= '+TabEkipmanlar.FieldByName('EKIPMANID').AsString+' ');
+  if AktifVeriMotor = vmPG then Tablo.Query8.SQL.Text := PgSqlCevir(Tablo.Query8.SQL.Text);
   Tablo.Query8.Open;
   if not Tablo.Query8.IsEmpty then begin
     Tablo.Query8.First;
@@ -1935,6 +1936,7 @@ begin
     AFastReport.EnabledDataSets.Add(frxYaslandirma);
     Tablo.TabMusteri.Close;
     Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', REHBER.FieldByName('ID').AsString, [rfReplaceAll]);
+    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
     Tablo.TabMusteri.Open;
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
   end;
@@ -1961,6 +1963,7 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ISLEMTARIHI from KASA where HESAPTURU=''B'' and HESAPID='+TabBankaHesaplar.Fields[0].AsString+' AND TUR<>1 '+DbSinir(1);
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.Open;
      if not Tablo.Query1.IsEmpty then
         raise Exception.Create(Tablo.Query1.Fields[0].AsString+RDGirilmisBankaBilgisiVarSilinemez);
@@ -2001,6 +2004,7 @@ begin
     TabAlias.Close;
     TabAlias.SQL.Text := 'SELECT * FROM REHBERALIAS WHERE REHBERID = ' +
                          IntToStr(REHBER.Fields[0].AsInteger);
+    if AktifVeriMotor = vmPG then TabAlias.SQL.Text := PgSqlCevir(TabAlias.SQL.Text);
     TabAlias.Open;
   end;
   TabAlias.Append;
@@ -2727,6 +2731,7 @@ begin
       8,15 :begin
         Tablo.Query9.Close;
         Tablo.Query9.SQL.Text := 'Select * from FATBASLIK Where ID='+TabCariListe.FieldByName('CEKID').AsString+' ';
+        if AktifVeriMotor = vmPG then Tablo.Query9.SQL.Text := PgSqlCevir(Tablo.Query9.SQL.Text);
         Tablo.Query9.Open;
 
         Tablo.FaturaIadeAl(Tablo.Query9,TMenuItem(Sender).Tag );
@@ -3919,6 +3924,7 @@ begin
      TabAlias.Close;
      TabAlias.SQL.Text := 'SELECT * FROM REHBERALIAS WHERE REHBERID = ' +
                           IntToStr(REHBER.Fields[0].AsInteger);
+     if AktifVeriMotor = vmPG then TabAlias.SQL.Text := PgSqlCevir(TabAlias.SQL.Text);
      TabAlias.Open;
      AliasToolbarDurumuGuncelle(False);
   end  else if PageControlSekme.ActivePage=TabSheetFirsat then begin

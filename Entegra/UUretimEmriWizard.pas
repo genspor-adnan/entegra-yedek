@@ -885,12 +885,14 @@ var
       TableRec := TFDQuery.Create(nil);
       TableRec.Connection := Tablo.FDCnn;
       TableRec.SQL.Text   := 'select * from URETIMRECETE where STOKID='+IntToStr(StokID);
+      if AktifVeriMotor = vmPG then TableRec.SQL.Text := PgSqlCevir(TableRec.SQL.Text);
       TableRec.Open;
       //bu re?ete detaylar?na ula??l?r
 
       TableRecDetay := TFDQuery.Create(nil);
       TableRecDetay.Connection := Tablo.FDCnn;
       TableRecDetay.SQL.Text := 'select * from URETIMRECETEDETAY where URETIMRECETEID='+TableRec.FieldByName('ID').AsString+' order by ADET desc';
+      if AktifVeriMotor = vmPG then TableRecDetay.SQL.Text := PgSqlCevir(TableRecDetay.SQL.Text);
       TableRecDetay.Open;
       //
       while not TableRecDetay.Eof do begin
@@ -1022,6 +1024,7 @@ begin
         Tablo.Query5.SQL.Add(' from URETIMEMRIDETAY inner join URETIMEMRIDETAY KU on URETIMEMRIDETAY.ID=KU.USTID  ');
         Tablo.Query5.SQL.Add(' inner join URETIMRECETEDETAY URD on KU.HEDEFRECETEID=URD.URETIMRECETEID and URETIMEMRIDETAY.TUR=URD.TUR and URETIMEMRIDETAY.URUNID=URD.URUNID  ');
         Tablo.Query5.SQL.Add(' where URETIMEMRIDETAY.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
+        if AktifVeriMotor = vmPG then Tablo.Query5.SQL.Text := PgSqlCevir(Tablo.Query5.SQL.Text);
         Tablo.Query5.ExecSQL;
         TabloYenile(TabUretimEmriDetay,[TabUretimEmri.FieldByName('ID').AsInteger]);
         TreeUretimAgaci.FullExpand;
@@ -1589,6 +1592,7 @@ begin
   Tablo.Query1.SQL.Add('from URETIMEMRIDETAY UD ');
   Tablo.Query1.SQL.Add('where ID='+IntToStr(UretimEmriDetayID));
   Tablo.Query1.SQL.Add('select scope_identity() ');
+  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
   Tablo.Query1.Open;
   Result := Tablo.Query1.Fields[0].AsInteger;
 end;
@@ -1820,6 +1824,7 @@ begin
       Tablo.Query1.SQL.Add(' '''','+Kullanan+',''Muaf'','+IntToStr(SubeId)+','+
                                IntToStr(TabNo_URETIMEMRI)+','+TabUretimEmri.FieldByName('ID').AsString+','+IntToStr(ProjeId)+
                                ','+Kullanan+','+RolID+',1) SELECT SCOPE_IDENTITY()');
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.Open;
       try
         StokList := TStringList.Create();
@@ -1841,6 +1846,7 @@ begin
               Tablo.Query2.SQL.Add('0.0,'''+CariDoviz+''',0.0,1.0,0,'+IntToStr(SubeID)+','+Kullanan+','+inttostr(Tabno)+','+TabPlanlama.FieldByName('ID').AsString+','+IntToStr(ProjeId));
               Tablo.Query2.SQL.Add(','''+FormatDateTime('yyyy-mm-dd', TabUretimOperasyon.FieldByName('BASTAR').AsDateTime)+''''+','+Kullanan+')');
 
+              if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
               Tablo.Query2.ExecSQL;
             end;
           end;
@@ -2133,6 +2139,7 @@ begin
       Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
       Tablo.Query2.SQL.Add(' and UE.HEDEFRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
       Tablo.Query2.SQL.Add(' and UE.USTID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
+    if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
     Tablo.Query2.open;
   Yetersiz:=False;
   while not Tablo.Query2.eof do begin
@@ -2172,6 +2179,7 @@ begin
                             IntToStr(TabNo_URETIMOPERASYON)+','+TabUretimOperasyon.FieldByName('ID').AsString+','+
                             TabUretimOperasyon.FieldByName('LOKASYON').AsString+','+TabUretimOperasyon.FieldByName('ISMERKEZI').AsString+','+
                             IntToStr(ProjeId)+','+TabUretimEmri.FieldByName('STOKID').AsString+','+StringReplace( VarToStr(Miktar), ',','.',[])+','+Tablo.Query3.Fields[0].AsString+') SELECT SCOPE_IDENTITY()');
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.Open;
 
       FBID := Tablo.Query1.Fields[0].AsInteger;
@@ -2196,6 +2204,7 @@ begin
       Tablo.Query2.SQL.Add(' INNER JOIN URETIMRECETEDETAY URD ON URD.URETIMRECETEID = UE.KAYNAKRECETEID AND UE.URUNID = URD.URUNID AND URD.ADET > 0 '+
                            ' where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
       Tablo.Query2.SQL.Add(' and KAYNAKRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
+      if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
       Tablo.Query2.ExecSQL; //ayn? re?eteden 2 tane eklenir ise patlayabilir..  buraya operasyon detay gibi bir ?apraz tablo gerekiyor..
       //Re?etden Hedefler eklenir.. - ile ?arp?larak.. ustid nin kaynak olmas? da gerekiyor..
       Tablo.Query2.Close;
@@ -2207,6 +2216,7 @@ begin
       Tablo.Query2.SQL.Add(' from URETIMEMRIDETAY UE inner join STOKLAR S on UE.URUNID=S.ID where UE.URETIMEMRIID='+TabUretimEmri.FieldByName('ID').AsString);
       Tablo.Query2.SQL.Add(' and UE.HEDEFRECETEID='+TabUretimOperasyon.FieldByName('RECETEID').AsString);
       Tablo.Query2.SQL.Add(' and UE.USTID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
+      if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
       Tablo.Query2.ExecSQL;
       Tablo.TablodanSorguAc(8,'select * from URETIMEMRIDETAY where ID='+TabUretimOperasyon.FieldByName('URETIMEMRIDETAYID').AsString);
       Tablo.Query2.SQL.Text := 'update FATURA set ';
@@ -2215,12 +2225,15 @@ begin
       Tablo.Query2.SQL.Add('MIKTAR=((MIKTAR/'+StringReplace(FloatToStr(Tablo.Query8.FieldByName('MIKTAR').AsFloat),',','.',[])+')*'+StringReplace(FloatToStr(Miktar),',','.',[])+'),');
       Tablo.Query2.SQL.Add('ADET=((ADET/'+StringReplace(FloatToStr(Tablo.Query8.FieldByName('MIKTAR').AsFloat),',','.',[])+')*'+StringReplace(FloatToStr(Miktar),',','.',[])+')');
       Tablo.Query2.SQL.Add(' where FATBASID='+IntToStr(FBID));
+      if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
       Tablo.Query2.ExecSQL;
       Tablo.UretimSatirMaliyetUpdate(FBID);
   //E?er ?retti?imiz ?r?nlerin izlemi (serino vb) varsa
       Query19.SQL.Text := ' select * from FATBASLIK FB where ID='+IntToStr(FBID);
+      if AktifVeriMotor = vmPG then Query19.SQL.Text := PgSqlCevir(Query19.SQL.Text);
       Query19.Open;
       Query20.SQL.Text := ' select * from FATURA F where FATBASID='+IntToStr(FBID)+' and IZLEME > 0';   // in (1,2,3,4)
+      if AktifVeriMotor = vmPG then Query20.SQL.Text := PgSqlCevir(Query20.SQL.Text);
       Query20.Open;
       while not Query20.eof do begin
         if StokIzlemBilgisi(Query19, Query20)=True then begin
@@ -2726,6 +2739,7 @@ begin
       Tablo.Query1.SQL.Add(' '''+TabUretimEmri.FieldByName('STOKKOD').AsString+'   '+TabUretimEmri.FieldByName('STOKADI').AsString+''','+Kullanan+',''Muaf'','+IntToStr(SubeId)+','+
                                IntToStr(TabNo_URETIMEMRI)+','+TabUretimEmri.FieldByName('ID').AsString+','+IntToStr(ProjeId)+
                                ','+Kullanan+','+RolID+',1,'''+TabUretimEmri.FieldByName('EMIRNO').AsString+''','+IntToStr(TabUretimEmri.FieldByName('ANAKAYNAK').AsInteger)+') SELECT SCOPE_IDENTITY()');
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.Open;
 
       TabPlanlama.First;
@@ -2740,6 +2754,7 @@ begin
         Tablo.Query2.SQL.Add('0.0,'''+CariDoviz+''',0.0,1.0,0,'+IntToStr(SubeID)+','+Kullanan+','+inttostr(Tabno)+','+TabPlanlama.FieldByName('ID').AsString+','+IntToStr(ProjeId));
         Tablo.Query2.SQL.Add(','''+FormatDateTime('yyyy-mm-dd', TabUretimOperasyon.FieldByName('BASTAR').AsDateTime)+''''+','+Kullanan+')');
 
+        if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
         Tablo.Query2.ExecSQL;
         TabPlanlama.Next;
       end;
@@ -2838,6 +2853,7 @@ begin
     Tablo.Query2.SQL.Add(' KUR=isnull((select '+DbUst(1)+'F.KUR from FATURA F inner join FATBASLIK FB on F.FATBASID=FB.ID ');
     Tablo.Query2.SQL.Add('  where FB.TUR in(10,11,12) and URETIMEMRIDETAY.TUR=F.TUR and URETIMEMRIDETAY.URUNID=F.URUNID order by FB.FATURATARIH desc '+DbSinir(1)+'),'''+CariDoviz+''')');
     Tablo.Query2.SQL.Add('where URETIMEMRIID='+IntToStr(UEID));
+    if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
     Tablo.Query2.ExecSQL;
   end;
 end;

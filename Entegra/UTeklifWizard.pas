@@ -723,6 +723,7 @@ begin
   TabloYenile(TabHazirlayanDetay,[TabTeklif.FieldByName('HAZIRLAYAN').AsString]);
   Tablo.TabMusteri.Close;
   Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
   Tablo.TabMusteri.Open;
   TabloYenile(TabStokDetay,[TabTeklif.FieldByName('ID').Value,6]);
   AFastReport.EnabledDataSets.Clear;
@@ -739,12 +740,14 @@ begin
   MusIlgiliID := IIF(TabTEKLIF.FieldByName('MUS_ILGILI').AsString='','-99',TabTEKLIF.FieldByName('MUS_ILGILI').AsString);
   Tablo.TabMusteriIlgili.Close;
   Tablo.TabMusteriIlgili.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',MusIlgiliID, [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.TabMusteriIlgili.SQL.Text := PgSqlCevir(Tablo.TabMusteriIlgili.SQL.Text);
   Tablo.TabMusteriIlgili.Open;
   AFastReport.EnabledDataSets.Add(Tablo.frxMusteriIlgili);
 
   PersonelID := IIF(TabTEKLIF.FieldByName('HAZIRLAYAN').AsString='','-99',TabTEKLIF.FieldByName('HAZIRLAYAN').AsString);
   Tablo.TabPersonel.Close;
   Tablo.TabPersonel.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1',PersonelID, [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then Tablo.TabPersonel.SQL.Text := PgSqlCevir(Tablo.TabPersonel.SQL.Text);
   Tablo.TabPersonel.Open;
   AFastReport.EnabledDataSets.Add(Tablo.frxPersonel);
 
@@ -1937,6 +1940,7 @@ begin
     tablo.Query1.Close;      // 'select distinct ALTERNATIFNO from TEKLIFDETAY                                                                                          //   TEKLIFID = '+TabTeklif.Fields[0].AsString+'
     tablo.Query1.SQL.Text := 'Select distinct ALTERNATIFNO from TEKLIF T left outer join TEKLIFDETAY TD on '+
     ' T.ID=TD.TEKLIFID where T.ID = '+TabTeklif.FieldByName('ID').AsString+' and  T.TEKLIFNO = '''+TabTeklif.FieldByName('TEKLIFNO').AsString+''' and T.REHBERID='+IntToStr(RehberId)+' and ALTERNATIFNO > 1 order by 1';
+    if AktifVeriMotor = vmPG then tablo.Query1.SQL.Text := PgSqlCevir(tablo.Query1.SQL.Text);
     tablo.Query1.Open;
     while not tablo.Query1.eof do begin //sonra varsa a?al?m
        TabSheetEkle('Alternatif '+IntToStr(tablo.Query1.fields[0].AsInteger-1), tablo.Query1.fields[0].AsInteger);

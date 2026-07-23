@@ -199,6 +199,7 @@ begin
   BtnCiroSil.Visible := cxGridTarihce.Visible;
   if BtnCiroEkle.Visible = True then begin
      TabCekHareketler.Close;
+     if AktifVeriMotor = vmPG then TabCekHareketler.SQL.Text := PgSqlCevir(TabCekHareketler.SQL.Text);
      TabCekHareketler.Params[0].Value:=TabCekler.FieldByName('ID').AsInteger;
      TabCekHareketler.Params[1].Value:=TabCekler.FieldByName('ID').AsInteger;
      TabCekHareketler.Params[2].Value:=TabCekler.FieldByName('ID').AsInteger;
@@ -219,6 +220,7 @@ begin
    TabCekler.Close;
    TabCekler.Open;
    TabCekHareketler.Close;
+   if AktifVeriMotor = vmPG then TabCekHareketler.SQL.Text := PgSqlCevir(TabCekHareketler.SQL.Text);
    TabCekHareketler.Params[0].Value:=TabCekler.FieldByName('ID').AsInteger;
    TabCekHareketler.Params[1].Value:=TabCekler.FieldByName('ID').AsInteger;
    TabCekHareketler.Params[2].Value:=TabCekler.FieldByName('ID').AsInteger;
@@ -230,8 +232,10 @@ begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      Tablo.Query1.Close;
      Tablo.Query1.SQL.Text := 'delete from CEKHAREKET where CEKSENETLERID = '+TabCekler.FieldByName('ID').asstring+' and ID = '+TabCekHareketler.FieldByName('SIRALAMA').asstring;
+     if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
      Tablo.Query1.ExecSQL;
      TabCekHareketler.Close;
+     if AktifVeriMotor = vmPG then TabCekHareketler.SQL.Text := PgSqlCevir(TabCekHareketler.SQL.Text);
      TabCekHareketler.Params[0].Value:=TabCekler.FieldByName('ID').AsInteger;
      TabCekHareketler.Params[1].Value:=TabCekler.FieldByName('ID').AsInteger;
      TabCekHareketler.Params[2].Value:=TabCekler.FieldByName('ID').AsInteger;
@@ -255,6 +259,7 @@ begin
    ResimDlg.ShowModal;
    ResimDlg.Destroy;
    TabResim.Close;
+   if AktifVeriMotor = vmPG then TabResim.SQL.Text := PgSqlCevir(TabResim.SQL.Text);
    TabResim.Params[0].Value := TabCekler.Fields[0].AsInteger;
    TabResim.Open;
 
@@ -268,6 +273,7 @@ begin
       TabCekler.SQL.Text := 'SELECT '+DbUst(1)+'*  FROM CEKLER ORDER BY ID DESC '+DbSinir(1)
     else begin
       TabCekler.SQL.Text := 'SELECT *   FROM CEKLER WHERE ID = :ID';
+      if AktifVeriMotor = vmPG then TabCekler.SQL.Text := PgSqlCevir(TabCekler.SQL.Text);
       TabCekler.Params.ParamByName('ID').AsInteger := ACekId;
     end;
   end else { Yani -1 -> Boş Çek senet ekranı için boş bir query }
@@ -489,6 +495,7 @@ begin
    if EskiRehberID <>  TabCekler.FieldByName('REHBERID').AsInteger then begin
       Tablo.Query1.Close;    //resimlerisilinir
       Tablo.Query1.SQL.Text := ' update IMAJ set YER_ID='+TabCekler.Fields[0].AsString + ' where YERI = 21 and YER_ID='+IntToStr(EskiRehberID);
+      if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
       Tablo.Query1.ExecSQL;
    end;
 
@@ -504,9 +511,11 @@ procedure TCekDlg.TabCeklerAfterScroll(DataSet: TDataSet);
 var CARIKOD, CARIUNVAN : string;
 begin
   TabBankalar.Close;
+  if AktifVeriMotor = vmPG then TabBankalar.SQL.Text := PgSqlCevir(TabBankalar.SQL.Text);
   TabBankalar.Params[0].Value := TabCekler.FieldByName('BANKASUBELERID').AsInteger;
   TabBankalar.Open;
   TabResim.Close;
+  if AktifVeriMotor = vmPG then TabResim.SQL.Text := PgSqlCevir(TabResim.SQL.Text);
   TabResim.Params[0].Value := TabCekler.Fields[0].AsInteger;
   TabResim.Open;
   Tablo.RehberBilgisiGetir(TabCekler.FieldByName('REHBERID').AsInteger, CARIKOD, CARIUNVAN );
@@ -539,6 +548,7 @@ begin
   if DtsCekler.State=dsInsert then begin
     Tablo.Query1.Close;
     Tablo.Query1.SQL.Text:=' select * from CEKLER where SERINO = '+inttostr(StrToIntDef(EditSERINO.Text, 0));
+    if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
     Tablo.Query1.Open;
     if Tablo.Query1.RecordCount>0 then
       raise Exception.Create(kullanilmisserino);

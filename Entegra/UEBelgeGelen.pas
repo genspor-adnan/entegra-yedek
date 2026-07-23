@@ -74,6 +74,7 @@ begin
           'IF @b IS NULL SET @b = ''dbo.EBELGE'';' +
           'IF COL_LENGTH(@b,''UBL_XML_ZIP'') IS NULL ' +
           '  EXEC(''ALTER TABLE '' + @b + '' ADD UBL_XML_ZIP varbinary(max) NULL'');';
+        if AktifVeriMotor = vmPG then LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
         LQ.ExecSQL;
       except
         // yetki yoksa sessiz gec; asagidaki dogrulama sonucu belirler
@@ -84,6 +85,7 @@ begin
         'SELECT @b = base_object_name FROM sys.synonyms WHERE object_id = OBJECT_ID(''dbo.EBELGE'');' +
         'IF @b IS NULL SET @b = ''dbo.EBELGE'';' +
         'SELECT COL_LENGTH(@b,''UBL_XML_ZIP'');';
+      if AktifVeriMotor = vmPG then LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
       LQ.Open;
       GUblZipKullanilabilir := not LQ.Fields[0].IsNull;
     finally
@@ -305,6 +307,7 @@ begin
       'select '+DbUst(1)+'ID, UBLVAR=case when (UBL_XML_ZIP IS NOT NULL ' +
       'OR len(isnull(UBL_XML, N''''))>0) then 1 else 0 end ' +
       'from ' + DepoTablo('EBELGE') + ' where YON=2 and UUID=:UUID and BELGETURU=:BELGETURU order by ID desc '+DbSinir(1);
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('UUID').AsString := AUUID;
     LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     LQry.Open;
@@ -345,6 +348,7 @@ begin
         'DURUM=:DURUM, API_JSON=cast(:AJ as nvarchar(max)), ' +
         LUxUpd + 'DEGISTIREN=:KUL, DEGISTIRMETARIHI=getdate() ' +
         'where ID=:ID';
+      if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
       LQry.ParamByName('ID').AsLargeInt := AEBelgeID;
     end else begin
       LQry.SQL.Text :=
@@ -353,6 +357,7 @@ begin
         '0, 0, :BELGETURU, 2, :UUID, :BNO, :GA, :AA, :DURUM, cast(:AJ as nvarchar(max)), ' +
         LUxIns + ', :KUL, getdate()); ' +
         'select cast(scope_identity() as bigint) as ID';
+      if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
       LQry.ParamByName('UUID').AsString := AUUID;
       LQry.ParamByName('BELGETURU').AsInteger := ABelgeTuru;
     end;
@@ -391,6 +396,7 @@ begin
       'insert into ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,HTTPKODU,' +
       'SERVISKODU,HATAKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) values(' +
       ':EID,2,2,:MT,:MSG,:HK,:SERVIS,:HKOD,:HMSG,:KUL,getdate())';
+    if AktifVeriMotor = vmPG then LQry.SQL.Text := PgSqlCevir(LQry.SQL.Text);
     LQry.ParamByName('EID').AsLargeInt := AEBelgeID;
     LQry.ParamByName('MT').AsInteger := 9;
     LQry.ParamByName('MSG').DataType := ftWideMemo;
@@ -422,6 +428,7 @@ begin
   try
     LQ.Connection := AConn;
     LQ.SQL.Text := 'select cast(API_JSON as nvarchar(max)) AJ from ' + DepoTablo('EBELGE') + ' where ID=' + IntToStr(AEBelgeID);
+    if AktifVeriMotor = vmPG then LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
     LQ.Open;
     if not LQ.Eof then begin
       LStr := LQ.Fields[0].AsString;
@@ -477,6 +484,7 @@ begin
       'insert into ' + DepoTablo('EBELGEMESAJ') + '(EBELGEID,YON,ISLEMTURU,MESAJTIPI,MESAJ,' +
       'SERVISKODU,HATAKODU,HATAMESAJI,EKLEYEN,EKLEMETARIHI) values(' +
       ':EID,2,2,:MT,:MSG,:SERVIS,:HKOD,:HMSG,:KUL,getdate())';
+    if AktifVeriMotor = vmPG then LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
     LQ.ParamByName('EID').AsLargeInt := AEBelgeID;
     LQ.ParamByName('MT').AsInteger := LMesajTipi;
     LQ.ParamByName('MSG').DataType := ftWideMemo;
@@ -1104,6 +1112,7 @@ begin
           'EXEC sp_Grnt_AlisFaturaHareketIslem @jsonData=:j, @TIP=1, ' +
           ' @SONUC_ID=@sid OUTPUT, @SONUC_MESAJ=@smsg OUTPUT; ' +
           'SELECT @sid AS SID, @smsg AS SMSG';
+        if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
         LSP.ParamByName('j').AsString := LJSON;
         LSP.Open;
         LSP.Close;
@@ -1242,6 +1251,7 @@ begin
       'SELECT COUNT(*) FROM ' + DepoTablo('EBELGE') + ' E WHERE E.YON=2 ' +
       '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
+    if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
     LSP.ParamByName('BELGETURU').AsInteger := LBelgeTuru;
     LSP.Open;
     if not LSP.Eof then LToplam := LSP.Fields[0].AsInteger;
@@ -1258,6 +1268,7 @@ begin
       'WHERE E.YON=2 ' +
       '  AND E.BELGETURU=:BELGETURU ' +
       '  AND NOT EXISTS (SELECT 1 FROM FATBASLIK FB WHERE FB.GNTPID = E.ID)';
+    if AktifVeriMotor = vmPG then LSel.SQL.Text := PgSqlCevir(LSel.SQL.Text);
     LSel.ParamByName('BELGETURU').AsInteger := LBelgeTuru;
     LSel.Open;
     SetLength(LSatirlar, 0);
@@ -1353,6 +1364,7 @@ begin
           ' AND RB.YERI = 2 AND RB.ETIKET = N''Vergi No'' ' +
           'WHERE R.DURUM = 1 ' +
           '  AND REPLACE(RB.BILGI, '' '', '''') = :VKN ORDER BY R.ID '+DbSinir(1);
+        if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
         LSP.ParamByName('VKN').AsString := StringReplace(LSupSSN, ' ', '', [rfReplaceAll]);
         LSP.Open;
         if not LSP.Eof then
@@ -1394,6 +1406,7 @@ begin
           'EXEC sp_Grnt_AlisFaturaIslem @jsonData=:j, @TIP=1, ' +
           '  @SONUC_ID=@sid OUTPUT, @SONUC_MESAJ=@smsg OUTPUT; ' +
           'SELECT @sid AS SID, @smsg AS SMSG';
+        if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
         LSP.ParamByName('j').AsString := LSpJSON;
         LSP.Open;
         if not LSP.Eof then begin
@@ -1415,6 +1428,7 @@ begin
         LSP.SQL.Text :=
           'SELECT '+DbUst(1)+'ID FROM FATBASLIK ' +
           'WHERE GNTP_FATBASID = :EID AND TUR = 11 ORDER BY ID DESC '+DbSinir(1);
+        if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
         LSP.ParamByName('EID').AsLargeInt := LEBelgeID;
         LSP.Open;
         if not LSP.Eof then
@@ -1447,6 +1461,7 @@ begin
           // "Tanimsiz Cari").
           var LRehberIDDetay: Integer := 0;
           LSP.SQL.Text := 'SELECT '+DbUst(1)+'ISNULL(REHBERID,0) FROM FATBASLIK WHERE ID=:F '+DbSinir(1);
+          if AktifVeriMotor = vmPG then LSP.SQL.Text := PgSqlCevir(LSP.SQL.Text);
           LSP.ParamByName('F').AsInteger := LYeniFatbasID;
           LSP.Open;
           if not LSP.Eof then LRehberIDDetay := LSP.Fields[0].AsInteger;
