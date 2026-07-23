@@ -410,6 +410,9 @@ begin
      KomutDeclare:=KomutDeclare+sLineBreak+' set @DepoID='+IntToStr(CikDepo)
   else
      KomutDeclare:=KomutDeclare+sLineBreak+' set @DepoID='+IntToStr(GirDepo);
+  // PG: KomutDeclare sonrasi memo/UPDATE ile YAPISMASIN (ayni satirda 'set @X=N update...' olursa
+  //   PgDeclareCevir'in set-value regex'i statement'i yutup ilk satiri siler -> "syntax near from").
+  KomutDeclare := KomutDeclare + sLineBreak;
 {  KomutInsert := ' insert into '+TabloAdi+ ' (STOKID,SERINO,DURUM,KALAN,SEC,LOTNO,SKT)';
 
   //üretim, irs ve fat giriş ise satır boş gelir
@@ -442,9 +445,9 @@ begin
          end
      end
      else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
+         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
-         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
+         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
          ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
      end;
   //çıkışlar
@@ -459,10 +462,10 @@ begin
             ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate));
          end
      end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID);
+         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
          ExecC(TabIzlem, KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []));
          // 11/05/2022 AO kaldırıldı
-         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID);
+         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
          ExecC(Tablo.Query1, KomutDeclare+' '+ MemoSec(SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate));
      end;
   end;
