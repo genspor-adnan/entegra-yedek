@@ -1586,7 +1586,7 @@ uses UAnaForm, registry, UMesaj,FetaUtil, FetaClassExtensions, UKasaWizard, UTab
   cxGridPopupMenuConsts,
   cxLibraryStrs, UInfo,
   UStokTalepWizard, UFastRap, UServisHareketEkle, GenGoogleCalenderService,GoogleApis.Calendar,
-  UTahakkukDlg, UVeriMotor;  //  UGoogleSyncBus,
+  UTahakkukDlg, UVeriMotor, UDFMPG;  //  UGoogleSyncBus,
 {$R *.DFM}
 
 var
@@ -6144,10 +6144,11 @@ begin
     if TabloAdi.Prepared then
       TabloAdi.Unprepare;
 
-    // PG: DFM/kod ile atanmis SQL'i diyalekt cevir (dis TOP/NOLOCK/[ident]/getdate/isnull).
-    //   :param'lara dokunmaz. Nested TOP/convert/declare iceren query'ler yine per-frame ele alinir.
+    // PG: DFM/kod ile atanmis SQL'i cevir. Once UDFMPG override (FormAdi.ComponentAdi), yoksa
+    //   PgSqlCevir (dis TOP/NOLOCK/[ident]/getdate/isnull). PG_MARK'li metin AYNEN doner (idempotent
+    //   -> her refresh'te tekrar cevrilmez). :param'a dokunmaz. vmMSSQL'de ADefaultSql AYNEN.
     if AktifVeriMotor = vmPG then
-      TabloAdi.SQL.Text := PgSqlCevir(TabloAdi.SQL.Text);
+      TabloAdi.SQL.Text := DFMPGSqlGetir(TabloAdi.Owner, TabloAdi, TabloAdi.SQL.Text);
 
     ParamNames := CollectColonParams(TabloAdi.SQL.Text);
     try

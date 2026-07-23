@@ -15,6 +15,14 @@ unit UDFMPG;
 
 interface
 
+uses System.Classes, FireDAC.Comp.Client;
+
+// DFM component SQL cozucusu (FormAdi.ComponentAdi anahtarli). vmPG'de: once override registry,
+//   yoksa PgSqlCevir(ADefaultSql). vmMSSQL'de: ADefaultSql AYNEN (dokunmaz). Zaten-cevrili (PG_MARK)
+//   metni aynen dondurur. UVeriMotor.DFMPGCozucuHook bu fonksiyona baglanir (initialization).
+//   Override eklemek: RegKur icinde Ekle('FormClassName-T''siz.ComponentAdi', <PG-native SQL>).
+function DFMPGSqlGetir(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string;
+
 const
   // UIzleme.SQLCikanUpdate PG: MSSQL 'UPDATE Tmp SET .. FROM :TabloAdi Tmp INNER JOIN (subq) x ON c'
   //   -> PG 'UPDATE :TabloAdi tmp SET .. FROM (subq) x WHERE c'. Secili cikis izlemlerini isaretler.
@@ -48,4 +56,56 @@ const
 
 implementation
 
+uses SysUtils, System.Generics.Collections, UVeriMotor;
+
+var
+  FReg: TDictionary<string,string> = nil;   // anahtar(lower) -> PG-native SQL
+
+// Form/frame class adindan anahtar oneki: 'TUSiparisWizard' -> 'USiparisWizard' (bas 'T' atilir).
+function FormAdiNorm(AOwner: TComponent): string;
+begin
+  Result := '';
+  if AOwner = nil then Exit;
+  Result := AOwner.ClassName;
+  if (Length(Result) > 1) and (Result[1] = 'T') then Delete(Result, 1, 1);
+end;
+
+procedure RegKur;
+  procedure Ekle(const AKey, ASql: string);
+  begin
+    FReg.AddOrSetValue(LowerCase(AKey), ASql);
+  end;
+begin
+  FReg := TDictionary<string,string>.Create;
+  // --- DFM component SQL override'lari ---
+  //   YALNIZ otomatik ceviricinin (PgSqlCevir) bozdugu/karmasik DFM sorgulari buraya alinir.
+  //   Cogu DFM SQL PgSqlCevir'den gecer; burasi bos kalmasi NORMAL. Ornek (sirasi gelince):
+  //   Ekle('USiparisWizard.TabSiparisDetay', 'select ... from ... where x=:P1');
+  //   Kural: PG-native yaz (limit/||/AS), :param KORU, deploy oncesi PG'ye karsi test et.
+end;
+
+function DFMPGSqlGetir(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string;
+var anahtar, ovr: string;
+begin
+  Result := ADefaultSql;
+  if AktifVeriMotor <> vmPG then Exit;             // MSSQL: dokunma (davranis-korur)
+  if Copy(ADefaultSql, 1, Length(PG_MARK)) = PG_MARK then Exit;  // zaten cevrilmis (idempotent)
+  if FReg = nil then RegKur;
+  if AQuery <> nil then
+  begin
+    anahtar := LowerCase(FormAdiNorm(AOwner) + '.' + AQuery.Name);
+    if FReg.TryGetValue(anahtar, ovr) and (Trim(ovr) <> '') then
+    begin
+      // Override PG-native sabit -> isaretle ki TabloYenile/scan bir daha PgSqlCevir'e sokmasin.
+      if Copy(ovr, 1, Length(PG_MARK)) = PG_MARK then Result := ovr else Result := PG_MARK + ovr;
+      Exit;
+    end;
+  end;
+  Result := PgSqlCevir(ADefaultSql);               // override yok -> merkezi cevirici (kendi isaretler)
+end;
+
+initialization
+  DFMPGCozucuHook := DFMPGSqlGetir;   // UVeriMotor kancasina bagla (circular-dep'siz)
+finalization
+  FreeAndNil(FReg);
 end.

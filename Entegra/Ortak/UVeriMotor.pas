@@ -15,9 +15,21 @@ uses System.Classes, FireDAC.Comp.Client;
 type
   TVeriMotor = (vmMSSQL, vmPG);
 
+const
+  // PG'ye cevrilmis SQL'in BASINA konan idempotency sentinel'i (SQL yorumu -> calismayi etkilemez).
+  //   PgSqlCevir bu isareti goren metni AYNEN dondurur -> TabloYenile/PgTumSorgulariCevir her
+  //   refresh'te tekrar cevirmez (cift-cevrim = limit/coalesce/alias bozulmasi riski). Override'lar
+  //   da bu isaretle donduruldugu icin sabit PG metni asla yeniden cevrilmez.
+  PG_MARK = '/*PGX*/';
+
 var
   // Varsayilan MSSQL -> mevcut davranis. Opsiyondan/baglanti anindan set edilecek.
   AktifVeriMotor: TVeriMotor = vmMSSQL;
+
+  // UDFMPG cozucu kancasi (circular-dep'ten kacinmak icin function-pointer). UDFMPG.initialization
+  //   atar; PgTumSorgulariCevir/TabloYenile once bunu dener (override), yoksa PgSqlCevir'e duser.
+  //   nil ise (UDFMPG linklenmemis) dogrudan PgSqlCevir kullanilir. vmMSSQL'de hic cagrilmaz.
+  DFMPGCozucuHook: function(AOwner: TComponent; AQuery: TFDQuery; const ADefaultSql: string): string = nil;
 
 // ---- Diyalekt yardimcilari (vmMSSQL -> bugunku T-SQL ile BIREBIR) ----
 function DbSimdi: string;                          // getdate()      | now()
@@ -1025,6 +1037,7 @@ var
 begin
   Result := ASql;
   if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
+  if Copy(ASql, 1, Length(PG_MARK)) = PG_MARK then Exit; // zaten cevrilmis (idempotent): tekrar cevirme
   src := PgTempTabloCevir(ASql);         // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
   src := PgDeclareCevir(src);            // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
   src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
@@ -1078,18 +1091,25 @@ begin
     disari.Free; sonuc.Free;
   end;
   Result := PgTopCevir(Result);   // dis SELECT TOP n -> LIMIT n (anchored; literal-disi)
+  if Copy(Result, 1, Length(PG_MARK)) <> PG_MARK then
+    Result := PG_MARK + Result;   // idempotency isareti (bir daha cevrilmesin)
 end;
 
 procedure PgTumSorgulariCevir(AOwner: TComponent);
-var i: Integer; q: TFDQuery;
+var i: Integer; q: TFDQuery; s: string;
 begin
   if (AktifVeriMotor <> vmPG) or (AOwner = nil) then Exit;
   for i := 0 to AOwner.ComponentCount - 1 do
     if AOwner.Components[i] is TFDQuery then
     begin
       q := TFDQuery(AOwner.Components[i]);
-      if Trim(q.SQL.Text) <> '' then
-        q.SQL.Text := PgSqlCevir(q.SQL.Text);
+      s := q.SQL.Text;
+      if (Trim(s) = '') or (Copy(s, 1, Length(PG_MARK)) = PG_MARK) then Continue;  // bos/zaten-cevrili: atla
+      // Once UDFMPG override (FormAdi.ComponentAdi), yoksa PgSqlCevir. Hook nil ise dogrudan cevir.
+      if Assigned(DFMPGCozucuHook) then
+        q.SQL.Text := DFMPGCozucuHook(AOwner, q, s)
+      else
+        q.SQL.Text := PgSqlCevir(s);
     end;
 end;
 
