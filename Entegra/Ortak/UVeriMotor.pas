@@ -1048,7 +1048,10 @@ begin
   Result := ASql;
   if AktifVeriMotor <> vmPG then Exit;   // MSSQL: aynen (davranis-korur) - SIFIR maliyet
   if Copy(ASql, 1, Length(PG_MARK)) = PG_MARK then Exit; // zaten cevrilmis (idempotent): tekrar cevirme
-  src := PgTempTabloCevir(ASql);         // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
+  // BasitKomut'un basa ekledigi 'SET NOCOUNT ON; ' -> alt-pass guard'lari (PgSelectAliasCevir'in
+  //   ^insert/^select kontrolu) bozulmasin diye BURADA (literal-oncesi) sil. Yalniz BASTAKI (leading).
+  src := TRegEx.Replace(ASql, '^\s*set\s+nocount\s+on\s*;?\s*', '', [roIgnoreCase]);
+  src := PgTempTabloCevir(src);          // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
   src := PgDeclareCevir(src);            // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
   src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
   // MSSQL 'insert ...[;] select scope_identity()' identity-getir idiom -> PG 'insert ... returning ID'
