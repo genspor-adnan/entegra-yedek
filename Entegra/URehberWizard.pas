@@ -30,7 +30,9 @@ uses
   dxDateRanges, dxScrollbarAnnotations, dxCoreGraphics, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  FireDAC.Comp.DataSet;
+  FireDAC.Comp.DataSet, dxSkinBasic, dxSkinOffice2019Black,
+  dxSkinOffice2019Colorful, dxSkinOffice2019DarkGray, dxSkinOffice2019White,
+  dxSkinTheBezier, dxSkinWXI;
 
 type
   TRehberWizardDlg = class(TForm)
@@ -798,7 +800,14 @@ begin
 end;
 
 procedure TRehberWizardDlg.FormCreate(Sender: TObject);
+var i: Integer;
 begin
+  // Bu wizard'in DFM TFDQuery'lerinde Connection TANIMSIZ (UFaturaWizard'da var, burada eksik --
+  //   muhtemelen ADO->FireDAC DFM donusumunde dustu). Baglantisiz query -> "-512 Connection not defined".
+  //   Tumune paylasilan Tablo.FDCnn ata (MSSQL/PG farketmez; aktif baglanti).
+  for i := 0 to ComponentCount - 1 do
+    if (Components[i] is TFDQuery) and (TFDQuery(Components[i]).Connection = nil) then
+      TFDQuery(Components[i]).Connection := Tablo.FDCnn;
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
   Tablo.GridTurkcelestir;
@@ -1902,7 +1911,7 @@ begin
   if OncekiTemsilciId <> TabRehber.FieldByName('TEMSILCI').AsInteger  then begin
      if TabRehber.FieldByName('TEMSILCI').AsInteger > 0  then
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' insert into REHBERTEMSILCI (REHBERID, TEMSILCIID, BASLAMA, BITIS, ACIKLAMA, EKLEYEN) '+
-          ' Values ('+TabRehber.FieldByName('ID').AsString+','+TabRehber.FieldByName('TEMSILCI').AsString+','''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+''',''2099-01-01'','''','+Kullanan+') ',[],[]);
+            ' Values ('+TabRehber.FieldByName('ID').AsString+','+TabRehber.FieldByName('TEMSILCI').AsString+','''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+''',''2099-01-01'','''','+Kullanan+') ',[],[]);
 
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update REHBERTEMSILCI set BITIS   = '''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh)+
         ''', ACIKLAMA = '''', DEGISTIREN = '+Kullanan+', DEGISTIRMETARIHI=getdate() where REHBERID= '+ TabRehber.FieldByName('ID').AsString+'  and TEMSILCIID='+IntToStr(OncekiTemsilciId)+ ' and BITIS = ''2099-01-01''',[],[]);
