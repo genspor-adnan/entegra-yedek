@@ -2352,12 +2352,21 @@ begin
         ASatirlar[I].KDVOrani) + '</td><td class="num">' +
         FormatFloat('#,##0.00', ASatirlar[I].Tutar) + '</td></tr>');
     LHTML.AppendLine('</tbody></table>');
-    LHTML.AppendLine('<div class="box" style="text-align:right"><b>Matrah:</b> ' +
+    // Dip-toplam: iskonto varsa Mal Hizmet Toplam (BRUT) + Toplam Iskonto goster, sonra
+    //   Net Tutar (Matrah) = iskonto sonrasi vergi matrahi (ABaslik.Matrah net). brut = Matrah + iskonto.
+    var LDipIsk: Currency := SatirlarIskontoToplami(ASatirlar);
+    var LDip: string := '<div class="box" style="text-align:right">';
+    if LDipIsk > 0.0001 then
+      LDip := LDip + '<b>Mal Hizmet Toplam Tutari:</b> ' +
+        FormatFloat('#,##0.00', ABaslik.Matrah + LDipIsk) + ' ' + ABaslik.ParaBirimi +
+        '<br><b>Toplam Iskonto:</b> ' + FormatFloat('#,##0.00', LDipIsk) + ' ' +
+        ABaslik.ParaBirimi + '<br>';
+    LDip := LDip + '<b>Net Tutar (Matrah):</b> ' +
       FormatFloat('#,##0.00', ABaslik.Matrah) + ' ' + ABaslik.ParaBirimi +
       '<br><b>KDV:</b> ' + FormatFloat('#,##0.00', ABaslik.KDV) + ' ' +
-      ABaslik.ParaBirimi + '<br><b>Toplam:</b> ' +
-      FormatFloat('#,##0.00', ABaslik.Toplam) + ' ' +
-      ABaslik.ParaBirimi + '</div>');
+      ABaslik.ParaBirimi + '<br><b>Genel Toplam:</b> ' +
+      FormatFloat('#,##0.00', ABaslik.Toplam) + ' ' + ABaslik.ParaBirimi + '</div>';
+    LHTML.AppendLine(LDip);
     if Trim(ABaslik.Aciklama) <> '' then
       LHTML.AppendLine('<div class="box"><b>Aciklama:</b><br>' +
         HTMLEscape(ABaslik.Aciklama) + '</div>');
