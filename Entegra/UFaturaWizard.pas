@@ -4486,6 +4486,17 @@ begin
     //else
     //  TabFatbaslik.FieldByName('EFATURADURUM').AsInteger := 1;
   end;
+  // YENI kayitta senaryo opsiyondaki default'tan gelsin (ComboSENARYO SENARYO alanina bagli).
+  //   ihracat tipleri (101/102/124) -> senaryo 3 (ihracat); digerleri -> Ops_FaturaOpsiyon_Senaryo.
+  //   (Hazirla/gonder'de EFaturaIslem gerekirse yeniden ayarlar; burada sadece ilk gorunum.)
+  if ((Tur = 15) or ((Tur = 14) and EIrsaliyeKullanimda)) and
+     (TabFatbaslik.FieldByName('SENARYO').AsInteger < 1) then
+  begin
+    if TabFatbaslik.FieldByName('TIPI').AsInteger in [101, 102, 124] then
+      TabFatbaslik.FieldByName('SENARYO').AsInteger := 3
+    else
+      TabFatbaslik.FieldByName('SENARYO').AsInteger := Tablo.GENINI.ReadInteger(Ops_FaturaOpsiyon_Senaryo, 1);
+  end;
 end;
 
 function TFaturaWizardDlg.IadeKontrolEt:Boolean;
