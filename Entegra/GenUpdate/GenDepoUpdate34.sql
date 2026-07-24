@@ -52,59 +52,8 @@ inner join sys.types T on T.user_type_id = C.user_type_id;
 exec sp_executesql @sql;
 go
 
-declare @DropAlanlar table(Alan sysname not null primary key);
-insert into @DropAlanlar(Alan) values
-('SUTKODU'),('BRANSKODU'),('UTSREF'),('FTN'),('GMDN'),('GMDNADI'),
-('DIGERURUNADI'),('MEDIKALSINIF'),('ITHALIMAL'),('MENSEIULKE'),
-('IHALESIRANO'),('DMOKODU'),('SMKODU');
-
-declare @sql nvarchar(max) = N'';
-
-select @sql = @sql + N'
-alter table dbo.STOKLAR drop constraint ' + quotename(DC.name) + N';'
-from sys.default_constraints DC
-inner join sys.columns C on C.object_id = DC.parent_object_id and C.column_id = DC.parent_column_id
-inner join @DropAlanlar A on A.Alan = C.name
-where DC.parent_object_id = object_id('dbo.STOKLAR');
-
-select @sql = @sql + N'
-alter table dbo.STOKLAR drop constraint ' + quotename(CC.name) + N';'
-from sys.check_constraints CC
-inner join @DropAlanlar A on charindex('[' + A.Alan + ']', CC.definition) > 0 or charindex(A.Alan, CC.definition) > 0
-where CC.parent_object_id = object_id('dbo.STOKLAR');
-
-select @sql = @sql + N'
-drop statistics dbo.STOKLAR.' + quotename(S.name) + N';'
-from sys.stats S
-inner join sys.stats_columns SC on SC.object_id = S.object_id and SC.stats_id = S.stats_id
-inner join sys.columns C on C.object_id = SC.object_id and C.column_id = SC.column_id
-inner join @DropAlanlar A on A.Alan = C.name
-where S.object_id = object_id('dbo.STOKLAR')
-  and S.user_created = 1
-  and not exists(select 1 from sys.indexes I where I.object_id = S.object_id and I.name = S.name);
-
-select @sql = @sql + N'
-drop index ' + quotename(I.name) + N' on dbo.STOKLAR;'
-from sys.indexes I
-where I.object_id = object_id('dbo.STOKLAR')
-  and I.is_primary_key = 0
-  and I.is_unique_constraint = 0
-  and exists(
-    select 1
-    from sys.index_columns IC
-    inner join sys.columns C on C.object_id = IC.object_id and C.column_id = IC.column_id
-    inner join @DropAlanlar A on A.Alan = C.name
-    where IC.object_id = I.object_id and IC.index_id = I.index_id
-  );
-
-select @sql = @sql + N'
-alter table dbo.STOKLAR drop column ' + quotename(A.Alan) + N';'
-from @DropAlanlar A
-where col_length('dbo.STOKLAR', A.Alan) is not null;
-
-exec sp_executesql @sql;
-go
-
+-- ONCE veriyi STOKLAR -> STOKLAR_USER aktar (STOKLAR'dan DROP'tan ONCE olmali; aksi halde
+-- kaynak kolonlar silinmis olur -> @Kolonlar/@Secim bos -> insert HIC calismaz, eski veri kaybolur).
 declare @Kolonlar nvarchar(max);
 declare @Secim nvarchar(max);
 declare @BosDegilKosul nvarchar(max);
@@ -156,4 +105,58 @@ where not exists(select 1 from dbo.STOKLAR_USER SU where SU.ID = S.ID)
 
   exec sp_executesql @sql;
 end
+go
+
+-- Veri aktarildiktan SONRA STOKLAR'daki ek kolonlari (constraint/stats/index dahil) DROP et.
+declare @DropAlanlar table(Alan sysname not null primary key);
+insert into @DropAlanlar(Alan) values
+('SUTKODU'),('BRANSKODU'),('UTSREF'),('FTN'),('GMDN'),('GMDNADI'),
+('DIGERURUNADI'),('MEDIKALSINIF'),('ITHALIMAL'),('MENSEIULKE'),
+('IHALESIRANO'),('DMOKODU'),('SMKODU');
+
+declare @sql nvarchar(max) = N'';
+
+select @sql = @sql + N'
+alter table dbo.STOKLAR drop constraint ' + quotename(DC.name) + N';'
+from sys.default_constraints DC
+inner join sys.columns C on C.object_id = DC.parent_object_id and C.column_id = DC.parent_column_id
+inner join @DropAlanlar A on A.Alan = C.name
+where DC.parent_object_id = object_id('dbo.STOKLAR');
+
+select @sql = @sql + N'
+alter table dbo.STOKLAR drop constraint ' + quotename(CC.name) + N';'
+from sys.check_constraints CC
+inner join @DropAlanlar A on charindex('[' + A.Alan + ']', CC.definition) > 0 or charindex(A.Alan, CC.definition) > 0
+where CC.parent_object_id = object_id('dbo.STOKLAR');
+
+select @sql = @sql + N'
+drop statistics dbo.STOKLAR.' + quotename(S.name) + N';'
+from sys.stats S
+inner join sys.stats_columns SC on SC.object_id = S.object_id and SC.stats_id = S.stats_id
+inner join sys.columns C on C.object_id = SC.object_id and C.column_id = SC.column_id
+inner join @DropAlanlar A on A.Alan = C.name
+where S.object_id = object_id('dbo.STOKLAR')
+  and S.user_created = 1
+  and not exists(select 1 from sys.indexes I where I.object_id = S.object_id and I.name = S.name);
+
+select @sql = @sql + N'
+drop index ' + quotename(I.name) + N' on dbo.STOKLAR;'
+from sys.indexes I
+where I.object_id = object_id('dbo.STOKLAR')
+  and I.is_primary_key = 0
+  and I.is_unique_constraint = 0
+  and exists(
+    select 1
+    from sys.index_columns IC
+    inner join sys.columns C on C.object_id = IC.object_id and C.column_id = IC.column_id
+    inner join @DropAlanlar A on A.Alan = C.name
+    where IC.object_id = I.object_id and IC.index_id = I.index_id
+  );
+
+select @sql = @sql + N'
+alter table dbo.STOKLAR drop column ' + quotename(A.Alan) + N';'
+from @DropAlanlar A
+where col_length('dbo.STOKLAR', A.Alan) is not null;
+
+exec sp_executesql @sql;
 go
