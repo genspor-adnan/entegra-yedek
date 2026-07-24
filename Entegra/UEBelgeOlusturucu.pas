@@ -1984,8 +1984,10 @@ begin
         LXML.AppendLine('</cac:WithholdingTaxTotal>');
       end;
       LXML.AppendLine('<cac:LegalMonetaryTotal>');
+      // Mal Hizmet Toplam Tutari = BRUT (iskonto oncesi = Matrah + toplam iskonto). GIB/izibiz boyle
+      //   bekler; TaxExclusive = NET (Matrah). brut - AllowanceTotal = TaxExclusive.
       LXML.AppendLine('<cbc:LineExtensionAmount currencyID="' +
-        ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Matrah, '0.00##') +
+        ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Matrah + LToplamIskonto, '0.00##') +
         '</cbc:LineExtensionAmount>');
       LXML.AppendLine('<cbc:TaxExclusiveAmount currencyID="' +
         ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Matrah, '0.00##') +
@@ -4757,14 +4759,15 @@ begin
         LContent.AddPair('withHoldingTax', LWithholdingTax);
       end;
 
+      // GIB/izibiz: legalMonetaryTotal.lineExtensionAmount = "Mal Hizmet Toplam Tutari" = BRUT
+      //   (iskonto ONCESI = net + toplam iskonto). taxExclusiveAmount = NET (iskonto sonrasi vergi matrahi).
+      //   brut - allowanceTotal = taxExclusive. (LToplamMatrah net; satir LineExtensionAmount net kalir.)
+      var LTopIsk: Currency := SatirlarIskontoToplami(ASatirlar);
       LMonetary := TJSONObject.Create;
-      LMonetary.AddPair('lineExtensionAmount', TJSONNumber.Create(LToplamMatrah));
-      LMonetary.AddPair('taxExclusiveAmount', TJSONNumber.Create(LToplamMatrah));
+      LMonetary.AddPair('lineExtensionAmount', TJSONNumber.Create(LToplamMatrah + LTopIsk));  // BRUT
+      LMonetary.AddPair('taxExclusiveAmount', TJSONNumber.Create(LToplamMatrah));               // NET
       LMonetary.AddPair('taxInclusiveAmount', TJSONNumber.Create(LToplamMatrah + LToplamKDV));
       LMonetary.AddPair('payableAmount', TJSONNumber.Create(ABaslik.Toplam));
-      // Toplam satir iskontosu -> izibiz legalMonetaryTotal.allowanceTotalAmount (UBL AllowanceTotalAmount
-      //   aynasi). Eksikse izibiz belge duzeyinde iskontoyu gostermez.
-      var LTopIsk: Currency := SatirlarIskontoToplami(ASatirlar);
       if LTopIsk > 0.0001 then
         LMonetary.AddPair('allowanceTotalAmount', TJSONNumber.Create(LTopIsk));
       LContent.AddPair('legalMonetaryTotal', LMonetary);
@@ -4844,8 +4847,8 @@ begin
       LLine.AddPair('itemPrice', TJSONNumber.Create(LSatir.BirimFiyat));
       // Satir iskontosu -> izibiz JSON 'allowanceCharge' dizisi (UBL cac:AllowanceCharge aynasi).
       //   Eksikse izibiz iskonto=0 gosterir + mal/hizmet'i iskonto-sonrasi (net) sanar. lineExtension
-      //   NET kalir; baseAmount=brut, amount=iskonto. multiplierFactorNumeric = PERCENT (izibiz ornegi:
-      //   base*mfn/100=amount; UBL'de /100'lu kesir, JSON'da tam yuzde). YALNIZ fatura (irsaliye'de yok).
+      //   NET kalir; baseAmount=brut, amount=iskonto. multiplierFactorNumeric = KESIR (oran/100; izibiz
+      //   dogru cikti 0.15 -> base*mfn=amount). YALNIZ fatura (irsaliye'de yok).
       if (not LIsIrsaliye) then begin
         var LSIskonto: Currency := SatirIskontoTutar(LSatir);
         if LSIskonto > 0.0001 then begin
@@ -4853,7 +4856,7 @@ begin
           var LAllow: TJSONObject := TJSONObject.Create;
           LAllow.AddPair('chargeIndicator', TJSONBool.Create(False));
           LAllow.AddPair('reason', 'Iskonto');
-          LAllow.AddPair('multiplierFactorNumeric', TJSONNumber.Create(SatirIskontoOrani(LSatir)));
+          LAllow.AddPair('multiplierFactorNumeric', TJSONNumber.Create(SatirIskontoOrani(LSatir) / 100.0));
           LAllow.AddPair('amount', TJSONNumber.Create(LSIskonto));
           var LSBrut: Currency := SatirBrutTutar(LSatir);
           if LSBrut > 0.0001 then
