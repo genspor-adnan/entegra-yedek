@@ -183,7 +183,6 @@ object HesapKoduPicker: THesapKoduPicker
   object TabPlan: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select ROOTKOD=REVERSE( SUBSTRING(REVERSE(HESAPKODU),CHARINDEX('#39 +
@@ -198,4 +197,3 @@ object HesapKoduPicker: THesapKoduPicker
     Top = 66
   end
 end
-

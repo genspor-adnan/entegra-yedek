@@ -1,0 +1,263 @@
+-- ============================================================================
+-- fn_proje_ekstre (PG portu, TVF-per-engine)
+-- MSSQL: dbo.fn_Proje_Ekstre(@ProjeID,@BasTar,@BitTar,@Tip,@MasrafID=0,@Ozelkod='')
+-- 5 kaynak union (@Tip'e gore dallanir):
+--   KASA(2,3) + FATBASLIK basliklar(1,3) + FATBASLIK ek vergiler(0,2)
+--   + FATURA detaylari(1,3) + CEK/CEKHAREKET(2,3)
+-- Running balance CURSOR -> window: BORC/ALACAK/YERELBAKIYE PARTITION BY KUR ORDER BY SIRANO
+--   (TUR 60-79 disla; bu kumede fiilen tetiklenmez ama birebir korundu).
+-- Devir: TARIH<BasTar altkumesi (union zaten year>=year(BasTar) filtreli -> sadece
+--   ayni yil onceki-donem) KUR,SUBEID bazinda toplanir; window TUM satirlar (pre+post)
+--   uzerinde kosar, sonra pre-BasTar satirlar Devir ile degistirilir.
+-- @YERELKUR = GENINI BOLUM=-10135 (yk CTE, CROSS JOIN). isnull->coalesce, +concat->||,
+--   TUR::varchar LIKE, guardsiz bolme->nullif. NOT: differential dogrula.
+-- ============================================================================
+DROP FUNCTION IF EXISTS fn_proje_ekstre(integer, timestamp, timestamp, integer, integer, varchar);
+CREATE OR REPLACE FUNCTION fn_proje_ekstre(
+  p_projeid integer,
+  p_bastar  timestamp,
+  p_bittar  timestamp,
+  p_tip     integer,
+  p_masrafid integer DEFAULT 0,
+  p_ozelkod  varchar DEFAULT '')
+RETURNS TABLE(
+  "SIRANO" integer, "CEKID" integer, "TARIH" timestamp, "AKSIYONTARIH" timestamp, "NO" varchar(20),
+  "TUR" smallint, "BASLIK" varchar(150), "TURAD" varchar(50), "REHBERID" integer, "KOD" varchar(20),
+  "AD" varchar(100), "ACIKLAMA" varchar(500), "HESAPID" integer, "HESAPKODU" varchar(100), "HESAPADI" varchar(150),
+  "DURUM" smallint, "BORC" numeric, "ALACAK" numeric, "KUR" varchar(6), "YERELKUR" numeric,
+  "MASRAFID" integer, "MASRAFKOD" varchar(50), "MASRAFAD" varchar(100), "BORCBAKIYE" numeric, "ALACAKBAKIYE" numeric,
+  "YERELTUTAR" numeric, "YERELBAKIYE" numeric, "SUBEID" integer, "VADETARIHI" timestamp, "ADET" double precision,
+  "BIRIM" varchar(20), "BIRIMFIYAT" numeric)
+LANGUAGE sql AS $$
+WITH yk AS (SELECT ANAHTAR AS d FROM GENINI WHERE BOLUM=-10135 LIMIT 1),
+har AS (
+  -- 1) KASA (@Tip in 2,3)
+  SELECT
+    K.ID::int AS CEKID, K.ISLEMTARIHI::timestamp AS TARIH, K.PLANTARIHI::timestamp AS AKSIYONTARIH,
+    K.BELGENO::varchar(20) AS no, K.TUR::smallint AS TUR, ''::varchar(150) AS BASLIK,
+    (CASE WHEN K.TUR::varchar LIKE '26__' THEN (SELECT G.ANAHTAR||' tahsilatı ' FROM GENINI G WHERE G.BOLUM=-2329 AND 2600+G.DEGER=K.TUR LIMIT 1)
+          WHEN K.TUR::varchar LIKE '36__' THEN (SELECT G.ANAHTAR||' ödemesi '   FROM GENINI G WHERE G.BOLUM=-2329 AND 3600+G.DEGER=K.TUR LIMIT 1)
+          ELSE (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-1005 AND G.DEGER=K.TUR LIMIT 1) END)::varchar(50) AS TURAD,
+    K.REHBERID::int AS REHBERID,
+    (CASE WHEN K.REHBERID=0 THEN M.KOD ELSE R.KOD END)::varchar(20) AS KOD,
+    (CASE WHEN K.REHBERID=0 THEN M.AD ELSE R.FIRMA END)::varchar(100) AS AD,
+    K.ACIKLAMA::varchar(500) AS ACIKLAMA, K.HESAPID::int AS HESAPID,
+    (CASE K.HESAPTURU
+       WHEN 'B' THEN (SELECT BH.HESAPKODU FROM BANKAHESAPLAR BH WHERE BH.ID=K.HESAPID)
+       WHEN 'H' THEN (SELECT K2.KASAKODU FROM KASALAR K2 WHERE K2.ID=K.HESAPID) || coalesce(' ('||(SELECT PK.ADI FROM PARA_KUPON PK WHERE PK.ID=K.CEKSENETID)||')','')
+       WHEN 'K' THEN (SELECT K2.KASAKODU FROM KASALAR K2 WHERE K2.ID=K.HESAPID)
+       WHEN 'P' THEN (SELECT P.KODU FROM POS P WHERE P.ID=K.HESAPID)
+       WHEN 'V' THEN (SELECT KK.KODU FROM KREDIKARTI KK WHERE KK.ID=K.HESAPID) END)::varchar(100) AS HESAPKODU,
+    (CASE K.HESAPTURU
+       WHEN 'B' THEN (SELECT BH.HESAPADI FROM BANKAHESAPLAR BH WHERE BH.ID=K.HESAPID)
+       WHEN 'H' THEN (SELECT K2.KASAADI FROM KASALAR K2 WHERE K2.ID=K.HESAPID) || coalesce(' ('||(SELECT PK.ADI FROM PARA_KUPON PK WHERE PK.ID=K.CEKSENETID)||')','')
+       WHEN 'K' THEN (SELECT K2.KASAADI FROM KASALAR K2 WHERE K2.ID=K.HESAPID)
+       WHEN 'P' THEN (SELECT P.ADI FROM POS P WHERE P.ID=K.HESAPID)
+       WHEN 'V' THEN (SELECT KK.ADI FROM KREDIKARTI KK WHERE KK.ID=K.HESAPID) END)::varchar(150) AS HESAPADI,
+    K.DURUM::smallint AS DURUM,
+    (CASE WHEN K.EKSTREDEKULLAN=1 AND K.BORC>0   THEN K.DOVIZ_TUTARI ELSE K.BORC   END)::numeric AS BORC,
+    (CASE WHEN K.EKSTREDEKULLAN=1 AND K.ALACAK>0 THEN K.DOVIZ_TUTARI ELSE K.ALACAK END)::numeric AS ALACAK,
+    (CASE WHEN K.EKSTREDEKULLAN=1 THEN K.DOVIZ_KURU ELSE K.KUR END)::varchar(6) AS KUR,
+    ABS((CASE WHEN K.DOVIZ_KURU=YK.d AND K.BORC>0   THEN K.DOVIZ_TUTARI
+              WHEN K.DOVIZ_KURU=YK.d AND K.ALACAK>0 THEN -1*K.DOVIZ_TUTARI
+              ELSE K.BORC-K.ALACAK END)
+        / (CASE WHEN ((CASE WHEN K.EKSTREDEKULLAN=1 AND K.BORC>0 THEN K.DOVIZ_TUTARI ELSE K.BORC END)
+                     -(CASE WHEN K.EKSTREDEKULLAN=1 AND K.ALACAK>0 THEN K.DOVIZ_TUTARI ELSE K.ALACAK END))=0 THEN 1
+                ELSE ((CASE WHEN K.EKSTREDEKULLAN=1 AND K.BORC>0 THEN K.DOVIZ_TUTARI ELSE K.BORC END)
+                     -(CASE WHEN K.EKSTREDEKULLAN=1 AND K.ALACAK>0 THEN K.DOVIZ_TUTARI ELSE K.ALACAK END)) END))::numeric AS YERELKUR,
+    K.MASRAFID::int AS MASRAFID, M.KOD::varchar(50) AS MASRAFKOD, M.AD::varchar(100) AS MASRAFAD,
+    (CASE WHEN K.DOVIZ_KURU=YK.d AND K.BORC>0   THEN K.DOVIZ_TUTARI
+          WHEN K.DOVIZ_KURU=YK.d AND K.ALACAK>0 THEN -1*K.DOVIZ_TUTARI
+          ELSE K.BORC-K.ALACAK END)::numeric AS YERELTUTAR,
+    K.SUBEID::int AS SUBEID, K.ISLEMTARIHI::timestamp AS VADETARIHI,
+    1.0::double precision AS ADET, ''::varchar(20) AS BIRIM, 0.0::numeric AS BIRIMFIYAT
+  FROM KASA K
+    LEFT JOIN REHBER R ON K.REHBERID=R.ID
+    LEFT JOIN MASRAFGELIR M ON M.ID=K.MASRAFID
+    CROSS JOIN yk YK
+  WHERE p_tip IN (2,3) AND K.PROJEID=p_projeid
+    AND extract(year from K.ISLEMTARIHI)>=extract(year from p_bastar)
+    AND extract(year from K.ISLEMTARIHI)<=extract(year from p_bittar) AND K.ISLEMTARIHI<=p_bittar
+    AND ((K.TUR IN (49)) OR (K.TUR NOT BETWEEN 40 AND 79))
+    AND (p_masrafid=0 OR p_masrafid=K.MASRAFID)
+    AND (p_ozelkod='' OR p_ozelkod=K.OZELKOD OR (p_ozelkod IS NULL AND coalesce(K.OZELKOD,'')<>''))
+
+  UNION ALL
+  -- 2) FATBASLIK basliklar (@Tip in 1,3)  TUR 11,12,13,15,16,17
+  SELECT
+    F.ID::int, F.FATURATARIH::timestamp, F.FATURATARIH::timestamp, F.FATURANO::varchar(20), F.TUR::smallint, F.BASLIK::varchar(150),
+    (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-1005 AND G.DEGER=F.TUR LIMIT 1)::varchar(50),
+    F.REHBERID::int, R.KOD::varchar(20), R.FIRMA::varchar(100), F.ACIKLAMA::varchar(500),
+    NULL::int, NULL::varchar(100), NULL::varchar(150), F.DURUM::smallint,
+    (CASE WHEN F.TUR IN (13) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END)::numeric,
+    (CASE WHEN F.TUR IN (17) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END)::numeric,
+    (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_CINSI ELSE F.KUR END)::varchar(6),
+    ABS((CASE WHEN F.RAPORDOVIZ=YK.d  AND F.TUR IN (13) THEN F.DOVIZ_TUTARI
+              WHEN F.RAPORDOVIZ=YK.d  AND F.TUR IN (17) THEN -1*F.DOVIZ_TUTARI
+              WHEN F.RAPORDOVIZ<>YK.d AND F.TUR IN (13) THEN F.FATURA_TUTARI
+              WHEN F.RAPORDOVIZ<>YK.d AND F.TUR IN (17) THEN -1*F.FATURA_TUTARI END)
+        / (CASE WHEN ((CASE WHEN F.TUR IN (13) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END)
+                     -(CASE WHEN F.TUR IN (17) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END))=0 THEN 1
+                ELSE ((CASE WHEN F.TUR IN (13) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END)
+                     -(CASE WHEN F.TUR IN (17) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN F.DOVIZ_TUTARI ELSE F.FATURA_TUTARI END) END)) END))::numeric,
+    F.MASRAFID::int, M.KOD::varchar(50), M.AD::varchar(100),
+    (CASE WHEN F.RAPORDOVIZ=YK.d   AND F.TUR IN (13) THEN F.DOVIZ_TUTARI
+          WHEN F.DOVIZ_CINSI=YK.d  AND F.TUR IN (17) THEN -1*F.DOVIZ_TUTARI
+          WHEN F.RAPORDOVIZ<>YK.d  AND F.TUR IN (13) THEN F.FATURA_TUTARI
+          WHEN F.DOVIZ_CINSI<>YK.d AND F.TUR IN (17) THEN -1*F.FATURA_TUTARI END)::numeric,
+    F.SUBEID::int, (F.FATURATARIH + (coalesce(F.VADE,0)*interval '1 day'))::timestamp,
+    1.0::double precision, ''::varchar(20), 0.0::numeric
+  FROM FATBASLIK F
+    LEFT JOIN REHBER R ON F.REHBERID=R.ID AND F.TUR IN (13,17) AND coalesce(F.DURUM,0)<>6
+    LEFT JOIN MASRAFGELIR M ON M.ID=F.MASRAFID
+    CROSS JOIN yk YK
+  WHERE p_tip IN (1,3) AND F.PROJEID=p_projeid
+    AND extract(year from F.FATURATARIH)>=extract(year from p_bastar)
+    AND extract(year from F.FATURATARIH)<=extract(year from p_bittar) AND F.FATURATARIH<=p_bittar
+    AND F.TUR IN (11,12,13,15,16,17)
+    AND (p_masrafid=0 OR p_masrafid=F.MASRAFID)
+    AND (p_ozelkod='' OR p_ozelkod=F.OZELKOD OR (p_ozelkod IS NULL AND coalesce(F.OZELKOD,'')<>''))
+
+  UNION ALL
+  -- 3) FATBASLIK ek vergiler (@Tip in 0,2)
+  SELECT
+    F.ID::int, F.FATURATARIH::timestamp, F.FATURATARIH::timestamp, F.FATURANO::varchar(20), F.TUR::smallint, F.BASLIK::varchar(150),
+    (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-1005 AND G.DEGER=F.TUR LIMIT 1)::varchar(50),
+    F.REHBERID::int, R.KOD::varchar(20), R.FIRMA::varchar(100), F.ACIKLAMA::varchar(500),
+    NULL::int, NULL::varchar(100), NULL::varchar(150), F.DURUM::smallint,
+    (CASE WHEN F.KUR=F.DOVIZ_CINSI THEN (CASE WHEN F.TUR IN (8,11,12,13) THEN 0.0 ELSE F.EKVERGI END)
+          ELSE ((CASE WHEN F.TUR IN (8,11,12,13) THEN 0.0 ELSE F.EKVERGI END)/nullif(F.DOVIZKUR,0)) END)::numeric,
+    (CASE WHEN F.KUR=F.DOVIZ_CINSI THEN (CASE WHEN F.TUR IN (15,16,17) THEN 0.0 ELSE F.EKVERGI END)
+          ELSE ((CASE WHEN F.TUR IN (15,16,17) THEN 0.0 ELSE F.EKVERGI END)/nullif(F.DOVIZKUR,0)) END)::numeric,
+    F.DOVIZ_CINSI::varchar(6),
+    0::numeric,
+    F.MASRAFID::int, M.KOD::varchar(50), M.AD::varchar(100),
+    (CASE WHEN F.TUR IN (8,11,12,13) THEN F.EKVERGI WHEN F.TUR IN (15,16,17) THEN -1*F.EKVERGI END)::numeric,
+    F.SUBEID::int, (F.FATURATARIH + (coalesce(F.VADE,0)*interval '1 day'))::timestamp,
+    1.0::double precision, ''::varchar(20), 0.0::numeric
+  FROM FATBASLIK F
+    INNER JOIN REHBER R ON F.REHBERID=R.ID AND F.TUR IN (8,11,12,13,15,16,17) AND coalesce(F.DURUM,0)<>6
+    LEFT JOIN MASRAFGELIR M ON M.ID=F.MASRAFID
+    CROSS JOIN yk YK
+  WHERE p_tip IN (0,2) AND F.PROJEID=p_projeid
+    AND coalesce(F.EKVERGI,0.0)<>0.0
+    AND extract(year from F.FATURATARIH)>=extract(year from p_bastar)
+    AND extract(year from F.FATURATARIH)<=extract(year from p_bittar) AND F.FATURATARIH<=p_bittar
+    AND (p_masrafid=0 OR p_masrafid=F.MASRAFID)
+    AND (p_ozelkod=''
+      OR (p_ozelkod=F.OZELKOD AND EXISTS(SELECT 1 FROM BORCKAPATMA B WHERE B.ALACAKTUR=F.TUR AND B.ALACAKID=F.ID))
+      OR (p_ozelkod IS NULL AND coalesce(F.OZELKOD,'')<>'' AND EXISTS(SELECT 1 FROM BORCKAPATMA B WHERE B.ALACAKTUR=F.TUR AND B.ALACAKID=F.ID)))
+
+  UNION ALL
+  -- 4) FATURA detaylari (@Tip in 1,3)
+  SELECT
+    F.ID::int, F.FATURATARIH::timestamp, F.FATURATARIH::timestamp, F.FATURANO::varchar(20), F.TUR::smallint, F.BASLIK::varchar(150),
+    (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-1005 AND G.DEGER=F.TUR LIMIT 1)::varchar(50),
+    F.REHBERID::int, R.KOD::varchar(20), R.FIRMA::varchar(100), FA.ACIKLAMA::varchar(500),
+    FA.URUNID::int,
+    (CASE WHEN FA.TUR IN (1,11) THEN (SELECT S.KOD FROM STOKLAR S WHERE S.ID=FA.URUNID) ELSE (SELECT MG.KOD FROM MASRAFGELIR MG WHERE MG.ID=FA.URUNID) END)::varchar(100),
+    (CASE WHEN FA.TUR IN (1,11) THEN (SELECT S.STOKADI FROM STOKLAR S WHERE S.ID=FA.URUNID) ELSE (SELECT MG.AD FROM MASRAFGELIR MG WHERE MG.ID=FA.URUNID) END)::varchar(150),
+    F.DURUM::smallint,
+    (CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (6,8,11,12) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END)
+          ELSE (CASE WHEN F.TUR IN (6,8,11,12) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END)::numeric,
+    (CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END)
+          ELSE (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END)::numeric,
+    F.DOVIZ_CINSI::varchar(6),
+    ABS((CASE WHEN F.RAPORDOVIZ=YK.d  AND F.TUR IN (8,11,12) THEN F.DOVIZ_TUTARI
+              WHEN F.RAPORDOVIZ=YK.d  AND F.TUR IN (8,11,12) THEN -1*F.DOVIZ_TUTARI
+              WHEN F.RAPORDOVIZ<>YK.d AND F.TUR IN (8,11,12) THEN F.FATURA_TUTARI
+              WHEN F.RAPORDOVIZ<>YK.d AND F.TUR IN (8,11,12) THEN -1*F.FATURA_TUTARI END)
+        / (CASE WHEN ((CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (8,11,12) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END) ELSE (CASE WHEN F.TUR IN (8,11,12) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END)
+                     -(CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END) ELSE (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END))=0 THEN 1
+                ELSE ((CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (8,11,12) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END) ELSE (CASE WHEN F.TUR IN (8,11,12) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END)
+                     -(CASE WHEN F.EKSTREDEKULLAN=1 THEN (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END) ELSE (CASE WHEN F.TUR IN (15,16) THEN 0.0 ELSE (FA.TUTAR*(FA.KDV+100)/100) END) END)) END))::numeric,
+    F.MASRAFID::int, M.KOD::varchar(50), M.AD::varchar(100),
+    (CASE WHEN FA.KUR='TL'       AND F.TUR IN (8,11,12)     THEN (FA.TUTAR*(FA.KDV+100)/100)
+          WHEN FA.DOVIZ_KURU='TL' AND F.TUR IN (8,11,12)     THEN (FA.DOVIZ_TUTARI*(FA.KDV+100)/100)
+          WHEN FA.KUR='TL'       AND F.TUR NOT IN (8,11,12) THEN -1.0*(FA.TUTAR*(FA.KDV+100)/100)
+          WHEN FA.DOVIZ_KURU='TL' AND F.TUR NOT IN (8,11,12) THEN -1.0*(FA.DOVIZ_TUTARI*(FA.KDV+100)/100) END)::numeric,
+    F.SUBEID::int, (F.FATURATARIH + (coalesce(F.VADE,0)*interval '1 day'))::timestamp,
+    FA.ADET::double precision,
+    (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-2702 AND G.DIL=-1 AND G.DEGER=FA.BIRIM LIMIT 1)::varchar(20),
+    (CASE WHEN F.KUR=F.DOVIZ_CINSI THEN ((FA.TUTAR*(FA.KDV+100)/100)/nullif(FA.ADET,0))
+          ELSE (((FA.TUTAR*(FA.KDV+100)/100)/nullif(FA.ADET,0))/nullif(F.DOVIZKUR,0)) END)::numeric
+  FROM FATBASLIK F INNER JOIN FATURA FA ON F.ID=FA.FATBASID
+    LEFT JOIN REHBER R ON F.REHBERID=R.ID AND coalesce(F.DURUM,0)<>6
+    LEFT JOIN MASRAFGELIR M ON M.ID=FA.MASRAFID
+    CROSS JOIN yk YK
+  WHERE p_tip IN (1,3) AND FA.PROJEID=p_projeid AND FA.MIKTAR>0.0
+    AND extract(year from F.FATURATARIH)>=extract(year from p_bastar)
+    AND extract(year from F.FATURATARIH)<=extract(year from p_bittar) AND F.FATURATARIH<=p_bittar
+    AND F.TUR IN (6,8,11,12,15,16)
+    AND (p_masrafid=0 OR p_masrafid=FA.MASRAFID)
+    AND (p_ozelkod=''
+      OR (p_ozelkod=F.OZELKOD AND EXISTS(SELECT 1 FROM BORCKAPATMA B WHERE B.ALACAKTUR=F.TUR AND B.ALACAKID=F.ID))
+      OR (p_ozelkod IS NULL AND coalesce(F.OZELKOD,'')<>'' AND EXISTS(SELECT 1 FROM BORCKAPATMA B WHERE B.ALACAKTUR=F.TUR AND B.ALACAKID=F.ID)))
+
+  UNION ALL
+  -- 5) CEK (CEKHAREKET) (@Tip in 2,3)
+  SELECT
+    C.ID::int, CH.TARIH::timestamp, C.VADE::timestamp, C.MAKBUZNO::varchar(20),
+    (CASE WHEN CH.ISLEM IN (130,141) THEN 23 ELSE 33 END)::smallint, ''::varchar(150),
+    (SELECT G.ANAHTAR FROM GENINI G WHERE G.BOLUM=-1005 AND G.DEGER=(CASE WHEN CH.ISLEM IN (130,141) THEN 23 ELSE 33 END) AND G.DIL=-1 LIMIT 1)::varchar(50),
+    CH.REHBERID::int, R.KOD::varchar(20), R.FIRMA::varchar(100),
+    ('Serino: '||C.SERINO::varchar||rtrim(coalesce(CH.ACIKLAMA,'')))::varchar(500),
+    CH.BANKAHESAPLARID::int, BH.HESAPKODU::varchar(100), BH.HESAPADI::varchar(150), C.DURUM::smallint,
+    (CASE WHEN CH.ISLEM IN (140,131,132,133,134,137) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN CH.TUTAR ELSE coalesce(C.TUTAR,0) END) ELSE 0 END)::numeric,
+    (CASE WHEN CH.ISLEM IN (130,141)                 THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN CH.TUTAR ELSE coalesce(C.TUTAR,0) END) ELSE 0 END)::numeric,
+    (CASE WHEN CH.EKSTREDEKULLAN=1 THEN CH.KUR ELSE coalesce(C.KUR,'TL') END)::varchar(6),
+    ABS((CASE WHEN C.DOVIZ_KURU=YK.d AND CH.ISLEM IN (140,131,132,133,134,137) THEN C.DOVIZ_TUTARI
+              WHEN C.DOVIZ_KURU=YK.d AND CH.ISLEM IN (130,141)                 THEN -1*C.DOVIZ_TUTARI END)
+        / nullif(((CASE WHEN CH.ISLEM IN (140,131,132,133,134,137) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN CH.TUTAR ELSE coalesce(C.TUTAR,0) END) ELSE 0 END)
+                 -(CASE WHEN CH.ISLEM IN (130,141)                 THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN CH.TUTAR ELSE coalesce(C.TUTAR,0) END) ELSE 0 END)),0))::numeric,
+    C.MASRAFID::int, M.KOD::varchar(50), M.AD::varchar(100),
+    (CASE WHEN C.DOVIZ_KURU=YK.d  AND CH.ISLEM IN (140,131,132,133,134,137) THEN C.DOVIZ_TUTARI
+          WHEN C.DOVIZ_KURU=YK.d  AND CH.ISLEM IN (130,141)                 THEN -1*C.DOVIZ_TUTARI
+          WHEN C.DOVIZ_KURU<>YK.d AND CH.ISLEM IN (140,131,132,133,134,137) THEN C.TUTAR
+          WHEN C.DOVIZ_KURU<>YK.d AND CH.ISLEM IN (130,141)                 THEN -1*C.TUTAR END)::numeric,
+    C.SUBEID::int, C.VADE::timestamp,
+    1.0::double precision, ''::varchar(20), 0.0::numeric
+  FROM CEKLER C INNER JOIN CEKHAREKET CH ON C.ID=CH.CEKSENETLERID
+    LEFT JOIN REHBER R ON CH.REHBERID=R.ID
+    LEFT JOIN BANKAHESAPLAR BH ON CH.BANKAHESAPLARID=BH.ID
+    LEFT JOIN MASRAFGELIR M ON M.ID=C.MASRAFID
+    CROSS JOIN yk YK
+  WHERE p_tip IN (2,3) AND CH.ISLEM IN (130,131,132,134,137,140,141) AND CH.PROJEID=p_projeid
+    AND extract(year from CH.TARIH)>=extract(year from p_bastar)
+    AND extract(year from CH.TARIH)<=extract(year from p_bittar) AND CH.TARIH<=p_bittar
+    AND (p_masrafid=0 OR p_masrafid=CH.MASRAFID)
+    AND (p_ozelkod='' OR p_ozelkod=C.OZELKOD OR (p_ozelkod IS NULL AND coalesce(C.OZELKOD,'')<>''))
+),
+seq AS (
+  SELECT h.*, row_number() OVER (ORDER BY KUR, TARIH, CEKID)::int AS SIRANO FROM har h
+),
+bal AS (
+  SELECT s.*,
+    greatest(SUM(CASE WHEN TUR BETWEEN 60 AND 79 THEN 0 ELSE BORC-ALACAK END) OVER w, 0)::numeric AS BORCBAKIYE,
+    greatest(SUM(CASE WHEN TUR BETWEEN 60 AND 79 THEN 0 ELSE ALACAK-BORC END) OVER w, 0)::numeric AS ALACAKBAKIYE,
+    (SUM(CASE WHEN TUR BETWEEN 60 AND 79 THEN 0 ELSE YERELTUTAR END) OVER w)::numeric AS YERELBAKIYE
+  FROM seq s
+  WINDOW w AS (PARTITION BY KUR ORDER BY SIRANO)
+)
+-- Devir (pre-BasTar altkume; union zaten ayni yila kirpiyor) KUR,SUBEID bazinda
+SELECT 0::int AS "SIRANO", 0::int AS "CEKID", p_bastar AS "TARIH", p_bastar AS "AKSIYONTARIH", NULL::varchar(20) AS "NO",
+  2::smallint AS "TUR", ''::varchar(150) AS "BASLIK", 'Devir'::varchar(50) AS "TURAD", 0::int AS "REHBERID", ''::varchar(20) AS "KOD",
+  ''::varchar(100) AS "AD", 'Devir'::varchar(500) AS "ACIKLAMA", NULL::int AS "HESAPID", NULL::varchar(100) AS "HESAPKODU", NULL::varchar(150) AS "HESAPADI",
+  1::smallint AS "DURUM", SUM(BORC)::numeric AS "BORC", SUM(ALACAK)::numeric AS "ALACAK", KUR::varchar(6) AS "KUR", NULL::numeric AS "YERELKUR",
+  0::int AS "MASRAFID", ''::varchar(50) AS "MASRAFKOD", ''::varchar(100) AS "MASRAFAD",
+  greatest(SUM(BORC-ALACAK),0)::numeric AS "BORCBAKIYE", greatest(SUM(ALACAK-BORC),0)::numeric AS "ALACAKBAKIYE",
+  SUM(YERELTUTAR)::numeric AS "YERELTUTAR", greatest(SUM(YERELTUTAR),0)::numeric AS "YERELBAKIYE",
+  SUBEID::int AS "SUBEID", p_bastar AS "VADETARIHI", NULL::double precision AS "ADET", NULL::varchar(20) AS "BIRIM", NULL::numeric AS "BIRIMFIYAT"
+FROM har
+WHERE ((TUR IN (49)) OR (TUR NOT BETWEEN 40 AND 79)) AND TARIH < p_bastar
+GROUP BY KUR, SUBEID
+
+UNION ALL
+-- Hareketler (TARIH >= BasTar); bakiye TUM satirlar uzerinde (pre dahil) kosuldu
+SELECT SIRANO, CEKID, TARIH, AKSIYONTARIH, no, TUR, BASLIK, TURAD, REHBERID, KOD, AD, ACIKLAMA, HESAPID, HESAPKODU, HESAPADI,
+  DURUM, BORC, ALACAK, KUR, YERELKUR, MASRAFID, MASRAFKOD, MASRAFAD, BORCBAKIYE, ALACAKBAKIYE, YERELTUTAR, YERELBAKIYE,
+  SUBEID, VADETARIHI, ADET, BIRIM, BIRIMFIYAT
+FROM bal
+WHERE TARIH >= p_bastar
+ORDER BY 19, 1;  -- KUR, SIRANO
+$$;

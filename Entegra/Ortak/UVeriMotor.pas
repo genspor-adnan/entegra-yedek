@@ -10,7 +10,7 @@
 // ============================================================
 interface
 
-uses System.Classes, FireDAC.Comp.Client;
+uses System.Classes, Data.DB, FireDAC.Comp.Client;
 
 type
   TVeriMotor = (vmMSSQL, vmPG);
@@ -102,6 +102,23 @@ procedure MotorBaglantisiKur(ACnn: TFDConnection; AMotor: TVeriMotor;
 //   deger tutan 8 ad (DURUM,GRUP,HAK,VARSAYILAN,ANIMSAT,OKUNDU,MUHAKTAR,SONUC) HARIC tutuldu.
 //   vmMSSQL'de etkisiz. Her PG FDConnection icin baglanti kurulumunda cagrilir.
 procedure PgBitMapKur(ACnn: TFDConnection);
+
+// SORGU-KAPSAMLI bit->boolean: global CPgBitAdlari'nda HARIC tutulan (baska tabloda deger tutan)
+//   bir kolon adi, BELIRLI bir sorguda gercekten bit ise (or. STOKBARKOD.VARSAYILAN 0/1). O sorgunun
+//   FormatOptions'una yerel maprule ekler (OwnMapRules) -> smallint kolon .AsBoolean ile okunur/yazilir.
+//   AAdlar ';' ayrik. Open'DAN ONCE cagrilmali (alanlar acilista olusur). vmMSSQL'de etkisiz.
+procedure PgSorguBoolAlan(AQuery: TFDQuery; const AAdlar: string);
+
+// TIP-GUVENLI TAMSAYI OKUMA: bit-koken bir kolon DB durumuna gore boolean (eski
+//   bit->boolean gecisi) VEYA smallint/int (bit->smallint kurali) gelebilir. Boolean
+//   field'da .AsInteger "Cannot access field as type Integer" atar. Bu helper alanin
+//   gercek tipine gore okur; cok-degerli (0/1/2/3) smallint'te tam deger korunur.
+//   Iki motorda da (MSSQL/PG) guvenli, motor-bagimsiz.
+function AlanTamsayi(AField: TField): Integer;
+
+// TIP-GUVENLI BOOL YAZMA: DURUM gibi bit->boolean HARIÇ (PG'de smallint) kolona .AsBoolean :=
+//   yazmak patlar; alanin gercek tipine gore yazar. Iki motorda da guvenli.
+procedure AlanBoolYaz(AField: TField; AValue: Boolean);
 
 // MERKEZI DIYALEKT CEVIRICI: vmPG iken bir SQL metnindeki GUVENLI/net T-SQL kaliplarini
 //   PG karsiligiyla degistirir (getdate()->now(), isnull(->coalesce( ...). Merkezi sorgu
@@ -415,6 +432,13 @@ begin
   Result := StringReplace(Result, 'isnull(',       'coalesce(',    [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, 'sysdatetime()', 'now()',        [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '@@spid',        'pg_backend_pid()', [rfReplaceAll, rfIgnoreCase]);
+  // MSSQL DATEDIFF(day, a, b) -> PG gun farki (cast(b as date) - cast(a as date)). getdate->now
+  //   yukarida olustu (b=now() destekli). Basit arg (kolon/now()); virgullu/parantezli arg (convert)
+  //   nadir -> kapsam disi (regex parantezsiz arg alir). 'day' ve 'dd' datepart.
+  if Pos('datediff', LowerCase(Result)) > 0 then
+    Result := TRegEx.Replace(Result,
+      'DATEDIFF\s*\(\s*(?:day|dd)\s*,\s*([^,()]+?)\s*,\s*(now\(\)|[^,()]+?)\s*\)',
+      '(cast($2 as date) - cast($1 as date))', [roIgnoreCase]);
   // NOT: dis SELECT TOP -> PgTopCevir (asagida). scope_identity/charindex/[]/+ ve nested/UNION
   //   TOP -> BURADA DEGIL (belirsiz/konumsal); seam ile (DbUst/DbSinir/DbKimlikAl...).
 end;
@@ -664,12 +688,15 @@ begin
             k := sb.Length - 1;
             while (k >= 0) and CharInSet(sb.Chars[k], [' ', #9, #10, #13]) do Dec(k);
             if k >= 0 then oncekar := sb.Chars[k] else oncekar := ' ';
+            // NESTED convert: args[1] icinde ic-ice CONVERT olabilir (or. convert(int,'x'+convert(
+            //   varchar(10),ST.MARKA))) -> args[1]'i OZYINELI cevir, yoksa ic convert ham gider
+            //   ('convert(varchar(10),..)' -> PG "syntax near ,").
             if fmt <> '' then
-              sb.Append('to_char(' + Trim(args[1]) + ',''' + fmt + ''')')
+              sb.Append('to_char(' + PgConvertCevir(Trim(args[1])) + ',''' + fmt + ''')')
             else if ((pgt = 'varchar') or (pgt = 'char')) and CharInSet(oncekar, ['=', '<', '>']) then
-              sb.Append(Trim(args[1]))
+              sb.Append(PgConvertCevir(Trim(args[1])))
             else
-              sb.Append('cast(' + Trim(args[1]) + ' as ' + pgt + ')');
+              sb.Append('cast(' + PgConvertCevir(Trim(args[1])) + ' as ' + pgt + ')');
             i := j; Continue;
           end;
         end;
@@ -838,6 +865,14 @@ begin
       if PgKwVar(S, i, 'FROM') and AtSelDepth then
       begin
         FlushAlias; Dec(selN); sb.Append(Copy(S, i, 4)); Inc(i, 4); itemStart := False; Continue;
+      end;
+      // FROM'suz select-listesini WHERE/GROUP/ORDER/HAVING/LIMIT de sonlandirir (or. portable upsert
+      //   'insert ... select <sabitler> where not exists(...)'). Bu anahtar-kelimeler select-listesinde
+      //   asla gecmez -> guvenli. FlushAlias+pop; keyword'u normal kopyalama isler (AtSelDepth artik false).
+      if AtSelDepth and (PgKwVar(S, i, 'WHERE') or PgKwVar(S, i, 'GROUP') or
+                         PgKwVar(S, i, 'ORDER') or PgKwVar(S, i, 'HAVING') or PgKwVar(S, i, 'LIMIT')) then
+      begin
+        FlushAlias; Dec(selN); itemStart := False; Continue;
       end;
       // UNION/INTERSECT/EXCEPT: FROM'suz select-listesini de sonlandirir (alias flush + pop)
       if AtSelDepth and (PgKwVar(S, i, 'UNION') or PgKwVar(S, i, 'INTERSECT') or PgKwVar(S, i, 'EXCEPT')) then
@@ -1037,6 +1072,15 @@ begin
   Result := res;
 end;
 
+function PgGlobalTempCevir(const S: string): string;
+begin
+  // MSSQL global gecici tablo '##ad' -> PG-gecerli isim 'gt_ad' ('#' PG identifier'da gecmez).
+  //   Ayni ada tum sorgularda ayni donusum -> paylasilan PG temp tablo (or. makbuz ##MAKBUZ_<spid>_
+  //   -> gt_makbuz_<spid>_; MakbuzAc CREATE TEMP TABLE ayni ada kurar). PG unquoted-identifier
+  //   lowercase katlamasi sayesinde buyuk/kucuk harf farki onemsiz. Tek '#' PgTempTabloCevir'in isi.
+  Result := TRegEx.Replace(S, '##(\w+)', 'gt_$1', [roIgnoreCase]);
+end;
+
 function PgSqlCevir(const ASql: string): string;
 var
   i, n: Integer;
@@ -1052,6 +1096,7 @@ begin
   //   ^insert/^select kontrolu) bozulmasin diye BURADA (literal-oncesi) sil. Yalniz BASTAKI (leading).
   src := TRegEx.Replace(ASql, '^\s*set\s+nocount\s+on\s*;?\s*', '', [roIgnoreCase]);
   src := PgTempTabloCevir(src);          // MSSQL temp-tablo batch (IF EXISTS/CREATE #X/INSERT/select) -> tek subselect + @param->:param
+  src := PgGlobalTempCevir(src);         // kalan '##ad' global-temp REFERANSLARI -> 'gt_ad' (PG-gecerli; paylasilan temp tablo)
   src := PgDeclareCevir(src);            // T-SQL yerel degisken (DECLARE/SET @x) -> inline (EXEC'ten ONCE: DECLARE-sarmali EXEC acilsin)
   src := PgExecCevir(src);               // EXEC dbo.sp_X args -> SELECT * FROM fn_x(args)
   // MSSQL 'insert ...[;] select scope_identity()' identity-getir idiom -> PG 'insert ... returning ID'
@@ -1225,13 +1270,77 @@ begin
   end;
 end;
 
+function AlanTamsayi(AField: TField): Integer;
+begin
+  if (AField = nil) or AField.IsNull then
+    Result := 0
+  else if AField.DataType = ftBoolean then
+    Result := Ord(AField.AsBoolean)   // boolean gelmis kolon -> 0/1
+  else
+    Result := AField.AsInteger;       // smallint/int -> tam deger (0/1/2/3...)
+end;
+
+procedure AlanBoolYaz(AField: TField; AValue: Boolean);
+begin
+  // TIP-GUVENLI BOOL YAZMA: DURUM gibi bit->boolean map'inde HARIÇ tutulan kolon PG'de smallint
+  //   gelir; ona .AsBoolean := YAZMAK "Cannot access field as type Boolean" atar. Alanin gercek
+  //   tipine gore yaz. Iki motorda da guvenli (MSSQL boolean alan / PG smallint).
+  if AField.DataType = ftBoolean then
+    AField.AsBoolean := AValue
+  else
+    AField.AsInteger := Ord(AValue);
+end;
+
+procedure PgSorguBoolAlan(AQuery: TFDQuery; const AAdlar: string);
+var
+  L: TStringList;
+  i: Integer;
+begin
+  if AktifVeriMotor <> vmPG then Exit;
+  AQuery.FormatOptions.OwnMapRules := True;   // bu sorguya ozel kural kumesi
+  AQuery.FormatOptions.MapRules.Clear;
+  // ONCE baglantinin TUM kurallarini kopyala (global bit->boolean + currency) -> OwnMapRules bunlari
+  //   devralmayi kesecegi icin elle tasi; yoksa currency/diger-bit kolonlari bozulur (KREDILER tutar
+  //   alanlari "expecting Currency" verirdi). SONRA bu sorguya ozel bool adlarini EKLE.
+  if Assigned(AQuery.Connection) then
+    for i := 0 to AQuery.Connection.FormatOptions.MapRules.Count - 1 do
+      AQuery.FormatOptions.MapRules.Add.Assign(AQuery.Connection.FormatOptions.MapRules[i]);
+  L := TStringList.Create;
+  try
+    L.StrictDelimiter := True;
+    L.Delimiter := ';';
+    L.DelimitedText := AAdlar;
+    for i := 0 to L.Count - 1 do
+      if Trim(L[i]) <> '' then
+        with AQuery.FormatOptions.MapRules.Add do
+        begin
+          NameMask := Trim(L[i]);
+          SourceDataType := dtInt16;
+          TargetDataType := dtBoolean;
+        end;
+  finally
+    L.Free;
+  end;
+end;
+
 procedure MotorBaglantisiKur(ACnn: TFDConnection; AMotor: TVeriMotor;
   const ASunucu, AVeritabani, AKullanici, ASifre: string; APort: Integer);
 begin
   ACnn.Connected := False;
   ACnn.Params.Clear;
+  // WAN fetch round-trip azalt: RowsetSize = fetch basina cekilen satir (default 50). Uzak
+  //   sunucuda 1000 satirlik grid = 20 round-trip x ~150ms. 500 -> ~1-2 round-trip. Alt
+  //   TFDQuery'ler baglantidan devralir (kendi RowsetSize'i acikca set etmeyenler).
+  ACnn.FetchOptions.RowsetSize := 500;
   if AMotor = vmPG then
   begin
+    // idle-in-transaction FIX (PG): FireDAC server-side cursor (fmOnDemand + WITH HOLD) grid
+    //   acikken transaction'i acik tutar -> ayni baglantidaki sonraki INSERT/UPDATE'ler commit
+    //   edilmeden birikir (kilit tutar, VACUUM'u engeller, 2. baglanti bloklanir). fmAll: tum
+    //   satirlar Open'da cekilir -> cursor HEMEN kapanir -> transaction commit -> sonraki DML
+    //   auto-commit olur. WAN'da da faydali (cursor round-trip'leri toplu, sonra kapanir).
+    //   (Alt TFDQuery'ler devralir; kendi Mode'unu acikca set edenler haric.)
+    ACnn.FetchOptions.Mode := fmAll;
     ACnn.Params.Values['DriverID']     := 'PG';
     ACnn.Params.Values['Server']       := ASunucu;
     if APort > 0 then
@@ -1240,6 +1349,9 @@ begin
     ACnn.Params.Values['User_Name']    := AKullanici;
     ACnn.Params.Values['Password']     := ASifre;
     ACnn.Params.Values['CharacterSet'] := 'UTF8';
+    // NOT: BAGLANTI HAVUZU (Pooled=True) GECICI GERI ALINDI - idle-in-transaction lock blogu
+    //   testi icin (ikinci fiziksel baglanti kapip fatbaslik kilit blogunu kolaylastirmis olabilir).
+    //   Suphe netlesince geri acilabilir.
     PgBitMapKur(ACnn);   // bit-kokenli smallint kolonlari -> boolean field (.AsBoolean icin)
   end
   else

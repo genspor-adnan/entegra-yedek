@@ -427,7 +427,8 @@ begin
    LogOnceki.Clear;   // iptal edilmis edit kalintisi yeni kaydi DEGISTIR olarak loglamasin
    TabPlan.FieldByName('GIRIS').AsInteger:= 0;
    TabPlan.FieldByName('DIGITSAY').AsInteger:= 0;
-   TabPlan.FieldByName('DURUM').AsBoolean:= True;
+   with TabPlan.FieldByName('DURUM') do  // DURUM smallint (PG) -> .AsBoolean patlar
+      if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
    TabPlan.FieldByName('EKLEYEN').AsString := Kullanan;
    TabPlan.FieldByName('SUBEID').AsInteger := SubeID;
 end;

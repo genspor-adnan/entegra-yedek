@@ -279,7 +279,7 @@ begin
            Tablo1.ExecSQL
         else
            Tablo1.Open;
-     end else if Dokuman_Kayit_Yeri=1 then begin//Eğer doküman veritabanı dışında klasörde tutulacaksa burada klasöre kaydediyoruz.. (Record oluşturduktan sonra)
+     end else if  Dokuman_Kayit_Yeri=1 then begin//Eğer doküman veritabanı dışında klasörde tutulacaksa burada klasöre kaydediyoruz.. (Record oluşturduktan sonra)
 
         with Tablo.Query1.Params.ParamByName('PBELGE') do
         begin

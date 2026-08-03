@@ -32,7 +32,7 @@ BEGIN
             ELSE MG.KOD
         END,
         BuyersItemCode = CASE
-            WHEN R.OZELKOD = N'DMO' AND F.TUR IN (1, 11) THEN S.SMKODU
+            WHEN R.OZELKOD = N'DMO' AND F.TUR IN (1, 11) THEN SU.SMKODU
             WHEN ISNULL(R.OZELKOD, N'') <> N'DMO' AND F.TUR IN (1, 11) THEN S.KOD
             ELSE MG.KOD
         END,
@@ -62,14 +62,15 @@ BEGIN
             ELSE 'C62'
         END,
         ModelName = CASE
+            WHEN R.OZELKOD = N'DMO' AND F.TUR IN (1, 11) THEN ISNULL(SU.SUTKODU, N'')
             WHEN F.TUR IN (1, 11) THEN ISNULL(MODELG.ANAHTAR, N'')
             ELSE N''
         END,
         BrandName = CASE
             WHEN FB.TUR = 14 AND R.OZELKOD = N'DMO' AND F.TUR IN (1, 11)
-                THEN ISNULL(S.DMOKODU, N'')
+                THEN ISNULL(SU.DMOKODU, N'')
             WHEN FB.TUR = 15 AND R.OZELKOD = N'IHALE' AND F.TUR IN (1, 11)
-                THEN ISNULL(S.IHALESIRANO, N'')
+                THEN ISNULL(SU.IHALESIRANO, N'')
             WHEN F.TUR IN (1, 11)
                 THEN ISNULL(MARKA.ANAHTAR, N'')
             ELSE N''
@@ -89,6 +90,8 @@ BEGIN
     LEFT JOIN dbo.STOKLAR S
         ON S.ID = F.URUNID
        AND F.TUR IN (1, 11)
+    LEFT JOIN dbo.STOKLAR_USER SU
+        ON SU.ID = S.ID
     LEFT JOIN dbo.MASRAFGELIR MG
         ON MG.ID = F.URUNID
        AND F.TUR NOT IN (1, 11)

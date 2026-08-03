@@ -86,25 +86,25 @@ type
   end;
 
 var
-  AlanlarDlg:  TAlanlarDlg;
+   AlanlarDlg:  TAlanlarDlg;
 
 implementation
 Uses
-   LocOnFly,FetaKurulusSiniflari,PrjConst;
+   LocOnFly,FetaKurulusSiniflari,PrjConst,UVeriMotor;
 
 {$R *.dfm}
 
 procedure TAlanlarDlg.btnIptalTusClick(Sender: TObject);
 begin
-   TabAlanlar.Cancel;
+    TabAlanlar.Cancel;
 end;
 
 procedure TAlanlarDlg.btnKaydetTusClick(Sender: TObject);
 begin
   TabAlanlar.Post;
   if IslemOp = 'E' then begin
-    TabLabel.Close;
-    TabLabel.Open;
+     TabLabel.Close;
+     TabLabel.Open;
 //    TabLabel.Append;
 //    TabLabel.Post;
   end;
@@ -172,23 +172,41 @@ begin
 end;
 
 procedure TAlanlarDlg.TabAlanlarAfterPost(DataSet: TDataSet);
-var s : string[50];
+var
+  s, LSql: string;
 begin
-  case TabAlanlar.FieldByName('TUR').AsInteger of
-    1,4,7,9,10 :  s:=' nvarchar(100) ';
-    2,6 :  s:=' int ';
-    3 :  s:=' datetime ';
-    5 :  s:=' bit ';
-    8 :  s:=' decimal(12,4) ';
-    13 :  s:=' image ';
+  if AktifVeriMotor = vmPG then begin
+    case TabAlanlar.FieldByName('TUR').AsInteger of
+      1,4,7,9,10 :  s := ' varchar(100) ';
+      2,6 :  s := ' integer ';
+      3 :  s := ' timestamp ';
+      5 :  s := ' boolean ';
+      8 :  s := ' numeric(12,4) ';
+      13 :  s := ' bytea ';
+    end;
+  end else begin
+    case TabAlanlar.FieldByName('TUR').AsInteger of
+      1,4,7,9,10 :  s:=' nvarchar(100) ';
+      2,6 :  s:=' int ';
+      3 :  s:=' datetime ';
+      5 :  s:=' bit ';
+      8 :  s:=' decimal(12,4) ';
+      13 :  s:=' image ';
+    end;
   end;
 
 
 
   try
-    if not(TabAlanlar.FieldByName('TUR').AsInteger in [11,12])  then
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'if not exists(select * from sys.columns where object_id=object_id('''+TabAlanlar.FieldByName('TABLO').AsString+''') and name='''+TabAlanlar.FieldByName('ALANADI').AsString+''' ) begin '+
-       ' Alter Table '+TabAlanlar.FieldByName('TABLO').AsString+' ADD '+TabAlanlar.FieldByName('ALANADI').AsString+s+' end ',[],[]);
+    if not(TabAlanlar.FieldByName('TUR').AsInteger in [11,12]) then begin
+      if AktifVeriMotor = vmPG then
+        LSql := 'alter table ' + TabAlanlar.FieldByName('TABLO').AsString +
+          ' add column if not exists ' + TabAlanlar.FieldByName('ALANADI').AsString + s
+      else
+        LSql := 'if not exists(select * from sys.columns where object_id=object_id('''+TabAlanlar.FieldByName('TABLO').AsString+''') and name='''+TabAlanlar.FieldByName('ALANADI').AsString+''' ) begin '+
+          ' Alter Table '+TabAlanlar.FieldByName('TABLO').AsString+' ADD '+TabAlanlar.FieldByName('ALANADI').AsString+s+' end ';
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, LSql, [], []);
+    end;
 
   except
   end;
@@ -216,8 +234,13 @@ begin
   LQry := TFDQuery.Create(nil);
   try
     LQry.Connection := Tablo.FDCnn;
-    LQry.SQL.Text := 'select ID=object_id(:TABLO, ''U'')';
-    LQry.ParamByName('TABLO').AsString := 'dbo.' + LUserTablo;
+    if AktifVeriMotor = vmPG then begin
+      LQry.SQL.Text := 'select to_regclass(:TABLO) as ID';
+      LQry.ParamByName('TABLO').AsString := 'public.' + LowerCase(LUserTablo);
+    end else begin
+      LQry.SQL.Text := 'select ID=object_id(:TABLO, ''U'')';
+      LQry.ParamByName('TABLO').AsString := 'dbo.' + LUserTablo;
+    end;
     LQry.Open;
     if not LQry.Fields[0].IsNull then
       Result := LUserTablo;

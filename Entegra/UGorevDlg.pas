@@ -497,7 +497,7 @@ begin
               ',[SONTARIH]='''+FormatDateTime('yyyy-mm-dd', TDateTime(SonTarih))+''',DEGISTIREN='+Kullanan+',DEGISTIRMETARIHI=GETDATE()'+
               ' where ID='+TabGorev.FieldByName('TEKRARID').AsString,[],[]);
 
-         Tablo.TablodanSorguAc(1,'select ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_Gorev_Peryot)+'and DEGER='+VarTostr(Peryot));
+         Tablo.TablodanSorguAc(1,'select ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_Gorev_Peryot)+' and DEGER='+VarTostr(Peryot));
          EditTekrar.Text := VarTostr(Adet)+' '+Tablo.Query1.Fields[0].AsString;
          TekrarAdet :=StrToInt(VarTostr(Adet));
          TekrarPeryot:=StrToInt(VarTostr(Peryot));
@@ -531,6 +531,15 @@ end;
 
 procedure TGorevDlg.FormCreate(Sender: TObject);
 begin
+   if AktifVeriMotor = vmPG then begin
+     TabGorev.UpdateOptions.RequestLive := True;
+     TabGorev.UpdateOptions.UpdateMode := upWhereKeyOnly;
+     TabGorev.UpdateOptions.UpdateTableName := 'GOREVLER';
+     TabGorev.UpdateOptions.KeyFields := 'ID';
+     TabGorev.UpdateOptions.AutoIncFields := 'ID';
+     if TabGorev.FindField('OLUSTURAN') <> nil then
+       TabGorev.FieldByName('OLUSTURAN').ProviderFlags := [];
+   end;
    TabGorev.BeforeEdit := TabGorevBeforeEdit;   // log: duzenleme oncesi snapshot
    if Tablo.GENINI.ReadBoolean(Ops_CheckEkipmanGor, True)=False then begin
       PanelEkipman.Destroy;
@@ -594,7 +603,7 @@ begin
    PeryotDegisti:=False;
    if TabGorev.FieldByName('TEKRARID').AsInteger>0 then begin
        Tablo.TablodanSorguAc(1,'select ADET,PERYOT,SONTARIH from GOREVTEKRAR where ID='+TabGorev.FieldByName('TEKRARID').AsString);
-       Tablo.TablodanSorguAc(2,'select ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_Gorev_Peryot)+'and DEGER='+Tablo.Query1.Fields[1].AsString);
+       Tablo.TablodanSorguAc(2,'select ANAHTAR from GENINI where BOLUM='+IntToStr(Ops_Gorev_Peryot)+' and DEGER='+Tablo.Query1.Fields[1].AsString);
        TekrarAdet := Tablo.Query1.Fields[0].AsInteger;
        TekrarPeryot := Tablo.Query1.Fields[1].AsInteger;
        TekrarSonTarih := Tablo.Query1.Fields[2].AsDateTime;

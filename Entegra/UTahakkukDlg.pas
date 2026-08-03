@@ -472,7 +472,7 @@ begin
   EditProje.Visible := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_ProjeGozuksun, True);
   LabelProje.Visible := EditProje.Visible;
   EditDemirbas.Visible := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DemirbasGozuksun, True);
-  lblDemirbas.Visible := EditProje.Visible;
+  lblDemirbas.Visible := EditDemirbas.Visible;
   case Tur of
     13 : begin
            Caption :=Alacak +' Tahakkuk';// Tahsilat;
@@ -552,8 +552,8 @@ begin
      if TabFatBaslik.FieldByName('MERKEZID').AsString <>'' then //begin
         EditSRMMerkezi.Text := Tablo.AciklamaGetir('SRMMERKEZI', 'MERKEZADI', TabFatBaslik.FieldByName('MERKEZID').AsInteger);
   if TabFatBaslik.FieldByName('DEMIRBASID').AsString <>'' then begin
-    EditDemirbas.Text := Tablo.AciklamaGetir('DEMIRBAS', 'DEMIRBASADI', DemirbasID);
-    EditDemirbas.Tag := DemirbasID;
+    EditDemirbas.Text := Tablo.AciklamaGetir('DEMIRBAS', 'DEMIRBASADI', TabFatBaslik.FieldByName('DEMIRBASID').AsInteger);
+    EditDemirbas.Tag := TabFatBaslik.FieldByName('DEMIRBASID').AsInteger;
   end;
 
   Tablo.ProjeMaliyetOnDeger(OncekiProjeId,OncekiMasrafId,EditProje,EditMM,TabFatBaslik.FieldByName('PROJEID').AsInteger,

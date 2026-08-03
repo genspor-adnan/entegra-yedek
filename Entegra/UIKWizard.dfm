@@ -79,6 +79,8 @@ object IKWizardDlg: TIKWizardDlg
       OnNextButtonClick = GirisEkrNextButtonClick
       WaterMark.Visible = False
       WaterMark.Width = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 70
@@ -592,6 +594,10 @@ object IKWizardDlg: TIKWizardDlg
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CariGridNotlar: TcxGrid
             Left = 0
             Top = 27
@@ -706,6 +712,10 @@ object IKWizardDlg: TIKWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -753,6 +763,8 @@ object IKWizardDlg: TIKWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1086,6 +1098,8 @@ object IKWizardDlg: TIKWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1403,6 +1417,8 @@ object IKWizardDlg: TIKWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 473
@@ -1463,6 +1479,7 @@ object IKWizardDlg: TIKWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 452
         AnchorX = 938
       end
       object GridYorum: TcxGrid
@@ -1567,6 +1584,8 @@ object IKWizardDlg: TIKWizardDlg
       Enabled = False
       OnEnterPage = PersonelOzlukEkrEnterPage
       OnPage = PersonelOzlukEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel1: TPanel
         Left = 0
         Top = 70
@@ -1769,6 +1788,8 @@ object IKWizardDlg: TIKWizardDlg
       ShowHint = True
       OnEnterPage = PersonelUcretEkrEnterPage
       OnPage = PersonelUcretEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar5: TToolBar
         AlignWithMargins = True
         Left = 3

@@ -25,7 +25,7 @@ object FastRaporDlg: TFastRaporDlg
     Width = 570
   end
   object frxReport1: TfrxReport
-    Version = '2023.2'
+    Version = '2024.2.5'
     DotMatrixReport = False
     EngineOptions.DoublePass = True
     IniFile = '\Software\Fast Reports'

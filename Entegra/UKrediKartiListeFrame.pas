@@ -23,7 +23,10 @@ uses
   dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010,
   dxSkinWhiteprint, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations;
+  dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, frCoreClasses, FireDAC.Comp.DataSet;
 
 type
   TKrediKartiListeFrame = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -167,6 +170,7 @@ type
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_KrediKarti_Liste_Json2)
     function HesapKesimBitTar: TDateTime;   // gecerli yil/ay/gun -> smalldatetime out-of-range engeli
     function EkranAdiAl: string;
+    procedure KKEkstreSQLHazirla;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
@@ -245,6 +249,7 @@ procedure TKrediKartiListeFrame.CalendarEkstreBasPropertiesEditValueChanged(Send
 begin
   if KREDIKARTI.RecordCount>0 then begin
     TabKKEkstre.Close;
+    KKEkstreSQLHazirla;
     TabKKEkstre.Params.Clear;
     with TabKKEkstre.Params.Add do begin Name := 'PKKID'; DataType := ftInteger; ParamType := ptInput; AsInteger := KREDIKARTI.FieldByName('ID').AsInteger; end;
     with TabKKEkstre.Params.Add do begin Name := 'PBasTar'; DataType := ftDateTime; ParamType := ptInput; AsDateTime := CalendarEkstreBas.Date; end;
@@ -406,9 +411,10 @@ procedure TKrediKartiListeFrame.KREDIKARTIAfterScroll(DataSet: TDataSet);
 var BitTar:TDateTime;
 begin
   if KREDIKARTI.RecordCount>0 then begin
-    BitTar := HesapKesimBitTar;
+    BitTar :=  HesapKesimBitTar;
     TabloYenile(tabHesapKesim,[KREDIKARTI.FieldByName('ID').AsInteger,SysUtils.IncMonth(BitTar,-1),BitTar]);
     TabKKEkstre.Close;
+    KKEkstreSQLHazirla;
     TabKKEkstre.Params.Clear;
     with TabKKEkstre.Params.Add do begin Name := 'PKKID'; DataType := ftInteger; ParamType := ptInput; AsInteger := KREDIKARTI.FieldByName('ID').AsInteger; end;
     with TabKKEkstre.Params.Add do begin Name := 'PBasTar'; DataType := ftDateTime; ParamType := ptInput; AsDateTime := CalendarEkstreBas.Date; end;
@@ -416,6 +422,29 @@ begin
     TabKKEkstre.Open;
     LabelSonOdeme.Caption := 'Son Ödeme Tarihi:'+FormatDateTime('YYYY-MM-DD',IncDay(BitTar,KREDIKARTI.FieldByName('ODEME_GUN_SAYISI').AsInteger));
   end;
+end;
+
+procedure TKrediKartiListeFrame.KKEkstreSQLHazirla;
+begin
+  if AktifVeriMotor  <> vmPG then Exit;
+
+  TabKKEkstre.SQL.Text :=
+    'select *,' + sLineBreak +
+    '  case when "BB" > 0.0 then "BB" else 0.0 end as "BORCBAKIYE",' + sLineBreak +
+    '  case when "AB" > 0.0 then "AB" else 0.0 end as "ALACAKBAKIYE"' + sLineBreak +
+    'from (' + sLineBreak +
+    '  select K.*, R.FIRMA, M.AD as "MASRAFAD",' + sLineBreak +
+    '    coalesce((select coalesce(sum(K2.BORC - K2.ALACAK), 0.0) from KASA K2 where K2.HESAPTURU = ''V'' and K2.HESAPID = K.HESAPID and K2.ISLEMTARIHI <= K.ISLEMTARIHI), 0.0) as "BB",' + sLineBreak +
+    '    coalesce((select coalesce(sum(K2.ALACAK - K2.BORC), 0.0) from KASA K2 where K2.HESAPTURU = ''V'' and K2.HESAPID = K.HESAPID and K2.ISLEMTARIHI <= K.ISLEMTARIHI), 0.0) as "AB"' + sLineBreak +
+    '  from KASA K' + sLineBreak +
+    '  left outer join REHBER R on K.REHBERID = R.ID' + sLineBreak +
+    '  left outer join MASRAFGELIR M on M.ID = K.MASRAFID' + sLineBreak +
+    '  where K.HESAPTURU = ''V''' + sLineBreak +
+    '    and K.HESAPID = :PKKID' + sLineBreak +
+    '    and K.ISLEMTARIHI >= :PBasTar' + sLineBreak +
+    '    and K.ISLEMTARIHI <= :PBitTar' + sLineBreak +
+    ') as ASD' + sLineBreak +
+    'order by ISLEMTARIHI';
 end;
 
 procedure TKrediKartiListeFrame.KrediKartiEkranAc(Yeni: Boolean);

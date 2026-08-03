@@ -55,7 +55,6 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
       ShowCaptions = True
       TabOrder = 0
       Transparent = True
-      ExplicitHeight = 29
       object YeniTus: TToolButton
         Left = 0
         Top = 0
@@ -153,33 +152,39 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
         object GridTviewTALEPTARIHI: TcxGridDBColumn
           Caption = 'Tarih'
           DataBinding.FieldName = 'TALEPTARIHI'
+          DataBinding.IsNullValueType = True
           Width = 172
         end
         object GridTviewTALEPNO: TcxGridDBColumn
           Caption = 'Talep No.'
           DataBinding.FieldName = 'TALEPNO'
+          DataBinding.IsNullValueType = True
           Width = 116
         end
         object GridTviewTALEPEDEN: TcxGridDBColumn
           Caption = 'Talep Eden'
           DataBinding.FieldName = 'FIRMA'
+          DataBinding.IsNullValueType = True
           Width = 137
         end
         object GridTviewTALEPEDENBOLUM: TcxGridDBColumn
           Caption = 'B'#246'l'#252'm'
           DataBinding.FieldName = 'TALEPEDENBOLUM'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepCariBolum
           Width = 163
         end
         object GridTviewDURUM: TcxGridDBColumn
           Caption = 'Durum'
           DataBinding.FieldName = 'DURUM'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepAktifPasif
           Width = 72
         end
         object GridTviewSUBEID: TcxGridDBColumn
           Caption = #350'ube'
           DataBinding.FieldName = 'SUBEID'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageComboBoxProperties'
           Properties.Items = <>
           RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
@@ -188,6 +193,7 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
         object GridTviewASAMA: TcxGridDBColumn
           Caption = 'A'#351'ama'
           DataBinding.FieldName = 'ASAMA'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageComboBoxProperties'
           Properties.Items = <>
           RepositoryItem = Tablo.RepSatinalmaAsama
@@ -225,7 +231,6 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
   end
   object TabSatinAlma: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 135
     Top = 136
   end
@@ -243,4 +248,3 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
     end
   end
 end
-

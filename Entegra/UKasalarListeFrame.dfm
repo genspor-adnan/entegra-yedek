@@ -13,6 +13,7 @@ object KasalarListeFrame: TKasalarListeFrame
     Left = 3
     Top = 3
     Width = 1007
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -92,40 +93,12 @@ object KasalarListeFrame: TKasalarListeFrame
       ImageName = 'PngImage3'
       Style = tbsSeparator
     end
-    object ToolButtonSSSAyrac: TToolButton
-      Left = 372
-      Top = 0
-      Width = 8
-      Caption = 'ToolButtonSSSAyrac'
-      Style = tbsSeparator
-    end
-    object LabelTumKayitlar: TToolButton
-      Left = 380
-      Top = 0
-      Caption = 'T'#252'm'
-      Style = tbsTextButton
-      OnClick = LabelTumKayitlarClick
-    end
-    object LabelSonArananlar: TToolButton
-      Left = 469
-      Top = 0
-      Caption = 'Son Aranan'
-      Style = tbsTextButton
-      OnClick = LabelSonArananlarClick
-    end
-    object LabelSikArananlar: TToolButton
-      Left = 558
-      Top = 0
-      Caption = 'S'#305'k Aranan'
-      Style = tbsTextButton
-      OnClick = LabelSikArananlarClick
-    end
   end
   object cxGrid: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1013
-    Height = 334
+    Height = 337
     Align = alClient
     Font.Charset = TURKISH_CHARSET
     Font.Color = clWindowText
@@ -138,6 +111,8 @@ object KasalarListeFrame: TKasalarListeFrame
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 334
     object GridTview: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -319,6 +294,10 @@ object KasalarListeFrame: TKasalarListeFrame
       Caption = 'Ekstre'
       ImageIndex = 6
       OnShow = TabSheetEkstreShow
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridKasaEkstre: TcxGrid
         Left = 0
         Top = 44
@@ -737,8 +716,8 @@ object KasalarListeFrame: TKasalarListeFrame
   end
   object DtsKasalar: TDataSource
     DataSet = KASALAR
-    Left = 169
-    Top = 136
+    Left = 233
+    Top = 80
   end
   object KASALAR: TFDQuery
     AfterOpen = KASALARAfterOpen
@@ -904,11 +883,11 @@ object KasalarListeFrame: TKasalarListeFrame
     BCDToCurrency = False
     DataSetOptions = []
     Left = 369
-    Top = 134
+    Top = 94
   end
   object KasaListeMenu: TPopupMenu
-    Left = 49
-    Top = 97
+    Left = 81
+    Top = 73
     object KasaInfoMenu: TMenuItem
       Caption = 'info'
       OnClick = KasaInfoMenuClick

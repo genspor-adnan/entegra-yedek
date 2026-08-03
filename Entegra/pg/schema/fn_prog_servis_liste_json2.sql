@@ -1,14 +1,3 @@
--- ============================================================
--- fn_prog_servis_liste_json2 — MSSQL sp_Prog_Servis_Liste_Json2 PG portu
---   Servis liste. Kaynak view: VServisListesi (PG: vservislistesi). SELECT S.* (view'in tum kolonlari).
---   @Baslik (EkAlanlar) YOK SAYILIR (sabit RETURNS TABLE'a ek-kolon eklenemez; superset dondur).
---   Dinamik: @Mod 3/5 KULLANICI_ARAMA join (Son/Sik), WHERE (no/kategori/konu/urun/musteri/sube/serino/
---            cbListe kapsam/durum/sorumlu/kapali-tarih), ORDER, TOP->LIMIT.
---   MSSQL->PG: LIKE(CI)->ILIKE quote_literal, ISNULL->COALESCE, bit->smallint, GETDATE()->current_date,
---     ROUND(CAST(dt AS float))-gun-esitligi -> dt::date=current_date, TOP->LIMIT.
---   VIEW BAGIMLILIGI: vservislistesi (+ fn_serviskisiler, vservishareket, v_servis_hareket_ozet) kurulu olmali.
---   NOT: @Pasif JSON'da tanimli ama MSSQL govdesinde de kullanilmiyor -> port'ta da yok.
--- ============================================================
 DROP FUNCTION IF EXISTS public.fn_prog_servis_liste_json2(text, text);
 CREATE FUNCTION public.fn_prog_servis_liste_json2(baslik text DEFAULT '', kosullar text DEFAULT '{}')
 RETURNS TABLE(
@@ -34,124 +23,207 @@ LANGUAGE plpgsql STABLE AS $$
 #variable_conflict use_column
 DECLARE
     j jsonb := COALESCE(NULLIF(kosullar,'')::jsonb, '{}'::jsonb);
-    v_topn      int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);
-    v_mod       int  := COALESCE(NULLIF(j->>'Mod','')::int, 4);
-    v_servisno  text := NULLIF(j->>'ServisNo','');
+    v_topn int := COALESCE(NULLIF(j->>'TopN','')::int, 0);
+    v_mod int := COALESCE(NULLIF(j->>'Mod','')::int, 4);
+    v_servisno text := NULLIF(j->>'ServisNo','');
     v_servisnoid int := NULLIF(j->>'ServisNoId','')::int;
+    v_servisnolike boolean := COALESCE(NULLIF(j->>'ServisNoLike','')::int, 0) <> 0;
     v_kategoriad text := NULLIF(j->>'KategoriAd','');
-    v_konusu    text := NULLIF(j->>'Konusu','');
-    v_urun      text := NULLIF(j->>'Urun','');
-    v_musteri   text := NULLIF(j->>'Musteri','');
-    v_serinom   text := NULLIF(j->>'SeriNo','');
+    v_konusu text := NULLIF(j->>'Konusu','');
+    v_urun text := NULLIF(j->>'Urun','');
+    v_musteri text := NULLIF(j->>'Musteri','');
+    v_serinom text := NULLIF(j->>'SeriNo','');
+    v_serinolike boolean := COALESCE(NULLIF(j->>'SeriNoLike','')::int, 0) <> 0;
     v_subeyetki text := NULLIF(j->>'SubeYetkiList','');
-    v_cbliste   int  := NULLIF(j->>'cbListe','')::int;
-    v_kullanan  int  := NULLIF(j->>'Kullanan','')::int;
-    v_subeidf   int  := NULLIF(j->>'SubeID','')::int;
-    v_durum     int  := NULLIF(j->>'Durum','')::int;
-    v_durumvar  int  := COALESCE(NULLIF(j->>'DurumVar','')::int, 0);
+    v_cbliste int := NULLIF(j->>'cbListe','')::int;
+    v_kullanan int := NULLIF(j->>'Kullanan','')::int;
+    v_subeidf int := NULLIF(j->>'SubeID','')::int;
+    v_durum int := NULLIF(j->>'Durum','')::int;
+    v_durumvar int := COALESCE(NULLIF(j->>'DurumVar','')::int, 0);
     v_sorumlutag int := COALESCE(NULLIF(j->>'SorumluTag','')::int, 0);
-    v_kapali    int  := COALESCE(NULLIF(j->>'Kapali','')::int, 0);
+    v_kapali int := COALESCE(NULLIF(j->>'Kapali','')::int, 0);
     v_tamamlanan int := NULLIF(j->>'Tamamlanan','')::int;
     v_kapalitarih text := NULLIF(j->>'KapaliTarih','');
-    v_tarihbas  text := NULLIF(j->>'TarihBas','');
-    v_tarihbit  text := NULLIF(j->>'TarihBit','');
-    v_kulid     int  := NULLIF(j->>'KulId','')::int;
-    v_modul     int  := NULLIF(j->>'Modul','')::int;
-    v_orderby   text := NULLIF(j->>'OrderBy','');
-    q text; w text := ' WHERE 1=1 '; joinka text := ''; ordr text := ''; lim text := '';
+    v_tarihbas text := NULLIF(j->>'TarihBas','');
+    v_tarihbit text := NULLIF(j->>'TarihBit','');
+    v_kulid int := NULLIF(j->>'KulId','')::int;
+    v_modul int := NULLIF(j->>'Modul','')::int;
+    v_orderby text := NULLIF(j->>'OrderBy','');
+    v_limit int := CASE WHEN v_topn > 0 THEN v_topn ELSE 200 END;
+    q text;
+    base_sql text;
+    w text := ' WHERE 1=1 ';
+    joinka text := '';
+    ordr text := '';
+    lim text := '';
     kajoin boolean := false;
 BEGIN
-    IF v_topn > 0 THEN lim := ' LIMIT ' || v_topn; END IF;
+    IF v_topn > 0 THEN
+        lim := ' LIMIT ' || v_topn;
+    END IF;
+
     IF v_mod IN (3,5) AND v_kulid IS NOT NULL AND v_modul IS NOT NULL THEN
         kajoin := true;
         joinka := ' INNER JOIN kullanici_arama ka ON ka.kayitid=s.id AND ka.kulid='||v_kulid||' AND ka.modul='||v_modul||' ';
+        IF v_mod = 5 THEN
+            ordr := 'ka.degistirmetarihi DESC';
+            base_sql := 'SELECT s0.* FROM servis s0 INNER JOIN kullanici_arama ka0 ON ka0.kayitid=s0.id AND ka0.kulid='||v_kulid||' AND ka0.modul='||v_modul||' ORDER BY ka0.degistirmetarihi DESC LIMIT '||v_limit;
+        ELSE
+            ordr := 'ka.say DESC';
+            base_sql := 'SELECT s0.* FROM servis s0 INNER JOIN kullanici_arama ka0 ON ka0.kayitid=s0.id AND ka0.kulid='||v_kulid||' AND ka0.modul='||v_modul||' ORDER BY ka0.say DESC LIMIT '||v_limit;
+        END IF;
+    ELSIF v_servisno IS NOT NULL OR v_serinom IS NOT NULL THEN
+        base_sql := 'SELECT s0.* FROM servis s0 WHERE (false';
+        IF v_servisno IS NOT NULL THEN
+            IF v_servisnolike THEN
+                base_sql := base_sql || ' OR s0.servisno ILIKE '||quote_literal(v_servisno);
+            ELSE
+                base_sql := base_sql || ' OR s0.servisno = '||quote_literal(v_servisno);
+            END IF;
+        END IF;
+        IF v_servisnoid IS NOT NULL AND v_servisnoid <> 0 THEN
+            base_sql := base_sql || ' OR s0.id='||v_servisnoid;
+        END IF;
+        IF v_serinom IS NOT NULL THEN
+            IF v_serinolike THEN
+                base_sql := base_sql || ' OR s0.serino ILIKE '||quote_literal(v_serinom);
+            ELSE
+                base_sql := base_sql || ' OR s0.serino = '||quote_literal(v_serinom);
+            END IF;
+        END IF;
+        base_sql := base_sql || ') ORDER BY s0.id DESC LIMIT '||v_limit;
+    ELSE
+        base_sql := 'SELECT s0.* FROM servis s0';
     END IF;
 
-    -- EditNo: SERVISNO prefix-LIKE (+ sayisal ise S.ID). Varsa asagidaki Kapali/tarih blogu atlanir.
     IF v_servisno IS NOT NULL THEN
-        w := w || ' AND ((s.servisno ILIKE '||quote_literal(v_servisno||'%')||')';
+        IF v_servisnolike THEN
+            w := w || ' AND ((s.servisno ILIKE '||quote_literal(v_servisno)||')';
+        ELSE
+            w := w || ' AND ((s.servisno = '||quote_literal(v_servisno)||')';
+        END IF;
         IF v_servisnoid IS NOT NULL AND v_servisnoid <> 0 THEN
             w := w || ' OR (s.id='||v_servisnoid||')';
         END IF;
         w := w || ')';
     END IF;
-
-    -- EditKategori (kategori adi ile esitlik; CI icin ILIKE)
     IF v_kategoriad IS NOT NULL THEN
         w := w || ' AND (SELECT ad FROM kategori k WHERE k.id=s.ekipmanid) ILIKE '||quote_literal(v_kategoriad)||' ';
     END IF;
-    -- AraKonusu
     IF v_konusu IS NOT NULL THEN
         w := w || ' AND s.konusu ILIKE '||quote_literal('%'||v_konusu||'%')||' ';
     END IF;
-    -- editUrun (ekipman adi)
     IF v_urun IS NOT NULL THEN
         w := w || ' AND (SELECT ad FROM ekipmanlar e WHERE e.id=s.ekipmanid) ILIKE '||quote_literal('%'||v_urun||'%')||' ';
     END IF;
-    -- AraMusteri (FIRMA view kolonu)
     IF v_musteri IS NOT NULL THEN
-        w := w || ' AND s.firma ILIKE '||quote_literal('%'||v_musteri||'%')||' ';
+        w := w || ' AND r1.firma ILIKE '||quote_literal('%'||v_musteri||'%')||' ';
     END IF;
-    -- Sube yetkisi (app-uretimi int listesi; guvenli guard)
     IF v_subeyetki IS NOT NULL AND v_subeyetki ~ '^[0-9, ]+$' THEN
         w := w || ' AND s.subeid IN ('||v_subeyetki||') ';
     END IF;
-    -- EditSerino prefix-LIKE
     IF v_serinom IS NOT NULL THEN
-        w := w || ' AND s.serino ILIKE '||quote_literal(v_serinom||'%')||' ';
+        IF v_serinolike THEN
+            w := w || ' AND s.serino ILIKE '||quote_literal(v_serinom)||' ';
+        ELSE
+            w := w || ' AND s.serino = '||quote_literal(v_serinom)||' ';
+        END IF;
     END IF;
 
-    -- cbListe (personel/departman/sube kapsami)
-    IF v_cbliste = 1 THEN        -- Aktif Servislerim (biten hareketi olmayan)
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE COALESCE(sh.bitissec,0)=0 AND sh.servisid=s.id AND sh.personel='||v_kullanan||') ';
-    ELSIF v_cbliste = 2 THEN     -- Ilgili Olduklarim
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE sh.servisid=s.id AND sh.personel='||v_kullanan||') ';
-    ELSIF v_cbliste = 5 THEN     -- Departman Servisleri
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE sh.servisid=s.id AND sh.personel IN '
+    IF v_cbliste = 1 THEN
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE COALESCE(shx.bitissec,0)=0 AND shx.servisid=s.id AND shx.personel='||v_kullanan||') ';
+    ELSIF v_cbliste = 2 THEN
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel='||v_kullanan||') ';
+    ELSIF v_cbliste = 5 THEN
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel IN '
              || ' (SELECT r.id FROM rehber r INNER JOIN roller rol ON r.sinif=rol.id '
              || '  WHERE rol.departman=(SELECT rol2.departman FROM rehber r2 INNER JOIN roller rol2 ON r2.sinif=rol2.id '
              || '  WHERE r2.id='||v_kullanan||'))) ';
-    ELSIF v_cbliste = 8 THEN     -- Sube Servislerim
+    ELSIF v_cbliste = 8 THEN
         w := w || ' AND s.subeid='||v_subeidf||' ';
     END IF;
 
-    -- AraDurumu (dogrudan S.DURUM esitligi)
     IF v_durumvar = 1 THEN
         w := w || ' AND s.durum='||v_durum||' ';
     END IF;
-    -- AraDurumu + EditSorumlu kombinasyonu (hareket bazli EXISTS)
     IF v_durumvar = 1 AND v_sorumlutag > 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE sh.servisid=s.id AND sh.durum='||v_durum||' AND sh.personel='||v_sorumlutag||') ';
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.durum='||v_durum||' AND shx.personel='||v_sorumlutag||') ';
     ELSIF v_durumvar = 0 AND v_sorumlutag > 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE sh.servisid=s.id AND sh.personel='||v_sorumlutag||') ';
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel='||v_sorumlutag||') ';
     ELSIF v_durumvar = 1 AND v_sorumlutag = 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket sh WHERE sh.servisid=s.id AND sh.durum='||v_durum||') ';
+        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.durum='||v_durum||') ';
     END IF;
 
-    -- Kapali/tarih blogu: yalnizca ServisNo bosken
-    IF v_servisno IS NULL THEN
+    IF v_servisno IS NULL AND v_serinom IS NULL THEN
         IF v_kapali = 1 THEN
-            IF v_tamamlanan = 1 THEN            -- bugun (MSSQL gun-esitligi ROUND(float) -> ::date)
+            IF v_tamamlanan = 1 THEN
                 w := w || ' AND (COALESCE(s.ackapa,0)=0 OR s.baslamatarihi::date = current_date) ';
-            ELSIF v_tamamlanan = 19000 THEN     -- iki tarih arasi
-                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR (s.baslamatarihi BETWEEN '||quote_literal(v_tarihbas)||'::timestamp AND '||quote_literal(v_tarihbit)||'::timestamp)) ';
-            ELSE                                -- son 1 ay / 1 yil vb.
-                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR s.baslamatarihi >= '||quote_literal(v_kapalitarih)||'::timestamp) ';
+            ELSIF v_tamamlanan = 19000 THEN
+                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR (s.baslamatarihi BETWEEN '||quote_nullable(v_tarihbas)||'::timestamp AND '||quote_nullable(v_tarihbit)||'::timestamp)) ';
+            ELSE
+                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR s.baslamatarihi >= '||quote_nullable(v_kapalitarih)||'::timestamp) ';
             END IF;
         ELSE
             w := w || ' AND s.ackapa = 0 ';
         END IF;
     END IF;
 
-    -- Son/Sik siralamasi (yalnizca KA join kuruldugunda)
-    IF kajoin AND v_mod = 5 THEN ordr := 'ka.degistirmetarihi DESC';
-    ELSIF kajoin AND v_mod = 3 THEN ordr := 'ka.say DESC';
-    ELSIF v_orderby IS NOT NULL THEN ordr := v_orderby;
+    IF NOT kajoin AND v_orderby IS NOT NULL THEN
+        ordr := v_orderby;
     END IF;
 
-    q := 'SELECT s.* FROM vservislistesi s ' || joinka || w;
-    IF ordr <> '' THEN q := q || ' ORDER BY ' || ordr; END IF;
-    q := q || lim;
+    q := 'WITH base AS ('||base_sql||')
+          SELECT
+              s.id, s.baslamatarihi, s.rehberid, s.servisno, s.konusu, s.durum,
+              s.mus_ilgili, s.bitistarihi, s.serino, s.kasa, s.fiyat_listesi,
+              s.ozelkod, s.yetkikodu, s.notlar, s.ekipmanrehberid, s.depo, s.lokasyonid,
+              s.planlanan_matrahi, s.planlanan_tutar, s.planlanan_kur, s.planlanan_doviz_tutari,
+              s.planlanan_doviz_kuru, s.planlanan_kdv_tutari, s.uygulanan_matrahi, s.uygulanan_tutar,
+              s.uygulanan_kur, s.uygulanan_doviz_tutari, s.uygulanan_doviz_kuru, s.uygulanan_kdv_tutari,
+              s.sorumlu, s.kabul_eden, s.kabul_sekli, s.teslim_alan, s.teslim_eden,
+              s.teslim_tarihi, s.teslim_sekli, s.teslim_kargo_no, s.onaysekli, s.onaytarihi,
+              s.onaylayan, s.onayalan, s.subeid, s.ekleyen, s.eklemetarihi, s.degistiren,
+              s.degistirmetarihi, s.kapsam, s.detaybolumu, s.acil, s.disservis, s.tarih,
+              s.ekipmanid, s.teslimnotu, s.ackapa, s.demirbas, s.yeri, s.yerid, s.turu,
+              s.onaylayacak, s.disonay, s.servisadresi, s.kocanno, s.servisseri, s.onemli,
+              s.projeid, s.giriskaynak, s.yildiz, sh.baslama, sh.bitis, sh.toplam_sure,
+              sh.calisma_suresi, sl.ad AS sorun_tipi, sb.aciklama AS sorun_aciklama,
+              sb.cozum AS sorun_sonucu, r7.firma AS kabul_edenad,
+              CASE WHEN s.demirbas=1 THEN (SELECT du.stokadi FROM demirbas_urun du INNER JOIN demirbas d ON d.kategoriid=du.id WHERE d.id=s.ekipmanid LIMIT 1)
+                   ELSE (SELECT k.ad FROM kategori k WHERE k.id=s.ekipmanid LIMIT 1) END AS kategoriad,
+              CASE WHEN s.demirbas=1 THEN (SELECT d.demirbasadi FROM demirbas d WHERE d.id=s.ekipmanid LIMIT 1)
+                   ELSE (SELECT e.ad FROM ekipmanlar e WHERE e.id=s.ekipmanid LIMIT 1) END AS ekipmanad,
+              r1.firma, fn_serviskisiler(s.durum, s.id)::varchar AS sorumluad, rp.firma AS mus_ilgiliad,
+              (SELECT l.aciklama FROM lokasyon l WHERE l.id=s.lokasyonid LIMIT 1) AS lokasyon,
+              (SELECT r5.firma FROM rehber r5 WHERE r5.grup=334 AND r5.id=s.disonay LIMIT 1) AS onaylayanad,
+              (SELECT r5.firma FROM rehber r5 WHERE r5.grup=334 AND r5.id=s.teslim_alan LIMIT 1) AS teslim_alanad,
+              (SELECT g.anahtar FROM genini g WHERE g.bolum=-3005 AND g.deger=s.onaysekli LIMIT 1) AS onaysekliad,
+              fb.faturatarih, fb.faturano, fb.fatura_tutari, ri.ad AS servis_adresi
+          FROM base s
+          LEFT JOIN v_servis_hareket_ozet sh ON sh.servisid=s.id
+          LEFT JOIN rehber r1 ON r1.id=s.rehberid
+          LEFT JOIN rehber rp ON rp.id=s.mus_ilgili AND rp.grup=334
+          LEFT JOIN LATERAL (
+              SELECT fb1.faturatarih, fb1.faturano, fb1.fatura_tutari
+              FROM fatbaslik fb1
+              WHERE fb1.servisid=s.id AND fb1.tur IN (15,16)
+              ORDER BY fb1.id DESC
+              LIMIT 1
+          ) fb ON true
+          LEFT JOIN (SELECT sb2.*, row_number() OVER (PARTITION BY sb2.servisid ORDER BY sb2.id) AS sirano FROM servisbilgi sb2 WHERE sb2.servistur=210) sb ON sb.sirano=1 AND sb.servisid=s.id
+          LEFT JOIN servisliste sl ON sl.id=sb.servislisteid
+          LEFT JOIN rehberiletisim ri ON ri.rehberid=s.rehberid AND ri.id=s.servisadresi
+          LEFT JOIN rehber r7 ON r7.id=s.ekleyen '
+          || joinka || w;
+    IF ordr <> '' THEN
+        q := q || ' ORDER BY ' || ordr;
+    END IF;
+    IF NOT kajoin THEN
+        q := q || lim;
+    END IF;
 
     RETURN QUERY EXECUTE q;
 END $$;
+
+CREATE INDEX IF NOT EXISTS ix_servis_servisno ON public.servis(servisno);
+CREATE INDEX IF NOT EXISTS ix_servis_serino ON public.servis(serino);

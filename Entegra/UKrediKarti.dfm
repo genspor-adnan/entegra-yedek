@@ -48,14 +48,14 @@ object KrediKarti: TKrediKarti
       OnClick = EkleTusClick
     end
     object SilTus: TToolButton
-      Left = 71
+      Left = 69
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
       OnClick = SilTusClick
     end
     object ToolButton5: TToolButton
-      Left = 142
+      Left = 138
       Top = 0
       Width = 8
       Caption = 'ToolButton5'
@@ -63,7 +63,7 @@ object KrediKarti: TKrediKarti
       Style = tbsSeparator
     end
     object KaydetTus: TToolButton
-      Left = 150
+      Left = 146
       Top = 0
       Caption = 'Kaydet'
       ImageIndex = 10
@@ -71,7 +71,7 @@ object KrediKarti: TKrediKarti
       OnClick = KaydetTusClick
     end
     object IptalTus: TToolButton
-      Left = 221
+      Left = 215
       Top = 0
       Caption = #304'ptal'
       ImageIndex = 17
@@ -79,7 +79,7 @@ object KrediKarti: TKrediKarti
       OnClick = IptalTusClick
     end
     object ToolButton1: TToolButton
-      Left = 292
+      Left = 284
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -87,7 +87,7 @@ object KrediKarti: TKrediKarti
       Style = tbsSeparator
     end
     object KapatTus: TToolButton
-      Left = 300
+      Left = 292
       Top = 0
       Caption = 'Kapat'
       ImageIndex = 18
@@ -949,13 +949,12 @@ object KrediKarti: TKrediKarti
     end
   end
   object TabKK: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabKKBeforeEdit
     BeforePost = TabKKBeforePost
     AfterPost = TabKKAfterPost
     AfterScroll = TabKKAfterScroll
     OnNewRecord = TabKKNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select *'
       ' from KREDIKARTI where ID= :Par')
@@ -969,4 +968,3 @@ object KrediKarti: TKrediKarti
     Top = 366
   end
 end
-

@@ -48,7 +48,7 @@ uses
   dxScrollbarAnnotations, frCoreClasses, cxGridDBTableView, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  FireDAC.Comp.DataSet;
+  FireDAC.Comp.DataSet, System.RegularExpressions;
 
 type
 
@@ -1647,6 +1647,15 @@ var Kosullar: array[1..10] of string[50];
   s: string;
   i : Integer;
   j : Integer;
+  function PGRaporLikeHazirla(const ASQL: string): string;
+  begin
+    Result := ASQL;
+    if AktifVeriMotor <> vmPG then Exit;
+    Result := TRegEx.Replace(Result,
+      '(?<![\w".])((?:[A-Za-z_][A-Za-z0-9_]*\.)?[A-Za-z_][A-Za-z0-9_]*)\s+(not\s+)?(like|ilike)\s+',
+      'CAST($1 AS text) $2$3 ',
+      [roIgnoreCase]);
+  end;
 begin
   Komut.Clear;
 //  Komut.Clear;
@@ -1660,7 +1669,7 @@ begin
 
     i := 0; //Koşulları Diziye Al
     TabKosul.First;
-    while not TabKosul.eof do
+    while  not TabKosul.eof do
     begin
       inc(i);
       if TabKosul.FieldByName('ICERIKTURU').AsInteger = 5 then //date
@@ -1672,7 +1681,7 @@ begin
     end;
 
     qryListe.Close;
-    qryListe.SQL.Text := Komut.Text;
+    qryListe.SQL.Text := PGRaporLikeHazirla(Komut.Text);
     qryListe.open;
 
 
@@ -1764,8 +1773,29 @@ begin
   YeniTus.Visible := (Dokum_Degis_Yetki)or(Standart=0);
   SilTus.Visible := (Dokum_Degis_Yetki)or(Standart=0);
   BuDkmzelBlmeKopyala1.Visible := (Standart=1)and(RolID='-1');
-  LabelOzel.Visible := Standart<>1;
-  TabloYenile(TabDokum, ['%' + Modul + '%', RolID, Standart, Durum]);
+  LabelOzel.Visible  := Standart<>1;
+  if AktifVeriMotor = vmPG then
+    TabDokum.SQL.Text :=
+      PG_MARK +
+      'SELECT D.*, Y.* FROM DOKUMLER D ' +
+      'CROSS JOIN (SELECT CAST(:Mod AS text) AS p_mod, CAST(:Rol AS integer) AS p_rol, CAST(:Stn AS smallint) AS p_stn, CAST(:Drm AS smallint) AS p_drm) P ' +
+      'LEFT OUTER JOIN YETKI Y ON ' +
+      'D.ID = CAST(substring(CAST(Y.MODULID AS varchar(20)) from 5 for 15) AS integer) AND ' +
+      'CAST(Y.MODULID AS text) LIKE ''__99_%'' AND ' +
+      'coalesce(Y.ROLID, 0) = P.p_rol AND ' +
+      'coalesce(Y.TUR, 0) = 1 AND ' +
+      'coalesce(Y.HAK, 0) = 1 ' +
+      'WHERE D.MODUL LIKE P.p_mod ' +
+      'AND D.STANDART = P.p_stn ' +
+      'AND coalesce(D.PRGVERSIYON, 0) >= 0 ' +
+      'AND D.DURUM >= P.p_drm ' +
+      'AND 1 = CASE ' +
+      'WHEN P.p_rol = -1 THEN 1 ' +
+      'WHEN (SELECT TY FROM ROLLER WHERE ID = P.p_rol) = 1 THEN 1 ' +
+      'WHEN Y.HAK = 1 THEN 1 ' +
+      'ELSE 0 END '   +
+      'ORDER BY D.GRUBU, D.RAPORADI';
+  TabloYenile(TabDokum,  ['%' + Modul + '%', RolID, Standart, Durum]);
   TabDokum.First;
 end;
 

@@ -138,6 +138,11 @@ begin
       LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.;
    Tablo.WizardTurkcelestir(WizardKontrol);
    ComboKUR.Enabled := DovizTakibi;
+   // Insert sonrası üretilen ID (identity/serial) fetch edilsin + DML anahtarı belli olsun.
+   //   PG'de FireDAC bunları metadata'dan çıkaramıyor -> KasaID=0 kalıp liste yenilenmiyordu.
+   TabKasalar.UpdateOptions.UpdateTableName := 'KASALAR';
+   TabKasalar.UpdateOptions.KeyFields := 'ID';
+   TabKasalar.UpdateOptions.AutoIncFields := 'ID';
 end;
 
 procedure TKasaTanimWizardDlg.FormShow(Sender: TObject);
@@ -191,7 +196,10 @@ end;
 procedure TKasaTanimWizardDlg.TabKasalarNewRecord(DataSet: TDataSet);
 begin
    TabKasalar.FieldByName('KUR').AsString := CariDoviz;
-   TabKasalar.FieldByName('DURUM').AsBoolean := True;//ComboDURUM.Items[0];
+   // DURUM bit->boolean map'inde HARIÇ (PG'de smallint) -> .AsBoolean patlıyordu.
+   //   Motor-bağımsız: MSSQL boolean alan / PG smallint.
+   with TabKasalar.FieldByName('DURUM') do
+      if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
    TabKasalar.FieldByName('GUNLUKAKSIYONDAGOSTER').AsBoolean := True;
    EditKASAKODU.SetFocus;
    TabKasalar.FieldByName('KASAKODU').AsString := Tablo.KodBulmaSihirbazi(100, 'HESAPPLANI', 'HESAPKODU', 'HESAPADI', 'KASALAR', 'KASAKODU');

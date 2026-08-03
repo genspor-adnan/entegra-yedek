@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>ILAC_TIBBICIHAZ</cbc:ProfileID>
+<cbc:ID>XWY2026000000003</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>BBAF1F78-D885-4B4D-ACC0-D84980092279</cbc:UUID>
+<cbc:IssueDate>2026-07-22</cbc:IssueDate>
+<cbc:IssueTime>14:37:21</cbc:IssueTime>
+<cbc:InvoiceTypeCode>IADE</cbc:InvoiceTypeCode>
+<cbc:Note>MMSMMS2026000000001 nolu, 01.06.2026 09:40:05 tarihli belgeden iade</cbc:Note>
+<cbc:Note>Yalnız SekizYüzOnİki Türk Lirası Doksanİki Kuruş</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:BillingReference>
+<cac:InvoiceDocumentReference>
+<cbc:ID>MMS2026000000001</cbc:ID>
+<cbc:IssueDate>2026-06-01</cbc:IssueDate>
+<cbc:DocumentTypeCode>IADE</cbc:DocumentTypeCode>
+<cbc:DocumentType>İade Edilen Fatura</cbc:DocumentType>
+</cac:InvoiceDocumentReference>
+</cac:BillingReference>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">3302000156</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="MERSISNO">0330200015600001</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">181788-5</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>EKSPERT MEDİKAL ÜRÜNLER SAN. VE TİC. LTD. ŞTİ.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>ŞERİFALİ MAH. HENDEM CAD. NO: 12/B
+34775</cbc:StreetName>
+<cbc:CitySubdivisionName>ÜMRANİYE</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>SARIGAZİ</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>EKSPERT MEDİKAL ÜRÜNLER SAN. VE TİC. LTD. ŞTİ.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Contact>
+<cbc:Telephone>0216 365 8500</cbc:Telephone>
+<cbc:Telefax>0216 365 8500</cbc:Telefax>
+<cbc:ElectronicMail>ekspertmedikal13@outlook.com</cbc:ElectronicMail>
+</cac:Contact>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">6190546099</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>META MEFRUŞAT KONFEKSİYON SAĞLIK SAN TİC LTD ŞTİ</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>MUSTAFA KEMAL MAH 2141 CAD 19/2 ÇANKAYA</cbc:StreetName>
+<cbc:CitySubdivisionName>ÇANKAYA</cbc:CitySubdivisionName>
+<cbc:CityName>ANKARA</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>MALTEPE</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>META MEFRUŞAT KONFEKSİYON SAĞLIK SAN TİC LTD ŞTİ</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:AllowanceCharge>
+<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+<cbc:AllowanceChargeReason>Iskonto</cbc:AllowanceChargeReason>
+<cbc:Amount currencyID="TRY">903.24</cbc:Amount>
+</cac:AllowanceCharge>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">73.90</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">739.02</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">73.902</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">739.02</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">739.02</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">812.92</cbc:TaxInclusiveAmount>
+<cbc:AllowanceTotalAmount currencyID="TRY">903.24</cbc:AllowanceTotalAmount>
+<cbc:PayableAmount currencyID="TRY">812.92</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:Note>Lot No: L2502450 Üretim Tarihi: 08.08.2025 Son Kullanma Tarihi: 08.08.2030 Miktar: 2.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">739.02</cbc:LineExtensionAmount>
+<cac:AllowanceCharge>
+<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+<cbc:AllowanceChargeReason>Iskonto</cbc:AllowanceChargeReason>
+<cbc:MultiplierFactorNumeric>0.55</cbc:MultiplierFactorNumeric>
+<cbc:Amount currencyID="TRY">903.24</cbc:Amount>
+<cbc:BaseAmount currencyID="TRY">1642.26</cbc:BaseAmount>
+</cac:AllowanceCharge>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">73.902</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">739.02</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">73.902</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>3.5 Kilit Vida, Kendinden Yiv Açan(TAN), Uz. 54mm</cbc:Name>
+<cbc:BrandName>MBOSS</cbc:BrandName>
+<cac:BuyersItemIdentification><cbc:ID>08904255306868</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>08904255306868</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>08904255306868</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">08904255306868</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>L2502450</cbc:Value></cac:AdditionalItemProperty>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)08904255306868(LNO)L2502450(URT)250808</cbc:ID>
+</cac:AdditionalItemIdentification>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)08904255306868(LNO)L2502450(URT)250808</cbc:ID>
+</cac:AdditionalItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">821.13</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

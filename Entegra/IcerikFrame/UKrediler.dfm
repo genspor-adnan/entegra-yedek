@@ -181,7 +181,6 @@ object KredilerDlg: TKredilerDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -1752,8 +1751,8 @@ object KredilerDlg: TKredilerDlg
     DataSet = KREDILER
     OnStateChange = DtsKredilerStateChange
     OnDataChange = DtsKredilerDataChange
-    Left = 82
-    Top = 403
+    Left = 138
+    Top = 379
   end
   object KREDILER: TFDQuery
     AfterOpen = KREDILERAfterOpen
@@ -1766,8 +1765,8 @@ object KredilerDlg: TKredilerDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from KREDILER')
-    Left = 30
-    Top = 403
+    Left = 38
+    Top = 371
   end
   object PopupMenu1: TPopupMenu
     Left = 789
@@ -2058,22 +2057,22 @@ object KredilerDlg: TKredilerDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 423
     Top = 276
     object MenuKlasordenEkle: TMenuItem

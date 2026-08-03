@@ -238,9 +238,9 @@ begin
       AsString['RAPORADI'] := ARaporAdi;
       AsString['GRUBU'] := AEkranAdi;
       AsString['MODUL'] := '-';
-      AsBoolean['VARSAYILAN'] := False;
+      AsInteger['VARSAYILAN'] := 0;                  // smallint bit (excluded-8) -> AsBoolean PG'de patlar
       AsInteger['SAYAC'] := 0;
-      AsString['EKLEYEN'] := Kullanan;
+      AsInteger['EKLEYEN'] := StrToIntDef(Kullanan, 0);   // DOKUMLER.EKLEYEN integer (Kullanan string)
     Post;
     RaporId := AsInteger['ID'];
   finally
@@ -252,7 +252,7 @@ begin
     Open;
     Append;
       AsInteger['DOKUMID'] := RaporId;
-      AsString['EKLEYEN'] := Kullanan;
+      AsInteger['EKLEYEN'] := StrToIntDef(Kullanan, 0);   // AYARLARYENI.EKLEYEN integer
     Post;
   finally
     Free;

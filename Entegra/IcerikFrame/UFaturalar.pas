@@ -1165,6 +1165,12 @@ begin
       AFastReport.EnabledDataSets.Add(frxFATBASLIK);
       AFastReport.EnabledDataSets.Add(frxSIPARISDETAY);
    end;
+   // Kullanici ek alanlari (_USER) rapora: baslik (kart) + satirlar (detay).
+   if FATBASLIK.Active and (not FATBASLIK.IsEmpty) then begin
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'FATBASLIK', FATBASLIK.FieldByName('ID').AsInteger);
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'FATURA', 0,
+        'select ID from FATURA where FATBASID=' + FATBASLIK.FieldByName('ID').AsString);
+   end;
 end;
 
 procedure TFaturalarDlg.Calendar1Change(Sender: TObject);
@@ -1275,7 +1281,7 @@ end;
 procedure TFaturalarDlg.AraKodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
 begin
  if Key = 38 then
-    GridFatListeTview.DataController. DataSource.DataSet.Prior
+    GridFatListeTview.DataController.DataSource.DataSet.Prior
  else if Key = 40 then
     GridFatListeTview.DataController.DataSource.DataSet.next
  else
@@ -1283,7 +1289,7 @@ begin
 end;
 
 
-procedure TFaturalarDlg.BaskiOnizlemeMenuClick(Sender: TObject);
+procedure  TFaturalarDlg.BaskiOnizlemeMenuClick(Sender: TObject);
 var
   s:string;
 begin
@@ -1910,7 +1916,7 @@ var
   LFaturaNo, LBaslik: string;
 begin
   if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
-  LFID := FATBASLIK.FieldByName('ID').AsInteger;
+  LFID :=  FATBASLIK.FieldByName('ID').AsInteger;
   LFaturaNo := Trim(FATBASLIK.FieldByName('FATURANO').AsString);
   LBaslik := Trim(FATBASLIK.FieldByName('BASLIK').AsString);
   TEBelgeMesajDlg.Goster(Self, Tablo.FDCnn, LFID, LFaturaNo, LBaslik);
@@ -3246,8 +3252,8 @@ begin
         '%''';
   end;
   LSQL := YeniGelenMarker +
-    ' SELECT F.*, CARIKOD=R.KOD, CARIAD=R.FIRMA, ' +
-    '   YAZIYLATOPLAM=N'''' ' +
+    ' SELECT F.*, R.KOD AS CARIKOD, R.FIRMA AS CARIAD, ' +
+    '   N'''' AS YAZIYLATOPLAM ' +
     ' FROM FATBASLIK F (NOLOCK) ' +
     '   INNER JOIN REHBER R ON R.ID = F.REHBERID ' +
     ' WHERE F.TUR=' + IntToStr(LTur) + ' AND F.EFATURADURUM IN (' + ADurumIn + ')' + AEkKosul +

@@ -310,6 +310,7 @@ type
     procedure TabRehberIletisimNewRecord(DataSet: TDataSet);
     procedure DetayBeforeEdit(DataSet: TDataSet);   // cari detay: log oncesi snapshot
     procedure DetayAfterPost(DataSet: TDataSet);     // cari detay: edit/insert log (ust=cari)
+    procedure DetayAfterOpenPG(DataSet: TDataSet);   // PG: detay grid live-edit ayari (Open sonrasi)
     procedure GridAdresAdViewSelectionChanged(Sender: TcxCustomGridTableView);
     procedure YeniAdresTusClick(Sender: TObject);
     procedure MenuItem7Click(Sender: TObject);
@@ -411,6 +412,56 @@ var
   KNo, GiristekiRehberId : String[15];
   FOturumID : string;   // geri-alinabilir oturum (Cagiran=0 mevcut cari duzenleme); '' = yok
   TabloNo, OncekiTemsilciId : Integer;
+
+function PgRehberDetayTempAdi(AQuery: TFDQuery): string;
+begin
+  Result := 'tmp_rehber_detay_' + LowerCase(AQuery.Name) + '_' + IntToStr(SPID);
+end;
+
+procedure PgRehberDetayTempAc(AQuery: TFDQuery; AYeri, AYerID: Integer; ATicari: Boolean);
+var
+  LTemp, LSql, LKolonlar: string;
+begin
+  LTemp := PgRehberDetayTempAdi(AQuery);
+  if ATicari then
+    LKolonlar := 'SIRA, ETIKET, BILGI, ORJINAL, GIRIS, KAYNAK, ZORUNLU, VARSAYILAN'
+  else
+    LKolonlar := 'SIRA, ETIKET, BILGI, ORJINAL, GIRIS, KAYNAK, ZORUNLU';
+
+  Tablo.FDCnn.ExecSQL('drop table if exists ' + LTemp);
+  if ATicari then
+    LSql :=
+      'create temp table ' + LTemp + ' on commit preserve rows as ' +
+      'select row_number() over(order by SIRA, ETIKET) as TMPID, X.* from (' +
+      'select RB.SIRA, RB.ETIKET, RB.BILGI, RB.BILGI as ORJINAL, RA.GIRIS, RA.KAYNAK, RA.ZORUNLU, RA.VARSAYILAN ' +
+      'from REHBERBILGI RB left outer join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RB.YERI=RA.YERI ' +
+      'where RB.YERI=' + IntToStr(AYeri) + ' and RB.YER_ID=' + IntToStr(AYerID) + ' ' +
+      'union all ' +
+      'select SIRA, ETIKET, '''' as BILGI, '''' as ORJINAL, GIRIS, KAYNAK, ZORUNLU, VARSAYILAN ' +
+      'from REHBERAYAR where YERI=' + IntToStr(AYeri) + ' and ETIKET not in ' +
+      '(select ETIKET from REHBERBILGI where YERI=' + IntToStr(AYeri) + ' and YER_ID=' + IntToStr(AYerID) + ')' +
+      ') X'
+  else
+    LSql :=
+      'create temp table ' + LTemp + ' on commit preserve rows as ' +
+      'select row_number() over(order by SIRA, ETIKET) as TMPID, X.* from (' +
+      'select RB.SIRA, RB.ETIKET, RB.BILGI, RB.BILGI as ORJINAL, RA.GIRIS, RA.KAYNAK, RA.ZORUNLU ' +
+      'from REHBERBILGI RB left outer join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RB.YERI=RA.YERI ' +
+      'where RB.YERI=' + IntToStr(AYeri) + ' and RB.YER_ID=' + IntToStr(AYerID) + ' ' +
+      'union all ' +
+      'select SIRA, ETIKET, '''' as BILGI, '''' as ORJINAL, GIRIS, KAYNAK, ZORUNLU ' +
+      'from REHBERAYAR where YERI=' + IntToStr(AYeri) + ' and ETIKET not in ' +
+      '(select ETIKET from REHBERBILGI where YERI=' + IntToStr(AYeri) + ' and YER_ID=' + IntToStr(AYerID) + ')' +
+      ') X';
+  Tablo.FDCnn.ExecSQL(LSql);
+  Tablo.FDCnn.ExecSQL('alter table ' + LTemp + ' add primary key (TMPID)');
+
+  AQuery.Close;
+  AQuery.UpdateOptions.UpdateTableName := LTemp;
+  AQuery.UpdateOptions.KeyFields := 'TMPID';
+  AQuery.SQL.Text := 'select TMPID, ' + LKolonlar + ' from ' + LTemp + ' order by SIRA';
+  AQuery.Open;
+end;
 
 procedure TRehberWizardDlg.AdresDegistirClick(Sender: TObject);
 var
@@ -772,14 +823,17 @@ begin
       RehberIletID := TabRehberIletisim.Fields[0].AsInteger;
 
       TabCariIlet.Close;
-      TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
-        IntToStr(SPID), [rfReplaceAll]);
-      if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
-        TabCariIlet.SQL.Text := PgSqlCevir(TabCariIlet.SQL.Text);
-      TabCariIlet.Params[0].Value := 1;
-      TabCariIlet.Params[1].Value := RehberIletID; // RehberPerID;
-      TabCariIlet.Params[2].Value := RehberIletID; // RehberPerI;
-      TabCariIlet.Open;
+      if AktifVeriMotor = vmPG then   // PG: session temp tablo -> live edit
+        PgRehberDetayTempAc(TabCariIlet, 1, RehberIletID, False)
+      else
+      begin
+        TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
+          IntToStr(SPID), [rfReplaceAll]);
+        TabCariIlet.Params[0].Value := 1;
+        TabCariIlet.Params[1].Value := RehberIletID; // RehberPerID;
+        TabCariIlet.Params[2].Value := RehberIletID; // RehberPerI;
+        TabCariIlet.Open;
+      end;
       EkleKurIlet := False
     end
     else
@@ -797,6 +851,41 @@ begin
   if ComboGRUP.text = '' then
     raise Exception.Create(RWOnceGrupSeciniz);
 
+end;
+
+// PG live-edit: editlenebilir detay query'sini kaydedilebilir yap. FireDAC PG surucusu
+//   kolon-koken (origin) metasini MSSQL gibi vermez -> hesaplanan (GOREVI) / join (RA.*)
+//   kolonlarini INSERT/UPDATE/WHERE'e katip bozuk DML uretir + dataset'i edit ettirmez.
+//   Cozum (kanitli UEkipmanWizard deseni): Open'DAN SONRA UpdateTableName ver + taban tablo
+//   DISI kolonlarin ProviderFlags'ini BOSALT ([]) -> FireDAC o alanlari her DML'de yok sayar.
+//   ProviderFlags dinamik alanlarda her Open'da sifirlanir -> AfterOpen'da tekrar uygulanir.
+procedure PgDetayEditAyarla(AQuery: TFDQuery; const ATablo: string;
+  const ADisKolonlar: array of string);
+var
+  i: Integer;
+  LF: TField;
+begin
+  if AktifVeriMotor <> vmPG then Exit;
+  if not AQuery.Active then Exit;
+  // UpdateTableName BOS DEGIL -> FireDAC dataset'i editlenebilir sayar (CanModify=True), aksi
+  //   halde PG'de derived-table/subselect otomatik read-only kalir. MSSQL'de tek-tablo/temp
+  //   otomatik editlenebilir; PG'de bu bayrak sart.
+  AQuery.UpdateOptions.RequestLive := True;
+  AQuery.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  AQuery.UpdateOptions.UpdateTableName := ATablo;
+  // KeyFields YALNIZ sonucta ID kolonu VARSA ayarlanir. Temp-tablo/union grid'lerinde (KurIlet/
+  //   PerIlet/Ticari) sonuc ID icermez -> 'ID' vermek FireDAC'i bozar (anahtar-alan yok) ve
+  //   editlemeyi engeller. Bu grid'ler CachedUpdates + elle kaydedildigi icin anahtar gereksiz.
+  if AQuery.FindField('ID') <> nil then
+    AQuery.UpdateOptions.KeyFields := 'ID'
+  else
+    AQuery.UpdateOptions.KeyFields := '';
+  for i := 0 to High(ADisKolonlar) do
+  begin
+    LF := AQuery.FindField(ADisKolonlar[i]);
+    if LF <> nil then
+      LF.ProviderFlags := [];   // hicbir DML'e (INSERT/UPDATE/WHERE) girmesin
+  end;
 end;
 
 procedure TRehberWizardDlg.FormCreate(Sender: TObject);
@@ -830,9 +919,43 @@ begin
   TabTicari.BeforeEdit := DetayBeforeEdit;
   TabTicari.AfterPost  := DetayAfterPost;
 
+  // PG: editlenebilir detay grid'lerini her Open'da kaydedilebilir yap (UpdateTableName +
+  //   join/hesaplanan kolonlarin ProviderFlags'ini bosalt). AfterOpen'da yapilir (dinamik
+  //   alanlar Open'da olusur). MSSQL yolu dokunulmaz (PgDetayEditAyarla vmPG'de is yapar).
+  if AktifVeriMotor = vmPG then
+  begin
+    TabRehber.UpdateOptions.UpdateTableName          := 'REHBER';
+    TabRehber.UpdateOptions.KeyFields                := 'ID';
+    TabRehber.UpdateOptions.AutoIncFields            := 'ID';
+    TabIlgili.AfterOpen         := DetayAfterOpenPG;
+    TabRehberIletisim.AfterOpen := DetayAfterOpenPG;
+    TabPerIletisim.AfterOpen    := DetayAfterOpenPG;
+    TabCariIlet.AfterOpen       := DetayAfterOpenPG;
+    TabPerIlet.AfterOpen        := DetayAfterOpenPG;
+    TabTicari.AfterOpen         := DetayAfterOpenPG;
+    // UpdateTableName Open'DAN ONCE de set edilmeli (read-only bayragi acilista kilitlenir; AfterOpen
+    //   gec kalabilir). ID'li gercek-tablo query'leri: KeyFields='ID'. (union grid'leri yukarida.)
+    TabIlgili.UpdateOptions.UpdateTableName         := 'REHBER';
+    TabIlgili.UpdateOptions.KeyFields               := 'ID';
+    TabIlgili.UpdateOptions.AutoIncFields           := 'ID';   // Post sonrasi yeni ID RETURNING ile alansin (elle INSERT bos deger vermesin)
+    TabRehberIletisim.UpdateOptions.UpdateTableName := 'REHBERILETISIM';
+    TabRehberIletisim.UpdateOptions.KeyFields       := 'ID';
+    TabRehberIletisim.UpdateOptions.AutoIncFields   := 'ID';
+    TabPerIletisim.UpdateOptions.UpdateTableName    := 'REHBERILETISIM';
+    TabPerIletisim.UpdateOptions.KeyFields          := 'ID';
+    TabPerIletisim.UpdateOptions.AutoIncFields      := 'ID';
+  end;
+
   LabelGrup.OnClick := tablo.LabelClickCombobox;
   LabelSinif.OnClick := tablo.LabelClickCombobox;
   LabelBolge.OnClick := tablo.LabelClickCombobox;
+  Label34.OnClick := tablo.LabelClickCombobox;
+  ComboGRUP.Tag := Ops_CariKart_Grup;
+  Tablo.GENINI.ReadImageSection(Ops_CariKart_Grup, ComboGRUP.Properties.Items, True);
+  ComboSINIF.Tag := Ops_CariKart_Sinif;
+  Tablo.GENINI.ReadImageSection(Ops_CariKart_Sinif, ComboSINIF.Properties.Items, True);
+  ComboDURUM.Tag := Ops_CariKart_Durum;
+  Tablo.GENINI.ReadImageSection(Ops_CariKart_Durum, ComboDURUM.Properties.Items, False);
 
   // Yetkilere g?re soldaki butonlar g?r?nmeyecek
 
@@ -858,15 +981,32 @@ begin
       CRMEkstreEkr.Visible := False;
    end;
 
+  // Temp-tablo/union grid'leri: CachedUpdates + elle kaydet (Ekle). MSSQL'de son SELECT tek
+  //   temp-tablo -> otomatik editlenebilir, UpdateTableName BOS kalabilir. PG'de ayni SQL
+  //   derived-table subselect'e cevrilir (read-only) -> FireDAC dataset'i editlemez. UpdateTableName
+  //   BOS DEGIL verilince FireDAC editlenebilir sayar (CanModify=True); Open'DAN ONCE set edilmeli
+  //   (read-only bayragi acilista kilitlenir). Sonuc ID icermez -> KeyFields BOS (yoksa FireDAC bozulur).
   TabPerIlet.CachedUpdates := True;
-  TabPerIlet.UpdateOptions.UpdateTableName := '';
-  TabPerIlet.UpdateOptions.KeyFields := '';
   TabCariIlet.CachedUpdates := True;
-  TabCariIlet.UpdateOptions.UpdateTableName := '';
-  TabCariIlet.UpdateOptions.KeyFields := '';
   TabTicari.CachedUpdates := True;
-  TabTicari.UpdateOptions.UpdateTableName := '';
-  TabTicari.UpdateOptions.KeyFields := '';
+  if AktifVeriMotor = vmPG then
+  begin
+    TabPerIlet.UpdateOptions.UpdateTableName  := 'REHBERBILGI';
+    TabCariIlet.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+    TabTicari.UpdateOptions.UpdateTableName   := 'REHBERBILGI';
+    TabPerIlet.UpdateOptions.KeyFields  := '';
+    TabCariIlet.UpdateOptions.KeyFields := '';
+    TabTicari.UpdateOptions.KeyFields   := '';
+  end
+  else
+  begin
+    TabPerIlet.UpdateOptions.UpdateTableName := '';
+    TabPerIlet.UpdateOptions.KeyFields := '';
+    TabCariIlet.UpdateOptions.UpdateTableName := '';
+    TabCariIlet.UpdateOptions.KeyFields := '';
+    TabTicari.UpdateOptions.UpdateTableName := '';
+    TabTicari.UpdateOptions.KeyFields := '';
+  end;
 end;
 
 procedure TRehberWizardDlg.FormKeyDown(Sender: TObject; var Key: Word;
@@ -974,21 +1114,20 @@ begin
 
   end;
 
-  // Ek alan (REHBER_USER): MEVCUT kartta (ID>0) hemen kur. YENI kartta ID yok -> ek-alan sekmesine
-  // gecince REHBER kaydedilip ID alinca kurulur (CariPageControlPageChanging).
+  // Ek alan (REHBER_USER): acilista kurulmaz; sekmeye ilk geciste kurulur.
   if CariPageControl <> nil then
      CariPageControl.OnPageChanging := CariPageControlPageChanging;
-  if (PanelEkAlanlar <> nil) and (RehberID > 0) then
-  begin
-    tablo.AlanOlustur(TRehberWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TRehberWizardDlg(Self), DtsRehber, 'REHBER_USER'));
-    FEkAlanKuruldu := True;
-  end;
-  // Ek alan olusturulunca SheetEkAlanlar aktiflesiyor -> varsayilan Notlar sekmesine dondur.
   if (CariPageControl <> nil) and (SheetNotlar <> nil) then
      CariPageControl.ActivePage := SheetNotlar;
 
-  OncekiTemsilciId := TabRehber.FieldByName('TEMSILCI').AsInteger;
-  GiristekiRehberId:= TabRehber.Fields[0].AsString;
+  // Cagiran<>0 (secim modu) TabRehber acilmaz (1072 sadece Cagiran=0) -> dinamik dataset kapali,
+  //   alan yok. Acik+alan varsa oku, yoksa 0 (temsilci-degisim takibi zaten yalniz Cagiran=0'da anlamli).
+  if TabRehber.Active and (TabRehber.FindField('TEMSILCI') <> nil) then
+    OncekiTemsilciId := TabRehber.FieldByName('TEMSILCI').AsInteger
+  else
+    OncekiTemsilciId := 0;
+  if TabRehber.Active then
+    GiristekiRehberId := TabRehber.Fields[0].AsString;
 
   // Geri-alinabilir oturum (yalniz Cagiran=0 + MEVCUT cari; GiristekiRehberId dolu = yuklendi).
   // Acilistaki hali SNAPSHOT'a al -> Cancel'da ilk hale don. IMAJ (blob) KAPSAM DISI.
@@ -1050,7 +1189,9 @@ begin
 
   Tabloyenile(TabNotlar, [RehberID]);
 
-  CheckPersonel.Checked := (TabRehber.FieldByName('BAGID').AsString <> '')and(TabRehber.FieldByName('BAGID').AsString <> '0');
+  CheckPersonel.Checked := (TabRehber.FindField('BAGID') <> nil) and
+    (TabRehber.FieldByName('BAGID').AsString <> '') and
+    (TabRehber.FieldByName('BAGID').AsString <> '0');
   EditTEMSILCI.enabled := ModulYetki_TekSubeTum.Cari <> 1;
 
   if (RehberID > 0) and (RehberID <> SonEklenenCari) then
@@ -1165,13 +1306,16 @@ begin
           Ekle(TabPerIlet, 1, RehberPerID, Degis);
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
-       TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-       if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
-         TabPerIlet.SQL.Text := PgSqlCevir(TabPerIlet.SQL.Text);
-       TabPerIlet.Params[0].Value := 1;
-       TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
-       TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
-       TabPerIlet.Open;
+       if AktifVeriMotor = vmPG then   // PG: session temp tablo -> live edit
+         PgRehberDetayTempAc(TabPerIlet, 1, RehberPerID, False)
+       else
+       begin
+         TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+         TabPerIlet.Params[0].Value := 1;
+         TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
+         TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
+         TabPerIlet.Open;
+       end;
        EklePerIlet := False
     end
     else
@@ -1183,10 +1327,11 @@ begin
       RehberIletID := TabRehberIletisim.Fields[0].AsInteger;
 
       TabCariIlet.Close;
-      TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
-        IntToStr(SPID), [rfReplaceAll]);
-      if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
-        TabCariIlet.SQL.Text := PgSqlCevir(TabCariIlet.SQL.Text);
+      if AktifVeriMotor = vmPG then   // PG: DUZ union (editlenebilir) - derived-table subselect DEGIL
+        TabCariIlet.SQL.Text := SQL_PG_KurIlet
+      else
+        TabCariIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',
+          IntToStr(SPID), [rfReplaceAll]);
       TabCariIlet.Params[0].Value := 1;
       TabCariIlet.Params[1].Value := RehberIletID; // RehberPerID;
       TabCariIlet.Params[2].Value := RehberIletID; // RehberPerI;
@@ -1649,12 +1794,12 @@ end;
 procedure TRehberWizardDlg.MenuItem7Click(Sender: TObject);
 begin
   veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'Update REHBERILETISIM Set VARSAYILAN=0 Where AKTIF=1 and REHBERID=&RehID',
+     'Update REHBERILETISIM Set VARSAYILAN=0 Where AKTIF=1 and REHBERID=&RehID',
     ['&RehID'], [TabRehber.FieldByName('ID').AsInteger]);
   veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     'Update REHBERILETISIM Set VARSAYILAN=1 Where AKTIF=1 and REHBERID=&RehID and ID=&IletID',
     ['&RehID', '&IletID'], [TabRehber.FieldByName('ID').AsInteger,
-    TabRehberIletisim.FieldByName('ID').AsInteger]);
+     TabRehberIletisim.FieldByName('ID').AsInteger]);
   TabRehberIletisim.Close;
   TabRehberIletisim.SQL.text := 'select * from REHBERILETISIM where REHBERID=' +
     TabRehber.Fields[0].AsString;
@@ -1682,7 +1827,7 @@ begin
   begin
 //    TabIlgili.Close;
 //    TabIlgili.SQL.text := 'select * from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID);
-    if RehberPerID > 0 then
+    if RehberPerID  > 0 then
       // e?er bir ilgili ?zerinde ?ift t?k yap?p de?i?iklik olacaksa
       //TabIlgili.SQL.Add(' and ID=' + IntToStr(RehberPerID));
        TabloYenile(TabIlgili,[RehberID, RehberPerID])
@@ -1742,20 +1887,20 @@ begin
 
      TabRehberIletisim.Append;
      TabRehberIletisim.FieldByName('AD').AsString := Trim(EtiAdi);
-     TabRehberIletisim.FieldByName('VARSAYILAN').AsBoolean := TabRehberIletisim.RecordCount < 1;
+     TabRehberIletisim.FieldByName('VARSAYILAN').AsBoolean  := TabRehberIletisim.RecordCount < 1;
      TabRehberIletisim.Post;
      IletID := TabRehberIletisim.FieldByName('ID').AsInteger;
      tablo.TablodanSorguAc(1, 'Select '+DbUst(1)+'* from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ' '+DbSinir(1));
 
      if tablo.Query1.RecordCount < 1 then
-        PersonelVarsayilanYap(RehberID, TabRehberIletisim.FieldByName('ID').AsInteger);
+        PersonelVarsayilanYap(RehberID,  TabRehberIletisim.FieldByName('ID').AsInteger);
 
      TabRehberIletisim.Close;
      TabRehberIletisim.SQL.text := 'select * from REHBERILETISIM where REHBERID=' + IntToStr(RehberID);
      //TabRehberIletisim.SQL.Add(' and ID in (Select MAX(ID) from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ' )');
      if AktifVeriMotor = vmPG then TabRehberIletisim.SQL.Text := PgSqlCevir(TabRehberIletisim.SQL.Text);
      TabRehberIletisim.Open;
-     TabRehberIletisim.Locate('ID',IletID,[]);
+     TabRehberIletisim.Locate('ID', IletID,[]);
      GridKurIlet.Visible := true;
      GridAdresAdViewSelectionChanged(nil);
   end
@@ -1922,6 +2067,21 @@ end;
 
 // Cari detay dataset'leri (REHBERILETISIM vb.) icin ORTAK log. BeforeEdit'te snapshot,
 // AfterPost'ta edit -> LogIslemleri, yeni satir -> LogKayitEkle. ust=(REHBER, cari ID).
+// PG: detay query her acildiginda taban tabloyu ver + join/hesaplanan kolonlari DML disi birak.
+procedure TRehberWizardDlg.DetayAfterOpenPG(DataSet: TDataSet);
+var
+  Q: TFDQuery;
+begin
+  if not (DataSet is TFDQuery) then Exit;
+  Q := TFDQuery(DataSet);
+  if Q = TabIlgili then
+    PgDetayEditAyarla(Q, 'REHBER', ['GOREVI'])
+  else if (Q = TabRehberIletisim) or (Q = TabPerIletisim) then
+    PgDetayEditAyarla(Q, 'REHBERILETISIM', [])
+  else if (Q = TabCariIlet) or (Q = TabPerIlet) or (Q = TabTicari) then
+    PgDetayEditAyarla(Q, PgRehberDetayTempAdi(Q), ['GIRIS', 'KAYNAK', 'ZORUNLU', 'ORJINAL']);
+end;
+
 procedure TRehberWizardDlg.DetayBeforeEdit(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: ilk gercek degisiklikte snapshot'i yakala
@@ -2048,14 +2208,17 @@ begin
   if not TabTicari.Active then
   begin
     TabTicari.Close;
-    TabTicari.SQL.text := StringReplace(SQLTicari.text, ':SPID', IntToStr(SPID),
-      [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then   // PG: temp-tablo batch -> subselect (read-only)
-      TabTicari.SQL.Text := PgSqlCevir(TabTicari.SQL.Text);
-    TabTicari.Params[0].Value := 2;
-    TabTicari.Params[1].Value := RehberID;
-    TabTicari.Params[2].Value := RehberID;
-    TabTicari.Open;
+    if AktifVeriMotor = vmPG then   // PG: session temp tablo -> live edit
+      PgRehberDetayTempAc(TabTicari, 2, RehberID, True)
+    else
+    begin
+      TabTicari.SQL.text := StringReplace(SQLTicari.text, ':SPID', IntToStr(SPID),
+        [rfReplaceAll]);
+      TabTicari.Params[0].Value := 2;
+      TabTicari.Params[1].Value := RehberID;
+      TabTicari.Params[2].Value := RehberID;
+      TabTicari.Open;
+    end;
   end;
 end;
 

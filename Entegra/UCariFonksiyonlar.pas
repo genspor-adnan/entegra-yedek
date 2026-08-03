@@ -116,7 +116,7 @@ begin
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
           Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
-          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);   // REHBERBILGI.DEGISTIREN integer (PG)
           Tablo.Query1.ParamByName('PID').AsInteger := RehberBilgiID;
           Tablo.Query1.ExecSQL;
         end
@@ -125,8 +125,8 @@ begin
           Tablo.Query1.Close;
           Tablo.Query1.SQL.Text := ' insert into REHBERBILGI (YERI,YER_ID,SIRA,ETIKET,BILGI,EKLEYEN,SUBEID) values (' +
             IntToStr(Yeri) + ',' + IntToStr(Yeri_Id) + ',' + Table1.FieldByName('SIRA').AsString + ',''' +
-            Table1.FieldByName('ETIKET').AsString + ''',''' + Table1.FieldByName('BILGI').AsString + ''',''' +
-            Kullanan + ''',' + IntToStr(SubeId) + ') select scope_identity()';
+            Table1.FieldByName('ETIKET').AsString + ''',''' + Table1.FieldByName('BILGI').AsString + ''',' +
+            Kullanan + ',' + IntToStr(SubeId) + ') ' + DbKimlikDonus;  // EKLEYEN integer -> tirnaksiz (PG); MSSQL: scope_identity | PG: returning ID
           Tablo.Query1.Open;
           RehberBilgiID := Tablo.Query1.Fields[0].AsInteger;
         end;
@@ -146,7 +146,7 @@ begin
         begin
           Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
           Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
-          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);   // REHBERBILGI.DEGISTIREN integer (PG)
           Tablo.Query1.ParamByName('PID').AsInteger := Table1.FieldByName('RBID').AsInteger;
           RehberBilgiID := Table1.FieldByName('RBID').AsInteger;
         end
@@ -155,7 +155,7 @@ begin
         begin
           Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
           Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
-          Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+          Tablo.Query1.ParamByName('PDEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);   // REHBERBILGI.DEGISTIREN integer (PG)
           Tablo.Query1.ParamByName('PID').AsInteger := Table1.FieldByName('ID').AsInteger;
           RehberBilgiID := Table1.FieldByName('ID').AsInteger;
         end
@@ -176,7 +176,7 @@ begin
           begin
             Tablo.Query1.SQL.Text := ' update REHBERBILGI set BILGI=:PBILGI, DEGISTIREN=:PDEGISTIREN where ID=:PID';
             Tablo.Query1.ParamByName('PBILGI').AsString := Table1.FieldByName('BILGI').AsString;
-            Tablo.Query1.ParamByName('PDEGISTIREN').AsString := Kullanan;
+            Tablo.Query1.ParamByName('PDEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);   // REHBERBILGI.DEGISTIREN integer (PG)
             Tablo.Query1.ParamByName('PID').AsInteger := HedefKayitID;
             RehberBilgiID := HedefKayitID;
           end;
@@ -234,7 +234,7 @@ begin
           try
             Pic.LoadFromStream(Table1.CreateBlobStream(Table1.FieldByName('RESIM'), bmRead));
             Tablo.Query1.SQL.Text := ' update REHBERBILGIRESIM set RESIM=:PResim,DEGISTIREN=' +
-              Kullanan + ',DEGISTIRMETARIHI=GetDate() where REHBERBILGIID=' + IntToStr(RehberBilgiID);
+              Kullanan + ',DEGISTIRMETARIHI=' + DbSimdi + ' where REHBERBILGIID=' + IntToStr(RehberBilgiID);  // :PResim blob param -> PgSqlCevir YOK, DbSimdi seam
             Tablo.Query1.ParamByName('PResim').Assign(Pic);
             Tablo.Query1.ExecSQL;
           finally

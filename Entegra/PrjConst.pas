@@ -2645,6 +2645,7 @@ const
     Ops_FaturaOpsiyon_EFaturaSeriKurallari = -24130;
     Ops_FaturaOpsiyon_EArsivSeriKurallari = -24131;
     Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari = -24133;
+    Ops_FaturaOpsiyon_EBelgeAlanEsleme = -24134;
     Ops_FaturaOpsiyon_EFaturaSabitNotlar = -24097;
     Ops_FaturaOpsiyon_EArsivFaturaSabitNotlar = -24098;
     Ops_FaturaOpsiyon_ESMMSabitNotlar = -24099;

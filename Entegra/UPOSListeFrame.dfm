@@ -122,13 +122,11 @@ object POSListeFrame: TPOSListeFrame
       Align = alClient
       BevelInner = bvNone
       BevelOuter = bvNone
-      PopupMenu = PosListeMenu
       TabOrder = 1
       LookAndFeel.Kind = lfOffice11
       LookAndFeel.NativeStyle = True
       LookAndFeel.ScrollbarMode = sbmClassic
       object GridTview: TcxGridDBTableView
-        PopupMenu = PosListeMenu
         Navigator.Buttons.CustomButtons = <>
         ScrollbarAnnotations.CustomAnnotations = <>
         OnCanFocusRecord = GridTviewCanFocusRecord

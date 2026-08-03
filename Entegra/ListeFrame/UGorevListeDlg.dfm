@@ -198,6 +198,7 @@ object GorevListeDlg: TGorevListeDlg
       HotZoneClassName = 'TcxMediaPlayer8Style'
       AlignSplitter = salBottom
       Control = cxPageControl1
+      ExplicitWidth = 8
     end
     object cxPageControl1: TcxPageControl
       Left = 1
@@ -216,6 +217,10 @@ object GorevListeDlg: TGorevListeDlg
       object cxTabSheet1: TcxTabSheet
         Caption = #304#231'erik'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object MemoNOTLAR: TcxDBMemo
           Left = 0
           Top = 33
@@ -309,6 +314,7 @@ object GorevListeDlg: TGorevListeDlg
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
+            ExplicitTop = 108
             AnchorX = 351
           end
           object GridYorum: TcxGrid
@@ -417,6 +423,10 @@ object GorevListeDlg: TGorevListeDlg
       object TabSheetListe: TcxTabSheet
         Caption = 'Liste'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridGorev: TcxGrid
           Left = 0
           Top = 0
@@ -434,6 +444,7 @@ object GorevListeDlg: TGorevListeDlg
             OnCanFocusRecord = GridGorevViewCanFocusRecord
             OnCellDblClick = GridGorevViewCellDblClick
             OnSelectionChanged = GridGorevViewSelectionChanged
+            Styles.OnGetContentStyle = GridGorevViewStylesGetContentStyle
             DataController.DataModeController.SmartRefresh = True
             DataController.DataSource = DtsGorevler
             DataController.KeyFieldNames = 'ID'
@@ -592,6 +603,10 @@ object GorevListeDlg: TGorevListeDlg
       object TabSheetGrup: TcxTabSheet
         Caption = 'Grup'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object FTileControl: TdxTileControl
           Left = 0
           Top = 0
@@ -1074,10 +1089,10 @@ object GorevListeDlg: TGorevListeDlg
         Transparent = True
       end
       object edTakvimSayisi: TSpinEdit
-        Left = 243
+        Left = 121
         Top = 24
         Width = 43
-        Height = 26
+        Height = 24
         MaxValue = 20
         MinValue = 1
         TabOrder = 0
@@ -1086,7 +1101,7 @@ object GorevListeDlg: TGorevListeDlg
       end
       object ToolButton1: TToolButton
         Tag = 6
-        Left = 286
+        Left = 164
         Top = 24
         Caption = 'Gant '#350'emas'#305
         ImageIndex = 35
@@ -1212,9 +1227,8 @@ object GorevListeDlg: TGorevListeDlg
     Top = 466
   end
   object TabGorevler: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabGorevlerAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT * FROM [dbo].[fn_Prg_IsListesiListeler](2,0,9999,11)')
     Left = 118
@@ -1224,22 +1238,22 @@ object GorevListeDlg: TGorevListeDlg
     OwnerDraw = True
     OnPopup = GorevlerMenuPopup
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 344
     Top = 160
     object GorevInfoMenu: TMenuItem
@@ -1420,7 +1434,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object AraQuery1: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       '   select KO.ID,  type = 0, '
       
@@ -1440,7 +1453,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object Query1: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 144
     Top = 408
   end
@@ -1451,7 +1463,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object TabPersonel: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select R.ID,FIRMA from REHBER R'
       
@@ -1466,7 +1477,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object tabTakvimKaynaklari: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select TOP 1 ID, FIRMA AS PERSONEL FROM REHBER order by 2')
     Left = 764
@@ -1479,13 +1489,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object TabIcerik: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PID'
-        DataType = ftWideString
-        Size = 2
-        Value = '13'
-      end>
     SQL.Strings = (
       
         'select KONUSU, NOTLAR=(select YORUM from GOREVYORUM where GOREVI' +
@@ -1494,6 +1497,13 @@ object GorevListeDlg: TGorevListeDlg
       'where G.ID=:PID')
     Left = 382
     Top = 407
+    ParamData = <
+      item
+        Name = 'PID'
+        DataType = ftWideString
+        Size = 2
+        Value = '13'
+      end>
   end
   object DtsIcerik: TDataSource
     DataSet = TabIcerik
@@ -1502,21 +1512,6 @@ object GorevListeDlg: TGorevListeDlg
   end
   object TabYorum: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <
-      item
-        Name = 'PYer'
-        DataType = ftSmallint
-        Precision = 5
-        Size = 2
-        Value = Null
-      end
-      item
-        Name = 'PYerId'
-        DataType = ftInteger
-        Precision = 10
-        Size = 4
-        Value = Null
-      end>
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -1535,6 +1530,21 @@ object GorevListeDlg: TGorevListeDlg
       'order by 3 DESC')
     Left = 421
     Top = 361
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftSmallint
+        Precision = 5
+        Size = 2
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
   end
   object DtsYorum: TDataSource
     DataSet = TabYorum
@@ -1573,22 +1583,22 @@ object GorevListeDlg: TGorevListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 423
     Top = 276
     object MenuKlasordenEkle: TMenuItem
@@ -1619,4 +1629,3 @@ object GorevListeDlg: TGorevListeDlg
     Top = 336
   end
 end
-

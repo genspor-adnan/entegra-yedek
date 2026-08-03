@@ -45,8 +45,6 @@ object POS: TPOS
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitWidth = 445
-    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -719,14 +717,13 @@ object POS: TPOS
   end
   object TabPOS: TFDQuery
     AutoCalcFields = False
-    Connection = Tablo.FDCnn
     AfterOpen = TabPOSAfterOpen
     BeforeEdit = TabPOSBeforeEdit
     BeforePost = TabPOSBeforePost
     AfterPost = TabPOSAfterPost
     AfterScroll = TabPOSAfterScroll
     OnNewRecord = TabPOSNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select *  from POS P where P.ID= :Par')
     Left = 36

@@ -362,6 +362,10 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Caption = 'Toplamlar'
       ImageIndex = 7
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
@@ -970,6 +974,10 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Caption = 'Rotatif'
       ImageIndex = 2
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelDurum: TPanel
         Left = 0
         Top = 132
@@ -1246,14 +1254,14 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
             Transparent = True
           end
           object DurumRaporuTus: TToolButton
-            Left = 431
+            Left = 409
             Top = 0
             Caption = 'Durum Raporu'
             ImageIndex = 8
             ImageName = 'PngImage15'
           end
           object ToolButton5: TToolButton
-            Left = 527
+            Left = 505
             Top = 0
             Caption = 'D'#246'nem / Oran'
             ImageIndex = 22
@@ -1459,6 +1467,10 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel7: TPanel
         Left = 0
         Top = 233
@@ -1519,6 +1531,7 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 273
         AnchorX = 866
       end
       object GridYorum: TcxGrid
@@ -1622,7 +1635,7 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     object ToolBar1: TToolBar
       Left = 1
       Top = 1
-      Width = 571
+      Width = 912
       Margins.Bottom = 0
       Align = alLeft
       AutoSize = True
@@ -1744,7 +1757,7 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       end
     end
     object JvNavPanelHeader1: TJvNavPanelHeader
-      Left = 572
+      Left = 913
       Top = 1
       Width = 301
       Height = 32
@@ -1758,6 +1771,7 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       ColorFrom = 14540253
       ColorTo = 11776947
       ImageIndex = 0
+      ExplicitLeft = 572
       object CheckAktifPasif: TcxCheckBox
         Left = 0
         Top = 0
@@ -2250,22 +2264,22 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
-    appearance.Gradient1Start = 15722724
-    appearance.Gradient1End = 14599608
-    appearance.Gradient2Start = 14203563
-    appearance.Gradient2End = 15722724
-    appearance.MarginX = 4
-    appearance.MarginY = 2
-    appearance.SeparatorLeading = 6
-    appearance.GutterWidth = 26
-    appearance.SeparatorBackgroundColor = 15656925
-    appearance.SeparatorLineColor = 12961221
-    appearance.GutterColor = 15658729
-    appearance.ItemBackgroundColor = 16448250
-    appearance.ItemSelectedColor = 15128011
-    appearance.FontColor = 7214336
-    appearance.FontDisabledColor = 14599640
-    style = msDefault
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
     Left = 423
     Top = 276
     object MenuKlasordenEkle: TMenuItem

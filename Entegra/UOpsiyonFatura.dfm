@@ -971,21 +971,19 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
-        Width = 512
+        Width = 493
         Height = 464
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = TabGenel
         Properties.CustomButtons.Buttons = <>
         Properties.Style = 8
-        ExplicitWidth = 493
         ClientRectBottom = 464
-        ClientRectRight = 512
+        ClientRectRight = 493
         ClientRectTop = 24
         object TabGenel: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 0
-          ExplicitWidth = 493
           object GroupEFaturaBag: TcxGroupBox
             Left = 3
             Top = 71
@@ -1233,6 +1231,9 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabSeri: TcxTabSheet
           Caption = 'Seri Bilgileri'
           ImageIndex = 5
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridEFaturaSeriKurallari: TcxGrid
             Left = 3
             Top = 47
@@ -1310,9 +1311,140 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             end
           end
         end
+        object TabAlanEsleme: TcxTabSheet
+          Caption = 'Alan E'#351'le'#351'tirme'
+          ImageIndex = 6
+          TabVisible = False
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+          object PanelAlanEslemeSag: TPanel
+            Left = 0
+            Top = 0
+            Width = 493
+            Height = 29
+            Align = alTop
+            BevelOuter = bvNone
+            TabOrder = 1
+            object BtnAlanEslemeDoldur: TcxButton
+              Left = 1
+              Top = 1
+              Width = 104
+              Height = 25
+              Caption = 'Alan Doldur'
+              TabOrder = 0
+              OnClick = BtnAlanEslemeDoldurClick
+            end
+          end
+          object GridAlanEsleme: TcxGrid
+            Left = 0
+            Top = 29
+            Width = 493
+            Height = 411
+            Align = alClient
+            TabOrder = 0
+            object GridAlanEslemeView: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              Navigator.Visible = True
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.Appending = True
+              OptionsView.GroupByBox = False
+              object GridAlanEslemeViewBELGETURU: TcxGridDBColumn
+                Caption = 'Belge T'#252'r'#252
+                DataBinding.FieldName = 'BELGETURU'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'E-Fatura'
+                    Value = 1
+                  end
+                  item
+                    Description = 'E-Ar'#351'iv'
+                    Value = 2
+                  end
+                  item
+                    Description = 'E-'#304'rsaliye'
+                    Value = 7
+                  end>
+                Width = 90
+              end
+              object GridAlanEslemeViewSENARYO: TcxGridDBColumn
+                Caption = 'Senaryo'
+                DataBinding.FieldName = 'SENARYO'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <>
+                Width = 110
+              end
+              object GridAlanEslemeViewCARIOZELKOD: TcxGridDBColumn
+                Caption = 'Cari '#214'zel Kod'
+                DataBinding.FieldName = 'CARIOZELKOD'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridAlanEslemeViewALANTIPI: TcxGridDBColumn
+                Caption = 'Alan Tipi'
+                DataBinding.FieldName = 'ALANTIPI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'Standart'
+                    Value = 'Stn'
+                  end
+                  item
+                    Description = 'Ek'
+                    Value = 'Ek'
+                  end>
+                Width = 70
+              end
+              object GridAlanEslemeViewUBLALAN: TcxGridDBColumn
+                Caption = 'UBL Alan'#305
+                DataBinding.FieldName = 'UBLALAN'
+                DataBinding.IsNullValueType = True
+                Width = 160
+              end
+              object GridAlanEslemeViewKAYNAK: TcxGridDBColumn
+                Caption = 'Kaynak'
+                DataBinding.FieldName = 'KAYNAK'
+                DataBinding.IsNullValueType = True
+                Width = 170
+              end
+              object GridAlanEslemeViewVARSAYILAN: TcxGridDBColumn
+                Caption = 'Varsay'#305'lan'
+                DataBinding.FieldName = 'VARSAYILAN'
+                DataBinding.IsNullValueType = True
+                Width = 170
+              end
+              object GridAlanEslemeViewAKTIF: TcxGridDBColumn
+                Caption = 'Aktif'
+                DataBinding.FieldName = 'AKTIF'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCheckBoxProperties'
+                Width = 45
+              end
+              object GridAlanEslemeViewSIRA: TcxGridDBColumn
+                Caption = 'S'#305'ra'
+                DataBinding.FieldName = 'SIRA'
+                DataBinding.IsNullValueType = True
+                Width = 45
+              end
+            end
+            object GridAlanEslemeLevel: TcxGridLevel
+              GridView = GridAlanEslemeView
+            end
+          end
+        end
         object TabEFatura: TcxTabSheet
           Caption = 'E-Fatura'
           ImageIndex = 1
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CheckIhracatGonderilsin: TcxCheckBox
             Left = 16
             Top = 410
@@ -1470,13 +1602,16 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Top = 31
             Caption = 'Gelen Faturay'#305' Al'
             Style.TransparentBorder = False
-            TabOrder = 14
+            TabOrder = 13
             Transparent = True
           end
         end
         object TabEArsivFatura: TcxTabSheet
           Caption = 'E-Ar'#351'iv Fatura'
           ImageIndex = 2
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CheckEArsivFaturaAktif: TcxCheckBox
             Left = 113
             Top = 35
@@ -1585,7 +1720,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           object URLEArsivGelen: TcxTextEdit
             Left = 112
             Top = 125
-            TabOrder = 11
+            TabOrder = 9
             Text = 'https://api.izibiz.com.tr/v1/earchives-gib-ivd/inbox/GIB'
             Width = 356
           end
@@ -1593,6 +1728,9 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabESMM: TcxTabSheet
           Caption = 'E-SMM'
           ImageIndex = 3
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CheckESMMAktif: TcxCheckBox
             Left = 119
             Top = 24
@@ -1696,6 +1834,9 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabEIrsaliye: TcxTabSheet
           Caption = 'E-'#304'rsaliye'
           ImageIndex = 4
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CheckEIrsaliyeAktif: TcxCheckBox
             Left = 122
             Top = 13
@@ -1828,32 +1969,33 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
       object PCSiparis: TcxPageControl
         Left = 0
         Top = 73
-        Width = 512
+        Width = 493
         Height = 391
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = SheetAlinanSip
         Properties.CustomButtons.Buttons = <>
         OnPageChanging = PCSiparisPageChanging
-        ExplicitWidth = 493
         ClientRectBottom = 387
         ClientRectLeft = 4
-        ClientRectRight = 508
+        ClientRectRight = 489
         ClientRectTop = 24
         object SheetAlinanSip: TcxTabSheet
           Tag = 19
           Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 0
-          ExplicitWidth = 485
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridDurumBaglanti: TcxGrid
             Left = 0
             Top = 0
-            Width = 504
+            Width = 485
             Height = 363
             Align = alClient
             PopupMenu = PopupDurumBglanti
             TabOrder = 0
-            ExplicitWidth = 485
             object GridDurumBaglantiDBTableView1: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
@@ -1943,17 +2085,19 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 9
           Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 1
-          ExplicitWidth = 485
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
       object Panel2: TPanel
         Left = 0
         Top = 0
-        Width = 512
+        Width = 493
         Height = 73
         Align = alTop
         TabOrder = 1
-        ExplicitWidth = 493
         object AlSiparisTus: TcxButton
           Left = 292
           Top = 11
@@ -2159,8 +2303,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object DtsDurumBaglanti: TDataSource
     DataSet = TabDurumBaglanti
-    Left = 48
-    Top = 80
+    Left = 64
+    Top = 96
   end
   object TabEFaturaSeriKurallari: TFDQuery
     AfterOpen = TabEFaturaSeriKurallariAfterOpen

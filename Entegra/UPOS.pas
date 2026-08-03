@@ -9,14 +9,16 @@ uses
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus,
   cxLookAndFeelPainters, cxButtons, UGentegreFrameYonetimi, ToolWin, DB, FireDAC.Comp.Client,
-  DBCtrls, Mask, dxSkinsCore, cxDBEdit, dxSkinLondonLiquidSky, cxLabel,
+  FireDAC.Stan.Option, DBCtrls, Mask, dxSkinsCore, cxDBEdit, dxSkinLondonLiquidSky, cxLabel,
   cxDBLabel, cxGraphics, cxDropDownEdit, cxCalendar, cxImageComboBox,
   cxCurrencyEdit, ExtCtrls, cxSpinEdit, cxImage, cxLookAndFeels, dxSkinLiquidSky,
   cxCheckBox, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
   dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxCoreGraphics;
+  dxSkinVisualStudio2013Light, dxCoreGraphics, FireDAC.Stan.Intf,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TPOS = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -160,13 +162,16 @@ begin
   TabPOS.Close;
   if POSId <> -1 then begin
     if POSId = -2 then
-      TabPOS.SQL.Text := 'select '+DbUst(1)+'P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P ORDER BY ID DESC '+DbSinir(1)
+      TabPOS.SQL.Text := 'select '+DbUst(1)+'P.*, (select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) AS KMMADI from POS P ORDER BY ID DESC '+DbSinir(1)
     else begin
-      TabPOS.SQL.Text := 'select P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P where P.ID = :ID';
+      TabPOS.SQL.Text := 'select P.*, (select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) AS KMMADI from POS P where P.ID = :ID';
       TabPOS.ParamByName('ID').AsInteger := POSId;
     end;
   end else
-    TabPOS.SQL.Text := 'select '+DbUst(0)+'P.*, KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) from POS P '+DbSinir(0);
+    TabPOS.SQL.Text := 'select '+DbUst(0)+'P.*, (select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) AS KMMADI from POS P '+DbSinir(0);
+  // DURUM gercek 0/1 bit ama global CPgBitAdlari'nda HARIC -> smallint gelir; kod .AsBoolean okuyor/yaziyor
+  //   (TabPOSNewRecord). Sorguya ozel bit->boolean maprule (Open'dan ONCE).
+  PgSorguBoolAlan(TabPOS, 'DURUM');
   TabPOS.Open;
 //  FFrameBilgi.Baslik := IIf(
 end;
@@ -182,7 +187,7 @@ begin
   if Tablo.MasrafMerkeziSecimEkrani(0,MASRAFID,MASRAFKODU,MASRAFMERKEZI)then begin
      TabPOS.Edit;
      TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsString:= MASRAFID;
-     //KMMADI=(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  )
+     //(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) AS KMMADI
      BEditKMM.Text := Tablo.AciklamaGetir('MASRAFGELIR','AD',TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsInteger);
   end;
 end;
@@ -277,7 +282,10 @@ end;
 
 procedure TPOS.IptalTusClick(Sender: TObject);
 begin
-   TabPOS.Cancel;
+   if TabPOS.State in [dsInsert, dsEdit] then
+      TabPOS.Cancel;
+   if Assigned(FKapatEylemi) then   // kaydetmeden kapat -> listeye don (Kapat gibi)
+      FKapatEylemi(Self);
 end;
 
 procedure TPOS.Kapatiliyor(var AKapansin: Boolean);
@@ -321,6 +329,17 @@ end;
 
 procedure TPOS.TabPOSAfterOpen(DataSet: TDataSet);
 begin
+   if AktifVeriMotor = vmPG then
+   begin
+     // PG driver kolon-koken metasi vermez -> Post'ta hesaplanan KMMADI alanini INSERT/UPDATE'e katiyor
+     //   ("syntax near ,"). Hedef tablo POS, KMMADI ProviderFlags:=[] (dinamik alan her acilista sifirlanir).
+     TabPOS.UpdateOptions.UpdateTableName := 'POS';
+     TabPOS.UpdateOptions.KeyFields := 'ID';
+     TabPOS.UpdateOptions.AutoIncFields := 'ID';
+     TabPOS.UpdateOptions.UpdateMode := upWhereKeyOnly;
+     if TabPOS.FindField('KMMADI') <> nil then
+        TabPOS.FieldByName('KMMADI').ProviderFlags := [];
+   end;
    BEditKMM.Text := Tablo.AciklamaGetir('MASRAFGELIR','AD',TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsInteger);
 end;
 
@@ -346,7 +365,7 @@ end;
 
 procedure TPOS.TabPOSBeforeEdit(DataSet: TDataSet);
 begin
-  if LogGun >0 then
+  if LogGun > 0 then
      Tablo.OncekiLogBelirle(TabPOS);
 end;
 
@@ -366,7 +385,7 @@ begin
   IslemOp := 'E';          // yeni POS -> kapanis fallback bunu EKLEME olarak taniyacak
   FEkleLogland := False;   // yeni insert basladi -> ekleme logu (kaydet/fallback) yeniden garanti
   EdiBANKATICARIHESAPKODUPropertiesButtonClick(Self,0);
-  TabPos.FieldByName('DURUM').AsBoolean:=True;
+  AlanBoolYaz(TabPos.FieldByName('DURUM'), True);
   TabPos.FieldByName('MASRAFCIKIS').AsInteger:=2;
   TabPOS.FieldByName('ALINISTARIHI').AsDateTime:=Tablo.GENINI.BugunTrh;
   TabPOS.FieldByName('KODU').Value := Tablo.KodBulmaSihirbazi(108,'HESAPPLANI','HESAPKODU','HESAPADI', 'POS', 'KODU');

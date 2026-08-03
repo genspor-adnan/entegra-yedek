@@ -19,6 +19,7 @@ object StokListeDlg: TStokListeDlg
     Left = 3
     Top = 3
     Width = 968
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -125,15 +126,17 @@ object StokListeDlg: TStokListeDlg
   end
   object GridStok: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 974
-    Height = 136
+    Height = 139
     Align = alClient
     PopupMenu = PmStok
     TabOrder = 3
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 136
     object GridStokView: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -391,6 +394,7 @@ object StokListeDlg: TStokListeDlg
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = Panel1
+    ExplicitWidth = 8
   end
   object Panel1: TPanel
     Left = 0
@@ -949,6 +953,10 @@ object StokListeDlg: TStokListeDlg
             object TabSheetSeriLot: TcxTabSheet
               Caption = 'Seri / Lot'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object GridSeriLot: TcxGrid
                 Left = 0
                 Top = 27
@@ -1405,6 +1413,10 @@ object StokListeDlg: TStokListeDlg
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3

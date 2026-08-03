@@ -4,17 +4,17 @@
 interface
 
 const
-  KomutNo  =    32924; // 17733;
+  KomutNo  =  32941; // 17733;
 
 var
-  VersBaslNo  : SmallInt;
+  VersBaslNo : SmallInt;
 
 procedure VersiyonGuncelle;
 
 implementation
 
 uses UAnaForm,Classes, SysUtils, Utablo,GenUpdateWS,messages,Dialogs, StdCtrls,
-      FetaKurulusSiniflari,StrUtils,PrjConst;
+      FetaKurulusSiniflari,StrUtils,PrjConst,UVeriMotor;
 
 var
    komutlar : TStringList;
@@ -23,21 +23,31 @@ var
 procedure VersiyonGuncelle;
 var
   i,j,yapilmayanKomut,AltSorguHataSay,ToplamHataSay:integer;
+  LPgKomut, LMotorUygun: Boolean;
 begin
   yapilmayanKomut   := 0;
+  ToplamHataSay     := 0;
   Tablo.TablodanSorguAc(1,'select DEGER from GENINI where BOLUM='+IntToStr(Ops_GenelOpsiyon_VersiyonNo)+' ');
 
   GResult:=Guncelleme.guncelleme(1,Tablo.Query1.FieldByName('DEGER').AsInteger+1,KomutNo);
 
   for i := 0 to Length(GResult) - 1 do begin
     AltSorguHataSay := 0;
-    Tablo.GuncellemeSatiriCalistir(GResult[i].KOMUT,AltSorguHataSay);
-    if AltSorguHataSay>0 then begin
-      ToplamHataSay := ToplamHataSay+AltSorguHataSay;
-      Inc(yapilmayanKomut);
-      Tablo.OlaylarIslemleri(3,10,101,-1,0,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA, 'null');
+    // Komut hangi motora ait? ACIKLAMA'da '#pg'/'#PG' -> PG komutu; yoksa MSSQL/varsayilan komut.
+    // Yalniz aktif motora uyan komut calistirilir; uyumsuz olan ATLANIR (versiyon no yine ilerler).
+    LPgKomut := ContainsText(GResult[i].ACIKLAMA, '#pg');
+    LMotorUygun := (LPgKomut = (AktifVeriMotor = vmPG));
+    if LMotorUygun then begin
+      Tablo.GuncellemeSatiriCalistir(GResult[i].KOMUT,AltSorguHataSay);
+      if AltSorguHataSay>0 then begin
+        ToplamHataSay := ToplamHataSay+AltSorguHataSay;
+        Inc(yapilmayanKomut);
+        Tablo.OlaylarIslemleri(3,10,101,-1,0,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA, 'null');
+      end else
+        Tablo.OlaylarIslemleri(1,10,101,-1,1,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA,'null');//TUR : 1-Bilgi, 2-Uyarı, 3-Hata
     end else
-      Tablo.OlaylarIslemleri(1,10,101,-1,1,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA,'null');//TUR : 1-Bilgi, 2-Uyarı, 3-Hata
+      // Motor uyumsuz komut atlandi (or. PG'de MSSQL komutu ya da MSSQL'de #pg komutu). Bilgi logla.
+      Tablo.OlaylarIslemleri(1,10,101,-1,1,GResult[i].VERSIYONNO,GResult[i].ACIKLAMA+' [atlandi: motor uyumsuz]','null');
 
     Tablo.Query2.Close;
     Tablo.Query2.SQL.Text:= 'UPDATE GENINI SET DEGER='+IntToStr(GResult[i].VERSIYONNO)+' where BOLUM= '+IntToStr(Ops_GenelOpsiyon_VersiyonNo);

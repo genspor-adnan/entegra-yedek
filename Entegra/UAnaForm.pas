@@ -706,7 +706,7 @@ var
 
 procedure TAnaForm.MesajSayiYaz;
 begin
-  Tablo.TablodanSorguAc(1,'select count(*) from MESAJLOGKULLANICI K where K.ALICIID='+Kullanan+'and K.OKUNMATARIHI is null');
+  Tablo.TablodanSorguAc(1,'select count(*) from MESAJLOGKULLANICI K where K.ALICIID='+Kullanan+' and K.OKUNMATARIHI is null');
   if Tablo.Query1.Fields[0].AsInteger>0 then
      MesajMenu.Caption := Tablo.Query1.Fields[0].AsString
   else
@@ -1721,7 +1721,11 @@ begin
 
   StatusBar1.Panels[0].Text := KullanAdi + ' (' + Kullanan + ')';
   // Bilgisayar / DB / DEPO. ServerAdi'ye (yedek onu '/' ile parse ediyor) DOKUNMA -> sadece gosterim.
-  StatusBar1.Panels[1].Text := ServerAdi + ' / ' + ULog.DepoDBAdi;
+  // PG tek-DB: ayrı GENDEPO yok -> depo bilgisini gösterme. MSSQL'de eskisi gibi Server / Depo.
+  if AktifVeriMotor = vmPG then
+    StatusBar1.Panels[1].Text := ServerAdi
+  else
+    StatusBar1.Panels[1].Text := ServerAdi + ' / ' + ULog.DepoDBAdi;
 
   StatusBar1.Panels[3].Text := 'SPID:' + IntToStr(SPID);
   StatusBar1.Panels[2].Text := 'Ver.: ' + GetFileVersion(Application.ExeName);

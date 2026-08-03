@@ -41,7 +41,8 @@ uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
   FireDAC.Comp.Client, FireDAC.Phys.MSSQL, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf,
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
-  FireDAC.VCLUI.Wait, FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase;
+  FireDAC.VCLUI.Wait, FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase,
+  dxBarBuiltInMenu, cxPC, cxTextEdit, cxMaskEdit, cxDropDownEdit;
 
 type
    TSQLConnection = record
@@ -53,21 +54,23 @@ type
 
    TOpenSQLServerForm = class(TForm)
       Panel2: TPanel;
-      cboServers: TComboBox;
-      cboDatabases: TComboBox;
-    ledUserName: TEdit;
-    ledPassword: TEdit;
-      TestConButton: TBitBtn;
       btnOk: TBitBtn;
       btnCancel: TBitBtn;
-      EditTimeOut: TEdit;
       ADOConnection1: TFDConnection;
     FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink;
-    yetkilendirmeComboBox: TComboBox;
-    Bevel1: TBevel;
     Panel1: TPanel;
     Label5: TLabel;
     Label6: TLabel;
+    cxPageControl1: TcxPageControl;
+    TabSheetSQL: TcxTabSheet;
+    Bevel1: TBevel;
+    EditTimeOut: TEdit;
+    TestConButton: TBitBtn;
+    cboDatabases: TComboBox;
+    cboServers: TComboBox;
+    ledPassword: TEdit;
+    ledUserName: TEdit;
+    yetkilendirmeComboBox: TComboBox;
     saglayiciComboBox: TComboBox;
     EditRemoteServer: TEdit;
     TestRemoteCon: TBitBtn;
@@ -79,6 +82,23 @@ type
     cxLabel8: TcxLabel;
     cxLabel1: TcxLabel;
     cxLabel5: TcxLabel;
+    TabSheetPG: TcxTabSheet;
+    ComboSQL: TcxComboBox;
+    cxLabel6: TcxLabel;
+    cxLabelPgSunucu: TcxLabel;
+    cxLabelPgPort: TcxLabel;
+    cxLabelPgVeritabani: TcxLabel;
+    cxLabelPgKullanici: TcxLabel;
+    cxLabelPgSifre: TcxLabel;
+    EditPgSunucu: TEdit;
+    EditPgPort: TEdit;
+    EditPgVeritabani: TComboBox;
+    EditPgKullanici: TEdit;
+    EditPgSifre: TEdit;
+    BtnTest: TBitBtn;
+    procedure btnTestClick(Sender: TObject);
+    procedure EditPgVeritabaniDropDown(Sender: TObject);
+    procedure ComboSQLPropertiesChange(Sender: TObject);
     procedure rbLoginInfoClick(Sender: TObject);
     procedure rbIntegratedSecurityClick(Sender: TObject);
     procedure cboServersClick(Sender: TObject);
@@ -107,6 +127,8 @@ type
       procedure ParseConnectionString(AConnStr: string);
 
       function TestConnection(Sender: TObject):Boolean;
+      // Sekme alanlarından geçici bağlantı ile test (kaydetmeden). APg: PG mi MSSQL mi.
+      procedure BaglantiTestEt(APg: Boolean);
    public
       class function Execute: widestring;
    //   public
@@ -132,7 +154,7 @@ SQLNCLI.1  --> Sql Native Client (2005)
 SQLNCLI10.1 --> Sql Native Client 10 (2008)
 }
 
-uses Variants, WinSock, Fetautil, UVeriMotor// ,AsyncCalls
+uses Variants, WinSock, Fetautil, UVeriMotor, UGenSifre// ,AsyncCalls
 {$IFNDEF NO_UTABLO}
 , UTablo
 {$ENDIF};
@@ -150,7 +172,7 @@ begin
     Exit;
 
   LLookupConnection := TFDConnection.Create(nil);
-  LLookupQuery := TFDQuery.Create(nil);
+  LLookupQuery :=  TFDQuery.Create(nil);
   try
     try
       LLookupConnection.LoginPrompt := False;
@@ -159,14 +181,17 @@ begin
       LLookupConnection.Connected := True;
 
       LLookupQuery.Connection := LLookupConnection;
+      // sys.databases MSSQL-özel sistem görünümü -> bu lookup HER ZAMAN MSSQL. Engine-bağımlı
+      //   DbUst/DbSinir (global AktifVeriMotor PG iken 'limit' üretip MSSQL'e gidince patlıyordu)
+      //   yerine sabit MSSQL 'TOP 1'.
       LLookupQuery.SQL.Text :=
-        'select '+DbUst(1)+'name ' +
+        'select TOP 1 name ' +
         'from sys.databases ' +
-        'where lower(name) = lower(:DBName) '+DbSinir(1);
+        'where lower(name) = lower(:DBName)';
       LLookupQuery.ParamByName('DBName').AsString := Result;
       LLookupQuery.Open;
       if not LLookupQuery.IsEmpty then
-        Result := Trim(LLookupQuery.Fields[0].AsString);
+         Result := Trim(LLookupQuery.Fields[0].AsString);
     except
       Result := Trim(ADatabaseName);
     end;
@@ -176,10 +201,31 @@ begin
   end;
 end;
 
+function InstalledMSSQLODBCDriverParam: string;
+var
+  Reg: TRegistry;
+begin
+  Result := '';
+  Reg := TRegistry.Create(KEY_READ);
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    if Reg.OpenKeyReadOnly('SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers') then
+    begin
+      if SameText(Reg.ReadString('ODBC Driver 18 for SQL Server'), 'Installed') then
+        Result := 'ODBCDriver=ODBC Driver 18 for SQL Server;'
+      else if SameText(Reg.ReadString('ODBC Driver 17 for SQL Server'), 'Installed') then
+        Result := 'ODBCDriver=ODBC Driver 17 for SQL Server;';
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
 function BuildFireDACConnectionString(const AServerName, ADatabaseName, AUserName, APassword: string;
   const AUseWindowsAuth: Boolean; ALoginTimeout: Integer = 15): string;
 begin
   Result := 'DriverID=MSSQL;' +
+    InstalledMSSQLODBCDriverParam +
     'ODBCAdvanced={TrustServerCertificate=yes};' +
     'MARS_Connection=Yes;' +
     'MultipleActiveResultSets=True;' +
@@ -209,6 +255,8 @@ begin
   AConnection.LoginPrompt := False;
   AConnection.Params.Clear;
   AConnection.Params.Add('DriverID=MSSQL');
+  if InstalledMSSQLODBCDriverParam <> '' then
+    AConnection.Params.Add(StringReplace(InstalledMSSQLODBCDriverParam, ';', '', [rfReplaceAll]));
   AConnection.Params.Add('ODBCAdvanced=TrustServerCertificate=yes');
   AConnection.Params.Add('MARS_Connection=Yes');
   AConnection.Params.Add('MultipleActiveResultSets=True');
@@ -260,6 +308,8 @@ begin
   AConnection.LoginPrompt := False;
   AConnection.Params.Clear;
   AConnection.Params.Add('DriverID=MSSQL');
+  if InstalledMSSQLODBCDriverParam <> '' then
+    AConnection.Params.Add(StringReplace(InstalledMSSQLODBCDriverParam, ';', '', [rfReplaceAll]));
   AConnection.Params.Add('ODBCAdvanced=TrustServerCertificate=yes');
   AConnection.Params.Add('MARS_Connection=Yes');
   AConnection.Params.Add('MultipleActiveResultSets=True');
@@ -311,7 +361,9 @@ begin
       else if SameText(LKey, 'ODBCAdvanced') then
         AConnection.Params.Values['ODBCAdvanced'] := StringReplace(StringReplace(LValue, '{', '', [rfReplaceAll]), '}', '', [rfReplaceAll])
       else if SameText(LKey, 'DriverID') then
-        AConnection.Params.Values['DriverID'] := LValue;
+        AConnection.Params.Values['DriverID'] := LValue
+      else if SameText(LKey, 'ODBCDriver') then
+        AConnection.Params.Values['ODBCDriver'] := LValue;
     end;
   finally
     LParams.Free;
@@ -331,6 +383,12 @@ begin
   end;
   if (ALoginTimeout > 0) and (AConnection.Params.Values['LoginTimeout'] = '') then
     AConnection.Params.Values['LoginTimeout'] := IntToStr(ALoginTimeout);
+  AConnection.Params.Values['MARS_Connection'] := 'Yes';
+  AConnection.Params.Values['MultipleActiveResultSets'] := 'True';
+
+  // NOT: BAGLANTI HAVUZU (Pooled) GECICI GERI ALINDI - idle-in-transaction lock blogu testi icin.
+  // WAN fetch round-trip azalt: RowsetSize default 50 -> 500 (alt TFDQuery'ler devralir).
+  AConnection.FetchOptions.RowsetSize := 500;
 
   AConnection.Params.Values['Database'] :=
     ResolveFDDatabaseName(AConnection, AConnection.Params.Values['Database']);
@@ -639,15 +697,195 @@ begin
 end;
 
 procedure TOpenSQLServerForm.btnOKClick(Sender: TObject);
+var
+   LCnn: TFDConnection;
+   LCst: string;
+   LMotorDegisti: Boolean;
 begin
-   TestConnection(Sender);
+   // Yeni seçilen motor, ÇALIŞAN motordan farklı mı? Farklıysa in-session geçiş yapma:
+   //   PG-diyalekt sorgu (LIMIT vb.) MSSQL'e giderse "syntax near 'limit'" patlar. Bunun yerine
+   //   kaydet + Halt -> kullanıcı programı yeniden açar, temiz olarak doğru motora bağlanır.
+   LMotorDegisti := ((ComboSQL.ItemIndex = 1) and (AktifVeriMotor <> vmPG))
+                 or ((ComboSQL.ItemIndex <> 1) and (AktifVeriMotor <> vmMSSQL));
 
-   GenRegIni.RegWriteString('','GenDataTimeOut', EditTimeOut.Text, 'C');
-//   if (sc.ServerName = '') or (sc.DatabaseName = '') then
-   if Baglandi then
-      ModalResult := mrOK
+   Baglandi := True;
+   LCnn := TFDConnection.Create(nil);
+   try
+      LCnn.LoginPrompt := False;
+      if ComboSQL.ItemIndex = 1 then
+         MotorBaglantisiKur(LCnn, vmPG, Trim(EditPgSunucu.Text), Trim(EditPgVeritabani.Text),
+                            Trim(EditPgKullanici.Text), EditPgSifre.Text, StrToIntDef(Trim(EditPgPort.Text), 5432))
+      else
+      begin
+         LCst := BuildFireDACConnectionString(cboServers.Text, cboDatabases.Text,
+            ledUserName.Text, ledPassword.Text,
+            yetkilendirmeComboBox.ItemIndex = 0, StrToIntDef(EditTimeOut.Text, 15));
+         ApplyFireDACConnectionString(LCnn, LCst, StrToIntDef(EditTimeOut.Text, 15));
+      end;
+      try
+         LCnn.Open; LCnn.Close;
+      except
+         on E: Exception do begin Baglandi := False; MessageDlg(E.Message, mtError, [mbOK], 0); end;
+      end;
+   finally
+      if LCnn.Connected then LCnn.Close;
+      LCnn.Free;
+   end;
+
+   if not Baglandi then begin
+      ModalResult := mrCancel;   // bağlanamadı -> formda kal, motor/kayıt değiştirme
+      Exit;
+   end;
+
+   // Bağlantı başarılı -> ayarları KALICI yaz (motor seçimi + o motorun bağlantı bilgileri).
+   GenRegIni.RegWriteString('','VeriMotor', IIf(ComboSQL.ItemIndex = 1, 'PostgreSQL', 'MSSQL'), 'C');
+   if ComboSQL.ItemIndex = 1 then
+   begin
+      GenRegIni.RegWriteString('PG','Sunucu',     Trim(EditPgSunucu.Text),     'C');
+      GenRegIni.RegWriteString('PG','Port',       Trim(EditPgPort.Text),       'C');
+      GenRegIni.RegWriteString('PG','Veritabani', Trim(EditPgVeritabani.Text), 'C');
+      GenRegIni.RegWriteString('PG','Kullanici',  Trim(EditPgKullanici.Text),  'C');
+      GenRegIni.RegWriteString('PG','Sifre',      Sifre(EditPgSifre.Text),     'C');  // SIFRELI
+   end
    else
-      ModalResult := mrCancel;
+   begin
+      GenRegIni.RegWriteString('','ConnectionString', Sifre(LCst), 'C');  // SIFRELI
+      GenRegIni.RegWriteString('','GenDataTimeOut', EditTimeOut.Text, 'C');
+   end;
+
+   if LMotorDegisti then begin
+      // Native MessageBox kullan: VCL MessageDlg app kapanmaya giderken DevExpress skin paint'i
+      //   gecikince transparent/boş çiziliyordu. Windows MessageBox anında çizilir (skin'e tabi değil).
+      Application.MessageBox(
+         'Veri motoru değiştirildi. Değişikliğin geçerli olması için program kapanacak; lütfen yeniden başlatın.',
+         'Bilgi', MB_OK or MB_ICONINFORMATION or MB_TOPMOST);
+      // Halt finalization sırasında (FireDAC/DevExpress teardown) nil erişimiyle AV veriyordu.
+      //   ExitProcess process'i finalization ÇALIŞTIRMADAN anında bitirir (reg zaten yazıldı).
+      ExitProcess(0);
+   end;
+
+   ModalResult := mrOK;
+end;
+
+procedure TOpenSQLServerForm.btnTestClick(Sender: TObject);
+begin
+   // ComboSQL'de hangi motor seçiliyse ONU test et (PostgreSQL = ItemIndex 1).
+   BaglantiTestEt(ComboSQL.ItemIndex = 1);
+end;
+
+procedure TOpenSQLServerForm.EditPgVeritabaniDropDown(Sender: TObject);
+var
+   LCnn: TFDConnection;
+   LQry: TFDQuery;
+   LEski, LBagDb: string;
+   LEskiSilent: Boolean;
+begin
+   // Girilen sunucu/port/kullanıcı/şifre ile bağlanıp sunucudaki DB'leri listele.
+   //   pg_database SHARED katalog: hangi DB'ye bağlanırsak bağlanalım TÜM DB adlarını verir.
+   //   Bağlantı DB'si olarak mevcut alan değeri (yoksa 'postgres') kullanılır.
+   LEski := Trim(EditPgVeritabani.Text);
+   LBagDb := LEski;
+   if LBagDb = '' then LBagDb := 'postgres';
+   EditPgVeritabani.Items.Clear;
+   LEskiSilent := FDManager.SilentMode;
+   FDManager.SilentMode := True;
+   LCnn := TFDConnection.Create(nil);
+   LQry := TFDQuery.Create(nil);
+   try
+      LCnn.LoginPrompt := False;
+      MotorBaglantisiKur(LCnn, vmPG, Trim(EditPgSunucu.Text), LBagDb,
+         Trim(EditPgKullanici.Text), EditPgSifre.Text, StrToIntDef(Trim(EditPgPort.Text), 5432));
+      try
+         LCnn.Open;
+         LQry.Connection := LCnn;
+         LQry.SQL.Text :=
+            'select datname from pg_database ' +
+            'where datistemplate = false and datallowconn = true order by datname';
+         LQry.Open;
+         while not LQry.Eof do
+         begin
+            EditPgVeritabani.Items.Add(LQry.Fields[0].AsString);
+            LQry.Next;
+         end;
+         LQry.Close;
+         LCnn.Close;
+      except
+         on E: Exception do
+            Application.MessageBox(PChar(
+               'Veritabanı listesi alınamadı.' + #13#10#13#10 +
+               'Önce Sunucu / Port / Kullanıcı / Şifre bilgilerini doğru girin.'),
+               'PostgreSQL', MB_OK or MB_ICONWARNING or MB_TOPMOST);
+      end;
+   finally
+      if LCnn.Connected then LCnn.Close;
+      LQry.Free;
+      LCnn.Free;
+      FDManager.SilentMode := LEskiSilent;
+   end;
+   EditPgVeritabani.Text := LEski;   // seçili değeri koru
+end;
+
+procedure TOpenSQLServerForm.BaglantiTestEt(APg: Boolean);
+var
+   LCnn: TFDConnection;
+   LCst: string;
+   LOk: Boolean;
+   LEskiSilent: Boolean;
+   LMotorAd, LSunucu, LDb: string;
+begin
+   // Sekme alanlarından geçici bağlantı ile SINA (kaydetme, aktif bağlantıya dokunma).
+   //   SilentMode=True: FireDAC'in kendi ham hata penceresini bastır -> hatayı biz gösterelim.
+   LOk := True;
+   LEskiSilent := FDManager.SilentMode;
+   FDManager.SilentMode := True;
+   LCnn := TFDConnection.Create(nil);
+   try
+      LCnn.LoginPrompt := False;
+      if APg then
+         MotorBaglantisiKur(LCnn, vmPG, Trim(EditPgSunucu.Text), Trim(EditPgVeritabani.Text),
+                            Trim(EditPgKullanici.Text), EditPgSifre.Text, StrToIntDef(Trim(EditPgPort.Text), 5432))
+      else
+      begin
+         LCst := BuildFireDACConnectionString(cboServers.Text, cboDatabases.Text,
+            ledUserName.Text, ledPassword.Text,
+            yetkilendirmeComboBox.ItemIndex = 0, StrToIntDef(EditTimeOut.Text, 15));
+         ApplyFireDACConnectionString(LCnn, LCst, StrToIntDef(EditTimeOut.Text, 15));
+      end;
+      try
+         LCnn.Open;
+         LCnn.Close;
+      except
+         on E: Exception do
+         begin
+            LOk := False;
+            // Ham FireDAC/libpq metni (E.Message) DEĞİL, bağlantı-hatasındaki AYNI anlaşılır mesaj.
+            if APg then
+            begin
+               LMotorAd := 'PostgreSQL'; LSunucu := Trim(EditPgSunucu.Text); LDb := Trim(EditPgVeritabani.Text);
+            end
+            else
+            begin
+               LMotorAd := 'SQL Server'; LSunucu := Trim(cboServers.Text); LDb := Trim(cboDatabases.Text);
+            end;
+            Application.MessageBox(PChar(
+               LMotorAd + ' veritabanı sunucusuna bağlanılamadı.' + #13#10 +
+               'Sunucu: ' + LSunucu + '     Veritabanı: ' + LDb + #13#10#13#10 +
+               'Olası nedenler:' + #13#10 +
+               '  • Sunucu kapalı ya da yeniden başlatılıyor' + #13#10 +
+               '  • İnternet/ağ bağlantısı yok veya VPN kapalı' + #13#10 +
+               '  • Sunucu güvenlik duvarı bu bilgisayarın IP adresine kapalı' + #13#10 +
+               '  • Sunucu adresi / port / kullanıcı / şifre hatalı'),
+               'Bağlantı Test', MB_OK or MB_ICONERROR or MB_TOPMOST);
+         end;
+      end;
+   finally
+      if LCnn.Connected then LCnn.Close;
+      LCnn.Free;
+      FDManager.SilentMode := LEskiSilent;
+   end;
+   if LOk then
+      Application.MessageBox('Bağlantı BAŞARILI.', 'Bağlantı Test',
+         MB_OK or MB_ICONINFORMATION or MB_TOPMOST);
 end;
 
 procedure TOpenSQLServerForm.TestConButtonClick(Sender: TObject);
@@ -853,12 +1091,45 @@ begin
 end;
 
 procedure TOpenSQLServerForm.FormShow(Sender: TObject);
+var
+   LMsCst: string;
 begin
    EditTimeOut.Text := GenRegIni.RegReadString('','GenDataTimeOut', EditTimeOut.Text, 'C');
    if EditTimeOut.Text = '' then
       EditTimeOut.Text := '15';
-   if cboDatabases.Text = '' then
+   // MSSQL sekmesini kayıtlı (şifreli) GENTEGRE2 bağlantısından doldur; aktif motor PG olsa
+   //   da HER İKİ sekme (MSSQL + PG) dolsun. (Eskiden bilgial cst'den dolduruyordu -> PG'de
+   //   cst boş -> MSSQL sekmesi boş geliyordu.)
+   LMsCst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
+   if LMsCst <> '' then begin
+      LMsCst := DeSifre(LMsCst);
+      if (Pos('Server=', LMsCst) = 0) and (Pos('Database=', LMsCst) = 0) then
+         LMsCst := DeSifre(LMsCst);   // çift-şifreli eski kayıt ihtimali
+      ParseConnectionString(LMsCst);
+   end
+   else if cboDatabases.Text = '' then
       ParseConnectionString(GetEntegraConnectionString);
+   // Motor secimi: ESKI musteriler icin default MSSQL (VeriMotor anahtari yoksa) -> SQL akisi AYNEN.
+   if SameText(GenRegIni.RegReadString('','VeriMotor','MSSQL','C'), 'PostgreSQL') then
+      ComboSQL.ItemIndex := 1
+   else
+      ComboSQL.ItemIndex := 0;
+   // PG ayarlari AYRI 'PG' alt-anahtarindan (SQL reg'ine dokunulmaz; sadece PG seildiginde ek olarak kullanilir)
+   EditPgSunucu.Text     := GenRegIni.RegReadString('PG','Sunucu',    EditPgSunucu.Text,     'C');
+   EditPgPort.Text       := GenRegIni.RegReadString('PG','Port',      EditPgPort.Text,       'C');
+   EditPgVeritabani.Text := GenRegIni.RegReadString('PG','Veritabani',EditPgVeritabani.Text, 'C');
+   EditPgKullanici.Text  := GenRegIni.RegReadString('PG','Kullanici', EditPgKullanici.Text,  'C');
+   EditPgSifre.Text      := DeSifre(GenRegIni.RegReadString('PG','Sifre', '', 'C'));  // SIFRELI saklanir
+   ComboSQLPropertiesChange(nil);
+end;
+
+procedure TOpenSQLServerForm.ComboSQLPropertiesChange(Sender: TObject);
+begin
+   // Secime gore ilgili sekmeyi one al (gorsel yonlendirme)
+   if ComboSQL.ItemIndex = 1 then
+      cxPageControl1.ActivePage := TabSheetPG
+   else
+      cxPageControl1.ActivePage := TabSheetSQL;
 end;
 
 function TOpenSQLServerForm.GetEntegraConnectionString: String;

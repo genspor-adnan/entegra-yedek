@@ -107,6 +107,8 @@ object StokTalepWizard: TStokTalepWizard
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelAlt2: TPanel
         Left = 0
         Top = 477
@@ -574,9 +576,9 @@ object StokTalepWizard: TStokTalepWizard
         TabOrder = 1
         object Panel2: TPanel
           Left = 1
-          Top = 218
+          Top = 215
           Width = 1030
-          Height = 188
+          Height = 191
           Align = alClient
           TabOrder = 0
           object GridFatura: TcxGrid
@@ -964,13 +966,14 @@ object StokTalepWizard: TStokTalepWizard
         end
         object PageControlUst: TcxPageControl
           Left = 1
-          Top = 36
+          Top = 33
           Width = 1030
           Height = 182
           Align = alTop
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
+          ExplicitTop = 36
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1026
@@ -1422,6 +1425,7 @@ object StokTalepWizard: TStokTalepWizard
           Left = 4
           Top = 4
           Width = 1024
+          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30

@@ -495,6 +495,18 @@ begin
   inherited;
   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
   FEkleLogland := False;
+  if AktifVeriMotor = vmPG then begin
+    KREDILER.UpdateOptions.RequestLive := True;
+    KREDILER.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    KREDILER.UpdateOptions.UpdateTableName := 'KREDILER';
+    KREDILER.UpdateOptions.KeyFields := 'ID';
+    KREDILER.UpdateOptions.AutoIncFields := 'ID';
+    PLANKREDI.UpdateOptions.RequestLive := True;
+    PLANKREDI.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    PLANKREDI.UpdateOptions.UpdateTableName := 'PLANKREDI';
+    PLANKREDI.UpdateOptions.KeyFields := 'ID';
+    PLANKREDI.UpdateOptions.AutoIncFields := 'ID';
+  end;
   PageControl1.ActivePageIndex := 0;
 end;
 
@@ -629,7 +641,10 @@ end;
 
 procedure TKredilerDlg.IptalTusClick(Sender: TObject);
 begin
-   KREDILER.Cancel;
+   if KREDILER.State in [dsInsert, dsEdit] then
+      KREDILER.Cancel;
+   if Assigned(FKapatEylemi) then   // kaydetmeden kapat -> listeye don (Kapat gibi)
+      FKapatEylemi(Self);
 end;
 
 procedure TKredilerDlg.IsaretlisatrlarOdendiolarakkabuletMenuClick(Sender: TObject);
@@ -744,6 +759,8 @@ end;
 procedure TKredilerDlg.KREDILERBeforePost(DataSet: TDataSet);
 begin
    BoslukKontrolu;
+   if not TarihKontrol(KREDILER.FieldByName('ALINISTARIHI').AsDateTime, 'Alinis Tarihi') then
+      Abort;
    EkleyenDegistiren(DtsKrediler);
 end;
 
@@ -754,7 +771,7 @@ begin
    KREDILER.FieldByName('ALINISTARIHI').AsDateTime := Tablo.Genini.BugunTrhSaat;
    KREDILER.FieldByName('GENELKREDITIPI').AsInteger:= 0;
    KREDILER.FieldByName('EKLEYEN').AsString := Kullanan;
-   KREDILER.FieldByName('DURUM').AsBoolean:= True;// ComboDURUM.Items[0];
+   AlanBoolYaz(KREDILER.FieldByName('DURUM'), True);// DURUM smallint (PG) -> .AsBoolean patlar
    KREDILER.FieldByName('KASAYA_DETAYLI').AsBoolean:= False;
    KREDILER.FieldByName('MASRAFID').AsInteger:= -1;
    KREDILER.FieldByName('BSMV').AsInteger:= 5;
@@ -871,6 +888,9 @@ begin
     end;
   end else { Yani -1 -> Bo� Kredi Ekran� i�in bo� bir query }
     KREDILER.SQL.Text := 'SELECT '+DbUst(0)+'* FROM KREDILER '+DbSinir(0);
+  // PG: KREDILER.DURUM/KASAYA_DETAYLI/DEGISTI gercek bit (.AsBoolean kullanilir) ama global maprule'da
+  //   DURUM HARIC (baska tabloda deger tutar) -> sorgu-kapsamli smallint->boolean. Open'dan ONCE.
+  PgSorguBoolAlan(KREDILER, 'DURUM;KASAYA_DETAYLI;DEGISTI');
   KREDILER.Open;
 end;
 

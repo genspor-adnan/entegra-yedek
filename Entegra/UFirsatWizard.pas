@@ -435,7 +435,7 @@ Uses  UVeriMotor, UDFMPG, UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,
 {  TabProjeAsama.FieldByName('PROJEID').AsInteger := TabFirsatlar.FieldByName('ID').AsInteger;
   TabProjeAsama.FieldByName('BASTAR').AsDatetime := Tablo.GENINI.BugunTrhSaat;
   TabProjeAsama.FieldByName('AKTIF').AsBoolean := True;
-  TabProjeAsama.FieldByName('DURUM').AsBoolean := True;
+  AlanBoolYaz(TabProjeAsama.FieldByName('DURUM'), True);
   TabProjeAsama.FieldByName('SUBEID').AsInteger := SubeID;
   TabProjeAsama.FieldByName('EKLEYEN').AsString:= Kullanan;}
 procedure TFirsatWizardDlg.AsamalariEkleClick(Sender: TObject);
@@ -810,6 +810,13 @@ begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    Tablo.GridTurkcelestir;
+   if AktifVeriMotor = vmPG then begin
+     TabFirsatlar.UpdateOptions.RequestLive := True;
+     TabFirsatlar.UpdateOptions.UpdateMode := upWhereKeyOnly;
+     TabFirsatlar.UpdateOptions.UpdateTableName := 'PROJELER';
+     TabFirsatlar.UpdateOptions.KeyFields := 'ID';
+     TabFirsatlar.UpdateOptions.AutoIncFields := 'ID';
+   end;
    Tablo.GridAyarRestore('ProjeTeklifGridi',GridBagTeklifView );
    Sontus:='I';
    RehberId := -1;
@@ -1204,6 +1211,11 @@ begin
     begin
       if TabDetay.FindField('ORJINAL') <> nil then
         TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+      if TabDetay.FindField('BILGI') <> nil then
+      begin
+        TabDetay.FieldByName('BILGI').ReadOnly := False;
+        TabDetay.FieldByName('BILGI').ProviderFlags := [pfInUpdate];
+      end;
       if TabDetay.FindField('GIRIS') <> nil then
         TabDetay.FieldByName('GIRIS').ProviderFlags := [];
       if TabDetay.FindField('KAYNAK') <> nil then
@@ -1212,6 +1224,10 @@ begin
         TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
       if TabDetay.FindField('ORJINAL') <> nil then
         TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+      if TabDetay.FindField('RBID') <> nil then
+        TabDetay.FieldByName('RBID').ProviderFlags := [];
+      if TabDetay.FindField('TMPID') <> nil then
+        TabDetay.FieldByName('TMPID').ProviderFlags := [];
       // Boş BILGI değerlerini Null yap - tarih editöründe '' hatası önlenir
       TabDetay.DisableControls;
       try
@@ -1406,7 +1422,7 @@ begin
   TabProjeAsama.FieldByName('PROJEID').AsInteger := TabFirsatlar.FieldByName('ID').AsInteger;
   TabProjeAsama.FieldByName('BASTAR').AsDatetime := Tablo.GENINI.BugunTrhSaat;
   TabProjeAsama.FieldByName('AKTIF').AsBoolean := True;
-  TabProjeAsama.FieldByName('DURUM').AsBoolean := True;
+  AlanBoolYaz(TabProjeAsama.FieldByName('DURUM'), True);
   TabProjeAsama.FieldByName('EKLEYEN').AsString:= Kullanan;
 end;
 

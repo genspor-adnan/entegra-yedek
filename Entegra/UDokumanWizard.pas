@@ -326,6 +326,32 @@ begin
     AQuery.FieldByName('FIRMA').ProviderFlags := [];
 end;
 
+procedure DokumanYetkiSqlPG(AQuery: TFDQuery);
+begin
+  if AktifVeriMotor <> vmPG then
+    Exit;
+
+  AQuery.SQL.Text :=
+    '/*PGX*/select' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when DY.TUR::int=5 then ''Kurum''' + sLineBreak +
+    '    when DY.TUR::int=4 then ''Şube''' + sLineBreak +
+    '    when DY.TUR::int=3 then ''Departman''' + sLineBreak +
+    '    when DY.TUR::int=2 then ''Görev''' + sLineBreak +
+    '    when DY.TUR::int=1 then ''Kişi''' + sLineBreak +
+    '  end as TURU,' + sLineBreak +
+    '  DY.*,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when DY.TUR::int=5 then ''Tüm Kullanıcılar''' + sLineBreak +
+    '    when DY.TUR::int in (1,4) then (select FIRMA from REHBER where ID=DY.REHBERID)' + sLineBreak +
+    '    when DY.TUR::int=3 then (select G.ANAHTAR from GENINI G where G.BOLUM=-2251 and G.DEGER=DY.REHBERID and G.DIL=-1)' + sLineBreak +
+    '    when DY.TUR::int=2 then (select G.ANAHTAR from GENINI G where G.BOLUM=-2252 and G.DEGER=DY.REHBERID and G.DIL=-1)' + sLineBreak +
+    '  end as FIRMA' + sLineBreak +
+    'from DOKUMANYETKI DY' + sLineBreak +
+    'where DY.YERI=:YERI and DY.YERID=:YERID' + sLineBreak +
+    'order by DY.TUR, DY.REHBERID desc';
+end;
+
 {$R *.dfm}
 
 var
@@ -585,6 +611,8 @@ end;
 
 procedure TDokumanWizard.BildirimEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
+   if not TabAbone.Active then
+      TabloYenile(TabAbone, [DokumanID]);
    Tablo.GENINI.ReadImageSection(Ops_Dokuman_BildirimTurleri, TcxImageComboBoxProperties(cxGridDBUyari.Properties).Items, False);
 end;
 
@@ -758,6 +786,13 @@ begin
    FRevizeSnapAlindi := False;
    LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
+   if AktifVeriMotor = vmPG then begin
+     TabDokuman.UpdateOptions.RequestLive := True;
+     TabDokuman.UpdateOptions.UpdateMode := upWhereKeyOnly;
+     TabDokuman.UpdateOptions.UpdateTableName := 'DOKUMAN';
+     TabDokuman.UpdateOptions.KeyFields := 'ID';
+     TabDokuman.UpdateOptions.AutoIncFields := 'ID';
+   end;
    FFileDetails := TFileAssociationDetails.Create;
    Tablo.GridTurkcelestir;
    PageControl1.ActivePageIndex := 0;
@@ -770,7 +805,7 @@ var ctrl  : TWinControl;
     Tur : integer;
 begin
   if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('E')) then  begin   //Yeni Bileşen Ekle
-    ctrl := FindVCLWindow(Mouse.CursorPos);
+     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
@@ -799,11 +834,10 @@ begin
 
   WizardKontrol.ActivePageIndex:= 0;
   TabloYenile(TabDokuman, [DokumanID]);
-  TabloYenile(TabTarihce, [DokumanID]);
-  TabloYenile(TabAbone, [DokumanID]);
 
   DokumanYetkiID := DokumanID; //Dokuman yetki bilgileri atanıyor.
   DokumanYetkiTur := 321;
+  DokumanYetkiSqlPG(TabYetki);
   TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
   HazirlaTabYetki(TabYetki);
   DokumanYetkiHepsiGor(DokumanYetkiTur,DokumanYetkiID);
@@ -900,14 +934,12 @@ begin
    EskiOnaylayacak := EditOnaylayacak.Tag;
 
    WinApiDeneme;
-   DETAY.Close;
-   DETAY.Open;
 end;
 
 procedure TDokumanWizard.YetkiEkle(Tur, YetkiID : Integer);
 begin
     //daha önce eklenmiş mi bakalım
-    Tablo.TablodanSorguAc(3,'select count(REHBERID) as sayi from DokumanYETKI WHERE TUR='+IntToStr(Tur)+' and REHBERID = '+ IntToStr(YetkiID) + 'and YERID= '+ IntToStr(DokumanYetkiID) );
+    Tablo.TablodanSorguAc(3,'select count(REHBERID) as sayi from DokumanYETKI WHERE TUR='+IntToStr(Tur)+' and REHBERID = '+ IntToStr(YetkiID) + ' and YERID= '+ IntToStr(DokumanYetkiID) );
     if (Tablo.Query3.FieldByName('Sayi').AsInteger <> 0) or (YetkiID = -99) then begin
           //ShowMessage('Listede var!');
     end
@@ -919,6 +951,7 @@ begin
           ['&A', '&B', '&C', '&D', '&E', '&F', '&G', '&H', '&I'],
           [DokumanYetkiTur, YetkiID, DokumanYetkiID, Tur, 1, 0, 0, 0, Kullanan]
         );
+        DokumanYetkiSqlPG(TabYetki);
         TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
         HazirlaTabYetki(TabYetki);
       end;
@@ -1183,6 +1216,7 @@ procedure TDokumanWizard.DokumanYetkiHepsiGor(Yeri,YerID:Integer);
         TabYetki.FieldByName('GOR').AsBoolean:=True;
         TabYetki.FieldByName('TUR').AsInteger:=0;
         tabyetki.Post;
+        DokumanYetkiSqlPG(TabYetki);
         TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
         HazirlaTabYetki(TabYetki);
         end;
@@ -1197,6 +1231,7 @@ procedure TDokumanWizard.DokumanYetkiHepsiGor(Yeri,YerID:Integer);
           TabYetki.FieldByName('GOR').AsBoolean:=True;
           TabYetki.FieldByName('TUR').AsInteger:=0;
           tabyetki.Post;
+          DokumanYetkiSqlPG(TabYetki);
           TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
           HazirlaTabYetki(TabYetki);
         HazirlaTabYetki(TabYetki);
@@ -1282,6 +1317,7 @@ begin
    then
     begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update DOKUMANYETKI SET '+HAlan+' =1 where YERID ='+InttoStr(DokumanYetkiID),[],[] );
+     DokumanYetkiSqlPG(TabYetki);
      TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
     end
   {  else
@@ -1325,6 +1361,7 @@ begin
       else begin
         if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay),MB_YESNO) = IDYES then begin
            veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from DOKUMANYETKI WHERE ID = '+tabyetki.FieldByName('ID').AsString, [],[]);
+           DokumanYetkiSqlPG(TabYetki);
            TabloYenile(TabYetki, [DokumanYetkiTur, DokumanYetkiID]);
           HazirlaTabYetki(TabYetki);
         HazirlaTabYetki(TabYetki);

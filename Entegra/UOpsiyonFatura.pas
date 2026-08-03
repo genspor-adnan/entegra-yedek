@@ -1,4 +1,4 @@
-﻿unit UOpsiyonFatura;
+﻿unit  UOpsiyonFatura;
 
 interface
 
@@ -22,7 +22,7 @@ uses
   dxScrollbarAnnotations, cxCustomListBox, cxSpinEdit, dxCoreGraphics,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, cxMemo;
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, cxMemo, System.JSON;
 
 type
   TOpsiyonFaturaDlg = class(TForm)
@@ -263,6 +263,21 @@ type
     GridEFaturaSeriKurallariViewKULLANICI: TcxGridDBColumn;
     GridEFaturaSeriKurallariViewONCELIK: TcxGridDBColumn;
     GridEFaturaSeriKurallariLevel: TcxGridLevel;
+    TabAlanEsleme: TcxTabSheet;
+    GridAlanEsleme: TcxGrid;
+    GridAlanEslemeView: TcxGridDBTableView;
+    GridAlanEslemeViewBELGETURU: TcxGridDBColumn;
+    GridAlanEslemeViewSENARYO: TcxGridDBColumn;
+    GridAlanEslemeViewCARIOZELKOD: TcxGridDBColumn;
+    GridAlanEslemeViewALANTIPI: TcxGridDBColumn;
+    GridAlanEslemeViewUBLALAN: TcxGridDBColumn;
+    GridAlanEslemeViewKAYNAK: TcxGridDBColumn;
+    GridAlanEslemeViewVARSAYILAN: TcxGridDBColumn;
+    GridAlanEslemeViewAKTIF: TcxGridDBColumn;
+    GridAlanEslemeViewSIRA: TcxGridDBColumn;
+    GridAlanEslemeLevel: TcxGridLevel;
+    PanelAlanEslemeSag: TPanel;
+    BtnAlanEslemeDoldur: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure GelenFaturaDetaySablonEkleTusClick(Sender: TObject);
@@ -319,15 +334,29 @@ type
     procedure GridEFaturaSeriKurallariViewKULLANICIPropertiesButtonClick(
       Sender: TObject; AButtonIndex: Integer);
     procedure TabSheetEBelgeShow(Sender: TObject);
+    procedure BtnAlanEslemeDoldurClick(Sender: TObject);
     procedure ComboXSLTPropertiesPopup(Sender: TObject);
     procedure XSLTComboEnter(Sender: TObject);
   private
     DoChange:boolean;
     FSeriKurallari: TFDMemTable;
+    FAlanEslemeleri: TFDMemTable;
+    FAlanEslemeDts: TDataSource;
+    FAlanEslemeTab: TcxTabSheet;
+    FAlanEslemeGrid: TcxGrid;
+    FAlanEslemeView: TcxGridDBTableView;
+    FAlanEslemeLevel: TcxGridLevel;
     procedure SeriKuraliKullaniciYaz(AKullaniciID: Integer);
     procedure SeriKurallariDatasetHazirla;
     procedure SeriKurallariYukle;
     procedure SeriKurallariKaydet;
+    procedure AlanEslemeGridOlustur;
+    procedure AlanEslemeDatasetHazirla;
+    procedure AlanEslemeYukle;
+    procedure AlanEslemeKaydet;
+    procedure AlanEslemeSpdenDoldur;
+    procedure AlanEslemeNewRecord(DataSet: TDataSet);
+    procedure AlanEslemeBeforePost(DataSet: TDataSet);
     procedure XSLTCombosYenile;
     procedure XSLTComboYukle(ACombo: TcxImageComboBox);
     procedure XSLTIcerikDuzenle;
@@ -345,6 +374,19 @@ uses UCombo, Utablo, URehberAyar, UGirisKutusuEx,UExcelKolonAyar, UGenSifre,PrjC
 
 
 {$R *.dfm}
+
+function ListeDuzenleGeniniSQL(const AAnahtarLike: string): string;
+begin
+  if AktifVeriMotor = vmPG then
+    Result := 'select * from GENINI where DIL=' + IntToStr(Dil) +
+      ' AND BOLUM=0 and DIL=' + IntToStr(Dil) +
+      ' and length(abs(DEGER)::text)=4 and DEGER::text like ''-24__'' and ANAHTAR like ''' + AAnahtarLike + ''''
+  else
+    Result := 'select * from GENINI where DIL=' + IntToStr(Dil) +
+      ' AND BOLUM=0 and DIL=' + IntToStr(Dil) +
+      ' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''' + AAnahtarLike + '''';
+end;
+
 var
    OncekiDigitSay : string[1];
 
@@ -453,6 +495,8 @@ begin
   TabEFaturaSeriKurallari.UpdateOptions.UpdateTableName := 'GENINI';
   TabEFaturaSeriKurallari.UpdateOptions.KeyFields := 'BOLUM;DEGER;DIL';
   SeriKurallariDatasetHazirla;
+  AlanEslemeGridOlustur;
+  AlanEslemeDatasetHazirla;
   DtsEFaturaSeriKurallari.DataSet := FSeriKurallari;
   GridXSLTView.Navigator.Visible := True;
   GridXSLTView.OptionsData.Appending := True;
@@ -465,6 +509,11 @@ begin
   GridEFaturaSeriKurallariView.OptionsData.Editing := True;
   GridEFaturaSeriKurallariView.OptionsData.Inserting := True;
   GridEFaturaSeriKurallariViewDEGER.RepositoryItem := Tablo.RepSenaryo;
+  FAlanEslemeView.Navigator.Visible := True;
+  FAlanEslemeView.OptionsData.Appending := True;
+  FAlanEslemeView.OptionsData.Deleting := True;
+  FAlanEslemeView.OptionsData.Editing := True;
+  FAlanEslemeView.OptionsData.Inserting := True;
   LabelXSLTKaydet.OnClick := LabelXSLTKaydetClick;
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   PageControl1.ActivePageIndex:=0;
@@ -540,6 +589,7 @@ begin
   EditEIrsaliyeGIBAlias.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EIrsaliyeGIBAlias, EditEIrsaliyeGIBAlias.Text);
 
   SeriKurallariYukle;
+  AlanEslemeYukle;
 
   MemoEFaturaNotlar.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EFaturaSabitNotlar, MemoEFaturaNotlar.Text);
   MemoEArsivFaturaNotlar.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_EArsivFaturaSabitNotlar, MemoEArsivFaturaNotlar.Text);
@@ -592,6 +642,7 @@ begin
   if TabXSLT.State in [dsEdit, dsInsert] then
     TabXSLT.Post;
   SeriKurallariKaydet;
+  AlanEslemeKaydet;
 
   //Modul 2400
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_ZorunluPlanOlustur,CheckFaturaPlaniOlustur.Checked);   //ZorunluPlanOlustur
@@ -723,27 +774,23 @@ begin
 
     GridListeDuzenle.Parent := GBGidFatListe;
     TabListeDuzenle.Close;
-    TabListeDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FaturaGiden_%''';
-    if AktifVeriMotor = vmPG then TabListeDuzenle.SQL.Text := PgSqlCevir(TabListeDuzenle.SQL.Text);
+    TabListeDuzenle.SQL.Text := ListeDuzenleGeniniSQL('FaturaGiden_%');
     TabListeDuzenle.Open;
 
     GridListeDetayDuzenle.Parent := GBGidFatDetay;
     TabListeDetayDuzenle.Close;
-    TabListeDetayDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FatGitDetay_%''';
-    if AktifVeriMotor = vmPG then TabListeDetayDuzenle.SQL.Text := PgSqlCevir(TabListeDetayDuzenle.SQL.Text);
+    TabListeDetayDuzenle.SQL.Text := ListeDuzenleGeniniSQL('FatGitDetay_%');
     TabListeDetayDuzenle.Open;
   end else  if PageControl1.ActivePage=GelenFaturaPage then begin
 
     GridListeDuzenle.Parent := GBGelFatListe;
     TabListeDuzenle.Close;
-    TabListeDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FaturaGelen_%''';
-    if AktifVeriMotor = vmPG then TabListeDuzenle.SQL.Text := PgSqlCevir(TabListeDuzenle.SQL.Text);
+    TabListeDuzenle.SQL.Text := ListeDuzenleGeniniSQL('FaturaGelen_%');
     TabListeDuzenle.Open;
 
     GridListeDetayDuzenle.Parent := GBGelFatDetay;
     TabListeDetayDuzenle.Close;
-    TabListeDetayDuzenle.SQL.Text := 'select * from GENINI where DIL='+IntToStr(Dil)+' AND  BOLUM=0 and DIL='+IntToStr(Dil)+' and LEN(ABS(DEGER))=4 and DEGER like ''-24__'' and ANAHTAR like ''FatGelDetay_%''';
-    if AktifVeriMotor = vmPG then TabListeDetayDuzenle.SQL.Text := PgSqlCevir(TabListeDetayDuzenle.SQL.Text);
+    TabListeDetayDuzenle.SQL.Text := ListeDuzenleGeniniSQL('FatGelDetay_%');
     TabListeDetayDuzenle.Open;
 
   end;
@@ -1064,6 +1111,298 @@ begin
   XSLTCombosYenile;
 end;
 
+procedure TOpsiyonFaturaDlg.AlanEslemeGridOlustur;
+  function KolonEkle(const ACaption, AField: string; AWidth: Integer): TcxGridDBColumn;
+  begin
+    Result := FAlanEslemeView.CreateColumn;
+    Result.Caption := ACaption;
+    Result.DataBinding.FieldName := AField;
+    Result.Width := AWidth;
+  end;
+var
+  LCol: TcxGridDBColumn;
+begin
+  if FAlanEslemeGrid <> nil then
+    Exit;
+
+  FAlanEslemeDts := TDataSource.Create(Self);
+  if GridAlanEsleme <> nil then begin
+    FAlanEslemeTab := TabAlanEsleme;
+    FAlanEslemeGrid := GridAlanEsleme;
+    FAlanEslemeView := GridAlanEslemeView;
+    FAlanEslemeLevel := GridAlanEslemeLevel;
+    FAlanEslemeView.DataController.DataSource := FAlanEslemeDts;
+    GridAlanEslemeViewSENARYO.RepositoryItem := Tablo.RepSenaryo;
+    GridAlanEslemeViewALANTIPI.PropertiesClassName := 'TcxImageComboBoxProperties';
+    with TcxImageComboBoxProperties(GridAlanEslemeViewALANTIPI.Properties).Items do begin
+      Clear;
+      Add.Description := 'Standart'; Items[Count-1].Value := 'Stn';
+      Add.Description := 'Ek'; Items[Count-1].Value := 'Ek';
+    end;
+    if BtnAlanEslemeDoldur <> nil then
+      BtnAlanEslemeDoldur.OnClick := BtnAlanEslemeDoldurClick;
+    Exit;
+  end;
+
+  FAlanEslemeTab := TcxTabSheet.Create(cxPageControl1);
+  FAlanEslemeTab.PageControl := cxPageControl1;
+  FAlanEslemeTab.Caption := 'Alan Eşleştirme';
+
+  FAlanEslemeGrid := TcxGrid.Create(Self);
+  FAlanEslemeGrid.Parent := FAlanEslemeTab;
+  FAlanEslemeGrid.Align := alClient;
+
+  FAlanEslemeView := FAlanEslemeGrid.CreateView(TcxGridDBTableView) as TcxGridDBTableView;
+  FAlanEslemeView.Navigator.Visible := True;
+  FAlanEslemeView.OptionsView.GroupByBox := False;
+  FAlanEslemeView.DataController.DataSource := FAlanEslemeDts;
+
+  LCol := KolonEkle('Belge Türü', 'BELGETURU', 90);
+  LCol.PropertiesClassName := 'TcxImageComboBoxProperties';
+  with TcxImageComboBoxProperties(LCol.Properties).Items do begin
+    Add.Description := 'E-Fatura'; Items[Count-1].Value := 1;
+    Add.Description := 'E-Arşiv'; Items[Count-1].Value := 2;
+    Add.Description := 'E-İrsaliye'; Items[Count-1].Value := 7;
+  end;
+
+  LCol := KolonEkle('Senaryo', 'SENARYO', 110);
+  LCol.RepositoryItem := Tablo.RepSenaryo;
+  KolonEkle('Cari Özel Kod', 'CARIOZELKOD', 90);
+  LCol := KolonEkle('Alan Tipi', 'ALANTIPI', 70);
+  LCol.PropertiesClassName := 'TcxImageComboBoxProperties';
+  with TcxImageComboBoxProperties(LCol.Properties).Items do begin
+    Add.Description := 'Standart'; Items[Count-1].Value := 'Stn';
+    Add.Description := 'Ek'; Items[Count-1].Value := 'Ek';
+  end;
+  KolonEkle('UBL Alanı', 'UBLALAN', 160);
+  KolonEkle('Kaynak', 'KAYNAK', 170);
+  KolonEkle('Varsayılan', 'VARSAYILAN', 170);
+  KolonEkle('Aktif', 'AKTIF', 45).PropertiesClassName := 'TcxCheckBoxProperties';
+  KolonEkle('Sıra', 'SIRA', 45);
+
+  FAlanEslemeLevel := FAlanEslemeGrid.Levels.Add;
+  FAlanEslemeLevel.GridView := FAlanEslemeView;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeSpdenDoldur;
+var
+  LQry: TFDQuery;
+  LAlan: string;
+  I: Integer;
+begin
+  AlanEslemeDatasetHazirla;
+  if not FAlanEslemeleri.IsEmpty then
+    Exit;
+
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    if AktifVeriMotor = vmPG then
+      LQry.SQL.Text :=
+        'select parameter_name as name ' +
+        'from information_schema.parameters ' +
+        'where specific_schema=''public'' ' +
+        'and specific_name in (select specific_name from information_schema.routines where routine_schema=''public'' and routine_name=''sp_prog_ebelge_gidenfaturadetay'') ' +
+        'and parameter_mode in (''OUT'',''INOUT'') ' +
+        'order by ordinal_position'
+    else
+      LQry.SQL.Text :=
+        'select name from sys.dm_exec_describe_first_result_set_for_object(object_id(''dbo.sp_Prog_EBelge_GidenFaturaDetay''), null) ' +
+        'where error_number is null and is_hidden=0 order by column_ordinal';
+    LQry.Open;
+
+    FAlanEslemeleri.DisableControls;
+    try
+      I := 1;
+      while not LQry.Eof do begin
+        LAlan := Trim(LQry.FieldByName('name').AsString);
+        if LAlan <> '' then begin
+          FAlanEslemeleri.Append;
+          FAlanEslemeleri.FieldByName('BELGETURU').AsInteger := 1;
+          FAlanEslemeleri.FieldByName('SENARYO').AsInteger := 0;
+          FAlanEslemeleri.FieldByName('ALANTIPI').AsString := 'Stn';
+          FAlanEslemeleri.FieldByName('UBLALAN').AsString := LAlan;
+          FAlanEslemeleri.FieldByName('KAYNAK').AsString := LAlan;
+          FAlanEslemeleri.FieldByName('AKTIF').AsBoolean := True;
+          FAlanEslemeleri.FieldByName('SIRA').AsInteger := I;
+          FAlanEslemeleri.Post;
+          Inc(I);
+        end;
+        LQry.Next;
+      end;
+    finally
+      FAlanEslemeleri.EnableControls;
+    end;
+  finally
+    LQry.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.BtnAlanEslemeDoldurClick(Sender: TObject);
+begin
+  AlanEslemeSpdenDoldur;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeDatasetHazirla;
+begin
+  if FAlanEslemeleri <> nil then
+     Exit;
+
+  FAlanEslemeleri := TFDMemTable.Create(Self);
+  FAlanEslemeleri.FieldDefs.Add('BELGETURU', ftInteger);
+  FAlanEslemeleri.FieldDefs.Add('SENARYO', ftInteger);
+  FAlanEslemeleri.FieldDefs.Add('CARIOZELKOD', ftString, 30);
+  FAlanEslemeleri.FieldDefs.Add('ALANTIPI', ftString, 3);
+  FAlanEslemeleri.FieldDefs.Add('UBLALAN', ftString, 80);
+  FAlanEslemeleri.FieldDefs.Add('KAYNAK', ftString, 120);
+  FAlanEslemeleri.FieldDefs.Add('VARSAYILAN', ftString, 120);
+  FAlanEslemeleri.FieldDefs.Add('AKTIF', ftBoolean);
+  FAlanEslemeleri.FieldDefs.Add('SIRA', ftInteger);
+  FAlanEslemeleri.CreateDataSet;
+  FAlanEslemeleri.OnNewRecord := AlanEslemeNewRecord;
+  FAlanEslemeleri.BeforePost := AlanEslemeBeforePost;
+  if FAlanEslemeDts <> nil then
+    FAlanEslemeDts.DataSet := FAlanEslemeleri;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeYukle;
+var
+  LQry: TFDQuery;
+  LJson: TJSONValue;
+  LArr: TJSONArray;
+  LObj: TJSONObject;
+  I: Integer;
+begin
+  AlanEslemeDatasetHazirla;
+  LQry := TFDQuery.Create(nil);
+  try
+    LQry.Connection := Tablo.FDCnn;
+    if AktifVeriMotor = vmPG then
+      LQry.SQL.Text := 'select YORUM from GOREVYORUM where GOREVID=:GOREVID and TUR=:TUR order by ID desc limit 1'
+    else
+      LQry.SQL.Text := 'select top 1 YORUM from GOREVYORUM where GOREVID=:GOREVID and TUR=:TUR order by ID desc';
+    LQry.ParamByName('GOREVID').AsInteger := Ops_FaturaOpsiyon_EBelgeAlanEsleme;
+    LQry.ParamByName('TUR').AsInteger := TabNo_AYAR;
+    LQry.Open;
+
+    FAlanEslemeleri.DisableControls;
+    try
+      FAlanEslemeleri.BeforePost := nil;
+      FAlanEslemeleri.EmptyDataSet;
+      if (not LQry.Eof) and (Trim(LQry.FieldByName('YORUM').AsString) <> '') then begin
+        LJson := TJSONObject.ParseJSONValue(LQry.FieldByName('YORUM').AsString);
+        try
+          if LJson is TJSONArray then begin
+            LArr := TJSONArray(LJson);
+            for I := 0 to LArr.Count - 1 do begin
+              if not (LArr.Items[I] is TJSONObject) then
+                Continue;
+              LObj := TJSONObject(LArr.Items[I]);
+              FAlanEslemeleri.Append;
+              FAlanEslemeleri.FieldByName('BELGETURU').AsInteger := StrToIntDef(LObj.GetValue<string>('BelgeTuru', '1'), 1);
+              FAlanEslemeleri.FieldByName('SENARYO').AsInteger := StrToIntDef(LObj.GetValue<string>('Senaryo', '0'), 0);
+              FAlanEslemeleri.FieldByName('CARIOZELKOD').AsString := LObj.GetValue<string>('CariOzelKod', '');
+              FAlanEslemeleri.FieldByName('ALANTIPI').AsString := LObj.GetValue<string>('AlanTipi', 'Stn');
+              FAlanEslemeleri.FieldByName('UBLALAN').AsString := LObj.GetValue<string>('UBLAlan', '');
+              FAlanEslemeleri.FieldByName('KAYNAK').AsString := LObj.GetValue<string>('Kaynak', '');
+              FAlanEslemeleri.FieldByName('VARSAYILAN').AsString := LObj.GetValue<string>('Varsayilan', '');
+              FAlanEslemeleri.FieldByName('AKTIF').AsBoolean := LObj.GetValue<Boolean>('Aktif', True);
+              FAlanEslemeleri.FieldByName('SIRA').AsInteger := StrToIntDef(LObj.GetValue<string>('Sira', IntToStr(I + 1)), I + 1);
+              FAlanEslemeleri.Post;
+            end;
+          end;
+        finally
+          LJson.Free;
+        end;
+      end;
+    finally
+      FAlanEslemeleri.BeforePost := AlanEslemeBeforePost;
+      FAlanEslemeleri.EnableControls;
+    end;
+  finally
+    LQry.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeKaydet;
+var
+  LQry: TFDQuery;
+  LArr: TJSONArray;
+  LObj: TJSONObject;
+  LJSON: string;
+begin
+  AlanEslemeDatasetHazirla;
+  if (FAlanEslemeleri.State = dsInsert) and
+     (Trim(FAlanEslemeleri.FieldByName('UBLALAN').AsString) = '') and
+     (Trim(FAlanEslemeleri.FieldByName('KAYNAK').AsString) = '') then
+    FAlanEslemeleri.Cancel
+  else if FAlanEslemeleri.State in [dsEdit, dsInsert] then
+    FAlanEslemeleri.Post;
+
+  LQry := TFDQuery.Create(nil);
+  LArr := TJSONArray.Create;
+  try
+    FAlanEslemeleri.First;
+    while not FAlanEslemeleri.Eof do begin
+      if (Trim(FAlanEslemeleri.FieldByName('UBLALAN').AsString) <> '') and
+         (Trim(FAlanEslemeleri.FieldByName('KAYNAK').AsString) <> '') then begin
+        LObj := TJSONObject.Create;
+        LObj.AddPair('BelgeTuru', TJSONNumber.Create(FAlanEslemeleri.FieldByName('BELGETURU').AsInteger));
+        LObj.AddPair('Senaryo', TJSONNumber.Create(FAlanEslemeleri.FieldByName('SENARYO').AsInteger));
+        LObj.AddPair('CariOzelKod', FAlanEslemeleri.FieldByName('CARIOZELKOD').AsString);
+        LObj.AddPair('AlanTipi', FAlanEslemeleri.FieldByName('ALANTIPI').AsString);
+        LObj.AddPair('UBLAlan', FAlanEslemeleri.FieldByName('UBLALAN').AsString);
+        LObj.AddPair('Kaynak', FAlanEslemeleri.FieldByName('KAYNAK').AsString);
+        LObj.AddPair('Varsayilan', FAlanEslemeleri.FieldByName('VARSAYILAN').AsString);
+        LObj.AddPair('Aktif', TJSONBool.Create(FAlanEslemeleri.FieldByName('AKTIF').AsBoolean));
+        LObj.AddPair('Sira', TJSONNumber.Create(FAlanEslemeleri.FieldByName('SIRA').AsInteger));
+        LArr.AddElement(LObj);
+      end;
+      FAlanEslemeleri.Next;
+    end;
+    LJSON := LArr.ToJSON;
+
+    LQry.Connection := Tablo.FDCnn;
+    LQry.SQL.Text := 'delete from GOREVYORUM where GOREVID=:GOREVID and TUR=:TUR';
+    LQry.ParamByName('GOREVID').AsInteger := Ops_FaturaOpsiyon_EBelgeAlanEsleme;
+    LQry.ParamByName('TUR').AsInteger := TabNo_AYAR;
+    LQry.ExecSQL;
+
+    if AktifVeriMotor = vmPG then
+      LQry.SQL.Text := 'insert into GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,EKLEMETARIHI,TARIH,GIRISKAYNAK,ATAC,PERSONEL,ZENGINMETIN) values (:GOREVID,:TUR,:YORUM,:KUL,now(),now(),0,false,false,false)'
+    else
+      LQry.SQL.Text := 'insert into GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,EKLEMETARIHI,TARIH,GIRISKAYNAK,ATAC,PERSONEL,ZENGINMETIN) values (:GOREVID,:TUR,:YORUM,:KUL,getdate(),getdate(),0,0,0,0)';
+    LQry.ParamByName('GOREVID').AsInteger := Ops_FaturaOpsiyon_EBelgeAlanEsleme;
+    LQry.ParamByName('TUR').AsInteger := TabNo_AYAR;
+    LQry.ParamByName('YORUM').DataType := ftWideMemo;
+    LQry.ParamByName('YORUM').AsWideMemo := LJSON;
+    LQry.ParamByName('KUL').AsInteger := StrToIntDef(Kullanan, 0);
+    LQry.ExecSQL;
+  finally
+    LArr.Free;
+    LQry.Free;
+  end;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeNewRecord(DataSet: TDataSet);
+begin
+  DataSet.FieldByName('BELGETURU').AsInteger := 1;
+  DataSet.FieldByName('SENARYO').AsInteger := 0;
+  DataSet.FieldByName('ALANTIPI').AsString := 'Stn';
+  DataSet.FieldByName('AKTIF').AsBoolean := True;
+  DataSet.FieldByName('SIRA').AsInteger := DataSet.RecordCount + 1;
+end;
+
+procedure TOpsiyonFaturaDlg.AlanEslemeBeforePost(DataSet: TDataSet);
+begin
+  if Trim(DataSet.FieldByName('UBLALAN').AsString) = '' then
+    raise Exception.Create('UBL alanı boş olamaz.');
+  if Trim(DataSet.FieldByName('KAYNAK').AsString) = '' then
+    raise Exception.Create('Kaynak alan boş olamaz.');
+  if DataSet.FieldByName('SIRA').AsInteger = 0 then
+    DataSet.FieldByName('SIRA').AsInteger := DataSet.RecNo;
+end;
+
 procedure TOpsiyonFaturaDlg.SeriKurallariDatasetHazirla;
 begin
   if FSeriKurallari <> nil then
@@ -1090,7 +1429,22 @@ begin
   SeriKurallariDatasetHazirla;
   if TabEFaturaSeriKurallari.Active then
     TabEFaturaSeriKurallari.Close;
-  if AktifVeriMotor = vmPG then TabEFaturaSeriKurallari.SQL.Text := PgSqlCevir(TabEFaturaSeriKurallari.SQL.Text);
+  if AktifVeriMotor = vmPG then
+    // PG-native: try_convert + parsename (MSSQL) PG'de YOK -> "column int does not exist" (int'i kolon sanar).
+    //   parsename(replace(ANAHTAR,',','.'),N) = ANAHTAR'in SAGDAN N. virgul-parcasi -> virgul-say ile split_part;
+    //   try_convert(int,x) = regex-guard'li ::int (sayisal degilse NULL, MSSQL try_convert gibi).
+    TabEFaturaSeriKurallari.SQL.Text :=
+      'select *,' +
+      ' case BOLUM when -24130 then ' + #39'E-Fatura'#39 +
+      ' when -24131 then ' + #39'E-Arşiv'#39 +
+      ' when -24133 then ' + #39'E-İrsaliye'#39 +
+      ' else ' + #39#39 + ' end as BELGETURU,' +
+      ' left(ANAHTAR, strpos(ANAHTAR||' + #39','#39 + ', ' + #39','#39 + ')-1) as SERI,' +
+      ' (case when split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))) ~ ' + #39'^-?\d+$'#39 +
+      '   then split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + ')))::int else null end) as SENARYO,' +
+      ' (case when split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))+1) ~ ' + #39'^-?\d+$'#39 +
+      '   then split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))+1)::int else null end) as KULLANICIID' +
+      ' from GENINI where BOLUM in (-24130,-24131,-24133) and DIL=-1';
   TabEFaturaSeriKurallari.Open;
 
   FSeriKurallari.DisableControls;

@@ -1136,6 +1136,8 @@ begin
                      //TabDetay.FieldByName('IADEADET').Value := TabDetay.FieldByName('IADEADET').Value-TabDetay.FieldByName('ADET').AsString;
                      //TabDetay.Post;
                  end;
+                 if not Tablo.FaturaSilinebilirMi(0, TabDetay.FieldByName('FID').AsInteger) then   // KILIT + e-belge + kullanim/izleme/uts/donusum
+                    Exit;
                  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from FATURA where ID='+TabDetay.FieldByName('FID').AsString,[],[]);
                  //TabDetay.Delete;
                  DetayTabloAc(MemoAdisyonSatir2.Text, AdisyonNo);

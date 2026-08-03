@@ -100,7 +100,7 @@ procedure VarsayilanResimTazele(Yeri, YerId: Integer);
 implementation
 
 {$R *.dfm}
-uses Utablo,PrjConst, FetaKurulusSiniflari, Fetautil, UBinarySave,LocOnFly, ULog;
+uses Utablo,PrjConst, FetaKurulusSiniflari, Fetautil, UBinarySave,LocOnFly, ULog, UVeriMotor;
 
 
 procedure ResimGetir(RehberId, Yer, YerId:Integer; Rsm:TcxImage);
@@ -293,8 +293,12 @@ begin
       // FALLBACK (DOSYA yok/hata): eski davranis - IMAJ.BELGE inline.
       Tablo.Query1.SQL.Text := ' insert into IMAJ (REHBERID,ICDIS,YERI,YER_ID,BELGEADI,BELGE,VARSAYILAN,EKLEYEN,SUBEID)values('+IntToStr(RehberId)+','+ IntToStr(Dokuman_Kayit_Yeri) + ','+IntToStr(Yeri)+','+IntToStr(Yer_ID)+
             ',''Resim.jpg'',:Prm1,1,'''+Kullanan+''','+IntToStr(SubeId)+') select scope_identity()';
-      Tablo.Query1.ParamByName('Prm1').Assign(Pic);
     end;
+    // MSSQL 'insert ... select scope_identity()' -> PG 'insert ... returning ID' (param adlari korunur).
+    if AktifVeriMotor = vmPG then
+      Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
+    if LDosyaID <= 0 then
+      Tablo.Query1.ParamByName('Prm1').Assign(Pic);
     Tablo.Query1.Open;
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update IMAJ set VARSAYILAN=0 where YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(Yer_ID)+' and ID<>&YeniId',['&YeniId'],[Tablo.Query1.Fields[0].AsInteger]);
 
@@ -483,9 +487,12 @@ procedure TResimDlg.TabResimBeforeOpen(DataSet: TDataSet);
 begin //eğer resimler dizine kayıt yapılıyorsa önce dizinden tabloya almak gerekir.
     // DOSYA deposundaki satirlar (DOSYAID>0) klasorden OKUNMAZ (icerik DOSYA'da, .OBJ yok)
     //  -> haric tut; yoksa null BELGE'de eski folder-load fn'i cagrilir ('dbo.' syntax hatasi).
-    Tablo.TablodanSorguAc(1, '  select ID, cast(BELGE as binary(1)) from IMAJ where (DOSYAID is null or DOSYAID=0) and YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
+    // cast(BELGE as binary(1)): MSSQL blob'u cekmeden varlik isareti; PG'de 'binary' tipi yok.
+    //   Portable: null-koruyan case (Fields[1].IsNull semantigi ayni, iki motorda da gecerli).
+    Tablo.TablodanSorguAc(1, '  select ID, case when BELGE is null then null else 1 end from IMAJ where (DOSYAID is null or DOSYAID=0) and YERI='+IntToStr(Yeri)+' and YER_ID='+IntToStr(YerId));
     while not Tablo.Query1.eof do begin
-       if Tablo.Query1.Fields[1].isnull then //eğer dosyada tutuluyorsa
+       // .OBJ klasor-yukleme (dbo.fn_Imaj_...) yalniz MSSQL on-disk deposu icin; PG'de icerik DOSYA'da, atla.
+       if (AktifVeriMotor <> vmPG) and Tablo.Query1.Fields[1].isnull then //eğer dosyada tutuluyorsa
           veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' dbo.fn_Imaj_KayitliObjNesnesiniOku ' + Tablo.Query1.Fields[0].AsString, [],[]);
        Tablo.Query1.next;
     end;

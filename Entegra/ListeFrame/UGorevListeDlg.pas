@@ -33,7 +33,10 @@ uses
   dxSkinWhiteprint, dxCustomTileControl, dxTileControl,
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxRichEdit,
-  dxDateRanges, dxScrollbarAnnotations, cxSchedulerAgendaView;//, cxSchedulerAgendaView;//, cxSchedulerRibbonStyleEventEditor,  cxSchedulerRecurrence;
+  dxDateRanges, dxScrollbarAnnotations, cxSchedulerAgendaView,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;//, cxSchedulerAgendaView;//, cxSchedulerRibbonStyleEventEditor,  cxSchedulerRecurrence;
 
 type
   TGorevListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -255,6 +258,8 @@ type
     procedure GridYorumDBCardView1CellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
+    procedure GridGorevViewStylesGetContentStyle(Sender: TcxCustomGridTableView;
+      ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure GridGorevViewCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
@@ -322,6 +327,57 @@ var
  KaynakKomut : string;
  MenuGorevId : Integer;
  AlanlarOlusturuldu : Boolean;
+
+function PgGorevEskiListeSQL(AKlasorID, AKullanici: Integer; const AAcKapa: string;
+  AGunSay: Integer): string;
+var
+  LWhere: string;
+begin
+  LWhere := ' where 1=1 ';
+  if AAcKapa = '0' then
+    LWhere := LWhere + ' and coalesce(g.ackapa,0)=0 '
+  else if AGunSay < 9999 then
+    LWhere := LWhere + ' and (coalesce(g.ackapa,0)=0 or coalesce(g.bitistarihi,g.degistirmetarihi,g.eklemetarihi) >= current_date - interval ''' + IntToStr(AGunSay) + ' day'') ';
+
+  case AKlasorID of
+    Masaustu:
+      LWhere := LWhere + ' and g.listeid=' + IntToStr(Masaustu) + ' and g.ekleyen=' + IntToStr(AKullanici);
+    BanaAtananlar:
+      LWhere := LWhere + ' and exists (select 1 from gorevkullanici gk where gk.listgorevid=g.id and gk.rehberid=' + IntToStr(AKullanici) + ')';
+    Atanmamislar:
+      LWhere := LWhere + ' and not exists (select 1 from gorevkullanici gk where gk.listgorevid=g.id)';
+    Atadiklarim:
+      LWhere := LWhere + ' and g.ekleyen=' + IntToStr(AKullanici);
+    Bayrakli:
+      LWhere := LWhere + ' and coalesce(g.bayrak,0)<>0';
+    ToplantiKlasor, DemirbasKlasor, Servis:
+      LWhere := LWhere + ' and g.listeid=' + IntToStr(AKlasorID);
+  else
+    if AKlasorID > 0 then
+      LWhere := LWhere + ' and g.listeid=' + IntToStr(AKlasorID);
+  end;
+
+  Result :=
+    'select distinct ' +
+    'g.id, g.ackapa, g.listeid, g.id as gorev_id, g.konusu, ' +
+    '(select anahtar from genini where bolum=-21044 and dil=-1 and deger=g.turu limit 1)::varchar as turu, ' +
+    'g.ekleyen, g.rehberid, g.rehberid as reh_id, ' +
+    '(select r.firma from rehber r where r.id=g.rehberid limit 1)::varchar as cariad, ' +
+    '(select r.firma from rehber r where r.id=g.mus_ilgili limit 1)::varchar as mus_ilgili, ' +
+    '(select case when count(*)=0 then '''' else string_agg(k.kod, '' - '' order by gk.id) || '' -'' end from gorevkullanici gk inner join kullanici k on k.rehberid=gk.rehberid where gk.listgorevid=g.id)::varchar as atanan1, ' +
+    'g.baslamatarihi, g.bitistarihi, ' +
+    '(case when coalesce(g.tekrarid,0)>0 then 1 else 0 end)::smallint as tekrar_bit, ' +
+    '(case when coalesce(g.animsat,0)>0 then 1 else 0 end)::smallint as animsat_bit, ' +
+    'g.bayrak, g.durum, g.eklemetarihi, ' +
+    '(select p.projekodu from projeler p where p.id=g.projeid limit 1)::varchar as projekodu, ' +
+    '(select r.firma from rehber r where r.id=g.ekleyen limit 1)::varchar as ekleyenad, ' +
+    '(case when exists(select 1 from gorevyorum gy where gy.gorevid=g.id and gy.tur=1) then 1 else 0 end)::smallint as notlar_bit, ' +   // MSSQL: GOREVYORUM TUR=1 (not)
+    '(case when exists(select 1 from gorevyorum gy where gy.gorevid=g.id and gy.tur=33) then 1 else 0 end)::smallint as yorum_bit, ' +  // MSSQL: GOREVYORUM TUR=33 (yorum)
+    'g.bagidust, g.bagidalt ' +
+    'from gorevler g left join gorevliste gl on gl.id=g.listeid ' +
+    LWhere +
+    ' order by g.ackapa, g.baslamatarihi, g.ekleyen desc';
+end;
 
 procedure TGorevListeDlg.InitIslemler(Sender:TObject);
 var
@@ -795,6 +851,15 @@ begin
   AnaForm.cxGridPopupMenu1.Grid:=GridGorev;
   AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridGorevView;
   AnaForm.pmGridStil.Tags.Values[GridGorev.Name] := 'IsListesiGridi';
+end;
+
+procedure TGorevListeDlg.GridGorevViewStylesGetContentStyle(Sender: TcxCustomGridTableView;
+  ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+begin
+  // Durum-renk kurallari tarihsel olarak 'GorevGridView' (ana sayfa gorev grid'i) adiyla
+  // tanimli (UOpsDlg > Stiller). Liste grid'i (GridGorevView) AYNI kurallari kullansin
+  // diye Sender.Name yerine o adla denetlenir -> tek kural seti iki ekranda da isler.
+  Tablo.GridStilYonetim.StilDenetle('GorevGridView', AStyle, Sender, ARecord);
 end;
 
 procedure TGorevListeDlg.GridGorevViewCellDblClick(
@@ -1547,10 +1612,78 @@ var s, tarih : String;
     Sorgu :string;
     i:smallint;
 begin
-   if SecilmisPersonelList=nil then
+  if SecilmisPersonelList=nil then
       SecilmisPersonelList := TStringList.Create;
 
    AraQuery1.Close;
+
+   if AktifVeriMotor = vmPG then
+   begin
+      if SecilmisPersonelList.Count > 0 then begin
+        s := '';
+        for i := 0 to SecilmisPersonelList.Count-1 do begin
+          if i > 0 then s := s + ',';
+          s := s + SecilmisPersonelList.Strings[i];
+        end;
+      end else
+        s := '';
+
+      AraQuery1.SQL.Clear;
+      AraQuery1.SQL.Add('select row_number() over(order by X."Start", X."GOREV_ID", X."Dosya")::integer as "ID", X.* from (');
+      AraQuery1.SQL.Add('select distinct ');
+      AraQuery1.SQL.Add('0::smallint as "Type", G.BASLAMATARIHI::timestamp as "Start", G.BITISTARIHI::timestamp as "Finish", ');
+      AraQuery1.SQL.Add('3::smallint as "Options", ');
+      AraQuery1.SQL.Add('(coalesce(G.KONUSU,'''') || '' / '' || coalesce((select K.KOD from KULLANICI K where K.REHBERID=G.EKLEYEN limit 1),'''') || '' > '' || ');
+      AraQuery1.SQL.Add('coalesce((select string_agg(coalesce(KL.KOD,''''), '' - '' order by GK2.ID) ');
+      AraQuery1.SQL.Add('from GOREVKULLANICI GK2 inner join KULLANICI KL on KL.REHBERID=GK2.REHBERID ');
+      AraQuery1.SQL.Add('where GK2.LISTGOREVID=G.ID and GK2.TUR=11),'''') || '' / '' || ');
+      AraQuery1.SQL.Add('coalesce(substring(Musteri.FIRMA from 1 for greatest(position('' '' in Musteri.FIRMA || '' '') - 1, 0)),''''))::varchar(1000) as "Caption", ');
+      AraQuery1.SQL.Add('''''::varchar(10) as "Location", ''''::varchar(10) as "Message", 0::smallint as "State", ');
+      AraQuery1.SQL.Add('(case when coalesce(G.ACKAPA,0)=1 then 13882323 else 55295 end)::bigint as "LabelColor", ');
+      AraQuery1.SQL.Add('coalesce(GK1.REHBERID, G.EKLEYEN)::integer as "ResourceID", ');
+      AraQuery1.SQL.Add('''GOREVLER''::varchar(20) as "Dosya", G.ID::integer as "GOREV_ID", ');
+      AraQuery1.SQL.Add('G.REHBERID::integer as "REHBERID", G.EKLEYEN::integer as "EKLEYEN", ');
+      AraQuery1.SQL.Add('coalesce(G.ACKAPA,0)::smallint as "ACKAPA", coalesce(G.BAYRAK,0)::smallint as "BAYRAK", G.LISTEID::integer as "LISTEID", 0::varchar(200) as "TUR" ');
+      AraQuery1.SQL.Add('from GOREVLER G ');
+      AraQuery1.SQL.Add('left join GOREVLISTE GL on G.LISTEID=GL.ID ');
+      AraQuery1.SQL.Add('left join GOREVKULLANICI GK1 on G.ID=GK1.LISTGOREVID and GK1.TUR in (0,1,2,11) ');
+      AraQuery1.SQL.Add('left join REHBER Musteri on Musteri.ID=G.REHBERID ');
+      AraQuery1.SQL.Add('where not exists (select 1 from GOREVLER G1 where G1.ID=G.ID ');
+      AraQuery1.SQL.Add('and G1.LISTEID=-27 and G1.EKLEYEN<>'+Kullanan+') ');
+
+      if not CheckTamamlanan.Checked then
+        AraQuery1.SQL.Add(' and coalesce(G.ACKAPA,0)=0 ')
+      else
+        AraQuery1.SQL.Add(' and G.BASLAMATARIHI>='''+FormatDateTime('yyyy-mm-dd', Tablo.GENINI.BugunTrh-ComboTamamlanan.EditValue)+'''::timestamp ');
+      if s <> '' then
+        AraQuery1.SQL.Add(' and (GK1.REHBERID in('+s+') or (G.EKLEYEN in('+s+') '+
+          'and not exists(select 1 from GOREVKULLANICI GK where G.ID=GK.LISTGOREVID '+
+          'and GK.TUR in (0,1,2,11)))) ');
+
+      AraQuery1.SQL.Add(
+        ' union all '+
+        'select distinct '+
+        '0::smallint as "Type", G.BASLAMATARIHI::timestamp as "Start", G.BITISTARIHI::timestamp as "Finish", '+
+        '3::smallint as "Options", '+
+        '(coalesce(G.KONUSU,'''') || '' / '' || coalesce((select string_agg(coalesce(KL.KOD,''''), '' - '' order by GK2.ID) from GOREVKULLANICI GK2 inner join KULLANICI KL on KL.REHBERID=GK2.REHBERID where GK2.LISTGOREVID=G.ID and GK2.TUR=12),'''') || '' / '' || coalesce(Musteri.FIRMA,''''))::varchar(1000) as "Caption", '+
+        '''''::varchar(10) as "Location", ''''::varchar(10) as "Message", 0::smallint as "State", '+
+        '(case when coalesce(G.ACKAPA,0)=1 then 13882323 else 16436871 end)::bigint as "LabelColor", '+
+        'coalesce(GK1.REHBERID, G.EKLEYEN)::integer as "ResourceID", '+
+        '''SERVIS''::varchar(20) as "Dosya", G.ID::integer as "GOREV_ID", G.REHBERID::integer as "REHBERID", G.EKLEYEN::integer as "EKLEYEN", '+
+        'coalesce(G.ACKAPA,0)::smallint as "ACKAPA", coalesce(G.ACIL,0)::smallint as "BAYRAK", -6::integer as "LISTEID", G.TURU::varchar(200) as "TUR" '+
+        'from SERVIS G '+
+        'left join GOREVKULLANICI GK1 on G.ID=GK1.LISTGOREVID and GK1.TUR=12 '+
+        'left join REHBER Musteri on Musteri.ID=G.REHBERID '+
+        'where 1=1 ');
+
+      if not CheckTamamlanan.Checked then
+        AraQuery1.SQL.Add(' and coalesce(G.ACKAPA,0)=0 ');
+      if s <> '' then
+        AraQuery1.SQL.Add(' and GK1.REHBERID in('+s+') ');
+      AraQuery1.SQL.Add(') X order by X."Start"');
+      TabloYenile(AraQuery1, []);
+      Exit;
+   end;
 
    AraQuery1.SQL.Text:= MemoPlanSQL.Text+' '+MemoGorevSQL.Text ;
    AraQuery1.SQL.Add(' and not exists (select * from GOREVLER G1 WHERE G1.ID=G.ID AND  G1.LISTEID=-27 AND G1.EKLEYEN<>'+Kullanan+')	');
@@ -1683,6 +1816,17 @@ begin
         TabGorevler.SQL.Add('('+Kullanan+','+AcKapa+','+IntToStr(GunSay)+','+FArama.TabListe.Fields[0].asstring+')');
        end;
   end;
+
+  if AktifVeriMotor = vmPG then
+    case FArama.TabListe.Fields[0].AsInteger of
+      Masaustu, BanaAtananlar, Atanmamislar, Atadiklarim, Bayrakli,
+      ToplantiKlasor, DemirbasKlasor, Servis:
+        TabGorevler.SQL.Text := PgGorevEskiListeSQL(FArama.TabListe.Fields[0].AsInteger,
+           StrToIntDef(Kullanan, 0), AcKapa, GunSay);
+      1..99999:
+        TabGorevler.SQL.Text := PgGorevEskiListeSQL(FArama.TabListe.Fields[0].AsInteger,
+          StrToIntDef(Kullanan, 0), AcKapa, GunSay);
+    end;
 
   TabloYenile(TabGorevler,[]);
 

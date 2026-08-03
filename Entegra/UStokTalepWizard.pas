@@ -36,6 +36,7 @@ type
   TStokTalepWizard = class(TForm, IPopupDialog)
     Panel1: TPanel;
     TalepTus: TcxButton;
+    DokumanTus: TcxButton;
     WizardKontrol: TJvWizard;
     SiparisEkr: TJvWizardInteriorPage;
     cxImageComboBox1: TcxImageComboBox;
@@ -100,7 +101,6 @@ type
     N5: TMenuItem;
     SipariKoanAyarlar1: TMenuItem;
     DokumanEkr: TJvWizardInteriorPage;
-    DokumanTus: TcxButton;
     dtsTOPLAMLAR: TDataSource;
     TOPLAMLAR: TFDQuery;
     PanelAlt2: TPanel;
@@ -356,6 +356,7 @@ type
     AraDlg : TStokHizmetAraDlg;
     sonbasilanctrl :TcxButtonEdit;
     KuraGoreFiyatHesaplamaAlani:integer ; //faturaadetchange olay?nda kullan?l?yor bu de?i?ken
+    FSatirEklemeToplamErtele: Boolean;
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // SIPARISDETAY orijinal satirlar (log diff icin)
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
@@ -418,6 +419,12 @@ begin
    Tabloyenile(TabYorum, [TabloNo, SIPARIS.FieldByName('ID').AsInteger]);
 end;
 
+procedure TStokTalepWizard.DokumanTusClick(Sender: TObject);
+begin
+  if BoslukKontrolu = False then
+     WizardKontrol.ActivePageIndex := TcxButton(Sender).Tag;;
+end;
+
 procedure TStokTalepWizard.DokumanEkrPage(Sender: TObject);
 begin
      ButtonDuzenle;
@@ -429,11 +436,6 @@ begin
                       TabNo_GOREVYORUM,TabYorum.FieldByName('ID').AsInteger, SIPARIS.FieldByName('REHBERID').AsInteger)
 end;
 
-procedure TStokTalepWizard.DokumanTusClick(Sender: TObject);
-begin
-  if BoslukKontrolu = False then
-     WizardKontrol.ActivePageIndex := TcxButton(Sender).Tag;;
-end;
 
 function TStokTalepWizard.EkranAdiAl: string;
 begin
@@ -505,8 +507,8 @@ end;
 
 procedure TStokTalepWizard.YorumDzenle1Click(Sender: TObject);
 begin
-  ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
-  Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Siparisdetay);
+   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
+   Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
 end;
 
 procedure TStokTalepWizard.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -571,7 +573,7 @@ procedure TStokTalepWizard.GridYorumDBCardView1CellDblClick(
   Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-    Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, Tabno_Siparisdetay);
+    Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, TabloNo);
 end;
 
 procedure TStokTalepWizard.GsterSeiliSatr1Click(Sender: TObject);
@@ -793,6 +795,14 @@ begin
   IptalSecildi := true;
   LogID:=0;
   FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
+  if AktifVeriMotor = vmPG then
+  begin
+    SIPARIS.UpdateOptions.RequestLive := True;
+    SIPARIS.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    SIPARIS.UpdateOptions.UpdateTableName := 'SIPARIS';
+    SIPARIS.UpdateOptions.KeyFields := 'ID';
+    SIPARIS.UpdateOptions.AutoIncFields := 'ID';
+  end;
 
   TabloNo := TabNo_SIPARIS_Gelen;
   //cbDovizCinsi.Visible:=DovizTakibi;
@@ -877,7 +887,7 @@ var
   KurDegeri : currency;
 begin
   StokTalepWizard.Height:= Screen.Height- round(Screen.Height*0.1);
-  EkleDetay := False;
+  EkleDetay :=  False;
   Tablo.AlanOlustur(TStokTalepWizard(Self), -1,DtsSIPARIS);
 
    if not TarayiciKullanimda then begin
@@ -1276,32 +1286,59 @@ begin
 end;
 
 procedure TStokTalepWizard.SatirEkleClick(Sender: TObject);
+var
+  LDetaySQL: string;
 begin
+  LDetaySQL := '';
   if SIPARIS.State in [dsEdit, dsInsert] then
   begin
     SIPARIS.Post;
     TabloYenile(SIPARISDETAY, [SiparisIdsi]);
   end;
 
+  FSatirEklemeToplamErtele := True;
+  if AktifVeriMotor = vmPG then
+  begin
+    LDetaySQL := SIPARISDETAY.SQL.Text;
+    SIPARISDETAY.Close;
+    SIPARISDETAY.SQL.Text := '/*PGX*/ select * from SIPARISDETAY where SIPARISID=:Par order by ID';
+    SIPARISDETAY.UpdateOptions.UpdateTableName := 'SIPARISDETAY';
+    SIPARISDETAY.UpdateOptions.KeyFields := 'ID';
+    SIPARISDETAY.UpdateOptions.AutoIncFields := 'ID';
+    SIPARISDETAY.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabloYenile(SIPARISDETAY, [SiparisIdsi]);
+  end;
+
   if AraDlg=nil then
     Application.CreateForm(TStokHizmetAraDlg,AraDlg);
 
-  AraDlg.FatBasID:=SIPARIS.FieldByName('ID').AsInteger;
-  AraDlg.RehberID:=SIPARIS.FieldByName('REHBERID').AsInteger;
-  AraDlg.TabDetayGiris:= SIPARISDETAY;
-  AraDlg.TabGiris := SIPARIS;
-  AraDlg.KalanAdetGetir:=True;
-  AraDlg.stokhizmetaracagirantur := SIPARIS.FieldByName('TUR').AsInteger;
-  AraDlg.GirisCikis:=FWGiris;
-  AraDlg.FiyatlariGetir:=True;
-  AraDlg.cbFiyatAdi.EditValue := SIPARIS.FieldByName('FIYAT_LISTESI').Value;
+  try
+    AraDlg.FatBasID:=SIPARIS.FieldByName('ID').AsInteger;
+    AraDlg.RehberID:=SIPARIS.FieldByName('REHBERID').AsInteger;
+    AraDlg.TabDetayGiris:= SIPARISDETAY;
+    AraDlg.TabGiris := SIPARIS;
+    AraDlg.KalanAdetGetir:=True;
+    AraDlg.stokhizmetaracagirantur := SIPARIS.FieldByName('TUR').AsInteger;
+    AraDlg.GirisCikis:=FWGiris;
+    AraDlg.FiyatlariGetir:=True;
+    AraDlg.cbFiyatAdi.EditValue := SIPARIS.FieldByName('FIYAT_LISTESI').Value;
   {if Tablo.YetkiVarmi(MODUL_Stok,YetkiTur_Gorme) then begin
      if SIPARISDETAY.RecordCount<1 then
         AraDlg.cbStokDepo.Enabled := True //daha ?nce depo se?imi yap?lmam??, yap?labilir
      else            //girilmi? stok i?lemi var m??
         AraDlg.cbStokDepo.Enabled := not Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SIPARISDETAY where SIPARISID =  &FId and TUR=1', ['&FId'],[SIPARIS.FieldByName('ID').AsInteger]);
   end; }
-  AraDlg.ShowModal;
+    AraDlg.ShowModal;
+  finally
+    if (AktifVeriMotor = vmPG) and (LDetaySQL <> '') then
+    begin
+      SIPARISDETAY.Close;
+      SIPARISDETAY.SQL.Text := LDetaySQL;
+      TabloYenile(SIPARISDETAY, [SIPARIS.FieldByName('ID').AsInteger]);
+    end;
+    FSatirEklemeToplamErtele := False;
+    FaturaTutarHesapla(True);
+  end;
 end;
 
 procedure TStokTalepWizard.SatirSilClick(Sender: TObject);
@@ -1309,6 +1346,8 @@ begin
    ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
   if SIPARISDETAY.RecordCount<=0 then abort;
   if Application.MessageBox(PCHAR(Sil_Onay),pchar(Onay), MB_YESNO + MB_ICONQUESTION) = ID_YES then begin
+    if not Tablo.SiparisSilinebilirMi(0, SIPARISDETAY.FieldByName('ID').AsInteger) then   // KILIT + DONUSUM
+       exit;
     SIPARISDETAY.Delete;
   end;
 end;
@@ -1435,7 +1474,12 @@ end;
 procedure TStokTalepWizard.FaturaTutarHesapla(TabloAc:Boolean);
 var DOVIZKUR,SIPARISDETAY_MATRAHI,KDV_TUTARI,SIPARISDETAY_TUTARI,DOVIZ_TUTARI,MALIYETORT,STOPAJ : extended;
     RaporDoviz,s:String;
+    LSiparisID: Integer;
 begin
+  LSiparisID := SIPARIS.FieldByName('ID').AsInteger;
+  if LSiparisID <= 0 then
+     Exit;
+
   TabloYenile( TOPLAMLAR, [SIPARIS.Fields[0].AsInteger]);
   SIPARISDETAY_MATRAHI := ToplamGetir(4,'DEGER');
   if SIPARISDETAY_MATRAHI=-99999 then
@@ -1459,10 +1503,10 @@ begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SIPARIS SET  '+ RaporDoviz+
         'SIPARIS_MATRAHI='+FCurrToStr(SIPARISDETAY_MATRAHI)+',KDV_TUTARI='+FCurrToStr(KDV_TUTARI)+
         ',SIPARIS_TUTARI='+FCurrToStr(SIPARISDETAY_TUTARI)+', DOVIZ_TUTARI= '+FCurrToStr(DOVIZ_TUTARI)+ S+
-        ' where ID='+SIPARIS.Fields[0].AsString,[],[]);
+        ' where ID='+IntToStr(LSiparisID),[],[]);
 
   if TabloAc then
-     TabloYenile(SIPARIS, [SIPARIS.Fields[0].AsInteger]);
+     TabloYenile(SIPARIS,  [LSiparisID]);
 end;
 
 procedure TStokTalepWizard.FirmaBilgileri;
@@ -1479,15 +1523,28 @@ end;
 
 procedure TStokTalepWizard.SIPARISDETAYAfterPost(DataSet: TDataSet);
 begin
+   if FSatirEklemeToplamErtele then
+      Exit;
+
    TabloYenile(SIPARISDETAY,[SIPARIS.FieldByName('ID').AsInteger]);
    TabloYenile(TOPLAMLAR,[SIPARIS.FieldByName('ID').AsInteger]);
    FaturaTutarHesapla(True);
-
 end;
 
 procedure TStokTalepWizard.SIPARISDETAYBeforeOpen(DataSet: TDataSet);
 begin
    SIPARISDETAY.SQL.Text := StringReplace(SIPARISDETAY.SQL.Text,'@Dil',IntToStr(Dil),[rfReplaceAll]);
+   // PG: SIPARISDETAY hesaplanan (alias=subquery) kolonlu editlenebilir sorgu. Taban tablo/anahtar
+   //   ACIKCA verilmezse FireDAC INSERT sonuna bos `RETURNING` (anahtar bulamiyor) ekler ->
+   //   "syntax error at end of input". UpdateTableName+KeyFields+AutoIncFields(ID identity RETURNING)
+   //   + upWhereKeyOnly (WHERE'e hesaplanan kolon koymasin). MSSQL yolu dokunulmaz.
+   if AktifVeriMotor = vmPG then
+   begin
+     SIPARISDETAY.UpdateOptions.UpdateTableName := 'SIPARISDETAY';
+     SIPARISDETAY.UpdateOptions.KeyFields       := 'ID';
+     SIPARISDETAY.UpdateOptions.AutoIncFields   := 'ID';
+     SIPARISDETAY.UpdateOptions.UpdateMode      := upWhereKeyOnly;
+   end;
 end;
 
 procedure TStokTalepWizard.SIPARISDETAYBeforePost(DataSet: TDataSet);

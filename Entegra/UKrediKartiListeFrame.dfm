@@ -32,7 +32,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       Margins.Bottom = 0
       AutoSize = True
       ButtonHeight = 30
-      ButtonWidth = 74
+      ButtonWidth = 89
       Caption = 'AletCubugu'
       Color = clTeal
       DockSite = True
@@ -55,7 +55,6 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       ShowCaptions = True
       TabOrder = 0
       Transparent = True
-      ExplicitHeight = 29
       object YeniTus: TToolButton
         Left = 0
         Top = 0
@@ -65,7 +64,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         OnClick = YeniTusClick
       end
       object SilTus: TToolButton
-        Left = 74
+        Left = 89
         Top = 0
         Caption = 'Sil'
         ImageIndex = 8
@@ -73,7 +72,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         OnClick = SilTusClick
       end
       object ToolButton1: TToolButton
-        Left = 148
+        Left = 178
         Top = 0
         Width = 8
         Caption = 'ToolButton1'
@@ -82,7 +81,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         Style = tbsSeparator
       end
       object DegisTus: TToolButton
-        Left = 156
+        Left = 186
         Top = 0
         Caption = 'D'#252'zenle'
         ImageIndex = 9
@@ -91,7 +90,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         OnClick = DegisTusClick
       end
       object YaziciYaz: TToolButton
-        Left = 230
+        Left = 275
         Top = 0
         Caption = 'Yazd'#305'r'
         DropdownMenu = PopupMenuYaz
@@ -99,28 +98,28 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         ImageName = 'PngImage15'
       end
       object ToolButtonArama: TToolButton
-        Left = 304
+        Left = 364
         Top = 0
         Width = 8
         Caption = 'ToolButtonArama'
         Style = tbsSeparator
       end
       object LabelTumKayitlar: TToolButton
-        Left = 312
+        Left = 372
         Top = 0
         Caption = 'T'#252'm'
         Style = tbsTextButton
         OnClick = LabelTumKayitlarClick
       end
       object LabelSonArananlar: TToolButton
-        Left = 386
+        Left = 461
         Top = 0
         Caption = 'Son Aranan'
         Style = tbsTextButton
         OnClick = LabelSonArananlarClick
       end
       object LabelSikArananlar: TToolButton
-        Left = 460
+        Left = 550
         Top = 0
         Caption = 'S'#305'k Aranan'
         Style = tbsTextButton
@@ -190,14 +189,17 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         object GridKKListeViewKODU: TcxGridDBColumn
           Caption = 'Kodu'
           DataBinding.FieldName = 'KODU'
+          DataBinding.IsNullValueType = True
         end
         object GridKKListeViewADI: TcxGridDBColumn
           Caption = 'Ad'#305
           DataBinding.FieldName = 'ADI'
+          DataBinding.IsNullValueType = True
           Width = 138
         end
         object GridKKListeViewLOGO: TcxGridDBColumn
           DataBinding.FieldName = 'LOGO'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageProperties'
           Properties.GraphicClassName = 'TdxPNGImage'
           IsCaptionAssigned = True
@@ -205,35 +207,42 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         object GridKKListeViewBANKAADI: TcxGridDBColumn
           Caption = 'Banka'
           DataBinding.FieldName = 'BANKAADI'
+          DataBinding.IsNullValueType = True
           Width = 97
         end
         object GridKKListeViewID: TcxGridDBColumn
           DataBinding.FieldName = 'ID'
+          DataBinding.IsNullValueType = True
           Visible = False
         end
         object GridKKListeViewHAMILI: TcxGridDBColumn
           Caption = 'Hamili'
           DataBinding.FieldName = 'HAMILI'
+          DataBinding.IsNullValueType = True
           Width = 149
         end
         object GridKKListeViewTURU: TcxGridDBColumn
           Caption = 'T'#252'r'#252
           DataBinding.FieldName = 'TURU'
+          DataBinding.IsNullValueType = True
           RepositoryItem = Tablo.RepKrediKartiTuru
         end
         object GridKKListeViewNOSU: TcxGridDBColumn
           Caption = 'No'
           DataBinding.FieldName = 'NOSU'
+          DataBinding.IsNullValueType = True
           Width = 114
         end
         object GridKKListeViewHESAP_KESIM_TARIHI: TcxGridDBColumn
           Caption = 'Hesap Kesim Tarihi'
           DataBinding.FieldName = 'HESAP_KESIM_TARIHI'
+          DataBinding.IsNullValueType = True
           Width = 84
         end
         object GridKKListeViewDURUM: TcxGridDBColumn
           Caption = 'Durum'
           DataBinding.FieldName = 'DURUM'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageComboBoxProperties'
           Properties.Items = <>
           RepositoryItem = Tablo.RepAktifPasif
@@ -241,6 +250,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         object GridKKListeViewSUBEID: TcxGridDBColumn
           Caption = #350'ube'
           DataBinding.FieldName = 'SUBEID'
+          DataBinding.IsNullValueType = True
           PropertiesClassName = 'TcxImageComboBoxProperties'
           Properties.Items = <>
           RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
@@ -266,6 +276,10 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       object TabSheetToplamlar: TcxTabSheet
         Caption = 'Hesap Kesim'
         ImageIndex = 7
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridHesapKesim: TcxGrid
           Left = 0
           Top = 29
@@ -324,39 +338,47 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
             Styles.Header = AnaForm.cxStyle1
             object GridHesapKesimViewID: TcxGridDBColumn
               DataBinding.FieldName = 'ID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridHesapKesimViewKASAID: TcxGridDBColumn
               DataBinding.FieldName = 'KASAID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridHesapKesimViewKKID: TcxGridDBColumn
               DataBinding.FieldName = 'KKID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridHesapKesimViewTARIH: TcxGridDBColumn
               Caption = 'Tarih'
               DataBinding.FieldName = 'TARIH'
+              DataBinding.IsNullValueType = True
               Width = 80
             end
             object GridHesapKesimViewTAKSIT: TcxGridDBColumn
               Caption = 'Taksit'
               DataBinding.FieldName = 'TAKSIT'
+              DataBinding.IsNullValueType = True
             end
             object GridHesapKesimViewTUTAR: TcxGridDBColumn
               Caption = 'Tutar'
               DataBinding.FieldName = 'TUTAR'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyBF
               Width = 87
             end
             object GridHesapKesimViewKUR: TcxGridDBColumn
               Caption = 'Kur'
               DataBinding.FieldName = 'KUR'
+              DataBinding.IsNullValueType = True
               Width = 43
             end
             object GridHesapKesimViewACIKLAMA: TcxGridDBColumn
               Caption = 'A'#231#305'klama'
               DataBinding.FieldName = 'ACIKLAMA'
+              DataBinding.IsNullValueType = True
               Width = 340
             end
           end
@@ -375,26 +397,31 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
             Styles.Header = AnaForm.cxStyle1
             object cxGridDBColumn15: TcxGridDBColumn
               DataBinding.FieldName = 'DURUM'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 74
             end
             object cxGridDBColumn16: TcxGridDBColumn
               DataBinding.FieldName = 'VADE'
+              DataBinding.IsNullValueType = True
               Width = 130
             end
             object cxGridDBColumn17: TcxGridDBColumn
               DataBinding.FieldName = 'SERINO'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 109
             end
             object cxGridDBColumn18: TcxGridDBColumn
               DataBinding.FieldName = 'HESAPADI'
+              DataBinding.IsNullValueType = True
               Width = 354
             end
             object cxGridDBColumn19: TcxGridDBColumn
               DataBinding.FieldName = 'CEKID'
+              DataBinding.IsNullValueType = True
             end
           end
           object cxGridLevel2: TcxGridLevel
@@ -547,6 +574,10 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       object TabSheetEkstre: TcxTabSheet
         Caption = 'Ekstre'
         ImageIndex = 6
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridKrediKarti: TcxGrid
           Left = 0
           Top = 31
@@ -609,84 +640,101 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
             Styles.Header = AnaForm.cxStyle1
             object GridKrediKartiViewID: TcxGridDBColumn
               DataBinding.FieldName = 'ID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridKrediKartiViewTUR: TcxGridDBColumn
               Caption = #304#351'lem T'#252'r'#252
               DataBinding.FieldName = 'TUR'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepKasaTurleri
             end
             object GridKrediKartiViewISLEMTARIHI: TcxGridDBColumn
               Caption = 'Tarih'
               DataBinding.FieldName = 'ISLEMTARIHI'
+              DataBinding.IsNullValueType = True
               Width = 97
             end
             object GridKrediKartiViewFIRMA: TcxGridDBColumn
               Caption = 'Cari'
               DataBinding.FieldName = 'FIRMA'
+              DataBinding.IsNullValueType = True
               Width = 134
             end
             object GridKrediKartiViewMASRAFAD: TcxGridDBColumn
               Caption = 'Masraf'
               DataBinding.FieldName = 'MASRAFAD'
+              DataBinding.IsNullValueType = True
               Width = 124
             end
             object GridKrediKartiViewBELGENO: TcxGridDBColumn
               Caption = 'Belge No'
               DataBinding.FieldName = 'BELGENO'
+              DataBinding.IsNullValueType = True
               Width = 68
             end
             object GridKrediKartiViewREHBERID: TcxGridDBColumn
               DataBinding.FieldName = 'REHBERID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridKrediKartiViewBORC: TcxGridDBColumn
               Caption = 'Bor'#231
               DataBinding.FieldName = 'BORC'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyBF
               Width = 65
             end
             object GridKrediKartiViewALACAK: TcxGridDBColumn
               Caption = 'Alacak'
               DataBinding.FieldName = 'ALACAK'
+              DataBinding.IsNullValueType = True
               RepositoryItem = Tablo.RepCurrencyBF
               Width = 62
             end
             object GridKrediKartiViewBORCBAKIYE: TcxGridDBColumn
               Caption = 'Bor'#231' Bakiye'
               DataBinding.FieldName = 'BORCBAKIYE'
+              DataBinding.IsNullValueType = True
             end
             object GridKrediKartiViewALACAKBAKIYE: TcxGridDBColumn
               Caption = 'Alacak Bakiye'
               DataBinding.FieldName = 'ALACAKBAKIYE'
+              DataBinding.IsNullValueType = True
             end
             object GridKrediKartiViewKUR: TcxGridDBColumn
               Caption = 'Kur'
               DataBinding.FieldName = 'KUR'
+              DataBinding.IsNullValueType = True
             end
             object GridKrediKartiViewYERELKUR: TcxGridDBColumn
               Caption = 'Y.Kur'
               DataBinding.FieldName = 'YERELKUR'
+              DataBinding.IsNullValueType = True
             end
             object GridKrediKartiViewYERELTUTAR: TcxGridDBColumn
               Caption = 'Y.Tutar'
               DataBinding.FieldName = 'YERELTUTAR'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
             end
             object GridKrediKartiViewYERELBAKIYE: TcxGridDBColumn
               Caption = 'Y.Bakiye'
               DataBinding.FieldName = 'YERELBAKIYE'
+              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = ',0.00;-,0.00'
             end
             object GridKrediKartiViewMASRAFID: TcxGridDBColumn
               DataBinding.FieldName = 'MASRAFID'
+              DataBinding.IsNullValueType = True
               Visible = False
             end
             object GridKrediKartiViewACIKLAMA: TcxGridDBColumn
               Caption = 'A'#231#305'klama'
               DataBinding.FieldName = 'ACIKLAMA'
+              DataBinding.IsNullValueType = True
               Visible = False
               Width = 304
             end
@@ -706,26 +754,31 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
             Styles.Header = AnaForm.cxStyle1
             object GridKrediKartiDBTableView1DURUM: TcxGridDBColumn
               DataBinding.FieldName = 'DURUM'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 74
             end
             object GridKrediKartiDBTableView1VADE: TcxGridDBColumn
               DataBinding.FieldName = 'VADE'
+              DataBinding.IsNullValueType = True
               Width = 130
             end
             object GridKrediKartiDBTableView1SERINO: TcxGridDBColumn
               DataBinding.FieldName = 'SERINO'
+              DataBinding.IsNullValueType = True
               FooterAlignmentHorz = taRightJustify
               GroupSummaryAlignment = taRightJustify
               Width = 109
             end
             object GridKrediKartiDBTableView1HESAPADI: TcxGridDBColumn
               DataBinding.FieldName = 'HESAPADI'
+              DataBinding.IsNullValueType = True
               Width = 354
             end
             object GridKrediKartiDBTableView1Column1: TcxGridDBColumn
               DataBinding.FieldName = 'CEKID'
+              DataBinding.IsNullValueType = True
             end
           end
           object GridKrediKartiLevel1: TcxGridLevel
@@ -826,6 +879,7 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       HotZoneClassName = 'TcxMediaPlayer8Style'
       AlignSplitter = salBottom
       Control = PageControlSekme
+      ExplicitWidth = 8
     end
     object SqlMemo: TMemo
       Left = 14
@@ -852,11 +906,10 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
     Top = 223
   end
   object KREDIKARTI: TFDQuery
-    Connection = Tablo.FDCnn
     AfterInsert = KREDIKARTIAfterScroll
     AfterDelete = KREDIKARTIAfterScroll
     AfterScroll = KREDIKARTIAfterScroll
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select KK.*,CAST(SKTAY as varchar(2))+'#39'/'#39'+CAST(SKTYIL as varchar' +
@@ -869,7 +922,6 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
   end
   object TabKKEkstre: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select *,'
       #9'BORCBAKIYE=case when BB>0.0 then BB else 0.0 end,'
@@ -1021,7 +1073,6 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
   end
   object tabHesapKesim: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select ID,KASAID,KKID,TARIH,TAKSIT=convert(varchar(10),TAKSITNO)' +

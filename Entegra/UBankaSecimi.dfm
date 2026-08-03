@@ -106,6 +106,8 @@ object BankaSecimDlg: TBankaSecimDlg
     Height = 416
     Align = alLeft
     TabOrder = 1
+    ExplicitTop = 32
+    ExplicitHeight = 419
     object Panel2: TPanel
       Left = 1
       Top = 1
@@ -216,6 +218,8 @@ object BankaSecimDlg: TBankaSecimDlg
     Height = 416
     Align = alClient
     TabOrder = 2
+    ExplicitTop = 32
+    ExplicitHeight = 419
     object Panel4: TPanel
       Left = 1
       Top = 1

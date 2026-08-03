@@ -393,10 +393,15 @@ begin
        if Kur<>'' then
           TabSubeler.SQL.Add(' and BH.KUR='''+Kur+''' ');
      end else begin             //cagiran 1..20 aras? sadece  bankalar ve ?ubelerin listesi
-       TabSubeler.SQL.Text :='  SELECT B.ID as SUBEID, BANKAKODU,SUBEKODU,SUBEADI,B.ILNO,ILADI, HESAPID=NULL, HESAPKODU=NULL, HESAPADI=NULL, HESAPNO=NULL, KUR=NULL FROM BANKASUBELER B LEFT OUTER JOIN ILLER I ON B.ILNO=I.ILNO WHERE BANKAKODU='+TabBankalar.Fields[0].AsString;
-       TabSubeler.SQL.Add(' and (B.SUBEKODU like ''%'+EditAra.Text+'%'' ');
+       // Portable alias: MSSQL 'HESAPID=NULL' PG'de 'HESAPID = NULL' (yok kolon) olur -> 'NULL AS HESAPID'
+       //   iki motorda da gecerli (.Open dogrudan, cevirici yok).
+       // Tipli NULL: tipsiz 'NULL as X' PG'de text olur; 1..20 dali ile 21+ dali (HESAPID int, digerleri
+       //   varchar) ayni field tiplerine sahip olmali (grid/kod ''->int cevrim hatasi). CAST ile tip ver.
+       TabSubeler.SQL.Text :='  SELECT B.ID as SUBEID, BANKAKODU,SUBEKODU,SUBEADI,B.ILNO,ILADI, CAST(NULL AS integer) as HESAPID, CAST(NULL AS varchar) as HESAPKODU, CAST(NULL AS varchar) as HESAPADI, CAST(NULL AS varchar) as HESAPNO, CAST(NULL AS varchar) as KUR FROM BANKASUBELER B LEFT OUTER JOIN ILLER I ON B.ILNO=I.ILNO WHERE BANKAKODU='+TabBankalar.Fields[0].AsString;
+       // SUBEKODU integer: MSSQL LIKE otomatik cast eder, PG etmez ("integer ~~ unknown") -> CAST varchar (iki motor).
+       TabSubeler.SQL.Add(' and (CAST(B.SUBEKODU AS varchar) like ''%'+EditAra.Text+'%'' ');
        for i := 0 to aralist.Count - 1 do
-          TabSubeler.SQL.Add(' or B.SUBEADI like ''%'+aralist.strings[i]+'%'' ');
+             TabSubeler.SQL.Add(' or B.SUBEADI like ''%'+aralist.strings[i]+'%'' ');
        TabSubeler.SQL.Add(') order by SUBEADI ');
      end;
      TabSubeler.Open;
@@ -405,7 +410,7 @@ end;
 
 procedure TBankaSecimDlg.FormCreate(Sender: TObject);
 begin
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+  if CokluDilVar then  LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   Tablo.GridTurkcelestir;
 end;
 

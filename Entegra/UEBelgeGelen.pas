@@ -56,6 +56,8 @@ function EBelgeUBLSikistir(AConnection: TFDConnection): Boolean;
 var
   LQ: TFDQuery;
 begin
+  if AktifVeriMotor = vmPG then
+    Exit(False);
   // Opsiyon varsayilan AÇIK (default zip).
   if not Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_UBL_ZIP, True) then
     Exit(False);

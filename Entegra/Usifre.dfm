@@ -1507,8 +1507,8 @@ object PasswordDlg: TPasswordDlg
     OnClick = CancelBtnClick
   end
   object cbLanguages: TcxImageComboBox
-    Left = 224
-    Top = 265
+    Left = 133
+    Top = 269
     RepositoryItem = Tablo.RepDiller
     Properties.Items = <>
     Properties.OnEditValueChanged = cbLanguagesPropertiesEditValueChanged
@@ -1548,9 +1548,20 @@ object PasswordDlg: TPasswordDlg
     Transparent = True
     OnClick = LabelSifreUnuttumClick
   end
+  object LabelSQL: TcxLabel
+    Left = 319
+    Top = 274
+    Cursor = crHandPoint
+    Caption = '-------'
+    ParentColor = False
+    ParentFont = False
+    Style.Color = clMaroon
+    Style.TextColor = clMaroon
+    Transparent = True
+  end
   object ImageList1: TImageList
-    Left = 12
-    Top = 50
+    Left = 28
+    Top = 26
     Bitmap = {
       494C010102000500040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
@@ -1697,7 +1708,7 @@ object PasswordDlg: TPasswordDlg
       
         'select K.*,R.TY from KULLANICI K left join ROLLER R on K.ROLID=R' +
         '.ID')
-    Left = 325
-    Top = 45
+    Left = 341
+    Top = 21
   end
 end

@@ -186,6 +186,13 @@ begin
   FEkleLogland := False;
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
+  if AktifVeriMotor = vmPG then begin
+    TabBankaHesaplar.UpdateOptions.RequestLive := True;
+    TabBankaHesaplar.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabBankaHesaplar.UpdateOptions.UpdateTableName := 'BANKAHESAPLAR';
+    TabBankaHesaplar.UpdateOptions.KeyFields := 'ID';
+    TabBankaHesaplar.UpdateOptions.AutoIncFields := 'ID';
+  end;
   HesapOlusturmaDuzenlemeEkr.Title.Text:=jvHesapOlusturmaDuzenleme;
   Tablo.GridTurkcelestir;
   ComboKUR.Enabled := DovizTakibi;
@@ -327,13 +334,13 @@ begin
   TabBankaHesaplar.FieldByName('EKLEYEN').AsString := Kullanan;
   TabBankaHesaplar.FieldByName('KUR').AsString := CariDoviz;
 
-  TabBankaHesaplar.FieldByName('DURUM').AsBoolean:= True;//ComboDURUM2.Items[0];
-  TabBankaHesaplar.FieldByName('VARSAYILAN').AsBoolean:= TabBankaHesaplar.RecordCount<1;
-  TabBankaHesaplar.FieldByName('CEKHESABI').AsBoolean:= False;
-  TabBankaHesaplar.FieldByName('KREDILIHESAP').AsBoolean := False;
-  TabBankaHesaplar.FieldByName('KREDIKARTI').AsBoolean := False;
-  TabBankaHesaplar.FieldByName('MAASHESABI').AsBoolean := False;
-  TabBankaHesaplar.FieldByName('GUNLUKAKSIYONDAGOSTER').AsBoolean := True;
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('DURUM'), True);//DURUM smallint (PG) -> .AsBoolean patlar
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('VARSAYILAN'), TabBankaHesaplar.RecordCount<1);  // VARSAYILAN smallint (PG) -> .AsBoolean patlar
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('CEKHESABI'), False);
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('KREDILIHESAP'), False);
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('KREDIKARTI'), False);
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('MAASHESABI'), False);
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('GUNLUKAKSIYONDAGOSTER'), True);
 
   {if SubeVarmi then begin
      case Tablo.GENINI.ReadInteger(Ops_OpsiyonBanka_GorunecekSubeler,0) of

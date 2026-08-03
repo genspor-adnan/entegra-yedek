@@ -322,6 +322,9 @@ begin
    AFastReport.EnabledDataSets.Clear;
    AFastReport.EnabledDataSets.Add(frxTEKLIF);
    AFastReport.EnabledDataSets.Add(frxTEKLIFDETAY);
+   // Kullanici ek alanlari (_USER) rapora (secili teklif karti).
+   if TabTeklif.Active and (not TabTeklif.IsEmpty) then
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'TEKLIF', TabTeklif.FieldByName('ID').AsInteger);
 end;
 
 procedure TTeklifListeDlg.pmAlinanSiparisedonusturClick(Sender: TObject);
@@ -474,7 +477,8 @@ var
   KonusuVal, TuruVal, DurumuVal, TopN, TID: Integer;
   j: TJSONObject;
 begin
-  if AktifVeriMotor = vmPG then Exit;   // JSON SP su an MSSQL (PG pilot: fn_prog_teklif_liste)
+  // NOT: eski 'if vmPG then Exit' guard'i kaldirildi -> fn_prog_teklif_liste_json2 PG'ye portlandi
+  //   (pg/schema/41), ListeSPJson PG'de 'SELECT * FROM fn_...' seam'ine cevirir. MSSQL yolu ayni.
   if Pos('0000', FormatDateTime('yyyy-mm-dd', FArama.AraTarihBas.Date)) > 0 then Exit;
 
   if (TabTeklif.Active) and (TabTeklif.RecordCount > 0) then

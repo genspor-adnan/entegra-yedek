@@ -764,7 +764,11 @@ begin
     AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
   end;
-
+  // Kullanici ek alanlari (_USER) rapora: emir karti + operasyon personel satirlari.
+  Tablo.UserAlanYazdirmaEkle(AFastReport, 'URETIMEMRI', UretimID);
+  Tablo.UserAlanYazdirmaEkle(AFastReport, 'URETIMOPERASYONPERSONEL', 0,
+    'select ID from URETIMOPERASYONPERSONEL where OPERASYONID in ' +
+    '(select ID from URETIMOPERASYON where URETIMEMRIID=' + IntToStr(UretimID) + ')');
 end;
 
 procedure TUretimEmriWizardDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -1161,6 +1165,8 @@ begin
     Tablo.UyariGoster(Uyari,AWBitisTarihiKucukOlamaz,1);
     Abort;
   end;
+  if not TarihKontrol(TabUretimEmri.FieldByName('TALEPTARIHI').AsDateTime, 'Talep Tarihi') then
+    Abort;
 
   BoslukKontrolu := False;
 end;

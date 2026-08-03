@@ -48,17 +48,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
       TabOrder = 1
       OnClick = FaturaTusClick
     end
-    object DokumanTus: TcxButton
-      Tag = 3
-      Left = 3
-      Top = 167
-      Width = 80
-      Height = 29
-      Caption = 'Yorum/Medya'
-      Enabled = False
-      TabOrder = 2
-      OnClick = FaturaTusClick
-    end
   end
   object WizardKontrol: TJvWizard
     Left = 86
@@ -2760,8 +2749,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
     Top = 342
   end
   object PopupMenuFatura: TPopupMenu
-    Left = 26
-    Top = 228
+    Left = 18
+    Top = 276
     object utarDvzHesapla1: TMenuItem
       Caption = 'Tutar / D'#246'viz Hesapla'
       OnClick = TutarDvzHesapla1Click
@@ -3134,7 +3123,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
       'from SIPARISDETAY F'
       'Where SIPARISID = :Par ')
     Left = 32
-    Top = 96
+    Top = 192
     ParamData = <
       item
         Name = 'Par'
@@ -3512,7 +3501,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
     Left = 43
-    Top = 201
+    Top = 161
   end
   object dtsTOPLAMLAR: TDataSource
     DataSet = TOPLAMLAR

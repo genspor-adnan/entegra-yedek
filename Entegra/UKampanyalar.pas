@@ -698,7 +698,8 @@ procedure TKampanyalarDlg.TabKampanyaNewRecord(DataSet: TDataSet);
 begin
   TabKampanya.FieldByName('TUR').AsInteger := 1;
   TabKampanya.FieldByName('EKLEYEN').AsString:= Kullanan;
-  TabKampanya.FieldByName('DURUM').AsBoolean:=True;
+  with TabKampanya.FieldByName('DURUM') do  // DURUM smallint (PG) -> .AsBoolean patlar
+     if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
   TabKampanya.FieldByName('SUBEID').AsInteger := SubeID;
 end;
 
@@ -716,7 +717,8 @@ procedure TKampanyalarDlg.TabKampKosulNewRecord(DataSet: TDataSet);
 begin
   (DataSet as TFDQuery).FieldByName('KAMPANYAID').AsInteger := TabKampanya.FieldByName('ID').AsInteger;
   (DataSet as TFDQuery).FieldByName('EKLEYEN').AsString := Kullanan;
-  (DataSet as TFDQuery).FieldByName('DURUM').AsBoolean := True;
+  with (DataSet as TFDQuery).FieldByName('DURUM') do  // DURUM smallint (PG) -> .AsBoolean patlar
+     if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
   (DataSet as TFDQuery).FieldByName('SUBEID').AsInteger := SubeID;
 end;
 

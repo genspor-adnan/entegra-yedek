@@ -24,7 +24,8 @@ uses
   dxSkinVisualStudio2013Light, dxDateRanges, dxScrollbarAnnotations,
   dxCoreGraphics, frCoreClasses, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  System.RegularExpressions;
 
 type
   TMakbuzWizardDlg = class(TForm, IPopupDialog)
@@ -154,6 +155,9 @@ type
 
   private
     { Private declarations }
+    FSQLCek: string;
+    FSQLMakbuzToplam: string;
+    FSQLMakbuzYaz: string;
     function BoslukKontrolu: Boolean;
 //    procedure YazdirmayaHazirla(AFastReport: TfrxReport);
 
@@ -216,22 +220,93 @@ begin
    AFastReport.EnabledDataSets.Add(frxmakbuz);
    AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
    AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
-   TabMakbuzToplam.SQL.Text := StringReplace(TabMakbuzToplam.SQL.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]);
+   TabMakbuzToplam.SQL.Text := StringReplace(FSQLMakbuzToplam, 'SPID', IntToStr(SPID), [rfReplaceAll]);
+   if AktifVeriMotor = vmPG then
+     TabMakbuzToplam.SQL.Text := PgSqlCevir(TabMakbuzToplam.SQL.Text);
    TabloYenile(TabMakbuzToplam,[]);
    AFastReport.EnabledDataSets.Add(frxMakbuzToplam);
 end;
 
 procedure TMakbuzWizardDlg.MakbuzAc(Trh:TDateTime; BelNo:String);
+const
+  CINS = 'INSERT INTO ##MAKBUZ_SPID_';
+  CSEL = 'SELECT * FROM ##MAKBUZ_SPID_';
 var Trh2:String[19];
+    LFull, LUnion, LTmp, LCreate, LInsertCols, LPart, LPartSql: string;
+    LParts: TArray<string>;
+    p1, p2, LInsLen : Integer;
+
+    function SqlYorumlariniAt(const ASql: string): string;
+    var
+      LPos: Integer;
+    begin
+      Result := TrimLeft(ASql);
+      while (Length(Result) >= 2) and (Result[1] = '-') and (Result[2] = '-') do
+      begin
+        LPos := Pos(#10, Result);
+        if LPos = 0 then
+        begin
+          Result := '';
+          Break;
+        end;
+        Result := TrimLeft(Copy(Result, LPos + 1, MaxInt));
+      end;
+    end;
 begin
    Trh2 := FormatDateTime('yyyy-mm-dd hh:nn:ss', Trh);
    TabMakbuz.Close;
-   TabMakbuz.SQL.Text := StringReplace(StringReplace(SQLCek.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]), '&RehID', IntToStr(RehberId), [RFrEPLACEaLL]);
-   TabMakbuz.SQL.Text := StringReplace(TabMakbuz.SQL.Text, ':TARIH', Trh2, [rfReplaceAll]);
-   TabMakbuz.SQL.Text := StringReplace(TabMakbuz.SQL.Text, ':MAKBUZNO', trim(BelNo), [rfReplaceAll]);
+   if AktifVeriMotor = vmPG then
+   begin
+     // MSSQL ##global-temp batch (IF/DROP/CREATE/INSERT/SELECT * FROM ##) PG'de gecersiz. Net sonuc =
+     //   INSERT ile SELECT * arasindaki UNION. Gercek PG temp tablo kur -> tabMakbuzToplam/TabMakbuzYaz
+     //   da paylasir (onlarin '##MAKBUZ_<spid>_' refleri PgGlobalTempCevir ile ayni 'gt_makbuz_<spid>_'e doner).
+     LTmp := 'gt_makbuz_' + IntToStr(SPID) + '_';
+     LFull := FSQLCek;
+     p1 := Pos(CINS, LFull);
+     p2 := Pos(CSEL, LFull);
+     if (p1 > 0) and (p2 > p1) then
+     begin
+       LInsLen := Length(CINS);
+       LUnion := Copy(LFull, p1 + LInsLen, p2 - (p1 + LInsLen));
+       LUnion := StringReplace(LUnion, '&RehID', IntToStr(RehberId), [rfReplaceAll]);
+       LUnion := StringReplace(LUnion, ':TARIH', Trh2, [rfReplaceAll]);
+       LUnion := StringReplace(LUnion, ':MAKBUZNO', Trim(BelNo), [rfReplaceAll]);
+       Tablo.FDCnn.ExecSQL('drop table if exists ' + LTmp);
+       LCreate :=
+         'create temp table ' + LTmp + '(' +
+         'ID smallint generated always as identity,' +
+         'ID_GELEN integer,TUR smallint,TARIH timestamp,VADETARIH timestamp,BELGENO varchar(40),' +
+         'KOD varchar(20),HESAP varchar(250),ACIKLAMA varchar(250),ACIKLAMA2 varchar(250),' +
+         'TUTAR numeric,DOVIZ_TUTARI numeric,KUR varchar(5),DOVIZ_KURU varchar(5),' +
+         'HESAPID integer,YERI integer,YERID bigint,FATURAID integer,HESAPTURU varchar(1),' +
+         'BASLIK varchar(250),CARI varchar(250),SERINO varchar(50),BANKA varchar(250),' +
+         'SUBENO varchar(50),SUBEADI varchar(50),HESAPNO varchar(50),IBAN varchar(50)) on commit preserve rows';
+       Tablo.FDCnn.ExecSQL(LCreate);
+       LInsertCols :=
+         '(ID_GELEN,TUR,TARIH,VADETARIH,BELGENO,KOD,HESAP,ACIKLAMA,ACIKLAMA2,TUTAR,DOVIZ_TUTARI,KUR,DOVIZ_KURU,' +
+         'HESAPID,YERI,YERID,FATURAID,HESAPTURU,BASLIK,CARI,SERINO,BANKA,SUBENO,SUBEADI,HESAPNO,IBAN)';
+       LParts := TRegEx.Split(LUnion, '\bUNION\s+ALL\b', [roIgnoreCase]);
+       for LPart in LParts do
+       begin
+         LPartSql := SqlYorumlariniAt(LPart);
+         if LPartSql <> '' then
+           Tablo.FDCnn.ExecSQL('insert into ' + LTmp + LInsertCols + ' ' + PgSqlCevir(LPartSql));
+       end;
+       TabMakbuz.SQL.Text := 'select * from ' + LTmp;
+     end;
+   end
+   else
+   begin
+     TabMakbuz.SQL.Text := StringReplace(StringReplace(FSQLCek, 'SPID', IntToStr(SPID), [rfReplaceAll]), '&RehID', IntToStr(RehberId), [rfReplaceAll]);
+     TabMakbuz.SQL.Text := StringReplace(TabMakbuz.SQL.Text, ':TARIH', Trh2, [rfReplaceAll]);
+     TabMakbuz.SQL.Text := StringReplace(TabMakbuz.SQL.Text, ':MAKBUZNO', trim(BelNo), [rfReplaceAll]);
+   end;
    TabMakbuz.Open;
    TabMakbuzToplam.Close;
-   TabMakbuzToplam.SQL.Text := StringReplace(TabMakbuzToplam.SQL.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]);
+   TabMakbuzToplam.SQL.Text := StringReplace(FSQLMakbuzToplam, 'SPID', IntToStr(SPID), [rfReplaceAll]);
+   // PG: '##MAKBUZ_<spid>_' -> 'gt_makbuz_<spid>_' + dbo./collate/alias= cevir (fn_paratextolaraktumdiller portlu).
+   if AktifVeriMotor = vmPG then
+     TabMakbuzToplam.SQL.Text := PgSqlCevir(TabMakbuzToplam.SQL.Text);
    TabMakbuzToplam.Open;
 end;
 
@@ -331,8 +406,11 @@ begin
   RehberId := -1;
   ProjeId := -1;
   AktiviteId := -1;
-  TabMakbuz.SQL.Text := StringReplace(SQLCek.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]);
-  TabMakbuzToplam.SQL.Text := StringReplace(TabMakbuzToplam.SQL.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]);
+  FSQLCek := SQLCek.Text;
+  FSQLMakbuzToplam := TabMakbuzToplam.SQL.Text;
+  FSQLMakbuzYaz := TabMakbuzYaz.SQL.Text;
+  TabMakbuz.SQL.Text := StringReplace(FSQLCek, 'SPID', IntToStr(SPID), [rfReplaceAll]);
+  TabMakbuzToplam.SQL.Text := StringReplace(FSQLMakbuzToplam, 'SPID', IntToStr(SPID), [rfReplaceAll]);
   Tablo.GridTurkcelestir;
 
 end;
@@ -546,7 +624,9 @@ end;
 
 procedure TMakbuzWizardDlg.TabMakbuzYazBeforeOpen(DataSet: TDataSet);
 begin
-  TabMakbuzYaz.SQL.Text := StringReplace(TabMakbuzYaz.SQL.Text, 'SPID', IntToStr(SPID), [RFrEPLACEaLL]) ;
+  TabMakbuzYaz.SQL.Text := StringReplace(FSQLMakbuzYaz, 'SPID', IntToStr(SPID), [rfReplaceAll]);
+  if AktifVeriMotor = vmPG then
+    TabMakbuzYaz.SQL.Text := PgSqlCevir(TabMakbuzYaz.SQL.Text);
 end;
 
 procedure TMakbuzWizardDlg.MakbuzEkrNextButtonClick(Sender: TObject; var Stop: Boolean);

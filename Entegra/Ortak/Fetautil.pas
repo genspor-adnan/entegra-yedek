@@ -2066,11 +2066,25 @@ var cst, DB_Pass, Ser_Name, DB_Name, s2: string;
    i: smallint;
    e: eoleexception;
    tut: Boolean;
+   LMotorAd, LHataMsg: string;
+   LEskiSilent: Boolean;
    function IsConnectionStringValid(const AConnStr: string): Boolean;
    begin
      Result :=
        ((Pos('Server=', AConnStr) > 0) or (Pos('Data Source=', AConnStr) > 0)) and
        ((Pos('Database=', AConnStr) > 0) or (Pos('Initial Catalog=', AConnStr) > 0));
+   end;
+
+   function PgSifreOku: string;
+   var enc: string;
+   begin
+     // PG sifresi 'PG\Sifre'de SIFRELI saklanir (UGenSifre.Sifre); DeSifre ile acilir.
+     //   Yoksa eski root 'PgSifre' (plaintext) fallback -> geriye-uyum.
+     enc := GenRegIni.RegReadString('PG', 'Sifre', '', 'C');
+     if enc <> '' then
+       Result := DeSifre(enc)
+     else
+       Result := GenRegIni.RegReadString('', 'PgSifre', 'FETAGEN', 'C');
    end;
 
    function TryDecodeConnectionString(var AConnStr: string): Boolean;
@@ -2153,43 +2167,62 @@ var cst, DB_Pass, Ser_Name, DB_Name, s2: string;
       OpenSQLServerForm.ledUserName.Text := 'sa';
       OpenSQLServerForm.ShowModal;
       if OpenSQLServerForm.ModalResult = mrOK then begin
-         if cnn.Connected then
-            cnn.Connected := False;
+         if OpenSQLServerForm.ComboSQL.ItemIndex = 1 then
+         begin
+            // PG seçildi: form 'PG' alt-anahtarına + VeriMotor'a zaten yazdı; MSSQL cst
+            //   rebuild YAPMA (boş MSSQL alanlarından bozuk cst üretip kayıtlı MSSQL'i ezerdi).
+            //   cst boş kalır -> ana akış motoru PG okur, MotorBaglantisiKur ile bağlanır.
+            cst := '';
+         end
+         else
+         begin
+            if cnn.Connected then
+               cnn.Connected := False;
 
-         cst := BuildFireDACConnectionString(
-            OpenSQLServerForm.cboServers.Text,
-            OpenSQLServerForm.cboDatabases.Text,
-            OpenSQLServerForm.ledUserName.Text,
-            OpenSQLServerForm.ledPassword.Text,
-            OpenSQLServerForm.yetkilendirmeComboBox.ItemIndex = 0,
-            StrToIntDef(OpenSQLServerForm.EditTimeOut.Text, 15));
-         ApplyFireDACConnectionString(cnn, cst, StrToIntDef(OpenSQLServerForm.EditTimeOut.Text, 15));
-         if cst <> '' then begin
-            cst := Sifre(cst);
-            GenRegIni.RegWriteString('', 'ConnectionString', cst, 'C');
+            cst := BuildFireDACConnectionString(
+               OpenSQLServerForm.cboServers.Text,
+               OpenSQLServerForm.cboDatabases.Text,
+               OpenSQLServerForm.ledUserName.Text,
+               OpenSQLServerForm.ledPassword.Text,
+               OpenSQLServerForm.yetkilendirmeComboBox.ItemIndex = 0,
+               StrToIntDef(OpenSQLServerForm.EditTimeOut.Text, 15));
+            ApplyFireDACConnectionString(cnn, cst, StrToIntDef(OpenSQLServerForm.EditTimeOut.Text, 15));
+            if cst <> '' then begin
+               cst := Sifre(cst);
+               GenRegIni.RegWriteString('', 'ConnectionString', cst, 'C');
+            end;
          end;
       end
       else
          cst:='';
    end;
 begin
-  cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
-//  cst2 := GenRegIni.RegReadString('', 'ConnectionString2', '', 'C');
-  if (cst = ''){and(cst2 = '')} then begin
-    bilgial;
+  // Veri motorunu baglanti-ONCESI belirle: MSSQL ConnectionString okuma/prompt YALNIZ MSSQL'de
+  //   calissin. PG'de bos MSSQL cst yuzunden gereksiz "MSSQL bilgisi sor" prompt'u cikmasin;
+  //   eski MSSQL musterileri (VeriMotor yok -> default MSSQL) registry'den DIREKT okumaya devam eder.
+  AktifVeriMotor := MetinMotor(GenRegIni.RegReadString('', 'VeriMotor', 'MSSQL', 'C'));
+  if FindCmdLineSwitch('PG', True) then AktifVeriMotor := vmPG
+  else if FindCmdLineSwitch('MSSQL', True) then AktifVeriMotor := vmMSSQL;
+
+  cst := '';
+  if AktifVeriMotor = vmMSSQL then
+  begin
     cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
-   // cst2 := GenRegIni.RegReadString('', 'ConnectionString2', '', 'C');
-  end
-  else begin
-    cst := DeSifre(cst);
-    if (Pos('Server=', cst)=0) and (Pos('Database=', cst)=0) then
-       cst := DeSifre(cst);
-    Ser_Name := GetConnectionValue(cst, 'Server', 'Data Source');
-    DB_Name := GetConnectionValue(cst, 'Database', 'Initial Catalog');
-    Tablo.Database_Name := DB_Name;
-    if (Ser_Name = '')or(DB_Name = '') then begin
-       bilgial;
-       cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
+    if (cst = '') then begin
+      bilgial;
+      cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
+    end
+    else begin
+      cst := DeSifre(cst);
+      if (Pos('Server=', cst)=0) and (Pos('Database=', cst)=0) then
+         cst := DeSifre(cst);
+      Ser_Name := GetConnectionValue(cst, 'Server', 'Data Source');
+      DB_Name := GetConnectionValue(cst, 'Database', 'Initial Catalog');
+      if Assigned(Tablo) then Tablo.Database_Name := DB_Name;
+      if (Ser_Name = '')or(DB_Name = '') then begin
+         bilgial;
+         cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
+      end;
     end;
   end;
 //  else if cst2 <> '' then begin
@@ -2197,13 +2230,29 @@ begin
 //    DB_Name := copy(cst2, pos('Initial Catalog=', cst2) + 16, pos(';Data Source=', cst2) - pos('Initial Catalog=', cst2) - 16);
 //    Tablo.Database_Name := DB_Name;
 //  end;
+  // Kullanıcı config formunu açtıysa (Usifre Image1 / Degis) motordan BAĞIMSIZ göster;
+  //   bilgial ComboSQL seçimine göre ya MSSQL cst kurar ya da PG'yi 'PG' alt-anahtarına yazar.
+  //   (Eskiden bu vmMSSQL guard'ının içindeydi -> PG'deyken form hiç açılmıyordu.)
   if (Degis) then
     bilgial;
 
-  if not TryDecodeConnectionString(cst) then
+  // bilgial motoru değiştirmiş olabilir (Image1'den PG<->MSSQL) -> yeniden oku.
+  AktifVeriMotor := MetinMotor(GenRegIni.RegReadString('', 'VeriMotor', 'MSSQL', 'C'));
+  if FindCmdLineSwitch('PG', True) then AktifVeriMotor := vmPG
+  else if FindCmdLineSwitch('MSSQL', True) then AktifVeriMotor := vmMSSQL;
+
+  // Yalnız MSSQL'de cst çöz/doğrula. PG'de cst boş kalır (kendi MotorBaglantisiKur yolu);
+  //   PG'deyken TryDecode('') başarısız olup ResetStoredConnectionString kayıtlı MSSQL
+  //   bağlantısını SİLİYORDU (PG'ye her geçiş MSSQL'i yok ediyordu).
+  if AktifVeriMotor = vmMSSQL then
   begin
-    ResetStoredConnectionString;
-    cst := '';
+    if cst = '' then
+      cst := GenRegIni.RegReadString('', 'ConnectionString', '', 'C');
+    if not TryDecodeConnectionString(cst) then
+    begin
+      ResetStoredConnectionString;
+      cst := '';
+    end;
   end;
   if (OpenSQLServerForm <> nil)and(OpenSQLServerForm.ModalResult = 2) then begin
     VTSifreKontrolu := '';
@@ -2232,8 +2281,10 @@ begin
     else if FindCmdLineSwitch('MSSQL', True) then AktifVeriMotor := vmMSSQL;
     if AktifVeriMotor = vmPG then
     begin
-      Ser_Name := GenRegIni.RegReadString('', 'PgSunucu', 'localhost', 'C');
-      DB_Name  := GenRegIni.RegReadString('', 'PgVeritabani', 'gentegre', 'C');
+      // PG ayarlari AYRI 'PG' alt-anahtarindan (OpenSQLServer formu buraya yazar); yoksa eski root
+      //   'PgX' degerine dus (geriye-uyum), o da yoksa dev-Docker varsayilani.
+      Ser_Name := GenRegIni.RegReadString('PG', 'Sunucu', GenRegIni.RegReadString('', 'PgSunucu', 'localhost', 'C'), 'C');
+      DB_Name  := GenRegIni.RegReadString('PG', 'Veritabani', GenRegIni.RegReadString('', 'PgVeritabani', 'gentegre', 'C'), 'C');
       if Assigned(Tablo) then Tablo.Database_Name := DB_Name;
     end;
 
@@ -2244,9 +2295,9 @@ begin
       cnn.LoginPrompt := False;
       if AktifVeriMotor = vmPG then
         MotorBaglantisiKur(cnn, vmPG, Ser_Name, DB_Name,
-          GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'),
-          GenRegIni.RegReadString('', 'PgSifre', 'FETAGEN', 'C'),
-          StrToIntDef(GenRegIni.RegReadString('', 'PgPort', '5433', 'C'), 5433))
+          GenRegIni.RegReadString('PG', 'Kullanici', GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'), 'C'),
+          PgSifreOku,
+          StrToIntDef(GenRegIni.RegReadString('PG', 'Port', GenRegIni.RegReadString('', 'PgPort', '5432', 'C'), 'C'), 5432))
       else
         ApplyFireDACConnectionString(cnn, cst);
     end;
@@ -2258,13 +2309,19 @@ begin
       Tablo.FDCnn.LoginPrompt := False;
       if AktifVeriMotor = vmPG then
         MotorBaglantisiKur(Tablo.FDCnn, vmPG, Ser_Name, DB_Name,
-          GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'),
-          GenRegIni.RegReadString('', 'PgSifre', 'FETAGEN', 'C'),
-          StrToIntDef(GenRegIni.RegReadString('', 'PgPort', '5433', 'C'), 5433))
+          GenRegIni.RegReadString('PG', 'Kullanici', GenRegIni.RegReadString('', 'PgKullanici', 'postgres', 'C'), 'C'),
+          PgSifreOku,
+          StrToIntDef(GenRegIni.RegReadString('PG', 'Port', GenRegIni.RegReadString('', 'PgPort', '5432', 'C'), 'C'), 5432))
       else
         ApplyFireDACConnectionString(Tablo.FDCnn, cst);
     end;
 
+    // FireDAC'in KENDİ ham hata penceresi (TFDGUIxErrorDialog) exception bize ulaşmadan ÖNCE
+    //   çıkıyordu ("önce ham hata sonra bizim mesaj"). SilentMode=True bunu bastırır -> hata
+    //   doğrudan bize gelir, SADECE anlaşılır mesajı gösteririz. Sonra eski moda dön.
+    LEskiSilent := FDManager.SilentMode;
+    FDManager.SilentMode := True;
+    try
     try
       if Assigned(cnn) then
         cnn.Connected := True
@@ -2272,11 +2329,44 @@ begin
         Tablo.FDCnn.Connected := True;
     except
       on E: Exception do
-        ShowMessage('Bağlantı Hatası!' + E.Message);
+      begin
+        // Ham FireDAC/libpq dökümü yerine ANLAŞILIR mesaj + kurtarma yolu (ayar/motor değiştir).
+        //   Aksi halde ölü bağlantıyla devam edilip sonraki sorgular ham hatalarla patlıyordu.
+        if AktifVeriMotor = vmPG then LMotorAd := 'PostgreSQL' else LMotorAd := 'SQL Server';
+        LHataMsg :=
+          LMotorAd + ' veritabanı sunucusuna bağlanılamadı.' + #13#10 +
+          'Sunucu: ' + Ser_Name + '     Veritabanı: ' + DB_Name + #13#10#13#10 +
+          'Olası nedenler:' + #13#10 +
+          '  • Sunucu kapalı ya da yeniden başlatılıyor' + #13#10 +
+          '  • İnternet/ağ bağlantısı yok veya VPN kapalı' + #13#10 +
+          '  • Sunucu güvenlik duvarı bu bilgisayarın IP adresine kapalı' + #13#10 +
+          '  • Sunucu adresi / port / kullanıcı / şifre hatalı' + #13#10#13#10 +
+          'Bağlantı ayarlarını açmak ister misiniz?   (Hayır = programdan çık)';
+        if Application.MessageBox(PChar(LHataMsg), 'Bağlantı Hatası',
+             MB_YESNO or MB_ICONERROR or MB_TOPMOST) = IDYES then
+        begin
+          // Config formu: sunucuyu düzelt ya da motoru değiştir (motor değişince form
+          //   ExitProcess yapar). Ardından tüm akışı yeni ayarlarla baştan dene.
+          bilgial;
+          Result := VTSifreKontrolu(GenRegIni, cnn, False);
+          Exit;
+        end
+        else
+        begin
+          Result := '';
+          Exit;
+        end;
+      end;
+    end;
+    finally
+      FDManager.SilentMode := LEskiSilent;
     end;
 
 
-  if cst<>'' then
+  // PG'de cst boş kalır (MSSQL cst bloğu atlanır); Result'ı motor-bağımsız
+  //   Ser_Name/DB_Name doluluğuna göre ver, yoksa PG başarılı bağlanınca da
+  //   '' dönüp çağıran taraf "bağlanamadı" sanıyordu.
+  if (Ser_Name<>'') and (DB_Name<>'') then
     Result := Ser_Name + ' / ' + DB_Name
   else
     Result:='';

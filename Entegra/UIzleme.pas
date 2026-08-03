@@ -620,7 +620,7 @@ procedure TIzlemeDlg.GridFatIzlemViewCellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
 if (KalanMiktar>0.001)and(GridFatIzlemViewSEC.Visible) then begin
-     if TabIzlem.state = dsbrowse then
+     if TabIzlem.state =  dsbrowse then
         TabIzlem.Edit;
      TabIzlem.FieldByName('SEC').AsBoolean := not TabIzlem.FieldByName('SEC').AsBoolean;
      if TabIzlem.FieldByName('SEC').AsBoolean=True then begin

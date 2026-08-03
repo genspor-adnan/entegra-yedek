@@ -11,10 +11,8 @@ object MasrafGelirSecDlg: TMasrafGelirSecDlg
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -221,12 +219,14 @@ object MasrafGelirSecDlg: TMasrafGelirSecDlg
     LookAndFeel.SkinName = 'LondonLiquidSky'
     Navigator.Buttons.CustomButtons = <>
     OptionsBehavior.IncSearch = True
+    OptionsData.Appending = True
     OptionsData.Inserting = True
     OptionsData.CheckHasChildren = False
     OptionsData.SmartRefresh = True
     OptionsSelection.CellSelect = False
     PopupMenu = PopupMenu1
     RootValue = -1
+    ScrollbarAnnotations.CustomAnnotations = <>
     TabOrder = 1
     OnDblClick = cxDBTreeList1DblClick
     object cxDBTreeList1cxDBTreeListColumn1: TcxDBTreeListColumn
@@ -266,7 +266,6 @@ object MasrafGelirSecDlg: TMasrafGelirSecDlg
   end
   object TabMasrafListe: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     Left = 273
     Top = 119
   end
@@ -284,4 +283,3 @@ object MasrafGelirSecDlg: TMasrafGelirSecDlg
     end
   end
 end
-

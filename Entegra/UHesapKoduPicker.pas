@@ -16,7 +16,9 @@ uses
   dxSkinOffice2016Dark, dxSkinSevenClassic, dxSkinSharpPlus,
   dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
   dxSkinVisualStudio2013Light, dxSkinVS2010, dxSkinWhiteprint, cxFilter,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   THesapKoduPicker = class(TForm)
@@ -58,7 +60,7 @@ var
   HesapKoduPicker : THesapKoduPicker;
 
 implementation
-  Uses UVeriMotor,LocOnFly,PrjConst;
+  Uses UVeriMotor,FetaKurulusSiniflari,LocOnFly,PrjConst;
 {$R *.dfm}
 
 
@@ -191,16 +193,32 @@ begin
     cxDBLabel1.DataBinding.DataField := RefKod;
     cxDBLabel2.DataBinding.DataField := RefAd;
     cxDBTreeList1.DataController.KeyField := RefKod;
-    TabPlan.SQL:= Memo1.Lines;
-    TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefKod',RefKod,[rfReplaceAll,rfIgnoreCase]);
-    TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefAd',RefAd,[rfReplaceAll,rfIgnoreCase]);
-    TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefTablo',RefTablo,[rfReplaceAll,rfIgnoreCase]);
-    TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&KodGrubu',IntToStr(KodGurubu),[rfReplaceAll,rfIgnoreCase]);
-    // NOT: Memo1 sablonu MSSQL'e ozel (declare @sql / if exists INFORMATION_SCHEMA / exec dinamik
-    //   SQL + CHARINDEX/LEN). PgSqlCevir isnull/alias'i cevirir ama dinamik-SQL'i ceviremez ->
-    //   bu dal (Varsayilan=0) PG'de PG-native rewrite bekliyor (buyuk/cetrefil kategori).
+    // Memo1 sablonu MSSQL'e ozel: declare @sql / if exists(INFORMATION_SCHEMA) / exec dinamik SQL.
+    //   PgSqlCevir dinamik-SQL/if-batch'i ceviremez (PG'de "syntax near if"). PG dalinda ayni
+    //   mantigi PG-native tek SELECT ile kur: DIGITSAY kolonu &RefTablo'da var mi -> coalesce(DIGITSAY,0)
+    //   yoksa 0; ROOTKOD portable (DbBul/DbUzunluk seam, else-daldaki idiomun ayni). MSSQL'de sablon aynen.
     if AktifVeriMotor = vmPG then
-      TabPlan.SQL.Text := PgSqlCevir(TabPlan.SQL.Text);
+    begin
+      var LDigit: string := '0';
+      if Veritabani.VeriVarMi(Tablo.FDCnn,
+           'select 1 from information_schema.columns where lower(table_name)=lower(' + QuotedStr(RefTablo) +
+           ') and lower(column_name)=' + QuotedStr('digitsay'), [], []) then
+        LDigit := 'coalesce(DIGITSAY,0)';
+      var LNP: string := QuotedStr('.');
+      var LCR: string := DbBul(LNP, 'REVERSE(' + RefKod + ')');
+      TabPlan.SQL.Text :=
+        'select REVERSE(SUBSTRING(REVERSE(' + RefKod + '),' + LCR + '+1,' +
+        DbUzunluk(RefKod) + '-(' + LCR + '-1))) AS ROOTKOD,' +
+        RefKod + ',' + RefAd + ',' + LDigit + ' AS DIGITSAY ' +
+        'from ' + RefTablo + ' where DURUM=1 and (VARSAYILAN=' + IntToStr(KodGurubu) + ') order by 1';
+    end
+    else begin
+      TabPlan.SQL:= Memo1.Lines;
+      TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefKod',RefKod,[rfReplaceAll,rfIgnoreCase]);
+      TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefAd',RefAd,[rfReplaceAll,rfIgnoreCase]);
+      TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&RefTablo',RefTablo,[rfReplaceAll,rfIgnoreCase]);
+      TabPlan.SQL.Text:=StringReplace(TabPlan.SQL.Text,'&KodGrubu',IntToStr(KodGurubu),[rfReplaceAll,rfIgnoreCase]);
+    end;
 
   end else begin
 
@@ -214,7 +232,7 @@ begin
     var LN: string := QuotedStr('.');
     var LCRH: string := DbBul(LN, 'REVERSE(HESAPKODU)');
     TabPlan.SQL.Text := 'select REVERSE(SUBSTRING(REVERSE(HESAPKODU),'+LCRH+'+1,'+
-      DbUzunluk('HESAPKODU')+'-('+LCRH+'-1))) AS ROOTKOD,'+
+       DbUzunluk('HESAPKODU')+'-('+LCRH+'-1))) AS ROOTKOD,'+
       'HESAPKODU,HESAPADI,DIGITSAY from HESAPPLANI where VARSAYILAN='+IntToStr(Varsayilan);
 
   end;

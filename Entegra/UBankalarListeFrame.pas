@@ -617,8 +617,19 @@ begin
           Tablo.Query4.SQL.Text := ' = '+ BANKALAR.FieldByName('ID').AsString+' AND TUR in (1,2)';
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''B'' AND TUR in (1,2) ',['&id'], [BANKALAR.Fields[0].AsInteger]);
                //kendisini sil
-          // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-          LogKartSil(BANKALAR, TabNo_BANKAHESAPLAR, BANKALAR.FieldByName('ID').AsInteger);
+          // Kart SILME logu: SILMEDEN ONCE, kayit dururken. BASE tablodan logla -> BANKALAR list
+          //   JOIN'inde BANKASUBELERID/REHBERID/CEKHESABI vb. base FK/kolonlar YOK; onlardan
+          //   loglayinca Geri Al eksik satir olusturur (BANKASUBELERID null -> liste inner-join'i eler).
+          var LBaseQ: TFDQuery := TFDQuery.Create(nil);
+          try
+            LBaseQ.Connection := Tablo.FDCnn;
+            LBaseQ.SQL.Text := 'select * from BANKAHESAPLAR where ID=' + BANKALAR.FieldByName('ID').AsString;
+            LBaseQ.Open;
+            if not LBaseQ.IsEmpty then
+              LogKartSil(LBaseQ, TabNo_BANKAHESAPLAR, LBaseQ.FieldByName('ID').AsInteger);
+          finally
+            LBaseQ.Free;
+          end;
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER  where KOD=&Kod ',['&Kod'],[BANKALAR.FieldByName('HESAPKODU').AsString]);
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from BANKAHESAPLAR  where ID=&id ',['&id'],[BANKALAR.Fields[0].AsInteger]);
 

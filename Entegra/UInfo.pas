@@ -77,16 +77,19 @@ type
     FTabloIDler: TStringList;  // FJsonlar ile paralel: her satirin TABLOID'i (deger cozumu icin)
     FKullaniciAdlari: TStringList;  // FJsonlar ile paralel: islemi yapan kullanici adi
     FTiklamaAcik: Boolean;     // button-edit OnClick re-entrancy guard'i
+    FButonaBasildi: Boolean;   // tiklama BUTONA mi geldi? ('-' temizle / '...') -> OnClick picker acmasin
     FCozumler: TStringList;    // LOGCOZUM satirlari: 'ALAN|TABLOID' -> 'KAYNAKTABLO|IDKOLON|ADKOLON|FILTRE'
     FCozumCache: TStringList;  // 'TABLOID|ALAN|DEGER' -> ad (tekrarli sorguyu onler)
     procedure CozumleriYukle;  // LOGCOZUM'u bellege al (bir kez)
     function  DegerCoz(ATabloID: Integer; const AAlan, ADeger: string;
       AKardesler: TStrings = nil): string;  // ID -> ad ({ALAN} placeholder = kardes alan degeri)
     procedure ButtonEditTiklama(Sender: TObject);   // edit'e tiklayinca picker'i ac
+    procedure ButtonEditMouseDown(Sender: TObject; Button: TMouseButton;   // yeni tiklama -> buton bayragini sifirla
+      Shift: TShiftState; X, Y: Integer);
     procedure SutunlariHazirla;
     procedure LogGecmisiYukle;
     procedure DetayGoster(const ABilgiJSON: string; ATip: Integer; ATabloID: Integer = 0; const AKullaniciAd: string = '');
-    procedure TabLogYukle;             // Genel grid: LOG (ISLEMLOG) listesi (filtreli)
+    procedure TabLogYukle;             // Genel grid: LOG listesi -> sp_Prog_Log_Liste_Json2 (SUNUCU)
     procedure GenelSatirDetayGoster;   // Genel'de secili satirin BILGI'sini LvDetay'a
     procedure FiltreOlaylariBagla;     // filtre kontrollerinin olaylarini bagla
     procedure FiltreUygula(Sender: TObject);
@@ -220,136 +223,40 @@ end;
 // ISLEMTIPI + BILGI_JSON detay sekmesi icin ekstra tasinir (grid'de gosterilmez).
 procedure TInfoDlg.TabLogYukle;
 var
-  LW, LTip: string;
+  LK: TJSONObject;
 
-  function Esc(const S: string): string;   // ' -> '' (SQL literal guvenli)
+  // Metin filtresi: DOLU ise JSON'a ekle. Bos ise anahtar HIC eklenmez -> SP'de NULL
+  // -> o filtre uygulanmaz (aile deseni: absent key = filtre yok).
+  procedure Metin(const AAd, ADeger: string);
   begin
-    Result := StringReplace(Trim(S), '''', '''''', [rfReplaceAll]);
-  end;
-
-  // Metin kolonu icin "iceren" (LIKE %v%) kosul. Bos ise ''.
-  function MetinKosul(const ACol, ADeger: string): string;
-  var v: string;
-  begin
-    Result := '';
-    v := Esc(ADeger);
-    if v <> '' then
-      Result := ' AND ' + ACol + ' LIKE ''%' + v + '%''';
-  end;
-
-  function Tipler: string;   // islem checkbox'lari; hicbiri secili degilse '' (=tumu)
-  begin
-    Result := '';
-    if CheckEkleme.Checked     then Result := Result + '1,';
-    if CheckDegistirme.Checked then Result := Result + '2,';
-    if CheckSilme.Checked      then Result := Result + '0,';
-    if Result <> '' then SetLength(Result, Length(Result) - 1);
+    if Trim(ADeger) <> '' then LK.AddPair(AAd, Trim(ADeger));
   end;
 
 begin
-  TabLog.Close;
-
-  // --- WHERE: filtre kontrollerinden. Bos alan -> o filtre yok (tum kayitlar). ---
-  LW := ' WHERE 1=1';
-  // Tarih filtresi SADECE genel arama (Ad/Icerik) ve Kayit No bosken uygulanir.
-  // Onlar girilince tarih araligina bakma -> aramanin/kaydin TUM gecmisi gelsin.
-  if (Trim(EditKayitNo.Text) = '') and (Trim(EditIcerik.Text) = '') then
-  begin
-    if not VarIsNull(DateTarihBas.EditValue) then
-      LW := LW + ' AND L.TARIH >= ''' + FormatDateTime('yyyymmdd', DateTarihBas.Date) + ' 00:00:00''';
-    if not VarIsNull(DateTarihBit.EditValue) then
-      LW := LW + ' AND L.TARIH <= ''' + FormatDateTime('yyyymmdd', DateTarihBit.Date) + ' 23:59:59''';
-  end;
-  // Kullanici (REHBER firma) - arama turu ile
-  LW := LW + MetinKosul('ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))', Kullanici.Text);
-  // Bolum: TABLOLAR modul listesinden secim (tam eslesme). Bos = tumu.
-  if Trim(txtTablo.Text) <> '' then
-    LW := LW + ' AND T.MODUL = ''' + Esc(txtTablo.Text) + '''';
-  // Kayit No (USTKAYITID) - arama turu ile
-  LW := LW + MetinKosul('CAST(L.USTKAYITID AS varchar(20))', EditKayitNo.Text);
-  // Bilgisayar (ISTASYON) - arama turu ile (txtAlan kutusu bu amacla kullaniliyor)
-  LW := LW + MetinKosul('L.ISTASYON', txtAlan.Text);
-  // Ad/Icerik (cift yonlu): once LOGREFERANS'ta ad/kod (HIZLI, indeksli, silinmis
-  // kayit dahil), sonra log JSON (BILGI) icerigi (yavas). Ikisinden biri eslesirse gelir.
-  if Trim(EditIcerik.Text) <> '' then
-  begin
-    var LAra: string := Esc(EditIcerik.Text);
-    if CheckIcerik.Checked then
-      // "Icerikten Ara" secili: log JSON (BILGI) icinde detayli arama (yavas)
-      LW := LW + ' AND CAST(DECOMPRESS(L.BILGI) AS nvarchar(max)) LIKE ''%' + LAra + '%'''
-    else
-      // Varsayilan: KOD/AD icinde (hizli, indeksli). Uc kaynak:
-      //   1) KARTIN KENDI kaydi (USTTABLOID/USTKAYITID) -> kredi karti(46), kasa(480),
-      //      POS(69), kredi(47), banka(7), cari(71) vb. kendi KOD/AD'i
-      //   2) bagli cari/IK (REHBERID -> 71/73/74)
-      //   3) bagli stok (STOKID -> 88)
-      LW := LW + ' AND EXISTS(SELECT 1 FROM LOGREFERANS r WHERE' +
-        ' ((r.KAYITID=L.USTKAYITID AND r.TABLOID=L.USTTABLOID)' +
-        ' OR (r.KAYITID=L.REHBERID AND r.TABLOID IN (71,73,74))' +
-        ' OR (r.KAYITID=L.STOKID AND r.TABLOID=88))' +
-        ' AND (r.AD LIKE ''%' + LAra + '%'' OR r.KOD LIKE ''%' + LAra + '%''))';
-  end;
-  // Islem tipi (Ekleme=1 / Degistirme=2 / Silme=0). Hicbiri secili degilse tumu.
-  LTip := Tipler;
-  if LTip <> '' then LW := LW + ' AND L.ISLEMTIPI IN (' + LTip + ')';
-
-  // Master (USTKAYITID) + islem tipi + GUN bazinda GRUPLU.
-  TabLog.SQL.Text :=
-    'SELECT TARIH = MAX(L.TARIH), GUN = CAST(L.TARIH AS date),' +
-    ' KAYITNO = L.USTKAYITID, USTTABLOID = L.USTTABLOID, L.ISLEMTIPI,' +
-    ' ISLEM = CASE L.ISLEMTIPI WHEN 0 THEN N''Silme'' WHEN 1 THEN N''Ekleme''' +
-    '         WHEN 2 THEN N''De' + #$011F + 'i' + #$015F + 'tirme'' ELSE ''?'' END,' +
-    ' FIRMA = MAX(ISNULL(R.FIRMA, CAST(L.KULLANICIID AS varchar(20)))),' +
-    ' PCADI = MAX(L.ISTASYON),' +
-    ' ANAHTAR = MAX(COALESCE(T.MODUL, T.TABLOADI, CAST(L.USTTABLOID AS varchar(20)))),' +
-    // Kod/Ad: once kaydin KENDI referansi (kart: KAYITID=USTKAYITID, TABLOID=USTTABLOID),
-    // yoksa bagli cari/IK (REHBERID) veya stok (STOKID) - LOGREFERANS''tan (guncel).
-    // Cek/Senet (315/316/318/319): kart kendi muhasebe kodu yerine borclu/alacakli CARI
-    // (REHBERID) kod/adi gelsin -> LRk atlanir, LRc (cari) oncelikli. Diger kartlar kendi ad/kod''u
-    // (NULLIF: bos ise bagli cari/stok''a gec).
-    // Uretim Fisi (144), Konsinye (209/219) ve Banka Odeme/Tahsilat (482/483) de cek/senet gibi:
-    // kart kendi kodu/aciklamasi yerine once CARI (REHBERID);
-    // cari yoksa uretilen stok (detay FATURA'da ADET>0 olan URUNID) kod/adi (LRuf).
-    // COLLATE DATABASE_DEFAULT: LOGREFERANS (GENDEPO) ile STOKLAR (ana DB) farkli collation ->
-    // COALESCE/MAX 'collation conflict' verir; hepsini ayni collation'a getir.
-    // KOD/AD YALNIZ kart satirindan (TABLOID=USTTABLOID); detay satirlarinin kendi cari/stok
-    // (LRc/LRs) degerleri MAX'e karisip yanlis ad secmesin (ör. uretim fisi malzemesi).
-    // Uretim Fisi(144): cari (LRc) yoksa uretilen stok -> LOGREFERANS (LRk, ekleme'de yazilir,
-    // silmede kalici) veya canli FATURA (LRuf, ekleme yedegi).
-    ' KOD = MAX(CASE WHEN L.USTTABLOID=485 THEN ''Opsiyon'' WHEN L.TABLOID=L.USTTABLOID THEN COALESCE(CASE WHEN L.USTTABLOID IN (315,316,318,319,144,209,219,482,483) THEN NULL ELSE NULLIF(LRk.KOD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(LRc.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RL.KOD,'''') COLLATE DATABASE_DEFAULT, CASE WHEN L.USTTABLOID IN (144,482,483) THEN NULLIF(LRk.KOD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(LRs.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RS.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(LRuf.KOD,'''') COLLATE DATABASE_DEFAULT) WHEN L.USTTABLOID IN (144,209,219) THEN COALESCE(NULLIF(LRcb.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RL.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(LRuf.KOD,'''') COLLATE DATABASE_DEFAULT) ELSE COALESCE(CASE WHEN L.USTTABLOID NOT IN (315,316,318,319,144,209,219,482,483) THEN NULLIF(LRk.KOD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(RL.KOD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RS.KOD,'''') COLLATE DATABASE_DEFAULT) END),' +
-    ' AD  = MAX(CASE WHEN L.USTTABLOID=485 THEN NULLIF(AYS.SEKSIYON,'''') COLLATE DATABASE_DEFAULT WHEN L.TABLOID=L.USTTABLOID THEN COALESCE(CASE WHEN L.USTTABLOID IN (315,316,318,319,144,209,219,482,483) THEN NULL ELSE NULLIF(LRk.AD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(LRc.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RL.AD,'''') COLLATE DATABASE_DEFAULT, CASE WHEN L.USTTABLOID IN (144,482,483) THEN NULLIF(LRk.AD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(LRs.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RS.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(LRuf.AD,'''') COLLATE DATABASE_DEFAULT) WHEN L.USTTABLOID IN (144,209,219) THEN COALESCE(NULLIF(LRcb.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RL.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(LRuf.AD,'''') COLLATE DATABASE_DEFAULT) ELSE COALESCE(CASE WHEN L.USTTABLOID NOT IN (315,316,318,319,144,209,219,482,483) THEN NULLIF(LRk.AD,'''') COLLATE DATABASE_DEFAULT END, NULLIF(RL.AD,'''') COLLATE DATABASE_DEFAULT, NULLIF(RS.AD,'''') COLLATE DATABASE_DEFAULT) END),' +
-    ' ADET = COUNT(*)' +
-    ' FROM ISLEMLOG L' +
-    ' LEFT JOIN REHBER R ON R.ID = L.KULLANICIID' +
-    ' LEFT JOIN TABLOLAR T ON T.TABLOID = L.USTTABLOID' +
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.USTKAYITID AND TABLOID=L.USTTABLOID ORDER BY ID DESC '+DbSinir(1)+') LRk' +
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC '+DbSinir(1)+') LRc' +
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=L.STOKID   AND TABLOID=88          ORDER BY ID DESC '+DbSinir(1)+') LRs' +
-    // CANLI fallback: LOGREFERANS (cache) bu cariyi/stogu henuz icermiyorsa (hic duzenlenmemis
-    // ve backfill'e girmemis) ad/kod dogrudan REHBER/STOKLAR'dan gelsin -> fatura vb. bos kalmasin.
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD=FIRMA,   KOD FROM REHBER  WHERE ID=L.REHBERID AND L.REHBERID>0 '+DbSinir(1)+') RL' +
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD=STOKADI, KOD FROM STOKLAR WHERE ID=L.STOKID   AND L.STOKID>0 '+DbSinir(1)+')   RS' +
-    // Opsiyon/ayar (485): KAYITID=BOLUM (USTKAYITID kaydet-oturumu!). SEKSIYON = opsiyon bolumu
-    // (Fatura/Stok/İK...) -> AD''ye gelir; KOD sabit ''Opsiyon''.
-    ' OUTER APPLY (SELECT '+DbUst(1)+'SEKSIYON, AD FROM AYARADI WHERE BOLUM=L.KAYITID AND L.USTTABLOID=485 '+DbSinir(1)+') AYS' +
-    // Belge (FATBASLIK) tabanli gruplar (144/209/219): grupta KART satiri yoksa (yalniz detay
-    // degisti) KOD/AD yine belge CARIsinden gelsin -> canli FATBASLIK.REHBERID -> LOGREFERANS.
-    ' OUTER APPLY (SELECT '+DbUst(1)+'REHBERID FROM FATBASLIK WHERE ID=L.USTKAYITID AND L.USTTABLOID IN (144,209,219) '+DbSinir(1)+') FB' +
-    ' OUTER APPLY (SELECT '+DbUst(1)+'AD, KOD FROM LOGREFERANS WHERE KAYITID=FB.REHBERID AND TABLOID IN (71,73,74) ORDER BY ID DESC '+DbSinir(1)+') LRcb' +
-    // Uretim Fisi (144): uretilen stok = detay (FATURA) ADET>0 olan URUNID -> STOKLAR kod/ad
-    ' OUTER APPLY (SELECT '+DbUst(1)+'KOD=s.KOD, AD=s.STOKADI FROM FATURA f JOIN STOKLAR s ON s.ID=f.URUNID' +
-    '   WHERE L.USTTABLOID=144 AND f.FATBASID=L.USTKAYITID AND f.ADET>0 ORDER BY f.ID '+DbSinir(1)+') LRuf' +
-    LW +
-    ' GROUP BY CAST(L.TARIH AS date), L.USTKAYITID, L.USTTABLOID, L.ISLEMTIPI' +
-    ' ORDER BY MAX(L.TARIH) DESC';
+  // Liste SUNUCU TARAFINDA: sp_Prog_Log_Liste_Json2 (MSSQL) / fn_prog_log_liste_json2 (PG).
+  // Filtreler JSON ile PARAMETRE olarak gider (eskiden WHERE metni burada string olarak
+  // kuruluyordu). Tarih araligini SP uygular: Kayit No ya da Ara doluysa tarih filtresi
+  // devre disi kalir (aramanin/kaydin TUM gecmisi gelsin) - eski davranis birebir.
+  LK := TJSONObject.Create;
+  Metin('Kullanici', Kullanici.Text);      // REHBER.FIRMA (yoksa KULLANICIID)
+  Metin('Modul',     txtTablo.Text);       // TABLOLAR.MODUL (tam eslesme)
+  Metin('KayitNo',   EditKayitNo.Text);    // USTKAYITID
+  Metin('Istasyon',  txtAlan.Text);        // bilgisayar adi (ISTASYON)
+  Metin('Ara',       EditIcerik.Text);     // ad/kod ya da (CheckIcerik) log icerigi
+  if not VarIsNull(DateTarihBas.EditValue) then
+    LK.AddPair('TarihBas', FormatDateTime('yyyy-mm-dd', DateTarihBas.Date));
+  if not VarIsNull(DateTarihBit.EditValue) then
+    LK.AddPair('TarihBit', FormatDateTime('yyyy-mm-dd', DateTarihBit.Date));
+  LK.AddPair('IcerikAra',  TJSONNumber.Create(Ord(CheckIcerik.Checked)));
+  // Islem tipi checkbox'lari; UCU DE bos ise SP tum tipleri getirir.
+  LK.AddPair('Ekleme',     TJSONNumber.Create(Ord(CheckEkleme.Checked)));
+  LK.AddPair('Degistirme', TJSONNumber.Create(Ord(CheckDegistirme.Checked)));
+  LK.AddPair('Silme',      TJSONNumber.Create(Ord(CheckSilme.Checked)));
   try
-    // PG: TabLog.Open dogrudan (TabloYenile/TablodanSorguAc yolu degil) -> diyalekt cevir
-    //   (OUTER APPLY->LATERAL, ISNULL, N'', COLLATE, alias=). DbUst/DbSinir zaten seam.
-    if AktifVeriMotor = vmPG then
-      TabLog.SQL.Text   := PgSqlCevir(TabLog.SQL.Text);
-    TabLog.Open;
+    // LK SAHIPLIGI devralinir (ListeSPJson Free eder). @Baslik bu listede kullanilmaz.
+    Tablo.ListeSPJson(TabLog, 'sp_Prog_Log_Liste_Json2', '', LK);
   except
-    // ISLEMLOG view yok / erisim yok -> sessiz gec (grid bos)
+    // SP / ISLEMLOG synonym'i yok ya da erisim yok -> grid bos (ekran akisini bozma)
   end;
   GeriAlButonGuncelle;   // secili satir degisti -> "Geri Al" gorunurlugu
 end;
@@ -377,10 +284,15 @@ begin
   EditIcerik.Properties.OnButtonClick := BilgiAlButonClick;  // BilgiAl giris + '-' temizle
   EditIcerik.Properties.OnChange := FiltreUygula;             // secim/temizlemede suz
   CheckIcerik.Properties.OnEditValueChanged := FiltreUygula;  // Icerikten Ara: mod degisince suz
-  // NOT: Eskiden button-edit'in HER yerine tiklayinca picker acilirdi (OnClick).
-  // Bu, '-' (temizle) butonuna basinca da OnClick'i tetikleyip picker'i aciyordu
-  // (temizleme goze gorunmeden dialog geliyordu). Kaldirildi: picker YALNIZ ellipsis
-  // ('...') butonundan (OnButtonClick index 0) acilir; '-' butonu (index 1) temizler.
+  // Ad/Icerik kutusu: ELLE YAZILMAZ (ReadOnly) -> uzerine tiklayinca DOGRUDAN BilgiAl
+  // giris ekrani acilir. '-' (temizle) butonu ise dialog ACMADAN siler.
+  //   Nasil ayrilir: cxButtonEdit'te buton tiklamasi ONCE OnButtonClick'i (MouseDown),
+  //   SONRA edit'in OnClick'ini (MouseUp) tetikler. BilgiAlButonClick FButonaBasildi'yi
+  //   set eder, ButtonEditTiklama gorur ve picker'i ACMAZ. OnMouseDown bayragi her yeni
+  //   tiklamada sifirlar -> modal MouseUp'i yutarsa bayrak BAYAT kalmaz.
+  EditIcerik.Properties.ReadOnly := True;
+  EditIcerik.OnMouseDown := ButtonEditMouseDown;
+  EditIcerik.OnClick     := ButtonEditTiklama;
 end;
 
 procedure TInfoDlg.FiltreUygula(Sender: TObject);
@@ -388,9 +300,23 @@ begin
   if GenelModu then TabLogYukle;
 end;
 
-// Button-edit'in herhangi bir yerine tiklayinca ilgili giris ekranini (picker) acar.
+// Yeni fare tiklamasi: buton bayragini sifirla. (Modal dialog MouseUp'i yutup OnClick'i
+// engellerse bayrak bayat kalir ve SONRAKI metin tiklamasi yutulurdu.)
+procedure TInfoDlg.ButtonEditMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  FButonaBasildi := False;
+end;
+
+// Button-edit'in METIN alanina tiklayinca ilgili giris ekranini (picker) acar.
+// Butona ('...' ya da '-') tiklandiysa ACMAZ: o tiklamayi OnButtonClick zaten isledi.
 procedure TInfoDlg.ButtonEditTiklama(Sender: TObject);
 begin
+  if FButonaBasildi then
+  begin
+    FButonaBasildi := False;   // tiklama butona aitti ('-' temizledi / '...' zaten acti)
+    Exit;
+  end;
   if FTiklamaAcik then Exit;   // modal sonrasi tekrar tetiklenmesin
   FTiklamaAcik := True;
   try
@@ -427,7 +353,8 @@ var
   LListe: TStringList;
   LSecim: Variant;
 begin
-  if AButtonIndex = 1 then   // '-' temizle
+  FButonaBasildi := True;    // tiklama BUTONA geldi -> ardindan gelen OnClick picker acmasin
+  if AButtonIndex = 1 then   // '-' temizle (dialog ACMADAN siler)
   begin
     TcxButtonEdit(Sender).Text := '';   // OnChange -> suzer
     Exit;
@@ -463,8 +390,9 @@ var
   LDeg: Variant;
   LBaslik: string;
 begin
+  FButonaBasildi := True;           // tiklama BUTONA geldi -> ardindan gelen OnClick picker acmasin
   LEdit := TcxButtonEdit(Sender);
-  if AButtonIndex = 1 then          // '-' temizle
+  if AButtonIndex = 1 then          // '-' temizle (dialog ACMADAN siler)
   begin
     LEdit.Text := '';               // OnChange -> suzer
     Exit;
@@ -501,7 +429,8 @@ begin
     Tablo.TablodanSorguAc(1,
       // Icerik GERCEK tipi gosterir: ALTISLEMTIPI (satirin oz tipi); yoksa (eski kayit)
       // ISLEMTIPI'ye duser. Filtre yine ISLEMTIPI'de (grup/kart modu) -> oturumun tum satirlari.
-      'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, t.GORUNUM, ' +
+      'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, ' +
+      'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
       'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
       'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
       'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
@@ -638,7 +567,8 @@ begin
 
   // 2) Ust altindaki TUM loglar. Master (TABLOID=USTTABLOID) USTTE, detaylar altta;
   //    her grup icinde en yeni ustte. TABLOLAR ile TABLOID->GORUNUM (Başlık/Detay).
-  LSQL := 'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, i.KAYITID, t.GORUNUM, ' +
+  LSQL := 'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, i.KAYITID, ' +
+          'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
           'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
           'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
           'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +

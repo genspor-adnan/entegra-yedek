@@ -338,7 +338,8 @@ end;
 
 procedure TKategoriDlg.TabKategoriNewRecord(DataSet: TDataSet);
 begin
-   TabKategori.FieldByName('DURUM').AsBoolean:= True;
+   with TabKategori.FieldByName('DURUM') do  // DURUM smallint (PG) -> .AsBoolean patlar
+      if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
    if TabKategori.FindField('DIGITSAY') <> nil then
       TabKategori.FieldByName('DIGITSAY').AsInteger := 0;
 {   TabKategori.FieldByName('MARKETSATIS').AsBoolean:= True;

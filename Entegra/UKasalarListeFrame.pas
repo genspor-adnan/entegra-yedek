@@ -158,10 +158,6 @@ type
     KurFarkGeliri1: TMenuItem;
     KurFarkGideri1: TMenuItem;
     N8: TMenuItem;
-    ToolButtonSSSAyrac: TToolButton;           // ayrac (Tum/Son/Sik butonlari icin)
-    LabelTumKayitlar: TToolButton;             // Tum Liste (Liste_SP_Cagir 1)
-    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
-    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
 //    procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure KasaYenileTusClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
@@ -191,9 +187,6 @@ type
     procedure Label1Click(Sender: TObject);
     procedure KurFarkGeliri1Click(Sender: TObject);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
-    procedure LabelTumKayitlarClick(Sender: TObject);
-    procedure LabelSonArananlarClick(Sender: TObject);
-    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -379,7 +372,7 @@ end;
 
 procedure TKasalarListeFrame.CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
 begin
-  if (PageControlSekme.ActivePage = TabSheetEkstre)and(KASALAR.Active)and(KASALAR.RecordCount>0)and(CalendarEkstreBas.EditValue<>null)and(CalendarEkstreBit.EditValue<>null) then begin
+  if (PageControlSekme.ActivePage  = TabSheetEkstre)and(KASALAR.Active)and(KASALAR.RecordCount>0)and(CalendarEkstreBas.EditValue<>null)and(CalendarEkstreBit.EditValue<>null) then begin
     case CbNakitVarlikTipi.EditValue of
     -1 : EKSTRE.SQL.Text := 'select * from dbo.fn_Kasa_Hediye_Ekstre ' ;//hediye
     -2 : EKSTRE.SQL.Text := 'select * from dbo.fn_Kasa_Iade_Ekstre ';//iade
@@ -575,7 +568,12 @@ begin
        Tablo.Query4.Close;
        Tablo.Query4.SQL.Text := 'delete From KASA Where HESAPTURU=''K'' AND HESAPID = '+ KASALAR.Fields[0].AsString+' AND TUR=1';
        Tablo.Query4.ExecSQL;
-       KASALAR.Delete;
+       // KASALAR SP/fonksiyon kaynaklı dataset -> FireDAC .Delete için DML üretemiyor
+       //   ("WHERE condition is empty"). Audit + explicit DELETE + listeyi tazele.
+       LogKartSil(KASALAR, TabNo_KASATANIM, KASALAR.FieldByName('ID').AsInteger);
+       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASALAR where ID=&ID',
+         ['&ID'], [KASALAR.FieldByName('ID').AsInteger]);
+       YenileTusClick;
      end;
   end;
 end;
@@ -700,21 +698,6 @@ begin
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-end;
-
-procedure TKasalarListeFrame.LabelTumKayitlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(1);   // Tum kayitlar
-end;
-
-procedure TKasalarListeFrame.LabelSonArananlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
-end;
-
-procedure TKasalarListeFrame.LabelSikArananlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

@@ -21,7 +21,9 @@ uses
   dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013DarkGray,
   dxSkinOffice2013LightGray, dxSkinOffice2013White, dxSkinSevenClassic,
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
-  dxDateRanges, dxScrollbarAnnotations;
+  dxDateRanges, dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TSatinAlmaListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame, IPopupDialog)
@@ -266,6 +268,7 @@ end;
 initialization
   RegisterClass(TSatinAlmaListeDlg);
 end.
+
 
 
 

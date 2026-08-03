@@ -158,9 +158,16 @@ begin
     ' EKIPMANAD = (select AD from EKIPMANLAR E where E.ID=G.EKIPMANID), ' + #13#10 +
     'ILGILI1=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.MUS_ILGILI),' + #13#10 +
     'ILGILI2=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.MUS_ILGILI2),' + #13#10 +
-    'OLUSTURAN=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.EKLEYEN),' + #13#10 +
+    'OLUSTURAN=(SELECT FIRMA FROM REHBER R WHERE R.ID=G.EKLEYEN),' + #13#10;
+   if AktifVeriMotor = vmPG then
+     s := s +
+    'ATANAN1=(SELECT string_agg(R.FIRMA, '', '' order by GK.ID) FROM GOREVKULLANICI GK INNER JOIN REHBER R ON R.ID=GK.REHBERID WHERE GK.LISTGOREVID=G.ID AND GK.TUR=11),' + #13#10 +
+    'BILGI1=(SELECT string_agg(R.FIRMA, '', '' order by GK.ID) FROM GOREVKULLANICI GK INNER JOIN REHBER R ON R.ID=GK.REHBERID WHERE GK.LISTGOREVID=G.ID AND GK.TUR=12),G.EKLEYEN' + #13#10
+   else
+     s := s +
     'ATANAN1=(SELECT [dbo].[fn_GorevVerilenKisilerUzunAd](11,G.ID,11)),' + #13#10 +
-    'BILGI1=(SELECT [dbo].[fn_GorevVerilenKisilerUzunAd](11,G.ID,12)),G.EKLEYEN' + #13#10 +
+    'BILGI1=(SELECT [dbo].[fn_GorevVerilenKisilerUzunAd](11,G.ID,12)),G.EKLEYEN' + #13#10;
+   s := s +
     'from GOREVLER G' + #13#10 +
     'left join GOREVYORUM GY on G.ID=GY.GOREVID and GY.TUR=1' + #13#10 +
     'left join GOREVLISTE GL on GL.ID=G.LISTEID' + #13#10 +

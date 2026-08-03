@@ -34,17 +34,15 @@ object IKListeDlg: TIKListeDlg
       ExplicitHeight = 0
       object IKGrid: TcxGrid
         Left = 0
-        Top = 35
+        Top = 32
         Width = 962
-        Height = 225
+        Height = 228
         Align = alClient
         PopupMenu = PopupMenuYeni
         TabOrder = 0
         LookAndFeel.Kind = lfOffice11
         LookAndFeel.NativeStyle = True
         LookAndFeel.ScrollbarMode = sbmClassic
-        ExplicitTop = 32
-        ExplicitHeight = 228
         object IKGridView: TcxGridDBTableView
           OnDblClick = IKGridViewDblClick
           Navigator.Buttons.CustomButtons = <>
@@ -424,6 +422,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetIlet: TcxTabSheet
           Caption = #304'leti'#351'im'
           ImageIndex = 7
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar10: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -2058,6 +2060,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetIsDeneyimi: TcxTabSheet
           Caption = #304#351' Deneyimi'
           ImageIndex = 9
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridIKDeneyim: TcxGrid
             Left = 0
             Top = 44
@@ -3143,6 +3149,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetPDKS: TcxTabSheet
           Caption = 'PDKS'
           ImageIndex = 4
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel13: TPanel
             Left = 0
             Top = 0
@@ -3245,6 +3255,10 @@ object IKListeDlg: TIKListeDlg
         object TabSheetHareketler: TcxTabSheet
           Caption = 'Hareketler'
           ImageIndex = 5
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar15: TToolBar
             Left = 0
             Top = 0
@@ -3923,6 +3937,7 @@ object IKListeDlg: TIKListeDlg
         Left = 3
         Top = 3
         Width = 956
+        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -4042,6 +4057,7 @@ object IKListeDlg: TIKListeDlg
         Left = 3
         Top = 3
         Width = 956
+        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -4097,12 +4113,14 @@ object IKListeDlg: TIKListeDlg
       end
       object Panel14: TPanel
         Left = 468
-        Top = 35
+        Top = 32
         Width = 494
-        Height = 492
+        Height = 495
         Align = alRight
         Caption = 'PanelFiyatAltSag'
         TabOrder = 1
+        ExplicitTop = 35
+        ExplicitHeight = 492
         object ToolBar16: TToolBar
           AlignWithMargins = True
           Left = 4
@@ -4178,9 +4196,9 @@ object IKListeDlg: TIKListeDlg
       end
       object GridGrup: TcxGrid
         Left = 0
-        Top = 35
+        Top = 32
         Width = 468
-        Height = 492
+        Height = 495
         Align = alClient
         BevelEdges = []
         BevelInner = bvNone
@@ -4188,6 +4206,8 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 2
         LookAndFeel.Kind = lfStandard
         LookAndFeel.NativeStyle = True
+        ExplicitTop = 35
+        ExplicitHeight = 492
         object GridGrupView: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>

@@ -432,7 +432,7 @@ Uses  UAnaForm, UBinarySave, PrjConst, FetaKurulusSiniflari,FetaClassExtensions,
 {  TabProjeAsama.FieldByName('PROJEID').AsInteger := TabProjeler.FieldByName('ID').AsInteger;
   TabProjeAsama.FieldByName('BASTAR').AsDatetime := Tablo.GENINI.BugunTrhSaat;
   TabProjeAsama.FieldByName('AKTIF').AsBoolean := True;
-  TabProjeAsama.FieldByName('DURUM').AsBoolean := True;
+  AlanBoolYaz(TabProjeAsama.FieldByName('DURUM'), True);
   TabProjeAsama.FieldByName('SUBEID').AsInteger := SubeID;
   TabProjeAsama.FieldByName('EKLEYEN').AsString:= Kullanan;}
 procedure TProjeWizardDlg.AsamalariEkleClick(Sender: TObject);
@@ -521,7 +521,7 @@ begin
       TabDetay.First;
       while not TabDetay.Eof do begin
         if TabDetay.FieldByName('BILGI').AsString <>'' then
-          Inc(i);
+           Inc(i);
         TabDetay.Next;
       end;
     end;
@@ -538,7 +538,7 @@ end;
 procedure TProjeWizardDlg.ComboBolumPropertiesInitPopup(Sender: TObject);
 begin
   if ComboBolum.Properties.Items.Count=0 then
-     ComboBolum.Properties.Items := Tablo.ComboboxInit('select '''' union all SELECT DISTINCT BOLUM FROM REHBERAYAR WHERE YERI = '+IntToStr(TabNo_PROJELER)).Items;
+     ComboBolum.Properties.Items  := Tablo.ComboboxInit('select '''' union all SELECT DISTINCT BOLUM FROM REHBERAYAR WHERE YERI = '+IntToStr(TabNo_PROJELER)).Items;
 end;
 
 procedure TProjeWizardDlg.ComboIlgiliPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -587,10 +587,10 @@ begin
 end;
 
 procedure TProjeWizardDlg.cxGridProjeAsamaDBTableView1ASAMASORUMLUSUPropertiesButtonClick(
-  Sender: TObject; AButtonIndex: Integer);
+  Sender: TObject;  AButtonIndex: Integer);
 begin
   TabProjeAsama.Edit;
-  TabProjeAsama.FieldByName('REHBERID').AsInteger := Tablo.RehberAra_IDGetir(335);
+  TabProjeAsama.FieldByName('REHBERID').AsInteger  := Tablo.RehberAra_IDGetir(335);
   TabProjeAsama.Post;
 end;
 
@@ -759,6 +759,13 @@ begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    Tablo.GridTurkcelestir;
+   if AktifVeriMotor = vmPG then begin
+     TabProjeler.UpdateOptions.RequestLive := True;
+     TabProjeler.UpdateOptions.UpdateMode := upWhereKeyOnly;
+     TabProjeler.UpdateOptions.UpdateTableName := 'PROJELER';
+     TabProjeler.UpdateOptions.KeyFields := 'ID';
+     TabProjeler.UpdateOptions.AutoIncFields := 'ID';
+   end;
    Sontus:='I';
    RehberId := -1;
    LogID:=0;
@@ -767,10 +774,19 @@ begin
    Tablo.GridAyarRestore('cxGridProjeAsama',cxGridProjeAsamaDBTableView1 );
    TabProjeAsama.UpdateOptions.UpdateTableName := 'PROJEASAMA';
    TabProjeAsama.UpdateOptions.KeyFields := 'ID';
+   TabProjeAsama.UpdateOptions.AutoIncFields := 'ID';   // PG identity: ID'yi INSERT'ten cikar, DB uretsin
    TabProjeAsama.UpdateOptions.UpdateChangedFields := False;
+   if TabProjeAsama.FindField('ID') <> nil then
+     TabProjeAsama.FieldByName('ID').ProviderFlags := [pfInWhere, pfInKey];
+   // PG: PROJEASAMA.DURUM gercek bit; global bit-map'te HARIC (baska tabloda multi-value) ->
+   //   bu sorguya ozel smallint->boolean map, persistent TBooleanField ile eslessin diye.
+   PgSorguBoolAlan(TabProjeAsama, 'durum');
    TabProjeButce.UpdateOptions.UpdateTableName := 'PROJEBUTCE';
    TabProjeButce.UpdateOptions.KeyFields := 'ID';
+   TabProjeButce.UpdateOptions.AutoIncFields := 'ID';   // PG identity: ID'yi INSERT'ten cikar, DB uretsin
    TabProjeButce.UpdateOptions.UpdateChangedFields := False;
+   if TabProjeButce.FindField('ID') <> nil then
+     TabProjeButce.FieldByName('ID').ProviderFlags := [pfInWhere, pfInKey];
    if TabProjeButce.FindField('ROOTKOD') <> nil then
      TabProjeButce.FieldByName('ROOTKOD').ProviderFlags := [];
    if TabProjeButce.FindField('KOD') <> nil then
@@ -1078,6 +1094,11 @@ begin
     begin
       if TabDetay.FindField('ORJINAL') <> nil then
         TabDetay.FieldByName('ORJINAL').ReadOnly := True;
+      if TabDetay.FindField('BILGI') <> nil then
+      begin
+        TabDetay.FieldByName('BILGI').ReadOnly := False;
+        TabDetay.FieldByName('BILGI').ProviderFlags := [pfInUpdate];
+      end;
       if TabDetay.FindField('GIRIS') <> nil then
         TabDetay.FieldByName('GIRIS').ProviderFlags := [];
       if TabDetay.FindField('KAYNAK') <> nil then
@@ -1086,6 +1107,10 @@ begin
         TabDetay.FieldByName('ZORUNLU').ProviderFlags := [];
       if TabDetay.FindField('ORJINAL') <> nil then
         TabDetay.FieldByName('ORJINAL').ProviderFlags := [];
+      if TabDetay.FindField('RBID') <> nil then
+        TabDetay.FieldByName('RBID').ProviderFlags := [];
+      if TabDetay.FindField('TMPID') <> nil then
+        TabDetay.FieldByName('TMPID').ProviderFlags := [];
 
       TabDetay.DisableControls;
       try
@@ -1190,7 +1215,7 @@ begin
   TabProjeAsama.FieldByName('PROJEID').AsInteger := TabProjeler.FieldByName('ID').AsInteger;
   TabProjeAsama.FieldByName('BASTAR').AsDatetime := Tablo.GENINI.BugunTrhSaat;
   TabProjeAsama.FieldByName('AKTIF').AsBoolean := True;
-  TabProjeAsama.FieldByName('DURUM').AsBoolean := True;
+  AlanBoolYaz(TabProjeAsama.FieldByName('DURUM'), True);
   TabProjeAsama.FieldByName('EKLEYEN').AsString:= Kullanan;
 end;
 
@@ -1527,9 +1552,6 @@ end;
 
 
 end.
-
-
-
 
 
 

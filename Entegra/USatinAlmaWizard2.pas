@@ -114,7 +114,6 @@ type
     ComboBolum: TcxDBComboBox;
     SQLDetay: TcxMemo;
     DokumanEkr: TJvWizardInteriorPage;
-    DokumanTus: TcxButton;
     dtsTOPLAMLAR: TDataSource;
     TOPLAMLAR: TFDQuery;
     PanelAlt2: TPanel;
@@ -522,6 +521,8 @@ begin
     AFastReport.EnabledDataSets.Add(frxDETAY);
     AFastReport.EnabledDataSets.Add(frxTOPLAMLAR);
   end;
+  // Kullanici ek alanlari (_USER) rapora (satinalma siparis karti; SIPARIS tablosu).
+  Tablo.UserAlanYazdirmaEkle(AFastReport, 'SIPARIS', SiparisIdsi);
 end;
 
 procedure TSatinAlmaWizard2.YorumDzenle1Click(Sender: TObject);
@@ -1341,6 +1342,8 @@ procedure TSatinAlmaWizard2.SatirSilClick(Sender: TObject);
 begin
   if SIPARISDETAY.IsEmpty then abort;
   if Application.MessageBox(PCHAR(Sil_Onay),pchar(Onay), MB_YESNO + MB_ICONQUESTION) = ID_YES then begin
+    if not Tablo.SiparisSilinebilirMi(0, SIPARISDETAY.FieldByName('ID').AsInteger) then   // KILIT + DONUSUM
+       exit;
     SIPARISDETAY.Delete;
   end;
 end;
@@ -2136,7 +2139,6 @@ procedure TSatinAlmaWizard2.ButtonDuzenle;
 begin
   FaturaTus.Enabled := FaturaTus.tag <> WizardKontrol.ActivePageIndex;
   DetayTus.Enabled := DetayTus.tag <> WizardKontrol.ActivePageIndex;
-  DokumanTus.Enabled := DokumanTus.tag <> WizardKontrol.ActivePageIndex;
 end;
 
 procedure TSatinAlmaWizard2.SIPARISAfterScroll(DataSet: TDataSet);

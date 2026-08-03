@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+<cbc:ID>MNG2026000000056</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>3C7EF753-D5D9-452B-9E1D-5FA4D3BE6AC1</cbc:UUID>
+<cbc:IssueDate>2026-07-15</cbc:IssueDate>
+<cbc:IssueTime>11:25:24</cbc:IssueTime>
+<cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız YüzOnBin Türk Lirası</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:Note>EFATURANOTU</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cbc:WebsiteURI>www.bilimplant.com</cbc:WebsiteURI>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">7330884158</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="MERSISNO">0733088415800001</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">918211-0</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>Dudullu OSB. Mah. İmes San. Sit. C Blok 305.Sok. No:3</cbc:StreetName>
+<cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cbc:PostalZone>34775</cbc:PostalZone>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>Yenikapı</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Contact>
+<cbc:Telephone>0216 999 5041</cbc:Telephone>
+<cbc:ElectronicMail>info@bilimplant.com</cbc:ElectronicMail>
+</cac:Contact>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4840847211</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>izibiz</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>LATİFAĞA CAD. GÜRÜN ÇIKMAZI no:155/3 </cbc:StreetName>
+<cbc:CitySubdivisionName>avcılar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>MECİDİYEKÖY </cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>izibiz</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">20000.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">100000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">20000.00</cbc:TaxAmount><cbc:Percent>20</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:WithholdingTaxTotal><cbc:TaxAmount currencyID="TRY">10000.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">20000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">10000.00</cbc:TaxAmount><cbc:Percent>50</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>Diğer Hizmetler [KDVGUT-(I/C-2.1.3.2.13)] (5/10)</cbc:Name><cbc:TaxTypeCode>616</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:WithholdingTaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">100000.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">100000.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">120000.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="TRY">110000.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">100000.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">20000.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">100000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">20000.00</cbc:TaxAmount><cbc:Percent>20</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:WithholdingTaxTotal><cbc:TaxAmount currencyID="TRY">10000.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">20000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">10000.00</cbc:TaxAmount><cbc:Percent>50</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>Diğer Hizmetler [KDVGUT-(I/C-2.1.3.2.13)] (5/10)</cbc:Name><cbc:TaxTypeCode>616</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:WithholdingTaxTotal>
+<cac:Item>
+<cbc:Name>FUAR,TANITIM ORGANİZASYON</cbc:Name>
+<cac:BuyersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:ManufacturersItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">100000.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

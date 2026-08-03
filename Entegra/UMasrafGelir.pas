@@ -1195,8 +1195,15 @@ begin         //   and(GELIRMI)      and (cxDBTreeList1.Selections[0].HasChildre
      //  TabFiyatlar.Post;
 //       TabloYenile(TabFiyatlar,[TabMasrafGelir.Fields[0].AsInteger, ComboSatis.ItemIndex]);
 //   end;
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update MASRAFGELIR set BASLIK=0 from MASRAFGELIR M where 0=(select count(*) from MASRAFGELIR MF1 where MF1.KOD like M.KOD+''.%'' )',[],[]);
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update MASRAFGELIR set BASLIK=1 from MASRAFGELIR M where 0<(select count(*) from MASRAFGELIR MF1 where MF1.KOD like M.KOD+''.%'' )',[],[]);
+  // BASLIK: KOD'u başka bir satırın önekiyse (alt kalemi varsa) 1, yoksa 0. MSSQL'de iki ayrı
+  //   UPDATE...FROM self-join + '+' concat vardı; PG'de UPDATE...FROM self yapısı + '+' concat
+  //   çalışmaz. Motor-aware TEK korelasyonlu CASE (fark yalnız concat + vs ||).
+  if AktifVeriMotor = vmPG then
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update MASRAFGELIR set BASLIK = case when exists(select 1 from MASRAFGELIR MF1 where MF1.KOD like MASRAFGELIR.KOD || ''.%'') then 1 else 0 end',[],[])
+  else
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update MASRAFGELIR set BASLIK = case when exists(select 1 from MASRAFGELIR MF1 where MF1.KOD like MASRAFGELIR.KOD + ''.%'') then 1 else 0 end',[],[]);
 
    if (TabMasrafGelir.FieldByName('KOD').AsString<>OncekiKod)or(TabMasrafGelir.FieldByName('AD').AsString<>OncekiAd) then begin
       YeniId := TabMasrafGelir.Fields[0].AsInteger;
@@ -1248,7 +1255,9 @@ begin
    LogOnceki.Clear;   // iptal edilmis edit kalintisi yeni kaydi DEGISTIR olarak loglamasin
    YeniKayit := True;
    TabMasrafGelir.FieldByName('GELIRMI').AsBoolean := GELIRMI;
-   TabMasrafGelir.FieldByName('DURUM').AsBoolean := True;//ComboDURUM.Items[0];
+   // DURUM bit->boolean map'inde HARIÇ (PG'de smallint) -> .AsBoolean patlar. Motor-bağımsız:
+   with TabMasrafGelir.FieldByName('DURUM') do
+      if DataType = ftBoolean then AsBoolean := True else AsInteger := 1;
    TabMasrafGelir.FieldByName('KDV').AsInteger := KDVOrani;
   {if SubeVarmi then begin
    case Tablo.GENINI.ReadInteger(Ops_OpsiyonKasa_GorunecekSubelerMM,0) of

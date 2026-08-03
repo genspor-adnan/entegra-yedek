@@ -122,9 +122,114 @@ var
 
 implementation
 
-uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst,ULog,UVeriMotor;
+uses Utablo,FetaKurulusSiniflari,UGirisKutusuEx,Fetautil,LocOnFly,PrjConst,ULog,UVeriMotor,
+  System.Generics.Collections;
 
 {$R *.dfm}
+
+var
+  GeniniScalarCache: TDictionary<string, string>;
+  // TObjectDictionary(doOwnsValues): Remove/Free cachelenmis TStringList'leri OTOMATIK free eder
+  //   (duz TDictionary'de Remove list'i orphan birakiyordu -> leak; her section-invalidation'da).
+  GeniniSectionCache: TObjectDictionary<string, TStringList>;
+
+function GeniniCacheAktif: Boolean;
+begin
+  Result := True;
+end;
+
+function GeniniCacheKey(const ATur: string; ABolum: Integer): string;
+begin
+  Result := ATur + ':' + IntToStr(ABolum) + ':0';
+end;
+
+function GeniniSectionCacheKey(const ATur: string; ABolum, ADil: Integer): string;
+begin
+  Result := ATur + ':' + IntToStr(ABolum) + ':' + IntToStr(ADil);
+end;
+
+function GeniniSectionLine(const AText: string; ADeger, ASira: Integer): string;
+begin
+  Result := AText + #31 + IntToStr(ADeger) + #31 + IntToStr(ASira);
+end;
+
+function GeniniSectionLineDecode(const ALine: string; out AText: string; out ADeger, ASira: Integer): Boolean;
+var
+  P1, P2: Integer;
+begin
+  P1 := Pos(#31, ALine);
+  P2 := Pos(#31, Copy(ALine, P1 + 1, MaxInt));
+  Result := (P1 > 0) and (P2 > 0);
+  if not Result then
+    Exit;
+  P2 := P1 + P2;
+  AText := Copy(ALine, 1, P1 - 1);
+  ADeger := StrToIntDef(Copy(ALine, P1 + 1, P2 - P1 - 1), 0);
+  ASira := StrToIntDef(Copy(ALine, P2 + 1, MaxInt), 0);
+end;
+
+function GeniniCacheTryGet(const ATur: string; ABolum: Integer; out ADeger: string): Boolean;
+begin
+  Result := GeniniCacheAktif and Assigned(GeniniScalarCache) and
+    GeniniScalarCache.TryGetValue(GeniniCacheKey(ATur, ABolum), ADeger);
+end;
+
+procedure GeniniCacheSet(const ATur: string; ABolum: Integer; const ADeger: string);
+begin
+  if not GeniniCacheAktif then Exit;
+  if not Assigned(GeniniScalarCache) then
+    GeniniScalarCache := TDictionary<string, string>.Create;
+  GeniniScalarCache.AddOrSetValue(GeniniCacheKey(ATur, ABolum), ADeger);
+end;
+
+procedure GeniniCacheBolumSil(ABolum: Integer);
+var
+  Key: string;
+  Silinecekler: TStringList;
+begin
+  if Assigned(GeniniScalarCache) then begin
+    GeniniScalarCache.Remove(GeniniCacheKey('S', ABolum));
+    GeniniScalarCache.Remove(GeniniCacheKey('I', ABolum));
+  end;
+  if Assigned(GeniniSectionCache) then begin
+    Silinecekler := TStringList.Create;
+    try
+      for Key in GeniniSectionCache.Keys do
+        if Pos(':' + IntToStr(ABolum) + ':', Key) > 0 then
+          Silinecekler.Add(Key);
+      for Key in Silinecekler do
+        GeniniSectionCache.Remove(Key);
+    finally
+      Silinecekler.Free;
+    end;
+  end;
+end;
+
+function GeniniSectionCacheTryGet(const AKey: string; ADest: TStrings): Boolean;
+var
+  LList: TStringList;
+begin
+  Result := GeniniCacheAktif and Assigned(GeniniSectionCache) and
+    GeniniSectionCache.TryGetValue(AKey, LList);
+  if Result then
+    ADest.Assign(LList);
+end;
+
+procedure GeniniSectionCacheSet(const AKey: string; ASource: TStrings);
+var
+  LList: TStringList;
+begin
+  if not GeniniCacheAktif then Exit;
+  if not Assigned(GeniniSectionCache) then
+    GeniniSectionCache := TObjectDictionary<string, TStringList>.Create([doOwnsValues]);
+  if GeniniSectionCache.TryGetValue(AKey, LList) then
+    LList.Assign(ASource)
+  else begin
+    LList := TStringList.Create;
+    LList.Assign(ASource);
+    GeniniSectionCache.Add(AKey, LList);
+  end;
+end;
 
 procedure TGENINIDuzenleDlg.BtnIptalClick(Sender: TObject);
 begin
@@ -497,6 +602,7 @@ begin
   end;
   BolumKaydet;
   AnahtarKaydet;
+  GeniniCacheBolumSil(Bolum);
   ModalResult := mrOk;
 end;
 
@@ -551,10 +657,20 @@ begin
 end;
 
 function TGENINIDuzenleDlg.ReadBoolean(Bolum:Integer;Varsayilan:Boolean=True):Boolean;
+var
+  LDeger: string;
 Begin
+  if GeniniCacheTryGet('I', Bolum, LDeger) then begin
+    if LDeger = '0' then Exit(False);
+    if LDeger = '1' then Exit(True);
+    Exit(Varsayilan);
+  end;
+
   TabKomutCalistir.Close;
   TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
+  if TabKomutCalistir.RecordCount=1 then
+    GeniniCacheSet('I', Bolum, TabKomutCalistir.Fields[0].AsString);
   if (TabKomutCalistir.RecordCount=1) and (TabKomutCalistir.Fields[0].AsString='0') then
     Result := False
   else if (TabKomutCalistir.RecordCount=1) and (TabKomutCalistir.Fields[0].AsString='1') then
@@ -564,10 +680,17 @@ Begin
 End;
 
 function TGENINIDuzenleDlg.ReadInteger(Bolum: Integer; Varsayilan: Integer=0): Integer;
+var
+  LDeger: string;
 Begin
+  if GeniniCacheTryGet('I', Bolum, LDeger) then
+    Exit(StrToIntDef(LDeger, Varsayilan));
+
   TabKomutCalistir.Close;
   TabKomutCalistir.SQL.Text := PgSqlCevir('select DEGER from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
+  if TabKomutCalistir.RecordCount=1 then
+    GeniniCacheSet('I', Bolum, TabKomutCalistir.Fields[0].AsString);
   if (TabKomutCalistir.RecordCount=1) and (StrToIntDef(TabKomutCalistir.Fields[0].AsString,-MaxInt)<>-MaxInt) then
     Result := TabKomutCalistir.Fields[0].AsInteger
   else
@@ -615,13 +738,19 @@ Begin
 End;
 
 function TGENINIDuzenleDlg.ReadString(Bolum:Integer;Varsayilan:string=''):String;
+var
+  LDeger: string;
 Begin
+  if GeniniCacheTryGet('S', Bolum, LDeger) then
+    Exit(LDeger);
+
   TabKomutCalistir.Close;
   TabKomutCalistir.SQL.Text := PgSqlCevir('select ANAHTAR from GENINI where BOLUM='+IntToStr(Bolum)+' and DIL=0');
   TabKomutCalistir.Open;
-  if TabKomutCalistir.RecordCount = 1 then
-    Result := TabKomutCalistir.Fields[0].AsString
-  else
+  if TabKomutCalistir.RecordCount = 1 then begin
+    Result := TabKomutCalistir.Fields[0].AsString;
+    GeniniCacheSet('S', Bolum, Result);
+  end else
     Result := Varsayilan;
 End;
 
@@ -704,6 +833,11 @@ Begin
     else
       TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+',null,0,0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
+    if Deger then
+      GeniniCacheSet('I', Bolum, '1')
+    else
+      GeniniCacheSet('I', Bolum, '0');
     Result := True;
   except
     Result := False;
@@ -719,6 +853,9 @@ Begin
     TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','+IntToStr(Deger)+','+IntToStr(Deger)+',0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
+    GeniniCacheSet('I', Bolum, IntToStr(Deger));
+    GeniniCacheSet('S', Bolum, IntToStr(Deger));
     Result := True;
   except
     Result :=  False;
@@ -733,6 +870,7 @@ Begin
     TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+FormatDateTime('yyyy-MM-dd hh:nn:ss.zzz',Deger)+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
     Result := True;
   except
     Result := False;
@@ -747,6 +885,7 @@ Begin //tarihi veritabanına şifreli olarak yazar..
     TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+UGenSifre.Sifre(FormatDateTime('yyyy-MM-dd hh:nn:ss.zzz',Deger))+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
     Result := True;
   except
     Result := False;
@@ -762,6 +901,9 @@ Begin
     TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+StringReplace(Deger,'''','''''',[rfReplaceAll])+''',0,0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
+    GeniniCacheSet('S', Bolum, Deger);
+    GeniniCacheSet('I', Bolum, '0');
     Result := True;
   except
     Result := False;
@@ -798,6 +940,7 @@ Begin
       TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+StringReplace(Anahtar,'''','''''',[rfReplaceAll])+''','+inttostr(maxdeger)+','+IntToStr(Diller[i])+',null)');
       TabKomutCalistir.ExecSQL;
     end;
+    GeniniCacheBolumSil(Bolum);
     Result := maxdeger;
   except
     Result := 0;
@@ -811,6 +954,7 @@ Begin
     TabKomutCalistir.SQL.Add('; insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)');
     TabKomutCalistir.SQL.Add(' values('+IntToStr(Bolum)+','''+StringReplace(Deger,'''','''''',[rfReplaceAll])+''','+Kullanan+',0,null)');
     TabKomutCalistir.ExecSQL;
+    GeniniCacheBolumSil(Bolum);
     Result := True;
   except
     Result := False;
@@ -818,17 +962,31 @@ Begin
 End;
 
 function TGENINIDuzenleDlg.ReadSection(Bolum:Integer;Properties:TcxCustomComboBoxProperties;BosEkle:Boolean=False):Boolean;
+var
+  CacheKey: string;
+  CacheList: TStringList;
+  I: Integer;
 begin
-  TabKomutCalistir.Close;
-  TabKomutCalistir.SQL.Text :=  PgSqlCevir('Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
-  TabKomutCalistir.Open;
+  CacheKey := GeniniSectionCacheKey('C', Bolum, Dil);
+  CacheList := TStringList.Create;
   Properties.Items.Clear;
-  if BosEkle then
-     Properties.Items.Add('');
-
-  while not TabKomutCalistir.eof do begin
-     Properties.Items.Add(TabKomutCalistir.Fields[0].AsString);
-     TabKomutCalistir.Next;
+  try
+    if not GeniniSectionCacheTryGet(CacheKey, CacheList) then begin
+      TabKomutCalistir.Close;
+      TabKomutCalistir.SQL.Text :=  PgSqlCevir('Select ANAHTAR FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
+      TabKomutCalistir.Open;
+      while not TabKomutCalistir.eof do begin
+         CacheList.Add(TabKomutCalistir.Fields[0].AsString);
+         TabKomutCalistir.Next;
+      end;
+      GeniniSectionCacheSet(CacheKey, CacheList);
+    end;
+    if BosEkle then
+       Properties.Items.Add('');
+    for I := 0 to CacheList.Count - 1 do
+       Properties.Items.Add(CacheList[I]);
+  finally
+    CacheList.Free;
   end;
   Result:=True;
   if (Properties.Owner<>nil)and(Properties.Owner.ClassName='TcxEditRepositoryComboBoxItem') then
@@ -839,22 +997,44 @@ end;
 function TGENINIDuzenleDlg.ReadCheckComboSection(Bolum:Integer;Items:TcxCheckComboBoxItems;BosEkle:Boolean=False):Boolean;
 var
   i:Integer;
+  CacheKey, Text: string;
+  CacheList: TStringList;
+  Deger, Sira: Integer;
 begin
   try
     Items.Clear;
-    TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text:='';
-    if BosEkle then
-      TabKomutCalistir.SQL.Text:= ' SELECT '''' AS ANAHTAR, 0 AS DEGER, 0 AS SIRA UNION ALL ';
-    TabKomutCalistir.SQL.Text := PgSqlCevir(TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
-    TabKomutCalistir.Open;
-    while not TabKomutCalistir.eof do begin
-      with Items.Add do begin
-        Description:=TabKomutCalistir.Fields[0].AsString;
-        ShortDescription:=TabKomutCalistir.Fields[0].AsString;
-        Tag:=TabKomutCalistir.Fields[1].AsInteger;
+    CacheKey := GeniniSectionCacheKey('K', Bolum, Dil);
+    CacheList := TStringList.Create;
+    try
+      if not GeniniSectionCacheTryGet(CacheKey, CacheList) then begin
+        TabKomutCalistir.Close;
+        TabKomutCalistir.SQL.Text := PgSqlCevir('Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
+        TabKomutCalistir.Open;
+        while not TabKomutCalistir.eof do begin
+          CacheList.Add(GeniniSectionLine(TabKomutCalistir.Fields[0].AsString,
+                                          TabKomutCalistir.Fields[1].AsInteger,
+                                          TabKomutCalistir.Fields[2].AsInteger));
+          TabKomutCalistir.Next;
+        end;
+        GeniniSectionCacheSet(CacheKey, CacheList);
       end;
-      TabKomutCalistir.Next;
+      if BosEkle then
+        with Items.Add do begin
+          Description := '';
+          ShortDescription := '';
+          Tag := 0;
+        end;
+      for I := 0 to CacheList.Count - 1 do begin
+        if not GeniniSectionLineDecode(CacheList[I], Text, Deger, Sira) then
+          Continue;
+        with Items.Add do begin
+          Description:=Text;
+          ShortDescription:=Description;
+          Tag:=Deger;
+        end;
+      end;
+    finally
+      CacheList.Free;
     end;
     Result:=True;
     if (Items.Owner.ClassName='TcxCheckComboBoxProperties') and ((Items.Owner as TcxCheckComboBoxProperties).Owner.ClassName='TcxEditRepositoryCheckComboBoxItem') then
@@ -868,22 +1048,44 @@ end;
 function TGENINIDuzenleDlg.ReadImageSection(Bolum:Integer;Items:TcxImageComboBoxItems;BosEkle:Boolean=False):Boolean;
 var
   i:Integer;
+  CacheKey, Text: string;
+  CacheList: TStringList;
+  Deger, Sira: Integer;
 begin
   try
     Items.Clear;
-    TabKomutCalistir.Close;
-    TabKomutCalistir.SQL.Text:='';
-    if BosEkle then
-      TabKomutCalistir.SQL.Text:= ' SELECT '''' AS ANAHTAR, 0 AS DEGER, 0 AS SIRA UNION ALL ';
-    TabKomutCalistir.SQL.Text  := PgSqlCevir(TabKomutCalistir.SQL.Text+'Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
-    TabKomutCalistir.Open;
-    while not TabKomutCalistir.eof do begin
-      with Items.Add do begin
-        Description:=TabKomutCalistir.Fields[0].AsString;
-        Value:=TabKomutCalistir.Fields[1].AsInteger;
-        Tag:=TabKomutCalistir.Fields[2].AsInteger;
+    CacheKey := GeniniSectionCacheKey('I', Bolum, Dil);
+    CacheList := TStringList.Create;
+    try
+      if not GeniniSectionCacheTryGet(CacheKey, CacheList) then begin
+        TabKomutCalistir.Close;
+        TabKomutCalistir.SQL.Text  := PgSqlCevir('Select ANAHTAR,DEGER,SIRA FROM GENINI WITH (NOLOCK) Where BOLUM='+IntToStr(Bolum)+' and DIL='+IntToStr(Dil)+' Order by SIRA ');
+        TabKomutCalistir.Open;
+        while not TabKomutCalistir.eof do begin
+          CacheList.Add(GeniniSectionLine(TabKomutCalistir.Fields[0].AsString,
+                                          TabKomutCalistir.Fields[1].AsInteger,
+                                          TabKomutCalistir.Fields[2].AsInteger));
+          TabKomutCalistir.Next;
+        end;
+        GeniniSectionCacheSet(CacheKey, CacheList);
       end;
-      TabKomutCalistir.Next;
+      if BosEkle then
+        with Items.Add do begin
+          Description := '';
+          Value := 0;
+          Tag := 0;
+        end;
+      for I := 0 to CacheList.Count - 1 do begin
+        if not GeniniSectionLineDecode(CacheList[I], Text, Deger, Sira) then
+          Continue;
+        with Items.Add do begin
+          Description:=Text;
+          Value:=Deger;
+          Tag:=Sira;
+        end;
+      end;
+    finally
+      CacheList.Free;
     end;
     Result:=True;
     if (Items.Owner.ClassName='TcxImageComboBoxProperties') and ((Items.Owner as TcxImageComboBoxProperties).Owner.ClassName='TcxEditRepositoryImageComboBoxItem') then
@@ -894,7 +1096,6 @@ begin
     Result:=False;
   end;
 end;
-
 
 end.
 

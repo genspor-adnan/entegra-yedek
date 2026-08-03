@@ -171,6 +171,7 @@ type
     cxGrid1DBCardViewAlislarBELGETIPI: TcxGridDBCardViewRow;
     cxGrid1DBCardViewSatislarBELGETIPI: TcxGridDBCardViewRow;
     LabelSonAranan: TLabel;
+    LabelOncekiAlimSatim: TcxLabel;
     procedure cxDBTreeList1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -210,17 +211,19 @@ type
     procedure GridStokViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure cxSplitter1AfterOpen(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
     procedure cxGrid1ActiveTabChanged(Sender: TcxCustomGrid;
       ALevel: TcxGridLevel);
+    procedure LabelOncekiAlimSatimClick(Sender: TObject);
   private
     Key1: string;
     AdetBirimi: Integer;
     BekletDlg: TBekletmeDlg;
     FSonAranan: Boolean;   // Son Aranan modu (LabelSonAranan tiklandi -> Mod=5)
+    FAcilistaListelemeAtla: Boolean;
     procedure StokAra;
     procedure HizmetAra;
     Procedure DagitimAra;
+    procedure SagPanelDetayYukle;
     { Private declarations }
   public
     FatBasID, RehberID, StokSayimID, stokhizmetaracagirantur,stokhizmetaracagirantip: Integer;
@@ -513,8 +516,7 @@ end;
 
 procedure TStokHizmetAraDlg.cxGrid1ActiveTabChanged(Sender: TcxCustomGrid;ALevel: TcxGridLevel);
 begin
-   if TabStokListe.Active then
-      TabStokListeAfterScroll(TabStokListe);
+   SagPanelDetayYukle;
 end;
 
 procedure TStokHizmetAraDlg.cxGrid1DBTableViewDurumStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
@@ -536,7 +538,7 @@ procedure TStokHizmetAraDlg.PageControl1Change(Sender: TObject);
 begin
     TabKategori.Close;
     if Assigned(PageControl1.ActivePage) then begin
-      if PageControl1.ActivePage.Name='SheetStok' then begin
+      if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then begin
          // ROOTKOD = KOD'un son '.' oncesi (ust kategori kodu). CHARINDEX/LEN MSSQL'e ozel;
          // PG'de strpos (ARG SIRASI TERS: haystack,needle) / LENGTH. Alias 'AS' ile portable.
          var LRootKod: string;
@@ -547,9 +549,11 @@ begin
          TabKategori.SQL.Text := ' select '+LRootKod+' AS ROOTKOD, ID,KOD,AD,DURUM from KATEGORI order by KOD';
       end
       else TabKategori.SQL.Text := ' select ID from KATEGORI where 1=2';
-      TabKategori.Open;
-      TreeListKategori.Visible := TabKategori.RecordCount>0;
-      ListeAc(1);
+      if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then
+        TabKategori.Open;
+      TreeListKategori.Visible := TabKategori.Active and (TabKategori.RecordCount>0);
+      if not FAcilistaListelemeAtla then
+        ListeAc(1);
     end;
 end;
 
@@ -607,12 +611,7 @@ begin
       cxGrid1LevelSonSatislar.Active := True
    else
       cxGrid1LevelSonAlislar.Active := True;
-end;
-
-procedure TStokHizmetAraDlg.FormActivate(Sender: TObject);
-begin
-  cxSplitter1.CloseSplitter;
-  cxSplitter1.OpenSplitter;
+   SagPanelDetayYukle;
 end;
 
 procedure TStokHizmetAraDlg.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -661,10 +660,13 @@ begin
 end;
 
 procedure TStokHizmetAraDlg.FormShow(Sender: TObject);
-var
-  Etiketler, Bilgiler: TArrayOfString;
 begin
+  FAcilistaListelemeAtla := True;
+  try
   PanelSag.Visible := tablo.YetkiVarmi(248010,YetkiTur_Gorme,False);
+  cxSplitter1.Visible := PanelSag.Visible;
+  if PanelSag.Visible then
+    cxSplitter1.CloseSplitter;
   cxDBTreeList1cxDBTreeListColumnKalan.Visible := (KalanAdetGetir) and (PageControl1.ActivePage <> SheetHizmet);
   cxDBTreeList1cxDBTreeListColumnFiyat.Visible := FiyatlariGetir;
   cbFiyatAdi.Visible := FiyatlariGetir;
@@ -675,8 +677,6 @@ begin
 
   cbStokDepo.Visible := (KalanAdetGetir) and (PageControl1.ActivePage <> SheetHizmet);
   LabelYer.Visible := (KalanAdetGetir) and (PageControl1.ActivePage <> SheetHizmet);
-  Tablo.RehberEkBilgileriniGetir(RehberID, 2, [RehVars_FiyatListeAdi, RehVars_FiyatListeAdiAlis ], Etiketler, Bilgiler);
-
   LabelSerino.Visible := GirisCikis= FWCikis;
   EditSerino.Visible := LabelSerino.Visible;
   if GirisCikis= FWCikis then begin
@@ -692,6 +692,7 @@ begin
   cbStokDepo.Properties.OnEditValueChanged := cbFiyatAdiPropertiesEditValueChanged;
   cbOlmayanlar.OnClick:=cbFiyatAdiPropertiesEditValueChanged;
   //ListeAc(1);
+  PanelDetayliArama.Visible := False;
   PageControl1Change(Sender);
   FocusDuzenle;
   case PageControl1.ActivePageIndex of
@@ -735,9 +736,11 @@ begin
   if SheetDagitim.tabVisible then
      SheetDagitim.TabVisible := Tablo.YetkiVarmi(2313,YetkiTur_Gorme);
 
-  PanelDetayliArama.Visible := StrToBool(GenRegIni.RegReadString('StokHizmetAraDurum','DetayliArama',BoolToStr(PanelDetayliArama.Visible),'C'));
   if cxGrid1.ActiveLevel <> nil then
     cxGrid1.ActiveLevel := TcxGridLevel(FindComponent(GenRegIni.RegReadString('StokHizmetAraDurum','AktifBilgiSayfasi',cxGrid1.ActiveLevel.Name,'C')));
+  finally
+    FAcilistaListelemeAtla := False;
+  end;
 
 end;
 
@@ -756,6 +759,19 @@ end;
 procedure TStokHizmetAraDlg.LabelDetayliAramaClick(Sender: TObject);
 begin
   PanelDetayliArama.Visible := not PanelDetayliArama.visible;
+  if PanelDetayliArama.Visible then
+    PageControl1Change(Sender);
+end;
+
+procedure TStokHizmetAraDlg.LabelOncekiAlimSatimClick(Sender: TObject);
+begin
+  if not cxSplitter1.Visible then
+    Exit;
+
+  if cxSplitter1.State = ssOpened then
+    cxSplitter1.CloseSplitter
+  else
+    cxSplitter1.OpenSplitter;
 end;
 
 procedure TStokHizmetAraDlg.ListeAc(Ara:Smallint);
@@ -927,7 +943,7 @@ begin
     TabDetayGiris.FieldByName('DOVIZKURDEGERI').AsCurrency:=AKurDegeri;
 
     TabGiris.Edit;
-    TabGiris.FieldByName('GIRISKAYNAK').AsInteger := Windows_Sekme_Giris;
+    TabGiris.FieldByName('GIRISKAYNAK').AsInteger  := Windows_Sekme_Giris;
     if stokhizmetaracagirantur in [9,10,11,12,14,15,16,19] then //irsaliye fe faturalar i?in
        DegerAta('RAPORDOVIZ')
     else if stokhizmetaracagirantur = 100 then //TEKL?FSE
@@ -1152,11 +1168,14 @@ Begin
     Result := True;
   end;
 End;
-
 procedure TStokHizmetAraDlg.SafePostDetayGiris;
 begin
+  // Zaten browse ise (onceki SafePost trigger-hatasinda Cancel etti VEYA post edildi) tekrar Post etme
+  //   -> "Dataset not in edit or insert mode". Dogrudan cagrilar (985/1037/1051/1063/1151) icin guvenli.
+  if not (TabDetayGiris.State in [dsEdit, dsInsert]) then
+     Exit;
   try
-    TabDetayGiris.Post;
+     TabDetayGiris.Post;
   except
     on E: EFDDBEngineException do
     begin
@@ -1659,7 +1678,7 @@ begin
   OkunanBarkod:='';
 end;
 
-procedure TStokHizmetAraDlg.TabStokListeAfterScroll(DataSet: TDataSet);
+procedure TStokHizmetAraDlg.SagPanelDetayYukle;
 var
   RehID:Integer;
 begin
@@ -1668,7 +1687,7 @@ begin
         RehID := RehberID
       else if rdTumu.checked then
         RehID := 0;
-      if (PageControl1.ActivePage.Name='SheetStok')and(TabStokListe.RecordCount > 0) then begin
+      if (PageControl1.ActivePage.Name='SheetStok') and TabStokListe.Active and (not TabStokListe.IsEmpty) then begin
         if cxGrid1LevelSonalislar.Active then
            TabloYenile(TabSonAlislar,[TabStokListe.FieldByName('ID').AsInteger,1,RehID])
         else if cxGrid1LevelSonSatislar.Active then
@@ -1681,7 +1700,7 @@ begin
            TabloYenile(tabUretim,[TabStokListe.FieldByName('ID').AsInteger])
         else if cxGrid1LevelTeklif.Active then
            TabloYenile(TabSonTeklifler,[TabStokListe.FieldByName('ID').AsInteger,1,RehID]);
-      end else if (PageControl1.ActivePage.Name='SheetHizmet')and(TabHizmetListe.RecordCount > 0) then begin
+      end else if (PageControl1.ActivePage.Name='SheetHizmet') and TabHizmetListe.Active and (not TabHizmetListe.IsEmpty) then begin
         if cxGrid1LevelSonalislar.Active then
            TabloYenile(TabSonAlislar,[TabHizmetListe.FieldByName('ID').AsInteger,0,RehID])
         else if cxGrid1LevelSonSatislar.Active then
@@ -1699,6 +1718,11 @@ begin
         TabUretim.Close;
       end;
   end;
+end;
+
+procedure TStokHizmetAraDlg.TabStokListeAfterScroll(DataSet: TDataSet);
+begin
+  SagPanelDetayYukle;
 end;
 
 procedure TStokHizmetAraDlg.TreeListKategoriClick(Sender: TObject);

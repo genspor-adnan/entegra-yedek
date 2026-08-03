@@ -417,7 +417,7 @@ type
 
 implementation
 
-uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst,UGirisKutusuEx, UFastRap, URaporAraclari,
+uses UVeriMotor, FetaKurulusSiniflari, FetaClassExtensions, PrjConst,UGirisKutusuEx, UFastRap, URaporAraclari,
      UGenelAnaSekmeFrame, UResim, UOpsDlg, UBarkodYazdir, LocOnFly, UExceldenVeriAl, UUTSDlg,
      System.JSON;
 {$R *.dfm}
@@ -540,7 +540,7 @@ End;
 
 procedure TStokListeDlg.ResimDosyadanTusClick(Sender: TObject);
 var
-   i : SmallInt;
+   i  : SmallInt;
 begin
    if Tablo.OpenPictureDialog1.Execute then begin
       for i := 0 to Tablo.OpenPictureDialog1.Files.Count-1 do
@@ -723,6 +723,9 @@ begin
     AFastReport.EnabledDataSets.Clear;
     AFastReport.EnabledDataSets.Add(frxStokListe);
   end;
+  // Kullanici ek alanlari (_USER) rapora (secili stok karti).
+  if STOKLAR.Active and (not STOKLAR.IsEmpty) then
+    Tablo.UserAlanYazdirmaEkle(AFastReport, 'STOKLAR', STOKLAR.FieldByName('ID').AsInteger);
 end;
 
 procedure TStokListeDlg.BarkodsuzrnleriListele1Click(Sender: TObject);
@@ -905,12 +908,64 @@ begin
 end;
 
 procedure TStokListeDlg.DateHarBasPropertiesEditValueChanged(Sender: TObject);
+var
+  LPgBasTar, LPgBitTar: string;
+  LPgDepo, LPgUrunID: Integer;
+  LPgHareketSQL: string;
 begin   //StokMaliyetHesapYontemi 0:yok, 1:ort, 2:fifo
    if (DateHarBas.Text<>'00'+FormatSettings.DateSeparator+'00'+FormatSettings.DateSeparator+'0000')and
       (DateHarBit.Text<>'00'+FormatSettings.DateSeparator+'00'+FormatSettings.DateSeparator+'0000')and
       ((ComboDepo.EditValue<>null))and(ComboDepo.EditValue>=0) then begin
 
-       if SQLVersion2008 then begin
+       if AktifVeriMotor = vmPG then begin
+          LPgBasTar := FormatDateTime('yyyy-mm-dd 00:00:00',DateHarBas.Date);
+          LPgBitTar := FormatDateTime('yyyy-mm-dd 23:59:59',DateHarBit.Date);
+          LPgDepo := StrToIntDef(ComboDepo.EditValue,0);
+          LPgUrunID := STOKLAR.Fields[0].AsInteger;
+          LPgHareketSQL :=
+            'WITH H AS ( '+
+            'SELECT F.ID AS FATURAID, F.URUNID, FB.ID AS FATBASID, FB.TUR, '+
+            'CASE WHEN '+IntToStr(LPgDepo)+'>0 AND COALESCE(FB.GIRISDEPO,0)='+IntToStr(LPgDepo)+' THEN ''Giris'' '+
+            '     WHEN '+IntToStr(LPgDepo)+'>0 AND COALESCE(FB.CIKISDEPO,0)='+IntToStr(LPgDepo)+' THEN ''Cikis'' '+
+            '     WHEN FB.TUR IN (3,6,10,11,12) THEN ''Giris'' ELSE ''Cikis'' END AS OLAY, '+
+            'G.ANAHTAR AS TURAD, FB.FATURATARIH, FB.FATURASERI, FB.FATURANO, FB.REHBERID, '+
+            'CASE WHEN '+IntToStr(LPgDepo)+'>0 THEN '+IntToStr(LPgDepo)+' ELSE COALESCE(NULLIF(FB.GIRISDEPO,0), FB.CIKISDEPO, 0) END AS DEPO, '+
+            'F.ADET, F.BIRIM, F.MIKTAR, F.BIRIMFIYAT, F.TUTAR, F.KUR, R.FIRMA, S.KOD, '+
+            'CASE WHEN '+IntToStr(LPgDepo)+'>0 THEN CASE WHEN COALESCE(FB.GIRISDEPO,0)='+IntToStr(LPgDepo)+' THEN COALESCE(F.MIKTAR,F.ADET,0) ELSE 0 END '+
+            '     ELSE CASE WHEN FB.TUR IN (3,6,10,11,12) THEN COALESCE(F.MIKTAR,F.ADET,0) ELSE 0 END END AS GIREN, '+
+            'CASE WHEN '+IntToStr(LPgDepo)+'>0 THEN CASE WHEN COALESCE(FB.CIKISDEPO,0)='+IntToStr(LPgDepo)+' THEN COALESCE(F.MIKTAR,F.ADET,0) ELSE 0 END '+
+            '     ELSE CASE WHEN FB.TUR IN (3,6,10,11,12) THEN 0 ELSE COALESCE(F.MIKTAR,F.ADET,0) END END AS CIKAN '+
+            'FROM FATURA F '+
+            'INNER JOIN FATBASLIK FB ON FB.ID=F.FATBASID '+
+            'LEFT JOIN STOKLAR S ON S.ID=F.URUNID '+
+            'LEFT JOIN REHBER R ON R.ID=FB.REHBERID '+
+            'LEFT JOIN GENINI G ON G.BOLUM=-1005 AND G.DIL=-1 AND G.DEGER=FB.TUR '+
+            'WHERE F.URUNID='+IntToStr(LPgUrunID)+' '+
+            'AND FB.FATURATARIH BETWEEN '''+LPgBasTar+'''::timestamp AND '''+LPgBitTar+'''::timestamp '+
+            'AND ('+IntToStr(LPgDepo)+'=0 OR FB.GIRISDEPO='+IntToStr(LPgDepo)+' OR FB.CIKISDEPO='+IntToStr(LPgDepo)+') '+
+            ') ';
+          if StokMaliyetHesapYontemi=0 then begin
+            TabStokHareketler.SQL.Text :=
+              '/*PGX*/ '+LPgHareketSQL+
+              'SELECT H.*, SUM(GIREN-CIKAN) OVER(ORDER BY FATURATARIH,FATURAID) AS KALAN, 0.0::double precision AS MALIYET, 0.0::double precision AS EKMALIYET FROM H '+
+              'ORDER BY FATURATARIH,FATURAID';
+            TabloYenile(TabStokHareketler,[]);
+          end else if StokMaliyetHesapYontemi=1 then begin
+            TabStokHareketler.SQL.Text :=
+              '/*PGX*/ '+LPgHareketSQL+
+              'SELECT H.*, SUM(GIREN-CIKAN) OVER(ORDER BY H.FATURATARIH,H.FATURAID) AS KALAN, COALESCE(SO.BIRIMMALIYET,0.0) AS MALIYET, 0.0::double precision AS EKMALIYET '+
+              'FROM H LEFT JOIN STOK_ORT_MALIYET SO ON H.DEPO=SO.DEPOID AND H.URUNID=SO.STOKID AND H.FATBASID=SO.FATBASID AND H.FATURAID=SO.FATURAID '+
+              'ORDER BY H.FATURATARIH,H.FATURAID';
+            TabloYenile(TabStokHareketler,[]);
+          end else if StokMaliyetHesapYontemi=2 then begin
+            TabStokHareketler.SQL.Text :=
+              '/*PGX*/ '+LPgHareketSQL+
+              'SELECT H.*, SUM(GIREN-CIKAN) OVER(ORDER BY H.FATURATARIH,H.FATURAID) AS KALAN, COALESCE(SMC.GIRISTUTAR/nullif(SMC.MIKTAR,0),0.0) AS MALIYET, 0.0::double precision AS EKMALIYET '+
+              'FROM H LEFT JOIN STOKMALIYET SMC ON SMC.TUR=1 AND H.URUNID=SMC.STOKID AND H.FATURAID=SMC.CIKISSATIRID '+
+              'ORDER BY H.FATURATARIH,H.FATURAID';
+            TabloYenile(TabStokHareketler,[]);
+          end;
+       end else if SQLVersion2008 then begin
          // StokHareketlerBIRIMMALIYET.DataBinding.FieldName := 'MALIYET';
           if StokMaliyetHesapYontemi=0 then begin     //maliyet yok
             TabStokHareketler.SQL.Text :='SELECT X.*,BIRIMMALIYET=0.0 FROM [dbo].[fn_PRG_StokHareket]( :PBasTar,:PBitTar,:PDepo,:PUrunID) X ';
@@ -937,7 +992,7 @@ begin   //StokMaliyetHesapYontemi 0:yok, 1:ort, 2:fifo
                 ''''+FormatDateTime('yyyy-mm-dd 00:00:00',DateHarBas.Date)+''','''+FormatDateTime('yyyy-mm-dd 23:59:59',DateHarBit.Date)+''','+IntToStr(ComboDepo.EditValue)+','+STOKLAR.Fields[0].AsString
             else
                TabStokHareketler.SQL.Text :='select * from fn_StokHareket_OrtMaliyet2012 ('+
-               ''''+FormatDateTime('yyyy-mm-dd 00:00:00',DateHarBas.Date)+''','''+FormatDateTime('yyyy-mm-dd 23:59:59',DateHarBit.Date)+''','+IntToStr(ComboDepo.EditValue)+','+STOKLAR.Fields[0].AsString+')';
+                ''''+FormatDateTime('yyyy-mm-dd 00:00:00',DateHarBas.Date)+''','''+FormatDateTime('yyyy-mm-dd 23:59:59',DateHarBit.Date)+''','+IntToStr(ComboDepo.EditValue)+','+STOKLAR.Fields[0].AsString+')';
             TabloYenile(TabStokHareketler,[]);
           end else if StokMaliyetHesapYontemi=2 then begin //fifo
             TabStokHareketler.SQL.Text :='exec sp_StokHareket_FIFO2012 '+
@@ -946,7 +1001,7 @@ begin   //StokMaliyetHesapYontemi 0:yok, 1:ort, 2:fifo
           end;
 
        end;
-       //StokHareketlerKALAN.Visible := ComboDepo.EditValue<>0;
+        //StokHareketlerKALAN.Visible := ComboDepo.EditValue<>0;
        StokHareketlerBIRIMMALIYET.Visible := ComboHareketTur.EditValue=2;// ComboDepo.EditValue<>0;
        StokHareketlerEKMALIYET.Visible := StokHareketlerBIRIMMALIYET.Visible;
       end;
@@ -955,7 +1010,7 @@ end;
 procedure TStokListeDlg.DegisTusClick(Sender: TObject);
 var
 //srid:
-   ID : integer;
+   ID  : integer;
 begin
   if Tablo.YetkiVarmi(2701,YetkiTur_Degistirme) then begin
     if GridStokView.Controller.SelectedRecordCount > 0 then

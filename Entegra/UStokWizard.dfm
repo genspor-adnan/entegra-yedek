@@ -1163,6 +1163,10 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetCevrim: TcxTabSheet
               Caption = #199'evrimler'
               ImageIndex = 2
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object ToolBar12: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -1341,6 +1345,10 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetYDil: TcxTabSheet
               Caption = 'Yabanc'#305' Dil'
               ImageIndex = 4
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object ToolBar4: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -2287,6 +2295,10 @@ object StokWizardDlg: TStokWizardDlg
         object TabSheetMuhasebeHesaplari: TcxTabSheet
           Caption = 'Muhasebe Hesaplar'#305
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object v: TcxGrid
             Left = 0
             Top = 24
@@ -2503,6 +2515,8 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Barkod Tan'#305'mlar'#305
       OnEnterPage = BarkodEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar5: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2975,6 +2989,8 @@ object StokWizardDlg: TStokWizardDlg
       Font.Name = 'Trebuchet MS'
       Font.Style = []
       OnEnterPage = FiyatEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PnlFiyat: TPanel
         Left = 0
         Top = 70
@@ -3500,6 +3516,8 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = PaketEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 469
         Top = 70
@@ -4079,8 +4097,12 @@ object StokWizardDlg: TStokWizardDlg
           ' from REHBERAYAR  '
           'where  YERI=@yeri '
           'and isnull(BOLUM,'#39#39')=@Bolum  '
-          'and ETIKET not in (select ETIKET from REHBERBILGI where  '
-          'YERI=@yeri  and YER_ID= @yerid )'
+          'and ETIKET not in ('
+          'select RB2.ETIKET from REHBERBILGI RB2 '
+          'inner join REHBERAYAR RA2 on RA2.YERI=RB2.YERI and '
+          'RA2.SIRA=RB2.SIRA and RA2.ETIKET=RB2.ETIKET '
+          'where RB2.YERI=@yeri and RB2.YER_ID=@yerid and isnull'
+          '(RA2.BOLUM,'#39#39')=@Bolum )'
           ''
           'order by 1'
           ''
@@ -4114,6 +4136,8 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'KotaEkr'
       OnEnterPage = KotaEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -4243,6 +4267,8 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Boyut Ekran'#305
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel5: TPanel
         Left = 0
         Top = 70
@@ -4719,8 +4745,8 @@ object StokWizardDlg: TStokWizardDlg
     SQL.Strings = (
       'SELECT * FROM STOKLAR_USER'
       'WHERE ID=:PAR')
-    Left = 112
-    Top = 134
+    Left = 136
+    Top = 102
   end
   object DtsStokUser: TDataSource
     DataSet = TabStokUser

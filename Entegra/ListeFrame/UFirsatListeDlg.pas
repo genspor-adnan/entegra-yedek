@@ -638,9 +638,9 @@ begin
         TabloYenile(TabGorevler,[Kullanan, AcKapa,  GunSay, FIRSATLAR.Fields[0].AsInteger]);
     end
     else if PageControlSekme.ActivePage=TabSheetTeklifler then begin
-        TabloYenile(TabTeklif, [FIRSATLAR.Fields[0].AsInteger]);
+            TabloYenile(TabTeklif, [FIRSATLAR.Fields[0].AsInteger]);
     end else if PageControlSekme.ActivePage = TabYorumMedya then
-        Tabloyenile(TabYorum,[Tabno_projeler, FIRSATLAR.Fields[0].AsInteger]);
+                Tabloyenile(TabYorum,[Tabno_projeler, FIRSATLAR.Fields[0].AsInteger]);
 end;
 
 procedure TFirsatListeDlg.GrubaElemanEkle(ProjeId, Asama, RehberId:Integer; Firma, ProjeAdi, Konusu, Turu, BasTarih, BitTarih:String);

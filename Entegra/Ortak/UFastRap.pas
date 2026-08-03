@@ -15,10 +15,10 @@ uses
   dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010, dxSkinWhiteprint,
   frxExportImage, dxSkinOffice2013White, dxSkinLiquidSky, dxSkinMetropolis,
   dxSkinMetropolisDark, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
-  System.ImageList, System.RegularExpressions, TypInfo, frCoreClasses, frxFDComponents,
+  System.ImageList, System.RegularExpressions, TypInfo, frCoreClasses, frxFDComponents, frxADOComponents,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet; //   frxExportImage,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, frxSmartMemo; //   frxExportImage,
 
 type
   TFastRaporDlg = class(TForm)
@@ -87,27 +87,49 @@ implementation
 uses Utablo,//,LocOnFly,
 //Compress,
 ZlibEx,
-FetaKurulusSiniflari, FetaClassExtensions, ComCtrls, UGirisKutusuEx, UGenelAnaSekmeFrame;
+FetaKurulusSiniflari, FetaClassExtensions, ComCtrls, UGirisKutusuEx, UGenelAnaSekmeFrame,
+UVeriMotor;
 {$R *.dfm}
 
 procedure TFastRaporDlg.RaporKaydet(frxReport1: TfrxReport);
 var
   Kaynak: TStream;
   Hedef: TStream;
+  Q: TFDQuery;
+  DokumID: Integer;
+  VarMi: Boolean;
 begin
   Kaynak := TMemoryStream.Create;
   Hedef := TMemoryStream.Create;
+  Q := TFDQuery.Create(nil);
   frxReport1.Variables.Clear;
   try
+    DokumID := frxReport1.Tag;
     frxReport1.SaveToStream(Kaynak);
     if (Kaynak.Size > 0) then
     begin
       Kaynak.Position := 0;
       ZCompressStream(Kaynak, Hedef);
       Hedef.Position := 0;
-      (TabYeniAyar.FieldByName('AYARLAR') as TBlobField).LoadFromStream(Hedef);
+
+      Q.Connection := Tablo.FDCnn;
+      Q.SQL.Text := 'select ID from AYARLARYENI where DOKUMID = :DOKUMID';
+      Q.ParamByName('DOKUMID').AsInteger := DokumID;
+      Q.Open;
+      VarMi := not Q.IsEmpty;
+      Q.Close;
+
+      if VarMi then
+        Q.SQL.Text := 'update AYARLARYENI set AYARLAR = :AYARLAR, DEGISTIREN = :KULLANAN, DEGISTIRMETARIHI = ' + DbSimdi + ' where DOKUMID = :DOKUMID'
+      else
+        Q.SQL.Text := 'insert into AYARLARYENI (DOKUMID, AYARLAR, EKLEYEN, EKLEMETARIHI) values (:DOKUMID, :AYARLAR, :KULLANAN, ' + DbSimdi + ')';
+      Q.ParamByName('DOKUMID').AsInteger := DokumID;
+      Q.ParamByName('KULLANAN').AsInteger := StrToIntDef(Kullanan, 0);
+      Q.ParamByName('AYARLAR').LoadFromStream(Hedef, ftBlob);
+      Q.ExecSQL;
     end;
   finally
+    Q.Free;
     Kaynak.Free;
     Hedef.Free;
   end;
@@ -282,7 +304,7 @@ begin
       frxReport1.PrepareReport(True);
     except
       on E: Exception do begin
-        FlNm := '';
+        FlNm  := '';
         try
           DumpDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Temp';
           ForceDirectories(DumpDir);
@@ -533,15 +555,10 @@ function TFastRaporDlg.frxDesigner1SaveReport(Report: TfrxReport; SaveAs: Boolea
      end;
   end;
 begin
-   if TabYeniAyar.RecordCount > 0 then
-      TabYeniAyar.edit
-   else begin
-      TabYeniAyar.Append;
-      TabYeniAyar.FieldByName('DOKUMID').AsInteger := frxReport1.Tag;//EkranAdi;
-   end;
    RaporKaydet(frxReport1);
-   TabYeniAyar.Post;
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update DOKUMLER set VERSIYON='''+VersiyonGetir(frxReport1.ReportOptions.VersionRelease)+'''  where ID=&id ',['&id'],[frxReport1.Tag]);
+   if TabYeniAyar.Active then
+     TabYeniAyar.Refresh;
 end;
 
 procedure TFastRaporDlg.mnuAdDegistirClick(Sender: TObject);

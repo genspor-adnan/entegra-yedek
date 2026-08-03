@@ -456,7 +456,7 @@ end;
 
 procedure TTeminatMektubuDlg.TabTeminatMektubuNewRecord(DataSet: TDataSet);
 begin
-   TabTeminatMektubu.FieldByName('DURUM').AsBoolean := True;//ComboDURUM.Items[0];
+   AlanBoolYaz(TabTeminatMektubu.FieldByName('DURUM'), True);//DURUM smallint (PG) -> .AsBoolean patlar
    TabTeminatMektubu.FieldByName('TARIH').AsDateTime:= Tablo.GENINI.BugunTrh;
    TabTeminatMektubu.FieldByName('BSMVORANI').AsInteger:= 5;
    TabTeminatMektubu.FieldByName('VADESI').AsDateTime:=  IncYear(Tablo.GENINI.BugunTrh,1);  // Tablo.GENINI.BugunTrh;

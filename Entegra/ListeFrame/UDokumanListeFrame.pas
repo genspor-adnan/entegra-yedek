@@ -268,6 +268,25 @@ var
   DYetkisonuc: DokumanYetkiSonuc;
   AlanlarOlusturuldu : boolean;
 
+procedure DokumanListeYetkiSqlPG(AQuery: TFDQuery);
+begin
+  if AktifVeriMotor <> vmPG then
+    Exit;
+
+  AQuery.SQL.Text :=
+    '/*PGX*/select case when DY.TUR::int=0 then ''Kullanıcı'' else ''Rol'' end as TURU,' + sLineBreak +
+    '  DY.*,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when DY.TUR::int=5 then ''Tüm Kullanıcılar''' + sLineBreak +
+    '    when DY.TUR::int in (1,4) then (select FIRMA from REHBER where ID=DY.REHBERID)' + sLineBreak +
+    '    when DY.TUR::int=3 then (select G.ANAHTAR from GENINI G where G.BOLUM=-2251 and G.DEGER=DY.REHBERID and G.DIL=-1)' + sLineBreak +
+    '    when DY.TUR::int=2 then (select G.ANAHTAR from GENINI G where G.BOLUM=-2252 and G.DEGER=DY.REHBERID and G.DIL=-1)' + sLineBreak +
+    '  end as FIRMA' + sLineBreak +
+    'from DOKUMANYETKI DY' + sLineBreak +
+    'where DY.YERID=:YERID' + sLineBreak +
+    'order by DY.TUR, DY.REHBERID asc';
+end;
+
 procedure TDokumanListeFrame.AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = 38 then
@@ -988,9 +1007,9 @@ begin
       1 : LblYon.Caption := 'Gelen';
       2 : LblYon.Caption := 'Giden';
     else
-       LblYon.Caption := '';
+        LblYon.Caption := '';
     end;
-    LblGizlilik.Caption := ComboGizlilik.Text;
+    LblGizlilik.Caption  := ComboGizlilik.Text;
     //LblKurum.Caption := Tablo.AciklamaGetir('REHBER', 'FIRMA', DOKUMAN.FieldByName('REHBERID').AsInteger);
     //LblModul.Caption := ComboModul.Text;
     //LblBag.Caption := Tablo.AciklamaGetir('PROJELER', 'PROJEKODU', DOKUMAN.FieldByName('BAGI').AsInteger);
@@ -1009,6 +1028,7 @@ begin
     TabloYenile(TabRevize, [DOKUMAN.FieldByName('ID').AsInteger]);
  end else if PageDokuman.ActivePage = TabSheetYetki then begin
     // Yetkilendirme Dolduruluyor.
+    DokumanListeYetkiSqlPG(TabYetki);
     TabloYenile(TabYetki, [321, DOKUMAN.FieldByName('ID').AsInteger]);
  end else if PageDokuman.ActivePage = TabSheetIlgili then begin
     // İlgili Dolduruluyor.

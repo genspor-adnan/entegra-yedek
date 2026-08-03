@@ -8,7 +8,9 @@
       "Read(//c/bin/**)",
       "WebSearch",
       "WebFetch(domain:bap.sdu.edu.tr)",
-      "WebFetch(domain:www.dengeakademi.com)"
+      "WebFetch(domain:www.dengeakademi.com)",
+      "Skill(simplify)",
+      "Skill(update-config)"
     ]
   }
 }

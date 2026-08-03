@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, dxSkinsCore, dxSkinLondonLiquidSky, dxSkinscxPCPainter, cxStyles,
   cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, DB,
   cxDBData, cxImageComboBox, cxMaskEdit, cxDropDownEdit, cxContainer,
@@ -274,7 +274,7 @@ end;
 
 procedure TRehberAramaEkrani.CariListele;
 var
-  s, Fir,Yet,Kod,Barkod, TFirma,TYet,TKod, Grup,Sinif, Sube, Aranan,Durumu,FatBaslik :string;
+  s, Fir,Yet,Kod,Barkod, TFirma,TYet,TKod, Grup,Sinif, Sube, Aranan,Durumu,FatBaslik, LikeOp :string;
 begin
   if (AramaGrup <> 335)and((ComboGrup.EditValue<1)and(ComboSinif.EditValue<1)and(Trim(AraFirma.Text)='')and(Trim(AraYetkili.Text)='')and(Trim(AraKod.Text)='')) then
       Exit;
@@ -283,6 +283,10 @@ begin
   Fir := ' R.FIRMA ';
   Yet := ' P.FIRMA ';
   Kod := ' R.KOD ';
+  if AktifVeriMotor = vmPG then
+    LikeOp := ' ILIKE '
+  else
+    LikeOp := ' LIKE ';
 
   TFirma := '%' + Trim(AraFirma.Text) + '%';// OR X1.BILGI LIKE '%' + Trim(AraFirma.Text) + '%';
   TYet := '%' + Trim(AraYetkili.Text) + '%';
@@ -333,16 +337,16 @@ begin
   FatBaslik:= '';
   if AraFirma.Text <> '' then begin
      if AramaGrup = -1 then
-        FatBaslik:= ' OR X1.BILGI LIKE ''' + TFirma +''' ' ;
+        FatBaslik:= ' OR X1.BILGI' + LikeOp + '''' + TFirma +''' ' ;
 
     Aranan := 'AraFirma';
-    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and (' + Fir + ' LIKE ''' + TFirma +''''+FatBaslik+ ')'+ Grup + ' '+Sube+' ORDER BY R.FIRMA'  //   and ' + gorulmeyecekkod
+    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and (' + Fir + LikeOp + '''' + TFirma +''''+FatBaslik+ ')'+ Grup + ' '+Sube+' ORDER BY R.FIRMA'  //   and ' + gorulmeyecekkod
   end else if AraYetkili.Text <> '' then begin
     Aranan := 'AraYetkili';
-    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and ' + Yet + ' LIKE ''' + TYet +''''+ Grup +' '+Sube+' ORDER BY R.FIRMA'             // and gorulmeyecekkod
+    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and ' + Yet + LikeOp + '''' + TYet +''''+ Grup +' '+Sube+' ORDER BY R.FIRMA'             // and gorulmeyecekkod
   end else if AraKod.Text <> '' then begin
     Aranan := 'AraKod';
-    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and ' + Kod + ' LIKE ''' + TKod+'''' + Grup + ' '+Sube+'  ORDER BY ' + Kod     // and gorulmeyecekkod
+    s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Grup+Durumu+' and ' + Kod + LikeOp + '''' + TKod+'''' + Grup + ' '+Sube+'  ORDER BY ' + Kod     // and gorulmeyecekkod
   end else if ComboSinif.Text <> '' then begin   //EditValue
     Aranan := '';
     s := ' where R.KOD not like ''102.%'' and R.ID > 0 '+Durumu+' '+Sinif+ ' '+Sube+' ORDER BY R.FIRMA'
@@ -398,13 +402,13 @@ end ;
 
 procedure TRehberAramaEkrani.KapatTusClick(Sender: TObject);
 begin
-   ModalResult := mrCancel;
+    ModalResult := mrCancel;
 end;
 
 procedure TRehberAramaEkrani.SecTusClick(Sender: TObject);
 begin
    if (SecTus.Visible)and(AraQuery1.RecordCount>0)  then begin
-      case AraQuery1.FieldByName('DURUM').AsInteger of
+      case AlanTamsayi(AraQuery1.FieldByName('DURUM')) of
        0 : if (MessageBox(0,PChar(CRPasif_kayda_islem_Secimi),PChar(Onay),MB_YESNO)<> ID_YES) then begin //pasif kayıt
                 ModalResult := mrCancel;
                 exit;

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>ILAC_TIBBICIHAZ</cbc:ProfileID>
+<cbc:ID>XWY2026000000003</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>B91D4BA4-F524-4532-AA84-A9178CE8D4E4</cbc:UUID>
+<cbc:IssueDate>2026-07-30</cbc:IssueDate>
+<cbc:IssueTime>14:58:56</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız Sıfır Türk Lirası</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">3302000156</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="MERSISNO">0330200015600001</cbc:ID></cac:PartyIdentification>
+<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">181788-5</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>EKSPERT MEDİKAL ÜRÜNLER SAN. VE TİC. LTD. ŞTİ.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>ŞERİFALİ MAH. HENDEM CAD. NO: 12/B
+34775</cbc:StreetName>
+<cbc:CitySubdivisionName>ÜMRANİYE</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>SARIGAZİ</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>EKSPERT MEDİKAL ÜRÜNLER SAN. VE TİC. LTD. ŞTİ.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Contact>
+<cbc:Telephone>0216 365 8500</cbc:Telephone>
+<cbc:Telefax>0216 365 8500</cbc:Telefax>
+<cbc:ElectronicMail>ekspertmedikal13@outlook.com</cbc:ElectronicMail>
+</cac:Contact>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4840847211</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>izibiz</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>adres</cbc:StreetName>
+<cbc:CitySubdivisionName>ilçe</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>maltepe</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>izibiz</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:AllowanceCharge>
+<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+<cbc:AllowanceChargeReason>Iskonto</cbc:AllowanceChargeReason>
+<cbc:Amount currencyID="TRY">8150.00</cbc:Amount>
+</cac:AllowanceCharge>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">135.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">1350.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">135.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">0.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cbc:TaxExemptionReasonCode>350</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>350 Diğer istisnalar</cbc:TaxExemptionReason><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">9500.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">1350.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">1485.00</cbc:TaxInclusiveAmount>
+<cbc:AllowanceTotalAmount currencyID="TRY">8150.00</cbc:AllowanceTotalAmount>
+<cbc:PayableAmount currencyID="TRY">1485.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:Note>Lot No: 03M0181A Üretim Tarihi: 11.03.2026 Son Kullanma Tarihi: 10.03.2031 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">1350.00</cbc:LineExtensionAmount>
+<cac:AllowanceCharge>
+<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+<cbc:AllowanceChargeReason>Iskonto</cbc:AllowanceChargeReason>
+<cbc:MultiplierFactorNumeric>0.1</cbc:MultiplierFactorNumeric>
+<cbc:Amount currencyID="TRY">150.00</cbc:Amount>
+<cbc:BaseAmount currencyID="TRY">1500.00</cbc:BaseAmount>
+</cac:AllowanceCharge>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">135.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">1350.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">135.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>12/14  CoCr Modüler  Femoral Baş  36  +4</cbc:Name>
+<cbc:BrandName>LATITUD</cbc:BrandName>
+<cac:BuyersItemIdentification><cbc:ID>HDAA-36/40+</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>HDAA-36/40+</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>08906067242914</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">08906067242914</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>03M0181A</cbc:Value></cac:AdditionalItemProperty>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)08906067242914(LNO)03M0181A(URT)260311</cbc:ID>
+</cac:AdditionalItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">1500.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+<cac:InvoiceLine>
+<cbc:ID>2</cbc:ID>
+<cbc:Note>Lot No: C2601102 Üretim Tarihi: 01.01.2026 Son Kullanma Tarihi: 31.12.2030 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">0.00</cbc:LineExtensionAmount>
+<cac:AllowanceCharge>
+<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+<cbc:AllowanceChargeReason>Iskonto</cbc:AllowanceChargeReason>
+<cbc:MultiplierFactorNumeric>1</cbc:MultiplierFactorNumeric>
+<cbc:Amount currencyID="TRY">8000.00</cbc:Amount>
+<cbc:BaseAmount currencyID="TRY">8000.00</cbc:BaseAmount>
+</cac:AllowanceCharge>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">0.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cbc:TaxExemptionReasonCode>350</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>350 Diğer istisnalar</cbc:TaxExemptionReason><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>DESTIKNEE DİZ SİSTEMİ İMPLANTI TIBIAL LINER PS C3-4 METALBACKED, 14mm</cbc:Name>
+<cbc:BrandName>DESTIKNEE </cbc:BrandName>
+<cac:BuyersItemIdentification><cbc:ID>MK-MLPSXC314</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>MK-MLPSXC314</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>08906067240903</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">08906067240903</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>C2601102</cbc:Value></cac:AdditionalItemProperty>
+<cac:AdditionalItemIdentification>
+<cbc:ID schemeID="TIBBICIHAZ">(UNO)08906067240903(LNO)C2601102(URT)260101</cbc:ID>
+</cac:AdditionalItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">8000.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

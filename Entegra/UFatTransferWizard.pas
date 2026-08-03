@@ -387,6 +387,21 @@ begin
   if FATURA.Connection = nil then FATURA.Connection := Tablo.FDCnn;
   TabFatura.CachedUpdates := False;
   TabFatura.UpdateOptions.CountUpdatedRecords := False;
+  // PG: varsayilan upWhereAll UPDATE WHERE'ine TUM alanlari koyar; PG'de bir alan degeri (bit->smallint,
+  //   numeric hassasiyet, timestamp fraksiyon) FireDAC'in fetch ettiginden farkli olursa WHERE 0 satir
+  //   eslesir -> "-312 update affected 0 rows, 1 requested". upWhereKeyOnly (WHERE yalniz ID) + taban
+  //   tablo/anahtar -> dogru satiri gunceller. MSSQL yolu dokunulmaz.
+  if AktifVeriMotor = vmPG then
+  begin
+    TabFatBaslik.UpdateOptions.UpdateTableName := 'FATBASLIK';
+    TabFatBaslik.UpdateOptions.KeyFields       := 'ID';
+    TabFatBaslik.UpdateOptions.UpdateMode      := upWhereKeyOnly;
+    TabFatBaslik.UpdateOptions.AutoIncFields   := 'ID';   // PG identity: INSERT'ten cikar + RETURNING ile ID geri al (yoksa sonraki UPDATE WHERE ID=yanlis -> 0 satir/-312)
+    TabFatura.UpdateOptions.UpdateTableName     := 'FATURA';
+    TabFatura.UpdateOptions.KeyFields           := 'ID';
+    TabFatura.UpdateOptions.UpdateMode          := upWhereKeyOnly;
+    TabFatura.UpdateOptions.AutoIncFields       := 'ID';   // PG identity: ID RETURNING ile geri al
+  end;
   aktifFrame := TGenelAnaSekmeFrame(UTablo.AnaFrameYoneticisi.AktifFrame.Ornek);
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz, ra, aktifFrame.RaporSecClick);
   YaziciYaz.Caption := ra;
@@ -508,16 +523,10 @@ begin
    //?retimde sarf sat?r? ise kontrole alm?yoruz..
    Silinebilir := True;
    if TabFatura.FieldByName('ADET').Value > 0 then begin
-       if TabFatura.FieldByName('IZLEME').AsInteger = 0 then begin //izlem yoksa
-          if Tablo.KullanimSayisi(TabFatBaslik.FieldByName('TUR').AsInteger, 0, TabFatura.FieldByName('ID').AsInteger, TabFatura.FieldByName('URUNID').AsInteger, TabFatBaslik.FieldByName('FATURATARIH').AsDateTime)>0 then
-             Silinebilir := False;
-       end
-       else begin
-          //?ts kullan?mda ve bildirim yap?lm??sa fatura silinemez
-          if Tablo.IzlemBildirimSayisi(TabFatBaslik.FieldByName('TUR').AsInteger, 0, TabFatura.FieldByName('ID').AsInteger, TabFatBaslik.FieldByName('FATURATARIH').AsDateTime)>0  then
-             Silinebilir := False;
-       end;
-       //
+       // KILIT + e-belge + kullanim/izleme/uts/donusum -> birlesik helper (eski inline kontrol yerine).
+       if not Tablo.FaturaSilinebilirMi(0, TabFatura.FieldByName('ID').AsInteger) then
+          Silinebilir := False;
+       // Transfer'e ozel ek kontrol: demirbas urun transfer satiri silinemez.
        Tablo.TablodanSorguAc(1,'Select * from DEMIRBAS Where STOKID='+TabFatura.FieldByName('URUNID').AsString+' ');
         if Tablo.Query1.RecordCount > 0 then begin
            Application.MessageBox(PChar(Transferurunlersilinemez),PChar(Uyari),MB_OK);
@@ -683,14 +692,14 @@ end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforeEdit(DataSet: TDataSet);
 begin
-  ULog.OturumYakala(FOturumID);   // LAZY: satir duzenleme -> yakala
+   ULog.OturumYakala(FOturumID);   // LAZY: satir duzenleme -> yakala
    OncekiStokMiktar  :=  TabFATURA.FieldByName('MIKTAR').AsFloat;
 end;
 
 procedure TFatTransferWizardDlg.TabFaturaBeforePost(DataSet: TDataSet);
 var
   Kur, Dovizkuru: string;
-  Tutar, Doviztutari:  Currency;
+  Tutar,  Doviztutari:  Currency;
   DetID : integer;
   miktar : extended;
   mik : variant;

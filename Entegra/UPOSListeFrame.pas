@@ -12,7 +12,7 @@ uses
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client,ToolWin, ExtCtrls, dxSkinsCore,
    dxSkinscxPCPainter, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData,
   cxDataStorage, cxDBData, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGridLevel, cxClasses, cxGridCustomView, cxGrid,
+  cxGridDBTableView, cxGridLevel, cxClasses, cxGridCustomView, cxGrid, cxGridCustomPopupMenu,
   dxSkinLondonLiquidSky, cxImage, Utablo, cxImageComboBox, cxCurrencyEdit,
   cxSplitter, cxDropDownEdit, cxCalendar, cxPC, frxClass, frxDBSet,
   cxLookAndFeels, cxNavigator, cxPCdxBarPopupMenu, dxCore, cxDateUtils,
@@ -177,6 +177,7 @@ type
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // POSORAN (detay) orijinal satirlar (log diff icin)
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
+    FPosHucreMenuKuruldu: Boolean;   // PosListeMenu cxGridPopupMenu'ya hucre menusu olarak kaydedildi mi
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_POS_Liste_Json2)
     procedure PosOranLogSnapshotAl;
     procedure PosOranLogDiffKaydet;
@@ -460,6 +461,18 @@ begin
    if AnaForm.cxGridPopupMenu1.PopupMenus.Count > 0 then
      AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView:=GridTview;
    AnaForm.pmGridStil.Tags.Values[cxGrid.Name] := 'PosTanimlariListeGridi';
+   // Grid.PopupMenu (=PosListeMenu) DFM'den kaldirildi -> BANKA/KREDI gibi indikator sag-tiki
+   //   pmGridStil'i (genislik/duzen ayar menusu) acsin. POS aksiyonlarini (info/acilis/devir)
+   //   kaybetmemek icin PosListeMenu'yu cxGridPopupMenu'ya HUCRE/SATIR menusu olarak kaydet (tek sefer).
+   if not FPosHucreMenuKuruldu then begin
+     AnaForm.cxGridPopupMenu1.PopupMenus.Add;   // Add base TCollectionItem doner -> tipli indexer ile eris
+     with AnaForm.cxGridPopupMenu1.PopupMenus[AnaForm.cxGridPopupMenu1.PopupMenus.Count - 1] do begin
+       GridView := GridTview;
+       PopupMenu := PosListeMenu;
+       HitTypes := [gvhtCell, gvhtRecord, gvhtNone];
+     end;
+     FPosHucreMenuKuruldu := True;
+   end;
 end;
 
 procedure TPOSListeFrame.GridTviewCellDblClick(Sender: TcxCustomGridTableView;
@@ -622,7 +635,19 @@ begin
         else begin//yoksa a??l?? kayd?n? silelim
           if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla; detay+kart
             LogDetaylariSil('POSORAN','POSID',TabNo_POSORAN,TabNo_POS,POSLAR.FieldByName('ID').AsInteger);
-            LogKartSil(POSLAR, TabNo_POS, POSLAR.FieldByName('ID').AsInteger);
+            // Kart logu BASE POS tablosundan: POSLAR list-SP'sinde BANKAHESAPID/base kolonlar yok
+            //   -> onlardan loglayinca Geri Al eksik satir olusturur (BANKAHESAPID null -> liste
+            //   inner-join'i eler, POS geri gelmez). Tam satiri base'den oku.
+            var LBaseQ: TFDQuery := TFDQuery.Create(nil);
+            try
+              LBaseQ.Connection := Tablo.FDCnn;
+              LBaseQ.SQL.Text := 'select * from POS where ID=' + POSLAR.FieldByName('ID').AsString;
+              LBaseQ.Open;
+              if not LBaseQ.IsEmpty then
+                LogKartSil(LBaseQ, TabNo_POS, LBaseQ.FieldByName('ID').AsInteger);
+            finally
+              LBaseQ.Free;
+            end;
           end;
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
                //kendisini sil

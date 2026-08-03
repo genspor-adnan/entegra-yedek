@@ -401,6 +401,66 @@ var
   KNo, GiristekiRehberId, OncekiGirisTarih, OncekiCikisTarih, OncekiTCNo : String[20];
   OncekiSinif, TabloNo:Smallint;
 
+function PgIKTempAdi(AQuery: TFDQuery): string;
+begin
+  Result := 'tmp_ik_detay_' + LowerCase(AQuery.Name) + '_' + IntToStr(SPID);
+end;
+
+procedure PgIKBilgiTempAc(AQuery: TFDQuery; AYeri, AYerID: Integer);
+var
+  LTemp: string;
+begin
+  LTemp := PgIKTempAdi(AQuery);
+  Tablo.FDCnn.ExecSQL('drop table if exists ' + LTemp);
+  Tablo.FDCnn.ExecSQL(
+    'create temp table ' + LTemp + ' on commit preserve rows as ' +
+    'select row_number() over(order by SIRA, ETIKET) as TMPID, X.* from (' +
+    'select RB.SIRA, RB.ETIKET, RB.BILGI, RB.BILGI as ORJINAL, RA.GIRIS, RA.KAYNAK, RA.ZORUNLU ' +
+    'from REHBERBILGI RB left outer join REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RB.YERI=RA.YERI ' +
+    'where RB.YERI=' + IntToStr(AYeri) + ' and RB.YER_ID=' + IntToStr(AYerID) + ' ' +
+    'union all ' +
+    'select SIRA, ETIKET, '''' as BILGI, '''' as ORJINAL, GIRIS, KAYNAK, ZORUNLU ' +
+    'from REHBERAYAR where YERI=' + IntToStr(AYeri) + ' and ETIKET not in ' +
+    '(select ETIKET from REHBERBILGI where YERI=' + IntToStr(AYeri) + ' and YER_ID=' + IntToStr(AYerID) + ')' +
+    ') X');
+  Tablo.FDCnn.ExecSQL('alter table ' + LTemp + ' add primary key (TMPID)');
+  AQuery.Close;
+  AQuery.CachedUpdates := True;
+  AQuery.UpdateOptions.RequestLive := True;
+  AQuery.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  AQuery.UpdateOptions.UpdateTableName := LTemp;
+  AQuery.UpdateOptions.KeyFields := 'TMPID';
+  AQuery.SQL.Text := 'select TMPID, SIRA, ETIKET, BILGI, ORJINAL, GIRIS, KAYNAK, ZORUNLU from ' + LTemp + ' order by SIRA';
+  AQuery.Open;
+end;
+
+procedure PgIKUcretTempAc(AQuery: TFDQuery; ARehberID: Integer);
+var
+  LTemp: string;
+begin
+  LTemp := PgIKTempAdi(AQuery);
+  Tablo.FDCnn.ExecSQL('drop table if exists ' + LTemp);
+  Tablo.FDCnn.ExecSQL(
+    'create temp table ' + LTemp + ' on commit preserve rows as ' +
+    'select row_number() over(order by SIRA, ETIKET) as TMPID, X.* from (' +
+    'select SIRA, ETIKET, TUTAR, KUR, TUTAR::varchar(50) as ORJINALTUTAR, KUR as ORJINALKUR, cast(0 as smallint) as ZORUNLU ' +
+    'from PLANMAAS where YER=0 and YERID=' + IntToStr(ARehberID) + ' ' +
+    'union all ' +
+    'select SIRA, ETIKET, cast(null as numeric) as TUTAR, cast(null as varchar(10)) as KUR, cast(null as varchar(50)) as ORJINALTUTAR, cast(null as varchar(500)) as ORJINALKUR, ZORUNLU ' +
+    'from REHBERAYAR where YERI=5 and VARSAYILAN in (11,12,13,15) and ETIKET not in ' +
+    '(select ETIKET from PLANMAAS where YER=0 and YERID=' + IntToStr(ARehberID) + ')' +
+    ') X');
+  Tablo.FDCnn.ExecSQL('alter table ' + LTemp + ' add primary key (TMPID)');
+  AQuery.Close;
+  AQuery.CachedUpdates := True;
+  AQuery.UpdateOptions.RequestLive := True;
+  AQuery.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  AQuery.UpdateOptions.UpdateTableName := LTemp;
+  AQuery.UpdateOptions.KeyFields := 'TMPID';
+  AQuery.SQL.Text := 'select TMPID, SIRA, ETIKET, TUTAR, KUR, ORJINALTUTAR, ORJINALKUR, ZORUNLU from ' + LTemp + ' order by SIRA';
+  AQuery.Open;
+end;
+
 procedure TIKWizardDlg.AdresDegistirClick(Sender: TObject);
 var
   EtiAdi: Variant;
@@ -558,12 +618,13 @@ begin
       RehberIletID := TabAdresAd.Fields[0].AsInteger;
 
       TabKurIlet.Close;
-      TabKurIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',IntToStr(SPID), [rfReplaceAll]);
-      //TabKurIlet.Params[0].Value := 1;
-      //TabKurIlet.Params[1].Value := RehberIletID; // RehberPerID;
-      //TabKurIlet.Params[2].Value := RehberIletID; // RehberPerI;
-      //TabKurIlet.Open;
-      Tabloyenile(TabKurIlet,[1,RehberIletID,RehberIletID]);
+      if AktifVeriMotor = vmPG then
+        PgIKBilgiTempAc(TabKurIlet, 1, RehberIletID)
+      else
+      begin
+        TabKurIlet.SQL.text := StringReplace(SQLKurIlet.text, ':SPID',IntToStr(SPID), [rfReplaceAll]);
+        Tabloyenile(TabKurIlet,[1,RehberIletID,RehberIletID]);
+      end;
       EkleKurIlet := False
     end
     else
@@ -572,7 +633,7 @@ end;
 
 procedure TIKWizardDlg.EditAdPropertiesChange(Sender: TObject);
 begin
-   GridIlet.Visible := (TabIlgili.Active) and (TabIlgili.RecordCount > 0);
+    GridIlet.Visible := (TabIlgili.Active) and (TabIlgili.RecordCount > 0);
 end;
 
 procedure TIKWizardDlg.EditDepartmanPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -634,8 +695,34 @@ begin
    FKartSnap := TStringList.Create;
 
    // IK personel iletisim (REHBERILETISIM) detayini ust=personel log'una bagla.
-   TabPerIletisim.BeforeEdit := DetayBeforeEdit;
-   TabPerIletisim.AfterPost  := DetayAfterPost;
+  TabPerIletisim.BeforeEdit := DetayBeforeEdit;
+  TabPerIletisim.AfterPost  := DetayAfterPost;
+  if AktifVeriMotor = vmPG then
+  begin
+    TabRehber.UpdateOptions.RequestLive := True;
+    TabRehber.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabRehber.UpdateOptions.UpdateTableName := 'REHBER';
+    TabRehber.UpdateOptions.KeyFields := 'ID';
+    TabRehber.UpdateOptions.AutoIncFields := 'ID';
+    // AutoIncFields='ID': PG identity PK -> INSERT'e konmaz + RETURNING id ile Post sonrasi alana
+    //   yazilir. Yoksa Post sonrasi ID NULL kalir -> sonraki elle INSERT'te (FieldByName('ID').AsString)
+    //   bos deger -> "values (,...)" -> syntax error at or near ",".
+    TabAdresAd.UpdateOptions.RequestLive := True;
+    TabAdresAd.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabAdresAd.UpdateOptions.UpdateTableName := 'REHBERILETISIM';
+    TabAdresAd.UpdateOptions.KeyFields := 'ID';
+    TabAdresAd.UpdateOptions.AutoIncFields := 'ID';
+    TabPerIletisim.UpdateOptions.RequestLive := True;
+    TabPerIletisim.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabPerIletisim.UpdateOptions.UpdateTableName := 'REHBERILETISIM';
+    TabPerIletisim.UpdateOptions.KeyFields := 'ID';
+    TabPerIletisim.UpdateOptions.AutoIncFields := 'ID';
+    TabIlgili.UpdateOptions.RequestLive := True;
+    TabIlgili.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabIlgili.UpdateOptions.UpdateTableName := 'REHBER';
+    TabIlgili.UpdateOptions.KeyFields := 'ID';
+    TabIlgili.UpdateOptions.AutoIncFields := 'ID';
+  end;
 
    // LabelGrup.OnClick := Tablo.LabelClickCombobox;
 
@@ -775,16 +862,9 @@ begin
       //ResimGetir(RehberID, 11, RehberID, LogoResim);
   end;
 
-  // Ek alan (REHBER_USER): MEVCUT kartta (ID>0) hemen kur. YENI kartta ID yok -> ek-alan sekmesine
-  // gecince personel kaydedilip ID alinca kurulur (CariPageControlPageChanging).
+  // Ek alan (REHBER_USER): acilista kurulmaz; sekmeye ilk geciste kurulur.
   if CariPageControl <> nil then
      CariPageControl.OnPageChanging := CariPageControlPageChanging;
-  if (PanelEkAlanlar <> nil) and (RehberID > 0) then
-  begin
-     tablo.AlanOlustur(TIKWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TIKWizardDlg(Self), DtsRehber, 'REHBER_USER'));
-     FEkAlanKuruldu := True;
-  end;
-  // Ek alan olusturulunca SheetEkAlanlar aktiflesiyor -> varsayilan Notlar sekmesine dondur.
   if (CariPageControl <> nil) and (SheetNotlar <> nil) then
      CariPageControl.ActivePage := SheetNotlar;
 
@@ -1045,12 +1125,16 @@ begin
           Ekle(TabPerIlet, 1, RehberPerID, Degis, '', TabloNo, RehberID, 81, TabIlgili.FieldByName('FIRMA').AsString);
        RehberPerID := TabPerIletisim.Fields[0].AsInteger;
        TabPerIlet.Close;
-       TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-       if AktifVeriMotor = vmPG then TabPerIlet.SQL.Text := PgSqlCevir(TabPerIlet.SQL.Text);
-       TabPerIlet.Params[0].Value := 1;
-       TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
-       TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
-       TabPerIlet.Open;
+       if AktifVeriMotor = vmPG then
+         PgIKBilgiTempAc(TabPerIlet, 1, RehberPerID)
+       else
+       begin
+         TabPerIlet.SQL.text := StringReplace(SQLPerIlet.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+         TabPerIlet.Params[0].Value := 1;
+         TabPerIlet.Params[1].Value := RehberPerID; // RehberPerID;
+         TabPerIlet.Params[2].Value := RehberPerID; // RehberPerID;
+         TabPerIlet.Open;
+       end;
        EklePerIlet := False
     end
     else
@@ -1300,9 +1384,19 @@ begin
 //      TabIlgili.Open;
       TabloYenile(TabIlgili,[]);
       if TabIlgili.RecordCount > 0 then
-        TabloYenile(TabPerIlet,[1, TabIlgili.Fields[0].AsInteger])
+      begin
+        if AktifVeriMotor = vmPG then
+          PgIKBilgiTempAc(TabPerIlet, 1, TabIlgili.Fields[0].AsInteger)
+        else
+          TabloYenile(TabPerIlet,[1, TabIlgili.Fields[0].AsInteger]);
+      end
       else
-        TabloYenile(TabPerIlet,[1, 0]);
+      begin
+        if AktifVeriMotor = vmPG then
+          PgIKBilgiTempAc(TabPerIlet, 1, 0)
+        else
+          TabloYenile(TabPerIlet,[1, 0]);
+      end;
       GridIlet.Visible := TabIlgili.RecordCount > 0;
       if (RehberPerID = -1) and (Cagiran = 4) then
       // yeni tu?una bas?lm?? demektir
@@ -1325,13 +1419,14 @@ begin
   if not TabPerOzluk.Active then
   begin
     TabPerOzluk.Close;
-    TabPerOzluk.SQL.text := StringReplace(SQLTemel.text, ':SPID',
-      IntToStr(SPID), [rfReplaceAll]);
-    //TabPerOzluk.Params[0].Value := 3;
-    //TabPerOzluk.Params[1].Value := RehberID;
-    //TabPerOzluk.Params[2].Value := RehberID;
-//    TabPerOzluk.Open;
-    Tabloyenile(TabPerOzluk,[3,RehberID,RehberID]);
+    if AktifVeriMotor = vmPG then
+      PgIKBilgiTempAc(TabPerOzluk, 3, RehberID)
+    else
+    begin
+      TabPerOzluk.SQL.text := StringReplace(SQLTemel.text, ':SPID',
+        IntToStr(SPID), [rfReplaceAll]);
+      Tabloyenile(TabPerOzluk,[3,RehberID,RehberID]);
+    end;
   end;
 end;
 
@@ -1345,11 +1440,13 @@ begin
   if not TabPerUcret.Active then
   begin
     TabPerUcret.Close;
-    TabPerUcret.SQL.text := StringReplace(SQLPerUcret.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-//    TabPerUcret.ParamByName('RID1').Value := RehberID;
-//    TabPerUcret.ParamByName('RID2').Value := RehberID;
-//    TabPerUcret.Open;
-    Tabloyenile(TabPerUcret,[RehberID,RehberID]);
+    if AktifVeriMotor = vmPG then
+       PgIKUcretTempAc(TabPerUcret, RehberID)
+    else
+    begin
+      TabPerUcret.SQL.text := StringReplace(SQLPerUcret.text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+      Tabloyenile(TabPerUcret,[RehberID,RehberID]);
+    end;
 
     // Kur Kontrolu
     TabPerUcret.first;
@@ -1441,7 +1538,7 @@ begin
 
     // Sonra Rehber ?leti?im tablosuna  'Merkez' ekleniyor.
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO REHBERILETISIM([REHBERID],[AD] ,[VARSAYILAN],[AKTIF],[SUBEID]) values ('
-      + TabIlgili.FieldByName('ID').AsString  + ',''Merkez'',1,1,' + IntToStr(SubeID) + ')', [], []);
+       + TabIlgili.FieldByName('ID').AsString  + ',''Merkez'',1,1,' + IntToStr(SubeID) + ')', [], []);
     TabloYenile(TabPerIletisim, [TabIlgili.FieldByName('ID').AsInteger]);
 
     tablo.TablodanSorguAc(1, 'Select * from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberID));
@@ -1924,7 +2021,7 @@ var
               + IntToStr(RehberID) + ',' + Table1.FieldByName('SIRA').AsString + ','''
               + Table1.FieldByName('ETIKET').AsString + ''',' +
               FCurrToStr(Table1.FieldByName('TUTAR').AsCurrency) + ',''' +
-              Table1.FieldByName('KUR').AsString + ''',''' + Kullanan + ''',' +
+              Table1.FieldByName('KUR').AsString + ''',' + Kullanan + ',' +
               IntToStr(SubeID) + ')'
           else if (orj <> '') and (Bilgi = '') then
             tablo.Query1.SQL.text := ' delete from PLANMAAS where YER=0 AND YERID=' +IntToStr(RehberID) +
@@ -1944,14 +2041,14 @@ var
                 + IntToStr(RehberID) + ',' + Table1.FieldByName('SIRA').AsString +
                 ',''' + Table1.FieldByName('ETIKET').AsString + ''',' +
                 FCurrToStr(Table1.FieldByName('TUTAR').AsCurrency) + ',''' +
-                Table1.FieldByName('KUR').AsString + ''',''' + Kullanan + ''','
+                Table1.FieldByName('KUR').AsString + ''',' + Kullanan + ','
                 + IntToStr(SubeID) + ')'
             else
             begin
               tablo.Query1.SQL.text := ' update PLANMAAS set TUTAR=' +
                 FCurrToStr(Table1.FieldByName('TUTAR').AsCurrency) + ',KUR=''' +
-                Table1.FieldByName('KUR').AsString + ''', DEGISTIREN=''' +
-                Kullanan + '''' + ' where YER=0 and YERID=' + IntToStr(RehberID) +
+                Table1.FieldByName('KUR').AsString + ''', DEGISTIREN=' +
+                Kullanan + ' where YER=0 and YERID=' + IntToStr(RehberID) +
                 ' and SIRA=' + Table1.FieldByName('SIRA').AsString +
                 ' and ETIKET=''' + Table1.FieldByName('ETIKET').AsString + '''';
               UpdateOldu := 1;

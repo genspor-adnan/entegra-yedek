@@ -1,4 +1,4 @@
-﻿unit  UStokWizard;
+﻿unit UStokWizard;
 
 interface
 
@@ -706,7 +706,12 @@ type
   private
     AdetBirimi:Integer;
     BekletDlg: TBekletmeDlg;
+    FEkAlanOlustu: Boolean;
+    FUTSOlustu: Boolean;
     procedure DetayTablosuAc;
+    procedure StokUserHazirla;
+    procedure EkAlanlariHazirla;
+    procedure UTSBilgileriniHazirla;
     procedure PopUpBarkodDuzenle;
     procedure BtnVarsayilanYap(Sender: TObject);
     { Private declarations }
@@ -741,6 +746,50 @@ var
   EkleDetay, TekUrunNo : Boolean;
   FArama : TStokAramaFrame;
   DYetkisonuc:DokumanYetkiSonuc;
+
+function PgStokDetayTempAdi: string;
+begin
+  Result := 'tmp_stok_detay_' + IntToStr(SPID);
+end;
+
+procedure PgStokDetayTempAc(AQuery: TFDQuery; AYeri, AYerID: Integer; const ABolum: string);
+var
+  LTemp, LBolum: string;
+begin
+  LTemp := PgStokDetayTempAdi;
+  LBolum := StringReplace(ABolum, '''', '''''', [rfReplaceAll]);
+  Tablo.FDCnn.ExecSQL('drop table if exists ' + LTemp);
+  Tablo.FDCnn.ExecSQL(
+    'create temp table ' + LTemp + ' on commit preserve rows as ' +
+    'select row_number() over(order by SIRA, ETIKET) as TMPID, X.* from (' +
+    'select RB.SIRA, RB.ETIKET, ' +
+    'case when RA.GIRIS=3 and coalesce(RB.BILGI,'''')='''' then null else RB.BILGI end as BILGI, ' +
+    'case when RA.GIRIS=3 and coalesce(RB.BILGI,'''')='''' then null else RB.BILGI end as ORJINAL, ' +
+    'RA.GIRIS, RA.KAYNAK, RA.ZORUNLU, RB.ID as RBID, RR.RESIM as RESIM, RR.RESIM as ESKIRESIM ' +
+    'from REHBERBILGI RB inner join REHBERAYAR RA on RB.SIRA=RA.SIRA and RB.YERI=RA.YERI ' +
+    'left outer join REHBERBILGIRESIM RR on RB.ID=RR.REHBERBILGIID ' +
+    'where RB.YERI=' + IntToStr(AYeri) + ' and RB.YER_ID=' + IntToStr(AYerID) + ' and coalesce(RA.BOLUM,'''')=''' + LBolum + ''' ' +
+    'union all ' +
+    'select SIRA, ETIKET, case when GIRIS=3 then null else '''' end as BILGI, ' +
+    'case when GIRIS=3 then null else '''' end as ORJINAL, GIRIS, KAYNAK, ZORUNLU, null::int as RBID, null::bytea as RESIM, null::bytea as ESKIRESIM ' +
+    'from REHBERAYAR where YERI=' + IntToStr(AYeri) + ' and coalesce(BOLUM,'''')=''' + LBolum + ''' ' +
+    'and ETIKET not in (' +
+      'select RB2.ETIKET from REHBERBILGI RB2 ' +
+      'inner join REHBERAYAR RA2 on RA2.YERI=RB2.YERI and RA2.SIRA=RB2.SIRA and RA2.ETIKET=RB2.ETIKET ' +
+      'where RB2.YERI=' + IntToStr(AYeri) + ' and RB2.YER_ID=' + IntToStr(AYerID) + ' and coalesce(RA2.BOLUM,'''')=''' + LBolum + '''' +
+    ')' +
+    ') X');
+  Tablo.FDCnn.ExecSQL('alter table ' + LTemp + ' add primary key (TMPID)');
+
+  AQuery.Close;
+  AQuery.CachedUpdates := True;
+  AQuery.UpdateOptions.RequestLive := True;
+  AQuery.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  AQuery.UpdateOptions.UpdateTableName := LTemp;
+  AQuery.UpdateOptions.KeyFields := 'TMPID';
+  AQuery.SQL.Text := 'select TMPID, SIRA, ETIKET, BILGI, ORJINAL, GIRIS, KAYNAK, ZORUNLU, RBID, RESIM, ESKIRESIM from ' + LTemp + ' order by SIRA';
+  AQuery.Open;
+end;
 
 procedure TStokWizardDlg.FiyatEkleTusClick(Sender: TObject);
 begin
@@ -866,7 +915,7 @@ end;
 
 procedure TStokWizardDlg.BarkodIptalTusClick(Sender: TObject);
 begin
-  TabBarkod.Cancel;
+   TabBarkod.Cancel;
 end;
 
 procedure TStokWizardDlg.BarkodKaydetTusClick(Sender: TObject);
@@ -1013,6 +1062,9 @@ procedure TStokWizardDlg.Burayaekstralarkopyala1Click(Sender: TObject);
 var st : Tstringlist;
   sql:string;
 begin
+    if AktifVeriMotor = vmPG then   // PG: koseli alias -> cift-tirnak, like -> ilike (buyuk/kucuk duyarsiz arama)
+      sql := ' SELECT S.ID,S.KOD as "Kod",S.STOKADI as "Stok Adı" FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD ilike ''<ara>%'' or S.STOKADI ilike ''<ara>%'') '
+    else
     sql := ' SELECT S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı] FROM STOKLAR S  Where S.ID <> '+IntToStr(StokID)+' and  (S.KOD like ''<ara>%'' or S.STOKADI like ''<ara>%'') ';
     st := Tstringlist.create;
     if Tablo.ListedenBilgiGetir(StokSecimi, sql,st,[]) then begin
@@ -1183,6 +1235,13 @@ begin
       //DetayEkrPage(Self);
       DetayTablosuAc
     end;
+  end
+  else begin
+    // DETAY kapali (ilk sablon secimi): 'if DETAY.Active' bloguna girmiyordu -> secim hicbir sey
+    //   yapmiyordu. Dogrudan yukle. Kart post -> PgStokDetayTempAc YER_ID icin ID lazim.
+    if dtsStok.State in [dsEdit,dsInsert] then
+      TabStok.Post;
+    DetayTablosuAc;
   end;
 end;
 
@@ -1644,6 +1703,15 @@ var st : Tstringlist;
   sql,Tipi:string;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: esdeger ekleme -> yakala
+  if AktifVeriMotor = vmPG then
+    // PG-native: koseli-parantezli alias (bosluk/Turkce) -> cift-tirnak; + string concat -> ||;
+    //   like -> ilike (PG deterministik collation = buyuk/kucuk duyarli). Kolon SIRASI ayni (repo dizisi konumsal).
+    sql:=' SELECT '+DbUst(100)+'S.ID,S.KOD as "Kod",S.STOKADI as "Stok Adı",TIPI AS "Tip",MARKA AS "Marka",'+
+    ' StokModel.ANAHTAR AS "Model", GRUBU AS "Grubu",OZELLIK AS "özellik",IZLEME AS "ızleme" '+
+    ' FROM STOKLAR S '+
+    ' LEFT OUTER JOIN GENINI StokModel ON StokModel.DEGER = S.MODEL AND StokModel.BOLUM=cast(''-2701''||cast(S.MARKA as varchar(10)) as int)   '+
+    ' Where S.STOKADI ilike ''%<ara>%'' and S.TIPI='+TabStok.FieldByName('TIPI').AsString+'  and S.ID <> '+IntToStr(StokID)+' '+DbSinir(100)
+  else
   sql:=' SELECT '+DbUst(100)+'S.ID,S.KOD as Kod,S.STOKADI as [Stok Adı],TIPI AS [Tip],MARKA AS Marka,'+
   ' StokModel.ANAHTAR AS Model, GRUBU AS Grubu,OZELLIK AS [özellik],IZLEME AS [ızleme] '+
   ' FROM STOKLAR S '+
@@ -1718,7 +1786,15 @@ begin
 end;
 
 procedure TStokWizardDlg.FiyatEkrEnterPage(Sender: TObject;const FromPage: TJvWizardCustomPage);
+var
+  LFiyatAdi: Variant;
 begin
+   if TabStok.State in [dsInsert, dsEdit] then
+   begin
+     TabStok.Post;
+     StokID := TabStok.FieldByName('ID').AsInteger;
+   end;
+
    TabloYenile(TabFiyat,[StokID, ComboSatis.ItemIndex]);
 {   if StokID <> TabFiyat.Params[0].Value then begin
      TabloYenile(TabFiyat,[StokID, ComboSatis.ItemIndex]);
@@ -1732,6 +1808,27 @@ begin
      end;
    end;  }
    cxImageComboBox2PropertiesChange(Self);
+   if (IslemOp = 'E') and (StokID > 0) and TabFiyat.IsEmpty and not (TabFiyat.State in [dsInsert, dsEdit]) then
+   begin
+     if ComboSatis.ItemIndex = 0 then
+     begin
+       if (GridFiyatViewFIYATADIALIS.RepositoryItem.Properties as TcxImageComboBoxProperties).Items.Count = 0 then Exit;
+       LFiyatAdi := (GridFiyatViewFIYATADIALIS.RepositoryItem.Properties as TcxImageComboBoxProperties).Items[0].Value;
+     end
+     else
+     begin
+       if (GridFiyatViewFIYATADI.RepositoryItem.Properties as TcxImageComboBoxProperties).Items.Count = 0 then Exit;
+       LFiyatAdi := (GridFiyatViewFIYATADI.RepositoryItem.Properties as TcxImageComboBoxProperties).Items[0].Value;
+     end;
+
+     TabFiyat.Append;
+     TabFiyat.FieldByName('FIYATADI').Value := LFiyatAdi;
+     TabFiyat.FieldByName('BIRIM').Value := TabStok.FieldByName('ANABIRIM').Value;
+     TabFiyat.FieldByName('FIYAT').Value := -1;
+     TabFiyat.FieldByName('KUR').Value := CariDoviz;
+     TabFiyat.FieldByName('SATIS').Value := ComboSatis.ItemIndex;
+     TabFiyat.FieldByName('KDVDURUM').Value := False;
+   end;
    if Tablo.YetkiVarmi(242118,YetkiTur_Gorme) then
       TabloYenile(TabKampanya, [StokID])
    else begin
@@ -1755,7 +1852,7 @@ begin
   // Geri-alinabilir oturum (D=degistir): iptal(Sontus='I'/X) -> ilk hale don; kaydet(Sontus='K') -> temizle.
   if (IslemOp = 'D') and (FOturumID <> '') then
   begin
-    if Sontus = 'I' then
+    if Sontus =  'I' then
     begin
       if TabStok.State in [dsEdit, dsInsert] then TabStok.Cancel;
       var LDegisti := ULog.OturumYakalandiMi(FOturumID);   // geri-yukleme ONCE (OturumGeriAl temizler)
@@ -1780,12 +1877,23 @@ procedure TStokWizardDlg.FormCreate(Sender: TObject);
    end;}
 begin
   Tablo.WizardTurkcelestir(WizardKontrol);
+  if AktifVeriMotor = vmPG then begin
+    TabStok.UpdateOptions.RequestLive := True;
+    TabStok.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabStok.UpdateOptions.UpdateTableName := 'STOKLAR';
+    TabStok.UpdateOptions.KeyFields := 'ID';
+    TabStok.UpdateOptions.AutoIncFields := 'ID';
+  end;
   Tablo.GridTurkcelestir;
   FKartSnap := TStringList.Create;
   // Stok detay dataset'lerini ust=stok log'una bagla (master-detail).
   TabFiyat.BeforeEdit := StokDetayBeforeEdit;
   TabFiyat.AfterPost  := StokDetayAfterPost;
   TabBarkod.BeforeEdit := StokDetayBeforeEdit;   // TabBarkod'un AfterPost'u kendi handler'inda cagrilir
+  // PG: STOKBARKOD.VARSAYILAN gercek bit (0/1) - global maprule'da HARIC (REHBERAYAR.VARSAYILAN deger
+  //   tutuyor). Bu sorguda .AsBoolean kullanildigi icin (2633/2682 + grid checkbox) sorgu-kapsamli
+  //   smallint->boolean maprule. Open'dan once.
+  PgSorguBoolAlan(TabBarkod, 'VARSAYILAN');
   if Sektor = Sektor_Tekstil then
      BtnBoyut.Caption := 'Renk-Beden'
   else if Sektor = Sektor_Fayans then begin
@@ -1887,6 +1995,8 @@ procedure TStokWizardDlg.FormShow(Sender: TObject);
 Var
   yeniStokID:integer;
 begin
+  FEkAlanOlustu := False;
+  FUTSOlustu := False;
   TekUrunNo := Tablo.GENINI.ReadBoolean(Ops_CheckUrunNoTek, True);
   BtnSecimler.visible := Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest];
   if Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest] then begin
@@ -2022,10 +2132,7 @@ begin
         ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + ')'),
         ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_Stoklar) + ' and GOREVID=' + IntToStr(StokID) + '))') ]);
 
-  Tablo.AlanOlustur(TStokWizardDlg(Self),  -1,DtsStokUser);
   if StokID > 0  then begin
-    TabloYenile(TabFiyat,[TabStok.FieldByName('ID').AsInteger,ComboSatis.ItemIndex]);
-    TabloYenile(TabKampanya,[TabStok.FieldByName('ID').AsInteger]);
     StokKartEkr.Enabled := Cagiran in [0];
     BarkodEkr.Enabled := Cagiran in [0];
     IsOrtagiEkr.Enabled := Cagiran in [0,2];
@@ -2057,9 +2164,6 @@ begin
       SilStokEsdeger.Visible:=False;
     end;
   end;
-  if not DETAY.Active then
-     DetayTablosuAc;
-  TabloYenile(TabStokBoyut,[StokID]);
   //cbIzlemePropertiesEditValueChanged(Self);
   if WizardKontrol.ActivePage <> StokKartEkr then
     WizardKontrol.ActivePage := StokKartEkr;
@@ -2314,10 +2418,16 @@ end;
 
 procedure TStokWizardDlg.PageControlAltChange(Sender: TObject);
 begin
-   if PageControlAlt.ActivePage = TabSheetCevrim then begin //?evrimler
+  if PageControlAlt.ActivePage = TabSheetCevrim then begin //?evrimler
       if DtsStok.State in [dsEdit,dsInsert] then
          TabStok.Post;
       TabloYenile(TabCevrim,[TabStok.FieldByName('ID').AsInteger]);
+   end
+   else if PageControlAlt.ActivePage = TabSheetBoyutlar then begin
+      if DtsStok.State in [dsEdit,dsInsert] then
+         TabStok.Post;
+      if not TabStokBoyut.Active then
+         TabloYenile(TabStokBoyut,[StokID]);
    end
    else if PageControlAlt.ActivePage = TabSheetYDil then begin //Kalite
       if DtsStok.State in [dsEdit,dsInsert] then
@@ -2457,7 +2567,7 @@ end;
 procedure TStokWizardDlg.MenuTurDegisClick(Sender: TObject);
 var ctrls : TGirdiDenetimleri;
     eskiad : Variant;
-    Mesaj : string;
+    Mesaj  : string;
 begin
    eskiad := '';
    ctrls := TGirdiDenetimleri.Create.ComboBox((BGYeni_tur),@eskiad,tablo.ComboboxInit('Select ANAHTAR from GENINI Where DIL='+IntToStr(Dil)+' and BOLUM ='+IntToStr(Ops_StokKart_EsdegerTur)+' ').items); //Anabirim listesi
@@ -2490,7 +2600,7 @@ begin
     //TabStok.Post;   kendisi post ediyor..
     veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from REHBERBILGI where YERI=88 and YER_ID='+TabStok.FieldByName('ID').AsString,[],[]);
     veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI) select YERI,'+TabStok.FieldByName('ID').AsString+',SIRA,ETIKET,BILGI from REHBERBILGI where YERI=88 and YER_ID='+Sonuclar[0],[],[]);
-    TabloYenile(DETAY,[]);
+    DetayTablosuAc;
   end;
   freeandnil(Sonuclar);
 end;
@@ -2498,10 +2608,14 @@ end;
 procedure TStokWizardDlg.DetayTablosuAc;
 begin
   DETAY.Close;
-  if AktifVeriMotor = vmPG then DETAY.SQL.Text := SQL_PG_RehberDetayStok
-  else DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
-  TabloYenile(DETAY, [TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, ComboBolum.Text]);
-  DETAY.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+  if AktifVeriMotor = vmPG then
+    PgStokDetayTempAc(DETAY, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, ComboBolum.Text)
+  else
+  begin
+    DETAY.SQL.Text := StringReplace(SQLDetay.Text, ':SPID', IntToStr(SPID), [rfReplaceAll]);
+    TabloYenile(DETAY, [TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger, ComboBolum.Text]);
+    DETAY.UpdateOptions.UpdateTableName := 'REHBERBILGI';
+  end;
 
   if DETAY.Active then
   begin
@@ -2937,7 +3051,6 @@ begin
 end;
 
 procedure TStokWizardDlg.TabStokKartChange(Sender: TObject);
-var i:integer;
 begin
    if TabStok.State in [dsEdit, dsInsert] then
      TabStok.Post;
@@ -2950,20 +3063,53 @@ begin
        TabloYenile(TabStokMuhasebe, [TabStok.FieldByName('ID').AsInteger]);
     end;
   end else if PageControlUst.ActivePage=EkAlanlarEkr then begin
-    TabloYenile(TabStokUser, [TabStok.FieldByName('ID').AsInteger]);
-    if TabStokUser.IsEmpty then
-      TabStokUser.Append;
-    for I := 0 to EkAlanlarEkr.ControlCount-1 do begin
-      (EkAlanlarEkr.Controls[i] as TcxControl).Refresh;
-      if (EkAlanlarEkr.Controls[i] as TcxControl).ClassName='TcxDBTextEdit' then
-        (EkAlanlarEkr.Controls[i] as TcxDBTextEdit).SetFocus;
-    end;
+    EkAlanlariHazirla;
   end else if PageControlUst.ActivePage=TabSheetUTS then begin
-    TabloYenile(TabStokUser, [TabStok.FieldByName('ID').AsInteger]);
-    if TabStokUser.IsEmpty then
-      TabStokUser.Append;
+    if not FUTSOlustu then
+      UTSBilgileriniHazirla;
   end;
 
+end;
+
+procedure TStokWizardDlg.StokUserHazirla;
+begin
+  if TabStok.State in [dsEdit, dsInsert] then
+    TabStok.Post;
+  DtsStokUser.AutoEdit := True;
+  TabStokUser.UpdateOptions.RequestLive := True;
+  TabStokUser.UpdateOptions.UpdateMode := upWhereKeyOnly;
+  TabStokUser.UpdateOptions.UpdateTableName := 'STOKLAR_USER';
+  TabStokUser.UpdateOptions.KeyFields := 'ID';
+  TabStokUser.UpdateOptions.AutoIncFields := '';
+  if (not TabStokUser.Active) or
+     (TabStokUser.ParamByName('PAR').AsInteger <> TabStok.FieldByName('ID').AsInteger) then
+    TabloYenile(TabStokUser, [TabStok.FieldByName('ID').AsInteger]);
+  if TabStokUser.IsEmpty then
+    TabStokUser.Append
+  else if not (TabStokUser.State in [dsEdit, dsInsert]) then
+    TabStokUser.Edit;
+end;
+
+procedure TStokWizardDlg.EkAlanlariHazirla;
+var
+  I: Integer;
+begin
+  StokUserHazirla;
+  if not FEkAlanOlustu then begin
+    Tablo.AlanOlustur(TStokWizardDlg(Self), -1, DtsStokUser);
+    FEkAlanOlustu := True;
+  end;
+  for I := 0 to EkAlanlarEkr.ControlCount-1 do begin
+    (EkAlanlarEkr.Controls[i] as TcxControl).Refresh;
+    if (EkAlanlarEkr.Controls[i] as TcxControl).ClassName='TcxDBTextEdit' then
+      (EkAlanlarEkr.Controls[i] as TcxDBTextEdit).SetFocus;
+  end;
+end;
+
+procedure TStokWizardDlg.UTSBilgileriniHazirla;
+begin
+  StokUserHazirla;
+  FUTSOlustu := True;
 end;
 
 procedure TStokWizardDlg.TabStokBoyutAfterOpen(DataSet: TDataSet);

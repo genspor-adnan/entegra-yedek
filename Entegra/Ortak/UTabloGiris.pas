@@ -88,7 +88,7 @@ var
 
 
 implementation
-Uses UAnaForm,UFastRap,UGenelAnaSekmeFrame,URaporAraclari,FetaClassExtensions,LocOnFly,PrjConst;
+Uses UAnaForm,UFastRap,UGenelAnaSekmeFrame,URaporAraclari,FetaClassExtensions,LocOnFly,PrjConst,UVeriMotor;
 
 
 
@@ -155,14 +155,21 @@ end;
 
 procedure TTabloGirisDlg.JvTimer1Timer(Sender: TObject);
 var i:Integer;
+    LSQL: string;
 begin
       TFDQuery(GridGirisTV.DataController.DataSource.DataSet).Close;
       if Komut = '' then begin
         TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Text := '';
         for I := 0 to Length(Komutlar) - 1 do
-          TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Add(StringReplace(Komutlar[i], '<ara>',Edit1.Text , [rfReplaceAll]))
-      end else
-        TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Text := StringReplace(Komut, '<ara>',Edit1.Text , [rfReplaceAll]);
+          TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Add(StringReplace(Komutlar[i], '<ara>',Edit1.Text , [rfReplaceAll]));
+        if AktifVeriMotor = vmPG then
+          TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Text := PgSqlCevir(TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Text);
+      end else begin
+        LSQL := StringReplace(Komut, '<ara>',Edit1.Text , [rfReplaceAll]);
+        if AktifVeriMotor = vmPG then
+          LSQL := PgSqlCevir(LSQL);
+        TFDQuery(GridGirisTV.DataController.DataSource.DataSet).SQL.Text := LSQL;
+      end;
       TFDQuery(GridGirisTV.DataController.DataSource.DataSet).Open;
       JvTimer1.Enabled := False;
 end;

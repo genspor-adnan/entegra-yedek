@@ -14,7 +14,10 @@ uses
   dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
   dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxSkinOffice2013White,
   dxSkinSevenClassic, dxSkinSharpPlus, dxSkinTheAsphaltWorld, dxSkinVS2010,
-  dxSkinWhiteprint;
+  dxSkinWhiteprint, cxFilter, dxScrollbarAnnotations, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
 
 type
   TMasrafGelirSecDlg = class(TForm)
@@ -64,7 +67,7 @@ var
 
 
 implementation
-Uses Utablo;
+Uses Utablo, UVeriMotor;
 
 {$R *.dfm}
 
@@ -91,7 +94,7 @@ begin
         TabMasrafListe.SQL.Add(' and M.DURUM=1 and  M.GELIRMI = '+IntToStr(Gelirmi));
 
       if (SubeVarmi)and(ComboSube.EditValue<1) then
-          TabMasrafListe.SQL.Add(' and (M.SUBEID ='+VarToStr(ComboSube.EditValue)+' or M.SUBEID = 0) ');
+           TabMasrafListe.SQL.Add(' and (M.SUBEID ='+VarToStr(ComboSube.EditValue)+' or M.SUBEID = 0) ');
       TabMasrafListe.SQL.Add(s);
       TabMasrafListe.Open;
 end;
@@ -122,7 +125,13 @@ procedure TMasrafGelirSecDlg.FormShow(Sender: TObject);
 var K :Word;
 begin
    if SQLKomut='' then begin
-      SQLKomut := ' select ROOTKOD=REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))), '+
+      // ROOTKOD = KOD'un son '.' oncesi (ust kategori). MSSQL CHARINDEX/LEN + alias= -> PG strpos
+      //   (arg TERS) / LENGTH + AS. Sorgu dogrudan .Open (routed DEGIL) -> motor-dalli yaz.
+      if AktifVeriMotor = vmPG then
+        SQLKomut := ' select REVERSE(SUBSTRING(REVERSE(M.KOD),strpos(REVERSE(M.KOD),''.'')+1,LENGTH(M.KOD)-(strpos(REVERSE(M.KOD),''.'')-1))) AS ROOTKOD, '
+      else
+        SQLKomut := ' select ROOTKOD=REVERSE( SUBSTRING(REVERSE(M.KOD),CHARINDEX(''.'',REVERSE(M.KOD),1)+1,LEN(M.KOD)-(CHARINDEX(''.'',REVERSE(M.KOD),1)-1))), ';
+      SQLKomut := SQLKomut +
                  ' M.ID,M.KOD,M.AD,M.DURUM,M.TUR,M.KDV,F.FIYAT,F.KUR,M.SUBEID '+
                  ' from MASRAFGELIR M left outer join FIYATLAR F on M.ID=F.HIZMETID and F.FIYATADI=1 WHERE 1=1 ';
    end;

@@ -560,6 +560,10 @@ begin
    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
    Tablo.TabMusteri.Open;
    AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
+   // Kullanici ek alanlari (_USER) rapora: servis karti + hareket satirlari.
+   Tablo.UserAlanYazdirmaEkle(AFastReport, 'SERVIS', TabServis.Fields[0].AsInteger);
+   Tablo.UserAlanYazdirmaEkle(AFastReport, 'SERVISHAREKET', 0,
+     'select ID from SERVISHAREKET where SERVISID=' + TabServis.Fields[0].AsString);
 end;
 
 procedure TServisWizardDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -605,6 +609,10 @@ begin
     TabDetay.CachedUpdates := True;
     TabDetay.UpdateOptions.UpdateTableName := '';
     TabDetay.UpdateOptions.KeyFields := '';
+    if TabDetay.FindField('BILGI') <> nil then begin
+      TabDetay.FieldByName('BILGI').ReadOnly := False;
+      TabDetay.FieldByName('BILGI').ProviderFlags := [];
+    end;
     if TabDetay.FindField('ORJINAL') <> nil then
       TabDetay.FieldByName('ORJINAL').ReadOnly := True;
     if TabDetay.FindField('GIRIS') <> nil then
@@ -782,8 +790,8 @@ begin
   TabloGirisDlg.ShowModal;
   if (TabloGirisDlg.ModalResult=mrOK)and(Trim(TabGenel.FieldByName('COZUM').AsString)='') then begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update SERVISBILGI set COZUM=&czm where ID=&id ',['&czm','&id'],
-        [ TabloGirisDlg.Query1.fields[1].AsString , TabGenel.FieldByName('ID').AsInteger]);
-     TabloYenile(TabGenel,[ServisID]);
+         [ TabloGirisDlg.Query1.fields[1].AsString , TabGenel.FieldByName('ID').AsInteger]);
+     TabloYenile(TabGenel,  [ServisID]);
   end;
   TabloGirisDlg.Destroy;
 
@@ -975,6 +983,9 @@ var
  component: TComponent;
 begin
  if PageControl1.ActivePage = EkAlanlarEkr then begin
+   if TabServis.State in [dsEdit, dsInsert] then
+     TabServis.Post;
+   Tablo.AlanOlustur(TServisWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
    for i := 0 to TWinControl(EkAlanlarEkr).ControlCount-1 do
      if (FindComponent(TWinControl(EkAlanlarEkr).Controls[i].Name).ClassType <> TcxLabel) and (FindComponent(TWinControl(EkAlanlarEkr).Controls[i].Name).ClassType <> TcxDBLabel) then
        TcxControl(TWinControl(EkAlanlarEkr).Controls[i]).SetFocus;
@@ -1444,6 +1455,8 @@ begin
 
 end;
 
+function ServisGecmisServislerSqlPG: string; forward;
+
 procedure TServisWizardDlg.FormShow(Sender: TObject);
 var I : smallint;
 begin
@@ -1508,6 +1521,8 @@ begin
              LabelKodClick(Self);
           ServisID:=veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'exec sp_prg_Servis_Yeni '+IntToStr(RehberID)+','+IntToStr(SubeID)+','+Kullanan+', '''', '''+formatdatetime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+'''  ',[],[],true);
           TabloYenile(TabServis,[ServisID]);
+          if EkAlanlarEkr.TabVisible then
+            Tablo.AlanOlustur(TServisWizardDlg(Self), -1, Tablo.UserDataSourceHazirla(TServisWizardDlg(Self), DtsServis, 'SERVIS_USER'));
           OncekiSorumlu:=0;
         end;
     'D': begin
@@ -1527,7 +1542,7 @@ begin
      RehberId := TabServis.FieldByName('REHBERID').AsInteger;
   FirmaBilgileri;
   if TabServis.FieldByName('REHBERID').AsInteger=0 then
-     LabelKod.Caption := 'Firma Seç..';
+     LabelKod.Caption  := 'Firma Seç..';
 //  LabelFirmaSec.Visible :=TabServis.FieldByName('REHBERID').AsInteger=0;
   LogBelge.Clear;
   LogBelge2.Clear;
@@ -1535,6 +1550,8 @@ begin
   BelgeDoldur(TabServisBelge,LogBelge2,1);
 //  Tablo.GridAyarRestore('ServisNotlar',GridNotlarView );
   Tablo.GridAyarRestore('ServisBelge',cxGridBelgelerDBTableView1 );
+  if AktifVeriMotor = vmPG then
+    TabGecmisServisler.SQL.Text := ServisGecmisServislerSqlPG;
   Tabloyenile(TabGecmisServisler, [TabServis.FieldByName('REHBERID').AsInteger,TabServis.FieldByName('REHBERID').AsInteger]);
   ServisPageControlChange(Self);
   if IslemOp='E' then begin
@@ -1558,6 +1575,13 @@ begin
 //     PageControl1.ActivePage := SheetHareketlerUst;
   ServisPageControl.ActivePageIndex := 0;
   ServisPageControlChange(self);
+  // Acilista Teslim sekmesi aktif olsun: AlanOlustur (SERVIS_USER) ek-alan kontrollerini
+  //   EkAlanlarEkr'e kurunca o sekme kendiliginden aktiflesiyordu -> Teslim'e geri al.
+  //   Ek Alan'a tiklaninca PageControl1Change zaten AlanOlustur ile bilgileri yukler.
+  if SheetTeslim.TabVisible then
+    PageControl1.ActivePage := SheetTeslim
+  else
+    PageControl1.ActivePageIndex := 0;
 
   // Servis hareket satirlari log baseline: yeni (E) -> bos snapshot (tum satirlar ekleme);
   // duzenleme (D) -> mevcut hareket satirlari snapshot'a alinir (Finish'te diff).
@@ -1604,12 +1628,91 @@ begin
    Tablo.EditButtonaPROJEIDGonder(BeditProje, TabServis, AButtonIndex, ProjeSecimi, TabServis.FieldByName('REHBERID').AsInteger, ProjeFirsatSec);
 end;
 
+function ServisBelgeSqlPG: string;
+begin
+  Result :=
+    'select 80 as TUR, T.ID, T.TARIH, T.TEKLIFNO as BELGENO, T.DOVIZ_TUTARI as TUTAR, T.DOVIZ_KURU as KUR, T.ACIKLAMA,' + sLineBreak +
+    '  (select R.FIRMA from REHBER R where R.ID=T.REHBERID) as FIRMA,' + sLineBreak +
+    '  '''' as KAYNAK,' + sLineBreak +
+    '  (case when 412 in (select YERI from SIPARISDETAY where YERID in (select ID from TEKLIFDETAY where TEKLIFID=T.ID)) then ''Verilen Sipariş '' else '''' end) ||' + sLineBreak +
+    '  (case when 413 in (select YERI from SIPARISDETAY where YERID in (select ID from TEKLIFDETAY where TEKLIFID=T.ID)) then ''Alınan Sipariş'' else '''' end) as HEDEF' + sLineBreak +
+    'from TEKLIF T where T.SERVISID=:PSerID' + sLineBreak +
+    'union all' + sLineBreak +
+    'select S.TUR, S.ID, S.TARIH, S.SIPARISNO as BELGENO, S.SIPARIS_TUTARI as TUTAR, S.KUR, S.ACIKLAMA,' + sLineBreak +
+    '  (select R.FIRMA from REHBER R where R.ID=S.REHBERID) as FIRMA,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when (S.TUR=9) and (412 in (select YERI from SIPARISDETAY where SIPARISID=S.ID)) then ''Teklifden''' + sLineBreak +
+    '    when (S.TUR=19) and (413 in (select YERI from SIPARISDETAY where SIPARISID=S.ID)) then ''Teklifden''' + sLineBreak +
+    '    else '''' end as KAYNAK,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when (S.TUR=9) and (407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''Faturaya''' + sLineBreak +
+    '    when (S.TUR=9) and (406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''İrsaliyeye''' + sLineBreak +
+    '    when (S.TUR=19) and (410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''Faturaya''' + sLineBreak +
+    '    when (S.TUR=19) and (409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''İrsaliyeye''' + sLineBreak +
+    '    when (S.TUR=19) and (415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''Üretim Fişine''' + sLineBreak +
+    '    when (S.TUR=19) and (420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=S.ID))) then ''Üretim Fişine''' + sLineBreak +
+    '    else '''' end as HEDEF' + sLineBreak +
+    'from SIPARIS S where S.SERVISID=:PSerID' + sLineBreak +
+    'union all' + sLineBreak +
+    'select F.TUR, F.ID, F.TARIH, F.FATURANO as BELGENO, F.FATURA_TUTARI as TUTAR, F.KUR, F.ACIKLAMA,' + sLineBreak +
+    '  (select R.FIRMA from REHBER R where R.ID=F.REHBERID) as FIRMA,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when (F.TUR=10) and (406 in (select YERI from FATURA where FATBASID=F.ID)) then ''Siparişten''' + sLineBreak +
+    '    when (F.TUR=14) and (409 in (select YERI from FATURA where FATBASID=F.ID)) then ''Siparişten''' + sLineBreak +
+    '    when (F.TUR=11) and (407 in (select YERI from FATURA where FATBASID=F.ID)) then ''Siparişten''' + sLineBreak +
+    '    when (F.TUR=11) and (408 in (select YERI from FATURA where FATBASID=F.ID)) then ''İrsaliyeden''' + sLineBreak +
+    '    when (F.TUR=15) and (410 in (select YERI from FATURA where FATBASID=F.ID)) then ''Siparişten''' + sLineBreak +
+    '    when (F.TUR=15) and (411 in (select YERI from FATURA where FATBASID=F.ID)) then ''İrsaliyeden''' + sLineBreak +
+    '    when (F.TUR=11) and (461 in (select YERI from FATURA where FATBASID=F.ID)) then ''Konsinyeden''' + sLineBreak +
+    '    when (F.TUR=15) and (462 in (select YERI from FATURA where FATBASID=F.ID)) then ''Konsinyeden''' + sLineBreak +
+    '    when (F.TUR=15) and (426 in (select YERI from FATURA where FATBASID=F.ID)) then ''Üretimden''' + sLineBreak +
+    '    when (F.TUR=14) and (425 in (select YERI from FATURA where FATBASID=F.ID)) then ''Üretimden''' + sLineBreak +
+    '    else '''' end as KAYNAK,' + sLineBreak +
+    '  case' + sLineBreak +
+    '    when (F.TUR=10) and (408 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''' + sLineBreak +
+    '    when (F.TUR=14) and (411 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''' + sLineBreak +
+    '    when (F.TUR=109) and (461 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''' + sLineBreak +
+    '    when (F.TUR=119) and (462 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''' + sLineBreak +
+    '    else '''' end as HEDEF' + sLineBreak +
+    'from FATBASLIK F where F.SERVISID=:PSerID';
+end;
+
+function ServisGecmisServislerSqlPG: string;
+begin
+  Result :=
+    '/*PGX*/SELECT * FROM (' + sLineBreak +
+    'select distinct' + sLineBreak +
+    '  (coalesce(S1.EKIPMANID,0)::text || coalesce(S1.SERINO,''''))::varchar(15) as USTID,' + sLineBreak +
+    '  (coalesce(S1.EKIPMANID,0)::text || coalesce(S1.SERINO,''''))::varchar(15) as ALTID,' + sLineBreak +
+    '  0 as ID,' + sLineBreak +
+    '  E.AD::varchar(100) as TARIH,' + sLineBreak +
+    '  coalesce(S1.SERINO,'''')::varchar(100) as DURUM' + sLineBreak +
+    'from SERVIS S1 inner join EKIPMANLAR E on S1.EKIPMANID=E.ID' + sLineBreak +
+    'where S1.REHBERID=:pRehID1' + sLineBreak +
+    'union all' + sLineBreak +
+    'select' + sLineBreak +
+    '  (coalesce(S2.EKIPMANID,0)::text || coalesce(S2.SERINO,''''))::varchar(15) as USTID,' + sLineBreak +
+    '  (coalesce(S2.EKIPMANID,0)::text || coalesce(S2.SERINO,'''') || ''.X.'' || coalesce(S2.SERINO,''0''))::varchar(15) as ALTID,' + sLineBreak +
+    '  S2.ID,' + sLineBreak +
+    '  to_char(S2.TARIH,''DD.MM.YYYY'')::varchar(100) as TARIH,' + sLineBreak +
+    '  (select ANAHTAR from GENINI where BOLUM=-3007 and DEGER=S2.DURUM and DIL=-1)::varchar(100) as DURUM' + sLineBreak +
+    'from SERVIS S2' + sLineBreak +
+    'where S2.REHBERID=:pRehID2' + sLineBreak +
+    ') AS X' + sLineBreak +
+    'order by USTID, ALTID, TARIH desc';
+end;
+
 procedure TServisWizardDlg.BelgeDoldur(Table1:TFDQuery;Belge:TStringList;Page:integer);
 var
   i:integer;
 begin
   Table1.Close;
-  if AktifVeriMotor = vmPG then Table1.SQL.Text := PgSqlCevir(Table1.SQL.Text);
+  if AktifVeriMotor = vmPG then begin
+    if Table1 = TabServisBelge then
+      Table1.SQL.Text := ServisBelgeSqlPG
+    else
+      Table1.SQL.Text := PgSqlCevir(Table1.SQL.Text);
+  end;
 
   if Table1.Params.FindParam('PSerID') = nil then begin
     with Table1.Params.Add do begin
@@ -2300,6 +2403,8 @@ end;
 procedure TServisWizardDlg.TabServisBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: servis/detay post -> yakala
+  if not TarihKontrol(TabServis.FieldByName('TARIH').AsDateTime, 'Servis Tarihi') then
+    Abort;
   EkleyenDegistiren(TabServis);
 end;
 
@@ -2512,6 +2617,9 @@ begin
    end;
    if ServisID <= 0 then
       ServisID := TabServis.FieldByName('ID').AsInteger;
+   Tablo.UserDataSourceKaydet(TServisWizardDlg(Self), 'SERVIS_USER');
+   if (IslemOp='E') or (IslemOp='K') then
+     Tablo.AramaKaydet(MODUL_Servis, ServisID);
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
      if islemOp = 'D' then

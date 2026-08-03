@@ -3244,9 +3244,9 @@ object TeklifWizardDlg: TTeklifWizardDlg
         'RIM=SC.BIRIM1 and SC.BIRIM2=(select DONUSUMTURU from TEKLIF TK w' +
         'here TK.ID=T.TEKLIFID) ),0.0),'
       
-        'EKIPMAN=(Select E.AD+'#39'('#39'+ER.SERINO+'#39')'#39' from EKIPMANREHBER ER inn' +
-        'er join EKIPMANLAR E on E.ID=ER.EKIPMANID  Where ER.ID=T.EKIPMAN' +
-        'ID)'
+        'EKIPMAN=CAST((Select E.AD+'#39'('#39'+ER.SERINO+'#39')'#39' from EKIPMANREHBER E' +
+        'R inner join EKIPMANLAR E on E.ID=ER.EKIPMANID  Where ER.ID=T.EK' +
+        'IPMANID) AS varchar(152))'
       'from TEKLIFDETAY T '
       'Where '
       'TEKLIFID = :Par1'
@@ -3553,7 +3553,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
   end
   object PopupMenuYaz: TPopupMenu
     Left = 79
-    Top = 116
+    Top = 84
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0

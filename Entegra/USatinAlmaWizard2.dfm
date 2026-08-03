@@ -49,17 +49,6 @@ object SatinAlmaWizard2: TSatinAlmaWizard2
       TabOrder = 1
       OnClick = FaturaTusClick
     end
-    object DokumanTus: TcxButton
-      Tag = 3
-      Left = 0
-      Top = 167
-      Width = 80
-      Height = 29
-      Caption = 'Yorum/Medya'
-      Enabled = False
-      TabOrder = 2
-      OnClick = FaturaTusClick
-    end
   end
   object WizardKontrol: TJvWizard
     Left = 86

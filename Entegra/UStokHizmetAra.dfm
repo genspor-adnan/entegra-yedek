@@ -4,7 +4,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   BorderIcons = [biSystemMenu]
   Caption = #220'r'#252'n Arama'
   ClientHeight = 588
-  ClientWidth = 1111
+  ClientWidth = 1104
   Color = clBtnFace
   Font.Charset = TURKISH_CHARSET
   Font.Color = clWindowText
@@ -13,7 +13,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   Font.Style = []
   KeyPreview = True
   Position = poMainFormCenter
-  OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -21,7 +20,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object PanelDetayliArama: TPanel
     Left = 0
     Top = 40
-    Width = 1111
+    Width = 1104
     Height = 41
     Align = alTop
     TabOrder = 1
@@ -111,7 +110,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Transparent = True
     end
     object Panel6: TPanel
-      Left = 1108
+      Left = 1101
       Top = 1
       Width = 2
       Height = 39
@@ -175,7 +174,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 1111
+    Width = 1104
     Height = 40
     Align = alTop
     TabOrder = 0
@@ -222,7 +221,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Transparent = True
     end
     object BtnKapat: TJvNavPanelButton
-      Left = 1016
+      Left = 1009
       Top = 1
       Width = 94
       Height = 38
@@ -256,7 +255,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       ExplicitLeft = 1048
     end
     object BtnSec: TJvNavPanelButton
-      Left = 922
+      Left = 915
       Top = 1
       Width = 94
       Height = 38
@@ -375,7 +374,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Width = 128
     end
     object Panel3: TPanel
-      Left = 920
+      Left = 913
       Top = 1
       Width = 2
       Height = 38
@@ -384,8 +383,8 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       TabOrder = 0
     end
     object LabelDetayliArama: TcxLabel
-      Left = 844
-      Top = 17
+      Left = 108
+      Top = 19
       Cursor = crHandPoint
       Caption = 'Detayl'#305' Arama...'
       ParentColor = False
@@ -419,18 +418,29 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       TabOrder = 6
       Width = 100
     end
+    object LabelOncekiAlimSatim: TcxLabel
+      Left = 807
+      Top = 17
+      Cursor = crHandPoint
+      Caption = #214'nceki Al'#305'm/Sat'#305'mlar'
+      ParentColor = False
+      Style.Color = clBtnFace
+      Style.TextColor = clNavy
+      Transparent = True
+      OnClick = LabelOncekiAlimSatimClick
+    end
   end
   object PanelGrid: TPanel
     Left = 0
     Top = 81
-    Width = 1111
+    Width = 1104
     Height = 507
     Align = alClient
     TabOrder = 2
     object PageControl1: TcxPageControl
       Left = 1
       Top = 1
-      Width = 724
+      Width = 717
       Height = 505
       Align = alClient
       TabOrder = 0
@@ -441,7 +451,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       OnPageChanging = PageControl1PageChanging
       ClientRectBottom = 501
       ClientRectLeft = 4
-      ClientRectRight = 720
+      ClientRectRight = 713
       ClientRectTop = 25
       object SheetStok: TcxTabSheet
         Tag = 1
@@ -524,7 +534,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         object GridStok: TcxGrid
           Left = 187
           Top = 0
-          Width = 529
+          Width = 522
           Height = 476
           Align = alClient
           TabOrder = 1
@@ -675,12 +685,12 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         ImageIndex = 4
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 0
+        ExplicitWidth = 716
         ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
-          Width = 716
+          Width = 709
           Height = 476
           Align = alClient
           Bands = <
@@ -701,6 +711,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
           ScrollbarAnnotations.CustomAnnotations = <>
           TabOrder = 0
           OnDblClick = cxDBTreeList1DblClick
+          ExplicitWidth = 716
           object cxDBTreeList1cxDBTreeListColumnID: TcxDBTreeListColumn
             Visible = False
             Caption.Glyph.SourceDPI = 96
@@ -906,18 +917,19 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         ImageIndex = 4
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 0
+        ExplicitWidth = 716
         ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0
-          Width = 716
+          Width = 709
           Height = 476
           Align = alClient
           TabOrder = 0
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
+          ExplicitWidth = 716
           object GridDagitimView: TcxGridDBTableView
             OnDblClick = BtnSecClick
             Navigator.Buttons.CustomButtons = <>
@@ -1034,7 +1046,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Transparent = True
     end
     object PanelSag: TPanel
-      Left = 733
+      Left = 726
       Top = 1
       Width = 377
       Height = 505
@@ -1498,7 +1510,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       end
     end
     object cxSplitter1: TcxSplitter
-      Left = 725
+      Left = 718
       Top = 1
       Width = 8
       Height = 505

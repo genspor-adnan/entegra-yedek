@@ -75,6 +75,7 @@ Key patterns to honor without re-deriving:
 - **Event bus:** Cross-module notification goes through `Ortak/UMultiCastEvent.pas`, not direct form references.
 - **Wizards:** Multi-step business flows use the `JvWizard`-based pattern (`UFaturaWizard`, `UStokWizard`, `UProjeWizard`...).
 - **ADO → FireDAC:** Legacy code uses `TADOQuery`/`TADOConnection`; new/modernized code uses `TFDQuery`/`TFDConnection`. The Python helpers in the parent folder (`convert_dfm.py`, `fix_dfm.py`, `fix_binary_dfm.py`) exist to assist this conversion on `.dfm` form files.
+- **Server-side list SPs:** grid/list screens increasingly call `sp_Prog_<Modül>_Liste_Json2` (MSSQL, `GenUpdate/`) / `fn_prog_<modül>_liste_json2` (PG, `pg/schema/`) instead of embedding SQL in the DFM. `KULLANICI_ARAMA.MODUL` must be the real MODULID (not the tab number) — collisions silently cross-wire saved searches between lists.
 - **ISLEMLOG audit logging:** Card/detail changes are audited into `GENDEPO.ISLEMLOG` via the central helpers in `Ortak/ULog.pas` (`LogKartEkle` / `LogKartDegisti` / `LogKartSil`, lower-level `LogKayitEkle` / `LogDiffKaydet` / `LogDetaylariSil`). Non-obvious rules: the **insert** log is written once when the form/wizard closes (guarded by an `FEkleLogland` flag), *not* in `AfterPost` (that produces duplicates); **delete** logging must run *before* the SQL `DELETE`; on wizard finish, `Cancel` the card dataset if it isn't `Modified` instead of posting (AutoEdit otherwise logs an empty "change"). Follow the existing pattern in an already-logged module when adding logging to a new one.
 
 ## PostgreSQL migration (dual-engine discipline)
@@ -85,6 +86,30 @@ An in-progress effort ports the app from SQL Server to PostgreSQL. It is **isola
 - **Prefer Pascal over SQL** for engine-divergent logic (e.g. `IncYear` instead of `DATEADD`), and portable ANSI (`AS`, `CAST`) in the SQL you do write. For genuine dialect gaps use the central `PgSqlCevir` (getdate/isnull) plus the per-call **seam helper** pattern (top/date) rather than duplicating queries.
 - **Known dialect traps:** MSSQL `bit` maps to PG `smallint` (not `boolean`) — otherwise `= 1`/`= 0` comparisons break en masse. `TOP 1 <col>` static ports become `MAX(CAST(col AS int))` on bit columns. Static `DECLARE`/`SET @var` in DFM SQL is inlined via `PgDeclareCevir`. Large/gnarly queries are *not* hand-rewritten to be portable — keep an MSSQL-original TVF and a PG-native TVF, call once from the app, and compare.
 - **No test suite → differential testing is the safety net:** run the same input on both engines and compare tables with `pg/tools/db_diff.ps1` (seed a PG copy from MSSQL with `pg/tools/seed_from_mssql.ps1`). PG string columns are deterministic (case-sensitive) collation in the pilot; `GLogins`/license-hash gate is disabled in the PG pilot and will be redesigned for real cutover.
+
+### PG dev environment (local)
+
+Docker Postgres 14 (`gentegre-pg`, `localhost:5433`, db `gentegre`, `postgres`/`FETAGEN`) plus Adminer on `localhost:8080`. The app's dev target is this local container, not the cloud host (`HETZNER_PG_KURULUM.md` covers the cloud/"ekspert" instance).
+
+```powershell
+Get-Content pg\schema\NN_x.sql | docker exec -i -e PGPASSWORD=FETAGEN gentegre-pg psql -U postgres -d gentegre
+powershell -File pg\tools\seed_from_mssql.ps1 -Table DEPOLAR      # MSSQL -> PG same data
+powershell -File pg\tools\db_diff.ps1 -Table DEPOLAR -Keys DEPOADI # compare engines
+```
+
+`pg/schema/` is numbered, apply-in-order SQL (`NN_fn_*.sql`) — ported functions/TVFs live here, one file per object. `pg/tools/` also has `schema_port*.ps1`, `seed_bulk.ps1`, `fix_pk_names.ps1`, and `resync_sequences.sql` (run after any MSSQL→PG seed, otherwise inserts fail with `duplicate key pk_…` because sequences lag the table max).
+
+## Database schema changes
+
+DB objects are **not** migrated by the build. `GenUpdate/` holds:
+
+- `GenDepoKur1..9.sql` + `sql_ayaradi_doldur.sql` — one-time GENDEPO install.
+- `GenDepoUpdateN.sql` — incremental updates (N currently up to 60). **New DB changes go into a new numbered file**, never by editing an already-shipped one.
+- `sp_Prog_*.sql` / `sp_Grnt_*.sql` / `tbl_*.sql` — deployable stored-procedure and table definitions.
+
+Customers receive updates through `UVersiyonGuncelle.pas`, which pulls command rows from the GenUpdate web service and runs those newer than `GENINI` section `Ops_GenelOpsiyon_VersiyonNo`. Each command is engine-tagged: `#pg` / `#PG` anywhere in its `ACIKLAMA` marks it a **PostgreSQL** command; untagged means MSSQL. Only commands matching the active engine run — the others are skipped (and logged) while the version number still advances, so a PG-only change must be tagged or it will execute against MSSQL. Mind the batch order inside a script: inserts that copy data must precede the `DROP` of their source.
+
+Deploying Turkish-containing SQL with `sqlcmd` requires `-f 65001` (a UTF-8 BOM alone is not enough), and `sqlcmd -u` mangles Turkish when *reading* definitions back — verify with `NCHAR` literals instead.
 
 ## Tooling in this folder
 

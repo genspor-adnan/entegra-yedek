@@ -1941,6 +1941,9 @@ begin
     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
   end;
   AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
+  // Kullanici ek alanlari (_USER) rapora (cari karti).
+  if REHBER.Active and (not REHBER.IsEmpty) then
+    Tablo.UserAlanYazdirmaEkle(AFastReport, 'REHBER', REHBER.FieldByName('ID').AsInteger);
 end;
 
 procedure TRehberAraDlg.BankaDuzenleTusClick(Sender: TObject);
@@ -3963,6 +3966,30 @@ begin
   //  GridTeklifView.ApplyBestFit();
   end else if PageControlSekme.ActivePage=TabyorumMedya then begin
         Tabloyenile(TabYorum,[TabloNo, REHBER.FieldByName('ID').AsInteger]);
+        if AktifVeriMotor = vmPG then
+        begin
+          TabYorum2.Close;
+          TabYorum2.SQL.Text :=
+            '/*PGX*/ '+
+            'select GY.ID,GY.GOREVID,GY.EKLEMETARIHI,GY.EKLEYEN, '+
+            '(select ANAHTAR from GENINI where BOLUM=-11110 and DEGER=GY.TUR limit 1) as "Modül", '+
+            'to_char(GY.EKLEMETARIHI,''DD Mon YYYY HH24:MI'') as TARIH, R.FIRMA as YAZAN, GY.YORUM, '+
+            'case when position(''.'' in reverse(coalesce(D.AD,'''')))>0 then reverse(left(reverse(D.AD), position(''.'' in reverse(D.AD)))) else '''' end as ATAC, '+
+            'D.ID as DOKUMANID, D.AD as DOKUMANAD '+
+            'from GOREVYORUM GY '+
+            'left outer join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID '+
+            'left outer join REHBER R on R.ID=GY.EKLEYEN '+
+            'where (:YerID=:YerID) and ('+
+            '(GY.TUR in (28,29,104,105,106,107,209,214,219) and GOREVID in (select ID from FATBASLIK where REHBERID=:PRID)) '+
+            'or (GY.TUR=97 and GOREVID in (select ID from TEKLIF where REHBERID=:PRID)) '+
+            'or (GY.TUR=47 and GOREVID in (select ID from KREDILER where REHBERID=:PRID)) '+
+            'or (GY.TUR in (15,315,316) and GOREVID in (select ID from CEKLER where REHBERID=:PRID)) '+
+            'or (GY.TUR=33 and GOREVID in (select ID from GOREVLER where REHBERID=:PRID)) '+
+            'or (GY.TUR=70 and GOREVID in (select ID from PROJELER where REHBERID=:PRID)) '+
+            'or (GY.TUR=83 and GOREVID in (select ID from SERVIS where REHBERID=:PRID)) '+
+            'or (GY.TUR in (91,92) and GOREVID in (select ID from SIPARIS where REHBERID=:PRID))) '+
+            'order by GY.GOREVID desc';
+        end;
         Tabloyenile(TabYorum2,[TabloNo,REHBER.FieldByName('ID').AsInteger]);
   end else if PageControlSekme.ActivePage=TabSheetYaslandirma then begin
     TabloYenile(TabYaslandirma,[REHBER.FieldByName('ID').AsInteger, FormatDateTime('yyyy-mm-dd hh:nn', Tablo.GENINI.BugunTrhSaat), REHBER.FieldByName('KUR').AsString]); //,Tablo.GENINI.BugunTrh+1

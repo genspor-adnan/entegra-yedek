@@ -27,7 +27,7 @@ type
 
 implementation
 
-uses ULog;
+uses ULog, UVeriMotor;
 
 type
   // "Kopyala" butonu icin yardimci: secili (veya odakli) satir(lar)i
@@ -166,18 +166,18 @@ begin
       'SELECT KAYNAK, TARIH, TIPI, MESAJ, HTTPKODU, HATAKODU, SERVISKODU ' +
       'FROM (' +
       '  SELECT ' +
-      '    KAYNAK = CAST(N''Mesaj'' AS NVARCHAR(20)), ' +
-      '    TARIH  = M.EKLEMETARIHI, ' +
-      '    TIPI   = CAST(CASE M.MESAJTIPI ' +
+      '    CAST(N''Mesaj'' AS NVARCHAR(20)) AS KAYNAK, ' +
+      '    M.EKLEMETARIHI AS TARIH, ' +
+      '    CAST(CASE M.MESAJTIPI ' +
       '              WHEN 1 THEN N''Bilgi'' ' +
       '              WHEN 2 THEN N''Yanit'' ' +
       '              WHEN 3 THEN N''Uyari'' ' +
       '              WHEN 9 THEN N''Hata''  ' +
-      '              ELSE CAST(M.MESAJTIPI AS NVARCHAR(10)) END AS NVARCHAR(20)), ' +
-      '    MESAJ  = CAST(ISNULL(M.MESAJ, N'''') AS NVARCHAR(MAX)), ' +
-      '    HTTPKODU = CAST(M.HTTPKODU AS NVARCHAR(10)), ' +
-      '    HATAKODU = CAST(M.HATAKODU AS NVARCHAR(50)), ' +
-      '    SERVISKODU = CAST(M.SERVISKODU AS NVARCHAR(50)) ' +
+      '              ELSE CAST(M.MESAJTIPI AS NVARCHAR(10)) END AS NVARCHAR(20)) AS TIPI, ' +
+      '    CAST(ISNULL(M.MESAJ, N'''') AS NVARCHAR(MAX)) AS MESAJ, ' +
+      '    CAST(M.HTTPKODU AS NVARCHAR(10)) AS HTTPKODU, ' +
+      '    CAST(M.HATAKODU AS NVARCHAR(50)) AS HATAKODU, ' +
+      '    CAST(M.SERVISKODU AS NVARCHAR(50)) AS SERVISKODU ' +
       '  FROM ' + DepoTablo('EBELGEMESAJ') + ' M ' +
       '    INNER JOIN ' + DepoTablo('EBELGE') + ' E ON E.ID = M.EBELGEID ' +
       '  WHERE E.FATBASLIKID = :FID1 ' +
@@ -199,6 +199,8 @@ begin
       '  WHERE E.FATBASLIKID = :FID2 ' +
       ') T ' +
       'ORDER BY TARIH DESC, KAYNAK';
+    if AktifVeriMotor = vmPG then
+      LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
     LQ.ParamByName('FID1').AsInteger := AFatBaslikID;
     LQ.ParamByName('FID2').AsInteger := AFatBaslikID;
 

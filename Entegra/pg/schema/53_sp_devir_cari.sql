@@ -1,0 +1,99 @@
+-- ============================================================================
+-- fn_prg_devir_cari (PG portu, MUTASYON: INSERT INTO KASA cari devri)
+-- MSSQL: Sp_Prg_Devir_Cari (@BasTar,@AktarilacakYil,@Kur,@IslemKur,@DevirleriAl)
+-- Kaynak 4-parca union: KASA + CEKLER/CEKHAREKET + SENETLER + FATBASLIK, grup REHBERID,KUR,SUBEID.
+-- DOVIZ_TUTARI: KUR<>@Kur ise DOVIZ tablosundan en-yakin-saat (@IslemKur ALIS/SATIS/EFALIS/EFSATIS) kuru ile carp.
+-- Acilis (yil basi) + Kapanis (onceki yil sonu). Kapanista FATBASLIK'ta TUR filtresi YOK (DURUM default 1).
+-- RETURNS integer. Yalniz yil-sonu kapanista UYilSonuDevirIslemleri tetikler. NOT: birebir; canli veriyle dogrula.
+-- ============================================================================
+DROP FUNCTION IF EXISTS fn_prg_devir_cari(timestamp, integer, varchar, varchar, integer);
+CREATE OR REPLACE FUNCTION fn_prg_devir_cari(p_bastar timestamp, p_yil integer, p_kur varchar, p_islemkur varchar, p_devirlerial integer)
+RETURNS integer LANGUAGE plpgsql AS $$
+DECLARE v_yb timestamp := (p_yil::text||'-01-01 00:00:00')::timestamp;
+        v_ys timestamp := ((p_yil-1)::text||'-12-31 23:59:59')::timestamp;
+        v_ac varchar := p_yil::text||' Yılı Açılış Devri';
+        v_ka varchar := (p_yil-1)::text||' Yılı Kapanış Devri';
+BEGIN
+  -- ===== ACILIS =====
+  INSERT INTO KASA(TUR,PLANTARIHI,ISLEMTARIHI,REHBERID,BORC,ALACAK,KUR,HESAPTURU,ACIKLAMA,SUBEID,DOVIZ_TUTARI,DOVIZ_KURU)
+  SELECT 2, v_yb, v_yb, REHBERID,
+    (CASE WHEN SUM(BORC-ALACAK)>0 THEN SUM(BORC-ALACAK) ELSE 0 END),
+    (CASE WHEN SUM(ALACAK-BORC)>0 THEN SUM(ALACAK-BORC) ELSE 0 END),
+    coalesce(KUR,p_kur), '', v_ac, SUBEID,
+    (CASE WHEN SUM(BORC-ALACAK)>0 THEN SUM(BORC-ALACAK) ELSE SUM(ALACAK-BORC) END) *
+      (CASE WHEN coalesce(KUR,p_kur)=p_kur THEN 1.0
+            ELSE coalesce((SELECT (CASE WHEN p_islemkur='ALIS' THEN coalesce(D.ALIS,0) WHEN p_islemkur='SATIS' THEN coalesce(D.SATIS,0)
+                                        WHEN p_islemkur='EFALIS' THEN coalesce(D.EFALIS,0) WHEN p_islemkur='EFSATIS' THEN coalesce(D.EFSATIS,0) END)
+                          FROM DOVIZ D WHERE D.CINSI=KUR ORDER BY abs(extract(epoch from (v_yb - D.TARIH))) LIMIT 1),0) END),
+    p_kur
+  FROM (
+    SELECT K.REHBERID,
+      (CASE WHEN K.EKSTREDEKULLAN=1 AND K.BORC>0 THEN coalesce(K.DOVIZ_TUTARI,0) ELSE coalesce(K.BORC,0) END) AS BORC,
+      (CASE WHEN K.EKSTREDEKULLAN=1 AND K.ALACAK>0 THEN coalesce(K.DOVIZ_TUTARI,0) ELSE coalesce(K.ALACAK,0) END) AS ALACAK,
+      (CASE WHEN K.EKSTREDEKULLAN=1 THEN coalesce(K.DOVIZ_KURU,'TL') ELSE coalesce(K.KUR,'TL') END) AS KUR, coalesce(K.SUBEID,-1) AS SUBEID
+    FROM KASA K WHERE coalesce(K.REHBERID,0)>0 AND ((K.TUR IN (49)) OR (K.TUR NOT BETWEEN 40 AND 79))
+      AND K.ISLEMTARIHI>=p_bastar AND K.ISLEMTARIHI<v_yb AND K.TUR<>(CASE WHEN p_devirlerial=0 THEN 2 ELSE 0 END)
+    UNION ALL
+    SELECT CH.REHBERID,
+      (CASE WHEN CH.ISLEM IN (140,131,132,133,134,137) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.TUTAR,0) ELSE coalesce(C.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN CH.ISLEM IN (130,141) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.TUTAR,0) ELSE coalesce(C.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.KUR,'TL') ELSE coalesce(C.KUR,'TL') END), coalesce(C.SUBEID,-1)
+    FROM CEKLER C INNER JOIN CEKHAREKET CH ON C.ID=CH.CEKSENETLERID
+    WHERE CH.ISLEM IN (130,131,132,134,137,140,141) AND CH.TARIH>=p_bastar AND CH.TARIH<v_yb
+    UNION ALL
+    SELECT S.REHBERID,
+      (CASE WHEN S.TUR=34 THEN (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_TUTARI,0) ELSE coalesce(S.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN S.TUR=24 THEN (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_TUTARI,0) ELSE coalesce(S.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_KURU,'TL') ELSE coalesce(S.KUR,'TL') END), coalesce(S.SUBEID,-1)
+    FROM SENETLER S WHERE S.TARIH>=p_bastar AND S.TARIH<v_yb
+    UNION ALL
+    SELECT F.REHBERID,
+      (CASE WHEN F.TUR IN (8,11,12,13) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_TUTARI,0) ELSE coalesce(F.FATURA_TUTARI,0) END) END),
+      (CASE WHEN F.TUR IN (15,16,17) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_TUTARI,0) ELSE coalesce(F.FATURA_TUTARI,0) END) END),
+      (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_CINSI,'TL') ELSE coalesce(F.KUR,'TL') END), coalesce(F.SUBEID,-1)
+    FROM FATBASLIK F WHERE F.TUR IN (8,11,12,13,15,16,17) AND coalesce(F.DURUM,0)<>6 AND F.FATURATARIH>=p_bastar AND F.FATURATARIH<v_yb
+  ) LST
+  WHERE LST.REHBERID>0 GROUP BY LST.REHBERID, LST.KUR, LST.SUBEID HAVING (SUM(BORC)-SUM(ALACAK))<>0;
+
+  -- ===== KAPANIS ===== (outer swap; FATBASLIK'ta TUR filtresi yok, DURUM default 1)
+  INSERT INTO KASA(TUR,PLANTARIHI,ISLEMTARIHI,REHBERID,BORC,ALACAK,KUR,HESAPTURU,ACIKLAMA,SUBEID,DOVIZ_TUTARI,DOVIZ_KURU)
+  SELECT 2, v_ys, v_ys, REHBERID,
+    (CASE WHEN SUM(ALACAK-BORC)>0 THEN SUM(ALACAK-BORC) ELSE 0 END),
+    (CASE WHEN SUM(BORC-ALACAK)>0 THEN SUM(BORC-ALACAK) ELSE 0 END),
+    coalesce(KUR,p_kur), '', v_ka, SUBEID,
+    (CASE WHEN SUM(BORC-ALACAK)>0 THEN SUM(BORC-ALACAK) ELSE SUM(ALACAK-BORC) END) *
+      (CASE WHEN coalesce(KUR,p_kur)=p_kur THEN 1.0
+            ELSE coalesce((SELECT (CASE WHEN p_islemkur='ALIS' THEN coalesce(D.ALIS,0) WHEN p_islemkur='SATIS' THEN coalesce(D.SATIS,0)
+                                        WHEN p_islemkur='EFALIS' THEN coalesce(D.EFALIS,0) WHEN p_islemkur='EFSATIS' THEN coalesce(D.EFSATIS,0) END)
+                          FROM DOVIZ D WHERE D.CINSI=KUR ORDER BY abs(extract(epoch from (v_yb - D.TARIH))) LIMIT 1),0) END),
+    p_kur
+  FROM (
+    SELECT K.REHBERID,
+      (CASE WHEN K.EKSTREDEKULLAN=1 AND K.BORC>0 THEN coalesce(K.DOVIZ_TUTARI,0) ELSE coalesce(K.BORC,0) END) AS BORC,
+      (CASE WHEN K.EKSTREDEKULLAN=1 AND K.ALACAK>0 THEN coalesce(K.DOVIZ_TUTARI,0) ELSE coalesce(K.ALACAK,0) END) AS ALACAK,
+      (CASE WHEN K.EKSTREDEKULLAN=1 THEN coalesce(K.DOVIZ_KURU,'TL') ELSE coalesce(K.KUR,'TL') END) AS KUR, coalesce(K.SUBEID,-1) AS SUBEID
+    FROM KASA K WHERE coalesce(K.REHBERID,0)>0 AND ((K.TUR IN (49)) OR (K.TUR NOT BETWEEN 40 AND 79))
+      AND K.ISLEMTARIHI>=p_bastar AND K.ISLEMTARIHI<v_yb AND K.TUR<>(CASE WHEN p_devirlerial=0 THEN 2 ELSE 0 END)
+    UNION ALL
+    SELECT CH.REHBERID,
+      (CASE WHEN CH.ISLEM IN (140,131,132,133,134,137) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.TUTAR,0) ELSE coalesce(C.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN CH.ISLEM IN (130,141) THEN (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.TUTAR,0) ELSE coalesce(C.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN CH.EKSTREDEKULLAN=1 THEN coalesce(CH.KUR,'TL') ELSE coalesce(C.KUR,'TL') END), coalesce(C.SUBEID,-1)
+    FROM CEKLER C INNER JOIN CEKHAREKET CH ON C.ID=CH.CEKSENETLERID
+    WHERE CH.ISLEM IN (130,131,132,134,137,140,141) AND CH.TARIH>=p_bastar AND CH.TARIH<v_yb
+    UNION ALL
+    SELECT S.REHBERID,
+      (CASE WHEN S.TUR=34 THEN (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_TUTARI,0) ELSE coalesce(S.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN S.TUR=24 THEN (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_TUTARI,0) ELSE coalesce(S.TUTAR,0) END) ELSE 0 END),
+      (CASE WHEN S.EKSTREDEKULLAN=1 THEN coalesce(S.DOVIZ_KURU,'TL') ELSE coalesce(S.KUR,'TL') END), coalesce(S.SUBEID,-1)
+    FROM SENETLER S WHERE S.TARIH>=p_bastar AND S.TARIH<v_yb
+    UNION ALL
+    SELECT F.REHBERID,
+      (CASE WHEN F.TUR IN (8,11,12,13) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_TUTARI,0) ELSE coalesce(F.FATURA_TUTARI,0) END) END),
+      (CASE WHEN F.TUR IN (15,16,17) THEN 0.0 ELSE (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_TUTARI,0) ELSE coalesce(F.FATURA_TUTARI,0) END) END),
+      (CASE WHEN F.EKSTREDEKULLAN=1 THEN coalesce(F.DOVIZ_CINSI,'TL') ELSE coalesce(F.KUR,'TL') END), coalesce(F.SUBEID,-1)
+    FROM FATBASLIK F WHERE F.FATURATARIH>=p_bastar AND F.FATURATARIH<v_yb AND coalesce(F.DURUM,1)<>6
+  ) LST
+  WHERE LST.REHBERID>0 GROUP BY LST.REHBERID, LST.KUR, LST.SUBEID HAVING (SUM(BORC)-SUM(ALACAK))<>0;
+  RETURN 0;
+END $$;

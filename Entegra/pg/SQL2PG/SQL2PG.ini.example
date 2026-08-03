@@ -1,0 +1,27 @@
+[General]
+SchemaDir=..\schema
+
+[MSSQL]
+DriverID=MSSQL
+Server=localhost
+Database=GENDEPO_BILIM
+User_Name=sa
+Password=***
+OSAuthent=No
+TrustServerCertificate=Yes
+ODBCAdvanced=TrustServerCertificate=yes
+
+[PG]
+DriverID=PG
+Server=localhost
+Port=5432
+Database=gentegre
+User_Name=postgres
+Password=***
+VendorLib=
+
+[Migrate]
+; Bos birakilirsa MSSQL icindeki tum kullanici tablolari denenir.
+Tables=GENINI,REHBER,STOKLAR,FATBASLIK,FATURA
+ClearBeforeLoad=True
+BatchSize=1000

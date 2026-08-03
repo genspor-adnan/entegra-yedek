@@ -423,6 +423,9 @@ begin
         end;
   end;
   AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
+  // Kullanici ek alanlari (_USER) rapora (secili demirbas karti).
+  if DEMIRBAS.Active and (not DEMIRBAS.IsEmpty) then
+    Tablo.UserAlanYazdirmaEkle(AFastReport, 'DEMIRBAS', DEMIRBAS.FieldByName('ID').AsInteger);
 end;
 
 procedure TDemirbasListeDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -1136,7 +1139,7 @@ var
   i,SeciliDurum,TutanakID,BelgeTipi: integer;
   BelgeTarihi:TDateTime;
   Tutar:Extended;
-  s,Kur,HedefDeger:string;
+  s,Kur,HedefDeger,TutarSQL:string;
 begin
     try
       Application.CreateForm(TDemirbasDurumDegisDlg,DemirbasDurumDegisDlg);
@@ -1277,6 +1280,9 @@ begin
         Tutar:=0.0;
         Kur:='';
       end;
+      TutarSQL := StringReplace(FormatFloat('0.############', Tutar), ',', '.', [rfReplaceAll]);
+      if TutarSQL = '' then
+        TutarSQL := '0';
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update DEMIRBAS_TUTANAK set '
                       +'TIP='+VarToStr(DemirbasDurumDegisDlg.cbDurum.EditValue)+','
                       +'TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',DemirbasDurumDegisDlg.edTarih.Date)+''','
@@ -1290,7 +1296,7 @@ begin
                       +'BELGETIPI='+IntToStr(BelgeTipi)+','
                       +'BELGETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn:ss',BelgeTarihi)+''','
                       +'REHBERID='+IntToStr(DemirbasDurumDegisDlg.BeditMusteri.Tag)+','
-                      +'TUTAR='''+FormatFloat('########.##',Tutar)+''','
+                      +'TUTAR='+TutarSQL+','
                       +'KUR='''+Kur+''','
                       +'NOTLAR='''+DemirbasDurumDegisDlg.MemoAciklama.Lines.Text+''','
                       +'REHBERPERSONELID='+IntToStr(DemirbasDurumDegisDlg.BeditMusteriIlgili.Tag)
@@ -1367,7 +1373,7 @@ var
   GorevTuru, i, SeciliDurum, TutanakID, YeniAksiyon, BelgeTipi, ServisAksiyon, MailSablon, ServisSorumluID : integer;
   BelgeTarihi        : TDateTime;
   Tutar              : Extended;
-  s, Kur, HedefDeger : string;
+  s, Kur, HedefDeger, TutarSQL : string;
 
   procedure ServisAksiyonEkle;
   var
@@ -1518,6 +1524,9 @@ begin
         Kur:='';
       end;
 
+      TutarSQL := StringReplace(FormatFloat('0.############', Tutar), ',', '.', [rfReplaceAll]);
+      if TutarSQL = '' then
+        TutarSQL := '0';
 
       TutanakID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' insert into DEMIRBAS_TUTANAK (TIP,TARIH,VERENID,ALANID,LOKASYONID,BELGENO,EKLEYEN,SUBEID,BELGETIPI,BELGETARIH,REHBERID,TUTAR,KUR,NOTLAR,REHBERPERSONELID)values('
                       +VarToStr(DemirbasDurumDegisDlg.cbDurum.EditValue)
@@ -1531,7 +1540,7 @@ begin
                       +IntToStr(BelgeTipi)+','
                       +''''+FormatDateTime('yyyy-mm-dd hh:nn:ss',BelgeTarihi)+''','
                       +IntToStr(DemirbasDurumDegisDlg.BeditMusteri.Tag)+','
-                      +''''+FormatFloat('########.##',Tutar)+''','
+                      +TutarSQL+','
                       +''''+Kur+''','
                       +''''+DemirbasDurumDegisDlg.MemoAciklama.Lines.Text+''','
                       +IntToStr(DemirbasDurumDegisDlg.BeditMusteriIlgili.Tag)

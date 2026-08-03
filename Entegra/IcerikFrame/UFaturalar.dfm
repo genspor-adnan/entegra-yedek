@@ -671,10 +671,6 @@
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 103
@@ -1029,10 +1025,6 @@
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 151
@@ -1093,7 +1085,6 @@
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 193
         AnchorX = 1223
       end
       object GridYorum: TcxGrid
@@ -1185,7 +1176,6 @@
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = cxPageControl1
-    ExplicitWidth = 8
   end
   object PanelKayitSayisi: TPanel
     Left = 0
@@ -2215,8 +2205,8 @@
         'ON='#39'Giden'#39',MODUL= CASE WHEN YER='#39'12'#39' THEN '#39'Aktivite'#39' WHEN YER='#39'8' +
         '3'#39' THEN '#39'Servis'#39' END,KATEGORI='#39#39',DOKUMANADI=GIDENADRES,SURUM='#39#39',' +
         'KONUSU=MESAJKONUSU,TUR='#39#39',BOLUM='#39#39',KURUM='#39#39',ILGILI='#39#39',SORUMLU='#39#39 +
-        ',BOYUT='#39#39',LOKASYON='#39#39',GECERLILIK_TARIHI='#39#39',KLASOR='#39#39',KAYNAK=EPOS' +
-        'TA,ANAHTAR,YER  FROM EPOSTALAR'
+        ',BOYUT='#39#39',LOKASYON='#39#39',GECERLILIK_TARIHI='#39#39',KLASOR='#39#39',EPOSTA AS K' +
+        'AYNAK,ANAHTAR,YER  FROM EPOSTALAR'
       'WHERE'
       'REHID=@REHID'
       'UNION ALL'
@@ -2225,8 +2215,8 @@
         'Giden'#39',MODUL= CASE WHEN YER='#39'12'#39' THEN '#39'Aktivite'#39' WHEN YER='#39'83'#39' T' +
         'HEN '#39'Servis'#39' END,KATEGORI='#39#39',DOKUMANADI=GSMNO,SURUM='#39#39',KONUSU=ME' +
         'SAJMETNI,TUR='#39#39',BOLUM='#39#39',KURUM='#39#39',ILGILI='#39#39',SORUMLU='#39#39',BOYUT='#39#39',' +
-        'LOKASYON='#39#39',GECERLILIK_TARIHI='#39#39',KLASOR='#39#39',KAYNAK='#39#39' ,ANAHTAR,YE' +
-        'R  FROM SMSLER'
+        'LOKASYON='#39#39',GECERLILIK_TARIHI='#39#39',KLASOR='#39#39','#39#39' AS KAYNAK ,ANAHTAR' +
+        ',YER  FROM SMSLER'
       'WHERE'
       'REHID=@REHID')
     Left = 200

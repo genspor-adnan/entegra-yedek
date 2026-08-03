@@ -873,6 +873,12 @@ begin
       AFastReport.EnabledDataSets.Add(frxFATBASLIK);
       AFastReport.EnabledDataSets.Add(frxSIPARISDETAY);
    end;
+   // Kullanici ek alanlari (_USER) rapora: baslik (kart) + satirlar (detay).
+   if FATBASLIK.Active and (not FATBASLIK.IsEmpty) then begin
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'FATBASLIK', FATBASLIK.FieldByName('ID').AsInteger);
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'FATURA', 0,
+        'select ID from FATURA where FATBASID=' + FATBASLIK.FieldByName('ID').AsString);
+   end;
 end;
 
 procedure TFaturalarDlg.Calendar1Change(Sender: TObject);

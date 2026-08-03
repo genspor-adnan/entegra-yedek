@@ -299,6 +299,8 @@ begin
    AFastReport.EnabledDataSets.Clear;
    AFastReport.EnabledDataSets.Add(frxDemirbas);
    AFastReport.EnabledDataSets.Add(frxDemirbasTarihce);
+   // Kullanici ek alanlari (_USER) rapora (demirbas karti).
+   Tablo.UserAlanYazdirmaEkle(AFastReport, 'DEMIRBAS', DemirbasID);
 end;
 
 procedure TDemirbasWizardDlg.BaskiOnizlemeMenuClick(Sender: TObject);
@@ -649,6 +651,13 @@ procedure TDemirbasWizardDlg.FormCreate(Sender: TObject);
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   Tablo.WizardTurkcelestir(WizardKontrol);
+  if AktifVeriMotor = vmPG then begin
+    TabDemirbas.UpdateOptions.RequestLive := True;
+    TabDemirbas.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabDemirbas.UpdateOptions.UpdateTableName := 'DEMIRBAS';
+    TabDemirbas.UpdateOptions.KeyFields := 'ID';
+    TabDemirbas.UpdateOptions.AutoIncFields := 'ID';
+  end;
   DemirbasEkr.Title.Text:=jvDemirbas;
   DokumanEkr.Title.Text:=jvDokuman;
   TarihceEkr.Title.Text:=jvTarihce;
@@ -657,8 +666,6 @@ begin
   cxPageControl1.ActivePageIndex := 0;
   LogID:=0;
   FAmortismanSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
-  if (not TabDemirbas.Active) then
-     Yenileclick(DemirbasID);
   //ComboStokKodu.Visible:= Tablo.GENINI.ReadBoolean(Ops_OpsiyonDemirbas_Stoktan,False);// StokOpsiyon','OnayliSayimDegistirme'
   //LabelStokKodu.Visible:= ComboStokKodu.Visible;
   //DokumanTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\DemirbasDokumanGridi',true,false,[gsoUseFilter],'DemirbasDokumanGridi');

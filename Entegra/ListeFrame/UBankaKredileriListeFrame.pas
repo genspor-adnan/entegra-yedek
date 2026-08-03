@@ -900,7 +900,7 @@ begin
 
 
       if EKSTRE.Active then
-        EKSTRE.Close;
+         EKSTRE.Close;
       if (KREDILER.RecordCount>0)and(KREDILER.FieldByName('ID').AsString<>'') then begin
          EKSTRE.SQL.Text := 'select * from dbo.fn_Kredi_Ekstre ';
          EKSTRE.SQL.Add('('+KREDILER.FieldByName('ID').AsString+','''+FormatDateTime('yyyy-mm-dd 00:00:00',CalendarEkstreBas.Date)+''','''+FormatDateTime('yyyy-mm-dd 23:59',CalendarEkstreBit.Date)+''','+iif(CheckMasrafGoster.Checked,'1','0')+')');

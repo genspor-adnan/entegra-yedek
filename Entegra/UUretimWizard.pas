@@ -2011,18 +2011,10 @@ var Silinebilir : boolean;
 begin
            //Üretimde sarf satırı ise kontrole almıyoruz..
    Silinebilir := True;
-   if TabUretimDetay.FieldByName('ADET').Value > 0 then begin
-       if TabUretimDetay.FieldByName('IZLEME').AsInteger = 0 then begin //izlem yoksa
-          if Tablo.KullanimSayisi(TabUretim.FieldByName('TUR').AsInteger, 0, TabUretimDetay.FieldByName('ID').AsInteger, TabUretimDetay.FieldByName('URUNID').AsInteger, TabUretim.FieldByName('FATURATARIH').AsDateTime)>0 then
-             Silinebilir := False;
-       end
-       else begin
-          //İts kullanımda ve bildirim yapılmışsa fatura silinemez
-          if Tablo.IzlemBildirimSayisi(TabUretim.FieldByName('TUR').AsInteger, 0, TabUretimDetay.FieldByName('ID').AsInteger, TabUretim.FieldByName('FATURATARIH').AsDateTime)>0  then
-             Silinebilir := False;
-       end;
-
-   end;
+   if TabUretimDetay.FieldByName('ADET').Value > 0 then
+       // KILIT + e-belge + kullanim/izleme/uts/donusum -> birlesik helper (eski inline yerine).
+       if not Tablo.FaturaSilinebilirMi(0, TabUretimDetay.FieldByName('ID').AsInteger) then
+          Silinebilir := False;
    if (Silinebilir) and (Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_YESNO+ MB_ICONQUESTION)= ID_YES) then begin
          ULog.OturumYakala(FOturumID);   // LAZY: satir silme = degisiklik -> snapshot'i yakala (SQL'den ONCE)
          if TabUretimDetay.FieldByName('ADET').AsFloat > 0 then

@@ -1595,6 +1595,7 @@ end;
 procedure TOpsiyonDlg.StilKaydetTusClick(Sender: TObject);
 begin
   tabStiller.Post;
+  Tablo.StilleriYenile;   // restart'siz gecerli olsun
 end;
 
 procedure TOpsiyonDlg.StilKosulEkleTusClick(Sender: TObject);
@@ -1625,22 +1626,27 @@ end;
 procedure TOpsiyonDlg.StilKosulKaydetTusClick(Sender: TObject);
 begin
   tabStilKosul.Post;
+  Tablo.StilleriYenile;   // restart'siz gecerli olsun
 end;
 
 procedure TOpsiyonDlg.StilKosulSilTusClick(Sender: TObject);
 begin
   if tabStilKosul.RecordCount<=0 then abort;
-  
+
   if Application.MessageBox(PChar(ODlgStilKosulSilinecektir),PChar(Onay), MB_YESNO+ MB_ICONQUESTION) = ID_NO then Abort
-  else
+  else begin
    tabStilKosul.Delete;
+   Tablo.StilleriYenile;
+  end;
 end;
 
 procedure TOpsiyonDlg.StilSilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(ODlgStilSilinecektir),PChar(Onay), MB_YESNO+ MB_ICONQUESTION) = ID_NO then Abort
-  else
+  else begin
     tabStiller.Delete;
+    Tablo.StilleriYenile;
+  end;
 end;
 
 procedure TOpsiyonDlg.tabEpostaHesaplariAfterOpen(DataSet: TDataSet);

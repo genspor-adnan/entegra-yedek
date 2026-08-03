@@ -148,7 +148,6 @@ object MakbuzWizardDlg: TMakbuzWizardDlg
           Left = 3
           Top = 3
           Width = 878
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30

@@ -78,6 +78,8 @@ object RehberWizardDlg: TRehberWizardDlg
       OnPage = GirisEkrPage
       OnNextButtonClick = GirisEkrNextButtonClick
       WaterMark.Visible = False
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel1: TPanel
         Left = 0
         Top = 70
@@ -198,7 +200,6 @@ object RehberWizardDlg: TRehberWizardDlg
           Top = 33
           HelpType = htKeyword
           HelpKeyword = 'REHBER.GRUP'
-          RepositoryItem = Tablo.RepCariGrup
           DataBinding.DataField = 'GRUP'
           DataBinding.DataSource = DtsRehber
           Properties.Alignment.Horz = taLeftJustify
@@ -257,7 +258,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object ComboSINIF: TcxDBImageComboBox
           Left = 103
           Top = 195
-          RepositoryItem = Tablo.RepCariSinif
           DataBinding.DataField = 'SINIF'
           DataBinding.DataSource = DtsRehber
           Properties.ImmediatePost = True
@@ -289,7 +289,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object ComboDURUM: TcxDBImageComboBox
           Left = 610
           Top = 141
-          RepositoryItem = Tablo.RepCariDurum
           DataBinding.DataField = 'DURUM'
           DataBinding.DataSource = DtsRehber
           Properties.ImageAlign = iaRight
@@ -366,7 +365,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object ComboSube: TcxDBImageComboBox
           Left = 610
           Top = 112
-          RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
           DataBinding.DataField = 'SUBEID'
           DataBinding.DataSource = DtsRehber
           Properties.ImmediatePost = True
@@ -398,7 +396,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object ComboBolge: TcxDBImageComboBox
           Left = 103
           Top = 222
-          RepositoryItem = Tablo.RepCariBolge
           DataBinding.DataField = 'BOLGE'
           DataBinding.DataSource = DtsRehber
           Properties.ImmediatePost = True
@@ -696,6 +693,10 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object CariGridNotlar: TcxGrid
             Left = 0
             Top = 27
@@ -727,8 +728,6 @@ object RehberWizardDlg: TRehberWizardDlg
                 Options.Editing = False
                 Options.ShowCaption = False
                 Position.BeginsLayer = True
-                Styles.Content = Tablo.cxStyle4
-                Styles.CategoryRow = Tablo.cxStyle4
               end
               object CariGridNotlarViewYORUM: TcxGridDBCardViewRow
                 DataBinding.FieldName = 'YORUM'
@@ -740,8 +739,6 @@ object RehberWizardDlg: TRehberWizardDlg
                 Options.Editing = False
                 Options.ShowCaption = False
                 Position.BeginsLayer = False
-                Styles.Content = Tablo.cxStyle12
-                Styles.CategoryRow = Tablo.cxStyle4
               end
             end
             object CariGridNotlarLevel1: TcxGridLevel
@@ -772,7 +769,6 @@ object RehberWizardDlg: TRehberWizardDlg
             GradientEndColor = 11776947
             GradientStartColor = 14540253
             HotTrackColor = 65408
-            Images = Tablo.PNGImageList2
             List = True
             ParentColor = False
             ParentFont = False
@@ -789,7 +785,7 @@ object RehberWizardDlg: TRehberWizardDlg
               OnClick = YorumEkleTusClick
             end
             object YorumSil: TToolButton
-              Left = 66
+              Left = 51
               Top = 0
               Caption = 'Sil'
               ImageIndex = 5
@@ -799,7 +795,7 @@ object RehberWizardDlg: TRehberWizardDlg
             end
             object YorumDuzenle: TToolButton
               Tag = 3
-              Left = 132
+              Left = 102
               Top = 0
               Caption = 'D'#252'zenle'
               ImageIndex = 7
@@ -812,6 +808,10 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -849,6 +849,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -950,7 +952,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
           OptionsView.GroupByBox = False
-          Styles.Content = AnaForm.cxStyle1
           Styles.OnGetContentStyle = GridKurIletViewStylesGetContentStyle
           object cxGridDBColumn3: TcxGridDBColumn
             Caption = 'Etiketi'
@@ -988,7 +989,6 @@ object RehberWizardDlg: TRehberWizardDlg
             Options.Grouping = False
             Options.HorzSizing = False
             Options.Moving = False
-            Styles.Content = Tablo.cxStyle1
             Width = 400
           end
           object GridKurIletViewColumn1: TcxGridDBColumn
@@ -1091,7 +1091,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsSelection.CellSelect = False
           OptionsSelection.MultiSelect = True
           OptionsView.GroupByBox = False
-          Styles.Selection = Tablo.cxstSecili
           object cxGridDBColumn10: TcxGridDBColumn
             Caption = 'Ad'#305' '
             DataBinding.FieldName = 'AD'
@@ -1103,7 +1102,6 @@ object RehberWizardDlg: TRehberWizardDlg
             DataBinding.FieldName = 'AKTIF'
             DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
-            Properties.Images = Tablo.PNGImageList2
             Properties.Items = <
               item
                 Description = 'Kurumda'
@@ -1161,6 +1159,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = TicariEkrEnterPage
       OnPage = TicariEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1233,7 +1233,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
           OptionsView.GroupByBox = False
-          Styles.Content = AnaForm.cxStyle1
           Styles.OnGetContentStyle = GridKurIletViewStylesGetContentStyle
           object cxGridDBColumn5: TcxGridDBColumn
             Caption = 'Etiketi'
@@ -1358,6 +1357,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1462,7 +1463,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
           OptionsView.GroupByBox = False
-          Styles.Content = AnaForm.cxStyle1
           Styles.OnGetContentStyle = GridKurIletViewStylesGetContentStyle
           object GridIletViewColumn1: TcxGridDBColumn
             Caption = 'Etiketi'
@@ -1587,7 +1587,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsSelection.CellSelect = False
           OptionsSelection.MultiSelect = True
           OptionsView.GroupByBox = False
-          Styles.Selection = Tablo.cxstSecili
           object PersonelAdi: TcxGridDBColumn
             Caption = 'Ad'#305' Soyad'#305
             DataBinding.FieldName = 'FIRMA'
@@ -1605,7 +1604,6 @@ object RehberWizardDlg: TRehberWizardDlg
             DataBinding.FieldName = 'DURUM'
             DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
-            Properties.Images = Tablo.PNGImageList2
             Properties.Items = <
               item
                 Description = 'Kurumda'
@@ -1663,6 +1661,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 491
@@ -1723,6 +1723,7 @@ object RehberWizardDlg: TRehberWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 470
         AnchorX = 755
       end
       object GridYorum: TcxGrid
@@ -1748,8 +1749,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsView.CategorySeparatorWidth = 1
           OptionsView.CellAutoHeight = True
           OptionsView.CellTextMaxLineCount = 5
-          Styles.Content = Tablo.cxStyle6
-          Styles.CardBorder = Tablo.cxStyle19
           object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
             DataBinding.FieldName = 'EKLEMETARIHI'
             DataBinding.IsNullValueType = True
@@ -1770,7 +1769,6 @@ object RehberWizardDlg: TRehberWizardDlg
           object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
             DataBinding.FieldName = 'ATAC'
             DataBinding.IsNullValueType = True
-            RepositoryItem = Tablo.repFileExtensionList
             Options.Editing = False
             Options.Focusing = False
             Options.ShowCaption = False
@@ -1796,8 +1794,6 @@ object RehberWizardDlg: TRehberWizardDlg
             Options.Focusing = False
             Options.ShowCaption = False
             Position.BeginsLayer = True
-            Styles.Content = Tablo.cxStyle12
-            Styles.CategoryRow = Tablo.cxStyle4
           end
         end
         object GridYorumLevel1: TcxGridLevel
@@ -1829,6 +1825,8 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'CRMEkstreEkr'
       OnEnterPage = CRMEkstreEkrEnterPage
       OnPage = CRMEkstreEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar7: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1888,7 +1886,6 @@ object RehberWizardDlg: TRehberWizardDlg
           OptionsData.Inserting = False
           OptionsSelection.CellSelect = False
           OptionsView.Indicator = True
-          Styles.Content = AnaForm.cxStyle1
           object cxGridCRMViewMODUL: TcxGridDBColumn
             Caption = 'Mod'#252'l'
             DataBinding.FieldName = 'MODUL'
@@ -2330,7 +2327,6 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object TabCariIlet: TFDQuery
     OnNewRecord = TabCariIletNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       
@@ -2358,7 +2354,6 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object TabPerIlet: TFDQuery
     OnNewRecord = TabPerIletNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select RB.ID,RB.SIRA,RB.ETIKET,RB.BILGI,GIRIS=isnull(RA.GIRIS,0)' +
@@ -2377,7 +2372,6 @@ object RehberWizardDlg: TRehberWizardDlg
   object TabTicari: TFDQuery
     BeforePost = TabTicariBeforePost
     OnNewRecord = TabTicariNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       
@@ -2409,7 +2403,6 @@ object RehberWizardDlg: TRehberWizardDlg
     AfterPost = TabRehberAfterPost
     AfterScroll = TabRehberAfterScroll
     OnNewRecord = TabRehberNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select  * from REHBER'
       'where ID=:PAR')
@@ -2432,7 +2425,6 @@ object RehberWizardDlg: TRehberWizardDlg
     AfterPost = TabIlgiliAfterPost
     AfterScroll = TabIlgiliAfterScroll
     OnNewRecord = TabIlgiliNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select R.ID, R.BAGID, R.FIRMA, R.STATU,GRUP,EKLEYEN,DURUM,SUBEID' +
@@ -2462,7 +2454,6 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 472
   end
   object TabSonAktivite: TFDQuery
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       'SELECT TOP 1 ID, BITISTARIHI , KONUSU, NOTLAR'
       'FROM AKTIVITELER A '
@@ -2477,7 +2468,6 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 423
   end
   object TabImaj: TFDQuery
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'SELECT  ID, YERI, YER_ID,DURUM,ICDIS, BELGENO, BELGEADI, TUR, AC' +
@@ -2513,12 +2503,10 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object TabCRMEkstre: TFDQuery
     AfterScroll = TabCRMEkstreAfterScroll
-    Connection = Tablo.FDCnn
     Left = 544
     Top = 520
   end
   object PopupIlgili: TPopupMenu
-    Images = Tablo.PNGImageList2
     Left = 25
     Top = 15
     object lgiliKurumdanAyrld1: TMenuItem
@@ -2557,7 +2545,6 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object TabRehberIletisim: TFDQuery
     OnNewRecord = TabRehberIletisimNewRecord
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       'select *'
@@ -2568,7 +2555,6 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 131
   end
   object PopupIletisim: TPopupMenu
-    Images = Tablo.PNGImageList2
     Left = 705
     Top = 511
     object MenuItem7: TMenuItem
@@ -2577,7 +2563,6 @@ object RehberWizardDlg: TRehberWizardDlg
     end
   end
   object TabNotlar: TFDQuery
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select '
       #9'GY.ID, GY.TUR, GY.TARIH,GY.EKLEMETARIHI, GY.EKLEYEN,'
@@ -2600,7 +2585,6 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 356
   end
   object TabPerIletisim: TFDQuery
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       ''
       'select *'
@@ -2611,7 +2595,6 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 251
   end
   object TabYorum: TFDQuery
-    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
       'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
@@ -2679,7 +2662,6 @@ object RehberWizardDlg: TRehberWizardDlg
     end
   end
   object YorumAtacMenu: TOfficePopupMenu
-    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724

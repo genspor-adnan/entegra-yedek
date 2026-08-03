@@ -576,9 +576,11 @@ type
     procedure SatirEkleClick(Sender: TObject);
     procedure SatirSilClick(Sender: TObject);
     procedure PageControlUstChange(Sender: TObject);
+    procedure PageControlAltPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     procedure AlternatifTusClick(Sender: TObject);
     procedure EMail1Click(Sender: TObject);
     procedure TabTeklifDetayBeforePost(DataSet: TDataSet);
+    procedure TabTeklifDetayAfterOpenPG(DataSet: TDataSet);
     procedure TabTeklifDetayAfterDelete(DataSet: TDataSet);
     procedure TabTeklifDetayAfterPost(DataSet: TDataSet);
     procedure ComboKurPropertiesCloseUp(Sender: TObject);
@@ -666,6 +668,7 @@ type
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure Kaydet;
     procedure TeklifTutarHesapla;
+    procedure StokDetayAc;
     procedure DetayKopyala(ID : Integer);
     procedure TabSheetEkle(Ad:string; AltNo:SmallInt);
     procedure Skroll;
@@ -685,7 +688,9 @@ type
     TeklifID,SatinAlmaID, RehberId,ProjeID,MasrafMerkezi,ServisID,TeklifTur,TeklifTipi : Integer;
     FOturumID: string;   // geri-alinabilir oturum (D=degistir SNAPSHOT); '' = yok
     Cagiran, Yeri,AlternatifNo:  SmallInt;
-    RevizeGrideTiklandi :boolean;
+    RevizeGrideTiklandi, FSatirEklemeToplamErtele :boolean;
+    FEkAlanKuruldu, FEkAlanKuruluyor: Boolean;   // ek-alan (TEKLIF_USER) LAZY kurulum (tek sefer / re-entry guard)
+    FEkAlanTeklifID: Integer;                     // ek-alan icin cozulmus teklif ID (EkAlanSekmeHazirla var param)
   end;
 
 var
@@ -716,16 +721,16 @@ var
   MusIlgiliID,PersonelID : string;
   FatTutar : Currency;
 begin
-  TabloYenile(TabTeklifYaz,[CariDoviz,TabTeklif.Fields[0].AsString]);
-  TabloYenile(TabTeklifDetayYaz,[CariDoviz,TabTeklif.Fields[0].AsString]);
-  TabloYenile(TabTeklifDetayResimli,[TabTeklif.Fields[0].AsString]);
-  TabloYenile(TabFinansalYaz,[TabTeklif.Fields[0].AsString]);
+  TabloYenile(TabTeklifYaz,[CariDoviz,TabTeklif.FieldByName('ID').AsString]);
+  TabloYenile(TabTeklifDetayYaz,[CariDoviz,TabTeklif.FieldByName('ID').AsString]);
+  TabloYenile(TabTeklifDetayResimli,[TabTeklif.FieldByName('ID').AsString]);
+  TabloYenile(TabFinansalYaz,[TabTeklif.FieldByName('ID').AsString]);
   TabloYenile(TabHazirlayanDetay,[TabTeklif.FieldByName('HAZIRLAYAN').AsString]);
   Tablo.TabMusteri.Close;
   Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
   if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
   Tablo.TabMusteri.Open;
-  TabloYenile(TabStokDetay,[TabTeklif.FieldByName('ID').Value,6]);
+  StokDetayAc;
   AFastReport.EnabledDataSets.Clear;
   AFastReport.EnabledDataSets.Add(frxTEKLIF);
   AFastReport.EnabledDataSets.Add(frxTEKLIFDETAY);
@@ -763,6 +768,53 @@ begin
      AFastReport.EnabledDataSets.Add(Tablo.frxSevkAdresi);
   end else
      Tablo.TabSevkAdresi.Close;
+  // Kullanici ek alanlari (_USER) rapora (teklif karti).
+  Tablo.UserAlanYazdirmaEkle(AFastReport, 'TEKLIF', TabTeklif.FieldByName('ID').AsInteger);
+end;
+
+procedure TTeklifWizardDlg.StokDetayAc;
+const
+  SQL_PG_TEKLIF_STOK_DETAY =
+    '/*PGX*/ '+
+    'with urunler as ( '+
+    '  select t.urunid, s.detaybolumu, s.stokadi, (t.tutar::text || t.kur) as urunfiyat, '+
+    '         row_number() over(partition by s.detaybolumu order by t.urunid) as rn '+
+    '  from stoklar s inner join teklifdetay t on t.tur=1 and t.urunid=s.id '+
+    '  where t.teklifid=:PTeklifID and coalesce(s.detaybolumu, '''')<>'''' '+
+    '), satirlar as ( '+
+    '  select ra.sira, ra.etiket, ra.bolum as konu, ra.giris '+
+    '  from rehberayar ra where ra.yeri=88 and exists(select 1 from urunler u where u.detaybolumu=ra.bolum) '+
+    '  union all select distinct -1, ''Ürün Adı'', detaybolumu, -1 from urunler '+
+    '  union all select distinct 2147483640, ''Fiyatı'', detaybolumu, 2147483640 from urunler '+
+    '), degerler as ( '+
+    '  select u.detaybolumu as konu, -1 as sira, ''Ürün Adı'' as etiket, u.rn, u.stokadi as bilgi, null::bytea as resim from urunler u '+
+    '  union all select u.detaybolumu, 2147483640, ''Fiyatı'', u.rn, u.urunfiyat, null::bytea from urunler u '+
+    '  union all '+
+    '  select u.detaybolumu, rb.sira, rb.etiket, u.rn, rb.bilgi, rr.resim '+
+    '  from urunler u '+
+    '  inner join rehberbilgi rb on rb.yeri=88 and rb.yer_id=u.urunid '+
+    '  inner join rehberayar ra on ra.bolum=u.detaybolumu and ra.sira=rb.sira and ra.etiket=rb.etiket '+
+    '  left join rehberbilgiresim rr on rr.rehberbilgiid=rb.id '+
+    ') '+
+    'select row_number() over(order by r.konu, r.sira)::integer as "ID", r.sira as "SIRA", r.etiket as "ETIKET", r.konu as "KONU", r.giris as "GIRIS", '+
+    '  max(d.bilgi) filter(where d.rn=1) as "Ürün1", decode(max(encode(d.resim,''hex'')) filter(where d.rn=1),''hex'') as "Resim1", '+
+    '  max(d.bilgi) filter(where d.rn=2) as "Ürün2", decode(max(encode(d.resim,''hex'')) filter(where d.rn=2),''hex'') as "Resim2", '+
+    '  max(d.bilgi) filter(where d.rn=3) as "Ürün3", decode(max(encode(d.resim,''hex'')) filter(where d.rn=3),''hex'') as "Resim3", '+
+    '  max(d.bilgi) filter(where d.rn=4) as "Ürün4", decode(max(encode(d.resim,''hex'')) filter(where d.rn=4),''hex'') as "Resim4", '+
+    '  max(d.bilgi) filter(where d.rn=5) as "Ürün5", decode(max(encode(d.resim,''hex'')) filter(where d.rn=5),''hex'') as "Resim5", '+
+    '  max(d.bilgi) filter(where d.rn=6) as "Ürün6", decode(max(encode(d.resim,''hex'')) filter(where d.rn=6),''hex'') as "Resim6" '+
+    'from satirlar r left join degerler d on d.konu=r.konu and d.sira=r.sira and d.etiket=r.etiket '+
+    'group by r.sira, r.etiket, r.konu, r.giris '+
+    'order by r.konu, r.sira';
+begin
+  TabStokDetay.Close;
+  if AktifVeriMotor = vmPG then
+  begin
+    TabStokDetay.SQL.Text := SQL_PG_TEKLIF_STOK_DETAY;
+    TabloYenile(TabStokDetay, [TabTeklif.FieldByName('ID').AsInteger]);
+  end
+  else
+    TabloYenile(TabStokDetay,[TabTeklif.FieldByName('ID').Value,6]);
 end;
 
 procedure TTeklifWizardDlg.YorumDzenle1Click(Sender: TObject);
@@ -784,7 +836,7 @@ end;
 
 procedure TTeklifWizardDlg.TabFinansalNewRecord(DataSet: TDataSet);
 begin
-       TabFinansal.FieldByName('TEKLIFID').AsInteger:=TabTeklif.Fields[0].AsInteger;
+       TabFinansal.FieldByName('TEKLIFID').AsInteger:=TabTeklif.FieldByName('ID').AsInteger;
        TabFinansal.FieldByName('SEC').AsBoolean:=True;
        TabFinansal.FieldByName('TARIH').AsDateTime:=Tablo.GENINI.BugunTrhSaat;
        GridFinansalViewKURUMADPropertiesButtonClick(Self, 0);
@@ -809,10 +861,10 @@ procedure TTeklifWizardDlg.AlternatifTusClick(Sender: TObject) ;
 var
   i:integer;
 begin
-  if TabTeklif.Fields[0].AsString = '' then
+  if TabTeklif.FieldByName('ID').AsString = '' then
      exit;
   for I := 1 to PageControlUst.PageCount-1 do begin
-    if not Veritabani.VeriVarMi(Tablo.FDCnn,'Select * from TEKLIFDETAY Where TEKLIFID='+TabTeklif.Fields[0].AsString+' and ALTERNATIFNO='+IntToStr(i)+'',[],[]) then begin
+    if not Veritabani.VeriVarMi(Tablo.FDCnn,'Select * from TEKLIFDETAY Where TEKLIFID='+TabTeklif.FieldByName('ID').AsString+' and ALTERNATIFNO='+IntToStr(i)+'',[],[]) then begin
       Application.MessageBox(PChar(TWDetaySatirBos),PChar(Uyari),0);
       Abort;
     end;
@@ -1004,10 +1056,6 @@ begin
 end;
 
 procedure TTeklifWizardDlg.TreeListGecmisTekliflerClick(Sender: TObject);
-(*var
-srid:integer;
-ra : string;
-aktifFrame : TGenelAnaSekmeFrame;*)
 begin
   if TabTeklif.State in [dsEdit, dsInsert] then
      Kaydet;
@@ -1037,7 +1085,7 @@ var seciliID, seciliSIRA : integer;
   begin
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA2)+' Where ID = '+IntToStr(ID1), [],[]);
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update TEKLIFDETAY set SIRALAMA='+IntToStr(SIRA1)+' Where ID = '+IntToStr(ID2), [],[]);
-       TabloYenile(TabTeklifDetay, [TabTeklif.Fields[0].AsInteger, AlternatifNo]);;
+       TabloYenile(TabTeklifDetay, [TabTeklif.FieldByName('ID').AsInteger, AlternatifNo]);;
      TabTeklifDetay.Locate('ID', ID1, []);
   end;
 begin
@@ -1095,6 +1143,15 @@ begin
    end;
 end;
 
+procedure TTeklifWizardDlg.PageControlAltPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
+begin
+  // Ek-alan (TEKLIF_USER) kontrolleri LAZY: sekmeye ilk gecince kurulur (acilisi hizlandirir).
+  //   Ortak mantik Tablo.EkAlanSekmeHazirla'da (kart bos-zorunlu alan -> Abort/AllowChange=False; tek sefer).
+  if NewPage = TabSheetEkAlanlar then
+     Tablo.EkAlanSekmeHazirla(Self, TabTeklif, DtsTeklif, TabSheetEkAlanlar, 'TEKLIF_USER',
+      FEkAlanTeklifID, FEkAlanKuruldu, FEkAlanKuruluyor, AllowChange);
+end;
+
 procedure TTeklifWizardDlg.PopupYorumlarPopup(Sender: TObject);
 begin
     DkmanGster1.Visible := TabYorum.FieldByName('DOKUMANID').AsString<>'';
@@ -1124,8 +1181,10 @@ end;
 procedure TTeklifWizardDlg.TeklifDetayRefresh;
 begin
   PageControlUst.Height := 26;
-  TabloYenile(TabTeklifDetay, [TabTeklif.Fields[0].AsInteger, AlternatifNo]);
-  TabloYenile(TOPLAMLAR,[TabTeklif.Fields[0].AsInteger,AlternatifNo]);
+  if AlternatifNo <= 0 then
+    AlternatifNo := 1;
+  TabloYenile(TabTeklifDetay, [TabTeklif.FieldByName('ID').AsInteger, AlternatifNo]);
+  TabloYenile(TOPLAMLAR,[TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
 end;
 procedure TTeklifWizardDlg.DtsFinansalStateChange(Sender: TObject);
 begin
@@ -1242,7 +1301,7 @@ procedure TTeklifWizardDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
    if (IptalSecildi) and ((IslemOp='E')or(IslemOp='K')) then begin //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
-      if (TabTeklif.active)and(TabTeklif.Fields[0].AsString <> '')  then begin
+      if (TabTeklif.active)and(TabTeklif.FieldByName('ID').AsString <> '')  then begin
       //varsa dokumanlar?n silinmeli
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[Yeri, TabTeklif.FieldByName('ID').AsInteger]);
       //varsa proje ba?lant?lar? silinmeli
@@ -1314,15 +1373,46 @@ begin
      if (Components[I] is TField) and (TField(Components[I]).DataSet = TabTeklifDetayYaz) then
        Components[I].Free;
 
-   TabTeklif.UpdateOptions.UpdateTableName := 'dbo.TEKLIF';
+   if AktifVeriMotor = vmPG then
+     TabTeklif.UpdateOptions.UpdateTableName := 'TEKLIF'
+   else
+     TabTeklif.UpdateOptions.UpdateTableName := 'dbo.TEKLIF';
    TabTeklif.UpdateOptions.UpdateMode := upWhereKeyOnly;
    TabTeklif.UpdateOptions.KeyFields := 'ID';
-   TabTeklifDetay.UpdateOptions.UpdateTableName := 'dbo.TEKLIFDETAY';
+   TabTeklif.UpdateOptions.AutoIncFields := 'ID';
+   if AktifVeriMotor = vmPG then
+     TabTeklifDetay.UpdateOptions.UpdateTableName := 'TEKLIFDETAY'
+   else
+     TabTeklifDetay.UpdateOptions.UpdateTableName := 'dbo.TEKLIFDETAY';
    TabTeklifDetay.UpdateOptions.UpdateMode := upWhereKeyOnly;
    TabTeklifDetay.UpdateOptions.KeyFields := 'ID';
-   TabFinansal.UpdateOptions.UpdateTableName := 'dbo.TEKLIFFINANSAL';
+   TabTeklifDetay.UpdateOptions.AutoIncFields := 'ID';
+   TabTeklifDetay.UpdateOptions.RequestLive := True;
+   if AktifVeriMotor = vmPG then
+     TabTeklifDetay.SQL.Text :=
+       '/*PGX*/ '+
+       'select T.*, '+
+       'case when T.TUR in (1,11) then (select STOKADI from STOKLAR where ID = T.URUNID) else (select AD from MASRAFGELIR where ID = T.URUNID) end as AD, '+
+       'case when T.TUR in (1,11) then (select KOD from STOKLAR where ID = T.URUNID) else (select KOD from MASRAFGELIR where ID = T.URUNID) end as KOD, '+
+       '(select P.PROJEKODU from PROJELER P where P.ID = T.PROJEID) as PROJEKODU, '+
+       'coalesce((select MALIYET from STOKMALIYET where TUR=2 and STOKID=T.URUNID and T.TUR=1 limit 1),0.0) as STOKMALIYET, '+
+       'coalesce((select T.MIKTAR*(SC.ADET2/SC.ADET1) from STOKCEVRIM SC where SC.STOKID=T.URUNID and T.TUR=1 and T.BIRIM=SC.BIRIM1::varchar and SC.BIRIM2=(select DONUSUMTURU from TEKLIF TK where TK.ID=T.TEKLIFID) limit 1),0.0) as DONUSENMIKTAR, '+
+       'cast((select E.AD || ''('' || ER.SERINO || '')'' from EKIPMANREHBER ER inner join EKIPMANLAR E on E.ID=ER.EKIPMANID where ER.ID=T.EKIPMANID) as varchar(152)) as EKIPMAN '+
+       'from TEKLIFDETAY T '+
+       'where T.TEKLIFID = :Par1 and T.ALTERNATIFNO = :Par2 '+
+       'order by T.POZNO,T.KUR,T.ID';
+   // PG: hesaplanan kolonlari ProviderFlags:=[] ile DML/refresh disi birak (INSERT sonrasi
+   //   ID-refresh bozulup satirin grid'den dusmesini engeller). Alanlar her acilista sifirlanir
+   //   -> AfterOpen'da uygulanir. Handler kendi icinde vmPG guard'li (MSSQL'de etkisiz).
+   if AktifVeriMotor = vmPG then
+     TabTeklifDetay.AfterOpen := TabTeklifDetayAfterOpenPG;
+   if AktifVeriMotor = vmPG then
+     TabFinansal.UpdateOptions.UpdateTableName := 'TEKLIFFINANSAL'
+   else
+     TabFinansal.UpdateOptions.UpdateTableName := 'dbo.TEKLIFFINANSAL';
    TabFinansal.UpdateOptions.UpdateMode := upWhereKeyOnly;
    TabFinansal.UpdateOptions.KeyFields := 'ID';
+   TabFinansal.UpdateOptions.AutoIncFields := 'ID';
 
    Tablo.WizardTurkcelestir(WizardKontrol);
    ComboKur.Visible:=DovizTakibi;
@@ -1364,6 +1454,8 @@ begin
      FreeAndNil(GridTeklifWizardDetayViewSAYI);
   end;
 
+  // Ek-alan sekmesine gecince TEKLIF_USER kontrollerini LAZY kur (bkz. PageControlAltPageChanging).
+  PageControlAlt.OnPageChanging := PageControlAltPageChanging;
 end;
 
 procedure TTeklifWizardDlg.FormKeyDown(Sender: TObject; var Key: Word;
@@ -1436,6 +1528,33 @@ end;
 procedure TTeklifWizardDlg.TarihceTabloAc;
 var s:String[20];
 begin
+    if AktifVeriMotor = vmPG then
+    begin
+      if pos('+', ComboSay.Text)>0 then
+         s:=''
+      else
+         s:=' limit '+ComboSay.Text;
+
+      TabGecmisTeklifler.SQL.Text :=
+        'with tmpTeklif as ('+
+        'select T1.ID as USTID, T1.ID as ALTID, T1.* '+
+        'from TEKLIF T1 '+
+        'where T1.DURUM <> 5 and T1.REHBERID = :pRehID '+
+        'order by T1.TARIH desc'+s+
+        ') '+
+        'select * from tmpTeklif '+
+        'union all '+
+        'select '+
+        '(select T3.ID from TEKLIF T3 where T3.DURUM<>5 and T3.REHBERID=:pRehID and T2.TEKLIFNO=T3.TEKLIFNO limit 1) as USTID, '+
+        'T2.ID as ALTID, T2.* '+
+        'from TEKLIF T2 '+
+        'where T2.DURUM=5 and T2.REHBERID=:pRehID '+
+        'and exists (select 1 from tmpTeklif Tmp where Tmp.TEKLIFNO = T2.TEKLIFNO) '+
+        'order by TARIH desc';
+      TabloYenile(TabGecmisTeklifler,[RehberId]); //ID
+      Exit;
+    end;
+
     if pos('+', ComboSay.Text)>0 then
        s:=''
     else
@@ -1517,7 +1636,10 @@ begin
             //Buraya SablonID eklencek.
             //Tablo.TablodanSorguAc(5,' Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and VARSAYILAN = 1 ');  Tablo.Query5.Fields[0].AsString
             if TabTeklif.FieldByName('SABLONID').AsString <> '' then begin
-               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update DOKUMLER set VARSAYILAN = 0 Where GRUBU='''+EkranAdiAl+'''  Update DOKUMLER set VARSAYILAN = 1 Where GRUBU='''+EkranAdiAl+''' and ID = '+TabTeklif.FieldByName('SABLONID').AsString+' ',[],[]);
+               // Iki AYRI statement (tek BasitKomut'ta yan yana 2 Update -> PG "syntax error at Update"
+               //   veya prepared'da coklu-komut reddi). Ayri cagri her iki motorda da guvenli.
+               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update DOKUMLER set VARSAYILAN = 0 Where GRUBU='''+EkranAdiAl+''' ',[],[]);
+               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update DOKUMLER set VARSAYILAN = 1 Where GRUBU='''+EkranAdiAl+''' and ID = '+TabTeklif.FieldByName('SABLONID').AsString+' ',[],[]);
 
                if not RevizeGrideTiklandi then  begin
                  TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz, ra, aktifFrame.RaporSecClick);
@@ -1557,8 +1679,11 @@ begin
            RevizeTus.Visible:=true;
          end;
   end;
-  if TabSheetEkAlanlar<>nil then
-     Tablo.AlanOlustur(TTeklifWizardDlg(Self),-1,Tablo.UserDataSourceHazirla(TTeklifWizardDlg(Self), DtsTeklif, 'TEKLIF_USER'));
+  // Ek-alan (TEKLIF_USER) kontrolleri artik EAGER kurulmuyor -> ek-alan sekmesine gecince LAZY kurulur
+  //   (PageControlAltPageChanging -> Tablo.EkAlanSekmeHazirla). Acilis hizlanir. Flag'leri sifirla.
+  FEkAlanKuruldu := False;
+  FEkAlanKuruluyor := False;
+  FEkAlanTeklifID := 0;
   Skroll;
   FirmaBilgileri;
 ////////TekliF Detay bilgileri
@@ -1603,6 +1728,7 @@ begin
   RevizeGrideTiklandi := False;
   PageControlUst.ActivePageIndex:=0;
   PageControlAlt.ActivePageIndex := TabSheetDetay.PageIndex;
+  TeklifTutarHesapla;   // acilis: toplami bir kez hesapla (AfterPost'tan kaldirildi)
 
   cbOnaylayacak.Properties.Items := Tablo.imgComboboxInit('select ID=0, FIRMA='''' union all '+StringReplace(OnayYetki, '@YetkiKodu', '290150', []),False).Items;
   //TabTeklifDetay.FieldByName('DOVIZ_BIRIMFIYAT').OnChange:= TabTeklifDetayADETChange;
@@ -1805,7 +1931,7 @@ begin
         TabTeklif.Cancel;
 
      if islemOp='E' then
-        btnTeklif.Tag:=TabTeklif.Fields[0].AsInteger;
+        btnTeklif.Tag:=TabTeklif.FieldByName('ID').AsInteger;
 
      // KART loglama (TEK SEFER): yeni -> LogKayitEkle, edit -> LogIslemleri.
      // Detay loglamasi (LogDiffKaydet/FDetSnap) asagida ayrica yapiliyor -> ona dokunma.
@@ -1813,17 +1939,17 @@ begin
         if YeniTeklif then
            FEkleLogland := LogKartEkle(TabTeklif, TabNo_TEKLIF, True, FEkleLogland) or FEkleLogland
         else if LogOnceki.Count>0 then
-           LogKartDegisti(TabTeklif, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger);
+           LogKartDegisti(TabTeklif, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
      end;
   end else begin
     s:=YaziciYaz.Caption;
     Delete(s, pos('&',s), 1);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update TEKLIF Set SABLONID = (Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ) Where ID='+TabTeklif.Fields[0].AsString+' ',[],[]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update TEKLIF Set SABLONID = (Select ID from DOKUMLER Where GRUBU='''+EkranAdiAl+''' and RAPORADI='''+s+''' ) Where ID='+TabTeklif.FieldByName('ID').AsString+' ',[],[]);
   end;
   Tablo.UserDataSourceKaydet(TTeklifWizardDlg(Self), 'TEKLIF_USER');
   // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
   if LogGun > 0 then
-    ULog.LogUserKaydet('TEKLIF_USER', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.Fields[0].AsInteger, (IslemOp='E') or (IslemOp='K'));
+    ULog.LogUserKaydet('TEKLIF_USER', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger, (IslemOp='E') or (IslemOp='K'));
 
    if TabTeklifDetay.State in [dsInsert, dsEdit] then begin
     TabTeklifDetay.post;
@@ -1937,7 +2063,7 @@ begin
     PageControlUst.Pages[PageControlUst.PageCount-1].Destroy;
   end;
   if TabTeklif.State <> dsInsert then begin
-    tablo.Query1.Close;      // 'select distinct ALTERNATIFNO from TEKLIFDETAY                                                                                          //   TEKLIFID = '+TabTeklif.Fields[0].AsString+'
+    tablo.Query1.Close;      // 'select distinct ALTERNATIFNO from TEKLIFDETAY                                                                                          //   TEKLIFID = '+TabTeklif.FieldByName('ID').AsString+'
     tablo.Query1.SQL.Text := 'Select distinct ALTERNATIFNO from TEKLIF T left outer join TEKLIFDETAY TD on '+
     ' T.ID=TD.TEKLIFID where T.ID = '+TabTeklif.FieldByName('ID').AsString+' and  T.TEKLIFNO = '''+TabTeklif.FieldByName('TEKLIFNO').AsString+''' and T.REHBERID='+IntToStr(RehberId)+' and ALTERNATIFNO > 1 order by 1';
     if AktifVeriMotor = vmPG then tablo.Query1.SQL.Text := PgSqlCevir(tablo.Query1.SQL.Text);
@@ -1986,11 +2112,24 @@ begin
 end;
 
 procedure TTeklifWizardDlg.SatirEkleClick(Sender: TObject);
+var
+  LEklemeAlternatifNo, LOncekiDetayMaxID, LTeklifID: Integer;
 begin
   //if TabTeklif.State in [dsEdit, dsInsert] then
   //   TabTeklif.Post;
 
   Kaydet;
+  if AlternatifNo <= 0 then
+     AlternatifNo := 1;
+  LEklemeAlternatifNo := AlternatifNo;
+  LTeklifID := TabTeklif.FieldByName('ID').AsInteger;
+  LOncekiDetayMaxID := 0;
+  if AktifVeriMotor = vmPG then
+  begin
+    Tablo.TablodanSorguAc(1, '/*PGX*/ select coalesce(max(ID),0) from TEKLIFDETAY');
+    if not Tablo.Query1.IsEmpty then
+      LOncekiDetayMaxID := Tablo.Query1.Fields[0].AsInteger;
+  end;
   if not TabTeklifDetay.Active then
      Skroll;
   Application.CreateForm(TStokHizmetAraDlg,AraDlg);
@@ -2006,21 +2145,33 @@ begin
   AraDlg.cbStokDepo.EditValue := VarsDepo;
   AraDlg.KalmayanCheckGoster:=True;
   AraDlg.stokhizmetaracagirantur:= 100; //15 gidiyordu, de?i?tirdim..
-  AraDlg.ShowModal;
-  FreeAndNil(AraDlg);
+  FSatirEklemeToplamErtele := True;   // toplu ekleme: her satir post'unda toplam hesaplama (yavaslik)
+  try
+    AraDlg.ShowModal;
+    if TabTeklifDetay.State in [dsEdit, dsInsert] then
+      TabTeklifDetay.Post;
+    if TabTeklif.State in [dsEdit, dsInsert] then
+      TabTeklif.Post;
+  finally
+    FSatirEklemeToplamErtele := False;
+    FreeAndNil(AraDlg);
+  end;
+  AlternatifNo := LEklemeAlternatifNo;
+
   editDovizKuru.Visible := ComboKur.Text <> CariDoviz;
-  TabloYenile(TabTeklifDetay,[TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
+  TabloYenile(TabTeklifDetay,[LTeklifID,LEklemeAlternatifNo]);
+  TeklifTutarHesapla;
 end;
 
 procedure TTeklifWizardDlg.SatirSilClick(Sender: TObject);
 begin
    ULog.OturumYakala(FOturumID);   // LAZY: satir silme -> yakala
-  if Kilit then begin
+  if Kilit  then begin
      Application.MessageBox(PChar(Butarihoncesiislemyapilmaz),PChar(Uyari),0);
      Abort
   end;
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) <> ID_OK then
-    Abort;
+     Abort;
   TabTeklifDetay.Delete;
 end;
 
@@ -2028,7 +2179,7 @@ procedure TTeklifWizardDlg.SonraTusClick(Sender: TObject);
 var
 Deg:string;
 begin
-  if IslemOp<>'E' then begin
+  if IslemOp  <> 'E' then begin
     Deg :=TabTeklif.FieldByName('TEKLIFNO').AsString;
     TabTeklif.Next;
     if Deg=EditTeklifNo.Text then
@@ -2041,8 +2192,27 @@ end;
 
 procedure TTeklifWizardDlg.TabTeklifAfterOpen(DataSet: TDataSet);
 begin
+   if AlternatifNo <= 0 then
+     AlternatifNo := 1;
    TabloYenile(TabTeklifDetay, [TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
    TabloYenile(TabFinansal, [TabTeklif.FieldByName('ID').AsInteger]);
+end;
+
+procedure TTeklifWizardDlg.TabTeklifDetayAfterOpenPG(DataSet: TDataSet);
+const
+  CHesaplananlar: array[0..5] of string =
+    ('AD','KOD','PROJEKODU','STOKMALIYET','DONUSENMIKTAR','EKIPMAN');
+var
+  i: Integer;
+begin
+  if AktifVeriMotor <> vmPG then Exit;
+  // PG driver kolon-koken metasi vermez -> T.* yanindaki hesaplanan (subquery) alanlar
+  //   FireDAC'in INSERT sonrasi ID-refresh'ini bozuyor -> RETURNING ID gelmez, satir grid'den
+  //   dusuyor (DB'ye commit olur ama gorunmez). Hesaplananlari ProviderFlags:=[] ile DML/refresh
+  //   disi birak -> ID refresh calisir, satir kalir. MSSQL'de origin metasi var, etkisiz.
+  for i := Low(CHesaplananlar) to High(CHesaplananlar) do
+    if TabTeklifDetay.FindField(CHesaplananlar[i]) <> nil then
+      TabTeklifDetay.FieldByName(CHesaplananlar[i]).ProviderFlags := [];
 end;
 
 procedure TTeklifWizardDlg.TabTeklifAfterPost(DataSet: TDataSet);
@@ -2050,8 +2220,13 @@ begin
   if btnTeklif.tag=0 then
      btnTeklif.tag := TabTeklif.FieldByName('ID').AsInteger;
   // KART loglama Kaydet icinde TEK SEFER yapiliyor (cift log olmasin diye buradan kaldirildi).
-  TabloYenile(TOPLAMLAR, [TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
-  TabloYenile(TabTeklifOnay, [TabTeklif.FieldByName('ID').AsInteger]);
+  // StokHizmetAra toplu ekleme sirasinda header her detay satirinda post ediliyor -> asagidaki
+  //   TOPLAMLAR (EXEC SP_PRG_TeklifDipToplami) + TabTeklifOnay refresh'leri per-satir DB sorgusu =
+  //   yavaslik. Bulk'ta ertele; dialog kapaninca SatirEkleClick->TeklifTutarHesapla TOPLAMLAR'i tazeler.
+  if not FSatirEklemeToplamErtele then begin
+    TabloYenile(TOPLAMLAR, [TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
+    TabloYenile(TabTeklifOnay, [TabTeklif.FieldByName('ID').AsInteger]);
+  end;
 
   if TabTeklif.FieldByName('KDVDURUM').AsString = 'Muaf' then begin
     TabTeklifDetay.First;
@@ -2141,7 +2316,11 @@ begin
     AltNo := 1;
   AlternatifNo := AltNo;
 
-  TeklifTutarHesapla;
+  // Tek satir degisiminde (manuel inline edit) toplami tazele. StokHizmetAra toplu ekleme
+  //   sirasinda FSatirEklemeToplamErtele=True -> her satir post'unda cagirma (yavaslik); dialog
+  //   kapaninca SatirEkleClick tek sefer hesaplar.
+  if not FSatirEklemeToplamErtele then
+    TeklifTutarHesapla;
 
   if TabTeklif.State in [dsEdit, dsInsert] then
     TabTeklif.Post;
@@ -2173,7 +2352,11 @@ begin
   if TabTeklifDetay.FindField('ALTERNATIFNO') <> nil then begin
     if TabTeklifDetay.FieldByName('ALTERNATIFNO').IsNull or
        (TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger <= 0) then
+    begin
+      if AlternatifNo <= 0 then
+        AlternatifNo := 1;
       TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger := AlternatifNo;
+    end;
     AlternatifNo := TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger;
   end;
 
@@ -2228,9 +2411,9 @@ end;
 function TTeklifWizardDlg.ToplamGetir(Bolum:Smallint;TLDoviz:String):Real;
 begin
   if TOPLAMLAR.Locate('TUR', Bolum,[loPartialKey]) then
-    result := TOPLAMLAR.FieldByName(TLDoviz).AsExtended
+     result := TOPLAMLAR.FieldByName(TLDoviz).AsExtended
   else
-    result:=-99999;
+     result:=-99999;
 end;
 
 procedure TTeklifWizardDlg.TeklifTutarHesapla;
@@ -2241,7 +2424,7 @@ begin
   if (not TabTeklifDetay.Active)or(TabTeklifDetay.RecordCount < 1) then
       exit;
 
-  TabloYenile( TOPLAMLAR, [TabTeklif.Fields[0].AsInteger,AlternatifNo]);
+  TabloYenile( TOPLAMLAR, [TabTeklif.FieldByName('ID').AsInteger,AlternatifNo]);
 
   TEKLIF_MATRAHI := ToplamGetir(4,'DEGER');
   if TEKLIF_MATRAHI=-99999 then
@@ -2383,6 +2566,8 @@ procedure TTeklifWizardDlg.TabTeklifDetayNewRecord(DataSet: TDataSet);
 begin
 //  Tablo.TablodanSorguAc(1,'select isnull(max(SIRALAMA),0)+1 from TEKLIFDETAY T Where TEKLIFID ='+TabTeklif.FieldByName('ID').AsString);
 //  TabTeklifDetay.FieldByName('SIRALAMA').Value := Tablo.Query1.Fields[0].AsInteger;
+  if AlternatifNo <= 0 then
+    AlternatifNo := 1;
   TabTeklifDetay.FieldByName('TEKLIFID').AsInteger := TabTeklif.FieldByname('ID').AsInteger;
   TabTeklifDetay.FieldByName('ALTERNATIFNO').AsInteger := AlternatifNo;
   TabTeklifDetay.FieldByName('REHBERID').AsInteger := RehberId;
@@ -2531,7 +2716,7 @@ begin
     raise Exception.create(UrungirilmedenKaydedilemez);
 
   Kaydet;
-  TeklifID := TabTeklif.Fields[0].AsInteger;
+  TeklifID := TabTeklif.FieldByName('ID').AsInteger;
 
 
   //burada bask? ?nizleme/yazd?rma i?in se?ilmi? ?ablonu teklife kaydedelim

@@ -132,10 +132,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 277
@@ -1704,10 +1700,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2607,10 +2599,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2775,8 +2763,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = DetayEkrPage
       OnExitPage = DetayEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3190,8 +3176,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -3252,7 +3236,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 554
         AnchorX = 1110
       end
       object GridYorum: TcxGrid
@@ -3625,6 +3608,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 329
   end
   object PopupMenuYaz: TPopupMenu
+    OnPopup = PopupMenuYazPopup
     Left = 421
     Top = 42
     object BaskiOnizlemeMenu: TMenuItem
@@ -4248,8 +4232,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 198
-    Top = 14
+    Left = 246
+    Top = 22
   end
   object TabPlan: TFDQuery
     AfterOpen = TabPlanAfterOpen
@@ -4757,211 +4741,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object TabStokDetay: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    SQL.Strings = (
-      'DECLARE '
-      #9'@SQL '#9#9#9'NVARCHAR(4000),'
-      #9'@KOLONBASLIK'#9'VARCHAR(100),'
-      #9'@URUNADI'#9#9'VARCHAR(100),'
-      #9'@URUNFIYATI'#9#9'VARCHAR(100),'
-      #9'@URUNID'#9#9#9'INT,'
-      #9'@FATBASID'#9#9'INT,'
-      #9'@ETIKET'#9#9#9'VARCHAR(100),'
-      #9'@BILGI'#9#9#9'VARCHAR(1000),'
-      #9'@SIRA'#9#9#9'VARCHAR(10),'
-      #9'@RESIM'#9#9#9'varbinary(max),'
-      #9'@DETAYBOLMU'#9#9'VARCHAR(20),'
-      #9'@KOLONSAYISI'#9'int,'
-      #9'@MinKolonSayisi'#9'int'#9
-      #9
-      'SET @FATBASID = :PFBID'
-      'SET @MinKolonSayisi = :PKolonSayisi'
-      'SET @SQL = '#39'Create Table ##RehberBilgiView( '
-      'ID'#9#9'INT IDENTITY(1,1),'
-      'SIRA '#9'INT NULL,'
-      'ETIKET'#9'VARCHAR(100) NULL,'
-      'KONU'#9'VARCHAR(50) NULL,'
-      'GIRIS'#9#9'INT NULL,'#39
-      ''
-      'select top 1 @KOLONSAYISI=count(*)'
-      
-        'FROM STOKLAR S inner join FATURA TD on S.ID=TD.URUNID and TD.TUR' +
-        '=1 '
-      'where '
-      #9'TD.FATBASID=@FATBASID and'
-      
-        #9'S.DETAYBOLUMU in(select distinct DETAYBOLUMU from STOKLAR S whe' +
-        're isnull(DETAYBOLUMU,'#39#39')<>'#39#39'and S.ID in(select URUNID from FATU' +
-        'RA T where T.TUR=1 and T.FATBASID=@FATBASID))'
-      'group by DETAYBOLUMU'
-      'order by 1 desc'
-      ''
-      'if @KOLONSAYISI<@MinKolonSayisi'
-      'SET @KOLONSAYISI=@MinKolonSayisi'
-      ''
-      'DECLARE @count INT '
-      'SET @count = 0 '
-      'WHILE (@count < @KOLONSAYISI) '
-      'BEGIN '
-      
-        '   SET @SQL = @SQL +'#39' ['#220'r'#252'n'#39'+CONVERT(varchar(5),@count+1)+'#39'] nva' +
-        'rchar(1000) NULL ,'#39' '
-      
-        '   SET @SQL = @SQL +'#39' [Resim'#39'+CONVERT(varchar(5),@count+1)+'#39'] va' +
-        'rbinary(MAX) NULL ,'#39' '
-      '   SET @count = (@count + 1) '
-      'END '
-      'SET @SQL = SUBSTRING(@SQL,1,LEN(@SQL)-1 )+'#39')'#39
-      'EXEC (@SQL)'
-      ''
-      'INSERT INTO ##RehberBilgiView (SIRA,ETIKET,KONU,GIRIS)'
-      'SELECT RA.SIRA,RA.ETIKET,RA.BOLUM,RA.GIRIS'
-      'FROM REHBERAYAR RA '
-      
-        'where YERI=88 and BOLUM in(select distinct DETAYBOLUMU from STOK' +
-        'LAR S where isnull(DETAYBOLUMU,'#39#39')<>'#39#39' and S.ID in (select URUNI' +
-        'D from FATURA T where T.TUR=1 and T.FATBASID=@FATBASID))'
-      'order by BOLUM '
-      'INSERT INTO ##RehberBilgiView (SIRA,ETIKET,KONU,GIRIS)'
-      
-        'select distinct -1,'#39#220'r'#252'n Ad'#305#39',DETAYBOLUMU,-1 from STOKLAR S wher' +
-        'e isnull(DETAYBOLUMU,'#39#39')<>'#39#39' and S.ID in (select URUNID from FAT' +
-        'URA T where T.TUR=1 and T.FATBASID=@FATBASID)'
-      'INSERT INTO ##RehberBilgiView (SIRA,ETIKET,KONU,GIRIS)'
-      
-        'select distinct 2147483640,'#39'Fiyat'#305#39',DETAYBOLUMU,2147483640 from ' +
-        'STOKLAR S where isnull(DETAYBOLUMU,'#39#39')<>'#39#39' and S.ID in (select U' +
-        'RUNID from FATURA T where T.TUR=1 and T.FATBASID=@FATBASID)'
-      ''
-      ''
-      'DECLARE cur_Konular Cursor For '
-      'select DETAYBOLUMU'
-      'FROM STOKLAR S '
-      
-        'where S.DETAYBOLUMU in(select distinct DETAYBOLUMU from STOKLAR ' +
-        'S where isnull(DETAYBOLUMU,'#39#39')<>'#39#39' and  S.ID in (select URUNID f' +
-        'rom FATURA T where T.TUR=1 and T.FATBASID=@FATBASID) )'
-      'group by DETAYBOLUMU'
-      'order by count(*) desc'
-      'OPEN cur_Konular'
-      'FETCH NEXT FROM cur_Konular INTO @DETAYBOLMU'
-      'WHILE @@FETCH_STATUS = 0'
-      #9'BEGIN '
-      #9#9#9#9#9#9
-      #9#9#9#9'DECLARE cur_Urunler cursor for '
-      #9#9#9#9'select '
-      #9#9#9#9#9'T.URUNID,'
-      
-        #9#9#9#9#9'KOLONADI='#39#220'r'#252'n'#39'+convert(varchar(5),ROW_NUMBER()OVER(order b' +
-        'y T.URUNID)),'
-      #9#9#9#9#9'S.STOKADI,'
-      #9#9#9#9#9'URUNFIYAT=convert(varchar(50),T.TUTAR)+KUR'
-      
-        #9#9#9#9'from STOKLAR S inner join FATURA T on T.TUR=1 and T.URUNID=S' +
-        '.ID'
-      #9#9#9#9'where T.FATBASID=@FATBASID and S.DETAYBOLUMU=@DETAYBOLMU'
-      #9#9#9#9'OPEN cur_Urunler'
-      
-        #9#9#9#9'FETCH NEXT FROM cur_Urunler INTO @URUNID,@KOLONBASLIK,@URUNA' +
-        'DI,@URUNFIYATI'#9
-      #9#9#9#9'WHILE @@FETCH_STATUS = 0'
-      #9#9#9#9#9'BEGIN '
-      ''
-      
-        #9#9#9#9#9#9'SET @SQL= '#39' UPDATE ##RehberBilgiView SET ['#39'+@KOLONBASLIK+'#39 +
-        '] = '#39#39#39'+@URUNADI+'#39#39#39' WHERE KONU='#39#39#39'+@DETAYBOLMU+'#39#39#39' and SIRA=-1 ' +
-        'and ETIKET = '#39#39#220'r'#252'n Ad'#305#39#39' '#39
-      #9#9#9#9#9#9'exec(@SQL)'
-      
-        #9#9#9#9#9#9'SET @SQL= '#39' UPDATE ##RehberBilgiView SET ['#39'+@KOLONBASLIK+'#39 +
-        '] = '#39#39#39'+@URUNFIYATI+'#39#39#39' WHERE KONU='#39#39#39'+@DETAYBOLMU+'#39#39#39' and SIRA=' +
-        '2147483640 and ETIKET = '#39#39'Fiyat'#305#39#39' '#39
-      #9#9#9#9#9#9'exec(@SQL)'#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9'DECLARE cur_Etiketler cursor for '
-      #9#9#9#9#9#9#9#9'select RB2.ETIKET,RB2.BILGI,RB2.SIRA '
-      #9#9#9#9#9#9#9#9'from --select * from REHBERBILGI'
-      #9#9#9#9#9#9#9#9#9'REHBERBILGI RB2 inner join '
-      
-        #9#9#9#9#9#9#9#9#9'REHBERAYAR RA2 on RB2.SIRA=RA2.SIRA and RB2.ETIKET=RA2.' +
-        'ETIKET'
-      
-        #9#9#9#9#9#9#9#9'where RA2.BOLUM=@DETAYBOLMU and RB2.YERI=88 and YER_ID=@' +
-        'URUNID'
-      #9#9#9#9#9#9#9#9'OPEN cur_Etiketler'
-      #9#9#9#9#9#9#9#9'FETCH NEXT FROM cur_Etiketler INTO @ETIKET,@BILGI,@SIRA'#9
-      #9#9#9#9#9#9#9#9'WHILE @@FETCH_STATUS = 0'
-      #9#9#9#9#9#9#9#9#9'BEGIN '
-      
-        #9#9#9#9#9#9#9#9#9#9'SET @SQL= '#39' UPDATE ##RehberBilgiView SET ['#39'+@KOLONBASL' +
-        'IK+'#39'] = '#39#39#39'+@BILGI+'#39#39#39' WHERE KONU='#39#39#39'+@DETAYBOLMU+'#39#39#39' and SIRA='#39 +
-        '+@SIRA+'#39' and ETIKET = '#39#39#39'+@ETIKET+'#39#39#39' '#39
-      #9#9#9#9#9#9#9#9#9#9'exec(@SQL)'#9#9#9#9#9#9#9#9#9#9#9#9#9#9#9#9
-      
-        #9#9#9#9#9#9#9#9#9#9'FETCH NEXT FROM cur_Etiketler INTO @ETIKET,@BILGI,@SIR' +
-        'A'#9#9#9#9
-      #9#9#9#9#9#9#9#9#9'END'#9#9#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9'CLOSE cur_Etiketler'
-      #9#9#9#9#9#9#9#9'DEALLOCATE cur_Etiketler'
-      ''
-      ''
-      #9#9#9#9#9#9#9#9'DECLARE cur_Resimler cursor for '
-      #9#9#9#9#9#9#9#9'select RB2.ETIKET,RB2.BILGI,RB2.SIRA,RR.RESIM '
-      #9#9#9#9#9#9#9#9'from --select * from REHBERBILGI'
-      #9#9#9#9#9#9#9#9#9'REHBERBILGI RB2 inner join '
-      
-        #9#9#9#9#9#9#9#9#9'REHBERAYAR RA2 on RB2.SIRA=RA2.SIRA and RB2.ETIKET=RA2.' +
-        'ETIKET left outer join'
-      #9#9#9#9#9#9#9#9#9'REHBERBILGIRESIM RR on RB2.ID=RR.REHBERBILGIID'
-      
-        #9#9#9#9#9#9#9#9'where RA2.BOLUM=@DETAYBOLMU and RB2.YERI=88 and YER_ID=@' +
-        'URUNID'
-      #9#9#9#9#9#9#9#9'OPEN cur_Resimler'
-      
-        #9#9#9#9#9#9#9#9'FETCH NEXT FROM cur_Resimler INTO @ETIKET,@BILGI,@SIRA,@' +
-        'RESIM'#9
-      #9#9#9#9#9#9#9#9'WHILE @@FETCH_STATUS = 0'
-      #9#9#9#9#9#9#9#9#9'BEGIN '
-      
-        #9#9#9#9#9#9#9#9#9#9'SET @SQL= '#39' UPDATE ##RehberBilgiView SET ['#39'+Replace(@K' +
-        'OLONBASLIK,'#39#220'r'#252'n'#39','#39'Resim'#39')+'#39'] = @imageAlan WHERE KONU='#39#39#39'+@DETAY' +
-        'BOLMU+'#39#39#39' and SIRA='#39'+@SIRA+'#39' and ETIKET = '#39#39#39'+@ETIKET+'#39#39#39' '#39
-      
-        #9#9#9#9#9#9#9#9#9#9'exec sp_executesql @SQL, N'#39'@imageAlan varbinary(max)'#39',' +
-        '@imageAlan = @RESIM'#9#9#9#9#9#9#9#9#9#9#9#9#9#9#9
-      
-        #9#9#9#9#9#9#9#9#9#9'FETCH NEXT FROM cur_Resimler INTO @ETIKET,@BILGI,@SIRA' +
-        ',@RESIM'#9#9#9#9
-      #9#9#9#9#9#9#9#9#9'END'#9#9#9#9#9#9#9#9
-      #9#9#9#9#9#9#9#9'CLOSE cur_Resimler'
-      #9#9#9#9#9#9#9#9'DEALLOCATE cur_Resimler'
-      #9#9#9#9#9#9#9#9#9#9#9#9#9#9
-      
-        #9#9#9#9#9#9'FETCH NEXT FROM cur_Urunler INTO @URUNID,@KOLONBASLIK,@URU' +
-        'NADI,@URUNFIYATI'#9#9#9#9
-      #9#9#9#9#9'END'
-      #9#9#9#9'CLOSE cur_Urunler'
-      #9#9#9#9'DEALLOCATE cur_Urunler'#9#9
-      ''
-      #9#9'FETCH NEXT FROM cur_Konular INTO @DETAYBOLMU'#9#9
-      #9'END '
-      'CLOSE cur_Konular'
-      'DEALLOCATE cur_Konular'#9
-      ''
-      'select * from ##RehberBilgiView order by KONU,SIRA'#9#9#9
-      'drop table ##RehberBilgiView'#9
-      '')
     Left = 657
     Top = 25
-    ParamData = <
-      item
-        Name = 'PFBID'
-        Size = -1
-        Value = Null
-      end
-      item
-        Name = 'PKolonSayisi'
-        Size = -1
-        Value = Null
-      end>
   end
   object frxStokDetay: TfrxDBDataset
     UserName = 'StokDetay1'

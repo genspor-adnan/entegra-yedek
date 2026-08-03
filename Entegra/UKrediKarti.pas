@@ -18,7 +18,10 @@ uses
   dxSkinOffice2013LightGray, dxSkinOffice2013White, dxSkinOffice2016Colorful,
   dxSkinOffice2016Dark, dxSkinSevenClassic, dxSkinSharpPlus,
   dxSkinTheAsphaltWorld, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light, dxSkinVS2010, dxSkinWhiteprint;
+  dxSkinVisualStudio2013Light, dxSkinVS2010, dxSkinWhiteprint, dxCoreGraphics,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TKrediKarti = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -192,6 +195,13 @@ constructor TKrediKarti.Create(AOwner: TComponent);
 begin
   inherited;
   FEkleLogland := False;
+  if AktifVeriMotor = vmPG then begin
+    TabKK.UpdateOptions.RequestLive := True;
+    TabKK.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    TabKK.UpdateOptions.UpdateTableName := 'KREDIKARTI';
+    TabKK.UpdateOptions.KeyFields := 'ID';
+    TabKK.UpdateOptions.AutoIncFields := 'ID';
+  end;
 end;
 
 procedure TKrediKarti.cxButtonEdit1PropertiesButtonClick(Sender: TObject;AButtonIndex: Integer);
@@ -295,7 +305,10 @@ end;
 
 procedure TKrediKarti.IptalTusClick(Sender: TObject);
 begin
-   TabKK.Cancel;
+   if TabKK.State in [dsInsert, dsEdit] then
+      TabKK.Cancel;
+   if Assigned(FKapatEylemi) then   // kaydetmeden kapat -> listeye don (Kapat gibi)
+      FKapatEylemi(Self);
 end;
 
 procedure TKrediKarti.Kapatiliyor(var AKapansin: Boolean);
@@ -355,7 +368,7 @@ begin
 
     if islemOp='E' then begin
       Tablo.KasaKaydet(4001, StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)), StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.GENINI.BugunTrh)),0,'Açılış Fişi',
-              TabKK.FieldByName('ID').AsInteger, ComboKur.Text,'', 0,0,0,0,-1, -1,-1,-1,-1, SubeId,'V');
+         TabKK.FieldByName('ID').AsInteger, ComboKur.Text,'', 0,0,0,0,-1, -1,-1,-1,-1, SubeId,'V');
     end;
 end;
 
@@ -387,9 +400,9 @@ end;
 
 procedure TKrediKarti.TabKKNewRecord(DataSet: TDataSet);
 begin
-   islemOp:='E';
+   islemOp :='E';
    FEkleLogland := False;   // yeni insert basladi -> ekleme logu (kaydet/fallback) yeniden garanti
-   TabKK.FieldByName('DURUM').AsInteger := 1;
+   AlanBoolYaz(TabKK.FieldByName('DURUM'), True);   // DURUM PG'de boolean gelebilir -> .AsInteger:=1 patlar; tip-guvenli yaz
    TabKK.FieldByName('KUR').AsString := CariDoviz;
    TabKK.FieldByName('HESAP_KESIM_TARIHI').AsInteger := 1;
    TabKK.FieldByName('ODEME_GUN_SAYISI').AsInteger := 1;

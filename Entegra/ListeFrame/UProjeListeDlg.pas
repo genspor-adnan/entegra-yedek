@@ -279,7 +279,8 @@ type
 
 implementation
 
-uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, UIsListesi, UGorevDlg, System.JSON;
+uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly,
+  UTeklifListeDlg, UIsListesi, UGorevDlg, System.JSON, UVeriMotor;
 
 {$R *.dfm}
 
@@ -287,6 +288,38 @@ const
   MODUL_Proje = 2111;   // MODUL.MODULID = 'Projeler Liste' (KULLANICI_ARAMA.MODUL; Stok'ta MODUL_Stok=27 karsiligi)
 
 { TProjeListeDlg }
+
+function PgProjeGorevListeSQL(AProjeID: Integer; const AAcKapa: string; AGunSay: Integer): string;
+var
+  LWhere: string;
+begin
+  LWhere := ' where g.projeid=' + IntToStr(AProjeID) + ' ';
+  if AAcKapa = '0' then
+    LWhere := LWhere + ' and coalesce(g.ackapa,0)=0 '
+  else if AGunSay < 9999 then
+    LWhere := LWhere + ' and (coalesce(g.ackapa,0)=0 or coalesce(g.bitistarihi,g.degistirmetarihi,g.eklemetarihi) >= current_date - interval ''' + IntToStr(AGunSay) + ' day'') ';
+
+  Result :=
+    'select distinct ' +
+    'g.id, g.ackapa, g.listeid, g.id as gorev_id, g.konusu, ' +
+    '(select anahtar from genini where bolum=-21044 and dil=-1 and deger=g.turu limit 1)::varchar as turu, ' +
+    'g.ekleyen, g.rehberid, g.rehberid as reh_id, ' +
+    '(select r.firma from rehber r where r.id=g.rehberid limit 1)::varchar as cariad, ' +
+    '(select r.firma from rehber r where r.id=g.mus_ilgili limit 1)::varchar as mus_ilgili, ' +
+    '(select case when count(*)=0 then '''' else string_agg(k.kod, '' - '' order by gk.id) || '' -'' end from gorevkullanici gk inner join kullanici k on k.rehberid=gk.rehberid where gk.listgorevid=g.id)::varchar as atanan1, ' +
+    'g.baslamatarihi, g.bitistarihi, ' +
+    '(case when coalesce(g.tekrarid,0)>0 then 1 else 0 end)::smallint as tekrar_bit, ' +
+    '(case when coalesce(g.animsat,0)>0 then 1 else 0 end)::smallint as animsat_bit, ' +
+    'g.bayrak, g.durum, g.eklemetarihi, ' +
+    '(select p.projekodu from projeler p where p.id=g.projeid limit 1)::varchar as projekodu, ' +
+    '(select r.firma from rehber r where r.id=g.ekleyen limit 1)::varchar as ekleyenad, ' +
+    '(case when exists(select 1 from gorevyorum gy where gy.gorevid=g.id and gy.tur=1) then 1 else 0 end)::smallint as notlar_bit, ' +
+    '(case when exists(select 1 from gorevyorum gy where gy.gorevid=g.id and gy.tur=33) then 1 else 0 end)::smallint as yorum_bit, ' +
+    'g.bagidust, g.bagidalt ' +
+    'from gorevler g left join gorevliste gl on gl.id=g.listeid ' +
+    LWhere +
+    ' order by g.ackapa, g.baslamatarihi, g.ekleyen desc';
+end;
 
 procedure TProjeListeDlg.ListeDragDrop(Sender: TObject; Pos: TPoint; Value: TStrings);
 begin
@@ -570,7 +603,14 @@ begin
            GunSay := ComboTamamlanan.EditValue
         else
            GunSay := 9999;
-        TabloYenile(TabGorevler,[Kullanan, AcKapa,  GunSay, ProjeId]);
+        if AktifVeriMotor = vmPG then
+        begin
+          TabGorevler.Close;
+          TabGorevler.SQL.Text := PgProjeGorevListeSQL(ProjeId, AcKapa, GunSay);
+          TabloYenile(TabGorevler, []);
+        end
+        else
+          TabloYenile(TabGorevler,[Kullanan, AcKapa,  GunSay, ProjeId]);
     end
     else if PageControlSekme.ActivePage = TabYorumMedya then
         Tabloyenile(TabYorum,[Tabno_projeler, ProjeId]);

@@ -822,6 +822,7 @@ type
     procedure SetArama(const Value: TIKDlgGenelAramaFrame);
     function EkranAdiAl: string;
     procedure IlgiliAraEditPropertiesChange(Sender: TObject);
+    procedure PersonelIzinEkstreAc;
   public
     { public declarations }
     Gelis, AdSakla, SoyadSakla :string[20];
@@ -961,14 +962,47 @@ end;
 
 procedure TIKListeDlg.SetArama(const Value: TIKDlgGenelAramaFrame);
 begin
-  FArama := Value;
+  FArama  := Value;
 end;
 
 procedure TIKListeDlg.SETarihBasPropertiesChange(Sender: TObject);
 begin
-   //TabloYenile(PERSONELIZIN, [REHBER.Fields[0].AsInteger, SETarihBas.Value, SETarihBit.Value]);
-   PERSONELIZIN.SQL.Text := ' EXEC SP_Prg_IK_IzinEkstre  '+REHBER.Fields[0].AsString+','+SETarihBas.Text+','+SETarihBit.Text;
-   TabloYenile(PERSONELIZIN,[]);
+   PersonelIzinEkstreAc;
+end;
+
+procedure TIKListeDlg.PersonelIzinEkstreAc;
+var
+  LPgBasTar, LPgBitTar: string;
+begin
+  PERSONELIZIN.Close;
+  if AktifVeriMotor = vmPG then
+  begin
+    LPgBasTar := FormatDateTime('yyyy-mm-dd', VarToDateTime(SETarihBas.EditValue));
+    LPgBitTar := FormatDateTime('yyyy-mm-dd', VarToDateTime(SETarihBit.EditValue));
+    PERSONELIZIN.SQL.Text :=
+      '/*PGX*/ '+
+      'select PI.*, '+
+      'PI.IZINBASLANGIC as BASLAMA, '+
+      'coalesce(G.ANAHTAR, '''') as TUR, '+
+      'case when coalesce(nullif(PI.IZINTURU,'''')::integer, 0) = -1 then coalesce(PI.HAK, 0) else 0 end as HAKEDILEN, '+   // IZINTURU varchar -> int (PG)
+      'case when coalesce(nullif(PI.IZINTURU,'''')::integer, 0) <> -1 then coalesce(PI.IZINLIGUNSAYISI, 0) else 0 end as KULLANILAN, '+
+      'coalesce(PI.HAK, 0) - coalesce(PI.IZINLIGUNSAYISI, 0) as KALAN '+
+      'from PERSONELIZIN PI '+
+      'left join GENINI G on G.BOLUM='+IntToStr(Ops_IzinTurleri)+' and G.DIL='+IntToStr(Dil)+' and G.DEGER=nullif(PI.IZINTURU,'''')::integer '+   // IZINTURU varchar -> int (PG)
+      'where PI.REHBERID='+REHBER.Fields[0].AsString+' '+
+      'and PI.IZINBASLANGIC::date >= '''+LPgBasTar+'''::date '+
+      'and PI.IZINBASLANGIC::date <= '''+LPgBitTar+'''::date '+
+      'order by PI.IZINBASLANGIC';
+    PERSONELIZIN.UpdateOptions.UpdateTableName := 'PERSONELIZIN';
+    PERSONELIZIN.UpdateOptions.KeyFields := 'ID';
+    PERSONELIZIN.UpdateOptions.AutoIncFields := 'ID';
+    TabloYenile(PERSONELIZIN, []);
+  end
+  else
+  begin
+    PERSONELIZIN.SQL.Text :=  ' EXEC SP_Prg_IK_IzinEkstre  '+REHBER.Fields[0].AsString+','+SETarihBas.Text+','+SETarihBit.Text;
+    TabloYenile(PERSONELIZIN,[]);
+  end;
 end;
 
 procedure TIKListeDlg.SetFrameBilgi(AValue: TIcerikFrameBilgi);
@@ -1172,9 +1206,7 @@ end;
 
 procedure TIKListeDlg.PERSONELIZINAfterPost(DataSet: TDataSet);
 begin
-  PERSONELIZIN.Close;
-  if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
-  PERSONELIZIN.Open;
+  PersonelIzinEkstreAc;
 end;
 
 procedure TIKListeDlg.PERSONELIZINNewRecord(DataSet: TDataSet);
@@ -1448,9 +1480,7 @@ procedure TIKListeDlg.BtnDuzenlePerizinClick(Sender: TObject);
     Tablo.Query6.ParamByName('DEGISTIREN').value := Kullanan;
     Tablo.Query6.ParamByName('DEGISTIRMETARIHI').value := Tablo.GENINI.BugunTrh;
     Tablo.Query6.ExecSQL;
-    PERSONELIZIN.Close;
-    if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
-    PERSONELIZIN.Open;
+    PersonelIzinEkstreAc;
   end;
 var
   ctrls:TGirdiDenetimleri;
@@ -1701,6 +1731,9 @@ begin
       AFastReport.EnabledDataSets.Add(frxREHBER);
    end;
    AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
+   // Kullanici ek alanlari (_USER) rapora (IK karti REHBER tabanli).
+   if REHBER.Active and (not REHBER.IsEmpty) then
+      Tablo.UserAlanYazdirmaEkle(AFastReport, 'REHBER', REHBER.Fields[0].AsInteger);
 end;
 
 procedure TIKListeDlg.DeneyimEkleTusClick(Sender: TObject);
@@ -1812,9 +1845,7 @@ begin
   if not PERSONELIZIN.IsEmpty then
     if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PERSONELIZIN where ID=&DokID',['&DokID'],[PERSONELIZIN.FieldByName('ID').AsInteger]);
-       PERSONELIZIN.Close;
-       if AktifVeriMotor = vmPG then PERSONELIZIN.SQL.Text := PgSqlCevir(PERSONELIZIN.SQL.Text);
-       PERSONELIZIN.Open;
+       PersonelIzinEkstreAc;
     end;
 end;
 
@@ -3553,6 +3584,18 @@ begin
       TabloYenile(TabDil,[REHBER.Fields[0].AsInteger]);
   end else if PageControlSekme.ActivePage=TabSheetMaas then begin
       TabloYenile(TabUcret,[REHBER.Fields[0].AsInteger]);
+      if AktifVeriMotor = vmPG then
+      begin
+        TabKesinti.Close;
+        TabKesinti.SQL.Text :=
+          '/*PGX*/ '+
+          'select ID, ETIKET, TUTAR, KUR, SIRA, TARIH, ACIKLAMA, '+
+          'case PM.TUR when ''B'' then ''Banka'' when ''K'' then ''Kasa'' end as TUR '+
+          'from PLANMAAS PM '+
+          'where YER=1 and PM.YERID=:YERID '+
+          'and TARIH::timestamp > date_trunc(''month'', current_date - interval ''1 month'') '+
+          'order by TARIH';
+      end;
       TabloYenile(TabKesinti, [REHBER.Fields[0].AsInteger]);
       Tablo.TablodanSorguAc(1,'SELECT '+DbUst(1)+'TUTAR, KUR FROM PLANMAAS WHERE YER=51 AND YERID='+REHBER.Fields[0].AsString+' '+DbSinir(1));
       Tablo.TablodanSorguAc(4,'SELECT TUTAR FROM PLANMAAS WHERE YER=61 AND YERID='+REHBER.Fields[0].AsString);
@@ -3646,11 +3689,6 @@ begin
   FreeAndNil(RehberPersonelHareket);
 end;
 }
-
-
-
-
-
 
 
 

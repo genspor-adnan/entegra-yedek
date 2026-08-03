@@ -445,8 +445,8 @@ begin
       ShowMessage(BTWIBANGecersiz);
       Abort;
     end;}
-  //yeni ?ek giri?leri i?in ?ek serino kontrol?
-  if CekSenetTur < Sbt_Senet_Gelen then begin  //?EK ?SE
+  // Yeni cek girisleri icin cek serino kontrolu.
+  if CekSenetTur < Sbt_Senet_Gelen then begin  // Cek ise
       if DtsCekler.State=dsInsert then begin
          Tablo.Query1.Close;
          Tablo.Query1.SQL.Text:=' select * from CEKLER where SERINO = '+inttostr(StrToIntDef(EditCekSERINO.Text, 0));
@@ -458,7 +458,7 @@ begin
 
       if not Kontrol('BANKASUBELERID', CWKontBanka) then abort;
       if not Kontrol('ODEMEYERI', CWKontKesideYei) then abort;
-      if (SeriNoKontrol)and(CekSenetTur = Sbt_Cek_Giden) then begin//Verdi?imiz ?ekse serino kontrolu var
+      if (SeriNoKontrol)and(CekSenetTur = Sbt_Cek_Giden) then begin // Verdigimiz cekse serino kontrolu var.
         if TabCekler.State = dsInsert then
            s:='-1'
         else
@@ -661,7 +661,10 @@ end;
 procedure TCekWizardDlg.FormCreate(Sender: TObject);
 begin
    FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
-   LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+   // ANIMSAT gercek 0/1 bit ama global CPgBitAdlari'nda HARIC (baska tabloda deger tutar).
+   //   Kod .AsBoolean okuyup/yaziyor -> bu sorguya ozel bit->boolean maprule (Open'dan once, kalici).
+   PgSorguBoolAlan(TabCekler, 'ANIMSAT');
+   LocalizerOnFly.ProcessContainer(Self); // Dil yukleniyor.
    Tablo.WizardTurkcelestir(WizardKontrol);
    CekEkr.Title.Text:=jvCek;
    DokumanEkr.Title.Text:=jvDokuman;
@@ -712,7 +715,7 @@ begin
       CekEkr.Title.Text := CWCekCikBilg;
       LabelMasrafMerkezi.Caption := GelirMerkezi;
       ComboDURUM.RepositoryItem := Tablo.RepCekDurum_Verilen;
-      //ciro ve bor? bilgileri sadece al?nan ?ekler i?in. Altta sekmedikicirobilgileri ise biz?ek ald?pkime cirolad???m?zla ilgili..
+      // Ciro ve borc bilgileri sadece alinan cekler icin. Alttaki ciro bilgileri biz cek alip kime ciroladigimizla ilgili.
       TabloNo := TabNo_CEKLER_Verilen;
       CheckCIROLU.Visible := False;
       LabelBorclu.Visible := False;
@@ -724,7 +727,7 @@ begin
 
   TabloYenile(TabCekler, [CekID]);
   Yeri := 21;
-  ComboDURUM.EditValue:= Tur;
+  ComboDURUM.EditValue := Tur;
   DateTARIH.Date:= MakbuzTarih;
   SeriNoTus.Visible := (SeriNoKontrol)and(CekSenetTur = Sbt_Cek_Giden);
   EditCekSERINO.Properties.ReadOnly := SeriNoTus.Visible;
@@ -760,7 +763,7 @@ begin
   end;
 
     end;
-   'K':begin                   //TARIH de?eri farkl? olursa ayn? MAkbuzda g?r?nm?yor.g?r?ns?n diye TARI de?erinide kopyal?yor.
+   'K':begin                   // TARIH degeri farkli olursa ayni makbuzda gorunmuyor; gorunsun diye TARIH degerini de kopyaliyor.
       MakbuzNo:=SiradakiMakbuzNumarasi(Tur);
       YeniCekIDsi := Tablo.SQLSatiriKopyala('CEKLER', CekID,['SERINO', 'EKLEYEN','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
             [ 0, Kullanan, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
@@ -842,7 +845,7 @@ begin
      Islem := TabCekHareketler.FieldByName('ISLEM').AsInteger;
      Tablo.CekHareketiSil(TabCekler.FieldByName('ID').AsInteger,TabCekHareketler.FieldByName('ID').AsInteger);
      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set TUR= (select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+' order by TARIH desc '+DbSinir(1)+') where ID='+TabCekler.FieldByName('ID').AsString,[],[]);
-     if Islem in [136, 143] then //E?er i?lem tahsil edildi veya ?dendi ise hareket silinince kasadan da silinmeli
+     if Islem in [136, 143] then // Eger islem tahsil edildi veya odendi ise hareket silinince kasadan da silinmeli.
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where TUR in (51,53) and CEKSENETID='+TabCekler.FieldByName('ID').AsString, [], []);
      //TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
      TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
@@ -901,9 +904,9 @@ var Cagiran : SmallInt;
     Etiketler, Bilgiler: TArrayOfString;
 begin
    Application.CreateForm(TBankaSecimDlg, BankaSecimDlg);
-   if Tur in [130..139]  then
-      BankaSecimDlg.Cagiran := 4//4; //m??teri (genel) banka lastesi gelsin
-   else begin
+   if Tur in [130..139]  then begin
+      BankaSecimDlg.Cagiran := 4; // Musteri (genel) banka listesi gelsin.
+   end else begin
       BankaSecimDlg.RehberId := '-1';
       BankaSecimDlg.Cagiran := 21;// bizim hesap listemiz
    end;
@@ -912,7 +915,7 @@ begin
       TabCekler.Edit;
       TabCekler.FieldByname('BANKASUBELERID').AsString := BankaSecimDlg.TabSubeler.FieldByname('SUBEID').AsString;
       TabloYenile(TabBankalar, [TabCekler.FieldByName('BANKASUBELERID').AsInteger]);
-      if CekSenetTur = Sbt_Cek_Giden then begin//bizim ?ekimiz; hesapno yu da doldural?m
+      if CekSenetTur = Sbt_Cek_Giden then begin // Bizim cekimiz; hesap noyu da dolduralim.
          TabCekler.FieldByname('KUR').AsString := BankaSecimDlg.TabSubeler.FieldByname('KUR').AsString;
          ComboKUR.Enabled := False;
          TabCekler.FieldByname('HESAPNO').AsString := BankaSecimDlg.TabSubeler.FieldByname('HESAPNO').AsString;
@@ -1040,6 +1043,20 @@ procedure TCekWizardDlg.TabCeklerAfterOpen(DataSet: TDataSet);
 var w:Word;
     ProjeID, MasrafID : integer;
 begin
+  if AktifVeriMotor = vmPG then
+  begin
+    // PG driver kolon-koken metasi vermez -> C.* yaninda hesaplanan alanlari (SONHAREKET/YAZIYLATOPLAM)
+    //   Post'ta INSERT/UPDATE'e katiyor ("syntax near ,"). Hedef tablo CEKLER, hesaplananlar ProviderFlags:=[].
+    //   Dinamik alanlar her acilista sifirlandigi icin AfterOpen'da uygulanir (MSSQL'de origin metasi var -> etkisiz).
+    TabCekler.UpdateOptions.UpdateTableName := 'CEKLER';
+    TabCekler.UpdateOptions.KeyFields := 'ID';
+    TabCekler.UpdateOptions.AutoIncFields := 'ID';
+    TabCekler.UpdateOptions.UpdateMode := upWhereKeyOnly;
+    if TabCekler.FindField('SONHAREKET') <> nil then
+       TabCekler.FieldByName('SONHAREKET').ProviderFlags := [];
+    if TabCekler.FindField('YAZIYLATOPLAM') <> nil then
+       TabCekler.FieldByName('YAZIYLATOPLAM').ProviderFlags := [];
+  end;
   if TabCekler.FieldByName('ID').AsString='' then begin
      ProjeID :=0;
      MasrafID:=0;
@@ -1065,6 +1082,10 @@ begin
 end;
 
 procedure TCekWizardDlg.TabCeklerAfterPost(DataSet: TDataSet);
+var
+  LDovizTutar, LTutar: Double;
+  LDovizKuru, LKur: string;
+  LKurGecerli: Boolean;
 begin
   case islemOp of
    'E' : if CekSenetTur = Sbt_Cek_Giden then
@@ -1072,44 +1093,63 @@ begin
    // KART loglama artik finish'te TEK SEFER yapiliyor (WizardKontrolFinishButtonClick).
   end;
   CekID := TabCekler.Fields[0].AsInteger;
-  //ilk ?ek hareketini yoksa ekliyoruz..
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'if not exists (select 1 from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString+') '+
-          'insert into CEKHAREKET(CEKSENETLERID,TARIH,ISLEM,DOVIZ_TUTARI,DOVIZ_KURU, REHBERID,BILGI,SUBEID,TIP,BELGENO,DURUM) VALUES('+
-  TabCekler.FieldByName('ID').AsString+','''+
-  FormatDateTime('yyyy-mm-dd hh:nn',TabCekler.FieldByName('TARIH').AsDateTime)+''','+
-  TabCekler.FieldByName('TUR').AsString+','+
-  Float_ToStr(TabCekler.FieldByName('DOVIZ_TUTARI').AsCurrency)+','+
-  ''''+TabCekler.FieldByName('DOVIZ_KURU').AsString+''','+
-  TabCekler.FieldByName('REHBERID').AsString+',''Yeni ?ek'','+IntToStr(SubeId)+',1,'''+
-  TabCekler.FieldByName('MAKBUZNO').AsString+''',1)',[],[]); //ge?ici, sallama bir belgeno olu?turuyoruz..
+  // Ilk cek hareketini yoksa ekliyoruz.
+  // MSSQL "if not exists(...) insert" idiomu PG'de gecersiz (syntax near if). Portable:
+  //   insert ... select <deger> where not exists(...) -> iki motorda da calisir.
+  // NOT: placeholder '&AD' konvansiyonu (InitSql). '$AD$' KULLANMA -> PG dollar-quoting ile cakisir
+  //   ($CEKID$...$CEKID$ = tek string literal) -> insert kirilir, AfterPost hatasi yutulur (kart zaten commit).
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'insert into CEKHAREKET(CEKSENETLERID,TARIH,ISLEM,DOVIZ_TUTARI,DOVIZ_KURU,REHBERID,BILGI,SUBEID,TIP,BELGENO,DURUM) '+
+    'select &CEKID,&TARIH,&ISLEM,&DOVIZTUTAR,&DOVIZKURU,&REHBERID,&BILGI,&SUBEID,1,&BELGENO,1 '+
+    'where not exists (select 1 from CEKHAREKET where CEKSENETLERID=&CEKID)',
+    ['&CEKID','&TARIH','&ISLEM','&DOVIZTUTAR','&DOVIZKURU','&REHBERID','&BILGI','&SUBEID','&BELGENO'],
+    [TabCekler.FieldByName('ID').AsInteger,
+     FormatDateTime('yyyy-mm-dd hh:nn',TabCekler.FieldByName('TARIH').AsDateTime),
+     TabCekler.FieldByName('TUR').AsInteger,
+     TabCekler.FieldByName('DOVIZ_TUTARI').AsCurrency,
+     TabCekler.FieldByName('DOVIZ_KURU').AsString,
+     TabCekler.FieldByName('REHBERID').AsInteger,
+     'Yeni Çek',
+     SubeId,
+     TabCekler.FieldByName('MAKBUZNO').AsString]); // Gecici, sallama bir belgeno olusturuyoruz.
   DokumanTus.Enabled := True;
   TarihceTus.Enabled := True;
 
   TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
   TabCekHareketler.First;
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set BELGENO='''+TabCekler.FieldByName('MAKBUZNO').AsString+''', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn',TabCekler.FieldByName('TARIH').AsDateTime)+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update CEKHAREKET set BELGENO='''+TabCekler.FieldByName('MAKBUZNO').AsString+''', TARIH='''+FormatDateTime('yyyy-mm-dd hh:nn',TabCekler.FieldByName('TARIH').AsDateTime)+''' where ID='+TabCekHareketler.FieldByName('ID').AsString,[],[]);
   TabloYenile(TabCekHareketler,[TabCekler.FieldByName('ID').AsInteger]);
   TabCekHareketler.First;
+  LKurGecerli := True;
   if CariDoviz = TabCekler.FieldByName('KUR').AsString then begin
-    if TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean then
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set DOVIZ_TUTARI=$P1$,DOVIZ_KURU=$P2$,TUTAR=$P3$,KUR=$P4$,EKSTREDEKULLAN=$EK$ where ID=$CekHarID$',
-          ['$P1$','$P2$','$P3$','$P4$','$EK$','$CekHarID$'],
-          [TabCekler.FieldByName('TUTAR').AsFloat,TabCekler.FieldByName('KUR').AsString,TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat,TabCekler.FieldByName('DOVIZ_KURU').AsString,IIF(TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean,1,0),TabCekHareketler.FieldByName('ID').AsInteger])
-    else
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set DOVIZ_TUTARI=$P1$,DOVIZ_KURU=$P2$,TUTAR=$P3$,KUR=$P4$,EKSTREDEKULLAN=$EK$ where ID=$CekHarID$',
-          ['$P1$','$P2$','$P3$','$P4$','$EK$','$CekHarID$'],
-          [TabCekler.FieldByName('TUTAR').AsFloat,TabCekler.FieldByName('KUR').AsString,TabCekler.FieldByName('TUTAR').AsFloat,TabCekler.FieldByName('KUR').AsString,IIF(TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean,1,0),TabCekHareketler.FieldByName('ID').AsInteger])
-  end else if CariDoviz = TabCekler.FieldByName('DOVIZ_KURU').AsString then begin
-    if TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean then
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set DOVIZ_TUTARI=$P1$,DOVIZ_KURU=$P2$,TUTAR=$P3$,KUR=$P4$,EKSTREDEKULLAN=$EK$ where ID=$CekHarID$',
-          ['$P1$','$P2$','$P3$','$P4$','$EK$','$CekHarID$'],
-          [TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat,TabCekler.FieldByName('DOVIZ_KURU').AsString,TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat,TabCekler.FieldByName('DOVIZ_KURU').AsString,IIF(TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean,1,0),TabCekHareketler.FieldByName('ID').AsInteger])
-    else
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set DOVIZ_TUTARI=$P1$,DOVIZ_KURU=$P2$,TUTAR=$P3$,KUR=$P4$,EKSTREDEKULLAN=$EK$ where ID=$CekHarID$',
-          ['$P1$','$P2$','$P3$','$P4$','$EK$','$CekHarID$'],
-          [TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat,TabCekler.FieldByName('DOVIZ_KURU').AsString,TabCekler.FieldByName('TUTAR').AsFloat,TabCekler.FieldByName('KUR').AsString,IIF(TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean,1,0),TabCekHareketler.FieldByName('ID').AsInteger])
-  end else
-     Tablo.UyariGoster(Uyari,'Kur Bilgisi Hatal? Olabilir. L?tfen '+CariDoviz+' Kullan?n.');
+    LDovizTutar := TabCekler.FieldByName('TUTAR').AsFloat;
+    LDovizKuru := TabCekler.FieldByName('KUR').AsString;
+    if TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean then begin
+      LTutar := TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat;
+      LKur := TabCekler.FieldByName('DOVIZ_KURU').AsString;
+    end else begin
+      LTutar := TabCekler.FieldByName('TUTAR').AsFloat;
+      LKur := TabCekler.FieldByName('KUR').AsString;
+    end;
+  end else if CariDoviz = TabCekler.FieldByName('DOVIZ_KURU').AsString then  begin
+    LDovizTutar := TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat;
+    LDovizKuru := TabCekler.FieldByName('DOVIZ_KURU').AsString;
+    if TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean then begin
+      LTutar := TabCekler.FieldByName('DOVIZ_TUTARI').AsFloat;
+      LKur := TabCekler.FieldByName('DOVIZ_KURU').AsString;
+    end else begin
+      LTutar := TabCekler.FieldByName('TUTAR').AsFloat;
+      LKur := TabCekler.FieldByName('KUR').AsString;
+    end;
+  end else begin
+     Tablo.UyariGoster(Uyari,'Kur Bilgisi Hatalı Olabilir. Lütfen '+CariDoviz+' Kullanın.');
+     LKurGecerli := False;
+  end;
+
+  if LKurGecerli then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update CEKHAREKET set DOVIZ_TUTARI=$P1$,DOVIZ_KURU=$P2$,TUTAR=$P3$,KUR=$P4$,EKSTREDEKULLAN=$EK$ where ID=$CekHarID$',
+       ['$P1$','$P2$','$P3$','$P4$','$EK$','$CekHarID$'],
+       [LDovizTutar,LDovizKuru,LTutar,LKur,IIF(TabCekler.FieldByName('EKSTREDEKULLAN').AsBoolean,1,0),TabCekHareketler.FieldByName('ID').AsInteger]);
 
   if CekHareketID<1 then
      CekHareketID := TabCekHareketler.FieldByName('ID').AsInteger;
@@ -1130,7 +1170,7 @@ begin
   ULog.OturumYakala(FOturumID);   // LAZY: cek post -> yakala
   BoslukKontrolu;
 
-   //Daha ?nce eklendi kontrol? yapal?m
+   // Daha once eklendi kontrolu yapalim.
    if (Veritabani.VeriVarMi(Tablo.FDCnn,'select * from CEKLER where ID<>'+IntToStr(TabCekler.Fields[0].AsInteger)+' and REHBERID='+IntToStr(TabCekler.FieldByName('REHBERID').AsInteger)+
          ' and VADE between '''+FormatDateTime('yyyy-mm-dd 00:00',DateKesideTarihi.Date)+'''  and '''+FormatDateTime('yyyy-mm-dd 23:59:59',DateKesideTarihi.Date)+''''+
          ' and TUR='+IntToStr(TabCekler.FieldByName('TUR').AsInteger)+' and  '+EditTUTAR.DataBinding.DataField+'='+ Float_ToStr(EditTUTAR.Value),[],[]))
@@ -1174,8 +1214,8 @@ begin
 
 //  if (ComboKur.EditValue = ComboDovKur.EditValue) and (EditKulKur.EditValue = 1) then
 //      TabCekler.FieldByName('DOVIZ_TUTARI').Value := TabCekler.FieldByName(EditTutar.DataBinding.DataField).Value;
-  //Burada muhasebe program?na entegrasyon i?in MUHKODU alan?na duruma g?re Hesapplan?ndaki hesap kodunu yazar?z
-  if ComboDurum.EditValue=1 then //portf?yde ise
+  // Burada muhasebe programina entegrasyon icin MUHKODU alanina duruma gore hesap planindaki hesap kodunu yazariz.
+  if ComboDurum.EditValue=1 then // Portfoyde ise
      TabCekler.FieldByName('MUHKODU').AsString := MuhKoduGetir(Tur, ComboDurum.EditValue, ComboKUR.Text);
 end;
 
@@ -1219,11 +1259,11 @@ begin
   // Iptal onayi (Gentegre Onay): Evet=Kaydet(finish), Hayir=Kaydetme(asagi/geri-al), Iptal=Geri Don.
   if ULog.OturumYakalandiMi(FOturumID) or ((TabCekler.State in [dsEdit, dsInsert]) and TabCekler.Modified) then
     case Application.MessageBox(PChar(KaydetmeSorusu), PChar(SGenotipOnay), MB_YESNOCANCEL) of
-      IDYES:    begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
-      IDCANCEL: begin ModalResult := mrNone; Exit; end;                                         // Geri Don
+      IDYES:     begin ModalResult := mrNone; WizardKontrolFinishButtonClick(Self); Exit; end;  // Kaydet
+      IDCANCEL:  begin ModalResult := mrNone; Exit; end;                                         // Geri Don
       // IDNO: Kaydetme -> asagi devam (mevcut iptal/geri-al mantigi calisir)
     end;
-  if IslemOp in ['E','K'] then begin // e?er yeni kay?tsa ve TabCekler edildiyse kaydedilmi? bilgilir silinmesi laz?m
+  if IslemOp in ['E','K'] then begin // Eger yeni kayitsa ve TabCekler edit edildiyse kaydedilmis bilgilerin silinmesi lazim.
       if (TabCekler.Active) and (TabCekler.FieldByName('ID').AsString <> '') then
            Tablo.CekSil(TabCekler.FieldByName('ID').AsInteger);
       FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
@@ -1236,7 +1276,7 @@ begin
     FOturumID := '';
   end;
   if CiroGirisMi then begin
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update CEKLER set CIROLU=0 ,DURUM=1,CIROREHBERID=0,CIROMAKBUZNO=0,CIROMASRAFID=0 Where ID=&ID and TUR=130 and DURUM=4 ',['&ID'],[TabCekler.FieldByName('ID').AsInteger]);
+     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'Update CEKLER set CIROLU=0 ,DURUM=1,CIROREHBERID=0,CIROMAKBUZNO=0,CIROMASRAFID=0 Where ID=&ID and TUR=130 and DURUM=4 ',['&ID'],[TabCekler.FieldByName('ID').AsInteger]);
      CiroGirisMi:=False;
      ModalResult := mrCancel;
   end;
@@ -1274,7 +1314,7 @@ begin
      end;
   end;
 
-//  if (OncekiProjeId <> BEditProje.Tag)or(OncekiMasrafId <> EditMM.Tag)then begin//de?i?iklik varsa
+//  if (OncekiProjeId <> BEditProje.Tag)or(OncekiMasrafId <> EditMM.Tag)then begin // Degisiklik varsa
 //      Tablo.tablodansorguAc(1,' select min(ID) from CEKHAREKET where CEKSENETLERID='+TabCekler.FieldByName('ID').AsString);
 //      Tablo.CokluProjeMAsrafIslemleri(TabNo_CEKLER_Hareket, Tablo.Query1.Fields[0].AsInteger ,OncekiProjeId, OncekiMasrafId, BEditProje.Tag, EditMM.Tag, EditTutar.Value, ComboKur.Text);
 //  end;

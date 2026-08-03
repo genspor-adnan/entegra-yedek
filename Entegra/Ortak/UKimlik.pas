@@ -122,7 +122,7 @@ var
 implementation
 
 {$R *.DFM}
-uses UTablo, UAraDlg, Udoktor;
+uses UTablo, UAraDlg, Udoktor, UVeriMotor;
 
 var
    dtar, DosyanoRakSay : SmallInt;
@@ -249,6 +249,19 @@ end;
 
 procedure TKimlikDlg.AppException(Sender: TObject; E: Exception);
 begin
+  // PG guvenlik agi: PG'de basarisiz bir sorgu transaction'i abORT eder ve SONRAKI tum komutlar
+  //   "current transaction is aborted" ile reddedilir -> baglanti (Tablo.FDCnn) donuncaya kadar
+  //   kitlenir (MSSQL'de her komut autocommit oldugu icin bu olmaz). Ele alinmayan bir hata global
+  //   handler'a dustuyse islem zaten bitti -> acik/abort transaction'i geri al ki oturum kilitlenmesin.
+  //   YALNIZ vmPG (MSSQL davranisi aynen korunur); rollback'i sarmala (tx yoksa hata vermesin).
+  if (AktifVeriMotor = vmPG) and Assigned(Tablo) and Assigned(Tablo.FDCnn) then
+    try
+      if Tablo.FDCnn.InTransaction then
+        Tablo.FDCnn.Rollback;
+    except
+      // rollback basarisiz olsa da asil hatayi gostermeye devam et
+    end;
+
   if pos('Key violation', E.Message) > 0  then
      showmessage('Aynı numara ya da isimle kayıtlı bilgi var!!!')
   else if pos('not a valid date', E.Message) > 0  then begin

@@ -461,6 +461,7 @@ object DokumanListeFrame: TDokumanListeFrame
     AlignSplitter = salBottom
     Control = PageDokuman
     Visible = False
+    ExplicitWidth = 8
   end
   object PageDokuman: TcxPageControl
     Left = 0
@@ -479,6 +480,9 @@ object DokumanListeFrame: TDokumanListeFrame
     object TabSheetGenel: TcxTabSheet
       Caption = '  Genel  '
       ImageIndex = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelGenel: TPanel
         Left = 0
         Top = 0
@@ -952,6 +956,9 @@ object DokumanListeFrame: TDokumanListeFrame
     object TabSheetRevize: TcxTabSheet
       Caption = 'Revize'
       ImageIndex = 1
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridAktDetay: TcxGrid
         Left = 0
         Top = 0
@@ -1036,6 +1043,9 @@ object DokumanListeFrame: TDokumanListeFrame
     object TabSheetIlgili: TcxTabSheet
       Caption = ' '#304'lgili Dok'#252'man '
       ImageIndex = 2
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridIlgili: TcxGrid
         Left = 0
         Top = 0
@@ -1092,6 +1102,9 @@ object DokumanListeFrame: TDokumanListeFrame
     object TabSheetYetki: TcxTabSheet
       Caption = 'Yetkilendirme'
       ImageIndex = 3
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridYetki: TcxGrid
         Left = 0
         Top = 0

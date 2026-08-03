@@ -19,26 +19,11 @@
 -- ============================================================
 DROP FUNCTION IF EXISTS public.fn_prog_fisler_liste_json2(text, text);
 CREATE FUNCTION public.fn_prog_fisler_liste_json2(p_baslik text DEFAULT '', p_kosullar text DEFAULT '{}')
-RETURNS TABLE(
-    id integer, tarih timestamp, tur smallint, tipi smallint, rehberid integer, projeid integer,
-    aktiviteid integer, anakayitid integer, faturatarih timestamp, kocanno integer, faturaseri varchar,
-    faturano varchar, girisdepo smallint, cikisdepo smallint, baslik varchar, adres varchar, ilce varchar,
-    il varchar, vd varchar, vno varchar, kdvdurum varchar, lotno varchar, fatura_gon_tarihi timestamp,
-    fatura_matrahi numeric, kdv_tutari numeric, ekvergi numeric, fatura_tutari numeric, kur varchar,
-    doviz_tutari numeric, doviz_cinsi varchar, kasa smallint, onay smallint, sayfa smallint, masrafid smallint,
-    aciklama varchar, isyeri smallint, bolum smallint, fatura_maliyeti_ort numeric, saticikodu integer,
-    durum smallint, irsaliye_tipi smallint, odemeplani smallint, ozelkod varchar, yetkikodu varchar,
-    fiyat_listesi smallint, stokisk double precision, vade smallint, r smallint, irsaliyeno varchar,
-    irsaliyetarih timestamp, planid integer, ekleyen integer, eklemetarihi timestamp, degistiren integer,
-    degistirmetarihi timestamp, kasatakipid integer, detaybolumu varchar, dovizkur numeric,
-    acik_kapali smallint, dil smallint, sayfasay smallint, rehberiletid integer, subeid smallint,
-    baglifaturaid integer, muhaktar smallint, aktarmatarihi timestamp, yeri smallint, yerid integer,
-    lokasyon integer, onaylayan integer, girissube smallint, zarfid integer, irsaliyeli smallint,
-    merkezid integer, efaturadurum smallint, donusumturu integer, yazdirildi smallint, efaturasonuc smallint,
-    senaryo smallint, ekstredekullan smallint, giriskaynak smallint, rapordoviz varchar, faturadovizi varchar,
-    servisid integer, aciklama2 varchar, demirbasid integer, ozelkod2 varchar, pozno integer,
-    atlantis_fatbasid integer, sanal smallint
-)
+-- Cikti = fatbaslik'in TAMAMI (RETURN QUERY 'SELECT DISTINCT fb.*'; p_baslik kullanilmiyor).
+--   Elle-yazili RETURNS TABLE listesi fatbaslik semasindan KAYIYORDU (kolon 89 tip uyusmazligi:
+--   "structure of query does not match function result type"). SETOF fatbaslik ile otomatik eslesir,
+--   fatbaslik'a kolon eklendikce kirilmaz.
+RETURNS SETOF public.fatbaslik
 LANGUAGE plpgsql STABLE AS $$
 #variable_conflict use_column
 DECLARE
@@ -61,6 +46,15 @@ DECLARE
     v_inner text;
     v_sql text;
 BEGIN
+    -- Gecersiz/sifir tarih (or. bos takvimden '0000-00-00 00:00') -> filtre YOK. MSSQL toleransliydi
+    --   ama PG ::timestamp "date/time field value out of range" atar. Gecerli mi diye dene, degilse NULL.
+    IF v_tarihbas IS NOT NULL THEN
+        BEGIN PERFORM v_tarihbas::timestamp; EXCEPTION WHEN others THEN v_tarihbas := NULL; END;
+    END IF;
+    IF v_tarihbit IS NOT NULL THEN
+        BEGIN PERFORM v_tarihbit::timestamp; EXCEPTION WHEN others THEN v_tarihbit := NULL; END;
+    END IF;
+
     IF v_mod IN (3, 5) AND v_kulid IS NOT NULL AND v_modul IS NOT NULL THEN
         -- Son(5)/Sik(3): kullanicinin actigi fisler (EXISTS suzgec). Tarih/depo/tipi/stok
         -- suzgecleri UYGULANMAZ (gecmis tum kayitlar), yalniz fb.tur korunur.

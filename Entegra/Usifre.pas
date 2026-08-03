@@ -40,6 +40,7 @@ type
     LabelAd: TLabel;
     LabelSifreDegis: TcxLabel;
     LabelSifreUnuttum: TcxLabel;
+    LabelSQL: TcxLabel;
     procedure FormShow(Sender: TObject);
     procedure OKBtnClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -216,6 +217,12 @@ begin
   end;
   //cbLanguages.EditValue := GenRegIni.RegReadString('DilAyarlari','KullanimdakiDil','1','C');
   //cbLanguages.Properties.OnEditValueChanged := cbLanguagesPropertiesEditValueChanged;
+
+  // Aktif veri motorunu goster (MSSQL / PostgreSQL).
+  if AktifVeriMotor = vmPG then
+    LabelSQL.Caption := 'PostgreSQL'
+  else
+    LabelSQL.Caption := 'MSSQL';
 end;
 
 procedure TPasswordDlg.OKBtnClick(Sender: TObject);
@@ -260,8 +267,11 @@ begin
   s := VTSifreKontrolu(GenRegIni,Tablo.FDCnn, True);
   if s <> '' then begin
     ServerAdi := s;
-    ModalResult := mrCancel;
-    Kapat := True;
+    // Motor/sunucu değiştikten sonra login'i KAPATMA; kullanıcı listesini yeni
+    //   bağlantıdan yeniden yükle, motor etiketini (LabelSQL) tazele, aynı ekranda
+    //   yeni motorla girişe devam et.
+    FormCreate(Nil);
+    FormShow(Nil);
   end;
 end;
 

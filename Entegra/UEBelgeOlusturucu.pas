@@ -194,6 +194,89 @@ type
     Baslik: string;
   end;
 
+function EBelgeGidenBaslikSQL(AFatBaslikID: Integer): string;
+begin
+  if AktifVeriMotor <> vmPG then begin
+    Result := 'exec dbo.sp_Prog_EBelge_GidenFatura @ID=' + IntToStr(AFatBaslikID);
+    Exit;
+  end;
+
+  Result :=
+    'select ' +
+    'FB.ID, FB.TUR, FB.TUR as BELGETURU, ' +
+    'case FB.TUR when 14 then ''E-Irsaliye'' when 15 then ''E-Fatura'' end as BELGETURADI, ' +
+    'FB.FATURATARIH, replace(ltrim(rtrim(coalesce(FB.VNO,''''))), '' '', '''') as VNO, FB.VD, ' +
+    'coalesce(nullif(FB.BASLIK,''''), R.FIRMA) as BASLIK, R.KOD as CARIKOD, R.FIRMA as CARIUNVAN, ' +
+    'FB.FATURA_MATRAHI, FB.FATURA_TUTARI, FB.KDV_TUTARI, FB.EKVERGI, FB.FATURASERI, FB.FATURANO, FB.KDVDURUM, ' +
+    'case when FB.TUR=15 and coalesce(FB.SENARYO,1) in (1,2,3,7,8) then FB.SENARYO ' +
+    'when FB.EFATURADURUM in (51,52) then 6 when FB.EFATURADURUM in (11,12,31,32) then 4 else coalesce(FB.SENARYO,1) end as SENARYO, ' +
+    'FB.IL, FB.ILCE, FB.ADRES, FB.ACIKLAMA, coalesce(FB.ACIKLAMA2,'''') as ACIKLAMA2, coalesce(nullif(FB.KUR,''''),''TL'') as KUR, ' +
+    'FB.TIPI, FB.PLANID, FB.REHBERID, FB.DOVIZ_TUTARI, FB.DOVIZ_CINSI, FB.DOVIZKUR, coalesce(nullif(FB.FATURADOVIZI,''''),''TL'') as FATURADOVIZI, ' +
+    'FB.SUBEID, FB.GIRISDEPO, FB.CIKISDEPO, FB.IRSALIYENO, FB.IRSALIYETARIH, FB.EFATURADURUM, FB.EFATURASONUC, ' +
+    'FB.EKLEYEN, FB.EKLEMETARIHI, FB.DEGISTIREN, FB.DEGISTIRMETARIHI, ' +
+    'EB.ID as EBELGEID, coalesce(EB.DURUM,0) as EBDURUM, coalesce(EB.UUID,'''') as EBUUID, coalesce(EB.BELGENO,'''') as EBBELGENO, ' +
+    'coalesce(EB.GONDERICIALIAS,'''') as GONDERICIALIAS, coalesce(nullif(EB.ALICIALIAS,''''), RA.ALIAS, '''') as ALICIALIAS, ' +
+    'case when EB.ID is null then false else true end as EBELGEOLUSTU, EH.ISLEMTURU as SONISLEMTURU, EH.HTTPKODU as SONHTTPKODU, ' +
+    'EH.SERVISKODU as SONSERVISKODU, EH.HATAKODU as SONHATAKODU, EH.HATAMESAJI as SONHATAMESAJI, ' +
+    'EB.ID as EiInvoiceId, R.ID as EiCustomerId, R.FIRMA as EiCustomerName, coalesce(EB.DURUM,0) as EiStatus, coalesce(EB.BELGENO,'''') as EiInvoiceNo, ' +
+    'false as EiIsIncomingInvoice, EH.SERVISKODU as EiProviderStatus, EB.UUID as EiUuId, case when EB.ID is null then false else true end as EiInvoiceCreated, ' +
+    'true as EiAutomationInvoiceCreated, null::integer as EiAutomationId, FB.ID::varchar(15) as EiSysInvoiceNo, R.FIRMA as EiSysCustomerName, ' +
+    'EH.HATAMESAJI as EiProviderDescription, case when coalesce(EB.DURUM,0)=4 then EH.HATAMESAJI else null end as EiRejectionReason, ' +
+    'case when FB.EFATURADURUM in (11,12,31,32) then true else false end as EiIsEArchive, ' +
+    'case when FB.TUR=14 then 7 when FB.EFATURADURUM in (11,12) then 2 when FB.EFATURADURUM in (21,22) then 3 when FB.EFATURADURUM in (31,32) then 4 else 1 end as EiInvoiceKind, ' +
+    'case when FB.TUR=14 then true else false end as EiIsEWayBill, ''''::varchar(100) as CarrierName, ''''::varchar(100) as CarrierSurname, ''''::varchar(50) as CarrierIdentification, ' +
+    'case when exists (select 1 from FATURA F where F.FATBASID=FB.ID and F.YERI=411) then ''IRSALIYE YERINE GECER'' else '''' end as IRSALIYE_YAZI, ' +
+    'coalesce(FBU.KURUM,'''')::varchar(150) as KURUM, ''''::varchar(150) as KURUMADRES, coalesce(FBU.ISLEMNO,'''')::varchar(50) as ISLEMNO, ' +
+    'coalesce(FBU.HASTA,'''') as HASTA, coalesce(to_char(FBU.OPERASYONTARIHI,''DD.MM.YYYY''),'''')::varchar(10) as OPERASYONTARIHI ' +
+    'from FATBASLIK FB ' +
+    'inner join REHBER R on R.ID=FB.REHBERID ' +
+    'left join FATBASLIK_USER FBU on FBU.ID=FB.ID ' +
+    'left join lateral (select E.* from ' + DepoTablo('EBELGE') + ' E where E.FATBASLIKID=FB.ID and E.YON=1 order by E.ID desc limit 1) EB on true ' +
+    'left join lateral (select H.ISLEMTURU,H.HTTPKODU,H.SERVISKODU,H.HATAKODU,H.HATAMESAJI from ' + DepoTablo('EBELGEMESAJ') + ' H where H.EBELGEID=EB.ID order by H.ID desc limit 1) EH on true ' +
+    'left join lateral (select A.ALIAS from REHBERALIAS A where A.REHBERID=FB.REHBERID and A.BELGETURU=FB.TUR and A.AKTIF=1 order by A.VARSAYILAN desc,A.ID limit 1) RA on true ' +
+    'where FB.ID=' + IntToStr(AFatBaslikID) + ' and FB.TUR in (14,15) and coalesce(FB.DURUM,0)<>6';
+end;
+
+function EBelgeGidenDetaySQL(AFatBaslikID: Integer): string;
+begin
+  if AktifVeriMotor <> vmPG then begin
+    Result := 'exec dbo.sp_Prog_EBelge_GidenFaturaDetay @invoiceId=' + IntToStr(AFatBaslikID);
+    Exit;
+  end;
+
+  Result :=
+    'select F.*, row_number() over(order by case when coalesce(F.SIRA,0)=0 then 2147483647 else F.SIRA end, F.ID) as LineNumber, ' +
+    'case when F.TUR in (1,11) then S.STOKADI else MG.AD end as ProductName, ' +
+    'case when F.TUR in (1,11) then S.KOD else MG.KOD end as ProductCode, ' +
+    'case when R.OZELKOD=''DMO'' and F.TUR in (1,11) then SU.SMKODU when coalesce(R.OZELKOD,'''')<>''DMO'' and F.TUR in (1,11) then S.KOD else MG.KOD end as BuyersItemCode, ' +
+    'case when F.TUR in (1,11) then S.URUNNO else MG.KOD end as ManufacturersItemCode, ' +
+    'case when F.TUR in (1,11) then coalesce(S.URUNNO,'''') else '''' end as BARKOD, U.ANAHTAR as UnitName, ' +
+    'case F.BIRIM when 10 then ''MIN'' when 11 then ''HUR'' when 12 then ''DAY'' when 51 then ''C62'' when 52 then ''MTR'' when 53 then ''CS'' when 54 then ''SET'' when 55 then ''SET'' when 56 then ''BX'' when 57 then ''KGM'' when 58 then ''MTK'' when 59 then ''PF'' else ''C62'' end as UnitCodeConverted, ' +
+    'case when R.OZELKOD=''DMO'' and F.TUR in (1,11) then coalesce(SU.SUTKODU,'''') when F.TUR in (1,11) then coalesce(MODELG.ANAHTAR,'''') else '''' end as ModelName, ' +
+    'case when FB.TUR=14 and R.OZELKOD=''DMO'' and F.TUR in (1,11) then coalesce(SU.DMOKODU,'''') when FB.TUR=15 and R.OZELKOD=''IHALE'' and F.TUR in (1,11) then coalesce(SU.IHALESIRANO,'''') when F.TUR in (1,11) then coalesce(MARKA.ANAHTAR,'''') else '''' end as BrandName, ' +
+    'case when F.TUR in (1,11) then coalesce(MARKA.ANAHTAR,'''') else '''' end as ManufacturerName, ' +
+    'coalesce(IZLEM.SERINO,'''') as SERINO, coalesce(IZLEM.LOTNO,'''') as LOTNO, coalesce(IZLEM.AdditionalItemIdentification,'''') as AdditionalItemIdentification, coalesce(IZLEM.Note,'''') as Note, coalesce(S.GTIP,'''') as GTIP ' +
+    'from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID inner join REHBER R on R.ID=FB.REHBERID ' +
+    'left join STOKLAR S on S.ID=F.URUNID and F.TUR in (1,11) ' +
+    'left join STOKLAR_USER SU on SU.ID=S.ID ' +
+    'left join MASRAFGELIR MG on MG.ID=F.URUNID and F.TUR not in (1,11) ' +
+    'left join lateral (select G.ANAHTAR from GENINI G where G.BOLUM=-2702 and G.DIL=-1 and G.DEGER=F.BIRIM order by G.SIRA limit 1) U on true ' +
+    'left join lateral (select G.ANAHTAR from GENINI G where G.BOLUM=-2701 and G.DIL=-1 and G.DEGER=S.MARKA order by G.SIRA limit 1) MARKA on true ' +
+    'left join lateral (select G.ANAHTAR from GENINI G where G.BOLUM=cast(''-2701'' || coalesce(S.MARKA,0)::varchar(10) as integer) and G.DIL=-1 and G.DEGER=S.MODEL order by G.SIRA limit 1) MODELG on true ' +
+    'left join lateral (select string_agg(nullif(SL.SERINO,''''), '', '' order by SI.ID) as SERINO, ' +
+    'string_agg(coalesce(nullif(SL.LOTNO,''''), nullif(SL.LOTNO_EX,'''')), '', '' order by SI.ID) as LOTNO, ' +
+    'string_agg(concat(case when coalesce(S.URUNNO,'''')<>'''' then ''(UNO)'' || S.URUNNO else '''' end, case when coalesce(nullif(SL.LOTNO,''''), nullif(SL.LOTNO_EX,'''')) is not null then ''(LNO)'' || coalesce(nullif(SL.LOTNO,''''), SL.LOTNO_EX) else '''' end, case when SL.URT>date ''1990-01-01'' then ''(URT)'' || to_char(SL.URT,''YYMMDD'') else '''' end), '''' order by SI.ID) as AdditionalItemIdentification, ' +
+    'string_agg(concat(case when coalesce(SL.SERINO,'''')<>'''' then ''Seri No: '' || SL.SERINO || '' '' else '''' end, case when coalesce(nullif(SL.LOTNO,''''), nullif(SL.LOTNO_EX,'''')) is not null then ''Lot No: '' || coalesce(nullif(SL.LOTNO,''''), SL.LOTNO_EX) || '' '' else '''' end, case when SL.URT>date ''1990-01-01'' then ''Uretim Tarihi: '' || to_char(SL.URT,''DD.MM.YYYY'') || '' '' else '''' end, case when SL.SKT>date ''1990-01-01'' then ''Son Kullanma Tarihi: '' || to_char(SL.SKT,''DD.MM.YYYY'') || '' '' else '''' end, case when SI.ADET is not null then ''Miktar: '' || SI.ADET::numeric(18,6)::varchar else '''' end), chr(13)||chr(10) order by SI.ID) as Note ' +
+    'from STOKIZLEME SI inner join STOKSERILOT SL on SL.ID=SI.SERILOTID where SI.BASLIKID=F.FATBASID and SI.SATIRID=F.ID and SI.STOKID=F.URUNID) IZLEM on true ' +
+    'where F.FATBASID=' + IntToStr(AFatBaslikID) + ' order by LineNumber';
+end;
+
+procedure PgQueryCevir(AQuery: TFDQuery);
+begin
+  if AktifVeriMotor = vmPG then
+    AQuery.SQL.Text := PgSqlCevir(AQuery.SQL.Text);
+end;
+
 function AlanStr(ADataSet: TDataSet; const AAlan: string): string;
 var
   LField: TField;
@@ -352,17 +435,17 @@ begin
 end;
 
 // Satir kalemi kimlik degerleri (UBL + JSON'da ortak):
-//   Alici (buyer)   = SutKodu, yoksa AliciUrunKodu
-//   Satici (seller) = SutKodu, yoksa UrunKodu
-//   Uretici         = SutKodu (dogrudan, ayri yardimci gerekmez)
+//   Alici (buyer)   = AliciUrunKodu
+//   Satici (seller) = UrunKodu
+//   Uretici         = SutKodu/ManufacturersItemCode
 function SatirAliciKimlik(const ASatir: TEBelgeSatir): string;
 begin
-  Result := IfThen(Trim(ASatir.SutKodu) <> '', ASatir.SutKodu, ASatir.AliciUrunKodu);
+  Result := ASatir.AliciUrunKodu;
 end;
 
 function SatirSaticiKimlik(const ASatir: TEBelgeSatir): string;
 begin
-  Result := IfThen(Trim(ASatir.SutKodu) <> '', ASatir.SutKodu, ASatir.UrunKodu);
+  Result := ASatir.UrunKodu;
 end;
 
 function SatirBrutTutar(const ASatir: TEBelgeSatir): Currency;
@@ -427,6 +510,23 @@ begin
   Result := False;
   for I := 0 to High(ASatirlar) do
     if SatirTevkifatTutar(ASatirlar[I]) > 0.0001 then begin
+      Result := True;
+      Exit;
+    end;
+end;
+
+function SatirTamIskontoMu(const ASatir: TEBelgeSatir): Boolean;
+begin
+  Result := ((100 - ASatir.IskontoOrani) * (100 - ASatir.Iskonto2Orani) <= 0.0001);
+end;
+
+function SatirlardaTamIskontoVar(const ASatirlar: TEBelgeSatirlar): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to High(ASatirlar) do
+    if SatirTamIskontoMu(ASatirlar[I]) then begin
       Result := True;
       Exit;
     end;
@@ -563,6 +663,19 @@ begin
     Result := 'KDV Istisna Kodu ' + KDVIstisnaKodu(ABaslik);
 end;
 
+// KDV tutari 0 olan 0015 grubu icin muafiyet kodu/neden (GIB schematron: TaxAmount=0
+//   olan 0015 KDV -> TaxExemptionReason ZORUNLU). Kod kullanicidan secilmis olmali;
+//   sessiz 351 fallback yapilmaz.
+procedure KDVMuafiyetKodNeden(const ABaslik: TEBelgeBaslik; out AKod, ANeden: string);
+begin
+  AKod := KDVIstisnaKodu(ABaslik);
+  if AKod <> '' then begin
+    ANeden := AKod + ' ' + KDVIstisnaNedeni(ABaslik);
+    Exit;
+  end;
+  raise Exception.Create('%0 KDV / muafiyetli satır için istisna nedeni seçilmemiş (FATBASLIK.PLANID).');
+end;
+
 function KDVIstisnaNotu(const ABaslik: TEBelgeBaslik): string;
 begin
   Result := '';
@@ -618,6 +731,31 @@ begin
         'KDV tevkifat orani (KDVMUHAFIYETI) girilmemis. Lutfen tevkifata tabi ' +
         'satirlara tevkifat oranini girin.');
   end;
+end;
+
+procedure TamIskontoNedeniKontrolEt(const ABaslik: TEBelgeBaslik;
+  const ASatirlar: TEBelgeSatirlar);
+var
+  I: Integer;
+  LUrun: string;
+begin
+  if not SatirlardaTamIskontoVar(ASatirlar) then
+    Exit;
+
+  if (ABaslik.PlanID > 0) and (Trim(KDVIstisnaKodu(ABaslik)) <> '') then
+    Exit;
+
+  LUrun := '';
+  for I := 0 to High(ASatirlar) do
+    if SatirTamIskontoMu(ASatirlar[I]) then begin
+      LUrun := Trim(ASatirlar[I].UrunKodu);
+      if LUrun = '' then
+        LUrun := Trim(ASatirlar[I].UrunAdi);
+      Break;
+    end;
+
+  raise Exception.Create('%100 iskonto satırı için tam istisna nedeni seçilmemiş ' +
+    '(FATBASLIK.PLANID).' + IfThen(LUrun <> '', ' Ürün: ' + LUrun, ''));
 end;
 
 function YeniUUID: string;
@@ -955,7 +1093,7 @@ begin
       end;
     if LGtipYok <> '' then
       LEksik.Add('- GTIP (ürün: ' + LGtipYok + ')');
-    Result := TrimRight(LEksik.Text);
+    Result  := TrimRight(LEksik.Text);
   finally
     LEksik.Free;
   end;
@@ -1015,8 +1153,7 @@ begin
   SetLength(ASatirlar, 0);
   LKimlikQuery := nil;
 
-  Tablo.TablodanSorguAc(1, 'exec dbo.sp_Prog_EBelge_GidenFatura @ID=' +
-    IntToStr(AFatBaslikID));
+  Tablo.TablodanSorguAc(1, EBelgeGidenBaslikSQL(AFatBaslikID));
   if Tablo.Query1.Eof then
     raise Exception.Create('Giden e-belge baslik bilgisi bulunamadi.');
 
@@ -1067,9 +1204,7 @@ begin
   if ABaslik.Senaryo = 3 then
     IhracatBilgisiOku(AFatBaslikID, ABaslik);
 
-  Tablo.TablodanSorguAc(1,
-    'exec dbo.sp_Prog_EBelge_GidenFaturaDetay @invoiceId=' +
-    IntToStr(AFatBaslikID));
+  Tablo.TablodanSorguAc(1, EBelgeGidenDetaySQL(AFatBaslikID));
   try
     while not Tablo.Query1.Eof do begin
       LSatir := Default(TEBelgeSatir);
@@ -1090,8 +1225,18 @@ begin
         if not Assigned(LKimlikQuery) then begin
           LKimlikQuery := TFDQuery.Create(nil);
           LKimlikQuery.Connection := Tablo.FDCnn;
-          LKimlikQuery.SQL.Text :=
-            'select dbo.fn_Efatura_AdditionalItemIdentification(:FATBASID,:SATIRID) as KIMLIK';
+          if AktifVeriMotor = vmPG then
+            LKimlikQuery.SQL.Text :=
+              'select coalesce(string_agg(concat(' +
+              'case when coalesce(S.URUNNO,'''')<>'''' then ''(UNO)'' || S.URUNNO else '''' end, ' +
+              'case when coalesce(nullif(SL.LOTNO,''''), nullif(SL.LOTNO_EX,'''')) is not null then ''(LNO)'' || coalesce(nullif(SL.LOTNO,''''), SL.LOTNO_EX) else '''' end, ' +
+              'case when SL.URT>date ''1990-01-01'' then ''(URT)'' || to_char(SL.URT,''YYMMDD'') else '''' end), '''' order by SI.ID), '''') as KIMLIK ' +
+              'from STOKIZLEME SI inner join STOKSERILOT SL on SL.ID=SI.SERILOTID ' +
+              'inner join STOKLAR S on S.ID=SI.STOKID ' +
+              'where SI.BASLIKID=:FATBASID and SI.SATIRID=:SATIRID'
+          else
+            LKimlikQuery.SQL.Text :=
+              'select dbo.fn_Efatura_AdditionalItemIdentification(:FATBASID,:SATIRID) as KIMLIK';
         end;
         LKimlikQuery.Close;
         LKimlikQuery.ParamByName('FATBASID').AsInteger := AFatBaslikID;
@@ -1100,6 +1245,11 @@ begin
         LSatir.TibbiCihazKimlik := AlanStr(LKimlikQuery, 'KIMLIK');
       end;
       LSatir.Aciklama := AlanStr(Tablo.Query1, 'ACIKLAMA');
+      // E-fatura satir adi = urun/hizmet adi + 1 bosluk + FATURA.ACIKLAMA (kullanici istegi).
+      //   UrunAdi tum ciktilarda kullanilir (UBL <cbc:Name>, izibiz JSON itemName, HTML) -> tek yerde.
+      //   Satir ACIKLAMA'si baska yerde emit edilmiyor (mukerrerlik yok). Bos ise ek yapma.
+      if Trim(LSatir.Aciklama) <> '' then
+        LSatir.UrunAdi := Trim(LSatir.UrunAdi) + ' ' + Trim(LSatir.Aciklama);
       LSatir.BirimKodu := AlanStr(Tablo.Query1, 'UnitCodeConverted');
       LMiktar := AlanFloat(Tablo.Query1, 'MIKTAR');
       if LMiktar = 0 then
@@ -1119,6 +1269,11 @@ begin
       ASatirlar[High(ASatirlar)] := LSatir;
       Tablo.Query1.Next;
     end;
+
+    if SatirlardaTamIskontoVar(ASatirlar) and (ABaslik.PlanID > 0) and
+       (Trim(ABaslik.KDVIstisnaKodu) = '') then
+      KDVIstisnaBilgisiGetir(ABaslik.PlanID, ABaslik.KDVIstisnaKodu,
+        ABaslik.KDVIstisnaNedeni);
   finally
     LKimlikQuery.Free;
   end;
@@ -1530,7 +1685,7 @@ begin
   try
     // 1. oncelik: sp_Prog_EBelge_GidenFatura SP ciktisi (e-belgeye giden degerler)
     LSp.Connection := Tablo.FDCnn;
-    LSp.SQL.Text := 'exec dbo.sp_Prog_EBelge_GidenFatura @ID=' + IntToStr(ABaslik.ID);
+    LSp.SQL.Text := EBelgeGidenBaslikSQL(ABaslik.ID);
     LSp.Open;
 
     // 3. oncelik: FATBASLIK
@@ -1539,8 +1694,10 @@ begin
     LFat.Open;
 
     // 2. oncelik: FATBASLIK_USER (uzanti) varsa; musteriye ozel ek alanlar burada olabilir.
-    if Veritabani.VeriVarMi(Tablo.FDCnn,
-         'select 1 X where object_id(''dbo.FATBASLIK_USER'',''U'') is not null', [], []) then begin
+    if ((AktifVeriMotor = vmPG) and Veritabani.VeriVarMi(Tablo.FDCnn,
+         'select 1 as X where to_regclass(''fatbaslik_user'') is not null', [], [])) or
+       ((AktifVeriMotor <> vmPG) and Veritabani.VeriVarMi(Tablo.FDCnn,
+         'select 1 X where object_id(''dbo.FATBASLIK_USER'',''U'') is not null', [], [])) then begin
       LFatU := TFDQuery.Create(nil);
       LFatU.Connection := Tablo.FDCnn;
       LFatU.SQL.Text := 'select * from FATBASLIK_USER where ID=' + IntToStr(ABaslik.ID);
@@ -1588,11 +1745,11 @@ function UBLXMLUret(const ABaslik: TEBelgeBaslik;
 var
   LXML: TStringBuilder;
   I, J: Integer;
-  LSatirVergi, LSatirTevkifat, LSatirIskonto, LSatirBrut, LToplamVergi,
+  LSatirVergi, LSatirTevkifat, LSatirIskonto, LSatirBrut, LToplamMatrah, LToplamVergi,
     LToplamTevkifat, LToplamIskonto, LGrupMatrah, LGrupVergi,
     LGrupTevkifat: Currency;
   LSatirTuru, LMiktarTuru, LRoot, LProfil, LXSLT, LIstisnaNotu,
-    LSatirNotu: string;
+    LSatirNotu, LSatirIstisnaXml: string;
   LGonderici, LAlici, LTasiyici: TEBelgeTaraf;
   LSevk: TSevkBilgisi;
   LTevkifatVar, LOranIslendi: Boolean;
@@ -1635,16 +1792,20 @@ begin
   LTevkifatVar := (ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar);
   if LTevkifatVar then
     TevkifatNedeniKontrolEt(ABaslik, ASatirlar);
-  LToplamVergi := ABaslik.KDV;
+  TamIskontoNedeniKontrolEt(ABaslik, ASatirlar);
+  LToplamMatrah := 0;
+  LToplamVergi := 0;
   LToplamTevkifat := 0;
   LToplamIskonto := SatirlarIskontoToplami(ASatirlar);
-  if LTevkifatVar then begin
-    LToplamVergi := 0;
-    for I := 0 to High(ASatirlar) do begin
-      LToplamVergi := LToplamVergi + SatirKDVBrut(ASatirlar[I]);
-      LToplamTevkifat := LToplamTevkifat + SatirTevkifatTutar(ASatirlar[I]);
-    end;
+  for I := 0 to High(ASatirlar) do begin
+    LToplamMatrah := LToplamMatrah + ASatirlar[I].Tutar;
+    LToplamVergi := LToplamVergi + SatirKDVBrut(ASatirlar[I]);
+    LToplamTevkifat := LToplamTevkifat + SatirTevkifatTutar(ASatirlar[I]);
   end;
+  if Abs(LToplamMatrah - ABaslik.Matrah) < 0.02 then
+    LToplamMatrah := ABaslik.Matrah;
+  if Abs(LToplamVergi - ABaslik.KDV) < 0.02 then
+    LToplamVergi := ABaslik.KDV;
 
   LXML := TStringBuilder.Create;
   try
@@ -1898,7 +2059,8 @@ begin
       //   UBL export = JSON = izibiz PDF (header ile tutarli). Cok-oranli: per-satir grup korunur.
       var LTekOran: Boolean := True;
       for I := 1 to High(ASatirlar) do
-        if Abs(ASatirlar[I].KDVOrani - ASatirlar[0].KDVOrani) > 0.001 then begin
+        if (Abs(ASatirlar[I].KDVOrani - ASatirlar[0].KDVOrani) > 0.001) or
+           ((SatirKDVBrut(ASatirlar[I]) < 0.001) <> (SatirKDVBrut(ASatirlar[0]) < 0.001)) then begin
           LTekOran := False; Break;
         end;
       LXML.AppendLine('<cac:TaxTotal>');
@@ -1907,7 +2069,8 @@ begin
       for I := 0 to High(ASatirlar) do begin
         LOranIslendi := False;
         for J := 0 to I - 1 do
-          if Abs(ASatirlar[J].KDVOrani - ASatirlar[I].KDVOrani) < 0.001 then begin
+          if (Abs(ASatirlar[J].KDVOrani - ASatirlar[I].KDVOrani) < 0.001) and
+             ((SatirKDVBrut(ASatirlar[J]) < 0.001) = (SatirKDVBrut(ASatirlar[I]) < 0.001)) then begin
             LOranIslendi := True;
             Break;
           end;
@@ -1916,24 +2079,26 @@ begin
         LGrupMatrah := 0;
         LGrupVergi := 0;
         for J := I to High(ASatirlar) do
-          if Abs(ASatirlar[J].KDVOrani - ASatirlar[I].KDVOrani) < 0.001 then begin
+          if (Abs(ASatirlar[J].KDVOrani - ASatirlar[I].KDVOrani) < 0.001) and
+             ((SatirKDVBrut(ASatirlar[J]) < 0.001) = (SatirKDVBrut(ASatirlar[I]) < 0.001)) then begin
             LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
             LGrupVergi := LGrupVergi + SatirKDVBrut(ASatirlar[J]);
           end;
         // Tek oranli: dip-toplam (round-of-sum) ile hizala -> Σ-satir yerine ABaslik.Matrah/KDV
         if LTekOran then begin
-          LGrupMatrah := ABaslik.Matrah;
-          LGrupVergi := ABaslik.KDV;
+          LGrupMatrah := LToplamMatrah;
+          LGrupVergi := LToplamVergi;
         end;
-        // KDV=0 (istisna/ihracat) satir grubunda GIB TaxExemptionReasonCode/Reason ZORUNLU (cac:TaxCategory icinde, TaxScheme'den ONCE).
+        // KDV tutari 0 olan 0015 grubunda GIB TaxExemptionReasonCode/Reason ZORUNLU (cac:TaxCategory
+        //   icinde, TaxScheme'den ONCE). Istisna/ihracat -> plan kodu; bedelsiz (%100 iskonto, net
+        //   matrah 0 -> KDV 0) -> muafiyet kodu 351. Tetik: KDV tutari 0 (oran degil - bedelsizde oran 18).
         var LIstisnaXml: string := '';
-        if (ASatirlar[I].KDVOrani < 0.001) and
-           ((ABaslik.Tipi = 24) or (SenaryoProfilKodu(ABaslik) = 'IHRACAT')) then begin
-          var LIstKodX: string := KDVIstisnaKodu(ABaslik);
-          if LIstKodX <> '' then
-            LIstisnaXml :=
-              '<cbc:TaxExemptionReasonCode>' + XMLEscape(LIstKodX) + '</cbc:TaxExemptionReasonCode>' +
-              '<cbc:TaxExemptionReason>' + XMLEscape(LIstKodX + ' ' + KDVIstisnaNedeni(ABaslik)) + '</cbc:TaxExemptionReason>';
+        if LGrupVergi < 0.001 then begin
+          var LMufKod, LMufNeden: string;
+          KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
+          LIstisnaXml :=
+            '<cbc:TaxExemptionReasonCode>' + XMLEscape(LMufKod) + '</cbc:TaxExemptionReasonCode>' +
+            '<cbc:TaxExemptionReason>' + XMLEscape(LMufNeden) + '</cbc:TaxExemptionReason>';
         end;
         LXML.AppendLine('<cac:TaxSubtotal><cbc:TaxableAmount currencyID="' +
           ABaslik.ParaBirimi + '">' + Ondalik(LGrupMatrah, '0.00##') +
@@ -1987,21 +2152,24 @@ begin
       // Mal Hizmet Toplam Tutari = BRUT (iskonto oncesi = Matrah + toplam iskonto). GIB/izibiz boyle
       //   bekler; TaxExclusive = NET (Matrah). brut - AllowanceTotal = TaxExclusive.
       LXML.AppendLine('<cbc:LineExtensionAmount currencyID="' +
-        ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Matrah + LToplamIskonto, '0.00##') +
+        ABaslik.ParaBirimi + '">' + Ondalik(LToplamMatrah + LToplamIskonto, '0.00##') +
         '</cbc:LineExtensionAmount>');
       LXML.AppendLine('<cbc:TaxExclusiveAmount currencyID="' +
-        ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Matrah, '0.00##') +
+        ABaslik.ParaBirimi + '">' + Ondalik(LToplamMatrah, '0.00##') +
         '</cbc:TaxExclusiveAmount>');
       LXML.AppendLine('<cbc:TaxInclusiveAmount currencyID="' +
         ABaslik.ParaBirimi + '">' +
-        Ondalik(ABaslik.Matrah + LToplamVergi, '0.00##') +
+        Ondalik(LToplamMatrah + LToplamVergi, '0.00##') +
         '</cbc:TaxInclusiveAmount>');
       if LToplamIskonto > 0.0001 then
         LXML.AppendLine('<cbc:AllowanceTotalAmount currencyID="' +
           ABaslik.ParaBirimi + '">' + Ondalik(LToplamIskonto, '0.00##') +
           '</cbc:AllowanceTotalAmount>');
+      var LPayable: Currency := LToplamMatrah + LToplamVergi - LToplamTevkifat;
+      if Abs(LPayable - ABaslik.Toplam) < 0.02 then
+        LPayable := ABaslik.Toplam;
       LXML.AppendLine('<cbc:PayableAmount currencyID="' +
-        ABaslik.ParaBirimi + '">' + Ondalik(ABaslik.Toplam, '0.00##') +
+        ABaslik.ParaBirimi + '">' + Ondalik(LPayable, '0.00##') +
         '</cbc:PayableAmount>');
       LXML.AppendLine('</cac:LegalMonetaryTotal>');
     end;
@@ -2100,6 +2268,15 @@ begin
         LSatirTevkifat := SatirTevkifatTutar(ASatirlar[I]);
         LSatirIskonto := SatirIskontoTutar(ASatirlar[I]);
         LSatirBrut := SatirBrutTutar(ASatirlar[I]);
+        LSatirIstisnaXml := '';
+        if LSatirVergi < 0.001 then begin
+          var LMufKod, LMufNeden: string;
+          KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
+          LSatirIstisnaXml :=
+            '<cbc:TaxExemptionReasonCode>' + XMLEscape(LMufKod) +
+            '</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>' +
+            XMLEscape(LMufNeden) + '</cbc:TaxExemptionReason>';
+        end;
         if LSatirIskonto > 0.0001 then begin
           LXML.AppendLine('<cac:AllowanceCharge>');
           LXML.AppendLine('<cbc:ChargeIndicator>false</cbc:ChargeIndicator>');
@@ -2123,7 +2300,8 @@ begin
           ABaslik.ParaBirimi + '">' + Ondalik(LSatirVergi, '0.00##') +
           '</cbc:TaxAmount><cbc:Percent>' +
           Ondalik(ASatirlar[I].KDVOrani, '0.##') +
-          '</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name>' +
+          '</cbc:Percent><cac:TaxCategory>' +
+          LSatirIstisnaXml + '<cac:TaxScheme><cbc:Name>KDV</cbc:Name>' +
           '<cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory>' +
           '</cac:TaxSubtotal></cac:TaxTotal>');
         if LSatirTevkifat > 0 then
@@ -2807,6 +2985,8 @@ begin
       'API_JSON=cast(:API_JSON as nvarchar(max)), ' +
       LUblSet + 'DEGISTIREN=:DEGISTIREN, ' +
       'DEGISTIRMETARIHI=getdate() where ID=:ID';
+    if AktifVeriMotor = vmPG then
+      LQuery.SQL.Text := PgSqlCevir(LQuery.SQL.Text);
     LQuery.ParamByName('REHBERID').AsInteger := ABaslik.RehberID;
     LQuery.ParamByName('UUID').AsString := ABaslik.UUID;
     LQuery.ParamByName('BELGENO').AsString := ABaslik.FaturaNo;
@@ -2846,8 +3026,11 @@ begin
       'GONDERICIALIAS,ALICIALIAS,DURUM,API_JSON,UBL_XML,UBL_XML_ZIP,EKLEYEN) values(' +
       ':FATBASLIKID,:REHBERID,:BELGETURU,1,:UUID,:BELGENO,:GONDERICIALIAS,' +
       ':ALICIALIAS,1,cast(:API_JSON as nvarchar(max)),' +
-      LUblVals + ',:EKLEYEN); ' +
-      'select cast(scope_identity() as bigint) as ID';
+      LUblVals + ',:EKLEYEN)';
+    if AktifVeriMotor = vmPG then
+      LQuery.SQL.Text := PgSqlCevir(LQuery.SQL.Text + ' returning ID')
+    else
+      LQuery.SQL.Text := LQuery.SQL.Text + '; select cast(scope_identity() as bigint) as ID';
     LQuery.ParamByName('FATBASLIKID').AsInteger := ABaslik.ID;
     LQuery.ParamByName('REHBERID').AsInteger := ABaslik.RehberID;
     LQuery.ParamByName('BELGETURU').AsInteger := ABaslik.EBelgeBelgeTuru;
@@ -2885,6 +3068,8 @@ begin
       'isnull(FATURANO,'''') FATURANO,isnull(FATURASERI,'''') FATURASERI,' +
       'isnull(VNO,'''') VNO,isnull(BASLIK,'''') BASLIK ' +
       'from FATBASLIK where ID=:ID';
+    if AktifVeriMotor = vmPG then
+      LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
     LQ.ParamByName('ID').AsInteger := AFatBaslikID;
     LQ.Open;
     if LQ.Eof then
@@ -2930,36 +3115,65 @@ function EBelgeSerileriYeni(AConnection: TFDConnection; ATur, ABelgeTuru,
   ASenaryo, AKullaniciID: Integer): string;
 var
   LQ: TFDQuery;
-  LListe: TStringList;
+  LListe, LParcalar: TStringList;
   LSeri: string;
+  LSatirSenaryo, LSatirKullaniciID: Integer;
 begin
   Result := '';
   LListe := TStringList.Create;
+  LParcalar := TStringList.Create;
   LQ := TFDQuery.Create(nil);
   try
+    LParcalar.StrictDelimiter := True;
+    LParcalar.Delimiter := ',';
     LQ.Connection := AConnection;
-    LQ.SQL.Text :=
-      'with K as (' +
-      'select SERI=left(ANAHTAR, charindex('','', ANAHTAR+'','')-1), ' +
-      'SENARYO=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),2)), ' +
-      'KULLANICIID=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),1)), ' +
-      'SIRA ' +
-      'from GENINI where BOLUM=:BOLUM and DIL=-1) ' +
-      'select SERI from K ' +
-      'where isnull(SERI,'''')<>'''' ' +
-      'and isnull(SENARYO,0) in (0,:SENARYO) ' +
-      'and isnull(KULLANICIID,0) in (0,:KULLANICIID) ' +
-      'order by case ' +
-      'when SENARYO=:SENARYO and KULLANICIID=:KULLANICIID then 1 ' +
-      'when SENARYO=0 and KULLANICIID=:KULLANICIID then 2 ' +
-      'when SENARYO=:SENARYO and KULLANICIID=0 then 3 ' +
-      'else 4 end, isnull(SIRA,0), SERI';
-    LQ.ParamByName('BOLUM').AsInteger := EBelgeSeriKuralBolumu(ATur, ABelgeTuru);
-    LQ.ParamByName('SENARYO').AsInteger := ASenaryo;
-    LQ.ParamByName('KULLANICIID').AsInteger := AKullaniciID;
+    if AktifVeriMotor = vmPG then
+      LQ.SQL.Text :=
+        'select ANAHTAR, SIRA from GENINI where BOLUM=' +
+        IntToStr(EBelgeSeriKuralBolumu(ATur, ABelgeTuru)) +
+        ' and DIL=-1 order by coalesce(SIRA,0), ANAHTAR'
+    else
+      LQ.SQL.Text :=
+        'with K as (' +
+        'select SERI=left(ANAHTAR, charindex('','', ANAHTAR+'','')-1), ' +
+        'SENARYO=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),2)), ' +
+        'KULLANICIID=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),1)), ' +
+        'SIRA ' +
+        'from GENINI where BOLUM=:BOLUM and DIL=-1) ' +
+        'select SERI from K ' +
+        'where isnull(SERI,'''')<>'''' ' +
+        'and isnull(SENARYO,0) in (0,:SENARYO) ' +
+        'and isnull(KULLANICIID,0) in (0,:KULLANICIID) ' +
+        'order by case ' +
+        'when SENARYO=:SENARYO and KULLANICIID=:KULLANICIID then 1 ' +
+        'when SENARYO=0 and KULLANICIID=:KULLANICIID then 2 ' +
+        'when SENARYO=:SENARYO and KULLANICIID=0 then 3 ' +
+        'else 4 end, isnull(SIRA,0), SERI';
+    if AktifVeriMotor <> vmPG then begin
+      LQ.ParamByName('BOLUM').AsInteger := EBelgeSeriKuralBolumu(ATur, ABelgeTuru);
+      LQ.ParamByName('SENARYO').AsInteger := ASenaryo;
+      LQ.ParamByName('KULLANICIID').AsInteger := AKullaniciID;
+    end;
     LQ.Open;
     while not LQ.Eof do begin
-      LSeri := Trim(LQ.FieldByName('SERI').AsString);
+      if AktifVeriMotor = vmPG then begin
+        LParcalar.DelimitedText := LQ.FieldByName('ANAHTAR').AsString;
+        LSeri := '';
+        LSatirSenaryo := 0;
+        LSatirKullaniciID := 0;
+        if LParcalar.Count > 0 then
+           LSeri := Trim(LParcalar[0]);
+        if LParcalar.Count > 1 then
+           LSatirSenaryo := StrToIntDef(Trim(LParcalar[1]), 0);
+        if LParcalar.Count > 2 then
+           LSatirKullaniciID := StrToIntDef(Trim(LParcalar[2]), 0);
+        if not ((LSatirSenaryo in [0, ASenaryo]) and
+          (LSatirKullaniciID in [0, AKullaniciID])) then begin
+          LQ.Next;
+          Continue;
+        end;
+      end else
+        LSeri := Trim(LQ.FieldByName('SERI').AsString);
       if (LSeri <> '') and (LListe.IndexOf(LSeri) < 0) then
         LListe.Add(LSeri);
       LQ.Next;
@@ -2970,6 +3184,7 @@ begin
       Result := EBelgeSerileri(ATur, ABelgeTuru);
   finally
     LQ.Free;
+    LParcalar.Free;
     LListe.Free;
   end;
 end;
@@ -3048,20 +3263,36 @@ begin
   // Mevcut (gonderilmis veya olusturulmus, sifirlanmamis) numaralari oku.
   // ILKBOSLUK: serideki ilk bos numara. SONRAKI: en buyuk numara + 1.
   // Hic gonderilmis belge yoksa ve bu iki aday farkliysa kullanici secer.
-  Tablo.TablodanSorguAc(1,
-    'with K as (select try_convert(bigint,right(FATURANO,9)) as N, EFATURADURUM ' +
-    'from FATBASLIK where ID<>' + IntToStr(AID) +
-    ' and TUR=' + IntToStr(ATur) +
-    ' and len(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
-    ' and try_convert(bigint,right(FATURANO,9)) is not null) ' +
-    'select ADET=(select count(*) from K), ' +
-    'GONDERILMIS=(select count(*) from K where EFATURADURUM in (2,12,52)), ' +
-    'ILKBOSLUK=isnull(coalesce(' +
-    '(select min(K.N+1) from K where K.N<(select max(N) from K) ' +
-    'and not exists (select 1 from K K2 where K2.N=K.N+1)), ' +
-    '(select case when min(N)>1 then min(N)-1 end from K), ' +
-    '(select max(N)+1 from K)),1), ' +
-    'SONRAKI=isnull((select max(N)+1 from K),1)');
+  if AktifVeriMotor = vmPG then
+    Tablo.TablodanSorguAc(1,
+      'with K as (select cast(right(FATURANO,9) as bigint) as N, EFATURADURUM ' +
+      'from FATBASLIK where ID<>' + IntToStr(AID) +
+      ' and TUR=' + IntToStr(ATur) +
+      ' and length(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
+      ' and right(FATURANO,9) ~ ''^[0-9]+$'') ' +
+      'select (select count(*) from K) as ADET, ' +
+      '(select count(*) from K where EFATURADURUM in (2,12,52)) as GONDERILMIS, ' +
+      'coalesce(coalesce(' +
+      '(select min(K.N+1) from K where K.N<(select max(N) from K) ' +
+      'and not exists (select 1 from K K2 where K2.N=K.N+1)), ' +
+      '(select case when min(N)>1 then min(N)-1 end from K), ' +
+      '(select max(N)+1 from K)),1) as ILKBOSLUK, ' +
+      'coalesce((select max(N)+1 from K),1) as SONRAKI')
+  else
+    Tablo.TablodanSorguAc(1,
+      'with K as (select try_convert(bigint,right(FATURANO,9)) as N, EFATURADURUM ' +
+      'from FATBASLIK where ID<>' + IntToStr(AID) +
+      ' and TUR=' + IntToStr(ATur) +
+      ' and len(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
+      ' and try_convert(bigint,right(FATURANO,9)) is not null) ' +
+      'select ADET=(select count(*) from K), ' +
+      'GONDERILMIS=(select count(*) from K where EFATURADURUM in (2,12,52)), ' +
+      'ILKBOSLUK=isnull(coalesce(' +
+      '(select min(K.N+1) from K where K.N<(select max(N) from K) ' +
+      'and not exists (select 1 from K K2 where K2.N=K.N+1)), ' +
+      '(select case when min(N)>1 then min(N)-1 end from K), ' +
+      '(select max(N)+1 from K)),1), ' +
+      'SONRAKI=isnull((select max(N)+1 from K),1)');
   LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
   LGonderilmisAdet := Tablo.Query1.FieldByName('GONDERILMIS').AsInteger;
   LIlkBosluk := Tablo.Query1.FieldByName('ILKBOSLUK').AsLargeInt;
@@ -3199,6 +3430,7 @@ begin
       'and ltrim(rtrim(isnull(FATURANO,'''')))=''0'' ' +
       'and cast(FATURATARIH as date)<cast(:TARIH as date) ' +
       'order by FATURATARIH,ID '+DbSinir(1);
+    PgQueryCevir(LQ);
     LQ.ParamByName('ID').AsInteger := ABaslik.ID;
     LQ.ParamByName('TUR').AsInteger := ABaslik.Tur;
     LQ.ParamByName('TARIH').AsDateTime := ABaslik.FaturaTarih;
@@ -3294,6 +3526,7 @@ begin
     VerileriOku(LBaslik.ID, LOnBaslik, LOnSatirlar);
     if (LOnBaslik.Tipi = 22) or SatirlardaTevkifatVar(LOnSatirlar) then
       TevkifatNedeniKontrolEt(LOnBaslik, LOnSatirlar);
+    TamIskontoNedeniKontrolEt(LOnBaslik, LOnSatirlar);
 
     // TEVKIFAT faturasi (Tipi=22): en az bir satirda GECERLI tevkifat (>0) olmali.
     // Satirin KDV orani 0 ise tevkifat tutari da 0 olur (tevkifat = KDV'nin yuzdesi)
@@ -3421,6 +3654,8 @@ begin
         Veritabani.BasitKomutÇalıştır(AConnection,
           'UPDATE FATBASLIK SET EFATURADURUM=&D, EFATURASONUC=0 WHERE ID=&ID',
           ['&D', '&ID'], [LDurum, LBaslik.ID]);
+      if (AktifVeriMotor = vmPG) and AConnection.InTransaction then
+        AConnection.Commit;
     end;
 
     LMesaj := 'Belge No: ' + LNumara + sLineBreak +
@@ -3726,6 +3961,7 @@ begin
         'and (SONRAKI_DENEME_TARIHI is null or SONRAKI_DENEME_TARIHI<=getdate()) ';
     LSQL := LSQL + 'order by ONCELIK,ID';
     LQ.SQL.Text := LSQL;
+    PgQueryCevir(LQ);
     LQ.Open;
     while not LQ.Eof do begin
       LListe.Add(LQ.FieldByName('ID').AsString + '=' + LQ.FieldByName('FATBASLIKID').AsString);
@@ -3808,11 +4044,19 @@ begin
         LQ.SQL.Text :=
           'select '+DbUst(1)+'FATURANO from FATBASLIK where FATURASERI=' + QuotedStr(LSeri) +
           ' and TUR=' + IntToStr(LBaslik.Tur) +
-          ' and EFATURADURUM in (1,11,51)' +
-          ' and len(FATURANO)=16 and left(FATURANO,7)=' + QuotedStr(LSeriYil) +
-          ' and try_convert(bigint,right(FATURANO,9)) is not null' +
-          ' and try_convert(bigint,right(FATURANO,9))<' + IntToStr(LCurSeq) +
-          ' order by try_convert(bigint,right(FATURANO,9)) '+DbSinir(1);
+          ' and EFATURADURUM in (1,11,51)';
+        if AktifVeriMotor = vmPG then
+          LQ.SQL.Text := LQ.SQL.Text +
+            ' and length(FATURANO)=16 and left(FATURANO,7)=' + QuotedStr(LSeriYil) +
+            ' and right(FATURANO,9) ~ ''^[0-9]+$''' +
+            ' and cast(right(FATURANO,9) as bigint)<' + IntToStr(LCurSeq) +
+            ' order by cast(right(FATURANO,9) as bigint) '+DbSinir(1)
+        else
+          LQ.SQL.Text := LQ.SQL.Text +
+            ' and len(FATURANO)=16 and left(FATURANO,7)=' + QuotedStr(LSeriYil) +
+            ' and try_convert(bigint,right(FATURANO,9)) is not null' +
+            ' and try_convert(bigint,right(FATURANO,9))<' + IntToStr(LCurSeq) +
+            ' order by try_convert(bigint,right(FATURANO,9)) '+DbSinir(1);
         LQ.Open;
         if not LQ.Eof then
           LBekleyen := LQ.Fields[0].AsString
@@ -3829,6 +4073,7 @@ begin
 
     LQ.SQL.Text :=
       'select '+DbUst(1)+'ID,BELGETURU from ' + DepoTablo('EBELGE') + ' where FATBASLIKID=:ID and YON=1 order by ID desc '+DbSinir(1);
+    PgQueryCevir(LQ);
     LQ.ParamByName('ID').AsInteger := AFatBaslikID;
     LQ.Open;
     if LQ.Eof then begin
@@ -3841,6 +4086,7 @@ begin
 
     LQ.SQL.Text :=
       'select '+DbUst(1)+'DURUM from ' + DepoTablo('EBELGEKUYRUK') + ' where EBELGEID=:EID and ISLEMTURU=1 and DURUM in (0,1,9) '+DbSinir(1);
+    PgQueryCevir(LQ);
     LQ.ParamByName('EID').AsLargeInt := LEBelgeID;
     LQ.Open;
     if LQ.Eof then begin
@@ -3952,6 +4198,7 @@ begin
     LQ.SQL.Text :=
       'select '+DbUst(1)+'ID, UUID, cast(API_JSON as nvarchar(max)) API_JSON ' +
       'from ' + DepoTablo('EBELGE') + ' where YON=2 and FATBASLIKID=:FID order by ID desc '+DbSinir(1);
+    PgQueryCevir(LQ);
     LQ.ParamByName('FID').AsInteger := AFatBaslikID;
     LQ.Open;
     if not LQ.Eof then begin
@@ -4379,7 +4626,7 @@ var
     LWithholdingSubArr: TJSONArray;
   LAddRefSend: TJSONObject;
   i, J, LBosluk: Integer;
-  LToplamMatrah, LToplamKDV, LToplamTevkifat, LGrupMatrah,
+  LToplamMatrah, LToplamKDV, LToplamTevkifat, LGrupMatrah, LGrupVergi,
     LGrupTevkifat, LSatirVergi, LSatirTevkifat: Currency;
   LSatir: TEBelgeSatir;
   LIsArsiv, LIsIrsaliye, LTevkifatVar, LOranIslendi: Boolean;
@@ -4405,6 +4652,8 @@ begin
     ((ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar));
   if LTevkifatVar then
     TevkifatNedeniKontrolEt(ABaslik, ASatirlar);
+  if not LIsIrsaliye then
+    TamIskontoNedeniKontrolEt(ABaslik, ASatirlar);
 
   LSevk := Default(TSevkBilgisi);
   LTasiyici := Default(TEBelgeTaraf);
@@ -4697,41 +4946,56 @@ begin
 
     // Tax / Monetary ? sadece fatura/arsiv icin (irsaliyede yok)
     if not LIsIrsaliye then begin
-      LToplamMatrah := ABaslik.Matrah;
-      LToplamKDV := ABaslik.KDV;
+      LToplamMatrah := 0;
+      LToplamKDV := 0;
       LToplamTevkifat := 0;
-      if LTevkifatVar then begin
-        LToplamKDV := 0;
-        for i := 0 to High(ASatirlar) do begin
-          LToplamKDV := LToplamKDV + SatirKDVBrut(ASatirlar[i]);
-          LToplamTevkifat := LToplamTevkifat + SatirTevkifatTutar(ASatirlar[i]);
-        end;
+      for i := 0 to High(ASatirlar) do begin
+        LToplamMatrah := LToplamMatrah + ASatirlar[i].Tutar;
+        LToplamTevkifat := LToplamTevkifat + SatirTevkifatTutar(ASatirlar[i]);
       end;
-      var LRootPercent: Double := 0;
-      if LToplamMatrah > 0.001 then
-        LRootPercent := Round(LToplamKDV / LToplamMatrah * 100);
       LTax := TJSONObject.Create;
-      LTax.AddPair('taxAmount', TJSONNumber.Create(LToplamKDV));
       LTaxSubArr := TJSONArray.Create;
-      LTaxSub := TJSONObject.Create;
-      LTaxSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
-      LTaxSub.AddPair('taxableAmount', TJSONNumber.Create(LToplamMatrah));
-      LTaxSub.AddPair('percent', TJSONNumber.Create(LRootPercent));
-      LTaxSub.AddPair('taxAmount', TJSONNumber.Create(LToplamKDV));
-      // KDV istisnasi (Tipi=24) veya ihracat (profile IHRACAT): KDV%=0 iken izibiz taxExemptionCode/Reason ZORUNLU kilar.
-      // Header taxSubtotal'da olmali (satirda DEGIL - izibiz ISTISNA ornegi). Reason format: "kod aciklama" (izibiz: "101 Ihracat Istisnasi").
-      if (LRootPercent < 0.001) and ((LDocTypeCode = 'ISTISNA') or (LProfil = 'IHRACAT')) then begin
-        var LIstKod: string := KDVIstisnaKodu(ABaslik);
-        if LIstKod <> '' then begin
-          LTaxSub.AddPair('taxExemptionCode', LIstKod);
-          LTaxSub.AddPair('taxExemptionReason', LIstKod + ' ' + KDVIstisnaNedeni(ABaslik));
+      for i := 0 to High(ASatirlar) do begin
+        LOranIslendi := False;
+        for J := 0 to i - 1 do
+          if (Abs(ASatirlar[J].KDVOrani - ASatirlar[i].KDVOrani) < 0.001) and
+             ((SatirKDVBrut(ASatirlar[J]) < 0.001) = (SatirKDVBrut(ASatirlar[i]) < 0.001)) then begin
+            LOranIslendi := True;
+            Break;
+          end;
+        if LOranIslendi then
+          Continue;
+
+        LGrupMatrah := 0;
+        LGrupVergi := 0;
+        for J := i to High(ASatirlar) do
+          if (Abs(ASatirlar[J].KDVOrani - ASatirlar[i].KDVOrani) < 0.001) and
+             ((SatirKDVBrut(ASatirlar[J]) < 0.001) = (SatirKDVBrut(ASatirlar[i]) < 0.001)) then begin
+            LGrupMatrah := LGrupMatrah + ASatirlar[J].Tutar;
+            LGrupVergi := LGrupVergi + SatirKDVBrut(ASatirlar[J]);
+          end;
+        LToplamKDV := LToplamKDV + LGrupVergi;
+
+        LTaxSub := TJSONObject.Create;
+        LTaxSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
+        LTaxSub.AddPair('taxableAmount', TJSONNumber.Create(LGrupMatrah));
+        LTaxSub.AddPair('percent', TJSONNumber.Create(ASatirlar[i].KDVOrani));
+        LTaxSub.AddPair('taxAmount', TJSONNumber.Create(LGrupVergi));
+        if LGrupVergi < 0.001 then begin
+          var LMufKod, LMufNeden: string;
+          KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
+          LTaxSub.AddPair('taxExemptionCode', LMufKod);
+          LTaxSub.AddPair('taxExemptionReason', LMufNeden);
         end;
+        LTaxScheme := TJSONObject.Create;
+        LTaxScheme.AddPair('name', 'KDV');
+        LTaxScheme.AddPair('typeCode', '0015');
+        LTaxSub.AddPair('taxScheme', LTaxScheme);
+        LTaxSubArr.AddElement(LTaxSub);
       end;
-      LTaxScheme := TJSONObject.Create;
-      LTaxScheme.AddPair('name', 'KDV');
-      LTaxScheme.AddPair('typeCode', '0015');   // izibiz KDV her zaman 0015 (KDV=0/istisna dahil; 9015 gecersiz - koleksiyonda 0 gecis)
-      LTaxSub.AddPair('taxScheme', LTaxScheme);
-      LTaxSubArr.AddElement(LTaxSub);
+      if Abs(LToplamKDV - ABaslik.KDV) < 0.02 then
+        LToplamKDV := ABaslik.KDV;
+      LTax.AddPair('taxAmount', TJSONNumber.Create(LToplamKDV));
       LTax.AddPair('taxSubTotal', LTaxSubArr);
       LContent.AddPair('taxTotal', LTax);
 
@@ -4772,11 +5036,14 @@ begin
       //   (iskonto ONCESI = net + toplam iskonto). taxExclusiveAmount = NET (iskonto sonrasi vergi matrahi).
       //   brut - allowanceTotal = taxExclusive. (LToplamMatrah net; satir LineExtensionAmount net kalir.)
       var LTopIsk: Currency := SatirlarIskontoToplami(ASatirlar);
+      var LPayable: Currency := LToplamMatrah + LToplamKDV - LToplamTevkifat;
+      if Abs(LPayable - ABaslik.Toplam) < 0.02 then
+        LPayable := ABaslik.Toplam;
       LMonetary := TJSONObject.Create;
       LMonetary.AddPair('lineExtensionAmount', TJSONNumber.Create(LToplamMatrah + LTopIsk));  // BRUT
       LMonetary.AddPair('taxExclusiveAmount', TJSONNumber.Create(LToplamMatrah));               // NET
       LMonetary.AddPair('taxInclusiveAmount', TJSONNumber.Create(LToplamMatrah + LToplamKDV));
-      LMonetary.AddPair('payableAmount', TJSONNumber.Create(ABaslik.Toplam));
+      LMonetary.AddPair('payableAmount', TJSONNumber.Create(LPayable));
       if LTopIsk > 0.0001 then
         LMonetary.AddPair('allowanceTotalAmount', TJSONNumber.Create(LTopIsk));
       LContent.AddPair('legalMonetaryTotal', LMonetary);
@@ -4927,6 +5194,12 @@ begin
       LLineTaxSub.AddPair('taxAmount', TJSONNumber.Create(LSatirVergi));
       LLineTaxSub.AddPair('calculationSequenceNumeric', TJSONNumber.Create(1));
       LLineTaxSub.AddPair('percent', TJSONNumber.Create(LSatir.KDVOrani));
+      if LSatirVergi < 0.001 then begin
+        var LMufKod, LMufNeden: string;
+        KDVMuafiyetKodNeden(ABaslik, LMufKod, LMufNeden);
+        LLineTaxSub.AddPair('taxExemptionCode', LMufKod);
+        LLineTaxSub.AddPair('taxExemptionReason', LMufNeden);
+      end;
       LLineTaxScheme := TJSONObject.Create;
       LLineTaxScheme.AddPair('name', 'KDV');
       LLineTaxScheme.AddPair('typeCode', '0015');   // izibiz KDV her zaman 0015 (KDV=0 dahil; 9015 gecersiz)
@@ -5110,6 +5383,7 @@ begin
       ' INNER JOIN FATBASLIK FB ON FB.ID = E.FATBASLIKID ' +
       'WHERE E.YON = 2 AND E.FATBASLIKID = :FID ' +
       'ORDER BY E.ID DESC '+DbSinir(1);
+    PgQueryCevir(LQry);
     LQry.ParamByName('FID').AsInteger := AFatBaslikID;
     LQry.Open;
     if not LQry.Eof then begin
