@@ -114,6 +114,14 @@ procedure LogDetaylariSilSorgu(const ADetayTablo, AWhere: string;
 procedure LogKayitSil(const ATablo: string; ATabNo: Integer; AKayitID: Int64;
   AUstTabNo: Integer; AUstID: Int64);
 
+// BLOB kolonu (or. REHBER.RESIM kart fotografi) silinen kayitla birlikte KAYBOLMASIN:
+// icerik GENDEPO.DOSYA'ya (hash-dedup) alinir, ISLEMLOG'a TabNo_BLOBYEDEK satiri yazilir
+// (JSON: TABLO/KOLON/DOSYAID). "Geri Al" bu satiri gorunce blob'u kayda GERI YAZAR.
+// Neden gerekli: log JSON'u blob/memo alanlarini bilincli DISLAR (boyut) -> blob normal
+// yoldan geri gelmez. Silmeden ONCE cagrilmali (veri hala DB'de).
+procedure LogBlobYedekle(const ATablo, ABlobKolon: string; AKayitID: Int64;
+  AUstTabNo: Integer; AUstID: Int64);
+
 // Kart (master) ad/kod referansini GENDEPO.LOGREFERANS'a UPSERT eder (hizli arama).
 // Silinen kayit da kalir (ASilindi=True -> SILINDI=1). AD/KOD dataset alanlarindan
 // (FIRMA/STOKADI/ADI/KOD...) cikarilir. Loglama gibi is akisini ASLA kirmaz.
@@ -266,8 +274,9 @@ var
 implementation
 
 uses
-  System.SysUtils, System.SyncObjs, System.DateUtils, FireDAC.Comp.Client, Winapi.Windows,
-  Utablo, PrjConst, uUtility_my,  System.Hash, UVeriMotor;
+  System.SysUtils, System.SyncObjs, System.DateUtils, System.Variants, FireDAC.Comp.Client,
+  Winapi.Windows, Utablo, PrjConst, uUtility_my,  System.Hash, UVeriMotor,
+  FetaKurulusSiniflari;   // Veritabani.VeriVarMi / BasitKomutÇalıştır / SorguBaslat
 
 var
   GLogCnn: TFDConnection = nil;   // otonom log baglantisi (GENDEPO'ya baglanir, cache)
@@ -549,9 +558,14 @@ var
   LQ: TFDQuery;
   LSyn: TStringList;
   LEski, LAd, LTbl: string;
-  i, p: Integer;
+  i,  p: Integer;
 begin
   if Trim(AYeniDepo) = '' then Exit;
+  // Hedef depo YOKSA hicbir sey yapma: aksi halde calisan synonym'ler var olmayan
+  //   DB'ye baglanir ve log/e-belge erisimi komple kirilir (yasandi: opsiyon bos ->
+  //   'GENDEPO' varsayimi -> tum synonym'ler gecersiz).
+  if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 where DB_ID(&D) is not null',
+       ['&D'], [Trim(AYeniDepo)]) then Exit;
   LEski := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
 
   // 1) Opsiyonu yaz.
@@ -599,48 +613,61 @@ end;
 
 procedure DepoSynonymDenetle;
 var
-  LQ: TFDQuery;
   LList: TStringList;
   LYeni, LAd, LTbl: string;
   i, p: Integer;
 begin
   if AktifVeriMotor = vmPG then Exit;   // PG: cross-DB synonym mekanizmasi yok ('depo' schema)
   try
-    LYeni := Trim(DepoDBAdi);
-    if LYeni = '' then Exit;
-    LQ := TFDQuery.Create(nil);
     LList := TStringList.Create;
     try
-      LQ.Connection := Tablo.FDCnn;
-      // Hedef depo YOKSA dokunma (var olmayan depoya synonym baglayip prefix'siz erisimi kirmayalim).
-      LQ.SQL.Text := 'SELECT DB_ID(:Y)';
-      LQ.ParamByName('Y').AsString := LYeni;
-      LQ.Open;
-      if LQ.Fields[0].IsNull then begin LQ.Close; Exit; end;
-      LQ.Close;
-      // BILINEN depo synonym'leri: hedefi YENI depo DEGILSE topla (eslesenlere dokunma).
-      LQ.SQL.Text :=
-        'SELECT name, PARSENAME(base_object_name,1) FROM sys.synonyms ' +
-        'WHERE name IN (''EBELGE'',''EBELGEMESAJ'',''EBELGEKUYRUK'',''ISLEMLOG'',' +
-        '''LOGREFERANS'',''LOGCOZUM'',''SNAPSHOT'',''DOSYA'') ' +
-        'AND PARSENAME(base_object_name,2)=''dbo'' ' +
-        'AND ISNULL(PARSENAME(base_object_name,3),'''') <> :Y';
-      LQ.ParamByName('Y').AsString := LYeni;
-      LQ.Open;
-      while not LQ.Eof do
+      // Depo adi opsiyonu (GENINI) BOS ise DepoDBAdi 'GENDEPO' varsayar. Bu durumda
+      //   asagidaki "yanlis depoyu gosterenleri duzelt" adimi CALISAN synonym'leri
+      //   var olmayan GENDEPO'ya cevirip loglamayi komple kirar. Bu yuzden: opsiyon
+      //   yoksa MEVCUT SYNONYM hedefi otorite kabul edilir (ve opsiyona yazilir).
+      if Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, '')) = '' then
       begin
-        LList.Add(LQ.Fields[0].AsString + '|' + LQ.Fields[1].AsString);
-        LQ.Next;
+        LYeni := Trim(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'select top 1 PARSENAME(base_object_name,3) from sys.synonyms ' +
+          ' where name in (''ISLEMLOG'',''DOSYA'',''LOGREFERANS'',''EBELGE'')' +
+          '   and PARSENAME(base_object_name,3) is not null' +
+          '   and DB_ID(PARSENAME(base_object_name,3)) is not null', [], [], True)));
+        if LYeni <> '' then
+        begin
+          Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_DepoDBAdi, LYeni);
+          DepoAdiSifirla;   // cache'i tazele -> DepoDBAdi artik dogru adi verir
+        end;
       end;
-      LQ.Close;
+      LYeni := Trim(DepoDBAdi);
+      if LYeni = '' then Exit;
+      // Hedef depo YOKSA dokunma (var olmayan depoya synonym baglayip prefix'siz erisimi kirmayalim).
+      if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 where DB_ID(&D) is not null',
+           ['&D'], [LYeni]) then Exit;
+      // BILINEN depo synonym'leri: hedefi YENI depo DEGILSE topla (eslesenlere dokunma).
+      with Veritabani.SorguBaslat(Tablo.FDCnn,
+        'select name, PARSENAME(base_object_name,1) from sys.synonyms' +
+        ' where name in (''EBELGE'',''EBELGEMESAJ'',''EBELGEKUYRUK'',''ISLEMLOG'',' +
+        '  ''LOGREFERANS'',''LOGCOZUM'',''SNAPSHOT'',''DOSYA'')' +
+        '   and PARSENAME(base_object_name,2)=''dbo''' +
+        '   and isnull(PARSENAME(base_object_name,3),'''') <> &D', ['&D'], [LYeni]) do
+      try
+        Open;
+        while not Eof do
+        begin
+          LList.Add(Fields[0].AsString + '|' + Fields[1].AsString);
+          Next;
+        end;
+      finally
+        Free;
+      end;
       for i := 0 to LList.Count - 1 do
       begin
         p := Pos('|', LList[i]);
         LAd := Copy(LList[i], 1, p - 1);
         LTbl := Copy(LList[i], p + 1, MaxInt);
-        LQ.SQL.Text := 'DROP SYNONYM dbo.[' + LAd + ']; ' +
-          'CREATE SYNONYM dbo.[' + LAd + '] FOR [' + LYeni + '].dbo.[' + LTbl + ']';
-        LQ.ExecSQL;
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'DROP SYNONYM dbo.[' + LAd + ']; ' +
+          'CREATE SYNONYM dbo.[' + LAd + '] FOR [' + LYeni + '].dbo.[' + LTbl + ']', [], []);
       end;
 
       // EKSIK synonym'leri KUR. Yeniden kurulum/restore sonrasi ana DB'de synonym hic
@@ -650,16 +677,12 @@ begin
       // Kosul: ana DB'de ayni adda nesne YOK + depoda hedef nesne VAR.
       for LTbl in TArray<string>.Create('EBELGE', 'EBELGEMESAJ', 'EBELGEKUYRUK',
         'ISLEMLOG', 'LOGREFERANS', 'LOGCOZUM', 'SNAPSHOT', 'DOSYA') do
-      begin
-        LQ.SQL.Text :=
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'IF OBJECT_ID(''dbo.' + LTbl + ''') IS NULL' +
           ' AND OBJECT_ID(''[' + LYeni + '].dbo.' + LTbl + ''') IS NOT NULL' +
-          ' CREATE SYNONYM dbo.[' + LTbl + '] FOR [' + LYeni + '].dbo.[' + LTbl + ']';
-        LQ.ExecSQL;
-      end;
+          ' CREATE SYNONYM dbo.[' + LTbl + '] FOR [' + LYeni + '].dbo.[' + LTbl + ']', [], []);
     finally
       LList.Free;
-      LQ.Free;
     end;
   except
     // giris akisini bozma; synonym senkronu best-effort.
@@ -667,18 +690,11 @@ begin
 end;
 
 procedure SnapshotEskiTemizle(AGun: Integer = 10);
-var LQ: TFDQuery;
 begin
   try
-    LQ := TFDQuery.Create(nil);
-    try
-      LQ.Connection  := Tablo.FDCnn;
-      LQ.SQL.Text := 'DELETE FROM ' + DepoTablo('SNAPSHOT') +
-        ' WHERE TARIH < ' + DbGunEkle(DbSimdi, -AGun);
-      LQ.ExecSQL;
-    finally
-      LQ.Free;
-    end;
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'delete from ' + DepoTablo('SNAPSHOT') +
+      ' where TARIH < ' + DbGunEkle(DbSimdi, -AGun), [], []);
   except
     // best-effort; SNAPSHOT/depo yoksa ya da hata olursa giris akisini bozma.
   end;
@@ -1501,6 +1517,49 @@ begin
   end;
 end;
 
+procedure LogBlobYedekle(const ATablo, ABlobKolon: string; AKayitID: Int64;
+  AUstTabNo: Integer; AUstID: Int64);
+var
+  LQ: TFDQuery;
+  LStream: TStream;
+  LDosyaID: Int64;
+  LK: TLogKurucu;
+begin
+  if (LogGun <= 0) or (Trim(ATablo) = '') or (Trim(ABlobKolon) = '') or (AKayitID <= 0) then Exit;
+  try
+    LDosyaID := 0;
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'select ' + ABlobKolon + ' from ' + ATablo + ' where ID=' + IntToStr(AKayitID);
+      LQ.Open;
+      if LQ.IsEmpty or LQ.Fields[0].IsNull then Exit;   // blob yok -> yedeklenecek sey yok
+      LStream := LQ.CreateBlobStream(LQ.Fields[0], bmRead);
+      try
+        LStream.Position := 0;
+        // Icerik deposu: hash-dedup -> ayni resim zaten varsa yeni satir acmaz, REFSAYAC+1.
+        LDosyaID := DosyaKaydet(LStream, '.jpg', 'image/jpeg');
+      finally
+        LStream.Free;
+      end;
+    finally
+      LQ.Free;
+    end;
+    if LDosyaID <= 0 then Exit;
+
+    // ISLEMLOG'a "geri yazma talimati" satiri (fiziksel tablo DEGIL -> TabNo_BLOBYEDEK).
+    LK := TLogKurucu.Yeni;
+    LK.Deger('TABLO',   ATablo);
+    LK.Deger('KAYITID', IntToStr(AKayitID));   // hangi karta ait (icerik panelinde gorunsun)
+    LK.Deger('KOLON',   ABlobKolon);
+    LK.Deger('DOSYAID', IntToStr(LDosyaID));
+    LogYaz(liSil, TabNo_BLOBYEDEK, AKayitID, LK, '', AUstTabNo, AUstID);   // LK sahipligi LogYaz'a gecer
+  except
+    // yedekleme silme islemini ASLA bozmaz
+  end;
+end;
+
+
 procedure LogDetaySatirPost(ADataSet: TDataSet; ADetayTabNo, AUstTabNo: Integer;
   AUstID: Int64);
 var
@@ -1628,6 +1687,60 @@ begin
   if Result = nil then Result := AObj.GetValue(LowerCase(AKey));
   if Result = nil then Result := AObj.GetValue(UpperCase(AKey));
 end;
+
+// TabNo_BLOBYEDEK satirindan blob'u kayda geri yazar (Geri Al icinde cagrilir).
+// True: yazildi/atlandi (hata degil). Icerik DOSYA'dan okunur, hedef kolona parametreyle
+// yazilir -> cross-DB tip donusumu ve motor farki sorun cikarmaz.
+function _BlobGeriYaz(const AJson: string; AKayitID: Int64): Boolean;
+var
+  LObj: TJSONObject;
+  LTablo, LKolon: string;
+  LDosyaID: Int64;
+  LSrc, LUpd: TFDQuery;
+  LStream: TStream;
+begin
+  Result := False;
+  LObj := TJSONObject.ParseJSONValue(AJson) as TJSONObject;
+  if LObj = nil then Exit;
+  try
+    LTablo   := GeriJsonDeger(JGetCI(LObj, 'TABLO'));
+    LKolon   := GeriJsonDeger(JGetCI(LObj, 'KOLON'));
+    LDosyaID := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'DOSYAID')), 0);
+  finally
+    LObj.Free;
+  end;
+  if (Trim(LTablo) = '') or (Trim(LKolon) = '') or (LDosyaID <= 0) or (AKayitID <= 0) then Exit;
+
+  LSrc := TFDQuery.Create(nil);
+  try
+    LSrc.Connection := Tablo.FDCnn;
+    LSrc.SQL.Text := 'select ICERIK from ' + DepoTablo('DOSYA') + ' where ID=' + IntToStr(LDosyaID);
+    LSrc.Open;
+    if LSrc.IsEmpty or LSrc.Fields[0].IsNull then Exit;
+    LStream := LSrc.CreateBlobStream(LSrc.Fields[0], bmRead);
+    try
+      LUpd := TFDQuery.Create(nil);
+      try
+        LUpd.Connection := Tablo.FDCnn;
+        LUpd.SQL.Text := 'update ' + LTablo + ' set ' + LKolon + '=:B where ID=' + IntToStr(AKayitID);
+        LStream.Position := 0;
+        LUpd.ParamByName('B').LoadFromStream(LStream, ftBlob);
+        LUpd.ExecSQL;
+        Result := True;
+      finally
+        LUpd.Free;
+      end;
+    finally
+      LStream.Free;
+    end;
+  finally
+    LSrc.Free;
+  end;
+  // Yedek tuketildi -> DOSYA referansini birak (baska kullanan varsa icerik durur).
+  if Result then
+    try DosyaReferansAzalt(LDosyaID); except end;
+end;
+
 
 // Tek bir kaydi (JSON alanlari) ATabloAdi'na AYNI ID ile ekler. Format-guvenli
 // (TField.AsString -> kultur-aware). Sonuc: '' = basari, aksi halde hata mesaji.
@@ -2291,6 +2404,15 @@ begin
     begin
       LRec := LList[i];
       LKart := (LRec.TabloID = AUstTabloID) and (LRec.KayitID = AUstKayitID);
+
+      // BLOB YEDEK satiri: fiziksel tablo degil -> INSERT edilmez, blob kayda GERI YAZILIR.
+      //   (Kart satiri listede ONCE geldigi icin hedef kayit bu noktada dirilmis olur.)
+      if LRec.TabloID = TabNo_BLOBYEDEK then
+      begin
+        if not _BlobGeriYaz(LRec.JSON, LRec.KayitID) then
+          LUyari := LUyari + 'Resim/blob geri yazilamadi (kayit ID=' + IntToStr(LRec.KayitID) + ').'#13#10;
+        Continue;
+      end;
 
       LTabloAdi := GeriTabloAdiGetir(LRec.TabloID);
       if LTabloAdi = '' then

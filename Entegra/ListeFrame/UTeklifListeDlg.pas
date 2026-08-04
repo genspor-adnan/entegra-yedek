@@ -309,8 +309,11 @@ begin
                                      [80, TabTeklif.FieldByName('ID').AsInteger]);
       // Detay satirlarini SILMEDEN ONCE logla (ust=teklif), sonra sil.
       LogDetaylariSil('TEKLIFDETAY', 'TEKLIFID', TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
-      // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-      LogKartSil(TabTeklif, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
+      // Kart SILME logu: SILMEDEN ONCE ve TABLODAN (dataset DEGIL) -> liste
+      //   sp_Prog_Teklif_Liste_Json2 kolonlarini tasidigi icin dataset'ten loglanirsa
+      //   gercek TEKLIF kolonlari loga girmez, "Geri Al" EKSIK dirilir.
+      LogKayitSil('TEKLIF', TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger,
+                  TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
       LogDetaylariSil('TEKLIF_USER', 'ID', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);

@@ -261,26 +261,28 @@ begin
   if Assigned(LKSil)   then LKSil.Free;
 end;
 
-// Silinen detay (iletisim 75 / ilgili 81) icin ISLEMLOG: baslik + silinecek REHBERBILGI
-// alanlari tek kayitta (liSil). Silmeden ONCE cagrilmali (veriler hala DB'de).
-procedure _DetaySilLog(ADetayTabNo, AKayitID, AUstTabloID, AUstKayitID: Integer;
-  const ABaslikEtiket, ABaslikDeger, ABilgiWhere: string);
+// Silinen detay (iletisim / ilgili kisi) icin ISLEMLOG. Silmeden ONCE cagrilmali.
+//
+// ESKIDEN: tek satirda ETIKET->BILGI (or. {"İletişim":"Merkez","İş Tel":"..."}) yazilirdi.
+//   Okunakliydi ama KOLON ADI ve ID icermedigi icin (a) kaydin neye bagli oldugu
+//   (REHBERID / YER_ID) gorunmuyordu, (b) "Geri Al" INSERT'u kuramiyor ->
+//   "Yazilacak alan yok" uyarisi veriyordu.
+// SIMDI: kart silme yoluyla AYNI desen -> kaydin kendisi + bagli REHBERBILGI satirlari
+//   + varsa IMAJ satirlari, her biri KENDI kolonlariyla loglanir (geri alinabilir).
+//   Okunabilirlik kaybolmaz: ETIKET/BILGI zaten REHBERBILGI satirlarinin kolonlarinda.
+procedure _DetaySilLog(const ATablo: string; ADetayTabNo, AKayitID, AUstTabloID,
+  AUstKayitID: Integer; const ABilgiWhere: string; const AImajWhere: string = '');
 begin
   if LogGun <= 0 then Exit;
   try
-    var LK: TLogKurucu := TLogKurucu.Yeni;
-    try
-      if ABaslikDeger <> '' then LK.Deger(ABaslikEtiket, ABaslikDeger);
-      Tablo.TablodanSorguAc(2, 'select ETIKET, BILGI from REHBERBILGI where ' + ABilgiWhere);
-      while not Tablo.Query2.Eof do
-      begin
-        LK.Deger(Tablo.Query2.FieldByName('ETIKET').AsString, Tablo.Query2.FieldByName('BILGI').AsString);
-        Tablo.Query2.Next;
-      end;
-      LogYaz(liSil, ADetayTabNo, AKayitID, LK.JSON, '', AUstTabloID, AUstKayitID, AUstKayitID);
-    finally
-      LK.Free;
-    end;
+    // 1) Kaydin kendisi (REHBERILETISIM / REHBER-334) - tum kolonlar
+    LogKayitSil(ATablo, ADetayTabNo, AKayitID, AUstTabloID, AUstKayitID);
+    // 2) Bagli bilgi satirlari (adres/telefon/eposta...)
+    if Trim(ABilgiWhere) <> '' then
+      LogDetaylariSilSorgu('REHBERBILGI', ABilgiWhere, TabNo_REHBERBILGI, AUstTabloID, AUstKayitID);
+    // 3) Bagli medya (iletisim resmi vb.)
+    if Trim(AImajWhere) <> '' then
+      LogDetaylariSilSorgu('IMAJ', AImajWhere, TabNo_IMAJ, AUstTabloID, AUstKayitID);
   except
   end;
 end;
@@ -289,11 +291,11 @@ procedure CariIletisimSil(RehberId, IletId: Integer; Varsayilan: Boolean; AUstTa
 var
   ID: Integer;
 begin
-  // SILME logu (75 iletisim): silmeden ONCE - baslik REHBERILETISIM.AD + bilgiler.
-  _DetaySilLog(75, IletId, AUstTabloID, RehberId, 'İletişim',
-    VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-      'select AD from REHBERILETISIM where ID=&id', ['&id'], [IletId], True)),
-    'YERI=1 and YER_ID=' + IntToStr(IletId));
+  // SILME logu (75 iletisim): silmeden ONCE, KOLON bazli (ID/REHBERID gorunur, geri alinabilir).
+  //   Silinen 3 sey: REHBERILETISIM satiri + bagli REHBERBILGI (YERI=1) + IMAJ (YERI=11).
+  _DetaySilLog('REHBERILETISIM', TabNo_REHBERILETISIM, IletId, AUstTabloID, RehberId,
+    'YERI=1 and YER_ID=' + IntToStr(IletId),
+    'YERI=11 and YER_ID=' + IntToStr(IletId));
 
   if Varsayilan then
   begin
@@ -329,11 +331,15 @@ begin
   Silme_Kontrolu('TEKLIF', 'MUS_ILGILI', RDTeklifVerisiVarSilinemez);
   Silme_Kontrolu('SERVIS', 'MUS_ILGILI', RDServisVerisiVarSilinemez);
 
-  // SILME logu (81 ilgili): silmeden ONCE - baslik REHBER.FIRMA (kisi adi) + bilgiler.
-  _DetaySilLog(81, PerId, AUstTabloID, RehberId, 'İlgili',
-    VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-      'select FIRMA from REHBER where ID=&id', ['&id'], [PerId], True)),
-    'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(PerId) + ')');
+  // SILME logu (ilgili kisi): silmeden ONCE, KOLON bazli (geri alinabilir).
+  //   Ilgili kisi bir REHBER satiridir (GRUP=334) -> TABLOID 71 (REHBER); eskiden 81
+  //   (REHBERBILGI/Ilgili) yazilirdi, geri alma yanlis tabloya gitmek uzereydi.
+  //   Silinen: REHBER-334 satiri + IMAJ (YERI=12) + kisinin REHBERILETISIM/REHBERBILGI'leri.
+  _DetaySilLog('REHBER', TabNo_REHBER, PerId, AUstTabloID, RehberId,
+    'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(PerId) + ')',
+    'YERI=12 and YER_ID=' + IntToStr(PerId));
+  LogDetaylariSilSorgu('REHBERILETISIM', 'REHBERID=' + IntToStr(PerId),
+    TabNo_REHBERILETISIM, AUstTabloID, RehberId);
 
   if Varsayilan then
   begin

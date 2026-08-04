@@ -284,8 +284,11 @@ procedure TEkipmanListeDlg.SilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      if not EkipmanHareketVarMi(TabEkipmanlar.FieldByName('ID').AsInteger) then begin
-       // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-       LogKartSil(TabEkipmanlar, TabNo_EKIPMAN, TabEkipmanlar.FieldByName('ID').AsInteger);
+       // Kart SILME logu: SILMEDEN ONCE ve TABLODAN (dataset DEGIL) -> liste
+       //   sp_Prog_Ekipman_Liste_Json2 kolonlarini tasidigi icin dataset'ten loglanirsa
+       //   gercek EKIPMANLAR kolonlari loga girmez, "Geri Al" EKSIK dirilir.
+       LogKayitSil('EKIPMANLAR', TabNo_EKIPMAN, TabEkipmanlar.FieldByName('ID').AsInteger,
+                   TabNo_EKIPMAN, TabEkipmanlar.FieldByName('ID').AsInteger);
        veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANDETAY where EKIPMANID='+TabEkipmanlar.FieldByName('ID').AsString,[],[]);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from EKIPMANLAR where ID=&ID',['&ID'],[TabEkipmanlar.FieldByName('ID').AsInteger]);
        Liste_SP_Cagir(4);

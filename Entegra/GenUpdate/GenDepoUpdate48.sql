@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate48 (musteri uygulama)
 --   DOSYA deposu ONARIM/TAMAMLAMA (FILESTREAM). GenDepoUpdate3'teki DOSYA kurulumu
 --   FILESTREAM OS-seviyesi KAPALIYKEN calisirsa YARIM kalabilir:
@@ -11,6 +11,11 @@
 --   COK-INSTANCE: depo adi @depo ile cozulur (GENINI BOLUM=-24120 DIL=0; yoksa 'GENDEPO').
 --   Tek batch (GO yok), idempotent. Ana DB baglantisindan calistirilir.
 -- ============================================================
+-- FILTRELI/UNIQUE INDEKS var: bu SET secenekleri ZORUNLU. sqlcmd varsayilani
+-- QUOTED_IDENTIFIER OFF'tur (-I bayragi verilmezse) -> 'CREATE INDEX failed because
+-- the following SET options have incorrect settings' hatasi ve KURULUM YARIM kalir.
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 

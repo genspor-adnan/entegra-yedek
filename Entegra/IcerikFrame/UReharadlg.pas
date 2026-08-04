@@ -1148,9 +1148,12 @@ end;
 procedure TRehberAraDlg.SilTusClick(Sender: TObject);
 begin
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     // SILME logu: kayit SILINMEDEN once alinmali (aksi halde refresh sonrasi yanlis
-     // kayit loglanir).
-     LogKartSil(REHBER, TabNo_REHBER, REHBER.Fields[0].AsInteger);
+     // SILME logu artik BURADA YAZILMIYOR: Tablo.CariSil kart + tum detaylari SILMEDEN
+     //   ONCE ve TABLODAN logluyor (LogKayitSil('REHBER',...)). Buradaki eski
+     //   LogKartSil(REHBER,...) dataset'ten yaziyordu; liste sp_Prog_Cari_Liste_Json2
+     //   kolonlarini tasidigi icin (ADSOYAD/BAKIYE/TEMSILCIAD...) gercek REHBER kolonlari
+     //   (FIRMA/GRUP) loga girmiyor, "Geri Al" kaydi EKSIK diriliyordu. Ayrica mukerrer
+     //   kart log satiri uretiyordu.
      LogOnceki.Clear;
      Tablo.CariSil( REHBER.Fields[0].AsInteger);
      TabloYenile(REHBER,[]);

@@ -1458,6 +1458,12 @@ resourcestring
     RDProjeVerisiVarSilinemez = 'Girilmiş proje bilgisi var, silinemez!';
     RDAktiviteVerisiVarSilinemez = 'Girilmiş aktivite verisi var, silinemez!';
     RDTeklifVerisiVarSilinemez = 'Girilmiş teklif verisi var, silinemez!';
+    RDSiparisVerisiVarSilinemez = 'Girilmiş sipariş verisi var, silinemez!';
+    RDSozlesmeVerisiVarSilinemez = 'Girilmiş sözleşme verisi var, silinemez!';
+    RDSatinAlmaVerisiVarSilinemez = 'Girilmiş satınalma verisi var, silinemez!';
+    RDUretimVerisiVarSilinemez = 'Girilmiş üretim emri verisi var, silinemez!';
+    RDIsEmriVerisiVarSilinemez = 'Girilmiş iş emri verisi var, silinemez!';
+    RDIlgiliKisiKullanilmisSilinemez = 'Bağlı ilgili kişi bir belgede kullanılmış, silinemez!';
     RDServisVerisiVarSilinemez = 'Girilmiş servis verisi var, silinemez!';
     RDServisHarVerisiVarSilinemez = 'Girilmiş birden çok hareket verisi var, silinemez!';
     RDServisTekHareketVarSilinemez = 'Bir serviste en az bir hareket olmalıdır, silinemez!';

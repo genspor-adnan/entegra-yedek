@@ -594,10 +594,6 @@ object IKWizardDlg: TIKWizardDlg
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CariGridNotlar: TcxGrid
             Left = 0
             Top = 27

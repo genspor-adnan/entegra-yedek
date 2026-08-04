@@ -1,8 +1,13 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoKur2 : EBELGE tablosu (GENDEPO) + ana DB synonym
 --   e-Belge (e-Fatura/e-Arsiv/e-Irsaliye) ana kaydi. GenDepoKur1'den SONRA.
 --   Idempotent: tablo/synonym yoksa olusturur.
 -- ============================================================
+-- FILTRELI/UNIQUE INDEKS var: bu SET secenekleri ZORUNLU. sqlcmd varsayilani
+-- QUOTED_IDENTIFIER OFF'tur (-I bayragi verilmezse) -> 'CREATE INDEX failed because
+-- the following SET options have incorrect settings' hatasi ve KURULUM YARIM kalir.
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
 SET NOCOUNT ON;
 IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO] COLLATE SQL_Latin1_General_CP1254_CI_AS');
 

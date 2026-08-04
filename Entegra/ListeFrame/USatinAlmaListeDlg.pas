@@ -210,8 +210,11 @@ end;
 procedure TSatinAlmaListeDlg.SilTusClick(Sender: TObject);
 begin
  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-  // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-  LogKartSil(TabSatinAlma, TabNo_SATINALMA, TabSatinAlma.FieldByName('ID').AsInteger);
+  // Kart SILME logu: SILMEDEN ONCE ve TABLODAN (dataset DEGIL) -> liste dataset'i SP
+  //   kolonlarini tasidigi icin dataset'ten loglanirsa gercek SATINALMA kolonlari loga
+  //   girmez ve "Geri Al" kaydi EKSIK dirilir.
+  LogKayitSil('SATINALMA', TabNo_SATINALMA, TabSatinAlma.FieldByName('ID').AsInteger,
+              TabNo_SATINALMA, TabSatinAlma.FieldByName('ID').AsInteger);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SATINALMADETAY where SATINALMAID=&id ',['&id'],[TabSatinAlma.Fields[0].AsInteger]);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SATINALMA where ID=&id ',['&id'],[TabSatinAlma.Fields[0].AsInteger]);
   YenileTusClick(Self);

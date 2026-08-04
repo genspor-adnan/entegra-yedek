@@ -109,7 +109,7 @@ var
 
 implementation
 
-   uses UVeriMotor, UTablo, UGirisKutusuEx, ULog;
+   uses UVeriMotor, UTablo, UGirisKutusuEx, ULog, UResim;   // UResim: Geri Al sonrasi RESIM cache tazeleme
 {$R *.dfm}
 
 function IslemAd(ATip: Integer): string;
@@ -430,7 +430,7 @@ begin
       // Icerik GERCEK tipi gosterir: ALTISLEMTIPI (satirin oz tipi); yoksa (eski kayit)
       // ISLEMTIPI'ye duser. Filtre yine ISLEMTIPI'de (grup/kart modu) -> oturumun tum satirlari.
       'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, ' +
-      'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
+      'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' when 513 then ''Cari Alias'' when 514 then ''Cari Temsilci'' when 515 then ''Cari İlgili Personel'' when 516 then ''İlgili Resmi'' when 517 then ''Kart Resmi'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
       'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
       'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
       'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
@@ -568,7 +568,7 @@ begin
   // 2) Ust altindaki TUM loglar. Master (TABLOID=USTTABLOID) USTTE, detaylar altta;
   //    her grup icinde en yeni ustte. TABLOLAR ile TABLOID->GORUNUM (Başlık/Detay).
   LSQL := 'select i.TARIH, i.ISLEMTIPI, ISNULL(i.ALTISLEMTIPI, i.ISLEMTIPI) as GERCEKTIP, i.TABLOID, i.KAYITID, ' +
-          'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
+          'GORUNUM = case i.TABLOID when 42 then ''Doküman Medya'' when 75 then ''Cari İletişim'' when 76 then ''Cari Detay'' when 79 then ''Cari Ticari'' when 81 then ''Cari İlgili'' when 210 then ''Görev Yorum'' when 321 then ''Doküman Kartı'' when 340 then ''Stok Barkod'' when 342 then ''Stok Boyut'' when 344 then ''Stok Eşdeğer'' when 346 then ''Stok Fiyat'' when 370 then ''Stok Detay'' when 513 then ''Cari Alias'' when 514 then ''Cari Temsilci'' when 515 then ''Cari İlgili Personel'' when 516 then ''İlgili Resmi'' when 517 then ''Kart Resmi'' else COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(t.MODUL,'''')+'' ''+ISNULL(t.GORUNUM,''''))),''''), null) end, ' +
           'KULLANICIAD = ISNULL((select FIRMA from REHBER where ID=i.KULLANICIID), CAST(i.KULLANICIID as varchar(20))), ' +
           'cast(DECOMPRESS(i.BILGI) as nvarchar(max)) as BILGI_JSON ' +
           'from ISLEMLOG i left join TABLOLAR t on t.TABLOID = i.TABLOID ' +
@@ -907,6 +907,10 @@ begin
   LSonuc := LogGeriAl(LUstTab, LUstKayit, LGun);
   if LSonuc = '' then
   begin
+    // RESIM cache'i (REHBER/STOKLAR/DEMIRBAS/MASRAFGELIR .RESIM kolonu) blob oldugu icin
+    // loglanmaz -> geri gelen IMAJ satirindan yeniden uretilir. IMAJ yoksa cache temizlenir.
+    if LUstTab in [71, 88, 18, 58] then
+      VarsayilanResimTazele(LUstTab, LUstKayit);
     ShowMessage('Kay'#$0131't geri al'#$0131'nd'#$0131'.');
     TabLogYukle;   // listeyi tazele (silme kaydi hala loglarda kalir)
   end

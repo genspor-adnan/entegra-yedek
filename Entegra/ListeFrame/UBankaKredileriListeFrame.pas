@@ -1226,7 +1226,11 @@ begin
      if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
         if LogGun > 0 then begin  // silmeden ONCE logla (kayit dururken): detay + kart
            LogDetaylariSil('PLANKREDI','KREDIID',TabNo_KREDIPLAN,TabNo_KREDILER,KREDILER.FieldByName('ID').AsInteger);
-           LogKartSil(KREDILER, TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger);
+           // TABLODAN logla (dataset DEGIL): liste sp_Prog_Banka_Liste_Json2 kolonlarini
+           //   tasir (TOPLAM_TUTAR/ODENENTAKSIT... hesapli) -> dataset'ten loglanirsa
+           //   gercek KREDILER kolonlari loga girmez, "Geri Al" EKSIK dirilir.
+           LogKayitSil('KREDILER', TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger,
+                       TabNo_KREDILER, KREDILER.FieldByName('ID').AsInteger);
         end;
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from PLANKREDI where KREDIID='+KREDILER.FieldByName('ID').AsString,[],[]);
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KREDILER where ID='+KREDILER.FieldByName('ID').AsString,[],[]);

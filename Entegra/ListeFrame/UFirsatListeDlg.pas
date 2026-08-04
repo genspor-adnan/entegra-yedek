@@ -354,7 +354,7 @@ type
 
 implementation
 
-uses UAnaForm, FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, ULog,
+uses UAnaForm,  FetaKurulusSiniflari, FetaClassExtensions,  PrjConst, UFastRap, LocOnfly, UTeklifListeDlg, ULog,
      UIsListesi, UGorevDlg, System.JSON, UVeriMotor;
 
 {$R *.dfm}
@@ -1076,6 +1076,11 @@ begin
       //varsa proje ba�lant�lar� silinmeli
       //kendisi silinir
       //FIRSATLAR.Delete;
+      // KART LOGU: SILMEDEN ONCE ve TABLODAN (firsat fiziksel olarak PROJELER'de durur).
+      //   Liste dataset'i sp_Prog_Firsat_Liste_Json2 kolonlarini tasiyor -> dataset'ten
+      //   loglanirsa gercek kolonlar loga girmez, "Geri Al" kaydi EKSIK dirilir.
+      LogKayitSil('PROJELER', TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger,
+                  TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
       // Detay (REHBERBILGI firsat bilgileri, YERI=proje) SILMEDEN ONCE logla.
       LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_PROJEDETAY, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger, 'YERI=' + IntToStr(TabNo_PROJELER));
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM REHBERBILGI WHERE YERI = &RYer AND YER_ID = &YerId ', ['&RYer','&YerId'],[TabNo_PROJELER, FIRSATLAR.Fields[0].AsInteger]);
@@ -1085,8 +1090,7 @@ begin
 
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[FIRSATLAR.Fields[0].AsInteger]);
 
-    // Kart SILME logu (TabNo_FIRSAT: detay loglariyla tutarli; eskiden yanlislikla TabNo_PROJELER yaziliyordu)
-    LogKartSil(FIRSATLAR, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
+    // NOT: kart silme logu YUKARIDA (silmeden once, PROJELER tablosundan) yazildi.
 
       FArama.YenileTus.Click;
         /// SQL2005 TE hataya neden oldu�u i�in delete olay�n� kendimiz yap�yoruz

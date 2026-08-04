@@ -31,6 +31,7 @@ $kok = $PSScriptRoot
 # --- Calistirilacaklar (SIRA ONEMLI) ---------------------------------------
 $adimlar = @(
     @{ Ad = "Depo synonym onarimi (log ekrani bos sorunu)";        Dosya = "GenUpdate\GenDepoUpdate61.sql" },
+    @{ Ad = "Cari/IK detay tablolari TABLOLAR kaydi (Geri Al)";    Dosya = "GenUpdate\GenDepoUpdate62.sql" },
     @{ Ad = "Stok adet kontrolu SP'leri (izlemli/izlemsiz)";       Dosya = "GenUpdate\GenDepoUpdate43.sql" },
     @{ Ad = "StokHizmetAra detay panelleri SP";                    Dosya = "GenUpdate\GenDepoUpdate45.sql" },
     @{ Ad = "Log/Info liste SP (UInfo sunucu-tarafi)";             Dosya = "GenUpdate\sp_Prog_Log_Liste_Json2.sql" },

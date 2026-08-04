@@ -1087,22 +1087,116 @@ begin
         raise Exception.Create(RDCekVerisiVarSilinemez);
      if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SENETLER where REHBERID =  &SId', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
         raise Exception.Create(RDSenetVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from REHBERILETISIM where REHBERID =  &SId', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
-        raise Exception.Create(RDiletisimBigisiVarSilinemez);
+     // NOT: iletisim bilgisi (REHBERILETISIM) ARTIK ENGEL DEGIL -> kartla birlikte silinir
+     //   (asagida, cari silme deseniyle ayni: Utablo.CariSil). Eski "iletisim bilgisi var,
+     //   silinemez" kontrolu kaldirildi; is verisi degil, kartin kendi detayi.
      if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from PERS_HAREKET where REHBERID =  &SId and TUR<>1', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
         raise Exception.Create(RDPersonelBigisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from REHBER where grup=334 and BAGID =  &SId', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
-        raise Exception.Create(RDPersonelBigisiVarSilinemez);
+     // BAGLI KISI (GRUP=334) kartin KENDI detayidir (kart acilirken "İlgili" girilince olusur)
+     //   -> tek basina ENGEL DEGIL; asagida loglanip kartla birlikte silinir.
+     //   ENGEL yalnizca o kisi bir BELGEDE "ilgili kisi" olarak kullanildiysa (is verisi).
+     if Veritabani.VeriVarMi(Tablo.FDCnn,
+          'select 1 from REHBER K where K.GRUP=334 and K.BAGID=&SId and ('+
+          ' exists(select 1 from SIPARIS  s where s.MUS_ILGILI=K.ID) or'+
+          ' exists(select 1 from TEKLIF   t where t.MUS_ILGILI=K.ID) or'+
+          ' exists(select 1 from SERVIS   v where v.MUS_ILGILI=K.ID) or'+
+          ' exists(select 1 from GOREVLER g where g.MUS_ILGILI=K.ID or g.MUS_ILGILI2=K.ID) or'+
+          ' exists(select 1 from EKIPMANREHBER e where e.MUS_ILGILI=K.ID) or'+
+          ' exists(select 1 from DOKUMAN  d where d.ILGILIID=K.ID) or'+
+          ' exists(select 1 from TEKLIFFINANSAL f where f.ILGILIID=K.ID))',
+          ['&SId'],[REHBER.FieldByName('ID').asstring]) then
+        raise Exception.Create(RDIlgiliKisiKullanilmisSilinemez);
      if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from BANKAHESAPLAR where REHBERID =  &SId', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
         raise Exception.Create(RDBankaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from IMAJ where DURUM = 1 and YERI=&yeri and YER_ID=&yer_id ', ['&yeri','&yer_id'],[ TabNo_REHBER, REHBER.FieldByName('ID').asstring]) then
-        raise Exception.Create(RDDokumanVerisiVarSilinemez);
+     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SERVIS where REHBERID =  &SId', ['&SId'],[REHBER.FieldByName('ID').asstring]) then
+        raise Exception.Create(RDServisVerisiVarSilinemez);
+     // NOT: IMAJ (resim/belge) ve GOREVYORUM (yorum/medya) ARTIK ENGEL DEGIL ->
+     //   asagida loglanip kartla birlikte silinir (Utablo.CariSil ile ayni desen).
 
-    //?LET??? S?L ME !!!!!!!!!!!!!!!!!!
-    //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=1 and YER_ID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    // KART LOGU: SILMEDEN ONCE ve TABLODAN (dataset'ten DEGIL). Liste dataset'i artik
+    //   sp_Prog_IK_Liste_Json2 kolonlarini tasiyor (ADSOYAD/DURUMAD/SUBE...) -> dataset'ten
+    //   loglanirsa gercek REHBER kolonlari (FIRMA, GRUP...) loga girmez ve "Geri Al"
+    //   kaydi EKSIK dirilir (FIRMA/GRUP NULL). LogKayitSil tabloyu yeniden sorgular.
+    LogKayitSil('REHBER', TabNo_IK, REHBER.FieldByName('ID').AsInteger,
+                TabNo_IK, REHBER.FieldByName('ID').AsInteger);
+    // KART FOTOGRAFI (REHBER.RESIM blob): log JSON'u blob'lari dislar -> ayrica yedekle
+    //   (icerik GENDEPO.DOSYA'ya, ISLEMLOG'a geri-yazma talimati). Geri Al'da resim doner.
+    LogBlobYedekle('REHBER', 'RESIM', REHBER.FieldByName('ID').AsInteger,
+                   TabNo_IK, REHBER.FieldByName('ID').AsInteger);
+    // Iletisim (adres/telefon/eposta...) + detay bilgileri: SILMEDEN ONCE logla ("Geri Al"
+    // ile dirilebilsin), sonra sil. Sira onemli: once bagli REHBERBILGI (YERI=1), sonra
+    // REHBERILETISIM (yetim satir/FK hatasi kalmasin).
+    LogDetaylariSilSorgu('REHBERBILGI',
+      'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + REHBER.Fields[0].AsString + ')',
+      TabNo_REHBERBILGI, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSil('REHBERILETISIM', 'REHBERID', TabNo_REHBERILETISIM, TabNo_IK, REHBER.Fields[0].AsInteger);
+    // RESIM/BELGE (IMAJ) + YORUM/MEDYA: cari silme (Utablo.CariSil) ile ayni 3 katman.
+    //   Personel fotografi = IMAJ (YERI=71 kart contexti, VARSAYILAN=1); REHBER.RESIM
+    //   yalniz cache (blob -> loglanmaz), Geri Al'da UInfo tazeler.
+    LogDetaylariSil('IMAJ', 'YER_ID', TabNo_IMAJ, TabNo_IK, REHBER.Fields[0].AsInteger,
+      'YERI=' + IntToStr(TabNo_REHBER));
+    LogDetaylariSilSorgu('REHBERBILGIRESIM',
+      'REHBERBILGIID in (select ID from REHBERBILGI where YERI in (1,2,3) and YER_ID=' + REHBER.Fields[0].AsString + ')',
+      TabNo_REHBERBILGIRESIM, TabNo_IK, REHBER.Fields[0].AsInteger);
+    // YORUM/MEDYA: IK kartinda GOREVYORUM.TUR = TabNo_IK (73) — cari (71) DEGIL.
+    //   Yanlis TUR ile hicbir satir eslesmez -> yorum/ek ne loglanir ne silinir, kart
+    //   gidince YETIM kalirdi. (Kart resmi IMAJ.YERI ise 71'dir: ResimEkleme Tabno_Rehber gecer.)
+    LogDetaylariSil('GOREVYORUM', 'GOREVID', Tabno_GOREVYORUM, TabNo_IK, REHBER.Fields[0].AsInteger,
+      'TUR=' + IntToStr(TabNo_IK));
+    LogDetaylariSilSorgu('DOKUMAN',
+      'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_IK) + ' and GOREVID=' + REHBER.Fields[0].AsString + ')',
+      TabNo_DOKUMAN, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSilSorgu('IMAJ',
+      'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_IK) + ' and GOREVID=' + REHBER.Fields[0].AsString + '))',
+      TabNo_IMAJ, TabNo_IK, REHBER.Fields[0].AsInteger);
+    // KULLANICI (personelin kullanici/rol baglantisi): siliniyordu ama LOGLANMIYORDU
+    //   -> Geri Al'da geri gelmiyordu (cari silmede zaten loglaniyor).
+    LogDetaylariSil('KULLANICI', 'REHBERID', TabNo_KULLANICI, TabNo_IK, REHBER.Fields[0].AsInteger);
+    // KART BILGILERI: ticari (YERI=2) LOGSUZ siliniyordu, ozluk (YERI=3) hic silinmiyordu
+    //   -> kart gidince ozluk satirlari YETIM kaliyordu. Ikisi de loglanip silinir (cari deseni).
+    //   (YERI=3 ozluk -> TabNo_REHBEROZLUK/86 "İK Özlük" olarak gorunur; YERI=2 ticari -> 76)
+    LogDetaylariSilSorgu('REHBERBILGI', 'YERI=3 and YER_ID=' + REHBER.Fields[0].AsString,
+      TabNo_REHBEROZLUK, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSilSorgu('REHBERBILGI', 'YERI=2 and YER_ID=' + REHBER.Fields[0].AsString,
+      TabNo_REHBERBILGI, TabNo_IK, REHBER.Fields[0].AsInteger);
+    // PERS_HAREKET: engel kontrolu TUR<>1'i zaten bloklar; kalan TUR=1 (ise giris) kartin
+    //   kendi kaydidir -> loglanip kartla birlikte silinir (yoksa yetim kalirdi).
+    LogDetaylariSil('PERS_HAREKET', 'REHBERID', TabNo_REHBERPERSONELHAREKET, TabNo_IK,
+      REHBER.Fields[0].AsInteger, 'TUR=1');
+    // BAGLI KISI (GRUP=334) ve onun detaylari: kartla birlikte loglanip silinir.
+    //   Sira: kisinin detaylari -> kisinin kendisi (yetim/FK kalmasin).
+    LogDetaylariSilSorgu('REHBERBILGI',
+      'YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + REHBER.Fields[0].AsString + '))',
+      TabNo_REHBERBILGI, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSilSorgu('REHBERILETISIM',
+      'REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + REHBER.Fields[0].AsString + ')',
+      TabNo_REHBERILETISIM, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSilSorgu('REHBER',
+      'GRUP=334 and BAGID=' + REHBER.Fields[0].AsString,
+      TabNo_REHBER, TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSil('REHBERALIAS',    'REHBERID', TabNo_REHBERALIAS,          TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSil('REHBERTEMSILCI', 'REHBERID', TabNo_REHBERTEMSILCI,       TabNo_IK, REHBER.Fields[0].AsInteger);
+    LogDetaylariSil('REHBERPERSONEL', 'REHBERID', TabNo_REHBERILGILIPERSONEL, TabNo_IK, REHBER.Fields[0].AsInteger);
+
+    // --- Silme sirasi: once bagli/alt satirlar ---
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGIRESIM where REHBERBILGIID in (select ID from REHBERBILGI where YERI in (1,2,3) and YER_ID=&id) ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=&id) ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=&tur and GOREVID=&id)) ',['&tur','&id'],[TabNo_IK, REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=&tur and GOREVID=&id) ',['&tur','&id'],[TabNo_IK, REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVYORUM where TUR=&tur and GOREVID=&id ',['&tur','&id'],[TabNo_IK, REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&id ',['&yeri','&id'],[TabNo_REHBER, REHBER.Fields[0].AsInteger]);
+    // Bagli kisi (334) + detaylari
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=&id)) ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=&id) ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER where GRUP=334 and BAGID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERALIAS where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERTEMSILCI where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERPERSONEL where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
     //ticari sil
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KULLANICI where REHBERID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=2 and YER_ID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI in (2,3) and YER_ID=&id ',['&id'],[REHBER.Fields[0].AsInteger]);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PERS_HAREKET where REHBERID=&id and TUR=1 ',['&id'],[REHBER.Fields[0].AsInteger]);
     //kendisini sil
     // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
     LogDetaylariSil('REHBER_USER', 'ID', TabNo_REHBER_USER, TabNo_IK, REHBER.Fields[0].AsInteger);
@@ -1113,7 +1207,9 @@ begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GENINI where BOLUM ='+'-100'+IntToStr(i)+REHBER.Fields[0].AsString+'  ',[],[]);
     end;
 
-    LogKartSil(REHBER, TabNo_IK, REHBER.FieldByName('ID').AsInteger);  // IK (73) - cari 71'den ayri
+    // NOT: kart silme logu YUKARIDA (silmeden once, tablodan) yazildi -> burada tekrar
+    //   LogKartSil(REHBER,...) cagrilmaz; dataset SP kolonlarini tasidigi icin eksik/yanlis
+    //   log uretiyordu (Geri Al'da FIRMA/GRUP bos kaliyordu).
     LogOnceki.Clear;
     //REHBER.Close;
     //REHBER.open;

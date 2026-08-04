@@ -13,7 +13,6 @@ object UretimListeDlg: TUretimListeDlg
     Left = 3
     Top = 3
     Width = 1021
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -84,16 +83,14 @@ object UretimListeDlg: TUretimListeDlg
   end
   object GridUretim: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 1027
-    Height = 261
+    Height = 258
     Align = alClient
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 35
-    ExplicitHeight = 258
     object GridUretimView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>

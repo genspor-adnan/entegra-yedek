@@ -1723,6 +1723,14 @@ begin
           Tablo.Query1.Next;
         end;
       end;
+      // KART LOGU: SILMEDEN ONCE ve TABLODAN. Liste dataset'i sp_Prog_Demirbas_Liste_Json2
+      //   kolonlarini tasiyor (ZIMMETLIADI/KATEGORIADI/MODELAD...) -> dataset'ten loglanirsa
+      //   gercek DEMIRBAS kolonlari loga girmez, "Geri Al" kaydi EKSIK dirilir.
+      LogKayitSil('DEMIRBAS', TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger,
+                  TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
+      // KART FOTOGRAFI (DEMIRBAS.RESIM blob) - log JSON'u blob'lari dislar, ayrica yedekle.
+      LogBlobYedekle('DEMIRBAS', 'RESIM', DEMIRBAS.FieldByName('ID').AsInteger,
+                     TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
       // Detay satirlarini SILMEDEN ONCE logla (ust=demirbas), sonra sil.
       LogDetaylariSil('DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID', TabNo_DEMIRBAS_TUTANAK, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
@@ -1732,7 +1740,7 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
      // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&DEMIRBASID',['&DEMIRBASID'],[DEMIRBAS.FieldByName('ID').AsString])
     end;
-    LogKartSil(DEMIRBAS, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
+    // NOT: kart silme logu YUKARIDA (silmeden once, tablodan) yazildi.
     YenileTusClick(Self);
     /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
     Abort;

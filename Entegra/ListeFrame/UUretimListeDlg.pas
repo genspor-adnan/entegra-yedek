@@ -162,7 +162,7 @@ type
   public
     { Public declarations }
   published
-    property Arama : TUretimAramaFrame read FArama write SetArama;
+    property  Arama : TUretimAramaFrame read FArama write SetArama;
     procedure AramaYap(Sender: TObject);
     procedure EditUretimNoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   end;

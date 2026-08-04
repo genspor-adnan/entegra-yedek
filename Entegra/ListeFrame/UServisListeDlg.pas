@@ -1061,8 +1061,10 @@ begin
        showmessage(RDServisHarVerisiVarSilinemez);
        exit;
     end;
-    // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-    LogKartSil(SERVIS, TabNo_SERVIS, ServisID);
+    // Kart SILME logu: SILMEDEN ONCE ve TABLODAN (dataset DEGIL) -> liste
+    //   sp_Prog_Servis_Liste_Json2 kolonlarini tasidigi icin dataset'ten loglanirsa
+    //   gercek SERVIS kolonlari loga girmez, "Geri Al" EKSIK dirilir.
+    LogKayitSil('SERVIS', TabNo_SERVIS, ServisID, TabNo_SERVIS, ServisID);
     // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
     LogDetaylariSil('SERVIS_USER', 'ID', TabNo_SERVIS_USER, TabNo_SERVIS, ServisID);
     Tablo.ServisSil(ServisID);

@@ -4248,6 +4248,22 @@ var
   LKontrolSatir: Integer;
   LKontrolKalan, LAzalma: Double;
 
+  // Satirin STOK ETKISI degisti mi? (yeni satir -> her zaman evet). Yalniz fiyat/iskonto/
+  // aciklama gibi alanlar degistiyse bakiye etkilenmez -> stok kontrolu CALISTIRILMAZ
+  // (aksi halde "sadece fiyati duzelttim" derken yetersiz-stok uyarisi cikiyordu).
+  function StokEtkisiDegisti: Boolean;
+    function Fark(const AAlan: string): Boolean;
+    var F: TField;
+    begin
+      F := TabFatura.FindField(AAlan);
+      Result := (F <> nil) and (VarIsNull(F.OldValue) or (VarToStr(F.OldValue) <> F.AsString));
+    end;
+  begin
+    Result := (TabFatura.State <> dsEdit) or
+              Fark('ADET') or Fark('MF') or Fark('BIRIM') or Fark('URUNID') or
+              Fark('STOKDURUMDEGIS');
+  end;
+
   Procedure TutarIslemler;
   begin
      if TabFatbaslik.FieldByName('TIPI').AsString = '5' then //kur fark?nda hesaplama farkl? olacak..
@@ -4308,8 +4324,10 @@ begin
      // Cikis (cikis fis 4/16 / satis fat 15 / giden irsaliye 14 / giden konsinye 119): belge
      // TARIHINDE kaynak depoda yeterli stok var mi? Kural (engelle/sor/izin) + mesaj artik
      // StokCikisYeterliMi ICINDE (StokDurumKontrolKurali). Yeni satirda FATURA.ID yok -> SATIRID=0.
+     //   Satirin stok etkisi DEGISMEDIYSE (or. yalniz fiyat/iskonto duzeltildi) kontrol
+     //   calistirilmaz: bakiye zaten bu satiri icerdigi gibi kaliyor.
      if (TabFatbaslik.FieldByname('TUR').AsInteger in [4, 14, 15, 16, 119]) and
-        TabFatura.FieldByname('STOKDURUMDEGIS').AsBoolean then begin
+        TabFatura.FieldByname('STOKDURUMDEGIS').AsBoolean and StokEtkisiDegisti then begin
        LKontrolSatir := TabFatura.FieldByName('ID').AsInteger;
        if LKontrolSatir <= 0 then
           LKontrolSatir := 0;
