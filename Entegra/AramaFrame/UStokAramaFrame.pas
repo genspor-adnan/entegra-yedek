@@ -50,12 +50,9 @@ type
     LabelTumKayitlar: TToolButton;
     LabelSonArananlar: TToolButton;
     LabelSikArananlar: TToolButton;
-    SpinKayitSayisi: TcxSpinEdit;
-    cxLabel6: TcxLabel;
     EditKategori: TcxButtonEdit;
     procedure ComboMarkaPropertiesCloseUp(Sender: TObject);
     procedure ComboAnalizClick(Sender: TObject);
-    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure EditKategoriPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
   private
@@ -198,11 +195,6 @@ end;
 procedure TStokAramaFrame.SetFrameBilgi(AValue: TAramaFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TStokAramaFrame.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  SpinKayitSayisi.PostEditValue;
 end;
 
 procedure TStokAramaFrame.TusAsagi(Sender: TObject; var Key: Word;

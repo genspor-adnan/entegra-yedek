@@ -799,6 +799,9 @@ type
     FArama : TIKDlgGenelAramaFrame;
     { IBilgiFrame ?yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -1782,6 +1785,15 @@ begin
      FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
      FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
    end;
+
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, REHBER, IKGridView, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
+
    IKGridViewSUBEID.Visible := SubeVarmi;
    Tablo.GridAyarRestore('PersonelOZGridi',GridPerTemelView );
    Tablo.GridAyarRestore('PersDemirbasGridi', GridDemirbasView);
@@ -3234,7 +3246,7 @@ procedure TIKListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 var
   SubeYetki, Firma, Kod: string;
   Aday, Filtre: Boolean;
-  LocateID: Integer;
+  LocateID, TopN: Integer;
   j: TJSONObject;
 
   function ComboDeger(Combo: TcxImageComboBox): Integer;
@@ -3254,6 +3266,16 @@ begin
 
   Aday   := Potansiyel;
   Filtre := (AMod = 4);
+
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski davranista (TOP yok).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // IK'da TOP yok
+  end;
 
   if (REHBER.Active) and (REHBER.RecordCount > 0) then
     LocateID := REHBER.FieldByName('ID').AsInteger
@@ -3276,7 +3298,7 @@ begin
   j := TJSONObject.Create;
   try
     j.AddPair('Aday', TJSONNumber.Create(Ord(Aday)));
-    j.AddPair('TopN', TJSONNumber.Create(0));                 // IK'da TOP yok
+    j.AddPair('TopN', TJSONNumber.Create(TopN));              // sayfali dalda sayfa boyu, digerlerinde 0
     j.AddPair('Mod',  TJSONNumber.Create(AMod));
     if Aday then
       j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler2.Checked)))
@@ -3320,6 +3342,7 @@ begin
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TIKListeDlg.Kapatiliyor(var AKapansin: Boolean);

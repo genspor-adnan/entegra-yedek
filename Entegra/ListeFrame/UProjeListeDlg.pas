@@ -245,6 +245,9 @@ type
     SecilenItem : TdxTileControlItem;
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TProjeListeAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -362,10 +365,20 @@ procedure TProjeListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   AMod: 1=Tum, 3=Sik Aranan, 4=Filtre, 5=Son Aranan.
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); bool/sayi TJSONNumber.
 var
-  Sorumlu, Turu, Asama, Sonuc, KendiKul, KendiSube, TID: Integer;
+  Sorumlu, Turu, Asama, Sonuc, KendiKul, KendiSube, TID, TopN: Integer;
   SubeYetki: string;
   j: TJSONObject;
 begin
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski davranista (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // orijinalde TOP yoktu
+  end;
+
   // Grid ozel alanlari (orijinal davranis - SELECT'e dokunmaz)
   Tablo.GrideAlanEkle('PROJELER', 'ProjeWizardDlg', cxGridProjeler);
 
@@ -394,7 +407,7 @@ begin
 
   j := TJSONObject.Create;
   try
-    j.AddPair('TopN',  TJSONNumber.Create(0));                                  // orijinalde TOP yoktu
+    j.AddPair('TopN',  TJSONNumber.Create(TopN));                               // 0 = TOP yok (sayfali dalda sayfa boyu)
     j.AddPair('Mod',   TJSONNumber.Create(AMod));
     j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.checkKapaliGoster.Checked)));
     if Trim(FArama.AraFirma.Text)     <> '' then j.AddPair('Firma',     Trim(FArama.AraFirma.Text));
@@ -431,6 +444,7 @@ begin
     RehberId := PROJELER.FieldByName('REHBERID').AsInteger;
   end;
   cxGridProjeler.ViewData.Expand(True);
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TProjeListeDlg.LabelTumKayitlarClick(Sender: TObject);
@@ -492,6 +506,14 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, PROJELER, cxGridProjeler, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
 
   Tablo.GridTurkcelestir;
 

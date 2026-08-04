@@ -274,6 +274,9 @@ type
     SecilmisPersonelSay:Integer;
     AKeys: Variant;
     SecilmisPersonelList: TStringList;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -561,6 +564,14 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, TabGorevler, GridGorevView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
 
   PanelTakvim.Visible := Tablo.YetkiVarmi(2132,YetkiTur_Gorme);
   cxSplitterTakvim.Visible := PanelTakvim.Visible;
@@ -1518,10 +1529,15 @@ begin
   else
      Ara := Trim(FArama.ComboKonusu.Text);
 
-  if AMod in [3, 5] then                                                // Son/Sik: kayit sayisi ile sinirla
-     TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 200)
-  else
-     TopN := 0;                                                         // Tum/Filtre: sinirsiz (orijinal GorevArama gibi)
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski TOP davranisinda (kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 200;            // Son/Sik: kayit sayisi ile sinirla
+  end;
 
   // Metin dolu degilse ID gonderilmez (SP >0 kontrolu ile filtreyi atlar)
   if FArama.AraFirma.Text <> '' then FirmaID := FArama.AraFirma.Tag else FirmaID := 0;
@@ -1564,6 +1580,7 @@ begin
      Tablo.GridAyarRestore('IsListesiGridi', GridGorevView);
      AlanlarOlusturuldu := True;
   end;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TGorevListeDlg.GorevEkleTusClick(Sender: TObject);

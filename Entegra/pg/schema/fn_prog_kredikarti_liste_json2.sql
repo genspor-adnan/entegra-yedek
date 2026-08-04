@@ -32,6 +32,7 @@ DECLARE
     v_kulid     int  := NULLIF(j->>'KulId','')::int;
     v_modul     int  := NULLIF(j->>'Modul','')::int;
     v_orderby   text := NULLIF(j->>'OrderBy','');
+    v_topn      int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);   -- SAYFALI liste: 0 = LIMIT yok
     v_subelist  text := NULLIF(j->>'SubeYetkiList','');
     q text; w text := ' WHERE 1=1 '; joinka text := ''; ordr text := '';
 BEGIN
@@ -59,5 +60,7 @@ BEGIN
             LEFT JOIN bankasubeler bs ON bh.bankasubelerid=bs.id
             LEFT JOIN bankalar b ON b.bankakodu=bs.bankakodu '
          || joinka || w || ordr;
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi
+    IF v_topn > 0 THEN q := q || ' LIMIT ' || v_topn; END IF;
     RETURN QUERY EXECUTE q;
 END $$;

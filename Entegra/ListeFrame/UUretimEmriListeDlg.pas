@@ -144,6 +144,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TUretimEmriAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -200,6 +203,13 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, TabUretimEmri, GridUretimEmriView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   AramaYap(nil);
   Tablo.GridTurkcelestir;
   Tablo.GridAyarRestore('UretimEmriGridi', GridUretimEmriView);
@@ -352,16 +362,26 @@ procedure TUretimEmriListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok). Eski sorguda TOP yoktu -> TopN=0.
 //   Sonuc kumesi eski JvTimer sorgusu ile BIREBIR (parite: sp_Prog_UretimEmri_Liste ile dogrulandi).
 var
-  UEID: Integer;
+  UEID, TopN: Integer;
   j: TJSONObject;
 begin
   UEID := 0;
   if (TabUretimEmri.Active) and (TabUretimEmri.RecordCount > 0) then
     UEID := TabUretimEmri.FieldByName('ID').AsInteger;
 
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (Filtre) sayfalanir;
+  // Son/Sik Aranan eski TOP davranisinda (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // eski sorgu TOP'suzdu
+  end;
+
   j := TJSONObject.Create;
   try
-    j.AddPair('TopN',  TJSONNumber.Create(0));                                // eski sorgu TOP'suzdu
+    j.AddPair('TopN',  TJSONNumber.Create(TopN));                             // sayfali dalda sayfa siniri
     j.AddPair('Mod',   TJSONNumber.Create(AMod));
     j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.CheckPasifler.Checked)));
 
@@ -380,6 +400,7 @@ begin
     // Generic helper: @Baslik='' (ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(TabUretimEmri, 'sp_Prog_UretimEmri_Liste_Json2', '', j, UEID);
     j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

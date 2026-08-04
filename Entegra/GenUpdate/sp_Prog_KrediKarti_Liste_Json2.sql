@@ -16,7 +16,7 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL / varsayilan. ----
     DECLARE @SelectList    NVARCHAR(MAX) = ISNULL(@Baslik, N'');                                        -- ek SELECT alanlari (KrediKarti'da bos)
-    DECLARE @TopN          INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- sablon uyumu (uygulanmaz)
+    DECLARE @TopN          INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- 0 = TOP yok
     DECLARE @Mod           SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')  AS SMALLINT), 4);
     DECLARE @KulId         INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.KulId') AS INT);
     DECLARE @Modul         INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.Modul') AS INT);
@@ -41,8 +41,13 @@ BEGIN
         SET @Filt = @Filt + N' AND KK.SUBEID IN (' + @SubeYetkiList + N') ';
 
     -- ================= GOVDE ESKI ISTEMCI-TABAN SORGUSU ILE BIREBIR =================
+    -- SAYFALI liste (TSayfaliListe): @TopN>0 -> TOP (n). 0 = TOP yok (eski davranis).
+    DECLARE @Top NVARCHAR(30) = CASE WHEN @TopN > 0
+                                     THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                                     ELSE N'' END;
+
     DECLARE @SQL NVARCHAR(MAX) = N'
-    select KK.*,CAST(SKTAY as varchar(2))+''/''+CAST(SKTYIL as varchar(2)) as SKT1,B.LOGO,B.BANKAADI,BS.SUBEADI' + @SelectList + N'/*KA*/
+    select ' + @Top + N'KK.*,CAST(SKTAY as varchar(2))+''/''+CAST(SKTYIL as varchar(2)) as SKT1,B.LOGO,B.BANKAADI,BS.SUBEADI' + @SelectList + N'/*KA*/
     from KREDIKARTI KK
         left  join BANKAHESAPLAR BH ON  BH.ID = KK.BANKAHESAPID
         left join BANKASUBELER BS ON BH.BANKASUBELERID=BS.ID

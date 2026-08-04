@@ -322,20 +322,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Images = Tablo.PNGImageList1
       OnClick = JvNavPanelButton1Click
     end
-    object Label9: TLabel
-      Left = 630
-      Top = 0
-      Width = 60
-      Height = 16
-      Caption = 'Kay'#305't Say'#305's'#305
-      Font.Charset = TURKISH_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Trebuchet MS'
-      Font.Style = [fsBold]
-      ParentFont = False
-      Transparent = True
-    end
     object LabelSonAranan: TLabel
       Left = 563
       Top = 19
@@ -392,19 +378,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Style.TextColor = clNavy
       Transparent = True
       OnClick = LabelDetayliAramaClick
-    end
-    object SpinKayitSayisi: TcxSpinEdit
-      Left = 630
-      Top = 16
-      Properties.ImmediatePost = True
-      Properties.MinValue = 1.000000000000000000
-      Properties.ValueType = vtInt
-      Properties.OnEditValueChanged = SpinKayitSayisiPropertiesEditValueChanged
-      Style.Color = clBtnFace
-      TabOrder = 4
-      Value = 200
-      OnKeyUp = SpinKayitSayisiKeyUp
-      Width = 62
     end
     object ComboSube: TcxImageComboBox
       Left = 698

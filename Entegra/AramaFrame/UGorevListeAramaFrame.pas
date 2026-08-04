@@ -83,9 +83,6 @@ type
     LabelTumKayitlar: TToolButton;
     LabelSonArananlar: TToolButton;
     LabelSikArananlar: TToolButton;
-    SpinKayitSayisi: TcxSpinEdit;
-    cxLabelKayit: TcxLabel;
-    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ListeyiSilMenuClick(Sender: TObject);
     procedure ListeMenuPopup(Sender: TObject);
     procedure ExceldenBilgiAl1Click(Sender: TObject);
@@ -198,11 +195,6 @@ end;
 procedure TGorevListeAramaFrame.EditAraIslerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
    Listele;
-end;
-
-procedure TGorevListeAramaFrame.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  SpinKayitSayisi.PostEditValue;
 end;
 
 procedure TGorevListeAramaFrame.ListeEkleTusClick(Sender: TObject);

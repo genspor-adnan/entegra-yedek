@@ -99,7 +99,7 @@ begin
 {
      if cgAlinanCekler.States[i] = cbsChecked then
          Result := Result + ',' + IntToStr(cgAlinanCekler.Properties.Items[i].Tag);
-    SpinKayitSayisi.text := GenRegIni.RegReadString('CekOpsiyon', 'Portföyde', '200', 'C');}
+}
 end;
 
 procedure TCekAramaFrame.btnSilClick(Sender: TObject);

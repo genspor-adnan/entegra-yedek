@@ -142,28 +142,6 @@ object IKDlgGenelAramaFrame: TIKDlgGenelAramaFrame
         TabOrder = 6
         Transparent = True
       end
-      object SpinKayitSayisi: TcxSpinEdit
-        Left = 108
-        Top = 3
-        Properties.ImmediatePost = True
-        TabOrder = 3
-        Value = 200
-        Width = 66
-      end
-      object cxLabel6: TcxLabel
-        Left = 59
-        Top = 5
-        Caption = 'Kay'#305't#'
-        ParentFont = False
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -13
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = []
-        Style.TextColor = clBtnText
-        Style.IsFontAssigned = True
-        Transparent = True
-      end
     end
     object cxTabSheet2: TcxTabSheet
       ImageIndex = 1

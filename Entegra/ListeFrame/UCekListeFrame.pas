@@ -276,6 +276,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TCekAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -451,6 +454,14 @@ var
   ra:string;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   // Ilk listelemeden (PageControlCekChange -> YenileTusClick) ONCE baglanmali.
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, TabCekler, GridTview, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
    GridTviewSUBEID.Visible := SubeVarmi;
    DegisTus.visible := TabCekler.Active;
    canChange := True;
@@ -1358,9 +1369,19 @@ procedure TCekListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Son/Sik icin KULLANICI_ARAMA (MODUL_Cek). Bos/opsiyonel filtre JSON'a EKLENMEZ.
 var
   j: TJSONObject;
-  LocateID: Integer;
+  LocateID, TopN: Integer;
   Islem, SubeList: string;
 begin
+  // SAYFALI (TSayfaliListe): Mod=4 (filtre/normal) ve Mod=1 (Tum) sayfalanir;
+  // Son/Sik Aranan (5/3) eski davranista (TOP yok, dogasi geregi kucuk liste).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // eski davranis: TOP yok
+  end;
+
   if TabCekler.Active and (TabCekler.RecordCount > 0) then
     LocateID := TabCekler.FieldByName('ID').AsInteger
   else
@@ -1370,6 +1391,7 @@ begin
 
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN',         TJSONNumber.Create(TopN));         // sayfa siniri (0 = TOP yok)
     j.AddPair('Mod',          TJSONNumber.Create(AMod));
     j.AddPair('CekSenet',     TJSONNumber.Create(CekSenetTur));   // HER ZAMAN: Where CEKSENET=
     if Trim(FArama.AraKod.Text)   <> '' then j.AddPair('AraKod', Trim(FArama.AraKod.Text));
@@ -1389,6 +1411,7 @@ begin
     // @Baslik='' (Cek'te ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
     Tablo.ListeSPJson(TabCekler, 'sp_Prog_Cek_Liste_Json2', '', j, LocateID);
     j := nil;   // sahiplik helper'a gecti
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

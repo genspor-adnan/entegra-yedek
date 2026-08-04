@@ -383,6 +383,10 @@ type
     CaptionList,FieldList : TArrayofstring;
     AlanlarOlusturuldu : Boolean;
     FIlkSonAranan : Boolean;   // ilk acilista Son Aranan (5) goster (JvTimer'de)
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod=4 (filtre) dali sayfalanir.
+    FSayfali: TSayfaliListe;
+    FStokSonMod: SmallInt;         // son Liste_SP_Cagir modu (buyutme ayni modla)
+    FStokSonCokKullan: Integer;    // son ACokKullanBolum (Mod=2 baglami)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -534,7 +538,6 @@ end;
 
 procedure TStokListeDlg.RegKaydetVeAramaYap;
 Begin
-  GenRegIni.RegWriteString('StokOpsiyon', 'StokAraKayitSayisi', VarToStr(FArama.SpinKayitSayisi.EditValue), 'C');
   AramaYap;
 End;
 
@@ -578,8 +581,16 @@ begin
   for i := 0 to Length(FieldList) - 1 do
     EkAlanlar := EkAlanlar + ',[' + CaptionList[i] + ']=' + FieldList[i];
 
-  if AMod = 1 then TopN := 0                                            // Tum: hepsi
-  else TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 200);
+  // SAYFALI (TSayfaliListe): Mod=4 (filtre/normal) ve Mod=1 (Tum) sayfalanir;
+  // Cok Kullanilan/Son/Sik eski TOP davranisinda (kucuk listeler).
+  FStokSonMod := AMod;
+  FStokSonCokKullan := ACokKullanBolum;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 200;
+  end;
 
   if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(27, YetkiTur_Gorme)
   else SubeYetki := '';
@@ -624,6 +635,7 @@ begin
     Tablo.GridAyarRestore('StokListeGridi', GridStokView);
     AlanlarOlusturuldu := True;
   end;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TStokListeDlg.JvTimer1Timer(Sender: TObject);
@@ -791,6 +803,13 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+  // SAYFALI stok listesi: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, STOKLAR, GridStokView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FStokSonMod, FStokSonCokKullan);
+      end);
   Tablo.EkAlanlariBul('','StokWizardDlg','STOKLAR',CaptionList,FieldList);
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
   YaziciYaz.Caption := ra;

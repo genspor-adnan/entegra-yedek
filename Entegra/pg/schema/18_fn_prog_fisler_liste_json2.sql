@@ -41,6 +41,7 @@ DECLARE
     v_kulid      int  := NULLIF(j->>'KulId', '')::int;
     v_modul      int  := NULLIF(j->>'Modul', '')::int;
     v_orderby    text := NULLIF(j->>'OrderBy', '');
+    v_topn       int  := COALESCE(NULLIF(j->>'TopN', '')::int, 0);   -- SAYFALI liste: 0 = LIMIT yok
     v_join text := '';   -- kosullu fatura/stoklar join
     v_filt text := '';   -- WHERE ek kosullar
     v_inner text;
@@ -104,6 +105,9 @@ BEGIN
     ELSE
         v_sql := v_inner || ' ORDER BY fb.faturatarih DESC';
     END IF;
+
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi
+    IF v_topn > 0 THEN v_sql := v_sql || ' LIMIT ' || v_topn; END IF;
 
     RETURN QUERY EXECUTE v_sql;
 END $$;

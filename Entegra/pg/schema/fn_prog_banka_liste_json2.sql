@@ -67,7 +67,7 @@ LANGUAGE plpgsql STABLE AS $$
 DECLARE
     j jsonb := COALESCE(NULLIF(kosullar,'')::jsonb, '{}'::jsonb);
     v_selectlist text := '';                                     -- @Baslik (EkAlanlar) YOK SAYILIR (superset base kolonlar)
-    v_topn   int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);     -- sablon uyumu (MSSQL'de de uygulanmaz)
+    v_topn   int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);     -- SAYFALI liste: 0 = LIMIT yok
     v_mod    int  := COALESCE(NULLIF(j->>'Mod','')::int, 4);
     v_pasif  int  := COALESCE(NULLIF(j->>'Pasif','')::int, 0);
     v_trh    timestamp := NULLIF(j->>'Trh','')::timestamp;
@@ -199,6 +199,13 @@ BEGIN
         q := v_body || ' ORDER BY ' || v_orderby;
     ELSE
         q := v_body;
+    END IF;
+
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi. Govde UNION ALL oldugundan
+    -- LIMIT en dista olmali; siralamasiz dalda da sarmalanir ki LIMIT tum birlesime uygulansin.
+    IF v_topn > 0 THEN
+        IF q = v_body THEN q := 'SELECT * FROM (' || v_body || ') q'; END IF;
+        q := q || ' LIMIT ' || v_topn;
     END IF;
 
     RETURN QUERY EXECUTE q

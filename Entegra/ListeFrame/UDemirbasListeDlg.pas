@@ -339,6 +339,9 @@ type
     { Private declarations }
     FFrameBilgi: TIcerikFrameBilgi;
     FArama: TDemirbasAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -490,6 +493,14 @@ begin
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
     FIlkSonAranan := True;   // ilk acilis: JvTimer'de Son Aranan (5) yuklensin (KategoriYetki'den SONRA)
   end;
+
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, DEMIRBAS, GridDemirbasView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
 end;
 
 procedure TDemirbasListeDlg.BtnMesajGonderClick(Sender: TObject);
@@ -805,9 +816,19 @@ procedure TDemirbasListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL/varsayilan=filtre yok); bool 0/1 (TRY_CAST AS BIT).
 var
   SubeYetki: string;
-  KullaniciKisit, SubeIdP, RolIdP, KategoriYetkiP, locateid: Integer;
+  KullaniciKisit, SubeIdP, RolIdP, KategoriYetkiP, locateid, TopN: Integer;
   j: TJSONObject;
 begin
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski davranista (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // orijinalde TOP yoktu
+  end;
+
   locateid := 0;
   if (DEMIRBAS.Active) and (DEMIRBAS.RecordCount > 0) then
     locateid := DEMIRBAS.FieldByName('ID').AsInteger;
@@ -834,7 +855,7 @@ begin
   j := TJSONObject.Create;
   try
     j.AddPair('Mod',   TJSONNumber.Create(AMod));
-    j.AddPair('TopN',  TJSONNumber.Create(0));                          // orijinalde TOP yoktu
+    j.AddPair('TopN',  TJSONNumber.Create(TopN));                       // 0 = TOP yok (sayfali dalda sayfa boyu)
     j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.cbPasiflerideGoster.Checked)));
     if Trim(FArama.AraDurumu.Text) <> '' then
       j.AddPair('DurumID', TJSONNumber.Create(StrToIntDef(VarToStr(FArama.AraDurumu.EditValue), 0)));
@@ -877,6 +898,7 @@ begin
     Tablo.GridAyarRestore('DemirbasGridi', GridDemirbasView);
     AlanlarOlusturuldu := True;
   end;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TDemirbasListeDlg.LabelTumKayitlarClick(Sender: TObject);

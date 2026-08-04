@@ -20,7 +20,7 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL / varsayilan. ----
     DECLARE @SelectList NVARCHAR(MAX) = ISNULL(@Baslik, N'');                                        -- sablon uyumu (Kasalar'da ek alan yok)
-    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- sablon uyumu (uygulanmaz)
+    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- 0 = TOP yok
     DECLARE @Mod        SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')  AS SMALLINT), 4);
     DECLARE @SubeList   NVARCHAR(MAX) = JSON_VALUE(@Kosullar,'$.SubeYetkiList');                      -- tam-sayi listesi (GUVENILIR; ComboSube=Tum)
     DECLARE @SubeId     INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.SubeId') AS INT);            -- tek sube (ComboSube=belirli, negatif ID)
@@ -51,8 +51,13 @@ BEGIN
     ELSE IF @SubeId IS NOT NULL
         SET @Sube = N' AND K.SUBEID = ' + CAST(@SubeId AS NVARCHAR(20)) + N' ';
 
+    -- SAYFALI liste (TSayfaliListe): @TopN>0 -> TOP (n). 0 = TOP yok (eski davranis).
+    DECLARE @Top NVARCHAR(30) = CASE WHEN @TopN > 0
+                                     THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                                     ELSE N'' END;
+
     DECLARE @SQL NVARCHAR(MAX) = N'
-    select K.*' + @SelectList + N'/*KA*/ from KASALAR K
+    select ' + @Top + N'K.*' + @SelectList + N'/*KA*/ from KASALAR K
     Where 1=1 /*SUBE*//*FLT*/';
 
     SET @SQL = REPLACE(@SQL, N'/*KA*/',   @KaCol);

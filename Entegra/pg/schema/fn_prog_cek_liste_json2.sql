@@ -37,6 +37,7 @@ DECLARE
     v_kulid     int  := NULLIF(j->>'KulId','')::int;
     v_modul     int  := NULLIF(j->>'Modul','')::int;
     v_orderby   text := NULLIF(j->>'OrderBy','');
+    v_topn      int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);   -- SAYFALI liste: 0 = LIMIT yok
     q text; w text := ''; ordr text := ''; ka_where text := '';
 BEGIN
     -- Son/Sik (KULLANICI_ARAMA): EXISTS suzgec + KA_SIRA siralama anahtari (order'da korelasyonlu subquery)
@@ -94,6 +95,9 @@ BEGIN
               || ' FROM kullanici_arama ka WHERE ' || ka_where || ') DESC';
     ELSIF v_orderby IS NOT NULL THEN ordr := ' ORDER BY ' || v_orderby;
     END IF;
+
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi
+    IF v_topn > 0 THEN ordr := ordr || ' LIMIT ' || v_topn; END IF;
 
     RETURN QUERY EXECUTE q || ordr;
 END $fn$;

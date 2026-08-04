@@ -32,8 +32,6 @@ type
     AraFirma: TcxTextEdit;
     AraKod: TcxTextEdit;
     CheckPasifler: TcxCheckBox;
-    SpinKayitSayisi: TcxSpinEdit;
-    cxLabel6: TcxLabel;
     cxLabel2: TcxLabel;
     cxLabel3: TcxLabel;
     cxLabel7: TcxLabel;
@@ -101,7 +99,6 @@ uses Utablo,LocOnFly,PrjConst;
 procedure TIKDlgGenelAramaFrame.Baslatildi;
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
-  SpinKayitSayisi.text := GenRegIni.RegReadString('CariOpsiyon', 'ListeKayitSayisi', '200', 'C');
 end;
 
 procedure TIKDlgGenelAramaFrame.comboTemsilciKeyDown(Sender: TObject;

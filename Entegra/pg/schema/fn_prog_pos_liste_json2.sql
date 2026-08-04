@@ -33,7 +33,7 @@ LANGUAGE plpgsql STABLE AS $$
 DECLARE
     j jsonb := COALESCE(NULLIF(kosullar,'')::jsonb, '{}'::jsonb);
     v_selectlist text := '';                                     -- @Baslik (EkAlanlar) YOK SAYILIR (superset base kolonlar)
-    v_topn   int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);     -- sablon uyumu (MSSQL'de de uygulanmaz)
+    v_topn   int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);     -- SAYFALI liste: 0 = LIMIT yok
     v_mod    int  := COALESCE(NULLIF(j->>'Mod','')::int, 4);
     v_sube   text := NULLIF(j->>'SubeYetkiList','');              -- app-uretimi int-list (GUVENILIR; yalniz SubeVarmi)
     v_kulid  int  := NULLIF(j->>'KulId','')::int;
@@ -84,6 +84,9 @@ BEGIN
     ELSE
         q := v_body;
     END IF;
+
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi
+    IF v_topn > 0 THEN q := q || ' LIMIT ' || v_topn; END IF;
 
     RETURN QUERY EXECUTE q;
 END $$;

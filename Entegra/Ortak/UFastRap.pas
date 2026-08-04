@@ -186,6 +186,17 @@ begin
         with TStringList.Create do
         try
           LoadFromStream(TempStream);
+          // Sablona GOMULU veritabani baglantilarini pasiflestir: eski tasarimlarda
+          // TfrxADODatabase Connected="True" + eski musteri sunucusunun baglanti dizesi
+          // kayitli kalabiliyor -> yuklerken ADO baglanmaya calisir, DBNETLIB
+          // "SQL Server yok veya erisim engellendi" ile onizleme patlar. Rapor verisi
+          // zaten uygulamanin dataset'lerinden gelir; gomulu baglanti kalintidir.
+          Text := TRegEx.Replace(Text,
+            '(<Tfrx(ADO|FD)Database\b[^>]*?)\sConnected="True"', '$1 Connected="False"',
+            [roIgnoreCase]);
+          Text := TRegEx.Replace(Text,
+            '(<Tfrx(ADO|FD)Database\b[^>]*?)\sLoginPrompt="True"', '$1 LoginPrompt="False"',
+            [roIgnoreCase]);
           // FireDAC report definitions are kept as-is; only unstable visual metadata is stripped.
           Text := TRegEx.Replace(Text, '\sPropData="[^"]*"', '', [roIgnoreCase]);
           Text := TRegEx.Replace(Text, '\sStyle="[^"]*"', '', [roIgnoreCase]);

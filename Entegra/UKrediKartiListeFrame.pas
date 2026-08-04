@@ -167,6 +167,9 @@ type
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod 1 (Tum) ve 4 (filtre) sayfalanir.
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_KrediKarti_Liste_Json2)
     function HesapKesimBitTar: TDateTime;   // gecerli yil/ay/gun -> smalldatetime out-of-range engeli
     function EkranAdiAl: string;
@@ -223,6 +226,14 @@ procedure TKrediKartiListeFrame.Baslatildi;
 var ra : string;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   // YenileClick'ten ONCE baglanmali (YenileClick -> Liste_SP_Cagir -> FSayfali).
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, KREDIKARTI, GridKKListeView, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
    Tablo.GridTurkcelestir;
    GridKKListeViewSUBEID.Visible := SubeVarmi;
    YenileClick;
@@ -575,7 +586,7 @@ procedure TKrediKartiListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Sonuc kumesi eski KREDIKARTI sorgusuyla BIREBIR ayni; Son/Sik icin KULLANICI_ARAMA (MODUL_KrediKarti).
 //   Sube-yetki filtresi yalniz SubeVarmi ise gonderilir (eski YenileClick paritesi: KK.SUBEID in(...)).
 var
-  LocateID: Integer;
+  LocateID, TopN: Integer;
   j: TJSONObject;
 begin
   if (KREDIKARTI.Active) and (KREDIKARTI.RecordCount > 0) then
@@ -583,8 +594,19 @@ begin
   else
     LocateID := -1;
 
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik aranan (5/3) dogasi geregi kucuk -> eski TOP davranisi (0 = TOP yok).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;
+  end;
+
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
     j.AddPair('Mod', TJSONNumber.Create(AMod));
     if SubeVarmi then
       j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme));  // eski: KK.SUBEID in(...)
@@ -594,6 +616,7 @@ begin
     // @Baslik='' (KrediKarti'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
     Tablo.ListeSPJson(KREDIKARTI, 'sp_Prog_KrediKarti_Liste_Json2', '', j, LocateID);
     j := nil;   // sahiplik helper'a gecti
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

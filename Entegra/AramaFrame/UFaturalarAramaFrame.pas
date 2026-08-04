@@ -36,13 +36,10 @@ type
     RbGunluk: TcxRadioButton;
     RbAylik: TcxRadioButton;
     RbHaftalik: TcxRadioButton;
-    SpinKayitSayisi: TcxSpinEdit;
-    cxLabel3: TcxLabel;
     CheckEkAlanlarListelensin: TcxCheckBox;
     procedure btnSilClick(Sender: TObject);
     procedure AraKodPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure AraKodKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     FFrameBilgi : TAramaFrameBilgi;
@@ -91,7 +88,6 @@ end;
 procedure TFaturalarAramaFrame.Baslatildi;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
-   SpinKayitSayisi.text := GenRegIni.RegReadString('AlisSatisOpsiyon', 'BelgeListeKayitSayisi', '200', 'C');
 end;
 
 procedure TFaturalarAramaFrame.btnSilClick(Sender: TObject);
@@ -160,12 +156,6 @@ end;
 procedure TFaturalarAramaFrame.SetFrameBilgi(AValue: TAramaFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TFaturalarAramaFrame.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-   GenRegIni.RegWriteString('AlisSatisOpsiyon', 'BelgeListeKayitSayisi', VarToStr(SpinKayitSayisi.Text), 'C');
-   //SpinKayitSayisi.PostEditValue;
 end;
 
 procedure TFaturalarAramaFrame.TusAsagi(Sender: TObject; var Key: Word;

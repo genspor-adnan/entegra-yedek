@@ -55,29 +55,6 @@ object SocialAramaFrame: TSocialAramaFrame
     TabOrder = 4
     Width = 115
   end
-  object SpinKayitSayisi: TcxSpinEdit
-    Left = 145
-    Top = 40
-    Properties.ImmediatePost = True
-    TabOrder = 0
-    Value = 200
-    OnKeyUp = SpinKayitSayisiKeyUp
-    Width = 51
-  end
-  object cxLabel6: TcxLabel
-    Left = 91
-    Top = 42
-    Caption = 'Kay'#305't #'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.TextColor = clBtnText
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object ToolBar6: TToolBar
     Left = 0
     Top = 1

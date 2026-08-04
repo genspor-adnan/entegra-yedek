@@ -316,6 +316,9 @@ type
     SecilenItem : TdxTileControlItem;
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TFirsatListeAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -399,10 +402,19 @@ procedure TFirsatListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   Firsat, PROJELER tablosunda MODUL=1; KULLANICI_ARAMA.MODUL = TabNo_FIRSAT (170).
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); Pasif 0/1 sayi (TRY_CAST AS BIT).
 var
-  PID, SorumluID, TuruVal, AsamaVal: Integer;
+  PID, SorumluID, TuruVal, AsamaVal, TopN: Integer;
   SubeYetki: string;
   j: TJSONObject;
 begin
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski davranista (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // Firsat orijinalinde limit yoktu
+  end;
 
   // Gridde ozel (ek) PROJELER alanlarini olustur - eski JvTimer ile ayni
   if (FIRSATLAR.Active) and (FIRSATLAR.RecordCount > 0) then
@@ -425,7 +437,7 @@ begin
 
   j := TJSONObject.Create;
   try
-    j.AddPair('TopN', TJSONNumber.Create(0));                              // Firsat orijinalinde limit yoktu
+    j.AddPair('TopN', TJSONNumber.Create(TopN));                           // 0 = limit yok (sayfali dalda sayfa boyu)
     j.AddPair('Mod',  TJSONNumber.Create(AMod));
     j.AddPair('Pasif', TJSONNumber.Create(Ord(FArama.checkKapaliGoster.Checked)));  // kapali goster=hepsi
     if Trim(FArama.AraFirma.Text)     <> '' then j.AddPair('Firma',     Trim(FArama.AraFirma.Text));
@@ -454,6 +466,7 @@ begin
   end;
 
   GridFirsatView.ViewData.Expand(True);
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TFirsatListeDlg.LabelTumKayitlarClick(Sender: TObject);
@@ -517,6 +530,13 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, FIRSATLAR, GridFirsatView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   //GridFirsatView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\ProjelerGridi',true,false,[gsoUseFilter],'ProjelerGridi');
    Tablo.GridAyarRestore('FirsatGridi',GridFirsatView );
   //GridTeklifView.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\ProjeTekliflerGridi',true,false,[gsoUseFilter],'ProjeTekliflerGridi');

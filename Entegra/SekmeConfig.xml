@@ -201,7 +201,6 @@
 						<OlayBagla hedefBilesen="ComboSinif.Properties" hedefOlay="OnCloseUp" kaynakMethod="ComboSinifPropertiesCloseUp"/>
 						<OlayBagla hedefBilesen="ComboBolge.Properties" hedefOlay="OnCloseUp" kaynakMethod="ComboBolgePropertiesCloseUp"/>
 						<OlayBagla hedefBilesen="ComboTemsilci.Properties" hedefOlay="OnChange" kaynakMethod="AraTusClick"/>
-						<OlayBagla hedefBilesen="SpinKayitSayisi.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AraTusClick"/>
 						<OlayBagla hedefBilesen="LabelSonArananlar" hedefOlay="OnClick" kaynakMethod="LabelSonArananlarClick"/>
 						<OlayBagla hedefBilesen="LabelSIKArananlar" hedefOlay="OnClick" kaynakMethod="LabelSonArananlarClick"/>
 						<OlayBagla hedefBilesen="LabelTumKayitlar" hedefOlay="OnClick" kaynakMethod="LabelTumKayitlarClick"/>
@@ -376,7 +375,6 @@
 				</AramaSekme>
 				<AramaSekme Adi="Fatura Arama" Tip="TFaturalarAramaFrame" >
 					<OlayBaglamalar>
-						<OlayBagla hedefBilesen="SpinKayitSayisi.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="Calendar1Change"/>
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="AraStok" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
 						<OlayBagla hedefBilesen="AraBaslik" hedefOlay="OnKeyUp" kaynakMethod="AraKodKeyUp"/>
@@ -618,7 +616,6 @@
 						<OlayBagla hedefBilesen="ComboMODEL.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
 						<OlayBagla hedefBilesen="ComboGRUBU.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
 						<OlayBagla hedefBilesen="ComboSUBE.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AramaYap"/>
-						<OlayBagla hedefBilesen="SpinKayitSayisi.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="RegKaydetVeAramaYap"/>
 						<OlayBagla hedefBilesen="CheckPasifler" hedefOlay="OnClick" kaynakMethod="CheckPasiflerClick"/>
 						<OlayBagla hedefBilesen="ComboAnaliz.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AnalizSec"/>
 						<OlayBagla hedefBilesen="AraSorgula" hedefOlay="OnClick" kaynakMethod="AramaYap"/>
@@ -780,7 +777,6 @@
 						<OlayBagla hedefBilesen="LabelTumKayitlar2" hedefOlay="OnClick" kaynakMethod="LabelTumKayitlarClick"/>
 						<OlayBagla hedefBilesen="AraKod" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
 						<OlayBagla hedefBilesen="AraFirma" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
-						<OlayBagla hedefBilesen="SpinKayitSayisi.Properties" hedefOlay="OnEditValueChanged" kaynakMethod="AraTusClick"/>
 						<OlayBagla hedefBilesen="CheckPasifler" hedefOlay="OnClick" kaynakMethod="CheckPasiflerClick"/>
 						<OlayBagla hedefBilesen="AraFirma2" hedefOlay="OnKeyUp" kaynakMethod="AraFirmaKeyUp"/>
 						<OlayBagla hedefBilesen="ComboCinsiyet.Properties" hedefOlay="OnCloseUp" kaynakMethod="AraTusClick"/>

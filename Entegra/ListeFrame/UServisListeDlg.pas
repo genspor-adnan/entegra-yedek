@@ -296,6 +296,9 @@ type
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TServisAramaFrame;
     FIlkSonAranan : Boolean;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -435,6 +438,13 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, SERVIS, GridServisView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   JvTimer1.Enabled := False;
 //  Tablo.GridAyarRestore('ServislerlerGridi',GridServisView );
   Tablo.GridAyarRestore('ServislerKabulGridi',GridKabulView );
@@ -1144,8 +1154,15 @@ begin
     LocateID := 0;
   end;
 
-  if AMod in [3, 5] then TopN := 200   // Son/Sik Aranan: sinirli (yeni islev)
-  else TopN := 0;                      // Tum/Filtre: eski davranis (limitsiz)
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (Filtre) sayfalanir;
+  // Son/Sik Aranan eski TOP davranisinda (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 200;            // Son/Sik Aranan: sinirli (yeni islev)
+  end;
 
   if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(30, YetkiTur_Gorme)
   else SubeYetki := '';
@@ -1156,8 +1173,10 @@ begin
   HizliArama := (AMod = 4) and ((ServisNo <> '') or (SeriNo <> ''));
   cbListeVal := StrToIntDef(VarToStr(FArama.cbListe.EditValue), 9);
 
+  // Hizli arama (servis/seri no) da SAYFALI: eskiden burada TopN 200'e sabitleniyordu.
+  // Sabit birakilsa sayfa siniri (FSinir) ile TopN uyusmaz, gereksiz ek requery olurdu.
   if HizliArama then
-    TopN := 200;
+    TopN := FSayfali.TopN;
 
   j := TJSONObject.Create;
   try
@@ -1201,6 +1220,7 @@ begin
     // Generic helper: @Baslik='' (Servis ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(SERVIS,  'sp_Prog_Servis_Liste_Json2', '', j, LocateID);
     j :=  nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

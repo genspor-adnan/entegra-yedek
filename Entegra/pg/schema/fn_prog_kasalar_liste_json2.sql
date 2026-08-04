@@ -27,7 +27,8 @@ DECLARE
     v_kulid     int  := NULLIF(j->>'KulId','')::int;
     v_modul     int  := NULLIF(j->>'Modul','')::int;
     v_orderby   text := COALESCE(NULLIF(j->>'OrderBy',''), 'KASAKODU');
-    q text; w text := ' WHERE 1=1 '; joinka text := ''; ordr text;
+    v_topn      int  := COALESCE(NULLIF(j->>'TopN','')::int, 0);   -- SAYFALI liste: 0 = LIMIT yok
+    q text; w text := ' WHERE 1=1 '; joinka text := ''; ordr text; lim text := '';
 BEGIN
     -- Son/Sik: kullanicinin actigi kasalar (KULLANICI_ARAMA) — suzgec + siralama
     IF v_mod IN (3,5) AND v_kulid IS NOT NULL AND v_modul IS NOT NULL THEN
@@ -46,6 +47,9 @@ BEGIN
     ELSIF v_mod = 3 THEN ordr := 'ka.say DESC';
     ELSE ordr := v_orderby; END IF;
 
-    q := 'SELECT k.* FROM kasalar k ' || joinka || w || ' ORDER BY ' || ordr;
+    -- SAYFALI liste (TSayfaliListe): MSSQL TOP (n) karsiligi
+    IF v_topn > 0 THEN lim := ' LIMIT ' || v_topn; END IF;
+
+    q := 'SELECT k.* FROM kasalar k ' || joinka || w || ' ORDER BY ' || ordr || lim;
     RETURN QUERY EXECUTE q;
 END $$;

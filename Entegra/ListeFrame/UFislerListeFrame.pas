@@ -24,7 +24,8 @@ uses
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxDateRanges,
   dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  Utablo;   // TSayfaliListe (sayfali liste yardimcisi) arayuzde kullaniliyor
 
 type
   TFislerListeFrame = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -90,6 +91,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TFislerAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Fisler_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
@@ -120,7 +124,7 @@ type
 
 implementation
 
-uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, Utablo,UGirisKutusuEx,LocOnFly, FetaUtil, System.JSON;
+uses UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UGirisKutusuEx,LocOnFly, FetaUtil, System.JSON;   // Utablo artik arayuz uses'inda
 
 {$R *.dfm}
 
@@ -132,6 +136,13 @@ SQLMemo :String;
 procedure TFislerListeFrame.Baslatildi;
 begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, TabFisler, GridTview, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   Tablo.GridTurkcelestir;
   FArama.CalendarBit.Date := Tablo.GENINI.BugunTrh;
   FArama.CalendarBas.Date := FArama.CalendarBit.Date;
@@ -338,10 +349,20 @@ procedure TFislerListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Son/Sik icin KULLANICI_ARAMA (MODUL_Fisler), PK = FATBASLIK.ID.
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok). FArama tip-esdes GUVENLI.
 var
-  LocateID, LSubeId, LDepoId, LTipi: Integer;
+  LocateID, LSubeId, LDepoId, LTipi, TopN: Integer;
   LStok: string;
   j: TJSONObject;
 begin
+  // SAYFALI (TSayfaliListe): Mod=4 (filtre/normal) ve Mod=1 (Tum) sayfalanir;
+  // Son/Sik Aranan (5/3) eski davranista (TOP yok, dogasi geregi kucuk liste).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // eski davranis: TOP yok
+  end;
+
   if (TabFisler.Active) and (TabFisler.RecordCount > 0) then
     LocateID := TabFisler.FieldByName('ID').AsInteger
   else
@@ -351,6 +372,7 @@ begin
 
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));                           // sayfa siniri (0 = TOP yok)
     j.AddPair('Mod', TJSONNumber.Create(AMod));
     j.AddPair('Tur', TJSONNumber.Create(Tur));                             // HER ZAMAN FB.TUR=@Tur
     j.AddPair('FaturaJoin', TJSONNumber.Create(Ord(LStok <> '')));         // stok aramasi -> FATURA/STOKLAR join
@@ -373,6 +395,7 @@ begin
     // @Baslik='' (Fisler'de ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
     Tablo.ListeSPJson(TabFisler, 'sp_Prog_Fisler_Liste_Json2', '', j, LocateID);
     j := nil;   // sahiplik helper'a gecti
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

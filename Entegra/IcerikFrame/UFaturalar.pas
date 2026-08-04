@@ -373,6 +373,7 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TFaturalarAramaFrame;
+    FSayfali : TSayfaliListe;   // SAYFALI liste (merkezi yardimci, Utablo)
     // "Yeni Giden" (TUR=15) sekmesi icin gonderim tarihi araligi (son 2 is gunu)
     FYeniGidenBas, FYeniGidenBit: TDateTime;
     FEBelgeStyleYeni: TcxStyle;
@@ -1008,6 +1009,7 @@ begin
     FATBASLIK.DisableControls;
     TabloYenile(FATBASLIK,[]);
     FATBASLIK.EnableControls;
+    FSayfali.YuklemeSonrasi;   // SAYFALI: ekran dolana kadar zincirleme sayfa
 end;
 
 
@@ -1019,6 +1021,7 @@ var
   gf :  TFaturaGorevFrame;
   SubeIDList : string;
   TarihBas, TarihBit : variant;
+  TopN : Integer;
  // LocateID:integer;
 begin
    JvTimer1.Enabled := False;
@@ -1026,6 +1029,7 @@ begin
    // degisiminde gelen kutusu sorgusunu yeniden insa etmek icin
    // PageControlTurChange'e route et.
    if (PageControlTur.ActivePage <> nil) and (PageControlTur.ActivePage.Tag >= 1201) and (PageControlTur.ActivePage.Tag <= 1203) then begin
+     FSayfali.TopN(False);   // Gelen Kutusu kendi sorgusunu kurar -> sayfalama tetikleri PASIF
      PageControlTurChange(PageControlTur);
      Exit;
    end;
@@ -1056,11 +1060,15 @@ begin
        TarihBit := null;
    end;
 
+   // SAYFALI liste (TSayfaliListe): TOP N artik sayfa siniri; sayfa boyu GENEL OPSIYON'dan
+   // (Ops_GenelOpsiyon_GridListeUzunlugu, vars.100). Ekrandaki kayit sayisi spin'i kaldirildi.
+   TopN := FSayfali.TopN;
+
    if gf.FAltTur in [9, 19, 101] then // al sat sipariş ve satınalma talebi
-      Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis_Json2', SipEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
+      Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis_Json2', SipEkAlanlar, TopN, gf.FAltTur, TarihBas, TarihBit,
       SubeIDList, Trim(FArama.AraFaturaNo.Text), Trim(FArama.AraBaslik.Text),Trim(FArama.AraKod.Text),Trim(FArama.AraAciklama.Text),Trim(FArama.AraStok.Text))
    else
-      Liste_SP_Cagir('sp_Prog_AlisSatis_IrsFatFisKons_Json2', FatEkAlanlar, FArama.SpinKayitSayisi.EditValue, gf.FAltTur, TarihBas, TarihBit,
+      Liste_SP_Cagir('sp_Prog_AlisSatis_IrsFatFisKons_Json2', FatEkAlanlar, TopN, gf.FAltTur, TarihBas, TarihBit,
       SubeIDList, Trim(FArama.AraFaturaNo.Text), Trim(FArama.AraBaslik.Text),Trim(FArama.AraKod.Text),Trim(FArama.AraAciklama.Text),Trim(FArama.AraStok.Text));
 
 
@@ -1390,6 +1398,14 @@ begin
 
   cxPageControl1.ActivePageIndex := 0;
   Self.Align := alClient;
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  // Yenileme JvTimer1Timer uzerinden -> son arama baglami (tarih/filtre/alt tur) korunur.
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, FATBASLIK, GridFatListeTview, nil,
+      procedure
+      begin
+        JvTimer1Timer(nil);
+      end);
   GridFatListe.LookAndFeel.ScrollbarMode := sbmClassic;
   GridFatListeTview.OptionsView.ScrollBars := ssBoth;
   GridFatView.OptionsView.ScrollBars := ssBoth;

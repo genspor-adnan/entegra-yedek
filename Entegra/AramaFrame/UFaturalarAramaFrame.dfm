@@ -212,28 +212,6 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
     TabOrder = 2
     Width = 115
   end
-  object SpinKayitSayisi: TcxSpinEdit
-    Left = 133
-    Top = 1
-    Properties.ImmediatePost = True
-    TabOrder = 13
-    Value = 200
-    OnKeyUp = SpinKayitSayisiKeyUp
-    Width = 65
-  end
-  object cxLabel3: TcxLabel
-    Left = 85
-    Top = 1
-    Caption = 'Kay'#305't#'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object CheckEkAlanlarListelensin: TcxCheckBox
     Left = 3
     Top = 155

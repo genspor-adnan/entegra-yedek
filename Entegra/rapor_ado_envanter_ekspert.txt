@@ -1,0 +1,17 @@
+﻿ADO sablon envanteri  DB=EKSPERT  Sunucu=DESKTOP-HL3J3AS\SQLEXPRESS  Tarih=2026-08-03 14:49
+Toplam sablon: 300 | ADO iceren: 8 | Acilamayan blob: 0
+
+
+AYARID DOKUMID RAPORADI       GRUBU              MODUL ADONESNE                      SUNUCU                  KATALOG       CONNECTED RAPORICISQL        
+------ ------- --------       -----              ----- --------                      ------                  -------       --------- -----------        
+   414     441 Transfer       FatTransferDlg     -     TfrxADODatabase, TfrxADOQuery IDEAMED\SQLEXPRESS      IdeaMed       EVET      EVET (SOKUM RISKLI)
+  1403    1428 Fatura         FaturaWizard       -     TfrxADODatabase, TfrxADOQuery 10.16.22.2              IdeaMed       EVET      EVET (SOKUM RISKLI)
+  1395    1420 Fatura Formu   FaturaWizard       -     TfrxADODatabase, TfrxADOQuery 10.16.22.2              Bilim_Ankara  EVET      EVET (SOKUM RISKLI)
+  1396    1421 Fis Formu      FisWizard          -     TfrxADODatabase, TfrxADOQuery 10.16.22.2              IdeaMed       EVET      EVET (SOKUM RISKLI)
+  1398    1423 Irsaliye Formu IrsaliyeWizardAlis -     TfrxADODatabase, TfrxADOQuery WIN-O1SLKFHG0U2\SQL2014 USAK          EVET      EVET (SOKUM RISKLI)
+  1413    1443 Konsinye Formu KonsinyeWizard     -     TfrxADODatabase, TfrxADOQuery 10.16.22.2              IdeaMed       EVET      EVET (SOKUM RISKLI)
+  1414    1447 Ekstre Özetli  RehberEkstre             TfrxADODatabase, TfrxADOQuery IDEAMED\SQLEXPRESS      IdeaMed       hayir     EVET (SOKUM RISKLI)
+  1400    1425 Teklif Formu   TekliflerDlg       -     TfrxADODatabase               10.16.22.2              Bilim_Kayseri EVET      hayir              
+
+
+

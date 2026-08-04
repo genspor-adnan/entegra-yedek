@@ -246,6 +246,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TTeklifAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -408,6 +411,13 @@ begin
     FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
     FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
   end;
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, TabTeklif, GridTeklifView, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   GridTeklifViewSUBEID.Visible := SubeVarmi;
   if not DovizTakibi then
      FreeAndNil(GridTeklifViewDOVIZ_TUTARI);
@@ -486,7 +496,15 @@ begin
   else
     TID := -1;
 
-  if AMod in [3, 5] then TopN := 200 else TopN := 0;   // Son/Sik icin makul limit
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (Filtre) sayfalanir;
+  // Son/Sik Aranan eski TOP davranisinda (dogasi geregi kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 200;            // Son/Sik icin makul limit
+  end;
 
   KonusuVal := StrToIntDef(VarToStr(FArama.AraKonusu.EditValue), 0);
   TuruVal   := StrToIntDef(VarToStr(FArama.AraTuru.EditValue), 0);
@@ -519,6 +537,7 @@ begin
     // Generic helper: @Baslik='' (Teklif ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(TabTeklif, 'sp_Prog_Teklif_Liste_Json2', '', j, TID);
     j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

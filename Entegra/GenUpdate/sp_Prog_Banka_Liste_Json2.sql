@@ -15,7 +15,7 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL / varsayilan. ----
     DECLARE @SelectList NVARCHAR(MAX) = ISNULL(@Baslik, N'');                                       -- sablon uyumu (Banka'da ek alan yok)
-    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);  -- sablon uyumu (uygulanmaz)
+    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);  -- 0 = TOP yok
     DECLARE @Mod        SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')  AS SMALLINT), 4);
     DECLARE @Pasif      BIT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Pasif') AS BIT), 0);
     DECLARE @Trh        DATETIME      = TRY_CAST(JSON_VALUE(@Kosullar,'$.Trh') AS DATETIME);
@@ -61,7 +61,7 @@ BEGIN
         KALAN_TUTAR=sum(case when P.ODENMIS=1 and P.TARIH<=@PTARIH then 0.0 else P.TAKSIT end),
         KALAN_ANAPARA=sum(case when P.ODENMIS=1 and P.TARIH<=@PTARIH then 0.0 else P.ANAPARA end),
         KALAN_GIDER=sum(case when P.ODENMIS=1 and P.TARIH<=@PTARIH then 0.0 else P.FAIZ+P.KKDF+P.BSMV end),
-        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, BH.KUR,
+        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, HESAPKUR = BH.KUR,
         KR.KREDITEMINAT,KR.KREDILIMITSURETIPI,KR.KREDILIMITSURE,KR.KREDILIMIT,KR.KREDIKULLANIMSURE,KR.KREDIEKLIMITVAR,KR.REVIZYONTARIHI/*KA*/
     from KREDILER KR
         left join PLANKREDI P on P.KREDIID=KR.ID
@@ -94,7 +94,7 @@ BEGIN
         KALAN_ANAPARA=isnull(sum(BORC-ALACAK),0),
         KALAN_GIDER=[dbo].[fn_RotatifFaizHesapla]  (KR.ID, ''2000.01.01 00:00'', @PTARIH-1, 0)
                     - (SELECT isnull(sum(BORC),0.0) FROM KASA K where K.TUR=32 and K.YERI=47 AND K.YERID=KR.ID),
-        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, BH.KUR,
+        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, HESAPKUR = BH.KUR,
         KR.KREDITEMINAT,KR.KREDILIMITSURETIPI,KR.KREDILIMITSURE,KR.KREDILIMIT,KR.KREDIKULLANIMSURE,KR.KREDIEKLIMITVAR,KR.REVIZYONTARIHI/*KA*/
     from KREDILER KR
         left outer join KASA KS on HESAPTURU=''R'' and KS.HESAPID=KR.ID and KS.HESAPID=KR.ID and KS.TUR<>2 and KS.ISLEMTARIHI<=@PTARIH+1
@@ -125,7 +125,7 @@ BEGIN
         KALAN_TUTAR=0,
         KALAN_ANAPARA=0,
         KALAN_GIDER=0,
-        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, BH.KUR,
+        B.BANKAADI,BS.SUBEADI,LOGO=null,BANKATICARIHESAPID, HESAPKUR = BH.KUR,
         KR.KREDITEMINAT,KR.KREDILIMITSURETIPI,KR.KREDILIMITSURE,KR.KREDILIMIT,KR.KREDIKULLANIMSURE,KR.KREDIEKLIMITVAR,KR.REVIZYONTARIHI/*KA*/
     from KREDILER KR
         left outer join KASA KS on HESAPTURU=''R'' and KS.HESAPID=KR.ID and KS.HESAPID=KR.ID and KS.TUR<>2 and KS.ISLEMTARIHI<=@PTARIH+1
@@ -143,6 +143,13 @@ BEGIN
     -- Son/Sik suzgeci + KA_SIRA kolonu enjeksiyonu (3 parca)
     SET @SQL = REPLACE(@SQL, N'/*KA*/',  @KaCol);
     SET @SQL = REPLACE(@SQL, N'/*FLT*/', @Filt);
+
+    -- SAYFALI liste (TSayfaliListe): @TopN>0 -> TOP (n). 0 = TOP yok (eski davranis).
+    --   Govde UNION ALL (taksitli + taksitsiz) oldugu icin TOP her dala AYRI uygulanmamali
+    --   (2xN satir doner) -> tum sorgu turetilmis tabloya sarilir. ORDER BY DISARIYA eklenir
+    --   (asagidaki blok) -> siralama TOP'tan ONCE degerlendirilir, sayfalar tutarli olur.
+    IF @TopN > 0
+        SET @SQL = N'SELECT TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') * FROM (' + @SQL + N') AS SAYFA';
 
     -- Siralama
     IF @Mod IN (3, 5)

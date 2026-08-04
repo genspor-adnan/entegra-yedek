@@ -514,6 +514,20 @@ object OpsiyonDlg: TOpsiyonDlg
         Top = 470
         Caption = 'ay'
       end
+      object cxLabelListeUzunluk: TcxLabel
+        Left = 347
+        Top = 454
+        Caption = 'Liste sayfa uzunlu'#287'u'
+      end
+      object SpinListeUzunluk: TcxSpinEdit
+        Left = 505
+        Top = 452
+        Properties.MaxValue = 10000.000000000000000000
+        Properties.MinValue = 25.000000000000000000
+        TabOrder = 28
+        Value = 100
+        Width = 69
+      end
       object GroupBox7: TGroupBox
         Left = 4
         Top = 27
@@ -2803,7 +2817,7 @@ object OpsiyonDlg: TOpsiyonDlg
     DataSet = tabStilKosul
     OnStateChange = dtsStilKosulStateChange
     Left = 52
-    Top = 111
+    Top = 79
   end
   object tabStilKosul: TFDQuery
     BeforeOpen = tabStilKosulBeforeOpen
@@ -2870,8 +2884,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object dtsSMSHesaplari: TDataSource
     DataSet = tabSMSHesapAyarlari
     OnStateChange = dtsSMSHesaplariStateChange
-    Left = 526
-    Top = 467
+    Left = 534
+    Top = 371
   end
   object tabEpostaHesaplari: TFDQuery
     AfterOpen = tabEpostaHesaplariAfterOpen
@@ -2893,8 +2907,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object DtsITSHesaplari: TDataSource
     DataSet = TabITSHesaplari
     OnStateChange = DtsITSHesaplariStateChange
-    Left = 567
-    Top = 460
+    Left = 583
+    Top = 396
   end
   object TabITSHesaplari: TFDQuery
     BeforePost = TabITSHesaplariBeforePost
@@ -2970,8 +2984,8 @@ object OpsiyonDlg: TOpsiyonDlg
     Top = 232
   end
   object KilitlemeMenu: TPopupMenu
-    Left = 303
-    Top = 295
+    Left = 295
+    Top = 215
     object TumunuSecKaldir: TMenuItem
       Tag = 1
       Caption = 'T'#252'm'#252'n'#252' Se'#231

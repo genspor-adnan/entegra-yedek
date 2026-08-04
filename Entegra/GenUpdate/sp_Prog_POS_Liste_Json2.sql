@@ -18,7 +18,7 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL / varsayilan. ----
     DECLARE @SelectList NVARCHAR(MAX) = ISNULL(@Baslik, N'');                                        -- sablon uyumu (POS'ta ek alan yok)
-    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- sablon uyumu (uygulanmaz)
+    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);   -- 0 = TOP yok
     DECLARE @Mod        SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')  AS SMALLINT), 4);
     DECLARE @SubeList   NVARCHAR(MAX) = JSON_VALUE(@Kosullar,'$.SubeYetkiList');                      -- tam-sayi listesi (GUVENILIR; yalniz SubeVarmi)
     DECLARE @KulId      INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.KulId') AS INT);
@@ -45,8 +45,13 @@ BEGIN
     IF @SubeList IS NOT NULL AND @SubeList <> N''
         SET @Sube = N' AND P.SUBEID IN (' + @SubeList + N') ';
 
+    -- SAYFALI liste (TSayfaliListe): @TopN>0 -> TOP (n). 0 = TOP yok (eski davranis).
+    DECLARE @Top NVARCHAR(30) = CASE WHEN @TopN > 0
+                                     THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                                     ELSE N'' END;
+
     DECLARE @SQL NVARCHAR(MAX) = N'
-    select P.*,B.LOGO,B.BANKAADI,BS.SUBEADI/*KA*/ from POS P
+    select ' + @Top + N'P.*,B.LOGO,B.BANKAADI,BS.SUBEADI/*KA*/ from POS P
         inner join BANKAHESAPLAR BH ON  BH.ID = P.BANKAHESAPID
         inner join BANKASUBELER BS ON BH.BANKASUBELERID=BS.ID
         inner join BANKALAR B on B.BANKAKODU=BS.BANKAKODU

@@ -18,7 +18,7 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL / varsayilan. ----
     DECLARE @SelectList NVARCHAR(MAX) = ISNULL(@Baslik, N'');                                        -- sablon uyumu (Cek'te ek alan yok)
-    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);  -- sablon uyumu (uygulanmaz)
+    DECLARE @TopN       INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN') AS INT), 0);  -- 0 = TOP yok
     DECLARE @Mod        SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')  AS SMALLINT), 4);
     DECLARE @CekSenet   INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.CekSenet') AS INT), 0);  -- HER ZAMAN: Where CEKSENET=@CekSenet
     DECLARE @AraKod     NVARCHAR(200) = JSON_VALUE(@Kosullar,'$.AraKod');
@@ -65,8 +65,13 @@ BEGIN
     IF @SubeList IS NOT NULL AND @SubeList <> N'' AND @SubeList NOT LIKE N'%[^0-9, -]%'
         SET @Filt = @Filt + N' AND C.SUBEID IN (' + @SubeList + N') ';
 
+    -- SAYFALI liste (TSayfaliListe): @TopN>0 -> TOP (n). 0 = TOP yok (eski davranis).
+    DECLARE @Top NVARCHAR(30) = CASE WHEN @TopN > 0
+                                     THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                                     ELSE N'' END;
+
     DECLARE @SQL NVARCHAR(MAX) = N'
-    SELECT C.ID,C.KOD,C.TUTAR,C.KUR, C.TUR,C.DURUM,MAKBUZNO=CH.BELGENO,C.CIROLU,C.ODEMEYERI,C.HESAPNO,C.SERINO,
+    SELECT ' + @Top + N'C.ID,C.KOD,C.TUTAR,C.KUR, C.TUR,C.DURUM,MAKBUZNO=CH.BELGENO,C.CIROLU,C.ODEMEYERI,C.HESAPNO,C.SERINO,
     C.DOVIZ_TUTARI,C.DOVIZ_KURU,C.BORCLU,C.IBAN,C.VKNO,C.BASKASININ,C.BORCLU, C.VADE,
     CARIKOD = R1.KOD, CARIUNVAN=R1.FIRMA,C.HESAPID,C.REHBERID,
     C.HESAPNO, B.BANKAADI, BS.SUBEADI,SONISLEM=CH.ISLEM, C.CEKSENET,

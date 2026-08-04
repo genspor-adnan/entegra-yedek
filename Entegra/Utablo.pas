@@ -13,6 +13,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
   frxClass, frxDBSet, IdMessage, IdMessageClient, IdSMTPBase, IdSMTP, MAPI,  ComObj, cxExtEditRepositoryItems,
   cxEditRepositoryItems, cxShellEditRepositoryItems,  StdCtrls,FileAssociationDetails,cxDBEditRepository,
   cxDBExtLookupComboBox, cxEdit, cxGridCustomTableView, cxCurrencyEdit, cxSpinEdit,  Graphics, Generics.Collections,  cxDBTL,
+  cxCustomData, cxFilter,   // TSayfaliListe: TcxDataFilterGetValueListEvent / TcxFilterCriteria / TcxDataFilterValueList
   PngImageList, DateUtils, cxCheckBox,  Vcl.ExtDlgs, IdIOHandler, IdIOHandlerSocket, IdIOHandlerStack, IdSSL,
   IdGlobal, cxGridCardView, cxClasses, cxCheckComboBox, UGENINIDuzenle,  cxTextEdit,ExtCtrls, IdSSLOpenSSL,
   Datasnap.DBClient, Soap.SOAPConn,cxLookAndFeelPainters, dxSkinLiquidSky, cxGridStrs, dxGDIPlusClasses,
@@ -86,6 +87,56 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     property AltDeger: string read FAltDeger write FAltDeger;
     property UstDeger: string read FUstDeger write FUstDeger;
     property stil: TcxStyle read FStil write FStil;
+  end;
+
+  // ---- SAYFALI LISTE yardimcisi (StokHizmetAra pilotundan merkezilestirildi) ----
+  // TOP sinirini sayfa sayfa buyuterek listeyi yeniler: ilk sayfa = ASayfaBoyu();
+  // kullanici grid'in sonuna kaydirinca / son kayda inince sinir +sayfa buyutulup
+  // AYenile cagrilir, kullanici Locate ile kaldigi kayitta birakilir. Sorgu sinira
+  // ulasmadan bittiyse (RecordCount < sinir) devami yoktur, requery yapilmaz.
+  // fmOnDemand BILEREK secilmedi: detay panelleri ayni baglantidan sorgu atinca
+  // FireDAC pending sonucun tamamini ceker (AutoFetchAll), sayfalama iptal olurdu.
+  // KULLANIM (3 nokta):
+  //   FormCreate : FSayfali := TSayfaliListe.Baglan(Self, TabX, GridXView,
+  //                  nil,   // sayfa boyu: GENEL OPSIYON Ops_GenelOpsiyon_GridListeUzunlugu (vars.100)
+  //                  procedure begin ListeyiYenile end);
+  //                (ekrana ozel boy gerekirse nil yerine function: Integer closure'i verilir)
+  //   Sorgu kur  : j.AddPair('TopN', TJSONNumber.Create(FSayfali.TopN));
+  //                (sayfalanamayan dalda FSayfali.TopN(False) cagrilip kendi TopN'i kullanilir)
+  //   Sorgu acildi: FSayfali.YuklemeSonrasi;  // ekran-doldurma degerlendirmesi
+  //   (istege) dataset AfterScroll : FSayfali.DatasetScrollTetigi;  // klavye ile son kayit
+  // TComponent: form Owner'i ile birlikte olur, ayrica Free gerekmez.
+  TSayfaliListe = class(TComponent)
+  private
+    FTab: TFDQuery;
+    FGrid: TcxGridDBTableView;
+    FSayfaBoyu: TFunc<Integer>;
+    FYenile: TProc;
+    FEskiScroll: TNotifyEvent;   // grid'in onceki OnTopRecordIndexChanged'i (zincirlenir)
+    FEskiFiltre: TNotifyEvent;   // grid'in onceki Filter.OnChanged'i (zincirlenir)
+    FEskiDegerListesi: TcxDataFilterGetValueListEvent;  // onceki Filter.OnGetValueList (zincirlenir)
+    FEskiSiralama: TNotifyEvent;    // onceki DataController.OnSortingChanged (zincirlenir)
+    FSinir: Integer;
+    FYukleniyor: Boolean;        // buyutme requery'si reentrancy guard'i
+    FAktif: Boolean;             // son sorgu sayfalanabilir dalda miydi
+    FTamListe: Boolean;          // grid KOLON FILTRESI acik -> TOP'suz TAM liste modu
+    FDegerListesiKuruluyor: Boolean;  // FiltreDegerListesi re-Load reentrancy guard'i
+    function  SayfaBoyuAl: Integer;   // closure yoksa genel opsiyon (GridListeUzunlugu, vars.100)
+    function  TamGereksinim: Boolean; // filtre DOLU ya da SIRALAMA aktif -> tam liste sart
+    procedure TamModaGec;             // FTamListe=True + kuyrukta TOP'suz requery
+    procedure ScrollDegisti(Sender: TObject);
+    procedure FiltreDegisti(Sender: TObject);
+    procedure FiltreDegerListesi(Sender: TcxFilterCriteria; AItemIndex: Integer;
+      AValueList: TcxDataFilterValueList);
+    procedure SiralamaDegisti(Sender: TObject);
+    procedure SonrakiKuyrukla;
+    procedure SonrakiGetir;
+  public
+    constructor Baglan(AOwner: TComponent; ATab: TFDQuery; AGrid: TcxGridDBTableView;
+      ASayfaBoyu: TFunc<Integer>; AYenile: TProc);
+    function TopN(ASayfalanabilir: Boolean = True): Integer;  // sorgu kurulurken: aktif sinir
+    procedure YuklemeSonrasi;       // sorgu acildiktan sonra: ekran dolana kadar zincirle
+    procedure DatasetScrollTetigi;  // AfterScroll'dan: klavye/tik ile son kayda inilince
   end;
 
   TGridStilYonetim = class(TObject)
@@ -1046,6 +1097,7 @@ const
   Internet_Cep_Giris=12;
 var
   Tablo: TTablo;
+  GSayfaliListeBoyu: Integer = 0;   // "Liste sayfa uzunlugu" oturum cache'i (0=henuz okunmadi; TSayfaliListe.SayfaBoyuAl lazy okur, UOpsDlg kaydeti tazeler)
   Lisanssrv: LisansServiceSoap;
   Guncelleme: IGenUpdateWS;
   RaporIslem: IRaporiumWS;
@@ -15105,6 +15157,227 @@ begin
   FAltDeger := ADs.AsString['ALTDEGER'];
   FUstDeger := ADs.AsString['USTDEGER'];
   FStil := TcxStyle(KullaniciArayuzu.BilesenBul('gridStil_' + ADs.AsString['STILID'], Tablo.cxStilTanimlari));
+end;
+
+{ TSayfaliListe }
+
+constructor TSayfaliListe.Baglan(AOwner: TComponent; ATab: TFDQuery; AGrid: TcxGridDBTableView;
+  ASayfaBoyu: TFunc<Integer>; AYenile: TProc);
+begin
+  inherited Create(AOwner);
+  FTab := ATab;
+  FGrid := AGrid;
+  FSayfaBoyu := ASayfaBoyu;
+  FYenile := AYenile;
+  // SCROLLBAR ile sona kaydirma tetigi: cxGrid'de scrollbar focused kaydi degistirmez,
+  // dataset AfterScroll gelmez -> gorsel kaydirmaya baglanmak SART. Var olan handler zincirlenir.
+  FEskiScroll := FGrid.OnTopRecordIndexChanged;
+  FGrid.OnTopRecordIndexChanged := ScrollDegisti;
+  // GRID KOLON FILTRESI tetigi: kismi listede grid filtresi yalniz YUKLU kayitlarda
+  // arar (sessizce eksik sonuc). Filtre acilinca TAM liste cekilir (TopN=0), filtre
+  // temizlenince sayfali moda donulur. Var olan handler zincirlenir.
+  FEskiFiltre := FGrid.DataController.Filter.OnChanged;
+  FGrid.DataController.Filter.OnChanged := FiltreDegisti;
+  // BASLIK filtre ACILIR LISTESI tetigi: deger listesi YUKLU kayitlardan kurulur ->
+  // kismi listede ilk sayfada olmayan degerler dropdown'da hic gorunmez (secilemez).
+  // Popup kurulurken tam liste cekilip degerler yeniden yuklenir.
+  FEskiDegerListesi := FGrid.DataController.Filter.OnGetValueList;
+  FGrid.DataController.Filter.OnGetValueList := FiltreDegerListesi;
+  // KOLON SIRALAMA tetigi: baslik tiklamasi yalniz YUKLU kismi siralar (kismi listede
+  // "en buyuk/kucuk" yaniltir). Siralama degisince tam liste cekilir; siralama ve filtre
+  // ikisi de kalkinca sayfaliya donulur (TopN icindeki kontrol).
+  FEskiSiralama := FGrid.DataController.OnSortingChanged;
+  FGrid.DataController.OnSortingChanged := SiralamaDegisti;
+end;
+
+function TSayfaliListe.SayfaBoyuAl: Integer;
+begin
+  if Assigned(FSayfaBoyu) then
+    Result := FSayfaBoyu()
+  else begin
+    // Merkezi varsayilan: genel opsiyon "Liste sayfa uzunlugu" (UOpsDlg, vars. 100).
+    // TEK KEZ okunur, oturum boyunca cache (GSayfaliListeBoyu); UOpsDlg kaydeti tazeler.
+    if GSayfaliListeBoyu <= 0 then
+      GSayfaliListeBoyu := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_GridListeUzunlugu, 100);
+    Result := GSayfaliListeBoyu;
+  end;
+  if Result < 25 then Result := 25;   // alt sinir: 0/bos/sacma deger korumasi
+end;
+
+function TSayfaliListe.TopN(ASayfalanabilir: Boolean): Integer;
+begin
+  FAktif := ASayfalanabilir;
+  if not FAktif then Exit(0);   // cagiran kendi TopN'ini kullanir; tetikler pasif
+  // Tam mod takili kalmasin: yeni aramada (buyutme degil) gereksinim kalktiysa
+  // (filtre bos + siralama yok) sayfaliya don (or. dropdown acilip vazgecildi).
+  if FTamListe and (not FYukleniyor) and (not TamGereksinim) then
+    FTamListe := False;
+  if FTamListe then Exit(0);    // grid filtresi acik -> TOP'suz TAM liste (SP TopN=0 = TOP yok)
+  // Sayfa buyutme disindaki HER yeni arama/filtre siniri ilk sayfaya dondurur.
+  if not FYukleniyor then
+    FSinir := SayfaBoyuAl;
+  Result := FSinir;
+end;
+
+// Baslik filtresinin ACILIR DEGER LISTESI kuruluyor (popup acilisi): liste kismi ise
+// once TAM veri cekilir (senkron; popup bu cagridan sonra aciliyor), sonra deger listesi
+// yeniden yuklenir -> kullanici TUM degerleri gorur ve secebilir. Filtre uygulaninca
+// FiltreDegisti zaten tam-liste modunu surdurur; temizlenince sayfaliya doner.
+procedure TSayfaliListe.FiltreDegerListesi(Sender: TcxFilterCriteria; AItemIndex: Integer;
+  AValueList: TcxDataFilterValueList);
+begin
+  if Assigned(FEskiDegerListesi) then FEskiDegerListesi(Sender, AItemIndex, AValueList);
+  if FDegerListesiKuruluyor then Exit;          // re-Load'un tetikledigi ic cagri
+  if (not FAktif) or FTamListe then Exit;       // sayfali degil ya da zaten tam
+  if (FTab = nil) or (not FTab.Active) then Exit;
+  if FTab.RecordCount < FSinir then Exit;       // liste zaten komple -> degerler tam
+  FDegerListesiKuruluyor := True;
+  try
+    FTamListe := True;      // filtreyle calisilacak -> tam mod (temizlenince FiltreDegisti geri alir)
+    FYukleniyor := True;    // TopN sayfa sinirini sifirlamasin
+    try
+      FYenile();            // SENKRON tam liste (TopN=0)
+    finally
+      FYukleniyor := False;
+    end;
+    AValueList.Load(AItemIndex);   // degerleri TAM veriden yeniden kur
+  finally
+    FDegerListesiKuruluyor := False;
+  end;
+end;
+
+// Tam liste GEREKSINIMI: grid kolon filtresi DOLU ya da kolon SIRALAMASI aktif.
+// Ikisi de kismi listede yaniltir (filtre eksik sonuc, siralama yanlis uc degerler).
+function TSayfaliListe.TamGereksinim: Boolean;
+begin
+  Result := (FGrid.SortedItemCount > 0) or
+    (FGrid.DataController.Filter.Active and (not FGrid.DataController.Filter.IsEmpty));
+end;
+
+// Tam moda gecis: TOP'suz requery kuyrukta (FYukleniyor korumali -> TopN sayfa sinirini
+// sifirlamaz; sayfaliya donuste kaldigi sinirdan devam eder).
+procedure TSayfaliListe.TamModaGec;
+begin
+  FTamListe := True;
+  TThread.ForceQueue(nil,
+    procedure
+    begin
+      if csDestroying in ComponentState then Exit;
+      FYukleniyor := True;
+      try
+        FYenile();
+      finally
+        FYukleniyor := False;
+      end;
+    end);
+end;
+
+// Kolon SIRALAMASI degisti (baslik tiklamasi): kismi listedeyse tam liste cekilir,
+// requery sonrasi grid ayni siralamayi TAM veriye uygular. Siralama+filtre ikisi de
+// kalkarsa sayfaliya donus (ayni requery mekanizmasi / TopN kontrolu).
+procedure TSayfaliListe.SiralamaDegisti(Sender: TObject);
+begin
+  if Assigned(FEskiSiralama) then FEskiSiralama(Sender);
+  FiltreDegisti(nil);   // ayni degerlendirme: gereksinim degistiyse gecis yap
+end;
+
+// Grid filtre/siralama durumu degisti: gereksinim DOGDUYSA tam listeye gec,
+// KALKTIYSA sayfali moda don (her iki gecis de ayni baglamla requery).
+procedure TSayfaliListe.FiltreDegisti(Sender: TObject);
+var
+  LGerekli: Boolean;
+begin
+  if (Sender <> nil) and Assigned(FEskiFiltre) then FEskiFiltre(Sender);
+  if FYukleniyor or (not FAktif) then Exit;
+  if (FTab = nil) or (not FTab.Active) then Exit;
+  LGerekli := TamGereksinim;
+  if LGerekli = FTamListe then Exit;   // mod degismedi
+  if LGerekli then
+    TamModaGec
+  else begin
+    FTamListe := False;   // sayfaliya donus: kaldigi sinirdan yeniden sorgula
+    TThread.ForceQueue(nil,
+      procedure
+      begin
+        if csDestroying in ComponentState then Exit;
+        FYukleniyor := True;
+        try
+          FYenile();
+        finally
+          FYukleniyor := False;
+        end;
+      end);
+  end;
+end;
+
+procedure TSayfaliListe.YuklemeSonrasi;
+begin
+  if (not FAktif) or FTamListe then Exit;
+  // Yeni arama KISMI geldi ama siralama/filtre hala aktif -> kismi liste yaniltir,
+  // dogrudan tam moda gec (or. siralama acikken yeni arama yapildi).
+  if TamGereksinim and (FTab <> nil) and FTab.Active and (FTab.RecordCount >= FSinir) then begin
+    TamModaGec;
+    Exit;
+  end;
+  // "Ekran dolu mu?" degerlendirmesi cizim BITTIKTEN sonra: kucuk sayfa ekrana sigarsa
+  // scrollbar olusmaz ve scroll tetigi hic gelmez; ekran dolana ya da liste bitene
+  // kadar zincirleme sayfa cekilir.
+  TThread.ForceQueue(nil,
+    procedure
+    begin
+      if not (csDestroying in ComponentState) then
+        ScrollDegisti(nil);
+    end);
+end;
+
+procedure TSayfaliListe.ScrollDegisti(Sender: TObject);
+begin
+  if Assigned(FEskiScroll) then FEskiScroll(Sender);
+  if FYukleniyor or (not FAktif) or FTamListe then Exit;
+  if (FTab = nil) or (not FTab.Active) then Exit;
+  if FGrid.DataController.RecordCount <= 0 then Exit;
+  // Gorunen son satir listenin sonuna ulasti -> sonraki sayfa.
+  if FGrid.Controller.TopRecordIndex + FGrid.ViewInfo.VisibleRecordCount >=
+     FGrid.DataController.RecordCount then
+    SonrakiKuyrukla;
+end;
+
+procedure TSayfaliListe.DatasetScrollTetigi;
+begin
+  if FYukleniyor or (not FAktif) or FTamListe then Exit;
+  if (FTab = nil) or (not FTab.Active) or (FTab.RecordCount <= 0) then Exit;
+  if FTab.RecNo = FTab.RecordCount then   // klavye/tiklama ile son kayda gelindi
+    SonrakiKuyrukla;
+end;
+
+procedure TSayfaliListe.SonrakiKuyrukla;
+begin
+  if FYukleniyor then Exit;
+  // Requery scroll/cizim olayinin ICINDE yapilamaz (dataset yeniden acilir) -> ana kuyruk.
+  TThread.ForceQueue(nil,
+    procedure
+    begin
+      if not (csDestroying in ComponentState) then
+        SonrakiGetir;
+    end);
+end;
+
+procedure TSayfaliListe.SonrakiGetir;
+var
+  LSonID: Integer;
+begin
+  if FYukleniyor or (not FAktif) or FTamListe then Exit;
+  if (FTab = nil) or (not FTab.Active) then Exit;
+  if FTab.RecordCount < FSinir then Exit;   // sinira ulasmadan bitti -> devami yok
+  FYukleniyor := True;
+  try
+    LSonID := FTab.FieldByName('ID').AsInteger;
+    FSinir := FSinir + SayfaBoyuAl;
+    FYenile();                        // ayni arama baglamiyla yeniden sorgula (TopN = yeni sinir)
+    FTab.Locate('ID', LSonID, []);    // kullanici kaldigi kayitta kalsin
+  finally
+    FYukleniyor := False;
+  end;
 end;
 
 { TGridStilYonetim }

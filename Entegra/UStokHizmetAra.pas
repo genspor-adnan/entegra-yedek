@@ -93,8 +93,6 @@ type
     ComboIcerik: TcxImageComboBox;
     cbBuFirma: TcxCheckBox;
     cbOlmayanlar: TcxCheckBox;
-    Label9: TLabel;
-    SpinKayitSayisi: TcxSpinEdit;
     JvTimer1: TJvTimer;
     cxGrid1DBTableViewMaliyetler: TcxGridDBTableView;
     cxGrid1LevelMaliyetler: TcxGridLevel;
@@ -200,8 +198,6 @@ type
     procedure ComboMARKAPropertiesEditValueChanged(Sender: TObject);
     procedure ComboGRUBUPropertiesEditValueChanged(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure SpinKayitSayisiPropertiesEditValueChanged(Sender: TObject);
     procedure JvTimer1Timer(Sender: TObject);
     procedure cxGrid1DBTableViewDurumStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure TreeListKategoriClick(Sender: TObject);
@@ -220,6 +216,7 @@ type
     BekletDlg: TBekletmeDlg;
     FSonAranan: Boolean;   // Son Aranan modu (LabelSonAranan tiklandi -> Mod=5)
     FAcilistaListelemeAtla: Boolean;
+    FSayfali: TSayfaliListe;    // SAYFALI stok listesi (merkezi yardimci, Utablo)
     procedure StokAra;
     procedure HizmetAra;
     Procedure DagitimAra;
@@ -240,7 +237,7 @@ var
 
 implementation
 
-uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON, UVeriMotor;
+uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON, System.Math, UVeriMotor;
 
 var
   UserInitiated:Boolean=True;
@@ -279,17 +276,6 @@ begin
          TabDetayGiris.FieldByName('URUNID').AsInteger := TabHizmetListe.FieldByName('ID').AsInteger;
   end;
   ModalResult := mrOk;
-end;
-
-procedure TStokHizmetAraDlg.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  SpinKayitSayisi.PostEditValue;
-end;
-
-procedure TStokHizmetAraDlg.SpinKayitSayisiPropertiesEditValueChanged(Sender: TObject);
-begin
-  GenRegIni.RegWriteString('StokOpsiyon', 'StHizAraKayitSayisi', VarToStr(SpinKayitSayisi.EditValue), 'C');
-  ListeAc(1);
 end;
 
 procedure TStokHizmetAraDlg.BtnSecClick(Sender: TObject);
@@ -642,10 +628,13 @@ begin
   cbStokDepo.Properties.OnEditValueChanged := cbFiyatAdiPropertiesEditValueChanged;
   cbOlmayanlar.OnClick:=cbFiyatAdiPropertiesEditValueChanged;
 
-  SpinKayitSayisi.Properties.onEditValueChanged := nil;
-  SpinKayitSayisi.EditValue := GenRegIni.RegReadString('StokOpsiyon','StHizAraKayitSayisi','200','C');
-  SpinKayitSayisi.PostEditValue;
-  SpinKayitSayisi.Properties.onEditValueChanged := SpinKayitSayisiPropertiesEditValueChanged;
+  // SAYFALI stok listesi: merkezi yardimciya baglan. Sayfa boyu GENEL OPSIYON
+  // (Liste sayfa uzunlugu, vars.100) -> closure nil.
+  FSayfali := TSayfaliListe.Baglan(Self, TabStokListe, GridStokView, nil,
+    procedure
+    begin
+      StokAra;
+    end);
 
   Tablo.GridTurkcelestir;
   if not DovizTakibi then begin
@@ -1305,6 +1294,7 @@ end;
 procedure TStokHizmetAraDlg.StokAra;
 // STANDART SISTEM: inline SQL -> sp_Prog_StokHizmetAra_Stok_Json2 (@Baslik+@Kosullar JSON).
 //   Mod=4 normal/filtre, Mod=5 Son Aranan (LabelSonAranan). Filtreler JSON'da (parametreli/guvenli).
+// SAYFALI: TSayfaliListe (Utablo) - TopN sinir yonetimi + tetikler merkezi yardimcida.
 var j: TJSONObject;
 begin
   j := TJSONObject.Create;
@@ -1315,7 +1305,7 @@ begin
   j.AddPair('Dil',        TJSONNumber.Create(Dil));
   j.AddPair('CariDoviz',  CariDoviz);
   j.AddPair('AdetBirimi', TJSONNumber.Create(AdetBirimi));
-  j.AddPair('TopN',       TJSONNumber.Create(StrToIntDef(VarToStr(SpinKayitSayisi.EditValue), 200)));
+  j.AddPair('TopN',       TJSONNumber.Create(FSayfali.TopN));
   j.AddPair('Olmayanlar', TJSONNumber.Create(Ord(cbOlmayanlar.Checked)));
   j.AddPair('BuFirma',    TJSONNumber.Create(Ord(cbBuFirma.Checked)));
   if not (stokhizmetaracagirantur in [99, TabNo_URETIMRECETE]) then
@@ -1353,6 +1343,7 @@ begin
   end;
   Tablo.ListeSPJson(TabStokListe, 'sp_Prog_StokHizmetAra_Stok_Json2', '', j);
   FSonAranan := False;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (kucuk sayfa boyunda)
 end;
 
 Procedure TStokHizmetAraDlg.HizmetAra;
@@ -1723,6 +1714,7 @@ end;
 procedure TStokHizmetAraDlg.TabStokListeAfterScroll(DataSet: TDataSet);
 begin
   SagPanelDetayYukle;
+  FSayfali.DatasetScrollTetigi;   // klavye/tiklama ile son kayda gelindiyse sonraki sayfa
 end;
 
 procedure TStokHizmetAraDlg.TreeListKategoriClick(Sender: TObject);

@@ -646,28 +646,6 @@ object GorevListeAramaFrame: TGorevListeAramaFrame
             ImageName = 'PngImage6'
           end
         end
-        object cxLabelKayit: TcxLabel
-          Left = 5
-          Top = 318
-          Caption = 'Kay'#305't#'
-          ParentFont = False
-          Style.Font.Charset = TURKISH_CHARSET
-          Style.Font.Color = clWindowText
-          Style.Font.Height = -11
-          Style.Font.Name = 'Trebuchet MS'
-          Style.Font.Style = []
-          Style.IsFontAssigned = True
-          Transparent = True
-        end
-        object SpinKayitSayisi: TcxSpinEdit
-          Left = 101
-          Top = 316
-          Properties.ImmediatePost = True
-          TabOrder = 16
-          Value = 200
-          OnKeyUp = SpinKayitSayisiKeyUp
-          Width = 91
-        end
       end
     end
   end

@@ -2232,6 +2232,7 @@ const
     Ops_GenelOpsiyon_AktarimGunSonu = -10052;
     Ops_GenelOpsiyon_AktarimKurumFaturalari = -10053;
     Ops_GenelOpsiyon_SifreSuresi = -10154;
+    Ops_GenelOpsiyon_GridListeUzunlugu = -10155;  // sayfali listelerde SAYFA boyu (TSayfaliListe; vars. 100)
 
     Ops_Yedekleme_YedeklemeDizin = -10054;
     Ops_Yedekleme_YedeklemeAdi = -10055;

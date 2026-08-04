@@ -342,6 +342,8 @@ type
     TabGoogleTakvimKULLANAN: TStringField;
     cxLabel18: TcxLabel;
     ComboSifreSuresi: TcxImageComboBox;
+    cxLabelListeUzunluk: TcxLabel;
+    SpinListeUzunluk: TcxSpinEdit;
     cxLabel19: TcxLabel;
     GroupBox7: TGroupBox;
     EditDepoDBAdi: TcxButtonEdit;
@@ -1230,6 +1232,7 @@ begin
    ComboDefaultDoviz.EditValue := Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'0'); //   GenelOpsiyon','VarsayilanDoviz
    EditGorunmesin.Value := Tablo.GENINI.ReadInteger(Ops_UyariOpsiyon_Gorunmesin, 90);
    ComboSifreSuresi.EditValue := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_SifreSuresi, 6);
+   SpinListeUzunluk.Value := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_GridListeUzunlugu, 100);  // sayfali liste SAYFA boyu
 
    checkAktiviteEpostaBildirim.Checked:= Tablo.GENINI.ReadBoolean(Ops_AktiviteOpsiyon_AktiviteEpostaBildirimAktif,False); //  AktiviteOpsiyon','AktiviteEpostaBildirimAktif
    checkAktiviteSMSBildirim.Checked:= Tablo.GENINI.ReadBoolean(Ops_AktiviteOpsiyon_AktiviteSMSBildirimAktif,False); //  AktiviteOpsiyon','AktiviteSMSBildirimAktif
@@ -1368,6 +1371,8 @@ begin
    Tablo.GENINI.WriteInteger(Ops_UyariOpsiyon_YeniKayitSuresi,EditYeniKayitSuresi.Value);  //   UyariOpsiyon   YeniKayitSuresi
    Tablo.GENINI.WriteInteger(Ops_UyariOpsiyon_Gorunmesin, EditGorunmesin.Value);
    Tablo.GENINI.WriteInteger(Ops_GenelOpsiyon_SifreSuresi, ComboSifreSuresi.EditValue);
+   Tablo.GENINI.WriteInteger(Ops_GenelOpsiyon_GridListeUzunlugu, SpinListeUzunluk.Value);  // sayfali liste SAYFA boyu
+   GSayfaliListeBoyu := SpinListeUzunluk.Value;   // oturum cache'ini tazele (restart'siz gecerli)
 
    Tablo.GENINI.WriteString(Ops_GenelOpsiyon_VarsayilanDoviz,ComboDefaultDoviz.EditValue);  //   GenelOpsiyon   VarsayilanDoviz
    Tablo.GENINI.WriteString(Ops_ChatOpsiyon_Adres,EdChatAdress.Text);  //   GenelOpsiyon  chat adres

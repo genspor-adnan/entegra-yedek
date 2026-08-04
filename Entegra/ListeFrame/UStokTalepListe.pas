@@ -129,6 +129,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama : TStokTalepAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -219,7 +222,15 @@ var
   TopN, DepoC, DepoG: Integer;
   j: TJSONObject;
 begin
-  if AMod = 1 then TopN := 0 else TopN := 200;
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik Aranan eski TOP davranisinda (kucuk listeler).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 200;
+  end;
 
   j := TJSONObject.Create;
   try
@@ -276,6 +287,7 @@ begin
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
+  FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
 end;
 
 procedure TStokTalepListeDlg.LabelTumKayitlarClick(Sender: TObject);
@@ -361,6 +373,14 @@ LogID:=0;
      FArama.LabelSonArananlar.OnClick := LabelSonArananlarClick;
      FArama.LabelSikArananlar.OnClick := LabelSikArananlarClick;
    end;
+
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, TabStokTalep, GridStokTalepTview, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
 
    Tablo.GENINI.ReadImageSection(Ops_StokKart_Anabirim,(GridDetayViewBIRIM1.Properties as TcxImageComboBoxProperties).Items);   //   StokKart_Anabirim
  // GridStokTalepTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\FatTransferGridi',true,false,[gsoUseFilter],'FatTransferGridi');

@@ -147,29 +147,6 @@ object RehberAramaFrame: TRehberAramaFrame
     TabOrder = 7
     Width = 115
   end
-  object SpinKayitSayisi: TcxSpinEdit
-    Left = 139
-    Top = 39
-    Properties.ImmediatePost = True
-    TabOrder = 16
-    Value = 200
-    OnKeyUp = SpinKayitSayisiKeyUp
-    Width = 51
-  end
-  object cxLabel6: TcxLabel
-    Left = 76
-    Top = 43
-    Caption = 'Kay'#305't #'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.TextColor = clBtnText
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object PanelCRM: TPanel
     Left = -1
     Top = 217

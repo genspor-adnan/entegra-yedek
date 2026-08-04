@@ -903,6 +903,9 @@ type
     FKayitErisimTamamlandi: TNotifyEvent;
     FKayitErisimIptalEdildi: TNotifyEvent;
     FArama : TRehberAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod=4 + analiz=0 dali sayfalanir.
+    FSayfali: TSayfaliListe;
+    FCariSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme requery'si ayni modla)
     { IBilgiFrame ?yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
     procedure KurumXSLTSec(ABolum, ARaporID: Integer; AEdit: TcxButtonEdit; AButtonIndex: Integer);
@@ -953,7 +956,7 @@ var
 
 implementation
 
-uses UVeriMotor, ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils,
+uses UVeriMotor, ULog, FetaUtil, UCombo, UAnaForm,UGirisKutusuEx,UKodAgaci,URehberBilgiDuzenle, UGenNotificationUtils, System.Math,
   FetaClassExtensions,FetaClassExtensionsConsts, UResim, PrjConst, UFastRap, UCariFonksiyonlar, UKasaWizard,
   UKasalarListeFrame, UGenelAnaSekmeFrame, URaporAraclari, UGenSifre,UBekletme, UGorevDlg,
   UReplikasyon, FetaKurulusSiniflari, UAcilisKaydi, UNakitDlg,UBinarySave,IdGlobalProtocols,UExceldenVeriAl,
@@ -2379,6 +2382,15 @@ begin
   // ALIAS kolonu yazÄ±labilir olsun
   if GridAliasViewALIAS.Properties is TcxTextEditProperties then
     TcxTextEditProperties(GridAliasViewALIAS.Properties).ReadOnly := False;
+  // SAYFALI cari listesi: merkezi yardimciya baglan. Sayfa boyu GENEL OPSIYON
+  // (Liste sayfa uzunlugu, vars.100) -> closure nil. FArama spin'i pasiflenir
+  // (arama frame'i sonradan atanir -> Baslatildi/GorunurOlacak aninda degil,
+  // Liste_SP_Cagir icinde ilk kullanildiginda kapatilir).
+  FSayfali := TSayfaliListe.Baglan(Self, REHBER, CariGridView, nil,
+    procedure
+    begin
+      Liste_SP_Cagir(FCariSonMod);
+    end);
 end;
 
 procedure TRehberAraDlg.cxDBTreeList1cxDBTreeListColumn2PropertiesButtonClick(
@@ -3498,6 +3510,7 @@ procedure TRehberAraDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   AMod: 1=Tum (TOP yok), 3=Sik (KA.SAY desc), 4=Filtre/normal (JvTimer), 5=Son (KA tarih desc).
 //   @Baslik = Paramst (SubSelectGetir ile birebir uretilen SELECT kolonlari) -> parite garanti.
 //   @Kosullar = filtreler JSON (TJSONObject ile guvenli escape/cast). PARITE MUTLAK.
+// SAYFALI (TSayfaliListe, Utablo): yalniz Mod=4 + analiz=0 dali sayfalanir.
 var
   AnalizIdx, VarMod, AnalizWhere, TopN, OrderCol, GrupID, BolgeID: Integer;
   KatID, SinifID, TemsilciID, TekSubeTum: Integer;
@@ -3519,11 +3532,18 @@ begin
   if (AMod = 4) and (AnalizIdx in [1..5]) then VarMod := 1 else VarMod := 0;
   if (AMod = 4) and (AnalizIdx in [1,2,3,4]) then AnalizWhere := AnalizIdx else AnalizWhere := 0;
 
-  // TopN: yalniz normal filtre (ItemIndex=0) TOP uygular; digerleri TOP'suz
-  if (AMod = 4) and (AnalizIdx = 0) then
-     TopN := StrToIntDef(VarToStr(FArama.SpinKayitSayisi.EditValue), 100)
-  else
+  // TopN: yalniz normal filtre (ItemIndex=0) TOP uygular; digerleri TOP'suz.
+  // SAYFALI (TSayfaliListe): bu dal sayfalanir; analiz/Tum/Sik/Son dallari eski davranista
+  // (analiz BA toplama kolonlu -> kismi listede toplam yaniltir, bilerek sayfalanmiyor).
+  FCariSonMod := AMod;
+  // Mod=4 (filtre, analizsiz) ve Mod=1 (Tum) SAYFALI (stok listesiyle tutarli);
+  // analiz dallari (BA toplamli) ve Sik/Son (kucuk listeler) eski davranista.
+  if ((AMod = 4) and (AnalizIdx = 0)) or (AMod = 1) then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
      TopN := 100;
+  end;
 
   if FArama.AraKod.Text <> '' then OrderCol := 1 else OrderCol := 0;  // KOD / FIRMA
   if FArama.ComboGrup.Text  <> '' then GrupID  := StrToIntDef(VarToStr(FArama.ComboGrup.EditValue), 0)  else GrupID  := 0;
@@ -3571,6 +3591,7 @@ begin
     // Generic helper: @Baslik=Paramst (ham SQL) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(REHBER, 'sp_Prog_Cari_Liste_Json2', Paramst, j, 0);
     j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

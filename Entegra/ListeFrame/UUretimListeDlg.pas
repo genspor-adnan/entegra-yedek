@@ -25,7 +25,8 @@ uses
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxDateRanges,
   dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  Utablo;   // TSayfaliListe (sayfali liste yardimcisi) interface bolumunde gerekli
 
 type
   TUretimListeDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame)
@@ -130,6 +131,9 @@ type
     { Private declarations }    
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TUretimAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod 1 (Tum) ve 4 (filtre) sayfalanir.
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -165,8 +169,7 @@ type
 
 implementation
 
-uses FetaKurulusSiniflari, FetaClassExtensions, Utablo, PrjConst,LocOnFly,
-      UUretimRecete, UAnaform, UBelgeDonusum;
+uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst,LocOnFly, UUretimRecete, UAnaform, UBelgeDonusum;
 
 {$R *.dfm}
 
@@ -175,6 +178,13 @@ uses FetaKurulusSiniflari, FetaClassExtensions, Utablo, PrjConst,LocOnFly,
 procedure TUretimListeDlg.Baslatildi;
 begin
     LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+    // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+    if FSayfali = nil then
+      FSayfali := TSayfaliListe.Baglan(Self, TabUretimListe, GridUretimView, nil,
+        procedure
+        begin
+          Liste_SP_Cagir(FSonMod);
+        end);
     Tablo.GridTurkcelestir;
 
     Tablo.GridAyarRestore('UretimFisiGridi', GridUretimView);
@@ -438,7 +448,7 @@ procedure TUretimListeDlg.Liste_SP_Cagir(AMod: SmallInt);
 //   Son/Sik'te KULLANICI_ARAMA gecmisi + SP kendi siralamasi kullanilir (enjeksiyon guvenli).
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok).
 var
-  locateID: Integer;
+  locateID, TopN: Integer;
   j: TJSONObject;
 begin
   if (TabUretimListe.Active) and (TabUretimListe.RecordCount > 0) then
@@ -446,8 +456,19 @@ begin
   else
     locateID := 0;
 
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre) sayfalanir;
+  // Son/Sik aranan (5/3) dogasi geregi kucuk -> eski TOP davranisi (0 = TOP yok).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;
+  end;
+
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
     j.AddPair('Mod', TJSONNumber.Create(AMod));
 
     // Tarih filtreleri: sadece EditValue>0 iken (eski davranis); yoksa JSON'a eklenmez -> SP filtrelemez
@@ -471,6 +492,7 @@ begin
     // Generic helper: @Baslik='' (Uretim ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(TabUretimListe, 'sp_Prog_Uretim_Liste_Json2', '', j, locateID);
     j := nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

@@ -191,6 +191,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TKasalarAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod 1 (Tum) ve 4 (filtre) sayfalanir.
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Kasalar_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
@@ -343,6 +346,13 @@ procedure TKasalarListeFrame.Baslatildi;
 var ra : string;
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, KASALAR, GridTview, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
   GridTviewSUBEID.Visible := SubeVarmi;
   PageControlSekme.ActivePageIndex:=0;
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,
@@ -667,7 +677,7 @@ procedure TKasalarListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Sube suzgeci (SubeVarmi): eski kod ComboSube.EditValue >= 0 -> yetki listesi (Tum Subeler=0),
 //   < 0 -> tek sube (belirli sube REHBER.ID<0 negatif ID). Parite icin ayni dallanma korunur.
 var
-  LocateID, SubeDeg: Integer;
+  LocateID, SubeDeg, TopN: Integer;
   j: TJSONObject;
 begin
   if (KASALAR.Active) and (KASALAR.RecordCount > 0) then
@@ -675,8 +685,19 @@ begin
   else
     LocateID := -1;
 
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik aranan (5/3) dogasi geregi kucuk -> eski TOP davranisi (0 = TOP yok).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;
+  end;
+
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
     j.AddPair('Mod', TJSONNumber.Create(AMod));
     if SubeVarmi then begin
       if FArama.ComboSube.EditValue >= 0 then
@@ -695,6 +716,7 @@ begin
     // @Baslik='' (Kasalar'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
     Tablo.ListeSPJson(KASALAR, 'sp_Prog_Kasalar_Liste_Json2', '', j, LocateID);
     j := nil;   // sahiplik helper'a gecti
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;

@@ -31,8 +31,6 @@ type
     ComboGrup: TcxImageComboBox;
     ComboKategori: TcxImageComboBox;
     ComboSinif: TcxImageComboBox;
-    SpinKayitSayisi: TcxSpinEdit;
-    cxLabel6: TcxLabel;
     PanelCRM: TPanel;
     cxLabel28: TcxLabel;
     Arailler: TcxImageComboBox;
@@ -54,7 +52,6 @@ type
       AButtonIndex: Integer);
     procedure comboTemsilciKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 
   private
     { Private declarations }
@@ -94,7 +91,6 @@ begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   ComboCariAnaliz.Visible := Tablo.YetkiVarMi(220190,1,False);
   LabelAnaliz.Visible := ComboCariAnaliz.Visible;
-  SpinKayitSayisi.text := GenRegIni.RegReadString('CariOpsiyon', 'ListeKayitSayisi', '200', 'C');
   CheckPotansiyel.checked := GenRegIni.RegReadString('CariOpsiyon', 'CariPotansiyelAra', '0', 'C')='-1';
 
   comboTemsilci.Enabled := ModulYetki_TekSubeTum.Cari <> 1;
@@ -177,11 +173,6 @@ end;
 procedure TRehberAramaFrame.SetFrameBilgi(AValue: TAramaFrameBilgi);
 begin
   FFrameBilgi := AValue;
-end;
-
-procedure TRehberAramaFrame.SpinKayitSayisiKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-   GenRegIni.RegWriteString('CariOpsiyon', 'ListeKayitSayisi', SpinKayitSayisi.text, 'C');
 end;
 
 procedure TRehberAramaFrame.TusAsagi(Sender: TObject; var Key: Word;

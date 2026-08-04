@@ -178,6 +178,9 @@ type
     FFrameBilgi : TIcerikFrameBilgi;
     FKapatEylemi: TNotifyEvent;
     FPosHucreMenuKuruldu: Boolean;   // PosListeMenu cxGridPopupMenu'ya hucre menusu olarak kaydedildi mi
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod 1 (Tum) ve 4 (filtre) sayfalanir.
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_POS_Liste_Json2)
     procedure PosOranLogSnapshotAl;
     procedure PosOranLogDiffKaydet;
@@ -249,7 +252,7 @@ procedure TPOSListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Sonuc kumesi eski YenileClick sorgusuyla BIREBIR; Son/Sik icin KULLANICI_ARAMA (MODUL_POS).
 //   Sube-yetki suzgeci yalniz SubeVarmi ise gonderilir (eski: and P.SUBEID in(...)).
 var
-  LocateID: Integer;
+  LocateID, TopN: Integer;
   j: TJSONObject;
 begin
   if (POSLAR.Active) and (POSLAR.RecordCount > 0) then
@@ -257,8 +260,19 @@ begin
   else
     LocateID := -1;
 
+  // SAYFALI (TSayfaliListe): Mod=1 (Tum) ve Mod=4 (filtre/normal) sayfalanir;
+  // Son/Sik aranan (5/3) dogasi geregi kucuk -> eski TOP davranisi (0 = TOP yok).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;
+  end;
+
   j := TJSONObject.Create;
   try
+    j.AddPair('TopN', TJSONNumber.Create(TopN));
     j.AddPair('Mod', TJSONNumber.Create(AMod));
     if SubeVarmi then
       j.AddPair('SubeYetkiList', Tablo.YetkiliSubeleriGetir(25, YetkiTur_Gorme));  // app-uretimi tam-sayi listesi (GUVENILIR)
@@ -268,6 +282,7 @@ begin
     // @Baslik='' (POS'ta ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
     Tablo.ListeSPJson(POSLAR, 'sp_Prog_POS_Liste_Json2', '', j, LocateID);
     j := nil;   // sahiplik helper'a gecti
+    FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
@@ -293,6 +308,14 @@ begin
    if not Assigned(FDetSnap) then
       FDetSnap := TObjectDictionary<Integer, TStringList>.Create([doOwnsValues]);
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   // YenileClick'ten ONCE baglanmali (YenileClick -> Liste_SP_Cagir -> FSayfali).
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, POSLAR, GridTview, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
    GridTviewSUBEID.Visible := SubeVarmi;
    //GridTview.RestoreFromRegistry('SOFTWARE\GENTEGRE2\Gridler\PosTanimlariListeGridi',true,false,[gsoUseFilter],'PosTanimlariListeGridi');
    Tablo.GridAyarRestore('PosTanimlariListeGridi',GridTview );

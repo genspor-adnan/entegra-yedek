@@ -13,6 +13,7 @@ object UretimListeDlg: TUretimListeDlg
     Left = 3
     Top = 3
     Width = 1021
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -39,7 +40,6 @@ object UretimListeDlg: TUretimListeDlg
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -84,14 +84,16 @@ object UretimListeDlg: TUretimListeDlg
   end
   object GridUretim: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1027
-    Height = 258
+    Height = 261
     Align = alClient
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 258
     object GridUretimView: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -395,6 +397,10 @@ object UretimListeDlg: TUretimListeDlg
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridUretimDetay: TcxGrid
         Left = 0
         Top = 0

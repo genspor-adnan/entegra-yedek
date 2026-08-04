@@ -454,30 +454,6 @@ object StokAramaFrame: TStokAramaFrame
       ImageName = 'PngImage6'
     end
   end
-  object SpinKayitSayisi: TcxSpinEdit
-    Left = 208
-    Top = 73
-    Properties.ImmediatePost = True
-    TabOrder = 2
-    Value = 200
-    OnKeyUp = SpinKayitSayisiKeyUp
-    Width = 57
-  end
-  object cxLabel6: TcxLabel
-    Left = 208
-    Top = 48
-    Caption = 'Kay'#305't#'
-    FocusControl = AraStokAdi
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -13
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.TextColor = clBtnText
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object EditKategori: TcxButtonEdit
     Left = 80
     Top = 130

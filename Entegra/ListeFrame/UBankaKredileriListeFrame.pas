@@ -337,6 +337,9 @@ type
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
     FArama      : TBankaKredileriAramaFrame;
+    // SAYFALI liste (merkezi TSayfaliListe, Utablo)
+    FSayfali: TSayfaliListe;
+    FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -478,10 +481,20 @@ procedure TBankaKredileriListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 //   Bos/opsiyonel filtre JSON'a EKLENMEZ (SP absent=NULL=filtre yok); @Trh her zaman gonderilir.
 var
   LAfterScroll: TDataSetNotifyEvent;
-  LocateID: Integer;
+  LocateID, TopN: Integer;
   KodVal: string;
   j: TJSONObject;
 begin
+  // SAYFALI (TSayfaliListe): Mod=4 (filtre/normal) ve Mod=1 (Tum) sayfalanir;
+  // Son/Sik Aranan (5/3) eski davranista (TOP yok, dogasi geregi kucuk liste).
+  FSonMod := AMod;
+  if AMod in [1, 4] then
+     TopN := FSayfali.TopN
+  else begin
+     FSayfali.TopN(False);   // tetikleri pasiflestir
+     TopN := 0;              // eski davranis: TOP yok
+  end;
+
   if EdKrediTrh.EditValue = Null then begin
     EdKrediTrh.EditValue := EndOfTheDay(Tablo.GENINI.BugunTrh);
     EdKrediTrh.PostEditValue;
@@ -503,6 +516,7 @@ begin
   try
     j := TJSONObject.Create;
     try
+      j.AddPair('TopN',  TJSONNumber.Create(TopN));                                 // sayfa siniri (0 = TOP yok)
       j.AddPair('Mod',   TJSONNumber.Create(AMod));
       j.AddPair('Pasif', TJSONNumber.Create(Ord(CheckAktifPasif.Checked)));         // orijinal PDrm=Ord(not Checked) esdegeri
       j.AddPair('Trh',   FormatDateTime('yyyy-mm-dd"T"hh:nn:ss.zzz', EndOfTheDay(EdKrediTrh.Date)));
@@ -513,6 +527,7 @@ begin
       // @Baslik='' (Banka'da ek alan yok); helper j'yi Free eder + TabloYenile (LocateID) yapar.
       Tablo.ListeSPJson(KREDILER, 'sp_Prog_Banka_Liste_Json2', '', j, LocateID);
       j := nil;   // sahiplik helper'a gecti
+      FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
     finally
       j.Free;     // AddPair sirasinda hata olursa temizle
     end;
@@ -610,6 +625,14 @@ begin
    TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,
    TGenelAnaSekmeFrame(FFrameBilgi.AnaFrameBilgi.Ornek).RaporSecClick);
    YaziciYaz.Caption := ra;
+   // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+   // Ilk listelemeden (YenileTusClick) ONCE baglanmali.
+   if FSayfali = nil then
+     FSayfali := TSayfaliListe.Baglan(Self, KREDILER, GridTakvimDBTableView1, nil,
+       procedure
+       begin
+         Liste_SP_Cagir(FSonMod);
+       end);
    YenileTusClick;
 
    if not TarayiciKullanimda then begin
