@@ -1,41 +1,37 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\UIKWizard.pas',0,1,2072,16,2078,0,0,,
-File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\UInfo.pas',0,1,281,1,296,0,0,,
-File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UFirsatListeDlg.pas',0,1,351,17,357,0,0,,
-File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\rtl\net\System.Net.HttpClient.Win.pas',0,1,1551,1,1563,0,0,,
-File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UOPSDLG.pas',0,1,1,1,1,0,0,,
-File_5=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBelgeDonusum.pas',0,1,168,49,181,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\ado\Data.Win.ADODB.pas',0,1,1678,1,1690,0,0,,
-File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas',0,1,1,20,7,0,0,,
-File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UServisListeDlg.pas',0,1,369,37,365,0,0,,
-File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
-File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UStokListeDlg.pas',0,1,535,7,543,0,0,,
-File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokTalepWizard.pas',0,1,500,2,511,0,0,,
-File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokWizard.pas',0,1,1526,15,1537,0,0,,
-File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.PGWrapper.pas',0,1,2105,1,2117,0,0,,
+File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\Utablo.pas',0,1,6556,1,6568,0,0,{{1238,0},{1668,11},{'String Sabitler'}}{{1243,0},{1249,11},{'YetkiTür Sabitleri'}}{{1250,0},{1283,11},{'RehberVarsayılan Sabitleri'}}{{1284,0},{1290,11},{'RehberAyarYeri Sabitleri'}}{{1291,0},{1516,11},{'Yer-YerId Sabitleri'}}{{1517,0},{1594,11},{'KasaTür Sabitleri'}}{{1595,0},{1601,11},{'Stok Sabitleri'}}{{1602,0},{1606,11},{'Dil Sabitleri'}}{{1607,0},{1617,11},{'Lokasyon Sabitleri'}}{{1618,0},{1629,11},{'Sektör Sabitleri'}}{{1630,0},{1661,11},{'Modül Sabitleri'}}{{1662,0},{1667,11},{'Diger Sabitleri'}},
+File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\UUretimWizard.pas',0,1,724,12,735,0,0,,
+File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\Data.DB.pas',0,1,3303,1,3315,0,0,,
+File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Comp.DataSet.pas',0,1,3012,1,3024,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Comp.Client.pas',0,1,11423,1,11435,0,0,,
+File_5=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,3921,1,3933,0,0,,
+File_6=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',0,1,1577,6,1579,0,0,,
+File_7=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
+File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\GirisSayfaFrame\UAnaGirisSayfasiFrame.pas',0,1,1813,1,1831,0,0,,
+File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UServisListeDlg.pas',0,1,1,21,8,0,0,,
+File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UFirsatListeDlg.pas',0,1,351,17,357,0,0,,
+File_11=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Stan.Error.pas',0,1,552,1,564,0,0,,
+File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas',0,1,207,4,212,0,0,,
+File_13=TSourceModule,'C:\Users\HP\Entegra\Entegra\UUretimEmriWizard.pas',0,1,750,5,765,0,0,,
+File_14=TSourceModule,'C:\Users\HP\Entegra\Entegra\UCariFonksiyonlar.pas',0,1,24,15,34,0,0,,
 
 [Modules]
-Module0=C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas
+Module0=C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas
 Module1=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
-Module2=C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas
-Count=3
+Count=2
 EditWindowCount=1
 
-[C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas]
+[C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas]
 ModuleType=TSourceModule
 
 [C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas]
 ModuleType=TSourceModule
 
-[C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas]
-ModuleType=TSourceModule
-
 [EditWindow0]
-ViewCount=3
-CurrentEditView=C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas
+ViewCount=2
+CurrentEditView=C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas
 View0=0
 View1=1
-View2=2
 PercentageSizes=1
 Create=1
 Visible=1
@@ -71,36 +67,25 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 
 [View0]
 CustomEditViewType=TEditView
-Module=C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas
-CursorX=6
+Module=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
+CursorX=1
 CursorY=1
 TopLine=1
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas
+EditViewName=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
 
 [View1]
 CustomEditViewType=TEditView
-Module=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
-CursorX=16
-CursorY=165
-TopLine=159
+Module=C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas
+CursorX=15
+CursorY=7
+TopLine=1
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
-
-[View2]
-CustomEditViewType=TEditView
-Module=C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas
-CursorX=10
-CursorY=566
-TopLine=553
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=C:\Users\HP\Entegra\Entegra\Ortak\ULog.pas
+EditViewName=C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas
 
 [Watches]
 Count=4
@@ -131,18 +116,20 @@ Dockable=1
 StayOnTop=0
 
 [Breakpoints]
-Count=11
-Breakpoint0='C:\Users\HP\Entegra\Entegra\Ortak\UFastRap.pas',543,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint1='C:\Users\HP\Entegra\Entegra\ListeFrame\UStokListeDlg.pas',949,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint2='C:\Users\HP\Entegra\Entegra\ListeFrame\UIKListeDlg.pas',996,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint3='C:\Users\HP\Entegra\Entegra\ListeFrame\UStokListeDlg.pas',917,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint4='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1149,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint5='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',2313,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint6='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',987,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint7='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1827,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint8='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1845,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint9='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1874,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint10='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1637,'',0,1,'',1,0,0,'',1,'','','',0,''
+Count=13
+Breakpoint0='C:\Users\HP\Entegra\Entegra\ListeFrame\UStokListeDlg.pas',949,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint1='C:\Users\HP\Entegra\Entegra\ListeFrame\UIKListeDlg.pas',996,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint2='C:\Users\HP\Entegra\Entegra\ListeFrame\UStokListeDlg.pas',917,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint3='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1149,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint4='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',2313,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint5='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',987,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint6='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1827,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint7='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1845,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint8='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1874,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint9='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1637,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint10='C:\Users\HP\Entegra\Entegra\URehberWizard.pas',2522,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint11='C:\Users\HP\Entegra\Entegra\URehberWizard.pas',2447,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint12='C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',1601,'',0,1,'',1,0,0,'',1,'','','',0,''
 
 [EmbarcaderoWin32Debugger_AddressBreakpoints]
 Count=0
