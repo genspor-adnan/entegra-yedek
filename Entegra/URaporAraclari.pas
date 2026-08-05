@@ -238,7 +238,9 @@ begin
       AsString['RAPORADI'] := ARaporAdi;
       AsString['GRUBU'] := AEkranAdi;
       AsString['MODUL'] := '-';
-      AsInteger['VARSAYILAN'] := 0;                  // smallint bit (excluded-8) -> AsBoolean PG'de patlar
+      // DOKUMLER.VARSAYILAN: MSSQL'de bit -> FireDAC ftBoolean (AsInteger patlar),
+      // PG'de smallint -> ftSmallint (AsBoolean patlar). Tipe gore yazan seam kullan.
+      AlanBoolYaz(FieldByName('VARSAYILAN'), False);
       AsInteger['SAYAC'] := 0;
       AsInteger['EKLEYEN'] := StrToIntDef(Kullanan, 0);   // DOKUMLER.EKLEYEN integer (Kullanan string)
     Post;

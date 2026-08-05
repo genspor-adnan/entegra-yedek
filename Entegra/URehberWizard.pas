@@ -310,6 +310,7 @@ type
     procedure TabRehberIletisimNewRecord(DataSet: TDataSet);
     procedure DetayBeforeEdit(DataSet: TDataSet);   // cari detay: log oncesi snapshot
     procedure DetayAfterPost(DataSet: TDataSet);     // cari detay: edit/insert log (ust=cari)
+    function  UstKartID: Integer;                    // cari ID (TabRehber kapaliysa RehberID)
     procedure DetayAfterOpenPG(DataSet: TDataSet);   // PG: detay grid live-edit ayari (Open sonrasi)
     procedure GridAdresAdViewSelectionChanged(Sender: TcxCustomGridTableView);
     procedure YeniAdresTusClick(Sender: TObject);
@@ -2103,7 +2104,20 @@ begin
   // Boylece kart + tum detaylar ayni ISLEMTIPI'de gruplanir -> UInfo'da TEK satir
   // (mevcut cariye iletisim/ticari eklenince ayri 'Ekleme' satiri cikmaz).
   if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
-  LogDetaySatirPost(DataSet, LTabNo, TabNo_REHBER, TabRehber.FieldByName('ID').AsInteger);
+  // Ust kart ID'si: TabRehber KAPALI olabilir (or. cari listesi > İlgili sekmesinden ilgili
+  //   ekleme akisi kart sorgusunu acmiyor) -> FieldByName o durumda
+  //   "TabRehber: Field 'ID' not found" atiyordu. Acikken dataset'ten, degilse RehberID'den.
+  LogDetaySatirPost(DataSet, LTabNo, TabNo_REHBER, UstKartID);
+end;
+
+// Cari kartin ID'si; TabRehber kapali/bos ise wizard'in RehberID degiskenine duser.
+function TRehberWizardDlg.UstKartID: Integer;
+begin
+  if TabRehber.Active and (TabRehber.RecordCount > 0) and
+     (TabRehber.FindField('ID') <> nil) then
+    Result := TabRehber.FieldByName('ID').AsInteger
+  else
+    Result := RehberID;
 end;
 
 procedure TRehberWizardDlg.TabRehberAfterScroll(DataSet: TDataSet);

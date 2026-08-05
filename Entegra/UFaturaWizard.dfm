@@ -3609,8 +3609,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   end
   object PopupMenuYaz: TPopupMenu
     OnPopup = PopupMenuYazPopup
-    Left = 421
-    Top = 42
+    Left = 357
+    Top = 50
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0
@@ -4232,8 +4232,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 246
-    Top = 22
+    Left = 174
+    Top = 14
   end
   object TabPlan: TFDQuery
     AfterOpen = TabPlanAfterOpen
@@ -4843,8 +4843,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         'BER ER1 ON E1.ID = ER1.EKIPMANID WHERE ER1.ID = F.EKIPMANID),'
       
         'SERINO = (SELECT ER2.SERINO FROM EKIPMANREHBER ER2 WHERE ER2.ID ' +
-        '= F.EKIPMANID)'
+        '= F.EKIPMANID),'
+      'FU.*'
       'FROM FATURA F'
+      'LEFT OUTER JOIN FATURA_USER FU ON FU.ID = F.ID'
       'WHERE F.FATBASID = :Par'
       'ORDER BY F.ID')
     Left = 365
@@ -4854,6 +4856,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Name = 'Par'
         DataType = ftInteger
         Precision = 10
+        ParamType = ptInput
         Size = 4
         Value = 1625003
       end>
@@ -4892,9 +4895,13 @@ object FaturaWizardDlg: TFaturaWizardDlg
       
         'KAYNAKBELGENO=dbo.fn_KaynakBelgeNolariStrOlarakGetir(F.TUR,F.ID)' +
         ','
-      'SATICIADI=(select R.FIRMA from REHBER R where R.ID=F.SATICIKODU)'
+      
+        'SATICIADI=(select R.FIRMA from REHBER R where R.ID=F.SATICIKODU)' +
+        ','
+      'FU.*'
       'FROM FATBASLIK F Left outer join DOVIZCINSLERI D on  '
       'F.DIL=D.DIL and F.DOVIZ_CINSI=D.DOVIZ'
+      'LEFT OUTER JOIN FATBASLIK_USER FU ON FU.ID = F.ID'
       'WHERE F.ID = :Par')
     Left = 288
     Top = 162

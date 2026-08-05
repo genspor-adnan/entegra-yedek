@@ -1145,6 +1145,9 @@ var
   LKod: Integer;
 begin
   Result := True;
+  if EFaturaKullanimda <= 0 then
+    Exit;
+
   if not (TamIskontoSatiriVar or KDVMuafiyetSatiriVar) then
     Exit;
 
@@ -1729,7 +1732,7 @@ begin
    end;
 
    // KDV İstisna fatura (TIPI=24) ise istisna nedeni (PLANID) seçilmeden kapatılamaz.
-   if (not IptalSecildi) and TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 24)
+   if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 24)
       and (TabFatbaslik.FieldByName('PLANID').IsNull or (TabFatbaslik.FieldByName('PLANID').AsInteger = 0)) then begin
       Application.MessageBox(PChar('KDV İstisna faturası için istisna nedeni seçmelisiniz.'),
         PChar(Uyari), MB_OK or MB_ICONWARNING);
@@ -1737,7 +1740,7 @@ begin
       Exit;
    end;
 
-   if (not IptalSecildi) and TabFatbaslik.Active and (TamIskontoSatiriVar or KDVMuafiyetSatiriVar)
+   if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active and (TamIskontoSatiriVar or KDVMuafiyetSatiriVar)
       and (TabFatbaslik.FieldByName('PLANID').IsNull or (TabFatbaslik.FieldByName('PLANID').AsInteger = 0)) then begin
       Application.MessageBox(PChar('%0 KDV / muafiyetli satır için istisna nedeni seçmelisiniz.'),
         PChar(Uyari), MB_OK or MB_ICONWARNING);

@@ -22,6 +22,15 @@ type
     BelgeTuru: Byte;
     Alias: string;
     Baslik: string;   // Izibiz 'title' (unvan) - coklu alias seciminde gosterim icin
+    // GIB alias aktivasyon/kayit zamani (Izibiz JSON'inda registerTime/creationTime...).
+    // Coklu alias seciminde hangisinin GUNCEL oldugunu ayirt etmek icin gosterilir;
+    // servis alani vermezse 0 kalir ve ekranda tarih yazilmaz.
+    AktivasyonTarihi: TDateTime;
+    // Kayittaki TUM tarih gorunumlu alanlar (ad + deger). Dogru alani secmek icin gerekli:
+    // yanitta mukellef-seviyesi (tum aliaslarda AYNI) tarihler de var; alias'a ozel olan,
+    // aliaslar arasinda DEGISEN alandir -> AktivasyonlariBelirle bunu secer.
+    TarihAdlari: TArray<string>;
+    TarihDegerleri: TArray<TDateTime>;
   end;
 
   TEBelgeAliasKayitlari = array of TEBelgeAliasKaydi;
@@ -118,6 +127,161 @@ begin
   LDeger := AObject.GetValue(AAlan);
   if Assigned(LDeger) and not (LDeger is TJSONNull) then
     Result := LDeger.Value;
+end;
+
+// Metni ISO 8601 / 'yyyy-mm-dd hh:nn:ss' tarihe cevirir; olmazsa 0 doner.
+function MetinTarih(const AMetin: string): TDateTime;
+var
+  S: string;
+begin
+  Result := 0;
+  S := Trim(AMetin);
+  if Length(S) < 10 then Exit;
+  if (S[5] <> '-') or (S[8] <> '-') then Exit;
+  S := StringReplace(S, 'T', ' ', [rfReplaceAll]);
+  if Pos('.', S) > 0 then S := Copy(S, 1, Pos('.', S) - 1);   // milisaniye eki
+  if Pos('+', S) > 0 then S := Copy(S, 1, Pos('+', S) - 1);   // saat dilimi eki
+  S := Trim(StringReplace(S, 'Z', '', [rfReplaceAll]));
+  if not TryEncodeDateTime(StrToIntDef(Copy(S, 1, 4), 0), StrToIntDef(Copy(S, 6, 2), 0),
+                           StrToIntDef(Copy(S, 9, 2), 0), StrToIntDef(Copy(S, 12, 2), 0),
+                           StrToIntDef(Copy(S, 15, 2), 0), StrToIntDef(Copy(S, 18, 2), 0),
+                           0, Result) then
+    Result := 0;
+end;
+
+// Kayittaki TUM tarih gorunumlu alanlari (ad + deger) toplar. Hangisinin "alias aktivasyonu"
+// oldugu yanitin alan adlarina gore degistigi icin secim AktivasyonlariBelirle'ye birakilir.
+procedure JSONTarihleriTopla(AObject: TJSONObject; var AAdlar: TArray<string>;
+  var ADegerler: TArray<TDateTime>);
+var
+  LPair, LAlt: TJSONPair;
+  LTarih: TDateTime;
+begin
+  SetLength(AAdlar, 0);
+  SetLength(ADegerler, 0);
+  if not Assigned(AObject) then Exit;
+  for LPair in AObject do
+  begin
+    if (not Assigned(LPair.JsonValue)) or (LPair.JsonValue is TJSONNull) then Continue;
+    // Bir seviye ic ice nesne (or. {"alias":{...,"registerTime":"..."}}) de taransin;
+    // ad 'ust.alt' olarak tutulur (yalniz karsilastirma icin kullanilir).
+    if LPair.JsonValue is TJSONObject then
+    begin
+      for LAlt in TJSONObject(LPair.JsonValue) do
+      begin
+        if (not Assigned(LAlt.JsonValue)) or (LAlt.JsonValue is TJSONNull) then Continue;
+        LTarih := MetinTarih(LAlt.JsonValue.Value);
+        if LTarih > 0 then
+        begin
+          AAdlar := AAdlar + [LPair.JsonString.Value + '.' + LAlt.JsonString.Value];
+          ADegerler := ADegerler + [LTarih];
+        end;
+      end;
+      Continue;
+    end;
+    LTarih := MetinTarih(LPair.JsonValue.Value);
+    if LTarih > 0 then
+    begin
+      AAdlar := AAdlar + [LPair.JsonString.Value];
+      ADegerler := ADegerler + [LTarih];
+    end;
+  end;
+end;
+
+// Coklu alias listesinde gosterilecek AKTIVASYON tarihini secer.
+// SORUN: Izibiz yaniti hem alias'a OZEL hem de mukellef-seviyesi (tum aliaslarda AYNI)
+//   tarihler iceriyor; sabit alan adi denemek yanlis alani secip her aliasta ayni tarihi
+//   gosteriyordu (or. 03.01.2020).
+// COZUM: birden fazla alias varsa, aliaslar arasinda DEGISEN (>=2 farkli degerli) alanlar
+//   arasindan bilinen-ad onceligine gore sec; hicbiri degismiyorsa yine bilinen-ad
+//   onceligine dus (tek alias durumunda da bu gecerli).
+procedure AktivasyonlariBelirle(var AKayitlar: TEBelgeAliasKayitlari);
+const
+  COncelik: array[0..7] of string = ('aliasCreationTime', 'registerTime', 'registrationTime',
+    'activationTime', 'creationTime', 'createDate', 'createTime', 'firstCreationTime');
+var
+  i, j, k: Integer;
+  LAdaylar: TArray<string>;
+  LDegisen: TArray<string>;
+  LSecilen: string;
+  LIlk: TDateTime;
+  LFarkli: Boolean;
+
+  function AdVar(const AAd: string; const ADizi: TArray<string>): Boolean;
+  var n: Integer;
+  begin
+    Result := False;
+    for n := 0 to High(ADizi) do
+      if SameText(ADizi[n], AAd) then Exit(True);
+  end;
+
+  function KayittaDeger(const AKayit: TEBelgeAliasKaydi; const AAd: string;
+    out ADeger: TDateTime): Boolean;
+  var n: Integer;
+  begin
+    Result := False;
+    ADeger := 0;
+    for n := 0 to High(AKayit.TarihAdlari) do
+      if SameText(AKayit.TarihAdlari[n], AAd) then
+      begin
+        ADeger := AKayit.TarihDegerleri[n];
+        Exit(True);
+      end;
+  end;
+
+  // Alan TUM kayitlarda var mi?
+  function HerKayittaVar(const AAd: string): Boolean;
+  var n: Integer; d: TDateTime;
+  begin
+    Result := True;
+    for n := 0 to High(AKayitlar) do
+      if not KayittaDeger(AKayitlar[n], AAd, d) then Exit(False);
+  end;
+
+var
+  LDeger: TDateTime;
+begin
+  if Length(AKayitlar) = 0 then Exit;
+
+  // 1) Tum kayitlarda ORTAK olan tarih alanlarinin adlarini topla
+  SetLength(LAdaylar, 0);
+  for i := 0 to High(AKayitlar[0].TarihAdlari) do
+    if HerKayittaVar(AKayitlar[0].TarihAdlari[i]) then
+      LAdaylar := LAdaylar + [AKayitlar[0].TarihAdlari[i]];
+
+  // 2) Birden fazla alias varsa: degerleri DEGISEN alanlari ayikla (alias'a ozel olanlar)
+  SetLength(LDegisen, 0);
+  if Length(AKayitlar) > 1 then
+    for i := 0 to High(LAdaylar) do
+    begin
+      KayittaDeger(AKayitlar[0], LAdaylar[i], LIlk);
+      LFarkli := False;
+      for j := 1 to High(AKayitlar) do
+      begin
+        KayittaDeger(AKayitlar[j], LAdaylar[i], LDeger);
+        if LDeger <> LIlk then begin LFarkli := True; Break; end;
+      end;
+      if LFarkli then
+        LDegisen := LDegisen + [LAdaylar[i]];
+    end;
+
+  // 3) Secim: once DEGISEN alanlar icinde bilinen-ad onceligi, sonra ilk degisen alan,
+  //    hicbiri yoksa tum adaylar icinde bilinen-ad onceligi.
+  LSecilen := '';
+  for k := Low(COncelik) to High(COncelik) do
+    if AdVar(COncelik[k], LDegisen) then begin LSecilen := COncelik[k]; Break; end;
+  if (LSecilen = '') and (Length(LDegisen) > 0) then
+    LSecilen := LDegisen[0];
+  if LSecilen = '' then
+    for k := Low(COncelik) to High(COncelik) do
+      if AdVar(COncelik[k], LAdaylar) then begin LSecilen := COncelik[k]; Break; end;
+
+  // 4) Uygula (secilemezse tarih gosterilmez)
+  for i := 0 to High(AKayitlar) do
+    if (LSecilen <> '') and KayittaDeger(AKayitlar[i], LSecilen, LDeger) then
+      AKayitlar[i].AktivasyonTarihi := LDeger
+    else
+      AKayitlar[i].AktivasyonTarihi := 0;
 end;
 
 function IzibizHataMesaji(ARoot: TJSONObject): string;
@@ -266,6 +430,8 @@ begin
 
       Result[LKayitSayisi].Alias := LAlias;
       Result[LKayitSayisi].Baslik := Trim(JSONMetni(LKayit, 'title'));
+      JSONTarihleriTopla(LKayit, Result[LKayitSayisi].TarihAdlari,
+                                 Result[LKayitSayisi].TarihDegerleri);
       LBelgeTuru := UpperCase(JSONMetni(LKayit, 'documentType'));
       if (LBelgeTuru = 'DESPATCHADVICE') or
         (Pos('IRSALIYE', UpperCase(LAlias)) > 0) then
@@ -275,6 +441,8 @@ begin
       Inc(LKayitSayisi);
     end;
     SetLength(Result, LKayitSayisi);
+    // Aktivasyon tarihi ancak TUM kayitlar elde olunca secilebilir (degisen alan analizi).
+    AktivasyonlariBelirle(Result);
   finally
     LJSON.Free;
   end;
@@ -442,8 +610,9 @@ end;
 
 // Birden fazla alias bulundugunda kullanicidan secim ister (combo, index bazli).
 // Iptal -> False. Secilirse ASecilen'e alias yazilir.
+// ATarihler: her alias'in GIB aktivasyon/kayit zamani (0 = servis vermedi -> yazilmaz).
 function AliasSec(const AAliaslar, ABasliklar: array of string;
-  out ASecilen: string): Boolean;
+  const ATarihler: array of TDateTime; out ASecilen: string): Boolean;
 var
   LListe: TStringList;
   LSecim: Variant;
@@ -457,7 +626,11 @@ begin
     for i := 0 to High(AAliaslar) do begin
       LSatir := AAliaslar[i];
       if (i <= High(ABasliklar)) and (Trim(ABasliklar[i]) <> '') then
-        LSatir := ABasliklar[i] + '  -  ' + AAliaslar[i];
+        LSatir := AAliaslar[i] + '  -  ' + ABasliklar[i];
+      // Ayni vergi numarasinda birden cok alias oldugunda karar veren bilgi genelde
+      // aktivasyon tarihidir (en yenisi genelde gecerli olan) -> satirin BASINDA.
+      if (i <= High(ATarihler)) and (ATarihler[i] > 0) then
+        LSatir := '(' + FormatDateTime('dd.mm.yyyy', ATarihler[i]) + ')  ' + LSatir;
       LListe.Add(LSatir);
     end;
     // Ilk ogeyi on-secili yap (init TEXT ile eslesir); donus ItemIndex olur.
@@ -598,11 +771,23 @@ begin
     // Belge turune uyan TUM aliaslari topla (14->EIrsaliye, 15->EFatura).
     var LAdaylar: TArray<string> := [];
     var LBasliklar: TArray<string> := [];
+    var LTarihler: TArray<TDateTime> := [];
     for i := 0 to Length(LKayitlar) - 1 do
       if LKayitlar[i].BelgeTuru = LIzibizFiltreTur then begin
         LAdaylar := LAdaylar + [LKayitlar[i].Alias];
         LBasliklar := LBasliklar + [LKayitlar[i].Baslik];
+        LTarihler := LTarihler + [LKayitlar[i].AktivasyonTarihi];
       end;
+
+    // Adaylari aktivasyon tarihine gore YENIDEN ESKIYE sirala: combo'da ilk sira
+    // on-secili geldigi icin en guncel alias varsayilan secim olur (tarihsizler sona).
+    for i := 0 to High(LAdaylar) - 1 do
+      for var k := 0 to High(LAdaylar) - 1 - i do
+        if LTarihler[k] < LTarihler[k + 1] then begin
+          var LT: TDateTime := LTarihler[k]; LTarihler[k] := LTarihler[k + 1]; LTarihler[k + 1] := LT;
+          var LS: string := LAdaylar[k];    LAdaylar[k]  := LAdaylar[k + 1];  LAdaylar[k + 1]  := LS;
+          LS := LBasliklar[k];              LBasliklar[k] := LBasliklar[k + 1]; LBasliklar[k + 1] := LS;
+        end;
 
     if Length(LAdaylar) = 1 then
       LIzibizAlias := LAdaylar[0]
@@ -635,7 +820,7 @@ begin
 
       if LHazirAlias <> '' then
         LIzibizAlias := LHazirAlias        // REHBERALIAS'taki aktif alias -> sormadan
-      else if not AliasSec(LAdaylar, LBasliklar, LIzibizAlias) then begin
+      else if not AliasSec(LAdaylar, LBasliklar, LTarihler, LIzibizAlias) then begin
         Result.Basari := False;
         Result.Mesaj := 'Alias secimi iptal edildi';
         Exit;

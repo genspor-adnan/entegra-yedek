@@ -761,8 +761,8 @@ begin
      AFastReport.EnabledDataSets.Add(frxOperasyonEkMaliyet);
      AFastReport.EnabledDataSets.Add(frxUretimOperasyonPersonel);
      AFastReport.EnabledDataSets.Add(frxFasonSatir);
-    AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
-    AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
+     AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
+     AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
   end;
   // Kullanici ek alanlari (_USER) rapora: emir karti + operasyon personel satirlari.
   Tablo.UserAlanYazdirmaEkle(AFastReport, 'URETIMEMRI', UretimID);

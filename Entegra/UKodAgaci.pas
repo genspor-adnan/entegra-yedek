@@ -75,7 +75,7 @@ var
 
 implementation
 Uses
-Utablo,LocOnFly;
+Utablo, LocOnFly;
 
 {$R *.dfm}
 
@@ -108,7 +108,8 @@ procedure TKodAgaciDlg.BtnKaydetClick(Sender: TObject);
 begin
   try
     cxDBTreeList1.Post;
-    //TabKodAgaci.Post;
+    if TabKodAgaci.State in [dsEdit, dsInsert] then
+      TabKodAgaci.Post;
     //cxDBTreeList1.GotoPrev;
     //cxDBTreeList1.GotoNext;
   finally
@@ -273,11 +274,17 @@ begin
 end;
 
 procedure TKodAgaciDlg.AramaYap;
+var
+  LAciklamaAlani: string;
 begin
   if SQLicerik='' then
      SQLicerik:=TabKodAgaci.SQL.Text;
+  LAciklamaAlani := 'ACIKLAMA';
+  if (TabKodAgaci.FindField('ACIKLAMA') = nil) and
+     (TabKodAgaci.FindField('AD') <> nil) then
+    LAciklamaAlani := 'AD';
   TabKodAgaci.SQL.Text:='SELECT * FROM ( '+SQLicerik+' ) AS XXX ';
-  TabKodAgaci.SQL.Text:=TabKodAgaci.SQL.Text+' WHERE KOD LIKE ''%'+EditKod.Text+'%'' AND ACIKLAMA LIKE ''%'+EditAciklama.Text+'%'' ORDER BY KOD';
+  TabKodAgaci.SQL.Text:=TabKodAgaci.SQL.Text+' WHERE KOD LIKE ''%'+EditKod.Text+'%'' AND '+LAciklamaAlani+' LIKE ''%'+EditAciklama.Text+'%'' ORDER BY KOD';
   TabKodAgaci.Close;
   TabKodAgaci.Open;
   cxDBTreeList1.FullExpand;

@@ -889,6 +889,9 @@ begin
   StokTalepWizard.Height:= Screen.Height- round(Screen.Height*0.1);
   EkleDetay :=  False;
   Tablo.AlanOlustur(TStokTalepWizard(Self), -1,DtsSIPARIS);
+  // Talep tarihi ileri olamaz -> takvimde ileri gun secilemesin (asil engel SIPARISBeforePost'ta).
+  //   Satirdaki TESLIMTARIHI bu kisittan etkilenmez (ileri olabilir).
+  EditFatTarih.Properties.MaxDate := DateOf(Tablo.GENINI.BugunTrh);
 
    if not TarayiciKullanimda then begin
       BtnDosyaGonder.Kind := cxbkStandard;
@@ -1382,6 +1385,18 @@ end;
 procedure TStokTalepWizard.SIPARISBeforePost(DataSet: TDataSet);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: stok talep post -> yakala
+
+  // TALEP TARIHI ileri olamaz (opsiyondan BAGIMSIZ; stok transferindeki kural ile ayni).
+  //   BoslukKontrolu'ndan ONCE: oradaki TarihKontrol genel opsiyona bagli (-10088); opsiyon
+  //   "sor" (1) ise once "devam edilsin mi?" diye sorup sonra burada reddetmesi kafa karistirir.
+  //   NOT: satirdaki TESLIMTARIHI ileri OLABILIR - kisitlanan yalniz BELGE (talep) tarihidir.
+  if DateOf(SIPARIS.FieldByName('SIPARISTARIH').AsDateTime) > DateOf(Tablo.GENINI.BugunTrh) then
+  begin
+    Application.MessageBox(PChar(STWIleriTarihOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+    if EditFatTarih.CanFocus then EditFatTarih.SetFocus;
+    Abort;
+  end;
+
   BoslukKontrolu;
   //Bu cariden bu sipari? no ile daha ?nce sipari? al?nm?? m? kontrol? yapal?m
   //Tablo.TablodanSorguAc(2,'select ID from SIPARIS where ')
@@ -1408,6 +1423,7 @@ begin
      Application.MessageBox(PChar(FTWDepolarAyniOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
      Abort;
    end;
+
 
   if KilitKontrolEt(1, SiparisTur,EditFatTarih.Date, 1) then
      abort;

@@ -3246,7 +3246,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
       
         'EKIPMAN=CAST((Select E.AD+'#39'('#39'+ER.SERINO+'#39')'#39' from EKIPMANREHBER E' +
         'R inner join EKIPMANLAR E on E.ID=ER.EKIPMANID  Where ER.ID=T.EK' +
-        'IPMANID) AS varchar(152))'
+        'IPMANID) AS nvarchar(152))'
       'from TEKLIFDETAY T '
       'Where '
       'TEKLIFID = :Par1'

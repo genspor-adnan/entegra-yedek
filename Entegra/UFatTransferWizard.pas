@@ -269,7 +269,7 @@ var
 
 implementation
 
-Uses  UVeriMotor, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
+Uses  System.DateUtils, UVeriMotor, UBinarySave, PrjConst, FetaKurulusSiniflari, UHizmetAra, UFastRap,
   UParaDegisiklik, URaporAraclari, UGenelAnaSekmeFrame, UAnaForm, LocOnFly,
   UGirisKutusuEx,UBelgeDonusum, UUTSKontrol;
 {$R *.dfm}
@@ -385,6 +385,9 @@ begin
   if TabFatBaslik.Connection = nil then TabFatBaslik.Connection := Tablo.FDCnn;
   if TabFatura.Connection = nil then TabFatura.Connection := Tablo.FDCnn;
   if FATURA.Connection = nil then FATURA.Connection := Tablo.FDCnn;
+  // Transfer ileri tarihe kaydedilemez -> takvimde de ileri gun SECILEMESIN (asil engel
+  //   TabFatBaslikBeforePost'ta; bu yalniz kullaniciyi bastan yonlendirir).
+  EditFatTarih.Properties.MaxDate := DateOf(Tablo.GENINI.BugunTrh);
   TabFatura.CachedUpdates := False;
   TabFatura.UpdateOptions.CountUpdatedRecords := False;
   // PG: varsayilan upWhereAll UPDATE WHERE'ine TUM alanlari koyar; PG'de bir alan degeri (bit->smallint,
@@ -605,6 +608,17 @@ begin
    if TabFatBaslik.FieldByName('GIRISDEPO').AsInteger= TabFatBaslik.FieldByName('CIKISDEPO').AsInteger then
    begin
      Application.MessageBox(PChar(FTWDepolarAyniOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+     Abort;
+   end;
+
+   // ILERI TARIH YASAK (opsiyondan BAGIMSIZ): transfer bir STOK HAREKETIDIR; ileri tarihli
+   //   transfer depo bakiyesini/maliyeti bozar. Genel "İleri tarihe kayıt" opsiyonu (-10088)
+   //   0/1 (kontrol yok / sor) olsa bile transferde kesin engel. Kontrol BeforePost'ta:
+   //   sayfa gecisindeki BoslukKontrolu atlanabiliyor (Finish'e dogrudan gidilince calismiyor).
+   if DateOf(TabFatBaslik.FieldByName('FATURATARIH').AsDateTime) > DateOf(Tablo.GENINI.BugunTrh) then
+   begin
+     Application.MessageBox(PChar(FTWIleriTarihOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+     if EditFatTarih.CanFocus then EditFatTarih.SetFocus;
      Abort;
    end;
 
@@ -968,6 +982,13 @@ begin
   BoslukKontrolu := True;
   if not BoslukKontrol(EditFatTarih.Text, KontrolFaturaTarihi) then Abort;
   if not BoslukKontrol(ComboTeslimlAlan.Text, BGTeslim_alan) then Abort;
+  // Ileri tarih KESIN yasak (asil engel TabFatBaslikBeforePost'ta). TarihKontrol'DEN ONCE:
+  //   o genel opsiyona bagli (-10088) ve "sor" modunda once soruyor, sonra post reddediyordu.
+  if DateOf(EditFatTarih.Date) > DateOf(Tablo.GENINI.BugunTrh) then
+  begin
+    Application.MessageBox(PChar(FTWIleriTarihOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+    Abort;
+  end;
   if not TarihKontrol(EditFatTarih.Date, 'Transfer' + KontrolTarihi) then
      Abort;
 //  if not BoslukKontrol(EditFatNo.Text, 'Belge No') then Abort;
