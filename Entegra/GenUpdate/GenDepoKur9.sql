@@ -1,10 +1,18 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoKur9 : LOGCOZUM baslangic eslemeleri (cozum kurallari)
 --   Cozum: SELECT <ADKOLON> FROM <KAYNAKTABLO> WHERE <IDKOLON>=<deger> [AND <FILTRE>]
 --   TABLOID NULL = tum log tablolari (genel alan).
 -- SIRA: GenDepoKur7'den (LOGCOZUM tablosu + synonym) SONRA. Ana baglantidan
 --   calisir; dbo.LOGCOZUM synonym -> GENDEPO.dbo.LOGCOZUM. Idempotent (MERGE).
 -- ============================================================
+-- ADLANDIRMA KURALI (05.08.2026): depo veritabani adi <ANA_DB>_GENDEPO olmak zorunda.
+--   Ayni sunucuda birden fazla Gentegre veritabani bulunabildigi icin sabit 'GENDEPO'
+--   adi ikinci kurulumda MEVCUT depoyu bulup ona baglaniyordu (yanlis depoya log/e-belge).
+--   Bu yuzden depo adi artik ANA DB adindan turetilir; script ana DB'den calistirilmalidir.
+DECLARE @Depo SYSNAME = DB_NAME() + N'_GENDEPO';
+DECLARE @D    NVARCHAR(300) = QUOTENAME(@Depo);      -- [SDI_GENDEPO]
+DECLARE @Dq   NVARCHAR(300) = QUOTENAME(@Depo, '''');  -- 'SDI_GENDEPO' (literal)
+
 SET NOCOUNT ON;
 
 MERGE dbo.LOGCOZUM AS h

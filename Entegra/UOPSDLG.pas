@@ -344,6 +344,8 @@ type
     ComboSifreSuresi: TcxImageComboBox;
     cxLabelListeUzunluk: TcxLabel;
     SpinListeUzunluk: TcxSpinEdit;
+    cxLabelTamListeSinir: TcxLabel;
+    SpinTamListeSinir: TcxSpinEdit;
     cxLabel19: TcxLabel;
     GroupBox7: TGroupBox;
     EditDepoDBAdi: TcxButtonEdit;
@@ -645,10 +647,14 @@ begin
   //   WITH MOVE -> dosya adi cakismasi olmaz), sonra LOGCOZUM HARIC tum tablolar bosaltilir.
   //   (DBCC CLONEDATABASE bu ortamda klon dosyalarini kaynak adiyla acmaya calisip
   //    RECOVERY_PENDING birakiyordu; o yuzden BACKUP/RESTORE'a gecildi.)
-  LHedef := Trim(EditDepoDBAdi.Text);
+  // ADLANDIRMA KURALI (05.08.2026): hedef depo adi ELLE girilmez, ana DB adindan turetilir
+  //   (<ANA_DB>_GENDEPO). Aksi halde klon baska bir veritabaninin deposu adiyla olusup
+  //   iki kurulum ayni depoyu paylasabiliyordu.
+  LHedef := ULog.BeklenenDepoAdi;
+  if LHedef = '' then LHedef := Trim(EditDepoDBAdi.Text);
   if not DepoAdiGecerliMi(LHedef) then
   begin
-    MessageDlg('Once bu alana gecerli bir HEDEF depo adi yazin '+
+    MessageDlg('Hedef depo adi belirlenemedi. Kural: <VERITABANI>_GENDEPO '+
       '(yalniz harf, rakam, _).', mtWarning, [mbOK], 0);
     Exit;
   end;
@@ -678,7 +684,10 @@ begin
     LQ.Close;
 
     // Kaynak depo adini EDIT ile al.
-    LKaynak := 'GENDEPO';
+    // Kaynak: kopyalanacak MEVCUT depo (genelde eski ad). Varsayilan olarak opsiyonda
+    //   yazili olani onerelim; yoksa eski genel ad.
+    LKaynak := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
+    if LKaynak = '' then LKaynak := 'GENDEPO';
     if not MesajStrAl('Depo Klonla', 'Kaynak Depo Ad'#$131'n'#$131' Girin:',
          'E', nil, LKaynak, '', 'E', nil, LKaynak) then Exit;
     LKaynak := Trim(LKaynak);
@@ -1215,8 +1224,17 @@ begin
    Degistirme.Checked :=Tablo.GENINI.ReadBoolean(Ops_GenelOpsiyon_LogDegistirme,False); //  GenelOpsiyon','LogDegistirme
 
    DokumanDizin.Text :=  Tablo.GENINI.ReadString(Ops_Dokuman_Dizin,'c:\GenDokuman\'); //  Doküman', 'Dizin'
-   // e-Belge/arsiv 2. DB adi (synonym hedefi). Bos ise varsayilan GENDEPO.
-   EditDepoDBAdi.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO');
+   // e-Belge/arsiv 2. DB adi. ADLANDIRMA KURALI (05.08.2026): ad ANA DB adindan TURETILIR
+   //   (<ANA_DB>_GENDEPO) ve elle degistirilemez -> ayni sunucudaki baska bir Gentegre
+   //   veritabaninin deposu yanlislikla secilemesin. Alan bilgi amacli gosterilir.
+   EditDepoDBAdi.Text := ULog.BeklenenDepoAdi;
+   if EditDepoDBAdi.Text = '' then
+     EditDepoDBAdi.Text := Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO');
+   EditDepoDBAdi.Properties.ReadOnly := True;
+   EditDepoDBAdi.Properties.Buttons[0].Visible := False;   // "degistir" dugmesi kapali
+   EditDepoDBAdi.Hint := 'Depo veritabani adi kural geregi <VERITABANI>_GENDEPO olarak ' +
+                         'otomatik belirlenir; elle degistirilemez.';
+   EditDepoDBAdi.ShowHint := True;
 
 
    EditVarsayDoviz.Text := Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayDoviz,'TL'); //   GenelOpsiyon', 'vars döviz'
@@ -1233,6 +1251,7 @@ begin
    EditGorunmesin.Value := Tablo.GENINI.ReadInteger(Ops_UyariOpsiyon_Gorunmesin, 90);
    ComboSifreSuresi.EditValue := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_SifreSuresi, 6);
    SpinListeUzunluk.Value := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_GridListeUzunlugu, 100);  // sayfali liste SAYFA boyu
+   SpinTamListeSinir.Value := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_TamListeSiniri, 5000);  // "Tümünü Yükle" üst sınırı (SQL Express koruması)
 
    checkAktiviteEpostaBildirim.Checked:= Tablo.GENINI.ReadBoolean(Ops_AktiviteOpsiyon_AktiviteEpostaBildirimAktif,False); //  AktiviteOpsiyon','AktiviteEpostaBildirimAktif
    checkAktiviteSMSBildirim.Checked:= Tablo.GENINI.ReadBoolean(Ops_AktiviteOpsiyon_AktiviteSMSBildirimAktif,False); //  AktiviteOpsiyon','AktiviteSMSBildirimAktif
@@ -1373,6 +1392,8 @@ begin
    Tablo.GENINI.WriteInteger(Ops_GenelOpsiyon_SifreSuresi, ComboSifreSuresi.EditValue);
    Tablo.GENINI.WriteInteger(Ops_GenelOpsiyon_GridListeUzunlugu, SpinListeUzunluk.Value);  // sayfali liste SAYFA boyu
    GSayfaliListeBoyu := SpinListeUzunluk.Value;   // oturum cache'ini tazele (restart'siz gecerli)
+   Tablo.GENINI.WriteInteger(Ops_GenelOpsiyon_TamListeSiniri, SpinTamListeSinir.Value);  // liste ust siniri
+   GTamListeSiniri := SpinTamListeSinir.Value;    // oturum cache'ini tazele
 
    Tablo.GENINI.WriteString(Ops_GenelOpsiyon_VarsayilanDoviz,ComboDefaultDoviz.EditValue);  //   GenelOpsiyon   VarsayilanDoviz
    Tablo.GENINI.WriteString(Ops_ChatOpsiyon_Adres,EdChatAdress.Text);  //   GenelOpsiyon  chat adres
@@ -1386,11 +1407,13 @@ begin
    if (DokumanDizin.Text<>'')and(DokumanDizin.Text[Length(DokumanDizin.Text)]<>'\') then
        DokumanDizin.Text := DokumanDizin.Text + '\';
    Tablo.GENINI.WriteString(Ops_Dokuman_Dizin,DokumanDizin.Text);
-   // e-Belge/arsiv 2. DB adi. Bos birakilirsa GENDEPO yazilir.
-   if Trim(EditDepoDBAdi.Text) = '' then
-     EditDepoDBAdi.Text := 'GENDEPO';
-   // Opsiyonu yaz + (degistiyse) synonym'leri yeni depoya cevir + cache sifirla.
-   ULog.DepoyaGec(Trim(EditDepoDBAdi.Text));
+   // e-Belge/arsiv 2. DB adi: KURAL geregi ana DB adindan turetilir; ekrandaki deger
+   //   yalnizca gosterim. Yanlislikla baska bir depoya gecilmesin diye kaydederken de
+   //   turetilen ad kullanilir.
+   if ULog.BeklenenDepoAdi <> '' then
+     ULog.DepoyaGec(ULog.BeklenenDepoAdi)
+   else if Trim(EditDepoDBAdi.Text) <> '' then
+     ULog.DepoyaGec(Trim(EditDepoDBAdi.Text));
 
 
    if EditVarsayDoviz.Text='' then EditVarsayDoviz.Text:='TL';

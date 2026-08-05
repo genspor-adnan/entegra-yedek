@@ -1,13 +1,21 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoKur3 : EBELGEMESAJ tablosu (GENDEPO) + ana DB synonym
 --   e-Belge islem/mesaj gecmisi (gonderim sonucu, hata, durum). FK -> EBELGE.
 --   GenDepoKur2'den (EBELGE) SONRA. Idempotent.
 -- ============================================================
-SET NOCOUNT ON;
-IF DB_ID('GENDEPO') IS NULL EXEC('CREATE DATABASE [GENDEPO] COLLATE SQL_Latin1_General_CP1254_CI_AS');
+-- ADLANDIRMA KURALI (05.08.2026): depo veritabani adi <ANA_DB>_GENDEPO olmak zorunda.
+--   Ayni sunucuda birden fazla Gentegre veritabani bulunabildigi icin sabit 'GENDEPO'
+--   adi ikinci kurulumda MEVCUT depoyu bulup ona baglaniyordu (yanlis depoya log/e-belge).
+--   Bu yuzden depo adi artik ANA DB adindan turetilir; script ana DB'den calistirilmalidir.
+DECLARE @Depo SYSNAME = DB_NAME() + N'_GENDEPO';
+DECLARE @D    NVARCHAR(300) = QUOTENAME(@Depo);      -- [SDI_GENDEPO]
+DECLARE @Dq   NVARCHAR(300) = QUOTENAME(@Depo, '''');  -- 'SDI_GENDEPO' (literal)
 
-IF OBJECT_ID('GENDEPO.dbo.EBELGEMESAJ','U') IS NULL
-EXEC('USE GENDEPO;
+SET NOCOUNT ON;
+IF DB_ID(@Depo) IS NULL EXEC('CREATE DATABASE ' + @D + ' COLLATE SQL_Latin1_General_CP1254_CI_AS');
+
+IF OBJECT_ID(@Depo + '.dbo.EBELGEMESAJ','U') IS NULL
+EXEC('USE ' + @D + ';
 CREATE TABLE dbo.EBELGEMESAJ(
   ID                bigint IDENTITY(1,1) NOT NULL,
   EBELGEID          bigint NOT NULL,
@@ -34,7 +42,7 @@ IF OBJECT_ID(''dbo.EBELGE'',''U'') IS NOT NULL AND OBJECT_ID(''dbo.FK_EBELGEHARE
 ');
 
 IF OBJECT_ID('dbo.EBELGEMESAJ','U') IS NULL AND OBJECT_ID('dbo.EBELGEMESAJ','SN') IS NULL
-   CREATE SYNONYM dbo.EBELGEMESAJ FOR GENDEPO.dbo.EBELGEMESAJ;
+   EXEC('CREATE SYNONYM dbo.EBELGEMESAJ FOR ' + @D + '.dbo.EBELGEMESAJ');
 
-SELECT EBELGEMESAJ = CASE WHEN OBJECT_ID('GENDEPO.dbo.EBELGEMESAJ','U') IS NOT NULL THEN 'VAR' ELSE 'YOK!' END,
+SELECT EBELGEMESAJ = CASE WHEN OBJECT_ID(@Depo + '.dbo.EBELGEMESAJ','U') IS NOT NULL THEN 'VAR' ELSE 'YOK!' END,
        SYNONYM_DURUM = CASE WHEN OBJECT_ID('dbo.EBELGEMESAJ','SN') IS NOT NULL THEN 'VAR' ELSE 'YOK/TABLO' END;

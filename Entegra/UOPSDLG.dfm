@@ -528,6 +528,30 @@ object OpsiyonDlg: TOpsiyonDlg
         Value = 100
         Width = 69
       end
+      object cxLabelTamListeSinir: TcxLabel
+        Left = 583
+        Top = 454
+        Hint =
+          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 = s' +
+          #305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
+        ParentShowHint = False
+        ShowHint = True
+        Caption = #220'st s'#305'n'#305'r'
+      end
+      object SpinTamListeSinir: TcxSpinEdit
+        Left = 640
+        Top = 452
+        Hint =
+          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 = s' +
+          #305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
+        ParentShowHint = False
+        ShowHint = True
+        Properties.MaxValue = 1000000.000000000000000000
+        Properties.MinValue = 0.000000000000000000
+        TabOrder = 29
+        Value = 5000
+        Width = 55
+      end
       object GroupBox7: TGroupBox
         Left = 4
         Top = 27

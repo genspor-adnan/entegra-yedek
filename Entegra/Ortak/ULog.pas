@@ -212,14 +212,30 @@ function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string): TSnapshot
 // de her giriste dogru depoya gider. best-effort (giris akisini bozmaz).
 procedure DepoSynonymDenetle;
 
+// Depo synonym'lerinin DURUMU. Iki sonuc AYRI dondurulur cunku riskleri farklidir:
+//   AYanlis : synonym var ama BASKA bir veritabanini gosteriyor -> en tehlikeli durum;
+//             oneksiz yazan SP'ler (ISLEMLOG/EBELGE/DOSYA) sessizce YANLIS depoya yazar.
+//   AEksik  : synonym hic yok -> islem hata verir, veri karismaz (daha az kritik).
+//   (PG'de synonym mekanizmasi yok -> ikisi de bos.)
+procedure DepoSynonymDurumu(out AYanlis, AEksik: string);
+
 // Program girisinde: SNAPSHOT'ta kalmis YETIM oturum kayitlarini (app cokme/anormal
 // kapanis) temizle -> AGun gunden eski TARIH'liler silinir. best-effort.
 procedure SnapshotEskiTemizle(AGun: Integer = 10);
 
 // ---- Depo (log/e-belge) DB adi ----
-// Depo DB adi — opsiyon Ops_FaturaOpsiyon_DepoDBAdi (default 'GENDEPO'). Log otonom
-// baglantisi bu ada baglanir; ayni zamanda EBELGE* tablolari da bu DB'de.
+// ADLANDIRMA KURALI (05.08.2026): depo DB adi ZORUNLU olarak  <ANA_DB_ADI>_GENDEPO
+//   (or. GENTEGRE -> GENTEGRE_GENDEPO, SDI -> SDI_GENDEPO). Bir sunucuda birden fazla
+//   Gentegre veritabani olabildigi icin ortak/karisik 'GENDEPO' adi yanlis depoya
+//   yazma riski tasiyordu. Kurala uymayan ad KULLANILMAZ: islem yapilmaz, hata verilir.
 function DepoDBAdi: string;
+
+// Ana DB adindan beklenen depo adini uretir: <ANA_DB>_GENDEPO. Ana DB adi okunamazsa ''.
+function BeklenenDepoAdi: string;
+
+// Depo adi kuralini dogrular. Uygun degilse (ya da depo DB'si yoksa) ADepoyoksaHata=True
+//   iken exception atar. Uygulama acilisinda bir kez cagrilir.
+function DepoKuralDenetle(AHataAt: Boolean = True): Boolean;
 
 // Depo tablosunun TAM NITELIKLI adi: DepoDBAdi + '.dbo.' + ATablo
 // (ör. DepoTablo('EBELGEMESAJ') -> 'GENDEPO.dbo.EBELGEMESAJ').
@@ -274,7 +290,8 @@ var
 implementation
 
 uses
-  System.SysUtils, System.SyncObjs, System.DateUtils, System.Variants, FireDAC.Comp.Client,
+  System.SysUtils, System.SyncObjs, System.DateUtils, System.Variants, System.StrUtils,
+  FireDAC.Comp.Client,
   Winapi.Windows, Utablo, PrjConst, uUtility_my,  System.Hash, UVeriMotor,
   FetaKurulusSiniflari;   // Veritabani.VeriVarMi / BasitKomutÇalıştır / SorguBaslat
 
@@ -311,17 +328,92 @@ begin
   Result := GIstasyon;
 end;
 
+function AnaDBAdi: string;
+// Ana (is) veritabaninin adi. Once baglanti parametresi, olmazsa DB_NAME() sorulur.
+begin
+  Result := '';
+  try
+    if (Tablo <> nil) and (Tablo.FDCnn <> nil) then
+    begin
+      Result := Trim(Tablo.FDCnn.Params.Database);
+      if (Result = '') and Tablo.FDCnn.Connected then
+        Result := Trim(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+                    'select ' + IfThen(AktifVeriMotor = vmPG, 'current_database()', 'DB_NAME()'),
+                    [], [], True)));
+    end;
+  except
+    Result := '';
+  end;
+end;
+
+function BeklenenDepoAdi: string;
+var
+  LAna: string;
+begin
+  LAna := AnaDBAdi;
+  if LAna = '' then Exit('');
+  Result := LAna + '_GENDEPO';
+end;
+
+function DepoKuralDenetle(AHataAt: Boolean = True): Boolean;
+// Depo adi <ANA_DB>_GENDEPO kuralina uyuyor mu ve o veritabani gercekten var mi?
+var
+  LBeklenen, LMevcut: string;
+begin
+  Result := False;
+  LBeklenen := BeklenenDepoAdi;
+  LMevcut   := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, ''));
+
+  if LBeklenen = '' then
+  begin
+    if AHataAt then
+      raise Exception.Create('Depo denetimi: ana veritabani adi okunamadi.');
+    Exit;
+  end;
+
+  // Kural: opsiyon ya BOS olmali (o zaman beklenen ad kullanilir) ya da beklenen ile AYNI.
+  if (LMevcut <> '') and (not SameText(LMevcut, LBeklenen)) then
+  begin
+    if AHataAt then
+      raise Exception.CreateFmt(
+        'Depo veritabani adi kurala uymuyor.'#13#10 +
+        'Tanimli: %s'#13#10'Olmasi gereken: %s'#13#10#13#10 +
+        'Bir sunucuda birden fazla Gentegre veritabani olabildigi icin depo adi ' +
+        '<VERITABANI>_GENDEPO olmak zorundadir. Depo veritabanini yeniden adlandirip ' +
+        'Opsiyonlar > 2.Depo DB Adi alanini duzeltin.', [LMevcut, LBeklenen]);
+    Exit;
+  end;
+
+  // Depo veritabani gercekten var mi? (PG'de depo ayri DB degil, 'depo' SCHEMA -> muaf)
+  if AktifVeriMotor <> vmPG then
+    if not Veritabani.VeriVarMi(Tablo.FDCnn,
+             'select 1 where DB_ID(&D) is not null', ['&D'], [LBeklenen]) then
+    begin
+      if AHataAt then
+        raise Exception.CreateFmt(
+          'Depo veritabani bulunamadi: %s'#13#10#13#10 +
+          'Bu veritabani GenDepoKur betikleri ile olusturulmalidir.', [LBeklenen]);
+      Exit;
+    end;
+
+  Result := True;
+end;
+
 function DepoDBAdi: string;
 begin
-  // INI'den YALNIZ 1 KEZ oku, sonra cache (DepoTablo ~50 sorguda cagriliyor).
-  // Ad degisirse uygulama yeniden baslatilmali (log baglantisi de cache'li).
+  // ADLANDIRMA KURALI: depo adi ANA DB adindan TURETILIR (<ANA_DB>_GENDEPO); opsiyondaki
+  //   deger yalnizca DOGRULAMA icin okunur (bkz. DepoKuralDenetle). Boylece ayni sunucuda
+  //   duran baska bir Gentegre veritabaninin deposuna yanlislikla yazilamaz.
+  // Cache: DepoTablo ~50 sorguda cagriliyor; ad degisirse DepoAdiSifirla cagrilmali.
   if GDepoDBAdi = '' then
   begin
-    try
-      GDepoDBAdi := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
-    except
-      GDepoDBAdi := '';
-    end;
+    GDepoDBAdi := BeklenenDepoAdi;
+    if GDepoDBAdi = '' then   // ana DB adi okunamadi (baglanti yok) -> eski davranisa dus
+      try
+        GDepoDBAdi := Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, 'GENDEPO'));
+      except
+        GDepoDBAdi := 'GENDEPO';
+      end;
     if GDepoDBAdi = '' then GDepoDBAdi := 'GENDEPO';
   end;
   Result := GDepoDBAdi;
@@ -621,24 +713,21 @@ begin
   try
     LList := TStringList.Create;
     try
-      // Depo adi opsiyonu (GENINI) BOS ise DepoDBAdi 'GENDEPO' varsayar. Bu durumda
-      //   asagidaki "yanlis depoyu gosterenleri duzelt" adimi CALISAN synonym'leri
-      //   var olmayan GENDEPO'ya cevirip loglamayi komple kirar. Bu yuzden: opsiyon
-      //   yoksa MEVCUT SYNONYM hedefi otorite kabul edilir (ve opsiyona yazilir).
-      if Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, '')) = '' then
-      begin
-        LYeni := Trim(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-          'select top 1 PARSENAME(base_object_name,3) from sys.synonyms ' +
-          ' where name in (''ISLEMLOG'',''DOSYA'',''LOGREFERANS'',''EBELGE'')' +
-          '   and PARSENAME(base_object_name,3) is not null' +
-          '   and DB_ID(PARSENAME(base_object_name,3)) is not null', [], [], True)));
-        if LYeni <> '' then
+      // ADLANDIRMA KURALI (05.08.2026): otorite ARTIK opsiyon ya da mevcut synonym degil,
+      //   ANA DB adindan turetilen <ANA_DB>_GENDEPO. Eskiden opsiyon bossa "mevcut synonym
+      //   hedefi dogrudur" varsayiliyordu; ayni sunucuda baska bir Gentegre veritabaninin
+      //   deposunu gosteren bayat bir synonym bu sekilde KALICI hale gelebiliyordu.
+      //   Artik kurala uymayan her synonym dogru depoya cevrilir.
+      LYeni := Trim(BeklenenDepoAdi);
+      if LYeni = '' then LYeni := Trim(DepoDBAdi);
+      // Opsiyon bos ya da yanlis ise kurala gore duzelt (kullanici mudahalesi gerekmeden).
+      if (LYeni <> '') and
+         (not SameText(Trim(Tablo.GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, '')), LYeni)) then
+        if Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 where DB_ID(&D) is not null', ['&D'], [LYeni]) then
         begin
           Tablo.GENINI.WriteString(Ops_FaturaOpsiyon_DepoDBAdi, LYeni);
-          DepoAdiSifirla;   // cache'i tazele -> DepoDBAdi artik dogru adi verir
+          DepoAdiSifirla;
         end;
-      end;
-      LYeni := Trim(DepoDBAdi);
       if LYeni = '' then Exit;
       // Hedef depo YOKSA dokunma (var olmayan depoya synonym baglayip prefix'siz erisimi kirmayalim).
       if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select 1 where DB_ID(&D) is not null',
@@ -686,6 +775,46 @@ begin
     end;
   except
     // giris akisini bozma; synonym senkronu best-effort.
+  end;
+end;
+
+procedure DepoSynonymDurumu(out AYanlis, AEksik: string);
+var
+  LTbl, LDepo, LHedef: string;
+begin
+  AYanlis := '';
+  AEksik  := '';
+  if AktifVeriMotor = vmPG then Exit;   // PG: 'depo' SCHEMA -> synonym yok
+  LDepo := Trim(BeklenenDepoAdi);
+  if LDepo = '' then LDepo := Trim(DepoDBAdi);
+  if LDepo = '' then Exit;
+  try
+    for LTbl in TArray<string>.Create('EBELGE', 'EBELGEMESAJ', 'EBELGEKUYRUK',
+      'ISLEMLOG', 'LOGREFERANS', 'LOGCOZUM', 'SNAPSHOT', 'DOSYA') do
+    begin
+      // Ana DB'de ayni adda GERCEK TABLO varsa synonym kurulmaz (eski kurulum) -> atla.
+      if Veritabani.VeriVarMi(Tablo.FDCnn,
+           'select 1 where OBJECT_ID(&T, ''U'') is not null', ['&T'], ['dbo.' + LTbl]) then
+        Continue;
+
+      // Synonym'in gosterdigi VERITABANI adi (yoksa bos).
+      LHedef := Trim(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'select PARSENAME(base_object_name,3) from sys.synonyms where name = &N',
+        ['&N'], [LTbl], True)));
+
+      if LHedef = '' then
+      begin
+        // Synonym yok. Depoda o tablo VARSA eksiklik sayilir (yoksa eski surum, atla).
+        if Veritabani.VeriVarMi(Tablo.FDCnn,
+             'select 1 where OBJECT_ID(&T) is not null', ['&T'], ['[' + LDepo + '].dbo.' + LTbl]) then
+          AEksik := AEksik + IfThen(AEksik = '', '', ', ') + LTbl;
+      end
+      else if not SameText(LHedef, LDepo) then
+        // BASKA depoyu gosteriyor -> yanlis veritabanina yazma riski.
+        AYanlis := AYanlis + IfThen(AYanlis = '', '', ', ') + LTbl + ' -> ' + LHedef;
+    end;
+  except
+    // dogrulama basarisiz olursa giris akisini bozma
   end;
 end;
 

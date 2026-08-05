@@ -701,12 +701,44 @@ var
    LCnn: TFDConnection;
    LCst: string;
    LMotorDegisti: Boolean;
+   LDbDegisti: Boolean;
+   LEskiDb, LEskiSrv: string;
 begin
    // Yeni seçilen motor, ÇALIŞAN motordan farklı mı? Farklıysa in-session geçiş yapma:
    //   PG-diyalekt sorgu (LIMIT vb.) MSSQL'e giderse "syntax near 'limit'" patlar. Bunun yerine
    //   kaydet + Halt -> kullanıcı programı yeniden açar, temiz olarak doğru motora bağlanır.
    LMotorDegisti := ((ComboSQL.ItemIndex = 1) and (AktifVeriMotor <> vmPG))
                  or ((ComboSQL.ItemIndex <> 1) and (AktifVeriMotor <> vmMSSQL));
+
+   // VERITABANI/SUNUCU DEGISIMI de motor degisimi kadar tehlikelidir: acik oturumda
+   //   GENINI onbellegi, depo adi (<DB>_GENDEPO), kullanici/yetki, sube, kocan, acilista
+   //   okunan tum ayarlar ESKI veritabanina aittir. In-session gecis yapilirsa program
+   //   yeni DB ile eski ayarlari karistirir (or. log/e-belge YANLIS depoya yazilabilir).
+   //   Bu yuzden: ad degistiyse de kaydet + kapat, kullanici yeniden acsin.
+   LDbDegisti := False;
+   if not LMotorDegisti then
+   begin
+{$IFNDEF NO_UTABLO}
+      // Yalniz CALISAN bir baglanti varken kiyasla (ilk acilista karsilastirilacak sey yok).
+      if (Tablo <> nil) and (Tablo.FDCnn <> nil) and Tablo.FDCnn.Connected then
+      begin
+         if ComboSQL.ItemIndex = 1 then
+         begin
+            LEskiDb  := Trim(Tablo.FDCnn.Params.Database);
+            LEskiSrv := Trim(Tablo.FDCnn.Params.Values['Server']);
+            LDbDegisti := (not SameText(LEskiDb,  Trim(EditPgVeritabani.Text))) or
+                          (not SameText(LEskiSrv, Trim(EditPgSunucu.Text)));
+         end
+         else
+         begin
+            LEskiDb  := Trim(Tablo.FDCnn.Params.Database);
+            LEskiSrv := Trim(Tablo.FDCnn.Params.Values['Server']);
+            LDbDegisti := (not SameText(LEskiDb,  Trim(cboDatabases.Text))) or
+                          (not SameText(LEskiSrv, Trim(cboServers.Text)));
+         end;
+      end;
+{$ENDIF}
+   end;
 
    Baglandi := True;
    LCnn := TFDConnection.Create(nil);
@@ -753,12 +785,19 @@ begin
       GenRegIni.RegWriteString('','GenDataTimeOut', EditTimeOut.Text, 'C');
    end;
 
-   if LMotorDegisti then begin
+   if LMotorDegisti or LDbDegisti then begin
       // Native MessageBox kullan: VCL MessageDlg app kapanmaya giderken DevExpress skin paint'i
       //   gecikince transparent/boş çiziliyordu. Windows MessageBox anında çizilir (skin'e tabi değil).
-      Application.MessageBox(
-         'Veri motoru değiştirildi. Değişikliğin geçerli olması için program kapanacak; lütfen yeniden başlatın.',
-         'Bilgi', MB_OK or MB_ICONINFORMATION or MB_TOPMOST);
+      if LMotorDegisti then
+         Application.MessageBox(
+            'Veri motoru değiştirildi. Değişikliğin geçerli olması için program kapanacak; lütfen yeniden başlatın.',
+            'Bilgi', MB_OK or MB_ICONINFORMATION or MB_TOPMOST)
+      else
+         Application.MessageBox(
+            'Bağlanılacak veritabanı/sunucu değiştirildi. Ayarlar (opsiyonlar, kullanıcı yetkileri, ' +
+            'log/e-Belge deposu) açılışta okunduğu için değişikliğin geçerli olması adına program ' +
+            'kapanacak; lütfen yeniden başlatın.',
+            'Bilgi', MB_OK or MB_ICONINFORMATION or MB_TOPMOST);
       // Halt finalization sırasında (FireDAC/DevExpress teardown) nil erişimiyle AV veriyordu.
       //   ExitProcess process'i finalization ÇALIŞTIRMADAN anında bitirir (reg zaten yazıldı).
       ExitProcess(0);
