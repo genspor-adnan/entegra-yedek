@@ -74,6 +74,8 @@ object UretimWizardDlg: TUretimWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       Caption = 'JvWizardInteriorPage1'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1210
         658)
@@ -119,6 +121,7 @@ object UretimWizardDlg: TUretimWizardDlg
           Left = 3
           Top = 3
           Width = 1204
+          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -145,7 +148,6 @@ object UretimWizardDlg: TUretimWizardDlg
           ShowCaptions = True
           TabOrder = 0
           Transparent = True
-          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0
@@ -230,15 +232,17 @@ object UretimWizardDlg: TUretimWizardDlg
         end
         object PageControlUst: TcxPageControl
           Left = 0
-          Top = 35
+          Top = 32
           Width = 1210
-          Height = 110
+          Height = 113
           Align = alClient
           TabOrder = 1
           Properties.ActivePage = cxTabSheet1
           Properties.CustomButtons.Buttons = <>
           OnChange = PageControlUstChange
-          ClientRectBottom = 106
+          ExplicitTop = 35
+          ExplicitHeight = 110
+          ClientRectBottom = 109
           ClientRectLeft = 4
           ClientRectRight = 1206
           ClientRectTop = 27
@@ -247,6 +251,7 @@ object UretimWizardDlg: TUretimWizardDlg
             Color = clWhite
             ImageIndex = 0
             ParentColor = False
+            ExplicitHeight = 79
             object Label19: TcxLabel
               Left = 529
               Top = 2
@@ -582,6 +587,10 @@ object UretimWizardDlg: TUretimWizardDlg
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
           end
         end
       end
@@ -914,6 +923,10 @@ object UretimWizardDlg: TUretimWizardDlg
         object TabSheetGenel: TcxTabSheet
           Caption = 'Genel'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object LabelProje: TcxLabel
             Left = 7
             Top = 7
@@ -1030,6 +1043,10 @@ object UretimWizardDlg: TUretimWizardDlg
         object TabIsVeZaman: TcxTabSheet
           Caption = #304#351' Zaman'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel9: TPanel
             Left = 0
             Top = 0
@@ -1369,6 +1386,8 @@ object UretimWizardDlg: TUretimWizardDlg
       Caption = 'UretimDetayPage'
       OnPage = UretimDetayPagePage
       OnExitPage = UretimDetayPageExitPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object LabelSablon: TcxLabel
         Left = 6
         Top = 38
@@ -1632,6 +1651,8 @@ object UretimWizardDlg: TUretimWizardDlg
       Header.Subtitle.Text = ''
       Caption = 'YorumMedyaPage'
       OnEnterPage = DokumanEkrEnterPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel6: TPanel
         Left = 0
         Top = 617
@@ -1692,6 +1713,7 @@ object UretimWizardDlg: TUretimWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 596
         AnchorX = 1210
       end
       object GridYorum: TcxGrid
@@ -2015,8 +2037,8 @@ object UretimWizardDlg: TUretimWizardDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       
-        'select ID,TUR,CIKISDEPO,CIKISDEPOAD=(select D.DEPOADI from DEPOL' +
-        'AR D where D.ID=CIKISDEPO),'
+        'select FB.ID,TUR,CIKISDEPO,CIKISDEPOAD=(select D.DEPOADI from DE' +
+        'POLAR D where D.ID=CIKISDEPO),'
       
         'GIRISDEPO,GIRISDEPOAD=(select D.DEPOADI from DEPOLAR D where D.I' +
         'D=GIRISDEPO),'
@@ -2039,10 +2061,18 @@ object UretimWizardDlg: TUretimWizardDlg
       
         'STOKID=AKTIVITEID,MIKTAR=STOKISK, LISTE_FIYATI=EKVERGI,MALIYETSO' +
         'N=KDV_TUTARI, MALIYETORT=DOVIZ_TUTARI,'
-      'BIRIM=SAYFA,YERI,YERID, DOVIZKUR, DOVIZ_CINSI, DOVIZ_TUTARI'
-      'from FATBASLIK FB  where FB. ID=:PID and FB.TUR=6')
+      'BIRIM=SAYFA,YERI,YERID, DOVIZKUR, DOVIZ_CINSI, DOVIZ_TUTARI,'
+      'FU.*'
+      'from FATBASLIK FB'
+      'LEFT OUTER JOIN FATBASLIK_USER FU ON FU.ID = FB.ID'
+      'where FB. ID=:PID and FB.TUR=6')
     Left = 220
     Top = 226
+    ParamData = <
+      item
+        Name = 'PID'
+        ParamType = ptInput
+      end>
   end
   object URETIMDETAY: TFDQuery
     Connection = Tablo.FDCnn
@@ -2077,10 +2107,20 @@ object UretimWizardDlg: TUretimWizardDlg
       
         '  BARKOD=(Select top 1 BARKOD from STOKBARKOD where VARSAYILAN=1' +
         ' and STOKID=F.URUNID),'
-      '  EKLEYENAD=(select FIRMA from REHBER where ID = F.EKLEYEN), F.*'
-      'from FATURA F where FATBASID=:PFatbasID')
+      
+        '  EKLEYENAD=(select FIRMA from REHBER where ID = F.EKLEYEN), F.*' +
+        ','
+      '  FU.*'
+      'from FATURA F'
+      'LEFT OUTER JOIN FATURA_USER FU ON FU.ID = F.ID'
+      'where F.FATBASID=:PFatbasID')
     Left = 613
     Top = 233
+    ParamData = <
+      item
+        Name = 'PFATBASID'
+        ParamType = ptInput
+      end>
   end
   object PopupMenuDonustur: TPopupMenu
     Left = 280
@@ -2255,7 +2295,13 @@ object UretimWizardDlg: TUretimWizardDlg
         'ON=L1.ID),'
       
         'KAYNAKADI=(select L1.ACIKLAMA from LOKASYON L1 where UO.KAYNAK=L' +
-        '1.ID)'
+        '1.ID),'
+      
+        'ADET=(select cast(F.ADET as float) from FATURA F where F.ID=UO.O' +
+        'PERASYONID),'
+      
+        'BIRIM=(select cast(F.BIRIM as int) from FATURA F where F.ID=UO.O' +
+        'PERASYONID)'
       'from URETIMOPERASYONPERSONEL UO '
       'where UO.OPERASYONID=:PRM1'
       'and YER=2'

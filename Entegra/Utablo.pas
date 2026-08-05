@@ -120,6 +120,8 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     FYukleniyor: Boolean;        // buyutme requery'si reentrancy guard'i
     FAktif: Boolean;             // son sorgu sayfalanabilir dalda miydi
     FTamListe: Boolean;          // grid KOLON FILTRESI acik -> TOP'suz TAM liste modu
+    FSiralamaKullanici: Boolean; // siralamayi KULLANICI mi yapti (kayitli grid ayari degil)
+    FOtoBuyutme: Integer;        // ardisik OTOMATIK sayfa buyutme sayaci (zincir freni)
     FDegerListesiKuruluyor: Boolean;  // FiltreDegerListesi re-Load reentrancy guard'i
     FSerit: TPanel;              // "kismi liste" uyari seridi (grid'in altinda, lazy olusur)
     FSeritYazi: TLabel;
@@ -127,6 +129,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     procedure SeritGuncelle;          // kismi mi? -> seridi goster/gizle + metni tazele
     procedure TumunuYukleTiklandi(Sender: TObject);
     function  SayfaBoyuAl: Integer;   // closure yoksa genel opsiyon (GridListeUzunlugu, vars.100)
+    function  TamSinirAl: Integer;    // "tam liste" ust siniri (TamListeSiniri, vars.5000; 0=sinirsiz)
     function  TamGereksinim: Boolean; // filtre DOLU ya da SIRALAMA aktif -> tam liste sart
     procedure TamModaGec;             // FTamListe=True + kuyrukta TOP'suz requery
     procedure ScrollDegisti(Sender: TObject);
@@ -1103,6 +1106,13 @@ const
 var
   Tablo: TTablo;
   GSayfaliListeBoyu: Integer = 0;   // "Liste sayfa uzunlugu" oturum cache'i (0=henuz okunmadi; TSayfaliListe.SayfaBoyuAl lazy okur, UOpsDlg kaydeti tazeler)
+  // KAYITLI grid ayari (AYAR tablosu) yukleniyor: restore sirasinda dogan filtre/siralama
+  // olaylari KULLANICI eylemi degildir -> TSayfaliListe tam-liste moduna GECMEZ.
+  // (Kayitli duzende siralama varsa sayfalama kalici olarak devre disi kalirdi.)
+  GGridAyarYukleniyor: Boolean = False;
+  // "Tam liste" ust siniri oturum cache'i (-1 = henuz okunmadi; 0 = sinirsiz). SQL Express
+  // korumasi icin varsayilan 5000 -> TSayfaliListe.TamSinirAl.
+  GTamListeSiniri: Integer = -1;
   Lisanssrv: LisansServiceSoap;
   Guncelleme: IGenUpdateWS;
   RaporIslem: IRaporiumWS;
@@ -1843,7 +1853,13 @@ end;
 
 procedure TTablo.GridAyarRestore(GridAdi:String; TView : TcxGridDBTableView; Tree1 : TcxDBTreeList=nil; AyarID:integer=0);
 var str,str2 : TMemoryStream;
+    EskiAyarYukleme : Boolean;
 begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yüklemesini yapar
+    // Restore sirasindaki filtre/siralama olaylari KULLANICI eylemi sayilmaz:
+    // sayfali listeler (TSayfaliListe) bu yuzden tam-liste moduna gecmesin.
+    EskiAyarYukleme := GGridAyarYukleniyor;
+    GGridAyarYukleniyor := True;
+  try
     str := TMemoryStream.Create();
     str2 := TMemoryStream.Create();
 
@@ -1881,6 +1897,9 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
       Tree1.ApplyBestFit();  }
     str.Free;
     str2.Free;
+  finally
+    GGridAyarYukleniyor := EskiAyarYukleme;
+  end;
 end;
 
 function TTablo.BelgeKopyala(ID, Tur, RehberId : integer; Tarih : TDateTime): integer;
@@ -2591,9 +2610,9 @@ var
 begin
   BaslikKur := CariDoviz;
   //önce hangi döviz türleri kullanılmış ona bakalım
-  Tablo.TablodanSorguAc(8,'select distinct DOVIZ_KURU from '+TabloAd+' where '+AlanAd+'='+TabloUst.FieldByName('ID').AsString+' and DOVIZ_KURU<>'''+CariDoviz+''' ');
+  Tablo.TablodanSorguAc(8, 'select distinct DOVIZ_KURU from '+TabloAd+' where '+AlanAd+'='+TabloUst.FieldByName('ID').AsString+' and DOVIZ_KURU<>'''+CariDoviz+''' ');
   while not Tablo.Query8.Eof do begin
-    Bilgi := DovizKuruBul(FormatDateTime('yyyy-mm-dd 00:00',TabloUst.FieldByName(TarihAd).AsDateTime),TabloDetay.FieldByName('DOVIZ_KURU').AsString,Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,''));
+    Bilgi := DovizKuruBul(FormatDateTime('yyyy-mm-dd 00:00',TabloUst.FieldByName(TarihAd).AsDateTime), Tablo.Query8.FieldByName('DOVIZ_KURU').AsString,Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,''));
     ctrls := TGirdiDenetimleri.Create.Edit(Tablo.Query8.Fields[0].AsString+' '+BGKur_degeri,@Bilgi);
     if (TGirisKutusuEx.BilgiAlEx(FWKurGir, ctrls) = mrOk)and(trim(Bilgi) <> '') then begin
       Kur := VarToStr(Bilgi);
@@ -3881,6 +3900,8 @@ begin
       Sonuc_Kod := '';
     if DlgAdi.TabKodAgaci.FindField('ACIKLAMA') <> nil then
       Sonuc_Aciklama := DlgAdi.TabKodAgaci.FieldByName('ACIKLAMA').AsString
+    else if DlgAdi.TabKodAgaci.FindField('AD') <> nil then
+      Sonuc_Aciklama := DlgAdi.TabKodAgaci.FieldByName('AD').AsString
     else
       Sonuc_Aciklama := '';
     if CokluSecim then
@@ -3922,7 +3943,6 @@ var
   stil: TcxStyle;
   LQry: TFDQuery;
   LArka: TColor;
-  LRgbArka: Longint;
 begin
   // grid stilleri için tanımlı stiller oluşturuluyor
 
@@ -3949,17 +3969,12 @@ begin
         if Tablo.Query3.FieldByName('ALTCIZGI').AsBoolean then
           stil.Font.Style := stil.Font.Style + [fsUnderline];
 
-        // Durum rengi FONTRENK kolonunda (ARKARENK tum satirlarda beyaz/16777215 -> renk kaynagi DEGIL).
-        //   Eski davranis: satir ARKA-PLANI durum rengiyle boyanir (renkli satirlar). Yeni kod yanlislikla
-        //   FONTRENK'i yazi rengi yapip arka-plani beyaz birakiyordu -> gorsel "renksiz". Geri: FONTRENK=arka.
-        //   Okunabilir yazi icin arka-plan luminans'ina gore siyah/beyaz metin (koyu->beyaz, acik->siyah).
-        LArka := StringToColor(Tablo.Query3.FieldByName('FONTRENK').AsString);
+        // Durum rengi FONTRENK kolonunda; kullanici tercihi (05.08.2026): renk YAZIYA uygulanir,
+        //   arka-plan ARKARENK'ten gelir (tipik olarak beyaz kalir) — eski surum davranisi.
+        //   (Bir ara FONTRENK arka-plana boyanmisti; kullanici yazi-rengi istedi, geri alindi.)
+        stil.TextColor := StringToColor(Tablo.Query3.FieldByName('FONTRENK').AsString);
+        LArka := StringToColor(Tablo.Query3.FieldByName('ARKARENK').AsString);
         stil.Color := LArka;
-        LRgbArka := ColorToRGB(LArka);
-        if (GetRValue(LRgbArka)*299 + GetGValue(LRgbArka)*587 + GetBValue(LRgbArka)*114) div 1000 > 140 then
-          stil.TextColor := clBlack
-        else
-          stil.TextColor := clWhite;
         stil.Name := 'gridStil_' + Tablo.Query3.FieldByName('ID').AsString;
 
         LQry.Close;
@@ -6459,6 +6474,20 @@ begin
 
     ParamNames := CollectColonParams(TabloAdi.SQL.Text);
     try
+      // DECLARE/SET iceren BATCH'ler PREPARE EDILEMEZ. FireDAC varsayilan olarak komutu
+      //   hazirlar (sp_prepare) ve ODBC surucusu parametre tiplerini betimlemeye calisirken
+      //   "COUNT field incorrect or syntax error" verir. Ornek: DOKUMLER'den gelen KDR/kokpit
+      //   raporlari ('declare @DonemBasi DATETIME ... Set @DonemBasi = :PDonemBas ... select').
+      //   DirectExecute, komutu hazirlamadan calistirir; parametreler yine baglanir.
+      //   (PG tarafinda bu tur T-SQL zaten PgDeclareCevir ile inline ediliyor.)
+      //   DIKKAT: DirectExecute TEK BASINA yetmiyor - burada ise yaramasinin sebebi asagidaki
+      //   Unprepare + ParamCreate=False + paramlarin ELLE olusturulmasi. Ayni bayragi bir
+      //   sorguya disaridan set edip dogrudan .Open demek hatayi COZMEZ (UStokHizmetAra/TabPaket
+      //   boyle denendi, ayni hatayi verdi -> sorgu SP'ye tasindi). Yeni yerlerde DECLARE'li
+      //   parametreli batch yazma; SP kullan ya da bu yoldan (TabloYenile) gec.
+      TabloAdi.ResourceOptions.DirectExecute :=
+        (Pos('declare', LowerCase(TabloAdi.SQL.Text)) > 0) and
+        (Pos('select', LowerCase(TabloAdi.SQL.Text)) > 0);
       OldParamCreate := TabloAdi.ResourceOptions.ParamCreate;
       TabloAdi.ResourceOptions.ParamCreate := False;
       for i := 0 to ParamNames.Count - 1 do
@@ -6540,6 +6569,12 @@ begin
       try
          TabloAdi.Open;
       except
+        // EAbort = kodun BILEREK iptal ettigi akis (Abort). Ornek: acilirken master/detay
+        //   CheckBrowseMode ile Post'a girer, BeforePost'taki kilit/dogrulama kontrolu Abort eder.
+        //   Sarmalanirsa kullaniciya "TabloYenile error ...: Operation aborted" + SQL metni cikar;
+        //   oysa iptali yapan kod kendi mesajini zaten gostermistir. AYNEN yukari birak.
+        on EAbort do
+          raise;
         on E: Exception do
           raise Exception.CreateFmt('TabloYenile error [%s]: %s'#13#10'SQL:'#13#10'%s',
             [TabloAdi.Name, E.Message, TabloAdi.SQL.Text]);
@@ -9886,14 +9921,14 @@ begin
   if AktifVeriMotor = vmPG then
     SQLText:=  ' select (case when strpos(KOD,''.'')=0 then '''' ' +
        ' else reverse(substring(reverse(KOD) from strpos(reverse(KOD),''.'')+1 for length(KOD)-(strpos(reverse(KOD),''.'')-1))) '+
-       ' end)::varchar(50) as ROOTKOD,KOD,AD as ACIKLAMA,SERVISTUR,ID from SERVISLISTE where SERVISTUR = '+IntToStr(Tur)
+       ' end)::varchar(50) as ROOTKOD,KOD,AD,SERVISTUR,ID from SERVISLISTE where SERVISTUR = '+IntToStr(Tur)
   else
     SQLText:=  ' select ROOTKOD= case when CHARINDEX(''.'',KOD,1)=0 then '''' ' +
        ' else REVERSE( SUBSTRING(REVERSE(KOD),CHARINDEX(''.'',REVERSE(KOD),1)+1,LEN(KOD)-(CHARINDEX(''.'',REVERSE(KOD),1)-1))) '+
-       ' end,KOD,ACIKLAMA=AD,SERVISTUR,ID from SERVISLISTE where SERVISTUR = '+IntToStr(Tur);
+       ' end,KOD,AD,SERVISTUR,ID from SERVISLISTE where SERVISTUR = '+IntToStr(Tur);
      //' and ID not in (select SERVISLISTEID from SERVISBILGI where SERVISID='+IntToStr(ServisID)+ ')'
 
-  if Tablo.KodAgacindanSec(KADlg,SQLText,True,True,False,False,AID,AKod,AAd,slist,[],['SERVISTUR'],[Tur],[],[True,True,False],True) then begin
+  if Tablo.KodAgacindanSec(KADlg,SQLText,True,True,False,False,AID,AKod,AAd,slist,[],['SERVISTUR'],[Tur],['Kod','Açıklama',''],[True,True,False],True) then begin
      if Tur<=260 then begin
         if Tek then //tek problem olacaksa öncekileri silelim. Demirbağ arızada tek problem var
            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from SERVISBILGI where SERVISID='+IntToStr(ServisID)+' and SERVISTUR='+IntToStr(Tur), [],[]);
@@ -12535,11 +12570,73 @@ begin
 end;
 
 procedure TTablo.AcilisIslemleri;
+var
+  LYanlis, LEksik: string;
 begin
-  // Giriste: BILINEN depo synonym'leri ini'deki depoya (DepoDBAdi=GENINI ANAHTAR) esitle.
-  // Klon/opsiyon degisiminden sonra synonym bayat kalmis olabilir -> onek'siz (SP) yazimlar
-  // yanlis depoya gitmesin. (Hedef depo yoksa dokunmaz; best-effort.)
+  // DEPO ADLANDIRMA KURALI (MSSQL): depo DB adi <ANA_DB>_GENDEPO olmak ZORUNDA. Ayni
+  //   sunucuda birden fazla Gentegre veritabani bulunabildigi icin ortak 'GENDEPO' adi
+  //   kayitlarin (ISLEMLOG / EBELGE / DOSYA) YANLIS depoya yazilma riskini tasiyor.
+  // Ihlal -> UYARI + PROGRAMA GIRIS YOK. Exception yerine acik kontrol: OnException
+  //   handler'i hatayi yutup uygulamayi devam ettirebilirdi.
+  // (PG'de depo ayri veritabani degil 'depo' SCHEMA'sidir -> kural disi.)
+  if (AktifVeriMotor <> vmPG) and (not ULog.DepoKuralDenetle(False)) then
+  begin
+    Application.MessageBox(
+      PChar('Depo (log / e-Belge) veritabani adi kurala uymuyor.' + sLineBreak + sLineBreak +
+            'Tanimli depo   : ' + GENINI.ReadString(Ops_FaturaOpsiyon_DepoDBAdi, '(bos)') + sLineBreak +
+            'Olmasi gereken : ' + ULog.BeklenenDepoAdi + sLineBreak + sLineBreak +
+            'Ayni sunucuda birden fazla Gentegre veritabani bulunabildigi icin depo adi ' +
+            '<VERITABANI>_GENDEPO olmak zorundadir; aksi halde kayitlar yanlis depoya ' +
+            'yazilabilir.' + sLineBreak + sLineBreak +
+            'Duzeltme: GenUpdate klasorundeki depo_adlandirma_duzelt.sql betigini MASTER ' +
+            'veritabaninda calistirin (@Uygula = 1). Depo hic yoksa GenDepoKur1..9 ile kurun.' +
+            sLineBreak + sLineBreak + 'Program kapatilacak.'),
+      PChar('Depo Adlandirma Hatasi'), MB_OK or MB_ICONERROR);
+    ProgKapat := True;
+    Exit;
+  end;
+
+  // Depo adi kurala UYGUN -> synonym'leri de bu depoya yeniden ayarla. Onek'siz yazan
+  //   SP'ler (ISLEMLOG, EBELGE, DOSYA ...) synonym uzerinden gider; depo yeniden
+  //   adlandirildiysa ya da baska bir kurulumdan kalan bayat synonym varsa kayitlar
+  //   YANLIS depoya yazilir. Bu yuzden kontrolun hemen ardindan senkron.
   DepoSynonymDenetle;
+
+  // Senkron best-effort (icinde try/except) -> SONUCU DOGRULA. Iki durum AYRI ele alinir:
+  //   YANLIS hedef: synonym baska bir veritabanini gosteriyor. Oneksiz yazan SP'ler
+  //     (ISLEMLOG/EBELGE/DOSYA) SESSIZCE yanlis depoya yazar -> daha once yasandi.
+  //     Bu durumda GIRISE IZIN YOK (veri karismasin).
+  //   EKSIK synonym: islem hata verir ama veri karismaz -> yalnizca uyari.
+  if AktifVeriMotor <> vmPG then
+  begin
+    ULog.DepoSynonymDurumu(LYanlis, LEksik);
+
+    if LYanlis <> '' then
+    begin
+      Application.MessageBox(
+        PChar('Depo baglantilari (synonym) YANLIS veritabanini gosteriyor.' + sLineBreak + sLineBreak +
+              'Olmasi gereken depo : ' + ULog.BeklenenDepoAdi + sLineBreak +
+              'Hatali baglantilar  : ' + LYanlis + sLineBreak + sLineBreak +
+              'Bu haliyle log / e-Belge / dosya kayitlari BASKA bir firmanin veritabanina ' +
+              'yazilabilir. Veri karismasin diye program kapatilacak.' + sLineBreak + sLineBreak +
+              'Cozum: GenUpdate klasorundeki depo_adlandirma_duzelt.sql betigini MASTER ' +
+              'veritabaninda calistirin (@Uygula = 1); synonym''ler dogru depoya baglanir.'),
+        PChar('Yanlis Depo Baglantisi'), MB_OK or MB_ICONERROR);
+      ProgKapat := True;
+      Exit;
+    end;
+
+    if LEksik <> '' then
+      Application.MessageBox(
+        PChar('Depo baglantilari (synonym) eksik.' + sLineBreak + sLineBreak +
+              'Depo         : ' + ULog.BeklenenDepoAdi + sLineBreak +
+              'Eksik nesne  : ' + LEksik + sLineBreak + sLineBreak +
+              'Bu nesnelere ONEKSIZ erisen islemler (log kaydi, e-Belge, dosya deposu) ' +
+              'hata verebilir.' + sLineBreak + sLineBreak +
+              'Cozum: kullanicinin synonym olusturma (DDL) yetkisi oldugundan emin olun; ' +
+              'depo eksikse GenDepoKur1..9 betiklerini calistirin.'),
+        PChar('Depo Baglanti Uyarisi'), MB_OK or MB_ICONWARNING);
+  end;
   SnapshotEskiTemizle;   // 10 gunden eski yetim SNAPSHOT kayitlarini temizle
   PosAktarim;
 end;
@@ -12576,7 +12673,7 @@ begin
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     ' update KULLANICI_ARAMA set SAY=SAY+1, DEGISTIRMETARIHI=getdate()' +
     '  where KULID='+IntToStr(Kul)+' and MODUL='+IntToStr(AModul)+' and KAYITID='+IntToStr(AKayitID),
-    [], []);
+      [], []);
   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
     ' insert into KULLANICI_ARAMA (KULID,MODUL,KAYITID,SAY,DEGISTIRMETARIHI)' +
     '  select '+IntToStr(Kul)+','+IntToStr(AModul)+','+IntToStr(AKayitID)+',1,getdate()' +
@@ -13274,6 +13371,9 @@ begin
   //   bankalar bosuna belege yukleniyordu (WAN'da ~530ms + transfer). Kaldirildi. Bir gun
   //   gerekirse ilgili ekran kendisi acar. (Utablo:127-128 tanim durur, zararsiz.)
   AcilisIslemleri;
+  // Depo adlandirma kurali ihlali AcilisIslemleri icinde ProgKapat=True yapar ->
+  //   kalan acilis islerini (ve ardindan sifre ekranini) hic calistirma.
+  if ProgKapat then Exit;
 
   EIrsaliyeKullanimda := Tablo.GENINI.ReadBoolean(Ops_OpsiyonEIrsaliye, False);
   EFaturaIhracat := Tablo.GENINI.ReadBoolean(Ops_OpsiyonIhracatGonder, True);
@@ -15295,6 +15395,22 @@ begin
   if Result < 25 then Result := 25;   // alt sinir: 0/bos/sacma deger korumasi
 end;
 
+// "Tumunu Yukle" / filtre-siralama dalinda cekilecek EN FAZLA satir.
+// NEDEN SINIR: musteriler SQL Express kullaniyor. Sinirsiz cekim (TOP yok) 50 bin satirlik
+// listede genis bir siralama/hash icin buyuk bellek grant'i ister; Express'in sorgu-bellek
+// havuzu kucuktur (baski altinda 8 MB'a kadar duser) -> sorgu RESOURCE_SEMAPHORE'da SONSUZ
+// bekler, ekran kum saatinde kilitlenir. Ust sinirli TOP ise "top-N sort" ile sabit ve
+// kucuk bellekle calisir. 0 = sinirsiz (guclu sunucuda bilincli tercih).
+function TSayfaliListe.TamSinirAl: Integer;
+begin
+  if GTamListeSiniri < 0 then                 // -1 = henuz okunmadi (0 = sinirsiz opsiyonu)
+    GTamListeSiniri := Tablo.GENINI.ReadInteger(Ops_GenelOpsiyon_TamListeSiniri, 5000);
+  Result := GTamListeSiniri;
+  if Result <= 0 then Exit(0);                // 0 = sinirsiz
+  if (Result > 0) and (Result < SayfaBoyuAl) then
+    Result := SayfaBoyuAl;                    // sayfa boyundan kucuk sinir anlamsiz
+end;
+
 function TSayfaliListe.TopN(ASayfalanabilir: Boolean): Integer;
 begin
   FAktif := ASayfalanabilir;
@@ -15303,10 +15419,15 @@ begin
   // (filtre bos + siralama yok) sayfaliya don (or. dropdown acilip vazgecildi).
   if FTamListe and (not FYukleniyor) and (not TamGereksinim) then
     FTamListe := False;
-  if FTamListe then Exit(0);    // grid filtresi acik -> TOP'suz TAM liste (SP TopN=0 = TOP yok)
+  // Grid filtresi/siralamasi acik ya da "Tumunu Yukle": TAM liste. Sinir opsiyonu 0 ise
+  // gercekten TOP'suz (SP TopN=0), degilse ust sinirli TOP (Express bellek korumasi).
+  if FTamListe then Exit(TamSinirAl);
   // Sayfa buyutme disindaki HER yeni arama/filtre siniri ilk sayfaya dondurur.
   if not FYukleniyor then
+  begin
     FSinir := SayfaBoyuAl;
+    FOtoBuyutme := 0;   // yeni arama -> otomatik buyutme freni sifirlanir
+  end;
   Result := FSinir;
 end;
 
@@ -15319,6 +15440,7 @@ procedure TSayfaliListe.FiltreDegerListesi(Sender: TcxFilterCriteria; AItemIndex
 begin
   if Assigned(FEskiDegerListesi) then FEskiDegerListesi(Sender, AItemIndex, AValueList);
   if FDegerListesiKuruluyor then Exit;          // re-Load'un tetikledigi ic cagri
+  if GGridAyarYukleniyor then Exit;             // kayitli duzen yukleniyor
   if (not FAktif) or FTamListe then Exit;       // sayfali degil ya da zaten tam
   if (FTab = nil) or (not FTab.Active) then Exit;
   if FTab.RecordCount < FSinir then Exit;       // liste zaten komple -> degerler tam
@@ -15341,7 +15463,9 @@ end;
 // Ikisi de kismi listede yaniltir (filtre eksik sonuc, siralama yanlis uc degerler).
 function TSayfaliListe.TamGereksinim: Boolean;
 begin
-  Result := (FGrid.SortedItemCount > 0) or
+  // Siralama: yalniz KULLANICI siraladiysa tam liste gerekir. Kayitli grid ayarindan
+  // (AYAR) gelen siralama tum listeleri kalici olarak TOP'suz cekmeye zorluyordu.
+  Result := FSiralamaKullanici or
     (FGrid.DataController.Filter.Active and (not FGrid.DataController.Filter.IsEmpty));
 end;
 
@@ -15369,6 +15493,8 @@ end;
 procedure TSayfaliListe.SiralamaDegisti(Sender: TObject);
 begin
   if Assigned(FEskiSiralama) then FEskiSiralama(Sender);
+  if GGridAyarYukleniyor then Exit;   // kayitli duzenden gelen siralama: kullanici eylemi degil
+  FSiralamaKullanici := FGrid.SortedItemCount > 0;
   FiltreDegisti(nil);   // ayni degerlendirme: gereksinim degistiyse gecis yap
 end;
 
@@ -15379,6 +15505,7 @@ var
   LGerekli: Boolean;
 begin
   if (Sender <> nil) and Assigned(FEskiFiltre) then FEskiFiltre(Sender);
+  if GGridAyarYukleniyor then Exit;   // kayitli duzen yukleniyor: kullanici eylemi degil
   if FYukleniyor or (not FAktif) then Exit;
   if (FTab = nil) or (not FTab.Active) then Exit;
   LGerekli := TamGereksinim;
@@ -15411,27 +15538,48 @@ begin
     TamModaGec;
     Exit;
   end;
-  // "Ekran dolu mu?" degerlendirmesi cizim BITTIKTEN sonra: kucuk sayfa ekrana sigarsa
-  // scrollbar olusmaz ve scroll tetigi hic gelmez; ekran dolana ya da liste bitene
-  // kadar zincirleme sayfa cekilir.
-  TThread.ForceQueue(nil,
-    procedure
-    begin
-      if not (csDestroying in ComponentState) then
-        ScrollDegisti(nil);
-    end);
+  // OTOMATIK "ekran doldurma" KALDIRILDI (05.08.2026).
+  //   Amac, sayfa ekrana sigip scrollbar olusmadiginda kullanicinin sonraki sayfayi
+  //   isteyememesiydi. Ancak kac satirin GERCEKTEN ekranda oldugunu guvenilir olcemedik:
+  //   cxGrid'in VisibleRecordCount'u cizilen satiri degil veri kaynagindaki gorunur kayit
+  //   sayisini verdigi icin kosul her zaman "ekran dolmadi" diyordu ve liste kullanici hic
+  //   scroll etmeden buyuyordu (once 100->...->3400, sonra 300, sonra 200 kayit).
+  //   Artik ilk sayfa neyse o gelir; devami KULLANICI scroll edince (ScrollDegisti) ya da
+  //   "Tumunu Yukle" seridiyle yuklenir - ikisi de kesin kullanici eylemidir.
+
 end;
 
 procedure TSayfaliListe.ScrollDegisti(Sender: TObject);
+const
+  // Sona bu kadar kayit kalinca sonraki sayfa istenir. DIKKAT: TopRecordIndex hicbir zaman
+  //   RecordCount'a ulasmaz - kullanici EN ALTA inse bile ekranda gorunen satir sayisi kadar
+  //   geride kalir (100 kayit / ~25 satirlik ekran -> en fazla 75). Esik ekran yuksekligini
+  //   kapsayacak kadar genis olmali; 20 iken "100'den fazla gitmiyor" sikayeti olustu.
+  //   Gorunen satir sayisi guvenilir olcelemedigi icin (VisibleRecordCount yaniltiyor)
+  //   bol tutuluyor: erken tetiklenirse yalnizca bir sonraki sayfa onden yuklenir.
+  CSonaYaklasma = 60;
+var
+  LUst, LToplam: Integer;
 begin
   if Assigned(FEskiScroll) then FEskiScroll(Sender);
   if FYukleniyor or (not FAktif) or FTamListe then Exit;
   if (FTab = nil) or (not FTab.Active) then Exit;
-  if FGrid.DataController.RecordCount <= 0 then Exit;
-  // Gorunen son satir listenin sonuna ulasti -> sonraki sayfa.
-  if FGrid.Controller.TopRecordIndex + FGrid.ViewInfo.VisibleRecordCount >=
-     FGrid.DataController.RecordCount then
-    SonrakiKuyrukla;
+  LToplam := FGrid.DataController.RecordCount;
+  if LToplam <= 0 then Exit;
+
+  // OLCUM: ViewInfo.VisibleRecordCount KULLANILMAZ - cxGrid'de bu deger ekranda CIZILEN
+  //   satiri degil veri kaynagindaki gorunur kayit sayisini verebiliyor. TopRecordIndex
+  //   ise gercek scroll konumudur.
+  LUst := FGrid.Controller.TopRecordIndex;
+
+  // NOT: "baz konum" mantigi KALDIRILDI. Baz, ForceQueue ile aliniyordu ve Locate ile
+  //   arasinda YARIS vardi: hangisi once calisirsa sonuc degisiyordu (bazen 200 geliyor,
+  //   bazen 100'de kaliyordu). Locate de kaldirildigi (yerine scroll konumu korundugu)
+  //   icin artik sahte olay uretilmiyor; sade "sona yaklasildi mi" kontrolu YETERLI.
+  if LUst <= 0 then Exit;                        // liste basindayiz -> istek yok
+  if LToplam - LUst > CSonaYaklasma then Exit;   // sona yaklasilmadi
+
+  SonrakiKuyrukla;
 end;
 
 procedure TSayfaliListe.DatasetScrollTetigi;
@@ -15456,7 +15604,7 @@ end;
 
 procedure TSayfaliListe.SonrakiGetir;
 var
-  LSonID: Integer;
+  LSonID, LUstEski: Integer;
 begin
   if FYukleniyor or (not FAktif) or FTamListe then Exit;
   if (FTab = nil) or (not FTab.Active) then Exit;
@@ -15464,11 +15612,23 @@ begin
   FYukleniyor := True;
   try
     LSonID := FTab.FieldByName('ID').AsInteger;
+    LUstEski := FGrid.Controller.TopRecordIndex;   // scroll konumunu SAKLA
     FSinir := FSinir + SayfaBoyuAl;
     FYenile();                        // ayni arama baglamiyla yeniden sorgula (TopN = yeni sinir)
-    FTab.Locate('ID', LSonID, []);    // kullanici kaldigi kayitta kalsin
+    // Eskiden burada FTab.Locate('ID', LSonID) vardi: kullaniciyi kaldigi KAYDA goturuyordu
+    //   ama focused record'u degistirdigi icin grid'i kaydiriyor ve SAHTE scroll olayi
+    //   uretiyordu -> sayfa zinciri. Bunun yerine SCROLL KONUMUNU geri koyuyoruz: gorunum
+    //   ayni yerde kalir, sahte olay olusmaz (deger degismedigi icin).
+    if LUstEski > 0 then
+      FGrid.Controller.TopRecordIndex := LUstEski
+    else
+      FTab.Locate('ID', LSonID, []);   // konum bilinmiyorsa eski davranis
   finally
     FYukleniyor := False;
+    // Locate grid'i EN ALTA kaydirir; bunun tetikledigi OnTopRecordIndexChanged olayi
+    //   yukleme bittikten SONRA (paint sirasinda) gelir ve "son satira gelindi" sanilip
+    //   yeni sayfa istenir -> sonsuz zincir (izlemede 34 ardisik sorgu). Yukleme anini
+    //   damgaliyoruz; ScrollDegisti kisa sessiz pencere icindeki olaylari yok sayar.
   end;
   SeritGuncelle;   // yeni sayfa geldi -> serit metni/gorunurlugu tazelensin
 end;
@@ -15480,12 +15640,17 @@ end;
 // Bilesenler LAZY olusturulur (Owner = bu yardimci -> form ile birlikte yok olur).
 procedure TSayfaliListe.SeritGuncelle;
 var
-  LKismi: Boolean;
+  LKismi, LSinirda: Boolean;
+  LSinir: Integer;
 begin
   LKismi := FAktif and (not FTamListe) and (FTab <> nil) and FTab.Active and
             (FTab.RecordCount >= FSinir);   // sinira dayandi -> devami olabilir
+  // TAM modda da uyari gerekir: ust sinir (Express korumasi) listeyi KESMIS olabilir.
+  LSinir   := TamSinirAl;
+  LSinirda := FAktif and FTamListe and (FTab <> nil) and FTab.Active and
+              (LSinir > 0) and (FTab.RecordCount >= LSinir);
 
-  if (not LKismi) then begin
+  if (not LKismi) and (not LSinirda) then begin
     if FSerit <> nil then FSerit.Visible := False;
     Exit;
   end;
@@ -15515,8 +15680,19 @@ begin
     FSeritYazi.Transparent := True;
   end;
 
-  FSeritYazi.Caption := Format('  Liste kısmi yüklendi: %d kayıt gösteriliyor — '+
-    'alttaki toplamlar yalnız gösterilenlere aittir.', [FTab.RecordCount]);
+  if LSinirda then begin
+    // Ust sinira dayandi: daha fazlasini cekmek SQL Express'te sorguyu bellek beklemesine
+    // sokabilir -> "Tümünü Yükle" gizlenir, kullanici filtre daraltmaya yonlendirilir.
+    FSeritTus.Visible  := False;
+    FSeritYazi.Caption := Format('  Üst sınıra ulaşıldı: %d kayıt gösteriliyor — '+
+      'devamı için arama/filtre kriterlerini daraltın (sınır: Opsiyonlar > Liste üst sınırı).',
+      [FTab.RecordCount]);
+  end
+  else begin
+    FSeritTus.Visible  := True;
+    FSeritYazi.Caption := Format('  Liste kısmi yüklendi: %d kayıt gösteriliyor — '+
+      'alttaki toplamlar yalnız gösterilenlere aittir.', [FTab.RecordCount]);
+  end;
   FSerit.Visible := True;
 end;
 

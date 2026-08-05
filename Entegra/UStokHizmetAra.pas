@@ -112,6 +112,8 @@ type
     GridDagitimLevel1: TcxGridLevel;
     LabelSerino: TLabel;
     EditSerino: TcxTextEdit;
+    LabelLotno: TLabel;
+    EditLotno: TcxTextEdit;
     DtsKategori: TDataSource;
     TabKategori: TFDQuery;
     TreeListKategori: TcxDBTreeList;
@@ -175,6 +177,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure PageControl1PageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     procedure ListeAc(Ara:Smallint);
+    function StokAramaKriteriVar: Boolean;  // stok sekmesi: bos kriter = otomatik listeleme yok
     procedure SadeceTurVeUrunIDGonder(Sender: TObject);
     procedure BtnSecClick(Sender: TObject);
     procedure cbFiyatAdiPropertiesEditValueChanged(Sender: TObject);
@@ -538,9 +541,25 @@ begin
       if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then
         TabKategori.Open;
       TreeListKategori.Visible := TabKategori.Active and (TabKategori.RecordCount>0);
+      // STOK sekmesi: bos kriterle OTOMATIK listelenmez (hizmet->stok gecisi tum stoklari
+      // dolduruyordu); kullanici arama yapinca dolar. HIZMET sekmesi bos kriterde tum
+      // listeyi getirmeye devam eder (istenen davranis).
       if not FAcilistaListelemeAtla then
-        ListeAc(1);
+        if (PageControl1.ActivePage <> SheetStok) or StokAramaKriteriVar then
+          ListeAc(1);
     end;
+end;
+
+// Stok sekmesinde herhangi bir arama kriteri dolu mu? (bos kriter = otomatik listeleme yok)
+function TStokHizmetAraDlg.StokAramaKriteriVar: Boolean;
+begin
+  Result := (Trim(EditKodu.Text) <> '') or (Trim(EditAdi.Text) <> '') or
+            (Trim(EditBarkodu.Text) <> '') or (OkunanBarkod <> '') or
+            (Trim(EditSerino.Text) <> '') or (Trim(EditLotno.Text) <> '') or
+            (PanelDetayliArama.Visible and
+              ((ComboGRUBU.Text <> '') or (ComboOZELLIK.Text <> '') or
+               (ComboMARKA.Text <> '') or (ComboMODEL.Text <> '') or
+               (ComboIcerik.Text <> '')));
 end;
 
 procedure TStokHizmetAraDlg.PageControl1PageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
@@ -668,6 +687,8 @@ begin
   LabelYer.Visible := (KalanAdetGetir) and (PageControl1.ActivePage <> SheetHizmet);
   LabelSerino.Visible := GirisCikis= FWCikis;
   EditSerino.Visible := LabelSerino.Visible;
+  LabelLotno.Visible := LabelSerino.Visible;
+  EditLotno.Visible := LabelSerino.Visible;
   if GirisCikis= FWCikis then begin
       cbFiyatAdi.RepositoryItem:= Tablo.RepFiyatAdlari;
       if (cbFiyatAdi.EditValue='0')or(cbFiyatAdi.Text='')or(cbFiyatAdi.EditValue = null) then
@@ -1327,12 +1348,13 @@ begin
       if Trim(EditAdi.Text)    <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
       if OkunanBarkod          <> '' then j.AddPair('Barkod', OkunanBarkod);
       if Trim(EditSerino.Text) <> '' then j.AddPair('Serino', Trim(EditSerino.Text));
+      if Trim(EditLotno.Text)  <> '' then j.AddPair('Lotno',  Trim(EditLotno.Text));
       if PanelDetayliArama.Visible then begin
         if ComboGRUBU.Text   <> '' then j.AddPair('GrubuID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboGRUBU.EditValue), 0)));
         if ComboOZELLIK.Text <> '' then j.AddPair('OzellikID', TJSONNumber.Create(StrToIntDef(VarToStr(ComboOZELLIK.EditValue), 0)));
         if ComboMARKA.Text   <> '' then j.AddPair('MarkaID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboMARKA.EditValue), 0)));
         if ComboMODEL.Text   <> '' then j.AddPair('ModelID',   TJSONNumber.Create(StrToIntDef(VarToStr(ComboMODEL.EditValue), 0)));
-        if ComboIcerik.Text  <> '' then j.AddPair('IcerikID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboMODEL.EditValue), 0)));
+        if ComboIcerik.Text  <> '' then j.AddPair('IcerikID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboIcerik.EditValue), 0)));  // (fix: yanlislikla ComboMODEL okunuyordu)
       end;
     end
     else  begin
@@ -1554,24 +1576,12 @@ begin
   LFiyatAdi := StrToIntDef(VarToStr(cbFiyatAdi.EditValue), 0);
   LDepoID := StrToIntDef(VarToStr(cbStokDepo.EditValue), 0);
 
+  // Paket icerigi ARTIK SP'den gelir: sp_Prog_StokHizmetAra_Paket (PG: fn_prog_stokhizmetara_paket).
+  //   Eskiden DFM'de "declare @PaketID int ... set @PaketID = :P1 ... select" batch'i vardi;
+  //   PARAMETRELI DECLARE BATCH'i ODBC surucusu PREPARE EDEMEZ (SQLDescribeParam basarisiz) ->
+  //   "COUNT field incorrect or syntax error". Dialekt SP govdesinde izole edildi.
   TabPaket.Close;
-  TabPaket.ResourceOptions.ParamCreate := True;
-  if TabPaket.FindParam('P1') <> nil then
-  begin
-    TabPaket.ParamByName('P1').DataType := ftInteger;
-    TabPaket.ParamByName('P1').AsInteger := UrunID;
-  end;
-  if TabPaket.FindParam('P2') <> nil then
-  begin
-    TabPaket.ParamByName('P2').DataType := ftInteger;
-    TabPaket.ParamByName('P2').AsInteger := LFiyatAdi;
-  end;
-  if TabPaket.FindParam('P3') <> nil then
-  begin
-    TabPaket.ParamByName('P3').DataType := ftInteger;
-    TabPaket.ParamByName('P3').AsInteger := LDepoID;
-  end;
-  TabPaket.Open;
+  TabloYenile(TabPaket, [UrunID, LFiyatAdi, LDepoID]);
 
   PaketAnaUrun := True;
   while not TabPaket.Eof do

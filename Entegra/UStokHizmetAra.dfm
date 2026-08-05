@@ -1,4 +1,4 @@
-object StokHizmetAraDlg: TStokHizmetAraDlg
+﻿object StokHizmetAraDlg: TStokHizmetAraDlg
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
@@ -109,6 +109,20 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       ParentFont = False
       Transparent = True
     end
+    object LabelLotno: TLabel
+      Left = 953
+      Top = -1
+      Width = 34
+      Height = 16
+      Caption = 'Lot No'
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Trebuchet MS'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
     object Panel6: TPanel
       Left = 1101
       Top = 1
@@ -168,7 +182,14 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       Top = 16
       TabOrder = 6
       OnKeyUp = EditAdetKeyUp
-      Width = 159
+      Width = 143
+    end
+    object EditLotno: TcxTextEdit
+      Left = 953
+      Top = 16
+      TabOrder = 7
+      OnKeyUp = EditAdetKeyUp
+      Width = 143
     end
   end
   object Panel1: TPanel
@@ -658,7 +679,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         ImageIndex = 4
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 716
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
@@ -684,7 +705,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
           ScrollbarAnnotations.CustomAnnotations = <>
           TabOrder = 0
           OnDblClick = cxDBTreeList1DblClick
-          ExplicitWidth = 716
           object cxDBTreeList1cxDBTreeListColumnID: TcxDBTreeListColumn
             Visible = False
             Caption.Glyph.SourceDPI = 96
@@ -890,7 +910,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         ImageIndex = 4
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 716
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
@@ -902,7 +922,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
           LookAndFeel.Kind = lfOffice11
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
-          ExplicitWidth = 716
           object GridDagitimView: TcxGridDBTableView
             OnDblClick = BtnSecClick
             Navigator.Buttons.CustomButtons = <>
@@ -1597,65 +1616,9 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
   object TabPaket: TFDQuery
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'declare @PaketID int'
-      'declare @FiyatAdi int'
-      'declare @DepoID int'
-      'declare @AdetID int'
-      'set @PaketID = :P1'
-      'set @FiyatAdi = :P2'
-      'set @DepoID = :P3'
       
-        'select @AdetID=CONVERT(int,DEGER) from GENINI where BOLUM=-2702 ' +
-        'and ANAHTAR='#39'Adet'#39
-      'select '
-      #9'ID=isnull(S.ID,0),'
-      #9'S.KOD,'
-      #9'AD=S.STOKADI,'
-      #9'FIYAT=isnull(SF.FIYAT,-1),'
-      #9'SF.KUR,'
-      #9'S.KDV,'
-      #9'SF.KDVDURUM,'
-      #9'S.IZLEME,'
-      
-        #9'KALAN=isnull((select SUM(SD.KALAN) from STOKDURUM SD where SD.S' +
-        'TOKID=S.ID and SD.DEPOID=@DepoID),0),'
-      #9'SF.BIRIM,'
-      #9'PD.STOK,'
-      #9'PD.ADET'
-      'from '
-      #9'PAKETDETAY PD left outer join '
-      #9'STOKLAR S on PD.URUNID=S.ID left outer join '
-      #9'STOKFIYAT SF on  SF.STOKID=S.ID and SF.BIRIM=PD.BIRIM '
-      '      --SF.PAKETID=@PaketID and'
-      #9
-      'where PD.PAKETID=@PaketID '
-      'and PD.STOK=1'
-      'and SF.FIYATADI=@FiyatAdi'
-      ''
-      'union all'
-      ''
-      'select '
-      #9'ID=isnull(M.ID,0),'
-      #9'M.KOD,'
-      #9'AD=M.AD,'
-      #9'FIYAT=isnull(F.FIYAT,-1),'
-      #9'F.KUR,'
-      #9'isnull(M.KDV,0),'
-      #9'F.KDVDURUM,'
-      #9'IZLEME=0,'
-      #9'KALAN=999999,'
-      #9'BIRIM=@AdetID,'
-      #9'PD.STOK,'
-      #9'PD.ADET'
-      'from '
-      #9'PAKETDETAY PD left outer join '
-      #9'MASRAFGELIR M on PD.URUNID=M.ID left outer join '
-      #9'FIYATLAR F on F.FIYATADI=@FiyatAdi and F.HIZMETID=M.ID'
-      #9
-      'where PD.PAKETID=@PaketID '
-      'and PD.STOK=0'
-      'and F.FIYATADI=@FiyatAdi'
-      '')
+        'exec dbo.sp_Prog_StokHizmetAra_Paket @PaketID=:P1, @FiyatAdi' +
+        '=:P2, @DepoID=:P3')
     Left = 540
     Top = 232
   end
@@ -1685,7 +1648,7 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=3, @StokID=:' +
         'PUrunID, @Tur=:PUrunTur, @RehberID=:PRehberID')
     Left = 112
-    Top = 134
+    Top = 110
   end
   object DtsSonSatislar: TDataSource
     DataSet = TabSonSatislar
