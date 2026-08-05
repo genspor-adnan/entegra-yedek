@@ -1,0 +1,278 @@
+BELGE DONUSUM SP PLANI - MSSQL
+================================
+
+1. AMAC
+-------
+Alis ve satis belgelerindeki siparis, konsinye, irsaliye, fatura,
+alis/satis fisi ve uretim fisi donusumlerini Delphi tarafinda SQL
+olusturmak yerine SQL Server stored procedure'leri ile tek transaction
+altinda gerceklestirmek.
+
+Ana kaynak kodlar:
+- Utablo.pas / BelgeDonustur
+- Utablo.pas / BelgeDonustur_DonusTipiBul
+- Utablo.pas / BelgeDonustur_BilgiAyarlari
+- Utablo.pas / BelgeDonustur_BaslikOlusur
+- Utablo.pas / BelgeDonustur_DetaySatirOlustur
+- UBelgeDonusum.pas / StokEkle
+- UFisIrsaliyeAraDlg.pas / btnIslemiTamamlaClick
+
+
+2. KAPSAM DISINDAKI DONUSUMLER
+-------------------------------
+Ilk SP surumunde asagidaki DonusumTuru kodlari desteklenmeyecek:
+
+- 404: Adisyon -> Satis fisi
+- 405: Adisyon -> Satis faturasi
+- 412: Teklif -> Alis siparisi
+- 413: Teklif -> Satis siparisi
+- 431: Uretim fisi -> Satis fisi
+- 469: Gelen konsinye -> Alis irsaliyesi
+
+412 ve 413 mevcut TeklifiSipariseDonustur akisi ile devam edecek.
+
+
+3. DESTEKLENECEK 22 DONUSUM
+---------------------------
+- 406: Alis siparisi (9) -> Alis irsaliyesi (10)
+- 407: Alis siparisi (9) -> Alis faturasi (11)
+- 478: Alis siparisi (9) -> Alis fisi (12)
+- 408: Alis irsaliyesi (10) -> Alis faturasi (11)
+- 427: Alis irsaliyesi (10) -> Alis fisi (12)
+- 409: Satis siparisi (19) -> Satis irsaliyesi (14)
+- 410: Satis siparisi (19) -> Satis faturasi (15)
+- 473: Satis siparisi (19) -> Satis fisi (16)
+- 411: Satis irsaliyesi (14) -> Satis faturasi (15)
+- 424: Satis irsaliyesi (14) -> Satis fisi (16)
+- 414: Alis siparisi (9) -> Transfer fisi (20)
+- 415: Satis siparisi (19) -> Uretim fisi urun satiri (6)
+- 420: Satis siparisi (19) -> Uretim fisi sarf satiri (6)
+- 425: Uretim fisi (6) -> Satis irsaliyesi (14)
+- 426: Uretim fisi (6) -> Satis faturasi (15)
+- 428: Satinalma talebi (101) -> Alis siparisi (9)
+- 429: Satis siparisi (19) -> Giden konsinye (119)
+- 435: Stok talebi (105) -> Transfer fisi (20)
+- 461: Gelen konsinye (109) -> Alis faturasi (11)
+- 468: Giden konsinye (119) -> Satis irsaliyesi (14)
+- 462: Giden konsinye (119) -> Satis faturasi (15)
+- 472: Giden konsinye (119) -> Satis fisi (16)
+
+
+4. STORED PROCEDURE LISTESI
+---------------------------
+Toplam 8 SP olacak: 1 mevcut, 7 yeni.
+
+1) dbo.sp_Prog_BelgeDonusum_Kaynak_Json2
+   Durum: Mevcut.
+   Gorev: Donusum ekranindaki kaynak belge ve satirlari listeler.
+   Belge olusturmaz ve veri degistirmez.
+
+2) dbo.sp_Prog_BelgeDonusum_Uygula_Json2
+   Durum: Yeni, disariya acik ana SP.
+   Gorev: Transaction yonetimi, alt SP'lerin cagrilmasi ve sonuc donusu.
+
+3) dbo.sp_Prog_BelgeDonusum_Dogrula
+   Durum: Yeni, ic SP.
+   Gorev: Rota, kaynak, hedef, cari, sube, depo, doviz, miktar,
+   stok, izleme ve belge durumu kontrolleri.
+
+4) dbo.sp_Prog_BelgeDonusum_BaslikOlustur
+   Durum: Yeni, ic SP.
+   Gorev: SIPARIS veya FATBASLIK hedef basligini olusturur. Mevcut hedef
+   verildiyse hedefin donusume uygunlugunu kontrol eder.
+
+5) dbo.sp_Prog_BelgeDonusum_SatirAktar
+   Durum: Yeni, ic SP.
+   Gorev: Kilit altinda kalan adet/miktari hesaplar, hedef detay satirlarini
+   olusturur ve yeni satir kimliklerini dogrudan alir.
+
+6) dbo.sp_Prog_BelgeDonusum_IzlemeAktar
+   Durum: Yeni, ic SP.
+   Gorev: STOKIZLEME ve STOKIZLEMEDEPO aktarimlarini seri/lot miktari
+   bazinda gerceklestirir.
+
+7) dbo.sp_Prog_BelgeDonusum_UretimAktar
+   Durum: Yeni, ic SP.
+   Gorev: 415 ve 420 rotalarindaki uretim urunu, recete ve sarf satirlarini
+   olusturur.
+
+8) dbo.sp_Prog_BelgeDonusum_Sonlandir
+   Durum: Yeni, ic SP.
+   Gorev: Belge toplamlari, KDV, doviz, irsaliye bilgileri, yorumlar,
+   maliyet ve gerekli son durum guncellemeleri.
+
+Uygulama yalnizca Kaynak_Json2 ve Uygula_Json2 SP'lerini dogrudan cagiracak.
+Diger SP'ler Uygula_Json2 tarafindan cagrilacak. Her DonusumTuru icin ayri
+SP yazilmayacak.
+
+
+5. ANA SP PARAMETRELERI
+-----------------------
+dbo.sp_Prog_BelgeDonusum_Uygula_Json2 icin onerilen parametreler:
+
+- @IstekID uniqueidentifier
+  Kullanici islemi icin tekil anahtar. Baglanti kesilmesi veya yeniden
+  denemede ayni hedef belgenin ikinci kez olusmasini engeller.
+
+- @DonusumTuru int
+  Kaynak ve hedef rotasini belirleyen mevcut kod.
+
+- @KullaniciID int
+  Kaydi yapan kullanici.
+
+- @SubeID int
+  Islemin subesi.
+
+- @KaynaklarJson nvarchar(max)
+  Bir veya daha fazla kaynak baslik ile secilen satir ve miktarlari tasir.
+
+- @HedefBaslikID int = 0
+  0 ise yeni hedef belge olusturulur. Pozitif ise mevcut hedef belgeye
+  satir eklenir.
+
+- @HedefAyarlarJson nvarchar(max) = N'{}'
+  Yeni belgenin tarih, depo, doviz, KDV, e-belge, seri ve belge numarasi
+  gibi baslik ayarlari.
+
+- @SeceneklerJson nvarchar(max) = N'{}'
+  Sadece kontrol modu, stok yetersizligi onayi ve benzeri islem secenekleri.
+
+
+6. KAYNAK VE HEDEF BELIRTME KURALI
+----------------------------------
+KaynakTablo, KaynakDetayTablo, HedefTablo ve HedefDetayTablo uygulamadan
+parametre olarak gonderilmeyecek. Bu tablolar yalnizca @DonusumTuru
+uzerinden SP tarafinda belirlenecek.
+
+Ornek:
+- DonusumTuru 410: SIPARIS/SIPARISDETAY, tur 19 -> FATBASLIK/FATURA, tur 15
+- DonusumTuru 411: FATBASLIK/FATURA, tur 14 -> FATBASLIK/FATURA, tur 15
+- DonusumTuru 429: SIPARIS/SIPARISDETAY, tur 19 -> FATBASLIK/FATURA, tur 119
+
+KaynaklarJson ornegi, tum kalan satirlar:
+[
+  { "baslikId": 1205, "tumKalan": true }
+]
+
+KaynaklarJson ornegi, secili ve kismi satirlar:
+[
+  {
+    "baslikId": 1205,
+    "satirlar": [
+      { "satirId": 4501, "adet": 2, "miktar": 20 },
+      { "satirId": 4502, "adet": 1 }
+    ]
+  }
+]
+
+Birden fazla kaynak baslik ayni hedefe tek cagrida birlestirilebilir.
+SP; REHBERID, SUBEID, depo, doviz ve KDV uyumunu kontrol eder.
+
+@HedefBaslikID=0 ise yeni belge olusturulur. Hedef turu DonusumTuru'nden
+bulunur. @HedefBaslikID>0 ise SP hedef belgeyi kilitler ve tur, cari, sube,
+depo, doviz ve duzenlenebilirlik kontrollerinden sonra satir ekler.
+
+
+7. IZLEME PARAMETRELERI
+-----------------------
+Izlemeli satirlarda kullanilacak STOKIZLEME kayitlari ve miktarlari kaynak
+satirin altinda acikca gonderilecek:
+
+{
+  "satirId": 4501,
+  "adet": 2,
+  "izlemeler": [
+    { "stokIzlemeId": 701, "adet": 1 },
+    { "stokIzlemeId": 702, "adet": 1 }
+  ]
+}
+
+SP yalnizca donusen miktari kaynak KALAN degerinden dusecek. Kismi
+donusumde kaynak izleme kaydinin tamami sifirlanmayacak.
+
+
+8. ISLEM SIRASI
+---------------
+1) IstekID daha once tamamlandiysa onceki sonuc dondurulur.
+2) Transaction baslatilir ve XACT_ABORT etkinlestirilir.
+3) DonusumTuru desteklenen rota listesinden dogrulanir.
+4) Kaynak baslik ve satirlar sabit sirayla kilitlenir.
+5) Donusen ve kalan adet/miktar transaction icinde tekrar hesaplanir.
+6) Kaynak ve hedef belge uyumu kontrol edilir.
+7) Yeni hedef baslik olusturulur veya mevcut hedef kilitlenir.
+8) Hedef detay satirlari set bazli eklenir; ID'ler OUTPUT ile alinir.
+9) YERI/YERID baglantilari uyumluluk icin yazilir.
+10) Seri/lot ve depo hareketleri aktarilir.
+11) Gerekliyse uretim recetesi ve sarf satirlari olusturulur.
+12) Belge toplamlari ve son alanlar guncellenir.
+13) Donusum islem kaydi yazilir ve transaction commit edilir.
+14) Hedef baslik ve kaynak-hedef satir eslesmeleri uygulamaya dondurulur.
+
+Herhangi bir satir hata verirse tum islem rollback olacak; bos baslik veya
+kismi izleme kaydi kalmayacak.
+
+
+9. SONUC SOZLESMESI
+-------------------
+Ana SP tek sonuc setinde asagidaki alanlari dondurecek:
+
+- BASARILI
+- HATAKODU
+- MESAJ
+- ISLEMID
+- HEDEFBASLIKID
+- HEDEFTUR
+- YENIBELGE
+- BELGENO
+- SATIRLARJSON
+- UYARILARJSON
+
+SATIRLARJSON; kaynak baslik ID, kaynak satir ID, hedef satir ID, donusen
+adet/miktar ve kalan adet/miktar bilgilerini icerecek.
+
+
+10. TEMEL TEKNIK KURALLAR
+-------------------------
+- DonusumTuru kaynak ve hedef icin tek yetkili rota bilgisi olacak.
+- Uygulamadan tablo adi veya serbest SQL alinmayacak.
+- Kalan miktar kilit altinda tekrar hesaplanacak.
+- ADET ve MIKTAR orani birlikte korunacak.
+- TUTAR, DOVIZ_TUTARI ve vergi tutarlari SP tarafinda hesaplanacak.
+- Yeni ID son kaydi sorgulayarak bulunmayacak; OUTPUT INSERTED.ID kullanilacak.
+- YERI/YERID mevcut ekranlar ve silme kontrolleri icin yazilmaya devam edecek.
+- E-fatura/e-irsaliye servis sorgusu SP icinde yapilmayacak. Uygulamada
+  belirlenen durum SP'ye gonderilecek ve lisans/kullanim kurali dogrulanacak.
+- Stok yetersizliginde SP ekranda soru sormayacak; hata veya onay gerektiren
+  sonuc dondurecek.
+- Bir istekte bir satir hata verirse diger satirlar da geri alinacak.
+
+
+11. GECIS PLANI
+---------------
+1) Rota matrisi ve parametre sozlesmesi sabitlenir.
+2) Donusum islem/iz kayit tablolari ve gerekli indeksler eklenir.
+3) Ana SP ile Dogrula, BaslikOlustur ve SatirAktar tamamlanir.
+4) IzlemeAktar ve UretimAktar eklenir.
+5) Sonlandir ile toplam ve yan etkiler tamamlanir.
+6) Utablo.BelgeDonustur ana SP'yi cagiracak ince bir istemciye donusturulur.
+7) UBelgeDonusum.StokEkle ve UFisIrsaliyeAraDlg dogrudan detay eklemek yerine
+   ayni ana SP'yi kullanir.
+8) Eski dinamik SQL akisi, sonuc karsilastirma testlerinden sonra kaldirilir.
+
+
+12. TEST KAPSAMI
+----------------
+- Desteklenen 22 rotanin tam donusumu
+- Kismi adet/miktar donusumu
+- Birden fazla kaynak belgenin tek hedefte birlestirilmesi
+- Mevcut hedef belgeye ekleme
+- Ayni kaynak satira es zamanli iki donusum istegi
+- Ayni IstekID ile yeniden deneme
+- Seri/lot tam ve kismi aktarim
+- Yetersiz stok engelleme/onay senaryolari
+- Uretim urun ve sarf satirlari
+- Doviz, KDV ve belge toplam kontrolleri
+- Ara adimda hata olusturularak tam rollback kontrolu
+- Liste SP'sindeki KALAN ile donusum sonucu kalan miktarin eslesmesi
+- Donusmus kaynak belgenin silme kontrolu
+
