@@ -673,6 +673,7 @@ var
 implementation
 
 uses
+  System.StrUtils,   // IfThen (string) - eksik kosul uyari metnini kurarken
   UVeriMotor,
   UAnaForm, JvJVCLUtils, Utablo, Fetautil, PrjConst, UKasaWizard, FetaClassExtensions, UDokumSart, UFastRap, UGenelAnaSekmeFrame,
   UGirisKutusuEx, URaporAraclari, UResim, UTabloGiris, UResimOlcumleme, IdIOHandlerSocket,LocOnFly,
@@ -1767,6 +1768,7 @@ var
   SQL: TStringList;
   i: SmallInt;
   s, Ustyazi, Altyazi: string;
+  BosKosul: string;   // degeri girilmemis kosullarin adlari (bkz. asagidaki koruma)
 begin
   if PageControl1.PageCount = 0 then
     exit;
@@ -1814,18 +1816,43 @@ begin
   if i >= 0 then
     Altyazi := Copy(SQL.Strings[i + 1], 3, 99); // alt yazı
   i := 0; // Koşulları Diziye Al
+  BosKosul := '';
   TabKosul.First;
   while not TabKosul.eof do begin
     inc(i);
     if TabKosul.FieldByName('ICERIKTURU').AsInteger = 5 then // date
        s := FormatDateTime('mm' + FormatSettings.DateSeparator + 'dd' + FormatSettings.DateSeparator + 'yyyy', StrToDateDef(TabKosul.FieldByName('DEGER').AsString,
-            Tablo.GENINI.BugunTrh)) // date
+              Tablo.GENINI.BugunTrh)) // date
     else
        s := TabKosul.FieldByName('DEGER').AsString;
+
+    // KOSUL DEGERI BOS ise SQL'e bos string gider ve sorgu BOZULUR:
+    //   '$yil$' -> ''  =>  "where year(TARIH)=  and month(TARIH)= ..."
+    //   -> "Incorrect syntax near the keyword 'and'". Once tespit et, asagida uyar.
+    if Trim(s) = '' then
+      BosKosul := BosKosul + IfThen(BosKosul = '', '', ', ') +
+                  IfThen(Trim(TabKosul.FieldByName('ACIKLAMA').AsString) <> '',
+                         TabKosul.FieldByName('ACIKLAMA').AsString,
+                         TabKosul.FieldByName('KOD_ADI').AsString);
+
     Tablo1.SQL.text := StringReplace(Tablo1.SQL.text, '$' + TabKosul.FieldByName('KOD_ADI').AsString + '$', s, [rfReplaceAll]);
     Ustyazi := StringReplace(Ustyazi, '$' + TabKosul.FieldByName('KOD_ADI').AsString + '$', s, [rfReplaceAll]);
     Altyazi := StringReplace(Altyazi, '$' + TabKosul.FieldByName('KOD_ADI').AsString + '$', s, [rfReplaceAll]);
     TabKosul.Next;
+  end;
+
+  // Eksik kosulla sorgu ACILMAZ: kullaniciya ne girmesi gerektigi soylenir. Aksi halde
+  //   bozuk SQL sunucuya gidip anlasilmaz bir sozdizimi hatasi doner.
+  if BosKosul <> '' then
+  begin
+    Application.MessageBox(
+      PChar('Bu rapor icin once kosul degeri girilmeli.' + sLineBreak + sLineBreak +
+            'Bos kosul(lar): ' + BosKosul + sLineBreak + sLineBreak +
+            'Sag ustteki kosul alanlarindan deger secip yenileyin.'),
+      PChar('Eksik Kosul'), MB_OK or MB_ICONINFORMATION);
+    Tablo1.Free;
+    Datasource1.Free;
+    Exit;
   end;
 
   Tablo1.Open;
@@ -2229,7 +2256,18 @@ begin
    SonListelenenRapor := RaporAd;
    Tablo1.Close;
    TabDokum.Close;
-   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = '''+RaporAd+'''  ';
+   // RaporAd = TIKLANAN TILE'in BILESEN adidir ve zorunlu olarak ASCII'dir (Delphi bilesen
+   //   adi Turkce harf iceremez): KDR_BORCLULAR, KDR_ALINAN_CEK, KDR_KREDILER...
+   //   DOKUMLER.RAPORADI da artik ASCII'dir (kdr_rapor_adlari_ascii.sql); ancak guncellemeyi
+   //   almamis kurulumda hala Turkce olabilir (KDR_BORÇLULAR...). Duz '=' o durumda eslesmez
+   //   ve grid BOS kalirdi. AKSAN-DUYARSIZ (CI_AI) collation Ç=C, İ=I kabul eder -> her iki
+   //   yazim da bulunur; boylece DB guncellemesi sirasi onemsiz hale gelir.
+   if AktifVeriMotor = vmPG then
+     TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''' + RaporAd + ''' '
+   else
+     TabDokum.SQL.Text := 'select * from DOKUMLER' +
+                          ' where RAPORADI COLLATE Latin1_General_CI_AI = ''' + RaporAd +
+                          ''' COLLATE Latin1_General_CI_AI ';
    TabloYenile(TabDokum, []);
    //eğer döküm varsa içeriği listeleyelim
    if TabDokum.recordcount>0 then begin
@@ -3084,7 +3122,14 @@ begin
 
    TabKDR.Close;
    TabDokum.Close;
-   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_SONUÇ''  ';
+   // Rapor adlari ASCII'dir (kdr_rapor_adlari_ascii.sql ile cevrildi); ancak guncellemeyi
+   //   almamis kurulumda ad hala Turkce olabilir -> AKSAN-DUYARSIZ (CI_AI) karsilastirma
+   //   iki yazimi da bulur (Ç=C, İ=I).
+   if AktifVeriMotor = vmPG then
+     TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_SONUC''  '
+   else
+     TabDokum.SQL.Text := 'select * from DOKUMLER' +
+                          ' where RAPORADI COLLATE Latin1_General_CI_AI = ''KDR_SONUC'' COLLATE Latin1_General_CI_AI ';
    TabloYenile(TabDokum, []);
    //eğer döküm varsa içeriği listeleyelim
    if TabDokum.recordcount>0 then begin
@@ -3231,7 +3276,14 @@ var I:smallint;
 begin
    TabKDR.Close;
    TabDokum.Close;
-   TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_STOK_SONUÇ''  ';
+   // Rapor adlari ASCII'dir (kdr_rapor_adlari_ascii.sql ile cevrildi); ancak guncellemeyi
+   //   almamis kurulumda ad hala Turkce olabilir -> AKSAN-DUYARSIZ (CI_AI) karsilastirma
+   //   iki yazimi da bulur (Ç=C, İ=I).
+   if AktifVeriMotor = vmPG then
+     TabDokum.SQL.Text := 'select * from DOKUMLER where RAPORADI = ''KDR_STOK_SONUC''  '
+   else
+     TabDokum.SQL.Text := 'select * from DOKUMLER' +
+                          ' where RAPORADI COLLATE Latin1_General_CI_AI = ''KDR_STOK_SONUC'' COLLATE Latin1_General_CI_AI ';
    TabloYenile(TabDokum, []);
    //eğer döküm varsa içeriği listeleyelim
    if TabDokum.recordcount>0 then begin
