@@ -729,12 +729,12 @@ begin
   if FArama.EditKategori.Tag>0 then
     Tablo1.SQL.Text := Tablo1.SQL.Text + ' and (select AD from KATEGORI K  where K.ID=S.EKIPMANID) = '''+FArama.EditKategori.Text+'''';
   if FArama.AraKonusu.Text <>'' then
-    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and S.KONUSU like ''%'+FArama.AraKonusu.Text+'%''';
+    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and S.KONUSU like ''%'+AramaMetniTemizle(FArama.AraKonusu.Text)+'%''';
 
   if FArama.editUrun.Text <>'' then
-    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and (select AD from EKIPMANLAR E  where E.ID=S.EKIPMANID) like ''%'+FArama.editUrun.Text+'%''';
+    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and (select AD from EKIPMANLAR E  where E.ID=S.EKIPMANID) like ''%'+AramaMetniTemizle(FArama.editUrun.Text)+'%''';
   if FArama.AraMusteri.Text <>'' then
-    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and FIRMA like ''%'+FArama.AraMusteri.Text+'%'' ';
+    Tablo1.SQL.Text := Tablo1.SQL.Text + ' and FIRMA like ''%'+AramaMetniTemizle(FArama.AraMusteri.Text)+'%'' ';
 
   if SubeVarmi then
    Tablo1.SQL.Text := Tablo1.SQL.Text + 'and S.SUBEID in('+Tablo.YetkiliSubeleriGetir(30,YetkiTur_Gorme)+') ';
@@ -896,13 +896,13 @@ begin
   if FArama.EditKategori.Tag>0 then
     SERVIS.SQL.Text := SERVIS.SQL.Text + ' and (select AD from KATEGORI K  where K.ID=S.EKIPMANID) = '''+FArama.EditKategori.Text+'''';
   if FArama.AraKonusu.Text <>'' then
-    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and S.KONUSU like '''+FArama.AraKonusu.Text+'%''';
+    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and S.KONUSU like '''+AramaMetniTemizle(FArama.AraKonusu.Text)+'%''';
   if FArama.EditSerino.Text <>'' then
-    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and S.SERINO like '''+FArama.EditSerino.Text+'%''';
+    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and S.SERINO like '''+AramaMetniTemizle(FArama.EditSerino.Text)+'%''';
   if FArama.editUrun.Text <>'' then
-    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and (select AD from EKIPMANLAR E  where E.ID=S.EKIPMANID) like '''+FArama.editUrun.Text+'%''';
+    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and (select AD from EKIPMANLAR E  where E.ID=S.EKIPMANID) like '''+AramaMetniTemizle(FArama.editUrun.Text)+'%''';
   if FArama.AraMusteri.Text <>'' then
-    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and R1.FIRMA like '''+FArama.AraMusteri.Text+'%'' ';
+    SERVIS.SQL.Text := SERVIS.SQL.Text + ' and R1.FIRMA like '''+AramaMetniTemizle(FArama.AraMusteri.Text)+'%'' ';
 
   if FArama.EditNo.Text = '' then begin //eğer no araması yapılıyorsa geçmiş kayıtlara da bakılır
       if FArama.CheckKapali.Checked then
@@ -1194,10 +1194,10 @@ begin
     end;
     if (not HizliArama) and (AMod = 4) then begin
       if (FArama.EditKategori.Tag > 0) and (Trim(FArama.EditKategori.Text) <> '') then
-        j.AddPair('KategoriAd', FArama.EditKategori.Text);
-      if Trim(FArama.AraKonusu.Text)    <> '' then j.AddPair('Konusu',  Trim(FArama.AraKonusu.Text));
-      if Trim(FArama.editUrun.Text)     <> '' then j.AddPair('Urun',    Trim(FArama.editUrun.Text));
-      if Trim(FArama.AraMusteri.Text)   <> '' then j.AddPair('Musteri', Trim(FArama.AraMusteri.Text));
+        j.AddPair('KategoriAd', AramaMetniTemizle(FArama.EditKategori.Text));
+      if Trim(FArama.AraKonusu.Text)    <> '' then j.AddPair('Konusu',  AramaMetniTemizle(FArama.AraKonusu.Text));
+      if Trim(FArama.editUrun.Text)     <> '' then j.AddPair('Urun',    AramaMetniTemizle(FArama.editUrun.Text));
+      if Trim(FArama.AraMusteri.Text)   <> '' then j.AddPair('Musteri', AramaMetniTemizle(FArama.AraMusteri.Text));
       if SubeYetki <> '' then j.AddPair('SubeYetkiList', SubeYetki);
       j.AddPair('cbListe',    TJSONNumber.Create(cbListeVal));
       j.AddPair('Kullanan',   TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
@@ -1221,7 +1221,7 @@ begin
 
     // Generic helper: @Baslik='' (Servis ek-alan yok) + @Kosullar=j (JSON); helper j'yi Free eder + TabloYenile yapar.
     Tablo.ListeSPJson(SERVIS,  'sp_Prog_Servis_Liste_Json2', '', j, LocateID);
-    j :=  nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
+    j :=   nil;   // sahiplik helper'a gecti -> finally'de tekrar Free etme
     FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (yalniz sayfali dalda etkin)
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle

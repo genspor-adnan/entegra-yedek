@@ -7,7 +7,7 @@
 -- MSSQL->PG: JSON_VALUE->->>, ISNULL/TRY_CAST->COALESCE/NULLIF+cast, LIKE(CI)->ILIKE,
 --   TOP(N)->LIMIT N, CAST('-2701'+CAST(MARKA AS VARCHAR)AS INT)->('-2701'||marka::text)::int,
 --   ROUND(x,0,1)[trunc]->trunc(x), REPLACE zinciri aynen. bit->0/1 int.
--- Metin filtreleri PARAMETRELI: $1=Kod $2=Ad $3=Barkod $4=Serino $5=CariDoviz (injection yok).
+-- Metin filtreleri PARAMETRELI: $1=Kod $2=Ad $3=Barkod $4=Serino $5=CariDoviz $6=Lotno (injection yok).
 --   B1 WHERE'de $1..$4 "IS NOT DISTINCT FROM" ile ANCHOR (SonAranan'da filtre yokken de USING
 --   sayisi sabit kalsin diye); $5 KUR'da her dalda gomulu. Sayisal/liste degerler int-cast inline.
 -- Kolonlar RETURNS tipine EXPLICIT ::cast (UNION dal tip-cakismasi guvencesi). 20 kolon.
@@ -39,6 +39,7 @@ DECLARE
     v_ad        text := NULLIF(j->>'Ad', '');
     v_barkod    text := NULLIF(j->>'Barkod', '');
     v_serino    text := NULLIF(j->>'Serino', '');
+    v_lotno     text := NULLIF(j->>'Lotno', '');
     v_grubuid   int  := NULLIF(j->>'GrubuID', '')::int;
     v_ozellikid int  := NULLIF(j->>'OzellikID', '')::int;
     v_markaid   int  := NULLIF(j->>'MarkaID', '')::int;
@@ -75,11 +76,13 @@ BEGIN
             IF v_hasbarkod THEN
                 v_filt := v_filt || ' AND (stb.barkod ILIKE ''%''||$3||''%'' OR $3 ILIKE replace(replace(replace(stb.barkod,''O'',''_''),''P'',''_''),''Q'',''_''))';
             END IF;
-            -- NOT: STOKIZLEME.SERINO MSSQL'de de GECERSIZ (dinamik-SQL'de @Serino bosken parse
-            --   edilmedigi icin gizli kalmis olu ozellik). Yalniz serino verilince eklenir (MSSQL ile
-            --   birebir davranis); normal aramada referans olmaz -> parse hatasi vermez.
+            -- SERI NO: stokserilot.serino (stokizleme'de serino kolonu YOK; serilotid FK).
             IF v_serino IS NOT NULL THEN
-                v_filt := v_filt || ' AND s.id IN (SELECT sbi.stokid FROM stokizleme sbi WHERE sbi.serino=$4)';
+                v_filt := v_filt || ' AND s.id IN (SELECT ssl.stokid FROM stokserilot ssl WHERE ssl.serino ILIKE ''%''||$4||''%'')';
+            END IF;
+            -- LOT NO: stokserilot.lotno (+lotno_ex serbest alan). $6 parametresi.
+            IF v_lotno IS NOT NULL THEN
+                v_filt := v_filt || ' AND s.id IN (SELECT ssl2.stokid FROM stokserilot ssl2 WHERE ssl2.lotno ILIKE ''%''||$6||''%'' OR ssl2.lotno_ex ILIKE ''%''||$6||''%'')';
             END IF;
             IF v_grubuid   > 0 THEN v_filt := v_filt || ' AND s.grubu='   || v_grubuid;   END IF;
             IF v_ozellikid > 0 THEN v_filt := v_filt || ' AND s.ozellik=' || v_ozellikid; END IF;
@@ -160,5 +163,5 @@ BEGIN
 
     v_sql := v_b1 || v_b2 || v_order || v_top;
 
-    RETURN QUERY EXECUTE v_sql USING v_kod, v_ad, v_barkod, v_serino, v_caridoviz;
+    RETURN QUERY EXECUTE v_sql USING v_kod, v_ad, v_barkod, v_serino, v_caridoviz, v_lotno;
 END $$;

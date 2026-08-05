@@ -38,7 +38,10 @@ DECLARE
     v_stokfiltre boolean := (v_stok IS NOT NULL AND v_stok <> 'ALL');
     q text; w text := ' WHERE F.TUR = ' || COALESCE(v_tur, 0) || ' ';
 BEGIN
-    q := 'SELECT DISTINCT
+    -- DISTINCT yalniz stok filtresi (FATURA/STOKLAR detay join'i) satir cogalttiginda gerekli.
+    -- MSSQL tarafinda kosulsuz DISTINCT tam listede buyuk bellek grant'i istiyordu; iki motor
+    -- ayni davransin diye burada da kosullu.
+    q := 'SELECT ' || CASE WHEN v_stokfiltre THEN 'DISTINCT ' ELSE '' END || '
         F.ID::integer, F.DURUM::smallint, F.ODEMEPLANI::smallint, F.FATURATARIH::timestamp,
         F.FATURANO::varchar, F.FATURASERI::varchar, F.TIPI::smallint, F.SENARYO::smallint,
         F.REHBERID::integer, F.TUR::smallint, F.SUBEID::smallint, F.SANAL::smallint, F.BASLIK::varchar,
@@ -77,7 +80,6 @@ BEGIN
         F.YAZDIRILDI::smallint, 0::integer, 0::integer, F.EFATURADURUM::smallint, F.EFATURASONUC::smallint
     FROM FATBASLIK F
         INNER JOIN REHBER R ON R.ID = F.REHBERID
-        LEFT JOIN REHBERBILGI RB ON RB.YER_ID = R.ID AND RB.YERI = 2 AND RB.ETIKET = ''Fatura Başlığı''
         LEFT JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID
         LEFT JOIN DEPOLAR DCIK ON DCIK.ID=F.CIKISDEPO
         LEFT JOIN DEPOLAR DGIR ON DGIR.ID=F.GIRISDEPO ';
@@ -102,7 +104,9 @@ BEGIN
     IF v_carifirma IS NOT NULL AND v_carifirma <> 'ALL' THEN
         w := w || ' AND (R.FIRMA ILIKE ' || quote_literal('%'||v_carifirma||'%')
               || ' OR F.BASLIK ILIKE ' || quote_literal('%'||v_carifirma||'%')
-              || ' OR (COALESCE(RB.BILGI,'''') <> '''' AND COALESCE(RB.BILGI,'''') ILIKE ' || quote_literal('%'||v_carifirma||'%') || ')) ';
+              || ' OR EXISTS (SELECT 1 FROM REHBERBILGI RB WHERE RB.YER_ID = R.ID AND RB.YERI = 2'
+              || '   AND RB.ETIKET = ' || quote_literal('Fatura Başlığı')
+              || '   AND RB.BILGI ILIKE ' || quote_literal('%'||v_carifirma||'%') || ')) ';
     END IF;
     IF v_aciklama IS NOT NULL AND v_aciklama <> 'ALL' THEN
         w := w || ' AND F.ACIKLAMA ILIKE ' || quote_literal('%'||v_aciklama||'%') || ' ';
@@ -113,6 +117,8 @@ BEGIN
               || ' OR ST.URUNNO ILIKE ' || quote_literal('%'||v_stok||'%') || ') ';
     END IF;
 
-    q := q || w || ' ORDER BY 4 DESC LIMIT ' || v_topn;
+    -- TopN=0 => sinir yok (TAM liste); LIMIT 0 bos kume dondururdu
+    q := q || w || ' ORDER BY 4 DESC LIMIT ' ||
+         CASE WHEN v_topn > 0 THEN v_topn::text ELSE 'ALL' END;
     RETURN QUERY EXECUTE q;
 END $$;

@@ -1,12 +1,4 @@
-﻿-- ============================================================
--- sp_Prog_AlisSatis_Siparis_Json2 - Siparis liste (2 PARAM JSON, SELF-CONTAINED)
---   TEK SP (wrapper YOK): @Kosullar JSON'i cozup isi KENDI icinde yapar.
---   @Baslik = SELECT ek kolonlari (eski @SelectList, app-uretimi/GUVENILIR).
---   @Kosullar ornek: '{"TopN":200,"Tur":14,"StartDate":"2026-07-01T00:00:00",
---     "EndDate":"2026-07-31T23:59:59","SubeIDList":"-1,0,1","Faturano":"",
---     "Baslik":"","CariFirma":"","Aciklama":"","Stok":""}'
--- ============================================================
-SET ANSI_NULLS ON
+﻿SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -54,15 +46,31 @@ DURUMNEREDEN = case     when (F.TUR=9)and(412 in
 (F.TUR=9)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden''     when (F.TUR=19)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then 
 ''Servisden''    when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten''    when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Üretimden''    else '''' end,   DURUMNEREYE = case  	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''     	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''   	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Siparişe''   	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''    when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fişe''     	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye''  	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	else '''' end,     TESLIMTARIHI =(Select Min(TESLIMTARIHI) from SIPARISDETAY Where SIPARISID=F.ID ), FATURA_GON_TARIHI=null,  ZARFID=null,ZARF=null,ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI,  F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0 ';
 
+    -- SIPARISDETAY/STOKLAR JOIN'i YALNIZ stok filtresi icin gerekli (SD./ST. baska yerde
+    -- kullanilmiyor). Kosulsuz join baslik basina detay sayisi kadar satir uretiyor,
+    -- DISTINCT de bunu tum kolonlar uzerinde sort/hash ile temizliyordu: TAM listede
+    -- buyuk bellek grant'i -> SQL Express'te RESOURCE_SEMAPHORE beklemesi (ekran kilitlenir).
+    DECLARE @StokJoin BIT = CASE WHEN @Stok IS NOT NULL AND @Stok <> '' AND @Stok <> 'ALL'
+                                 THEN 1 ELSE 0 END;
+
     DECLARE @SQL NVARCHAR(MAX) = '
-        SELECT DISTINCT TOP (' + CAST(@TopN AS NVARCHAR) + ') ' + @BaseSelect +
+        SELECT ' + CASE WHEN @StokJoin = 1 THEN N'DISTINCT ' ELSE N'' END
+                 + CASE WHEN @TopN > 0                          -- TopN=0 => TOP yok (TAM liste)
+                                 THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                                 ELSE N'' END + @BaseSelect +
         CASE WHEN @Baslik IS NOT NULL AND @Baslik <> '' THEN   @Baslik ELSE '' END + '
-from SIPARIS F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID  
-INNER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID 
-LEFT OUTER JOIN STOKLAR ST ON ST.ID = SD.URUNID 
-LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID 
+from SIPARIS F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID  ' +
+        CASE WHEN @StokJoin = 1 THEN '
+INNER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID
+LEFT OUTER JOIN STOKLAR ST ON ST.ID = SD.URUNID ' ELSE '' END + '
+LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID
 LEFT OUTER JOIN DEPOLAR D ON D.ID=F.CIKISDEPO
-        WHERE F.TUR = @Tur';
+        WHERE F.TUR = @Tur' +
+        -- Eski INNER JOIN SIPARISDETAY detaysiz siparisleri listeden DUSURUYORDU;
+        -- join kaldirildi, ayni suzmeyi cogaltmadan yapan EXISTS ile davranis korunur.
+        CASE WHEN @StokJoin = 1 THEN ''
+             ELSE ' AND EXISTS (SELECT 1 FROM SIPARISDETAY SD2 WITH (NOLOCK) WHERE SD2.SIPARISID = F.ID)'
+        END;
 
     IF @StartDate IS NOT NULL AND @EndDate IS NOT NULL and @StartDate <>'' AND @EndDate <> ''
         SET @SQL += ' AND F.SIPARISTARIH BETWEEN @StartDate AND @EndDate';

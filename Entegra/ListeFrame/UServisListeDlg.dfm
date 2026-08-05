@@ -1848,7 +1848,7 @@ object ServisListeDlg: TServisListeDlg
   object PopupMenuHareket: TPopupMenu
     OnPopup = PopupMenuHareketPopup
     Left = 151
-    Top = 69
+    Top = 101
     object MenuItem1: TMenuItem
       Tag = 102648
       Caption = 'Kay'#305't Kabul Mod'#252'l'#252' Geli'#351'tirme '#304'ste'#287'i'
@@ -1856,8 +1856,8 @@ object ServisListeDlg: TServisListeDlg
     end
   end
   object PopupMenuServis: TPopupMenu
-    Left = 231
-    Top = 69
+    Left = 335
+    Top = 85
     object ServisInfoMenu: TMenuItem
       Caption = 'info'
       OnClick = ServisInfoMenuClick

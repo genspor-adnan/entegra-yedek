@@ -671,6 +671,10 @@
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 103
@@ -1025,6 +1029,10 @@
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 151
@@ -1085,6 +1093,7 @@
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 193
         AnchorX = 1223
       end
       object GridYorum: TcxGrid
@@ -1176,6 +1185,7 @@
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = cxPageControl1
+    ExplicitWidth = 8
   end
   object PanelKayitSayisi: TPanel
     Left = 0
@@ -1185,6 +1195,7 @@
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 6
+    Visible = False
     object LabelKayitSayisi: TLabel
       Left = 8
       Top = 3

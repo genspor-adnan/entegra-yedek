@@ -1286,6 +1286,8 @@ resourcestring
     FTWGirisDeposuBosOlamaz = 'Giriş Deposu boş olamaz';
     FTWCikisDeposuBosOlamaz = 'Çıkış Deposu boş olamaz';
     FTWDepolarAyniOlamaz = 'Giriş Çıkış Depoları aynı olamaz';
+    FTWIleriTarihOlamaz = 'Stok transferi ileri tarihe kaydedilemez. Transfer tarihi bugünden sonra olamaz.';
+    STWIleriTarihOlamaz = 'Stok talebi ileri tarihe kaydedilemez. Talep tarihi bugünden sonra olamaz.';
     FTWTarihKucukOlamaz = 'Başlama bitişten sonra olamaz';
     FTWTarihUzakOlamaz = 'Verdiğiniz tarih o kadar uzak olamaz';
 
@@ -2239,6 +2241,10 @@ const
     Ops_GenelOpsiyon_AktarimKurumFaturalari = -10053;
     Ops_GenelOpsiyon_SifreSuresi = -10154;
     Ops_GenelOpsiyon_GridListeUzunlugu = -10155;  // sayfali listelerde SAYFA boyu (TSayfaliListe; vars. 100)
+    // "Tumunu Yukle" / filtre-siralama icin cekilen EN FAZLA satir (TSayfaliListe; vars. 5000, 0=sinirsiz).
+    // SQL Express'te sinirsiz cekim buyuk bellek grant'i ister; grant havuzu kucukse sorgu
+    // RESOURCE_SEMAPHORE'da bekler ve ekran kilitlenir -> ust sinir guvenlik supabi.
+    Ops_GenelOpsiyon_TamListeSiniri = -10156;
 
     Ops_Yedekleme_YedeklemeDizin = -10054;
     Ops_Yedekleme_YedeklemeAdi = -10055;

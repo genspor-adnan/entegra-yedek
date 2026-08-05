@@ -35,9 +35,12 @@ DECLARE
     v_carifirma text := NULLIF(j->>'CariFirma','');
     v_aciklama  text := NULLIF(j->>'Aciklama','');
     v_stok      text := NULLIF(j->>'Stok','');
+    v_stokfiltre boolean := (v_stok IS NOT NULL AND v_stok <> 'ALL');
     q text; w text := ' WHERE F.TUR = ' || COALESCE(v_tur, 0) || ' ';
 BEGIN
-    q := 'SELECT DISTINCT
+    -- SIPARISDETAY/STOKLAR join'i yalniz stok filtresinde gerekli (satir cogaltir -> DISTINCT).
+    -- Diger dallarda join de DISTINCT de kaldirildi; detaysiz siparis dusmesin diye EXISTS eklenir.
+    q := 'SELECT ' || CASE WHEN v_stokfiltre THEN 'DISTINCT ' ELSE '' END || '
         F.ID::integer, F.DURUM::smallint, F.ODEMEPLANI::smallint, F.SIPARISTARIH::timestamp,
         F.SIPARISNO::varchar, F.SIPARISSERI::varchar, F.TIPI::smallint, NULL::smallint,
         F.REHBERID::integer, F.TUR::smallint, F.SUBEID::smallint, F.BASLIK::varchar,
@@ -76,10 +79,16 @@ BEGIN
         F.YAZDIRILDI::smallint, F.ONAYLAYACAK::integer, F.ONAYLAYAN::integer, 0::smallint
     FROM SIPARIS F
         INNER JOIN REHBER R ON R.ID = F.REHBERID
-        INNER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID
-        LEFT OUTER JOIN STOKLAR ST ON ST.ID = SD.URUNID
         LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID
-        LEFT OUTER JOIN DEPOLAR D ON D.ID=F.CIKISDEPO ';
+        LEFT OUTER JOIN DEPOLAR D ON D.ID=F.CIKISDEPO '
+         || CASE WHEN v_stokfiltre
+                 THEN ' INNER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID
+                        LEFT OUTER JOIN STOKLAR ST ON ST.ID = SD.URUNID '
+                 ELSE '' END;
+
+    IF NOT v_stokfiltre THEN   -- eski INNER JOIN'in suzme etkisi (detaysiz siparis listelenmez)
+        w := w || ' AND EXISTS (SELECT 1 FROM SIPARISDETAY SD2 WHERE SD2.SIPARISID = F.ID) ';
+    END IF;
 
     IF v_start IS NOT NULL AND v_end IS NOT NULL THEN
         w := w || ' AND F.SIPARISTARIH BETWEEN ' || quote_literal(v_start) || ' AND ' || quote_literal(v_end) || ' ';
@@ -105,6 +114,8 @@ BEGIN
               || ' OR ST.URUNNO ILIKE ' || quote_literal('%'||v_stok||'%') || ') ';
     END IF;
 
-    q := q || w || ' ORDER BY 4 DESC LIMIT ' || v_topn;
+    -- TopN=0 => sinir yok (TAM liste); LIMIT 0 bos kume dondururdu
+    q := q || w || ' ORDER BY 4 DESC LIMIT ' ||
+         CASE WHEN v_topn > 0 THEN v_topn::text ELSE 'ALL' END;
     RETURN QUERY EXECUTE q;
 END $$;

@@ -230,7 +230,7 @@ type
 
 implementation
 
-uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
+uses Fetautil, ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions, PrjConst, UFastRap, URaporAraclari,
       UGenelAnaSekmeFrame, UKasalarListeFrame, LocOnFly, UBankaHareketleri,
       UBankaHesapGiris, UVeriMotor;
 
@@ -653,7 +653,7 @@ begin
       if not FArama.CheckPasifler.Checked  then
          BANKALAR.SQL.Add(' and BH.DURUM=1 ');
       if FArama.AraKod.Text <> '' then
-         BANKALAR.SQL.Add(' and (BH.HESAPNO like ''%'+FArama.AraKod.Text+'%'' or BH.HESAPADI like ''%'+FArama.AraKod.Text+'%'') ');
+         BANKALAR.SQL.Add(' and (BH.HESAPNO like ''%'+AramaMetniTemizle(FArama.AraKod.Text)+'%'' or BH.HESAPADI like ''%'+AramaMetniTemizle(FArama.AraKod.Text)+'%'') ');
       if SubeVarmi then begin
          if FArama.ComboSube.EditValue = 0 then
             BANKALAR.SQL.Add(' and BH.SUBEID in('+Tablo.YetkiliSubeleriGetir(25,YetkiTur_Gorme)+') ')

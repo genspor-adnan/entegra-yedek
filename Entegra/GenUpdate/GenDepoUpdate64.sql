@@ -1,4 +1,54 @@
-﻿CREATE OR ALTER PROCEDURE dbo.sp_Prog_Servis_Liste_Json2
+﻿SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- ============================================================
+-- GenDepoUpdate64 (musteri uygulama)
+--   SERVIS LISTESI PERFORMANS duzeltmesi.
+--
+--   SIKAYET: "Butun servislerim > Kapali servisleri listele > Baslangictan" secilince
+--            liste 12 sn suruyor / ekran yanit vermiyor.
+--
+--   TESHIS (AYDINSAAT, 34.144 servis / 127.558 servis hareketi):
+--     1) sp_Prog_Servis_Liste_Json2 TUM SERVIS tablosu icin ~15 correlated subquery + 8 join
+--        + DISTINCT hesaplayip SONRA disarida filtreleyip TOP aliyordu. TopN=100 hic
+--        limitsizden bile yavasti (row-goal ile kotu plan): 5.3 sn vs 3.8 sn.
+--     2) V_Servis_Hareket_Ozet gorunumu tum SERVISHAREKET kayitlarini gruplayip her grup icin
+--        IKI SKALER UDF (fn_TarihFarkiFormatli / fn_TarihFarkiFormatli2) calistiriyordu;
+--        LEFT JOIN edilince gorunumun TAMAMI uretiliyordu -> 34.000 x 2 UDF cagrisi.
+--     3) SERVISHAREKET.SERVISID uzerinde INDEX YOKTU (127.558 satir) -> her servis icin
+--        tam tarama. FATBASLIK.SERVISID de indekssizdi.
+--
+--   YAPILAN:
+--     a) Filtreler + TOP en icteki SERVIS taramasina indirildi (on suzme, ORDER BY ID DESC).
+--     b) Gereksiz DISTINCT kaldirildi (cogaltan join yok: FATBASLIK/REHBERILETISIM tekil,
+--        SERVISBILGI zaten ilk satirla sinirli).
+--     c) Gorunum join'i ve ROW_NUMBER'li turetilmis tablo OUTER APPLY'a cevrildi.
+--     d) Eksik indexler eklendi (asagida).
+--
+--   SONUC (AYDINSAAT): 100 kayit 5.3 sn -> 0.5 sn; tam liste 3.8 sn -> 1.7 sn.
+--   DOGRULAMA: eski/yeni SP 5 senaryoda BIREBIR ayni kayit kumesini dondurdu.
+--
+--   NOT: Yeni surum ORDER BY S.ID DESC uygular (en yeni servis ustte). Eskiden ORDER BY
+--        yoktu ve sayfa buyudukce (TSayfaliListe) hangi kayitlarin gelecegi belirsizdi.
+-- ============================================================
+
+-- ---- 1) Eksik indexler --------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+               WHERE object_id = OBJECT_ID('dbo.SERVISHAREKET') AND name = 'IX_SERVISHAREKET_SERVISID')
+    CREATE NONCLUSTERED INDEX IX_SERVISHAREKET_SERVISID ON dbo.SERVISHAREKET (SERVISID)
+        INCLUDE (PERSONEL, DURUM, BASLAMA, BITIS, BITISSEC);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+               WHERE object_id = OBJECT_ID('dbo.FATBASLIK') AND name = 'IX_FATBASLIK_SERVISID')
+    CREATE NONCLUSTERED INDEX IX_FATBASLIK_SERVISID ON dbo.FATBASLIK (SERVISID, TUR)
+        INCLUDE (FATURATARIH, FATURANO, FATURA_TUTARI)
+        WHERE SERVISID IS NOT NULL;
+GO
+
+-- ---- 2) Yeniden yazilan liste SP'si -------------------------------------------
+CREATE OR ALTER PROCEDURE dbo.sp_Prog_Servis_Liste_Json2
     @Baslik   NVARCHAR(MAX) = N'',
     @Kosullar NVARCHAR(MAX)
 AS
@@ -302,10 +352,3 @@ BEGIN
          @pMusteri = @Musteri, @pSeriNo = @SeriNo, @pTarihBas = @TarihBas, @pTarihBit = @TarihBit, @pKapaliTarih = @KapaliTarih;
 END;
 GO
-
-IF OBJECT_ID(N'dbo.sp_Prog_Servis_Liste', N'P') IS NOT NULL
-    DROP PROCEDURE dbo.sp_Prog_Servis_Liste;
-GO
-
-
-

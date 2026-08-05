@@ -52,11 +52,15 @@ DECLARE
     v_limit int := CASE WHEN v_topn > 0 THEN v_topn ELSE 200 END;
     q text;
     base_sql text;
-    w text := ' WHERE 1=1 ';
+    w text := ' WHERE 1=1 ';   -- filtreler ON SUZMEYE tasindi; burada yalniz kajoin kaliyor
     joinka text := '';
     ordr text := '';
     lim text := '';
     kajoin boolean := false;
+    -- ON SUZME (PERF): MSSQL ikizindeki ayni duzeltme. Filtreler ve LIMIT en icteki servis
+    --   taramasina inmezse, TUM servis tablosu (or. 34.000 satir) icin ~15 alt sorgu +
+    --   ozet gorunum hesaplanip SONRA filtreleniyor -> liste saniyelerce suruyor.
+    v_filt text := '';
 BEGIN
     IF v_topn > 0 THEN
         lim := ' LIMIT ' || v_topn;
@@ -93,83 +97,98 @@ BEGIN
         END IF;
         base_sql := base_sql || ') ORDER BY s0.id DESC LIMIT '||v_limit;
     ELSE
-        base_sql := 'SELECT s0.* FROM servis s0';
+        base_sql := NULL;   -- filtreler toplandiktan SONRA kurulur (asagida)
     END IF;
 
     IF v_servisno IS NOT NULL THEN
         IF v_servisnolike THEN
-            w := w || ' AND ((s.servisno ILIKE '||quote_literal(v_servisno)||')';
+            v_filt := v_filt || ' AND ((s0.servisno ILIKE '||quote_literal(v_servisno)||')';
         ELSE
-            w := w || ' AND ((s.servisno = '||quote_literal(v_servisno)||')';
+            v_filt := v_filt || ' AND ((s0.servisno = '||quote_literal(v_servisno)||')';
         END IF;
         IF v_servisnoid IS NOT NULL AND v_servisnoid <> 0 THEN
-            w := w || ' OR (s.id='||v_servisnoid||')';
+            v_filt := v_filt || ' OR (s0.id='||v_servisnoid||')';
         END IF;
-        w := w || ')';
+        v_filt := v_filt || ')';
     END IF;
     IF v_kategoriad IS NOT NULL THEN
-        w := w || ' AND (SELECT ad FROM kategori k WHERE k.id=s.ekipmanid) ILIKE '||quote_literal(v_kategoriad)||' ';
+        v_filt := v_filt || ' AND (SELECT ad FROM kategori k WHERE k.id=s0.ekipmanid) ILIKE '||quote_literal(v_kategoriad)||' ';
     END IF;
     IF v_konusu IS NOT NULL THEN
-        w := w || ' AND s.konusu ILIKE '||quote_literal('%'||v_konusu||'%')||' ';
+        v_filt := v_filt || ' AND s0.konusu ILIKE '||quote_literal('%'||v_konusu||'%')||' ';
     END IF;
     IF v_urun IS NOT NULL THEN
-        w := w || ' AND (SELECT ad FROM ekipmanlar e WHERE e.id=s.ekipmanid) ILIKE '||quote_literal('%'||v_urun||'%')||' ';
+        v_filt := v_filt || ' AND (SELECT ad FROM ekipmanlar e WHERE e.id=s0.ekipmanid) ILIKE '||quote_literal('%'||v_urun||'%')||' ';
     END IF;
     IF v_musteri IS NOT NULL THEN
-        w := w || ' AND r1.firma ILIKE '||quote_literal('%'||v_musteri||'%')||' ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM rehber rm WHERE rm.id=s0.rehberid AND rm.firma ILIKE '||quote_literal('%'||v_musteri||'%')||') ';
     END IF;
     IF v_subeyetki IS NOT NULL AND v_subeyetki ~ '^[0-9, ]+$' THEN
-        w := w || ' AND s.subeid IN ('||v_subeyetki||') ';
+        v_filt := v_filt || ' AND s0.subeid IN ('||v_subeyetki||') ';
     END IF;
     IF v_serinom IS NOT NULL THEN
         IF v_serinolike THEN
-            w := w || ' AND s.serino ILIKE '||quote_literal(v_serinom)||' ';
+            v_filt := v_filt || ' AND s0.serino ILIKE '||quote_literal(v_serinom)||' ';
         ELSE
-            w := w || ' AND s.serino = '||quote_literal(v_serinom)||' ';
+            v_filt := v_filt || ' AND s0.serino = '||quote_literal(v_serinom)||' ';
         END IF;
     END IF;
 
     IF v_cbliste = 1 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE COALESCE(shx.bitissec,0)=0 AND shx.servisid=s.id AND shx.personel='||v_kullanan||') ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE COALESCE(shx.bitissec,0)=0 AND shx.servisid=s0.id AND shx.personel='||v_kullanan||') ';
     ELSIF v_cbliste = 2 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel='||v_kullanan||') ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s0.id AND shx.personel='||v_kullanan||') ';
     ELSIF v_cbliste = 5 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel IN '
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s0.id AND shx.personel IN '
              || ' (SELECT r.id FROM rehber r INNER JOIN roller rol ON r.sinif=rol.id '
              || '  WHERE rol.departman=(SELECT rol2.departman FROM rehber r2 INNER JOIN roller rol2 ON r2.sinif=rol2.id '
              || '  WHERE r2.id='||v_kullanan||'))) ';
     ELSIF v_cbliste = 8 THEN
-        w := w || ' AND s.subeid='||v_subeidf||' ';
+        v_filt := v_filt || ' AND s0.subeid='||v_subeidf||' ';
     END IF;
 
     IF v_durumvar = 1 THEN
-        w := w || ' AND s.durum='||v_durum||' ';
+        v_filt := v_filt || ' AND s0.durum='||v_durum||' ';
     END IF;
     IF v_durumvar = 1 AND v_sorumlutag > 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.durum='||v_durum||' AND shx.personel='||v_sorumlutag||') ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s0.id AND shx.durum='||v_durum||' AND shx.personel='||v_sorumlutag||') ';
     ELSIF v_durumvar = 0 AND v_sorumlutag > 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.personel='||v_sorumlutag||') ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s0.id AND shx.personel='||v_sorumlutag||') ';
     ELSIF v_durumvar = 1 AND v_sorumlutag = 0 THEN
-        w := w || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s.id AND shx.durum='||v_durum||') ';
+        v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM vservishareket shx WHERE shx.servisid=s0.id AND shx.durum='||v_durum||') ';
     END IF;
 
     IF v_servisno IS NULL AND v_serinom IS NULL THEN
         IF v_kapali = 1 THEN
             IF v_tamamlanan = 1 THEN
-                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR s.baslamatarihi::date = current_date) ';
+                v_filt := v_filt || ' AND (COALESCE(s0.ackapa,0)=0 OR s0.baslamatarihi::date = current_date) ';
             ELSIF v_tamamlanan = 19000 THEN
-                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR (s.baslamatarihi BETWEEN '||quote_nullable(v_tarihbas)||'::timestamp AND '||quote_nullable(v_tarihbit)||'::timestamp)) ';
+                v_filt := v_filt || ' AND (COALESCE(s0.ackapa,0)=0 OR (s0.baslamatarihi BETWEEN '||quote_nullable(v_tarihbas)||'::timestamp AND '||quote_nullable(v_tarihbit)||'::timestamp)) ';
             ELSE
-                w := w || ' AND (COALESCE(s.ackapa,0)=0 OR s.baslamatarihi >= '||quote_nullable(v_kapalitarih)||'::timestamp) ';
+                v_filt := v_filt || ' AND (COALESCE(s0.ackapa,0)=0 OR s0.baslamatarihi >= '||quote_nullable(v_kapalitarih)||'::timestamp) ';
             END IF;
         ELSE
-            w := w || ' AND s.ackapa = 0 ';
+            v_filt := v_filt || ' AND s0.ackapa = 0 ';
         END IF;
+    END IF;
+
+    -- Genel dal: filtreler + LIMIT en ice; deterministik siralama (id DESC = en yeni ustte)
+    --   sayfalama icin sart (TSayfaliListe LIMIT'i buyuterek ayni sorguyu tekrar cagirir).
+    IF base_sql IS NULL THEN
+        base_sql := 'SELECT s0.* FROM servis s0 WHERE 1=1 ' || v_filt || ' ORDER BY s0.id DESC';
+        IF v_topn > 0 THEN
+            base_sql := base_sql || ' LIMIT ' || v_topn;
+        END IF;
+    ELSE
+        -- servisno/serino ya da Son/Sik Aranan dali: kendi on suzmesi var, filtreler eklenir
+        base_sql := 'SELECT * FROM (' || base_sql || ') b0 WHERE 1=1 '
+                    || replace(v_filt, 's0.', 'b0.');
     END IF;
 
     IF NOT kajoin AND v_orderby IS NOT NULL THEN
         ordr := v_orderby;
+    ELSIF NOT kajoin AND v_orderby IS NULL THEN
+        ordr := 's.id DESC';   -- MSSQL ile ayni: on suzme sirasi disarida da korunur
     END IF;
 
     q := 'WITH base AS ('||base_sql||')
@@ -200,7 +219,12 @@ BEGIN
               (SELECT g.anahtar FROM genini g WHERE g.bolum=-3005 AND g.deger=s.onaysekli LIMIT 1) AS onaysekliad,
               fb.faturatarih, fb.faturano, fb.fatura_tutari, ri.ad AS servis_adresi
           FROM base s
-          LEFT JOIN v_servis_hareket_ozet sh ON sh.servisid=s.id
+          -- NOT: MSSQL tarafinda bu gorunum her grup icin IKI SKALER UDF calistirdigi icin
+          --   OUTER APPLY yapildi; PG surumu ayni hesabi saf SQL (CASE) ile yapar, skaler UDF
+          --   yoktur. Asil kazanc zaten ON SUZMEDE.
+          LEFT JOIN LATERAL (SELECT o.baslama, o.bitis, o.toplam_sure, o.calisma_suresi
+                               FROM v_servis_hareket_ozet o
+                              WHERE o.servisid = s.id) sh ON TRUE
           LEFT JOIN rehber r1 ON r1.id=s.rehberid
           LEFT JOIN rehber rp ON rp.id=s.mus_ilgili AND rp.grup=334
           LEFT JOIN LATERAL (
@@ -210,7 +234,15 @@ BEGIN
               ORDER BY fb1.id DESC
               LIMIT 1
           ) fb ON true
-          LEFT JOIN (SELECT sb2.*, row_number() OVER (PARTITION BY sb2.servisid ORDER BY sb2.id) AS sirano FROM servisbilgi sb2 WHERE sb2.servistur=210) sb ON sb.sirano=1 AND sb.servisid=s.id
+          -- row_number li turetilmis tablo TUM servisbilgi icin hesaplaniyordu; ilk satiri
+          --   satir basina getiren LATERAL ayni sonucu index ile verir (apostrof YOK: bu metin
+          --   dinamik SQL dizgisinin icinde).
+          LEFT JOIN LATERAL (
+              SELECT sb2.aciklama, sb2.cozum, sb2.servislisteid
+                FROM servisbilgi sb2
+               WHERE sb2.servisid = s.id AND sb2.servistur = 210
+               ORDER BY sb2.id
+               LIMIT 1) sb ON TRUE
           LEFT JOIN servisliste sl ON sl.id=sb.servislisteid
           LEFT JOIN rehberiletisim ri ON ri.rehberid=s.rehberid AND ri.id=s.servisadresi
           LEFT JOIN rehber r7 ON r7.id=s.ekleyen '

@@ -183,6 +183,10 @@ function ResizeJPG(var oJPG: TJpegImage; Percent, Quality: integer): integer;
 function JPGKucult(var oJPG: TJpegImage; Pixel:integer): integer;
 function RoundN(x: Extended; d: Integer): Extended;
 function SifreKontrolu(OncekiSifre,inputStr,inputStr2 : string) : string;
+/// Arama kutusundan gelen metni SQL'e GOMULMEYE hazirlar: tek tirnak ve ters egik
+/// cizgi TEMIZLENIR (kullanici tirnak yazarsa sorgu kirilmasin / hata cikmasin).
+/// Parametreli sorgularda gerek yoktur; literal birlestiren eski arama kodlari icindir.
+function AramaMetniTemizle(const AMetin: string): string;
 
 const
   DataFile = 'Datgen.dll';
@@ -3307,6 +3311,17 @@ function RoundN(x: Extended; d: Integer): Extended;
       Result := (Int(x) + Int(Frac(x) * 2)) * t[-d];
     end;
   end;
+
+function AramaMetniTemizle(const AMetin: string): string;
+// Arama kutusuna tirnak yazilinca (or. cari adi "5'li paket") literal birlestiren eski
+//   arama SQL'leri kiriliyor ve ekran hata veriyordu. Tirnagi ATIYORUZ (ikilemek yerine):
+//   arama LIKE ile yapildigi icin tirnaksiz metin yine dogru kaydi bulur, kullanici da
+//   hata gormez. Ters egik cizgi de temizlenir (LIKE ESCAPE / PG dizgi kacisi tuzagi).
+begin
+  Result := StringReplace(AMetin, '''', '', [rfReplaceAll]);
+  Result := StringReplace(Result, '\', '', [rfReplaceAll]);
+  Result := Trim(Result);
+end;
 
 function SifreKontrolu(OncekiSifre,inputStr,inputStr2 : string):string;
 var

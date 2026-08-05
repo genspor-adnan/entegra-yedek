@@ -50,9 +50,19 @@ CREATE TABLE #SubeIDs (ID SMALLINT);
 
 
 
+    -- Stok filtresi FATURA/STOKLAR detay JOIN'i ekler (baslik basina COK satir) -> yalniz
+    -- o durumda DISTINCT gerekir. DISTINCT tum kolonlar uzerinde sort/hash demek: TAM
+    -- listede (TopN=0) 50 bin genis satirda buyuk bellek grant'i ister ve SQL Express'te
+    -- RESOURCE_SEMAPHORE'da sonsuz bekler (ekran kilitlenir). Diger dallarda kaldirildi.
+    DECLARE @StokJoin BIT = CASE WHEN @Stok IS NOT NULL AND @Stok <> '' AND @Stok <> 'ALL'
+                                 THEN 1 ELSE 0 END;
+
     DECLARE @SQL NVARCHAR(MAX) = '
 
-    SELECT DISTINCT TOP (' + CAST(@TopN AS NVARCHAR(20)) + ') ' + '
+    SELECT ' + CASE WHEN @StokJoin = 1 THEN N'DISTINCT ' ELSE N'' END
+             + CASE WHEN @TopN > 0                              -- TopN=0 => TOP yok (TAM liste)
+                             THEN N'TOP (' + CAST(@TopN AS NVARCHAR(20)) + N') '
+                             ELSE N'' END + '
 
     F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.SENARYO,F.REHBERID,F.TUR,F.SUBEID,F.SANAL,F.BASLIK, FATURA_MATRAHI, 
 
@@ -128,7 +138,6 @@ FROM FATBASLIK F WITH (NOLOCK)
 
     INNER JOIN REHBER R ON R.ID = F.REHBERID
 
-	LEFT JOIN REHBERBILGI RB ON RB.YER_ID = R.ID AND RB.YERI = 2 AND RB.ETIKET = ''Fatura Başlığı''
 
     LEFT JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID
 
@@ -178,7 +187,15 @@ FROM FATBASLIK F WITH (NOLOCK)
 
     IF @CariFirma IS NOT NULL AND @CariFirma <> '' AND @CariFirma <> 'ALL'
 
-        SET @SQL += ' AND (R.FIRMA LIKE ''%'' + @CariFirma + ''%'' OR F.BASLIK LIKE ''%'' + @CariFirma + ''%'' OR (ISNULL(RB.BILGI,'''') <> '''' AND ISNULL(RB.BILGI,'''') LIKE ''%'' + @CariFirma + ''%''))';
+        -- REHBERBILGI eskiden LEFT JOIN idi: ayni cariye ait birden cok "Fatura Başlığı"
+        -- satiri baslik satirini COGALTIR (bu yuzden DISTINCT gerekiyordu). EXISTS ile
+        -- cogaltma yok, join yalniz bu filtre kullanildiginda calisir.
+        SET @SQL += ' AND (R.FIRMA LIKE ''%'' + @CariFirma + ''%'' OR F.BASLIK LIKE ''%'' + @CariFirma + ''%''
+                       OR EXISTS (SELECT 1 FROM REHBERBILGI RB WITH (NOLOCK)
+                                  WHERE RB.YER_ID = R.ID AND RB.YERI = 2
+                                    AND RB.ETIKET = ''Fatura Başlığı''
+                                    AND ISNULL(RB.BILGI,'''') <> ''''
+                                    AND RB.BILGI LIKE ''%'' + @CariFirma + ''%''))';
 
 
 

@@ -441,7 +441,7 @@ var
 
 implementation
 
-uses  UVeriMotor, ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
+uses  Fetautil, UVeriMotor, ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
   Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
   UEBelgeAliasServis, UEBelgeOlusturucu, UEBelgeMesajDlg, UIzibizRest,
@@ -558,6 +558,9 @@ begin
 end;
 
 procedure TFaturalarDlg._KayitSayisiGuncelle;
+// PanelKayitSayisi artik GIZLI (kullanici istegi: gridin altindaki "Kayıt Sayısı" seridi
+// kaldirildi). Panel/label duruyor: e-Fatura senkronizasyonu ilerlemesini gosteriyor,
+// o islem suresince gecici olarak gorunur yapilir (BtnEFaturaGuncelleClick).
 var
   LSay: Integer;
 begin
@@ -627,7 +630,7 @@ var
   procedure YazdirmayaHazirlaEPosta(AFastReport: TfrxReport);
   var i:Integer;
   begin
-    TabloYenile(SIPARIS,[FATBASLIK.Fields[0].AsString]);
+    TabloYenile(SIPARIS, [FATBASLIK.Fields[0].AsString]);
     TabloYenile(SIPARISDETAY,[FATBASLIK.Fields[0].AsString]);
     frxSIPARIS.DataSet := SIPARIS;
     Tablo.TabMusteri.Close;
@@ -808,8 +811,8 @@ begin
     SQLPart11 :=  ' where 1=1'+SQLEk;
         if FArama.AraKod.Text<>'' then SQLPart11 := SQLPart11+' and (R.KOD like ''%'+Trim(FArama.AraKod.Text)+'%'' or R.FIRMA like ''%'+Trim(FArama.AraKod.Text)+'%'')';
 //        if FArama.AraStok.Text<>'' then SQLPart11 := SQLPart11+' and (S.KOD like ''%'+Trim(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+Trim(FArama.AraStok.Text)+'%'')';
-        if FArama.AraStok.Text<>'' then SQLPart11 := SQLPart11+' and (S.KOD like ''%'+Trim(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+Trim(FArama.AraStok.Text)+'%'''+
-                                        ' or S.URUNNO like ''%'+Trim(FArama.AraStok.Text)+'%'')';
+        if FArama.AraStok.Text<>'' then SQLPart11 := SQLPart11+' and (S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'''+
+                                        ' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'')';
         if FArama.AraAciklama.Text<>'' then SQLPart11 := SQLPart11+' and ISNULL(F.ACIKLAMA,'''') like ''%'+Trim(FArama.AraAciklama.Text)+'%''';
         if FArama.AraBaslik.Text<>'' then SQLPart11 := SQLPart11+' and isnull(F.BASLIK,'''') like ''%'+Trim(FArama.AraBaslik.Text)+'%'' ';
         if FArama.AraFaturaNo.Text<>'' then begin
@@ -865,8 +868,8 @@ begin
 //        ' and ISNULL(SIPARISNO,'''') like ''%'+FArama.AraFaturaNo.Text+'%'' '+SQLEk ;
     SQLPart21 :=  ' where 1=1'+SQLEk;
         if FArama.AraKod.Text<>'' then SQLPart21 := SQLPart21+' and (R.KOD like ''%'+Trim(FArama.AraKod.Text)+'%'' or R.FIRMA like ''%'+Trim(FArama.AraKod.Text)+'%'')';
-        if FArama.AraStok.Text<>'' then SQLPart21 := SQLPart21+' and (S.KOD like ''%'+Trim(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+Trim(FArama.AraStok.Text)+'%'''+
-                                        ' or S.URUNNO like ''%'+Trim(FArama.AraStok.Text)+'%'')';
+        if FArama.AraStok.Text<>'' then SQLPart21 := SQLPart21+' and (S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'''+
+                                        ' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'')';
         if FArama.AraAciklama.Text<>'' then SQLPart21 := SQLPart21+' and ISNULL(F.ACIKLAMA,'''') like ''%'+Trim(FArama.AraAciklama.Text)+'%''';
         if FArama.AraBaslik.Text<>'' then SQLPart21 := SQLPart21+' and isnull(F.BASLIK,'''') like ''%'+Trim(FArama.AraBaslik.Text)+'%'' ';
         if FArama.AraFaturaNo.Text<>'' then begin
@@ -882,7 +885,7 @@ begin
          FATBASLIK.SQL.Add(' and FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
                               ' FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
         if FArama.AraStok.Text<> '' then
-           FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+FArama.AraStok.Text+'%'' or S.KOD like ''%'+FArama.AraStok.Text+'%'' or S.URUNNO like ''%'+Trim(FArama.AraStok.Text)+'%''  or MG.AD like ''%'+FArama.AraStok.Text+'%'' or MG.KOD like ''%'+FArama.AraStok.Text+'%''  )');
+           FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
         if SubeVarmi then
            FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
 //      FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,FATURA_MATRAHI,F.SUBEID, KDV_TUTARI,(KDV_TUTARI/nullif(DOVIZKUR,0)),FATURA_TUTARI,F.KUR,' + #13#10 +
@@ -895,7 +898,7 @@ begin
          FATBASLIK.SQL.Add(' and SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
                               ' SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
       if FArama.AraStok.Text<> '' then
-          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+FArama.AraStok.Text+'%'' or S.KOD like ''%'+FArama.AraStok.Text+'%''  or S.URUNNO like ''%'+Trim(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+FArama.AraStok.Text+'%'' or MG.KOD like ''%'+FArama.AraStok.Text+'%''  )');
+          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
       if SubeVarmi then
           FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
 
@@ -914,7 +917,7 @@ begin
          FATBASLIK.SQL.Add(' and SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
                               ' SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
       if FArama.AraStok.Text<> '' then
-          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+FArama.AraStok.Text+'%'' or S.KOD like ''%'+FArama.AraStok.Text+'%''  or S.URUNNO like ''%'+Trim(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+FArama.AraStok.Text+'%'' or MG.KOD like ''%'+FArama.AraStok.Text+'%''  )');
+          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
       if SubeVarmi then
           FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
 //         FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,SIPARISTARIH,SIPARISNO,F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,SIPARIS_MATRAHI,F.SUBEID,(KDV_TUTARI/nullif(DOVIZKUR,0)),'+
@@ -1516,6 +1519,7 @@ var
 begin
   LogSistemIslem('E-Fatura güncelleme basıldı');
   LEskiCaption := LabelKayitSayisi.Caption;
+  PanelKayitSayisi.Visible := True;   // ilerleme seridi yalniz bu islem boyunca gorunur
   LIlerleme :=
     procedure(const AMevcut, ATotal: Integer; const ABilgi: string)
     begin
@@ -1564,6 +1568,7 @@ begin
   finally
     Screen.Cursor := crDefault;
     LabelKayitSayisi.Caption := LEskiCaption;
+    PanelKayitSayisi.Visible := False;   // serit tekrar gizlensin
   end;
 
   LMesaj := 'Senkronizasyon tamamlandi.' + sLineBreak +
