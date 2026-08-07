@@ -390,9 +390,8 @@ object UTSKontrolDlg: TUTSKontrolDlg
     WordWrap = False
   end
   object TabUTSKontrol: TFDQuery
-    Connection = Tablo.FDCnn
     AfterOpen = TabUTSKontrolAfterOpen
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       
         'select UK.ID, UK.TARIH, SI.STOKID,UNO=S.URUNNO,S.KOD, AD=S.STOKA' +
@@ -418,8 +417,8 @@ object UTSKontrolDlg: TUTSKontrolDlg
   end
   object DtsUTSKontrol: TDataSource
     DataSet = TabUTSKontrol
-    Left = 160
-    Top = 97
+    Left = 152
+    Top = 145
   end
   object PopupSeriNo: TPopupMenu
     Left = 264
@@ -435,4 +434,3 @@ object UTSKontrolDlg: TUTSKontrolDlg
     end
   end
 end
-

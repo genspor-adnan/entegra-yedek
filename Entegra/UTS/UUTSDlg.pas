@@ -448,7 +448,10 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
 //           if n > 0 then
 //              for j := 0 to n-1 do
 //                  Adet := Adet + aski.snc.lst[0].adt;
-           n := length(aski.SNC.LST);
+           // TAskiSonuc.SNC bir NESNE: yanitta SNC yoksa nil kalir -> nil alan okumasi = AV
+           n := 0;
+           if (aski <> nil) and (aski.SNC <> nil) then
+              n := length(aski.SNC.LST);
            if n > 0 then
               for j := 0 to n-1 do
                  Adet := Adet + aski.SNC.LST[j].ADT;
@@ -614,6 +617,7 @@ var
             if k = nil then
                raise Exception.Create('Okunamadı');
 
+            n := 0;   // SNC yoksa n eski degerinde kalip donguyu surdurmesin
             if k.SNC <> nil then
             begin
               n := length(k.SNC.LST);
@@ -658,7 +662,9 @@ var
                                       TMU, TAskiSonuc));         //     TModel.Create
             if k = nil then
                raise Exception.Create('Okunamadı');
-            n := length(k.SNC.LST);
+            n := 0;
+            if k.SNC <> nil then
+               n := length(k.SNC.LST);
             for i := 0 to n - 1 do
                  k.SNC.LST[i].toDataSet(MemDataSorgu);
             Result := n=10;
@@ -845,7 +851,7 @@ var
                                   TMU, TBildirimSonucUrun));         //     TModel.Create
         if k = nil then
            raise Exception.Create('Okunamadı')
-        else //if((k.SNC <> nil) and (k.SNC.LST <> nil)) then
+        else if (k.SNC <> nil) then
             modelArrayToDataSet(k.SNC.LST, MemDataSorgu);
         {n := length(k.SNC);
         for i := 0 to n - 1 do

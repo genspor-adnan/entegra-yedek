@@ -18,7 +18,9 @@ uses
   dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
   dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, cxCalendar,
   cxMaskEdit, cxDropDownEdit, cxImageComboBox, dxDateRanges,
-  dxScrollbarAnnotations;
+  dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TUTSKontrolDlg = class(TForm)
@@ -121,7 +123,7 @@ procedure TUTSKontrolDlg.UTSdenAdetKontrol;
 var
 	       k : TUrunSonuc;
          aski : TAskiSonuc;
-         i,j,n,GelenAdet,AskiAdet,Sonuc : Integer;
+         j,n,GelenAdet,AskiAdet,Sonuc : Integer;
          Adres,GelenURT,GelenSKT : string;
     procedure Sorgula(BildirimTur:Integer);
     var
@@ -132,42 +134,55 @@ var
         TMU.LNO := TabUTSKontrol.FieldByName('LOTNO').AsString;//'231316';//EditLNO.Text;
         TMU.SNO := '';//EditSNO.Text;
         Tablo.TablodanSorguAc(1,'  select ADRESSORGU from [UTS_BILDIRIM_TUR] where ID='+IntToStr(BildirimTur));
+        if Tablo.Query1.IsEmpty then
+           raise Exception.Create('UTS bildirim türü tanımı bulunamadı (UTS_BILDIRIM_TUR ID=' + IntToStr(BildirimTur) + ')');
         Adres := Tablo.Query1.Fields[0].AsString;  //  utsServer
+        if Trim(Adres) = '' then
+           raise Exception.Create('UTS sorgu adresi boş (UTS_BILDIRIM_TUR ID=' + IntToStr(BildirimTur) + ')');
 
         case BildirimTur of
         45 : begin //tekil sorgu
                  k := TUrunSonuc(utsTalkMC(Adres, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
-                                  TMU, TUrunSonuc));         //     TModel.Create
+                                   TMU, TUrunSonuc));         //     TModel.Create
                  if k = nil then raise Exception.Create('Okunamadı');
              end;
         52 : begin
                  //TMU.KUN := UTSFirmaNo;
                  TMU.ADT := 100;
                  aski := TAskiSonuc(utsTalkMC(Adres, TMU, TAskiSonuc)); //askı sorgu
+                 if aski = nil then raise Exception.Create('Askı sorgusu okunamadı');
              end;
         end;
         //TMU.Free;
     end;
 
 begin
+        k    := nil;
+        aski := nil;
+        GelenURT := '';
+        GelenSKT := '';
         Sorgula(45);//tekil ürün sorgusu
         GelenAdet := 0;
         AskiAdet := 0;
         n := length(k.SNC);
         if n > 0 then begin
-           GelenURT := k.SNC[i].URT;
-           GelenSKT := k.SNC[i].SKT;
+           // ilk kalemin URT/SKT'si (onceden atanmamis "i" degiskeni kullaniliyordu)
+           GelenURT := k.SNC[0].URT;
+           GelenSKT := k.SNC[0].SKT;
 
 
            for j := 0 to n-1 do
                  GelenAdet := GelenAdet + k.SNC[j].ADT;
         //
            Sorgula(52);//giden askı sorgusu
-           n := length(aski.SNC.LST);
-
-           if n > 0 then
-              for j := 0 to n-1 do
-                 AskiAdet := AskiAdet + aski.SNC.LST[j].ADT;
+           // TAskiSonuc.SNC bir NESNE (TAskiSNC): yanitta SNC yoksa nil kalir ->
+           //   "aski.SNC.LST" nil nesne okumasi = access violation. Once nil kontrolu.
+           if (aski <> nil) and (aski.SNC <> nil) then begin
+              n := length(aski.SNC.LST);
+              if n > 0 then
+                 for j := 0 to n-1 do
+                    AskiAdet := AskiAdet + aski.SNC.LST[j].ADT;
+           end;
         end;
         if TabUTSKontrol.FieldByName('ADET').AsInteger > (GelenAdet - AskiAdet) then
            Sonuc:=0

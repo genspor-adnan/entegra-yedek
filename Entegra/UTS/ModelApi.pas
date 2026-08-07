@@ -423,12 +423,25 @@ procedure       TModel.byJson(json: String);
 var
 	tVal: TValue;
 	jObj: TJSONObject;
+	jVal: TJSONValue;
 begin
 	jObj := nil;
 	enterContext;
 try
 	TValue.MakeWithoutCopy(@self, self.ClassType.ClassInfo, tVal);
-	jObj := TJSONObject(TJSONObject.ParseJSONValue(json));
+	// ParseJSONValue gecersiz/JSON-olmayan govdede (yetki hatasi, HTML, bos yanit) nil
+	//   ya da nesne-disi bir deger dondurur. Kontrolsuz cast + jsonToObj = nil alan
+	//   okumasi (access violation). Once dogrula, anlasilir hata ver.
+	jVal := TJSONObject.ParseJSONValue(json);
+	if (not (jVal is TJSONObject)) then
+	begin
+		if (jVal <> nil) then
+			jVal.Free;
+		raise Exception.Create(
+			'E_NOT_JSON_OBJECT: sunucu yanıtı JSON nesnesi değil -> '
+			+ Copy(TrimLeft(json), 1, 300));
+	end;
+	jObj := TJSONObject(jVal);
 	jsonToObj(jObj, tVal);
 finally
 	if (jObj <> nil) then
@@ -1509,7 +1522,11 @@ var
 	fNam: String;                               	// Field name.
 	fKnd: TTypeKind;                                // Field type.
 begin
+	if (j = nil) then                               // No json -> nothing to fill.
+		exit(v);
 	mObj := v.AsObject;                            	// Unpack model.
+	if (mObj = nil) then
+		exit(v);
 	rLst := fetchModel(mObj);                     	// Get RTTI list.
 	for rFld in rLst do                             // Iterate RTTI list.
 	begin
@@ -1528,6 +1545,15 @@ begin
 		end;
 		fVal := rFld.GetValue(mObj);				// Get field as template.
 		fKnd := fVal.Kind;							// Get field kind.
+		// TIP UYUSMAZLIGI KORUMASI: model alani dizi/nesne bekliyor ama JSON'da
+		//   baska tipte geldiyse hard-cast (TJSONArray(jVal).Size) gecersiz bellek
+		//   okur = access violation. Uyusmayan alani bos birak, digerlerine devam et.
+		if ((fKnd = tkDynArray) and (not (jVal is TJSONArray)))
+		or ((fKnd = tkClass)    and (not (jVal is TJSONObject))) then
+		begin
+			rFld.SetValue(mObj, nil);
+			continue;
+		end;
 		case fKnd of                                // Prepare if obj. or array.
 		tkUnknown,
 		tkClass:	fVal :=	prepJ2O(j, fVal, rFld);
