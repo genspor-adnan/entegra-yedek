@@ -1,4 +1,4 @@
-object FaturalarAramaFrame: TFaturalarAramaFrame
+﻿object FaturalarAramaFrame: TFaturalarAramaFrame
   Left = 0
   Top = 0
   Width = 312
@@ -8,9 +8,60 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   ParentBackground = False
   ParentColor = False
   TabOrder = 0
+  object ToolBarAranan: TToolBar
+    Left = 0
+    Top = 0
+    Width = 312
+    Height = 28
+    AutoSize = True
+    ButtonHeight = 24
+    ButtonWidth = 62
+    Caption = 'AletCubugu'
+    Color = clTeal
+    DrawingStyle = dsGradient
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    Font.Charset = TURKISH_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Trebuchet MS'
+    Font.Style = []
+    GradientEndColor = 11776947
+    GradientStartColor = 14540253
+    HotTrackColor = 65408
+    Images = Tablo.PNGImageList2
+    List = True
+    ParentColor = False
+    ShowCaptions = True
+    ParentFont = False
+    TabOrder = 9
+    Transparent = True
+    object LabelTumKayitlar: TToolButton
+      Left = 0
+      Top = 0
+      Caption = 'T'#252'm'
+      ImageIndex = 32
+      ImageName = 'PngImageListe'
+    end
+    object LabelSonArananlar: TToolButton
+      Tag = 5
+      Left = 62
+      Top = 0
+      Caption = 'Son'
+      ImageIndex = 21
+      ImageName = 'PngImage21'
+    end
+    object LabelSikArananlar: TToolButton
+      Tag = 3
+      Left = 124
+      Top = 0
+      Caption = 'S'#305'k'
+      ImageIndex = 31
+      ImageName = 'PngImageYildiz'
+    end
+  end
   object LabelPNO: TcxLabel
     Left = 0
-    Top = 25
+    Top = 40
     Caption = '&Belge No'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -23,7 +74,7 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object Label4: TcxLabel
     Left = 0
-    Top = 49
+    Top = 64
     Caption = 'Cari &Kod/'#220'nvan'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -36,7 +87,7 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object Label6: TcxLabel
     Left = 0
-    Top = 126
+    Top = 141
     Caption = '&Notlar'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -49,14 +100,14 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object EditCARIID: TcxLabel
     Left = 119
-    Top = 210
+    Top = 225
   end
   object Panel1: TPanel
     Left = 2
-    Top = 179
+    Top = 194
     Width = 198
     Height = 111
-    TabOrder = 6
+    TabOrder = 5
     object Label2: TcxLabel
       Left = 0
       Top = 3
@@ -127,7 +178,7 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object CheckTarihAralik: TcxCheckBox
     Left = 118
-    Top = 153
+    Top = 168
     Caption = 'Tarih Aral'#305#287#305
     ParentFont = False
     State = cbsChecked
@@ -138,24 +189,24 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
     Style.Font.Style = []
     Style.TextColor = clNavy
     Style.IsFontAssigned = True
-    TabOrder = 7
+    TabOrder = 6
     Transparent = True
   end
   object AraFaturaNo: TcxTextEdit
     Left = 83
-    Top = 25
+    Top = 40
     TabOrder = 0
     Width = 115
   end
   object AraAciklama: TcxTextEdit
     Left = 83
-    Top = 126
+    Top = 141
     TabOrder = 4
     Width = 115
   end
   object cxLabel1: TcxLabel
     Left = 0
-    Top = 100
+    Top = 115
     Caption = #220'r'#252'n Kod/Ad'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -168,13 +219,13 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object AraStok: TcxTextEdit
     Left = 83
-    Top = 100
+    Top = 115
     TabOrder = 3
     Width = 115
   end
   object AraKod: TcxButtonEdit
     Left = 83
-    Top = 49
+    Top = 64
     ParentShowHint = False
     Properties.Buttons = <
       item
@@ -195,7 +246,7 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object cxLabel2: TcxLabel
     Left = 0
-    Top = 74
+    Top = 89
     Caption = '&Ba'#351'l'#305'k'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -208,13 +259,13 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
   end
   object AraBaslik: TcxTextEdit
     Left = 83
-    Top = 74
+    Top = 89
     TabOrder = 2
     Width = 115
   end
   object CheckEkAlanlarListelensin: TcxCheckBox
     Left = 3
-    Top = 155
+    Top = 170
     Caption = 'Ek Alanlar Listele'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -225,7 +276,7 @@ object FaturalarAramaFrame: TFaturalarAramaFrame
     Style.TextColor = clNavy
     Style.TransparentBorder = False
     Style.IsFontAssigned = True
-    TabOrder = 15
+    TabOrder = 14
     Transparent = True
   end
 end

@@ -13,7 +13,6 @@ object KasalarListeFrame: TKasalarListeFrame
     Left = 3
     Top = 3
     Width = 1007
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -40,6 +39,7 @@ object KasalarListeFrame: TKasalarListeFrame
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -49,7 +49,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
-      Left = 89
+      Left = 86
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
@@ -58,7 +58,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = SilTusClick
     end
     object ToolButton3: TToolButton
-      Left = 178
+      Left = 172
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -67,7 +67,7 @@ object KasalarListeFrame: TKasalarListeFrame
       Style = tbsSeparator
     end
     object DegisTus: TToolButton
-      Left = 186
+      Left = 180
       Top = 0
       Caption = 'D'#252'zenle'
       ImageIndex = 9
@@ -77,7 +77,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = DegisTusClick
     end
     object AksiyonTus: TToolButton
-      Left = 275
+      Left = 266
       Top = 0
       Caption = 'Aksiyonlar'
       ImageIndex = 1
@@ -85,7 +85,7 @@ object KasalarListeFrame: TKasalarListeFrame
       OnClick = AksiyonTusClick
     end
     object ToolButton1: TToolButton
-      Left = 364
+      Left = 352
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -96,9 +96,9 @@ object KasalarListeFrame: TKasalarListeFrame
   end
   object cxGrid: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 1013
-    Height = 337
+    Height = 334
     Align = alClient
     Font.Charset = TURKISH_CHARSET
     Font.Color = clWindowText
@@ -111,8 +111,6 @@ object KasalarListeFrame: TKasalarListeFrame
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 35
-    ExplicitHeight = 334
     object GridTview: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -199,7 +197,6 @@ object KasalarListeFrame: TKasalarListeFrame
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
-    ExplicitWidth = 8
   end
   object PageControlSekme: TcxPageControl
     Left = 0
@@ -294,10 +291,6 @@ object KasalarListeFrame: TKasalarListeFrame
       Caption = 'Ekstre'
       ImageIndex = 6
       OnShow = TabSheetEkstreShow
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GridKasaEkstre: TcxGrid
         Left = 0
         Top = 44
@@ -967,8 +960,8 @@ object KasalarListeFrame: TKasalarListeFrame
     DataSet = KASALAR
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 474
-    Top = 137
+    Left = 426
+    Top = 169
   end
   object TOPLAMLAR: TFDQuery
     Connection = Tablo.FDCnn

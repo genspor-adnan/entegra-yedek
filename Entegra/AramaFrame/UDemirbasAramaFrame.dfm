@@ -1,4 +1,4 @@
-object DemirbasAramaFrame: TDemirbasAramaFrame
+﻿object DemirbasAramaFrame: TDemirbasAramaFrame
   Left = 0
   Top = 0
   Width = 451
@@ -313,9 +313,10 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     Left = 0
     Top = 0
     Width = 451
-    Height = 39
-    ButtonHeight = 39
-    ButtonWidth = 61
+    Height = 28
+    AutoSize = True
+    ButtonHeight = 24
+    ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
     DrawingStyle = dsGradient
@@ -329,6 +330,7 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
     GradientStartColor = 14540253
     HotTrackColor = 65408
     Images = Tablo.PNGImageList2
+    List = True
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
@@ -338,25 +340,25 @@ object DemirbasAramaFrame: TDemirbasAramaFrame
       Tag = 1
       Left = 0
       Top = 0
-      Caption = 'T'#252'm Liste'
-      ImageIndex = 20
-      ImageName = 'PngImage20'
+      Caption = 'T'#252'm'
+      ImageIndex = 32
+      ImageName = 'PngImageListe'
     end
     object LabelSonArananlar: TToolButton
       Tag = 5
-      Left = 61
+      Left = 62
       Top = 0
-      Caption = 'Son Aranan'
+      Caption = 'Son'
       ImageIndex = 21
       ImageName = 'PngImage21'
     end
     object LabelSikArananlar: TToolButton
       Tag = 3
-      Left = 122
+      Left = 124
       Top = 0
-      Caption = 'S'#305'k Aranan'
-      ImageIndex = 6
-      ImageName = 'PngImage6'
+      Caption = 'S'#305'k'
+      ImageIndex = 31
+      ImageName = 'PngImageYildiz'
     end
   end
 end

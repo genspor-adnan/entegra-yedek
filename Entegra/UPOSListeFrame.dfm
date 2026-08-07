@@ -1,4 +1,4 @@
-object POSListeFrame: TPOSListeFrame
+﻿object POSListeFrame: TPOSListeFrame
   Left = 0
   Top = 0
   Width = 1221
@@ -22,11 +22,11 @@ object POSListeFrame: TPOSListeFrame
       Width = 1213
       Margins.Bottom = 0
       AutoSize = True
-      ButtonHeight = 30
-      ButtonWidth = 74
+      ButtonHeight = 24
+      ButtonWidth = 62
       Caption = 'AletCubugu'
       Color = clTeal
-      DockSite = True
+      DockSite = False
       DrawingStyle = dsGradient
       EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
       EdgeInner = esLowered
@@ -90,26 +90,29 @@ object POSListeFrame: TPOSListeFrame
         Style = tbsSeparator
       end
       object LabelTumKayitlar: TToolButton
-        Left = 292
+        Left = 0
         Top = 0
-        Caption = 'T'#252'm Liste'
-        ImageIndex = 20
+        Caption = 'T'#252'm'
+        ImageIndex = 52
+        ImageName = 'PngImageListe1'
         Style = tbsTextButton
         OnClick = LabelTumKayitlarClick
       end
       object LabelSonArananlar: TToolButton
-        Left = 384
+        Left = 62
         Top = 0
-        Caption = 'Son Aranan'
-        ImageIndex = 21
+        Caption = 'Son'
+        ImageIndex = 43
+        ImageName = 'PngImage43'
         Style = tbsTextButton
         OnClick = LabelSonArananlarClick
       end
       object LabelSikArananlar: TToolButton
-        Left = 476
+        Left = 124
         Top = 0
-        Caption = 'S'#305'k Aranan'
-        ImageIndex = 6
+        Caption = 'S'#305'k'
+        ImageIndex = 51
+        ImageName = 'PngImageYildiz1'
         Style = tbsTextButton
         OnClick = LabelSikArananlarClick
       end

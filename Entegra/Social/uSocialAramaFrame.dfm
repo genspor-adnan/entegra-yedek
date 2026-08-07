@@ -1,4 +1,4 @@
-object SocialAramaFrame: TSocialAramaFrame
+﻿object SocialAramaFrame: TSocialAramaFrame
   Left = 0
   Top = 0
   Width = 289
@@ -59,16 +59,16 @@ object SocialAramaFrame: TSocialAramaFrame
     Left = 0
     Top = 1
     Width = 265
-    Height = 38
+    Height = 28
     Margins.Bottom = 0
     Align = alCustom
     AutoSize = True
-    ButtonHeight = 39
-    ButtonWidth = 55
+    ButtonHeight = 24
+    ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
     Ctl3D = False
-    DockSite = True
+    DockSite = False
     DrawingStyle = dsGradient
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     EdgeInner = esNone
@@ -82,6 +82,7 @@ object SocialAramaFrame: TSocialAramaFrame
     GradientStartColor = 14540253
     HotTrackColor = 65408
     Images = Tablo.PNGImageList2
+    List = True
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
@@ -94,8 +95,8 @@ object SocialAramaFrame: TSocialAramaFrame
       HelpType = htKeyword
       HelpKeyword = 'K.SAY'
       Caption = 'T'#252'm Liste'
-      ImageIndex = 20
-      ImageName = 'PngImage20'
+      ImageIndex = 32
+      ImageName = 'PngImageListe'
     end
     object buttonYenile: TToolButton
       Left = 55

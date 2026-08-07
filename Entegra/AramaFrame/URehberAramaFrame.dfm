@@ -1,4 +1,4 @@
-object RehberAramaFrame: TRehberAramaFrame
+﻿object RehberAramaFrame: TRehberAramaFrame
   Left = 0
   Top = 0
   Width = 510
@@ -304,16 +304,16 @@ object RehberAramaFrame: TRehberAramaFrame
     Left = 0
     Top = 0
     Width = 191
-    Height = 38
+    Height = 28
     Margins.Bottom = 0
     Align = alCustom
     AutoSize = True
-    ButtonHeight = 39
-    ButtonWidth = 61
+    ButtonHeight = 24
+    ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
     Ctl3D = False
-    DockSite = True
+    DockSite = False
     DrawingStyle = dsGradient
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     EdgeInner = esNone
@@ -327,6 +327,7 @@ object RehberAramaFrame: TRehberAramaFrame
     GradientStartColor = 14540253
     HotTrackColor = 65408
     Images = Tablo.PNGImageList2
+    List = True
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
@@ -338,29 +339,29 @@ object RehberAramaFrame: TRehberAramaFrame
       Top = 0
       HelpType = htKeyword
       HelpKeyword = 'K.SAY'
-      Caption = 'T'#252'm Liste'
-      ImageIndex = 20
-      ImageName = 'PngImage20'
+      Caption = 'T'#252'm'
+      ImageIndex = 32
+      ImageName = 'PngImageListe'
     end
     object LabelSonArananlar: TToolButton
       Tag = 4
-      Left = 61
+      Left = 62
       Top = 0
       HelpType = htKeyword
       HelpKeyword = 'K.DEGISTIRMETARIHI'
-      Caption = 'Son Aranan'
+      Caption = 'Son'
       ImageIndex = 21
       ImageName = 'PngImage21'
     end
     object LabelSIKArananlar: TToolButton
       Tag = 3
-      Left = 122
+      Left = 124
       Top = 0
       HelpType = htKeyword
       HelpKeyword = 'K.SAY'
-      Caption = 'S'#305'k Aranan'
-      ImageIndex = 6
-      ImageName = 'PngImage6'
+      Caption = 'S'#305'k'
+      ImageIndex = 31
+      ImageName = 'PngImageYildiz'
     end
   end
   object TabSK: TFDQuery

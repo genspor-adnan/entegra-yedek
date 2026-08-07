@@ -1,4 +1,4 @@
-object UretimAramaFrame: TUretimAramaFrame
+﻿object UretimAramaFrame: TUretimAramaFrame
   Left = 0
   Top = 0
   Width = 451
@@ -80,10 +80,10 @@ object UretimAramaFrame: TUretimAramaFrame
     Left = 0
     Top = 0
     Width = 451
-    Height = 43
+    Height = 28
     AutoSize = True
-    ButtonHeight = 39
-    ButtonWidth = 61
+    ButtonHeight = 24
+    ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
     DrawingStyle = dsGradient
@@ -94,6 +94,7 @@ object UretimAramaFrame: TUretimAramaFrame
     Font.Name = 'Trebuchet MS'
     Font.Style = []
     Images = Tablo.PNGImageList2
+    List = True
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
@@ -104,23 +105,23 @@ object UretimAramaFrame: TUretimAramaFrame
     object LabelTumKayitlar: TToolButton
       Left = 0
       Top = 0
-      Caption = 'T'#252'm Liste'
-      ImageIndex = 20
-      ImageName = 'PngImage20'
+      Caption = 'T'#252'm'
+      ImageIndex = 32
+      ImageName = 'PngImageListe'
     end
     object LabelSonArananlar: TToolButton
-      Left = 61
+      Left = 62
       Top = 0
-      Caption = 'Son Aranan'
+      Caption = 'Son'
       ImageIndex = 21
       ImageName = 'PngImage21'
     end
     object LabelSikArananlar: TToolButton
-      Left = 122
+      Left = 124
       Top = 0
-      Caption = 'S'#305'k Aranan'
-      ImageIndex = 6
-      ImageName = 'PngImage6'
+      Caption = 'S'#305'k'
+      ImageIndex = 31
+      ImageName = 'PngImageYildiz'
     end
   end
   object DateBas: TcxDateEdit

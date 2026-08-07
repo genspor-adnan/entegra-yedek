@@ -1,4 +1,4 @@
-object BankaKredileriListeFrame: TBankaKredileriListeFrame
+﻿object BankaKredileriListeFrame: TBankaKredileriListeFrame
   Left = 0
   Top = 0
   Width = 874
@@ -1639,13 +1639,13 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
       Margins.Bottom = 0
       Align = alLeft
       AutoSize = True
-      ButtonHeight = 30
-      ButtonWidth = 111
+      ButtonHeight = 24
+      ButtonWidth = 62
       Caption = 'AletCubugu'
       Color = clBtnFace
       Ctl3D = False
       DoubleBuffered = False
-      DockSite = True
+      DockSite = False
       DrawingStyle = dsGradient
       EdgeInner = esNone
       EdgeOuter = esNone
@@ -1733,27 +1733,33 @@ object BankaKredileriListeFrame: TBankaKredileriListeFrame
         Style = tbsSeparator
       end
       object LabelTumKayitlar: TToolButton
-        Left = 579
+        Left = 0
         Top = 0
         Caption = 'T'#252'm'
         Style = tbsTextButton
         OnClick = LabelTumKayitlarClick
+        ImageIndex = 52
+        ImageName = 'PngImageListe1'
       end
       object LabelSonArananlar: TToolButton
         Tag = 5
-        Left = 690
+        Left = 62
         Top = 0
-        Caption = 'Son Aranan'
+        Caption = 'Son'
         Style = tbsTextButton
         OnClick = LabelSonArananlarClick
+        ImageIndex = 43
+        ImageName = 'PngImage43'
       end
       object LabelSikArananlar: TToolButton
         Tag = 3
-        Left = 801
+        Left = 124
         Top = 0
-        Caption = 'S'#305'k Aranan'
+        Caption = 'S'#305'k'
         Style = tbsTextButton
         OnClick = LabelSikArananlarClick
+        ImageIndex = 51
+        ImageName = 'PngImageYildiz1'
       end
     end
     object JvNavPanelHeader1: TJvNavPanelHeader

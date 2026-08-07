@@ -1,4 +1,4 @@
-object KrediKartiListeFrame: TKrediKartiListeFrame
+﻿object KrediKartiListeFrame: TKrediKartiListeFrame
   Left = 0
   Top = 0
   Width = 1007
@@ -31,11 +31,11 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
       Width = 999
       Margins.Bottom = 0
       AutoSize = True
-      ButtonHeight = 30
-      ButtonWidth = 89
+      ButtonHeight = 24
+      ButtonWidth = 62
       Caption = 'AletCubugu'
       Color = clTeal
-      DockSite = True
+      DockSite = False
       DrawingStyle = dsGradient
       EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
       EdgeInner = esLowered
@@ -105,25 +105,31 @@ object KrediKartiListeFrame: TKrediKartiListeFrame
         Style = tbsSeparator
       end
       object LabelTumKayitlar: TToolButton
-        Left = 372
+        Left = 0
         Top = 0
         Caption = 'T'#252'm'
         Style = tbsTextButton
         OnClick = LabelTumKayitlarClick
+        ImageIndex = 52
+        ImageName = 'PngImageListe1'
       end
       object LabelSonArananlar: TToolButton
-        Left = 461
+        Left = 62
         Top = 0
-        Caption = 'Son Aranan'
+        Caption = 'Son'
         Style = tbsTextButton
         OnClick = LabelSonArananlarClick
+        ImageIndex = 43
+        ImageName = 'PngImage43'
       end
       object LabelSikArananlar: TToolButton
-        Left = 550
+        Left = 124
         Top = 0
-        Caption = 'S'#305'k Aranan'
+        Caption = 'S'#305'k'
         Style = tbsTextButton
         OnClick = LabelSikArananlarClick
+        ImageIndex = 51
+        ImageName = 'PngImageYildiz1'
       end
     end
     object GridKKListe: TcxGrid

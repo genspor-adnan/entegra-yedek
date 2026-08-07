@@ -1,4 +1,4 @@
-object FatTransferListeDlg: TFatTransferListeDlg
+﻿object FatTransferListeDlg: TFatTransferListeDlg
   Left = 0
   Top = 0
   Width = 866
@@ -18,11 +18,11 @@ object FatTransferListeDlg: TFatTransferListeDlg
     Width = 860
     Margins.Bottom = 0
     AutoSize = True
-    ButtonHeight = 30
-    ButtonWidth = 74
+    ButtonHeight = 24
+    ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
-    DockSite = True
+    DockSite = False
     DrawingStyle = dsGradient
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     EdgeInner = esLowered
@@ -102,27 +102,33 @@ object FatTransferListeDlg: TFatTransferListeDlg
       Style = tbsSeparator
     end
     object LabelTumKayitlar: TToolButton
-      Left = 320
+      Left = 0
       Top = 0
       Caption = 'T'#252'm'
       Style = tbsTextButton
       OnClick = LabelTumKayitlarClick
+      ImageIndex = 52
+      ImageName = 'PngImageListe1'
     end
     object LabelSonArananlar: TToolButton
       Tag = 5
-      Left = 394
+      Left = 62
       Top = 0
-      Caption = 'Son Aranan'
+      Caption = 'Son'
       Style = tbsTextButton
       OnClick = LabelSonArananlarClick
+      ImageIndex = 43
+        ImageName = 'PngImage43'
     end
     object LabelSikArananlar: TToolButton
       Tag = 3
-      Left = 468
+      Left = 124
       Top = 0
-      Caption = 'S'#305'k Aranan'
+      Caption = 'S'#305'k'
       Style = tbsTextButton
       OnClick = LabelSikArananlarClick
+      ImageIndex = 51
+      ImageName = 'PngImageYildiz1'
     end
   end
   object GridFatListe: TcxGrid
