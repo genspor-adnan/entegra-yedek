@@ -1,29 +1,28 @@
 ﻿SET NOCOUNT ON;
-IF OBJECT_ID('tempdb..#D') IS NOT NULL DROP TABLE #D;
-CREATE TABLE #D (ID INT PRIMARY KEY, Tur INT, Eski INT, Yeni INT, Kapsam NVARCHAR(10) COLLATE DATABASE_DEFAULT,
-                 Neden NVARCHAR(60) COLLATE DATABASE_DEFAULT, Satir INT, Tamamlanan INT, Kismi INT, Acik INT);
-INSERT #D (ID,Tur,Eski) SELECT TOP 800 ID, TUR, ISNULL(DURUM,0) FROM SIPARIS ORDER BY ID DESC;
-DECLARE @id INT, @j NVARCHAR(200); DECLARE @R TABLE (S NVARCHAR(MAX));
-DECLARE c CURSOR LOCAL FAST_FORWARD FOR SELECT ID FROM #D;
-OPEN c; FETCH NEXT FROM c INTO @id;
-WHILE @@FETCH_STATUS=0 BEGIN
-  SET @j = N'{"BelgeId":' + CAST(@id AS varchar(20)) + N',"Kaynak":"siparis","Yaz":0}';
-  DELETE @R; INSERT @R EXEC dbo.sp_Api_Belge_DurumHesapla_Json @j;
-  UPDATE D SET Yeni=J.Durum, Kapsam=J.Kapsam, Neden=J.Neden, Satir=J.Satir, Tamamlanan=J.Tamamlanan, Kismi=J.Kismi, Acik=J.Acik
-  FROM #D D CROSS APPLY (SELECT TOP 1 S FROM @R) X
-    CROSS APPLY OPENJSON(X.S) WITH (Durum INT, Kapsam NVARCHAR(10), Neden NVARCHAR(60), Satir INT, Tamamlanan INT, Kismi INT, Acik INT) J
-  WHERE D.ID=@id; FETCH NEXT FROM c INTO @id; END
-CLOSE c; DEALLOCATE c;
+DECLARE @Baslik INT = 114010, @Satir INT = 3557475, @Urun INT = 142, @Tur INT = 119;
+DECLARE @Once INT = (SELECT COUNT(*) FROM STOKSERILOT WHERE STOKID=@Urun);
 
-SELECT 'Siparis' AS Olcut, COUNT(*) AS Adet FROM #D
-UNION ALL SELECT 'Kapsam ici', COUNT(*) FROM #D WHERE Kapsam='ici'
-UNION ALL SELECT 'Durum AYNI', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=Yeni
-UNION ALL SELECT 'Durum FARKLI', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski<>Yeni
-UNION ALL SELECT '  0 -> 9 (tamamlanmis ama isaretlenmemis)', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=0 AND Yeni=9
-UNION ALL SELECT '  0 -> 1', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=0 AND Yeni=1
-UNION ALL SELECT '  1 -> 9', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=1 AND Yeni=9
-UNION ALL SELECT '  9 -> 1 (geri alma!)', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=9 AND Yeni=1
-UNION ALL SELECT '  9 -> 0', COUNT(*) FROM #D WHERE Kapsam='ici' AND Eski=9 AND Yeni=0;
-SELECT 'Kapsam disi nedenleri' AS x, Neden, COUNT(*) AS Adet FROM #D WHERE Kapsam='disi' GROUP BY Neden ORDER BY COUNT(*) DESC;
-SELECT TOP 6 'FARK ORNEK' AS x, ID, Tur, Eski, Yeni, Satir, Tamamlanan, Kismi, Acik FROM #D WHERE Kapsam='ici' AND Eski<>Yeni ORDER BY ID DESC;
-DROP TABLE #D;
+-- YENI seri/lot (var olmayan) + duzgun Oturum JSON
+DECLARE @j NVARCHAR(MAX) = N'{"BelgeId":114010,"SatirId":3557475,"UrunId":142,"BelgeTur":119,
+ "IslemTip":1,"IzlemTur":2,"GirisDepo":11,"CikisDepo":1,"StokDurumDegis":true,"KaynakSatirId":0,
+ "Oturum":{"KulId":7},
+ "SeriLot":[{"Sira":1,"SeriNo":"TEST-API-1","LotNo":"LOT-API-1","Urt":"2026-01-01","Skt":"2027-01-01","Kalan":3,"Durum":0},
+            {"Sira":2,"SeriNo":"","LotNo":"252067","Kalan":1,"Durum":0}]}';
+EXEC dbo.sp_Api_Belge_SeriLot_Yaz_Json @j;
+
+SELECT 'SONUC - STOKIZLEME' AS x, SI.ID, SI.SERILOTID, SL.SERINO, SL.LOTNO, SI.ADET, SI.KALAN, SI.EKLEYEN
+FROM STOKIZLEME SI LEFT JOIN STOKSERILOT SL ON SL.ID=SI.SERILOTID
+WHERE SI.BASLIKID=@Baslik AND SI.SATIRID=@Satir AND SI.STOKID=@Urun ORDER BY SI.ID;
+SELECT 'SONUC - DEPO' AS x, SD.IZLEMID, SD.DEPOID, SD.ADET FROM STOKIZLEMEDEPO SD
+WHERE SD.IZLEMID IN (SELECT ID FROM STOKIZLEME WHERE BASLIKID=@Baslik AND SATIRID=@Satir AND STOKID=@Urun) ORDER BY SD.IZLEMID, SD.DEPOID;
+SELECT 'STOKSERILOT once/sonra' AS x, @Once AS Once_, (SELECT COUNT(*) FROM STOKSERILOT WHERE STOKID=@Urun) AS Sonra;
+
+-- TEMIZLIK: test verisini geri al, orijinal tek satiri yeniden kur
+DECLARE @g NVARCHAR(MAX) = N'{"BelgeId":114010,"SatirId":3557475,"UrunId":142,"BelgeTur":119,
+ "IslemTip":1,"IzlemTur":2,"GirisDepo":11,"CikisDepo":1,"StokDurumDegis":true,"KaynakSatirId":0,
+ "Oturum":{"KulId":0},
+ "SeriLot":[{"Sira":1,"SeriNo":"","LotNo":"252067","Kalan":1,"Durum":0}]}';
+EXEC dbo.sp_Api_Belge_SeriLot_Yaz_Json @g;
+DELETE FROM STOKSERILOT WHERE STOKID=@Urun AND SERINO='TEST-API-1';
+SELECT 'TEMIZLIK SONRASI' AS x, COUNT(*) AS IzlemSatir FROM STOKIZLEME WHERE BASLIKID=@Baslik AND SATIRID=@Satir AND STOKID=@Urun;
+SELECT 'STOKSERILOT son' AS x, COUNT(*) AS Adet FROM STOKSERILOT WHERE STOKID=@Urun;
