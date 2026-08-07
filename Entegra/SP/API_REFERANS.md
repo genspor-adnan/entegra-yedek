@@ -143,8 +143,8 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 | `sp_Api_Donusum_Kontrol_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,Satirlar:[{SatirId,Adet}]}` | `{Sonuc,Uygun,Satirlar:[{SatirId,Adet,Kalan,Uygun,Neden}]}` — aşırı dönüşüm koruması. `GenDepoUpdate73.sql` |
 | `sp_Api_Donusum_Kaynak_Json` | ⬜ (mevcut `sp_Prog_BelgeDonusum_Kaynak_Json2` yeterli olabilir) | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
 | `sp_Api_Donusum_Uygula_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,HedefBelgeId,Oturum,Satirlar:[{Sira,KaynakSatirId,UrunId,Adet,BirimFiyat,Kdv,Iskonto,Iskonto2,...}]}` | `{Sonuc,HedefBelgeId,Yazilan,Satirlar:[{Sira,KaynakSatirId,SatirId}],Toplam,KaynakDurum}` — **açık-değerli sözleşme**: fiyat/iskonto/KDV hesaplamaz, çağıran gönderir. `GenDepoUpdate74.sql` |
-| `sp_Api_Donusum_Geri_Json` | ⬜ | `{HedefBelgeId}` \| `{HedefSatirId}` | `{Sonuc,Adet}` |
-| `sp_Api_Donusum_Rapor_Json` | ⬜ | `{BasTarih,BitTarih,Yon,Filtre}` | sonuç kümesi |
+| `sp_Api_Donusum_Geri_Json` | ⬜ (gerekmeyebilir — hedef satır silinince `YERI`/`YERID` bağı satırla gider, kalan kendiliğinden döner; `Belge_Sil` karşılıyor) | `{HedefBelgeId}` \| `{HedefSatirId}` | `{Sonuc,Adet}` |
+| `sp_Api_Donusum_Rapor_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,BasTarih,BitTarih,GizleKaynakTur,GizleHedefTur,KalmayanGoster,GizlenenGoster,RehberId,BelgeNo,StokKod,StokAd,Sayfa,SayfaBoyu}` | sonuç kümesi (`Fields[0] = SATIRID`) — `TM_DonusumListeleri`+`Alis`+`Satis` (906 satır, 11 sabit ekran dalı) yerine tek gövde. `GenDepoUpdate75.sql` |
 
 ### E. Okuma
 

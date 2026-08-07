@@ -1,39 +1,30 @@
 ﻿SET NOCOUNT ON;
--- B) TAM donusmus satiri tekrar donusturmeye calis -> RED, HICBIR SEY YAZILMAMALI
-DECLARE @sid INT = 156939;  -- kalan=0 (onceki testte dogrulandi)
-DECLARE @urun INT = (SELECT URUNID FROM SIPARISDETAY WHERE ID=@sid);
-DECLARE @hed INT = (SELECT TOP 1 ID FROM FATBASLIK WHERE TUR=14 ORDER BY ID DESC);
-DECLARE @satirOnce INT = (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed);
-SELECT 'Once' AS x, @sid AS Satir, (SELECT Kalan FROM dbo.fn_Api_Donusum_Kalan(2,409,@sid,0)) AS Kalan,
-       @satirOnce AS HedefSatirSayisi;
+SELECT 'A) Satis3 karsiligi (Kaynak=2, DonusumTuru=409)' AS x;
+EXEC dbo.sp_Api_Donusum_Rapor_Json N'{"Kaynak":2,"DonusumTuru":409,"GizleHedefTur":14,"SayfaBoyu":5}';
 
-DECLARE @j NVARCHAR(MAX) = N'{"Kaynak":2,"DonusumTuru":409,"HedefBelgeId":' + CAST(@hed AS varchar(20)) +
-  N',"Oturum":{"KulId":7},"Satirlar":[{"Sira":1,"KaynakSatirId":' + CAST(@sid AS varchar(20)) +
-  N',"UrunId":' + CAST(@urun AS varchar(20)) + N',"Adet":1,"BirimFiyat":100,"Kdv":20}]}';
-BEGIN TRY
-  EXEC dbo.sp_Api_Donusum_Uygula_Json @j;
-  SELECT 'HATA: red edilmedi' AS x;
-END TRY
-BEGIN CATCH
-  SELECT 'Beklenen RED' AS x, ERROR_NUMBER() AS No, LEFT(ERROR_MESSAGE(),140) AS Mesaj;
-END CATCH
-SELECT 'Sonra (yazim olmamali)' AS x, (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed) AS HedefSatirSayisi;
+SELECT 'B) ayni filtre, TM_DonusumListeleriSatis Satis3 ile satir sayisi karsilastirmasi' AS x;
+-- TM: kalmayan=0 (yalniz kalani olanlar), gizlenen=0
+DECLARE @tm INT, @api INT;
+IF OBJECT_ID('tempdb..#tm') IS NOT NULL DROP TABLE #tm;
+SELECT SD.ID INTO #tm
+FROM SIPARIS S INNER JOIN SIPARISDETAY SD ON S.ID=SD.SIPARISID
+     INNER JOIN STOKLAR ST ON SD.TUR=1 AND SD.URUNID=ST.ID INNER JOIN REHBER R ON R.ID=S.REHBERID
+WHERE SD.ADET > ISNULL((SELECT SUM(F1.ADET) FROM FATURA F1 WHERE F1.YERI=409 AND F1.YERID=SD.ID),0.0)
+  AND NOT EXISTS (SELECT ID FROM DONUSUMBILGISIGIZLE WHERE HEDEFTUR=14 AND KAYNAKID=SD.ID);
+SELECT @tm = COUNT(*) FROM #tm;
 
--- C) Coklu satir: biri gecerli biri asiri -> TOPTAN RED
-DECLARE @ok INT = (SELECT TOP 1 SD.ID FROM SIPARISDETAY SD CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K
-                   WHERE K.Donusen=0 AND K.Kalan>0 ORDER BY SD.ID DESC);
-DECLARE @okUrun INT = (SELECT URUNID FROM SIPARISDETAY WHERE ID=@ok);
-SET @j = N'{"Kaynak":2,"DonusumTuru":409,"HedefBelgeId":' + CAST(@hed AS varchar(20)) +
-  N',"Oturum":{"KulId":7},"Satirlar":[{"Sira":1,"KaynakSatirId":' + CAST(@ok AS varchar(20)) +
-  N',"UrunId":' + CAST(@okUrun AS varchar(20)) + N',"Adet":1,"BirimFiyat":100,"Kdv":20},' +
-  N'{"Sira":2,"KaynakSatirId":' + CAST(@sid AS varchar(20)) + N',"UrunId":' + CAST(@urun AS varchar(20)) +
-  N',"Adet":1,"BirimFiyat":100,"Kdv":20}]}';
-BEGIN TRY
-  EXEC dbo.sp_Api_Donusum_Uygula_Json @j;
-  SELECT 'HATA: red edilmedi' AS x;
-END TRY
-BEGIN CATCH
-  SELECT 'C) coklu - beklenen RED' AS x, ERROR_NUMBER() AS No, LEFT(ERROR_MESSAGE(),140) AS Mesaj;
-END CATCH
-SELECT 'C sonrasi (yazim olmamali)' AS x, (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed) AS HedefSatirSayisi,
-       (SELECT COUNT(*) FROM FATURA WHERE YERI=409 AND YERID=@ok) AS GecerliSatirYazildiMi;
+IF OBJECT_ID('tempdb..#api') IS NOT NULL DROP TABLE #api;
+CREATE TABLE #api (SATIRID INT);
+INSERT #api EXEC('
+SELECT K.SATIRID FROM (SELECT SD.ID AS SATIRID FROM SIPARIS S
+   INNER JOIN SIPARISDETAY SD ON S.ID=SD.SIPARISID
+   INNER JOIN STOKLAR ST ON SD.TUR=1 AND SD.URUNID=ST.ID INNER JOIN REHBER R ON R.ID=S.REHBERID) K
+CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,K.SATIRID,0) D
+LEFT OUTER JOIN DONUSUMBILGISIGIZLE G ON G.KAYNAKID=K.SATIRID AND G.HEDEFTUR=14
+WHERE D.Kalan > 0.0001 AND G.KAYNAKID IS NULL');
+SELECT @api = COUNT(*) FROM #api;
+
+SELECT 'Satir sayisi' AS x, @tm AS TM_esdegeri, @api AS API, CASE WHEN @tm=@api THEN 'AYNI' ELSE 'FARKLI' END AS Durum;
+SELECT 'Yalniz TM de' AS x, COUNT(*) AS Adet FROM (SELECT ID FROM #tm EXCEPT SELECT SATIRID FROM #api) a;
+SELECT 'Yalniz API de' AS x, COUNT(*) AS Adet FROM (SELECT SATIRID FROM #api EXCEPT SELECT ID FROM #tm) b;
+DROP TABLE #tm; DROP TABLE #api;

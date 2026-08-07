@@ -1,16 +1,23 @@
-﻿x	Satir	Kalan	HedefSatirSayisi
+﻿x
 --------------------------------------------------------------------------------
-Once	156939	0,000000	1
-x	No	Mesaj
+A) Satis3 karsiligi (Kaynak=2, DonusumTuru=409)
+SATIRID	BASLIKID	STOKID	REHBERID	FIRMA	TARIH	BELGENO	KOD	STOKADI	URUNNO	ACIKLAMA	IZLEME	ANABIRIM	BIRIM	KDV	KUR	DOVIZ_KURU	ADET	MIKTAR	BIRIMFIYAT	ISKONTO	ISKONTO2	TUTAR	DOVIZ_BIRIMFIYAT	DOVIZKURDEGERI	DOVIZ_TUTARI	MASRAFID	PROJEID	PROJEKODU	POZNO	OZELKOD	OZELKOD2	MUHKODU	TESLIMTARIHI	DONUSEN	KALAN	GIZLE
 --------------------------------------------------------------------------------
-Beklenen RED	51200	Kaynak satir 156939: kalan yetersiz (istenen 1.000000, kalan 0.000000)
-x	HedefSatirSayisi
+157996	23203	134	-1	Proimtech Sağlık Ürünleri A.Ş.	14.07.2026 13:31:46	002794	ASNP	Dayanak Bağlantı Vidası NP	8681489701606		2	51	Adet	10	TL	TL	1,000000	1,000000	0,000000	0	0	0,00	0,000000	1,0000	0,00	0	-1			T	NP-V1		14.07.2026 00:00:00	0,000000	1,000000	0
+157992	23202	143	1109	TORKS DENTAL SAĞLIK HİZMETLERİ SANAYİ TİCARET LTD.ŞTİ.	09.07.2026 11:20:32	101268	CG001	Dijital Rehber Tutucu H2	8681489722014		2	51	Adet	10	TL	TL	1,000000	1,000000	1500,000000	0	0	1500,00	1500,000000	1,0000	1500,00	0	-1						09.07.2026 00:00:00	0,000000	1,000000	0
+157986	23199	136	-1	Proimtech Sağlık Ürünleri A.Ş.	05.07.2026 00:23:11	002793	AS14	Dayanak Bağlantı Vidası M1.4	8681489706861		2	51	Adet	10	TL	TL	2,000000	2,000000	0,000000	0	0	0,00	0,000000	1,0000	0,00	0	-1			T			05.07.2026 00:00:00	0,000000	2,000000	0
+157979	23193	122	-1	Proimtech Sağlık Ürünleri A.Ş.	03.04.2026 14:05:02	002792	ACCERS	Cerrahi Set (Tek Parça İmplant)	8681489706779		2	51	Adet	10	TL	TL	1,000000	1,000000	0,000000	0	0	0,00	0,000000	1,0000	0,00	0	-1			T			03.04.2026 00:00:00	0,000000	1,000000	0
+157978	23192	122	-1	Proimtech Sağlık Ürünleri A.Ş.	03.04.2026 13:59:56	002791	ACCERS	Cerrahi Set (Tek Parça İmplant)	8681489706779		2	51	Adet	10	TL	TL	1,000000	1,000000	0,000000	0	0	0,00	0,000000	1,0000	0,00	0	-1			T			03.04.2026 00:00:00	0,000000	1,000000	0
+x
 --------------------------------------------------------------------------------
-Sonra (yazim olmamali)	1
-x	No	Mesaj
+B) ayni filtre, TM_DonusumListeleriSatis Satis3 ile satir sayisi karsilastirmasi
+x	TM_esdegeri	API	Durum
 --------------------------------------------------------------------------------
-C) coklu - beklenen RED	51200	Kaynak satir 156939: kalan yetersiz (istenen 1.000000, kalan 0.000000)
-x	HedefSatirSayisi	GecerliSatirYazildiMi
+Satir sayisi	5388	5388	AYNI
+x	Adet
 --------------------------------------------------------------------------------
-C sonrasi (yazim olmamali)	1	0
+Yalniz TM de	0
+x	Adet
+--------------------------------------------------------------------------------
+Yalniz API de	0
 
