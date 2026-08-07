@@ -1,0 +1,1044 @@
+<title>BILIMPLANT_V2 — TM_ Stored Procedure Analiz Raporu</title>
+<style>
+  :root{
+    --ink:#161b20; --paper:#f4f6f7; --raised:#ffffff; --line:#dde3e6; --muted:#5b6772;
+    --accent:#0d7a6c; --accent-ink:#065a4f; --accent-soft:#e2f2ef;
+    --danger:#a52a1f; --danger-soft:#faeae7; --danger-ink:#7a1f16;
+    --warn:#8a5a08; --warn-soft:#faf1de; --warn-ink:#6b4506;
+    --dup:#4a4f8a; --dup-soft:#eceeff; --dup-ink:#33376b;
+    --code-bg:#eef1f2;
+    --shadow: 0 1px 2px rgba(20,30,35,.06), 0 8px 24px -12px rgba(20,30,35,.15);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e6eaed; --paper:#0e1317; --raised:#161d22; --line:#28323a; --muted:#93a0a9;
+      --accent:#39c7b3; --accent-ink:#8fe9dc; --accent-soft:#123330;
+      --danger:#e58074; --danger-soft:#3a1c17; --danger-ink:#f4b3a8;
+      --warn:#e0b25a; --warn-soft:#3a2d10; --warn-ink:#f0cd8e;
+      --dup:#a9adf0; --dup-soft:#22254a; --dup-ink:#c7caf5;
+      --code-bg:#1b2329;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#e6eaed; --paper:#0e1317; --raised:#161d22; --line:#28323a; --muted:#93a0a9;
+    --accent:#39c7b3; --accent-ink:#8fe9dc; --accent-soft:#123330;
+    --danger:#e58074; --danger-soft:#3a1c17; --danger-ink:#f4b3a8;
+    --warn:#e0b25a; --warn-soft:#3a2d10; --warn-ink:#f0cd8e;
+    --dup:#a9adf0; --dup-soft:#22254a; --dup-ink:#c7caf5;
+    --code-bg:#1b2329;
+  }
+  :root[data-theme="light"]{
+    --ink:#161b20; --paper:#f4f6f7; --raised:#ffffff; --line:#dde3e6; --muted:#5b6772;
+    --accent:#0d7a6c; --accent-ink:#065a4f; --accent-soft:#e2f2ef;
+    --danger:#a52a1f; --danger-soft:#faeae7; --danger-ink:#7a1f16;
+    --warn:#8a5a08; --warn-soft:#faf1de; --warn-ink:#6b4506;
+    --dup:#4a4f8a; --dup-soft:#eceeff; --dup-ink:#33376b;
+    --code-bg:#eef1f2;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family: Charter, "Iowan Old Style", "Georgia", "Noto Serif", serif;
+    font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family: ui-monospace, SFMono-Regular, Consolas, "Cascadia Code", "JetBrains Mono", Menlo, monospace; }
+  a{ color:var(--accent-ink); }
+  ::selection{ background:var(--accent-soft); }
+
+  /* ---------- Shell layout ---------- */
+  .shell{ display:grid; grid-template-columns: 280px 1fr; min-height:100vh; }
+  @media (max-width: 880px){ .shell{ grid-template-columns: 1fr; } .sidebar{ position:static; height:auto; } }
+
+  .sidebar{
+    position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+    border-right:1px solid var(--line); padding:28px 20px 40px;
+    background:var(--raised);
+  }
+  .brand{ margin-bottom:22px; }
+  .brand .eyebrow{ font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  .brand h1{ font-size:19px; margin:6px 0 0; line-height:1.3; font-family: Charter, Georgia, serif; font-weight:700; text-wrap:balance; }
+  .brand .db{ margin-top:8px; font-size:12.5px; color:var(--muted); }
+
+  .search{ margin:18px 0 20px; }
+  .search input{
+    width:100%; padding:9px 11px; border-radius:7px; border:1px solid var(--line);
+    background:var(--paper); color:var(--ink); font-size:13.5px; font-family:inherit;
+  }
+  .search input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .search .count{ margin-top:6px; font-size:11.5px; color:var(--muted); }
+
+  .navgroup{ margin-bottom:4px; }
+  .navgroup a{
+    display:flex; justify-content:space-between; gap:8px;
+    padding:7px 8px; border-radius:6px; text-decoration:none;
+    color:var(--ink); font-size:13.5px;
+  }
+  .navgroup a:hover{ background:var(--accent-soft); }
+  .navgroup a .n{ color:var(--muted); font-size:11.5px; font-variant-numeric:tabular-nums; }
+
+  main{ min-width:0; padding: 40px clamp(20px, 4vw, 64px) 100px; max-width: 980px; }
+
+  /* ---------- Header / summary ---------- */
+  .report-head{ margin-bottom:34px; }
+  .report-head .eyebrow{ font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  .report-head h2{ font-family:Charter, Georgia, serif; font-size:clamp(28px,4vw,38px); margin:8px 0 10px; text-wrap:balance; font-weight:700; }
+  .report-head p.lede{ max-width:66ch; color:var(--muted); font-size:16.5px; }
+  .report-head .meta{ margin-top:14px; font-size:12.5px; color:var(--muted); }
+
+  .metrics{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:26px 0; }
+  .metric{ background:var(--raised); padding:16px 18px; }
+  .metric .num{ font-family: ui-monospace, Consolas, monospace; font-size:26px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .metric .lbl{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .callout{ border:1px solid var(--danger); background:var(--danger-soft); border-radius:10px; padding:20px 22px; margin:26px 0; }
+  .callout h3{ margin:0 0 10px; font-size:14px; letter-spacing:.04em; text-transform:uppercase; color:var(--danger-ink); font-family: ui-monospace, monospace; }
+  .callout ol{ margin:0; padding-left:20px; }
+  .callout li{ margin-bottom:9px; font-size:14.5px; }
+  .callout li:last-child{ margin-bottom:0; }
+  .callout code{ font-size:.9em; }
+  .callout a{ text-decoration:none; border-bottom:1px dotted var(--accent-ink); }
+
+  /* ---------- Badges ---------- */
+  .badge{ display:inline-block; font-family: ui-monospace, Consolas, monospace; font-size:10.5px; letter-spacing:.03em; padding:2px 7px; border-radius:5px; font-weight:600; text-transform:uppercase; }
+  .badge-sec{ background:var(--danger-soft); color:var(--danger-ink); border:1px solid color-mix(in srgb, var(--danger) 45%, transparent); }
+  .badge-warn{ background:var(--warn-soft); color:var(--warn-ink); border:1px solid color-mix(in srgb, var(--warn) 45%, transparent); }
+  .badge-dup{ background:var(--dup-soft); color:var(--dup-ink); border:1px solid color-mix(in srgb, var(--dup) 45%, transparent); }
+
+  code, .pill{ font-family: ui-monospace, Consolas, monospace; background:var(--code-bg); padding:1px 6px; border-radius:5px; font-size:.86em; }
+
+  /* ---------- Sections & cards ---------- */
+  section.group{ margin-top:52px; scroll-margin-top: 20px; }
+  section.group .ghead{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:6px; }
+  section.group .gid{ font-family: ui-monospace, Consolas, monospace; color:var(--accent); font-size:13px; font-weight:700; }
+  section.group h3{ font-family:Charter, Georgia, serif; font-size:23px; margin:0; font-weight:700; }
+  section.group .gdesc{ color:var(--muted); font-size:14.5px; margin:10px 0 22px; max-width:70ch; }
+
+  .proc{ border:1px solid var(--line); border-radius:10px; background:var(--raised); margin-bottom:10px; box-shadow:var(--shadow); }
+  .proc summary{
+    list-style:none; cursor:pointer; padding:13px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .proc summary::-webkit-details-marker{ display:none; }
+  .proc summary .tri{ font-family: ui-monospace, monospace; color:var(--muted); font-size:11px; transition:transform .15s ease; flex:0 0 auto; }
+  .proc[open] summary .tri{ transform:rotate(90deg); }
+  .proc summary .name{ font-family: ui-monospace, Consolas, monospace; font-weight:700; font-size:14.5px; color:var(--ink); }
+  .proc summary .oneliner{ color:var(--muted); font-size:13.5px; flex:1 1 260px; min-width:0; }
+  .proc summary .badges{ display:flex; gap:6px; flex:0 0 auto; }
+  .proc .body{ padding:2px 18px 18px 42px; border-top:1px solid var(--line); }
+  .proc .row{ margin-top:12px; font-size:14.5px; }
+  .proc .row .k{ font-family: ui-monospace, Consolas, monospace; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); display:block; margin-bottom:4px; }
+  .proc .row.notes{ background:var(--code-bg); border-radius:8px; padding:10px 13px; margin-top:14px; font-size:14px; }
+  .proc .row.notes .k{ color:var(--muted); }
+
+  footer{ margin-top:70px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted); }
+
+  .hidden{ display:none !important; }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="eyebrow">Saklı Yordam Envanteri</div>
+      <h1>TM_ Prosedür Raporu</h1>
+      <div class="db mono">BILIMPLANT_V2 · MSSQL</div>
+    </div>
+
+    <div class="search">
+      <input type="text" id="q" placeholder="Prosedür / tablo ara…" autocomplete="off">
+      <div class="count" id="qcount">84 prosedür</div>
+    </div>
+
+    <div class="navgroup">
+      <a href="#ozet"><span>Yönetici Özeti</span></a>
+      <a href="#grup-a"><span>A · Finans &amp; Muhasebe</span><span class="n">15</span></a>
+      <a href="#grup-b"><span>B · Fatura Yönetimi</span><span class="n">6</span></a>
+      <a href="#grup-c"><span>C · Sipariş &amp; Dönüşüm</span><span class="n">10</span></a>
+      <a href="#grup-d"><span>D · Stok &amp; Depo</span><span class="n">6</span></a>
+      <a href="#grup-e"><span>E · CRM &amp; Görev</span><span class="n">14</span></a>
+      <a href="#grup-f"><span>F · İletişim Entegrasyonu</span><span class="n">7</span></a>
+      <a href="#grup-g"><span>G · Doküman &amp; Görsel</span><span class="n">7</span></a>
+      <a href="#grup-h"><span>H · Üretim Yönetimi</span><span class="n">12</span></a>
+      <a href="#grup-i"><span>I · Sistem &amp; Referans</span><span class="n">7</span></a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="report-head" id="ozet">
+      <div class="eyebrow">Veritabanı Analiz Raporu</div>
+      <h2>BILIMPLANT_V2 içindeki 84 adet <span class="mono">TM_</span> prosedürünün işlevsel dökümü</h2>
+      <p class="lede">Veritabanına bağlanılıp <code>sys.procedures</code> üzerinden isimleri <code>TM_</code> ile başlayan tüm saklı yordamların kaynak kodu (<code>OBJECT_DEFINITION</code>) tek tek okunarak analiz edildi. Aşağıda her prosedürün amacı, parametreleri, işlediği tablolar ve dikkat çeken iş mantığı 9 fonksiyonel alan altında listeleniyor.</p>
+      <div class="meta">Rapor tarihi: 5 Ağustos 2026 · Kaynak: <code>sys.procedures</code>, <code>OBJECT_DEFINITION()</code> · Instance: <code>localhost\MSSQLSERVER</code></div>
+    </header>
+
+    <div class="metrics">
+      <div class="metric"><div class="num">84</div><div class="lbl">Prosedür</div></div>
+      <div class="metric"><div class="num">9</div><div class="lbl">Fonksiyonel alan</div></div>
+      <div class="metric"><div class="num">5</div><div class="lbl">Güvenlik bulgusu</div></div>
+      <div class="metric"><div class="num">17</div><div class="lbl">Dinamik SQL / hardcode</div></div>
+      <div class="metric"><div class="num">4</div><div class="lbl">Belirgin kod tekrarı</div></div>
+    </div>
+
+    <div class="callout">
+      <h3>Öncelikli Bulgular</h3>
+      <ol>
+        <li><strong>Kritik — düz metin şifre:</strong> <code>TM_UserGiris</code> hiç şifre parametresi almıyor; kullanıcı adına göre bulduğu <code>KULLANICI.SIFRE</code> alanını (hash'lenmemiş görünüyor) doğrudan çağırana döndürüyor. Doğrulama istemci tarafında yapılıyor olmalı — kimliği doğrulanmamış herhangi biri, sadece kullanıcı adını bilerek şifreyi okuyabilir. Alt hesaplarda ise "şifre" olarak e-posta adresi dönüyor. Bkz. <a href="#TM_UserGiris">TM_UserGiris</a>.</li>
+        <li><strong><code>xp_cmdshell</code> kullanımı:</strong> <code>TM_DokumanGuncelleListele</code> ve <code>TM_Imaj_Disk</code>, sunucu düzeyinde <code>xp_cmdshell</code>'i açıp harici bir PowerShell script / .exe çalıştırıyor. <code>TM_Imaj_Disk</code> işlem bitince özelliği tekrar kapatıyor, ancak hata durumunda dosya/izin sızıntısı riski var. Bkz. <a href="#TM_Imaj_Disk">TM_Imaj_Disk</a>, <a href="#TM_DokumanGuncelleListele">TM_DokumanGuncelleListele</a>.</li>
+        <li><strong>Devre dışı yetki kontrolü:</strong> <code>TM_STOKTRANSFER</code> içinde kullanıcının görme yetkisi hesaplanıyor ama WHERE koşulundaki filtre satırları yorum satırına alınmış — tüm depo transferleri, yetkiye bakılmaksızın herkese listeleniyor. Bkz. <a href="#TM_STOKTRANSFER">TM_STOKTRANSFER</a>.</li>
+        <li><strong>Kullanıcı girdisiyle <code>EXEC()</code>:</strong> <code>TM_EkAlanCalistir</code> arama metnini doğrudan dinamik SQL'e enjekte ediyor; <code>TM_DonusumListeleri</code>, <code>TM_IsListesiPerformansRaporu</code>, <code>TM_UretimPersonelZamanPlanla</code> ve ek alan motorları (<code>TM_UretimPersonelZamanPlanlaEkalanlar/Satir</code>, <code>TM_FatBaslikEkalanlar</code>) benzer string birleştirmeli dinamik SQL örüntüleri kullanıyor.</li>
+        <li><strong>Kopyala-yapıştır hataları (hardcoded ID):</strong> <code>TM_FATBASLIKDurumGuncelle</code> ve <code>TM_SiparisDurumGuncelle</code> içinde parametre yerine sabit <code>10224</code> ID'si kullanılmış — "kısmi tamamlanma" durumu üretimde yanlış hesaplanıyor olabilir.</li>
+        <li><strong>Kod tekrarı:</strong> <code>TM_SAP_ENG_KDRSonucDetay</code> ile <code>TM_SAP_KDRSonucDetay</code> neredeyse birebir aynı; <code>TM_FATBASLIK</code>, <code>TM_SiparisAlinan</code> ve üç <code>TM_GOREVLERWHATSAPPGONDER*</code> prosedürü de büyük ölçüde örtüşen mantığı ayrı ayrı barındırıyor — bakım yükünü katlıyor.</li>
+        <li><strong>Transaction'sız çok adımlı yazma:</strong> <code>TM_StokSayimKalemleri</code>, sayım kalemi → seri/lot → izleme → depo izleme adımlarını <code>BEGIN TRAN</code> olmadan sırayla yazıyor; ara adımda hata olursa veri tutarsız kalabilir.</li>
+      </ol>
+    </div>
+
+    <!-- ================= GRUP A ================= -->
+    <section class="group" id="grup-a">
+      <div class="ghead"><span class="gid">A</span><h3>Finans &amp; Muhasebe Raporları</h3></div>
+      <p class="gdesc">Ciro, mizan, KDV, cari ekstre ve "KDR" (kasa/banka/kredi/stok bazlı likidite özeti) raporlarını üreten salt-okunur raporlama prosedürleri; ayrıca ayrı bir SAP Business One veritabanına bağlanan entegrasyon prosedürleri.</p>
+
+      <details class="proc" id="TM_AlisSatisAylar">
+        <summary><span class="tri">▸</span><span class="name">TM_AlisSatisAylar</span><span class="oneliner">Belirtilen yıl için aylık alış/satış (fatura matrahı) toplamlarını ay adına göre gruplar.</span><span class="badges"><span class="badge badge-warn">kullanılmayan param</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code> (yıl) · <code>@BITTAR</code> tanımlı ama kodda hiç kullanılmıyor.</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code></div>
+          <div class="row notes"><span class="k">Not</span><code>SET LANGUAGE Turkish</code> ile ay adları Türkçe alınıp sonda <code>us_english</code>'e dönülüyor. TUR IN (11,12) alış, TUR IN (15,16) satış.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_AlisSatisYillar">
+        <summary><span class="tri">▸</span><span class="name">TM_AlisSatisYillar</span><span class="oneliner">Tarih aralığındaki yılların alış/satış toplamlarını yıl bazında özetler (çok yıllı trend).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code> (yıl, DATETIME'a çevriliyor).</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code></div>
+          <div class="row notes"><span class="k">Not</span>TUR IN (11,12,13) alış, TUR IN (15,16,17) satış — aylık sürümden bir tür fazla içeriyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_CariExtre">
+        <summary><span class="tri">▸</span><span class="name">TM_CariExtre</span><span class="oneliner">Bir cari hesabın tarih aralığındaki ekstresini özet veya detay modda, bakiyeleriyle listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@REHBERID</code> (KOD ile başlıyorsa REHBER.KOD'dan çözülür) · <code>@BASTARIH</code>, <code>@BITTARIH</code>, <code>@DetayOzet</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>fn_Cari_Ekstre</code> / <code>fn_Cari_Detayli_Ekstre</code> (TVF), dolaylı <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span><code>GROUP BY ROLLUP(...)</code> ile ara/genel toplam satırları otomatik üretiliyor; TURAD alanı "Ara Toplam :" / "Genel Toplam :" etiketine dönüştürülüyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_CariExtreDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_CariExtreDetay</span><span class="oneliner">Bir fatura başlığına ait satır detaylarını (ürün, adet, fiyat, iskonto, KDV, döviz) listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID INT</code> (FATBASID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATURA</code>, <code>FATBASLIK</code>, <code>STOKLAR</code>, <code>MASRAFGELIR</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>KDV ve döviz KDV hesaplamaları, KDVDURUM (Dahil/Hariç) ve OTV durumuna göre dallanan karmaşık formüllerle yapılıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_CiroRaporu">
+        <summary><span class="tri">▸</span><span class="name">TM_CiroRaporu</span><span class="oneliner">Tarih aralığında ciro raporu üretir: fatura, SGK, fiş, iade, toplam kırılımı.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code>, <code>FATURA</code></div>
+          <div class="row notes"><span class="k">Not</span>TUR=15 fatura, TUR=16 fiş, TIPI=2 iade; "SOSYAL GÜVENLİK KURUMU BAŞKANLIĞI" başlıklı kayıtlar SGK olarak ayrılıyor. Linked server (Venmed_Bornova/Fatih/Uskudar) üzerinden çoklu şube bloğu yorum satırıyla devre dışı — sadece Merkez şube aktif.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_CiroYuzdeDagilim">
+        <summary><span class="tri">▸</span><span class="name">TM_CiroYuzdeDagilim</span><span class="oneliner">Firma bazında ciro dağılımı ve kümülatif yüzdesini hesaplar (Pareto/ABC analizi).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code>, <code>@Yuzde FLOAT = 100</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code>, <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span>Window function ile kümülatif oran hesaplanıyor; belirli bir kümülatif yüzdeye kadar firmalar döner. TUR=15 filtreleniyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_HesapPlani">
+        <summary><span class="tri">▸</span><span class="name">TM_HesapPlani</span><span class="oneliner">Muhasebe hesap planını, varsayılan hesap gruplarıyla eşleştirip kök hesap kodunu hesaplayarak listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP VARCHAR(20)</code> (kodda kullanılmıyor gibi görünüyor)</div>
+          <div class="row"><span class="k">Tablolar</span><code>HESAPPLANI</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>ROOTKOD, hesap kodundaki son noktadan sonraki kısmın ters çevrilmesiyle (REVERSE/SUBSTRING/CHARINDEX) hesaplanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_KDRSonuc">
+        <summary><span class="tri">▸</span><span class="name">TM_KDRSonuc</span><span class="oneliner">Kasa, banka, POS, çek/senet, stok, borçlu/alacaklı ve kredi bakiyelerinden net bir likidite göstergesi ("KDR") üretir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok (yıl <code>GETDATE()</code>'ten alınıyor)</div>
+          <div class="row"><span class="k">Tablolar</span><code>POS</code>, <code>KASA</code>, <code>KASALAR</code>, <code>CEKLER</code>, <code>REHBER</code>, <code>FATBASLIK</code>, <code>KREDILER</code>, <code>PLANKREDI</code>, <code>KREDIKARTI</code>, <code>BANKAHESAPLAR</code>, <code>STOKLAR</code>, <code>STOK_ORT_MALIYET</code>, <code>FATURA</code>, <code>DOVIZ</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>Çok karmaşık, iç içe alt sorgulardan oluşan tek dev SELECT. Her bileşen ayrı hesaplanıp döviz kuruyla TL'ye çevriliyor. Sonuç: (Borçlular+Banka+POS+AlınanÇek+AlınanSenet+Kasa+Stok) − (Alacaklılar+Krediler+KrediKartı+VerilenÇek+VerilenSenet).</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_KDRSonucDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_KDRSonucDetay</span><span class="oneliner">TM_KDRSonuc'taki her bileşenin detay dökümünü, DOKUMLER'de saklı hazır SQL raporlarını çalıştırarak döner.</span><span class="badges"><span class="badge badge-warn">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP varchar(2)</code> (1–13 arası, her biri ayrı bir detay raporuna karşılık geliyor)</div>
+          <div class="row"><span class="k">Tablolar</span><code>DOKUMLER</code> (rapor SQL'lerini saklıyor) + hedef tablolar (#TempResults / #TempResults1)</div>
+          <div class="row notes"><span class="k">Not</span>DOKUMLER'den çekilen SQL metnindeki <code>:PDonemBas</code>/<code>:PDonemSon</code> yer tutucuları REPLACE edilip <code>EXEC(@SQL)</code> ile çalıştırılıyor — şablon tabanlı bir rapor motoru.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_KdvOzet">
+        <summary><span class="tri">▸</span><span class="name">TM_KdvOzet</span><span class="oneliner">Tarih aralığında Hesaplanan KDV (satış) ile İndirilen KDV (alış) tutarlarını oran ve muafiyet durumuna göre özetler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTar</code>, <code>@BitTar</code>, <code>@KDVDURUM VARCHAR(20) = NULL</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATURA</code>, <code>FATBASLIK</code>, <code>ISLEMTURLERI</code></div>
+          <div class="row notes"><span class="k">Not</span>KDV tutarı KDVDURUM (Dahil/Hariç) ve muafiyet yüzdesine göre 4 farklı formülle hesaplanıyor; İndirilen KDV raporda −1 ile çarpılıp negatif gösteriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_MizanToplu">
+        <summary><span class="tri">▸</span><span class="name">TM_MizanToplu</span><span class="oneliner">Belirli tarih aralığı için genel muhasebe mizanını (kasa/POS/banka/çek/cari/masraf-gelir) tek raporda birleştirir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTar</code>, <code>@BitTar</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>POS</code>, <code>KASA</code>, <code>KASALAR</code>, <code>BANKAHESAPLAR</code>, <code>CEKLER</code>, <code>CEKHAREKET</code>, <code>HESAPPLANI</code>, <code>FATBASLIK</code>, <code>FATURA</code>, <code>REHBER</code>, <code>SENETLER</code>, <code>MASRAFGELIR</code>, <code>STOKLAR</code>, <code>ISLEMTURLERI</code></div>
+          <div class="row notes"><span class="k">Not</span>~400 satırlık, çok sayıda <code>UNION ALL</code> alt sorgusundan oluşan tek dev SELECT. Çeklerde "devir bakiye" ile "dönem içi hareket" ayrı hesaplanıp toplanıyor. Salt okunur.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SAP_ENG_KDRSonucDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_SAP_ENG_KDRSonucDetay</span><span class="oneliner">SAP Business One verilerinden konsolide bakiye detay raporu üretir (İngilizce kolon adlarıyla).</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP VARCHAR(2)</code> (1–13: Borç, Banka, Pos, Alınan Çek/Senet, Kasa, Stok, Alacak, Kredi, Kredi Kartı, Verilen Çek/Senet)</div>
+          <div class="row"><span class="k">Tablolar</span>SAP Business One şeması: <code>OCRD</code>, <code>OCRG</code>, <code>JDT1</code>/<code>OJDT</code>, <code>OACT</code>, <code>@GRNT_KDR</code>, <code>UFD1</code>, <code>OFPR</code>, <code>OINM</code>/<code>OITM</code>/<code>OUGP</code>/<code>OITB</code></div>
+          <div class="row notes"><span class="k">Not</span>Harici bir SAP B1 veritabanına doğrudan bağlanan entegrasyon prosedürü. Her <code>@TIP</code> dalı neredeyse aynı join zincirini tekrarlıyor — tek parametrik sorguya indirgenebilir. <code>TM_SAP_KDRSonucDetay</code> ile neredeyse birebir aynı (bkz. Grup A).</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SAP_KDRSonuc">
+        <summary><span class="tri">▸</span><span class="name">TM_SAP_KDRSonuc</span><span class="oneliner">SAP verilerinden tüm bakiye kategorilerinin PIVOT'lanmış tek satırlık özet/kontrol raporunu üretir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok</div>
+          <div class="row"><span class="k">Tablolar</span><code>OCRD</code>, <code>OCRG</code>, <code>JDT1</code>, <code>OJDT</code>, <code>OINM</code>/<code>OITM</code>/<code>OUGP</code>/<code>OITB</code>, <code>UFD1</code>, <code>OFPR</code></div>
+          <div class="row notes"><span class="k">Not</span><code>GROUP BY CUBE(Descr)</code> ile hem kategori hem genel toplam tek sorguda elde edilip PIVOT uygulanıyor — muhasebe mutabakat panosu niteliğinde.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SAP_KDRSonucDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_SAP_KDRSonucDetay</span><span class="oneliner">TM_SAP_ENG_KDRSonucDetay ile birebir aynı mantık; sadece kolon adları Türkçeleştirilmiş.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP VARCHAR(2)</code> (aynı 1–13 anlamları)</div>
+          <div class="row"><span class="k">Tablolar</span>TM_SAP_ENG_KDRSonucDetay ile aynı SAP tabloları</div>
+          <div class="row notes"><span class="k">Not</span>İki prosedür neredeyse birebir kopya — muhtemelen biri Türkçe arayüz, diğeri İngilizce dışa aktarım için. İş mantığı değişirse her iki yerde de güncelleme gerekir.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Dokumler">
+        <summary><span class="tri">▸</span><span class="name">TM_Dokumler</span><span class="oneliner">RaporId parametresine göre ilgili raporlama prosedürünü çağıran yönlendirici (dispatcher).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code>, <code>@RaporId INT</code></div>
+          <div class="row"><span class="k">Tablolar</span>Doğrudan yok — alt prosedür çağrıları</div>
+          <div class="row notes"><span class="k">Not</span>RaporId'ye göre <code>TM_SatisFirsatiPerformansRaporu</code>, <code>TM_MizanToplu</code>, <code>TM_KdvOzet</code>, <code>TM_IsListesiPerformansRaporu</code>, <code>TM_CiroYuzdeDagilim</code>, <code>TM_AlisSatisYillar</code>, <code>TM_AlisSatisAylar</code>, <code>TM_CiroRaporu</code> çağırıyor — raporlama ekranının tek giriş noktası.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP B ================= -->
+    <section class="group" id="grup-b">
+      <div class="ghead"><span class="gid">B</span><h3>Fatura Yönetimi</h3></div>
+      <p class="gdesc">Fatura/irsaliye başlığı ve satırlarının listelenmesi, CRUD işlemleri, durum takibi ve fatura sihirbazının dinamik "ek alanlar" motoru.</p>
+
+      <details class="proc" id="TM_FATBASLIK">
+        <summary><span class="tri">▸</span><span class="name">TM_FATBASLIK</span><span class="oneliner">Fatura başlıklarını kullanıcı yetkisine göre filtreleyip kaynağı/hedefiyle (teklif/servis/üretim → fatura/irsaliye) zenginleştirerek listeler.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ID</code>, <code>@TAMAMLANAN</code>, <code>@BAYIID</code>, <code>@TUR</code>, <code>@KULLANICIKODU</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code>, <code>FATURA</code>, <code>REHBER</code>, <code>DEPOLAR</code>, <code>SIPARISDETAY</code>, <code>ISEMRI</code>, <code>REHBERBILGI</code>, <code>GOREVYORUM</code>, <code>GENINI</code>, <code>KULLANICI</code>, <code>YETKIEK</code>, <code>ROLLER</code></div>
+          <div class="row notes"><span class="k">Not</span><code>YETKIEK</code>/<code>ROLLER</code> üzerinden görme yetkisi (1=kendi, 10=şube bazlı) hesaplanıp uygulanıyor. <code>@BAYIID=-1</code> genel liste, aksi halde bayi bazlı — iki büyük SELECT bloğu neredeyse birebir tekrar ediyor. Kodda unutulmuş <code>PRINT</code> debug ifadeleri var.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FATBASLIKDurumGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_FATBASLIKDurumGuncelle</span><span class="oneliner">Fatura başlığının satır dönüşüm durumuna göre DURUM alanını otomatik günceller (Yeni/Kısmi/Tamamlandı).</span><span class="badges"><span class="badge badge-warn">hardcoded id</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@FATBASLIKID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code> (UPDATE), <code>FATURA</code> (okuma)</div>
+          <div class="row notes"><span class="k">Bug</span><code>@KISMI</code> hesaplanan alt sorguda <code>SD.FATBASID = 10224</code> sabit değeri kullanılmış, <code>@FATBASLIKID</code> parametresi yerine geçmiş — kısmi tamamlanma durumu muhtemelen yanlış hesaplanıyor. Sadece TUR=19 (satış) için çalışıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FATBASLIKGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_FATBASLIKGuncelle</span><span class="oneliner">Fatura/irsaliye sihirbazının ana kaydetme prosedürü: başlık ekler, günceller veya siler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>30'dan fazla parametre — <code>@ID</code>, <code>@TARIH</code>, <code>@TUR</code>, <code>@TIPI</code>, <code>@REHBERID</code>, <code>@PROJEID</code>, <code>@FATBASLIKNO</code> (='Sil' ise silme), <code>@CIKISDEPO</code>, adres/vergi alanları, <code>@KUR</code>, <code>@DOVIZ_TUTARI</code>, <code>@SUBEID</code>, <code>@BAYIID</code> vb.</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code> (INSERT/UPDATE/DELETE), <code>FATURA</code> (DELETE), <code>REHBER</code>, <code>REHBERBILGI</code>, <code>REHBERAYAR</code>, <code>REHBERILETISIM</code>, <code>KOCANAYARLARI</code>, <code>DEPOLAR</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span><code>TRY...CATCH</code> hata yönetimi var. Belge no <code>sp_BelgeNoGetir</code> ile üretiliyor. <code>@TUR=10</code>'da adres/vergi bilgisi negatif ID'li özel bir REHBER kaydından (muhtemelen kendi firma) alınıyor. Sonda güncel kaydı döndürmek için <code>TM_FATBASLIK</code> çağrılıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FatBaslikEkalanlar">
+        <summary><span class="tri">▸</span><span class="name">TM_FatBaslikEkalanlar</span><span class="oneliner">FATBASLIK kolonlarını/ek alanları dinamik olarak listeleyen ya da JSON üzerinden güncelleyen genel amaçlı motor.</span><span class="badges"><span class="badge badge-warn">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@EMIRNO</code> (FATBASLIK.ID), <code>@TIP</code> ('Listele'/'Guncelle'), <code>@JSON</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code> (dinamik SELECT/UPDATE), <code>sys.columns</code>/<code>sys.types</code>, <code>ALANLAR</code>, <code>TMLOG</code></div>
+          <div class="row notes"><span class="k">Not</span>Kolon adları <code>sys.columns</code>'tan okunup <code>EXEC(@sql)</code> ile çalıştırılıyor. 'Guncelle' modunda <code>OPENJSON</code> ile gelen veri <code>ALANLAR</code> (EKRANADI='FaturaWizardDlg') tanımlarıyla eşleştirilip güncelleniyor. Her çağrı <code>TMLOG</code>'a loglanıyor — göreceli olarak daha kontrollü bir dinamik SQL kullanımı.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FaturaDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_FaturaDetay</span><span class="oneliner">Bir fatura başlığına bağlı satırları ürün, birim, ekipman, seri no, proje ve satıcı bilgileriyle zenginleştirir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@SIPARISID INT</code> (FATURA.FATBASID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATURA</code>, <code>STOKLAR</code>, <code>MASRAFGELIR</code>, <code>GENINI</code>, <code>PROJELER</code>, <code>REHBER</code>, <code>STOKCEVRIM</code>, <code>FATBASLIK</code>, <code>EKIPMANLAR</code>, <code>EKIPMANREHBER</code>, <code>GOREVYORUM</code>, <code>DOKUMAN</code></div>
+          <div class="row notes"><span class="k">Not</span>TUR=0 ise masraf/gelir kalemi, aksi halde stok kalemi olarak farklı alanlar hesaplanıyor. Dönüşen miktar STOKCEVRIM üzerinden hesaplanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FATURAGir">
+        <summary><span class="tri">▸</span><span class="name">TM_FATURAGir</span><span class="oneliner">Fatura satırlarını ekler/günceller/siler; stok hareketlerini ve seri/lot takibini işler, üst faturayı yeniden hesaplar.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (0 ise yeni), <code>@SIPARISID</code>, <code>@REHBERID</code>, <code>@TUR</code> ('Stok'/'Sil'), <code>@URUNID</code>, <code>@MIKTAR</code>, <code>@BIRIMFIYAT</code>, <code>@ISKONTO</code>, <code>@KDV</code>, döviz alanları, <code>@EKIPMANID</code>, <code>@SERILOTLISTESI</code> (JSON)</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATURA</code> (I/U/D), <code>FATBASLIK</code> (toplamlar), <code>STOKIZLEME</code>, <code>STOKIZLEMEDEPO</code>, <code>STOKSERILOT</code>, <code>STOKDURUMIZLEME</code>, <code>DOVIZ</code>, <code>STOKLAR</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@SERILOTLISTESI</code> JSON parametresi <code>OPENJSON</code> ile parse edilip seri/lot hareketleri toplu işleniyor; <code>OUTPUT ... INTO</code> ile üretilen ID'ler yakalanıyor. İşlem sonunda üst FATBASLIK'ın tutarları alt satırlardan yeniden toplanıyor; sonda <code>TM_FaturaDetay</code> çağrılarak güncel liste dönüyor (self-call).</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP C ================= -->
+    <section class="group" id="grup-c">
+      <div class="ghead"><span class="gid">C</span><h3>Sipariş, Dönüşüm Zinciri &amp; Stok Transferi</h3></div>
+      <p class="gdesc">Teklif → sipariş → irsaliye → fatura dönüşüm zincirinin listelenmesi, sipariş CRUD işlemleri ve depolar arası stok transfer belgeleri.</p>
+
+      <details class="proc" id="TM_DonusumListeleri">
+        <summary><span class="tri">▸</span><span class="name">TM_DonusumListeleri</span><span class="oneliner">Satış/alış dönüşüm listelerini ve üretim emri listesini ekrana göre yönlendiren ana giriş noktası.</span><span class="badges"><span class="badge badge-sec">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ekran</code> ('Alis1', 'Satis1', 'uel', 'siparis'…), <code>@gizlenen</code>, <code>@kalmayan</code>, <code>@ekleyen</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMEMRI</code>, <code>URETIMEMRIDETAY</code>, <code>STOKLAR</code>, <code>REHBER</code>, <code>SIPARIS</code>, <code>SIPARISDETAY</code>, <code>PROJELER</code>, <code>DONUSUMBILGISIGIZLE</code> vb.</div>
+          <div class="row notes"><span class="k">Not</span><code>@ekran</code> 'Alis%' ise <code>TM_DonusumListeleriAlis</code>, 'Satis%' ise <code>TM_DonusumListeleriSatis</code> çağrılıyor. 'uel' ve 'siparis' ekranları için tarih parametreleri dahil dinamik SQL string birleştirmeyle inşa edilip <code>EXEC(@SQL)</code> ile çalıştırılıyor — SQL injection riski taşıyan bir örüntü.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_DonusumListeleriAlis">
+        <summary><span class="tri">▸</span><span class="name">TM_DonusumListeleriAlis</span><span class="oneliner">Alış dönüşüm aşamalarını (Teklif→Sipariş→Fatura/İrsaliye/Konsinye, 6 ekran) "dönüşen/kalan miktar" ile listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ekran</code>, <code>@gizlenen</code>, <code>@kalmayan</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TEKLIF</code>/<code>TEKLIFDETAY</code>, <code>SIPARIS</code>/<code>SIPARISDETAY</code>, <code>FATBASLIK</code>/<code>FATURA</code>, <code>STOKLAR</code>, <code>REHBER</code>, <code>PROJELER</code>, <code>DONUSUMBILGISIGIZLE</code></div>
+          <div class="row notes"><span class="k">Not</span>Her ekran farklı YERI/YERID koduna göre DONUSEN/KALAN hesaplıyor. <code>@kalmayan</code> tamamen dönüşmüşleri, <code>@gizlenen</code> kullanıcı tarafından gizlenenleri filtreler.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_DonusumListeleriSatis">
+        <summary><span class="tri">▸</span><span class="name">TM_DonusumListeleriSatis</span><span class="oneliner">Satış dönüşüm aşamalarını (Teklif→Sipariş→Fatura/İrsaliye, 5 ekran) listeler — Alış prosedürünün satış karşılığı.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ekran</code>, <code>@gizlenen</code>, <code>@kalmayan</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TEKLIF</code>/<code>TEKLIFDETAY</code>, <code>SIPARIS</code>/<code>SIPARISDETAY</code>, <code>FATBASLIK</code>/<code>FATURA</code>, <code>STOKLAR</code>, <code>REHBER</code>, <code>PROJELER</code></div>
+          <div class="row notes"><span class="k">Not</span>TUR=19 (satış siparişi) ve TUR=14 (satış faturası) filtreleri; farklı YERI kodlarıyla (409/410/411/413/429…) çalışıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SiparisAlinan">
+        <summary><span class="tri">▸</span><span class="name">TM_SiparisAlinan</span><span class="oneliner">Alınan siparişleri (TUR=19) tarih/sipariş/bayiye göre, hangi süreçten geldiği/gittiği bilgisiyle listeler.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ID</code>, <code>@TAMAMLANAN</code>, <code>@BAYIID</code> (-1 = tüm bayiler), <code>@KULLANICIKODU</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>SIPARIS</code> (NOLOCK), <code>REHBER</code>, <code>SIPARISDETAY</code>, <code>DEPOLAR</code>, <code>FATURA</code>, <code>ISEMRI</code>, <code>YETKIEK</code>, <code>REHBERBILGI</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@BAYIID=-1</code> dalı ile tek bayi dalı neredeyse birebir aynı iki büyük SELECT bloğu içeriyor. DURUMNEREDEN/DURUMNEREYE alanları iç içe alt sorgularla iş akışı adımını türetiyor. Yetki: 1=satıcı bazlı, 10=şube bazlı. <code>NOLOCK</code> hint'i kirli okuma riski taşıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SiparisAlinanDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_SiparisAlinanDetay</span><span class="oneliner">Bir siparişin satır detaylarını ürün/masraf bilgisi, birim, proje, satıcı ve dönüşen miktarla listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@SIPARISID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>SIPARISDETAY</code>, <code>MASRAFGELIR</code>, <code>STOKLAR</code>, <code>GOREVYORUM</code>, <code>DOKUMAN</code>, <code>GENINI</code>, <code>PROJELER</code>, <code>REHBER</code>, <code>STOKCEVRIM</code>, <code>SIPARIS</code>, <code>EKIPMANLAR</code></div>
+          <div class="row notes"><span class="k">Not</span>Salt okunur. TUR=0 ise masraf/gelir kalemi, değilse stok kalemi mantığıyla dallanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SiparisDetayGir">
+        <summary><span class="tri">▸</span><span class="name">TM_SiparisDetayGir</span><span class="oneliner">Sipariş detay satırı ekler/günceller/siler; ardından sipariş başlığındaki toplamları yeniden hesaplar.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (0/boş=yeni), <code>@SIPARISID</code>, <code>@TUR</code> ('Sil'/'Stok'), <code>@URUNID</code>, <code>@MIKTAR</code>, <code>@BIRIMFIYAT</code>, <code>@ISKONTO</code>, <code>@DOVIZ_KURU</code> vb.</div>
+          <div class="row"><span class="k">Tablolar</span><code>SIPARISDETAY</code> (I/U/D), <code>SIPARIS</code> (toplamlar), <code>DOVIZ</code></div>
+          <div class="row notes"><span class="k">Not</span>Döviz cinsi TL değilse günün satış kuruyla yeniden hesaplama yapılıyor. <code>TRY/CATCH</code> ile Türkçe hata mesajı dönüyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SiparisDurumGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_SiparisDurumGuncelle</span><span class="oneliner">Sipariş durumunu (Tamamlandı/Kısmi/Yeni), faturalanan miktarlara göre otomatik günceller.</span><span class="badges"><span class="badge badge-warn">hardcoded id</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@SIPARISID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>SIPARIS</code> (UPDATE DURUM), <code>SIPARISDETAY</code>, <code>FATURA</code> (YERI IN 409,410,429,473)</div>
+          <div class="row notes"><span class="k">Bug</span><code>@KISMI</code> hesaplanan alt sorguda <code>SD.SIPARISID = 10224</code> sabit değeri kullanılmış — parametre olan <code>@SIPARISID</code> kullanılmamış; kopyala-yapıştır hatası olabilir. Sadece TUR=19 için çalışıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SiparisGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_SiparisGuncelle</span><span class="oneliner">Sipariş başlığını (kalemleriyle birlikte) ekler, günceller veya siler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code>, <code>@TARIH</code>, <code>@TUR</code>, <code>@TIPI</code>, <code>@REHBERID</code>, <code>@PROJEID</code>, <code>@SIPARISNO</code> ('Sil' ile silme), döviz alanları, <code>@DURUM</code>, <code>@VADE</code>, <code>@BAYIID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>SIPARIS</code> (I/U/D), <code>SIPARISDETAY</code> (silme akışında), <code>REHBER</code>, <code>REHBERAYAR</code>, <code>REHBERBILGI</code>, <code>DEPOLAR</code></div>
+          <div class="row notes"><span class="k">Not</span>Sipariş no <code>KOCANNO=1901</code> sabit değerine göre en büyük numaranın +1'i olarak üretiliyor. Kayıt sonrası <code>TM_SiparisAlinan</code> çağrılıyor. <code>TRY/CATCH</code> var.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_STOKTRANSFER">
+        <summary><span class="tri">▸</span><span class="name">TM_STOKTRANSFER</span><span class="oneliner">Depolar arası stok transfer belgelerini (TUR=20) tarih/ID/bayiye göre listeler.</span><span class="badges"><span class="badge badge-sec">yetki devre dışı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@ID</code>, <code>@TAMAMLANAN</code>, <code>@BAYIID</code>, <code>@KULLANICIKODU</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code>, <code>DEPOLAR</code>, <code>REHBER</code>, <code>YETKIEK</code>, <code>ROLLER</code>, <code>KULLANICI</code>, <code>SIPARISDETAY</code>, <code>FATURA</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span>Kullanıcının görme yetkisi (<code>@GORMEYETKISI</code>, <code>@SUBEID</code>) hesaplanıyor, fakat WHERE koşulundaki filtre satırları yorum satırına alınmış — hesaplanan yetki fiilen uygulanmıyor, tüm transfer belgeleri herkese açık listeleniyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_STOKTRANSFERGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_STOKTRANSFERGuncelle</span><span class="oneliner">Stok transfer belgesini (TUR=20) ekler, günceller veya siler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TUR</code> ('Sil' ile silme), <code>@ID</code>, <code>@REHBERID</code> (teslim alan), <code>@SATICIKODU</code> (teslim eden), <code>@CIKISDEPO</code>, <code>@GIRISDEPO</code>, <code>@DURUM</code>, <code>@BAYIID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code> (I/U/D), <code>FATURA</code> (silmede), <code>DEPOLAR</code>, <code>KOCANAYARLARI</code></div>
+          <div class="row notes"><span class="k">Not</span>Belge no <code>sp_BelgeNoGetir</code> ile üretiliyor. Sonda <code>TM_STOKTRANSFER</code> çağrılarak güncel kayıt döndürülüyor. <code>TRY/CATCH</code> var.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP D ================= -->
+    <section class="group" id="grup-d">
+      <div class="ghead"><span class="gid">D</span><h3>Stok &amp; Depo</h3></div>
+      <p class="gdesc">Ürün arama (internet satışı ve sayım ekranları), fiyat/kampanya hesaplama, stok sayım süreci ve seri/lot yönetimi.</p>
+
+      <details class="proc" id="TM_StokAra">
+        <summary><span class="tri">▸</span><span class="name">TM_StokAra</span><span class="oneliner">İnternet satışı için ürün arama; fiyat listesi, depo bazlı kalan miktar ve kampanya iskontosuyla sonuç döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@AD</code>, <code>@KOD</code>, <code>@URUNID</code> (S=Sipariş, F=Fatura, SD=depo araması, diğer=doğrudan ID), <code>@REHBERID</code>, <code>@BARKOD</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>STOKLAR</code>, <code>STOKFIYAT</code>, <code>STOKDURUM</code>, <code>STOKBARKOD</code>, <code>KAMPANYACARI</code>, <code>DEPOLAR</code>, <code>KATEGORI</code>, <code>SIPARIS</code>, <code>FATBASLIK</code></div>
+          <div class="row notes"><span class="k">Not</span>Sonuçlar <code>INTERNET_SATIS=1</code> ve <code>DURUM=1</code> stoklarla sınırlı. SD modunda depo bazlı detay <code>FOR JSON PATH</code> ile döndürülüyor. Kampanya iskontosu <code>KAMPANYACARI</code>+<code>GENINI</code> ile hesaplanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_StokAraDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_StokAraDetay</span><span class="oneliner">Bir ürünün son 10 alış ve son 10 satış faturasını listeler (hızlı fiyat geçmişi).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@URUNID</code>, <code>@REHBERID</code> (0 = tüm cariler)</div>
+          <div class="row"><span class="k">Tablolar</span><code>FATBASLIK</code> (TUR 11,12=alış; 15,16=satış), <code>FATURA</code>, <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span>Salt okunur; <code>UNION ALL</code> ile alış/satış birleştiriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_StokAraSayim">
+        <summary><span class="tri">▸</span><span class="name">TM_StokAraSayim</span><span class="oneliner">Stok sayımı ekranı için ürün arama (ad/kod/barkod/kategori/depo bazlı).</span><span class="badges"><span class="badge badge-warn">hardcoded değer</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@AD</code>, <code>@KOD</code>, <code>@BARKOD</code>, <code>@DEPO</code>, <code>@KATEGORI</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>STOKLAR</code>, <code>STOKFIYAT</code>, <code>STOKDURUM</code>, <code>STOKBARKOD</code>, <code>KATEGORI</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@FiyatAdi</code> sabit olarak 10 atanmış (parametre değil, hardcoded). Barkod eşleşmesinde O/P/Q karakterleri alt çizgiyle değiştirilerek esnek eşleşme sağlanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_StokSayim">
+        <summary><span class="tri">▸</span><span class="name">TM_StokSayim</span><span class="oneliner">Tarih aralığında henüz onaylanmamış stok sayımlarını listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTARIH</code>, <code>@BITTARIH</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>STOKSAYIM</code>, <code>DEPOLAR</code>, <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span>Salt okunur, basit liste sorgusu (<code>SAYIMONAY≠1</code>).</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_StokSayimKalemleri">
+        <summary><span class="tri">▸</span><span class="name">TM_StokSayimKalemleri</span><span class="oneliner">Sayım sırasında okutulan ürün miktarlarını seri/lot bilgisiyle kaydeder (Listele/Giriş/Sil).</span><span class="badges"><span class="badge badge-warn">transaction yok</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> (Listele/Giris/Sil), <code>@SAYIMID</code>, <code>@STOKID</code>, <code>@SAYIMMIKTAR</code>, <code>@SERINO</code>, <code>@LOTNO</code>, <code>@SKT</code>, <code>@DEPOID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>STOKSAYIMKALEMLERI</code>, <code>STOKSERILOT</code>, <code>STOKIZLEME</code>, <code>STOKIZLEMEDEPO</code>, <code>STOKLOKASYON</code></div>
+          <div class="row notes"><span class="k">Not</span>Giriş akışı: kalem → seri/lot (yoksa oluştur) → izleme kaydı → depo bazlı izleme — çok adımlı, <code>BEGIN TRAN</code> olmadan sıralı yazılıyor; ara adımda hata olursa veri tutarsızlığı riski var. Debug <code>PRINT</code> ifadeleri kod içinde bırakılmış.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_StokSeriLotListele">
+        <summary><span class="tri">▸</span><span class="name">TM_StokSeriLotListele</span><span class="oneliner">Belge türüne göre seçilebilecek seri/lot stoklarını listeler; faturaya bağlı seri/lot hareketlerini siler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> (Sil/liste), <code>@STOKID</code>, <code>@DEPOID</code>, <code>@STOKSERILOTID</code> (silmede aslında FATURA.ID), <code>@SIPARISID</code> (aslında FATBASLIK.ID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>STOKDURUMIZLEME</code>, <code>STOKSERILOT</code>, <code>STOKIZLEME</code>, <code>STOKLOKASYON</code>, <code>FATURA</code>, <code>FATBASLIK</code></div>
+          <div class="row notes"><span class="k">Not</span>10=alış girişi, 14/20=çıkış/transfer için farklı davranıyor. Sil modunda ilişkili kayıtlar FATURA.ID üzerinden siliniyor.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP E ================= -->
+    <section class="group" id="grup-e">
+      <div class="ghead"><span class="gid">E</span><h3>CRM, Görev &amp; Satış Fırsatları</h3></div>
+      <p class="gdesc">Cari/rehber (müşteri) kartı, potansiyel müşteri yönetimi, görev/iş listesi sistemi ve satış fırsatı (proje) takibi.</p>
+
+      <details class="proc" id="TM_CrmIstatistik">
+        <summary><span class="tri">▸</span><span class="name">TM_CrmIstatistik</span><span class="oneliner">İçinde bulunulan yıl için aylık yeni cari kaydı ve görev sayısı istatistiklerini CRM dashboard'u için hazırlar.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok</div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBER</code>, <code>GENINI</code>, <code>GOREVLER</code></div>
+          <div class="row notes"><span class="k">Not</span>Ay isimleri Türkçeleştirilip sıra numarasıyla ("1-Ocak") formatlanıyor; sadece cari yıl.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FirsatBagla">
+        <summary><span class="tri">▸</span><span class="name">TM_FirsatBagla</span><span class="oneliner">Bir cariye bağlı veya tüm açık satış fırsatlarını/projeleri listeler (fırsat bağlama ekranı).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@REHBERID varchar(20)</code> ('0' = tüm açık projeler)</div>
+          <div class="row"><span class="k">Tablolar</span><code>PROJELER</code>, <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span>Basit filtreleme prosedürü.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GorevDetayListeleGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_GorevDetayListeleGuncelle</span><span class="oneliner">Görev kayıtlarını listeler/ekler/günceller; atanan kişileri ve yorumları yönetir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> (Listele/Guncelle/Sil), <code>@ID</code>, <code>@DURUM</code>, <code>@KONUSU</code>, <code>@TURU</code>, <code>@REHBERID</code>, <code>@ATANAN</code>/<code>@BILGI</code> (JSON kişi listeleri), <code>@PROJEID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLER</code> (I/U/D), <code>GOREVYORUM</code>, <code>GOREVKULLANICI</code>, <code>GENINI</code>, <code>REHBER</code>, <code>PROJELER</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@ATANAN</code>/<code>@BILGI</code> JSON parametreleri <code>OPENJSON</code> ile parse edilip GOREVKULLANICI'ye yazılıyor. Güncelleme sonrası <code>TM_GOREVLERWHATSAPPGONDERMAIL</code> ve <code>TM_GOREVLERWHATSAPPGONDERWA</code> otomatik tetikleniyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GorevFonsiyonGetir">
+        <summary><span class="tri">▸</span><span class="name">TM_GorevFonsiyonGetir</span><span class="oneliner">Kullanıcının erişebildiği görev listelerini ve "akıllı liste" görünümlerini (bana atananlar, bu hafta vb.) getirir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@Kullanici</code>, <code>@AcKapa</code>, <code>@BaslaGun</code>, <code>@ListeId</code> (negatif = sanal liste: -27, -24, -18, -15, -12, -9, -3)</div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLISTE</code>, <code>GOREVKULLANICI</code>, <code>GOREVLER</code>, <code>ROLLER</code>, <code>KULLANICI</code> + çok sayıda table-valued fonksiyon (<code>fn_prg_IsListesi*</code>)</div>
+          <div class="row notes"><span class="k">Not</span>Erişim yetkisi karmaşık bir CASE/OR koşuluyla (herkese açık mı, ekleyen mi, ya da 4 farklı TUR/rol kombinasyonu) kontrol ediliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GorevListe">
+        <summary><span class="tri">▸</span><span class="name">TM_GorevListe</span><span class="oneliner">Kullanıcının görebileceği görev listelerini (normal + sabit/sanal listeler) birleştirerek döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@REHBERID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLISTE</code>, <code>GOREVKULLANICI</code></div>
+          <div class="row notes"><span class="k">Not</span>TM_GorevFonsiyonGetir ile aynı yetkilendirme mantığı; TUR=1 (kullanıcıya özel) ve TUR=0 (sabit) <code>UNION ALL</code> ile birleştiriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GorevYorum">
+        <summary><span class="tri">▸</span><span class="name">TM_GorevYorum</span><span class="oneliner">Bir göreve bağlı farklı bağlamlardaki (irsaliye, ÜEL, sipariş, satış fırsatı) yorumları listeler/ekler/günceller.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@GOREVID</code>, <code>@TIP varchar(50)</code> (ListeleIrsaliye/ListeleUel/ListeleIslistesi/ListeleSiparis/ListeleSatisFirsatlari ve Guncelle* varyantları)</div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVYORUM</code> (TUR: 105=irsaliye, 142=ÜEL, 33=iş listesi, 91/93=sipariş, 70=satış fırsatı), <code>REHBER</code>, <code>IMAJ</code>, <code>DOKUMAN</code></div>
+          <div class="row notes"><span class="k">Not</span>Upsert deseni (<code>@ID=0</code> → INSERT). GuncelleIslistesi sonrası WhatsApp/mail bildirim prosedürleri tetikleniyor. Prosedür kendi kendini farklı <code>@TIP</code> ile çağırıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Ilgililer">
+        <summary><span class="tri">▸</span><span class="name">TM_Ilgililer</span><span class="oneliner">Bir firmaya bağlı ilgili kişi (contact) kaydını oluşturur/günceller; yoksa yeni REHBER+REHBERILETISIM açar.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ILGILIFIRMAID</code>, <code>@ILGILIAD</code>, <code>@ILGILIISTEL</code>, <code>@ILGILICEPTEL</code>, <code>@ILGILIEPOSTA</code>, <code>@ILGILIGOREVI</code>, <code>@EKLEYEN</code>, <code>@DURUM</code>, <code>@ID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBER</code> (insert), <code>REHBERILETISIM</code> (insert), <code>REHBERBILGI</code> (upsert)</div>
+          <div class="row notes"><span class="k">Not</span><code>@ILGILIFIRMAID=0</code> ise yeni REHBER kaydı (GRUP=334) açılıp <code>SCOPE_IDENTITY()</code> ile ID alınıyor. Her iletişim alanı için "UPDATE, @@ROWCOUNT=0 ise INSERT" deseni tekrarlanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_IsListesiPerformansRaporu">
+        <summary><span class="tri">▸</span><span class="name">TM_IsListesiPerformansRaporu</span><span class="oneliner">Tarih aralığında kişi/tür/firma bazında görev performansını, PIVOT'lanmış rapor olarak döner.</span><span class="badges"><span class="badge badge-sec">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code>, <code>@KISI</code>, <code>@TUR</code>, <code>@FIRMA</code> (hepsi NULL olabilir)</div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLER</code>, <code>GOREVLISTE</code>, <code>REHBER</code>, <code>GENINI</code>, <code>PROJELER</code></div>
+          <div class="row notes"><span class="k">Not</span>Görev türleri bir <code>WHILE</code> döngüsüyle gezilerek dinamik PIVOT kolon listesi oluşturuluyor ve <code>EXEC(@SQL)</code> ile çalıştırılıyor. <code>@KISI</code>/<code>@TUR</code>/<code>@FIRMA</code> parametreleri doğrudan string birleştirmeyle sorguya ekleniyor — SQL injection riski.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_PotansiyelDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_PotansiyelDetay</span><span class="oneliner">Potansiyel müşteri/cari kaydının detayını görüntüler veya ekler/günceller; ilgili kişi listesini JSON olarak işler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code>, <code>@TIP</code> (Listele/Guncelle) + firma/grup/sektör/kategori/temsilci gibi çok sayıda REHBER alanı, <code>@ILGILIJSON</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBER</code> (S/U/I), <code>REHBERILETISIM</code>, <code>REHBERBILGI</code> (upsert), <code>TM_Ilgililer</code> (cursor içinde çağrılıyor)</div>
+          <div class="row notes"><span class="k">Not</span><code>TRY/CATCH</code> var. Yeni kayıtta hiyerarşik alt kod (.01, .02) string manipülasyonuyla (REVERSE/SUBSTRING/CHARINDEX) üretiliyor — kırılgan bir mantık. <code>@ILGILIJSON</code> bir <code>CURSOR</code> ile satır satır <code>TM_Ilgililer</code>'e aktarılıyor (performans açısından dikkat gerektirir).</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_PotansiyelListe">
+        <summary><span class="tri">▸</span><span class="name">TM_PotansiyelListe</span><span class="oneliner">Potansiyel müşteri/cari listesini filtreli ve yetkiye göre kısıtlanmış şekilde arar; son aktivite/satış bilgisiyle.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@UNVAN</code>, <code>@ILGILI</code>, <code>@DURUM</code>, <code>@TEMSILCIAD</code>, <code>@GRUP</code>, <code>@DETAYARA</code>, <code>@KULLANICIKODU</code>, <code>@EKRAN</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBER</code>, <code>REHBERILETISIM</code>, <code>REHBERBILGI</code>, <code>YETKIEK</code>, <code>GOREVLER</code>, <code>FATBASLIK</code></div>
+          <div class="row notes"><span class="k">Not</span><code>YETKIEK</code>'ten görme yetkisi okunuyor (1=temsilci bazlı, 10=şube bazlı — satır bazlı erişim kontrolü). Sonuç <code>TOP 500</code> ile sınırlı; iki aşamalı filtreleme (temel filtre + serbest metin arama).</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Rehber">
+        <summary><span class="tri">▸</span><span class="name">TM_Rehber</span><span class="oneliner">Rehber (cari/firma) kayıtlarını farklı bağlamlarda (genel, yetki kısıtlı, satıcı, rakip, bayi) arayan çok amaçlı prosedür.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@KOD</code>, <code>@FIRMA</code>, <code>@TIP</code> ('335', 'YETKIKISITLI', 'SATICI', 'BAGLI', 'RAKIP', 'BAYI'), <code>@KULLANICIKODU</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBER</code>, <code>REHBERBILGI</code>, <code>GOREVYORUM</code>, <code>YETKIEK</code>, <code>ROLLER</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@TIP</code>'e göre 6 ayrı SELECT bloğu (statik IF, dinamik SQL değil), her biri en fazla 50 sonuç dönüyor. 'RAKIP' dalı sabit <code>GRUP=950</code> filtresi kullanıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_RehberIletisim">
+        <summary><span class="tri">▸</span><span class="name">TM_RehberIletisim</span><span class="oneliner">Bir cariye ait adres, ilçe, il, vergi dairesi ve vergi numarası bilgilerini döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@REHBERID INTEGER</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>REHBERILETISIM</code>, <code>REHBERAYAR</code>, <code>REHBERBILGI</code></div>
+          <div class="row notes"><span class="k">Not</span>REHBERAYAR.VARSAYILAN sabit kodlarına (2=Adres, 6=İlçe, 8=İl, 20=VD, 22=VNo) göre REHBERBILGI'den alan çekiliyor — EAV benzeri esnek veri modeli.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SatisFirsatiPerformansRaporu">
+        <summary><span class="tri">▸</span><span class="name">TM_SatisFirsatiPerformansRaporu</span><span class="oneliner">Tarih aralığında sorumlu bazında satış fırsatı performansını, aşama bazlı PIVOT tablo olarak döner.</span><span class="badges"><span class="badge badge-warn">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BASTAR</code>, <code>@BITTAR</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GENINI</code> (aşama listesi → #TEMP_ASAMA), <code>PROJELER</code>, <code>REHBER</code>, <code>TEKLIF</code></div>
+          <div class="row notes"><span class="k">Not</span>Aşama listesi bir <code>WHILE</code> döngüsüyle PIVOT kolon listesine dönüştürülüp <code>EXEC(@SQL)</code> ile çalıştırılıyor; tarih değerleri DATETIME olduğu için risk düşük ama yine de dikkat gerektiren bir örüntü.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_SatisFirsatlarListeleGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_SatisFirsatlarListeleGuncelle</span><span class="oneliner">Satış fırsatları için listeleme, ekleme/güncelleme ve silme (CRUD) sağlar.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> (Listele/Guncelle/Sil), <code>@KONUSU</code>, <code>@SATISFIYATI</code>, <code>@PROJESORUMLUSUID</code>, <code>@TURU</code>, <code>@TIPI</code>, <code>@ASAMA</code>, <code>@ID</code> vb.</div>
+          <div class="row"><span class="k">Tablolar</span><code>PROJELER</code> (S/U/I/D), <code>REHBER</code>, <code>GENINI</code>, <code>GOREVLER</code>, <code>GOREVYORUM</code></div>
+          <div class="row notes"><span class="k">Not</span>Guncelle/Sil sonunda kendini 'Listele' ile çağırıyor (self-call). Silme fiziksel <code>DELETE</code> — soft-delete değil, geri alınamaz.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP F ================= -->
+    <section class="group" id="grup-f">
+      <div class="ghead"><span class="gid">F</span><h3>İletişim Entegrasyonu — WhatsApp, Mail, Facebook</h3></div>
+      <p class="gdesc">Görev bildirimlerinin WhatsApp/mail kuyruğuna yazılması, harici WhatsApp servisinden gelen kişi/mesaj verisinin işlenmesi ve Facebook Lead Ads entegrasyonu.</p>
+
+      <details class="proc" id="TM_EPostaHesaplari">
+        <summary><span class="tri">▸</span><span class="name">TM_EPostaHesaplari</span><span class="oneliner">Sistemde tanımlı varsayılan e-posta hesabını/hesaplarını döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok</div>
+          <div class="row"><span class="k">Tablolar</span><code>EPOSTAHESAPLARI</code> (VARSAYILAN=1)</div>
+          <div class="row notes"><span class="k">Not</span>Çok basit, tek satırlık SELECT.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_FacebookEnt">
+        <summary><span class="tri">▸</span><span class="name">TM_FacebookEnt</span><span class="oneliner">Facebook/Meta Lead Ads'ten gelen JSON lead verisini parse edip aday müşteri olarak kaydeder.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@JSON NVARCHAR(MAX)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>META_Collect</code> (insert)</div>
+          <div class="row notes"><span class="k">Not</span><code>OPENJSON</code> ile iç içe JSON parse ediliyor; isim, telefon, e-posta, adres, cinsiyet (TR/EN eşleme) alanları pivotlanıyor. <code>FB_Support=1</code>, <code>Meta_Class=2</code> sabit değerlerle işaretleniyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GOREVLERWHATSAPPGONDER">
+        <summary><span class="tri">▸</span><span class="name">TM_GOREVLERWHATSAPPGONDER</span><span class="oneliner">Bir görev için detaylı metin mesajı hazırlayıp WhatsApp/mail kuyruğuna (TMWHATSAPPMESAJ) "Mail" olarak ekler.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@GOREVID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLER</code>, <code>REHBER</code>, <code>GENINI</code>, <code>GOREVLISTE</code>, <code>GOREVKULLANICI</code>, <code>GOREVYORUM</code>, <code>REHBERILETISIM</code> → <code>TMWHATSAPPMESAJ</code></div>
+          <div class="row notes"><span class="k">Not</span>Alıcı mail adresleri <code>STRING_AGG</code> ile birleştiriliyor. Cep telefonuyla gönderim kısmı yorum satırına alınmış — yerini aşağıdaki WA prosedürü almış görünüyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GOREVLERWHATSAPPGONDERMAIL">
+        <summary><span class="tri">▸</span><span class="name">TM_GOREVLERWHATSAPPGONDERMAIL</span><span class="oneliner">TM_GOREVLERWHATSAPPGONDER'in HTML formatlı, yorum geçmişini de içeren detaylı versiyonu.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@GOREVID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLER</code>, <code>REHBER</code>, <code>GOREVYORUM</code> (TUR=1 not, TUR=33 yorum geçmişi) → <code>TMWHATSAPPMESAJ</code></div>
+          <div class="row notes"><span class="k">Not</span>Yorum geçmişi <code>STRING_AGG</code> ile tarih/kişi/yorum formatında HTML bloklarına dönüştürülüyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_GOREVLERWHATSAPPGONDERWA">
+        <summary><span class="tri">▸</span><span class="name">TM_GOREVLERWHATSAPPGONDERWA</span><span class="oneliner">Görev bilgisini WhatsApp formatında hazırlayıp cep telefonlarına "WA" türünde kuyruk kaydı açar.</span><span class="badges"><span class="badge badge-dup">kod tekrarı</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@GOREVID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVLER</code>, <code>REHBERILETISIM</code> (Cep Tel) → geçici <code>#TEMPWA</code> → <code>TMWHATSAPPMESAJ</code></div>
+          <div class="row notes"><span class="k">Not</span><code>TM_TelFormatla</code> fonksiyonuyla telefon numarası WhatsApp API formatına ('@c.us') çevriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Whatsappcontacts">
+        <summary><span class="tri">▸</span><span class="name">TM_Whatsappcontacts</span><span class="oneliner">Harici WhatsApp entegrasyonundan gelen kişi listesini JSON olarak alıp tabloyu tamamen yeniler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@JSON NVARCHAR(MAX)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TMWHATSAPPCONTACTS</code> (TRUNCATE + INSERT)</div>
+          <div class="row notes"><span class="k">Not</span>Her çağrıda tablo tamamen boşaltılıp yeniden dolduruluyor (artımlı değil) — büyük kişi listelerinde performans/eşzamanlılık riski taşıyabilir.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Whatsappmesaj">
+        <summary><span class="tri">▸</span><span class="name">TM_Whatsappmesaj</span><span class="oneliner">Harici WhatsApp mesaj JSON'unu loglar, ayrıştırıp kaydeder ve bildirim için filtrelenmiş mesaj döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@JSON NVARCHAR(MAX)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TMLOG</code> (ham JSON log), <code>TMWHATSAPPMESAJCHAT</code></div>
+          <div class="row notes"><span class="k">Not</span><code>typex NOT IN (e2e_notification, notification_template)</code> filtresiyle gerçek mesajlar ayrıca dönülüyor — bildirim amaçlı.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP G ================= -->
+    <section class="group" id="grup-g">
+      <div class="ghead"><span class="gid">G</span><h3>Doküman &amp; Görsel Yönetimi</h3></div>
+      <p class="gdesc">Arşiv/doküman klasör yapısı, dosya yükleme ve resim/PDF üretimi — bu grupta sunucu tarafında komut çalıştırma (<code>xp_cmdshell</code>) kullanan iki kritik prosedür bulunuyor.</p>
+
+      <details class="proc" id="TM_DokumanGuncelleListele">
+        <summary><span class="tri">▸</span><span class="name">TM_DokumanGuncelleListele</span><span class="oneliner">Doküman/arşiv ekranı için kayıt listeler, günceller veya yeni dosya ekler.</span><span class="badges"><span class="badge badge-sec">xp_cmdshell</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> ('Listele'/'Guncelle'), <code>@ID</code> + tarih/durum/kategori/kurum/demirbaş/departman/lokasyon/gizlilik/sorumlu/klasör/belge içeriği (binary) gibi çok sayıda meta veri alanı</div>
+          <div class="row"><span class="k">Tablolar</span><code>DOKUMAN</code> (S/U/I), <code>IMAJ</code> (S/U/I), <code>GENINI</code>, <code>REHBER</code>, <code>DEMIRBAS</code>, <code>LOKASYON</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span>Yeni belge eklenirken <code>sp_Imaj_Kaydetme</code> çağrılıyor ve <code>xp_cmdshell</code> ile PowerShell script (<code>ConvertToBase64.ps1</code>) çalıştırılarak dosya diske yazılıyor. Sonunda kendini 'Listele' modunda tekrar çağırıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_DokumanKlasor">
+        <summary><span class="tri">▸</span><span class="name">TM_DokumanKlasor</span><span class="oneliner">Aktif doküman klasör ağacını, hesaplanan sıralama değeriyle listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok</div>
+          <div class="row"><span class="k">Tablolar</span><code>DOKUMANKLASOR</code></div>
+          <div class="row notes"><span class="k">Not</span>ÜstID+ID birleştirilip sayıya çevrilerek hiyerarşik sıralama hilesi uygulanıyor. Sadece DURUM=1.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_DokumanYetki">
+        <summary><span class="tri">▸</span><span class="name">TM_DokumanYetki</span><span class="oneliner">Belirli bir klasördeki (ve kısayollarındaki) dokümanları tam klasör yol adıyla listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@REHBERID</code>, <code>@KLASORID</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>DOKUMANKLASOR</code> (recursive CTE), <code>DOKUMAN</code>, <code>IMAJ</code>, <code>DOKUMANKISAYOL</code>, <code>DOKUMANYETKI</code></div>
+          <div class="row notes"><span class="k">Not</span>Recursive CTE ile klasör hiyerarşisinin tam yolu oluşturuluyor; doğrudan klasördekiler + kısayolla bağlı olanlar <code>UNION ALL</code> ile birleşiyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Imaj">
+        <summary><span class="tri">▸</span><span class="name">TM_Imaj</span><span class="oneliner">Bir görsel kaydını ID'sine göre okuyup binary içeriğini döner (sp_Imaj_Okuma sarmalayıcısı).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>IMAJ</code> (dolaylı, sp_Imaj_Okuma üzerinden)</div>
+          <div class="row notes"><span class="k">Not</span><code>TRY/CATCH</code> var ama CATCH içindeki alternatif sorgu yorum satırına alınmış — hata durumunda sessizce boş sonuç dönüyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Imaj_Disk">
+        <summary><span class="tri">▸</span><span class="name">TM_Imaj_Disk</span><span class="oneliner">Harici bir .exe (GentegreMobilReport.exe) çalıştırarak PDF üretir, sonra binary olarak okuyup döner.</span><span class="badges"><span class="badge badge-sec">xp_cmdshell</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TabloAdi VARCHAR(100)</code>, <code>@ID INT</code></div>
+          <div class="row"><span class="k">Tablolar</span>Doğrudan yok — dosya sistemi ve <code>xp_cmdshell</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span><code>sp_configure</code> ile <code>xp_cmdshell</code> sunucu düzeyinde açılıp iş bitince tekrar kapatılıyor; üretilen PDF <code>OPENROWSET(BULK ..., SINGLE_BLOB)</code> ile okunuyor. CATCH bloğundaki hata raporlama da yorum satırına alınmış — hata sessizce yutuluyor. Dosya silme adımı (DEL) da devre dışı, PDF diskte kalıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Imaj_Okuma_Disk">
+        <summary><span class="tri">▸</span><span class="name">TM_Imaj_Okuma_Disk</span><span class="oneliner">Verilen dosya yolundaki dosyayı OPENROWSET ile binary olarak okuyup OUTPUT parametresiyle döner.</span><span class="badges"><span class="badge badge-warn">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@DosyaYolu VARCHAR(255)</code>, <code>@SONUC varbinary(MAX) OUTPUT</code></div>
+          <div class="row"><span class="k">Tablolar</span>Yok — sadece dosya sistemi erişimi (sp_executesql)</div>
+          <div class="row notes"><span class="k">Not</span><code>@DosyaYolu</code> doğrudan string birleştirmeyle SQL'e ekleniyor — dosya yolu kontrolsüzse injection riski taşıyabilir. TM_Imaj_Disk ve benzerleri tarafından yardımcı fonksiyon olarak kullanılıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_ImajListele">
+        <summary><span class="tri">▸</span><span class="name">TM_ImajListele</span><span class="oneliner">Bir göreve bağlı resim ve doküman kayıtlarını birleşik bir liste olarak döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID INT</code>, <code>@TUR INT</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>GOREVYORUM</code>, <code>IMAJ</code>, <code>DOKUMAN</code></div>
+          <div class="row notes"><span class="k">Not</span><code>UNION ALL</code> ile "Resim" ve "Doküman" türleri birleştiriliyor; DOKUMAN eşleşmesi <code>KLASOR = -1*@TUR</code> işaretli kodlama kullanıyor.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP H ================= -->
+    <section class="group" id="grup-h">
+      <div class="ghead"><span class="gid">H</span><h3>Üretim Yönetimi</h3></div>
+      <p class="gdesc">Üretim emri ve operasyon takibi, personel zaman planlama, kalite ölçüm şablonları, fason (dış kaynak) hareketleri ve üretim emri "ek alanlar" motoru.</p>
+
+      <details class="proc" id="TM_UretimEkAlanOzellikler">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimEkAlanOzellikler</span><span class="oneliner">Üretim ekranlarında gösterilecek dinamik ek alan tanımlarını ve seçenek listesini döndürür.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@KONUM VARCHAR(50)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>ALANLAR</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>Meta-veri/konfigürasyon amaçlı; form alanları kod değişikliği gerektirmeden tanımlanabiliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimFason">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimFason</span><span class="oneliner">Üretim operasyonlarında dış kaynak (fason) giriş/çıkış hareketlerini yönetir.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> (ListeleUel/GuncelleUel), <code>@URETIMOPERASYONID</code>, <code>@OLAY</code> (Giriş/Çıkış), <code>@REHBERID</code>, <code>@GIREN</code>, <code>@CIKAN</code>, <code>@FASONTIPI</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYONFASON</code> (I/U/S), <code>REHBER</code>, <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>Güncelleme sonrası kendini ListeleUel ile tekrar çağırıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimImajListele">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimImajListele</span><span class="oneliner">Bir üretim operasyonuna bağlı stoğun resim ve dökümanlarını birleşik listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (URETIMOPERASYON.ID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYON</code>, <code>STOKLAR</code>, <code>IMAJ</code>, <code>DOKUMAN</code></div>
+          <div class="row notes"><span class="k">Not</span>Salt okunur; UNION ALL ile Resim/Doküman birleştiriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimOlcum">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimOlcum</span><span class="oneliner">Üretim operasyonu personeline bağlı kalite ölçüm kayıtlarını listeler/yönetir; yeni ölçümde şablondan detay satırları üretir.</span><span class="badges"><span class="badge badge-warn">hardcoded değer</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code>, <code>@OPID</code>, <code>@TIP</code> (Listele/Guncelle), <code>@TARIH</code>, <code>@PERSONEL</code>, <code>@ADET</code>, <code>@DURUM</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOLCUM</code> (I/U/S), <code>URETIMOLCUMDETAY</code> (insert), <code>KALITESABLONDETAY</code>, <code>REHBER</code></div>
+          <div class="row notes"><span class="k">Not</span>Detay satırlarının alarm durumuna göre genel ALARM hesaplanıyor. Yeni kayıtta <code>@DEGER</code> değişkeni sabit 10 atanmış — muhtemelen henüz gerçek ölçüm değeri girilmeden bırakılmış eksik/geliştirme aşaması mantığı.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimOlcumDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimOlcumDetay</span><span class="oneliner">Bir üretim ölçümüne ait detay satırlarını (test değeri, tolerans, alarm) listeler ve günceller.</span><span class="badges"><span class="badge badge-sec">dinamik SQL + cursor</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code>, <code>@OLCUMID</code>, <code>@TIP</code> (Listele/Guncelle), <code>@JSON</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOLCUMDETAY</code>, <code>KALITESABLONDETAY</code>, <code>KALITETEST</code>, geçici <code>#URETIMDETAY</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span>Listeleme sırasında her satırın KAYNAK sütununda saklı bir SQL sorgu metni varsa, bir <code>CURSOR</code> ile tek tek dolaşılıp <code>sp_executesql</code> ile dinamik çalıştırılıyor — veritabanında saklı serbest metin SQL'in doğrudan çalıştırılması; performans (satır bazlı cursor) ve güvenlik açısından (KAYNAK alanının kaynağına bağlı) risk taşıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanla">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanla</span><span class="oneliner">Üretim emirlerini tarih/emir no'ya göre, fason/yorum/sipariş bilgileriyle zenginleştirerek listeler.</span><span class="badges"><span class="badge badge-sec">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@BasTarihi</code>, <code>@BitTarihi</code>, <code>@kalmayan</code>, <code>@EMIRNO</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMEMRI</code>, <code>GENINI</code>, <code>REHBER</code>, <code>URETIMOPERASYONFASON</code>, <code>STOKLAR</code>, <code>SIPARIS</code></div>
+          <div class="row notes"><span class="k">Not</span>Sorgu tamamen bir <code>@sql</code> string değişkeninde inşa edilip <code>EXEC(@SQL)</code> ile çalıştırılıyor; <code>@EMIRNO</code> ve tarihler doğrudan string birleştirmeyle ekleniyor (parametrized query değil) — SQL injection riski.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaDetay">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaDetay</span><span class="oneliner">Bir üretim operasyonuna atanmış personelin zaman planlama detaylarını listeler.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (URETIMOPERASYON.ID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYONPERSONEL</code>, <code>URETIMOPERASYON</code>, <code>REHBER</code>, <code>URETIMOLCUM</code></div>
+          <div class="row notes"><span class="k">Not</span>Süre <code>FORMAT(DATEADD(...))</code> ile HH:mm formatında hesaplanıyor. Salt okunur.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaDetayGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaDetayGuncelle</span><span class="oneliner">Personel zaman planlama detay satırını (başlama/bitiş, lot, sıcaklık, voltaj) ekler/günceller.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@OPID</code>, <code>@BasTar</code>/<code>@BitTar</code>/<code>@BasTarT</code>/<code>@BitTarT</code> (tarih+saat ayrı), <code>@LOTU</code>, <code>@SICAKLIGI</code>, <code>@VOLTAJ</code>, <code>@ISKARTA</code>, <code>@URETILEN</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYONPERSONEL</code> (I/U), <code>URETIMRECETEOPR</code></div>
+          <div class="row notes"><span class="k">Not</span>Tarih/saat string birleştirmesiyle oluşturuluyor (implicit convert'e güveniliyor, format hatalarına açık). Güncelleme sonrası TM_UretimPersonelZamanPlanlaDetay çağrılıyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaDurumGuncelle">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaDurumGuncelle</span><span class="oneliner">Emir numarasına göre üretim emrinin durumunu GENINI kod karşılığına çevirerek günceller.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@UID</code> (EMIRNO), <code>@DURUM</code> (metin karşılığı)</div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMEMRI</code> (UPDATE), <code>GENINI</code></div>
+          <div class="row notes"><span class="k">Not</span>Tek satırlık basit durum güncelleme prosedürü.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaEkalanlar">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaEkalanlar</span><span class="oneliner">URETIMEMRI'nin tüm kolonlarını meta-veri üzerinden dinamik sorgulayan/güncelleyen generic ek alan motoru.</span><span class="badges"><span class="badge badge-sec">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@EMIRNO</code>, <code>@TIP</code> (Listele/Guncelle), <code>@JSON</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMEMRI</code>, <code>ALANLAR</code>, <code>sys.columns</code>/<code>sys.types</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span>Kolon listesi ve UPDATE/SELECT cümleleri tamamen metin birleştirmeyle inşa edilip <code>EXEC(@sql)</code> ile çalıştırılıyor. <code>@EMIRNO</code> ve <code>@json</code> doğrudan string olarak ekleniyor, tek tırnak escape'i görünmüyor — SQL injection açısından riskli.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaEkalanlarSatir">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaEkalanlarSatir</span><span class="oneliner">Yukarıdakiyle aynı dinamik ek alan mantığının URETIMOPERASYONPERSONEL (satır bazlı) versiyonu.</span><span class="badges"><span class="badge badge-sec">dinamik SQL</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code>, <code>@TIP</code> (Listele/Guncelle), <code>@JSON</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYONPERSONEL</code>, <code>ALANLAR</code>, <code>TMLOG</code></div>
+          <div class="row notes"><span class="k">Not</span>Güncelleme öncesi gelen JSON <code>TMLOG</code>'a ham olarak kaydediliyor (denetim amaçlı), ama sorgu yine tamamen dinamik SQL (<code>EXEC(@sql)</code>) — <code>@ID</code>/<code>@json</code> string birleştirmeyle giriyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UretimPersonelZamanPlanlaOpr">
+        <summary><span class="tri">▸</span><span class="name">TM_UretimPersonelZamanPlanlaOpr</span><span class="oneliner">Bir üretim operasyonunun özet bilgilerini ve reçete adımlarını (JSON) tek satırda döndürür.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (URETIMOPERASYON.ID)</div>
+          <div class="row"><span class="k">Tablolar</span><code>URETIMOPERASYON</code>, <code>URETIMEMRI</code>, <code>STOKLAR</code>, <code>REHBER</code>, <code>DEPOLAR</code>, <code>URETIMRECETEOPR</code>, <code>IMAJ</code>, <code>DOKUMAN</code></div>
+          <div class="row notes"><span class="k">Not</span>RECETELISTE alanı <code>FOR JSON PATH</code> ile serileştirilip elle bir JSON zarfına sarılıyor; sadece <code>URETIMEMRI.DURUM &gt; 0</code> olan emirler için çalışıyor.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= GRUP I ================= -->
+    <section class="group" id="grup-i">
+      <div class="ghead"><span class="gid">I</span><h3>Sistem, Referans Veri, Mobil &amp; Güvenlik</h3></div>
+      <p class="gdesc">Uygulama genelinde kullanılan referans/kombobox veri kaynakları, mobil uygulama yetki ayarları, kullanıcı girişi ve serbest metin arama motoru.</p>
+
+      <details class="proc" id="TM_DashBoard">
+        <summary><span class="tri">▸</span><span class="name">TM_DashBoard</span><span class="oneliner">Ana ekran için duyuru, atanmış görev ve açık servis kayıtlarını zaman etiketiyle listeler.</span><span class="badges"><span class="badge badge-warn">hardcoded değer</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Dışarıdan parametre yok — <code>@RehberId FLOAT = 2</code> ve <code>@gunsay int = -90</code> kod içinde sabit</div>
+          <div class="row"><span class="k">Tablolar</span><code>DUYURU</code>, <code>UYARIAYAR</code>, <code>DUYURUKULLANICI</code>, <code>SERVIS</code>, <code>SERVISHAREKET</code>, <code>fn_prg_IsListesiBanaAtananlar</code></div>
+          <div class="row notes"><span class="k">Not</span><code>@RehberId</code>'nin dışarıdan alınmaması nedeniyle kişiselleştirme muhtemelen çalışmıyor — her kullanıcı için sabit ID=2 baz alınıyor gibi görünüyor. "Teklif Onay"/"Teklif SKT" blokları yorumla devre dışı; sadece son 90 gün gösteriliyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_EkAlanCalistir">
+        <summary><span class="tri">▸</span><span class="name">TM_EkAlanCalistir</span><span class="oneliner">ALANLAR tablosunda tanımlı, kullanıcı kriterine göre parametrik SQL şablonu çalıştıran genel arama motoru.</span><span class="badges"><span class="badge badge-sec">SQL injection</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@ID</code> (ALANLAR kaydı), <code>@KOSUL</code> (arama metni)</div>
+          <div class="row"><span class="k">Tablolar</span><code>ALANLAR</code></div>
+          <div class="row notes"><span class="k">Güvenlik</span><code>&lt;ara&gt;</code> yer tutucusu doğrudan <code>@KOSUL</code> ile değiştirilip <code>TOP 100</code> eklenerek <code>EXEC(@SQL)</code> ile çalıştırılıyor — kullanıcı girdisi hiç filtrelenmeden sorguya enjekte ediliyor, klasik SQL injection açığı.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_Iller">
+        <summary><span class="tri">▸</span><span class="name">TM_Iller</span><span class="oneliner">İl veya ilçe referans listesini döner (adres/lokasyon seçim ekranları için).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@TIP</code> ('IL'/'ILCE')</div>
+          <div class="row"><span class="k">Tablolar</span><code>ILLER</code>, <code>ILCELER</code></div>
+          <div class="row notes"><span class="k">Not</span>Basit referans veri prosedürü; <code>ILNO&lt;82</code> ile Türkiye illeriyle sınırlı.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_IniOku">
+        <summary><span class="tri">▸</span><span class="name">TM_IniOku</span><span class="oneliner">Uygulamanın onlarca açılır listesini (birim, depo, il/ilçe, döviz, durum kodları vb.) tek seferde dolduran dev referans sorgusu.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span>Yok</div>
+          <div class="row"><span class="k">Tablolar</span><code>LOKASYON</code>, <code>GENINI</code> (çok sayıda BOLUM değeriyle), <code>DEPOLAR</code>, <code>REHBER</code>, <code>KULLANICI</code>, <code>ROLLER</code>, <code>YETKI</code>, <code>DOVIZ</code>, <code>KATEGORI</code></div>
+          <div class="row notes"><span class="k">Not</span>40'tan fazla <code>UNION ALL</code> bloğu, her biri farklı bir FILTRE etiketiyle sonuç dönüyor — tek bir "her şeyi getir" referans veri prosedürü. SORUMLU filtrelerinde YETKI/ROLLER üzerinden modül bazlı yetki kontrolü var.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_MobilAyarlar">
+        <summary><span class="tri">▸</span><span class="name">TM_MobilAyarlar</span><span class="oneliner">Mobil uygulama genel ayarlarını ve kullanıcının modül bazlı yetkilerini (buton açık/kapalı) hesaplayarak döner.</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@KULLANICI VARCHAR(50)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TMMOBILAYARLAR</code>, <code>REHBER</code>, <code>KULLANICI</code>, <code>YETKI</code>, <code>MODUL</code>, <code>ROLLER</code>, <code>DEPOLAR</code></div>
+          <div class="row notes"><span class="k">Not</span>Çok sayıda <code>UNION ALL</code> bloğu, her biri CASE...WHEN ile MODULID'i buton adına çeviriyor. Kodda "yetki eklenene kadar" notuyla bırakılmış sabit kodlanmış bir buton satırı var — teknik borç işareti.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_MobilAyarlar1">
+        <summary><span class="tri">▸</span><span class="name">TM_MobilAyarlar1</span><span class="oneliner">TM_MobilAyarlar'ın hafif versiyonu; önbelleklenmiş buton ayarlarını doğrudan okur (canlı yetki hesabı yapmaz).</span><span class="badges"></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@KULLANICI VARCHAR(50)</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TMMOBILAYARLAR</code> (tek tablo)</div>
+          <div class="row notes"><span class="k">Not</span>Muhtemelen performans nedeniyle TM_MobilAyarlar'a alternatif/yeni bir sürüm; <code>Btn_&lt;kullanıcı&gt;%</code> anahtarlı önceden hesaplanmış kayıtları okuyor.</div>
+        </div>
+      </details>
+
+      <details class="proc" id="TM_UserGiris">
+        <summary><span class="tri">▸</span><span class="name">TM_UserGiris</span><span class="oneliner">Kullanıcı adı/e-posta ile eşleşen kullanıcı kaydını ve şifresini döndürür.</span><span class="badges"><span class="badge badge-sec">kritik güvenlik</span></span></summary>
+        <div class="body">
+          <div class="row"><span class="k">Parametreler</span><code>@KADI VARCHAR(50)</code> (kullanıcı adı veya e-posta), <code>@CIHAZID VARCHAR(250) = NULL</code></div>
+          <div class="row"><span class="k">Tablolar</span><code>TMLOG</code> (login denemesi logu), <code>KULLANICI</code>, <code>REHBER</code>, <code>REHBERILETISIM</code>, <code>REHBERBILGI</code></div>
+          <div class="row notes"><span class="k">Güvenlik — kritik</span>Prosedür hiç şifre parametresi almıyor. Sadece kullanıcı adına/e-postaya göre eşleşen kaydı bulup <code>KULLANICI.SIFRE</code> alanını (hash fonksiyonu kullanılmadan, düz metin gibi görünen bir SELECT ile) doğrudan çağırana döndürüyor. Bu, doğrulamanın sunucuda değil istemcide yapıldığını gösteriyor: (1) şifre ağ üzerinden açık taşınıyor, (2) veritabanında da düz metin saklanıyor olma ihtimali yüksek, (3) sadece kullanıcı adını bilen herkes şifreyi okuyabilir. Ayrıca alt hesaplar (GRUP=951) için "şifre" olarak REHBERBILGI'deki e-posta adresi dönüyor — bu grupta şifre fiilen e-posta ile aynı.</div>
+        </div>
+      </details>
+    </section>
+
+    <footer>
+      Rapor, <code>C:\Users\alioz\...\tm_procs_definitions.txt</code> dosyasına dışa aktarılan 84 prosedürün <code>OBJECT_DEFINITION()</code> çıktısı satır satır incelenerek hazırlanmıştır. Prosedür isimleri değil, gerçek T-SQL gövdeleri esas alınmıştır.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var q = document.getElementById('q');
+  var countEl = document.getElementById('qcount');
+  var procs = Array.prototype.slice.call(document.querySelectorAll('.proc'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('section.group'));
+  var total = procs.length;
+
+  function norm(s){
+    return (s||'').toLocaleUpperCase('tr-TR')
+      .replace(/İ/g,'I').replace(/I/g,'I');
+  }
+
+  q.addEventListener('input', function(){
+    var term = norm(q.value.trim());
+    var shown = 0;
+    procs.forEach(function(p){
+      var hay = norm(p.querySelector('.name').textContent + ' ' + p.querySelector('.oneliner').textContent + ' ' + p.textContent);
+      var match = term === '' || hay.indexOf(term) !== -1;
+      p.classList.toggle('hidden', !match);
+      if(match) shown++;
+      if(match && term !== ''){ p.setAttribute('open',''); } else if(term === ''){ p.removeAttribute('open'); }
+    });
+    groups.forEach(function(g){
+      var anyVisible = g.querySelectorAll('.proc:not(.hidden)').length > 0;
+      g.classList.toggle('hidden', term !== '' && !anyVisible);
+    });
+    countEl.textContent = term === '' ? (total + ' prosedür') : (shown + ' / ' + total + ' eşleşti');
+  });
+})();
+</script>
