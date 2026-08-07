@@ -524,7 +524,6 @@ function THizliGunsonuDlg.FatbaslikOlustur(Tur,Tip, Yeri,YerId:Integer; TurAd:St
 var
   belgeno : TBelgeNo;
   RehberId,GDepo,CDepo:Integer;
-  FATURA_MATRAHI, KDV_TUTARI : Extended;
   BrFiyat:String;
 begin
    if not Veritabani.VeriVarMi(Tablo.FDCnn,'SELECT * from STOKGUNSONUDETAY WHERE SGSID='+TabGunSonuStok.Fields[0].AsString+' and abs('+TurAd+')>0.0 and KAYIT=0',[],[]) then
@@ -575,17 +574,10 @@ begin
                             ' where SGSID='+TabGunSonuStok.Fields[0].AsString+' and abs(SGS.'+TurAd+')>0.0');
   Tablo.Query6.ExecSQL;
 
-  Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' +
-      ' isnull(ROUND(sum(TUTAR*(KDV/100.0)),2),0.0) AS KDVTOPLAM ' +
-//      ' isnull(ROUND(sum(DOVIZ_TUTARI*((KDV*(100.0-KDVMUHAFIYETI)/100.0)/100.0)),2),0.0) AS DOVIZKDVTOPLAM , ' +
-//      ' isnull(ROUND(sum(MALIYET),2),0.0) as MALIYET_ORT, isnull(ROUND(sum(EKMALIYET),2),0.0) as MALIYET_SON '+
-      ' from FATURA where FATBASID=' + Tablo.Query7.Fields[0].AsString;
-  Tablo.Query1.Open;
-
-  FATURA_MATRAHI := Tablo.Query1.FieldByName('ARATOPLAM').AsExtended;
-  KDV_TUTARI     := Tablo.Query1.FieldByName('KDVTOPLAM').AsExtended;
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATBASLIK set FATURA_MATRAHI='+Float_ToStr(FATURA_MATRAHI)+','+
-    'KDV_TUTARI='+Float_ToStr(KDV_TUTARI)+',FATURA_TUTARI='+Float_ToStr(FATURA_MATRAHI+KDV_TUTARI)+', DOVIZ_TUTARI=0.0 WHERE ID='+Tablo.Query7.Fields[0].AsString ,[],[]);
+  // Toplamlar sunucuda (sp_Api_Belge_ToplamHesapla_Json). Buradaki eski hesap
+  //   iskontoyu hic uygulamiyor ve DOVIZ_TUTARI'na 0 yaziyordu; besleyen sorgu
+  //   da artik gereksiz (SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
+  Tablo.BelgeToplamHesapla(Tablo.Query7.Fields[0].AsInteger);
 //  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKGUNSONUDETAY set KAYIT=1 WHERE SGSID='+TabGunSonuStok.Fields[0].AsString+' and '+TurAd+'>0.0 and  KAYIT=0' ,[],[]);
   Result := Tablo.Query7.Fields[0].AsInteger;
 end;

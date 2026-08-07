@@ -3938,9 +3938,7 @@ begin
   else
      s:=',DOVIZKUR='+FExtToStr((DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00',FATBASLIK.FieldByName('FATURATARIH').AsDateTime),FATBASLIK.FieldByName('RAPORDOVIZ').AsString, Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'))),4);
   }
-  Tablo.ApiCagir('sp_Api_Belge_ToplamHesapla_Json',
-    TJSONObject.Create.AddPair('BelgeId',
-      TJSONNumber.Create(TabFatbaslik.Fields[0].AsInteger)) as TJSONObject);
+  Tablo.BelgeToplamHesapla(TabFatbaslik.Fields[0].AsInteger);
 
   if TabloAc then
      TabloYenile(TabFatbaslik, [TabFatbaslik.Fields[0].AsInteger]);

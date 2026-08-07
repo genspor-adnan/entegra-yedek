@@ -1017,12 +1017,10 @@ begin
      //****************************************************
      (*        fatura toplam alanları güncelle           *)
      //****************************************************
-      Tablo.Query5.Close;
-      Tablo.Query5.Connection:=Tablo.FDCnn;
-      Tablo.Query5.SQL.Text:='UPDATE FATBASLIK SET FATURA_MATRAHI = '+FCurrToStr(FaturaMatrahi)
-      +' ,KDV_TUTARI ='+FCurrToStr(KDVTutari)
-      +' WHERE ID = '+inttostr(FBID);
-      Tablo.Query5.ExecSQL;
+      // Toplamlar sunucuda: burada matrah SUM(TUTAR) idi (iskonto uygulanmamis) ve
+      //   iskontolar ISK1+ISK2 TOPLANARAK tek alana yaziliyordu - carpimsal iskonto
+      //   kuralina aykiriydi (SP/TOPLAM_FORMUL_KARSILASTIRMA.md §3 C6).
+      Tablo.BelgeToplamHesapla(FBID);
 
      //****************************************************
      (*                       Plan                       *)

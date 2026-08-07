@@ -3660,10 +3660,7 @@ begin
          //   siparisi (TUR=9) hic islenmiyordu ve ADET=0 satirlar tamamlanmis
          //   sayiliyordu. Yenisi bunlari duzeltir ve 0/1/9 disindaki (iptal vb.)
          //   durumlara dokunmaz.
-         Tablo.ApiCagir('sp_Api_Belge_DurumHesapla_Json',
-           TJSONObject.Create
-             .AddPair('BelgeId', TJSONNumber.Create(yeniid))
-             .AddPair('Kaynak', 'siparis') as TJSONObject);
+         Tablo.BelgeDurumHesapla(yeniid, 'siparis');
     end;
     JvTimer1Timer(Self);
   end;

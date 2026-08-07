@@ -629,24 +629,19 @@ var
 
    procedure FaturaImport;
         procedure FaturaTutarHesapla(Tablo1 : TFDQuery);
+        // TOPLAMLAR ARTIK SUNUCUDA: sp_Api_Belge_ToplamHesapla_Json hem hesaplar
+        //   hem FATBASLIK'a yazar (SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
+        //   DAVRANIS DEGISIKLIGI (bilincli, karar 2): KDV Dahil belgede matrah
+        //   artik NET matrahtir; burada brut SUM(TUTAR) yaziliyordu. Eski hesapta
+        //   iskonto / OTV / KDV muafiyeti de yoktu.
         begin
-          Tablo1.Edit;
-          Tablo.Query1.Close;
-          if Tablo1.FieldByName('KDVDURUM').AsString = 'Hariç' then
-             Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + IntToStr(BagliId)
-           else
-             Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + '  ROUND(isnull(SUM(TUTAR-(TUTAR/(1+(KDV/100.0)))),0),2) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + IntToStr(BagliId);
-          Tablo.Query1.Open;
-
-          Tablo1.FieldByName('FATURA_MATRAHI').AsCurrency  := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency;
-          Tablo1.FieldByName('KDV_TUTARI').AsCurrency  := Tablo.Query1.FieldByName('KDVTOPLAM').Value;
-          if Tablo1.FieldByName('KDVDURUM').AsString = 'Hariç' then
-             Tablo1.FieldByName('FATURA_TUTARI').AsCurrency  := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency + Tablo.Query1.FieldByName('KDVTOPLAM').AsCurrency
-          else
-             Tablo1.FieldByName('FATURA_TUTARI').AsCurrency  := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency;
-          //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update FATBASLIK set FATURA_MATRAHI='+Tablo1.FieldByName('FATURA_MATRAHI').AsCurrency +', KDV_TUTARI='+
-          //      Tablo1.FieldByName('KDV_TUTARI').AsCurrency+', FATURA_TUTARI='+Tablo1.FieldByName('FATURA_TUTARI').AsCurrency+'   where ID =&id ',['&id'],[BagliId]);
-          Tablo1.Post;
+          if Tablo1.State in [dsEdit, dsInsert] then
+             Tablo1.Post;
+          Tablo.BelgeToplamHesapla(Tablo1.Fields[0].AsInteger);
+          try
+            Tablo1.Refresh;   // SP FATBASLIK'a yazdi -> dataset tazelensin
+          except
+          end;
         end;
    begin
       if (FaturadakiKodlarStoktaveCarideVarmi('STOKLAR','URUNID'))or(FaturadakiKodlarStoktaveCarideVarmi('REHBER','REHBERID')) then begin

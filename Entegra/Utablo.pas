@@ -813,6 +813,9 @@ type
     //   AKosullar SAHIPLIGI devralinir (Free edilir). SP hata verirse (THROW 51xxx)
     //   exception yukari gider - yutulmaz. PG'de fn_api_* karsiligi cagrilir.
     function ApiCagir(const ASPAdi: string; AKosullar: TJSONObject): string;
+    // Sade sarmalayicilar - cagiran unit'in System.JSON'a ihtiyaci olmasin diye.
+    procedure BelgeToplamHesapla(ABelgeId: Integer);                 // FATBASLIK toplamlari (sunucuda)
+    procedure BelgeDurumHesapla(ABelgeId: Integer; const AKaynak: string = 'siparis');  // kapanma durumu
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -12734,6 +12737,27 @@ begin
   finally
     LQ.Free;
   end;
+end;
+
+procedure TTablo.BelgeToplamHesapla(ABelgeId: Integer);
+// Belge toplamlarini (matrah/KDV/toplam/doviz/maliyet) SUNUCUDA hesaplatir ve
+//   FATBASLIK'a yazar. Formul tek yerde: fn_Api_Belge_DipToplam.
+//   Gelen e-belge ve uretim fisinde SP kapsam disi birakir (yazmaz).
+begin
+  if ABelgeId <= 0 then Exit;
+  ApiCagir('sp_Api_Belge_ToplamHesapla_Json',
+    TJSONObject.Create.AddPair('BelgeId', TJSONNumber.Create(ABelgeId)) as TJSONObject);
+end;
+
+procedure TTablo.BelgeDurumHesapla(ABelgeId: Integer; const AKaynak: string = 'siparis');
+// Siparis/belge kapanma durumu (0 yeni / 1 kismi / 9 tamamlandi) - donusum
+//   baglarindan sunucuda hesaplanir. 0/1/9 disindaki durumlara (iptal vb.) dokunmaz.
+begin
+  if ABelgeId <= 0 then Exit;
+  ApiCagir('sp_Api_Belge_DurumHesapla_Json',
+    TJSONObject.Create
+      .AddPair('BelgeId', TJSONNumber.Create(ABelgeId))
+      .AddPair('Kaynak', AKaynak) as TJSONObject);
 end;
 
 procedure TTablo.CekSenetOpsiyonUygula;

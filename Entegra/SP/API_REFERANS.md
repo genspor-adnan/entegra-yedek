@@ -199,7 +199,22 @@ yukarı gider — **yutulmaz** (silme/kaydetme sessizce başarısız olmasın).
 | `UFaturaWizard.FaturaTutarHesapla` | `TOPLAMLAR`'dan okuyup Pascal'da hesap + `UPDATE FATBASLIK` | `sp_Api_Belge_ToplamHesapla_Json` (ekrandaki dip toplam listesi için `TOPLAMLAR` kalıyor) |
 | `UFaturalar.MenuDurumuGuncelleClick` | `EXEC TM_SiparisDurumGuncelle` | `sp_Api_Belge_DurumHesapla_Json` |
 
-**Henüz bağlanmayanlar** (toplam formülü tekrarı — bkz. `TOPLAM_FORMUL_KARSILASTIRMA.md`):
-`Ubelgegiris`, `UEBelgeGelen`, `UHizliGiris`, `UHizliGunsonuDlg`, `UImport`, `UReplikasyon`,
-`UGiderPusulasi`, `IcerikFrame/UFaturalar` + `UFaturalar2` (durum sıfırlama). Bunlar sırayla
-`sp_Api_Belge_ToplamHesapla_Json`'a geçirilecek.
+Sade sarmalayıcılar (çağıran unit'in `System.JSON`'a ihtiyacı olmasın diye):
+**`Tablo.BelgeToplamHesapla(BelgeId)`** ve **`Tablo.BelgeDurumHesapla(BelgeId, Kaynak)`**.
+
+### Toplam hesabı — tüm çağrı yerleri
+
+| Yer | Durum |
+|---|---|
+| `UFaturaWizard.FaturaTutarHesapla` | ✅ `BelgeToplamHesapla` |
+| `Ubelgegiris` (2 yer) | ✅ Pascal'da biriktirilen `Tutar/KDV/Toplam` yerine |
+| `UHizliGunsonuDlg.FatbaslikOlustur` | ✅ (besleyen ölü sorgu da kaldırıldı) |
+| `UReplikasyon` | ✅ (toplamsal `ISK1+ISK2` iskonto kuralı da düzeldi) |
+| `UGiderPusulasi.FaturaTutarGuncelle` | ✅ `Post` → SP → `Refresh` |
+| `UImport.FaturaTutarHesapla` | ✅ `Post` → SP → `Refresh` |
+| `UEBelgeGelen` (2 yer) | ⛔ **bilerek bırakıldı** — gelen e-belge; toplamlar tedarikçinin UBL'inden gelir, SP zaten `Kapsam=disi` der |
+| `UHizliGiris.TabDetayAfterPost` | ⛔ **bilerek bırakıldı** — belge `FATBASLIK`'ta değil, geçici tabloda (`AktifFatTabloAdi`); ayrıca yalnız ekran gösterimi, DB'ye yazmıyor |
+| `IcerikFrame/UFaturalar` + `UFaturalar2` | ⛔ **bilerek bırakıldı** — `DURUM=6` ile toplamları **sıfırlama** (iptal), hesap değil |
+
+**Davranış değişikliği (bilinçli, karar 2):** `UGiderPusulasi` ve `UImport` KDV Dahil belgede
+matraha **brüt** `SUM(TUTAR)` yazıyordu; artık **net matrah** yazılıyor.

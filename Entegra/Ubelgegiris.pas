@@ -532,9 +532,11 @@ var
               //Yeni belge geldi. Önceki belgeye toplamları atalım
               KasaKayitID := 0;
               if OncekiFirma <> 0 then //İlk belge değilse
-                 Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update FATBASLIK set FATURA_MATRAHI='+FCurrToStr(Tutar)+', KDV_TUTARI='+FCurrToStr(KDV)+
-                 ', FATURA_TUTARI='+FCurrToStr(Toplam)+', DOVIZ_TUTARI = '+FCurrToStr(Toplam)+' where ID=&ID ',
-                     ['&ID'],[fisnumarasi]);
+                 // Toplamlar sunucuda (sp_Api_Belge_ToplamHesapla_Json). Burada Pascal'da
+                 //   biriktirilen Tutar/KDV/Toplam yaziliyordu; iskonto/OTV/KDV muafiyeti
+                 //   ve gercek doviz karsiligi hesaba girmiyor, DOVIZ_TUTARI'na TL toplam
+                 //   yaziliyordu (SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
+                 Tablo.BelgeToplamHesapla(fisnumarasi);
               OncekiFirma := dxmemdata1cr_id.AsInteger;
               OncekiBelgeTip := dxmemdata1belgetip.AsString;
               OncekiBelgeNo := dxmemdata1belge_no.AsString;
@@ -682,8 +684,7 @@ begin
           dxmemdata1.Next;
       end;
       //Son belge bitince toplamları yazalım
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update FATBASLIK set FATURA_MATRAHI='+FCurrToStr(Tutar)+', KDV_TUTARI='+FCurrToStr(KDV)+
-                 ', FATURA_TUTARI='+FCurrToStr(Toplam)+', DOVIZ_TUTARI = '+FCurrToStr(Toplam)+' where ID=&ID ', ['&ID'],[fisnumarasi]);
+      Tablo.BelgeToplamHesapla(fisnumarasi);
 
      Application.MessageBox(pchar(DKayit_yapildi),pchar(Kaydet),MB_ICONINFORMATION+MB_ok);
      dxmemdata1.Close;

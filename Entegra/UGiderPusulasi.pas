@@ -219,22 +219,20 @@ var
   belgeno: TBelgeNo;
 
 procedure TGiderPusulasiDlg.FaturaTutarGuncelle;
+// TOPLAMLAR ARTIK SUNUCUDA: sp_Api_Belge_ToplamHesapla_Json hem hesaplar hem
+//   FATBASLIK'a yazar (SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
+//   DAVRANIS DEGISIKLIGI (bilincli, karar 2): KDV Dahil belgede matrah artik
+//   NET matrahtir; burada brut SUM(TUTAR) yaziliyordu.
+//   EKVERGI genel toplama TVF icinde (TUR=8/9) zaten giriyor - burada AYRICA
+//   eklenmez, yoksa cift sayilirdi.
 begin
-      //FATBASLIK tablosu da güncelleniyor
-      Tablo.Query1.Close;
-      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'Hariç' then
-         Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + ' isnull(SUM(ROUND( TUTAR*KDV/100.0,2 )),0) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + FATBASLIK.Fields[0].AsString
-       else
-         Tablo.Query1.SQL.Text := 'Select isnull(SUM(ROUND(TUTAR,2)),0) AS ARATOPLAM,' + '  ROUND(isnull(SUM(TUTAR-(TUTAR/(1+(KDV/100.0)))),0),2) AS KDVTOPLAM ' + ' from FATURA where FATBASID=' + FATBASLIK.Fields[0].AsString;
-      Tablo.Query1.Open;
-      FATBASLIK.Edit;
-      FATBASLIK.FieldByName('FATURA_MATRAHI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency;
-      FATBASLIK.FieldByName('KDV_TUTARI').Value := Tablo.Query1.FieldByName('KDVTOPLAM').Value;
-      if FATBASLIK.FieldByName('KDVDURUM').AsString = 'Hariç' then
-         FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency + Tablo.Query1.FieldByName('KDVTOPLAM').AsCurrency+FATBASLIK.FieldByName('EKVERGI').AsCurrency
-      else
-         FATBASLIK.FieldByName('FATURA_TUTARI').AsCurrency := Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency+FATBASLIK.FieldByName('EKVERGI').AsCurrency;
-      FATBASLIK.Post;
+  if FATBASLIK.State in [dsEdit, dsInsert] then
+     FATBASLIK.Post;
+  Tablo.BelgeToplamHesapla(FATBASLIK.Fields[0].AsInteger);
+  try
+    FATBASLIK.Refresh;   // SP FATBASLIK'a yazdi -> ekrandaki kart tazelensin
+  except
+  end;
 end;
 
 procedure TGiderPusulasiDlg.FaturaIadeBilgisiGuncelle(adet:string;hedefid:integer);
