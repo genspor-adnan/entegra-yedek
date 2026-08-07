@@ -44,7 +44,6 @@ type
     N1: TMenuItem;
     KutuyuBosalt: TMenuItem;
     TabSheetArama: TcxTabSheet;
-    LabelTumKayitlar: TcxLabel;
     cxLabel1: TcxLabel;
     AraDokuman: TcxTextEdit;
     cxLabel2: TcxLabel;
@@ -64,7 +63,12 @@ type
     AraBolumu: TcxImageComboBox;
     AraModul: TcxImageComboBox;
     AraKonusu: TcxTextEdit;
-    YenileTus: TSpeedButton;
+    // Liste kapsam secimi (diger arama frame'leriyle ayni): Tumu / Son / Sik.
+    //   Eski 'Yenile' ve 'Tum Kayitlar' bilesenleri kaldirildi; islevleri bu toolbar'da.
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     cxLabel8: TcxLabel;
     AraAnahtar: TcxTextEdit;
     YetkilendirmeMenu: TMenuItem;

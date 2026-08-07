@@ -802,6 +802,8 @@ type
     procedure DuyuruMotoru(TaraTarih : TDateTime);
     procedure SKRehberEkle(Rehber_Id: Integer);
     procedure AramaKaydet(AModul, AKayitID: Integer);  // Son/Sik Aranan: KULLANICI_ARAMA upsert (generic, MODUL bazli)
+    function  BelgeModulID(ATur: Integer): Integer;    // FATBASLIK.TUR -> MODUL.MODULID (belge turu bazli Son/Sik Aranan)
+    procedure BelgeAramaKaydet(ATur, AKayitID: Integer); // belge acilinca/kaydedilince Son Aranan'a yaz
     // Liste ilk-acilis "Son Aranan" deseni: bayragi kontrol edip kapatir. True donerse liste
     // frame'i Liste_SP_Cagir(5) (Son Aranan) gostermeli. Kullanim (JvTimer1Timer'de):
     //   if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;
@@ -1640,6 +1642,7 @@ const
   MODUL_Alinan_Siparis=241111;
   MODUL_Banka = 25;
   MODUL_Stok = 27;
+  MODUL_Hizmet = 248002;   // KULLANICI_ARAMA.MODUL - Hizmetler (MODUL.MODULID 'Hizmetler')
   MODUL_StokTalep = 2709;   // KULLANICI_ARAMA.MODUL - Stok Talep listesi (MODUL 'Stoktan Talep')
   MODUL_Demirbas = 28;
   MODUL_Teklif = 29;
@@ -5752,7 +5755,9 @@ begin
   Tablo1.FieldByName('ILCE').AsString := tabCariBilgileri.FieldByName('ILCE').AsString;
   Tablo1.FieldByName('IL').AsString := tabCariBilgileri.FieldByName('IL').AsString;
   Tablo1.FieldByName('VD').AsString := tabCariBilgileri.FieldByName('VERGIDAI').AsString;
-  Tablo1.FieldByName('VNO').AsString := tabCariBilgileri.FieldByName('VERGINO').AsString;
+  // VKN/TCKN yalniz rakam: karta bosluklu/tireli girilmis numara faturaya oldugu gibi
+  //   tasinirsa e-Belge alias sorgusu bulamaz, XML/JSON'a da gecersiz gider.
+  Tablo1.FieldByName('VNO').AsString := VergiNoTemizle(tabCariBilgileri.FieldByName('VERGINO').AsString);
   if tabCariBilgileri.FieldByName('SENARYO').AsString <> '' then
      Tablo1.FieldByName('SENARYO').AsInteger := Tablo.GENINI.DegerGetir(EFatura_Senaryo,-1, tabCariBilgileri.FieldByName('SENARYO').AsString, 1);;
   if Tablo1.FieldByName('BASLIK').AsString = '' then begin // eğer ticari bilgiler kısmında başlık yoksa firma adını alsın
@@ -8606,6 +8611,11 @@ begin                                                                         //
 end;
 function TTablo.DokumanSihirbazBaslat(IslemOp: Char; Cagiran, DokumanID : Integer; KlasorID,YeniKayit,Modul,ModulID,RehberID: Integer;BelgeYolu:string=''): Integer;
 begin
+  // DOKUMAN KARTI ACILDI ("Form Ac" / duzenleme) -> Son/Sik Aranan listesine yaz.
+  //   Icerik goruntuleme Dokuman_Gor_Duzenle'den, KART acilisi buradan gecer; ikisi de
+  //   kaydeder ki kullanici hangi yoldan girerse girsin liste guncel olsun.
+  //   YENI kayitta (DokumanID = 0) ID henuz yok -> AramaKaydet zaten 0'i atlar.
+  AramaKaydet(MODUL_Dokuman, DokumanID);
   Application.CreateForm(TDokumanWizard, DokumanWizard);
   DokumanWizard.Cagiran := Cagiran;
   DokumanWizard.DokumanID := DokumanID;
@@ -8818,6 +8828,11 @@ end;
 function TTablo.Dokuman_Gor_Duzenle(Tur,DokumanID:integer; DokumanAd:String):boolean; //Tür:1 Gör 2:gör ve kayder 3:gör kaydet revize
 var edit : Boolean;
 begin
+   // DOKUMANA ERISILDI -> "Son/Sik Aranan" listesine yaz (KULLANICI_ARAMA, MODUL_Dokuman).
+   //   MERKEZI NOKTA: gorme (1), gor+kaydet (2) ve revize (3) akislarinin HEPSI buradan
+   //   gecer (liste, wizard, evrak ekranlari). Boylece kullanici dokumani nereden acarsa
+   //   acsin Son/Sik listesi guncel kalir. AramaKaydet idempotent upsert'tir (SAY+1).
+   AramaKaydet(MODUL_Dokuman, DokumanID);
    DYetkisonuc := Tablo.DokumanYetkiKontrol(321, DokumanID);
    if ((Tur=1)and(DYetkisonuc.Gor))or((Tur=3)and(DYetkisonuc.Degistir)) then begin
       //önce belge kilitlimi diye bakalım
@@ -12654,6 +12669,53 @@ begin
   SonEklenenCari := Rehber_Id;
 end;
 
+function TTablo.BelgeModulID(ATur: Integer): Integer;
+// FATBASLIK.TUR (belge turu) -> MODUL.MODULID. Son/Sik Aranan listesi KULLANICI_ARAMA'da
+//   MODUL bazli tutuldugu icin her belge turu AYRI listeye yazilir: alis faturasi (11) ile
+//   satis faturasi (15), giris fisi (3) ile cikis fisi (4) karismaz.
+//   Eslesme MODUL.KASATUR uzerinden okunur; MODUL'de KASATUR'u bos olan turler icin
+//   (or. Gelen Konsinye 109) elle esleme kullanilir.
+begin
+  // MODULID'ler SISTEM SABITIDIR; harita KODDA tutulur, MODUL tablosuna SORGU ATILMAZ:
+  //   (a) her belge acilisinda/kaydinda ekstra sorgu olmaz,
+  //   (b) MODUL tablosuna erisilemeyen kurulumda ozellik sessizce olmez
+  //       ("Invalid object name 'MODUL'").
+  //   Kaynak: MODUL.KASATUR eslesmesi (KASATUR = FATBASLIK.TUR).
+  case ATur of
+      3: Result := 2712;     // Stok Giris Fisi
+      4: Result := 2713;     // Stok Cikis Fisi
+      6: Result := 3316;     // Uretim Fisleri
+      7: Result := 2714;     // Stok Sayim Fisi
+      8: Result := 240161;   // Gider Pusulasi
+      9: Result := 241111;   // Alinan Siparisler
+     10: Result := 240121;   // Irsaliyeler   (alis)
+     11: Result := 240131;   // Faturalar     (alis)
+     12: Result := 240141;   // Fisler        (alis)
+     13: Result := 240151;   // Tahakkuklar   (alis)
+     14: Result := 241121;   // Irsaliyeler   (satis)
+     15: Result := 241131;   // Faturalar     (satis)
+     16: Result := 241141;   // Fisler        (satis)
+     17: Result := 241151;   // Tahakkuklar   (satis)
+     19: Result := 240111;   // Verilen Siparisler
+    109: Result := 240171;   // Gelen Konsinye  (MODUL.KASATUR bos)
+    119: Result := 241161;   // Giden Konsinye
+  else
+    Result := 0;             // haritada yok -> Son Aranan yazilmaz (zararsiz)
+  end;
+end;
+
+procedure TTablo.BelgeAramaKaydet(ATur, AKayitID: Integer);
+// Belge ACILDIGINDA ve KAYDEDILDIGINDE cagrilir: kullanicinin son dokundugu belgeler
+//   listesi (Son Aranan) guncel kalsin. AramaKaydet idempotent upsert'tir (SAY+1).
+var
+  LModul: Integer;
+begin
+  if AKayitID <= 0 then Exit;
+  LModul := BelgeModulID(ATur);
+  if LModul > 0 then
+    AramaKaydet(LModul, AKayitID);
+end;
+
 procedure TTablo.AramaKaydet(AModul, AKayitID: Integer);
 // Kullanicinin bir karti acmasini KULLANICI_ARAMA'ya yazar (Son/Sik Aranan icin).
 //   Generic: AModul = MODUL.MODULID (MODUL_Cari/Stok/Demirbas...), AKayitID = kayit ID.
@@ -13420,8 +13482,16 @@ begin
 
   { Satış İrsaliyesi 14  Satış Faturası 15   Satış Fişi 16   Transfer  20, gider pusulası 8 }
   KDVOrani := GENINI.ReadInteger(Ops_KasaOpsiyon_KDVOrani,20) ; //  KasaOpsiyon KDVOrani
-  Dokuman_Kayit_Yeri := GENINI.ReadInteger(Ops_Dokuman_Kayit_Yeri,1) ; //  Doküman Kayit_Yeri', 0);
-  // 0:DB  1:Dosya
+  // DOKUMAN ICERIK YERI ARTIK OPSIYONA BAGLI DEGIL (07.08.2026).
+  //   Yeni sistemde icerik GENDEPO.DOSYA'da (FILESTREAM + hash-dedup) tutulur; IMAJ yalnizca
+  //   referans verir (DOSYAID, ICDIS=0). Eski "1 = klasor" secimi kalmis kurulumlarda
+  //   ekleme, olmayan klasor/SP yoluna gidip BASARISIZ oluyordu (dokuman ve yorum/medya
+  //   ekleme calismiyordu). Degisken artik SABIT 0: hem karar dallari DB/DOSYA yoluna gider
+  //   hem IMAJ.ICDIS 0 yazilir.
+  //   Opsiyon ekranindaki secim yalnizca GECMIS kayitlar icin bilgi amaclidir; ESKI kayitlar
+  //   kendi ICDIS degerleriyle okunmaya devam eder (okuma kayit bazli, bu degiskene bakmaz).
+  Dokuman_Kayit_Yeri := 0;
+  // 0:DB/DOSYA  (1:Klasor artik KULLANILMIYOR)
   MaxDosyaBuyuklugu := GENINI.ReadInteger(Ops_Dokuman_MaxBoyut,1000) ; //  Doküman', 'MaxBoyut', 1000);
 
   try
@@ -14116,6 +14186,15 @@ begin
 
   LID := AnaDataSource.DataSet.FieldByName('ID').AsInteger;
   if LID <= 0 then
+    Exit;
+
+  // _USER tablosu HER kurulumda YOKTUR (musteri ek alan tanimlamadiysa hic olusmaz).
+  //   Yoksa asagidaki Open "Invalid object name" ile patlar ve ek-alan sekmesi acilmaz.
+  //   Bu durumda ana datasource ile devam et (ek alan zaten yok -> gorunur etkisi olmaz).
+  //   lower(): PG'de tablo adlari KUCUK harf tutulur; duz esitlik orada hep "yok" derdi.
+  if not Veritabani.VeriVarMi(FDCnn,
+       'select 1 from INFORMATION_SCHEMA.TABLES where lower(TABLE_NAME) = lower(&t)',
+       ['&t'], [UserTablo]) then
     Exit;
 
   LName := 'CodexDts' + StringReplace(UserTablo, '_', '', [rfReplaceAll]);

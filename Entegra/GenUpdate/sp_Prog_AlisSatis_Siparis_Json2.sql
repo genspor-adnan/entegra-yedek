@@ -15,6 +15,13 @@ BEGIN
     DECLARE @Tur        SMALLINT      = TRY_CAST(JSON_VALUE(@Kosullar,'$.Tur') AS SMALLINT);
     DECLARE @StartDate  DATETIME      = TRY_CAST(JSON_VALUE(@Kosullar,'$.StartDate') AS DATETIME);
     DECLARE @EndDate    DATETIME      = TRY_CAST(JSON_VALUE(@Kosullar,'$.EndDate') AS DATETIME);
+    -- SON ARANAN (KULLANICI_ARAMA): kullanicinin bu belge turunde son actigi/kestigi
+    --   kayitlar. Modul = belge turunun MODUL.MODULID'si, Kul = kullanici ID.
+    DECLARE @SonAranan  TINYINT       = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.SonAranan') AS TINYINT), 0);  -- 0=Tumu 1=Son 2=Sik
+    DECLARE @Modul      INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Modul') AS INT), 0);
+    DECLARE @Kul        INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Kul')   AS INT), 0);
+    IF @Modul <= 0 OR @Kul <= 0 SET @SonAranan = 0;
+
     DECLARE @SubeIDList NVARCHAR(MAX) = ISNULL(JSON_VALUE(@Kosullar,'$.SubeIDList'), N'');
     DECLARE @Faturano   NVARCHAR(100) = ISNULL(JSON_VALUE(@Kosullar,'$.Faturano'),  N'');
     DECLARE @AraBaslik  NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Baslik'),    N'');
@@ -44,7 +51,13 @@ F.IRSALIYENO , F.SATICIKODU,F.DETAYBOLUMU, SATICIADI = SATICIBILGI.FIRMA, F.VADE
 DURUMNEREDEN = case     when (F.TUR=9)and(412 in 
 (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Teklifden''     when (F.TUR=19)and(413 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Teklifden''    when 
 (F.TUR=9)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden''     when (F.TUR=19)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then 
-''Servisden''    when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten''    when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Üretimden''    else '''' end,   DURUMNEREYE = case  	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''     	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''   	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Siparişe''   	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''    when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fişe''     	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye''  	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	else '''' end,     TESLIMTARIHI =(Select Min(TESLIMTARIHI) from SIPARISDETAY Where SIPARISID=F.ID ), FATURA_GON_TARIHI=null,  ZARFID=null,ZARF=null,ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI,  F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0 ';
+''Servisden''    when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten''    when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Üretimden''    else '''' end,   DURUMNEREYE = case  	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''     	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''   	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Siparişe''   	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''    when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fişe''     	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye''  	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine''  	else '''' end,     TESLIMTARIHI =(Select Min(TESLIMTARIHI) from SIPARISDETAY Where SIPARISID=F.ID ), FATURA_GON_TARIHI=null,  ZARFID=null,ZARF=null,ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI,  F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0,
+-- SON/SIK ARANAN siralama kolonlari (KULLANICI_ARAMA). EN SONA eklenir: kolon SIRASI
+--   degismemeli, kod bazi yerlerde POZISYONEL erisiyor (Fields[0] = F.ID).
+SONERISIM = (SELECT MAX(KA.DEGISTIRMETARIHI) FROM KULLANICI_ARAMA KA
+              WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul),
+ERISIMSAY = (SELECT MAX(KA.SAY) FROM KULLANICI_ARAMA KA
+              WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul) ';
 
     -- SIPARISDETAY/STOKLAR JOIN'i YALNIZ stok filtresi icin gerekli (SD./ST. baska yerde
     -- kullanilmiyor). Kosulsuz join baslik basina detay sayisi kadar satir uretiyor,
@@ -95,14 +108,18 @@ LEFT OUTER JOIN DEPOLAR D ON D.ID=F.CIKISDEPO
                       OR ST.STOKADI LIKE ''%'' + @Stok + ''%'' 
                       OR ST.URUNNO LIKE ''%'' + @Stok + ''%'')';
 
+    IF @SonAranan > 0
+        SET @SQL += ' AND EXISTS (SELECT 1 FROM KULLANICI_ARAMA KA
+                                   WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul)';
+
     SET @SQL += ' ORDER BY F.SIPARISTARIH DESC';
 
     EXEC sp_executesql
         @SQL,
         N'@Tur SMALLINT, @StartDate DATETIME, @EndDate DATETIME, @Baslik NVARCHAR(MAX), @SubeIDList NVARCHAR(MAX),
-          @Faturano NVARCHAR(50), @AraBaslik NVARCHAR(150), @CariFirma NVARCHAR(100), @Aciklama NVARCHAR(100), @Stok NVARCHAR(150)',
+          @Faturano NVARCHAR(50), @AraBaslik NVARCHAR(150), @CariFirma NVARCHAR(100), @Aciklama NVARCHAR(100), @Stok NVARCHAR(150), @Modul INT, @Kul INT',
         @Tur, @StartDate, @EndDate, @Baslik, @SubeIDList,
-        @Faturano, @AraBaslik, @CariFirma, @Aciklama, @Stok;
+        @Faturano, @AraBaslik, @CariFirma, @Aciklama, @Stok, @Modul, @Kul;
 
     DROP TABLE #SubeIDs;
 END

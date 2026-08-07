@@ -667,6 +667,7 @@ type
       Shift: TShiftState);
   private
     { Private declarations }
+    FSonArananYazildi: Boolean;  // Son Aranan kaydi bu belge icin bir kez yazilsin
     FSkipDetailAfterScroll: Boolean;
     FDeferredCalcInitDone: Boolean;
     FTabSiparisDetayUpdateSQL: TFDUpdateSQL;
@@ -2595,6 +2596,9 @@ begin
         end;
   end;
   Tablo.UserDataSourceKaydet(TSiparisWizardDlg(Self), 'SIPARIS_USER');
+  // BELGE KAYDEDILDI -> "Son Aranan" (yeni belgede ID ancak burada olusur).
+  Tablo.BelgeAramaKaydet(TabSiparis.FieldByName('TUR').AsInteger,
+                         TabSiparis.FieldByName('ID').AsInteger);
   // _USER (ek alan) audit: UserDataSourceKaydet _USER'i post ettikten SONRA logla (kart grubuna baglanir).
   if LogGun > 0 then
   begin
@@ -3241,6 +3245,14 @@ end;
 procedure TSiparisWizardDlg.TabSiparisAfterScroll(DataSet: TDataSet);
 begin
   TabloYenile(TOPLAMLAR,[TabSiparis.FieldByName('ID').AsInteger]);
+  // BELGE ACILDI -> "Son Aranan" listesine yaz (siparis turu bazli: alinan 9 / verilen 19).
+  //   Bayrak: AfterScroll birden fazla tetiklenebilir, her tetikte DB'ye upsert gitmesin.
+  if (not FSonArananYazildi) and (TabSiparis.FieldByName('ID').AsInteger > 0) then
+  begin
+    Tablo.BelgeAramaKaydet(TabSiparis.FieldByName('TUR').AsInteger,
+                           TabSiparis.FieldByName('ID').AsInteger);
+    FSonArananYazildi := True;
+  end;
 end;
 
 end.

@@ -12,11 +12,18 @@ uses
   cxCheckBox, cxDropDownEdit, cxCalendar, ExtCtrls, cxLabel,
   dxSkinLondonLiquidSky,Utablo, cxRadioGroup, cxGraphics, cxLookAndFeels, dxSkinLiquidSky, dxCore, cxDateUtils, cxSpinEdit, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinValentine, dxSkinVS2010,
   dxSkinWhiteprint, dxSkinXmas2008Blue, dxSkinMetropolis, dxSkinMetropolisDark,
-  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxCoreGraphics;
+  dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray, dxCoreGraphics,
+  Vcl.ToolWin;
 
 type
   TFaturalarAramaFrame = class(TFrame, IAramaBilgiFrame, IBilgiFrame)
     EditCARIID: TcxLabel;
+    // Liste kapsam secimi: Tumu / Son Aranan / Sik Aranan. OnClick liste frame'inde
+    //   (UFaturalar.InitIslemler) baglanir - arama frame'i listeyi tanimaz.
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     Panel1: TPanel;
     Label2: TcxLabel;
     Label3: TcxLabel;

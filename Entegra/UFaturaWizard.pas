@@ -764,6 +764,7 @@ type
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // FATURA (detay) orijinal satirlar (log diff icin)
     FFaturaSnapAlindi: Boolean;
     Tur, TabFaturaIDsi, RehberId,ServisID, ProjeId, AktiviteId, MasrafMerkezi, Tipi: Integer;
+    FSonArananYazildi: Boolean;  // Son Aranan kaydi bu belge icin bir kez yazilsin
     iadefis, Kilit: Boolean;
     Cagiran: SmallInt;
     OncekiStokMiktar: Real;
@@ -1214,6 +1215,10 @@ begin
   Tablo.UserDataSourceKaydet(TFaturaWizardDlg(Self), 'FATBASLIK_USER');
   if TabFatura.State in [dsInsert, dsEdit] then
      TabFatura.Post;
+  // BELGE KAYDEDILDI -> "Son Aranan" listesine yaz. Yeni belgede ID ancak burada olusur;
+  //   kullanici listeye gectiginde az once kestigi belgeyi gorsun.
+  Tablo.BelgeAramaKaydet(TabFatbaslik.FieldByName('TUR').AsInteger,
+                         TabFatbaslik.FieldByName('ID').AsInteger);
 end;
 
 function TFaturaWizardDlg.EkranAdiAl: string;
@@ -3780,7 +3785,7 @@ begin
         Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,1,6,EditILCE.Text);
         Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,1,8,EditIL.Text);
         Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,2,20,EditVD.Text);
-        Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,2,22,EditVNO.Text);
+        Tablo.RehberBilgiGuncelle(TabFatbaslik.FieldByName('REHBERID').AsInteger,2,22,VergiNoTemizle(EditVNO.Text));
      end;
   end;
 end;
@@ -3798,6 +3803,15 @@ end;
 procedure TFaturaWizardDlg.FATBASLIKAfterScroll(DataSet: TDataSet);
 begin
   TabloYenile(TOPLAMLAR, [TabFatbaslik.FieldByName('ID').AsInteger]);
+  // BELGE ACILDI -> "Son Aranan" listesine yaz (belge turu bazli: alis faturasi ile
+  //   satis faturasi ayri listelerde). Bayrak: AfterScroll birden fazla tetiklenebilir,
+  //   her tetikte DB'ye upsert gitmesin.
+  if (not FSonArananYazildi) and (TabFatbaslik.FieldByName('ID').AsInteger > 0) then
+  begin
+    Tablo.BelgeAramaKaydet(TabFatbaslik.FieldByName('TUR').AsInteger,
+                           TabFatbaslik.FieldByName('ID').AsInteger);
+    FSonArananYazildi := True;
+  end;
   if TabFatbaslik.FieldByName('MERKEZID').AsString <>'' then
      EditSRMMerkezi.Text := Tablo.AciklamaGetir('SRMMERKEZI', 'MERKEZADI', TabFatbaslik.FieldByName('MERKEZID').AsInteger);
 end;
@@ -3836,9 +3850,20 @@ begin
 end;
 
 procedure TFaturaWizardDlg.FATBASLIKBeforePost(DataSet: TDataSet);
+var
+  LVNO: string;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
   PgFatbaslikIdHazirla;
+  // VKN/TCKN SON SAVUNMA: alan elle de doldurulabiliyor ("12 23 545 871"). Kayda
+  //   yalniz rakam gitsin; aksi halde e-Belge alias sorgusu bulamaz, XML/JSON'daki
+  //   numara gecersiz olur ve VKN/TCKN sema secimi (uzunluga bakar) yanilir.
+  if TabFatbaslik.FindField('VNO') <> nil then
+  begin
+    LVNO := VergiNoTemizle(TabFatbaslik.FieldByName('VNO').AsString);
+    if LVNO <> TabFatbaslik.FieldByName('VNO').AsString then
+      TabFatbaslik.FieldByName('VNO').AsString := LVNO;
+  end;
   if (TabFatbaslik.State <> dsInsert)and(cbIrsaliyeli.Checked)and(TabFatbaslik.FieldByName('IRSALIYELI').OldValue<>TabFatbaslik.FieldByName('IRSALIYELI').NewValue) then
       Tablo.BelgeNoIslemleri(TabFatbaslik, Tur, cbIrsaliyeli.Checked);
   BoslukKontrolu;

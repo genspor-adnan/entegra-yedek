@@ -192,6 +192,11 @@ type
     procedure YenileTusClick;
     procedure YenileKlasorClick(KlasorId: Integer);
     procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure PageAramaDegisti(Sender: TObject);
+    function  AramaSekmesiAktif: Boolean;
+    procedure AramaModuListele(AMod: Integer);
+    procedure AramaModuSonClick(Sender: TObject);
+    procedure AramaModuSikClick(Sender: TObject);
     procedure DokumanTviewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure DokumanTviewDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure KesMenuClick(Sender: TObject);
@@ -520,10 +525,62 @@ begin
   Tablo.ListeSPJson(DOKUMAN, 'sp_Prog_Dokuman_Liste_Json2', '', jP);
 end;
 
+procedure TDokumanListeFrame.PageAramaDegisti(Sender: TObject);
+// Sekme degisince liste KAYNAGI degisir:
+//   Klasorler sekmesi -> secili klasorun icerigi (Mod=1)
+//   Arama sekmesi     -> kapsam butonlarindan hangisi basiliysa (Tum / Son / Sik)
+begin
+  if FArama = nil then Exit;
+  if FArama.PageArama.ActivePage = FArama.TabSheetKlasor then
+  begin
+    if FArama.TabKlasorler.Active then
+      YenileKlasorClick(FArama.TabKlasorler.FieldByName('ID').AsInteger);
+  end
+  else if FArama.LabelSonArananlar.Down then AramaModuListele(1)
+  else if FArama.LabelSikArananlar.Down then AramaModuListele(2)
+  else LabelTumKayitlarClick(nil);
+end;
+
+function TDokumanListeFrame.AramaSekmesiAktif: Boolean;
+// "Tum / Son / Sik" YALNIZ Arama sekmesinde gecerlidir. Klasor sekmesinde liste
+//   secili klasorun icerigidir (Mod=1) - kapsam butonlari oraya karismaz.
+begin
+  Result := (FArama <> nil) and (FArama.PageArama.ActivePage = FArama.TabSheetArama);
+end;
+
+procedure TDokumanListeFrame.AramaModuListele(AMod: Integer);
+// SON (1) / SIK (2) Aranan: liste KULLANICI_ARAMA kayitlariyla sinirlanir.
+//   Modul = MODUL_Dokuman (32), Kul = oturum kullanicisi. SP tarafinda Mod=3 (tum kayit)
+//   sorgusuna EXISTS + siralama eklenir.
+var
+  jP: TJSONObject;
+begin
+  DOKUMAN.Close;
+  jP := TJSONObject.Create;
+  jP.AddPair('Mod', TJSONNumber.Create(3));            // taban: tum kayitlar
+  jP.AddPair('AramaModu', TJSONNumber.Create(AMod));   // 1=Son, 2=Sik
+  jP.AddPair('Modul', TJSONNumber.Create(MODUL_Dokuman));
+  jP.AddPair('Kul',   TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+  Tablo.ListeSPJson(DOKUMAN, 'sp_Prog_Dokuman_Liste_Json2', '', jP);
+end;
+
+procedure TDokumanListeFrame.AramaModuSonClick(Sender: TObject);
+begin
+  if not AramaSekmesiAktif then Exit;
+  AramaModuListele(1);
+end;
+
+procedure TDokumanListeFrame.AramaModuSikClick(Sender: TObject);
+begin
+  if not AramaSekmesiAktif then Exit;
+  AramaModuListele(2);
+end;
+
 procedure TDokumanListeFrame.LabelTumKayitlarClick(Sender: TObject);
 var
   jP: TJSONObject;
 begin
+  if not AramaSekmesiAktif then Exit;
   // MOTOR SEAM: PG'de fn_prog_dokuman_liste_json2 (vmPG-Exit kaldirildi).
   DOKUMAN.Close;
   // STANDART SISTEM: union-all -> sp_Prog_Dokuman_Liste_Json2 (Mod=3 tum-kayitlar).
@@ -921,6 +978,23 @@ var
   k: Word;
 begin
   FArama := Value;
+  // Kapsam butonlari (Tumu / Son / Sik) - diger arama frame'leriyle ayni desen.
+  //   Eski 'Yenile' ve 'Tum Kayitlar' bilesenleri kaldirildi; islevleri buraya tasindi.
+  if FArama <> nil then
+  begin
+    FArama.LabelTumKayitlar.Style    := tbsCheck;
+    FArama.LabelSonArananlar.Style   := tbsCheck;
+    FArama.LabelSikArananlar.Style   := tbsCheck;
+    FArama.LabelTumKayitlar.Grouped  := True;
+    FArama.LabelSonArananlar.Grouped := True;
+    FArama.LabelSikArananlar.Grouped := True;
+    FArama.LabelTumKayitlar.OnClick  := LabelTumKayitlarClick;
+    FArama.LabelSonArananlar.OnClick := AramaModuSonClick;
+    FArama.LabelSikArananlar.OnClick := AramaModuSikClick;
+    FArama.LabelTumKayitlar.Down     := True;
+    // Sekme degisimini liste frame'i yonetir (arama frame'i listeyi tanimaz).
+    FArama.PageArama.OnChange := PageAramaDegisti;
+  end;
   with FArama do
   begin
     FArama.PageArama.ActivePageIndex := 0;

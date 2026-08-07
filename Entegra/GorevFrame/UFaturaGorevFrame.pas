@@ -182,6 +182,9 @@ begin
       if TFaturalarDlg(Ornek).Basladi then begin
         with TFaturalarDlg(Ornek) do begin
           FAltTur := TComponent(Sender).Tag;
+          // Liste butonu TUM listeyi acar. Son/Sik kapsamina gecis arama panelindeki
+          //   uc butondan yapilir (Tum / Son / Sik).
+          AramaModuUygula(0);
           if FAltTur in [3,8,9,10,11,12,13,101,109] then
             FMenuTur := 0
           else

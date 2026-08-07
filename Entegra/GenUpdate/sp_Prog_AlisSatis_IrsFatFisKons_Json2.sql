@@ -23,6 +23,15 @@ BEGIN
     DECLARE @Tur        SMALLINT      = TRY_CAST(JSON_VALUE(@Kosullar,'$.Tur') AS SMALLINT);
     DECLARE @StartDate  DATETIME      = TRY_CAST(JSON_VALUE(@Kosullar,'$.StartDate') AS DATETIME);
     DECLARE @EndDate    DATETIME      = TRY_CAST(JSON_VALUE(@Kosullar,'$.EndDate') AS DATETIME);
+    -- SON ARANAN: kullanicinin son actigi/kestigi belgeler (KULLANICI_ARAMA).
+    --   Modul = belge turunun MODUL.MODULID'si (her belge turu AYRI liste),
+    --   Kul   = kullanici ID. Ikisi de dolu ve SonAranan=1 ise liste bu kayitlara sinirlanir
+    --   ve KULLANICI_ARAMA.DEGISTIRMETARIHI DESC siralanir (en son dokunulan en ustte).
+    DECLARE @SonAranan  TINYINT       = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.SonAranan') AS TINYINT), 0);  -- 0=Tumu 1=Son 2=Sik
+    DECLARE @Modul      INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Modul') AS INT), 0);
+    DECLARE @Kul        INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Kul')   AS INT), 0);
+    IF @Modul <= 0 OR @Kul <= 0 SET @SonAranan = 0;   -- eksik bilgi -> normal liste
+
     DECLARE @SubeIDList NVARCHAR(MAX) = ISNULL(JSON_VALUE(@Kosullar,'$.SubeIDList'), N'');
     DECLARE @Faturano   NVARCHAR(100) = ISNULL(JSON_VALUE(@Kosullar,'$.Faturano'),  N'');
     DECLARE @AraBaslik  NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Baslik'),    N'');
@@ -132,7 +141,13 @@ F1.FATBASID=F.ID)) then ''Siparişten''
 
     ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),
 
-    F.YAZDIRILDI, ONAYLAYACAK=0, ONAYLAYAN=0, EFATURADURUM, EFATURASONUC ' + ISNULL(@Baslik, '') + '
+    F.YAZDIRILDI, ONAYLAYACAK=0, ONAYLAYAN=0, EFATURADURUM, EFATURASONUC,
+    -- SON/SIK ARANAN siralama kolonlari (KULLANICI_ARAMA). EN SONA eklenir: kolon SIRASI
+    --   degismemeli, kod bazi yerlerde POZISYONEL erisiyor (Fields[0] = F.ID).
+    SONERISIM = (SELECT MAX(KA.DEGISTIRMETARIHI) FROM KULLANICI_ARAMA KA
+                  WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul),
+    ERISIMSAY = (SELECT MAX(KA.SAY) FROM KULLANICI_ARAMA KA
+                  WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul) ' + ISNULL(@Baslik, '') + '
 
 FROM FATBASLIK F WITH (NOLOCK)
 
@@ -219,7 +234,12 @@ FROM FATBASLIK F WITH (NOLOCK)
 
 
 
-    SET @SQL += ' ORDER BY F.FATURATARIH DESC';
+    -- Son Aranan modunda liste KULLANICI_ARAMA ile sinirlanir ve o tabloya gore siralanir.
+    IF @SonAranan > 0
+        SET @SQL += ' AND EXISTS (SELECT 1 FROM KULLANICI_ARAMA KA
+                                   WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul)';
+
+    SET @SQL += ' ORDER BY F.FATURATARIH DESC';   -- Son/Sik siralamasi GRID'den yapilir
 
 
 
@@ -227,9 +247,9 @@ FROM FATBASLIK F WITH (NOLOCK)
 
         @SQL,
 
-        N'@Tur SMALLINT, @StartDate DATETIME, @EndDate DATETIME, @Faturano NVARCHAR(100), @AraBaslik NVARCHAR(200), @CariFirma NVARCHAR(200), @Aciklama NVARCHAR(200), @Stok NVARCHAR(200)',
+        N'@Tur SMALLINT, @StartDate DATETIME, @EndDate DATETIME, @Faturano NVARCHAR(100), @AraBaslik NVARCHAR(200), @CariFirma NVARCHAR(200), @Aciklama NVARCHAR(200), @Stok NVARCHAR(200), @Modul INT, @Kul INT',
 
-        @Tur, @StartDate, @EndDate, @Faturano, @AraBaslik, @CariFirma, @Aciklama, @Stok;
+        @Tur, @StartDate, @EndDate, @Faturano, @AraBaslik, @CariFirma, @Aciklama, @Stok, @Modul, @Kul;
 
 
 

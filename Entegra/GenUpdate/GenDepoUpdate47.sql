@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate47 (musteri uygulama)
 --   Dokuman liste standart-sistem SP'si (ListeSPJson @Baslik+@Kosullar):
 --     sp_Prog_Dokuman_Liste_Json2  (Mod=1 klasor-agac / 2 arama / 3 tum; 2-kol union)
@@ -47,6 +47,13 @@ BEGIN
     DECLARE @AraSorumlu NVARCHAR(200) = NULLIF(JSON_VALUE(@Kosullar,'$.AraSorumlu'), N'');
     DECLARE @AraLokasyon NVARCHAR(200)= NULLIF(JSON_VALUE(@Kosullar,'$.AraLokasyon'), N'');
     DECLARE @Bolum      INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.Bolum') AS INT);
+    -- SON/SIK ARANAN (KULLANICI_ARAMA): 0 = kapali, 1 = Son (tarih), 2 = Sik (kullanim).
+    --   Modul = MODUL_Dokuman (32), Kul = oturum kullanicisi. Eksikse otomatik kapanir.
+    DECLARE @AramaModu    INT = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.AramaModu') AS INT), 0);
+    DECLARE @AramaModulID INT = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Modul')     AS INT), 0);
+    DECLARE @AramaKul     INT = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Kul')       AS INT), 0);
+    IF @AramaModulID <= 0 OR @AramaKul <= 0 SET @AramaModu = 0;
+
     DECLARE @Modul      INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.Modul') AS INT);
     DECLARE @Kategori   INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.Kategori') AS INT);
     DECLARE @Pasif      BIT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Pasif') AS BIT), 0);
@@ -78,14 +85,21 @@ BEGIN
         ONAYLAYACAKAD = (SELECT FIRMA FROM REHBER WHERE ID = I.ONAYLAYACAK),
         ONAYLAYANAD   = (SELECT FIRMA FROM REHBER WHERE ID = I.ONAY),
         EKLEYENAD     = (SELECT FIRMA FROM REHBER WHERE ID = D.EKLEYEN),
-        DEGISTIRENAD  = (SELECT FIRMA FROM REHBER WHERE ID = D.DEGISTIREN)
+        DEGISTIRENAD  = (SELECT FIRMA FROM REHBER WHERE ID = D.DEGISTIREN),
+        -- SON/SIK ARANAN siralama kolonlari (KULLANICI_ARAMA). ORDER BY YOK: siralama
+        --   GRID'den yapilir (kullanicinin kayitli grid siralamasi bozulmasin). Bu kolonlar
+        --   normal listede de dolar: "en son ne zaman actim / kac kez actim".
+        SONERISIM = (SELECT MAX(KA.DEGISTIRMETARIHI) FROM KULLANICI_ARAMA KA
+                      WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID AND KA.KULID = @AramaKul),
+        ERISIMSAY = (SELECT MAX(KA.SAY)              FROM KULLANICI_ARAMA KA
+                      WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID AND KA.KULID = @AramaKul)
     FROM DOKUMAN D
         INNER JOIN IMAJ I ON I.ID = (SELECT TOP 1 ID FROM IMAJ WHERE YERI = 1 AND YER_ID = D.ID ORDER BY ID DESC)
         LEFT OUTER JOIN REHBER   Firma    ON Firma.ID    = D.REHBERID
         LEFT OUTER JOIN LOKASYON Lokasyon ON Lokasyon.ID = D.LOKASYON
         LEFT OUTER JOIN REHBER   Sorumlu  ON Sorumlu.ID  = I.REHBERID
         LEFT OUTER JOIN DOKUMANYETKI DY   ON DY.YERI = 321 AND DY.YERID = D.ID
-    WHERE
+    WHERE (
         (   -- Mod=1 klasor-agac
             @Mod = 1
             AND D.KLASOR = @KlasorId
@@ -110,6 +124,11 @@ BEGIN
             AND (@TarihVar    = 0     OR (D.TARIH >= @TarihBas AND D.TARIH <= @TarihBit))
         )
         OR @Mod = 3   -- Mod=3 tum-kayitlar
+        )
+        AND (@AramaModu = 0
+             OR EXISTS (SELECT 1 FROM KULLANICI_ARAMA KA
+                         WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID
+                           AND KA.KULID = @AramaKul))
 
     UNION ALL
 
@@ -126,14 +145,21 @@ BEGIN
         ONAYLAYACAKAD = (SELECT FIRMA FROM REHBER WHERE ID = I.ONAYLAYACAK),
         ONAYLAYANAD   = (SELECT FIRMA FROM REHBER WHERE ID = I.ONAY),
         EKLEYENAD     = (SELECT FIRMA FROM REHBER WHERE ID = D.EKLEYEN),
-        DEGISTIRENAD  = (SELECT FIRMA FROM REHBER WHERE ID = D.DEGISTIREN)
+        DEGISTIRENAD  = (SELECT FIRMA FROM REHBER WHERE ID = D.DEGISTIREN),
+        -- SON/SIK ARANAN siralama kolonlari (KULLANICI_ARAMA). ORDER BY YOK: siralama
+        --   GRID'den yapilir (kullanicinin kayitli grid siralamasi bozulmasin). Bu kolonlar
+        --   normal listede de dolar: "en son ne zaman actim / kac kez actim".
+        SONERISIM = (SELECT MAX(KA.DEGISTIRMETARIHI) FROM KULLANICI_ARAMA KA
+                      WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID AND KA.KULID = @AramaKul),
+        ERISIMSAY = (SELECT MAX(KA.SAY)              FROM KULLANICI_ARAMA KA
+                      WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID AND KA.KULID = @AramaKul)
     FROM DOKUMANKISAYOL DK
         INNER JOIN DOKUMAN D ON DK.DOKUMANID = D.ID
         INNER JOIN IMAJ I ON I.ID = (SELECT TOP 1 ID FROM IMAJ WHERE YERI = 1 AND YER_ID = D.ID ORDER BY ID DESC)
         LEFT OUTER JOIN REHBER   Firma    ON Firma.ID    = D.REHBERID
         LEFT OUTER JOIN LOKASYON Lokasyon ON Lokasyon.ID = D.LOKASYON
         LEFT OUTER JOIN REHBER   Sorumlu  ON Sorumlu.ID  = I.REHBERID
-    WHERE
+    WHERE (
         (   -- Mod=1 klasor-agac (arm2: kisayol yeri/yer_id)
             @Mod = 1
             AND DK.YER = @TabNo AND DK.YER_ID = @KlasorId
@@ -154,5 +180,10 @@ BEGIN
             AND (@TamYetki    = 1     OR D.GIZLILIKDERECESI <= @GD)
             AND (@TarihVar    = 0     OR (D.TARIH >= @TarihBas AND D.TARIH <= @TarihBit))
         )
-        OR @Mod = 3;   -- Mod=3 tum-kayitlar
+        OR @Mod = 3   -- Mod=3 tum-kayitlar
+        )
+        AND (@AramaModu = 0
+             OR EXISTS (SELECT 1 FROM KULLANICI_ARAMA KA
+                         WHERE KA.KAYITID = D.ID AND KA.MODUL = @AramaModulID
+                           AND KA.KULID = @AramaKul));
 END;

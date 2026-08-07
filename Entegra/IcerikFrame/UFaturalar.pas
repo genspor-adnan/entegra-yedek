@@ -427,7 +427,15 @@ type
   public
     { Public declarations }
     SQLEk:string;
+    // Liste kapsami: 0 = Tumu (normal), 1 = Son Aranan, 2 = Sik Aranan.
+    //   1/2'de liste KULLANICI_ARAMA kayitlariyla sinirlanir; siralama Son'da
+    //   tarihe, Sik'ta kullanim sayisina gore yapilir.
+    FAramaModu: Integer;
     Basladi : Boolean;
+    // NOT: ALANLAR metodlardan ONCE gelmeli (E2169) - yeni alan eklerken bu blogun
+    //   ustune ekleyin, asagidaki metod listesinin arasina DEGIL.
+    procedure AramaModuSec(Sender: TObject);
+    procedure AramaModuUygula(AMod: Integer);   // modu ve buton gorunumunu birlikte ayarlar
     procedure InitIslemler;
   published
 
@@ -453,6 +461,30 @@ var
   EkAlanlar, SipEkAlanlar, FatEkAlanlar : String;
   EkAlanKolonList : TStringList;
   TabloNo : Integer;
+
+procedure TFaturalarDlg.AramaModuUygula(AMod: Integer);
+// Kapsami ayarlar ve arama panelindeki uc butonun basili gorunumunu senkronlar.
+//   Gorev panelindeki liste butonu da bunu cagirir (dogrudan "Son Aranan" ile acilir).
+begin
+  FAramaModu := AMod;
+  if FArama <> nil then
+  begin
+    FArama.LabelTumKayitlar.Down  := (AMod = 0);
+    FArama.LabelSonArananlar.Down := (AMod = 1);
+    FArama.LabelSikArananlar.Down := (AMod = 2);
+  end;
+end;
+
+procedure TFaturalarDlg.AramaModuSec(Sender: TObject);
+// Arama panelindeki uc buton: Tumu / Son Aranan / Sik Aranan.
+//   Buton Tag'i mod degil GORSEL secim icin kullanilir; mod bileşen ADINDAN belirlenir.
+begin
+  if not (Sender is TComponent) then Exit;
+  if      TComponent(Sender).Name = 'LabelSonArananlar' then AramaModuUygula(1)
+  else if TComponent(Sender).Name = 'LabelSikArananlar' then AramaModuUygula(2)
+  else                                                       AramaModuUygula(0);
+  JvTimer1.Enabled := True;   // listeyi yeniden kur (debounce timer)
+end;
 
 procedure TFaturalarDlg.InitIslemler;
 var
@@ -996,6 +1028,15 @@ begin
       LKosullar.AddPair('CariFirma', CariFirma);
       LKosullar.AddPair('Aciklama', Aciklama);
       LKosullar.AddPair('Stok', Stok);
+      // SON ARANAN modu: gorev panelindeki liste butonu bu modu acar. Kullanicinin bu belge
+      //   turunde son actigi/kestigi belgeler (KULLANICI_ARAMA) listelenir, en son dokunulan
+      //   en ustte. Modul = belge turunun MODUL.MODULID'si -> her tur AYRI liste.
+      if FAramaModu > 0 then
+      begin
+        LKosullar.AddPair('SonAranan', TJSONNumber.Create(FAramaModu));   // 1=Son, 2=Sik
+        LKosullar.AddPair('Modul', TJSONNumber.Create(Tablo.BelgeModulID(Tur)));
+        LKosullar.AddPair('Kul',   TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+      end;
 
       // MOTOR SEAM (Utablo.ListeSPJson ile ayni): MSSQL EXEC dbo.sp_Prog_X ;
       //   PG SELECT * FROM fn_prog_x (ayni @Baslik+@Kosullar). fn adi = 'fn_'+lower(sp_'den-sonrasi).
@@ -1066,6 +1107,15 @@ begin
    // SAYFALI liste (TSayfaliListe): TOP N artik sayfa siniri; sayfa boyu GENEL OPSIYON'dan
    // (Ops_GenelOpsiyon_GridListeUzunlugu, vars.100). Ekrandaki kayit sayisi spin'i kaldirildi.
    TopN := FSayfali.TopN;
+
+   // SON ARANAN modu yalniz "temiz" listede gecerlidir: kullanici arama kutularindan
+   //   birine deger yazdiysa normal aramaya doner (aksi halde arama sonucu son-aranan
+   //   kayitlariyla kesisir ve kullanici aradigini bulamaz).
+   if (FAramaModu > 0) and
+      ((Trim(FArama.AraFaturaNo.Text) <> '') or (Trim(FArama.AraBaslik.Text) <> '') or
+       (Trim(FArama.AraKod.Text) <> '') or (Trim(FArama.AraAciklama.Text) <> '') or
+       (Trim(FArama.AraStok.Text) <> '')) then
+     FAramaModu := 0;
 
    if gf.FAltTur in [9, 19, 101] then // al sat sipariş ve satınalma talebi
       Liste_SP_Cagir('sp_Prog_AlisSatis_Siparis_Json2', SipEkAlanlar, TopN, gf.FAltTur, TarihBas, TarihBit,
@@ -3632,6 +3682,21 @@ var
   k : word;
 begin
   FArama := Value;
+  // Kapsam butonlari (Tumu / Son Aranan / Sik Aranan): olay liste frame'inde baglanir,
+  //   arama frame'i listeyi tanimaz. Butonlar "basili kalan" gruptur (Down + Allow).
+  if FArama <> nil then
+  begin
+    FArama.LabelTumKayitlar.Style     := tbsCheck;
+    FArama.LabelSonArananlar.Style    := tbsCheck;
+    FArama.LabelSikArananlar.Style    := tbsCheck;
+    FArama.LabelTumKayitlar.Grouped   := True;
+    FArama.LabelSonArananlar.Grouped  := True;
+    FArama.LabelSikArananlar.Grouped  := True;
+    FArama.LabelTumKayitlar.OnClick   := AramaModuSec;
+    FArama.LabelSonArananlar.OnClick  := AramaModuSec;
+    FArama.LabelSikArananlar.OnClick  := AramaModuSec;
+    FArama.LabelTumKayitlar.Down      := True;   // acilista TUM liste
+  end;
   with FArama do begin
     k := 0;
     Self.AraKodKeyUp(Self, k, []);
