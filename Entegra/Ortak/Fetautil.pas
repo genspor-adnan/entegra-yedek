@@ -188,6 +188,12 @@ function SifreKontrolu(OncekiSifre,inputStr,inputStr2 : string) : string;
 /// Parametreli sorgularda gerek yoktur; literal birlestiren eski arama kodlari icindir.
 function AramaMetniTemizle(const AMetin: string): string;
 
+/// VKN / TCKN'yi normalize eder: YALNIZ rakamlari birakir.
+///   Kartlara "12 23 545 871", "1223545-871", "1223545.871" gibi girilebiliyor.
+///   Bu haliyle e-Belge alias sorgusu SONUC BULMAZ ve numara XML/JSON'a bosluklu
+///   gidip GIB tarafindan REDDEDILIR; ayrica uzunluga bakan VKN/TCKN ayrimi da yanilir.
+function VergiNoTemizle(const AVergiNo: string): string;
+
 const
   DataFile = 'Datgen.dll';
 var
@@ -3321,6 +3327,16 @@ begin
   Result := StringReplace(AMetin, '''', '', [rfReplaceAll]);
   Result := StringReplace(Result, '\', '', [rfReplaceAll]);
   Result := Trim(Result);
+end;
+
+function VergiNoTemizle(const AVergiNo: string): string;
+var
+  C: Char;
+begin
+  Result := '';
+  for C in AVergiNo do
+    if CharInSet(C, ['0'..'9']) then
+      Result := Result + C;
 end;
 
 function SifreKontrolu(OncekiSifre,inputStr,inputStr2 : string):string;

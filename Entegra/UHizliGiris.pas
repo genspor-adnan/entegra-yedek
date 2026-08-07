@@ -2236,7 +2236,7 @@ begin
 //     Tablo.RehberEkBilgileriniGetir(StrToInt(EditRehID.Text), 2, [10, 20, 22, 34], Etktler, Blgiler);
      TabFatBasDetay.FieldByName('BASLIK').Value := Tablo.TabCariBilgileri.FieldByName('FATURABASLIK').AsString;//Blgiler[0];
      TabFatBasDetay.FieldByName('VD').Value := Tablo.TabCariBilgileri.FieldByName('VERGIDAI').AsString;//Blgiler[1];
-     TabFatBasDetay.FieldByName('VNO').Value := Tablo.TabCariBilgileri.FieldByName('VERGINO').AsString;//Blgiler[2];
+     TabFatBasDetay.FieldByName('VNO').Value := VergiNoTemizle(Tablo.TabCariBilgileri.FieldByName('VERGINO').AsString);//Blgiler[2];
      {if Blgiler[3] = '' then
         TabFatBasDetay.FieldByName('MASRAFID').Value := 0
      else

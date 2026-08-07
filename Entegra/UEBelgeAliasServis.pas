@@ -75,7 +75,7 @@ uses
   System.Net.URLClient, System.DateUtils, System.UITypes, System.Variants,
   FireDAC.Stan.Param, Vcl.Dialogs, Vcl.StdCtrls,
   Utablo, FetaKurulusSiniflari, UEBelgeKimlik, UMailOnayDlg, PrjConst,
-  UGirisKutusuEx, UVeriMotor;
+  UGirisKutusuEx, UVeriMotor, Fetautil;
 
 type
   TIzibizAliasSaglayici = class(TInterfacedObject, IEBelgeAliasSaglayici)
@@ -397,8 +397,12 @@ begin
     TNameValuePair.Create('Authorization', 'Bearer ' + LToken),
     TNameValuePair.Create('Accept', 'application/json')
   ];
+  // VKN/TCKN kartta bosluklu ya da tireli girilmis olabilir ("12 23 545 871",
+  //   "1223545-871"). Servise HAM gonderilirse alias BULUNAMAZ. Temizligi burada
+  //   yapiyoruz: boylece bu servisi hangi akis cagirirsa cagirsin (e-Fatura hazirla,
+  //   ServistenGuncelle, alias yonetimi) ayni normalize edilmis numara gider.
   LCevap := FHTTPClient.Get(FApiBaseURL + '/v1/resources/gib-users?identifier=' +
-    AVergiNo, nil, LHeaders);
+    VergiNoTemizle(AVergiNo), nil, LHeaders);
 
   LJSON := TJSONObject.ParseJSONValue(LCevap.ContentAsString(TEncoding.UTF8));
   try
@@ -496,7 +500,8 @@ var
   LVergiNo: string;
   LAliasID, LBelgeTuru, I: Integer;
 begin
-  LVergiNo := StringReplace(Trim(AVergiNo), ' ', '', [rfReplaceAll]);
+  // Yalniz bosluk degil tire/nokta gibi ayraclar da temizlenir (ortak yardimci).
+  LVergiNo := VergiNoTemizle(AVergiNo);
   if not (Length(LVergiNo) in [10, 11]) then
     raise Exception.Create('Gecerli vergi veya T.C. kimlik numarasi bulunamadi.');
 

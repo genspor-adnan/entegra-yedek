@@ -66,7 +66,7 @@ uses
   System.JSON, System.NetEncoding, System.IOUtils, System.Variants,
   System.DateUtils, Data.DB, Vcl.Dialogs, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   System.StrUtils, ComObj, Utablo, PrjConst, FetaKurulusSiniflari,
-  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor;
+  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor, Fetautil;
 
 type
   // Iade faturasi (Tipi=2): iade edilen orijinal fatura referansi (cac:BillingReference)
@@ -390,7 +390,9 @@ end;
 
 function KimlikSemasi(const AVergiNo: string): string;
 begin
-  if Length(Trim(AVergiNo)) = 11 then
+  // Uzunluk RAKAM sayisina gore belirlenir: kartta "12 23 545 871" gibi bosluklu/
+  //   tireli girilmis numarada Trim yetmez (13 karakter -> yanlis sema secilirdi).
+  if Length(VergiNoTemizle(AVergiNo)) = 11 then
     Result := 'TCKN'
   else
     Result := 'VKN';
@@ -1290,9 +1292,11 @@ begin
     if Trim(ATaraf.Web) <> '' then
       LXML.AppendLine('<cbc:WebsiteURI>' + XMLEscape(ATaraf.Web) +
         '</cbc:WebsiteURI>');
+    // VKN/TCKN XML'e YALNIZ RAKAM olarak yazilir: kartta bosluklu/tireli girilmis
+    //   numara ("12 23 545 871") ham gonderilirse GIB belgeyi REDDEDER.
     if Trim(ATaraf.VergiNo) <> '' then
       LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="' +
-        KimlikSemasi(ATaraf.VergiNo) + '">' + XMLEscape(ATaraf.VergiNo) +
+        KimlikSemasi(ATaraf.VergiNo) + '">' + XMLEscape(VergiNoTemizle(ATaraf.VergiNo)) +
         '</cbc:ID></cac:PartyIdentification>');
     // MERSIS No / Ticaret Sicil No (REHBERBILGI ticari bilgiler) -> ek PartyIdentification.
     if Trim(ATaraf.MersisNo) <> '' then
@@ -4732,7 +4736,7 @@ begin
     // Supplier (gonderici = bizim firma)
     LSupplier := TJSONObject.Create;
     LSupplier.AddPair('name', AGondericiTaraf.Unvan);
-    LSupplier.AddPair('identifier', AGondericiTaraf.VergiNo);
+    LSupplier.AddPair('identifier', VergiNoTemizle(AGondericiTaraf.VergiNo));
     LSupplier.AddPair('schemeId', KimlikSemasi(AGondericiTaraf.VergiNo));
     if Trim(AGondericiTaraf.VergiDairesi) <> '' then
       LSupplier.AddPair('taxOffice', AGondericiTaraf.VergiDairesi);
@@ -4870,10 +4874,10 @@ begin
       // kimligi ister (customerParty ise asagida Gumruk'e cevrilir).
       LCustomer.AddPair('schemeId', 'PARTYTYPE');
       LCustomer.AddPair('partyType', 'EXPORT');
-      LCustomer.AddPair('identifier', ABaslik.VergiNo);
+      LCustomer.AddPair('identifier', VergiNoTemizle(ABaslik.VergiNo));
     end else begin
       LCustomer.AddPair('schemeId', LCustSeli);
-      LCustomer.AddPair('identifier', ABaslik.VergiNo);
+      LCustomer.AddPair('identifier', VergiNoTemizle(ABaslik.VergiNo));
     end;
     if SameText(LCustSeli, 'TCKN') and (LIsArsiv or LIsIrsaliye) then begin
       // Baslik'tan ad/soyad ayir: SON kelime SOYAD, oncesi AD (orn "Mehmet Ali Ay" -> Ad="Mehmet Ali", Soyad="Ay")
@@ -5084,7 +5088,7 @@ begin
         if Trim(LTasiyici.Unvan) <> '' then
           LCarrier.AddPair('name', LTasiyici.Unvan);
         if Trim(LTasiyici.VergiNo) <> '' then begin
-          LCarrier.AddPair('identifier', LTasiyici.VergiNo);
+          LCarrier.AddPair('identifier', VergiNoTemizle(LTasiyici.VergiNo));
           LCarrier.AddPair('schemeId', KimlikSemasi(LTasiyici.VergiNo));
         end;
         LStage.AddPair('carrierParty', LCarrier);
