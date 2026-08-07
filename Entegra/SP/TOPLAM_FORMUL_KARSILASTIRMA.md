@@ -179,4 +179,11 @@ da ikinci iskontoyu düşmesidir.
 mevcut hiçbir belgede `ISKONTO2` dolu olmadığı için **yürürlükteki hiçbir belge etkilenmez**;
 değişiklik yalnız ikinci iskonto kullanılmaya başlandığında devreye girer.
 
-Uygulanmadı — onay bekliyor.
+**Uygulandı (08.08.2026, `GenDepoUpdate68.sql`).** `TUR=5` bloğundaki 7 taban ifadesine
+`*(100-ISKONTO2)/100` eklendi.
+
+Doğrulama:
+- **Regresyon:** 400 belge / 2.483 dip toplam satırı, değişiklik öncesi ve sonrası **birebir aynı**
+  (iki yönde de sıfır fark) — beklendiği gibi, çünkü bu belgelerde `ISKONTO2 = 0`.
+- **Sentetik:** `150 × 2,75`, `%10 + %5` iskonto, KDV %20 → Matrah **352,69** / KDV **70,54** /
+  Genel toplam **423,23**. Düzeltme öncesi 94,25 / 546,94 çıkıyordu.

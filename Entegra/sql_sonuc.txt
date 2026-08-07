@@ -1,33 +1,24 @@
-﻿x	Rehber	Urun1	Urun2
+﻿x	Adet
 --------------------------------------------------------------------------------
-Girdi	3520	54	55
-x
---------------------------------------------------------------------------------
-A) yeni belge
+Once satir	2483
+Sonra satir	2483
+Yalniz ONCE de	0
+Yalniz SONRA da	0
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114041,"BelgeNo":"104151","Yeni":true,"SilinenSatir":0,"Satirlar":[{"Sira":1,"ID":3557518,"Islem":"ekle"},{"Sira":2,"ID":3557519,"Islem":"ekle"}],"Toplam":"{\"Matrah\":452.6900,\"Kdv\":94.2500,\"Toplam\":546.9400,\"Doviz\":546.9400,\"Neden\":\"\"}"}
-x	ID	URUNID	ADET	BIRIMFIYAT	ISKONTO	ISKONTO2	TUTAR	KDVDAHILFIYAT
+{"Sonuc":1,"BelgeId":114042,"BelgeNo":"104151","Yeni":true,"SilinenSatir":0,"Satirlar":[{"Sira":1,"ID":3557521,"Islem":"ekle"}],"Toplam":"{\"Matrah\":352.6900,\"Kdv\":70.5400,\"Toplam\":423.2300,\"Doviz\":423.2300,\"Neden\":\"\"}"}
+x	TUR	ACIKLAMA	DEGER
 --------------------------------------------------------------------------------
-Yazilan satirlar	3557518	54	2,750000	150,000000	10	5	352,69	423,23
-Yazilan satirlar	3557519	55	1,000000	100,000000	0	0	100,00	120
-x	ID	FATURANO	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI
+Dip toplam	1	Toplam	412,5
+Dip toplam	3	İskonto(%14.5)	59,81
+Dip toplam	4	Ara Toplam	352,69
+Dip toplam	5	KDV%20	70,54
+Dip toplam	15	KDV Toplam	70,54
+Dip toplam	20	Genel Toplam	423,23
+x	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI
 --------------------------------------------------------------------------------
-Baslik	114041	104151	452,6900	94,2500	546,9400
-x
+Baslik	352,6900	70,5400	423,2300
+x	Matrah	Kdv	Toplam
 --------------------------------------------------------------------------------
-B) delta guncelle/sil/ekle
-Sonuc
---------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114041,"BelgeNo":"104151","Yeni":false,"SilinenSatir":1,"Satirlar":[{"Sira":1,"ID":3557518,"Islem":"guncelle"},{"Sira":2,"ID":3557519,"Islem":"sil"},{"Sira":3,"ID":3557520,"Islem":"ekle"}],"Toplam":"{\"Matrah\":900.0000,\"Kdv\":165.0000,\"Toplam\":1065.0000,\"Doviz\":1065.0000,\"Neden\":\"\"}"}
-x	ID	URUNID	ADET	BIRIMFIYAT	TUTAR
---------------------------------------------------------------------------------
-B sonrasi satirlar	3557518	54	5,000000	150,000000	750,00
-B sonrasi satirlar	3557520	55	3,000000	50,000000	150,00
-x	ACIKLAMA	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI
---------------------------------------------------------------------------------
-B sonrasi baslik	API testi - guncel	900,0000	165,0000	1065,0000
-x	KalanBelge
---------------------------------------------------------------------------------
-ROLLBACK sonrasi	0
+Beklenen	352,6900	70,5400	423,2300
 
