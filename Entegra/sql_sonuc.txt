@@ -1,15 +1,25 @@
 ﻿Olcut	Adet
 --------------------------------------------------------------------------------
-Toplam belge	600
-Kapsam ICI	161
-Kapsam DISI (yazilmaz)	439
-ICI: matrah ayni (<=1 krs)	161
-ICI: matrah 1-5 krs	0
-ICI: matrah >1 TL	0
-ICI: KDV ayni	161
-ICI: KDV >1 TL	0
-ICI: toplam ayni	155
-ICI: toplam >1 TL	0
-x	ID	EskiMat	YeniMat	EskiKdv	YeniKdv	EskiTop	YeniTop
+Siparis	800
+Kapsam ici	394
+Durum AYNI	328
+Durum FARKLI	66
+  0 -> 9 (tamamlanmis ama isaretlenmemis)	60
+  0 -> 1	6
+  1 -> 9	0
+  9 -> 1 (geri alma!)	0
+  9 -> 0	0
+x	Neden	Adet
 --------------------------------------------------------------------------------
+Kapsam disi nedenleri	siparis turu kapsam disi	357
+Kapsam disi nedenleri	durum korumali (6)	43
+Kapsam disi nedenleri	adetli satir yok	6
+x	ID	Tur	Eski	Yeni	Satir	Tamamlanan	Kismi	Acik
+--------------------------------------------------------------------------------
+FARK ORNEK	22167	19	0	9	4	4	0	0
+FARK ORNEK	22166	19	0	9	2	2	0	0
+FARK ORNEK	22165	19	0	9	1	1	0	0
+FARK ORNEK	22161	19	0	9	1	1	0	0
+FARK ORNEK	22160	19	0	9	5	5	0	0
+FARK ORNEK	22154	19	0	9	2	2	0	0
 

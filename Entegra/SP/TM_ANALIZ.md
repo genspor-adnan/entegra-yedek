@@ -11,7 +11,7 @@
 | Yazan (INSERT/UPDATE/DELETE) | 32 |
 | Toplam satır | ~9.200 |
 | Ortalama parametre | 6,2 — **en fazla 38** (`TM_FATURAGir` 33, `TM_FATBASLIKGuncelle` 38) |
-| Delphi uygulamasından çağrılan | **0** — set tamamen mobil istemciye ait |
+| Delphi uygulamasından çağrılan | **1** — `TM_SiparisDurumGuncelle` (`IcerikFrame/UFaturalar.pas:3659`, "Durumu Güncelle" menüsü). Kalanı mobile ait. |
 
 `BILIMPLANT` referans alınmalı: `BILIM`'de 17 SP hiç yok, diğer müşteri DB'lerinde sürümler farklı. Şu an **tek bir "doğru sürüm" yok** — her DB'de ayrı ayrı yaşıyor.
 

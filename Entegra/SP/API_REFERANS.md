@@ -102,7 +102,7 @@ Ortak altyapı: **`dbo.fn_Api_Belge_DipToplam(@BelgeId)`** — belge dip toplam 
 | Nesne | Durum | Girdi | Çıktı | Not |
 |---|---|---|---|---|
 | `sp_Api_Belge_ToplamHesapla_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,Yaz,Zorla}` | `{Sonuc,BelgeId,Kapsam,Neden,Yazildi,Matrah,Kdv,Toplam,Doviz,Maliyet,EkVergi}` | Kanonik formül `fn_Api_Belge_DipToplam` TVF'i. Gelen e-belge ve üretim fişinde `Kapsam=disi` → yazmaz (`Zorla=1` hariç). `GenDepoUpdate68.sql` |
-| `sp_Api_Belge_DurumHesapla_Json` | ⬜ | `{BelgeId}` | `{Sonuc,Durum}` | Kısmi/tamam/yeni |
+| `sp_Api_Belge_DurumHesapla_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,Kaynak,Yaz}` | `{Sonuc,BelgeId,Kaynak,Tur,Kapsam,Neden,Durum,OncekiDurum,Yazildi,Satir,Tamamlanan,Kismi,Acik}` | `Kaynak`: `siparis` (SIPARIS/SIPARISDETAY) \| `belge` (FATBASLIK/FATURA). Durum 0/1/9 dışındaki belgeye dokunmaz. `GenDepoUpdate69.sql` |
 | `sp_Api_Belge_SeriLot_Yaz_Json` | ⬜ | `{BelgeId,SatirId,UrunId,SeriLot:[]}` | `{Sonuc,Satir:[]}` | Silme belge+satır filtreli |
 
 ### C. Silme
