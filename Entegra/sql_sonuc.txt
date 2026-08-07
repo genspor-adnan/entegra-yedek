@@ -1,30 +1,16 @@
-﻿x
+﻿x	Satir	Kalan	HedefSatirSayisi
 --------------------------------------------------------------------------------
-A) kalan=0 satirda 1 adet
-Sonuc
+Once	156939	0,000000	1
+x	No	Mesaj
 --------------------------------------------------------------------------------
-{"Sonuc":1,"Uygun":false,"Satirlar":[{"SatirId":156939,"Adet":1.000000,"Kalan":0.000000,"Uygun":false,"Neden":"kalan yetersiz"}]}
-x	SatirId	Kalan
+Beklenen RED	51200	Kaynak satir 156939: kalan yetersiz (istenen 1.000000, kalan 0.000000)
+x	HedefSatirSayisi
 --------------------------------------------------------------------------------
-B) test satiri	157996	1,000000
-Sonuc
+Sonra (yazim olmamali)	1
+x	No	Mesaj
 --------------------------------------------------------------------------------
-{"Sonuc":1,"Uygun":true,"Satirlar":[{"SatirId":157996,"Adet":1.000000,"Kalan":1.000000,"Uygun":true,"Neden":""}]}
-x
+C) coklu - beklenen RED	51200	Kaynak satir 156939: kalan yetersiz (istenen 1.000000, kalan 0.000000)
+x	HedefSatirSayisi	GecerliSatirYazildiMi
 --------------------------------------------------------------------------------
-C) kalandan 0.5 fazla
-Sonuc
---------------------------------------------------------------------------------
-{"Sonuc":1,"Uygun":false,"Satirlar":[{"SatirId":157996,"Adet":1.500000,"Kalan":1.000000,"Uygun":false,"Neden":"kalan yetersiz"}]}
-x
---------------------------------------------------------------------------------
-D) biri olmayan satir
-Sonuc
---------------------------------------------------------------------------------
-{"Sonuc":1,"Uygun":false,"Satirlar":[{"SatirId":-999,"Adet":1.000000,"Kalan":0.000000,"Uygun":false,"Neden":"kaynak satir bulunamadi"},{"SatirId":157996,"Adet":1.000000,"Kalan":1.000000,"Uygun":true,"Neden":""}]}
-x	ID	ADET	Donusen	Kalan
---------------------------------------------------------------------------------
-E) Kaynak=3 ornek	3557388	2,000000	1,000000	1,000000
-E) Kaynak=3 ornek	3557386	1,000000	1,000000	0,000000
-E) Kaynak=3 ornek	3551041	1,000000	1,000000	0,000000
+C sonrasi (yazim olmamali)	1	0
 

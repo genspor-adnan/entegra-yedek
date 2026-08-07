@@ -79,6 +79,13 @@ CREATE OR ALTER PROCEDURE dbo.sp_Api_<X>_Json
 | 51200-51299 | İş kuralı (kilitli belge, dönüştürülmüş kaynak, kalan miktar aşımı) |
 | 51300-51399 | Durum çakışması (iyimser kilit, eşzamanlı değişiklik) |
 
+### 2.4.1 Dış transaction uyarısı
+
+Yazan nesneler `SET XACT_ABORT ON` + `THROW` kullanır. Bir çağrı reddedilirse (ör. 51200)
+**dıştaki transaction da düşer** — `BEGIN TRAN` açıp SP'yi çağıran ve hatayı yakalayan bir kod
+`ROLLBACK` diyemez ("no corresponding BEGIN TRANSACTION"). Çağıran ya transaction'ı SP'ye
+bırakmalı ya da hatayı yakalamadan yukarı taşımalıdır.
+
 ### 2.5 Zorunlu kurallar
 
 1. `SET NOCOUNT ON` + `SET XACT_ABORT ON`.
@@ -94,6 +101,11 @@ CREATE OR ALTER PROCEDURE dbo.sp_Api_<X>_Json
 Durum: ⬜ planlandı · 🟨 geliştiriliyor · ✅ hazır (MSSQL + PG + test)
 
 ### B. Hesap / yan etki
+
+İç yardımcılar (sonuç kümesi döndürmez, başka SP'lerden çağrılabilir):
+`sp_Api_Belge_Toplam_Yaz_Ic`, `sp_Api_Belge_Durum_Yaz_Ic`. JSON nesneleri bunların ince
+sarmalayıcısıdır — bir SP başka bir SP'yi çağırınca onun `SELECT`'i istemciye fazladan sonuç
+kümesi olarak giderdi.
 
 Ortak altyapı: **`dbo.fn_Api_Belge_DipToplam(@BelgeId)`** — belge dip toplam kümesi (TUR 1=Toplam,
 2=ÖTV, 3=İskonto, 4=Ara Toplam, 5/6/7=KDV satırları, 8=Ek Vergi, 9=Stopaj, 15=KDV Toplam,
@@ -130,7 +142,7 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 |---|---|---|---|
 | `sp_Api_Donusum_Kontrol_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,Satirlar:[{SatirId,Adet}]}` | `{Sonuc,Uygun,Satirlar:[{SatirId,Adet,Kalan,Uygun,Neden}]}` — aşırı dönüşüm koruması. `GenDepoUpdate73.sql` |
 | `sp_Api_Donusum_Kaynak_Json` | ⬜ (mevcut `sp_Prog_BelgeDonusum_Kaynak_Json2` yeterli olabilir) | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
-| `sp_Api_Donusum_Uygula_Json` | ⛔ **kapsam kararı bekliyor** — `UBelgeDonusum.StokEkle` (13.900 karakter) fiyat sorma diyaloğu, hedef grid dataset'i ve `showmessage`'lı depo kontrolleri içeriyor; birebir SQL karşılığı yok | `{HedefBelgeId?,HedefTur,KaynakSatirlar:[]}` | `{Sonuc,HedefBelgeId,Satirlar:[]}` |
+| `sp_Api_Donusum_Uygula_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,HedefBelgeId,Oturum,Satirlar:[{Sira,KaynakSatirId,UrunId,Adet,BirimFiyat,Kdv,Iskonto,Iskonto2,...}]}` | `{Sonuc,HedefBelgeId,Yazilan,Satirlar:[{Sira,KaynakSatirId,SatirId}],Toplam,KaynakDurum}` — **açık-değerli sözleşme**: fiyat/iskonto/KDV hesaplamaz, çağıran gönderir. `GenDepoUpdate74.sql` |
 | `sp_Api_Donusum_Geri_Json` | ⬜ | `{HedefBelgeId}` \| `{HedefSatirId}` | `{Sonuc,Adet}` |
 | `sp_Api_Donusum_Rapor_Json` | ⬜ | `{BasTarih,BitTarih,Yon,Filtre}` | sonuç kümesi |
 

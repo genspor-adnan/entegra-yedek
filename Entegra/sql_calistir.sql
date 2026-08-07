@@ -1,28 +1,39 @@
 ﻿SET NOCOUNT ON;
--- A) TAM donusmus satir (Kalan=0) -> 1 adet istenirse RED
-SELECT 'A) kalan=0 satirda 1 adet' AS x;
-EXEC dbo.sp_Api_Donusum_Kontrol_Json N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":156939,"Adet":1}]}';
+-- B) TAM donusmus satiri tekrar donusturmeye calis -> RED, HICBIR SEY YAZILMAMALI
+DECLARE @sid INT = 156939;  -- kalan=0 (onceki testte dogrulandi)
+DECLARE @urun INT = (SELECT URUNID FROM SIPARISDETAY WHERE ID=@sid);
+DECLARE @hed INT = (SELECT TOP 1 ID FROM FATBASLIK WHERE TUR=14 ORDER BY ID DESC);
+DECLARE @satirOnce INT = (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed);
+SELECT 'Once' AS x, @sid AS Satir, (SELECT Kalan FROM dbo.fn_Api_Donusum_Kalan(2,409,@sid,0)) AS Kalan,
+       @satirOnce AS HedefSatirSayisi;
 
--- B) Hic donusmemis satir bul, kalanina esit iste -> UYGUN
-DECLARE @sid INT = (SELECT TOP 1 SD.ID FROM SIPARISDETAY SD
-                    CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K
-                    WHERE K.Donusen = 0 AND K.Kalan > 0 ORDER BY SD.ID DESC);
-DECLARE @kal DECIMAL(18,6) = (SELECT Kalan FROM dbo.fn_Api_Donusum_Kalan(2,409,@sid,0));
-SELECT 'B) test satiri' AS x, @sid AS SatirId, @kal AS Kalan;
-DECLARE @j NVARCHAR(MAX) = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":' + CAST(@kal AS varchar(30)) + N'}]}';
-EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
+DECLARE @j NVARCHAR(MAX) = N'{"Kaynak":2,"DonusumTuru":409,"HedefBelgeId":' + CAST(@hed AS varchar(20)) +
+  N',"Oturum":{"KulId":7},"Satirlar":[{"Sira":1,"KaynakSatirId":' + CAST(@sid AS varchar(20)) +
+  N',"UrunId":' + CAST(@urun AS varchar(20)) + N',"Adet":1,"BirimFiyat":100,"Kdv":20}]}';
+BEGIN TRY
+  EXEC dbo.sp_Api_Donusum_Uygula_Json @j;
+  SELECT 'HATA: red edilmedi' AS x;
+END TRY
+BEGIN CATCH
+  SELECT 'Beklenen RED' AS x, ERROR_NUMBER() AS No, LEFT(ERROR_MESSAGE(),140) AS Mesaj;
+END CATCH
+SELECT 'Sonra (yazim olmamali)' AS x, (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed) AS HedefSatirSayisi;
 
--- C) Ayni satirda kalandan fazla -> RED
-SET @j = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":' + CAST(@kal + 0.5 AS varchar(30)) + N'}]}';
-SELECT 'C) kalandan 0.5 fazla' AS x;
-EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
-
--- D) Olmayan satir + gecerli satir birlikte -> toplu RED
-SET @j = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":1},{"SatirId":-999,"Adet":1}]}';
-SELECT 'D) biri olmayan satir' AS x;
-EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
-
--- E) FATBASLIK kaynagi (Kaynak=3) TVF calisiyor mu
-SELECT TOP 3 'E) Kaynak=3 ornek' AS x, F.ID, F.ADET, K.Donusen, K.Kalan
-FROM FATURA F CROSS APPLY dbo.fn_Api_Donusum_Kalan(3, 411, F.ID, 0) K
-WHERE EXISTS(SELECT 1 FROM FATURA F1 WHERE F1.YERI IN (411,424) AND F1.YERID=F.ID) ORDER BY F.ID DESC;
+-- C) Coklu satir: biri gecerli biri asiri -> TOPTAN RED
+DECLARE @ok INT = (SELECT TOP 1 SD.ID FROM SIPARISDETAY SD CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K
+                   WHERE K.Donusen=0 AND K.Kalan>0 ORDER BY SD.ID DESC);
+DECLARE @okUrun INT = (SELECT URUNID FROM SIPARISDETAY WHERE ID=@ok);
+SET @j = N'{"Kaynak":2,"DonusumTuru":409,"HedefBelgeId":' + CAST(@hed AS varchar(20)) +
+  N',"Oturum":{"KulId":7},"Satirlar":[{"Sira":1,"KaynakSatirId":' + CAST(@ok AS varchar(20)) +
+  N',"UrunId":' + CAST(@okUrun AS varchar(20)) + N',"Adet":1,"BirimFiyat":100,"Kdv":20},' +
+  N'{"Sira":2,"KaynakSatirId":' + CAST(@sid AS varchar(20)) + N',"UrunId":' + CAST(@urun AS varchar(20)) +
+  N',"Adet":1,"BirimFiyat":100,"Kdv":20}]}';
+BEGIN TRY
+  EXEC dbo.sp_Api_Donusum_Uygula_Json @j;
+  SELECT 'HATA: red edilmedi' AS x;
+END TRY
+BEGIN CATCH
+  SELECT 'C) coklu - beklenen RED' AS x, ERROR_NUMBER() AS No, LEFT(ERROR_MESSAGE(),140) AS Mesaj;
+END CATCH
+SELECT 'C sonrasi (yazim olmamali)' AS x, (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@hed) AS HedefSatirSayisi,
+       (SELECT COUNT(*) FROM FATURA WHERE YERI=409 AND YERID=@ok) AS GecerliSatirYazildiMi;
