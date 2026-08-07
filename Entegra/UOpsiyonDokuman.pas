@@ -124,7 +124,13 @@ end;
 
 procedure TOpsiyonDokumanDlg.FormCreate(Sender: TObject);
 begin
-   DokumanOrtami.ItemIndex := Tablo.GENINI.ReadInteger(Ops_Dokuman_Kayit_Yeri,1); // Dokuman Kayit_Yeri
+   // ICERIK YERI SECIMI ARTIK ISLEVSEL DEGIL (07.08.2026): yeni sistemde dokuman/medya
+   //   icerigi her zaman GENDEPO.DOSYA'da (FILESTREAM + hash-dedup) tutulur. Eski "Klasor"
+   //   secimi kalmis kurulumlarda EKLEME CALISMIYORDU. Secim bilgi amacli gosterilir, KILITLI.
+   DokumanOrtami.ItemIndex := 0;
+   DokumanOrtami.Enabled := False;
+   DokumanOrtami.Hint := 'Icerik artik her zaman veritabani deposunda (DOSYA) tutulur.';
+   DokumanOrtami.ShowHint := True;
    if DokumanOrtami.ItemIndex=0 then
       DokumanDizin.Text :=  Tablo.GENINI.ReadString(Ops_VeriTabaniAdi,'.') // Dokuman Dizin
    else
@@ -143,7 +149,9 @@ end;
 
 procedure TOpsiyonDokumanDlg.KaydetTusClick(Sender: TObject);
 begin
-   Dokuman_Kayit_Yeri := DokumanOrtami.ItemIndex;
+   // Global degisken ARTIK SECIMDEN ALINMAZ: icerik her zaman DOSYA deposuna yazilir.
+   //   (Eskiden burada 1 = klasor atanip ekleme akisi olmayan klasor yoluna gidiyordu.)
+   Dokuman_Kayit_Yeri := 0;
    Tablo.GENINI.WriteInteger(Ops_Dokuman_Kayit_Yeri, Dokuman_Kayit_Yeri);  // Dokuman Kayit_Yeri
    if DokumanOrtami.ItemIndex=0 then
       Tablo.GENINI.WriteString(Ops_VeriTabaniAdi, DokumanDizin.Text) // Dokuman Dizin

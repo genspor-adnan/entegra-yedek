@@ -1,3 +1,22 @@
+﻿/* ############################################################################
+   !!! BU BETIK ARTIK KULLANILMAMALIDIR - YERINE  depo_adlandirma_onar.sql  !!!
+
+   KUSUR (06.08.2026 tespit): GENINI depo opsiyonunu uygulamanin OKUMADIGI
+   bicimde yaziyordu. Uygulama (UGENINIDuzenle.ReadString) opsiyonu
+       select ANAHTAR from GENINI where BOLUM = -24120 and DIL = 0
+       ... if RecordCount = 1 then <deger> else <varsayilan 'GENDEPO'>
+   seklinde okur; yani satir DIL = 0 olmali ve TAM BIR tane olmalidir.
+   Bu betik ise  INSERT ... DIL = -1  yaziyor ve okurken DIL'i hic
+   filtrelemiyordu -> uygulama depo adini goremeyip 'GENDEPO' varsayimina
+   dusuyor, depo YANLIS baglaniyordu.
+
+   Asagidaki gövde bu kusur giderilmis haliyle birakilmistir (yanlislikla
+   calistirilirsa zarar vermesin diye), ancak ONARIM ICIN
+       GenUpdate/depo_adlandirma_onar.sql
+   kullanin: o betik her ana veritabanini KENDI deposuna baglar, paylasimli
+   depoyu korur ve opsiyonu DIL = 0 / tek satir olarak yazar.
+############################################################################ */
+
 /* ============================================================================
    depo_adlandirma_duzelt.sql   —   MASTER veritabaninda calistirilir (SSMS)
 
@@ -67,7 +86,7 @@ BEGIN
     BEGIN
         SET @mevcut = N'';
         SET @sql = N'SELECT @o = ISNULL((SELECT TOP 1 ANAHTAR FROM ' + QUOTENAME(@db) + N'.dbo.GENINI
-                                          WHERE BOLUM = @b), N'''')';
+                                          WHERE BOLUM = @b ORDER BY CASE WHEN DIL = 0 THEN 0 ELSE 1 END), N'''')';
         EXEC sp_executesql @sql, N'@b INT, @o NVARCHAR(200) OUTPUT', @b = @DepoOpsiyon, @o = @mevcut OUTPUT;
 
         SET @beklenen = @db + N'_GENDEPO';
@@ -140,11 +159,9 @@ BEGIN
 
         /* 3b) GENINI depo opsiyonu (upsert) */
         SET @sql = N'
-            IF EXISTS (SELECT 1 FROM ' + QUOTENAME(@db) + N'.dbo.GENINI WHERE BOLUM = @b)
-                UPDATE ' + QUOTENAME(@db) + N'.dbo.GENINI SET ANAHTAR = @y WHERE BOLUM = @b;
-            ELSE
-                INSERT ' + QUOTENAME(@db) + N'.dbo.GENINI (BOLUM, ANAHTAR, DEGER, DIL)
-                VALUES (@b, @y, N'''', -1);';
+            DELETE FROM ' + QUOTENAME(@db) + N'.dbo.GENINI WHERE BOLUM = @b;
+            INSERT ' + QUOTENAME(@db) + N'.dbo.GENINI (BOLUM, ANAHTAR, DEGER, DIL, SIRA)
+            VALUES (@b, @y, 0, 0, 0);';
         EXEC sp_executesql @sql, N'@b INT, @y NVARCHAR(200)', @b = @DepoOpsiyon, @y = @yeni;
         PRINT '    opsiyon guncellendi';
 
