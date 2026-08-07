@@ -1,25 +1,36 @@
 ﻿SET NOCOUNT ON;
 SET XACT_ABORT ON;
-DECLARE @id INT = (SELECT TOP 1 ID FROM FATBASLIK WHERE ACIKLAMA IS NOT NULL AND ACIKLAMA <> '' ORDER BY ID DESC);
-BEGIN TRAN;
-INSERT INTO ALANLAR (EKRANADI, TUR, TABLO, ALANADI, CAPTION, [LEFT], [TOP], WIDTH, HEIGHT)
-VALUES ('TESTAPI', 1, 'FATBASLIK', 'ACIKLAMA', 'Aciklama', 10, 10, 200, 20),
-       ('TESTAPI', 1, 'FATBASLIK', 'FATURATARIH', 'Fatura Tarihi', 10, 40, 120, 20),
-       ('TESTAPI', 1, 'FATBASLIK', 'DOVIZKUR', 'Kur', 10, 70, 100, 20);
-DECLARE @j NVARCHAR(400) = N'{"Ekran":"TESTAPI","Tablo":"FATBASLIK","KayitId":' + CAST(@id AS varchar(20)) + N'}';
-EXEC dbo.sp_Api_Belge_EkAlan_Json @j;
-ROLLBACK;
+DECLARE @reh INT = (SELECT TOP 1 REHBERID FROM FATBASLIK WHERE TUR=14 ORDER BY ID DESC);
+DECLARE @urun INT = (SELECT TOP 1 ID FROM STOKLAR WHERE DURUM=1 ORDER BY ID);
+DECLARE @urun2 INT = (SELECT TOP 1 ID FROM STOKLAR WHERE DURUM=1 AND ID<>@urun ORDER BY ID);
+SELECT 'Girdi' AS x, @reh AS Rehber, @urun AS Urun1, @urun2 AS Urun2;
 
-DECLARE @sid INT = (SELECT TOP 1 ID FROM FATURA ORDER BY ID DESC);
-DECLARE @bid INT = (SELECT FATBASID FROM FATURA WHERE ID=@sid);
 BEGIN TRAN;
-DECLARE @lj NVARCHAR(MAX) = N'{"Tablo":"FATURA","TabNo":110,"KayitId":' + CAST(@sid AS varchar(20)) +
-  N',"UstTabNo":14,"UstId":' + CAST(@bid AS varchar(20)) + N',"Oturum":{"KulId":9,"Istasyon":"XMLTEST"}}';
-EXEC dbo.sp_Api_Log_KayitSil_Json @lj;
-DECLARE @depo sysname = dbo.fn_Api_DepoDBAdi();
-DECLARE @s NVARCHAR(MAX) = N'SELECT TOP 1 ''LOG JSON'' AS x, CAST(DECOMPRESS(BILGI) AS nvarchar(max)) AS J FROM [' + @depo + N'].dbo.ISLEMLOG ORDER BY ID DESC;';
-EXEC sp_executesql @s;
+-- A) YENI belge + 2 satir
+DECLARE @j NVARCHAR(MAX) = N'{"SatirModu":"delta","Oturum":{"KulId":7,"SubeId":-1},
+ "Baslik":{"ID":0,"Tur":14,"Tipi":1,"Tarih":"2026-08-08","FaturaTarih":"2026-08-08",
+   "RehberId":' + CAST(@reh AS varchar(20)) + N',"CikisDepo":1,"KdvDurum":"Hariç","Kur":"TL","Aciklama":"API testi"},
+ "Satirlar":[{"Sira":1,"UrunId":' + CAST(@urun AS varchar(20)) + N',"Adet":2.75,"BirimFiyat":150,"Kdv":20,"Iskonto":10,"Iskonto2":5},
+             {"Sira":2,"UrunId":' + CAST(@urun2 AS varchar(20)) + N',"Adet":1,"BirimFiyat":100,"Kdv":20}]}';
+SELECT 'A) yeni belge' AS x;
+EXEC dbo.sp_Api_Belge_Kaydet_Json @j;
+
+DECLARE @bid INT = (SELECT TOP 1 ID FROM FATBASLIK ORDER BY ID DESC);
+SELECT 'Yazilan satirlar' AS x, ID, URUNID, ADET, BIRIMFIYAT, ISKONTO, ISKONTO2, TUTAR, KDVDAHILFIYAT FROM FATURA WHERE FATBASID=@bid ORDER BY ID;
+SELECT 'Baslik' AS x, ID, FATURANO, FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI FROM FATBASLIK WHERE ID=@bid;
+
+-- B) ayni belgeye delta: 1 satir guncelle, 1 satir sil, 1 satir ekle
+DECLARE @s1 INT = (SELECT TOP 1 ID FROM FATURA WHERE FATBASID=@bid ORDER BY ID);
+DECLARE @s2 INT = (SELECT TOP 1 ID FROM FATURA WHERE FATBASID=@bid ORDER BY ID DESC);
+SET @j = N'{"SatirModu":"delta","Oturum":{"KulId":7},
+ "Baslik":{"ID":' + CAST(@bid AS varchar(20)) + N',"Aciklama":"API testi - guncel"},
+ "Satirlar":[{"Sira":1,"ID":' + CAST(@s1 AS varchar(20)) + N',"UrunId":' + CAST(@urun AS varchar(20)) + N',"Adet":5,"BirimFiyat":150,"Kdv":20},
+             {"Sira":2,"ID":' + CAST(@s2 AS varchar(20)) + N',"Sil":true},
+             {"Sira":3,"UrunId":' + CAST(@urun2 AS varchar(20)) + N',"Adet":3,"BirimFiyat":50,"Kdv":10}]}';
+SELECT 'B) delta guncelle/sil/ekle' AS x;
+EXEC dbo.sp_Api_Belge_Kaydet_Json @j;
+SELECT 'B sonrasi satirlar' AS x, ID, URUNID, ADET, BIRIMFIYAT, TUTAR FROM FATURA WHERE FATBASID=@bid ORDER BY ID;
+SELECT 'B sonrasi baslik' AS x, ACIKLAMA, FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI FROM FATBASLIK WHERE ID=@bid;
+
 ROLLBACK;
-SELECT 'FATURA loglanabilir kolon' AS x, COUNT(*) AS Adet FROM sys.columns c JOIN sys.types t ON t.user_type_id=c.user_type_id
- WHERE c.object_id=OBJECT_ID('FATURA') AND c.generated_always_type=0 AND c.is_hidden=0
-   AND t.name NOT IN ('varbinary','binary','image','text','ntext','xml','geography','geometry','hierarchyid','sql_variant','timestamp');
+SELECT 'ROLLBACK sonrasi' AS x, (SELECT COUNT(*) FROM FATBASLIK WHERE ACIKLAMA LIKE 'API testi%') AS KalanBelge;

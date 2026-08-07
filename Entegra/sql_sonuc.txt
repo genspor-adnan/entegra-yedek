@@ -1,18 +1,33 @@
-﻿ID	ALANADI	CAPTION	TUR	SQL	DEGER	KONUM	TAG	GENISLIK	YUKSEKLIK	SIRA
+﻿x	Rehber	Urun1	Urun2
 --------------------------------------------------------------------------------
-193	ACIKLAMA	Aciklama	1					200	20	1
-194	FATURATARIH	Fatura Tarihi	1					120	20	2
-195	DOVIZKUR	Kur	1					100	20	3
+Girdi	3520	54	55
+x
+--------------------------------------------------------------------------------
+A) yeni belge
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"KayitId":113795,"Degerler":{"ACIKLAMA":"AAA202400000015 nolu, 10.06.2024 10:38:08 tarihli belgeden iade","FATURATARIH":"2026-06-26 23:02:27","DOVIZKUR":"1.000000"}}
+{"Sonuc":1,"BelgeId":114041,"BelgeNo":"104151","Yeni":true,"SilinenSatir":0,"Satirlar":[{"Sira":1,"ID":3557518,"Islem":"ekle"},{"Sira":2,"ID":3557519,"Islem":"ekle"}],"Toplam":"{\"Matrah\":452.6900,\"Kdv\":94.2500,\"Toplam\":546.9400,\"Doviz\":546.9400,\"Neden\":\"\"}"}
+x	ID	URUNID	ADET	BIRIMFIYAT	ISKONTO	ISKONTO2	TUTAR	KDVDAHILFIYAT
+--------------------------------------------------------------------------------
+Yazilan satirlar	3557518	54	2,750000	150,000000	10	5	352,69	423,23
+Yazilan satirlar	3557519	55	1,000000	100,000000	0	0	100,00	120
+x	ID	FATURANO	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI
+--------------------------------------------------------------------------------
+Baslik	114041	104151	452,6900	94,2500	546,9400
+x
+--------------------------------------------------------------------------------
+B) delta guncelle/sil/ekle
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"Yazilan":1}
-x	J
+{"Sonuc":1,"BelgeId":114041,"BelgeNo":"104151","Yeni":false,"SilinenSatir":1,"Satirlar":[{"Sira":1,"ID":3557518,"Islem":"guncelle"},{"Sira":2,"ID":3557519,"Islem":"sil"},{"Sira":3,"ID":3557520,"Islem":"ekle"}],"Toplam":"{\"Matrah\":900.0000,\"Kdv\":165.0000,\"Toplam\":1065.0000,\"Doviz\":1065.0000,\"Neden\":\"\"}"}
+x	ID	URUNID	ADET	BIRIMFIYAT	TUTAR
 --------------------------------------------------------------------------------
-LOG JSON	{"ID":"3557514","FATBASID":"114037","REHBERID":"-1","TUR":"1","URUNID":"122","ACIKLAMA":"","ADET":"1.000000","MF":"0.000000","BIRIM":"51","MIKTAR":"1.000000","BIRIMFIYAT":"1926.347700","TUTAR":"1926.350000","KUR":"TL","ISKONTO":"0","KDV":"10","MASRAFID":"0","OZELKOD":"T","DOVIZ_TUTARI":"0.000000","DOVIZ_KURU":"$","ISKONTO2":"0","IZLEME":"2","EKLEYEN":"2","EKLEMETARIHI":"2026-07-16 21:44:00","DOVIZ_BIRIMFIYAT":"160.000000","DOVIZKURDEGERI":"47.009800","STOKDURUMDEGIS":"True","SUBEID":"-1","KDVMUHAFIYETI":"0","BASTAR":"2026-07-16 00:00:00","GIRISKAYNAK":"1","GIRDEPO":"8","CIKDEPO":"1","ISKONTOLUBRMFIYAT":"1926.35","KDVDAHILBRMFIYAT":"2118.980000","KDVDAHILFIYAT":"2118.99","OZELKOD2":""}
-x	Adet
+B sonrasi satirlar	3557518	54	5,000000	150,000000	750,00
+B sonrasi satirlar	3557520	55	3,000000	50,000000	150,00
+x	ACIKLAMA	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI
 --------------------------------------------------------------------------------
-FATURA loglanabilir kolon	63
+B sonrasi baslik	API testi - guncel	900,0000	165,0000	1065,0000
+x	KalanBelge
+--------------------------------------------------------------------------------
+ROLLBACK sonrasi	0
 

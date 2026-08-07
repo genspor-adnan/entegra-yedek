@@ -115,7 +115,7 @@ Ortak altyapı: **`dbo.fn_Api_Belge_DipToplam(@BelgeId)`** — belge dip toplam 
 |---|---|---|---|---|
 | `sp_Api_Belge_ToplamHesapla_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,Yaz,Zorla}` | `{Sonuc,BelgeId,Kapsam,Neden,Yazildi,Matrah,Kdv,Toplam,Doviz,Maliyet,EkVergi}` | Kanonik formül `fn_Api_Belge_DipToplam` TVF'i. Gelen e-belge ve üretim fişinde `Kapsam=disi` → yazmaz (`Zorla=1` hariç). `GenDepoUpdate68.sql` |
 | `sp_Api_Belge_DurumHesapla_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,Kaynak,Yaz}` | `{Sonuc,BelgeId,Kaynak,Tur,Kapsam,Neden,Durum,OncekiDurum,Yazildi,Satir,Tamamlanan,Kismi,Acik}` | `Kaynak`: `siparis` (SIPARIS/SIPARISDETAY) \| `belge` (FATBASLIK/FATURA). Durum 0/1/9 dışındaki belgeye dokunmaz. `GenDepoUpdate69.sql` |
-| `sp_Api_Belge_SeriLot_Yaz_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,SatirId,UrunId,BelgeTur,IslemTip,IzlemTur,GirisDepo,CikisDepo,StokDurumDegis,KaynakSatirId,Oturum,SeriLot:[{Sira,SeriNo,LotNo,Urt,Skt,Kalan,Durum,IzlemId}]}` | `{Sonuc,BelgeId,SatirId,Silinen,Yazilan,Satirlar:[{Sira,IzlemId,SeriLotId}]}` | Kanonik kaynak `TTablo.IzlemBilgisiKaydet`. Silme `STOKID+BASLIKID+SATIRID` kapsamında. `GenDepoUpdate70.sql` |
+| `sp_Api_Belge_SeriLot_Yaz_Json` | 🟨 MSSQL hazır, PG bekliyor (iç yardımcı `sp_Api_Belge_SeriLot_Yaz_Ic` üzerinden; `Belge_Kaydet` de onu çağırır) | `{BelgeId,SatirId,UrunId,BelgeTur,IslemTip,IzlemTur,GirisDepo,CikisDepo,StokDurumDegis,KaynakSatirId,Oturum,SeriLot:[{Sira,SeriNo,LotNo,Urt,Skt,Kalan,Durum,IzlemId}]}` | `{Sonuc,BelgeId,SatirId,Silinen,Yazilan,Satirlar:[{Sira,IzlemId,SeriLotId}]}` | Kanonik kaynak `TTablo.IzlemBilgisiKaydet`. Silme `STOKID+BASLIKID+SATIRID` kapsamında. `GenDepoUpdate70.sql` |
 
 ### C. Silme
 
@@ -158,7 +158,7 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 
 | Nesne | Durum | Girdi | Çıktı |
 |---|---|---|---|
-| `sp_Api_Belge_Kaydet_Json` | ⬜ | `{Surum,Oturum,Baslik,Satirlar,SatirModu}` | `{Sonuc,BelgeId,BelgeNo,Satirlar:[]}` |
+| `sp_Api_Belge_Kaydet_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Surum,SatirModu,Oturum,Baslik{...},Satirlar[{Sira,ID,Sil,UrunId,Adet,BirimFiyat,Kdv,Iskonto,Iskonto2,SeriLot[]}]}` | `{Sonuc,BelgeId,BelgeNo,Yeni,SilinenSatir,Satirlar:[{Sira,ID,Islem}],Toplam}` — açık-değerli sözleşme. `SatirModu`: `delta` (varsayılan) \| `tam`. `GenDepoUpdate78.sql` |
 
 ## 4. Yetki
 

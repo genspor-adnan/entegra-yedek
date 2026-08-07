@@ -144,3 +144,39 @@ Karar 1 ve 2'nin yolları ancak **sentetik test belgesiyle** doğrulanabilir —
 
 Ek not: `BILIM.FATBASLIK.KDVDURUM` dağılımı `Muaf` 42.737 / `Hariç` 32.591 / `NULL` 4.800 / `Hari?` 1.
 Sondaki tek kayıt Türkçe karakter kaybı bozulması (`Hariç` → `Hari?`).
+
+
+## 7. YENİ BULGU (08.08.2026) — KDV tabanı `ISKONTO2`'yi uygulamıyor
+
+`sp_Api_Belge_Kaydet_Json` testinde sentetik olarak `ISKONTO2 = 5` verilen bir satırla ortaya çıktı.
+Hiçbir müşteri DB'sinde `ISKONTO2` verisi olmadığı için (§6.3) bugüne kadar görünmemiş.
+
+`fn_Api_Belge_DipToplam` (yani `SP_PRG_FaturaDipToplami`) içinde:
+
+| Satır | Formül | `ISKONTO2` |
+|---|---|---|
+| `TUR=3` İskonto | `SUM(BF*ADET) - SUM(BF*ADET*(100-ISKONTO)/100*(100-ISKONTO2)/100)` | **uygular** |
+| `TUR=5` KDV | `KDV * ((BF*ADET)*(100-ISKONTO)/100) / 100` | **uygulamaz** |
+
+Sonuç: `ISKONTO2` dolu satırda **matrah ikinci iskontolu, KDV tabanı ikinci iskontosuz** → KDV ve
+genel toplam fazla çıkar.
+
+Ölçülen örnek (tek satır, 150 × 2,75, %10 + %5 iskonto, KDV %20 + 100 TL'lik ikinci satır):
+
+| | Hesaplanan | Olması gereken |
+|---|---|---|
+| Matrah | 452,69 | 452,69 |
+| KDV | **94,25** | 90,54 |
+| Genel toplam | **546,94** | 543,23 |
+
+KDV tabanı `471,25` (= 412,50 × 0,90 + 100) çıkıyor; doğrusu `452,69` (ikinci iskonto da düşülmüş).
+
+**Bu, karar 1 ile çelişiyor** ("`TUTAR` `ISKONTO2`'yi içerir"). Karar 1'in doğal sonucu KDV tabanının
+da ikinci iskontoyu düşmesidir.
+
+**Düzeltme kapsamı:** `fn_Api_Belge_DipToplam`'ın `TUR=5` (ve döviz karşılığı) dallarına
+`*(100-ISKONTO2)/100` eklenmesi. Bu TVF Delphi'nin dip toplam ekranını da besliyor — ancak
+mevcut hiçbir belgede `ISKONTO2` dolu olmadığı için **yürürlükteki hiçbir belge etkilenmez**;
+değişiklik yalnız ikinci iskonto kullanılmaya başlandığında devreye girer.
+
+Uygulanmadı — onay bekliyor.
