@@ -54,7 +54,9 @@ DECLARE
     v_sayimid   int  := COALESCE(NULLIF(j->>'SayimID', '')::int, 0);
     v_birim2get int  := COALESCE(NULLIF(j->>'Birim2Getir', '')::int, 1);
 
-    v_sonaranan boolean := (v_mod = 5 AND v_kulid IS NOT NULL AND v_modul IS NOT NULL);
+    v_sonaranan boolean := (v_mod IN (5,6) AND v_kulid IS NOT NULL AND v_modul IS NOT NULL);
+    -- Mod=6 -> SIK Aranan: ayni kullanici_arama join'i, siralama say (kullanim adedi) desc
+    v_sikaranan boolean := (v_mod = 6 AND v_kulid IS NOT NULL AND v_modul IS NOT NULL);
     v_hasbarkod boolean;
     v_top       text := CASE WHEN v_topn > 0 THEN ' LIMIT ' || v_topn ELSE '' END;
     v_filt      text := '';
@@ -159,7 +161,9 @@ BEGIN
     END IF;
 
     -- ---- ORDER ----
-    v_order := CASE WHEN v_sonaranan THEN ' ORDER BY ka.degistirmetarihi DESC' ELSE ' ORDER BY 2' END;
+    v_order := CASE WHEN v_sikaranan THEN ' ORDER BY ka.say DESC, ka.degistirmetarihi DESC'
+                    WHEN v_sonaranan THEN ' ORDER BY ka.degistirmetarihi DESC'
+                    ELSE ' ORDER BY 2' END;
 
     v_sql := v_b1 || v_b2 || v_order || v_top;
 

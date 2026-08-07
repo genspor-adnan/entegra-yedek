@@ -170,8 +170,11 @@ type
     GridStokViewURUNNO: TcxGridDBColumn;
     cxGrid1DBCardViewAlislarBELGETIPI: TcxGridDBCardViewRow;
     cxGrid1DBCardViewSatislarBELGETIPI: TcxGridDBCardViewRow;
-    LabelSonAranan: TLabel;
     LabelOncekiAlimSatim: TcxLabel;
+    ToolBarAranan: TToolBar;
+    LabelTumKayitlar: TToolButton;
+    LabelSonArananlar: TToolButton;
+    LabelSikArananlar: TToolButton;
     procedure cxDBTreeList1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -205,7 +208,9 @@ type
     procedure cxGrid1DBTableViewDurumStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure TreeListKategoriClick(Sender: TObject);
     procedure GridStokViewDblClick(Sender: TObject);
-    procedure LabelSonArananClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
     procedure TabStokListeAfterScroll(DataSet: TDataSet);
     procedure GridStokViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
@@ -217,11 +222,15 @@ type
     Key1: string;
     AdetBirimi: Integer;
     BekletDlg: TBekletmeDlg;
-    FSonAranan: Boolean;   // Son Aranan modu (LabelSonAranan tiklandi -> Mod=5)
+    // ToolBarAranan kapsami: 0=Tum, 1=Son Aranan (Mod=5), 2=Sik Aranan (Mod=6).
+    //   Stok ve Hizmet AYRI listeler: KULLANICI_ARAMA.MODUL = MODUL_Stok / MODUL_Hizmet.
+    FAramaKapsami: Integer;
     FAcilistaListelemeAtla: Boolean;
     FSayfali: TSayfaliListe;    // SAYFALI stok listesi (merkezi yardimci, Utablo)
     procedure StokAra;
     procedure HizmetAra;
+    procedure AramaKapsamiUygula(AMod: Integer);
+    procedure AramaKapsamiSifirla;
     Procedure DagitimAra;
     procedure SagPanelDetayYukle;
     { Private declarations }
@@ -323,7 +332,9 @@ begin
   PaketAnaUrun := True;
   // Aranip EKLENEN stok -> Son Aranan listesine yaz (KULLANICI_ARAMA; MODUL_Stok)
   if PageControl1.ActivePage.Name = 'SheetStok' then
-    Tablo.AramaKaydet(MODUL_Stok, TabStokListe.FieldByName('ID').AsInteger);
+    Tablo.AramaKaydet(MODUL_Stok, TabStokListe.FieldByName('ID').AsInteger)
+  else if PageControl1.ActivePage.Name = 'SheetHizmet' then
+    Tablo.AramaKaydet(MODUL_Hizmet, TabHizmetListe.FieldByName('ID').AsInteger);
   if (StokZorunluSecimVar)and(stokhizmetaracagirantur in [9,19,100]) and (PageControl1.ActivePage.Name='SheetStok') then begin//Bu ?r?n yerine se?ilmesi gereken ba?ka ?r?nler var m?
     if EsdegerUrunlerListelendi=False then begin
       Tablo.TablodanSorguAc(0,'declare @ID nvarchar(500) set @ID='''+TabStokListe.FieldByName('ID').AsString+''' select @ID=cast(STOKESDEGERID as varchar(10))+'',''+@ID from(select STOKESDEGERID from STOKESDEGER where STOKID='+TabStokListe.FieldByName('ID').AsString+' union select STOKID from STOKESDEGER where STOKESDEGERID='+TabStokListe.FieldByName('ID').AsString+') as asd select @ID');
@@ -541,12 +552,17 @@ begin
       if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then
         TabKategori.Open;
       TreeListKategori.Visible := TabKategori.Active and (TabKategori.RecordCount>0);
-      // STOK sekmesi: bos kriterle OTOMATIK listelenmez (hizmet->stok gecisi tum stoklari
-      // dolduruyordu); kullanici arama yapinca dolar. HIZMET sekmesi bos kriterde tum
-      // listeyi getirmeye devam eder (istenen davranis).
+      // Bos kriterde OTOMATIK listeleme YOK (stok da hizmet de): liste bos gelir,
+      //   kullanici arama yapinca ya da ToolBarAranan butonuna basinca dolar.
+      //   Dagitim sekmesi sabit/kucuk liste - o yuklenmeye devam eder.
       if not FAcilistaListelemeAtla then
-        if (PageControl1.ActivePage <> SheetStok) or StokAramaKriteriVar then
-          ListeAc(1);
+        if (PageControl1.ActivePage = SheetDagitim) or StokAramaKriteriVar then
+          ListeAc(1)
+        else begin
+          AramaKapsamiSifirla;
+          if TabStokListe.Active   then TabStokListe.Close;
+          if TabHizmetListe.Active then TabHizmetListe.Close;
+        end;
     end;
 end;
 
@@ -786,6 +802,11 @@ end;
 
 procedure TStokHizmetAraDlg.ListeAc(Ara:Smallint);
 Begin
+  // Metin/kategori kriteri girilmisse Son/Sik kapsamindan cikilir. Kriter yokken
+  //   (depo/fiyat-adi/checkbox degisimi gibi) aktif kapsam KORUNUR - aksi halde
+  //   "Son Aranan" listesi combo degisiminde tum listeye donerdi.
+  if StokAramaKriteriVar then
+    AramaKapsamiSifirla;
   AramaModu:=Ara;
   JvTimer1.Enabled := False;
   JvTimer1.Interval := 700;
@@ -1305,16 +1326,54 @@ begin
   end;
 end;
 
-procedure TStokHizmetAraDlg.LabelSonArananClick(Sender: TObject);
-// Son Aranan: KULLANICI_ARAMA (bu kullanici, MODUL_Stok, tarih desc) -> Mod=5
+// ---- ToolBarAranan: Tum / Son Aranan / Sik Aranan ----------------------------
+// Kapsam AKTIF SEKMEYE gore ayri liste tutar: Stok -> MODUL_Stok, Hizmet -> MODUL_Hizmet.
+// Forma girildiginde hicbiri basili degildir ve liste BOS gelir; kullanici butona
+// basinca dolar (bos kriterle tum stok/hizmet cekmek yavas oldugu icin).
+procedure TStokHizmetAraDlg.AramaKapsamiSifirla;
+// Metinle/filtreyle normal arama yapilinca Son/Sik kapsamindan cikilir (butonlar kalkar).
 begin
-  FSonAranan := True;
-  StokAra;
+  FAramaKapsami := 0;
+  LabelTumKayitlar.Down  := False;
+  LabelSonArananlar.Down := False;
+  LabelSikArananlar.Down := False;
+end;
+
+procedure TStokHizmetAraDlg.AramaKapsamiUygula(AMod: Integer);
+// 0=Tum liste, 1=Son Aranan (tarih desc), 2=Sik Aranan (kullanim adedi desc).
+begin
+  FAramaKapsami := AMod;
+  LabelTumKayitlar.Down  := AMod = 0;
+  LabelSonArananlar.Down := AMod = 1;
+  LabelSikArananlar.Down := AMod = 2;
+  // kapsam butonlari filtresiz calisir -> metin kriterleri temizlenir
+  EditleriTemizle;
+  AramaModu := 1;   // arama TIPI = filtre dali (kategori dali degil; TabKategori kapali olabilir)
+  if PageControl1.ActivePage = SheetStok then
+    StokAra
+  else if PageControl1.ActivePage = SheetHizmet then
+    HizmetAra;
+end;
+
+procedure TStokHizmetAraDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+  AramaKapsamiUygula(0);
+end;
+
+procedure TStokHizmetAraDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+  AramaKapsamiUygula(1);
+end;
+
+procedure TStokHizmetAraDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+  AramaKapsamiUygula(2);
 end;
 
 procedure TStokHizmetAraDlg.StokAra;
 // STANDART SISTEM: inline SQL -> sp_Prog_StokHizmetAra_Stok_Json2 (@Baslik+@Kosullar JSON).
-//   Mod=4 normal/filtre, Mod=5 Son Aranan (LabelSonAranan). Filtreler JSON'da (parametreli/guvenli).
+//   Mod=4 normal/filtre, Mod=5 Son Aranan, Mod=6 Sik Aranan (ToolBarAranan butonlari).
+//   Filtreler JSON'da (parametreli/guvenli).
 // SAYFALI: TSayfaliListe (Utablo) - TopN sinir yonetimi + tetikler merkezi yardimcida.
 var j: TJSONObject;
 begin
@@ -1337,8 +1396,9 @@ begin
     j.AddPair('Sayim',   TJSONNumber.Create(1));
     j.AddPair('SayimID', TJSONNumber.Create(TabGiris.FieldByName('ID').AsInteger));
   end;
-  if FSonAranan then begin
-    j.AddPair('Mod',   TJSONNumber.Create(5));
+  if FAramaKapsami > 0 then begin
+    // 1=Son Aranan -> Mod 5 (tarih desc), 2=Sik Aranan -> Mod 6 (SAY desc)
+    j.AddPair('Mod',   TJSONNumber.Create(4 + FAramaKapsami));
     j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
     j.AddPair('Modul', TJSONNumber.Create(MODUL_Stok));
   end else begin
@@ -1357,14 +1417,13 @@ begin
         if ComboIcerik.Text  <> '' then j.AddPair('IcerikID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboIcerik.EditValue), 0)));  // (fix: yanlislikla ComboMODEL okunuyordu)
       end;
     end
-    else  begin
+    else if TabKategori.Active and (TabKategori.RecordCount > 0) then begin
       j.AddPair('KategoriArama', TJSONNumber.Create(1));
       j.AddPair('KategoriID',    TJSONNumber.Create(TabKategori.FieldByName('ID').AsInteger));
     end;
     if EsdegerUrunlerListelendi and (TumEsdegerler <> '') then j.AddPair('Esdeger', TumEsdegerler);
   end;
   Tablo.ListeSPJson(TabStokListe, 'sp_Prog_StokHizmetAra_Stok_Json2', '', j);
-  FSonAranan := False;
   FSayfali.YuklemeSonrasi;   // ekran dolana kadar zincirleme sayfa (kucuk sayfa boyunda)
 end;
 
@@ -1376,9 +1435,16 @@ begin
   j.AddPair('FiyatAdi',   TJSONNumber.Create(StrToIntDef(VarToStr(cbFiyatAdi.EditValue), 0)));
   j.AddPair('Satis',      TJSONNumber.Create(Ord(GirisCikis = FWCikis)));
   j.AddPair('AdetBirimi', TJSONNumber.Create(AdetBirimi));
-  if Trim(EditKodu.Text) <> '' then j.AddPair('Kod',    Trim(EditKodu.Text));
-  if Trim(EditAdi.Text)  <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
-  if OkunanBarkod        <> '' then j.AddPair('Barkod', OkunanBarkod);
+  if FAramaKapsami > 0 then begin
+    // Hizmet Son/Sik listesi STOKTAN AYRI: KULLANICI_ARAMA.MODUL = MODUL_Hizmet
+    j.AddPair('Mod',   TJSONNumber.Create(4 + FAramaKapsami));
+    j.AddPair('KulId', TJSONNumber.Create(StrToIntDef(Kullanan, 0)));
+    j.AddPair('Modul', TJSONNumber.Create(MODUL_Hizmet));
+  end else begin
+    if Trim(EditKodu.Text) <> '' then j.AddPair('Kod',    Trim(EditKodu.Text));
+    if Trim(EditAdi.Text)  <> '' then j.AddPair('Ad',     Trim(EditAdi.Text));
+    if OkunanBarkod        <> '' then j.AddPair('Barkod', OkunanBarkod);
+  end;
   if SubeVarmi and (ComboSube.EditValue <> null) then begin
     j.AddPair('SubeVar',  TJSONNumber.Create(1));
     j.AddPair('SubeID',  TJSONNumber.Create(StrToIntDef(VarToStr(ComboSube.EditValue), 0)));
@@ -1570,7 +1636,7 @@ End;
 function TStokHizmetAraDlg.PaketEkle(UrunID: Integer): Boolean;
 var
   Fiyat: Currency;
-  LFiyatAdi, LDepoID: Integer;
+  LFiyatAdi, LDepoID, LSonID: Integer;
 begin
   Result := False;
   LFiyatAdi := StrToIntDef(VarToStr(cbFiyatAdi.EditValue), 0);
@@ -1600,6 +1666,22 @@ begin
       HizmetEkle(TabPaket.FieldByName('ID').AsInteger, TabPaket.FieldByName('KOD').AsString, TabPaket.FieldByName('AD').AsString, Fiyat, TabPaket.FieldByName('KUR').AsString, cbFiyatAdi.EditValue, TabPaket.FieldByName('KDV').AsInteger, TabPaket.FieldByName('KDVDURUM').AsBoolean,TabStokListe.FieldByName('OZELKOD').AsString,TabPaket.FieldByName('ADET').AsFloat,TabStokListe.FieldByName('BIRIM').AsInteger);
 
     TabPaket.Next;
+  end;
+
+  // PAKET SATIRLARI EKLENDI -> detay listesini TAZELE.
+  //   Detay sorgusunda KOD ve AD alt-sorgu (subquery) ile uretilir; yeni eklenen satirda
+  //   bu alanlar DB'den okunmadigi icin ekranda BOS gorunuyordu (belge kapatilip acilinca
+  //   doluyordu). Refresh satirlari yeniden okur; imlec basa kaymasin diye son satira donulur.
+  if (TabDetayGiris <> nil) and TabDetayGiris.Active then
+  try
+    if TabDetayGiris.State in [dsEdit, dsInsert] then
+      TabDetayGiris.Post;
+    LSonID := TabDetayGiris.FieldByName('ID').AsInteger;
+    TabDetayGiris.Refresh;
+    if LSonID > 0 then
+      TabDetayGiris.Locate('ID', LSonID, []);
+  except
+    // tazeleme basarisizsa satirlar yine eklidir; yalniz KOD/AD bir sonraki acilista dolar
   end;
 
   Result := True;

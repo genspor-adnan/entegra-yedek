@@ -30,8 +30,19 @@ DECLARE
     v_barkod    text := NULLIF(j->>'Barkod', '');
     v_subevar   int  := COALESCE(NULLIF(j->>'SubeVar', '')::int, 0);
     v_subeid    int  := COALESCE(NULLIF(j->>'SubeID', '')::int, 0);
+    -- Mod: 4=normal/filtre, 5=Son Aranan (degistirmetarihi desc), 6=Sik Aranan (say desc).
+    --   kullanici_arama.modul hizmette 248002 (Hizmetler) - stok listesinden AYRI liste.
+    v_mod       int  := COALESCE(NULLIF(j->>'Mod', '')::int, 4);
+    v_kulid     int  := NULLIF(j->>'KulId', '')::int;
+    v_modul     int  := NULLIF(j->>'Modul', '')::int;
+    v_sonaranan boolean := (COALESCE(NULLIF(j->>'Mod','')::int,4) IN (5,6)
+                            AND NULLIF(j->>'KulId','') IS NOT NULL AND NULLIF(j->>'Modul','') IS NOT NULL);
+    v_sikaranan boolean := (COALESCE(NULLIF(j->>'Mod','')::int,4) = 6
+                            AND NULLIF(j->>'KulId','') IS NOT NULL AND NULLIF(j->>'Modul','') IS NOT NULL);
+    v_jka       text := '';
     v_varsayilan int := CASE WHEN COALESCE(NULLIF(j->>'Satis','')::int,1) = 1 THEN 3 ELSE 2 END;
-    v_aramabos  boolean := (NULLIF(j->>'Kod','') IS NULL) AND (NULLIF(j->>'Ad','') IS NULL)
+    v_aramabos  boolean := (COALESCE(NULLIF(j->>'Mod','')::int,4) NOT IN (5,6))
+                           AND (NULLIF(j->>'Kod','') IS NULL) AND (NULLIF(j->>'Ad','') IS NULL)
                            AND (NULLIF(j->>'Barkod','') IS NULL);
     -- ROOTKOD ic-ifadesi (X icin): son '.' oncesi (tersten strpos)
     v_rk_h text := 'reverse(substring(reverse(h.hesapkodu), strpos(reverse(h.hesapkodu),''.'')+1,'
@@ -40,6 +51,13 @@ DECLARE
                    || ' length(m.kod)-(strpos(reverse(m.kod),''.'')-1)))';
     v_sql text := '';
 BEGIN
+    -- Son/Sik modu: metin filtresi devre disi, kullanici_arama join'i devrede (masrafgelir.id = ka.kayitid)
+    IF v_sonaranan THEN
+        v_kod := NULL; v_ad := NULL; v_barkod := NULL;
+        v_jka := ' INNER JOIN kullanici_arama ka ON ka.kayitid=m.id AND ka.kulid=' || v_kulid
+                 || ' AND ka.modul=' || v_modul;
+    END IF;
+
     -- HESAPPLANI baslik satirlari (yalnizca arama bos iken)
     IF v_aramabos THEN
         v_sql := v_sql ||
@@ -72,6 +90,7 @@ BEGIN
         || ' FROM masrafgelir m'
         || ' LEFT OUTER JOIN fiyatlar f ON m.id=f.hizmetid AND f.fiyatadi=' || v_fiyatadi
         || '   AND f.paketid=0 AND f.satis=' || v_satis
+        || v_jka
         || ' WHERE m.gelirmi=' || v_satis || ' AND m.durum>0'
         || ' AND ($1::text IS NULL OR m.kod ILIKE ''%''||$1||''%'')'
         || ' AND ($2::text IS NULL OR m.ad ILIKE ''%''||$2||''%'')'
@@ -81,7 +100,9 @@ BEGIN
         v_sql := v_sql || ' AND m.subeid IN (0,' || v_subeid || ')';
     END IF;
 
-    v_sql := v_sql || ' ORDER BY 2';
+    v_sql := v_sql || CASE WHEN v_sikaranan THEN ' ORDER BY ka.say DESC, ka.degistirmetarihi DESC'
+                           WHEN v_sonaranan THEN ' ORDER BY ka.degistirmetarihi DESC'
+                           ELSE ' ORDER BY 2' END;
 
     RETURN QUERY EXECUTE v_sql USING v_kod, v_ad, v_barkod;
 END $$;

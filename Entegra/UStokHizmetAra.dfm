@@ -343,22 +343,6 @@
       Images = Tablo.PNGImageList1
       OnClick = JvNavPanelButton1Click
     end
-    object LabelSonAranan: TLabel
-      Left = 563
-      Top = 19
-      Width = 61
-      Height = 16
-      Cursor = crHandPoint
-      Caption = 'Son Aranan'
-      Font.Charset = TURKISH_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Trebuchet MS'
-      Font.Style = [fsBold]
-      ParentFont = False
-      Transparent = True
-      OnClick = LabelSonArananClick
-    end
     object EditKodu: TcxTextEdit
       Left = 192
       Top = 16
@@ -401,7 +385,7 @@
       OnClick = LabelDetayliAramaClick
     end
     object ComboSube: TcxImageComboBox
-      Left = 698
+      Left = 707
       Top = 15
       RepositoryItem = Tablo.RepSubeler
       Enabled = False
@@ -410,7 +394,7 @@
       StyleDisabled.Color = clWhite
       StyleDisabled.TextColor = clBackground
       TabOrder = 6
-      Width = 100
+      Width = 99
     end
     object LabelOncekiAlimSatim: TcxLabel
       Left = 807
@@ -422,6 +406,70 @@
       Style.TextColor = clNavy
       Transparent = True
       OnClick = LabelOncekiAlimSatimClick
+    end
+    object ToolBarAranan: TToolBar
+      Left = 563
+      Top = 12
+      Width = 147
+      Height = 26
+      Align = alCustom
+      AutoSize = True
+      ButtonHeight = 24
+      ButtonWidth = 47
+      Caption = 'AletCubugu'
+      Color = clTeal
+      DrawingStyle = dsGradient
+      EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Trebuchet MS'
+      Font.Style = []
+      GradientEndColor = 11776947
+      GradientStartColor = 14540253
+      HotTrackColor = 65408
+      Images = Tablo.PNGImageList2
+      List = True
+      ParentColor = False
+      ParentFont = False
+      ShowCaptions = True
+      TabOrder = 7
+      Transparent = True
+      object LabelTumKayitlar: TToolButton
+        Left = 0
+        Top = 0
+        Caption = 'T'#252'm'
+        ImageIndex = 32
+        ImageName = 'PngImageListe'
+        AllowAllUp = True
+        Grouped = True
+        Style = tbsCheck
+        OnClick = LabelTumKayitlarClick
+      end
+      object LabelSonArananlar: TToolButton
+        Tag = 5
+        Left = 47
+        Top = 0
+        Caption = 'Son'
+        ImageIndex = 21
+        ImageName = 'PngImage21'
+        AllowAllUp = True
+        Grouped = True
+        Style = tbsCheck
+        OnClick = LabelSonArananlarClick
+      end
+      object LabelSikArananlar: TToolButton
+        Tag = 3
+        Left = 94
+        Top = 0
+        Caption = 'S'#305'k'
+        ImageIndex = 31
+        ImageName = 'PngImageYildiz'
+        AllowAllUp = True
+        Grouped = True
+        Style = tbsCheck
+        OnClick = LabelSikArananlarClick
+      end
     end
   end
   object PanelGrid: TPanel
@@ -451,10 +499,6 @@
         Tag = 1
         Caption = 'Stoklar'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label2: TLabel
           Left = 720
           Top = 107
@@ -677,10 +721,6 @@
       object SheetHizmet: TcxTabSheet
         Caption = 'Hizmetler'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
@@ -908,10 +948,6 @@
       object SheetDagitim: TcxTabSheet
         Caption = 'Da'#287#305't'#305'm'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0
@@ -1617,8 +1653,8 @@
     Connection = Tablo.FDCnn
     SQL.Strings = (
       
-        'exec dbo.sp_Prog_StokHizmetAra_Paket @PaketID=:P1, @FiyatAdi' +
-        '=:P2, @DepoID=:P3')
+        'exec dbo.sp_Prog_StokHizmetAra_Paket @PaketID=:P1, @FiyatAdi=:P2' +
+        ', @DepoID=:P3')
     Left = 540
     Top = 232
   end
