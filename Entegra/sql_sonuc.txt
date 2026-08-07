@@ -1,26 +1,7 @@
-﻿Sonuc
+﻿x	Adet
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114010,"SatirId":3557475,"Silinen":1,"Yazilan":2,"Satirlar":[{"Sira":1,"IzlemId":549440,"SeriLotId":43650},{"Sira":2,"IzlemId":549441,"SeriLotId":38847}]}
-x	ID	SERILOTID	SERINO	LOTNO	ADET	KALAN	EKLEYEN
---------------------------------------------------------------------------------
-SONUC - STOKIZLEME	549440	43650	TEST-API-1	LOT-API-1	3	3	7
-SONUC - STOKIZLEME	549441	38847		252067	1	1	7
-x	IZLEMID	DEPOID	ADET
---------------------------------------------------------------------------------
-SONUC - DEPO	549440	1	-3
-SONUC - DEPO	549440	11	3
-SONUC - DEPO	549441	1	-1
-SONUC - DEPO	549441	11	1
-x	Once_	Sonra
---------------------------------------------------------------------------------
-STOKSERILOT once/sonra	16	17
-Sonuc
---------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114010,"SatirId":3557475,"Silinen":2,"Yazilan":1,"Satirlar":[{"Sira":1,"IzlemId":549442,"SeriLotId":38847}]}
-x	IzlemSatir
---------------------------------------------------------------------------------
-TEMIZLIK SONRASI	1
+silinen	2
 x	Adet
 --------------------------------------------------------------------------------
-STOKSERILOT son	16
+kalan test logu	0
 

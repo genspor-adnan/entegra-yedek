@@ -1873,6 +1873,51 @@ end;
 
 // Tek bir kaydi (JSON alanlari) ATabloAdi'na AYNI ID ile ekler. Format-guvenli
 // (TField.AsString -> kultur-aware). Sonuc: '' = basari, aksi halde hata mesaji.
+// Log JSON'undaki metin degeri alana yazar. IKI BICIMI de kabul eder:
+//   - DEGISMEZ (SQL tarafi loglayici uretir): ISO tarih 'yyyy-mm-dd[ hh:nn:ss]',
+//     ondalikta NOKTA ('1234.56')
+//   - KULTUR-DUYARLI (Pascal LogKayitSil uretir; TField.AsString): '08.07.2026',
+//     '1234,56' - istemcinin yerel ayarina gore
+// Once degismez bicim denenir, tutmazsa AsString'e (kultur) duser. Boylece
+//   hem yeni SQL loglari hem eski Pascal loglari geri alinabilir; ayrica
+//   Ingilizce Windows'ta yazilmis eski bir log Turkce istemcide de calisir.
+procedure GeriDegerAta(F: TField; const ADeger: string);
+var
+  LFmt: TFormatSettings;
+  LDT: TDateTime;
+  LF: Double;
+  S: string;
+begin
+  S := Trim(ADeger);
+  LFmt := TFormatSettings.Invariant;
+  if F.DataType in [ftDate, ftTime, ftDateTime, ftTimeStamp] then
+  begin
+    // ISO: 2026-07-16 / 2026-07-16 21:44:00 / 2026-07-16T21:44:00
+    if (Length(S) >= 10) and (S[5] = '-') and (S[8] = '-') then
+    begin
+      LFmt.DateSeparator  := '-';
+      LFmt.TimeSeparator  := ':';
+      LFmt.ShortDateFormat := 'yyyy-mm-dd';
+      if TryStrToDateTime(StringReplace(S, 'T', ' ', []), LDT, LFmt) then
+      begin
+        F.AsDateTime := LDT;
+        Exit;
+      end;
+    end;
+  end
+  else if F.DataType in [ftFloat, ftCurrency, ftBCD, ftFMTBcd, ftSingle, ftExtended] then
+  begin
+    // Degismez ondalik: yalniz rakam ve TEK nokta (binlik ayirici yok)
+    if (Pos(',', S) = 0) and (Pos('.', S) > 0) and (Pos('.', S) = LastDelimiter('.', S)) then
+      if TryStrToFloat(S, LF, LFmt) then
+      begin
+        F.AsFloat := LF;
+        Exit;
+      end;
+  end;
+  F.AsString := ADeger;   // kultur-duyarli (eski davranis)
+end;
+
 function GeriKayitEkle(const ATabloAdi, AJSON: string): string;
 var
   LQ, LIns: TFDQuery;
@@ -1921,7 +1966,7 @@ begin
         else if F is TBooleanField then
           F.AsBoolean := SameText(LDeger, 'True') or (LDeger = '1') or (LDeger = '-1')
         else
-          F.AsString := LDeger;
+          GeriDegerAta(F, LDeger);
         LKolonlar.Add(F.FieldName);
       end;
 

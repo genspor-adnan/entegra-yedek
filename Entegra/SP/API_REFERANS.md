@@ -107,11 +107,18 @@ Ortak altyapı: **`dbo.fn_Api_Belge_DipToplam(@BelgeId)`** — belge dip toplam 
 
 ### C. Silme
 
+Ortak altyapı: **`dbo.fn_Api_DepoDBAdi()`** (depo DB adı = `<ANA_DB>_GENDEPO`), **`sp_Api_Log_YilTablosu`**
+(`LOG<yyyy>` yoksa oluşturur, DDL `ULog.LogYilTablosu` ile birebir), **`sp_Api_Log_Yaz_Ic`** (iç yardımcı).
+
+Değer biçimi: SQL tarafı **değişmez** biçim yazar (ISO tarih, nokta ondalık, `True`/`False`).
+Pascal tarafı istemci yerel ayarıyla yazmaya devam eder; `ULog.GeriDegerAta` iki biçimi de kabul eder.
+Temporal (`GENERATED ALWAYS`) ve gizli kolonlar log JSON'una **alınmaz** — geri yazılamazlar.
+
 | Nesne | Durum | Girdi | Çıktı |
 |---|---|---|---|
 | `sp_Api_Belge_Sil_Json` | ⬜ | `{BelgeId,Oturum,KilitKaldirildi,Gerekce}` | `{Sonuc,BelgeId,SilinenSatir}` |
-| `sp_Api_Log_KayitSil_Json` | ⬜ | `{Tablo,TabNo,KayitId,UstTabNo,UstId,Oturum}` | `{Sonuc,LogId}` |
-| `sp_Api_Log_DetaySil_Json` | ⬜ | `{Tablo,Kosul,TabNo,UstTabNo,UstId,Oturum}` | `{Sonuc,Adet}` |
+| `sp_Api_Log_KayitSil_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Tablo,TabNo,KayitId,UstTabNo,UstId,RehberId,StokId,Oturum:{KulId,SubeId,Ip,Istasyon}}` | `{Sonuc,Yazilan}` |
+| `sp_Api_Log_DetaySil_Json` | 🟨 MSSQL hazır, PG bekliyor | aynı + `Kosul` (ham WHERE, **uygulama üretir**) | `{Sonuc,Yazilan}` |
 
 ### D. Dönüşüm
 
