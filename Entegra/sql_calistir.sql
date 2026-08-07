@@ -1,41 +1,28 @@
 ﻿SET NOCOUNT ON;
-SET XACT_ABORT ON;
-DECLARE @id INT = 114001;   -- TUR=4 cikis fisi, 3 satir, 4 izlem
-DECLARE @depo sysname = dbo.fn_Api_DepoDBAdi();
-DECLARE @lt sysname = N'LOG' + CAST(YEAR(GETDATE()) AS varchar(4));
+-- A) TAM donusmus satir (Kalan=0) -> 1 adet istenirse RED
+SELECT 'A) kalan=0 satirda 1 adet' AS x;
+EXEC dbo.sp_Api_Donusum_Kontrol_Json N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":156939,"Adet":1}]}';
 
-SELECT 'ONCE' AS x,
-  (SELECT COUNT(*) FROM FATBASLIK WHERE ID=@id) AS Baslik,
-  (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@id) AS Satir,
-  (SELECT COUNT(*) FROM STOKIZLEME WHERE BASLIKID=@id) AS Izlem,
-  (SELECT COUNT(*) FROM STOKIZLEMEDEPO WHERE IZLEMID IN (SELECT ID FROM STOKIZLEME WHERE BASLIKID=@id)) AS IzlemDepo,
-  (SELECT COUNT(*) FROM KASA WHERE TUR IN (61,71) AND FATURAID=@id) AS Kasa;
+-- B) Hic donusmemis satir bul, kalanina esit iste -> UYGUN
+DECLARE @sid INT = (SELECT TOP 1 SD.ID FROM SIPARISDETAY SD
+                    CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K
+                    WHERE K.Donusen = 0 AND K.Kalan > 0 ORDER BY SD.ID DESC);
+DECLARE @kal DECIMAL(18,6) = (SELECT Kalan FROM dbo.fn_Api_Donusum_Kalan(2,409,@sid,0));
+SELECT 'B) test satiri' AS x, @sid AS SatirId, @kal AS Kalan;
+DECLARE @j NVARCHAR(MAX) = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":' + CAST(@kal AS varchar(30)) + N'}]}';
+EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
 
-BEGIN TRAN;   -- test: sonunda GERI ALINACAK
+-- C) Ayni satirda kalandan fazla -> RED
+SET @j = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":' + CAST(@kal + 0.5 AS varchar(30)) + N'}]}';
+SELECT 'C) kalandan 0.5 fazla' AS x;
+EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
 
-DECLARE @j NVARCHAR(MAX) = N'{"BelgeId":' + CAST(@id AS varchar(20)) +
-     N',"KilitKaldirildi":false,"Oturum":{"KulId":9,"SubeId":-1,"Ip":"1.2.3.4","Istasyon":"SILTEST"}}';
-EXEC dbo.sp_Api_Belge_Sil_Json @j;
+-- D) Olmayan satir + gecerli satir birlikte -> toplu RED
+SET @j = N'{"Kaynak":2,"DonusumTuru":409,"Satirlar":[{"SatirId":' + CAST(@sid AS varchar(20)) + N',"Adet":1},{"SatirId":-999,"Adet":1}]}';
+SELECT 'D) biri olmayan satir' AS x;
+EXEC dbo.sp_Api_Donusum_Kontrol_Json @j;
 
-SELECT 'SONRA (tran ici)' AS x,
-  (SELECT COUNT(*) FROM FATBASLIK WHERE ID=@id) AS Baslik,
-  (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@id) AS Satir,
-  (SELECT COUNT(*) FROM STOKIZLEME WHERE BASLIKID=@id) AS Izlem,
-  (SELECT COUNT(*) FROM STOKIZLEMEDEPO WHERE IZLEMID IN (SELECT ID FROM STOKIZLEME WHERE BASLIKID=@id)) AS IzlemDepo,
-  (SELECT COUNT(*) FROM KASA WHERE TUR IN (61,71) AND FATURAID=@id) AS Kasa;
-
-DECLARE @s NVARCHAR(MAX) = N'
-SELECT ''YAZILAN LOGLAR'' AS x, TABLOID, COUNT(*) AS Adet, MIN(ID) AS IlkId, MAX(ID) AS SonId
-FROM [' + @depo + N'].dbo.' + @lt + N' WHERE ISTASYON=''SILTEST'' GROUP BY TABLOID ORDER BY MIN(ID);
-SELECT ''LOG SIRASI'' AS y, ID, TABLOID, KAYITID, USTTABLOID, USTKAYITID
-FROM [' + @depo + N'].dbo.' + @lt + N' WHERE ISTASYON=''SILTEST'' ORDER BY ID;';
-EXEC sp_executesql @s;
-
-ROLLBACK;   -- her sey geri alinir (loglar dahil)
-
-SELECT 'ROLLBACK SONRASI' AS x,
-  (SELECT COUNT(*) FROM FATBASLIK WHERE ID=@id) AS Baslik,
-  (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@id) AS Satir,
-  (SELECT COUNT(*) FROM STOKIZLEME WHERE BASLIKID=@id) AS Izlem;
-DECLARE @s2 NVARCHAR(MAX) = N'SELECT ''KALAN TEST LOGU'' AS x, COUNT(*) AS Adet FROM [' + @depo + N'].dbo.' + @lt + N' WHERE ISTASYON=''SILTEST'';';
-EXEC sp_executesql @s2;
+-- E) FATBASLIK kaynagi (Kaynak=3) TVF calisiyor mu
+SELECT TOP 3 'E) Kaynak=3 ornek' AS x, F.ID, F.ADET, K.Donusen, K.Kalan
+FROM FATURA F CROSS APPLY dbo.fn_Api_Donusum_Kalan(3, 411, F.ID, 0) K
+WHERE EXISTS(SELECT 1 FROM FATURA F1 WHERE F1.YERI IN (411,424) AND F1.YERID=F.ID) ORDER BY F.ID DESC;

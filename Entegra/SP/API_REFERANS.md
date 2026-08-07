@@ -122,10 +122,15 @@ Temporal (`GENERATED ALWAYS`) ve gizli kolonlar log JSON'una **alınmaz** — ge
 
 ### D. Dönüşüm
 
+Ortak altyapı: **`dbo.fn_Api_Donusum_Kalan(@Kaynak, @DonusumTuru, @SatirId, @HedefUretim)`** —
+bir kaynak satırın `Adet / Donusen / Kalan` değerleri. Formül `sp_Prog_BelgeDonusum_Kaynak_Json2`
+içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde.
+
 | Nesne | Durum | Girdi | Çıktı |
 |---|---|---|---|
-| `sp_Api_Donusum_Kaynak_Json` | ⬜ | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
-| `sp_Api_Donusum_Uygula_Json` | ⬜ | `{HedefBelgeId?,HedefTur,KaynakSatirlar:[]}` | `{Sonuc,HedefBelgeId,Satirlar:[]}` |
+| `sp_Api_Donusum_Kontrol_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,Satirlar:[{SatirId,Adet}]}` | `{Sonuc,Uygun,Satirlar:[{SatirId,Adet,Kalan,Uygun,Neden}]}` — aşırı dönüşüm koruması. `GenDepoUpdate73.sql` |
+| `sp_Api_Donusum_Kaynak_Json` | ⬜ (mevcut `sp_Prog_BelgeDonusum_Kaynak_Json2` yeterli olabilir) | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
+| `sp_Api_Donusum_Uygula_Json` | ⛔ **kapsam kararı bekliyor** — `UBelgeDonusum.StokEkle` (13.900 karakter) fiyat sorma diyaloğu, hedef grid dataset'i ve `showmessage`'lı depo kontrolleri içeriyor; birebir SQL karşılığı yok | `{HedefBelgeId?,HedefTur,KaynakSatirlar:[]}` | `{Sonuc,HedefBelgeId,Satirlar:[]}` |
 | `sp_Api_Donusum_Geri_Json` | ⬜ | `{HedefBelgeId}` \| `{HedefSatirId}` | `{Sonuc,Adet}` |
 | `sp_Api_Donusum_Rapor_Json` | ⬜ | `{BasTarih,BitTarih,Yon,Filtre}` | sonuç kümesi |
 
