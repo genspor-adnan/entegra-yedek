@@ -116,7 +116,7 @@ Temporal (`GENERATED ALWAYS`) ve gizli kolonlar log JSON'una **alınmaz** — ge
 
 | Nesne | Durum | Girdi | Çıktı |
 |---|---|---|---|
-| `sp_Api_Belge_Sil_Json` | ⬜ | `{BelgeId,Oturum,KilitKaldirildi,Gerekce}` | `{Sonuc,BelgeId,SilinenSatir}` |
+| `sp_Api_Belge_Sil_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId,KilitKaldirildi,Oturum}` | `{Sonuc,BelgeId,Tur,SilinenSatir,Loglanan}` — hata: 51200 `Belge silinemez: <NEDEN>` |
 | `sp_Api_Log_KayitSil_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Tablo,TabNo,KayitId,UstTabNo,UstId,RehberId,StokId,Oturum:{KulId,SubeId,Ip,Istasyon}}` | `{Sonuc,Yazilan}` |
 | `sp_Api_Log_DetaySil_Json` | 🟨 MSSQL hazır, PG bekliyor | aynı + `Kosul` (ham WHERE, **uygulama üretir**) | `{Sonuc,Yazilan}` |
 

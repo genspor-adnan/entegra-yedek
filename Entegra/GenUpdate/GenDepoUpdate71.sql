@@ -97,6 +97,9 @@ GO
 CREATE OR ALTER PROCEDURE dbo.sp_Api_Log_Yaz_Ic
     @Tablo    sysname,
     @Kosul    NVARCHAR(MAX) = NULL,
+    -- @Kosul icinde kullanilabilecek TEK parametre: @pB (ust kayit/belge ID'si).
+    --   Boylece kosul metni sabit kalir, deger parametreyle baglanir (birlestirme yok).
+    @KosulPar BIGINT        = NULL,
     @KayitId  BIGINT        = NULL,
     @TabNo    INT,
     @UstTabNo INT           = 0,
@@ -195,11 +198,11 @@ SET @pN = @@ROWCOUNT;';
     EXEC sp_executesql @sql,
         N'@pIp varchar(45), @pIst varchar(64), @pKul int, @pSub int, @pUstT int, @pUstId bigint,
           @pTabNo int, @pReh bigint, @pStk bigint, @pRehKendi bit, @pStkKendi bit,
-          @pKayit bigint, @pN int OUTPUT',
+          @pKayit bigint, @pB bigint, @pN int OUTPUT',
         @pIp = @Ip, @pIst = @Istasyon, @pKul = @KulId, @pSub = @SubeId,
         @pUstT = @UstT, @pUstId = @UstId, @pTabNo = @TabNo,
         @pReh = @Reh, @pStk = @Stk, @pRehKendi = @RehKendi, @pStkKendi = @StkKendi,
-        @pKayit = @KayitId, @pN = @Yazilan OUTPUT;
+        @pKayit = @KayitId, @pB = @KosulPar, @pN = @Yazilan OUTPUT;
 END
 GO
 

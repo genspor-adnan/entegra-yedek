@@ -1,7 +1,36 @@
-﻿x	Adet
+﻿x	Baslik	Satir	Izlem	IzlemDepo	Kasa
 --------------------------------------------------------------------------------
-silinen	2
+ONCE	1	3	4	4	0
+Sonuc
+--------------------------------------------------------------------------------
+{"Sonuc":1,"BelgeId":114001,"Tur":4,"SilinenSatir":3,"Loglanan":12}
+x	Baslik	Satir	Izlem	IzlemDepo	Kasa
+--------------------------------------------------------------------------------
+SONRA (tran ici)	0	0	0	0	0
+x	TABLOID	Adet	IlkId	SonId
+--------------------------------------------------------------------------------
+YAZILAN LOGLAR	107	1	609	609
+YAZILAN LOGLAR	330	3	610	612
+YAZILAN LOGLAR	367	4	613	616
+YAZILAN LOGLAR	375	4	617	620
+y	ID	TABLOID	KAYITID	USTTABLOID	USTKAYITID
+--------------------------------------------------------------------------------
+LOG SIRASI	609	107	114001	107	114001
+LOG SIRASI	610	330	3557453	107	114001
+LOG SIRASI	611	330	3557454	107	114001
+LOG SIRASI	612	330	3557455	107	114001
+LOG SIRASI	613	367	549402	107	114001
+LOG SIRASI	614	367	549403	107	114001
+LOG SIRASI	615	367	549404	107	114001
+LOG SIRASI	616	367	549405	107	114001
+LOG SIRASI	617	375	0	107	114001
+LOG SIRASI	618	375	0	107	114001
+LOG SIRASI	619	375	0	107	114001
+LOG SIRASI	620	375	0	107	114001
+x	Baslik	Satir	Izlem
+--------------------------------------------------------------------------------
+ROLLBACK SONRASI	1	3	4
 x	Adet
 --------------------------------------------------------------------------------
-kalan test logu	0
+KALAN TEST LOGU	0
 
