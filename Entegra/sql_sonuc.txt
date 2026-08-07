@@ -1,4 +1,9 @@
-﻿name	create_date	modify_date
+﻿name	tip	max_length	is_nullable	is_identity
 --------------------------------------------------------------------------------
-sp_Prog_Firsat_Liste	13.07.2026 20:38:06	13.07.2026 20:38:06
+ID	int	4	False	True
+KULID	int	4	False	False
+MODUL	int	4	False	False
+KAYITID	int	4	False	False
+SAY	int	4	False	False
+DEGISTIRMETARIHI	smalldatetime	4	False	False
 
