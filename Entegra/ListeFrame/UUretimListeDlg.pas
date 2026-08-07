@@ -5,7 +5,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxGraphics,

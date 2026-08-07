@@ -107,8 +107,6 @@ object StokTalepWizard: TStokTalepWizard
       VisibleButtons = [bkNext, bkFinish, bkCancel]
       OnPage = SiparisEkrPage
       OnNextButtonClick = SiparisEkrNextButtonClick
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelAlt2: TPanel
         Left = 0
         Top = 477
@@ -576,11 +574,13 @@ object StokTalepWizard: TStokTalepWizard
         TabOrder = 1
         object Panel2: TPanel
           Left = 1
-          Top = 215
+          Top = 218
           Width = 1030
-          Height = 191
+          Height = 188
           Align = alClient
           TabOrder = 0
+          ExplicitTop = 215
+          ExplicitHeight = 191
           object GridFatura: TcxGrid
             AlignWithMargins = True
             Left = 4
@@ -593,6 +593,7 @@ object StokTalepWizard: TStokTalepWizard
             LookAndFeel.Kind = lfOffice11
             LookAndFeel.NativeStyle = False
             LookAndFeel.SkinName = 'LondonLiquidSky'
+            ExplicitHeight = 156
             object GridFaturaView: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
@@ -966,14 +967,14 @@ object StokTalepWizard: TStokTalepWizard
         end
         object PageControlUst: TcxPageControl
           Left = 1
-          Top = 33
+          Top = 36
           Width = 1030
           Height = 182
           Align = alTop
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
-          ExplicitTop = 36
+          ExplicitTop = 33
           ClientRectBottom = 178
           ClientRectLeft = 4
           ClientRectRight = 1026
@@ -1425,7 +1426,6 @@ object StokTalepWizard: TStokTalepWizard
           Left = 4
           Top = 4
           Width = 1024
-          Height = 29
           Margins.Bottom = 0
           AutoSize = True
           ButtonHeight = 30
@@ -1452,6 +1452,7 @@ object StokTalepWizard: TStokTalepWizard
           ShowCaptions = True
           TabOrder = 2
           Transparent = True
+          ExplicitHeight = 29
           object KaydetTus: TToolButton
             Left = 0
             Top = 0

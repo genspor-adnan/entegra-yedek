@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, cxLookAndFeelPainters, dxSkinsCore, cxGraphics, dxSkinscxPCPainter, cxStyles,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData, FireDAC.Comp.Client,
   cxImageComboBox, cxMemo, cxSpinEdit, cxTimeEdit, cxDBEdit, cxCurrencyEdit,
@@ -358,6 +358,10 @@ type
     KuraGoreFiyatHesaplamaAlani:integer ; //faturaadetchange olay?nda kullan?l?yor bu de?i?ken
     FSatirEklemeToplamErtele: Boolean;
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // SIPARISDETAY orijinal satirlar (log diff icin)
+    FEkAlanKuruldu: Boolean;    // ek-alan (SIPARIS_USER) kontrolleri kuruldu mu (kart ID gelince kurulur)
+    FEkAlanKuruluyor: Boolean;  // re-entry guard (Post/AlanOlustur sekme degisimini tekrar tetiklerse)
+    FEkAlanKartID: Integer;     // ek alanlarin baglandigi talep (SIPARIS) ID'si
+    procedure PageControlUstPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure FaturaTutarHesapla(TabloAc:Boolean);
@@ -841,7 +845,9 @@ begin
     if Assigned(ctrl) then begin
       OutputDebugString(PChar(ctrl.Name));
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
-      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TStokTalepWizard(Self),DtsSIPARIS);
+      // Ek alan ANA SIPARIS'e degil SIPARIS_USER'a yazilir -> dialog da o datasource ile acilmali.
+      Tablo.AlanlarDlgBaslat('E',1,-1,ctrlPos.X,ctrlPos.Y,-1,FindComponent(ctrl.Name),TStokTalepWizard(Self),
+                             Tablo.UserDataSourceHazirla(TStokTalepWizard(Self), DtsSIPARIS, 'SIPARIS_USER'));
     end;
   end
   else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin   //Bile?en D?zenle
@@ -851,29 +857,48 @@ begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
 
       Tur := Tablo.ComponentTurGetir(ctrl.ClassName);
-      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(PanelUst.Name),TStokTalepWizard(Self),DtsSIPARIS);
+      Tablo.AlanlarDlgBaslat('D',1,Tur,ctrlPos.X,ctrlPos.Y,ctrl.Tag,FindComponent(PanelUst.Name),TStokTalepWizard(Self),
+                             Tablo.UserDataSourceHazirla(TStokTalepWizard(Self), DtsSIPARIS, 'SIPARIS_USER'));
     end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('S')) then  begin  //Bile?en Sil
     ctrl := FindVCLWindow(Mouse.CursorPos);
     if Assigned(ctrl) then begin
       ctrlPos := ctrl.ScreenToClient(Mouse.CursorPos);
       if ctrl.Name <> '' then begin
-        Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+' and TUR <> 11 ');
+        // TABLO kolonu da okunur: kolon HANGI tablodan dusurulecegini ALANLAR soyler.
+        //   (Eskiden sabit 'DEMIRBAS' yaziyordu - kopyala/yapistir hatasi; try/except
+        //    yuttugu icin sessizce YANLIS tabloya gidiyordu, ek alan kolonu SIPARIS_USER'da kaliyordu.)
+        Tablo.TablodanSorguAc(1,'Select CAPTION,ALANADI,TAG,TABLO from ALANLAR Where TAG='+IntToStr(ctrl.Tag)+' and TUR <> 11 ');
         if Application.MessageBox(PChar(Tablo.Query1.FieldByName('CAPTION').AsString+' alanını silmek istiyor musunuz ?'),'UYARI',MB_YESNO)=mrYes then  begin
 
           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from ALANLAR Where TAG ='+IntToStr(ctrl.Tag)+' ',[],[]);
           try
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Alter table DEMIRBAS drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
+            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Alter table '+Tablo.Query1.FieldByName('TABLO').AsString+
+                                          ' drop column '+Tablo.Query1.FieldByName('ALANADI').AsString+' ',[],[]);
           except
           end;
           ctrl.Visible := False;
-          //Tablo.AlanOlustur(FindComponent(PanelAlt.Name),TStokTalepWizard(Self),-1,DtsSIPARIS);
-          Tablo.AlanOlustur(TStokTalepWizard(Self),-1,DtsSIPARIS);
+          Tablo.AlanOlustur(TStokTalepWizard(Self),-1,Tablo.UserDataSourceHazirla(TStokTalepWizard(Self), DtsSIPARIS, 'SIPARIS_USER'));
         end;
       end;
     end;
   end;
 
+end;
+
+procedure TStokTalepWizard.PageControlUstPageChanging(Sender: TObject; NewPage: TcxTabSheet;
+  var AllowChange: Boolean);
+begin
+  // "Ek Alanlar" sekmesine gecis LAZY: once talep (SIPARIS) kaydedilir -> kart ID olusur,
+  //   sonra ek-alan (SIPARIS_USER) kontrolleri kurulur. ID olmadan _USER satiri yazilamaz,
+  //   bu yuzden acilista degil TAM BU ANDA kuruyoruz. Zorunlu alan bos ise BeforePost
+  //   Abort eder ve sekmeye GECILMEZ (ortak mantik Tablo.EkAlanSekmeHazirla'da).
+  if NewPage = TabSheetEkAlanlar then
+  begin
+    FEkAlanKartID := SIPARIS.FieldByName('ID').AsInteger;
+    Tablo.EkAlanSekmeHazirla(Self, SIPARIS, DtsSIPARIS, PanelAlt, 'SIPARIS_USER',
+      FEkAlanKartID, FEkAlanKuruldu, FEkAlanKuruluyor, AllowChange);
+  end;
 end;
 
 procedure TStokTalepWizard.FormShow(Sender: TObject);
@@ -888,7 +913,15 @@ var
 begin
   StokTalepWizard.Height:= Screen.Height- round(Screen.Height*0.1);
   EkleDetay :=  False;
-  Tablo.AlanOlustur(TStokTalepWizard(Self), -1,DtsSIPARIS);
+  // Ek alanlar ARTIK ACILISTA KURULMUYOR (lazy: "Ek Alanlar" sekmesine gecerken).
+  //   Eskiden burada AlanOlustur(..., DtsSIPARIS) cagriliyordu; ek alan kontrolleri ANA
+  //   SIPARIS dataset'ine baglaniyordu. O kolonlar SIPARIS'te olmadigi icin alanlar
+  //   DUZENLENEMIYORDU. Dogrusu SIPARIS_USER datasource'u (UserDataSourceHazirla).
+  FEkAlanKuruldu := False;
+  FEkAlanKuruluyor := False;
+  FEkAlanKartID := 0;
+  if PageControlUst <> nil then
+    PageControlUst.OnPageChanging := PageControlUstPageChanging;
   // Talep tarihi ileri olamaz -> takvimde ileri gun secilemesin (asil engel SIPARISBeforePost'ta).
   //   Satirdaki TESLIMTARIHI bu kisittan etkilenmez (ileri olabilir).
   EditFatTarih.Properties.MaxDate := DateOf(Tablo.GENINI.BugunTrh);
@@ -1726,6 +1759,9 @@ begin
      else
         SIPARIS.Cancel;
   end;
+  // Ek alanlar (SIPARIS_USER) AYRI datasource'ta tutulur -> kart Post'undan sonra o da yazilmali.
+  //   Sekmeye hic girilmediyse datasource olusmamistir; UserDataSourceKaydet o durumda no-op.
+  Tablo.UserDataSourceKaydet(TStokTalepWizard(Self), 'SIPARIS_USER');
   if SIPARISDETAY.State in [dsInsert, dsEdit] then
      SIPARISDETAY.Post;
   // NOT: eski etkisiz LogIslemleri/LogIslemlerBelge(SIPARISDETAY,...) kaldirildi.
