@@ -1,9 +1,15 @@
-﻿name	tip	max_length	is_nullable	is_identity
+﻿Olcut	Adet
 --------------------------------------------------------------------------------
-ID	int	4	False	True
-KULID	int	4	False	False
-MODUL	int	4	False	False
-KAYITID	int	4	False	False
-SAY	int	4	False	False
-DEGISTIRMETARIHI	smalldatetime	4	False	False
+Toplam belge	600
+Kapsam ICI	161
+Kapsam DISI (yazilmaz)	439
+ICI: matrah ayni (<=1 krs)	161
+ICI: matrah 1-5 krs	0
+ICI: matrah >1 TL	0
+ICI: KDV ayni	161
+ICI: KDV >1 TL	0
+ICI: toplam ayni	155
+ICI: toplam >1 TL	0
+x	ID	EskiMat	YeniMat	EskiKdv	YeniKdv	EskiTop	YeniTop
+--------------------------------------------------------------------------------
 
