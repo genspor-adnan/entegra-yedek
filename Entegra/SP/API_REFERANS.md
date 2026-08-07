@@ -150,9 +150,9 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 
 | Nesne | Durum | Girdi | Çıktı |
 |---|---|---|---|
-| `sp_Api_Belge_Liste_Json` | ⬜ | `{Tur,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu,Sirala}` | sonuç kümesi |
-| `sp_Api_Belge_Getir_Json` | ⬜ | `{BelgeId}` | 2 sonuç kümesi (başlık, satırlar) |
-| `sp_Api_Belge_EkAlan_Json` | ⬜ | `{Yer,KayitId}` | tanım + değerler |
+| `sp_Api_Belge_Liste_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Tur\|Turler[],BasTarih,BitTarih,RehberId,SubeId,Durum,BelgeNo,Aciklama,Sayfa,SayfaBoyu,Sirala}` | sonuç kümesi (`Fields[0]=ID`). `Sirala` beyaz liste: `TARIH_DESC\|TARIH_ASC\|NO_DESC\|NO_ASC\|TUTAR_DESC`. `GenDepoUpdate76.sql` |
+| `sp_Api_Belge_Getir_Json` | 🟨 MSSQL hazır, PG bekliyor | `{BelgeId}` | 2 sonuç kümesi (başlık, satırlar); ikisinde de `Fields[0]=ID`. `TM_FATBASLIK`+`TM_FaturaDetay` ikilisi yerine tek çağrı. `GenDepoUpdate76.sql` |
+| `sp_Api_Belge_EkAlan_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Ekran,Tablo,KayitId}` — `Tablo` beyaz liste | 2 sonuç kümesi: alan tanımları (`ALANLAR`) + `{Sonuc,KayitId,Degerler:{...}}`. `GenDepoUpdate77.sql` |
 
 ### F. Yazma
 

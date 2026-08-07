@@ -125,34 +125,36 @@ BEGIN
     EXEC dbo.sp_Api_Log_YilTablosu @Yil = @Yil, @Tablo = @LogTablo OUTPUT;
 
     -- ---- BILGI JSON ifadesi: kolon basina  ,"AD":"deger"  (NULL/bos ve blob HARIC) ----
-    DECLARE @Parca NVARCHAR(MAX) = N'';
-    SELECT @Parca = @Parca +
-        CASE WHEN @Parca = N'' THEN N'' ELSE N' + ' END +
-        N'CASE WHEN ' + QUOTENAME(c.name) + N' IS NULL THEN N'''' ELSE ' +
-        N'N'',"' + STRING_ESCAPE(c.name, 'json') + N'":"'' + STRING_ESCAPE(' +
-          CASE
-            WHEN t.name = 'date'                    THEN N'CONVERT(nvarchar(10), ' + QUOTENAME(c.name) + N', 23)'
-            WHEN t.name IN ('datetime','datetime2','smalldatetime','datetimeoffset')
-                                                    THEN N'CONVERT(nvarchar(19), ' + QUOTENAME(c.name) + N', 120)'
-            WHEN t.name = 'time'                    THEN N'CONVERT(nvarchar(8),  ' + QUOTENAME(c.name) + N', 108)'
-            WHEN t.name IN ('float','real')         THEN N'CONVERT(nvarchar(50), ' + QUOTENAME(c.name) + N')'
-            WHEN t.name IN ('money','smallmoney','decimal','numeric')
-                                                    THEN N'CONVERT(nvarchar(50), CAST(' + QUOTENAME(c.name) + N' AS decimal(38,6)))'
-            WHEN t.name = 'bit'                     THEN N'CASE WHEN ' + QUOTENAME(c.name) + N' = 1 THEN N''True'' ELSE N''False'' END'
-            WHEN t.name = 'uniqueidentifier'        THEN N'CONVERT(nvarchar(36), ' + QUOTENAME(c.name) + N')'
-            ELSE N'CAST(' + QUOTENAME(c.name) + N' AS nvarchar(max))'
-          END +
-        N', ''json'') + N''"'' END'
-    FROM sys.columns c
-        JOIN sys.types t ON t.user_type_id = c.user_type_id
-    WHERE c.object_id = @oid
-      AND t.name NOT IN ('varbinary','binary','image','text','ntext','xml',
-                         'geography','geometry','hierarchyid','sql_variant','timestamp')
-      -- temporal (system-versioned) ValidFrom/ValidTo ve gizli kolonlar: GENERATED ALWAYS
-      --   olduklari icin geri yazilamaz, log'a da girmemeli.
-      AND c.generated_always_type = 0
-      AND c.is_hidden = 0
-    ORDER BY c.column_id;
+    -- DIKKAT: "SELECT @v = @v + ..." birikimli atama JOIN + ORDER BY ile
+    --   BELIRSIZDIR (SQL Server garanti vermez). Ifade FOR XML PATH ile kurulur.
+    DECLARE @Parca NVARCHAR(MAX) =
+    (
+        SELECT N' + CASE WHEN ' + QUOTENAME(c.name) + N' IS NULL THEN N'''' ELSE ' +
+               N'N'',"' + STRING_ESCAPE(c.name, 'json') + N'":"'' + STRING_ESCAPE(' +
+               CASE
+                 WHEN t.name = 'date'                    THEN N'CONVERT(nvarchar(10), ' + QUOTENAME(c.name) + N', 23)'
+                 WHEN t.name IN ('datetime','datetime2','smalldatetime','datetimeoffset')
+                                                         THEN N'CONVERT(nvarchar(19), ' + QUOTENAME(c.name) + N', 120)'
+                 WHEN t.name = 'time'                    THEN N'CONVERT(nvarchar(8),  ' + QUOTENAME(c.name) + N', 108)'
+                 WHEN t.name IN ('float','real')         THEN N'CONVERT(nvarchar(50), ' + QUOTENAME(c.name) + N')'
+                 WHEN t.name IN ('money','smallmoney','decimal','numeric')
+                                                         THEN N'CONVERT(nvarchar(50), CAST(' + QUOTENAME(c.name) + N' AS decimal(38,6)))'
+                 WHEN t.name = 'bit'                     THEN N'CASE WHEN ' + QUOTENAME(c.name) + N' = 1 THEN N''True'' ELSE N''False'' END'
+                 WHEN t.name = 'uniqueidentifier'        THEN N'CONVERT(nvarchar(36), ' + QUOTENAME(c.name) + N')'
+                 ELSE N'CAST(' + QUOTENAME(c.name) + N' AS nvarchar(max))'
+               END +
+               N', ''json'') + N''"'' END'
+        FROM sys.columns c
+            JOIN sys.types t ON t.user_type_id = c.user_type_id
+        WHERE c.object_id = @oid
+          AND t.name NOT IN ('varbinary','binary','image','text','ntext','xml',
+                             'geography','geometry','hierarchyid','sql_variant','timestamp')
+          AND c.generated_always_type = 0
+          AND c.is_hidden = 0
+        ORDER BY c.column_id
+        FOR XML PATH(''), TYPE
+    ).value('.', 'nvarchar(max)');
+    SET @Parca = STUFF(ISNULL(@Parca, N''), 1, 3, N'');   -- bastaki ' + ' at
 
     IF @Parca = N'' RETURN;
 
