@@ -3912,8 +3912,6 @@ begin
 end;
 
 procedure TFaturaWizardDlg.FaturaTutarHesapla(TabloAc:Boolean);
-var DOVIZKUR,FATURA_MATRAHI,KDV_TUTARI,FATURA_TUTARI,DOVIZ_TUTARI,MALIYETORT,STOPAJ : extended;
-    RaporDoviz,s:String;
 begin
   if FSatirEklemeToplamErtele then begin
     FToplamHesapBekliyor := True;
@@ -3922,21 +3920,14 @@ begin
 
   if (TabFatbaslik.Fields[0].AsString='')or(TabFatbaslik.Fields[0].AsString='-1') then
      exit;
-  TabloYenile( TOPLAMLAR, [TabFatbaslik.Fields[0].AsInteger]);
-  FATURA_MATRAHI := ToplamGetir(4,'DEGER');
-  if FATURA_MATRAHI=-99999 then
-     FATURA_MATRAHI := ToplamGetir(1,'DEGER'); //Toplam
-  FATURA_TUTARI  := ToplamGetir(20,'DEGER');    //'Genel Toplam'
-  DOVIZ_TUTARI   := ToplamGetir(20,'DOVIZTUTARI');
-  if (ComboFatTipi.EditValue=4)or(ComboFatTipi.EditValue=7)or(ComboFatTipi.EditValue=8) then begin//Serbest meslek makbuzu ise direk kdv yi alırız yoksa fark?
-     KDV_TUTARI     := ToplamGetir(15,'DEGER');
-     STOPAJ := abs(EditEkVergi.Value);  //ToplamGetir(7,'DEGER');
-     FATURA_MATRAHI := FATURA_MATRAHI - STOPAJ; //Normal matrahtan stopaj? ??kar?yoruz.
-  end else
-     KDV_TUTARI     := FATURA_TUTARI-FATURA_MATRAHI;
-   Tablo.TablodanSorguAc(1, 'select isnull(ROUND(sum(F.MIKTAR*ISNULL(SOM.BIRIMMALIYET,0.0)),2),0.0) as MALIYET_ORT '+
-      ' from FATURA F left outer join STOK_ORT_MALIYET SOM on F.ID=SOM.FATURAID where F.FATBASID=' + TabFatbaslik.Fields[0].AsString);
-   MALIYETORT := Tablo.Query1.FieldByName('MALIYET_ORT').AsExtended;
+  TabloYenile( TOPLAMLAR, [TabFatbaslik.Fields[0].AsInteger]);   // ekrandaki dip toplam listesi
+  // TOPLAM HESABI ARTIK SUNUCUDA: sp_Api_Belge_ToplamHesapla_Json hem hesaplar
+  //   hem FATBASLIK'a yazar. Ayni formulu (SP_PRG_FaturaDipToplami/TVF) kullanir;
+  //   stopaj (fatura tipi 4/7/8) ve ortalama maliyet kurallari da icindedir.
+  //   Boylece bu hesap Delphi'nin 9 ayri yerinde tekrarlanmiyor (bkz.
+  //   SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
+  //   NOT: gelen e-belge ve uretim fisinde SP kapsam disi birakir (yazmaz);
+  //   o belgelerde toplamlar kaynagindan (UBL / maliyet) gelir.
 
   {RaporDoviz := 'RAPORDOVIZ=(case when RAPORDOVIZ is null then '''+FATURA.FieldByName('DOVIZ_KURU').AsString+''' else RAPORDOVIZ end),';
    if ComboFatTipi.EditValue=5 then //kur fark? ise
@@ -3947,12 +3938,9 @@ begin
   else
      s:=',DOVIZKUR='+FExtToStr((DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00',FATBASLIK.FieldByName('FATURATARIH').AsDateTime),FATBASLIK.FieldByName('RAPORDOVIZ').AsString, Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'))),4);
   }
-  Veritabani.BasitKomutÇalıştır(
-    Tablo.FDCnn,
-    'update FATBASLIK set FATURA_MATRAHI=&MAT, KDV_TUTARI=&KDV, FATURA_TUTARI=&FAT, DOVIZ_TUTARI=&DOV, FATURA_MALIYETI_ORT=&MAL where ID=&ID',
-    ['&MAT','&KDV','&FAT','&DOV','&MAL','&ID'],
-    [FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, DOVIZ_TUTARI, MALIYETORT, TabFatbaslik.Fields[0].AsInteger]
-  );
+  Tablo.ApiCagir('sp_Api_Belge_ToplamHesapla_Json',
+    TJSONObject.Create.AddPair('BelgeId',
+      TJSONNumber.Create(TabFatbaslik.Fields[0].AsInteger)) as TJSONObject);
 
   if TabloAc then
      TabloYenile(TabFatbaslik, [TabFatbaslik.Fields[0].AsInteger]);

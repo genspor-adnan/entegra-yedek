@@ -184,3 +184,22 @@ PG'de karşılığı `GRANT EXECUTE ON FUNCTION public.fn_api_<x>_json(text,text
 
 Kaynak kodu bozulmadan çıkarmak için tanımlar **UTF-8** okunmalı; `sqlcmd -o` Türkçe karakterleri
 bozar (bkz. `TM_ANALIZ.md` §1 uyarısı).
+
+
+## 6. Delphi tarafı bağlama durumu
+
+Yardımcı: **`TTablo.ApiCagir(ASPAdi, AKosullar): string`** (`Utablo.pas`) — yazma nesnesini çağırır,
+tek satır/tek kolon JSON sonucunu döndürür. `ListeSPJson` ile aynı motor seam'i kullanır
+(MSSQL `EXEC dbo.sp_Api_...`, PG `SELECT * FROM fn_api_...`). SP içindeki `THROW` exception olarak
+yukarı gider — **yutulmaz** (silme/kaydetme sessizce başarısız olmasın).
+
+| Çağrı yeri | Eskiden | Şimdi |
+|---|---|---|
+| `TTablo.FaturaSil` (`Utablo.pas`) | Ayrı bağlantıda (`LConn`), transaction'sız; Pascal loglama + 8 ayrı `DELETE` | `sp_Api_Belge_Sil_Json` — tek transaction, aynı sıra ve kapsam |
+| `UFaturaWizard.FaturaTutarHesapla` | `TOPLAMLAR`'dan okuyup Pascal'da hesap + `UPDATE FATBASLIK` | `sp_Api_Belge_ToplamHesapla_Json` (ekrandaki dip toplam listesi için `TOPLAMLAR` kalıyor) |
+| `UFaturalar.MenuDurumuGuncelleClick` | `EXEC TM_SiparisDurumGuncelle` | `sp_Api_Belge_DurumHesapla_Json` |
+
+**Henüz bağlanmayanlar** (toplam formülü tekrarı — bkz. `TOPLAM_FORMUL_KARSILASTIRMA.md`):
+`Ubelgegiris`, `UEBelgeGelen`, `UHizliGiris`, `UHizliGunsonuDlg`, `UImport`, `UReplikasyon`,
+`UGiderPusulasi`, `IcerikFrame/UFaturalar` + `UFaturalar2` (durum sıfırlama). Bunlar sırayla
+`sp_Api_Belge_ToplamHesapla_Json`'a geçirilecek.

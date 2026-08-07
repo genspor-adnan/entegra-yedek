@@ -809,6 +809,10 @@ type
     //   if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;
     function IlkAcilisSonArananMi(var AIlkYukleme: Boolean): Boolean;
     procedure ListeSPJson(ATab: TFDQuery; const ASPAdi, ABaslik: string; AKosullar: TJSONObject; ALocateID: Integer = 0; const AIDTur: string = 'ID');  // generic 2-param JSON liste SP cagrisi (@Baslik ham SQL + @Kosullar JSON); AKosullar SAHIPLIGI devralinir (Free edilir)
+    // API (sp_Api_*_Json) YAZMA nesnesi cagirir; tek satir/tek kolon JSON sonucu doner.
+    //   AKosullar SAHIPLIGI devralinir (Free edilir). SP hata verirse (THROW 51xxx)
+    //   exception yukari gider - yutulmaz. PG'de fn_api_* karsiligi cagrilir.
+    function ApiCagir(const ASPAdi: string; AKosullar: TJSONObject): string;
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -5176,12 +5180,12 @@ begin
 end;
 
 procedure TTablo.FaturaSil(TabFatBaslik, TabFatura: TFDQuery; FatbasID:integer =0);
+// Silme govdesi 08.08.2026'da sp_Api_Belge_Sil_Json'a tasindi (asagida).
+//   Burada kalan: dataset hazirlama + on-kontrol (kullaniciya mesaj gosteren
+//   FaturaSilinebilirMi) + SP cagrisi.
 var
-  TabNo, TabNoKart, TurNo :Integer;
-  Cik, Silinebilir : boolean;
-  LConn: TFDConnection;
+  Silinebilir : boolean;
 begin
-  LConn := nil;
   if FatbasID = 0 then
      FatbasID:= TabFatBaslik.FieldByName('ID').AsInteger
   else if (TabFatBaslik = nil) or (TabFatura = nil) then begin
@@ -5239,101 +5243,28 @@ begin
 //  Veritabani.BasitKomutÇalıştır(FDCnn, 'update STOKIZLEME set DONUSID=0 where DONUSID in (select ID from STOKIZLEME where BASLIKID='+TabFatBaslik.FieldByName('ID').AsString+')',[],[]);
   if TabFatBaslik.FieldByName('ID').AsString='' then
      exit;
-  LConn := YeniGeciciBaglantiOlustur;
-  try
-    //eğer Üretim fişi ve üretilen ürün silinmişse lotnoyu da silelim
-    if TabFatBaslik.FieldByName('TUR').AsInteger=6 then begin
-       Veritabani.BasitKomutÇalıştır(LConn, ' DELETE SL FROM FATURA F '+
-         '     INNER JOIN STOKIZLEME SI ON SI.BASLIKID = F.FATBASID AND SI.SATIRID = F.ID AND SI.BELGETUR = 6 '+
-         '     INNER JOIN STOKSERILOT SL ON SL.STOKID = SI.STOKID AND SL.ID = SI.SERILOTID '+
-         ' WHERE F.FATBASID = '+TabFatBaslik.FieldByName('ID').AsString +
-         '   AND NOT EXISTS(SELECT SI1.* FROM STOKIZLEME SI1 WHERE SI1.STOKID = SI.STOKID AND SI1.SERILOTID = SL.ID AND SI1.ID <> SI.ID) ',[],[]);
-    end;
-  ///
-    // ---- LOGLAMA, FATURA satirlari SILINMEDEN ONCE (Geri Al icin). FATURA silininde FATURA_USER
-    // (satir ek alan) FK cascade ile gider -> once burada logla. Sira: kart -> her satir (once
-    // FATURA, sonra FATURA_USER) -> restore'da satir _USER'dan once eklenir (FK dogru).
-    TurNo := TabFatBaslik.FieldByName('TUR').AsInteger;
-    case TurNo of
-      3,12 : TabNo := TabNo_FIS_Gelen;   // giris fisi
-      4,16 : TabNo := TabNo_FIS_Giden;   // cikis fisi
-      20 : TabNo := TabNo_TRANSFER;      // stok transfer
-      6 : TabNo := TabNo_URETIMFISI;     // uretim fisi
-      10 : TabNo := TabNo_IRSALIYE_Gelen;     // wizard (TabloNo) ile ayni eslesme
-      14 : TabNo := TabNo_IRSALIYE_Giden;
-      8,110 : TabNo := Tabno_GIDERPUSULASI;
-      109 : TabNo := TabNo_KONSINYE_GELEN;
-      119 : TabNo := TabNo_KONSINYE_GIDEN;
-      9,11,13 : TabNo := TabNo_FATBASLIK_Gelen;
-      19,15,17 : TabNo := TabNo_FATBASLIK_Giden;
-    else
-      TabNo := TabNo_FATBASLIK;
-    end;
-    TabNoKart := TabNo;   // detay ust'u icin sakla
-    LogKartSil(TabFatBaslik, TabNo, TabFatBaslik.FieldByName('ID').AsInteger);
+  // ---- SILME ARTIK SUNUCUDA: sp_Api_Belge_Sil_Json ----
+  //   Kapsam ve sira bu yordamdan AYNEN devralindi (kart -> satirlar ->
+  //   FATURA_USER -> STOKIZLEME -> STOKIZLEMEDEPO -> FATBASLIK_USER loglanir,
+  //   sonra FK sirasinda silinir). Uc kazanim:
+  //     1) TEK TRANSACTION - burada ayri baglantida (LConn) ve transaction'siz
+  //        yapiliyordu; ortada hata olursa belge yarim silinmis kaliyordu.
+  //     2) Mobil ile ayni davranis - TM_FATBASLIKGuncelle'nin 'Sil' dali
+  //        yalnizca FATURA+FATBASLIK siliyordu (log/izleme/kasa/imaj yok).
+  //     3) Loglama SQL tarafinda; deger bicimi degismez (ISO/nokta), geri alma
+  //        ULog.GeriDegerAta ile iki bicimi de kabul eder.
+  //   Hata (or. 51200 silinemez) exception olarak yukari gider - yutulmaz.
+  Tablo.ApiCagir('sp_Api_Belge_Sil_Json',
+    TJSONObject.Create
+      .AddPair('BelgeId', TJSONNumber.Create(FatbasID))
+      .AddPair('Oturum', TJSONObject.Create
+        .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+        .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
 
-    TabFatura.First;
-    while not TabFatura.Eof do begin
-      case TurNo of
-        3,12 : TabNo := TabNo_FATURA;   // giris fisi detay
-        4,16 : TabNo := TabNo_FATURA;   // cikis fisi detay
-        20 : TabNo := TabNo_FATURA;     // transfer detay
-        6 : TabNo := TabNo_URETIMFISDETAY;  // uretim fisi detay
-        9 : TabNo := TabNo_FATURA_AlisSiparis;
-        10,11,13,8,109 : TabNo := TabNo_FATURA_GelenFatFisIrs;
-        19 : TabNo := TabNo_FATURA_SatisSiparis;
-        14,15,17,110,119 : Tabno := TabNo_FATURA_GidenFatFisIrs;
-      else TabNo := TabNo_FATURA_GelenFatFisIrs;
-      end;
-      // Detay -> ust=kart. Once FATURA satiri, sonra FATURA_USER (restore FK sirasi icin).
-      LogKartSil(TabFatura, TabNo, Tabfatura.FieldByName('ID').AsInteger, TabNoKart, FatbasID);
-      LogKayitSil('FATURA_USER', TabNo_FATURA_USER, Tabfatura.FieldByName('ID').AsInteger, TabNoKart, FatbasID);
-      TabFatura.Next;
-    end;
-    // STOKIZLEME (stok izleme/seri-lot; BASLIKID=FATBASLIK, SATIRID=FATURA) -> SILINMEDEN ONCE logla
-    // (Geri Al), sonra sil. FATURA'dan ONCE silinmeli (FK: SATIRID->FATURA). STOKLOKASYON loglanmaz.
-    // STOKIZLEMEDEPO (IZLEMID->STOKIZLEME.ID): STOKIZLEME delete trigger'i (TG_StokIzlemeDurumSil)
-    // bunu ve STOKDURUMIZLEME'yi siler. STOKIZLEME insert'inin durum trigger'i YOK -> restore'da
-    // izleme agregatlari tutmaz. Cozum: STOKIZLEMEDEPO'yu da logla (STOKIZLEME'den SONRA -> restore'da
-    // STOKIZLEME once gelir/FK, sonra STOKIZLEMEDEPO insert'i TG_StokIzlemeDurumEkle'yi tetikler ->
-    // STOKDURUMIZLEME yeniden kurulur). STOKDURUMIZLEME turetilmis, loglanmaz.
-    LogDetaylariSil('STOKIZLEME', 'BASLIKID', TabNo_STOKIZLEME, TabNoKart, FatbasID);
-    LogDetaylariSilSorgu('STOKIZLEMEDEPO',
-      'IZLEMID in (select ID from STOKIZLEME where BASLIKID='+IntToStr(FatbasID)+')',
-      TabNo_STOKIZLEMEDEPO, TabNoKart, FatbasID);
-    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKIZLEME where BASLIKID='+IntToStr(FatbasID),[],[]);
-    Veritabani.BasitKomutÇalıştır(LConn, 'delete from STOKLOKASYON where BASLIKID='+IntToStr(FatbasID),[],[]);
-
-    // ---- Loglama bitti; simdi FATURA satirlarini FIZIKSEL sil (FATURA_USER cascade gider).
-    TablodanSorguAc(1,'SElect FBTUR=FB.TUR,FB.GIRISDEPO,FB.CIKISDEPO,FID=F.ID,FTUR=F.TUR,F.IZLEME,F.URUNID,F.ADET,F.IADEFATURAID,F.YERI from FATBASLIK FB '+
-                      ' left outer join FATURA F on FB.ID=F.FATBASID Where FB.ID='+inttoStr(FatbasID)+'');
-    Query1.First;
-    While not Query1.Eof do begin
-      // eğer silinen kayıt gider pusulası ise ilgili fatura satırının iade miktar alanı güncellenmeli
-      if Query1.FieldByName('FBTUR').AsInteger = 8 then
-        IadeMiktarGuncelle(Query1.FieldByName('IADEFATURAID').AsInteger, Query1.FieldByName('ADET').AsString);
-      Veritabani.BasitKomutÇalıştır(LConn, ' delete from FATURA where ID=&Id ', ['&Id'], [Query1.FieldByName('FID').AsInteger]);
-      Query1.Next;
-    end;
-    Query1.Close;
-
-    if Assigned(TabFatura) and TabFatura.Active then
-      TabFatura.Close;
-    if Assigned(TabFatBaslik) and TabFatBaslik.Active then
-      TabFatBaslik.Close;
-
-    // varsa dokümanların silinmeli
-  //  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_FATURA)+' and YERID=&SId', ['&SId'], [FatbasID]);
-    Veritabani.BasitKomutÇalıştır(LConn, ' delete from REHBERBILGI where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'], [FaturaDetaySablonTipiBul(TurNo), FatbasID]);
-    Veritabani.BasitKomutÇalıştır(LConn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ', ['&yeri', '&yer_id'], [31, FatbasID]);
-    Veritabani.BasitKomutÇalıştır(LConn, ' delete from KASA where TUR in (61,71) and FATURAID=&Id ', ['&Id'], [FatbasID]);
-    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
-    // TabNo yukaridaki FATURA satir dongusunde ezildi -> kart grubu icin TabNoKart kullan.
-    LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, TabNoKart, FatbasID);
-    Veritabani.BasitKomutÇalıştır(LConn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[FatbasID]);
-  finally
-    FreeAndNil(LConn);
-  end;
+  if Assigned(TabFatura) and TabFatura.Active then
+    TabFatura.Close;
+  if Assigned(TabFatBaslik) and TabFatBaslik.Active then
+    TabFatBaslik.Close;
 end;
 
 procedure TTablo.IletisimEkle(RehberId:integer; var YeniId:integer; var YeniAd : string);
@@ -12772,6 +12703,37 @@ begin
     FreeAndNil(AKosullar);
   end;
   TabloYenile(ATab, [], ALocateID, AIDTur);
+end;
+
+function TTablo.ApiCagir(const ASPAdi: string; AKosullar: TJSONObject): string;
+// API yazma nesnesi cagrisi (sp_Api_<X>_Json / fn_api_<x>_json).
+//   Girdi tek JSON parametre (@Kosullar), cikti tek satir/tek kolon JSON.
+//   SP icindeki THROW buraya exception olarak gelir; CAGIRAN yakalamali ya da
+//   kullaniciya gostermeli - burada YUTULMAZ (silme/kaydetme sessizce
+//   basarisiz olmasin).
+var
+  LQ: TFDQuery;
+begin
+  Result := '';
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LQ.Connection := FDCnn;
+      // MOTOR SEAM: ListeSPJson ile ayni ad turetme kurali.
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := 'SELECT * FROM fn_' + LowerCase(Copy(ASPAdi, 4, MaxInt)) + '(:Kosullar)'
+      else
+        LQ.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Kosullar=:Kosullar';
+      LQ.ParamByName('Kosullar').AsString := AKosullar.ToJSON;
+      LQ.Open;
+      if not LQ.IsEmpty then
+        Result := LQ.Fields[0].AsString;
+    finally
+      FreeAndNil(AKosullar);
+    end;
+  finally
+    LQ.Free;
+  end;
 end;
 
 procedure TTablo.CekSenetOpsiyonUygula;

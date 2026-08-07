@@ -3655,10 +3655,15 @@ begin
     yeniid := 0;
     for I := 0 to GridFatListeTview.Controller.SelectedRecordCount - 1 do begin
          yeniid := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index];
-         Tablo.Query1.Close;
-         Tablo.Query1.SQL.Text:= 'EXEC TM_SiparisDurumGuncelle ' + IntToStr(yeniid);
-         if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-         Tablo.Query1.ExecSQL;
+         // API: siparis kapanma durumu (TM_SiparisDurumGuncelle yerine).
+         //   Eski SP'de @KISMI hesabi sabit ID (10224) ile yapiliyordu, alis
+         //   siparisi (TUR=9) hic islenmiyordu ve ADET=0 satirlar tamamlanmis
+         //   sayiliyordu. Yenisi bunlari duzeltir ve 0/1/9 disindaki (iptal vb.)
+         //   durumlara dokunmaz.
+         Tablo.ApiCagir('sp_Api_Belge_DurumHesapla_Json',
+           TJSONObject.Create
+             .AddPair('BelgeId', TJSONNumber.Create(yeniid))
+             .AddPair('Kaynak', 'siparis') as TJSONObject);
     end;
     JvTimer1Timer(Self);
   end;
