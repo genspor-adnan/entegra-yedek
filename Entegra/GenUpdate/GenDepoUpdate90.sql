@@ -249,13 +249,50 @@ BEGIN
         END
     END
 
-    -- ---------- 7) Izleme secimi ----------   [K6]
+    -- ---------- 7) Izleme ----------   [K6]
+    --
+    -- IKI FARKLI DURUM VAR - eski Pascal akisi da bu ayrimi yapiyordu
+    -- ('if (Izleme>0) and (KaynakTabloAdi = ''FATBASLIK'')'):
+    --
+    --  a) KAYNAK FATURA (irsaliye -> fatura/fis, konsinye, uretimden):
+    --     kaynakta STOKIZLEME kaydi VARDIR; seri/lot hedefe TASINIR.
+    --     Cagiran secim gondermediyse kaynagin kalanli kayitlarindan FIFO ile
+    --     otomatik secilir (eski akis da hepsini otomatik tasiyordu).
+    --  b) KAYNAK SIPARISDETAY (siparisten belge):
+    --     SIPARIS stok hareketi yapmaz, STOKIZLEME kaydi YOKTUR; seri/lot
+    --     DEPODAN SECILMELIDIR. Bu secim ekrandan yapilir. Secim gelmediyse
+    --     donusum yapilmaz (eski akis da engelliyordu).
     IF @IzlemeAktarim = 1
     BEGIN
-        -- Izlemeli satirda secim ZORUNLU
+        -- (a) Secim gonderilmemis izlemeli satirlar icin FIFO otomatik secim
+        INSERT #DonusumIzlemeSecim (SatirId, StokIzlemeId, Adet)
+        SELECT X.SatirId, X.IzlemId, X.Pay
+        FROM (
+            SELECT S.SatirId, SI.ID AS IzlemId,
+                   Pay = CASE WHEN SUM(SI.KALAN) OVER (PARTITION BY S.SatirId
+                                                       ORDER BY SI.ID
+                                                       ROWS UNBOUNDED PRECEDING) <= S.IstenenAdet
+                              THEN SI.KALAN
+                              ELSE S.IstenenAdet
+                                 - ISNULL(SUM(SI.KALAN) OVER (PARTITION BY S.SatirId
+                                                              ORDER BY SI.ID
+                                                              ROWS BETWEEN UNBOUNDED PRECEDING
+                                                                       AND 1 PRECEDING), 0)
+                         END
+            FROM #DonusumKaynakSatir S
+                 INNER JOIN STOKIZLEME SI WITH (UPDLOCK, HOLDLOCK)
+                         ON SI.BASLIKID = S.BaslikId AND SI.SATIRID = S.SatirId
+                        AND ISNULL(SI.KALAN, 0) > 0
+            WHERE ISNULL(S.Durum, N'') <> N'atlandi'
+              AND ISNULL(S.Izleme, 0) > 0
+              AND NOT EXISTS (SELECT 1 FROM #DonusumIzlemeSecim I WHERE I.SatirId = S.SatirId)
+        ) X
+        WHERE X.Pay > 0.0001;
+
+        -- Hala secimi olmayan izlemeli satir varsa kaynakta yeterli seri/lot yok
         INSERT #DonusumUyari (Kod, KaynakSatirId, Mesaj)
-        SELECT N'IZLEME_SECIMI_EKSIK', S.SatirId,
-               N'"' + ISNULL(ST.STOKADI, N'?') + N'" izlemeli bir urun; seri/lot secimi yapilmali.'
+        SELECT N'IZLEME_KAYNAKTA_YOK', S.SatirId,
+               N'"' + ISNULL(ST.STOKADI, N'?') + N'" icin kaynak belgede kalan seri/lot yok.'
         FROM #DonusumKaynakSatir S
              LEFT JOIN STOKLAR ST ON ST.ID = S.UrunId
         WHERE ISNULL(S.Durum, N'') <> N'atlandi'
@@ -289,6 +326,22 @@ BEGIN
         WHERE SI.ID IS NULL OR ISNULL(SI.KALAN, 0) + 0.0001 < I.Adet;
         SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
 
+        IF @HataSayisi > 0 RETURN;
+    END
+    ELSE
+    BEGIN
+        -- (b) Kaynak SIPARIS: seri/lot depodan secilmeli. Secim gelmediyse engelle.
+        INSERT #DonusumUyari (Kod, KaynakSatirId, Mesaj)
+        SELECT N'IZLEME_SECIMI_EKSIK', S.SatirId,
+               N'"' + ISNULL(ST.STOKADI, N'?') + N'" izlemeli bir urun; hangi seri/lot '
+             + N'cikacagi secilmeden bu belge olusturulamaz.'
+        FROM #DonusumKaynakSatir S
+             LEFT JOIN STOKLAR ST ON ST.ID = S.UrunId
+        WHERE ISNULL(S.Durum, N'') <> N'atlandi'
+          AND ISNULL(S.Izleme, 0) > 0
+          AND S.SatirTur = 1
+          AND NOT EXISTS (SELECT 1 FROM #DonusumIzlemeSecim I WHERE I.SatirId = S.SatirId);
+        SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
         IF @HataSayisi > 0 RETURN;
     END
 
