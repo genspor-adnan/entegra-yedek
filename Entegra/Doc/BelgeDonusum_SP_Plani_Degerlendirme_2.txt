@@ -1,0 +1,379 @@
+BELGE DONUSUM SP PLANI - DEGERLENDIRME RAPORU 2
+================================================
+Tarih: 05.08.2026
+Degerlendirilen plan: BelgeDonusum_SP_Plani.txt
+Karsilastirilan rapor: BelgeDonusum_SP_Plani_Degerlendirme.txt
+
+
+GENEL KANAAT
+------------
+Ilk degerlendirme raporu guclu ve buyuk olcude dogrudur. SP planinin ana
+omurgasi korunabilir; ancak uygulamaya baslamadan once trigger etkilesimi,
+rota politikalari, SP'ler arasi veri aktarimi ve davranis degisiklikleri
+acikca tanimlanmalidir.
+
+Sekiz SP'li yapi korunabilir. Bunun icin ana SP'nin JSON'u bir defa acmasi,
+alt SP'lerin ayni session icindeki gecici tablolar uzerinden calismasi ve
+tum islemin tek transaction altinda kalmasi gerekir.
+
+
+1. AYNEN KABUL EDILEN DEGERLENDIRMELER
+--------------------------------------
+
+1.1 Trigger envanteri
+Mevcut donusumun onemli yan etkileri trigger'lara baglidir. Utablo.pas
+icindeki asagidaki islem bu bagimliligi acikca gostermektedir:
+
+  update FATURA
+     set STOKDURUMDEGIS=STOKDURUMDEGIS
+   where FATBASID=<kaynak>
+
+Bu islem irsaliye -> fatura/fis rotalarinda maliyet/stok trigger'larini
+tetiklemek amaciyla kullanilmaktadir. Yeni SP, bu davranisi anlamadan
+Sonlandir asamasinda ayni hesaplari tekrar yaparsa cift hesap riski dogar.
+
+Uygulamaya baslamadan once canli SQL Server veritabaninda su nesneler
+dogrulanmalidir:
+
+- FATURA trigger'lari
+- FATBASLIK trigger'lari
+- SIPARIS ve SIPARISDETAY trigger'lari
+- STOKIZLEME ve STOKIZLEMEDEPO trigger'lari
+- Trigger'larin INSERT/UPDATE/DELETE davranislari
+- Trigger'larin cok satirli inserted/deleted tablolarini destekleyip
+  desteklemedigi
+
+Trigger tanimlari repoda tam olarak bulunmadigi icin yalniz adlara
+guvenilmemeli; sys.triggers, sys.trigger_events ve OBJECT_DEFINITION ile
+canli veritabanindan envanter alinmalidir.
+
+
+1.2 Kalan miktar hesabi
+Kalan hesaplamasi her rotada FATURA tablosuna bakamaz. 428 gibi hedefi
+SIPARISDETAY olan rotalarda hedef tablo farklidir. Bununla birlikte yalniz
+"kalan tablosu" bilgisi de yeterli degildir.
+
+Rota matrisinde asagidaki iki bilgi bulunmalidir:
+
+- KalanHedefTablo: FATURA, SIPARISDETAY veya URETIMEMRIDETAY
+- KalanGrubu: Ayni kaynak miktarini birlikte tuketen DonusumTuru kodlari
+
+Ornegin ayni irsaliye satirinin fatura ve fis donusumlerinin birbirinin
+kalanini etkileyip etkilemedigi KalanGrubu ile acikca belirlenmelidir.
+
+
+1.3 Rota matrisinin genisletilmesi
+Rota matrisi yalniz kaynak/hedef tur ve tablo adlarini icermemelidir.
+Asagidaki is kurallari da rota politikasinin parcasi olmalidir:
+
+- Kaynak belge turu ve hedef belge turu
+- Kaynak/hedef baslik ve detay tablo ailesi
+- KalanHedefTablo ve KalanGrubu
+- GirisDepoPolitikasi ve CikisDepoPolitikasi
+- DovizKaynakAlani ve DovizHedefAlani
+- StokDurumDegis degeri
+- Adet/Miktar isareti ve carpan
+- Izleme aktarim politikasi
+- Uretim/recete politikasi
+- Belge numarasi politikasi
+- E-belge durum politikasi
+- Kopyalanacak rota ozel kolonlari
+- Detay bolumu, ek bilgi ve yorum kopyalama politikasi
+
+
+1.4 Satir bazli fiyat bilgileri
+KaynaklarJson semasina kullanici tarafindan degistirilebilen su alanlar
+eklenmelidir:
+
+- birimFiyat
+- dovizBirimFiyat
+- iskonto
+- iskonto2
+- kdv
+- doviz
+- dovizKur
+- dovizKurDegeri
+- projeId
+- masrafId
+- merkezId
+- kampanyaId
+- aciklama
+- en, boy, yuzey ve sayi
+
+TUTAR, DOVIZ_TUTARI ve vergi tutarlari uygulamadan alinmamalidir. Bunlar
+SP tarafinda kaynak satir ve onaylanmis fiyat alanlarindan hesaplanmalidir.
+
+
+1.5 Davranis degisiklikleri
+Bos basligin rollback edilmesi, stok yetersiz satirin sessizce atlanmamasi
+ve kismi izleme miktarinin tamaminin sifirlanmamasi mevcut davranisla
+birebir uyum degil; bilincli hata duzeltmeleridir.
+
+Bu degisiklikler surum notunda ve kabul testlerinde ayri basliklarla
+belirtilmelidir.
+
+
+1.6 PostgreSQL paritesi
+Ilk kullanici talebi MSSQL ve PostgreSQL motorlarini kapsamaktadir. Mevcut
+plan dosyasi bilerek MSSQL'e indirgenmistir. Bu nedenle MSSQL plani tamam
+olduktan sonra ayri bir PostgreSQL esdeger plan hazirlanmalidir.
+
+PostgreSQL planinda en az asagidakiler bulunmalidir:
+
+- fn_prog_belgedonusum_uygula_json2
+- OUTPUT INSERTED.ID yerine RETURNING
+- UPDLOCK/HOLDLOCK yerine SELECT ... FOR UPDATE
+- SQL Server trigger yan etkilerinin PostgreSQL karsiliklari
+- Transaction sinirinin fonksiyon/cagiran baglanti arasinda tanimi
+- Gecici tablo, CTE veya array kullanimi
+- MSSQL ve PostgreSQL sonuc sozlesmesi paritesi
+
+PostgreSQL fonksiyonu icinde COMMIT/ROLLBACK yapilamaz. Islenmeyen hata
+zaten cagriyi geri alir. EXCEPTION blogu yalniz hatayi yapilandirilmis
+sonuca cevirmek gerekiyorsa kullanilmali ve yazilan kayitlarin geri
+alinmasi garanti edilmelidir.
+
+
+2. DUZELTILEREK KABUL EDILEN DEGERLENDIRMELER
+----------------------------------------------
+
+2.1 Belge numarasi politikasi
+Belge numarasi her rotada otomatik uretilmemelidir. Rota matrisinde
+BelgeNoPolitikasi bulunmalidir:
+
+- OTOMATIK:
+  Satis, uretim, transfer ve giden konsinye belgelerinde numara transaction
+  icinde sp_BelgeNoGetir kullanilarak tahsis edilir.
+
+- KULLANICI_GIRISI:
+  Tedarikci fatura ve irsaliye numaralari dis belge numarasidir. Kullanici
+  tarafindan girilebilir veya hedef sihirbazda tamamlanabilir.
+
+- KAYNAKTAN_KOPYALA:
+  Is kurali gerektiriyorsa kaynak numarasi hedefe aktarilir.
+
+- E_BELGE_SONRA:
+  Numara e-belge surecinde sonradan atanacaksa gecici durum acikca tutulur.
+
+Otomatik numara tahsisi uygulama tarafinda yapilmamali; SP transaction'i
+icinde ve es zamanli kullanim guvenli sekilde gerceklestirilmelidir.
+
+
+2.2 Differential test yaklasimi
+Eski Delphi akisiyla SP akisinin her durumda birebir esit olmasi zorunlu
+tutulmamali; eski akista bilinen hatalar vardir.
+
+Test sonuclari uc gruba ayrilmalidir:
+
+1) Beklenen birebir esdegerlik
+2) Onaylanmis davranis degisikligi/hata duzeltmesi
+3) Istenmeyen regresyon
+
+Bos baslik rollback'i, stok yetersizliginde tam hata ve kismi izleme
+duzeltmesi ikinci grupta yer almalidir. Differential test, degisikligi
+gorunur kilmak icin kullanilmali; eski hatayi korumak icin kullanilmamalidir.
+
+
+2.3 Stok yetersizligi davranisi
+Onerilen varsayilan davranis:
+
+- Bir satirda stok yetersizse tum donusum rollback edilir.
+- Satir sessizce atlanmaz.
+- HATAKODU ve satir bilgisi sonuc setinde dondurulur.
+- StokDurumKontrolKurali kullanici onayina izin veriyorsa uygulama onayi
+  alir ve ayni istek acik onay parametresiyle yeniden gonderilir.
+- Onayla devam edilen durum UYARILARJSON ve islem kaydinda saklanir.
+
+
+2.4 Fiyat onayi ekrani
+FiyatSor davranisinin mutlaka tek bir toplu ekrana donusmesi gerekmez.
+Mevcut satir bazli diyalog korunabilir.
+
+Onerilen akis:
+
+1) Kullanici kaynak satirlari secer.
+2) FiyatSor her satir icin gerekli onaylari alir.
+3) Sonuclar uygulama tarafindaki gecici donusum listesinde tutulur.
+4) Kaydet/Uygula aninda butun satirlar tek KaynaklarJson ile ana SP'ye
+   gonderilir.
+
+Boylece mevcut kullanici aliskanligi korunurken veritabani islemi tek
+transaction olarak calisir.
+
+
+2.5 EFATURASONUC kurali
+Ilk degerlendirmedeki "EFATURASONUC=20 yalniz satis fatura rotalari"
+ifadesi mevcut kodla tam uyumlu degildir. Utablo.pas icindeki kod 424
+Satis irsaliyesi -> Satis fisi rotasinda da EfatSonuc=20 atamaktadir.
+
+Bu durum dogrudan kopyalanmamalidir. Is kurali netlestirilerek rota
+matrisindeki EBelgePolitikasi alanina yazilmalidir. Hedef satis fisi icin
+20 degerinin gerekli olmadigi dogrulanirsa bu mevcut hata olarak
+duzeltilmelidir.
+
+
+3. ILK DEGERLENDIRMEDE EKSIK KALAN KONULAR
+------------------------------------------
+
+3.1 Alt SP'ler arasindaki veri aktarimi
+Ana SP'nin JSON'u her alt SP'de tekrar acmasi dogru degildir. Ayrica SQL
+Server stored procedure'leri tablo tipinde OUTPUT parametresi donduremez.
+
+Onerilen session gecici tablolari:
+
+- #DonusumKaynakBaslik
+- #DonusumKaynakSatir
+- #DonusumIzlemeSecim
+- #DonusumSatirEsleme
+- #DonusumUyari
+
+Ana Uygula_Json2 SP'si JSON'u bir kez bu tablolara acacak. Alt SP'ler ayni
+baglanti ve transaction icinde bu tablolari okuyup guncelleyecek.
+
+Bu sozlesme tanimlanmadan sekiz SP'li yapinin uygulanmasina baslanmamalidir.
+
+
+3.2 IstekID ve idempotency tablosu
+Ana veritabaninda benzersiz indeksli bir BELGEDONUSUMISLEM tablosu
+bulunmalidir. GENDEPO veya synonym uzerinden tutulmamalidir.
+
+Asgari alanlar:
+
+- ID
+- ISTEKID uniqueidentifier
+- DONUSUMTURU
+- KULLANICIID
+- SUBEID
+- DURUM: BASLADI, TAMAMLANDI, HATA
+- HEDEFBASLIKID
+- HEDEFTUR
+- BASLAMATARIHI
+- BITISTARIHI
+- SONUCJSON veya HATAKODU
+
+ISTEKID uzerinde unique index olmali. Ayni IstekID tekrar geldiginde:
+
+- TAMAMLANDI ise onceki sonuc dondurulur.
+- BASLADI ise es zamanli islem/timeout politikasi uygulanir.
+- HATA ise yeni deneme kurali acikca belirlenir.
+
+Hata durum kaydinin ana transaction rollback oldugunda nasil saklanacagi
+ayrica tasarlanmalidir. SQL Server'da autonomous transaction olmadigi icin
+hata kaydi rollback disinda ayri baglanti veya uygulama logu gerektirebilir.
+
+
+3.3 Mevcut hedef belge kontrolleri
+@HedefBaslikID>0 oldugunda sadece tur ve cari kontrolu yeterli degildir.
+Asagidakiler de kontrol edilmelidir:
+
+- Belge silinmis/iptal edilmis mi
+- Belge kapali veya kesinlesmis mi
+- E-fatura/e-irsaliye gonderilmis ya da islem gormus mu
+- Belge baska kullanici tarafindan degistirilmis mi
+- Sube, cari, giris/cikis depo, doviz ve KDV uyumlu mu
+- Belge tarihi kilitli donem veya devir sonrasinda mi
+- Satir eklemeye kullanici yetkisi var mi
+
+
+3.4 Trigger bilgisinin kaynagi
+Ilk degerlendirmedeki trigger adlari dogru bir baslangic envanteridir;
+ancak tanimlari repo icinde gorulmedigi icin kesin tasarim girdisi olarak
+almak yeterli degildir.
+
+Canli veritabanindan su bilgiler raporlanmalidir:
+
+- Trigger adi ve bagli tablo
+- AFTER/INSTEAD OF ve INSERT/UPDATE/DELETE olaylari
+- Trigger kodu
+- Tek satir varsayimi yapip yapmadigi
+- Recursive/nested trigger bagimliligi
+- Devre disi olup olmadigi
+- Hangi GENINI/opsiyon degerlerine bagli oldugu
+
+
+3.5 Sonlandirma sorumlulugu
+FaturaTutarGuncelle mevcut BelgeDonustur akisinda yorum satirindadir.
+Toplamlar wizard, SP_PRG_FaturaDipToplami veya trigger tarafindan farkli
+noktalarda hesaplanabilmektedir.
+
+Sonlandir SP'sine kod yazmadan once her hedef belge turu icin su tablo
+hazirlanmalidir:
+
+- Toplami kim hesapliyor
+- Cari bakiyeyi kim guncelliyor
+- Stok/maliyeti kim guncelliyor
+- Kaynak belge maliyetini kim yeniden hesapliyor
+- Hangi trigger veya mevcut SP bu isi yapiyor
+
+Ayni sorumluluk hem trigger hem Sonlandir SP'sinde uygulanmamalidir.
+
+
+4. SP SAYISI HAKKINDA SONUC
+---------------------------
+Toplam 8 SP plani korunabilir:
+
+1) dbo.sp_Prog_BelgeDonusum_Kaynak_Json2          - mevcut/disariya acik
+2) dbo.sp_Prog_BelgeDonusum_Uygula_Json2           - yeni/disariya acik
+3) dbo.sp_Prog_BelgeDonusum_Dogrula                - yeni/ic
+4) dbo.sp_Prog_BelgeDonusum_BaslikOlustur          - yeni/ic
+5) dbo.sp_Prog_BelgeDonusum_SatirAktar             - yeni/ic
+6) dbo.sp_Prog_BelgeDonusum_IzlemeAktar            - yeni/ic
+7) dbo.sp_Prog_BelgeDonusum_UretimAktar             - yeni/ic
+8) dbo.sp_Prog_BelgeDonusum_Sonlandir              - yeni/ic
+
+Bu sayinin dogru olmasi icin alt SP'ler arasindaki #temp tablo sozlesmesi,
+transaction sahipligi ve hata dondurma kurali planin parcasi olmalidir.
+
+
+5. REVIZE EDILMESI GEREKEN UYGULAMA SIRASI
+------------------------------------------
+1) Canli MSSQL trigger envanteri cikartilir.
+2) Trigger'lar tek ve cok satirli islemlerle test edilir.
+3) Desteklenen 22 rota icin genisletilmis politika matrisi hazirlanir.
+4) Mevcut ve hedeflenen davranis farklari is birimi tarafindan onaylanir.
+5) BelgeNoPolitikasi ve EBelgePolitikasi kesinlestirilir.
+6) Ana JSON semasi ve #temp tablo sozlesmesi kesinlestirilir.
+7) BELGEDONUSUMISLEM ve satir izleme semasi tasarlanir.
+8) Dogrula, BaslikOlustur ve SatirAktar SP'leri gelistirilir.
+9) IzlemeAktar ve UretimAktar SP'leri gelistirilir.
+10) Trigger sorumluluklarina gore Sonlandir SP'si gelistirilir.
+11) Eski Delphi akisi ile differential ve davranis testleri yapilir.
+12) Utablo.BelgeDonustur ana SP istemcisine donusturulur.
+13) UBelgeDonusum ve UFisIrsaliyeAraDlg ayni ana SP'ye tasinir.
+14) MSSQL kabulunden sonra PostgreSQL esdeger plan ve fonksiyonlar uygulanir.
+
+
+6. TEST KARARI
+--------------
+Her rota icin asagidaki test katmanlari uygulanmalidir:
+
+- Eski akis ile SP akisinin tablo bazli differential karsilastirmasi
+- Onaylanmis davranis farklari listesi
+- Tek satir ve cok satirli trigger testi
+- Tam ve kismi miktar donusumu
+- Seri/lot tam ve kismi aktarim
+- Es zamanli ayni kaynak satir donusumu
+- IstekID yeniden deneme
+- Mevcut hedef belgeye ekleme
+- Stok yetersizligi ve kullanici onayi
+- E-belge ve kilitli belge reddi
+- Ara adim hatasinda tam rollback
+- Belge numarasi es zamanlilik testi
+- Toplam, doviz, KDV, stok, maliyet ve cari bakiye kontrolu
+
+
+SONUC
+-----
+Ilk degerlendirme raporunun ana bulgulari kabul edilmektedir. SP plani
+uygulanabilir bir mimari sunmaktadir; ancak su dort konu tamamlanmadan
+kodlamaya baslanmamalidir:
+
+1) Canli trigger envanteri ve coklu satir guvenligi
+2) Genisletilmis rota politikasi ve kalan grubu
+3) Ana JSON -> #temp tablo -> alt SP veri sozlesmesi
+4) Onaylanmis davranis degisiklikleri ve differential test kurali
+
+Belge numarasi, fiyat onayi, PostgreSQL hata yonetimi ve differential
+testler ilk degerlendirmedeki sekliyle dogrudan alinmamis; mevcut is
+kurallari ve bilinen eski hatalar dikkate alinarak netlestirilmistir.
+

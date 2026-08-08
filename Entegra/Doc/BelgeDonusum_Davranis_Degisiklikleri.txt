@@ -1,0 +1,176 @@
+﻿BELGE DONUSUM SP PLANI - ON KOSUL 4: DAVRANIS DEGISIKLIKLERI VE TEST KURALI
+============================================================================
+Tarih  : 08.08.2026
+Amac   : BelgeDonusum_SP_Plani_Degerlendirme.txt madde 5 + Degerlendirme_2
+         madde 1.5 / 2.2 - eski akisla SP akisi arasindaki farklarin ONCEDEN
+         onaylanmis listesi ve differential testin nasil yorumlanacagi.
+Onceki : Trigger_Envanteri (1), Rota_Matrisi (2), Veri_Sozlesmesi (3)
+
+
+1. KARARLAR (08.08.2026, kullanici)
+------------------------------------
+K1  KalanGrubu: gruplar tanimli; IADE (416/417) ve FIYAT FARKI (418/419)
+    kalani TUKETMEZ. Mevcut 416 istisnasi kaldirilacak.
+K2  428'in kaynak TUR'u 101 (satinalma talebi) - canli veriyle dogrulandi.
+K3  EFATURADURUM: hedefe 0 yazilir. BaslikOlusur'un hesaplayip ilettigi
+    EFaturaDurum parametresi OLU'dur ve KALDIRILIR (bugunku fiili davranis
+    zaten 0 yazmak; degisiklik yok, yalnizca olu parametre temizleniyor).
+K4  EFATURASONUC: 0 yazilir.
+K5  Yorum kopyalama SP'ye ALINIR - yoruma bagli DOKUMAN (MODUL=210) ve IMAJ
+    katmanlari dahil.
+K6  Stok ve izleme on kosullari (asagida 2.1 ve 2.2).
+
+
+2. ONAYLANMIS DAVRANIS DEGISIKLIKLERI
+--------------------------------------
+Bunlar differential testte "regresyon" degil, ONAYLI FARK olarak gorulecek.
+
+2.1 STOK YETERSIZLIGI - kismi belge YOK   [K6]
+    BUGUN : stok yetersiz satir SESSIZCE atlaniyor; kalan satirlarla EKSIK bir
+            belge olusuyor, kullaniciya hicbir sey soylenmiyor.
+    YENI  : depodan cikis yapan rotalarda (satis siparisi -> irsaliye/fatura/
+            fis/konsinye, transfer, uretim sarf) once TUM satirlar icin stok
+            kontrolu yapilir. Yetersiz satir varsa:
+              - donusum HIC YAPILMAZ (tam rollback / hicbir yazma yok)
+              - yetersiz stoklar Uyarilar[] ile satir satir bildirilir
+              - HATAKODU 51200
+            "Bir kismi gecsin" davranisi YOK.
+    NOT   : StokDurumKontrolKurali kullanici onayina izin veriyorsa uygulama
+            onayi alir ve AYNI istegi stokOnayi=true ile yeniden gonderir.
+            Onay verilen durum islem kaydinda saklanir.
+
+2.2 IZLEMLI URUN - engelleme degil, SORMA   [K6]
+    BUGUN : kaynakta izlemeli (seri/lot) stok satiri varsa BASLIK OLUSUR,
+            "Izleme bilgili urun bulundu. DONUSUM butonundan donusturulebilir!"
+            mesaji cikar, SATIRLAR AKTARILMAZ -> geriye BOS BASLIK kalir.
+    YENI  : izlemeli her stok icin izlem bilgisi KULLANICIYA SORULUR
+            (mevcut StokIzleme diyalogu). Secimler #DonusumIzlemeSecim'e
+            (stokIzlemeId + adet) yazilip tek cagrida gonderilir.
+            Izlemeli satir var ve izleme secimi GELMEMISSE donusum YAPILMAZ
+            (51200 + Uyarilar[] IZLEME_SECIMI_EKSIK). Bos baslik ASLA kalmaz.
+    ETKI  : "DONUSUM butonundan yap" yonlendirmesi ortadan kalkiyor; izlemeli
+            urun normal donusum ekranindan da cevrilebilir hale geliyor.
+
+2.3 BOS BASLIK ROLLBACK
+    BUGUN : hata/engel durumunda baslik olusmus, satirlar olusmamis kaliyor.
+    YENI  : ara adimda hata olursa tum islem geri alinir; bos baslik kalmaz.
+
+2.4 KISMI IZLEME - kaynak KALAN'i tamamen sifirlanmayacak
+    BUGUN : donusen satirin STOKIZLEME kaydinda KALAN=0 yapiliyor (miktar ne
+            olursa olsun TAMAMI).
+    YENI  : yalnizca donusen miktar dusulur. Kismi donusumde kaynak seri/lot
+            kaydinda kalan miktar korunur.
+    BULGU (08.08.2026, testle): dogru dusumu TG_IzlemOrjinalYap trigger'i ZATEN
+            yapiyor (yeni satirin DONUSID'sine bakip kaynagin KALAN'ini dusuyor;
+            kalan 2 iken 1 adetlik aktarimda 1'e iniyor). Eski akistaki hata,
+            trigger isini yaptiktan SONRA Pascal'in KALAN=0 yazmasiydi.
+            Dolayisiyla duzeltme = elle UPDATE'i KALDIRMAK. Ilk yazimda elle
+            dusme de eklemistim, trigger ile CIFTE DUSUM yapip kalani 0'a
+            indiriyordu - test yakaladi.
+    ETKI  : izleme raporlarinda kismi donusmus satirlar artik dogru gorunur.
+            Gecmis veriyi DUZELTMEZ (yalniz bundan sonraki islemler).
+
+2.5 REHBERBILGI SABLON KOPYASI - kosul duzeltmesi
+    BUGUN : 'if VeriVarMi(...) then' blogunun begin/end'i EKSIK oldugu icin
+            REHBERBILGI insert'i KOSULSUZ calisiyor (kaynakta sablon olmasa da).
+            Ayrica kaynak YERI degeri 132 HARDCODED; dogrusu
+            FaturaDetaySablonTipiBul(kaynak belge turu).
+    YENI  : kaynakta sablon VARSA kopyalanir; kaynak ve hedef YERI degerleri
+            belge turunden hesaplanir.
+
+2.6 KALAN GRUBU - cift donusum kapatiliyor   [K1]
+    BUGUN : her rota yalniz kendi kodunu sayiyor (411'in 424'u saymasi haric).
+            Ayni siparis satiri hem irsaliyeye hem dogrudan faturaya
+            cevrilebiliyor. KANIT: SIPARISDETAY 6101 ADET 10 iken 409+410 ile
+            toplam 20 donusmus; 6764 ADET 4 iken 8.
+    YENI  : kalan, KalanGrubu'ndaki TUM kodlarin toplamiyla hesaplanir.
+    ETKI  : bugun "kalani var" gorunen bazi satirlar artik "kalan yok" olacak.
+            Mevcut asiri donusmus 9 satir GERIYE DONUK duzeltilmez.
+
+2.7 IADE / FIYAT FARKI kalani tuketmez   [K1]
+    BUGUN : 416 (iade-alis) TEKLIF ve FATBASLIK kaynaklarinda kalandan
+            dusuluyor; 417 (iade-satis) hicbir yerde dusulmuyor. Tutarsiz.
+    YENI  : hicbiri kalani tuketmez (tutarli). Iadenin kalani tuketmesi
+            gerekiyorsa AYRI bir is kurali karari olarak ele alinacak.
+    ETKI  : 416 izi olan satirlarda kalan artar (377 kaynak satir).
+
+2.8 EFATURASONUC = 0   [K4]
+    BUGUN : 410, 411, 424 rotalarinda 20 yaziliyor.
+    YENI  : 0 yazilir.
+    TEYIT EDILDI (T1): TUM rotalar icin 0. 410/411 dahil.
+
+2.9 EFATURADURUM olu parametre temizligi   [K3]
+    Davranis DEGISMEZ (0 yaziliyordu, 0 yazilmaya devam edecek). Yalnizca
+    BaslikOlusur'un kullanilmayan EFaturaDurum parametresi kaldirilir.
+
+2.10 YORUM KOPYALAMA SP'ye   [K5]
+    BUGUN : yalniz 428 rotasinda, Pascal'da YorumDonusKopyala -> YorumKopyala.
+            Yorumun kendisi + bagli DOKUMAN (MODUL=210) + IMAJ katmanlari
+            kopyalaniyor.
+    YENI  : ayni is Sonlandir icinde SQL ile yapilir. Uc katman da kopyalanir;
+            duz GOREVYORUM INSERT'i YETMEZ (ekler kaybolur).
+    DIKKAT: IMAJ icerigi GENDEPO.DOSYA'da (FILESTREAM, hash-dedup). Kopyalama
+            DOSYAID referansini paylasir, icerigi COGALTMAZ - DOSYA pin
+            sayaclari ULog deseniyle uyumlu tutulacak.
+    KAPSAM TEYIT EDILDI (T2): TUM rotalarda calisacak. Bugun yalniz 428'de
+            calistigi icin bu ayrica bir DAVRANIS DEGISIKLIGIDIR - kaynak belgenin
+            yorumlari artik her donusumde hedefe kopyalanir.
+
+
+3. DEGISMEYECEK DAVRANISLAR (bilincli)
+---------------------------------------
+  - Fiyat onayi (FiyatSor) SATIR BAZLI diyalog olarak KALIR. Sonuclar
+    uygulamada biriktirilip Uygula aninda tek cagrida gonderilir.
+    (Degerlendirme_2 madde 2.4 - kullanici aliskanligi korunuyor.)
+  - Belge numarasi politikasi rota bazlidir: alis tarafi (9/10/11/12) numara
+    URETMEZ, kullanici girer. Otomatik numara yalniz 14/15/16/6/119/20.
+  - YERI/YERID yazimi devam eder (mevcut ekranlar ve silme kontrolleri buna
+    bagli).
+  - Toplamlari Kaydet, stok/maliyeti trigger'lar yazar; Sonlandir bunlari
+    TEKRAR HESAPLAMAZ.
+
+
+4. DIFFERENTIAL TEST KURALI
+----------------------------
+Eski Delphi akisi ile SP akisi AYNI girdi ile kosulur; su tablolar
+karsilastirilir:
+    FATBASLIK, FATURA, SIPARIS, SIPARISDETAY, STOKIZLEME, STOKIZLEMEDEPO,
+    REHBERBILGI, GOREVYORUM, ISLEMLOG
+Karsilastirmada ID ve zaman damgalari maskelenir.
+
+Sonuclar UC gruba ayrilir:
+  1) BEKLENEN BIREBIR ESDEGERLIK - fark cikarsa REGRESYON
+  2) ONAYLI FARK - bu dosyanin 2. bolumundeki maddeler
+  3) ISTENMEYEN REGRESYON - duzeltilir
+
+Kural: ESKI AKISTAKI HATAYI KORUMAK ICIN test kullanilmaz. Bir fark 2. bolumde
+listeliyse test GECER; listede yoksa incelenir.
+
+Kapsam: ESKI AKIS KALDIRILMADAN ONCE her rota icin en az bir diff-esit kosu.
+Ayrica ayri test edilecekler:
+  - tek satir vs cok satirli INSERT'te trigger dogrulugu (on kosul 1)
+  - ayni kaynak satira es zamanli iki donusum istegi
+  - ayni IstekID ile yeniden deneme
+  - belge numarasi es zamanlilik
+  - ara adimda hata -> tam rollback (bos baslik kalmamali)
+
+
+5. KODLAMAYA GECIS - KALAN TEYITLER
+------------------------------------
+  T1  TEYIT EDILDI: TUM rotalar icin 0.
+  T2  TEYIT EDILDI: TUM rotalarda calisacak (bugun yalniz 428'de calisiyordu -
+      bu da bir davranis degisikligidir).
+Bu iki teyit disinda plan on kosullari (1-4) TAMAMLANMISTIR; kodlamaya
+gecilebilir:
+  Adim 1: sp_Api_Belge_Kaydet_Json genisletmesi (alanlar + @BelgeIdOut)  [TAMAM
+          - GenDepoUpdate88.sql, 08.08.2026]
+  Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i  [TAMAM - GenDepoUpdate89]
+  Adim 3: sp_Prog_BelgeDonusum_Dogrula  [TAMAM - GenDepoUpdate90]
+  Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)  [TAMAM - GenDepoUpdate91]
+  Adim 5: IzlemeAktar / UretimAktar / Sonlandir  [TAMAM - GenDepoUpdate92]
+  Adim 6: sp_Prog_BelgeDonusum_Uygula_Json2 (ana SP)  [TAMAM - GenDepoUpdate93]
+  Adim 7: differential testler
+  Adim 8: Utablo.BelgeDonustur ince istemciye donusur  [TAMAM - Utablo.pas]
+          Eski akis SILINMEDI: yalniz sunucunun desteklemedigi rotalar (428,
+          412/413) icin duruyor. Adim 7 (differential test) bitince o dallar
+          da temizlenecek.

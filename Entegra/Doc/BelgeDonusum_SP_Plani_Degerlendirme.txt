@@ -1,0 +1,183 @@
+BELGE DONUSUM SP PLANI - DEGERLENDIRME RAPORU
+==============================================
+Tarih: 05.08.2026
+Degerlendirilen plan: BelgeDonusum_SP_Plani.txt
+Incelenen kod: Utablo.pas (BelgeDonustur, BelgeDonustur_BaslikOlusur,
+BelgeDonustur_DetaySatirOlustur, BelgeDonustur_DonusTipiBul,
+BelgeDonustur_BilgiAyarlari, FaturaTutarGuncelle), UBelgeDonusum.pas (StokEkle),
+UFaturaTransferListe.pas, UFaturalar.pas cagri noktalari.
+
+
+GENEL KANAAT
+------------
+Plan omurga olarak saglam: rota matrisinin SP icinde tutulmasi, IstekID ile
+idempotency, OUTPUT INSERTED.ID, tek transaction + tam rollback, set bazli
+satir aktarimi dogru kararlar. Mevcut Delphi kodunda bunlarin cogu yok:
+transaction yok, detay ID'si "order by ID desc" ile bulunuyor (race'e acik),
+izlemli urunde bos baslik kalabiliyor. SP'ye tasima bu yapisal sorunlari
+cozer. Asagidaki eksikler yayina girmeden plana eklenmeli.
+
+
+1. TRIGGER'LAR PLANDA HIC YOK (EN BUYUK EKSIK)
+-----------------------------------------------
+Donusumun asil yan etkileri SP'de degil trigger'da yasiyor:
+
+  FATURA     : TG_StokDurumGuncelle, TG_StokFiyatGuncelle,
+               Trg_Fatura_MasrafID_Guncelle, Trg_Fatura_MasrafID_StokID_Guncelle
+  FATBASLIK  : TG_MaliyetGuncelle, TG_FatBaslik_CariBakiye
+  SIPARIS    : trg_Siparis_Aktarim
+  STOKIZLEME : TG_StokIzlemeDurumSil, TG_IzlemOrjinalYap
+
+Riskler / yapilacaklar:
+- Sonlandir SP'si toplam/maliyet guncellerken trigger ile CIFTE HESAP riski.
+  Not: FaturaTutarGuncelle cagrisi BelgeDonustur'da bugun YORUM SATIRINDA;
+  toplamlari fiilen kimin guncelledigi (trigger mi, cagiran ekran mi) once
+  netlestirilmeli.
+- Set bazli INSERT cok satirli 'inserted' uretir; satir-satir varsayan
+  trigger varsa bozulur. Cok satirli insert + trigger testi sart.
+- Mevcut akistaki "trigger durtme" planda yok:
+  update FATURA set STOKDURUMDEGIS=STOKDURUMDEGIS where FATBASID=<kaynak>
+  (irs->fat/fis rotalarinda maliyet trigger'ini tetiklemek icin).
+- Plana "trigger envanteri ve etkilesim" fazi eklenmeli.
+
+
+2. PG PARITESI TEK SATIRLA GECILMIS
+------------------------------------
+Plan basligi "MSSQL". Proje kurali: her degisiklik iki motorda calismali.
+Daha kritigi: PG'de (docker pilot) fatura/fatbaslik/siparis/stokizleme
+uzerinde HIC TRIGGER YOK. MSSQL SP'si trigger'lara yaslanirken PG fonksiyonu
+ayni yan etkileri ya acikca kendi icinde yapmali ya da once trigger'lar
+portlanmali. Ayrica:
+- fn_prog_belgedonusum_uygula plpgsql ikizi gerekir.
+- OUTPUT INSERTED.ID -> RETURNING
+- UPDLOCK/HOLDLOCK   -> SELECT ... FOR UPDATE
+- XACT_ABORT/TRY-CATCH -> plpgsql EXCEPTION blogu
+- #temp tablolar -> gecici tablo / CTE / array
+Bu is plana ayri bir faz olarak girmeli; "PG'ye sonra bakariz" denirse
+cift-motor kurali bozulur.
+
+
+3. KALAN (DONUSENMIKTAR) TABLOSU ROTA-BAGIMLI (MEVCUT BUG)
+-----------------------------------------------------------
+Kod her rotada kalani FATURA'dan sayiyor:
+  DONUSENMIKTAR=ISNULL((SELECT SUM(MIKTAR) FROM FATURA
+                        WHERE YERI=<DonusTuru> AND YERID=D.ID),0)
+428 (satinalma talebi -> alis siparisi) rotasinda hedef SIPARISDETAY —
+kalan yanlis tablodan sayiliyor (ya da trg_Siparis_Aktarim ile telafi
+ediliyor; dogrulanmali). Rota matrisine "kalan hangi tablodan sayilir"
+kolonu eklenmeli.
+
+
+4. BELGE NUMARASI SP ICINDE URETILMELI
+---------------------------------------
+Plan numarayi @HedefAyarlarJson ile disaridan aliyor; mevcut kod
+SiradakiBelgeNumarasi + KocannoBul'u app tarafinda cagiriyor. Iki kullanici
+ayni anda donusum yaparsa numara cakismasi bugun mumkun. SP'ye tasima bu
+race'i bitirme firsati; numara tahsisi transaction icinde SP'de olmali,
+app en fazla oneri gonderebilmeli.
+
+
+5. DAVRANIS DEGISIKLIKLERI BOLUMU EKSIK
+----------------------------------------
+Plan asagidakileri sessizce degistiriyor; bilincli karar olarak ayrica
+yazilmali:
+
+a) Stok yetersiz satir bugun SESSIZCE ATLANIYOR (stokyeterli=False ->
+   satir eklenmez, mesaj yok, eksik belge olusur). Plan "hata veya onay"
+   diyor — varsayilan davranis ne olacak? Atlanan satirlar UYARILARJSON'a
+   mutlaka girmeli.
+b) Izlemli urunde bugun BOS BASLIK kaliyor (baslik olusur, MessageBox
+   cikar, satirlar atlanir). Rollback bunu duzeltir — dogru — ama kullanici
+   aliskanligi degisir; surum notuna yazilmali.
+c) Kismi izleme: plan "kaynak izleme kaydinin tamami sifirlanmayacak"
+   diyor; bugun KALAN=0 yapiliyor (tamami sifirlaniyor) ve STOKIZLEMEDEPO'ya
+   ADET=0 satir aciliyor, DONUSID ile eski satira baglaniyor. Plandaki
+   davranis bir DUZELTMEDIR, mevcutla uyum degil — acikca secilmeli ve
+   izleme raporlari bundan etkilenir mi bakilmali.
+
+
+6. ROTA MATRISINDE EKSIK ALANLAR
+---------------------------------
+Koddan cikan, planin 6. bolumune girmemis istisnalar:
+
+- Depo eslemesi rota bazli:
+  * SATIS_SIPARIS_KON (429): GIRISDEPO=(select ID from DEPOLAR where
+    DURUM=1 and VARSAYILAN=7 and SUBEID=<sube>) — konsinye deposu kurali.
+  * Uretim rotalari (415/420, 425/426): GIRISDEPO/CIKISDEPO caprazlari.
+  * 414 (siparis->transfer): cift kolon 'GIRISDEPO,CIKISDEPO'.
+- Doviz kolon eslemesi uc dal:
+  * siparis->irs/uretim : RAPORDOVIZ -> FATURADOVIZI
+  * irs->fat/fis, uretim->irs/fat : FATURADOVIZI -> FATURADOVIZI
+  * digerleri : CariDoviz sabiti
+- Kolon listesi rota bazli:
+  * KDVMUHAFIYETI yalniz irs->fat/fis rotalarinda.
+  * Uretim SARF (420): Carpan=-1 (negatif adet/miktar),
+    EKIPMANID = case when MIKTAR>0 then 1 else -1 end.
+  * EFATURASONUC=20 yalniz satis fatura rotalari; SENARYO GENINI
+    Ops_FaturaOpsiyon_Senaryo'dan.
+  * STOKDURUMDEGIS rota bazli 0/1 (iki kez stok dusmemesi icin) — matrise
+    kolon olarak girmeli.
+- DETAYBOLUMU + REHBERBILGI sablon kopyasi (BaslikOlusur sonrasi) planda
+  yok. Ustelik mevcut kodda 'if VeriVarMi ... then' bloklarinin begin/end'i
+  EKSIK — REHBERBILGI insert'i kosulsuz calisiyor ve kaynak YERI=132
+  HARDCODED (dogrusu FaturaDetaySablonTipiBul(kaynak tur)). SP'ye tasirken
+  bu bug da duzeltilmeli.
+- YorumDonusKopyala bugun YALNIZ 428'de calisiyor; plan Sonlandir'da
+  "yorumlar" diye genel gecmis — kapsam netlestirilmeli (yalniz 428 mi,
+  tum rotalar mi).
+- Uretim recete/sarf patlatmasi (415): recete detay insert'inde bugun ID
+  donusu ve izleme YOK; maliyet MALIYETSON/MALIYETORT + DovizKurDegeri
+  bolmesi, YERI=TabNo_URETIMRECETEDETAY, YERID=URD.ID. UretimAktar bu
+  kurallari birebir almali.
+
+
+7. UI ETKILESIMI SATIR BASINA — GECIS PLANI ADIM 7 GERCEKCI DEGIL
+------------------------------------------------------------------
+UBelgeDonusum.StokEkle satir BASINA FiyatSor diyalogu aciyor (fiyat/iskonto
+onayi). "Ayni ana SP'yi kullanir" demek yetmez: fiyat onaylari SP cagrisindan
+ONCE toplu alinip KaynaklarJson'a satir bazli alan olarak girmeli. Plandaki
+satir semasinda birimFiyat/iskonto/iskonto2/dovizKur alani YOK — eklenmeli.
+Bu bir UX degisikligidir (satir satir soru yerine tek toplu onay ekrani),
+davranis degisiklikleri bolumune de yazilmali.
+
+
+8. TEST BOLUMUNE MEKANIZMA EKLE
+--------------------------------
+12. bolum senaryo sayiyor ama arac belirtmiyor. Eldeki differential
+altyapi kullanilmali:
+- Ayni senaryo eski Delphi akisi ile bir DB'de, SP ile kopya DB'de kosulur;
+  FATBASLIK / FATURA / SIPARISDETAY / STOKIZLEME / STOKIZLEMEDEPO /
+  REHBERBILGI tablolari diff'lenir (pg/tools/db_diff.ps1 deseni MSSQL-MSSQL
+  icin uyarlanabilir).
+- Eski akis kaldirilmadan once ROTA BASINA en az bir diff-esit kosu sart.
+- Cok satirli INSERT'te trigger dogrulugu ayri test edilmeli (tek satir vs
+  coklu satir ayni sonucu vermeli).
+
+
+9. KUCUK NOTLAR
+----------------
+- IstekID / donusum islem-kayit tablosu ANA DB'de olmali, GENDEPO'da degil
+  (synonym bagimliligi log ekrani vakasinda sorun cikarmisti).
+- Dogrula'daki stok kontrolu mevcut sp_Prog_Kontrol_Adet_Izlemli /
+  sp_Prog_Kontrol_Adet_Izlemsiz SP'lerini YENIDEN KULLANMALI (tarih bazli,
+  StokDurumKontrolKurali opsiyonlu); ayni mantik ikinci kez yazilmamali.
+- Kapsam disi listesi dogru (404/405/412/413/431/469). 412/413 icin
+  BelgeDonustur icinde de dal var; gecis tamamlaninca o dallar OLU KOD
+  olarak isaretlenmeli/temizlenmeli.
+- EKLEYEN alani FATURA insert'inde sayi (Kullanan), SIPARIS baslik
+  insert'inde tirnakli string olarak gidiyor — SP'de tek tip (int) olmali.
+
+
+OZET
+----
+Plan omurga olarak ONAYLANIR. Yayina girmeden once eklenecekler:
+ (1) Trigger envanteri + etkilesim fazi (cifte hesap, coklu satir,
+     STOKDURUMDEGIS durtmesi)
+ (2) PG stratejisi: trigger yoklugu + plpgsql ikiz fonksiyon fazi
+ (3) Rota matrisine depo/doviz/kolon istisnalari + kalan-tablosu kolonu
+ (4) Belge no tahsisi SP icine
+ (5) "Davranis degisiklikleri" bolumu (atlanan satir, bos baslik, kismi
+     izleme)
+ (6) KaynaklarJson'a fiyat/iskonto alanlari (FiyatSor'un toplu onaya
+     donusmesi)
+ (7) Differential test mekanizmasi (rota basina eski-vs-SP diff)

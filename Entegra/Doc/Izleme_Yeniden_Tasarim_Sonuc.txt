@@ -1,0 +1,224 @@
+SERI/LOT (IZLEME) ALT SISTEMI - YENIDEN TASARIM SONUC RAPORU
+=============================================================
+Tarih   : 08.08.2026
+Kapsam  : Izleme ekrani (UIzleme) + belge donusumu izleme akisi
+Plan    : Doc/Izleme_Ekrani_Plani.txt (A1-A8), Doc/Sayim_Ekrani_Plani.txt (A7)
+Durum   : A1-A8 TAMAMLANDI. Dagitim (GUNCELLEMELER) ve PG portu YAPILMADI.
+
+
+1. CIKIS NOKTASI
+-----------------
+Ekran "kirilgan" geliyordu. Olculen sebepler:
+
+ - Ekran KENDI YAZIYORDU ve bunu FORM YOK EDILIRKEN yapiyordu
+   (UIzleme.FormDestroy, 136 satir). Yazma mrOk verildikten SONRA
+   calisiyordu: hata olusursa kullaniciya mesaj gitmiyor, cagiranin
+   akisina/transaction'ina girilemiyor, cagiran "kaydedildi" sanip devam
+   ediyordu.
+ - Yeni satirda satir ID'si Post'tan SONRA olustugu icin ekran canli
+   tutulup "dogru anda" yok ediliyordu. Kirilganligin buyuk kismi bu
+   numaradan geliyordu; uretim sihirbazlarinda yok etme UC ayri noktadaydi.
+ - Liste, DFM icindeki ALTI TMemo sorgusundan, metinle uretilen
+   "declare @X int set @X=123" on ekiyle ve ##TmpIzleme_<SPID>_<zaman>
+   global gecici tablosuyla olusuyordu. Ayni hesap uc memo ciftinde
+   tekrarlaniyor, biri degisince digeri geride kaliyordu.
+ - Eslestirme SERINO+LOTNO+SKT metin ucslusu ve elle COLLATE ile
+   yapiliyordu; collate/NULL/bosluk farki eslesmeyi SESSIZCE bozuyordu.
+
+
+2. YENI YAPI
+-------------
+CEKIRDEK ILKE: EKRAN SECER, YAZMAZ.
+
+  Okuma : sp_Prog_Izleme_Aday_Json      (aday liste, tek kaynak)
+  Kural : sp_Prog_Izleme_Dogrula_Json   (secim dogrulamasi, tek kaynak)
+  Yazma : sp_Prog_Izleme_Yaz_Json       (kanonik yazma)
+  Tasima: sp_Prog_Izleme_Aktar_Json     (kanonik tasima; donusum zinciri de
+                                         artik buna devrediyor)
+
+Istemci sarmalayicilari:
+  AnaForm.StokIzlemeSecimAl  - ekrani acar, YALNIZ secimi dondurur
+  Tablo.IzlemeSecimYaz       - secimi SP ile yazar
+  AnaForm.StokIzlemeSec      - satir ID'si belli olanlar icin ikisinin kisayolu
+
+Aday listesinin UC YONTEMI (eski memo ciftlerinin karsiligi):
+  tasima  = SQLDonusCikanHedef + Update  -> donusumde kaynaktan tasinacaklar
+  depo    = SQLCikan + SQLCikanUpdate    -> cikista depodaki bakiyeden secim
+  kendi   = SQLGiren + SQLCikanUpdate    -> giriste satirin kendi kayitlari
+Ekran hangisini istedigini "yontem" olarak soyler; donusum TURUNU bilmesi
+gerekmez.
+
+Eslestirme artik SERILOTID ile (STOKIZLEME'nin 454.379 satirinin hepsinde
+dolu oldugu dogrulandi). Metin+COLLATE ucslusu kalkti.
+
+
+3. TASINAN CAGIRANLAR (alti)
+-----------------------------
+  UFaturaWizard          secim BeforePost, yazma AfterPost (satir ID orada)
+  UFatTransferWizard     ayni desen
+  UFisIrsaliyeAraDlg     satir ID zaten belli - sec + hemen yaz
+  UBelgeDonusum          giris/cikis ayrimli
+  UUretimWizard          uc yazma noktasi -> IzlemSeciminiYaz(satirId)
+  UUretimEmriWizard      iki yazma noktasi -> ayni
+
+Utablo:2163'teki cagri yorum blogunda cikti - listeden dustu.
+
+
+4. SAYIM AYRILDI (A7 / secenek S2)
+-----------------------------------
+Ekran 5 moddan 4'e indi (giris/cikis/donusum/uretim). Sayim kipi acikca
+reddediliyor.
+
+Ayirirken olculen: SAYIM IZLEM VERISI HICBIR YERE KAYDEDILMIYORDU.
+  - 4.508 sayim kaleminin 4.200'u izlemli, ama STOKIZLEME'de BELGETUR=99
+    kaydi SIFIR; STOKSAYIMKALEMLERI'nde seri/lot kolonu da yok.
+  - Sebebi: dosyadan sayim okuma yolundaki UC insert (SSKT/SBYT/SKRKSN)
+    STOKIZLEME'nin ARTIK OLMAYAN kolonlarina yaziyordu.
+  - "Stok Durum Guncelle" menusunun govdesi bostu.
+Yani kaldirilan calisan bir islev degildi; calismadigi olculdu.
+
+YAN KAZANC: izlemli urunlerde SAYIM FARKI FISE HIC YAZILMIYORDU (izlemli dal
+hep bos donen BELGETUR=99 sorgusuna bakiyordu). Izlemli/izlemsiz ayrimi
+kaldirildi; fark artik her urunde ayni yoldan fise gidiyor.
+
+Sayimda lot bazli takip istenirse AYRI IS (Sayim_Ekrani_Plani.txt, S1):
+yeni tablo + kendi ekrani + fark-fisi uretimi.
+
+
+5. YOL BOYUNCA BULUNAN CANLI HATALAR
+-------------------------------------
+Bunlarin cogu yeniden tasarimin urunu degil; uzerini actikca cikti.
+
+ 5.1 KISMI TASIMADA KALAN SIFIRLANIYORDU
+     "update STOKIZLEME set KALAN = 0" UC AYRI YERDE yaziliydi. Oysa
+     TG_IzlemOrjinalYap kaynagin KALAN'ini DONUSID'ye bakip zaten duserir;
+     ustune sifir yazmak kismi donusumde kalani yok ediyordu.
+
+ 5.2 IZLEMLI URUNDE ADET KILIDI (03/08/2022'den beri)
+     Donusumde miktar paneli kilitliydi cunku eski akis kaynagin TUM kalanini
+     tasiyordu. Artik her tasinan satir DONUSID ile kaynagina bagli; kilit
+     kalkti, SP "istenenAdet" kadar FIFO tasiyor.
+
+ 5.3 SIPARIS KAYNAKLI IZLEMLI URUN HIC ISLENMIYORDU
+     SIPARIS stok hareketi yapmaz, STOKIZLEME kaydi yoktur - tasinacak sey de
+     yok. Lotlar DEPODAN secilmeli. Bu dal hic yazilmamisti; belge izlemsiz
+     olusuyordu.
+
+ 5.4 ALIS YOLU HIC SINANMAMIS - dort ayri hata
+     a) Depodaki tek lot GELEN mala otomatik atandi (+20 depoya girdi).
+        Otomatik secim yalniz CIKISTA gecerli olmali; alista lot
+        TEDARIKCIDEN gelir.
+     b) Istemci ekrani SABIT "satis irsaliyesi" turuyle aciyordu -> alista
+        cikis kipi.
+     c) Gecici tablo (tempdb: Turkish_CI_AS) ile STOKSERILOT (veritabani:
+        SQL_Latin1_General_CP1254_CI_AS) collation catismasi.
+     d) Depo yeterlilik kontrolu alista da uygulaniyordu.
+     Ortak kok: kod CIKIS varsayimiyla yazilmis.
+
+ 5.5 HEDEF BELGE DUZENLENINCE/SILININCE KAYNAGIN DURUMU GUNCELLENMIYORDU
+     Siparis 23205: 15 adet faturaya donusmus, fatura 10'a dusurulmus; kalan
+     5 oldugu halde DURUM 9 (kapali) kalmisti. Kapali gorunen siparisin
+     kalanini kimse donusturmeye calismaz.
+
+ 5.6 SILME SIRASI BAKIYEYI BOZUYORDU
+     TG_StokIzlemeDurumSil (STOKIZLEME FOR DELETE) bakiyeyi geri verirken
+     deleted'i STOKIZLEMEDEPO ile JOIN'liyor. Depo satirlarini once silince
+     trigger hicbir sey bulamiyor: ayni satiri iki kez yazinca bakiye
+     233 -> 223 oluyordu (dogrusu 228).
+
+ 5.7 UFisIrsaliyeAraDlg'de UC PARAMETRE YANLISTI
+     satir ID 0 geciliyordu; belge turu/basligi olarak KAYNAK veriliyordu
+     (izlem HEDEFE yazilir); kaynak baslik/satir hic gecilmiyordu. Sonuncusu
+     yuzunden ekran donusum listesi yerine BOS giris listesi aciyordu.
+
+ 5.8 SILME KOSULUNDA BELGETUR YOKTU
+     BASLIKID/SATIRID belge turleri arasinda ORTAK sayi uzayindan gelir.
+     BILIM'de 768 sayim kalemi fatura satirlariyla SAYICA cakisiyordu; veri
+     kaybi olmamasi STOKID'nin de tutmasi gerekmesine bagliydi - tesaduf.
+
+ 5.9 TASIMADA "MEVCUT" KENDI ETKISINI GERI EKLEMIYORDU
+     Kayitli donusum yeniden acildiginda kaynak tukenmis gorunuyor (KALAN 0),
+     kullanici adedi DUSUREBILIYOR ama ARTIRAMIYORDU.
+
+ 5.10 URETIM: STOKIZLEME.FATBASID DIYE KOLON YOK
+     Izlemi eksik satirlari toplu tamamlayan dongu bu kolona bakiyordu;
+     "Invalid column name" ile patliyordu, yani hic calismamis.
+
+ 5.11 PARAMETRE ONEK CAKISMASI
+     Veritabani helper'lari parametreleri METIN olarak degistiriyor;
+     '&lot' adi '&lotno' icinde de eslesip geriye 'no' birakiyordu.
+     KURAL: parametre adlari birbirinin ONEKI OLMAMALI.
+     Ayni yerde: InitSql varDate'i YEREL bicimle string'e ceviriyor -
+     tarihler ISO metin ('yyyy-mm-dd') gonderilmeli.
+
+ 5.12 KONTROL KIPINDE VERI SIZINTISI
+     Yeni lot karti "parse" asamasinda aciliyordu; o blok BEGIN TRAN'dan ONCE
+     calisiyor - sadeceKontrol cagrisi bile bos lot karti birakiyordu.
+     Kart acma islemin kendi transaction'ina alindi.
+
+
+6. VERI TEMIZLIGI (BILIM)
+--------------------------
+ - 15 hatali izlem hareketi (DEPOID=0): 4 tasindi, 11 silindi
+ - 37 karsiliksiz bakiye satiri silindi
+ - Hatali olusan belgeler silindi (114108, 114112) - yedekler ZZ_SILINEN_*
+ - Bakiye tablosu: 48.917 kayit, SIFIR sapma, gecersiz depo YOK
+Butun silme islemleri once ZZ_SILINEN_* tablolarina yedeklendi.
+
+
+7. YENI/DEGISEN VERITABANI NESNELERI
+-------------------------------------
+ GenDepoUpdate 94-95   trigger duzeltmeleri + bakiye kontrol/onarim araclari
+ GenDepoUpdate 96,99   sp_Prog_Izleme_Aday_Json  (uc yontem)
+ GenDepoUpdate 97      sp_Prog_Izleme_Dogrula_Json
+ GenDepoUpdate 98,100,102,109
+                       sp_Prog_Izleme_Aktar_Json (kismi adet, depodan kip,
+                       yon-bazli depo kontrolu)
+ GenDepoUpdate 101     sp_Prog_Belge_KaynakDurum_Json
+ GenDepoUpdate 103,107,108
+                       donusum zinciri: yeni lot kabulu, collation
+ GenDepoUpdate 104,106 fn_Prog_Izleme_DepoAday + tek-lot kurali (yalniz cikis)
+ GenDepoUpdate 105     sp_Prog_Izleme_Yaz_Json  (kanonik yazma)
+ GenDepoUpdate 110     Aday SP'ye "yontem" parametresi
+ GenDepoUpdate 111     tasimada MEVCUT = kalan + kendi aldigi
+ GenDepoUpdate 112     IzlemeAktar kanonik SP'ye devretti (tekrar kapandi)
+
+
+8. SILINEN OLU KOD
+-------------------
+ UIzleme.dfm/.pas : 7 TMemo (SQLGiren, SQLCikan, SQLCikanUpdate,
+                    SQLDonusCikanHedef, SQLDonusCikanHedefUpdate,
+                    SQLDonusCikanHedef_2, Memo1)
+ Ortak/UDFMPG.pas : karsilik gelen 5 PG sabiti
+ UIzleme.FormDestroy : 136 satirlik yazma blogu
+ Utablo.IzlemBilgisiKaydet : 103 satir
+ UStokSayim : olu insert'ler + IzlemVar
+
+ KALAN (bilincli): SQLDonusKaynak + SQL_PG_IzlemDonusKaynak.
+ "Bu satir baska belgeye donusmus" salt-okunur gorunumu; SP karsiligi yok.
+
+
+9. YAPILMAYANLAR
+-----------------
+ 9.1 DAGITIM - GenUpdate 82-112 GUNCELLEMELER'e EKLENMEDI.
+     Her sey yalniz BILIM'de. Musteriye bu haliyle cikarsa exe yeni SP'leri
+     arar, bulamaz. MSSQL komutlari #pg etiketi ALMAYACAK.
+ 9.2 PG PORTU - bu calismada yazilan ~15 SP'nin PG karsiligi yok.
+ 9.3 Sayimda lot bazli takip (S1) - karar bekliyor.
+ 9.4 Gecmis veri taramasi: duzenlenmis/silinmis donusumlerin kaynaklari
+     yanlis DURUM'da kalmis olabilir. BILIM test verisi oldugu icin
+     yapilmadi; musteri tarafinda once RAPOR olarak dusunulmeli
+     (orneklemede 200 belgenin 198'i "sapan" cikti ama sapmanin cogu eski
+     akisin DURUM'u hic yazmamasindan - toplu duzeltme buyuk davranis
+     degisikligi olur, ayri karar).
+
+
+10. TEST KAPSAMI (canli, uygulamadan)
+--------------------------------------
+ giris (yeni lot yazma)          114113, 114115  OK
+ cikis (depodan secim, cok lot)  114116          OK
+ transfer (iki depo hareketi)    114117          OK
+ tasima (donusum + kismi)        114118          OK
+ silme (bakiye geri donusu)      114108, 114114  OK
+ siparis -> alis irsaliyesi      23206           OK
+Her adimda sp_Prog_Izleme_BakiyeKontrol: 0 sapma.

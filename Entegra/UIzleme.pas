@@ -1559,150 +1559,20 @@ begin
 end;
 
 procedure TIzlemeDlg.FormDestroy(Sender: TObject);
-var s:string;  //Komut
-    Carpan:String[10];
-    ID : Integer;//, DonusId, SeriLotId
-  //  kalan, fark : real; }
-
-    function Insert(Tur : char; IDD:Integer=0):integer; //where:string
-    //var SKT, URT : String[20];
-    (*
-        Procedure DepoInsert(IzlemId,DepoId:Integer; Miktars:real);
-        begin
-               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into STOKIZLEMEDEPO (IZLEMID, DEPOID, ADET) values('+
-                      IntToStr(IzlemId)+','+IntToStr(DepoId)+','+stringreplace(FloatToStr(Miktars),',','.',[])+')', [], []);
-        end;
-              *)
-    begin
-
-      case Tur of
-        'G' : s:='';
-        'C' : s:=' where SEC = 1 and KALAN <> 0.0 '; //Çıkış ise
-        'D' : s:=' where ID='+IntToStr(IDD); //Dönüşüm ise
-      end;
-      Tablo.TablodanSorguAc(8, 'select * from '+TabloAdi+s);
-      Tablo.IzlemBilgisiKaydet(Tablo.Query8, IslemTur,IslemTip, KaynakSatirID, BaslikID, SatirID, IzlemTur, GirDepo, CikDepo, StokDurumDegis);
-      (* 27.11.2024 AO
-      Tablo.Query8.First;
-      while not Tablo.Query8.Eof do begin
-        //Giriş ise hepsini kaydet çıkış ise işaretli ve kalanı sıfırdan büyük olanlar
-        //if (Tur='G')or( (Tur='C')and(Tablo.Query8.FieldByName('SEC').AsBoolean=True)and(Tablo.Query8.FieldByName('KALAN').AsInteger>0) ) then begin
-                //Komut := 'insert into STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,IZLEMTUR,KALAN,ADET,SERINO,' +
-                //                            'EKLEYEN,LOTNO,SKT,URT,DONUSID)';
-                //daha önce bu serilotlar var mı bakalım yoksa tabloya ekleyelim
-                Tablo.TablodanSorguAc(1, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+Tablo.Query8.FieldByName('STOKID').AsString+
-                  ' and SERINO='''+Tablo.Query8.FieldByName('SERINO').AsString+''' and LOTNO='''+Tablo.Query8.FieldByName('LOTNO').AsString+''' '+DbSinir(1));
-                if Tablo.Query1.RecordCount>0 then
-                    SeriLotId := Tablo.Query1.Fields[0].AsInteger
-                else begin
-                    if Tablo.Query8.FieldByName('SKT').AsString<>'' then
-                       SKT:=FormatDateTime('yyyy-mm-dd', Tablo.Query8.FieldByName('SKT').AsDateTime)
-                    else
-                       SKT:='1990-01-01';
-                    if Tablo.Query8.FieldByName('URT').AsString<>'' then
-                       URT:=FormatDateTime('yyyy-mm-dd', Tablo.Query8.FieldByName('URT').AsDateTime)
-                    else
-                       URT:='1990-01-01';
-                    Komut := 'INSERT INTO [STOKSERILOT] ([STOKID],[SERINO],[LOTNO],[URT],[SKT])';
-                    Komut := Komut + ' values('+Tablo.Query8.FieldByName('STOKID').AsString+','''+ Tablo.Query8.FieldByName('SERINO').AsString+''','+
-                                   ''''+Tablo.Query8.FieldByName('LOTNO').AsString+''','''+URT+''','''+SKT+''')';
-                    SeriLotId := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
-                end;
-                //////
-                Komut := 'insert into STOKIZLEME(STOKID,BELGETUR,BASLIKID,SATIRID,IZLEMTUR,KALAN,ADET, EKLEYEN, DONUSID, SERILOTID)';
-                {27.11.2024 AO syok sayım fişi depoları etkilememeli, sadece hangi lottan ne kadar var bilgisi bulunmalıdı
-                if IslemTur=KasaTur_StokSayimIslemi then //99 eğer sayım varsa lotu 5 olan üründen sistemde 10 varsa ve sayımda 8 gelmişse  8-10=-2 ekleriz (Yani çıkarırız)
-                   Miktar := Tablo.Query8.FieldByName('KALAN').AsFloat - Tablo.Query8.FieldByName('DURUM').AsFloat// '(KALAN-DURUM)'
-                else }
-                   kalan := Tablo.Query8.FieldByName('KALAN').AsFloat;//'KALAN';
-
-                if IslemTur=KasaTur_StokSayimIslemi then
-                   fark := kalan - Tablo.Query8.FieldByName('DURUM').AsFloat
-                else
-                   fark := kalan;
-
-                if KaynakSatirID>0 then //dönüşüm varsa
-                   DonusId := Tablo.Query8.FieldByName('IZLEMID').AsInteger //'IZLEMID'
-                else
-                   DonusId := 0;
-                //   29/09/2021
-                Komut := Komut + ' values('+Tablo.Query8.FieldByName('STOKID').AsString+','+IntToStr(IslemTur)+','+IntToStr(BaslikID)+','+IntToStr(SatirID)+','+
-                                   IntToStr(IzlemTur)+','+stringreplace( FloatToStr(fark), ',', '.', [])+','+stringreplace(FloatToStr(kalan),',','.',[])+','+Kullanan+','+IntToStr(DonusId)+','+IntToStr(SeriLotId)+')';
-    {           Komut := Komut + ' select STOKID,'+IntToStr(DepoID)+','+IntToStr(IslemTur)+','+IntToStr(BaslikID)+','+IntToStr(SatirID)+','+
-                                         IntToStr(IzlemTur)+','+s+','+s+', isnull(SERINO,''''),'+Kullanan+',isnull(LOTNO,''''),isnull(SKT,''1990-01-01''),isnull(URT,''1990-01-01''),'+DonusId+
-                          ' from '+TabloAdi; }
-               Result := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,Komut+' select scope_identity()',[],[],True);
-
-               // depo ayarlanır
-               if StokDurumDegis=False then  //dönüşüm varsa ve daha önce irsaliye ile çıkıldıysa depodan çıkış yapılmaz
-                  kalan := 0;
-
-
-               if IslemTur <> KasaTur_StokSayimIslemi then  begin //27.11.2024 AO sayımda depolarda artma eksilme olmayacak, giriş çıkış fişleriyle olacak
-                   if (IslemTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,
-                                            KasaTur_Giden_Konsinye, {KasaTur_StokSayimIslemi,} KasaTur_StokTransferi, KasaTur_Uretim_Sarf]) then
-                      DepoInsert(Result, CikDepo, -1.0*kalan)
-                   else
-                      DepoInsert(Result, GirDepo, kalan);
-
-                   if IslemTur in [KasaTur_Giden_Konsinye, KasaTur_StokTransferi] then
-                      DepoInsert(Result, GirDepo, kalan)
-                   else if (IslemTur in [KasaTur_Gelen_Konsinye])and(IslemTip=2)  then  //iade konsinye ise konsinyeden çıkış anadepoya giriş olmalı
-                      DepoInsert(Result, CikDepo, -1*kalan);
-                end;
-
-
-        //end;
-        Tablo.Query8.Next
-      end;   *)
-    end;
 begin
-    if Kaydedilebilir=False then
-       exit;
-    // YALNIZ SECIM KIPI: yazma cagiranin SP'sinde. Bu blok calisirsa ayni
-    //   izlem kayitlari IKI KEZ olusur (biri burada, biri SP'de).
-    if YalnizSecim then
-       exit;
-    // Önce eski kayıtları silelim
-//    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEMEDEPO where IZLEMID in '+
-//       '(select ID from STOKIZLEME where STOKID=&StkID and BASLIKID=&BlgID and SATIRID=&StrID)',['&StkID','&BlgID','&StrID'],[StokID,BaslikID,SatirID]);
-    // BELGETUR kosula DAHIL: BASLIKID/SATIRID belge turleri arasinda ORTAK bir
-    //   sayi uzayindan gelir (FATURA.ID, SIPARISDETAY.ID, STOKSAYIMKALEMLERI.ID
-    //   hepsi 1'den artar). BELGETUR olmadan bir belgenin izlemini silerken
-    //   ayni ID'li BASKA turden bir belgenin izlemi de silinebilir. BILIM'de
-    //   768 sayim kalemi sayica cakisiyordu; veri kaybi olmamasi STOKID'nin de
-    //  tutmasi gerekmesine bagliydi - tesaduf, koruma degil. (08.08.2026)
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and STOKID=&StkID and BASLIKID=&BlgID and SATIRID=&StrID',['&Tur','&StkID','&BlgID','&StrID'],[IslemTur,StokID,BaslikID,SatirID]);
-{    if (IslemTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,KasaTur_Giden_Konsinye,KasaTur_StokSayimIslemi]) then begin
-       Carpan :='-1*';
-       DepoId := CikDepo;
-    end else begin
-       Carpan :='';
-       DepoId := GirDepo;
-    end;   }
-    //////
-    if KaynakSatirId>0 then begin//dönüşüm varsa
-       TabIzlem.First;
-       while not TabIzlem.eof do begin
-          if (TabIzlem.FieldByName('SEC').AsString='True')and(TabIzlem.FieldByName('KALAN').AsFloat > 0) then begin
-              //ID := Insert(' where ID='+TabIzlem.Fields[0].AsString);
-              ID := Insert('D', TabIzlem.Fields[0].AsInteger);
-          end;
-          TabIzlem.Next;
-       end;
-    end
-    else begin
-            //çıkış kayıtları ise eksi ile çarpalım
-            if GridFatIzlemViewSEC.Visible then begin
-               Insert('C');//' where SEC = 1 and KALAN <> 0 ');
-{               if IslemTur=KasaTur_StokTransferi then begin //sadece transfer işlemi için stokizlemde 2 satır oluşturulur
-                  Carpan :='-1*';
-                  DepoId := CikDepo;
-                  Insert(' where SEC = 1 and KALAN <> 0 ');
-               end  }
-            end else
-               Insert('G');
-    end;
+  // ---- ESKI YAZMA YOLU KALDIRILDI (plan A8 tamamlandi, 08.08.2026) ----
+  //   Bu yordam 136 satirlik bir yazma blogu tasiyordu: gecici tablodaki
+  //   secimi STOKIZLEME/STOKIZLEMEDEPO'ya yaziyor ve bunu FORM YOK EDILIRKEN
+  //   yapiyordu - yani mrOk verildikten SONRA. Hata olusursa kullaniciya
+  //   mesaj gitmiyor, cagiranin akisina/transaction'ina girilemiyor, cagiran
+  //   "kaydedildi" sanip devam ediyordu. Ayrica yeni satirda satir ID'si
+  //   Post'tan sonra olustugu icin ekran canli tutulup "dogru anda" yok
+  //   ediliyordu; kirilganligin buyuk kismi bu numaradan geliyordu.
+  //
+  //   Artik ekran YALNIZCA SECER; yazmayi cagiran yapar:
+  //     AnaForm.StokIzlemeSecimAl -> Tablo.IzlemeSecimYaz
+  //       -> sp_Prog_Izleme_Yaz_Json
+  //   Alti cagiranin hepsi bu yola tasindi.
 end;
 
 end.
