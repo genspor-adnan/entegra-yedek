@@ -1,4 +1,21 @@
 ﻿-- ============================================================
+-- GenDepoUpdate85.sql
+-- sp_Prog_Gorev_Liste_Json2 : bellek grant'i duzeltmesi (istenen 12,2 MB)
+--
+-- GenDepoUpdate83 (Dokuman) / 84 (Stok Talep) ile AYNI SINIF hata, daha kucuk
+--   olcekte: SQL Express'te sorgu-bellek semaforu ~10 MB'a dustugunde bu istek de
+--   karsilanamaz ve Gorev listesi acilirken ekran RESOURCE_SEMAPHORE'da donar.
+--
+-- KOK NEDEN: "LEFT JOIN GOREVYORUM GY" KOSULSUZ duruyordu. Gorev basina yorum
+--   sayisi kadar satir uretiyor, bunu "SELECT DISTINCT" topluyordu (tum kolonlar
+--   uzerinde hash/sort). GY yalnizca OPSIYONEL @Ara metin aramasinda kullaniliyor.
+--   GOREVKULLANICI GK join'i @AtananID'ye bagli olsa da o da 1:N - filtre aktifken
+--   ayni cogaltmayi yapiyordu.
+--
+-- COZUM: iki join de kaldirildi, filtreler EXISTS'e cevrildi, DISTINCT kaldirildi.
+--   EXISTS satir cogaltmaz; sonuc kumesi ayni, DISTINCT'e gerek kalmaz.
+-- ============================================================
+-- ============================================================
 -- sp_Prog_Gorev_Liste_Json2 — tek JSON parametre versiyonu (MSSQL)
 --   IKI PARAM: @Baslik = SELECT ek kolonlari (ham SQL, GUVENILIR; Gorev'de bos);
 --              @Kosullar = filtreler (JSON: cast/parametreli DEGERLER).
