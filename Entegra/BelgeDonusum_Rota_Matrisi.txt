@@ -1,0 +1,228 @@
+BELGE DONUSUM SP PLANI - ON KOSUL 2: GENISLETILMIS ROTA POLITIKA MATRISI
+=========================================================================
+Tarih  : 08.08.2026
+Kaynak : Utablo.pas (BelgeDonustur, BaslikOlusur, DetaySatirOlustur,
+         BilgiAyarlari, DonusTipiBul), PrjConst.pas, BILIM canli veri
+Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 1.3 - rota matrisi
+         yalniz tablo adlarini degil IS KURALLARINI da tasimali.
+
+
+1. MATRIS - KAYNAK / HEDEF
+---------------------------
+  DT  = DonusumTuru        KT = kaynak belge TUR       HT = hedef belge TUR
+  KTb = kaynak baslik/detay tablosu                    HTb = hedef baslik/detay
+
+  DT   Aciklama                          KT   HT   KTb/detay          HTb/detay
+  ---  --------------------------------  ---  ---  -----------------  -----------------
+  406  Alis siparisi -> alis irsaliyesi    9   10  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  407  Alis siparisi -> alis faturasi      9   11  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  478  Alis siparisi -> alis fisi          9   12  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  408  Alis irsaliyesi -> alis faturasi   10   11  FATBASLIK/FATURA     FATBASLIK/FATURA
+  427  Alis irsaliyesi -> alis fisi       10   12  FATBASLIK/FATURA     FATBASLIK/FATURA
+  409  Satis siparisi -> satis irsaliyesi 19   14  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  410  Satis siparisi -> satis faturasi   19   15  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  473  Satis siparisi -> satis fisi       19   16  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  411  Satis irsaliyesi -> satis faturasi 14   15  FATBASLIK/FATURA     FATBASLIK/FATURA
+  424  Satis irsaliyesi -> satis fisi     14   16  FATBASLIK/FATURA     FATBASLIK/FATURA
+  414  Siparis -> transfer fisi           19   20  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  429  Satis siparisi -> giden konsinye   19  119  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  435  Stok talebi -> transfer fisi      105   20  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  461  Gelen konsinye -> alis faturasi   109   11  FATBASLIK/FATURA     FATBASLIK/FATURA
+  468  Giden konsinye -> satis irsaliye  119   14  FATBASLIK/FATURA     FATBASLIK/FATURA
+  462  Giden konsinye -> satis faturasi  119   15  FATBASLIK/FATURA     FATBASLIK/FATURA
+  472  Giden konsinye -> satis fisi      119   16  FATBASLIK/FATURA     FATBASLIK/FATURA
+  415  Satis siparisi -> uretim (urun)    19    6  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  420  Satis siparisi -> uretim (sarf)    19    6  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
+  425  Uretim fisi -> satis irsaliyesi     6   14  FATBASLIK/FATURA     FATBASLIK/FATURA
+  426  Uretim fisi -> satis faturasi       6   15  FATBASLIK/FATURA     FATBASLIK/FATURA
+  428  Satinalma talebi -> alis siparisi 105    9  SIPARIS/SIPARISDETAY SIPARIS/SIPARISDETAY
+
+  DIKKAT: 428'in kaynak TUR'u kodda "TabNo_Satinalma_Talep" ile eslesiyor;
+  SIPARIS.TUR degeri olarak 105 (stok talebi) ile 101 (satinalma) ayrimi
+  SP yazilmadan once DOGRULANMALI. BilgiAyarlari'nda 428 hic yok.
+
+
+2. KALAN POLITIKASI  (Degerlendirme_2 madde 1.2)
+-------------------------------------------------
+2.1 KalanHedefTablo - kaynak satirin "donusen" miktari HANGI tablodan sayilir
+
+  Kaynak SIPARISDETAY olan rotalar (406/407/478/409/410/473/414/429/435/415/420):
+      -> FATURA          (hedef FATBASLIK/FATURA oldugu icin)
+  428 (hedef SIPARISDETAY):
+      -> SIPARISDETAY    ** mevcut kodda YANLIS: FATURA'dan sayiliyor **
+  Kaynak FATURA olan rotalar (408/427/411/424/461/468/462/472/425/426):
+      -> FATURA
+
+  CANLI VERI DOGRULAMASI (YERI kodu -> izin bulundugu tablo, BILIM):
+      406 FATURA 39        407 FATURA 764       408 FATURA 2.567
+      409 FATURA 115.671   410 FATURA 2         411 FATURA 108.882
+      424 FATURA 4         435 FATURA 2.771     462 FATURA 1
+      428 SIPARISDETAY 667                      <-- tek istisna, dogrulandi
+  URETIMEMRIDETAY'da donusum izi HIC YOK -> 415/420 uretim FISI (FATBASLIK/FATURA)
+  uretiyor, URETIMEMRIDETAY'a yazmiyor. fn_Api_Donusum_Kalan'daki @HedefUretim
+  dali bu rotalar icin KULLANILMIYOR; matriste "uretim emri" ile karistirilmamali.
+
+2.2 KalanGrubu - ayni kaynak miktarini BIRLIKTE tuketen kodlar
+
+  Kalan hesabi yalniz donusum kodlarini saymiyor; IADE ve FIYAT FARKI baglantilari
+  da ayni YERI/YERID mekanizmasini kullaniyor:
+      416 TabNo_IADE_ALISBELGE       (FATURA'da 384 satir)
+      417 TabNo_IADE_SATISBELGE      (FATURA'da 256 satir)
+      418 TabNo_FIYATFARKI_ALISBELGE (1)
+      419 TabNo_FIYATFARKI_SATISBELGE(3)
+      465 Tabno_URETIMEMRI_SATINALMATALEP (SIPARISDETAY 5)
+      467 Tabno_URETIMEMRI_STOKTALEP      (SIPARISDETAY 2.744)
+
+  Mevcut fn_Api_Donusum_Kalan davranisi:
+      TEKLIF kaynagi     : DT + 416
+      SIPARIS kaynagi    : DT (yalniz kendisi)
+      FATBASLIK kaynagi  : DT + 416, ayrica DT=411 iken 424 de sayilir
+
+  ** TUTARSIZLIK (karar gerekiyor) **
+   a) 411 (irs->fatura) hesabi 424'u (irs->fis) sayiyor ama 424 hesabi 411'i
+      SAYMIYOR. Asimetrik. Ayni irsaliye satiri once fise sonra faturaya
+      cevrilirse cift donusum mumkun. Dogrusu: {411,424} tek KalanGrubu.
+   b) Ayni mantik alis tarafinda YOK: {408,427} grubu tanimli degil.
+   c) 416 (iade) SIPARIS kaynagi icin sayilmiyor ama FATBASLIK icin sayiliyor.
+      Satis siparisi iadesi diye bir sey varsa eksik.
+  ONERI: KalanGrubu acikca tanimlansin:
+      {406,407,478}   {409,410,473,429}   {408,427}   {411,424}
+      {414,435}       {461}  {468,462,472}  {415,420}  {425,426}  {428}
+  ve her gruba iade/fiyat farki kodlari eklensin (alis tarafi 416/418,
+  satis tarafi 417/419). Bu bir DAVRANIS DEGISIKLIGIDIR - onay listesine girer.
+
+
+3. DEPO POLITIKASI  (BaslikOlusur case bloklarindan)
+-----------------------------------------------------
+  Hedef GIRISDEPO <- kaynagin ...   Hedef CIKISDEPO <- kaynagin ...
+  ---------------------------------------------------------------
+  varsayilan (cogu rota) : GIRISDEPO                CIKISDEPO
+  429 (giden konsinye)   : DEPOLAR.VARSAYILAN=7     CIKISDEPO
+                           (DURUM=1, ayni SUBEID)   <- konsinye deposu
+  462/468/472 (konsinye) : NULL                     kaynagin GIRISDEPO'su
+  415/420 (uretim)       : CIKISDEPO                CIKISDEPO
+  425/426 (uretimden)    : NULL                     CIKISDEPO
+
+  BilgiAyarlari'ndaki "depoalani" ayri bir alan: kaynak satirin stok kontrolu
+  hangi depodan yapilacagi (alis tarafinda GIRISDEPO, satista CIKISDEPO).
+
+
+4. DOVIZ POLITIKASI
+--------------------
+  Hedefin RAPORDOVIZ'i kaynaktan AYNEN kopyalanir (her rotada).
+  Hedefin FATURADOVIZI'sine yazilan deger rota bazli:
+    406/409/415            : kaynagin RAPORDOVIZ'i
+    408/427/411/424/425/426: kaynagin FATURADOVIZI'si
+    digerleri              : GENINI varsayilan dovizi (CariDoviz)
+  428 (hedef SIPARIS)      : DOVIZ_CINSI = CariDoviz
+
+
+5. SATIR KOLON POLITIKASI  (DetaySatirOlustur'dan)
+---------------------------------------------------
+  STOKDURUMDEGIS = 0 (iki kez stok dusmesin):
+      468, 412, 413, 408, 427, 411, 424, 428      digerlerinde 1
+  KDVMUHAFIYETI kopyalanir : yalniz 408, 427, 411, 424
+  EKIPMANID = 1 sabit      : 415, 420        digerlerinde kaynaktan
+  Carpan = -1 (negatif adet/miktar) : 420 (uretim sarf)
+  EN/BOY/YUZEY/SAYI        : yalniz "en-boy hesaplama" opsiyonu acikken
+  TESLIMTARIHI             : yalniz hedef SIPARISDETAY iken (428)
+  POZNO                    : yalniz hedef FATURA iken
+  TUTAR        = (100 - ISNULL(ISKONTO2,0)) * (100 - ISKONTO) * Adet * BIRIMFIYAT / 10000
+  DOVIZ_TUTARI = ayni formul, DOVIZ_BIRIMFIYAT ile
+  YERI/YERID   = DonusumTuru + kaynak satir ID  (donusum bagi - HER rotada)
+
+
+6. BELGE NUMARASI POLITIKASI  (Degerlendirme_2 madde 2.1)
+----------------------------------------------------------
+  Mevcut kod: SiradakiBelgeNumarasi yalniz su hedef turlerinde numara uretir:
+      8 (gider pusulasi), 14, 15, 16, 6 (uretim), 119, 20 (transfer)
+  Alis tarafi (10, 11, 12) ve siparis (9) numara URETMEZ - numara tedarikcinin
+  belgesinden gelir, kullanici girer.
+  Ayrica TUR=15 + EFaturaKullanimda ise Serino='' ve BelgeNo='0' (numara
+  e-belge surecinde atanir).
+
+  MATRISE YAZILAN POLITIKA:
+      OTOMATIK        : 14, 15, 16, 6, 119, 20   (SP transaction'i icinde
+                        sp_BelgeNoGetir ile - es zamanlilik guvenli)
+      E_BELGE_SONRA   : 15 (+ e-fatura acik) -> seri bos, no '0'
+      KULLANICI_GIRISI: 10, 11, 12, 9         (dis belge numarasi)
+
+7. E-BELGE POLITIKASI
+----------------------
+  EFATURADURUM : mevcut kodda HER ZAMAN 0 yaziliyor. BaslikOlusur'un
+                 EFaturaDurum parametresi hesaplanip ILETILIYOR ama INSERT'e
+                 sabit 0 giriyor - PARAMETRE OLU. (BelgeDonustur icinde
+                 EFaturami(...) / EIrsaliyeKullanimda ile hesaplanan deger
+                 fiilen kullanilmiyor.) SP'ye tasirken bu bilincli karar
+                 haline getirilmeli: ya deger yazilacak ya parametre kalkacak.
+  EFATURASONUC = 20 : 410, 411, 424 rotalarinda.
+                 Degerlendirme_2 madde 2.5 bunun 424 (satis FISI) icin dogru
+                 olup olmadigini sorguluyor - IS BIRIMI ONAYI GEREKIYOR.
+  SENARYO      : GENINI Ops_FaturaOpsiyon_Senaryo (-24035), varsayilan 1.
+
+8. KOPYALANAN BASLIK ALANLARI (BaslikOlusur ile birebir)
+---------------------------------------------------------
+  TUR(sabit), TIPI=1, REHBERID, PROJEID, AKTIVITEID, FATURATARIH=GETDATE(),
+  TARIH=GETDATE(), KOCANNO, FATURANO/SIPARISNO, ACIKLAMA, GIRISDEPO, CIKISDEPO,
+  BASLIK, ADRES, ILCE, IL, VD, VNO, KDVDURUM, SATICIKODU, DURUM, EKLEYEN,
+  FATURASERI/SIPARISSERI, FIYAT_LISTESI, VADE, DOVIZKUR, DOVIZ_CINSI,
+  RAPORDOVIZ, FATURADOVIZI, KUR, REHBERILETID, SUBEID, EFATURADURUM,
+  EFATURASONUC, SENARYO, SERVISID, DETAYBOLUMU, OZELKOD
+  (428/SIPARIS hedefinde: EFATURA*/SENARYO/DETAYBOLUMU yok, SERVISID var)
+
+9. YAN ETKI POLITIKASI
+-----------------------
+  Detay sablonu : kaynakta REHBERBILGI kaydi varsa DETAYBOLUMU kopyalanir ve
+                  REHBERBILGI satirlari hedefe eklenir.
+                  ** MEVCUT KOD HATASI: 'if VeriVarMi ... then' blogunun
+                     begin/end'i EKSIK -> REHBERBILGI insert'i KOSULSUZ
+                     calisiyor; ayrica kaynak YERI=132 HARDCODED (dogrusu
+                     FaturaDetaySablonTipiBul(kaynak tur)). SP'ye tasirken
+                     duzeltilecek - davranis degisikligi listesine girer.
+  Yorum         : yalniz 428. YorumKopyala yoruma bagli DOKUMAN(MODUL=210) ve
+                  IMAJ katmanlarini da kopyalar -> duz INSERT ile SP'ye
+                  tasinamaz; ya bu katmanlar da SP'ye alinacak ya Pascal'da
+                  kalacak. KARAR GEREKIYOR.
+  Seri/lot      : kaynak FATBASLIK ve satir izlemeli ise STOKIZLEME satirlari
+                  hedefe tasinir, STOKIZLEMEDEPO acilir, kaynagin KALAN'i
+                  SIFIRLANIR. Plan "kismi donusumde tamami sifirlanmasin"
+                  diyor -> DAVRANIS DEGISIKLIGI (onay listesine).
+  Izlemli engel : siparisten belge uretiminde kaynakta izlemeli stok satiri
+                  varsa satirlar aktarilmaz (baslik yine olusur -> bos baslik).
+                  Plan rollback ongoruyor -> DAVRANIS DEGISIKLIGI.
+  Kaynak durtme : 408/427/411/424 sonrasi
+                  update FATURA set STOKDURUMDEGIS=STOKDURUMDEGIS where FATBASID=<kaynak>
+                  Tetiklenen trigger'lar TG_StokDurumGuncelle ve
+                  TG_StokFiyatGuncelle'dir (TG_MaliyetGuncelle DEVRE DISI -
+                  bkz. BelgeDonusum_Trigger_Envanteri.txt).
+  Uretim recete : 415'te recetedeki sarf satirlari FATURA'ya eklenir
+                  (YERI=TabNo_URETIMRECETEDETAY, YERID=URD.ID,
+                   maliyet MALIYETSON/MALIYETORT, DovizKurDegeri bolmesi).
+
+10. TRIGGER KISITI  (on kosul 1'den)
+-------------------------------------
+  FATURA detay satirlari SET BAZLI eklenebilir - Trg_Fatura_MasrafID_Guncelle
+  08.08.2026'da set-bazliya cevrildi (GenDepoUpdate87).
+  SIPARIS BASLIGI HER ZAMAN TEK SATIR eklenecek: trg_Siparis_Aktarim skaler
+  atama yapiyor ve baska bir DB'ye (AlpAlk) yaziyor; cok satirli baslik
+  insert'i bozar. 428 rotasinda toplu baslik uretimi YAPILMAYACAK.
+
+11. KAPSAM DISI
+----------------
+  404/405 (adisyon), 412/413 (teklif->siparis), 431 (uretim fisi->satis fisi),
+  469 (gelen konsinye->alis irsaliyesi).
+  412/413: TEKLIF tablosunda AKTIVITEID/GIRISDEPO/CIKISDEPO/BASLIK/ADRES/ILCE/
+  IL/VD/VNO/SATICIKODU kolonlari YOK (dogrulandi) - BaslikOlusur'un kopyaladigi
+  kolon kumesi bu tabloda calismaz. Ayrica mevcut kod 412/413'te hedef SIPARIS
+  olmasina ragmen basligi FATBASLIK'a yaziyor. Bu dallar OLU/BOZUK; gecis
+  tamamlaninca temizlenmeli.
+
+12. KARAR BEKLEYENLER (SP yazilmadan once)
+-------------------------------------------
+  K1  KalanGrubu tanimi ve iade/fiyat farki kodlarinin dahil edilmesi (2.2)
+  K2  428'in kaynak TUR'u: 101 mi 105 mi (1. bolum notu)
+  K3  EFATURADURUM olu parametresi: deger yazilacak mi, parametre kalkacak mi
+  K4  EFATURASONUC=20'nin 424 (satis fisi) icin gecerliligi (is birimi)
+  K5  Yorum kopyalama SP'ye alinacak mi (DOKUMAN/IMAJ katmanlari dahil)
+  K6  Davranis degisiklikleri onayi: bos baslik rollback, stok yetersizliginde
+      tam hata, kismi izleme sifirlamasi, REHBERBILGI kosulsuz insert duzeltmesi
