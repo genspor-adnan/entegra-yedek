@@ -911,6 +911,30 @@ Begin
        Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LIzlemJson);
     end;
 
+    // ============================================================
+    // KAYNAK BELGENIN DURUMU
+    //
+    // Bu ekran kaynak belgenin DURUM'unu guncellemiyordu: tamamen donusmus
+    //   bir siparis listede hala "acik" gorunuyordu (kalan 0 oldugu halde
+    //   DURUM 0 kaliyordu - 08.08.2026 tespiti, siparis 23205).
+    //   Yeni SP tabanli donusum yolunda bunu sp_Prog_BelgeDonusum_Sonlandir
+    //   yapiyor; eski ekran yolunda karsiligi yoktu.
+    //
+    // Hesap merkezi: sp_Api_Belge_DurumHesapla_Json (Tablo.BelgeDurumHesapla).
+    //   Kalan miktara bakip kapali/kismi/acik durumunu yeniden hesaplar -
+    //   idempotent, satir basina cagrilmasi zararsiz.
+    // TEKLIF (99) kaynagi DISARIDA: durum hesabi yalniz siparis ve belge icin
+    //   tanimli.
+    var LKaynakTur: Integer := StrToIntDef(VarToStr(cbTur.EditValue), 0);
+    if (LKaynakTur <> 99) and (TabKaynak.Active) and
+       (TabKaynak.FieldByName('BASLIKID').AsInteger > 0) then
+    begin
+      if LKaynakTur in [9, 19, 101, 105] then
+        Tablo.BelgeDurumHesapla(TabKaynak.FieldByName('BASLIKID').AsInteger, 'siparis')
+      else
+        Tablo.BelgeDurumHesapla(TabKaynak.FieldByName('BASLIKID').AsInteger, 'belge');
+    end;
+
   end;
 End;
 
