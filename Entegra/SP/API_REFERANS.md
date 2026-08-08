@@ -1,4 +1,4 @@
-# Gentegre API — Referans
+﻿# Gentegre API — Referans
 
 Delphi, mobil ve web istemcilerinin ortak kullandığı veritabanı API'si.
 Her nesnenin MSSQL ve PostgreSQL karşılığı vardır ve **ikisi aynı sözleşmeye uyar**.
@@ -143,7 +143,8 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 |---|---|---|---|
 | `sp_Api_Donusum_Kontrol_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,Satirlar:[{SatirId,Adet}]}` | `{Sonuc,Uygun,Satirlar:[{SatirId,Adet,Kalan,Uygun,Neden}]}` — aşırı dönüşüm koruması. `GenDepoUpdate73.sql` |
 | `sp_Api_Donusum_Kaynak_Json` | ⬜ (mevcut `sp_Prog_BelgeDonusum_Kaynak_Json2` yeterli olabilir) | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
-| `sp_Api_Donusum_SiparistenBelge_Json` | 🟨 MSSQL hazır, PG bekliyor | `{SiparisId,HedefTur,Tarih,SatirIds[],Oturum}` | `{Sonuc,SiparisId,HedefBelgeId,HedefBelgeNo,HedefTur,DonusumTuru,Satir,Loglanan,Toplam,KaynakDurum}` — siparişi tek işlemde hedef belgeye çevirir (başlık + kalan satırlar + toplam + kaynak durum, tek transaction). `GenDepoUpdate81.sql` |
+| `sp_Api_Belge_Donusum_Json` | 🟨 MSSQL hazır, PG bekliyor | `{DonusumTuru,KaynakBelgeId,HedefBelgeId,Tarih,SatirIds[],Oturum}` | `{Sonuc,DonusumTuru,KaynakBelgeId,HedefBelgeId,HedefBelgeNo,HedefTur,Satir,Loglanan,Toplam,KaynakDurum}` — **genel belge dönüşümü**; kaynak/hedef eşlemesi `fn_Api_Donusum_Esleme()`'den gelir. `HedefBelgeId > 0` verilirse yeni belge açılmaz, mevcut belgeye eklenir. `GenDepoUpdate82.sql` |
+| `sp_Api_Donusum_SiparistenBelge_Json` | ⚪ geriye uyumlu sarmalayıcı | `{SiparisId,HedefTur,…}` | `sp_Api_Belge_Donusum_Json`'a yönlendirir (`SiparisId`+`HedefTur` → `DonusumTuru`). Yeni kod doğrudan genel SP'yi çağırmalı. `GenDepoUpdate82.sql` |
 | `sp_Api_Donusum_Uygula_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,HedefBelgeId,Oturum,Satirlar:[{Sira,KaynakSatirId,UrunId,Adet,BirimFiyat,Kdv,Iskonto,Iskonto2,...}]}` | `{Sonuc,HedefBelgeId,Yazilan,Satirlar:[{Sira,KaynakSatirId,SatirId}],Toplam,KaynakDurum}` — **açık-değerli sözleşme**: fiyat/iskonto/KDV hesaplamaz, çağıran gönderir. `GenDepoUpdate74.sql` |
 | `sp_Api_Donusum_Geri_Json` | ⬜ (gerekmeyebilir — hedef satır silinince `YERI`/`YERID` bağı satırla gider, kalan kendiliğinden döner; `Belge_Sil` karşılıyor) | `{HedefBelgeId}` \| `{HedefSatirId}` | `{Sonuc,Adet}` |
 | `sp_Api_Donusum_Rapor_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,BasTarih,BitTarih,GizleKaynakTur,GizleHedefTur,KalmayanGoster,GizlenenGoster,RehberId,BelgeNo,StokKod,StokAd,Sayfa,SayfaBoyu}` | sonuç kümesi (`Fields[0] = SATIRID`) — `TM_DonusumListeleri`+`Alis`+`Satis` (906 satır, 11 sabit ekran dalı) yerine tek gövde. `GenDepoUpdate75.sql` |
@@ -222,6 +223,39 @@ Sade sarmalayıcılar (çağıran unit'in `System.JSON`'a ihtiyacı olmasın diy
 **Davranış değişikliği (bilinçli, karar 2):** `UGiderPusulasi` ve `UImport` KDV Dahil belgede
 matraha **brüt** `SUM(TUTAR)` yazıyordu; artık **net matrah** yazılıyor.
 
+
+
+### 6.1 Dönüşüm eşleme tablosu (`fn_Api_Donusum_Esleme`)
+
+`TTablo.BelgeDonustur` (Utablo.pas, ~21.800 karakter) `case` bloğundaki eşleme SP tarafına alındı:
+dönüşüm türü → kaynak tablo/detay/bağlantı alanı, beklenen kaynak TUR, hedef TUR, hedef tablo.
+
+**Şu an desteklenen (hedefi `FATBASLIK`):**
+
+| Dönüşüm | Kaynak | Hedef |
+|---|---|---|
+| 406 / 407 / 478 | alış siparişi (9) | irsaliye 10 / fatura 11 / fiş 12 |
+| 409 / 410 / 473 / 429 | satış siparişi (19) | irsaliye 14 / fatura 15 / fiş 16 / giden konsinye 119 |
+| 408 / 427 | alış irsaliyesi (10) | fatura 11 / fiş 12 |
+| 411 / 424 | satış irsaliyesi (14) | fatura 15 / fiş 16 |
+| 461 / 469 | gelen konsinye (109) | fatura 11 / irsaliye 10 |
+| 462 / 468 / 472 | giden konsinye (119) | fatura 15 / irsaliye 14 / fiş 16 |
+| 414 / 435 | sipariş / stok talep | stok transferi 20 |
+
+**Kapsam dışı (bilinçli, `51200` ile reddedilir):** hedefi `SIPARIS` olanlar (412/413 teklif→sipariş,
+428 satınalma talebi→sipariş) ve üretim hedefleri (415/420/425/426/431). Bunlar Belge Dönüşüm
+ekranı / `BelgeDonustur` yolunda kalır.
+
+**Henüz taşınmayan kurallar** (`BelgeDonustur`'da var, SP'de yok): izlemli ürün engeli, stok
+yeterlilik kontrolü, hedefte e-fatura/e-irsaliye durumu, detay şablonu (`REHBERBILGI`) ve yorum
+kopyalama. Bu yüzden **`BelgeDonustur` henüz emekli edilmedi**.
+
+**Sunucuda olan, Pascal yolunda olmayan:** tek transaction, aşırı dönüşüm koruması (`UPDLOCK` +
+kalan), hedef toplamları, kaynak belgenin kapanma durumu, ISLEMLOG.
+
+Delphi tarafı: sipariş listesindeki **"Seçilenleri İrsaliyeye/Faturaya Dönüştür"** menüsü bu SP'yi
+çağırır (`TFaturalarDlg.mnIrsaliyeyeDonusturClick`). Önceki hâlinde Faturaya Dönüştür dalı boştu ve
+İrsaliyeye Dönüştür `YERI`/`YERID` yazmadığı için dönüşüm bağı kurulmuyordu.
 
 ## 7. Ubelgegiris (toplu belge girişi) — F5 Kaydet
 

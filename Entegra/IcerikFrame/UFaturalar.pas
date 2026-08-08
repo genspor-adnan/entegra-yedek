@@ -2378,7 +2378,7 @@ end;
 procedure TFaturalarDlg.mnIrsaliyeyeDonusturClick(Sender: TObject);
 // "Irsaliyesini Olustur" / "Faturasini Olustur" (pmBelgeDonustur; Tag 1 = irsaliye,
 //   2 = fatura). Secili SIPARIS(ler) sunucuda tek islemde hedef belgeye cevrilir:
-//   sp_Api_Donusum_SiparistenBelge_Json.
+//   sp_Api_Belge_Donusum_Json.
 //
 // ONCEKI HALI VE NEDEN DEGISTI
 //   - Tag=2 (faturaya donustur) dallari TAMAMEN BOSTU; menu hicbir sey yapmiyordu.
@@ -2395,7 +2395,7 @@ procedure TFaturalarDlg.mnIrsaliyeyeDonusturClick(Sender: TObject);
 //   TEK transaction.
 var
   gf: TFaturaGorevFrame;
-  I, LSiparisId, LKaynakTur, LHedefTur, LBasarili: Integer;
+  I, LSiparisId, LKaynakTur, LDonusumTuru, LBasarili: Integer;
   LSonuc, LBelgeNolar, LHata: string;
   LJson: TJSONObject;
 begin
@@ -2424,21 +2424,23 @@ begin
     LKaynakTur := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewTUR.Index]), 0);
     if LSiparisId <= 0 then Continue;
 
-    // Hedef tur: alis siparisi (9) -> irsaliye 10 / fatura 11
-    //            satis siparisi (19) -> irsaliye 14 / fatura 15
+    // Donusum turu: alis siparisi (9)  -> irsaliye 406 / fatura 407
+    //               satis siparisi (19) -> irsaliye 409 / fatura 410
     if (Sender as TMenuItem).Tag = 1 then
-      LHedefTur := IfThen(LKaynakTur = 9, 10, 14)
+      LDonusumTuru := IfThen(LKaynakTur = KasaTur_AlisSiparisi,
+                             TabNo_DONUSUM_ALIS_SIPARIS_IRS, TabNo_DONUSUM_SATIS_SIPARIS_IRS)
     else
-      LHedefTur := IfThen(LKaynakTur = 9, 11, 15);
+      LDonusumTuru := IfThen(LKaynakTur = KasaTur_AlisSiparisi,
+                             TabNo_DONUSUM_ALIS_SIPARIS_FAT, TabNo_DONUSUM_SATIS_SIPARIS_FAT);
 
     LJson := TJSONObject.Create;
-    LJson.AddPair('SiparisId', TJSONNumber.Create(LSiparisId));
-    LJson.AddPair('HedefTur',  TJSONNumber.Create(LHedefTur));
+    LJson.AddPair('DonusumTuru',   TJSONNumber.Create(LDonusumTuru));
+    LJson.AddPair('KaynakBelgeId', TJSONNumber.Create(LSiparisId));
     LJson.AddPair('Oturum', TJSONObject.Create
       .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
       .AddPair('SubeId', TJSONNumber.Create(SubeID)));
     try
-      LSonuc := Tablo.ApiCagir('sp_Api_Donusum_SiparistenBelge_Json', LJson);
+      LSonuc := Tablo.ApiCagir('sp_Api_Belge_Donusum_Json', LJson);
       if Tablo.ApiSonucInt(LSonuc, 'HedefBelgeId') > 0 then
       begin
         Inc(LBasarili);
