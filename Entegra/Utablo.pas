@@ -2009,6 +2009,39 @@ begin
   Result := 0;
   if BaslikTur in [KasaTur_GiderPusulasi, KasaTur_SatisIrsaliyesi, KasaTur_SatisFaturasi, KasaTur_SatisFisi, KasaTur_Uretim, KasaTur_Giden_Konsinye, KasaTur_StokTransferi] then
      BelgeNo := SiradakiBelgeNumarasi(BaslikTur, Tablo.GENINI.BugunTrhSaat);
+
+  // ---- YENI YOL: baslik INSERT'i sunucuda (sp_Api_Belge_Donusum_Baslik_Json) ----
+  // Kolon kumesi asagidaki eski koda BIREBIR ayni; depo/doviz eslemesi de sunucuda
+  //   (fn_Api_Donusum_Esleme). Kazanc: tek yerde baslik uretimi (yeni SP tabanli
+  //   donusum yolu da AYNI ic yordami cagirir), ISLEMLOG ve motor bagimsizligi
+  //   (elle string birlestirme + MSSQL/PG dallanmasi kalkti).
+  // Oturum/opsiyon verisi Pascal'da kalir ve parametre olarak gider: kocan numarasi
+  //   (kocannumaralari kaydi), belge no/seri (e-Fatura ozel durumu dahil), varsayilan
+  //   senaryo ve varsayilan doviz (GENINI).
+  // TEKLIF kaynagi HARIC: TEKLIF tablosunda AKTIVITEID/GIRISDEPO/CIKISDEPO/BASLIK/
+  //   ADRES/ILCE/IL/VD/VNO/SATICIKODU kolonlari yok -> eski yol asagida calisir.
+  if (basliktablosu = 'SIPARIS') or (basliktablosu = 'FATBASLIK') then
+  begin
+    Result := ApiSonucInt(
+      ApiCagir('sp_Api_Belge_Donusum_Baslik_Json',
+        TJSONObject.Create
+          .AddPair('DonusumTuru',     TJSONNumber.Create(DonusTuru))
+          .AddPair('KaynakBelgeId',   TJSONNumber.Create(KaynakBaslikId))
+          .AddPair('HedefTur',        TJSONNumber.Create(BaslikTur))
+          .AddPair('KocanNo',         TJSONNumber.Create(KocannoBul(BaslikTur)))
+          .AddPair('BelgeNo',         BelgeNo.BelgeNo)
+          .AddPair('BelgeSeri',       BelgeNo.Serino)
+          .AddPair('Senaryo',         TJSONNumber.Create(
+                     StrToIntDef(GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo, '1'), 1)))
+          .AddPair('VarsayilanDoviz', CariDoviz)
+          .AddPair('Oturum', TJSONObject.Create
+            .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+            .AddPair('SubeId', TJSONNumber.Create(SubeId))) as TJSONObject),
+      'HedefBelgeId');
+    Exit;
+  end;
+
+  // ---- ESKI YOL (yalniz TEKLIF kaynagi) ----
 {  if basliktablosu='SIPARIS' then
      Doviz:='DOVIZ_CINSI'
   else
