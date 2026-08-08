@@ -169,7 +169,7 @@ type
 
 var
   BelgeDonusumDlg: TBelgeDonusumDlg;
-  HedefTablo : String[30];
+  HedefTablo   : String[30];
 
 implementation
 
@@ -881,7 +881,68 @@ Begin
     end;
     //01/04/2022 AO   izlenen satırsa aynen devam eder
     i:=cbTur.EditValue;
-    if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
+
+    // ============================================================
+    // KAYNAK SIPARIS + IZLEMLI URUN  -> DEPODAN SECIM   (plan A5)
+    //
+    // SIPARIS stok hareketi yapmaz, STOKIZLEME kaydi YOKTUR - tasinacak bir
+    //   sey de yoktur. Lotlar DEPODAKI BAKIYEDEN secilir. Bu dal bugune kadar
+    //   HIC yoktu: izlemli urun iceren siparis irsaliyeye donusturuldugunde
+    //   seri/lot hic sorulmuyor, belge izlemsiz olusuyordu (siparis 23202).
+    //
+    // Ekran YALNIZ SECIM kipinde ve KaynakSatirID VERILMEDEN acilir; boylece
+    //   UIzleme'nin "depodan cikis" dali (SQLCikan) calisir. Yazmayi SP yapar.
+    // ============================================================
+    //   Yalniz stok hareketi yapan hedeflerde: siparisten siparise/teklife
+    //   donusumde (hedef SIPARISDETAY) izlem kavrami yoktur.
+    if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)
+       and (i in [9, 19, 101, 105, 109])
+       and (HedefBaslikTur in [10, 11, 12, 14, 15, 16, 119]) then begin
+       var LDepoSec: TIzlemeDlg := nil;
+       var LDepoJson: TJSONObject := TJSONObject.Create;
+       try
+         try
+           Application.CreateForm(TIzlemeDlg, LDepoSec);
+           LDepoSec.YalnizSecim    := True;
+           LDepoSec.StokID         := TabDetayGiris.FieldByName('URUNID').AsInteger;
+           LDepoSec.IzlemTur       := TabDetayGiris.FieldByName('IZLEME').AsInteger;
+           LDepoSec.IslemTur       := HedefBaslikTur;
+           LDepoSec.IslemTip       := 1;
+           LDepoSec.BaslikID       := HedefBaslikID;
+           LDepoSec.SatirID        := TabDetayGiris.FieldByName('ID').AsInteger;
+           LDepoSec.KaynakBaslikID := 0;   // kaynakta izlem kaydi YOK -> depodan
+           LDepoSec.KaynakSatirID  := 0;
+           LDepoSec.GirDepo        := CDepo;
+           LDepoSec.CikDepo        := CDepo;
+           LDepoSec.GerekliMiktar  := TabDetayGiris.FieldByName('ADET').AsFloat;
+           LDepoSec.KALAN          := TabDetayGiris.FieldByName('ADET').AsFloat;
+           LDepoSec.StokDurumDegis := True;   // siparisten cikis: stok GERCEKTEN duser
+           LDepoSec.RehberId       := RehID;
+           LDepoSec.ShowModal;
+           if (LDepoSec.ModalResult <> mrOk) or (Trim(LDepoSec.SecimJson) = '') then begin
+             TabDetayGiris.Delete;
+             Abort;
+           end;
+           // kaynak.satirId GONDERILMEZ -> SP depodan kipe gecer, DONUSID=0
+           LDepoJson.AddPair('hedef', TJSONObject.Create
+             .AddPair('tur',      TJSONNumber.Create(HedefBaslikTur))
+             .AddPair('baslikId', TJSONNumber.Create(HedefBaslikID))
+             .AddPair('satirId',  TJSONNumber.Create(TabDetayGiris.FieldByName('ID').AsInteger)));
+           LDepoJson.AddPair('depoId',       TJSONNumber.Create(CDepo));
+           LDepoJson.AddPair('stokHareketi', TJSONBool.Create(True));
+           LDepoJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
+           LDepoJson.AddPair('secim',
+             TJSONObject.ParseJSONValue(LDepoSec.SecimJson) as TJSONArray);
+         finally
+           FreeAndNil(LDepoSec);
+         end;
+       except
+         LDepoJson.Free;
+         raise;
+       end;
+       Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LDepoJson);
+    end
+    else if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
        // ============================================================
        // SERI/LOT TASIMA - KANONIK SP  (A4)
        //   dbo.sp_Prog_Izleme_Aktar_Json
