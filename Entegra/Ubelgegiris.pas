@@ -3,7 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.JSON,
+  Winapi.Windows,  Winapi.Messages, System.SysUtils, System.Variants, System.JSON,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxStyles, dxSkinsCore, System.Classes, Vcl.Graphics,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, Data.DB,
@@ -598,8 +598,10 @@ var
 
               dxmemdata2.Locate('sno',dxmemdata1s_no.AsString,[]);
 
+              // DIKKAT: belgetip degeri TURKCE ('Fiş'); ASCII 'Fis' ile karsilastirmak
+              //   fisleri Tahakkuk (13) yapiyordu.
               if dxmemdata1belgetip.AsString = 'Fatura' then LTur := 11
-              else if dxmemdata1belgetip.AsString = 'Fis' then LTur := 12
+              else if dxmemdata1belgetip.AsString = 'Fiş' then LTur := 12
               else LTur := 13;   // Tahakkuk
 
               Tablo.RehberEkBilgileriniGetir(dxmemdata1cr_id.AsInteger, 2, [RehVars_FiyatListeAdi,
