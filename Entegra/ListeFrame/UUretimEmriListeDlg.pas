@@ -376,7 +376,8 @@ begin
      TopN := FSayfali.TopN
   else begin
      FSayfali.TopN(False);   // tetikleri pasiflestir
-     TopN := 0;              // eski sorgu TOP'suzdu
+     // Son/Sik icin guvenlik supabi (bkz. UUretimListeDlg): TOP'suz tam tabloya dusmesin.
+     TopN := 200;
   end;
 
   j := TJSONObject.Create;

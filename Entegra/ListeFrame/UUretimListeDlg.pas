@@ -5,7 +5,7 @@
 interface
 
 uses
-  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxGraphics,
@@ -463,7 +463,10 @@ begin
      TopN := FSayfali.TopN
   else begin
      FSayfali.TopN(False);   // tetikleri pasiflestir
-     TopN := 0;
+     // Son/Sik dogasi geregi kucuktur ama sinirsiz birakmak, KULLANICI_ARAMA gecmisi
+     // bosken/eksik parametrede TOP'suz tam tabloya duser (Uretim'de ~40 bin satir,
+     // SQL Express'te buyuk bellek grant'i). Guvenlik supabi: StokTalep ile ayni 200.
+     TopN := 200;
   end;
 
   j := TJSONObject.Create;
