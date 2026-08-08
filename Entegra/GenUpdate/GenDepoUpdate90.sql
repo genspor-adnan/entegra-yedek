@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate90.sql
 -- BELGE DONUSUM - KODLAMA ADIM 3: sp_Prog_BelgeDonusum_Dogrula
 --
@@ -170,8 +170,12 @@ BEGIN
     UPDATE #DonusumKaynakSatir SET Durum = N'hata'
      WHERE IstenenAdet > KalanAdet + 0.0001;
 
-    IF @HataSayisi > 0
-        THROW 51300, N'Kaynak satirlarda yeterli kalan yok (baska bir islem tuketmis olabilir).', 1;
+    -- IS KURALI hatalarinda THROW YOK: THROW rollback tetikler ve #DonusumUyari'ya
+    --   yazilan satir satir uyarilar da geri gider; kullanici "neden olmadi"
+    --   goremez. Cagiran @HataSayisi'na bakip uyarilari KOPYALADIKTAN SONRA
+    --   rollback yapar. (Yapisal hatalarda - bilinmeyen rota, satir yok -
+    --   THROW korunur.)
+    IF @HataSayisi > 0 RETURN;
 
     -- Kalani sifir/negatif olan satir gonderilmisse
     IF EXISTS (SELECT 1 FROM #DonusumKaynakSatir WHERE KalanAdet <= 0.0001)
@@ -238,9 +242,10 @@ BEGIN
         DECLARE @Yetersiz INT = (SELECT COUNT(*) FROM #DonusumKaynakSatir WHERE StokYeterli = 0);
         IF @Yetersiz > 0 AND @StokOnayi = 0
         BEGIN
+            -- K6: kismi belge YOK - hicbir satir gecmez. Uyarilar korunsun diye
+            --   THROW degil RETURN (yukaridaki nota bakiniz).
             SET @HataSayisi = @HataSayisi + @Yetersiz;
-            -- K6: kismi belge YOK - hicbir satir gecmez.
-            THROW 51200, N'Yetersiz stok nedeniyle donusum yapilamaz.', 1;
+            RETURN;
         END
     END
 
@@ -284,8 +289,7 @@ BEGIN
         WHERE SI.ID IS NULL OR ISNULL(SI.KALAN, 0) + 0.0001 < I.Adet;
         SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
 
-        IF @HataSayisi > 0
-            THROW 51200, N'Seri/lot secimi eksik ya da uygun degil - donusum yapilamaz.', 1;
+        IF @HataSayisi > 0 RETURN;
     END
 
     -- ---------- Sonuc ----------

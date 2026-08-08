@@ -205,7 +205,11 @@ BEGIN
 
     -- ---------- Kanonik belge uretimi ----------
     DECLARE @YeniId INT;
-    EXEC dbo.sp_Api_Belge_Kaydet_Json @Kosullar = @Json, @BelgeIdOut = @YeniId OUTPUT;
+    -- @SonucDondur = 0: Kaydet kendi sonuc setini ISTEMCIYE GONDERMESIN. Aksi
+    --   halde uygulama Q.Open ile ILK result set'i (Kaydet'inkini) okur ve ana
+    --   SP'nin sonucunu goremez - donusumde bos uyariya sebep olmustu.
+    EXEC dbo.sp_Api_Belge_Kaydet_Json @Kosullar = @Json, @BelgeIdOut = @YeniId OUTPUT,
+         @SonucDondur = 0;
 
     SET @HedefBaslikOut = ISNULL(NULLIF(@YeniId, 0), @HedefBaslikID);
     IF ISNULL(@HedefBaslikOut, 0) = 0

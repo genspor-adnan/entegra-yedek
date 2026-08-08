@@ -50,7 +50,13 @@ CREATE OR ALTER PROCEDURE dbo.sp_Api_Belge_Kaydet_Json
     --   INSERT...EXEC kullaniyor (sp_BelgeNoGetir), bu yuzden disaridan
     --   INSERT...EXEC ile sarmalanamaz -> OUTPUT parametresi.
     --   Tek parametreyle cagiran mevcut kod ETKILENMEZ.
-    @BelgeIdOut  INT = NULL OUTPUT
+    @BelgeIdOut  INT = NULL OUTPUT,
+    -- Bu SP bir BASKA SP icinden cagrildiginda kendi sonuc setini istemciye
+    --   GONDERMEMELI: uygulama Q.Open ile ILK result set'i okur ve dis SP'nin
+    --   sonucu yerine bunu alir. Donusumde tam olarak bu oldu - ApiSonucInt
+    --   'HedefBaslikId' bulamayip 0 dondu, kullaniciya BOS UYARI cikti.
+    --   Varsayilan 1: tek basina cagiran mevcut kod etkilenmez.
+    @SonucDondur BIT = 1
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -398,14 +404,15 @@ BEGIN
         SET @BelgeIdOut = @BelgeId;
         COMMIT;
 
-        SELECT (SELECT 1 AS Sonuc, @BelgeId AS BelgeId, @BelgeNo AS BelgeNo, @Yeni AS Yeni,
-                       @SilinenSatir AS SilinenSatir, @Loglanan AS Loglanan,
-                       (SELECT Sira, ISNULL(YeniId, SatirId) AS ID, Islem
-                          FROM @S ORDER BY Sira FOR JSON PATH) AS Satirlar,
-                       (SELECT @Matrah AS Matrah, @Kdv AS Kdv, @Toplam AS Toplam,
-                               @Doviz AS Doviz, @TNeden AS Neden
-                          FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS Toplam
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS Sonuc;
+        IF @SonucDondur = 1
+            SELECT (SELECT 1 AS Sonuc, @BelgeId AS BelgeId, @BelgeNo AS BelgeNo, @Yeni AS Yeni,
+                           @SilinenSatir AS SilinenSatir, @Loglanan AS Loglanan,
+                           (SELECT Sira, ISNULL(YeniId, SatirId) AS ID, Islem
+                              FROM @S ORDER BY Sira FOR JSON PATH) AS Satirlar,
+                           (SELECT @Matrah AS Matrah, @Kdv AS Kdv, @Toplam AS Toplam,
+                                   @Doviz AS Doviz, @TNeden AS Neden
+                              FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS Toplam
+                    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS Sonuc;
     END TRY
     BEGIN CATCH
         IF XACT_STATE() <> 0 ROLLBACK;

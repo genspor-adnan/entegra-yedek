@@ -127,6 +127,13 @@ BEGIN
     CREATE TABLE #DonusumUyari (
         Sira INT IDENTITY, Kod NVARCHAR(30), KaynakSatirId INT NULL, Mesaj NVARCHAR(400));
 
+    -- ROLLBACK'TEN SAG CIKAN KOPYA: #temp yazmalari transaction'a dahildir ve
+    --   geri alinir; TABLO DEGISKENI ise transaction'dan etkilenmez. Is kurali
+    --   ihlalinde (yetersiz stok, eksik seri/lot) kullaniciya SATIR SATIR sebep
+    --   gosterebilmek icin uyarilar rollback'ten ONCE buraya kopyalanir.
+    DECLARE @UyariKalici TABLE (Sira INT IDENTITY, Kod NVARCHAR(30),
+                                KaynakSatirId INT NULL, Mesaj NVARCHAR(400));
+
     BEGIN TRY
         -- ---------- Rota ----------
         DECLARE @KaynakBaslikTablo NVARCHAR(20), @KaynakDetayTablo NVARCHAR(20), @Destek BIT;
@@ -248,8 +255,13 @@ BEGIN
             EXEC dbo.sp_Prog_BelgeDonusum_Dogrula @DonusumTuru = @DonusumTuru,
                  @HedefBaslikID = @HedefBaslikID, @SubeID = @SubeID, @Tarih = @Tarih,
                  @StokOnayi = @StokOnayi, @SadeceKontrol = 1, @HataSayisi = @HataSayisi OUTPUT;
-            SET @Basarili = 1;
-            SET @Mesaj = N'Kontrol tamamlandi.';
+            INSERT @UyariKalici (Kod, KaynakSatirId, Mesaj)
+            SELECT Kod, KaynakSatirId, Mesaj FROM #DonusumUyari ORDER BY Sira;
+            SET @Basarili = CASE WHEN @HataSayisi > 0 THEN 0 ELSE 1 END;
+            SET @HataKodu = CASE WHEN @HataSayisi > 0 THEN 51200 ELSE 0 END;
+            SET @Mesaj = CASE WHEN @HataSayisi > 0
+                              THEN N'Kontrolde engel bulundu - ayrintilar uyarilarda.'
+                              ELSE N'Kontrol tamamlandi.' END;
             GOTO Bitir;
         END
 
@@ -259,6 +271,20 @@ BEGIN
         EXEC dbo.sp_Prog_BelgeDonusum_Dogrula @DonusumTuru = @DonusumTuru,
              @HedefBaslikID = @HedefBaslikID, @SubeID = @SubeID, @Tarih = @Tarih,
              @StokOnayi = @StokOnayi, @SadeceKontrol = 0, @HataSayisi = @HataSayisi OUTPUT;
+
+        -- Dogrula is kurali ihlalinde THROW ETMEZ, @HataSayisi doner (uyarilar
+        --   rollback'te kaybolmasin diye). Once uyarilari KALICI kopyaya al,
+        --   sonra geri sar.
+        IF @HataSayisi > 0
+        BEGIN
+            INSERT @UyariKalici (Kod, KaynakSatirId, Mesaj)
+            SELECT Kod, KaynakSatirId, Mesaj FROM #DonusumUyari ORDER BY Sira;
+            ROLLBACK;
+            SET @Basarili = 0;
+            SET @HataKodu = 51200;
+            SET @Mesaj = N'Donusum yapilamadi - ayrintilar uyarilarda.';
+            GOTO Bitir;
+        END
 
         DECLARE @HedefOut INT, @BNoOut NVARCHAR(50), @YeniOut BIT;
         EXEC dbo.sp_Prog_BelgeDonusum_Kaydet @DonusumTuru = @DonusumTuru,
@@ -289,6 +315,11 @@ BEGIN
         SET @YeniBelge = @YeniOut;
     END TRY
     BEGIN CATCH
+        -- Yapisal hata (THROW) yolu: uyarilar zaten rollback'e gidecek; varsa
+        --   once kalici kopyaya alalim.
+        IF XACT_STATE() <> -1
+            INSERT @UyariKalici (Kod, KaynakSatirId, Mesaj)
+            SELECT Kod, KaynakSatirId, Mesaj FROM #DonusumUyari ORDER BY Sira;
         IF XACT_STATE() <> 0 ROLLBACK;
         SET @Basarili = 0;
         SET @HataKodu = ERROR_NUMBER();
@@ -305,9 +336,13 @@ Bitir:
                        HedefSatirId AS hedefSatirId, DonusenAdet AS donusenAdet,
                        KalanAdet AS kalanAdet
                 FROM #DonusumSatirEsleme ORDER BY Sira FOR JSON PATH), N'[]');
+    -- Uyarilar KALICI kopyadan okunur; #DonusumUyari rollback olduysa bostur.
     DECLARE @UyariJson NVARCHAR(MAX) =
         ISNULL((SELECT Kod AS kod, KaynakSatirId AS kaynakSatirId, Mesaj AS mesaj
-                FROM #DonusumUyari ORDER BY Sira FOR JSON PATH), N'[]');
+                FROM @UyariKalici ORDER BY Sira FOR JSON PATH), N'[]');
+    IF @UyariJson = N'[]'
+        SET @UyariJson = ISNULL((SELECT Kod AS kod, KaynakSatirId AS kaynakSatirId, Mesaj AS mesaj
+                                 FROM #DonusumUyari ORDER BY Sira FOR JSON PATH), N'[]');
 
     -- Elle string birlestirme YOK: FOR JSON kacislari (tirnak, Turkce, satir sonu)
     --   dogru yapar; JSON_QUERY ile alt diziler string'e cevrilmeden gomulur.
