@@ -637,7 +637,6 @@ procedure TBelgeDonusumDlg.StokEkle;
 Var
   TLFiyat, DovizFiyat:Currency;
   AKur,AAciklama:String;
-  Kalan : String[20];
   AKDV,i,ReceteID,StkID,UrnTur,PrjID, ID:integer;
   AAdet,AKurDegeri,Miktar,AIsk1,AIsk2,ABrmFiyat, En,Boy,Yuzey,Sayi : extended;
   procedure DegerAta(DovizAlan:String);
@@ -878,28 +877,38 @@ Begin
     //01/04/2022 AO   izlenen satırsa aynen devam eder
     i:=cbTur.EditValue;
     if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
-       Tablo.TablodanSorguAc(9,'select ID, KALAN from STOKIZLEME where SATIRID='+TabKaynak.FieldByName('SATIRID').AsString+'  AND KALAN>0 ');
-       while not Tablo.Query9.Eof  do begin
-         ID := Tablo.SQLSatiriKopyala('STOKIZLEME', Tablo.Query9.Fields[0].AsInteger,[ 'BELGETUR', 'BASLIKID','SATIRID', 'EKLEYEN', 'DONUSID', 'ADET'],
-                  [ HedefBaslikTur, HedefBaslikID, TabDetayGiris.FieldByName('ID').AsInteger, Kullanan, Tablo.Query9.Fields[0].AsString, Tablo.Query9.FieldByName('KALAN').AsInteger ]);
-         if (DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Irsaliye)or(DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fatura) or
-            (DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fis) or (DonusumTuru = TabNo_DONUSUM_SATIS_IRS_FAT) then begin
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update STOKIZLEME set KALAN = 0 where ID = '+Tablo.Query9.Fields[0].AsString, [], []);
-            //
-            if DonusumTuru = TabNo_DONUSUM_SATIS_IRS_FAT then   //08/11/2022 AO satış irsaliyesinden faturaya dönüş ise stok izlemdepoya atmamalı
-               Kalan := '0.0'
-            else
-               Kalan := stringreplace(FloatToStr(-1 * Tablo.Query9.FieldByName('KALAN').AsFloat),',','.',[]);
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into STOKIZLEMEDEPO (IZLEMID, DEPOID, ADET) values('+
-                      IntToStr(Id)+','+IntToStr(CDepo)+','+Kalan+')', [], []);
-
-
-         end;
-
-
-         Tablo.Query9.next;
-       end;
-       // TabKaynak.FieldByName('SATIRID').AsInteger
+       // ============================================================
+       // SERI/LOT TASIMA - KANONIK SP  (A4)
+       //   dbo.sp_Prog_Izleme_Aktar_Json
+       //
+       // Onceki hali: kaynak izlem kayitlari SQLSatiriKopyala ile satir satir
+       //   kopyalaniyor, STOKIZLEMEDEPO elle insert ediliyor ve kaynaga
+       //   "update STOKIZLEME set KALAN = 0" yaziliyordu.
+       //   O UPDATE HATALIYDI: TG_IzlemOrjinalYap yeni satirin DONUSID'sine
+       //   bakip kaynagin KALAN'ini ZATEN dogru dusuruyor (testle dogrulandi:
+       //   kalan 2, 1 adet tasima -> 1). Ustune sifir yazmak KISMI tasimada
+       //   kalani yok ediyordu. Yeni SP kalana elle DOKUNMAZ.
+       //
+       // stokHareketi=False -> STOKIZLEMEDEPO satiri ADET=0 ile acilir
+       //   (K-B karari; eski koddaki "satis irsaliyesinden faturaya donuste
+       //    stok izlem depoya atmamali" dali bunun karsiligi).
+       // ============================================================
+       var LStokHar: Boolean := (DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Irsaliye) or
+                                (DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fatura) or
+                                (DonusumTuru = TabNo_DONUSUM_Giden_Konsinye_Fis);
+       // Satis irsaliyesi -> fatura: stoktan zaten irsaliyeyle cikilmis,
+       //   depo hareketi YAPILMAZ (satir ADET=0 ile acilir).
+       var LIzlemJson: TJSONObject := TJSONObject.Create;
+       LIzlemJson.AddPair('kaynak', TJSONObject.Create
+         .AddPair('satirId', TJSONNumber.Create(TabKaynak.FieldByName('SATIRID').AsInteger)));
+       LIzlemJson.AddPair('hedef', TJSONObject.Create
+         .AddPair('tur',      TJSONNumber.Create(HedefBaslikTur))
+         .AddPair('baslikId', TJSONNumber.Create(HedefBaslikID))
+         .AddPair('satirId',  TJSONNumber.Create(TabDetayGiris.FieldByName('ID').AsInteger)));
+       LIzlemJson.AddPair('depoId',       TJSONNumber.Create(CDepo));
+       LIzlemJson.AddPair('stokHareketi', TJSONBool.Create(LStokHar));
+       LIzlemJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
+       Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LIzlemJson);
     end;
 
   end;
