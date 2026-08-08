@@ -361,6 +361,12 @@ type
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
     IzlemDlg3 : TIzlemeDlg;
+    // A8: izleme secimi alindi, satir ID'si cagri yerinde belli olacak
+    FIzlemBekliyor  : Boolean;
+    FIzlemSecimJson : string;
+    FIzlemTur       : Integer;   // belge turu (uretim urun 6 / sarf 101)
+    FIzlemStokId    : Integer;
+    FIzlemTuru      : Integer;   // izleme yontemi
     FDetSnap: TObjectDictionary<Integer, TStringList>;  // URETIMFISDETAY orijinal satirlar (log diff icin)
     FEkleLogland: Boolean;  // kart EKLEME logu (mukerrer onleme: Finish/FormClose tek sefer)
     procedure IletisimEkleClick(Sender: TObject);
@@ -370,6 +376,8 @@ type
     function EkranAdiAl: string;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure StokIzlemBilgisi(TabloDetay:TFDQuery);
+    // A8: StokIzlemBilgisi'nde alinan secimi, satir ID'si belli olan yerde yazar
+    procedure IzlemSeciminiYaz(ASatirId: Integer);
     { Private declarations }
   public
     UretimID,Cagiran,RehberId:Integer;
@@ -883,10 +891,10 @@ begin
   //şimdilik kaldırdım AO 31/1/2018 bunun yerine beforepost'ta maliyet tablosundan getiriyorum
   //Tablo.UretimSatirMaliyetUpdate(TabUretim.FieldByname('ID').AsInteger);
 
-  if IzlemDlg3<>nil then begin   //kaydetmesi için destroy etmemiz lazım
-     IzlemDlg3.SatirID := TabUretimDetay.FieldByName('ID').AsInteger;
-     FreeAndNil(IzlemDlg3);
-  end;
+  // A8: secim StokIzlemBilgisi'nde alindi; YAZMA BURADA - satir ID'si
+  //   ancak bu noktada belli. Eskiden ekran canli tutulup burada yok
+  //   ediliyor, yazma FormDestroy'da oluyordu.
+  IzlemSeciminiYaz(TabUretimDetay.FieldByName('ID').AsInteger);
   TabloYenile(TabUretimDetay,[TabUretim.FieldByName('ID').AsInteger]);
   TabUretimDetay.FieldByName('DOVIZ_BIRIMFIYAT').OnChange := URETIMADETChange;
   TabUretimDetay.FieldByName('BIRIMFIYAT').OnChange := URETIMADETChange;
@@ -1441,10 +1449,10 @@ end;
 procedure TUretimWizardDlg.IzlemBilgileriGorDegistirMenuClick(Sender: TObject);
 begin
     StokIzlemBilgisi( TabUretimDetay);
-    if IzlemDlg3<>nil then begin //kaydetmesi için destroy etmemiz lazım
-       IzlemDlg3.SatirID := TabUretimDetay.FieldByName('ID').AsInteger;
-       FreeAndNil(IzlemDlg3);
-    end;
+    // A8: secim StokIzlemBilgisi'nde alindi; YAZMA BURADA - satir ID'si
+    //   ancak bu noktada belli. Eskiden ekran canli tutulup burada yok
+    //   ediliyor, yazma FormDestroy'da oluyordu.
+    IzlemSeciminiYaz(TabUretimDetay.FieldByName('ID').AsInteger);
 end;
 
 procedure TUretimWizardDlg.UretimDetayPageExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
@@ -1658,6 +1666,21 @@ begin
    ReceteTus.Click;
 end;
 
+procedure TUretimWizardDlg.IzlemSeciminiYaz(ASatirId: Integer);
+// StokIzlemBilgisi secimi FIzlemSecimJson'a koyar; satir ID'si ancak
+//   cagiran tarafta (Post sonrasi ya da hazir satirda) bellidir. Yazma orada.
+begin
+  if not FIzlemBekliyor then Exit;
+  FIzlemBekliyor := False;
+  if ASatirId <= 0 then Exit;
+  Tablo.IzlemeSecimYaz(FIzlemSecimJson, FIzlemTur, 1,
+    TabUretim.FieldByName('ID').AsInteger, ASatirId,
+    FIzlemStokId, FIzlemTuru,
+    TabUretim.FieldByName('GIRISDEPO').AsInteger,
+    TabUretim.FieldByName('CIKISDEPO').AsInteger, True, 0);
+  FIzlemSecimJson := '';
+end;
+
 procedure TUretimWizardDlg.StokIzlemBilgisi(TabloDetay:TFDQuery);
 var
   DetID,GDepo,CDepo,Tur:integer;
@@ -1696,13 +1719,22 @@ begin
 //       Tablo.UyariGoster(Uyari, BildirimYapilmisDegisemez);
 
 
-    if not Anaform.StokIzleme(IzlemDlg3, TabloDetay.FieldByName('URUNID').AsInteger, TabloDetay.FieldByName('IZLEME').AsInteger,
+    // A8: ekran yalnizca SECER. Yazma, satir ID'si belli olan yerde
+    //   IzlemSeciminiYaz ile yapilir (uc cagri yerinin her biri kendi
+    //   ID'siyle cagirir). Eskiden ekran canli tutulup FormDestroy'da
+    //   yaziliyordu: hata olusursa kullaniciya ulasmiyordu.
+    FIzlemBekliyor := False;
+    if not Anaform.StokIzlemeSecimAl(TabloDetay.FieldByName('URUNID').AsInteger, TabloDetay.FieldByName('IZLEME').AsInteger,
        Tur, 1, TabUretim.FieldByName('ID').AsInteger,DetID, 0, TabUretim.FieldByName('GIRISDEPO').AsInteger, TabUretim.FieldByName('CIKISDEPO').AsInteger,
-       GerekMiktar, Miktar, Degisemez, '',0,0,True,UretimNo) then begin
-       FreeAndNil(IzlemDlg3);
+       GerekMiktar, Miktar, FIzlemSecimJson, True, 0, 0, Degisemez, '', 'E') then begin
+       FIzlemSecimJson := '';
        TabloDetay.Cancel;
        Abort;
     end;
+    FIzlemBekliyor  := True;
+    FIzlemTur       := Tur;
+    FIzlemStokId    := TabloDetay.FieldByName('URUNID').AsInteger;
+    FIzlemTuru      := TabloDetay.FieldByName('IZLEME').AsInteger;
 
     if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //bütünden parçaya üretim
        //Miktar := MiktarSor(Miktar);
@@ -1804,16 +1836,19 @@ begin
   //Eğer ürettiğimiz ürünlerin izlemi (serino vb) varsa
   // Query20.SQL.Text := ' select * from FATURA F where FATBASID='+TabUretim.FieldByName('ID').AsString+' and IZLEME  between 1 and 6 ';    ,,,
   // 25.03.2022  AO  değişti
+   // STOKIZLEME'de FATBASID diye kolon YOK - belge basligi BASLIKID'de tutulur.
+   //   Eski hali "Invalid column name 'FATBASID'" ile patliyordu; bu yuzden
+   //   izlemi eksik satirlarin toplu tamamlanmasi hic calismamis. (08.08.2026)
    Query20.SQL.Text := ' select * from FATURA F where FATBASID='+TabUretim.FieldByName('ID').AsString+' and IZLEME  between 1 and 6 '+
-                       ' and F.ID not in (select SATIRID from STOKIZLEME where FATBASID='+TabUretim.FieldByName('ID').AsString+')';
+                       ' and F.ID not in (select SATIRID from STOKIZLEME where BASLIKID='+TabUretim.FieldByName('ID').AsString+')';
   ///
   Query20.Open;
   while not Query20.eof do begin
     StokIzlemBilgisi(Query20);
-    if IzlemDlg3<>nil then begin //kaydetmesi için destroy etmemiz lazım
-       IzlemDlg3.SatirID := Query20.FieldByName('ID').AsInteger;
-       FreeAndNil(IzlemDlg3);
-    end;
+    // A8: secim StokIzlemBilgisi'nde alindi; YAZMA BURADA - satir ID'si
+    //   ancak bu noktada belli. Eskiden ekran canli tutulup burada yok
+    //   ediliyor, yazma FormDestroy'da oluyordu.
+    IzlemSeciminiYaz(Query20.FieldByName('ID').AsInteger);
     Query20.Next;
   end;
 end;

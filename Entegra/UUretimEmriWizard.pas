@@ -581,6 +581,15 @@ type
     UretimOncekiStokMiktar : Real;
     UretimOncekiBirim,Carpan : Integer;
     IzlemDlg3 : TIzlemeDlg;
+    // A8: izleme secimi alindi, satir ID'si cagri yerinde belli olacak
+    FIzlemBekliyor  : Boolean;
+    FIzlemSecimJson : string;
+    FIzlemTur       : Integer;
+    FIzlemBaslikId  : Integer;
+    FIzlemGirDepo   : Integer;
+    FIzlemCikDepo   : Integer;
+    FIzlemStokId    : Integer;
+    FIzlemTuru      : Integer;
     FEkleLogland: Boolean;  // kart EKLEME logu (mukerrer onleme: Finish/FormClose tek sefer)
 
     procedure IletisimEkleClick(Sender: TObject);
@@ -595,6 +604,8 @@ type
     function OperasyonSilinebilir(OpID: Integer): Boolean;
     procedure TabUretimOperasyonADETChange(Sender: TField);
     function StokIzlemBilgisi(TabUretim, TabloDetay:TFDQuery):boolean;
+    // A8: secimi, satir ID'si belli olan yerde yazar
+    procedure IzlemSeciminiYaz(ASatirId: Integer);
     procedure UretimAgaciOlustur(ReceteID, ButtonIndex, Yeri,YerId : Integer; Istenen:Extended=1.0);
     procedure FirmaBilgileri(RehberId:integer);
 //    function KonularEkle(ID:Integer):integer;
@@ -2046,6 +2057,16 @@ begin
   ModalResult := mrOk;
 end;
 
+procedure TUretimEmriWizardDlg.IzlemSeciminiYaz(ASatirId: Integer);
+begin
+  if not FIzlemBekliyor then Exit;
+  FIzlemBekliyor := False;
+  if ASatirId <= 0 then Exit;
+  Tablo.IzlemeSecimYaz(FIzlemSecimJson, FIzlemTur, 1, FIzlemBaslikId, ASatirId,
+    FIzlemStokId, FIzlemTuru, FIzlemGirDepo, FIzlemCikDepo, True, 0);
+  FIzlemSecimJson := '';
+end;
+
 function TUretimEmriWizardDlg.StokIzlemBilgisi(TabUretim, TabloDetay:TFDQuery):boolean;
 var
   DetID,GDepo,CDepo,Tur:integer;
@@ -2087,14 +2108,25 @@ begin
 //       Tablo.UyariGoster(Uyari, BildirimYapilmisDegisemez);
 
     Result := True;
-    if not Anaform.StokIzleme(IzlemDlg3, TabloDetay.FieldByName('URUNID').AsInteger, TabloDetay.FieldByName('IZLEME').AsInteger,
+    // A8: ekran yalnizca SECER; yazma satir ID'si belli olan yerde
+    //   IzlemSeciminiYaz ile yapilir. Eskiden ekran canli tutulup
+    //   FormDestroy'da yaziliyordu - hata kullaniciya ulasmiyordu.
+    FIzlemBekliyor := False;
+    if not Anaform.StokIzlemeSecimAl(TabloDetay.FieldByName('URUNID').AsInteger, TabloDetay.FieldByName('IZLEME').AsInteger,
        Tur, 1, TabUretim.FieldByName('ID').AsInteger,DetID, 0, TabUretim.FieldByName('GIRISDEPO').AsInteger, TabUretim.FieldByName('CIKISDEPO').AsInteger,
-       GerekMiktar, Miktar, Degisemez, '',0,0,True, UretimNo) then begin
-       FreeAndNil(IzlemDlg3);
+       GerekMiktar, Miktar, FIzlemSecimJson, True, 0, 0, Degisemez, '', 'E') then begin
+       FIzlemSecimJson := '';
        TabloDetay.Cancel;
        Result := False;
        exit;
     end;
+    FIzlemBekliyor := True;
+    FIzlemTur      := Tur;
+    FIzlemBaslikId := TabUretim.FieldByName('ID').AsInteger;
+    FIzlemGirDepo  := TabUretim.FieldByName('GIRISDEPO').AsInteger;
+    FIzlemCikDepo  := TabUretim.FieldByName('CIKISDEPO').AsInteger;
+    FIzlemStokId   := TabloDetay.FieldByName('URUNID').AsInteger;
+    FIzlemTuru     := TabloDetay.FieldByName('IZLEME').AsInteger;
 
     if TabUretim.FieldByname('SENARYO').AsInteger=2 then begin //b?t?nden par?aya ?retim
        //Miktar := MiktarSor(Miktar);
@@ -2243,10 +2275,8 @@ begin
       Query20.Open;
       while not Query20.eof do begin
         if StokIzlemBilgisi(Query19, Query20)=True then begin
-           if IzlemDlg3<>nil then begin //kaydetmesi i?in destroy etmemiz laz?m
-              IzlemDlg3.SatirID := Query20.FieldByName('ID').AsInteger;
-              FreeAndNil(IzlemDlg3);
-           end
+           // A8: secim yukarida alindi; YAZMA BURADA - satir ID'si belli.
+           IzlemSeciminiYaz(Query20.FieldByName('ID').AsInteger)
         end
         else begin//faturay? sil
            Tablo.FaturaSil(Query19, Query20, FBID);
