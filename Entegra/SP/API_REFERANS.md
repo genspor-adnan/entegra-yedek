@@ -143,7 +143,6 @@ içindeki üç dalın (1=teklif, 2=sipariş, 3=belge) aynısı; artık tek yerde
 |---|---|---|---|
 | `sp_Api_Donusum_Kontrol_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,Satirlar:[{SatirId,Adet}]}` | `{Sonuc,Uygun,Satirlar:[{SatirId,Adet,Kalan,Uygun,Neden}]}` — aşırı dönüşüm koruması. `GenDepoUpdate73.sql` |
 | `sp_Api_Donusum_Kaynak_Json` | ⬜ (mevcut `sp_Prog_BelgeDonusum_Kaynak_Json2` yeterli olabilir) | `{HedefTur,RehberId,DepoId,BasTarih,BitTarih,Filtre,Sayfa,SayfaBoyu}` | sonuç kümesi |
-| `sp_Api_Belge_Donusum_Baslik_Json` | 🟨 MSSQL hazır, PG bekliyor | `{DonusumTuru,KaynakBelgeId,HedefTur,KocanNo,BelgeNo,BelgeSeri,Senaryo,VarsayilanDoviz,Oturum}` | `{Sonuc,HedefBelgeId,HedefTablo,Loglanan}` — **dönüşümde hedef başlık oluşturma**. `TTablo.BelgeDonustur_BaslikOlusur` bunu çağırır; kolon kümesi eski Pascal SQL'i ile birebir (farksal test: 409/410/473 → aynı). TEKLIF kaynağı kapsam dışı (o tabloda kolonlar yok). `GenDepoUpdate87.sql` |
 | `sp_Api_Belge_Donusum_Json` | 🟨 MSSQL hazır, PG bekliyor | `{DonusumTuru,KaynakBelgeId,HedefBelgeId,Tarih,SatirIds[],Oturum}` | `{Sonuc,DonusumTuru,KaynakBelgeId,HedefBelgeId,HedefBelgeNo,HedefTur,Satir,Loglanan,Toplam,KaynakDurum}` — **genel belge dönüşümü**; kaynak/hedef eşlemesi `fn_Api_Donusum_Esleme()`'den gelir. `HedefBelgeId > 0` verilirse yeni belge açılmaz, mevcut belgeye eklenir. `GenDepoUpdate82.sql` |
 | `sp_Api_Donusum_SiparistenBelge_Json` | ⚪ geriye uyumlu sarmalayıcı | `{SiparisId,HedefTur,…}` | `sp_Api_Belge_Donusum_Json`'a yönlendirir (`SiparisId`+`HedefTur` → `DonusumTuru`). Yeni kod doğrudan genel SP'yi çağırmalı. `GenDepoUpdate82.sql` |
 | `sp_Api_Donusum_Uygula_Json` | 🟨 MSSQL hazır, PG bekliyor | `{Kaynak,DonusumTuru,HedefUretim,HedefBelgeId,Oturum,Satirlar:[{Sira,KaynakSatirId,UrunId,Adet,BirimFiyat,Kdv,Iskonto,Iskonto2,...}]}` | `{Sonuc,HedefBelgeId,Yazilan,Satirlar:[{Sira,KaynakSatirId,SatirId}],Toplam,KaynakDurum}` — **açık-değerli sözleşme**: fiyat/iskonto/KDV hesaplamaz, çağıran gönderir. `GenDepoUpdate74.sql` |
@@ -257,27 +256,6 @@ kalan), hedef toplamları, kaynak belgenin kapanma durumu, ISLEMLOG.
 Delphi tarafı: sipariş listesindeki **"Seçilenleri İrsaliyeye/Faturaya Dönüştür"** menüsü bu SP'yi
 çağırır (`TFaturalarDlg.mnIrsaliyeyeDonusturClick`). Önceki hâlinde Faturaya Dönüştür dalı boştu ve
 İrsaliyeye Dönüştür `YERI`/`YERID` yazmadığı için dönüşüm bağı kurulmuyordu.
-
-
-### 6.2 Başlık üretimi tek yerde
-
-Dönüşümde hedef başlık **iki ayrı yerde** üretiliyordu: `TTablo.BelgeDonustur_BaslikOlusur`
-(Pascal, elle string birleştirme + MSSQL/PG dallanması) ve `sp_Api_Belge_Donusum_Json`'un kendi
-küçük kolon kümesi. SP tarafında `KOCANNO`, `BASLIK/ADRES/ILCE/IL/VD/VNO`, `AKTIVITEID`,
-`REHBERILETID`, `SERVISID`, `DETAYBOLUMU`, `OZELKOD`, `EFATURADURUM/EFATURASONUC` ve `SENARYO`
-yazılmıyordu.
-
-Artık ikisi de `dbo.sp_Api_Belge_Donusum_Baslik_Ic`'i çağırıyor. İş bölümü:
-
-- **Pascal'da kalan** (oturum/opsiyon verisi, SP'de yok): koçan numarası (`kocannumaralari`),
-  belge no/seri (`SiradakiBelgeNumarasi`, e-Fatura'da `TUR=15` özel durumu), varsayılan senaryo
-  ve varsayılan döviz (GENINI).
-- **SP'ye geçen**: INSERT'ün kendisi, dönüşüm türüne göre depo ve döviz eşlemesi
-  (`fn_Api_Donusum_Esleme`'ye `GirisKaynak`/`CikisKaynak`/`KaynakDovizAlan`/`EfatSonuc` kolonları
-  eklendi), ISLEMLOG.
-
-Döviz kuralı Pascal ile birebir: hedefin `RAPORDOVIZ`'i kaynaktan **aynen** kopyalanır, eşleme
-sonucu `FATURADOVIZI`'ye yazılır. Konsinye hedefinde `GIRISDEPO` = `DEPOLAR.VARSAYILAN=7` deposu.
 
 ## 7. Ubelgegiris (toplu belge girişi) — F5 Kaydet
 
