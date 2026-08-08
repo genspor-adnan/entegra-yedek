@@ -51,19 +51,13 @@ type
     ChecktumKayitlar: TcxCheckBox;
     EditAra: TcxTextEdit;
     cxLabel1: TcxLabel;
-    SQLGiren: TMemo;
     SQLDonusKaynak: TMemo;
-    SQLCikanUpdate: TMemo;
     GridFatIzlemViewURT: TcxGridDBColumn;
-    SQLDonusCikanHedef_2: TMemo;
-    SQLDonusCikanHedefUpdate: TMemo;
-    SQLCikan: TMemo;
     EditBarkod: TcxTextEdit;
     cxLabel2: TcxLabel;
     cxLabel3: TcxLabel;
     ComboBarkod: TcxImageComboBox;
     BtnTopluSerino: TToolButton;
-    Memo1: TMemo;
     PopupSeriNo: TPopupMenu;
     Listedentoplualma1: TMenuItem;
     N1: TMenuItem;
@@ -72,7 +66,6 @@ type
     cxLabel5: TcxLabel;
     GridFatIzlemViewID: TcxGridDBColumn;
     LblKalanMiktar: TcxLabel;
-    SQLDonusCikanHedef: TMemo;
     BtnLotNoVer: TToolButton;
     LabelRafOmru: TcxLabel;
     EditRafOmru: TcxLabel;
