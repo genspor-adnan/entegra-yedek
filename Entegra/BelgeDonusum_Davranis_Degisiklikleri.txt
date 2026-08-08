@@ -1,4 +1,4 @@
-BELGE DONUSUM SP PLANI - ON KOSUL 4: DAVRANIS DEGISIKLIKLERI VE TEST KURALI
+﻿BELGE DONUSUM SP PLANI - ON KOSUL 4: DAVRANIS DEGISIKLIKLERI VE TEST KURALI
 ============================================================================
 Tarih  : 08.08.2026
 Amac   : BelgeDonusum_SP_Plani_Degerlendirme.txt madde 5 + Degerlendirme_2
@@ -90,10 +90,7 @@ Bunlar differential testte "regresyon" degil, ONAYLI FARK olarak gorulecek.
 2.8 EFATURASONUC = 0   [K4]
     BUGUN : 410, 411, 424 rotalarinda 20 yaziliyor.
     YENI  : 0 yazilir.
-    ** KAPSAM DOGRULAMASI GEREKIYOR **: K4 sorusu 424 (satis fisi) icin
-    sorulmustu, cevap "0 olmali" seklinde geldi. Bu dosyada karar TUM rotalar
-    icin 0 olarak yazildi. 410/411 (satis faturasi) icin 20 korunmasi
-    isteniyorsa tek satirlik degisiklik - kodlamadan once teyit edilecek.
+    TEYIT EDILDI (T1): TUM rotalar icin 0. 410/411 dahil.
 
 2.9 EFATURADURUM olu parametre temizligi   [K3]
     Davranis DEGISMEZ (0 yaziliyordu, 0 yazilmaya devam edecek). Yalnizca
@@ -108,8 +105,9 @@ Bunlar differential testte "regresyon" degil, ONAYLI FARK olarak gorulecek.
     DIKKAT: IMAJ icerigi GENDEPO.DOSYA'da (FILESTREAM, hash-dedup). Kopyalama
             DOSYAID referansini paylasir, icerigi COGALTMAZ - DOSYA pin
             sayaclari ULog deseniyle uyumlu tutulacak.
-    KAPSAM SORUSU: yorum kopyalama yalniz 428'de mi kalacak, tum rotalarda mi
-            calisacak? Bugun yalniz 428. Kodlamadan once teyit.
+    KAPSAM TEYIT EDILDI (T2): TUM rotalarda calisacak. Bugun yalniz 428'de
+            calistigi icin bu ayrica bir DAVRANIS DEGISIKLIGIDIR - kaynak belgenin
+            yorumlari artik her donusumde hedefe kopyalanir.
 
 
 3. DEGISMEYECEK DAVRANISLAR (bilincli)
@@ -152,11 +150,13 @@ Ayrica ayri test edilecekler:
 
 5. KODLAMAYA GECIS - KALAN TEYITLER
 ------------------------------------
-  T1  EFATURASONUC=0 tum rotalar icin mi, yalniz 424 icin mi (madde 2.8)
-  T2  Yorum kopyalama yalniz 428'de mi, tum rotalarda mi (madde 2.10)
+  T1  TEYIT EDILDI: TUM rotalar icin 0.
+  T2  TEYIT EDILDI: TUM rotalarda calisacak (bugun yalniz 428'de calisiyordu -
+      bu da bir davranis degisikligidir).
 Bu iki teyit disinda plan on kosullari (1-4) TAMAMLANMISTIR; kodlamaya
 gecilebilir:
-  Adim 1: sp_Api_Belge_Kaydet_Json genisletmesi (alanlar + @BelgeIdOut)
+  Adim 1: sp_Api_Belge_Kaydet_Json genisletmesi (alanlar + @BelgeIdOut)  [TAMAM
+          - GenDepoUpdate88.sql, 08.08.2026]
   Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i
   Adim 3: sp_Prog_BelgeDonusum_Dogrula
   Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)
