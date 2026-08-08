@@ -123,6 +123,8 @@ type
   private
     Kaydedilebilir : boolean;
     procedure TempTabloOlustur;
+    // A8 okuma tarafi: aday listesini sp_Prog_Izleme_Aday_Json'dan doldurur
+    function AdaydanDoldur(const AYontem: string): Boolean;
     procedure SecimJsonUret;
     function BuSeriNoKullanilmismiKontrolu(IzlemNo:string) : Boolean;
     { Private declarations }
@@ -155,7 +157,8 @@ var
 
 implementation
 
-uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, UDFMPG, System.JSON;
+uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, UDFMPG,
+     System.JSON, System.Math;
 
 
 
@@ -484,44 +487,26 @@ begin
                     ' ) as List where DURUM > 0 '); }
   if IslemTur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi,KasaTur_Uretim,KasaTur_Uretim_Urun, KasaTur_Gelen_Konsinye] then begin
      //girişler
-     if KaynakSatirID <= 0 then begin //direk giriş varsa
-        {if (IslemTur = KasaTur_Gelen_Konsinye)and(IslemTip=2) then begin //konsinye iade alınırsa
-           //KomutDeclare := ' declare @BaslikID int, @SatirID int set @BaslikID='+IntToStr(KaynakBaslikID)+ ' set @SatirID='+IntToStr(KaynakSatirID);
-           TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusCikanHedef.text, ':TabloAdi', TabloAdi, []);
-           TabIzlem.ExecSQL;
-        end
-        else }if DonusumKaynak then begin
-           ExecMemo(TabIzlem, SQLDonusKaynak.text, SQL_PG_IzlemDonusKaynak, BaslikID, SatirID);
-        end
-        else begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            ExecMemo(TabIzlem, SQLGiren.text, SQL_PG_IzlemGiren, BaslikID, SatirID);
-            ExecMemo(Tablo.Query1, SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate, BaslikID, SatirID);
-         end
+     // ---- A8: LISTE ARTIK SP'DEN ----
+     //   Uc memo cifti (SQLGiren+CikanUpdate / SQLCikan+CikanUpdate /
+     //   SQLDonusCikanHedef+Update) sp_Prog_Izleme_Aday_Json'un uc yontemine
+     //   karsilik geliyor. Ekran hangisini istedigini soyluyor; hesap tek yerde.
+     if KaynakSatirID <= 0 then begin
+        if DonusumKaynak then
+           // Bu satir baska belgeye DONUSMUS - salt okunur "kaynak" gorunumu.
+           //   SP karsiligi henuz yok; memo yolunda birakildi (bkz. A8 notu).
+           ExecMemo(TabIzlem, SQLDonusKaynak.text, SQL_PG_IzlemDonusKaynak, BaslikID, SatirID)
+        else
+           AdaydanDoldur('kendi');
      end
-     else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
-         ExecMemo(TabIzlem, SQLDonusCikanHedef.text, SQL_PG_IzlemDonusCikanHedef, KaynakBaslikID, KaynakSatirID);
-         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
-         ExecMemo(Tablo.Query1, SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate, BaslikID, SatirID);
-     end;
+     else
+        AdaydanDoldur('tasima');
   //çıkışlar
   end else begin
-     if KaynakSatirID <= 0  then begin //direk çıkış varsa
-        { if DonusumKaynak then begin //dönüşmüş belge (Kons.Çıkış veya İrsaliye çıkış) ise kaynak görüntülenir.
-            TabIzlem.SQL.Text := KomutDeclare+' '+ StringReplace(SQLDonusKaynak.text, ':TabloAdi', TabloAdi, []);
-            TabIzlem.ExecSQL;
-         end else }
-         begin        //Normal Çıkış belgesi (Kons.Çıkış veya İrsaliye çıkış veya Fatura Çıkış)
-            ExecMemo(TabIzlem, SQLCikan.text, SQL_PG_IzlemCikan, BaslikID, SatirID);
-            ExecMemo(Tablo.Query1, SQLCikanUpdate.text, SQL_PG_IzlemeCikanUpdate, BaslikID, SatirID);
-         end
-     end else begin //dönüşümden çıkış varsa, esas belgedeki izlemler gelmelidir
-         KomutDeclare := ' declare @BaslikID int, @SatirID int'+sLineBreak+' set @BaslikID='+IntToStr(KaynakBaslikID)+sLineBreak+' set @SatirID='+IntToStr(KaynakSatirID)+sLineBreak;
-         ExecMemo(TabIzlem, SQLDonusCikanHedef.text, SQL_PG_IzlemDonusCikanHedef, KaynakBaslikID, KaynakSatirID);
-         // 11/05/2022 AO kaldırıldı
-         KomutDeclare := ' declare @SatirID int'+sLineBreak+' set @SatirID='+IntToStr(SatirID)+sLineBreak;
-         ExecMemo(Tablo.Query1, SQLDonusCikanHedefUpdate.text, SQL_PG_IzlemeDonusCikanHedefUpdate, BaslikID, SatirID);
-     end;
+     if KaynakSatirID <= 0 then
+        AdaydanDoldur('depo')
+     else
+        AdaydanDoldur('tasima');
   end;
 
 
@@ -1405,6 +1390,109 @@ begin
   LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Tablo.GridTurkcelestir;
   Tablo.GridAyarRestore('GridFatIzlemGridi', GridFatIzlemView);
+end;
+
+function TIzlemeDlg.AdaydanDoldur(const AYontem: string): Boolean;
+// ============================================================
+// A8 OKUMA TARAFI - aday listesi artik SUNUCUDAN
+//
+// Eskiden bu liste DFM icindeki alti TMemo sorgusundan, metinle uretilen
+//   "declare @X int set @X=123" on ekiyle ve ##TmpIzleme_<SPID>_<zaman>
+//   global gecici tablosuyla olusuyordu. Ayni hesap uc ayri memo ciftinde
+//   tekrarlaniyor, biri degisince digeri geride kaliyordu (or. donusum
+//   listesindeki depo-filtresiz join satir cogaltiyordu).
+//
+// Artik tek kaynak: sp_Prog_Izleme_Aday_Json. Ekran hangi listeye ihtiyaci
+//   oldugunu YONTEM olarak soyler:
+//     tasima - donusumde kaynak belgeden tasinacak lotlar
+//     depo   - cikista depodaki bakiyeden secim
+//     kendi  - giriste bu satirin kendi kayitlari
+//
+// Gecici tablo KALDI (grid'in duzenlenebilir veri kaynagi), yalniz DOLDURMA
+//   yolu degisti. Kolon ON YUKLEME kurallari eski memolardan birebir alindi:
+//     kendi  : DURUM 0, KALAN = secilen (SEC 1)
+//     depo   : DURUM = depodaki bakiye, KALAN 0 (secili ise secilen)
+//     tasima : DURUM = kaynagin kalani, KALAN = ayni (secili ise secilen)
+// ============================================================
+var
+  LQ: TFDQuery;
+  LJson: TJSONObject;
+  LKaynak, LBelge: TJSONObject;
+  LKalan, LDurum: Double;
+begin
+  Result := False;
+  LJson := TJSONObject.Create;
+  try
+    LJson.AddPair('yontem',   AYontem);
+    LJson.AddPair('stokId',   TJSONNumber.Create(StokID));
+    LJson.AddPair('izlemTur', TJSONNumber.Create(IzlemTur));
+    if AYontem = 'depo' then
+      LJson.AddPair('depoId', TJSONNumber.Create(
+        IfThen(IslemTur in [KasaTur_DigerCikisFisi, KasaTur_SatisFaturasi,
+                            KasaTur_SatisFisi, KasaTur_SatisIrsaliyesi,
+                            KasaTur_Giden_Konsinye, KasaTur_Uretim_Sarf,
+                            KasaTur_StokTransferi], CikDepo, GirDepo)));
+    LBelge := TJSONObject.Create;
+    LBelge.AddPair('tur',      TJSONNumber.Create(IslemTur));
+    LBelge.AddPair('baslikId', TJSONNumber.Create(BaslikID));
+    LBelge.AddPair('satirId',  TJSONNumber.Create(SatirID));
+    LJson.AddPair('belge', LBelge);
+    if KaynakSatirID > 0 then
+    begin
+      LKaynak := TJSONObject.Create;
+      LKaynak.AddPair('baslikId', TJSONNumber.Create(KaynakBaslikID));
+      LKaynak.AddPair('satirId',  TJSONNumber.Create(KaynakSatirID));
+      LJson.AddPair('kaynak', LKaynak);
+    end;
+
+    LQ := TFDQuery.Create(nil);
+    try
+      LQ.Connection := Tablo.FDCnn;
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := 'SELECT * FROM fn_prog_izleme_aday_json(:Kosullar)'
+      else
+        LQ.SQL.Text := 'EXEC dbo.sp_Prog_Izleme_Aday_Json @Kosullar=:Kosullar';
+      LQ.ParamByName('Kosullar').AsString := LJson.ToJSON;
+      LQ.Open;
+      while not LQ.Eof do
+      begin
+        if LQ.FieldByName('SECILI').AsBoolean then
+          LKalan := LQ.FieldByName('SECILENADET').AsFloat
+        else if AYontem = 'depo' then
+          LKalan := 0
+        else
+          LKalan := LQ.FieldByName('MEVCUT').AsFloat;
+
+        if AYontem = 'kendi' then
+          LDurum := 0
+        else
+          LDurum := LQ.FieldByName('MEVCUT').AsFloat;
+
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+          'insert into ' + TabloAdi +
+          ' (STOKID, SERILOTID, SERINO, LOTNO, SKT, URT, DURUM, KALAN, SEC,' +
+          '  IZLEMID, BASLIKID, SATIRID, UPDID)' +
+          ' values (&stok, &lot, &seri, &lotno, &skt, &urt, &durum, &kalan, &sec,' +
+          '  &izlem, 0, 0, 0)',
+          ['&stok','&lot','&seri','&lotno','&skt','&urt','&durum','&kalan','&sec','&izlem'],
+          [StokID,
+           LQ.FieldByName('SERILOTID').AsInteger,
+           LQ.FieldByName('SERINO').AsString,
+           LQ.FieldByName('LOTNO').AsString,
+           LQ.FieldByName('SKT').AsDateTime,
+           LQ.FieldByName('URT').AsDateTime,
+           LDurum, LKalan,
+           Integer(Ord(LQ.FieldByName('SECILI').AsBoolean)),
+           LQ.FieldByName('KAYNAKIZLEMID').AsInteger]);
+        LQ.Next;
+      end;
+      Result := True;
+    finally
+      LQ.Free;
+    end;
+  finally
+    LJson.Free;
+  end;
 end;
 
 // ============================================================
