@@ -1400,8 +1400,9 @@ end;
 // ============================================================
 procedure TIzlemeDlg.SecimJsonUret;
 var
-  LDizi : TJSONArray;
-  LAdet : Double;
+  LDizi  : TJSONArray;
+  LSatir : TJSONObject;
+  LAdet  : Double;
 begin
   SecimJson := '';
   LDizi := TJSONArray.Create;
@@ -1411,11 +1412,30 @@ begin
       TabIzlem.First;
       while not TabIzlem.Eof do begin
         LAdet := TabIzlem.FieldByName('KALAN').AsFloat;
-        if (TabIzlem.FieldByName('SEC').AsBoolean) and (LAdet > 0) then
-          LDizi.Add(TJSONObject.Create
+        // GIRIS kipinde SEC kolonu gorunmez ve isaretlenmez; oradaki her satir
+        //   kullanicinin girdigi/onayladigi lottur. CIKIS ve DONUSUMDE yalniz
+        //   isaretliler alinir.
+        if ((TabIzlem.FieldByName('SEC').AsBoolean) or (not GridFatIzlemViewSEC.Visible))
+           and (LAdet > 0) then
+        begin
+          LSatir := TJSONObject.Create
             .AddPair('kaynakIzlemId', TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
+            .AddPair('izlemId',       TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
             .AddPair('serilotId',     TJSONNumber.Create(TabIzlem.FieldByName('SERILOTID').AsInteger))
-            .AddPair('adet',          TJSONNumber.Create(LAdet)));
+            .AddPair('adet',          TJSONNumber.Create(LAdet));
+          // Seri/lot karti HENUZ YOKSA (giriste kullanici yeni lot yazar)
+          //   tanimlayici alanlar da gonderilir; karti yazan SP acar.
+          if TabIzlem.FieldByName('SERILOTID').AsInteger <= 0 then
+          begin
+            LSatir.AddPair('seriNo', TabIzlem.FieldByName('SERINO').AsString);
+            LSatir.AddPair('lotNo',  TabIzlem.FieldByName('LOTNO').AsString);
+            if not TabIzlem.FieldByName('SKT').IsNull then
+              LSatir.AddPair('skt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('SKT').AsDateTime));
+            if not TabIzlem.FieldByName('URT').IsNull then
+              LSatir.AddPair('urt', FormatDateTime('yyyy-mm-dd', TabIzlem.FieldByName('URT').AsDateTime));
+          end;
+          LDizi.Add(LSatir);
+        end;
         TabIzlem.Next;
       end;
     finally

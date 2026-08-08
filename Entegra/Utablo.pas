@@ -643,6 +643,12 @@ type
     procedure BelgeSil(Table1: TDataSet);
     function YeniGeciciBaglantiOlustur: TFDConnection;
     function IzlemBilgisiKaydet(TabKaynak : TFDQuery; IslemTur,IslemTip, KaynakSatirID, BaslikID, SatirID, IzlemTur, GirDepo, CikDepo : integer; StokDurumDegis:boolean) : integer;
+    // A8: izleme ekranindan alinan secimi sunucuya yazdirir
+    //   (sp_Prog_Izleme_Yaz_Json). IzlemBilgisiKaydet'in yerini alir.
+    procedure IzlemeSecimYaz(const ASecimJson: string;
+      AIslemTur, AIslemTip, ABaslikID, ASatirID, AStokID, AIzlemTur,
+      AGirDepo, ACikDepo: Integer; AStokDurumDegis: Boolean;
+      AKaynakSatirID: Integer = 0);
     function KullanimSayisi(Tur, FatBasId, FatSatirId, StokId:Integer; BelgeTarih:TDateTime):Integer;
     function IzlemBildirimSayisi(Tur, FatBasId, FatSatirId:Integer; BelgeTarih:TDateTime):Integer;
     // Fatura/irsaliye SILME on-kontrolu (server-side SP). ASatirID>0 tek satir; =0 AFatBasID
@@ -7028,6 +7034,47 @@ begin
   for i := 0 to Tablo1.FieldCount - 1 do begin
     LogOnceki.Add(Tablo1.Fields[i].AsString);
   end;
+end;
+
+procedure TTablo.IzlemeSecimYaz(const ASecimJson: string;
+  AIslemTur, AIslemTip, ABaslikID, ASatirID, AStokID, AIzlemTur,
+  AGirDepo, ACikDepo: Integer; AStokDurumDegis: Boolean;
+  AKaynakSatirID: Integer = 0);
+// A8: izleme ekranindan alinan secimi sunucuda yazar.
+//   IzlemBilgisiKaydet'in yaptigi is (seri/lot karti acma, STOKIZLEME +
+//   STOKIZLEMEDEPO, yon kurallari, depo korumasi) sp_Prog_Izleme_Yaz_Json'a
+//   tasindi; burada yalniz cagri kaldi.
+//
+//   ASecimJson bos olsa bile CAGRILIR: SP onceki kayitlari siler, yani
+//   kullanici tum secimleri kaldirdiysa eski satirlar da gider.
+//
+//   Satir ID'si Post SONRASI olustugundan cagiran bu yordami dogru anda
+//   cagirmali (yeni satirda AfterPost).
+var
+  LJson: TJSONObject;
+begin
+  if ASatirID <= 0 then
+    raise Exception.Create('Izleme kaydi icin satir ID gerekli (satir henuz kaydedilmemis).');
+
+  LJson := TJSONObject.Create;
+  LJson.AddPair('belge', TJSONObject.Create
+    .AddPair('tur',      TJSONNumber.Create(AIslemTur))
+    .AddPair('baslikId', TJSONNumber.Create(ABaslikID))
+    .AddPair('satirId',  TJSONNumber.Create(ASatirID))
+    .AddPair('islemTip', TJSONNumber.Create(AIslemTip)));
+  LJson.AddPair('stokId',        TJSONNumber.Create(AStokID));
+  LJson.AddPair('izlemTur',      TJSONNumber.Create(AIzlemTur));
+  LJson.AddPair('girDepo',       TJSONNumber.Create(AGirDepo));
+  LJson.AddPair('cikDepo',       TJSONNumber.Create(ACikDepo));
+  LJson.AddPair('stokHareketi',  TJSONBool.Create(AStokDurumDegis));
+  LJson.AddPair('kaynakSatirId', TJSONNumber.Create(AKaynakSatirID));
+  LJson.AddPair('kullaniciId',   TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
+  if Trim(ASecimJson) <> '' then
+    LJson.AddPair('satirlar', TJSONObject.ParseJSONValue(ASecimJson) as TJSONArray)
+  else
+    LJson.AddPair('satirlar', TJSONArray.Create);
+
+  ApiCagir('sp_Prog_Izleme_Yaz_Json', LJson);
 end;
 
 function TTablo.IzlemBilgisiKaydet(TabKaynak : TFDQuery; IslemTur,IslemTip, KaynakSatirID, BaslikID, SatirID, IzlemTur, GirDepo, CikDepo : integer; StokDurumDegis:boolean) : integer;

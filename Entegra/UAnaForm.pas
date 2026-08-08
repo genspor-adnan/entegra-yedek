@@ -192,6 +192,21 @@ type
     procedure LblSubeClick(Sender: TObject);
     procedure StokIzlemeDetayiGoster(Izleme,StokID,DepoID:Integer);
     procedure StokIzlemeDetayiGosterBelge(BaslikTur,BaslikID,DetayID,Izleme,StokID:Integer);
+    // A8: ekran YALNIZCA SECER. Secim ASecimJson'a doner; yazma cagiranin
+    //   uygun anda Tablo.IzlemeSecimYaz cagrisiyla yapilir.
+    //   Neden ayri: yeni satirda satir ID'si HENUZ YOK (Post'tan sonra olusur).
+    //   Eski akis bu yuzden ekrani canli tutup FormDestroy'da yaziyordu.
+    function StokIzlemeSecimAl(StkID, IzlemTur, IslemTur, IslemTip, BaslikID, DetayID,
+      RehberId, GirDepo, CikDepo: Integer; GerekliMiktar: real; var Miktar: real;
+      out ASecimJson: string; StokDurumDegis: Boolean = True;
+      KaynakBaslik: Integer = 0; KaynakSatir: Integer = 0; Degisemez: Boolean = False;
+      Barkod: string = ''; IslemOp: char = 'E'): Boolean;
+    // Satir ID'si zaten belli olan cagiranlar icin: sec + hemen yaz.
+    function StokIzlemeSec(StkID, IzlemTur, IslemTur, IslemTip, BaslikID, DetayID,
+      RehberId, GirDepo, CikDepo: Integer; GerekliMiktar: real; var Miktar: real;
+      StokDurumDegis: Boolean = True; KaynakBaslik: Integer = 0;
+      KaynakSatir: Integer = 0; Degisemez: Boolean = False;
+      Barkod: string = ''; IslemOp: char = 'E'): Boolean;
     function StokIzleme(var dlgIzlem:TIzlemeDlg; StkID,IzlemTur,IslemTur,IslemTip,BaslikID,DetayID,RehberId, GirDepo,CikDepo : Integer;
                GerekliMiktar : real; var Miktar:real; Degisemez : boolean=False; Barkod : string=''; KaynakBaslik : integer=0; KaynakSatir:integer=0;
                StokDurumDegis:boolean=True; UretimNo:string='0'; IslemOp:char='E'):Boolean;
@@ -279,7 +294,7 @@ var
 
 implementation
 
-uses Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
+uses System.JSON, Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
   UKasa, ULogo, UOpsDlg, UListe, UKullaniciDuzenle, UStokHizmetAra,
   GT_RehberAbout, UDoviz, UKullaniciKodYetki, UMailYaz, FetaUtil,
   UTakvim, UKrediler, UKasaWizard, UOpsiyonBanka, UDokumanListeFrame, UStokListeDlg,
@@ -1094,6 +1109,79 @@ begin
   Result := dlgIzlem.ModalResult = mrOk;
   if dlgIzlem.ModalResult <> mrOk then
      FreeAndNil(dlgIzlem);
+end;
+
+function TAnaForm.StokIzlemeSecimAl(StkID, IzlemTur, IslemTur, IslemTip, BaslikID, DetayID,
+         RehberId, GirDepo, CikDepo: Integer; GerekliMiktar: real; var Miktar: real;
+         out ASecimJson: string; StokDurumDegis: Boolean = True;
+         KaynakBaslik: Integer = 0; KaynakSatir: Integer = 0; Degisemez: Boolean = False;
+         Barkod: string = ''; IslemOp: char = 'E'): Boolean;
+// ============================================================
+// IZLEME SECIMI - YENI YOL  (plan A8)
+//
+// Eski StokIzleme'den TEK FARKI: ekran HICBIR SEY YAZMAZ. Secim ASecimJson'a
+//   doner, yazmayi cagiran yapar (Tablo.IzlemeSecimYaz).
+//
+// Eskiden yazma FormDestroy'da, yani mrOk verildikten SONRA form yok edilirken
+//   oluyordu: hata olusursa kullaniciya mesaj gitmiyor, cagiranin
+//   transaction'ina girilemiyor, cagiran "kaydedildi" sanip devam ediyordu.
+//   Ayrica yeni satirda satir ID'si Post'tan sonra olustugu icin ekran canli
+//   tutulup AfterPost'ta yok ediliyordu - kirilganligin bir kaynagi da buydu.
+//
+// Doner: kullanici onayladi mi. False ise secim yok, HICBIR SEY yazilmaz.
+// ============================================================
+var
+  LDlg: TIzlemeDlg;
+begin
+  Result := False;
+  ASecimJson := '';
+  LDlg := nil;
+  try
+    Application.CreateForm(TIzlemeDlg, LDlg);
+    LDlg.YalnizSecim    := True;
+    LDlg.StokID         := StkID;
+    LDlg.IzlemTur       := IzlemTur;
+    LDlg.RehberId       := RehberId;
+    LDlg.IslemTur       := IslemTur;
+    LDlg.IslemTip       := IslemTip;
+    LDlg.BaslikID       := BaslikID;
+    LDlg.SatirID        := DetayID;
+    LDlg.KaynakBaslikID := KaynakBaslik;
+    LDlg.KaynakSatirID  := KaynakSatir;
+    LDlg.GirDepo        := GirDepo;
+    LDlg.CikDepo        := CikDepo;
+    LDlg.GerekliMiktar  := GerekliMiktar;
+    LDlg.Kalan          := Miktar;
+    LDlg.Degisemez      := Degisemez;
+    LDlg.StokDurumDegis := StokDurumDegis;
+    LDlg.IslemOp        := IslemOp;
+    LDlg.Barkod         := Barkod;
+    LDlg.ShowModal;
+
+    Miktar := LDlg.Kalan;
+    if LDlg.ModalResult <> mrOk then Exit;
+    ASecimJson := LDlg.SecimJson;
+    Result := True;
+  finally
+    FreeAndNil(LDlg);
+  end;
+end;
+
+function TAnaForm.StokIzlemeSec(StkID, IzlemTur, IslemTur, IslemTip, BaslikID, DetayID,
+         RehberId, GirDepo, CikDepo: Integer; GerekliMiktar: real; var Miktar: real;
+         StokDurumDegis: Boolean = True; KaynakBaslik: Integer = 0;
+         KaynakSatir: Integer = 0; Degisemez: Boolean = False;
+         Barkod: string = ''; IslemOp: char = 'E'): Boolean;
+// Satir ID'si zaten belli olan cagiranlar icin kisayol: sec + hemen yaz.
+var
+  LSecim: string;
+begin
+  Result := StokIzlemeSecimAl(StkID, IzlemTur, IslemTur, IslemTip, BaslikID, DetayID,
+              RehberId, GirDepo, CikDepo, GerekliMiktar, Miktar, LSecim,
+              StokDurumDegis, KaynakBaslik, KaynakSatir, Degisemez, Barkod, IslemOp);
+  if Result then
+    Tablo.IzlemeSecimYaz(LSecim, IslemTur, IslemTip, BaslikID, DetayID, StkID,
+                         IzlemTur, GirDepo, CikDepo, StokDurumDegis, KaynakSatir);
 end;
 
 function TAnaForm.StokLokasyonSor(var dlgLok:TStokLokasyonDlg;StkID,IslemTur,BaslikID,DetayID,GirDepo,CikDepo:Integer;Miktar:Extended;Durum:Boolean=True):Boolean;

@@ -720,6 +720,13 @@ type
     BekletDlg: TBekletmeDlg;
     IzlemDlg:TIzlemeDlg;
     LokasyonDlg:TStokLokasyonDlg;
+    // A8: izleme secimi alindi ama satir ID'si henuz yok - AfterPost'ta yazilir
+    FIzlemBekliyor  : Boolean;
+    FIzlemSecimJson : string;
+    FIzlemStokId    : Integer;
+    FIzlemTuru      : Integer;
+    FIzlemKaynakSat : Integer;
+    FIzlemStokHar   : Boolean;
     function BoslukKontrolu: Boolean;
     procedure YazdirmayaHazirla(AFastReport: TfrxReport);
     procedure StokDetayAc;
@@ -4076,16 +4083,31 @@ begin
               SatirId := TabFatura.FieldByName('YERID').AsInteger
           else
               SatirId := 0;
-          if not Anaform.StokIzleme(IzlemDlg,TabFatura.FieldByName('URUNID').AsInteger,TabFatura.FieldByName('IZLEME').AsInteger,
+          // A8: ekran yalnizca SECER; yazma AfterPost'ta yapilir.
+          //   Yeni satirda FatSatID = 0 - satir ID'si Post'tan sonra olusuyor.
+          //   Eski akis bu yuzden ekrani canli tutup AfterPost'ta yok ediyor,
+          //   yazma da FormDestroy'da oluyordu. Artik ekran kapaniyor, secim
+          //   FIzlemSecimJson'da bekliyor, AfterPost yaziyor - hata da orada
+          //   kullaniciya ulasabiliyor.
+          if not Anaform.StokIzlemeSecimAl(TabFatura.FieldByName('URUNID').AsInteger,TabFatura.FieldByName('IZLEME').AsInteger,
                         TabFatbaslik.FieldByName('TUR').AsInteger,TabFatbaslik.FieldByName('TIPI').AsInteger,
                         TabFatbaslik.FieldByName('ID').AsInteger, FatSatID, TabFatbaslik.FieldByName('REHBERID').AsInteger, TabFatbaslik.FieldByName('GIRISDEPO').AsInteger,  TabFatbaslik.FieldByName('CIKISDEPO').AsInteger,
-                        GerekMiktar,miktar,False,ArananBarkod,0, SatirId,TabFatura.FieldByName('STOKDURUMDEGIS').AsBoolean,'0',IslemOp) then begin
-             FreeAndNil(IzlemDlg);
+                        GerekMiktar, miktar, FIzlemSecimJson,
+                        TabFatura.FieldByName('STOKDURUMDEGIS').AsBoolean,
+                        0, SatirId, False, ArananBarkod, IslemOp) then begin
+             FIzlemSecimJson := '';
+             FIzlemBekliyor  := False;
              TabFatura.Cancel;
              if (TabFatura.recordcount>0)and(TabFatura.FieldByName('ADET').AsInteger=0) then
                  TabFatura.Delete;
              Abort;
           end;
+          // Yazma icin AfterPost'u bekliyoruz (satir ID'si orada belli olur).
+          FIzlemBekliyor  := True;
+          FIzlemStokId    := TabFatura.FieldByName('URUNID').AsInteger;
+          FIzlemTuru      := TabFatura.FieldByName('IZLEME').AsInteger;
+          FIzlemKaynakSat := SatirId;
+          FIzlemStokHar   := TabFatura.FieldByName('STOKDURUMDEGIS').AsBoolean;
     end;
  //end;
 end;
@@ -4122,9 +4144,21 @@ begin
 
   FaturaTipiDuzenle;
   //?zlem bilgisi var m? bakal?m serino vb.
-  if IzlemDlg<>nil then begin //kaydetmesi i?in destroy etmemiz laz?m
-     IzlemDlg.SatirID := TabFatura.FieldByName('ID').AsInteger;
-     FreeAndNil(IzlemDlg);
+  // A8: secim StokIzlemBilgisi'nde alindi, YAZMA BURADA - satir ID'si ancak
+  //   simdi belli. Eskiden ekran canli tutulup burada yok ediliyor, yazma
+  //   FormDestroy'da oluyordu; hata olusursa kimse gormuyordu.
+  if FIzlemBekliyor then begin
+     FIzlemBekliyor := False;
+     Tablo.IzlemeSecimYaz(FIzlemSecimJson,
+       TabFatbaslik.FieldByName('TUR').AsInteger,
+       TabFatbaslik.FieldByName('TIPI').AsInteger,
+       TabFatbaslik.FieldByName('ID').AsInteger,
+       TabFatura.FieldByName('ID').AsInteger,
+       FIzlemStokId, FIzlemTuru,
+       TabFatbaslik.FieldByName('GIRISDEPO').AsInteger,
+       TabFatbaslik.FieldByName('CIKISDEPO').AsInteger,
+       FIzlemStokHar, FIzlemKaynakSat);
+     FIzlemSecimJson := '';
   end;
   /////
   if LokasyonDlg<>nil then begin
