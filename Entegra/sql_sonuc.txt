@@ -1,28 +1,19 @@
 ﻿x	ID	TUR	DURUM	SIPARISNO
 --------------------------------------------------------------------------------
 Kaynak siparis	23202	19	0	101268
-x	ID	URUNID	ADET	Donusen	Kalan
---------------------------------------------------------------------------------
-Kalan satirlari	157992	143	1,000000	0,000000	1,000000
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"SiparisId":23202,"HedefBelgeId":114050,"HedefBelgeNo":"104151","HedefTur":14,"DonusumTuru":409,"Satir":1,"Loglanan":2,"Toplam":"{\"Matrah\":1500.0000,\"Kdv\":150.0000,\"Toplam\":1650.0000,\"Doviz\":1650.0000}","KaynakDurum":"{\"Durum\":9,\"Yazildi\":true,\"Neden\":\"\"}"}
-x	ID	TUR	FATURANO	REHBERID	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI	ACIKLAMA
+{"Sonuc":1,"SiparisId":23202,"HedefBelgeId":114051,"HedefBelgeNo":"104151","HedefTur":14,"DonusumTuru":409,"Satir":1,"Loglanan":2,"Toplam":"{\"Matrah\":1500.0000,\"Kdv\":150.0000,\"Toplam\":1650.0000,\"Doviz\":1650.0000}","KaynakDurum":"{\"Durum\":9,\"Yazildi\":true,\"Neden\":\"\"}"}
+x	ID	TUR	FATURANO	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI	ACIKLAMA
 --------------------------------------------------------------------------------
-Hedef belge	114050	14	104151	1109	1500,0000	150,0000	1650,0000	101268 nolu siparisten
-x	ID	URUNID	ADET	BIRIMFIYAT	TUTAR	KDV	YERI	YERID
+Hedef irsaliye	114051	14	104151	1500,0000	150,0000	1650,0000	101268 nolu siparisten
+x	ID	URUNID	ADET	TUTAR	YERI	YERID
 --------------------------------------------------------------------------------
-Hedef satirlar	3557533	143	1,000000	1500,000000	1500,00	10	409	157992
-x	ID	Kalan
---------------------------------------------------------------------------------
-Kaynak kalan (tran ici)	157992	0,000000
+Satirlar	3557534	143	1,000000	1500,00	409	157992
 x	DURUM
 --------------------------------------------------------------------------------
-Siparis durumu (tran ici)	9
-x	is_disabled
+Siparis durumu	9
+x	Hedef	SipDurum
 --------------------------------------------------------------------------------
-Tetikleyici geri acildi mi	False
-x	Adet
---------------------------------------------------------------------------------
-Rollback sonrasi hedef belge	0
+Rollback sonrasi	0	0
 
