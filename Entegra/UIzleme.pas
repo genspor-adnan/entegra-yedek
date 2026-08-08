@@ -469,7 +469,7 @@ begin
      KomutDeclare:=KomutDeclare+sLineBreak+' set @DepoID='+IntToStr(GirDepo);
   // PG: KomutDeclare sonrasi memo/UPDATE ile YAPISMASIN (ayni satirda 'set @X=N update...' olursa
   //   PgDeclareCevir'in set-value regex'i statement'i yutup ilk satiri siler -> "syntax near from").
-  KomutDeclare := KomutDeclare + sLineBreak;
+  KomutDeclare  := KomutDeclare + sLineBreak;
 {  KomutInsert := ' insert into '+TabloAdi+ ' (STOKID,SERINO,DURUM,KALAN,SEC,LOTNO,SKT)';
 
   //üretim, irs ve fat giriş ise satır boş gelir
@@ -1468,19 +1468,25 @@ begin
         else
           LDurum := LQ.FieldByName('MEVCUT').AsFloat;
 
+        // PARAMETRE ADLARINDA ONEK CAKISMASI OLMAMALI: token'lar metin olarak
+        //   degistiriliyor, '&lot' adi '&lotno' icinde de eslesiyor ve geriye
+        //   'no' kaliyordu -> "Incorrect syntax near 'no'". (08.08.2026)
         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
           'insert into ' + TabloAdi +
           ' (STOKID, SERILOTID, SERINO, LOTNO, SKT, URT, DURUM, KALAN, SEC,' +
           '  IZLEMID, BASLIKID, SATIRID, UPDID)' +
-          ' values (&stok, &lot, &seri, &lotno, &skt, &urt, &durum, &kalan, &sec,' +
+          ' values (&stok, &serilotid, &serino, &lotno, &skt, &urt, &durum, &kalan, &sec,' +
           '  &izlem, 0, 0, 0)',
-          ['&stok','&lot','&seri','&lotno','&skt','&urt','&durum','&kalan','&sec','&izlem'],
+          ['&stok','&serilotid','&serino','&lotno','&skt','&urt','&durum','&kalan','&sec','&izlem'],
           [StokID,
            LQ.FieldByName('SERILOTID').AsInteger,
            LQ.FieldByName('SERINO').AsString,
            LQ.FieldByName('LOTNO').AsString,
-           LQ.FieldByName('SKT').AsDateTime,
-           LQ.FieldByName('URT').AsDateTime,
+           // Tarihler ISO metin olarak: InitSql varDate'i YEREL bicimle
+           //   string'e ceviriyor (Turkce'de 14.03.2027) - motor ve yerel
+           //   ayara bagimli. 'yyyy-mm-dd' iki motorda da tek anlamli.
+           FormatDateTime('yyyy-mm-dd', LQ.FieldByName('SKT').AsDateTime),
+           FormatDateTime('yyyy-mm-dd', LQ.FieldByName('URT').AsDateTime),
            LDurum, LKalan,
            Integer(Ord(LQ.FieldByName('SECILI').AsBoolean)),
            LQ.FieldByName('KAYNAKIZLEMID').AsInteger]);
