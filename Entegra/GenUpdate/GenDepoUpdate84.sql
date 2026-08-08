@@ -1,4 +1,34 @@
 ﻿-- ============================================================
+-- GenDepoUpdate84.sql
+-- sp_Prog_StokTalep_Liste_Json2 : bellek grant'i duzeltmesi (istenen 283,4 MB)
+--
+-- GenDepoUpdate83 (Dokuman listesi) ile AYNI SINIF hata. Plan cache taramasinda
+--   bu sorgu 283,4 MB "istenen" bellekle listenin BASINDA cikti; gereken minimum
+--   yalnizca 7,5 MB. SQL Express'te sorgu-bellek semaforu 10 MB civarina dustugunde
+--   bu istek karsilanamaz ve Stok Talep listesi acilirken program KILITLENIR
+--   (RESOURCE_SEMAPHORE, timeout yok, hata da vermez).
+--
+-- KOK NEDEN: "LEFT OUTER JOIN SIPARISDETAY SD" KOSULSUZ duruyordu. Talep basina
+--   detay satiri kadar satir uretiyor, bunu da "SELECT DISTINCT TOP (200)" topluyordu.
+--   DISTINCT tum kolonlar (genis satir) uzerinde hash/sort demek. SD'ye gercekte
+--   yalnizca iki yerde ihtiyac vardi:
+--     1) opsiyonel AraKod/AraStok filtresi (STOKLAR join'i zaten kosulluydu),
+--     2) KAYNAK kolonunun 'Uretimden' kosulu.
+--   Ikisi de EXISTS ile satir cogaltmadan ifade edilebiliyor.
+--
+-- YAN FAYDA - GIZLI KAYIT COGALTMA HATASI: DISTINCT satirlari birlestirirken
+--   KAYNAK degeri detay satirina gore degistigi icin ayni talep hem KAYNAK=''
+--   hem KAYNAK='Uretimden' ile IKI KEZ listelenebiliyordu. EXISTS'e gecince
+--   talep basina tek satir kalir.
+--
+-- COZUM: SD join'i tamamen kaldirildi, AraKod/AraStok ve KAYNAK EXISTS'e cevrildi,
+--   DISTINCT kaldirildi.
+--
+-- NOT (duzeltilmedi, bilgi): SELECT listesinde "PROJEKOD=(...)" korele alt sorgusu
+--   UC KEZ birebir tekrar ediyor. Kolon sayisi/sirasi degisirse istemci tarafi
+--   etkilenebilecegi icin dokunulmadi.
+-- ============================================================
+-- ============================================================
 -- sp_Prog_StokTalep_Liste_Json2 — tek JSON parametre (MSSQL)
 --   IKI PARAM: @Baslik = SELECT ek kolonlari (ham SQL, GUVENILIR); @Kosullar = filtreler (JSON).
 --   @Kosullar = '{"Mod":4,"TarihBas":"2026-01-01",...}' -> JSON_VALUE ile yerel degiskenlere.
