@@ -1,23 +1,12 @@
-﻿x	Rehber	MasrafId
+﻿Sonuc
 --------------------------------------------------------------------------------
-Girdi	1259	1058
+{"Sonuc":1,"BelgeId":114048,"BelgeNo":"LOGTEST-2","Yeni":true,"SilinenSatir":0,"Loglanan":1,"Toplam":"{\"Matrah\":0.0000,\"Kdv\":0.0000,\"Toplam\":0.0000,\"Doviz\":0.0000,\"Neden\":\"\"}"}
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114044,"BelgeNo":"TEST-UB-1","Yeni":true,"SilinenSatir":0,"Toplam":"{\"Matrah\":0.0000,\"Kdv\":0.0000,\"Toplam\":0.0000,\"Doviz\":0.0000,\"Neden\":\"\"}"}
-x	ID	TUR	FATURANO	BASLIK	ADRES	IL	VD	VNO	FIYAT_LISTESI	ACIK_KAPALI	KDVDURUM
+{"Sonuc":1,"BelgeId":114048,"BelgeNo":"LOGTEST-2","Yeni":false,"SilinenSatir":0,"Loglanan":2,"Satirlar":[{"Sira":1,"ID":3557530,"Islem":"ekle"},{"Sira":2,"ID":3557531,"Islem":"ekle"}],"Toplam":"{\"Matrah\":200.0000,\"Kdv\":30.0000,\"Toplam\":230.0000,\"Doviz\":230.0000,\"Neden\":\"\"}"}
+x	ID	ISLEMTIPI	TABLOID	KAYITID	USTTABLOID	USTKAYITID	REHBERID
 --------------------------------------------------------------------------------
-Baslik yazildi	114044	11	TEST-UB-1	Bizim Firma	Adres 1	İstanbul	Kozyatağı	1234567890	1	True	Hariç
-Sonuc
---------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114044,"BelgeNo":"TEST-UB-1","Yeni":false,"SilinenSatir":0,"Satirlar":[{"Sira":1,"ID":3557523,"Islem":"ekle"},{"Sira":2,"ID":3557524,"Islem":"ekle"}],"Toplam":"{\"Matrah\":200.0000,\"Kdv\":30.0000,\"Toplam\":230.0000,\"Doviz\":230.0000,\"Neden\":\"\"}"}
-x	ID	TUR	URUNID	STOKID	MASRAFID	ADET	BIRIMFIYAT	TUTAR	KDV
---------------------------------------------------------------------------------
-Satirlar	3557523	0	1058	0	1058	1,000000	100,000000	100,00	20
-Satirlar	3557524	0	1058	0	1058	2,000000	50,000000	100,00	10
-x	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI	DOVIZ_TUTARI
---------------------------------------------------------------------------------
-Baslik toplamlari	200,0000	30,0000	230,0000	230,0000
-x	Kalan
---------------------------------------------------------------------------------
-Rollback sonrasi	0
+LOGLAR	657	1	106	114048	106	114048	1126
+LOGLAR	658	1	330	3557530	106	114048	1126
+LOGLAR	659	1	330	3557531	106	114048	1126
 

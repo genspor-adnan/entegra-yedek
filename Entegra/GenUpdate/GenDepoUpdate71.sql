@@ -16,7 +16,8 @@
 --              ULog.LogYilTablosu ile birebir). Depo adi ANA DB adindan turer.
 --   Kolonlar : IP, ISTASYON, KULLANICIID, SUBEID, ISLEMTIPI, ALTISLEMTIPI,
 --              USTTABLOID, USTKAYITID, TABLOID, KAYITID, REHBERID, STOKID, BILGI
---   ISLEMTIPI / ALTISLEMTIPI = 0 (liSil). MODUL yazilmaz (TABLOLAR.MODUL'den gelir).
+--   ISLEMTIPI / ALTISLEMTIPI = @IslemTipi (0 sil / 1 ekle / 2 degistir; varsayilan 0).
+--   MODUL yazilmaz (TABLOLAR.MODUL'den gelir).
 --   USTTABLOID/USTKAYITID verilmezse kaydin kendisi (ULog ile ayni).
 --   REHBERID/STOKID: ULog.LogKayitSil ile ayni sira ile bulunur -
 --              1) cagirandan geldiyse o,
@@ -115,6 +116,8 @@ CREATE OR ALTER PROCEDURE dbo.sp_Api_Log_Yaz_Ic
     @Istasyon VARCHAR(64)   = NULL,
     @RehberId BIGINT        = 0,
     @StokId   BIGINT        = 0,
+    -- 0 = liSil (varsayilan), 1 = liEkle, 2 = liDegistir (ULog.TLogIslem ile ayni)
+    @IslemTipi TINYINT      = 0,
     @Yazilan  INT OUTPUT
 AS
 BEGIN
@@ -223,7 +226,7 @@ BEGIN
     DECLARE @sql NVARCHAR(MAX) = N'
 INSERT INTO ' + @LogTablo + N' (IP,ISTASYON,KULLANICIID,SUBEID,ISLEMTIPI,ALTISLEMTIPI,
         USTTABLOID,USTKAYITID,TABLOID,KAYITID,REHBERID,STOKID,BILGI)
-SELECT @pIp, @pIst, @pKul, @pSub, 0, 0,
+SELECT @pIp, @pIst, @pKul, @pSub, @pTip, @pTip,
        @pUstT,
        CASE WHEN ISNULL(@pUstId,0) = 0 THEN ' + @KayitIfade + N' ELSE @pUstId END,
        @pTabNo, ' + @KayitIfade + N',
@@ -239,11 +242,11 @@ SET @pN = @@ROWCOUNT;';
     EXEC sp_executesql @sql,
         N'@pIp varchar(45), @pIst varchar(64), @pKul int, @pSub int, @pUstT int, @pUstId bigint,
           @pTabNo int, @pReh bigint, @pStk bigint, @pRehKendi bit, @pStkKendi bit,
-          @pKayit bigint, @pB bigint, @pN int OUTPUT',
+          @pKayit bigint, @pB bigint, @pTip tinyint, @pN int OUTPUT',
         @pIp = @Ip, @pIst = @Istasyon, @pKul = @KulId, @pSub = @SubeId,
         @pUstT = @UstT, @pUstId = @UstId, @pTabNo = @TabNo,
         @pReh = @Reh, @pStk = @Stk, @pRehKendi = @RehKendi, @pStkKendi = @StkKendi,
-        @pKayit = @KayitId, @pB = @KosulPar, @pN = @Yazilan OUTPUT;
+        @pKayit = @KayitId, @pB = @KosulPar, @pTip = @IslemTipi, @pN = @Yazilan OUTPUT;
 END
 GO
 

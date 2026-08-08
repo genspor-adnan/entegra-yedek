@@ -119,7 +119,8 @@ Ortak altyapı: **`dbo.fn_Api_Belge_DipToplam(@BelgeId)`** — belge dip toplam 
 
 ### C. Silme
 
-Ortak altyapı: **`dbo.fn_Api_DepoDBAdi()`** (depo DB adı = `<ANA_DB>_GENDEPO`), **`sp_Api_Log_YilTablosu`**
+Ortak altyapı: **`dbo.fn_Api_Belge_TabNo(@Tur, @Detay)`** (belge türü → `ISLEMLOG.TABLOID`;
+kart/detay, `TTablo.FaturaSil` ile aynı eşleme), **`dbo.fn_Api_DepoDBAdi()`** (depo DB adı = `<ANA_DB>_GENDEPO`), **`sp_Api_Log_YilTablosu`**
 (`LOG<yyyy>` yoksa oluşturur, DDL `ULog.LogYilTablosu` ile birebir), **`sp_Api_Log_Yaz_Ic`** (iç yardımcı).
 
 Değer biçimi: SQL tarafı **değişmez** biçim yazar (ISO tarih, nokta ondalık, `True`/`False`).
@@ -243,3 +244,19 @@ Kasa (`KASA`) kaydı mantığı **değişmedi** — yalnızca `FATURAID` artık 
 başlıkta `Unvan/Adres/Ilce/Il/Vd/Vno/FiyatListesi/EkstredeKullan/AcikKapali/MasrafId/FaturaDovizi/EkVergi`.
 Ayrıca satırda **`STOKID` yalnız `Tur <> 0` iken** doldurulur — masraf/gelir satırında `UrunId` bir
 `MASRAFGELIR` ID'sidir, stok referansına yazılmamalı (önceki sürüm `TM_FATURAGir`'den devraldığı için yazıyordu).
+
+
+## 8. Hangi API nesnesi ISLEMLOG yazar
+
+| Nesne | Log |
+|---|---|
+| `sp_Api_Belge_Sil_Json` | kart + satırlar + `FATURA_USER` + `STOKIZLEME` + `STOKIZLEMEDEPO` + `FATBASLIK_USER` — hepsi **silmeden önce** (`ISLEMTIPI = 0`) |
+| `sp_Api_Belge_Kaydet_Json` | kart (yeni → `1`, güncelleme → `2`), satırlar (ekle `1` / güncelle `2` / **sil `0`, silmeden önce**) |
+| Diğerleri (`ToplamHesapla`, `DurumHesapla`, `SeriLot_Yaz`, `Donusum_*`, okuma nesneleri) | yazmaz |
+
+`Kaydet` yalnız başlıkta **ID dışında alan geldiyse** kart "değiştirme" logu yazar — Ubelgegiris'in
+"sadece satır yaz" ikinci çağrısı gereksiz log üretmesin diye.
+
+**Bilinçli fark:** `ULog` "değiştirme" logunu alan bazlı **diff** olarak yazar (`LogDiffKaydet`);
+API tarafında tam satır anlık görüntüsü yazılır — SP eski değeri bilmez. UInfo'da işlem görünür,
+alan bazlı diff için sihirbaz yolu gerekir.
