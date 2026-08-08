@@ -216,18 +216,26 @@ begin
             // A8: ekran secer, yazma sp_Prog_Izleme_Yaz_Json ile hemen yapilir.
             //   Satir ID'si BURADA ZATEN BELLI (faturasatirid, yukarida
             //   BelgeDonustur_DetaySatirOlustur ile olustu) - erteleme gerekmiyor.
-            //   Eski cagri satir ID'si olarak 0 geciyordu; ekran mrOk'ta canli
-            //   kaldigi icin yazma bir sonraki cagrida SATIRID=0 ile
-            //   yapilabiliyordu. (BILIM'de SATIRID=0 kaydi yok - bu yol
-            //   calismamis gorunuyor, yine de dogrusu yazildi.)
+            //
+            // ESKI CAGRIDA UC ALAN YANLISTI (08.08.2026 tespiti - kullanici
+            //   "izlem ekrani bos geldi, lot yazamiyorum" dedi):
+            //     1) satir ID'si 0 geciliyordu
+            //     2) belge turu/basligi olarak KAYNAK belge veriliyordu
+            //        (FATBASTUR / FATBASID) - oysa izlem HEDEF belgeye yazilir
+            //     3) kaynak baslik/satir HIC gecilmiyordu
+            //   (3) yuzunden ekran donusum listesi yerine BOS giris listesi
+            //   aciyordu: tasinacak lotlar gorunmuyor, eklenecek satir da
+            //   olmadigi icin hicbir alana yazilamiyordu.
             if not Anaform.StokIzlemeSec(
                                     tabDonusumSepet.FieldByName('URUNID').AsInteger,
                                     tabDonusumSepet.FieldByName('IZLEME').AsInteger,
-                                    tabDonusumSepet.FieldByName('FATBASTUR').AsInteger,1,
-                                    tabDonusumSepet.FieldByName('FATBASID').AsInteger,
+                                    donusumayarlari.Baslikturu, belgetipi,
+                                    SeciliFatID,
                                     faturasatirid,
                                     tabDonusumSepet.FieldByName('REHBERID').AsInteger, GDepo,  CDepo,
-                                    miktar,miktar) then begin
+                                    miktar, miktar, True,
+                                    tabDonusumSepet.FieldByName('FATBASID').AsInteger,
+                                    tabDonusumSepet.FieldByName('DETAYSATIRID').AsInteger) then begin
               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' DELETE FROM FATURA WHERE ID='+inttostr(faturasatirid),[],[]  );
               Abort;
             end;
