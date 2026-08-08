@@ -922,7 +922,11 @@ type
     // Sunucu tarafi donusum (sp_Prog_BelgeDonusum_Uygula_Json2). Sonuc JSON'u
     //   ASonucJson'a yazilir; doner deger hedef baslik ID (basarisizsa 0).
     function BelgeDonusumUygula(ADonusumTuru, AKaynakBaslikId, AHedefBasID: Integer;
-      AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string): Integer;
+      AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string;
+      const ASatirlarJson: string = ''): Integer;
+    // Sunucu "IZLEME_SECIMI_EKSIK" dediginde etkilenen satirlar icin izleme
+    //   ekranini acar ve satirlar[] JSON'unu uretir ('' = kullanici vazgecti).
+    function DonusumIzlemSecimiSor(const ASonucJson: string): string;
     // Donusum sonucundaki Uyarilar[] dizisinin mesajlarini alt alta metne cevirir;
     //   uyari yoksa Mesaj alanini doner.
     function DonusumUyariMetni(const ASonucJson: string): string;
@@ -3066,8 +3070,104 @@ end;
 //   belgeyi IKINCI KEZ URETMEZ, onceki sonucu doner (baglanti koptu / kullanici
 //   iki kez tikladi senaryolari).
 // ============================================================
+function TTablo.DonusumIzlemSecimiSor(const ASonucJson: string): string;
+// Sunucu, siparis kaynakli izlemeli satirlarda "IZLEME_SECIMI_EKSIK" doner:
+//   SIPARIS stok hareketi yapmaz, STOKIZLEME kaydi yoktur - seri/lot DEPODAN
+//   secilmelidir ve bunu ancak kullanici yapabilir.
+//
+// Bu yordam uyaridaki her satir icin izleme ekranini YALNIZ SECIM kipinde acar
+//   ve donusum istegine eklenecek satirlar[] JSON'unu uretir. Ekran hicbir sey
+//   yazmaz; yazma donusumun kendi transaction'inda olur.
+//
+// '' doner: kullanici vazgecti (ya da secim yapmadi) -> donusum yapilmamali.
+var
+  LKok: TJSONObject;
+  LUyarilar, LSatirlar, LSecim: TJSONArray;
+  LU, LSatir: TJSONObject;
+  I, LSatirId, LStokId, LIzlemTur, LDepo: Integer;
+  LAdet: Double;
+  LDlg: TIzlemeDlg;
+  LGorulen: TStringList;
+begin
+  Result := '';
+  LKok := TJSONObject.ParseJSONValue(ASonucJson) as TJSONObject;
+  if LKok = nil then Exit;
+  LSatirlar := TJSONArray.Create;
+  LGorulen := TStringList.Create;
+  try
+    try
+      LUyarilar := LKok.GetValue('Uyarilar') as TJSONArray;
+      if LUyarilar = nil then Exit;
+      for I := 0 to LUyarilar.Count - 1 do
+      begin
+        LU := LUyarilar.Items[I] as TJSONObject;
+        if LU = nil then Continue;
+        if LU.GetValue<string>('kod', '') <> 'IZLEME_SECIMI_EKSIK' then Continue;
+        LSatirId := LU.GetValue<Integer>('kaynakSatirId', 0);
+        if LSatirId <= 0 then Continue;
+        if LGorulen.IndexOf(IntToStr(LSatirId)) >= 0 then Continue;   // ayni satir bir kez
+        LGorulen.Add(IntToStr(LSatirId));
+
+        // Satirin urun/izleme/adet bilgisi ve cikis deposu kaynaktan okunur
+        TablodanSorguAc(1,
+          'select SD.URUNID, SD.IZLEME, ADET=SD.ADET-isnull((select sum(ADET) from FATURA ' +
+          ' where YERID=SD.ID and YERI in (select DonusumTuru from dbo.fn_Prog_BelgeDonusum_Rota()' +
+          ' where KaynakDetayTablo=''SIPARISDETAY'')),0), DEPO=isnull(S.CIKISDEPO, S.GIRISDEPO)' +
+          ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID where SD.ID=' +
+          IntToStr(LSatirId));
+        if Query1.IsEmpty then Continue;
+        LStokId   := Query1.FieldByName('URUNID').AsInteger;
+        LIzlemTur := Query1.FieldByName('IZLEME').AsInteger;
+        LAdet     := Query1.FieldByName('ADET').AsFloat;
+        LDepo     := Query1.FieldByName('DEPO').AsInteger;
+        if (LIzlemTur <= 0) or (LAdet <= 0) then Continue;
+
+        LDlg := nil;
+        try
+          Application.CreateForm(TIzlemeDlg, LDlg);
+          LDlg.YalnizSecim    := True;
+          LDlg.StokID         := LStokId;
+          LDlg.IzlemTur       := LIzlemTur;
+          LDlg.IslemTur       := KasaTur_SatisIrsaliyesi;  // cikis dali (depodan liste)
+          LDlg.IslemTip       := 1;
+          LDlg.BaslikID       := 0;    // hedef belge HENUZ YOK
+          LDlg.SatirID        := 0;
+          LDlg.KaynakBaslikID := 0;    // kaynakta izlem kaydi yok -> depodan
+          LDlg.KaynakSatirID  := 0;
+          LDlg.GirDepo        := LDepo;
+          LDlg.CikDepo        := LDepo;
+          LDlg.GerekliMiktar  := LAdet;
+          LDlg.KALAN          := LAdet;
+          LDlg.StokDurumDegis := True;
+          LDlg.ShowModal;
+          if (LDlg.ModalResult <> mrOk) or (Trim(LDlg.SecimJson) = '') then Exit;  // vazgecildi
+
+          LSecim := TJSONObject.ParseJSONValue(LDlg.SecimJson) as TJSONArray;
+          if LSecim = nil then Exit;
+          LSatir := TJSONObject.Create;
+          LSatir.AddPair('satirId', TJSONNumber.Create(LSatirId));
+          LSatir.AddPair('izlemeler', LSecim);
+          LSatirlar.Add(LSatir);
+        finally
+          FreeAndNil(LDlg);
+        end;
+      end;
+      if LSatirlar.Count > 0 then
+        Result := LSatirlar.ToJSON;
+    except
+      Result := '';
+      raise;
+    end;
+  finally
+    LGorulen.Free;
+    LSatirlar.Free;
+    LKok.Free;
+  end;
+end;
+
 function TTablo.BelgeDonusumUygula(ADonusumTuru, AKaynakBaslikId, AHedefBasID: Integer;
-  AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string): Integer;
+  AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string;
+  const ASatirlarJson: string = ''): Integer;
 var
   Q: TFDQuery;
   LKaynaklar, LSecenekler, LAyarlar: string;
@@ -3075,7 +3175,13 @@ begin
   Result := 0;
   ASonucJson := '';
 
-  LKaynaklar  := '[{"baslikId":' + IntToStr(AKaynakBaslikId) + ',"tumKalan":true}]';
+  // ASatirlarJson verilirse satir bazli istek gonderilir (izlemeler[] bunun
+  //   icindedir); yoksa "tum kalan" istegi.
+  if Trim(ASatirlarJson) <> '' then
+    LKaynaklar := '[{"baslikId":' + IntToStr(AKaynakBaslikId) +
+                  ',"satirlar":' + ASatirlarJson + '}]'
+  else
+    LKaynaklar := '[{"baslikId":' + IntToStr(AKaynakBaslikId) + ',"tumKalan":true}]';
   LSecenekler := '{"sadeceKontrol":' + LowerCase(BoolToStr(ASadeceKontrol, True)) +
                  ',"stokOnayi":' + LowerCase(BoolToStr(AStokOnayi, True)) + '}';
   LAyarlar    := '{"varsayilanDoviz":"' + CariDoviz + '","senaryo":' +
@@ -3185,6 +3291,27 @@ begin
       else
       begin
         Result := 0;
+        Exit;
+      end;
+    end;
+
+    // Izlemeli urun: sunucu hangi seri/lotun cikacagini soruyor. Kaynak SIPARIS
+    //   oldugunda STOKIZLEME kaydi yoktur, lot DEPODAN secilir - bunu ancak
+    //   kullanici yapabilir. Ekrani ac, secimi al, AYNI istegi satirlar[] ile
+    //   tekrar gonder (stok yetersizligindeki desenin aynisi).
+    if Pos('"kod":"IZLEME_SECIMI_EKSIK"', LSonuc) > 0 then
+    begin
+      var LSatirlar: string := DonusumIzlemSecimiSor(LSonuc);
+      if LSatirlar = '' then
+      begin
+        Result := 0;    // kullanici vazgecti - sessiz cik, uyari zaten gorulmustu
+        Exit;
+      end;
+      LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False,
+                                LSonuc, LSatirlar);
+      if LId > 0 then
+      begin
+        Result := LId;
         Exit;
       end;
     end;
