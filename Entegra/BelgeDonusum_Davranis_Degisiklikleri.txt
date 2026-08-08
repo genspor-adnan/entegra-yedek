@@ -159,7 +159,7 @@ gecilebilir:
           - GenDepoUpdate88.sql, 08.08.2026]
   Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i  [TAMAM - GenDepoUpdate89]
   Adim 3: sp_Prog_BelgeDonusum_Dogrula  [TAMAM - GenDepoUpdate90]
-  Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)
+  Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)  [TAMAM - GenDepoUpdate91]
   Adim 5: IzlemeAktar / UretimAktar / Sonlandir
   Adim 6: sp_Prog_BelgeDonusum_Uygula_Json2 (ana SP)
   Adim 7: differential testler

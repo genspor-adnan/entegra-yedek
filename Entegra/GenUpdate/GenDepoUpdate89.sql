@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate89.sql
 -- BELGE DONUSUM - KODLAMA ADIM 2: islem kaydi tablosu + KANONIK rota matrisi
 --
@@ -121,7 +121,12 @@ RETURN
         (426, N'Uretim fisi -> satis faturasi',       6,  15, 'FATBASLIK', 'FATURA',       'FATBASLIK', 'FATURA',       'FATBASID',   'FATURA',       'URETIM_KAY', 'YOK',         'CIKISDEPO',   'GIRISDEPO', 'FATURADOVIZI',  1,  0,  0,  1,   0,  1,  0, 'OTOMATIK',         1),
         -- K2: kaynak TUR 101 (satinalma talebi) - canli veriyle dogrulandi.
         -- Hedef SIPARIS: trg_Siparis_Aktarim skaler atama yaptigi icin baslik TEK SATIR eklenecek.
-        (428, N'Satinalma talebi -> alis siparisi', 101,   9, 'SIPARIS',   'SIPARISDETAY', 'SIPARIS',   'SIPARISDETAY', 'SIPARISID',  'SIPARISDETAY', 'TALEP_SIP',  'GIRISDEPO',   'CIKISDEPO',   'GIRISDEPO', NULL,            0,  0,  0,  1,   0,  0,  0, 'KULLANICI_GIRISI', 1)
+        -- DESTEK = 0 (08.08.2026): belge uretimi kanonik yol olan sp_Api_Belge_Kaydet_Json
+        --   uzerinden yapiliyor; o SP yalnizca FATBASLIK/FATURA yaziyor. Hedefi SIPARIS olan
+        --   bu rota icin SIPARIS tarafinda es deger bir "kaydet" SP'si YOK. Ikiz bir uretim
+        --   yazmamak icin rota simdilik kapsam disi; eski akista calismaya devam ediyor.
+        --   Sipariş tarafi kanonik kaydet SP'si yazilinca Destek=1 yapilacak.
+        (428, N'Satinalma talebi -> alis siparisi', 101,   9, 'SIPARIS',   'SIPARISDETAY', 'SIPARIS',   'SIPARISDETAY', 'SIPARISID',  'SIPARISDETAY', 'TALEP_SIP',  'GIRISDEPO',   'CIKISDEPO',   'GIRISDEPO', NULL,            0,  0,  0,  1,   0,  0,  0, 'KULLANICI_GIRISI', 0)
     ) AS R(DonusumTuru, Aciklama, KaynakTur, HedefTur,
            KaynakBaslikTablo, KaynakDetayTablo, HedefBaslikTablo, HedefDetayTablo,
            KaynakBaglanti, KalanHedefTablo, KalanGrubu,

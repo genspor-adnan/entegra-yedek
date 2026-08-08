@@ -19,7 +19,8 @@
 --   Yeri, YerId  <-- DONUSUM BAGI. Hedef satirin hangi donusum turuyle hangi
 --                    kaynak satirdan uretildigini tutar; kalan hesabinin
 --                    (KalanGrubu) dayandigi tek bilgi budur.
---   PozNo, StokDurumDegis, EkipmanId, Mf, MuhKodu, Kasa, OtvYuzde, OtvMiktar,
+--   PozNo, StokDurumDegis, EkipmanId, Mf (decimal - FATURA.MF ondalikli), MuhKodu,
+--   Kasa, OtvYuzde, OtvMiktar,
 --   IzlemeKodu, Vade, KampanyaId, KdvMuafiyeti
 --
 --   KAPSAM DISI - EN/BOY/YUZEY/SAYI ve TESLIMTARIHI:
@@ -134,7 +135,7 @@ BEGIN
         --   Yeri/YerId DONUSUM BAGIDIR: hedef satir hangi donusum turuyle
         --   hangi kaynak satirdan uretildi. Kalan hesabi buna dayanir.
         Yeri INT NULL, YerId INT NULL, PozNo INT NULL, StokDurumDegis INT NULL,
-        EkipmanId INT NULL, Mf INT NULL, MuhKodu NVARCHAR(50) NULL, Kasa INT NULL,
+        EkipmanId INT NULL, Mf DECIMAL(18,6) NULL, MuhKodu NVARCHAR(50) NULL, Kasa INT NULL,
         OtvYuzde FLOAT NULL, OtvMiktar DECIMAL(18,6) NULL, IzlemeKodu NVARCHAR(50) NULL,
         Vade INT NULL, KampanyaId INT NULL, KdvMuafiyeti INT NULL);
     INSERT @S (Sira, SatirId, Sil, UrunId, Tur, Adet, Miktar, Birim, BirimFiyat, Tutar, Kdv,
@@ -161,7 +162,8 @@ BEGIN
                DovizBirimFiyat DECIMAL(18,6), DovizKurDegeri MONEY, DovizTutari DECIMAL(18,6),
                Aciklama NVARCHAR(250), ProjeId INT, MasrafId INT, OzelKod NVARCHAR(50),
                OzelKod2 NVARCHAR(50), Izleme INT,
-                   Yeri INT, YerId INT, PozNo INT, StokDurumDegis INT, EkipmanId INT, Mf INT,
+                   Yeri INT, YerId INT, PozNo INT, StokDurumDegis INT, EkipmanId INT,
+                   Mf DECIMAL(18,6),
                    MuhKodu NVARCHAR(50), Kasa INT, OtvYuzde FLOAT, OtvMiktar DECIMAL(18,6),
                    IzlemeKodu NVARCHAR(50), Vade INT, KampanyaId INT, KdvMuafiyeti INT,
                    SeriLot NVARCHAR(MAX) AS JSON) J;
