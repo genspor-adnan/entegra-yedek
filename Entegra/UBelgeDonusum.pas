@@ -496,9 +496,14 @@ begin
       FYS.EditKurDegeri.Value  := FYS.EditBirimFiyat.Value / FYS.EditDovizBirimFiyat.Value;
     FYS.Hesapla; }
   end;
-  //03/08/2022 ao İPTAL EDİLDİ
-  if TabKaynak.FieldByName('IZLEME').AsInteger > 0 then
-     FYS.PanelMiktar.Enabled := False;
+  // 03/08/2022'de izlemeli urunlerde miktar kilitlenmisti: eski akis kaynagin
+  //   TUM kalanini tasiyor, hangi seri/lottan ne kadar gittigi takip
+  //   edilemiyordu. Artik her tasinan izlem satiri DONUSID ile kaynagina bagli
+  //   ve sp_Prog_Izleme_Aktar_Json "istenenAdet" kadar FIFO tasiyor; kaynagin
+  //   KALAN'ini TG_IzlemOrjinalYap dusuruyor. Kilide gerek kalmadi. (08.08.2026)
+  //   Eski hali:
+  //   if TabKaynak.FieldByName('IZLEME').AsInteger > 0 then
+  //      FYS.PanelMiktar.Enabled := False;
 
 
   FYS.ShowModal;
@@ -907,6 +912,11 @@ Begin
          .AddPair('satirId',  TJSONNumber.Create(TabDetayGiris.FieldByName('ID').AsInteger)));
        LIzlemJson.AddPair('depoId',       TJSONNumber.Create(CDepo));
        LIzlemJson.AddPair('stokHareketi', TJSONBool.Create(LStokHar));
+       // KISMI DONUSUM: yalniz bu satira secilen adet kadar seri/lot tasinir.
+       //   Gonderilmezse SP kaynagin tum kalanini tasir - adet dusurulmusse
+       //   izlem ile satir adedi tutmazdi.
+       LIzlemJson.AddPair('istenenAdet',
+         TJSONNumber.Create(TabDetayGiris.FieldByName('ADET').AsFloat));
        LIzlemJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
        Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LIzlemJson);
     end;
