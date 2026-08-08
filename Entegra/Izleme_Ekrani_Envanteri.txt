@@ -1,4 +1,4 @@
-IZLEME (SERI/LOT) EKRANI - DAVRANIS ENVANTERI
+﻿IZLEME (SERI/LOT) EKRANI - DAVRANIS ENVANTERI
 ==============================================
 Tarih  : 08.08.2026
 Kaynak : UIzleme.pas (1.518 satir / 71 KB), UIzleme.dfm (27 KB),
@@ -233,3 +233,101 @@ D5  Sayim modunun negatif fark hesabi - ayri is akisi mi olmali.
 D6  DONUSID zinciri: donusumde kaynak izlem kaydina baglanti nasil kuruluyor,
     kismi donusumde ne oluyor (yeni SP'de kalan dusumunu TG_IzlemOrjinalYap
     trigger'inin yaptigini tespit etmistik - burada da ayni mi).
+
+
+==========================================================================
+EK-1  (D1)  GOMULU SORGULARIN NE HESAPLADIGI
+==========================================================================
+Yedi TMemo'nun tam metni DFM'den cikarildi. Ozetle ne yaptiklari:
+
+SQLGiren  (giris belgeleri)
+  Bu belge satirinin (BASLIKID+SATIRID) KENDI yazdigi STOKIZLEME kayitlarini
+  temp tabloya alir. DURUM=0, KALAN=SUM(KALAN), SEC=1.
+  Yani "giriste zaten girilmis seri/lotlari yeniden goster" sorgusu.
+
+SQLCikan  (cikis belgeleri) - EN KRITIK HESAP
+  DURUM = (depodaki mevcut) - (BU SATIRIN kendi yaptigi hareket)
+    1. dal: STOKDURUMIZLEME.KALAN  (STOKID + DEPOID)
+            @BaslikTur=99 (sayim) ise KALAN<>0 filtresi UYGULANMAZ,
+            sifir kalanlar da listelenir.
+    2. dal: -1 * SUM(STOKIZLEMEDEPO.ADET)  (SATIRID + DEPOID)
+  Iki dal UNION ALL + SUM -> "benim etkim haric mevcut".
+  KALAN=0, SEC=0 ile eklenir; secim SQLCikanUpdate ile isaretlenir.
+
+SQLCikanUpdate  (cikis belgeleri, ikinci adim)
+  Bu satirin ONCEDEN sectigi seri/lotlari isaretler:
+  temp.KALAN = bu satirin ADET'i, SEC=1, UPDID = STOKIZLEME.ID.
+  ** ESLESME SERILOTID ILE DEGIL, METINLE YAPILIYOR **:
+     SERINO + LOTNO (COLLATE SQL_Latin1_General_CP1254_CI_AS) + SKT
+     ucusu, NULL karsilastirmalari elle. Kirilgan: collate/NULL/bosluk
+     farki eslesmeyi bozar. SERILOTID kolonu zaten VAR.
+
+SQLDonusKaynak  (donusum, kaynak taraf)
+  Kaynak satirin (SATIRID) STOKIZLEME kayitlari + bunlara DONUSID ile bagli
+  ikinci seviye kayitlar (left join SI2 on SI1.ID=SI2.DONUSID) UNION ALL
+  edilip DURUM>0 olanlar gruplanir. abs() ile isaret temizlenir.
+
+SQLDonusCikanHedef  (donusum, hedef taraf)
+  Hedef satirin mevcut izlem kayitlarini DURUM=abs(KALAN), KALAN=0, SEC=0
+  ile listeler; IZLEMID/BASLIKID/SATIRID/UPDID(=DONUSID) tasinir.
+
+SQLDonusCikanHedefUpdate
+  Hedefte zaten secilmis olanlari isaretler: DURUM=DURUM+ADET, KALAN=ADET,
+  SEC=1, UPDID=STOKIZLEME.ID.
+  Eslesme yine SERINO/LOTNO/SKT METNI uzerinden (ayni kirilganlik).
+
+SQLDonusCikanHedef_2   ** OLU **  DFM'de var, kodda cagrilmiyor.
+  Farki: DURUM'u STOKDURUMIZLEME'den (SDI.KALAN) aliyor, KALAN'i
+  STOKIZLEME'den. Muhtemelen SQLDonusCikanHedef'in denenmis bir varyanti.
+
+D1 SONUCU - yeni tasarimda sunucuya tasinacak UC HESAP:
+  H1  "Bu depoda su an secilebilir seri/lot ve miktarlari"
+      (SQLCikan: STOKDURUMIZLEME - bu satirin kendi hareketi)
+  H2  "Bu belge satirinin halihazirdaki secimi"
+      (SQLGiren / SQLCikanUpdate / SQLDonusCikanHedefUpdate)
+  H3  "Kaynak belgeden tasinabilir seri/lot"  (SQLDonusKaynak)
+  Eslesme METIN yerine SERILOTID uzerinden yapilmali.
+
+
+==========================================================================
+EK-2  (D2)  STOKIZLEMEDEPO ISARET KURALLARI - CANLI VERI DOGRULAMASI
+==========================================================================
+BILIM, 08.08.2026. Kodda okunan kurallar veriyle karsilastirildi.
+
+  BELGETUR  izlem     depo      poz      neg      sifir   depo/izlem
+  --------  --------  --------  -------  -------  ------  ----------
+  14 satis irs  131081  131081        0   131081       0     1.00
+  15 satis fat  124816  124816        0      228  124588     1.00
+ 101 uretim sarf 113003  113003       0   113003       0     1.00
+   6 uretim urun 36476    36476   36476        0       0     1.00
+  20 transfer    18200    36400   18200    18200       0     2.00
+   4 diger cikis 14153    14153       0    14152       1     1.00
+  11 alis fat     6548     6515    2048        0    4467     0.99
+  10 alis irs     5516     5516    5516        0       0     1.00
+   3 giris fisi   4573     4573    4573        0       0     1.00
+ 119 giden kons      7       14        7        7       0     2.00
+  16 satis fis       5        5        0        1       4     1.00
+ 109 gelen kons      1        1        1        0       0     1.00
+
+DOGRULANAN KURALLAR
+  - Cikis belgeleri (14, 15, 16, 4, 101) -> NEGATIF, izlem basina 1 depo satiri
+  - Giris belgeleri (10, 3, 6, 109)      -> POZITIF, izlem basina 1 satir
+  - Transfer (20) ve giden konsinye (119) -> izlem basina TAM 2 satir
+    (biri pozitif biri negatif). Kodda yazan cift-satir kurali dogrulandi.
+  - Sayim (99): STOKIZLEME'de HIC KAYIT YOK (0 satir). Yani sayim modu izlem
+    kaydi uretmiyor; ekranin 99 dallari yalniz GORUNTULEME/duzeltme icin.
+    ** Bu, "sayim ayri is akisi olmali" tezini destekliyor. **
+
+ANOMALILER (yeni tasarimda ele alinmali)
+  A1  ADET = 0 depo satirlari: 15'te 124.588, 11'de 4.467, 16'da 4, 4'te 1.
+      Bunlar StokDurumDegis=False dali - irsaliyeden donusen fatura/fis.
+      Depo hareketi yapilmiyor AMA yine de satir aciliyor (ADET=0).
+      Karar gerekiyor: satir hic acilmasin mi, yoksa "hareketsiz" isareti
+      olarak kalsin mi? Bugunku tabloda veri hacminin buyuk kismi bu.
+  A2  Depo satiri OLMAYAN 33 izlem kaydi - hepsi BELGETUR=11 (alis faturasi).
+      Ne kod dalinda ne veri deseninde karsiligi var; yarim kalmis kayit
+      olmali (FormDestroy ortasinda kesilme senaryosu - K1 ile tutarli).
+  A3  15 (satis faturasi) turunde 228 NEGATIF satir var, 124.588 sifira karsi.
+      Yani satis faturasi bazen depodan dusuyor bazen dusmuyor - irsaliyeli /
+      irsaliyesiz ayrimi. Yeni tasarimda bu ayrim ACIK bir kural olmali
+      (bugun StokDurumDegis parametresiyle cagirandan geliyor).
