@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- sp_Prog_Uretim_Liste_Json2 - tek JSON parametre (MSSQL)
 --   sp_Prog_Uretim_Liste (tipli) deseninin IKI-PARAM JSON karsiligi (Teklif pilotu ile ayni yapi).
 --   @Baslik   = SELECT ek kolonlari (ham SQL parcasi, app-uretimi/GUVENILIR). Uretim'de app '' gonderir.
@@ -101,6 +101,14 @@ BEGIN
 
     IF @OrderBy IS NOT NULL AND @OrderBy <> N''
         SET @SQL = @SQL + N' ORDER BY ' + @OrderBy;
+
+    -- Bellek grant'i sinirlama. Bu liste TOP kullanmiyor (app TopN=0 gonderir), yani
+    --   ORDER BY tum tabloyu siraliyor ve genis satirlar (SELECT <tablo>.*) hash join'lerden
+    --   geciyordu. SQL Express'te sorgu-bellek semaforu daralinca bu istek karsilanamaz ve
+    --   ekran RESOURCE_SEMAPHORE'da donar (bkz. GenDepoUpdate83/84/85).
+    --   Tum join'ler benzersiz anahtar uzerinde arama oldugu icin LOOP JOIN hash tamponunu
+    --   kaldirir; ORDER BY ve sonuc sirasi AYNEN korunur.
+    SET @SQL = @SQL + N' OPTION (LOOP JOIN, MAXDOP 1)';
 
     EXEC sp_executesql @SQL,
          N'@pDateBas DATETIME, @pDateBitis DATETIME, @pUretimID NVARCHAR(50), @pUretimNo NVARCHAR(50), @pStokKodu NVARCHAR(50), @pStokAdi NVARCHAR(150)',
