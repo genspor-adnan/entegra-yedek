@@ -237,8 +237,9 @@ Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 1.3 - rota matrisi
 -------------------------------------------
   K1  KARARLASTIRILDI (secenek 2): gruplar tanimli, iade/fiyat farki HARIC.
   K2  KARARLASTIRILDI: 428 kaynak TUR = 101 (satinalma talebi), veriyle dogrulandi.
-  K3  EFATURADURUM olu parametresi: deger yazilacak mi, parametre kalkacak mi
-  K4  EFATURASONUC=20'nin 424 (satis fisi) icin gecerliligi (is birimi)
-  K5  Yorum kopyalama SP'ye alinacak mi (DOKUMAN/IMAJ katmanlari dahil)
-  K6  Davranis degisiklikleri onayi: bos baslik rollback, stok yetersizliginde
-      tam hata, kismi izleme sifirlamasi, REHBERBILGI kosulsuz insert duzeltmesi
+  K3  KARARLASTIRILDI: hedefe 0 yazilir, olu EFaturaDurum parametresi kaldirilir.
+  K4  KARARLASTIRILDI: EFATURASONUC = 0 (20 kurali kalkiyor).
+  K5  KARARLASTIRILDI: yorum kopyalama SP'ye alinir (DOKUMAN/IMAJ katmanlari dahil).
+  K6  KARARLASTIRILDI: stok yetersizse donusum HIC yapilmaz (yetersizler mesajla
+      bildirilir); izlemeli urunde her stok icin izlem bilgisi SORULUR; kosullar
+      saglanmazsa donusum yapilmaz. Ayrinti: BelgeDonusum_Davranis_Degisiklikleri.txt

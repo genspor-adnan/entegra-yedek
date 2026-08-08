@@ -309,7 +309,7 @@ Bu sozlesme MSSQL icindir. PG karsiligi ayri faz:
 -------------------
   K1 KARARLASTIRILDI (secenek 2): KalanGrubu tanimli, iade/fiyat farki haric.
   K2 KARARLASTIRILDI: 428 kaynak TUR = 101 (satinalma talebi), veriyle dogrulandi.
-  K3 EFATURADURUM olu parametresi
-  K4 EFATURASONUC=20'nin 424 icin gecerliligi
-  K5 Yorum kopyalama SP'ye alinacak mi (DOKUMAN/IMAJ katmanlari)
-  K6 Davranis degisiklikleri onayi
+  K3 KARARLASTIRILDI: 0 yazilir, olu parametre kaldirilir. // eski:
+  K4 KARARLASTIRILDI: EFATURASONUC = 0. // eski:
+  K5 KARARLASTIRILDI: SP'ye alinir (DOKUMAN/IMAJ katmanlari dahil).
+  K6 KARARLASTIRILDI: bkz. BelgeDonusum_Davranis_Degisiklikleri.txt
