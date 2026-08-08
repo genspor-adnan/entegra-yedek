@@ -1,0 +1,315 @@
+﻿BELGE DONUSUM SP PLANI - ON KOSUL 3: VERI SOZLESMESI
+=====================================================
+Tarih  : 08.08.2026
+Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 3.1 - ana JSON'un bir
+         kez acilmasi, alt SP'lerin ayni session/transaction icindeki gecici
+         tablolar uzerinden calismasi. Bu sozlesme tanimlanmadan SP yazilmayacak.
+Onceki : BelgeDonusum_Trigger_Envanteri.txt (on kosul 1)
+         BelgeDonusum_Rota_Matrisi.txt      (on kosul 2, K1 kararlastirildi)
+
+
+0. PLANDAN SAPMA - BELGE OLUSTURMA TEK YERDEN
+----------------------------------------------
+Plan (madde 4) sekiz SP sayiyor; bunlarin ikisi BaslikOlustur ve SatirAktar.
+KULLANICI KARARI (08.08.2026): belge olusturma icin YENI nesne uretilmeyecek;
+Ubelgegiris akisinda kullanilan KANONIK yol kullanilacak:
+
+    dbo.sp_Api_Belge_Kaydet_Json
+
+Gerekce: eski BelgeDonustur_BaslikOlusur / DetaySatirOlustur'un SQL tarafinda
+ikizini yazmak, ayni isi yapan IKINCI bir belge uretim yolu demektir. Kaydet
+zaten baslik + satir + toplam + ISLEMLOG isini tek transaction'da yapiyor.
+
+Bu nedenle plandaki SP listesi su sekilde revize edildi:
+
+  PLAN                                  BU SOZLESME
+  ------------------------------------  ---------------------------------------
+  sp_Prog_BelgeDonusum_Kaynak_Json2     AYNEN (mevcut, salt okuma)
+  sp_Prog_BelgeDonusum_Uygula_Json2     AYNEN (ana SP, transaction sahibi)
+  sp_Prog_BelgeDonusum_Dogrula          AYNEN (ic)
+  sp_Prog_BelgeDonusum_BaslikOlustur }  BIRLESTI -> sp_Prog_BelgeDonusum_Kaydet
+  sp_Prog_BelgeDonusum_SatirAktar    }  (ic; #temp'ten Kaydet JSON'unu kurar ve
+                                         sp_Api_Belge_Kaydet_Json'u cagirir)
+  sp_Prog_BelgeDonusum_IzlemeAktar      AYNEN (ic)
+  sp_Prog_BelgeDonusum_UretimAktar      AYNEN (ic)
+  sp_Prog_BelgeDonusum_Sonlandir        AYNEN (ic)
+
+  Toplam 7 SP (1 mevcut + 6 yeni). Uygulama yalnizca Kaynak_Json2 ve
+  Uygula_Json2'yi cagirir.
+
+KAYDET'E GEREKEN GENISLETME (yeni nesne degil, mevcut nesneye alan eklemek):
+  Baslik : KocanNo, Senaryo, EFaturaDurum, EFaturaSonuc, AktiviteId,
+           RehberIletId, ServisId, DetayBolumu, SaticiKodu
+  Satir  : Yeri, YerId (DONUSUM BAGI - zorunlu), PozNo, StokDurumDegis,
+           EkipmanId, Mf, MuhKodu, Kasa, OtvYuzde, OtvMiktar, IzlemeKodu,
+           Vade, KampanyaId, KdvMuafiyeti, En, Boy, Yuzey, Sayi, TeslimTarihi
+  Parametre : @BelgeIdOut INT = NULL OUTPUT
+           Kaydet kendi icinde INSERT...EXEC kullaniyor (sp_BelgeNoGetir), bu
+           yuzden disaridan INSERT...EXEC ile sarmalanamaz. ID'yi OUTPUT ile
+           alacagiz. Tek parametreyle cagiran mevcut kod etkilenmez.
+  Hepsi OPSIYONEL alan; gonderilmezse Kaydet'in bugunku davranisi degismez.
+
+
+1. ANA SP PARAMETRELERI
+------------------------
+CREATE PROCEDURE dbo.sp_Prog_BelgeDonusum_Uygula_Json2
+    @IstekID           UNIQUEIDENTIFIER,
+    @DonusumTuru       INT,
+    @KullaniciID       INT,
+    @SubeID            INT,
+    @KaynaklarJson     NVARCHAR(MAX),
+    @HedefBaslikID     INT           = 0,
+    @HedefAyarlarJson  NVARCHAR(MAX) = N'{}',
+    @SeceneklerJson    NVARCHAR(MAX) = N'{}'
+
+@KaynaklarJson:
+[
+  { "baslikId": 1205,
+    "tumKalan": true },
+  { "baslikId": 1206,
+    "satirlar": [
+      { "satirId": 4501, "adet": 2, "miktar": 20,
+        "birimFiyat": 15.5, "dovizBirimFiyat": 0.5, "iskonto": 10, "iskonto2": 0,
+        "kdv": 20, "doviz": "TL", "dovizKur": "TL", "dovizKurDegeri": 1,
+        "projeId": 0, "masrafId": 0, "kampanyaId": 0, "aciklama": "...",
+        "en": 0, "boy": 0, "yuzey": 0, "sayi": 0,
+        "izlemeler": [ { "stokIzlemeId": 701, "adet": 1 } ] }
+    ] }
+]
+  - Fiyat alanlari OPSIYONEL. Gonderilmezse kaynak satirin degeri kullanilir.
+    (UBelgeDonusum.StokEkle'nin FiyatSor diyalogu satir bazli kalir; sonuclar
+     uygulamada biriktirilip Uygula aninda tek cagrida gonderilir -
+     Degerlendirme_2 madde 2.4.)
+  - TUTAR / DOVIZ_TUTARI / vergi UYGULAMADAN ALINMAZ; Kaydet hesaplar.
+
+@HedefAyarlarJson: { "tarih": "...", "girisDepo": 0, "cikisDepo": 0,
+                     "belgeNo": "...", "belgeSeri": "...", "senaryo": 1,
+                     "eFaturaDurum": 0, "varsayilanDoviz": "TL" }
+  belgeNo/belgeSeri yalniz BelgeNoPolitikasi=KULLANICI_GIRISI rotalarinda
+  dikkate alinir; OTOMATIK rotalarda SP transaction icinde uretir (rota matrisi
+  bolum 6).
+
+@SeceneklerJson: { "sadeceKontrol": false, "stokOnayi": false, "enBoy": false }
+
+
+2. GECICI TABLO SOZLESMESI
+---------------------------
+Ana SP JSON'u BIR KEZ acar; alt SP'ler ayni baglanti ve transaction icinde bu
+tablolari okur/gunceller. Tablolar ana SP'de olusturulur, alt SP'lerde CREATE
+edilmez (yalnizca kullanilir).
+
+#DonusumKaynakBaslik
+    BaslikId        INT PRIMARY KEY
+    KaynakTur       INT
+    RehberId        INT
+    SubeId          INT
+    GirisDepo       INT
+    CikisDepo       INT
+    KdvDurum        NVARCHAR(20)
+    RaporDoviz      NVARCHAR(10)
+    FaturaDovizi    NVARCHAR(10)
+    Kur             NVARCHAR(10)
+    DovizKur        MONEY
+    BelgeNo         NVARCHAR(50)     -- kaynagin numarasi (aciklamada kullanilir)
+    Kilitlendi      BIT              -- UPDLOCK alindi mi
+
+#DonusumKaynakSatir
+    Sira            INT IDENTITY PRIMARY KEY   -- Kaydet'e gidecek satir sirasi
+    BaslikId        INT
+    SatirId         INT
+    UrunId          INT
+    SatirTur        INT              -- 0 masraf/gelir, 1 stok
+    KaynakAdet      DECIMAL(18,6)
+    KaynakMiktar    DECIMAL(18,6)
+    DonusenAdet     DECIMAL(18,6)    -- KalanGrubu ile hesaplanan
+    KalanAdet       DECIMAL(18,6)
+    IstenenAdet     DECIMAL(18,6)    -- JSON'dan; tumKalan ise KalanAdet
+    IstenenMiktar   DECIMAL(18,6)
+    Birim           INT
+    BirimFiyat      DECIMAL(18,6)
+    DovizBirimFiyat DECIMAL(18,6)
+    Iskonto         FLOAT
+    Iskonto2        FLOAT
+    Kdv             INT
+    Kur             NVARCHAR(10)
+    DovizKuru       NVARCHAR(10)
+    DovizKurDegeri  MONEY
+    Aciklama        NVARCHAR(250)
+    ProjeId         INT
+    MasrafId        INT
+    KampanyaId      INT
+    OzelKod         NVARCHAR(50)
+    OzelKod2        NVARCHAR(50)
+    PozNo           INT
+    Izleme          INT              -- stokun izleme turu (0 = izlemesiz)
+    MuhKodu         NVARCHAR(50)
+    Kasa            INT
+    Mf              INT
+    OtvYuzde        FLOAT
+    OtvMiktar       DECIMAL(18,6)
+    IzlemeKodu      NVARCHAR(50)
+    Vade            INT
+    KdvMuafiyeti    INT
+    En / Boy / Yuzey / Sayi   FLOAT
+    TeslimTarihi    DATETIME
+    StokYeterli     BIT              -- Dogrula doldurur
+    Durum           NVARCHAR(20)     -- 'uygun' | 'atlandi' | 'hata'
+
+#DonusumIzlemeSecim
+    SatirId         INT              -- kaynak satir
+    StokIzlemeId    INT              -- kaynak STOKIZLEME.ID
+    Adet            DECIMAL(18,6)    -- bu donusumde kullanilacak miktar
+    YeniIzlemeId    INT NULL         -- IzlemeAktar doldurur
+
+#DonusumSatirEsleme
+    Sira            INT              -- #DonusumKaynakSatir.Sira
+    KaynakBaslikId  INT
+    KaynakSatirId   INT
+    HedefSatirId    INT              -- Kaydet donusunden
+    DonusenAdet     DECIMAL(18,6)
+    KalanAdet       DECIMAL(18,6)    -- islem SONRASI kalan
+
+#DonusumUyari
+    Sira            INT IDENTITY
+    Kod             NVARCHAR(30)     -- 'STOK_YETERSIZ', 'IZLEMLI_URUN', ...
+    KaynakSatirId   INT NULL
+    Mesaj           NVARCHAR(400)
+
+TIP KURALI: tum DECIMAL(18,6) ve MONEY tipleri kaynak tablodaki kolon tipiyle
+ayni tutulacak; ara donusum yapilmayacak.
+
+
+3. ADIM SIRASI VE SORUMLULUK
+-----------------------------
+  ADIM                         OKUR                        YAZAR
+  ---------------------------  --------------------------  -----------------------
+  Uygula: JSON ac              @KaynaklarJson              #KaynakBaslik, #KaynakSatir,
+                                                           #IzlemeSecim
+  Uygula: BEGIN TRAN           -                           -
+  Dogrula                      #KaynakBaslik, #KaynakSatir #KaynakSatir.Durum,
+                                                           .StokYeterli, #Uyari
+  Kaydet (Baslik+Satir)        #KaynakBaslik, #KaynakSatir #SatirEsleme
+    -> sp_Api_Belge_Kaydet_Json
+  IzlemeAktar                  #IzlemeSecim, #SatirEsleme  STOKIZLEME,
+                                                           STOKIZLEMEDEPO,
+                                                           #IzlemeSecim.YeniIzlemeId
+  UretimAktar (415/420)        #SatirEsleme                FATURA (recete sarflari)
+  Sonlandir                    #SatirEsleme                kaynak DURUM, durtme,
+                                                           BELGEDONUSUMISLEM
+  Uygula: COMMIT + sonuc       hepsi                       -
+
+TRANSACTION SAHIBI YALNIZ ANA SP'DIR. Alt SP'ler BEGIN/COMMIT/ROLLBACK YAPMAZ.
+Hata: alt SP THROW eder, ana SP CATCH edip XACT_STATE()<>0 ise ROLLBACK yapar
+ve yapilandirilmis sonuc doner.
+
+KAYDET'IN KENDI TRANSACTION'I: sp_Api_Belge_Kaydet_Json icinde BEGIN TRAN /
+COMMIT var. Ic ice transaction'da COMMIT sayaci azaltir, gercek commit disarida
+olur - guvenli. Ancak Kaydet XACT_ABORT ON + THROW kullaniyor: ic THROW dis
+transaction'i da geri alir. Bu ISTENEN davranistir (tam rollback), fakat ana
+SP'nin CATCH blogunda XACT_STATE() = -1 durumu ayrica ele alinmali.
+
+HATA KODU ARALIKLARI (mevcut API ile ayni):
+  51000-51099 girdi hatasi     51100-51199 yetki
+  51200-51299 is kurali        51300-51399 es zamanlilik
+
+
+4. IDEMPOTENCY - BELGEDONUSUMISLEM
+-----------------------------------
+ANA veritabaninda (GENDEPO'da DEGIL - synonym bagimliligi log ekraninda sorun
+cikarmisti):
+
+CREATE TABLE dbo.BELGEDONUSUMISLEM (
+    ID              INT IDENTITY PRIMARY KEY,
+    ISTEKID         UNIQUEIDENTIFIER NOT NULL,
+    DONUSUMTURU     INT NOT NULL,
+    KULLANICIID     INT NOT NULL,
+    SUBEID          INT NOT NULL,
+    DURUM           NVARCHAR(12) NOT NULL,   -- BASLADI | TAMAMLANDI | HATA
+    HEDEFBASLIKID   INT NULL,
+    HEDEFTUR        INT NULL,
+    BASLAMATARIHI   DATETIME NOT NULL DEFAULT GETDATE(),
+    BITISTARIHI     DATETIME NULL,
+    SONUCJSON       NVARCHAR(MAX) NULL,
+    HATAKODU        INT NULL);
+CREATE UNIQUE INDEX UX_BELGEDONUSUMISLEM_ISTEKID ON dbo.BELGEDONUSUMISLEM(ISTEKID);
+
+Ayni ISTEKID tekrar gelirse:
+  TAMAMLANDI -> onceki SONUCJSON aynen dondurulur, hicbir sey yazilmaz
+  BASLADI    -> 51300 "islem devam ediyor" (BASLAMATARIHI 5 dakikadan eskiyse
+                terk edilmis sayilir ve yeniden denenir)
+  HATA       -> yeni deneme SERBEST
+
+HATA KAYDININ ROLLBACK SORUNU: SQL Server'da autonomous transaction yok. Ana
+transaction rollback olunca HATA satiri da geri gider. COZUM: "BASLADI" satiri
+transaction'dan ONCE ayri bir cagride yazilir (kendi kucuk transaction'i),
+sonuc/hata guncellemesi de COMMIT/ROLLBACK'ten SONRA yapilir. Boylece izleme
+kaydi her kosulda kalir.
+
+
+5. SONUC SOZLESMESI
+--------------------
+Tek sonuc seti, tek satir, tek NVARCHAR(MAX) kolon (JSON):
+{
+  "Basarili": 1, "HataKodu": 0, "Mesaj": "",
+  "IslemId": 123, "IstekId": "....",
+  "HedefBaslikId": 114080, "HedefTur": 14, "YeniBelge": 1, "BelgeNo": "104151",
+  "Satirlar": [ { "kaynakBaslikId":1205, "kaynakSatirId":4501,
+                  "hedefSatirId":3557600, "donusenAdet":2, "kalanAdet":8 } ],
+  "Uyarilar": [ { "kod":"STOK_YETERSIZ", "kaynakSatirId":4502, "mesaj":"..." } ]
+}
+Hata halinde Basarili=0, HataKodu dolu, HedefBaslikId=0, Satirlar bos.
+
+
+6. SADECE KONTROL MODU
+-----------------------
+@SeceneklerJson.sadeceKontrol = true iken: Dogrula calisir, sonuc ve uyarilar
+doner, HICBIR yazma yapilmaz (Kaydet cagrilmaz), BELGEDONUSUMISLEM'e de
+yazilmaz. Uygulama bunu "onizleme / stok kontrolu" icin kullanir.
+
+
+7. STOK YETERSIZLIGI AKISI (Degerlendirme_2 madde 2.3)
+-------------------------------------------------------
+Varsayilan: bir satirda stok yetersizse TUM donusum reddedilir (51200), satir
+sessizce ATLANMAZ. Yetersiz satirlar Uyarilar'da doner.
+StokDurumKontrolKurali kullanici onayina izin veriyorsa uygulama onayi alir ve
+AYNI istegi @SeceneklerJson.stokOnayi=true ile yeniden gonderir; bu durumda
+donusum yapilir ve onay UYARILARJSON + islem kaydinda saklanir.
+Bu MEVCUT DAVRANISTAN FARKLIDIR (bugun satir sessizce atlanip eksik belge
+olusuyor) - K6 onay listesinde.
+
+
+8. TRIGGER KISITLARI (on kosul 1'den)
+--------------------------------------
+  - FATURA satirlari SET BAZLI eklenebilir (Trg_Fatura_MasrafID_Guncelle
+    08.08.2026'da set-bazliya cevrildi). Kaydet bugun satir-satir ekliyor;
+    bu bir performans konusu, dogruluk sorunu degil.
+  - SIPARIS BASLIGI TEK SATIR eklenecek (trg_Siparis_Aktarim). 428 rotasinda
+    toplu baslik uretimi yapilmayacak.
+  - Sonlandir toplam/maliyet YAZMAYACAK: toplamlari Kaydet zaten yaziyor,
+    stok/maliyeti TG_StokDurumGuncelle + TG_StokFiyatGuncelle yapiyor.
+    Sonlandir'in isi: kaynak belge DURUM'u, irs->fat durtmesi ve islem kaydi.
+    (Cifte hesap riski boylece kapaniyor.)
+
+
+9. PG PARITESI
+---------------
+Bu sozlesme MSSQL icindir. PG karsiligi ayri faz:
+  #temp tablolar        -> ON COMMIT DROP gecici tablo
+  OUTPUT INSERTED.ID    -> RETURNING
+  UPDLOCK/HOLDLOCK      -> SELECT ... FOR UPDATE
+  XACT_ABORT/TRY-CATCH  -> plpgsql EXCEPTION
+  fonksiyon icinde COMMIT/ROLLBACK YOK -> transaction sinirinin cagiran
+    baglantida oldugu varsayilir
+  PG'de FATURA/FATBASLIK/SIPARIS/STOKIZLEME uzerinde TRIGGER YOK; MSSQL'de
+  trigger'a birakilan yan etkiler (stok durumu, fiyat, cari bakiye) PG
+  fonksiyonunda ACIKCA yapilmali ya da once trigger'lar portlanmali.
+
+
+10. KALAN KARARLAR
+-------------------
+  K1 KARARLASTIRILDI (secenek 2): KalanGrubu tanimli, iade/fiyat farki haric.
+  K2 KARARLASTIRILDI: 428 kaynak TUR = 101 (satinalma talebi), veriyle dogrulandi.
+  K3 EFATURADURUM olu parametresi
+  K4 EFATURASONUC=20'nin 424 icin gecerliligi
+  K5 Yorum kopyalama SP'ye alinacak mi (DOKUMAN/IMAJ katmanlari)
+  K6 Davranis degisiklikleri onayi

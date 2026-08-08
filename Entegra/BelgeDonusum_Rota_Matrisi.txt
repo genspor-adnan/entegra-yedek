@@ -1,4 +1,4 @@
-BELGE DONUSUM SP PLANI - ON KOSUL 2: GENISLETILMIS ROTA POLITIKA MATRISI
+﻿BELGE DONUSUM SP PLANI - ON KOSUL 2: GENISLETILMIS ROTA POLITIKA MATRISI
 =========================================================================
 Tarih  : 08.08.2026
 Kaynak : Utablo.pas (BelgeDonustur, BaslikOlusur, DetaySatirOlustur,
@@ -35,11 +35,13 @@ Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 1.3 - rota matrisi
   420  Satis siparisi -> uretim (sarf)    19    6  SIPARIS/SIPARISDETAY FATBASLIK/FATURA
   425  Uretim fisi -> satis irsaliyesi     6   14  FATBASLIK/FATURA     FATBASLIK/FATURA
   426  Uretim fisi -> satis faturasi       6   15  FATBASLIK/FATURA     FATBASLIK/FATURA
-  428  Satinalma talebi -> alis siparisi 105    9  SIPARIS/SIPARISDETAY SIPARIS/SIPARISDETAY
+  428  Satinalma talebi -> alis siparisi 101    9  SIPARIS/SIPARISDETAY SIPARIS/SIPARISDETAY
 
-  DIKKAT: 428'in kaynak TUR'u kodda "TabNo_Satinalma_Talep" ile eslesiyor;
-  SIPARIS.TUR degeri olarak 105 (stok talebi) ile 101 (satinalma) ayrimi
-  SP yazilmadan once DOGRULANMALI. BilgiAyarlari'nda 428 hic yok.
+  K2 KARARLASTIRILDI (08.08.2026, canli veri): 428'in kaynak TUR'u 101
+  (satinalma talebi). Dogrulama: YERI=428 olan 654 SIPARISDETAY satirinin
+  kaynak basligi ISTISNASIZ TUR=101. TUR=105 STOK TALEBIDIR ve 435 rotasinda
+  kullanilir (SIPARIS'te 101: 462 baslik, 105: 2.764 baslik).
+  BilgiAyarlari'nda 428 hic yok - matris tek kaynak olacak.
 
 
 2. KALAN POLITIKASI  (Degerlendirme_2 madde 1.2)
@@ -85,11 +87,25 @@ Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 1.3 - rota matrisi
    b) Ayni mantik alis tarafinda YOK: {408,427} grubu tanimli degil.
    c) 416 (iade) SIPARIS kaynagi icin sayilmiyor ama FATBASLIK icin sayiliyor.
       Satis siparisi iadesi diye bir sey varsa eksik.
-  ONERI: KalanGrubu acikca tanimlansin:
+  ** KARAR K1 (08.08.2026, kullanici) - SECENEK 2 **
+     Gruplar asagidaki gibi tanimlanir; IADE (416/417) ve FIYAT FARKI (418/419)
+     kalani TUKETMEZ. Iadenin kalani tuketip tuketmeyecegi AYRI bir is kurali
+     karari olarak birakildi (630 kaynak satiri etkiler).
+     Mevcut 416 istisnasi (TEKLIF ve FATBASLIK kaynaklarinda sayiliyordu)
+     KALDIRILACAK - bu bir davranis degisikligidir, K6 listesine eklendi.
+
+  KANIT (BILIM, 08.08.2026): cift dönüsüm gercekten olusmus.
+     SIPARISDETAY 6101: ADET 10, 409+410 ile toplam 20 donusmus (tam iki kat)
+     SIPARISDETAY 6764: ADET  4, 409+410 ile toplam  8 donusmus
+     Siparis tarafi 115.397 kaynak satirin 7'sinde, irsaliye tarafi 108.754
+     satirin 2'sinde asiri donusum var.
+
+  KalanGrubu tanimi:
       {406,407,478}   {409,410,473,429}   {408,427}   {411,424}
       {414,435}       {461}  {468,462,472}  {415,420}  {425,426}  {428}
-  ve her gruba iade/fiyat farki kodlari eklensin (alis tarafi 416/418,
-  satis tarafi 417/419). Bu bir DAVRANIS DEGISIKLIGIDIR - onay listesine girer.
+  Gruptaki HER kod kalan hesabinda toplanir:
+      Kalan = KaynakAdet - SUM(hedef satir ADET) WHERE YERI IN (<grup>) AND YERID = <kaynak satir>
+  Hedef tablo KalanHedefTablo'dan gelir (428 icin SIPARISDETAY, digerleri FATURA).
 
 
 3. DEPO POLITIKASI  (BaslikOlusur case bloklarindan)
@@ -219,8 +235,8 @@ Amac   : BelgeDonusum_SP_Plani_Degerlendirme_2.txt madde 1.3 - rota matrisi
 
 12. KARAR BEKLEYENLER (SP yazilmadan once)
 -------------------------------------------
-  K1  KalanGrubu tanimi ve iade/fiyat farki kodlarinin dahil edilmesi (2.2)
-  K2  428'in kaynak TUR'u: 101 mi 105 mi (1. bolum notu)
+  K1  KARARLASTIRILDI (secenek 2): gruplar tanimli, iade/fiyat farki HARIC.
+  K2  KARARLASTIRILDI: 428 kaynak TUR = 101 (satinalma talebi), veriyle dogrulandi.
   K3  EFATURADURUM olu parametresi: deger yazilacak mi, parametre kalkacak mi
   K4  EFATURASONUC=20'nin 424 (satis fisi) icin gecerliligi (is birimi)
   K5  Yorum kopyalama SP'ye alinacak mi (DOKUMAN/IMAJ katmanlari dahil)
