@@ -1,22 +1,26 @@
 ﻿SET NOCOUNT ON;
 SET XACT_ABORT ON;
-DECLARE @reh INT = 1126, @masraf INT = (SELECT TOP 1 ID FROM MASRAFGELIR WHERE DURUM>0 AND BASLIK=0 ORDER BY ID);
-DECLARE @depo sysname = dbo.fn_Api_DepoDBAdi();
+DECLARE @sip INT = (SELECT TOP 1 S.ID FROM SIPARIS S
+   WHERE S.TUR=19 AND S.DURUM IN (0,1)
+     AND EXISTS(SELECT 1 FROM SIPARISDETAY SD CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K
+                WHERE SD.SIPARISID=S.ID AND K.Kalan>0.0001)
+   ORDER BY S.ID DESC);
+SELECT 'Kaynak siparis' AS x, ID, TUR, DURUM, SIPARISNO FROM SIPARIS WHERE ID=@sip;
+SELECT 'Kalan satirlari' AS x, SD.ID, SD.URUNID, SD.ADET, K.Donusen, K.Kalan
+FROM SIPARISDETAY SD CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K WHERE SD.SIPARISID=@sip;
+
 BEGIN TRAN;
-DECLARE @j1 NVARCHAR(MAX) = N'{"SatirModu":"delta","Oturum":{"KulId":2,"SubeId":-1},
- "Baslik":{"Tur":12,"Tipi":1,"Tarih":"2026-08-08 09:00:00","FaturaTarih":"2026-08-08 09:00:00",
-  "RehberId":' + CAST(@reh AS varchar(20)) + N',"FaturaNo":"LOGTEST-2","GirisDepo":1,"KdvDurum":"Hariç","Kur":"TL"}}';
-EXEC dbo.sp_Api_Belge_Kaydet_Json @j1;
-DECLARE @bid INT = (SELECT TOP 1 ID FROM FATBASLIK ORDER BY ID DESC);
-DECLARE @j2 NVARCHAR(MAX) = N'{"SatirModu":"delta","Oturum":{"KulId":2,"SubeId":-1},
- "Baslik":{"ID":' + CAST(@bid AS varchar(20)) + N'},
- "Satirlar":[{"Sira":1,"Tur":0,"UrunId":' + CAST(@masraf AS varchar(20)) + N',"MasrafId":' + CAST(@masraf AS varchar(20)) +
- N',"Adet":1,"BirimFiyat":100,"Kdv":20,"Kur":"TL"},
-             {"Sira":2,"Tur":0,"UrunId":' + CAST(@masraf AS varchar(20)) + N',"MasrafId":' + CAST(@masraf AS varchar(20)) +
- N',"Adet":2,"BirimFiyat":50,"Kdv":10,"Kur":"TL"}]}';
-EXEC dbo.sp_Api_Belge_Kaydet_Json @j2;
-DECLARE @s NVARCHAR(MAX) = N'
-SELECT ''LOGLAR'' AS x, ID, ISLEMTIPI, TABLOID, KAYITID, USTTABLOID, USTKAYITID, REHBERID
-FROM [' + @depo + N'].dbo.ISLEMLOG WHERE USTKAYITID = ' + CAST(@bid AS varchar(20)) + N' ORDER BY ID;';
-EXEC sp_executesql @s;
+-- SP'yi dogrulamak icin bozuk tetikleyiciyi SADECE bu transaction icinde devre disi birak
+DISABLE TRIGGER trg_Siparis_Aktarim ON SIPARIS;
+DECLARE @j NVARCHAR(MAX) = N'{"SiparisId":' + CAST(@sip AS varchar(20)) +
+   N',"HedefTur":14,"Tarih":"2026-08-08","Oturum":{"KulId":2,"SubeId":-1}}';
+EXEC dbo.sp_Api_Donusum_SiparistenBelge_Json @j;
+
+DECLARE @hed INT = (SELECT TOP 1 ID FROM FATBASLIK ORDER BY ID DESC);
+SELECT 'Hedef belge' AS x, ID, TUR, FATURANO, REHBERID, FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, ACIKLAMA FROM FATBASLIK WHERE ID=@hed;
+SELECT 'Hedef satirlar' AS x, ID, URUNID, ADET, BIRIMFIYAT, TUTAR, KDV, YERI, YERID FROM FATURA WHERE FATBASID=@hed;
+SELECT 'Kaynak kalan (tran ici)' AS x, SD.ID, K.Kalan FROM SIPARISDETAY SD CROSS APPLY dbo.fn_Api_Donusum_Kalan(2,409,SD.ID,0) K WHERE SD.SIPARISID=@sip;
+SELECT 'Siparis durumu (tran ici)' AS x, DURUM FROM SIPARIS WHERE ID=@sip;
 ROLLBACK;
+SELECT 'Tetikleyici geri acildi mi' AS x, is_disabled FROM sys.triggers WHERE name='trg_Siparis_Aktarim';
+SELECT 'Rollback sonrasi hedef belge' AS x, COUNT(*) AS Adet FROM FATBASLIK WHERE ID=@hed;

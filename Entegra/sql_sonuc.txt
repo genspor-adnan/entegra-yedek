@@ -1,12 +1,28 @@
-﻿Sonuc
+﻿x	ID	TUR	DURUM	SIPARISNO
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114048,"BelgeNo":"LOGTEST-2","Yeni":true,"SilinenSatir":0,"Loglanan":1,"Toplam":"{\"Matrah\":0.0000,\"Kdv\":0.0000,\"Toplam\":0.0000,\"Doviz\":0.0000,\"Neden\":\"\"}"}
+Kaynak siparis	23202	19	0	101268
+x	ID	URUNID	ADET	Donusen	Kalan
+--------------------------------------------------------------------------------
+Kalan satirlari	157992	143	1,000000	0,000000	1,000000
 Sonuc
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114048,"BelgeNo":"LOGTEST-2","Yeni":false,"SilinenSatir":0,"Loglanan":2,"Satirlar":[{"Sira":1,"ID":3557530,"Islem":"ekle"},{"Sira":2,"ID":3557531,"Islem":"ekle"}],"Toplam":"{\"Matrah\":200.0000,\"Kdv\":30.0000,\"Toplam\":230.0000,\"Doviz\":230.0000,\"Neden\":\"\"}"}
-x	ID	ISLEMTIPI	TABLOID	KAYITID	USTTABLOID	USTKAYITID	REHBERID
+{"Sonuc":1,"SiparisId":23202,"HedefBelgeId":114050,"HedefBelgeNo":"104151","HedefTur":14,"DonusumTuru":409,"Satir":1,"Loglanan":2,"Toplam":"{\"Matrah\":1500.0000,\"Kdv\":150.0000,\"Toplam\":1650.0000,\"Doviz\":1650.0000}","KaynakDurum":"{\"Durum\":9,\"Yazildi\":true,\"Neden\":\"\"}"}
+x	ID	TUR	FATURANO	REHBERID	FATURA_MATRAHI	KDV_TUTARI	FATURA_TUTARI	ACIKLAMA
 --------------------------------------------------------------------------------
-LOGLAR	657	1	106	114048	106	114048	1126
-LOGLAR	658	1	330	3557530	106	114048	1126
-LOGLAR	659	1	330	3557531	106	114048	1126
+Hedef belge	114050	14	104151	1109	1500,0000	150,0000	1650,0000	101268 nolu siparisten
+x	ID	URUNID	ADET	BIRIMFIYAT	TUTAR	KDV	YERI	YERID
+--------------------------------------------------------------------------------
+Hedef satirlar	3557533	143	1,000000	1500,000000	1500,00	10	409	157992
+x	ID	Kalan
+--------------------------------------------------------------------------------
+Kaynak kalan (tran ici)	157992	0,000000
+x	DURUM
+--------------------------------------------------------------------------------
+Siparis durumu (tran ici)	9
+x	is_disabled
+--------------------------------------------------------------------------------
+Tetikleyici geri acildi mi	False
+x	Adet
+--------------------------------------------------------------------------------
+Rollback sonrasi hedef belge	0
 
