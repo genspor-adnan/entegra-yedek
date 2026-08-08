@@ -3059,6 +3059,110 @@ var
     end;
   end;
 begin
+  // ============================================================
+  // YENI YOL: donusumun tamami sunucuda - sp_Api_Belge_Donusum_Json
+  //   (GenDepoUpdate82/87/88/89/90). Sunucu tarafinda yapilanlar:
+  //     kalan miktar kontrolu (UPDLOCK, asiri donusum korumasi), hedef baslik
+  //     (sp_Api_Belge_Donusum_Baslik_Ic), satirlar + seri/lot tasima + uretim recete
+  //     sarflari (sp_Api_Belge_Donusum_Satir_Ic), detay sablonu (REHBERBILGI),
+  //     izlemli urun engeli, hedef toplamlari, kaynak belgenin kapanma durumu,
+  //     irsaliye->fatura sonrasi kaynak "durtme" ve ISLEMLOG - HEPSI TEK TRANSACTION.
+  //
+  //   ARAYUZ ISI PASCAL'DA KALIR:
+  //     - stok yeterlilik kontrolu (StokCikisYeterliMi kullaniciya soru sorar) ->
+  //       once burada yapilir, gecen satirlarin ID'leri SP'ye SatirIds ile gonderilir
+  //     - izlemli urun uyari kutusu (SP IzlemEngel=1 doner)
+  //     - yorum kopyalama (Tablo.YorumKopyala yoruma bagli DOKUMAN/IMAJ katmanlarini
+  //       da kopyalar; sunucuda duz INSERT ekleri kaybederdi)
+  //
+  //   Sunucunun DESTEKLEMEDIGI donusumler (teklif->siparis, satinalma talebi->siparis,
+  //   uretim hedefleri) asagidaki ESKI YOL'da calismaya devam eder.
+  // ============================================================
+  var LAyar: string := '';
+  var LDestek: Boolean := False;
+  try
+    LAyar := ApiCagir('sp_Api_Belge_Donusum_Ayar_Json',
+      TJSONObject.Create.AddPair('DonusumTuru', TJSONNumber.Create(DonusTuru)));
+    LDestek := ApiSonucInt(LAyar, 'Destek') = 1;
+  except
+    LDestek := False;   // bilinmeyen tur / eski DB -> eski yol
+  end;
+
+  if LDestek then
+  begin
+    var LKok: TJSONObject := TJSONObject.Create;
+    LKok.AddPair('DonusumTuru',    TJSONNumber.Create(DonusTuru));
+    LKok.AddPair('KaynakBelgeId',  TJSONNumber.Create(KaynakBaslikId));
+    if HedefBasID > 0 then
+      LKok.AddPair('HedefBelgeId', TJSONNumber.Create(HedefBasID));
+    LKok.AddPair('Senaryo',         TJSONNumber.Create(
+      StrToIntDef(GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo, '1'), 1)));
+    LKok.AddPair('VarsayilanDoviz', CariDoviz);
+    LKok.AddPair('EnBoy',           TJSONNumber.Create(Ord(EnBoyHesaplamaAktif)));
+    LKok.AddPair('DovizKurDegeri',  TJSONNumber.Create(DovizKurDegeri));
+    LKok.AddPair('Oturum', TJSONObject.Create
+      .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('SubeId', TJSONNumber.Create(SubeId)));
+
+    // Stok yeterlilik: yalniz depodan CIKIS yapan donusumlerde sorulur (eski koddaki
+    //   "stokyeterli := True" listesinde OLMAYAN turler). Yetmeyen satirlar disarida
+    //   birakilir; SP yalniz gonderilen satirlari donusturur.
+    if DonusTuru in [TabNo_DONUSUM_SATIS_SIPARIS_IRS, TabNo_DONUSUM_SATIS_SIPARIS_FAT,
+                     TabNo_DONUSUM_SATIS_SIPARIS_FIS, TabNo_DONUSUM_SATIS_SIPARIS_KON,
+                     TabNo_DONUSUM_SIPARIS_TRANSFER] then
+    begin
+      var LSatirlar: TJSONArray := TJSONArray.Create;
+      var LTumu: Boolean := True;
+      TablodanSorguAc(0,
+        'select SD.ID, SD.URUNID, S.CIKISDEPO as DEPOID, K.Kalan ' +
+        'from SIPARISDETAY SD inner join SIPARIS S on S.ID = SD.SIPARISID ' +
+        'cross apply dbo.fn_Api_Donusum_Kalan(2, ' + IntToStr(DonusTuru) + ', SD.ID, 0) K ' +
+        'where SD.SIPARISID = ' + IntToStr(KaynakBaslikId) + ' and K.Kalan > 0.0001');
+      while not Query0.Eof do
+      begin
+        if Query0.FieldByName('URUNID').AsInteger > 0 then
+        begin
+          var LKalanStok: Double;
+          if StokCikisYeterliMi(Query0.FieldByName('URUNID').AsInteger,
+               Query0.FieldByName('DEPOID').AsInteger, 0, GENINI.BugunTrh,
+               Query0.FieldByName('Kalan').AsFloat, False, 0, LKalanStok) then
+            LSatirlar.Add(Query0.Fields[0].AsInteger)
+          else
+            LTumu := False;
+        end
+        else
+          LSatirlar.Add(Query0.Fields[0].AsInteger);
+        Query0.Next;
+      end;
+      Query0.Close;
+      if LTumu then
+        LSatirlar.Free            // hepsi uygun -> filtre gonderme (SP tumunu alir)
+      else if LSatirlar.Count = 0 then
+      begin
+        LSatirlar.Free; LKok.Free;
+        Result := 0;              // hicbir satir cikamiyor -> belge olusturma
+        Exit;
+      end
+      else
+        LKok.AddPair('SatirIds', LSatirlar);
+    end;
+
+    var LSonuc: string := ApiCagir('sp_Api_Belge_Donusum_Json', LKok);
+    Result := ApiSonucInt(LSonuc, 'HedefBelgeId');
+
+    if Pos('"IzlemEngel":true', LSonuc) > 0 then
+      Application.MessageBox(PWideChar(IzlemliUrunVar), PWideChar(Dikkat), MB_ICONERROR or MB_OK);
+
+    // Yorum kopyalama sunucuya tasinmadi (ekli DOKUMAN/IMAJ katmanlari icin).
+    if DonusTuru = TabNo_DONUSUM_SATINALMATALEP_SIPARIS then
+      YorumDonusKopyala(TabNo_SATINALMA, TabNo_SIPARIS_Gelen, KaynakBaslikId, Result);
+    Exit;
+  end;
+
+  // ============================================================
+  // ESKI YOL - yalniz sunucunun desteklemedigi donusumler icin.
+  //   Desteklenenler yukarida SP ile isleniyor.
+  // ============================================================
   case DonusTuru of
     TabNo_DONUSUM_ALIS_SIPARIS_IRS : begin
       HedefBelgeTuru := KasaTur_AlisIrsaliyesi;
