@@ -1,4 +1,4 @@
-SERI/LOT (IZLEME) ALT SISTEMI - YENIDEN TASARIM SONUC RAPORU
+﻿SERI/LOT (IZLEME) ALT SISTEMI - YENIDEN TASARIM SONUC RAPORU
 =============================================================
 Tarih   : 08.08.2026
 Kapsam  : Izleme ekrani (UIzleme) + belge donusumu izleme akisi
@@ -222,3 +222,33 @@ Butun silme islemleri once ZZ_SILINEN_* tablolarina yedeklendi.
  silme (bakiye geri donusu)      114108, 114114  OK
  siparis -> alis irsaliyesi      23206           OK
 Her adimda sp_Prog_Izleme_BakiyeKontrol: 0 sapma.
+
+
+11. EK: SIPARIS KANONIK KAYDET + ROTA 428  (08.08.2026, sonradan)
+------------------------------------------------------------------
+sp_Api_Belge_Siparis_Kaydet_Json (GenDepoUpdate113)
+  FATBASLIK/FATURA icin olan sp_Api_Belge_Kaydet_Json'un SIPARIS/SIPARISDETAY
+  karsiligi. AYNI SOZLESME: {"Baslik":{...},"Satirlar":[...],"SatirModu":...}.
+  Alan adlarinda ikiz JSON uretmemek icin hem "Fatura..." hem "Siparis..."
+  adlarini kabul eder (FaturaTarih|SiparisTarih -> SIPARISTARIH gibi).
+  SIPARIS'te karsiligi olmayan alanlar (Senaryo, EFaturaDurum) yok sayilir.
+  SIPARISDETAY'da STOKDURUMDEGIS/KDVMUAFIYETI KOLONU YOK - gonderilse de
+  yazilmaz. Toplamlar SP_PRG_Siparis_DipToplami ile (uygulamayla ayni formul).
+
+Rota 428 acildi (GenDepoUpdate114)
+  428 (satinalma talebi -> alis siparisi) hedefi SIPARIS olan TEK rotaydi ve
+  "SIPARIS tarafinda kanonik kaydet yok" diye Destek=0 birakilmisti.
+  Uc degisiklik:
+    1) Rota   : Destek 0 -> 1
+    2) Kaydet : hedef tabloya gore SP secimi; guard artik
+                'FATBASLIK ya da SIPARIS' kabul ediyor
+    3) Dogrula: hedef detay FATURA degilse IZLEME HIC SORULMAZ. Siparis stok
+                hareketi yapmaz, seri/lot kavrami yoktur; guard olmadan
+                izlemeli satirlar "seri/lot secilmeden belge olusturulamaz"
+                ile bloklaniyordu.
+
+  Dogrulandi: talep 21785 / satir 155678 -> alis siparisi 23209, kismi 2/5.
+  Hedef satirda YERI=428, YERID=155678; kaynak kalan 3'e dustu. Test belgesi
+  silindi, kalan 5'e dondu.
+
+  BOYLECE ROTA MATRISINDE Destek=0 KALAN ROTA YOK.
