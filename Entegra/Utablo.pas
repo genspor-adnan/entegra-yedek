@@ -916,6 +916,13 @@ type
     procedure IadeMiktarGuncelle(iadefaturaid: integer; iadeadet: string);
     function KusuratAyarla(Hane: SmallInt; ACurrency: Extended): Extended;
     function BelgeDonustur(DonusTuru, KaynakBaslikId : integer; HedefBasID:integer=0): Integer;
+    // Sunucu tarafi donusum (sp_Prog_BelgeDonusum_Uygula_Json2). Sonuc JSON'u
+    //   ASonucJson'a yazilir; doner deger hedef baslik ID (basarisizsa 0).
+    function BelgeDonusumUygula(ADonusumTuru, AKaynakBaslikId, AHedefBasID: Integer;
+      AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string): Integer;
+    // Donusum sonucundaki Uyarilar[] dizisinin mesajlarini alt alta metne cevirir;
+    //   uyari yoksa Mesaj alanini doner.
+    function DonusumUyariMetni(const ASonucJson: string): string;
     function TeklifiSipariseDonustur(DonusTuru, KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
     function EFaturami(RehID:integer; CarideEFatura : boolean; VNo:string; Tipi:smallint=0):smallint;
     procedure BelgeDonustur_DetaySatirOlustur(var detayId: Integer;DonusTuru,hedefbaslikid,kaynaktabaslikid,kaynaksatirid:integer;adet,Birim,Miktar:Extended;Izleme:Integer=-1;KaynakTabloAdi:string='';KaynakDetayTabloAdi:string='';HedefTabloAdi:string='';HedefDetayTabloAdi:string='');
@@ -3008,6 +3015,97 @@ begin
   Tablo.Query2.Open;
 end;
 
+// ============================================================
+// DonusumUyariMetni - sunucunun urettigi uyarilari kullaniciya gosterilecek
+//   metne cevirir. Mesajlar SUNUCUDA uretilir (stok adi, tarih, mevcut/istenen
+//   miktar dahil); istemci onlari yeniden yazmaz.
+// ============================================================
+function TTablo.DonusumUyariMetni(const ASonucJson: string): string;
+var
+  LKok, LU: TJSONObject;
+  LDizi: TJSONArray;
+  I: Integer;
+begin
+  Result := '';
+  LKok := TJSONObject.ParseJSONValue(ASonucJson) as TJSONObject;
+  if LKok = nil then Exit;
+  try
+    LDizi := LKok.GetValue('Uyarilar') as TJSONArray;
+    if LDizi <> nil then
+      for I := 0 to LDizi.Count - 1 do
+      begin
+        LU := LDizi.Items[I] as TJSONObject;
+        if LU <> nil then
+        begin
+          if Result <> '' then Result := Result + #13#10;
+          Result := Result + LU.GetValue<string>('mesaj', '');
+        end;
+      end;
+    if Result = '' then
+      Result := LKok.GetValue<string>('Mesaj', '');
+  finally
+    LKok.Free;
+  end;
+end;
+
+// ============================================================
+// BelgeDonusumUygula - sunucu tarafi belge donusumu
+//
+// Uygulamanin donusum icin cagirdigi TEK yazma noktasi:
+//   dbo.sp_Prog_BelgeDonusum_Uygula_Json2
+// Sunucu tarafinda yapilanlar (hepsi TEK transaction):
+//   rota politikasi, kilit altinda kalan hesabi, dogrulama (tur/cari/sube/depo/
+//   stok/izleme), hedef belgenin KANONIK yolla uretilmesi
+//   (sp_Api_Belge_Kaydet_Json), seri/lot aktarimi, uretim recete sarflari,
+//   kaynak belge durumu, yorum kopyalama, ISLEMLOG ve idempotency.
+//
+// IstekID: her cagri icin yeni GUID. Ayni GUID ile tekrar gelinirse sunucu
+//   belgeyi IKINCI KEZ URETMEZ, onceki sonucu doner (baglanti koptu / kullanici
+//   iki kez tikladi senaryolari).
+// ============================================================
+function TTablo.BelgeDonusumUygula(ADonusumTuru, AKaynakBaslikId, AHedefBasID: Integer;
+  AStokOnayi, ASadeceKontrol: Boolean; out ASonucJson: string): Integer;
+var
+  Q: TFDQuery;
+  LKaynaklar, LSecenekler, LAyarlar: string;
+begin
+  Result := 0;
+  ASonucJson := '';
+
+  LKaynaklar  := '[{"baslikId":' + IntToStr(AKaynakBaslikId) + ',"tumKalan":true}]';
+  LSecenekler := '{"sadeceKontrol":' + LowerCase(BoolToStr(ASadeceKontrol, True)) +
+                 ',"stokOnayi":' + LowerCase(BoolToStr(AStokOnayi, True)) + '}';
+  LAyarlar    := '{"varsayilanDoviz":"' + CariDoviz + '","senaryo":' +
+                 GENINI.ReadString(Ops_FaturaOpsiyon_Senaryo, '1') + '}';
+
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := FDCnn;
+    // IstekID GUID olarak dogrudan gomulur (uniqueidentifier parametre bagi
+    //   motorlar arasi degisken; GUID metni enjeksiyon riski tasimaz).
+    Q.SQL.Text :=
+      'exec dbo.sp_Prog_BelgeDonusum_Uygula_Json2 ' +
+      '@IstekID=''' + GUIDToString(TGUID.NewGuid).Trim(['{','}']) + ''', ' +
+      '@DonusumTuru=' + IntToStr(ADonusumTuru) + ', ' +
+      '@KullaniciID=' + IntToStr(StrToIntDef(Trim(Kullanan), 0)) + ', ' +
+      '@SubeID=' + IntToStr(SubeId) + ', ' +
+      '@KaynaklarJson=:Kaynaklar, ' +
+      '@HedefBaslikID=' + IntToStr(AHedefBasID) + ', ' +
+      '@HedefAyarlarJson=:Ayarlar, ' +
+      '@SeceneklerJson=:Secenekler';
+    Q.ParamByName('Kaynaklar').AsString  := LKaynaklar;
+    Q.ParamByName('Ayarlar').AsString    := LAyarlar;
+    Q.ParamByName('Secenekler').AsString := LSecenekler;
+    Q.Open;
+    if not Q.Eof then
+      ASonucJson := Q.Fields[0].AsString;
+    Q.Close;
+    Result := ApiSonucInt(ASonucJson, 'HedefBaslikId');
+  finally
+    Q.Free;
+  end;
+end;
+
 function TTablo.BelgeDonustur(DonusTuru, KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
 var
   HedefBelgeTuru, KaynakBelgeTuru, EFaturaDurumu : integer;
@@ -3025,7 +3123,79 @@ var
        Tablo.Query0.next;
     end;
   end;
+
+  // Sunucunun bu rotayi isleyip islemedigi rota matrisinden okunur.
+  function SunucuDestekli: Boolean;
+  var
+    LD: string;
+  begin
+    try
+      LD := VarToStr(Veritabani.BasitKomutÇalıştır(FDCnn,
+        'select Destek from dbo.fn_Prog_BelgeDonusum_Rota() where DonusumTuru=&dt',
+        ['&dt'], [DonusTuru], True));
+      // BIT kolon surucuye gore '1' ya da 'True' donebilir - ikisi de kabul.
+      Result := SameText(LD, '1') or SameText(LD, 'True');
+    except
+      Result := False;   // eski DB / nesne yok -> eski yol calisir
+    end;
+  end;
+
 begin
+  // ============================================================
+  // YENI YOL: donusumun tamami sunucuda
+  //   (sp_Prog_BelgeDonusum_Uygula_Json2 - GenDepoUpdate89..93)
+  //
+  // Arayuz isi Pascal'da kalir:
+  //   - stok yetersizligi: sunucu donusumu REDDEDER ve yetersiz stoklari
+  //     Uyarilar[] ile bildirir. StokDurumKontrolKurali "sor" ise kullaniciya
+  //     sorulur ve ayni istek stokOnayi=true ile TEKRAR gonderilir.
+  //   - izlemeli urun: sunucu seri/lot secimi ister; secim gelmezse donusum
+  //     yapilmaz ve uyari gosterilir.
+  //
+  // Sunucunun desteklemedigi rotalar (428 satinalma talebi->siparis, teklif->
+  //   siparis 412/413) asagidaki ESKI YOL'da calismaya devam eder.
+  // ============================================================
+  if SunucuDestekli then
+  begin
+    var LSonuc: string;
+    var LId: Integer := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, False, False, LSonuc);
+
+    if LId > 0 then
+    begin
+      Result := LId;
+      Exit;
+    end;
+
+    // Basarisiz: stok yetersizligi ve kullanici onayi verilebiliyorsa tekrar dene
+    if (Pos('"kod":"STOK_YETERSIZ"', LSonuc) > 0) and (StokDurumKontrolKurali = 1) then
+    begin
+      if UyariGoster(Uyari, DonusumUyariMetni(LSonuc) + #13#10 +
+                     TCikmakIstediginizKadarUrunYokYinedeCik, 2) = mrYes then
+      begin
+        LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False, LSonuc);
+        if LId > 0 then
+        begin
+          Result := LId;
+          Exit;
+        end;
+      end
+      else
+      begin
+        Result := 0;
+        Exit;
+      end;
+    end;
+
+    // Diger hatalar: sunucunun urettigi uyari metinlerini oldugu gibi goster
+    Application.MessageBox(PWideChar(DonusumUyariMetni(LSonuc)), PWideChar(Uyari),
+                           MB_ICONWARNING or MB_OK);
+    Result := 0;
+    Exit;
+  end;
+
+  // ============================================================
+  // ESKI YOL - yalniz sunucunun desteklemedigi rotalar
+  // ============================================================
   case DonusTuru of
     TabNo_DONUSUM_ALIS_SIPARIS_IRS : begin
       HedefBelgeTuru := KasaTur_AlisIrsaliyesi;

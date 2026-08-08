@@ -170,4 +170,7 @@ gecilebilir:
   Adim 5: IzlemeAktar / UretimAktar / Sonlandir  [TAMAM - GenDepoUpdate92]
   Adim 6: sp_Prog_BelgeDonusum_Uygula_Json2 (ana SP)  [TAMAM - GenDepoUpdate93]
   Adim 7: differential testler
-  Adim 8: Utablo.BelgeDonustur ince istemciye donusur, eski akis kaldirilir
+  Adim 8: Utablo.BelgeDonustur ince istemciye donusur  [TAMAM - Utablo.pas]
+          Eski akis SILINMEDI: yalniz sunucunun desteklemedigi rotalar (428,
+          412/413) icin duruyor. Adim 7 (differential test) bitince o dallar
+          da temizlenecek.
