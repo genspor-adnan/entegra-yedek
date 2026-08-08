@@ -211,6 +211,7 @@ Sade sarmalayıcılar (çağıran unit'in `System.JSON`'a ihtiyacı olmasın diy
 | `UHizliGunsonuDlg.FatbaslikOlustur` | ✅ (besleyen ölü sorgu da kaldırıldı) |
 | `UReplikasyon` | ✅ (toplamsal `ISK1+ISK2` iskonto kuralı da düzeldi) |
 | `UGiderPusulasi.FaturaTutarGuncelle` | ✅ `Post` → SP → `Refresh` |
+| `Ubelgegiris` F5-Kaydet | ✅ belge **oluşturma** da SP'de (`sp_Api_Belge_Kaydet_Json`) — aşağıya bak |
 | `UImport.FaturaTutarHesapla` | ✅ `Post` → SP → `Refresh` |
 | `UEBelgeGelen` (2 yer) | ⛔ **bilerek bırakıldı** — gelen e-belge; toplamlar tedarikçinin UBL'inden gelir, SP zaten `Kapsam=disi` der |
 | `UHizliGiris.TabDetayAfterPost` | ⛔ **bilerek bırakıldı** — belge `FATBASLIK`'ta değil, geçici tabloda (`AktifFatTabloAdi`); ayrıca yalnız ekran gösterimi, DB'ye yazmıyor |
@@ -218,3 +219,27 @@ Sade sarmalayıcılar (çağıran unit'in `System.JSON`'a ihtiyacı olmasın diy
 
 **Davranış değişikliği (bilinçli, karar 2):** `UGiderPusulasi` ve `UImport` KDV Dahil belgede
 matraha **brüt** `SUM(TUTAR)` yazıyordu; artık **net matrah** yazılıyor.
+
+
+## 7. Ubelgegiris (toplu belge girişi) — F5 Kaydet
+
+Akış artık iki SP çağrısı (belge başına), dataset `Insert/Post` yok:
+
+1. **Grup başında** (cari + belge tipi + belge no değişince) — başlık-only çağrı → `BelgeId` döner.
+2. Satırlar `FSatirlar: TJSONArray` içinde birikir.
+3. **Grup bitince** `BelgeSatirlariniYaz` — aynı `BelgeId` ile `SatirModu:"delta"`, tüm satırlar tek çağrıda.
+   Toplamlar SP içinde hesaplanır.
+
+Kazanımlar:
+
+- **Belge ID'si artık gerçek.** Eski akış `select max(ID) from FATBASLIK` (`fisnobul`) ile tahmin
+  ediyordu; aynı anda başka kullanıcı belge eklerse satırlar **yanlış belgeye** yazılabilirdi.
+- Başlık + satırlar tek transaction.
+- Satır sayısı kadar `Post` yerine belge başına 2 çağrı.
+
+Kasa (`KASA`) kaydı mantığı **değişmedi** — yalnızca `FATURAID` artık SP'den dönen gerçek ID.
+
+`sp_Api_Belge_Kaydet_Json` bu akış için genişletildi (`GenDepoUpdate79.sql`, geriye uyumlu):
+başlıkta `Unvan/Adres/Ilce/Il/Vd/Vno/FiyatListesi/EkstredeKullan/AcikKapali/MasrafId/FaturaDovizi/EkVergi`.
+Ayrıca satırda **`STOKID` yalnız `Tur <> 0` iken** doldurulur — masraf/gelir satırında `UrunId` bir
+`MASRAFGELIR` ID'sidir, stok referansına yazılmamalı (önceki sürüm `TM_FATURAGir`'den devraldığı için yazıyordu).

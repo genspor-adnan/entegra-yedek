@@ -3,7 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.JSON,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxStyles, dxSkinsCore, System.Classes, Vcl.Graphics,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, Data.DB,
@@ -493,6 +493,7 @@ var
    fisnumarasi, OncekiFirma, KasaKayitID, KasaTur:integer;
    sqltext, OncekiBelgeNo,OncekiBelgeTip:string;
    Tutar, KDV, Toplam : Currency;
+   FSatirlar: TJSONArray;   // islenmekte olan belgenin satirlari (SP'ye tek cagrida gider)
   function YeniKasaKaydet:integer;
   begin
     kasakayit.append;
@@ -527,123 +528,136 @@ var
 
   end;
 
-  Procedure FaturaOlustur;
+  // Satir artik dogrudan yazilmiyor; grubun JSON dizisine ekleniyor.
+  procedure InsertYap;
+  var LS: TJSONObject;
   begin
-              //Yeni belge geldi. Önceki belgeye toplamları atalım
+          if FSatirlar = nil then Exit;
+          LS := TJSONObject.Create;
+          LS.AddPair('Sira',       TJSONNumber.Create(FSatirlar.Count + 1));
+          LS.AddPair('Tur',        TJSONNumber.Create(0));            // masraf/gelir kalemi
+          LS.AddPair('UrunId',     TJSONNumber.Create(dxmemdata1m_id.AsInteger));
+          LS.AddPair('MasrafId',   TJSONNumber.Create(dxmemdata1m_id.AsInteger));
+          LS.AddPair('Aciklama',   dxmemdata1aciklama.AsString);
+          LS.AddPair('Adet',       TJSONNumber.Create(dxmemdata1adet.AsFloat));
+          LS.AddPair('Miktar',     TJSONNumber.Create(dxmemdata1adet.AsFloat));
+          LS.AddPair('Birim',      TJSONNumber.Create(51));
+          LS.AddPair('BirimFiyat', TJSONNumber.Create(dxmemdata1b_fiyat.AsFloat));
+          LS.AddPair('Tutar',      TJSONNumber.Create(dxmemdata1ctutar.AsFloat));
+          LS.AddPair('Kdv',        TJSONNumber.Create(dxmemdata1KDV.AsInteger));
+          LS.AddPair('Iskonto',    TJSONNumber.Create(0));
+          LS.AddPair('Kur',        dxmemdata1p_birim.AsString);
+          LS.AddPair('DovizKuru',  dxmemdata1p_birim.AsString);
+          LS.AddPair('DovizBirimFiyat', TJSONNumber.Create(dxmemdata1b_fiyat.AsFloat));
+          LS.AddPair('DovizTutari',     TJSONNumber.Create(dxmemdata1ctutar.AsFloat));
+          LS.AddPair('DovizKurDegeri',  TJSONNumber.Create(1));
+          LS.AddPair('ProjeId',    TJSONNumber.Create(dxmemdata1ProjeId.AsInteger));
+          FSatirlar.AddElement(LS);
+  end;
+
+  // Biriken satirlari TEK cagrida yazar; toplamlar SP icinde hesaplanir.
+  procedure BelgeSatirlariniYaz;
+  var LKok: TJSONObject;
+  begin
+    if FSatirlar = nil then Exit;
+    if (fisnumarasi <= 0) or (FSatirlar.Count = 0) then
+    begin
+      FreeAndNil(FSatirlar);
+      Exit;
+    end;
+    LKok := TJSONObject.Create;
+    LKok.AddPair('SatirModu', 'delta');
+    LKok.AddPair('Oturum', TJSONObject.Create
+      .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('SubeId', TJSONNumber.Create(SubeID)));
+    LKok.AddPair('Baslik', TJSONObject.Create.AddPair('ID', TJSONNumber.Create(fisnumarasi)));
+    LKok.AddPair('Satirlar', FSatirlar);    // sahiplik LKok'a gecer
+    FSatirlar := nil;
+    Tablo.ApiCagir('sp_Api_Belge_Kaydet_Json', LKok);
+  end;
+
+  // Belge (FATBASLIK) artik sp_Api_Belge_Kaydet_Json ile olusuyor.
+  //   Kazanimlar:
+  //     - Belge ID'si SP'den GERCEK degeriyle donuyor. Onceki akis
+  //       "select max(ID) from FATBASLIK" (fisnobul) ile tahmin ediyordu; ayni
+  //       anda baska kullanici belge eklerse YANLIS belgeye satir yazilabiliyordu.
+  //     - Baslik + satirlar tek transaction; toplamlar sunucuda hesaplaniyor.
+  //   Satirlar burada YAZILMAZ; grup boyunca FSatirlar dizisinde birikir, grup
+  //   bitince BelgeSatirlariniYaz ile TEK cagrida yazilir.
+  Procedure FaturaOlustur;
+  var
+    LBaslik, LKok: TJSONObject;
+    LTur: Integer;
+  begin
+              //Yeni belge geldi. Onceki belgenin biriken satirlarini yaz.
+              BelgeSatirlariniYaz;
               KasaKayitID := 0;
-              if OncekiFirma <> 0 then //İlk belge değilse
-                 // Toplamlar sunucuda (sp_Api_Belge_ToplamHesapla_Json). Burada Pascal'da
-                 //   biriktirilen Tutar/KDV/Toplam yaziliyordu; iskonto/OTV/KDV muafiyeti
-                 //   ve gercek doviz karsiligi hesaba girmiyor, DOVIZ_TUTARI'na TL toplam
-                 //   yaziliyordu (SP/TOPLAM_FORMUL_KARSILASTIRMA.md).
-                 Tablo.BelgeToplamHesapla(fisnumarasi);
               OncekiFirma := dxmemdata1cr_id.AsInteger;
               OncekiBelgeTip := dxmemdata1belgetip.AsString;
               OncekiBelgeNo := dxmemdata1belge_no.AsString;
-              Tutar := 0; KDV:=0; Toplam:=0;
 
               dxmemdata2.Locate('sno',dxmemdata1s_no.AsString,[]);
 
+              if dxmemdata1belgetip.AsString = 'Fatura' then LTur := 11
+              else if dxmemdata1belgetip.AsString = 'Fis' then LTur := 12
+              else LTur := 13;   // Tahakkuk
 
-              ftbaslik.Insert;
-              ftbaslik.fieldbyname('TARIH').value:=cxdateedit1.Date;
-              if dxmemdata1belgetip.AsString='Fatura' then
-                 ftbaslik.fieldbyname('TUR').AsString:='11'
-              else if dxmemdata1belgetip.AsString='Fiş' then
-                 ftbaslik.fieldbyname('TUR').AsString:='12'
-              else if dxmemdata1belgetip.AsString='Tahakkuk' then
-                 ftbaslik.fieldbyname('TUR').AsString:='13';
-              ftbaslik.fieldbyname('TIPI').AsString:='1';
-
-              {if (dxmemdata1baslik.AsInteger=0) and (dxmemdata1belgetip.AsString='Fatura') then ftbaslik.fieldbyname('TUR').AsString:='11';
-              if (dxmemdata1baslik.AsInteger=0) and (dxmemdata1belgetip.AsString='Fiş') then ftbaslik.fieldbyname('TUR').AsString:='12';
-              if dxmemdata1baslik.AsInteger=0 then ftbaslik.fieldbyname('TIPI').AsString:='1';
-              if (dxmemdata1baslik.AsInteger=2) and (cxcombobox1.ItemIndex=2) then ftbaslik.fieldbyname('TUR').AsString:='13';}
-              ftbaslik.fieldbyname('REHBERID').AsInteger:=dxmemdata1cr_id.AsInteger;
-              ftbaslik.fieldbyname('BASLIK').AsString:=Tablo.TabBizim.fieldbyname('FIRMA').AsString;
-              ftbaslik.fieldbyname('ADRES').AsString:=Tablo.TabBizim.fieldbyname('ADRES').AsString;
-              ftbaslik.fieldbyname('ILCE').AsString:=Tablo.TabBizim.fieldbyname('ILCE').AsString;
-              ftbaslik.fieldbyname('IL').AsString:=Tablo.TabBizim.fieldbyname('IL').AsString;
-              ftbaslik.fieldbyname('VD').AsString:=Tablo.TabBizim.fieldbyname('VERGIDAI').AsString;
-              ftbaslik.fieldbyname('VNO').AsString:=Tablo.TabBizim.fieldbyname('VERGINO').AsString;
-
-
-              ftbaslik.fieldbyname('GIRISDEPO').AsInteger := VarsDepo;
-              ftbaslik.fieldbyname('FATURATARIH').Value := dxmemdata1belgetarih.value;
-              ftbaslik.fieldbyname('FATURANO').AsString := dxmemdata1belge_no.AsString;
-              //ftbaslik.fieldbyname('PROJEID').AsInteger := dxmemdata1ProjeId.asinteger;
-
-              ftbaslik.fieldbyname('KDVDURUM').AsString:='Hariç';
-{              ftbaslik.fieldbyname('FATURA_MATRAHI').AsFloat:=dxmemdata2toplam.AsFloat;
-              ftbaslik.fieldbyname('KDV_TUTARI').AsFloat:=dxmemdata2kdvtoplam.AsFloat;
-              ftbaslik.fieldbyname('FATURA_TUTARI').AsFloat:=dxmemdata2geneltoplam.AsFloat;
-              ftbaslik.fieldbyname('DOVIZ_TUTARI').AsFloat:=dxmemdata2geneltoplam.AsFloat;}
               Tablo.RehberEkBilgileriniGetir(dxmemdata1cr_id.AsInteger, 2, [RehVars_FiyatListeAdi,
-                       RehVars_Stok_Vade, RehVars_GLN, RehVars_FiyatListeAdiAlis], etiketler,bilgiler);
+                       RehVars_Stok_Vade, RehVars_GLN, RehVars_FiyatListeAdiAlis], etiketler, bilgiler);
 
-              ftbaslik.FieldByName('FIYAT_LISTESI').Value := StrToIntDef( bilgiler[3],VarsAlisFiyatID);//VarsAlisFiyatID
+              LBaslik := TJSONObject.Create;
+              LBaslik.AddPair('Tur',            TJSONNumber.Create(LTur));
+              LBaslik.AddPair('Tipi',           TJSONNumber.Create(1));
+              LBaslik.AddPair('Tarih',          FormatDateTime('yyyy-mm-dd hh:nn:ss', cxdateedit1.Date));
+              LBaslik.AddPair('FaturaTarih',    FormatDateTime('yyyy-mm-dd hh:nn:ss', dxmemdata1belgetarih.AsDateTime));
+              LBaslik.AddPair('RehberId',       TJSONNumber.Create(dxmemdata1cr_id.AsInteger));
+              LBaslik.AddPair('FaturaNo',       dxmemdata1belge_no.AsString);
+              LBaslik.AddPair('GirisDepo',      TJSONNumber.Create(VarsDepo));
+              LBaslik.AddPair('KdvDurum',       'Hariç');
+              LBaslik.AddPair('Kur',            dxmemdata1p_birim.AsString);
+              LBaslik.AddPair('RaporDoviz',     dxmemdata1p_birim.AsString);
+              LBaslik.AddPair('FaturaDovizi',   dxmemdata1p_birim.AsString);
+              LBaslik.AddPair('DovizCinsi',     dxmemdata1p_birim.AsString);
+              LBaslik.AddPair('DovizKur',       TJSONNumber.Create(1));
+              LBaslik.AddPair('Unvan',          Tablo.TabBizim.fieldbyname('FIRMA').AsString);
+              LBaslik.AddPair('Adres',          Tablo.TabBizim.fieldbyname('ADRES').AsString);
+              LBaslik.AddPair('Ilce',           Tablo.TabBizim.fieldbyname('ILCE').AsString);
+              LBaslik.AddPair('Il',             Tablo.TabBizim.fieldbyname('IL').AsString);
+              LBaslik.AddPair('Vd',             Tablo.TabBizim.fieldbyname('VERGIDAI').AsString);
+              LBaslik.AddPair('Vno',            Tablo.TabBizim.fieldbyname('VERGINO').AsString);
+              LBaslik.AddPair('FiyatListesi',   TJSONNumber.Create(StrToIntDef(bilgiler[3], VarsAlisFiyatID)));
+              LBaslik.AddPair('EkstredeKullan', TJSONBool.Create(False));
+              LBaslik.AddPair('AcikKapali',     TJSONBool.Create(ComboOdeme.Properties.Items[ComboOdeme.ItemIndex].Tag <> 0));
+              LBaslik.AddPair('EkVergi',        TJSONNumber.Create(0));
+              LBaslik.AddPair('Durum',          TJSONNumber.Create(0));
+              LBaslik.AddPair('Aciklama',       dxmemdata1aciklama.AsString);
+              if dxmemdata1baslik.AsInteger = 2 then
+                 LBaslik.AddPair('MasrafId',    TJSONNumber.Create(dxmemdata1m_id.AsInteger));
 
-              ftbaslik.fieldbyname('KUR').AsString:=dxmemdata1p_birim.AsString;
-              ftbaslik.fieldbyname('RAPORDOVIZ').AsString:=dxmemdata1p_birim.AsString;
-              ftbaslik.fieldbyname('FATURADOVIZI').AsString:=dxmemdata1p_birim.AsString;
-              ftbaslik.fieldbyname('DOVIZ_CINSI').AsString:=dxmemdata1p_birim.AsString;
-              ftbaslik.fieldbyname('DOVIZKUR').AsString:='1';
+              LKok := TJSONObject.Create;
+              LKok.AddPair('SatirModu', 'delta');
+              LKok.AddPair('Oturum', TJSONObject.Create
+                .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+                .AddPair('SubeId', TJSONNumber.Create(SubeID)));
+              LKok.AddPair('Baslik', LBaslik);
 
-              ftbaslik.fieldbyname('EKSTREDEKULLAN').AsBoolean := False;
+              fisnumarasi := Tablo.ApiSonucInt(
+                Tablo.ApiCagir('sp_Api_Belge_Kaydet_Json', LKok), 'BelgeId');
+              if fisnumarasi <= 0 then
+                 raise Exception.Create('Belge olusturulamadi.');
 
-              ftbaslik.fieldbyname('ACIK_KAPALI').AsBoolean := ComboOdeme.Properties.Items[ComboOdeme.ItemIndex].Tag<>0;
+              FSatirlar := TJSONArray.Create;   // bu belgenin satirlari burada birikir
 
-              ftbaslik.fieldbyname('EKVERGI').AsString:='0';
-              ftbaslik.fieldbyname('DURUM').AsString:='0';
-
-
-              ftbaslik.fieldbyname('EKLEMETARIHI').Value:=tablo.genini.buguntrhsaat;
-              ftbaslik.fieldbyname('EKLEYEN').AsString:=kullanan;
-              ftbaslik.fieldbyname('DEGISTIREN').AsString:=kullanan;
-              ftbaslik.fieldbyname('DEGISTIRMETARIHI').Value:=tablo.genini.buguntrhsaat;
-              ftbaslik.fieldbyname('aciklama').AsString:=dxmemdata1aciklama.AsString;
-              if dxmemdata1baslik.AsInteger=2 then ftbaslik.fieldbyname('MASRAFID').AsInteger:=dxmemdata1m_id.AsInteger;
-
-              ftbaslik.Post;
-              fisnobul;
-              fisnumarasi:=fisnoID.AsInteger;
-              if dxmemdata1kasa_id.AsInteger<>0 then begin //'Açık Hesap' değilse
+              if dxmemdata1kasa_id.AsInteger <> 0 then begin //Acik Hesap degilse
                 KasaKayitID := YeniKasaKaydet;
               end;
   end;
 
-  procedure InsertYap;
-  begin
-          ftdetay.Insert;
-          ftdetay.fieldbyname('FATBASID').AsInteger:=fisnumarasi;
-          ftdetay.fieldbyname('REHBERID').AsInteger:=dxmemdata1cr_id.AsInteger;
-          ftdetay.fieldbyname('TUR').AsInteger:=0;
-          ftdetay.fieldbyname('URUNID').AsInteger:=dxmemdata1m_id.AsInteger;
-          ftdetay.fieldbyname('ACIKLAMA').AsString:=dxmemdata1aciklama.AsString;
-          ftdetay.fieldbyname('ADET').AsFloat:=dxmemdata1adet.AsFloat;
-          ftdetay.fieldbyname('MF').AsInteger:=0;
-          ftdetay.fieldbyname('BIRIM').AsInteger:=51;
-          ftdetay.fieldbyname('MIKTAR').AsFloat:=dxmemdata1adet.AsFloat;
-          ftdetay.fieldbyname('BIRIMFIYAT').AsFloat:=dxmemdata1b_fiyat.AsFloat;
-          ftdetay.fieldbyname('TUTAR').AsFloat:=dxmemdata1ctutar.AsFloat;
-          ftdetay.fieldbyname('KUR').AsString:=dxmemdata1p_birim.AsString;
-          ftdetay.fieldbyname('ISKONTO').AsFloat:=0;
-          ftdetay.fieldbyname('KDV').AsInteger:=dxmemdata1KDV.AsInteger;
-          ftdetay.fieldbyname('MASRAFID').AsInteger:=dxmemdata1m_id.AsInteger;
-          ftdetay.fieldbyname('DOVIZ_TUTARI').AsFloat:=dxmemdata1ctutar.AsFloat;
-          ftdetay.fieldbyname('DOVIZ_KURU').AsString:=dxmemdata1p_birim.AsString;
-          ftdetay.fieldbyname('EKLEMETARIHI').Value:=tablo.genini.buguntrhsaat;
-          ftdetay.fieldbyname('DOVIZ_BIRIMFIYAT').AsFloat:=dxmemdata1b_fiyat.AsFloat;
-          ftdetay.fieldbyname('EKLEYEN').asstring:=kullanan;
-          ftdetay.fieldbyname('DOVIZKURDEGERI').AsString := '1';
-          ftdetay.fieldbyname('PROJEID').AsInteger := dxmemdata1ProjeId.asinteger;
-  end;
 begin
   if dxmemdata1.RecordCount=0 then Application.MessageBox(pchar(DGiris_yapin),pchar(DBos_alan),MB_ICONINFORMATION+MB_ok)
   else begin
-    ftbaslik.Open;
-    ftdetay.Open;
     kasakayit.open;
+    FSatirlar := nil;
 
     OncekiFirma:=0;
     OncekiBelgeNo:='0';
@@ -680,17 +694,15 @@ begin
           KDV:=KDV+dxmemdata1ckdvtut.AsFloat;
           Toplam:=Toplam+dxmemdata1ctoplam.AsFloat;
 
-          ftdetay.Post;
           dxmemdata1.Next;
       end;
-      //Son belge bitince toplamları yazalım
-      Tablo.BelgeToplamHesapla(fisnumarasi);
+      // Son belgenin biriken satirlarini yaz (toplamlar SP icinde hesaplanir)
+      BelgeSatirlariniYaz;
 
      Application.MessageBox(pchar(DKayit_yapildi),pchar(Kaydet),MB_ICONINFORMATION+MB_ok);
+     FreeAndNil(FSatirlar);
      dxmemdata1.Close;
      dxmemdata2.close;
-     ftbaslik.close;
-     ftdetay.close;
      kasakayit.close;
      dxmemdata1.Open;
      dxmemdata2.open;

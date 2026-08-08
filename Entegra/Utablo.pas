@@ -816,6 +816,7 @@ type
     // Sade sarmalayicilar - cagiran unit'in System.JSON'a ihtiyaci olmasin diye.
     procedure BelgeToplamHesapla(ABelgeId: Integer);                 // FATBASLIK toplamlari (sunucuda)
     procedure BelgeDurumHesapla(ABelgeId: Integer; const AKaynak: string = 'siparis');  // kapanma durumu
+    function ApiSonucInt(const AJson, AAlan: string): Integer;   // API sonuc JSON'undan tamsayi alan
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -12758,6 +12759,28 @@ begin
     TJSONObject.Create
       .AddPair('BelgeId', TJSONNumber.Create(ABelgeId))
       .AddPair('Kaynak', AKaynak) as TJSONObject);
+end;
+
+function TTablo.ApiSonucInt(const AJson, AAlan: string): Integer;
+// API yazma nesnesinin dondurdugu JSON'dan tamsayi alan okur (or. 'BelgeId').
+//   Cozumlenemezse 0 doner - cagiran kontrol etmeli.
+var
+  LV: TJSONValue;
+  LObj: TJSONObject;
+begin
+  Result := 0;
+  if Trim(AJson) = '' then Exit;
+  LV := TJSONObject.ParseJSONValue(AJson);
+  try
+    if LV is TJSONObject then
+    begin
+      LObj := TJSONObject(LV);
+      if LObj.GetValue(AAlan) <> nil then
+        Result := StrToIntDef(LObj.GetValue(AAlan).Value, 0);
+    end;
+  finally
+    LV.Free;
+  end;
 end;
 
 procedure TTablo.CekSenetOpsiyonUygula;
