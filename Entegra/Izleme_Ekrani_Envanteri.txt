@@ -331,3 +331,72 @@ ANOMALILER (yeni tasarimda ele alinmali)
       Yani satis faturasi bazen depodan dusuyor bazen dusmuyor - irsaliyeli /
       irsaliyesiz ayrimi. Yeni tasarimda bu ayrim ACIK bir kural olmali
       (bugun StokDurumDegis parametresiyle cagirandan geliyor).
+
+
+==========================================================================
+EK-3  IZLEME TRIGGER'LARI  (canli tanim + veri dogrulamasi)
+==========================================================================
+Dort trigger var. STOKDURUMIZLEME (bakiye tablosu) YALNIZCA bu trigger'larla
+bakim goruyor; ekranin "secilebilir miktar" hesabi (H1) o tabloyu okuyor.
+Yani bakiyenin dogrulugu tamamen bu trigger'lara bagli.
+
+T1  TG_IzlemOrjinalYap   (STOKIZLEME, FOR INSERT, DELETE)
+    Set bazli, cok satirli insert'e DAYANIKLI.
+    Kaynak izlem kaydinin KALAN'ini yeniden hesaplar:
+        O.KALAN = O.ADET - SUM(cocuklarin ADET'i)     (cocuk = DONUSID -> O.ID)
+    Donusumde kalan dusumunu YAPAN budur (belge donusumu isinde tespit
+    edilmisti; oradaki elle UPDATE cifte dusum yapiyordu, kaldirildi).
+    ** ACIK: UPDATE olayinda tetiklenmiyor. Bir cocuk kaydin ADET'i
+       GUNCELLENIRSE kaynak KALAN yeniden hesaplanmaz. **
+
+T2  TG_StokIzlemeDurumSil (STOKIZLEME, FOR DELETE)
+    CURSOR ile deleted x STOKIZLEMEDEPO dolasir:
+      - STOKDURUMIZLEME satiri yoksa 0 ile ACAR
+      - KALAN = KALAN - (silinen depo hareketinin ADET'i)
+      - STOKIZLEMEDEPO satirini SILER (cascade elle yapiliyor)
+    Cok satirli delete'e dayanikli (cursor). Transferde izlem basina 2 depo
+    satiri oldugu icin ikisini de isler - dogru.
+
+T3  TG_StokIzlemeDurumEkle (STOKIZLEMEDEPO, FOR INSERT)
+    CURSOR; STOKDURUMIZLEME yoksa 0 ile acar, sonra
+        KALAN = KALAN + ADET      (DOGRU: artimsal)
+
+T4  TG_StokIzlemeDurumUpdate (STOKIZLEMEDEPO, FOR UPDATE)   ** BOZUK **
+        KALAN = @CurMIKTAR        (ARTIMSAL DEGIL, ATAMA)
+    T3 "KALAN + ADET", T2 "KALAN - ADET" yaparken bu "KALAN = ADET" yapiyor.
+    Sonuc: bir depo hareketi guncellenince o (STOKID, DEPOID, SERILOTID)
+    bakiyesi, DIGER TUM hareketleri yok sayarak tek satirin degerine esitlenir.
+    Ayrica "yoksa ekle" guvenligi YORUM SATIRINDA - satir yoksa update sessizce
+    hicbir sey yapmaz.
+
+    BU TRIGGER ULASILABILIR - kodda UPDATE STOKIZLEMEDEPO yapan uc yer var:
+      UIzleme.pas:679        cxLabel1DblClick  (ekranin kendi "adet duzelt"i)
+      UTS/UUTSDlg.pas:2156   set ADET=ADET+...
+      UTS/UUTSDlg.pas:2184   set ADET=ADET+...
+
+VERI DOGRULAMASI (BILIM, 08.08.2026)
+    STOKDURUMIZLEME.KALAN  <->  SUM(STOKIZLEMEDEPO.ADET)  karsilastirmasi:
+        toplam 48.948 (stok, depo, serilot) kombinasyonu
+        uyusan 48.944    SAPAN 4
+    Sapan dordu de ayni imzayi tasiyor:
+        stok 726  depo 0  serilot 42622   cache  600   gercek -600   fark 1200
+        stok 726  depo 0  serilot 42623   cache  300   gercek -300   fark  600
+        stok 2592 depo 0  serilot 42625   cache  300   gercek -300   fark  600
+        stok 4524 depo 0  serilot 42624   cache  300   gercek -300   fark  600
+    Isaret ters ve fark tam iki kati -> T4'un "atama" davranisinin imzasi:
+    negatif bir hareket guncellenince bakiye pozitife esitlenmis.
+    (Hepsi DEPOID=0 - gecersiz depo; ayri bir sorun olabilir.)
+
+SONUC
+  S1  T4 duzeltilmeli: KALAN = KALAN - eski.ADET + yeni.ADET (deleted/inserted
+      farkiyla), ve "yoksa ekle" guvenligi acilmali. Set bazli yazilabilir.
+  S2  T1'e UPDATE olayi eklenmeli (cocuk ADET'i degisince kaynak KALAN'i
+      yeniden hesaplansin).
+  S3  Sapan 4 kayit duzeltilmeli (yeniden hesaplayan tek seferlik betik).
+  S4  Yeni tasarimda bakiye ya trigger'la tutulmali ya SP'de - IKISI BIRDEN
+      OLMAMALI. Bugun ekran hem STOKIZLEMEDEPO yaziyor (trigger bakiyeyi
+      guncelliyor) hem de bazi yerlerde STOKDURUMIZLEME'yi dogrudan okuyor.
+      Belge donusumunde ayni tuzaga dusmustuk: elle dusum + trigger dusumu =
+      cifte dusum.
+  S5  DEPOID=0 kayitlari: gecerli depo olmadan bakiye satiri olusmus. Depo
+      zorunlulugu SP tarafinda dogrulanmali.
