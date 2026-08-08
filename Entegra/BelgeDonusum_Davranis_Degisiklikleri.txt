@@ -157,8 +157,8 @@ Bu iki teyit disinda plan on kosullari (1-4) TAMAMLANMISTIR; kodlamaya
 gecilebilir:
   Adim 1: sp_Api_Belge_Kaydet_Json genisletmesi (alanlar + @BelgeIdOut)  [TAMAM
           - GenDepoUpdate88.sql, 08.08.2026]
-  Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i
-  Adim 3: sp_Prog_BelgeDonusum_Dogrula
+  Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i  [TAMAM - GenDepoUpdate89]
+  Adim 3: sp_Prog_BelgeDonusum_Dogrula  [TAMAM - GenDepoUpdate90]
   Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)
   Adim 5: IzlemeAktar / UretimAktar / Sonlandir
   Adim 6: sp_Prog_BelgeDonusum_Uygula_Json2 (ana SP)
