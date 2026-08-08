@@ -1,0 +1,132 @@
+IZLEME (SERI/LOT) EKRANI - YENIDEN TASARIM PLANI
+=================================================
+Tarih  : 08.08.2026
+Onceki : Izleme_Ekrani_Envanteri.txt (davranis envanteri + D1/D2 + trigger analizi)
+Karar  : kullanici, 08.08.2026
+
+
+0. CEKIRDEK ILKE
+-----------------
+EKRAN SECIM YAPAR, YAZMAZ.
+
+Bugun: ekran kendi yaziyor ve yazmayi FormDestroy'da (136 satir) yapiyor.
+  Sonuc mrOk verildikten SONRA, form yok edilirken. Hata olursa kullaniciya
+  mesaj yok, transaction sinirlanamiyor, cagiran "basarili" sanip devam ediyor.
+Yeni : ekran yalnizca secim listesi dondurur; YAZMA cagiranin transaction'inda,
+  zaten var olan belge SP'leri uzerinden olur.
+
+Belge donusumunde kurdugumuz desenin aynisi.
+
+
+1. ALINAN KARARLAR
+-------------------
+K-A  SAYIM AYRILIYOR.
+     Gerekce (veriyle): IslemTur=99 icin STOKIZLEME'de HIC KAYIT YOK ve depo
+     hareketi yapilmiyor. Sayim ayni formu kullaniyor ama semantigi farkli
+     (mevcut sayimi duzeltme). UStokSayim kendi secim ekranini kullanacak;
+     izleme ekrani 5 moddan 4'e iner (giris / cikis / donusum / uretim).
+
+K-B  ADET = 0 DEPO SATIRI KORUNUYOR.
+     Irsaliyeden donusen fatura/fiste depo hareketi yok ama satir yine de
+     aciliyor (satis faturasinda 124.588 satir). "Bu satir izlemliydi ama stok
+     dusmedi" bilgisi ve gecmis veriyle tutarlilik korunuyor.
+
+K-C  BASLANGIC: UBelgeDonusum.
+     Gerekce: donusum isinin yarim kalan parcasini (siparis kaynakli izlemeli
+     urun) kapatir ve differential testi tek seferde yapmayi saglar.
+
+K-D  TEK FORM + NET MOD PARAMETRESI (oneri kabul edildi).
+     Mod basina ayri form bakim yukunu ucе katlar. SP zaten modu biliyor;
+     ekran ona gore kolon acar.
+
+
+2. SUNUCU NESNELERI - UC TANE (yazma nesnesi YOK)
+--------------------------------------------------
+2.1 sp_Prog_Izleme_Aday_Json      (yeni)
+    Ekranin listesini uretir. Envanterdeki UC hesabi tek yerde toplar:
+      H1 bu depoda su an secilebilir seri/lot
+         = STOKDURUMIZLEME.KALAN  EKSI  bu belge satirinin kendi hareketi
+      H2 bu belge satirinin halihazirdaki secimi
+      H3 kaynak belgeden tasinabilir seri/lot (donusum)
+    GIRDI  {mod, stokId, izlemTur, depoId, belge{tur,baslikId,satirId},
+            kaynak{baslikId,satirId}, tarih}
+    CIKTI  serilotId, seriNo, lotNo, skt, urt, mevcut, secili, secilenAdet
+    Bugunku 7 gomulu DFM sorgusu + gecici tablo + KomutDeclare metin
+    birlestirmesi BURADA son bulur.
+    ** ESLESME SERILOTID ILE ** - SERINO/LOTNO/SKT metin + COLLATE
+    karsilastirmasi kalkar (envanter D1: bugunku kirilganligin kaynagi).
+
+2.2 sp_Prog_Izleme_Dogrula_Json   (yeni)
+    Secim dogrulamasi: secilen toplam = gerekli miktar mi, secilen lotta
+    yeterli kalan var mi, lot-SKT tutarliligi.
+    sp_Prog_BelgeDonusum_Dogrula'da bu kontrollerin IKINCI KOPYASI yazilmisti;
+    bu SP gelince o kopya kalkar ve donusum de bunu cagirir.
+
+2.3 YAZMA ICIN YENI NESNE YOK
+    Ekranin sonucu [{serilotId, adet}] olarak cagirana doner:
+      - fatura/irsaliye kaydinda -> sp_Api_Belge_Kaydet_Json'un ZATEN VAR OLAN
+        "SeriLot" alani
+      - donusumde -> sp_Prog_BelgeDonusum_Uygula_Json2'nin "izlemeler[]" alani
+    FormDestroy'daki 136 satir ve IzlemBilgisiKaydet cagrisi ekrandan CIKAR.
+
+
+3. GIRIS MODU - SECIM DEGIL URETIM
+-----------------------------------
+Giris belgelerinde kullanici yeni seri/lot YAZAR. Sozlesmede ayri alan:
+    { "secim": [{"serilotId":42622,"adet":5}],
+      "yeni" : [{"seriNo":"A123","lotNo":"L9","skt":"...","urt":"...","adet":10}] }
+STOKSERILOT'a ekleme Kaydet icinde yapilir (bugun IzlemBilgisiKaydet yapiyor);
+ekran yalnizca listeyi tasir.
+
+
+4. EKRANDA KALANLAR (kullanici arayuzu isi)
+--------------------------------------------
+Barkod okuma ve barkod tipi, lot no uretme, raf omrunden SKT hesabi, toplu
+alma, araliktan uretme, boyut (en/boy) hesabi, kolon gorunurluk kurallari.
+SP'ye tasinan yalniz VERI ve DOGRULAMA.
+
+
+5. UYGULAMA SIRASI
+-------------------
+ A1  sp_Prog_Izleme_Aday_Json - DONUSUM modu
+     UBelgeDonusum'un kullandigi dal (H3 + H2). Once bu, cunku donusum isinin
+     yarim kalan parcasi burada.
+ A2  Differential test: eski DFM sorgulari (SQLDonusKaynak /
+     SQLDonusCikanHedef / SQLDonusCikanHedefUpdate) ile yeni SP ayni girdide
+     ayni listeyi vermeli.
+ A3  sp_Prog_Izleme_Dogrula_Json + BelgeDonusum_Dogrula'daki kopya kontrollerin
+     kaldirilmasi.
+ A4  UBelgeDonusum ekrani: StokIzleme cagrisi -> yeni SP'ler; secim sonucu
+     donusum SP'sine izlemeler[] olarak gonderilir. FormDestroy yazmasi bu
+     yoldan CIKAR.
+ A5  Siparis kaynakli izlemeli urun acigi kapanir (bugun donusum bu yuzden
+     bloke - sp_Prog_BelgeDonusum_Dogrula "seri/lot secimi yapilmali" diyor).
+ A6  sp_Prog_Izleme_Aday_Json - CIKIS ve GIRIS modlari; UFaturaWizard ve
+     digerleri sirayla tasinir.
+ A7  UStokSayim kendi ekranina ayrilir (K-A).
+ A8  Eski akis (FormDestroy yazmasi, gecici tablo, 7 DFM memo) kaldirilir.
+
+
+6. MUSTERI GECISI
+------------------
+ - Yeni SP'ler ADDITIVE eklenir; eski ekran calismaya devam eder.
+ - Sema DEGISMEZ (envanterde gerekcelendirildi: STOKIZLEME zaten yalniz
+   SERILOTID tutuyor, 454.379 satirin hepsinde dolu; GenUpdate DB'yi exe'den
+   once gunceller, sema degisikligi eski exe'yi kirar).
+ - Ekran ekran tasinir; her adim kendi differential testini gecmeden bir
+   sonrakine gecilmez.
+ - Eski akis A8'e kadar SILINMEZ.
+
+
+7. TAMAMLANMIS ON HAZIRLIK (08.08.2026)
+----------------------------------------
+ - Davranis envanteri, D1 (7 sorgunun ne hesapladigi), D2 (depo isaret
+   kurallari canli veriyle), trigger analizi  -> Izleme_Ekrani_Envanteri.txt
+ - TG_StokIzlemeDurumUpdate artimsal hale getirildi, TG_IzlemOrjinalYap'a
+   UPDATE eklendi                                -> GenDepoUpdate94.sql
+ - Bakiye kontrol raporu + opt-in onarim araci   -> GenDepoUpdate94/95.sql
+ - Gecersiz depoya (0) izlem hareketi yazilmasi engellendi -> Utablo.pas
+ - BILIM veri temizligi: 15 hatali hareket (4 tasindi, 11 silindi), 37
+   karsiliksiz bakiye satiri silindi; bakiye tablosu 48.911 kayitta SIFIR
+   sapma. Yedekler: ZZ_SILINEN_STOKDURUMIZLEME_20260808,
+   ZZ_SILINEN_STOKIZLEMEDEPO_20260808.
