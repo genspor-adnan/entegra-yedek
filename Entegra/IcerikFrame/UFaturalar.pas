@@ -451,7 +451,7 @@ implementation
 
 uses  Fetautil, UVeriMotor, ULog, System.StrUtils, System.JSON, UAnaForm, FetaKurulusSiniflari, FetaClassExtensions, UKasaWizard, PrjConst,UGirisKutusuEx, UImport, UGenSifre, UEBelgeKimlik,
   UFastRap, UGenelAnaSekmeFrame, URaporAraclari,UFaturaGorevFrame,UNakitDlg,UBekletme, UBelgeZarflari,
-  Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
+  System.Math, Ubelgegiris, UBelgeDonusum,LocOnFly, GenoTIP.eFatura.NativeApi, UBinarySave, UExceldenVeriAl,
   UEBelgeAliasServis, UEBelgeOlusturucu, UEBelgeMesajDlg, UIzibizRest,
   UStokEslestirme, UFaturaWizard;
 
@@ -2376,170 +2376,87 @@ begin
 end;
 
 procedure TFaturalarDlg.mnIrsaliyeyeDonusturClick(Sender: TObject);
+// "Irsaliyesini Olustur" / "Faturasini Olustur" (pmBelgeDonustur; Tag 1 = irsaliye,
+//   2 = fatura). Secili SIPARIS(ler) sunucuda tek islemde hedef belgeye cevrilir:
+//   sp_Api_Donusum_SiparistenBelge_Json.
+//
+// ONCEKI HALI VE NEDEN DEGISTI
+//   - Tag=2 (faturaya donustur) dallari TAMAMEN BOSTU; menu hicbir sey yapmiyordu.
+//   - Tag=1 dali SIPARIS basligini kolon kolon FATBASLIK'a kopyalayip satirlari
+//     FATURA'ya YERI='' , YERID='' ile yaziyordu: DONUSUM BAGI KURULMUYORDU.
+//     Dolayisiyla siparis "donusmus" sayilmiyor, kalan miktar dusmuyor, ayni
+//     siparis defalarca irsaliyelestirilebiliyordu.
+//   - "Update SIPARIS set ANAKAYITID:=A0 Where ID:=A1" sozdizimi hatali (:=A0)
+//     ve iki kez Params[0] atanmisti -> zaten calismiyordu.
+//   - Toplam hesabi, ISLEMLOG ve transaction yoktu.
+//
+// SP tarafi: kalan miktar kontrolu (asiri donusum korumasi, UPDLOCK), YERI/YERID
+//   bagi, hedef toplamlari, kaynak siparisin kapanma durumu ve ISLEMLOG - hepsi
+//   TEK transaction.
 var
-  belgeno:TBelgeNo;
-  FaturaSeriNo,FaturaNo:string;
-  KocanNo:integer;
-  gf : TFaturaGorevFrame;
+  gf: TFaturaGorevFrame;
+  I, LSiparisId, LKaynakTur, LHedefTur, LBasarili: Integer;
+  LSonuc, LBelgeNolar, LHata: string;
+  LJson: TJSONObject;
 begin
   gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
-  if GridFatListeTview.DataController.GetSelectedCount<=0  then
-    Abort
-  else
+  if GridFatListeTview.Controller.SelectedRecordCount <= 0 then
   begin
-         //Tur: Giren:0,Çıkan:1 AltTur: sipariş:0,irsaliye:1,Fat:2,fiş:3,Tahakkuk:4,Tümü:-1
-    case (Sender as TMenuItem).Tag of
-     1 : begin // irsaliyeye dönüştür
-          case gf.FAltTur of
-            0:begin
-              case gf.FMenuTur of
-                0:begin
-                 if FATBASLIK.FieldByName('ANAKAYITID').AsString <> '' then begin
-                  ShowMessage(Girenirsaliyelisiparis);
-                 end else   begin
-                   if Application.MessageBox(PChar(Irsaliyeyapilsinmi),'UYARI',MB_YESNO)=IDNO then
-                   Abort;
+    ShowMessage(Listeden_sec);
+    Exit;
+  end;
+  // Bu menu yalniz SIPARIS listesinde anlamli (gf.FAltTur = 0 -> siparis)
+  if gf.FAltTur <> 0 then
+  begin
+    ShowMessage(Listeden_sec);
+    Exit;
+  end;
 
-                   Tablo.Query1.Close;
-                   Tablo.Query1.SQL.Text:='INSERT INTO FATBASLIK '+
-                      ' ([TUR],[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[ANAKAYITID],[FATURATARIH],[KOCANNO],[FATURANO] '+
-                      ' ,[GIRISDEPO],[CIKISDEPO],[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[LOTNO],[ACIK_KAPALI],[FATURA_GON_TARIHI]'+
-                      ' ,[FATURA_MATRAHI],[KDV_TUTARI],[FATURA_TUTARI],[KUR],[DOVIZ_TUTARI],[DOVIZ_CINSI],[KASA],[ONAY],[SAYFA],[MASRAFID]'+
-                      ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD],OZELKOD2 '+
-                      ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],[FATURASERI],[IRSALIYENO] '+
-                      ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID])'+
-                      '  SELECT 10,[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[ANAKAYITID],[SIPARISTARIH],[KOCANNO],[SIPARISNO]'+
-                      ' ,[GIRISDEPO],[CIKISDEPO],[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[LOTNO],[ACIK_KAPALI],[SIPARIS_GON_TARIHI]'+
-                      ' ,[SIPARIS_MATRAHI],[KDV_TUTARI],[SIPARIS_TUTARI],[KUR],[DOVIZ_TUTARI],[DOVIZ_CINSI],[KASA],[ONAY],[SAYFA],[MASRAFID] '+
-                      ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD],OZELKOD2 '+
-                      ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],[SIPARISSERI],[IRSALIYENO]'+
-                      ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID] FROM SIPARIS Where ID=:A0 SELECT SCOPE_IDENTITY() ';
-                   if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-                   Tablo.Query1.Params[0].Value:=FATBASLIK.FieldByName('ID').AsInteger ;
-                   Tablo.Query1.Open;
-                   Tablo.Query2.Close;
-                   Tablo.Query2.SQL.Text:= ' INSERT INTO FATURA ([FATBASID],[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
-                    ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
-                    ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],[YERI],[YERID],[SUBEID]) '+
-                    ' SELECT :A0,[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
-                    ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
-                    ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],'''','''',[SUBEID]  FROM SIPARISDETAY where SIPARISID=:A1 ';
-                    if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
-                    Tablo.Query2.Params[0].Value:= Tablo.Query1.Fields[0].AsInteger;
-                    Tablo.Query2.Params[1].Value:=FATBASLIK.FieldByName('ID').AsInteger;
-                    Tablo.Query2.ExecSQL;
+  if Application.MessageBox(PChar(Irsaliyeyapilsinmi), PChar(Uyari), MB_YESNO) = IDNO then
+    Exit;
 
-                    Tablo.Query3.Close;
-                    Tablo.Query3.SQL.Text:='Update SIPARIS set ANAKAYITID:=A0 Where ID:=A1';
-                    if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
-                    Tablo.Query3.Params[0].Value:=Tablo.Query1.Fields[0].AsInteger;;
-                    Tablo.Query3.Params[0].Value:=FATBASLIK.FieldByName('ID').AsInteger;
-                    Tablo.Query3.ExecSQL;
-                 end;
+  LBasarili := 0;
+  LBelgeNolar := '';
+  LHata := '';
+  for I := 0 to GridFatListeTview.Controller.SelectedRecordCount - 1 do
+  begin
+    LSiparisId := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewID.Index]), 0);
+    LKaynakTur := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewTUR.Index]), 0);
+    if LSiparisId <= 0 then Continue;
 
-                end;
-                1:begin
-                     if FATBASLIK.FieldByName('ANAKAYITID').AsString <> '' then begin
-                   ShowMessage(Cikanirsaliyelisiparis);
-                   end else   begin
+    // Hedef tur: alis siparisi (9) -> irsaliye 10 / fatura 11
+    //            satis siparisi (19) -> irsaliye 14 / fatura 15
+    if (Sender as TMenuItem).Tag = 1 then
+      LHedefTur := IfThen(LKaynakTur = 9, 10, 14)
+    else
+      LHedefTur := IfThen(LKaynakTur = 9, 11, 15);
 
-                         belgeno:= SiradakiBelgeNumarasi(9,FATBASLIK.FieldByName('FATURATARIH').AsDateTime);
-                         FaturaSeriNo := belgeno.serino; //seri
-                         FaturaNo:= belgeno.belgeno; //FatNo;
-                         KocanNo := KocannoBul(19); //KOCAN numaras?
-
-                       if Application.MessageBox(PChar(Irsaliyeyapilsinmi),PChar(Uyari),MB_YESNO)=IDNO then
-                       Abort;
-
-                       Tablo.Query1.Close;
-                       Tablo.Query1.SQL.Text:='INSERT INTO FATBASLIK '+
-                          ' ([TUR],[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[ANAKAYITID],[FATURATARIH],[KOCANNO],[FATURANO]'+
-                          ' ,[GIRISDEPO],[CIKISDEPO],[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[LOTNO],[ACIK_KAPALI],[FATURA_GON_TARIHI]'+
-                          ' ,[FATURA_MATRAHI],[KDV_TUTARI],[FATURA_TUTARI],[KUR],[DOVIZ_TUTARI],[DOVIZ_CINSI],[KASA],[ONAY],[SAYFA],[MASRAFID]'+
-                          ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD] '+
-                          ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],[FATURASERI],[IRSALIYENO] '+
-                          ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID])'+
-                          '  SELECT 14,[TIPI],[REHBERID],[PROJEID],[AKTIVITEID],[ANAKAYITID],[SIPARISTARIH],:A0,:A1'+
-                          ' ,[GIRISDEPO],[CIKISDEPO],[BASLIK],[ADRES],[ILCE],[IL],[VD],[VNO],[KDVDURUM],[LOTNO],[ACIK_KAPALI],[SIPARIS_GON_TARIHI]'+
-                          ' ,[SIPARIS_MATRAHI],[KDV_TUTARI],[SIPARIS_TUTARI],[KUR],[DOVIZ_TUTARI],[DOVIZ_CINSI],[KASA],[ONAY],[SAYFA],[MASRAFID] '+
-                          ' ,[ACIKLAMA],[ISYERI],[BOLUM],[SIPARIS_MALIYETI_ORT],[SATICIKODU],[DURUM],[IRSALIYE_TIPI],[SIPARIS_MALIYETI_SON],[ODEMEPLANI],[OZELKOD] '+
-                          ' ,[YETKIKODU],[R],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI],[EKVERGI],:A2,[IRSALIYENO]'+
-                          ' ,[FIYAT_LISTESI],[STOKISK],[HIZMETISK],[DETAYBOLUMU],[SUBEID] FROM SIPARIS Where ID=:A3 SELECT SCOPE_IDENTITY() ';
-                       if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-                       Tablo.Query1.Params[0].Value:=KocanNo;
-                       Tablo.Query1.Params[1].Value:=FaturaNo ;
-                       Tablo.Query1.Params[2].Value:= FaturaSeriNo;
-                       Tablo.Query1.Params[3].Value:=FATBASLIK.FieldByName('ID').AsInteger ;
-                       Tablo.Query1.Open;
-                       Tablo.Query2.Close;
-                       Tablo.Query2.SQL.Text:= ' INSERT INTO FATURA ([FATBASID],[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
-                        ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
-                        ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],[YERI],[YERID],[SUBEID]) '+
-                        ' SELECT :A0,[REHBERID],[SEC],[TUR],[URUNID],[KOD],[ACIKLAMA],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR]'+
-                        ' ,[ISKONTO],[KDV],[MASRAFID],[SKT],[OZELKOD],OZELKOD2,[MUHKODU],[KASA],[ONAY],[EKLEYEN],[EKLEMETARIHI],[DEGISTIREN],[DEGISTIRMETARIHI]'+
-                        ' ,[KUR],[IZLEMEKODU],[AD],[DOVIZ_TUTARI],[DOVIZ_CINSI],[ISKONTO2],[IZLEME],'''','''',[SUBEID]  FROM SIPARISDETAY where SIPARISID=:A1 ';
-                        if AktifVeriMotor = vmPG then Tablo.Query2.SQL.Text := PgSqlCevir(Tablo.Query2.SQL.Text);
-                        Tablo.Query2.Params[0].Value:= Tablo.Query1.Fields[0].AsInteger;
-                        Tablo.Query2.Params[1].Value:=FATBASLIK.FieldByName('ID').AsInteger;
-                        Tablo.Query2.ExecSQL;
-
-                        Tablo.Query3.Close;
-                        Tablo.Query3.SQL.Text:='Update SIPARIS set ANAKAYITID:=A0 , IRSALIYENO:=A1 Where ID:=A2';
-                        if AktifVeriMotor = vmPG then Tablo.Query3.SQL.Text := PgSqlCevir(Tablo.Query3.SQL.Text);
-                        Tablo.Query3.Params[0].Value:=Tablo.Query1.Fields[0].AsInteger;
-                        Tablo.Query3.Params[1].Value:=FaturaNo;
-                        Tablo.Query3.Params[2].Value:=FATBASLIK.FieldByName('ID').AsInteger;
-                        Tablo.Query3.ExecSQL;
-                   end;
-                end;
-              end;
-            end;
-          end;
-        end;
-
-     2 : begin      //faturaya dönüştür
-          case gf.FAltTur of
-            0:begin
-              case gf.FMenuTur of
-                0:begin
-                   if FATBASLIK.FieldByName('IRSALIYENO').AsString <> Null then begin
-                   ShowMessage(Girenirsaliyelisiparis);
-                   end else   begin
-
-                   end;
-                end;
-                1:begin
-                     if FATBASLIK.FieldByName('IRSALIYENO').AsString <> Null then begin
-                   ShowMessage(Cikanirsaliyelisiparis);
-                   end else   begin
-
-                   end;
-                end;
-              end;
-            end;
-            1:Begin
-              case gf.FMenuTur of
-                0:begin
-                   if FATBASLIK.FieldByName('IRSALIYENO').AsString <> Null then begin
-                   ShowMessage(Girenirsaliyelifatura);
-                   end else   begin
-
-                   end;
-                end;
-                1:begin
-                     if FATBASLIK.FieldByName('IRSALIYENO').AsString <> Null then begin
-                   ShowMessage(Cikanirsaliyelifatura);
-                   end else   begin
-
-                   end;
-                end;
-              end;
-            End;
-          end;
-         end;
-
+    LJson := TJSONObject.Create;
+    LJson.AddPair('SiparisId', TJSONNumber.Create(LSiparisId));
+    LJson.AddPair('HedefTur',  TJSONNumber.Create(LHedefTur));
+    LJson.AddPair('Oturum', TJSONObject.Create
+      .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('SubeId', TJSONNumber.Create(SubeID)));
+    try
+      LSonuc := Tablo.ApiCagir('sp_Api_Donusum_SiparistenBelge_Json', LJson);
+      if Tablo.ApiSonucInt(LSonuc, 'HedefBelgeId') > 0 then
+      begin
+        Inc(LBasarili);
+        if LBelgeNolar <> '' then LBelgeNolar := LBelgeNolar + ', ';
+        LBelgeNolar := LBelgeNolar + VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewID.Index]);
+      end;
+    except
+      on E: Exception do
+        LHata := LHata + E.Message + #13#10;   // 51200: kalan yok / tur uyumsuz vb.
     end;
   end;
+
+  if LHata <> '' then
+    Application.MessageBox(PChar(LHata), PChar(Uyari), MB_OK + MB_ICONWARNING);
+  if LBasarili = 0 then
+    Application.MessageBox(PChar(Belge_olusmadi), PChar(Bilgi), MB_OK + MB_ICONWARNING);
+
+  TarihDegisti;
 end;
 
 procedure TFaturalarDlg.Nakit1Click(Sender: TObject);

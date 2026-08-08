@@ -1435,6 +1435,7 @@
     object mnFaturayaDonustur: TMenuItem
       Tag = 2
       Caption = 'Se'#231'ilenleri Faturaya D'#246'n'#252#351't'#252'r'
+      OnClick = mnIrsaliyeyeDonusturClick
     end
   end
   object SIPARISDETAY: TFDQuery
