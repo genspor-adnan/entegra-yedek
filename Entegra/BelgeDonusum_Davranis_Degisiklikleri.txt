@@ -60,6 +60,13 @@ Bunlar differential testte "regresyon" degil, ONAYLI FARK olarak gorulecek.
             olursa olsun TAMAMI).
     YENI  : yalnizca donusen miktar dusulur. Kismi donusumde kaynak seri/lot
             kaydinda kalan miktar korunur.
+    BULGU (08.08.2026, testle): dogru dusumu TG_IzlemOrjinalYap trigger'i ZATEN
+            yapiyor (yeni satirin DONUSID'sine bakip kaynagin KALAN'ini dusuyor;
+            kalan 2 iken 1 adetlik aktarimda 1'e iniyor). Eski akistaki hata,
+            trigger isini yaptiktan SONRA Pascal'in KALAN=0 yazmasiydi.
+            Dolayisiyla duzeltme = elle UPDATE'i KALDIRMAK. Ilk yazimda elle
+            dusme de eklemistim, trigger ile CIFTE DUSUM yapip kalani 0'a
+            indiriyordu - test yakaladi.
     ETKI  : izleme raporlarinda kismi donusmus satirlar artik dogru gorunur.
             Gecmis veriyi DUZELTMEZ (yalniz bundan sonraki islemler).
 
@@ -160,7 +167,7 @@ gecilebilir:
   Adim 2: BELGEDONUSUMISLEM tablosu + rota matrisi TVF'i  [TAMAM - GenDepoUpdate89]
   Adim 3: sp_Prog_BelgeDonusum_Dogrula  [TAMAM - GenDepoUpdate90]
   Adim 4: sp_Prog_BelgeDonusum_Kaydet (Kaydet cagirisi)  [TAMAM - GenDepoUpdate91]
-  Adim 5: IzlemeAktar / UretimAktar / Sonlandir
+  Adim 5: IzlemeAktar / UretimAktar / Sonlandir  [TAMAM - GenDepoUpdate92]
   Adim 6: sp_Prog_BelgeDonusum_Uygula_Json2 (ana SP)
   Adim 7: differential testler
   Adim 8: Utablo.BelgeDonustur ince istemciye donusur, eski akis kaldirilir
