@@ -3939,6 +3939,10 @@ begin
      s:=',DOVIZKUR='+FExtToStr((DovizKuruBul(formatdatetime('yyyy-mm-dd 00:00',FATBASLIK.FieldByName('FATURATARIH').AsDateTime),FATBASLIK.FieldByName('RAPORDOVIZ').AsString, Tablo.GENINI.ReadString(Ops_GenelOpsiyon_VarsayilanDoviz,'ALIS'))),4);
   }
   Tablo.BelgeToplamHesapla(TabFatbaslik.Fields[0].AsInteger);
+  // Bu belge donusumle olustuysa kaynagin (siparis/irsaliye) kapanma durumu
+  //   adet degistiginde yeniden hesaplanmali - yoksa kalani olan bir siparis
+  //   listede "kapali" gorunur (08.08.2026, siparis 23205: kalan 5, DURUM 9).
+  Tablo.KaynakDurumGuncelle(TabFatbaslik.Fields[0].AsInteger);
 
   if TabloAc then
      TabloYenile(TabFatbaslik, [TabFatbaslik.Fields[0].AsInteger]);

@@ -816,6 +816,9 @@ type
     // Sade sarmalayicilar - cagiran unit'in System.JSON'a ihtiyaci olmasin diye.
     procedure BelgeToplamHesapla(ABelgeId: Integer);                 // FATBASLIK toplamlari (sunucuda)
     procedure BelgeDurumHesapla(ABelgeId: Integer; const AKaynak: string = 'siparis');  // kapanma durumu
+    procedure KaynakDurumGuncelle(ABelgeId: Integer);                 // donusum kaynaklarinin durumu
+    function  KaynakBaglariAl(ABelgeId: Integer): string;             // silmeden once: kaynak listesi
+    procedure KaynakDurumGuncelleListe(const AKaynaklarJson: string); // silmeden sonra: listeyi hesapla
     function ApiSonucInt(const AJson, AAlan: string): Integer;   // API sonuc JSON'undan tamsayi alan
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
@@ -5428,12 +5431,20 @@ begin
   //     3) Loglama SQL tarafinda; deger bicimi degismez (ISO/nokta), geri alma
   //        ULog.GeriDegerAta ile iki bicimi de kabul eder.
   //   Hata (or. 51200 silinemez) exception olarak yukari gider - yutulmaz.
+  // Bu belge donusumle olustuysa kaynaklarin (siparis/irsaliye) durumu silme
+  //   sonrasi yeniden hesaplanmali - yoksa kapali gorunen siparis, hedefi
+  //   silinmis oldugu halde kapali kalir. Liste SILMEDEN ONCE alinir: silme
+  //   satirlari ve YERI/YERID bagini yok eder, sonrasinda kaynak bulunamaz.
+  var LKaynaklar: string := Tablo.KaynakBaglariAl(FatbasID);
+
   Tablo.ApiCagir('sp_Api_Belge_Sil_Json',
     TJSONObject.Create
       .AddPair('BelgeId', TJSONNumber.Create(FatbasID))
       .AddPair('Oturum', TJSONObject.Create
         .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
         .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
+
+  Tablo.KaynakDurumGuncelleListe(LKaynaklar);
 
   if Assigned(TabFatura) and TabFatura.Active then
     TabFatura.Close;
@@ -12946,6 +12957,68 @@ begin
     TJSONObject.Create
       .AddPair('BelgeId', TJSONNumber.Create(ABelgeId))
       .AddPair('Kaynak', AKaynak) as TJSONObject);
+end;
+
+procedure TTablo.KaynakDurumGuncelle(ABelgeId: Integer);
+// Bu belge donusumle olustuysa KAYNAK belgelerinin (siparis/irsaliye) kapanma
+//   durumunu yeniden hesaplatir.
+//
+// Donusum ANINDA hesap zaten yapiliyordu; eksik olan DUZENLEME idi: hedef
+//   belgenin adedi degisince kaynagin kalani degisiyor ama durumu oldugu gibi
+//   kaliyordu. Tespit (08.08.2026): siparis 23205 tamamen donusmus gorunuyordu
+//   (DURUM 9) ama kalani 5'ti - listede "kapali" oldugu icin kimse kalanini
+//   donusturmeye calismiyordu.
+//
+// Kaynaklari SP hedef belgenin satirlarindaki YERI/YERID baglarindan bulur;
+//   bag yoksa hicbir sey yapmaz (donusum disi belgelerde bedava cagri).
+begin
+  if ABelgeId <= 0 then Exit;
+  ApiCagir('sp_Prog_Belge_KaynakDurum_Json',
+    TJSONObject.Create.AddPair('belgeId', TJSONNumber.Create(ABelgeId)) as TJSONObject);
+end;
+
+function TTablo.KaynakBaglariAl(ABelgeId: Integer): string;
+// Belgenin donusum kaynaklarini LISTELER (hesaplamaz). SILME yolunda gerekli:
+//   belge silinince satirlardaki YERI/YERID bagi kaybolur, sonrasinda kaynak
+//   bulunamaz. Cagiran silmeden ONCE bunu alir, silmeden SONRA
+//   KaynakDurumGuncelleListe'ye verir.
+var
+  LSonuc: string;
+  LVal: TJSONValue;
+begin
+  Result := '';
+  if ABelgeId <= 0 then Exit;
+  LSonuc := ApiCagir('sp_Prog_Belge_KaynakDurum_Json',
+    TJSONObject.Create
+      .AddPair('belgeId', TJSONNumber.Create(ABelgeId))
+      .AddPair('listele', TJSONNumber.Create(1)) as TJSONObject);
+  if Trim(LSonuc) = '' then Exit;
+  LVal := TJSONObject.ParseJSONValue(LSonuc);
+  try
+    if LVal is TJSONObject then
+      Result := TJSONObject(LVal).GetValue<string>('Kaynaklar', '');
+  finally
+    LVal.Free;
+  end;
+end;
+
+procedure TTablo.KaynakDurumGuncelleListe(const AKaynaklarJson: string);
+// KaynakBaglariAl ile onceden alinmis listenin durumunu yeniden hesaplatir.
+var
+  LDizi: TJSONValue;
+begin
+  if Trim(AKaynaklarJson) = '' then Exit;
+  LDizi := TJSONObject.ParseJSONValue(AKaynaklarJson);
+  if not (LDizi is TJSONArray) then begin
+    LDizi.Free;
+    Exit;
+  end;
+  if TJSONArray(LDizi).Count = 0 then begin
+    LDizi.Free;
+    Exit;
+  end;
+  ApiCagir('sp_Prog_Belge_KaynakDurum_Json',
+    TJSONObject.Create.AddPair('kaynaklar', LDizi) as TJSONObject);
 end;
 
 function TTablo.ApiSonucInt(const AJson, AAlan: string): Integer;
