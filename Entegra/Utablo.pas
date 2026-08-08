@@ -3104,6 +3104,10 @@ begin
     try
       LUyarilar := LKok.GetValue('Uyarilar') as TJSONArray;
       if LUyarilar = nil then Exit;
+      // Hedef belge turu sunucunun sonucunda geliyor; ekranin GIRIS mi CIKIS
+      //   mi acilacagini bu belirler.
+      var LHedefTur: Integer := LKok.GetValue<Integer>('HedefTur', 0);
+      var LGirisHedef: Boolean := LHedefTur in [3, 10, 11, 12, 102, 109];
       for I := 0 to LUyarilar.Count - 1 do
       begin
         LU := LUyarilar.Items[I] as TJSONObject;
@@ -3114,11 +3118,14 @@ begin
         if LGorulen.IndexOf(IntToStr(LSatirId)) >= 0 then Continue;   // ayni satir bir kez
         LGorulen.Add(IntToStr(LSatirId));
 
-        // Satirin urun/izleme/adet bilgisi ve cikis deposu kaynaktan okunur
+        // Satirin urun/izleme/adet bilgisi ve deposu kaynaktan okunur.
+        //   Depo yonu hedefe gore: giriste GIRISDEPO, cikista CIKISDEPO.
         TablodanSorguAc(1,
           'select SD.URUNID, SD.IZLEME, ADET=SD.ADET-isnull((select sum(ADET) from FATURA ' +
           ' where YERID=SD.ID and YERI in (select DonusumTuru from dbo.fn_Prog_BelgeDonusum_Rota()' +
-          ' where KaynakDetayTablo=''SIPARISDETAY'')),0), DEPO=isnull(S.CIKISDEPO, S.GIRISDEPO)' +
+          ' where KaynakDetayTablo=''SIPARISDETAY'')),0), DEPO=' +
+          IfThen(LGirisHedef, 'isnull(S.GIRISDEPO, S.CIKISDEPO)',
+                              'isnull(S.CIKISDEPO, S.GIRISDEPO)') +
           ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID where SD.ID=' +
           IntToStr(LSatirId));
         if Query1.IsEmpty then Continue;
@@ -3134,7 +3141,11 @@ begin
           LDlg.YalnizSecim    := True;
           LDlg.StokID         := LStokId;
           LDlg.IzlemTur       := LIzlemTur;
-          LDlg.IslemTur       := KasaTur_SatisIrsaliyesi;  // cikis dali (depodan liste)
+          // Hedef belge turu ROTADAN gelir. Sabit "satis irsaliyesi" yazmak
+          //   alis donusumlerinde ekrani CIKIS kipinde aciyordu: kullaniciya
+          //   depodaki mevcut lotlar gosteriliyor, oysa mal GELIYOR ve lot
+          //   tedarikciden yazilmali. (08.08.2026)
+          LDlg.IslemTur       := LHedefTur;
           LDlg.IslemTip       := 1;
           LDlg.BaslikID       := 0;    // hedef belge HENUZ YOK
           LDlg.SatirID        := 0;

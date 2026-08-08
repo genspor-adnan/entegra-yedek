@@ -902,20 +902,34 @@ Begin
        var LDepoJson: TJSONObject := TJSONObject.Create;
        var LSecimMetni: string := '';
 
-       // TEK ADAY LOT -> SORMA. Secebilecegi baska bir sey yok; adet kadari
-       //   otomatik secilir. Aday tanimi fn_Prog_Izleme_DepoAday'da - sunucu
-       //   zinciri (sp_Prog_BelgeDonusum_Dogrula) de AYNI TVF'i kullanir ki
-       //   iki taraf "tek lot"tan ayni seyi anlasin.
-       Tablo.TablodanSorguAc(1,
-         'select n=count(*), serilot=min(SERILOTID), mevcut=min(Mevcut) ' +
-         ' from dbo.fn_Prog_Izleme_DepoAday(' +
-         TabDetayGiris.FieldByName('URUNID').AsString + ',' + IntToStr(CDepo) + ',0)');
-       if (not Tablo.Query1.IsEmpty) and (Tablo.Query1.FieldByName('n').AsInteger = 1)
-          and (Tablo.Query1.FieldByName('mevcut').AsFloat + 0.0001 >=
-               TabDetayGiris.FieldByName('ADET').AsFloat) then
-         LSecimMetni := '[{"serilotId":' + Tablo.Query1.FieldByName('serilot').AsString +
-                        ',"adet":' + StringReplace(
-                          FloatToStr(TabDetayGiris.FieldByName('ADET').AsFloat), ',', '.', []) + '}]';
+       // GIRIS mi CIKIS mi? Ayrim BELIRLEYICI:
+       //   CIKIS (satis irsaliye/fatura/fis, giden konsinye): mal depodan
+       //     cikiyor - lotlar DEPODAKI BAKIYEDEN secilir.
+       //   GIRIS (alis irsaliye/fatura/fis): mal GELIYOR - lot numarasi
+       //     TEDARIKCININ irsaliyesinde yazar, kullanici ELLE GIRER. Depodaki
+       //     mevcut lotu varsaymak, gelen mala baskasinin lotunu yazmaktir.
+       //     (08.08.2026: alis irsaliyesi 114108'e depodaki ti0002 otomatik
+       //      atanmis, depoya +20 girmisti.)
+       var LGirisHedef: Boolean := HedefBaslikTur in [3, 10, 11, 12, 102, 109];
+
+       // TEK ADAY LOT -> SORMA. Yalniz CIKISTA gecerli: secebilecegi baska bir
+       //   sey yok, adet kadari otomatik secilir. GIRISTE HER ZAMAN SORULUR -
+       //   tek lot bile olsa. Aday tanimi fn_Prog_Izleme_DepoAday'da; sunucu
+       //   zinciri (sp_Prog_BelgeDonusum_Dogrula) ayni TVF'i ve ayni giris/
+       //   cikis ayrimini kullanir.
+       if not LGirisHedef then
+       begin
+         Tablo.TablodanSorguAc(1,
+           'select n=count(*), serilot=min(SERILOTID), mevcut=min(Mevcut) ' +
+           ' from dbo.fn_Prog_Izleme_DepoAday(' +
+           TabDetayGiris.FieldByName('URUNID').AsString + ',' + IntToStr(CDepo) + ',0)');
+         if (not Tablo.Query1.IsEmpty) and (Tablo.Query1.FieldByName('n').AsInteger = 1)
+            and (Tablo.Query1.FieldByName('mevcut').AsFloat + 0.0001 >=
+                 TabDetayGiris.FieldByName('ADET').AsFloat) then
+           LSecimMetni := '[{"serilotId":' + Tablo.Query1.FieldByName('serilot').AsString +
+                          ',"adet":' + StringReplace(
+                            FloatToStr(TabDetayGiris.FieldByName('ADET').AsFloat), ',', '.', []) + '}]';
+       end;
 
        try
          try
@@ -929,9 +943,12 @@ Begin
            LDepoSec.IslemTip       := 1;
            LDepoSec.BaslikID       := HedefBaslikID;
            LDepoSec.SatirID        := TabDetayGiris.FieldByName('ID').AsInteger;
-           LDepoSec.KaynakBaslikID := 0;   // kaynakta izlem kaydi YOK -> depodan
-           LDepoSec.KaynakSatirID  := 0;
-           LDepoSec.GirDepo        := CDepo;
+           LDepoSec.KaynakBaslikID := 0;   // kaynakta izlem kaydi YOK
+           LDepoSec.KaynakSatirID  := 0;   // GIRISTE yeni lot yazilir, CIKISTA depodan secilir
+           if LGirisHedef then
+             LDepoSec.GirDepo      := GDepo
+           else
+             LDepoSec.GirDepo      := CDepo;
            LDepoSec.CikDepo        := CDepo;
            LDepoSec.GerekliMiktar  := TabDetayGiris.FieldByName('ADET').AsFloat;
            LDepoSec.KALAN          := TabDetayGiris.FieldByName('ADET').AsFloat;
@@ -944,16 +961,20 @@ Begin
              end;
              LSecimMetni := LDepoSec.SecimJson;
            end;
-           // kaynak.satirId GONDERILMEZ -> SP depodan kipe gecer, DONUSID=0
-           LDepoJson.AddPair('hedef', TJSONObject.Create
-             .AddPair('tur',      TJSONNumber.Create(HedefBaslikTur))
-             .AddPair('baslikId', TJSONNumber.Create(HedefBaslikID))
-             .AddPair('satirId',  TJSONNumber.Create(TabDetayGiris.FieldByName('ID').AsInteger)));
-           LDepoJson.AddPair('depoId',       TJSONNumber.Create(CDepo));
-           LDepoJson.AddPair('stokHareketi', TJSONBool.Create(True));
-           LDepoJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
-           LDepoJson.AddPair('secim',
-             TJSONObject.ParseJSONValue(LSecimMetni) as TJSONArray);
+           if not LGirisHedef then
+           begin
+             // CIKIS: depodaki mevcut lotlardan secildi.
+             //   kaynak.satirId GONDERILMEZ -> SP depodan kipe gecer, DONUSID=0
+             LDepoJson.AddPair('hedef', TJSONObject.Create
+               .AddPair('tur',      TJSONNumber.Create(HedefBaslikTur))
+               .AddPair('baslikId', TJSONNumber.Create(HedefBaslikID))
+               .AddPair('satirId',  TJSONNumber.Create(TabDetayGiris.FieldByName('ID').AsInteger)));
+             LDepoJson.AddPair('depoId',       TJSONNumber.Create(CDepo));
+             LDepoJson.AddPair('stokHareketi', TJSONBool.Create(True));
+             LDepoJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
+             LDepoJson.AddPair('secim',
+               TJSONObject.ParseJSONValue(LSecimMetni) as TJSONArray);
+           end;
          finally
            FreeAndNil(LDepoSec);
          end;
@@ -961,7 +982,21 @@ Begin
          LDepoJson.Free;
          raise;
        end;
-       Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LDepoJson);
+
+       if LGirisHedef then
+       begin
+         // GIRIS: kullanicinin girdigi lotlar YENI olabilir; seri/lot kartini
+         //   acan ve depoya POZITIF hareket yazan yol sp_Prog_Izleme_Yaz_Json.
+         //   (Aktar_Json depodan kipi mevcut lot bekler, serilotId=0 kabul etmez.)
+         LDepoJson.Free;
+         Tablo.IzlemeSecimYaz(LSecimMetni, HedefBaslikTur, 1, HedefBaslikID,
+           TabDetayGiris.FieldByName('ID').AsInteger,
+           TabDetayGiris.FieldByName('URUNID').AsInteger,
+           TabDetayGiris.FieldByName('IZLEME').AsInteger,
+           GDepo, CDepo, True, 0);
+       end
+       else
+         Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LDepoJson);
     end
     else if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
        // ============================================================
