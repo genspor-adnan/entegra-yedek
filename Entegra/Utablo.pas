@@ -6901,6 +6901,23 @@ var
   kalan, fark : real;
   Procedure DepoInsert(IzlemId,DepoId:Integer; Miktars:real);
   begin
+         // KORUMA (08.08.2026): GECERSIZ DEPOYA (0) IZLEM HAREKETI YAZILMAZ.
+         //   BILIM'de 15 hareket satiri DEPOID=0 ile yazilmis (satis irsaliye/
+         //   fatura belgeleri): 5 belgede basligin CIKISDEPO'su hic secilmemis,
+         //   1 belgede (108552) baslikta depo VARDI ama cagiran StokIzleme'ye
+         //   gecirmemis. Sonuc: stok hicbir depodan dusmemis ama izlem kaydi
+         //   olusmus; STOKDURUMIZLEME'de karsiligi olmayan bakiye satirlari
+         //   birakmis (bkz. sp_Prog_Izleme_BakiyeKontrol raporu).
+         //   Sessizce yazmak yerine ACIK HATA veriyoruz: kullanici depoyu
+         //   secmeden belgeyi kaydedemez, bozuk veri olusmaz.
+         //   NOT: hareket YAPILMAYAN durumlarda (sayim, StokDurumDegis=False)
+         //   buraya Miktars=0 ile gelinir; o durumda depo 0 olsa bile engel yok
+         //   - zaten stok etkilenmiyor.
+         if (DepoId <= 0) and (Miktars <> 0) then
+            raise Exception.Create(
+              'Bu belgede depo secilmedigi icin seri/lot hareketi kaydedilemez.' + sLineBreak +
+              'Once belgenin giris/cikis deposunu secin.');
+
          Veritabani.BasitKomutÇalıştır(tablo.FDCnn, 'insert into STOKIZLEMEDEPO (IZLEMID, DEPOID, ADET) values('+
                 IntToStr(IzlemId)+','+IntToStr(DepoId)+','+stringreplace(FloatToStr(Miktars),',','.',[])+')', [], []);
   end;
