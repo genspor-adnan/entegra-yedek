@@ -213,15 +213,21 @@ begin
             else
               CDepo := 0;
             miktar := tabDonusumSepet.FieldByName('MIKTAR').AsInteger;
-            if not Anaform.StokIzleme(IzlemDlg,
+            // A8: ekran secer, yazma sp_Prog_Izleme_Yaz_Json ile hemen yapilir.
+            //   Satir ID'si BURADA ZATEN BELLI (faturasatirid, yukarida
+            //   BelgeDonustur_DetaySatirOlustur ile olustu) - erteleme gerekmiyor.
+            //   Eski cagri satir ID'si olarak 0 geciyordu; ekran mrOk'ta canli
+            //   kaldigi icin yazma bir sonraki cagrida SATIRID=0 ile
+            //   yapilabiliyordu. (BILIM'de SATIRID=0 kaydi yok - bu yol
+            //   calismamis gorunuyor, yine de dogrusu yazildi.)
+            if not Anaform.StokIzlemeSec(
                                     tabDonusumSepet.FieldByName('URUNID').AsInteger,
                                     tabDonusumSepet.FieldByName('IZLEME').AsInteger,
                                     tabDonusumSepet.FieldByName('FATBASTUR').AsInteger,1,
                                     tabDonusumSepet.FieldByName('FATBASID').AsInteger,
-                                    0,
-                                     tabDonusumSepet.FieldByName('REHBERID').AsInteger, GDepo,  CDepo,
+                                    faturasatirid,
+                                    tabDonusumSepet.FieldByName('REHBERID').AsInteger, GDepo,  CDepo,
                                     miktar,miktar) then begin
-              FreeAndNil(IzlemDlg);
               Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' DELETE FROM FATURA WHERE ID='+inttostr(faturasatirid),[],[]  );
               Abort;
             end;

@@ -266,6 +266,11 @@ type
 var
   FatTransferWizardDlg: TFatTransferWizardDlg;
   IzlemDlg2: TIzlemeDlg;
+  // A8: izleme secimi alindi, satir ID'si AfterPost'ta belli olacak
+  FIzlemBekliyor  : Boolean;
+  FIzlemSecimJson : string;
+  FIzlemStokId    : Integer;
+  FIzlemTuru      : Integer;
 
 implementation
 
@@ -307,9 +312,18 @@ begin
   YeniID := TabFATURA.FieldByName('ID').AsInteger;
   SatirFatBasID := TabFATURA.FieldByName('FATBASID').AsInteger;
 
-  if IzlemDlg2<>nil then begin
-    IzlemDlg2.SatirID := YeniID;
-    FreeAndNil(IzlemDlg2);
+  // A8: secim TabFaturaBeforePost'ta alindi, YAZMA BURADA - satir ID'si
+  //   ancak simdi belli. Eskiden ekran canli tutulup burada yok ediliyordu.
+  if FIzlemBekliyor then begin
+    FIzlemBekliyor := False;
+    Tablo.IzlemeSecimYaz(FIzlemSecimJson,
+      TabFatBaslik.FieldByName('TUR').AsInteger,
+      TabFatBaslik.FieldByName('TIPI').AsInteger,
+      TabFatBaslik.FieldByName('ID').AsInteger,
+      YeniID, FIzlemStokId, FIzlemTuru,
+      TabFATBASLIK.FieldByName('GIRISDEPO').AsInteger,
+      TabFATBASLIK.FieldByName('CIKISDEPO').AsInteger, True, 0);
+    FIzlemSecimJson := '';
   end;
 
   if SatirFatBasID > 0 then
@@ -802,13 +816,18 @@ begin
       else
         DetID := 0;
       MiktarInt := miktar;
-      if not Anaform.StokIzleme(IzlemDlg2,TabFATURA.FieldByName('URUNID').AsInteger,TabFATURA.FieldByName('IZLEME').AsInteger,TabFatBaslik.FieldByName('TUR').AsInteger,
+      // A8: ekran yalnizca secer; yazma AfterPost'ta (satir ID'si orada belli).
+      if not Anaform.StokIzlemeSecimAl(TabFATURA.FieldByName('URUNID').AsInteger,TabFATURA.FieldByName('IZLEME').AsInteger,TabFatBaslik.FieldByName('TUR').AsInteger,
                                 TabFatBaslik.FieldByName('TIPI').AsInteger, TabFatBaslik.FieldByName('ID').AsInteger,DetID,0,TabFATBASLIK.FieldByName('GIRISDEPO').AsInteger,
-                                TabFATBASLIK.FieldByName('CIKISDEPO').AsInteger, MiktarInt, MiktarInt) then begin
-        FreeAndNil(IzlemDlg2);
+                                TabFATBASLIK.FieldByName('CIKISDEPO').AsInteger, MiktarInt, MiktarInt, FIzlemSecimJson) then begin
+        FIzlemSecimJson := '';
+        FIzlemBekliyor  := False;
         TabFatura.Cancel;
         Abort;
       end;
+      FIzlemBekliyor := True;
+      FIzlemStokId   := TabFATURA.FieldByName('URUNID').AsInteger;
+      FIzlemTuru     := TabFATURA.FieldByName('IZLEME').AsInteger;
     end;
   end;
 
