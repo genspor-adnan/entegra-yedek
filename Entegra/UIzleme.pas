@@ -175,6 +175,18 @@ procedure TIzlemeDlg.FormShow(Sender: TObject);
 var
   MenuItem:TMenuItem;
 begin
+  // ---- SAYIM KIPI KALKTI (A7/S2, 08.08.2026) ----
+  //   Bu ekran 5 modda calisiyordu: giris / cikis / donusum / uretim / SAYIM.
+  //   Sayimin semantigi digerlerinden farkliydi ("bu belgeden su lot cikacak"
+  //   yerine "depoda su lottan kac tane var") ve verisi hicbir yere
+  //   kaydedilmiyordu (STOKIZLEME'de BELGETUR=99: sifir kayit). Sayim artik
+  //   urun bazinda; bu ekrani cagirmiyor. Kod icindeki 99 dallari erisilemez
+  //   durumda - sessizce yanlis calismasin diye burada acikca reddediliyor.
+  //   Ayrinti: Sayim_Ekrani_Plani.txt
+  if IslemTur = KasaTur_StokSayimIslemi then
+    raise Exception.Create('Izleme ekrani sayim kipinde kullanilamaz; ' +
+                           'sayim urun bazinda yapilir.');
+
   GridFatIzlemView.OptionsData.editing := not Degisemez;
   KaydetTus.Enabled := not Degisemez;
 
@@ -1523,7 +1535,13 @@ begin
     // Önce eski kayıtları silelim
 //    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEMEDEPO where IZLEMID in '+
 //       '(select ID from STOKIZLEME where STOKID=&StkID and BASLIKID=&BlgID and SATIRID=&StrID)',['&StkID','&BlgID','&StrID'],[StokID,BaslikID,SatirID]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where STOKID=&StkID and BASLIKID=&BlgID and SATIRID=&StrID',['&StkID','&BlgID','&StrID'],[StokID,BaslikID,SatirID]);
+    // BELGETUR kosula DAHIL: BASLIKID/SATIRID belge turleri arasinda ORTAK bir
+    //   sayi uzayindan gelir (FATURA.ID, SIPARISDETAY.ID, STOKSAYIMKALEMLERI.ID
+    //   hepsi 1'den artar). BELGETUR olmadan bir belgenin izlemini silerken
+    //   ayni ID'li BASKA turden bir belgenin izlemi de silinebilir. BILIM'de
+    //   768 sayim kalemi sayica cakisiyordu; veri kaybi olmamasi STOKID'nin de
+    //  tutmasi gerekmesine bagliydi - tesaduf, koruma degil. (08.08.2026)
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and STOKID=&StkID and BASLIKID=&BlgID and SATIRID=&StrID',['&Tur','&StkID','&BlgID','&StrID'],[IslemTur,StokID,BaslikID,SatirID]);
 {    if (IslemTur in [KasaTur_DigerCikisFisi,KasaTur_SatisFaturasi,KasaTur_SatisFisi,KasaTur_SatisIrsaliyesi,KasaTur_Giden_Konsinye,KasaTur_StokSayimIslemi]) then begin
        Carpan :='-1*';
        DepoId := CikDepo;

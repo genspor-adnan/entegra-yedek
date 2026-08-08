@@ -251,20 +251,9 @@ var
      Result := Tablo.Query2.Fields[0].AsInteger;
   end;
 
-  procedure IzlemVar(SayimKalemID:integer; GirenCikan:char);
-  begin
-     //önce bakalım eksik var mı yanı fiş çıkışı olacak                                                                                       //  > veya <
-     Tablo.TablodanSorguAc(7, 'select abs(sum(KALAN)) FROM STOKIZLEME WHERE BELGETUR=99 and SATIRID='+IntToStr(SayimKalemID)+ ' and KALAN '+GirenCikan+' 0');
-     if Tablo.Query7.Fields[0].AsFloat > 0 then   // toplam çıkan lotlar için ön tarafa adet girilmeli
-         SatirID := FiseSatirEkle(tabSayimKalemleri.FieldByName('ID').AsInteger, Tablo.Query7.Fields[0].AsFloat);
-
-     Tablo.TablodanSorguAc(8, 'select SI.ID, SI.STOKID,SERINO, LOTNO, SKT, URT, KALAN = ABS(KALAN), DURUM= SI.ADET '+
-                              'from STOKIZLEME SI inner join [STOKSERILOT] SSL ON SI.SERILOTID=SSL.ID  '+
-                              'where BELGETUR=99 and SATIRID='+IntToStr(SayimKalemID)+ ' and KALAN '+GirenCikan+' 0');
-     Tablo.IzlemBilgisiKaydet(Tablo.Query8, IslemTur,IslemTip, 0, KulFatbasID, SatirID, tabSayimKalemleri.FieldByName('IZLEME').AsInteger, GirDepo, CikDepo, True);
-
-
-  end;
+  // IzlemVar KALDIRILDI (A7/S2, 08.08.2026): STOKIZLEME'de BELGETUR=99 kaydini
+  //   okuyordu; o kayit hic olusmadigindan hep bos donuyor, izlemli urunlerde
+  //   sayim farki fise hic yazilmiyordu. Cagiran dal da kaldirildi.
 
   procedure UpdateBaslikToplamlar(KulFatbasID : integer);
   begin
@@ -298,20 +287,13 @@ begin
     BekletDlg.LabelUstTaraf.Update;
 
     if (tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsString<>'')and(tabSayimKalemleri.FieldByName('SISTEMDEKIMIKTAR').AsFloat<>tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsFloat) then begin
-       //önce bakıyoruz izlem var mı
-       //eğer izlem varsa bir kalemin hem lot eksikleri hem de fazlaları olabilir..
-       if tabSayimKalemleri.FieldByName('IZLEME').AsInteger > 0 then begin
-           //sayım eksiği çıkış fişine girilecek
-           KulFatbasID := sayimCikfisfatbasid;
-           IslemTur := 4; IslemTip := 16; GirDepo := 0; CikDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger;
-           IzlemVar(tabSayimKalemleri.FieldByName('ID').AsInteger, '<');
-
-           //sayım fazlası giriş fişine girilecek
-           KulFatbasID := sayimGirfisfatbasid;
-           IslemTur := 3; IslemTip := 17; GirDepo := TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger; CikDepo := 0;
-           IzlemVar(tabSayimKalemleri.FieldByName('ID').AsInteger, '>');
-       end
-       else begin //İzlem yooook
+       // A7/S2: IZLEMLI URUN ARTIK AYRI ISLENMIYOR.
+       //   Eski izlemli dal IzlemVar'i cagiriyordu; o da STOKIZLEME'de
+       //   BELGETUR=99 kayitlarini okuyordu. O kayit HIC olusmuyor (bkz.
+       //   Sayim_Ekrani_Plani.txt B1/B2), dolayisiyla izlemeli urunlerde
+       //   sayim farki fise HIC yazilmiyordu - sessiz bir delik. Artik
+       //   izlemli/izlemsiz ayrimi yok: fark her urunde ayni yoldan fise gider.
+       begin
            if tabSayimKalemleri.FieldByName('SISTEMDEKIMIKTAR').AsFloat>tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsFloat then begin
               //sayım eksiği çıkış fişine girilecek
               KulFatbasID := sayimCikfisfatbasid;
@@ -474,7 +456,9 @@ var
   SKT,Tarih:Tdatetime;
   SayimMiktari:extended;
   Fiyat:Currency;
+  AtlananIzlem:Integer;   // A7/S2: dosyadaki lot/seri/boyut satirlari islenmiyor
 begin
+  AtlananIzlem := 0;
   if OpenDialog2.Execute then begin //burada text dosyayı seçtiriyoruz.. uzantısı .txt .dat gibi olabilir..
     sl := TStringList.Create;
     try
@@ -552,13 +536,12 @@ begin
           SKT := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
           SayimMiktari := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
-          Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
-          if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (SKT>0.0) and (SayimMiktari>0) then
-            veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into STOKIZLEME(STOKID, DEPOID, BELGETUR, BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
-                                                    'values('+Tablo.Query0.FieldByName('STOKID').AsString+','+TabSayTutanak.FieldByName('SAYIMDEPO').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
-                                                                +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',2,'
-                                                                +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
-                                                                +' '''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''',0,'''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''','''+FormatDateTime('yyyy-mm-dd hh:nn',SKT)+''',0)',[],[]);
+          // A7/S2: lot/SKT satiri islenmiyor - sayimda lot takibi yok.
+          //   Eski INSERT, STOKIZLEME'nin artik OLMAYAN kolonlarina yaziyordu
+          //   (DEPOID, GIRISDEPO, CIKISDEPO, MIKTAR, IZLEM, IZLEMID, ACIKLAMA,
+          //   SKT, DURUM); calissa "Invalid column name" verirdi. Sessizce
+          //   atlamak yerine sonda kullaniciya kac satirin atlandigi bildirilir.
+          Inc(AtlananIzlem);
 
         end else if SatirTur='SBYT' then begin//izleme bilgisi boyut
           //Sayım ID, STOK ID, ID,TURU,Miktar,Tarih
@@ -569,13 +552,7 @@ begin
           BoyutAdi := dize.SinirlandirilmisMetin(Satir,'|');
           SayimMiktari := StrToIntDef(dize.SinirlandirilmisMetin(Satir,'|'),0);
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
-          Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
-          if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (BoyutID>0.0) and (SayimMiktari>0) then
-            veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
-                                                    'values('+Tablo.Query0.FieldByName('STOKID').AsString+','+TabSayTutanak.FieldByName('SAYIMDEPO').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
-                                                                +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',4,'
-                                                                +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
-                                                                +' '''+BoyutAdi+''','+IntToStr(BoyutID)+','''+BoyutAdi+''',null,0)',[],[]);
+          Inc(AtlananIzlem);   // A7/S2: boyut satiri islenmiyor
         end else if SatirTur='SKRKSN' then begin//izleme bilgisi serino/karekod
           //Sayım ID,Seri Numarası veya  Kare Kodu,Tarih
           //SKRKSN|1|54687984564163|25.09.2013
@@ -583,15 +560,16 @@ begin
           Serino := dize.SinirlandirilmisMetin(Satir,'|');
           SayimMiktari := 1.0;
           Tarih := StrToDateTimeDef(StringReplace(dize.SinirlandirilmisMetin(Satir,'|'),'.',FormatSettings.DateSeparator,[rfReplaceAll]),0.0);
-          Tablo.TablodanSorguAc(0,'select * from STOKSAYIMKALEMLERI where SAYIMID='+TabSayTutanak.FieldByName('ID').AsString+' and DOSYAID='+IntToStr(SayimId));
-          if (Tablo.Query0.RecordCount=1) and (SayimId>0) and (Serino>'') then
-            veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into STOKIZLEME(STOKID,DEPOID,BELGETUR,BASLIKID,SATIRID,GIRISDEPO,CIKISDEPO,IZLEMTUR,MIKTAR,IZLEM,IZLEMID,ACIKLAMA,SKT,DURUM)'+
-                                                    'values('+Tablo.Query0.FieldByName('STOKID').AsString+',99,'+TabSayTutanak.FieldByName('ID').AsString+','+Tablo.Query0.Fields[0].AsString+','
-                                                                +VarToStr(cbSayimDepo.EditValue)+','+VarToStr(cbSayimDepo.EditValue)+',1,'
-                                                                +StringReplace(FloatToStr(SayimMiktari),FormatSettings.DecimalSeparator,'.',[rfReplaceAll])+','
-                                                                +' '''+Serino+''',0,'''+Serino+''',null,0)',[],[]);
+          // A7/S2: seri/karekod satiri islenmiyor. (Bu INSERT ayrica 14 kolona
+          //   13 deger veriyordu - DEPOID atlanmisti; iki kere bozuktu.)
+          Inc(AtlananIzlem);
         end;
       end;
+      if AtlananIzlem > 0 then
+        Application.MessageBox(
+          PChar('Dosyadaki ' + IntToStr(AtlananIzlem) + ' seri/lot/boyut satiri islenmedi.'#13#10 +
+                'Sayim urun bazinda yapilir; sayim miktarlari aktarildi.'),
+          PChar(Uyari), MB_OK or MB_ICONINFORMATION);
     finally
       sl.Free;
     end;
@@ -608,10 +586,8 @@ end;
 
 procedure TStokSayimDlg.tabSayimKalemleriAfterPost(DataSet: TDataSet);
 begin
-  if IzlemDlg<>nil then begin
-    IzlemDlg.SatirID := tabSayimKalemleri.FieldByName('ID').AsInteger;
-    FreeAndNil(IzlemDlg);
-  end;
+  // IzlemDlg artik hic olusturulmuyor (A7/S2); alan duruyor ki DFM/arayuz
+  //   degismesin, ama burada temizlik gerekmiyor.
   if LokasyonDlg<>nil then begin
     LokasyonDlg.SatirID := tabSayimKalemleri.FieldByName('ID').AsInteger;
     FreeAndNil(LokasyonDlg);
@@ -628,7 +604,6 @@ end;
 
 procedure TStokSayimDlg.tabSayimKalemleriBeforePost(DataSet: TDataSet);
   var DetID:integer;
-      miktar : real;
 begin
   if (tabSayimKalemleri.State=dsInsert)or(tabSayimKalemleri.FieldByName('SAYIMMIKTAR').OldValue <> tabSayimKalemleri.FieldByName('SAYIMMIKTAR').NewValue) then begin
     //insert modunda detay id si yok..
@@ -646,16 +621,15 @@ begin
         Abort;
       end;
     end;
-    if tabSayimKalemleri.FieldByName('IZLEME').AsInteger > 0 then begin
-      miktar := tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsInteger;
-      if not Anaform.StokIzleme(IzlemDlg,tabSayimKalemleri.FieldByName('STOKID').AsInteger, tabSayimKalemleri.FieldByName('IZLEME').AsInteger, 99, 1,
-                      TabSayTutanak.FieldByName('ID').AsInteger,DetID,0,TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger, TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger,
-                      miktar, miktar) then begin                                                  //Adnan
-        FreeAndNil(IzlemDlg);
-        tabSayimKalemleri.Cancel;
-        Abort;
-      end;
-    end;
+    // SAYIMDA LOT SORULMUYOR (A7/S2, 08.08.2026).
+    //   Sorulan lot bilgisi HICBIR YERE kaydedilmiyordu: STOKSAYIMKALEMLERI'nde
+    //   seri/lot kolonu yok, STOKIZLEME'de BELGETUR=99 kaydi sifir (4.200
+    //   izlemli sayim kalemine ragmen). Sebebi asagida kaldirilan SQL'ler:
+    //   STOKIZLEME'nin ARTIK OLMAYAN kolonlarina yaziyorlardi, calissalar
+    //   "Invalid column name" verirlerdi. Kullanici lot lot giriyor, sonuc
+    //   kayboluyordu - "girdim ama kaydolmadi" yanilgisi.
+    //   Sayimda lot takibi istenirse kendi saklama yeri ve ekraniyla ayri is
+    //   olarak yapilacak (Sayim_Ekrani_Plani.txt, secenek S1).
     if tabSayimKalemleri.FieldByName('IZLEME').Value = null then
       tabSayimKalemleri.FieldByName('IZLEME').AsInteger := 0;
   end;
@@ -904,7 +878,14 @@ begin
     Abort;
   end;
 
-
+  // Bu yordamin GOVDESI YOK: on kontrolleri yapip hicbir sey yapmadan bitiyordu.
+  //   Kullanici "Stok Durum Guncelle" diyor, hicbir sey olmuyor, hata da yok -
+  //   en kotu davranis bu. Isi yapan akis "Sayimi Fise Aktar" tarafinda.
+  //   (A7/S2 tespiti, 08.08.2026 - Sayim_Ekrani_Plani.txt B3)
+  Application.MessageBox(
+    PChar('Bu menu su an bir islem yapmiyor.'#13#10 +
+          'Sayim farkini stoga islemek icin sayimi fise aktarma islemini kullanin.'),
+    PChar(Uyari), MB_OK or MB_ICONINFORMATION);
 end;
 
 procedure TStokSayimDlg.dateBitisPropertiesCloseUp(Sender: TObject);
@@ -972,14 +953,15 @@ begin
 end;
 
 procedure TStokSayimDlg.IzlemBilgisiDuzenleMenuClick(Sender: TObject);
-var miktar : real;
 begin
-     miktar := tabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsInteger;
-     if not Anaform.StokIzleme(IzlemDlg,tabSayimKalemleri.FieldByName('STOKID').AsInteger,tabSayimKalemleri.FieldByName('IZLEME').AsInteger,99, 1,
-                TabSayTutanak.FieldByName('ID').AsInteger,tabSayimKalemleri.FieldByName('ID').AsInteger,TabSayTutanak.FieldByName('ID').AsInteger,
-                TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger,TabSayTutanak.FieldByName('SAYIMDEPO').AsInteger,
-                TabSayimKalemleri.FieldByName('SAYIMMIKTAR').AsInteger, miktar) then
-        FreeAndNil(IzlemDlg);
+  // A7/S2: sayimda lot takibi yok - menu gizli (DFM'de Visible=False).
+  //   Govde, menu bir sekilde acilirsa sessiz kalmasin diye acik mesaj verir.
+  //   Eski hali izleme ekranini 99 kipinde aciyordu; girilen lotlar hicbir
+  //   yere kaydedilmiyordu (bkz. Sayim_Ekrani_Plani.txt, bulgu B1/B2).
+  Application.MessageBox(
+    PChar('Sayimda seri/lot takibi bu surumde yok.'#13#10 +
+          'Sayim urun bazinda yapilir; lot bazli sayim ayri bir calisma.'),
+    PChar(Uyari), MB_OK or MB_ICONINFORMATION);
 end;
 
 procedure TStokSayimDlg.lbSayimTipiClick(Sender: TObject);

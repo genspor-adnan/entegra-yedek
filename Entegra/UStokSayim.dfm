@@ -966,6 +966,7 @@ object StokSayimDlg: TStokSayimDlg
     object IzlemBilgisiDuzenleMenu: TMenuItem
       Caption = #304'zlem Bilgisi D'#252'zenle'
       OnClick = IzlemBilgisiDuzenleMenuClick
+      Visible = False
     end
   end
 end
