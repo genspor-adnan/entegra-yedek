@@ -123,6 +123,7 @@ type
   private
     Kaydedilebilir : boolean;
     procedure TempTabloOlustur;
+    procedure SecimJsonUret;
     function BuSeriNoKullanilmismiKontrolu(IzlemNo:string) : Boolean;
     { Private declarations }
     procedure SayiGetir;
@@ -135,6 +136,14 @@ type
     DonusumHedef, DonusumKaynak, Degisemez, StokDurumDegis : Boolean;
     //IzlemAktif:boolean;
     Barkod:String;
+    // ---- YALNIZ SECIM KIPI (plan A8) -------------------------------------
+    //   True ise ekran HICBIR SEY YAZMAZ: FormDestroy'daki 136 satirlik
+    //   yazma blogu atlanir, secim SecimJson'da cagirana doner ve yazmayi
+    //   cagiranin SP'si yapar (sp_Prog_Izleme_Aktar_Json / Belge_Kaydet).
+    //   Boylece secim ile yazma ayni transaction'da olur ve hata kullaniciya
+    //   ulasir - bugun yazma form yok edilirken oldugundan hata yutuluyordu.
+    YalnizSecim : Boolean;
+    SecimJson   : string;   // [{"kaynakIzlemId":n,"serilotId":n,"adet":x}, ...]
   end;
 
 var
@@ -143,7 +152,7 @@ var
 
 implementation
 
-uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, UDFMPG;
+uses UVeriMotor,UGirisKutusuEx,Utablo,LocOnfly,FetaUtil, UAnaForm, UDFMPG, System.JSON;
 
 
 
@@ -511,6 +520,12 @@ procedure TIzlemeDlg.KaydetTusClick(Sender: TObject);
     Result := True;
     if (GridFatIzlemViewSEC.Visible = False)or(IslemTur < 14) then
         exit;
+    // Yalniz secim kipinde depo yeterlilik kontrolu SP'nin isi
+    //   (sp_Prog_Izleme_Aktar_Json yetersizse 51200 ile reddeder). Burada
+    //   yapilirsa irsaliyeden faturaya donuste yanlis calisir: stok zaten
+    //   irsaliyeyle cikmistir, depo bakiyesi 0'dir.
+    if YalnizSecim then
+        exit;
     if IslemOp='D' then exit; //eğer faturada değişiklşk yapılıyorsa lotno miktarını kontrol etmesine gerek yok..
     //lot miktarını kontrol edelim..
     TabIzlem.First;
@@ -536,6 +551,8 @@ begin
   if (KaydetTus.Enabled)and(CikisMiktarKontrolEt) then begin
      Tablo.TablodanSorguAc(2,'select sum(KALAN) from '+TabloAdi+' where SEC=1');
      KALAN := Tablo.Query2.Fields[0].AsFloat;
+     if YalnizSecim then
+        SecimJsonUret;
      //before post olayında serino bilgileri alınıyor
      //after post olayında destroy edip Kaydetme (STOKIZLEM tablosuna) gerçekleşiyor
      Kaydedilebilir := True;
@@ -1359,6 +1376,45 @@ begin
   Tablo.GridAyarRestore('GridFatIzlemGridi', GridFatIzlemView);
 end;
 
+// ============================================================
+// SecimJsonUret - YALNIZ SECIM KIPI (plan A8)
+//   Isaretli satirlari, cagiranin SP'sine gonderilecek "secim" dizisine
+//   cevirir. Hicbir sey yazmaz.
+//     kaynakIzlemId : donusumde kaynak STOKIZLEME.ID (DONUSID bagi)
+//     serilotId     : lotun kimligi
+//     adet          : bu lottan alinacak miktar (kullanicinin girdigi)
+//   Sayilar noktali yazilir - JSON ondaliginda virgul gecersizdir; yerel
+//   ayar Turkce oldugundan FloatToStr virgul uretir.
+// ============================================================
+procedure TIzlemeDlg.SecimJsonUret;
+var
+  LDizi : TJSONArray;
+  LAdet : Double;
+begin
+  SecimJson := '';
+  LDizi := TJSONArray.Create;
+  try
+    TabIzlem.DisableControls;
+    try
+      TabIzlem.First;
+      while not TabIzlem.Eof do begin
+        LAdet := TabIzlem.FieldByName('KALAN').AsFloat;
+        if (TabIzlem.FieldByName('SEC').AsBoolean) and (LAdet > 0) then
+          LDizi.Add(TJSONObject.Create
+            .AddPair('kaynakIzlemId', TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
+            .AddPair('serilotId',     TJSONNumber.Create(TabIzlem.FieldByName('SERILOTID').AsInteger))
+            .AddPair('adet',          TJSONNumber.Create(LAdet)));
+        TabIzlem.Next;
+      end;
+    finally
+      TabIzlem.EnableControls;
+    end;
+    SecimJson := LDizi.ToJSON;
+  finally
+    LDizi.Free;
+  end;
+end;
+
 procedure TIzlemeDlg.FormDestroy(Sender: TObject);
 var s:string;  //Komut
     Carpan:String[10];
@@ -1459,6 +1515,10 @@ var s:string;  //Komut
     end;
 begin
     if Kaydedilebilir=False then
+       exit;
+    // YALNIZ SECIM KIPI: yazma cagiranin SP'sinde. Bu blok calisirsa ayni
+    //   izlem kayitlari IKI KEZ olusur (biri burada, biri SP'de).
+    if YalnizSecim then
        exit;
     // Önce eski kayıtları silelim
 //    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEMEDEPO where IZLEMID in '+

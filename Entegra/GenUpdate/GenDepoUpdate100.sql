@@ -61,15 +61,43 @@ BEGIN
     DECLARE @SecimVar BIT = CASE WHEN EXISTS (SELECT 1 FROM OPENJSON(@Kosullar, '$.secim')) THEN 1 ELSE 0 END;
 
     IF @SecimVar = 1
-        -- Acik secim: hangi seri/lottan ne kadar. istenenAdet yok sayilir.
+    BEGIN
+        -- Acik secim: hangi kayittan/lottan ne kadar. istenenAdet yok sayilir.
+        --   Eslesme once "kaynakIzlemId" (kesin: ayni seri/lot kaynak satirda
+        --   birden fazla kayitta olabilir), yoksa "serilotId" ile.
+        INSERT @T (KaynakIzlemId, SerilotId, StokId, IzlemTur, Yer, Adet)
+        SELECT SI.ID, SI.SERILOTID, SI.STOKID, SI.IZLEMTUR, SI.YER, J.Adet
+        FROM OPENJSON(@Kosullar, '$.secim')
+             WITH (KaynakIzlemId INT '$.kaynakIzlemId', Adet DECIMAL(18,6) '$.adet') J
+             INNER JOIN dbo.STOKIZLEME SI ON SI.ID = J.KaynakIzlemId
+        WHERE J.Adet > 0 AND ISNULL(J.KaynakIzlemId, 0) > 0
+          AND SI.SATIRID = @KaynakSatir;
+
         INSERT @T (KaynakIzlemId, SerilotId, StokId, IzlemTur, Yer, Adet)
         SELECT MIN(SI.ID), SI.SERILOTID, MIN(SI.STOKID), MIN(SI.IZLEMTUR), MIN(SI.YER), MIN(J.Adet)
         FROM OPENJSON(@Kosullar, '$.secim')
-             WITH (SerilotId INT '$.serilotId', Adet DECIMAL(18,6) '$.adet') J
+             WITH (KaynakIzlemId INT '$.kaynakIzlemId',
+                   SerilotId INT '$.serilotId', Adet DECIMAL(18,6) '$.adet') J
              INNER JOIN dbo.STOKIZLEME SI ON SI.SATIRID = @KaynakSatir
                                          AND SI.SERILOTID = J.SerilotId
-        WHERE J.Adet > 0
+        WHERE J.Adet > 0 AND ISNULL(J.KaynakIzlemId, 0) = 0
+          AND NOT EXISTS (SELECT 1 FROM @T T2 WHERE T2.SerilotId = J.SerilotId)
         GROUP BY SI.SERILOTID;
+
+        -- Secilen adet kaynagin o kaydindaki kalani asamaz
+        IF EXISTS (SELECT 1 FROM @T T
+                   INNER JOIN dbo.STOKIZLEME SI ON SI.ID = T.KaynakIzlemId
+                   WHERE ABS(ISNULL(SI.KALAN, 0)) + 0.0001 < T.Adet)
+        BEGIN
+            DECLARE @m2 NVARCHAR(300) =
+                (SELECT TOP 1 N'Secilen seri/lot icin kaynakta yeterli kalan yok (mevcut: '
+                     + CAST(CAST(ABS(ISNULL(SI.KALAN,0)) AS decimal(18,3)) AS nvarchar(30))
+                     + N', istenen: ' + CAST(CAST(T.Adet AS decimal(18,3)) AS nvarchar(30)) + N').'
+                 FROM @T T INNER JOIN dbo.STOKIZLEME SI ON SI.ID = T.KaynakIzlemId
+                 WHERE ABS(ISNULL(SI.KALAN, 0)) + 0.0001 < T.Adet);
+            THROW 51200, @m2, 1;
+        END
+    END
     ELSE IF ISNULL(@Istenen, 0) > 0
     BEGIN
         -- ---------- KISMI: FIFO ile istenen kadar ----------

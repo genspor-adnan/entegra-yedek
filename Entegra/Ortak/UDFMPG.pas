@@ -136,11 +136,11 @@ const
   SQL_PG_IzlemDonusCikanHedef =
     'insert into :TabloAdi'#13#10 +
     '(STOKID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT, IZLEMID, BASLIKID, SATIRID, UPDID, SERILOTID)'#13#10 +
-    ' SELECT SI1.STOKID, SSL.SERINO, abs(SI1.KALAN) AS DURUM, 0.0 AS KALAN, 0 AS SEC, SSL.LOTNO, SSL.SKT, SSL.URT,'#13#10 +
+    ' SELECT SI1.STOKID, SSL.SERINO, abs(SI1.KALAN) AS DURUM, abs(SI1.KALAN) AS KALAN, 0 AS SEC, SSL.LOTNO, SSL.SKT, SSL.URT,'#13#10 +
     ' SI1.ID, SI1.BASLIKID, SI1.SATIRID, SI1.DONUSID, SSL.ID AS SERILOTID'#13#10 +
     ' from STOKIZLEME SI1'#13#10 +
     ' INNER JOIN STOKSERILOT SSL ON SI1.SERILOTID=SSL.ID'#13#10 +
-    ' where SI1.SATIRID=@SatirID';
+    ' where SI1.SATIRID=@SatirID and abs(coalesce(SI1.KALAN,0)) > 0.0001';
 
   // Wizard/form 'SQLDetay' PG karsiligi: MSSQL declare @var + '#DETAY temp (IF EXISTS/CREATE/INSERT
   //   union/select)' batch'i cevirici-disi ve @-hatasi verir. Temp gereksiz -> sonuc = union select

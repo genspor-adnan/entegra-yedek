@@ -918,6 +918,49 @@ Begin
        LIzlemJson.AddPair('istenenAdet',
          TJSONNumber.Create(TabDetayGiris.FieldByName('ADET').AsFloat));
        LIzlemJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
+
+       // ---- KISMI ADET: hangi seri/lottan alinacagini KULLANICI secer ----
+       //   Adet birebir tam alinmissa secime gerek yok - kaynakta ne varsa
+       //   hepsi gider (eski davranis, ek tiklama yok).
+       //   Adet dusurulmusse ekran YALNIZ SECIM kipinde acilir: hicbir sey
+       //   yazmaz, isaretlenenleri secim[] olarak dondurur; yazmayi SP yapar.
+       //   Vazgecilirse satir donusturulmez.
+       if TabDetayGiris.FieldByName('ADET').AsFloat <
+          TabKaynak.FieldByName('ADET').AsFloat - 0.0001 then
+       begin
+         var LKalanMik: real := TabDetayGiris.FieldByName('ADET').AsFloat;
+         var LSecDlg: TIzlemeDlg := nil;
+         try
+           Application.CreateForm(TIzlemeDlg, LSecDlg);
+           LSecDlg.YalnizSecim     := True;
+           LSecDlg.StokID          := TabDetayGiris.FieldByName('URUNID').AsInteger;
+           LSecDlg.IzlemTur        := TabDetayGiris.FieldByName('IZLEME').AsInteger;
+           LSecDlg.IslemTur        := HedefBaslikTur;
+           LSecDlg.IslemTip        := 1;
+           LSecDlg.BaslikID        := HedefBaslikID;
+           LSecDlg.SatirID         := TabDetayGiris.FieldByName('ID').AsInteger;
+           LSecDlg.KaynakBaslikID  := TabKaynak.FieldByName('BASLIKID').AsInteger;
+           LSecDlg.KaynakSatirID   := TabKaynak.FieldByName('SATIRID').AsInteger;
+           LSecDlg.GirDepo         := CDepo;
+           LSecDlg.CikDepo         := CDepo;
+           LSecDlg.GerekliMiktar   := LKalanMik;
+           LSecDlg.KALAN           := LKalanMik;
+           LSecDlg.StokDurumDegis  := LStokHar;
+           LSecDlg.RehberId        := RehId;
+           LSecDlg.ShowModal;
+           if LSecDlg.ModalResult <> mrOk then begin
+             LIzlemJson.Free;
+             TabDetayGiris.Delete;
+             Abort;
+           end;
+           if Trim(LSecDlg.SecimJson) <> '' then
+             LIzlemJson.AddPair('secim',
+               TJSONObject.ParseJSONValue(LSecDlg.SecimJson) as TJSONArray);
+         finally
+           FreeAndNil(LSecDlg);
+         end;
+       end;
+
        Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LIzlemJson);
     end;
 
