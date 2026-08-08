@@ -168,7 +168,7 @@ type
   end;
 
 var
-  BelgeDonusumDlg: TBelgeDonusumDlg;
+  BelgeDonusumDlg  : TBelgeDonusumDlg;
   HedefTablo   : String[30];
 
 implementation
@@ -900,8 +900,27 @@ Begin
        and (HedefBaslikTur in [10, 11, 12, 14, 15, 16, 119]) then begin
        var LDepoSec: TIzlemeDlg := nil;
        var LDepoJson: TJSONObject := TJSONObject.Create;
+       var LSecimMetni: string := '';
+
+       // TEK ADAY LOT -> SORMA. Secebilecegi baska bir sey yok; adet kadari
+       //   otomatik secilir. Aday tanimi fn_Prog_Izleme_DepoAday'da - sunucu
+       //   zinciri (sp_Prog_BelgeDonusum_Dogrula) de AYNI TVF'i kullanir ki
+       //   iki taraf "tek lot"tan ayni seyi anlasin.
+       Tablo.TablodanSorguAc(1,
+         'select n=count(*), serilot=min(SERILOTID), mevcut=min(Mevcut) ' +
+         ' from dbo.fn_Prog_Izleme_DepoAday(' +
+         TabDetayGiris.FieldByName('URUNID').AsString + ',' + IntToStr(CDepo) + ',0)');
+       if (not Tablo.Query1.IsEmpty) and (Tablo.Query1.FieldByName('n').AsInteger = 1)
+          and (Tablo.Query1.FieldByName('mevcut').AsFloat + 0.0001 >=
+               TabDetayGiris.FieldByName('ADET').AsFloat) then
+         LSecimMetni := '[{"serilotId":' + Tablo.Query1.FieldByName('serilot').AsString +
+                        ',"adet":' + StringReplace(
+                          FloatToStr(TabDetayGiris.FieldByName('ADET').AsFloat), ',', '.', []) + '}]';
+
        try
          try
+           if LSecimMetni = '' then
+           begin
            Application.CreateForm(TIzlemeDlg, LDepoSec);
            LDepoSec.YalnizSecim    := True;
            LDepoSec.StokID         := TabDetayGiris.FieldByName('URUNID').AsInteger;
@@ -919,9 +938,11 @@ Begin
            LDepoSec.StokDurumDegis := True;   // siparisten cikis: stok GERCEKTEN duser
            LDepoSec.RehberId       := RehID;
            LDepoSec.ShowModal;
-           if (LDepoSec.ModalResult <> mrOk) or (Trim(LDepoSec.SecimJson) = '') then begin
-             TabDetayGiris.Delete;
-             Abort;
+             if (LDepoSec.ModalResult <> mrOk) or (Trim(LDepoSec.SecimJson) = '') then begin
+               TabDetayGiris.Delete;
+               Abort;
+             end;
+             LSecimMetni := LDepoSec.SecimJson;
            end;
            // kaynak.satirId GONDERILMEZ -> SP depodan kipe gecer, DONUSID=0
            LDepoJson.AddPair('hedef', TJSONObject.Create
@@ -932,7 +953,7 @@ Begin
            LDepoJson.AddPair('stokHareketi', TJSONBool.Create(True));
            LDepoJson.AddPair('kullaniciId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)));
            LDepoJson.AddPair('secim',
-             TJSONObject.ParseJSONValue(LDepoSec.SecimJson) as TJSONArray);
+             TJSONObject.ParseJSONValue(LSecimMetni) as TJSONArray);
          finally
            FreeAndNil(LDepoSec);
          end;
@@ -986,8 +1007,14 @@ Begin
        //   Adet dusurulmusse ekran YALNIZ SECIM kipinde acilir: hicbir sey
        //   yazmaz, isaretlenenleri secim[] olarak dondurur; yazmayi SP yapar.
        //   Vazgecilirse satir donusturulmez.
-       if TabDetayGiris.FieldByName('ADET').AsFloat <
-          TabKaynak.FieldByName('ADET').AsFloat - 0.0001 then
+       //   Kaynakta TEK lot varsa yine sorulmaz: secebilecegi baska bir sey
+       //   yok, SP istenenAdet kadarini o lottan alir.
+       if (TabDetayGiris.FieldByName('ADET').AsFloat <
+           TabKaynak.FieldByName('ADET').AsFloat - 0.0001)
+          and (Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+                 'select count(distinct SERILOTID) from STOKIZLEME ' +
+                 ' where SATIRID=&s and abs(isnull(KALAN,0))>0.0001',
+                 ['&s'], [TabKaynak.FieldByName('SATIRID').AsInteger], True) > 1) then
        begin
          var LKalanMik: real := TabDetayGiris.FieldByName('ADET').AsFloat;
          var LSecDlg: TIzlemeDlg := nil;
