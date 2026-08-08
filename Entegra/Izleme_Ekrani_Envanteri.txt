@@ -1,0 +1,235 @@
+IZLEME (SERI/LOT) EKRANI - DAVRANIS ENVANTERI
+==============================================
+Tarih  : 08.08.2026
+Kaynak : UIzleme.pas (1.518 satir / 71 KB), UIzleme.dfm (27 KB),
+         UAnaForm.StokIzleme, Utablo.IzlemBilgisiKaydet, 10 cagri yeri
+Amac   : Ekrani yeniden tasarlamadan ONCE bugun NE YAPTIGINI kayda gecirmek.
+         (Belge donusumunde izledigimiz yolun aynisi: once envanter, sonra plan.)
+
+
+1. GIRIS NOKTASI
+-----------------
+TAnaForm.StokIzleme(var dlgIzlem, StkID, IzlemTur, IslemTur, IslemTip,
+    BaslikID, DetayID, RehberId, GirDepo, CikDepo, GerekliMiktar,
+    var Miktar, Degisemez=False, Barkod='', KaynakBaslik=0, KaynakSatir=0,
+    StokDurumDegis=True, UretimNo='0', IslemOp='E') : Boolean
+
+18 parametre. Form ShowModal ile acilir; sonuc iki kanaldan doner:
+  - fonksiyon sonucu  : ModalResult = mrOk mu
+  - "var Miktar"      : ekranin hesapladigi KALAN geri yazilir (giris+cikis parametre)
+mrOk DEGILSE form hemen Free edilir; mrOk ISE form CAGIRANDA yasar ve
+cagiran sonradan dlgIzlem.SatirID gibi alanlari doldurur.
+
+
+2. CAGRI YERLERI VE KULLANDIKLARI KOMBINASYON
+----------------------------------------------
+  # KAYNAK                       IslemTur          Tip Kaynak(Baslik,Satir) Ozel
+  1 UFaturaWizard 4075           FATBASLIK.TUR     TIPI  -            fatura satiri
+  2 UFatTransferWizard 805       FATBASLIK.TUR     TIPI  -            transfer
+  3 UBelgeDonusum 841            HedefBaslikTur    1     VAR          DONUSUM
+  4 UFisIrsaliyeAraDlg 216       FATBASTUR         1     -            sepetten
+  5 Utablo 2156 (BelgeDonustur)  HedefBaslikTur    1     -            (KOD OLU - blok yorumda)
+  6 UStokSayim 651               99 (sabit)        1     -            sayim
+  7 UStokSayim 978               99 (sabit)        1     -            sayim (satir bazli)
+  8 UUretimWizard 1699           Tur               1     -            Degisemez, UretimNo
+  9 UUretimEmriWizard 2090       Tur               1     -            Degisemez, UretimNo
+ 10 (UAnaForm 195 - bildirim)
+
+  NOT: 5 numarali cagri BelgeDonustur icindeki BLOK YORUMDA - calismiyor.
+       Donusumde izleme bugun UBelgeDonusum (3) uzerinden yapiliyor.
+
+
+3. MOD MATRISI - ekran hangi moda gore davraniyor
+--------------------------------------------------
+Belirleyici uc girdi var: IslemTur (belge turu), KaynakSatirID (>0 = donusum),
+IzlemTur (seri/lot/skt cesidi).
+
+3.1 GIRIS BELGELERI  (DigerGirisFisi 3, AlisFaturasi 11, AlisFisi 12,
+    AlisIrsaliyesi 10, Uretim_Urun, Gelen_Konsinye 109)
+    - Yeni seri/lot GIRILIR (kullanici yazar ya da barkod okutur)
+    - SEC kolonu GORUNMEZ; tum satirlar kaydedilir
+    - Kaynak sorgu: SQLGiren (DFM memo)
+
+3.2 CIKIS BELGELERI  (DigerCikisFisi 4, SatisFaturasi 15, SatisFisi 16,
+    SatisIrsaliyesi 14, Giden_Konsinye 119, StokTransferi 20, Uretim_Sarf)
+    - Depodaki MEVCUT seri/lot listelenir, kullanici SEC ile isaretler
+    - SEC ve DURUM kolonlari GORUNUR
+    - Kaynak sorgu: SQLCikan + SQLCikanUpdate
+
+3.3 DONUSUM  (KaynakSatirID > 0)
+    - Kaynak belgenin seri/lot kayitlari listelenir (depo degil)
+    - Kaynak sorgu: SQLDonusKaynak ya da SQLDonusCikanHedef +
+      SQLDonusCikanHedefUpdate
+    - SEC gorunur; DURUM gorunur
+
+3.4 SAYIM  (IslemTur = 99)
+    - Tum satirlar otomatik SEC=1 isaretlenir (`update <temp> set SEC=1`)
+    - SEC kolonu GORUNMEZ (secim yok)
+    - SERINO/LOTNO EDITLENEBILIR (tek istisna: `or (IslemTur = 99)`)
+    - Depo giris/cikisi YAPILMAZ (bkz. 6.3)
+
+3.5 URETIM  (UUretimWizard / UUretimEmriWizard)
+    - Degisemez=True gonderilir -> grid salt okunur, Kaydet pasif
+    - UretimNo parametresi lot uretiminde kullanilir
+
+
+4. IZLEM TURUNE GORE KOLON GORUNURLUGU  (izl_* sabitleri)
+----------------------------------------------------------
+  izl_Yok=0, izl_SeriNo=1, izl_LotNo=2, izl_SKT=3, izl_Karekod=4,
+  izl_LotNo_SKT=5, izl_SeriNo_LotNo=6
+
+  KOLON     GORUNUR                          EDITLENEBILIR
+  SERINO    1, 4, 6                          DURUM ve SEC gizliyken; ya da IslemTur=99
+  LOTNO     2, 5, 6                          SERINO ile ayni kural
+  SKT       1, 3, 5                          yalniz yeni satirda (dsInsert)
+  URT       SKT gorunur ise, ya da 2         yalniz yeni satirda
+  MIKTAR    2, 3, 5                          IzlemTur <> 1 (serinoda adet sabit 1)
+  DURUM     donusum ya da cikis belgesi      -
+  SEC       donusum ya da cikis belgesi      kullanici isaretler
+
+  Serino basligi IzlemTur'e gore degisir: 1 -> "Serino", 4 -> "Karekod".
+
+
+5. VERI KAYNAGI - GECICI TABLO + 7 GOMULU SORGU
+------------------------------------------------
+5.1 Gecici tablo
+    MSSQL : ##TmpIzleme_<SPID>_<yyyymmddhhnnsszzz>   (GLOBAL temp - ## )
+    PG    : tmpizleme_<SPID>_<zaman>                  (CREATE TEMP TABLE)
+    Kolonlar: ID, STOKID, SERINO, DURUM, KALAN, SEC, LOTNO, SKT, URT,
+              IZLEMID, BASLIKID, SATIRID, UPDID, SERILOTID
+    PG'de SEC smallint (bit yok) + UpdateMode upWhereKeyOnly (maprule
+    'sec'->boolean ile FireDAC WHERE'inin bozulmasini engellemek icin).
+
+5.2 DFM'e gomulu sorgular (TMemo) ve PG karsiliklari
+    SQLGiren                    / SQL_PG_IzlemGiren
+    SQLCikan                    / SQL_PG_IzlemCikan
+    SQLCikanUpdate              / SQL_PG_IzlemeCikanUpdate
+    SQLDonusKaynak              / SQL_PG_IzlemDonusKaynak
+    SQLDonusCikanHedef          / SQL_PG_IzlemDonusCikanHedef
+    SQLDonusCikanHedefUpdate    / SQL_PG_IzlemeDonusCikanHedefUpdate
+    SQLDonusCikanHedef_2        (DFM'de var, koddan CAGRILMIYOR - olu)
+
+5.3 Parametre gecisi
+    MSSQL: metin olarak uretilen "declare @StokID int, ... set @StokID=123"
+           on eki (KomutDeclare) + memo metni; ':TabloAdi' string replace ile
+           degistirilir. PARAMETRE BAGI YOK, hepsi metin birlestirme.
+    PG   : UDFMPG.IzlemePGKur(sabit, tabloAdi, stokId, izlemTur, baslikId,
+           satirId, islemTur, depo) - ayri, elle yazilmis PG sabitleri.
+    @DepoID: cikis belgelerinde CikDepo, digerlerinde GirDepo.
+
+
+6. YAZMA - EN KRITIK BOLUM
+---------------------------
+6.1 Kaydet dugmesi HICBIR SEY YAZMAZ
+    KaydetTusClick yalnizca: cikis miktar kontrolu + KALAN toplami hesapla +
+    Kaydedilebilir := True + ModalResult := mrOk.
+
+6.2 ASIL YAZMA FormDestroy ICINDE (136 satir)
+    Insert('G')  -> tum satirlar               (giris belgeleri)
+    Insert('C')  -> where SEC=1 and KALAN<>0   (cikis belgeleri)
+    Insert('D')  -> where ID=<n>               (donusum, satir bazli)
+    Her biri temp tablodan okuyup Tablo.IzlemBilgisiKaydet cagirir.
+    Kaydedilebilir=False ise: 'delete from STOKIZLEME where STOKID/BASLIKID/
+    SATIRID' ile onceki kayitlar SILINIR.
+
+6.3 IzlemBilgisiKaydet (Utablo.pas, 85 satir) ne yapar
+    - STOKSERILOT'ta ayni STOKID+SERINO+LOTNO var mi bakar; yoksa EKLER
+    - STOKIZLEME satiri yazar (BELGETUR, BASLIKID, SATIRID, IZLEMTUR, ADET,
+      KALAN, SERINO, LOTNO, SKT, URT, DONUSID, SERILOTID)
+    - STOKIZLEMEDEPO satiri yazar (IZLEMID, DEPOID, ADET) - ISARET KURALI:
+      * cikis belgeleri (4,14,15,16,99,119,20, Uretim_Sarf) -> CikDepo, negatif
+      * Giden_Konsinye / StokTransferi -> hem cikis hem giris satiri
+      * Gelen_Konsinye + IslemTip=2 (iade) -> konsinye deposundan cikis,
+        ana depoya giris
+      * IslemTur=99 (sayim) -> DEPO HAREKETI YOK
+      * StokDurumDegis=False (donusumde daha once irsaliye ile cikilmis)
+        -> depodan cikis YAPILMAZ
+
+6.4 DOKUNULAN TABLOLAR
+    STOKSERILOT      (seri/lot ana kayit - yoksa olusturulur)
+    STOKIZLEME       (belge satiri x seri/lot)
+    STOKIZLEMEDEPO   (depo hareketi)
+    STOKDURUMIZLEME  (yalniz OKUMA - cikis miktar kontrolunde)
+    STOKLAR, GENINI, KOCANAYARLARI (okuma)
+
+
+7. IS KURALLARI VE BUGUN NEREDE DURUYORLAR
+-------------------------------------------
+  KURAL                                        YER
+  Cikacak miktar depoda var mi                 KaydetTusClick / CikisMiktarKontrolEt
+  Ayni lot icin SKT/URT tutarsizligi           TabIzlemBeforePost (124 satir, soru sorar)
+  Seri no daha once kullanilmis mi             BuSeriNoKullanilmismiKontrolu
+  Secilen toplam = gerekli miktar mi           SayiGetir + LblKalanMiktar
+  Serinoda adet zorunlu 1                      FormShow (kolon editing)
+  Sayimda tum satirlar secili                  TempTabloOlustur (update SEC=1)
+  Raf omru -> SKT hesabi                       EditRafOmruClick
+  Barkod okuma / barkod tipi                   EditBarkodKeyUp, ComboBarkod*
+  Boyut (en/boy) degeri                        BoyutDegeriGetir, YeniBoyutOlustur
+  Lot no otomatik uretimi                      BtnLotNoVerClick
+  Toplu alma / araliktan uretme                Listedentoplualma1Click, Balamabitivererek1Click
+
+  Bu kurallarin HICBIRI sunucuda degil; her biri forma gomulu. Belge donusumu
+  SP'lerinde ayni kontrollerin (secilen adet = satir adedi, lotta yeterli kalan)
+  IKINCI KEZ yazilmasi bu yuzden gerekti.
+
+
+8. KIRILGANLIK ENVANTERI  (kanitli)
+------------------------------------
+K1  YAZMA FormDestroy'DA
+    Sonuc mrOk verildikten sonra, form yok edilirken yaziliyor. Hata olursa
+    kullaniciya anlamli mesaj verilemez, transaction sinirlanamaz, cagiran
+    "basarili" sanip devam eder. Rollback kavrami yok.
+
+K2  GLOBAL GECICI TABLO (##)
+    Sunucu kapsamli; ad SPID + milisaniye ile uretiliyor. Baglanti havuzunda
+    SPID yeniden kullanilinca cakisma riski; form dusmezse tablo sunucuda
+    kalir. Temizlik yalnizca FormDestroy'a bagli.
+
+K3  18 PARAMETRELI SOZLESME
+    9 farkli cagri yeri, her biri farkli kombinasyon. Hangi kombinasyonun
+    gecerli oldugu hicbir yerde yazili degil; ornegin RehberId cogu cagride 0,
+    UretimNo yalniz iki cagride anlamli, IslemOp yalniz fatura duzenlemede.
+
+K4  "var Miktar" - yan etkili parametre
+    Hem girdi hem cikti. Cagiran ekran kapandiktan sonra degeri okuyor.
+
+K5  SQL METIN BIRLESTIRME, PARAMETRE YOK
+    KomutDeclare "set @StokID=123" seklinde metin; 71 yerde SQL.Text/Add.
+    ':TabloAdi' StringReplace ile degistiriliyor.
+
+K6  IKI MOTOR IKI AYRI KOD YOLU
+    MSSQL DFM memo + KomutDeclare; PG icin elle yazilmis ayri sabitler
+    (UDFMPG.IzlemePGKur). Ayni mantigin iki kopyasi.
+
+K7  OLU KOD
+    - SQLDonusCikanHedef_2 memo'su DFM'de var, cagrilmiyor
+    - Utablo 2156'daki cagri blok yorum icinde
+    - FormDestroy ve TempTabloOlustur icinde genis yorum-blogu kalintilari
+
+K8  MOD SAYISI x KOLON KURALI KOMBINASYONU TEST EDILEMEZ HALDE
+    5 mod (giris/cikis/donusum/sayim/uretim) x 6 izlem turu x kolon
+    gorunurluk/editlenebilirlik kurallari forma dagilmis; hicbiri tek yerde
+    ifade edilmiyor.
+
+K9  SAYIM AYNI EKRANDA AMA SEMANTIGI FARKLI
+    IslemTur=99 icin ozel dallar: otomatik SEC=1, SERINO editlenebilir, depo
+    hareketi yok, negatif fark hesabi. Ayri bir is akisinin ayni forma
+    sikistirilmis hali.
+
+K10 HATA HALINDE TEMIZLIK "DELETE"
+    Kaydedilebilir=False ise STOKIZLEME'den STOKID+BASLIKID+SATIRID ile
+    siliniyor - transaction yerine telafi silme.
+
+
+9. DOGRULANMASI GEREKENLER (yeniden tasarim oncesi)
+----------------------------------------------------
+D1  SQLGiren / SQLCikan / SQLDonus* sorgularinin TAM metni ve ne dondurdukleri
+    (DFM'den cikarilip belgelenmeli; kalan/durum hesabinin kaynagi bunlar).
+D2  STOKIZLEMEDEPO isaret kurallari: hangi belge turunde kac satir yaziliyor
+    (canli veriden dogrulanmali - 6.3'teki liste koddan okundu).
+D3  IslemTip'in anlami (2 = iade konsinye disinda nerede kullaniliyor).
+D4  UretimNo'nun lot uretimindeki rolu.
+D5  Sayim modunun negatif fark hesabi - ayri is akisi mi olmali.
+D6  DONUSID zinciri: donusumde kaynak izlem kaydina baglanti nasil kuruluyor,
+    kismi donusumde ne oluyor (yeni SP'de kalan dusumunu TG_IzlemOrjinalYap
+    trigger'inin yaptigini tespit etmistik - burada da ayni mi).
