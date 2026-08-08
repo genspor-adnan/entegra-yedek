@@ -300,31 +300,48 @@ BEGIN
           AND NOT EXISTS (SELECT 1 FROM #DonusumIzlemeSecim I WHERE I.SatirId = S.SatirId);
         SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
 
-        -- Secilen seri/lot adetleri istenen adetle tutmali
-        INSERT #DonusumUyari (Kod, KaynakSatirId, Mesaj)
-        SELECT N'IZLEME_ADET_UYUMSUZ', S.SatirId,
-               N'Secilen seri/lot toplami (' + CAST(CAST(T.Toplam AS decimal(18,3)) AS nvarchar(30))
-             + N') satir adediyle (' + CAST(CAST(S.IstenenAdet AS decimal(18,3)) AS nvarchar(30))
-             + N') ayni degil.'
-        FROM #DonusumKaynakSatir S
-             CROSS APPLY (SELECT Toplam = SUM(I.Adet) FROM #DonusumIzlemeSecim I
-                           WHERE I.SatirId = S.SatirId) T
-        WHERE ISNULL(S.Durum, N'') <> N'atlandi'
-          AND ISNULL(S.Izleme, 0) > 0
-          AND T.Toplam IS NOT NULL
-          AND ABS(T.Toplam - S.IstenenAdet) > 0.0001;
-        SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
+        -- ---- Secim dogrulamasi ORTAK SP'DEN ----
+        --   'Secilen adet = satir adedi' ve 'lotta yeterli kalan var mi'
+        --   kontrolleri burada IKINCI KEZ yaziliyordu. Artik izleme ekraniyla
+        --   AYNI nesne kullaniliyor: sp_Prog_Izleme_Dogrula_Json (A3).
+        --   Boylece ekran ile donusum ayni kurali uygular; biri degisince
+        --   digeri geride kalmaz.
+        DECLARE @Sorun TABLE (KOD NVARCHAR(30), SERILOTID INT NULL, MESAJ NVARCHAR(400));
+        DECLARE @dSatir INT, @dStok INT, @dIzleme INT, @dAdet DECIMAL(18,6), @dJson NVARCHAR(MAX);
 
-        -- Secilen STOKIZLEME kaydinda o kadar kalan var mi
-        INSERT #DonusumUyari (Kod, KaynakSatirId, Mesaj)
-        SELECT N'IZLEME_KALAN_YETERSIZ', I.SatirId,
-               N'Secilen seri/lot kaydinda yeterli kalan yok (mevcut: '
-             + CAST(CAST(ISNULL(SI.KALAN, 0) AS decimal(18,3)) AS nvarchar(30))
-             + N', istenen: ' + CAST(CAST(I.Adet AS decimal(18,3)) AS nvarchar(30)) + N').'
-        FROM #DonusumIzlemeSecim I
-             LEFT JOIN STOKIZLEME SI WITH (UPDLOCK, HOLDLOCK) ON SI.ID = I.StokIzlemeId
-        WHERE SI.ID IS NULL OR ISNULL(SI.KALAN, 0) + 0.0001 < I.Adet;
-        SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
+        DECLARE cd CURSOR LOCAL FAST_FORWARD FOR
+            SELECT S.SatirId, S.UrunId, ISNULL(S.Izleme, 0), S.IstenenAdet
+            FROM #DonusumKaynakSatir S
+            WHERE ISNULL(S.Durum, N'') <> N'atlandi' AND ISNULL(S.Izleme, 0) > 0;
+        OPEN cd; FETCH NEXT FROM cd INTO @dSatir, @dStok, @dIzleme, @dAdet;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @dJson =
+                N'{"mod":"donusum","donusumTuru":' + CAST(@DonusumTuru AS nvarchar(10))
+              + N',"stokId":' + CAST(ISNULL(@dStok, 0) AS nvarchar(12))
+              + N',"izlemTur":' + CAST(@dIzleme AS nvarchar(10))
+              + N',"gerekliAdet":' + CAST(@dAdet AS nvarchar(30))
+              + N',"kaynak":{"baslikId":0,"satirId":' + CAST(@dSatir AS nvarchar(12)) + N'}'
+              + N',"secim":'
+              -- DIKKAT: #DonusumIzlemeSecim KAYNAK STOKIZLEME.ID tutar, dogrulama
+              --   SP'si ise SERILOTID bekler. Cevrim burada yapiliyor.
+              + ISNULL((SELECT serilotId = SI.SERILOTID, adet = I.Adet
+                        FROM #DonusumIzlemeSecim I
+                             INNER JOIN STOKIZLEME SI ON SI.ID = I.StokIzlemeId
+                        WHERE I.SatirId = @dSatir
+                        FOR JSON PATH), N'[]') + N'}';
+
+            DELETE @Sorun;
+            INSERT @Sorun (KOD, SERILOTID, MESAJ)
+            EXEC dbo.sp_Prog_Izleme_Dogrula_Json @dJson;
+
+            INSERT #DonusumUyari (Kod, KaynakSatirId, Mesaj)
+            SELECT KOD, @dSatir, MESAJ FROM @Sorun;
+            SET @HataSayisi = @HataSayisi + @@ROWCOUNT;
+
+            FETCH NEXT FROM cd INTO @dSatir, @dStok, @dIzleme, @dAdet;
+        END
+        CLOSE cd; DEALLOCATE cd;
 
         IF @HataSayisi > 0 RETURN;
     END
