@@ -18,8 +18,13 @@
 --              USTTABLOID, USTKAYITID, TABLOID, KAYITID, REHBERID, STOKID, BILGI
 --   ISLEMTIPI / ALTISLEMTIPI = 0 (liSil). MODUL yazilmaz (TABLOLAR.MODUL'den gelir).
 --   USTTABLOID/USTKAYITID verilmezse kaydin kendisi (ULog ile ayni).
---   REHBERID/STOKID verilmezse kart tipinden turetilir: 71/73/74 -> REHBERID,
---              88 -> STOKID; kartin KENDISI ise KAYITID, altindaki DETAY ise USTKAYITID.
+--   REHBERID/STOKID: ULog.LogKayitSil ile ayni sira ile bulunur -
+--              1) cagirandan geldiyse o,
+--              2) SATIRIN KENDI kolonundan (REHBERID/CARIID, STOKID/URUNID) -
+--                 ULog.LogVarlikIDleri'nin yaptigi is; UInfo ekraninda cari/stok
+--                 KOD-AD cozumlemesi buna bagli,
+--              3) kart tipinden turetme: 71/73/74 -> REHBERID, 88 -> STOKID
+--                 (kartin KENDISI ise KAYITID, altindaki DETAY ise USTKAYITID).
 --   BILGI    : COMPRESS(CAST(<json> AS nvarchar(max)))  (ULog.DbLogBilgiYaz)
 --
 -- BILGI JSON (ULog.LogKayitSil kurali): satirin tum kolonlari; NULL/bos olanlar
@@ -160,6 +165,38 @@ BEGIN
 
     DECLARE @IdVar BIT = CASE WHEN EXISTS (SELECT 1 FROM sys.columns WHERE object_id = @oid AND name = 'ID')
                               THEN 1 ELSE 0 END;
+
+    -- Satirin KENDI varlik kolonlari (ULog.LogVarlikIDleri ile ayni oncelik).
+    --   Bunlar olmadan UInfo silme satirinda cari/stok KOD-AD cozulemiyordu.
+--   Tablo iki kolonu da tasiyabilir (FATURA'da hem STOKID hem URUNID var) ve
+--   biri NULL olabilir -> ULog gibi SIRAYLA denenir, ilk dolu olan alinir.
+--   NOT: COALESCE tek argumanla SOZDIZIMI HATASI verir -> kolon sayisi 1 ise
+--   sarmalanmaz, 0 ise NULL yazilir.
+    DECLARE @RehIfade NVARCHAR(400), @StkIfade NVARCHAR(400);
+    DECLARE @RehLst NVARCHAR(400) =
+        (SELECT STRING_AGG(N'NULLIF(CAST(' + QUOTENAME(x.name) + N' AS bigint), 0)', N', ')
+                  WITHIN GROUP (ORDER BY x.sira)
+           FROM (SELECT c.name, sira = CASE c.name WHEN 'REHBERID' THEN 0 ELSE 1 END
+                   FROM sys.columns c
+                  WHERE c.object_id = @oid AND c.name IN ('REHBERID','CARIID')) x);
+    DECLARE @StkLst NVARCHAR(400) =
+        (SELECT STRING_AGG(N'NULLIF(CAST(' + QUOTENAME(x.name) + N' AS bigint), 0)', N', ')
+                  WITHIN GROUP (ORDER BY x.sira)
+           FROM (SELECT c.name, sira = CASE c.name WHEN 'STOKID' THEN 0 ELSE 1 END
+                   FROM sys.columns c
+                  WHERE c.object_id = @oid AND c.name IN ('STOKID','URUNID')) x);
+    -- Kolon SAYISI ile karar ver: uretilen ifade zaten virgul iceriyor
+    --   (NULLIF(..., 0)), o yuzden virgul saymak YANLIS olur.
+    DECLARE @RehAdet INT = (SELECT COUNT(*) FROM sys.columns c
+                             WHERE c.object_id = @oid AND c.name IN ('REHBERID','CARIID'));
+    DECLARE @StkAdet INT = (SELECT COUNT(*) FROM sys.columns c
+                             WHERE c.object_id = @oid AND c.name IN ('STOKID','URUNID'));
+    SET @RehIfade = CASE WHEN @RehAdet = 0 THEN N'NULL'
+                         WHEN @RehAdet = 1 THEN @RehLst
+                         ELSE N'COALESCE(' + @RehLst + N')' END;
+    SET @StkIfade = CASE WHEN @StkAdet = 0 THEN N'NULL'
+                         WHEN @StkAdet = 1 THEN @StkLst
+                         ELSE N'COALESCE(' + @StkLst + N')' END;
     DECLARE @KayitIfade NVARCHAR(100) = CASE WHEN @IdVar = 1 THEN N'CAST([ID] AS bigint)' ELSE N'CAST(0 AS bigint)' END;
 
     DECLARE @Where NVARCHAR(MAX) =
@@ -190,8 +227,10 @@ SELECT @pIp, @pIst, @pKul, @pSub, 0, 0,
        @pUstT,
        CASE WHEN ISNULL(@pUstId,0) = 0 THEN ' + @KayitIfade + N' ELSE @pUstId END,
        @pTabNo, ' + @KayitIfade + N',
-       CASE WHEN @pRehKendi = 1 THEN ' + @KayitIfade + N' ELSE @pReh END,
-       CASE WHEN @pStkKendi = 1 THEN ' + @KayitIfade + N' ELSE @pStk END,
+       NULLIF(CASE WHEN @pRehKendi = 1 THEN ' + @KayitIfade + N'
+                   ELSE COALESCE(@pReh, ' + @RehIfade + N') END, 0),
+       NULLIF(CASE WHEN @pStkKendi = 1 THEN ' + @KayitIfade + N'
+                   ELSE COALESCE(@pStk, ' + @StkIfade + N') END, 0),
        COMPRESS(CAST(N''{'' + ISNULL(STUFF(' + @Parca + N', 1, 1, N''''), N'''') + N''}'' AS nvarchar(max)))
 FROM ' + QUOTENAME(OBJECT_SCHEMA_NAME(@oid)) + N'.' + QUOTENAME(OBJECT_NAME(@oid)) + N'
 WHERE ' + @Where + N';

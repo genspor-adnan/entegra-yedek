@@ -1,13 +1,11 @@
-﻿x	BelgeId	Satir
+﻿x	TABLOID	KAYITID	REHBERID	STOKID
 --------------------------------------------------------------------------------
-Silinecek belge	114025	4
-Sonuc
+YENI SILME LOGU	29	114043	3520	
+YENI SILME LOGU	132	3557522	3520	1577
+x	TABLOID	KAYITID	REHBERID	STOKID
 --------------------------------------------------------------------------------
-{"Sonuc":1,"BelgeId":114025,"Tur":15,"SilinenSatir":4,"Loglanan":9}
-x	Baslik	Satir
---------------------------------------------------------------------------------
-Tran ici durum	0	0
-x	Baslik
---------------------------------------------------------------------------------
-Rollback sonrasi	1
+ESKI EKLEME LOGU	29	114043	3520	
+ESKI EKLEME LOGU	330	3557522	3520	1577
+ESKI EKLEME LOGU	29	114043	3520	
+ESKI EKLEME LOGU	132	3557522	3520	1577
 

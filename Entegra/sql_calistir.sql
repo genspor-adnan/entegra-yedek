@@ -1,23 +1,18 @@
 ﻿SET NOCOUNT ON;
 SET XACT_ABORT ON;
--- Delphi'nin cagiracagi sekilde: sp_Api_Belge_Sil_Json (Oturum ile)
-DECLARE @id INT = (SELECT TOP 1 FB.ID FROM FATBASLIK FB
-  WHERE EXISTS(SELECT 1 FROM FATURA F WHERE F.FATBASID=FB.ID) AND ISNULL(FB.EFATURADURUM,0)=0
-    AND FB.TUR=15 ORDER BY FB.ID DESC);
-SELECT 'Silinecek belge' AS x, @id AS BelgeId,
-  (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@id) AS Satir;
+DECLARE @depo sysname = dbo.fn_Api_DepoDBAdi();
 BEGIN TRAN;
-DECLARE @j NVARCHAR(MAX) = N'{"BelgeId":' + CAST(@id AS varchar(20)) + N',"Oturum":{"KulId":2,"SubeId":-1}}';
-BEGIN TRY
-  EXEC dbo.sp_Api_Belge_Sil_Json @j;
-END TRY
-BEGIN CATCH
-  SELECT 'RED' AS x, ERROR_NUMBER() AS No, LEFT(ERROR_MESSAGE(),120) AS Mesaj;
-END CATCH
-IF @@TRANCOUNT > 0
-BEGIN
-  SELECT 'Tran ici durum' AS x, (SELECT COUNT(*) FROM FATBASLIK WHERE ID=@id) AS Baslik,
-         (SELECT COUNT(*) FROM FATURA WHERE FATBASID=@id) AS Satir;
-  ROLLBACK;
-END
-SELECT 'Rollback sonrasi' AS x, (SELECT COUNT(*) FROM FATBASLIK WHERE ID=@id) AS Baslik;
+DECLARE @n INT;
+EXEC dbo.sp_Api_Log_Yaz_Ic @Tablo='FATBASLIK', @KayitId=114043, @TabNo=29, @UstTabNo=29, @UstId=114043,
+     @KulId=2, @Istasyon='REHTEST4', @Yazilan=@n OUTPUT;
+EXEC dbo.sp_Api_Log_Yaz_Ic @Tablo='FATURA', @Kosul=N'FATBASID = @pB', @KosulPar=114043, @TabNo=132,
+     @UstTabNo=29, @UstId=114043, @KulId=2, @Istasyon='REHTEST4', @Yazilan=@n OUTPUT;
+EXEC dbo.sp_Api_Log_Yaz_Ic @Tablo='STOKIZLEME', @Kosul=N'BASLIKID = @pB', @KosulPar=114043, @TabNo=367,
+     @UstTabNo=29, @UstId=114043, @KulId=2, @Istasyon='REHTEST4', @Yazilan=@n OUTPUT;
+DECLARE @s NVARCHAR(MAX) = N'
+SELECT ''YENI SILME LOGU'' AS x, TABLOID, KAYITID, REHBERID, STOKID FROM [' + @depo + N'].dbo.ISLEMLOG
+ WHERE ISTASYON=''REHTEST4'' ORDER BY ID;
+SELECT ''ESKI EKLEME LOGU'' AS x, TABLOID, KAYITID, REHBERID, STOKID
+ FROM [' + @depo + N'].dbo.ISLEMLOG WHERE USTKAYITID=114043 AND ISLEMTIPI=1 ORDER BY ID;';
+EXEC sp_executesql @s;
+ROLLBACK;
