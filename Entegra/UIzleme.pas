@@ -144,6 +144,9 @@ type
     //   ulasir - bugun yazma form yok edilirken oldugundan hata yutuluyordu.
     YalnizSecim : Boolean;
     SecimJson   : string;   // [{"kaynakIzlemId":n,"serilotId":n,"adet":x}, ...]
+    // Giris belgesi mi (alis/uretim urun/gelen konsinye): seri-lot DAIMA
+    //   yazilabilir ve satir eklenebilir. FormShow'da belirlenir.
+    FGirisBelgesi : Boolean;
   end;
 
 var
@@ -217,9 +220,22 @@ begin
 //  GridFatIzlemViewLOTNO.Options.Editing := (GridFatIzlemViewLOTNO.Visible)and(not GridFatIzlemViewDURUM.Visible);
 //  GridFatIzlemViewSKT.Options.Editing:= (GridFatIzlemViewSKT.Visible)and(not GridFatIzlemViewDURUM.Visible);
 // üretim veya sayım ise giriş yapılabilir
-  GridFatIzlemViewSERINO.Options.Editing := ((not GridFatIzlemViewDURUM.Visible)and(not GridFatIzlemViewSEC.Visible)) or (IslemTur = 99);
+  // ---- GIRIS BELGESINDE SERI/LOT DAIMA YAZILABILIR (08.08.2026) ----
+  //   Mal ALINIRKEN seri/lot numarasi ilk kez BURADA olusur - tedarikcinin
+  //   irsaliyesindeki lot elle girilir. Belge donusumle gelmis olsa bile
+  //   (or. alis irsaliyesi -> alis faturasi) kullanicinin lot yazabilmesi
+  //   gerekir: kaynakta olmayan bir lot eklenebilir ya da adi duzeltilebilir.
+  //   Eski kural donusumde (KaynakSatirID > 0) alani kilitliyordu; cikista
+  //   dogru (var olan lottan secilir) ama GIRISTE yanlisti.
+  FGirisBelgesi :=
+        IslemTur in [KasaTur_DigerGirisFisi, KasaTur_AlisIrsaliyesi,
+                     KasaTur_AlisFaturasi, KasaTur_AlisFisi,
+                     KasaTur_Uretim_Urun, KasaTur_Gelen_Konsinye];
+
+  GridFatIzlemViewSERINO.Options.Editing := FGirisBelgesi or
+        ((not GridFatIzlemViewDURUM.Visible)and(not GridFatIzlemViewSEC.Visible));
   GridFatIzlemViewLOTNO.Options.Editing  := GridFatIzlemViewSERINO.Options.Editing;
-  if tabizlem.state <> dsInsert then begin
+  if (tabizlem.state <> dsInsert) and (not FGirisBelgesi) then begin
      GridFatIzlemViewSKT.Options.Editing    := False;  //GridFatIzlemViewSERINO.Options.Editing;
      GridFatIzlemViewURT.Options.Editing    := False;  //GridFatIzlemViewSERINO.Options.Editing;
   end;
@@ -229,7 +245,9 @@ begin
      GridFatIzlemViewSERINO.Caption := 'Karekod';
 
   //seçim kolonu varsa ekle sil butonları görünmez
-  EkleTus.visible := not GridFatIzlemViewSEC.Visible;
+  //   ISTISNA: giris belgesinde SEC gorunse de satir eklenebilmeli - yeni lot
+  //   ancak boyle girilir (mal alinirken lot ILK KEZ burada olusur).
+  EkleTus.visible := (not GridFatIzlemViewSEC.Visible) or FGirisBelgesi;
   SilTus.visible := EkleTus.visible;
   BtnTopluSerino.visible := not GridFatIzlemViewSEC.Visible;
   //satır ekleme yada silmeyi istemediğimiz durumlar..
@@ -726,7 +744,8 @@ end;
 
 procedure TIzlemeDlg.DtsIzlemStateChange(Sender: TObject);
 begin
-  EkleTus.Visible := (DtsIzlem.State = dsBrowse)and(not GridFatIzlemViewSEC.Visible);
+  EkleTus.Visible := (DtsIzlem.State = dsBrowse)
+                     and((not GridFatIzlemViewSEC.Visible) or FGirisBelgesi);
   SilTus.Visible  := (DtsIzlem.State = dsBrowse)and(not GridFatIzlemViewSEC.Visible);
   KaydetBtn.Visible := DtsIzlem.State in [dsEdit,dsInsert];
   IptalBtn.Visible := DtsIzlem.State in [dsEdit,dsInsert];
@@ -1415,7 +1434,12 @@ begin
         // GIRIS kipinde SEC kolonu gorunmez ve isaretlenmez; oradaki her satir
         //   kullanicinin girdigi/onayladigi lottur. CIKIS ve DONUSUMDE yalniz
         //   isaretliler alinir.
-        if ((TabIzlem.FieldByName('SEC').AsBoolean) or (not GridFatIzlemViewSEC.Visible))
+        // ISTISNA: SERILOTID'si olmayan satir kullanicinin ELLE EKLEDIGI yeni
+        //   lottur (giris belgesinde SEC gorunse bile isaretlenmemis olabilir).
+        //   Onu atlarsak kullanici lotu yazar ama kaydolmaz.
+        if ((TabIzlem.FieldByName('SEC').AsBoolean)
+            or (not GridFatIzlemViewSEC.Visible)
+            or (TabIzlem.FieldByName('SERILOTID').AsInteger <= 0))
            and (LAdet > 0) then
         begin
           LSatir := TJSONObject.Create
