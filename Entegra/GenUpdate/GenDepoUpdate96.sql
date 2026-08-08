@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate96.sql
 -- IZLEME EKRANI - ADIM A1: sp_Prog_Izleme_Aday_Json
 --
@@ -112,7 +112,11 @@ BEGIN
              LEFT JOIN @Secili S ON S.SERILOTID = SI.SERILOTID
         WHERE SI.SATIRID = @KaynakSatir
           AND SI.BASLIKID = ISNULL(NULLIF(@KaynakBaslik, 0), SI.BASLIKID)
-          AND ABS(ISNULL(SI.KALAN, 0)) > 0.0001
+          -- Tukenmis (KALAN=0) kaynak kayitlari gizlenir - onlardan tasinacak
+          --   bir sey yok. ISTISNA: hedefte ZATEN SECILI olan lot, kaynagi
+          --   tukenmis olsa da listede kalmali; aksi halde kullanici kendi
+          --   secimini goremez ve yanlislikla siler. (H1 dalinda ayni kural.)
+          AND (ABS(ISNULL(SI.KALAN, 0)) > 0.0001 OR S.SERILOTID IS NOT NULL)
         ORDER BY SSL.SKT, SSL.LOTNO, SSL.SERINO;
     END
     ELSE
