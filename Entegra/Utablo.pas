@@ -931,7 +931,10 @@ type
       const ASatirlarJson: string = ''): Integer;
     // Sunucu "IZLEME_SECIMI_EKSIK" dediginde etkilenen satirlar icin izleme
     //   ekranini acar ve satirlar[] JSON'unu uretir ('' = kullanici vazgecti).
-    function DonusumIzlemSecimiSor(const ASonucJson: string): string;
+    //   AVazgecildi: kullanici ekrani IPTAL etti. False donup sonuc da bos
+    //   ise SORULACAK SATIR BULUNAMAMISTIR - bu sessizce gecilmemeli.
+    function DonusumIzlemSecimiSor(const ASonucJson: string;
+      out AVazgecildi: Boolean): string;
     // Donusum sonucundaki Uyarilar[] dizisinin mesajlarini alt alta metne cevirir;
     //   uyari yoksa Mesaj alanini doner.
     function DonusumUyariMetni(const ASonucJson: string): string;
@@ -3075,7 +3078,8 @@ end;
 //   belgeyi IKINCI KEZ URETMEZ, onceki sonucu doner (baglanti koptu / kullanici
 //   iki kez tikladi senaryolari).
 // ============================================================
-function TTablo.DonusumIzlemSecimiSor(const ASonucJson: string): string;
+function TTablo.DonusumIzlemSecimiSor(const ASonucJson: string;
+  out AVazgecildi: Boolean): string;
 // Sunucu, siparis kaynakli izlemeli satirlarda "IZLEME_SECIMI_EKSIK" doner:
 //   SIPARIS stok hareketi yapmaz, STOKIZLEME kaydi yoktur - seri/lot DEPODAN
 //   secilmelidir ve bunu ancak kullanici yapabilir.
@@ -3095,6 +3099,7 @@ var
   LGorulen: TStringList;
 begin
   Result := '';
+  AVazgecildi := False;
   LKok := TJSONObject.ParseJSONValue(ASonucJson) as TJSONObject;
   if LKok = nil then Exit;
   LSatirlar := TJSONArray.Create;
@@ -3119,13 +3124,21 @@ begin
 
         // Satirin urun/izleme/adet bilgisi ve deposu kaynaktan okunur.
         //   Depo yonu hedefe gore: giriste GIRISDEPO, cikista CIKISDEPO.
+        // IZLEME URUN KARTINDAN okunur. SIPARISDETAY.IZLEME cogu kayitta NULL
+        //   (or. stok talebi satirlari); oradan okuyunca izlem turu 0 cikiyor,
+        //   satir atlaniyor, secim listesi bos kaliyor ve donusum SESSIZCE
+        //   hicbir sey yapmadan donuyordu - "transfere donustur calismadi"
+        //   (08.08.2026). Dogrulama SP'si de STOKLAR.IZLEME kullaniyor;
+        //   iki taraf ayni kaynaga baksin.
         TablodanSorguAc(1,
-          'select SD.URUNID, SD.IZLEME, ADET=SD.ADET-isnull((select sum(ADET) from FATURA ' +
+          'select SD.URUNID, IZLEME=coalesce(nullif(SD.IZLEME,0), ST.IZLEME, 0),' +
+          ' ADET=SD.ADET-isnull((select sum(ADET) from FATURA ' +
           ' where YERID=SD.ID and YERI in (select DonusumTuru from dbo.fn_Prog_BelgeDonusum_Rota()' +
           ' where KaynakDetayTablo=''SIPARISDETAY'')),0), DEPO=' +
           IfThen(LGirisHedef, 'isnull(S.GIRISDEPO, S.CIKISDEPO)',
                               'isnull(S.CIKISDEPO, S.GIRISDEPO)') +
-          ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID where SD.ID=' +
+          ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID' +
+          ' left join STOKLAR ST on ST.ID=SD.URUNID where SD.ID=' +
           IntToStr(LSatirId));
         if Query1.IsEmpty then Continue;
         LStokId   := Query1.FieldByName('URUNID').AsInteger;
@@ -3156,7 +3169,10 @@ begin
           LDlg.KALAN          := LAdet;
           LDlg.StokDurumDegis := True;
           LDlg.ShowModal;
-          if (LDlg.ModalResult <> mrOk) or (Trim(LDlg.SecimJson) = '') then Exit;  // vazgecildi
+          if (LDlg.ModalResult <> mrOk) or (Trim(LDlg.SecimJson) = '') then begin
+            AVazgecildi := True;   // kullanici IPTAL etti
+            Exit;
+          end;
 
           LSecim := TJSONObject.ParseJSONValue(LDlg.SecimJson) as TJSONArray;
           if LSecim = nil then Exit;
@@ -3317,10 +3333,18 @@ begin
     //   tekrar gonder (stok yetersizligindeki desenin aynisi).
     if Pos('"kod":"IZLEME_SECIMI_EKSIK"', LSonuc) > 0 then
     begin
-      var LSatirlar: string := DonusumIzlemSecimiSor(LSonuc);
+      var LVazgecildi: Boolean;
+      var LSatirlar: string := DonusumIzlemSecimiSor(LSonuc, LVazgecildi);
       if LSatirlar = '' then
       begin
-        Result := 0;    // kullanici vazgecti - sessiz cik, uyari zaten gorulmustu
+        // Vazgecildiyse sessiz cik. Vazgecilmediyse SORULACAK SATIR
+        //   BULUNAMAMISTIR (or. satirin izlem turu okunamadi) - bu durumda
+        //   sunucunun uyarisi gosterilmeli, yoksa kullaniciya hicbir sey
+        //   olmamis gibi gorunur.
+        if not LVazgecildi then
+          Application.MessageBox(PWideChar(DonusumUyariMetni(LSonuc)),
+                                 PWideChar(Uyari), MB_ICONWARNING or MB_OK);
+        Result := 0;
         Exit;
       end;
       LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False,
