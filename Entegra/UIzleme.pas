@@ -1001,16 +1001,23 @@ begin
 
     if TGirisKutusuEx.BilgiAlEx('Seri No listesi', ctrls) = mrOk then begin
       if Trim(VarToStr(MemoYorum))<>'' then begin //eğer yorum düzenlenebiliyorsa
-         memo1.Text := Trim(VarToStr(MemoYorum));
-         for I := 0 to memo1.Lines.Count-1 do
-           if trim(memo1.lines[I])<>'' then begin
-              Degerler := IntToStr(StokId)+','''+ trim(memo1.lines[I])+'''';
-              if GridFatIzlemViewLOTNO.Visible then
-                 Degerler := Degerler + ','''+ VarToStr(LotNo)  +'''';
-              Degerler := Degerler + ','''+FormatDateTime('yyyy-mm-dd', SKT)+''','''+FormatDateTime('yyyy-mm-dd', URT)+''',1,1.0';
-              Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into '+TabloAdi+
-                    '('+Alanlar+')values('+Degerler+')', [], []);
-           end;
+         // Metni satirlara bolmek icin formda GORUNMEZ bir TMemo (Memo1)
+         //   tutuluyordu; yerine yerel TStringList kullaniliyor. (08.08.2026)
+         Liste := TStringList.Create;
+         try
+           Liste.Text := Trim(VarToStr(MemoYorum));
+           for I := 0 to Liste.Count-1 do
+             if trim(Liste[I])<>'' then begin
+                Degerler := IntToStr(StokId)+','''+ trim(Liste[I])+'''';
+                if GridFatIzlemViewLOTNO.Visible then
+                   Degerler := Degerler + ','''+ VarToStr(LotNo)  +'''';
+                Degerler := Degerler + ','''+FormatDateTime('yyyy-mm-dd', SKT)+''','''+FormatDateTime('yyyy-mm-dd', URT)+''',1,1.0';
+                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into '+TabloAdi+
+                      '('+Alanlar+')values('+Degerler+')', [], []);
+             end;
+         finally
+           Liste.Free;
+         end;
          TabloYenile(TabIzlem, []);
       end;
     end;
