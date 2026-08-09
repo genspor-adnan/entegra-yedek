@@ -656,6 +656,9 @@ type
     // Siparis SILME on-kontrolu (server-side sp_Prog_Siparis_Silinebilir_Mi). ASatirID>0 tek
     //   SIPARISDETAY; =0 ASiparisID altindaki tum satirlar. True=silinebilir. Donusumde uyari.
     function SiparisSilinebilirMi(ASiparisID, ASatirID: Integer): Boolean;
+    // Teklif SILME on-kontrolu (sp_Prog_Teklif_Silinebilir_Mi). Siparise
+    //   donusturulmus teklif silinemez - zincir kopmasin.
+    function TeklifSilinebilirMi(ATeklifID, ASatirID: Integer): Boolean;
     procedure IzlemBilgileriniDuzenle(IslemOp:char; FATBASLIK, FATURA:TFDQuery; Degisemez:Boolean = False);
     Function EAN13Hesapla( Bar12Hane:String ):String;
     procedure F_Tuslari(Ekran: string; Key: Word; DBNavigator1: TDBNavigator);
@@ -5097,6 +5100,35 @@ begin
     if (not Q.Eof) and (Q.FieldByName('SILINEBILIR').AsInteger = 0) then begin
       Result := False;
       UyariGoster(Uyari, DonusumYapilmis);   // siparis'te tek SP engeli: DONUSUM
+    end;
+  finally
+    Q.Free;
+  end;
+end;
+
+function TTablo.TeklifSilinebilirMi(ATeklifID, ASatirID: Integer): Boolean;
+// Teklif siparise donusturulmusse SILINEMEZ.
+//   Teklif tarafinda bu kontrol HIC YOKTU (siparis ve faturada vardi):
+//   donusmus teklif silinip zincir kopabiliyordu - teklif 1045, 09.08.2026.
+//   Kural sunucuda ve kodlari ROTA MATRISINDEN okuyor.
+var
+  Q: TFDQuery;
+begin
+  Result := True;
+  if (ATeklifID <= 0) and (ASatirID <= 0) then Exit;
+
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := FDCnn;
+    Q.SQL.Text := 'exec dbo.sp_Prog_Teklif_Silinebilir_Mi :TeklifID, :SatirID';
+    if AktifVeriMotor = vmPG then
+      Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
+    Q.ParamByName('TeklifID').AsInteger := ATeklifID;
+    Q.ParamByName('SatirID').AsInteger := ASatirID;
+    Q.Open;
+    if (not Q.Eof) and (Q.FieldByName('SILINEBILIR').AsInteger = 0) then begin
+      Result := False;
+      UyariGoster(Uyari, DonusumYapilmis);
     end;
   finally
     Q.Free;

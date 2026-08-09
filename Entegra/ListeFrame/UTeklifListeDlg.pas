@@ -301,6 +301,14 @@ end;
 
 Function TeklifSilmeIslemi(TabTeklif:TFDQuery):Boolean;
 begin
+   Result := False;
+   // DONUSUM KONTROLU (09.08.2026): siparise donusturulmus teklif SILINEMEZ.
+   //   Bu kontrol teklif tarafinda HIC YOKTU - siparis ve faturada vardi.
+   //   Teklif 1045 donusmus oldugu halde silinebiliyordu, zincir kopuyordu.
+   //   Mesaji Tablo.TeklifSilinebilirMi gosterir.
+   if not Tablo.TeklifSilinebilirMi(TabTeklif.FieldByName('ID').AsInteger, 0) then
+      Exit;
+
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
       //bu teklifte onaylama varsa onun yay?n? vard?r onu da silmek gerekir, bunun ii?in ?imdi onaylayacak k?sma s?f?r koyar?z..
       Tablo.OnayYayinIslemleri('TEKLIF',TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger, 1, 0, -18);
