@@ -678,6 +678,7 @@ object CekDlg: TCekDlg
     Top = 408
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 224
     Top = 50
     object BaskiOnizlemeMenu: TMenuItem

@@ -679,13 +679,16 @@ object HesapPlaniDlg: THesapPlaniDlg
     Top = 137
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenu1Popup
     Left = 581
     Top = 239
     object PasifleriGster1: TMenuItem
       Caption = 'G'#246'r'#252'n'#252'm'
+      ImageIndex = 12
       object Pasifler1: TMenuItem
         Caption = 'Pasifler'
+        ImageIndex = 15
         Checked = True
         OnClick = Pasifler1Click
       end
@@ -694,22 +697,27 @@ object HesapPlaniDlg: THesapPlaniDlg
       end
       object Kasalar1: TMenuItem
         Caption = 'Kasalar'
+        ImageIndex = 15
         OnClick = Kasalar1Click
       end
       object BankaHesaplar1: TMenuItem
         Caption = 'Banka Hesaplar'#305
+        ImageIndex = 34
         OnClick = BankaHesaplar1Click
       end
       object Gelir1: TMenuItem
         Caption = 'Gelir M.'
+        ImageIndex = 34
         OnClick = Gelir1Click
       end
       object Masraf1: TMenuItem
         Caption = 'Masraf M.'
+        ImageIndex = 34
         OnClick = Masraf1Click
       end
       object CariKartlar1: TMenuItem
         Caption = 'Cari Kartlar'
+        ImageIndex = 35
         OnClick = CariKartlar1Click
       end
       object N2: TMenuItem
@@ -717,36 +725,45 @@ object HesapPlaniDlg: THesapPlaniDlg
       end
       object Hepsi1: TMenuItem
         Caption = 'Hepsi'
+        ImageIndex = 15
         OnClick = Hepsi1Click
       end
       object SadecePlan1: TMenuItem
         Caption = 'Sadece Plan'
+        ImageIndex = 21
         OnClick = SadecePlan1Click
       end
     end
     object VarlklarGster1: TMenuItem
       Caption = 'Olu'#351'tur'
+      ImageIndex = 0
       object Ekle1: TMenuItem
         Caption = 'Yeni'
+        ImageIndex = 0
         OnClick = EkleTusClick
       end
       object SeiliyiKopyala1: TMenuItem
         Caption = 'Se'#231'iliyi Kopyala'
+        ImageIndex = 10
         Enabled = False
       end
     end
     object Sil1: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       object SeiliyiSil1: TMenuItem
         Caption = 'Se'#231'iliyi Sil'
+        ImageIndex = 1
       end
       object SeiliveTmAltKategorilerinisil1: TMenuItem
         Caption = 'Alt Kategorilerini sil'
+        ImageIndex = 1
         Enabled = False
       end
     end
     object ResimGirMenu: TMenuItem
       Caption = 'Resim Gir'
+      ImageIndex = 30
       OnClick = ResimGirMenuClick
     end
     object N3: TMenuItem
@@ -754,10 +771,12 @@ object HesapPlaniDlg: THesapPlaniDlg
     end
     object ExceldenBilgiekle1: TMenuItem
       Caption = 'Excelden Bilgi Al '
+      ImageIndex = 32
       OnClick = ExceldenBilgiekle1Click
     end
     object ExceleGnder1: TMenuItem
       Caption = 'Excele G'#246'nder'
+      ImageIndex = 32
       OnClick = ExceleGnder1Click
     end
   end

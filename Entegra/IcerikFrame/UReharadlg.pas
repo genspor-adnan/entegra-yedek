@@ -263,7 +263,6 @@ type
     Varsaylan1: TMenuItem;
     N7: TMenuItem;
     GridCariProjelerViewPROJEKODU: TcxGridDBColumn;
-    TabSheetEkipman: TcxTabSheet;
     TabEkipmanlar: TFDQuery;
     DtsEkipmanlar: TDataSource;
     CariGridViewILLER: TcxGridDBColumn;
@@ -409,6 +408,46 @@ type
     CariGridViewILCE: TcxGridDBColumn;
     TabSheetCRM: TcxTabSheet;
     PageControlCRM: TcxPageControl;
+    TabSheetServisAna: TcxTabSheet;
+    PageControlServis: TcxPageControl;
+    TabSheetServisListe: TcxTabSheet;
+    GridCariServis: TcxGrid;
+    GridCariServisView: TcxGridDBTableView;
+    GridCariServisLevel1: TcxGridLevel;
+    GridCariServisViewSERVISNO: TcxGridDBColumn;
+    GridCariServisViewDURUM: TcxGridDBColumn;
+    GridCariServisViewBASLAMA: TcxGridDBColumn;
+    GridCariServisViewBITIS: TcxGridDBColumn;
+    GridCariServisViewKONUSU: TcxGridDBColumn;
+    GridCariServisViewSERINO: TcxGridDBColumn;
+    GridCariServisViewNOTLAR: TcxGridDBColumn;
+    TabCariServis: TFDQuery;
+    DtsCariServis: TDataSource;
+    TabSheetAlisSatis: TcxTabSheet;
+    PageControlAlisSatis: TcxPageControl;
+    TabSheetAlisSip: TcxTabSheet;
+    TabSheetAlisIrs: TcxTabSheet;
+    TabSheetAlisKons: TcxTabSheet;
+    TabSheetSatisSip: TcxTabSheet;
+    TabSheetSatisIrs: TcxTabSheet;
+    TabSheetSatisKons: TcxTabSheet;
+    GridCariBelge: TcxGrid;
+    GridCariBelgeView: TcxGridDBTableView;
+    GridCariBelgeLevel1: TcxGridLevel;
+    GridCariBelgeViewTARIH: TcxGridDBColumn;
+    GridCariBelgeViewBELGENO: TcxGridDBColumn;
+    GridCariBelgeViewSERI: TcxGridDBColumn;
+    GridCariBelgeViewACIKLAMA: TcxGridDBColumn;
+    GridCariBelgeViewMATRAH: TcxGridDBColumn;
+    GridCariBelgeViewKDV: TcxGridDBColumn;
+    GridCariBelgeViewTUTAR: TcxGridDBColumn;
+    GridCariBelgeViewKUR: TcxGridDBColumn;
+    GridCariBelgeViewVADE: TcxGridDBColumn;
+    GridCariBelgeViewKAYNAK: TcxGridDBColumn;
+    GridCariBelgeViewHEDEF: TcxGridDBColumn;
+    GridCariBelgeViewDEPO: TcxGridDBColumn;
+    TabCariBelge: TFDQuery;
+    DtsCariBelge: TDataSource;
     TabSheetGorev: TcxTabSheet;
     TabGorevler: TFDQuery;
     DtsGorevler: TDataSource;
@@ -435,7 +474,6 @@ type
     CariGridViewALTSEKTOR: TcxGridDBColumn;
     PersonelLOKASYON: TcxGridDBColumn;
     CariGridViewColumn1: TcxGridDBColumn;
-    PageControlEkipman: TcxPageControl;
     SheetBizimEkipman: TcxTabSheet;
     SheetRakipEkipman: TcxTabSheet;
     ToolBarEkipmanDetay: TToolBar;
@@ -726,6 +764,13 @@ type
     procedure PageControlSekmeChange(Sender: TObject);
     procedure PageControlCRMChange(Sender: TObject);
     procedure CRMAltSekmeYenile;
+    procedure PageControlServisChange(Sender: TObject);
+    procedure ServisAltSekmeYenile;
+    procedure PageControlAlisSatisChange(Sender: TObject);
+    procedure AlisSatisAltSekmeYenile;
+    procedure GridCariBelgeViewCanFocusRecord(Sender: TcxCustomGridTableView;
+      ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    function AlisSatisGridAyarAdi: string;
     procedure IlgiliEkleTusClick(Sender: TObject);
     procedure IlgiliSilTusClick(Sender: TObject);
     procedure ResimDuzenleTusClick(Sender: TObject);
@@ -2078,6 +2123,7 @@ end;
 
 procedure TRehberAraDlg.Baslatildi;
 var ra : string;
+    i  : Integer;
 begin
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
    // Tum/Son/Sik Aranan toolbar butonlarini list handler'larina bagla (sunucu-tarafi SP listeleme)
@@ -2202,9 +2248,64 @@ begin
      TabSheetTeklifler.TabVisible:=False;
      TabSheetTeklifler.Visible:=False;
    end;
+   // ---- Alis/Satis sekmesi (siparis / irsaliye / konsinye) ----
+   //   CRM ile AYNI desen: once MODUL LISANSI (2401 alis, 2411 satis), sonra
+   //   belge turu bazinda ROL yetkisi. Alt sekmelerin hepsi kapaliysa ust sekme
+   //   hic gorunmez. Yetki kodlari fatura listesi gorev frame'i ile AYNI.
+   TabSheetAlisSip.TabVisible  := Tablo.YetkiVarmi(2401,YetkiTur_Gorme) and
+                                  Tablo.YetkiVarmi(240111,YetkiTur_Gorme);
+   TabSheetAlisIrs.TabVisible  := Tablo.YetkiVarmi(2401,YetkiTur_Gorme) and
+                                  Tablo.YetkiVarmi(240121,YetkiTur_Gorme);
+   TabSheetAlisKons.TabVisible := Tablo.YetkiVarmi(2401,YetkiTur_Gorme) and
+                                  Tablo.YetkiVarmi(240171,YetkiTur_Gorme);
+   TabSheetSatisSip.TabVisible  := Tablo.YetkiVarmi(2411,YetkiTur_Gorme) and
+                                   Tablo.YetkiVarmi(241111,YetkiTur_Gorme);
+   TabSheetSatisIrs.TabVisible  := Tablo.YetkiVarmi(2411,YetkiTur_Gorme) and
+                                   Tablo.YetkiVarmi(241121,YetkiTur_Gorme);
+   TabSheetSatisKons.TabVisible := Tablo.YetkiVarmi(2411,YetkiTur_Gorme) and
+                                   Tablo.YetkiVarmi(241161,YetkiTur_Gorme);
+
+   TabSheetAlisSatis.TabVisible := TabSheetAlisSip.TabVisible or
+                                   TabSheetAlisIrs.TabVisible or
+                                   TabSheetAlisKons.TabVisible or
+                                   TabSheetSatisSip.TabVisible or
+                                   TabSheetSatisIrs.TabVisible or
+                                   TabSheetSatisKons.TabVisible;
+   if TabSheetAlisSatis.TabVisible then begin
+      // Ilk GORUNEN alt sekme etkin olsun; gizli sekme etkin kalirsa grid bos gorunur.
+      for i := 0 to PageControlAlisSatis.PageCount - 1 do
+        if PageControlAlisSatis.Pages[i].TabVisible then begin
+           PageControlAlisSatis.ActivePage := PageControlAlisSatis.Pages[i];
+           Break;
+        end;
+   end;
+
+   // ---- Servis sekmesi (Servis / Musteri Ekipman / Rakip Ekipman) ----
+   //   CRM ile AYNI desen: once MODUL LISANSI, sonra ROL yetkisi; ust sekme
+   //   alt sekmelere bagli (hepsi kapaliysa Servis sekmesi hic gorunmez).
+   //   Ekipman iki alt sekmesi eskiden Ekipman icindeki AYRI bir page control
+   //   idi; ayni yetki (220180) ikisini birden yonetiyor.
+   if not Tablo.YetkiVarmi(MODUL_Servis,YetkiTur_Gorme) then begin
+     TabSheetServisListe.TabVisible:=False;
+     TabSheetServisListe.Visible:=False;
+   end;
    if not Tablo.YetkiVarmi(220180,YetkiTur_Gorme) then begin
-     TabSheetEkipman.TabVisible:=False;
-     TabSheetEkipman.Visible:=False;
+     SheetBizimEkipman.TabVisible:=False;
+     SheetBizimEkipman.Visible:=False;
+     SheetRakipEkipman.TabVisible:=False;
+     SheetRakipEkipman.Visible:=False;
+   end;
+
+   TabSheetServisAna.TabVisible := TabSheetServisListe.TabVisible or
+                                   SheetBizimEkipman.TabVisible or
+                                   SheetRakipEkipman.TabVisible;
+   if TabSheetServisAna.TabVisible then begin
+      if TabSheetServisListe.TabVisible then
+         PageControlServis.ActivePage := TabSheetServisListe
+      else if SheetBizimEkipman.TabVisible then
+         PageControlServis.ActivePage := SheetBizimEkipman
+      else
+         PageControlServis.ActivePage := SheetRakipEkipman;
    end;
 
 
@@ -3995,6 +4096,129 @@ begin
   CRMAltSekmeYenile;
 end;
 
+procedure TRehberAraDlg.ServisAltSekmeYenile;
+// Servis ust sekmesinin alt sekmeleri (Servis listesi / Ekipman). Hem ust sekme
+//   Servis'e gelince hem de alt sekme degisince cagrilir.
+var
+  j: TJSONObject;
+begin
+  if not(REHBER.Active) or (REHBER.IsEmpty) then
+    Exit;
+
+  if PageControlServis.ActivePage = TabSheetServisListe then begin
+    // Servis listesi ile AYNI SP; farki: RehberId ile yalniz bu carinin servisleri
+    //   (bu yuzden gridde cari adi kolonu da yok).
+    j := TJSONObject.Create;
+    try
+      j.AddPair('Mod',      TJSONNumber.Create(4));
+      j.AddPair('TopN',     TJSONNumber.Create(0));   // 0 = TOP yok (tumu)
+      j.AddPair('Pasif',    TJSONNumber.Create(0));
+      j.AddPair('RehberId', TJSONNumber.Create(REHBER.FieldByName('ID').AsInteger));
+      j.AddPair('cbListe',  TJSONNumber.Create(9));   // kullanici/sube kisiti yok
+      // Kapanmis servisler de gorunsun: SP'de Kapali=1 tek basina yetmez, kapali
+      //   kayitlar icin bir TARIH kisiti bekler (Tamamlanan=19000 -> aralik modu).
+      //   Cari kartinda TUM gecmis istendigi icin aralik olabildigince genis verilir.
+      j.AddPair('Kapali',     TJSONNumber.Create(1));
+      j.AddPair('Tamamlanan', TJSONNumber.Create(19000));
+      j.AddPair('TarihBas',   '1900-01-01');
+      j.AddPair('TarihBit',   '2999-12-31');
+      Tablo.ListeSPJson(TabCariServis, 'sp_Prog_Servis_Liste_Json2', '', j, 0);
+      j := nil;   // sahiplik helper'a gecti
+    finally
+      j.Free;
+    end;
+  end else if PageControlServis.ActivePage = SheetRakipEkipman then begin
+    TabloYenile(TabEkipmanRakip,[REHBER.Fields[0].AsInteger]);
+  end else if PageControlServis.ActivePage = SheetBizimEkipman then begin
+    TabloYenile(TabEkipmanlar,[REHBER.Fields[0].AsInteger]);
+    (TreeListEkipmancxDBTreeListColumn3.Properties as TcxImageComboBoxProperties).Items.Clear;
+    Tablo.TablodanSorguAc(7,'select ID,AD from REHBERILETISIM where REHBERID='+REHBER.FieldByName('ID').AsString,false);
+    Tablo.Query7.First;
+    while not Tablo.Query7.Eof do begin
+      with (TreeListEkipmancxDBTreeListColumn3.Properties as TcxImageComboBoxProperties).Items.Add do begin
+        Description := Tablo.Query7.FieldByName('AD').AsString;
+        Value := Tablo.Query7.FieldByName('ID').AsInteger;
+        ImageIndex := -1;
+      end;
+      Tablo.Query7.Next;
+    end;
+  end;
+end;
+
+procedure TRehberAraDlg.PageControlServisChange(Sender: TObject);
+begin
+  ServisAltSekmeYenile;
+end;
+
+procedure TRehberAraDlg.AlisSatisAltSekmeYenile;
+// Alis/Satis alt sekmeleri (siparis / irsaliye / konsinye x alis-satis).
+//   Fatura listesindeki gibi TEK GRID kullanilir: alt sekme yalniz belge TURunu
+//   (sekmenin Tag'i) degistirir, kolonlar aynidir. Iki SP de ayni kolon adlarini
+//   dondurur (SIPARIS tarafinda FATURANO/FATURATARIH takma ad).
+//   Cari adi kolonu YOK: liste zaten tek cariye ait (RehberId).
+var
+  j: TJSONObject;
+  LSayfa: TcxTabSheet;
+  LTur: Integer;
+  LSP: string;
+begin
+  if not(REHBER.Active) or (REHBER.IsEmpty) then
+    Exit;
+  LSayfa := PageControlAlisSatis.ActivePage;
+  if LSayfa = nil then
+    Exit;
+  LTur := LSayfa.Tag;
+  if LTur = 0 then
+    Exit;
+
+  // Grid tek nesne; etkin sekmeye tasinir (her sekmeye ayri grid koymak yerine).
+  if GridCariBelge.Parent <> LSayfa then
+    GridCariBelge.Parent := LSayfa;
+
+  if LTur in [9, 19, 101] then          // siparis/talep AYRI tabloda (SIPARIS)
+    LSP := 'sp_Prog_AlisSatis_Siparis_Json2'
+  else
+    LSP := 'sp_Prog_AlisSatis_IrsFatFisKons_Json2';
+
+  j := TJSONObject.Create;
+  try
+    j.AddPair('TopN',     TJSONNumber.Create(0));   // 0 = TOP yok (cari basina kucuk kume)
+    j.AddPair('Tur',      TJSONNumber.Create(LTur));
+    j.AddPair('RehberId', TJSONNumber.Create(REHBER.FieldByName('ID').AsInteger));
+    Tablo.ListeSPJson(TabCariBelge, LSP, '', j, 0);
+    j := nil;   // sahiplik helper'a gecti
+  finally
+    j.Free;
+  end;
+
+  // Kolon duzeni ALT SEKME BASINA saklanir: alis siparisi ile satis irsaliyesinin
+  //   kullanisli kolonlari ayni degil (fatura listesindeki desen: ad + AltTur).
+  Tablo.GridAyarRestore(AlisSatisGridAyarAdi, GridCariBelgeView);
+end;
+
+function TRehberAraDlg.AlisSatisGridAyarAdi: string;
+// Grid ayar anahtari - etkin alt sekmenin belge TUR'unu tasir (Tag).
+begin
+  Result := 'CariAlisSatisGridi';
+  if (PageControlAlisSatis <> nil) and (PageControlAlisSatis.ActivePage <> nil) then
+    Result := Result + '-' + IntToStr(PageControlAlisSatis.ActivePage.Tag);
+end;
+
+procedure TRehberAraDlg.GridCariBelgeViewCanFocusRecord(Sender: TcxCustomGridTableView;
+  ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+// Ortak kolon/stil menusu (AnaForm.cxGridPopupMenu1) bu gride baglanir; kaydetme
+//   anahtari alt sekmeye gore degisir -> her belge turu kendi duzenini saklar.
+begin
+  AnaForm.cxGridPopupMenu1.Grid := GridCariBelge;
+  AnaForm.cxGridPopupMenu1.PopupMenus[0].GridView := GridCariBelgeView;
+  AnaForm.pmGridStil.Tags.Values[GridCariBelge.Name] := AlisSatisGridAyarAdi;
+end;
+
+procedure TRehberAraDlg.PageControlAlisSatisChange(Sender: TObject);
+begin
+  AlisSatisAltSekmeYenile;
+end;
+
 procedure TRehberAraDlg.PageControlSekmeChange(Sender: TObject);
 var AcKapa:String[1];
     GunSay : Smallint;
@@ -4064,21 +4288,11 @@ begin
     TabloYenile(TabYaslandirma,[REHBER.FieldByName('ID').AsInteger, FormatDateTime('yyyy-mm-dd hh:nn', Tablo.GENINI.BugunTrhSaat), REHBER.FieldByName('KUR').AsString]); //,Tablo.GENINI.BugunTrh+1
   end else if PageControlSekme.ActivePage=TabSheetEkstre then begin
     CalendarEkstreBasPropertiesEditValueChanged(Self);
-  end else if PageControlSekme.ActivePage=TabSheetEkipman then begin
-    TabloYenile(TabEkipmanlar,[REHBER.Fields[0].AsInteger]);
-    TabloYenile(TabEkipmanRakip,[REHBER.Fields[0].AsInteger]);
-    (TreeListEkipmancxDBTreeListColumn3.Properties as TcxImageComboBoxProperties).Items.Clear;
-    Tablo.TablodanSorguAc(7,'select ID,AD from REHBERILETISIM where REHBERID='+REHBER.FieldByName('ID').AsString,false);
-    Tablo.Query7.First;
-    while not Tablo.Query7.Eof do begin
-      with (TreeListEkipmancxDBTreeListColumn3.Properties as TcxImageComboBoxProperties).Items.Add do begin
-        Description := Tablo.Query7.FieldByName('AD').AsString;
-        Value := Tablo.Query7.FieldByName('ID').AsInteger;
-        ImageIndex := -1;
-      end;
-      Tablo.Query7.Next;
-    end;
-  end;
+  end else if PageControlSekme.ActivePage=TabSheetServisAna then
+    // Ekipman artik Servis ust sekmesinin ALT SEKMESI; yukleme oraya tasindi.
+    ServisAltSekmeYenile
+  else if PageControlSekme.ActivePage=TabSheetAlisSatis then
+    AlisSatisAltSekmeYenile;
   //PopupMenuYaz.Items.Clear;
   for i := PopupMenuYaz.Items.Count-1 downto 0 do
     if (Assigned(PopupMenuYaz.Items[i])) and (PopupMenuYaz.Items[i].MenuIndex>N3.MenuIndex) then

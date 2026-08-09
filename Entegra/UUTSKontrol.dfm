@@ -421,16 +421,19 @@ object UTSKontrolDlg: TUTSKontrolDlg
     Top = 145
   end
   object PopupSeriNo: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 264
     Top = 104
     object Listedentoplualma1: TMenuItem
       Caption = 'Listeden toplu alma'
+      ImageIndex = 32
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object Balamabitivererek1: TMenuItem
       Caption = 'Ba'#351'lama no vererek'
+      ImageIndex = 6
     end
   end
 end

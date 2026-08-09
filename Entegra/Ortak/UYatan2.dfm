@@ -2428,42 +2428,51 @@ object YatanHastaListDlg: TYatanHastaListDlg
       000000000000}
   end
   object PopupMenuGor: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 384
     Top = 73
     object Byk1: TMenuItem
       Tag = 1
       Caption = 'Büyük'
+      ImageIndex = 15
       OnClick = Byk1Click
     end
     object Kk1: TMenuItem
       Tag = 2
       Caption = 'Küçük'
+      ImageIndex = 15
       OnClick = Byk1Click
     end
     object Liste1: TMenuItem
       Tag = 3
       Caption = 'Liste'
+      ImageIndex = 32
       OnClick = Byk1Click
     end
     object Ayrnt1: TMenuItem
       Tag = 4
       Caption = 'Ayrýntý'
+      ImageIndex = 15
       OnClick = Byk1Click
     end
   end
   object PopupMenudol: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 320
     Top = 72
     object BosDolu: TMenuItem
       Caption = 'Boþ+Dolu'
+      ImageIndex = 15
       OnClick = BosDoluClick
     end
     object Bos: TMenuItem
       Caption = 'Boþ'
+      ImageIndex = 15
       OnClick = BosClick
     end
     object Dolu: TMenuItem
       Caption = 'Dolu'
+      ImageIndex = 15
       OnClick = DoluClick
     end
   end

@@ -177,10 +177,12 @@ object MailForm: TMailForm
     TabOrder = 1
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 248
     Top = 8
     object MNParola: TMenuItem
       Caption = 'Parola Belirle'
+      ImageIndex = 15
       OnClick = MNParolaClick
     end
   end

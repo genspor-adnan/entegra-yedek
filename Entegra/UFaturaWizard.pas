@@ -4460,6 +4460,15 @@ begin
   if (TabFatbaslik.FieldByName('DURUM').AsInteger<>6)and(TabFatura.FieldByName('ADET').AsFloat <= 0) then
     raise Exception.create(Adetsifirolamaz);
 
+  // DONUSUM KURALI: bu satirdan URETILMIS adedin altina inilemez (ust sinir yok).
+  //   Ornek: 10'luk irsaliye satirinin 8'i faturaya donustuyse adet >= 8 kalmali.
+  //   Yeni satirda (dsInsert) donusum olamaz -> yalniz dsEdit'te bakilir.
+  if (TabFatura.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('FATURA',
+            TabFatura.FieldByName('ID').AsInteger,
+            TabFatura.FieldByName('ADET').AsFloat)) then
+    Abort;
+
   //İzlem bilgisi var mı bakalım serino vb.
    if (OncekiStokMiktar<>TabFatura.FieldByName('MIKTAR').AsFloat)and(TabFatura.FieldByName('IZLEME').AsInteger > 0 ) then begin
        if (BDDlg=nil)or((BDDlg<>nil)and((BDDlg.DonusumTuru = TabNo_DONUSUM_SATIS_SIPARIS_IRS)or(BDDlg.DonusumTuru = TabNo_DONUSUM_SATIS_SIPARIS_FAT)or(BDDlg.DonusumTuru = TabNo_DONUSUM_SATIS_SIPARIS_FIS)

@@ -105,6 +105,7 @@ object ProjeListeDlg: TProjeListeDlg
     Align = alBottom
     TabOrder = 3
     object PageControlSekme: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 1
       Width = 974
@@ -120,7 +121,7 @@ object ProjeListeDlg: TProjeListeDlg
       ClientRectTop = 27
       object TabSheetGorevler: TcxTabSheet
         Caption = #304#351' Listesi'
-        ImageIndex = 1
+        ImageIndex = 32
         object TreeListGorev: TcxDBTreeList
           Left = 0
           Top = 41
@@ -592,7 +593,7 @@ object ProjeListeDlg: TProjeListeDlg
       end
       object TabYorumMedya: TcxTabSheet
         Caption = 'Yorum/Medya'
-        ImageIndex = 2
+        ImageIndex = 38
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -1164,6 +1165,7 @@ object ProjeListeDlg: TProjeListeDlg
     Top = 104
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 30
     Top = 104
     object BaskiOnizlemeMenu: TMenuItem
@@ -1247,14 +1249,17 @@ object ProjeListeDlg: TProjeListeDlg
     Top = 218
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 28
     Top = 167
     object ProjeInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = ProjeInfoMenuClick
     end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
     object N4: TMenuItem
@@ -1263,10 +1268,12 @@ object ProjeListeDlg: TProjeListeDlg
     object GrupA1: TMenuItem
       Tag = 1
       Caption = 'Grup A'#231'(-)'
+      ImageIndex = 32
       OnClick = GrupA1Click
     end
     object GrupKapa1: TMenuItem
       Caption = 'Grup Kapat(+)'
+      ImageIndex = 32
       OnClick = GrupA1Click
     end
   end
@@ -1321,6 +1328,7 @@ object ProjeListeDlg: TProjeListeDlg
     Top = 312
   end
   object GorevlerMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724
@@ -1343,14 +1351,17 @@ object ProjeListeDlg: TProjeListeDlg
     Top = 308
     object DuzenleMenu: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = DuzenleMenuClick
     end
     object TamamlandiIsaretleMenu: TMenuItem
       Caption = #304#351'aretliler Tamamland'#305' / Tamamlanmad'#305
+      ImageIndex = 23
       OnClick = TamamlandiIsaretleMenuClick
     end
     object Bayraklaretle1: TMenuItem
       Caption = #304#351'aretliler  Bayrakl'#305' / Bayraks'#305'z'
+      ImageIndex = 31
       OnClick = Bayraklaretle1Click
     end
     object MenuItem3: TMenuItem
@@ -1358,39 +1369,47 @@ object ProjeListeDlg: TProjeListeDlg
     end
     object TarihBugunMenu: TMenuItem
       Caption = #304#351'aretlilerin Tarihi Bug'#252'n'
+      ImageIndex = 21
     end
     object arihYarn1: TMenuItem
       Tag = 1
       Caption = #304#351'aretlilerin Tarihi Yar'#305'n'
+      ImageIndex = 21
     end
     object TarihiKaldirMenu: TMenuItem
       Tag = -1
       Caption = #304#351'aretlilerin Tarihini Kald'#305'r'
+      ImageIndex = 24
     end
     object MenuItem5: TMenuItem
       Caption = '-'
     end
     object Atamayap1: TMenuItem
       Caption = #304#351'aretlilere Atama yap'
+      ImageIndex = 15
     end
     object MenuItem6: TMenuItem
       Caption = '-'
     end
     object BuiiEPostaGnder1: TMenuItem
       Caption = 'Bu i'#351'i E-Posta G'#246'nder'
+      ImageIndex = 17
     end
     object BuiYazdr1: TMenuItem
       Caption = 'Bu '#304#351'i Yazd'#305'r'
+      ImageIndex = 8
     end
     object MenuItem9: TMenuItem
       Caption = '-'
     end
     object IsiKopyalaMenu: TMenuItem
       Caption = #304#351'i Kopyala'
+      ImageIndex = 10
       OnClick = IsiKopyalaMenuClick
     end
     object IsiSilMenu: TMenuItem
       Caption = #304#351'i Sil'
+      ImageIndex = 1
       OnClick = IsiSilMenuClick
     end
   end
@@ -1400,15 +1419,18 @@ object ProjeListeDlg: TProjeListeDlg
     Top = 396
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -1416,14 +1438,17 @@ object ProjeListeDlg: TProjeListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

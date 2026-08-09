@@ -634,10 +634,12 @@ object FisIrsaliyeAraDlg: TFisIrsaliyeAraDlg
     Top = 475
   end
   object pmSepet: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 668
     Top = 444
     object SatrSil1: TMenuItem
       Caption = 'Sat'#305'r'#305' Sil'
+      ImageIndex = 1
       OnClick = SatrSil1Click
     end
     object N1: TMenuItem
@@ -645,6 +647,7 @@ object FisIrsaliyeAraDlg: TFisIrsaliyeAraDlg
     end
     object mnSil: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Sil'
+      ImageIndex = 1
       OnClick = mnSilClick
     end
   end

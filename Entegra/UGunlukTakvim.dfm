@@ -551,47 +551,59 @@ object GunlukTakvimDlg: TGunlukTakvimDlg
     Top = 137
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 592
     Top = 177
     object BilgileriDegisMenu: TMenuItem
       Caption = 'Bilgilerini g'#246'r / de'#287'i'#351'tir'
+      ImageIndex = 22
     end
     object FaturageldiMenu: TMenuItem
       Caption = 'Fatura geldi'
+      ImageIndex = 19
       Visible = False
     end
     object TahsilMenu: TMenuItem
       Caption = #214'deme yap'
+      ImageIndex = 34
       Visible = False
       object NakitOdemeMenu: TMenuItem
         Tag = 1
         Caption = 'Nakit'
+        ImageIndex = 34
       end
       object HavaleEFTOdemeMenu: TMenuItem
         Tag = 2
         Caption = 'Havale/EFT'
+        ImageIndex = 34
       end
       object CekOdemeMenu: TMenuItem
         Tag = 3
         Caption = #199'ek'
+        ImageIndex = 34
       end
       object SenetOdemeMenu: TMenuItem
         Caption = 'Senet'
+        ImageIndex = 34
       end
     end
     object TahsilatiptaletMenu: TMenuItem
       Caption = 'Tahsilat'#305' iptal et'
+      ImageIndex = 3
       Visible = False
     end
     object IsaretleMenu: TMenuItem
       Caption = #304#351'aretle'
+      ImageIndex = 15
       Visible = False
       object KarlYok1: TMenuItem
         Caption = 'Kar'#351#305'l'#305#287#305' yok'
+        ImageIndex = 15
       end
       object ahsiledilemiyor1: TMenuItem
         Caption = 'Tahsil edilemiyor'
+        ImageIndex = 34
       end
     end
     object N3: TMenuItem
@@ -600,24 +612,30 @@ object GunlukTakvimDlg: TGunlukTakvimDlg
     end
     object Butariheplanekle1: TMenuItem
       Caption = 'Bu tarihe plan ekle'
+      ImageIndex = 21
       Visible = False
       object TahsilatPlanMenu: TMenuItem
         Tag = 61
         Caption = 'Tahsilat'
+        ImageIndex = 34
       end
       object OdemePlanMenu: TMenuItem
         Tag = 71
         Caption = #214'deme'
+        ImageIndex = 34
       end
     end
     object Butarihefaturaekle1: TMenuItem
       Caption = 'Bu tarihe fatura ekle'
+      ImageIndex = 21
       Visible = False
       object GelenFaturaMenu: TMenuItem
         Caption = 'Gelen Fatura'
+        ImageIndex = 19
       end
       object GidenFaturaMenu: TMenuItem
         Caption = 'Giden Fatura'
+        ImageIndex = 19
       end
     end
     object N4: TMenuItem
@@ -626,6 +644,7 @@ object GunlukTakvimDlg: TGunlukTakvimDlg
     end
     object BuguneaksiyonekleMenu: TMenuItem
       Caption = 'Bu tarihe aksiyon ekle'
+      ImageIndex = 21
       Visible = False
     end
     object N1: TMenuItem
@@ -634,6 +653,7 @@ object GunlukTakvimDlg: TGunlukTakvimDlg
     end
     object GnderilecekbankahesabnsecMenu: TMenuItem
       Caption = #304#351'aretlilerin banka hesab'#305'n'#305' se'#231'/de'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = GnderilecekbankahesabnsecMenuClick
     end
   end
@@ -656,6 +676,7 @@ object GunlukTakvimDlg: TGunlukTakvimDlg
     Top = 183
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 325
     Top = 234
     object BaskiOnizlemeMenu: TMenuItem

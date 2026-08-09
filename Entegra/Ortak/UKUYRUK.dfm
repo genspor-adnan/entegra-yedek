@@ -312,13 +312,16 @@ object KuyrukDlg: TKuyrukDlg
     Top = 384
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 128
     Top = 128
     object KurukDegisMenu: TMenuItem
       Caption = 'Kuyruk De'#287'i'#351
+      ImageIndex = 15
     end
     object BelirsizlerdeMenu: TMenuItem
       Caption = 'Belirsizler de kuyru'#287'a gelsin'
+      ImageIndex = 15
       OnClick = BelirsizlerdeMenuClick
     end
     object N2: TMenuItem
@@ -326,14 +329,17 @@ object KuyrukDlg: TKuyrukDlg
     end
     object CagriCihaziMenu: TMenuItem
       Caption = #199'a'#287'r'#305' Cihaz'#305'na G'#246'nder'
+      ImageIndex = 18
       OnClick = CagriCihaziMenuClick
     end
     object GeldiOlarakIsaretleMenu: TMenuItem
       Caption = '"Geldi" Olarak '#304#351'aretle'
+      ImageIndex = 15
       OnClick = GeldiOlarakIsaretleMenuClick
     end
     object GelmediOlarakIsaretleMenu: TMenuItem
       Caption = '"Gelmedi" Olarak '#304#351'aretle'
+      ImageIndex = 15
       OnClick = GelmediOlarakIsaretleMenuClick
     end
     object N3: TMenuItem
@@ -341,6 +347,7 @@ object KuyrukDlg: TKuyrukDlg
     end
     object KuyruktanSil1: TMenuItem
       Caption = 'Kuyruktan Sil'
+      ImageIndex = 1
       OnClick = KuyruktanSil1Click
     end
     object N1: TMenuItem
@@ -348,6 +355,7 @@ object KuyrukDlg: TKuyrukDlg
     end
     object AlanEkleKaldr1: TMenuItem
       Caption = 'Alan Ekle/Kald'#305'r'
+      ImageIndex = 24
       OnClick = AlanEkleKaldr1Click
     end
   end

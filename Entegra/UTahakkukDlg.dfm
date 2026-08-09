@@ -683,6 +683,7 @@ object TahakkukDlg: TTahakkukDlg
     Top = 6
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 493
     Top = 10
     object BaskiOnizlemeMenu: TMenuItem

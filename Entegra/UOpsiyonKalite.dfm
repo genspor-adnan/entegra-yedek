@@ -152,6 +152,7 @@ object OpsiyonKaliteDlg: TOpsiyonKaliteDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 392
@@ -166,7 +167,7 @@ object OpsiyonKaliteDlg: TOpsiyonKaliteDlg
     ClientRectTop = 24
     object SheetToplanti: TcxTabSheet
       Caption = 'Kalite'
-      ImageIndex = 0
+      ImageIndex = 19
       object cxLabel5: TcxLabel
         Left = 5
         Top = 11

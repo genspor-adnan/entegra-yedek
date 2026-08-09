@@ -16,6 +16,9 @@ BEGIN
     DECLARE @Konusu         NVARCHAR(250) = JSON_VALUE(@Kosullar,'$.Konusu');
     DECLARE @Urun           NVARCHAR(200) = JSON_VALUE(@Kosullar,'$.Urun');
     DECLARE @Musteri        NVARCHAR(200) = JSON_VALUE(@Kosullar,'$.Musteri');
+    -- Belirli bir cariye ait servisler (cari ekranindaki Servis alt sekmesi).
+    --   @Musteri AD uzerinden LIKE arar; bu KIMLIK uzerinden kesin filtredir.
+    DECLARE @RehberId       INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.RehberId') AS INT);
     DECLARE @SeriNo         NVARCHAR(50)  = JSON_VALUE(@Kosullar,'$.SeriNo');
     DECLARE @SeriNoLike     BIT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.SeriNoLike') AS BIT), 0);
     DECLARE @SubeYetkiList  NVARCHAR(MAX) = JSON_VALUE(@Kosullar,'$.SubeYetkiList');
@@ -90,6 +93,9 @@ BEGIN
 
     IF @Musteri IS NOT NULL AND @Musteri <> N''
         SET @Filt = @Filt + N' AND EXISTS (SELECT 1 FROM REHBER RM WHERE RM.ID = SV0.REHBERID AND RM.FIRMA LIKE N''%'' + @pMusteri + N''%'') ';
+
+    IF ISNULL(@RehberId, 0) > 0
+        SET @Filt = @Filt + N' AND SV0.REHBERID = ' + CAST(@RehberId AS NVARCHAR(20)) + N' ';
 
     IF @SubeYetkiList IS NOT NULL AND @SubeYetkiList <> N''
         SET @Filt = @Filt + N' AND SV0.SUBEID IN (' + @SubeYetkiList + N') ';

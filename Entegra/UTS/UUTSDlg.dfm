@@ -14,6 +14,7 @@ object UTSDlg: TUTSDlg
   OnCreate = FormCreate
   TextHeight = 13
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 1370
@@ -32,14 +33,14 @@ object UTSDlg: TUTSDlg
     ClientRectTop = 31
     object cxTabSheet2: TcxTabSheet
       Caption = 'Sorgula / G'#246'nder'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
     end
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
-      ImageIndex = 4
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -51,7 +52,7 @@ object UTSDlg: TUTSDlg
       Font.Height = -13
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
-      ImageIndex = 3
+      ImageIndex = 19
       ParentFont = False
       ExplicitLeft = 0
       ExplicitTop = 0
@@ -59,7 +60,7 @@ object UTSDlg: TUTSDlg
     end
     object cxTabSheet1: TcxTabSheet
       Caption = #304'ptaller'
-      ImageIndex = 4
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -134,6 +135,7 @@ object UTSDlg: TUTSDlg
     Align = alClient
     TabOrder = 2
     object PageControlListe: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 184
       Width = 1172
@@ -148,7 +150,7 @@ object UTSDlg: TUTSDlg
       ClientRectTop = 24
       object TabSheetSorgu: TcxTabSheet
         Caption = 'Sorgu Listesi'
-        ImageIndex = 1
+        ImageIndex = 32
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -242,7 +244,7 @@ object UTSDlg: TUTSDlg
       end
       object TabSheetBildirim: TcxTabSheet
         Caption = 'Bildirim Listesi'
-        ImageIndex = 0
+        ImageIndex = 32
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -1121,10 +1123,12 @@ object UTSDlg: TUTSDlg
     Top = 392
   end
   object PopupMenuSorgu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 272
     Top = 296
     object menuexcel: TMenuItem
       Caption = 'Excele Kaydet'
+      ImageIndex = 2
       OnClick = menuexcelClick
     end
   end

@@ -339,6 +339,7 @@
     end
   end
   object PageControlSekme: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 267
     Width = 874
@@ -360,7 +361,7 @@
     ClientRectTop = 27
     object TabSheetIlet: TcxTabSheet
       Caption = 'Toplamlar'
-      ImageIndex = 7
+      ImageIndex = 44
       TabVisible = False
       ExplicitLeft = 0
       ExplicitTop = 0
@@ -369,7 +370,7 @@
     end
     object TabSheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
-      ImageIndex = 6
+      ImageIndex = 32
       OnShow = TabSheetEkstreShow
       object cxGrid1: TcxGrid
         Left = 0
@@ -806,7 +807,7 @@
     end
     object TabSheetCekKocan: TcxTabSheet
       Caption = #199'ek Ko'#231'an'#305' Listesi'
-      ImageIndex = 3
+      ImageIndex = 32
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -972,7 +973,7 @@
     end
     object TabRotatif: TcxTabSheet
       Caption = 'Rotatif'
-      ImageIndex = 2
+      ImageIndex = 19
       TabVisible = False
       ExplicitLeft = 0
       ExplicitTop = 0
@@ -1466,7 +1467,7 @@
     end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
-      ImageIndex = 1
+      ImageIndex = 38
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1633,6 +1634,7 @@
     Caption = 'Panel2'
     TabOrder = 3
     object ToolBar1: TToolBar
+      Height = 24
       Left = 1
       Top = 1
       Width = 912
@@ -1640,7 +1642,7 @@
       Align = alLeft
       AutoSize = True
       ButtonHeight = 24
-      ButtonWidth = 62
+      ButtonWidth = 40
       Caption = 'AletCubugu'
       Color = clBtnFace
       Ctl3D = False
@@ -1666,6 +1668,7 @@
       TabOrder = 0
       Transparent = True
       object YeniTus: TToolButton
+        AutoSize = True
         Left = 0
         Top = 0
         Caption = 'Yeni'
@@ -1674,6 +1677,7 @@
         OnClick = YeniTusClick
       end
       object KrediSilTus: TToolButton
+        AutoSize = True
         Left = 111
         Top = 0
         Caption = 'Sil'
@@ -1682,6 +1686,7 @@
         OnClick = KrediSilTusClick
       end
       object DegisTus: TToolButton
+        AutoSize = True
         Left = 222
         Top = 0
         Caption = 'D'#252'zenle'
@@ -1700,6 +1705,7 @@
         Style = tbsSeparator
       end
       object YaziciYaz: TToolButton
+        AutoSize = True
         Left = 341
         Top = 0
         Caption = 'Yazd'#305'r'
@@ -1718,6 +1724,7 @@
         Style = tbsSeparator
       end
       object ToolButton2: TToolButton
+        AutoSize = True
         Left = 460
         Top = 0
         Caption = 'Hesap Makinas'#305
@@ -1733,6 +1740,7 @@
         Style = tbsSeparator
       end
       object LabelTumKayitlar: TToolButton
+        AutoSize = True
         Left = 0
         Top = 0
         Caption = 'T'#252'm'
@@ -1742,6 +1750,7 @@
         ImageName = 'PngImageListe1'
       end
       object LabelSonArananlar: TToolButton
+        AutoSize = True
         Tag = 5
         Left = 62
         Top = 0
@@ -1752,6 +1761,7 @@
         ImageName = 'PngImage43'
       end
       object LabelSikArananlar: TToolButton
+        AutoSize = True
         Tag = 3
         Left = 124
         Top = 0
@@ -2093,6 +2103,7 @@
     Top = 240
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 92
     Top = 387
     object BaskiOnizlemeMenu: TMenuItem
@@ -2168,31 +2179,38 @@
     Top = 137
   end
   object KrediMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 238
     Top = 145
     object KrediInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = KrediInfoMenuClick
     end
     object arihSe1: TMenuItem
       Caption = 'Durum Tarihi Se'#231
+      ImageIndex = 21
       OnClick = arihSe1Click
     end
     object YeniBanka1: TMenuItem
       Caption = 'Yeni Kredi Olu'#351'tur'
+      ImageIndex = 0
       OnClick = YeniTusClick
     end
     object HesabDzenle1: TMenuItem
       Caption = 'Krediyi D'#252'zenle'
+      ImageIndex = 7
       OnClick = DegisTusClick
     end
     object HesabSil1: TMenuItem
       Caption = 'Krediyi Sil'
+      ImageIndex = 1
       OnClick = KrediSilTusClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
@@ -2239,15 +2257,18 @@
     Top = 364
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 512
     Top = 294
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -2255,14 +2276,17 @@
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2371,33 +2395,41 @@
       end>
   end
   object PopupRotatif: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 813
     Top = 319
     object KrediyiEkleMenu: TMenuItem
       Caption = 'Al'#305'nan bu kredi miktar'#305'n'#305' hesaba ekle'
+      ImageIndex = 0
     end
   end
   object PopupRotatifMasrafEkleMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 85
     Top = 439
     object RotatifFaizrMasrafEkleMenu: TMenuItem
       Caption = 'D'#246'nem Faizi Hesapla ve Tahakkuk  Ettir'
+      ImageIndex = 34
       OnClick = RotatifFaizrMasrafEkleMenuClick
     end
     object RotatifDigerTurMasrafEkleMenu: TMenuItem
       Caption = 'Di'#287'er T'#252'r Masraf Tahakkuk Ettir'
+      ImageIndex = 34
       OnClick = RotatifDigerTurMasrafEkleMenuClick
     end
   end
   object PopupRotatifMasrafOdeMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 261
     Top = 407
     object DonemFaiziOdeMenu: TMenuItem
       Caption = 'D'#246'nem Faizi '#214'de'
+      ImageIndex = 15
       OnClick = DonemFaiziOdeMenuClick
     end
     object DigerMasrafOdeMenu: TMenuItem
       Caption = 'Di'#287'er Masraf '#214'de'
+      ImageIndex = 34
       OnClick = DigerMasrafOdeMenuClick
     end
   end

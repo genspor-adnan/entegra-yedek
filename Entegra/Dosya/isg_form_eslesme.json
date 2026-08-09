@@ -1,0 +1,259 @@
+{
+  "_aciklama": [
+    "KoBo alan adi -> Excel hucresi eslesmesi (isg yeni form.xlsx, sayfa 1).",
+    "Birlesik hucrelerde SOL UST hucre yazilir; bicim/kenarlik bozulmaz.",
+    "'kutu' tipindeki alanlar Hayir/Evet kutucuklarina X koyar.",
+    "EMIN OLUNAMAYAN hucreler '_supheli' listesinde - ciktida gozle dogrulanmali."
+  ],
+  "duz": {
+    "isyeri/isyeri_unvan": "C3",
+    "calisan/calisan_ad_soyad": "C12",
+    "calisan/calisan_tc": "K12",
+    "calisan/calisan_cinsiyet": "C13",
+    "calisan/calisan_dogum_yeri": "K13",
+    "calisan/calisan_egitim": "C14",
+    "calisan/calisan_medeni": "H14",
+    "calisan/calisan_cocuk_sayisi": "M14",
+    "calisan/calisan_tel": "B17",
+    "calisan/calisan_meslek": "G17",
+    "calisan/calisan_bolum": "L17",
+    "calisan/calisan_yaptigi_is": "G18",
+    "ozgecmis/kan_grubu": "D23",
+    "ozgecmis/kronik_hastalik": "J23",
+    "ozgecmis/bagisiklama_tetanoz": "E24",
+    "ozgecmis/bagisiklama_hepatit": "H24",
+    "ozgecmis/bagisiklama_diger": "K24",
+    "soygecmis/soy_anne": "E25",
+    "soygecmis/soy_baba": "H25",
+    "soygecmis/soy_kardes": "K25",
+    "soygecmis/soy_cocuk": "M25",
+    "anamnez_diger/hastane_aciklama": "I39",
+    "anamnez_diger/ameliyat_aciklama": "I40",
+    "anamnez_diger/is_kazasi_aciklama": "I41",
+    "anamnez_diger/maluliyet_aciklama": "J42",
+    "anamnez_diger/meslek_hst_sonuc": "C44",
+    "anamnez_diger/tedavi_nedir": "C46",
+    "aliskanlik/sigara_ne_kadar_once": "G48",
+    "aliskanlik/sigara_ne_kadar_icmis": "J48",
+    "aliskanlik/sigara_kac_adet_icmis": "M48",
+    "aliskanlik/sigara_kac_yildir": "G49",
+    "aliskanlik/sigara_kac_adet": "J49",
+    "aliskanlik/alkol_ne_kadar_once": "G51",
+    "aliskanlik/alkol_ne_kadar_icmis": "J51",
+    "aliskanlik/alkol_kac_adet_icmis": "M51",
+    "aliskanlik/alkol_kac_yildir": "G52",
+    "aliskanlik/alkol_ne_siklikla": "J52",
+    "fizik_muayene/fm_goz": "F54",
+    "fizik_muayene/fm_kbb": "J54",
+    "fizik_muayene/fm_deri": "L54",
+    "olcumler/ta": "B63",
+    "olcumler/nb": "J63",
+    "olcumler/boy": "B64",
+    "olcumler/kilo": "F64",
+    "olcumler/vki": "K64",
+    "laboratuvar/lab_kan": "F66",
+    "laboratuvar/lab_idrar": "J66",
+    "laboratuvar/lab_sft": "F67",
+    "laboratuvar/lab_odyometre": "J67",
+    "laboratuvar/lab_radyolojik": "E68",
+    "laboratuvar/lab_psikolojik": "E69",
+    "laboratuvar/lab_diger": "E70",
+    "hekim/muayene_tarihi": "E79"
+  },
+  "_birlesik_metin": {
+    "_aciklama": "F55:M62 TEK birlesik blok - b..h muayene sonuclari alt alta tek hucreye yazilir.",
+    "hucre": "F55",
+    "alanlar": [
+      [
+        "b) Kardiyovaskuler",
+        "fizik_muayene/fm_kardiyovaskuler"
+      ],
+      [
+        "c) Solunum",
+        "fizik_muayene/fm_solunum"
+      ],
+      [
+        "d) Sindirim",
+        "fizik_muayene/fm_sindirim"
+      ],
+      [
+        "e) Urogenital",
+        "fizik_muayene/fm_urogenital"
+      ],
+      [
+        "f) Kas-Iskelet",
+        "fizik_muayene/fm_kas_iskelet"
+      ],
+      [
+        "g) Norolojik",
+        "fizik_muayene/fm_norolojik"
+      ],
+      [
+        "h) Psikiyatrik",
+        "fizik_muayene/fm_psikiyatrik"
+      ],
+      [
+        "i) Diger",
+        "fizik_muayene/fm_diger"
+      ]
+    ]
+  },
+  "kutu": {
+    "_aciklama": "deger 'hayir' ise hayir_hucre, 'evet' ise evet_hucre isaretlenir (X).",
+    "yakinmalar/yak_balgamli_oksuruk": {
+      "hayir": "E29",
+      "evet": "G29"
+    },
+    "yakinmalar/yak_nefes_darligi": {
+      "hayir": "K29",
+      "evet": "M29"
+    },
+    "yakinmalar/yak_gogus_agrisi": {
+      "hayir": "E30",
+      "evet": "G30"
+    },
+    "yakinmalar/yak_carpinti": {
+      "hayir": "K30",
+      "evet": "M30"
+    },
+    "yakinmalar/yak_sirt_agrisi": {
+      "hayir": "E31",
+      "evet": "G31"
+    },
+    "yakinmalar/yak_eklem_agrisi": {
+      "hayir": "K31",
+      "evet": "M31"
+    },
+    "yakinmalar/yak_ishal_kabizlik": {
+      "hayir": "E32",
+      "evet": "G32"
+    },
+    "yakinmalar/yak_digerleri": {
+      "hayir": "K32",
+      "evet": "M32"
+    },
+    "hastaliklar/hst_gorme_bozuklugu": {
+      "hayir": "E34",
+      "evet": "G34"
+    },
+    "hastaliklar/hst_seker": {
+      "hayir": "K34",
+      "evet": "M34"
+    },
+    "hastaliklar/hst_bobrek": {
+      "hayir": "E35",
+      "evet": "G35"
+    },
+    "hastaliklar/hst_isitme_kaybi": {
+      "hayir": "K35",
+      "evet": "M35"
+    },
+    "hastaliklar/hst_sinir_sistemi": {
+      "hayir": "E36",
+      "evet": "G36"
+    },
+    "hastaliklar/hst_deri": {
+      "hayir": "K36",
+      "evet": "M36"
+    },
+    "hastaliklar/hst_besin_zehirlenmesi": {
+      "hayir": "E37",
+      "evet": "G37"
+    },
+    "hastaliklar/hst_kalp": {
+      "hayir": "K37",
+      "evet": "M37"
+    },
+    "hastaliklar/hst_ulser": {
+      "hayir": "E38",
+      "evet": "G38"
+    },
+    "hastaliklar/hst_sarilik": {
+      "hayir": "K38",
+      "evet": "M38"
+    },
+    "anamnez_diger/hastane": {
+      "hayir": "F39",
+      "evet": null
+    },
+    "anamnez_diger/ameliyat": {
+      "hayir": "F40",
+      "evet": null
+    },
+    "anamnez_diger/is_kazasi": {
+      "hayir": "F41",
+      "evet": null
+    },
+    "anamnez_diger/maluliyet": {
+      "hayir": "F42",
+      "evet": null
+    },
+    "anamnez_diger/meslek_hst": {
+      "hayir": "L43",
+      "evet": null
+    },
+    "anamnez_diger/tedavi": {
+      "hayir": "L45",
+      "evet": null
+    }
+  },
+  "calisma_durumu": {
+    "_aciklama": "calisabilir -> H sutunu, calisamaz -> J sutunu isaretlenir; aciklama L sutununa.",
+    "calisma/cd_genel": {
+      "satir": 71
+    },
+    "calisma/cd_tehlikeli": {
+      "satir": 72
+    },
+    "calisma/cd_gece": {
+      "satir": 73
+    },
+    "calisma/cd_yuksekte": {
+      "satir": 74
+    }
+  },
+  "_supheli": [
+    "E29/G29 gibi kutucuk hucreleri: etiket D29='Hayir', F29='Evet' oldugu icin",
+    "  isaret hucresi ARALARINDAKI hucre varsayildi. Ciktida yanlissa kaydirilacak.",
+    "sonuc/kanaat -> 1./2. secenekli blok (A76/A77); hangi secenegin isaretlenecegi belirsiz.",
+    "calisan Ev Adresi: A15:M16 ETIKETIN KENDISI birlesik - ayri deger hucresi yok.",
+    "onceki_isler tekrarli grup -> A20/A21/A22 satirlarina yazilir (etiket '1.' '2.' '3.' ile ayni hucre).",
+    "imza gorselleri: hekim B80, calisan H10 hucrelerine sabitlendi - konum/boyut 'imza' bolumunden ayarlanir."
+  ],
+  "_hekim_blok": {
+    "_aciklama": "A79:D82 'KASE VE IMZA' ETIKETLI blok. Hekim kimlik bilgileri etiketin ALTINA alt alta yazilir, imza gorseli bu blogun icine yerlestirilir. Etiket korunur.",
+    "hucre": "A79",
+    "etiket": "KAŞE VE İMZA",
+    "alanlar": [
+      [
+        "",
+        "hekim/hekim_ad_soyad"
+      ],
+      [
+        "Diploma",
+        "hekim/hekim_diploma"
+      ],
+      [
+        "Tescil",
+        "hekim/hekim_diploma_tescil"
+      ],
+      [
+        "Belge No",
+        "hekim/hekim_belge"
+      ]
+    ]
+  },
+  "imza": {
+    "_aciklama": "KoBo eki (question_xpath) -> yerlestirilecek hucre ve boyut (piksel).",
+    "hekim/hekim_kase_imza": {
+      "hucre": "B80",
+      "genislik": 150,
+      "yukseklik": 55
+    },
+    "onay/calisan_imza": {
+      "hucre": "H10",
+      "genislik": 130,
+      "yukseklik": 40
+    }
+  }
+}

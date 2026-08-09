@@ -883,10 +883,12 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     Top = 288
   end
   object Menu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 542
     Top = 137
     object KuralListesiniAcMenu: TMenuItem
       Caption = 'Kural Listesini A'#231
+      ImageIndex = 32
       OnClick = KuralListesiniAcMenuClick
     end
     object N1: TMenuItem
@@ -894,10 +896,12 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     end
     object KurallarUygulaMenu: TMenuItem
       Caption = 'T'#252'm Se'#231'ililere Kurallar'#305' Uygula'
+      ImageIndex = 15
       OnClick = KurallarUygulaMenuClick
     end
     object BuSatirdaKuralTestEtMenu: TMenuItem
       Caption = 'Bu Sat'#305'rda Kural Test Et'
+      ImageIndex = 15
       OnClick = BuSatirdaKuralTestEtMenuClick
     end
     object N2: TMenuItem
@@ -906,40 +910,48 @@ object BankaHareketlerDlg: TBankaHareketlerDlg
     object TumunuSecMenu: TMenuItem
       Tag = 1
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = TumunuSecMenuClick
     end
     object anmszveEksikleriSe1: TMenuItem
       Tag = 3
       Caption = '"Tan'#305'ms'#305'z" ve "Eksikleri" Se'#231
+      ImageIndex = 15
       OnClick = TumunuSecMenuClick
     end
     object HazrlarSe1: TMenuItem
       Tag = 4
       Caption = '"Haz'#305'r" lar'#305' Se'#231
+      ImageIndex = 15
       OnClick = TumunuSecMenuClick
     end
     object mnBrak1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' B'#305'rak'
+      ImageIndex = 15
       OnClick = TumunuSecMenuClick
     end
     object SeilileriTersevir1: TMenuItem
       Tag = 2
       Caption = 'Se'#231'ilileri Ters '#199'evir'
+      ImageIndex = 9
       OnClick = TumunuSecMenuClick
     end
   end
   object PopupMenuKural: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 414
     Top = 105
     object IslemTipineGoreMenu: TMenuItem
       Tag = 1
       Caption = #304#351'lem Tipine G'#246're '
+      ImageIndex = 22
       Hint = 'GELENISLEMTIPI'
       OnClick = IslemTipineGoreMenuClick
     end
     object AciklamayaGoreMenu: TMenuItem
       Tag = 2
       Caption = 'A'#231#305'klamaya G'#246're '
+      ImageIndex = 22
       Hint = 'ACIKLAMA'
       OnClick = IslemTipineGoreMenuClick
     end

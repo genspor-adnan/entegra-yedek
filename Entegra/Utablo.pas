@@ -659,6 +659,15 @@ type
     // Teklif SILME on-kontrolu (sp_Prog_Teklif_Silinebilir_Mi). Siparise
     //   donusturulmus teklif silinemez - zincir kopmasin.
     function TeklifSilinebilirMi(ATeklifID, ASatirID: Integer): Boolean;
+    // DONUSUM KURALI 2: bir kaynak satirin adedi, o satirdan URETILMIS adedin
+    //   ALTINA dusurulemez (ust sinir yok). Ornek: 10'luk siparis satirinin
+    //   8'i irsaliyeye donustuyse adet >= 8 olmali.
+    //   AKaynakDetayTablo: 'SIPARISDETAY' | 'FATURA' | 'TEKLIFDETAY'
+    //   (rota matrisindeki KaynakDetayTablo ile ayni degerler)
+    function DonusenAdetGetir(const AKaynakDetayTablo: string; ASatirID: Integer): Double;
+    // True = yeni adet uygun. False ise kullaniciya mesaj GOSTERILIR (AUyariGoster).
+    function AdetDusurulebilirMi(const AKaynakDetayTablo: string; ASatirID: Integer;
+      AYeniAdet: Double; AUyariGoster: Boolean = True): Boolean;
     procedure IzlemBilgileriniDuzenle(IslemOp:char; FATBASLIK, FATURA:TFDQuery; Degisemez:Boolean = False);
     Function EAN13Hesapla( Bar12Hane:String ):String;
     procedure F_Tuslari(Ekran: string; Key: Word; DBNavigator1: TDBNavigator);
@@ -5129,6 +5138,75 @@ begin
     if (not Q.Eof) and (Q.FieldByName('SILINEBILIR').AsInteger = 0) then begin
       Result := False;
       UyariGoster(Uyari, DonusumYapilmis);
+    end;
+  finally
+    Q.Free;
+  end;
+end;
+
+function TTablo.DonusenAdetGetir(const AKaynakDetayTablo: string; ASatirID: Integer): Double;
+// Kaynak satirdan uretilmis (donusmus) toplam adet. 0 = hic donusmemis.
+//   Kural sunucuda: fn_Prog_Donusum_DonusenAdet rota matrisinden okur, yeni rota
+//   eklendiginde burasi degismez.
+var
+  Q: TFDQuery;
+begin
+  Result := 0;
+  if ASatirID <= 0 then Exit;
+
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := FDCnn;
+    Q.SQL.Text := 'select dbo.fn_Prog_Donusum_DonusenAdet(:Tablo, :SatirID) as DONUSEN';
+    if AktifVeriMotor = vmPG then
+      Q.SQL.Text := PgSqlCevir('select fn_prog_donusum_donusenadet(:Tablo, :SatirID) as DONUSEN');
+    Q.ParamByName('Tablo').AsString := AKaynakDetayTablo;
+    Q.ParamByName('SatirID').AsInteger := ASatirID;
+    try
+      Q.Open;
+      if not Q.Eof then
+        Result := Q.Fields[0].AsFloat;
+    except
+      // PG pilotunda donusum alt sistemi (rota matrisi) henuz portlanmadi -
+      //   nesne yoksa kural uygulanamaz, islem engellenmemeli.
+      on E: Exception do
+        if AktifVeriMotor <> vmPG then raise;
+    end;
+  finally
+    Q.Free;
+  end;
+end;
+
+function TTablo.AdetDusurulebilirMi(const AKaynakDetayTablo: string; ASatirID: Integer;
+  AYeniAdet: Double; AUyariGoster: Boolean): Boolean;
+// DONUSUM KURALI 2. Yeni adet, donusen adedin altindaysa ENGELLE.
+//   Ust sinir yoktur - kullanici istedigi kadar artirabilir.
+var
+  Q: TFDQuery;
+begin
+  Result := True;
+  if ASatirID <= 0 then Exit;
+
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := FDCnn;
+    Q.SQL.Text := 'exec dbo.sp_Prog_Donusum_SatirAdetKontrol :Tablo, :SatirID, :YeniAdet';
+    if AktifVeriMotor = vmPG then
+      Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
+    Q.ParamByName('Tablo').AsString := AKaynakDetayTablo;
+    Q.ParamByName('SatirID').AsInteger := ASatirID;
+    Q.ParamByName('YeniAdet').AsFloat := Abs(AYeniAdet);
+    try
+      Q.Open;
+      if (not Q.Eof) and (Q.FieldByName('UYGUN').AsInteger = 0) then begin
+        Result := False;
+        if AUyariGoster then
+          UyariGoster(Uyari, Q.FieldByName('MESAJ').AsString);
+      end;
+    except
+      // PG pilotu: donusum nesneleri yoksa kural atlanir (bkz. DonusenAdetGetir)
+      on E: Exception do
+        if AktifVeriMotor <> vmPG then raise;
     end;
   finally
     Q.Free;
@@ -15419,7 +15497,7 @@ begin
       exit;
   // KontrolEt ile ayni deger-bazli yol (tip listesi kaldirildi; Abort cizimi kilitliyordu).
   Result := False;
-  if FStil = nil then Exit;
+  if FStil =  nil then Exit;
   try
     AColumn1 := (AGrid as TcxGridDBCardView).GetRowByFieldName(FAlanAdi);
     if AColumn1 = nil then Exit;

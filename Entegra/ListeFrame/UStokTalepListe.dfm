@@ -273,6 +273,7 @@
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 386
     Width = 850
@@ -288,7 +289,7 @@
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Detay'
-      ImageIndex = 0
+      ImageIndex = 22
       object Panel4: TPanel
         Left = 0
         Top = 106
@@ -647,6 +648,7 @@
     Top = 207
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 342
     Top = 109
     object BaskiOnizlemeMenu: TMenuItem
@@ -1013,10 +1015,12 @@
     Top = 156
   end
   object PopupMenuTransfer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 446
     Top = 109
     object TalepInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = TalepInfoMenuClick
     end
     object MenuTansfereDonustur: TMenuItem
@@ -1026,6 +1030,7 @@
     end
     object MenuHedefBelgeAc: TMenuItem
       Caption = 'Hedef Belgeyi A'#231
+      ImageIndex = 19
       OnClick = MenuHedefBelgeAcClick
     end
   end

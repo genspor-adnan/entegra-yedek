@@ -152,6 +152,7 @@ object OpsiyonDemirbasDlg: TOpsiyonDemirbasDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 683
@@ -166,7 +167,7 @@ object OpsiyonDemirbasDlg: TOpsiyonDemirbasDlg
     ClientRectTop = 24
     object SheetGenel: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 0
+      ImageIndex = 11
       object Label1: TLabel
         Left = 4
         Top = 81
@@ -382,7 +383,7 @@ object OpsiyonDemirbasDlg: TOpsiyonDemirbasDlg
     end
     object SheetDurumBaglanti: TcxTabSheet
       Caption = 'Durum Ba'#287'lant'#305'lar'#305
-      ImageIndex = 1
+      ImageIndex = 19
       object GridAksiyonDurum: TcxGrid
         Left = 0
         Top = 0
@@ -597,14 +598,17 @@ object OpsiyonDemirbasDlg: TOpsiyonDemirbasDlg
     Top = 184
   end
   object PopupDurumBglanti: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 504
     Top = 296
     object TeklifDurumlarnDzenle1: TMenuItem
       Caption = 'Demirba'#351' Aksiyonlar'#305'n'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = TeklifDurumlarnDzenle1Click
     end
     object DemirbaDurumlarnDzenle1: TMenuItem
       Caption = 'Demirba'#351' Durumlar'#305'n'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = DemirbaDurumlarnDzenle1Click
     end
     object N1: TMenuItem
@@ -612,10 +616,12 @@ object OpsiyonDemirbasDlg: TOpsiyonDemirbasDlg
     end
     object BalantlarOlutur1: TMenuItem
       Caption = 'Eksik Ba'#287'lant'#305'lar'#305' Olu'#351'tur'
+      ImageIndex = 13
       OnClick = BalantlarOlutur1Click
     end
     object KopmuBalantlarTemizle1: TMenuItem
       Caption = 'Kopmu'#351' Ba'#287'lant'#305'lar'#305' Temizle'
+      ImageIndex = 9
       OnClick = KopmuBalantlarTemizle1Click
     end
   end

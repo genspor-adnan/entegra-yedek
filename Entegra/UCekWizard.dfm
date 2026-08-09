@@ -1597,6 +1597,7 @@ object CekWizardDlg: TCekWizardDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 335
     Top = 177
     object BaskiOnizlemeMenu: TMenuItem
@@ -1756,14 +1757,17 @@ object CekWizardDlg: TCekWizardDlg
     Top = 416
   end
   object PopupCekHareket: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 480
     Top = 240
     object arihDeitir1: TMenuItem
       Caption = 'Tarih/Makbuz No/A'#231#305'klama'
+      ImageIndex = 21
       OnClick = arihDeitir1Click
     end
     object HareketiSil1: TMenuItem
       Caption = 'Hareketi Sil'
+      ImageIndex = 1
       OnClick = HareketiSil1Click
     end
   end
@@ -1794,15 +1798,18 @@ object CekWizardDlg: TCekWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 112
     Top = 96
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1810,14 +1817,17 @@ object CekWizardDlg: TCekWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

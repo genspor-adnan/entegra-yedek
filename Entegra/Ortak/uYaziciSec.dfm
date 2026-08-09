@@ -18,6 +18,7 @@ object YaziciSec: TYaziciSec
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 8
     Top = 8
     Width = 321
@@ -26,6 +27,7 @@ object YaziciSec: TYaziciSec
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Mevcut Yaz'#305'c'#305'lar'
+      ImageIndex = 8
       object LSYazici: TListBox
         Left = 0
         Top = 0

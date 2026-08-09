@@ -192,10 +192,12 @@ object ResimDlg: TResimDlg
     Top = 64
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 299
     Top = 132
     object Varsaylanyap1: TMenuItem
       Caption = 'Varsay'#305'lan yap'
+      ImageIndex = 23
       OnClick = Varsaylanyap1Click
     end
   end

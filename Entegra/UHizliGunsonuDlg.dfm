@@ -300,6 +300,7 @@ object HizliGunsonuDlg: THizliGunsonuDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 105
     Width = 1389
@@ -319,7 +320,7 @@ object HizliGunsonuDlg: THizliGunsonuDlg
     ClientRectTop = 24
     object cxTabSheet1: TcxTabSheet
       Caption = '     Stok     '
-      ImageIndex = 0
+      ImageIndex = 12
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -864,7 +865,7 @@ object HizliGunsonuDlg: THizliGunsonuDlg
     end
     object cxTabSheet3: TcxTabSheet
       Caption = '     Kasa     '
-      ImageIndex = 2
+      ImageIndex = 34
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -1177,7 +1178,7 @@ object HizliGunsonuDlg: THizliGunsonuDlg
     end
     object TabSheetCiro: TcxTabSheet
       Caption = 'Ciro'
-      ImageIndex = 2
+      ImageIndex = 19
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0

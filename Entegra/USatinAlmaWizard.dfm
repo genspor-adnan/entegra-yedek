@@ -1349,15 +1349,18 @@ object SatinAlmaWizard: TSatinAlmaWizard
     Left = 607
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PmSagClickPopup
     Left = 384
     Top = 224
     object PmOnayla: TMenuItem
       Caption = 'Onayla'
+      ImageIndex = 23
       OnClick = PmOnaylaClick
     end
     object PmOnaylama: TMenuItem
       Caption = 'Onaylama'
+      ImageIndex = 23
       OnClick = PmOnaylaClick
     end
     object N1: TMenuItem
@@ -1365,6 +1368,7 @@ object SatinAlmaWizard: TSatinAlmaWizard
     end
     object utarendkolanlaronayla1: TMenuItem
       Caption = 'Tutar'#305' en d'#252#351#252'k olanlar'#305' onayla'
+      ImageIndex = 23
       OnClick = utarendkolanlaronayla1Click
     end
   end

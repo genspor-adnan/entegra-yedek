@@ -16,7 +16,7 @@ object KasalarListeFrame: TKasalarListeFrame
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
-    ButtonWidth = 89
+    ButtonWidth = 86
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -39,7 +39,6 @@ object KasalarListeFrame: TKasalarListeFrame
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -197,6 +196,7 @@ object KasalarListeFrame: TKasalarListeFrame
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
+    ExplicitWidth = 8
   end
   object PageControlSekme: TcxPageControl
     Left = 0
@@ -213,6 +213,7 @@ object KasalarListeFrame: TKasalarListeFrame
     TabOrder = 3
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnChange = PageControlSekmeChange
     ClientRectBottom = 263
     ClientRectLeft = 4
@@ -220,7 +221,7 @@ object KasalarListeFrame: TKasalarListeFrame
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Toplamlar'
-      ImageIndex = 1
+      ImageIndex = 44
       PopupMenu = PopupMenuBakiye
       object cxLabel1: TcxLabel
         Left = 48
@@ -289,7 +290,7 @@ object KasalarListeFrame: TKasalarListeFrame
     end
     object TabSheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
-      ImageIndex = 6
+      ImageIndex = 32
       OnShow = TabSheetEkstreShow
       object GridKasaEkstre: TcxGrid
         Left = 0
@@ -722,6 +723,7 @@ object KasalarListeFrame: TKasalarListeFrame
     Top = 137
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 60
     Top = 243
     object BaskiOnizlemeMenu: TMenuItem
@@ -879,14 +881,17 @@ object KasalarListeFrame: TKasalarListeFrame
     Top = 94
   end
   object KasaListeMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 81
     Top = 73
     object KasaInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = KasaInfoMenuClick
     end
     object AksMenu: TMenuItem
       Caption = 'Aksiyonlar'
+      ImageIndex = 19
       OnClick = AksiyonTusClick
     end
     object N5: TMenuItem
@@ -895,11 +900,13 @@ object KasalarListeFrame: TKasalarListeFrame
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir/De'#287'i'#351'tir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir/De'#287'i'#351'tir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
@@ -911,6 +918,7 @@ object KasalarListeFrame: TKasalarListeFrame
     end
   end
   object AksiyonlarMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = AksiyonlarMenuPopup
     Left = 163
     Top = 245
@@ -923,14 +931,17 @@ object KasalarListeFrame: TKasalarListeFrame
     end
     object Ekle1: TMenuItem
       Caption = 'Aksiyon Ekle'
+      ImageIndex = 19
       OnClick = Ekle1Click
     end
     object Sil1: TMenuItem
       Caption = 'Aksiyon Sil'
+      ImageIndex = 1
       OnClick = Sil1Click
     end
     object AksiyonBilgisiniGorMenu: TMenuItem
       Caption = 'Aksiyon Bilgisini G'#246'r'
+      ImageIndex = 22
       OnClick = AksiyonBilgisiniGorMenuClick
     end
     object N6: TMenuItem
@@ -939,11 +950,13 @@ object KasalarListeFrame: TKasalarListeFrame
     object KurFarkGeliri1: TMenuItem
       Tag = 88
       Caption = 'Kur Fark'#305' Geliri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object KurFarkGideri1: TMenuItem
       Tag = 98
       Caption = 'Kur Fark'#305' Gideri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object N8: TMenuItem
@@ -951,6 +964,7 @@ object KasalarListeFrame: TKasalarListeFrame
     end
     object KopyalaMenu: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = KopyalaMenuClick
     end
   end
@@ -996,10 +1010,12 @@ object KasalarListeFrame: TKasalarListeFrame
     Top = 392
   end
   object PopupMenuBakiye: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 361
     Top = 289
     object MenuItem1: TMenuItem
       Caption = 'Bakiyeyi '#252'st tarafa kaydet'
+      ImageIndex = 2
       OnClick = MenuItem1Click
     end
   end

@@ -231,6 +231,7 @@ object UretimWizardDlg: TUretimWizardDlg
           end
         end
         object PageControlUst: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 32
           Width = 1210
@@ -249,7 +250,7 @@ object UretimWizardDlg: TUretimWizardDlg
           object cxTabSheet1: TcxTabSheet
             Caption = 'Bilgi'
             Color = clWhite
-            ImageIndex = 0
+            ImageIndex = 22
             ParentColor = False
             ExplicitHeight = 79
             object Label19: TcxLabel
@@ -586,7 +587,7 @@ object UretimWizardDlg: TUretimWizardDlg
           end
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
-            ImageIndex = 1
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -907,6 +908,7 @@ object UretimWizardDlg: TUretimWizardDlg
         Width = 485
       end
       object PageControlAlt: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 486
         Width = 1210
@@ -922,7 +924,7 @@ object UretimWizardDlg: TUretimWizardDlg
         ClientRectTop = 24
         object TabSheetGenel: TcxTabSheet
           Caption = 'Genel'
-          ImageIndex = 0
+          ImageIndex = 11
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1042,7 +1044,7 @@ object UretimWizardDlg: TUretimWizardDlg
         end
         object TabIsVeZaman: TcxTabSheet
           Caption = #304#351' Zaman'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1918,6 +1920,7 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 285
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 355
     Top = 224
     object BaskiOnizlemeMenu: TMenuItem
@@ -2012,22 +2015,27 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 340
   end
   object PopupRecete: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 281
     Top = 274
     object Reeteler1: TMenuItem
       Caption = 'Re'#231'eteleri D'#252'zenle'
+      ImageIndex = 7
       OnClick = Reeteler1Click
     end
     object ReeteOlarakKaydet1: TMenuItem
       Caption = 'Re'#231'ete Olarak Kaydet'
+      ImageIndex = 2
       OnClick = ReeteOlarakKaydet1Click
     end
     object ReetedenGetir1: TMenuItem
       Caption = 'Re'#231'eteden Getir'
+      ImageIndex = 15
       OnClick = ReetedenGetir1Click
     end
     object ReeteyeGreMiktarAyarla1: TMenuItem
       Caption = 'Re'#231'eteye G'#246're Miktar Ayarla'
+      ImageIndex = 11
       OnClick = ReeteyeGreMiktarAyarla1Click
     end
   end
@@ -2123,25 +2131,30 @@ object UretimWizardDlg: TUretimWizardDlg
       end>
   end
   object PopupMenuDonustur: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 280
     Top = 336
     object rnOlarak1: TMenuItem
       Tag = 415
       Caption = #220'r'#252'n Olarak'
+      ImageIndex = 12
       OnClick = BtnDonusturClick
     end
     object SarfOlarak1: TMenuItem
       Tag = 420
       Caption = 'Sarf Olarak'
+      ImageIndex = 15
       OnClick = BtnDonusturClick
     end
   end
   object PopupGenel: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupGenelPopup
     Left = 58
     Top = 328
     object IzlemBilgileriGorDegistirMenu: TMenuItem
       Caption = #304'zlem Bilgileri G'#246'r/De'#287'i'#351'tir'
+      ImageIndex = 22
       OnClick = IzlemBilgileriGorDegistirMenuClick
     end
   end
@@ -2212,15 +2225,18 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 340
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 848
     Top = 184
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -2228,14 +2244,17 @@ object UretimWizardDlg: TUretimWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2407,19 +2426,23 @@ object UretimWizardDlg: TUretimWizardDlg
     Top = 395
   end
   object PopupMenuIsZaman: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupGenelPopup
     Left = 282
     Top = 472
     object MenuKopyala: TMenuItem
       Caption = 'Sat'#305'r'#305' kopyala'
+      ImageIndex = 10
       OnClick = MenuKopyalaClick
     end
   end
   object PopupIsZamanPer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 109
     Top = 568
     object MenuTumKonular: TMenuItem
       Caption = 'T'#252'm '#304#351' Emri Konular'#305'n'#305' Ekle'
+      ImageIndex = 0
       OnClick = MenuTumKonularClick
     end
     object N5: TMenuItem
@@ -2427,6 +2450,7 @@ object UretimWizardDlg: TUretimWizardDlg
     end
     object RecetedenKonularEkleMenu: TMenuItem
       Caption = 'Re'#231'eteden Konular'#305' Ekle'
+      ImageIndex = 0
       OnClick = RecetedenKonularEkleMenuClick
     end
   end

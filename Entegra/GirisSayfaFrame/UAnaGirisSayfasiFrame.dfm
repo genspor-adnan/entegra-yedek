@@ -31,6 +31,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
       ParentBackground = False
       TabOrder = 1
       object PageControlOrta: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 1
         Top = 1
         Width = 950
@@ -48,7 +49,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         ClientRectTop = 27
         object SheetGiris: TcxTabSheet
           Caption = 'SheetGiris'
-          ImageIndex = 13
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -103,7 +104,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetArama: TcxTabSheet
           Caption = 'SheetArama'
-          ImageIndex = 0
+          ImageIndex = 6
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -301,7 +302,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetDuyurular: TcxTabSheet
           Caption = 'SheetDuyurular'
-          ImageIndex = 10
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -619,7 +620,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetMesajlasma: TcxTabSheet
           Caption = 'SheetMesajlasma'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -937,7 +938,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetYonetimFinans: TcxTabSheet
           Caption = 'SheetYonetimFinans'
-          ImageIndex = 9
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -962,7 +963,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetYonetimCRM: TcxTabSheet
           Caption = 'SheetYonetimCRM'
-          ImageIndex = 10
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -987,7 +988,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetYonetimTeklif: TcxTabSheet
           Caption = 'SheetYonetimTeklif'
-          ImageIndex = 11
+          ImageIndex = 4
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1012,7 +1013,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetYonetimServis: TcxTabSheet
           Caption = 'SheetYonetimServis'
-          ImageIndex = 12
+          ImageIndex = 7
           PopupMenu = PopupMenuGrafik
           ExplicitLeft = 0
           ExplicitTop = 0
@@ -1256,7 +1257,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetKDR: TcxTabSheet
           Caption = 'Karar Destek Raporlar'#305
-          ImageIndex = 8
+          ImageIndex = 32
           object dxTileControl1: TdxTileControl
             Left = 0
             Top = 0
@@ -1820,7 +1821,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetNakitAkisi: TcxTabSheet
           Caption = 'Nakit Ak'#305#351#305
-          ImageIndex = 9
+          ImageIndex = 34
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1841,7 +1842,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             ClientRectTop = 27
             object TabSheetTakvim: TcxTabSheet
               Caption = 'Takvim'
-              ImageIndex = 0
+              ImageIndex = 21
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -1880,7 +1881,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Storage = SchedulerDBStorage
                 TabOrder = 0
                 OnDblClick = SchedulerDblClick
-                Selection = 133
+                Selection = 147
                 Splitters = {
                   87020000FB000000A503000000010000820200000100000087020000F8010000}
                 StoredClientBounds = {0100000001000000A5030000F8010000}
@@ -2807,7 +2808,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             end
             object TabSheetPivot: TcxTabSheet
               Caption = 'Pivot'
-              ImageIndex = 2
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -2920,8 +2921,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
               end
               object FGrid: TcxGrid
                 AlignWithMargins = True
-                Left = 2063
-                Top = 1915
+                Left = 2075
+                Top = 1927
                 Width = 443
                 Height = 128
                 Align = alCustom
@@ -3044,7 +3045,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             end
             object TabSheetGrafik: TcxTabSheet
               Caption = 'Grafik'
-              ImageIndex = 1
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -3637,7 +3638,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             end
             object TabSheetListe: TcxTabSheet
               Caption = 'Liste'
-              ImageIndex = 3
+              ImageIndex = 32
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -3961,7 +3962,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         end
         object SheetStok: TcxTabSheet
           Caption = 'SheetStok'
-          ImageIndex = 10
+          ImageIndex = 12
           object dxTileControl2: TdxTileControl
             Left = 0
             Top = 41
@@ -4871,6 +4872,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 148
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 604
     Top = 55
   end
@@ -4917,22 +4919,27 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 123
   end
   object MesajMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 593
     Top = 269
     object KonusmaGecmisiMenu: TMenuItem
       Caption = 'Konu'#351'ma Ge'#231'mi'#351'ini G'#246'ster'
+      ImageIndex = 19
       OnClick = KonusmaGecmisiMenuClick
     end
   end
   object PopupMenuGrafik: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 585
     Top = 337
     object KosullarMenu: TMenuItem
       Caption = 'Ko'#351'ullar'
+      ImageIndex = 15
       OnClick = KosullarMenuClick
     end
     object YenileMenu: TMenuItem
       Caption = 'Yenile'
+      ImageIndex = 9
       OnClick = YenileMenuClick
     end
     object N1: TMenuItem
@@ -4940,18 +4947,22 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     end
     object DokumAyarlarMenu: TMenuItem
       Caption = 'Dokum Ayarlar'#305
+      ImageIndex = 11
       OnClick = DokumAyarlarMenuClick
     end
     object YeniDokumMenu: TMenuItem
       Caption = 'Yeni D'#246'k'#252'm'
+      ImageIndex = 0
       OnClick = DokumAyarlarMenuClick
     end
     object DokumuKopyalaMenu: TMenuItem
       Caption = 'D'#246'k'#252'm'#252' Kopyala'
+      ImageIndex = 10
       OnClick = DokumuKopyalaMenuClick
     end
     object DokumSilMenu: TMenuItem
       Caption = 'D'#246'k'#252'm Sil'
+      ImageIndex = 1
       OnClick = DokumSilMenuClick
     end
     object N2: TMenuItem
@@ -4959,6 +4970,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     end
     object DokumKaydetMenu: TMenuItem
       Caption = 'D'#246'k'#252'm'#252' Kaydet'
+      ImageIndex = 2
       OnClick = DokumKaydetMenuClick
     end
   end
@@ -6073,10 +6085,12 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 264
   end
   object PopupDuyuru: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 606
     Top = 216
     object YorumYaz1: TMenuItem
       Caption = 'Yorum Yaz'
+      ImageIndex = 15
     end
   end
   object JvDesktopAlertStack1: TJvDesktopAlertStack
@@ -6084,14 +6098,17 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 312
   end
   object PopHavaDurumu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 40
     Top = 80
     object ehirDeitir1: TMenuItem
       Caption = #350'ehir De'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = ehirDeitir1Click
     end
     object Yenile1: TMenuItem
       Caption = 'Yenile'
+      ImageIndex = 9
       OnClick = Yenile1Click
     end
   end
@@ -12309,25 +12326,30 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 105
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 631
     Top = 104
     object Gizle1: TMenuItem
       Caption = 'Gizle'
+      ImageIndex = 14
       Visible = False
       OnClick = Gizle1Click
     end
     object BilgileriDegisMenu: TMenuItem
       Caption = 'bilgilerini g'#246'r / de'#287'i'#351'tir'
+      ImageIndex = 22
     end
     object SilMenu: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
     end
     object N3: TMenuItem
       Caption = '-'
     end
     object BuguneaksiyonekleMenu: TMenuItem
       Caption = 'Bu tarihe aksiyon ekle'
+      ImageIndex = 21
       OnClick = BuguneaksiyonekleMenuClick
     end
   end
@@ -12370,6 +12392,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 215
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 227
     Top = 191
     object BaskiOnizlemeMenu: TMenuItem
@@ -12648,10 +12671,12 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
     Top = 164
   end
   object pmPivot: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 176
     Top = 152
     object ExcelPivot1: TMenuItem
       Caption = 'Excel Pivot...'
+      ImageIndex = 32
       OnClick = ExcelPivot1Click
     end
   end

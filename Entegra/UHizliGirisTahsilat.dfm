@@ -1148,16 +1148,19 @@ object HizliGirisTahsilatDlg: THizliGirisTahsilatDlg
     Top = 333
   end
   object DigerMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 83
     Top = 402
     object DigerYeniMenu: TMenuItem
       Tag = 21
       Caption = 'Yeni Para Tan'#305'mla'
+      ImageIndex = 0
       OnClick = DigerYeniMenuClick
     end
     object DigerSilMenu: TMenuItem
       Tag = 121
       Caption = 'Para Tan'#305'm'#305'n'#305' Sil'
+      ImageIndex = 1
       OnClick = DigerSilMenuClick
     end
   end

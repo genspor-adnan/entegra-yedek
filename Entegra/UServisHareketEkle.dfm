@@ -137,6 +137,7 @@ object ServisHareketDlg: TServisHareketDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 54
     Width = 518
@@ -158,7 +159,7 @@ object ServisHareketDlg: TServisHareketDlg
     object TabSheetServisEkle: TcxTabSheet
       Caption = 'Servis Ekleme'
       Color = 15329769
-      ImageIndex = 2
+      ImageIndex = 7
       ParentColor = False
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -562,7 +563,7 @@ object ServisHareketDlg: TServisHareketDlg
         object cxTabSheet2: TcxTabSheet
           Caption = 'Hareket Ekleme'
           Color = 388542
-          ImageIndex = 0
+          ImageIndex = 32
           ParentColor = False
           object Panel13: TPanel
             Left = 0
@@ -1108,7 +1109,7 @@ object ServisHareketDlg: TServisHareketDlg
     object TabSheetYorumMedya: TcxTabSheet
       Caption = 'Yorum/Medya'
       Color = 388542
-      ImageIndex = 1
+      ImageIndex = 38
       ParentColor = False
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1460,15 +1461,18 @@ object ServisHareketDlg: TServisHareketDlg
     Top = 216
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 189
     Top = 16
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1476,14 +1480,17 @@ object ServisHareketDlg: TServisHareketDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -1521,6 +1528,7 @@ object ServisHareketDlg: TServisHareketDlg
     end
   end
   object MainMenu1: TMainMenu
+    Images = Tablo.PNGImageList2
     Left = 280
     Top = 16
   end

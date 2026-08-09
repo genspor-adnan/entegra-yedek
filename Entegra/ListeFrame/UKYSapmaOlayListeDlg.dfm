@@ -245,6 +245,7 @@ object KYSapmaOlayListeDlg: TKYSapmaOlayListeDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 341
     Top = 11
     object BaskiOnizlemeMenu: TMenuItem
@@ -361,10 +362,12 @@ object KYSapmaOlayListeDlg: TKYSapmaOlayListeDlg
     Top = 185
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 423
     Top = 200
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
   end

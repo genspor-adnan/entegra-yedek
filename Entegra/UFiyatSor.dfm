@@ -54,6 +54,7 @@ object FiyatSorDlg: TFiyatSorDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 46
     Width = 467
@@ -71,7 +72,7 @@ object FiyatSorDlg: TFiyatSorDlg
     ClientRectTop = 19
     object SheetFiyatlandirma: TcxTabSheet
       Caption = '  Fiyatland'#305'rma  '
-      ImageIndex = 0
+      ImageIndex = 34
       object PanelUst: TPanel
         Left = 0
         Top = 0
@@ -792,7 +793,7 @@ object FiyatSorDlg: TFiyatSorDlg
     end
     object SheetDetay: TcxTabSheet
       Caption = '  Detay  '
-      ImageIndex = 1
+      ImageIndex = 22
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -1464,7 +1465,7 @@ object FiyatSorDlg: TFiyatSorDlg
     end
     object SheetBilgi: TcxTabSheet
       Caption = '  '#220'r'#252'n Bilgisi  '
-      ImageIndex = 2
+      ImageIndex = 12
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0

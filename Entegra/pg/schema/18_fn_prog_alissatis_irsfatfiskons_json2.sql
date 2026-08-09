@@ -33,6 +33,8 @@ DECLARE
     v_faturano  text := NULLIF(j->>'Faturano','');
     v_arabaslik text := NULLIF(j->>'Baslik','');
     v_carifirma text := NULLIF(j->>'CariFirma','');
+    -- Cari ekranindaki Alis/Satis sekmesi: kimlik uzerinden kesin cari filtresi.
+    v_rehberid  int  := NULLIF(j->>'RehberId','')::int;
     v_aciklama  text := NULLIF(j->>'Aciklama','');
     v_stok      text := NULLIF(j->>'Stok','');
     v_stokfiltre boolean := (v_stok IS NOT NULL AND v_stok <> 'ALL');
@@ -101,6 +103,10 @@ BEGIN
     IF v_arabaslik IS NOT NULL AND v_arabaslik <> 'ALL' THEN
         w := w || ' AND F.BASLIK ILIKE ' || quote_literal('%'||v_arabaslik||'%') || ' ';
     END IF;
+    IF COALESCE(v_rehberid,0) > 0 THEN
+        w := w || ' AND F.REHBERID = ' || v_rehberid || ' ';
+    END IF;
+
     IF v_carifirma IS NOT NULL AND v_carifirma <> 'ALL' THEN
         w := w || ' AND (R.FIRMA ILIKE ' || quote_literal('%'||v_carifirma||'%')
               || ' OR F.BASLIK ILIKE ' || quote_literal('%'||v_carifirma||'%')

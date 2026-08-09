@@ -1438,6 +1438,7 @@ object HizliGirisKasaSayDlg: THizliGirisKasaSayDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 171
     Top = 2
     object BaskiOnizlemeMenu: TMenuItem

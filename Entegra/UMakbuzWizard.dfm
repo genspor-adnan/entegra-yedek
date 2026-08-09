@@ -1008,6 +1008,7 @@ object MakbuzWizardDlg: TMakbuzWizardDlg
     Top = 292
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 21
     Top = 218
     object BaskiOnizlemeMenu: TMenuItem
@@ -1129,38 +1130,45 @@ object MakbuzWizardDlg: TMakbuzWizardDlg
     Top = 281
   end
   object pmDigerTurler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 335
     Top = 107
     object mnIadeCeki: TMenuItem
       Tag = 39
       Caption = #304'ade '#199'eki'
+      ImageIndex = 34
       Hint = '29'
       OnClick = NakitTusClick
     end
     object Hediyeeki1: TMenuItem
       Tag = 38
       Caption = 'Hediye '#199'eki'
+      ImageIndex = 34
       Hint = '28'
       OnClick = NakitTusClick
     end
     object Kupon1: TMenuItem
       Tag = 36
       Caption = 'Kupon'
+      ImageIndex = 34
       Hint = '26'
       OnClick = NakitTusClick
     end
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PmSagClickPopup
     Left = 240
     Top = 104
     object PmItemCekKopyala: TMenuItem
       Caption = #199'ek Kopyala'
+      ImageIndex = 10
       Visible = False
       OnClick = PmItemCekKopyalaClick
     end
     object PmItemSenetKopyala: TMenuItem
       Caption = 'Senet Kopyala'
+      ImageIndex = 10
       Visible = False
       OnClick = PmItemCekKopyalaClick
     end

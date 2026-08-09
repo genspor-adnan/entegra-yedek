@@ -203,21 +203,25 @@ object IskontoDlg: TIskontoDlg
     Top = 109
   end
   object Menu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 33
     Top = 84
     object TumUrunlerMenu: TMenuItem
       Tag = -3
       Caption = 'T'#252'm '#220'r'#252'nler'
+      ImageIndex = 12
       OnClick = TumUrunlerMenuClick
     end
     object UrunMenu: TMenuItem
       Tag = -1
       Caption = #220'r'#252'n Ekle'
+      ImageIndex = 12
       OnClick = UrunMenuClick
     end
     object UrunKategorisiMenu: TMenuItem
       Tag = -2
       Caption = #220'r'#252'n Kategorisi Ekle'
+      ImageIndex = 12
       OnClick = UrunKategorisiMenuClick
     end
     object N1: TMenuItem
@@ -226,16 +230,19 @@ object IskontoDlg: TIskontoDlg
     object TumHizmetlerMenu: TMenuItem
       Tag = -13
       Caption = 'T'#252'm Hizmetler'
+      ImageIndex = 15
       OnClick = TumUrunlerMenuClick
     end
     object Hizmet1: TMenuItem
       Tag = -11
       Caption = 'Hizmet Ekle'
+      ImageIndex = 0
       OnClick = UrunMenuClick
     end
     object HizmetKategorisi1: TMenuItem
       Tag = -12
       Caption = 'Hizmet Kategorisi Ekle'
+      ImageIndex = 0
       Visible = False
       OnClick = UrunKategorisiMenuClick
     end

@@ -1541,6 +1541,14 @@ begin
      showmessage(BGSadeceIskonto2Girilemez);
      Abort;
   end;
+
+  // DONUSUM KURALI: adet, bu satirdan URETILMIS (donusmus) adedin altina inemez.
+  //   Ust sinir yok. Yeni satirda donusum olamaz -> yalniz dsEdit'te bakilir.
+  if (SIPARISDETAY.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('SIPARISDETAY',
+            SIPARISDETAY.FieldByName('ID').AsInteger,
+            SIPARISDETAY.FieldByName('ADET').AsFloat)) then
+    Abort;
   if SIPARISDETAY.FieldByName('BIRIMFIYAT').AsString='' then
      SIPARISDETAY.FieldByName('BIRIMFIYAT').AsFloat:=0;
   if (not Eksiskontoya)and((SIPARISDETAY.FieldByName('ISKONTO').AsFloat<0)or(SIPARISDETAY.FieldByName('ISKONTO2').AsFloat<0)) then begin ///eksi iskonto izni yoksa engel oluruz

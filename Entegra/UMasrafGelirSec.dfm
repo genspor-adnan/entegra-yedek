@@ -275,10 +275,12 @@ object MasrafGelirSecDlg: TMasrafGelirSecDlg
     Top = 119
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 172
     Top = 208
     object ListeyiYenile1: TMenuItem
       Caption = 'Listeyi Yenile'
+      ImageIndex = 9
       OnClick = ListeyiYenile1Click
     end
   end

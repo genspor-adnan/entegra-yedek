@@ -150,6 +150,7 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 472
@@ -159,6 +160,7 @@ object OpsiyonCariDlg: TOpsiyonCariDlg
     TabOrder = 1
     object TabSheetGenel: TTabSheet
       Caption = 'Genel'
+      ImageIndex = 11
       object BitBtn1: TBitBtn
         Left = 9
         Top = 4

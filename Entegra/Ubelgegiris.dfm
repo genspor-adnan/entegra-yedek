@@ -1671,10 +1671,12 @@ object belgegirisdlg: Tbelgegirisdlg
     Top = 352
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 488
     Top = 288
     object SatrSil1: TMenuItem
       Caption = 'Sat'#305'r Sil'
+      ImageIndex = 1
       OnClick = SatrSil1Click
     end
   end

@@ -19,6 +19,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
   OnShow = FormShow
   TextHeight = 16
   object PageYetkilDetay: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 674
     Top = 0
     Width = 546
@@ -33,7 +34,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Rol'#252'n Yetkileri'
-      ImageIndex = 0
+      ImageIndex = 29
       object PanelRol: TPanel
         Left = 0
         Top = 33
@@ -209,7 +210,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
             ClientRectTop = 27
             object TabSheetSecim: TcxTabSheet
               Caption = 'Se'#231'im'
-              ImageIndex = 0
+              ImageIndex = 19
               object RadioGroupSecim: TcxDBRadioGroup
                 Left = 0
                 Top = 0
@@ -245,7 +246,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
             end
             object TabSheetDemirbas: TcxTabSheet
               Caption = 'Demirba'#351' Kategori'
-              ImageIndex = 1
+              ImageIndex = 12
               object RadioGroupDemirbas: TcxDBRadioGroup
                 Left = 0
                 Top = 0
@@ -335,6 +336,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     Control = PageOrganizasyon
   end
   object PageKullan: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 393
     Top = 0
     Width = 273
@@ -349,7 +351,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     ClientRectTop = 27
     object cxTabSheet2: TcxTabSheet
       Caption = 'Roldeki Kullan'#305'c'#305'lar'
-      ImageIndex = 0
+      ImageIndex = 35
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -454,6 +456,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     Control = PageKullan
   end
   object PageOrganizasyon: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 385
@@ -468,7 +471,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     ClientRectTop = 27
     object cxTabSheet3: TcxTabSheet
       Caption = 'Organizasyon / Roller'
-      ImageIndex = 0
+      ImageIndex = 19
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -803,30 +806,37 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     Top = 126
   end
   object PopupMenuGurup: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 435
     Top = 277
     object mGurubuSe1: TMenuItem
       Caption = 'T'#252'm Gurubu Se'#231
+      ImageIndex = 15
       OnClick = mGurubuSe1Click
     end
     object mGurubuKaldr1: TMenuItem
       Caption = 'T'#252'm Gurubu Kald'#305'r'
+      ImageIndex = 24
       OnClick = mGurubuKaldr1Click
     end
   end
   object PopupMenuRoller: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 76
     Top = 154
     object Yeni1: TMenuItem
       Caption = 'Yeni'
+      ImageIndex = 0
       OnClick = RolYeniTusClick
     end
     object Sil1: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = RolSilTusClick
     end
     object Dzenle1: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = RolDuzenleTusClick
     end
     object N2: TMenuItem
@@ -834,6 +844,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     end
     object BakaBirRoldenYetkiKopyala1: TMenuItem
       Caption = 'Ba'#351'ka Bir Rolden Yetki Kopyala'
+      ImageIndex = 10
       OnClick = BakaBirRoldenYetkiKopyala1Click
     end
     object N1: TMenuItem
@@ -841,10 +852,12 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     end
     object DepertmanListesiDzenle1: TMenuItem
       Caption = 'Departman Listesi D'#252'zenle'
+      ImageIndex = 7
       OnClick = DepertmanListesiDzenle1Click
     end
     object GrevListesiDzenle1: TMenuItem
       Caption = 'G'#246'rev Listesi D'#252'zenle'
+      ImageIndex = 7
       OnClick = GrevListesiDzenle1Click
     end
   end

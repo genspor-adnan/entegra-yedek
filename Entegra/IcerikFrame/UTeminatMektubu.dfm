@@ -933,18 +933,22 @@ object TeminatMektubuDlg: TTeminatMektubuDlg
     Top = 36
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 725
     Top = 268
     object BaslatMenu: TMenuItem
       Caption = #214'deme takvimini planlarda g'#246'ster'
+      ImageIndex = 34
       OnClick = BaslatMenuClick
     end
     object SilMenu: TMenuItem
       Caption = 'Olu'#351'turulmu'#351' '#214'deme planlar'#305'n'#305' sil'
+      ImageIndex = 1
       OnClick = SilMenuClick
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 695
     Top = 138
     object BaskiOnizlemeMenu: TMenuItem

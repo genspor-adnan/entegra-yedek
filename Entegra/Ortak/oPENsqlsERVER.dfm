@@ -104,6 +104,7 @@ object OpenSQLServerForm: TOpenSQLServerForm
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 57
     Width = 389
@@ -118,7 +119,7 @@ object OpenSQLServerForm: TOpenSQLServerForm
     ClientRectTop = 24
     object TabSheetSQL: TcxTabSheet
       Caption = 'MSSQL'
-      ImageIndex = 0
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -281,7 +282,7 @@ object OpenSQLServerForm: TOpenSQLServerForm
     end
     object TabSheetPG: TcxTabSheet
       Caption = 'PostrgreSQL'
-      ImageIndex = 1
+      ImageIndex = 34
       object cxLabelPgSunucu: TcxLabel
         Left = 8
         Top = 20

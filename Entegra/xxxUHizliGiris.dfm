@@ -2666,17 +2666,21 @@ object HizliGirisDlg: THizliGirisDlg
     Top = 402
   end
   object PopupBekletilenler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 375
     Top = 156
   end
   object PopupKisaYollar: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 373
     Top = 112
     object StokEkle1: TMenuItem
       Caption = 'Stok Ekle '
+      ImageIndex = 12
     end
     object SeiliStouksayolmensndenkaldr1: TMenuItem
       Caption = 'Stok Kald'#305'r'
+      ImageIndex = 24
       OnClick = SeiliStouksayolmensndenkaldr1Click
     end
   end
@@ -2750,10 +2754,12 @@ object HizliGirisDlg: THizliGirisDlg
     Top = 47
   end
   object PopupSablonMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 470
     Top = 219
     object SablonSiparistenGetirMenu: TMenuItem
       Caption = #350'ablondan Getir'
+      ImageIndex = 15
       OnClick = SablonSiparistenGetirMenuClick
     end
     object N2: TMenuItem
@@ -2761,13 +2767,16 @@ object HizliGirisDlg: THizliGirisDlg
     end
     object YeniSablonSiparisOlusturMenu: TMenuItem
       Caption = 'Yeni '#350'ablon Olu'#351'tur'
+      ImageIndex = 0
       OnClick = YeniSablonSiparisOlusturMenuClick
     end
     object SablonSiparisDegistirMenu: TMenuItem
       Caption = #350'ablon De'#287'i'#351'tir'
+      ImageIndex = 30
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 1064
     Top = 45
     object BaskiOnizlemeMenu: TMenuItem

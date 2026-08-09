@@ -763,6 +763,7 @@ object BelgeZarflariDlg: TBelgeZarflariDlg
     Top = 136
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 829
     Top = 138
     object BaskiOnizlemeMenu: TMenuItem

@@ -247,6 +247,7 @@ object ServisWizardDlg: TServisWizardDlg
         1185
         595)
       object ServisPageControl: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 242
         Width = 1185
@@ -262,7 +263,7 @@ object ServisWizardDlg: TServisWizardDlg
         ClientRectTop = 27
         object SheetHareketlerAlt: TcxTabSheet
           Caption = 'Hareketler'
-          ImageIndex = 4
+          ImageIndex = 32
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -676,7 +677,7 @@ object ServisWizardDlg: TServisWizardDlg
         end
         object SheetGenel: TcxTabSheet
           Caption = 'Genel '
-          ImageIndex = 10
+          ImageIndex = 11
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -988,7 +989,7 @@ object ServisWizardDlg: TServisWizardDlg
         object SheetBelgeler: TcxTabSheet
           Tag = 250
           Caption = 'Belgeler'
-          ImageIndex = 1
+          ImageIndex = 19
           object ToolBar8: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1662,6 +1663,7 @@ object ServisWizardDlg: TServisWizardDlg
           end
         end
         object PageControl1: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 543
           Top = 0
           Width = 642
@@ -1682,7 +1684,7 @@ object ServisWizardDlg: TServisWizardDlg
           object SheetTeslim: TcxTabSheet
             Caption = 'Teslim'
             Color = clGray
-            ImageIndex = 1
+            ImageIndex = 19
             ParentColor = False
             object cxLabel14: TcxLabel
               Left = 5
@@ -1846,7 +1848,7 @@ object ServisWizardDlg: TServisWizardDlg
           end
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
-            ImageIndex = 4
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1854,7 +1856,7 @@ object ServisWizardDlg: TServisWizardDlg
           end
           object SheetOzellik: TcxTabSheet
             Caption = #214'zellikler'
-            ImageIndex = 5
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -2522,6 +2524,7 @@ object ServisWizardDlg: TServisWizardDlg
     Top = 400
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 101
     Top = 551
     object BaskiOnizlemeMenu: TMenuItem
@@ -2607,16 +2610,17 @@ object ServisWizardDlg: TServisWizardDlg
     Top = 452
   end
   object PopupMenuKopya: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 336
     Top = 456
     object MenuButunServisKopyala: TMenuItem
       Caption = 'B'#252't'#252'n Servisi kopyala'
-      ImageIndex = 0
+      ImageIndex = 10
     end
     object MenuSadeceDetay: TMenuItem
       Tag = 1
       Caption = 'Sadece detay sat'#305'rlar'#305' kopyala'
-      ImageIndex = 1
+      ImageIndex = 10
     end
   end
   object TabServisBelge: TFDQuery
@@ -3118,78 +3122,96 @@ object ServisWizardDlg: TServisWizardDlg
     Top = 390
   end
   object PopupYeniBelge: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 112
     Top = 496
     object eklif1: TMenuItem
       Tag = 80
       Caption = 'Teklif'
+      ImageIndex = 4
       OnClick = eklif1Click
     end
     object Sipari1: TMenuItem
       Caption = 'Sipari'#351
+      ImageIndex = 4
       object VerilenSipari1: TMenuItem
         Tag = 9
         Caption = 'Verilen Sipari'#351
+        ImageIndex = 4
         OnClick = eklif1Click
       end
       object AlnanSipari1: TMenuItem
         Tag = 19
         Caption = 'Al'#305'nan Sipari'#351
+        ImageIndex = 4
         OnClick = eklif1Click
       end
     end
     object rsaliye1: TMenuItem
       Caption = #304'rsaliye'
+      ImageIndex = 19
       object Al1: TMenuItem
         Tag = 10
         Caption = 'Al'#305#351' '#304'rsaliyesi'
+        ImageIndex = 19
         OnClick = eklif1Click
       end
       object Satrsaliyesi1: TMenuItem
         Tag = 14
         Caption = 'Sat'#305#351' '#304'rsaliyesi'
+        ImageIndex = 19
         OnClick = eklif1Click
       end
     end
     object Fatura2: TMenuItem
       Caption = 'Fatura'
+      ImageIndex = 19
       object AlFaturas1: TMenuItem
         Tag = 11
         Caption = 'Al'#305#351' Faturas'#305
+        ImageIndex = 19
         OnClick = eklif1Click
       end
       object SatFaturas1: TMenuItem
         Tag = 15
         Caption = 'Sat'#305#351' Faturas'#305
+        ImageIndex = 19
         OnClick = eklif1Click
       end
     end
     object Fi1: TMenuItem
       Caption = 'Fi'#351
+      ImageIndex = 19
       object AlFii1: TMenuItem
         Tag = 12
         Caption = 'Al'#305#351' Fi'#351'i'
+        ImageIndex = 19
         OnClick = eklif1Click
       end
       object SatFii1: TMenuItem
         Tag = 16
         Caption = 'Sat'#305#351' Fi'#351'i'
+        ImageIndex = 19
         OnClick = eklif1Click
       end
     end
   end
   object PopupBelgeDonusum: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 376
     Top = 520
     object BelgeyiA1: TMenuItem
       Caption = 'Belgeyi A'#231
+      ImageIndex = 19
     end
     object KaynakBelgeyiA1: TMenuItem
       Caption = 'Kaynak Belgeyi A'#231
+      ImageIndex = 19
       OnClick = KaynakBelgeyiA1Click
     end
     object HedefBelgeyiA1: TMenuItem
       Caption = 'Hedef Belgeyi A'#231
+      ImageIndex = 19
       OnClick = HedefBelgeyiA1Click
     end
     object N6: TMenuItem
@@ -3198,47 +3220,55 @@ object ServisWizardDlg: TServisWizardDlg
     object SipariOlutur1: TMenuItem
       Tag = 19
       Caption = 'Al'#305'nan Sipari'#351'e D'#246'n'#252#351't'#252'r'
+      ImageIndex = 4
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object VerSipariineDntr1: TMenuItem
       Tag = 9
       Caption = 'Verilen Sipari'#351'ine D'#246'n'#252#351't'#252'r'
+      ImageIndex = 4
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object rsaliyeOlutur2: TMenuItem
       Tag = 10
       Caption = 'Al'#305#351' '#304'rsaliyesine D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       OnClick = SipariOlutur1Click
     end
     object FaturaOlutur1: TMenuItem
       Tag = 11
       Caption = 'Al'#305#351' Faturas'#305'na D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object FiOlutur1: TMenuItem
       Tag = 12
       Caption = 'Al'#305#351' Fi'#351'ine D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object SatrsaliyesineDntr1: TMenuItem
       Tag = 14
       Caption = 'Sat'#305#351' '#304'rsaliyesine D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object SatFaturasnaDntr1: TMenuItem
       Tag = 15
       Caption = 'Sat'#305#351' Faturas'#305'na D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       Visible = False
       OnClick = SipariOlutur1Click
     end
     object SatFiineDntr1: TMenuItem
       Tag = 16
       Caption = 'Sat'#305#351' Fi'#351'ine D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       Visible = False
       OnClick = SipariOlutur1Click
     end
@@ -3271,15 +3301,18 @@ object ServisWizardDlg: TServisWizardDlg
     Top = 396
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = YorumSilClick
     end
     object N4: TMenuItem
@@ -3287,14 +3320,17 @@ object ServisWizardDlg: TServisWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

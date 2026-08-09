@@ -201,6 +201,7 @@ object GorevListeDlg: TGorevListeDlg
       ExplicitWidth = 8
     end
     object cxPageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 413
       Width = 653
@@ -216,7 +217,7 @@ object GorevListeDlg: TGorevListeDlg
       ClientRectTop = 26
       object cxTabSheet1: TcxTabSheet
         Caption = #304#231'erik'
-        ImageIndex = 0
+        ImageIndex = 19
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -407,6 +408,7 @@ object GorevListeDlg: TGorevListeDlg
       end
     end
     object PageControlUst: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 42
       Width = 653
@@ -422,7 +424,7 @@ object GorevListeDlg: TGorevListeDlg
       ClientRectTop = 26
       object TabSheetListe: TcxTabSheet
         Caption = 'Liste'
-        ImageIndex = 0
+        ImageIndex = 32
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -602,7 +604,7 @@ object GorevListeDlg: TGorevListeDlg
       end
       object TabSheetGrup: TcxTabSheet
         Caption = 'Grup'
-        ImageIndex = 1
+        ImageIndex = 19
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -1235,6 +1237,7 @@ object GorevListeDlg: TGorevListeDlg
     Top = 471
   end
   object GorevlerMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = GorevlerMenuPopup
     OfficeDesign = True
@@ -1258,23 +1261,28 @@ object GorevListeDlg: TGorevListeDlg
     Top = 160
     object GorevInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = GorevInfoMenuClick
     end
     object BuTariheIsEkleMenu: TMenuItem
       Caption = 'Bu Tarihe '#304#351' Ekle'
+      ImageIndex = 21
       OnClick = GorevEkleTusClick
     end
     object DuzenleMenu: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = DuzenleMenuClick
     end
     object TamamlandiIsaretleMenu: TMenuItem
       Caption = #304#351'aretliler Tamamland'#305' / Tamamlanmad'#305
+      ImageIndex = 23
       Visible = False
       OnClick = TamamlandiIsaretleMenuClick
     end
     object Bayraklaretle1: TMenuItem
       Caption = #304#351'aretliler  Bayrakl'#305' / Bayraks'#305'z'
+      ImageIndex = 31
       Visible = False
       OnClick = Bayraklaretle1Click
     end
@@ -1283,18 +1291,21 @@ object GorevListeDlg: TGorevListeDlg
     end
     object TarihBugunMenu: TMenuItem
       Caption = #304#351'aretlilerin Tarihi Bug'#252'n'
+      ImageIndex = 21
       Visible = False
       OnClick = TarihBugunMenuClick
     end
     object arihYarn1: TMenuItem
       Tag = 1
       Caption = #304#351'aretlilerin Tarihi Yar'#305'n'
+      ImageIndex = 21
       Visible = False
       OnClick = TarihBugunMenuClick
     end
     object TarihiKaldirMenu: TMenuItem
       Tag = -1
       Caption = #304#351'aretlilerin Tarihini Kald'#305'r'
+      ImageIndex = 24
       Visible = False
       OnClick = TarihBugunMenuClick
     end
@@ -1304,6 +1315,7 @@ object GorevListeDlg: TGorevListeDlg
     end
     object Atamayap1: TMenuItem
       Caption = 'Atama yap'
+      ImageIndex = 15
       OnClick = Atamayap1Click
     end
     object N3: TMenuItem
@@ -1311,6 +1323,7 @@ object GorevListeDlg: TGorevListeDlg
     end
     object MteriSe1: TMenuItem
       Caption = 'M'#252#351'teri Se'#231
+      ImageIndex = 35
       OnClick = MteriSe1Click
     end
     object N4: TMenuItem
@@ -1318,11 +1331,13 @@ object GorevListeDlg: TGorevListeDlg
     end
     object UstIsiAcMenu: TMenuItem
       Caption = 'Bu '#304#351'in Ba'#287'l'#305' Oldu'#287'u '#220'st '#304#351'i A'#231
+      ImageIndex = 19
       Visible = False
       OnClick = UstIsiAcMenuClick
     end
     object AltIsiAcMenu: TMenuItem
       Caption = 'Bu '#304#351'e Ba'#287'l'#305' Alt '#304#351'i A'#231
+      ImageIndex = 19
       Visible = False
       OnClick = AltIsiAcMenuClick
     end
@@ -1332,10 +1347,12 @@ object GorevListeDlg: TGorevListeDlg
     end
     object BuiIsiTasiMenu: TMenuItem
       Caption = #304#351'aretli  '#304#351'leri Ta'#351#305
+      ImageIndex = 6
       Visible = False
       object MasaUstuMenu: TMenuItem
         Tag = -27
         Caption = 'Masa'#252'st'#252
+        ImageIndex = 6
         OnClick = MenuItem1Click
       end
       object N8: TMenuItem
@@ -1347,6 +1364,7 @@ object GorevListeDlg: TGorevListeDlg
     end
     object BuiiEPostaGnder1: TMenuItem
       Caption = 'Bu i'#351'i E-Posta G'#246'nder'
+      ImageIndex = 17
       OnClick = BuiiEPostaGnder1Click
     end
     object N6: TMenuItem
@@ -1354,14 +1372,17 @@ object GorevListeDlg: TGorevListeDlg
     end
     object ButenYeniBirListeOlutur1: TMenuItem
       Caption = 'Bu '#304#351'ten Yeni Bir Liste Olu'#351'tur'
+      ImageIndex = 32
       OnClick = ButenYeniBirListeOlutur1Click
     end
     object IsiKopyalaMenu: TMenuItem
       Caption = #304#351'i Kopyala'
+      ImageIndex = 10
       OnClick = IsiKopyalaMenuClick
     end
     object IsiSilMenu: TMenuItem
       Caption = #304#351'i Sil'
+      ImageIndex = 1
       OnClick = IsiSilMenuClick
     end
   end
@@ -1552,15 +1573,18 @@ object GorevListeDlg: TGorevListeDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 421
     Top = 552
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -1568,14 +1592,17 @@ object GorevListeDlg: TGorevListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

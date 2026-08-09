@@ -203,6 +203,7 @@
     end
   end
   object PCCekTurleri: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 153
     Width = 552
@@ -219,7 +220,7 @@
     ClientRectTop = 27
     object SheetAlinanCekler: TcxTabSheet
       Caption = 'Al'#305'nan '#199'ekler'
-      ImageIndex = 0
+      ImageIndex = 38
       ExplicitHeight = 246
       object cgAlinanCekler: TcxCheckGroup
         Left = 0
@@ -275,7 +276,7 @@
     end
     object SheetVerilenCekler: TcxTabSheet
       Caption = 'Verilen '#199'ekler'
-      ImageIndex = 1
+      ImageIndex = 38
       ExplicitHeight = 246
       object cgVerilenCekler: TcxCheckGroup
         Left = 0

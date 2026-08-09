@@ -677,6 +677,7 @@ object RehberWizardDlg: TRehberWizardDlg
         end
       end
       object CariPageControl: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 361
         Width = 755
@@ -692,7 +693,7 @@ object RehberWizardDlg: TRehberWizardDlg
         ClientRectTop = 29
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
-          ImageIndex = 0
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -807,7 +808,7 @@ object RehberWizardDlg: TRehberWizardDlg
         end
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2507,6 +2508,7 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 520
   end
   object PopupIlgili: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 25
     Top = 15
     object lgiliKurumdanAyrld1: TMenuItem
@@ -2517,6 +2519,7 @@ object RehberWizardDlg: TRehberWizardDlg
     end
     object DurumuSfrla1: TMenuItem
       Caption = #304'lgilinin durumunu bo'#351' olarak i'#351'aretle'
+      ImageIndex = 23
       OnClick = DurumuSfrla1Click
     end
     object N2: TMenuItem
@@ -2524,10 +2527,12 @@ object RehberWizardDlg: TRehberWizardDlg
     end
     object lgiliyeletiimBilgisiKopyala1: TMenuItem
       Caption = #304'lgiliye '#304'leti'#351'im Bilgisi Kopyala'
+      ImageIndex = 10
       OnClick = lgiliyeletiimBilgisiKopyala1Click
     end
     object lgiliyiKopyala1: TMenuItem
       Caption = #304'lgiliyi Kopyala'
+      ImageIndex = 10
       OnClick = lgiliyiKopyala1Click
     end
     object N7: TMenuItem
@@ -2535,6 +2540,7 @@ object RehberWizardDlg: TRehberWizardDlg
     end
     object Varsaylan1: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
       OnClick = Varsaylan1Click
     end
   end
@@ -2555,10 +2561,12 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 131
   end
   object PopupIletisim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 705
     Top = 511
     object MenuItem7: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
       OnClick = MenuItem7Click
     end
   end
@@ -2634,15 +2642,18 @@ object RehberWizardDlg: TRehberWizardDlg
     Top = 400
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -2650,18 +2661,22 @@ object RehberWizardDlg: TRehberWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
   object YorumAtacMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724

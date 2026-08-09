@@ -353,8 +353,8 @@ object RehberAramaEkrani: TRehberAramaEkrani
     end
     object ToolBar1: TToolBar
       AlignWithMargins = True
-      Left = 20028
-      Top = 19465
+      Left = 20046
+      Top = 19483
       Width = 60
       Height = 33
       Margins.Bottom = 0
@@ -466,10 +466,12 @@ object RehberAramaEkrani: TRehberAramaEkrani
     Top = 156
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 688
     Top = 160
     object GrupIceriginiGosterMenu: TMenuItem
       Caption = 'Grup '#304#231'eri'#287'ini G'#246'ster'
+      ImageIndex = 19
       OnClick = GrupIceriginiGosterMenuClick
     end
   end

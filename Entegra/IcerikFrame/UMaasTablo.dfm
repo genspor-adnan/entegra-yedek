@@ -342,6 +342,7 @@ object MaasTabloDlg: TMaasTabloDlg
     Align = alBottom
     TabOrder = 4
     object cxPageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 1
       Width = 528
@@ -356,7 +357,7 @@ object MaasTabloDlg: TMaasTabloDlg
       ClientRectTop = 24
       object cxTabSheet1: TcxTabSheet
         Caption = 'Tahakkuk'
-        ImageIndex = 0
+        ImageIndex = 19
         object GridTahakkuk: TcxGrid
           Left = 0
           Top = 0
@@ -457,6 +458,7 @@ object MaasTabloDlg: TMaasTabloDlg
       end
     end
     object cxPageControl2: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 529
       Top = 1
       Width = 541
@@ -471,7 +473,7 @@ object MaasTabloDlg: TMaasTabloDlg
       ClientRectTop = 24
       object cxTabSheet2: TcxTabSheet
         Caption = 'Kesinti'
-        ImageIndex = 0
+        ImageIndex = 19
         object GridKesinti: TcxGrid
           Left = 0
           Top = 0
@@ -1249,18 +1251,22 @@ object MaasTabloDlg: TMaasTabloDlg
     Top = 227
   end
   object TabloyuOlustur: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = TabloyuOlusturPopup
     Left = 231
     Top = 50
     object OlusturMenu: TMenuItem
       Caption = '1 - Tabloyu olu'#351'tur'
+      ImageIndex = 0
       object TabloOlusturMenu: TMenuItem
         Tag = 1
         Caption = #199'ar'#351'af Listeden'
+        ImageIndex = 32
         OnClick = TabloOlusturMenuClick
       end
       object ExceldenTabloyuolusturMenu: TMenuItem
         Caption = 'Excel'#39'den '
+        ImageIndex = 32
         OnClick = ExceldenTabloyuolusturMenuClick
       end
       object N6: TMenuItem
@@ -1268,25 +1274,31 @@ object MaasTabloDlg: TMaasTabloDlg
       end
       object ExceldenPrimleriTabloyaEkleMenu: TMenuItem
         Caption = 'Excel'#39'den Primleri Tabloya Ekle'
+        ImageIndex = 32
         OnClick = ExceldenPrimleriTabloyaEkleMenuClick
       end
     end
     object BankayaexceltablosuhazrlaMenu: TMenuItem
       Caption = '2 - Se'#231'ililerden '#39'Bankaya Excel'#39' tablosu haz'#305'rla'
+      ImageIndex = 32
       OnClick = BankayaexceltablosuhazrlaMenuClick
     end
     object KasayagiderolarakIsleMenu: TMenuItem
       Caption = '3 - Kasaya i'#351'lemler'
+      ImageIndex = 15
       object SeilileriTahakkukolarakile1: TMenuItem
         Caption = 'Se'#231'ilileri '#39'Tahakkuk'#39' olarak i'#351'le'
+        ImageIndex = 19
         OnClick = SeilileriTahakkukolarakile1Click
       end
       object SeilileriBankadandemeolarakile1: TMenuItem
         Caption = 'Se'#231'ilileri '#39'Bankadan '#214'deme'#39' olarak i'#351'le'
+        ImageIndex = 34
         OnClick = SeilileriBankadandemeolarakile1Click
       end
       object SeilileriKasadandemeolarakile1: TMenuItem
         Caption = 'Se'#231'ilileri '#39'Kasadan '#214'deme'#39' olarak i'#351'le'
+        ImageIndex = 34
         OnClick = SeilileriKasadandemeolarakile1Click
       end
       object N5: TMenuItem
@@ -1294,11 +1306,13 @@ object MaasTabloDlg: TMaasTabloDlg
       end
       object sttekinuygula1: TMenuItem
         Caption = #220'stteki '#252#231#252'n'#252' toplu uygula'
+        ImageIndex = 15
         OnClick = sttekinuygula1Click
       end
     end
     object KasayaAvansOlarakIsle: TMenuItem
       Caption = '3 - Se'#231'ilileri '#39'Avans '#214'deme'#39' olarak i'#351'le'
+      ImageIndex = 34
       OnClick = KasayaAvansOlarakIsleClick
     end
     object N4: TMenuItem
@@ -1306,18 +1320,22 @@ object MaasTabloDlg: TMaasTabloDlg
     end
     object TabloyuSilMenu: TMenuItem
       Caption = 'Tablodan se'#231'ilileri sil'
+      ImageIndex = 1
       OnClick = TabloyuSilMenuClick
     end
     object BorcluBankaAtaMenu: TMenuItem
       Caption = 'Se'#231'ililere kurum "Banka" ata'
+      ImageIndex = 15
       OnClick = BorcluBankaAtaMenuClick
     end
     object AlacaklibankaataMenu: TMenuItem
       Caption = 'Personelin "Banka" bilgisini gir'
+      ImageIndex = 22
       OnClick = AlacaklibankaataMenuClick
     end
     object SeililereborluKasaata1: TMenuItem
       Caption = 'Se'#231'ililere bor'#231'lu "Kasa" ata'
+      ImageIndex = 15
       OnClick = SeililereborluKasaata1Click
     end
     object N2: TMenuItem
@@ -1326,16 +1344,19 @@ object MaasTabloDlg: TMaasTabloDlg
     object HepsinisecMenu: TMenuItem
       Tag = 1
       Caption = 'Hepsini se'#231
+      ImageIndex = 23
       OnClick = HepsinisecMenuClick
     end
     object HepsinikaldirMenu: TMenuItem
       Tag = 2
       Caption = 'Hepsini kald'#305'r'
+      ImageIndex = 24
       OnClick = HepsinisecMenuClick
     end
     object SecimiterscevirMenu: TMenuItem
       Tag = 3
       Caption = 'Se'#231'imi ters '#231'evir'
+      ImageIndex = 9
       OnClick = HepsinisecMenuClick
     end
     object N1: TMenuItem
@@ -1343,18 +1364,22 @@ object MaasTabloDlg: TMaasTabloDlg
     end
     object PersonelinKartnAcMenu: TMenuItem
       Caption = 'Personelin Kart'#305'n'#305' A'#231
+      ImageIndex = 35
       OnClick = PersonelinKartnAcMenuClick
     end
     object PersonelinEkstresiniAcMenu: TMenuItem
       Caption = 'Personelin Ekstresini A'#231
+      ImageIndex = 35
     end
     object N3: TMenuItem
       Caption = '-'
     end
     object DigerIslemlerMenu: TMenuItem
       Caption = 'Di'#287'er '#304#351'lemler'
+      ImageIndex = 15
       object ExcelAlanEslestirmesiMenu: TMenuItem
         Caption = 'Bilgi almak i'#231'in Excel <--> Alan E'#351'le'#351'tirmesi'
+        ImageIndex = 32
         OnClick = ExcelAlanEslestirmesiMenuClick
       end
     end
@@ -1374,6 +1399,7 @@ object MaasTabloDlg: TMaasTabloDlg
     Top = 72
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 27
     Top = 108
     object BaskiOnizlemeMenu: TMenuItem
@@ -1501,20 +1527,24 @@ object MaasTabloDlg: TMaasTabloDlg
     Top = 226
   end
   object PopupMenuTahakkuk: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuTahakkukPopup
     Left = 24
     Top = 208
     object TahakkukDuzenle: TMenuItem
       Caption = 'Tahakkuk D'#252'zenle'
+      ImageIndex = 7
       OnClick = TahakkukDuzenleClick
     end
   end
   object PopupMenuKesinti: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuKesintiPopup
     Left = 48
     Top = 296
     object KesintiDuzenle: TMenuItem
       Caption = 'Kesinti D'#252'zenle'
+      ImageIndex = 7
       OnClick = KesintiDuzenleClick
     end
   end

@@ -278,6 +278,7 @@ object StokWizardDlg: TStokWizardDlg
       ExplicitWidth = 0
       ExplicitHeight = 0
       object PageControlUst: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 70
         Width = 916
@@ -294,7 +295,7 @@ object StokWizardDlg: TStokWizardDlg
         object TabSeetGenelBilgiler: TcxTabSheet
           Caption = 'Genel Bilgiler'
           Color = clSilver
-          ImageIndex = 0
+          ImageIndex = 11
           ParentColor = False
           PopupMenu = PopupMenuStok
           ExplicitLeft = 0
@@ -889,7 +890,7 @@ object StokWizardDlg: TStokWizardDlg
             ClientRectTop = 27
             object TabSheerNotlar: TcxTabSheet
               Caption = 'Notlar'
-              ImageIndex = 0
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -907,7 +908,7 @@ object StokWizardDlg: TStokWizardDlg
             end
             object TabSheetBoyutlar: TcxTabSheet
               Caption = #214'l'#231#252'ler'
-              ImageIndex = 1
+              ImageIndex = 19
               object cxGroupBox1: TcxGroupBox
                 Left = -5
                 Top = 3
@@ -1162,7 +1163,7 @@ object StokWizardDlg: TStokWizardDlg
             end
             object TabSheetCevrim: TcxTabSheet
               Caption = #199'evrimler'
-              ImageIndex = 2
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -1311,7 +1312,7 @@ object StokWizardDlg: TStokWizardDlg
             end
             object TabSheetKalite: TcxTabSheet
               Caption = 'Kalite'
-              ImageIndex = 3
+              ImageIndex = 19
               object ComboKALITEKONTROL: TcxDBComboBox
                 Left = 93
                 Top = 36
@@ -1344,7 +1345,7 @@ object StokWizardDlg: TStokWizardDlg
             end
             object TabSheetYDil: TcxTabSheet
               Caption = 'Yabanc'#305' Dil'
-              ImageIndex = 4
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -1993,7 +1994,7 @@ object StokWizardDlg: TStokWizardDlg
         end
         object TabSheetUTS: TcxTabSheet
           Caption = #220'TS Bilgileri'
-          ImageIndex = 3
+          ImageIndex = 22
           object cxLabel16: TcxLabel
             Left = 21
             Top = 21
@@ -2294,7 +2295,7 @@ object StokWizardDlg: TStokWizardDlg
         end
         object TabSheetMuhasebeHesaplari: TcxTabSheet
           Caption = 'Muhasebe Hesaplar'#305
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2485,7 +2486,7 @@ object StokWizardDlg: TStokWizardDlg
         end
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alanlar'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -4956,15 +4957,18 @@ object StokWizardDlg: TStokWizardDlg
     Top = 57
   end
   object PmHesapla: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 303
     Top = 432
     object Hesapla1: TMenuItem
       Caption = 'Fiyat Hesapla'
+      ImageIndex = 34
       Visible = False
       OnClick = Hesapla1Click
     end
     object FiyatListeleri1: TMenuItem
       Caption = 'Fiyat Listeleri'
+      ImageIndex = 32
       Visible = False
       OnClick = FiyatListeleri1Click
     end
@@ -5038,10 +5042,12 @@ object StokWizardDlg: TStokWizardDlg
     Top = 26
   end
   object PmKopyala: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 900
     Top = 25
     object Burayaekstralarkopyala1: TMenuItem
       Caption = 'Buraya Ekstralar'#305'  Kopyala'
+      ImageIndex = 10
       OnClick = Burayaekstralarkopyala1Click
     end
   end
@@ -5064,28 +5070,35 @@ object StokWizardDlg: TStokWizardDlg
     Top = 221
   end
   object PopupStokBoyutBarkod: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 539
     Top = 230
     object ret1: TMenuItem
       Caption = 'Numerik Barkod '#220'ret'
+      ImageIndex = 15
       object Bo1: TMenuItem
         Caption = 'Kullan'#305'c'#305
+        ImageIndex = 35
         OnClick = BtnBarkodUretClick
       end
     end
     object GrselBarkodret1: TMenuItem
       Caption = 'G'#246'rsel Barkod '#220'ret'
+      ImageIndex = 22
       OnClick = GrselBarkodret1Click
     end
     object VarsaylanYap1: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
     end
   end
   object PopupDetayIslemleri: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 494
     Top = 11
     object DetayKopyala1: TMenuItem
       Caption = 'Detay Kopyala'
+      ImageIndex = 10
       OnClick = DetayKopyala1Click
     end
   end
@@ -5121,22 +5134,27 @@ object StokWizardDlg: TStokWizardDlg
     Top = 196
   end
   object PopupMenuBirim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 222
     Top = 65531
     object MenuItemAnaBirim: TMenuItem
       Caption = 'Anabirimi de'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = MenuItemAnaBirimClick
     end
   end
   object PopupMenuEsdeger: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 612
     Top = 193
     object MenuTurDegis: TMenuItem
       Caption = 'T'#252'r'#252'n'#252' De'#287'i'#351'tir'
+      ImageIndex = 12
       OnClick = MenuTurDegisClick
     end
     object MenuAciklamaDegis: TMenuItem
       Caption = 'A'#231#305'klamas'#305'n'#305' de'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = MenuAciklamaDegisClick
     end
   end
@@ -5163,18 +5181,22 @@ object StokWizardDlg: TStokWizardDlg
     Top = 64
   end
   object PopupStokCevrim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 492
     Top = 129
     object BakaKarttanKopyala1: TMenuItem
       Caption = 'Ba'#351'ka Karttan Kopyala'
+      ImageIndex = 10
       OnClick = BakaKarttanKopyala1Click
     end
   end
   object PopupMenuStok: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 396
     Top = 113
     object MenuAnaBirimDegis: TMenuItem
       Caption = 'Ana birimi de'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = MenuAnaBirimDegisClick
     end
   end
@@ -5205,15 +5227,18 @@ object StokWizardDlg: TStokWizardDlg
     Top = 172
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 848
     Top = 184
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -5221,14 +5246,17 @@ object StokWizardDlg: TStokWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

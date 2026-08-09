@@ -354,14 +354,17 @@
     Top = 156
   end
   object PopupFis: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 488
     Top = 208
   end
   object PopupFisGrid: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 560
     Top = 208
     object FisInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = FisInfoMenuClick
     end
   end

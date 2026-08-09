@@ -58,10 +58,6 @@ type
     TreeListEkipmancxDBTreeListSTOKLU: TcxDBTreeListColumn;
     // Own-toolbar Tum/Son/Sik butonlari (arama-frame'siz; FArama'ya DOKUNULMAZ).
     // Published ALANLAR method'lardan ONCE bildirilir (E2169 engeli).
-    ToolButton2: TToolButton;
-    LabelTumKayitlar: TToolButton;
-    LabelSonArananlar: TToolButton;
-    LabelSikArananlar: TToolButton;
     procedure BaskiOnizlemeMenuClick(Sender: TObject);
     procedure GridServisViewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem;
       var AStyle: TcxStyle);
@@ -75,9 +71,6 @@ type
     procedure YeniTusClick(Sender: TObject);
     procedure TreeListEkipmanDblClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
-    procedure LabelTumKayitlarClick(Sender: TObject);
-    procedure LabelSonArananlarClick(Sender: TObject);
-    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -357,21 +350,6 @@ begin
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-end;
-
-procedure TEkipmanListeDlg.LabelTumKayitlarClick(Sender: TObject);
-begin
-  Liste_SP_Cagir(1);   // Tum kayitlar
-end;
-
-procedure TEkipmanListeDlg.LabelSonArananlarClick(Sender: TObject);
-begin
-  Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
-end;
-
-procedure TEkipmanListeDlg.LabelSikArananlarClick(Sender: TObject);
-begin
-  Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 initialization

@@ -248,6 +248,7 @@ object BankaSecimDlg: TBankaSecimDlg
       end
     end
     object cxPageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 42
       Width = 661
@@ -407,18 +408,22 @@ object BankaSecimDlg: TBankaSecimDlg
     Top = 141
   end
   object PopupSube: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 544
     Top = 304
     object ubeEkle2: TMenuItem
       Caption = #350'ube Ekle'
+      ImageIndex = 13
       OnClick = ubeEkle2Click
     end
   end
   object PopupBanka: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 88
     Top = 200
     object BankaMenu: TMenuItem
       Caption = 'Banka Ekle'
+      ImageIndex = 0
       OnClick = BankaMenuClick
     end
     object N1: TMenuItem
@@ -426,6 +431,7 @@ object BankaSecimDlg: TBankaSecimDlg
     end
     object BankaSilMenu: TMenuItem
       Caption = 'Banka Sil'
+      ImageIndex = 1
       OnClick = BankaSilMenuClick
     end
   end

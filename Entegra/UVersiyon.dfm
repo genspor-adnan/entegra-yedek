@@ -324,10 +324,12 @@ object VersiyonDlg: TVersiyonDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 48
     Top = 369
     object Komutugster1: TMenuItem
       Caption = 'Uyguland'#305' olarak i'#351'aretle'
+      ImageIndex = 23
     end
   end
   object TabOlaylar: TFDQuery
@@ -355,15 +357,18 @@ object VersiyonDlg: TVersiyonDlg
     Top = 99
   end
   object PmDurum: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 568
     Top = 64
     object Yapld1: TMenuItem
       Tag = 1
       Caption = 'Yap'#305'ld'#305
+      ImageIndex = 15
       OnClick = Yapld1Click
     end
     object Yaplmad1: TMenuItem
       Caption = 'Yap'#305'lmad'#305
+      ImageIndex = 15
       OnClick = Yapld1Click
     end
     object N1: TMenuItem
@@ -371,6 +376,7 @@ object VersiyonDlg: TVersiyonDlg
     end
     object HepsiniSe1: TMenuItem
       Caption = 'Hepsini Se'#231
+      ImageIndex = 23
       OnClick = HepsiniSe1Click
     end
   end

@@ -93,42 +93,6 @@
       ImageIndex = 16
       ImageName = 'PngImage15'
     end
-    object ToolButtonSSAyrac: TToolButton
-      Left = 312
-      Top = 0
-      Width = 8
-      Caption = 'ToolButtonSSAyrac'
-      Style = tbsSeparator
-    end
-    object LabelTumKayitlar: TToolButton
-      Left = 0
-      Top = 0
-      Caption = 'T'#252'm'
-      ImageIndex = 52
-      ImageName = 'PngImageListe1'
-      Style = tbsTextButton
-      OnClick = LabelTumKayitlarClick
-    end
-    object LabelSonArananlar: TToolButton
-      Tag = 5
-      Left = 62
-      Top = 0
-      Caption = 'Son'
-      ImageIndex = 43
-      ImageName = 'PngImage43'
-      Style = tbsTextButton
-      OnClick = LabelSonArananlarClick
-    end
-    object LabelSikArananlar: TToolButton
-      Tag = 3
-      Left = 124
-      Top = 0
-      Caption = 'S'#305'k'
-      ImageIndex = 51
-      ImageName = 'PngImageYildiz1'
-      Style = tbsTextButton
-      OnClick = LabelSikArananlarClick
-    end
   end
   object GridFatListe: TcxGrid
     Left = 0
@@ -297,6 +261,7 @@
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 391
     Width = 866
@@ -312,7 +277,7 @@
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Detay'
-      ImageIndex = 0
+      ImageIndex = 22
       object Panel4: TPanel
         Left = 0
         Top = 106
@@ -687,6 +652,7 @@
     Top = 287
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 342
     Top = 109
     object BaskiOnizlemeMenu: TMenuItem
@@ -1052,10 +1018,12 @@
     Top = 156
   end
   object PopupMenuTransfer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 446
     Top = 109
     object TransferInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = TransferInfoMenuClick
     end
     object MenuUretim: TMenuItem
@@ -1065,10 +1033,12 @@
     end
     object MenuKaynakBelgeAc: TMenuItem
       Caption = 'Kaynak Belgeyi A'#231
+      ImageIndex = 19
       OnClick = MenuKaynakBelgeAcClick
     end
     object MenuHedefBelgeAc: TMenuItem
       Caption = 'Hedef Belgeyi A'#231
+      ImageIndex = 19
       OnClick = MenuHedefBelgeAcClick
     end
   end

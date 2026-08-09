@@ -485,11 +485,13 @@ object TakvimProje: TTakvimProje
     Top = 86
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 104
     Top = 128
     object BilgileriDegisMenu: TMenuItem
       Caption = 'bilgilerini g'#246'r / de'#287'i'#351'tir'
+      ImageIndex = 22
       OnClick = BilgileriDegisMenuClick
     end
     object N3: TMenuItem
@@ -497,6 +499,7 @@ object TakvimProje: TTakvimProje
     end
     object ButariheProjeekle: TMenuItem
       Caption = 'Bu tarihe Proje ekle'
+      ImageIndex = 21
       OnClick = ButariheProjeekleClick
     end
     object N1: TMenuItem
@@ -504,6 +507,7 @@ object TakvimProje: TTakvimProje
     end
     object ProjeyiSil1: TMenuItem
       Caption = 'Projeyi Sil'
+      ImageIndex = 1
       OnClick = ProjeyiSil1Click
     end
   end

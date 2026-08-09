@@ -250,11 +250,13 @@ object VardiyaTanimlariDlg: TVardiyaTanimlariDlg
     Top = 80
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PmSagClickPopup
     Left = 168
     Top = 96
     object PmTabloyuOlustur: TMenuItem
       Caption = 'Tabloyu Olu'#351'tur'
+      ImageIndex = 0
       OnClick = PmTabloyuOlusturClick
     end
   end

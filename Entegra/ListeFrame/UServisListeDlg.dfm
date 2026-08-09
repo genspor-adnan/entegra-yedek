@@ -27,6 +27,7 @@ object ServisListeDlg: TServisListeDlg
     ExplicitWidth = 8
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 263
     Width = 944
@@ -42,7 +43,7 @@ object ServisListeDlg: TServisListeDlg
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Bilgi/A'#231#305'klama'
-      ImageIndex = 0
+      ImageIndex = 22
       TabVisible = False
       ExplicitLeft = 0
       ExplicitTop = 0
@@ -182,7 +183,7 @@ object ServisListeDlg: TServisListeDlg
     end
     object cxTabSheet2: TcxTabSheet
       Caption = 'Hareketler'
-      ImageIndex = 2
+      ImageIndex = 32
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -430,7 +431,7 @@ object ServisListeDlg: TServisListeDlg
     end
     object TabSheetGenel: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 1
+      ImageIndex = 11
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -624,7 +625,7 @@ object ServisListeDlg: TServisListeDlg
     end
     object cxTabSheet3: TcxTabSheet
       Caption = 'Belgeler'
-      ImageIndex = 3
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -773,6 +774,7 @@ object ServisListeDlg: TServisListeDlg
     Width = 588
   end
   object PageControlServis: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 944
@@ -788,7 +790,7 @@ object ServisListeDlg: TServisListeDlg
     ClientRectTop = 27
     object TabServis: TcxTabSheet
       Caption = 'Servis'
-      ImageIndex = 0
+      ImageIndex = 7
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1215,7 +1217,7 @@ object ServisListeDlg: TServisListeDlg
     end
     object Tabhareket: TcxTabSheet
       Caption = 'Hareket'
-      ImageIndex = 1
+      ImageIndex = 32
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1504,6 +1506,7 @@ object ServisListeDlg: TServisListeDlg
     Top = 130
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 175
     Top = 157
     object BaskiOnizlemeMenu: TMenuItem
@@ -1721,15 +1724,18 @@ object ServisListeDlg: TServisListeDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 32
     Top = 104
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1737,14 +1743,17 @@ object ServisListeDlg: TServisListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -1846,6 +1855,7 @@ object ServisListeDlg: TServisListeDlg
     Top = 141
   end
   object PopupMenuHareket: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuHareketPopup
     Left = 151
     Top = 101
@@ -1856,10 +1866,12 @@ object ServisListeDlg: TServisListeDlg
     end
   end
   object PopupMenuServis: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 335
     Top = 85
     object ServisInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = ServisInfoMenuClick
     end
   end

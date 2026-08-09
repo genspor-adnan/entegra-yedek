@@ -231,6 +231,7 @@
       end
     end
     object PageControlSekme: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 174
       Width = 1219
@@ -246,7 +247,7 @@
       ClientRectTop = 26
       object TabSheetIlet: TcxTabSheet
         Caption = 'Toplamlar'
-        ImageIndex = 7
+        ImageIndex = 44
         PopupMenu = PopupMenuBakiye
         object cxLabel1: TcxLabel
           Left = 48
@@ -311,7 +312,7 @@
       end
       object cxTabSheet2: TcxTabSheet
         Caption = 'Komisyon'
-        ImageIndex = 2
+        ImageIndex = 19
         object ToolBar2: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -443,7 +444,7 @@
       end
       object TabSheetEkstre: TcxTabSheet
         Caption = 'Ekstre'
-        ImageIndex = 6
+        ImageIndex = 32
         object GridPOS: TcxGrid
           Left = 0
           Top = 44
@@ -1010,6 +1011,7 @@
     Top = 144
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 86
     Top = 128
     object BaskiOnizlemeMenu: TMenuItem
@@ -1121,20 +1123,24 @@
     Top = 240
   end
   object PosListeMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 249
     Top = 81
     object POSInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = POSInfoMenuClick
     end
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
@@ -1170,10 +1176,12 @@
     Top = 392
   end
   object PopupMenuBakiye: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 369
     Top = 297
     object MenuItem1: TMenuItem
       Caption = 'Bakiyeyi '#252'st tarafa kaydet'
+      ImageIndex = 2
       OnClick = MenuItem1Click
     end
   end

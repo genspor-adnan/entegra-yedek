@@ -15,6 +15,7 @@
   ParentFont = False
   TabOrder = 0
   object PageArama: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 587
@@ -30,7 +31,7 @@
     ClientRectTop = 27
     object TabSheetKlasor: TcxTabSheet
       Caption = 'Klas'#246'rler'
-      ImageIndex = 0
+      ImageIndex = 19
       object TreeKlasorler: TcxDBTreeList
         Left = 0
         Top = 26
@@ -237,7 +238,7 @@
     end
     object TabSheetArama: TcxTabSheet
       Caption = 'Arama'
-      ImageIndex = 1
+      ImageIndex = 6
       object ToolBarAranan: TToolBar
         Left = 0
         Top = 0

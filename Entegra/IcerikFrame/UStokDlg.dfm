@@ -135,6 +135,7 @@ object StokDlg: TStokDlg
       ExplicitWidth = 449
       ExplicitHeight = 20
       object PageControl1: TPageControl
+        Images = Tablo.PNGImageList2
         Left = 1
         Top = 1
         Width = 696
@@ -145,6 +146,7 @@ object StokDlg: TStokDlg
         TabOrder = 0
         object tshFiyatlar: TTabSheet
           Caption = 'Fiyatland'#305'rma'
+          ImageIndex = 34
           object GridFiyat: TcxGrid
             Left = 0
             Top = 27
@@ -231,7 +233,7 @@ object StokDlg: TStokDlg
         end
         object tshStokDurum: TTabSheet
           Caption = 'Stok Durum'
-          ImageIndex = -1
+          ImageIndex = 12
           object Panel4: TPanel
             Left = 0
             Top = 108
@@ -419,7 +421,7 @@ object StokDlg: TStokDlg
         end
         object tshGiris: TTabSheet
           Caption = 'Giri'#351'ler'
-          ImageIndex = 2
+          ImageIndex = 19
           object cxgrdStokGirisKart: TcxGrid
             Left = 0
             Top = 22
@@ -580,7 +582,7 @@ object StokDlg: TStokDlg
         end
         object tshCikis: TTabSheet
           Caption = #199#305'k'#305#351'lar'
-          ImageIndex = 4
+          ImageIndex = 19
           object cxGridStokCikislar: TcxGrid
             Left = 0
             Top = 22
@@ -736,7 +738,7 @@ object StokDlg: TStokDlg
         end
         object tshTeknikSartname: TTabSheet
           Caption = 'Teknik '#350'artname'
-          ImageIndex = 5
+          ImageIndex = 19
           object DBMemo1: TDBMemo
             Left = 0
             Top = 0
@@ -756,7 +758,7 @@ object StokDlg: TStokDlg
         end
         object tshStokPanel: TTabSheet
           Caption = 'Panel Bilgileri'
-          ImageIndex = 6
+          ImageIndex = 22
           object Panel10: TPanel
             Left = 0
             Top = 0
@@ -912,7 +914,7 @@ object StokDlg: TStokDlg
         end
         object tsKritikSeviye: TTabSheet
           Caption = 'Kritik Seviye'
-          ImageIndex = 7
+          ImageIndex = 19
           object Panel9: TPanel
             Left = 0
             Top = 0
@@ -1405,6 +1407,7 @@ object StokDlg: TStokDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 380
     Top = 208
@@ -1425,6 +1428,7 @@ object StokDlg: TStokDlg
     Top = 309
   end
   object PopupMenu2: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 313
     Top = 311
@@ -1437,7 +1441,7 @@ object StokDlg: TStokDlg
     end
     object FiyatKopyala: TMenuItem
       Caption = 'Fiyat'#305'n'#305' Kopyala'
-      ImageIndex = 3
+      ImageIndex = 10
     end
     object MenuItem2: TMenuItem
       Caption = '-'
@@ -1451,7 +1455,7 @@ object StokDlg: TStokDlg
     end
     object FiyatSil: TMenuItem
       Caption = 'Fiyat'#305'n'#305' Sil'
-      ImageIndex = 9
+      ImageIndex = 1
     end
     object N5: TMenuItem
       Caption = '-'
@@ -1475,6 +1479,7 @@ object StokDlg: TStokDlg
     end
   end
   object PopupMenu3: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 316
     Top = 209
@@ -1487,15 +1492,18 @@ object StokDlg: TStokDlg
     end
     object AnaBirimDeitir1: TMenuItem
       Caption = 'AnaBirim De'#287'i'#351'tir'
+      ImageIndex = 30
     end
     object N2BirimDeitir1: TMenuItem
       Caption = '2.Birim De'#287'i'#351'tir'
+      ImageIndex = 30
     end
     object N6: TMenuItem
       Caption = '-'
     end
     object KartKopyala1: TMenuItem
       Caption = 'Kart'#305' Kopyala'
+      ImageIndex = 10
     end
   end
   object XPMenu1: TXPMenu

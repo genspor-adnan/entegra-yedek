@@ -1037,6 +1037,7 @@ object HavaleEFTEkrani: THavaleEFTEkrani
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 485
     Top = 338
     object BaskiOnizlemeMenu: TMenuItem

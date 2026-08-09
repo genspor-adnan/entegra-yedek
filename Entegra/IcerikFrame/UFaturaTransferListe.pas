@@ -128,10 +128,6 @@ type
     TabFaturaBASTAR: TSQLTimeStampField;
     TabFaturaIZLEME: TSmallintField;
     GridFatListeTviewEMIRNO: TcxGridDBColumn;
-    ToolButtonSSAyrac: TToolButton;            // ayrac (Tum/Son/Sik butonlari icin)
-    LabelTumKayitlar: TToolButton;             // Tum kayitlar (Liste_SP_Cagir 1)
-    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
-    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
     procedure GridFatListeTviewDblClick(Sender: TObject);
     procedure YeniTusClick(Sender: TObject);
     procedure AraKodKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -152,9 +148,6 @@ type
     procedure MenuHedefBelgeAcClick(Sender: TObject);
     procedure TransferInfoMenuClick(Sender: TObject);
     procedure AramaYap;
-    procedure LabelTumKayitlarClick(Sender: TObject);   // own-toolbar Tum/Son/Sik (DFM OnClick -> PUBLISHED olmali)
-    procedure LabelSonArananlarClick(Sender: TObject);
-    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -286,21 +279,6 @@ begin
   finally
     j.Free;     // AddPair sirasinda hata olursa temizle
   end;
-end;
-
-procedure TFatTransferListeDlg.LabelTumKayitlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(1);   // Tum kayitlar
-end;
-
-procedure TFatTransferListeDlg.LabelSonArananlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
-end;
-
-procedure TFatTransferListeDlg.LabelSikArananlarClick(Sender: TObject);
-begin
-   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
 end;
 
 

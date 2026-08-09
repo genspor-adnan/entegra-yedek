@@ -622,57 +622,69 @@ object FiyatDegisiklikDlg: TFiyatDegisiklikDlg
     Top = 149
   end
   object PMSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 393
     Top = 136
     object Yeni1: TMenuItem
       Caption = 'Yeni Fiyat Listesi Olu'#351'tur'
+      ImageIndex = 32
       OnClick = Yeni1Click
     end
     object Kopyala1: TMenuItem
       Tag = 1
       Caption = 'Fiyat Listesini Kopyala'
+      ImageIndex = 10
       OnClick = SubMenuClick
     end
     object AdDegistir1: TMenuItem
       Tag = 2
       Caption = 'Fiyat Listesinin Ad'#305'n'#305' De'#287'i'#351'tir'
+      ImageIndex = 32
       OnClick = SubMenuClick
     end
     object Sil1: TMenuItem
       Tag = 3
       Caption = 'Fiyat Listesini Sil'
+      ImageIndex = 1
       OnClick = SubMenuClick
     end
     object Tasi1: TMenuItem
       Tag = 4
       Caption = 'Fiyat Listesini Ta'#351#305
+      ImageIndex = 32
       OnClick = SubMenuClick
     end
     object EksikFiyatlarVarsaOlusturMenu: TMenuItem
       Tag = 9
       Caption = 'Eksik Fiyatlar Varsa Olu'#351'tur'
+      ImageIndex = 34
       OnClick = SubMenuClick
     end
     object FiyatGuncelle1: TMenuItem
       Caption = 'Fiyat Listesinin Tutar'#305'n'#305' G'#252'ncelle'
+      ImageIndex = 32
       object FiyatGir1: TMenuItem
         Tag = 1
         Caption = 'Tutar Gir'
+        ImageIndex = 34
         OnClick = SubMenuFiyatGirClick
       end
       object OranGir1: TMenuItem
         Tag = 2
         Caption = '% Oran Gir'
+        ImageIndex = 34
         OnClick = SubMenuFiyatGirClick
       end
       object utarKDVOranKadarArtr1: TMenuItem
         Tag = 3
         Caption = 'Tutar'#305' KDV Oran'#305' Kadar Art'#305'r'
+        ImageIndex = 34
         OnClick = SubMenuFiyatGirClick
       end
       object utarKDVOranKadarArtr2: TMenuItem
         Tag = 4
         Caption = 'Tutar'#305' KDV Oran'#305' Kadar Azalt'
+        ImageIndex = 34
         OnClick = SubMenuFiyatGirClick
       end
       object cizgi2: TMenuItem
@@ -680,23 +692,28 @@ object FiyatDegisiklikDlg: TFiyatDegisiklikDlg
       end
       object FiyatHesapla: TMenuItem
         Caption = 'Fiyat Hesapla'
+        ImageIndex = 34
         OnClick = FiyatHesaplaClick
       end
     end
     object KDVGuncelle: TMenuItem
       Caption = 'Fiyat Listesinin KDV Durumunu G'#252'ncelle'
+      ImageIndex = 32
       object KDVHaric: TMenuItem
         Caption = '+KDV'
+        ImageIndex = 34
         OnClick = KDVDurumGuncelle
       end
       object KdvDahil: TMenuItem
         Tag = 1
         Caption = 'Dahil'
+        ImageIndex = 15
         OnClick = KDVDurumGuncelle
       end
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 686
     Top = 180
     object BaskiOnizlemeMenu: TMenuItem
@@ -826,18 +843,22 @@ object FiyatDegisiklikDlg: TFiyatDegisiklikDlg
     end
   end
   object pmSecKaldir: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 392
     Top = 192
     object HepsiniSe1: TMenuItem
       Caption = 'Hepsini Se'#231
+      ImageIndex = 23
       OnClick = HepsiniSe1Click
     end
     object Kaldr1: TMenuItem
       Caption = 'Hepsini Kald'#305'r'
+      ImageIndex = 24
       OnClick = Kaldr1Click
     end
     object SeimiTersevir1: TMenuItem
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = SeimiTersevir1Click
     end
   end

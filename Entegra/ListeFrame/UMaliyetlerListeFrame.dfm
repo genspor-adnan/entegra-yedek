@@ -239,10 +239,12 @@ object MaliyetlerListeFrame: TMaliyetlerListeFrame
     Top = 232
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 296
     Top = 192
     object Exceleaktar1: TMenuItem
       Caption = 'Excele aktar'
+      ImageIndex = 32
       OnClick = Exceleaktar1Click
     end
   end

@@ -78,6 +78,7 @@
     Transparent = True
   end
   object PageControlArama: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 43
     Width = 451

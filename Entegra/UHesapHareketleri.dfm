@@ -416,25 +416,31 @@ object HesapHareketleriDlg: THesapHareketleriDlg
     Top = 105
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 302
     Top = 152
     object HareketleriYenile1: TMenuItem
       Caption = 'Hareketleri Yenile'
+      ImageIndex = 9
       OnClick = BtnYenileClick
     end
     object mnSe1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = mnSe1Click
     end
     object SeilenleriEletir1: TMenuItem
       Caption = 'Se'#231'ilenleri E'#351'le'#351'tir'
+      ImageIndex = 15
     end
     object SeilenleriAktar1: TMenuItem
       Caption = 'Se'#231'ilenleri Aktar'
+      ImageIndex = 15
       OnClick = BtnAktarClick
     end
     object anmlamalar1: TMenuItem
       Caption = 'Tan'#305'mlamalar'
+      ImageIndex = 15
       OnClick = BtnTanimlamalarClick
     end
   end

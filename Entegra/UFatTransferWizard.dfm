@@ -765,10 +765,12 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     Top = 21
   end
   object PopupMenuFatura: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 265
     Top = 230
     object BoSatrEkle1: TMenuItem
       Caption = 'Alta Bo'#351' Sat'#305'r Ekle'
+      ImageIndex = 0
       Visible = False
     end
     object N16: TMenuItem
@@ -776,19 +778,23 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     end
     object FaturaKoanAyarlar1: TMenuItem
       Caption = 'Fatura Ko'#231'an'#305' Ayarlar'#305
+      ImageIndex = 11
     end
     object BuKullancdaFaturaKoannDeitir1: TMenuItem
       Caption = 'Bu Kullan'#305'c'#305'da Fatura Ko'#231'an'#305'n'#305' De'#287'i'#351'tir'
+      ImageIndex = 35
     end
     object N21: TMenuItem
       Caption = '-'
     end
     object UTSdenAdetleriKontrolEtMenu: TMenuItem
       Caption = #220'TS'#39'den Adetleri Kontrol Et'
+      ImageIndex = 15
       OnClick = UTSdenAdetleriKontrolEtMenuClick
     end
     object IzlemBilgileriniDuzenle: TMenuItem
       Caption = #304'zlem Bilgilerini D'#252'zenle'
+      ImageIndex = 7
       OnClick = IzlemBilgileriniDuzenleClick
     end
     object MenuItem48: TMenuItem
@@ -796,10 +802,11 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     end
     object FatHepsiniSil: TMenuItem
       Caption = 'Sat'#305'rlar'#305' Sil'
-      ImageIndex = 2
+      ImageIndex = 1
     end
     object FaturayiptalEt1: TMenuItem
       Caption = 'Faturay'#305' Sil'
+      ImageIndex = 1
     end
   end
   object cxStyleRepository1: TcxStyleRepository
@@ -980,6 +987,7 @@ object FatTransferWizardDlg: TFatTransferWizardDlg
     Top = 259
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 697
     Top = 41
     object BaskiOnizlemeMenu: TMenuItem

@@ -673,6 +673,7 @@ object ProjeWizardDlg: TProjeWizardDlg
           end
         end
         object CariPageControl: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 167
           Width = 918
@@ -687,7 +688,7 @@ object ProjeWizardDlg: TProjeWizardDlg
           ClientRectTop = 27
           object cxTabSheet1: TcxTabSheet
             Caption = 'Yorum/Medya'
-            ImageIndex = 0
+            ImageIndex = 38
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1290,6 +1291,7 @@ object ProjeWizardDlg: TProjeWizardDlg
       ExplicitWidth = 0
       ExplicitHeight = 0
       object cxPageControl1: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 70
         Width = 918
@@ -1304,7 +1306,7 @@ object ProjeWizardDlg: TProjeWizardDlg
         ClientRectTop = 27
         object TabSheetButce: TcxTabSheet
           Caption = '   B'#252't'#231'e   '
-          ImageIndex = 0
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1676,7 +1678,7 @@ object ProjeWizardDlg: TProjeWizardDlg
         end
         object TabSheetMaliyet: TcxTabSheet
           Caption = '  Maliyet  '
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1812,7 +1814,7 @@ object ProjeWizardDlg: TProjeWizardDlg
         end
         object TabSheetEkstre: TcxTabSheet
           Caption = 'Ekstre'
-          ImageIndex = 2
+          ImageIndex = 32
           object Panel5: TPanel
             Left = 0
             Top = 0
@@ -2564,10 +2566,12 @@ object ProjeWizardDlg: TProjeWizardDlg
     Top = 236
   end
   object PmKopyala: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 552
     Top = 336
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
     end
   end
   object TabProjeAsama: TFDQuery
@@ -2656,10 +2660,12 @@ object ProjeWizardDlg: TProjeWizardDlg
     Top = 230
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 632
     Top = 328
     object AsamalariEkle: TMenuItem
       Caption = 'T'#252'm A'#351'amalar'#305' Ekle'
+      ImageIndex = 0
       OnClick = AsamalariEkleClick
     end
   end
@@ -2760,15 +2766,18 @@ object ProjeWizardDlg: TProjeWizardDlg
     Top = 252
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 752
     Top = 200
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -2776,14 +2785,17 @@ object ProjeWizardDlg: TProjeWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2926,10 +2938,12 @@ object ProjeWizardDlg: TProjeWizardDlg
     end
   end
   object PMButce: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 848
     Top = 152
     object ExceldenVeriAlMenu: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAlMenuClick
     end
     object N1: TMenuItem
@@ -2937,6 +2951,7 @@ object ProjeWizardDlg: TProjeWizardDlg
     end
     object ExceleGonderMenu: TMenuItem
       Caption = 'Excele G'#246'nder'
+      ImageIndex = 32
       OnClick = ExceleGonderMenuClick
     end
   end
@@ -2978,6 +2993,7 @@ object ProjeWizardDlg: TProjeWizardDlg
     Top = 370
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 853
     Top = 194
     object BaskiOnizlemeMenu: TMenuItem

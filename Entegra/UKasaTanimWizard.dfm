@@ -400,17 +400,20 @@ object KasaTanimWizardDlg: TKasaTanimWizardDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 17
     Top = 159
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object N2: TMenuItem
@@ -418,12 +421,14 @@ object KasaTanimWizardDlg: TKasaTanimWizardDlg
     end
     object KasaYenileMenu: TMenuItem
       Caption = 'Sadece Bu Kasan'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object BtnKasalarnToplamlarnYenile1: TMenuItem
       Caption = 'B'#252't'#252'n Kasalar'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
   end
   object frxKasalar: TfrxDBDataset

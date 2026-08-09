@@ -16,6 +16,7 @@ object InfoDlg: TInfoDlg
   OnShow = FormShow
   TextHeight = 15
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 35
     Width = 920
@@ -31,7 +32,7 @@ object InfoDlg: TInfoDlg
     ClientRectTop = 26
     object cxTabSheet1: TcxTabSheet
       Caption = 'Liste'
-      ImageIndex = 0
+      ImageIndex = 32
       object PanelUst: TPanel
         Left = 0
         Top = 0
@@ -281,7 +282,7 @@ object InfoDlg: TInfoDlg
     end
     object cxTabSheet2: TcxTabSheet
       Caption = #304#231'erik'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0

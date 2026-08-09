@@ -28,6 +28,9 @@ BEGIN
     DECLARE @CariFirma  NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.CariFirma'), N'');
     DECLARE @Aciklama   NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Aciklama'),  N'');
     DECLARE @Stok       NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Stok'),      N'');
+    -- Belirli bir cariye ait belgeler (cari ekranindaki Alis/Satis alt sekmesi).
+    --   @CariFirma cari ADI uzerinden LIKE arar; bu KIMLIK uzerinden kesin filtredir.
+    DECLARE @RehberId   INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.RehberId') AS INT);
 
 CREATE TABLE #SubeIDs (ID SMALLINT);
     IF @SubeIDList IS NOT NULL  AND @SubeIDList <> ''
@@ -84,6 +87,10 @@ LEFT OUTER JOIN DEPOLAR D ON D.ID=F.CIKISDEPO
         CASE WHEN @StokJoin = 1 THEN ''
              ELSE ' AND EXISTS (SELECT 1 FROM SIPARISDETAY SD2 WITH (NOLOCK) WHERE SD2.SIPARISID = F.ID)'
         END;
+
+    IF ISNULL(@RehberId, 0) > 0
+        SET @SQL += ' AND F.REHBERID = ' + CAST(@RehberId AS NVARCHAR(20));
+
 
     IF @StartDate IS NOT NULL AND @EndDate IS NOT NULL and @StartDate <>'' AND @EndDate <> ''
         SET @SQL += ' AND F.SIPARISTARIH BETWEEN @StartDate AND @EndDate';

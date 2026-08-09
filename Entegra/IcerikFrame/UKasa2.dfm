@@ -702,19 +702,23 @@ object KasaDlg: TKasaDlg
     Top = 321
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 117
     Top = 109
     object EkleMenu: TMenuItem
       Caption = 'Ekle'
+      ImageIndex = 0
       OnClick = EkleTusClick
     end
     object SilMenu: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = SilTusClick
     end
     object GorMenu: TMenuItem
       Caption = 'G'#246'r'
+      ImageIndex = 37
       OnClick = GorTusClick
     end
     object N2: TMenuItem
@@ -722,10 +726,12 @@ object KasaDlg: TKasaDlg
     end
     object Ekstre1: TMenuItem
       Caption = 'Ekstre'
+      ImageIndex = 15
       OnClick = Ekstre1Click
     end
     object Varlklar1: TMenuItem
       Caption = 'Varl'#305'klar'
+      ImageIndex = 15
       OnClick = VarliklarTusClick
     end
   end

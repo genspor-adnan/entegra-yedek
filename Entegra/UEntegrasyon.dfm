@@ -166,14 +166,17 @@ object EntegrasyonDlg: TEntegrasyonDlg
     Top = 58
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 45
     Top = 47
     object mnSe1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = mnSe1Click
     end
     object mnTemizle1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Temizle'
+      ImageIndex = 9
       OnClick = mnTemizle1Click
     end
   end

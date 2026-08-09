@@ -38,6 +38,9 @@ BEGIN
     DECLARE @CariFirma  NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.CariFirma'), N'');
     DECLARE @Aciklama   NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Aciklama'),  N'');
     DECLARE @Stok       NVARCHAR(200) = ISNULL(JSON_VALUE(@Kosullar,'$.Stok'),      N'');
+    -- Belirli bir cariye ait belgeler (cari ekranindaki Alis/Satis alt sekmesi).
+    --   @CariFirma cari ADI uzerinden LIKE arar; bu KIMLIK uzerinden kesin filtredir.
+    DECLARE @RehberId   INT           = TRY_CAST(JSON_VALUE(@Kosullar,'$.RehberId') AS INT);
 
 CREATE TABLE #SubeIDs (ID SMALLINT);
 
@@ -173,6 +176,9 @@ FROM FATBASLIK F WITH (NOLOCK)
 
 
     SET @SQL += '  WHERE F.TUR = @Tur';
+
+    IF ISNULL(@RehberId, 0) > 0
+        SET @SQL += ' AND F.REHBERID = ' + CAST(@RehberId AS NVARCHAR(20));
 
 
 

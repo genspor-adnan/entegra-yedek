@@ -228,6 +228,7 @@ object KullaniciDlg: TKullaniciDlg
         OnEnter = TreeView1Enter
       end
       object PageControl1: TPageControl
+        Images = Tablo.PNGImageList2
         Left = 376
         Top = 17
         Width = 324
@@ -237,6 +238,7 @@ object KullaniciDlg: TKullaniciDlg
         OnChange = PageControl1Change
         object TabSheet1: TTabSheet
           Caption = 'Kullan'#305'c'#305
+          ImageIndex = 35
           object GroupBox2: TGroupBox
             Left = 10
             Top = 28
@@ -521,7 +523,7 @@ object KullaniciDlg: TKullaniciDlg
         end
         object TabSheet2: TTabSheet
           Caption = 'Grup'
-          ImageIndex = 1
+          ImageIndex = 19
           object GroupBox3: TGroupBox
             Left = 10
             Top = 13
@@ -818,6 +820,7 @@ object KullaniciDlg: TKullaniciDlg
         end
       end
       object PageControl2: TPageControl
+        Images = Tablo.PNGImageList2
         Left = 377
         Top = 262
         Width = 324
@@ -826,6 +829,7 @@ object KullaniciDlg: TKullaniciDlg
         TabOrder = 2
         object TabSheet3: TTabSheet
           Caption = 'Yetkilendirme'
+          ImageIndex = 29
           object GroupBox1: TGroupBox
             Left = 9
             Top = -1
@@ -1229,16 +1233,19 @@ object KullaniciDlg: TKullaniciDlg
     Top = 264
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 308
     Top = 147
     object Sadeceuygula1: TMenuItem
       Caption = 'Sadece bu yetkilendirmeyi bu gruptakilere uygula'
+      ImageIndex = 29
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object Tumunuuygula1: TMenuItem
       Caption = 'T'#252'm yetkilendirmeleri bu gruptakilere uygula'
+      ImageIndex = 29
     end
   end
 end

@@ -41,6 +41,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     Caption = 'Veren Personel'
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 120
     Width = 543
@@ -55,7 +56,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     ClientRectTop = 24
     object SheetAciklama: TcxTabSheet
       Caption = 'A'#231#305'klama'
-      ImageIndex = 0
+      ImageIndex = 19
       object MemoAciklama: TcxMemo
         Left = 0
         Top = 0
@@ -67,7 +68,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     end
     object SheetDemirbas: TcxTabSheet
       Caption = 'Demirba'#351
-      ImageIndex = 4
+      ImageIndex = 12
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -114,7 +115,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     end
     object SheetAlisBelgesi: TcxTabSheet
       Caption = 'Al'#305#351' Belgesi'
-      ImageIndex = 0
+      ImageIndex = 19
       object cbAlBelgeTipi: TcxImageComboBox
         Left = 88
         Top = 22
@@ -184,7 +185,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     end
     object SheetSatisBelgesi: TcxTabSheet
       Caption = 'Sat'#305#351' Belgesi'
-      ImageIndex = 1
+      ImageIndex = 19
       object cbVerBelgeTipi: TcxImageComboBox
         Left = 88
         Top = 22
@@ -254,7 +255,7 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     end
     object SheetCariBilgi: TcxTabSheet
       Caption = 'Cari Bilgisi'
-      ImageIndex = 2
+      ImageIndex = 35
       object BeditMusteri: TcxButtonEdit
         Left = 96
         Top = 23
@@ -524,10 +525,12 @@ object DemirbasDurumDegisDlg: TDemirbasDurumDegisDlg
     Top = 224
   end
   object PopupDemirbas: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 192
     Top = 240
     object Seilidemirbalistedenkart1: TMenuItem
       Caption = 'Se'#231'ili demirba'#351#305' listeden '#231#305'kart'
+      ImageIndex = 32
       OnClick = Seilidemirbalistedenkart1Click
     end
   end

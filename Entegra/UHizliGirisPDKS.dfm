@@ -431,11 +431,13 @@
     Top = 152
   end
   object pmGridStil: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = pmGridStilPopup
     Left = 559
     Top = 243
     object StilOlutur1: TMenuItem
       Caption = 'Stil D'#252'zenle'
+      ImageIndex = 7
       OnClick = StilOlutur1Click
     end
   end

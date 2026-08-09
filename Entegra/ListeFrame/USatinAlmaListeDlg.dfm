@@ -235,15 +235,18 @@ object SatinAlmaListeDlg: TSatinAlmaListeDlg
     Top = 136
   end
   object PmPopupMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 510
     Top = 113
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
     end
   end

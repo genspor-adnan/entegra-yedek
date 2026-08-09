@@ -945,6 +945,7 @@ object GiderPusulasiDlg: TGiderPusulasiDlg
     Top = 161
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 102
     Top = 140
     object BaskiOnizlemeMenu: TMenuItem

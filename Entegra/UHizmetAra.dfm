@@ -280,6 +280,7 @@ object HizmetAraDlg: THizmetAraDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 79
     Width = 919
@@ -295,7 +296,7 @@ object HizmetAraDlg: THizmetAraDlg
     ClientRectTop = 27
     object shtHizmetAra: TcxTabSheet
       Caption = 'Hizmet F1'
-      ImageIndex = 0
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -368,7 +369,7 @@ object HizmetAraDlg: THizmetAraDlg
     end
     object shtStokAra: TcxTabSheet
       Caption = 'Stok F2'
-      ImageIndex = 1
+      ImageIndex = 12
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -634,66 +635,81 @@ object HizmetAraDlg: THizmetAraDlg
     Top = 206
   end
   object PopupUcret: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 86
     Top = 134
     object Y00: TMenuItem
       Tag = 1
       Caption = '% 0 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y10: TMenuItem
       Tag = 1
       Caption = '% 10 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y15: TMenuItem
       Tag = 1
       Caption = '% 15 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y20: TMenuItem
       Tag = 1
       Caption = '% 20 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y25: TMenuItem
       Tag = 1
       Caption = '% 25 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y30: TMenuItem
       Tag = 1
       Caption = '% 30 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y35: TMenuItem
       Tag = 1
       Caption = '% 35 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y40: TMenuItem
       Tag = 1
       Caption = '% 40 '#304'ndirim'
+      ImageIndex = 34
     end
     object Y45: TMenuItem
       Tag = 1
       Caption = '% 45 '#304'ndirim'
+      ImageIndex = 34
     end
     object Ozel: TMenuItem
       Tag = 1
       Caption = #214'zel %...'
+      ImageIndex = 34
     end
     object N2: TMenuItem
       Caption = '-'
     end
     object ExceleGnder1: TMenuItem
       Caption = 'Excel'#39'e G'#246'nder..'
+      ImageIndex = 32
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object HepsiniSil1: TMenuItem
       Caption = 'Hepsini Sil'
+      ImageIndex = 1
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 345
     Top = 195
     object IsleminUcretiniSorMenu: TMenuItem
       Caption = #304#351'lemin '#220'cretini Gir'
+      ImageIndex = 30
     end
   end
   object cxStyleRepository1: TcxStyleRepository

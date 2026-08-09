@@ -2356,6 +2356,14 @@ begin
   if not BoslukKontrol(TabSiparisDetay.FieldByName('KDV').AsString, 'KDV') then
     Abort;
 
+  // DONUSUM KURALI: adet, bu satirdan URETILMIS (donusmus) adedin altina inemez.
+  //   Ust sinir yok - artirmak serbest. Yeni satirda (dsInsert) donusum olamaz.
+  if (TabSiparisDetay.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('SIPARISDETAY',
+            TabSiparisDetay.FieldByName('ID').AsInteger,
+            TabSiparisDetay.FieldByName('ADET').AsFloat)) then
+    Abort;
+
 
   if (TabSiparisDetay.FieldByName('TUR').AsInteger=1)and(veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMRECETE where STOKID='+TabSiparisDetay.FieldByName('URUNID').AsString,[],[])) then
     TabSiparisDetay.FieldByName('URETIMPLANDETAYID').AsInteger := 0

@@ -59,6 +59,7 @@ object HizliGirisDokumDlg: THizliGirisDokumDlg
         ParentCtl3D = False
         TabOrder = 0
         object pcArama: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 0
           Width = 299
@@ -523,6 +524,7 @@ object HizliGirisDokumDlg: THizliGirisDokumDlg
     Top = 178
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 432
     Top = 182
     object BaskiOnizlemeMenu: TMenuItem

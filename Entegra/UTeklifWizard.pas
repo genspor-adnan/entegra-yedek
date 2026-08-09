@@ -2170,6 +2170,10 @@ begin
      Application.MessageBox(PChar(Butarihoncesiislemyapilmaz),PChar(Uyari),0);
      Abort
   end;
+  // DONUSUM KURALI: siparise donusmus teklif satiri SILINEMEZ (zincir kopar).
+  //   Mesaji Tablo.TeklifSilinebilirMi gosterir.
+  if not Tablo.TeklifSilinebilirMi(0, TabTeklifDetay.FieldByName('ID').AsInteger) then
+     Abort;
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) <> ID_OK then
      Abort;
   TabTeklifDetay.Delete;
@@ -2382,6 +2386,14 @@ begin
      showmessage(BGEksiIskontoGirilemez);
      Abort;
   end;
+
+  // DONUSUM KURALI: siparise donusmus teklif satirinin adedi, donusen adedin
+  //   altina inemez (ust sinir yok). Yeni satirda donusum olamaz -> yalniz dsEdit.
+  if (TabTeklifDetay.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('TEKLIFDETAY',
+            TabTeklifDetay.FieldByName('ID').AsInteger,
+            TabTeklifDetay.FieldByName('ADET').AsFloat)) then
+    Abort;
 
   TutarIslemler;
 end;

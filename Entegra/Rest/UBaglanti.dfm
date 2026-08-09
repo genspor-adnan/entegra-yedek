@@ -800,14 +800,17 @@ object BaglantiDlg: TBaglantiDlg
     Top = 136
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 320
     Top = 104
     object Open: TMenuItem
       Caption = 'A'#231
+      ImageIndex = 6
       OnClick = OpenClick
     end
     object Exit: TMenuItem
       Caption = 'Kapat'
+      ImageIndex = 15
       OnClick = ExitClick
     end
   end

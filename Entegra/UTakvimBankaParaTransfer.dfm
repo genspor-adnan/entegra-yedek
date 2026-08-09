@@ -4286,14 +4286,17 @@ object TakvimBankaParaTransferDLG: TTakvimBankaParaTransferDLG
     Top = 440
   end
   object PopupParaTransfer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 355
     Top = 48
     object HavaleEftSihirbaznBalat1: TMenuItem
       Caption = 'Havale/Eft Sihirbaz'#305'n'#305' Ba'#351'lat'
+      ImageIndex = 34
       OnClick = HavaleEftSihirbaznBalat1Click
     end
     object alimatSihirbazBalat1: TMenuItem
       Caption = 'Talimat Sihirbaz'#305' Ba'#351'lat'
+      ImageIndex = 6
       OnClick = alimatSihirbazBalat1Click
     end
   end

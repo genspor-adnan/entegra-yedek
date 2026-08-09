@@ -541,14 +541,17 @@ object DokumDlg: TDokumDlg
     ExplicitWidth = 8
   end
   object pmDokumSartlari: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 256
     Top = 160
     object DosyaAyarlar1: TMenuItem
       Caption = 'Dosya Ayarlar'#305
+      ImageIndex = 11
       OnClick = DosyaAyarlar1Click
     end
     object DosyayaYazdr1: TMenuItem
       Caption = 'Dosyaya Yazd'#305'r'
+      ImageIndex = 8
       OnClick = DosyayaYazdr1Click
     end
     object N3: TMenuItem
@@ -556,74 +559,92 @@ object DokumDlg: TDokumDlg
     end
     object RaporKaydet1: TMenuItem
       Caption = 'Rapor Kaydet (Text)'
+      ImageIndex = 2
       OnClick = RaporKaydet1Click
     end
     object RaporEkle2: TMenuItem
       Caption = 'Rapor Al (Text)'
+      ImageIndex = 32
     end
     object N6: TMenuItem
       Caption = '-'
     end
     object BuRapor1: TMenuItem
       Caption = 'Bu Rapor'
+      ImageIndex = 32
       object HerkesteGrnsn1: TMenuItem
         Caption = 'Herkeste G'#246'r'#252'ns'#252'n'
+        ImageIndex = 10
         OnClick = HerkesteGrnsn1Click
       end
       object KimsedeGrnmesin1: TMenuItem
         Caption = 'Kimsede G'#246'r'#252'nmesin'
+        ImageIndex = 12
         OnClick = KimsedeGrnmesin1Click
       end
     end
     object Moduller: TMenuItem
       Caption = 'Mod'#252'ller'
+      ImageIndex = 15
       OnClick = ModullerClick
       object R: TMenuItem
         Caption = 'CRM'
+        ImageIndex = 15
         OnClick = CClick
       end
       object C: TMenuItem
         Caption = 'Cari'
+        ImageIndex = 35
         OnClick = CClick
       end
       object K: TMenuItem
         Caption = 'Kasa'
+        ImageIndex = 15
         OnClick = CClick
       end
       object B: TMenuItem
         Caption = 'Banka'
+        ImageIndex = 15
         OnClick = CClick
       end
       object F: TMenuItem
         Caption = 'Al'#305#351'/Sat'#305#351
+        ImageIndex = 15
         OnClick = CClick
       end
       object S: TMenuItem
         Caption = 'Stok'
+        ImageIndex = 12
         OnClick = CClick
       end
       object U: TMenuItem
         Caption = #220'retim'
+        ImageIndex = 15
         OnClick = CClick
       end
       object D: TMenuItem
         Caption = 'Demirba'#351
+        ImageIndex = 6
         OnClick = CClick
       end
       object T: TMenuItem
         Caption = 'Teklif'
+        ImageIndex = 4
         OnClick = CClick
       end
       object P: TMenuItem
         Caption = #304'K'
+        ImageIndex = 15
         OnClick = CClick
       end
       object E: TMenuItem
         Caption = 'Teknik Servis'
+        ImageIndex = 15
         OnClick = CClick
       end
       object O: TMenuItem
         Caption = 'Dok'#252'man'
+        ImageIndex = 15
         OnClick = CClick
       end
     end
@@ -632,6 +653,7 @@ object DokumDlg: TDokumDlg
     end
     object BuDkmzelBlmeKopyala1: TMenuItem
       Caption = 'Bu D'#246'k'#252'm'#252' "'#214'zel" B'#246'l'#252'me Kopyala '
+      ImageIndex = 10
       OnClick = BuDkmzelBlmeKopyala1Click
     end
   end
@@ -646,11 +668,13 @@ object DokumDlg: TDokumDlg
     Top = 231
   end
   object PopupMenu2: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenu2Popup
     Left = 572
     Top = 163
     object OrjinalExcel1: TMenuItem
       Caption = 'Orjinal Excel'
+      ImageIndex = 32
       Visible = False
       OnClick = OrjinalExcel1Click
     end
@@ -680,12 +704,14 @@ object DokumDlg: TDokumDlg
     object CariKartAcMenu: TMenuItem
       Tag = 1
       Caption = 'Cari Kart'#305'n'#305' A'#231
+      ImageIndex = 35
       Visible = False
       OnClick = CariKartAcMenuClick
     end
     object StokKartAcMenu: TMenuItem
       Tag = 2
       Caption = 'Stok Kart'#305'n'#305' A'#231
+      ImageIndex = 12
       Visible = False
       OnClick = CariKartAcMenuClick
     end
@@ -1022,6 +1048,7 @@ object DokumDlg: TDokumDlg
     Top = 302
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 129
     Top = 192
     object BaskiOnizlemeMenu: TMenuItem

@@ -156,18 +156,21 @@ object AnaForm: TAnaForm
     OnClick = LblSubeClick
   end
   object MainMenu1: TMainMenu
-    Images = Tablo.ImgListGridResimleri
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     Left = 82
     Top = 162
     object N1: TMenuItem
       Caption = 'Gen'
+      ImageIndex = 11
       object KasiyerMenu: TMenuItem
         Caption = 'Kasiyer'
+        ImageIndex = 34
         OnClick = KasiyerMenuClick
       end
       object CafeRestMenu: TMenuItem
         Caption = 'Cafe / Rest'
+        ImageIndex = 34
         OnClick = CafeRestMenuClick
       end
       object N4: TMenuItem
@@ -176,19 +179,22 @@ object AnaForm: TAnaForm
       end
       object k1: TMenuItem
         Caption = #199#305'k'#305#351
-        ImageIndex = 47
+        ImageIndex = 24
         ShortCut = 16465
         OnClick = k1Click
       end
     end
     object Seenekler1: TMenuItem
       Caption = 'Se'#231'enekler'
+      ImageIndex = 11
       object HesapPlanMenu: TMenuItem
         Caption = 'Hesap Plan'#305
+        ImageIndex = 32
         OnClick = HesapPlanMenuClick
       end
       object FirmaBilgileri1: TMenuItem
         Caption = 'Firma Bilgileri'
+        ImageIndex = 11
         OnClick = FirmaBilgileri1Click
       end
       object N2: TMenuItem
@@ -196,11 +202,12 @@ object AnaForm: TAnaForm
       end
       object DovizBilgileriMenu: TMenuItem
         Caption = 'D'#246'viz Bilgileri'
-        ImageIndex = 49
+        ImageIndex = 34
         OnClick = DovizBilgileriMenuClick
       end
       object BankaBilgileriMenu: TMenuItem
         Caption = 'Banka Bilgileri'
+        ImageIndex = 34
         OnClick = BankaBilgileriMenuClick
       end
       object N7: TMenuItem
@@ -211,13 +218,15 @@ object AnaForm: TAnaForm
       end
       object KullancAyarlar1: TMenuItem
         Caption = 'Kullan'#305'c'#305' Ayarlar'#305
+        ImageIndex = 35
         OnClick = KullancAyarlar1Click
       end
       object Opsiyonlar1: TMenuItem
         Caption = 'Opsiyonlar'
-        ImageIndex = 48
+        ImageIndex = 11
         object GenelOpsMenu: TMenuItem
           Caption = 'Genel'
+          ImageIndex = 11
           OnClick = GenelOpsMenuClick
         end
         object N3: TMenuItem
@@ -225,79 +234,98 @@ object AnaForm: TAnaForm
         end
         object CRMOpsMenu: TMenuItem
           Caption = 'CRM'
+          ImageIndex = 36
           OnClick = CRMOpsMenuClick
         end
         object CariOpsMenu: TMenuItem
           Caption = 'Cari'
+          ImageIndex = 35
           OnClick = CariOpsMenuClick
         end
         object KasaOpsMenu: TMenuItem
           Caption = 'Kasa'
+          ImageIndex = 34
           OnClick = KasaOpsMenuClick
         end
         object KasiyerOpsMenu: TMenuItem
           Caption = 'Kasiyer'
+          ImageIndex = 34
           OnClick = KasiyerOpsMenuClick
         end
         object BankaOpsMenu: TMenuItem
           Caption = 'Banka'
+          ImageIndex = 34
           OnClick = BankaOpsMenuClick
         end
         object FaturaOpsMenu: TMenuItem
           Caption = 'Al'#305#351' Sat'#305#351
+          ImageIndex = 34
           OnClick = FaturaOpsMenuClick
         end
         object CekSenetOpsMenu: TMenuItem
           Caption = #199'ek Senet'
+          ImageIndex = 34
           OnClick = CekSenetOpsMenuClick
         end
         object StokOpsMenu: TMenuItem
           Caption = 'Stok'
+          ImageIndex = 12
           OnClick = StokOpsMenuClick
         end
         object UretimOpsMenu: TMenuItem
           Caption = #220'retim'
+          ImageIndex = 12
           OnClick = UretimOpsMenuClick
         end
         object IKOpsMenu: TMenuItem
           Caption = #304'K'
+          ImageIndex = 35
           OnClick = IKOpsMenuClick
         end
         object DemirbasOpsMenu: TMenuItem
           Caption = 'Demirba'#351
+          ImageIndex = 12
           OnClick = DemirbasOpsMenuClick
         end
         object TeklifOpsMenu: TMenuItem
           Caption = 'Teklif'
+          ImageIndex = 4
           OnClick = TeklifOpsMenuClick
         end
         object ServisOpsMenu: TMenuItem
           Caption = 'Servis'
+          ImageIndex = 7
           OnClick = ServisOpsMenuClick
         end
         object DokumanOpsMenu: TMenuItem
           Caption = 'Dok'#252'man'
+          ImageIndex = 19
           OnClick = DokumanOpsMenuClick
         end
         object KaliteOpsMenu: TMenuItem
           Caption = 'Kalite'
+          ImageIndex = 23
           OnClick = KaliteOpsMenuClick
         end
       end
       object EntegrasyonMenu: TMenuItem
         Caption = 'Replikasyon'
+        ImageIndex = 9
         Visible = False
         OnClick = EntegrasyonMenuClick
       end
       object tslemleri1: TMenuItem
         Caption = #304'ts '#304#351'lemleri'
+        ImageIndex = 20
         Visible = False
         OnClick = tslemleri1Click
       end
       object VeriAlImport1: TMenuItem
         Caption = 'Veri Al (Import)'
+        ImageIndex = 32
         object KullaniciTanimliMenu: TMenuItem
           Caption = 'Kullan'#305'c'#305' Tan'#305'ml'#305
+          ImageIndex = 0
           OnClick = KullaniciTanimliMenuClick
         end
         object N8: TMenuItem
@@ -305,37 +333,44 @@ object AnaForm: TAnaForm
         end
         object AcilisKaydiDegerleriMenu: TMenuItem
           Caption = 'A'#231#305'l'#305#351' Kayd'#305' De'#287'erleri'
+          ImageIndex = 4
           OnClick = AcilisKaydiDegerleriMenuClick
         end
       end
       object YedekAl1: TMenuItem
         Caption = 'Yedekleme'
+        ImageIndex = 2
         OnClick = YedekAl1Click
       end
       object MenuGenelInfo: TMenuItem
         Caption = 'Log info'
+        ImageIndex = 22
         OnClick = MenuGenelInfoClick
       end
     end
     object Yardm1: TMenuItem
       Caption = 'Yard'#305'm'
+      ImageIndex = 22
       object Hakknda1: TMenuItem
         Caption = 'Hakk'#305'nda'
-        ImageIndex = 41
+        ImageIndex = 22
         OnClick = Hakknda1Click
       end
       object KullanmKlavuzu1: TMenuItem
         Caption = 'Kullan'#305'm Klavuzu'
+        ImageIndex = 19
         OnClick = KullanmKlavuzu1Click
       end
       object MesajGnder1: TMenuItem
         Caption = 'Mesaj G'#246'nder'
+        ImageIndex = 18
         ShortCut = 49229
         Visible = False
         OnClick = MesajGnder1Click
       end
       object MenuSifreIslemleri: TMenuItem
         Caption = #350'ifre '#304#351'lemleri'
+        ImageIndex = 29
         OnClick = MenuSifreIslemleriClick
       end
       object N6: TMenuItem
@@ -343,6 +378,7 @@ object AnaForm: TAnaForm
       end
       object Haklar1: TMenuItem
         Caption = 'Haklar'
+        ImageIndex = 29
         OnClick = Haklar1Click
       end
       object N9: TMenuItem
@@ -423,10 +459,12 @@ object AnaForm: TAnaForm
     Top = 187
   end
   object PopupMDI: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 811
     Top = 61
     object Tabs1: TMenuItem
       Caption = 'Sekme'
+      ImageIndex = 15
       GroupIndex = 100
       RadioItem = True
       OnClick = Tabs1Click
@@ -434,6 +472,7 @@ object AnaForm: TAnaForm
     object Buttons1: TMenuItem
       Tag = 1
       Caption = 'Buton'
+      ImageIndex = 15
       GroupIndex = 100
       RadioItem = True
       OnClick = Tabs1Click
@@ -441,6 +480,7 @@ object AnaForm: TAnaForm
     object Flat1: TMenuItem
       Tag = 2
       Caption = 'D'#252'z'
+      ImageIndex = 15
       Checked = True
       GroupIndex = 100
       RadioItem = True
@@ -461,61 +501,76 @@ object AnaForm: TAnaForm
     Top = 28
   end
   object pmGridStil: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = pmGridStilPopup
     Left = 887
     Top = 59
     object AlanYnetimi1: TMenuItem
       Caption = 'Alan Y'#246'netimi'
+      ImageIndex = 15
       OnClick = AlanYnetimi1Click
     end
     object EnUygunGenilieAyarla1: TMenuItem
       Caption = 'En Uygun Geni'#351'li'#287'e Ayarla'
+      ImageIndex = 11
       OnClick = EnUygunGenilieAyarla1Click
     end
     object GrupAKapa1: TMenuItem
       Caption = 'Grup A'#231'/Kapa'
+      ImageIndex = 32
       object GrupA1: TMenuItem
         Caption = 'Grup A'#231' (-)'
+        ImageIndex = 32
         OnClick = GrupA1Click
       end
       object GrupKapat1: TMenuItem
         Caption = 'Grup Kapat (+)'
+        ImageIndex = 32
         OnClick = GrupKapat1Click
       end
     end
     object Kaydet: TMenuItem
       Caption = 'Ayar'#305' Kaydet'
+      ImageIndex = 2
       object ButunkullanclarMenu: TMenuItem
         Caption = 'T'#252'm kullan'#305'c'#305'lar i'#231'in Varsay'#305'lan'
+        ImageIndex = 23
         OnClick = KaydetClick
       end
       object KullancVarsaylanolarak1: TMenuItem
         Tag = 1
         Caption = 'Bana '#214'zel Varsay'#305'lan'
+        ImageIndex = 23
         OnClick = KaydetClick
       end
       object FarklKaydet1: TMenuItem
         Tag = 2
         Caption = 'Farkl'#305' Kaydet'
+        ImageIndex = 2
         OnClick = KaydetClick
       end
     end
     object DierKullancAyarlar1: TMenuItem
       Caption = 'Kay'#305'tl'#305' Kullan'#305'c'#305' Ayar'#305' Uygula'
+      ImageIndex = 35
     end
     object KaytlKullancAyarSil: TMenuItem
       Caption = 'Kay'#305'tl'#305' Kullan'#305'c'#305' Ayar'#305' Sil'
+      ImageIndex = 1
     end
     object GridAyarlarnSfrla1: TMenuItem
       Caption = 'Varsay'#305'lan Ayarlara D'#246'n'
+      ImageIndex = 23
       OnClick = GridAyarlarnSfrla1Click
     end
     object StilOlutur1: TMenuItem
       Caption = 'Stil D'#252'zenle'
+      ImageIndex = 7
       OnClick = StilOlutur1Click
     end
     object ExceleAktar1: TMenuItem
       Caption = 'Excele Aktar'
+      ImageIndex = 32
       OnClick = ExceleAktar1Click
     end
   end
@@ -912,30 +967,37 @@ object AnaForm: TAnaForm
     Top = 8
   end
   object PopupMenuTree: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 879
     Top = 131
     object MenuItem1: TMenuItem
       Caption = 'Alan Y'#246'netimi'
+      ImageIndex = 15
       OnClick = MenuItem1Click
     end
     object MenuItem2: TMenuItem
       Caption = 'En Uygun Geni'#351'li'#287'e Ayarla'
+      ImageIndex = 11
       OnClick = MenuItem2Click
     end
     object MenuItem3: TMenuItem
       Caption = 'Kaydet'
+      ImageIndex = 2
       OnClick = MenuItem3Click
     end
     object MenuItem4: TMenuItem
       Caption = 'Varsay'#305'lan Ayarlara D'#246'n'
+      ImageIndex = 23
       OnClick = MenuItem4Click
     end
     object MenuItem5: TMenuItem
       Caption = 'Stil D'#252'zenle'
+      ImageIndex = 7
       Visible = False
     end
     object MenuItem6: TMenuItem
       Caption = 'Excele Aktar'
+      ImageIndex = 32
       OnClick = MenuItem6Click
     end
   end

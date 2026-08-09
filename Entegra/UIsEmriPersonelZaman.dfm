@@ -139,6 +139,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
   end
   object PageControlUst: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 957
@@ -154,7 +155,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     ClientRectTop = 24
     object TabSheetCalisma: TcxTabSheet
       Caption = #199'al'#305#351'ma'
-      ImageIndex = 0
+      ImageIndex = 19
       object GroupDetay: TcxGroupBox
         Left = 169
         Top = 0
@@ -390,7 +391,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
     object TabSheetOlcum: TcxTabSheet
       Caption = #214'l'#231#252'm'
-      ImageIndex = 1
+      ImageIndex = 19
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -972,7 +973,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
     object TabSheetEkAlan111: TcxTabSheet
       Caption = 'Ek Alan1'
-      ImageIndex = 2
+      ImageIndex = 19
       object TabSheetEkAlan1: TPanel
         Left = 0
         Top = 0
@@ -985,7 +986,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
     object TabSheetEkAlan222: TcxTabSheet
       Caption = 'Ek Alan 2'
-      ImageIndex = 3
+      ImageIndex = 19
       object TabSheetEkAlan2: TPanel
         Left = 0
         Top = 0
@@ -1175,6 +1176,7 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     Top = 285
   end
   object PopupMenuOlcum: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 261
     Top = 225
     object Nominal2OlculenMenu: TMenuItem

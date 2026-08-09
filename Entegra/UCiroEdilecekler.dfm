@@ -443,10 +443,12 @@ object CiroEdileceklerDlg: TCiroEdileceklerDlg
     Top = 142
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 256
     Top = 144
     object Cirola1: TMenuItem
       Caption = 'Ciro Et'
+      ImageIndex = 15
     end
   end
 end

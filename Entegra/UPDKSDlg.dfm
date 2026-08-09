@@ -19,6 +19,7 @@
   PixelsPerInch = 96
   TextHeight = 13
   object PageControlPDKS: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 93
     Width = 1222
@@ -33,7 +34,7 @@
     ClientRectTop = 24
     object TabSheetGenel: TcxTabSheet
       Caption = 'PDKS Liste'
-      ImageIndex = 0
+      ImageIndex = 32
       object PDKSListe: TcxGrid
         Left = 0
         Top = 27
@@ -300,7 +301,7 @@
     end
     object TabSheetGrafik: TcxTabSheet
       Caption = 'Grafik'
-      ImageIndex = 1
+      ImageIndex = 19
       object GridPDKSGrafik: TcxGrid
         Left = 0
         Top = 0
@@ -907,6 +908,7 @@
     Top = 224
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 37
     Top = 240
     object BaskiOnizlemeMenu: TMenuItem
@@ -1000,22 +1002,26 @@
     Top = 209
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PmSagClickPopup
     Left = 128
     Top = 184
     object HepsiniSe1: TMenuItem
       Tag = 5
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = HepsiniSe1Click
     end
     object mnKaldr1: TMenuItem
       Tag = 6
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
       OnClick = HepsiniSe1Click
     end
     object SeimiTersevir1: TMenuItem
       Tag = 7
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = HepsiniSe1Click
     end
     object N4: TMenuItem
@@ -1024,10 +1030,12 @@
     object GrupA1: TMenuItem
       Tag = 1
       Caption = 'Grup A'#231'(-)'
+      ImageIndex = 32
       OnClick = GrupKapa1Click
     end
     object GrupKapa1: TMenuItem
       Caption = 'Grup Kapat(+)'
+      ImageIndex = 32
       OnClick = GrupKapa1Click
     end
     object N5: TMenuItem
@@ -1035,6 +1043,7 @@
     end
     object DurumDegisMenu: TMenuItem
       Caption = 'Durum De'#287'i'#351'tir'
+      ImageIndex = 30
     end
     object N6: TMenuItem
       Caption = '-'
@@ -1042,25 +1051,30 @@
     object GiriSaatDzenle1: TMenuItem
       Tag = 53
       Caption = 'Giri'#351' Saat D'#252'zenle'
+      ImageIndex = 7
       OnClick = btnGirisClick
     end
     object kSaatDzenle1: TMenuItem
       Tag = 54
       Caption = #199#305'k'#305#351' Saat D'#252'zenle'
+      ImageIndex = 7
       OnClick = btnGirisClick
     end
   end
   object PmYeniEkle: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 144
     Top = 256
     object MenuItemTekEkle: TMenuItem
       Tag = 2
       Caption = 'Tek Ekle'
+      ImageIndex = 0
       OnClick = MenuItemTekEkleClick
     end
     object MenuItemTumEkle: TMenuItem
       Tag = 3
       Caption = 'T'#252'm'#252'n'#252' Ekle'
+      ImageIndex = 0
       OnClick = MenuItemTekEkleClick
     end
   end

@@ -171,6 +171,7 @@ object KYToplantiListeDlg: TKYToplantiListeDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 189
     Top = 75
     object BaskiOnizlemeMenu: TMenuItem
@@ -279,10 +280,12 @@ object KYToplantiListeDlg: TKYToplantiListeDlg
     Top = 193
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 464
     Top = 200
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
   end

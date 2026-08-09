@@ -243,6 +243,7 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       end
     end
     object PageHareketSeriLot: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 966
       Top = 1
       Width = 270
@@ -258,7 +259,11 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       ClientRectTop = 24
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
-        ImageIndex = 1
+        ImageIndex = 19
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridSeriLotHareket: TcxGrid
           Left = 0
           Top = 0
@@ -751,14 +756,17 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
     Top = 200
   end
   object PopupGrid: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 376
     Top = 216
     object Gizle1: TMenuItem
       Caption = 'Gizle'
+      ImageIndex = 14
       OnClick = Gizle1Click
     end
     object GizlemeyiKaldr1: TMenuItem
       Caption = 'Gizlemeyi Kald'#305'r'
+      ImageIndex = 24
       OnClick = GizlemeyiKaldr1Click
     end
     object N1: TMenuItem
@@ -766,10 +774,12 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
     end
     object StokDetay1: TMenuItem
       Caption = 'Stok Detay'#305
+      ImageIndex = 22
       OnClick = StokDetay1Click
     end
     object zlemeDetay1: TMenuItem
       Caption = #304'zleme Detay'#305
+      ImageIndex = 22
       OnClick = zlemeDetay1Click
     end
   end

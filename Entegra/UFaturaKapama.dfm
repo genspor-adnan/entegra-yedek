@@ -545,10 +545,12 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
     end
   end
   object PopupBorc: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 176
     Top = 208
     object Busatrnbalantlarnsil2: TMenuItem
       Caption = 'Bu sat'#305'r'#305'n ba'#287'lant'#305'lar'#305'n'#305' sil'
+      ImageIndex = 1
       OnClick = Busatrnbalantlarnsil2Click
     end
   end
@@ -683,10 +685,12 @@ object FaturaKapamaDlg: TFaturaKapamaDlg
     Top = 120
   end
   object PopupAlacak: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 704
     Top = 128
     object Busatrnbalantlarnsil1: TMenuItem
       Caption = 'Bu sat'#305'r'#305'n ba'#287'lant'#305'lar'#305'n'#305' sil'
+      ImageIndex = 1
       OnClick = Busatrnbalantlarnsil1Click
     end
   end

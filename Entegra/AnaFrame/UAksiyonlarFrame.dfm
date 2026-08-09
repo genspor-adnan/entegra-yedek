@@ -122,6 +122,7 @@ object AksiyonlarFrame: TAksiyonlarFrame
         ExplicitWidth = 183
         ExplicitHeight = 144
         object pcArama: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 0
           Width = 181
@@ -153,6 +154,7 @@ object AksiyonlarFrame: TAksiyonlarFrame
     BevelOuter = bvNone
     TabOrder = 1
     object AnaSayfaDenetimi: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 0
       Top = 28
       Width = 266

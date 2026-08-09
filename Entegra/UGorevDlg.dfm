@@ -616,6 +616,7 @@ object GorevDlg: TGorevDlg
     TabOrder = 1
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 439
     Width = 1092
@@ -630,7 +631,7 @@ object GorevDlg: TGorevDlg
     ClientRectTop = 29
     object cxTabSheet2: TcxTabSheet
       Caption = 'Yorum/Medya'
-      ImageIndex = 1
+      ImageIndex = 38
       DesignSize = (
         1084
         157)
@@ -1422,15 +1423,18 @@ object GorevDlg: TGorevDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 229
     Top = 488
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1438,14 +1442,17 @@ object GorevDlg: TGorevDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -1520,6 +1527,7 @@ object GorevDlg: TGorevDlg
     Top = 488
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 181
     Top = 34
     object BaskiOnizlemeMenu: TMenuItem

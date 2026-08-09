@@ -579,6 +579,7 @@ object IKWizardDlg: TIKWizardDlg
         end
       end
       object CariPageControl: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 303
         Width = 938
@@ -593,7 +594,7 @@ object IKWizardDlg: TIKWizardDlg
         ClientRectTop = 29
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
-          ImageIndex = 0
+          ImageIndex = 19
           object CariGridNotlar: TcxGrid
             Left = 0
             Top = 27
@@ -707,7 +708,7 @@ object IKWizardDlg: TIKWizardDlg
         end
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2261,6 +2262,7 @@ object IKWizardDlg: TIKWizardDlg
     Top = 511
     object MenuItem7: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
       OnClick = MenuItem7Click
     end
   end
@@ -2328,15 +2330,18 @@ object IKWizardDlg: TIKWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 608
     Top = 104
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -2344,14 +2349,17 @@ object IKWizardDlg: TIKWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

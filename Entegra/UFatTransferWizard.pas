@@ -752,6 +752,14 @@ begin
 
   if not BoslukKontrol(TabFATURA.FieldByName('ADET').AsString, KontrolFaturaAdet) then
     Abort;
+
+  // DONUSUM KURALI: bu satirdan URETILMIS adedin altina inilemez (ust sinir yok).
+  //   Transfer satiri uretim fisine donusmus olabilir.
+  if (TabFATURA.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('FATURA',
+            TabFATURA.FieldByName('ID').AsInteger,
+            TabFATURA.FieldByName('ADET').AsFloat)) then
+    Abort;
   //if not BoslukKontrol(TabFATURA.FieldByName('BIRIMFIYAT').AsString, KontrolBirimFiyati) then
   //  Abort;
 //  if not BoslukKontrol(TabFATURA.FieldByName('KDV').AsString, KontrolKDV) then

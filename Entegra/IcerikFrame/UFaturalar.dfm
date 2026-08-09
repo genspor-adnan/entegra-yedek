@@ -655,6 +655,7 @@
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 285
     Width = 1231
@@ -670,7 +671,7 @@
     ClientRectTop = 27
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
-      ImageIndex = 0
+      ImageIndex = 22
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1028,7 +1029,7 @@
     end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
-      ImageIndex = 1
+      ImageIndex = 38
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1228,6 +1229,7 @@
     Visible = False
   end
   object PageControlTur: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 49
     Width = 1231
@@ -1242,10 +1244,11 @@
     ClientRectTop = 0
     object TabSheetTumu: TcxTabSheet
       Caption = 'T'#252'm'#252
-      ImageIndex = 0
+      ImageIndex = 19
     end
   end
   object PageControlAlt: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 73
     Width = 1231
@@ -1340,6 +1343,7 @@
     Top = 262
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 446
     Top = 72
     object BaskiOnizlemeMenu: TMenuItem
@@ -1425,16 +1429,19 @@
     Top = 174
   end
   object pmFatIslemler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 320
     Top = 72
     object mnIrsaliyeyeDonustur: TMenuItem
       Tag = 1
       Caption = 'Se'#231'ilenleri '#304'rsaliyeye D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       OnClick = mnIrsaliyeyeDonusturClick
     end
     object mnFaturayaDonustur: TMenuItem
       Tag = 2
       Caption = 'Se'#231'ilenleri Faturaya D'#246'n'#252#351't'#252'r'
+      ImageIndex = 19
       OnClick = mnIrsaliyeyeDonusturClick
     end
   end
@@ -1516,6 +1523,7 @@
     Top = 22
     object infoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 53
       OnClick = infoMenuClick
     end
     object N14: TMenuItem
@@ -1556,14 +1564,17 @@
       object MenuYanitla: TMenuItem
         Tag = 2
         Caption = 'Yan'#305'tla'
+        ImageIndex = 41
         GroupIndex = 1
         object MenuKabulEt: TMenuItem
           Tag = 2
           Caption = 'Kabul Et'
+          ImageIndex = 11
         end
         object MenuRedEt: TMenuItem
           Tag = 2
           Caption = 'Red Et'
+          ImageIndex = 31
         end
       end
       object MenuSistemeTasi: TMenuItem
@@ -1634,15 +1645,18 @@
       object rnEletirme1: TMenuItem
         Tag = 2
         Caption = #220'r'#252'n E'#351'le'#351'tirme'
+        ImageIndex = 33
         GroupIndex = 1
         object MenuUrunEslestir: TMenuItem
           Tag = 2
           Caption = #220'r'#252'n E'#351'le'#351'tir'
+          ImageIndex = 33
           OnClick = MenuUrunEslestirClick
         end
         object MenuEslesmeTablosunuAc: TMenuItem
           Tag = 2
           Caption = 'E'#351'le'#351'me Tablosunu A'#231
+          ImageIndex = 52
           OnClick = MenuEslesmeTablosunuAcClick
         end
       end
@@ -1659,39 +1673,47 @@
     object SipariiniOlutur1: TMenuItem
       Tag = 9
       Caption = 'Sipari'#351'ini Olu'#351'tur'
+      ImageIndex = 19
       Visible = False
       OnClick = mnIrsaliyesiniOlusturClick
     end
     object mnIrsaliyesiniOlustur: TMenuItem
       Tag = 1
       Caption = #304'rsaliyesini Olu'#351'tur'
+      ImageIndex = 42
       OnClick = mnIrsaliyesiniOlusturClick
     end
     object mnFaturasiniOlustur: TMenuItem
       Tag = 2
       Caption = 'Faturas'#305'n'#305' Olu'#351'tur'
+      ImageIndex = 30
       OnClick = mnIrsaliyesiniOlusturClick
     end
     object mnSatisFisiniOlustur: TMenuItem
       Tag = 16
       Caption = 'Sat'#305#351' Fi'#351'ini Olu'#351'tur'
+      ImageIndex = 34
       OnClick = mnIrsaliyesiniOlusturClick
     end
     object KonsinyesiniOlusturMenu: TMenuItem
       Caption = 'Konsinyesini Olu'#351'tur'
+      ImageIndex = 29
       OnClick = mnIrsaliyesiniOlusturClick
     end
     object UretimFisiniOlutur: TMenuItem
       Tag = 4
       Caption = #220'retim Fi'#351'ini Olu'#351'tur'
+      ImageIndex = 39
       object rnOlarak1: TMenuItem
         Tag = 4
         Caption = #220'r'#252'n Olarak'
+        ImageIndex = 29
         OnClick = mnIrsaliyesiniOlusturClick
       end
       object Sae1: TMenuItem
         Tag = -4
         Caption = 'Sarf Olarak'
+        ImageIndex = 12
         OnClick = mnIrsaliyesiniOlusturClick
       end
     end
@@ -1700,6 +1722,7 @@
     end
     object Kopyala2: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 35
       OnClick = Kopyala2Click
     end
     object N5: TMenuItem
@@ -1707,14 +1730,17 @@
     end
     object BelgeyiAc: TMenuItem
       Caption = 'Belgeyi A'#231
+      ImageIndex = 6
       OnClick = BelgeyiAcClick
     end
     object KaynakBelgeyiA1: TMenuItem
       Caption = 'Kaynak Belgeyi A'#231
+      ImageIndex = 13
       OnClick = KaynakBelgeyiA1Click
     end
     object HedefBelgeyiA1: TMenuItem
       Caption = 'Hedef Belgeyi A'#231
+      ImageIndex = 14
       OnClick = HedefBelgeyiA1Click
     end
     object N12: TMenuItem
@@ -1722,6 +1748,7 @@
     end
     object MenuDurumuGuncelle: TMenuItem
       Caption = 'Se'#231'ililerde Durumu G'#252'ncelle'
+      ImageIndex = 11
       OnClick = MenuDurumuGuncelleClick
     end
     object N6: TMenuItem
@@ -1729,6 +1756,7 @@
     end
     object IptalIsaretleMenu: TMenuItem
       Caption = #304'ptal '#304#351'aretle'
+      ImageIndex = 49
       OnClick = IptalIsaretleMenuClick
     end
     object N7: TMenuItem
@@ -1737,11 +1765,13 @@
     end
     object ExceldenBelgeEkle: TMenuItem
       Caption = 'Excelden Belge Al-1'
+      ImageIndex = 48
       Visible = False
       OnClick = ExceldenBelgeEkleClick
     end
     object ExceldenBelgeEkle2: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 48
       OnClick = ExceldenBelgeEkle2Click
     end
     object N8: TMenuItem
@@ -1750,14 +1780,17 @@
     end
     object IadeAl: TMenuItem
       Caption = #304'ade Al'
+      ImageIndex = 17
       object Fatura1: TMenuItem
         Tag = 2
         Caption = 'Fatura ile'
+        ImageIndex = 30
         OnClick = Fatura1Click
       end
       object Pusula1: TMenuItem
         Tag = 5
         Caption = 'Gider Pusulas'#305' ile'
+        ImageIndex = 19
         OnClick = Fatura1Click
       end
     end
@@ -1766,34 +1799,41 @@
     end
     object TahsilOdemeMenu: TMenuItem
       Caption = 'Tahsil Et'
+      ImageIndex = 3
       object Nakit1: TMenuItem
         Tag = 21
         Caption = 'Nakit'
+        ImageIndex = 3
         OnClick = Nakit1Click
       end
       object HavaleEFT1: TMenuItem
         Tag = 22
         Caption = 'Havale/EFT'
+        ImageIndex = 5
         OnClick = Nakit1Click
       end
       object POSMenu: TMenuItem
         Tag = 25
         Caption = 'POS'
+        ImageIndex = 3
         OnClick = Nakit1Click
       end
       object KrediKartiMenu: TMenuItem
         Tag = 35
         Caption = 'Kredi Kart'#305
+        ImageIndex = 3
         OnClick = Nakit1Click
       end
       object ek1: TMenuItem
         Tag = 23
         Caption = #199'ek'
+        ImageIndex = 34
         OnClick = Nakit1Click
       end
       object Senet1: TMenuItem
         Tag = 24
         Caption = 'Senet'
+        ImageIndex = 34
         OnClick = Nakit1Click
       end
       object N10: TMenuItem
@@ -1802,11 +1842,13 @@
       object ahsilatPlanla1: TMenuItem
         Tag = 61
         Caption = 'Tahsilat Planla'
+        ImageIndex = 43
         OnClick = Nakit1Click
       end
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 560
     Top = 72
   end
@@ -2099,84 +2141,101 @@
     Top = 249
   end
   object PopupFatGiris: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 648
     Top = 72
     object AlSat1: TMenuItem
       Tag = 1
       Caption = 'Al'#305#351' / Sat'#305#351
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object adeFaturas1: TMenuItem
       Tag = 2
       Caption = #304'ade Faturas'#305
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object FiatFark1: TMenuItem
       Tag = 3
       Caption = 'Fiyat Fark'#305
+      ImageIndex = 34
       OnClick = AlSat1Click
     end
     object StopajMenu: TMenuItem
       Tag = 4
       Caption = 'Stopaj'
+      ImageIndex = 34
       object SerbestMeslekMakbuzuMenu: TMenuItem
         Tag = 4
         Caption = 'Serbest Meslek Makbuzu'
+        ImageIndex = 19
         OnClick = AlSat1Click
       end
       object KiraMenu: TMenuItem
         Tag = 7
         Caption = 'Kira'
+        ImageIndex = 34
         OnClick = AlSat1Click
       end
       object GiderPusulasiMenu: TMenuItem
         Tag = 8
         Caption = 'Gider Pusulas'#305
+        ImageIndex = 19
         OnClick = AlSat1Click
       end
     end
     object EFaturaMenu1: TMenuItem
       Tag = 22
       Caption = 'Tevkifatl'#305
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object MenuKDVIstisna: TMenuItem
       Tag = 24
       Caption = 'KDV '#304'stisna'
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object KurFark1: TMenuItem
       Tag = 5
       Caption = 'Kur Fark'#305
+      ImageIndex = 34
       OnClick = AlSat1Click
     end
     object IthalatMenu: TMenuItem
       Tag = 6
       Caption = #304'thalat'
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object IhracatMenu: TMenuItem
       Tag = 26
       Caption = #304'hracat'
+      ImageIndex = 19
       object Menu_Ihr_Satis: TMenuItem
         Tag = 101
         Caption = 'Sat'#305#351
+        ImageIndex = 19
         OnClick = AlSat1Click
       end
       object Menu_Ihr_Iade: TMenuItem
         Tag = 102
         Caption = #304'ade'
+        ImageIndex = 3
         OnClick = AlSat1Click
       end
       object Menu_Ihr_Istisna: TMenuItem
         Tag = 124
         Caption = #304'stisna'
+        ImageIndex = 19
         OnClick = AlSat1Click
       end
     end
     object IhracKayitliMenu: TMenuItem
       Tag = 9
       Caption = #304'hra'#231' Kay'#305'tl'#305
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object CizgiMenu1: TMenuItem
@@ -2287,15 +2346,18 @@
     Top = 468
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -2303,14 +2365,17 @@
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2364,16 +2429,19 @@
     end
   end
   object PopupKonsGiris: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 776
     Top = 72
     object MenuItem2: TMenuItem
       Tag = 1
       Caption = 'Al'#305#351
+      ImageIndex = 19
       OnClick = AlSat1Click
     end
     object MenuItem3: TMenuItem
       Tag = 2
       Caption = #304'ade '
+      ImageIndex = 3
       OnClick = AlSat1Click
     end
   end

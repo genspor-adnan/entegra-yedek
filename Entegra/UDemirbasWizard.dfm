@@ -115,6 +115,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
       OnPage = DemirbasEkrPage
       OnExitPage = DemirbasEkrExitPage
       object cxPageControl1: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 217
         Width = 815
@@ -131,7 +132,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         ClientRectTop = 27
         object cxTabSheet1: TcxTabSheet
           Caption = 'Genel '#214'zellikler'
-          ImageIndex = 0
+          ImageIndex = 11
           object Label1: TcxLabel
             Tag = 21
             Left = 323
@@ -589,7 +590,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         end
         object TabSheetMasraf: TcxTabSheet
           Caption = 'Masraf Kalemi'
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitHeight = 298
           object ToolBar4: TToolBar
             Left = 0
@@ -679,7 +680,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         end
         object TabSheetAmortisman: TcxTabSheet
           Caption = 'Amortisman'
-          ImageIndex = 6
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -848,6 +849,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         end
       end
       object PageControl1: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 105
         Width = 815
@@ -864,7 +866,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         object TabSheetGenel: TcxTabSheet
           Caption = 'Genel'
           Color = 11776947
-          ImageIndex = 0
+          ImageIndex = 11
           ParentColor = False
           object PanelUst: TPanel
             Left = 0
@@ -1191,7 +1193,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
         end
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alan'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1498,6 +1500,7 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     Top = 74
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 493
     Top = 200
     object BaskiOnizlemeMenu: TMenuItem
@@ -1583,16 +1586,17 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     Top = 520
   end
   object PopupMenuKopya: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 513
     Top = 101
     object MenuButunDemirbasKopyala: TMenuItem
       Caption = 'B'#252't'#252'n Demirbasi kopyala'
-      ImageIndex = 0
+      ImageIndex = 10
     end
     object MenuSadeceDetay: TMenuItem
       Tag = 1
       Caption = 'Sadece detay sat'#305'rlar'#305' kopyala'
-      ImageIndex = 1
+      ImageIndex = 10
     end
   end
   object tabDemirbasTarihce: TFDQuery
@@ -1858,15 +1862,18 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 232
     Top = 352
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1874,14 +1881,17 @@ object DemirbasWizardDlg: TDemirbasWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

@@ -365,19 +365,24 @@ object IskontoYetkiDlg: TIskontoYetkiDlg
     Top = 266
   end
   object PopupIslemler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 424
     Top = 232
     object SecililereIskontoGir: TMenuItem
       Caption = 'Se'#231'ili '#220'r'#252'nlere '#304'skonto Oran'#305' Gir'
+      ImageIndex = 34
       object STumRoller: TMenuItem
         Caption = 'T'#252'm Roller'
+        ImageIndex = 15
         OnClick = SecililereClick
       end
     end
     object TumuneIskontoGir: TMenuItem
       Caption = 'T'#252'm '#220'r'#252'nlere '#304'skonto Oran'#305' Gir'
+      ImageIndex = 34
       object TTumRoller: TMenuItem
         Caption = 'T'#252'm Roller'
+        ImageIndex = 15
         OnClick = TumuneClick
       end
     end

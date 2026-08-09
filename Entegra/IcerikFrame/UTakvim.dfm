@@ -13,6 +13,7 @@ object TakvimDlg: TTakvimDlg
   ParentFont = False
   TabOrder = 0
   object PageControl: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 33
     Width = 1154
@@ -29,7 +30,7 @@ object TakvimDlg: TTakvimDlg
     object TabSheetTakvim: TcxTabSheet
       Tag = 1
       Caption = 'Takvim'
-      ImageIndex = 0
+      ImageIndex = 21
       object Scheduler: TcxScheduler
         Left = 0
         Top = 0
@@ -983,7 +984,7 @@ object TakvimDlg: TTakvimDlg
     object TabSheetPivot: TcxTabSheet
       Tag = 2
       Caption = 'Pivot'
-      ImageIndex = 2
+      ImageIndex = 19
       object Label1: TLabel
         Left = 184
         Top = 48
@@ -1221,7 +1222,7 @@ object TakvimDlg: TTakvimDlg
     object TabSheetGrafik: TcxTabSheet
       Tag = 3
       Caption = 'Grafik'
-      ImageIndex = 1
+      ImageIndex = 19
       object GridGrafik: TcxGrid
         Left = 0
         Top = 0
@@ -1872,7 +1873,7 @@ object TakvimDlg: TTakvimDlg
     object TabSheetListe: TcxTabSheet
       Tag = 4
       Caption = 'Liste'
-      ImageIndex = 3
+      ImageIndex = 32
       object Panel2: TPanel
         Left = 0
         Top = 0
@@ -2261,81 +2262,98 @@ object TakvimDlg: TTakvimDlg
     Top = 73
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupMenu1Popup
     Left = 623
     Top = 80
     object Gizle1: TMenuItem
       Caption = 'Gizle'
+      ImageIndex = 14
       Visible = False
       OnClick = Gizle1Click
     end
     object BilgileriDegisMenu: TMenuItem
       Caption = 'bilgilerini g'#246'r / de'#287'i'#351'tir'
+      ImageIndex = 22
       OnClick = BilgileriDegisMenuClick
     end
     object SilMenu: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = SilMenuClick
     end
     object TahsilMenu: TMenuItem
       Caption = 'Tahsil Et'
+      ImageIndex = 34
       object Nakit1: TMenuItem
         Tag = 21
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object HavaleEFT1: TMenuItem
         Tag = 22
         Caption = 'Havale/EFT'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object POS1: TMenuItem
         Tag = 23
         Caption = 'POS'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object ek1: TMenuItem
         Tag = 24
         Caption = #199'ek'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object Senet1: TMenuItem
         Tag = 25
         Caption = 'Senet'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
     end
     object OdemeMenu: TMenuItem
       Caption = #214'deme yap'
+      ImageIndex = 34
       object NakitOdemeMenu: TMenuItem
         Tag = 31
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object HavaleEFTOdemeMenu: TMenuItem
         Tag = 32
         Caption = 'Havale/EFT'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object KrediKart1: TMenuItem
         Tag = 33
         Caption = 'Kredi Kart'#305
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object CekOdemeMenu: TMenuItem
         Tag = 34
         Caption = #199'ek'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
       object SenetOdemeMenu: TMenuItem
         Tag = 35
         Caption = 'Senet'
+        ImageIndex = 34
         OnClick = NakitOdemeMenuClick
       end
     end
     object GenelMenu: TMenuItem
       Caption = 'Genel'
+      ImageIndex = 15
       OnClick = NakitOdemeMenuClick
     end
     object N3: TMenuItem
@@ -2343,25 +2361,31 @@ object TakvimDlg: TTakvimDlg
     end
     object Butariheplanekle1: TMenuItem
       Caption = 'Bu tarihe plan ekle'
+      ImageIndex = 21
       object TahsilatPlanMenu: TMenuItem
         Tag = 61
         Caption = 'Tahsilat'
+        ImageIndex = 34
         OnClick = OdemePlanMenuClick
       end
       object OdemePlanMenu: TMenuItem
         Tag = 71
         Caption = #214'deme'
+        ImageIndex = 34
         OnClick = OdemePlanMenuClick
       end
     end
     object Butarihefaturaekle1: TMenuItem
       Caption = 'Bu tarihe fatura ekle'
+      ImageIndex = 21
       Visible = False
       object GelenFaturaMenu: TMenuItem
         Caption = 'Gelen Fatura'
+        ImageIndex = 19
       end
       object GidenFaturaMenu: TMenuItem
         Caption = 'Giden Fatura'
+        ImageIndex = 19
       end
     end
     object N4: TMenuItem
@@ -2369,6 +2393,7 @@ object TakvimDlg: TTakvimDlg
     end
     object BuguneaksiyonekleMenu: TMenuItem
       Caption = 'Bu tarihe aksiyon ekle'
+      ImageIndex = 21
       OnClick = BuguneaksiyonekleMenuClick
     end
     object N1: TMenuItem
@@ -2376,6 +2401,7 @@ object TakvimDlg: TTakvimDlg
     end
     object GunlukMenu: TMenuItem
       Caption = 'G'#252'nl'#252'k gelir-gider '#231'izelgesini a'#231
+      ImageIndex = 34
       OnClick = GunlukMenuClick
     end
     object N2: TMenuItem
@@ -2383,6 +2409,7 @@ object TakvimDlg: TTakvimDlg
     end
     object AksiyonMenu: TMenuItem
       Caption = 'G'#252'nl'#252'k aksiyon sayfas'#305'n'#305' a'#231
+      ImageIndex = 19
       OnClick = AksiyonMenuClick
     end
   end
@@ -2442,6 +2469,7 @@ object TakvimDlg: TTakvimDlg
       end>
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 243
     Top = 191
     object BaskiOnizlemeMenu: TMenuItem
@@ -2748,10 +2776,12 @@ object TakvimDlg: TTakvimDlg
     Top = 156
   end
   object pmPivot: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 176
     Top = 160
     object ExcelPivot1: TMenuItem
       Caption = 'Excel Pivot...'
+      ImageIndex = 32
       OnClick = ExcelPivot1Click
     end
   end

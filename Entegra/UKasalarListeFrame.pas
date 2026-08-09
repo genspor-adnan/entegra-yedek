@@ -194,6 +194,7 @@ type
     // SAYFALI liste (merkezi TSayfaliListe, Utablo): yalniz Mod 1 (Tum) ve 4 (filtre) sayfalanir.
     FSayfali: TSayfaliListe;
     FSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme ayni modla)
+    procedure SayfaliHazirla;                  // FSayfali'yi (bir kez) olusturur
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_Kasalar_Liste_Json2)
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
@@ -346,13 +347,7 @@ procedure TKasalarListeFrame.Baslatildi;
 var ra : string;
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
-  // SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
-  if FSayfali = nil then
-    FSayfali := TSayfaliListe.Baglan(Self, KASALAR, GridTview, nil,
-      procedure
-      begin
-        Liste_SP_Cagir(FSonMod);
-      end);
+  SayfaliHazirla;
   GridTviewSUBEID.Visible := SubeVarmi;
   PageControlSekme.ActivePageIndex:=0;
   TRaporAraclari.RaporPopupMenuHazirla(EkranAdiAl, PopupMenuYaz,ra,
@@ -669,6 +664,20 @@ begin
    Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_Kasalar_Liste_Json2)
 end;
 
+procedure TKasalarListeFrame.SayfaliHazirla;
+// SAYFALI liste: merkezi yardimci; sayfa boyu GENEL OPSIYON (Liste sayfa uzunlugu).
+//   Eskiden yalniz Baslatildi'da kuruluyordu; ancak liste, frame'in arama panelinden
+//   (olay baglama) Baslatildi'dan ONCE de yenilenebiliyor -> FSayfali nil kalip
+//   Liste_SP_Cagir'da erisim ihlali veriyordu. Artik ilk kullanan kurar.
+begin
+  if FSayfali = nil then
+    FSayfali := TSayfaliListe.Baglan(Self, KASALAR, GridTview, nil,
+      procedure
+      begin
+        Liste_SP_Cagir(FSonMod);
+      end);
+end;
+
 procedure TKasalarListeFrame.Liste_SP_Cagir(AMod: SmallInt);
 // Kasa tanim listesini sunucu-tarafi SP ile getirir (sp_Prog_Kasalar_Liste_Json2).
 //   2 PARAM: @Baslik = SELECT ek kolonlari (Kasalar'da BOS) + @Kosullar = filtreler (JSON).
@@ -680,6 +689,8 @@ var
   LocateID, SubeDeg, TopN: Integer;
   j: TJSONObject;
 begin
+  SayfaliHazirla;   // arama panelinden Baslatildi ONCESI cagrilabiliyor
+
   if (KASALAR.Active) and (KASALAR.RecordCount > 0) then
     LocateID := KASALAR.FieldByName('ID').AsInteger
   else

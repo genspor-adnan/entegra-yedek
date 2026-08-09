@@ -632,6 +632,7 @@ object KrediHesapMakineDlg: TKrediHesapMakineDlg
     Visible = False
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 35
     Width = 802
@@ -646,11 +647,11 @@ object KrediHesapMakineDlg: TKrediHesapMakineDlg
     ClientRectTop = 0
     object cxTabSheet1: TcxTabSheet
       Caption = 'Kredi Hesaplama'
-      ImageIndex = 0
+      ImageIndex = 34
     end
     object cxTabSheet2: TcxTabSheet
       Caption = 'Leasing Hesaplama'
-      ImageIndex = 1
+      ImageIndex = 19
     end
   end
   object MemoSQLLeasing: TMemo
@@ -955,6 +956,7 @@ object KrediHesapMakineDlg: TKrediHesapMakineDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 755
     Top = 137
     object BaskiOnizlemeMenu: TMenuItem

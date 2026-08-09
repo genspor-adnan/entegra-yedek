@@ -67,6 +67,7 @@ object GenelAnaSekmeFrame: TGenelAnaSekmeFrame
         ParentCtl3D = False
         TabOrder = 0
         object pcArama: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 0
           Width = 205
@@ -101,6 +102,7 @@ object GenelAnaSekmeFrame: TGenelAnaSekmeFrame
     BevelOuter = bvNone
     TabOrder = 1
     object pcIcerik: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 8
       Top = 0
       Width = 594
@@ -130,6 +132,7 @@ object GenelAnaSekmeFrame: TGenelAnaSekmeFrame
     Top = 99
   end
   object pmMevcutDokumler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 176
     Top = 180
   end

@@ -13,6 +13,7 @@ object CekSenetAramaDlg: TCekSenetAramaDlg
   OnCreate = FormCreate
   TextHeight = 13
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 820
@@ -24,6 +25,7 @@ object CekSenetAramaDlg: TCekSenetAramaDlg
     ExplicitHeight = 437
     object shtCek: TTabSheet
       Caption = #199'ek Arama'
+      ImageIndex = 34
       object Panel2: TPanel
         Left = 0
         Top = 89
@@ -274,7 +276,7 @@ object CekSenetAramaDlg: TCekSenetAramaDlg
     end
     object shtTaksit: TTabSheet
       Caption = 'Taksit Arama'
-      ImageIndex = 1
+      ImageIndex = 6
       object Panel3: TPanel
         Left = 0
         Top = 0

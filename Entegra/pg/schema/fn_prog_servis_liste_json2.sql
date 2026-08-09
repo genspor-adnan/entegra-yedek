@@ -32,6 +32,8 @@ DECLARE
     v_konusu text := NULLIF(j->>'Konusu','');
     v_urun text := NULLIF(j->>'Urun','');
     v_musteri text := NULLIF(j->>'Musteri','');
+    -- Cari ekranindaki Servis alt sekmesi: kimlik uzerinden kesin cari filtresi.
+    v_rehberid int := NULLIF(j->>'RehberId','')::int;
     v_serinom text := NULLIF(j->>'SeriNo','');
     v_serinolike boolean := COALESCE(NULLIF(j->>'SeriNoLike','')::int, 0) <> 0;
     v_subeyetki text := NULLIF(j->>'SubeYetkiList','');
@@ -122,6 +124,10 @@ BEGIN
     END IF;
     IF v_musteri IS NOT NULL THEN
         v_filt := v_filt || ' AND EXISTS (SELECT 1 FROM rehber rm WHERE rm.id=s0.rehberid AND rm.firma ILIKE '||quote_literal('%'||v_musteri||'%')||') ';
+    END IF;
+
+    IF COALESCE(v_rehberid,0) > 0 THEN
+        v_filt := v_filt || ' AND s0.rehberid = '||v_rehberid||' ';
     END IF;
     IF v_subeyetki IS NOT NULL AND v_subeyetki ~ '^[0-9, ]+$' THEN
         v_filt := v_filt || ' AND s0.subeid IN ('||v_subeyetki||') ';

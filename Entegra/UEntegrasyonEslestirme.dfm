@@ -17,6 +17,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
   PixelsPerInch = 96
   TextHeight = 16
   object pgctrl: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 839
@@ -32,7 +33,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
     ClientRectTop = 27
     object tsRehber: TcxTabSheet
       Caption = 'Rehber Kay'#305'tlar'#305
-      ImageIndex = 4
+      ImageIndex = 19
       object cxPageControl3: TcxPageControl
         Left = 0
         Top = 0
@@ -49,7 +50,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         ClientRectTop = 27
         object cxTabSheet4: TcxTabSheet
           Caption = 'Aktar'#305'm Ayarlar'#305
-          ImageIndex = 0
+          ImageIndex = 11
           object PnAktarimAyarlari: TPanel
             Left = 0
             Top = 0
@@ -146,7 +147,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         end
         object cxTabSheet5: TcxTabSheet
           Caption = 'A'#231#305'klama'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxMemo2: TcxMemo
             Left = 0
             Top = 0
@@ -182,7 +183,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
     end
     object tsStokKart: TcxTabSheet
       Caption = 'Stok Kartlar'#305
-      ImageIndex = 1
+      ImageIndex = 12
       object cxPageControl4: TcxPageControl
         Left = 0
         Top = 0
@@ -199,11 +200,11 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         ClientRectTop = 27
         object cxTabSheet6: TcxTabSheet
           Caption = 'Aktar'#305'm Ayarlar'#305
-          ImageIndex = 0
+          ImageIndex = 11
         end
         object cxTabSheet7: TcxTabSheet
           Caption = 'A'#231#305'klama'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxMemo3: TcxMemo
             Left = 0
             Top = 0
@@ -239,7 +240,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
     end
     object tsStokGiris: TcxTabSheet
       Caption = 'Stok Giri'#351' Faturalar'#305
-      ImageIndex = 2
+      ImageIndex = 19
       object cxPageControl5: TcxPageControl
         Left = 0
         Top = 0
@@ -256,11 +257,11 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         ClientRectTop = 27
         object cxTabSheet8: TcxTabSheet
           Caption = 'Aktar'#305'm Ayarlar'#305
-          ImageIndex = 0
+          ImageIndex = 11
         end
         object cxTabSheet9: TcxTabSheet
           Caption = 'A'#231#305'klama'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxMemo4: TcxMemo
             Left = 0
             Top = 0
@@ -300,7 +301,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
     end
     object tsGunSonu: TcxTabSheet
       Caption = 'G'#252'n Sonu'
-      ImageIndex = 0
+      ImageIndex = 19
       object cxPageControl2: TcxPageControl
         Left = 0
         Top = 0
@@ -317,7 +318,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         ClientRectTop = 27
         object cxTabSheet1: TcxTabSheet
           Caption = 'Aktar'#305'm Ayarlar'#305
-          ImageIndex = 0
+          ImageIndex = 11
           object Panel2: TPanel
             Left = 0
             Top = 97
@@ -525,7 +526,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         end
         object cxTabSheet2: TcxTabSheet
           Caption = 'A'#231#305'klama'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxMemo1: TcxMemo
             Left = 0
             Top = 0
@@ -576,7 +577,7 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
     end
     object tsKurumFaturalari: TcxTabSheet
       Caption = 'Kurum Faturalar'#305
-      ImageIndex = 3
+      ImageIndex = 34
       object cxPageControl6: TcxPageControl
         Left = 0
         Top = 0
@@ -593,11 +594,11 @@ object EntegrasyonEslestirmeDlg: TEntegrasyonEslestirmeDlg
         ClientRectTop = 27
         object cxTabSheet10: TcxTabSheet
           Caption = 'Aktar'#305'm Ayarlar'#305
-          ImageIndex = 0
+          ImageIndex = 11
         end
         object cxTabSheet11: TcxTabSheet
           Caption = 'A'#231#305'klama'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxMemo5: TcxMemo
             Left = 0
             Top = 0

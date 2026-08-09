@@ -417,6 +417,7 @@ object ImportDlg: TImportDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 145
     Width = 830
@@ -431,7 +432,7 @@ object ImportDlg: TImportDlg
     ClientRectTop = 25
     object cxTabSheet1: TcxTabSheet
       Caption = 'Alanlar'
-      ImageIndex = 0
+      ImageIndex = 19
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -619,7 +620,7 @@ object ImportDlg: TImportDlg
     end
     object cxTabSheet2: TcxTabSheet
       Caption = 'Mesaj'
-      ImageIndex = 1
+      ImageIndex = 19
       object Memo1: TcxMemo
         Left = 0
         Top = 0
@@ -659,16 +660,19 @@ object ImportDlg: TImportDlg
     Top = 42
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 560
     Top = 120
     object lgilieklemekiinExcel1: TMenuItem
       Tag = 4
       Caption = #304'lgili i'#231'in Excel olu'#351'tur'
+      ImageIndex = 32
       OnClick = lgilieklemekiinExcel1Click
     end
     object lgiliyiExcelden1: TMenuItem
       Tag = 4
       Caption = 'Excelden ilgili aktar '
+      ImageIndex = 32
       OnClick = lgiliyiExcelden1Click
     end
     object N1: TMenuItem
@@ -677,11 +681,13 @@ object ImportDlg: TImportDlg
     object letiimiinExcelolutur1: TMenuItem
       Tag = 1
       Caption = #304'leti'#351'im i'#231'in Excel olu'#351'tur.'
+      ImageIndex = 32
       OnClick = lgilieklemekiinExcel1Click
     end
     object Exceldeniletiimaktar1: TMenuItem
       Tag = 1
       Caption = 'Excelden ileti'#351'im aktar'
+      ImageIndex = 32
       OnClick = lgiliyiExcelden1Click
     end
     object N2: TMenuItem
@@ -691,6 +697,7 @@ object ImportDlg: TImportDlg
     object Geniniyeekle1: TMenuItem
       Tag = 5
       Caption = 'Geniniye ekle'
+      ImageIndex = 0
       Visible = False
     end
   end

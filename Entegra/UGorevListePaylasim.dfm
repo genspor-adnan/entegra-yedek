@@ -322,26 +322,31 @@ object GorevListePaylasimDlg: TGorevListePaylasimDlg
     Top = 124
   end
   object PopupMenuPaylasilan: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 106
     Top = 142
     object KisiMenu: TMenuItem
       Tag = 1
       Caption = 'Ki'#351'i'
+      ImageIndex = 35
       OnClick = KisiMenuClick
     end
     object GorevMenu: TMenuItem
       Tag = 2
       Caption = 'G'#246'rev'
+      ImageIndex = 19
       OnClick = KisiMenuClick
     end
     object DepartmanMenu: TMenuItem
       Tag = 3
       Caption = 'Departman'
+      ImageIndex = 35
       OnClick = KisiMenuClick
     end
     object SubeMenu: TMenuItem
       Tag = 4
       Caption = #350'ube'
+      ImageIndex = 13
       OnClick = KisiMenuClick
     end
   end

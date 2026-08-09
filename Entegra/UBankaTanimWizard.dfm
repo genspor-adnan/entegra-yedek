@@ -520,17 +520,20 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     Top = 16
   end
   object CariHesapEkstresi1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 409
     Top = 13
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object N2: TMenuItem
@@ -538,19 +541,23 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     end
     object KasaYenileMenu: TMenuItem
       Caption = 'Sadece Bu Hesab'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
     object BtnKasalarnToplamlarnYenile1: TMenuItem
       Caption = 'Bu Bankan'#305'n B'#252't'#252'n Hesaplar'#305'n'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object YeniBankaTanmla1: TMenuItem
       Caption = 'Yeni Banka Tan'#305'mla'
+      ImageIndex = 0
       OnClick = YeniBankaTanmla1Click
     end
     object YeniubeTanmla1: TMenuItem
       Caption = 'Yeni '#350'ube Tan'#305'mla'
+      ImageIndex = 13
       OnClick = YeniubeTanmla1Click
     end
   end

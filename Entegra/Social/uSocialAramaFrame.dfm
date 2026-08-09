@@ -333,10 +333,12 @@
     Top = 99
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 80
     Top = 336
     object mnuTumunuYenile: TMenuItem
       Caption = 'T'#252'm Sosyal Medya Yenile'
+      ImageIndex = 9
     end
     object N1: TMenuItem
       Caption = '-'
@@ -344,10 +346,12 @@
     object mnuMetaYenile: TMenuItem
       Tag = 1
       Caption = 'Meta Form verileri'
+      ImageIndex = 15
     end
     object mnuWebFormYenile: TMenuItem
       Tag = 2
       Caption = 'Web Form Verileri'
+      ImageIndex = 15
     end
   end
 end

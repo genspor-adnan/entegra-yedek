@@ -236,6 +236,7 @@ object KategoriDlg: TKategoriDlg
     end
   end
   object PageKontrolSag: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 461
     Top = 35
     Width = 356
@@ -251,7 +252,7 @@ object KategoriDlg: TKategoriDlg
     ClientRectTop = 24
     object TabPageGenel: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 0
+      ImageIndex = 11
       object DBText1: TcxDBLabel
         Left = 75
         Top = 131
@@ -401,7 +402,7 @@ object KategoriDlg: TKategoriDlg
     end
     object TabPageMuhasebe: TcxTabSheet
       Caption = 'Muhasebe Kodu'
-      ImageIndex = 1
+      ImageIndex = 19
       TabVisible = False
       object GridMuhasebeKod: TcxGrid
         Left = 0
@@ -580,18 +581,22 @@ object KategoriDlg: TKategoriDlg
     Top = 127
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 216
     Top = 224
     object HepsiniSecMenu: TMenuItem
       Caption = 'Hepsini Se'#231
+      ImageIndex = 23
       OnClick = HepsiniSecMenuClick
     end
     object HepsiniBrakMenu: TMenuItem
       Caption = 'Hepsini B'#305'rak'
+      ImageIndex = 15
       OnClick = HepsiniBrakMenuClick
     end
     object TersCevirMenu: TMenuItem
       Caption = 'Ters '#199'evir'
+      ImageIndex = 9
       OnClick = TersCevirMenuClick
     end
   end

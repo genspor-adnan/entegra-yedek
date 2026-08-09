@@ -701,6 +701,7 @@
     object ListeyeKisiEkle1: TMenuItem
       Tag = 1
       Caption = 'Listeye Ki'#351'i Ekle/Sil'
+      ImageIndex = 32
       OnClick = ListeyiDuzenleMenuClick
     end
     object N1: TMenuItem
@@ -708,6 +709,7 @@
     end
     object ExceldenBilgiAl1: TMenuItem
       Caption = 'Excelden Bilgi Al (Import)'
+      ImageIndex = 32
       OnClick = ExceldenBilgiAl1Click
     end
     object N3: TMenuItem
@@ -715,15 +717,18 @@
     end
     object ListeyiEPostaileGnder1: TMenuItem
       Caption = 'Listeyi E-Posta ile G'#246'nder'
+      ImageIndex = 32
     end
     object ListyiYazdr1: TMenuItem
       Caption = 'Listeyi Yazd'#305'r'
+      ImageIndex = 32
     end
     object N2: TMenuItem
       Caption = '-'
     end
     object ListeyiKopyala1: TMenuItem
       Caption = 'Listeyi Kopyala'
+      ImageIndex = 10
       OnClick = ListeyiKopyala1Click
     end
     object ListeyiSilMenu: TMenuItem

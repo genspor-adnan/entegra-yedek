@@ -1099,6 +1099,7 @@ object EvrakListeFrame: TEvrakListeFrame
     ExplicitWidth = 8
   end
   object PageDokuman: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 460
     Width = 1078
@@ -1114,7 +1115,7 @@ object EvrakListeFrame: TEvrakListeFrame
     ClientRectTop = 27
     object TabSheetGenel: TcxTabSheet
       Caption = '  Genel  '
-      ImageIndex = 0
+      ImageIndex = 11
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -1509,7 +1510,7 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object TabSheetRevize: TcxTabSheet
       Caption = 'Revize'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -1596,7 +1597,7 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object TabSheetIlgili: TcxTabSheet
       Caption = ' '#304'lgili Dok'#252'man '
-      ImageIndex = 2
+      ImageIndex = 19
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -1655,7 +1656,7 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object TabSheetYetki: TcxTabSheet
       Caption = 'Yetkilendirme'
-      ImageIndex = 3
+      ImageIndex = 29
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -2238,18 +2239,22 @@ object EvrakListeFrame: TEvrakListeFrame
     Top = 191
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 36
     Top = 317
     object Gr1: TMenuItem
       Caption = 'G'#246'r'
+      ImageIndex = 37
       OnClick = GortusClick
     end
     object Deitir1: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = DegistirTusClick
     end
     object DegisMenu: TMenuItem
       Caption = 'Form A'#231
+      ImageIndex = 6
       OnClick = FormAcTusClick
     end
     object N4: TMenuItem
@@ -2257,18 +2262,22 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object Yeni1: TMenuItem
       Caption = 'Yeni'
+      ImageIndex = 0
       OnClick = YeniTusClick
     end
     object ara1: TMenuItem
       Caption = 'Tara'
+      ImageIndex = 38
       OnClick = TaraTusClick
     end
     object BurayaKisayololusturMenu: TMenuItem
       Caption = 'Buraya k'#305'sayol olu'#351'tur'
+      ImageIndex = 39
       OnClick = BurayaKisayololusturMenuClick
     end
     object Baskayerekisayololustur1: TMenuItem
       Caption = 'Ba'#351'ka yere k'#305'sayol olu'#351'tur'
+      ImageIndex = 39
       OnClick = Baskayerekisayololustur1Click
     end
     object N5: TMenuItem
@@ -2276,19 +2285,23 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object KesMenu: TMenuItem
       Caption = 'Kes'
+      ImageIndex = 40
       OnClick = KesMenuClick
     end
     object KopyalaMenu: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = KopyalaMenuClick
     end
     object YapistirMenu: TMenuItem
       Caption = 'Yap'#305#351't'#305'r'
+      ImageIndex = 41
       Enabled = False
       OnClick = YapistirMenuClick
     end
     object SilMenu: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = SilTusClick
     end
     object N2: TMenuItem
@@ -2296,14 +2309,17 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object VerMenu: TMenuItem
       Caption = 'Ver (Export)'
+      ImageIndex = 15
       OnClick = VerTusClick
     end
     object DuyuruOlarakYaynla1: TMenuItem
       Caption = 'Duyuru olarak yay'#305'nla'
+      ImageIndex = 42
       OnClick = DuyuruOlarakYaynla1Click
     end
     object EPostaMenu: TMenuItem
       Caption = 'E-Posta olarak g'#246'nder'
+      ImageIndex = 17
       OnClick = EPostaMenuClick
     end
     object N3: TMenuItem
@@ -2311,27 +2327,33 @@ object EvrakListeFrame: TEvrakListeFrame
     end
     object EPostaAl1: TMenuItem
       Caption = 'E-Posta Al'
+      ImageIndex = 17
       OnClick = EPostaAl1Click
     end
     object Yetkilendirme1: TMenuItem
       Caption = 'Yetkilendirme'
+      ImageIndex = 29
       Visible = False
       OnClick = Yetkilendirme1Click
     end
   end
   object popcop: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 552
     Top = 128
     object Sil1: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = Sil1Click
     end
     object GeriYkle1: TMenuItem
       Caption = 'Geri Y'#252'kle'
+      ImageIndex = 15
       OnClick = GeriYkle1Click
     end
     object GeriDnmBoalt1: TMenuItem
       Caption = 'Geri D'#246'n'#252#351#252'm'#252' Bo'#351'alt'
+      ImageIndex = 15
       OnClick = GeriDnmBoalt1Click
     end
   end

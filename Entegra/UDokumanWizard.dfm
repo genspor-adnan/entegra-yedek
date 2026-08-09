@@ -158,6 +158,7 @@ object DokumanWizard: TDokumanWizard
           end
         end
         object PageControlSag: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 1
           Top = 33
           Width = 287
@@ -172,7 +173,7 @@ object DokumanWizard: TDokumanWizard
           ClientRectTop = 24
           object cxTabSheet1: TcxTabSheet
             Caption = 'cxTabSheet1'
-            ImageIndex = 0
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -366,7 +367,7 @@ object DokumanWizard: TDokumanWizard
           end
           object TabSheetSozlesme: TcxTabSheet
             Caption = 'TabSheetSozlesme'
-            ImageIndex = 1
+            ImageIndex = 19
             object Panel6: TPanel
               Left = 0
               Top = 0
@@ -592,6 +593,7 @@ object DokumanWizard: TDokumanWizard
         end
       end
       object PageControl1: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 70
         Width = 593
@@ -608,7 +610,7 @@ object DokumanWizard: TDokumanWizard
         object TabSheetGenel: TcxTabSheet
           Caption = 'Genel'
           Color = clHotLight
-          ImageIndex = 0
+          ImageIndex = 11
           ParentColor = False
           object Panel2: TPanel
             Left = 0
@@ -1347,7 +1349,7 @@ object DokumanWizard: TDokumanWizard
         end
         object EkAlanlarEkr: TcxTabSheet
           Caption = 'Ek Alan'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2357,31 +2359,37 @@ object DokumanWizard: TDokumanWizard
     Top = 224
   end
   object PopupMenuYetki: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 245
     Top = 262
     object TumKullanicilarMenu: TMenuItem
       Tag = 5
       Caption = 'T'#252'm Kullan'#305'c'#305'lar'
+      ImageIndex = 35
       OnClick = TumKullanicilarMenuClick
     end
     object SubeMenu: TMenuItem
       Tag = 4
       Caption = #350'ube'
+      ImageIndex = 13
       OnClick = SubeMenuClick
     end
     object DepartmanMenu: TMenuItem
       Tag = 3
       Caption = 'Departman'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
     object GorevMenu: TMenuItem
       Tag = 2
       Caption = 'G'#246'rev'
+      ImageIndex = 19
       OnClick = SubeMenuClick
     end
     object KisiMenu: TMenuItem
       Tag = 1
       Caption = 'Ki'#351'i'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
   end

@@ -18,6 +18,7 @@ object SeriNoDlg: TSeriNoDlg
   PixelsPerInch = 96
   TextHeight = 16
   object pgSeriNo: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 88
     Width = 535
@@ -32,7 +33,7 @@ object SeriNoDlg: TSeriNoDlg
     ClientRectTop = 27
     object shtSeriNoGiris: TcxTabSheet
       Caption = 'Seri No Giri'#351
-      ImageIndex = 0
+      ImageIndex = 19
       ExplicitLeft = 2
       ExplicitTop = 28
       ExplicitWidth = 531
@@ -76,7 +77,7 @@ object SeriNoDlg: TSeriNoDlg
     end
     object shtSeriNoDuzeltSil: TcxTabSheet
       Caption = 'Seri No D'#252'zeltme-Silme'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitLeft = 2
       ExplicitTop = 28
       ExplicitWidth = 531

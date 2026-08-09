@@ -258,6 +258,7 @@ object BankalarListeFrame: TBankalarListeFrame
     end
   end
   object PageControlSekme: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 230
     Width = 1106
@@ -273,7 +274,7 @@ object BankalarListeFrame: TBankalarListeFrame
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Toplamlar'
-      ImageIndex = 1
+      ImageIndex = 44
       object cxLabel1: TcxLabel
         Left = 48
         Top = 23
@@ -341,7 +342,7 @@ object BankalarListeFrame: TBankalarListeFrame
     end
     object TabSheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
-      ImageIndex = 6
+      ImageIndex = 32
       OnShow = TabSheetEkstreShow
       object GridBankaEkstre: TcxGrid
         Left = 0
@@ -855,6 +856,7 @@ object BankalarListeFrame: TBankalarListeFrame
     Top = 267
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 79
     Top = 192
     object BaskiOnizlemeMenu: TMenuItem
@@ -931,14 +933,17 @@ object BankalarListeFrame: TBankalarListeFrame
     end
   end
   object BankaListeMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 254
     Top = 129
     object BankaInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = BankaInfoMenuClick
     end
     object HesaplararasTransferYap1: TMenuItem
       Caption = 'Aksiyonlar'
+      ImageIndex = 19
       OnClick = AksiyonTusClick
     end
     object N5: TMenuItem
@@ -946,14 +951,17 @@ object BankalarListeFrame: TBankalarListeFrame
     end
     object YeniBanka1: TMenuItem
       Caption = 'Yeni Banka Hesab'#305
+      ImageIndex = 0
       OnClick = YeniTusClick
     end
     object HesabDzenle1: TMenuItem
       Caption = 'Hesab'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = DegisTusClick
     end
     object HesabSil1: TMenuItem
       Caption = 'Hesab'#305' Sil'
+      ImageIndex = 1
       OnClick = SilTusClick
     end
     object N10: TMenuItem
@@ -961,6 +969,7 @@ object BankalarListeFrame: TBankalarListeFrame
     end
     object HesapBakiyesiniGuncelleMenu: TMenuItem
       Caption = 'Hesap Bakiyesini G'#252'ncelle'
+      ImageIndex = 34
       OnClick = HesapBakiyesiniGuncelleMenuClick
     end
     object N8: TMenuItem
@@ -969,16 +978,19 @@ object BankalarListeFrame: TBankalarListeFrame
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end
   end
   object AksiyonlarMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = AksiyonlarMenuPopup
     Left = 555
     Top = 325
@@ -992,14 +1004,17 @@ object BankalarListeFrame: TBankalarListeFrame
     end
     object Ekle1: TMenuItem
       Caption = 'Aksiyon Ekle'
+      ImageIndex = 19
       OnClick = Ekle1Click
     end
     object Sil1: TMenuItem
       Caption = 'Aksiyon Sil'
+      ImageIndex = 1
       OnClick = Sil1Click
     end
     object AksiyonBilgisiniGorMenu: TMenuItem
       Caption = 'Aksiyon Bilgisini G'#246'r'
+      ImageIndex = 22
       OnClick = AksiyonBilgisiniGorMenuClick
     end
     object N7: TMenuItem
@@ -1008,11 +1023,13 @@ object BankalarListeFrame: TBankalarListeFrame
     object KurFarkGeliri1: TMenuItem
       Tag = 88
       Caption = 'Kur Fark'#305' Geliri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object KurFarkGideri1: TMenuItem
       Tag = 98
       Caption = 'Kur Fark'#305' Gideri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object N6: TMenuItem
@@ -1020,6 +1037,7 @@ object BankalarListeFrame: TBankalarListeFrame
     end
     object KopyalaMenu: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = KopyalaMenuClick
     end
   end

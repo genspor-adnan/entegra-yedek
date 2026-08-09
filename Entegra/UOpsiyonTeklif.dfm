@@ -18,6 +18,7 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
   PixelsPerInch = 96
   TextHeight = 16
   object PageControlTeklifListe: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 683
@@ -34,7 +35,7 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
     ClientRectTop = 27
     object TabSheetTeklif: TcxTabSheet
       Caption = 'Teklif'
-      ImageIndex = 0
+      ImageIndex = 4
       ExplicitLeft = 2
       ExplicitTop = 28
       ExplicitWidth = 679
@@ -218,7 +219,7 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
     end
     object TabSheetSablonlar: TcxTabSheet
       Caption = #350'ablonlar'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 545
@@ -329,7 +330,7 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
     end
     object SheetSatinAlma: TcxTabSheet
       Caption = 'Sat'#305'n Alma'
-      ImageIndex = 2
+      ImageIndex = 19
       ExplicitLeft = 2
       ExplicitTop = 28
       ExplicitWidth = 679
@@ -354,7 +355,7 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
     end
     object SheetDurumBaglanti: TcxTabSheet
       Caption = 'Durum Ba'#287'lant'#305'lar'#305
-      ImageIndex = 3
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 545
@@ -522,18 +523,22 @@ object OpsiyonTeklifDlg: TOpsiyonTeklifDlg
     Top = 176
   end
   object PopupDurumBglanti: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 328
     Top = 232
     object TeklifDurumlarnDzenle1: TMenuItem
       Caption = 'Teklif Durumlar'#305'n'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = TeklifDurumlarnDzenle1Click
     end
     object BalantlarOlutur1: TMenuItem
       Caption = 'Eksik Ba'#287'lant'#305'lar'#305' Olu'#351'tur'
+      ImageIndex = 13
       OnClick = BalantlarOlutur1Click
     end
     object KopmuBalantlarTemizle1: TMenuItem
       Caption = 'Kopmu'#351' Ba'#287'lant'#305'lar'#305' Temizle'
+      ImageIndex = 9
       OnClick = KopmuBalantlarTemizle1Click
     end
   end

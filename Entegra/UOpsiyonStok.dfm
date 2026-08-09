@@ -150,6 +150,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 528
@@ -160,6 +161,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     OnChange = PageControl1Change
     object TsGenel: TTabSheet
       Caption = 'Genel'
+      ImageIndex = 11
       object Label2: TLabel
         Left = 5
         Top = 495
@@ -571,7 +573,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
     object tsDepolar: TTabSheet
       Caption = 'Depolar'
-      ImageIndex = 1
+      ImageIndex = 12
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -755,7 +757,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
     object TsITS: TTabSheet
       Caption = #220'TS'
-      ImageIndex = 2
+      ImageIndex = 19
       object cxGroupBox1: TcxGroupBox
         Left = 158
         Top = 344
@@ -859,7 +861,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
     object tsStokBoyutlar: TTabSheet
       Caption = 'Boyutlar'
-      ImageIndex = 3
+      ImageIndex = 19
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
@@ -1100,7 +1102,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
     object tsBarkodUretimi: TTabSheet
       Caption = 'Barkod '#220'retimi'
-      ImageIndex = 4
+      ImageIndex = 19
       object GridBarkodAyar: TcxGrid
         Left = 0
         Top = 24
@@ -1237,7 +1239,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
     object TabSheetKarekod: TTabSheet
       Caption = 'Karekod Format'#305
-      ImageIndex = 5
+      ImageIndex = 19
       object ToolBar5: TToolBar
         Left = 0
         Top = 0

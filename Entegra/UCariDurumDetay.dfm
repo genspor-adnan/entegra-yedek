@@ -25,6 +25,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
     ExplicitTop = 49
     ExplicitHeight = 528
     object cxPageControl2: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 1
       Width = 1002
@@ -40,7 +41,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
       ClientRectTop = 24
       object SheetCariKart: TcxTabSheet
         Caption = 'Cari Kart Bilgileri'
-        ImageIndex = 0
+        ImageIndex = 35
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -61,7 +62,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           ClientRectTop = 24
           object SheetIletisim: TcxTabSheet
             Caption = #304'leti'#351'im Bilgileri'
-            ImageIndex = 0
+            ImageIndex = 22
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -229,7 +230,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object SheetTicariBilg: TcxTabSheet
             Caption = 'Ticari Bilgiler'
-            ImageIndex = 1
+            ImageIndex = 35
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -308,7 +309,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object SheetIlgililer: TcxTabSheet
             Caption = #304'lgili Ki'#351'iler'
-            ImageIndex = 2
+            ImageIndex = 35
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -459,7 +460,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
       end
       object SheetTicariBilgiler: TcxTabSheet
         Caption = 'Ticari Hareketler'
-        ImageIndex = 1
+        ImageIndex = 32
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -480,7 +481,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           ClientRectTop = 24
           object SheetTeklif: TcxTabSheet
             Caption = 'Teklifler'
-            ImageIndex = 1
+            ImageIndex = 4
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -678,7 +679,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object SheetSiparis: TcxTabSheet
             Caption = 'Sipari'#351'ler'
-            ImageIndex = 2
+            ImageIndex = 4
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -868,7 +869,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object cxTabSheet1: TcxTabSheet
             Caption = 'Fatura/'#304'rsaliyeler'
-            ImageIndex = 3
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1042,7 +1043,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object SheetEkstre: TcxTabSheet
             Caption = 'Ekstre'
-            ImageIndex = 3
+            ImageIndex = 32
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1241,7 +1242,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object cxTabSheet2: TcxTabSheet
             Caption = 'Ekstre(Detayl'#305')'
-            ImageIndex = 4
+            ImageIndex = 32
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1465,7 +1466,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
       end
       object SheetDokuman: TcxTabSheet
         Caption = 'D'#246'k'#252'manlar'
-        ImageIndex = 3
+        ImageIndex = 19
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -1669,7 +1670,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
       end
       object SheetCRM: TcxTabSheet
         Caption = 'CRM Bilgileri'
-        ImageIndex = 2
+        ImageIndex = 22
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -1690,7 +1691,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           ClientRectTop = 24
           object SheetProjeler: TcxTabSheet
             Caption = 'Projeler'
-            ImageIndex = 0
+            ImageIndex = 13
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -1813,7 +1814,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
           end
           object SheetAktiviteler: TcxTabSheet
             Caption = 'Aktiviteler'
-            ImageIndex = 1
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -2439,6 +2440,7 @@ object CariDurumDetayDlg: TCariDurumDetayDlg
     Top = 259
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 53
     Top = 418
     object BaskiOnizlemeMenu: TMenuItem

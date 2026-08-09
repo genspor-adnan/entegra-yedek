@@ -498,7 +498,7 @@
       object SheetStok: TcxTabSheet
         Tag = 1
         Caption = 'Stoklar'
-        ImageIndex = 4
+        ImageIndex = 12
         object Label2: TLabel
           Left = 720
           Top = 107
@@ -720,7 +720,7 @@
       end
       object SheetHizmet: TcxTabSheet
         Caption = 'Hizmetler'
-        ImageIndex = 4
+        ImageIndex = 19
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
@@ -947,7 +947,7 @@
       end
       object SheetDagitim: TcxTabSheet
         Caption = 'Da'#287#305't'#305'm'
-        ImageIndex = 4
+        ImageIndex = 19
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0

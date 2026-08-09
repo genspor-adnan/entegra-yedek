@@ -17,6 +17,7 @@ object OpsiyonKasaDlg: TOpsiyonKasaDlg
   PixelsPerInch = 96
   TextHeight = 16
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 512
@@ -31,7 +32,7 @@ object OpsiyonKasaDlg: TOpsiyonKasaDlg
     ClientRectTop = 28
     object cxTabSheet1: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 0
+      ImageIndex = 11
       object RadioBakiye: TcxRadioGroup
         Left = 328
         Top = 124

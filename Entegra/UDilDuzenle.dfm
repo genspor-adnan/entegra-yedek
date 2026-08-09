@@ -330,10 +330,12 @@ object DilDuzenleDlg: TDilDuzenleDlg
     Top = 312
   end
   object PopYeniDil: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 536
     Top = 72
     object YeniDilEkle1: TMenuItem
       Caption = 'Yeni Dil Ekle'
+      ImageIndex = 0
       OnClick = YeniDilEkle1Click
     end
   end

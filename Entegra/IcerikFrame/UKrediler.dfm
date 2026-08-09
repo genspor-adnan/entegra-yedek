@@ -534,6 +534,7 @@ object KredilerDlg: TKredilerDlg
     end
   end
   object PageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 129
     Width = 920
@@ -548,7 +549,7 @@ object KredilerDlg: TKredilerDlg
     ClientRectTop = 24
     object cxTabSheet1: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 0
+      ImageIndex = 11
       object Bevel3: TBevel
         Left = 39
         Top = 21
@@ -1159,7 +1160,7 @@ object KredilerDlg: TKredilerDlg
     end
     object TabSheetKrediOranlari: TcxTabSheet
       Caption = 'Kredi Oranlar'#305
-      ImageIndex = 1
+      ImageIndex = 34
       object Bevel2: TBevel
         Left = 241
         Top = 16
@@ -1423,7 +1424,7 @@ object KredilerDlg: TKredilerDlg
     end
     object TabSheetGeriOdemePlani: TcxTabSheet
       Caption = 'Geri '#214'deme Plan'#305
-      ImageIndex = 2
+      ImageIndex = 34
       object GridGeriOdeme: TcxGrid
         Left = 0
         Top = 0
@@ -1603,7 +1604,7 @@ object KredilerDlg: TKredilerDlg
     end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
-      ImageIndex = 3
+      ImageIndex = 38
       object Panel7: TPanel
         Left = 0
         Top = 306
@@ -1769,10 +1770,12 @@ object KredilerDlg: TKredilerDlg
     Top = 371
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 789
     Top = 327
     object KrediyiEkleMenu: TMenuItem
       Caption = 'Al'#305'nan bu kredi miktar'#305'n'#305' hesaba ekle'
+      ImageIndex = 0
     end
   end
   object PLANKREDI: TFDQuery
@@ -1798,11 +1801,13 @@ object KredilerDlg: TKredilerDlg
     Top = 452
   end
   object PopupMenu2: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenu2Popup
     Left = 856
     Top = 235
     object PlanSilMenu: TMenuItem
       Caption = #214'deme Plan'#305'n'#305' T'#252'm'#252'yle Sil'
+      ImageIndex = 1
       OnClick = PlanSilMenuClick
     end
     object N1: TMenuItem
@@ -1810,15 +1815,18 @@ object KredilerDlg: TKredilerDlg
     end
     object IsaretlisatrlarOdendiolarakkabuletMenu: TMenuItem
       Caption = #304#351'aretli sat'#305'rlar'#305' "'#214'dendi" olarak kabul et'
+      ImageIndex = 15
       Visible = False
       OnClick = IsaretlisatrlarOdendiolarakkabuletMenuClick
     end
     object ExceldenVeriAlMenu: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAlMenuClick
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 842
     Top = 290
     object BaskiOnizlemeMenu: TMenuItem
@@ -2026,15 +2034,18 @@ object KredilerDlg: TKredilerDlg
     Top = 220
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 528
     Top = 264
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -2042,14 +2053,17 @@ object KredilerDlg: TKredilerDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

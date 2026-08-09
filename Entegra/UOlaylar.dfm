@@ -322,10 +322,12 @@ object OlaylarDlg: TOlaylarDlg
     Top = 9
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 576
     Top = 320
     object BaslatMenu: TMenuItem
       Caption = 'Vadesiz hesaptan vadeli hesaba aktar ve vadeyi ba'#351'lat'
+      ImageIndex = 21
     end
     object N1: TMenuItem
       Caption = '-'
@@ -340,12 +342,14 @@ object OlaylarDlg: TOlaylarDlg
     end
     object TemditliYenileMenu: TMenuItem
       Caption = #304#351'lem temditli; yenileyerek devam ettir'
+      ImageIndex = 9
     end
     object N3: TMenuItem
       Caption = '-'
     end
     object VadeBozMenu: TMenuItem
       Caption = 'Vadeyi bozdur; anaparay'#305' vadesiz hesaba aktar'
+      ImageIndex = 21
     end
   end
   object TabMesaj: TFDQuery

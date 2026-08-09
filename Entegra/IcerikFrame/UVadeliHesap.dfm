@@ -898,10 +898,12 @@ object VadeliHesapDlg: TVadeliHesapDlg
     Top = 50
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 376
     Top = 363
     object BaslatMenu: TMenuItem
       Caption = 'Vadesiz hesaptan vadeli hesaba aktar ve vadeyi ba'#351'lat'
+      ImageIndex = 21
       OnClick = BaslatMenuClick
     end
     object N1: TMenuItem
@@ -918,6 +920,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
     end
     object TemditliYenileMenu: TMenuItem
       Caption = #304#351'lem temditli; yenileyerek devam ettir'
+      ImageIndex = 9
       OnClick = TemditliYenileMenuClick
     end
     object N3: TMenuItem
@@ -925,6 +928,7 @@ object VadeliHesapDlg: TVadeliHesapDlg
     end
     object VadeBozMenu: TMenuItem
       Caption = 'Vadeyi bozdur; anaparay'#305' vadesiz hesaba aktar'
+      ImageIndex = 21
       OnClick = VadeBozMenuClick
     end
   end

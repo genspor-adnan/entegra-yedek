@@ -15,6 +15,7 @@ object EvrakAramaFrame: TEvrakAramaFrame
   ParentFont = False
   TabOrder = 0
   object PageArama: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 411
@@ -30,7 +31,7 @@ object EvrakAramaFrame: TEvrakAramaFrame
     ClientRectTop = 27
     object TabSheetKlasor: TcxTabSheet
       Caption = 'Klas'#246'rler'
-      ImageIndex = 0
+      ImageIndex = 19
       object TreeKlasorler: TcxDBTreeList
         Left = 0
         Top = 0
@@ -95,7 +96,7 @@ object EvrakAramaFrame: TEvrakAramaFrame
     end
     object TabSheetArama: TcxTabSheet
       Caption = 'Arama'
-      ImageIndex = 1
+      ImageIndex = 6
       object YenileTus: TSpeedButton
         Tag = 4
         Left = 1

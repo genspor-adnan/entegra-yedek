@@ -233,7 +233,8 @@ object BarkodYazdirDlg: TBarkodYazdirDlg
   object TabBarkodYazdir: TFDQuery
     AutoCalcFields = False
     Connection = Tablo.FDCnn
-    AfterPost = TabBarkodYazdirAfterPost
+    AfterPost = TabBarkodYazdirAfterPost
+
     ParamData = <>
     SQL.Strings = (
       'select * '
@@ -263,6 +264,7 @@ object BarkodYazdirDlg: TBarkodYazdirDlg
     Top = 216
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 138
     Top = 126
     object BaskiOnizlemeMenu: TMenuItem
@@ -339,7 +341,8 @@ object BarkodYazdirDlg: TBarkodYazdirDlg
   end
   object TabBarkodYazdirDetay: TFDQuery
     AutoCalcFields = False
-    Connection = Tablo.FDCnn
+    Connection = Tablo.FDCnn
+
     ParamData = <>
     SQL.Strings = (
       

@@ -812,16 +812,20 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     Top = 314
   end
   object PopupMenuSecim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 545
     Top = 205
     object mnSe1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
     end
     object mnKaldr1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
     end
     object SeimiTersevir1: TMenuItem
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
     end
   end
   object DtsKatilimci: TDataSource
@@ -848,6 +852,7 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     Top = 544
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 349
     Top = 261
     object BaskiOnizlemeMenu: TMenuItem
@@ -1004,10 +1009,12 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     Top = 342
   end
   object PopupMenuEkle: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 105
     Top = 277
     object MenuItemKarar: TMenuItem
       Caption = 'Karar'
+      ImageIndex = 15
       OnClick = MenuItemKararClick
     end
     object MenuItem2: TMenuItem
@@ -1015,6 +1022,7 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     end
     object MenuItemGorev: TMenuItem
       Caption = 'G'#246'rev'
+      ImageIndex = 19
       OnClick = MenuItemGorevClick
     end
   end
@@ -1046,15 +1054,18 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     Top = 353
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 928
     Top = 232
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1062,14 +1073,17 @@ object KaliteToplantiDlg: TKaliteToplantiDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

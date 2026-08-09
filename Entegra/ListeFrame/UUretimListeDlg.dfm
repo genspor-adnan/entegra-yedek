@@ -379,6 +379,7 @@ object UretimListeDlg: TUretimListeDlg
     end
   end
   object PageAlt: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 293
     Width = 1027
@@ -393,7 +394,7 @@ object UretimListeDlg: TUretimListeDlg
     ClientRectTop = 26
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
-      ImageIndex = 0
+      ImageIndex = 22
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -663,20 +664,24 @@ object UretimListeDlg: TUretimListeDlg
     Top = 172
   end
   object PopupMenuUretim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 70
     Top = 117
     object UretimFisInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = UretimFisInfoMenuClick
     end
     object rsaliyeOlutur1: TMenuItem
       Tag = 14
       Caption = #304'rsaliye Olu'#351'tur'
+      ImageIndex = 19
       OnClick = FaturaOlutur1Click
     end
     object FaturaOlutur1: TMenuItem
       Tag = 15
       Caption = 'Fatura Olu'#351'tur'
+      ImageIndex = 19
       OnClick = FaturaOlutur1Click
     end
     object N1: TMenuItem
@@ -689,10 +694,12 @@ object UretimListeDlg: TUretimListeDlg
     end
     object KaynakBelgeyiAcMenu: TMenuItem
       Caption = 'Kaynak Belgeyi A'#231
+      ImageIndex = 19
       OnClick = KaynakBelgeyiAcMenuClick
     end
     object HedefBelgeyiA1: TMenuItem
       Caption = 'Hedef Belgeyi A'#231
+      ImageIndex = 19
       OnClick = HedefBelgeyiA1Click
     end
   end

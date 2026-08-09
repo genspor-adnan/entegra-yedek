@@ -162,6 +162,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           end
         end
         object PageControlUst: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 32
           Width = 1196
@@ -182,7 +183,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           object cxTabSheet1: TcxTabSheet
             AllowCloseButton = False
             Caption = 'Genel'
-            ImageIndex = 0
+            ImageIndex = 11
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -641,7 +642,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           end
           object EkAlanlarEkr: TcxTabSheet
             Caption = 'Ek Alanlar'
-            ImageIndex = 1
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -649,7 +650,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           end
           object EkAlanlarEkr2: TcxTabSheet
             Caption = 'Ek Alanlar2'
-            ImageIndex = 2
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -657,7 +658,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
           end
           object EkAlanlarEkr3: TcxTabSheet
             Caption = 'EkAlanlarEkr3'
-            ImageIndex = 3
+            ImageIndex = 19
             ExplicitLeft = 0
             ExplicitTop = 0
             ExplicitWidth = 0
@@ -666,6 +667,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         end
       end
       object cxPageControl1: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 246
         Width = 1196
@@ -681,7 +683,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         ClientRectTop = 24
         object SheetUretimAgaci: TcxTabSheet
           Caption = #220'retim A'#287'ac'#305
-          ImageIndex = 0
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1005,7 +1007,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         end
         object SheetOperasyonlar: TcxTabSheet
           Caption = 'Operasyon'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1309,7 +1311,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               ClientRectTop = 24
               object SheetIsZaman: TcxTabSheet
                 Caption = #304#351' Zaman Personel'
-                ImageIndex = 2
+                ImageIndex = 35
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -1607,7 +1609,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               end
               object SheetPlanlama: TcxTabSheet
                 Caption = 'Malzeme Planlama'
-                ImageIndex = 4
+                ImageIndex = 12
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -1838,7 +1840,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               end
               object SheetOpIslemler: TcxTabSheet
                 Caption = 'T'#252'ketilenler'
-                ImageIndex = 0
+                ImageIndex = 19
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -1930,7 +1932,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               end
               object SheetOpMaliyet: TcxTabSheet
                 Caption = 'Ekstra Maliyet'
-                ImageIndex = 1
+                ImageIndex = 19
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -2091,7 +2093,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               end
               object cxTabSheet2: TcxTabSheet
                 Caption = 'D'#305#351' Kaynak Kullan'#305'm'#305' (Fason)'
-                ImageIndex = 5
+                ImageIndex = 19
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -2288,7 +2290,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
               end
               object SheetYorumMedya: TcxTabSheet
                 Caption = 'Yorum/Medya'
-                ImageIndex = 3
+                ImageIndex = 38
                 ExplicitLeft = 0
                 ExplicitTop = 0
                 ExplicitWidth = 0
@@ -2442,7 +2444,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         end
         object SheetMaliyet: TcxTabSheet
           Caption = 'Maliyet'
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2549,7 +2551,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
         end
         object SheetGereksinim: TcxTabSheet
           Caption = 'Gereksinim'
-          ImageIndex = 3
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2893,6 +2895,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Top = 413
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 45
     Top = 350
     object BaskiOnizlemeMenu: TMenuItem
@@ -3306,19 +3309,23 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Top = 347
   end
   object PopupOperasyonOlustur: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupOperasyonOlusturPopup
     Left = 24
     Top = 128
     object SeiliOperasyonuOlutur1: TMenuItem
       Caption = 'Se'#231'ili Operasyonu Olu'#351'tur'
+      ImageIndex = 0
       OnClick = SeiliOperasyonuOlutur1Click
     end
     object EksikOperasyonuOlustu: TMenuItem
       Caption = 'Eksik '#304#351'aretli Operasyonlar'#305' Olu'#351'tur'
+      ImageIndex = 0
       OnClick = EksikOperasyonuOlustuClick
     end
     object TumOperasyonuOlutur: TMenuItem
       Caption = 'T'#252'm Operasyonlar'#305' Olu'#351'tur'
+      ImageIndex = 0
       OnClick = TumOperasyonuOluturClick
     end
   end
@@ -3491,15 +3498,18 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Top = 496
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 840
     Top = 400
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -3507,14 +3517,17 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -3602,17 +3615,20 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Top = 308
   end
   object PopupOperasyonPlanlama: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupOperasyonOlusturPopup
     Left = 800
     Top = 448
     object IsaretlilereAlimTalebiOlustur: TMenuItem
       Tag = 101
       Caption = 'Gereksinime G'#246're Sat'#305'nalma Talebi Olu'#351'tur'
+      ImageIndex = 0
       OnClick = IsaretlilereAlimTalebiOlusturClick
     end
     object GenelDurumaGreSatnalmaTalebiOlutur1: TMenuItem
       Tag = 101
       Caption = 'Genel Duruma G'#246're Sat'#305'nalma Talebi Olu'#351'tur'
+      ImageIndex = 0
       OnClick = GenelDurumaGreSatnalmaTalebiOlutur1Click
     end
     object N4: TMenuItem
@@ -3621,6 +3637,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     object GereksinimOlanlaraStoktanTalepOlutur1: TMenuItem
       Tag = 105
       Caption = 'Gereksinime G'#246're Stoktan Talep Olu'#351'tur'
+      ImageIndex = 12
       OnClick = IsaretlilereAlimTalebiOlusturClick
     end
   end
@@ -3631,18 +3648,22 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     Top = 411
   end
   object PopupUretimFisi: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 133
     Top = 336
     object kalaniuret: TMenuItem
       Caption = #220'ret'
+      ImageIndex = 15
       OnClick = kalaniuretClick
     end
   end
   object PopupIsZamanPer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 109
     Top = 568
     object MenuTumKonular: TMenuItem
       Caption = 'T'#252'm '#304#351' Emri Konular'#305'n'#305' Ekle'
+      ImageIndex = 0
       OnClick = MenuTumKonularClick
     end
     object N5: TMenuItem
@@ -3650,6 +3671,7 @@ object UretimEmriWizardDlg: TUretimEmriWizardDlg
     end
     object RecetedenKonularEkleMenu: TMenuItem
       Caption = 'Re'#231'eteden Konular'#305' Ekle'
+      ImageIndex = 0
       OnClick = RecetedenKonularEkleMenuClick
     end
   end

@@ -354,6 +354,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       end
     end
     object cxPageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 6
       Top = 166
       Width = 1063
@@ -371,7 +372,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       ClientRectTop = 27
       object TabSheetFiyat: TcxTabSheet
         Caption = 'Fiyatlar'
-        ImageIndex = 2
+        ImageIndex = 34
         ExplicitHeight = 345
         object ToolBar5: TToolBar
           AlignWithMargins = True
@@ -532,7 +533,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       end
       object TabSheetButce: TcxTabSheet
         Caption = 'B'#252't'#231'e Bilgileri'
-        ImageIndex = 1
+        ImageIndex = 22
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -782,7 +783,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       end
       object TabSheetYDil: TcxTabSheet
         Caption = 'Yabanc'#305' Dil'
-        ImageIndex = 4
+        ImageIndex = 19
         ExplicitHeight = 345
         object ToolBar4: TToolBar
           AlignWithMargins = True
@@ -905,7 +906,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       end
       object TabSheetEkstre: TcxTabSheet
         Caption = 'Ekstre'
-        ImageIndex = 3
+        ImageIndex = 32
         object GridMasrafEkstre: TcxGrid
           Left = 0
           Top = 49
@@ -1443,7 +1444,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
       end
       object cxTabSheetMuhKod: TcxTabSheet
         Caption = 'Muhasebe Hesaplar'#305
-        ImageIndex = 4
+        ImageIndex = 19
         ExplicitHeight = 345
         object v: TcxGrid
           Left = 0
@@ -1897,17 +1898,20 @@ object MasrafGelirDlg: TMasrafGelirDlg
     Top = 343
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenu1Popup
     Left = 64
     Top = 155
     object KasaYenileMenu: TMenuItem
       Caption = 'Sadece Bu Kasan'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object BtnKasalarnToplamlarnYenile1: TMenuItem
       Caption = 'B'#252't'#252'n Kasalar'#305'n Toplamlar'#305'n'#305' Yenile'
+      ImageIndex = 44
     end
     object N4: TMenuItem
       Caption = '-'
@@ -1915,6 +1919,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
     object AcilisFisiGirMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir/De'#287'i'#351'tir'
+      ImageIndex = 19
       OnClick = AcilisFisiGirMenuClick
     end
     object Cizgi3: TMenuItem
@@ -1923,17 +1928,20 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
     object TumunuKopyala: TMenuItem
       Tag = 4
       Caption = 'T'#252'm'#252'n'#252' Kopyala'
+      ImageIndex = 10
       Visible = False
       OnClick = TumunuKopyalaClick
     end
     object SecilileriKopyala: TMenuItem
       Tag = 5
       Caption = 'Se'#231'ili Olanlar'#305' Kopyala'
+      ImageIndex = 10
       Visible = False
       OnClick = TumunuKopyalaClick
     end
@@ -1942,10 +1950,12 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object Exceldenverial1: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = Exceldenverial1Click
     end
     object ExceleGnderMenu: TMenuItem
       Caption = 'Excel'#39'e G'#246'nder'
+      ImageIndex = 32
       OnClick = ExceleGnderMenuClick
     end
   end
@@ -1998,10 +2008,12 @@ object MasrafGelirDlg: TMasrafGelirDlg
     Top = 198
   end
   object PopupMenuFiyat: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 224
     Top = 257
     object FiyatAdListesi1: TMenuItem
       Caption = 'Fiyat Ad Listesi'
+      ImageIndex = 32
       OnClick = FiyatAdListesi1Click
     end
     object N2: TMenuItem
@@ -2009,13 +2021,14 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object YeniFiyatOlutur1: TMenuItem
       Caption = 'Yeni Fiyat Olu'#351'tur'
+      ImageIndex = 34
     end
     object N8: TMenuItem
       Caption = '-'
     end
     object FiyatKopyala: TMenuItem
       Caption = 'Fiyat'#305'n'#305' Kopyala'
-      ImageIndex = 20
+      ImageIndex = 10
     end
     object MenuItem2: TMenuItem
       Caption = '-'
@@ -2029,17 +2042,19 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object FiyatSil: TMenuItem
       Caption = 'Fiyat'#305'n'#305' Sil'
-      ImageIndex = 2
+      ImageIndex = 1
     end
     object N5: TMenuItem
       Caption = '-'
     end
     object MiktarArtma: TMenuItem
       Caption = 'Fiyat'#305' Miktar Art'#305'r'
+      ImageIndex = 34
       Hint = 'Artma'
     end
     object MiktarAzaltma: TMenuItem
       Caption = 'Fiyat'#305' Miktar Azalt'
+      ImageIndex = 34
       Hint = 'Azaltma'
     end
     object N6: TMenuItem
@@ -2047,18 +2062,22 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object YuzdeArtma: TMenuItem
       Caption = 'Fiyat'#305' % x Art'#305'r'
+      ImageIndex = 34
       Hint = 'Artma'
     end
     object YuzdeAzaltma: TMenuItem
       Caption = 'Fiyat'#305' % x Azalt'
+      ImageIndex = 34
       Hint = 'Azaltma'
     end
   end
   object pmdb: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 286
     Top = 413
     object Sil1: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
     end
   end
   object DtsCariListe: TDataSource
@@ -2091,6 +2110,7 @@ object MasrafGelirDlg: TMasrafGelirDlg
     Top = 269
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 856
     Top = 370
     object BaskiOnizlemeMenu: TMenuItem
@@ -2176,23 +2196,28 @@ object MasrafGelirDlg: TMasrafGelirDlg
     Top = 254
   end
   object PopupMenuButce: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 750
     Top = 357
     object GerceklesenaylaragorebutceplanlaMenu: TMenuItem
       Caption = 'Ger'#231'ekle'#351'en aylara g'#246're b'#252't'#231'e planla'
+      ImageIndex = 34
       OnClick = GerceklesenaylaragorebutceplanlaMenuClick
     end
     object Butungerceklesenlerigetir1: TMenuItem
       Caption = 'B'#252't'#252'n ger'#231'ekle'#351'enleri getir'
+      ImageIndex = 34
       OnClick = Butungerceklesenlerigetir1Click
     end
   end
   object PopupMenuAksiyon: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuAksiyonPopup
     Left = 430
     Top = 293
     object DemirbasKartiniAcMenu: TMenuItem
       Caption = 'Demirba'#351' Kart'#305'n'#305' A'#231
+      ImageIndex = 6
       OnClick = DemirbasKartiniAcMenuClick
     end
     object N9: TMenuItem
@@ -2200,14 +2225,17 @@ object MasrafGelirDlg: TMasrafGelirDlg
     end
     object BuKartinDemirbasOlusturMenu: TMenuItem
       Caption = 'Bu Kart '#304#231'in Demirba'#351' Olu'#351'tur'
+      ImageIndex = 19
       OnClick = BuKartinDemirbasOlusturMenuClick
     end
     object VarolanDemirbasiBuKartaBaglaMenu: TMenuItem
       Caption = 'Varolan Demirba'#351#305' Bu Karta Ba'#287'la'
+      ImageIndex = 6
       OnClick = VarolanDemirbasiBuKartaBaglaMenuClick
     end
     object DemirbasBaglantsiniKoparMenu: TMenuItem
       Caption = 'Demirba'#351' Ba'#287'lant'#305's'#305'n'#305' Kopar'
+      ImageIndex = 13
       OnClick = DemirbasBaglantsiniKoparMenuClick
     end
   end

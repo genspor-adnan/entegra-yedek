@@ -14,6 +14,7 @@ object OpsiyonDokumanDlg: TOpsiyonDokumanDlg
   OnCreate = FormCreate
   TextHeight = 13
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 521
@@ -28,7 +29,7 @@ object OpsiyonDokumanDlg: TOpsiyonDokumanDlg
     ClientRectTop = 24
     object cxTabSheet1: TcxTabSheet
       Caption = 'Dok'#252'man'
-      ImageIndex = 0
+      ImageIndex = 19
       object Panel1: TPanel
         Left = 0
         Top = 380

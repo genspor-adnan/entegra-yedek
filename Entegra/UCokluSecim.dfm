@@ -188,18 +188,22 @@ object CokluSecimDlg: TCokluSecimDlg
     Top = 245
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 235
     Top = 62
     object mnSe1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = mnSe1Click
     end
     object mnKaldr1: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
       OnClick = mnKaldr1Click
     end
     object SeimiTersevir1: TMenuItem
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = SeimiTersevir1Click
     end
   end

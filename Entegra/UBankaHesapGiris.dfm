@@ -593,14 +593,17 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
     Top = 232
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 320
     Top = 184
     object miSatirSil: TMenuItem
       Caption = 'Sat'#305'r Sil'
+      ImageIndex = 1
       OnClick = miSatirSilClick
     end
     object miBenzerlerineUygula: TMenuItem
       Caption = 'Benzerlerine Uygula'
+      ImageIndex = 15
       OnClick = miBenzerlerineUygulaClick
     end
   end

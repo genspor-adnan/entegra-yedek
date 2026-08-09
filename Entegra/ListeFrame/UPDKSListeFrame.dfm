@@ -9,6 +9,7 @@ object PDKSListeFrame: TPDKSListeFrame
   ParentColor = False
   TabOrder = 0
   object PageControlPDKS: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 93
     Width = 1131
@@ -23,7 +24,7 @@ object PDKSListeFrame: TPDKSListeFrame
     ClientRectTop = 26
     object TabSheetGenel: TcxTabSheet
       Caption = 'PDKS Liste'
-      ImageIndex = 0
+      ImageIndex = 32
       object PDKSListe: TcxGrid
         Left = 0
         Top = 35
@@ -394,7 +395,7 @@ object PDKSListeFrame: TPDKSListeFrame
     end
     object TabSheetGrafik: TcxTabSheet
       Caption = 'Grafik'
-      ImageIndex = 1
+      ImageIndex = 19
       object GridPDKSGrafik: TcxGrid
         Left = 0
         Top = 0
@@ -992,6 +993,7 @@ object PDKSListeFrame: TPDKSListeFrame
     Top = 224
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 37
     Top = 240
     object BaskiOnizlemeMenu: TMenuItem
@@ -1086,21 +1088,25 @@ object PDKSListeFrame: TPDKSListeFrame
     Top = 209
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 136
     Top = 216
     object HepsiniSe1: TMenuItem
       Tag = 5
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = HepsiniSe1Click
     end
     object mnKaldr1: TMenuItem
       Tag = 6
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
       OnClick = HepsiniSe1Click
     end
     object SeimiTersevir1: TMenuItem
       Tag = 7
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = HepsiniSe1Click
     end
     object N4: TMenuItem
@@ -1109,10 +1115,12 @@ object PDKSListeFrame: TPDKSListeFrame
     object GrupA1: TMenuItem
       Tag = 1
       Caption = 'Grup A'#231'(-)'
+      ImageIndex = 32
       OnClick = GrupA1Click
     end
     object GrupKapa1: TMenuItem
       Caption = 'Grup Kapat(+)'
+      ImageIndex = 32
       OnClick = GrupA1Click
     end
     object N5: TMenuItem
@@ -1120,6 +1128,7 @@ object PDKSListeFrame: TPDKSListeFrame
     end
     object DurumDegisMenu: TMenuItem
       Caption = 'Durum De'#287'i'#351'tir'
+      ImageIndex = 30
     end
     object N6: TMenuItem
       Caption = '-'
@@ -1127,11 +1136,13 @@ object PDKSListeFrame: TPDKSListeFrame
     object GiriSaatDzenle1: TMenuItem
       Tag = 53
       Caption = 'Giri'#351' Saat D'#252'zenle'
+      ImageIndex = 7
       OnClick = GiriSaatDzenle1Click
     end
     object kSaatDzenle1: TMenuItem
       Tag = 54
       Caption = #199#305'k'#305#351' Saat D'#252'zenle'
+      ImageIndex = 7
       OnClick = GiriSaatDzenle1Click
     end
     object N7: TMenuItem
@@ -1139,24 +1150,29 @@ object PDKSListeFrame: TPDKSListeFrame
     end
     object ExceldenVeriAlMenu2: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAlMenu1Click
     end
     object ExcelAyarlarSifirlaMenu: TMenuItem
       Caption = 'Excel Ayarlar'#305'n'#305' S'#305'f'#305'rla'
+      ImageIndex = 32
       OnClick = ExcelAyarlarSifirlaMenuClick
     end
   end
   object PmYeniEkle: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 208
     Top = 256
     object MenuItemTekEkle: TMenuItem
       Tag = 2
       Caption = 'Tek Ekle'
+      ImageIndex = 0
       OnClick = MenuItemTekEkleClick
     end
     object MenuItemTumEkle: TMenuItem
       Tag = 3
       Caption = 'T'#252'm'#252'n'#252' Ekle'
+      ImageIndex = 0
       OnClick = MenuItemTekEkleClick
     end
     object N8: TMenuItem
@@ -1164,6 +1180,7 @@ object PDKSListeFrame: TPDKSListeFrame
     end
     object ExceldenVeriAlMenu1: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAlMenu1Click
     end
   end
@@ -1185,6 +1202,7 @@ object PDKSListeFrame: TPDKSListeFrame
     Top = 304
   end
   object PopupDurum: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 112
     Top = 360
   end

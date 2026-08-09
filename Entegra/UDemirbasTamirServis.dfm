@@ -434,6 +434,7 @@ object DemirbasTamirServisDLG: TDemirbasTamirServisDLG
     Top = 2
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 86
     Top = 96
     object BaskiOnizlemeMenu: TMenuItem

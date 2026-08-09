@@ -1684,6 +1684,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Visible = False
       end
       object PageUst: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 105
         Width = 1104
@@ -1699,7 +1700,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ClientRectTop = 27
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
-          ImageIndex = 0
+          ImageIndex = 11
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2466,7 +2467,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         end
         object SheetGenotip: TcxTabSheet
           Caption = 'Hasta Bilgileri'
-          ImageIndex = 2
+          ImageIndex = 22
           object cxGroupBox1: TcxGroupBox
             Left = 15
             Top = 0
@@ -2598,7 +2599,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         end
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
-          ImageIndex = 1
+          ImageIndex = 19
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -3346,11 +3347,13 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 24
   end
   object PopupMenuFatura: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuFaturaPopup
     Left = 458
     Top = 110
     object info1: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = info1Click
     end
     object N8: TMenuItem
@@ -3358,6 +3361,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object SatirDuzenleMenu: TMenuItem
       Caption = 'Sat'#305'r D'#252'zenle'
+      ImageIndex = 7
       OnClick = GridFaturaViewDblClick
     end
     object N4: TMenuItem
@@ -3365,183 +3369,219 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object Miktarskontosu1: TMenuItem
       Caption = 'Miktar '#304'skontosu Gir'
+      ImageIndex = 34
       object KDVHaricTutargir1: TMenuItem
         Caption = 'KDV Hari'#231' Tutar'#305' Gir'
+        ImageIndex = 34
         OnClick = KDVHaricTutargir1Click
       end
       object KDVDahilTutargir1: TMenuItem
         Tag = 1
         Caption = 'KDV Dahil Tutar'#305' Gir'
+        ImageIndex = 34
         OnClick = KDVHaricTutargir1Click
       end
     end
     object Yzdeskontosu1: TMenuItem
       Caption = 'Y'#252'zde '#304'skontosu Gir'
+      ImageIndex = 34
       object skonto11: TMenuItem
         Caption = #304'skonto1'
+        ImageIndex = 34
         object N52: TMenuItem
           Caption = '% 0'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N53: TMenuItem
           Tag = 5
           Caption = '% 5'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N102: TMenuItem
           Tag = 10
           Caption = '% 10'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N152: TMenuItem
           Tag = 15
           Caption = '% 15'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N202: TMenuItem
           Tag = 20
           Caption = '% 20'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N252: TMenuItem
           Tag = 25
           Caption = '% 25'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N302: TMenuItem
           Tag = 30
           Caption = '% 30'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N402: TMenuItem
           Tag = 40
           Caption = '% 40'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N502: TMenuItem
           Tag = 50
           Caption = '% 50'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object N1001: TMenuItem
           Tag = 100
           Caption = '% 100'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object zel3: TMenuItem
           Tag = -1
           Caption = 'Di'#287'er'
+          ImageIndex = 15
           Hint = #304'skonto1'
           OnClick = N52Click
         end
         object zel2: TMenuItem
           Tag = 1
           Caption = #214'zel'
+          ImageIndex = 15
           OnClick = SatiraOzelIskontoClick
         end
       end
       object Cariskonto1: TMenuItem
         Caption = 'Cari '#304'skonto'
+        ImageIndex = 35
         OnClick = Cariskonto1Click
       end
       object skonto21: TMenuItem
         Caption = #304'skonto2'
+        ImageIndex = 34
         object N01: TMenuItem
           Caption = '% 0'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N51: TMenuItem
           Tag = 5
           Caption = '% 5'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N101: TMenuItem
           Tag = 10
           Caption = '% 10'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N151: TMenuItem
           Tag = 15
           Caption = '% 15'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N201: TMenuItem
           Tag = 20
           Caption = '% 20'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N251: TMenuItem
           Tag = 25
           Caption = '% 25'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N301: TMenuItem
           Tag = 30
           Caption = '% 30'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N401: TMenuItem
           Tag = 40
           Caption = '% 40'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N501: TMenuItem
           Tag = 50
           Caption = '% 50'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object N1002: TMenuItem
           Tag = 100
           Caption = '% 100'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object zel1: TMenuItem
           Tag = -2
           Caption = 'Di'#287'er'
+          ImageIndex = 15
           Hint = #304'skonto2'
           OnClick = N52Click
         end
         object zel4: TMenuItem
           Tag = 2
           Caption = #214'zel'
+          ImageIndex = 15
           OnClick = SatiraOzelIskontoClick
         end
       end
       object Stokskontosu1: TMenuItem
         Caption = 'Stok '#304'skontosu'
+        ImageIndex = 34
         OnClick = Stokskontosu1Click
       end
     end
     object utarDvzHesapla1: TMenuItem
       Caption = 'Tutar / D'#246'viz Hesapla'
+      ImageIndex = 34
     end
     object KDVOranGir1: TMenuItem
       Caption = 'KDV Oran'#305' Gir'
+      ImageIndex = 34
       object SeciliSatira: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'ra'
+        ImageIndex = 15
       end
       object Tumune1: TMenuItem
         Caption = 'T'#252'm'#252'ne'
+        ImageIndex = 15
       end
     end
     object N16: TMenuItem
@@ -3549,6 +3589,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object FaturaKoanAyarlar1: TMenuItem
       Caption = 'FATURA Ko'#231'an'#305' Ayarlar'#305
+      ImageIndex = 11
       OnClick = FaturaKoanAyarlar1Click
     end
     object N5: TMenuItem
@@ -3556,10 +3597,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object IhracatBilgileriMenu: TMenuItem
       Caption = #304'hracat Bilgilerini D'#252'zenle'
+      ImageIndex = 7
       OnClick = IhracatBilgileriMenuClick
     end
     object IzlemBilgileriniDzenleMenu: TMenuItem
       Caption = #304'zlem Bilgilerini D'#252'zenle'
+      ImageIndex = 7
       OnClick = IzlemBilgileriniDzenleMenuClick
     end
     object N6: TMenuItem
@@ -3567,10 +3610,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object BirSatrAdetiKadarSatrlaraBolMenu: TMenuItem
       Caption = 'Bir Sat'#305'r'#305' Adeti Kadar Sat'#305'rlara B'#246'l'
+      ImageIndex = 15
       OnClick = BirSatrAdetiKadarSatrlaraBolMenuClick
     end
     object AyniUrunKodluSatrlarBirlestirMenu: TMenuItem
       Caption = 'Ayn'#305' '#220'r'#252'n Kodlu Sat'#305'rlar'#305' Birle'#351'tir'
+      ImageIndex = 12
       OnClick = AyniUrunKodluSatrlarBirlestirMenuClick
     end
     object N7: TMenuItem
@@ -3578,6 +3623,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object UTSdenAdetleriKontrolEtMenu: TMenuItem
       Caption = #220'TS'#39'den Adetleri Kontrol Et'
+      ImageIndex = 15
       OnClick = UTSdenAdetleriKontrolEtMenuClick
     end
     object N9: TMenuItem
@@ -3585,12 +3631,15 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object ExceldenVeriAl1: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       object MenuExcelDosyaSec: TMenuItem
         Caption = 'Dosya Se'#231
+        ImageIndex = 15
         OnClick = MenuExcelDosyaSecClick
       end
       object MenuKolonEslestir: TMenuItem
         Caption = 'Kolon E'#351'le'#351'tir'
+        ImageIndex = 15
         OnClick = MenuKolonEslestirClick
       end
     end
@@ -3608,6 +3657,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 329
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuYazPopup
     Left = 357
     Top = 50
@@ -4365,6 +4415,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 307
   end
   object PopupBagliBelgeler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 392
     Top = 312
     object BelgeEkle1: TMenuItem
@@ -4383,6 +4434,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
   end
   object PopupBelgeZarfi: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 480
     Top = 344
     object MenuItem1: TMenuItem
@@ -4397,7 +4449,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object MenuItem3: TMenuItem
       Caption = 'Zarflar'#305' G'#246'r/D'#252'zenle'
-      ImageIndex = 9
+      ImageIndex = 7
       OnClick = MenuItem3Click
     end
   end
@@ -4616,15 +4668,18 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 928
     Top = 152
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem4: TMenuItem
@@ -4632,14 +4687,17 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -4754,6 +4812,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     Top = 31
   end
   object PopupMenuEBelge: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuEBelgePopup
     Left = 744
     Top = 80
@@ -4765,6 +4824,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
   end
   object PopupMenuTipDegis: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuTipDegisPopup
     Left = 581
     Top = 82

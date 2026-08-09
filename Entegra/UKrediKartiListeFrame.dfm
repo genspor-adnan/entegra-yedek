@@ -267,6 +267,7 @@
       end
     end
     object PageControlSekme: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 227
       Width = 1005
@@ -281,7 +282,7 @@
       ClientRectTop = 27
       object TabSheetToplamlar: TcxTabSheet
         Caption = 'Hesap Kesim'
-        ImageIndex = 7
+        ImageIndex = 19
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -579,7 +580,7 @@
       end
       object TabSheetEkstre: TcxTabSheet
         Caption = 'Ekstre'
-        ImageIndex = 6
+        ImageIndex = 32
         ExplicitLeft = 0
         ExplicitTop = 0
         ExplicitWidth = 0
@@ -965,6 +966,7 @@
     Top = 219
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 367
     Top = 184
     object BaskiOnizlemeMenu: TMenuItem
@@ -1059,20 +1061,24 @@
     Top = 272
   end
   object PmKrediKarti: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 510
     Top = 113
     object KKInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = KKInfoMenuClick
     end
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisKaydiMenuClick
     end
     object DevirFiiGir1: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       Visible = False
       OnClick = AcilisKaydiMenuClick
     end

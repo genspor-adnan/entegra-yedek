@@ -396,6 +396,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
         Height = 273
         Width = 1133
         object PageControl1: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 2
           Top = 18
           Width = 1129
@@ -410,7 +411,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
           ClientRectTop = 24
           object cxTabSheet1: TcxTabSheet
             Caption = 'Detay'
-            ImageIndex = 3
+            ImageIndex = 22
             object cxLabel20: TcxLabel
               Left = 17
               Top = 4
@@ -465,7 +466,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
           end
           object TabSheetSonuc: TcxTabSheet
             Caption = '   Sonu'#231'   '
-            ImageIndex = 0
+            ImageIndex = 19
             object cxLabel21: TcxLabel
               Left = 20
               Top = 94
@@ -537,7 +538,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
           end
           object cxTabSheet2: TcxTabSheet
             Caption = 'Onaylar'
-            ImageIndex = 4
+            ImageIndex = 19
             object cxLabel3: TcxLabel
               Left = 8
               Top = 6
@@ -921,7 +922,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
           end
           object TabSheetDOF: TcxTabSheet
             Caption = 'A'#231#305'lan D'#214'F'
-            ImageIndex = 1
+            ImageIndex = 19
             object Panel9: TPanel
               Left = 0
               Top = 0
@@ -1086,7 +1087,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
           end
           object SheetYorum: TcxTabSheet
             Caption = 'Yorum/Medya'
-            ImageIndex = 2
+            ImageIndex = 38
             object Panel4: TPanel
               Left = 0
               Top = 184
@@ -1363,16 +1364,19 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
     end
   end
   object PopupDokuman: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 219
     Top = 464
     object DokDizindenMenu: TMenuItem
       Caption = 'Dizinden'
+      ImageIndex = 15
     end
     object N10: TMenuItem
       Caption = '-'
     end
     object DokListedenMenu: TMenuItem
       Caption = 'Dok'#252'man Listesinden'
+      ImageIndex = 32
     end
   end
   object YorumAtacMenu: TOfficePopupMenu
@@ -1409,15 +1413,18 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
     end
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 708
     Top = 344
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -1425,14 +1432,17 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -1478,6 +1488,7 @@ object KYSapmaOlayWizardDlg: TKYSapmaOlayWizardDlg
     Top = 368
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 133
     Top = 73
     object BaskiOnizlemeMenu: TMenuItem

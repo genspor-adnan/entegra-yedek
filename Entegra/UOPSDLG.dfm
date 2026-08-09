@@ -25,6 +25,7 @@ object OpsiyonDlg: TOpsiyonDlg
     Caption = 'Label1'
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 706
@@ -35,6 +36,7 @@ object OpsiyonDlg: TOpsiyonDlg
     OnChange = PageControl1Change
     object TabSheet1: TTabSheet
       Caption = 'Genel Ayarlar'
+      ImageIndex = 11
       object Label10: TLabel
         Left = 6
         Top = 385
@@ -587,7 +589,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object TabSheet6: TTabSheet
       Caption = 'Uyar'#305'lar'
-      ImageIndex = 5
+      ImageIndex = 19
       object cxDBTreeList1: TcxDBTreeList
         Left = 0
         Top = 81
@@ -769,7 +771,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object shtStiller: TTabSheet
       Caption = 'Stiller'
-      ImageIndex = 5
+      ImageIndex = 11
       OnShow = shtStillerShow
       object pageStil: TPageControl
         Left = 0
@@ -782,6 +784,7 @@ object OpsiyonDlg: TOpsiyonDlg
         OnChange = pageStilChange
         object TabSheet5: TTabSheet
           Caption = 'Stiller'
+          ImageIndex = 11
           object gridStilTanim: TcxGrid
             Left = 0
             Top = 27
@@ -956,7 +959,7 @@ object OpsiyonDlg: TOpsiyonDlg
         end
         object shtStilKosullari: TTabSheet
           Caption = 'Stil Kullan'#305'm'#305
-          ImageIndex = 1
+          ImageIndex = 11
           object ToolBar1: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1104,7 +1107,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object shtKocanAyarlari: TTabSheet
       Caption = 'Ko'#231'an Ayarlar'#305
-      ImageIndex = 6
+      ImageIndex = 11
       OnEnter = shtKocanAyarlariEnter
       object gridKocanAyar: TcxGrid
         Left = 0
@@ -1492,7 +1495,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object shtBildirim: TTabSheet
       Caption = 'Bildirim'
-      ImageIndex = 7
+      ImageIndex = 19
       object pgBildirim: TPageControl
         Left = 0
         Top = 0
@@ -1504,6 +1507,7 @@ object OpsiyonDlg: TOpsiyonDlg
         OnChange = pgBildirimChange
         object TabSheet7: TTabSheet
           Caption = 'SMS'
+          ImageIndex = 33
           object GroupBox1: TGroupBox
             Left = 0
             Top = 0
@@ -1695,7 +1699,7 @@ object OpsiyonDlg: TOpsiyonDlg
         end
         object TabSheet8: TTabSheet
           Caption = 'E-Posta'
-          ImageIndex = 1
+          ImageIndex = 17
           object GroupEPostaHesaplari: TGroupBox
             Left = 0
             Top = 56
@@ -1935,7 +1939,7 @@ object OpsiyonDlg: TOpsiyonDlg
         end
         object TabSheet9: TTabSheet
           Caption = 'ITS'
-          ImageIndex = 2
+          ImageIndex = 19
           object GroupBox10: TGroupBox
             Left = 0
             Top = 0
@@ -2098,7 +2102,7 @@ object OpsiyonDlg: TOpsiyonDlg
         end
         object TabGoogle: TTabSheet
           Caption = 'Google Takvim'
-          ImageIndex = 3
+          ImageIndex = 21
           object ToolBar7: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -2251,7 +2255,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object SheetListeDuzenle: TTabSheet
       Caption = 'Listeler'
-      ImageIndex = 7
+      ImageIndex = 32
       TabVisible = False
       object GridListeDuzenle: TcxGrid
         Left = 0
@@ -2295,7 +2299,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object ShtKilitleme: TTabSheet
       Caption = 'Kilitleme'
-      ImageIndex = 6
+      ImageIndex = 19
       object Panel4: TPanel
         Left = 0
         Top = 0
@@ -2512,11 +2516,11 @@ object OpsiyonDlg: TOpsiyonDlg
         object TabSheetKilitYeni: TcxTabSheet
           Tag = 1
           Caption = 'Yeni Kay'#305't Giri'#351'i'
-          ImageIndex = 0
+          ImageIndex = 19
         end
         object TabSheetGuncel: TcxTabSheet
           Caption = 'G'#252'ncelleme (De'#287'i'#351'iklik,Silme)'
-          ImageIndex = 1
+          ImageIndex = 19
         end
       end
       object SQLKilitGuncel: TMemo
@@ -2552,7 +2556,7 @@ object OpsiyonDlg: TOpsiyonDlg
     end
     object TabSheetSecenekler: TTabSheet
       Caption = 'Se'#231'enekler'
-      ImageIndex = 7
+      ImageIndex = 38
       object cxLabel12: TcxLabel
         Left = 28
         Top = 64
@@ -2781,22 +2785,27 @@ object OpsiyonDlg: TOpsiyonDlg
     end
   end
   object BayramMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 647
     Top = 199
     object Ramazan: TMenuItem
       Caption = 'Ramazan Bayram'#305' Ekle'
+      ImageIndex = 0
     end
     object Kurban: TMenuItem
       Caption = 'Kurban Bayram'#305' Ekle'
+      ImageIndex = 0
     end
     object DierTatilgnEkle1: TMenuItem
       Caption = 'Di'#287'er Tatil g'#252'n'#252' Ekle'
+      ImageIndex = 0
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object DierTatilGnSil1: TMenuItem
       Caption = 'Di'#287'er Tatil G'#252'n'#252' Sil'
+      ImageIndex = 1
     end
   end
   object TabUyariAyar: TFDQuery
@@ -3008,16 +3017,19 @@ object OpsiyonDlg: TOpsiyonDlg
     Top = 232
   end
   object KilitlemeMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 295
     Top = 215
     object TumunuSecKaldir: TMenuItem
       Tag = 1
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = TumunuSecKaldirClick
     end
     object mnKaldr1: TMenuItem
       Tag = 2
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
       OnClick = TumunuSecKaldirClick
     end
     object N2: TMenuItem
@@ -3026,21 +3038,26 @@ object OpsiyonDlg: TOpsiyonDlg
     object SeililereTarihAta1: TMenuItem
       Tag = 4
       Caption = 'Se'#231'ilenlere Tarih Ata'
+      ImageIndex = 21
       OnClick = YeniKilit1Click
     end
     object SeilenlereOtomatikGnGir1: TMenuItem
       Tag = 5
       Caption = 'Se'#231'ilenlere Otomatik G'#252'n Ata'
+      ImageIndex = 15
       OnClick = YeniKilit1Click
     end
     object SeilenleriAktifYap1: TMenuItem
       Caption = 'Se'#231'ilenleri Kilidini'
+      ImageIndex = 15
       object Aktif1: TMenuItem
         Caption = 'Aktif Ata'
+        ImageIndex = 15
         OnClick = Aktif1Click
       end
       object PasifAta1: TMenuItem
         Caption = 'Pasif Ata'
+        ImageIndex = 15
       end
     end
   end

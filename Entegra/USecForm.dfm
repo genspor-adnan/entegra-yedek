@@ -18,6 +18,7 @@ object SecimDlg: TSecimDlg
   PixelsPerInch = 96
   TextHeight = 16
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 27
     Width = 526
@@ -32,7 +33,7 @@ object SecimDlg: TSecimDlg
     ClientRectTop = 27
     object cxTabSheet1: TcxTabSheet
       Caption = 'Bildirilen Sorunlar'
-      ImageIndex = 0
+      ImageIndex = 19
       object CheckListSorun: TcxCheckListBox
         Left = 0
         Top = 0
@@ -46,7 +47,7 @@ object SecimDlg: TSecimDlg
     end
     object cxTabSheet2: TcxTabSheet
       Caption = 'Teslim Al'#305'nanlar'
-      ImageIndex = 1
+      ImageIndex = 19
       object CheckListTeslim: TcxCheckListBox
         Left = 0
         Top = 0
@@ -114,14 +115,17 @@ object SecimDlg: TSecimDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 91
     Top = 129
     object Sorunlistesi1: TMenuItem
       Caption = 'Sorun listesi'
+      ImageIndex = 32
       OnClick = Sorunlistesi1Click
     end
     object eslimalnanlistesi1: TMenuItem
       Caption = 'Teslim al'#305'nan listesi'
+      ImageIndex = 32
       OnClick = eslimalnanlistesi1Click
     end
   end

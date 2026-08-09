@@ -152,6 +152,7 @@ object OpsiyonCekSenetDlg: TOpsiyonCekSenetDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 541
@@ -162,6 +163,7 @@ object OpsiyonCekSenetDlg: TOpsiyonCekSenetDlg
     OnChange = PageControl1Change
     object TSCek: TTabSheet
       Caption = #199'ek'
+      ImageIndex = 34
       object Label1: TLabel
         Left = 152
         Top = 127
@@ -349,7 +351,7 @@ object OpsiyonCekSenetDlg: TOpsiyonCekSenetDlg
     end
     object tsSenet: TTabSheet
       Caption = 'Senet'
-      ImageIndex = 1
+      ImageIndex = 34
       object Label2: TLabel
         Left = 152
         Top = 15

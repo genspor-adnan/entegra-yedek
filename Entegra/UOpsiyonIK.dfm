@@ -150,6 +150,7 @@ object OpsiyonIKDlg: TOpsiyonIKDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 507
@@ -159,6 +160,7 @@ object OpsiyonIKDlg: TOpsiyonIKDlg
     TabOrder = 1
     object TabSheetGenel: TTabSheet
       Caption = 'Genel'
+      ImageIndex = 11
       object BitBtn1: TBitBtn
         Left = 7
         Top = 4
@@ -484,7 +486,7 @@ object OpsiyonIKDlg: TOpsiyonIKDlg
     end
     object TabSheetPDKS: TTabSheet
       Caption = 'PDKS'
-      ImageIndex = 1
+      ImageIndex = 19
       object BtnVardiyaTanimlari: TcxButton
         Left = 55
         Top = 24
@@ -636,7 +638,7 @@ object OpsiyonIKDlg: TOpsiyonIKDlg
     end
     object TabSheetIzin: TTabSheet
       Caption = #304'zin'
-      ImageIndex = 2
+      ImageIndex = 19
       object GBGorev: TcxGroupBox
         Left = 19
         Top = 34

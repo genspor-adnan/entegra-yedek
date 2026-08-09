@@ -809,11 +809,13 @@ object StokSayimDlg: TStokSayimDlg
     Top = 222
   end
   object pmSayimTutanak: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = pmSayimTutanakPopup
     Left = 328
     Top = 245
     object mnStokDurumGuncelle: TMenuItem
       Caption = 'Deponun Say'#305'm Durumunu G'#252'ncelle'
+      ImageIndex = 12
       OnClick = mnStokDurumGuncelleClick
     end
   end
@@ -850,6 +852,7 @@ object StokSayimDlg: TStokSayimDlg
     Top = 267
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 329
     Top = 193
     object BaskiOnizlemeMenu: TMenuItem
@@ -935,14 +938,17 @@ object StokSayimDlg: TStokSayimDlg
     Top = 272
   end
   object PopupDosyadan: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 328
     Top = 296
     object ExcelDosya1: TMenuItem
       Caption = 'Excel Dosya'
+      ImageIndex = 32
       OnClick = ExcelDosya1Click
     end
     object SaymCihaz1: TMenuItem
       Caption = 'Say'#305'm Cihaz'#305
+      ImageIndex = 15
       OnClick = SaymCihaz1Click
     end
   end
@@ -954,10 +960,12 @@ object StokSayimDlg: TStokSayimDlg
     Top = 195
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 712
     Top = 200
     object TumKaytlarnSaymMiktarlarnSfrAtaMenu: TMenuItem
       Caption = 'T'#252'm Kay'#305'tlar'#305'n Say'#305'm Miktarlar'#305'n'#305' S'#305'f'#305'r Ata'
+      ImageIndex = 15
       OnClick = TumKaytlarnSaymMiktarlarnSfrAtaMenuClick
     end
     object N4: TMenuItem
@@ -965,6 +973,7 @@ object StokSayimDlg: TStokSayimDlg
     end
     object IzlemBilgisiDuzenleMenu: TMenuItem
       Caption = #304'zlem Bilgisi D'#252'zenle'
+      ImageIndex = 7
       OnClick = IzlemBilgisiDuzenleMenuClick
       Visible = False
     end

@@ -1,4 +1,4 @@
-﻿object IzlemeDlg: TIzlemeDlg
+object IzlemeDlg: TIzlemeDlg
   Left = 0
   Top = 0
   BorderIcons = [biMaximize]
@@ -528,7 +528,7 @@
       ' ) as Liste'
       '  where DURUM>0.0'
       ' group by  STOKID, SERINO,KALAN,SEC,LOTNO, SKT, URT ')
-    TabOrder = 5
+    TabOrder = 4
     Visible = False
     WordWrap = False
   end
@@ -542,7 +542,7 @@
     OnNewRecord = TabIzlemNewRecord
     Connection = Tablo.FDCnn
     Left = 40
-    Top = 89
+    Top = 121
   end
   object DtsIzlem: TDataSource
     DataSet = TabIzlem
@@ -551,10 +551,12 @@
     Top = 97
   end
   object PopupSeriNo: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 304
     Top = 104
     object Listedentoplualma1: TMenuItem
       Caption = 'Listeden toplu alma'
+      ImageIndex = 32
       OnClick = Listedentoplualma1Click
     end
     object N1: TMenuItem
@@ -562,6 +564,7 @@
     end
     object Balamabitivererek1: TMenuItem
       Caption = 'Ba'#351'lama no vererek'
+      ImageIndex = 6
       OnClick = Balamabitivererek1Click
     end
   end

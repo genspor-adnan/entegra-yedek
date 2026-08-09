@@ -338,6 +338,7 @@ object DokumSartDlg: TDokumSartDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 98
     Width = 1251
@@ -353,7 +354,7 @@ object DokumSartDlg: TDokumSartDlg
     TabOrder = 1
     object TabSheet4: TTabSheet
       Caption = 'SQL Komutu'
-      ImageIndex = 3
+      ImageIndex = 19
       object GroupBox1: TGroupBox
         Left = 0
         Top = 0
@@ -496,7 +497,7 @@ object DokumSartDlg: TDokumSartDlg
     end
     object TabSheetKosullar: TTabSheet
       Caption = 'Ko'#351'ullar'
-      ImageIndex = 1
+      ImageIndex = 19
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3

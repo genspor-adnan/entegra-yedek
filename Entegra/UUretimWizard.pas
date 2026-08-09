@@ -1011,6 +1011,14 @@ begin
 
   TabUretimDetay.FieldByname('ADET').AsFloat := Abs(TabUretimDetay.FieldByname('ADET').AsFloat) * TabUretimDetay.FieldByname('EKIPMANID').AsInteger;//Carpan;
   TabUretimDetay.FieldByname('MIKTAR').AsFloat := Tablo.StokMiktarHesapla(TabUretimDetay.FieldByname('URUNID').AsInteger,TabUretimDetay.FieldByname('ADET').AsFloat,TabUretimDetay.FieldByname('BIRIM').AsInteger);
+
+  // DONUSUM KURALI: uretim satiri irsaliye/faturaya donusmusse adet, donusen
+  //   adedin altina inemez (ust sinir yok). ADET sarfta eksi olabilir -> ABS.
+  if (TabUretimDetay.State = dsEdit) and
+     (not Tablo.AdetDusurulebilirMi('FATURA',
+            TabUretimDetay.FieldByName('ID').AsInteger,
+            Abs(TabUretimDetay.FieldByName('ADET').AsFloat))) then
+    Abort;
   if TabUretimDetay.FieldByname('DOVIZKURDEGERI').AsCurrency>0 then
      TabUretimDetay.FieldByname('DOVIZ_BIRIMFIYAT').AsCurrency := TabUretimDetay.FieldByname('BIRIMFIYAT').AsCurrency/TabUretimDetay.FieldByname('DOVIZKURDEGERI').AsCurrency;
   if TabUretimDetay.FieldByName('ISKONTO').Value = null  then

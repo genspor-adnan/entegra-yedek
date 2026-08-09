@@ -658,6 +658,7 @@ object HizliGirisIsk: THizliGirisIsk
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 37
     Width = 251

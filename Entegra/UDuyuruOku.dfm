@@ -853,6 +853,7 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
       end
     end
     object cxPageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 263
       Width = 966
@@ -868,7 +869,7 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
       ClientRectTop = 24
       object TabSheetIcerik: TcxTabSheet
         Caption = #304#231'erik'
-        ImageIndex = 0
+        ImageIndex = 19
         object RichEdit1: TJvDBRichEdit
           Left = 0
           Top = 0
@@ -891,7 +892,7 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
       end
       object TabSheetGorunum: TcxTabSheet
         Caption = 'G'#246'r'#252'n'#252'm'
-        ImageIndex = 1
+        ImageIndex = 12
         object WebBrowser1: TWebBrowser
           Left = 0
           Top = 0
@@ -1069,6 +1070,7 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
       end
     end
     object PageControl1: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 59
       Width = 247
@@ -1084,22 +1086,22 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
       ClientRectTop = 24
       object TabGelen: TcxTabSheet
         Caption = 'Gelen'
-        ImageIndex = 0
+        ImageIndex = 19
       end
       object TabGiden: TcxTabSheet
         Tag = 1
         Caption = 'Giden'
-        ImageIndex = 1
+        ImageIndex = 19
       end
       object TabTaslak: TcxTabSheet
         Tag = 2
         Caption = 'Taslak'
-        ImageIndex = 2
+        ImageIndex = 19
       end
       object TabSilinen: TcxTabSheet
         Tag = 4
         Caption = 'Silinen'
-        ImageIndex = 3
+        ImageIndex = 19
       end
     end
     object ListeGrid: TcxGrid
@@ -1428,14 +1430,17 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
     Top = 145
   end
   object PopupMenuDosya: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 445
     Top = 294
     object Dosyadan1: TMenuItem
       Caption = 'Bilgisayardan'
+      ImageIndex = 22
       OnClick = Dosyadan1Click
     end
     object Dkmandan1: TMenuItem
       Caption = 'Dok'#252'mandan'
+      ImageIndex = 15
       OnClick = Dkmandan1Click
     end
   end
@@ -1496,14 +1501,17 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
     Top = 156
   end
   object PopupMenuAlici2: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 397
     Top = 126
     object MenuBolum: TMenuItem
       Caption = 'B'#246'l'#252'm'
+      ImageIndex = 15
       OnClick = MenuBolumClick
     end
     object MenuKisi: TMenuItem
       Caption = 'Ki'#351'i'
+      ImageIndex = 35
       OnClick = MenuKisiClick
     end
   end
@@ -1528,31 +1536,37 @@ object DuyuruOkuDlg: TDuyuruOkuDlg
     Top = 209
   end
   object PopupMenuAlici: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 501
     Top = 126
     object TumKullanicilarMenu: TMenuItem
       Tag = 5
       Caption = 'T'#252'm Kullan'#305'c'#305'lar'
+      ImageIndex = 35
       OnClick = TumKullanicilarMenuClick
     end
     object SubeMenu: TMenuItem
       Tag = 4
       Caption = #350'ube'
+      ImageIndex = 13
       OnClick = SubeMenuClick
     end
     object DepartmanMenu: TMenuItem
       Tag = 3
       Caption = 'Departman'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
     object GorevMenu: TMenuItem
       Tag = 2
       Caption = 'G'#246'rev'
+      ImageIndex = 19
       OnClick = SubeMenuClick
     end
     object KisiMenu: TMenuItem
       Tag = 1
       Caption = 'Ki'#351'i'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
   end

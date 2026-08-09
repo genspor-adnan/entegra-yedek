@@ -68,6 +68,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
     end
     object PcBildirim: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 81
       Width = 832
@@ -87,7 +88,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       ClientRectTop = 24
       object TsDogrulamaBildirim: TcxTabSheet
         Caption = 'Do'#287'rulama Bildirim'
-        ImageIndex = 0
+        ImageIndex = 19
         ExplicitHeight = 385
         object GridDogrulaBildirim: TcxGrid
           Left = 0
@@ -178,7 +179,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsMalAlim: TcxTabSheet
         Caption = 'Mal - Al'#305'm Bildirimi '
-        ImageIndex = 1
+        ImageIndex = 19
         object Label1: TLabel
           Left = 200
           Top = 176
@@ -274,7 +275,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsMalIade: TcxTabSheet
         Caption = 'Mal - '#304'ade Bildirimi'
-        ImageIndex = 2
+        ImageIndex = 19
         object GridMalIade: TcxGrid
           Left = 0
           Top = 0
@@ -363,7 +364,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsSatisBildirim: TcxTabSheet
         Caption = 'Sat'#305#351' Bildirim'
-        ImageIndex = 3
+        ImageIndex = 19
         object GridSatis: TcxGrid
           Left = 0
           Top = 0
@@ -452,7 +453,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsSatisIptal: TcxTabSheet
         Caption = 'Sat'#305#351' - '#304'ptal Bildirim'
-        ImageIndex = 4
+        ImageIndex = 19
         object GridSatisIade: TcxGrid
           Left = 0
           Top = 0
@@ -541,7 +542,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsDeAktivasyon: TcxTabSheet
         Caption = 'DeAktivasyon'
-        ImageIndex = 5
+        ImageIndex = 19
         object GridDeAktivasyon: TcxGrid
           Left = 0
           Top = 0
@@ -630,7 +631,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsBos: TcxTabSheet
         Caption = 'TsBos'
-        ImageIndex = 6
+        ImageIndex = 19
         object Label4: TLabel
           Left = 69
           Top = 73
@@ -756,7 +757,7 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
       end
       object TsGecmis: TcxTabSheet
         Caption = 'Ge'#231'mi'#351
-        ImageIndex = 7
+        ImageIndex = 19
         object GridGecmis: TcxGrid
           Left = 0
           Top = 0
@@ -1423,21 +1424,25 @@ object ITSEzcaDepoDlg: TITSEzcaDepoDlg
     Top = 352
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 688
     Top = 168
     object pmHepsiSec: TMenuItem
       Tag = 1
       Caption = 'Hepsini Se'#231
+      ImageIndex = 23
       OnClick = pmHepsiSecClick
     end
     object pmTumunuKaldir: TMenuItem
       Tag = 2
       Caption = 'T'#252'm'#252'n'#252' Kald'#305'r'
+      ImageIndex = 24
       OnClick = pmHepsiSecClick
     end
     object pmSecimiTersCevir: TMenuItem
       Tag = 3
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = pmHepsiSecClick
     end
   end

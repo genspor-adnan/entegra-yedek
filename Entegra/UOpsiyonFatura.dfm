@@ -15,6 +15,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   OnShow = FormShow
   TextHeight = 13
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 501
@@ -25,6 +26,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     OnChange = PageControl1Change
     object TabSheetGenel: TTabSheet
       Caption = 'Genel'
+      ImageIndex = 11
       OnShow = TabSheetGenelShow
       object Label1: TLabel
         Left = 153
@@ -504,6 +506,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     end
     object GelenFaturaPage: TTabSheet
       Caption = 'Gelen Fatura'
+      ImageIndex = 19
       object GBGelFatListe: TcxGroupBox
         Left = 148
         Top = 172
@@ -718,7 +721,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     end
     object GidenFaturaPage: TTabSheet
       Caption = 'Giden Fatura'
-      ImageIndex = 1
+      ImageIndex = 19
       object GBGidFatListe: TcxGroupBox
         Left = 147
         Top = 168
@@ -966,7 +969,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     end
     object TabSheet1: TTabSheet
       Caption = 'E-Belge'
-      ImageIndex = 3
+      ImageIndex = 19
       OnShow = TabSheetEBelgeShow
       object cxPageControl1: TcxPageControl
         Left = 0
@@ -983,7 +986,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         ClientRectTop = 24
         object TabGenel: TcxTabSheet
           Caption = 'Genel'
-          ImageIndex = 0
+          ImageIndex = 11
           object GroupEFaturaBag: TcxGroupBox
             Left = 3
             Top = 71
@@ -1230,7 +1233,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabSeri: TcxTabSheet
           Caption = 'Seri Bilgileri'
-          ImageIndex = 5
+          ImageIndex = 22
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -1313,7 +1316,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabAlanEsleme: TcxTabSheet
           Caption = 'Alan E'#351'le'#351'tirme'
-          ImageIndex = 6
+          ImageIndex = 19
           TabVisible = False
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1441,7 +1444,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabEFatura: TcxTabSheet
           Caption = 'E-Fatura'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -1608,7 +1611,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabEArsivFatura: TcxTabSheet
           Caption = 'E-Ar'#351'iv Fatura'
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -1727,7 +1730,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabESMM: TcxTabSheet
           Caption = 'E-SMM'
-          ImageIndex = 3
+          ImageIndex = 19
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -1833,7 +1836,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         end
         object TabEIrsaliye: TcxTabSheet
           Caption = 'E-'#304'rsaliye'
-          ImageIndex = 4
+          ImageIndex = 19
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -1983,7 +1986,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object SheetAlinanSip: TcxTabSheet
           Tag = 19
           Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
-          ImageIndex = 0
+          ImageIndex = 4
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2084,7 +2087,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object SheetVerilenSip: TcxTabSheet
           Tag = 9
           Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
-          ImageIndex = 1
+          ImageIndex = 4
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2337,18 +2340,22 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
     Top = 96
   end
   object PopupDurumBglanti: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 464
     Top = 24
     object ServisDurumlarnDzenle1: TMenuItem
       Caption = 'Servis Durumlar'#305'n'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = ServisDurumlarnDzenle1Click
     end
     object BalantlarOlutur1: TMenuItem
       Caption = 'Eksik Ba'#287'lant'#305'lar'#305' Olu'#351'tur'
+      ImageIndex = 13
       OnClick = BalantlarOlutur1Click
     end
     object KopmuBalantlarTemizle1: TMenuItem
       Caption = 'Kopmu'#351' Ba'#287'lant'#305'lar'#305' Temizle'
+      ImageIndex = 9
       OnClick = KopmuBalantlarTemizle1Click
     end
   end

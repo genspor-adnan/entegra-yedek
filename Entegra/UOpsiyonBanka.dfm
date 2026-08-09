@@ -18,6 +18,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
   PixelsPerInch = 96
   TextHeight = 16
   object Pagectrl: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 767
@@ -28,6 +29,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
     OnChange = PagectrlChange
     object TabSheetBanka: TTabSheet
       Caption = 'Banka'
+      ImageIndex = 34
       object BankaGroup: TcxGroupBox
         Left = 3
         Top = 3
@@ -127,6 +129,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
     end
     object TabSheetPOS: TTabSheet
       Caption = 'POS'
+      ImageIndex = 34
       object cxGroupBox2: TcxGroupBox
         Left = 323
         Top = 131
@@ -193,7 +196,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
     end
     object TabSheetKrediler: TTabSheet
       Caption = 'Kredi Kart'#305
-      ImageIndex = 1
+      ImageIndex = 34
       OnEnter = TabSheetKredilerEnter
       object cxPageControl1: TcxPageControl
         Left = 0
@@ -210,7 +213,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
         ClientRectTop = 28
         object cxTabSheet1: TcxTabSheet
           Caption = 'Bilgiler'
-          ImageIndex = 0
+          ImageIndex = 22
           object cxGroupBox4: TcxGroupBox
             Left = 3
             Top = 3
@@ -263,7 +266,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
         end
         object cxTabSheet2: TcxTabSheet
           Caption = 'Kart T'#252'rleri'
-          ImageIndex = 1
+          ImageIndex = 19
           object cxGrid1: TcxGrid
             Left = 0
             Top = 24
@@ -451,7 +454,7 @@ object OpsiyonBankaDlg: TOpsiyonBankaDlg
     end
     object TabSheet1: TTabSheet
       Caption = 'Kredi'
-      ImageIndex = 3
+      ImageIndex = 34
       object cxGroupBox1: TcxGroupBox
         Left = 3
         Top = 3

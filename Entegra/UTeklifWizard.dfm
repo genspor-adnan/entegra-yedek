@@ -229,6 +229,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
         Transparent = True
       end
       object PageControlUst: TcxPageControl
+        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 70
         Width = 1138
@@ -245,6 +246,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
         object TabSheetDetay: TcxTabSheet
           Tag = 1
           Caption = 'Detay'
+          ImageIndex = 22
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -1226,7 +1228,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
             ClientRectTop = 27
             object cxTabSheet1: TcxTabSheet
               Caption = 'Genel Bilgiler'
-              ImageIndex = 0
+              ImageIndex = 11
               object PanelUst: TPanel
                 Left = 0
                 Top = 0
@@ -1760,7 +1762,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
             end
             object TabSheetEkAlanlar: TcxTabSheet
               Caption = 'Ek Alanlar'
-              ImageIndex = 1
+              ImageIndex = 19
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -1768,7 +1770,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
             end
             object TabSheetFinans: TcxTabSheet
               Caption = 'Finansal Kurumlar'
-              ImageIndex = 2
+              ImageIndex = 34
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
@@ -2092,7 +2094,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
         object TabSheetMetinler: TcxTabSheet
           Tag = 1
           Caption = 'Metinler'
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
@@ -2236,7 +2238,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
         end
         object SheetOnaylar: TcxTabSheet
           Caption = 'Onaylar'
-          ImageIndex = 2
+          ImageIndex = 19
           TabVisible = False
           ExplicitLeft = 0
           ExplicitTop = 0
@@ -2884,154 +2886,183 @@ object TeklifWizardDlg: TTeklifWizardDlg
     Top = 18
   end
   object PopupMenuFatura: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 169
     Top = 179
     object MiktarskontosuGir1: TMenuItem
       Caption = 'Tutar '#304'skontosu Gir'
+      ImageIndex = 34
       object KDVHariTutarGir1: TMenuItem
         Caption = 'KDV Hari'#231' Tutar'#305' Gir'
+        ImageIndex = 34
         OnClick = KDVHariTutarGir1Click
       end
       object KDVHariTutarGir2: TMenuItem
         Tag = 1
         Caption = 'KDV Dahil Tutar'#305' Gir'
+        ImageIndex = 34
         OnClick = KDVHariTutarGir1Click
       end
     end
     object e1: TMenuItem
       Caption = 'Y'#252'zde '#304'skontosu Gir'
+      ImageIndex = 34
       object skonto1: TMenuItem
         Caption = #304'skonto1'
+        ImageIndex = 34
         object N51: TMenuItem
           Caption = '% 0'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N52: TMenuItem
           Tag = 5
           Caption = '% 5'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N101: TMenuItem
           Tag = 10
           Caption = '% 10'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N151: TMenuItem
           Tag = 15
           Caption = '% 15'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N201: TMenuItem
           Tag = 20
           Caption = '% 20'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N251: TMenuItem
           Tag = 25
           Caption = '% 25'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N301: TMenuItem
           Tag = 30
           Caption = '% 30'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N401: TMenuItem
           Tag = 40
           Caption = '% 40'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N501: TMenuItem
           Tag = 50
           Caption = '% 50'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object N1001: TMenuItem
           Tag = 100
           Caption = '% 100'
+          ImageIndex = 34
           Hint = #304'skonto1'
           OnClick = N51Click
         end
         object zel1: TMenuItem
           Tag = -1
           Caption = #214'zel'
+          ImageIndex = 15
           Hint = #304'skonto1'
           OnClick = N51Click
         end
       end
       object skonto21: TMenuItem
         Caption = #304'skonto2'
+        ImageIndex = 34
         object N01: TMenuItem
           Caption = '% 0'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N53: TMenuItem
           Tag = 5
           Caption = '% 5'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N102: TMenuItem
           Tag = 10
           Caption = '% 10'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N152: TMenuItem
           Tag = 15
           Caption = '% 15'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N202: TMenuItem
           Tag = 20
           Caption = '% 20'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N252: TMenuItem
           Tag = 25
           Caption = '% 25'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N302: TMenuItem
           Tag = 30
           Caption = '% 30'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N402: TMenuItem
           Tag = 40
           Caption = '% 40'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N502: TMenuItem
           Tag = 50
           Caption = '% 50'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object N1002: TMenuItem
           Tag = 100
           Caption = '% 100'
+          ImageIndex = 34
           Hint = #304'skonto2'
           OnClick = N51Click
         end
         object zel2: TMenuItem
           Tag = -1
           Caption = #214'zel'
+          ImageIndex = 15
           Hint = #304'skonto2'
           OnClick = N51Click
         end
@@ -3042,10 +3073,12 @@ object TeklifWizardDlg: TTeklifWizardDlg
     end
     object MenuUsteTasi: TMenuItem
       Caption = '^ Sat'#305'r'#305' '#220'ste Ta'#351#305
+      ImageIndex = 6
       OnClick = MenuUsteTasiClick
     end
     object MenuAltaTasi: TMenuItem
       Caption = 'v  Sat'#305'r'#305' Alta Ta'#351#305
+      ImageIndex = 6
       OnClick = MenuUsteTasiClick
     end
   end
@@ -3552,6 +3585,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
     Top = 243
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 79
     Top = 84
     object BaskiOnizlemeMenu: TMenuItem
@@ -3628,6 +3662,7 @@ object TeklifWizardDlg: TTeklifWizardDlg
     end
   end
   object PopupMenuKopya: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 531
     Top = 168
     object BuMusteriyeKopyala: TMenuItem
@@ -4730,10 +4765,12 @@ object TeklifWizardDlg: TTeklifWizardDlg
     Top = 383
   end
   object PMMetinler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 288
     Top = 331
     object PmSablon: TMenuItem
       Caption = #350'ablon'
+      ImageIndex = 15
     end
   end
   object TabTeklifOnay: TFDQuery
@@ -4970,15 +5007,18 @@ object TeklifWizardDlg: TTeklifWizardDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 336
     Top = 40
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -4986,14 +5026,17 @@ object TeklifWizardDlg: TTeklifWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

@@ -533,6 +533,7 @@ object DemirbasHareketDlg: TDemirbasHareketDlg
     Top = 416
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 230
     Top = 8
     object BaskiOnizlemeMenu: TMenuItem

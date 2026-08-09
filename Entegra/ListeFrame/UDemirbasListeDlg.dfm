@@ -116,6 +116,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Control = PgAltDetay
   end
   object PgAltDetay: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 411
     Width = 1092
@@ -132,7 +133,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object TabSheetHareketler: TcxTabSheet
       Tag = 1
       Caption = 'Hareketler'
-      ImageIndex = 0
+      ImageIndex = 32
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -427,162 +428,10 @@ object DemirbasListeDlg: TDemirbasListeDlg
         end
       end
     end
-    object TabYorumMedya: TcxTabSheet
-      Tag = 5
-      Caption = 'Yorum/Medya'
-      ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
-      object Panel4: TPanel
-        Left = 0
-        Top = 159
-        Width = 1084
-        Height = 41
-        Align = alBottom
-        TabOrder = 0
-        object MemoChat: TcxRichEdit
-          Left = 1
-          Top = 1
-          Align = alClient
-          Properties.ScrollBars = ssVertical
-          TabOrder = 1
-          Height = 39
-          Width = 936
-        end
-        object BtnMesajGonder: TcxButton
-          Left = 937
-          Top = 1
-          Width = 85
-          Height = 39
-          Align = alRight
-          OptionsImage.ImageIndex = 39
-          OptionsImage.Images = Tablo.cxImageList1
-          TabOrder = 0
-          OnClick = BtnMesajGonderClick
-        end
-        object BtnDosyaGonder: TcxButton
-          Left = 1022
-          Top = 1
-          Width = 61
-          Height = 39
-          Align = alRight
-          DropDownMenu = YorumAtacMenu
-          Kind = cxbkDropDown
-          OptionsImage.ImageIndex = 38
-          OptionsImage.Images = Tablo.cxImageList1
-          TabOrder = 2
-        end
-      end
-      object labelFileName: TcxLabel
-        Left = 0
-        Top = 200
-        ParentCustomHint = False
-        Align = alBottom
-        ParentColor = False
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = False
-        Style.Edges = [bLeft, bRight]
-        Style.Font.Charset = TURKISH_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -11
-        Style.Font.Name = 'Trebuchet MS'
-        Style.Font.Style = []
-        Style.Shadow = False
-        Style.IsFontAssigned = True
-        Properties.Alignment.Horz = taRightJustify
-        Transparent = True
-        Visible = False
-        ExplicitTop = 199
-        AnchorX = 1084
-      end
-      object GridYorum: TcxGrid
-        Left = 0
-        Top = 0
-        Width = 1084
-        Height = 159
-        Align = alClient
-        TabOrder = 2
-        LookAndFeel.ScrollbarMode = sbmClassic
-        object GridYorumDBCardView1: TcxGridDBCardView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          OnCellDblClick = GridYorumDBCardView1CellDblClick
-          DataController.DataSource = DtsYorum
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          LayoutDirection = ldVertical
-          OptionsView.CardBorderWidth = 1
-          OptionsView.CardIndent = 2
-          OptionsView.CardWidth = 900
-          OptionsView.CategoryIndent = 1
-          OptionsView.CategorySeparatorWidth = 1
-          OptionsView.CellAutoHeight = True
-          OptionsView.CellTextMaxLineCount = 5
-          Styles.Content = Tablo.cxStyle6
-          Styles.CardBorder = Tablo.cxStyle19
-          object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'EKLEMETARIHI'
-            DataBinding.IsNullValueType = True
-            Options.Editing = False
-            Options.Focusing = False
-            Options.ShowCaption = False
-            Position.BeginsLayer = True
-            Position.Width = 120
-          end
-          object GridYorumDBCardView1YAZAN: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'YAZAN'
-            DataBinding.IsNullValueType = True
-            Options.Editing = False
-            Options.Focusing = False
-            Options.ShowCaption = False
-            Position.BeginsLayer = False
-          end
-          object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'ATAC'
-            DataBinding.IsNullValueType = True
-            RepositoryItem = Tablo.repFileExtensionList
-            Options.Editing = False
-            Options.Focusing = False
-            Options.ShowCaption = False
-            Position.BeginsLayer = False
-            Position.Width = 25
-            IsCaptionAssigned = True
-          end
-          object GridYorumDBCardView1DOKUMANAD: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'DOKUMANAD'
-            DataBinding.IsNullValueType = True
-            Options.Editing = False
-            Options.Focusing = False
-            Options.ShowCaption = False
-            Position.BeginsLayer = False
-            Position.Width = 300
-            IsCaptionAssigned = True
-          end
-          object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'YORUM'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxRichEditProperties'
-            Options.Editing = False
-            Options.Focusing = False
-            Options.ShowCaption = False
-            Position.BeginsLayer = True
-            Styles.Content = Tablo.cxStyle12
-            Styles.CategoryRow = Tablo.cxStyle4
-          end
-        end
-        object GridYorumLevel1: TcxGridLevel
-          GridView = GridYorumDBCardView1
-        end
-      end
-    end
     object TabSheetKalibrasyon: TcxTabSheet
       Tag = 3
       Caption = 'Kalibrasyon'
-      ImageIndex = 2
+      ImageIndex = 19
       object ToolBar3: TToolBar
         Left = 0
         Top = 0
@@ -746,7 +595,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object TabSheetTakip: TcxTabSheet
       Tag = 4
       Caption = 'Takip / Uyar'#305
-      ImageIndex = 2
+      ImageIndex = 19
       object TreeListGorev: TcxDBTreeList
         Left = 0
         Top = 41
@@ -1218,7 +1067,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object TabSheetMasraflar: TcxTabSheet
       Tag = 6
       Caption = 'Masraflar'
-      ImageIndex = 4
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -1314,6 +1163,158 @@ object DemirbasListeDlg: TDemirbasListeDlg
         end
         object cxGridLevel2: TcxGridLevel
           GridView = MasrafGridView
+        end
+      end
+    end
+    object TabYorumMedya: TcxTabSheet
+      Tag = 5
+      Caption = 'Yorum/Medya'
+      ImageIndex = 38
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object Panel4: TPanel
+        Left = 0
+        Top = 159
+        Width = 1084
+        Height = 41
+        Align = alBottom
+        TabOrder = 0
+        object MemoChat: TcxRichEdit
+          Left = 1
+          Top = 1
+          Align = alClient
+          Properties.ScrollBars = ssVertical
+          TabOrder = 1
+          Height = 39
+          Width = 936
+        end
+        object BtnMesajGonder: TcxButton
+          Left = 937
+          Top = 1
+          Width = 85
+          Height = 39
+          Align = alRight
+          OptionsImage.ImageIndex = 39
+          OptionsImage.Images = Tablo.cxImageList1
+          TabOrder = 0
+          OnClick = BtnMesajGonderClick
+        end
+        object BtnDosyaGonder: TcxButton
+          Left = 1022
+          Top = 1
+          Width = 61
+          Height = 39
+          Align = alRight
+          DropDownMenu = YorumAtacMenu
+          Kind = cxbkDropDown
+          OptionsImage.ImageIndex = 38
+          OptionsImage.Images = Tablo.cxImageList1
+          TabOrder = 2
+        end
+      end
+      object labelFileName: TcxLabel
+        Left = 0
+        Top = 200
+        ParentCustomHint = False
+        Align = alBottom
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
+        Style.Edges = [bLeft, bRight]
+        Style.Font.Charset = TURKISH_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Trebuchet MS'
+        Style.Font.Style = []
+        Style.Shadow = False
+        Style.IsFontAssigned = True
+        Properties.Alignment.Horz = taRightJustify
+        Transparent = True
+        Visible = False
+        ExplicitTop = 199
+        AnchorX = 1084
+      end
+      object GridYorum: TcxGrid
+        Left = 0
+        Top = 0
+        Width = 1084
+        Height = 159
+        Align = alClient
+        TabOrder = 2
+        LookAndFeel.ScrollbarMode = sbmClassic
+        object GridYorumDBCardView1: TcxGridDBCardView
+          Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
+          OnCellDblClick = GridYorumDBCardView1CellDblClick
+          DataController.DataSource = DtsYorum
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          LayoutDirection = ldVertical
+          OptionsView.CardBorderWidth = 1
+          OptionsView.CardIndent = 2
+          OptionsView.CardWidth = 900
+          OptionsView.CategoryIndent = 1
+          OptionsView.CategorySeparatorWidth = 1
+          OptionsView.CellAutoHeight = True
+          OptionsView.CellTextMaxLineCount = 5
+          Styles.Content = Tablo.cxStyle6
+          Styles.CardBorder = Tablo.cxStyle19
+          object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
+            DataBinding.FieldName = 'EKLEMETARIHI'
+            DataBinding.IsNullValueType = True
+            Options.Editing = False
+            Options.Focusing = False
+            Options.ShowCaption = False
+            Position.BeginsLayer = True
+            Position.Width = 120
+          end
+          object GridYorumDBCardView1YAZAN: TcxGridDBCardViewRow
+            DataBinding.FieldName = 'YAZAN'
+            DataBinding.IsNullValueType = True
+            Options.Editing = False
+            Options.Focusing = False
+            Options.ShowCaption = False
+            Position.BeginsLayer = False
+          end
+          object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
+            DataBinding.FieldName = 'ATAC'
+            DataBinding.IsNullValueType = True
+            RepositoryItem = Tablo.repFileExtensionList
+            Options.Editing = False
+            Options.Focusing = False
+            Options.ShowCaption = False
+            Position.BeginsLayer = False
+            Position.Width = 25
+            IsCaptionAssigned = True
+          end
+          object GridYorumDBCardView1DOKUMANAD: TcxGridDBCardViewRow
+            DataBinding.FieldName = 'DOKUMANAD'
+            DataBinding.IsNullValueType = True
+            Options.Editing = False
+            Options.Focusing = False
+            Options.ShowCaption = False
+            Position.BeginsLayer = False
+            Position.Width = 300
+            IsCaptionAssigned = True
+          end
+          object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
+            DataBinding.FieldName = 'YORUM'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxRichEditProperties'
+            Options.Editing = False
+            Options.Focusing = False
+            Options.ShowCaption = False
+            Position.BeginsLayer = True
+            Styles.Content = Tablo.cxStyle12
+            Styles.CategoryRow = Tablo.cxStyle4
+          end
+        end
+        object GridYorumLevel1: TcxGridLevel
+          GridView = GridYorumDBCardView1
         end
       end
     end
@@ -1593,6 +1594,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Top = 129
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 375
     Top = 125
     object BaskiOnizlemeMenu: TMenuItem
@@ -2216,11 +2218,13 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Top = 198
   end
   object PopupDemirbasListe: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupDemirbasListePopup
     Left = 448
     Top = 96
     object DemirbasInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = DemirbasInfoMenuClick
     end
     object N4: TMenuItem
@@ -2230,6 +2234,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object KalibrasyonBilgisiGirMenu: TMenuItem
       Tag = -1
       Caption = 'Se'#231'ililere Kalibrasyon Bilgisi Gir'
+      ImageIndex = 30
       OnClick = KalibrasyonBilgisiGirMenuClick
     end
     object N5: TMenuItem
@@ -2239,14 +2244,17 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object TeknikServisAtaMenu: TMenuItem
       Tag = -1
       Caption = 'Taknik Servis '
+      ImageIndex = 7
       object TeknikServisSorumlusuAtaMenu: TMenuItem
         Tag = 335
         Caption = 'Sorumlusu Ata'
+        ImageIndex = 35
         OnClick = TeknikServisSorumlusuAtaMenuClick
       end
       object BilgilendirilecekAtaMenu: TMenuItem
         Tag = 337
         Caption = 'Bilgilendirilecek Ata'
+        ImageIndex = 17
         OnClick = TeknikServisSorumlusuAtaMenuClick
       end
     end
@@ -2257,6 +2265,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object Exceldenverial: TMenuItem
       Tag = -5
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenverialClick
     end
   end
@@ -2331,10 +2340,12 @@ object DemirbasListeDlg: TDemirbasListeDlg
       end>
   end
   object PopupMenuYeniTakip: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 169
     Top = 325
     object MenuItemTakipGorev: TMenuItem
       Caption = #304#351' / G'#246'rev'
+      ImageIndex = 19
       OnClick = MenuItemTakipGorevClick
     end
     object MenuItem2: TMenuItem
@@ -2342,9 +2353,11 @@ object DemirbasListeDlg: TDemirbasListeDlg
     end
     object MenuItemTakipDuyuru: TMenuItem
       Caption = 'Duyuru'
+      ImageIndex = 42
     end
   end
   object GorevlerMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724
@@ -2367,50 +2380,61 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Top = 244
     object DuzenleMenu: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
     end
     object TamamlandiIsaretleMenu: TMenuItem
       Caption = #304#351'aretliler Tamamland'#305' / Tamamlanmad'#305
+      ImageIndex = 23
     end
     object Bayraklaretle1: TMenuItem
       Caption = #304#351'aretliler  Bayrakl'#305' / Bayraks'#305'z'
+      ImageIndex = 31
     end
     object MenuItem3: TMenuItem
       Caption = '-'
     end
     object TarihBugunMenu: TMenuItem
       Caption = #304#351'aretlilerin Tarihi Bug'#252'n'
+      ImageIndex = 21
     end
     object arihYarn1: TMenuItem
       Tag = 1
       Caption = #304#351'aretlilerin Tarihi Yar'#305'n'
+      ImageIndex = 21
     end
     object TarihiKaldirMenu: TMenuItem
       Tag = -1
       Caption = #304#351'aretlilerin Tarihini Kald'#305'r'
+      ImageIndex = 24
     end
     object MenuItem5: TMenuItem
       Caption = '-'
     end
     object Atamayap1: TMenuItem
       Caption = #304#351'aretlilere Atama yap'
+      ImageIndex = 35
     end
     object MenuItem6: TMenuItem
       Caption = '-'
     end
     object BuiiEPostaGnder1: TMenuItem
       Caption = 'Bu i'#351'i E-Posta G'#246'nder'
+      ImageIndex = 17
     end
     object BuiYazdr1: TMenuItem
       Caption = 'Bu '#304#351'i Yazd'#305'r'
+      ImageIndex = 8
     end
     object MenuItem9: TMenuItem
       Caption = '-'
     end
     object IsiKopyalaMenu: TMenuItem
       Caption = #304#351'i Kopyala'
+      ImageIndex = 10
     end
     object IsiSilMenu: TMenuItem
       Caption = #304#351'i Sil'
+      ImageIndex = 1
     end
   end
   object TabGorevler: TFDQuery
@@ -2462,15 +2486,18 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Top = 244
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 728
     Top = 184
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -2478,14 +2505,17 @@ object DemirbasListeDlg: TDemirbasListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2675,10 +2705,12 @@ object DemirbasListeDlg: TDemirbasListeDlg
       end>
   end
   object PopupMasraflar: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 784
     Top = 392
     object BtnTahakkukEkle: TMenuItem
       Caption = 'Tahakkuk Ekle'
+      ImageIndex = 19
       OnClick = BtnTahakkukEkleClick
     end
     object N7: TMenuItem
@@ -2686,10 +2718,12 @@ object DemirbasListeDlg: TDemirbasListeDlg
     end
     object Dzenle1: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = Dzenle1Click
     end
     object Sil1: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = Sil1Click
     end
   end

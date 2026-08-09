@@ -16,6 +16,7 @@ object KareKodDlg: TKareKodDlg
   PixelsPerInch = 96
   TextHeight = 13
   object Pgizlem: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 835
@@ -29,7 +30,7 @@ object KareKodDlg: TKareKodDlg
     ClientRectTop = 24
     object TsKarekod: TcxTabSheet
       Caption = 'Karekod'
-      ImageIndex = 0
+      ImageIndex = 19
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0
@@ -266,7 +267,7 @@ object KareKodDlg: TKareKodDlg
         ClientRectTop = 24
         object shtKareKodGiris: TcxTabSheet
           Caption = 'KareKod Giri'#351
-          ImageIndex = 0
+          ImageIndex = 19
           ExplicitLeft = 2
           ExplicitTop = 25
           ExplicitWidth = 827
@@ -381,7 +382,7 @@ object KareKodDlg: TKareKodDlg
         end
         object shtKareKodDuzeltSil: TcxTabSheet
           Caption = 'KareKod '#199#305'k'#305#351' - D'#252'zeltme - Silme'
-          ImageIndex = 1
+          ImageIndex = 19
           ExplicitLeft = 2
           ExplicitTop = 25
           ExplicitWidth = 827
@@ -467,7 +468,7 @@ object KareKodDlg: TKareKodDlg
     end
     object TsSeriNo: TcxTabSheet
       Caption = 'Seri No'
-      ImageIndex = 1
+      ImageIndex = 19
       ExplicitTop = 0
       ExplicitWidth = 0
       ExplicitHeight = 0

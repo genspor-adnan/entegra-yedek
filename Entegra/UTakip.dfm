@@ -20,6 +20,7 @@ object TakipDlg: TTakipDlg
   PixelsPerInch = 96
   TextHeight = 13
   object Pgizlem: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 81
     Width = 898
@@ -34,7 +35,7 @@ object TakipDlg: TTakipDlg
     ClientRectTop = 25
     object TsKarekod: TcxTabSheet
       Caption = 'Karekod'
-      ImageIndex = 0
+      ImageIndex = 19
       object pgKareKod: TcxPageControl
         Left = 0
         Top = 0
@@ -50,7 +51,7 @@ object TakipDlg: TTakipDlg
         ClientRectTop = 25
         object shtKareKodGiris: TcxTabSheet
           Caption = 'Sat'#305'n Alma'
-          ImageIndex = 0
+          ImageIndex = 19
           object Panel2: TPanel
             Left = 0
             Top = 35
@@ -234,7 +235,7 @@ object TakipDlg: TTakipDlg
         end
         object shtKareKodDuzeltSil: TcxTabSheet
           Caption = 'D'#252'zeltme - Silme'
-          ImageIndex = 1
+          ImageIndex = 19
           object Panel1: TPanel
             Left = 0
             Top = 0
@@ -348,7 +349,7 @@ object TakipDlg: TTakipDlg
         end
         object TsUretimEkle: TcxTabSheet
           Caption = #220'retim Ekle'
-          ImageIndex = 2
+          ImageIndex = 19
           object Panel3: TPanel
             Left = 0
             Top = 0
@@ -777,7 +778,7 @@ object TakipDlg: TTakipDlg
         end
         object TsUretimDuzenleCikis: TcxTabSheet
           Caption = #199#305'k'#305#351' '
-          ImageIndex = 3
+          ImageIndex = 19
           object Panel12: TPanel
             Left = 0
             Top = 0
@@ -937,7 +938,7 @@ object TakipDlg: TTakipDlg
     end
     object TsSeriNo: TcxTabSheet
       Caption = 'Seri No'
-      ImageIndex = 1
+      ImageIndex = 19
       object pgSeriNo: TcxPageControl
         Left = 0
         Top = 0
@@ -954,7 +955,7 @@ object TakipDlg: TTakipDlg
         ClientRectTop = 25
         object shtSeriNoGiris: TcxTabSheet
           Caption = 'Seri No Giri'#351
-          ImageIndex = 0
+          ImageIndex = 19
           object memoSeriNolar: TcxMemo
             Left = 3
             Top = 24
@@ -993,7 +994,7 @@ object TakipDlg: TTakipDlg
         end
         object shtSeriNoDuzeltSil: TcxTabSheet
           Caption = 'Seri No D'#252'zeltme-Silme'
-          ImageIndex = 1
+          ImageIndex = 19
           object Panel5: TPanel
             Left = 0
             Top = 0

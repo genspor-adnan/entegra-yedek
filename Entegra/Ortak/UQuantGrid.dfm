@@ -195,35 +195,41 @@ object QuantGrid: TQuantGrid
     end
   end
   object pmSummary: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 240
     Top = 72
     object piSumF: TMenuItem
       Tag = 1
       Caption = 'Toplam'
+      ImageIndex = 44
       GroupIndex = 2
       RadioItem = True
     end
     object piMinF: TMenuItem
       Tag = 2
       Caption = 'En K'#252#231#252'k'
+      ImageIndex = 15
       GroupIndex = 2
       RadioItem = True
     end
     object piMaxF: TMenuItem
       Tag = 3
       Caption = 'En B'#252'y'#252'k'
+      ImageIndex = 15
       GroupIndex = 2
       RadioItem = True
     end
     object piCountF: TMenuItem
       Tag = 4
       Caption = 'Say'
+      ImageIndex = 15
       GroupIndex = 2
       RadioItem = True
     end
     object piAverageF: TMenuItem
       Tag = 5
       Caption = 'Ortalama'
+      ImageIndex = 15
       GroupIndex = 2
       RadioItem = True
     end
@@ -234,6 +240,7 @@ object QuantGrid: TQuantGrid
     end
     object GrubuKaldr1: TMenuItem
       Caption = 'Hi'#231'biri'
+      ImageIndex = 15
       GroupIndex = 2
     end
   end

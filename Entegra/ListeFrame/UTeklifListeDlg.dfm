@@ -473,6 +473,7 @@ object TeklifListeDlg: TTeklifListeDlg
     Control = cxPageControl1
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 233
     Width = 1174
@@ -487,7 +488,7 @@ object TeklifListeDlg: TTeklifListeDlg
     ClientRectTop = 27
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
-      ImageIndex = 0
+      ImageIndex = 22
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -777,7 +778,7 @@ object TeklifListeDlg: TTeklifListeDlg
     end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum/Medya'
-      ImageIndex = 2
+      ImageIndex = 38
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -985,6 +986,7 @@ object TeklifListeDlg: TTeklifListeDlg
     Top = 121
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 199
     Top = 56
     object BaskiOnizlemeMenu: TMenuItem
@@ -1244,15 +1246,18 @@ object TeklifListeDlg: TTeklifListeDlg
       end>
   end
   object PmSiparisedonustur: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PmSiparisedonusturPopup
     Left = 64
     Top = 72
     object TeklifInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = TeklifInfoMenuClick
     end
     object eklifiA1: TMenuItem
       Caption = 'Teklifi A'#231
+      ImageIndex = 4
       OnClick = eklifiA1Click
     end
     object N4: TMenuItem
@@ -1261,12 +1266,14 @@ object TeklifListeDlg: TTeklifListeDlg
     object AlnanSipariiA1: TMenuItem
       Tag = 413
       Caption = 'Al'#305'nan Sipari'#351'i A'#231
+      ImageIndex = 4
       Hint = '413'
       OnClick = AlnanSipariiA1Click
     end
     object VerilenSipariiA1: TMenuItem
       Tag = 412
       Caption = 'Verilen Sipari'#351'i A'#231
+      ImageIndex = 4
       Hint = '412'
       OnClick = VerilenSipariiA1Click
     end
@@ -1276,12 +1283,14 @@ object TeklifListeDlg: TTeklifListeDlg
     object pmAlinanSiparisedonustur: TMenuItem
       Tag = 19
       Caption = 'Al'#305'nan Sipari'#351'e D'#246'n'#252#351't'#252'r'
+      ImageIndex = 4
       Hint = '413'
       OnClick = pmAlinanSiparisedonusturClick
     end
     object pmVerilenSiparisedonustur: TMenuItem
       Tag = 9
       Caption = 'Verilen Sipari'#351'e D'#246'n'#252#351't'#252'r'
+      ImageIndex = 4
       Hint = '412'
       OnClick = pmAlinanSiparisedonusturClick
     end
@@ -1291,6 +1300,7 @@ object TeklifListeDlg: TTeklifListeDlg
     end
     object PmVerilenSiparisDetay: TMenuItem
       Caption = 'Verilen sipari'#351' detay tablosu'
+      ImageIndex = 22
       Visible = False
       OnClick = PmVerilenSiparisDetayClick
     end
@@ -1299,6 +1309,7 @@ object TeklifListeDlg: TTeklifListeDlg
     end
     object EPosta1: TMenuItem
       Caption = 'E-Posta olarak g'#246'nder'
+      ImageIndex = 17
       OnClick = btnEPostaClick
     end
   end
@@ -2472,15 +2483,18 @@ object TeklifListeDlg: TTeklifListeDlg
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -2488,14 +2502,17 @@ object TeklifListeDlg: TTeklifListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

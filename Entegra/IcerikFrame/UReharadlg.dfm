@@ -1,4 +1,4 @@
-﻿object RehberAraDlg: TRehberAraDlg
+object RehberAraDlg: TRehberAraDlg
   Left = 0
   Top = 0
   Width = 1044
@@ -600,6 +600,7 @@
     TabOrder = 4
     Properties.ActivePage = TabSheetIlet
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnChange = PageControlSekmeChange
     ClientRectBottom = 255
     ClientRectLeft = 4
@@ -607,17 +608,15 @@
     ClientRectTop = 27
     object TabSheetIlet: TcxTabSheet
       Caption = #304'leti'#351'im'
-      ImageIndex = 7
+      ImageIndex = 33
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 1030
-        Height = 41
+        Height = 24
         Margins.Bottom = 0
-        AutoSize = True
-        ButtonHeight = 39
-        ButtonWidth = 46
+        ButtonWidth = 66
         Caption = 'AletCubugu'
         Color = clTeal
         DockSite = True
@@ -634,6 +633,7 @@
         GradientStartColor = 14540253
         HotTrackColor = 65408
         Images = Tablo.PNGImageList2
+        List = True
         ParentColor = False
         ParentFont = False
         ShowCaptions = True
@@ -648,7 +648,7 @@
           OnClick = iletisimEkleClick
         end
         object iletisimSil: TToolButton
-          Left = 46
+          Left = 66
           Top = 0
           Caption = 'Sil'
           ImageIndex = 1
@@ -656,7 +656,7 @@
           OnClick = iletisimSilClick
         end
         object ToolButton14: TToolButton
-          Left = 92
+          Left = 132
           Top = 0
           Width = 8
           Caption = 'ToolButton14'
@@ -665,7 +665,7 @@
           Style = tbsSeparator
         end
         object iletisimDuzenle: TToolButton
-          Left = 100
+          Left = 140
           Top = 0
           Caption = 'D'#252'zenle'
           ImageIndex = 7
@@ -675,9 +675,9 @@
       end
       object cxGrid7: TcxGrid
         Left = 160
-        Top = 44
+        Top = 27
         Width = 691
-        Height = 184
+        Height = 201
         Align = alClient
         BevelEdges = []
         BevelInner = bvNone
@@ -757,9 +757,9 @@
       end
       object GridRehberIletisim: TcxGrid
         Left = 0
-        Top = 44
+        Top = 27
         Width = 160
-        Height = 184
+        Height = 201
         Align = alLeft
         PopupMenu = PopupIletisim
         TabOrder = 1
@@ -833,9 +833,9 @@
       end
       object PanelFiyatAltSag: TPanel
         Left = 851
-        Top = 44
+        Top = 27
         Width = 185
-        Height = 184
+        Height = 201
         Align = alRight
         Caption = 'PanelFiyatAltSag'
         TabOrder = 3
@@ -846,7 +846,6 @@
           Width = 177
           Height = 24
           Margins.Bottom = 0
-          AutoSize = True
           ButtonWidth = 75
           Caption = 'AletCubugu'
           Color = clTeal
@@ -912,7 +911,7 @@
           StyleFocused.BorderStyle = ebsNone
           TabOrder = 1
           OnClick = LogoResimClick
-          Height = 155
+          Height = 172
           Width = 183
         end
       end
@@ -924,14 +923,14 @@
       Font.Height = -12
       Font.Name = 'Trebuchet MS'
       Font.Style = []
-      ImageIndex = 6
+      ImageIndex = 35
       ParentFont = False
       PopupMenu = PopupIlgililer
       object cxGrid2: TcxGrid
         Left = 0
-        Top = 41
+        Top = 30
         Width = 459
-        Height = 187
+        Height = 198
         Align = alLeft
         TabOrder = 0
         LookAndFeel.Kind = lfOffice11
@@ -1025,16 +1024,16 @@
       end
       object Panel2: TPanel
         Left = 459
-        Top = 41
+        Top = 30
         Width = 577
-        Height = 187
+        Height = 198
         Align = alClient
         TabOrder = 1
         object GridPerIlet: TcxGrid
           Left = 1
           Top = 25
           Width = 352
-          Height = 161
+          Height = 172
           Align = alLeft
           BevelEdges = []
           BevelInner = bvNone
@@ -1151,7 +1150,7 @@
           Style.Color = clBtnFace
           Style.Edges = []
           TabOrder = 2
-          Height = 161
+          Height = 172
           Width = 223
         end
       end
@@ -1159,20 +1158,19 @@
         Left = 0
         Top = 0
         Width = 1036
-        Height = 41
+        Height = 26
         Align = alTop
         Caption = 'Panel9'
         TabOrder = 2
         object ToolBar2: TToolBar
+          ButtonHeight = 22
           Left = 1
           Top = 1
-          Width = 146
-          Height = 39
+          Width = 206
+          Height = 24
           Margins.Bottom = 0
           Align = alLeft
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
+          ButtonWidth = 66
           Caption = 'AletCubugu'
           Color = clTeal
           Ctl3D = False
@@ -1190,6 +1188,7 @@
           GradientStartColor = 14540253
           HotTrackColor = 65408
           Images = Tablo.PNGImageList2
+          List = True
           ParentColor = False
           ParentFont = False
           ShowCaptions = True
@@ -1204,7 +1203,7 @@
             OnClick = IlgiliEkleTusClick
           end
           object IlgiliSilTus: TToolButton
-            Left = 46
+            Left = 66
             Top = 0
             Caption = 'Sil'
             ImageIndex = 1
@@ -1212,7 +1211,7 @@
             OnClick = IlgiliSilTusClick
           end
           object ToolButton6: TToolButton
-            Left = 92
+            Left = 132
             Top = 0
             Width = 8
             Caption = 'ToolButton6'
@@ -1221,7 +1220,7 @@
             Style = tbsSeparator
           end
           object IlgiliDuzenleTus: TToolButton
-            Left = 100
+            Left = 140
             Top = 0
             Caption = 'D'#252'zenle'
             ImageIndex = 7
@@ -1230,10 +1229,10 @@
           end
         end
         object JvNavPanelHeader5: TJvNavPanelHeader
-          Left = 147
+          Left = 207
           Top = 1
-          Width = 888
-          Height = 39
+          Width = 828
+          Height = 28
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWhite
@@ -1245,13 +1244,14 @@
           ColorTo = 11776947
           ImageIndex = 0
           object IlgiliAraEdit: TcxTextEdit
+            Height = 17
             Left = 80
-            Top = 8
+            Top = 3
             ParentFont = False
             Properties.OnChange = IlgiliAraEditPropertiesChange
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clBlack
-            Style.Font.Height = -16
+            Style.Font.Height = -11
             Style.Font.Name = 'Arial'
             Style.Font.Style = [fsBold]
             Style.IsFontAssigned = True
@@ -1260,12 +1260,12 @@
           end
           object cxLabel3: TcxLabel
             Left = 21
-            Top = 9
+            Top = 4
             Caption = 'Ara'
             ParentFont = False
             Style.Font.Charset = TURKISH_CHARSET
             Style.Font.Color = clBlack
-            Style.Font.Height = -13
+            Style.Font.Height = -11
             Style.Font.Name = 'Trebuchet MS'
             Style.Font.Style = []
             Style.IsFontAssigned = True
@@ -1276,7 +1276,7 @@
     end
     object TabSheetTicari: TcxTabSheet
       Caption = 'Ticari Bilgiler'
-      ImageIndex = 9
+      ImageIndex = 11
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
@@ -1289,20 +1289,18 @@
         Properties.Style = 8
         ClientRectBottom = 228
         ClientRectRight = 1036
-        ClientRectTop = 22
+        ClientRectTop = 27
         object cxTabSheet1: TcxTabSheet
           Caption = 'Temel Bilgiler'
-          ImageIndex = 0
+          ImageIndex = 22
           object ToolBar7: TToolBar
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 1030
-            Height = 41
+            Height = 24
             Margins.Bottom = 0
-            AutoSize = True
-            ButtonHeight = 39
-            ButtonWidth = 79
+            ButtonWidth = 100
             Caption = 'AletCubugu'
             Color = clTeal
             DockSite = True
@@ -1319,6 +1317,7 @@
             GradientStartColor = 14540253
             HotTrackColor = 65408
             Images = Tablo.PNGImageList2
+            List = True
             ParentColor = False
             ParentFont = False
             ShowCaptions = True
@@ -1334,7 +1333,7 @@
               OnClick = TicariDuzenleTusClick
             end
             object ToolButton5: TToolButton
-              Left = 79
+              Left = 99
               Top = 0
               Width = 8
               Caption = 'ToolButton5'
@@ -1343,7 +1342,7 @@
               Style = tbsSeparator
             end
             object IskontoTus: TToolButton
-              Left = 87
+              Left = 107
               Top = 0
               Caption = #304'skonto'
               ImageIndex = 20
@@ -1351,7 +1350,7 @@
               OnClick = IskontoTusClick
             end
             object BtnKota: TToolButton
-              Left = 166
+              Left = 206
               Top = 0
               Caption = 'Risk Limiti'
               ImageIndex = 29
@@ -1361,9 +1360,9 @@
           end
           object GridTicari: TcxGrid
             Left = 0
-            Top = 44
+            Top = 27
             Width = 1036
-            Height = 162
+            Height = 174
             Align = alClient
             BevelEdges = []
             BevelInner = bvNone
@@ -1445,17 +1444,15 @@
         end
         object TabSheetEBelge: TcxTabSheet
           Caption = 'E-Belge Bilgileri'
-          ImageIndex = 2
+          ImageIndex = 19
           object ToolBar13: TToolBar
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 1030
-            Height = 41
+            Height = 24
             Margins.Bottom = 0
-            AutoSize = True
-            ButtonHeight = 39
-            ButtonWidth = 46
+            ButtonWidth = 66
             Caption = 'AletCubugu'
             Color = clTeal
             DockSite = True
@@ -1472,6 +1469,7 @@
             GradientStartColor = 14540253
             HotTrackColor = 65408
             Images = Tablo.PNGImageList2
+            List = True
             ParentColor = False
             ParentFont = False
             ShowCaptions = True
@@ -1486,7 +1484,7 @@
               OnClick = BankaEkleTusClick
             end
             object ToolButton19: TToolButton
-              Left = 46
+              Left = 66
               Top = 0
               Caption = 'Sil'
               ImageIndex = 1
@@ -1494,7 +1492,7 @@
               OnClick = BankaSilTusClick
             end
             object ToolButton20: TToolButton
-              Left = 92
+              Left = 132
               Top = 0
               Width = 8
               Caption = 'ToolButton10'
@@ -1503,7 +1501,7 @@
               Style = tbsSeparator
             end
             object ToolButton21: TToolButton
-              Left = 100
+              Left = 140
               Top = 0
               Caption = 'D'#252'zenle'
               ImageIndex = 7
@@ -1512,7 +1510,7 @@
               OnClick = BankaDuzenleTusClick
             end
             object ToolButton22: TToolButton
-              Left = 146
+              Left = 206
               Top = 0
               Caption = 'Kaydet'
               ImageIndex = 2
@@ -1521,7 +1519,7 @@
               OnClick = BtnKaydetBHClick
             end
             object ToolButton23: TToolButton
-              Left = 192
+              Left = 272
               Top = 0
               Caption = #304'ptal'
               ImageIndex = 3
@@ -1530,7 +1528,7 @@
               OnClick = BtnIptalBHClick
             end
             object cxLabel7: TcxLabel
-              Left = 238
+              Left = 338
               Top = 0
               Align = alClient
               Caption = '        Kurum Alias Bilgisi '
@@ -1555,9 +1553,9 @@
           end
           object GridAlias: TcxGrid
             Left = 0
-            Top = 44
+            Top = 27
             Width = 1036
-            Height = 121
+            Height = 133
             Align = alClient
             TabOrder = 1
             LookAndFeel.Kind = lfOffice11
@@ -1657,7 +1655,7 @@
           end
           object Panel10: TPanel
             Left = 0
-            Top = 165
+            Top = 160
             Width = 1036
             Height = 41
             Align = alBottom
@@ -1744,17 +1742,15 @@
         end
         object cxTabSheet3: TcxTabSheet
           Caption = 'Banka Bilgileri'
-          ImageIndex = 1
+          ImageIndex = 34
           object ToolBar3: TToolBar
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 1030
-            Height = 41
+            Height = 24
             Margins.Bottom = 0
-            AutoSize = True
-            ButtonHeight = 39
-            ButtonWidth = 46
+            ButtonWidth = 66
             Caption = 'AletCubugu'
             Color = clTeal
             DockSite = True
@@ -1771,6 +1767,7 @@
             GradientStartColor = 14540253
             HotTrackColor = 65408
             Images = Tablo.PNGImageList2
+            List = True
             ParentColor = False
             ParentFont = False
             ShowCaptions = True
@@ -1785,7 +1782,7 @@
               OnClick = BankaEkleTusClick
             end
             object BankaSilTus: TToolButton
-              Left = 46
+              Left = 66
               Top = 0
               Caption = 'Sil'
               ImageIndex = 1
@@ -1793,7 +1790,7 @@
               OnClick = BankaSilTusClick
             end
             object ToolButton10: TToolButton
-              Left = 92
+              Left = 132
               Top = 0
               Width = 8
               Caption = 'ToolButton10'
@@ -1802,7 +1799,7 @@
               Style = tbsSeparator
             end
             object BankaDuzenleTus: TToolButton
-              Left = 100
+              Left = 140
               Top = 0
               Caption = 'D'#252'zenle'
               ImageIndex = 7
@@ -1811,7 +1808,7 @@
               OnClick = BankaDuzenleTusClick
             end
             object BtnKaydetBH: TToolButton
-              Left = 146
+              Left = 206
               Top = 0
               Caption = 'Kaydet'
               ImageIndex = 2
@@ -1820,7 +1817,7 @@
               OnClick = BtnKaydetBHClick
             end
             object BtnIptalBH: TToolButton
-              Left = 192
+              Left = 272
               Top = 0
               Caption = #304'ptal'
               ImageIndex = 3
@@ -1831,9 +1828,9 @@
           end
           object GridBanka: TcxGrid
             Left = 0
-            Top = 44
+            Top = 27
             Width = 1036
-            Height = 162
+            Height = 174
             Align = alClient
             TabOrder = 1
             LookAndFeel.Kind = lfOffice11
@@ -1960,9 +1957,646 @@
         end
       end
     end
+    object TabSheetAlisSatis: TcxTabSheet
+      Caption = 'Al'#305#351'/Sat'#305#351
+      ImageIndex = 34
+      object PageControlAlisSatis: TcxPageControl
+        Left = 0
+        Top = 0
+        Width = 1036
+        Height = 228
+        Align = alClient
+        TabOrder = 0
+        Properties.ActivePage = TabSheetAlisSip
+        Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
+        Properties.Style = 8
+        OnChange = PageControlAlisSatisChange
+        ClientRectBottom = 228
+        ClientRectRight = 1036
+        ClientRectTop = 27
+        object TabSheetAlisSip: TcxTabSheet
+          Tag = 9
+          Caption = 'Al'#305#351' Sipari'#351
+          ImageIndex = 4
+          object GridCariBelge: TcxGrid
+            Left = 0
+            Top = 0
+            Width = 1036
+            Height = 201
+            Align = alClient
+            TabOrder = 0
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridCariBelgeView: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataSource = DtsCariBelge
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OnCanFocusRecord = GridCariBelgeViewCanFocusRecord
+              OptionsData.Deleting = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsView.ColumnAutoWidth = False
+              OptionsView.ScrollBars = ssBoth
+              OptionsView.GroupByBox = False
+              object GridCariBelgeViewTARIH: TcxGridDBColumn
+                Caption = 'Tarih'
+                DataBinding.FieldName = 'FATURATARIH'
+                DataBinding.IsNullValueType = True
+                Width = 110
+              end
+              object GridCariBelgeViewBELGENO: TcxGridDBColumn
+                Caption = 'Belge No'
+                DataBinding.FieldName = 'FATURANO'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridCariBelgeViewSERI: TcxGridDBColumn
+                Caption = 'Seri'
+                DataBinding.FieldName = 'FATURASERI'
+                DataBinding.IsNullValueType = True
+                Width = 60
+              end
+              object GridCariBelgeViewACIKLAMA: TcxGridDBColumn
+                Caption = 'A'#231#305'klama'
+                DataBinding.FieldName = 'ACIKLAMA'
+                DataBinding.IsNullValueType = True
+                Width = 160
+              end
+              object GridCariBelgeViewMATRAH: TcxGridDBColumn
+                Caption = 'Matrah'
+                DataBinding.FieldName = 'FATURA_MATRAHI'
+                DataBinding.IsNullValueType = True
+                Width = 100
+              end
+              object GridCariBelgeViewKDV: TcxGridDBColumn
+                Caption = 'KDV'
+                DataBinding.FieldName = 'KDV_TUTARI'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridCariBelgeViewTUTAR: TcxGridDBColumn
+                Caption = 'Tutar'
+                DataBinding.FieldName = 'FATURA_TUTARI'
+                DataBinding.IsNullValueType = True
+                Width = 110
+              end
+              object GridCariBelgeViewKUR: TcxGridDBColumn
+                Caption = 'Kur'
+                DataBinding.FieldName = 'KUR'
+                DataBinding.IsNullValueType = True
+                Width = 50
+              end
+              object GridCariBelgeViewVADE: TcxGridDBColumn
+                Caption = 'Vade'
+                DataBinding.FieldName = 'VADETARIH'
+                DataBinding.IsNullValueType = True
+                Width = 100
+              end
+              object GridCariBelgeViewKAYNAK: TcxGridDBColumn
+                Caption = 'Kaynak'
+                DataBinding.FieldName = 'DURUMNEREDEN'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridCariBelgeViewHEDEF: TcxGridDBColumn
+                Caption = 'Hedef'
+                DataBinding.FieldName = 'DURUMNEREYE'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridCariBelgeViewDEPO: TcxGridDBColumn
+                Caption = 'Depo'
+                DataBinding.FieldName = 'CIKISDEPOADI'
+                DataBinding.IsNullValueType = True
+                Width = 120
+              end
+            end
+            object GridCariBelgeLevel1: TcxGridLevel
+              GridView = GridCariBelgeView
+            end
+          end
+        end
+        object TabSheetAlisIrs: TcxTabSheet
+          Tag = 10
+          Caption = 'Al'#305#351' '#304'rsaliye'
+          ImageIndex = 19
+        end
+        object TabSheetAlisKons: TcxTabSheet
+          Tag = 109
+          Caption = 'Al'#305#351' Konsinye'
+          ImageIndex = 12
+        end
+        object TabSheetSatisSip: TcxTabSheet
+          Tag = 19
+          Caption = 'Sat'#305#351' Sipari'#351
+          ImageIndex = 4
+        end
+        object TabSheetSatisIrs: TcxTabSheet
+          Tag = 14
+          Caption = 'Sat'#305#351' '#304'rsaliye'
+          ImageIndex = 19
+        end
+        object TabSheetSatisKons: TcxTabSheet
+          Tag = 119
+          Caption = 'Sat'#305#351' Konsinye'
+          ImageIndex = 12
+        end
+      end
+    end
+    object TabSheetEkstre: TcxTabSheet
+      Caption = 'Ekstre'
+      ImageIndex = 32
+      object GridCariEkstre: TcxGrid
+        Left = 0
+        Top = 30
+        Width = 1036
+        Height = 198
+        Align = alClient
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Trebuchet MS'
+        Font.Style = []
+        ParentFont = False
+        PopupMenu = PMAksiyonlarMenu
+        TabOrder = 0
+        LookAndFeel.Kind = lfOffice11
+        LookAndFeel.NativeStyle = True
+        LookAndFeel.ScrollbarMode = sbmClassic
+        object GridCariEkstreView: TcxGridDBTableView
+          OnDblClick = AksiyonBilgisiniGorMenuClick
+          Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
+          OnCanFocusRecord = GridCariEkstreViewCanFocusRecord
+          DataController.DataModeController.SmartRefresh = True
+          DataController.DataSource = DtsCariListe
+          DataController.Options = [dcoAnsiSort, dcoGroupsAlwaysExpanded]
+          DataController.Summary.DefaultGroupSummaryItems = <
+            item
+              Format = ',0.00;(,0.00)'
+              Kind = skSum
+              Position = spFooter
+              Column = GridCariEkstreViewBORC
+            end
+            item
+              Format = ',0.00;(,0.00)'
+              Kind = skSum
+              Position = spFooter
+              Column = GridCariEkstreViewALACAK
+            end>
+          DataController.Summary.FooterSummaryItems = <
+            item
+              Format = ',0.00;(,0.00)'
+              Kind = skSum
+              FieldName = 'BORC'
+              Column = GridCariEkstreViewBORC
+            end
+            item
+              Format = ',0.00;(,0.00)'
+              Kind = skSum
+              FieldName = 'ALACAK'
+              Column = GridCariEkstreViewALACAK
+            end
+            item
+              Format = ',0.00;(,0.00)'
+              Column = GridCariEkstreViewBORCBAKIYE
+            end
+            item
+              Format = ',0.00;(,0.00)'
+              Column = GridCariEkstreViewALACAKBAKIYE
+            end>
+          DataController.Summary.SummaryGroups = <>
+          OptionsBehavior.FocusCellOnCycle = True
+          OptionsCustomize.ColumnsQuickCustomization = True
+          OptionsData.CancelOnExit = False
+          OptionsData.Deleting = False
+          OptionsData.DeletingConfirmation = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
+          OptionsSelection.CellSelect = False
+          OptionsSelection.MultiSelect = True
+          OptionsView.GroupByBox = False
+          OptionsView.GroupFooters = gfAlwaysVisible
+          OptionsView.Indicator = True
+          Styles.OnGetContentStyle = GridCariEkstreViewStylesGetContentStyle
+          object GridCariEkstreViewTARIH: TcxGridDBColumn
+            Caption = 'Kay'#305't'
+            DataBinding.FieldName = 'TARIH'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxDateEditProperties'
+            Properties.InputKind = ikRegExpr
+            Properties.Kind = ckDateTime
+            Width = 68
+          end
+          object GridCariEkstreViewAKSIYONTARIH: TcxGridDBColumn
+            Caption = 'Aksiyon/Vade'
+            DataBinding.FieldName = 'AKSIYONTARIH'
+            DataBinding.IsNullValueType = True
+            Width = 79
+          end
+          object GridCariEkstreViewNO: TcxGridDBColumn
+            Caption = 'No'
+            DataBinding.FieldName = 'NO'
+            DataBinding.IsNullValueType = True
+            Width = 49
+          end
+          object GridCariEkstreViewTUR: TcxGridDBColumn
+            Caption = 'T'#252'r'
+            DataBinding.FieldName = 'TUR'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxImageComboBoxProperties'
+            Properties.Items = <>
+            RepositoryItem = Tablo.RepKasaTurleri
+            Width = 53
+          end
+          object GridCariEkstreViewKOD: TcxGridDBColumn
+            Caption = 'Kod'
+            DataBinding.FieldName = 'KOD'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 77
+          end
+          object GridCariEkstreViewBASLIK: TcxGridDBColumn
+            Caption = 'Ba'#351'l'#305'k'
+            DataBinding.FieldName = 'BASLIK'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 90
+          end
+          object GridCariEkstreViewAD: TcxGridDBColumn
+            Caption = #220'nvan'
+            DataBinding.FieldName = 'AD'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 90
+          end
+          object GridCariEkstreViewACIKLAMA: TcxGridDBColumn
+            Caption = 'Notlar'
+            DataBinding.FieldName = 'ACIKLAMA'
+            DataBinding.IsNullValueType = True
+            BestFitMaxWidth = 80
+            Width = 128
+          end
+          object GridCariEkstreViewHESAPKODU: TcxGridDBColumn
+            Caption = 'Hesap Kodu'
+            DataBinding.FieldName = 'HESAPKODU'
+            DataBinding.IsNullValueType = True
+            Width = 64
+          end
+          object GridCariEkstreViewHESAPADI: TcxGridDBColumn
+            Caption = 'Hesap Ad'#305
+            DataBinding.FieldName = 'HESAPADI'
+            DataBinding.IsNullValueType = True
+            Width = 82
+          end
+          object GridCariEkstreViewADET: TcxGridDBColumn
+            Caption = 'Adet'
+            DataBinding.FieldName = 'ADET'
+            DataBinding.IsNullValueType = True
+            RepositoryItem = Tablo.RepCurrencyAdetGenel
+            Width = 32
+          end
+          object GridCariEkstreViewBIRIM: TcxGridDBColumn
+            Caption = 'Birim'
+            DataBinding.FieldName = 'BIRIM'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 47
+          end
+          object GridCariEkstreViewBIRIMFIYAT: TcxGridDBColumn
+            Caption = 'Birim Fiyat'
+            DataBinding.FieldName = 'BIRIMFIYAT'
+            DataBinding.IsNullValueType = True
+            RepositoryItem = Tablo.RepCurrencyBF
+            Visible = False
+            Width = 63
+          end
+          object GridCariEkstreViewBORC: TcxGridDBColumn
+            Caption = 'Bor'#231
+            DataBinding.FieldName = 'BORC'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+            RepositoryItem = Tablo.RepCurrencyGenel
+            Width = 56
+          end
+          object GridCariEkstreViewALACAK: TcxGridDBColumn
+            Caption = 'Alacak'
+            DataBinding.FieldName = 'ALACAK'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+            RepositoryItem = Tablo.RepCurrencyGenel
+            Width = 67
+          end
+          object GridCariEkstreViewBORCBAKIYE: TcxGridDBColumn
+            Caption = 'B.Bakiye'
+            DataBinding.FieldName = 'BORCBAKIYE'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+            RepositoryItem = Tablo.RepCurrencyGenel
+            Width = 54
+          end
+          object GridCariEkstreViewALACAKBAKIYE: TcxGridDBColumn
+            Caption = 'A.Bakiye'
+            DataBinding.FieldName = 'ALACAKBAKIYE'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+            RepositoryItem = Tablo.RepCurrencyGenel
+            Width = 56
+          end
+          object GridCariEkstreViewKUR: TcxGridDBColumn
+            Caption = 'Para Birimi'
+            DataBinding.FieldName = 'KUR'
+            DataBinding.IsNullValueType = True
+            GroupIndex = 0
+            Width = 76
+          end
+          object GridCariEkstreViewYERELKUR: TcxGridDBColumn
+            Caption = 'Kur'
+            DataBinding.FieldName = 'YERELKUR'
+            DataBinding.IsNullValueType = True
+          end
+          object GridCariEkstreViewYERELTUTAR: TcxGridDBColumn
+            Caption = 'Y.Tutar'
+            DataBinding.FieldName = 'YERELTUTAR'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+          end
+          object GridCariEkstreViewYERELBAKIYE: TcxGridDBColumn
+            Caption = 'Y.Bakiye'
+            DataBinding.FieldName = 'YERELBAKIYE'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = ',0.00;-,0.00'
+          end
+          object GridCariEkstreViewMASRAFKOD: TcxGridDBColumn
+            Caption = 'Masraf Kod'
+            DataBinding.FieldName = 'MASRAFKOD'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 83
+          end
+          object GridCariEkstreViewMASRAFAD: TcxGridDBColumn
+            Caption = 'Masraf Ad'
+            DataBinding.FieldName = 'MASRAFAD'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 120
+          end
+          object GridCariEkstreViewColumn1: TcxGridDBColumn
+            Caption = #350'ube'
+            DataBinding.FieldName = 'SUBEID'
+            DataBinding.IsNullValueType = True
+            RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
+            Visible = False
+          end
+          object GridCariEkstreViewColumn2: TcxGridDBColumn
+            Caption = 'Vade Tarihi'
+            DataBinding.FieldName = 'VADETARIHI'
+            DataBinding.IsNullValueType = True
+            Visible = False
+            Width = 67
+          end
+          object GridCariEkstreViewCEKID: TcxGridDBColumn
+            DataBinding.FieldName = 'CEKID'
+            DataBinding.IsNullValueType = True
+            Visible = False
+          end
+        end
+        object GridCariEkstreDBTableView1: TcxGridDBTableView
+          Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
+          DataController.DataModeController.SmartRefresh = True
+          DataController.DetailKeyFieldNames = 'CEKID'
+          DataController.MasterKeyFieldNames = 'CEKID'
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          OptionsView.GroupByBox = False
+          object GridCariEkstreDBTableView1DURUM: TcxGridDBColumn
+            DataBinding.FieldName = 'DURUM'
+            DataBinding.IsNullValueType = True
+            FooterAlignmentHorz = taRightJustify
+            GroupSummaryAlignment = taRightJustify
+            Width = 74
+          end
+          object GridCariEkstreDBTableView1VADE: TcxGridDBColumn
+            DataBinding.FieldName = 'VADE'
+            DataBinding.IsNullValueType = True
+            Width = 130
+          end
+          object GridCariEkstreDBTableView1SERINO: TcxGridDBColumn
+            DataBinding.FieldName = 'SERINO'
+            DataBinding.IsNullValueType = True
+            FooterAlignmentHorz = taRightJustify
+            GroupSummaryAlignment = taRightJustify
+            Width = 109
+          end
+          object GridCariEkstreDBTableView1HESAPADI: TcxGridDBColumn
+            DataBinding.FieldName = 'HESAPADI'
+            DataBinding.IsNullValueType = True
+            Width = 354
+          end
+          object GridCariEkstreDBTableView1Column1: TcxGridDBColumn
+            DataBinding.FieldName = 'CEKID'
+            DataBinding.IsNullValueType = True
+          end
+        end
+        object GridCariEkstreLevel1: TcxGridLevel
+          GridView = GridCariEkstreView
+        end
+      end
+      object Panel8: TPanel
+        Left = 0
+        Top = 0
+        Width = 1036
+        Height = 26
+        Align = alTop
+        Caption = 'Panel8'
+        TabOrder = 1
+        object ToolBar11: TToolBar
+          ButtonHeight = 22
+          Left = 1
+          Top = 1
+          Width = 140
+          Height = 24
+          Margins.Bottom = 0
+          Align = alLeft
+          ButtonWidth = 66
+          Caption = 'AletCubugu'
+          DockSite = True
+          DrawingStyle = dsGradient
+          EdgeInner = esNone
+          EdgeOuter = esNone
+          Font.Charset = TURKISH_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'Trebuchet MS'
+          Font.Style = []
+          GradientEndColor = 11776947
+          GradientStartColor = 14540253
+          Images = Tablo.PNGImageList2
+          List = True
+          ParentFont = False
+          ShowCaptions = True
+          TabOrder = 0
+          object EkstreSilTus: TToolButton
+            Left = 0
+            Top = 0
+            Hint = 'Aksiyon Sil'
+            Caption = 'Sil'
+            ImageIndex = 1
+            ImageName = 'PngImage1'
+            ParentShowHint = False
+            ShowHint = True
+            OnClick = Sil1Click
+          end
+          object EkstreDegisTus: TToolButton
+            Left = 66
+            Top = 0
+            Hint = 'Aksiyon D'#252'zenle'
+            Caption = 'D'#252'zenle'
+            ImageIndex = 7
+            ImageName = 'PngImage7'
+            ParentShowHint = False
+            ShowHint = True
+            OnClick = AksiyonBilgisiniGorMenuClick
+          end
+          object ToolButton1: TToolButton
+            Left = 132
+            Top = 0
+            Width = 8
+            Caption = 'ToolButton1'
+            ImageIndex = 17
+            ImageName = 'PngImage17'
+            Style = tbsSeparator
+          end
+        end
+        object JvNavPanelHeader4: TJvNavPanelHeader
+          Left = 141
+          Top = 1
+          Width = 894
+          Height = 28
+          Align = alClient
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWhite
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = [fsBold]
+          ParentFont = False
+          ColorFrom = 14540253
+          ColorTo = 11776947
+          ImageIndex = 0
+          object Label1: TcxLabel
+            Left = 3
+            Top = 4
+            Caption = 'Ba'#351'lama'
+            ParentFont = False
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.IsFontAssigned = True
+            Transparent = True
+            OnClick = Label1Click
+          end
+          object CalendarEkstreBas: TcxDateEdit
+            Height = 17
+            Left = 60
+            Top = 3
+            ParentFont = False
+            Properties.ImmediatePost = True
+            Properties.OnEditValueChanged = CalendarEkstreBasPropertiesEditValueChanged
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.IsFontAssigned = True
+            TabOrder = 1
+            Width = 121
+          end
+          object Label2: TcxLabel
+            Left = 187
+            Top = 4
+            Caption = 'Biti'#351
+            ParentFont = False
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.IsFontAssigned = True
+            Transparent = True
+          end
+          object CalendarEkstreBit: TcxDateEdit
+            Height = 17
+            Left = 223
+            Top = 3
+            ParentFont = False
+            Properties.ImmediatePost = True
+            Properties.OnEditValueChanged = CalendarEkstreBasPropertiesEditValueChanged
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.IsFontAssigned = True
+            TabOrder = 3
+            Width = 121
+          end
+          object CheckDetayli: TcxCheckBox
+            Height = 17
+            Left = 350
+            Top = 3
+            Caption = 'Detayl'#305' Ekstre G'#246'ster'
+            ParentFont = False
+            Properties.ImmediatePost = True
+            Properties.OnEditValueChanged = CheckDetayliPropertiesEditValueChanged
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.Shadow = False
+            Style.TransparentBorder = True
+            Style.IsFontAssigned = True
+            TabOrder = 4
+            Transparent = True
+          end
+          object CheckPlan: TcxCheckBox
+            Height = 17
+            Left = 510
+            Top = 3
+            Caption = 'Planlar'#305' G'#246'ster'
+            ParentFont = False
+            Properties.ImmediatePost = True
+            Properties.OnEditValueChanged = CheckDetayliPropertiesEditValueChanged
+            Style.Font.Charset = TURKISH_CHARSET
+            Style.Font.Color = clBlack
+            Style.Font.Height = -11
+            Style.Font.Name = 'Trebuchet MS'
+            Style.Font.Style = []
+            Style.Shadow = False
+            Style.TransparentBorder = True
+            Style.IsFontAssigned = True
+            TabOrder = 5
+            Transparent = True
+          end
+        end
+      end
+    end
     object TabSheetCRM: TcxTabSheet
       Caption = 'CRM'
-      ImageIndex = 10
+      ImageIndex = 36
       object PageControlCRM: TcxPageControl
         Left = 0
         Top = 0
@@ -1972,6 +2606,7 @@
         TabOrder = 0
         Properties.ActivePage = TabSheetGorev
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         Properties.Style = 8
         OnChange = PageControlCRMChange
         ClientRectBottom = 228
@@ -1979,12 +2614,12 @@
         ClientRectTop = 27
         object TabSheetGorev: TcxTabSheet
           Caption = #304#351' Listesi'
-          ImageIndex = 10
+          ImageIndex = 19
           object TreeListGorev: TcxDBTreeList
             Left = 0
-            Top = 41
+            Top = 30
             Width = 1036
-            Height = 187
+            Height = 171
             Align = alClient
             Bands = <
               item
@@ -2323,20 +2958,18 @@
             Left = 0
             Top = 0
             Width = 1036
-            Height = 41
+            Height = 30
             Align = alTop
             Caption = 'Panel9'
             TabOrder = 1
             object ToolBar6: TToolBar
               Left = 1
               Top = 1
-              Width = 146
-              Height = 39
+              Width = 206
+              Height = 28
               Margins.Bottom = 0
               Align = alLeft
-              AutoSize = True
-              ButtonHeight = 39
-              ButtonWidth = 46
+              ButtonWidth = 66
               Caption = 'AletCubugu'
               Color = clTeal
               Ctl3D = False
@@ -2354,6 +2987,7 @@
               GradientStartColor = 14540253
               HotTrackColor = 65408
               Images = Tablo.PNGImageList2
+              List = True
               ParentColor = False
               ParentFont = False
               ShowCaptions = True
@@ -2368,7 +3002,7 @@
                 OnClick = GorevEkleTusClick
               end
               object GorevSilTus: TToolButton
-                Left = 46
+                Left = 66
                 Top = 0
                 Caption = 'Sil'
                 ImageIndex = 1
@@ -2376,7 +3010,7 @@
                 OnClick = GorevSilTusClick
               end
               object ToolButton15: TToolButton
-                Left = 92
+                Left = 132
                 Top = 0
                 Width = 8
                 Caption = 'ToolButton6'
@@ -2385,7 +3019,7 @@
                 Style = tbsSeparator
               end
               object GorevDuzenleTus: TToolButton
-                Left = 100
+                Left = 140
                 Top = 0
                 Caption = 'D'#252'zenle'
                 ImageIndex = 7
@@ -2394,10 +3028,10 @@
               end
             end
             object JvNavPanelHeader1: TJvNavPanelHeader
-              Left = 147
+              Left = 207
               Top = 1
-              Width = 888
-              Height = 39
+              Width = 828
+              Height = 28
               Align = alClient
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWhite
@@ -2426,7 +3060,7 @@
               end
               object ComboTamamlanan: TcxImageComboBox
                 Left = 213
-                Top = 7
+                Top = 3
                 RepositoryItem = Tablo.RepGorevSonKac
                 Properties.Items = <>
                 Properties.OnEditValueChanged = CheckTamamlananClick
@@ -2440,25 +3074,23 @@
         end
         object TabSheetFirsat: TcxTabSheet
           Caption = 'Sat'#305#351' F'#305'rsatlar'#305
-          ImageIndex = 10
+          ImageIndex = 31
           object Panel7: TPanel
             Left = 0
             Top = 0
             Width = 1036
-            Height = 41
+            Height = 30
             Align = alTop
             Caption = 'Panel6'
             TabOrder = 0
             object ToolBar9: TToolBar
               Left = 1
               Top = 1
-              Width = 146
-              Height = 39
+              Width = 206
+              Height = 28
               Margins.Bottom = 0
               Align = alLeft
-              AutoSize = True
-              ButtonHeight = 39
-              ButtonWidth = 46
+              ButtonWidth = 66
               Caption = 'AletCubugu'
               Color = clTeal
               Ctl3D = False
@@ -2476,6 +3108,7 @@
               GradientStartColor = 14540253
               HotTrackColor = 65408
               Images = Tablo.PNGImageList2
+              List = True
               ParentColor = False
               ParentFont = False
               ShowCaptions = True
@@ -2490,7 +3123,7 @@
                 OnClick = FirsatEkleTusClick
               end
               object FirsatSilTus: TToolButton
-                Left = 46
+                Left = 66
                 Top = 0
                 Caption = 'Sil'
                 ImageIndex = 1
@@ -2498,7 +3131,7 @@
                 OnClick = FirsatSilTusClick
               end
               object ToolButton16: TToolButton
-                Left = 92
+                Left = 132
                 Top = 0
                 Width = 8
                 Caption = 'ToolButton7'
@@ -2507,7 +3140,7 @@
                 Style = tbsSeparator
               end
               object FirsatDuzenleTus: TToolButton
-                Left = 100
+                Left = 140
                 Top = 0
                 Caption = 'D'#252'zenle'
                 ImageIndex = 7
@@ -2516,10 +3149,10 @@
               end
             end
             object JvNavPanelHeader3: TJvNavPanelHeader
-              Left = 147
+              Left = 207
               Top = 1
-              Width = 888
-              Height = 39
+              Width = 828
+              Height = 28
               Align = alClient
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWhite
@@ -2552,9 +3185,9 @@
           end
           object GridFirsat: TcxGrid
             Left = 0
-            Top = 41
+            Top = 30
             Width = 1036
-            Height = 187
+            Height = 171
             Align = alClient
             PopupMenu = PmProjeAktKopyala
             TabOrder = 1
@@ -2689,27 +3322,27 @@
             Height = 89
             Color = clSilver
             Lines.Strings = (
-          
+              
                 'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
                 'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
-          
+              
                 'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
                 ',P.OLASILIK,P.APLIKASYON,'
-          
+              
                 'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
                 'eDurum.ANAHTAR PROJEDURUM'
               'from PROJELER P '
               #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
-          
+              
                 #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
                 'P.ILGILI'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
                 'D ProjeTuru.BOLUM =-2112'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
                 ' AND ProjeAsama.BOLUM =-2113'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
                 ' AND ProjeDurum.BOLUM =-2114'
               'WHERE '
@@ -2722,12 +3355,12 @@
         end
         object TabSheetProje: TcxTabSheet
           Caption = 'Projeler'
-          ImageIndex = 5
+          ImageIndex = 13
           object GridCariProjeler: TcxGrid
             Left = 0
-            Top = 41
+            Top = 30
             Width = 1036
-            Height = 187
+            Height = 171
             Align = alClient
             PopupMenu = PmProjeAktKopyala
             TabOrder = 0
@@ -2875,27 +3508,27 @@
             Height = 89
             Color = clSilver
             Lines.Strings = (
-          
+              
                 'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
                 'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
-          
+              
                 'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
                 ',P.OLASILIK,P.APLIKASYON,'
-          
+              
                 'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
                 'eDurum.ANAHTAR PROJEDURUM'
               'from PROJELER P '
               #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
-          
+              
                 #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
                 'P.ILGILI'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
                 'D ProjeTuru.BOLUM =-2132'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
                 ' AND ProjeAsama.BOLUM =-2133'
-          
+              
                 #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
                 ' AND ProjeDurum.BOLUM =-2134'
               'WHERE '
@@ -2910,20 +3543,18 @@
             Left = 0
             Top = 0
             Width = 1036
-            Height = 41
+            Height = 30
             Align = alTop
             Caption = 'Panel6'
             TabOrder = 2
             object ToolBar4: TToolBar
               Left = 1
               Top = 1
-              Width = 146
-              Height = 39
+              Width = 206
+              Height = 28
               Margins.Bottom = 0
               Align = alLeft
-              AutoSize = True
-              ButtonHeight = 39
-              ButtonWidth = 46
+              ButtonWidth = 66
               Caption = 'AletCubugu'
               Color = clTeal
               Ctl3D = False
@@ -2941,6 +3572,7 @@
               GradientStartColor = 14540253
               HotTrackColor = 65408
               Images = Tablo.PNGImageList2
+              List = True
               ParentColor = False
               ParentFont = False
               ShowCaptions = True
@@ -2955,7 +3587,7 @@
                 OnClick = ProjeEkleTusClick
               end
               object ProjeSilTus: TToolButton
-                Left = 46
+                Left = 66
                 Top = 0
                 Caption = 'Sil'
                 ImageIndex = 1
@@ -2963,7 +3595,7 @@
                 OnClick = ProjeSilTusClick
               end
               object ToolButton7: TToolButton
-                Left = 92
+                Left = 132
                 Top = 0
                 Width = 8
                 Caption = 'ToolButton7'
@@ -2972,7 +3604,7 @@
                 Style = tbsSeparator
               end
               object ProjeDuzenle: TToolButton
-                Left = 100
+                Left = 140
                 Top = 0
                 Caption = 'D'#252'zenle'
                 ImageIndex = 7
@@ -2981,10 +3613,10 @@
               end
             end
             object JvNavPanelHeader2: TJvNavPanelHeader
-              Left = 147
+              Left = 207
               Top = 1
-              Width = 888
-              Height = 39
+              Width = 828
+              Height = 28
               Align = alClient
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWhite
@@ -3020,17 +3652,15 @@
     end
     object TabSheetTeklifler: TcxTabSheet
       Caption = 'Teklif'
-      ImageIndex = 6
+      ImageIndex = 4
       object ToolBar12: TToolBar
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 1030
-        Height = 41
+        Height = 24
         Margins.Bottom = 0
-        AutoSize = True
-        ButtonHeight = 39
-        ButtonWidth = 46
+        ButtonWidth = 66
         Caption = 'AletCubugu'
         Color = clTeal
         DockSite = True
@@ -3047,6 +3677,7 @@
         GradientStartColor = 14540253
         HotTrackColor = 65408
         Images = Tablo.PNGImageList2
+        List = True
         ParentColor = False
         ParentFont = False
         ShowCaptions = True
@@ -3061,7 +3692,7 @@
           OnClick = TeklifEkleClick
         end
         object TeklifSil: TToolButton
-          Left = 46
+          Left = 66
           Top = 0
           Caption = 'Sil'
           ImageIndex = 1
@@ -3069,7 +3700,7 @@
           OnClick = TeklifSilClick
         end
         object ToolButton12: TToolButton
-          Left = 92
+          Left = 132
           Top = 0
           Width = 8
           Caption = 'ToolButton7'
@@ -3078,7 +3709,7 @@
           Style = tbsSeparator
         end
         object TeklifDuzenle: TToolButton
-          Left = 100
+          Left = 140
           Top = 0
           Caption = 'D'#252'zenle'
           ImageIndex = 7
@@ -3088,9 +3719,9 @@
       end
       object GridTeklif: TcxGrid
         Left = 0
-        Top = 44
+        Top = 27
         Width = 1036
-        Height = 184
+        Height = 201
         Align = alClient
         TabOrder = 1
         LookAndFeel.Kind = lfOffice11
@@ -3221,7 +3852,7 @@
     end
     object TabSheetYaslandirma: TcxTabSheet
       Caption = 'Ya'#351'land'#305'rma'
-      ImageIndex = 7
+      ImageIndex = 21
       object GridYaslandir: TcxGrid
         Left = 0
         Top = 33
@@ -3408,25 +4039,100 @@
         TabOrder = 0
       end
     end
-    object TabSheetEkipman: TcxTabSheet
-      Caption = 'Ekipman'
-      ImageIndex = 9
-      object PageControlEkipman: TcxPageControl
+    object TabSheetServisAna: TcxTabSheet
+      Caption = 'Servis'
+      ImageIndex = 7
+      object PageControlServis: TcxPageControl
         Left = 0
         Top = 0
         Width = 1036
         Height = 228
         Align = alClient
         TabOrder = 0
-        Properties.ActivePage = SheetBizimEkipman
+        Properties.ActivePage = TabSheetServisListe
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         Properties.Style = 8
+        OnChange = PageControlServisChange
         ClientRectBottom = 228
         ClientRectRight = 1036
         ClientRectTop = 27
+        object TabSheetServisListe: TcxTabSheet
+          Caption = 'Servis'
+          ImageIndex = 7
+          object GridCariServis: TcxGrid
+            Left = 0
+            Top = 0
+            Width = 1036
+            Height = 201
+            Align = alClient
+            TabOrder = 0
+            object GridCariServisView: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataSource = DtsCariServis
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.Deleting = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsView.ColumnAutoWidth = True
+              OptionsView.GroupByBox = False
+              object GridCariServisViewSERVISNO: TcxGridDBColumn
+                Caption = 'Servis No'
+                DataBinding.FieldName = 'SERVISNO'
+                DataBinding.IsNullValueType = True
+                Width = 90
+              end
+              object GridCariServisViewDURUM: TcxGridDBColumn
+                Caption = 'Durum'
+                DataBinding.FieldName = 'DURUM'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <>
+                RepositoryItem = Tablo.repServisDurum
+                Width = 80
+              end
+              object GridCariServisViewBASLAMA: TcxGridDBColumn
+                Caption = 'Ba'#351'lama'
+                DataBinding.FieldName = 'BASLAMATARIHI'
+                DataBinding.IsNullValueType = True
+                Width = 110
+              end
+              object GridCariServisViewBITIS: TcxGridDBColumn
+                Caption = 'Biti'#351
+                DataBinding.FieldName = 'BITISTARIHI'
+                DataBinding.IsNullValueType = True
+                Width = 110
+              end
+              object GridCariServisViewKONUSU: TcxGridDBColumn
+                Caption = 'Konu'
+                DataBinding.FieldName = 'KONUSU'
+                DataBinding.IsNullValueType = True
+                Width = 220
+              end
+              object GridCariServisViewSERINO: TcxGridDBColumn
+                Caption = 'Seri No'
+                DataBinding.FieldName = 'SERINO'
+                DataBinding.IsNullValueType = True
+                Width = 100
+              end
+              object GridCariServisViewNOTLAR: TcxGridDBColumn
+                Caption = 'Notlar'
+                DataBinding.FieldName = 'NOTLAR'
+                DataBinding.IsNullValueType = True
+                Width = 200
+              end
+            end
+            object GridCariServisLevel1: TcxGridLevel
+              GridView = GridCariServisView
+            end
+          end
+        end
         object SheetBizimEkipman: TcxTabSheet
-          Caption = 'Ekipmanlar'
-          ImageIndex = 0
+          Caption = 'M'#252#351'teri Ekipman'
+          ImageIndex = 12
           object ToolBarEkipmanDetay: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -3434,7 +4140,6 @@
             Width = 1030
             Height = 24
             Margins.Bottom = 0
-            AutoSize = True
             ButtonWidth = 66
             Caption = 'AletCubugu'
             Color = clBtnFace
@@ -3875,8 +4580,8 @@
           end
         end
         object SheetRakipEkipman: TcxTabSheet
-          Caption = 'Rakip Ekipmanlar'
-          ImageIndex = 1
+          Caption = 'Rakip Ekipman'
+          ImageIndex = 13
           object ToolBar8: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -3884,7 +4589,6 @@
             Width = 1030
             Height = 24
             Margins.Bottom = 0
-            AutoSize = True
             ButtonWidth = 62
             Caption = 'AletCubugu'
             Color = clBtnFace
@@ -4026,493 +4730,9 @@
         end
       end
     end
-    object TabSheetEkstre: TcxTabSheet
-      Caption = 'Ekstre'
-      ImageIndex = 7
-      object GridCariEkstre: TcxGrid
-        Left = 0
-        Top = 41
-        Width = 1036
-        Height = 187
-        Align = alClient
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Trebuchet MS'
-        Font.Style = []
-        ParentFont = False
-        PopupMenu = PMAksiyonlarMenu
-        TabOrder = 0
-        LookAndFeel.Kind = lfOffice11
-        LookAndFeel.NativeStyle = True
-        LookAndFeel.ScrollbarMode = sbmClassic
-        object GridCariEkstreView: TcxGridDBTableView
-          OnDblClick = AksiyonBilgisiniGorMenuClick
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          OnCanFocusRecord = GridCariEkstreViewCanFocusRecord
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DataSource = DtsCariListe
-          DataController.Options = [dcoAnsiSort, dcoGroupsAlwaysExpanded]
-          DataController.Summary.DefaultGroupSummaryItems = <
-            item
-              Format = ',0.00;(,0.00)'
-              Kind = skSum
-              Position = spFooter
-              Column = GridCariEkstreViewBORC
-            end
-            item
-              Format = ',0.00;(,0.00)'
-              Kind = skSum
-              Position = spFooter
-              Column = GridCariEkstreViewALACAK
-            end>
-          DataController.Summary.FooterSummaryItems = <
-            item
-              Format = ',0.00;(,0.00)'
-              Kind = skSum
-              FieldName = 'BORC'
-              Column = GridCariEkstreViewBORC
-            end
-            item
-              Format = ',0.00;(,0.00)'
-              Kind = skSum
-              FieldName = 'ALACAK'
-              Column = GridCariEkstreViewALACAK
-            end
-            item
-              Format = ',0.00;(,0.00)'
-              Column = GridCariEkstreViewBORCBAKIYE
-            end
-            item
-              Format = ',0.00;(,0.00)'
-              Column = GridCariEkstreViewALACAKBAKIYE
-            end>
-          DataController.Summary.SummaryGroups = <>
-          OptionsBehavior.FocusCellOnCycle = True
-          OptionsCustomize.ColumnsQuickCustomization = True
-          OptionsData.CancelOnExit = False
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsSelection.CellSelect = False
-          OptionsSelection.MultiSelect = True
-          OptionsView.GroupByBox = False
-          OptionsView.GroupFooters = gfAlwaysVisible
-          OptionsView.Indicator = True
-          Styles.OnGetContentStyle = GridCariEkstreViewStylesGetContentStyle
-          object GridCariEkstreViewTARIH: TcxGridDBColumn
-            Caption = 'Kay'#305't'
-            DataBinding.FieldName = 'TARIH'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxDateEditProperties'
-            Properties.InputKind = ikRegExpr
-            Properties.Kind = ckDateTime
-            Width = 68
-          end
-          object GridCariEkstreViewAKSIYONTARIH: TcxGridDBColumn
-            Caption = 'Aksiyon/Vade'
-            DataBinding.FieldName = 'AKSIYONTARIH'
-            DataBinding.IsNullValueType = True
-            Width = 79
-          end
-          object GridCariEkstreViewNO: TcxGridDBColumn
-            Caption = 'No'
-            DataBinding.FieldName = 'NO'
-            DataBinding.IsNullValueType = True
-            Width = 49
-          end
-          object GridCariEkstreViewTUR: TcxGridDBColumn
-            Caption = 'T'#252'r'
-            DataBinding.FieldName = 'TUR'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxImageComboBoxProperties'
-            Properties.Items = <>
-            RepositoryItem = Tablo.RepKasaTurleri
-            Width = 53
-          end
-          object GridCariEkstreViewKOD: TcxGridDBColumn
-            Caption = 'Kod'
-            DataBinding.FieldName = 'KOD'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 77
-          end
-          object GridCariEkstreViewBASLIK: TcxGridDBColumn
-            Caption = 'Ba'#351'l'#305'k'
-            DataBinding.FieldName = 'BASLIK'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 90
-          end
-          object GridCariEkstreViewAD: TcxGridDBColumn
-            Caption = #220'nvan'
-            DataBinding.FieldName = 'AD'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 90
-          end
-          object GridCariEkstreViewACIKLAMA: TcxGridDBColumn
-            Caption = 'Notlar'
-            DataBinding.FieldName = 'ACIKLAMA'
-            DataBinding.IsNullValueType = True
-            BestFitMaxWidth = 80
-            Width = 128
-          end
-          object GridCariEkstreViewHESAPKODU: TcxGridDBColumn
-            Caption = 'Hesap Kodu'
-            DataBinding.FieldName = 'HESAPKODU'
-            DataBinding.IsNullValueType = True
-            Width = 64
-          end
-          object GridCariEkstreViewHESAPADI: TcxGridDBColumn
-            Caption = 'Hesap Ad'#305
-            DataBinding.FieldName = 'HESAPADI'
-            DataBinding.IsNullValueType = True
-            Width = 82
-          end
-          object GridCariEkstreViewADET: TcxGridDBColumn
-            Caption = 'Adet'
-            DataBinding.FieldName = 'ADET'
-            DataBinding.IsNullValueType = True
-            RepositoryItem = Tablo.RepCurrencyAdetGenel
-            Width = 32
-          end
-          object GridCariEkstreViewBIRIM: TcxGridDBColumn
-            Caption = 'Birim'
-            DataBinding.FieldName = 'BIRIM'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 47
-          end
-          object GridCariEkstreViewBIRIMFIYAT: TcxGridDBColumn
-            Caption = 'Birim Fiyat'
-            DataBinding.FieldName = 'BIRIMFIYAT'
-            DataBinding.IsNullValueType = True
-            RepositoryItem = Tablo.RepCurrencyBF
-            Visible = False
-            Width = 63
-          end
-          object GridCariEkstreViewBORC: TcxGridDBColumn
-            Caption = 'Bor'#231
-            DataBinding.FieldName = 'BORC'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-            RepositoryItem = Tablo.RepCurrencyGenel
-            Width = 56
-          end
-          object GridCariEkstreViewALACAK: TcxGridDBColumn
-            Caption = 'Alacak'
-            DataBinding.FieldName = 'ALACAK'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-            RepositoryItem = Tablo.RepCurrencyGenel
-            Width = 67
-          end
-          object GridCariEkstreViewBORCBAKIYE: TcxGridDBColumn
-            Caption = 'B.Bakiye'
-            DataBinding.FieldName = 'BORCBAKIYE'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-            RepositoryItem = Tablo.RepCurrencyGenel
-            Width = 54
-          end
-          object GridCariEkstreViewALACAKBAKIYE: TcxGridDBColumn
-            Caption = 'A.Bakiye'
-            DataBinding.FieldName = 'ALACAKBAKIYE'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-            RepositoryItem = Tablo.RepCurrencyGenel
-            Width = 56
-          end
-          object GridCariEkstreViewKUR: TcxGridDBColumn
-            Caption = 'Para Birimi'
-            DataBinding.FieldName = 'KUR'
-            DataBinding.IsNullValueType = True
-            GroupIndex = 0
-            Width = 76
-          end
-          object GridCariEkstreViewYERELKUR: TcxGridDBColumn
-            Caption = 'Kur'
-            DataBinding.FieldName = 'YERELKUR'
-            DataBinding.IsNullValueType = True
-          end
-          object GridCariEkstreViewYERELTUTAR: TcxGridDBColumn
-            Caption = 'Y.Tutar'
-            DataBinding.FieldName = 'YERELTUTAR'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-          end
-          object GridCariEkstreViewYERELBAKIYE: TcxGridDBColumn
-            Caption = 'Y.Bakiye'
-            DataBinding.FieldName = 'YERELBAKIYE'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;-,0.00'
-          end
-          object GridCariEkstreViewMASRAFKOD: TcxGridDBColumn
-            Caption = 'Masraf Kod'
-            DataBinding.FieldName = 'MASRAFKOD'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 83
-          end
-          object GridCariEkstreViewMASRAFAD: TcxGridDBColumn
-            Caption = 'Masraf Ad'
-            DataBinding.FieldName = 'MASRAFAD'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 120
-          end
-          object GridCariEkstreViewColumn1: TcxGridDBColumn
-            Caption = #350'ube'
-            DataBinding.FieldName = 'SUBEID'
-            DataBinding.IsNullValueType = True
-            RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
-            Visible = False
-          end
-          object GridCariEkstreViewColumn2: TcxGridDBColumn
-            Caption = 'Vade Tarihi'
-            DataBinding.FieldName = 'VADETARIHI'
-            DataBinding.IsNullValueType = True
-            Visible = False
-            Width = 67
-          end
-          object GridCariEkstreViewCEKID: TcxGridDBColumn
-            DataBinding.FieldName = 'CEKID'
-            DataBinding.IsNullValueType = True
-            Visible = False
-          end
-        end
-        object GridCariEkstreDBTableView1: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DetailKeyFieldNames = 'CEKID'
-          DataController.MasterKeyFieldNames = 'CEKID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsView.GroupByBox = False
-          object GridCariEkstreDBTableView1DURUM: TcxGridDBColumn
-            DataBinding.FieldName = 'DURUM'
-            DataBinding.IsNullValueType = True
-            FooterAlignmentHorz = taRightJustify
-            GroupSummaryAlignment = taRightJustify
-            Width = 74
-          end
-          object GridCariEkstreDBTableView1VADE: TcxGridDBColumn
-            DataBinding.FieldName = 'VADE'
-            DataBinding.IsNullValueType = True
-            Width = 130
-          end
-          object GridCariEkstreDBTableView1SERINO: TcxGridDBColumn
-            DataBinding.FieldName = 'SERINO'
-            DataBinding.IsNullValueType = True
-            FooterAlignmentHorz = taRightJustify
-            GroupSummaryAlignment = taRightJustify
-            Width = 109
-          end
-          object GridCariEkstreDBTableView1HESAPADI: TcxGridDBColumn
-            DataBinding.FieldName = 'HESAPADI'
-            DataBinding.IsNullValueType = True
-            Width = 354
-          end
-          object GridCariEkstreDBTableView1Column1: TcxGridDBColumn
-            DataBinding.FieldName = 'CEKID'
-            DataBinding.IsNullValueType = True
-          end
-        end
-        object GridCariEkstreLevel1: TcxGridLevel
-          GridView = GridCariEkstreView
-        end
-      end
-      object Panel8: TPanel
-        Left = 0
-        Top = 0
-        Width = 1036
-        Height = 41
-        Align = alTop
-        Caption = 'Panel8'
-        TabOrder = 1
-        object ToolBar11: TToolBar
-          Left = 1
-          Top = 1
-          Width = 100
-          Height = 39
-          Margins.Bottom = 0
-          Align = alLeft
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
-          Caption = 'AletCubugu'
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeInner = esNone
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          Images = Tablo.PNGImageList2
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          object EkstreSilTus: TToolButton
-            Left = 0
-            Top = 0
-            Hint = 'Aksiyon Sil'
-            Caption = 'Sil'
-            ImageIndex = 1
-            ImageName = 'PngImage1'
-            ParentShowHint = False
-            ShowHint = True
-            OnClick = Sil1Click
-          end
-          object EkstreDegisTus: TToolButton
-            Left = 46
-            Top = 0
-            Hint = 'Aksiyon D'#252'zenle'
-            Caption = 'D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            ParentShowHint = False
-            ShowHint = True
-            OnClick = AksiyonBilgisiniGorMenuClick
-          end
-          object ToolButton1: TToolButton
-            Left = 92
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton1'
-            ImageIndex = 17
-            ImageName = 'PngImage17'
-            Style = tbsSeparator
-          end
-        end
-        object JvNavPanelHeader4: TJvNavPanelHeader
-          Left = 101
-          Top = 1
-          Width = 934
-          Height = 39
-          Align = alClient
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWhite
-          Font.Height = -16
-          Font.Name = 'Arial'
-          Font.Style = [fsBold]
-          ParentFont = False
-          ColorFrom = 14540253
-          ColorTo = 11776947
-          ImageIndex = 0
-          object Label1: TcxLabel
-            Left = 3
-            Top = 8
-            Caption = 'Ba'#351'lama'
-            ParentFont = False
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
-            Transparent = True
-            OnClick = Label1Click
-          end
-          object CalendarEkstreBas: TcxDateEdit
-            Left = 60
-            Top = 6
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.OnEditValueChanged = CalendarEkstreBasPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
-            TabOrder = 1
-            Width = 121
-          end
-          object Label2: TcxLabel
-            Left = 187
-            Top = 8
-            Caption = 'Biti'#351
-            ParentFont = False
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
-            Transparent = True
-          end
-          object CalendarEkstreBit: TcxDateEdit
-            Left = 223
-            Top = 8
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.OnEditValueChanged = CalendarEkstreBasPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
-            TabOrder = 3
-            Width = 121
-          end
-          object CheckDetayli: TcxCheckBox
-            Left = 350
-            Top = -1
-            Caption = 'Detayl'#305' Ekstre G'#246'ster'
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.OnEditValueChanged = CheckDetayliPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.Shadow = False
-            Style.TransparentBorder = True
-            Style.IsFontAssigned = True
-            TabOrder = 4
-            Transparent = True
-          end
-          object CheckPlan: TcxCheckBox
-            Left = 350
-            Top = 16
-            Caption = 'Planlar'#305' G'#246'ster'
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.OnEditValueChanged = CheckDetayliPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.Shadow = False
-            Style.TransparentBorder = True
-            Style.IsFontAssigned = True
-            TabOrder = 5
-            Transparent = True
-          end
-        end
-      end
-    end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum/Medya'
-      ImageIndex = 10
+      ImageIndex = 38
       object Panel4: TPanel
         Left = 0
         Top = 167
@@ -5370,8 +5590,8 @@
         'where YERI= 1  and YER_ID=(select top 1 ID from REHBERILETISIM w' +
         'here REHBERID =  :UstId)   '
       'order by 1   ')
-    Left = 251
-    Top = 243
+    Left = 171
+    Top = 203
     ParamData = <
       item
         Name = 'UstId'
@@ -5570,6 +5790,7 @@
     Top = 174
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 13
     Top = 189
     object BaskiOnizlemeMenu: TMenuItem
@@ -5675,12 +5896,14 @@
     Top = 254
   end
   object PopupMenuREHBER: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupMenuREHBERPopup
-    Left = 65
-    Top = 58
+    Left = 41
+    Top = 50
     object info1: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = info1Click
     end
     object N11: TMenuItem
@@ -5688,14 +5911,17 @@
     end
     object EkleMenu: TMenuItem
       Caption = 'Yeni'
+      ImageIndex = 0
       OnClick = YeniTusClick
     end
     object SilMenu: TMenuItem
       Caption = 'Sil'
+      ImageIndex = 1
       OnClick = SilTusClick
     end
     object GorMenu: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = DegisTusClick
     end
     object MenuItem1: TMenuItem
@@ -5703,6 +5929,7 @@
     end
     object BorcAlacakKapamaMenu: TMenuItem
       Caption = 'Bor'#231'/Alacak Kapama'
+      ImageIndex = 23
       OnClick = FaturaKapatma1Click
     end
     object N18: TMenuItem
@@ -5711,11 +5938,13 @@
     object AcilisiFisiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 4
       OnClick = AcilisiFisiMenuClick
     end
     object DevirFisiMenu: TMenuItem
       Tag = 2
       Caption = 'Devir Fi'#351'i Gir'
+      ImageIndex = 19
       OnClick = AcilisiFisiMenuClick
     end
     object N21: TMenuItem
@@ -5723,10 +5952,12 @@
     end
     object PotansiyelListesineGnderMenu: TMenuItem
       Caption = 'Potansiyel Listesine G'#246'nder'
+      ImageIndex = 31
       OnClick = PotansiyelListesineGonderMenuClick
     end
     object MusteriListesineGonderMenu: TMenuItem
       Caption = 'M'#252#351'teri Listesine G'#246'nder'
+      ImageIndex = 28
       OnClick = MusteriListesineEkleMenuClick
     end
     object N19: TMenuItem
@@ -5734,65 +5965,79 @@
     end
     object ExceldenVeriAlMenu: TMenuItem
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAlMenuClick
     end
     object ExcelKolonAyarlar1: TMenuItem
       Caption = 'Excel Kolon Ayarlar'#305
+      ImageIndex = 11
       Visible = False
       OnClick = ExcelKolonAyarlar1Click
     end
   end
   object PopupMenuYeni: TPopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupMenuYeniPopup
     Left = 107
     Top = 190
     object MusteriListesineEkleMenu: TMenuItem
       Caption = 'Cari Listesine G'#246'nder'
+      ImageIndex = 18
       OnClick = MusteriListesineEkleMenuClick
     end
     object AlisBelgesiMenu: TMenuItem
       Caption = 'Al'#305#351' Belgesi'
+      ImageIndex = 19
       object Fatura1: TMenuItem
         Tag = 11
         Caption = 'Fatura'
+        ImageIndex = 19
         object FaturaAlisMenu: TMenuItem
           Tag = 111
           Caption = 'Al'#305#351' '
+          ImageIndex = 19
           OnClick = Fatura1Click
         end
         object ade1: TMenuItem
           Tag = 112
           Caption = #304'ade'
+          ImageIndex = 3
           OnClick = Fatura1Click
         end
         object FiyatFark1: TMenuItem
           Tag = 113
           Caption = 'Fiyat Fark'#305
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object SerbestMeslekMekabuzu1: TMenuItem
           Tag = 114
           Caption = 'Stopaj'
+          ImageIndex = 34
           object SerbestMeslekMakbuzuMenu: TMenuItem
             Tag = 4
             Caption = 'Serbest Meslek Makbuzu'
+            ImageIndex = 19
             OnClick = Fatura1Click
           end
           object KiraMenu: TMenuItem
             Tag = 7
             Caption = 'Kira'
+            ImageIndex = 34
             OnClick = Fatura1Click
           end
           object GiderPusulasiMenu: TMenuItem
             Tag = 8
             Caption = 'Gider Pusulas'#305
+            ImageIndex = 19
             OnClick = Fatura1Click
           end
         end
         object KurFark1: TMenuItem
           Tag = 115
           Caption = 'Kur Fark'#305
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object AlisCizgiMenu: TMenuItem
@@ -5801,17 +6046,20 @@
         object AlisEFaturaMenu: TMenuItem
           Tag = -111
           Caption = 'E-Fatura'
+          ImageIndex = 19
           OnClick = Fatura1Click
         end
       end
       object Fi1: TMenuItem
         Tag = 12
         Caption = 'Fi'#351
+        ImageIndex = 4
         OnClick = Fatura1Click
       end
       object rsaliye1: TMenuItem
         Tag = 10
         Caption = #304'rsaliye'
+        ImageIndex = 19
         OnClick = Fatura1Click
       end
       object N5: TMenuItem
@@ -5820,37 +6068,45 @@
       object ahakkuk1: TMenuItem
         Tag = 13
         Caption = 'Tahakkuk'
+        ImageIndex = 19
         OnClick = Fatura1Click
       end
       object Sipari2: TMenuItem
         Tag = 9
         Caption = 'Sipari'#351
+        ImageIndex = 4
         OnClick = Fatura1Click
       end
     end
     object SatisBelgesiMenu: TMenuItem
       Caption = 'Sat'#305#351' belgesi'
+      ImageIndex = 19
       object Fatura2: TMenuItem
         Tag = 15
         Caption = 'Fatura'
+        ImageIndex = 19
         object FaturaSatisMenu: TMenuItem
           Tag = 151
           Caption = 'Sat'#305#351
+          ImageIndex = 19
           OnClick = Fatura1Click
         end
         object ade2: TMenuItem
           Tag = 152
           Caption = #304'ade'
+          ImageIndex = 3
           OnClick = Fatura1Click
         end
         object FiyatFark2: TMenuItem
           Tag = 153
           Caption = 'Fiyat Fark'#305
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object KurFark2: TMenuItem
           Tag = 155
           Caption = 'Kur Fark'#305
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object SatisCizgiMenu: TMenuItem
@@ -5859,17 +6115,20 @@
         object SatisEFaturaMenu: TMenuItem
           Tag = -151
           Caption = 'E-Fatura'
+          ImageIndex = 19
           OnClick = Fatura1Click
         end
       end
       object Fi2: TMenuItem
         Tag = 16
         Caption = 'Fi'#351
+        ImageIndex = 4
         OnClick = Fatura1Click
       end
       object rsaliye2: TMenuItem
         Tag = 14
         Caption = #304'rsaliye'
+        ImageIndex = 19
         OnClick = Fatura1Click
       end
       object N6: TMenuItem
@@ -5878,21 +6137,25 @@
       object ahakkuk2: TMenuItem
         Tag = 17
         Caption = 'Tahakkuk'
+        ImageIndex = 19
         OnClick = Fatura1Click
       end
       object Sipari1: TMenuItem
         Tag = 19
         Caption = 'Sipari'#351
+        ImageIndex = 4
         OnClick = Fatura1Click
       end
     end
     object AcilisFisiGirMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
+      ImageIndex = 4
       OnClick = AcilisiFisiMenuClick
     end
     object MutabakatKaydiEkleMenu: TMenuItem
       Caption = 'Mutabakat Kayd'#305' Ekle'
+      ImageIndex = 0
       OnClick = MutabakatKaydiEkleMenuClick
     end
     object MenuItem4: TMenuItem
@@ -5900,111 +6163,135 @@
     end
     object CariTahsilatMenu: TMenuItem
       Caption = 'Cari Tahsilat'
+      ImageIndex = 1
       object Nakit1: TMenuItem
         Tag = 21
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object HavaleEFT1: TMenuItem
         Tag = 22
         Caption = 'Havale / EFT'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object POSTahsilMenu: TMenuItem
         Tag = 25
         Caption = 'POS'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object KrediKartndanade1: TMenuItem
         Tag = 350
         Caption = 'Kredi Kart'#305'na '#304'ade'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object CekTahsilMenu: TMenuItem
         Tag = 101
         Caption = #199'ek'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object SenetTahsilMenu: TMenuItem
         Tag = 121
         Caption = 'Senet'
+        ImageIndex = 34
         object SenetCokluPlanlamaMenu: TMenuItem
           Tag = 161
           Caption = #199'oklu Planlama'
+          ImageIndex = 21
           OnClick = Fatura1Click
         end
         object TekSenetEkranMenu: TMenuItem
           Tag = 121
           Caption = 'Tek Senet Ekran'#305
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
       end
       object Dier1: TMenuItem
         Caption = 'Di'#287'er'
+        ImageIndex = 32
         object Hediyeeki1: TMenuItem
           Tag = 28
           Caption = 'Hediye '#199'eki'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object adeeki1: TMenuItem
           Tag = 29
           Caption = #304'ade '#199'eki'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object Kupon1: TMenuItem
           Tag = 26
           Caption = 'Kupon'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
       end
     end
     object CariOdemeMenu: TMenuItem
       Caption = 'Cari '#214'deme'
+      ImageIndex = 34
       object Nakit2: TMenuItem
         Tag = 31
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object HavaleEFT2: TMenuItem
         Tag = 32
         Caption = 'Havale / EFT'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object KrediKartiOdeMenu: TMenuItem
         Tag = 35
         Caption = 'Kredi Kart'#305
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object POSOdeMenu: TMenuItem
         Tag = 125
         Caption = 'POS'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object CekOdeMenu: TMenuItem
         Tag = 103
         Caption = #199'ek'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object SenetOdeMenu: TMenuItem
         Tag = 321
         Caption = 'Senet'
+        ImageIndex = 34
         OnClick = Fatura1Click
       end
       object Dier2: TMenuItem
         Caption = 'Di'#287'er'
+        ImageIndex = 32
         object Hediyeeki2: TMenuItem
           Tag = 38
           Caption = 'Hediye '#199'eki'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object adeeki2: TMenuItem
           Tag = 39
           Caption = #304'ade '#199'eki'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
         object Kupon2: TMenuItem
           Tag = 36
           Caption = 'Kupon'
+          ImageIndex = 34
           OnClick = Fatura1Click
         end
       end
@@ -6012,6 +6299,7 @@
     object CarilerArasTransfer1: TMenuItem
       Tag = 49
       Caption = 'Cariler Aras'#305' Transfer'
+      ImageIndex = 34
       OnClick = Fatura1Click
     end
     object MenuItem2: TMenuItem
@@ -6019,33 +6307,40 @@
     end
     object MasrafOdemeMenu: TMenuItem
       Caption = 'Masraf '#214'deme'
+      ImageIndex = 34
       object MasrafNakitMenu: TMenuItem
         Tag = 31
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = MasrafNakitMenuClick
       end
       object HavaleEFT4: TMenuItem
         Tag = 32
         Caption = 'Havale / EFT'
+        ImageIndex = 34
         OnClick = MasrafNakitMenuClick
       end
       object KrediKart1: TMenuItem
         Tag = 35
         Caption = 'Kredi Kart'#305
+        ImageIndex = 34
         OnClick = MasrafNakitMenuClick
       end
     end
     object GelirTahsilatMenu: TMenuItem
       Caption = 'Gelir Tahsilat'
+      ImageIndex = 1
       object Nakit5: TMenuItem
         Tag = 21
         Break = mbBarBreak
         Caption = 'Nakit'
+        ImageIndex = 34
         OnClick = MasrafNakitMenuClick
       end
       object HavaleEFT5: TMenuItem
         Tag = 22
         Caption = 'Havale / EFT'
+        ImageIndex = 34
         OnClick = MasrafNakitMenuClick
       end
     end
@@ -6055,11 +6350,13 @@
     object TahsilatPlanMenu: TMenuItem
       Tag = 61
       Caption = 'Tahsilat Plan'#305
+      ImageIndex = 1
       OnClick = Fatura1Click
     end
     object OdemePlanMenu: TMenuItem
       Tag = 71
       Caption = #214'deme Plan'#305
+      ImageIndex = 34
       OnClick = Fatura1Click
     end
     object N20: TMenuItem
@@ -6067,6 +6364,7 @@
     end
     object PotansiyelListesineGonderMenu: TMenuItem
       Caption = 'Potansiyel Listesine G'#246'nder'
+      ImageIndex = 18
       OnClick = PotansiyelListesineGonderMenuClick
     end
   end
@@ -6105,8 +6403,8 @@
         '                      REHBER AS R ON R.ID = D.ZIMMETLIPERSONELID' +
         ' '
       'where D.ZIMMETLIPERSONELID=:P1')
-    Left = 437
-    Top = 283
+    Left = 541
+    Top = 227
     ParamData = <
       item
         Name = 'P1'
@@ -6122,15 +6420,18 @@
     Top = 323
   end
   object PMAksiyonlarMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PMAksiyonlarMenuPopup
     Left = 331
     Top = 372
     object Sil1: TMenuItem
       Caption = 'Aksiyon Sil'
+      ImageIndex = 1
       OnClick = Sil1Click
     end
     object AksiyonBilgisiniGorMenu: TMenuItem
       Caption = 'Aksiyon Bilgisini G'#246'r'
+      ImageIndex = 22
       OnClick = AksiyonBilgisiniGorMenuClick
     end
     object N13: TMenuItem
@@ -6138,6 +6439,7 @@
     end
     object OdemeTahsilatYapMenu: TMenuItem
       Caption = #214'deme / Tahsilat Yap'
+      ImageIndex = 34
       OnClick = OdemeTahsilatYapMenuClick
     end
     object N17: TMenuItem
@@ -6145,6 +6447,7 @@
     end
     object ExceldenAksiyonAktar1: TMenuItem
       Caption = 'Excelden Tahakkuk '#304#231'eri Al'
+      ImageIndex = 32
       OnClick = ExceldenAksiyonAktar1Click
     end
     object N4: TMenuItem
@@ -6153,11 +6456,13 @@
     object KurFarkGeliri1: TMenuItem
       Tag = 88
       Caption = 'Kur Fark'#305' Geliri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object KurFarkGideri1: TMenuItem
       Tag = 98
       Caption = 'Kur Fark'#305' Gideri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object N9: TMenuItem
@@ -6165,6 +6470,7 @@
     end
     object Kopyala2: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala2Click
     end
     object N14: TMenuItem
@@ -6172,14 +6478,17 @@
     end
     object iadeAl: TMenuItem
       Caption = #304'ade Al'
+      ImageIndex = 3
       object Faturaile1: TMenuItem
         Tag = 2
         Caption = 'Fatura ile'
+        ImageIndex = 19
         OnClick = Faturaile1Click
       end
       object GiderPusulasile1: TMenuItem
         Tag = 5
         Caption = 'Gider Pusulas'#305' ile'
+        ImageIndex = 19
         OnClick = Faturaile1Click
       end
     end
@@ -6214,21 +6523,24 @@
     Top = 378
   end
   object PopupIlgililer: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 79
     Top = 252
     object lgiliKurumdanAyrld1: TMenuItem
       Tag = 3
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak i'#351'aretle'
-      ImageIndex = 10
+      ImageIndex = 24
       OnClick = lgiliKurumdanAyrld1Click
     end
     object DurumuSfrla1: TMenuItem
       Tag = 1
       Caption = #304'lgilinin durumunu bo'#351' olarak i'#351'aretle '
+      ImageIndex = 3
       OnClick = lgiliKurumdanAyrld1Click
     end
     object Varsaylan1: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
       OnClick = Varsaylan1Click
     end
     object N12: TMenuItem
@@ -6236,6 +6548,7 @@
     end
     object lgiliyiKopyala1: TMenuItem
       Caption = #304'lgiliyi Kopyala'
+      ImageIndex = 10
       OnClick = lgiliyiKopyala1Click
     end
     object N7: TMenuItem
@@ -6243,10 +6556,12 @@
     end
     object ifreOlutur1: TMenuItem
       Caption = #350'ifre Olu'#351'tur'
+      ImageIndex = 0
       OnClick = ifreOlutur1Click
     end
     object SifreyiEpostaAt: TMenuItem
       Caption = #350'ifreyi EPosta ile g'#246'nder'
+      ImageIndex = 17
       OnClick = SifreyiEpostaAtClick
     end
     object N8: TMenuItem
@@ -6254,10 +6569,12 @@
     end
   end
   object PmProjeAktKopyala: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 143
     Top = 240
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
   end
@@ -6310,6 +6627,26 @@
   object OpenDialog1: TOpenDialog
     Left = 647
     Top = 128
+  end
+  object TabCariBelge: TFDQuery
+    Connection = Tablo.FDCnn
+    Left = 764
+    Top = 240
+  end
+  object DtsCariBelge: TDataSource
+    DataSet = TabCariBelge
+    Left = 764
+    Top = 288
+  end
+  object TabCariServis: TFDQuery
+    Connection = Tablo.FDCnn
+    Left = 700
+    Top = 240
+  end
+  object DtsCariServis: TDataSource
+    DataSet = TabCariServis
+    Left = 760
+    Top = 240
   end
   object TabEkipmanlar: TFDQuery
     AfterPost = TabEkipmanlarAfterPost
@@ -6416,10 +6753,12 @@
     Top = 277
   end
   object PopupIletisim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 243
     Top = 360
     object letiimaddeitir1: TMenuItem
       Caption = #304'leti'#351'im ad'#305' de'#287'i'#351'tir'
+      ImageIndex = 30
       OnClick = letiimaddeitir1Click
     end
     object N10: TMenuItem
@@ -6427,6 +6766,7 @@
     end
     object VarsaylanYap1: TMenuItem
       Caption = 'Varsay'#305'lan Yap'
+      ImageIndex = 23
       OnClick = VarsaylanYap1Click
     end
   end
@@ -6485,10 +6825,12 @@
     Top = 234
   end
   object PopupMenuEkipman: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 957
     Top = 281
     object EkimanKopyalaMenu: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = EkimanKopyalaMenuClick
     end
     object N16: TMenuItem
@@ -6496,6 +6838,7 @@
     end
     object BaskacariyekopyalaMenu: TMenuItem
       Caption = 'Ba'#351'ka cariye kopyala'
+      ImageIndex = 10
       OnClick = EkimanKopyalaMenuClick
     end
   end
@@ -6597,6 +6940,7 @@
     Top = 104
   end
   object GorevlerMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724
@@ -6615,18 +6959,21 @@
     Appearance.FontColor = 7214336
     Appearance.FontDisabledColor = 14599640
     Style = msDefault
-    Left = 248
-    Top = 264
+    Left = 264
+    Top = 232
     object DuzenleMenu: TMenuItem
       Caption = 'D'#252'zenle'
+      ImageIndex = 7
       OnClick = DuzenleMenuClick
     end
     object TamamlandiIsaretleMenu: TMenuItem
       Caption = #304#351'aretliler Tamamland'#305' / Tamamlanmad'#305
+      ImageIndex = 23
       OnClick = TamamlandiIsaretleMenuClick
     end
     object Bayraklaretle1: TMenuItem
       Caption = #304#351'aretliler  Bayrakl'#305' / Bayraks'#305'z'
+      ImageIndex = 31
       OnClick = Bayraklaretle1Click
     end
     object MenuItem3: TMenuItem
@@ -6634,39 +6981,47 @@
     end
     object TarihBugunMenu: TMenuItem
       Caption = #304#351'aretlilerin Tarihi Bug'#252'n'
+      ImageIndex = 21
     end
     object arihYarn1: TMenuItem
       Tag = 1
       Caption = #304#351'aretlilerin Tarihi Yar'#305'n'
+      ImageIndex = 21
     end
     object TarihiKaldirMenu: TMenuItem
       Tag = -1
       Caption = #304#351'aretlilerin Tarihini Kald'#305'r'
+      ImageIndex = 1
     end
     object MenuItem5: TMenuItem
       Caption = '-'
     end
     object Atamayap1: TMenuItem
       Caption = #304#351'aretlilere Atama yap'
+      ImageIndex = 35
     end
     object MenuItem6: TMenuItem
       Caption = '-'
     end
     object BuiiEPostaGnder1: TMenuItem
       Caption = 'Bu i'#351'i E-Posta G'#246'nder'
+      ImageIndex = 17
     end
     object BuiYazdr1: TMenuItem
       Caption = 'Bu '#304#351'i Yazd'#305'r'
+      ImageIndex = 8
     end
     object MenuItem9: TMenuItem
       Caption = '-'
     end
     object IsiKopyalaMenu: TMenuItem
       Caption = #304#351'i Kopyala'
+      ImageIndex = 10
       OnClick = IsiKopyalaMenuClick
     end
     object IsiSilMenu: TMenuItem
       Caption = #304#351'i Sil'
+      ImageIndex = 1
       OnClick = IsiSilMenuClick
     end
   end
@@ -6709,15 +7064,18 @@
     Top = 428
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem7: TMenuItem
@@ -6725,14 +7083,17 @@
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -6792,8 +7153,8 @@
     Appearance.FontColor = 7214336
     Appearance.FontDisabledColor = 14599640
     Style = msDefault
-    Left = 383
-    Top = 308
+    Left = 327
+    Top = 324
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0

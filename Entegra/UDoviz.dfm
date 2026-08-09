@@ -350,10 +350,12 @@ object DovizDlg: TDovizDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 272
     Top = 99
     object KurGetirMenu: TMenuItem
       Caption = 'Kurlar'#305' getir       '
+      ImageIndex = 15
       OnClick = KurGetirMenuClick
     end
     object N1: TMenuItem
@@ -361,6 +363,7 @@ object DovizDlg: TDovizDlg
     end
     object MBGuncelleMenu: TMenuItem
       Caption = 'MB'#39'dan G'#252'ncelle'
+      ImageIndex = 30
       OnClick = MBGuncelleMenuClick
     end
   end

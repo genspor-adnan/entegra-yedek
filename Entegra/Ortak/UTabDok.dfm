@@ -15,6 +15,7 @@ object TabloDokum: TTabloDokum
     Top = 8
   end
   object PopupListe: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupListePopup
     OfficeDesign = True
@@ -38,6 +39,7 @@ object TabloDokum: TTabloDokum
     Top = 120
   end
   object PopupSagTusMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupSagTusMenuPopup
     OfficeDesign = True
@@ -84,7 +86,7 @@ object TabloDokum: TTabloDokum
     object KopyalaYeni1: TMenuItem
       Caption = 'Kopyala'
       Hint = 'D'#246'k'#252'm'#252'n kopyas'#305'n'#305' olu'#351'turman'#305'za yard'#305'mc'#305' olur'
-      ImageIndex = 1
+      ImageIndex = 10
       OnClick = KopyalaYeni1Click
     end
     object AdDegistir: TMenuItem
@@ -96,7 +98,7 @@ object TabloDokum: TTabloDokum
     object Sil1: TMenuItem
       Caption = 'Sil'
       Hint = 'Bu d'#246'k'#252'm'#252' siler'
-      ImageIndex = 3
+      ImageIndex = 1
       OnClick = Sil1Click
     end
     object N1: TMenuItem
@@ -860,6 +862,7 @@ object TabloDokum: TTabloDokum
       000000000000}
   end
   object FastRepPopUpSagTusMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15465983
@@ -898,7 +901,7 @@ object TabloDokum: TTabloDokum
     object MenuItem6: TMenuItem
       Caption = 'Kopyala'
       Hint = 'D'#246'k'#252'm'#252'n kopyas'#305'n'#305' olu'#351'turman'#305'za yard'#305'mc'#305' olur'
-      ImageIndex = 1
+      ImageIndex = 10
     end
     object MenuItem7: TMenuItem
       Caption = 'Ad De'#287'i'#351'tir'
@@ -908,7 +911,7 @@ object TabloDokum: TTabloDokum
     object MenuItem8: TMenuItem
       Caption = 'Sil'
       Hint = 'Bu d'#246'k'#252'm'#252' siler'
-      ImageIndex = 3
+      ImageIndex = 1
     end
     object MenuItem9: TMenuItem
       Caption = '-'

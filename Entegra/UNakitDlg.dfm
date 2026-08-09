@@ -848,6 +848,7 @@ object NakitDlg: TNakitDlg
     Top = 277
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 437
     Top = 130
     object BaskiOnizlemeMenu: TMenuItem

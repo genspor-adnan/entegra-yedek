@@ -1,7 +1,7 @@
 ﻿unit UUretimListeDlg;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
-{ Tarih : 04/12/2010 11:54:17}
+{ Tarih :   04/12/2010 11:54:17}
 interface
 
 uses

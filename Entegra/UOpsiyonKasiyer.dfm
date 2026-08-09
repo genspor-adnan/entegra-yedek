@@ -17,6 +17,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
   PixelsPerInch = 96
   TextHeight = 13
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 580
@@ -32,7 +33,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     ClientRectTop = 25
     object cxTabSheet2: TcxTabSheet
       Caption = 'Genel'
-      ImageIndex = 1
+      ImageIndex = 11
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -268,7 +269,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
         ClientRectTop = 25
         object cxTabSheet3: TcxTabSheet
           Caption = 'Tahsilat T'#252'rleri'
-          ImageIndex = 0
+          ImageIndex = 34
           object CheckTahTurNakit: TcxCheckBox
             Left = 6
             Top = 3
@@ -344,7 +345,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
         end
         object cxTabSheet4: TcxTabSheet
           Caption = #214'deme T'#252'rleri'
-          ImageIndex = 1
+          ImageIndex = 34
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -396,7 +397,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
         end
         object cxTabSheet5: TcxTabSheet
           Caption = 'Belge T'#252'rleri'
-          ImageIndex = 2
+          ImageIndex = 19
           ExplicitTop = 0
           ExplicitWidth = 0
           ExplicitHeight = 0
@@ -543,7 +544,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TabSheetsatis: TcxTabSheet
       Caption = 'Sat'#305#351' Ekran'#305' '
-      ImageIndex = 4
+      ImageIndex = 19
       ExplicitLeft = 4
       ExplicitTop = 24
       ExplicitWidth = 572
@@ -958,7 +959,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TabSheetTahsilat: TcxTabSheet
       Caption = 'Tahsilat Ekran'#305
-      ImageIndex = 6
+      ImageIndex = 34
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -993,7 +994,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TsYazarkasa: TcxTabSheet
       Caption = 'Yazarkasa'
-      ImageIndex = 2
+      ImageIndex = 34
       object GrpBarkod: TcxGroupBox
         Left = 9
         Top = 133
@@ -1383,7 +1384,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TabSheetTerazi: TcxTabSheet
       Caption = 'Terazi'
-      ImageIndex = 3
+      ImageIndex = 19
       ExplicitLeft = 4
       ExplicitTop = 24
       ExplicitWidth = 572
@@ -1545,7 +1546,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TabSheetCafe: TcxTabSheet
       Caption = 'Cafe / Rest'
-      ImageIndex = 3
+      ImageIndex = 19
       ExplicitLeft = 4
       ExplicitTop = 24
       ExplicitWidth = 572
@@ -2027,7 +2028,7 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     end
     object TabSheetSecimler: TcxTabSheet
       Caption = 'Se'#231'imler'
-      ImageIndex = 5
+      ImageIndex = 19
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -2124,11 +2125,11 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
         ClientRectTop = 0
         object TabSheetTekli: TcxTabSheet
           Caption = 'Tekli Se'#231'im'
-          ImageIndex = 1
+          ImageIndex = 19
         end
         object TabSheetCoklu: TcxTabSheet
           Caption = #199'oklu Se'#231'im'
-          ImageIndex = 2
+          ImageIndex = 19
         end
       end
       object GridSecimDetay: TcxGrid
@@ -2479,11 +2480,12 @@ object OpsiyonKasiyerDlg: TOpsiyonKasiyerDlg
     Top = 151
   end
   object PopupSecim: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 264
     Top = 168
     object MenuKopyala: TMenuItem
       Caption = 'Kopyala'
-      ImageIndex = 4
+      ImageIndex = 10
       OnClick = MenuKopyalaClick
     end
   end

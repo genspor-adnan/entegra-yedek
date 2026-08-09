@@ -284,31 +284,37 @@ object DokumanYetki: TDokumanYetki
     Top = 85
   end
   object PopupMenuYetki: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 149
     Top = 238
     object TumKullanicilarMenu: TMenuItem
       Tag = 5
       Caption = 'T'#252'm Kullan'#305'c'#305'lar'
+      ImageIndex = 35
       OnClick = TumKullanicilarMenuClick
     end
     object SubeMenu: TMenuItem
       Tag = 4
       Caption = #350'ube'
+      ImageIndex = 13
       OnClick = SubeMenuClick
     end
     object DepartmanMenu: TMenuItem
       Tag = 3
       Caption = 'Departman'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
     object GorevMenu: TMenuItem
       Tag = 2
       Caption = 'G'#246'rev'
+      ImageIndex = 19
       OnClick = SubeMenuClick
     end
     object KisiMenu: TMenuItem
       Tag = 1
       Caption = 'Ki'#351'i'
+      ImageIndex = 35
       OnClick = SubeMenuClick
     end
   end

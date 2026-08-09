@@ -299,6 +299,7 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
       ExplicitHeight = 187
     end
     object PageControlKalite: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 200
       Top = 1
       Width = 675
@@ -316,7 +317,7 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
       ClientRectTop = 27
       object TabSheetKontrol: TcxTabSheet
         Caption = 'Kalite Kontrol'
-        ImageIndex = 0
+        ImageIndex = 19
         ExplicitHeight = 156
         object ToolBar1: TToolBar
           AlignWithMargins = True
@@ -510,7 +511,7 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
       end
       object TabSheetYorumMedya: TcxTabSheet
         Caption = 'Yorum/Medya'
-        ImageIndex = 1
+        ImageIndex = 38
         ExplicitHeight = 156
         object Panel1: TPanel
           Left = 0
@@ -649,6 +650,7 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 773
     Top = 443
     object BaskiOnizlemeMenu: TMenuItem
@@ -747,22 +749,26 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
     Top = 193
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenu1Popup
     Left = 423
     Top = 200
     object Kabul1: TMenuItem
       Tag = 1
       Caption = 'Kabul'
+      ImageIndex = 15
       OnClick = Kabul1Click
     end
     object Red1: TMenuItem
       Tag = 2
       Caption = 'Red'
+      ImageIndex = 15
       OnClick = Kabul1Click
     end
     object RedKabul1: TMenuItem
       Tag = 3
       Caption = 'Red / Onay'
+      ImageIndex = 23
       OnClick = Kabul1Click
     end
   end
@@ -834,15 +840,18 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
     Top = 400
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 832
     Top = 320
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem1: TMenuItem
@@ -850,14 +859,17 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -910,6 +922,7 @@ object KYKontrolListeDlg: TKYKontrolListeDlg
     Top = 46
   end
   object YorumAtacMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
     OwnerDraw = True
     OfficeDesign = True
     Appearance.Gradient1Start = 15722724

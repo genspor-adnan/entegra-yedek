@@ -79,6 +79,7 @@ object MesajDlg: TMesajDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 41
     Width = 33
@@ -91,10 +92,11 @@ object MesajDlg: TMesajDlg
     OnChange = PageControl1Change
     object TabSheetGelen: TTabSheet
       Caption = 'Gelen'
+      ImageIndex = 19
     end
     object TabSheetGiden: TTabSheet
       Caption = 'Giden'
-      ImageIndex = 1
+      ImageIndex = 19
     end
   end
   object Panel2: TPanel

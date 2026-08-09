@@ -391,10 +391,12 @@ object MesajlasmaDlg: TMesajlasmaDlg
     end
   end
   object MesajMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 477
     Top = 203
     object KonusmaGecmisiMenu: TMenuItem
       Caption = 'Konu'#351'ma Ge'#231'mi'#351'ini G'#246'ster'
+      ImageIndex = 19
     end
   end
   object DtsMesajKisiler: TDataSource

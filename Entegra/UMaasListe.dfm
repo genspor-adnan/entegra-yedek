@@ -412,14 +412,17 @@ object MaasListeDlg: TMaasListeDlg
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 125
     Top = 167
     object ExceldenBilgiekle1: TMenuItem
       Caption = 'Excelden Bilgi Al '
+      ImageIndex = 32
       OnClick = ExceldenBilgiekle1Click
     end
     object ExceleGnder1: TMenuItem
       Caption = 'Excele G'#246'nder'
+      ImageIndex = 32
       Visible = False
     end
     object AraCizgi1Menu: TMenuItem
@@ -427,10 +430,12 @@ object MaasListeDlg: TMaasListeDlg
     end
     object PrimOranlariMenu: TMenuItem
       Caption = 'Prim Oranlar'#305
+      ImageIndex = 15
       OnClick = PrimOranlariMenuClick
     end
     object PrimListesiMenu: TMenuItem
       Caption = 'Prim Listesi'
+      ImageIndex = 32
       OnClick = PrimListesiMenuClick
     end
   end

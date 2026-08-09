@@ -18,6 +18,7 @@ object KampanyalarDlg: TKampanyalarDlg
   PixelsPerInch = 96
   TextHeight = 16
   object PageCtrlDetaylar: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 228
     Width = 805
@@ -33,7 +34,7 @@ object KampanyalarDlg: TKampanyalarDlg
     ClientRectTop = 28
     object SheetUrunListe: TcxTabSheet
       Caption = #220'r'#252'n Kartlar'#305
-      ImageIndex = 1
+      ImageIndex = 12
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -142,7 +143,7 @@ object KampanyalarDlg: TKampanyalarDlg
     end
     object SheetCariListe: TcxTabSheet
       Caption = 'Cari Kartlar'
-      ImageIndex = 0
+      ImageIndex = 35
       object ToolBar5: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -257,7 +258,7 @@ object KampanyalarDlg: TKampanyalarDlg
     end
     object SheetKosullar: TcxTabSheet
       Caption = 'Ko'#351'ullar'
-      ImageIndex = 2
+      ImageIndex = 19
       OnExit = SheetKosullarExit
       object ToolBar2: TToolBar
         AlignWithMargins = True
@@ -355,7 +356,7 @@ object KampanyalarDlg: TKampanyalarDlg
     end
     object SheetSonuclar: TcxTabSheet
       Caption = 'Sonu'#231'lar'
-      ImageIndex = 3
+      ImageIndex = 19
       OnExit = SheetSonuclarExit
       object ToolBar4: TToolBar
         AlignWithMargins = True
@@ -849,10 +850,12 @@ object KampanyalarDlg: TKampanyalarDlg
     Top = 350
   end
   object PmKopyalama: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 449
     Top = 164
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
   end

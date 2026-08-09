@@ -266,7 +266,7 @@ object ServisEkipmanSecDlg: TServisEkipmanSecDlg
     ClientRectTop = 25
     object SheetRehberEkipman: TcxTabSheet
       Caption = 'Anla'#351'mal'#305'/Garantili Ekipmanlar'
-      ImageIndex = 4
+      ImageIndex = 12
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
@@ -427,7 +427,7 @@ object ServisEkipmanSecDlg: TServisEkipmanSecDlg
     end
     object SheetTumEkipmanlar: TcxTabSheet
       Caption = 'T'#252'm Ekipmanlar'
-      ImageIndex = 4
+      ImageIndex = 12
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0

@@ -151,6 +151,7 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     end
   end
   object cxPageControl1: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 692
@@ -165,7 +166,7 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     ClientRectTop = 24
     object SheetGenel: TcxTabSheet
       Caption = '    Genel    '
-      ImageIndex = 0
+      ImageIndex = 11
       object Label1: TLabel
         Left = 24
         Top = 205
@@ -397,7 +398,7 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     end
     object cxTabSheet1: TcxTabSheet
       Caption = 'Durum Ba'#287'lant'#305'lar'#305
-      ImageIndex = 1
+      ImageIndex = 19
       object GridDurumBaglanti: TcxGrid
         Left = 0
         Top = 37
@@ -556,7 +557,7 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     end
     object SheetMusteri: TcxTabSheet
       Caption = 'M'#252#351'teri Etkile'#351'imli'
-      ImageIndex = 2
+      ImageIndex = 35
       object ComboSenaryo: TcxImageComboBox
         Left = 9
         Top = 36
@@ -711,18 +712,22 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     Top = 160
   end
   object PopupDurumBglanti: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 48
     Top = 208
     object ServisDurumlarnDzenle1: TMenuItem
       Caption = 'Servis Durumlar'#305'n'#305' D'#252'zenle'
+      ImageIndex = 7
       OnClick = BtnTakipTurleriClick
     end
     object BalantlarOlutur1: TMenuItem
       Caption = 'Eksik Ba'#287'lant'#305'lar'#305' Olu'#351'tur'
+      ImageIndex = 13
       OnClick = BalantlarOlutur1Click
     end
     object KopmuBalantlarTemizle1: TMenuItem
       Caption = 'Kopmu'#351' Ba'#287'lant'#305'lar'#305' Temizle'
+      ImageIndex = 9
       OnClick = KopmuBalantlarTemizle1Click
     end
     object N1: TMenuItem
@@ -731,15 +736,18 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     object MenuTumSec: TMenuItem
       Tag = 1
       Caption = 'T'#252'm'#252'n'#252' Se'#231
+      ImageIndex = 23
       OnClick = MenuTumSecClick
     end
     object MenuTumBirak: TMenuItem
       Caption = 'T'#252'm'#252'n'#252' B'#305'rak'
+      ImageIndex = 15
       OnClick = MenuTumSecClick
     end
     object MenuSecimiTersCevir: TMenuItem
       Tag = 2
       Caption = 'Se'#231'imi Ters '#199'evir'
+      ImageIndex = 9
       OnClick = MenuTumSecClick
     end
   end

@@ -787,6 +787,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           end
         end
         object PageControlAlt: TcxPageControl
+          Properties.Images = Tablo.PNGImageList2
           Left = 0
           Top = 170
           Width = 987
@@ -801,7 +802,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           ClientRectTop = 27
           object TabSheetIsListesi: TcxTabSheet
             Caption = #304#351' Listesi'
-            ImageIndex = 3
+            ImageIndex = 32
             object Panel2: TPanel
               Left = 0
               Top = 0
@@ -1281,7 +1282,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           end
           object TabSheetLojistik: TcxTabSheet
             Caption = 'Lojistik'
-            ImageIndex = 1
+            ImageIndex = 19
             object ToolBar2: TToolBar
               AlignWithMargins = True
               Left = 3
@@ -1485,7 +1486,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           end
           object TabSheetAsama: TcxTabSheet
             Caption = 'A'#351'ama'
-            ImageIndex = 2
+            ImageIndex = 19
             object ToolBar5: TToolBar
               Left = 0
               Top = 0
@@ -1629,7 +1630,7 @@ object FirsatWizardDlg: TFirsatWizardDlg
           end
           object TabSheet1: TcxTabSheet
             Caption = 'Yorum / Medya'
-            ImageIndex = 0
+            ImageIndex = 38
             DesignSize = (
               979
               184)
@@ -2454,10 +2455,12 @@ object FirsatWizardDlg: TFirsatWizardDlg
     Top = 350
   end
   object PmKopyala: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 552
     Top = 336
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
     end
   end
   object TabMaliyet: TFDQuery
@@ -2557,15 +2560,18 @@ object FirsatWizardDlg: TFirsatWizardDlg
     Top = 252
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 752
     Top = 200
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object N4: TMenuItem
@@ -2573,14 +2579,17 @@ object FirsatWizardDlg: TFirsatWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end
@@ -2862,10 +2871,12 @@ object FirsatWizardDlg: TFirsatWizardDlg
     Top = 326
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 640
     Top = 352
     object AsamalariEkle: TMenuItem
       Caption = 'T'#252'm A'#351'amalar'#305' Ekle'
+      ImageIndex = 0
       OnClick = AsamalariEkleClick
     end
   end

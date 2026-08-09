@@ -150,6 +150,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
   end
   object PageControl1: TPageControl
+    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 580
@@ -160,6 +161,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     OnChange = PageControl1Change
     object TabSheet1: TTabSheet
       Caption = 'Genel'
+      ImageIndex = 11
       object BitBtn2: TBitBtn
         Left = 14
         Top = 76
@@ -267,7 +269,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
     object FirsatPage: TTabSheet
       Caption = 'Sat'#305#351' F'#305'rsat'#305
-      ImageIndex = 2
+      ImageIndex = 31
       object cxLabel1: TcxLabel
         Left = 58
         Top = 142
@@ -315,7 +317,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
     object ProjePage: TTabSheet
       Caption = 'Proje'
-      ImageIndex = 1
+      ImageIndex = 13
       OnShow = ProjePageShow
       object Label1: TLabel
         Left = 4
@@ -611,7 +613,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
     object GorevPage: TTabSheet
       Caption = #304#351' Listesi'
-      ImageIndex = 3
+      ImageIndex = 32
       object checkGorevAciklama: TCheckBox
         Left = 34
         Top = 288
@@ -852,7 +854,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
     object shSocial: TTabSheet
       Caption = 'SosyalMeyda'
-      ImageIndex = 4
+      ImageIndex = 19
       object PageSocial: TcxPageControl
         AlignWithMargins = True
         Left = 3
@@ -871,7 +873,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
         ClientRectTop = 27
         object shSocialMeta: TcxTabSheet
           Caption = 'Meta Business'
-          ImageIndex = 0
+          ImageIndex = 19
           object dxSocialGroupBox: TdxCheckGroupBox
             AlignWithMargins = True
             Left = 3
@@ -1045,7 +1047,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
         end
         object shSocialIMAP: TcxTabSheet
           Caption = 'Web Forn ePosta'
-          ImageIndex = 1
+          ImageIndex = 17
           object dxSocialIMAPGroupBox: TdxCheckGroupBox
             AlignWithMargins = True
             Left = 3

@@ -118,6 +118,7 @@ object CekListeFrame: TCekListeFrame
     Control = PageControlHarEkstre
   end
   object PageControlHarEkstre: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 284
     Width = 1081
@@ -133,7 +134,7 @@ object CekListeFrame: TCekListeFrame
     ClientRectTop = 27
     object SheetHareketler: TcxTabSheet
       Caption = 'Hareketler'
-      ImageIndex = 0
+      ImageIndex = 32
       object cxGridTarihce: TcxGrid
         Left = 0
         Top = 0
@@ -211,7 +212,7 @@ object CekListeFrame: TCekListeFrame
     end
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
-      ImageIndex = 2
+      ImageIndex = 38
       object Panel4: TPanel
         Left = 0
         Top = 191
@@ -357,7 +358,7 @@ object CekListeFrame: TCekListeFrame
     end
     object SheetEkstre: TcxTabSheet
       Caption = 'Ekstre'
-      ImageIndex = 1
+      ImageIndex = 32
       object JvNavPanelHeader2: TJvNavPanelHeader
         Left = 0
         Top = 0
@@ -673,6 +674,7 @@ object CekListeFrame: TCekListeFrame
     end
   end
   object PageControlCek: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 32
     Width = 1081
@@ -688,7 +690,7 @@ object CekListeFrame: TCekListeFrame
     ClientRectTop = 27
     object SheetCekListe: TcxTabSheet
       Caption = 'Liste'
-      ImageIndex = 0
+      ImageIndex = 32
       object cxGrid: TcxGrid
         Left = 0
         Top = 0
@@ -880,7 +882,7 @@ object CekListeFrame: TCekListeFrame
     end
     object SheetHesapListe: TcxTabSheet
       Caption = #199'ek Hesaplar'#305
-      ImageIndex = 1
+      ImageIndex = 34
       object cxGrid2: TcxGrid
         Left = 0
         Top = 0
@@ -1061,11 +1063,13 @@ object CekListeFrame: TCekListeFrame
     Top = 193
   end
   object PopupAlinanCekler: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupAlinanCeklerPopup
     Left = 480
     Top = 128
     object CekInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = CekInfoMenuClick
     end
     object NInfoA: TMenuItem
@@ -1074,50 +1078,60 @@ object CekListeFrame: TCekListeFrame
     object Portfyde2: TMenuItem
       Tag = 130
       Caption = 'Portf'#246'ye Al'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object Cirola2: TMenuItem
       Tag = 131
       Caption = 'Cirola'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object TeminataVer2: TMenuItem
       Tag = 132
       Caption = 'Teminata Ver'
+      ImageIndex = 15
       object Bankaya1: TMenuItem
         Tag = 138
         Caption = 'Bankaya'
+        ImageIndex = 15
         OnClick = CekIslemleriClick
       end
       object Cariye1: TMenuItem
         Tag = 132
         Caption = 'Cariye'
+        ImageIndex = 35
         OnClick = CekIslemleriClick
       end
     end
     object TakasaVer2: TMenuItem
       Tag = 133
       Caption = 'Takasa Ver'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object IcrayaVer2: TMenuItem
       Tag = 134
       Caption = #304'craya Ver'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object Karsiliksiz2: TMenuItem
       Tag = 135
       Caption = 'Kar'#351#305'l'#305'ks'#305'z '#304#351'aretle'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object TahsilEt2: TMenuItem
       Tag = 136
       Caption = 'Tahsil Et'
+      ImageIndex = 34
       OnClick = CekIslemleriClick
     end
     object IadeEt2: TMenuItem
       Tag = 137
       Caption = #304'ade Et'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object N1: TMenuItem
@@ -1125,6 +1139,7 @@ object CekListeFrame: TCekListeFrame
     end
     object CekiKopyalaMenu: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = CekiKopyalaMenuClick
     end
     object N4: TMenuItem
@@ -1133,14 +1148,17 @@ object CekListeFrame: TCekListeFrame
     object ExceldenAlinanCekImport: TMenuItem
       Tag = 130
       Caption = 'Excelden Veri Al'
+      ImageIndex = 32
       OnClick = ExceldenAlinanCekImportClick
     end
   end
   object PopupVerilenCekler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 480
     Top = 184
     object CekInfoMenuV: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = CekInfoMenuClick
     end
     object NInfoV: TMenuItem
@@ -1149,21 +1167,25 @@ object CekListeFrame: TCekListeFrame
     object SatcyaVer3: TMenuItem
       Tag = 140
       Caption = 'Sat'#305'c'#305'ya Ver'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object IadeAl3: TMenuItem
       Tag = 141
       Caption = #304'ade Al'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object IptalEt3: TMenuItem
       Tag = 142
       Caption = #304'ptal Et'
+      ImageIndex = 15
       OnClick = CekIslemleriClick
     end
     object OdesiniYap3: TMenuItem
       Tag = 143
       Caption = #214'demesini Yap'
+      ImageIndex = 34
       OnClick = CekIslemleriClick
     end
     object N2: TMenuItem
@@ -1171,6 +1193,7 @@ object CekListeFrame: TCekListeFrame
     end
     object CekiKopyalaVerilen: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = CekiKopyalaMenuClick
     end
     object N5: TMenuItem
@@ -1179,22 +1202,27 @@ object CekListeFrame: TCekListeFrame
     object ExceldenVerilenCekImport: TMenuItem
       Tag = 140
       Caption = 'Excelden Veri al'
+      ImageIndex = 32
       OnClick = ExceldenAlinanCekImportClick
     end
   end
   object PopupCekHareket: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 304
     Top = 256
     object arihDeitir1: TMenuItem
       Caption = 'Tarih/Makbuz No/A'#231#305'klama'
+      ImageIndex = 21
       OnClick = arihDeitir1Click
     end
     object lemYeriSe1: TMenuItem
       Caption = #304#351'lem Yeri'
+      ImageIndex = 15
       OnClick = lemYeriSe1Click
     end
     object HareketiSil1: TMenuItem
       Caption = 'Hareketi Sil'
+      ImageIndex = 1
       OnClick = HareketiSil1Click
     end
   end
@@ -1263,20 +1291,24 @@ object CekListeFrame: TCekListeFrame
     Top = 201
   end
   object AksiyonlarMenu: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 483
     Top = 245
     object KurFarkGeliri1: TMenuItem
       Tag = 88
       Caption = 'Kur Fark'#305' Geliri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object KurFarkGideri1: TMenuItem
       Tag = 98
       Caption = 'Kur Fark'#305' Gideri'
+      ImageIndex = 34
       OnClick = KurFarkGeliri1Click
     end
     object KurFarkiSil: TMenuItem
       Caption = 'Hareketi Sil'
+      ImageIndex = 1
       OnClick = KurFarkiSilClick
     end
   end
@@ -1320,6 +1352,7 @@ object CekListeFrame: TCekListeFrame
     Top = 392
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 575
     Top = 136
     object BaskiOnizlemeMenu: TMenuItem
@@ -1473,15 +1506,18 @@ object CekListeFrame: TCekListeFrame
     Top = 356
   end
   object PopupYorumlar: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
     Left = 768
     Top = 448
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
+      ImageIndex = 7
       OnClick = YorumDzenle1Click
     end
     object PopupYorumuSil: TMenuItem
       Caption = 'Yorum Sil'
+      ImageIndex = 1
       OnClick = PopupYorumuSilClick
     end
     object MenuItem3: TMenuItem
@@ -1489,14 +1525,17 @@ object CekListeFrame: TCekListeFrame
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
+      ImageIndex = 19
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
+      ImageIndex = 19
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
       Caption = 'D'#246'k'#252'man Sil'
+      ImageIndex = 1
       OnClick = DkmanSil1Click
     end
   end

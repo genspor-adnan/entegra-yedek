@@ -404,6 +404,7 @@ object UretimReceteDlg: TUretimReceteDlg
       end
     end
     object PageControlOpr: TcxPageControl
+      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 136
       Width = 602
@@ -419,7 +420,7 @@ object UretimReceteDlg: TUretimReceteDlg
       ClientRectTop = 24
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
-        ImageIndex = 0
+        ImageIndex = 12
         object GridUretim: TcxGrid
           Left = 0
           Top = 0
@@ -582,7 +583,7 @@ object UretimReceteDlg: TUretimReceteDlg
       end
       object cxTabSheet2: TcxTabSheet
         Caption = 'Operasyon Konu'
-        ImageIndex = 1
+        ImageIndex = 19
         object PanelOprUst: TPanel
           Left = 0
           Top = 0
@@ -1833,10 +1834,12 @@ object UretimReceteDlg: TUretimReceteDlg
       end>
   end
   object PopupMenuDetay: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 940
     Top = 277
     object ReeternOlarakaretle1: TMenuItem
       Caption = 'Re'#231'ete '#220'r'#252'n'#252' Olarak '#304#351'aretle'
+      ImageIndex = 12
       OnClick = ReeternOlarakaretle1Click
     end
     object N1: TMenuItem
@@ -1844,9 +1847,11 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object MaliyetleriHesaplaMenu: TMenuItem
       Caption = 'Maliyetleri Hesapla'
+      ImageIndex = 34
     end
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 1011
     Top = 248
     object BaskiOnizlemeMenu: TMenuItem
@@ -1932,6 +1937,7 @@ object UretimReceteDlg: TUretimReceteDlg
     Top = 235
   end
   object PopupHesapla: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 75
     Top = 104
     object BuUrunMenu: TMenuItem
@@ -1945,18 +1951,22 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object TumUrunlerMenu: TMenuItem
       Caption = 'T'#252'm '#220'r'#252'nleri'
+      ImageIndex = 12
       OnClick = TumUrunlerMenuClick
     end
   end
   object PopupMenuListe: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 240
     Top = 136
     object ReceteInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = ReceteInfoMenuClick
     end
     object Kopyala1: TMenuItem
       Caption = 'Kopyala'
+      ImageIndex = 10
       OnClick = Kopyala1Click
     end
     object N4: TMenuItem
@@ -1964,10 +1974,12 @@ object UretimReceteDlg: TUretimReceteDlg
     end
     object ExceldenVeriAl1: TMenuItem
       Caption = 'Excelden Re'#231'ete Verisi Al'
+      ImageIndex = 32
       OnClick = ExceldenVeriAl1Click
     end
     object ExceldenOperasyonKonuVeriAl1: TMenuItem
       Caption = 'Excelden Operasyon Konu Veri Al '
+      ImageIndex = 32
       OnClick = ExceldenOperasyonKonuVeriAl1Click
     end
   end
@@ -2030,11 +2042,13 @@ object UretimReceteDlg: TUretimReceteDlg
     Top = 284
   end
   object PopupMenuTest: TPopupMenu
+    Images = Tablo.PNGImageList2
     OnPopup = PopupMenuTestPopup
     Left = 580
     Top = 456
     object KopyalaMenuItem: TMenuItem
       Caption = 'Buraya Test Kopyala'
+      ImageIndex = 10
       OnClick = KopyalaMenuItemClick
     end
   end

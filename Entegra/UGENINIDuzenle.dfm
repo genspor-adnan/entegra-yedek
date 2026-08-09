@@ -387,10 +387,12 @@ object GENINIDuzenleDlg: TGENINIDuzenleDlg
     Top = 202
   end
   object PmSagClick: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 216
     Top = 128
     object Listedenbilgiaktar1: TMenuItem
       Caption = 'Listeden bilgi aktar'
+      ImageIndex = 32
       OnClick = Listedenbilgiaktar1Click
     end
   end

@@ -188,6 +188,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
   end
   object PageAlt: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 231
     Width = 1014
@@ -202,7 +203,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     ClientRectTop = 26
     object SheetDepoDurumu: TcxTabSheet
       Caption = 'Depo Durumu'
-      ImageIndex = 0
+      ImageIndex = 12
       object Panel2: TPanel
         Left = 0
         Top = 0
@@ -369,7 +370,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
     object SheetAlinanSiparis: TcxTabSheet
       Caption = 'Al'#305'nan Sipari'#351'ler'
-      ImageIndex = 1
+      ImageIndex = 4
       object cxGrid2: TcxGrid
         Left = 0
         Top = 0
@@ -471,7 +472,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
     object SheetVerilenSiparis: TcxTabSheet
       Caption = 'Verilen Sipari'#351'ler'
-      ImageIndex = 2
+      ImageIndex = 4
       object cxGrid3: TcxGrid
         Left = 0
         Top = 0
@@ -573,7 +574,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
     object SheetUretimEmri: TcxTabSheet
       Caption = #220'retim Emri'
-      ImageIndex = 3
+      ImageIndex = 19
       object cxGrid4: TcxGrid
         Left = 0
         Top = 0
@@ -678,7 +679,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
     object SheetUretimOp: TcxTabSheet
       Caption = #220'retim Operasyonu'
-      ImageIndex = 5
+      ImageIndex = 19
       object cxGrid5: TcxGrid
         Left = 0
         Top = 0
@@ -763,7 +764,7 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     end
     object SheetUretimFisi: TcxTabSheet
       Caption = #220'retim Fi'#351'i'
-      ImageIndex = 4
+      ImageIndex = 19
       object cxGrid6: TcxGrid
         Left = 0
         Top = 0
@@ -1205,81 +1206,102 @@ object UretimPlanlamaListeDlg: TUretimPlanlamaListeDlg
     Top = 134
   end
   object PopupYeniIslemler: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 472
     Top = 160
     object Plan1: TMenuItem
       Caption = #220'retim Plan'#305
+      ImageIndex = 21
       object Yeni1: TMenuItem
         Caption = 'Yeni '#220'retim Plan'#305
+        ImageIndex = 21
         OnClick = YeniPlanClick
       end
       object Sil1: TMenuItem
         Caption = #220'retim Plan'#305'n'#305' Sil'
+        ImageIndex = 1
         OnClick = Sil1Click
       end
       object PlanaSipariEkle1: TMenuItem
         Caption = 'Plana Sipari'#351' Ekle'
+        ImageIndex = 21
         OnClick = PlanaSipariEkle1Click
       end
       object SeiliSatrPlandankart1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'r'#305' Plandan '#199#305'kart'
+        ImageIndex = 21
         OnClick = SeiliSatrPlandankart1Click
       end
     end
     object retimEmri1: TMenuItem
       Caption = #220'retim Emri'
+      ImageIndex = 15
       object SeiliSatrinretimEmriOlutur1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'r '#304#231'in '#220'retim Emri Olu'#351'tur'
+        ImageIndex = 19
         OnClick = SeiliSatrinretimEmriOlutur1Click
       end
       object SeiliSatraBalretimEmirlerini1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'ra Ba'#287'l'#305' '#220'retim Emirlerini Sil '
+        ImageIndex = 1
         OnClick = SeiliSatraBalretimEmirlerini1Click
       end
       object Yeni2: TMenuItem
         Caption = #304'lgili T'#252'm '#220'retim Emirlerini Olu'#351'tur'
+        ImageIndex = 0
         OnClick = YeniUretimEmriClick
       end
       object Sil2: TMenuItem
         Caption = #304'lgili T'#252'm Emirleri Sil'
+        ImageIndex = 1
         OnClick = Sil2Click
       end
     end
     object retimOperasyonu1: TMenuItem
       Caption = #220'retim Operasyonu'
+      ImageIndex = 15
       object SeiliSatrinretimOperasyonuOlutur1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'r '#304#231'in '#220'retim Operasyonu Olu'#351'tur'
+        ImageIndex = 19
         OnClick = SeiliSatrinretimOperasyonuOlutur1Click
       end
       object SeiliSatraBalretimEmirleriniSil1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'ra Ba'#287'l'#305' '#220'retim Operasyonlar'#305'n'#305' Sil '
+        ImageIndex = 1
         OnClick = SeiliSatraBalretimEmirleriniSil1Click
       end
       object Yeni3: TMenuItem
         Caption = #304'lgili T'#252'm '#220'retim Operasyonlar'#305'n'#305' Olu'#351'tur'
+        ImageIndex = 0
         OnClick = YeniOperasyonClick
       end
       object Sil3: TMenuItem
         Caption = #304'lgili T'#252'm Operasyonlar'#305' Sil'
+        ImageIndex = 1
         OnClick = Sil3Click
       end
     end
     object retimFii1: TMenuItem
       Caption = #220'retim Fi'#351'i'
+      ImageIndex = 19
       object SeiliSatrinretimFiiOlutur1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'r '#304#231'in '#220'retim Fi'#351'i Olu'#351'tur'
+        ImageIndex = 19
         OnClick = SeiliSatrinretimFiiOlutur1Click
       end
       object SeiliSatraBalretimFileriniSil1: TMenuItem
         Caption = 'Se'#231'ili Sat'#305'ra Ba'#287'l'#305' '#220'retim Fi'#351'lerini Sil '
+        ImageIndex = 1
         OnClick = SeiliSatraBalretimFileriniSil1Click
       end
       object YeniFis: TMenuItem
         Caption = #304'lgili T'#252'm '#220'retim Fi'#351'lerini Olu'#351'tur'
+        ImageIndex = 19
         OnClick = YeniFisClick
       end
       object SilFis: TMenuItem
         Caption = #304'lgili T'#252'm Fi'#351'leri Sil'
+        ImageIndex = 1
         OnClick = SilFisClick
       end
     end

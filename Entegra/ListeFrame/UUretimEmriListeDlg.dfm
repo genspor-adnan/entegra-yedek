@@ -252,6 +252,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     end
   end
   object PageAlt: TcxPageControl
+    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 436
     Width = 1391
@@ -267,7 +268,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     ClientRectTop = 26
     object SheetDetay: TcxTabSheet
       Caption = #220'retim A'#287'ac'#305
-      ImageIndex = 0
+      ImageIndex = 19
       object TreeUretimAgaci: TcxDBTreeList
         Left = 0
         Top = 0
@@ -477,7 +478,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     end
     object cxTabSheet1: TcxTabSheet
       Caption = 'Operasyonlar'
-      ImageIndex = 1
+      ImageIndex = 19
       object GridUrtOperasyon: TcxGrid
         Left = 0
         Top = 0
@@ -639,7 +640,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     end
     object cxTabSheet2: TcxTabSheet
       Caption = 'Maliyet'
-      ImageIndex = 2
+      ImageIndex = 19
       object cxGrid1: TcxGrid
         Left = 0
         Top = 0
@@ -942,10 +943,12 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     Top = 244
   end
   object UretimEmriPopup: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 592
     Top = 152
     object UretimEmriInfoMenu: TMenuItem
       Caption = 'info'
+      ImageIndex = 22
       OnClick = UretimEmriInfoMenuClick
     end
   end

@@ -506,6 +506,7 @@ object DBSDlg: TDBSDlg
     Top = 45
   end
   object PopupMenuYaz: TPopupMenu
+    Images = Tablo.PNGImageList2
     Left = 32
     Top = 47
     object BaskiOnizlemeMenu: TMenuItem
