@@ -763,6 +763,10 @@ type
     function DokumanTarihceEkle(DokumanId:integer; Aciklama:string; Tur:integer):Integer;
     procedure DokumanTarihceKapat(GecmisId, Tur:integer);
     function UretimFisiOlustur(Tarih:TDateTime;Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;Miktar:Extended):integer;
+    // Ayni is, KANONIK belge uretimi uzerinden (sp_Prog_UretimFisi_Olustur_Json
+    //   -> sp_Api_Belge_Kaydet_Json). Fiyatlar 0 yazilir. Yeni kod bunu kullanir.
+    function UretimFisiOlusturSP(Tarih:TDateTime; Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;
+      Miktar:Extended): Integer;
     function EkipmanSihirbazBaslat(IslemOp: Char; Cagiran, EkipmanID,StokID: Integer): Integer;
     function EgitimSihirbazBaslat(IslemOp: Char; Cagiran, EgitimID, StokID: Integer): Integer;
     function FaturaSihirbazBaslat(IslemOp: Char; Tur, Cagiran, FaturaId,RehberId: Integer;Tipi:Integer=1;Kilit:Boolean=False; MasrafMerkezi: Integer = -1; ServisID: Integer = -1): Integer;
@@ -6416,6 +6420,33 @@ begin
   Tablo.Query1.ParamByName('EKLEYEN').Value := Kullanan;
   Tablo.Query1.ParamByName('SUBEID').Value := SubeId;
   Tablo.Query1.ExecSQL;
+end;
+
+function TTablo.UretimFisiOlusturSP(Tarih:TDateTime; Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;
+  Miktar:Extended): Integer;
+// Uretim fisini KANONIK belge uretimiyle olusturur.
+//   Eski UretimFisiOlustur FATBASLIK ve FATURA'ya ELLE INSERT yaziyordu -
+//   belge uretiminin ikinci bir kapisiydi ve alan kurallari degistikce geride
+//   kalirdi. Artik sp_Prog_UretimFisi_Olustur_Json -> sp_Api_Belge_Kaydet_Json.
+//   Fiyatlar 0 yazilir (maliyet uretim sonunda ayrica hesaplanir).
+//   Recete yoksa/bossa 0 doner - cagiran satiri atlayabilir.
+var
+  LSonuc: string;
+begin
+  Result := 0;
+  if ReceteID <= 0 then Exit;
+  LSonuc := ApiCagir('sp_Prog_UretimFisi_Olustur_Json',
+    TJSONObject.Create
+      .AddPair('tarih',       FormatDateTime('yyyy-mm-dd hh:nn:ss', Tarih))
+      .AddPair('yeri',        TJSONNumber.Create(Yeri))
+      .AddPair('yerId',       TJSONNumber.Create(YerId))
+      .AddPair('receteId',    TJSONNumber.Create(ReceteID))
+      .AddPair('girisDepo',   TJSONNumber.Create(GirisDepo))
+      .AddPair('cikisDepo',   TJSONNumber.Create(CikisDepo))
+      .AddPair('miktar',      TJSONNumber.Create(Miktar))
+      .AddPair('subeId',      TJSONNumber.Create(SubeId))
+      .AddPair('kullaniciId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0))) as TJSONObject);
+  Result := ApiSonucInt(LSonuc, 'BelgeId');
 end;
 
 function TTablo.UretimFisiOlustur(Tarih:TDateTime;Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;Miktar:Extended):integer;

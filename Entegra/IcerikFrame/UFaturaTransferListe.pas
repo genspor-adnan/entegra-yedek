@@ -509,7 +509,10 @@ begin
     Tablo.Query8.first;
     while not Tablo.Query8.eof do begin
        if Tablo.Query8.FieldByName('RECETEID').AsInteger > 0 then begin
-          Result := Tablo.UretimFisiOlustur(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime,
+          // A: kanonik belge uretimi (sp_Prog_UretimFisi_Olustur_Json ->
+          //    sp_Api_Belge_Kaydet_Json). Eski UretimFisiOlustur elle INSERT
+          //    yaziyordu; fiyatlar artik 0.
+          Result := Tablo.UretimFisiOlusturSP(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime,
                       TabNo_TRANSFER, KaynakBaslikId,
                       Tablo.Query8.FieldByName('RECETEID').AsInteger,
                       Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,
@@ -524,7 +527,7 @@ begin
 
     if LOlusan = 0 then
        Application.MessageBox(
-         PChar('Uretim fisi olusturulamadi.'#13#10 +
+          PChar('Uretim fisi olusturulamadi.'#13#10 +
                 'Bu transferdeki urunlerin uretim recetesi tanimli degil.'),
          PChar(Uyari), MB_OK or MB_ICONWARNING)
     else if LAtlanan > 0 then
