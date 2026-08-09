@@ -1063,5 +1063,13 @@
       ImageIndex = 0
       OnClick = MenuUretimClick
     end
+    object MenuKaynakBelgeAc: TMenuItem
+      Caption = 'Kaynak Belgeyi A'#231
+      OnClick = MenuKaynakBelgeAcClick
+    end
+    object MenuHedefBelgeAc: TMenuItem
+      Caption = 'Hedef Belgeyi A'#231
+      OnClick = MenuHedefBelgeAcClick
+    end
   end
 end

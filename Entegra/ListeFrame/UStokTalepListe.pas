@@ -86,6 +86,7 @@ type
     PopupMenuTransfer: TPopupMenu;
     TalepInfoMenu: TMenuItem;
     MenuTansfereDonustur: TMenuItem;
+    MenuHedefBelgeAc: TMenuItem;
     GridStokTalepTviewBIRIMONAYLAYANAD: TcxGridDBColumn;
     SQLMemo: TcxMemo;
     GridStokTalepTviewPROJEKOD: TcxGridDBColumn;
@@ -118,6 +119,7 @@ type
       var AStyle: TcxStyle);
     procedure JvTimer1Timer(Sender: TObject);
     procedure MenuTansfereDonusturClick(Sender: TObject);
+    procedure MenuHedefBelgeAcClick(Sender: TObject);
     procedure AramaYap;
     procedure BtnDonusturClick(Sender: TObject);
     procedure TalepInfoMenuClick(Sender: TObject);
@@ -412,6 +414,62 @@ begin
     Tablo.InfoGoster('SIPARIS', TabStokTalep.FieldByName('ID').AsInteger, TabNo_STOKTALEP);
 end;
 
+procedure TStokTalepListeDlg.MenuHedefBelgeAcClick(Sender: TObject);
+// Bu talepten uretilen TRANSFER belgesini acar.
+//   Bag satir bazlidir: FATURA.YERI = 435 (stok talebi -> transfer fisi) ve
+//   FATURA.YERID = SIPARISDETAY.ID. Birden fazla transfer olusmus olabilir
+//   (kismi donusum); o zaman kullaniciya secim listesi cikar.
+var
+  sts: TStringList;
+  LId, LRehber: Integer;
+  LBelgeNo: string;
+begin
+  if TabStokTalep.IsEmpty then Exit;
+
+  Tablo.Query1.Close;
+  Tablo.Query1.SQL.Text :=
+    'select distinct HEDEFTUR=FB.TUR, HEDEFBELGENO=FB.FATURANO, HEDEFID=FB.ID,' +
+    ' HEDEFTARIH=FB.FATURATARIH' +
+    ' from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID' +
+    ' where F.YERI=435 and F.YERID in' +
+    '   (select ID from SIPARISDETAY where SIPARISID=' +
+        TabStokTalep.FieldByName('ID').AsString + ')';
+  Tablo.Query1.Open;
+
+  case Tablo.Query1.RecordCount of
+    0: begin
+         Application.MessageBox(
+           PChar('Bu talepten olusturulmus bir transfer belgesi yok.'),
+           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
+         Exit;
+       end;
+    1: begin
+         LId      := Tablo.Query1.FieldByName('HEDEFID').AsInteger;
+         LBelgeNo := Tablo.Query1.FieldByName('HEDEFBELGENO').AsString;
+       end;
+  else
+    LId := 0;
+    sts := TStringList.Create;
+    try
+      if Tablo.ListedenBilgiGetir('Hedef Belge Seçimi', Tablo.Query1.SQL.Text, sts,
+           [Tablo.RepKasaTurleri, Tablo.cxEditRepository1Label1,
+            Tablo.cxEditRepository1Label1, Tablo.cxEditRepository1Label1],
+           'TransferHedefSecimi') then begin
+        LId      := StrToIntDef(sts[2], 0);
+        LBelgeNo := sts[1];
+      end;
+    finally
+      sts.Free;
+    end;
+    if LId <= 0 then Exit;
+  end;
+
+  Tablo.TablodanSorguAc(2, 'select REHBERID from FATBASLIK where ID=' + IntToStr(LId));
+  LRehber := Tablo.Query2.FieldByName('REHBERID').AsInteger;
+  AnaForm.GormeDialogCagir(LId, KasaTur_StokTransferi, LRehber, 0,
+                           Tablo.GENINI.BugunTrh, LBelgeNo);
+end;
+
 procedure TStokTalepListeDlg.EkranYazdir(Sender: TObject);
 begin
 
@@ -519,7 +577,7 @@ end;
 procedure TStokTalepListeDlg.GridStokTalepTviewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
   AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
-  Tablo.GridStilYonetim.StilDenetle(Sender.Name,AStyle,Sender,ARecord);
+   Tablo.GridStilYonetim.StilDenetle(Sender.Name,AStyle,Sender,ARecord);
 end;
 
 procedure TStokTalepListeDlg.Kapatiliyor(var AKapansin: Boolean);
@@ -533,7 +591,7 @@ begin
   if GridStokTalepTview.Controller.SelectedRecordCount > 1 then begin
      yeniid := 0;
      for I := 0 to GridStokTalepTview.Controller.SelectedRecordCount - 1 do
-         yeniid := Tablo.BelgeDonustur(TabNo_DONUSUM_STOKTALEP_TRANSFER,GridStokTalepTview.Controller.SelectedRecords[i].Values[GridStokTalepTviewID.Index],yeniid);
+         yeniid  := Tablo.BelgeDonustur(TabNo_DONUSUM_STOKTALEP_TRANSFER,GridStokTalepTview.Controller.SelectedRecords[i].Values[GridStokTalepTviewID.Index],yeniid);
   end else
      yeniid := Tablo.BelgeDonustur(TabNo_DONUSUM_STOKTALEP_TRANSFER,TabStokTalep.FieldByName('ID').AsInteger);
 

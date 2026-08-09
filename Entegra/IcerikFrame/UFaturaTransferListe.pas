@@ -112,6 +112,8 @@ type
     JvTimer1: TJvTimer;
     PopupMenuTransfer: TPopupMenu;
     MenuUretim: TMenuItem;
+    MenuKaynakBelgeAc: TMenuItem;
+    MenuHedefBelgeAc: TMenuItem;
     TransferInfoMenu: TMenuItem;
     GridFatListeTviewKAYNAK: TcxGridDBColumn;
     GridFatListeTviewHEDEF: TcxGridDBColumn;
@@ -146,6 +148,8 @@ type
       var AStyle: TcxStyle);
     procedure JvTimer1Timer(Sender: TObject);
     procedure MenuUretimClick(Sender: TObject);
+    procedure MenuKaynakBelgeAcClick(Sender: TObject);
+    procedure MenuHedefBelgeAcClick(Sender: TObject);
     procedure TransferInfoMenuClick(Sender: TObject);
     procedure AramaYap;
     procedure LabelTumKayitlarClick(Sender: TObject);   // own-toolbar Tum/Son/Sik (DFM OnClick -> PUBLISHED olmali)
@@ -574,6 +578,60 @@ begin
       else
          BelgeDonustur(LId);
   end;
+end;
+
+procedure TFatTransferListeDlg.MenuKaynakBelgeAcClick(Sender: TObject);
+// Bu transferin uretildigi STOK TALEBINI acar.
+//   Bag satir bazli: FATURA.YERI = 435, FATURA.YERID = SIPARISDETAY.ID.
+var
+  LSipId, LRehber: Integer;
+  LBelgeNo: string;
+begin
+  if TabFatBaslik.IsEmpty then Exit;
+
+  Tablo.TablodanSorguAc(1,
+    'select top 1 SIPARISID=SD.SIPARISID, SIPARISNO=S.SIPARISNO, S.REHBERID' +
+    ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID' +
+    ' where SD.ID in (select F.YERID from FATURA F' +
+    '                  where F.YERI=435 and F.FATBASID=' +
+                          TabFatBaslik.FieldByName('ID').AsString + ')');
+  if Tablo.Query1.IsEmpty then begin
+    Application.MessageBox(PChar('Bu transferin kaynak belgesi yok.'),
+                           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
+    Exit;
+  end;
+
+  LSipId   := Tablo.Query1.FieldByName('SIPARISID').AsInteger;
+  LBelgeNo := Tablo.Query1.FieldByName('SIPARISNO').AsString;
+  LRehber  := Tablo.Query1.FieldByName('REHBERID').AsInteger;
+  AnaForm.GormeDialogCagir(LSipId, KasaTur_StoktanTalep, LRehber, 0,
+                           Tablo.GENINI.BugunTrh, LBelgeNo);
+end;
+
+procedure TFatTransferListeDlg.MenuHedefBelgeAcClick(Sender: TObject);
+// Bu transferden uretilen URETIM FISINI acar.
+//   Bag BASLIK bazli: FATBASLIK.TUR=6, YERI=TabNo_TRANSFER, YERID=transfer ID.
+var
+  LId, LRehber: Integer;
+  LBelgeNo: string;
+begin
+  if TabFatBaslik.IsEmpty then Exit;
+
+  Tablo.TablodanSorguAc(1,
+    'select top 1 ID, FATURANO, REHBERID from FATBASLIK' +
+    ' where TUR=6 and YERI=' + IntToStr(TabNo_TRANSFER) +
+    ' and YERID=' + TabFatBaslik.FieldByName('ID').AsString + ' order by ID');
+  if Tablo.Query1.IsEmpty then begin
+    Application.MessageBox(PChar('Bu transferden olusturulmus bir uretim fisi yok.'),
+                           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
+    Exit;
+  end;
+
+  LId      := Tablo.Query1.FieldByName('ID').AsInteger;
+  LBelgeNo := Tablo.Query1.FieldByName('FATURANO').AsString;
+  LRehber  := Tablo.Query1.FieldByName('REHBERID').AsInteger;
+  AnaForm.GormeDialogCagir(LId, KasaTur_Uretim, LRehber, 0,
+                           Tablo.GENINI.BugunTrh, LBelgeNo);
 end;
 
 procedure TFatTransferListeDlg.TransferInfoMenuClick(Sender: TObject);
