@@ -2396,8 +2396,7 @@ procedure TFaturalarDlg.mnIrsaliyeyeDonusturClick(Sender: TObject);
 var
   gf: TFaturaGorevFrame;
   I, LSiparisId, LKaynakTur, LDonusumTuru, LBasarili: Integer;
-  LSonuc, LBelgeNolar, LHata: string;
-  LJson: TJSONObject;
+  LBelgeNolar, LHata: string;
 begin
   gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
   if GridFatListeTview.Controller.SelectedRecordCount <= 0 then
@@ -2433,15 +2432,15 @@ begin
       LDonusumTuru := IfThen(LKaynakTur = KasaTur_AlisSiparisi,
                              TabNo_DONUSUM_ALIS_SIPARIS_FAT, TabNo_DONUSUM_SATIS_SIPARIS_FAT);
 
-    LJson := TJSONObject.Create;
-    LJson.AddPair('DonusumTuru',   TJSONNumber.Create(LDonusumTuru));
-    LJson.AddPair('KaynakBelgeId', TJSONNumber.Create(LSiparisId));
-    LJson.AddPair('Oturum', TJSONObject.Create
-      .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
-      .AddPair('SubeId', TJSONNumber.Create(SubeID)));
+    // KANONIK DONUSUM YOLU (08.08.2026)
+    //   Onceden burasi sp_Api_Belge_Donusum_Json'u cagiriyordu; o SP kendi
+    //   kalan hesabini (fn_Api_Donusum_Kalan) kullanan AYRI bir uygulamaydi:
+    //   izleme secimi, stok yetersizligi sorusu, kaynak durum guncellemesi ve
+    //   rota politikalari (depo yonu, KDV muafiyeti, carpan) o yolda YOK.
+    //   Artik Tablo.BelgeDonustur - digerleriyle ayni zincir
+    //   (sp_Prog_BelgeDonusum_Uygula_Json2).
     try
-      LSonuc := Tablo.ApiCagir('sp_Api_Belge_Donusum_Json', LJson);
-      if Tablo.ApiSonucInt(LSonuc, 'HedefBelgeId') > 0 then
+      if Tablo.BelgeDonustur(LDonusumTuru, LSiparisId) > 0 then
       begin
         Inc(LBasarili);
         if LBelgeNolar <> '' then LBelgeNolar := LBelgeNolar + ', ';
