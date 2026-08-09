@@ -485,17 +485,53 @@ end;
 
 function TFatTransferListeDlg.BelgeDonustur(KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
 begin
-    // Result atanmiyordu (tanimsiz deger donuyordu). Son olusan uretim fisinin
-    //   ID'si donuyor; cagiran su an kullanmiyor ama tanimsiz kalmasin.
+// RECETE URUNDEN COZULUR.
+//   Eski sorgu "F.URETIMPLANID is not null" sarti ariyor ve URETIMPLANID'yi
+//   RECETE kimligi olarak geciriyordu. Oysa UretimFisiOlustur URETIMRECETE.ID
+//   bekler ve URETIMPLANID hicbir transfer/stok-talep satirinda dolu DEGIL
+//   (BILIM'de sifir kayit) - yani bu menu bugune kadar HIC calismamis, sessizce
+//   hicbir sey yapiyordu. Recete artik urunun kendi recetesinden bulunuyor
+//   (siparis -> uretim yolunda da ayni kural).
+//   Recetesi olmayan satirlar atlanir ve sonunda kullaniciya bildirilir;
+//   sessiz hicbir sey yapmama hali kalmadi.
+var
+  LAtlanan, LOlusan: Integer;
+begin
     Result := 0;
-    Tablo.TablodanSorguAc(8, 'select F.ID,FB.FATURATARIH, RECETEID=isnull(F.URETIMPLANID,-99), FB.GIRISDEPO,FB.GIRISDEPO, F.MIKTAR '+
+    LAtlanan := 0;
+    LOlusan  := 0;
+    Tablo.TablodanSorguAc(8,
+          'select F.ID, FB.FATURATARIH, FB.GIRISDEPO, F.MIKTAR, F.URUNID,' +
+          ' RECETEID = coalesce(F.URETIMPLANID,' +
+          '   (select min(UR.ID) from URETIMRECETE UR where UR.STOKID = F.URUNID), 0)' +
           ' from FATBASLIK FB inner join FATURA F on FB.ID=F.FATBASID '+
-          ' where FB.ID='+IntToStr(KaynakBaslikId)+' and F.TUR>0 and F.URETIMPLANID is not null  order by ID');
+          ' where FB.ID='+IntToStr(KaynakBaslikId)+' and F.TUR>0 order by F.ID');
     Tablo.Query8.first;
     while not Tablo.Query8.eof do begin
-       Result := Tablo.UretimFisiOlustur(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime, TabNo_TRANSFER, KaynakBaslikId, Tablo.Query8.FieldByName('RECETEID').AsInteger, Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('MIKTAR').AsFloat);
+       if Tablo.Query8.FieldByName('RECETEID').AsInteger > 0 then begin
+          Result := Tablo.UretimFisiOlustur(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime,
+                      TabNo_TRANSFER, KaynakBaslikId,
+                      Tablo.Query8.FieldByName('RECETEID').AsInteger,
+                      Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,
+                      Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,
+                      Tablo.Query8.FieldByName('MIKTAR').AsFloat);
+          if Result > 0 then Inc(LOlusan) else Inc(LAtlanan);
+       end
+       else
+          Inc(LAtlanan);
        Tablo.Query8.next;
     end;
+
+    if LOlusan = 0 then
+       Application.MessageBox(
+         PChar('Uretim fisi olusturulamadi.'#13#10 +
+               'Bu transferdeki urunlerin uretim recetesi tanimli degil.'),
+         PChar(Uyari), MB_OK or MB_ICONWARNING)
+    else if LAtlanan > 0 then
+       Application.MessageBox(
+         PChar(IntToStr(LOlusan) + ' uretim fisi olusturuldu.'#13#10 +
+               IntToStr(LAtlanan) + ' satir atlandi (recetesi yok).'),
+         PChar(Uyari), MB_OK or MB_ICONINFORMATION);
 end;
 
 procedure TFatTransferListeDlg.MenuUretimClick(Sender: TObject);
