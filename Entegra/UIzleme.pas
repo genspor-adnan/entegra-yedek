@@ -114,7 +114,6 @@ type
       AShift: TShiftState; var AHandled: Boolean);
     procedure LblKalanMiktarClick(Sender: TObject);
   private
-    Kaydedilebilir : boolean;
     procedure TempTabloOlustur;
     // A8 okuma tarafi: aday listesini sp_Prog_Izleme_Aday_Json'dan doldurur
     function AdaydanDoldur(const AYontem: string): Boolean;
@@ -274,103 +273,6 @@ begin
 
 end;
 
-(*procedure TIzlemeDlg.TempTabloOlustur;
-var s:String;
-begin
-  TabloAdi := '##TmpIzleme_'+IntToStr(SPID)+'_'+FormatDateTime('yyyymmddhhnnsszzz',Tablo.GENINI.BugunTrhSaat);
-  TabIzlem.SQL.Text := 'create table '+TabloAdi+'(';
-  TabIzlem.SQL.Add('[ID] [int] IDENTITY(1,1) NOT NULL,');
-  TabIzlem.SQL.Add('[STOKID] [int] NOT NULL,');
-  TabIzlem.SQL.Add('[SERINO] [nvarchar](64) NULL,');
-  TabIzlem.SQL.Add('[IZLEMID] [int] NULL,');
-  TabIzlem.SQL.Add('[DURUM] [float] NULL,');
-  TabIzlem.SQL.Add('[KALAN] [float] NULL,');
-  TabIzlem.SQL.Add('[SEC] [bit] NULL ,');
-  TabIzlem.SQL.Add('[LOTNO] [nvarchar](50) NULL,');
-  TabIzlem.SQL.Add('[SKT] datetime NULL)');
-  TabIzlem.ExecSQL;
-
-  TabIzlem.SQL.Text := 'declare @StokID int, @BaslikTur int, @BaslikID int, @SatirID int, @GirDepoID int, @CikDepoID int, @Dil int, @RehberId int, @IzlemTur int';
-  TabIzlem.SQL.Add('set @StokID='+IntToStr(StokID));
-
-  //Bakalım bu fatura ve irsaliyeden dönüştürülmüş ise irsaliye ID sinden izlemeaçılacak
-  if IslemTur in [11,15] then begin
-      Tablo.TablodanSorguAc(1,'select ID from FATBASLIK FB where FATURANO=(select IRSALIYENO from FATBASLIK where ID='+IntToStr(BaslikID)+') and TUR=10');
-      if Tablo.Query1.RecordCount > 0 then begin
-         BaslikID:=StrToIntDef(Tablo.Query1.Fields[0].AsString,0);
-         Tablo.TablodanSorguAc(1,'select YERID from FATURA where ID='+IntToStr(SatirID));
-         SatirID :=StrToIntDef(Tablo.Query1.Fields[0].AsString,0);
-         IslemTur:= IslemTur-1;
-      end;
-  end;
-
-  TabIzlem.SQL.Add('set @BaslikTur='+IntToStr(IslemTur));
-  TabIzlem.SQL.Add('set @BaslikID='+IntToStr(BaslikID));
-  TabIzlem.SQL.Add('set @SatirID='+IntToStr(SatirID));
-  TabIzlem.SQL.Add('set @GirDepoID='+IntToStr(GirDepo));
-  TabIzlem.SQL.Add('set @CikDepoID='+IntToStr(CikDepo));
-  TabIzlem.SQL.Add('set @Dil='+IntToStr(Dil));
-  TabIzlem.SQL.Add('set @RehberId='+IntToStr(RehberId));
-  TabIzlem.SQL.Add('set @IzlemTur='+IntToStr(IzlemTur));
-  TabIzlem.SQL.Add('insert into '+TabloAdi);
-  TabIzlem.SQL.Add('(STOKID,SERINO,IZLEMID,DURUM,KALAN,SEC,LOTNO,SKT)');
-  case IzlemTur of
-    izl_SeriNo, izl_Karekod, izl_SeriNo_LotNo:begin //Serino Karekod
-      if IslemTur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi,KasaTur_Uretim_Urun,109] then begin
-        TabIzlem.SQL.Add(MemoSerinoGir.Lines.Text)
-      end else begin
-        TabIzlem.SQL.Add(MemoSerinoCik.Lines.Text);
-        if GridFatIzlemViewMIKTAR.Properties <> nil then
-           GridFatIzlemViewMIKTAR.Properties.ReadOnly := True;
-      end;
-    end;
-    izl_LotNo, izl_SKT, izl_LotNo_SKT :begin //SKT
-      if IslemTur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi,KasaTur_Uretim_Urun,109] then begin
-         if IslemTip = 2 then //İade ise
-            s := ' and FB.REHBERID=@RehberId'
-         else //normal giriş
-            s := ' and SI1.BELGETUR=@BaslikTur and SI1.BASLIKID=@BaslikID and SI1.SATIRID=@SatirID ';
-         TabIzlem.SQL.Add(StringReplace( MemoSKTGir.Lines.Text, '--AraSatir', s, []));
-      end else begin
-        if ChecktumKayitlar.Checked = False then begin
-           TabIzlem.SQL.Add(StringReplace(MemoSKTCik.Lines.Text,'--having','having',[]));
-        end else if ChecktumKayitlar.Checked = True then begin
-           TabIzlem.SQL.Add(StringReplace(MemoSKTCik.Lines.Text,'having','--having',[]));
-        end;
-      end;
-    end;
-    {4:begin //Boyut
-      if IslemTur in [KasaTur_DigerGirisFisi,KasaTur_AlisFaturasi,KasaTur_AlisFisi,KasaTur_AlisIrsaliyesi,KasaTur_Uretim_Urun,109] then begin
-        TabIzlem.SQL.Add(MemoBoyutGir.Lines.Text);
-      end else begin
-        TabIzlem.SQL.Add(MemoBoyutCik.Lines.Text);
-      end;
-    end; }
-  end;
-  if not IzlemAktif then begin
-    TabIzlem.SQL.Text := StringReplace(TabIzlem.SQL.Text,'SI.DURUM=1 and',' ',[rfReplaceAll]);
-    TabIzlem.SQL.Text := StringReplace(TabIzlem.SQL.Text,'SI1.DURUM=1 and',' ',[rfReplaceAll]);
-    TabIzlem.SQL.Text := StringReplace(TabIzlem.SQL.Text,'SI2.DURUM=1 and',' ',[rfReplaceAll]);
-    TabIzlem.SQL.Text := StringReplace(TabIzlem.SQL.Text,'SI3.DURUM=1 and',' ',[rfReplaceAll]);
-  end;
-  TabIzlem.ExecSQL;
-
-  if IslemTur=KasaTur_StokSayimIslemi then //99 ise hepsini işaretleyelim tüm satırların şu anki değerlerini girsinler
-     veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+TabloAdi+' set SEC=1' ,[],[]);
-
-  TabIzlem.SQL.Text := 'select * from '+TabloAdi;
-  TabIzlem.Open;
-  case TabIzlem.RecordCount of
-    0 : TabIzlem.Append;
-    1 : begin//tek kayıt varsaişaretleyelim
-         TabIzlem.Edit;
-         TabIzlem.FieldByName('SEC').AsBoolean := True;
-         TabIzlem.Post
-      end;
-  end;
-  //
-
-end;   *)
 procedure TIzlemeDlg.TempTabloOlustur;
 var s, KomutDeclare, KomutInsert:String;
   // Izleme SQL'ini calistir. PG: UDFMPG PG-native sabiti (APgSql), degerler Pascal'da inline
@@ -561,16 +463,14 @@ begin
      KALAN := Tablo.Query2.Fields[0].AsFloat;
      if YalnizSecim then
         SecimJsonUret;
-     //before post olayında serino bilgileri alınıyor
-     //after post olayında destroy edip Kaydetme (STOKIZLEM tablosuna) gerçekleşiyor
-     Kaydedilebilir := True;
      ModalResult := MrOk;
   end;
 end;
 
 procedure TIzlemeDlg.CancelBtnClick(Sender: TObject);
 begin
-  Kaydedilebilir :=False;
+  // Kaydedilebilir bayragi kaldirildi: FormDestroy'daki yazma blogunu
+  //   kosullamak icin vardi, o blok artik yok (ekran yazmiyor).
   ModalResult := mrCancel;
 end;
 
@@ -997,7 +897,7 @@ begin
    Alanlar := 'STOKID,SERINO,';
    if GridFatIzlemViewLOTNO.Visible then
       Alanlar := Alanlar + 'LOTNO,';
-   Alanlar := Alanlar + 'SKT,URT,SEC,KALAN';
+   Alanlar  := Alanlar + 'SKT,URT,SEC,KALAN';
 
     if TGirisKutusuEx.BilgiAlEx('Seri No listesi', ctrls) = mrOk then begin
       if Trim(VarToStr(MemoYorum))<>'' then begin //eğer yorum düzenlenebiliyorsa
