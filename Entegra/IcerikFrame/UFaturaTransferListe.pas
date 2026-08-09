@@ -485,12 +485,15 @@ end;
 
 function TFatTransferListeDlg.BelgeDonustur(KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
 begin
+    // Result atanmiyordu (tanimsiz deger donuyordu). Son olusan uretim fisinin
+    //   ID'si donuyor; cagiran su an kullanmiyor ama tanimsiz kalmasin.
+    Result := 0;
     Tablo.TablodanSorguAc(8, 'select F.ID,FB.FATURATARIH, RECETEID=isnull(F.URETIMPLANID,-99), FB.GIRISDEPO,FB.GIRISDEPO, F.MIKTAR '+
           ' from FATBASLIK FB inner join FATURA F on FB.ID=F.FATBASID '+
           ' where FB.ID='+IntToStr(KaynakBaslikId)+' and F.TUR>0 and F.URETIMPLANID is not null  order by ID');
     Tablo.Query8.first;
     while not Tablo.Query8.eof do begin
-       Tablo.UretimFisiOlustur(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime, TabNo_TRANSFER, KaynakBaslikId, Tablo.Query8.FieldByName('RECETEID').AsInteger, Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('MIKTAR').AsFloat);
+       Result := Tablo.UretimFisiOlustur(Tablo.Query8.FieldByName('FATURATARIH').AsDateTime, TabNo_TRANSFER, KaynakBaslikId, Tablo.Query8.FieldByName('RECETEID').AsInteger, Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('GIRISDEPO').AsInteger,Tablo.Query8.FieldByName('MIKTAR').AsFloat);
        Tablo.Query8.next;
     end;
 end;
@@ -503,7 +506,11 @@ begin
        if GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewKAYNAK.Index]='' then
           BelgeDonustur(GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index])
   end else
-      if TabFatBaslik.FieldByName('DURUMNEREYE').AsString='' then
+      // Alan adi KAYNAK: liste sunucu tarafina tasinirken (sp_Prog_FatTransfer_
+      //   Liste_Json2) eski DURUMNEREYE kolonu kalkti, yerine KAYNAK geldi.
+      //   Cok-secim dali zaten KAYNAK kullaniyordu; tek-kayit dali eski adda
+      //   kalmis ve "Field 'DURUMNEREYE' not found" veriyordu. (08.08.2026)
+      if TabFatBaslik.FieldByName('KAYNAK').AsString='' then
          BelgeDonustur(TabFatBaslik.FieldByName('ID').AsInteger);
 
 end;
