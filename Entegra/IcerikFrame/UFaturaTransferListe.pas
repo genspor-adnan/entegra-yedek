@@ -182,6 +182,7 @@ type
     procedure YazdirmayaHazirla(AFastReport : TfrxReport);
     function EkranAdiAl : string;
     function BelgeDonustur(KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
+    function UretimeDonusmusMu(ABelgeId: Integer): Boolean;
 
   public
     { Public declarations }
@@ -524,7 +525,7 @@ begin
     if LOlusan = 0 then
        Application.MessageBox(
          PChar('Uretim fisi olusturulamadi.'#13#10 +
-               'Bu transferdeki urunlerin uretim recetesi tanimli degil.'),
+                'Bu transferdeki urunlerin uretim recetesi tanimli degil.'),
          PChar(Uyari), MB_OK or MB_ICONWARNING)
     else if LAtlanan > 0 then
        Application.MessageBox(
@@ -533,21 +534,42 @@ begin
          PChar(Uyari), MB_OK or MB_ICONINFORMATION);
 end;
 
+function TFatTransferListeDlg.UretimeDonusmusMu(ABelgeId: Integer): Boolean;
+// "Bu transfer ZATEN uretim fisine donusturulmus mu?"
+//   Uretim fisi FATBASLIK'a TUR=6, YERI=TabNo_TRANSFER, YERID=<transfer id>
+//   ile yazilir (UretimFisiOlustur).
+begin
+  Result := (ABelgeId > 0) and
+    Veritabani.VeriVarMi(Tablo.FDCnn,
+      'select ID from FATBASLIK where TUR=6 and YERI=&yer and YERID=&yid',
+      ['&yer', '&yid'], [TabNo_TRANSFER, ABelgeId]);
+end;
+
 procedure TFatTransferListeDlg.MenuUretimClick(Sender: TObject);
-var I :integer;
+// KOSUL DEGISTI (08.08.2026): "zaten uretime donusmus mu" diye bakiliyor.
+//   Eski kod DURUMNEREYE=''  ariyordu - "bu belge NEREYE donustu" bilgisi,
+//   yani amac cifte donusumu engellemekti. Liste sunucu tarafina tasinirken
+//   o kolon kalkti ve yerine KAYNAK geldi; KAYNAK ise "bu belge NEREDEN
+//   geldi" ('Talepten') demek - ANLAM TERS. Sonuc: talepten gelen transferler
+//   (yani cogu) uretime donusturulemiyor, hicbir sey olmuyordu.
+var
+  I, LId: Integer;
 begin
   if GridFatListeTview.Controller.SelectedRecordCount > 1 then begin
-     for I := 0 to GridFatListeTview.Controller.SelectedRecordCount - 1 do
-       if GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewKAYNAK.Index]='' then
-          BelgeDonustur(GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index])
-  end else
-      // Alan adi KAYNAK: liste sunucu tarafina tasinirken (sp_Prog_FatTransfer_
-      //   Liste_Json2) eski DURUMNEREYE kolonu kalkti, yerine KAYNAK geldi.
-      //   Cok-secim dali zaten KAYNAK kullaniyordu; tek-kayit dali eski adda
-      //   kalmis ve "Field 'DURUMNEREYE' not found" veriyordu. (08.08.2026)
-      if TabFatBaslik.FieldByName('KAYNAK').AsString='' then
-         BelgeDonustur(TabFatBaslik.FieldByName('ID').AsInteger);
-
+     for I := 0 to GridFatListeTview.Controller.SelectedRecordCount - 1 do begin
+       LId := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index];
+       if not UretimeDonusmusMu(LId) then
+          BelgeDonustur(LId);
+     end;
+  end else begin
+      LId := TabFatBaslik.FieldByName('ID').AsInteger;
+      if UretimeDonusmusMu(LId) then
+         Application.MessageBox(
+           PChar('Bu transfer icin uretim fisi zaten olusturulmus.'),
+           PChar(Uyari), MB_OK or MB_ICONINFORMATION)
+      else
+         BelgeDonustur(LId);
+  end;
 end;
 
 procedure TFatTransferListeDlg.TransferInfoMenuClick(Sender: TObject);
