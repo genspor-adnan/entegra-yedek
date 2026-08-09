@@ -407,6 +407,8 @@ type
     CariGridViewYETKIKODU: TcxGridDBColumn;
     CariGridViewMUHKODU: TcxGridDBColumn;
     CariGridViewILCE: TcxGridDBColumn;
+    TabSheetCRM: TcxTabSheet;
+    PageControlCRM: TcxPageControl;
     TabSheetGorev: TcxTabSheet;
     TabGorevler: TFDQuery;
     DtsGorevler: TDataSource;
@@ -722,6 +724,8 @@ type
     procedure CheckPasiflerClick(Sender: TObject);
     procedure CheckPotansiyelClick(Sender: TObject);
     procedure PageControlSekmeChange(Sender: TObject);
+    procedure PageControlCRMChange(Sender: TObject);
+    procedure CRMAltSekmeYenile;
     procedure IlgiliEkleTusClick(Sender: TObject);
     procedure IlgiliSilTusClick(Sender: TObject);
     procedure ResimDuzenleTusClick(Sender: TObject);
@@ -2149,7 +2153,11 @@ begin
    else  //sat?n al?nd?ysa yetkisi var m??
       if not Tablo.YetkiVarmi(220135,YetkiTur_Gorme) then tabYorumMedya.TabVisible:=False;
 
-   //?nce crm al?nm?? m? bakar?z
+   // ---- CRM sekmesi (Is Listesi / Satis Firsatlari / Projeler) ----
+   //   Iki kademe: once MODUL LISANSI, sonra ROL yetkisi.
+   //   CRM sekmesinin kendisi alt sekmelere BAGLI: ucunden hicbirini gorme
+   //   yetkisi yoksa CRM sekmesi HIC gorunmez; birine bile yetki varsa CRM
+   //   gorunur ve altinda yalniz yetkili olduklari kalir. (09.08.2026)
    if (not Tablo.YetkiVarmi(MODUL_CRM,YetkiTur_Gorme)){or(not Tablo.YetkiVarmi(21,YetkiTur_Gorme))} then begin
        TabSheetGorev.TabVisible:=False;
        TabSheetProje.TabVisible:=False;
@@ -2173,6 +2181,21 @@ begin
               ProjeSilTus.Visible := False;
           end;
         end;
+
+   // CRM sekmesi: alt sekmelerden EN AZ BIRI gorunuyorsa gorunur.
+   //   Ucu de kapaliysa bos bir sekme birakmanin anlami yok.
+   TabSheetCRM.TabVisible := TabSheetGorev.TabVisible or
+                             TabSheetFirsat.TabVisible or
+                             TabSheetProje.TabVisible;
+   if TabSheetCRM.TabVisible then begin
+      // Ilk gorunen alt sekme etkin olsun (gizli sekme etkin kalirsa bos gorunur)
+      if TabSheetGorev.TabVisible then
+         PageControlCRM.ActivePage := TabSheetGorev
+      else if TabSheetFirsat.TabVisible then
+         PageControlCRM.ActivePage := TabSheetFirsat
+      else
+         PageControlCRM.ActivePage := TabSheetProje;
+   end;
 
 
    if not Tablo.YetkiVarmi(29,YetkiTur_Gorme) or not Tablo.YetkiVarmi(220170,YetkiTur_Gorme) then begin
@@ -3924,6 +3947,54 @@ begin
       ['&G', '&Y', '&K'], [LRehberID, VarToStr(LMetin), StrToIntDef(Kullanan, 0)]);
 end;
 
+procedure TRehberAraDlg.CRMAltSekmeYenile;
+// CRM alt sekmelerinin (Is Listesi / Satis Firsatlari / Projeler) verisini
+//   yukler. Hem ust sekme CRM'e gelince hem de alt sekme degisince cagrilir.
+var
+  AcKapa: String[1];
+  GunSay: Smallint;
+begin
+  if not(REHBER.Active) or (REHBER.IsEmpty) then
+    Exit;
+
+  if PageControlCRM.ActivePage = TabSheetGorev then begin
+    AcKapa:=IntToStr(Abs(StrToInt(BoolToStr(CheckTamamlanan.Checked))));
+    if CheckTamamlanan.Checked then
+       GunSay := ComboTamamlanan.EditValue
+    else
+       GunSay := 9999;
+    TabloYenile(TabGorevler,[REHBER.FieldByName('ID').AsString, AcKapa,  GunSay]);
+    //GorevGridDBTableView1.ViewData.Expand(True);
+  end else if PageControlCRM.ActivePage = TabSheetFirsat then begin
+      TabFirsat.Close;
+      TabFirsat.SQL.Text:= MemoFirsat.Text;
+      if not(checkKapaliFirsatGoster.Checked) then
+         TabFirsat.SQL.Add(' AND P.DURUM <> 2 ');
+      case ModulYetki_TekSubeTum.Proje of
+        1 : TabFirsat.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi f?rsatlar?n? g?r?r
+       10 : TabFirsat.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi ?ube f?rsatlar?n? g?r?r
+      end;
+      TabFirsat.SQL.Add(' ORDER BY BITISTARIHI DESC ');
+      TabloYenile(TabFirsat,[REHBER.FieldByName('ID').AsInteger]);
+  end else if PageControlCRM.ActivePage = TabSheetProje then begin
+      TabProjeler.Close;
+      TabProjeler.SQL.Text:= MemoProjeler.Text;
+      if not(checkKapaliProjeGoster.Checked) then
+         TabProjeler.SQL.Add(' AND P.DURUM <> 2 ');
+      case ModulYetki_TekSubeTum.Proje of
+        1 : TabProjeler.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi projelerini g?r?r
+       10 : TabProjeler.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi ?ube projelerini g?r?r
+      end;
+      TabProjeler.SQL.Add(' ORDER BY BITISTARIHI DESC ');
+      TabloYenile(TabProjeler,[REHBER.FieldByName('ID').AsInteger]);
+  end;
+end;
+
+procedure TRehberAraDlg.PageControlCRMChange(Sender: TObject);
+begin
+  CRMAltSekmeYenile;
+end;
+
 procedure TRehberAraDlg.PageControlSekmeChange(Sender: TObject);
 var AcKapa:String[1];
     GunSay : Smallint;
@@ -3954,37 +4025,11 @@ begin
      if AktifVeriMotor = vmPG then TabAlias.SQL.Text := PgSqlCevir(TabAlias.SQL.Text);
      TabAlias.Open;
      AliasToolbarDurumuGuncelle(False);
-  end  else if PageControlSekme.ActivePage=TabSheetFirsat then begin
-      TabFirsat.Close;
-      TabFirsat.SQL.Text:= MemoFirsat.Text;
-      if not(checkKapaliFirsatGoster.Checked) then
-         TabFirsat.SQL.Add(' AND P.DURUM <> 2 ');
-      case ModulYetki_TekSubeTum.Proje of
-        1 : TabFirsat.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi f?rsatlar?n? g?r?r
-       10 : TabFirsat.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi ?ube f?rsatlar?n? g?r?r
-      end;
-      TabFirsat.SQL.Add(' ORDER BY BITISTARIHI DESC ');
-      TabloYenile(TabFirsat,[REHBER.FieldByName('ID').AsInteger]);
-  end  else if PageControlSekme.ActivePage=TabSheetProje then begin
-      TabProjeler.Close;
-      TabProjeler.SQL.Text:= MemoProjeler.Text;
-      if not(checkKapaliProjeGoster.Checked) then
-         TabProjeler.SQL.Add(' AND P.DURUM <> 2 ');
-      case ModulYetki_TekSubeTum.Proje of
-        1 : TabProjeler.SQL.Add(' AND P.PRJ_SORUMLUSU_ID='+Kullanan);//sadece kendi projelerini g?r?r
-       10 : TabProjeler.SQL.Add(' AND P.SUBEID='+IntToStr(SubeId));//sadece kendi ?ube projelerini g?r?r
-      end;
-      TabProjeler.SQL.Add(' ORDER BY BITISTARIHI DESC ');
-      TabloYenile(TabProjeler,[REHBER.FieldByName('ID').AsInteger]);
-  end else  if PageControlSekme.ActivePage=TabSheetGorev then begin
-    AcKapa:=IntToStr(Abs(StrToInt(BoolToStr(CheckTamamlanan.Checked))));
-    if CheckTamamlanan.Checked then
-       GunSay := ComboTamamlanan.EditValue
-    else
-       GunSay := 9999;
-    TabloYenile(TabGorevler,[REHBER.FieldByName('ID').AsString, AcKapa,  GunSay]);
-    //GorevGridDBTableView1.ViewData.Expand(True);
-  end
+  end  else if PageControlSekme.ActivePage=TabSheetCRM then
+     // Uc CRM listesi artik PageControlCRM'in ALT SEKMELERI; hangisi etkinse
+     //   onun verisi yuklenir. PageControlSekme.ActivePage burada daima
+     //   TabSheetCRM'dir - eskisi gibi dogrudan karsilastirmak calismaz.
+     CRMAltSekmeYenile
   else if PageControlSekme.ActivePage=TabSheetTeklifler then begin
     TabloYenile(TabTeklifler,[REHBER.FieldByName('ID').AsInteger]);
   //  GridTeklifView.ApplyBestFit();

@@ -1,4 +1,4 @@
-object RehberAraDlg: TRehberAraDlg
+﻿object RehberAraDlg: TRehberAraDlg
   Left = 0
   Top = 0
   Width = 1044
@@ -1286,7 +1286,7 @@ object RehberAraDlg: TRehberAraDlg
         TabOrder = 0
         Properties.ActivePage = cxTabSheet1
         Properties.CustomButtons.Buttons = <>
-        Properties.Style = 10
+        Properties.Style = 8
         ClientRectBottom = 228
         ClientRectRight = 1036
         ClientRectTop = 22
@@ -1960,1041 +1960,1060 @@ object RehberAraDlg: TRehberAraDlg
         end
       end
     end
-    object TabSheetFirsat: TcxTabSheet
-      Caption = 'Sat'#305#351' F'#305'rsatlar'#305
+    object TabSheetCRM: TcxTabSheet
+      Caption = 'CRM'
       ImageIndex = 10
-      object Panel7: TPanel
+      object PageControlCRM: TcxPageControl
         Left = 0
         Top = 0
         Width = 1036
-        Height = 41
-        Align = alTop
-        Caption = 'Panel6'
-        TabOrder = 0
-        object ToolBar9: TToolBar
-          Left = 1
-          Top = 1
-          Width = 146
-          Height = 39
-          Margins.Bottom = 0
-          Align = alLeft
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
-          Caption = 'AletCubugu'
-          Color = clTeal
-          Ctl3D = False
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-          EdgeInner = esNone
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          HotTrackColor = 65408
-          Images = Tablo.PNGImageList2
-          ParentColor = False
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          Transparent = True
-          object FirsatEkleTus: TToolButton
-            Left = 0
-            Top = 0
-            Caption = 'Yeni'
-            ImageIndex = 0
-            ImageName = 'PngImage0'
-            OnClick = FirsatEkleTusClick
-          end
-          object FirsatSilTus: TToolButton
-            Left = 46
-            Top = 0
-            Caption = 'Sil'
-            ImageIndex = 1
-            ImageName = 'PngImage1'
-            OnClick = FirsatSilTusClick
-          end
-          object ToolButton16: TToolButton
-            Left = 92
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton7'
-            ImageIndex = 8
-            ImageName = 'PngImage15'
-            Style = tbsSeparator
-          end
-          object FirsatDuzenleTus: TToolButton
-            Left = 100
-            Top = 0
-            Caption = 'D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            OnClick = FirsatDuzenleTusClick
-          end
-        end
-        object JvNavPanelHeader3: TJvNavPanelHeader
-          Left = 147
-          Top = 1
-          Width = 888
-          Height = 39
-          Align = alClient
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWhite
-          Font.Height = -16
-          Font.Name = 'Arial'
-          Font.Style = [fsBold]
-          ParentFont = False
-          ColorFrom = 14540253
-          ColorTo = 11776947
-          ImageIndex = 0
-          object checkKapaliFirsatGoster: TcxCheckBox
-            Left = 0
-            Top = 0
-            Align = alLeft
-            Caption = 'Kapal'#305' F'#305'rsatlar'#305' da g'#246'ster'
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.NullStyle = nssUnchecked
-            Properties.OnEditValueChanged = checkKapaliGosterPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
-            TabOrder = 0
-            Transparent = True
-          end
-        end
-      end
-      object GridFirsat: TcxGrid
-        Left = 0
-        Top = 41
-        Width = 1036
-        Height = 187
+        Height = 228
         Align = alClient
-        PopupMenu = PmProjeAktKopyala
-        TabOrder = 1
-        LookAndFeel.Kind = lfOffice11
-        LookAndFeel.NativeStyle = True
-        LookAndFeel.ScrollbarMode = sbmClassic
-        object GridFirsatView: TcxGridDBTableView
-          OnDblClick = ProjeDuzenleClick
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          OnCanFocusRecord = GridCariProjelerViewCanFocusRecord
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DataSource = DtsFirsat
-          DataController.DetailKeyFieldNames = 'ID'
-          DataController.KeyFieldNames = 'ID'
-          DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsCustomize.ColumnsQuickCustomization = True
-          OptionsData.CancelOnExit = False
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsSelection.CellSelect = False
-          OptionsView.ExpandButtonsForEmptyDetails = False
-          OptionsView.GroupByBox = False
-          OptionsView.Indicator = True
-          Styles.OnGetContentStyle = GridCariProjelerViewStylesGetContentStyle
-          object cxGridDBColumn5: TcxGridDBColumn
-            Caption = 'Ba'#351'lama'
-            DataBinding.FieldName = 'BASLAMATARIHI'
-            DataBinding.IsNullValueType = True
-            Width = 89
-          end
-          object cxGridDBColumn6: TcxGridDBColumn
-            Caption = 'Biti'#351
-            DataBinding.FieldName = 'BITISTARIHI'
-            DataBinding.IsNullValueType = True
-          end
-          object cxGridDBColumn8: TcxGridDBColumn
-            Caption = 'F'#305'rsat Kodu'
-            DataBinding.FieldName = 'PROJEKODU'
-            DataBinding.IsNullValueType = True
-            Width = 107
-          end
-          object cxGridDBColumn13: TcxGridDBColumn
-            Caption = 'F'#305'rsat Ad'#305
-            DataBinding.FieldName = 'PROJEADI'
-            DataBinding.IsNullValueType = True
-            Width = 85
-          end
-          object cxGridDBColumn14: TcxGridDBColumn
-            Caption = 'Konusu'
-            DataBinding.FieldName = 'KONUSU'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxTextEditProperties'
-            Width = 86
-          end
-          object cxGridDBColumn15: TcxGridDBColumn
-            Caption = 'T'#252'r'#252
-            DataBinding.FieldName = 'PROJETURU'
-            DataBinding.IsNullValueType = True
-            Width = 79
-          end
-          object cxGridDBColumn16: TcxGridDBColumn
-            Caption = 'Durum'
-            DataBinding.FieldName = 'PROJEDURUM'
-            DataBinding.IsNullValueType = True
-          end
-          object cxGridDBColumn17: TcxGridDBColumn
-            Caption = 'A'#351'ama'
-            DataBinding.FieldName = 'PROJEASAMA'
-            DataBinding.IsNullValueType = True
-          end
-          object cxGridDBColumn20: TcxGridDBColumn
-            Caption = 'F'#305'rsat De'#287'eri'
-            DataBinding.FieldName = 'SATISFIYATI'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;(,0.00)'
-            Width = 77
-          end
-          object cxGridDBColumn21: TcxGridDBColumn
-            Caption = 'P.Birimi'
-            DataBinding.FieldName = 'SATISKUR'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxComboBoxProperties'
-          end
-          object cxGridDBColumn22: TcxGridDBColumn
-            Caption = 'Notlar'
-            DataBinding.FieldName = 'NOTLAR'
-            DataBinding.IsNullValueType = True
-          end
-        end
-        object cxGridDBTableView2: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          DataController.DataModeController.GridMode = True
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DataSource = DtsPerIletisim
-          DataController.DetailKeyFieldNames = 'SOZID'
-          DataController.MasterKeyFieldNames = 'ID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsView.GroupByBox = False
-          object cxGridDBColumn23: TcxGridDBColumn
-            Caption = 'T'#252'r'
-            DataBinding.FieldName = 'TUR'
-            DataBinding.IsNullValueType = True
-          end
-          object cxGridDBColumn24: TcxGridDBColumn
-            Caption = 'Belge Ad'#305
-            DataBinding.FieldName = 'BELGEADI'
-            DataBinding.IsNullValueType = True
-          end
-        end
-        object cxGridLevel2: TcxGridLevel
-          GridView = GridFirsatView
-        end
-      end
-      object MemoFirsat: TMemo
-        Left = 21
-        Top = 85
-        Width = 638
-        Height = 89
-        Color = clSilver
-        Lines.Strings = (
-          
-            'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
-            'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
-          
-            'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
-            ',P.OLASILIK,P.APLIKASYON,'
-          
-            'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
-            'eDurum.ANAHTAR PROJEDURUM'
-          'from PROJELER P '
-          #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
-          
-            #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
-            'P.ILGILI'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
-            'D ProjeTuru.BOLUM =-2112'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
-            ' AND ProjeAsama.BOLUM =-2113'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
-            ' AND ProjeDurum.BOLUM =-2114'
-          'WHERE '
-          'P.REHBERID = :PID '
-          'and P.MODUL=1')
-        TabOrder = 2
-        Visible = False
-        WordWrap = False
-      end
-    end
-    object TabSheetProje: TcxTabSheet
-      Caption = 'Projeler'
-      ImageIndex = 5
-      object GridCariProjeler: TcxGrid
-        Left = 0
-        Top = 41
-        Width = 1036
-        Height = 187
-        Align = alClient
-        PopupMenu = PmProjeAktKopyala
         TabOrder = 0
-        LookAndFeel.Kind = lfOffice11
-        LookAndFeel.NativeStyle = True
-        LookAndFeel.ScrollbarMode = sbmClassic
-        object GridCariProjelerView: TcxGridDBTableView
-          OnDblClick = ProjeDuzenleClick
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          OnCanFocusRecord = GridCariProjelerViewCanFocusRecord
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DataSource = DtsProjeler
-          DataController.DetailKeyFieldNames = 'ID'
-          DataController.KeyFieldNames = 'ID'
-          DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsCustomize.ColumnsQuickCustomization = True
-          OptionsData.CancelOnExit = False
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsSelection.CellSelect = False
-          OptionsView.ExpandButtonsForEmptyDetails = False
-          OptionsView.GroupByBox = False
-          OptionsView.Indicator = True
-          Styles.OnGetContentStyle = GridCariProjelerViewStylesGetContentStyle
-          object GridCariProjelerViewBASTARIHI: TcxGridDBColumn
-            Caption = 'Ba'#351'lama'
-            DataBinding.FieldName = 'BASLAMATARIHI'
-            DataBinding.IsNullValueType = True
-            Width = 89
-          end
-          object GridCariProjelerViewBITTARIHI: TcxGridDBColumn
-            Caption = 'Biti'#351' Tarihi'
-            DataBinding.FieldName = 'BITISTARIHI'
-            DataBinding.IsNullValueType = True
-          end
-          object GridCariProjelerViewPROJEKODU: TcxGridDBColumn
-            Caption = 'Proje Kodu'
-            DataBinding.FieldName = 'PROJEKODU'
-            DataBinding.IsNullValueType = True
-            Width = 107
-          end
-          object GridCariProjelerViewPROJEADI: TcxGridDBColumn
-            Caption = 'Proje Ad'#305
-            DataBinding.FieldName = 'PROJEADI'
-            DataBinding.IsNullValueType = True
-            Width = 85
-          end
-          object GridCariProjelerViewKONUSU: TcxGridDBColumn
-            Caption = 'Konusu'
-            DataBinding.FieldName = 'KONUSU'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxTextEditProperties'
-            Width = 86
-          end
-          object GridCariProjelerViewTURU: TcxGridDBColumn
-            Caption = 'T'#252'r'#252
-            DataBinding.FieldName = 'PROJETURU'
-            DataBinding.IsNullValueType = True
-            Width = 79
-          end
-          object GridCariProjelerViewDURUM: TcxGridDBColumn
-            Caption = 'Durum'
-            DataBinding.FieldName = 'PROJEDURUM'
-            DataBinding.IsNullValueType = True
-          end
-          object GridCariProjelerViewASAMA: TcxGridDBColumn
-            Caption = 'A'#351'ama'
-            DataBinding.FieldName = 'PROJEASAMA'
-            DataBinding.IsNullValueType = True
-          end
-          object GridCariProjelerViewLISTEFIYATI: TcxGridDBColumn
-            Caption = 'Liste Fiyat'#305
-            DataBinding.FieldName = 'LISTEFIYATI'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;(,0.00)'
-          end
-          object GridCariProjelerViewLISTEKUR: TcxGridDBColumn
-            Caption = 'Liste P.Birimi'
-            DataBinding.FieldName = 'LISTEKUR'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxComboBoxProperties'
-          end
-          object GridCariProjelerViewSATISFIYATI: TcxGridDBColumn
-            Caption = 'Sat'#305#351' Fiyat'#305
-            DataBinding.FieldName = 'SATISFIYATI'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxCurrencyEditProperties'
-            Properties.DisplayFormat = ',0.00;(,0.00)'
-            Width = 77
-          end
-          object GridCariProjelerViewSATISKUR: TcxGridDBColumn
-            Caption = 'Sat'#305#351' P.Birimi'
-            DataBinding.FieldName = 'SATISKUR'
-            DataBinding.IsNullValueType = True
-            PropertiesClassName = 'TcxComboBoxProperties'
-          end
-          object GridCariProjelerViewNOTLAR: TcxGridDBColumn
-            Caption = 'Notlar'
-            DataBinding.FieldName = 'NOTLAR'
-            DataBinding.IsNullValueType = True
-          end
-        end
-        object GridCariProjelerDBTableView1: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
-          DataController.DataModeController.GridMode = True
-          DataController.DataModeController.SmartRefresh = True
-          DataController.DataSource = DtsPerIletisim
-          DataController.DetailKeyFieldNames = 'SOZID'
-          DataController.MasterKeyFieldNames = 'ID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsView.GroupByBox = False
-          object GridCariProjelerDBTableView1TUR: TcxGridDBColumn
-            Caption = 'T'#252'r'
-            DataBinding.FieldName = 'TUR'
-            DataBinding.IsNullValueType = True
-          end
-          object GridCariProjelerDBTableView1BELGEADI: TcxGridDBColumn
-            Caption = 'Belge Ad'#305
-            DataBinding.FieldName = 'BELGEADI'
-            DataBinding.IsNullValueType = True
-          end
-        end
-        object GridCariProjelerLevel1: TcxGridLevel
-          GridView = GridCariProjelerView
-        end
-      end
-      object MemoProjeler: TMemo
-        Left = 15
-        Top = 72
-        Width = 638
-        Height = 89
-        Color = clSilver
-        Lines.Strings = (
-          
-            'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
-            'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
-          
-            'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
-            ',P.OLASILIK,P.APLIKASYON,'
-          
-            'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
-            'eDurum.ANAHTAR PROJEDURUM'
-          'from PROJELER P '
-          #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
-          
-            #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
-            'P.ILGILI'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
-            'D ProjeTuru.BOLUM =-2132'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
-            ' AND ProjeAsama.BOLUM =-2133'
-          
-            #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
-            ' AND ProjeDurum.BOLUM =-2134'
-          'WHERE '
-          'P.REHBERID = :PID '
-          'and P.MODUL=11'
-          '')
-        TabOrder = 1
-        Visible = False
-        WordWrap = False
-      end
-      object Panel6: TPanel
-        Left = 0
-        Top = 0
-        Width = 1036
-        Height = 41
-        Align = alTop
-        Caption = 'Panel6'
-        TabOrder = 2
-        object ToolBar4: TToolBar
-          Left = 1
-          Top = 1
-          Width = 146
-          Height = 39
-          Margins.Bottom = 0
-          Align = alLeft
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
-          Caption = 'AletCubugu'
-          Color = clTeal
-          Ctl3D = False
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-          EdgeInner = esNone
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          HotTrackColor = 65408
-          Images = Tablo.PNGImageList2
-          ParentColor = False
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          Transparent = True
-          object ProjeEkleTus: TToolButton
+        Properties.ActivePage = TabSheetGorev
+        Properties.CustomButtons.Buttons = <>
+        Properties.Style = 8
+        OnChange = PageControlCRMChange
+        ClientRectBottom = 228
+        ClientRectRight = 1036
+        ClientRectTop = 27
+        object TabSheetGorev: TcxTabSheet
+          Caption = #304#351' Listesi'
+          ImageIndex = 10
+          object TreeListGorev: TcxDBTreeList
             Left = 0
-            Top = 0
-            Caption = 'Yeni'
-            ImageIndex = 0
-            ImageName = 'PngImage0'
-            OnClick = ProjeEkleTusClick
-          end
-          object ProjeSilTus: TToolButton
-            Left = 46
-            Top = 0
-            Caption = 'Sil'
-            ImageIndex = 1
-            ImageName = 'PngImage1'
-            OnClick = ProjeSilTusClick
-          end
-          object ToolButton7: TToolButton
-            Left = 92
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton7'
-            ImageIndex = 8
-            ImageName = 'PngImage15'
-            Style = tbsSeparator
-          end
-          object ProjeDuzenle: TToolButton
-            Left = 100
-            Top = 0
-            Caption = 'D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            OnClick = ProjeDuzenleClick
-          end
-        end
-        object JvNavPanelHeader2: TJvNavPanelHeader
-          Left = 147
-          Top = 1
-          Width = 888
-          Height = 39
-          Align = alClient
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWhite
-          Font.Height = -16
-          Font.Name = 'Arial'
-          Font.Style = [fsBold]
-          ParentFont = False
-          ColorFrom = 14540253
-          ColorTo = 11776947
-          ImageIndex = 0
-          object checkKapaliProjeGoster: TcxCheckBox
-            Left = 0
-            Top = 0
-            Align = alLeft
-            Caption = 'Kapal'#305' Projeleri de g'#246'ster'
-            ParentFont = False
-            Properties.ImmediatePost = True
-            Properties.NullStyle = nssUnchecked
-            Properties.OnEditValueChanged = checkKapaliGosterPropertiesEditValueChanged
-            Style.Font.Charset = TURKISH_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
+            Top = 41
+            Width = 1036
+            Height = 187
+            Align = alClient
+            Bands = <
+              item
+              end>
+            DataController.DataSource = DtsGorevler
+            DataController.ParentField = 'BAGIDUST'
+            DataController.KeyField = 'ID'
+            DragMode = dmAutomatic
+            Images = Tablo.KlasorResimleri
+            LookAndFeel.ScrollbarMode = sbmClassic
+            Navigator.Buttons.CustomButtons = <>
+            OptionsCustomizing.ColumnsQuickCustomization = True
+            OptionsData.Editing = False
+            OptionsData.Deleting = False
+            OptionsSelection.MultiSelect = True
+            OptionsView.GridLines = tlglBoth
+            OptionsView.Indicator = True
+            OptionsView.TreeLineStyle = tllsNone
+            PopupMenu = GorevlerMenu
+            RootValue = -1
+            ScrollbarAnnotations.CustomAnnotations = <>
             TabOrder = 0
-            Transparent = True
+            OnClick = TreeListGorevClick
+            OnDblClick = TreeListGorevDblClick
+            object cxDBTreeListColumn1: TcxDBTreeListColumn
+              Visible = False
+              DataBinding.FieldName = 'ID'
+              Width = 100
+              Position.ColIndex = 7
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListACKAPA: TcxDBTreeListColumn
+              Tag = 1
+              PropertiesClassName = 'TcxCheckBoxProperties'
+              Caption.Glyph.SourceDPI = 96
+              Caption.Glyph.Data = {
+                424D360400000000000036000000280000001000000010000000010020000000
+                000000000000C40E0000C40E0000000000000000000000000000000000000000
+                000000000002000000070000000C0000001000000012000000110000000E0000
+                0008000000020000000000000000000000000000000000000000000000010000
+                0004000101120D2A1D79184E36C6216B4BFF216B4BFF216C4BFF1A533AD20F2F
+                218400010115000000050000000100000000000000000000000000000005050F
+                0A351C5B40DC24805CFF29AC7EFF2CC592FF2DC894FF2DC693FF2AAE80FF2585
+                60FF1A563DD405110C3D00000007000000010000000000000003040E0A312065
+                48ED299D74FF2FC896FF2EC996FF56D4ACFF68DAB5FF3BCD9DFF30C996FF32CA
+                99FF2BA479FF227050F805110C3D00000005000000000000000A1A573DD02EA5
+                7CFF33CA99FF2EC896FF4CD2A8FF20835CFF00673BFF45BE96FF31CB99FF31CB
+                98FF34CC9CFF31AD83FF1B5C41D300010113000000020B23185E2E8A66FF3BCD
+                9EFF30CA97FF4BD3A9FF349571FF87AF9DFFB1CFC1FF238A60FF45D3A8FF36CF
+                9FFF33CD9BFF3ED0A3FF319470FF0F32237F00000007184D37B63DB38CFF39CD
+                9FFF4BD5A9FF43A382FF699782FFF8F1EEFFF9F3EEFF357F5DFF56C4A1FF43D5
+                A8FF3ED3A4FF3CD1A4FF41BC95FF1B5C43CD0000000B1C6446DF4BCAA4FF44D2
+                A8FF4FB392FF4E826AFFF0E9E6FFC0C3B5FFEFE3DDFFCEDDD4FF1B754FFF60DC
+                B8FF48D8ACFF47D6AAFF51D4ACFF247A58F80000000E217050F266D9B8FF46D3
+                A8FF0B6741FFD2D2CBFF6A8F77FF116B43FF73967EFFF1E8E3FF72A28BFF46A6
+                85FF5EDFBAFF4CD9AFFF6BE2C2FF278460FF020604191E684ADC78D9BEFF52DA
+                B1FF3DBA92FF096941FF2F9C76FF57DEB8FF2D9973FF73967EFFF0EAE7FF4F88
+                6CFF5ABB9AFF5BDEB9FF7FE2C7FF27835FF80000000C19523BAB77C8B0FF62E0
+                BCFF56DDB7FF59DFBAFF5CE1BDFF5EE2BEFF5FE4C1FF288C67FF698E76FFE6E1
+                DCFF176B47FF5FD8B4FF83D5BDFF1E674CC60000000909201747439C7BFF95EC
+                D6FF5ADFBAFF5EE2BDFF61E4BFFF64E6C1FF67E6C5FF67E8C7FF39A17EFF1F6D
+                4AFF288B64FF98EFD9FF4DAC8CFF1036286D00000004000000041C5F46B578C6
+                ADFF9AEED9FF65E5C0FF64E7C3FF69E7C6FF6BE8C8FF6CE9C9FF6BEAC9FF5ED6
+                B6FF97EDD7FF86D3BBFF237759D20102010C0000000100000001030A0718247B
+                5BDA70C1A8FFB5F2E3FF98F0DAFF85EDD4FF75EBCEFF88EFD6FF9CF2DDFFBAF4
+                E7FF78CDB3FF2A906DEA0615102E00000002000000000000000000000001030A
+                07171E694FB844AB87FF85D2BBFFA8E6D6FFC5F4EBFFABE9D8FF89D8C1FF4BB6
+                92FF237F60CB05130E2700000003000000000000000000000000000000000000
+                0001000000030A241B411B60489D258464CF2C9D77EE258867CF1F7156B00E32
+                26560000000600000002000000000000000000000000}
+              Caption.ShowEndEllipsis = False
+              Caption.Text = '*'
+              DataBinding.FieldName = 'ACKAPA'
+              Options.Editing = False
+              Width = 61
+              Position.ColIndex = 0
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListLISTEADI: TcxDBTreeListColumn
+              Caption.Text = 'L'#304'STE'
+              DataBinding.FieldName = 'LISTEADI'
+              Options.Editing = False
+              Width = 62
+              Position.ColIndex = 1
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListKONUSU: TcxDBTreeListColumn
+              DataBinding.FieldName = 'KONUSU'
+              Options.Editing = False
+              Width = 139
+              Position.ColIndex = 2
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListTURU: TcxDBTreeListColumn
+              Caption.Text = 'T'#220'R'#220
+              DataBinding.FieldName = 'TURU'
+              Options.Editing = False
+              Width = 65
+              Position.ColIndex = 3
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListATANAN1: TcxDBTreeListColumn
+              Caption.Text = 'ATANAN'
+              DataBinding.FieldName = 'ATANAN1'
+              Options.Editing = False
+              Width = 100
+              Position.ColIndex = 4
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListTARIH: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxDateEditProperties'
+              Caption.Text = 'TAR'#304'H'
+              DataBinding.FieldName = 'BITISTARIHI'
+              Options.Editing = False
+              Width = 100
+              Position.ColIndex = 5
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListNOTLAR_BIT: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = Tablo.KlasorResimleri
+              Properties.Items = <
+                item
+                  Value = False
+                end
+                item
+                  ImageIndex = 27
+                  Value = True
+                end>
+              Caption.Glyph.SourceDPI = 96
+              Caption.Glyph.Data = {
+                424D360400000000000036000000280000001000000010000000010020000000
+                000000000000C40E0000C40E0000000000000000000000000000000000000000
+                0000000000000000000000000000000000000000000000000000000000000000
+                0000000000000000000000000000000000000000000000000000000000200000
+                002100000023000000240000002600000027000000290000002A0000002C0000
+                002D0000002F0000003100000032000000340000000000000000000000140000
+                00150000001600000017000000190000001A0000001B0000001D0000001E0000
+                0020000000210000002300000024000000260000000000000000000000090000
+                000A0000000B0000000C0000000E0000000F0000001000000011000000120000
+                0014000000150000001600000017000000190000000000000000000000000000
+                000000000000000000040000000F000000110000000B00000004000000010000
+                0000000000000000000000000000000000000000000000000000402A1FFF402A
+                1FFF3E291FFF0000000E421C11FF31140CE1190A0698030407420000000C0000
+                0002000000000000000000000000000000000000000000000000422B20FF0000
+                0000000000000000000D663C2BDCB9C7D2FF7889A2FF244182FF051033960000
+                000F000000020000000000000000000000000000000000000000442D22FF0000
+                0000000000000000000841261B91879AB2FFC8E3F5FF1F66B6FF2B6BA8FF0512
+                36950000000E0000000200000000000000000000000000000000452E23FF0000
+                000000000000000000031113163E488BC3FFDEFEFDFF51B4E3FF1F68B7FF3173
+                AEFF061538940000000D00000002000000000000000000000000483022FF0000
+                00000000000000000001000000081D44618D479FD2FFDEFEFDFF59BFE9FF216B
+                B9FF367BB3FF07173A920000000C000000020000000000000000493224FF0000
+                0000000000000000000000000001000000091D44618C4BA5D5FFDEFEFDFF61CA
+                EFFF246FBCFF3B83B9FF08193D900000000A00000002000000004A3225FF0000
+                000000000000000000000000000000000001000000081D44618A4EAAD7FFDEFE
+                FDFF68D4F4FF2875BEFF3F8BBEFF091B3F8E00000006000000004C3426FF4B33
+                26FF4B3225FF4A3225FF493225FF483124FF483124FF000000071C44618951AE
+                DAFFDEFEFDFF6EDDF8FF2C7BC2FF18448BFF0000000800000000000000000000
+                0000000000000000000000000000000000000000000000000001000000061D44
+                618754B1DCFFDEFEFDFF4FA6D4FF112B4E880000000400000000000000000000
+                0000000000000000000000000000000000000000000000000000000000010000
+                00051D456185357FBCFF173A5986000000050000000100000000000000000000
+                0000000000000000000000000000000000000000000000000000000000000000
+                00010000000200000004000000030000000100000000}
+              Caption.Text = 'N'
+              DataBinding.FieldName = 'NOTLAR_BIT'
+              Width = 22
+              Position.ColIndex = 6
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListYORUM_BIT: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = Tablo.KlasorResimleri
+              Properties.Items = <
+                item
+                  Value = False
+                end
+                item
+                  ImageIndex = 26
+                  Value = True
+                end>
+              Caption.Text = 'Y'
+              DataBinding.FieldName = 'YORUM_BIT'
+              Width = 22
+              Position.ColIndex = 8
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListTEKRAR_BIT: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = Tablo.KlasorResimleri
+              Properties.Items = <
+                item
+                  Value = False
+                end
+                item
+                  ImageIndex = 20
+                  Value = True
+                end>
+              Caption.Text = 'T'
+              DataBinding.FieldName = 'TEKRAR_BIT'
+              Width = 22
+              Position.ColIndex = 9
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListANIMSAT_BIT: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = Tablo.KlasorResimleri
+              Properties.Items = <
+                item
+                  Value = False
+                end
+                item
+                  ImageIndex = 23
+                  Value = True
+                end>
+              Caption.Text = 'A'
+              DataBinding.FieldName = 'ANIMSAT_BIT'
+              Width = 22
+              Position.ColIndex = 10
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListBAYRAK: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = Tablo.KlasorResimleri
+              Properties.Items = <
+                item
+                  Value = False
+                end
+                item
+                  ImageIndex = 21
+                  Value = True
+                end>
+              Caption.Text = 'B'
+              DataBinding.FieldName = 'BAYRAK'
+              Width = 22
+              Position.ColIndex = 11
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListDURUM: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Items = <>
+              RepositoryItem = Tablo.RepGorevDurum
+              DataBinding.FieldName = 'DURUM'
+              Width = 100
+              Position.ColIndex = 12
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListPROJEKODU: TcxDBTreeListColumn
+              DataBinding.FieldName = 'PROJEKODU'
+              Width = 100
+              Position.ColIndex = 13
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListEKLEYENAD: TcxDBTreeListColumn
+              DataBinding.FieldName = 'EKLEYENAD'
+              Width = 100
+              Position.ColIndex = 14
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListEkipmancxDBTreeListEKLEMETARIHI: TcxDBTreeListColumn
+              PropertiesClassName = 'TcxDateEditProperties'
+              DataBinding.FieldName = 'EKLEMETARIHI'
+              Width = 100
+              Position.ColIndex = 15
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListGorevcxDBTreeListEKLEYEN: TcxDBTreeListColumn
+              Visible = False
+              DataBinding.FieldName = 'EKLEYEN'
+              Position.ColIndex = 16
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
+            object TreeListGorevcxDBTreeListLISTEID: TcxDBTreeListColumn
+              Visible = False
+              DataBinding.FieldName = 'LISTEID'
+              Position.ColIndex = 17
+              Position.RowIndex = 0
+              Position.BandIndex = 0
+              Summary.FooterSummaryItems = <>
+              Summary.GroupFooterSummaryItems = <>
+            end
           end
-        end
-      end
-    end
-    object TabSheetGorev: TcxTabSheet
-      Caption = #304#351' Listesi'
-      ImageIndex = 10
-      object TreeListGorev: TcxDBTreeList
-        Left = 0
-        Top = 41
-        Width = 1036
-        Height = 187
-        Align = alClient
-        Bands = <
-          item
-          end>
-        DataController.DataSource = DtsGorevler
-        DataController.ParentField = 'BAGIDUST'
-        DataController.KeyField = 'ID'
-        DragMode = dmAutomatic
-        Images = Tablo.KlasorResimleri
-        LookAndFeel.ScrollbarMode = sbmClassic
-        Navigator.Buttons.CustomButtons = <>
-        OptionsCustomizing.ColumnsQuickCustomization = True
-        OptionsData.Editing = False
-        OptionsData.Deleting = False
-        OptionsSelection.MultiSelect = True
-        OptionsView.GridLines = tlglBoth
-        OptionsView.Indicator = True
-        OptionsView.TreeLineStyle = tllsNone
-        PopupMenu = GorevlerMenu
-        RootValue = -1
-        ScrollbarAnnotations.CustomAnnotations = <>
-        TabOrder = 0
-        OnClick = TreeListGorevClick
-        OnDblClick = TreeListGorevDblClick
-        object cxDBTreeListColumn1: TcxDBTreeListColumn
-          Visible = False
-          DataBinding.FieldName = 'ID'
-          Width = 100
-          Position.ColIndex = 7
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListACKAPA: TcxDBTreeListColumn
-          Tag = 1
-          PropertiesClassName = 'TcxCheckBoxProperties'
-          Caption.Glyph.SourceDPI = 96
-          Caption.Glyph.Data = {
-            424D360400000000000036000000280000001000000010000000010020000000
-            000000000000C40E0000C40E0000000000000000000000000000000000000000
-            000000000002000000070000000C0000001000000012000000110000000E0000
-            0008000000020000000000000000000000000000000000000000000000010000
-            0004000101120D2A1D79184E36C6216B4BFF216B4BFF216C4BFF1A533AD20F2F
-            218400010115000000050000000100000000000000000000000000000005050F
-            0A351C5B40DC24805CFF29AC7EFF2CC592FF2DC894FF2DC693FF2AAE80FF2585
-            60FF1A563DD405110C3D00000007000000010000000000000003040E0A312065
-            48ED299D74FF2FC896FF2EC996FF56D4ACFF68DAB5FF3BCD9DFF30C996FF32CA
-            99FF2BA479FF227050F805110C3D00000005000000000000000A1A573DD02EA5
-            7CFF33CA99FF2EC896FF4CD2A8FF20835CFF00673BFF45BE96FF31CB99FF31CB
-            98FF34CC9CFF31AD83FF1B5C41D300010113000000020B23185E2E8A66FF3BCD
-            9EFF30CA97FF4BD3A9FF349571FF87AF9DFFB1CFC1FF238A60FF45D3A8FF36CF
-            9FFF33CD9BFF3ED0A3FF319470FF0F32237F00000007184D37B63DB38CFF39CD
-            9FFF4BD5A9FF43A382FF699782FFF8F1EEFFF9F3EEFF357F5DFF56C4A1FF43D5
-            A8FF3ED3A4FF3CD1A4FF41BC95FF1B5C43CD0000000B1C6446DF4BCAA4FF44D2
-            A8FF4FB392FF4E826AFFF0E9E6FFC0C3B5FFEFE3DDFFCEDDD4FF1B754FFF60DC
-            B8FF48D8ACFF47D6AAFF51D4ACFF247A58F80000000E217050F266D9B8FF46D3
-            A8FF0B6741FFD2D2CBFF6A8F77FF116B43FF73967EFFF1E8E3FF72A28BFF46A6
-            85FF5EDFBAFF4CD9AFFF6BE2C2FF278460FF020604191E684ADC78D9BEFF52DA
-            B1FF3DBA92FF096941FF2F9C76FF57DEB8FF2D9973FF73967EFFF0EAE7FF4F88
-            6CFF5ABB9AFF5BDEB9FF7FE2C7FF27835FF80000000C19523BAB77C8B0FF62E0
-            BCFF56DDB7FF59DFBAFF5CE1BDFF5EE2BEFF5FE4C1FF288C67FF698E76FFE6E1
-            DCFF176B47FF5FD8B4FF83D5BDFF1E674CC60000000909201747439C7BFF95EC
-            D6FF5ADFBAFF5EE2BDFF61E4BFFF64E6C1FF67E6C5FF67E8C7FF39A17EFF1F6D
-            4AFF288B64FF98EFD9FF4DAC8CFF1036286D00000004000000041C5F46B578C6
-            ADFF9AEED9FF65E5C0FF64E7C3FF69E7C6FF6BE8C8FF6CE9C9FF6BEAC9FF5ED6
-            B6FF97EDD7FF86D3BBFF237759D20102010C0000000100000001030A0718247B
-            5BDA70C1A8FFB5F2E3FF98F0DAFF85EDD4FF75EBCEFF88EFD6FF9CF2DDFFBAF4
-            E7FF78CDB3FF2A906DEA0615102E00000002000000000000000000000001030A
-            07171E694FB844AB87FF85D2BBFFA8E6D6FFC5F4EBFFABE9D8FF89D8C1FF4BB6
-            92FF237F60CB05130E2700000003000000000000000000000000000000000000
-            0001000000030A241B411B60489D258464CF2C9D77EE258867CF1F7156B00E32
-            26560000000600000002000000000000000000000000}
-          Caption.ShowEndEllipsis = False
-          Caption.Text = '*'
-          DataBinding.FieldName = 'ACKAPA'
-          Options.Editing = False
-          Width = 61
-          Position.ColIndex = 0
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListLISTEADI: TcxDBTreeListColumn
-          Caption.Text = 'L'#304'STE'
-          DataBinding.FieldName = 'LISTEADI'
-          Options.Editing = False
-          Width = 62
-          Position.ColIndex = 1
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListKONUSU: TcxDBTreeListColumn
-          DataBinding.FieldName = 'KONUSU'
-          Options.Editing = False
-          Width = 139
-          Position.ColIndex = 2
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListTURU: TcxDBTreeListColumn
-          Caption.Text = 'T'#220'R'#220
-          DataBinding.FieldName = 'TURU'
-          Options.Editing = False
-          Width = 65
-          Position.ColIndex = 3
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListATANAN1: TcxDBTreeListColumn
-          Caption.Text = 'ATANAN'
-          DataBinding.FieldName = 'ATANAN1'
-          Options.Editing = False
-          Width = 100
-          Position.ColIndex = 4
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListTARIH: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxDateEditProperties'
-          Caption.Text = 'TAR'#304'H'
-          DataBinding.FieldName = 'BITISTARIHI'
-          Options.Editing = False
-          Width = 100
-          Position.ColIndex = 5
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListNOTLAR_BIT: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = Tablo.KlasorResimleri
-          Properties.Items = <
-            item
-              Value = False
-            end
-            item
-              ImageIndex = 27
-              Value = True
-            end>
-          Caption.Glyph.SourceDPI = 96
-          Caption.Glyph.Data = {
-            424D360400000000000036000000280000001000000010000000010020000000
-            000000000000C40E0000C40E0000000000000000000000000000000000000000
-            0000000000000000000000000000000000000000000000000000000000000000
-            0000000000000000000000000000000000000000000000000000000000200000
-            002100000023000000240000002600000027000000290000002A0000002C0000
-            002D0000002F0000003100000032000000340000000000000000000000140000
-            00150000001600000017000000190000001A0000001B0000001D0000001E0000
-            0020000000210000002300000024000000260000000000000000000000090000
-            000A0000000B0000000C0000000E0000000F0000001000000011000000120000
-            0014000000150000001600000017000000190000000000000000000000000000
-            000000000000000000040000000F000000110000000B00000004000000010000
-            0000000000000000000000000000000000000000000000000000402A1FFF402A
-            1FFF3E291FFF0000000E421C11FF31140CE1190A0698030407420000000C0000
-            0002000000000000000000000000000000000000000000000000422B20FF0000
-            0000000000000000000D663C2BDCB9C7D2FF7889A2FF244182FF051033960000
-            000F000000020000000000000000000000000000000000000000442D22FF0000
-            0000000000000000000841261B91879AB2FFC8E3F5FF1F66B6FF2B6BA8FF0512
-            36950000000E0000000200000000000000000000000000000000452E23FF0000
-            000000000000000000031113163E488BC3FFDEFEFDFF51B4E3FF1F68B7FF3173
-            AEFF061538940000000D00000002000000000000000000000000483022FF0000
-            00000000000000000001000000081D44618D479FD2FFDEFEFDFF59BFE9FF216B
-            B9FF367BB3FF07173A920000000C000000020000000000000000493224FF0000
-            0000000000000000000000000001000000091D44618C4BA5D5FFDEFEFDFF61CA
-            EFFF246FBCFF3B83B9FF08193D900000000A00000002000000004A3225FF0000
-            000000000000000000000000000000000001000000081D44618A4EAAD7FFDEFE
-            FDFF68D4F4FF2875BEFF3F8BBEFF091B3F8E00000006000000004C3426FF4B33
-            26FF4B3225FF4A3225FF493225FF483124FF483124FF000000071C44618951AE
-            DAFFDEFEFDFF6EDDF8FF2C7BC2FF18448BFF0000000800000000000000000000
-            0000000000000000000000000000000000000000000000000001000000061D44
-            618754B1DCFFDEFEFDFF4FA6D4FF112B4E880000000400000000000000000000
-            0000000000000000000000000000000000000000000000000000000000010000
-            00051D456185357FBCFF173A5986000000050000000100000000000000000000
-            0000000000000000000000000000000000000000000000000000000000000000
-            00010000000200000004000000030000000100000000}
-          Caption.Text = 'N'
-          DataBinding.FieldName = 'NOTLAR_BIT'
-          Width = 22
-          Position.ColIndex = 6
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListYORUM_BIT: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = Tablo.KlasorResimleri
-          Properties.Items = <
-            item
-              Value = False
-            end
-            item
-              ImageIndex = 26
-              Value = True
-            end>
-          Caption.Text = 'Y'
-          DataBinding.FieldName = 'YORUM_BIT'
-          Width = 22
-          Position.ColIndex = 8
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListTEKRAR_BIT: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = Tablo.KlasorResimleri
-          Properties.Items = <
-            item
-              Value = False
-            end
-            item
-              ImageIndex = 20
-              Value = True
-            end>
-          Caption.Text = 'T'
-          DataBinding.FieldName = 'TEKRAR_BIT'
-          Width = 22
-          Position.ColIndex = 9
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListANIMSAT_BIT: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = Tablo.KlasorResimleri
-          Properties.Items = <
-            item
-              Value = False
-            end
-            item
-              ImageIndex = 23
-              Value = True
-            end>
-          Caption.Text = 'A'
-          DataBinding.FieldName = 'ANIMSAT_BIT'
-          Width = 22
-          Position.ColIndex = 10
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListBAYRAK: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = Tablo.KlasorResimleri
-          Properties.Items = <
-            item
-              Value = False
-            end
-            item
-              ImageIndex = 21
-              Value = True
-            end>
-          Caption.Text = 'B'
-          DataBinding.FieldName = 'BAYRAK'
-          Width = 22
-          Position.ColIndex = 11
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListDURUM: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Items = <>
-          RepositoryItem = Tablo.RepGorevDurum
-          DataBinding.FieldName = 'DURUM'
-          Width = 100
-          Position.ColIndex = 12
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListPROJEKODU: TcxDBTreeListColumn
-          DataBinding.FieldName = 'PROJEKODU'
-          Width = 100
-          Position.ColIndex = 13
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListEKLEYENAD: TcxDBTreeListColumn
-          DataBinding.FieldName = 'EKLEYENAD'
-          Width = 100
-          Position.ColIndex = 14
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListEkipmancxDBTreeListEKLEMETARIHI: TcxDBTreeListColumn
-          PropertiesClassName = 'TcxDateEditProperties'
-          DataBinding.FieldName = 'EKLEMETARIHI'
-          Width = 100
-          Position.ColIndex = 15
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListGorevcxDBTreeListEKLEYEN: TcxDBTreeListColumn
-          Visible = False
-          DataBinding.FieldName = 'EKLEYEN'
-          Position.ColIndex = 16
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-        object TreeListGorevcxDBTreeListLISTEID: TcxDBTreeListColumn
-          Visible = False
-          DataBinding.FieldName = 'LISTEID'
-          Position.ColIndex = 17
-          Position.RowIndex = 0
-          Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
-        end
-      end
-      object Panel5: TPanel
-        Left = 0
-        Top = 0
-        Width = 1036
-        Height = 41
-        Align = alTop
-        Caption = 'Panel9'
-        TabOrder = 1
-        object ToolBar6: TToolBar
-          Left = 1
-          Top = 1
-          Width = 146
-          Height = 39
-          Margins.Bottom = 0
-          Align = alLeft
-          AutoSize = True
-          ButtonHeight = 39
-          ButtonWidth = 46
-          Caption = 'AletCubugu'
-          Color = clTeal
-          Ctl3D = False
-          DockSite = True
-          DrawingStyle = dsGradient
-          EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
-          EdgeInner = esNone
-          EdgeOuter = esNone
-          Font.Charset = TURKISH_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Trebuchet MS'
-          Font.Style = []
-          GradientEndColor = 11776947
-          GradientStartColor = 14540253
-          HotTrackColor = 65408
-          Images = Tablo.PNGImageList2
-          ParentColor = False
-          ParentFont = False
-          ShowCaptions = True
-          TabOrder = 0
-          Transparent = True
-          object GorevEkleTus: TToolButton
+          object Panel5: TPanel
             Left = 0
             Top = 0
-            Caption = 'Yeni'
-            ImageIndex = 0
-            ImageName = 'PngImage0'
-            OnClick = GorevEkleTusClick
-          end
-          object GorevSilTus: TToolButton
-            Left = 46
-            Top = 0
-            Caption = 'Sil'
-            ImageIndex = 1
-            ImageName = 'PngImage1'
-            OnClick = GorevSilTusClick
-          end
-          object ToolButton15: TToolButton
-            Left = 92
-            Top = 0
-            Width = 8
-            Caption = 'ToolButton6'
-            ImageIndex = 2
-            ImageName = 'PngImage2'
-            Style = tbsSeparator
-          end
-          object GorevDuzenleTus: TToolButton
-            Left = 100
-            Top = 0
-            Caption = 'D'#252'zenle'
-            ImageIndex = 7
-            ImageName = 'PngImage7'
-            OnClick = TreeListGorevDblClick
+            Width = 1036
+            Height = 41
+            Align = alTop
+            Caption = 'Panel9'
+            TabOrder = 1
+            object ToolBar6: TToolBar
+              Left = 1
+              Top = 1
+              Width = 146
+              Height = 39
+              Margins.Bottom = 0
+              Align = alLeft
+              AutoSize = True
+              ButtonHeight = 39
+              ButtonWidth = 46
+              Caption = 'AletCubugu'
+              Color = clTeal
+              Ctl3D = False
+              DockSite = True
+              DrawingStyle = dsGradient
+              EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+              EdgeInner = esNone
+              EdgeOuter = esNone
+              Font.Charset = TURKISH_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Trebuchet MS'
+              Font.Style = []
+              GradientEndColor = 11776947
+              GradientStartColor = 14540253
+              HotTrackColor = 65408
+              Images = Tablo.PNGImageList2
+              ParentColor = False
+              ParentFont = False
+              ShowCaptions = True
+              TabOrder = 0
+              Transparent = True
+              object GorevEkleTus: TToolButton
+                Left = 0
+                Top = 0
+                Caption = 'Yeni'
+                ImageIndex = 0
+                ImageName = 'PngImage0'
+                OnClick = GorevEkleTusClick
+              end
+              object GorevSilTus: TToolButton
+                Left = 46
+                Top = 0
+                Caption = 'Sil'
+                ImageIndex = 1
+                ImageName = 'PngImage1'
+                OnClick = GorevSilTusClick
+              end
+              object ToolButton15: TToolButton
+                Left = 92
+                Top = 0
+                Width = 8
+                Caption = 'ToolButton6'
+                ImageIndex = 2
+                ImageName = 'PngImage2'
+                Style = tbsSeparator
+              end
+              object GorevDuzenleTus: TToolButton
+                Left = 100
+                Top = 0
+                Caption = 'D'#252'zenle'
+                ImageIndex = 7
+                ImageName = 'PngImage7'
+                OnClick = TreeListGorevDblClick
+              end
+            end
+            object JvNavPanelHeader1: TJvNavPanelHeader
+              Left = 147
+              Top = 1
+              Width = 888
+              Height = 39
+              Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -16
+              Font.Name = 'Arial'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ColorFrom = 14540253
+              ColorTo = 11776947
+              ImageIndex = 0
+              object CheckTamamlanan: TcxCheckBox
+                Left = 0
+                Top = 0
+                Align = alLeft
+                Caption = 'Tamamlananlar'#305' da g'#246'ster'
+                ParentFont = False
+                Style.Font.Charset = DEFAULT_CHARSET
+                Style.Font.Color = clBlack
+                Style.Font.Height = -13
+                Style.Font.Name = 'Trebuchet MS'
+                Style.Font.Style = []
+                Style.IsFontAssigned = True
+                TabOrder = 0
+                Transparent = True
+                OnClick = CheckTamamlananClick
+              end
+              object ComboTamamlanan: TcxImageComboBox
+                Left = 213
+                Top = 7
+                RepositoryItem = Tablo.RepGorevSonKac
+                Properties.Items = <>
+                Properties.OnEditValueChanged = CheckTamamlananClick
+                Style.Color = clSilver
+                TabOrder = 1
+                Visible = False
+                Width = 141
+              end
+            end
           end
         end
-        object JvNavPanelHeader1: TJvNavPanelHeader
-          Left = 147
-          Top = 1
-          Width = 888
-          Height = 39
-          Align = alClient
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWhite
-          Font.Height = -16
-          Font.Name = 'Arial'
-          Font.Style = [fsBold]
-          ParentFont = False
-          ColorFrom = 14540253
-          ColorTo = 11776947
-          ImageIndex = 0
-          object CheckTamamlanan: TcxCheckBox
+        object TabSheetFirsat: TcxTabSheet
+          Caption = 'Sat'#305#351' F'#305'rsatlar'#305
+          ImageIndex = 10
+          object Panel7: TPanel
             Left = 0
             Top = 0
-            Align = alLeft
-            Caption = 'Tamamlananlar'#305' da g'#246'ster'
-            ParentFont = False
-            Style.Font.Charset = DEFAULT_CHARSET
-            Style.Font.Color = clBlack
-            Style.Font.Height = -13
-            Style.Font.Name = 'Trebuchet MS'
-            Style.Font.Style = []
-            Style.IsFontAssigned = True
+            Width = 1036
+            Height = 41
+            Align = alTop
+            Caption = 'Panel6'
             TabOrder = 0
-            Transparent = True
-            OnClick = CheckTamamlananClick
+            object ToolBar9: TToolBar
+              Left = 1
+              Top = 1
+              Width = 146
+              Height = 39
+              Margins.Bottom = 0
+              Align = alLeft
+              AutoSize = True
+              ButtonHeight = 39
+              ButtonWidth = 46
+              Caption = 'AletCubugu'
+              Color = clTeal
+              Ctl3D = False
+              DockSite = True
+              DrawingStyle = dsGradient
+              EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+              EdgeInner = esNone
+              EdgeOuter = esNone
+              Font.Charset = TURKISH_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Trebuchet MS'
+              Font.Style = []
+              GradientEndColor = 11776947
+              GradientStartColor = 14540253
+              HotTrackColor = 65408
+              Images = Tablo.PNGImageList2
+              ParentColor = False
+              ParentFont = False
+              ShowCaptions = True
+              TabOrder = 0
+              Transparent = True
+              object FirsatEkleTus: TToolButton
+                Left = 0
+                Top = 0
+                Caption = 'Yeni'
+                ImageIndex = 0
+                ImageName = 'PngImage0'
+                OnClick = FirsatEkleTusClick
+              end
+              object FirsatSilTus: TToolButton
+                Left = 46
+                Top = 0
+                Caption = 'Sil'
+                ImageIndex = 1
+                ImageName = 'PngImage1'
+                OnClick = FirsatSilTusClick
+              end
+              object ToolButton16: TToolButton
+                Left = 92
+                Top = 0
+                Width = 8
+                Caption = 'ToolButton7'
+                ImageIndex = 8
+                ImageName = 'PngImage15'
+                Style = tbsSeparator
+              end
+              object FirsatDuzenleTus: TToolButton
+                Left = 100
+                Top = 0
+                Caption = 'D'#252'zenle'
+                ImageIndex = 7
+                ImageName = 'PngImage7'
+                OnClick = FirsatDuzenleTusClick
+              end
+            end
+            object JvNavPanelHeader3: TJvNavPanelHeader
+              Left = 147
+              Top = 1
+              Width = 888
+              Height = 39
+              Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -16
+              Font.Name = 'Arial'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ColorFrom = 14540253
+              ColorTo = 11776947
+              ImageIndex = 0
+              object checkKapaliFirsatGoster: TcxCheckBox
+                Left = 0
+                Top = 0
+                Align = alLeft
+                Caption = 'Kapal'#305' F'#305'rsatlar'#305' da g'#246'ster'
+                ParentFont = False
+                Properties.ImmediatePost = True
+                Properties.NullStyle = nssUnchecked
+                Properties.OnEditValueChanged = checkKapaliGosterPropertiesEditValueChanged
+                Style.Font.Charset = TURKISH_CHARSET
+                Style.Font.Color = clBlack
+                Style.Font.Height = -13
+                Style.Font.Name = 'Trebuchet MS'
+                Style.Font.Style = []
+                Style.IsFontAssigned = True
+                TabOrder = 0
+                Transparent = True
+              end
+            end
           end
-          object ComboTamamlanan: TcxImageComboBox
-            Left = 213
-            Top = 7
-            RepositoryItem = Tablo.RepGorevSonKac
-            Properties.Items = <>
-            Properties.OnEditValueChanged = CheckTamamlananClick
-            Style.Color = clSilver
+          object GridFirsat: TcxGrid
+            Left = 0
+            Top = 41
+            Width = 1036
+            Height = 187
+            Align = alClient
+            PopupMenu = PmProjeAktKopyala
+            TabOrder = 1
+            LookAndFeel.Kind = lfOffice11
+            LookAndFeel.NativeStyle = True
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridFirsatView: TcxGridDBTableView
+              OnDblClick = ProjeDuzenleClick
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              OnCanFocusRecord = GridCariProjelerViewCanFocusRecord
+              DataController.DataModeController.SmartRefresh = True
+              DataController.DataSource = DtsFirsat
+              DataController.DetailKeyFieldNames = 'ID'
+              DataController.KeyFieldNames = 'ID'
+              DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsCustomize.ColumnsQuickCustomization = True
+              OptionsData.CancelOnExit = False
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsSelection.CellSelect = False
+              OptionsView.ExpandButtonsForEmptyDetails = False
+              OptionsView.GroupByBox = False
+              OptionsView.Indicator = True
+              Styles.OnGetContentStyle = GridCariProjelerViewStylesGetContentStyle
+              object cxGridDBColumn5: TcxGridDBColumn
+                Caption = 'Ba'#351'lama'
+                DataBinding.FieldName = 'BASLAMATARIHI'
+                DataBinding.IsNullValueType = True
+                Width = 89
+              end
+              object cxGridDBColumn6: TcxGridDBColumn
+                Caption = 'Biti'#351
+                DataBinding.FieldName = 'BITISTARIHI'
+                DataBinding.IsNullValueType = True
+              end
+              object cxGridDBColumn8: TcxGridDBColumn
+                Caption = 'F'#305'rsat Kodu'
+                DataBinding.FieldName = 'PROJEKODU'
+                DataBinding.IsNullValueType = True
+                Width = 107
+              end
+              object cxGridDBColumn13: TcxGridDBColumn
+                Caption = 'F'#305'rsat Ad'#305
+                DataBinding.FieldName = 'PROJEADI'
+                DataBinding.IsNullValueType = True
+                Width = 85
+              end
+              object cxGridDBColumn14: TcxGridDBColumn
+                Caption = 'Konusu'
+                DataBinding.FieldName = 'KONUSU'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Width = 86
+              end
+              object cxGridDBColumn15: TcxGridDBColumn
+                Caption = 'T'#252'r'#252
+                DataBinding.FieldName = 'PROJETURU'
+                DataBinding.IsNullValueType = True
+                Width = 79
+              end
+              object cxGridDBColumn16: TcxGridDBColumn
+                Caption = 'Durum'
+                DataBinding.FieldName = 'PROJEDURUM'
+                DataBinding.IsNullValueType = True
+              end
+              object cxGridDBColumn17: TcxGridDBColumn
+                Caption = 'A'#351'ama'
+                DataBinding.FieldName = 'PROJEASAMA'
+                DataBinding.IsNullValueType = True
+              end
+              object cxGridDBColumn20: TcxGridDBColumn
+                Caption = 'F'#305'rsat De'#287'eri'
+                DataBinding.FieldName = 'SATISFIYATI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.DisplayFormat = ',0.00;(,0.00)'
+                Width = 77
+              end
+              object cxGridDBColumn21: TcxGridDBColumn
+                Caption = 'P.Birimi'
+                DataBinding.FieldName = 'SATISKUR'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxComboBoxProperties'
+              end
+              object cxGridDBColumn22: TcxGridDBColumn
+                Caption = 'Notlar'
+                DataBinding.FieldName = 'NOTLAR'
+                DataBinding.IsNullValueType = True
+              end
+            end
+            object cxGridDBTableView2: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataModeController.GridMode = True
+              DataController.DataModeController.SmartRefresh = True
+              DataController.DataSource = DtsPerIletisim
+              DataController.DetailKeyFieldNames = 'SOZID'
+              DataController.MasterKeyFieldNames = 'ID'
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsView.GroupByBox = False
+              object cxGridDBColumn23: TcxGridDBColumn
+                Caption = 'T'#252'r'
+                DataBinding.FieldName = 'TUR'
+                DataBinding.IsNullValueType = True
+              end
+              object cxGridDBColumn24: TcxGridDBColumn
+                Caption = 'Belge Ad'#305
+                DataBinding.FieldName = 'BELGEADI'
+                DataBinding.IsNullValueType = True
+              end
+            end
+            object cxGridLevel2: TcxGridLevel
+              GridView = GridFirsatView
+            end
+          end
+          object MemoFirsat: TMemo
+            Left = 21
+            Top = 85
+            Width = 638
+            Height = 89
+            Color = clSilver
+            Lines.Strings = (
+          
+                'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
+                'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
+          
+                'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
+                ',P.OLASILIK,P.APLIKASYON,'
+          
+                'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
+                'eDurum.ANAHTAR PROJEDURUM'
+              'from PROJELER P '
+              #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
+          
+                #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
+                'P.ILGILI'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
+                'D ProjeTuru.BOLUM =-2112'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
+                ' AND ProjeAsama.BOLUM =-2113'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
+                ' AND ProjeDurum.BOLUM =-2114'
+              'WHERE '
+              'P.REHBERID = :PID '
+              'and P.MODUL=1')
+            TabOrder = 2
+            Visible = False
+            WordWrap = False
+          end
+        end
+        object TabSheetProje: TcxTabSheet
+          Caption = 'Projeler'
+          ImageIndex = 5
+          object GridCariProjeler: TcxGrid
+            Left = 0
+            Top = 41
+            Width = 1036
+            Height = 187
+            Align = alClient
+            PopupMenu = PmProjeAktKopyala
+            TabOrder = 0
+            LookAndFeel.Kind = lfOffice11
+            LookAndFeel.NativeStyle = True
+            LookAndFeel.ScrollbarMode = sbmClassic
+            object GridCariProjelerView: TcxGridDBTableView
+              OnDblClick = ProjeDuzenleClick
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              OnCanFocusRecord = GridCariProjelerViewCanFocusRecord
+              DataController.DataModeController.SmartRefresh = True
+              DataController.DataSource = DtsProjeler
+              DataController.DetailKeyFieldNames = 'ID'
+              DataController.KeyFieldNames = 'ID'
+              DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsCustomize.ColumnsQuickCustomization = True
+              OptionsData.CancelOnExit = False
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsSelection.CellSelect = False
+              OptionsView.ExpandButtonsForEmptyDetails = False
+              OptionsView.GroupByBox = False
+              OptionsView.Indicator = True
+              Styles.OnGetContentStyle = GridCariProjelerViewStylesGetContentStyle
+              object GridCariProjelerViewBASTARIHI: TcxGridDBColumn
+                Caption = 'Ba'#351'lama'
+                DataBinding.FieldName = 'BASLAMATARIHI'
+                DataBinding.IsNullValueType = True
+                Width = 89
+              end
+              object GridCariProjelerViewBITTARIHI: TcxGridDBColumn
+                Caption = 'Biti'#351' Tarihi'
+                DataBinding.FieldName = 'BITISTARIHI'
+                DataBinding.IsNullValueType = True
+              end
+              object GridCariProjelerViewPROJEKODU: TcxGridDBColumn
+                Caption = 'Proje Kodu'
+                DataBinding.FieldName = 'PROJEKODU'
+                DataBinding.IsNullValueType = True
+                Width = 107
+              end
+              object GridCariProjelerViewPROJEADI: TcxGridDBColumn
+                Caption = 'Proje Ad'#305
+                DataBinding.FieldName = 'PROJEADI'
+                DataBinding.IsNullValueType = True
+                Width = 85
+              end
+              object GridCariProjelerViewKONUSU: TcxGridDBColumn
+                Caption = 'Konusu'
+                DataBinding.FieldName = 'KONUSU'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Width = 86
+              end
+              object GridCariProjelerViewTURU: TcxGridDBColumn
+                Caption = 'T'#252'r'#252
+                DataBinding.FieldName = 'PROJETURU'
+                DataBinding.IsNullValueType = True
+                Width = 79
+              end
+              object GridCariProjelerViewDURUM: TcxGridDBColumn
+                Caption = 'Durum'
+                DataBinding.FieldName = 'PROJEDURUM'
+                DataBinding.IsNullValueType = True
+              end
+              object GridCariProjelerViewASAMA: TcxGridDBColumn
+                Caption = 'A'#351'ama'
+                DataBinding.FieldName = 'PROJEASAMA'
+                DataBinding.IsNullValueType = True
+              end
+              object GridCariProjelerViewLISTEFIYATI: TcxGridDBColumn
+                Caption = 'Liste Fiyat'#305
+                DataBinding.FieldName = 'LISTEFIYATI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.DisplayFormat = ',0.00;(,0.00)'
+              end
+              object GridCariProjelerViewLISTEKUR: TcxGridDBColumn
+                Caption = 'Liste P.Birimi'
+                DataBinding.FieldName = 'LISTEKUR'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxComboBoxProperties'
+              end
+              object GridCariProjelerViewSATISFIYATI: TcxGridDBColumn
+                Caption = 'Sat'#305#351' Fiyat'#305
+                DataBinding.FieldName = 'SATISFIYATI'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.DisplayFormat = ',0.00;(,0.00)'
+                Width = 77
+              end
+              object GridCariProjelerViewSATISKUR: TcxGridDBColumn
+                Caption = 'Sat'#305#351' P.Birimi'
+                DataBinding.FieldName = 'SATISKUR'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxComboBoxProperties'
+              end
+              object GridCariProjelerViewNOTLAR: TcxGridDBColumn
+                Caption = 'Notlar'
+                DataBinding.FieldName = 'NOTLAR'
+                DataBinding.IsNullValueType = True
+              end
+            end
+            object GridCariProjelerDBTableView1: TcxGridDBTableView
+              Navigator.Buttons.CustomButtons = <>
+              ScrollbarAnnotations.CustomAnnotations = <>
+              DataController.DataModeController.GridMode = True
+              DataController.DataModeController.SmartRefresh = True
+              DataController.DataSource = DtsPerIletisim
+              DataController.DetailKeyFieldNames = 'SOZID'
+              DataController.MasterKeyFieldNames = 'ID'
+              DataController.Summary.DefaultGroupSummaryItems = <>
+              DataController.Summary.FooterSummaryItems = <>
+              DataController.Summary.SummaryGroups = <>
+              OptionsData.Deleting = False
+              OptionsData.DeletingConfirmation = False
+              OptionsData.Editing = False
+              OptionsData.Inserting = False
+              OptionsView.GroupByBox = False
+              object GridCariProjelerDBTableView1TUR: TcxGridDBColumn
+                Caption = 'T'#252'r'
+                DataBinding.FieldName = 'TUR'
+                DataBinding.IsNullValueType = True
+              end
+              object GridCariProjelerDBTableView1BELGEADI: TcxGridDBColumn
+                Caption = 'Belge Ad'#305
+                DataBinding.FieldName = 'BELGEADI'
+                DataBinding.IsNullValueType = True
+              end
+            end
+            object GridCariProjelerLevel1: TcxGridLevel
+              GridView = GridCariProjelerView
+            end
+          end
+          object MemoProjeler: TMemo
+            Left = 15
+            Top = 72
+            Width = 638
+            Height = 89
+            Color = clSilver
+            Lines.Strings = (
+          
+                'select P.ID,P.REHBERID,P.PROJEKODU,Firma.FIRMA, BASLAMATARIHI,TU' +
+                'RU,KONUSU,ASAMA,LISTEFIYATI,LISTEKUR,SATISFIYATI,SATISKUR, '
+          
+                'RehberIlgili.ADSOYAD, P.DURUM,P.NOTLAR , BITISTARIHI ,P.PROJEADI' +
+                ',P.OLASILIK,P.APLIKASYON,'
+          
+                'ProjeTuru.ANAHTAR PROJETURU, ProjeAsama.ANAHTAR PROJEASAMA, Proj' +
+                'eDurum.ANAHTAR PROJEDURUM'
+              'from PROJELER P '
+              #9'INNER JOIN REHBER Firma on Firma.ID = P.REHBERID'
+          
+                #9'LEFT OUTER JOIN REHBERPERSONEL RehberIlgili on RehberIlgili.ID=' +
+                'P.ILGILI'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeTuru ON ProjeTuru.DEGER = P.TURU AN' +
+                'D ProjeTuru.BOLUM =-2132'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeAsama ON ProjeAsama.DEGER = P.ASAMA' +
+                ' AND ProjeAsama.BOLUM =-2133'
+          
+                #9'LEFT OUTER JOIN GENINI ProjeDurum ON ProjeDurum.DEGER = P.DURUM' +
+                ' AND ProjeDurum.BOLUM =-2134'
+              'WHERE '
+              'P.REHBERID = :PID '
+              'and P.MODUL=11'
+              '')
             TabOrder = 1
             Visible = False
-            Width = 141
+            WordWrap = False
+          end
+          object Panel6: TPanel
+            Left = 0
+            Top = 0
+            Width = 1036
+            Height = 41
+            Align = alTop
+            Caption = 'Panel6'
+            TabOrder = 2
+            object ToolBar4: TToolBar
+              Left = 1
+              Top = 1
+              Width = 146
+              Height = 39
+              Margins.Bottom = 0
+              Align = alLeft
+              AutoSize = True
+              ButtonHeight = 39
+              ButtonWidth = 46
+              Caption = 'AletCubugu'
+              Color = clTeal
+              Ctl3D = False
+              DockSite = True
+              DrawingStyle = dsGradient
+              EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+              EdgeInner = esNone
+              EdgeOuter = esNone
+              Font.Charset = TURKISH_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Trebuchet MS'
+              Font.Style = []
+              GradientEndColor = 11776947
+              GradientStartColor = 14540253
+              HotTrackColor = 65408
+              Images = Tablo.PNGImageList2
+              ParentColor = False
+              ParentFont = False
+              ShowCaptions = True
+              TabOrder = 0
+              Transparent = True
+              object ProjeEkleTus: TToolButton
+                Left = 0
+                Top = 0
+                Caption = 'Yeni'
+                ImageIndex = 0
+                ImageName = 'PngImage0'
+                OnClick = ProjeEkleTusClick
+              end
+              object ProjeSilTus: TToolButton
+                Left = 46
+                Top = 0
+                Caption = 'Sil'
+                ImageIndex = 1
+                ImageName = 'PngImage1'
+                OnClick = ProjeSilTusClick
+              end
+              object ToolButton7: TToolButton
+                Left = 92
+                Top = 0
+                Width = 8
+                Caption = 'ToolButton7'
+                ImageIndex = 8
+                ImageName = 'PngImage15'
+                Style = tbsSeparator
+              end
+              object ProjeDuzenle: TToolButton
+                Left = 100
+                Top = 0
+                Caption = 'D'#252'zenle'
+                ImageIndex = 7
+                ImageName = 'PngImage7'
+                OnClick = ProjeDuzenleClick
+              end
+            end
+            object JvNavPanelHeader2: TJvNavPanelHeader
+              Left = 147
+              Top = 1
+              Width = 888
+              Height = 39
+              Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -16
+              Font.Name = 'Arial'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ColorFrom = 14540253
+              ColorTo = 11776947
+              ImageIndex = 0
+              object checkKapaliProjeGoster: TcxCheckBox
+                Left = 0
+                Top = 0
+                Align = alLeft
+                Caption = 'Kapal'#305' Projeleri de g'#246'ster'
+                ParentFont = False
+                Properties.ImmediatePost = True
+                Properties.NullStyle = nssUnchecked
+                Properties.OnEditValueChanged = checkKapaliGosterPropertiesEditValueChanged
+                Style.Font.Charset = TURKISH_CHARSET
+                Style.Font.Color = clBlack
+                Style.Font.Height = -13
+                Style.Font.Name = 'Trebuchet MS'
+                Style.Font.Style = []
+                Style.IsFontAssigned = True
+                TabOrder = 0
+                Transparent = True
+              end
+            end
           end
         end
       end
