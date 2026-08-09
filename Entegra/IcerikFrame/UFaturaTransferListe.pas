@@ -114,6 +114,7 @@ type
     MenuUretim: TMenuItem;
     TransferInfoMenu: TMenuItem;
     GridFatListeTviewKAYNAK: TcxGridDBColumn;
+    GridFatListeTviewHEDEF: TcxGridDBColumn;
     SQLMemo: TcxMemo;
     GridFatListeTviewOZELKOD: TcxGridDBColumn;
     GridFatListeTviewYETKIKODU: TcxGridDBColumn;

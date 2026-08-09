@@ -5,7 +5,7 @@
 interface
 
 uses
-  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,    Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxGraphics,
@@ -339,6 +339,21 @@ var
   AYeri,AYerID,RehID:Integer;
   ABelgeno:string;
 begin
+  // TRANSFERDEN URETIM: uretim fisi bir transferden uretildiyse baglanti
+  //   FATBASLIK.YERI = TabNo_TRANSFER / YERID = transfer belge ID'sindedir
+  //   (satir bazli YERI/YERID degil). Asagidaki siparis sorgusu bu durumu
+  //   bulamaz; dogrudan kaynak transferi acalim. (08.08.2026)
+  if TabUretimListe.FieldByName('YERI').AsInteger = TabNo_TRANSFER then begin
+    AYerID := TabUretimListe.FieldByName('YERID').AsInteger;
+    if AYerID <= 0 then Abort;
+    Tablo.TablodanSorguAc(2, 'select FATURANO, REHBERID from FATBASLIK where ID='+IntToStr(AYerID));
+    if Tablo.Query2.IsEmpty then Abort;
+    AnaForm.GormeDialogCagir(AYerID, KasaTur_StokTransferi,
+      Tablo.Query2.FieldByName('REHBERID').AsInteger, 0, Tablo.GENINI.BugunTrh,
+      Tablo.Query2.FieldByName('FATURANO').AsString);
+    Exit;
+  end;
+
   Tablo.Query1.Close;
   Tablo.Query1.SQL.Text := ' select distinct ';
   Tablo.Query1.SQL.Add(' KAYNAKTUR = 19, ');

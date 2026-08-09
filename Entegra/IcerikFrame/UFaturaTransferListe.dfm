@@ -16,13 +16,13 @@
     Left = 3
     Top = 3
     Width = 860
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 24
     ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
-    DockSite = False
     DrawingStyle = dsGradient
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     EdgeInner = esLowered
@@ -42,7 +42,6 @@
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -105,37 +104,37 @@
       Left = 0
       Top = 0
       Caption = 'T'#252'm'
-      Style = tbsTextButton
-      OnClick = LabelTumKayitlarClick
       ImageIndex = 52
       ImageName = 'PngImageListe1'
+      Style = tbsTextButton
+      OnClick = LabelTumKayitlarClick
     end
     object LabelSonArananlar: TToolButton
       Tag = 5
       Left = 62
       Top = 0
       Caption = 'Son'
+      ImageIndex = 43
+      ImageName = 'PngImage43'
       Style = tbsTextButton
       OnClick = LabelSonArananlarClick
-      ImageIndex = 43
-        ImageName = 'PngImage43'
     end
     object LabelSikArananlar: TToolButton
       Tag = 3
       Left = 124
       Top = 0
       Caption = 'S'#305'k'
-      Style = tbsTextButton
-      OnClick = LabelSikArananlarClick
       ImageIndex = 51
       ImageName = 'PngImageYildiz1'
+      Style = tbsTextButton
+      OnClick = LabelSikArananlarClick
     end
   end
   object GridFatListe: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 866
-    Height = 349
+    Height = 352
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -144,6 +143,8 @@
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 349
     object GridFatListeTview: TcxGridDBTableView
       OnDblClick = GridFatListeTviewDblClick
       Navigator.Buttons.CustomButtons = <>
@@ -262,6 +263,11 @@
       object GridFatListeTviewKAYNAK: TcxGridDBColumn
         Caption = 'Kaynak'
         DataBinding.FieldName = 'KAYNAK'
+        DataBinding.IsNullValueType = True
+      end
+      object GridFatListeTviewHEDEF: TcxGridDBColumn
+        Caption = 'Hedef'
+        DataBinding.FieldName = 'HEDEF'
         DataBinding.IsNullValueType = True
       end
       object GridFatListeTviewONAY: TcxGridDBColumn
@@ -768,73 +774,256 @@
   object frxFATBASLIK: TfrxDBDataset
     UserName = 'FATBASLIK'
     CloseDataSource = False
-    FieldAliases.Strings = (
-      'ID=ID'
-      'TARIH=TARIH'
-      'TUR=TUR'
-      'TIPI=TIPI'
-      'REHBERID=REHBERID'
-      'PROJEID=PROJEID'
-      'AKTIVITEID=AKTIVITEID'
-      'ANAKAYITID=ANAKAYITID'
-      'FATURATARIH=FATURATARIH'
-      'KOCANNO=KOCANNO'
-      'FATURANO=FATURANO'
-      'GIRISDEPO=GIRISDEPO'
-      'CIKISDEPO=CIKISDEPO'
-      'BASLIK=BASLIK'
-      'ADRES=ADRES'
-      'ILCE=ILCE'
-      'IL=IL'
-      'VD=VD'
-      'VNO=VNO'
-      'KDVDURUM=KDVDURUM'
-      'LOTNO=LOTNO'
-      'ACIK_KAPALI=ACIK_KAPALI'
-      'FATURA_GON_TARIHI=FATURA_GON_TARIHI'
-      'FATURA_MATRAHI=FATURA_MATRAHI'
-      'KDV_TUTARI=KDV_TUTARI'
-      'FATURA_TUTARI=FATURA_TUTARI'
-      'KUR=KUR'
-      'DOVIZ_TUTARI=DOVIZ_TUTARI'
-      'DOVIZ_KURU=DOVIZ_KURU'
-      'KASA=KASA'
-      'ONAY=ONAY'
-      'SAYFA=SAYFA'
-      'MASRAFID=MASRAFID'
-      'ACIKLAMA=ACIKLAMA'
-      'ISYERI=ISYERI'
-      'BOLUM=BOLUM'
-      'AMBAR=AMBAR'
-      'SATICIKODU=SATICIKODU'
-      'DURUM=DURUM'
-      'IRSALIYE_TIPI=IRSALIYE_TIPI'
-      'IRSALIYE_NO=IRSALIYE_NO'
-      'ODEMEPLANI=ODEMEPLANI'
-      'OZELKOD=OZELKOD'
-      'YETKIKODU=YETKIKODU'
-      'R=R'
-      'EKLEYEN=EKLEYEN'
-      'EKLEMETARIHI=EKLEMETARIHI'
-      'DEGISTIREN=DEGISTIREN'
-      'DEGISTIRMETARIHI=DEGISTIRMETARIHI'
-      'EKVERGI=EKVERGI'
-      'FATURASERI=FATURASERI'
-      'IRSALIYENO=IRSALIYENO'
-      'IRSALIYETARIH=IRSALIYETARIH'
-      'PLANID=PLANID'
-      'FIYAT_LISTESI=FIYAT_LISTESI'
-      'STOKISK=STOKISK'
-      'HIZMETISK=HIZMETISK'
-      'VADE=VADE'
-      'KASATAKIPID=KASATAKIPID'
-      'DETAYBOLUMU=DETAYBOLUMU'
-      'YAZIYLATOPLAM=YAZIYLATOPLAM')
     DataSet = TabFatBaslik
     BCDToCurrency = False
     DataSetOptions = []
     Left = 246
     Top = 168
+    FieldDefs = <
+      item
+        FieldName = 'ID'
+        FieldAlias = 'ID'
+      end
+      item
+        FieldName = 'TARIH'
+        FieldAlias = 'TARIH'
+      end
+      item
+        FieldName = 'TUR'
+        FieldAlias = 'TUR'
+      end
+      item
+        FieldName = 'TIPI'
+        FieldAlias = 'TIPI'
+      end
+      item
+        FieldName = 'REHBERID'
+        FieldAlias = 'REHBERID'
+      end
+      item
+        FieldName = 'PROJEID'
+        FieldAlias = 'PROJEID'
+      end
+      item
+        FieldName = 'AKTIVITEID'
+        FieldAlias = 'AKTIVITEID'
+      end
+      item
+        FieldName = 'ANAKAYITID'
+        FieldAlias = 'ANAKAYITID'
+      end
+      item
+        FieldName = 'FATURATARIH'
+        FieldAlias = 'FATURATARIH'
+      end
+      item
+        FieldName = 'KOCANNO'
+        FieldAlias = 'KOCANNO'
+      end
+      item
+        FieldName = 'FATURANO'
+        FieldAlias = 'FATURANO'
+      end
+      item
+        FieldName = 'GIRISDEPO'
+        FieldAlias = 'GIRISDEPO'
+      end
+      item
+        FieldName = 'CIKISDEPO'
+        FieldAlias = 'CIKISDEPO'
+      end
+      item
+        FieldName = 'BASLIK'
+        FieldAlias = 'BASLIK'
+      end
+      item
+        FieldName = 'ADRES'
+        FieldAlias = 'ADRES'
+      end
+      item
+        FieldName = 'ILCE'
+        FieldAlias = 'ILCE'
+      end
+      item
+        FieldName = 'IL'
+        FieldAlias = 'IL'
+      end
+      item
+        FieldName = 'VD'
+        FieldAlias = 'VD'
+      end
+      item
+        FieldName = 'VNO'
+        FieldAlias = 'VNO'
+      end
+      item
+        FieldName = 'KDVDURUM'
+        FieldAlias = 'KDVDURUM'
+      end
+      item
+        FieldName = 'LOTNO'
+        FieldAlias = 'LOTNO'
+      end
+      item
+        FieldName = 'ACIK_KAPALI'
+        FieldAlias = 'ACIK_KAPALI'
+      end
+      item
+        FieldName = 'FATURA_GON_TARIHI'
+        FieldAlias = 'FATURA_GON_TARIHI'
+      end
+      item
+        FieldName = 'FATURA_MATRAHI'
+        FieldAlias = 'FATURA_MATRAHI'
+      end
+      item
+        FieldName = 'KDV_TUTARI'
+        FieldAlias = 'KDV_TUTARI'
+      end
+      item
+        FieldName = 'FATURA_TUTARI'
+        FieldAlias = 'FATURA_TUTARI'
+      end
+      item
+        FieldName = 'KUR'
+        FieldAlias = 'KUR'
+      end
+      item
+        FieldName = 'DOVIZ_TUTARI'
+        FieldAlias = 'DOVIZ_TUTARI'
+      end
+      item
+        FieldName = 'DOVIZ_KURU'
+        FieldAlias = 'DOVIZ_KURU'
+      end
+      item
+        FieldName = 'KASA'
+        FieldAlias = 'KASA'
+      end
+      item
+        FieldName = 'ONAY'
+        FieldAlias = 'ONAY'
+      end
+      item
+        FieldName = 'SAYFA'
+        FieldAlias = 'SAYFA'
+      end
+      item
+        FieldName = 'MASRAFID'
+        FieldAlias = 'MASRAFID'
+      end
+      item
+        FieldName = 'ACIKLAMA'
+        FieldAlias = 'ACIKLAMA'
+      end
+      item
+        FieldName = 'ISYERI'
+        FieldAlias = 'ISYERI'
+      end
+      item
+        FieldName = 'BOLUM'
+        FieldAlias = 'BOLUM'
+      end
+      item
+        FieldName = 'AMBAR'
+        FieldAlias = 'AMBAR'
+      end
+      item
+        FieldName = 'SATICIKODU'
+        FieldAlias = 'SATICIKODU'
+      end
+      item
+        FieldName = 'DURUM'
+        FieldAlias = 'DURUM'
+      end
+      item
+        FieldName = 'IRSALIYE_TIPI'
+        FieldAlias = 'IRSALIYE_TIPI'
+      end
+      item
+        FieldName = 'IRSALIYE_NO'
+        FieldAlias = 'IRSALIYE_NO'
+      end
+      item
+        FieldName = 'ODEMEPLANI'
+        FieldAlias = 'ODEMEPLANI'
+      end
+      item
+        FieldName = 'OZELKOD'
+        FieldAlias = 'OZELKOD'
+      end
+      item
+        FieldName = 'YETKIKODU'
+        FieldAlias = 'YETKIKODU'
+      end
+      item
+        FieldName = 'R'
+        FieldAlias = 'R'
+      end
+      item
+        FieldName = 'EKLEYEN'
+        FieldAlias = 'EKLEYEN'
+      end
+      item
+        FieldName = 'EKLEMETARIHI'
+        FieldAlias = 'EKLEMETARIHI'
+      end
+      item
+        FieldName = 'DEGISTIREN'
+        FieldAlias = 'DEGISTIREN'
+      end
+      item
+        FieldName = 'DEGISTIRMETARIHI'
+        FieldAlias = 'DEGISTIRMETARIHI'
+      end
+      item
+        FieldName = 'EKVERGI'
+        FieldAlias = 'EKVERGI'
+      end
+      item
+        FieldName = 'FATURASERI'
+        FieldAlias = 'FATURASERI'
+      end
+      item
+        FieldName = 'IRSALIYENO'
+        FieldAlias = 'IRSALIYENO'
+      end
+      item
+        FieldName = 'IRSALIYETARIH'
+        FieldAlias = 'IRSALIYETARIH'
+      end
+      item
+        FieldName = 'PLANID'
+        FieldAlias = 'PLANID'
+      end
+      item
+        FieldName = 'FIYAT_LISTESI'
+        FieldAlias = 'FIYAT_LISTESI'
+      end
+      item
+        FieldName = 'STOKISK'
+        FieldAlias = 'STOKISK'
+      end
+      item
+        FieldName = 'HIZMETISK'
+        FieldAlias = 'HIZMETISK'
+      end
+      item
+        FieldName = 'VADE'
+        FieldAlias = 'VADE'
+      end
+      item
+        FieldName = 'KASATAKIPID'
+        FieldAlias = 'KASATAKIPID'
+      end
+      item
+        FieldName = 'DETAYBOLUMU'
+        FieldAlias = 'DETAYBOLUMU'
+      end
+      item
+        FieldName = 'YAZIYLATOPLAM'
+        FieldAlias = 'YAZIYLATOPLAM'
+      end>
   end
   object FatBaslik: TFDQuery
     AutoCalcFields = False
