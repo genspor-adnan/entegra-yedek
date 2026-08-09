@@ -483,8 +483,6 @@ begin
 
 end;
 
-function TFatTransferListeDlg.BelgeDonustur(KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
-begin
 // RECETE URUNDEN COZULUR.
 //   Eski sorgu "F.URETIMPLANID is not null" sarti ariyor ve URETIMPLANID'yi
 //   RECETE kimligi olarak geciriyordu. Oysa UretimFisiOlustur URETIMRECETE.ID
@@ -494,6 +492,7 @@ begin
 //   (siparis -> uretim yolunda da ayni kural).
 //   Recetesi olmayan satirlar atlanir ve sonunda kullaniciya bildirilir;
 //   sessiz hicbir sey yapmama hali kalmadi.
+function TFatTransferListeDlg.BelgeDonustur(KaynakBaslikId: integer; HedefBasID:integer=0): Integer;
 var
   LAtlanan, LOlusan: Integer;
 begin
