@@ -2362,7 +2362,23 @@ begin
         ULog.SnapTablo(2, 'GOREVYORUM',  'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString),
         ULog.SnapTablo(3, 'DOKUMAN',     'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString + ')'),
         ULog.SnapTablo(4, 'IMAJ',        'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabloNo) + ' and GOREVID=' + TabFatbaslik.FieldByName('ID').AsString + '))'),
-        ULog.SnapTablo(3, 'STOKIZLEME',  'BASLIKID=' + TabFatbaslik.FieldByName('ID').AsString) ]);
+        // STOKIZLEME/STOKIZLEMEDEPO cifti TAMSIL + AYRI SILME SIRASI ister:
+        //   stok iadesi STOKIZLEME'nin DELETE tetiginde yapilir ve tetik depo satirlarini
+        //   OKUR -> depo satirlari once silinirse iade kaybolur (bkz. GenDepoUpdate125).
+        //   SilSira: STOKIZLEME=5 (once silinir), STOKIZLEMEDEPO=4 (sonra silinir);
+        //   Sira    : STOKIZLEME=3 (once eklenir), STOKIZLEMEDEPO=4 (sonra eklenir).
+        ULog.SnapTablo(3, 'STOKIZLEME',  'BASLIKID=' + TabFatbaslik.FieldByName('ID').AsString, True, 5),
+        // STOKIZLEMEDEPO'nun ID kolonu YOK; snapshot motoru artik ID'siz tabloyu da
+        //   kapsiyor (tam-sil + yeniden-ekle). Bu satir olmadan iptalde STOKIZLEME geri
+        //   geliyor ama depo dagilimi bos kaliyor, STOKDURUMIZLEME de tutmuyordu.
+        //   SIRA 4 = STOKIZLEME'nin (3) cocugu -> silme DESC'te once, ekleme ASC'te sonra.
+        // Filtre iki dalli: (1) mevcut izlem satirlari, (2) snapshot'taki izlem ID'leri.
+        //   (2) SART: izlem satirlari SILINDIKTEN SONRA depo satirlari (1) ile bulunamaz,
+        //   oksuz kalirlardi. {SNAP}/{OTURUM} yer tutucularini ULog cozer.
+        ULog.SnapTablo(4, 'STOKIZLEMEDEPO',
+          'IZLEMID in (select ID from STOKIZLEME where BASLIKID=' + TabFatbaslik.FieldByName('ID').AsString + ')' +
+          ' or IZLEMID in (select KAYITID from {SNAP} where OTURUMID=''{OTURUM}''' +
+          ' and TABLOADI=''STOKIZLEME'' and KAYITID is not null)', True, 4) ]);
   end;
 
   case Tur of
@@ -4455,10 +4471,10 @@ begin
 //     Abort;
   if not BoslukKontrol(TabFatura.FieldByName('KDV').AsString, KontrolKDV) then
      Abort;
-  if (TabFatbaslik.FieldByName('DURUM').AsInteger<>6)and(not SifirKontrol(TabFatura.FieldByName('ADET').AsFloat, KontrolFaturaAdet)) then
+  if (TabFatbaslik.FieldByName('DURUM').AsInteger<>6) and (not SifirKontrol(TabFatura.FieldByName('ADET').AsFloat, KontrolFaturaAdet)) then
      Abort;
-  if (TabFatbaslik.FieldByName('DURUM').AsInteger<>6)and(TabFatura.FieldByName('ADET').AsFloat <= 0) then
-    raise Exception.create(Adetsifirolamaz);
+  if (TabFatbaslik.FieldByName('DURUM').AsInteger<>6) and (TabFatura.FieldByName('ADET').AsFloat <= 0) then
+      raise Exception.create(Adetsifirolamaz);
 
   // DONUSUM KURALI: bu satirdan URETILMIS adedin altina inilemez (ust sinir yok).
   //   Ornek: 10'luk irsaliye satirinin 8'i faturaya donustuyse adet >= 8 kalmali.
@@ -4467,7 +4483,7 @@ begin
      (not Tablo.AdetDusurulebilirMi('FATURA',
             TabFatura.FieldByName('ID').AsInteger,
             TabFatura.FieldByName('ADET').AsFloat)) then
-    Abort;
+      Abort;
 
   //İzlem bilgisi var mı bakalım serino vb.
    if (OncekiStokMiktar<>TabFatura.FieldByName('MIKTAR').AsFloat)and(TabFatura.FieldByName('IZLEME').AsInteger > 0 ) then begin
@@ -4483,12 +4499,12 @@ end;
 
 procedure TFaturaWizardDlg.FATURANewRecord(DataSet: TDataSet);
 begin
-  TabFatura.FieldByName('FATBASID').AsInteger := TabFatbaslik.FieldByName('ID').AsInteger;
+  TabFatura.FieldByName('FATBASID').AsInteger  := TabFatbaslik.FieldByName('ID').AsInteger;
   TabFatura.FieldByName('REHBERID').AsInteger := RehberId;
   TabFatura.FieldByName('MERKEZID').AsInteger := TabFatbaslik.FieldByName('MERKEZID').AsInteger;
   TabFatura.FieldByName('GIRDEPO').AsInteger := TabFatbaslik.FieldByName('GIRISDEPO').AsInteger;
   TabFatura.FieldByName('CIKDEPO').AsInteger := TabFatbaslik.FieldByName('CIKISDEPO').AsInteger;
-  TabFatura.FieldByName('EKLEYEN').AsString := Kullanan;
+  TabFatura.FieldByName('EKLEYEN').AsString  := Kullanan;
   TabFatura.FieldByName('PROJEID').AsInteger := TabFatbaslik.FieldByName('PROJEID').AsInteger;
 
   TabFatura.FieldByName('STOKDURUMDEGIS').AsBoolean := True;
@@ -4500,9 +4516,9 @@ begin
 //  FATURAISKONTO2.OnChange := FATURAADETChange;
 //  FATURA.FieldByName('KUR').AsString := CariDoviz;
   if not SatirVadesiKullan then
-    TabFatura.FieldByName('VADE').Value := TabFatbaslik.FieldByName('VADE').Value
+     TabFatura.FieldByName('VADE').Value := TabFatbaslik.FieldByName('VADE').Value
   else
-    TabFatura.FieldByName('VADE').Value := '0';
+     TabFatura.FieldByName('VADE').Value := '0';
   TabFatura.FieldByName('SUBEID').AsInteger := SubeID;
   TabFatura.FieldByName('KDVMUHAFIYETI').AsInteger := 0;
  // FATURA.FieldByName('GIRISKAYNAK').AsInteger := Windows_Sekme_Giris;

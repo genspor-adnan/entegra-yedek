@@ -431,17 +431,22 @@ begin
 end;
 
 procedure TStokSayimDlg.SayimSilClick(Sender: TObject);
+// Silme sunucuda: sp_Api_Stok_Sayim_Sil_Json -> kalem kontrolu, ISLEMLOG (Geri Al)
+//   ve sayimin urettigi envanter belgesi (FATBASLIK TUR=7) TEK transaction'da.
+//   Eskiden fatura basligi LOGSUZ ve transaction'siz siliniyor, kalem kontrolu de
+//   yalnizca ekranda yapiliyordu.
+var
+  LId: Integer;
 begin
   if tabSayimKalemleri.RecordCount > 0 then begin
     Application.MessageBox(PChar(STOnce_sil),PChar(Bilgi), MB_OK + MB_ICONWARNING);
     Abort
   end;
-  //önce İlgili fatura kaydı silinsin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text:= 'DELETE FROM FATBASLIK WHERE TUR = 7 AND ANAKAYITID ='+ TabSayTutanak.FieldByName('ID').AsString +' ';
-  Tablo.Query1.ExecSQL;
+  if TabSayTutanak.IsEmpty then Exit;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) <> IDYES then Exit;
 
-  TabSayTutanak.Delete;
+  LId := TabSayTutanak.FieldByName('ID').AsInteger;
+  Tablo.ApiSilCagir('sp_Api_StokSayim_Sil_Json', LId);
   SayimlariListele;
 end;
 

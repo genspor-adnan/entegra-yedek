@@ -132,6 +132,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 277
@@ -1684,7 +1688,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Visible = False
       end
       object PageUst: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 105
         Width = 1104
@@ -1693,6 +1696,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         TabOrder = 7
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         OnChange = PageUstChange
         ClientRectBottom = 168
         ClientRectLeft = 4
@@ -1701,6 +1705,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 11
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2600,6 +2608,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 19
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2764,6 +2776,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = DetayEkrPage
       OnExitPage = DetayEkrExitPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3177,6 +3191,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -3237,6 +3253,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 554
         AnchorX = 1110
       end
       object GridYorum: TcxGrid
@@ -3390,78 +3407,78 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ImageIndex = 34
         object N52: TMenuItem
           Caption = '% 0'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N53: TMenuItem
           Tag = 5
           Caption = '% 5'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N102: TMenuItem
           Tag = 10
           Caption = '% 10'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N152: TMenuItem
           Tag = 15
           Caption = '% 15'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N202: TMenuItem
           Tag = 20
           Caption = '% 20'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N252: TMenuItem
           Tag = 25
           Caption = '% 25'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N302: TMenuItem
           Tag = 30
           Caption = '% 30'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N402: TMenuItem
           Tag = 40
           Caption = '% 40'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N502: TMenuItem
           Tag = 50
           Caption = '% 50'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N1001: TMenuItem
           Tag = 100
           Caption = '% 100'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object zel3: TMenuItem
           Tag = -1
           Caption = 'Di'#287'er'
-          ImageIndex = 15
           Hint = #304'skonto1'
+          ImageIndex = 15
           OnClick = N52Click
         end
         object zel2: TMenuItem
@@ -3481,78 +3498,78 @@ object FaturaWizardDlg: TFaturaWizardDlg
         ImageIndex = 34
         object N01: TMenuItem
           Caption = '% 0'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N51: TMenuItem
           Tag = 5
           Caption = '% 5'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N101: TMenuItem
           Tag = 10
           Caption = '% 10'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N151: TMenuItem
           Tag = 15
           Caption = '% 15'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N201: TMenuItem
           Tag = 20
           Caption = '% 20'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N251: TMenuItem
           Tag = 25
           Caption = '% 25'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N301: TMenuItem
           Tag = 30
           Caption = '% 30'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N401: TMenuItem
           Tag = 40
           Caption = '% 40'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N501: TMenuItem
           Tag = 50
           Caption = '% 50'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N1002: TMenuItem
           Tag = 100
           Caption = '% 100'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object zel1: TMenuItem
           Tag = -2
           Caption = 'Di'#287'er'
-          ImageIndex = 15
           Hint = #304'skonto2'
+          ImageIndex = 15
           OnClick = N52Click
         end
         object zel4: TMenuItem
@@ -4687,12 +4704,12 @@ object FaturaWizardDlg: TFaturaWizardDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -4740,13 +4757,11 @@ object FaturaWizardDlg: TFaturaWizardDlg
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

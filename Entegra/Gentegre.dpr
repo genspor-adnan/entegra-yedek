@@ -324,6 +324,7 @@ uses
   UFaturaTransferListe in 'IcerikFrame\UFaturaTransferListe.pas' {FatTransferListeDlg: TFrame},
   UIsEmriPersonelZaman in 'UIsEmriPersonelZaman.pas' {IsEmriPersonelZamanDlg},
   UMesajlasma in 'UMesajlasma.pas' {MesajlasmaDlg},
+  UMesajBildirim in 'Ortak\UMesajBildirim.pas',
   UFirsatListeDlg in 'ListeFrame\UFirsatListeDlg.pas' {FirsatListeDlg: TFrame},
   UFirsatWizard in 'UFirsatWizard.pas' {FirsatWizardDlg},
   UProjeListeDlg in 'ListeFrame\UProjeListeDlg.pas' {ProjeListeDlg: TFrame},

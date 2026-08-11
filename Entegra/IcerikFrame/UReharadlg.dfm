@@ -1285,6 +1285,7 @@ object RehberAraDlg: TRehberAraDlg
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = cxTabSheet1
+        Properties.Images = Tablo.PNGImageList2
         Properties.CustomButtons.Buttons = <>
         Properties.Style = 8
         ClientRectBottom = 228
@@ -1742,7 +1743,7 @@ object RehberAraDlg: TRehberAraDlg
         end
         object cxTabSheet3: TcxTabSheet
           Caption = 'Banka Bilgileri'
-          ImageIndex = 34
+          ImageIndex = 46
           object ToolBar3: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1959,7 +1960,7 @@ object RehberAraDlg: TRehberAraDlg
     end
     object TabSheetAlisSatis: TcxTabSheet
       Caption = 'Al'#305#351'/Sat'#305#351
-      ImageIndex = 34
+      ImageIndex = 49
       object PageControlAlisSatis: TcxPageControl
         Left = 0
         Top = 0
@@ -2614,7 +2615,7 @@ object RehberAraDlg: TRehberAraDlg
         ClientRectTop = 27
         object TabSheetGorev: TcxTabSheet
           Caption = #304#351' Listesi'
-          ImageIndex = 19
+          ImageIndex = 54
           object TreeListGorev: TcxDBTreeList
             Left = 0
             Top = 30
@@ -5924,6 +5925,11 @@ object RehberAraDlg: TRehberAraDlg
       ImageIndex = 7
       OnClick = DegisTusClick
     end
+    object KartiKopyalaMenu: TMenuItem
+      Caption = 'Kart'#305' Kopyala'
+      ImageIndex = 4
+      OnClick = KartiKopyalaMenuClick
+    end
     object MenuItem1: TMenuItem
       Caption = '-'
     end
@@ -7083,12 +7089,12 @@ object RehberAraDlg: TRehberAraDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -7158,13 +7164,11 @@ object RehberAraDlg: TRehberAraDlg
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

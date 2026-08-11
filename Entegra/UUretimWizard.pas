@@ -1306,7 +1306,13 @@ begin
         ULog.SnapTablo(2, 'FATURA',     'FATBASID=' + IntToStr(UretimID)),
         ULog.SnapTablo(2, 'GOREVYORUM', 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID)),
         ULog.SnapTablo(3, 'DOKUMAN', 'MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + ')'),
-        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + '))') ]);
+        ULog.SnapTablo(4, 'IMAJ',    'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where ' + 'TUR=' + IntToStr(TabNo_URETIMFISI) + ' and GOREVID=' + IntToStr(UretimID) + '))'),
+        // Izleme (lot/seri): UFaturaWizard ile AYNI desen (bkz. GenDepoUpdate125).
+        ULog.SnapTablo(3, 'STOKIZLEME', 'BASLIKID=' + IntToStr(UretimID), True, 5),
+        ULog.SnapTablo(4, 'STOKIZLEMEDEPO',
+          'IZLEMID in (select ID from STOKIZLEME where BASLIKID=' + IntToStr(UretimID) + ')' +
+          ' or IZLEMID in (select KAYITID from {SNAP} where OTURUMID=''{OTURUM}''' +
+          ' and TABLOADI=''STOKIZLEME'' and KAYITID is not null)', True, 4) ]);
   end;
 
   if (IslemOp='E') and (UretimID < 1) then begin

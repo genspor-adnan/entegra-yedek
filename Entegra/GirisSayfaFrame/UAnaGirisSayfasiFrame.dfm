@@ -31,7 +31,6 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
       ParentBackground = False
       TabOrder = 1
       object PageControlOrta: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 1
         Top = 1
         Width = 950
@@ -43,6 +42,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
         TabOrder = 0
         Properties.ActivePage = SheetNakitAkisi
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         ClientRectBottom = 596
         ClientRectLeft = 4
         ClientRectRight = 946
@@ -616,324 +616,6 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
             Visible = False
             Height = 89
             Width = 553
-          end
-        end
-        object SheetMesajlasma: TcxTabSheet
-          Caption = 'SheetMesajlasma'
-          ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-          object pnlMesajlasma: TPanel
-            Left = 0
-            Top = 0
-            Width = 942
-            Height = 569
-            Align = alClient
-            Color = clGradientInactiveCaption
-            ParentBackground = False
-            TabOrder = 0
-            object Panel18: TPanel
-              Left = 1
-              Top = 1
-              Width = 940
-              Height = 24
-              Align = alTop
-              Color = clSkyBlue
-              ParentBackground = False
-              TabOrder = 0
-              object Label12: TLabel
-                Left = 6
-                Top = 3
-                Width = 70
-                Height = 18
-                Caption = 'Mesajla'#351'ma'
-                Font.Charset = TURKISH_CHARSET
-                Font.Color = clNavy
-                Font.Height = -13
-                Font.Name = 'Trebuchet MS'
-                Font.Style = [fsBold]
-                ParentFont = False
-              end
-              object MesajLED: TJvLED
-                Left = 83
-                Top = 4
-                Status = False
-              end
-            end
-            object ScrollBox2: TScrollBox
-              Left = 1
-              Top = 25
-              Width = 211
-              Height = 543
-              Align = alLeft
-              TabOrder = 1
-              object cxGrid4: TcxGrid
-                Left = 0
-                Top = 31
-                Width = 207
-                Height = 508
-                Align = alClient
-                PopupMenu = MesajMenu
-                TabOrder = 1
-                LookAndFeel.Kind = lfOffice11
-                LookAndFeel.NativeStyle = False
-                object cxGrid4DBTableViewKisiler: TcxGridDBTableView
-                  PopupMenu = MesajMenu
-                  Navigator.Buttons.CustomButtons = <>
-                  ScrollbarAnnotations.CustomAnnotations = <>
-                  OnCellClick = cxGrid4DBTableViewKisilerCellClick
-                  DataController.DataSource = DtsMesajKisiler
-                  DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
-                  DataController.Summary.DefaultGroupSummaryItems = <>
-                  DataController.Summary.FooterSummaryItems = <>
-                  DataController.Summary.SummaryGroups = <>
-                  Images = Tablo.PNGImageList2
-                  OptionsCustomize.ColumnsQuickCustomization = True
-                  OptionsData.Deleting = False
-                  OptionsData.DeletingConfirmation = False
-                  OptionsData.Editing = False
-                  OptionsData.Inserting = False
-                  OptionsSelection.CellSelect = False
-                  OptionsView.ScrollBars = ssVertical
-                  OptionsView.DataRowHeight = 40
-                  OptionsView.GridLines = glNone
-                  OptionsView.GroupByBox = False
-                  OptionsView.Header = False
-                  object cxGrid4DBTableViewKisilerColumn1: TcxGridDBColumn
-                    DataBinding.FieldName = 'ID'
-                    DataBinding.IsNullValueType = True
-                    RepositoryItem = Tablo.repOnlinePersonel
-                    Options.ShowCaption = False
-                    Width = 200
-                    IsCaptionAssigned = True
-                  end
-                end
-                object cxGridLevel1: TcxGridLevel
-                  GridView = cxGrid4DBTableViewKisiler
-                end
-              end
-              object Panel10: TPanel
-                Left = 0
-                Top = 0
-                Width = 207
-                Height = 31
-                Align = alTop
-                TabOrder = 0
-                Visible = False
-                object MesajPersonAra: TcxButtonEdit
-                  AlignWithMargins = True
-                  Left = 7
-                  Top = 4
-                  Hint = 'Personel ara'
-                  ParentShowHint = False
-                  Properties.Buttons = <>
-                  ShowHint = True
-                  TabOrder = 0
-                  TextHint = 'Ara'
-                  Visible = False
-                  Width = 162
-                end
-              end
-            end
-            object PanelChat: TPanel
-              Left = 212
-              Top = 25
-              Width = 729
-              Height = 543
-              Align = alClient
-              TabOrder = 2
-              object PageControlChat: TcxPageControl
-                Left = 1
-                Top = 1
-                Width = 727
-                Height = 500
-                Align = alClient
-                PopupMenu = MesajMenu
-                TabOrder = 0
-                Properties.CustomButtons.Buttons = <>
-                LookAndFeel.NativeStyle = False
-                OnCanClose = PageControlChatCanClose
-                OnPageChanging = PageControlChatPageChanging
-                ClientRectBottom = 498
-                ClientRectLeft = 2
-                ClientRectRight = 725
-                ClientRectTop = 2
-              end
-              object Panel4: TPanel
-                Left = 1
-                Top = 501
-                Width = 727
-                Height = 41
-                Align = alBottom
-                TabOrder = 1
-                object BtnMesajGonder: TcxButton
-                  Left = 628
-                  Top = 1
-                  Width = 59
-                  Height = 39
-                  Align = alRight
-                  Caption = 'G'#246'nder'
-                  Enabled = False
-                  TabOrder = 0
-                  OnClick = BtnMesajGonderClick
-                end
-                object MemoChat: TcxRichEdit
-                  Left = 1
-                  Top = 1
-                  Align = alClient
-                  Enabled = False
-                  Properties.ScrollBars = ssVertical
-                  TabOrder = 2
-                  OnKeyUp = MemoChatKeyUp
-                  Height = 39
-                  Width = 627
-                end
-                object BtnDosyaGonder: TcxButton
-                  Left = 687
-                  Top = 1
-                  Width = 39
-                  Height = 39
-                  Align = alRight
-                  Enabled = False
-                  OptionsImage.Glyph.SourceDPI = 96
-                  OptionsImage.Glyph.Data = {
-                    424D361000000000000036000000280000002000000020000000010020000000
-                    000000000000C40E0000C40E00000000000000000000FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E2DA
-                    D5FFA59081FF7E604AFF69452AFF643E22FF6A472CFF836954FFAD9D92FFF0ED
-                    E9FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0ECEAFF927B67FF6740
-                    24FF774929FF83522CFF88552EFF87542EFF804F2CFF7A4D29FF714726FF6642
-                    28FFAFA093FFFDFDFDFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E5DDD8FF855F40FF9C6134FFB872
-                    3EFFC87D43FFD18346FFD88748FFDC8849FFD48648FFBE7640FF9B5F34FF7E4E
-                    2AFF6E4424FF8A7666FFFBFAFAFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00F1EBE6FFA6724AFFC87D43FFDA8949FFDA88
-                    49FFDA8F59FFF3C199FFFDD9BDFFFFE5CDFFFFDEBBFFFFCD94FFFFA75BFFD282
-                    46FF8A572EFF6E4626FF9D8F82FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00F6F2F0FFB17D57FFDF8B4AFFE4904CFFC67D43FFD5B3
-                    98FFFDFBF8FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFF8EAFFFFC6
-                    84FFED9550FF8B562EFF654023FFDCD8D5FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FCFBFAFFB38A68FFDD8A4AFFE9934EFFBD7741FFD1BEAEFFFFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFD
-                    F7FFFFC97DFFE48B4CFF764A28FF958478FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FDFDFDFFC0997DFFD9874AFFED9350FFC77C42FFC6AE9CFFFFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFF1CEFFFFB662FFA46436FF6A503DFFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00CEAD94FFD88648FFEF9651FFD08245FFBFA38DFFFFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFBF3FFFFC56AFFD38246FF563821FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00D6BC
-                    A9FFD28247FFF39850FFD58448FFB5967FFFFEFEFEFFF0E9E3FFDAC5B5FFDBC5
-                    B5FFF1E8E2FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFAF4FFFFC46BFFE9914EFF583B24FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00DFCDBEFFCC80
-                    46FFF59952FFDE8B4AFFAB8971FFF3EFEEFFB38E72FF83532EFF7E502AFF7F4F
-                    2CFF82522DFFAD8B71FFF7F5F3FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFF0D7FFFFC369FFE58E4CFF725946FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E7DBD1FFC68049FFF89A
-                    54FFE4904CFFAC8568FFF3F1EEFFCA9669FFD28346FFD18346FFC87C43FFB270
-                    3BFF8F5A2FFF774A28FF93745EFFFEFEFEFFFFFFFF00FFFFFF00FFFFFF00FEFE
-                    FEFFFFD28EFFFFBC65FFC27740FFA19387FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00EFE7E1FFC58251FFFA9B53FFEC94
-                    4FFFAD815DFFEEEBEAFFD29F75FFF69952FFF59853FFD18449FFF0B487FFFFC3
-                    8FFFFA9E56FFA66738FF714625FFD8D0CAFFFFFFFF00FFFFFF00FFFFFF00FFDA
-                    AEFFFFB863FFFFA75AFF865533FFECE9E7FFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00F5EFECFFC4875AFFFB9C55FFF49851FFAF7B
-                    56FFEDEAE8FFD9A982FFF59952FFFC9C55FFBB7843FFD8CCC2FFFFFFFF00FFFF
-                    FF00FFE8BAFFFBA357FF82502BFFBAADA2FFFFFFFF00FFFEFEFFFFD4A5FFFFA8
-                    5AFFFFAA5BFFC47A41FFB3A498FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00F9F7F5FFC69168FFFC9D54FFFA9D55FFB57C4FFFE7E5
-                    E2FFDAAC8BFFF79A52FFFF9F56FFBD7841FFCBBDB2FFFFFFFF00FFFFFF00FEF9
-                    F5FFFFBF82FFFFB662FF925A31FFBEB7B2FFFDFCFBFFF8C796FFFFAA5DFFFFA1
-                    58FFD08146FFAF9681FFFEFEFEFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FDFDFCFFCC987AFFFD9D54FFFFA157FFB97A4AFFE2DDD9FFDCB2
-                    93FFF89B54FFFFA357FFC27B42FFCDBDB2FFFFFFFF00FFFFFF00FEF8F4FFEFA9
-                    73FFFFA659FFFCA055FF7A573DFFF2F0EDFFFFC18EFFFFAA5BFFFFA358FFBF78
-                    42FFB9A595FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00D5AA8DFFFC9D56FFFFA659FFC17E4AFFDBD5D1FFE0BBA0FFFA9D
-                    54FFFFA659FFC87E44FFCDBCAFFFFFFFFF00FFFFFF00FEF8F4FFF5AD75FFFFA8
-                    5AFFFC9D56FF9E6A40FFCEC7C2FFFFC188FFFFAE5DFFFFA258FFB57441FFC8B8
-                    ADFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00E1BEA4FFFA9D55FFFFAB5BFFCA8147FFD3CAC2FFE5C6ADFFF99D55FFFFA9
-                    5BFFCF8146FFCFBCAFFFFFFFFF00FFFFFF00FDF4EFFFF9AD74FFFFAA5BFFFC9E
-                    55FF996842FFD7CDC7FFFFBE7EFFFFAF5EFFFFA158FFAF7141FFD1C7BFFFFFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E8CD
-                    B9FFF59A53FFFFAF5FFFD68649FFCDC0B7FFE8CCB7FFF89C56FFFFAD5CFFD284
-                    47FFCEBDAEFFFFFFFF00FFFFFF00FEF7F0FFFDAE74FFFFAD5DFFFA9E55FF9667
-                    44FFDFD4CCFFFFBB78FFFFB160FFFE9F57FFA97046FFDDD6D1FFFFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E8D6C9FFF39C
-                    57FFFFB561FFE48E4EFFC5B5A8FFEAD2BFFFF9A059FFFFB05EFFDB894AFFD0BC
-                    ADFFFFFFFF00FFFFFF00FEF6EFFFFFB174FFFFB060FFFA9E55FF936A4BFFE3D7
-                    CDFFFFB871FFFFB461FFFA9D55FFA5744FFFE6E2DEFFFFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E99C5FFFFFB9
-                    63FFF29852FFBCA898FFEFDBCBFFFAA45BFFFFB461FFE18D4BFFC6B0A1FFFFFF
-                    FF00FFFFFF00FFF4ECFFFFAF70FFFFB461FFF89D54FF916B50FFEAD9CCFFFFB8
-                    6EFFFFB662FFF89A54FFA57B5AFFEFEDEBFFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFE4B5FFFFA6
-                    59FFB89D8AFFF4E3D6FFF8A55DFFFFB863FFE8914EFFC4AB99FFFFFFFF00FFFF
-                    FF00FFF5EDFFFFB472FFFFB663FFF89B54FF8E6D54FFEFDACBFFFFBA6AFFFFB7
-                    63FFF09651FFA68569FFF6F5F4FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FAF4
-                    EFFFF4E6DCFFF9A762FFFFBF67FFEF9752FFC5AB99FFFFFFFF00FFFFFF00FFF3
-                    E8FFFFB875FFFFBA64FFF59A53FF91725EFFF2DAC6FFFFBD6AFFFFB963FFE991
-                    4DFFAE937AFFFBFAFAFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F7EA
-                    E0FFFAAE69FFFFC369FFF59B55FFC8AB98FFFFFFFF00FFFFFF00FFF4EBFFFFB9
-                    71FFFFBE66FFF29952FF927764FFF6DBC2FFFFBE69FFFFBA64FFDE894AFFB8A0
-                    8FFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FEFAF7FFFFB5
-                    72FFFFC76CFFFAA057FFC9AC96FFFFFFFF00FFFFFF00FFF3E9FFFFBD75FFFFC1
-                    68FFF09752FF998071FFF9D8B9FFFFC169FFFFBA65FFD28146FFC3B1A4FFFFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFE3C9FFFFCA
-                    6DFFFBA558FFC3A691FFFFFFFF00FFFFFF00FFF7EBFFFFBF72FFFFC56AFFED95
-                    51FF9C887AFFFDD9B4FFFFC66AFFFFBA64FFC87F49FFCFC3B9FFFFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFE8CAFFFFBB
-                    66FF774727FFBC9D87FFFCF9F6FFFFFFFF00FFF9E0FFFFCC6DFFE6914FFFA492
-                    86FFFFD6AAFFFFCA6DFFFFB964FFC17E4CFFD9CFCAFFFFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFBF5FFFFC0
-                    73FFBA723DFFB5723DFFBF8253FFE2CDB9FFFFFEFEFFFCDFBFFFBAABA2FFFFD9
-                    A4FFFFCF6FFFFFB763FFB87C4FFFE4DDDAFFFFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFF5
-                    E3FFFFB875FFF89B54FFD18246FFB5753EFFB68E65FFE5BE9FFFFFCE8CFFFFD1
-                    71FFFFB562FFB37F59FFECE9E6FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFDFCFFFFDDBBFFFFAA65FFE4904DFFDE8A4AFFFFC269FFFFD472FFFFB1
-                    5FFFB08565FFF3F3F2FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FEF9F4FFF5C8A6FFF0A268FFE79753FFDF9C64FFC7AB
-                    96FFF9F9F9FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-                    FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00}
-                  TabOrder = 1
-                  OnClick = BtnDosyaGonderClick
-                end
-              end
-            end
           end
         end
         object SheetYonetimFinans: TcxTabSheet
@@ -1881,7 +1563,7 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
                 Storage = SchedulerDBStorage
                 TabOrder = 0
                 OnDblClick = SchedulerDblClick
-                Selection = 147
+                Selection = 189
                 Splitters = {
                   87020000FB000000A503000000010000820200000100000087020000F8010000}
                 StoredClientBounds = {0100000001000000A5030000F8010000}
@@ -2921,8 +2603,8 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
               end
               object FGrid: TcxGrid
                 AlignWithMargins = True
-                Left = 2075
-                Top = 1927
+                Left = 2111
+                Top = 1963
                 Width = 443
                 Height = 128
                 Align = alCustom
@@ -4668,7 +4350,6 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
           StyleReadOnly.LookAndFeel.NativeStyle = False
           TabOrder = 1
           Transparent = True
-          OnClick = ProfilResimClick
           Height = 86
           Width = 91
         end

@@ -221,7 +221,7 @@ object FirsatListeDlg: TFirsatListeDlg
       ClientRectTop = 27
       object TabSheetGorevler: TcxTabSheet
         Caption = #304#351' Listesi'
-        ImageIndex = 32
+        ImageIndex = 54
         object TreeListGorev: TcxDBTreeList
           Left = 0
           Top = 41
@@ -2119,12 +2119,12 @@ object FirsatListeDlg: TFirsatListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -2208,13 +2208,11 @@ object FirsatListeDlg: TFirsatListeDlg
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

@@ -690,11 +690,6 @@ object FiyatDegisiklikDlg: TFiyatDegisiklikDlg
       object cizgi2: TMenuItem
         Caption = '-'
       end
-      object FiyatHesapla: TMenuItem
-        Caption = 'Fiyat Hesapla'
-        ImageIndex = 34
-        OnClick = FiyatHesaplaClick
-      end
     end
     object KDVGuncelle: TMenuItem
       Caption = 'Fiyat Listesinin KDV Durumunu G'#252'ncelle'

@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- GenDepoUpdate124.sql
 -- DONUSUM KURALI (genel):
 --   1) Donusmus belge / satir SILINEMEZ.        -> sp_Prog_*_Silinebilir_Mi (117/119/120)
@@ -115,8 +115,10 @@ BEGIN
                      N'. Adet bu değerin altına düşürülemez.';
     END;
 
+    -- UYGUN INT olarak doner: bit alan FireDAC'ta Boolean'a maplenip
+    --   AsInteger okunusunda "Cannot access field 'UYGUN' as type Integer" veriyordu.
     SELECT DONUSENADET = @Donusen,
-           UYGUN       = @Uygun,
+           UYGUN       = CAST(@Uygun AS int),
            MESAJ       = @Mesaj,
            BELGEAD     = @BelgeAd,
            BELGENO     = @BelgeNo,

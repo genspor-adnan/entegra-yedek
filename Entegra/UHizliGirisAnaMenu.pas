@@ -80,6 +80,11 @@ type
     Cagiran : Integer;
     function KasaTakipIdBilgisi: integer;
     function KasaKaydet(HesapTuru:char; Tahsil:currency; Tur,HesapId,MusteriHesapId, KuponId, RehId, FatTur, YerId:Integer): String;
+    // POS tahsilat API'si (GenDepoUpdate138) icin yardimcilar
+    function TahsilatSatirJson(Tur, HesapId, MusteriHesapId: Integer; Tutar: Currency; HesapTuru: Char): String;
+    function TahsilatSatirParca(Tur, HesapId, MusteriHesapId: Integer; Tutar: Currency; HesapTuru: Char): String;
+    function TahsilatFaturaId(FatTur: Integer): Integer;
+    function TahsilatMasrafId(FatTur: Integer): Integer;
     function TahsilatInsert(RehId,FatTur,YerId:Integer): TStringList;
     Procedure TahsilatTablosuAc;
   end;
@@ -100,7 +105,7 @@ implementation
 
 {$R *.dfm}
 
-uses UHizliGiris, Utablo, UHizliGirisKasaSay, UHizliGirisDokumDlg,
+uses System.StrUtils, UHizliGiris, Utablo, UHizliGirisKasaSay, UHizliGirisDokumDlg,
   UGiderPusulasi, UGirisKutusuEx, Fetautil, PrjConst, FetaKurulusSiniflari, UHizliGirisPDKS, UMekanMasaGor,
   LocOnFly, UHizliGirisKKTahsilat, UHizliGirisTahsilat, UHizliGunsonuDlg, UYazarKasa_Ingenico;
 
@@ -256,86 +261,101 @@ begin
 end;
 
 function THizliGirisAnaMenu.KasaKaydet(HesapTuru:char; Tahsil:currency; Tur,HesapId,MusteriHesapId, KuponId, RehId, FatTur, YerId:Integer): String;
-var s:String[10];
+// Tek odeme satiri -> ortak POS tahsilat API'si (GenDepoUpdate138).
+//   Eskiden KASA satiri dataset Append/Post ile yaziliyordu; makbuz no, kur, sube,
+//   giris kaynagi gibi alanlar burada tek tek dolduruluyordu. Artik alanlar da
+//   transaction da sunucuda; buradan yalnizca satir bilgisi gecirilir.
 begin
-   if (CheckPerakendeyeSatis)and(RehID=VarsMusteri) then begin//satış kasaya hızlı kayıt yapar
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into SATISKASA ([TUR],[TARIH],[REHBERID],[HESAPID],[TUTAR],[FATURAID],[EKLEYEN],[SUBEID], AKTAR)'+
-          'values('+IntToStr(Tur)+','''+FormatDateTime('yyyy-mm-dd hh:nn',Tablo.GENINI.BugunTrhSaat)+''','+IntToStr(RehId)+','+IntToStr(HesapId)+','+Float_ToStr(Tahsil)+',0,'+Kullanan+','+IntToStr(SubeId)+',0)',[],[]);
-       Result := '0';
-   end else begin
-      Result := '-1';
-      HizliGirisAnaMenu.TabKasa.Close;
-      HizliGirisAnaMenu.TabKasa.SQL.Text := 'Select * from KASA where 1=2';
-      HizliGirisAnaMenu.TabKasa.Open;
+  Result := Tablo.PosTahsilatYaz(
+    TahsilatSatirJson(Tur, HesapId, MusteriHesapId, Tahsil, HesapTuru),
+    RehId, FatTur, YerId, TahsilatFaturaId(FatTur), TahsilatMasrafId(FatTur),
+    Windows_Kasiyer_Gunici, TabNo_KASATAKIP, CariDoviz,
+    (CheckPerakendeyeSatis) and (RehID = VarsMusteri));
+  if Result = '' then
+    Result := '-1';
+end;
 
-      HizliGirisAnaMenu.TabKasa.Append;
-      HizliGirisAnaMenu.TabKasa.FieldByName('TUR').Value := Tur;
-      HizliGirisAnaMenu.TabKasa.FieldByName('PLANTARIHI').Value := Tablo.GENINI.BugunTrhSaat;
-      HizliGirisAnaMenu.TabKasa.FieldByName('ISLEMTARIHI').Value := HizliGirisAnaMenu.TabKasa.FieldByName('PLANTARIHI').Value;
-      HizliGirisAnaMenu.TabKasa.FieldByName('BELGENO').Value := SiradakiMakbuzNumarasi(Tur); // MakbuzNo MaxMakbuzno+1????
-      HizliGirisAnaMenu.TabKasa.FieldByName('REHBERID').Value := RehId;
-      HizliGirisAnaMenu.TabKasa.FieldByName('HESAPID').Value := HesapId;
-      HizliGirisAnaMenu.TabKasa.FieldByName('BORC').Value := 0;
-      HizliGirisAnaMenu.TabKasa.FieldByName('ALACAK').Value := Tahsil;
-      HizliGirisAnaMenu.TabKasa.FieldByName('KUR').Value := CariDoviz;
-      HizliGirisAnaMenu.TabKasa.FieldByName('DOVIZ_TUTARI').Value := Tahsil;
-      HizliGirisAnaMenu.TabKasa.FieldByName('DOVIZ_KURU').Value := CariDoviz;
-      HizliGirisAnaMenu.TabKasa.FieldByName('HESAPTURU').Value := HesapTuru;
-      //if Tur=26 then //kupon ile tahsilat..
-      //   HizliGirisAnaMenu.TabKasa.FieldByName('CEKSENETID').Value := KuponId;
-      if FatTur>0 then begin
-         HizliGirisAnaMenu.TabKasa.FieldByName('MASRAFID').Value := Tablo.TabFatbaslik.FieldByName('MASRAFID').Value;
-         if FatTur=19 then//Tablo.TabFatbaslik.FieldByName('TUR').AsInteger=19 then //siparişse
-            s:='SIPARISNO'
-         else
-            s:='FATURANO';
-         //HizliGirisAnaMenu.TabKasa.FieldByName('ACIKLAMA').Value := Tablo.TabFatbaslik.FieldByName(s).AsString + ' Nolu ' + Tablo.RepKasaTurleri.Properties.FindItemByValue(FatTur).Description + ' Tahsilatı.';
-         HizliGirisAnaMenu.TabKasa.FieldByName('FATURAID').Value := Tablo.TabFatbaslik.FieldByName('ID').Value;
-      end;
-      HizliGirisAnaMenu.TabKasa.FieldByName('EKLEYEN').Value := Kullanan;
-      HizliGirisAnaMenu.TabKasa.FieldByName('SUBEID').AsInteger := SubeId;
-      HizliGirisAnaMenu.TabKasa.FieldByName('YERI').AsInteger := TabNo_KASATAKIP;
-      HizliGirisAnaMenu.TabKasa.FieldByName('YERID').AsInteger := YerId;
-      HizliGirisAnaMenu.TabKasa.FieldByName('GIRISKAYNAK').AsInteger := Windows_Kasiyer_Gunici;
-      if Tur=25 then //KK ile tah.
-         HizliGirisAnaMenu.TabKasa.FieldByName('MUSTERIHESAPID').Value := MusteriHesapId;
-      HizliGirisAnaMenu.TabKasa.Post;
-      Result := HizliGirisAnaMenu.TabKasa.FieldByName('ID').Value;
-   end;
+function THizliGirisAnaMenu.TahsilatSatirJson(Tur, HesapId, MusteriHesapId: Integer;
+  Tutar: Currency; HesapTuru: Char): String;
+// Tek satirlik JSON dizisi (SP OPENJSON ile okur). Ondalik ayraci NOKTA olmali.
+begin
+  Result := '[' + TahsilatSatirParca(Tur, HesapId, MusteriHesapId, Tutar, HesapTuru) + ']';
+end;
+
+function THizliGirisAnaMenu.TahsilatSatirParca(Tur, HesapId, MusteriHesapId: Integer;
+  Tutar: Currency; HesapTuru: Char): String;
+begin
+  Result := '{"Tur":' + IntToStr(Tur) +
+            ',"HesapId":' + IntToStr(HesapId) +
+            ',"MusteriHesapId":' + IntToStr(MusteriHesapId) +
+            ',"Tutar":' + Float_ToStr(Tutar) +
+            ',"HesapTuru":"' + HesapTuru + '"}';
+end;
+
+function THizliGirisAnaMenu.TahsilatFaturaId(FatTur: Integer): Integer;
+begin
+  Result := 0;
+  if (FatTur > 0) and Tablo.TabFatbaslik.Active and (not Tablo.TabFatbaslik.IsEmpty) then
+    Result := Tablo.TabFatbaslik.FieldByName('ID').AsInteger;
+end;
+
+function THizliGirisAnaMenu.TahsilatMasrafId(FatTur: Integer): Integer;
+begin
+  Result := 0;
+  if (FatTur > 0) and Tablo.TabFatbaslik.Active and (not Tablo.TabFatbaslik.IsEmpty) then
+    Result := Tablo.TabFatbaslik.FieldByName('MASRAFID').AsInteger;
 end;
 
 function  THizliGirisAnaMenu.TahsilatInsert(RehId,FatTur,YerId:Integer): TStringList;
-var //KasaIdList:TStringList;
-    Tutar:Currency;
-Begin // alacak 21nakit 25pos
-  //10 tl 20 tl gibi nakitler seçilerek toplamnakit oluşturulur ve bunun 1 satır olarak kaydedilmesi gerekir;
-  //KasaIdList := TStringList.Create;
-  result := TStringList.Create;
- // if HizliGirisTahsilatDlg.ToplamNakit > 0 then
- //    result.Add(KasaKaydet('K',HizliGirisTahsilatDlg.ToplamNakit-HizliGirisTahsilatDlg.EditParaUstu.EditValue, 21,VarsKasa,0,0,RehId,FatTur,YerId));
-  //Nakit dışındakilerin kasaya kaydı
+// TUM odeme satirlari TEK API cagrisi = TEK transaction (GenDepoUpdate138).
+//   Once her satir icin ayri INSERT atiliyordu: 3 odemenin 2'si yazilip baglanti
+//   koparsa kasa yarim kaliyordu (kasiyer gun sonunda fark ediyordu).
+var
+  LSatirlar: string;
+  LTutar: Currency;
+  LTur: Integer;
+  LIdler: string;
+Begin // alacak 21 nakit, 25 pos, 26/28/29 ve 2600+ kupon
+  Result := TStringList.Create;
+  LSatirlar := '';
+
   HizliGirisAnaMenu.TabTahDetay.First;
-  while (HizliGirisTahsilatDlg.ToplamTutar.EditValue>0.01)and(not HizliGirisAnaMenu.TabTahDetay.Eof) do begin
+  while (HizliGirisTahsilatDlg.ToplamTutar.EditValue > 0.01) and (not HizliGirisAnaMenu.TabTahDetay.Eof) do
+  begin
     if HizliGirisAnaMenu.TabTahDetay.FieldByName('TUTAR').AsCurrency > HizliGirisTahsilatDlg.ToplamTutar.EditValue then
-       Tutar := HizliGirisTahsilatDlg.ToplamTutar.EditValue
+      LTutar := HizliGirisTahsilatDlg.ToplamTutar.EditValue
     else
-       Tutar := HizliGirisAnaMenu.TabTahDetay.FieldByName('TUTAR').AsCurrency;
-    case HizliGirisAnaMenu.TabTahDetay.FieldByName('TUR').AsInteger of
-      21: if (HizliGirisTahsilatDlg.ToplamTutar.EditValue>0.01)and(Tutar>=0.01) then
-             result.Add(KasaKaydet('K', Tutar, 21,VarsKasa,0,0,RehId,FatTur,YerId));
-      25: if (HizliGirisTahsilatDlg.ToplamTutar.EditValue>0.01)and(Tutar>=0.01) then
-             result.Add(KasaKaydet('P',Tutar, 25, HizliGirisAnaMenu.TabTahDetay.FieldByName('HESAPID').AsInteger, 0,0,RehId,FatTur,YerId));
-      26,28, 29, 2600..9000: if (HizliGirisTahsilatDlg.ToplamTutar.EditValue>0.01)and(Tutar>=0.01) then
-             result.Add(KasaKaydet('K',Tutar,HizliGirisAnaMenu.TabTahDetay.FieldByName('TUR').AsInteger,
-                        HizliGirisAnaMenu.TabTahDetay.FieldByName('HESAPID').AsInteger, 0,
-                        HizliGirisAnaMenu.TabTahDetay.FieldByName('HESAPID').AsInteger,RehId,FatTur,YerId));
-    end;
-    //toplam tahsil edilecek miktardan nakit miktarı düşelim ki fazla POS yazıldıysa onlardan düşmesin
-    HizliGirisTahsilatDlg.ToplamTutar.EditValue:=HizliGirisTahsilatDlg.ToplamTutar.EditValue-Tutar;
+      LTutar := HizliGirisAnaMenu.TabTahDetay.FieldByName('TUTAR').AsCurrency;
+
+    LTur := HizliGirisAnaMenu.TabTahDetay.FieldByName('TUR').AsInteger;
+    if LTutar >= 0.01 then
+      case LTur of
+        21: LSatirlar := LSatirlar + IfThen(LSatirlar = '', '', ',') +
+              TahsilatSatirParca(21, VarsKasa, 0, LTutar, 'K');
+        25: LSatirlar := LSatirlar + IfThen(LSatirlar = '', '', ',') +
+              TahsilatSatirParca(25, HizliGirisAnaMenu.TabTahDetay.FieldByName('HESAPID').AsInteger, 0, LTutar, 'P');
+        26, 28, 29, 2600..9000: LSatirlar := LSatirlar + IfThen(LSatirlar = '', '', ',') +
+              TahsilatSatirParca(LTur, HizliGirisAnaMenu.TabTahDetay.FieldByName('HESAPID').AsInteger, 0, LTutar, 'K');
+      end;
+
+    // Toplam tahsil edilecekten dusulur ki fazla POS yazildiysa onlardan dusmesin
+    HizliGirisTahsilatDlg.ToplamTutar.EditValue := HizliGirisTahsilatDlg.ToplamTutar.EditValue - LTutar;
     HizliGirisAnaMenu.TabTahDetay.Next;
   end;
-//  Result := KasaIdList;
-//  KasaIdList.Free;
+
+  if LSatirlar = '' then Exit;
+
+  LIdler := Tablo.PosTahsilatYaz('[' + LSatirlar + ']', RehId, FatTur, YerId,
+    TahsilatFaturaId(FatTur), TahsilatMasrafId(FatTur),
+    Windows_Kasiyer_Gunici, TabNo_KASATAKIP, CariDoviz,
+    (CheckPerakendeyeSatis) and (RehID = VarsMusteri));
+
+  if LIdler <> '' then
+  begin
+    Result.Delimiter := ',';
+    Result.StrictDelimiter := True;
+    Result.DelimitedText := LIdler;
+  end;
 End;
 
 Procedure THizliGirisAnaMenu.TahsilatTablosuAc;

@@ -655,7 +655,6 @@
     end
   end
   object cxPageControl1: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 285
     Width = 1231
@@ -664,6 +663,7 @@
     TabOrder = 4
     Properties.ActivePage = SheetDetay
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnPageChanging = cxPageControl1PageChanging
     ClientRectBottom = 241
     ClientRectLeft = 4
@@ -1229,7 +1229,6 @@
     Visible = False
   end
   object PageControlTur: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 49
     Width = 1231
@@ -1238,6 +1237,7 @@
     TabOrder = 5
     Properties.ActivePage = TabSheetTumu
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     Properties.Style = 10
     OnChange = PageControlTurChange
     ClientRectRight = 0
@@ -1248,7 +1248,6 @@
     end
   end
   object PageControlAlt: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 73
     Width = 1231
@@ -1257,6 +1256,7 @@
     TabOrder = 7
     Visible = False
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     Properties.Style = 3
     OnChange = PageControlAltChange
     ClientRectBottom = 24
@@ -1277,8 +1277,8 @@
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 235
-    Top = 28
+    Left = 227
+    Top = 60
     ParamData = <
       item
         Name = 'Par'
@@ -1564,8 +1564,8 @@
       object MenuYanitla: TMenuItem
         Tag = 2
         Caption = 'Yan'#305'tla'
-        ImageIndex = 41
         GroupIndex = 1
+        ImageIndex = 41
         object MenuKabulEt: TMenuItem
           Tag = 2
           Caption = 'Kabul Et'
@@ -1645,8 +1645,8 @@
       object rnEletirme1: TMenuItem
         Tag = 2
         Caption = #220'r'#252'n E'#351'le'#351'tirme'
-        ImageIndex = 33
         GroupIndex = 1
+        ImageIndex = 33
         object MenuUrunEslestir: TMenuItem
           Tag = 2
           Caption = #220'r'#252'n E'#351'le'#351'tir'
@@ -2147,13 +2147,13 @@
     object AlSat1: TMenuItem
       Tag = 1
       Caption = 'Al'#305#351' / Sat'#305#351
-      ImageIndex = 19
+      ImageIndex = 49
       OnClick = AlSat1Click
     end
     object adeFaturas1: TMenuItem
       Tag = 2
       Caption = #304'ade Faturas'#305
-      ImageIndex = 19
+      ImageIndex = 50
       OnClick = AlSat1Click
     end
     object FiatFark1: TMenuItem
@@ -2188,13 +2188,13 @@
     object EFaturaMenu1: TMenuItem
       Tag = 22
       Caption = 'Tevkifatl'#305
-      ImageIndex = 19
+      ImageIndex = 51
       OnClick = AlSat1Click
     end
     object MenuKDVIstisna: TMenuItem
       Tag = 24
       Caption = 'KDV '#304'stisna'
-      ImageIndex = 19
+      ImageIndex = 57
       OnClick = AlSat1Click
     end
     object KurFark1: TMenuItem
@@ -2212,7 +2212,7 @@
     object IhracatMenu: TMenuItem
       Tag = 26
       Caption = #304'hracat'
-      ImageIndex = 19
+      ImageIndex = 52
       object Menu_Ihr_Satis: TMenuItem
         Tag = 101
         Caption = 'Sat'#305#351
@@ -2222,20 +2222,20 @@
       object Menu_Ihr_Iade: TMenuItem
         Tag = 102
         Caption = #304'ade'
-        ImageIndex = 3
+        ImageIndex = 50
         OnClick = AlSat1Click
       end
       object Menu_Ihr_Istisna: TMenuItem
         Tag = 124
         Caption = #304'stisna'
-        ImageIndex = 19
+        ImageIndex = 57
         OnClick = AlSat1Click
       end
     end
     object IhracKayitliMenu: TMenuItem
       Tag = 9
       Caption = #304'hra'#231' Kay'#305'tl'#305
-      ImageIndex = 19
+      ImageIndex = 52
       OnClick = AlSat1Click
     end
     object CizgiMenu1: TMenuItem
@@ -2365,12 +2365,12 @@
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -2418,13 +2418,11 @@
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

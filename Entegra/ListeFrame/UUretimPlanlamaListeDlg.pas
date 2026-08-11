@@ -416,8 +416,13 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMOPERASYON where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimOperasyonuSil)
     else begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANDETAYID=&UPID)',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANDETAYID=&UPID',['&UPID'],[TabUretimPlanlama.FieldByName('ID').AsInteger]);
+      // Her emir ORTAK silme yolundan (sp_Api_UretimEmri_Sil_Json): loglu + tum cocuklar.
+      Tablo.TablodanSorguAc(9, 'select ID from URETIMEMRI where URETIMPLANDETAYID=' + TabUretimPlanlama.FieldByName('ID').AsString);
+      Tablo.Query9.First;
+      while not Tablo.Query9.Eof do begin
+        Tablo.ApiSilCagir('sp_Api_UretimEmri_Sil_Json', Tablo.Query9.FieldByName('ID').AsInteger);
+        Tablo.Query9.Next;
+      end;
 
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);
@@ -748,8 +753,13 @@ begin
     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMOPERASYON where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]) then
       ShowMessage(URUretimOperasyonuSil)
     else begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID in (select ID from URETIMEMRI where URETIMPLANID=&UPID)',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where URETIMPLANID=&UPID',['&UPID'],[FArama.TabPlanlar.FieldByName('ID').AsInteger]);
+      // Her emir ORTAK silme yolundan (sp_Api_UretimEmri_Sil_Json): loglu + tum cocuklar.
+      Tablo.TablodanSorguAc(9, 'select ID from URETIMEMRI where URETIMPLANID=' + FArama.TabPlanlar.FieldByName('ID').AsString);
+      Tablo.Query9.First;
+      while not Tablo.Query9.Eof do begin
+        Tablo.ApiSilCagir('sp_Api_UretimEmri_Sil_Json', Tablo.Query9.FieldByName('ID').AsInteger);
+        Tablo.Query9.Next;
+      end;
 
       TabloYenile(FArama.TabPlanlar,[FArama.cbDepo.EditValue]);
       AramaYap(nil);

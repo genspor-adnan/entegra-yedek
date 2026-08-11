@@ -68,10 +68,6 @@ type
     PopupFis: TPopupMenu;
     PopupFisGrid: TPopupMenu;
     FisInfoMenu: TMenuItem;
-    ToolButton2: TToolButton;         // ayrac (Tum/Son/Sik butonlari icin)
-    LabelTumKayitlar: TToolButton;    // Tum kayitlar (Liste_SP_Cagir 1)
-    LabelSonArananlar: TToolButton;   // Son Aranan (Liste_SP_Cagir 5)
-    LabelSikArananlar: TToolButton;   // Sik Aranan (Liste_SP_Cagir 3)
     procedure InitEkran(Sender: TObject);
     procedure YenileTusClick(Sender: TObject);
     procedure DegisTusClick(Sender: TObject);
@@ -84,7 +80,7 @@ type
     procedure GridTviewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure FisInfoMenuClick(Sender: TObject);
-    procedure LabelTumKayitlarClick(Sender: TObject);
+    procedure LabelTumKayitlarClick(Sender: TObject);   // SekmeConfig OlayBagla (arama paneli) -> PUBLISHED olmali
     procedure LabelSonArananlarClick(Sender: TObject);
     procedure LabelSikArananlarClick(Sender: TObject);
   private
@@ -401,6 +397,10 @@ begin
   end;
 end;
 
+
+// Arama panelindeki (AramaFrame) Tum/Son/Sik butonlari SekmeConfig OlayBagla ile
+//   BU metotlara baglidir - liste toolbar'indaki kopyalari kaldirildi ama metotlar
+//   KALMALI (yoksa "Kaynak orenekte bu yontem bulunamiyor" hatasi).
 procedure TFislerListeFrame.LabelTumKayitlarClick(Sender: TObject);
 begin
    Liste_SP_Cagir(1);   // Tum kayitlar

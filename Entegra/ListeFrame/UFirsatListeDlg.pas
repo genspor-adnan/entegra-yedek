@@ -1039,64 +1039,30 @@ begin
 end;
 
 procedure TFirsatListeDlg.SilTusClick(Sender: TObject);
+// SILME ARTIK SUNUCUDA: sp_Api_Firsat_Sil_Json (GenDepoUpdate127/129, modul 170).
+//   Engel kurallari fn_Prog_Silme_Engel(170), kapsam+sira fn_Prog_Silme_Detay(170);
+//   TEK transaction. Yetki (sorumlu), onay sorusu ve Google takvim app tarafinda.
 var
-    GoogleTakvimSonuc:boolean;
+    GoogleTakvimSonuc: Boolean;
 begin
+   if FIRSATLAR.IsEmpty then Exit;
    if (RolId<>'-1')and(FIRSATLAR.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
        Application.MessageBox(PChar(AWSorumluHaricindeSilmeYapilmaz), PChar(Uyari), MB_OK + MB_ICONERROR);
        Abort;
    end;
 
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-      //varsa dokumanlar�n silinmeli
-
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from FATBASLIK where PROJEID =  &SId', ['&SId'],[FIRSATLAR.Fields[0].AsInteger]) then
-        raise Exception.Create(PDFaturaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from KASA where PROJEID =  &SId', ['&SId'],[FIRSATLAR.Fields[0].AsInteger]) then
-        raise Exception.Create(RDPlanVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from CEKHAREKET where PROJEID =  &SId', ['&SId'],[FIRSATLAR.Fields[0].AsInteger]) then
-        raise Exception.Create(RDCekVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from GOREVLER where PROJEID =  &SId', ['&SId'],[FIRSATLAR.Fields[0].AsInteger]) then
-        raise Exception.Create(RDAktiviteVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from TEKLIF where PROJEID =  &SId', ['&SId'],[FIRSATLAR.Fields[0].AsInteger]) then
-        raise Exception.Create(RDTeklifVerisiVarSilinemez);
-
-        Tablo.TablodanSorguAc(5,'select * from PROJELER where ID='+FIRSATLAR.Fields[0].AsString);
-       if (GCalendarAktif = true) and ( Tablo.Query5.FieldByName('GOOGLEOLAYID').AsString <> '') then
+      if (GCalendarAktif) and (FIRSATLAR.FieldByName('GOOGLEOLAYID').AsString <> '') then
       begin
-        GoogleTakvimSonuc:= Tablo.GoogleTakvimSil(Tablo.Query5.FieldByName('GOOGLEHESAPID').AsInteger,
-                                                  Tablo.Query5.FieldByName('GOOGLEOLAYID').AsString);
-        if GoogleTakvimSonuc= false then
-           Showmessage(AKGoogle_takvim_silinemedi);
+        GoogleTakvimSonuc := Tablo.GoogleTakvimSil(FIRSATLAR.FieldByName('GOOGLEHESAPID').AsInteger,
+                                                   FIRSATLAR.FieldByName('GOOGLEOLAYID').AsString);
+        if not GoogleTakvimSonuc then
+           ShowMessage(AKGoogle_takvim_silinemedi);
       end;
-
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
-         [41, FIRSATLAR.Fields[0].AsInteger]);
-      //varsa proje ba�lant�lar� silinmeli
-      //kendisi silinir
-      //FIRSATLAR.Delete;
-      // KART LOGU: SILMEDEN ONCE ve TABLODAN (firsat fiziksel olarak PROJELER'de durur).
-      //   Liste dataset'i sp_Prog_Firsat_Liste_Json2 kolonlarini tasiyor -> dataset'ten
-      //   loglanirsa gercek kolonlar loga girmez, "Geri Al" kaydi EKSIK dirilir.
-      LogKayitSil('PROJELER', TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger,
-                  TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
-      // Detay (REHBERBILGI firsat bilgileri, YERI=proje) SILMEDEN ONCE logla.
-      LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_PROJEDETAY, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger, 'YERI=' + IntToStr(TabNo_PROJELER));
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM REHBERBILGI WHERE YERI = &RYer AND YER_ID = &YerId ', ['&RYer','&YerId'],[TabNo_PROJELER, FIRSATLAR.Fields[0].AsInteger]);
-      // Detay satirlarini SILMEDEN ONCE logla (ust=firsat), sonra sil.
-      LogDetaylariSil('PROJEASAMA', 'PROJEID', TabNo_PROJEASAMA, TabNo_FIRSAT, FIRSATLAR.Fields[0].AsInteger);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM PROJEASAMA where PROJEID= &YerId ', ['&YerId'],[ FIRSATLAR.Fields[0].AsInteger]);
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[FIRSATLAR.Fields[0].AsInteger]);
-
-    // NOT: kart silme logu YUKARIDA (silmeden once, PROJELER tablosundan) yazildi.
-
+      Tablo.ApiSilCagir('sp_Api_Firsat_Sil_Json', FIRSATLAR.FieldByName('ID').AsInteger);
       FArama.YenileTus.Click;
-        /// SQL2005 TE hataya neden oldu�u i�in delete olay�n� kendimiz yap�yoruz
-       Abort;
+      Abort;   // grid'in kendi delete'i calismasin (liste yeniden yuklendi)
    end;
-
 end;
 
 procedure TFirsatListeDlg.qryPROJELERrrAfterOpen(DataSet: TDataSet);

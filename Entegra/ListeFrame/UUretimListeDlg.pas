@@ -5,7 +5,7 @@
 interface
 
 uses
-  Windows,    Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit, System.JSON,
   cxTextEdit, ComCtrls, StdCtrls, UFrameYoneticisi, Menus, UGentegreFrameYonetimi,
   cxLookAndFeelPainters, cxButtons,DB, FireDAC.Comp.Client, ToolWin, ExtCtrls, cxGraphics,
@@ -334,68 +334,10 @@ begin
 end;
 
 procedure TUretimListeDlg.KaynakBelgeyiAcMenuClick(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID,RehID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
 begin
-  // TRANSFERDEN URETIM: uretim fisi bir transferden uretildiyse baglanti
-  //   FATBASLIK.YERI = TabNo_TRANSFER / YERID = transfer belge ID'sindedir
-  //   (satir bazli YERI/YERID degil). Asagidaki siparis sorgusu bu durumu
-  //   bulamaz; dogrudan kaynak transferi acalim. (08.08.2026)
-  if TabUretimListe.FieldByName('YERI').AsInteger = TabNo_TRANSFER then begin
-    AYerID := TabUretimListe.FieldByName('YERID').AsInteger;
-    if AYerID <= 0 then Abort;
-    Tablo.TablodanSorguAc(2, 'select FATURANO, REHBERID from FATBASLIK where ID='+IntToStr(AYerID));
-    if Tablo.Query2.IsEmpty then Abort;
-    AnaForm.GormeDialogCagir(AYerID, KasaTur_StokTransferi,
-      Tablo.Query2.FieldByName('REHBERID').AsInteger, 0, Tablo.GENINI.BugunTrh,
-      Tablo.Query2.FieldByName('FATURANO').AsString);
-    Exit;
-  end;
-
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := ' select distinct ';
-  Tablo.Query1.SQL.Add(' KAYNAKTUR = 19, ');
-  Tablo.Query1.SQL.Add(' KAYNAKBELGENO=(select SIPARISNO from SIPARIS where ID=SD.SIPARISID),');
-  Tablo.Query1.SQL.Add(' KAYNAKID=SD.SIPARISID,');
-  Tablo.Query1.SQL.Add(' KAYNAKFIRMA=(select REHBERID from SIPARIS where ID=SD.SIPARISID)  ');
-  Tablo.Query1.SQL.Add(' from SIPARISDETAY SD ');
-  Tablo.Query1.SQL.Add(' where ID in (select F1.YERID from FATURA F1 where YERI in (415,420) and FATBASID = '+TabUretimListe.FieldByName('ID').AsString+' )');
-
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  if AYeri=83 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from SERVIS where ID='+IntToStr(AYerID));
-    //RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-    Tablo.ServisSihirbazBaslat(False, 'D',0 ,AYerID ,Tablo.Query2.FieldByName('REHBERID').AsInteger);
-    Abort;
-  end else
-  if AYeri=-99 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from TEKLIF where ID='+IntToStr(AYerID));
-    RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-  end else
-    RehID := TabUretimListe.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,RehID,0,Tablo.GENINI.BugunTrh,ABelgeno);
-  //Tablo.SiparisSihirbazBaslat('D',FATBASLIK.FieldByName('TUR').AsInteger,0,FATBASLIK.FieldByName('ID').AsInteger,FATBASLIK.FieldByName('REHBERID').AsInteger);
+    Tablo.DonusumBelgeAc('KAYNAK', 'FATBASLIK', TabUretimListe.FieldByName('ID').AsInteger);
 end;
 
 procedure TUretimListeDlg.GridUretimViewCanFocusRecord(
@@ -413,39 +355,10 @@ begin
 end;
 
 procedure TUretimListeDlg.HedefBelgeyiA1Click(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := '';
-  Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
-  Tablo.Query1.SQL.Add(' from FATURA F ');
-  Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on F.ID=F2.YERID and F2.YERI in (425,426) ');
-  Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
-  Tablo.Query1.SQL.Add(' where F.FATBASID='+TabUretimListe.FieldByName('ID').AsString);
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,TabUretimListe.FieldByName('REHBERID').AsInteger,0,Tablo.GENINI.BugunTrh,ABelgeno);
+  Tablo.DonusumBelgeAc('HEDEF', 'FATBASLIK', TabUretimListe.FieldByName('ID').AsInteger);
 end;
 
 procedure TUretimListeDlg.JvTimer1Timer(Sender: TObject);

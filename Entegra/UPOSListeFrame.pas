@@ -656,26 +656,10 @@ begin
         if Tablo.Query4.RecordCount> 0 then
           raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')
         else begin//yoksa a??l?? kayd?n? silelim
-          if LogGun>0 then begin  // SILMEDEN ONCE, dogru kayit (secili) dururken logla; detay+kart
-            LogDetaylariSil('POSORAN','POSID',TabNo_POSORAN,TabNo_POS,POSLAR.FieldByName('ID').AsInteger);
-            // Kart logu BASE POS tablosundan: POSLAR list-SP'sinde BANKAHESAPID/base kolonlar yok
-            //   -> onlardan loglayinca Geri Al eksik satir olusturur (BANKAHESAPID null -> liste
-            //   inner-join'i eler, POS geri gelmez). Tam satiri base'den oku.
-            var LBaseQ: TFDQuery := TFDQuery.Create(nil);
-            try
-              LBaseQ.Connection := Tablo.FDCnn;
-              LBaseQ.SQL.Text := 'select * from POS where ID=' + POSLAR.FieldByName('ID').AsString;
-              LBaseQ.Open;
-              if not LBaseQ.IsEmpty then
-                LogKartSil(LBaseQ, TabNo_POS, LBaseQ.FieldByName('ID').AsInteger);
-            finally
-              LBaseQ.Free;
-            end;
-          end;
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''P'' AND TUR in (1,2) ',['&id'], [POSLAR.Fields[0].AsInteger]);
-               //kendisini sil
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from POS  where ID=&id ',['&id'],[POSLAR.Fields[0].AsInteger]);
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from posoran where POSID=&id',['&id'],[POSLAR.Fields[0].AsInteger]);
+          // SILME ARTIK SUNUCUDA: sp_Api_POS_Sil_Json (modul 69).
+          //   Loglama (kart + POSORAN + acilis kasa kaydi) ve silme TEK
+          //   transaction'da SP icinde; Pascal log cagrilari kaldirildi.
+          Tablo.ApiSilCagir('sp_Api_POS_Sil_Json', POSLAR.Fields[0].AsInteger);
           YenileClick;
         end;
       end;

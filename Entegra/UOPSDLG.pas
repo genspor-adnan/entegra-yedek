@@ -1778,8 +1778,9 @@ end;
 procedure TOpsiyonDlg.tabKocanAyarlariNewRecord(DataSet: TDataSet);
 begin
   tabKocanAyarlari.FieldByName('KOCANKULLAN').AsBoolean:= True;
-  Tablo.TablodanSorguAc(1,'select isnull(max(KOCANNO),0)+1 from KOCANAYARLARI');
-  tabKocanAyarlari.FieldByName('KOCANNO').AsInteger:=Tablo.Query1.Fields[0].AsInteger;
+  // Koçan no: MERKEZI SAYAC (istemcide max+1 -> iki kullanıcı aynı koçan numarasını alır)
+  tabKocanAyarlari.FieldByName('KOCANNO').AsInteger :=
+    Tablo.SiradakiNoSayi('KOCANAYARLARI', 'KOCANNO');
   tabKocanAyarlari.FieldByName('BASLANGICTARIHI').AsDateTime := Tablo.GENINI.BugunTrhSaat;
   tabKocanAyarlari.FieldByName('SUBEID').AsInteger := SubeID;
   if (clmKocanTur.Properties as TcxImageComboBoxProperties).items.Count=1 then

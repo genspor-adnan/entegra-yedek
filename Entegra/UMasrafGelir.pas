@@ -1024,9 +1024,13 @@ begin
 end;
 
 procedure TMasrafGelirDlg.SilTusClick(Sender: TObject);
+// Kayit SUNUCUDA silinir (sp_Api_MasrafGelir_Sil_Json) -> dataset'te .Delete
+//   CAGRILMAZ (satir zaten yok; ayrica BeforeDelete ikinci kez loglardi).
+//   Sadece listeyi tazele.
 begin
+  if TabMasrafGelir.IsEmpty then Exit;
   if MasrafSilmeIslemi(TabMasrafGelir.FieldByName('ID').AsInteger) then
-     TabMasrafGelir.delete;
+     TabloYenile(TabMasrafGelir, []);
 end;
 
 procedure TMasrafGelirDlg.TumunuKopyalaClick(Sender: TObject);

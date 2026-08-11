@@ -613,7 +613,7 @@ object OpsiyonAksiyonDlg: TOpsiyonAksiyonDlg
     end
     object GorevPage: TTabSheet
       Caption = #304#351' Listesi'
-      ImageIndex = 32
+      ImageIndex = 54
       object checkGorevAciklama: TCheckBox
         Left = 34
         Top = 288

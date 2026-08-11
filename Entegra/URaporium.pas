@@ -42,6 +42,8 @@ type
     procedure TamamTusClick(Sender: TObject);
   private
     { Private declarations }
+    // Sunucudan XML ceker. Doner: '' = BASARILI; aksi halde kullaniciya
+    //   gosterilecek HATA metni (HTTP kodu / baglanti hatasi).
     function DokumanSorgula(var FXml : TECXMLParser; versiyon:string; dokumid, islemNo:smallint):string;
     procedure RaporUpdate;
     procedure ListeyeEkle(RaporNo,EkleDegis:String);
@@ -111,69 +113,88 @@ begin
 end;
 
 function TRaporiumDlg.DokumanSorgula(var FXml : TECXMLParser; versiyon:string; dokumid, islemNo:smallint):string;
-  var
-    GonderilecekString ,GelenCevap : String;
-    DonenDeger:TStringlist;
-    ResponseStream: TMemoryStream;
-    InputStringList : TStringList;
-    IdHttp1 : TIDHTTP;
-    XMLString : string;
-    xmlstream : TStringStream;
-
+// Rapor sunucusundan (GenYazilim) XML ceker.
+//   Doner: '' = basarili, aksi halde HATA metni.
+// ONCEKI DAVRANIS (hata kaynagi): exception YUTULUYORDU, Result hic atanmiyordu ve
+//   HTTP durum kodu kontrol edilmiyordu. Sunucu 503/404 verince ya da baglanti
+//   kopunca ekran SESSIZCE kapaniyor, kullanici "guncelleme yok" saniyordu.
+//   Ayrica hata halinde FXml ONCEKI cagrinin icerigiyle KALIYOR (FreeAndNil basarili
+//   dalda) -> ayni liste tekrar islenebiliyordu. IdHTTP ve TStringList de sizdiriliyordu.
+var
+  GonderilecekString : String;
+  ResponseStream: TMemoryStream;
+  InputStringList : TStringList;
+  IdHttp1 : TIDHTTP;
+  XMLString : string;
 begin
-    IdHttp1 :=   TIDHTTP.Create(nil);
-    //IdHttp1.ProxyParams.ProxyPort := 8888;
-    //IdHttp1.ProxyParams.ProxyServer:='localhost';
+  Result := '';
+  IdHttp1 := TIDHTTP.Create(nil);
+  ResponseStream := TMemoryStream.Create;
+  InputStringList := TStringList.Create;
+  try
     IdHttp1.HTTPOptions := [];
-    if ProxyAdres<>'' then begin
-       IdHTTP1.ProxyParams.ProxyServer:=ProxyAdres;
-       IdHTTP1.ProxyParams.ProxyPort:=StrToIntDef(ProxyPort,0);
+    IdHttp1.ConnectTimeout := 15000;
+    IdHttp1.ReadTimeout    := 30000;
+    if ProxyAdres <> '' then begin
+       IdHTTP1.ProxyParams.ProxyServer := ProxyAdres;
+       IdHTTP1.ProxyParams.ProxyPort   := StrToIntDef(ProxyPort, 0);
     end;
 
-    DonenDeger :=   TStringList.Create();
-    ResponseStream := TMemoryStream.Create;
-    InputStringList := TStringList.Create;
-
-
-
     XMLString :=
-     // '<?xml version=“1.0” encoding=“utf-8” ?>                  '+
       '  <Raporium>                                          '+
       '    <versiyon>'+Versiyon+'</versiyon>      '+
       '    <dokumid>'+IntToStr(dokumid)+'</dokumid>             '+
       '    <islemNo>'+IntToStr(islemNo)+'</islemNo>             '+
       '    <Sektor>'+IntToStr(Sektor)+'</Sektor>             '+
       '  </Raporium>    ';
-
-
     InputStringList.Add(XMLString);
-      try
-       IdHttp1.Request.Accept := '*/*';
-       //IdHttp1.Request.ContentType := 'text/xml; charset=utf-8';
-       IdHttp1.Request.ContentType := 'text/xml';
-        //IdHTTP1.Post('http://'+GenYazilimIPAdress+':8090/Gentegre/GetReport.asmx/DokumanSorgula', InputStringList, ResponseStream);
-        //IdHTTP1.Post('http://genlisans.genyazilim.com/Gentegredokum/GetReport.asmx/DokumanSorgula', InputStringList, ResponseStream);
 
-        //Result:=MemoryStreamToString(ResponseStream);
-        //GelenCevap:= IdHttp1.ResponseText;
-        //IdHTTP1.Post('http://genlisans.genyazilim.com/GentegreDokuman/GetReport.asmx/DokumanSorgula', InputStringList, ResponseStream);
-        GonderilecekString := 'http://'+Tablo.GENINI.ReadString(Ops_GenelOpsiyon_GenYazilimIPAdress,'genupdate.genyazilim.com')+'/Dokuman/GetReport.asmx/DokumanSorgula';
-        IdHTTP1.Post(GonderilecekString, InputStringList, ResponseStream);
+    // Onceki icerik her durumda birakilir: hata halinde ESKI liste ile devam
+    //   edilmesin (bkz. yukaridaki not).
+    if Assigned(FXml) then
+      FreeAndNil(FXml);
 
-        //XMLString:=MemoryStreamToString(ResponseStream);
-        //xmlstream:= TStringStream.Create(XMLString,TEncoding.UTF8);
-        if (Assigned(FXml)) then
-        FreeAndNil(FXml);
-        FXml:= TECXMLParser.Create(nil);
-        ResponseStream.Position :=0;
-        FXml.LoadFromStream(ResponseStream,TEncoding.UTF8);
-        GelenCevap:= IdHttp1.ResponseText;
-      except
-            on E: Exception do
-            GelenCevap:=  E.Message;
+    GonderilecekString := 'http://' +
+      Tablo.GENINI.ReadString(Ops_GenelOpsiyon_GenYazilimIPAdress, 'genupdate.genyazilim.com') +
+      '/Dokuman/GetReport.asmx/DokumanSorgula';
+    try
+      IdHttp1.Request.Accept := '*/*';
+      IdHttp1.Request.ContentType := 'text/xml';
+      IdHTTP1.Post(GonderilecekString, InputStringList, ResponseStream);
+
+      if IdHttp1.ResponseCode <> 200 then
+      begin
+        Result := 'Rapor sunucusu yanıt vermedi (HTTP ' + IntToStr(IdHttp1.ResponseCode) + ').';
+        Exit;
       end;
-      ResponseStream.Free;
-      InputStringList.Free;
+      if ResponseStream.Size = 0 then
+      begin
+        Result := 'Rapor sunucusundan boş yanıt geldi.';
+        Exit;
+      end;
+
+      FXml := TECXMLParser.Create(nil);
+      ResponseStream.Position := 0;
+      try
+        FXml.LoadFromStream(ResponseStream, TEncoding.UTF8);
+      except
+        // 503/404 sayfalari HTML doner - XML olarak cozulemez.
+        FreeAndNil(FXml);
+        Result := 'Rapor sunucusundan geçersiz yanıt geldi (XML değil).';
+        Exit;
+      end;
+    except
+      on E: Exception do
+      begin
+        if Assigned(FXml) then FreeAndNil(FXml);
+        Result := 'Rapor sunucusuna ulaşılamadı: ' + E.Message;
+      end;
+    end;
+  finally
+    InputStringList.Free;
+    ResponseStream.Free;
+    IdHttp1.Free;
+  end;
 end;
 
 procedure TRaporiumDlg.Panel1DblClick(Sender: TObject);
@@ -204,27 +225,38 @@ end;
 procedure TRaporiumDlg.RaporUpdate;
 var i,say:smallint;
     EkleDegis:string;
+    LHata:string;
     procedure Sil(ID:String);
     begin
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM KOSULLAR WHERE DOKUMID = &DID', ['&DID'],[ID]);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM AYARLARYENI WHERE DOKUMID = &DID', ['&DID'],[ID]);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DOKUMLER WHERE ID = &DID', ['&DID'],[ID]);
     end;
-begin        //http://genlisans.genyazilim.com:8090/Gentegrelisans/GentegreLisans.asmx/LisansCevirUpdate
-  //DokumanSorgula('1.1', StrToDateTime('01/01/2013'), 379, 4)
-  //Önce bu verssiyondan düşük rapor listesini alalım
-  DokumanSorgula(XmlListe,IntToStr(KomutNo),0,2);
-
-  //UPDATE:M.Y.
-  if Not Assigned(XmlListe) then
-   Exit;
+begin
+  //Once bu versiyondan dusuk rapor listesini alalim
+  LHata := DokumanSorgula(XmlListe, IntToStr(KomutNo), 0, 2);
+  if LHata <> '' then
+  begin
+    // Sessiz kapanma YOK: sunucu kapali/erisilemez oldugunda kullanici bunu
+    //   "guncelleme yok" saniyordu (hatanin asil belirtisi buydu).
+    Tablo.UyariGoster(Uyari, LHata);
+    Close;
+    Exit;
+  end;
+  if not Assigned(XmlListe) then
+  begin
+    Close;
+    Exit;
+  end;
 
   cxProgressBar1.Properties.Max := XmlListe.root.count;
   say:=0;
   for a in XmlListe.Root do begin
     ad := A.Text;
     i:=pos(',',Ad);
+    if i <= 1 then Continue;        // beklenen bicim: RAPORNO,VERSIYON,PRGVERSIYON
     RaporNo:=copy(Ad,1,i-1);
+    if StrToIntDef(RaporNo, 0) <= 0 then Continue;
     RaporId:='0';
     Vers := copy(Ad,i+1, revpos(',',Ad)-i-1);
     PrgVers := copy(Ad, revpos(',',Ad)+1, 10);
@@ -245,7 +277,14 @@ begin        //http://genlisans.genyazilim.com:8090/Gentegrelisans/GentegreLisan
           EkleDegis := 'Eklendi';
 
     if (EkleDegis = 'Eklendi')or(EkleDegis = 'Değişti') then begin
-       DokumanSorgula(XmlRapor,'0',StrToInt(RaporNo),1);
+       LHata := DokumanSorgula(XmlRapor,'0',StrToIntDef(RaporNo,0),1);
+       if (LHata <> '') or (not Assigned(XmlRapor)) then
+       begin
+         // Tek rapor cekilemedi: tum guncellemeyi iptal etme, bu raporu ATLA.
+         inc(say);
+         cxProgressBar1.Position := say;
+         Continue;
+       end;
        //XmlRapor.SaveToFile('D:\GenDokuman\deneme'+ID+'.frd');
        XML2Rapor(XmlRapor,StrToIntDef(RaporId,0));
        ListeyeEkle(RaporNo,EkleDegis);

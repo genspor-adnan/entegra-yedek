@@ -1,0 +1,12 @@
+T|ID|TUR|FATURANO|FATURATARIH|REHBERID|DURUM|GIRISDEPO|CIKISDEPO
+-|--|---|--------|-----------|--------|-----|---------|---------
+T|ID|URUNID|ADET|MIKTAR|BIRIMFIYAT|TUTAR|IZLEME|YERI|YERID
+-|--|------|----|------|----------|-----|------|----|-----
+T|ID|BASLIKID|SATIRID|STOKID|SERILOTID|ADET|KALAN|DONUSID|IZLEMTUR|BELGETUR
+-|--|--------|-------|------|---------|----|-----|-------|--------|--------
+T|IZLEMID|DEPOID|ADET
+-|-------|------|----
+T|STOKID|DEPOID|GIREN|CIKAN|KALAN
+-|------|------|-----|-----|-----
+T|STOKID|DEPOID|SERILOTID|KALAN
+-|------|------|---------|-----

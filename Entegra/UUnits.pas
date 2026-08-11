@@ -62,21 +62,17 @@ begin
 end;
 
 function MasrafSilmeIslemi(MasrafId:Integer):Boolean;
+// SILME ARTIK SUNUCUDA: sp_Api_MasrafGelir_Sil_Json (GenDepoUpdate129, modul 58).
+//   Engel kurallari (kasa/belge/fatura satiri/butce) fn_Prog_Silme_Engel(58);
+//   FIYATLAR satirlari + kart TEK transaction. Eskiden log HIC yazilmiyordu ->
+//   silinen masraf/gelir Geri Al ile geri gelmiyordu.
+//   Doner True: cagiran dataset'i tazelemeli (kayit SUNUCUDA silindi).
 begin
   Result := False;
+  if MasrafId <= 0 then Exit;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-    //Önce girilmiş hizmet var mı bakalım
-     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from KASA where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
-     if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from FATBASLIK where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
-     if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from FATURA where TUR=0 and URUNID='+IntToStr(MasrafId)+' '+DbSinir(1));
-     if Tablo.Query1.RecordCount > 0 then raise Exception.Create(HareketGormusSilinemez);
-     Tablo.TablodanSorguAc(1,' select '+DbUst(1)+'ID from BUTCE where MASRAFID='+IntToStr(MasrafId)+' '+DbSinir(1));
-     if Tablo.Query1.RecordCount>0 then raise Exception.Create(sButce_Silin);
-
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'Delete From FIYATLAR Where HIZMETID='+IntToStr(MasrafId), [],[]);
-     Result := True;
+    Tablo.ApiSilCagir('sp_Api_MasrafGelir_Sil_Json', MasrafId);
+    Result := True;
   end;
 end;
 

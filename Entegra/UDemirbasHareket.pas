@@ -184,19 +184,9 @@ procedure TDemirbasHareketDlg.btnYeniClick(Sender: TObject);
 
 end;
 Function TDemirbasHareketDlg.FormNoGetirFunc: string;
-var
-  say, i: smallint;
-  s: String;
+// Tutanak no: MERKEZI SAYAC (istemcide max+1 -> es zamanli iki tutanak ayni numarayi alir)
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := 'select Num=isnull(max( cast(BELGENO as int)),0)+1 from DEMIRBAS_TUTANAK';
-  Tablo.Query1.Open;
-
-  s := Tablo.Query1.Fields[0].AsString;
-  say := length(s);
-  for i := 0 to 4 - say do
-    s := '0' + s;
-  Result := s;
+  Result := Tablo.SiradakiNo('DEMIRBAS_TUTANAK', 'BELGENO', '', '', 5);
 end;
 procedure TDemirbasHareketDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin

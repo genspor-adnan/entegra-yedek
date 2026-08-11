@@ -194,6 +194,7 @@ type
     YorumAtacMenu: TOfficePopupMenu;
     MenuKlasordenEkle: TMenuItem;
     MenuTarayacidanEkle: TMenuItem;
+    MenuHedefBelgeAc: TMenuItem;
     BtnDosyaGonder: TcxButton;
     gridFatToplam: TcxGrid;
     tvFatToplamlar: TcxGridDBTableView;
@@ -218,6 +219,7 @@ type
     procedure PmSiparisedonusturPopup(Sender: TObject);
     procedure GridTeklifViewStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure eklifiA1Click(Sender: TObject);
+    procedure MenuHedefBelgeAcClick(Sender: TObject);
     procedure AlnanSipariiA1Click(Sender: TObject);
     procedure VerilenSipariiA1Click(Sender: TObject);
     procedure TOPLAMLARAfterOpen(DataSet: TDataSet);
@@ -300,32 +302,21 @@ begin
 end;
 
 Function TeklifSilmeIslemi(TabTeklif:TFDQuery):Boolean;
+// SILME ARTIK SUNUCUDA: sp_Api_Teklif_Sil_Json (GenDepoUpdate127, modul 97).
+//   Eski govde yalniz IMAJ(YERI=80) + TEKLIFDETAY + TEKLIF siliyordu; YORUM/MEDYA
+//   (GOREVYORUM) ve yoruma EKLI DOKUMAN kartla birlikte gitmiyor, YETIM kaliyordu
+//   (teklif 1046 testi). Kapsam+sira artik metadata'da, hepsi TEK transaction.
+//   Donusum engeli de SP tarafinda (rota matrisi) - ekrandaki on-kontrol kalir
+//   ki kullanici ONAY sorusunu bosuna gormesin.
 begin
    Result := False;
-   // DONUSUM KONTROLU (09.08.2026): siparise donusturulmus teklif SILINEMEZ.
-   //   Bu kontrol teklif tarafinda HIC YOKTU - siparis ve faturada vardi.
-   //   Teklif 1045 donusmus oldugu halde silinebiliyordu, zincir kopuyordu.
-   //   Mesaji Tablo.TeklifSilinebilirMi gosterir.
    if not Tablo.TeklifSilinebilirMi(TabTeklif.FieldByName('ID').AsInteger, 0) then
       Exit;
 
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-      //bu teklifte onaylama varsa onun yay?n? vard?r onu da silmek gerekir, bunun ii?in ?imdi onaylayacak k?sma s?f?r koyar?z..
+      //bu teklifte onaylama varsa onun yayini vardir, onu da kaldirmak gerekir
       Tablo.OnayYayinIslemleri('TEKLIF',TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger, 1, 0, -18);
-      //varsa dokumanlar?n silinmeli
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
-                                     [80, TabTeklif.FieldByName('ID').AsInteger]);
-      // Detay satirlarini SILMEDEN ONCE logla (ust=teklif), sonra sil.
-      LogDetaylariSil('TEKLIFDETAY', 'TEKLIFID', TabNo_TEKLIFDETAY, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
-      // Kart SILME logu: SILMEDEN ONCE ve TABLODAN (dataset DEGIL) -> liste
-      //   sp_Prog_Teklif_Liste_Json2 kolonlarini tasidigi icin dataset'ten loglanirsa
-      //   gercek TEKLIF kolonlari loga girmez, "Geri Al" EKSIK dirilir.
-      LogKayitSil('TEKLIF', TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger,
-                  TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
-      // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
-      LogDetaylariSil('TEKLIF_USER', 'ID', TabNo_TEKLIF_USER, TabNo_TEKLIF, TabTeklif.FieldByName('ID').AsInteger);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TabTeklif.FieldByName('ID').AsInteger]);
+      Tablo.ApiSilCagir('sp_Api_Teklif_Sil_Json', TabTeklif.FieldByName('ID').AsInteger);
       Result:=True;
    end else
       Result := False;
@@ -353,6 +344,18 @@ begin
   SipID := Tablo.TeklifiSipariseDonustur(DonusTipi,TabTeklif.FieldByName('ID').AsInteger);
   RehID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'select REHBERID from SIPARIS where ID='+Inttostr(SipID),[],[],True);
   Tablo.SiparisSihirbazBaslat('D',TMenuItem(Sender).Tag,TMenuItem(Sender).Tag,SipID,RehID);
+  JvTimer1Timer(JvTimer1);
+end;
+
+procedure TTeklifListeDlg.MenuHedefBelgeAcClick(Sender: TObject);
+// Bu teklifTEN uretilen belge(ler)i acar (teklif -> alis/satis siparisi).
+//   Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc
+//   (rota matrisi tabanli sp_Prog_Donusum_HedefBelge - GenDepoUpdate128).
+//   Ayri 'Alinan/Verilen Siparisi Ac' maddeleri (elle yazilmis 412/413 sorgulari)
+//   yerinde kalir; bu madde ikisini de kapsar ve yeni rotalari kendiliginden alir.
+begin
+  if TabTEKLIF.IsEmpty then Exit;
+  Tablo.DonusumBelgeAc('HEDEF', 'TEKLIF', TabTEKLIF.FieldByName('ID').AsInteger);
   JvTimer1Timer(JvTimer1);
 end;
 

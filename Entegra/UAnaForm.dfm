@@ -162,7 +162,7 @@ object AnaForm: TAnaForm
     Top = 162
     object N1: TMenuItem
       Caption = 'Gen'
-      ImageIndex = 11
+      ImageIndex = 55
       object KasiyerMenu: TMenuItem
         Caption = 'Kasiyer'
         ImageIndex = 34
@@ -194,7 +194,7 @@ object AnaForm: TAnaForm
       end
       object FirmaBilgileri1: TMenuItem
         Caption = 'Firma Bilgileri'
-        ImageIndex = 11
+        ImageIndex = 45
         OnClick = FirmaBilgileri1Click
       end
       object N2: TMenuItem
@@ -207,7 +207,7 @@ object AnaForm: TAnaForm
       end
       object BankaBilgileriMenu: TMenuItem
         Caption = 'Banka Bilgileri'
-        ImageIndex = 34
+        ImageIndex = 46
         OnClick = BankaBilgileriMenuClick
       end
       object N7: TMenuItem
@@ -322,7 +322,7 @@ object AnaForm: TAnaForm
       end
       object VeriAlImport1: TMenuItem
         Caption = 'Veri Al (Import)'
-        ImageIndex = 32
+        ImageIndex = 47
         object KullaniciTanimliMenu: TMenuItem
           Caption = 'Kullan'#305'c'#305' Tan'#305'ml'#305
           ImageIndex = 0
@@ -350,7 +350,7 @@ object AnaForm: TAnaForm
     end
     object Yardm1: TMenuItem
       Caption = 'Yard'#305'm'
-      ImageIndex = 22
+      ImageIndex = 56
       object Hakknda1: TMenuItem
         Caption = 'Hakk'#305'nda'
         ImageIndex = 22
@@ -404,14 +404,12 @@ object AnaForm: TAnaForm
     end
     object DuyuruMenu: TMenuItem
       Hint = 'Gelen duyurular'#305' listeler'
-      ImageIndex = 12
-      ImageName = 'PngImage12'
+      ImageIndex = 42
       OnClick = DuyuruMenuClick
     end
     object MesajMenu: TMenuItem
       Hint = 'Gelen ve giden konu'#351'malar'#305' listeler'
-      ImageIndex = 7
-      ImageName = 'PngImage7'
+      ImageIndex = 48
       OnClick = MesajMenuClick
     end
   end
@@ -464,25 +462,25 @@ object AnaForm: TAnaForm
     Top = 61
     object Tabs1: TMenuItem
       Caption = 'Sekme'
-      ImageIndex = 15
       GroupIndex = 100
+      ImageIndex = 15
       RadioItem = True
       OnClick = Tabs1Click
     end
     object Buttons1: TMenuItem
       Tag = 1
       Caption = 'Buton'
-      ImageIndex = 15
       GroupIndex = 100
+      ImageIndex = 15
       RadioItem = True
       OnClick = Tabs1Click
     end
     object Flat1: TMenuItem
       Tag = 2
       Caption = 'D'#252'z'
-      ImageIndex = 15
       Checked = True
       GroupIndex = 100
+      ImageIndex = 15
       RadioItem = True
       OnClick = Tabs1Click
     end
@@ -1001,18 +999,11 @@ object AnaForm: TAnaForm
       OnClick = MenuItem6Click
     end
   end
-  object MsgClient: TIdTCPClient
-    OnConnected = MsgClientConnected
-    ConnectTimeout = 0
-    Host = '192.168.0.18'
-    Port = 7777
-    ReadTimeout = -1
-    Left = 215
-    Top = 126
-  end
   object ChatTimer: TJvTimer
+    Enabled = False
+    Interval = 15000
     OnTimer = ChatTimerTimer
-    Left = 264
+    Left = 232
     Top = 16
   end
 end

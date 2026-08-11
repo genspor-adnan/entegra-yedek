@@ -2345,7 +2345,7 @@ object DemirbasListeDlg: TDemirbasListeDlg
     Top = 325
     object MenuItemTakipGorev: TMenuItem
       Caption = #304#351' / G'#246'rev'
-      ImageIndex = 19
+      ImageIndex = 54
       OnClick = MenuItemTakipGorevClick
     end
     object MenuItem2: TMenuItem
@@ -2505,12 +2505,12 @@ object DemirbasListeDlg: TDemirbasListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -2594,13 +2594,11 @@ object DemirbasListeDlg: TDemirbasListeDlg
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

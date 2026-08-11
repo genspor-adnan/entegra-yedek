@@ -1,4 +1,4 @@
-﻿object RehberAramaFrame: TRehberAramaFrame
+object RehberAramaFrame: TRehberAramaFrame
   Left = 0
   Top = 0
   Width = 510
@@ -16,7 +16,7 @@
   TabOrder = 0
   object Label2: TcxLabel
     Left = -1
-    Top = 92
+    Top = 58
     Caption = #304'lgili'
     FocusControl = AraYetkili
     ParentFont = False
@@ -30,7 +30,7 @@
   end
   object LabelPNO: TcxLabel
     Left = -1
-    Top = 67
+    Top = 31
     Caption = #220'nvan'
     FocusControl = AraFirma
     ParentFont = False
@@ -44,7 +44,7 @@
   end
   object Label3: TcxLabel
     Left = -1
-    Top = 117
+    Top = 85
     Caption = '&Kod'
     FocusControl = AraKod
     ParentFont = False
@@ -58,7 +58,7 @@
   end
   object LabelGrup: TcxLabel
     Left = -1
-    Top = 143
+    Top = 113
     Caption = '&Grup'
     FocusControl = AraKod
     ParentFont = False
@@ -72,7 +72,7 @@
   end
   object Label6: TcxLabel
     Left = -1
-    Top = 169
+    Top = 139
     Caption = 'Kategori'
     FocusControl = AraKod
     ParentFont = False
@@ -86,7 +86,7 @@
   end
   object Label7: TcxLabel
     Left = -1
-    Top = 194
+    Top = 166
     Caption = 'S'#305'n'#305'f'
     FocusControl = AraKod
     ParentFont = False
@@ -100,32 +100,32 @@
   end
   object AraYetkili: TcxTextEdit
     Left = 76
-    Top = 90
+    Top = 56
     TabOrder = 2
     Width = 115
   end
   object AraFirma: TcxTextEdit
     Left = 76
-    Top = 65
+    Top = 29
     TabOrder = 0
     Width = 115
   end
   object AraKod: TcxTextEdit
     Left = 76
-    Top = 115
+    Top = 83
     TabOrder = 4
     Width = 115
   end
   object CheckPasifler: TcxCheckBox
     Left = 65
-    Top = 367
+    Top = 343
     Caption = 'Pasifleri de g'#246'ster'
     TabOrder = 9
     Transparent = True
   end
   object ComboGrup: TcxImageComboBox
     Left = 76
-    Top = 140
+    Top = 110
     RepositoryItem = Tablo.RepCariGrup
     Properties.Items = <>
     TabOrder = 5
@@ -133,7 +133,7 @@
   end
   object ComboKategori: TcxImageComboBox
     Left = 76
-    Top = 166
+    Top = 136
     RepositoryItem = Tablo.RepCariKategori
     Properties.Items = <>
     TabOrder = 6
@@ -141,7 +141,7 @@
   end
   object ComboSinif: TcxImageComboBox
     Left = 76
-    Top = 191
+    Top = 163
     RepositoryItem = Tablo.RepCariSinif
     Properties.Items = <>
     TabOrder = 7
@@ -149,13 +149,13 @@
   end
   object PanelCRM: TPanel
     Left = -1
-    Top = 217
+    Top = 190
     Width = 209
     Height = 79
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
-    TabOrder = 18
+    TabOrder = 17
     Visible = False
     object cxLabel28: TcxLabel
       Left = 0
@@ -237,8 +237,8 @@
     end
   end
   object ComboCariAnaliz: TcxComboBox
-    Left = 74
-    Top = 321
+    Left = 76
+    Top = 297
     Properties.DropDownListStyle = lsFixedList
     Properties.ImmediatePost = True
     Properties.Items.Strings = (
@@ -254,7 +254,7 @@
   end
   object LabelAnaliz: TcxLabel
     Left = -3
-    Top = 324
+    Top = 300
     Caption = 'Analiz'
     FocusControl = AraFirma
     ParentFont = False
@@ -268,14 +268,14 @@
   end
   object CheckDetay: TcxCheckBox
     Left = 65
-    Top = 347
+    Top = 323
     Caption = 'Detay g'#246'ster'
-    TabOrder = 21
+    TabOrder = 14
     Transparent = True
   end
   object LabelOzelKod: TcxLabel
     Left = -2
-    Top = 297
+    Top = 272
     Caption = #214'zel Kod'
     FocusControl = AraOzelKod
     ParentFont = False
@@ -288,23 +288,23 @@
     Transparent = True
   end
   object AraOzelKod: TcxTextEdit
-    Left = 75
-    Top = 295
-    TabOrder = 23
+    Left = 77
+    Top = 270
+    TabOrder = 16
     Width = 115
   end
   object CheckPotansiyel: TcxCheckBox
     Left = 65
-    Top = 386
+    Top = 362
     Caption = 'Potansiyelde de Ara'
-    TabOrder = 24
+    TabOrder = 18
     Transparent = True
   end
   object ToolBar6: TToolBar
     Left = 0
     Top = 0
     Width = 191
-    Height = 28
+    Height = 24
     Margins.Bottom = 0
     Align = alCustom
     AutoSize = True
@@ -313,7 +313,6 @@
     Caption = 'AletCubugu'
     Color = clTeal
     Ctl3D = False
-    DockSite = False
     DrawingStyle = dsGradient
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     EdgeInner = esNone
@@ -331,7 +330,7 @@
     ParentColor = False
     ParentFont = False
     ShowCaptions = True
-    TabOrder = 25
+    TabOrder = 20
     Transparent = True
     object LabelTumKayitlar: TToolButton
       Tag = 3
@@ -345,7 +344,7 @@
     end
     object LabelSonArananlar: TToolButton
       Tag = 4
-      Left = 62
+      Left = 47
       Top = 0
       HelpType = htKeyword
       HelpKeyword = 'K.DEGISTIRMETARIHI'
@@ -355,7 +354,7 @@
     end
     object LabelSIKArananlar: TToolButton
       Tag = 3
-      Left = 124
+      Left = 94
       Top = 0
       HelpType = htKeyword
       HelpKeyword = 'K.SAY'
@@ -366,19 +365,17 @@
   end
   object TabSK: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         ' select top 15 R.ID,R.FIRMA from KULLANICI_REHBER K inner join R' +
         'EHBER R on K.REHBERID=R.ID where KULID=5'
       ' order by K.DEGISTIRMETARIHI desc')
     Left = 119
-    Top = 140
+    Top = 110
   end
   object DtsSK: TDataSource
     DataSet = TabSK
     Left = 126
-    Top = 96
+    Top = 62
   end
 end
-

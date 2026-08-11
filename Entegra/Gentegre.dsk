@@ -1,26 +1,26 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\UKasalarListeFrame.pas',0,1,680,11,681,0,0,,
-File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UReharadlg.pas',0,1,3584,15,3595,0,0,,
-File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1614,1,1621,0,0,,
-File_3=TSourceModule,'C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',0,1,2301,1,2313,0,0,,
-File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UIzleme.pas',0,1,149,11,155,0,0,,
-File_5=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturaTransferListe.pas',0,1,1,86,9,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Stan.Error.pas',0,1,556,1,564,0,0,,
-File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UStokTalepListe.pas',0,1,521,4,522,0,0,,
-File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\Data.DB.pas',0,1,3303,1,3315,0,0,,
-File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBelgeDonusum.pas',0,1,167,49,181,0,0,,
-File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokSayim.pas',0,1,189,2,203,0,0,,
-File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ubelgegiris.pas',0,1,1,17,1,0,0,,
-File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\UUTSKontrol.pas',0,1,138,58,151,0,0,,
-File_13=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,1690,18,1700,0,0,,
+File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\GirisSayfaFrame\UAnaGirisSayfasiFrame.pas',0,1,501,15,501,0,0,,
+File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\UAnaForm.pas',0,1,2031,3,2034,0,0,,
+File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\UMesajlasma.pas',0,1,317,55,330,0,0,,
+File_3=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBelgeDonusum.pas',0,1,168,49,181,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\SOURCE\VCL\Vcl.Imaging.jpeg.pas',0,1,904,1,916,0,0,,
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\SOURCE\VCL\Vcl.Controls.pas',0,1,8285,1,8297,0,0,,
+File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\rtl\common\System.Classes.pas',0,1,9202,1,9214,0,0,,
+File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ortak\Umesaj.pas',0,1,1,1,1,0,0,,
+File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\SOURCE\RTL\SYS\System.pas',0,1,27210,1,27222,0,0,,
+File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\AramaFrame\URehberAramaFrame.pas',0,1,1,1,1,0,0,,
+File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\UHizliGiris.pas',0,1,2952,3,2966,0,0,,
+File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturalar.pas',0,1,1908,32,1925,0,0,,
+File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,792,17,792,0,0,,
+File_13=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturaTransferListe.pas',0,1,502,22,519,0,0,,
 
 [Modules]
-Module0=C:\Users\HP\Entegra\Entegra\Utablo.pas
+Module0=C:\Users\HP\Entegra\Entegra\Ortak\UMesajBildirim.pas
 Module1=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
 Count=2
 EditWindowCount=1
 
-[C:\Users\HP\Entegra\Entegra\Utablo.pas]
+[C:\Users\HP\Entegra\Entegra\Ortak\UMesajBildirim.pas]
 ModuleType=TSourceModule
 
 [C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas]
@@ -28,7 +28,7 @@ ModuleType=TSourceModule
 
 [EditWindow0]
 ViewCount=2
-CurrentEditView=C:\Users\HP\Entegra\Entegra\Utablo.pas
+CurrentEditView=C:\Users\HP\Entegra\Entegra\Ortak\UMesajBildirim.pas
 View0=0
 View1=1
 PercentageSizes=1
@@ -53,13 +53,13 @@ BorlandEditorCodeExplorer=BorlandEditorCodeExplorer@EditWindow0
 TopPanelSize=0
 LeftPanelSize=1896
 LeftPanelClients=PropertyInspector
-LeftPanelData=00000800010100000000B30E0000000000000168070000000000000100000000251A00001100000050726F7065727479496E73706563746F72FFFFFFFF
+LeftPanelData=00000800010100000000B30D00000000000001680700000000000001000000005D1800001100000050726F7065727479496E73706563746F72FFFFFFFF
 RightPanelSize=0
 RightPanelClients=DockSite2
 RightPanelData=0000080001010100000009000000446F636B53697465329E1100000000000001CF07000000000000FFFFFFFF
-BottomPanelSize=1224
+BottomPanelSize=1680
 BottomPanelClients=MessageView,DockSite1
-BottomPanelData=0000080001020100000009000000446F636B5369746531AA4400000000000002C8040000000000000100000000AA4400000F0000004D65737361676556696577466F726DFFFFFFFF
+BottomPanelData=0000080001020100000009000000446F636B5369746531AA440000000000000290060000000000000100000000AA4400000F0000004D65737361676556696577466F726DFFFFFFFF
 BottomMiddlePanelSize=0
 BottomMiddlePanelClients=DockSite0,GraphDrawingModel
 BottomMiddelPanelData=0000080001020200000009000000446F636B536974653010000000477261706844726177696E67566965779A1D00000000000002F806000000000000FFFFFFFF
@@ -67,9 +67,9 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
-CursorX=13
-CursorY=4
-TopLine=1
+CursorX=4
+CursorY=340
+TopLine=336
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -77,14 +77,14 @@ EditViewName=C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas
 
 [View1]
 CustomEditViewType=TEditView
-Module=C:\Users\HP\Entegra\Entegra\Utablo.pas
-CursorX=51
-CursorY=15505
-TopLine=15496
+Module=C:\Users\HP\Entegra\Entegra\Ortak\UMesajBildirim.pas
+CursorX=14
+CursorY=92
+TopLine=85
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=C:\Users\HP\Entegra\Entegra\Utablo.pas
+EditViewName=C:\Users\HP\Entegra\Entegra\Ortak\UMesajBildirim.pas
 
 [Watches]
 Count=3
@@ -126,11 +126,11 @@ Breakpoint7='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1874,'',0,1,'',1,0,0
 Breakpoint8='C:\Users\HP\Entegra\Entegra\UTeklifWizard.pas',1637,'',0,1,'',1,0,0,'',1,'','','',0,''
 Breakpoint9='C:\Users\HP\Entegra\Entegra\URehberWizard.pas',2447,'',0,1,'',1,0,0,'',1,'','','',0,''
 Breakpoint10='C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',1601,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint11='C:\Users\HP\Entegra\Entegra\Utablo.pas',2041,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint12='C:\Users\HP\Entegra\Entegra\Utablo.pas',2156,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint13='C:\Users\HP\Entegra\Entegra\Utablo.pas',2016,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint14='C:\Users\HP\Entegra\Entegra\Utablo.pas',3675,'',0,1,'',1,0,0,'',1,'','','',0,''
-Breakpoint15='C:\Users\HP\Entegra\Entegra\Utablo.pas',3283,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint11='C:\Users\HP\Entegra\Entegra\Utablo.pas',2017,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint12='C:\Users\HP\Entegra\Entegra\Utablo.pas',2132,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint13='C:\Users\HP\Entegra\Entegra\Utablo.pas',1992,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint14='C:\Users\HP\Entegra\Entegra\Utablo.pas',3651,'',0,1,'',1,0,0,'',1,'','','',0,''
+Breakpoint15='C:\Users\HP\Entegra\Entegra\Utablo.pas',3259,'',0,1,'',1,0,0,'',1,'','','',0,''
 
 [EmbarcaderoWin32Debugger_AddressBreakpoints]
 Count=0
@@ -186,12 +186,12 @@ State=0
 Left=0
 Top=28
 Width=9883
-Height=917
+Height=1403
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=9883
-ClientHeight=917
-TBDockHeight=917
+ClientHeight=1403
+TBDockHeight=1403
 LRDockWidth=2767
 Dockable=1
 StayOnTop=0
@@ -224,18 +224,18 @@ State=0
 Left=0
 Top=28
 Width=1896
-Height=6750
+Height=6264
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=1896
-ClientHeight=6750
+ClientHeight=6264
 PixelsPerInch=96
 MonitorNum=0
 TBDockHeight=9014
 LRDockWidth=1896
 Dockable=1
 StayOnTop=0
-SplitPos=111
+SplitPos=126
 
 [frmDesignPreview]
 PercentageSizes=1
@@ -600,7 +600,7 @@ Create=1
 Visible=0
 Docked=1
 State=0
-Left=675
+Left=0
 Top=28
 Width=3821
 Height=1417

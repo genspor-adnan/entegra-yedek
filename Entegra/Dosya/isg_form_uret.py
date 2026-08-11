@@ -4,6 +4,8 @@ KoBo (GenForms) gonderimlerini "isg yeni form.xlsx" sablonuna doldurur.
 
   python isg_form_uret.py --token <API_KEY> [--cikti KLASOR] [--id 1]
 
+Cikti varsayilani: <proje>/GenForms  (ekler: GenForms/_ekler)
+
 Her gonderim icin sablonun BIR KOPYASI uretilir; sablon degistirilmez.
 Hucre eslesmesi isg_form_eslesme.json'da - yanlis hucre gorursen ORAYI duzelt,
 betige dokunma.
@@ -29,6 +31,8 @@ except ImportError:
 SUNUCU  = "https://genforms-gf.genyazilim.com"
 FORM_ID = "apyZkuLcNyw28bDft7nVvE"          # Ise Giris / Periyodik Muayene Formu
 BURASI  = os.path.dirname(os.path.abspath(__file__))
+# Tum ciktilar GenForms klasorune (proje kokunun altinda) yazilir.
+CIKTI_KOK = os.path.join(os.path.dirname(BURASI), "GenForms")
 SABLON  = os.path.join(BURASI, "isg yeni form.xlsx")
 ESLESME = os.path.join(BURASI, "isg_form_eslesme.json")
 
@@ -188,7 +192,7 @@ def doldur(sub, esl, cikti_klasor, ekler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--token", required=True, help="KoBo API key")
-    ap.add_argument("--cikti", default=os.path.join(BURASI, "isg_ciktilar"))
+    ap.add_argument("--cikti", default=CIKTI_KOK)   # varsayilan: <proje>/GenForms
     ap.add_argument("--id", default=None, help="yalniz bu gonderim (_id)")
     a = ap.parse_args()
 

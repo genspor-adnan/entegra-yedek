@@ -44,10 +44,6 @@ uses
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;//  cxSchedulerAgendaView;
 
 type
-  TChatWindow = class;
-
-  TFileSendInfo = class;
-
   TAnaGirisSayfasiFrame = class(TFrame, IAnaBilgiFrame, IBilgiFrame)
     TabMesajKisiler: TFDQuery;
     DtsMesajKisiler: TDataSource;
@@ -64,7 +60,6 @@ type
     PanelOrta: TPanel;
     PageControlOrta: TcxPageControl;
     SheetArama: TcxTabSheet;
-    SheetMesajlasma: TcxTabSheet;
     SheetYonetimFinans: TcxTabSheet;
     pnlHaberler: TPanel;
     Panel8: TPanel;
@@ -79,19 +74,6 @@ type
     GridAraViewAranan: TcxGridDBColumn;
     GridAra: TcxGridLevel;
     SQLMemoAra: TcxMemo;
-    pnlMesajlasma: TPanel;
-    Panel18: TPanel;
-    Label12: TLabel;
-    ScrollBox2: TScrollBox;
-    cxGrid4: TcxGrid;
-    cxGrid4DBTableViewKisiler: TcxGridDBTableView;
-    cxGrid4DBTableViewKisilerColumn1: TcxGridDBColumn;
-    cxGridLevel1: TcxGridLevel;
-    PanelChat: TPanel;
-    PageControlChat: TcxPageControl;
-    Panel4: TPanel;
-    BtnMesajGonder: TcxButton;
-    MemoChat: TcxRichEdit;
     SheetYonetimCRM: TcxTabSheet;
     SheetYonetimTeklif: TcxTabSheet;
     SheetYonetimServis: TcxTabSheet;
@@ -119,7 +101,6 @@ type
     Label5: TLabel;
     Label6: TLabel;
     Shape1: TShape;
-    MesajLED: TJvLED;
     MesajMenu: TPopupMenu;
     KonusmaGecmisiMenu: TMenuItem;
     PopupMenuGrafik: TPopupMenu;
@@ -159,9 +140,6 @@ type
     ImageList1: TImageList;
     XMLDocument1: TXMLDocument;
     IdHTTP1: TIdHTTP;
-    Panel10: TPanel;
-    MesajPersonAra: TcxButtonEdit;
-    BtnDosyaGonder: TcxButton;
     OpenDialog1: TOpenDialog;
     SaveDialog1: TSaveDialog;
     JvTimer1: TJvTimer;
@@ -422,16 +400,8 @@ type
     procedure AraTusClick(Sender: TObject);
     procedure GridAraViewDblClick(Sender: TObject);
     procedure EditAraKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure BtnMesajGonderClick(Sender: TObject);
-    procedure PageControlChatPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
-    procedure MsgClientConnected(Sender: TObject);
     procedure ChatTimerTimer(Sender: TObject);
     procedure pageFinansChange(Sender: TObject);
-    procedure MemoChatKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure ProfilResimClick(Sender: TObject);
-    procedure cxGrid4DBTableViewKisilerCellClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-      AShift: TShiftState; var AHandled: Boolean);
-    procedure PageControlChatMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure KonusmaGecmisiMenuClick(Sender: TObject);
     procedure SatirEkleClick(Sender: TObject);
     procedure btnAramaClick(Sender: TObject);
@@ -441,8 +411,6 @@ type
     procedure Yenile1Click(Sender: TObject);
     procedure cxGridDBTableView1OKUNMAMISYORUMSAYStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure BtnDosyaGonderClick(Sender: TObject);
-    procedure PageControlChatCanClose(Sender: TObject; var ACanClose: Boolean);
     procedure JvTimer1Timer(Sender: TObject);
     procedure GorevGridViewStylesGetGroupStyle(Sender: TcxGridTableView;
       ARecord: TcxCustomGridRecord; ALevel: Integer; var AStyle: TcxStyle);
@@ -503,7 +471,6 @@ type
     FFrameIcerikBilgi :TIcerikFrameBilgi;
     Initialized: Boolean;
     //FHavaDurumuImage: Integer;
-    FChatWindows: TObjectList<TChatWindow>;
     FOnlineUsers: TStringList;
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
@@ -524,21 +491,14 @@ type
     procedure IcerikFrameAktifOlacak(Sender: TIcerikFrameBilgi);
     procedure OlayListele;
     procedure GrafikOlustur(Yenile: Boolean; PageControl1: TcxPageControl);
-    procedure OkunmamisDialoglariGetir;
     procedure YoneticiDokumuOlustur(Modul: string; APageControl: TcxPageControl);
-    procedure Baglan;
-    procedure KonusmaSekmesiAc(Sender: TObject);
     function FindDownedButton: TJvNavPanelButton;
-    function OkunmamisMesajSayisiDuzenle: integer;
     function DevamedenServisDuzenle: integer;
-    procedure DuyuruAlarmiVer(DuyuruID: Integer);
     procedure JvDesktopAlert2MessageClick(Sender: TObject);
     procedure MesajaGit(MesajSayfasi: Integer);
-    function GetActiveChatWindow: TChatWindow;
-    procedure TryCloseMainForm;
     procedure ZamanSecildi;
     procedure Grafiklendir;
-    function DetayliBilgiGetir(Tur, Id : Integer; var RehberID: Integer; var Tutar:Currency) : Boolean;
+    function  DetayliBilgiGetir(Tur, Id : Integer; var RehberID: Integer; var Tutar:Currency) : Boolean;
     procedure TusBasildi(Tus : TToolButton);
     procedure TabloAc(var Tablo1 : TFDQuery; BasTarih, BitTarih : TDateTime);
     procedure YenileTusClick(Sender: TObject);
@@ -547,126 +507,27 @@ type
 
   public
     UyariTabloAdi: string;
-    Btn: TButtonItem;
+    Btn  : TButtonItem;
     Alarmlar: array of TJvDesktopAlert;
     FMainFormClosing: Boolean;
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure HandleFileSends;
-    function CancelFileSends: Boolean;
-    function CreateChatWindow(AServerId, AUserId: Integer): TChatWindow;
-    function CreateChatWindowByUserID(AUserId: Integer): TChatWindow;
-    function FindChatWindowByServerId(AServerId: Integer): TChatWindow;
-    function FindChatWindowByUserId(AUserId: Integer): TChatWindow;
 //    property HavaDurumuImage: Integer read FHavaDurumuImage write SetHavaDurumuImage;
-    property ActiveChatWindow: TChatWindow read GetActiveChatWindow;
     function OkunmamisDuyuruSayisiDuzenle: integer;
 
   end;
 
   PRSSFeedData = ^TRSSFeedData;
 
-  TRSSFeedData = record
+  TRSSFeedData  = record
     Sehir: string;
     Tarih: string;
     Tahmin: string;
     Derece: string;
   end;
 
-  TFileSendInfo = class(TObject)
-  private
-    FFileName: string;
-    FReferenceId: Integer;
-    FIsSend: Boolean;
-    FFileSize: Integer;
-    FLogId: Integer;
-    FLogUserId: Integer;
-    FFromServerId: Integer;
-    FRecordIndex: Integer;
-    FIsConfirming: Boolean;
-    FClient: TIdTCPClient;
-    FToServerId: Integer;
-    FChatWindow: TChatWindow;
-    FIsAborted : Boolean;
-    FState: Integer;
-    FFileStream: TFileStream;
-    FBuffer: TIdBytes;
-    FRemainingBytes: Integer;
-    FSentBytes: Integer;
-    FReceivedBytes: Integer;
 
-  published
-  private
-    FToUserId: Integer;
-    FFromUserId: Integer;
-    procedure MsgClientConnected(Sender: TObject);
-  public
-    constructor Create(AFileName: string);
-    class function CreateNew(AChatWindow: TChatWindow; AFileName: string): TFileSendInfo;
-    class function FromMessage(AMsg: string): TFileSendInfo;
-    procedure Abort;
-    procedure PartialSend;
-    procedure PartialReceive;
-    procedure Send(AOrg: TIdTCPClient);
-    procedure Receive(AOrg: TIdTCPClient);
-    procedure PerformOperation;
-    destructor Destroy; override;
-    property FileName: string read FFileName write FFileName;
-    property ReferenceId: Integer read FReferenceId write FReferenceId;
-    property FileSize: Integer read FFileSize write FFileSize;
-    property IsSend: Boolean read FIsSend write FIsSend;
-    property IsConfirming: Boolean read FIsConfirming write FIsConfirming;
-    property LogId: Integer read FLogId write FLogId;
-    property LogUserId: Integer read FLogUserId write FLogUserId;
-    property FromServerId: Integer read FFromServerId write FFromServerId;
-    property FromUserId: Integer read FFromUserId write FFromUserId;
-    property ToServerId: Integer read FToServerId write FToServerId;
-    property ToUserId: Integer read FToUserId write FToUserId;
-    property RecordIndex: Integer read FRecordIndex write FRecordIndex;
-  end;
-
-  TChatWindow = class(TObject)
-  private
-    FTabSheet: TcxTabSheet;
-    FUserId: Integer;
-    FServerId: Integer;
-    FGrid: TcxGrid;
-    FGridLevel: TcxGridLevel;
-    FCardView: TcxGridCardView;
-    FPageControl: TcxPageControl;
-    FMsgClient: TIdTCPClient;
-    FSaveDialog: TSaveDialog;
-    FFileSends: TObjectList<TFileSendInfo>;
-  published
-  private
-    FUserName: string;
-    procedure MsgOnGetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
-    procedure MsgStylesOnGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure AliciOnayIptalClick(Sender: TObject; AButtonIndex: Integer);
-    procedure GonderenIptalClick(Sender: TObject; AButtonIndex: Integer);
-    procedure AliciProgressIptalClick(Sender: TObject; AButtonIndex: Integer);
-    procedure GonderenProgressIptalClick(Sender: TObject; AButtonIndex: Integer);
-    procedure SetUserName(const Value: string);
-    procedure OnFileSendReceiveCompleted(AFSI : TFileSendInfo);
-  public
-    class function CreateNew(AMsgClient: TIdTCPClient; APageControl: TcxPageControl; AServerId: Integer; AUserId: Integer): TChatWindow;
-    procedure CreateUI;
-    constructor Create(AMsgClient: TIdTCPClient);
-    function FindFileSendById(ARefId: Integer): TFileSendInfo;
-    procedure WriteToWindow(AUserId: Integer; AAuthor: string; ADateTime: TDateTime; AMsg: string; ARefId: Integer = 0);
-    procedure EditChatMessage(AUserId:Integer;ARefId:Integer;AMsg:string;EraseRefID:Boolean);
-    procedure HandleFileSends;
-  published
-    property TabSheet: TcxTabSheet read FTabSheet write FTabSheet;
-    property Grid: TcxGrid read FGrid write FGrid;
-    property GridLevel: TcxGridLevel read FGridLevel write FGridLevel;
-    property CardView: TcxGridCardView read FCardView write FCardView;
-    property UserId: Integer read FUserId write FUserId;
-    property ServerId: Integer read FServerId write FServerId;
-    property UserName: string read FUserName write SetUserName;
-
-  end;
 var
   HomePageInstance : TAnaGirisSayfasiFrame = nil;
 
@@ -1000,45 +861,11 @@ begin
     btnGorev.Visible := false;
     btnAktivite.Align := alClient;
   end;
-{  if (not Tablo.YetkiVarmi(2009, YetkiTur_Gorme, false)) and (not Tablo.YetkiVarmi(2010, YetkiTur_Gorme, false)) then
-    PanelFinansCRM.Visible := false
-  else if not Tablo.YetkiVarmi(2009, YetkiTur_Gorme, false) then begin
-    BtnYonetimFinans.Visible := false;
-    BtnYonetimCRM.Align := alClient;
-  end else if not Tablo.YetkiVarmi(2010, YetkiTur_Gorme, false) then begin
-    BtnYonetimCRM.Visible := false;
-    BtnYonetimFinans.Align := alClient;
-  end;
-  if (not Tablo.YetkiVarmi(2011, YetkiTur_Gorme, false)) and (not Tablo.YetkiVarmi(2012, YetkiTur_Gorme, false)) then
-    PanelTeklifServis.Visible := false
-  else if not Tablo.YetkiVarmi(2011, YetkiTur_Gorme, false) then begin
-    BtnYonetimTeklif.Visible := false;
-    BtnYonetimServis.Align := alClient;
-  end else if not Tablo.YetkiVarmi(2012, YetkiTur_Gorme, false) then begin
-    BtnYonetimServis.Visible := false;
-    BtnYonetimTeklif.Align := alClient;
-  end; }
+
 
 //  if not Tablo.YetkiVarmi(2111, YetkiTur_Degistirme, false) then // proje değiştirme yetkisi
 //     tvProjeler.OnDblClick := Nil;
-  TabMesajKisiler.Close;
-  if TabMesajKisiler.Params.FindParam('PRID') = nil then
-    with TabMesajKisiler.Params.Add do begin
-      Name := 'PRID';
-      DataType := ftInteger;
-      ParamType := ptInput;
-    end;
-  with TabMesajKisiler.ParamByName('PRID') do begin
-    DataType := ftInteger;
-    Size := 10;
-    AsInteger := StrToIntDef(Kullanan, 0);
-  end;
-  TabMesajKisiler.Open;
-  try
-    Baglan;
-  finally
-    //OkunmamisDialoglariGetir;
-  end;
+
   for I := 0 to PageControlOrta.PageCount - 1 do
     PageControlOrta.Pages[i].TabVisible := false;
 
@@ -1057,90 +884,11 @@ begin
         btnGorev.Caption := AGS_Gorevler;
   end;
   OkunmamisDuyuruSayisiDuzenle;
-  OkunmamisMesajSayisiDuzenle;
+
   DevamedenServisDuzenle;
   lblKullanici.Caption := KullanAdi;
   if BtnDuyuru.visible then
      BtnDuyuru.Click;
-end;
-
-procedure TAnaGirisSayfasiFrame.HandleFileSends;
-var
-  cw : TChatWindow;
-begin
-  for cw in FChatWindows do
-    cw.HandleFileSends;
-end;
-
-function TAnaGirisSayfasiFrame.CancelFileSends: Boolean;
-var
-  cw : TChatWindow;
-  fsi : TFileSendInfo;
-begin
-  Result := True;
-{  if FMainFormClosing then Exit(True);
-  Result := True;
-  FMainFormClosing := True;
-  if MsgClient.Connected then  begin
-    for cw in FChatWindows do begin
-      for fsi in cw.FFileSends do begin
-        if fsi.IsSend then begin
-          fsi.Abort;
-        end else begin
-          MsgClient.Socket.WriteLn(Format('FSABORT %d %d',[fsi.FromServerId,fsi.ReferenceId * -1]));
-        end;
-        Result := False;
-      end;
-    end;
-    MsgClient.Socket.WriteBufferFlush;
-  end; }
-end;
-
-procedure TAnaGirisSayfasiFrame.OkunmamisDialoglariGetir;
-
-var
-  cw: TChatWindow;
-Begin
-  Tablo.TablodanSorguAc(4,
-    'select ML.GONDERENID,ML.TARIH,ML.MESAJ from MESAJLOG ML inner join MESAJLOGKULLANICI MLK on ML.ID=MLK.MESAJLOGID where ML.TUR=1 and MLK.ALICIID='
-      + Kullanan + ' and isnull(MLK.OKUNDU,0)<>1 order by ML.TARIH');
-  while not Tablo.Query4.eof do begin
-    if TabMesajKisiler.Locate('ID', Tablo.Query4.FieldByName('GONDERENID').AsInteger, []) then begin
-      // mesajı gönderenin sayfası açık değilse tekrar oluşturalım...
-      cw := CreateChatWindowByUserID(Tablo.Query4.FieldByName('GONDERENID').AsInteger);
-      cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-      cw.WriteToWindow(cw.UserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.Query4.FieldByName('TARIH').AsDateTime,
-        Tablo.Query4.FieldByName('MESAJ').AsString);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ALICIID=&AliciID and MESAJLOGID in(select ID from MESAJLOG where GONDERENID=&GonderenID)', ['&AliciID', '&GonderenID'], [Kullanan,cw.UserId]);
-    end;
-    Tablo.Query4.Next;
-  end;
-End;
-
-function TAnaGirisSayfasiFrame.FindChatWindowByServerId(AServerId: Integer): TChatWindow;
-
-var
-  cw: TChatWindow;
-begin
-  result := nil;
-  for cw in FChatWindows do begin
-    if cw.ServerId = AServerId then
-      exit(cw);
-  end;
-end;
-
-function TAnaGirisSayfasiFrame.FindChatWindowByUserId(AUserId: Integer): TChatWindow;
-
-var
-  cw: TChatWindow;
-begin
-  result := nil;
-  for cw in FChatWindows do begin
-    if cw.UserId = AUserId then
-      exit(cw);
-  end;
-
 end;
 
 function TAnaGirisSayfasiFrame.FindDownedButton: TJvNavPanelButton;
@@ -1183,10 +931,8 @@ begin
   if TJvNavPanelButton(Sender) = btnArama then begin // arama
     PageControlOrta.ActivePage := SheetArama;
   end else if TJvNavPanelButton(Sender) = BtnMesaj then begin
-    PageControlOrta.ActivePage := SheetMesajlasma;
-    Baglan;
-    if (not AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir)and(MemoChat.Enabled=True) then
-      MemoChat.SetFocus;
+    // Eski sohbet sekmesi (SheetMesajlasma) kaldirildi -> yeni mesajlasma ekrani
+    if Assigned(AnaForm) then AnaForm.MesajMenuClick(nil);
   end else if TJvNavPanelButton(Sender) = BtnDuyuru then begin
     //Tablo.DuyuruAc('O', 0, 1);
     PageControlOrta.ActivePage := SheetDuyurular;
@@ -1206,105 +952,14 @@ begin
   end;
 end;
 
-procedure TAnaGirisSayfasiFrame.BtnDosyaGonderClick(Sender: TObject);
-var
-  Msg: string;
-  MesajLogID, MesajLogKullaniciID: Variant;
-  DosyaAdi: string;
-  fsi: TFileSendInfo;
-begin
- { if OpenDialog1.Execute then begin
-    MesajLogID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-      'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
-      [2, Kullanan, '<' + MsgDosyayiPaylasiyorsunuz + ':' + ExtractFileName(OpenDialog1.FileName) + '>'], true);
-    MesajLogKullaniciID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-      'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
-      [VarToStr(MesajLogID), ActiveChatWindow.FServerId], true);
-    fsi := TFileSendInfo.CreateNew(ActiveChatWindow, OpenDialog1.FileName);
-    fsi.IsSend := true;
-    fsi.IsConfirming := true;
-    fsi.ToServerId := ActiveChatWindow.FServerId;
-    fsi.FromServerId := FServerId;
-    fsi.FileSize := FileSizeByName(fsi.FileName);
-    // FSCONFIRM AliciServerId LogId LogKullanıcıId ReferansId DosyaAdı
-    Msg := Format('FSCONFIRM %d %s %s %d %d %s', [ActiveChatWindow.FServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID),fsi.ReferenceId, fsi.FileSize, ExtractFileName(OpenDialog1.FileName)]);
-    MsgClient.Socket.WriteLn(Msg);
-    ActiveChatWindow.WriteToWindow(ActiveChatWindow.UserId, KullanAdi, Tablo.GENINI.BugunTrhSaat, '<' + MsgDosyayiPaylasiyorsunuz + ':' + ExtractFileName(OpenDialog1.FileName) + '>',fsi.ReferenceId);
-    PageControlChat.ActivePage := ActiveChatWindow.FTabSheet;
-  end; }
-end;
-
-procedure TAnaGirisSayfasiFrame.BtnMesajGonderClick(Sender: TObject);
-var
-  Msg: string;
-  MesajLogID, MesajLogKullaniciID: Variant;
-  cw: TChatWindow;
-begin
-{  cw := ActiveChatWindow;
-  if not Assigned(cw) then
-    exit;
-
-  MesajLogID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
-    [1, Kullanan, MemoChat.text], true);
-  MesajLogKullaniciID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
-    [VarToStr(MesajLogID),ActiveChatWindow.FUserId], true);
-  Msg := Format('SEND %d %s %s %s', [cw.ServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), Dize.SatirSonuEncode(MemoChat.text)]);
-  cw.WriteToWindow(cw.UserId, KullanAdi, Tablo.GENINI.BugunTrhSaat, MemoChat.text);
-
-  // MsgClient.Socket.WriteLn('SEND ' + IntToStr(PageControlChat.ActivePage.Tag) + ' LOGID '+ VarToStr(MesajLogID) + ' LOGKULID '+ VarToStr(MesajLogKullaniciID) +' '+ MemoChat.Text);
-  MsgClient.Socket.WriteLn(Msg);
-  MemoChat.Clear;
-  MemoChat.SetFocus; }
-end;
-
 procedure TAnaGirisSayfasiFrame.CheckPasifPropertiesEditValueChanged(Sender: TObject);
 begin
   OlayListele;
 end;
 
-procedure TAnaGirisSayfasiFrame.cxGrid4DBTableViewKisilerCellClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-var
-  cw : TChatWindow;
-begin
-  KonusmaSekmesiAc(Sender);
-  cw := FindChatWindowByUserId(TabMesajKisiler.FieldByName('ID').AsInteger);
-  PageControlChat.ActivePage := cw.FTabSheet;
-
-end;
-
 procedure TAnaGirisSayfasiFrame.KonusmaGecmisiMenuClick(Sender: TObject);
-
-var
-  Key: Word;
 begin
-  Application.CreateForm(TTabloGirisDlg, TabloGirisDlg);
-  TabloGirisDlg.Caption := 'İleti Geçmişi';
-  TabloGirisDlg.Komut :=
-    'select TARIH='+DbConv('TARIH','VARCHAR(10)',103)+',SAAT='+DbConv('TARIH','VARCHAR(10)',108)+', KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
-    #13#10 + 'from MESAJLOG ML' + #13#10 + 'inner join MESAJLOGKULLANICI MKUL on MKUL.MESAJLOGID=ML.ID' +
-    #13#10
-    + 'inner join REHBER RG on RG.ID=ML.GONDERENID' + #13#10 + 'inner join REHBER RA on RA.ID=MKUL.ALICIID' +
-    #13#10 + 'where ML.GONDERENID = '+IntToStr(ActiveChatWindow.FUserId)+' and MKUL.ALICIID = '+Kullanan+' ' + #13#10 + 'union all' +
-    #13#10 + 'select TARIH='+DbConv('TARIH','VARCHAR(10)',103)+',SAAT='+DbConv('TARIH','VARCHAR(10)',108)+', KIMDEN=RG.FIRMA,KIME=RA.FIRMA, MESAJ' +
-    #13#10 + 'from MESAJLOG ML' + #13#10 + 'inner join MESAJLOGKULLANICI MKUL on MKUL.MESAJLOGID=ML.ID' + #13#10 +
-    'inner join REHBER RG on RG.ID=ML.GONDERENID' + #13#10 + 'inner join REHBER RA on RA.ID=MKUL.ALICIID' + #13#10 +
-    'where ML.GONDERENID = '+Kullanan+' and MKUL.ALICIID = '+IntToStr(ActiveChatWindow.FUserId)+'' + #13#10 + 'order by 1,2';
-  Key := 0;
-  TabloGirisDlg.Edit1KeyUp(Self, Key, [ssShift]);
-  TabloGirisDlg.ShowModal;
-  TabloGirisDlg.Destroy;
-end;
-
-procedure TAnaGirisSayfasiFrame.KonusmaSekmesiAc(Sender: TObject);
-var
-  cw : TChatWindow;
-begin
-  cw := CreateChatWindowByUserID(TabMesajKisiler.FieldByName('ID').asInteger);
-  cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-  MemoChat.SetFocus;
+  if Assigned(AnaForm) then AnaForm.MesajMenuClick(nil);
 end;
 
 function TAnaGirisSayfasiFrame.OkunmamisDuyuruSayisiDuzenle: integer;
@@ -1336,295 +991,11 @@ begin
   end;
 end;
 
-function TAnaGirisSayfasiFrame.OkunmamisMesajSayisiDuzenle: integer;
-var
-  i: Integer;
-begin
-  result := 0;
-  for I := 0 to PageControlChat.PageCount - 1 do
-    if PageControlChat.Pages[i].Highlighted = true then
-      Inc(result);
-  if result > 0 then
-    BtnMesaj.Caption := AGS_Mesajlasma + ' (' + inttostr(result) + ')'
-  else
-    BtnMesaj.Caption := AGS_Mesajlasma;
-end;
-
 procedure TAnaGirisSayfasiFrame.ChatTimerTimer(Sender: TObject);
-var
-  cmd: string;
-  part, Part1, Part2, DosyaAdi: string;
-  AliciID, MsgLogID, MsgLogKulID, i, RecIndx, AliciServerId: Integer;
-  cw: TChatWindow;
-  fsi: TFileSendInfo;
-  lst: TStringList;
-  Function GriddeKelimeAra(Grid: TcxGridCardView; ItemIndex: Integer; Kelime: string): Integer;
-  var
-    j: integer;
-  begin
-    result := -1;
-    for j := Grid.DataController.RecordCount - 1 Downto 0 do
-    begin
-      if Pos(Kelime, Grid.DataController.DisplayTexts[j, ItemIndex]) > 0 then
-        result := j;
-    end;
-  end;
+// ESKI TCP dinleyicisi. Mesajlasma DB uzerinden yurudugu icin (UMesajlasma kendi
+//   3 sn'lik yoklamasini yapar, rozeti AnaForm tazeler) burasi is yapmaz.
 begin
-  // Page Hint de dosya adı yazar,
-  // Page HelpKeyword de dosya gönderim satırına locate olabilmek için içeriğindeki text yazıyor..
-  // Bağlı değilse buffer kontrol etmesine gerek yok çıksın
-{  if not MsgClient.Connected then
-    exit;
-  // Bağlıysa TCP den gelen mesajları aldığı bufferdan bilgileri alsın
-  if (not MsgClient.Socket.InputBufferIsEmpty) then begin
-    cmd := Dize.SatirSonuDecode(MsgClient.Socket.ReadLn);
-    part := Dize.SinirlandirilmisMetin(cmd, ' ');
-    if part = 'MSG' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      if TabMesajKisiler.Locate('ID', AliciID, []) then begin
-        // log güncelleyelim... 'LOGID=11 LOGKULID=9 asdas dasasd asd'
-        MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-        MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],
-          [MsgLogKulID]);
-        // mesajı gönderenin sayfası açık değilse tekrar oluşturalım...
-        cw := CreateChatWindow(AliciServerId, AliciID);
-        cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-        // açık olan başka sayfaysa mesaj gelen sayfayı highligt yapalım..
-        if not(AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) and (Screen.ActiveForm = AnaForm) and (PageControlChat.ActivePage = cw.FTabSheet) and (PageControlOrta.ActivePage = SheetMesajlasma) then
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ID=&ID', ['&ID'],
-            [MsgLogKulID])
-        else begin
-          cw.FTabSheet.Highlighted := true;
-          OkunmamisMesajSayisiDuzenle;
-        end;
-        if (AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) or (PageControlOrta.ActivePage <> SheetMesajlasma) then begin
-          AnaForm.AnaSayfaDenetimi.Pages[0].Highlighted := true;
-          if Length(Alarmlar) > 0 then
-            for I := 0 to Length(Alarmlar) - 1 do
-              if Assigned(Alarmlar[0]) then
-                FreeAndNil(Alarmlar[i]);
-          SetLength(Alarmlar, 1);
-          Alarmlar[0] := TJvDesktopAlert.Create(Self);
-          Alarmlar[0].HeaderText := 'Mesaj - ' + TabMesajKisiler.FieldByName('FIRMA').AsString;
-          Alarmlar[0].MessageText := cmd;
-          Alarmlar[0].Tag := cw.FTabSheet.PageIndex;
-          Alarmlar[0].AlertStack := JvDesktopAlertStack1;
-          Alarmlar[0].Image.Bitmap.Assign(JvDesktopAlert1.Image.Bitmap);
-          Alarmlar[0].OnMessageClick := JvDesktopAlert2MessageClick;
-          Alarmlar[0].StyleOptions.DisplayDuration := 10000;
-          Alarmlar[0].Execute;
-        end;
-        // içeriye mesaj yazalım
-        cw.WriteToWindow(cw.UserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.GENINI.BugunTrhSaat, cmd);
-      end;
-    end else if part = 'USRLIST' then begin
-      Tablo.repOnlinePersonel.Properties.Images := Tablo.PNGImageList2;
-      if not TabMesajKisiler.Active then begin
-        TabMesajKisiler.Close;
-  if TabMesajKisiler.Params.FindParam('PRID') = nil then
-    with TabMesajKisiler.Params.Add do begin
-      Name := 'PRID';
-      DataType := ftInteger;
-      ParamType := ptInput;
-    end;
-  with TabMesajKisiler.ParamByName('PRID') do begin
-    DataType := ftInteger;
-    Size := 10;
-    AsInteger := StrToIntDef(Kullanan, 0);
-  end;
-  TabMesajKisiler.Open;
-      end;
-      FOnlineUsers.text := cmd;
-      for i := 0 to Tablo.repOnlinePersonel.Properties.Items.Count - 1 do
-        if FOnlineUsers.IndexOfName(VarToStr(Tablo.repOnlinePersonel.Properties.Items[i].Value)) > -1 then
-          Tablo.repOnlinePersonel.Properties.Items[i].ImageIndex := 25
-        else
-          Tablo.repOnlinePersonel.Properties.Items[i].ImageIndex := 26;
-      for cw in FChatWindows do cw.ServerId := -1;
-      for I := 0 to FOnlineUsers.Count - 1 do
-        for cw in FChatWindows do begin
-          if cw.FUserId = StrToInt(FOnlineUsers.Names[i]) then
-          begin
-            cw.ServerId := StrToInt(FOnlineUsers.ValueFromIndex[i]);
-          end;
-        end;
-    end else if part = 'Duyuru' then begin
-      if (Length(Alarmlar) > 0) and (Assigned(Alarmlar[0])) then
-        for I := 0 to Length(Alarmlar) do
-          FreeAndNil(Alarmlar[i]);
-      OkunmamisDuyuruSayisiDuzenle;
-      Tablo.TablodanSorguAc(8,
-        'select D.ID,D.KONU from DUYURU D inner join DUYURUKULLANICI DK on DK.DUYURUID=D.ID where D.TUR=2 and isnull(DK.OKUNDU,0)=0 and DK.ALICIID='
-          + Kullanan);
-
-      SetLength(Alarmlar, Tablo.Query8.RecordCount);
-      Tablo.Query8.First;
-      i := 0;
-      while not Tablo.Query8.eof do begin
-        Alarmlar[i] := TJvDesktopAlert.Create(Self);
-        Alarmlar[i].HeaderText := 'Okunmamış Duyurunuz Var!';
-        Alarmlar[i].MessageText := Tablo.Query8.FieldByName('KONU').AsString;
-        Alarmlar[i].Tag := Tablo.Query8.FieldByName('ID').AsInteger;
-        Alarmlar[i].AlertStack := JvDesktopAlertStack1;
-        Alarmlar[i].Image.Bitmap.Assign(JvDesktopAlert1.Image.Bitmap);
-        Alarmlar[i].OnMessageClick := JvDesktopAlert1MessageClick;
-        Alarmlar[i].StyleOptions.DisplayDuration := 10000;
-        Alarmlar[i].Execute;
-        Inc(i);
-        Tablo.Query8.Next;
-      end;
-    end else if part = 'FSCONFIRM' then begin
-      fsi := TFileSendInfo.FromMessage(cmd);
-      fsi.ToServerId := FServerId;
-      fsi.ToUserId := StrToInt(Kullanan);
-      if TabMesajKisiler.Locate('ID', fsi.FromUserId, []) then
-      begin
-        //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],[MsgLogKulID]);
-        // mesajı gönderenin sayfası açık değilse tekrar oluşturalım...
-
-        cw := CreateChatWindow(fsi.FromServerId, fsi.FromUserId);
-        cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-        fsi.FChatWindow := cw;
-        cw.FFileSends.Add(fsi);
-        cw.WriteToWindow(fsi.FFromUserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.GENINI.BugunTrhSaat,
-          '<'+MsgDosyaSizinlePaylasiliyor +':' + fsi.FileName+'>', fsi.ReferenceId);
-      end;
-    end else if part = 'FSCONFIRMED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send confirmed ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        fsi.FileSize := FileSizeByName(fsi.FileName);
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizKabulEdildi + ':' + fsi.FFileName + '>', False);
-        fsi.Send(MsgClient);
-      end;
-    end else if part = 'FSDECLINED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send cancelled ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizReddedildi  + ':' + fsi.FFileName + '>', True);
-        cw.FFileSends.Remove(fsi);
-      end;
-    end else if part = 'FSCANCELLED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send canceled ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i*-1);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizIptalEdildi  + ':' + fsi.FFileName + '>', True);
-        cw.FFileSends.Remove(fsi);
-      end;
-    end else if part = 'FILERECV' then begin
-      GtpLog.Log('%s received',[part]);
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then
-        fsi.FileSize := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '))
-      else
-        GtpLog.Log('File send reference %d was not found',[i]);
-    end else if part = 'FSABORT' then begin // alici gönderir
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        if fsi.IsSend then
-          cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasimiAliciTarafindanDurduruldu + ':' + fsi.FFileName + '>', True)
-        else
-          cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasimiGonderenTarafindanDurduruldu + ':' + fsi.FFileName + '>', True);
-        fsi.Abort;
-      end;
-    end;
-
-
-  end; }
-end;
-
-constructor TAnaGirisSayfasiFrame.Create(AOwner: TComponent);
-var
-  KulID: Integer;
-begin
-  inherited;
-  KulID := StrToIntDef(Kullanan, 1);
-  TabSK.Close;
-  TabSK.SQL.Text :=
-    ' select ' + DbUst(10) + ' M.MODULID, M.MODULADI from KULLANICI_ISLEM K ' +
-    ' inner join MODUL M on K.ISLEMID=M.MODULID ' +
-    ' where KULID=' + IntToStr(KulID) + ' order by SAY desc ' + DbSinir(10);
-  TabSK.Open;
-  FChatWindows := TObjectList<TChatWindow>.Create;
-  FOnlineUsers := TStringList.Create;
-  FOnlineUsers.NameValueSeparator := ' ';
-  //FOnlineUsers.Delimiter := ',';
-  FOnlineUsers.LineBreak := ',';
-end;
-
-function TAnaGirisSayfasiFrame.CreateChatWindow(AServerId, AUserId: Integer): TChatWindow;
-begin
- { result := FindChatWindowByServerId(AServerId);
-  if not Assigned(result) then begin
-    result := TChatWindow.CreateNew(MsgClient, PageControlChat, AServerId, AUserId);
-    result.CreateUI;
-    FChatWindows.Add(result);
-  end else begin
-    if result.ServerId = -1 then
-      result.ServerId := AServerId;
-  end;
-  if ActiveChatWindow <> result then
-    result.FTabSheet.Highlighted := true; }
-
-  // PageControlChat.ActivePage := Result.FTabSheet;
-end;
-
-function TAnaGirisSayfasiFrame.CreateChatWindowByUserID(AUserId: Integer): TChatWindow;
-var
-  serverId : Integer;
-begin
- { result := FindChatWindowByUserId(AUserId);
-  serverID := -1;
-  if (FOnlineUsers.IndexOfName(IntToStr(AUserId)) > -1) then
-    serverId := StrToInt(FOnlineUsers.Values[IntToStr(AUserId)]);
-  if not Assigned(result) then begin
-    result := TChatWindow.CreateNew(MsgClient, PageControlChat, serverId, AUserId);
-    result.CreateUI;
-    FChatWindows.Add(result);
-  end;
-  if ActiveChatWindow <> result then
-    result.FTabSheet.Highlighted := true; }
+  if Assigned(ChatTimer) then ChatTimer.Enabled := False;
 end;
 
 procedure TAnaGirisSayfasiFrame.cxButton3Click(Sender: TObject);
@@ -1934,36 +1305,6 @@ begin
 
 end;
 
-procedure TAnaGirisSayfasiFrame.PageControlChatCanClose(Sender: TObject; var ACanClose: Boolean);
-var i:Integer;
-begin
-  ACanClose := false;
-  {for i := 0 to ActiveChatWindow.CardView.DataController.RecordCount - 1 do
-    if StrToIntDef(VarToStrDef(ActiveChatWindow.CardView.DataController.Values[i,3],'0'),0)>0 then begin
-      ShowMessage('Aktif dosya transferi işleminiz sonlanana yada iptal edilene kadar bu sayfayı kapatamazsınız!');
-      ACanClose := false;
-      Exit;
-    end;  }
-end;
-
-procedure TAnaGirisSayfasiFrame.PageControlChatMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  if Button = mbMiddle then
-    PageControlChat.ActivePage.Destroy;
-end;
-
-procedure TAnaGirisSayfasiFrame.PageControlChatPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
-begin
-  NewPage.Highlighted := false;
-  OkunmamisMesajSayisiDuzenle;
-  BtnMesajGonder.Enabled := True;
-  BtnDosyaGonder.Enabled := True;
-  MemoChat.Enabled := True;
-  if (not AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) and (PageControlOrta.ActivePage = SheetMesajlasma) then
-    MemoChat.SetFocus;
-
-end;
-
 procedure TAnaGirisSayfasiFrame.YoneticiDokumuOlustur(Modul: string; APageControl: TcxPageControl);
 
 var
@@ -2020,13 +1361,7 @@ end;
 
 procedure TAnaGirisSayfasiFrame.Panel20DblClick(Sender: TObject);
 begin
-   Tablo.Satis2Fatura_Olustur(1);
-end;
-
-destructor TAnaGirisSayfasiFrame.Destroy;
-begin
-  FChatWindows.Free;
-  inherited;
+  if Assigned(AnaForm) then AnaForm.MesajMenuClick(nil);
 end;
 
 procedure TAnaGirisSayfasiFrame.EditAraKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2076,13 +1411,6 @@ end;
 procedure TAnaGirisSayfasiFrame.FareTekerlekYukari(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
 
-end;
-
-function TAnaGirisSayfasiFrame.GetActiveChatWindow: TChatWindow;
-begin
-  if PageControlChat.PageCount = 0 then
-    exit(nil);
-  result := TChatWindow(PageControlChat.ActivePage.Tag);
 end;
 
 function TAnaGirisSayfasiFrame.GetFrameBilgi: TAnaFrameBilgi;
@@ -2144,17 +1472,38 @@ begin
 end;
 
 procedure TAnaGirisSayfasiFrame.JvTimer1Timer(Sender: TObject);
+// Eski TCP dosya aktarimi zamanlayicisiydi (HandleFileSends kaldirildi).
 begin
-  HandleFileSends;
-  JvTimer1.Enabled := True;
+  JvTimer1.Enabled := False;
 end;
 
 procedure TAnaGirisSayfasiFrame.MesajaGit(MesajSayfasi: Integer);
+// Eski sohbet sekmelerine gidiyordu; artik yeni mesajlasma ekranini acar.
 begin
-  with (FFrameBilgi.AnaFrameYoneticisi.FrameBul(TAnaGirisSayfasiFrame).Ornek as TAnaGirisSayfasiFrame).GetFrameBilgi.Git do begin
-    BtnMesaj.Click;
-    PageControlChat.ActivePageIndex := MesajSayfasi;
-  end;
+  if Assigned(AnaForm) then AnaForm.MesajMenuClick(nil);
+end;
+constructor TAnaGirisSayfasiFrame.Create(AOwner: TComponent);
+var
+  KulID: Integer;
+begin
+  inherited;
+  KulID := StrToIntDef(Kullanan, 1);
+  TabSK.Close;
+  TabSK.SQL.Text :=
+    ' select ' + DbUst(10) + ' M.MODULID, M.MODULADI from KULLANICI_ISLEM K ' +
+    ' inner join MODUL M on K.ISLEMID=M.MODULID ' +
+    ' where KULID=' + IntToStr(KulID) + ' order by SAY desc ' + DbSinir(10);
+  TabSK.Open;
+  // FChatWindows kaldirildi (eski TCP sohbet listesi)
+  FOnlineUsers := TStringList.Create;
+  FOnlineUsers.NameValueSeparator := ' ';
+  FOnlineUsers.LineBreak := ',';
+end;
+
+destructor TAnaGirisSayfasiFrame.Destroy;
+begin
+  FOnlineUsers.Free;
+  inherited;
 end;
 
 procedure TAnaGirisSayfasiFrame.Kapatiliyor(var AKapansin: Boolean);
@@ -2168,53 +1517,12 @@ begin
   KosulButon.Visible := false;
 end;
 
-procedure TAnaGirisSayfasiFrame.ProfilResimClick(Sender: TObject);
-
-var
-  DosyaAdi: string;
-begin
-  if Tablo.OpenPictureDialog1.Execute then
-  begin
-    // DosyaAdi := ResimOlcumleme(Tablo.OpenPictureDialog1.Files[0]);
-    DosyaAdi := ResimKucult(Tablo.OpenPictureDialog1.Files[0], 130);
-    if DosyaAdi <> '' then begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from IMAJ where REHBERID=' + Kullanan + ' and YERI=13 and YER_ID=' + Kullanan, [], []);
-      ResimEkleme(DosyaAdi, StrToInt(Kullanan), 13, StrToInt(Kullanan));
-      ResimGetir(StrToInt(Kullanan), 13, StrToInt(Kullanan), ProfilResim);
-    end;
-  end;
-end;
-
-procedure TAnaGirisSayfasiFrame.MemoChatKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = 13) and (Shift <> [ssCtrl]) then
-    BtnMesajGonderClick(Self);
-end;
 
 procedure TAnaGirisSayfasiFrame.SatirEkleClick(Sender: TObject);
 begin
-  DuyuruAlarmiVer(Tablo.DuyuruAc('E',0, 0));
-
-end;
-
-procedure TAnaGirisSayfasiFrame.DuyuruAlarmiVer(DuyuruID: Integer);
-
-var
-  st: string;
-begin
-  {if (DuyuruID > 0) and (MsgClient.Connected) then
-  begin
-    Tablo.TablodanSorguAc(7, 'select ALICIID from DUYURUKULLANICI where OKUNDU=0 and DUYURUID=' + IntToStr(DuyuruID));
-    st := 'DYR ' + IntToStr(DuyuruID) + ' ';
-    Tablo.Query7.First;
-    while not Tablo.Query7.eof do
-    begin
-      st := st + Tablo.Query7.fields[0].AsString + ',';
-      Tablo.Query7.Next;
-    end;
-    MsgClient.Socket.WriteLn(st);
-  end; }
-
+  // DuyuruAlarmiVer kaldirildi: govdesi zaten tamamen yorumdaydi (eski TCP
+  //   "DYR" bildirimi). Duyuru ekrani acilmaya devam ediyor.
+  Tablo.DuyuruAc('E', 0, 0);
 end;
 
 procedure TAnaGirisSayfasiFrame.DuyuruYenileTusClick(Sender: TObject);
@@ -2341,25 +1649,6 @@ procedure TAnaGirisSayfasiFrame.SetFrameBilgi(AValue: TAnaFrameBilgi);
 begin
   FFrameBilgi := AValue;
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
-end;
-
-procedure TAnaGirisSayfasiFrame.Baglan;
-begin
- { if not MsgClient.Connected then
-    try
-      MsgClient.Host := Tablo.GENINI.ReadString(Ops_ChatOpsiyon_Adres, '127.0.0.1');
-      MsgClient.Port := StrToInt(Tablo.GENINI.ReadString(Ops_ChatOpsiyon_Port, '7777'));
-      if MsgClient.Host <> '127.0.0.1' then begin
-        MsgClient.Connect;
-        MesajLED.Status := MsgClient.Connected;
-        PanelChat.Enabled := MesajLED.Status;
-        cxGrid4.Enabled := MesajLED.Status;
-      end;
-    except
-      MesajLED.Status := false;
-      PanelChat.Enabled := false;
-      cxGrid4.Enabled := false;
-    end;  }
 end;
 
 procedure TAnaGirisSayfasiFrame.SpeedButton1Click(Sender: TObject);
@@ -2495,22 +1784,6 @@ begin
   TabKosul.fields[1].AsInteger := TabDokum.fields[0].AsInteger;
 end;
 
-procedure TAnaGirisSayfasiFrame.TryCloseMainForm;
-var
-  cw : TChatWindow;
-  fsi : TFileSendInfo;
-  cls : Boolean;
-begin
-  if not FMainFormClosing then Exit;
-  cls := True;
-  for cw in FChatWindows do begin
-    if cw.FFileSends.Count > 0 then
-      cls := False;
-  end;
-  if cls then
-    AnaForm.Close;  
-end;
-
 procedure TAnaGirisSayfasiFrame.TusAsagi(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
@@ -2543,14 +1816,6 @@ begin
   Tablo.GridStilYonetim.StilDenetle(Sender.Name, AStyle, Sender, ARecord);
 end;
 
-procedure TAnaGirisSayfasiFrame.MsgClientConnected(Sender: TObject);
-begin
-{  MsgClient.Socket.WriteLn('messaging');
-  MsgClient.Socket.WriteLn(KullanAdi);
-  MsgClient.Socket.WriteLn(Kullanan);
-  FServerId := StrToInt(MsgClient.Socket.ReadLn); }
-end;
-
 procedure TAnaGirisSayfasiFrame.YaziciYazdir(Sender: TObject);
 begin
 
@@ -2573,534 +1838,6 @@ begin
   GrafikOlustur(true, TcxPageControl(FindComponent(StringReplace(PageControlOrta.ActivePage.Name, 'SheetYonetim', 'Page', []))));
 end;
 
-{ TFileSendInfo }
-
-procedure TFileSendInfo.Abort;
-begin
-  FIsAborted := True;
-end;
-
-constructor TFileSendInfo.Create(AFileName: string);
-begin
-  FFileName := AFileName;
-  FReferenceId := RefCounter;
-  Inc(RefCounter);
-  FState := 0;
-end;
-
-class function TFileSendInfo.CreateNew(AChatWindow: TChatWindow; AFileName: string): TFileSendInfo;
-begin
-  result := TFileSendInfo.Create(AFileName);
-  result.FChatWindow := AChatWindow;
-  if Assigned(AChatWindow) then
-    AChatWindow.FFileSends.Add(result);
-end;
-
-destructor TFileSendInfo.Destroy;
-begin
-  if Assigned(FClient) then
-    FClient.Free;
-  inherited;
-end;
-
-class function TFileSendInfo.FromMessage(AMsg: string): TFileSendInfo;
-begin
-  result := CreateNew(nil,'');
-  with result do begin
-    FFromServerId := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' '));
-    FFromUserId := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' '));
-    FLogId := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' '));
-    FLogUserId := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' '));
-    FReferenceId := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' ')) * -1;
-    FFileSize := StrToInt(Dize.SinirlandirilmisMetin(AMsg, ' '));
-    FIsConfirming := true;
-    FFileName := AMsg;
-  end;
-end;
-
-procedure TFileSendInfo.MsgClientConnected(Sender: TObject);
-begin
-
-end;
-
-
-procedure TFileSendInfo.PartialReceive;
-var
-  sck : TIdIOHandlerSocket;
-  s   : string;
-  msg : string;
-begin
-  if not Assigned(FClient) then Exit;
-  if not FClient.Connected then Exit;
-  sck := FClient.Socket;
-  if FState = 0 then begin
-    sck.WriteLn('filereceiving');
-    Msg := Format('%d %d %d', [FromServerId, ToServerId, ReferenceId * -1]);
-    sck.WriteLn(Msg);
-    FState := 1;
-    FReceivedBytes := 0;
-  end else if FState = 1 then begin
-    if not sck.InputBufferIsEmpty then begin
-      s := sck.ReadLn(#$A,300);
-      if (not sck.ReadLnTimedout) then begin
-        FRemainingBytes := StrToInt(s);
-        FFileStream := TFileStream.Create(FileName, fmCreate);
-        SetLength(FBuffer, 104858);
-        FState := 2;
-      end;
-    end;
-  end else if FState = 2 then begin
-    try
-      if FRemainingBytes > 0 then begin
-        if (sck.ReadByte = 1)or(not FClient.Connected) then begin
-          FIsAborted := True;
-          FState := 3;
-          Exit;
-        end;
-        if FRemainingBytes >= 104858 then
-        begin
-          FReceivedBytes := FReceivedBytes + Length(FBuffer);
-          FChatWindow.EditChatMessage(FChatWindow.FUserId, FReferenceId,'<' + MsgDosyaAliniyor + ':' + FFileName + ' - ' + FormatFloat('#####0.##',FReceivedBytes/1048576) + 'MB/'+ FormatFloat('#####0.##',FFileSize/1048576) + 'MB>',True);
-          sck.ReadBytes(FBuffer, 104858,False);
-          FFileStream.Write(FBuffer[0], 104858);
-          FRemainingBytes := FRemainingBytes - 104858;
-        end
-        else
-        begin
-          sck.ReadBytes(FBuffer, FRemainingBytes,False);
-          FFileStream.Write(FBuffer[0], FRemainingBytes);
-          FRemainingBytes := 0;
-        end;
-      end else FState := 3;
-    except
-      FState := 3;
-      FIsAborted := True;
-    end;
-  end else if FState = 3 then begin
-    if not FIsAborted then
-      FChatWindow.EditChatMessage(FChatWindow.FUserId, FReferenceId,'<' + MsgDosyaGonderiminizTamamlandi + ':' + FFileName + ' - ' + FormatFloat('#####0.##',FFileSize/1048576) + 'MB>',True)
-    else
-      FChatWindow.EditChatMessage(FChatWindow.FUserId, FReferenceId, '<' + MsgDosyaPaylasimiGonderenTarafindanDurduruldu + ':' + FFileName + '>', True); 
-    FFileStream.Free;
-    FClient.Disconnect;
-    FChatWindow.OnFileSendReceiveCompleted(Self);
-    FState := 4;
-  end;
-end;
-
-procedure TFileSendInfo.PartialSend;
-label __exit;
-var
-  sck : TIdIOHandlerSocket;
-  s   : string;
-  msg : string;
-begin
-  if not Assigned(FClient) then Exit;
-  if not FClient.Connected then Exit;
-  sck := FClient.Socket;
-  if FState = 0 then begin
-    sck.WriteLn('filesending');
-    Msg := Format('%d %d %d %d', [FromServerId, ToServerId, FileSize, ReferenceId]);
-    sck.WriteLn(Msg);
-    FState := 1;
-  end else if FState = 1 then begin
-    if not sck.InputBufferIsEmpty then begin
-      s := sck.ReadLn(#$A,300);
-      if (not sck.ReadLnTimedout) and (s = 'beginsend') then begin
-        FState := 2;
-      end;
-    end;
-    FSentBytes := 0;
-  end else if FState = 2 then begin
-    SetLength(FBuffer, 104858);
-    FFileStream := TFileStream.Create(FileName, fmOpenRead);
-    FState := 3;
-  end else if FState = 3 then begin
-    try
-      FRemainingBytes := FFileStream.Read(FBuffer[0], 104858);
-      if FRemainingBytes > 0 then begin
-        if FIsAborted then begin
-          sck.Write(1);
-          FState := 4;
-          Exit;
-        end else
-          sck.Write(0);
-        FSentBytes := FSentBytes + Length(FBuffer);
-        FChatWindow.EditChatMessage(FChatWindow.FUserId, FReferenceId,'<' + MsgDosyaVeriliyor + ':' + FFileName + ' - ' + FormatFloat('#####0.##',FSentBytes/1048576) + 'MB/'+ FormatFloat('#####0.##',FFileSize/1048576) + 'MB>',True);
-        sck.Write(FBuffer, FRemainingBytes, 0);
-      end else FState := 4;
-    except
-      FState := 4;
-      FIsAborted := True;
-    end;
-  end else if FState = 4 then begin
-    if not FIsAborted then
-      FChatWindow.EditChatMessage(FChatWindow.FUserId, FReferenceId,'<' + MsgDosyaAliminizTamamlandi + ':' + FFileName + ' - ' + FormatFloat('#####0.##',FFileSize/1048576) + 'MB>',True);
-    FFileStream.Free;
-    FClient.Disconnect;
-    FChatWindow.OnFileSendReceiveCompleted(Self);
-    FState := 5;
-  end;
-end;
-
-procedure TFileSendInfo.PerformOperation;
-begin
-  if IsSend then
-    PartialSend
-  else
-    PartialReceive;
-end;
-
-procedure TFileSendInfo.Receive(AOrg: TIdTCPClient);
-begin
-  if not Assigned(FClient) then
-  begin
-    FClient := TIdTCPClient.Create(nil);
-    FClient.Host := AOrg.Host;
-    FClient.Port := AOrg.Port;
-    FClient.OnConnected := MsgClientConnected;
-  end;
-  FClient.Connect;
-end;
-
-procedure TFileSendInfo.Send(AOrg: TIdTCPClient);
-begin
-  if not Assigned(FClient) then
-  begin
-    FClient := TIdTCPClient.Create(nil);
-    FClient.Host := AOrg.Host;
-    FClient.Port := AOrg.Port;
-    FClient.OnConnected := MsgClientConnected;
-  end;
-  FClient.Connect;
-end;
-
-{ TChatWindow }
-
-procedure TChatWindow.AliciOnayIptalClick(Sender: TObject; AButtonIndex: Integer);
-var
-  Msg, Part1, Part2: string;
-  MesajLogID, MesajLogKullaniciID: Variant;
-  i, refId: Integer;
-  fsi: TFileSendInfo;
-begin
-  if not Assigned(FSaveDialog) then
-    FSaveDialog := TSaveDialog.Create(FPageControl.Owner);
-  refId := FCardView.DataController.Values[FCardView.DataController.EditingRecordIndex, 3];
-  fsi := FindFileSendById(refId);
-  if Assigned(fsi) then
-  begin
-    if AButtonIndex = 0 then
-    begin
-      FSaveDialog.DefaultExt := ExtractFileExt(fsi.FFileName);
-      FSaveDialog.FileName := fsi.FFileName;
-      FSaveDialog.Filter := ExtractFileExt(fsi.FFileName) + '|*' + ExtractFileExt(fsi.FFileName);
-      if FSaveDialog.Execute then
-      begin
-        for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do
-          (Sender as TcxTextEdit).Properties.Buttons[i].Enabled := false;
-        MesajLogID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-          'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
-          [2, Kullanan, '<' + MsgDosyaPaylasiminiKabulEttiniz + ':' + FSaveDialog.FileName + '>'], true);
-        MesajLogKullaniciID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-          'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
-          [VarToStr(MesajLogID), FUserId], true);
-        EditChatMessage(FUserId,fsi.ReferenceId,'<' + MsgDosyaPaylasiminiKabulEttiniz + ':' + FSaveDialog.FileName + '>',False);
-        Msg := Format('FSCONFIRMED %d %s %s %d', [fsi.FromServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), fsi.ReferenceId * -1]);
-        fsi.FileName := FSaveDialog.FileName;
-        fsi.IsConfirming := false;
-        FMsgClient.Socket.WriteLn(Msg);
-        fsi.Receive(FMsgClient);
-      end;
-    end else if AButtonIndex = 1 then begin
-      for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do (Sender as TcxTextEdit)
-        .Properties.Buttons[i].Enabled := false;
-      MesajLogID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
-        [2, Kullanan, '<' + MsgDosyaPaylasiminiReddettiniz + ':' + fsi.FFileName + '>'], true);
-      MesajLogKullaniciID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
-        [VarToStr(MesajLogID), FUserId], true);
-      Msg := Format('FSDECLINED %d %s %s %d', [fsi.FromServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), fsi.ReferenceId * -1]);
-      fsi.IsConfirming := false;
-      EditChatMessage(FUserId,fsi.ReferenceId,'<' + MsgDosyaPaylasiminiReddettiniz  + ':' + fsi.FFileName + '>',True);
-      FMsgClient.Socket.WriteLn(Msg);
-      fsi.FChatWindow.FFileSends.Remove(fsi);
-
-    end;
-  end;
-end;
-
-procedure TChatWindow.GonderenIptalClick(Sender: TObject; AButtonIndex: Integer);
-var
-  Msg: string;
-  MesajLogID, MesajLogKullaniciID: Variant;
-  i, refId: Integer;
-  fsi: TFileSendInfo;
-begin
-  for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do
-    (Sender as TcxTextEdit).Properties.Buttons[i].Enabled := false;
-  refId := FCardView.DataController.Values[FCardView.DataController.EditingRecordIndex, 3];
-  fsi := FindFileSendById(refId);
-
-  MesajLogID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'insert into MESAJLOG(TUR,GONDERENID,MESAJ)values(&Tur,&GonderenID,&Mesaj) select scope_identity() ', ['&Tur', '&GonderenID', '&Mesaj'],
-    [2, Kullanan, '<' + MsgDosyaPaylasiminiIptalEttiniz + ':' + fsi.FFileName + '>'], true);
-  MesajLogKullaniciID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-    'insert into MESAJLOGKULLANICI(MESAJLOGID,ALICIID)values(&MesajLogID,&AliciID) select scope_identity()', ['&MesajLogID', '&AliciID'],
-    [VarToStr(MesajLogID), FUserId], true);
-  Msg := Format('FSCANCELLED %d %s %s %d', [fsi.FToServerId, VarToStr(MesajLogID), VarToStr(MesajLogKullaniciID), fsi.ReferenceId]);
-  fsi.IsConfirming := false;
-  EditChatMessage(FUserId, fsi.ReferenceId,'<' + MsgDosyaPaylasiminiIptalEttiniz  + ':' + fsi.FFileName + '>',True);
-  FMsgClient.Socket.WriteLn(Msg);
-  fsi.FChatWindow.FFileSends.Remove(fsi);
-end;
-
-procedure TChatWindow.GonderenProgressIptalClick(Sender: TObject; AButtonIndex: Integer);
-var
-  i: Integer;
-  refId: Integer;
-  fsi: TFileSendInfo;
-  msg: string;
-begin
-  for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do (Sender as TcxTextEdit)
-    .Properties.Buttons[i].Enabled := false;
-  refId := FCardView.DataController.Values[FCardView.DataController.EditingRecordIndex, 3];
-  fsi := FindFileSendById(refId);
-  EditChatMessage(FUserId, fsi.ReferenceId,'<' + MsgDosyaVermeyiDurduruldunuz   + ':' + fsi.FFileName + '>',True);
-  fsi.Abort;
-end;
-
-procedure TChatWindow.HandleFileSends;
-var
-  fs : TFileSendInfo;
-begin
-  for fs in FFileSends do
-    fs.PerformOperation;
-end;
-
-procedure TChatWindow.AliciProgressIptalClick(Sender: TObject; AButtonIndex: Integer);
-var
-  i: Integer;
-  refId: Integer;
-  fsi: TFileSendInfo;
-begin
-  for I := 0 to (Sender as TcxTextEdit).Properties.Buttons.Count - 1 do
-    (Sender as TcxTextEdit).Properties.Buttons[i].Enabled := false;
-  refId := FCardView.DataController.Values[FCardView.DataController.EditingRecordIndex, 3];
-  fsi := FindFileSendById(refId);
-  EditChatMessage(FUserId, fsi.ReferenceId,'<' + MsgDosyaAlmayiDurduruldunuz + ':' + fsi.FFileName + '>',True);
-  FMsgClient.Socket.WriteLn(Format('FSABORT %d %d',[fsi.FromServerId,fsi.ReferenceId * -1]));
-end;
-
-constructor TChatWindow.Create(AMsgClient: TIdTCPClient);
-begin
-  FMsgClient := AMsgClient;
-  FFileSends := TObjectList<TFileSendInfo>.Create;
-end;
-
-class function TChatWindow.CreateNew(AMsgClient: TIdTCPClient; APageControl: TcxPageControl; AServerId, AUserId: Integer): TChatWindow;
-begin
-  result := TChatWindow.Create(AMsgClient);
-  result.FPageControl := APageControl;
-  result.FServerId := AServerId;
-  result.FUserId := AUserId;
-end;
-
-procedure TChatWindow.CreateUI;
-
-var
-  CAd, CTrh, CMsg, CRefID: TcxGridCardViewRow;
-begin
-  FTabSheet := TcxTabSheet.Create(FPageControl.Owner);
-  with FTabSheet do
-  begin
-    Parent := FPageControl;
-    Caption := FUserName;
-    //my.15.05.2025 Integer --> NativeInt
-    Tag := NativeInt(Self);
-  end;
-  FGrid := TcxGrid.Create(FPageControl.Owner);
-  with FGrid do
-  begin
-    Parent := FTabSheet;
-    Align := alClient;
-  end;
-  FCardView := (FGrid.CreateView(TcxGridCardView) as TcxGridCardView);
-  with FCardView do
-  begin
-    OptionsCustomize.RowFiltering := false;
-    OptionsSelection.HideFocusRectOnExit := false;
-    OptionsSelection.InvertSelect := false;
-    OptionsSelection.UnselectFocusedRecordOnExit := false;
-    OptionsView.ScrollBars := ssVertical;
-    LayoutDirection := ldVertical;
-    OptionsView.CaptionSeparator := #0;
-    OptionsView.CardBorderWidth := 4;
-    OptionsView.CardIndent := 0;
-    OptionsView.CardWidth := 800;
-    OptionsView.CategorySeparatorWidth := 1;
-    OptionsView.CellAutoHeight := true;
-    OptionsView.SeparatorWidth := 0;
-    OptionsData.Deleting := False;
-    Styles.OnGetContentStyle := MsgStylesOnGetContentStyle;
-    Styles.StyleSheet := Tablo.cxGridCardViewStyleSheetMsg;
-  end;
-  FGridLevel := FGrid.Levels.Add;
-  with FGridLevel do
-  begin
-    GridView := FCardView;
-  end;
-  CAd := FCardView.CreateRow;
-  with CAd do
-  begin
-    Properties := Tablo.cxEditRepository1Label1.Properties;
-    Options.Editing := false;
-    Options.Focusing := false;
-    Position.BeginsLayer := true;
-  end;
-  CTrh := FCardView.CreateRow;
-  with CTrh do
-  begin
-    Properties := Tablo.cxEditRepository1DateItem1.Properties;
-    Options.Editing := false;
-    Options.Focusing := false;
-    Position.BeginsLayer := false
-  end;
-  CMsg := FCardView.CreateRow;
-  with CMsg do
-  begin
-    Properties := Tablo.cxEditRepository1ButtonItem1.Properties;
-    OnGetPropertiesForEdit := MsgOnGetPropertiesForEdit;
-  end;
-  CRefID := FCardView.CreateRow;
-  with CRefID do
-  begin
-    Visible := false;
-  end;
-end;
-
-function TChatWindow.FindFileSendById(ARefId: Integer): TFileSendInfo;
-var
-  item: TFileSendInfo;
-begin
-  result := nil;
-  for item in FFileSends do
-  begin
-    if item.ReferenceId = ARefId then
-      exit(item);
-  end;
-
-end;
-
-
-procedure TChatWindow.MsgStylesOnGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-begin
-  if VarToStrDef(ARecord.Values[0],'') = KullanAdi then
-    AStyle := Tablo.cxStyle6
-  else
-    AStyle := Tablo.cxStyle4
-end;
-
-procedure TChatWindow.MsgOnGetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-  var AProperties: TcxCustomEditProperties);
-
-var
-  refId: Integer;
-  fsi: TFileSendInfo;
-begin
-  // butonlar ve click evenlerini oluşturalım..
-  // dosyayı gönderirken mesaj bizde <Dosya Transferi:C:\dosyayolu\dosyaadı> şeklinde gözükürken alıcıda <Dosya Transferi:dosyaadı> şeklindedir.
-  refId := ARecord.Values[3];
-  fsi := FindFileSendById(refId);
-  AProperties.Buttons.Clear;
-  AProperties.OnButtonClick := nil;
-  if Assigned(fsi) then
-  begin
-    if fsi.IsSend then
-    begin
-      with AProperties.Buttons.Add do
-      begin
-        Caption := 'x';
-        Kind := bkText;
-      end;
-      if fsi.IsConfirming then
-        AProperties.OnButtonClick := GonderenIptalClick
-      else
-        AProperties.OnButtonClick := GonderenProgressIptalClick;
-    end
-    else
-    begin
-      if fsi.IsConfirming then
-      begin
-        with AProperties.Buttons.Add do
-        begin
-          Caption := #8730;
-          Default := true;
-          Kind := bkText;
-        end;
-        with AProperties.Buttons.Add do
-        begin
-          Caption := 'x';
-          Kind := bkText;
-        end;
-        AProperties.OnButtonClick := AliciOnayIptalClick;
-      end
-      else
-      begin
-        with AProperties.Buttons.Add do
-        begin
-          Caption := 'x';
-          Kind := bkText;
-        end;
-        AProperties.OnButtonClick := AliciProgressIptalClick;
-      end;
-    end;
-  end;
-  AProperties.ReadOnly := true;
-end;
-
-procedure TChatWindow.OnFileSendReceiveCompleted(AFSI: TFileSendInfo);
-begin
-  FFileSends.Remove(AFSI);
-  if FFileSends.Count = 0 then
-    HomePageInstance.TryCloseMainForm;
-end;
-
-procedure TChatWindow.SetUserName(const Value: string);
-begin
-  FUserName := Value;
-  if Assigned(FTabSheet) then
-    FTabSheet.Caption := Value;
-end;
-
-procedure TChatWindow.EditChatMessage(AUserId:Integer;ARefId:Integer;AMsg:string;EraseRefID:Boolean);
-var
-  fsi: TFileSendInfo;
-begin
-  fsi := FindFileSendById(ARefId);
-  if Assigned(fsi) then begin
-      FCardView.DataController.SetValue(fsi.FRecordIndex,2,AMsg);
-      if EraseRefID then
-        FCardView.DataController.SetValue(fsi.FRecordIndex,3,0);
-  end;
-  FCardView.DataController.Post(true);
-end;
-
-procedure TChatWindow.WriteToWindow(AUserId: Integer; AAuthor: string; ADateTime: TDateTime; AMsg: string; ARefId: Integer);
-var
-  fsi: TFileSendInfo;
-begin
-  FCardView.DataController.Append;
-  FCardView.DataController.SetValue(FCardView.DataController.RecordCount - 1, 0, AAuthor);
-  FCardView.DataController.SetValue(FCardView.DataController.RecordCount - 1, 1, ADateTime);
-  FCardView.DataController.SetValue(FCardView.DataController.RecordCount - 1, 2, AMsg);
-  FCardView.DataController.SetValue(FCardView.DataController.RecordCount - 1, 3, ARefId);
-  FCardView.DataController.Post(true);
-  fsi := FindFileSendById(ARefId);
-  if Assigned(fsi) then
-    fsi.RecordIndex := FCardView.DataController.FocusedRecordIndex;
-end;
 
 procedure TAnaGirisSayfasiFrame.KDRListeCategories0Items0Click(Sender: TObject);
 var I:smallint;

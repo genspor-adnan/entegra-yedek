@@ -135,7 +135,6 @@ type
     GrupA1: TMenuItem;
     GrupKapat1: TMenuItem;
     MesajMenu: TMenuItem;
-    MsgClient: TIdTCPClient;
     ChatTimer: TJvTimer;
     MenuSifreIslemleri: TMenuItem;
 
@@ -235,12 +234,16 @@ type
     procedure GrupKapat1Click(Sender: TObject);
     procedure MesajMenuClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure MsgClientConnected(Sender: TObject);
-    procedure ChatTimerTimer(Sender: TObject);
+    procedure ChatTimerTimer(Sender: TObject);   // artik: okunmamis rozeti yoklamasi
     procedure MenuSifreIslemleriClick(Sender: TObject);
     procedure MenuGenelInfoClick(Sender: TObject);
 
   private
+    // published bolume KONULMAZ (E2217: DFM alani sanilir) -> private
+    FSonOkunmamisMesaj: Integer;
+    FSonSesliMesaj: Integer;       // sessize ALINMAMIS sohbetlerin okunmamisi (SES bunun icin)
+    FKanalOkunmamis: TStringList;  // KANALID=okunmamis (hangi sohbette ARTIS oldu?)
+    FBildirimSorgu: TFDQuery;      // bildirim metni icin sohbet listesi
     { Private declarations }
     FserverAddr: TINAddr;
     FFrameYoneticisi: TAnaFrameYoneticisi;
@@ -252,12 +255,15 @@ type
     procedure CID_olay(ASender: TObject; const DeviceID, Line,PhoneNumber, DateTime, OtherText: WideString);
 
     procedure FrameBasliklariniGuncelle;
-    procedure MesajSayiYaz;
-    procedure Baglan;
     procedure RunDeferredStartup;
+    procedure MesajBildirimleriCikar(const AYoklaJson: string);
+    procedure BildirimeTiklandi(AKanalId: Integer);
   public
     { Public declarations }
     FServerId: Integer;
+    // Mesajlasma ekrani okundu/okunmadi isaretleyince ust rozeti tazeler
+    //   (alan bildirimleri metotlardan ONCE gelmeli - E2169)
+    procedure MesajSayiYaz;
     property FrameYoneticisi: TAnaFrameYoneticisi read FFrameYoneticisi;
     procedure DokumMenuOlustur;
     procedure CariKaydaGit(ARehberId: Integer);
@@ -267,7 +273,6 @@ type
     procedure AktiviteKontrol(msg: string);
     function StokAraIdGetir(TabNo:Integer; var Tur:Integer; CokUrunEkle:Boolean):integer;
     procedure OnaylariOlustur(Yeri,YerID: integer);
-    procedure OkunduUpdate(KarsiKisi:Integer);
     procedure UyariGoster(uyaribaslik, uyarimesaj, uyarituru: string);
     function AktiviteMesajMetniOlustur(MesajTuru:string; aktiviteId, atayan, gorevli: Integer; baslik, mesajekaciklama: string): string;
   end;
@@ -294,7 +299,7 @@ var
 
 implementation
 
-uses System.JSON, Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
+uses System.JSON, UMesajBildirim, Utablo, URehAraDlg, UDokum, UCombo, UPaylasim, ULog,
   UKasa, ULogo, UOpsDlg, UListe, UKullaniciDuzenle, UStokHizmetAra,
   GT_RehberAbout, UDoviz, UKullaniciKodYetki, UMailYaz, FetaUtil,
   UTakvim, UKrediler, UKasaWizard, UOpsiyonBanka, UDokumanListeFrame, UStokListeDlg,
@@ -374,258 +379,24 @@ begin
   OpsiyonCekSenetDlg.Destroy;
 end;
 
-procedure TAnaForm.OkunduUpdate(KarsiKisi:Integer);
-begin
-   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-        'update K set OKUNMATARIHI=GetDate() from MESAJLOGKULLANICI K inner join MESAJLOG M on M.ID=K.MESAJLOGID '+
-        ' where ALICIID=&AliciID and GONDERENID=&GonderenID and OKUNMATARIHI is null', ['&AliciID', '&GonderenID'],
-         [Kullanan, KarsiKisi]);
-end;
-
 procedure TAnaForm.ChatTimerTimer(Sender: TObject);
-var
-  cmd: string;
-  part, Part1, Part2, DosyaAdi: string;
-  AliciID, MsgLogID, MsgLogKulID, i, RecIndx, GonderenServerId, GonderenRehberId, AktifRehberId: Integer;
- // cw: TChatWindow;
- // fsi: TFileSendInfo;
-  lst : TStringList;
-{  Function GriddeKelimeAra(Grid: TcxGridCardView; ItemIndex: Integer; Kelime: string): Integer;
-  var
-    j: integer;
-  begin
-    result := -1;
-    for j := Grid.DataController.RecordCount - 1 Downto 0 do
-    begin
-      if Pos(Kelime, Grid.DataController.DisplayTexts[j, ItemIndex]) > 0 then
-        result := j;
-    end;
-  end;}
+// Mesajlasma DB uzerinden yurur (GenDepoUpdate145/146). Burada okunmamis rozeti
+//   tazelenir ve yeni mesaj varsa sag alt kose bildirimi cikar.
+//   (Eski TCP istemcisi MsgClient ve baglanti kodlari KALDIRILDI - sunucu tarafi
+//    hic yazilmamisti, olu koddu.)
+// PERFORMANS: DFM'de Interval verilmemisti -> 1000 ms. Bu haliyle saniyede bir SP
+//   cagrisi oluyor ve acilis/giris agirlasiyordu. Interval 15 sn'ye alindi; sohbet
+//   ekrani zaten kendi 3 sn'lik yoklamasini yapiyor. Mesajlasma ekrani ACIKKEN
+//   rozet sorgusu tekrarlanmaz.
 begin
-  // Page Hint de dosya ad? yazar,
-  // Page HelpKeyword de dosya g?nderim sat?r?na locate olabilmek i?in i?eri?indeki text yaz?yor..
-  // Ba?l? de?ilse buffer kontrol etmesine gerek yok ??ks?n
-try
-
-
-  if not Anaform.MsgClient.Connected then
-    exit;
-  // Ba?l?ysa TCP den gelen mesajlar? ald??? bufferdan bilgileri als?n
-  ChatTimer.Enabled := False;
-
-  if (not MsgClient.Socket.InputBufferIsEmpty) then begin
-      cmd := Dize.SatirSonuDecode(Anaform.MsgClient.Socket.ReadLn);
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      if part = 'MSG' then begin
-         part := Dize.SinirlandirilmisMetin(cmd, ' ');
-         GonderenServerId := StrToInt(part);
-         GonderenRehberId := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-         if MesajlasmaDlg<>nil then begin
-            AktifRehberId := MesajlasmaDlg.TabMesajKisiler.FieldByName('REHBERID').AsInteger;
-            if GonderenRehberId=AktifRehberId then begin //mesaj g?nderen ki?i aktif mi?
-               OkunduUpdate(AktifRehberId);
-               TabloYenile(MesajlasmaDlg.TabMesajlar, [StrToInt(Kullanan), MesajlasmaDlg.TabMesajKisiler.FieldByName('REHBERID').AsInteger]);
-               MesajlasmaDlg.TabMesajlar.Last;
-            end;
-            TabloYenile(MesajlasmaDlg.TabMesajKisiler, [Kullanan]);
-            MesajlasmaDlg.TabMesajKisiler.Locate('REHBERID', AktifRehberId, []);
-         end
-         else
-            MesajSayiYaz; //mesaj ekran? kapal?ysa ?stte say? olarak g?stersin
-      end;
-   end;
-
-(*if (not Anaform.MsgClient.Socket.InputBufferIsEmpty) then begin
-    cmd := Dize.SatirSonuDecode(Anaform.MsgClient.Socket.ReadLn);
-    part := Dize.SinirlandirilmisMetin(cmd, ' ');
-    if part = 'MSG' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      if TabMesajKisiler.Locate('ID', AliciID, []) then begin
-        // log g?ncelleyelim... 'LOGID=11 LOGKULID=9 asdas dasasd asd'
-        MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-        MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],
-          [MsgLogKulID]);
-        // mesaj? g?nderenin sayfas? a??k de?ilse tekrar olu?tural?m...
-        cw := CreateChatWindow(AliciServerId, AliciID);
-        cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-        // a??k olan ba?ka sayfaysa mesaj gelen sayfay? highligt yapal?m..
-        if not(AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) and (Screen.ActiveForm = AnaForm) and (PageControlChat.ActivePage = cw.FTabSheet) and (PageControlOrta.ActivePage = SheetMesajlasma) then
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set OKUNDU=1, OKUNMATARIHI=GetDate() where ID=&ID', ['&ID'],
-            [MsgLogKulID])
-        else begin
-          cw.FTabSheet.Highlighted := true;
-          OkunmamisMesajSayisiDuzenle;
-        end;
-        if (AnaFrameYoneticisi.AktifFrame.FrameYonetilebilir) or (PageControlOrta.ActivePage <> SheetMesajlasma) then begin
-          AnaForm.AnaSayfaDenetimi.Pages[0].Highlighted := true;
-          if Length(Alarmlar) > 0 then
-            for I := 0 to Length(Alarmlar) - 1 do
-              if Assigned(Alarmlar[0]) then
-                FreeAndNil(Alarmlar[i]);
-          SetLength(Alarmlar, 1);
-          Alarmlar[0] := TJvDesktopAlert.Create(Self);
-          Alarmlar[0].HeaderText := 'Mesaj - ' + TabMesajKisiler.FieldByName('FIRMA').AsString;
-          Alarmlar[0].MessageText := cmd;
-          Alarmlar[0].Tag := cw.FTabSheet.PageIndex;
-          Alarmlar[0].AlertStack := JvDesktopAlertStack1;
-          Alarmlar[0].Image.Bitmap.Assign(JvDesktopAlert1.Image.Bitmap);
-          Alarmlar[0].OnMessageClick := JvDesktopAlert2MessageClick;
-          Alarmlar[0].StyleOptions.DisplayDuration := 10000;
-          Alarmlar[0].Execute;
-        end;
-        // i?eriye mesaj yazal?m
-        cw.WriteToWindow(cw.UserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.GENINI.BugunTrhSaat, cmd);
-      end;
-    end else if part = 'USRLIST' then begin
-      Tablo.repOnlinePersonel.Properties.Images := Tablo.PNGImageList2;
-      if not TabMesajKisiler.Active then
-        TabMesajKisiler.Open;
-      FOnlineUsers.text := cmd;
-      for i := 0 to Tablo.repOnlinePersonel.Properties.Items.Count - 1 do
-        if FOnlineUsers.IndexOfName(VarToStr(Tablo.repOnlinePersonel.Properties.Items[i].Value)) > -1 then
-          Tablo.repOnlinePersonel.Properties.Items[i].ImageIndex := 25
-        else
-          Tablo.repOnlinePersonel.Properties.Items[i].ImageIndex := 26;
-      for cw in FChatWindows do cw.ServerId := -1;
-      for I := 0 to FOnlineUsers.Count - 1 do
-        for cw in FChatWindows do begin
-          if cw.FUserId = StrToInt(FOnlineUsers.Names[i]) then
-          begin
-            cw.ServerId := StrToInt(FOnlineUsers.ValueFromIndex[i]);
-          end;
-        end;
-    end else if part = 'Duyuru' then begin
-      if (Length(Alarmlar) > 0) and (Assigned(Alarmlar[0])) then
-        for I := 0 to Length(Alarmlar) do
-          FreeAndNil(Alarmlar[i]);
-      OkunmamisDuyuruSayisiDuzenle;
-      Tablo.TablodanSorguAc(8,
-        'select D.ID,D.KONU from DUYURU D inner join DUYURUKULLANICI DK on DK.DUYURUID=D.ID where D.TUR=2 and isnull(DK.OKUNDU,0)=0 and DK.ALICIID='
-          + Kullanan);
-
-      Tablo.Query8.FetchAll;
-      SetLength(Alarmlar, Tablo.Query8.RecordCount);
-      Tablo.Query8.First;
-      i := 0;
-      while not Tablo.Query8.eof do begin
-        Alarmlar[i] := TJvDesktopAlert.Create(Self);
-        Alarmlar[i].HeaderText := 'Okunmamış Duyurunuz Var!';
-        Alarmlar[i].MessageText := Tablo.Query8.FieldByName('KONU').AsString;
-        Alarmlar[i].Tag := Tablo.Query8.FieldByName('ID').AsInteger;
-        Alarmlar[i].AlertStack := JvDesktopAlertStack1;
-        Alarmlar[i].Image.Bitmap.Assign(JvDesktopAlert1.Image.Bitmap);
-        Alarmlar[i].OnMessageClick := JvDesktopAlert1MessageClick;
-        Alarmlar[i].StyleOptions.DisplayDuration := 10000;
-        Alarmlar[i].Execute;
-        Inc(i);
-        Tablo.Query8.Next;
-      end;
-    end else if part = 'FSCONFIRM' then begin
-      fsi := TFileSendInfo.FromMessage(cmd);
-      fsi.ToServerId := FServerId;
-      fsi.ToUserId := StrToInt(Kullanan);
-      if TabMesajKisiler.Locate('ID', fsi.FromUserId, []) then
-      begin
-        //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update MESAJLOGKULLANICI set ALINDI=1, ALINMATARIHI=GetDate() where ID=&ID', ['&ID'],[MsgLogKulID]);
-        // mesaj? g?nderenin sayfas? a??k de?ilse tekrar olu?tural?m...
-
-        cw := CreateChatWindow(fsi.FromServerId, fsi.FromUserId);
-        cw.UserName := TabMesajKisiler.FieldByName('FIRMA').AsString;
-        fsi.FChatWindow := cw;
-        cw.FFileSends.Add(fsi);
-        cw.WriteToWindow(fsi.FFromUserId, TabMesajKisiler.FieldByName('FIRMA').AsString, Tablo.GENINI.BugunTrhSaat,
-          '<'+MsgDosyaSizinlePaylasiliyor +':' + fsi.FileName+'>', fsi.ReferenceId);
-      end;
-    end else if part = 'FSCONFIRMED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send confirmed ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        fsi.FileSize := FileSizeByName(fsi.FileName);
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizKabulEdildi + ':' + fsi.FFileName + '>', False);
-        fsi.Send(Anaform.MsgClient);
-      end;
-    end else if part = 'FSDECLINED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send cancelled ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizReddedildi  + ':' + fsi.FFileName + '>', True);
-        cw.FFileSends.Remove(fsi);
-      end;
-    end else if part = 'FSCANCELLED' then begin
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      MsgLogKulID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(cmd);
-      GtpLog.Log('File send canceled ref : %d',[i]);
-
-      fsi := cw.FindFileSendById(i*-1);
-      if Assigned(fsi) then begin
-        fsi.IsConfirming := false;
-        cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasiminizIptalEdildi  + ':' + fsi.FFileName + '>', True);
-        cw.FFileSends.Remove(fsi);
-      end;
-    end else if part = 'FILERECV' then begin
-      GtpLog.Log('%s received',[part]);
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then
-        fsi.FileSize := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '))
-      else
-        GtpLog.Log('File send reference %d was not found',[i]);
-    end else if part = 'FSABORT' then begin // alici g?nderir
-      part := Dize.SinirlandirilmisMetin(cmd, ' ');
-      AliciServerId := StrToInt(part);
-
-      AliciID := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      cw := CreateChatWindow(AliciServerId, AliciID);
-      i := StrToInt(Dize.SinirlandirilmisMetin(cmd, ' '));
-      fsi := cw.FindFileSendById(i);
-      if Assigned(fsi) then begin
-        if fsi.IsSend then
-          cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasimiAliciTarafindanDurduruldu + ':' + fsi.FFileName + '>', True)
-        else
-          cw.EditChatMessage(AliciID, fsi.ReferenceId, '<' + MsgDosyaPaylasimiGonderenTarafindanDurduruldu + ':' + fsi.FFileName + '>', True);
-        fsi.Abort;
-      end;
-    end;
-
-
-  end;        *)
-except
-  ShowMessage(' ');
+  if Trim(Kullanan) = '' then Exit;
+  if Assigned(MesajlasmaDlg) and MesajlasmaDlg.Visible then Exit;
+  try
+    MesajSayiYaz;
+  except
+    // rozet yenilenemezse (baglanti kopmus) sessiz gec
+  end;
 end;
-ChatTimer.Enabled := True;
-end;
-
-
 
 procedure DokumEkleme(FileNames: TStrings);
 var
@@ -655,7 +426,6 @@ begin
       FastRaporDlg.XMLOku(Ad, FileNames.Strings[j]); // (EkranAdi1, RaporAdi1, DosyaAdi : String)  //'DokumDlg'
     end;
 end;
-
 
 procedure TAnaForm.JvDragDrop1Drop(Sender: TObject; Pos: TPoint; Value: TStrings);
 var
@@ -720,12 +490,28 @@ var
   ChangeWindowMessageFilter:TChangeWindowMessageFilter=nil;
 
 procedure TAnaForm.MesajSayiYaz;
+// Okunmamis mesaj ROZETI (ana menu). Kaynak: sp_Prog_Mesaj_Yokla_Json
+//   (GenDepoUpdate146); eski MESAJLOG/MESAJLOGKULLANICI semasi birakildi.
+//   Sayi ARTTIYSA kisa uyari sesi (karar: rozet + ses, kayan bildirim yok).
+//   SES yalniz "Sesli" degerine bakar: sessize alinan sohbetler (BILDIRIM = 0)
+//   rozete girer ama SES CIKARMAZ (GenDepoUpdate164).
+var
+  LJson: string;
+  LOkunmamis, LSesli: Integer;
 begin
-  Tablo.TablodanSorguAc(1,'select count(*) from MESAJLOGKULLANICI K where K.ALICIID='+Kullanan+' and K.OKUNMATARIHI is null');
-  if Tablo.Query1.Fields[0].AsInteger>0 then
-     MesajMenu.Caption := Tablo.Query1.Fields[0].AsString
+  LJson := Tablo.MesajYokla;
+  LOkunmamis := Tablo.ApiSonucInt(LJson, 'Okunmamis');
+  LSesli := Tablo.ApiSonucInt(LJson, 'Sesli');
+  if LSesli > FSonSesliMesaj then
+    MessageBeep(MB_ICONASTERISK);              // SES yalniz sessize alinmamislarda
+  MesajBildirimleriCikar(LJson);               // sag alt kose bildirimi (sesten bagimsiz)
+  FSonSesliMesaj := LSesli;
+  FSonOkunmamisMesaj := LOkunmamis;
+
+  if LOkunmamis > 0 then
+    MesajMenu.Caption := IntToStr(LOkunmamis)
   else
-     MesajMenu.Caption := '';
+    MesajMenu.Caption := '';
 end;
 
 procedure TAnaForm.AktifFormDegisti(Sender: TObject);
@@ -811,8 +597,10 @@ begin
     Exit;
 
   FStartupDeferredDone := True;
-  Baglan;
   MesajSayiYaz;
+  // Rozet zamanlayicisi acilisdan SONRA baslar (DFM'de Enabled=False).
+  //   Eskiden TJvTimer varsayilan 1000 ms ile acilistan itibaren donuyordu.
+  ChatTimer.Enabled := True;
 
   if Tablo.Yetkivarmi(1801,YetkiTur_Gorme) then
     KasiyerMenuClick(Self);
@@ -1246,7 +1034,7 @@ begin
           DovizBilgileriMenu.Visible := False;
       end;
     end;
-  end else if AFrameInfo.Params.Values['Adi'] = 'Alis/Satis' Then begin  // fatura sekmesi
+  end else if AFrameInfo.Params.Values['Adi'] = 'Alış/Satış' Then begin  // fatura sekmesi
     if not(Tablo.YetkiVarmi(MODUL_Alis_Satis, YetkiTur_Gorme)) then begin
       if not Tablo.YetkiVarmi(1801, YetkiTur_Gorme) then begin
          canLoad := False;
@@ -1989,15 +1777,6 @@ begin
   KullaniciKodYetkiDlg.Destroy;
 end;
 
-procedure TAnaForm.MsgClientConnected(Sender: TObject);
-begin
-  MsgClient.Socket.WriteLn('messaging');
-  MsgClient.Socket.WriteLn(KullanAdi);
-  MsgClient.Socket.WriteLn(Kullanan);
-  FServerId := StrToInt(MsgClient.Socket.ReadLn);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'if COL_LENGTH(''''KULLANICI'''',''''SERVERID'''') is not null update KULLANICI set SERVERID='+IntToStr(FServerId)+' where REHBERID='+ Kullanan, [], []);
-end;
-
 procedure TAnaForm.N9Click(Sender: TObject);
 begin
   CID_olay(self,'1','1','11234567','0','');
@@ -2158,29 +1937,86 @@ begin
   MailGonderDlg.Destroy;
 end;
 
-procedure TAnaForm.Baglan;
+procedure TAnaForm.MesajBildirimleriCikar(const AYoklaJson: string);
+// Yoklama ciktisindaki "Kanallar" dizisini ONCEKI durumla karsilastirir; okunmamis
+//   sayisi ARTAN sohbetler icin sag altta bildirim gosterir.
+//   Mesajlasma ekrani aciksa bildirim CIKMAZ (zaten goruyor).
+var
+  LVeri, LKanallar: TJSONValue;
+  LDizi: TJSONArray;
+  LObj: TJSONObject;
+  i, LKanal, LAdet, LOnceki: Integer;
+  LAnahtar, LBaslik, LMetin: string;
+  LYeniler: TStringList;
 begin
-  if not MsgClient.Connected then
-    try
-      MsgClient.Host := Tablo.GENINI.ReadString(Ops_ChatOpsiyon_Adres, '127.0.0.1');
-      MsgClient.Port := StrToInt(Tablo.GENINI.ReadString(Ops_ChatOpsiyon_Port, '7777'));
-      if MsgClient.Host <> '127.0.0.1' then begin
-        MsgClient.Connect;
-        //MesajLED.Status := MsgClient.Connected;
-        //PanelChat.Enabled := MesajLED.Status;
-        //cxGrid4.Enabled := MesajLED.Status;
+  if Assigned(MesajlasmaDlg) and MesajlasmaDlg.Visible then Exit;
+  if FKanalOkunmamis = nil then FKanalOkunmamis := TStringList.Create;
+
+  LVeri := TJSONObject.ParseJSONValue(AYoklaJson);
+  if LVeri = nil then Exit;
+  LYeniler := TStringList.Create;
+  try
+    if not (LVeri is TJSONObject) then Exit;
+    LKanallar := TJSONObject(LVeri).GetValue('Kanallar');
+    if not (LKanallar is TJSONArray) then LDizi := nil else LDizi := TJSONArray(LKanallar);
+
+    if LDizi <> nil then
+      for i := 0 to LDizi.Count - 1 do
+      begin
+        if not (LDizi.Items[i] is TJSONObject) then Continue;
+        LObj := TJSONObject(LDizi.Items[i]);
+        LKanal := StrToIntDef(LObj.GetValue<string>('KANALID', '0'), 0);
+        LAdet  := StrToIntDef(LObj.GetValue<string>('OKUNMAMIS', '0'), 0);
+        if LKanal <= 0 then Continue;
+        LAnahtar := IntToStr(LKanal);
+        LYeniler.Values[LAnahtar] := IntToStr(LAdet);
+        LOnceki := StrToIntDef(FKanalOkunmamis.Values[LAnahtar], 0);
+        // ILK yoklamada (program acilisi) bildirim yagmuru olmasin
+        if (LAdet > LOnceki) and (FKanalOkunmamis.Count > 0) then
+        begin
+          if FBildirimSorgu = nil then
+          begin
+            FBildirimSorgu := TFDQuery.Create(Self);
+            FBildirimSorgu.Connection := Tablo.FDCnn;
+          end;
+          Tablo.MesajKanalListe(FBildirimSorgu);
+          if FBildirimSorgu.Locate('KANALID', LKanal, []) then
+          begin
+            LBaslik := FBildirimSorgu.FieldByName('ADI').AsString;
+            LMetin := FBildirimSorgu.FieldByName('SONMESAJ').AsString;
+            if FBildirimSorgu.FieldByName('TUR').AsInteger = 2 then
+              LMetin := FBildirimSorgu.FieldByName('SONGONDEREN').AsString + ': ' + LMetin;
+            MesajBildirimGoster(LBaslik, LMetin, LKanal, BildirimeTiklandi);
+          end;
+        end;
       end;
-    except
-      //MesajLED.Status := false;
-      //PanelChat.Enabled := false;
-      //cxGrid4.Enabled := false;
-    end;
+
+    FKanalOkunmamis.Assign(LYeniler);
+    if FKanalOkunmamis.Count = 0 then FKanalOkunmamis.Values['0'] := '0';   // "ilk tur bitti"
+  finally
+    LYeniler.Free;
+    LVeri.Free;
+  end;
+end;
+
+procedure TAnaForm.BildirimeTiklandi(AKanalId: Integer);
+// Bildirime tiklandi: mesajlasma ekranini ac (ilgili sohbet secili gelir).
+begin
+  MesajBildirimleriKapat;
+  Application.CreateForm(TMesajlasmaDlg, MesajlasmaDlg);
+  try
+    MesajlasmaDlg.AcilistaKanal := AKanalId;
+    MesajlasmaDlg.ShowModal;
+  finally
+    MesajlasmaDlg.Destroy;
+    MesajSayiYaz;
+  end;
 end;
 
 procedure TAnaForm.MesajMenuClick(Sender: TObject);
 begin
   Application.CreateForm(TMesajlasmaDlg, MesajlasmaDlg);
-  MesajlasmaDlg.MesajLED.Status := MsgClient.Connected;
+  MesajlasmaDlg.MesajLED.Status := False;   // yeni mesaj gelince ekran kendi yakar
   MesajlasmaDlg.ShowModal;
   MesajlasmaDlg.Destroy;
   MesajSayiYaz;
@@ -2195,7 +2031,7 @@ end;
 
 procedure TAnaForm.FirmaBilgileri1Click(Sender: TObject);
 begin
-  Tablo.ListedenDuzenle(Tablo.FDCnn,'Firma ve şube Bilgileri',' select ID, KOD, FIRMA FROM REHBER where ID < 0 order by 1 desc','şubeler',True,False,True);
+   Tablo.ListedenDuzenle(Tablo.FDCnn,'Firma ve şube Bilgileri',' select ID, KOD, FIRMA FROM REHBER where ID < 0 order by 1 desc','şubeler',True,False,True);
 //  Tablo.RehberSihirbazBaslat(0, StrToIntDef(liste.Strings[0], -1),-100, -100, StrToDate('01' + FormatSettings.DateSeparator + '01' + FormatSettings.DateSeparator + '1900'));
 end;
 
@@ -2204,8 +2040,8 @@ begin
   if not FClosingAskedToUser then begin
     CanClose := AskForApplicationExit;
     FClosingAskedToUser := CanClose;
-    if CanClose then
-      CanClose := HomePageInstance.CancelFileSends;
+    // Eski TCP dosya gonderimi kaldirildi (CancelFileSends yok); kapanisi
+    //   engelleyecek bekleyen aktarim kalmadi.
   end;
 end;
 

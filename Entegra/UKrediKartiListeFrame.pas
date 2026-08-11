@@ -496,11 +496,9 @@ begin
         else begin//yoksa açılış kaydını silelim
           // SILMEDEN ONCE, dogru kayit (secili) dururken logla;
           // delete+YenileClick sonrasi cursor kayardi -> yanlis ID loglaniyordu
-          LogKartSil(KREDIKARTI, TabNo_KREDIKARTI, KREDIKARTI.FieldByName('ID').AsInteger);
-          Tablo.Query4.SQL.Text := ' = '+ KREDIKARTI.FieldByName('ID').AsString+' AND TUR in (1,2)';
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete From KASA Where HESAPID=&id and HESAPTURU=''V'' AND TUR in (1,2) ',['&id'], [KREDIKARTI.Fields[0].AsInteger]);
-               //kendisini sil
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KREDIKARTI  where ID=&id ',['&id'],[KREDIKARTI.Fields[0].AsInteger]);
+          // SILME ARTIK SUNUCUDA: sp_Api_KrediKarti_Sil_Json (modul 46).
+          //   Kart logu + acilis/devir kasa kaydi + kart TEK transaction'da.
+          Tablo.ApiSilCagir('sp_Api_KrediKarti_Sil_Json', KREDIKARTI.Fields[0].AsInteger);
           YenileClick;
         end;
       end;

@@ -180,9 +180,17 @@ function LogGeriAl(AUstTabloID: Integer; AUstKayitID: Int64; AGun: TDateTime): s
 type
   // Geri-alinabilir oturum: bir formun/wizardin snapshot kapsamindaki bir tablosu.
   TSnapshotTablo = record
-    Sira: SmallInt;      // geri-yukleme sirasi (ust=kucuk, alt=buyuk)
+    Sira: SmallInt;      // geri-EKLEME sirasi (ust=kucuk, alt=buyuk)
     TabloAdi: string;    // ana DB tablosu (ör. 'SIPARISDETAY')
     Filtre: string;      // o oturumun satirlarini secen WHERE (concrete deger; subquery olabilir)
+    // SILME sirasi EKLEME sirasindan FARKLI olabilir: tetikler bazi tablolarda
+    //   cocugun ust satirdan SONRA silinmesini gerektirir (STOKIZLEME'nin DELETE
+    //   tetigi stogu STOKIZLEMEDEPO'dan okur -> depo satirlari once silinirse iade kaybolur).
+    //   0 = SIRA kullanilir.
+    SilSira: SmallInt;
+    // True: geri yuklemede filtredeki TUM satirlar silinip snapshot'takiler yeniden
+    //   EKLENIR (satir-eslemeli UPDATE yapilmaz). Tetikleri dogru tetiklemek icin.
+    TamSil: Boolean;
   end;
 
 // GERI-ALINABILIR OTURUM. Duzenleme acilisinda ATablolar'daki her tablonun (Filtre'ye uyan)
@@ -203,7 +211,8 @@ function OturumBaslatPlan(const AAnaTabloAdi: string; AAnaID: Int64; const ATabl
 procedure OturumYakala(const AOturum: string);
 function OturumYakalandiMi(const AOturum: string): Boolean;
 // Config yardimcisi: tek TSnapshotTablo uretir (OturumBaslat cagrilarini sadelestirir).
-function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string): TSnapshotTablo;
+function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string;
+  ATamSil: Boolean = False; ASilSira: SmallInt = 0): TSnapshotTablo;
 
 // Program girisinde: BILINEN depo synonym'leri (EBELGE/ISLEMLOG/LOGREFERANS/...) ini'deki
 // depoyu (DepoDBAdi = GENINI ANAHTAR) gostermiyorsa ona cevir; EKSIK olani da KURAR.
@@ -290,10 +299,25 @@ var
 implementation
 
 uses
+
+
   System.SysUtils, System.SyncObjs, System.DateUtils, System.Variants, System.StrUtils,
   FireDAC.Comp.Client,
   Winapi.Windows, Utablo, PrjConst, uUtility_my,  System.Hash, UVeriMotor,
   FetaKurulusSiniflari;   // Veritabani.VeriVarMi / BasitKomutÇalıştır / SorguBaslat
+
+function SnapAlanDeger(F: TField): string;
+// Snapshot/silme logu JSON'una yazilacak METIN. Tarih/saat alanlarinda TField.AsString
+//   yerel kisa bicimi verir ve MILISANIYEYI DUSURUR -> geri yuklemede 11:38:19.327
+//   yerine 11:38:19.000 donuyordu. ISO + ms ile tam degeri sakla (GeriDegerAta okur).
+begin
+  if F.IsNull then
+    Result := ''
+  else if F.DataType in [ftDate, ftTime, ftDateTime, ftTimeStamp, ftOraTimeStamp] then
+    Result := FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', F.AsDateTime)
+  else
+    Result := F.AsString;
+end;
 
 var
   GLogCnn: TFDConnection = nil;   // otonom log baglantisi (GENDEPO'ya baglanir, cache)
@@ -1429,7 +1453,7 @@ begin
           if (LQ.Fields[i].FieldKind = fkData) and
              (LQ.Fields[i].DataType <> ftBlob) and (LQ.Fields[i].DataType <> ftMemo) and
              (Trim(LQ.Fields[i].AsString) <> '') then
-            LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
+            LK.Deger(LQ.Fields[i].FieldName, SnapAlanDeger(LQ.Fields[i]));
         LogVarlikIDleri(LQ, LReh, LStk);
         // 'ID' kolonu olmayan (bilesik anahtarli) detay tablolarinda cakma (Field 'ID' not found).
         var LDetayID: Int64 := 0;
@@ -1480,7 +1504,7 @@ begin
         if (LQ.Fields[i].FieldKind = fkData) and
            (LQ.Fields[i].DataType <> ftBlob) and (LQ.Fields[i].DataType <> ftMemo) and
            (Trim(LQ.Fields[i].AsString) <> '') then
-          LK.Deger(LQ.Fields[i].FieldName, LQ.Fields[i].AsString);
+          LK.Deger(LQ.Fields[i].FieldName, SnapAlanDeger(LQ.Fields[i]));
       LogVarlikIDleri(LQ, LReh, LStk);
       LogYaz(liSil, ATabNo, AKayitID, LK, '', AUstTabNo, AUstID, LReh, LStk);
     finally
@@ -1730,6 +1754,13 @@ begin
     case ATabloID of
       75:  Result := 'REHBERILETISIM';
       76, 79, 81, 86, 370: Result := 'REHBERBILGI';
+      // MANTIKSAL tablolar: TABLOLAR'daki ad UI icindir, FIZIKSEL tablo baskadir.
+      //   Uretim fisi = FATBASLIK/FATURA (TUR=6). Esleme olmadan geri alma
+      //   "Invalid object name 'URETIMFISI'" veriyordu (10.08.2026).
+      144: Result := 'FATBASLIK';        // Uretim Fisi (kart)
+      145: Result := 'FATURA';           // Uretim Fisi (detay)
+      373: Result := 'AMORTISMAN_ORAN';  // Demirbas amortisman plani
+      374: Result := 'IMAJ';             // Dokuman revizyonu satirlari IMAJ'da (YERI=1)
     end;
     if Result = '' then
       case ATabloID of
@@ -2033,11 +2064,17 @@ end;
 
 // ==== GERI-ALINABILIR OTURUM (SNAPSHOT depo tablosu; Cancel=geri yukle, Finish=sil) ====
 
-function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string): TSnapshotTablo;
+function SnapTablo(ASira: SmallInt; const ATabloAdi, AFiltre: string;
+  ATamSil: Boolean; ASilSira: SmallInt): TSnapshotTablo;
 begin
   Result.Sira := ASira;
   Result.TabloAdi := ATabloAdi;
   Result.Filtre := AFiltre;
+  Result.TamSil := ATamSil;
+  if ASilSira = 0 then
+    Result.SilSira := ASira    // varsayilan: silme sirasi = ekleme sirasi
+  else
+    Result.SilSira := ASilSira;
 end;
 
 // LAZY oturum: VERISI YAKALANMIS oturum ID'leri (in-memory, tek proses). Eager OturumBaslat da
@@ -2052,9 +2089,83 @@ type
   end;
 var
   FYakalanmisOturumlar: TStringList = nil;
+  // Tablonun ID kolonu var mi? (snapshot geri-yuklemesi satir eslemesini ID ile yapar;
+  //   ID'siz tablolarda -STOKIZLEMEDEPO, STOK_ORT_MALIYET- tam-sil + yeniden-ekle uygulanir.)
+  //   Metadata sorgusu satir basina tekrarlanmasin diye onbelleklenir.
+  FIdKolonuOnbellek: TDictionary<string, Boolean> = nil;
+  // SNAPSHOT'ta SILSIRA/TAMSIL kolonlari var mi (bir kez sorgulanir)
+  FSnapKolonBilindi: Boolean = False;
+  FSnapKolonVar: Boolean = False;
   // LAZY: plan (tablo/filtre/sira) DB'ye DEGIL BELLEKTE tutulur -> bakmada SNAPSHOT tamamen BOS.
   // Ilk gercek degisiklikte OturumYakala plani+veriyi DB'ye yazar ve bellekten cikarir.
   FOturumPlanlari: TDictionary<string, TOturumPlanKaydi> = nil;
+
+function FiltreCoz(const AFiltre, AOturum: string): string;
+// Filtre metnindeki yer tutucularini cozer:
+//   {SNAP}   -> SNAPSHOT tablosunun tam adi
+//   {OTURUM} -> oturum GUID'i
+// Kullanim: ust satiri SILINDIKTEN SONRA cocugu bulabilmek icin (ornek: STOKIZLEMEDEPO,
+//   ust STOKIZLEME satirlari silinince 'IZLEMID in (select ID from STOKIZLEME...)' bos
+//   doner -> oksuz satirlar kalirdi). Snapshot'taki KAYITID listesi ustten bagimsizdir.
+begin
+  Result := StringReplace(AFiltre, '{SNAP}', DepoTablo('SNAPSHOT'), [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '{OTURUM}', AOturum, [rfReplaceAll, rfIgnoreCase]);
+end;
+
+function SnapshotSilSiraVarMi: Boolean;
+// SNAPSHOT tablosunda SILSIRA/TAMSIL kolonlari var mi? (GenDepoUpdate125).
+//   Eski depolarda yok -> motor eski davranisi surdurur.
+var
+  LQ: TFDQuery;
+begin
+  if FSnapKolonBilindi then Exit(FSnapKolonVar);
+  FSnapKolonVar := False;
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'SELECT * FROM ' + DepoTablo('SNAPSHOT') + ' WHERE 1=0';
+      LQ.Open;
+      FSnapKolonVar := (LQ.FindField('SILSIRA') <> nil) and (LQ.FindField('TAMSIL') <> nil);
+      LQ.Close;
+    except
+    end;
+  finally
+    LQ.Free;
+  end;
+  FSnapKolonBilindi := True;
+  Result := FSnapKolonVar;
+end;
+
+function TabloIdKolonuVarMi(const ATabloAdi: string): Boolean;
+// Snapshot motoru satirlari ID ile esler. ID kolonu olmayan tablolar da
+//   kapsanabilsin diye tablo bir kez sorgulanip sonuc onbellege alinir.
+var
+  LQ: TFDQuery;
+  LAd: string;
+begin
+  LAd := UpperCase(Trim(ATabloAdi));
+  if FIdKolonuOnbellek = nil then
+    FIdKolonuOnbellek := TDictionary<string, Boolean>.Create;
+  if FIdKolonuOnbellek.TryGetValue(LAd, Result) then Exit;
+
+  Result := True;   // bilinmiyorsa ESKI davranis (ID var kabul) - guvenli taraf
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LQ.Connection := Tablo.FDCnn;
+      LQ.SQL.Text := 'SELECT * FROM ' + ATabloAdi + ' WHERE 1=0';
+      LQ.Open;
+      Result := LQ.FindField('ID') <> nil;
+      LQ.Close;
+    except
+      // tablo yok/izin yok -> eski davranis
+    end;
+  finally
+    LQ.Free;
+  end;
+  FIdKolonuOnbellek.AddOrSetValue(LAd, Result);
+end;
 
 procedure OturumBitir(const AOturum: string);
 var
@@ -2130,6 +2241,7 @@ var
   LRowQ, LInsQ: TFDQuery;
   LK: TLogKurucu;
   LDFld: TField;
+  LAnahtarsizSayac: Int64;
 
   procedure ParamlariYaz(AKapsam: Boolean);
   begin
@@ -2138,7 +2250,15 @@ var
     LInsQ.ParamByName('AI').AsLargeInt := AAnaID;
     LInsQ.ParamByName('S').AsInteger := ATablolar[i].Sira;
     LInsQ.ParamByName('T').AsString  := ATablolar[i].TabloAdi;
-    LInsQ.ParamByName('F').AsString  := ATablolar[i].Filtre;
+    LInsQ.ParamByName('F').AsString  := FiltreCoz(ATablolar[i].Filtre, Result);
+    if SnapshotSilSiraVarMi then
+    begin
+      if ATablolar[i].SilSira = 0 then
+        LInsQ.ParamByName('SS').AsInteger := ATablolar[i].Sira
+      else
+        LInsQ.ParamByName('SS').AsInteger := ATablolar[i].SilSira;
+      LInsQ.ParamByName('TS').AsInteger := Ord(ATablolar[i].TamSil);
+    end;
     if AKapsam then
     begin
       LInsQ.ParamByName('K').Clear;
@@ -2146,7 +2266,16 @@ var
     end
     else
     begin
-      LInsQ.ParamByName('K').AsLargeInt := LRowQ.FieldByName('ID').AsLargeInt;
+      // ID kolonu OLMAYAN tablolar (STOKIZLEMEDEPO gibi) da snapshot'lanabilir:
+      //   KAYITID'ye negatif sahte anahtar yazilir (yalniz "veri satiri" isaretidir).
+      //   Geri yuklemede o tablo TAMAMEN silinip satirlar yeniden INSERT edilir.
+      if LRowQ.FindField('ID') <> nil then
+        LInsQ.ParamByName('K').AsLargeInt := LRowQ.FieldByName('ID').AsLargeInt
+      else
+      begin
+        Dec(LAnahtarsizSayac);
+        LInsQ.ParamByName('K').AsLargeInt := LAnahtarsizSayac;
+      end;
       LInsQ.ParamByName('J').AsWideMemo := LJson;   // ftWideMemo (AsString tipi degistirir -> reprepare hatasi)
     end;
   end;
@@ -2154,6 +2283,7 @@ var
 begin
   CreateGUID(LGuid);
   Result := Copy(GUIDToString(LGuid), 2, 36);   // suslu parantezsiz 36 hane
+  LAnahtarsizSayac := 0;
   LSnap := DepoTablo('SNAPSHOT');
   LRowQ := TFDQuery.Create(nil);
   LInsQ := TFDQuery.Create(nil);
@@ -2162,10 +2292,16 @@ begin
     LInsQ.Connection := Tablo.FDCnn;
     var LJDeger: string := ':J';
     if AktifVeriMotor = vmPG then LJDeger := 'CAST(:J AS jsonb)';   // PG: jsonb kolonuna text -> cast
-    LInsQ.SQL.Text :=
-      'INSERT INTO ' + LSnap +
-      '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) ' +
-      'VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
+    if SnapshotSilSiraVarMi then
+      LInsQ.SQL.Text :=
+        'INSERT INTO ' + LSnap +
+        '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON,SILSIRA,TAMSIL) ' +
+        'VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ',:SS,:TS)'
+    else
+      LInsQ.SQL.Text :=
+        'INSERT INTO ' + LSnap +
+        '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) ' +
+        'VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
     // NULL gelebilen K/J param tiplerini acikca ver (cross-DB describe garantisi yok ->
     // "data type unknown" engeli).
     LInsQ.ParamByName('K').DataType := ftLargeint;
@@ -2176,7 +2312,8 @@ begin
       // ATLA, digerlerini bozma. Once VERI (ID erisimi burada) -> hata olursa kapsam da yazilmaz
       // (yarim kapsam -> OturumGeriAl'da yanlis silme onlenir).
       try
-        LRowQ.SQL.Text := 'SELECT * FROM ' + ATablolar[i].TabloAdi + ' WHERE ' + ATablolar[i].Filtre;
+        LRowQ.SQL.Text := 'SELECT * FROM ' + ATablolar[i].TabloAdi + ' WHERE ' +
+                          FiltreCoz(ATablolar[i].Filtre, Result);
         LRowQ.Open;
         while not LRowQ.Eof do
         begin
@@ -2185,7 +2322,7 @@ begin
             for j := 0 to LRowQ.FieldCount - 1 do
               if (LRowQ.Fields[j].FieldKind = fkData) and
                  (LRowQ.Fields[j].DataType <> ftBlob) then
-                LK.Deger(LRowQ.Fields[j].FieldName, LRowQ.Fields[j].AsString);
+                LK.Deger(LRowQ.Fields[j].FieldName, SnapAlanDeger(LRowQ.Fields[j]));
             LJson := LK.JSON;
           finally
             LK.Free;
@@ -2256,7 +2393,9 @@ var
   j, p: Integer;
   LK: TLogKurucu;
   LDFld: TField;
+  LAnahtarsizSayac: Int64;
 begin
+  LAnahtarsizSayac := 0;
   if (AOturum = '') or OturumYakalandiMi(AOturum) then Exit;
   // Plan BELLEKTE (OturumBaslatPlan koydu). Yoksa armed degil -> hicbir sey yapma.
   if (FOturumPlanlari = nil) or (not FOturumPlanlari.TryGetValue(AOturum, LKayit)) then Exit;
@@ -2270,14 +2409,19 @@ begin
     LInsQ.Connection := Tablo.FDCnn;
     var LJDeger: string := ':J';
     if AktifVeriMotor = vmPG then LJDeger := 'CAST(:J AS jsonb)';   // PG: jsonb kolonuna text -> cast
-    LInsQ.SQL.Text := 'INSERT INTO ' + DepoTablo('SNAPSHOT') +
-      '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
+    if SnapshotSilSiraVarMi then
+      LInsQ.SQL.Text := 'INSERT INTO ' + DepoTablo('SNAPSHOT') +
+        '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON,SILSIRA,TAMSIL) VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ',:SS,:TS)'
+    else
+      LInsQ.SQL.Text := 'INSERT INTO ' + DepoTablo('SNAPSHOT') +
+        '(OTURUMID,ANATABLOADI,ANAID,SIRA,TABLOADI,FILTRE,KAYITID,SATIRJSON) VALUES(:O,:AT,:AI,:S,:T,:F,:K,' + LJDeger + ')';
     LInsQ.ParamByName('K').DataType := ftLargeint;
     LInsQ.ParamByName('J').DataType := ftWideMemo;
     for p := 0 to High(LKayit.Tablolar) do
     begin
       try
-        LRowQ.SQL.Text := 'SELECT * FROM ' + LKayit.Tablolar[p].TabloAdi + ' WHERE ' + LKayit.Tablolar[p].Filtre;
+        LRowQ.SQL.Text := 'SELECT * FROM ' + LKayit.Tablolar[p].TabloAdi + ' WHERE ' +
+                          FiltreCoz(LKayit.Tablolar[p].Filtre, AOturum);
         LRowQ.Open;
         while not LRowQ.Eof do
         begin
@@ -2285,7 +2429,7 @@ begin
           try
             for j := 0 to LRowQ.FieldCount - 1 do
               if (LRowQ.Fields[j].FieldKind = fkData) and (LRowQ.Fields[j].DataType <> ftBlob) then
-                LK.Deger(LRowQ.Fields[j].FieldName, LRowQ.Fields[j].AsString);
+                LK.Deger(LRowQ.Fields[j].FieldName, SnapAlanDeger(LRowQ.Fields[j]));
             LJson := LK.JSON;
           finally
             LK.Free;
@@ -2295,8 +2439,24 @@ begin
           LInsQ.ParamByName('AI').AsLargeInt := LKayit.AnaID;
           LInsQ.ParamByName('S').AsInteger := LKayit.Tablolar[p].Sira;
           LInsQ.ParamByName('T').AsString := LKayit.Tablolar[p].TabloAdi;
-          LInsQ.ParamByName('F').AsString := LKayit.Tablolar[p].Filtre;
-          LInsQ.ParamByName('K').AsLargeInt := LRowQ.FieldByName('ID').AsLargeInt;
+          LInsQ.ParamByName('F').AsString := FiltreCoz(LKayit.Tablolar[p].Filtre, AOturum);
+          if SnapshotSilSiraVarMi then
+          begin
+            if LKayit.Tablolar[p].SilSira = 0 then
+              LInsQ.ParamByName('SS').AsInteger := LKayit.Tablolar[p].Sira
+            else
+              LInsQ.ParamByName('SS').AsInteger := LKayit.Tablolar[p].SilSira;
+            LInsQ.ParamByName('TS').AsInteger := Ord(LKayit.Tablolar[p].TamSil);
+          end;
+          // ID'siz tablo (STOKIZLEMEDEPO gibi) -> negatif sahte anahtar; geri yuklemede
+          //   tablo filtreyle TAMAMEN silinip satirlar yeniden eklenir.
+          if LRowQ.FindField('ID') <> nil then
+            LInsQ.ParamByName('K').AsLargeInt := LRowQ.FieldByName('ID').AsLargeInt
+          else
+          begin
+            Dec(LAnahtarsizSayac);
+            LInsQ.ParamByName('K').AsLargeInt := LAnahtarsizSayac;
+          end;
           LInsQ.ParamByName('J').AsWideMemo := LJson;
           LInsQ.ExecSQL;
           LDFld := LRowQ.FindField('DOSYAID');
@@ -2310,7 +2470,15 @@ begin
         LInsQ.ParamByName('AI').AsLargeInt := LKayit.AnaID;
         LInsQ.ParamByName('S').AsInteger := LKayit.Tablolar[p].Sira;
         LInsQ.ParamByName('T').AsString := LKayit.Tablolar[p].TabloAdi;
-        LInsQ.ParamByName('F').AsString := LKayit.Tablolar[p].Filtre;
+        LInsQ.ParamByName('F').AsString := FiltreCoz(LKayit.Tablolar[p].Filtre, AOturum);
+        if SnapshotSilSiraVarMi then
+        begin
+          if LKayit.Tablolar[p].SilSira = 0 then
+            LInsQ.ParamByName('SS').AsInteger := LKayit.Tablolar[p].Sira
+          else
+            LInsQ.ParamByName('SS').AsInteger := LKayit.Tablolar[p].SilSira;
+          LInsQ.ParamByName('TS').AsInteger := Ord(LKayit.Tablolar[p].TamSil);
+        end;
         LInsQ.ParamByName('K').Clear;
         LInsQ.ParamByName('J').Clear;
         LInsQ.ExecSQL;
@@ -2351,6 +2519,10 @@ begin
       LObj := TJSONObject(LParsed);
       // JSON anahtari capture'da alan adiyla kurulur (PG lowercase 'id') -> case-insensitive al.
       LVal := JGetCI(LObj, 'ID');
+      // ID kolonu OLMAYAN tablo: satir esleme mumkun degil; silme adiminda tablo
+      //   filtreyle bosaltildi -> burada dogrudan INSERT yeterli.
+      if (LVal = nil) and (not TabloIdKolonuVarMi(ATabloAdi)) then
+        Exit(GeriKayitEkle(ATabloAdi, AJSON));
       if LVal = nil then Exit('ID yok.');
       LID := StrToInt64Def(GeriJsonDeger(LVal), 0);
 
@@ -2366,7 +2538,14 @@ begin
         F := LTmpl.FindField(LPair.JsonString.Value);
         if (F = nil) or F.ReadOnly then Continue;
         LDeger := GeriJsonDeger(LPair.JsonValue);
-        if Trim(LDeger) = '' then F.Clear else F.AsString := LDeger;
+        // Tarih/sayi ISO yazildi (SnapAlanDeger) -> yerel AsString ile parse EDILMEZ;
+        //   kultur-aware GeriDegerAta kullanilir. Boolean alanlar '1'/'True' gelebilir.
+        if Trim(LDeger) = '' then
+          F.Clear
+        else if F is TBooleanField then
+          F.AsBoolean := SameText(LDeger, 'True') or (LDeger = '1') or (LDeger = '-1')
+        else
+          GeriDegerAta(F, LDeger);
         if not SameText(F.FieldName, 'ID') then
           LKolonlar.Add(F.FieldName);
       end;
@@ -2460,20 +2639,38 @@ begin
     try
       // 1) Mevcut satirlari SIL: cocuk once (SIRA DESC). Filtre subquery olabilir; ust tablo
       //    henuz silinmediginden alt tablonun filtresi dogru cozer.
-      LPlanQ.SQL.Text :=
-        'SELECT DISTINCT SIRA, TABLOADI, FILTRE FROM ' + LSnap +
-        ' WHERE OTURUMID=:O ORDER BY SIRA DESC';
+      // SILME sirasi SILSIRA'dan okunur (yoksa SIRA). Tetik bagimliligi olan tablolarda
+      //   silme sirasi ekleme sirasindan FARKLI olabilir (bkz. GenDepoUpdate125).
+      if SnapshotSilSiraVarMi then
+        LPlanQ.SQL.Text :=
+          'SELECT DISTINCT COALESCE(SILSIRA,SIRA) SIRA, TABLOADI, FILTRE, ' +
+          'MAX(CAST(COALESCE(TAMSIL,0) AS int)) OVER (PARTITION BY TABLOADI) TAMSIL FROM ' + LSnap +
+          ' WHERE OTURUMID=:O ORDER BY 1 DESC'
+      else
+        LPlanQ.SQL.Text :=
+          'SELECT DISTINCT SIRA, TABLOADI, FILTRE, 0 TAMSIL FROM ' + LSnap +
+          ' WHERE OTURUMID=:O ORDER BY SIRA DESC';
       LPlanQ.ParamByName('O').AsString := AOturum;
       LPlanQ.Open;
       while not LPlanQ.Eof do
       begin
         // YALNIZ EKLENEN satirlari sil (snapshot'ta OLMAYAN ID'ler). Mevcut satirlar
         // SILINMEZ -> dis FK (KULLANICI, FATBASLIK...) korunur; onlar asagida UPDATE ile gelir.
-        LDelQ.SQL.Text := 'DELETE FROM ' + LPlanQ.FieldByName('TABLOADI').AsString +
-          ' WHERE (' + LPlanQ.FieldByName('FILTRE').AsString + ') AND ID NOT IN (' +
-          'SELECT KAYITID FROM ' + LSnap + ' WHERE OTURUMID=:O AND TABLOADI=:T AND KAYITID IS NOT NULL)';
-        LDelQ.ParamByName('O').AsString := AOturum;
-        LDelQ.ParamByName('T').AsString := LPlanQ.FieldByName('TABLOADI').AsString;
+        if TabloIdKolonuVarMi(LPlanQ.FieldByName('TABLOADI').AsString) and
+           (LPlanQ.FieldByName('TAMSIL').AsInteger = 0) then
+        begin
+          LDelQ.SQL.Text := 'DELETE FROM ' + LPlanQ.FieldByName('TABLOADI').AsString +
+            ' WHERE (' + LPlanQ.FieldByName('FILTRE').AsString + ') AND ID NOT IN (' +
+            'SELECT KAYITID FROM ' + LSnap + ' WHERE OTURUMID=:O AND TABLOADI=:T AND KAYITID IS NOT NULL)';
+          LDelQ.ParamByName('O').AsString := AOturum;
+          LDelQ.ParamByName('T').AsString := LPlanQ.FieldByName('TABLOADI').AsString;
+        end
+        else
+          // ID kolonu YOK (STOKIZLEMEDEPO gibi) ya da TAMSIL=1: satir eslemesi yapilmaz ->
+          //   filtredeki TUM satirlar silinir, snapshot'takiler asagida yeniden EKLENIR.
+          //   (TAMSIL, tetiklerin dogru sirayla calismasi icin gerekli - stok iadesi.)
+          LDelQ.SQL.Text := 'DELETE FROM ' + LPlanQ.FieldByName('TABLOADI').AsString +
+            ' WHERE (' + LPlanQ.FieldByName('FILTRE').AsString + ')';
         LDelQ.ExecSQL;
         LPlanQ.Next;
       end;
@@ -2481,15 +2678,26 @@ begin
 
       // 2) Snapshot satirlarini geri yaz: VAR ise UPDATE (silmez -> FK guvenli), YOK ise
       //    INSERT (ayni ID). Ust once (SIRA ASC). Hata -> raise -> rollback.
-      LDataQ.SQL.Text :=
-        'SELECT TABLOADI, SATIRJSON FROM ' + LSnap +
-        ' WHERE OTURUMID=:O AND KAYITID IS NOT NULL ORDER BY SIRA ASC, ID ASC';
+      if SnapshotSilSiraVarMi then
+        LDataQ.SQL.Text :=
+          'SELECT TABLOADI, SATIRJSON, CAST(COALESCE(TAMSIL,0) AS int) TAMSIL FROM ' + LSnap +
+          ' WHERE OTURUMID=:O AND KAYITID IS NOT NULL ORDER BY SIRA ASC, ID ASC'
+      else
+        LDataQ.SQL.Text :=
+          'SELECT TABLOADI, SATIRJSON, 0 TAMSIL FROM ' + LSnap +
+          ' WHERE OTURUMID=:O AND KAYITID IS NOT NULL ORDER BY SIRA ASC, ID ASC';
       LDataQ.ParamByName('O').AsString := AOturum;
       LDataQ.Open;
       while not LDataQ.Eof do
       begin
-        LErr := GeriKayitYaz(LDataQ.FieldByName('TABLOADI').AsString,
-                             LDataQ.FieldByName('SATIRJSON').AsString);
+        // TAMSIL: satirlar yukarida topluca silindi -> UPDATE yolu YOK, dogrudan INSERT
+        //   (tetikler boylece "yeni satir" olarak calisir ve stok dogru dusulur).
+        if LDataQ.FieldByName('TAMSIL').AsInteger = 1 then
+          LErr := GeriKayitEkle(LDataQ.FieldByName('TABLOADI').AsString,
+                                LDataQ.FieldByName('SATIRJSON').AsString)
+        else
+          LErr := GeriKayitYaz(LDataQ.FieldByName('TABLOADI').AsString,
+                               LDataQ.FieldByName('SATIRJSON').AsString);
         if LErr <> '' then
           raise Exception.Create('Geri yukleme hatasi (' +
             LDataQ.FieldByName('TABLOADI').AsString + '): ' + LErr);
@@ -2643,6 +2851,11 @@ initialization
   GYillar := TStringList.Create;
 
 finalization
+  if FIdKolonuOnbellek <> nil then
+  begin
+    FIdKolonuOnbellek.Free;
+    FIdKolonuOnbellek := nil;
+  end;
   if GLogCnn <> nil then
   begin
     try GLogCnn.Free; except end;

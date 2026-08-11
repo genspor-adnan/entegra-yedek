@@ -322,13 +322,11 @@ type
     procedure JvTimer1Timer(Sender: TObject);
     procedure ExceldenBelgeEkleClick(Sender: TObject);
     procedure Nakit1Click(Sender: TObject);
-    procedure btnEPostaGonderClick(Sender: TObject);
     procedure HizliGirisTusClick(Sender: TObject);
     procedure AlSat1Click(Sender: TObject);
     procedure BtnDonusumClick(Sender: TObject);
     function TipSecimi(Tur:integer):integer;
     procedure DokumanTviewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure SmsEPostaTableViewCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure EPostaTusClick(Sender: TObject);
     procedure cxPageControl1PageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     procedure TaraTusClick(Sender: TObject);
@@ -421,7 +419,6 @@ type
     function Add_Column(CType:SmallInt;const ACaption, AName: string): TcxGridColumn;
     procedure EkKolonSil;
     Function EkAlanlariGetir(TabloAdi:String):String;
-    procedure EskiListe(Sender: TObject);
     procedure Liste_SP_Cagir(const SP_Adi, SelectList: string; const TopN: Integer;const Tur: SmallInt;const StartDate, EndDate : variant;
    const SubeIDList, Faturano, Baslik, CariFirma, Aciklama, Stok : string);
   public
@@ -647,363 +644,9 @@ begin
   JvTimer1.Enabled := True;
 end;
 
-procedure TFaturalarDlg.btnEPostaGonderClick(Sender: TObject);
-var
-  RaporAdi,EkranAdi,GidecekMail :String;
-  AtacDosya,konu,icerik,Ad,kime,bilgi,gizli,FirmaAdi,SiparisNo: string;
-  RehberId,Mailsayi,i: integer;
-  Etiketler,Bilgiler:TArrayOfString;
-  maill:Mailadresleris;
-  gmail : dmailadresleri;
-  LFileStream: TFileStream;
-  SiparisTarih: TDateTime;
-  MailAdresi:Variant;
-  PDFExport: TfrxPDFExport;
-  procedure YazdirmayaHazirlaEPosta(AFastReport: TfrxReport);
-  var i:Integer;
-  begin
-    TabloYenile(SIPARIS, [FATBASLIK.Fields[0].AsString]);
-    TabloYenile(SIPARISDETAY,[FATBASLIK.Fields[0].AsString]);
-    frxSIPARIS.DataSet := SIPARIS;
-    Tablo.TabMusteri.Close;
-    Tablo.TabMusteri.SQL.Text := StringReplace(Tablo.TabBizim.SQL.Text, '-1', IntToStr(RehberId), [rfReplaceAll]);
-    if AktifVeriMotor = vmPG then Tablo.TabMusteri.SQL.Text := PgSqlCevir(Tablo.TabMusteri.SQL.Text);
-    Tablo.TabMusteri.Open;
-    AFastReport.EnabledDataSets.Add(Tablo.frxBizim);
-    AFastReport.EnabledDataSets.Add(Tablo.frxMusteri);
-    AFastReport.EnabledDataSets.Add(frxSIPARIS);
-    AFastReport.EnabledDataSets.Add(frxSIPARISDETAY);
-    AFastReport.EnabledDataSets.Add(frxFATBASLIK);
-  end;
-
-begin
- (* EkranAdi := EkranAdiAl;
-
-  RaporAdi := YaziciYaz.Caption;
-  Delete(RaporAdi, pos('&',RaporAdi), 1);
-  //Delete(RaporAdi, pos('&',RaporAdi), 1);
-  YazdirmayaHazirlaEPosta(FastRaporDlg.frxReport1);
-  FastRaporDlg.FastRapor(0, EkranAdi, RaporAdi);
-
-  FirmaAdi := FATBASLIK.FieldByName('CARIAD').AsString;
-  SiparisTarih := SIPARIS.FieldByName('TARIH').AsDateTime;
-  SiparisNo := SIPARIS.FieldByName('SIPARISNO').AsString;
-
-  if Pos(' ',FirmaAdi) > 0 then
-  begin
-    FirmaAdi := Copy(FirmaAdi,0,Pos(' ',FirmaAdi)-1);
-  end;
-
-  AtacDosya:= GetEnvironmentVariable('Temp')+Concat('\', FirmaAdi, '_', IntToStr(YearOf(SiparisTarih)), '_', IntToStr(MonthOfTheYear(SiparisTarih)), '_', IntToStr(DayOfTheMonth(SiparisTarih)), '_', SiparisNo, '.pdf');
-  //PDF kayıt edilecek.
-  LFileStream := TFileStream.Create(AtacDosya, fmCreate or fmShareDenyNone);
-  try
-    PDFExport:=TfrxPDFExport.Create(nil);
-    PDFExport.ShowDialog := False;
-    PDFExport.ShowProgress := False;
-    PDFExport.OverwritePrompt := False;
-    //PDFExport.FileName := 'c:\report.pdf';
-    PDFExport.Stream := LFileStream;
-    try
-      FastRaporDlg.frxReport1.PrepareReport(True);
-    except
-      on E: Exception do
-        raise Exception.Create('PrepareReport direct error [UFaturalar.pas]: ' + E.Message);
-    end;
-    FastRaporDlg.frxReport1.Export(PDFExport);
-  finally
-    FreeAndNil(LFileStream);
-    PDFExport.Stream := NIL;
-    FreeAndNil(PDFExport);
-  end;
-  RehberId := FATBASLIK.FieldByName('REHBERID').AsInteger;
-
-  ///Tekliflerde öncelik: ilgilinin maili varsa ona gider, ilgili yoksa kuruma gider, ikisinde de yoksa girin uyarısı verilir.
-  Tablo.TablodanSorguAc(1,'SELECT  '+DbUst(1)+'RB.BILGI,RA.YERI  FROM REHBERBILGI RB INNER JOIN REHBERILETISIM RI ON RB.YER_ID=RI.ID'+
-      ' INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA  AND RA.YERI=RB.YERI WHERE RI.REHBERID = '+inttostr(RehberId)+'  AND RB.YERI = 1'+
-      ' and RI.VARSAYILAN=1 and RA.VARSAYILAN=46 '+DbSinir(1));
-
-   if Tablo.Query1.RecordCount > 0 then
-     GidecekMail := Tablo.Query1.FieldByName('BILGI').AsString
-   else
-   begin
-    if Application.MessageBox(PChar(Mailbulunamadiadresekle),PWideChar(PrjConst.Onay),MB_ICONQUESTION+MB_YESNO) = IDYES then
-    begin
-      if TGirisKutusuEx.BilgiAlEx(BGMail_adres_gir,TGirdiDenetimleri.Create.Edit(BGMail_adresi,@MailAdresi)) = mrOk then
-      begin
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO dbo.REHBERBILGI(YERI, YER_ID, SIRA, ETIKET, BILGI, EKLEYEN, EKLEMETARIHI, DEGISTIREN, DEGISTIRMETARIHI, SUBEID)'+
-        'VALUES  (1,(SELECT ID FROM REHBERILETISIM WHERE REHBERID=&REHBERID),'+
-        '(SELECT SIRA FROM dbo.REHBERAYAR WHERE YERI=1 AND ETIKET=&ETIKET),'+
-        '(SELECT ETIKET FROM dbo.REHBERAYAR WHERE ETIKET=&ETIKET AND YERI=1),'+
-        '&BILGI,&EKLEYEN,&EKLEMETARIHI,0,NULL,&SUBEID)',['&REHBERID','&BILGI','&ETIKET','&EKLEYEN','&EKLEMETARIHI','&SUBEID'],[RehberId,MailAdresi,'EPosta',Kullanan,FormatDateTime('yyyy-MM-dd hh:nn:ss',Now),SubeId]);
-      end;
-    end;
-    FreeAndNil(LFileStream);
-   end;
-
-  Tablo.MailSablonGetir(MODUL_Alis_Satis,konu,icerik);
-  Mailsayi := Tablo.EMailSayisiGetir(RehberId); //mail adetini buluyor
-  if mailsayi > 1 then
-  begin    // Birden fazla mail adresi varsa mail seçim ekranı getirilip oradan mail adresleri seçiliyor ve mail gönderiliyor.
-    SetLength(gmail,100);
-    maill.kime:=TStringList.Create;
-    maill.bilgi:=TStringList.Create;
-
-    gmail:=Tablo.EMailBilgiGetir(FATBASLIK.FieldByName('REHBERID').AsInteger,GidecekMail);
-    for i:=0 to Length(gmail) -1 do
-    begin
-      if (i=0) or (gmail[i].kime<>'') then
-        maill.kime.add(gmail[i].kime);                              //Tablo.EMailBilgiGetir(rehberid)[i].kime;
-      if  (i=0) or (gmail[i].bilgi<>'') then
-        maill.bilgi.add(gmail[i].bilgi);                                                    //Tablo.EMailBilgiGetir(rehberid)[i].bilgi;
-    end;
-    Tablo.SendMail(konu,icerik,AtacDosya,'','','',maill.kime,maill.bilgi,nil,True);
-  end else
-  begin
-    Tablo.RehberEkBilgileriniGetir(RehberId,1,[RehVars_EPosta],Etiketler,Bilgiler); //Bir tane mail adresi var ise mail adresi alinip mail gönderiliyor.
-    maill.kime := TStringList.Create;
-    maill.bilgi := TStringList.Create;
-
-    if Bilgiler[0] ='' then begin
-      //ShowMessage('Mail adresi bulunamadı!');
-      maill.kime.add('');
-      maill.bilgi.Add('');
-      maill.kime.Add(bilgiler[0]);
-      Tablo.SendMail(konu,icerik, AtacDosya,'','','',maill.kime,maill.bilgi,nil,True);
-    end else begin
-      maill.kime.add('');
-      maill.bilgi.add('');
-      maill.kime.Add(bilgiler[0]);
-      Tablo.SendMail(konu,icerik,AtacDosya,'','','',maill.kime,maill.bilgi,nil,True);
-    end;
-  end;
-  maill.kime.Free;
-  maill.bilgi.Free;
-  FreeAndNil(LFileStream);
-  DeleteFile(AtacDosya);        *)
-end;
-
 procedure TFaturalarDlg.BtnMesajGonderClick(Sender: TObject);
 begin
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, FATBASLIK.FieldByName('ID').AsInteger, FATBASLIK.FieldByName('REHBERID').AsInteger,TabYorum);
-end;
-
-procedure TFaturalarDlg.EskiListe(Sender: TObject);
-var
-  SQLPart1,SQLPart2,SQLPart11,SQLPart21,SQLPart12,SQLPart22 : string;
-  gf : TFaturaGorevFrame;
-  LocateID:integer;
-begin
- (* JvTimer1.Enabled := False;
-  if (FATBASLIK.Active)and(FATBASLIK.RecordCount>0) then
-      LocateID := FATBASLIK.FieldByName('ID').AsInteger;
-  gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
-  BtnBelgeZarfi.Visible := gf.FAltTur=11; //SQLEk=' and F.TUR = 11 ';
-  if Length(SQLEk)>10 then begin
-    if (FArama.Calendar2.Text = '')or(FArama.Calendar1.Text = '')then  // DOVIZ_FATURA_MATRAHI=((FATURA_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0))
-       exit;
-    SQLPart1 :=  'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.SENARYO,F.REHBERID,F.TUR,F.SUBEID,F.BASLIK, '+
-//        ' FATURA_MATRAHI=FATURA_TUTARI-KDV_TUTARI,KDV_TUTARI,FATURA_TUTARI,F.KUR,FATURA_MALIYETI_ORT,'+
-        ' FATURA_MATRAHI, KDV_TUTARI, FATURA_TUTARI, F.KUR, FATURA_MALIYETI_ORT,'+
-        ' ORTKARORAN=round((FATURA_MATRAHI-FATURA_MALIYETI_ORT)/nullif(FATURA_MALIYETI_ORT,0)*100.0,2),'+
-        ' ORTKAR=FATURA_MATRAHI-FATURA_MALIYETI_ORT,  '+
-        ' F.ACIKLAMA,F.OZELKOD,F.OZELKOD2, CARIKOD=R.KOD,CARIAD=R.FIRMA,DOVIZ_CINSI=F.RAPORDOVIZ,DOVIZKUR,F.DOVIZ_TUTARI,'+
-        ' DOVIZ_FATURA_MATRAHI=isnull((F.DOVIZ_TUTARI-F.DOVIZ_TUTARI*(cast(KDV_TUTARI as float)/nullif(cast(FATURA_TUTARI as float),0))),0), '+
-        ' DOVIZ_KDV_TUTARI=isnull((F.DOVIZ_TUTARI*(cast(KDV_TUTARI as float)/nullif(cast(FATURA_TUTARI as float),0)) ),0),'+
-        ' F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU,F.DETAYBOLUMU, SATICIADI = SATICIBILGI.FIRMA,F.VADE, VADETARIH=FATURATARIH + F.VADE,  ';
-    if Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DonusumGozuksun, True) then begin
-      SQLPart1 := SQLPart1 + ' DURUMNEREDEN = case  '+
-          '   when exists(select F2.ID from SIPARISDETAY F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (406,407,409,410,429,473) and F1.FATBASID=F.ID)) then ''Siparişten''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (408,410,411) and F1.FATBASID=F.ID)) then ''İrsaliyeden''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (461,462,464,468,472) and F1.FATBASID=F.ID)) then ''Konsinyeden''  '+
-          '   when exists(select F2.ID from FATURA F2 where F2.ID in (select F1.YERID from FATURA F1 where F1.YERI in (425,426) and F1.FATBASID=F.ID)) then ''Üretimden''  '+
-          '   else '''' end,  '+
-          ' DURUMNEREYE = case '+
-          '   when (F.TUR=10)and(408 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=14)and(411 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=109)and(461 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=119)and(462 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Faturaya''   '+
-          '   when (F.TUR=119)and(468 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''İrsaliyeye''   '+
-          '   when (F.TUR=119)and(472 in (select YERI from FATURA where YERID in (select ID from FATURA where FATBASID=F.ID))) then ''Fişe''   '+
-          '   else '''' end,    ';
-    end else begin
-      SQLPart1 := SQLPart1 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
-    end;
-
-    SQLPart1 := SQLPart1 + FatEkAlanlar;
-    SQLPart1 := SQLPart1 + ' TESLIMTARIHI='''',F.FATURA_GON_TARIHI, '+
-        ' F.ZARFID,ZARF=(select AD from BELGEZARFI B where B.ID=F.ZARFID),ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI, ' +
-        ' ONAYLAYACAK=0,ONAYLAYAN=0,EFATURADURUM,EFATURASONUC' +
-        ' from FATBASLIK F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID '+
-        ' LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID ' ;
-    if FArama.AraStok.Text<> '' then
-       SQLPart1:=SQLPart1+' LEFT OUTER JOIN FATURA FD  ON F.ID = FD.FATBASID '+
-                          ' left outer join STOKLAR S on S.ID=FD.URUNID '+
-                          ' left outer join MASRAFGELIR MG on MG.ID=FD.URUNID ';
-    SQLPart11 :=  ' where 1=1'+SQLEk;
-        if FArama.AraKod.Text<>'' then SQLPart11 := SQLPart11+' and (R.KOD like ''%'+Trim(FArama.AraKod.Text)+'%'' or R.FIRMA like ''%'+Trim(FArama.AraKod.Text)+'%'')';
-//        if FArama.AraStok.Text<>'' then SQLPart11 := SQLPart11+' and (S.KOD like ''%'+Trim(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+Trim(FArama.AraStok.Text)+'%'')';
-        if FArama.AraStok.Text<>'' then SQLPart11 := SQLPart11+' and (S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'''+
-                                        ' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'')';
-        if FArama.AraAciklama.Text<>'' then SQLPart11 := SQLPart11+' and ISNULL(F.ACIKLAMA,'''') like ''%'+Trim(FArama.AraAciklama.Text)+'%''';
-        if FArama.AraBaslik.Text<>'' then SQLPart11 := SQLPart11+' and isnull(F.BASLIK,'''') like ''%'+Trim(FArama.AraBaslik.Text)+'%'' ';
-        if FArama.AraFaturaNo.Text<>'' then begin
-           if gf.FAltTur in [9, 19, 101] then
-              SQLPart11 := SQLPart11+' and ISNULL(SIPARISNO,'''') like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' '
-           else
-              SQLPart11 := SQLPart11+' and ISNULL(FATURANO,'''')  like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' ';
-        end;
-    SQLPart2 :=   'SELECT distinct '+DbUst(FArama.SpinKayitSayisi.EditValue)+'F.ID,F.DURUM,F.ODEMEPLANI,FATURATARIH=SIPARISTARIH,FATURANO=SIPARISNO,FATURASERI=F.SIPARISSERI,F.TIPI,SENARYO=CAST(NULL AS smallint),F.REHBERID,F.TUR,F.SUBEID,F.BASLIK,'+
-        ' FATURA_MATRAHI=SIPARIS_TUTARI-KDV_TUTARI,'+
-        ' KDV_TUTARI,FATURA_TUTARI=SIPARIS_TUTARI,F.KUR,KURFATURA_MALIYETI_ORT=0.0,ORTKARORAN=0.0, ORTKAR=0.0  ,F.ACIKLAMA,F.OZELKOD,F.OZELKOD2,CARIKOD=R.KOD,CARIAD=R.FIRMA,DOVIZ_CINSI=F.RAPORDOVIZ,F.DOVIZKUR,DOVIZ_TUTARI=(SIPARIS_TUTARI/nullif(DOVIZKUR,0.0)), '+
-        ' DOVIZ_FATURA_MATRAHI=((SIPARIS_TUTARI-KDV_TUTARI)/nullif(DOVIZKUR,0.0)),DOVIZ_KDV_TUTARI=(cast(KDV_TUTARI as float)/nullif(cast(DOVIZKUR as float),0.0)) '+
-        ' ,F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU,F.DETAYBOLUMU, SATICIADI = SATICIBILGI.FIRMA, F.VADE, VADETARIH=SIPARISTARIH + F.VADE,  ';
-        //' FATDURUM = '''', ';
-    if Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DonusumGozuksun, True) then begin
-      SQLPart2 := SQLPart2 + ' DURUMNEREDEN = case  '+
-          '   when (F.TUR=9)and(412 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Teklifden''  '+
-          '   when (F.TUR=19)and(413 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Teklifden'' '+
-          '   when (F.TUR=9)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden''  '+
-          '   when (F.TUR=19)and(83 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Servisden'' '+
-          '   when (F.TUR=9)and(428 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Talepten'' '+
-          '   when (F.TUR=101)and(465 in (select YERI from SIPARISDETAY where SIPARISID=F.ID)) then ''Üretimden'' '+
-          '   else '''' end,  '+
-          ' DURUMNEREYE = case '+
-          ' 	when (F.TUR=9)and(407 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''    '+
-          ' 	when (F.TUR=9)and(406 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye''  '+
-          ' 	when (F.TUR=101)and(428 in (select YERI from SIPARISDETAY where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Siparişe''  '+
-          ' 	when (F.TUR=19)and(410 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Faturaya''   '+
-          ' 	when (F.TUR=19)and(409 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''İrsaliyeye'' '+
-          '   when (F.TUR=19)and(473 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Fişe''    '   +
-          ' 	when (F.TUR=19)and(429 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Konsinyeye'' '+
-          ' 	when (F.TUR=19)and(415 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine'' '+
-          ' 	when (F.TUR=19)and(420 in (select YERI from FATURA where YERID in (select ID from SIPARISDETAY where SIPARISID=F.ID))) then ''Üretim Fişine'' '+
-          ' 	else '''' end,    ';
-    end else begin
-      SQLPart2 := SQLPart2 + ' DURUMNEREDEN = '''', DURUMNEREYE =  '''',   ';
-    end;
-    SQLPart2 := SQLPart2 + SipEkAlanlar;
-
-    SQLPart2 := SQLPart2 + ' TESLIMTARIHI =(Select Min(TESLIMTARIHI) from SIPARISDETAY Where SIPARISID=F.ID ), FATURA_GON_TARIHI=null, '+
-        ' ZARFID=null,ZARF=null,ISEMRIDURUM=isnull((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1),F.YAZDIRILDI, '+
-        ' F.ONAYLAYACAK,F.ONAYLAYAN,EFATURADURUM=0,EFATURASONUC=0' +
-        ' from SIPARIS F (NOLOCK) inner join REHBER R on R.ID = F.REHBERID '+
-        ' LEFT OUTER JOIN SIPARISDETAY SD ON F.ID = SD.SIPARISID'+
-        ' LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID ' ;
-        if FArama.AraStok.Text<> '' then
-          SQLPart2:=SQLPart2+' LEFT OUTER JOIN FATURA FD  ON F.ID = FD.FATBASID '+
-                             ' left outer join STOKLAR S on S.ID=SD.URUNID '+
-                             ' left outer join MASRAFGELIR MG on MG.ID=SD.URUNID  ';
-
-//    SQLPart21 := ' where (ISNULL(R.KOD,'''') like ''%'+FArama.AraKod.Text+'%'' or ISNULL(R.FIRMA,'''') like ''%'+FArama.AraKod.Text+'%'') and '+
-//        ' ISNULL(F.ACIKLAMA,'''') like ''%'+FArama.AraAciklama.Text+'%'' and isnull(F.BASLIK,'''') like ''%'+FArama.AraBaslik.Text+'%''  '+
-//        ' and ISNULL(SIPARISNO,'''') like ''%'+FArama.AraFaturaNo.Text+'%'' '+SQLEk ;
-    SQLPart21 :=  ' where 1=1'+SQLEk;
-        if FArama.AraKod.Text<>'' then SQLPart21 := SQLPart21+' and (R.KOD like ''%'+Trim(FArama.AraKod.Text)+'%'' or R.FIRMA like ''%'+Trim(FArama.AraKod.Text)+'%'')';
-        if FArama.AraStok.Text<>'' then SQLPart21 := SQLPart21+' and (S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'''+
-                                        ' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'')';
-        if FArama.AraAciklama.Text<>'' then SQLPart21 := SQLPart21+' and ISNULL(F.ACIKLAMA,'''') like ''%'+Trim(FArama.AraAciklama.Text)+'%''';
-        if FArama.AraBaslik.Text<>'' then SQLPart21 := SQLPart21+' and isnull(F.BASLIK,'''') like ''%'+Trim(FArama.AraBaslik.Text)+'%'' ';
-        if FArama.AraFaturaNo.Text<>'' then begin
-           if gf.FAltTur in [9, 19, 101] then
-              SQLPart21 := SQLPart21+' and ISNULL(SIPARISNO,'''') like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' '
-           else
-              SQLPart21 := SQLPart21+' and ISNULL(FATURANO,'''') like ''%'+Trim(FArama.AraFaturaNo.Text)+'%'' ';
-        end;
-    if gf.FAltTur<=0 then begin
-      FATBASLIK.SQL.Text := SQLPart1;
-      FATBASLIK.SQL.Add(SQLPart11);
-      if FArama.CheckTarihAralik.checked then
-         FATBASLIK.SQL.Add(' and FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
-                              ' FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
-        if FArama.AraStok.Text<> '' then
-           FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
-        if SubeVarmi then
-           FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
-//      FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.FATURANO,F.FATURASERI,F.TIPI,F.REHBERID,F.TUR,FATURA_MATRAHI,F.SUBEID, KDV_TUTARI,(KDV_TUTARI/nullif(DOVIZKUR,0)),FATURA_TUTARI,F.KUR,' + #13#10 +
-//                                     'F.ACIKLAMA,F.OZELKOD, R.KOD, R.FIRMA,F.DOVIZ_CINSI,F.DOVIZ_TUTARI,F.DOVIZKUR,F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO,F.BAGLIFATURAID ,' + #13#10 +
-//                                     'F.SATICIKODU,F.DETAYBOLUMU, SATICIBILGI.FIRMA,F.VADE,F.SUBEID,F.BASLIK,FATURA_GON_TARIHI,F.ZARFID,'+EkAlanlar+'F.YAZDIRILDI' ;
-      FATBASLIK.SQL.Add( ' union all ');
-      FATBASLIK.SQL.Add( SQLPart2 );
-      FATBASLIK.SQL.Add(SQLPart21);
-      if FArama.CheckTarihAralik.checked then
-         FATBASLIK.SQL.Add(' and SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
-                              ' SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
-      if FArama.AraStok.Text<> '' then
-          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
-      if SubeVarmi then
-          FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
-
-//      FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,SIPARISTARIH,SIPARISNO,F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,SIPARIS_MATRAHI,F.SUBEID,(KDV_TUTARI/nullif(DOVIZKUR,0)),'+
-//                                           ' KDV_TUTARI,SIPARIS_TUTARI,F.KUR,F.ACIKLAMA, F.OZELKOD, R.KOD,R.FIRMA,F.DOVIZKUR,F.DOVIZ_CINSI,F.DOVIZ_TUTARI,'+
-//                                           ' F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU, F.DETAYBOLUMU,  SATICIBILGI.FIRMA,F.BASLIK, F.VADE,'+EkAlanlar+'F.YAZDIRILDI' ;
-    end else if gf.FAltTur in [9, 19, 101] then begin
-      case gf.FAltTur of
-       9  : GridFatListeTviewDURUM.RepositoryItem := Tablo.repSiparisDurumVerilen;
-       19 : GridFatListeTviewDURUM.RepositoryItem := Tablo.repSiparisDurumAlinan;
-       101: GridFatListeTviewDURUM.RepositoryItem := Tablo.RepSatinalmaAsama;
-      end;
-      FATBASLIK.SQL.Text := SQLPart2;
-      FATBASLIK.SQL.Add(SQLPart21);
-      if FArama.CheckTarihAralik.checked then
-         FATBASLIK.SQL.Add(' and SIPARISTARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
-                              ' SIPARISTARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
-      if FArama.AraStok.Text<> '' then
-          FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or S.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  or S.URUNNO like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.AD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%'' or MG.KOD like ''%'+AramaMetniTemizle(FArama.AraStok.Text)+'%''  )');
-      if SubeVarmi then
-          FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
-//         FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,SIPARISTARIH,SIPARISNO,F.SIPARISSERI,F.TIPI,F.REHBERID,F.TUR,SIPARIS_MATRAHI,F.SUBEID,(KDV_TUTARI/nullif(DOVIZKUR,0)),'+
-//                                           ' KDV_TUTARI,SIPARIS_TUTARI,F.KUR,F.ACIKLAMA,F.OZELKOD,R.KOD,R.FIRMA,F.DOVIZKUR,F.DOVIZ_CINSI,F.DOVIZ_TUTARI  ,'+
-//                                           ' F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO , F.SATICIKODU, F.DETAYBOLUMU,  SATICIBILGI.FIRMA,F.VADE, F.BASLIK,'+EkAlanlar+'F.YAZDIRILDI' ;
-    end else begin
-      if gf.FAltTur in [11,12,13,14] then
-        GridFatListeTviewDURUM.RepositoryItem := Tablo.RepFaturaGelenDurum
-      else if gf.FAltTur in [15,16,17] then
-        GridFatListeTviewDURUM.RepositoryItem := Tablo.RepFaturaGidenDurum;
-      FATBASLIK.SQL.Text := SQLPart1;
-      FATBASLIK.SQL.Add(SQLPart11);
-      if FArama.CheckTarihAralik.checked then
-         FATBASLIK.SQL.Add(' and FATURATARIH>='''+ FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date)+''' and '+
-                              ' FATURATARIH<='''+ FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date)+'''');
-//      if FArama.AraStok.Text<> '' then
-//        FATBASLIK.SQL.Add(' and (S.STOKADI like ''%'+FArama.AraStok.Text+'%'' or S.KOD like ''%'+FArama.AraStok.Text+'%'' or MG.AD like ''%'+FArama.AraStok.Text+'%'' or MG.KOD like ''%'+FArama.AraStok.Text+'%''  )');
-      if SubeVarmi then
-          FATBASLIK.SQL.Add( ' and F.SUBEID in('+Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme)+') ');
-//      FATBASLIK.SQL.Text:= FATBASLIK.SQL.Text+ ' GROUP BY F.ID,F.DURUM,F.ODEMEPLANI,F.FATURATARIH,F.DOVIZKUR,F.RAPORDOVIZ,F.FATURANO,F.FATURASERI,F.TIPI,'+
-//                'F.REHBERID,F.TUR,FATURA_MATRAHI,F.SUBEID, KDV_TUTARI,(KDV_TUTARI/nullif(DOVIZKUR,0)), KDV_TUTARI,FATURA_TUTARI,F.KUR,F.FATURA_MALIYETI_ORT,' + #13#10 +
-//                'FATURA_MATRAHI-ISNULL(FATURA_MALIYETI_ORT,0),F.ACIKLAMA,F.OZELKOD, R.KOD, R.FIRMA,F.DOVIZ_CINSI,F.DOVIZ_TUTARI,F.BAGLIFATURAID,F.GIRISDEPO,F.CIKISDEPO,F.IRSALIYENO ,' + #13#10 +
-//                'F.SATICIKODU, F.DETAYBOLUMU, SATICIBILGI.FIRMA, F.VADE, F.BASLIK,FATURA_GON_TARIHI,F.ZARFID,'+EkAlanlar+'F.YAZDIRILDI';
-    end;
-    FATBASLIK.SQL.Add(' ORDER BY F.ID desc,F.TUR,F.KUR '+DbSinir(FArama.SpinKayitSayisi.EditValue));
-    TabloYenile(FATBASLIK,[],LocateID,'ID');
-
-    case gf.FAltTur of
-      3  : TabloNo := TabNo_FIS_Gelen;
-      4  : TabloNo := TabNo_FIS_Giden;
-      8  : TabloNo := Tabno_GIDERPUSULASI;
-      9  : TabloNo := TabNo_SIPARIS_Gelen;
-      10 : TabloNo := TabNo_IRSALIYE_Gelen;
-      11 : TabloNo := TabNo_FATBASLIK_Gelen;
-      12 : TabloNo := TabNo_FIS_Gelen;
-      14 : TabloNo := TabNo_IRSALIYE_Giden;
-      15 : TabloNo := TabNo_FATBASLIK_Giden;
-      16 : TabloNo := TabNo_FIS_Giden;
-      19 : TabloNo := TabNo_SIPARIS_Gelen; //TabNo_SIPARIS_Giden;
-      101 : TabloNo := TabNo_SATINALMA;
-      109: TabloNo := TabNo_KONSINYE_GELEN;
-      110: TabloNo := Tabno_GIDERPUSULASI;
-      119: TabloNo := TabNo_KONSINYE_GIDEN;
-    end;
-
-    if gf.FMenuTur=1  then begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Gelir Adı';
-      GridFatDBTableView1MASRAFKOD.Caption:= 'Gelir Kodu';
-    end else begin
-      GridFatDBTableView1MASRAFAD.Caption:= 'Masraf Adı';
-      GridFatDBTableView1MASRAFKOD.Caption:= 'Masraf Kodu';
-    end;
-  end;
-  GridFatListeTview.ViewData.Expand(True);         *)
 end;
 
 procedure TFaturalarDlg.Liste_SP_Cagir(const SP_Adi, SelectList: string; const TopN: Integer;const Tur: SmallInt;const StartDate, EndDate : variant;
@@ -2155,21 +1798,30 @@ begin
 end;
 
 function TFaturalarDlg.BelgeIptalEt(Tur,ID:Integer):Boolean;
-Begin
-  case Tur of
-    9,19,101:begin
-      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SIPARIS set DURUM=6,SIPARIS_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,SIPARIS_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
-                ,['&Tur','&ID'],[Tur,ID]);
-      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SIPARISDETAY set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,ADET=0,MIKTAR=0 where SIPARISID=&Siparisid'
-                ,['&Siparisid'],[ID]);
-    end;
-  else
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATBASLIK set DURUM=6,FATURA_MALIYETI_ORT=0,FATURA_MATRAHI=0,KDV_TUTARI=0,EKVERGI=0,FATURA_TUTARI=0,DOVIZ_TUTARI=0 where TUR=&Tur and ID=&ID'
-              ,['&Tur','&ID'],[Tur,ID]);
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATURA set BIRIMFIYAT=0,TUTAR=0,DOVIZ_TUTARI=0,DOVIZ_BIRIMFIYAT=0,STOKDURUMDEGIS=0,ADET=0,MIKTAR=0,YERI=0,YERID=0 where FATBASID=&Fatbasid'
-              ,['&Fatbasid'],[ID]);
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from STOKIZLEME where BELGETUR=&Tur and BASLIKID=&Fatbasid'
-              ,['&Tur','&Fatbasid'],[Tur,ID]);
+// IPTAL ARTIK SUNUCUDA: sp_Api_Belge_Iptal_Json (GenDepoUpdate132).
+//   Davranis aynen korundu (DURUM=6 + tutar/adet sifirlama + FATURA.YERI/YERID
+//   sifirlama + STOKIZLEME silme), UC KUSUR giderildi:
+//     1) TEK TRANSACTION - yarim iptal kalmaz.
+//     2) KAYNAK DURUMU yeniden hesaplanir: bag koparilmadan ONCE kaynak listesi
+//        alinir, iptalden sonra siparis/irsaliye Taslak/Kismi'ye doner (once
+//        hedefi iptal edilen siparis "Tamamlandi" olarak kaliyordu).
+//     3) ISLEMLOG yazilir (kart+detay degistirme, izleme satirlari silme) ->
+//        kim/ne zaman iptal etti izlenir, Geri Al icin temel olusur.
+begin
+  Result := False;
+  if ID <= 0 then Exit;
+  try
+    Tablo.ApiCagir('sp_Api_Belge_Iptal_Json',
+      TJSONObject.Create
+        .AddPair('BelgeId', TJSONNumber.Create(ID))
+        .AddPair('Tur',     TJSONNumber.Create(Tur))
+        .AddPair('Oturum', TJSONObject.Create
+          .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+          .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
+    Result := True;
+  except
+    on E: Exception do
+      Tablo.UyariGoster(Uyari, E.Message);   // "zaten iptal" vb. -> sade uyari
   end;
 End;
 
@@ -2422,6 +2074,13 @@ begin
     LSiparisId := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewID.Index]), 0);
     LKaynakTur := StrToIntDef(VarToStr(GridFatListeTview.Controller.SelectedRecords[I].Values[GridFatListeTviewTUR.Index]), 0);
     if LSiparisId <= 0 then Continue;
+    // IPTAL kaynak donusmez (durum 6): coklu secimde iptal olani ATLA, digerlerini
+    //   isle; uyari toplu sonuc mesajinda gorunsun diye burada gosterilmez.
+    if not Tablo.DonusumKaynakUygunMu('SIPARIS', LSiparisId, False) then
+    begin
+      LHata := LHata + IfThen(LHata = '', '', ', ') + IntToStr(LSiparisId) + ' (iptal)';
+      Continue;
+    end;
 
     // Donusum turu: alis siparisi (9)  -> irsaliye 406 / fatura 407
     //               satis siparisi (19) -> irsaliye 409 / fatura 410
@@ -2770,57 +2429,13 @@ begin
 end;
 
 procedure TFaturalarDlg.HedefBelgeyiA1Click(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (SP'ler rota
+//   matrisinden okur - GenDepoUpdate128). Buradaki ~60 satirlik elle yazilmis
+//   CASE bloklari kaldirildi; yeni rota eklendiginde bu ekran kendiliginden kapsar.
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := '';
-  case FATBASLIK.FieldByName('TUR').AsInteger of
-    9,19:begin
-      Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
-      Tablo.Query1.SQL.Add(' from SIPARISDETAY SD ');
-      Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on SD.ID=F2.YERID and F2.YERI in (406,407,409,410,415,420,429,473) ');
-      Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
-      Tablo.Query1.SQL.Add(' where SD.SIPARISID='+FATBASLIK.FieldByName('ID').AsString);
-    end;
-    101:begin
-      Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.SIPARISNO,FB.ID ');
-      Tablo.Query1.SQL.Add(' from SIPARISDETAY SD ');
-      Tablo.Query1.SQL.Add(' 	inner join SIPARISDETAY F2 on SD.ID=F2.YERID and F2.YERI in (406,407,409,410,415,420,428,473) ');
-      Tablo.Query1.SQL.Add(' 	inner join SIPARIS FB on F2.SIPARISID=FB.ID ');
-      Tablo.Query1.SQL.Add(' where SD.SIPARISID='+FATBASLIK.FieldByName('ID').AsString);
-    end;
-  else
-    Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
-    Tablo.Query1.SQL.Add(' from FATURA F ');
-    Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on F.ID=F2.YERID and F2.YERI in (408,411,461,424,427,462,468) ');
-    Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
-    Tablo.Query1.SQL.Add(' where F.FATBASID='+FATBASLIK.FieldByName('ID').AsString);
-  end;
-  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,FATBASLIK.FieldByName('REHBERID').AsInteger,0,Tablo.GENINI.BugunTrh,ABelgeno);
+  Tablo.DonusumBelgeAc('HEDEF',
+    IfThen(FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101,105], 'SIPARIS', 'FATBASLIK'),
+    FATBASLIK.FieldByName('ID').AsInteger);
 end;
 
 procedure TFaturalarDlg.HizliGirisTusClick(Sender: TObject);
@@ -3436,98 +3051,13 @@ begin
 end;
 
 procedure TFaturalarDlg.KaynakBelgeyiA1Click(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID,RehID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (SP'ler rota
+//   matrisinden okur - GenDepoUpdate128). Buradaki ~60 satirlik elle yazilmis
+//   CASE bloklari kaldirildi; yeni rota eklendiginde bu ekran kendiliginden kapsar.
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := '';
-  Tablo.Query1.SQL.Add(' select distinct    ');
-  Tablo.Query1.SQL.Add(' KAYNAKTUR = case   ');
-  Tablo.Query1.SQL.Add(' 	when YERI =83 then 83   ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407) then 9   ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 408 then 10         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 424 then 14         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 425 then 6         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 411 then 14         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 427 then 10        ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 428 then 101        ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 461 then 109        ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (409,410,473) then 19  ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 462 then 119        ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 468 then 119        '); //kaynak : giden konsinye
-  Tablo.Query1.SQL.Add(' 	when YERI = 429 then 19        ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 473 then 19        ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then -99 ');
-  Tablo.Query1.SQL.Add(' end, ');
-  Tablo.Query1.SQL.Add(' KAYNAKBELGENO=case ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISNO from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410,428,429,473) then (select SIPARISNO from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,424,425,427,461,462,468) then (select FATURANO from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID))               ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (select TEKLIFNO from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))             ');
-  Tablo.Query1.SQL.Add(' end, ');
-  Tablo.Query1.SQL.Add(' KAYNAKID=case      ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISID from SERVISDETAY where ID=F.YERID ) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410,428,429,473) then (select SIPARISID from SIPARISDETAY where ID=F.YERID ) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,424,425,427,461,462,468) then (select FATBASID from FATURA where ID=F.YERID )                ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID )           ');
-  Tablo.Query1.SQL.Add(' end, ');
-
-
-  Tablo.Query1.SQL.Add(' KAYNAKFIRMA=(select FIRMA from REHBER where ID=(case   ');
-  Tablo.Query1.SQL.Add(' when YERI = 83 then (select REHBERID from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' when YERI in (406,407,409,410,428,429,473) then (select REHBERID from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' when YERI in (408,411,424,425,427,461,462,468) then (select REHBERID from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' when YERI in (412,413) then (select REHBERID from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' end ))  ');
-
-
-  case FATBASLIK.FieldByName('TUR').AsInteger of
-    9,19,101:begin
-      Tablo.Query1.SQL.Add(' from SIPARISDETAY F ');
-      Tablo.Query1.SQL.Add(' where SIPARISID='+FATBASLIK.FieldByName('ID').AsString+' and ');
-      Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,428,461,462,468,473) ');
-    end;
-  else
-    Tablo.Query1.SQL.Add(' from FATURA F  ');
-    Tablo.Query1.SQL.Add(' where FATBASID='+FATBASLIK.FieldByName('ID').AsString+' and ');
-    Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,424,425,427,429,461,462,468,473) ');
-  end;
-  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  if AYeri=83 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from SERVIS where ID='+IntToStr(AYerID));
-    //RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-    Tablo.ServisSihirbazBaslat(False, 'D',0 ,AYerID ,Tablo.Query2.FieldByName('REHBERID').AsInteger);
-    Abort;
-  end else
-  if AYeri=-99 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from TEKLIF where ID='+IntToStr(AYerID));
-    RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-  end else
-    RehID := FATBASLIK.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,RehID,0,Tablo.GENINI.BugunTrh,ABelgeno);
-  //Tablo.SiparisSihirbazBaslat('D',FATBASLIK.FieldByName('TUR').AsInteger,0,FATBASLIK.FieldByName('ID').AsInteger,FATBASLIK.FieldByName('REHBERID').AsInteger);
+  Tablo.DonusumBelgeAc('KAYNAK',
+    IfThen(FATBASLIK.FieldByName('TUR').AsInteger in [9,19,101,105], 'SIPARIS', 'FATBASLIK'),
+    FATBASLIK.FieldByName('ID').AsInteger);
 end;
 
 procedure TFaturalarDlg.Kapatiliyor(var AKapansin: Boolean);
@@ -3674,56 +3204,8 @@ begin
             Application.MessageBox(PChar(Kilitliveplanlibelgesilinemez),PChar(Uyari),0)
         end;
         TarihDegisti;
-      end (*else  if GridFatListeTview.Controller.SelectedRecordCount = 1 then begin
-        for I := 0 to GridFatListeTview.Controller.SelectedRecordCount-1 do begin
-          ResultID := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewID.Index];
-          TUR := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewTUR.Index];
-          Tarih := GridFatListeTview.Controller.SelectedRecords[i].Values[GridFatListeTviewFATURATARIH.Index];
-          if not(TUR in [9,19,101]) then begin
-              begin
-              if Veritabani.VeriVarMi(Tablo.FDCnn,'Select ID from KASA where TUR in (61,71) and FATURAID='+IntToStr(ResultID)+' ',[],[]) then begin
-                if Application.MessageBox(PChar(faturaplanlisilinecekmi),PChar(Uyari),MB_YESNO)=mrYes then
-                  //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID)
-                  Tablo.KasaSilmeIslemleri(ResultID,TUR)
-                else Abort;
-              end else begin
-               Tablo.KasaSilmeIslemleri(ResultID,TUR);
-              end;
-
-               //Tablo.FaturaSil(FATBASLIK, FATURA,ResultID);    //IDye göre düzenlenecek
-            end;
-                //Silme işleminden önce faturayla ilişkili dokümanlar varsa silinsin.
-            //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_FATBASLIK_DOKUMAN, ResultID]);
-          end else if TUR in [9,19,101] then begin
-            Tablo.SiparisSil(ResultID, TUR);
-                //Silme işleminden önce faturayla ilişkili dokümanlar varsa silinsin.
-           // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SIPARIS_DOKUMAN, ResultID]);
-          end else begin
-            Application.MessageBox(PChar(Hareketgormussilinemez + IntToStr(ResultID)),PChar(Uyari),MB_OK+MB_ICONWARNING);
-          end;
-        end;
-      end;
-      TarihDegisti;
-   end;   09/01/2019 AO *)
+      end
 end;
-end;
-
-procedure TFaturalarDlg.SmsEPostaTableViewCellDblClick(
-  Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-var
-  Ad:String;
-begin
-{  If(Screen.Cursor = crHandPoint) and (SmsEPostaTableView.Controller.SelectedRecordCount > 0) then begin
-    Tablo.TablodanSorguAc(2,'select * from IMAJ WHERE YERI= '+ TabSmsEPosta.FieldByName('YER').AsString+' AND YER_ID= '+TabSmsEPosta.FieldByName('ANAHTAR').AsString);
-    Ad := Tablo.Query2.FieldByName('BELGEADI').AsString;
-    if Tablo.Query2.FieldByName('ICDIS').AsString = 'True' then // eğer dosyada tutuluyorsa
-      Tablo.TablodanSorguAc(5, ' DECLARE @SONUC varbinary(MAX) exec sp_Imaj_Okuma ' + Tablo.Query2.FieldByName('ID').AsString + ' ,@SONUC OUTPUT select BELGE=@SONUC, BELGEADI=''' + ExtractFileExt(Ad) + '''')
-    else
-      Tablo.TablodanSorguAc(5, 'select ID,ICDIS,BELGE,BELGEADI from IMAJ where ID=' + Tablo.Query2.Fields[0].AsString); // eğer doküman tabloda BELGE alanında ise
-    KutuktenOku(Tablo.Query5, 'BELGE', ExtractFileExt(Ad), True);
-  end else
-     BelgeDuzenleTus.Click;   }
 end;
 
 procedure TFaturalarDlg.TusAsagi(Sender: TObject; var Key: Word;

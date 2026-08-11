@@ -72,7 +72,6 @@ type
     KdvDahil: TMenuItem;
     Tasi1: TMenuItem;
     cizgi2: TMenuItem;
-    FiyatHesapla: TMenuItem;
     StokHizmetListesiView: TcxGridDBTableView;
     GridStokHizmetListesiLevel1: TcxGridLevel;
     GridStokHizmetListesi: TcxGrid;
@@ -143,7 +142,6 @@ type
     procedure Kaldr1Click(Sender: TObject);
     procedure SeimiTersevir1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FiyatHesaplaClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure StokHizmetListesiViewSelectionChanged(Sender: TcxCustomGridTableView);
     procedure GridFatListeTviewSelectionChanged(Sender: TcxCustomGridTableView);
@@ -920,32 +918,6 @@ begin
    YenileClick;
 end;
 
-procedure TFiyatDegisiklikDlg.FiyatHesaplaClick(Sender: TObject);
-var
-  i:integer;
-  IMALATCI, DEPOCU,IDisim,Database: string;
-begin
-  TabStokHizmetListesi.First;
-  while not TabStokHizmetListesi.Eof do
-  begin
-     Tablo.TablodanSorguAc(1,'Select FIYAT,KDVDURUM from STOKFIYAT Where STOKID='+TabStokHizmetListesi.FieldByName('ID').AsString+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Etiket,30))+' and SATIS =1 ');
-
-    if Tablo.FiyatHesaplama(TabStokHizmetListesi.FieldByName('ID').AsInteger, Tablo.Query1.FieldByName('FIYAT').AsFloat, Tablo.Query1.FieldByName('KDVDURUM').AsBoolean, IMALATCI, DEPOCU)   then
-    begin
-
-      IMALATCI := StringReplace(IMALATCI, ',', '.', [rfReplaceAll]);
-      DEPOCU := StringReplace(DEPOCU, ',', '.', [rfReplaceAll]);
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update STOKFIYAT set FIYAT=''' + IMALATCI + ''' Where PAKETID=0 and STOKID =' +TabStokHizmetListesi.FieldByName('ID').AsString + ' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Imalatci,31))+' and SATIS=1 ', [],[]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update STOKFIYAT set FIYAT=''' + DEPOCU + ''' Where PAKETID=0 and STOKID =' + TabStokHizmetListesi.FieldByName('ID').AsString + ' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Depocu,32))+' and SATIS=1 ', [],[]);
-
-    end;
-    TabStokHizmetListesi.Next;
-  end;
-  TabFiyatRefresh
- // FiyatlariAc;
-end;
-
 procedure TFiyatDegisiklikDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   ModalResult := mrClose;
@@ -1074,7 +1046,6 @@ begin
   FiyatGuncelle1.Caption  := 'Fiyatını Güncelle';
   KDVGuncelle.Caption     := 'KDV Durumunu Güncelle';
   cizgi2.Visible:=False;
-  FiyatHesapla.Visible:=False;
   Kopyala1.Caption:=Tablo.Query1.Fields[0].AsString+' '+Kopyala1.Caption;
   AdDegistir1.Caption := Tablo.Query1.Fields[0].AsString+' '+AdDegistir1.Caption;
   Sil1.Caption:= Tablo.Query1.Fields[0].AsString+' '+Sil1.Caption;
@@ -1103,41 +1074,12 @@ begin
 end;
 
 procedure TFiyatDegisiklikDlg.EksikFiyatlariEkle;
-var
-  sqlStokText,sqlHizmetText:string;
+// Tanimli her fiyat adi icin eksik STOKFIYAT/FIYATLAR satirlari - TEK SP cagrisi
+//   (sp_Api_Fiyat_EksikleriEkle_Json). Eskiden fiyat adi basina 2 INSERT ve
+//   istemci dongusu vardi; fiyat listesi cogaldikca acilis yavasliyordu.
 begin
-  //stok sayısı x fiyat adı sayısı x birim sayısı
-  sqlStokText := 'insert into STOKFIYAT(STOKID,FIYATADI,BIRIM,FIYAT,KUR,KDVDURUM,PAKETID,SATIS) '+
-                 'select ID,&Fiyat&,ANABIRIM,-1.0,'''+CariDoviz+''',0,0,&Satis& '+
-                 'from STOKLAR S '+
-                 'where not exists (select 1 from STOKFIYAT SF where SF.STOKID=S.ID and SF.BIRIM=S.ANABIRIM and SF.FIYATADI=&Fiyat& and SF.SATIS=&Satis&)'+
-                 'union all '+
-                 'select ID,&Fiyat&,BIRIM2,-1.0,'''+CariDoviz+''',0,0,&Satis& '+
-                 'from STOKLAR S '+
-                 'where ANABIRIM<>BIRIM2 and not exists (select 1 from STOKFIYAT SF where SF.STOKID=S.ID and SF.BIRIM=S.BIRIM2 and SF.FIYATADI=&Fiyat& and SF.SATIS=&Satis&)';
-  sqlHizmetText := 'insert into FIYATLAR(HIZMETID,FIYATADI,FIYAT,KUR,KDVDURUM,PAKETID,SATIS) '+
-                 'select ID,&Fiyat&,-1.0,'''+CariDoviz+''',0,0,&Satis& '+
-                 'from MASRAFGELIR H '+
-                 'where not exists (select 1 from FIYATLAR F where F.HIZMETID=H.ID and F.FIYATADI=&Fiyat& and F.SATIS=&Satis&)';
-
-  Tablo.Query1.First;
-  Tablo.TablodanSorguAc(1,'select * from GENINI where DIL='+IntToStr(Dil)+'  and BOLUM='+IntToStr(Ops_FiyatListeAdi));
-  Tablo.Query1.First;
-  while not Tablo.Query1.Eof do begin
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,StringReplace(StringReplace(sqlStokText,'&Fiyat&',Tablo.Query1.FieldByName('DEGER').AsString,[rfReplaceAll]),'&Satis&','1',[rfReplaceAll]),[],[]);
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,StringReplace(StringReplace(sqlHizmetText,'&Fiyat&',Tablo.Query1.FieldByName('DEGER').AsString,[rfReplaceAll]),'&Satis&','1',[rfReplaceAll]),[],[]);
-    Tablo.Query1.next;
-  end;
-
-
-  Tablo.TablodanSorguAc(1,'select * from GENINI where DIL='+IntToStr(Dil)+'  and BOLUM='+IntToStr(Ops_FiyatListeAdiAlis));
-  Tablo.Query1.First;
-  while not Tablo.Query1.Eof do begin
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,StringReplace(StringReplace(sqlStokText,'&Fiyat&',Tablo.Query1.FieldByName('DEGER').AsString,[rfReplaceAll]),'&Satis&','0',[rfReplaceAll]),[],[]);
-    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,StringReplace(StringReplace(sqlHizmetText,'&Fiyat&',Tablo.Query1.FieldByName('DEGER').AsString,[rfReplaceAll]),'&Satis&','0',[rfReplaceAll]),[],[]);
-    Tablo.Query1.next;
-  end;
-
+  Tablo.ApiCagirMetin('sp_Api_Fiyat_EksikleriEkle_Json',
+    '{"Dil":' + IntToStr(Dil) + ',"Kur":"' + CariDoviz + '"}');
 end;
 
 procedure TFiyatDegisiklikDlg.EditAraKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

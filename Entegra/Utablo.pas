@@ -707,7 +707,6 @@ type
     procedure AktiviteIptalClick(Id,Durum,Tur: Integer);
     function HesapBilgisiGetirDetay(Id: Integer): TFDQuery;
     Procedure KesilmemisCekBul(Kod: String);
-    function FiyatHesaplama(StokID: integer; EczaSatisFiyat: Currency; KDVDurum: Boolean; var IMALATCI, DEPOCU: string): Boolean;
     function ResmiTatilVar(Tarih: TDateTime): Boolean;
     function DiniTatilVar(Tarih: TDateTime): Boolean;
     function ResmiTatilGunuKontrolu(Tarih: TDateTime): TDateTime;
@@ -757,6 +756,12 @@ type
     function KasaTanimSihirbazBaslat(IslemOp: Char; Cagiran, KasaID: Integer): Integer;
     function BankaTanimSihirbazBaslat(IslemOp: Char; Cagiran, BankaId, RehberId: Integer): Integer;
     function StokSihirbazBaslat(IslemOp: Char; Cagiran, StokID,IsOrtagi, Kategori: Integer): Integer;
+    // Kart KLONU sunucuda (sp_Api_*_Klonla_Json): kaydet API'si uzerinden yeni kart
+    //   uretilir, cagiran onu 'K' (kopya) modunda acar. Iptal edilirse cagiran siler.
+    function StokKlonla(AKaynakId: Integer; const AKod: string; ADetay: Boolean): Integer;
+    function CariKlonla(AKaynakId: Integer; const AKod, AFirma: string): Integer;
+    function RehberKlonlaIc(const ASPAdi: string; AKaynakId: Integer; const AKod, AFirma: string): Integer;
+    function IKKlonla(AKaynakId: Integer; const AKod, AFirma: string): Integer;
     function ScannerSihirbazBaslat(var DosyaAdi : string; var Tur : string; var TurId : SmallInt; var Boyut:Real) : Boolean;
     function DokumanTara(KlasorId, RehberId:integer; Yeri:integer=0; YerId:integer=0): Integer;
     function DokumanSihirbazBaslat(IslemOp:Char; Cagiran,DokumanID : Integer; KlasorID,YeniKayit,Modul,ModulID,RehberID:Integer; BelgeYolu:string=''): Integer;
@@ -774,9 +779,6 @@ type
     Procedure DokumanDisariVer(ID:integer; AD,AdDokuman:String) ;
     function DokumanTarihceEkle(DokumanId:integer; Aciklama:string; Tur:integer):Integer;
     procedure DokumanTarihceKapat(GecmisId, Tur:integer);
-    function UretimFisiOlustur(Tarih:TDateTime;Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;Miktar:Extended):integer;
-    // Ayni is, KANONIK belge uretimi uzerinden (sp_Prog_UretimFisi_Olustur_Json
-    //   -> sp_Api_Belge_Kaydet_Json). Fiyatlar 0 yazilir. Yeni kod bunu kullanir.
     function UretimFisiOlusturSP(Tarih:TDateTime; Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;
       Miktar:Extended): Integer;
     function EkipmanSihirbazBaslat(IslemOp: Char; Cagiran, EkipmanID,StokID: Integer): Integer;
@@ -833,7 +835,70 @@ type
     // API (sp_Api_*_Json) YAZMA nesnesi cagirir; tek satir/tek kolon JSON sonucu doner.
     //   AKosullar SAHIPLIGI devralinir (Free edilir). SP hata verirse (THROW 51xxx)
     //   exception yukari gider - yutulmaz. PG'de fn_api_* karsiligi cagrilir.
+    // ---- DONUSUM ZINCIRINDE GEZINME (tek yol, tum listeler icin) ----
+    //   AYon: 'KAYNAK' (bu belge nereden uretildi) | 'HEDEF' (bu belgeden ne uretildi)
+    //   ABelgeTablo: 'FATBASLIK' | 'SIPARIS' | 'TEKLIF'
+    //   Kod listesi YOK: SP'ler rota matrisinden okur (GenDepoUpdate128).
+    //   Tek sonuc varsa dogrudan, birden fazlaysa secim listesiyle ACAR.
+    //   Doner: False = bagli belge yok (cagiran sessizce cikar).
+    function DonusumBelgeAc(const AYon, ABelgeTablo: string; ABelgeId: Integer): Boolean;
+    // Kaynak belge donusturulebilir mi? (IPTAL=6 ise HAYIR - GenDepoUpdate130)
+    //   ATablo: 'SIPARIS' | 'FATBASLIK'. Uyari gostererek False doner.
+    function DonusumKaynakUygunMu(const ATablo: string; ABelgeId: Integer;
+      AUyariGoster: Boolean = True): Boolean;
     function ApiCagir(const ASPAdi: string; AKosullar: TJSONObject): string;
+    // Hazir JSON metniyle cagri (cagiran unit'in System.JSON'a ihtiyaci olmasin).
+    function ApiCagirMetin(const ASPAdi, AKosullarJson: string): string;
+    // Silme API'leri icin ortak cagirici: engel mesajini SADE uyari olarak gosterir.
+    procedure ApiSilCagir(const ASPAdi: string; AKayitId: Integer);
+    // ---- KURUM ICI MESAJLASMA (GenDepoUpdate145/146) ----------------------
+    //   Tasima YOK: her sey DB uzerinden (SP'ler), istemci 2-3 sn yoklar.
+    //   Kullanici kimligi = REHBER.ID ('Kullanan').
+    //   AFiltre: 0 tumu, 1 okunmamis, 2 favoriler, 3 gruplar
+    procedure MesajKanalListe(ATab: TFDQuery; const AAra: string = ''; AFiltre: Integer = 0);
+    procedure MesajFavori(AKanalId: Integer; AFavori: Boolean);
+    procedure MesajOkunmadi(AKanalId: Integer);
+    procedure MesajSessize(AKanalId: Integer; ABildirim: Boolean);
+    procedure MesajKisiListe(ATab: TFDQuery; const AAra: string = '');
+    procedure MesajUyeListe(ATab: TFDQuery; AKanalId: Integer);
+    procedure MesajIcerikAra(ATab: TFDQuery; const AAra: string; ATopN: Integer = 100);
+    procedure MesajKisiBilgi(ATab: TFDQuery; ARehberId: Integer);   // sol panel "Kişiler"
+    procedure MesajGecmis(ATab: TFDQuery; AKanalId: Integer;
+      AOncekiId: Int64 = 0; ASonrakiId: Int64 = 0; ATopN: Integer = 50);
+    function  MesajKanalAc(AKarsiId: Integer): Integer;                    // birebir sohbet ac/bul
+    function  MesajGrupOlustur(const AAd: string; AUyeler: TArray<Integer>): Integer;
+    procedure MesajGrupUye(AKanalId: Integer; AUyeler: TArray<Integer>; AEkle: Boolean);
+    procedure MesajGrupAdDegistir(AKanalId: Integer; const AAd: string);
+    procedure MesajGrupAvatar(AKanalId: Integer; ADosyaId: Int64);
+    procedure MesajUyeRol(AKanalId: Integer; AUyeler: TArray<Integer>; AYonetici: Boolean);
+    procedure MesajGruptanCik(AKanalId: Integer);
+    function  MesajKanalTemizle(AKanalId: Integer; AHerkesten: Boolean = False): Integer;
+    function  MesajGonder(AKanalId: Integer; const AMetin: string; AYanitId: Int64 = 0;
+      ADosyaId: Int64 = 0; const ADosyaAdi: string = ''; ADosyaBoyut: Int64 = 0): Int64;
+    procedure MesajOkundu(AKanalId: Integer; ASonOkumaId: Int64 = 0);
+    procedure MesajSil(AMesajId: Int64; AHerkesten: Boolean = False);
+    function  MesajYokla: string;   // ham JSON: {"SonId":..,"Okunmamis":..,"Kanallar":[...]}
+
+    // ---- MERKEZI NUMARA URETIMI (GenDepoUpdate135 / pg 72) -----------------
+    //   Istemcide "select max(X)+1" YAPMA - iki kullanici ayni numarayi alir.
+    //   ATablo/AAlan: numaranin tutuldugu gercek tablo/kolon (tohumlama+dogrulama)
+    //   AKapsam     : bagimsiz sayac ayrimi ('T14|S-1|K1401' gibi serbest metin)
+    //   AKosul      : tohumlama/dogrulama WHERE'i (kocan/tur/tarih suzgeci)
+    //   ADijit      : sifir dolgusu; AAdet: blok tahsis (toplu satir ekleme)
+    function SiradakiNo(const ATablo, AAlan: string; const AKapsam: string = '';
+      const AKosul: string = ''; ADijit: Integer = 0; AAdet: Integer = 1;
+      ABaslangic: Int64 = 1): string;                         // dolgulu metin (ilk numara)
+    function SiradakiNoSayi(const ATablo, AAlan: string; const AKapsam: string = '';
+      const AKosul: string = ''; AAdet: Integer = 1; ABaslangic: Int64 = 1): Int64;
+    // Belge kaydedilmediyse numarayi geri ver (yalnizca sayacin SON degeriyse alinir).
+    procedure SiradakiNoIade(const ATablo, AAlan: string; const AKapsam: string; ANo: Int64);
+    // ---- POS/kasiyer tahsilati (GenDepoUpdate138) --------------------------
+    //   TUM odeme satirlari TEK transaction'da yazilir. ASatirlarJson: hazir JSON
+    //   dizisi metni ([{"Tur":21,"HesapId":5,"Tutar":100.0,"HesapTuru":"K"}]).
+    //   Doner: olusan KASA ID'leri (virgullu; perakende hizli satista '0').
+    function PosTahsilatYaz(const ASatirlarJson: string; ARehId, AFatTur, AYerId,
+      AFaturaId, AMasrafId, AGirisKaynak, AKasaTakipTabNo: Integer;
+      const AKur: string; APerakende: Boolean): string;
     // Sade sarmalayicilar - cagiran unit'in System.JSON'a ihtiyaci olmasin diye.
     procedure BelgeToplamHesapla(ABelgeId: Integer);                 // FATBASLIK toplamlari (sunucuda)
     procedure BelgeDurumHesapla(ABelgeId: Integer; const AKaynak: string = 'siparis');  // kapanma durumu
@@ -841,6 +906,7 @@ type
     function  KaynakBaglariAl(ABelgeId: Integer): string;             // silmeden once: kaynak listesi
     procedure KaynakDurumGuncelleListe(const AKaynaklarJson: string); // silmeden sonra: listeyi hesapla
     function ApiSonucInt(const AJson, AAlan: string): Integer;   // API sonuc JSON'undan tamsayi alan
+    function ApiSonucMetin(const AJson, AAlan: string): string;  // ... metin alan
     procedure EkAlanlariBul(Konum,Form,Tablo:string; var CaptionList:TArrayofstring; var FieldList:TArrayofstring);
     procedure DemirbasInit(Durum, MARKA, TESLIM: TcxImageComboBoxProperties);
     procedure FaturaInit(Tur: SmallInt; Durum, DETAYTUR, BIRIM: TcxImageComboBoxProperties);
@@ -928,7 +994,9 @@ type
     function DovizKuruSecimi(EditTutar: Boolean; Tarih: TDateTime; var GirenDovizKuru, CikanDovizKuru: string; var GirenDovizTutari, CikanDovizTutari: Extended ; SadeceKurSec : Boolean = False): Boolean;
     function RehberEkBilgileriniGetir(RehberId, Yeri: Integer; Varsayilanlar: array of Integer; var Etiket: TArrayOfString; var Bilgi: TArrayOfString):Integer;
     procedure Satis2Fatura_Olustur(GunOnce:Smallint);
-    function StokSilmeIslemleri(StokID:Integer):Boolean;
+    // AOnaySor=False: cagiran zaten karar vermistir (or. sihirbaz iptalinde
+    //   vazgecilen KLONU temizler) -> ikinci kez onay sorma.
+    function StokSilmeIslemleri(StokID:Integer; AOnaySor:Boolean=True):Boolean;
     procedure RehberBilgiGuncelle(RehberId, Yeri,Vars:Integer; Adres:String);
     procedure KocanAyarlariniGetir(Tur: integer);
     procedure ProjeTarihceEkle(ProjeTablo: TFDQuery);
@@ -1080,30 +1148,6 @@ type
     TediyeMakbuz:integer;
     VirmanMakbuz:integer;
     UretimEmri:integer;
-  end;
-
-type
-  TFiyatHesaplamaBilgileri = record
-    Kademe1_Barem: Double;
-    Kademe1_Etiket: Currency;
-    Kademe1_DepoKar: Double;
-    Kademe1_EczaciKar: Double;
-    Kademe2_Barem: Double;
-    Kademe2_Etiket: Currency;
-    Kademe2_DepoKar: Double;
-    Kademe2_EczaciKar: Double;
-    Kademe3_Barem: Double;
-    Kademe3_Etiket: Currency;
-    Kademe3_DepoKar: Double;
-    Kademe3_EczaciKar: Double;
-    Kademe4_Barem: Double;
-    Kademe4_Etiket: Currency;
-    Kademe4_DepoKar: Double;
-    Kademe4_EczaciKar: Double;
-    Kademe5_Barem: Double;
-    Kademe5_DepoKar: Double;
-    Kademe5_EczaciKar: Double;
-    KDVOrani: Double;
   end;
 
 type
@@ -1263,7 +1307,6 @@ var
   faturaurungarantisuresi: Integer;
   kocannumaralari: TKocanNumaralari;
   ModulYetki_TekSubeTum : ModulYetki_TST;
-  FiyatHesaplamaBilgileri: TFiyatHesaplamaBilgileri;
 
   IzlemTuruUretimIse: Boolean = False;
 
@@ -1840,28 +1883,7 @@ begin
 end;
 
 function TTablo.SatirKopyala(TabloAdi: String; Id: Integer; KeyAlan:string='ID'): Integer;
-var
-  i: Integer;
 begin
-  {Query1.Close;
-  Query1.SQL.Text := 'select * from ' + TabloAdi + ' where '+KeyAlan+'=-1';
-  Query1.Open;
-  Query2.Close;
-  Query2.SQL.Text := 'select * from ' + TabloAdi + ' where '+KeyAlan+'=' + IntToStr(Id);
-  Query2.Open;
-  Query1.Append;
-  for i := 1 to Query2.Fields.count - 1 do
-    if (Pos('EKLEYEN', Query2.Fields[i].FieldName) = 0) and
-      (Pos('EKLEMETARIHI', Query2.Fields[i].FieldName) = 0) and
-      (Pos('DEGISTIREN', Query2.Fields[i].FieldName) = 0) and
-      (Pos('DEGISTIRMETARIHI', Query2.Fields[i].FieldName) = 0) and
-      (Query2.Fields[i].ReadOnly=False) then
-      Query1.Fields[i].Assign(Query2.Fields[i]);
-  if Query1.FindField('EKLEYEN')<> nil then
-     Query1.FieldByName('EKLEYEN').AsString := Kullanan;
-  Query1.Post;
-  Result := Query1.Fields[0].AsInteger; }
-
    Result := Tablo.SQLSatiriKopyala(TabloAdi, Id,[ 'EKLEYEN','EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI'],
                   [Kullanan, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
 end;
@@ -1952,52 +1974,40 @@ begin //burada AYAR tablosundaki grid veya tree ayarlarının ekrana geri yükle
 end;
 
 function TTablo.BelgeKopyala(ID, Tur, RehberId : integer; Tarih : TDateTime): integer;
-var   belgeno: TBelgeNo;
-      EFaturaDurumu, FaturaIDsi : integer;
-      VNOsu, TabloAd, IDAD:string[20];
+// BELGE KLONU - TAMAMEN SUNUCUDA (GenDepoUpdate140 + 142).
+//   FATBASLIK tabanli belgeler  -> sp_Api_Belge_Klonla_Json         -> sp_Api_Belge_Kaydet_Json
+//   Siparis (TUR 9/19/101)      -> sp_Api_Belge_Siparis_Klonla_Json -> sp_Api_Belge_Siparis_Kaydet_Json
+//   Klon boylece "elden girilmis yeni belge" ile AYNI kod yolundan gecer: belge no
+//   (kocan), toplamlar, durum, ISLEMLOG ve ek alan kurallari TEK yerde.
+//
+//   Eski hal: FATBASLIK/FATURA (ya da SIPARIS/SIPARISDETAY) satirlari
+//   SQLSatiriKopyala ile HAM kopyalaniyordu. Sifirlanacak alanlar elle listeliydi
+//   (tabloya eklenen yeni kolon kopyaya sessizce tasiniyordu), toplam/durum/log
+//   hic islenmiyordu ve transaction yoktu.
+//
+//   Klon TASLAK (DURUM=0) baslar, donusum bagi (YERI/YERID) tasinmaz, lot/seri
+//   izlemli belge klonlanmaz (SP mesaj verir).
+var
+  LSPAdi: string;
 begin
-      if tur in [10,11,12,13] then begin
-         belgeno.SeriNo :='';  belgeno.belgeno :='';
-      end else
-         belgeno := SiradakiBelgeNumarasi(Tur, Tarih);
-      //case Tur of
-      //  10,11,12,13,14,15,16,17:
-      //    begin
-            if Tur = KasaTur_SatisFaturasi then
-               EFaturaDurumu := Tablo.EFaturami(RehberId,
-                     Tablo.AciklamaGetir('REHBER', 'EFATURA', RehberId)='True',
-                     Tablo.AciklamaGetir('FATBASLIK','VNO', ID))
-            else
-               EFaturaDurumu := 0;
+  Result := 0;
+  if ID <= 0 then Exit;
 
-            if Tur in [9,19,101] then begin
-               TabloAd:='SIPARISDETAY';
-               IDAD:='SIPARISID';
-               FaturaIDsi := Tablo.SQLSatiriKopyala('SIPARIS', ID,[ 'SIPARISTARIH', 'YERI','YERID', 'EKLEYEN', 'SIPARISSERI', 'KOCANNO',
-                 'SIPARISNO', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','MUHAKTAR'],
-                  [ Tablo.GENINI.BugunTrhSaat, null, null, Kullanan,  belgeno.SeriNo, KocannoBul(Tur),
-                  belgeno.belgeno, Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0]);
-            end else begin
-               TabloAd :='FATURA';
-               IDAD := 'FATBASID';
-               FaturaIDsi := Tablo.SQLSatiriKopyala('FATBASLIK', ID,[ 'FATURATARIH', 'YERI','YERID', 'EKLEYEN', 'FATURASERI', 'KOCANNO',
-                 'FATURANO', 'EFATURADURUM','EFATURASONUC', 'EKLEMETARIHI', 'DEGISTIREN', 'DEGISTIRMETARIHI','MUHAKTAR', 'ZARFID'],
-                  [ Tablo.GENINI.BugunTrhSaat, null, null, Kullanan,  belgeno.SeriNo, KocannoBul(Tur),
-                  belgeno.belgeno, EFaturaDurumu,0,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat,0,0]);
-            end;
-      //    end;
-      //end;{case}
-      Tablo.TablodanSorguAc(3,'select * from '+TabloAd+' where '+IDAD+' = ' + IntToStr(ID));
-      while not Tablo.Query3.Eof do begin
-        if Tur in [11,15] then //fatura ise
-           Tablo.SQLSatiriKopyala(TabloAd, Tablo.Query3.FieldByName('ID').AsInteger, ['EKLEYEN', IDAD,'YERI', 'YERID', 'EKLEMETARIHI','DEGISTIREN', 'DEGISTIRMETARIHI','EKMALIYET'],
-            [Kullanan, FaturaIDsi,null,null,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat, 0])
-        else
-           Tablo.SQLSatiriKopyala(TabloAd, Tablo.Query3.FieldByName('ID').AsInteger, ['EKLEYEN', IDAD,'YERI', 'YERID', 'EKLEMETARIHI','DEGISTIREN', 'DEGISTIRMETARIHI'],
-            [Kullanan, FaturaIDsi,null,null,Tablo.GENINI.BugunTrhSaat, Kullanan, Tablo.GENINI.BugunTrhSaat]);
-        Tablo.Query3.Next;
-      end;
-      Result := FaturaIDsi;
+  if Tur in [9, 19, 101] then
+    LSPAdi := 'sp_Api_Belge_Siparis_Klonla_Json'
+  else
+    LSPAdi := 'sp_Api_Belge_Klonla_Json';
+
+  Result := ApiSonucInt(
+    ApiCagir(LSPAdi,
+      TJSONObject.Create
+        .AddPair('KaynakId', TJSONNumber.Create(ID))
+        .AddPair('Tarih', FormatDateTime('yyyy-mm-dd hh:nn:ss', GENINI.BugunTrhSaat))
+        .AddPair('RehberId', TJSONNumber.Create(RehberId))
+        .AddPair('Oturum', TJSONObject.Create
+          .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+          .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject),
+    'BelgeId');
 end;
 
 procedure TTablo.MailSablonYonetimi(ModulID:Integer);
@@ -2338,93 +2348,6 @@ begin
     Tablo.Query3.SQL.Add(' FATURA_TUTARI = CAST(REPLACE('''+FCurrToStr(Tablo.Query1.FieldByName('ARATOPLAM').AsCurrency+Tablo.Query1.FieldByName('EKVERGI').AsCurrency)+ ''','','' ,''.'' ) AS MONEY) ');
   Tablo.Query3.SQL.Add(' WHERE ID = ' + inttostr(baslikid) + ' ');
   Tablo.Query3.ExecSQL;
-end;
-
-function TTablo.FiyatHesaplama(StokID: integer; EczaSatisFiyat: Currency;
-  KDVDurum: Boolean; var IMALATCI, DEPOCU: string): Boolean;
-var
-  st: TStringList;
-  TutarFiyat: Currency;
-  ImalatKDVDurum,DepocuKDVDurum:boolean;
-  ImalatciFiyat, DepocuFiyat, Degisken: Currency;
-begin
-  ImalatciFiyat := 0;
-  DepocuFiyat := 0;
-  if KDVDurum then     // False ise Hariç(/),True ise Dahil(*)
-   TutarFiyat := EczaSatisFiyat / (1 + FiyatHesaplamaBilgileri.KDVOrani / 100)
-  else
-   TutarFiyat := EczaSatisFiyat;
-  // 1.08  //ilk iş olarak KDV Hariç hesaplanır ona göre işlem yapılır.
-
-  if TutarFiyat > 0 then
-  begin
-    if TutarFiyat < FiyatHesaplamaBilgileri.Kademe1_Etiket then // 13.63
-      Degisken := TutarFiyat
-    else
-      Degisken := FiyatHesaplamaBilgileri.Kademe1_Etiket; // 13.63
-
-    DepocuFiyat := Degisken / (1 + FiyatHesaplamaBilgileri.Kademe1_EczaciKar / 100); // 1.25;
-    ImalatciFiyat := (Degisken / (1 + FiyatHesaplamaBilgileri.Kademe1_DepoKar / 100)) / (1 + FiyatHesaplamaBilgileri.Kademe1_EczaciKar / 100);
-    // (Degisken/1.09)/1.25;
-
-    if TutarFiyat > FiyatHesaplamaBilgileri.Kademe1_Etiket then
-    begin // 13.63
-      if TutarFiyat < FiyatHesaplamaBilgileri.Kademe2_Etiket then // 67.63
-        Degisken := TutarFiyat - FiyatHesaplamaBilgileri.Kademe1_Etiket // 13.63
-      else
-        Degisken := 54; // Sabit
-
-      DepocuFiyat := DepocuFiyat + (Degisken / (1 + FiyatHesaplamaBilgileri.Kademe2_EczaciKar / 100));     // ImalatciFiyat+(Degisken/1.25);
-      ImalatciFiyat := ImalatciFiyat +  ((Degisken / (1 + FiyatHesaplamaBilgileri.Kademe2_DepoKar / 100)) /  (1 + FiyatHesaplamaBilgileri.Kademe2_EczaciKar / 100));     // DepocuFiyat+((Degisken/1.08)/1.25);
-
-      if TutarFiyat > FiyatHesaplamaBilgileri.Kademe2_Etiket then
-      begin // 67.63
-        if TutarFiyat < FiyatHesaplamaBilgileri.Kademe3_Etiket then // 134.5
-          Degisken := TutarFiyat - FiyatHesaplamaBilgileri.Kademe2_Etiket       // 67.63
-        else
-          Degisken := 66.87; // Sabit
-
-        DepocuFiyat := DepocuFiyat + (Degisken / (1 + FiyatHesaplamaBilgileri.Kademe3_EczaciKar / 100));         // ImalatciFiyat+(Degisken/1.25);
-        ImalatciFiyat := ImalatciFiyat +    ((Degisken / (1 + FiyatHesaplamaBilgileri.Kademe3_DepoKar / 100)) /(1 + FiyatHesaplamaBilgileri.Kademe3_EczaciKar / 100));        // DepocuFiyat+((Degisken/1.07)/1.25);
-
-        if TutarFiyat > FiyatHesaplamaBilgileri.Kademe3_Etiket then
-        begin // 134.5
-          if TutarFiyat < FiyatHesaplamaBilgileri.Kademe4_Etiket then // 255.14
-            Degisken := TutarFiyat - FiyatHesaplamaBilgileri.Kademe3_Etiket         // 134.5
-          else
-            Degisken := 120.64; // Sabit
-
-          DepocuFiyat := DepocuFiyat +(Degisken / (1 + FiyatHesaplamaBilgileri.Kademe4_EczaciKar / 100));           // ImalatciFiyat+(Degisken/1.16);
-          ImalatciFiyat := ImalatciFiyat + ((Degisken / (1 + FiyatHesaplamaBilgileri.Kademe4_DepoKar / 100)) /  (1 + FiyatHesaplamaBilgileri.Kademe4_EczaciKar / 100));          // DepocuFiyat+((Degisken/1.04)/1.16);
-
-          if TutarFiyat > FiyatHesaplamaBilgileri.Kademe4_Etiket then
-          begin // 255.14
-            Degisken := TutarFiyat - FiyatHesaplamaBilgileri.Kademe4_Etiket;
-            // 255.14
-
-            DepocuFiyat := DepocuFiyat +(Degisken / (1 + FiyatHesaplamaBilgileri.Kademe5_EczaciKar / 100) ); // ImalatciFiyat+(Degisken/1.12);
-            ImalatciFiyat := ImalatciFiyat +  ((Degisken / (1 + FiyatHesaplamaBilgileri.Kademe5_DepoKar / 100)) / (1 + FiyatHesaplamaBilgileri.Kademe5_EczaciKar / 100));            // DepocuFiyat+((Degisken/1.02)/1.12);
-
-          end;
-        end;
-      end;
-    end;
-  end;
-  TablodanSorguAc(3,'Select ImalatciKDVDurum=(Select KDVDURUM from STOKFIYAT Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Imalatci,31))+'),'+
-  ' DepocuKDVDurum=(Select KDVDURUM from STOKFIYAT Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Depocu,32))+')');
-    // False ise Hariç(/),True ise Dahil(*)
-  if Query3.FieldByName('ImalatciKDVDurum').AsBoolean  then  //Dahil ise
-     IMALATCI := FCurrToStr(ImalatciFiyat +  (ImalatciFiyat * FiyatHesaplamaBilgileri.KDVOrani) / 100)
-  else
-     IMALATCI := FCurrToStr(ImalatciFiyat);
-
-   if Query3.FieldByName('DepocuKDVDurum').AsBoolean then  //Dahil ise
-     DEPOCU := FCurrToStr(DepocuFiyat + (DepocuFiyat * FiyatHesaplamaBilgileri.KDVOrani) / 100)
-   else
-     DEPOCU := FCurrToStr(DepocuFiyat);
-
-  Result := True;
-
 end;
 
 function TTablo.DonusTipiBul(DonusTuru: integer): integer;
@@ -4990,10 +4913,14 @@ begin
   end;
 end;
 procedure TTablo.TeklifSil(TeklifID:integer);
+// SILME ARTIK SUNUCUDA: sp_Api_Teklif_Sil_Json (GenDepoUpdate127, modul 97).
+//   Eskiden yalniz IMAJ+TEKLIFDETAY+TEKLIF siliniyordu: yorum/medya, ekli
+//   dokuman ve TEKLIF_USER satirlari YETIM kaliyordu, log da yazilmiyordu
+//   (Geri Al calismazdi). Kapsam+sira artik metadata'da, hepsi TEK transaction.
+//   Siparise donusmus teklif SP tarafinda ENGELLENIR (rota matrisi).
 begin
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[80, TeklifID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIFDETAY where TEKLIFID=&id ',['&id'],[TeklifID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from TEKLIF where ID=&id ',['&id'],[TeklifID]);
+  if TeklifID <= 0 then Exit;
+  ApiSilCagir('sp_Api_Teklif_Sil_Json', TeklifID);
 end;
 
 function TTablo.FaturaSilinebilirMi(AFatBasID, ASatirID: Integer; AKilitKaldirildi: Boolean): Boolean;
@@ -5183,6 +5110,7 @@ function TTablo.AdetDusurulebilirMi(const AKaynakDetayTablo: string; ASatirID: I
 //   Ust sinir yoktur - kullanici istedigi kadar artirabilir.
 var
   Q: TFDQuery;
+  LUygun: string;
 begin
   Result := True;
   if ASatirID <= 0 then Exit;
@@ -5198,7 +5126,15 @@ begin
     Q.ParamByName('YeniAdet').AsFloat := Abs(AYeniAdet);
     try
       Q.Open;
-      if (not Q.Eof) and (Q.FieldByName('UYGUN').AsInteger = 0) then begin
+      // UYGUN 0/1 doner. TIP OKUMASI STRING UZERINDEN: alan sunucuda bit ise
+      //   FireDAC onu Boolean maplar ve AsInteger "Cannot access field 'UYGUN'
+      //   as type Integer" hatasi verir (int'e cevrildi ama eski kurulumda bit
+      //   kalabilir).
+      if not Q.Eof then
+        LUygun := UpperCase(Trim(Q.FieldByName('UYGUN').AsString))
+      else
+        LUygun := '1';
+      if (LUygun = '0') or (LUygun = 'FALSE') then begin
         Result := False;
         if AUyariGoster then
           UyariGoster(Uyari, Q.FieldByName('MESAJ').AsString);
@@ -5350,71 +5286,39 @@ end;
   ///
   ///
 procedure TTablo.SiparisSil(SiparisId: Integer; SiparisTur: Integer=0; Tarih : TDateTime = 39895);
+// SILME ARTIK SUNUCUDA: sp_Api_Belge_Siparis_Sil_Json (GenDepoUpdate127/129, modul 91).
+//   Engel kurallari (donusum) fn_Prog_Silme_Engel(91) - rota matrisinden okur;
+//   loglama + silme sirasi fn_Prog_Silme_Detay(91). Hepsi TEK transaction.
+//   ONAY YAYINI ve SERVIS bagi app tarafinda kalir (SP kapsaminda degil).
 var
-  tur, tabno : integer;
-  LYorumQ : TFDQuery;
+  LServisId: Integer;
 begin
+  if SiparisId <= 0 then Exit;
+  // KILIT + donusum on-kontrolu (kullaniciya mesaj gosterir)
+  if not SiparisSilinebilirMi(SiparisId, 0) then
+     Abort;
 
-   // KILIT + DONUSUM: hepsi SiparisSilinebilirMi'de (kilit dahil; TUR/TARIH SIPARIS'ten okunur).
-   if not SiparisSilinebilirMi(SiparisId, 0) then
-      Abort;
-
-  //bu siparişte onaylama varsa onun yayını vardır onu da silmek gerekir, bunun için şimdi onaylayacak kısma sıfır koyarız..
+  // Onay yayinini kaldir (belge turune gore)
   case SiparisTur of
-   9 :  Tablo.OnayYayinIslemleri('SIPARIS',TabNo_SIPARIS_Gelen, SiparisId, 1, 0, -32);
-   19 : Tablo.OnayYayinIslemleri('SIPARIS',TabNo_SIPARIS_Giden, SiparisId, 1, 0, -34);
-   101 : begin  //satinalma
-          Tablo.OnayYayinIslemleri('SIPARIS',TabNo_Satinalma_Talep, SiparisId, 1, 0, -24);
-          Tablo.OnayYayinIslemleri('SIPARIS',TabNo_SATINALMA, SiparisId, 1, 0, -26);
+   9 :  OnayYayinIslemleri('SIPARIS', TabNo_SIPARIS_Gelen, SiparisId, 1, 0, -32);
+   19 : OnayYayinIslemleri('SIPARIS', TabNo_SIPARIS_Giden, SiparisId, 1, 0, -34);
+   101 : begin
+          OnayYayinIslemleri('SIPARIS', TabNo_Satinalma_Talep, SiparisId, 1, 0, -24);
+          OnayYayinIslemleri('SIPARIS', TabNo_SATINALMA, SiparisId, 1, 0, -26);
         end;
   end;
-  ///
-  ///
-  ///
-  // Kart tabNo'sunu TUR'a gore belirle -> UInfo'da dogru modul/bolum (Stok Talep/Satinalma/Siparis).
-  case SiparisTur of
-    9:   tabno := TabNo_SIPARIS_Gelen;
-    19:  tabno := TabNo_SIPARIS_Giden;
-    101: tabno := TabNo_SATINALMA;
-    105: tabno := TabNo_STOKTALEP;
-  else   tabno := TabNo_SIPARIS_Gelen;
-  end;
 
-  //Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI in (' + IntToStr(TabNo_SIPARIS_Gelen) + ',' + IntToStr(TabNo_SIPARIS_Giden) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+  // Servisten donusmus siparis: servisin donusum bagi cozulur (SP kapsami disi).
+  LServisId := 0;
+  TablodanSorguAc(3, 'select YERI, YERID from SIPARIS where ID=' + IntToStr(SiparisId));
+  if (not Query3.IsEmpty) and (Query3.FieldByName('YERI').AsInteger = 83) then
+     LServisId := Query3.FieldByName('YERID').AsInteger;
 
-  // REHBERBILGI (siparis detay sablon bilgileri): YER_ID=siparis, YERI=alis/satis siparis sablon tipi.
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI in (' + IntToStr(TabNo_FATURA_AlisSiparis) + ',' + IntToStr(TabNo_FATURA_SatisSiparis) + ') and YER_ID=&yer_id ',['&yer_id'], [SiparisId]);
+  ApiSilCagir('sp_Api_Belge_Siparis_Sil_Json', SiparisId);
 
-  // GOREVYORUM (siparis yorumlari) + her yoruma EKLI DOKUMAN. Yorum: TUR=TabNo_SIPARIS_Gelen,
-  // GOREVID=siparis. Once ekli dokumanlari DokumanSil ile temizle (DOKUMAN + IMAJ/yetki/gecmis...),
-  // sonra yorum satirlarini sil. (GridYorumuSil ile ayni desen.)
-  LYorumQ := TFDQuery.Create(nil);
-  try
-    LYorumQ.Connection := Tablo.FDCnn;
-    LYorumQ.SQL.Text := 'select D.ID from DOKUMAN D inner join GOREVYORUM GY on D.MODULID = GY.ID where GY.TUR=91 and GOREVID=' + IntToStr(SiparisId);
-    LYorumQ.Open;
-    while not LYorumQ.Eof do begin
-      if LYorumQ.FieldByName('ID').AsInteger > 0 then
-        Tablo.DokumanSil(True, LYorumQ.FieldByName('ID').AsInteger, 1, -1);
-      LYorumQ.Next;
-    end;
-     LYorumQ.Close;
-  finally
-     LYorumQ.Free;
-  end;
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVYORUM where TUR=&tur and GOREVID=&gid ',['&tur','&gid'], [TabNo_SIPARIS_Gelen, SiparisId]);
-
-  // Detay (SIPARISDETAY) SILMEDEN ONCE logla (her satir kendi ID, ust=kart).
-  LogDetaylariSil('SIPARISDETAY', 'SIPARISID', TabNo_SIPARISDETAY, tabno, SiparisId);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARISDETAY where SIPARISID=&Id ', ['&Id'], [SiparisId]);
-  Tablo.TablodanSorguAc(3,'SELECT * FROM SIPARIS where ID='+IntToStr(SiparisId));
-  if Tablo.Query3.FieldByName('YERI').AsString = '83' then //servisten siparişe dönüşmüşse
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update SERVIS set YERI=null, YERID=null where ID=&Id ', ['&Id'], [Tablo.Query3.FieldByName('YERID').AsInteger]);
-
-  LogKartSil(Tablo.Query3, tabno, SiparisId);   // kart SILME, dogru tabNo
-  // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
-  LogDetaylariSil('SIPARIS_USER', 'ID', TabNo_SIPARIS_USER, tabno, SiparisId);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from SIPARIS where ID=&Id ', ['&Id'], [SiparisId]);
+  if LServisId > 0 then
+     Veritabani.BasitKomutÇalıştır(FDCnn, ' update SERVIS set YERI=null, YERID=null where ID=&Id ',
+       ['&Id'], [LServisId]);
 end;
 
 function TTablo.SistemTarihFormatinaCevirme(TarihBilgi: String): String;
@@ -6135,43 +6039,6 @@ begin
   Result := ApiSonucInt(LSonuc, 'BelgeId');
 end;
 
-function TTablo.UretimFisiOlustur(Tarih:TDateTime;Yeri,YerId,ReceteID,GirisDepo,CikisDepo:integer;Miktar:Extended):integer;
-var
-  belgeno : TBelgeNo;
-begin
-  belgeno:= SiradakiBelgeNumarasi(6, Tablo.GENINI.BugunTrhSaat);
-
-  Tablo.TablodanSorguAc(8,'select KOD,AD,STOKID, BIRIM=(select S.ANABIRIM from STOKLAR S where S.ID=UR.STOKID),'+
-                          ' MALIYETSON=(select SF.FIYAT from STOKFIYAT SF where UR.STOKID=SF.STOKID and SF.FIYATADI=-1),'+
-                          ' MALIYETORT=(select SF.FIYAT from STOKFIYAT SF where UR.STOKID=SF.STOKID and SF.FIYATADI=-2) '+
-                          ' from URETIMRECETE UR where  ID='+IntToStr(ReceteID));
-  if Tablo.Query8.RecordCount=0 then
-     Exit(0);
-                                //TabNo_URETIMRECETE                 ANAKAYITID'YE RECETEID KAYDEDİLİR
-
-  Tablo.Query7.Close;
-  Tablo.Query7.SQL.Text:= 'INSERT INTO FATBASLIK (TARIH,FATURATARIH,FATURANO,KOCANNO,TUR,TIPI,REHBERID,GIRISDEPO,CIKISDEPO, EKVERGI,KUR,DOVIZ_CINSI,SAYFA';
-  Tablo.Query7.SQL.Add(' ,ACIKLAMA,EKLEYEN,KDVDURUM,SUBEID,YERI,YERID,ANAKAYITID,LOKASYON,ISYERI,AKTIVITEID,STOKISK,FATURA_MATRAHI,FATURA_TUTARI,DOVIZKUR,KDV_TUTARI,DOVIZ_TUTARI ) ');
-  Tablo.Query7.SQL.Add(' VALUES('''+FormatDateTime('mm/dd/yyyy hh:nn:ss', Tarih)+''','''+FormatDateTime('mm/dd/yyyy hh:nn:ss', Tarih)+''','''+belgeno.Serino+''','+IntToStr(KocannoBul(6))+',6,1,0,'+IntToStr(GirisDepo)+','+IntToStr(CikisDepo));
-  Tablo.Query7.SQL.Add(' ,0.0,'''+CariDoviz+''','''+VarsDoviz+''','+Tablo.Query8.FieldByName('BIRIM').AsString+',');
-  Tablo.Query7.SQL.Add(' '''+Tablo.Query8.FieldByName('KOD').AsString+' - '+Tablo.Query8.FieldByName('AD').AsString+''','+Kullanan+',''Muaf'','+
-                    IntToStr(SubeId)+','+IntToStr(Yeri)+','+IntToStr(YerId)+','+IntToStr(ReceteID)+',0,0,'+
-                    Tablo.Query8.FieldByName('STOKID').AsString+','+Float_ToStr(Miktar)+','+Float_ToStr(Tablo.Query8.FieldByName('MALIYETSON').AsFloat)+','+
-                    Float_ToStr(Tablo.Query8.FieldByName('MALIYETORT').AsFloat)+','+Float_ToStr(DovizKurDegeri)+','+
-                    Float_ToStr(Tablo.Query8.FieldByName('MALIYETSON').AsFloat/DovizKurDegeri)
-                    +','+Float_ToStr(Tablo.Query8.FieldByName('MALIYETORT').AsFloat/DovizKurDegeri)+') ');
-  Tablo.Query7.Open;
-  Tablo.Query6.Close;
-  Tablo.Query6.SQL.Text := 'INSERT INTO FATURA(FATBASID,REHBERID,TUR,URUNID,ACIKLAMA,ADET,BIRIM,MIKTAR,BIRIMFIYAT,TUTAR,KUR,ISKONTO,ISKONTO2,KDV ' ;
-  Tablo.Query6.SQL.Add(',DOVIZ_TUTARI,DOVIZ_KURU,DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,MASRAFID,IZLEME,STOKDURUMDEGIS,SUBEID,EKLEYEN,YERI,YERID)  ');
-  Tablo.Query6.SQL.Add('select '+Tablo.Query7.Fields[0].asstring+',0,URD.TUR,URD.URUNID,URD.ACIKLAMA,URD.ADET*'+FormatFloat('#.######',Miktar)+
-                       ',URD.BIRIM,URD.MIKTAR*'+FormatFloat('#.######',Miktar)+',MALIYETSON,MALIYETORT,'''+CariDoviz+''',0,0,S.KDV,MALIYETORT/'+Float_ToStr(DovizKurDegeri)+','''+VarsDoviz+''',MALIYETSON/'+Float_ToStr(DovizKurDegeri)+
-                       ','+Float_ToStr(DovizKurDegeri));
-  Tablo.Query6.SQL.Add(',URD.MASRAFID,S.IZLEME,1,'+IntToStr(SubeID)+','+Kullanan+','+inttostr(TabNo_URETIMRECETEDETAY)+',URD.ID ');
-  Tablo.Query6.SQL.Add(' from URETIMRECETEDETAY URD inner join STOKLAR S on URD.URUNID=S.ID where URETIMRECETEID='+IntToStr(ReceteID));
-  Tablo.Query6.ExecSQL;
-  Result := Tablo.Query7.Fields[0].AsInteger;
-end;
 
 procedure TTablo.DovizGuncelle(Force: Boolean);
 var
@@ -7336,7 +7203,9 @@ begin
   // sıradaki belge no
   if FileSizeByName(DosyaAdi) > (MaxDosyaBuyuklugu * 1024) then
     raise Exception.Create(Maksimumdosyaboyutu +  IntToStr(MaxDosyaBuyuklugu)  );
-  Tablo.TablodanSorguAc(2, 'select isnull(max(BELGENO),0)+1 from IMAJ where YERI in (41,51,61,72,81,86,100)');
+  // Sıradaki belge no: MERKEZI SAYAC (istemcide max+1 -> iki kullanıcı aynı numarayı alır)
+  var LBelgeNo: string := IntToStr(SiradakiNoSayi('IMAJ', 'BELGENO', 'DOKUMAN',
+    'YERI in (41,51,61,72,81,86,100)'));
   // Belge türü nedir
   s := ExtractFileExt(DosyaAdi);
   if Pos('.', s) > 0 then
@@ -7346,7 +7215,7 @@ begin
 (*  Tablo.Query1.Close;                                                                                        //FExtToStr
   Tablo.Query1.SQL.Text := ' INSERT INTO IMAJ (SURUM,DURUM,ICDIS,REHBERID,YERI,YER_ID,BELGENO,BELGETURU,BOYUT,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) '
     + 'VALUES(''1.0'',1,' + IntToStr(Dokuman_Kayit_Yeri) + ',' + Kullanan + ',''' + IntToStr(Yeri) + ''',' + IntToStr(Yer_ID)
-    + ',' + Tablo.Query2.Fields[0].AsString + ',''' + copy(DosyaAdi, RevPos('.', DosyaAdi)+1,5)+''','+Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi)
+    + ',' + LBelgeNo + ',''' + copy(DosyaAdi, RevPos('.', DosyaAdi)+1,5)+''','+Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi)
     + ''',:PBELGE,' + Kullanan + ','''+FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat)+''','+inttostr(SubeID)+') select scope_identity()';*)
   Tablo.Query1.Close;                                                                                        //FExtToStr
   // Kolon + VALUES ortak; ID-getir motora gore: MSSQL OUTPUT INSERTED.ID INTO @NewID + SELECT,
@@ -7355,7 +7224,7 @@ begin
     'INSERT INTO IMAJ (SURUM,DURUM,ICDIS,REHBERID,YERI,YER_ID,BELGENO,BELGETURU,BOYUT,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) ';
   var LImajVal: string :=
     'VALUES(''1.0'',1,' + IntToStr(Dokuman_Kayit_Yeri) + ',' + Kullanan + ',''' + IntToStr(Yeri) + ''',' +
-    IntToStr(Yer_ID) + ',' + Tablo.Query2.Fields[0].AsString + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
+    IntToStr(Yer_ID) + ',' + LBelgeNo + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
     Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi) +
     ''',:PBELGE,' + Kullanan + ',''' + FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat) + ''',' +
     IntToStr(SubeID) + ')';
@@ -7365,7 +7234,7 @@ begin
       'INSERT INTO IMAJ (ID,SURUM,DURUM,ICDIS,REHBERID,YERI,YER_ID,BELGENO,BELGETURU,BOYUT,BELGEADI,BELGE,EKLEYEN,DEGISTIRMETARIHI,SUBEID) ';
     LImajVal :=
       'VALUES((select coalesce(max(ID),0)+1 from IMAJ),''1.0'',1,' + IntToStr(Dokuman_Kayit_Yeri) + ',' + Kullanan + ',''' + IntToStr(Yeri) + ''',' +
-      IntToStr(Yer_ID) + ',' + Tablo.Query2.Fields[0].AsString + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
+      IntToStr(Yer_ID) + ',' + LBelgeNo + ',''' + Copy(DosyaAdi, RevPos('.', DosyaAdi) + 1, 5) + ''',' +
       Float_ToStr(FileSizeByName(DosyaAdi) / 1024) + ',''' + ExtractFileName(DosyaAdi) +
       ''',:PBELGE,' + Kullanan + ',''' + FormatDateTime('yyyy-mm-dd hh:nn', Genini.BugunTrhSaat) + ''',' +
       IntToStr(SubeID) + ')';
@@ -8096,53 +7965,20 @@ begin
    end;
 end;
 
-function TTablo.StokSilmeIslemleri(StokID:Integer):Boolean;
+function TTablo.StokSilmeIslemleri(StokID:Integer; AOnaySor:Boolean=True):Boolean;
+// Silme tamamen SUNUCUDA: sp_Api_Stok_Sil_Json (kontrol -> log -> sirali delete,
+//   tek transaction). Engel kurallari fn_Prog_Silme_Engel_Ek(88), silme plani
+//   fn_Prog_Silme_Detay_Ek(88) icinde - kural degisirse tek yerde degisir.
 begin
   Result := False;
-  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-    if StokHareketVarMi(StokID,True) then
-      raise Exception.Create(Kartsilinemez)
-    else begin
-      // SILME logu: kayit silinmeden once (ISLEMLOG) - ust=kendisi.
-      if LogGun > 0 then begin
-        Tablo.TablodanSorguAc(1, 'select * from STOKLAR where ID='+IntToStr(StokID));
-        if not Tablo.Query1.IsEmpty then begin
-          LogKartSil(Tablo.Query1, TabNo_STOKLAR, StokID);
-          LogOnceki.Clear;
-        end;
-      end;
-      // KART FOTOGRAFI (STOKLAR.RESIM blob) - log JSON'u blob'lari dislar, ayrica yedekle.
-      LogBlobYedekle('STOKLAR', 'RESIM', StokID, TabNo_STOKLAR, StokID);
-      LogDetaylariSil('IMAJ', 'YER_ID', TabNo_IMAJ, TabNo_STOKLAR, StokID, 'YERI between 71 and 72');
-      LogDetaylariSil('STOKFIYAT', 'STOKID', TabNo_STOKFIYAT, TabNo_STOKLAR, StokID);
-      LogDetaylariSil('STOKESDEGER', 'STOKID', TabNo_STOKESDEGER, TabNo_STOKLAR, StokID);
-      LogDetaylariSil('STOKBARKOD', 'STOKID', TabNo_STOKBARKOD, TabNo_STOKLAR, StokID);
-      LogDetaylariSil('STOKBOYUTKOMBINASYON', 'STOKID', TabNo_STOKBOYUTKOMBINASYON, TabNo_STOKLAR, StokID);
-      LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_STOKDETAY, TabNo_STOKLAR, StokID, 'YERI=' + IntToStr(TabNo_STOKLAR));
-      LogDetaylariSil('GOREVYORUM', 'GOREVID', Tabno_GOREVYORUM, TabNo_STOKLAR, StokID, 'TUR=' + IntToStr(TabNo_STOKLAR));
-      LogDetaylariSilSorgu('DOKUMAN',
-        'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_STOKLAR) + ' and GOREVID=' + IntToStr(StokID) + ')',
-        TabNo_DOKUMAN, TabNo_STOKLAR, StokID);
-      LogDetaylariSilSorgu('IMAJ',
-        'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_STOKLAR) + ' and GOREVID=' + IntToStr(StokID) + '))',
-        TabNo_IMAJ, TabNo_STOKLAR, StokID);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where (YERI between 71 and 72) and YER_ID=&yer_id ', ['&yer_id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKFIYAT where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from ISORTAGI where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKESDEGER where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKBARKOD where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from EKIPMANLAR where URUNID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PAKETDETAY where PAKETID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PAKETDETAY where URUNID=&id and STOK=1 ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKBOYUTKOMBINASYON where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKSEVIYE where STOKID=&id ', ['&id'], [StokID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKMUHASEBE where STOKID=&id ', ['&id'], [StokID]);
-      // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
-      LogDetaylariSil('STOKLAR_USER', 'ID', TabNo_STOKLAR_USER, TabNo_STOKLAR, StokID);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from STOKLAR where ID=&id ', ['&id'], [StokID]);
-      Result := True;
-    end;
-  end;
+  if AOnaySor and (Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) <> IDYES) then Exit;
+
+  // KART FOTOGRAFI (STOKLAR.RESIM blob): log JSON'u blob'lari dislar -> Geri Al
+  //   icin app tarafinda ayrica yedeklenir (SP bunu yapamaz).
+  LogBlobYedekle('STOKLAR', 'RESIM', StokID, TabNo_STOKLAR, StokID);
+
+  ApiSilCagir('sp_Api_Stok_Sil_Json', StokID);
+  Result := True;
 end;
 
 function TTablo.BankaHesapEkrani(Cagiran: SmallInt; var HESAPID, HESAPKODU, HESAPNO, HESAPADI, Kur: string): Boolean;
@@ -8819,53 +8655,33 @@ begin
 end;
 
 function TTablo.ProjeSilmeIslemleri(Tablo1:TFDQuery; ProjeID:Integer):boolean;
+// SILME ARTIK SUNUCUDA: sp_Api_Proje_Sil_Json (modul 70).
+//   Engel kurallari (belge/kasa/cek/gorev/teklif/siparis) fn_Prog_Silme_Engel(70);
+//   detay+yorum+ek dosya kapsami fn_Prog_Silme_Detay(70). TEK transaction.
+//   YETKI (yalniz proje sorumlusu silebilir), ONAY sorusu ve GOOGLE TAKVIM
+//   app tarafinda kalir - bunlar SP kapsami degildir.
 var
-    GoogleTakvimSonuc:boolean;
+  GoogleTakvimSonuc: Boolean;
 begin
-   Result:=False;
-   Tablo.TablodanSorguAc(5,'select * from projeler where ID='+IntToStr(ProjeID));
-   if (RolId<>'-1')and(Tablo.Query5.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
+   Result := False;
+   if ProjeID <= 0 then Exit;
+
+   TablodanSorguAc(5, 'select * from PROJELER where ID=' + IntToStr(ProjeID));
+   if (RolId <> '-1') and (Query5.FieldByName('PRJ_SORUMLUSU_ID').AsString <> Kullanan) then begin
        Application.MessageBox(PChar(AWSorumluHaricindeSilmeYapilmaz), PChar(Uyari), MB_OK + MB_ICONERROR);
        Abort;
    end;
 
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     //varsa dokümanların silinmeli
-
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from FATBASLIK where PROJEID =  &SId', ['&SId'],[ProjeID]) then
-        raise Exception.Create(PDFaturaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from KASA where PROJEID =  &SId', ['&SId'],[ProjeID]) then
-        raise Exception.Create(RDPlanVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from CEKHAREKET where PROJEID =  &SId', ['&SId'],[ProjeID]) then
-        raise Exception.Create(RDCekVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from GOREVLER where PROJEID =  &SId', ['&SId'],[ProjeID]) then
-        raise Exception.Create(RDAktiviteVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from TEKLIF where PROJEID =  &SId', ['&SId'],[ProjeID]) then
-        raise Exception.Create(RDTeklifVerisiVarSilinemez);
-
-       if (GCalendarAktif = true) and ( Tablo.Query5.FieldByName('GOOGLEOLAYID').AsString <> '') then
+      if (GCalendarAktif) and (Query5.FieldByName('GOOGLEOLAYID').AsString <> '') then
       begin
-        GoogleTakvimSonuc:= Tablo.GoogleTakvimSil(Tablo.Query5.FieldByName('GOOGLEHESAPID').AsInteger,
-                                                  Tablo.Query5.FieldByName('GOOGLEOLAYID').AsString);
-        if GoogleTakvimSonuc= false then
-           Showmessage(AKGoogle_takvim_silinemedi);
+        GoogleTakvimSonuc := GoogleTakvimSil(Query5.FieldByName('GOOGLEHESAPID').AsInteger,
+                                             Query5.FieldByName('GOOGLEOLAYID').AsString);
+        if not GoogleTakvimSonuc then
+           ShowMessage(AKGoogle_takvim_silinemedi);
       end;
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],
-         [41, ProjeID]);
-     //varsa proje bağlantıları silinmeli
-      //kendisi silinir
-      //PROJELER.Delete;
-      // Detay (REHBERBILGI proje bilgileri, YERI=proje) SILMEDEN ONCE logla.
-      LogDetaylariSil('REHBERBILGI', 'YER_ID', TabNo_PROJEDETAY, TabNo_PROJELER, ProjeID, 'YERI=' + IntToStr(TabNo_PROJELER));
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM REHBERBILGI WHERE YERI = &RYer AND YER_ID = &YerId ', ['&RYer','&YerId'],[TabNo_PROJELER, ProjeID]);
-      // Detay satirlarini SILMEDEN ONCE logla (ust=proje), sonra sil.
-      LogDetaylariSil('PROJEASAMA', 'PROJEID', TabNo_PROJEASAMA, TabNo_PROJELER, ProjeID);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' DELETE FROM PROJEASAMA where PROJEID= &YerId ', ['&YerId'],[ ProjeID]);
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJELER where Id=&id ',['&id'],[ProjeID]);
-
-    LogKartSil(Tablo1, TabNo_PROJELER, ProjeID);
-    Result:=True;
+      ApiSilCagir('sp_Api_Proje_Sil_Json', ProjeID);
+      Result := True;
    end;
 end;
 
@@ -8873,17 +8689,12 @@ procedure TTablo.DokumanSil(Cop: Boolean; ID, TIP, KISAYOLID: integer);
 begin
   if Cop then begin // çöp kutusu içinden bir yerden seçilmiş, uçurulacak.
     // if DOKUMAN.FieldByName('TIP').AsInteger = 1 then
-    if TIP = 1 then begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANYETKI  where YERI=321 and YERID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI  where YERI=321 and YER_ID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SOZLESMELER   where YERI=321 and YER_ID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANGECMIS   where DOKUMANID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANILGILI    where DOKUMANID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANBILDIRIM     where DOKUMANID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMANKISAYOL where DOKUMANID=&DokID', ['&DokID'], [ID]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where ID=&DokID', ['&DokID'], [ID]);
-    end;
+    if TIP = 1 then
+      // SILME ARTIK SUNUCUDA: sp_Api_Dokuman_Sil_Json (modul 321).
+      //   Icerik (IMAJ), yetki, ilgili, bildirim, gecmis, kisayol ve kart TEK
+      //   transaction'da; ayrica ISLEMLOG yazilir (eskiden HIC loglanmiyordu ->
+      //   silinen dokuman Geri Al ile geri gelmiyordu).
+      ApiSilCagir('sp_Api_Dokuman_Sil_Json', ID);
     // if DOKUMAN.FieldByName('TIP').AsInteger = 0 then
     if TIP = 0 then
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMANKISAYOL where ID=&ID', ['&ID'], [KISAYOLID]);
@@ -9384,20 +9195,12 @@ begin
 end;
 
 procedure TTablo.UretimEmriSilmeIslemleri(UretimEmriID:integer);
+// Silme sunucuda: sp_Api_UretimEmri_Sil_Json. Plan fn_Prog_Silme_Detay_Ek(140)
+//   operasyon agacinin TAMAMINI kapsar (personel/olcum/maliyet/fason/yorum-medya) -
+//   burada elle yazilan dizi yalnizca operasyon+detay siliyor, gerisi yetim kaliyordu.
+//   Engel: operasyondan uretim fisi cikmissa silinmez (SP mesaj verir).
 begin
-  // Detay satirlarini SILMEDEN ONCE logla (ust=uretim emri), sonra sil.
-  LogDetaylariSil('URETIMOPERASYON', 'URETIMEMRIID', TabNo_URETIMOPERASYON, TabNo_URETIMEMRI, UretimEmriID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMOPERASYON where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
-  LogDetaylariSil('URETIMEMRIDETAY', 'URETIMEMRIID', TabNo_URETIMEMRIDETAY, TabNo_URETIMEMRI, UretimEmriID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRIDETAY where URETIMEMRIID=&ID',['&ID'],[UretimEmriID]);
-  // KART (URETIMEMRI) silme logu (silmeden ONCE, kayit dururken)
-  if LogGun > 0 then begin
-    Tablo.TablodanSorguAc(1,'select * from URETIMEMRI where ID='+IntToStr(UretimEmriID));
-    LogKartSil(Tablo.Query1, TabNo_URETIMEMRI, UretimEmriID);
-  end;
-  // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin); FK cascade kart ile siler.
-  LogDetaylariSil('URETIMEMRI_USER', 'ID', TabNo_URETIMEMRI_USER, TabNo_URETIMEMRI, UretimEmriID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMEMRI where ID=&ID',['&ID'],[UretimEmriID]);
+  ApiSilCagir('sp_Api_UretimEmri_Sil_Json', UretimEmriID);
 end;
 
 function TTablo.UretimEmriSihirbazBaslat(IslemOp:Char;Cagiran,UretimEmriId:Integer):Integer;
@@ -9780,23 +9583,12 @@ begin
 end;
 
 procedure TTablo.ServisSil(ServisId:Integer);
+// SILME ARTIK SUNUCUDA: sp_Api_Servis_Sil_Json (GenDepoUpdate127, modul 83).
+//   Detay/yorum/ek dosya kapsami ve sirasi metadata'da (fn_Prog_Silme_Detay);
+//   "servisten belge uretilmis" engeli fn_Prog_Silme_Engel'de. TEK transaction.
 begin
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[TabNo_SERVIS, ServisID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISDETAY where SERVISID=&Id ',['&Id'], [ServisID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISBILGI where SERVISID=&Id ',['&Id'], [ServisID]);
-  // Detay satirlarini SILMEDEN ONCE logla (ust=servis), sonra sil.
-  LogDetaylariSil('SERVISDETAYPERSONEL', 'SERVISID', TabNo_SERVISDETAYPERSONEL, TabNo_SERVIS, ServisID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISDETAYPERSONEL where SERVISID = &Id ',['&Id'], [ServisID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISASAMA where SERVISID = &Id ',['&Id'], [ServisID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVKULLANICI where TUR=12 and LISTGOREVID  = &Id ',['&Id'], [ServisID]);
-  // Detay satirlarini SILMEDEN ONCE logla (ust=servis), sonra sil.
-  LogDetaylariSil('SERVISHAREKET', 'SERVISID', TabNo_SERVISHAREKET, TabNo_SERVIS, ServisID);
-  // SERVISHAREKET_USER (satir ek alan, ID=hareket ID) -> subquery ile kart grubuna sil-logla (Geri Al).
-  LogDetaylariSilSorgu('SERVISHAREKET_USER',
-    'ID in (select ID from SERVISHAREKET where SERVISID=' + IntToStr(ServisID) + ')',
-    TabNo_SERVISHAREKET_USER, TabNo_SERVIS, ServisID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVISHAREKET where SERVISID  = &Id ',['&Id'], [ServisID]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from SERVIS where ID=&Id ',['&Id'], [ServisID]);
+  if ServisId <= 0 then Exit;
+  ApiSilCagir('sp_Api_Servis_Sil_Json', ServisId);
 end;
 
 (*
@@ -10171,20 +9963,15 @@ begin
 end;
 
 function TTablo.GorevSil(ID:Integer):Boolean;
+// SILME ARTIK SUNUCUDA: sp_Api_Gorev_Sil_Json (modul 33).
+//   Yorum/ek dosya/atama/animsatici kapsami metadata'da; TEK transaction.
+//   Google takvim olayi app tarafinda silinir (dis servis).
 begin
   Result := False;
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from DOKUMAN where MODUL='+IntToStr(TabNo_GOREVLER)+' AND MODULID='+IntToStr(ID),[],[]);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from ANIMSAT where TUR=1 and ID='+IntToStr(ID),[],[]);
-  // Detay satirlarini SILMEDEN ONCE logla (ust=gorev), sonra sil.
-  LogDetaylariSil('GOREVYORUM', 'GOREVID', Tabno_GOREVYORUM, TabNo_GOREVLER, ID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVYORUM where [GOREVID]='+IntToStr(ID),[],[]);
-  // Atanan personel (GOREVKULLANICI TUR=11) SILMEDEN ONCE logla (ust=gorev).
-  LogDetaylariSil('GOREVKULLANICI', 'LISTGOREVID', TabNo_GOREVLER, TabNo_GOREVLER, ID, 'TUR=11');
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVKULLANICI where [LISTGOREVID]='+IntToStr(ID)+' AND TUR=11 ',[],[]);
+  if ID <= 0 then Exit;
   if GoogleTakvimeKaydet then
      GoogleCalendarOlaySil(ID);
-  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVLER where ID='+IntToStr(ID),[],[]);
-
+  ApiSilCagir('sp_Api_Gorev_Sil_Json', ID);
   Result := True;
 end;
 function TTablo.GorevOlustur(Konu:String; ListeId,GorevID,ProjeId,Bayrak,RehberId,PersonelId,BagliId,Turu, Yer, Yer_Id : Integer; BasTrh,BitTrh :TDateTime; BilgiId:integer=0): Integer;
@@ -11235,47 +11022,45 @@ begin
 end;
 
 function TTablo.CekSil(CekId: Integer): Boolean;
-var i : smallint;
-    LTabNo: Integer;
+// SILME ARTIK SUNUCUDA: sp_Api_CekSenet_Sil_Json (GenDepoUpdate129).
+//   Kart TABLOID'i CEKSENET'e gore secilir (315 alinan cek / 316 verilen cek /
+//   318 alinan senet / 319 verilen senet) -> UInfo'da dogru kart tipiyle gorunur
+//   ve Geri Al dogru modulden calisir.
+//   Engel (giris disinda hareket) fn_Prog_Silme_Engel; IMAJ + CEKHAREKET + kart
+//   TEK transaction'da silinir. KILIT kontrolu app tarafinda kalir (MODUL/devir).
+var
+  i, LTabNo: Integer;
 begin
-   Tablo.TablodanSorguAc(1,'SELECT * FROM CEKLER WHERE ID='+IntToStr(CekId));
-   // CEKSENET'e gore dogru kart TABLOID'i (Alinan/Verilen Cek/Senet) - ekleme/degistirme ile ayni
-   case Tablo.Query1.FieldByName('CEKSENET').AsInteger of
+   Result := False;
+   if CekId <= 0 then Exit;
+
+   TablodanSorguAc(1, 'SELECT * FROM CEKLER WHERE ID=' + IntToStr(CekId));
+   if Query1.IsEmpty then Exit;
+   case Query1.FieldByName('CEKSENET').AsInteger of
      103: LTabNo := TabNo_CEKLER_Verilen;
      121: LTabNo := TabNo_SENET_Alinan;
      321: LTabNo := TabNo_SENET_Verilen;
    else   LTabNo := TabNo_CEKLER_Alinan;
    end;
-   if Tablo.Query1.FieldByName('TUR').AsInteger in [130..139]  then
-         i := 23
-   else
-         i := 33;
-   if KilitKontrolEt(2, i, Tablo.Query1.FieldByName('TARIH').AsDateTime, 2) then
-      abort;
+   if Query1.FieldByName('TUR').AsInteger in [130..139] then i := 23 else i := 33;
+   if KilitKontrolEt(2, i, Query1.FieldByName('TARIH').AsDateTime, 2) then
+      Abort;
 
-   Tablo.TablodanSorguAc(1,'SELECT count(*) FROM CEKHAREKET WHERE CEKSENETLERID='+IntToStr(CekId));
-   if Tablo.Query1.Fields[0].AsInteger>1 then begin  //tek giriş hareketi dışında hareket var mı?
-      UyariGoster(Uyari,CekHareketHareketiHatasi,1);
-      Result := False;
-   end else begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from IMAJ where YERI = 21 and YER_ID=&SId', ['&SId'], [CekId]);
-      if LogGun > 0 then begin
-         // hareketler (detay), ust = cek karti (LTabNo); SatirID = hareket ID
-         Tablo.TablodanSorguAc(0,'SELECT * FROM CEKHAREKET WHERE CEKSENETLERID='+IntToStr(CekId));
-         Tablo.Query0.First;
-         while not Tablo.Query0.Eof do begin
-           LogKartSil(Tablo.Query0, TabNo_CEKLER_Hareket, Tablo.Query0.Fields[0].AsInteger, LTabNo, CekId);
-           Tablo.Query0.Next;
-         end;
-       end;
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from CEKHAREKET where CEKSENETLERID=&SId', ['&SId'], [CekId]);
-
-       if LogGun > 0 then begin
-          Tablo.TablodanSorguAc(1,'SELECT * FROM CEKLER WHERE ID='+IntToStr(CekId));
-          LogKartSil(Tablo.Query1, LTabNo, CekId);
-       end;
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from CEKLER where ID=&SId', ['&SId'], [CekId]);
-       Result := True;
+   try
+     ApiCagir('sp_Api_CekSenet_Sil_Json',
+       TJSONObject.Create
+         .AddPair('Modul',   TJSONNumber.Create(LTabNo))
+         .AddPair('KayitId', TJSONNumber.Create(CekId))
+         .AddPair('Oturum', TJSONObject.Create
+           .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+           .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
+     Result := True;
+   except
+     on E: Exception do
+     begin
+       UyariGoster(Uyari, E.Message);   // is kurali engeli -> sade uyari
+       Result := False;
+     end;
    end;
 end;
 
@@ -11323,302 +11108,83 @@ begin
 end;
 
 procedure TTablo.CariSil(RehberId:Integer);
-var I : Integer;
+// SILME ARTIK SUNUCUDA: sp_Api_Cari_Sil_Json (GenDepoUpdate127).
+//   Kapsam bu yordamdan AYNEN devralindi - engel kurallari fn_Prog_Silme_Engel,
+//   loglama + silme sirasi fn_Prog_Silme_Detay metadata'sinda (modul 71).
+//   Kazanim: TEK TRANSACTION (burada baglantisiz/parcali siliniyordu -> yarim
+//   silme riski), mobil/Delphi ayni davranis, kural tek yerde.
+//   Engel durumunda SP 51200 ile THROW eder; mesaj kullaniciya aynen gider.
 begin
-   Tablo.TablodanSorguAc(1,'select ISNULL(ROL.TY,0),R.ID from REHBER R inner join KULLANICI  K on R.ID = K.REHBERID'+
-                           ' inner join  ROLLER ROL on K.ROLID = ROL.ID where R.ID='+IntToStr(RehberId));
-   if (Tablo.Query1.RecordCount>0)and(Tablo.Query1.Fields[0].AsBoolean=True) then
-        raise Exception.Create(RDYoneticiKullaniciSilinemez)
-   else if Pos('400.', IntToStr(RehberId))=1 then
-         raise Exception.Create(RDKrediTanimiSilinemez)
-   else if Pos('102.', IntToStr(RehberId))=1 then
-         raise Exception.Create(RDBankaTanimiSilinemez);
-
-     Tablo.Query1.Close;
-     Tablo.Query1.SQL.Text := 'select '+DbUst(1)+'ISLEMTARIHI,ID from KASA where REHBERID = '+ IntToStr(RehberId)+' '+DbSinir(1);
-     Tablo.Query1.Open;
-     if Tablo.Query1.RecordCount>0 then
-        raise Exception.Create(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy', Tablo.Query1.Fields[0].AsDateTime)+RDPlanVerisiVarSilinemez);
-     // NOT: yorum/medya (GOREVYORUM) ARTIK ENGEL DEGIL -> kartla birlikte loglanip silinir
-     //   (StokSil deseni: yorum -> DOKUMAN MODUL=210 -> IMAJ YERI=1 uc katman).
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from FATBASLIK where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDFaturaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from CEKLER where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDCekVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SENETLER where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDSenetVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from PERS_HAREKET where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDPersonelBigisiVarSilinemez);
-     // BAGLI KISI (GRUP=334) kartin KENDI detayidir ("İlgili" girilince olusur) -> tek basina
-     //   ENGEL DEGIL; asagida loglanip kartla birlikte silinir. ENGEL yalnizca o kisi bir
-     //   BELGEDE "ilgili kisi" olarak kullanildiysa (gercek is verisi).
-     if Veritabani.VeriVarMi(Tablo.FDCnn,
-          'select 1 from REHBER K where K.GRUP=334 and K.BAGID=&SId and ('+
-          ' exists(select 1 from SIPARIS  s where s.MUS_ILGILI=K.ID) or'+
-          ' exists(select 1 from TEKLIF   t where t.MUS_ILGILI=K.ID) or'+
-          ' exists(select 1 from SERVIS   v where v.MUS_ILGILI=K.ID) or'+
-          ' exists(select 1 from GOREVLER g where g.MUS_ILGILI=K.ID or g.MUS_ILGILI2=K.ID) or'+
-          ' exists(select 1 from EKIPMANREHBER e where e.MUS_ILGILI=K.ID) or'+
-          ' exists(select 1 from DOKUMAN  d where d.ILGILIID=K.ID) or'+
-          ' exists(select 1 from TEKLIFFINANSAL f where f.ILGILIID=K.ID))',
-          ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDIlgiliKisiKullanilmisSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from BANKAHESAPLAR where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDBankaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from PROJELER where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDProjeVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from AKTIVITELER where MUSTERIID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDAktiviteVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from TEKLIF where REHBERID =  &SId ', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDTeklifVerisiVarSilinemez);
-     // IS VERISI ENGELLERI (kart silinirse yetim kalirdi; eskiden hic kontrol edilmiyordu):
-     //   siparis / servis / sozlesme / satinalma / uretim emri / is emri.
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SIPARIS where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDSiparisVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SERVIS where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDServisVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SOZLESMELER where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDSozlesmeVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from SATINALMA where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDSatinAlmaVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from URETIMEMRI where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDUretimVerisiVarSilinemez);
-     if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from ISEMRI where REHBERID =  &SId', ['&SId'],[IntToStr(RehberId)]) then
-        raise Exception.Create(RDIsEmriVerisiVarSilinemez);
-     // NOT: IMAJ (resim/belge) ARTIK ENGEL DEGIL -> asagida loglanip silinir.
-
-    LogKayitSil('REHBER', TabNo_REHBER, RehberId, TabNo_REHBER, RehberId);
-    // KART FOTOGRAFI (REHBER.RESIM blob): log JSON'u blob'lari dislar -> ayrica yedekle
-    //   (icerik GENDEPO.DOSYA'ya, ISLEMLOG'a geri-yazma talimati). Geri Al'da resim doner.
-    LogBlobYedekle('REHBER', 'RESIM', RehberId, TabNo_REHBER, RehberId);
-    LogDetaylariSil('KULLANICI', 'REHBERID', TabNo_KULLANICI, TabNo_REHBER, RehberId);
-    LogDetaylariSilSorgu('REHBERBILGI',
-      'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(RehberId) + ')',
-      TabNo_REHBERBILGI, TabNo_REHBER, RehberId);
-    LogDetaylariSil('REHBERILETISIM', 'REHBERID', TabNo_REHBERILETISIM, TabNo_REHBER, RehberId);
-    LogDetaylariSilSorgu('REHBERBILGI', 'YERI in (2, 3) and YER_ID=' + IntToStr(RehberId),
-      TabNo_REHBERBILGI, TabNo_REHBER, RehberId);
-    // RESIM/BELGE (IMAJ) + YORUM/MEDYA: StokSil deseni (Utablo:8108-8121) ile ayni.
-    //   Cari resmi = IMAJ (YERI=71, VARSAYILAN=1); icerik IMAJ.BELGE ya da GENDEPO.DOSYA
-    //   (DOSYAID). REHBER.RESIM yalniz CACHE'tir (VarsayilanResimTazele uretir) ve blob
-    //   oldugu icin loga girmez -> Geri Al sonrasi cache UInfo tarafinda tazelenir.
-    LogDetaylariSil('IMAJ', 'YER_ID', TabNo_IMAJ, TabNo_REHBER, RehberId,
-      'YERI=' + IntToStr(TabNo_REHBER));
-    LogDetaylariSilSorgu('REHBERBILGIRESIM',
-      'REHBERBILGIID in (select ID from REHBERBILGI where YERI in (1,2,3) and YER_ID=' + IntToStr(RehberId) + ')',
-      TabNo_REHBERBILGIRESIM, TabNo_REHBER, RehberId);
-    LogDetaylariSil('GOREVYORUM', 'GOREVID', Tabno_GOREVYORUM, TabNo_REHBER, RehberId,
-      'TUR=' + IntToStr(TabNo_REHBER));
-    LogDetaylariSilSorgu('DOKUMAN',
-      'MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_REHBER) + ' and GOREVID=' + IntToStr(RehberId) + ')',
-      TabNo_DOKUMAN, TabNo_REHBER, RehberId);
-    LogDetaylariSilSorgu('IMAJ',
-      'YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=' + IntToStr(TabNo_REHBER) + ' and GOREVID=' + IntToStr(RehberId) + '))',
-      TabNo_IMAJ, TabNo_REHBER, RehberId);
-    // Kartin kendi detaylari (engel DEGIL, kartla gider): e-fatura alias, temsilci,
-    // ilgili personel, ekipman baglantisi, kampanya, kota, bakiye ozeti, yetki alani.
-    // BAGLI KISI (GRUP=334) ve detaylari: kartla birlikte loglanip silinir.
-    LogDetaylariSilSorgu('REHBERBILGI',
-      'YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberId) + '))',
-      TabNo_REHBERBILGI, TabNo_REHBER, RehberId);
-    LogDetaylariSilSorgu('REHBERILETISIM',
-      'REHBERID in (select ID from REHBER where GRUP=334 and BAGID=' + IntToStr(RehberId) + ')',
-      TabNo_REHBERILETISIM, TabNo_REHBER, RehberId);
-    LogDetaylariSilSorgu('REHBER', 'GRUP=334 and BAGID=' + IntToStr(RehberId),
-      TabNo_REHBER, TabNo_REHBER, RehberId);
-    LogDetaylariSil('REHBERALIAS',   'REHBERID', TabNo_REHBERALIAS,          TabNo_REHBER, RehberId);
-    LogDetaylariSil('REHBERTEMSILCI','REHBERID', TabNo_REHBERTEMSILCI,       TabNo_REHBER, RehberId);
-    LogDetaylariSil('REHBERPERSONEL','REHBERID', TabNo_REHBERILGILIPERSONEL, TabNo_REHBER, RehberId);
-
-    // --- Silme sirasi: once bagli/alt satirlar, sonra kartin kendisi ---
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGIRESIM where REHBERBILGIID in (select ID from REHBERBILGI where YERI in (1,2,3) and YER_ID=&id) ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=1 and YER_ID in (select ID from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=&tur and GOREVID=&id)) ',['&tur','&id'],[TabNo_REHBER, RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DOKUMAN where MODUL=210 and MODULID in (select ID from GOREVYORUM where TUR=&tur and GOREVID=&id) ',['&tur','&id'],[TabNo_REHBER, RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GOREVYORUM where TUR=&tur and GOREVID=&id ',['&tur','&id'],[TabNo_REHBER, RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&id ',['&yeri','&id'],[TabNo_REHBER, RehberId]);
-    // Bagli kisi (334) + detaylari
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YER_ID in (select ID from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=&id)) ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID in (select ID from REHBER where GRUP=334 and BAGID=&id) ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER where GRUP=334 and BAGID=&id ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERALIAS where REHBERID=&id ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERTEMSILCI where REHBERID=&id ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERPERSONEL where REHBERID=&id ',['&id'],[RehberId]);
-    //iletisim/ticari sil
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KULLANICI where REHBERID=&id ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=&id) ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERILETISIM where REHBERID=&id ',['&id'],[RehberId]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBERBILGI where YERI in (2, 3) and YER_ID=&id ',['&id'],[RehberId]);
-    // _USER (ek alan) satirini SILMEDEN ONCE logla (Geri Al icin).
-    LogDetaylariSil('REHBER_USER', 'ID', TabNo_REHBER_USER, TabNo_REHBER, RehberId);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER_USER where ID=&id ',['&id'],[RehberId]);
-    //kendisini sil
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from REHBER where ID=&id ',['&id'],[RehberId]);
-     //GENINI' den sil
-    for I := 54 to 69 do begin       ///-10054...-10069 yedekleme ops arası, bu aradakiler silinir.
-      if Veritabani.VeriVarMi(Tablo.FDCnn,'Select * from GENINI Where DIL='+IntToStr(Dil)+' AND BOLUM ='+'-100'+IntToStr(i)+IntToStr(RehberId)+'  ',[],[]) then
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from GENINI where BOLUM ='+'-100'+IntToStr(i)+IntToStr(RehberId)+'  ',[],[]);
-    end;
+  if RehberId <= 0 then Exit;
+  ApiSilCagir('sp_Api_Cari_Sil_Json', RehberId);
 end;
 
 procedure TTablo.KasaSilmeIslemleri(Id, Tur: Integer; Tarih : TDateTime = 39895);
+// KASA HAREKETI SILME - govde SUNUCUDA: sp_Api_KasaHareket_Sil_Json (GenDepoUpdate137).
+//   Eskiden burada 24 ayri DELETE/UPDATE vardi ve TRANSACTION YOKTU: cek hareketi
+//   silinip CEKLER durumu guncellenmeden kopan baglanti kasayi tutarsiz birakiyordu.
+//   Loglama da dagilmisti (bazi dallarda var, bazilarinda yok) -> Geri Al eksik calisiyordu.
+//   Artik tek transaction + her dalda silme-oncesi log.
+//
+// Bu yordam yalnizca YONLENDIRME yapar: cek/senet, fatura-irsaliye ve tahakkuk
+//   kendi silme yollarina (CekSil / FaturaSil / FATBASLIK) gider; KASA satiri API'ye.
 var
-  HId, FaturaId, CekSenetId, KrediId, GeriDonusId, RehberId, KasaID: Integer;
-  BORC, ALACAK, Tutar: Currency;
-  Aciklama: String;
-  s: String[15];
-  islem: Char;
-  procedure AvansTaksitleriniSil(Id:Integer);
-  begin
-    Tablo.TablodanSorguAc(1,'select KASATUR from KASALAR KS inner join KASA K on K.HESAPID=KS.ID where K.ID='+IntToStr(Id));
-    if (Tablo.Query1.RecordCount>0)and(Tablo.Query1.Fields[0].AsInteger=196) then
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from PLANMAAS where YERID=&REHBERID and DURUM=&ID ',['&REHBERID','&ID'],[RehberId,ID]);
-  end;
-
+  LSonuc: string;
+  LFaturaId: Integer;
 begin
-   if KilitKontrolEt(2, Tur, Tarih, 2) then
-      Abort;
-  if Tur in [23, 24, 33,  34] then begin    //Çek ve senet
-     Tablo.CekSil(Id);
-     exit;
-  end
-  else if Tur in [13,17] then begin //Tahakkuklar
-     //Tahakkuk (FATBASLIK) silinirse ve KASA= -9 ise YER ve YERID'deki tablodaki bilgiler silinir.
-     Tablo.TablodanSorguAc(1,'select KASA,YERI,YERID from FATBASLIK where ID='+IntToStr(Id));
-     if Tablo.Query1.Fields[0].AsInteger=-9 then
-        case Tablo.Query1.Fields[1].AsInteger of
-          TabNo_KASA : Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&Id ', ['&Id'],[Tablo.Query1.Fields[2].AsInteger]);
-        end;
-     //
-//     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_FATBASLIK)+' and YERID=&SId', ['&SId'], [Id]);
-     // Tahakkuk (FATBASLIK) kart + FATBASLIK_USER SILMEDEN ONCE logla (Geri Al).
-     // Log listesinde Fatura yerine Tahakkuk bolumu gorunsun diye 108/109 tablo no kullanilir.
-     var LTahakkukTabNo := TabNo_TAHAKKUK_Alacak;
-     if Tur = 17 then LTahakkukTabNo := TabNo_TAHAKKUK_Borc;
-     LogKayitSil('FATBASLIK', LTahakkukTabNo, Id, LTahakkukTabNo, Id);
-     LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, LTahakkukTabNo, Id);
-     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[Id]);
-     Exit;
-  end else if Tur in [4, 6, 8, 10,11,12,14,15,16,109,110,119] then begin //110:adisyon
-    Tablo.TablodanSorguAc(4, 'select * from FATBASLIK where ID=' + IntToStr(Id));
-    if Tablo.Query4.FieldByName('YERI').AsString = '83' then //servisten faturaya/irsaliyeye dönüşmüşse
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' update SERVIS set YERI=null, YERID=null where ID=&Id ', ['&Id'], [Tablo.Query4.FieldByName('YERID').AsInteger]);
+  if KilitKontrolEt(2, Tur, Tarih, 2) then
+    Abort;
 
+  if Tur in [23, 24, 33, 34] then begin           // Cek ve senet
+    Tablo.CekSil(Id);
+    Exit;
+  end
+  else if Tur in [13, 17] then begin              // Tahakkuklar (FATBASLIK)
+    // KASA=-9 ise YERI/YERID'deki bagli kayit da silinir.
+    Tablo.TablodanSorguAc(1, 'select KASA,YERI,YERID from FATBASLIK where ID=' + IntToStr(Id));
+    if Tablo.Query1.Fields[0].AsInteger = -9 then
+      case Tablo.Query1.Fields[1].AsInteger of
+        TabNo_KASA : Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&Id ', ['&Id'], [Tablo.Query1.Fields[2].AsInteger]);
+      end;
+    // Log listesinde Fatura yerine Tahakkuk bolumu gorunsun diye 108/109 tablo no kullanilir.
+    var LTahakkukTabNo := TabNo_TAHAKKUK_Alacak;
+    if Tur = 17 then LTahakkukTabNo := TabNo_TAHAKKUK_Borc;
+    LogKayitSil('FATBASLIK', LTahakkukTabNo, Id, LTahakkukTabNo, Id);
+    LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, LTahakkukTabNo, Id);
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'], [Id]);
+    Exit;
+  end
+  else if Tur in [4, 6, 8, 10, 11, 12, 14, 15, 16, 109, 110, 119] then begin  // 110: adisyon
+    Tablo.TablodanSorguAc(4, 'select * from FATBASLIK where ID=' + IntToStr(Id));
+    if Tablo.Query4.FieldByName('YERI').AsString = '83' then   // servisten faturaya/irsaliyeye donusmusse
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' update SERVIS set YERI=null, YERID=null where ID=&Id ', ['&Id'], [Tablo.Query4.FieldByName('YERID').AsInteger]);
     Tablo.TablodanSorguAc(8, 'select * from FATURA where FATBASID=' + IntToStr(Id));
     Tablo.FaturaSil(Tablo.Query4, Tablo.Query8);
-    exit;
+    Exit;
   end;
-  Tablo.Query8.Close;
-  Tablo.Query8.SQL.Text := ' Select * from KASA (nolock) where ID = ' + IntToStr(Id);
-  Tablo.Query8.Open;
-  HId := Tablo.Query8.FieldByName('HESAPID').AsInteger;
-  RehberId := Tablo.Query8.FieldByName('REHBERID').AsInteger;
-  FaturaId := Tablo.Query8.FieldByName('FATURAID').AsInteger;
-  CekSenetId := Tablo.Query8.FieldByName('CEKSENETID').AsInteger;
-  KrediId := Tablo.Query8.FieldByName('KREDIID').AsInteger;
-  GeriDonusId := Tablo.Query8.FieldByName('GERIDONUSID').AsInteger;
-  BORC := Tablo.Query8.FieldByName('BORC').AsCurrency;
-  ALACAK := Tablo.Query8.FieldByName('ALACAK').AsCurrency;
-  Aciklama := Tablo.Query8.FieldByName('ACIKLAMA').AsString;
 
-  case Tur of
-    22,32: begin
-        //KASA (Banka) tablosundaki gider/gelir silinirse ve GERIDONUSID = -9 ise YER ve YERID'deki tablodaki bilgiler silinir.
-         if Tablo.Query8.FieldByName('GERIDONUSID').AsInteger=-9 then
-          case Tablo.Query8.FieldByName('YERI').AsInteger of
-            TabNo_FATBASLIK : begin
-                // Bagli FATBASLIK kart + _USER SILMEDEN ONCE logla (Geri Al).
-                LogKayitSil('FATBASLIK', TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger, TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger);
-                LogDetaylariSil('FATBASLIK_USER', 'ID', TabNo_FATBASLIK_USER, TabNo_FATBASLIK, Tablo.Query8.FieldByName('YERID').AsInteger);
-                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from FATBASLIK where ID=&Id ', ['&Id'],[Tablo.Query8.FieldByName('YERID').AsInteger]);
-              end;
-          end
-         else if Tur = 32 then begin
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from KASA Where YERID=' + IntToStr(Id) + '', [], []);
-            // Bagli FATBASLIK(ler) + FATBASLIK_USER SILMEDEN ONCE logla (KASA=Id; Geri Al icin veri).
-            LogDetaylariSilSorgu('FATBASLIK', 'KASA=' + IntToStr(Id), TabNo_FATBASLIK, TabNo_FATBASLIK, Id);
-            LogDetaylariSilSorgu('FATBASLIK_USER', 'ID in (select ID from FATBASLIK where KASA=' + IntToStr(Id) + ')', TabNo_FATBASLIK_USER, TabNo_FATBASLIK, Id);
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Delete from FATBASLIK Where KASA=' + IntToStr(Id) + '', [], []);
-         end;
+  // ---- KASA satiri: tum dallar (virman, kredi karti, avans, cek portfoy donusu,
+  //      kredi taksit zinciri, gider/gelir bagli fatbaslik) sunucuda, tek transaction.
+  LFaturaId := 0;
+  try
+    LSonuc := ApiCagir('sp_Api_KasaHareket_Sil_Json',
+      TJSONObject.Create
+        .AddPair('KayitId', TJSONNumber.Create(Id))
+        .AddPair('Oturum', TJSONObject.Create
+          .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+          .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
+    LFaturaId := ApiSonucInt(LSonuc, 'FaturaId');
+  except
+    on E: Exception do
+    begin
+      UyariGoster(Uyari, E.Message);
+      Abort;
     end;
-    31:
-      if Pos('AVANS', UpperCase(Aciklama)) > 0 then
-         // eğer avans ise geri Ödeme tablosundan da silmek lazım
-         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from PLANAVANS where KASAID=' + IntToStr(Id),[],[]);
-    35, 350: //KK Ödeme veya KK'na iade
-      begin
-        s := IIf(Tur = 25, 'POS', 'PLANKREDIKARTI');
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from ' + s + ' where KASAID=' +IntToStr(Id),[],[]);
-      end;
-    40 .. 50, 57, 65,  75, 87:
-      if GeriDonusId > -1 then
-      begin
-        if Tur in[40,42] then begin //eğer 196 maaş avansına virman varsa ve taksitliyse taksitlerin de silinmesi gerekir
-           AvansTaksitleriniSil(Id);
-           AvansTaksitleriniSil(GeriDonusId);
-        end;
-        Tablo.TablodanSorguAc(3, ' Select * from KASA (nolock) where ID = ' + IntToStr(GeriDonusId));
-        // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-        LogKartSil(Tablo.Query3, TabNo_KASA, GeriDonusId);
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where ID=' + IntToStr(GeriDonusId), [], []);
-      end;
-    51,52:
-      begin // eğer Çek - senet ise durumu portföyde yapalım ve son hareketi silelim
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from CEKHAREKET where CEKSENETLERID=&CekId and ISLEM = 136', ['&CekId'],[IntToStr(CekSenetId)]);
-           Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID = '+IntToStr(CekSenetId)+' order by TARIH desc '+DbSinir(1));
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update CEKLER set DURUM=1, TUR =  '+Tablo.Query1.Fields[0].AsString+' where ID=&CekId', ['&CekId'],[IntToStr(CekSenetId)]);
-        //end;
-      end;
-    53,54:
-      begin // eğer Çek - senet ise durumu portföyde yapalım ve son hareketi silelim
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from CEKHAREKET where CEKSENETLERID=&CekId and ISLEM = 143', ['&CekId'],[IntToStr(CekSenetId)]);
-           Tablo.TablodanSorguAc(1,'select '+DbUst(1)+'ISLEM from CEKHAREKET where CEKSENETLERID = '+IntToStr(CekSenetId)+' order by TARIH desc '+DbSinir(1));
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update CEKLER set DURUM=1,  TUR=  '+Tablo.Query1.Fields[0].AsString+' where ID=&CekId', ['&CekId'],[IntToStr(CekSenetId)]);
-        //end;
-      end;
-   { 52, 54:
-      begin // eğer Çek - senet ise durumu portföyde yapalım
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SENETLER set DURUM =1 where ID=&CekId', ['&CekId'],[IntToStr(CekSenetId)]);
-        // Tablo.Query1.SQL.Text := 'update CEKLER set DURUM = 1 where ID=' +TabKasa.FieldByName('CEKSENETID').AsString;
-      end;
-    58: if Tablo.Query8.FieldByName('YERID').AsString <> '' then begin
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update PLANKREDI set ODENMIS = 0 where ID=' + Tablo.Query8.FieldByName('YERID').AsString,[],[]);
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where TUR=58 and KREDIID=' + Tablo.Query8.FieldByName('KREDIID').AsString+
-               ' and YERID='+Tablo.Query8.FieldByName('YERID').AsString,[],[]);
-        end;}
-    58,59:
-      begin
-      //burada 3 satır birbirine geridönüş ile bağlı olabilir. 3 satırı da silmemiz gerekiyor..
-      {   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where TUR=59 and KREDIID=' + Tablo.Query8.FieldByName('KREDIID').AsString+
-           ' and ISLEMTARIHI between '''+FormatDateTime('yyyy-mm-dd 00:00', Tablo.Query8.FieldByName('ISLEMTARIHI').AsDateTime)+''' and '+
-           ''''+FormatDateTime('yyyy-mm-dd 23:59', Tablo.Query8.FieldByName('ISLEMTARIHI').AsDateTime)+''' ',[],[]);  }
-        KasaID := ID;
-        while (Tablo.Query8.RecordCount > 0)and(KasaID > 0) do begin
-          if Tablo.Query8.FieldByName('YERID').AsString <> '' then
-            Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update PLANKREDI set ODENMIS = 0 where ID=' + Tablo.Query8.FieldByName('YERID').AsString,[],[]);
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from KASA where ID=' + IntToStr(KasaID),[],[]);
-          KasaID := GeriDonusId;
-          Tablo.TablodanSorguAc(8,'select * from KASA where ID='+IntToStr(KasaID));
-          GeriDonusId := Tablo.Query8.FieldByName('GERIDONUSID').AsInteger;
-        end;
-
-      end;
   end;
 
-  if (Tur in [0, 1, 2, 13, 17, 21, 22, 25, 26, 28, 29, 31, 32, 35, 36, 38, 39, 51,
-    52, 53, 54, 57, 58, 59, 61, 65, 91, 95, 71, 75, 81,87,88,98, 125]) or (Tur in [40 .. 50]) or (Tur = 350) or (Tur > 2600)//2600 ve üzeri Sodexo gibi kuponlar
-  then begin
-    // Kart SILME logu: SILMEDEN ONCE, kayit dururken.
-    LogKartSil(Tablo.Query8, TabNo_KASA, Tablo.Query8.FieldByName('ID').AsInteger);
-//    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,' delete from PROJEMALIYET where YER = '+IntToStr(TabNo_KASA)+' and YERID=&SId', ['&SId'], [ID]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASA where ID=' + IntToStr(Id),[],[]);
-    // exception'ın handle olmaması lazım..
-    // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASA where ID=&Id', ['&Id'], [Id]);
-  end;
-
-  if FaturaId > 0 then // Silinmiş olan tahsilat/Ödeme için eğer bağlı fatura varsa durumu güncellenir
-    Tablo.FaturaDurumUpdate(FaturaId, 0);
-
-  // Tablo.LogIslemleri('Cari', 'Silme', TabKasa, True);
+  // Silinen tahsilat/odemeye bagli fatura varsa durumu guncellenir (odendi/kismi).
+  if LFaturaId > 0 then
+    Tablo.FaturaDurumUpdate(LFaturaId, 0);
 end;
 
 function TTablo.KodBulmaSihirbazi(Kod:integer; RefTablo, RefKod, RefAd, YazTablo, YazAlan: String;Varsayilan:integer=0): String;
@@ -12722,11 +12288,527 @@ begin
     else
       ATab.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Baslik=:Baslik, @Kosullar=:Kosullar';
     ATab.ParamByName('Baslik').AsString   := ABaslik;
-    ATab.ParamByName('Kosullar').AsString := AKosullar.ToJSON;
+    // UNICODE: AsString ANSI (CP1254) baglar - emoji gibi kod sayfasi disi
+    //   karakterler KAYBOLUR (sunucuya bos/'?' gider). SP parametresi
+    //   NVARCHAR(MAX); ftWideMemo + AsWideString ile tam Unicode gonderilir.
+    ATab.ParamByName('Kosullar').DataType := ftWideMemo;
+    ATab.ParamByName('Kosullar').AsWideString := AKosullar.ToJSON;
   finally
     FreeAndNil(AKosullar);
   end;
   TabloYenile(ATab, [], ALocateID, AIDTur);
+end;
+
+function SqlHataMesajiSadelestir(const AMesaj: string): string;
+// FireDAC/ODBC/SQL Server oneklerini ("[FireDAC][Phys][ODBC][Microsoft][ODBC
+//   Driver 18 for SQL Server][SQL Server]...") atip yalniz SP'nin yazdigi
+//   mesaji birakir. Kose parantezli onek yoksa metin AYNEN doner.
+var
+  i: Integer;
+  LSat: string;
+begin
+  Result := Trim(AMesaj);
+  // Cok satirli mesajlarda ilk anlamli satir yeterli (devami surucu ayrintisi).
+  i := Pos(#13, Result);
+  if i > 0 then Result := Copy(Result, 1, i - 1);
+  i := Pos(#10, Result);
+  if i > 0 then Result := Copy(Result, 1, i - 1);
+  // Son ']' karakterinden sonrasi = asil mesaj
+  LSat := Result;
+  i := LastDelimiter(']', LSat);
+  if (i > 0) and (i < Length(LSat)) then
+    Result := Trim(Copy(LSat, i + 1, MaxInt));
+  if Result = '' then Result := Trim(AMesaj);
+end;
+
+procedure TTablo.ApiSilCagir(const ASPAdi: string; AKayitId: Integer);
+// Silme API'lerinin ORTAK cagricisi. Is kurali engeli (SP THROW 51200) teknik bir
+//   hata degildir -> kullaniciya SADE uyari kutusu gosterilir ve islem Abort edilir
+//   (exception diyalogu / surucu onekleri gorunmez).
+begin
+  if AKayitId <= 0 then Exit;
+  try
+    ApiCagir(ASPAdi,
+      TJSONObject.Create
+        .AddPair('KayitId', TJSONNumber.Create(AKayitId))
+        .AddPair('Oturum', TJSONObject.Create
+          .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+          .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject);
+  except
+    on E: Exception do
+    begin
+      UyariGoster(Uyari, E.Message);
+      Abort;
+    end;
+  end;
+end;
+
+function TTablo.SiradakiNoSayi(const ATablo, AAlan: string; const AKapsam: string;
+  const AKosul: string; AAdet: Integer; ABaslangic: Int64): Int64;
+// Merkezi sayac: TEK deyimle tahsis (MSSQL UPDATE..OUTPUT / PG UPDATE..RETURNING),
+//   yani iki kullanici ayni numarayi ALAMAZ. Sayac ilk kullanimda gercek tablodaki
+//   MAX ile tohumlanir -> eski kayitlarla ve hala max()+1 yazan eski kod yollariyla
+//   carpismaz (@Dogrula tahsis sonrasi numara kullanilmis mi diye bakar).
+var
+  LQ: TFDQuery;
+begin
+  Result := 0;
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := FDCnn;
+    if AktifVeriMotor = vmPG then
+      LQ.SQL.Text := 'select * from fn_prog_siradakino(:T, :A, :K, :W, :B, :AD, 0, true, true)'
+    else
+      LQ.SQL.Text := 'exec dbo.sp_Prog_SiradakiNo :T, :A, :K, :W, :B, :AD, 0, 1, 1';
+    LQ.ParamByName('T').AsString  := ATablo;
+    LQ.ParamByName('A').AsString  := AAlan;
+    LQ.ParamByName('K').AsString  := AKapsam;
+    LQ.ParamByName('W').AsString  := AKosul;
+    LQ.ParamByName('B').AsLargeInt := ABaslangic;
+    LQ.ParamByName('AD').AsInteger := AAdet;
+    LQ.Open;
+    if not LQ.Eof then
+      Result := LQ.FieldByName('ILKNO').AsLargeInt;
+  finally
+    LQ.Free;
+  end;
+end;
+
+function TTablo.SiradakiNo(const ATablo, AAlan: string; const AKapsam: string;
+  const AKosul: string; ADijit: Integer; AAdet: Integer; ABaslangic: Int64): string;
+begin
+  Result := IntToStr(SiradakiNoSayi(ATablo, AAlan, AKapsam, AKosul, AAdet, ABaslangic));
+  while Length(Result) < ADijit do
+    Result := '0' + Result;
+end;
+
+procedure TTablo.SiradakiNoIade(const ATablo, AAlan: string; const AKapsam: string; ANo: Int64);
+// Belge kaydedilmeden vazgecildiyse numarayi geri ver -> numara boslugu olusmaz.
+//   Arada baska kullanici numara aldiysa sayac degismez (o durumda bosluk kacinilmaz).
+var
+  LQ: TFDQuery;
+begin
+  if ANo <= 0 then Exit;
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LQ.Connection := FDCnn;
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := 'select * from fn_prog_siradakino_iade(:T, :A, :K, :N)'
+      else
+        LQ.SQL.Text := 'exec dbo.sp_Prog_SiradakiNo_Iade :T, :A, :K, :N';
+      LQ.ParamByName('T').AsString := ATablo;
+      LQ.ParamByName('A').AsString := AAlan;
+      LQ.ParamByName('K').AsString := AKapsam;
+      LQ.ParamByName('N').AsLargeInt := ANo;
+      LQ.Open;
+    except
+      // iade basarisiz olsa da is akisi durmaz (yalnizca numara boslugu kalir)
+    end;
+  finally
+    LQ.Free;
+  end;
+end;
+
+function TTablo.PosTahsilatYaz(const ASatirlarJson: string; ARehId, AFatTur, AYerId,
+  AFaturaId, AMasrafId, AGirisKaynak, AKasaTakipTabNo: Integer;
+  const AKur: string; APerakende: Boolean): string;
+// POS tahsilati: butun odeme satirlari TEK transaction (sp_Api_POS_Tahsilat_Json).
+//   Eskiden satirlar dataset Append/Post ile tek tek yaziliyordu ve hicbir yerde
+//   transaction yoktu -> ortada kopan baglanti yarim tahsilat birakiyordu.
+//   Makbuz numarasi yine sp_BelgeNoGetir'den (kocan SEQUENCE'i) alinir.
+var
+  LQ: TFDQuery;
+  LJson: string;
+begin
+  Result := '';
+  if Trim(ASatirlarJson) = '' then Exit;
+
+  LJson :=
+    '{"RehId":' + IntToStr(ARehId) +
+    ',"FatTur":' + IntToStr(AFatTur) +
+    ',"YerId":' + IntToStr(AYerId) +
+    ',"FaturaId":' + IntToStr(AFaturaId) +
+    ',"MasrafId":' + IntToStr(AMasrafId) +
+    ',"Kur":"' + AKur + '"' +
+    ',"Perakende":' + IfThen(APerakende, '1', '0') +
+    ',"KasaTakipTabNo":' + IntToStr(AKasaTakipTabNo) +
+    ',"GirisKaynak":' + IntToStr(AGirisKaynak) +
+    ',"Satirlar":' + ASatirlarJson +
+    ',"Oturum":{"KulId":' + IntToStr(StrToIntDef(Trim(Kullanan), 0)) +
+    ',"SubeId":' + IntToStr(SubeID) + '}}';
+
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := FDCnn;
+    // NOT: SP icinde "INSERT ... EXEC sp_BelgeNoGetir" var -> bu SP baska bir
+    //   INSERT-EXEC icinden cagrilamaz; buradan DOGRUDAN cagrilir.
+    // PG: POS alt-sistemi (##global temp tablolar dahil) henuz portlanmadi ->
+    //   sessizce yanlis calismasin diye acik hata verilir.
+    if AktifVeriMotor = vmPG then
+      raise Exception.Create('POS tahsilatı PostgreSQL için henüz portlanmadı.');
+    LQ.SQL.Text := 'exec dbo.sp_Api_POS_Tahsilat_Json :J';
+    LQ.ParamByName('J').AsString := LJson;
+    LQ.Open;
+    if not LQ.Eof then
+      Result := ApiSonucMetin(LQ.Fields[0].AsString, 'Idler');
+  finally
+    LQ.Free;
+  end;
+end;
+
+
+{ ============================ MESAJLASMA ============================ }
+
+procedure TTablo.MesajKanalListe(ATab: TFDQuery; const AAra: string; AFiltre: Integer);
+// Sohbet listesi: son mesaj + okunmamis sayisi (sp_Prog_Mesaj_Kanal_Liste_Json2).
+//   AFiltre = sol paneldeki cipler: 0 Tümü, 1 Okunmamış, 2 Favoriler, 3 Gruplar.
+begin
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Kanal_Liste_Json2', '',
+    TJSONObject.Create
+      .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('Ara', AAra)
+      .AddPair('YalnizOkunmamis', TJSONNumber.Create(IfThen(AFiltre = 1, 1, 0)))
+      .AddPair('YalnizFavori', TJSONNumber.Create(IfThen(AFiltre = 2, 1, 0)))
+      .AddPair('YalnizGrup', TJSONNumber.Create(IfThen(AFiltre = 3, 1, 0))) as TJSONObject);
+end;
+
+procedure TTablo.MesajFavori(AKanalId: Integer; AFavori: Boolean);
+// Sohbeti favorilere ekler/cikarir (kullaniciya ozel: MESAJKANALUYE.FAVORI).
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Favori_Json',
+    '{"KanalId":' + IntToStr(AKanalId) + ',"Favori":' + IfThen(AFavori, '1', '0') +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajOkunmadi(AKanalId: Integer);
+// Okundu imlecini son GELEN mesajin gerisine alir -> okunmamis rozeti geri gelir.
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Okunmadi_Json',
+    '{"KanalId":' + IntToStr(AKanalId) +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajSessize(AKanalId: Integer; ABildirim: Boolean);
+// ABildirim=False -> sohbet sessize alinir (MESAJKANALUYE.BILDIRIM = 0).
+//   Rozet yine artar ama SES calmaz (yoklama SP'si "Sesli" sayisini ayri doner).
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+    '{"Islem":"sessize","KanalId":' + IntToStr(AKanalId) +
+    ',"Bildirim":' + IfThen(ABildirim, '1', '0') +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajKisiListe(ATab: TFDQuery; const AAra: string);
+// Sistemde kullanicisi olan personel (kendisi haric) - sol panelin alt bolumu.
+begin
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Kisi_Liste_Json2', '',
+    TJSONObject.Create
+      .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('Ara', AAra)
+      .AddPair('TopN', TJSONNumber.Create(300)) as TJSONObject);
+end;
+
+procedure TTablo.MesajUyeListe(ATab: TFDQuery; AKanalId: Integer);
+// Kanal uyeleri (sohbet bilgisi paneli). Yalniz uyeler gorebilir (SP kontrol eder).
+begin
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Uye_Liste_Json2', '',
+    TJSONObject.Create
+      .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('KanalId', TJSONNumber.Create(AKanalId)) as TJSONObject);
+end;
+
+procedure TTablo.MesajIcerikAra(ATab: TFDQuery; const AAra: string; ATopN: Integer);
+// TUM sohbetlerde mesaj metni aramasi (sp_Prog_Mesaj_Icerik_Ara_Json2).
+begin
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Icerik_Ara_Json2', '',
+    TJSONObject.Create
+      .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('Ara', AAra)
+      .AddPair('TopN', TJSONNumber.Create(ATopN)) as TJSONObject);
+end;
+
+procedure TTablo.MesajKisiBilgi(ATab: TFDQuery; ARehberId: Integer);
+// Kisi kunyesi (bilgi panosu): departman / gorev / e-posta - IK ekraninin kaynaklari.
+begin
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Kisi_Bilgi_Json2', '',
+    TJSONObject.Create
+      .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+      .AddPair('RehberId', TJSONNumber.Create(ARehberId)) as TJSONObject);
+end;
+
+procedure TTablo.MesajGecmis(ATab: TFDQuery; AKanalId: Integer;
+  AOncekiId: Int64; ASonrakiId: Int64; ATopN: Integer);
+// Imlecli gecmis: OncekiId = yukari kaydirma (daha eskiler),
+//   SonrakiId = yoklamada YALNIZ yeni gelenler.
+var
+  LK: TJSONObject;
+begin
+  LK := TJSONObject.Create
+    .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+    .AddPair('KanalId', TJSONNumber.Create(AKanalId))
+    .AddPair('TopN', TJSONNumber.Create(ATopN)) as TJSONObject;
+  if AOncekiId > 0  then LK.AddPair('OncekiId', TJSONNumber.Create(AOncekiId));
+  if ASonrakiId > 0 then LK.AddPair('SonrakiId', TJSONNumber.Create(ASonrakiId));
+  ListeSPJson(ATab, 'sp_Prog_Mesaj_Gecmis_Json2', '', LK);
+end;
+
+function TTablo.MesajKanalAc(AKarsiId: Integer): Integer;
+begin
+  Result := ApiSonucInt(
+    ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+      '{"Islem":"birebir","KarsiId":' + IntToStr(AKarsiId) +
+      ',"Oturum":{"KulId":' + Trim(Kullanan) + ',"SubeId":' + IntToStr(SubeID) + '}}'),
+    'KanalId');
+end;
+
+function TTablo.MesajGrupOlustur(const AAd: string; AUyeler: TArray<Integer>): Integer;
+var
+  LListe: string;
+  i: Integer;
+begin
+  LListe := '';
+  for i := 0 to High(AUyeler) do
+    LListe := LListe + IfThen(LListe = '', '', ',') + IntToStr(AUyeler[i]);
+  Result := ApiSonucInt(
+    ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+      '{"Islem":"grup","Adi":' + TJSONString.Create(AAd).ToJSON +
+      ',"Uyeler":[' + LListe + ']' +
+      ',"Oturum":{"KulId":' + Trim(Kullanan) + ',"SubeId":' + IntToStr(SubeID) + '}}'),
+    'KanalId');
+end;
+
+procedure TTablo.MesajGrupUye(AKanalId: Integer; AUyeler: TArray<Integer>; AEkle: Boolean);
+var
+  LListe: string;
+  i: Integer;
+begin
+  LListe := '';
+  for i := 0 to High(AUyeler) do
+    LListe := LListe + IfThen(LListe = '', '', ',') + IntToStr(AUyeler[i]);
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+    '{"Islem":"' + IfThen(AEkle, 'uyeekle', 'uyecikar') + '","KanalId":' + IntToStr(AKanalId) +
+    ',"Uyeler":[' + LListe + ']' +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajGrupAdDegistir(AKanalId: Integer; const AAd: string);
+// Grup adini degistir (yalniz grup yoneticisi - SP kontrol eder).
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+    '{"Islem":"addegistir","KanalId":' + IntToStr(AKanalId) +
+    ',"Adi":' + TJSONString.Create(AAd).ToJSON +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajGrupAvatar(AKanalId: Integer; ADosyaId: Int64);
+// Grup fotografi: icerik GENDEPO.DOSYA'da, kanalda yalniz DOSYAID durur.
+//   ADosyaId = 0 -> fotografi kaldirir.
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Avatar_Json',
+    '{"KanalId":' + IntToStr(AKanalId) + ',"DosyaId":' + IntToStr(ADosyaId) +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajUyeRol(AKanalId: Integer; AUyeler: TArray<Integer>; AYonetici: Boolean);
+// Uyeyi grup yoneticisi yapar / yoneticiligini kaldirir (yalniz yonetici cagirabilir).
+//   Sunucu son yoneticinin dusurulmesine izin vermez.
+var
+  LListe: string;
+  i: Integer;
+begin
+  LListe := '';
+  for i := 0 to High(AUyeler) do
+    LListe := LListe + IfThen(LListe = '', '', ',') + IntToStr(AUyeler[i]);
+  if LListe = '' then Exit;
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Rol_Json',
+    '{"KanalId":' + IntToStr(AKanalId) + ',"Rol":' + IfThen(AYonetici, '1', '0') +
+    ',"Uyeler":[' + LListe + ']' +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+procedure TTablo.MesajGruptanCik(AKanalId: Integer);
+// Kendini gruptan cikarir (Uyeler bos -> SP cagirani cikarir).
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Kanal_Kaydet_Json',
+    '{"Islem":"uyecikar","KanalId":' + IntToStr(AKanalId) +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+
+function TTablo.MesajKanalTemizle(AKanalId: Integer; AHerkesten: Boolean): Integer;
+// AHerkesten=False -> sohbet YALNIZ BENDEN temizlenir (mesajlar digerlerinde kalir).
+// AHerkesten=True  -> mesajlar herkesten KALICI silinir; sunucu yalniz GRUP
+//   yoneticisine izin verir. Doner: etkilenen mesaj sayisi.
+begin
+  Result := ApiSonucInt(
+    ApiCagirMetin('sp_Api_Mesaj_Kanal_Temizle_Json',
+      '{"KanalId":' + IntToStr(AKanalId) +
+      ',"Kapsam":"' + IfThen(AHerkesten, 'herkes', 'ben') + '"' +
+      ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}'), 'SilinenMesaj');
+end;
+
+function TTablo.MesajGonder(AKanalId: Integer; const AMetin: string; AYanitId: Int64;
+  ADosyaId: Int64; const ADosyaAdi: string; ADosyaBoyut: Int64): Int64;
+// Dosya eki: icerik GENDEPO.DOSYA'ya (FILESTREAM, hash-dedup) ULog.DosyaKaydet ile
+//   yazilir; mesaj yalnizca DOSYAID + ad/boyut tasir (mesaj tablosunda blob YOK).
+var
+  LJson: string;
+begin
+  LJson := '{"KanalId":' + IntToStr(AKanalId) +
+           ',"Metin":' + TJSONString.Create(AMetin).ToJSON;
+  if AYanitId > 0 then LJson := LJson + ',"YanitId":' + IntToStr(AYanitId);
+  if ADosyaId > 0 then
+    LJson := LJson + ',"DosyaId":' + IntToStr(ADosyaId) +
+             ',"DosyaAdi":' + TJSONString.Create(ADosyaAdi).ToJSON +
+             ',"DosyaBoyut":' + IntToStr(ADosyaBoyut);
+  LJson := LJson + ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}';
+  Result := ApiSonucInt(ApiCagirMetin('sp_Api_Mesaj_Gonder_Json', LJson), 'MesajId');
+end;
+
+procedure TTablo.MesajOkundu(AKanalId: Integer; ASonOkumaId: Int64);
+// SonOkumaId verilmezse kanaldaki EN SON mesaj okunmus sayilir (SP hesaplar).
+var
+  LJson: string;
+begin
+  LJson := '{"KanalId":' + IntToStr(AKanalId);
+  if ASonOkumaId > 0 then LJson := LJson + ',"SonOkumaId":' + IntToStr(ASonOkumaId);
+  LJson := LJson + ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}';
+  ApiCagirMetin('sp_Api_Mesaj_Okundu_Json', LJson);
+end;
+
+procedure TTablo.MesajSil(AMesajId: Int64; AHerkesten: Boolean);
+// AHerkesten=False -> mesaj YALNIZ bu kullanicidan gizlenir (MESAJGIZLI).
+// AHerkesten=True  -> herkeste "(bu mesaj silindi)" olur; sunucu yalniz mesaji
+//   GONDERENE ya da GRUP YONETICISINE izin verir.
+begin
+  ApiCagirMetin('sp_Api_Mesaj_Sil_Json',
+    '{"MesajId":' + IntToStr(AMesajId) +
+    ',"Kapsam":"' + IfThen(AHerkesten, 'herkes', 'ben') + '"' +
+    ',"Oturum":{"KulId":' + Trim(Kullanan) + '}}');
+end;
+function TTablo.MesajYokla: string;
+// 2-3 sn'de bir cagrilir; UCUZ olmali. Hata olursa is akisini bozmaz (bos doner).
+begin
+  Result := '';
+  try
+    Result := ApiCagirMetin('sp_Prog_Mesaj_Yokla_Json',
+      '{"KulId":' + Trim(Kullanan) + '}');
+  except
+    // yoklama hatasi kullaniciya gosterilmez (baglanti kopmus olabilir)
+  end;
+end;
+
+function TTablo.DonusumBelgeAc(const AYon, ABelgeTablo: string; ABelgeId: Integer): Boolean;
+// Donusum zincirinde kaynak/hedef belgeyi bulur ve ACAR.
+//   Once her listede ~60 satirlik ELLE yazilmis CASE bloklari vardi (donusum
+//   kodlari gomulu); yeni rota eklenince biri guncellenip digeri unutuluyordu.
+//   Artik tek SP + tek Pascal yolu: sp_Prog_Donusum_KaynakBelge / _HedefBelge.
+var
+  LQ: TFDQuery;
+  LSts: TStringList;
+  LTur, LId, LReh: Integer;
+  LNo: string;
+begin
+  Result := False;
+  if ABelgeId <= 0 then Exit;
+
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := FDCnn;
+    if SameText(AYon, 'HEDEF') then
+      LQ.SQL.Text := 'exec dbo.sp_Prog_Donusum_HedefBelge :Tablo, :Id'
+    else
+      LQ.SQL.Text := 'exec dbo.sp_Prog_Donusum_KaynakBelge :Tablo, :Id';
+    if AktifVeriMotor = vmPG then
+      LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
+    LQ.ParamByName('Tablo').AsString := ABelgeTablo;
+    LQ.ParamByName('Id').AsInteger := ABelgeId;
+    LQ.Open;
+
+    if LQ.IsEmpty then Exit;                       // bagli belge yok
+
+    if LQ.RecordCount = 1 then
+    begin
+      LTur := LQ.FieldByName('TUR').AsInteger;
+      LId  := LQ.FieldByName('BELGEID').AsInteger;
+      LReh := LQ.FieldByName('REHBERID').AsInteger;
+      LNo  := LQ.FieldByName('BELGENO').AsString;
+    end
+    else
+    begin
+      // Birden fazla bagli belge -> kullanici secsin (TUR/BELGEID gizli kolon degil,
+      //   secim listesi ayni sorguyu kullanir).
+      LSts := TStringList.Create;
+      try
+        if not ListedenBilgiGetir(
+             IfThen(SameText(AYon, 'HEDEF'), 'Hedef Belge Seçimi', 'Kaynak Belge Seçimi'),
+             LQ.SQL.Text, LSts,
+             [cxEditRepository1Label1, cxEditRepository1Label1, cxEditRepository1Label1,
+              cxEditRepository1Label1, cxEditRepository1Label1, cxEditRepository1Label1,
+              cxEditRepository1Label1, cxEditRepository1Label1],
+             'DonusumBelgeSecimi') then
+          Exit;
+        LTur := StrToIntDef(LSts[0], 0);
+        LId  := StrToIntDef(LSts[1], 0);
+        LNo  := LSts[2];
+        LReh := StrToIntDef(LSts[3], 0);
+      finally
+        LSts.Free;
+      end;
+    end;
+  finally
+    LQ.Free;
+  end;
+
+  if LId <= 0 then Exit;
+  Result := True;
+
+  // Belge turune gore DOGRU ekran: servis ve teklif kendi sihirbazinda acilir,
+  //   digerleri ortak gorme dialogundan (GormeDialogCagir).
+  case LTur of
+    83: ServisSihirbazBaslat(False, 'D', 0, LId, LReh);
+    80: TeklifSihirbazBaslat('D', 80, 0, LId, LReh, -1);
+  else
+    AnaForm.GormeDialogCagir(LId, LTur, LReh, 0, GENINI.BugunTrh, LNo);
+  end;
+end;
+
+function TTablo.DonusumKaynakUygunMu(const ATablo: string; ABelgeId: Integer;
+  AUyariGoster: Boolean): Boolean;
+// IPTAL edilmis kaynak belge DONUSMEZ (durum modeli: 0 Taslak, 2 Onay,
+//   1 Kismi, 9 Tamamlandi, 6 Iptal). Kural sunucuda tek yerde:
+//   fn_Prog_Donusum_KaynakDonusebilirMi. Donusum kaynak LISTELERI zaten iptal
+//   belgeyi getirmez; bu kontrol LISTE DISI yollar icindir (liste sag tus ile
+//   toplu donusum, belge icindeki donustur butonu, kod icinden cagrilar).
+var
+  LQ: TFDQuery;
+begin
+  Result := True;
+  if ABelgeId <= 0 then Exit;
+  LQ := TFDQuery.Create(nil);
+  try
+    try
+      LQ.Connection := FDCnn;
+      LQ.SQL.Text := 'select dbo.fn_Prog_Donusum_KaynakDonusebilirMi(:T, :Id) as UYGUN';
+      if AktifVeriMotor = vmPG then
+        LQ.SQL.Text := PgSqlCevir('select fn_prog_donusum_kaynakdonusebilirmi(:T, :Id) as UYGUN');
+      LQ.ParamByName('T').AsString := ATablo;
+      LQ.ParamByName('Id').AsInteger := ABelgeId;
+      LQ.Open;
+      if (not LQ.Eof) and (Trim(LQ.Fields[0].AsString) = '0') then
+      begin
+        Result := False;
+        if AUyariGoster then
+          UyariGoster(Uyari, 'Bu belge iptal edilmiş, dönüştürülemez.');
+      end;
+    except
+      // PG pilotunda nesne yoksa kural atlanir (donusum alt sistemi portlanmadi)
+      on E: Exception do
+        if AktifVeriMotor <> vmPG then raise;
+    end;
+  finally
+    LQ.Free;
+  end;
 end;
 
 function TTablo.ApiCagir(const ASPAdi: string; AKosullar: TJSONObject): string;
@@ -12748,8 +12830,19 @@ begin
         LQ.SQL.Text := 'SELECT * FROM fn_' + LowerCase(Copy(ASPAdi, 4, MaxInt)) + '(:Kosullar)'
       else
         LQ.SQL.Text := 'EXEC dbo.' + ASPAdi + ' @Kosullar=:Kosullar';
-      LQ.ParamByName('Kosullar').AsString := AKosullar.ToJSON;
-      LQ.Open;
+      // UNICODE: bkz. ListeSPJson - AsString ANSI baglar, emoji kaybolur.
+      LQ.ParamByName('Kosullar').DataType := ftWideMemo;
+      LQ.ParamByName('Kosullar').AsWideString := AKosullar.ToJSON;
+      try
+        LQ.Open;
+      except
+        // SP'nin THROW mesaji kullaniciya "[FireDAC][Phys][ODBC][Microsoft][ODBC
+        //   Driver 18 for SQL Server][SQL Server]Bu cariye ait ..." seklinde
+        //   ulasiyordu. Surucu onekleri kullaniciyi ilgilendirmez -> SADE mesajla
+        //   yeniden firlat (yigin/kod kaybolmaz, sadece metin temizlenir).
+        on E: Exception do
+          raise Exception.Create(SqlHataMesajiSadelestir(E.Message));
+      end;
       if not LQ.IsEmpty then
         Result := LQ.Fields[0].AsString;
     finally
@@ -12843,6 +12936,13 @@ begin
     TJSONObject.Create.AddPair('kaynaklar', LDizi) as TJSONObject);
 end;
 
+function TTablo.ApiCagirMetin(const ASPAdi, AKosullarJson: string): string;
+// ApiCagir'in metin girdili hali: JSON'u cagiran hazirlar (kucuk cagrilarda
+//   TJSONObject kurmaya deger yok). Hata yonetimi ApiCagir ile ayni.
+begin
+  Result := ApiCagir(ASPAdi, TJSONObject.ParseJSONValue(AKosullarJson) as TJSONObject);
+end;
+
 function TTablo.ApiSonucInt(const AJson, AAlan: string): Integer;
 // API yazma nesnesinin dondurdugu JSON'dan tamsayi alan okur (or. 'BelgeId').
 //   Cozumlenemezse 0 doner - cagiran kontrol etmeli.
@@ -12859,6 +12959,73 @@ begin
       LObj := TJSONObject(LV);
       if LObj.GetValue(AAlan) <> nil then
         Result := StrToIntDef(LObj.GetValue(AAlan).Value, 0);
+    end;
+  finally
+    LV.Free;
+  end;
+end;
+
+function TTablo.StokKlonla(AKaynakId: Integer; const AKod: string; ADetay: Boolean): Integer;
+// Klon SUNUCUDA: sp_Api_Stok_Klonla_Json -> sp_Api_Stok_Kaydet_Json.
+//   Boylece klon, elden girilmis yeni kart ile ayni yoldan gecer (log, alan
+//   varsayilanlari, alt koleksiyonlar tek yerde). Eskiden sihirbazin 'K' dalinda
+//   satir satir SQLSatiriKopyala ile yapiliyordu.
+begin
+  Result := 0;
+  if AKaynakId <= 0 then Exit;
+  Result := ApiSonucInt(
+    ApiCagir('sp_Api_Stok_Klonla_Json',
+      TJSONObject.Create
+        .AddPair('KaynakId', TJSONNumber.Create(AKaynakId))
+        .AddPair('Kod', AKod)
+        .AddPair('Detay', TJSONNumber.Create(IfThen(ADetay, 1, 0)))
+        .AddPair('Oturum', TJSONObject.Create
+          .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+          .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject),
+    'KayitId');
+end;
+
+function TTablo.CariKlonla(AKaynakId: Integer; const AKod, AFirma: string): Integer;
+begin
+  Result := RehberKlonlaIc('sp_Api_Cari_Klonla_Json', AKaynakId, AKod, AFirma);
+end;
+
+function TTablo.IKKlonla(AKaynakId: Integer; const AKod, AFirma: string): Integer;
+begin
+  Result := RehberKlonlaIc('sp_Api_IK_Klonla_Json', AKaynakId, AKod, AFirma);
+end;
+
+function TTablo.RehberKlonlaIc(const ASPAdi: string; AKaynakId: Integer;
+  const AKod, AFirma: string): Integer;
+var
+  LObj: TJSONObject;
+begin
+  Result := 0;
+  if AKaynakId <= 0 then Exit;
+  LObj := TJSONObject.Create.AddPair('KaynakId', TJSONNumber.Create(AKaynakId));
+  if AKod <> '' then LObj.AddPair('Kod', AKod);
+  if AFirma <> '' then LObj.AddPair('Firma', AFirma);
+  LObj.AddPair('Oturum', TJSONObject.Create
+    .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
+    .AddPair('SubeId', TJSONNumber.Create(SubeID)));
+  Result := ApiSonucInt(ApiCagir(ASPAdi, LObj), 'KayitId');
+end;
+
+function TTablo.ApiSonucMetin(const AJson, AAlan: string): string;
+// ApiSonucInt'in metin karsiligi (or. 'Idler' = "12,13").
+var
+  LV: TJSONValue;
+  LObj: TJSONObject;
+begin
+  Result := '';
+  if Trim(AJson) = '' then Exit;
+  LV := TJSONObject.ParseJSONValue(AJson);
+  try
+    if LV is TJSONObject then
+    begin
+      LObj := TJSONObject(LV);
+      if LObj.GetValue(AAlan) <> nil then
+        Result := LObj.GetValue(AAlan).Value;
     end;
   finally
     LV.Free;
@@ -15497,7 +15664,7 @@ begin
       exit;
   // KontrolEt ile ayni deger-bazli yol (tip listesi kaldirildi; Abort cizimi kilitliyordu).
   Result := False;
-  if FStil =  nil then Exit;
+  if FStil =   nil then Exit;
   try
     AColumn1 := (AGrid as TcxGridDBCardView).GetRowByFieldName(FAlanAdi);
     if AColumn1 = nil then Exit;

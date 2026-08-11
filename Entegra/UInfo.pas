@@ -113,11 +113,17 @@ implementation
 {$R *.dfm}
 
 function IslemAd(ATip: Integer): string;
+// ATip = ALTISLEMTIPI (satirin GERCEK tipi), yoksa ISLEMTIPI.
+//   3/5: kayit ekleme olarak yazilir (ISLEMTIPI=1) ama NASIL olustugu ALTISLEMTIPI'de:
+//   klon ya da donusum (GenDepoUpdate143). Kaynak ID'si BILGI JSON'unda
+//   _KopyaKaynak / _DonusumKaynak alanlarinda.
 begin
   case ATip of
     0: Result := 'Silme';
     1: Result := 'Ekleme';
     2: Result := 'De'#$011F'i'#$015F'tirme';   // Değiştirme
+    3: Result := 'Kopyalama';
+    5: Result := 'D'#$00F6'n'#$00FC#$015F#$00FC'm';        // Dönüşüm
   else
     Result := '?';
   end;

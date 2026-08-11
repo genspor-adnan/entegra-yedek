@@ -35,6 +35,7 @@ uses
 type
   TRehberAraDlg = class(TFrame, IIcerikBilgiFrame, IBilgiFrame,IPopupDialog )
     REHBER: TFDQuery;
+    KartiKopyalaMenu: TMenuItem;   // 'Kartı Kopyala' (klon API'si)
     CariGrid: TcxGrid;
     CariGridLevel1: TcxGridLevel;
     CariGridView: TcxGridDBTableView;
@@ -784,6 +785,7 @@ type
     procedure cxGridPersonellerSelectionChanged(Sender: TcxCustomGridTableView);
     procedure IlgiliDuzenleTusClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
+    procedure KartiKopyalaMenuClick(Sender: TObject);
     procedure BankaEkleTusClick(Sender: TObject);
     procedure BankaSilTusClick(Sender: TObject);
     procedure BankaDuzenleTusClick(Sender: TObject);
@@ -1192,6 +1194,37 @@ begin
         Application.MessageBox(PChar(CRKilitli_planli_belge_silinemez),PChar(Uyari),0)
     end;
   end;
+end;
+
+procedure TRehberAraDlg.KartiKopyalaMenuClick(Sender: TObject);
+// KART KLONU: once SUNUCUDA klon olusturulur (sp_Api_Cari_Klonla_Json -> kaydet
+//   API'si; kart + iletisimler + iletisim bilgileri, kod otomatik "<KOD>-K"),
+//   sonra sihirbaz o kart uzerinde acilir. Kullanici vazgecerse klon SILINIR.
+//   Belge klonuyla ayni desen; eski ham SQLSatiriKopyala yolu kullanilmaz.
+var
+  LKaynak, LYeni, LSonuc: Integer;
+begin
+  if REHBER.IsEmpty then Exit;
+  LKaynak := REHBER.Fields[0].AsInteger;
+  if LKaynak <= 0 then Exit;
+  if Application.MessageBox(PChar('Bu kartın kopyası oluşturulacak. Devam edilsin mi?'),
+       PChar(Onay), MB_YESNO + MB_ICONQUESTION) <> IDYES then Exit;
+
+  LYeni := Tablo.CariKlonla(LKaynak, '', '');
+  if LYeni <= 0 then Exit;
+
+  LSonuc := Tablo.RehberSihirbazBaslat(0, LYeni, -1, -1, False);
+  if LSonuc = -99 then
+  begin
+    Tablo.ApiSilCagir('sp_Api_Cari_Sil_Json', LYeni);   // vazgecildi -> klonu geri al
+    Liste_SP_Cagir(5);
+    Exit;
+  end;
+
+  // "Yeni cari" ile ayni davranis: Son/Sik Aranan'a yaz, Son Aranan ile tazele, karta git.
+  Tablo.AramaKaydet(MODUL_Cari, LYeni);
+  Liste_SP_Cagir(5);                    // Son Aranan (en yeni ustte)
+  REHBER.Locate('ID', LYeni, []);
 end;
 
 procedure TRehberAraDlg.SilTusClick(Sender: TObject);

@@ -560,26 +560,14 @@ begin
 end;
 
 procedure TKasalarListeFrame.SilTusClick(Sender: TObject);
+// SILME ARTIK SUNUCUDA: sp_Api_Kasa_Sil_Json (GenDepoUpdate129, modul 480).
+//   Engel (acilis disinda hareket) fn_Prog_Silme_Engel(480); acilis kaydi (KASA
+//   TUR=1) + kart TEK transaction'da silinir ve ISLEMLOG yazilir.
 begin
-  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then  begin
-     //Önce açılış kaydı harici girilmiş bilgi var mı
-     Tablo.Query4.Close;
-     Tablo.Query4.SQL.Text := 'Select '+DbUst(1)+'ISLEMTARIHI From KASA Where HESAPTURU=''K'' AND HESAPID = '+ KASALAR.Fields[0].AsString+' AND TUR<>1 '+DbSinir(1);
-     Tablo.Query4.Open;
-
-     if Tablo.Query4.RecordCount> 0 then
-       raise Exception.Create(FormatDateTime('DD'+FormatSettings.DateSeparator+'MM'+FormatSettings.DateSeparator+'YYYY', Tablo.Query4.fields[0].AsDateTime)+' tarihinde girilmiş kasa bilgisi var, silinemez...')
-     else begin//yoksa açılış kaydını silelim
-       Tablo.Query4.Close;
-       Tablo.Query4.SQL.Text := 'delete From KASA Where HESAPTURU=''K'' AND HESAPID = '+ KASALAR.Fields[0].AsString+' AND TUR=1';
-       Tablo.Query4.ExecSQL;
-       // KASALAR SP/fonksiyon kaynaklı dataset -> FireDAC .Delete için DML üretemiyor
-       //   ("WHERE condition is empty"). Audit + explicit DELETE + listeyi tazele.
-       LogKartSil(KASALAR, TabNo_KASATANIM, KASALAR.FieldByName('ID').AsInteger);
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASALAR where ID=&ID',
-         ['&ID'], [KASALAR.FieldByName('ID').AsInteger]);
-       YenileTusClick;
-     end;
+  if KASALAR.IsEmpty then Exit;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
+     Tablo.ApiSilCagir('sp_Api_Kasa_Sil_Json', KASALAR.FieldByName('ID').AsInteger);
+     YenileTusClick;
   end;
 end;
 

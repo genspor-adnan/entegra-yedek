@@ -147,10 +147,6 @@ type
     GridTakvimDBTableView1KALAN_ANAPARA: TcxGridDBColumn;
     GridTakvimDBTableView1KALAN_GIDER: TcxGridDBColumn;
     ToolButton2: TToolButton;
-    ToolButton10: TToolButton;                 // ayrac (Son/Sik butonlari icin)
-    LabelTumKayitlar: TToolButton;             // Tum kayitlar (Liste_SP_Cagir 1)
-    LabelSonArananlar: TToolButton;            // Son Aranan (Liste_SP_Cagir 5)
-    LabelSikArananlar: TToolButton;            // Sik Aranan (Liste_SP_Cagir 3)
     TabYorumMedya: TcxTabSheet;
     TabYorum: TFDQuery;
     DtsYorum: TDataSource;
@@ -330,7 +326,9 @@ type
     procedure TabCekKocanBeforePost(DataSet: TDataSet);
     procedure CalendarEkstreBasPropertiesEditValueChanged(Sender: TObject);
     procedure KrediInfoMenuClick(Sender: TObject);
-    procedure LabelTumKayitlarClick(Sender: TObject);   // own-toolbar Tum/Son/Sik (DFM OnClick -> PUBLISHED olmali)
+    // Arama panelindeki Tum/Son/Sik butonlari bu metotlara baglanir (liste
+    //   toolbar'indaki kopyalari kaldirildi) -> PUBLISHED kalmali.
+    procedure LabelTumKayitlarClick(Sender: TObject);
     procedure LabelSonArananlarClick(Sender: TObject);
     procedure LabelSikArananlarClick(Sender: TObject);
   private

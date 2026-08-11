@@ -379,7 +379,6 @@ object UretimListeDlg: TUretimListeDlg
     end
   end
   object PageAlt: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 293
     Width = 1027
@@ -388,6 +387,7 @@ object UretimListeDlg: TUretimListeDlg
     TabOrder = 2
     Properties.ActivePage = SheetDetay
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     ClientRectBottom = 175
     ClientRectLeft = 4
     ClientRectRight = 1023

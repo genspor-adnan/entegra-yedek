@@ -686,7 +686,6 @@
     object YeniListeOlutur1: TMenuItem
       Caption = 'Yeni Liste Olu'#351'tur'
       ImageIndex = 0
-      ImageName = 'PngImage0'
     end
     object N7: TMenuItem
       Caption = '-'
@@ -695,7 +694,6 @@
       Tag = 1
       Caption = 'Liste Ad'#305'n'#305' De'#287'i'#351'tir'
       ImageIndex = 7
-      ImageName = 'PngImage7'
       OnClick = ListeyiDuzenleMenuClick
     end
     object ListeyeKisiEkle1: TMenuItem
@@ -734,7 +732,6 @@
     object ListeyiSilMenu: TMenuItem
       Caption = 'Listeyi Sil'
       ImageIndex = 1
-      ImageName = 'PngImage1'
       OnClick = ListeyiSilMenuClick
     end
   end

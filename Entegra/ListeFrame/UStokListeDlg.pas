@@ -528,12 +528,19 @@ begin
 end;
 
 procedure TStokListeDlg.ReceteyiSilMenuClick(Sender: TObject);
+// Stogun receteleri: her biri sunucudaki ORTAK silme yolundan gecer
+//   (sp_Api_UretimRecete_Sil_Json) - eskiden LOGSUZ ve KONTROLSUZ toplu DELETE idi,
+//   uretim emrinde kullanilan recete bile siliniyordu.
 begin
-  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from URETIMRECETEDETAY where URETIMRECETEID in(select ID from URETIMRECETE where STOKID=&SID)',['&SID'],[STOKLAR.FieldByName('ID').AsString]);
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete  from URETIMRECETE where STOKID=&SID',['&SID'],[STOKLAR.FieldByName('ID').AsString]);
-    RecetePopupDuzenle;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) <> IDYES then Exit;
+
+  Tablo.TablodanSorguAc(3, 'select ID from URETIMRECETE where STOKID=' + STOKLAR.FieldByName('ID').AsString);
+  Tablo.Query3.First;
+  while not Tablo.Query3.Eof do begin
+    Tablo.ApiSilCagir('sp_Api_UretimRecete_Sil_Json', Tablo.Query3.FieldByName('ID').AsInteger);
+    Tablo.Query3.Next;
   end;
+  RecetePopupDuzenle;
 end;
 
 procedure TStokListeDlg.RegKaydetVeAramaYap;
@@ -1249,14 +1256,43 @@ begin
 end;
 
 procedure TStokListeDlg.Kopyala1Click(Sender: TObject);
+// KLON: once SUNUCUDA yeni kart olusturulur (sp_Api_Stok_Klonla_Json -> kaydet API'si),
+//   sonra sihirbaz o kart uzerinde 'K' (kopya) modunda acilir. Kullanici vazgecerse
+//   sihirbaz kapanirken klonu siler (FormClose'daki mevcut Sontus='I' yolu).
+//   Eskiden klonu sihirbaz kendi icinde satir satir SQLSatiriKopyala ile uretiyordu.
 var
-  ID:integer;
+  ID, LKaynak, LYeni: Integer;
+  LKod: string;
+  LDetay: Boolean;
 begin
-  if Tablo.YetkiVarmi(2701,YetkiTur_Ekleme) then begin
-    islemKopyala:='K';
-    ID := Tablo.StokSihirbazBaslat('K', 0, STOKLAR.Fields[0].AsInteger,-1,0);
-    if ID > 0 then
-      Liste_SP_Cagir(4);   // STOKLAR SP-tabanli -> TabloYenile(STOKLAR,[periyot]) SP'yi bozuyordu
+  if not Tablo.YetkiVarmi(2701, YetkiTur_Ekleme) then Exit;
+  LKaynak := STOKLAR.Fields[0].AsInteger;
+  if LKaynak <= 0 then Exit;
+
+  // Kod/ad KURALI SUNUCUDA (GenDepoUpdate143): kod = <KAYNAKKOD>_K1 (dolu ise _K2...),
+  //   ad = <KAYNAKAD> (KOPYA). Bos gecilir ki SP uretsin - eskiden burada zaman
+  //   damgasi ya da hesap plani sihirbazi ile kod aliniyordu.
+  LKod := '';
+
+  // Ek bilgi (detay) satirlari kopyalansin mi?
+  LDetay := Veritabani.VeriVarMi(Tablo.FDCnn,
+              'select ID from REHBERBILGI where YERI=&Yeri and YER_ID=&Yer_ID',
+              ['&Yeri', '&Yer_ID'], [TabNo_STOKLAR, LKaynak])
+            and (Application.MessageBox(PChar(SDStokDetayKopyalansinMi), PChar(Onay),
+                   MB_YESNO + MB_ICONQUESTION) <> ID_NO);
+
+  LYeni := Tablo.StokKlonla(LKaynak, LKod, LDetay);
+  if LYeni <= 0 then Exit;
+
+  islemKopyala := 'K';
+  ID := Tablo.StokSihirbazBaslat('K', 0, LYeni, -1, 0);
+  if ID > 0 then
+  begin
+    // "Yeni" ile ayni son-islem davranisi: Son/Sik Aranan'a yaz, listeyi Son Aranan
+    //   ile tazele ve yeni karta git (klonda bunlar atlaniyordu).
+    Tablo.AramaKaydet(MODUL_Stok, ID);
+    Liste_SP_Cagir(5);                 // Son Aranan (en yeni ustte)
+    STOKLAR.Locate('ID', ID, []);
   end;
 end;
 

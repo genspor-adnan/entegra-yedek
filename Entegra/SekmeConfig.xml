@@ -1,7 +1,7 @@
 <Gentegre>
 	<AnaSekmeler>  
 	<AnaSekme Tip="TAnaGirisSayfasiFrame" Image="0" FrameYonetilebilir="hayir" AnaSekme="evet"/>
-	<AnaSekme Adi="Aksiyonlar" Tip="TGenelAnaSekmeFrame" Image="1"
+	<AnaSekme Adi="Aksiyonlar" Tip="TGenelAnaSekmeFrame" Image="57"
         IcerikSayfaDenetimi="pcIcerik"
         AramaSayfaDenetimi="pcArama"
         GorevlerPaneli="pnlGorev"
@@ -335,7 +335,7 @@
 			<AracCubuklari>  
 			</AracCubuklari>  
 		</AnaSekme> 
-		<AnaSekme Adi="Alis/Satis" Tip="TGenelAnaSekmeFrame" Image="4"
+		<AnaSekme Adi="Alýþ/Satýþ" Tip="TGenelAnaSekmeFrame" Image="55"
         IcerikSayfaDenetimi="pcIcerik" 
         AramaSayfaDenetimi="pcArama"  
         GorevlerPaneli="pnlGorev"  

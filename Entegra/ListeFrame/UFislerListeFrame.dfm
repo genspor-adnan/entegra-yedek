@@ -208,13 +208,14 @@
     end
   end
   object ToolBar1: TToolBar
+    Height = 29
     AlignWithMargins = True
     Left = 3
     Top = 3
     Width = 1080
     Margins.Bottom = 0
     AutoSize = True
-    ButtonHeight = 24
+    ButtonHeight = 30
     ButtonWidth = 62
     Caption = 'AletCubugu'
     Color = clTeal
@@ -271,40 +272,6 @@
       ImageName = 'PngImage8'
       Style = tbsTextButton
       OnClick = DegisTusClick
-    end
-    object ToolButton2: TToolButton
-      Left = 230
-      Top = 0
-      Width = 8
-      Caption = 'ToolButton2'
-      Style = tbsSeparator
-    end
-    object LabelTumKayitlar: TToolButton
-      Left = 0
-      Top = 0
-      Caption = 'T'#252'm'
-      Style = tbsTextButton
-      OnClick = LabelTumKayitlarClick
-      ImageIndex = 52
-      ImageName = 'PngImageListe1'
-    end
-    object LabelSonArananlar: TToolButton
-      Left = 62
-      Top = 0
-      Caption = 'Son'
-      Style = tbsTextButton
-      OnClick = LabelSonArananlarClick
-      ImageIndex = 43
-        ImageName = 'PngImage43'
-    end
-    object LabelSikArananlar: TToolButton
-      Left = 124
-      Top = 0
-      Caption = 'S'#305'k'
-      Style = tbsTextButton
-      OnClick = LabelSikArananlarClick
-      ImageIndex = 51
-      ImageName = 'PngImageYildiz1'
     end
   end
   object SQLMemo: TcxMemo

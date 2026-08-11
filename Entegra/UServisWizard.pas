@@ -918,51 +918,15 @@ begin
 end;
 
 procedure TServisWizardDlg.HedefBelgeyiA1Click(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
+//   Servis ekranindaki BELGE listesinden secili belge icin calisir.
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := '';
-  case TabServisBelge.FieldByName('TUR').AsInteger of
-    9,19:begin
-      Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
-      Tablo.Query1.SQL.Add(' from SIPARISDETAY SD ');
-      Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on SD.ID=F2.YERID and F2.YERI in (406,407,409,410,415,420) ');
-      Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
-      Tablo.Query1.SQL.Add(' where SD.SIPARISID='+TabServisBelge.FieldByName('ID').AsString);
-    end;
+  if TabServisBelge.IsEmpty then Exit;
+  if TabServisBelge.FieldByName('TUR').AsInteger in [9,19,101,105] then
+    Tablo.DonusumBelgeAc('HEDEF', 'SIPARIS', TabServisBelge.FieldByName('ID').AsInteger)
   else
-    Tablo.Query1.SQL.Add(' select distinct FB.TUR,BELGENO=FB.FATURANO,FB.ID ');
-    Tablo.Query1.SQL.Add(' from FATURA F ');
-    Tablo.Query1.SQL.Add(' 	inner join FATURA F2 on F.ID=F2.YERID and F2.YERI in (408,411,461,462) ');
-    Tablo.Query1.SQL.Add(' 	inner join FATBASLIK FB on F2.FATBASID=FB.ID ');
-    Tablo.Query1.SQL.Add(' where F.FATBASID='+TabServisBelge.FieldByName('ID').AsString);
-  end;
-  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Hedef Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleriReadOnly,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarHedefSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,TabServis.FieldByName('REHBERID').AsInteger,0,Tablo.GENINI.BugunTrh,ABelgeno);
-  TabloYenile(TabServisBelge,[ServisID]);
+    Tablo.DonusumBelgeAc('HEDEF', 'FATBASLIK', TabServisBelge.FieldByName('ID').AsInteger);
 end;
 
 procedure TServisWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
@@ -2038,87 +2002,15 @@ begin
 end;
 
 procedure TServisWizardDlg.KaynakBelgeyiA1Click(Sender: TObject);
-var
-  sts:TStringlist;
-  AYeri,AYerID,RehID:Integer;
-  ABelgeno:string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
+//   Servis ekranindaki BELGE listesinden secili belge icin calisir.
 begin
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text := '';
-  Tablo.Query1.SQL.Add(' select distinct    ');
-  Tablo.Query1.SQL.Add(' KAYNAKTUR = case   ');
-  Tablo.Query1.SQL.Add(' 	when YERI =83 then 83   ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407) then 9   ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 408 then 10         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 411 then 14         ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 461 then 109        ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (409,410) then 19  ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 462 then 119        ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then -99 ');
-  Tablo.Query1.SQL.Add(' end, ');
-  Tablo.Query1.SQL.Add(' KAYNAKBELGENO=case ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISNO from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410) then (select SIPARISNO from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,461,462) then (select FATURANO from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID))               ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (select TEKLIFNO from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))             ');
-  Tablo.Query1.SQL.Add(' end, ');
-  Tablo.Query1.SQL.Add(' KAYNAKID=case      ');
-  Tablo.Query1.SQL.Add(' 	when YERI = 83 then (select SERVISID from SERVISDETAY where ID=F.YERID ) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410) then (select SIPARISID from SIPARISDETAY where ID=F.YERID ) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411,461,462) then (select FATBASID from FATURA where ID=F.YERID )                ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID )           ');
-  Tablo.Query1.SQL.Add(' end, ');
-  Tablo.Query1.SQL.Add(' KAYNAKFIRMA=(select FIRMA from REHBER where ID=(case   ');
-  Tablo.Query1.SQL.Add(' when YERI = 83 then (select REHBERID from SERVIS where ID=(select SERVISID from SERVISDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' when YERI in (406,407,409,410) then (select REHBERID from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' when YERI in (408,411,461,462) then (select REHBERID from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' when YERI in (412,413) then (select REHBERID from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ');
-  Tablo.Query1.SQL.Add(' end ))  ');
-  case TabServisBelge.FieldByName('TUR').AsInteger of
-    9,19:begin
-      Tablo.Query1.SQL.Add(' from SIPARISDETAY F ');
-      Tablo.Query1.SQL.Add(' where SIPARISID='+TabServisBelge.FieldByName('ID').AsString+' and ');
-      Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,461,462) ');
-    end;
+  if TabServisBelge.IsEmpty then Exit;
+  if TabServisBelge.FieldByName('TUR').AsInteger in [9,19,101,105] then
+    Tablo.DonusumBelgeAc('KAYNAK', 'SIPARIS', TabServisBelge.FieldByName('ID').AsInteger)
   else
-    Tablo.Query1.SQL.Add(' from FATURA F  ');
-    Tablo.Query1.SQL.Add(' where FATBASID='+TabServisBelge.FieldByName('ID').AsString+' and ');
-    Tablo.Query1.SQL.Add(' 	YERI in (83,404,405,406,407,408,409,410,411,412,413,414,415,461,462) ');
-  end;
-  if AktifVeriMotor = vmPG then Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
-  Tablo.Query1.Open;
-  case Tablo.Query1.RecordCount of
-    0: Abort;
-    1: begin
-      AYeri := Tablo.Query1.Fields[0].AsInteger;
-      AYerID:= Tablo.Query1.Fields[2].AsInteger;
-      ABelgeno:= Tablo.Query1.Fields[1].AsString;
-    end;
-  else
-    try
-      sts := TStringlist.Create;
-      if Tablo.ListedenBilgiGetir('Kaynak Seçimi',Tablo.Query1.SQL.Text,sts,[Tablo.RepKasaTurleri,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1,Tablo.cxEditRepository1Label1],'FaturalarKaynakSecimi')then begin
-        AYeri := StrToInt(sts[0]);
-        AYerID:= StrToInt(sts[2]);
-        ABelgeno:= sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-  end;
-  if AYeri=83 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from SERVIS where ID='+IntToStr(AYerID));
-    //RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-    Tablo.ServisSihirbazBaslat(False, 'D',0 ,AYerID ,Tablo.Query2.FieldByName('REHBERID').AsInteger);
-    Abort;
-  end else if AYeri=-99 then begin
-    Tablo.TablodanSorguAc(2,'select REHBERID from TEKLIF where ID='+IntToStr(AYerID));
-    RehID := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-  end else
-    RehID := TabServis.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(AYerID,AYeri,RehID,0,Tablo.GENINI.BugunTrh,ABelgeno);
-  //Tablo.SiparisSihirbazBaslat('D',FATBASLIK.FieldByName('TUR').AsInteger,0,FATBASLIK.FieldByName('ID').AsInteger,FATBASLIK.FieldByName('REHBERID').AsInteger);
-  TabloYenile(TabServisBelge,[ServisID]);
+    Tablo.DonusumBelgeAc('KAYNAK', 'FATBASLIK', TabServisBelge.FieldByName('ID').AsInteger);
 end;
 
 procedure TServisWizardDlg.TabEkipmanDetayBeforeDelete(DataSet: TDataSet);

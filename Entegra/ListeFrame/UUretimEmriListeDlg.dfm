@@ -68,7 +68,7 @@ object UretimEmriListeDlg: TUretimEmriListeDlg
     object GorTus: TToolButton
       Left = 126
       Top = 0
-      Caption = 'G'#246'r'
+      Caption = 'D'#252'zenle'
       ImageIndex = 9
       ImageName = 'PngImage8'
       OnClick = GorTusClick

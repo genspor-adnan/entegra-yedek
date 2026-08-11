@@ -52,7 +52,6 @@ object StokListeDlg: TStokListeDlg
       Top = 0
       Caption = 'Yeni'
       ImageIndex = 7
-      ImageName = 'PngImage6'
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
@@ -61,7 +60,6 @@ object StokListeDlg: TStokListeDlg
       Top = 0
       Caption = 'Sil'
       ImageIndex = 8
-      ImageName = 'PngImage7'
       OnClick = SilTusClick
     end
     object DegisTus: TToolButton
@@ -70,7 +68,6 @@ object StokListeDlg: TStokListeDlg
       Top = 0
       Caption = 'D'#252'zenle'
       ImageIndex = 9
-      ImageName = 'PngImage8'
       Style = tbsTextButton
       OnClick = DegisTusClick
     end
@@ -80,7 +77,6 @@ object StokListeDlg: TStokListeDlg
       Width = 8
       Caption = 'ToolButton1'
       ImageIndex = 22
-      ImageName = 'PngImage22'
       Style = tbsSeparator
     end
     object AraTus: TToolButton
@@ -90,7 +86,6 @@ object StokListeDlg: TStokListeDlg
       Caption = 'AraTus'
       Enabled = False
       ImageIndex = 21
-      ImageName = 'PngImage21'
       Visible = False
       OnClick = AraTusClick
     end
@@ -101,15 +96,13 @@ object StokListeDlg: TStokListeDlg
       Caption = 'Yazd'#305'r'
       DropdownMenu = PopupMenuYaz
       ImageIndex = 16
-      ImageName = 'PngImage15'
     end
     object BtnBarkodYazdir: TToolButton
       AutoSize = True
       Left = 533
       Top = 0
       Caption = 'Barkod Yazd'#305'r'
-      ImageIndex = 16
-      ImageName = 'PngImage15'
+      ImageIndex = 58
       OnClick = BtnBarkodYazdirClick
     end
     object ToolButton2: TToolButton
@@ -118,7 +111,6 @@ object StokListeDlg: TStokListeDlg
       Width = 8
       Caption = 'ToolButton2'
       ImageIndex = 17
-      ImageName = 'PngImage16'
       Style = tbsSeparator
     end
     object ButtonUTS: TToolButton
@@ -126,8 +118,7 @@ object StokListeDlg: TStokListeDlg
       Left = 646
       Top = 0
       Caption = #220'TS'
-      ImageIndex = 29
-      ImageName = 'PngImage29'
+      ImageIndex = 59
       OnClick = ButtonUTSClick
     end
   end
@@ -572,157 +563,6 @@ object StokListeDlg: TStokListeDlg
             LookAndFeel.Kind = lfFlat
             LookAndFeel.NativeStyle = True
             Transparent = True
-          end
-        end
-      end
-      object TabYorumMedya: TcxTabSheet
-        Caption = 'Yorum / Medya'
-        ImageIndex = 38
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
-        object Panel4: TPanel
-          Left = 0
-          Top = 260
-          Width = 779
-          Height = 41
-          Align = alBottom
-          TabOrder = 0
-          object MemoChat: TcxRichEdit
-            Left = 1
-            Top = 1
-            Align = alClient
-            Properties.ScrollBars = ssVertical
-            TabOrder = 1
-            Height = 39
-            Width = 631
-          end
-          object BtnMesajGonder: TcxButton
-            Left = 632
-            Top = 1
-            Width = 85
-            Height = 39
-            Align = alRight
-            OptionsImage.ImageIndex = 39
-            OptionsImage.Images = Tablo.cxImageList1
-            TabOrder = 0
-            OnClick = BtnMesajGonderClick
-          end
-          object BtnDosyaGonder: TcxButton
-            Left = 717
-            Top = 1
-            Width = 61
-            Height = 39
-            Align = alRight
-            DropDownMenu = YorumAtacMenu
-            Kind = cxbkDropDown
-            OptionsImage.ImageIndex = 38
-            OptionsImage.Images = Tablo.cxImageList1
-            TabOrder = 2
-          end
-        end
-        object labelFileName: TcxLabel
-          Left = 0
-          Top = 240
-          ParentCustomHint = False
-          Align = alBottom
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = False
-          Style.Edges = [bLeft, bRight]
-          Style.Font.Charset = TURKISH_CHARSET
-          Style.Font.Color = clWindowText
-          Style.Font.Height = -11
-          Style.Font.Name = 'Trebuchet MS'
-          Style.Font.Style = []
-          Style.Shadow = False
-          Style.IsFontAssigned = True
-          Properties.Alignment.Horz = taRightJustify
-          Transparent = True
-          Visible = False
-          ExplicitTop = 239
-          AnchorX = 779
-        end
-        object GridYorum: TcxGrid
-          Left = 0
-          Top = 0
-          Width = 779
-          Height = 240
-          Align = alClient
-          TabOrder = 2
-          LookAndFeel.ScrollbarMode = sbmClassic
-          object GridYorumDBCardView1: TcxGridDBCardView
-            Navigator.Buttons.CustomButtons = <>
-            ScrollbarAnnotations.CustomAnnotations = <>
-            OnCellDblClick = GridYorumDBCardView1CellDblClick
-            DataController.DataSource = DtsYorum
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
-            LayoutDirection = ldVertical
-            OptionsView.CardBorderWidth = 1
-            OptionsView.CardIndent = 2
-            OptionsView.CardWidth = 900
-            OptionsView.CategoryIndent = 1
-            OptionsView.CategorySeparatorWidth = 1
-            OptionsView.CellAutoHeight = True
-            OptionsView.CellTextMaxLineCount = 5
-            Styles.Content = Tablo.cxStyle6
-            Styles.CardBorder = Tablo.cxStyle19
-            object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
-              DataBinding.FieldName = 'EKLEMETARIHI'
-              DataBinding.IsNullValueType = True
-              Options.Editing = False
-              Options.Focusing = False
-              Options.ShowCaption = False
-              Position.BeginsLayer = True
-              Position.Width = 120
-            end
-            object GridYorumDBCardView1YAZAN: TcxGridDBCardViewRow
-              DataBinding.FieldName = 'YAZAN'
-              DataBinding.IsNullValueType = True
-              Options.Editing = False
-              Options.Focusing = False
-              Options.ShowCaption = False
-              Position.BeginsLayer = False
-            end
-            object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
-              DataBinding.FieldName = 'ATAC'
-              DataBinding.IsNullValueType = True
-              RepositoryItem = Tablo.repFileExtensionList
-              Options.Editing = False
-              Options.Focusing = False
-              Options.ShowCaption = False
-              Position.BeginsLayer = False
-              Position.Width = 25
-              IsCaptionAssigned = True
-            end
-            object GridYorumDBCardView1DOKUMANAD: TcxGridDBCardViewRow
-              DataBinding.FieldName = 'DOKUMANAD'
-              DataBinding.IsNullValueType = True
-              Options.Editing = False
-              Options.Focusing = False
-              Options.ShowCaption = False
-              Position.BeginsLayer = False
-              Position.Width = 300
-              IsCaptionAssigned = True
-            end
-            object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
-              DataBinding.FieldName = 'YORUM'
-              DataBinding.IsNullValueType = True
-              PropertiesClassName = 'TcxRichEditProperties'
-              Options.Editing = False
-              Options.Focusing = False
-              Options.ShowCaption = False
-              Position.BeginsLayer = True
-              Styles.Content = Tablo.cxStyle12
-              Styles.CategoryRow = Tablo.cxStyle4
-            end
-          end
-          object GridYorumLevel1: TcxGridLevel
-            GridView = GridYorumDBCardView1
           end
         end
       end
@@ -1422,6 +1262,7 @@ object StokListeDlg: TStokListeDlg
       end
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
+        TabVisible = False
         ImageIndex = 12
         ExplicitLeft = 0
         ExplicitTop = 0
@@ -1532,6 +1373,157 @@ object StokListeDlg: TStokListeDlg
           end
           object cxGridLevel6: TcxGridLevel
             GridView = StokEsdegerTV
+          end
+        end
+      end
+      object TabYorumMedya: TcxTabSheet
+        Caption = 'Yorum / Medya'
+        ImageIndex = 38
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object Panel4: TPanel
+          Left = 0
+          Top = 260
+          Width = 779
+          Height = 41
+          Align = alBottom
+          TabOrder = 0
+          object MemoChat: TcxRichEdit
+            Left = 1
+            Top = 1
+            Align = alClient
+            Properties.ScrollBars = ssVertical
+            TabOrder = 1
+            Height = 39
+            Width = 631
+          end
+          object BtnMesajGonder: TcxButton
+            Left = 632
+            Top = 1
+            Width = 85
+            Height = 39
+            Align = alRight
+            OptionsImage.ImageIndex = 39
+            OptionsImage.Images = Tablo.cxImageList1
+            TabOrder = 0
+            OnClick = BtnMesajGonderClick
+          end
+          object BtnDosyaGonder: TcxButton
+            Left = 717
+            Top = 1
+            Width = 61
+            Height = 39
+            Align = alRight
+            DropDownMenu = YorumAtacMenu
+            Kind = cxbkDropDown
+            OptionsImage.ImageIndex = 38
+            OptionsImage.Images = Tablo.cxImageList1
+            TabOrder = 2
+          end
+        end
+        object labelFileName: TcxLabel
+          Left = 0
+          Top = 240
+          ParentCustomHint = False
+          Align = alBottom
+          ParentColor = False
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = False
+          Style.Edges = [bLeft, bRight]
+          Style.Font.Charset = TURKISH_CHARSET
+          Style.Font.Color = clWindowText
+          Style.Font.Height = -11
+          Style.Font.Name = 'Trebuchet MS'
+          Style.Font.Style = []
+          Style.Shadow = False
+          Style.IsFontAssigned = True
+          Properties.Alignment.Horz = taRightJustify
+          Transparent = True
+          Visible = False
+          ExplicitTop = 239
+          AnchorX = 779
+        end
+        object GridYorum: TcxGrid
+          Left = 0
+          Top = 0
+          Width = 779
+          Height = 240
+          Align = alClient
+          TabOrder = 2
+          LookAndFeel.ScrollbarMode = sbmClassic
+          object GridYorumDBCardView1: TcxGridDBCardView
+            Navigator.Buttons.CustomButtons = <>
+            ScrollbarAnnotations.CustomAnnotations = <>
+            OnCellDblClick = GridYorumDBCardView1CellDblClick
+            DataController.DataSource = DtsYorum
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            LayoutDirection = ldVertical
+            OptionsView.CardBorderWidth = 1
+            OptionsView.CardIndent = 2
+            OptionsView.CardWidth = 900
+            OptionsView.CategoryIndent = 1
+            OptionsView.CategorySeparatorWidth = 1
+            OptionsView.CellAutoHeight = True
+            OptionsView.CellTextMaxLineCount = 5
+            Styles.Content = Tablo.cxStyle6
+            Styles.CardBorder = Tablo.cxStyle19
+            object GridYorumDBCardView1EKLEMETARIHI: TcxGridDBCardViewRow
+              DataBinding.FieldName = 'EKLEMETARIHI'
+              DataBinding.IsNullValueType = True
+              Options.Editing = False
+              Options.Focusing = False
+              Options.ShowCaption = False
+              Position.BeginsLayer = True
+              Position.Width = 120
+            end
+            object GridYorumDBCardView1YAZAN: TcxGridDBCardViewRow
+              DataBinding.FieldName = 'YAZAN'
+              DataBinding.IsNullValueType = True
+              Options.Editing = False
+              Options.Focusing = False
+              Options.ShowCaption = False
+              Position.BeginsLayer = False
+            end
+            object GridYorumDBCardViewATAC: TcxGridDBCardViewRow
+              DataBinding.FieldName = 'ATAC'
+              DataBinding.IsNullValueType = True
+              RepositoryItem = Tablo.repFileExtensionList
+              Options.Editing = False
+              Options.Focusing = False
+              Options.ShowCaption = False
+              Position.BeginsLayer = False
+              Position.Width = 25
+              IsCaptionAssigned = True
+            end
+            object GridYorumDBCardView1DOKUMANAD: TcxGridDBCardViewRow
+              DataBinding.FieldName = 'DOKUMANAD'
+              DataBinding.IsNullValueType = True
+              Options.Editing = False
+              Options.Focusing = False
+              Options.ShowCaption = False
+              Position.BeginsLayer = False
+              Position.Width = 300
+              IsCaptionAssigned = True
+            end
+            object GridYorumDBCardView1YORUM: TcxGridDBCardViewRow
+              DataBinding.FieldName = 'YORUM'
+              DataBinding.IsNullValueType = True
+              PropertiesClassName = 'TcxRichEditProperties'
+              Options.Editing = False
+              Options.Focusing = False
+              Options.ShowCaption = False
+              Position.BeginsLayer = True
+              Styles.Content = Tablo.cxStyle12
+              Styles.CategoryRow = Tablo.cxStyle4
+            end
+          end
+          object GridYorumLevel1: TcxGridLevel
+            GridView = GridYorumDBCardView1
           end
         end
       end
@@ -2320,12 +2312,12 @@ object StokListeDlg: TStokListeDlg
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -2373,13 +2365,11 @@ object StokListeDlg: TStokListeDlg
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

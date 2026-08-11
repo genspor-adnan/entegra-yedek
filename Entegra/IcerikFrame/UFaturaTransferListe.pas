@@ -148,6 +148,9 @@ type
     procedure MenuHedefBelgeAcClick(Sender: TObject);
     procedure TransferInfoMenuClick(Sender: TObject);
     procedure AramaYap;
+    procedure LabelTumKayitlarClick(Sender: TObject);   // SekmeConfig OlayBagla (arama paneli) -> PUBLISHED olmali
+    procedure LabelSonArananlarClick(Sender: TObject);
+    procedure LabelSikArananlarClick(Sender: TObject);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -281,6 +284,25 @@ begin
   end;
 end;
 
+
+
+// Arama panelindeki (AramaFrame) Tum/Son/Sik butonlari SekmeConfig OlayBagla ile
+//   BU metotlara baglidir - liste toolbar'indaki kopyalari kaldirildi ama metotlar
+//   KALMALI (yoksa "Kaynak orenekte bu yontem bulunamiyor" hatasi).
+procedure TFatTransferListeDlg.LabelTumKayitlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(1);   // Tum kayitlar
+end;
+
+procedure TFatTransferListeDlg.LabelSonArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(5);   // Son Aranan (KULLANICI_ARAMA tarih desc)
+end;
+
+procedure TFatTransferListeDlg.LabelSikArananlarClick(Sender: TObject);
+begin
+   Liste_SP_Cagir(3);   // Sik Aranan (KULLANICI_ARAMA SAY desc)
+end;
 
 function TFatTransferListeDlg.EkranAdiAl: string;
 begin
@@ -559,57 +581,19 @@ begin
 end;
 
 procedure TFatTransferListeDlg.MenuKaynakBelgeAcClick(Sender: TObject);
-// Bu transferin uretildigi STOK TALEBINI acar.
-//   Bag satir bazli: FATURA.YERI = 435, FATURA.YERID = SIPARISDETAY.ID.
-var
-  LSipId, LRehber: Integer;
-  LBelgeNo: string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
 begin
   if TabFatBaslik.IsEmpty then Exit;
-
-  Tablo.TablodanSorguAc(1,
-    'select top 1 SIPARISID=SD.SIPARISID, SIPARISNO=S.SIPARISNO, S.REHBERID' +
-    ' from SIPARISDETAY SD inner join SIPARIS S on S.ID=SD.SIPARISID' +
-    ' where SD.ID in (select F.YERID from FATURA F' +
-    '                  where F.YERI=435 and F.FATBASID=' +
-                          TabFatBaslik.FieldByName('ID').AsString + ')');
-  if Tablo.Query1.IsEmpty then begin
-    Application.MessageBox(PChar('Bu transferin kaynak belgesi yok.'),
-                           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
-    Exit;
-  end;
-
-  LSipId   := Tablo.Query1.FieldByName('SIPARISID').AsInteger;
-  LBelgeNo := Tablo.Query1.FieldByName('SIPARISNO').AsString;
-  LRehber  := Tablo.Query1.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(LSipId, KasaTur_StoktanTalep, LRehber, 0,
-                           Tablo.GENINI.BugunTrh, LBelgeNo);
+  Tablo.DonusumBelgeAc('KAYNAK', 'FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger);
 end;
 
 procedure TFatTransferListeDlg.MenuHedefBelgeAcClick(Sender: TObject);
-// Bu transferden uretilen URETIM FISINI acar.
-//   Bag BASLIK bazli: FATBASLIK.TUR=6, YERI=TabNo_TRANSFER, YERID=transfer ID.
-var
-  LId, LRehber: Integer;
-  LBelgeNo: string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
 begin
   if TabFatBaslik.IsEmpty then Exit;
-
-  Tablo.TablodanSorguAc(1,
-    'select top 1 ID, FATURANO, REHBERID from FATBASLIK' +
-    ' where TUR=6 and YERI=' + IntToStr(TabNo_TRANSFER) +
-    ' and YERID=' + TabFatBaslik.FieldByName('ID').AsString + ' order by ID');
-  if Tablo.Query1.IsEmpty then begin
-    Application.MessageBox(PChar('Bu transferden olusturulmus bir uretim fisi yok.'),
-                           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
-    Exit;
-  end;
-
-  LId      := Tablo.Query1.FieldByName('ID').AsInteger;
-  LBelgeNo := Tablo.Query1.FieldByName('FATURANO').AsString;
-  LRehber  := Tablo.Query1.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(LId, KasaTur_Uretim, LRehber, 0,
-                           Tablo.GENINI.BugunTrh, LBelgeNo);
+  Tablo.DonusumBelgeAc('HEDEF', 'FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger);
 end;
 
 procedure TFatTransferListeDlg.TransferInfoMenuClick(Sender: TObject);

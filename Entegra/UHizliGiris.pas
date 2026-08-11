@@ -326,7 +326,8 @@ uses
   UAnaForm, UHizliGirisIsk, UHizliGirisTahsilat, UHizliGirisBaski, UYazarKasa_Ingenico,
   UHizliGirisKKTahsilat, UHizliGirisKasaSay, UGiderPusulasi,UBarkod,UHizliSiparisSecim,
   Fetautil, FetaKurulusSiniflari, UKullaniciGiris, PrjConst, UHizliGirisDokumDlg, UGirisKutusuEx,
-  UGenSifre,  UGENINIDuzenle, UTerazi, UFastRap,UHizliGirisAnaMenu, USiparisPivot,LocOnFly, UVeriMotor;//,;
+  UGenSifre,  UGENINIDuzenle, UTerazi, UFastRap,UHizliGirisAnaMenu, USiparisPivot,LocOnFly, UVeriMotor,
+  System.JSON;   // POS iskonto/satis API cagrilari (GenDepoUpdate138)
 
 
 var
@@ -651,26 +652,29 @@ var belgeno :  Tbelgeno;
     end;
 
     procedure IskontoUygula;
+    // Iskonto: gecici tablo + FATURA + FATBASLIK toplamlari TEK transaction
+    //   (sp_Api_POS_Iskonto_Json / GenDepoUpdate138). Eskiden uc ayri komuttu:
+    //   ortada kopunca adisyon iskontolu, fatura toplami eski kaliyordu.
     begin
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update '+AktifFatTabloAdi+' set ISKONTO='+Float_ToStr(HizliGirisTahsilatDlg.IskontOran)+', TUTAR=ADET*BIRIMFIYAT*((100.0-'+Float_ToStr(HizliGirisTahsilatDlg.IskontOran)+')/100.0) '+
-           ', DOVIZ_TUTARI=ADET*BIRIMFIYAT*((100.0-'+Float_ToStr(HizliGirisTahsilatDlg.IskontOran)+')/100.0) ',[],[]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATURA set ISKONTO='+Float_ToStr(HizliGirisTahsilatDlg.IskontOran)+', '+
-        'TUTAR=ADET*BIRIMFIYAT*((100.0-'+Float_ToStr(HizliGirisTahsilatDlg.IskontOran)+')/100.0) where FATBASID =  '+IntToStr(AdisyonNo),[],[]);
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK  set '+ //mevcut kayıtlı adisyona iskontoyu uyarlayalım..
-        ' KDV_TUTARI= (select case when FATBASLIK.KDVDURUM=''Hariç'' then isnull(ROUND(SUM(TUTAR*(KDV/100.0)),2),0.0)'+
-        '    else ROUND(isnull(SUM(TUTAR-(TUTAR/(1+(KDV/100.0)))),0.0),2) end  from FATURA F where F.FATBASID=FATBASLIK.ID),'+
-        ' FATURA_TUTARI = (select case when FATBASLIK.KDVDURUM=''Hariç'' then isnull(SUM(ROUND(TUTAR*(1+(KDV/100.0)),2)),0.0)'+
-        '   else isnull(SUM(ROUND(TUTAR,2)),0.0) end from FATURA F where F.FATBASID=FATBASLIK.ID)'+
-        'where ID = '+IntToStr(AdisyonNo),[],[]);
-        TabloYenile(TabDetay, [])
+      Tablo.ApiCagir('sp_Api_POS_Iskonto_Json',
+        TJSONObject.Create
+          .AddPair('FatTablo', AktifFatTabloAdi)
+          .AddPair('AdisyonId', TJSONNumber.Create(AdisyonNo))
+          .AddPair('Oran', TJSONNumber.Create(HizliGirisTahsilatDlg.IskontOran)) as TJSONObject);
+      TabloYenile(TabDetay, [])
     end;
     procedure SatisOlustur;
+    // SATIS + SATISDETAY TEK transaction (sp_Api_POS_Satis_Json / GenDepoUpdate138).
+    //   Eskiden iki ayri komuttu: ikincisi patlarsa detaysiz (yetim) SATIS kaliyordu.
     begin
-       i := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into SATIS ([TARIH],[TUR],[REHBERID],[FATURANO],[CIKISDEPO],[EKLEYEN])'+
-        ' select [FATURATARIH],[TUR],[REHBERID],[FATURANO],[CIKISDEPO],'+Kullanan+' from '+AktifFatBasTabloAdi+' select SCOPE_IDENTITY()',[], [], True);
-       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'insert into [SATISDETAY]([SATISID],[URUNID],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR],[ISKONTO],[ISKONTO2])'+
-        'select [SATISID]='+IntToStr(i)+',[URUNID],[ADET],[BIRIM],[MIKTAR],[BIRIMFIYAT],[TUTAR],[ISKONTO],[ISKONTO2] from '+ AktifFatTabloAdi ,[], []);
+      i := Tablo.ApiSonucInt(
+        Tablo.ApiCagir('sp_Api_POS_Satis_Json',
+          TJSONObject.Create
+            .AddPair('FatBasTablo', AktifFatBasTabloAdi)
+            .AddPair('FatTablo', AktifFatTabloAdi)
+            .AddPair('Oturum', TJSONObject.Create
+              .AddPair('KulId', TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))) as TJSONObject),
+        'SatisId');
     end;
 begin
   if TabDetay.RecordCount=0 then Exit;
@@ -2962,8 +2966,8 @@ begin //Üretim yapılır
       if TabDetay.FieldByName('RECETEID').value <> null then
 //         showmessage(TabDetay.FieldByName('AD').AsString+' Üretim reçetesi bulunamadı..')
 //      else
-         Tablo.UretimFisiOlustur(TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime, 0,0,
-                                 TabDetay.FieldByName('RECETEID').AsInteger, VarsDepo{Giris},VarsDepo{Cikis},TabDetay.FieldByName('MIKTAR').AsFloat);
+//         Tablo.UretimFisiOlustur(TabFatBasDetay.FieldByName('FATURATARIH').AsDateTime, 0,0,
+//                                 TabDetay.FieldByName('RECETEID').AsInteger, VarsDepo{Giris},VarsDepo{Cikis},TabDetay.FieldByName('MIKTAR').AsFloat);
       TabDetay.next;
     end;
 end;

@@ -1692,59 +1692,23 @@ begin
 end;
 
 procedure TDemirbasListeDlg.SilTusClick(Sender: TObject);
+// SILME ARTIK SUNUCUDA: sp_Api_Demirbas_Sil_Json (modul 18).
+//   Engel kurallari (kalibrasyon / bagli is-gorev / servis) fn_Prog_Silme_Engel(18);
+//   tutanak detayi, yorum+ek dosya, amortisman, _USER kapsami fn_Prog_Silme_Detay(18).
+//   "Tutanak hareket gormus" kurali EKRANDA kalir: birden COK tutanak detayi varsa
+//   demirbas dolasmis demektir (SP metadata'si sayim kurali tasimaz).
 begin
+  if DEMIRBAS.IsEmpty then Exit;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then
   begin
-    // varsa dokümanların silinmeli
     Tablo.TablodanSorguAc(1, ' Select count(*) from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID='+DEMIRBAS.FieldByName('ID').AsString);
-    if Tablo.Query1.Fields[0].AsInteger > 1 then  begin
+    if Tablo.Query1.Fields[0].AsInteger > 1 then begin
       Application.MessageBox(PChar(DDTutanakHareketGormusSilinemez),PChar(Uyari), 0);
       Abort;
-    end else if Veritabani.VeriVarMi(Tablo.FDCnn, ' Select ID from GOREVYORUM where TUR='+IntToStr(Tabno_Demirbas)+' and GOREVID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]) then  begin
-      Application.MessageBox(PChar(DDYorumMedyaHareketGormusSilinemez),PChar(Uyari), 0);
-      Abort;
-    end else if Veritabani.VeriVarMi(Tablo.FDCnn, ' Select DEMIRBASID from KALIBRASYON where DEMIRBASID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]) then  begin
-      Application.MessageBox(PChar(DDKalibrasyonHareketGormusSilinemez),PChar(Uyari), 0);
-      Abort;
-    end else if Veritabani.VeriVarMi(Tablo.FDCnn, ' Select ID from GOREVLER where YER='+IntToStr(Tabno_Demirbas)+' and YER_ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]) then  begin
-      Application.MessageBox(PChar(DDTakipHareketGormusSilinemez),PChar(Uyari), 0);
-      Abort;
     end;
-    Tabloyenile(TabMasraflar,[DEMIRBAS.FieldByName('ID').AsInteger]);
-    if TabMasraflar.Recordcount >0 then  begin
-      Application.MessageBox(PChar(DDmasrafHareketGormusSilinemez),PChar(Uyari), 0);
-      Abort;
-    end else begin
-      Tablo.TablodanSorguAc(1,'Select * from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID='+DEMIRBAS.FieldByName('ID').AsString+' ');
-      if Tablo.Query1.RecordCount>0 then begin
-        while not Tablo.Query1.Eof do begin
-          // Master tutanak'i (DEMIRBAS_TUTANAK, ID'li) SILMEDEN ONCE logla -> Geri Al ile dirilir.
-          LogKayitSil('DEMIRBAS_TUTANAK', TabNo_DEMIRBAS_TUTANAK_KART, Tablo.Query1.FieldByName('TUTANAKID').AsInteger, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
-          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK where ID=&id ', ['&id'], [Tablo.Query1.FieldByName('TUTANAKID').AsInteger]);
-          Tablo.Query1.Next;
-        end;
-      end;
-      // KART LOGU: SILMEDEN ONCE ve TABLODAN. Liste dataset'i sp_Prog_Demirbas_Liste_Json2
-      //   kolonlarini tasiyor (ZIMMETLIADI/KATEGORIADI/MODELAD...) -> dataset'ten loglanirsa
-      //   gercek DEMIRBAS kolonlari loga girmez, "Geri Al" kaydi EKSIK dirilir.
-      LogKayitSil('DEMIRBAS', TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger,
-                  TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
-      // KART FOTOGRAFI (DEMIRBAS.RESIM blob) - log JSON'u blob'lari dislar, ayrica yedekle.
-      LogBlobYedekle('DEMIRBAS', 'RESIM', DEMIRBAS.FieldByName('ID').AsInteger,
-                     TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
-      // Detay satirlarini SILMEDEN ONCE logla (ust=demirbas), sonra sil.
-      LogDetaylariSil('DEMIRBAS_TUTANAK_DETAY', 'DEMIRBASID', TabNo_DEMIRBAS_TUTANAK, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_TUTANAK_DETAY where DEMIRBASID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
-      // _USER (ek alan) satirini SILMEDEN ONCE logla, sonra sil (FK: kart silinmeden once _USER).
-      LogDetaylariSil('DEMIRBAS_USER', 'ID', TabNo_DEMIRBAS_USER, TabNo_DEMIRBAS, DEMIRBAS.FieldByName('ID').AsInteger);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS_USER where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from DEMIRBAS where ID=&id ', ['&id'], [DEMIRBAS.FieldByName('ID').AsInteger]);
-     // Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'DELETE FROM DEMIRBASTAKIP WHERE DEMIRBASID=&DEMIRBASID',['&DEMIRBASID'],[DEMIRBAS.FieldByName('ID').AsString])
-    end;
-    // NOT: kart silme logu YUKARIDA (silmeden once, tablodan) yazildi.
+    Tablo.ApiSilCagir('sp_Api_Demirbas_Sil_Json', DEMIRBAS.FieldByName('ID').AsInteger);
     YenileTusClick(Self);
-    /// SQL2005 TE hataya neden olduğu için delete olayını kendimiz yapıyoruz
-    Abort;
+    Abort;   // grid'in kendi delete'i calismasin
   end;
 end;
 

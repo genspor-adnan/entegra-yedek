@@ -1728,48 +1728,8 @@
         Left = 460
         Top = 0
         Caption = 'Hesap Makinas'#305
-        ImageIndex = 3
-        ImageName = 'PngImage18'
+        ImageIndex = 60
         OnClick = ToolButton2Click
-      end
-      object ToolButton10: TToolButton
-        Left = 571
-        Top = 0
-        Width = 8
-        Caption = 'ToolButton10'
-        Style = tbsSeparator
-      end
-      object LabelTumKayitlar: TToolButton
-        AutoSize = True
-        Left = 0
-        Top = 0
-        Caption = 'T'#252'm'
-        Style = tbsTextButton
-        OnClick = LabelTumKayitlarClick
-        ImageIndex = 52
-        ImageName = 'PngImageListe1'
-      end
-      object LabelSonArananlar: TToolButton
-        AutoSize = True
-        Tag = 5
-        Left = 62
-        Top = 0
-        Caption = 'Son'
-        Style = tbsTextButton
-        OnClick = LabelSonArananlarClick
-        ImageIndex = 43
-        ImageName = 'PngImage43'
-      end
-      object LabelSikArananlar: TToolButton
-        AutoSize = True
-        Tag = 3
-        Left = 124
-        Top = 0
-        Caption = 'S'#305'k'
-        Style = tbsTextButton
-        OnClick = LabelSikArananlarClick
-        ImageIndex = 51
-        ImageName = 'PngImageYildiz1'
       end
     end
     object JvNavPanelHeader1: TJvNavPanelHeader
@@ -2276,12 +2236,12 @@
     end
     object DkmanGster1: TMenuItem
       Caption = 'D'#246'k'#252'man G'#246'ster'
-      ImageIndex = 19
+      ImageIndex = 37
       OnClick = DkmanGster1Click
     end
     object DokumanFormunuA1: TMenuItem
       Caption = 'Dokuman Formunu A'#231
-      ImageIndex = 19
+      ImageIndex = 43
       OnClick = DokumanFormunuA1Click
     end
     object DkmanSil1: TMenuItem
@@ -2315,13 +2275,11 @@
     object MenuKlasordenEkle: TMenuItem
       Caption = 'Klas'#246'rden'
       ImageIndex = 0
-      ImageName = 'PngImage0'
       OnClick = MenuKlasordenEkleClick
     end
     object MenuTarayacidanEkle: TMenuItem
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
-      ImageName = 'PngImage16'
       OnClick = MenuTarayacidanEkleClick
     end
   end

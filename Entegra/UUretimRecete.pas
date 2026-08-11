@@ -1190,21 +1190,13 @@ begin
 end;
 
 procedure TUretimReceteDlg.ReceteSilBtnClick(Sender: TObject);
+// Silme sunucuda: sp_Api_UretimRecete_Sil_Json (kontrol -> log -> sirali delete,
+//   tek transaction). Engeller (uretim fisi / receteyi kullanan uretim emri /
+//   ANAURUN=0 detay) fn_Prog_Silme_Engel_Ek(138) icinde - mesajlar SP'den gelir.
 begin
+  if TabRecete.IsEmpty then Exit;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
-     if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from FATBASLIK where TUR=6 and YERI=138 and YERID=&YERID',['&YERID'],[TabRecete.FieldByName('ID').AsInteger]) then
-        ShowMessage(URKayitSilinemez)
-     else if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMEMRI where RECETEID=&UEID',['&UEID'],[TabRecete.FieldByName('ID').AsInteger]) then
-        ShowMessage(URKayitSilinemez)
-     else if Veritabani.VeriVarMi(Tablo.FDCnn,'select 1 from URETIMRECETEDETAY where URETIMRECETEID=&UEID and ANAURUN=0',['&UEID'],[TabRecete.FieldByName('ID').AsInteger]) then
-        ShowMessage('Önce Reçete detayını silin!')
-     else begin
-        if LogGun > 0 then begin  // silmeden ONCE logla: detay + kart
-           LogDetaylariSil('URETIMRECETEDETAY','URETIMRECETEID',TabNo_URETIMRECETEDETAY,TabNo_URETIMRECETE,TabRecete.FieldByName('ID').AsInteger);
-           LogKartSil(TabRecete, TabNo_URETIMRECETE, TabRecete.FieldByName('ID').AsInteger);
-        end;
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from URETIMRECETE where ID=&ID', ['&ID'], [TabRecete.FieldByName('ID').AsInteger]);
-     end;
+    Tablo.ApiSilCagir('sp_Api_UretimRecete_Sil_Json', TabRecete.FieldByName('ID').AsInteger);
     TabloYenile(TabRecete, []);
   end;
 end;

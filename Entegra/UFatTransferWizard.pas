@@ -480,7 +480,17 @@ begin
   if IslemOp = 'D' then
     FOturumID := ULog.OturumBaslatPlan('FATBASLIK', TabFatBaslik.FieldByName('ID').AsInteger,   // LAZY: plan bellekte
       [ ULog.SnapTablo(1, 'FATBASLIK', 'ID=' + TabFatBaslik.FieldByName('ID').AsString),
-        ULog.SnapTablo(2, 'FATURA',    'FATBASID=' + TabFatBaslik.FieldByName('ID').AsString) ]);
+        ULog.SnapTablo(2, 'FATURA',    'FATBASID=' + TabFatBaslik.FieldByName('ID').AsString),
+        // Izleme (lot/seri) satirlari: UFaturaWizard ile AYNI desen.
+        //   STOKIZLEME  : Sira=3 (once eklenir), SilSira=5 (once silinir), TamSil
+        //   STOKIZLEMEDEPO: Sira=4 (sonra eklenir), SilSira=4 (sonra silinir), TamSil
+        //   Stok iadesi STOKIZLEME'nin DELETE tetiginde ve tetik depo satirlarini OKUR ->
+        //   depo once silinirse iade kaybolur (bkz. GenDepoUpdate125).
+        ULog.SnapTablo(3, 'STOKIZLEME', 'BASLIKID=' + TabFatBaslik.FieldByName('ID').AsString, True, 5),
+        ULog.SnapTablo(4, 'STOKIZLEMEDEPO',
+          'IZLEMID in (select ID from STOKIZLEME where BASLIKID=' + TabFatBaslik.FieldByName('ID').AsString + ')' +
+          ' or IZLEMID in (select KAYITID from {SNAP} where OTURUMID=''{OTURUM}''' +
+          ' and TABLOADI=''STOKIZLEME'' and KAYITID is not null)', True, 4) ]);
 
   if KilitKontrolEt(2,Tur,TabFatBaslik.FieldByName('FATURATARIH').AsDateTime,2) then begin
      Kilit := True;

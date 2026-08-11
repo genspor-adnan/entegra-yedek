@@ -148,7 +148,6 @@ type
     DETAY: TFDQuery;
     DtsDetay: TDataSource;
     PmHesapla: TPopupMenu;
-    Hesapla1: TMenuItem;
     PnlFiyat: TPanel;
     GridFiyat: TcxGrid;
     GridFiyatView: TcxGridDBTableView;
@@ -586,7 +585,6 @@ type
     procedure cxGridDBColumn7GetPropertiesForEdit(
       Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
       var AProperties: TcxCustomEditProperties);
-    procedure Hesapla1Click(Sender: TObject);
     procedure KampanyaKaydetClick(Sender: TObject);
     procedure DtsKampanyaStateChange(Sender: TObject);
     procedure KampanyaSilClick(Sender: TObject);
@@ -722,7 +720,6 @@ type
     FEkleLogland: Boolean;   // kart EKLEME logu tek sefer (kaydet + kapanis fallback)
     FKartSnap: TStringList;  // kart (STOK) BeforeEdit snapshot'i - detay logu LogOnceki'yi ezmesin
     FKartSnapID: Integer;    // snapshot'in ait oldugu kart ID'si
-    KodAl:String;
     StokID , Cagiran,SayAlisSatis,IsOrtagi,Kategori : Integer;
     ///Dok?man
     //Yeri:  SmallInt;
@@ -1842,12 +1839,15 @@ begin
   FreeAndNil(FKartSnap);
   LogUstModu := -1;   // ana kart modu bayat kalmasin (sonraki form etkilenmesin)
   if (Sontus='I') and ((IslemOp='E')or (IslemOp='K')) and(TabStok.Fields[0].AsString <> '')and(TabStok.Fields[0].AsInteger > 0) then begin
-    //e?er yeni kay?tsa ve iptal edildiyse kaydedilmi? bilgilir silinmesi laz?m
-    Tablo.StoksilmeIslemleri(StokID);
+    // Yeni/kopya kart iptal edildi -> kaydedilen bilgiler silinir.
+    //   ONAY SORMA: kullanici zaten "iptal" dedi; ikinci kez "silinsin mi?" sorulunca
+    //   Hayir denip vazgecilen KLON kart ortada kaliyordu.
+    Tablo.StoksilmeIslemleri(StokID, False);
     //islemKopyala:='';
   end else
     // FALLBACK: yeni stok kaydedilip Finish'siz kapatildiysa EKLEME logu kacmasin (tek sefer).
-    FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, (IslemOp='E') or (IslemOp='K'), FEkleLogland) or FEkleLogland;
+    // FALLBACK yalnizca 'E' (yeni kart) icin: 'K'da klonu API loglar (Kopyalama).
+    FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, (IslemOp='E'), FEkleLogland) or FEkleLogland;
 
   // Geri-alinabilir oturum (D=degistir): iptal(Sontus='I'/X) -> ilk hale don; kaydet(Sontus='K') -> temizle.
   if (IslemOp = 'D') and (FOturumID <> '') then
@@ -1992,8 +1992,6 @@ begin
 end;
 
 procedure TStokWizardDlg.FormShow(Sender: TObject);
-Var
-  yeniStokID:integer;
 begin
   FEkAlanOlustu := False;
   FUTSOlustu := False;
@@ -2047,56 +2045,13 @@ begin
 
             WizardKontrol.ActivePageIndex:=Cagiran;
          end;
-     'K':begin //Kod Alma ??lemi
-//            if IslemOp='K' then begin  //??lemOP Kopyalama m? oldu?u kontrol ediliyor.
-              if Tablo.GENINI.ReadInteger(Ops_StokOpsiyon_StokKodGirisi,2)  = 2 then
-                 KodAl:= Tablo.KodBulmaSihirbazi(150, 'HESAPPLANI', 'HESAPKODU', 'HESAPADI','STOKLAR' ,'KOD')
-              else
-                 KodAl:= FormatDateTime('yyyymmddhhnnss', Tablo.GENINI.BugunTrhSaat);
-
-              //if KodAl='' then
-              //  islemKopyala:='';
-//            end else
-//              KodAl:='0';
-
-           yeniStokID:=Tablo.SQLSatiriKopyala('STOKLAR',StokID,['KOD','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[KodAl,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-
-           if (Veritabani.VeriVarMi(Tablo.FDCnn,'select ID from REHBERBILGI where YERI=&Yeri and YER_ID=&Yer_ID ',['&Yeri','&Yer_ID'],[TabNo_Stoklar,StokID]))
-              and (Application.MessageBox( PChar(SDStokDetayKopyalansinMi), PChar(Onay), MB_YESNO+ MB_ICONQUESTION) <> ID_NO) then
-             Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-                          'insert into REHBERBILGI(YERI,YER_ID,SIRA,ETIKET,BILGI,SUBEID) '+
-                          'select YERI,&YeniYerIDsi,SIRA,ETIKET,BILGI,SUBEID from REHBERBILGI '+
-                          'where YERI=&Yeri and YER_ID=&Yer_ID'
-                            ,['&Yeri','&Yer_ID','&YeniYerIDsi'],[TabNo_Stoklar,StokID,yeniStokID]);
-
-           {Tablo.TablodanSorguAc(3,'select * from STOKFIYAT where STOKID='+inttostr(StokID));
-           while not Tablo.Query3.EoF do begin
-             Tablo.SQLSatiriKopyala('STOKFIYAT',Tablo.Query3.FieldByName('ID').AsInteger,['STOKID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniStokID,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-             Tablo.Query3.next;
-           end;}
-
-           Tablo.TablodanSorguAc(3,'select * from ISORTAGI where STOKID='+inttostr(StokID));
-           while not Tablo.Query3.EoF do begin
-             Tablo.SQLSatiriKopyala('ISORTAGI',Tablo.Query3.FieldByName('ID').AsInteger,['STOKID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniStokID,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-             Tablo.Query3.next;
-           end;
-
-           Tablo.TablodanSorguAc(3,'select * from STOKESDEGER where STOKID='+inttostr(StokID));
-           while not Tablo.Query3.EoF do begin
-             Tablo.SQLSatiriKopyala('STOKESDEGER',Tablo.Query3.FieldByName('ID').AsInteger,['STOKID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniStokID,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-             Tablo.Query3.next;
-           end;
-
-           Tablo.TablodanSorguAc(3,'select * from STOKCEVRIM where STOKID='+inttostr(StokID));
-           while not Tablo.Query3.EoF do begin
-             Tablo.SQLSatiriKopyala('STOKCEVRIM',Tablo.Query3.FieldByName('ID').AsInteger,['STOKID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniStokID,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-             Tablo.Query3.next;
-           end;
-
-           Tablo.TablodanSorguAc(3,'insert into IMAJ(VARSAYILAN,REHBERID,YERI,YER_ID,BELGEADI,BELGE,ACIKLAMA,BELGENO,TUR,ICDIS,DURUM) '+
-                              'select VARSAYILAN,'+inttostr(yeniStokID)+',YERI,'+inttostr(yeniStokID)+',BELGEADI,BELGE,ACIKLAMA,BELGENO,TUR,ICDIS,DURUM from IMAJ where YERI='+IntToStr(Tabno_Stoklar)+' and YER_ID='+inttostr(StokID)+' select scope_identity()');
-
-           StokID := yeniStokID;
+     'K':begin
+           // KOPYA MODU: klon ARTIK BURADA URETILMEZ. Cagiran menu once sunucuda
+           //   klonu olusturur (sp_Api_Stok_Klonla_Json -> kaydet API'si) ve StokID
+           //   olarak KLONUN id'sini verir. Burada yalnizca kart acilir; kullanici
+           //   vazgecerse FormClose (Sontus='I') klonu siler.
+           //   Eski hal: kod alma + STOKLAR/REHBERBILGI/ISORTAGI/STOKESDEGER/
+           //   STOKCEVRIM/IMAJ satir satir SQLSatiriKopyala ile kopyalaniyordu.
            TabloYenile(TabStok, [StokID]);
          end;
    end;
@@ -2289,29 +2244,6 @@ procedure TStokWizardDlg.GridYorumDBCardView1CellDblClick(
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
    Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, Tabno_Stoklar);
-end;
-
-procedure TStokWizardDlg.Hesapla1Click(Sender: TObject);
-var
-IMALATCI,DEPOCU:string;
-begin
- if TabFiyat.State in [dsEdit] then
-       TabFiyat.Post;
-  Tablo.TablodanSorguAc(1,'Select FIYAT,KDVDURUM from STOKFIYAT Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Etiket,30))+' and SATIS =1 ');
-  if not Tablo.Query1.IsEmpty then begin
-
-    if Tablo.FiyatHesaplama(StokID,Tablo.Query1.FieldByName('FIYAT').AsFloat,Tablo.Query1.FieldByName('KDVDURUM').AsBoolean,IMALATCI,DEPOCU) then begin
-
-      IMALATCI:=StringReplace(IMALATCI,',','.',[rfReplaceAll]);
-      DEPOCU:=StringReplace(DEPOCU,',','.',[rfReplaceAll]);
-
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+IMALATCI+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Imalatci,31))+' and SATIS=1 ',[],[]);
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update STOKFIYAT set FIYAT='''+DEPOCU+''' Where STOKID='+IntToStr(StokID)+' and FIYATADI='+IntToStr(Tablo.GENINI.ReadInteger(Ops_ITSOpsiyon_Depocu,32))+' and SATIS=1 ',[],[]);
-
-      TabFiyat.Refresh;
-    end;
-  end else
-    Application.MessageBox(PChar(STStokfiyat_kontrol_et),PChar(Uyari),0);
 end;
 
 procedure TStokWizardDlg.IptalTusClick(Sender: TObject);
@@ -3480,14 +3412,17 @@ begin
 
    // KART loglama (TEK SEFER, Finish'te): edit -> LogIslemleri, yeni -> LogKayitEkle.
    if LogGun > 0 then begin
-     if islemOp = 'D' then begin
+     // 'K' (kopya) da DEGISTIRME kolunda: klon kaydi SUNUCUDA olusturuldu ve
+     //   ISLEMLOG'a "Kopyalama" (ALTISLEMTIPI=3) olarak yazildi. Burada tekrar
+     //   EKLEME yazilirsa UInfo'da MUKERRER "Ekleme" satiri cikiyordu.
+     if (islemOp = 'D') or (islemOp = 'K') then begin
        // Detay (fiyat/barkod) loglamasi LogOnceki'yi ezip/temizleyip kart diff'ini
        // kaybediyordu -> DOGRU karta ait snapshot'i geri yukle, sonra logla.
        if Assigned(FKartSnap) and (FKartSnapID = TabStok.FieldByName('ID').AsInteger)
           and (FKartSnap.Count > 0) then LogOnceki.Assign(FKartSnap);
        LogKartDegisti(TabStok, TabNo_STOKLAR, TabStok.FieldByName('ID').AsInteger)
      end
-     else if (islemOp = 'E') or (islemOp = 'K') then   // yeni stok -> EKLEME (ust=kendisi)
+     else if islemOp = 'E' then   // yeni stok -> EKLEME (ust=kendisi)
        FEkleLogland := LogKartEkle(TabStok, TabNo_STOKLAR, True, FEkleLogland) or FEkleLogland;
      // _USER (ek alan) audit: yeni kart -> EKLE, duzenleme -> alan diff (kart grubuna baglanir).
      ULog.LogUserKaydet('STOKLAR_USER', TabNo_STOKLAR_USER, TabNo_STOKLAR,

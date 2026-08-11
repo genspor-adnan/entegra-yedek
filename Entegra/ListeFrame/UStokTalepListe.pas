@@ -415,59 +415,11 @@ begin
 end;
 
 procedure TStokTalepListeDlg.MenuHedefBelgeAcClick(Sender: TObject);
-// Bu talepten uretilen TRANSFER belgesini acar.
-//   Bag satir bazlidir: FATURA.YERI = 435 (stok talebi -> transfer fisi) ve
-//   FATURA.YERID = SIPARISDETAY.ID. Birden fazla transfer olusmus olabilir
-//   (kismi donusum); o zaman kullaniciya secim listesi cikar.
-var
-  sts: TStringList;
-  LId, LRehber: Integer;
-  LBelgeNo: string;
+// Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
+//   tabanli sp_Prog_Donusum_HedefBelge - GenDepoUpdate128).
 begin
   if TabStokTalep.IsEmpty then Exit;
-
-  Tablo.Query1.Close;
-  Tablo.Query1.SQL.Text :=
-    'select distinct HEDEFTUR=FB.TUR, HEDEFBELGENO=FB.FATURANO, HEDEFID=FB.ID,' +
-    ' HEDEFTARIH=FB.FATURATARIH' +
-    ' from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID' +
-    ' where F.YERI=435 and F.YERID in' +
-    '   (select ID from SIPARISDETAY where SIPARISID=' +
-        TabStokTalep.FieldByName('ID').AsString + ')';
-  Tablo.Query1.Open;
-
-  case Tablo.Query1.RecordCount of
-    0: begin
-         Application.MessageBox(
-           PChar('Bu talepten olusturulmus bir transfer belgesi yok.'),
-           PChar(Uyari), MB_OK or MB_ICONINFORMATION);
-         Exit;
-       end;
-    1: begin
-         LId      := Tablo.Query1.FieldByName('HEDEFID').AsInteger;
-         LBelgeNo := Tablo.Query1.FieldByName('HEDEFBELGENO').AsString;
-       end;
-  else
-    LId := 0;
-    sts := TStringList.Create;
-    try
-      if Tablo.ListedenBilgiGetir('Hedef Belge Seçimi', Tablo.Query1.SQL.Text, sts,
-           [Tablo.RepKasaTurleri, Tablo.cxEditRepository1Label1,
-            Tablo.cxEditRepository1Label1, Tablo.cxEditRepository1Label1],
-           'TransferHedefSecimi') then begin
-        LId      := StrToIntDef(sts[2], 0);
-        LBelgeNo := sts[1];
-      end;
-    finally
-      sts.Free;
-    end;
-    if LId <= 0 then Exit;
-  end;
-
-  Tablo.TablodanSorguAc(2, 'select REHBERID from FATBASLIK where ID=' + IntToStr(LId));
-  LRehber := Tablo.Query2.FieldByName('REHBERID').AsInteger;
-  AnaForm.GormeDialogCagir(LId, KasaTur_StokTransferi, LRehber, 0,
-                           Tablo.GENINI.BugunTrh, LBelgeNo);
+  Tablo.DonusumBelgeAc('HEDEF', 'SIPARIS', TabStokTalep.FieldByName('ID').AsInteger);
 end;
 
 procedure TStokTalepListeDlg.EkranYazdir(Sender: TObject);

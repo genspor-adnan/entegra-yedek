@@ -2686,6 +2686,11 @@ const
     Ops_FaturaOpsiyon_EArsivGelenURL = -24118; //Gelen e-Arsivler icin URL
     Ops_FaturaOpsiyon_UBL_ZIP = -24119; //EBELGE.UBL_XML'i COMPRESS ile sakla (bool)
     Ops_FaturaOpsiyon_DepoDBAdi = -24120; //e-Belge/arsiv 2. DB adi (string, default GENDEPO)
+    // Belge numarasi REZERVASYONU (bool, varsayilan 0 = eski davranis).
+    //   1 -> sp_BelgeNoGetir numarayi merkezi sayactan ATOMIK tahsis eder
+    //   (GenDepoUpdate135/136 + pg/schema/72). Es zamanli kayitta mukerrer belge
+    //   numarasi olusmaz; bedeli: kaydedilmeyen belgede numara boslugu (iade ile azalir).
+    Ops_FaturaOpsiyon_BelgeNoSayac = -24121;
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;
 

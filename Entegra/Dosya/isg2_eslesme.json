@@ -1,0 +1,383 @@
+{
+  "_aciklama": [
+    "KoBo alan adi -> Excel hucresi eslesmesi.",
+    "SABLON: GenForms/İşe Giriş ve Muayene.xlsx (resmi Ek-2), sayfa 'İşe Giriş'.",
+    "BU DOSYA ELLE YAZILMADI: isg2_form_tanimi_uret.py hem XLSForm'u hem bunu",
+    "  ayni tanimdan uretir. Hucre duzeltmesi burada yapilabilir; ama betik",
+    "  yeniden calistirilirsa uzerine yazar.",
+    "Birlesik hucrelerde SOL UST hucre yazilir; bicim/kenarlik bozulmaz."
+  ],
+  "sayfa": "İşe Giriş",
+  "duz": {
+    "isyeri/isyeri_unvan": "I4",
+    "isyeri/isyeri_sgk_sicil": "I5",
+    "isyeri/isyeri_adres": "I6",
+    "isyeri/isyeri_tel": "I8",
+    "isyeri/isyeri_faks": "I9",
+    "isyeri/isyeri_eposta": "I10",
+    "calisan/calisan_ad_soyad": "I13",
+    "calisan/calisan_cocuk_sayisi": "X13",
+    "calisan/calisan_tc": "I14",
+    "calisan/calisan_ev_tel": "X14",
+    "calisan/calisan_tel": "X15",
+    "calisan/calisan_cinsiyet": "I16",
+    "calisan/calisan_meslek": "X16",
+    "calisan/calisan_egitim": "I17",
+    "calisan/calisan_yaptigi_is": "X17",
+    "calisan/calisan_medeni": "I18",
+    "calisan/calisan_bolum": "X18",
+    "calisan/calisan_ev_adresi": "I19",
+    "onceki/onceki1_isyeri": "A22",
+    "onceki/onceki1_is_kolu": "I22",
+    "onceki/onceki1_yaptigi_is": "P22",
+    "onceki/onceki1_tarih": "W22",
+    "onceki/onceki2_isyeri": "A23",
+    "onceki/onceki2_is_kolu": "I23",
+    "onceki/onceki2_yaptigi_is": "P23",
+    "onceki/onceki2_tarih": "W23",
+    "onceki/onceki3_isyeri": "A24",
+    "onceki/onceki3_is_kolu": "I24",
+    "onceki/onceki3_yaptigi_is": "P24",
+    "onceki/onceki3_tarih": "W24",
+    "onceki/onceki4_isyeri": "A25",
+    "onceki/onceki4_is_kolu": "I25",
+    "onceki/onceki4_yaptigi_is": "P25",
+    "onceki/onceki4_tarih": "W25",
+    "ozgecmis/kan_grubu": "S29",
+    "ozgecmis/bag_tetanoz_tarih": "P29",
+    "ozgecmis/bag_hepatit_tarih": "P30",
+    "ozgecmis/bag_grip_tarih": "P31",
+    "ozgecmis/bag_diger1_tarih": "P32",
+    "ozgecmis/bag_diger2_tarih": "P33",
+    "soygecmis/soy_kardes": "Y31",
+    "soygecmis/soy_cocuk": "Y32",
+    "soygecmis/soy_aciklama": "W33",
+    "yakinmalar/yak_digerleri": "L46",
+    "hastaliklar/hst_diger": "P48",
+    "anamnez_diger/hastane_aciklama": "V52",
+    "anamnez_diger/ameliyat_aciklama": "V53",
+    "anamnez_diger/is_kazasi_aciklama": "V54",
+    "anamnez_diger/meslek_hst_aciklama": "V55",
+    "anamnez_diger/maluliyet_aciklama": "V56",
+    "anamnez_diger/tedavi_aciklama": "V57",
+    "aliskanlik/sigara_birakma_ay": "F60",
+    "aliskanlik/sigara_birakma_yil": "J60",
+    "aliskanlik/sigara_icmis_ay": "N60",
+    "aliskanlik/sigara_icmis_yil": "R60",
+    "aliskanlik/sigara_suren_ay": "N61",
+    "aliskanlik/sigara_suren_yil": "R61",
+    "aliskanlik/alkol_birakma_ay": "F64",
+    "aliskanlik/alkol_birakma_yil": "J64",
+    "aliskanlik/alkol_icmis_ay": "N64",
+    "aliskanlik/alkol_icmis_yil": "R64",
+    "aliskanlik/alkol_suren_ay": "N65",
+    "aliskanlik/alkol_suren_yil": "R65",
+    "aliskanlik/alkol_miktar": "V65",
+    "aliskanlik/alkol_siklik": "Z65",
+    "fizik_muayene/fm_goz_aciklama": "S69",
+    "fizik_muayene/fm_kbb_aciklama": "S70",
+    "fizik_muayene/fm_deri_aciklama": "S71",
+    "fizik_muayene/fm_kardiyovaskuler_aciklama": "S72",
+    "fizik_muayene/fm_solunum_aciklama": "S73",
+    "fizik_muayene/fm_sindirim_aciklama": "S74",
+    "fizik_muayene/fm_urogenital_aciklama": "S75",
+    "fizik_muayene/fm_kas_iskelet_aciklama": "S76",
+    "fizik_muayene/fm_norolojik_aciklama": "S77",
+    "fizik_muayene/fm_psikiyatrik_aciklama": "S78",
+    "fizik_muayene/fm_diger_aciklama": "S79",
+    "olcumler/ta": "A81",
+    "olcumler/nb": "H81",
+    "olcumler/boy": "M81",
+    "olcumler/kilo": "Q81",
+    "olcumler/vki": "U81",
+    "olcumler/bel": "Y81",
+    "laboratuvar/lab_biyolojik": "O84",
+    "laboratuvar/lab_kan": "O85",
+    "laboratuvar/lab_idrar": "O86",
+    "laboratuvar/lab_radyolojik": "O87",
+    "laboratuvar/lab_fizyolojik": "O88",
+    "laboratuvar/lab_odyometre": "O89",
+    "laboratuvar/lab_sft": "O90",
+    "laboratuvar/lab_psikolojik": "O91",
+    "laboratuvar/lab_diger": "O92",
+    "hekim/muayene_tarihi": "U100"
+  },
+  "isaret": {
+    "_aciklama": "Hucrede etiket (Hayır/Evet/VAR-YOK/SAĞ-ÖLÜ) var; secilen ☒, digeri ☐.",
+    "ozgecmis/bag_tetanoz": {
+      "yok": "N29",
+      "var": "N29"
+    },
+    "ozgecmis/bag_hepatit": {
+      "yok": "N30",
+      "var": "N30"
+    },
+    "ozgecmis/bag_grip": {
+      "yok": "N31",
+      "var": "N31"
+    },
+    "ozgecmis/bag_diger1": {
+      "yok": "N32",
+      "var": "N32"
+    },
+    "ozgecmis/bag_diger2": {
+      "yok": "N33",
+      "var": "N33"
+    },
+    "soygecmis/soy_anne": {
+      "sag": "Y29",
+      "olu": "Y29"
+    },
+    "soygecmis/soy_baba": {
+      "sag": "Y30",
+      "olu": "Y30"
+    },
+    "yakinmalar/yak_balgamli_oksuruk": {
+      "hayir": "L38",
+      "evet": "N38"
+    },
+    "yakinmalar/yak_nefes_darligi": {
+      "hayir": "L39",
+      "evet": "N39"
+    },
+    "yakinmalar/yak_gogus_agrisi": {
+      "hayir": "L40",
+      "evet": "N40"
+    },
+    "yakinmalar/yak_carpinti": {
+      "hayir": "L41",
+      "evet": "N41"
+    },
+    "yakinmalar/yak_boyun_agrisi": {
+      "hayir": "L42",
+      "evet": "N42"
+    },
+    "yakinmalar/yak_sirt_agrisi": {
+      "hayir": "L43",
+      "evet": "N43"
+    },
+    "yakinmalar/yak_eklem_agrisi": {
+      "hayir": "L44",
+      "evet": "N44"
+    },
+    "yakinmalar/yak_ishal_kabizlik": {
+      "hayir": "L45",
+      "evet": "N45"
+    },
+    "hastaliklar/hst_kalp": {
+      "hayir": "Z38",
+      "evet": "AB38"
+    },
+    "hastaliklar/hst_seker": {
+      "hayir": "Z39",
+      "evet": "AB39"
+    },
+    "hastaliklar/hst_bobrek": {
+      "hayir": "Z40",
+      "evet": "AB40"
+    },
+    "hastaliklar/hst_sarilik": {
+      "hayir": "Z41",
+      "evet": "AB41"
+    },
+    "hastaliklar/hst_ulser": {
+      "hayir": "Z42",
+      "evet": "AB42"
+    },
+    "hastaliklar/hst_isitme_kaybi": {
+      "hayir": "Z43",
+      "evet": "AB43"
+    },
+    "hastaliklar/hst_gorme_bozuklugu": {
+      "hayir": "Z44",
+      "evet": "AB44"
+    },
+    "hastaliklar/hst_sinir_sistemi": {
+      "hayir": "Z45",
+      "evet": "AB45"
+    },
+    "hastaliklar/hst_deri": {
+      "hayir": "Z46",
+      "evet": "AB46"
+    },
+    "hastaliklar/hst_besin_zehirlenmesi": {
+      "hayir": "Z47",
+      "evet": "AB47"
+    },
+    "anamnez_diger/hastane": {
+      "hayir": "R52",
+      "evet": "T52"
+    },
+    "anamnez_diger/ameliyat": {
+      "hayir": "R53",
+      "evet": "T53"
+    },
+    "anamnez_diger/is_kazasi": {
+      "hayir": "R54",
+      "evet": "T54"
+    },
+    "anamnez_diger/meslek_hst": {
+      "hayir": "R55",
+      "evet": "T55"
+    },
+    "anamnez_diger/maluliyet": {
+      "hayir": "R56",
+      "evet": "T56"
+    },
+    "anamnez_diger/tedavi": {
+      "hayir": "R57",
+      "evet": "T57"
+    },
+    "fizik_muayene/fm_goz": {
+      "hayir": "O69",
+      "evet": "Q69"
+    },
+    "fizik_muayene/fm_kbb": {
+      "hayir": "O70",
+      "evet": "Q70"
+    },
+    "fizik_muayene/fm_deri": {
+      "hayir": "O71",
+      "evet": "Q71"
+    },
+    "fizik_muayene/fm_kardiyovaskuler": {
+      "hayir": "O72",
+      "evet": "Q72"
+    },
+    "fizik_muayene/fm_solunum": {
+      "hayir": "O73",
+      "evet": "Q73"
+    },
+    "fizik_muayene/fm_sindirim": {
+      "hayir": "O74",
+      "evet": "Q74"
+    },
+    "fizik_muayene/fm_urogenital": {
+      "hayir": "O75",
+      "evet": "Q75"
+    },
+    "fizik_muayene/fm_kas_iskelet": {
+      "hayir": "O76",
+      "evet": "Q76"
+    },
+    "fizik_muayene/fm_norolojik": {
+      "hayir": "O77",
+      "evet": "Q77"
+    },
+    "fizik_muayene/fm_psikiyatrik": {
+      "hayir": "O78",
+      "evet": "Q78"
+    },
+    "fizik_muayene/fm_diger": {
+      "hayir": "O79",
+      "evet": "Q79"
+    }
+  },
+  "kutu": {
+    "_aciklama": "Bos hucreye X konur.",
+    "aliskanlik/sigara": {
+      "icmiyor": "D59",
+      "birakmis": "D60",
+      "iciyor": "D61"
+    },
+    "aliskanlik/alkol": {
+      "almiyor": "D63",
+      "birakmis": "D64",
+      "aliyor": "D65"
+    },
+    "sonuc/kanaat": {
+      "elverisli": "AB95",
+      "kkd_sartiyla": "AB96",
+      "elverisli_degil": null
+    }
+  },
+  "metin_kutu": {
+    "_aciklama": "Tek hucreye EVET/HAYIR yazilir.",
+    "hekim/vardiyali": {
+      "hucre": "N98",
+      "metin": {
+        "evet": "EVET",
+        "hayir": "HAYIR"
+      }
+    },
+    "hekim/gece": {
+      "hucre": "N99",
+      "metin": {
+        "evet": "EVET",
+        "hayir": "HAYIR"
+      }
+    },
+    "hekim/yuksekte": {
+      "hucre": "N100",
+      "metin": {
+        "evet": "EVET",
+        "hayir": "HAYIR"
+      }
+    }
+  },
+  "birlesik": {
+    "_aciklama": "Birden fazla alan tek hucrede.",
+    "I15": {
+      "alanlar": [
+        "calisan/calisan_dogum_yeri",
+        "calisan/calisan_dogum_tarihi"
+      ],
+      "ayrac": " "
+    }
+  },
+  "onekli": {
+    "_aciklama": "Hucredeki etiket korunur / sablona gore yazilir.",
+    "A30": {
+      "alan": "ozgecmis/kronik_1",
+      "onek": "1) "
+    },
+    "A31": {
+      "alan": "ozgecmis/kronik_2",
+      "onek": "2) "
+    },
+    "A32": {
+      "alan": "ozgecmis/kronik_3",
+      "onek": "3) "
+    },
+    "A33": {
+      "alan": "ozgecmis/kronik_4",
+      "onek": "4) "
+    },
+    "V60": {
+      "alan": "aliskanlik/sigara_icmis_adet",
+      "sablon": "{deger} / Gün"
+    },
+    "V61": {
+      "alan": "aliskanlik/sigara_adet",
+      "sablon": "{deger} / Gün"
+    },
+    "A95": {
+      "alan": "sonuc/kanaat_sart",
+      "sablon": "1-) {deger} işinde/işyerinde bedenen çalışmaya elverişlidir."
+    }
+  },
+  "imza": {
+    "_aciklama": "Ek (question_xpath) -> hucre ve boyut (piksel).",
+    "calisan/calisan_foto": {
+      "hucre": "X4",
+      "genislik": 110,
+      "yukseklik": 120
+    },
+    "hekim/hekim_kase_imza": {
+      "hucre": "A99",
+      "genislik": 150,
+      "yukseklik": 50
+    },
+    "onay/calisan_imza": {
+      "hucre": "T11",
+      "genislik": 130,
+      "yukseklik": 28
+    }
+  },
+  "_supheli": [
+    "Sigara/alkol bloklarindaki Ay/Yil deger hucreleri (F/J/N/R/V, 60-65 satirlari)",
+    "  sablon duzeninden cikarildi; ilk ciktida gozle dogrulanmali.",
+    "Bagisiklama VAR/YOK ve soygecmis SAĞ/ÖLÜ hucreleri TEK hucrede iki secenek",
+    "  tasiyor ('VAR/YOK'); secilen ☒ ile isaretlenip hucre yeniden yazilir."
+  ]
+}

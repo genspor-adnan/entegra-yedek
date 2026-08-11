@@ -4,22 +4,21 @@ object MesajlasmaDlg: TMesajlasmaDlg
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Mesajla'#351'ma Ekran'#305
   ClientHeight = 572
-  ClientWidth = 1398
+  ClientWidth = 1370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMesajlasma: TPanel
     Left = 0
     Top = 0
-    Width = 1398
+    Width = 1370
     Height = 572
     Align = alClient
     Color = clGradientInactiveCaption
@@ -28,7 +27,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
     object Panel18: TPanel
       Left = 1
       Top = 1
-      Width = 1396
+      Width = 1368
       Height = 24
       Align = alTop
       Color = clSkyBlue
@@ -52,60 +51,6 @@ object MesajlasmaDlg: TMesajlasmaDlg
         Top = 4
         Status = False
       end
-      object Label2: TLabel
-        Left = 123
-        Top = -3
-        Width = 35
-        Height = 29
-        Caption = '+   '
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clNavy
-        Font.Height = -24
-        Font.Name = 'Trebuchet MS'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object Label3: TLabel
-        Left = 234
-        Top = -3
-        Width = 35
-        Height = 29
-        Caption = '+   '
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clNavy
-        Font.Height = -24
-        Font.Name = 'Trebuchet MS'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object LabelYeniGrup: TLabel
-        Left = 250
-        Top = 3
-        Width = 62
-        Height = 18
-        Caption = 'Yeni Grup'
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clNavy
-        Font.Height = -13
-        Font.Name = 'Trebuchet MS'
-        Font.Style = [fsBold]
-        ParentFont = False
-        OnClick = LabelYeniGrupClick
-      end
-      object LabelYeniKisi: TLabel
-        Left = 135
-        Top = 3
-        Width = 56
-        Height = 18
-        Caption = ' Yeni ki'#351'i'
-        Font.Charset = TURKISH_CHARSET
-        Font.Color = clNavy
-        Font.Height = -13
-        Font.Name = 'Trebuchet MS'
-        Font.Style = [fsBold]
-        ParentFont = False
-        OnClick = LabelYeniKisiClick
-      end
     end
     object ScrollBox2: TScrollBox
       Left = 1
@@ -127,6 +72,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
         object GridPersonelDBTableViewKisiler: TcxGridDBTableView
           PopupMenu = MesajMenu
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsMesajKisiler
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -144,9 +90,9 @@ object MesajlasmaDlg: TMesajlasmaDlg
           OptionsView.GridLines = glNone
           OptionsView.GroupByBox = False
           OptionsView.Header = False
-          OptionsView.IndicatorWidth = 0
           object GridPersonelDBTableViewKisilerColumn1: TcxGridDBColumn
-            DataBinding.FieldName = 'FIRMA'
+            DataBinding.FieldName = 'ADI'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Options.ShowCaption = False
             Width = 180
@@ -154,17 +100,21 @@ object MesajlasmaDlg: TMesajlasmaDlg
           end
           object GridPersonelDBTableViewKisilerColumn2: TcxGridDBColumn
             DataBinding.FieldName = 'OKUNMAMIS'
+            DataBinding.IsNullValueType = True
             Width = 20
           end
           object GridPersonelDBTableViewKisilerColumn3: TcxGridDBColumn
-            DataBinding.FieldName = 'MESAJ'
+            DataBinding.FieldName = 'SONMESAJ'
+            DataBinding.IsNullValueType = True
           end
           object GridPersonelDBTableViewKisilerColumn4: TcxGridDBColumn
-            DataBinding.FieldName = 'ZAMAN'
+            DataBinding.FieldName = 'SONTARIH'
+            DataBinding.IsNullValueType = True
           end
         end
         object GridPersonelCardView1: TcxGridCardView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
@@ -184,6 +134,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
         end
         object GridPersonelDBCardView1: TcxGridDBCardView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           OnCellClick = GridPersonelDBCardView1CellClick
           OnCellDblClick = GridPersonelDBCardView1CellDblClick
           DataController.DataSource = DtsMesajKisiler
@@ -195,23 +146,17 @@ object MesajlasmaDlg: TMesajlasmaDlg
           OptionsView.CaptionSeparator = #0
           OptionsView.CardIndent = 7
           OptionsView.CardWidth = 372
-          Styles.Background = Tablo.cxStSelected
-          object GridPersonelDBCardView1Row5: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'RESIM '
-            PropertiesClassName = 'TcxImageProperties'
-            Position.BeginsLayer = True
-            Position.LineCount = 2
-            Position.Width = 20
-            IsCaptionAssigned = True
-          end
+          Styles.Background = Tablo.cxStyle1
           object GridPersonelDBCardView1Row1: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'FIRMA'
+            DataBinding.FieldName = 'ADI'
+            DataBinding.IsNullValueType = True
             Options.ShowCaption = False
-            Position.BeginsLayer = False
+            Position.BeginsLayer = True
             Position.Width = 70
           end
           object GridPersonelDBCardView1Row4: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'ZAMAN'
+            DataBinding.FieldName = 'SONTARIH'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Options.ShowCaption = False
             Position.BeginsLayer = False
@@ -219,13 +164,15 @@ object MesajlasmaDlg: TMesajlasmaDlg
           end
           object GridPersonelDBCardView1Row3: TcxGridDBCardViewRow
             DataBinding.FieldName = 'OKUNMAMIS'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Options.ShowCaption = False
             Position.BeginsLayer = False
             Position.Width = 15
           end
           object GridPersonelDBCardView1Row2: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'MESAJ'
+            DataBinding.FieldName = 'SONMESAJ'
+            DataBinding.IsNullValueType = True
             Options.ShowCaption = False
             Position.BeginsLayer = True
           end
@@ -260,14 +207,14 @@ object MesajlasmaDlg: TMesajlasmaDlg
     object PanelChat: TPanel
       Left = 409
       Top = 25
-      Width = 988
+      Width = 960
       Height = 546
       Align = alClient
       TabOrder = 2
       object Panel4: TPanel
         Left = 1
         Top = 504
-        Width = 986
+        Width = 958
         Height = 41
         Align = alBottom
         TabOrder = 0
@@ -279,10 +226,10 @@ object MesajlasmaDlg: TMesajlasmaDlg
           TabOrder = 0
           OnKeyUp = MemoChatKeyUp
           Height = 39
-          Width = 838
+          Width = 810
         end
         object BtnMesajGonder: TcxButton
-          Left = 839
+          Left = 811
           Top = 1
           Width = 85
           Height = 39
@@ -293,21 +240,21 @@ object MesajlasmaDlg: TMesajlasmaDlg
           OnClick = BtnMesajGonderClick
         end
         object BtnDosyaGonder: TcxButton
-          Left = 924
+          Left = 896
           Top = 1
           Width = 61
           Height = 39
           Align = alRight
-          Kind = cxbkDropDown
           OptionsImage.ImageIndex = 38
           OptionsImage.Images = Tablo.cxImageList1
           TabOrder = 2
+          OnClick = BtnDosyaGonderClick
         end
       end
       object GridMesaj: TcxGrid
         Left = 1
         Top = 1
-        Width = 986
+        Width = 958
         Height = 503
         Align = alClient
         PopupMenu = MesajMenu
@@ -317,6 +264,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
         object cxGridDBTableView1: TcxGridDBTableView
           PopupMenu = MesajMenu
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsMesajKisiler
           DataController.Options = [dcoAnsiSort, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding]
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -337,6 +285,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
         end
         object GridMesajDBCardView1: TcxGridDBCardView
           Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsMesajlar
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -352,14 +301,16 @@ object MesajlasmaDlg: TMesajlasmaDlg
           Styles.Background = Tablo.cxStyle10
           Styles.CardBorder = Tablo.cxStyle10
           object GridMesajDBCardView1Row4: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'KIMDEN'
+            DataBinding.FieldName = 'GONDEREN'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Options.ShowCaption = False
             Position.BeginsLayer = True
             Position.Width = 100
           end
           object GridMesajDBCardView1Row2: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'ZAMAN'
+            DataBinding.FieldName = 'TARIH'
+            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxTextEditProperties'
             Properties.Alignment.Horz = taRightJustify
             CaptionAlignmentHorz = taRightJustify
@@ -369,7 +320,8 @@ object MesajlasmaDlg: TMesajlasmaDlg
             IsCaptionAssigned = True
           end
           object GridMesajDBCardView1Row1: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'GIDENMESAJ'
+            DataBinding.FieldName = 'METIN'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Position.BeginsLayer = True
             Position.Width = 400
@@ -377,7 +329,8 @@ object MesajlasmaDlg: TMesajlasmaDlg
             IsCaptionAssigned = True
           end
           object GridMesajDBCardView1Row3: TcxGridDBCardViewRow
-            DataBinding.FieldName = 'GELENMESAJ'
+            DataBinding.FieldName = 'BENIMMI'
+            DataBinding.IsNullValueType = True
             Options.Editing = False
             Position.BeginsLayer = False
             Styles.Content = Tablo.cxStyle10
@@ -393,7 +346,7 @@ object MesajlasmaDlg: TMesajlasmaDlg
   object MesajMenu: TPopupMenu
     Images = Tablo.PNGImageList2
     Left = 477
-    Top = 203
+    Top = 115
     object KonusmaGecmisiMenu: TMenuItem
       Caption = 'Konu'#351'ma Ge'#231'mi'#351'ini G'#246'ster'
       ImageIndex = 19
@@ -406,117 +359,14 @@ object MesajlasmaDlg: TMesajlasmaDlg
   end
   object TabMesajKisiler: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
-      ''
-      
-        '-- Kullan'#305'c'#305'ya ki'#351'ilerden gelen/giden ve gruptan gelen/giden mes' +
-        'aj olabilir.'
-      'Declare @KULID int'
-      'Declare @Bugun datetime'
-      ''
-      'set @KULID=:PRID'
-      'set @Bugun = GETDATE()'
-      ''
-      ''
-      
-        'select SERVERID=0,MESAJID,M.TARIH, Liste.REHBERID, R.FIRMA, R.G' +
-        'RUP,'
-      
-        'OKUNMAMIS=(case when (select count(*) from MESAJLOG M inner join' +
-        ' MESAJLOGKULLANICI K on M.ID=K.MESAJLOGID '
-      
-        '                      where M.GONDERENID=Liste.REHBERID and K.OK' +
-        'UNMATARIHI is null)>0 then'
-      
-        '                  (convert(varchar(5), (select count(*) from MES' +
-        'AJLOG M inner join MESAJLOGKULLANICI K on M.ID=K.MESAJLOGID '
-      
-        '                     where M.GONDERENID=Liste.REHBERID and K.OKU' +
-        'NMATARIHI is null)))'
-      #9#9#9#9'else '#39#39' end),'
-      
-        'ZAMAN=dbo.fn_prg_iki_tarih_farki_Yazi(M.TARIH,@Bugun), M.MESAJ,R' +
-        '.RESIM'
-      'from ('
-      'select '
-      
-        #9'MESAJID=max(M.ID), REHBERID=(case when ALANID=@KULID then M.GON' +
-        'DERENID else ALANID end)  '
-      'from  '
-      #9'MESAJLOG M '
-      #9'--inner join MESAJLOGKULLANICI L on M.ID=L.MESAJLOGID'
-      'where'
-      '-- Ki'#351'i Giden mesaj'
-      #9'1=case '
-      
-        #9'    when M.GRUP=0 and (M.GONDERENID=@KULID or M.ALANID=@KULID) ' +
-        'then 1 '
-      
-        #9'    --when M.GRUP=1 and @KULID in (select K.ALICIID from MESAJL' +
-        'OGKULLANICI K where M.ID=K.MESAJLOGID) then 1 '
-      
-        #9#9'when M.GRUP=1 and @KULID in (select ALICILAR=DEGER from GENINI' +
-        ' where BOLUM=99 and DIL=M.ALANID) then 1 '
-      #9#9'else 0 '
-      #9'end'
-      ''
-      '-- Ki'#351'i Gelen mesaj'
-      #9
-      
-        'group by (case when ALANID=@KULID then M.GONDERENID else ALANID ' +
-        'end)  '
-      ''
-      ')as Liste '
-      'inner join MESAJLOG M on M.ID=Liste.MESAJID'
-      'inner join REHBER R on R.ID=Liste.REHBERID'
-      'left join KULLANICI K on R.ID=K.REHBERID'
-      'order by 2 desc')
-    Left = 119
-    Top = 240
+      '')
+    Left = 175
+    Top = 96
   end
   object TabMesajlar: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
-      'Declare @KULID int'
-      'Declare @KARSIID int'
-      'Declare @Bugun datetime'
-      ''
-      'set @KULID=:PKULID'
-      'set @KARSIID= :PKARSIID'
-      'set @Bugun = GETDATE()'
-      ''
-      'SET LANGUAGE turkish;  '
-      ''
-      'select distinct'
-      'TARIH,'#9
-      'ZAMAN=dbo.fn_prg_iki_tarih_farki_Yazi(TARIH,@Bugun),'#9
-      #9
-      #9'KIMDEN=RG.FIRMA,'
-      
-        #9'GELENMESAJ = case when M.GONDERENID = @KULID then MESAJ else '#39#39 +
-        ' end,'
-      
-        #9'GIDENMESAJ = case when M.GONDERENID <> @KULID then MESAJ else '#39 +
-        #39' end'
-      'from '
-      #9'MESAJLOG M  '
-      #9'inner join REHBER RG on RG.ID=M.GONDERENID'
-      'where '
-      #9'1=case '
-      
-        #9'    when M.GRUP=0 and ((M.GONDERENID=@KARSIID and M.ALANID=@KUL' +
-        'ID) or (M.GONDERENID=@KULID and M.ALANID=@KARSIID)) then 1 '
-      #9#9'when M.GRUP=1 and M.ALANID=@KARSIID then 1 '
-      #9#9'else 0 '
-      #9'end'
-      'order by 1'
-      ''
-      'SET LANGUAGE us_english;  '
-      ''
-      ''
-      ''
       '')
     Left = 855
     Top = 184
@@ -527,4 +377,3 @@ object MesajlasmaDlg: TMesajlasmaDlg
     Top = 174
   end
 end
-
