@@ -39,6 +39,8 @@ type
     LabelREHBERID: TcxDBLabel;
     cxLabel9: TcxLabel;
     ComboSoru: TcxImageComboBox;
+    cxLabel10: TcxLabel;
+    ComboSkin: TcxDBImageComboBox;
     procedure cxTextEdit1PropertiesChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnKaydetClick(Sender: TObject);
@@ -155,6 +157,16 @@ begin
 
   TabloYenile(TabKullanici1, [KulID]);
 
+  // Gecis doneminde eski veritabaninda SKINADI olmayabilir. Bu durumda
+  // kullanici ayarlari ekrani acilmaya devam eder ve mevcut gorunum korunur.
+  if TabKullanici1.FindField('SKINADI') <> nil then begin
+     ComboSkin.DataBinding.DataField := 'SKINADI';
+     ComboSkin.Enabled := True;
+  end else begin
+     ComboSkin.DataBinding.DataField := '';
+     ComboSkin.Enabled := False;
+  end;
+
   OncekiSifre := TabKullanici1.FieldByName('SIFRE').AsString;
   ComboSoru.EditValue  :=  TabKullanici1.FieldByName('SORU').Value;
   EditCevap.Text :=   UGenSifre.DeSifre( TabKullanici1.FieldByName('CEVAP').AsString);
@@ -185,6 +197,12 @@ begin
    // Kullanici EKLE/DEGISTIR logu (LogOnceki dolu -> DEGISTIR, bos -> EKLE; sifre sifreli haliyle loglanir)
    if TabKullanici1.FieldByName('ID').AsInteger > 0 then
       LogDetaySatirPost(DataSet, TabNo_KULLANICI, TabNo_KULLANICI, TabKullanici1.FieldByName('ID').AsInteger);
+   if (IntToStr(RehId) = Kullanan) and (DataSet.FindField('SKINADI') <> nil) then begin
+      if DataSet.FieldByName('SKINADI').IsNull then
+         Tablo.KullaniciSkinUygula('DEFAULT')
+      else
+         Tablo.KullaniciSkinUygula(DataSet.FieldByName('SKINADI').AsString);
+   end;
    Sube:=Tablo.AciklamaGetir('ROLLER', 'SUBEID', TabKullanici1.FieldByName('ROLID').AsInteger);
    //veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update REHBER set SUBEID='+Sube+', SINIF='+TabKullanici1.FieldByName('ROLID').AsString+' where ID='+TabKullanici1.FieldByName('REHBERID').AsString,[],[]);
 end;

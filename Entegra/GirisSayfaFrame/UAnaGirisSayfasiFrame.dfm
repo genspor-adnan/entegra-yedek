@@ -347,6 +347,104 @@ object AnaGirisSayfasiFrame: TAnaGirisSayfasiFrame
               TabOrder = 1
               OnClick = DuyuruYenileTusClick
             end
+            object lblDuyuruSkin: TcxLabel
+              Left = 661
+              Top = 5
+              Anchors = [akTop, akRight]
+              Caption = 'G'#246'r'#252'n'#252'm'
+              Transparent = True
+            end
+            object ComboDuyuruSkin: TcxImageComboBox
+              Left = 727
+              Top = 3
+              Anchors = [akTop, akRight]
+              ParentFont = False
+              Properties.DropDownRows = 16
+              Properties.Items = <
+                item
+                  Description = 'Mevcut g'#246'r'#252'n'#252'm'
+                  Value = 'DEFAULT'
+                end
+                item
+                  Description = 'Blue'
+                  Value = 'Blue'
+                end
+                item
+                  Description = 'Blueprint'
+                  Value = 'Blueprint'
+                end
+                item
+                  Description = 'DevExpress Style'
+                  Value = 'DevExpressStyle'
+                end
+                item
+                  Description = 'DevExpress Dark Style'
+                  Value = 'DevExpressDarkStyle'
+                end
+                item
+                  Description = 'High Contrast'
+                  Value = 'HighContrast'
+                end
+                item
+                  Description = 'Metropolis'
+                  Value = 'Metropolis'
+                end
+                item
+                  Description = 'Metropolis Dark'
+                  Value = 'MetropolisDark'
+                end
+                item
+                  Description = 'Office 2010 Black'
+                  Value = 'Office2010Black'
+                end
+                item
+                  Description = 'Office 2010 Blue'
+                  Value = 'Office2010Blue'
+                end
+                item
+                  Description = 'Office 2010 Silver'
+                  Value = 'Office2010Silver'
+                end
+                item
+                  Description = 'Office 2013 Dark Gray'
+                  Value = 'Office2013DarkGray'
+                end
+                item
+                  Description = 'Office 2013 Light Gray'
+                  Value = 'Office2013LightGray'
+                end
+                item
+                  Description = 'Office 2013 White'
+                  Value = 'Office2013White'
+                end
+                item
+                  Description = 'Office 2016 Colorful'
+                  Value = 'Office2016Colorful'
+                end
+                item
+                  Description = 'Office 2016 Dark'
+                  Value = 'Office2016Dark'
+                end
+                item
+                  Description = 'Visual Studio 2013 Blue'
+                  Value = 'VisualStudio2013Blue'
+                end
+                item
+                  Description = 'Visual Studio 2013 Dark'
+                  Value = 'VisualStudio2013Dark'
+                end
+                item
+                  Description = 'Visual Studio 2013 Light'
+                  Value = 'VisualStudio2013Light'
+                end
+                item
+                  Description = 'VS 2010'
+                  Value = 'VS2010'
+                end>
+              Properties.OnEditValueChanged = ComboDuyuruSkinPropertiesEditValueChanged
+              TabOrder = 2
+              Width = 208
+            end
           end
           object GridDuyuru: TcxGrid
             Left = 0

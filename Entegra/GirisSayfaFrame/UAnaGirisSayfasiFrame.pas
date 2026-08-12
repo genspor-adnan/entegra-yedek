@@ -148,6 +148,8 @@ type
     Label2: TLabel;
     EditDuyuruArama: TcxTextEdit;
     DuyuruYenileTus: TcxButton;
+    lblDuyuruSkin: TcxLabel;
+    ComboDuyuruSkin: TcxImageComboBox;
     GridDuyuru: TcxGrid;
     TabDuyuruListe: TFDQuery;
     DtsDuyuruListe: TDataSource;
@@ -422,6 +424,7 @@ type
     procedure DuyuruYenileTusClick(Sender: TObject);
     procedure EditDuyuruAramaKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure ComboDuyuruSkinPropertiesEditValueChanged(Sender: TObject);
     procedure pnlImageDblClick(Sender: TObject);
     procedure Panel20DblClick(Sender: TObject);
     procedure GridDuyuruDBCardViewRow7PropertiesButtonClick(Sender: TObject;
@@ -472,6 +475,8 @@ type
     Initialized: Boolean;
     //FHavaDurumuImage: Integer;
     FOnlineUsers: TStringList;
+    FSkinSecimiYukleniyor: Boolean;
+    procedure SkinSeciminiYukle;
     procedure GorunurOlacak;
     procedure GorunmezOlacak;
     procedure Gorunmez;
@@ -1487,6 +1492,7 @@ var
   KulID: Integer;
 begin
   inherited;
+  SkinSeciminiYukle;
   KulID := StrToIntDef(Kullanan, 1);
   TabSK.Close;
   TabSK.SQL.Text :=
@@ -1498,6 +1504,60 @@ begin
   FOnlineUsers := TStringList.Create;
   FOnlineUsers.NameValueSeparator := ' ';
   FOnlineUsers.LineBreak := ',';
+end;
+
+procedure TAnaGirisSayfasiFrame.SkinSeciminiYukle;
+var
+  LQuery: TFDQuery;
+begin
+  FSkinSecimiYukleniyor := True;
+  LQuery := TFDQuery.Create(nil);
+  try
+    ComboDuyuruSkin.Enabled := True;
+    ComboDuyuruSkin.EditValue := 'DEFAULT';
+    try
+      LQuery.Connection := Tablo.FDCnn;
+      LQuery.SQL.Text := 'select SKINADI from KULLANICI where ID=:ID';
+      LQuery.ParamByName('ID').AsInteger := KullaniciID;
+      LQuery.Open;
+      if not LQuery.IsEmpty and not LQuery.FieldByName('SKINADI').IsNull and
+         (Trim(LQuery.FieldByName('SKINADI').AsString) <> '') then
+        ComboDuyuruSkin.EditValue := LQuery.FieldByName('SKINADI').AsString;
+    except
+      // Eski veritabaninda SKINADI yoksa ana sayfa calismaya devam etsin.
+      ComboDuyuruSkin.Enabled := False;
+    end;
+  finally
+    LQuery.Free;
+    FSkinSecimiYukleniyor := False;
+  end;
+end;
+
+procedure TAnaGirisSayfasiFrame.ComboDuyuruSkinPropertiesEditValueChanged(
+  Sender: TObject);
+var
+  LSkin: string;
+  LDeger: Variant;
+begin
+  if FSkinSecimiYukleniyor or not ComboDuyuruSkin.Enabled or
+     (KullaniciID <= 0) then Exit;
+
+  LSkin := Trim(VarToStr(ComboDuyuruSkin.EditValue));
+  if LSkin = '' then LSkin := 'DEFAULT';
+  if SameText(LSkin, 'DEFAULT') then
+    LDeger := Null
+  else
+    LDeger := LSkin;
+
+  try
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update KULLANICI set SKINADI=&SKINADI where ID=&ID',
+      ['&SKINADI', '&ID'], [LDeger, KullaniciID]);
+  except
+    SkinSeciminiYukle;
+    raise;
+  end;
+  Tablo.KullaniciSkinUygula(LSkin);
 end;
 
 destructor TAnaGirisSayfasiFrame.Destroy;
@@ -2445,7 +2505,6 @@ RegisterClass(TAnaGirisSayfasiFrame);
 finalization
 
 end.
-
 
 
 

@@ -643,6 +643,8 @@ begin
       GeciciOwner := FSekmeSayfasi.Owner;
       IsUniqueGlobalComponentNameProc := @FrameIcinAdDegistirici;
       FGorevFrameOrnek.Create(FOrnek);
+      if Assigned(FrameSkinUygulayici) then
+        FrameSkinUygulayici(FGorevFrameOrnek);
       IsUniqueGlobalComponentNameProc := nil;
       FGorevFrameOrnek.Parent := TWinControl(ctrl);
       {* FrameBilgi property set etme }

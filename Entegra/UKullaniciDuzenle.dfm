@@ -3,7 +3,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Kullan'#305'c'#305' Ayarlar'#305
-  ClientHeight = 330
+  ClientHeight = 360
   ClientWidth = 308
   Color = clBtnFace
   Font.Charset = TURKISH_CHARSET
@@ -18,7 +18,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   TextHeight = 16
   object btnKaydet: TcxButton
     Left = 147
-    Top = 293
+    Top = 323
     Width = 75
     Height = 25
     Caption = 'Tamam'
@@ -34,7 +34,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object btnIptal: TcxButton
     Left = 230
-    Top = 293
+    Top = 323
     Width = 75
     Height = 25
     Caption = #304'ptal'
@@ -50,7 +50,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object cxLabel3: TcxLabel
     Left = 6
-    Top = 224
+    Top = 254
     Caption = #350'ifre'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -63,7 +63,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object cxLabel4: TcxLabel
     Left = 6
-    Top = 251
+    Top = 281
     Caption = #350'ifre(Tekrar)'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -76,7 +76,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object EditSifre2: TcxTextEdit
     Left = 101
-    Top = 250
+    Top = 280
     ParentFont = False
     Properties.EchoMode = eemPassword
     Properties.IncrementalSearch = False
@@ -95,7 +95,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object EditSifre1: TcxTextEdit
     Left = 101
-    Top = 223
+    Top = 253
     ParentFont = False
     Properties.EchoMode = eemPassword
     Properties.PasswordChar = '*'
@@ -112,7 +112,7 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   end
   object cxImage1: TcxImage
     Left = 229
-    Top = 217
+    Top = 247
     Picture.Data = {
       0954474946496D6167654749463839613B003600F70000000000FFFFFFFFF7FF
       FFFAFFFFFDFFFCFBFEF5F4FCFEFEFFF8FBFFFBFFFFFCFFFFF7FFFCEFFFF5F8FF
@@ -270,6 +270,115 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
     Style.TextStyle = [fsBold]
     Style.IsFontAssigned = True
     TabOrder = 9
+    Width = 204
+  end
+  object cxLabel10: TcxLabel
+    Left = 6
+    Top = 207
+    Caption = 'G'#246'r'#252'n'#252'm'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object ComboSkin: TcxDBImageComboBox
+    Left = 101
+    Top = 205
+    DataBinding.DataSource = DtsKullanici1
+    ParentFont = False
+    Properties.DropDownRows = 16
+    Properties.Items = <
+      item
+        Description = 'Mevcut g'#246'r'#252'n'#252'm'
+        Value = Null
+      end
+      item
+        Description = 'Blue'
+        Value = 'Blue'
+      end
+      item
+        Description = 'Blueprint'
+        Value = 'Blueprint'
+      end
+      item
+        Description = 'DevExpress Style'
+        Value = 'DevExpressStyle'
+      end
+      item
+        Description = 'DevExpress Dark Style'
+        Value = 'DevExpressDarkStyle'
+      end
+      item
+        Description = 'High Contrast'
+        Value = 'HighContrast'
+      end
+      item
+        Description = 'Metropolis'
+        Value = 'Metropolis'
+      end
+      item
+        Description = 'Metropolis Dark'
+        Value = 'MetropolisDark'
+      end
+      item
+        Description = 'Office 2010 Black'
+        Value = 'Office2010Black'
+      end
+      item
+        Description = 'Office 2010 Blue'
+        Value = 'Office2010Blue'
+      end
+      item
+        Description = 'Office 2010 Silver'
+        Value = 'Office2010Silver'
+      end
+      item
+        Description = 'Office 2013 Dark Gray'
+        Value = 'Office2013DarkGray'
+      end
+      item
+        Description = 'Office 2013 Light Gray'
+        Value = 'Office2013LightGray'
+      end
+      item
+        Description = 'Office 2013 White'
+        Value = 'Office2013White'
+      end
+      item
+        Description = 'Office 2016 Colorful'
+        Value = 'Office2016Colorful'
+      end
+      item
+        Description = 'Office 2016 Dark'
+        Value = 'Office2016Dark'
+      end
+      item
+        Description = 'Visual Studio 2013 Blue'
+        Value = 'VisualStudio2013Blue'
+      end
+      item
+        Description = 'Visual Studio 2013 Dark'
+        Value = 'VisualStudio2013Dark'
+      end
+      item
+        Description = 'Visual Studio 2013 Light'
+        Value = 'VisualStudio2013Light'
+      end
+      item
+        Description = 'VS 2010'
+        Value = 'VS2010'
+      end>
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    TabOrder = 12
     Width = 204
   end
   object Panel1: TPanel
@@ -458,6 +567,6 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
   object DtsKullanici1: TDataSource
     DataSet = TabKullanici1
     Left = 247
-    Top = 298
+    Top = 328
   end
 end

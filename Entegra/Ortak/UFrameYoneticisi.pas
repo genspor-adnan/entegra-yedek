@@ -142,7 +142,12 @@ type
     property OnFrameBaslatildi : TMultiCastNotify read FOnFrameBaslatildi;
     property ImageIndex : Integer read FImageIndex write SetImageIndex;
   end;
-  
+
+var
+  // Uygulama temasi gibi frame yaratildiktan sonra calisacak merkezi kanca.
+  // UFrameYoneticisi uygulama katmanina baglanmaz; atamayi ana form yapar.
+  FrameSkinUygulayici: TNotifyEvent;
+
 implementation
 uses
   TypInfo;//,LocOnFly;
@@ -453,6 +458,8 @@ begin
   GeciciOwner := FSayfaDenetimi.Owner;
   IsUniqueGlobalComponentNameProc := @YumurtlananFrameIcinAdDegistirici;
   FOrnek.Create(FSekmeSayfasi.Owner);
+  if Assigned(FrameSkinUygulayici) then
+    FrameSkinUygulayici(FOrnek);
   IsUniqueGlobalComponentNameProc := nil;
   { Eğer bu ilk sekme ise OnFrameShow olayı tetkiklenecektir }
   FSekmeSayfasi.PageControl := FSayfaDenetimi;

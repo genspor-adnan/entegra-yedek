@@ -139,10 +139,72 @@ begin
 end;
 
 procedure TAboutBox.FormCreate(Sender: TObject);
+var
+  LSkinAdi: string;
+  LKoyu: Boolean;
+  LFormRengi, LPanelRengi, LYaziRengi: TColor;
+
+  procedure KontrolRenkleriniUygula(AWinControl: TWinControl);
+  var
+    I: Integer;
+    LControl: TControl;
+  begin
+    for I := 0 to AWinControl.ControlCount - 1 do begin
+      LControl := AWinControl.Controls[I];
+      if LControl is TPanel then begin
+        TPanel(LControl).ParentBackground := False;
+        TPanel(LControl).ParentColor := False;
+        TPanel(LControl).Color := LPanelRengi;
+        TPanel(LControl).Font.Color := LYaziRengi;
+      end else if LControl is TButton then begin
+        TButton(LControl).Font.Color := LYaziRengi;
+      end else if LControl is TMemo then begin
+        TMemo(LControl).Color := LPanelRengi;
+        TMemo(LControl).Font.Color := LYaziRengi;
+      end else if LControl is TcxLabel then begin
+        TcxLabel(LControl).Style.TextColor := LYaziRengi;
+        TcxLabel(LControl).Style.Font.Color := LYaziRengi;
+      end;
+
+      if LControl is TWinControl then
+        KontrolRenkleriniUygula(TWinControl(LControl));
+    end;
+  end;
+
 begin
   if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);
   if Sektor in [Sektor_Cafe, Sektor_Rest] then
      Caption := 'GenoRes Restaurant Yönetim Sistemi';
+
+  if Tablo = nil then Exit;
+  Tablo.KullaniciSkinBilesenlereUygula(Self);
+
+  LSkinAdi := Tablo.dxSkinController1.SkinName;
+  LKoyu := SameText(LSkinAdi, 'DevExpressDarkStyle') or
+    SameText(LSkinAdi, 'MetropolisDark') or
+    SameText(LSkinAdi, 'Office2010Black') or
+    SameText(LSkinAdi, 'Office2013DarkGray') or
+    SameText(LSkinAdi, 'Office2016Dark') or
+    SameText(LSkinAdi, 'VisualStudio2013Dark') or
+    SameText(LSkinAdi, 'HighContrast');
+
+  if LKoyu then begin
+    LFormRengi := RGB(48, 48, 51);
+    LPanelRengi := RGB(58, 58, 61);
+    LYaziRengi := RGB(235, 235, 235);
+  end else if SameText(LSkinAdi, 'Blueprint') then begin
+    LFormRengi := RGB(214, 226, 246);
+    LPanelRengi := RGB(231, 239, 252);
+    LYaziRengi := RGB(30, 45, 65);
+  end else begin
+    LFormRengi := clBtnFace;
+    LPanelRengi := clBtnFace;
+    LYaziRengi := clWindowText;
+  end;
+
+  Color := LFormRengi;
+  Font.Color := LYaziRengi;
+  KontrolRenkleriniUygula(Self);
 end;
 
 procedure TAboutBox.TerminallerTusClick(Sender: TObject);

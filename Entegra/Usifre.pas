@@ -376,6 +376,7 @@ var
   reg:TRegistry;
   KulSay, sure:integer;
   SKT, Suan : TDateTime;
+  SkinAdi: string;
 begin
   Tablo.RepositoryDoldur;
   Tablo.RepositoryDuzenle;
@@ -425,6 +426,16 @@ begin
       else
          Kullanan_Ayar := 0; }
     end;
+    // SKINADI eski veritabanlarinda bulunmayabilir; tercih uyumlu ayri sorguyla okunur.
+    SkinAdi := '';
+    try
+      Tablo.TablodanSorguAc(1, 'select SKINADI from KULLANICI where ID=' + IntToStr(KullaniciID));
+      if (not Tablo.Query1.IsEmpty) and (not Tablo.Query1.FieldByName('SKINADI').IsNull) then
+        SkinAdi := Tablo.Query1.FieldByName('SKINADI').AsString;
+    except
+      SkinAdi := '';
+    end;
+    Tablo.KullaniciSkinUygula(SkinAdi);
     if KullaniciID <> 2 then begin
         //şifre doğru giriş yaptı.. şimdi şifre süresi dolmuş mu bakalım
         Tablo.TablodanSorguAc(1,'select '+DbTarihFark('DAY','GETDATE()','isnull(SIFREDEGISME,getdate()-2)')+' AS GunSayisi from KULLANICI where REHBERID='+Kullanan);

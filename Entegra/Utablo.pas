@@ -5,7 +5,7 @@ interface
 uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSky, dxSkinsDefaultPainters, //HKMTab,
   IdBaseComponent, IdComponent, UKodAgaci, cxGridDBTableView, cxButtonEdit,cxmemo,cxbuttons, IdTCPConnection, IdTCPClient,
   IdHTTP, cxLookAndFeels, cxImageComboBox,XMLDoc, ImgList, Controls, cxStyles, Classes, AppEvnts,
-  Forms, sysutils, dbctrls, UCombo, ComCtrls, Types,  EntegraActivityAutomationWebService,cxRichEdit, cxLabel, //DBTables,
+  Forms, sysutils, dbctrls, UCombo, ComCtrls, Types, TypInfo, EntegraActivityAutomationWebService,cxRichEdit, cxLabel, //DBTables,
   Dialogs, UQuantGrid, lisansws, UMultiCastEvent, UMultiDataSetEvent, wininet,  IdCustomTCPServer, cxGraphics,
   IdCustomHTTPServer, IdHTTPServer, InvokeRegistry,  SOAPHTTPClient, MSS_Sender, Menus, cxDropDownEdit,
   Variants, Rio, UGentegreFrameYonetimi, IdExplicitTLSClientServerBase,  cxGridDBCardView, JvTimer, cxCalendar,
@@ -598,7 +598,26 @@ type
     FGridStilYonetim: TGridStilYonetim;
     FFileDetails : TFileAssociationDetails;
     FUserTabloDurum: TStringList;   // _USER tablo varlik cache'i ('TABLO=1/0'; UserAlanYazdirmaEkle)
+    FKullaniciSkinAdi: string;
+    FSkinOrijinaller: TStringList;  // LookAndFeel, grid stili ve toolbar ozgun degerleri
+    FSkinUygulananlar: TStringList; // Ayni skin icin tekrar frame/form taramasini atlar
     { Private declarations }
+    function SkinNesneOzelligi(AObject: TObject; const APropName: string): TObject;
+    function SkinYolNesnesi(AObject: TObject; const AYol: string): TObject;
+    procedure SkinLookAndFeelUygula(AComponent: TComponent; ALookAndFeel: TObject;
+      const AYol: string; AGeriAl: Boolean);
+    function SkinKoyuMu: Boolean;
+    function SkinAramaFrameIcinde(AComponent: TComponent): Boolean;
+    function SkinGorevFrameIcinde(AComponent: TComponent): Boolean;
+    function SkinListeAramaPanelIcinde(AComponent: TComponent): Boolean;
+    function SkinAnaGirisSolPanelIcinde(AComponent: TComponent): Boolean;
+    function SkinGenelSkinAlaniIcinde(AComponent: TComponent): Boolean;
+    procedure SkinAramaKontrolUygula(AControl: TControl; AGeriAl: Boolean);
+    procedure SkinStilUygula(AStyle: TcxStyle; AGeriAl: Boolean);
+    procedure SkinToolBarUygula(AToolBar: TToolBar; AGeriAl: Boolean);
+    procedure SkinBilesenleriTara(AComponent: TComponent; AGeriAl: Boolean); overload;
+    procedure SkinBilesenleriTara(AComponent: TComponent; AGeriAl: Boolean;
+      AGorulen: TStrings); overload;
     procedure CreatePropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure AcilisIslemleri;
     procedure PosAktarim;
@@ -617,6 +636,8 @@ type
     Procedure GridTurkcelestir;
     Procedure WizardTurkcelestir(Wizard:TjvWizard);
     procedure SetConnectionParams;
+    procedure KullaniciSkinUygula(const ASkinAdi: string);
+    procedure KullaniciSkinBilesenlereUygula(Sender: TObject);
     procedure MailSablonYonetimi(ModulID: Integer);
     procedure MailSablonGetir(ModulID: Integer; var Konu, Icerik:string);
     function BelgeKopyala(ID, Tur, RehberId : integer; Tarih : TDateTime):integer;
@@ -1781,6 +1802,10 @@ uses UAnaForm, registry, UMesaj,FetaUtil, FetaClassExtensions, UKasaWizard, UTab
   UStokTalepWizard, UFastRap, UServisHareketEkle, GenGoogleCalenderService,GoogleApis.Calendar,
   UTahakkukDlg, UVeriMotor, UDFMPG;  //  UGoogleSyncBus,
 {$R *.DFM}
+
+type
+  TControlSkinAccess = class(TControl);
+  TWinControlSkinAccess = class(TWinControl);
 
 var
   BugunTrh: TDateTime;
@@ -3484,6 +3509,7 @@ begin
   RehberAramaEkrani.AraYetkili.Text := '';
   RehberAramaEkrani.SAPOrtak := SAPOrtak;
   RehberAramaEkrani.AraQuery1.Close;
+  KullaniciSkinBilesenlereUygula(RehberAramaEkrani);
 
   RehberAramaEkrani.ShowModal;
   if RehberAramaEkrani.ModalResult = mrOk then begin
@@ -13411,6 +13437,12 @@ label
 begin
   //BaglantiKaydet(FDCnn);
   count := 0;
+  FKullaniciSkinAdi := '';
+  FSkinOrijinaller := TStringList.Create;
+  FSkinOrijinaller.NameValueSeparator := '=';
+  FSkinUygulananlar := TStringList.Create;
+  FSkinUygulananlar.Sorted := True;
+  FSkinUygulananlar.Duplicates := dupIgnore;
   { Frameler tarafından kullanılacak event bağlantılatmaları }
   MultiDsEvent := TMultiCastDataSetEventManager.Create;
   { Win.Ini'ye yazılan bilgiler }
@@ -15492,6 +15524,8 @@ end;
 procedure TTablo.DataModuleDestroy(Sender: TObject);
 begin
   //GENINI.Free;
+  FreeAndNil(FSkinUygulananlar);
+  FreeAndNil(FSkinOrijinaller);
   FreeAndNil(FUserTabloDurum);   // _USER varlik cache'i (UserAlanYazdirmaEkle)
   if FDCnn.Connected = True then
     VeriTabani.BasitKomutÇalıştır(FDCnn,'delete from master.dbo.GLogins where ID='+IntToStr(UserSessionID),[],[]);
@@ -15514,6 +15548,723 @@ end;
 procedure TTablo.SetConnectionParams;
 begin
   VTSifreKontrolu(GenRegIni, FDCnn, True);
+end;
+
+function TTablo.SkinNesneOzelligi(AObject: TObject;
+  const APropName: string): TObject;
+var
+  LProp: PPropInfo;
+begin
+  Result := nil;
+  if AObject = nil then Exit;
+  try
+    // Yalniz gercek nesne ozelliklerini izle. Ornegin bazi DevExpress
+    // bilesenlerinde "Style" bir enum/sayi olabilir; GetObjectProp bunu
+    // nesne sanip 5 gibi gecersiz bir adres dondurebiliyordu.
+    LProp := GetPropInfo(AObject, APropName, [tkClass]);
+    if LProp = nil then Exit;
+    Result := GetObjectProp(AObject, LProp);
+  except
+    Result := nil;
+  end;
+end;
+
+function TTablo.SkinYolNesnesi(AObject: TObject; const AYol: string): TObject;
+var
+  LKalan, LParca: string;
+  LNokta: Integer;
+begin
+  Result := AObject;
+  LKalan := AYol;
+  while (Result <> nil) and (LKalan <> '') do begin
+    LNokta := Pos('.', LKalan);
+    if LNokta > 0 then begin
+      LParca := Copy(LKalan, 1, LNokta - 1);
+      Delete(LKalan, 1, LNokta);
+    end else begin
+      LParca := LKalan;
+      LKalan := '';
+    end;
+    Result := SkinNesneOzelligi(Result, LParca);
+  end;
+end;
+
+procedure TTablo.SkinLookAndFeelUygula(AComponent: TComponent;
+  ALookAndFeel: TObject; const AYol: string; AGeriAl: Boolean);
+var
+  LProp: PPropInfo;
+  LAnahtar: string;
+  LIndex: Integer;
+begin
+  if (ALookAndFeel = nil) or (FSkinOrijinaller = nil) then Exit;
+  LAnahtar := IntToStr(NativeInt(AComponent)) + '|' + AYol;
+
+  try
+    LProp := GetPropInfo(ALookAndFeel, 'SkinName',
+      [tkString, tkLString, tkWString, tkUString]);
+  except
+    LProp := nil;
+  end;
+  if LProp <> nil then try
+    LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|S');
+    if AGeriAl then begin
+      if LIndex >= 0 then
+        SetStrProp(ALookAndFeel, LProp, FSkinOrijinaller.ValueFromIndex[LIndex]);
+    end else begin
+      if LIndex < 0 then
+        FSkinOrijinaller.Add(LAnahtar + '|S=' + GetStrProp(ALookAndFeel, LProp));
+      SetStrProp(ALookAndFeel, LProp, FKullaniciSkinAdi);
+    end;
+  except
+    // Bazi ucuncu parti LookAndFeel nesneleri salt okunur olabilir.
+  end;
+
+  try
+    LProp := GetPropInfo(ALookAndFeel, 'NativeStyle', [tkEnumeration]);
+  except
+    LProp := nil;
+  end;
+  if LProp <> nil then try
+    LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|N');
+    if AGeriAl then begin
+      if LIndex >= 0 then
+        SetOrdProp(ALookAndFeel, LProp,
+          StrToIntDef(FSkinOrijinaller.ValueFromIndex[LIndex], 0));
+    end else begin
+      if LIndex < 0 then
+        FSkinOrijinaller.Add(LAnahtar + '|N=' +
+          IntToStr(GetOrdProp(ALookAndFeel, LProp)));
+      SetOrdProp(ALookAndFeel, LProp, 0);
+    end;
+  except
+    // SkinName uygulanabiliyorsa NativeStyle hatasi temayi engellemesin.
+  end;
+end;
+
+function TTablo.SkinKoyuMu: Boolean;
+begin
+  Result := MatchText(FKullaniciSkinAdi, [
+    'DevExpressDarkStyle', 'MetropolisDark', 'Office2010Black',
+    'Office2013DarkGray', 'Office2016Dark', 'VisualStudio2013Dark',
+    'HighContrast']);
+end;
+
+function TTablo.SkinAramaFrameIcinde(AComponent: TComponent): Boolean;
+var
+  LSahip: TComponent;
+begin
+  Result := False;
+  LSahip := AComponent;
+  while LSahip <> nil do begin
+    if (LSahip is TFrame) and ContainsText(LSahip.ClassName, 'AramaFrame') then
+      Exit(True);
+    LSahip := LSahip.Owner;
+  end;
+end;
+
+function TTablo.SkinGorevFrameIcinde(AComponent: TComponent): Boolean;
+var
+  LSahip: TComponent;
+begin
+  Result := False;
+  LSahip := AComponent;
+  while LSahip <> nil do begin
+    if (LSahip is TFrame) and ContainsText(LSahip.ClassName, 'GorevFrame') then
+      Exit(True);
+    LSahip := LSahip.Owner;
+  end;
+end;
+
+function TTablo.SkinListeAramaPanelIcinde(AComponent: TComponent): Boolean;
+var
+  LKontrol: TControl;
+begin
+  Result := False;
+  if not (AComponent is TControl) then Exit;
+  LKontrol := TControl(AComponent);
+  while LKontrol <> nil do begin
+    if ((LKontrol.Name = 'pnl2') or (LKontrol.Name = 'cxGroupBox1') or
+        (LKontrol.Name = 'ScrollBox2') or (LKontrol.Name = 'pcArama')) and
+       (LKontrol.Owner <> nil) and ContainsText(LKontrol.Owner.ClassName, 'Frame') then
+      Exit(True);
+    LKontrol := LKontrol.Parent;
+  end;
+end;
+
+function TTablo.SkinAnaGirisSolPanelIcinde(AComponent: TComponent): Boolean;
+var
+  LKontrol: TControl;
+begin
+  Result := False;
+  if not (AComponent is TControl) then Exit;
+  LKontrol := TControl(AComponent);
+  while LKontrol <> nil do begin
+    if (LKontrol.Name = 'Panel9') and (LKontrol.Owner <> nil) and
+       (LKontrol.Owner.ClassName = 'TAnaGirisSayfasiFrame') then
+      Exit(True);
+    LKontrol := LKontrol.Parent;
+  end;
+end;
+
+function TTablo.SkinGenelSkinAlaniIcinde(AComponent: TComponent): Boolean;
+var
+  LSahip: TComponent;
+begin
+  Result := False;
+  LSahip := AComponent;
+  while LSahip <> nil do begin
+    if MatchText(LSahip.ClassName, ['TMasrafGelirDlg', 'TInfoDlg']) then
+      Exit(True);
+    LSahip := LSahip.Owner;
+  end;
+end;
+
+procedure TTablo.SkinAramaKontrolUygula(AControl: TControl;
+  AGeriAl: Boolean);
+var
+  LAnahtar: string;
+  LDeger: Integer;
+  LRenk, LYaziRengi: TColor;
+  LArkaPlan, LYazi: Boolean;
+
+  procedure DegerKaydet(const AAlan: string; ADeger: Integer);
+  begin
+    if FSkinOrijinaller.IndexOfName(LAnahtar + AAlan) < 0 then
+      FSkinOrijinaller.Add(LAnahtar + AAlan + '=' + IntToStr(ADeger));
+  end;
+
+  function DegerOku(const AAlan: string; out ADeger: Integer): Boolean;
+  var
+    LIndex: Integer;
+  begin
+    LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + AAlan);
+    Result := LIndex >= 0;
+    if Result then
+      ADeger := StrToIntDef(FSkinOrijinaller.ValueFromIndex[LIndex], 0);
+  end;
+
+  function NötrRenk(ARenk: TColor): Boolean;
+  begin
+    Result := (ARenk = clWhite) or (ARenk = clWindow) or
+      (ARenk = clBtnFace) or (ARenk = clInactiveBorder) or
+      (ARenk = clSilver);
+  end;
+
+  function NötrYazi(ARenk: TColor): Boolean;
+  begin
+    Result := (ARenk = clBlack) or (ARenk = clWindowText) or
+      (ARenk = clBtnText) or (ARenk = clBackground) or
+      (ARenk = clWhite) or (ARenk = clWindow);
+  end;
+
+  function SkinAramaArkaPlanRengi(AFrame: Boolean; AMevcutRenk: TColor): TColor;
+  begin
+    if SameText(FKullaniciSkinAdi, 'HighContrast') then
+      Exit(clBlack);
+    if SameText(FKullaniciSkinAdi, 'MetropolisDark') then begin
+      if AFrame then
+        Exit(RGB(40, 43, 47));
+      Exit(RGB(50, 53, 57));
+    end;
+    if SameText(FKullaniciSkinAdi, 'Office2010Black') then begin
+      if AFrame then
+        Exit(RGB(54, 58, 64));
+      Exit(RGB(67, 71, 78));
+    end;
+    if SameText(FKullaniciSkinAdi, 'Office2013DarkGray') then begin
+      if AFrame then
+        Exit(RGB(76, 76, 76));
+      Exit(RGB(88, 88, 88));
+    end;
+    if SameText(FKullaniciSkinAdi, 'Office2016Dark') then begin
+      if AFrame then
+        Exit(RGB(50, 50, 50));
+      Exit(RGB(62, 62, 62));
+    end;
+    if SameText(FKullaniciSkinAdi, 'VisualStudio2013Dark') then begin
+      if AFrame then
+        Exit(RGB(45, 45, 48));
+      Exit(RGB(51, 51, 55));
+    end;
+    if SkinKoyuMu then begin
+      if AMevcutRenk = clSilver then
+        Exit(RGB(67, 67, 70));
+      if AFrame then
+        Exit(RGB(48, 48, 51));
+      Exit(RGB(58, 58, 61));
+    end;
+    if SameText(FKullaniciSkinAdi, 'Blueprint') then begin
+      if AFrame then
+        Exit(RGB(214, 226, 246));
+      Exit(RGB(231, 239, 252));
+    end;
+    if AFrame then
+      Exit(RGB(235, 238, 242));
+    Result := RGB(245, 247, 250);
+  end;
+
+  function SkinAramaYaziRengi: TColor;
+  begin
+    if SkinKoyuMu then
+      Exit(RGB(235, 235, 235));
+    Result := RGB(30, 45, 65);
+  end;
+
+  procedure RenkOzelligiUygula(AObject: TObject; const AAlan, APropName: string;
+    ARenk: TColor);
+  var
+    LProp: PPropInfo;
+    LIndex: Integer;
+  begin
+    if AObject = nil then Exit;
+    LProp := GetPropInfo(AObject, APropName, [tkInteger]);
+    if LProp = nil then Exit;
+    LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + AAlan);
+    try
+      if AGeriAl then begin
+        if LIndex >= 0 then
+          SetOrdProp(AObject, LProp,
+            StrToIntDef(FSkinOrijinaller.ValueFromIndex[LIndex], 0));
+      end else begin
+        if LIndex < 0 then
+          FSkinOrijinaller.Add(LAnahtar + AAlan + '=' +
+            IntToStr(GetOrdProp(AObject, LProp)));
+        SetOrdProp(AObject, LProp, Integer(ARenk));
+      end;
+    except
+      // Bazi JVCL renk alanlari skin gecisinde salt okunur davranabilir.
+    end;
+  end;
+
+  procedure CxStilRenkleriUygula;
+  var
+    LStyle, LFont: TObject;
+    LYaziRenk: TColor;
+  begin
+    LStyle := SkinNesneOzelligi(AControl, 'Style');
+    if LStyle = nil then Exit;
+    LYaziRenk := SkinAramaYaziRengi;
+    if LYazi then begin
+      RenkOzelligiUygula(LStyle, 'STC', 'TextColor', LYaziRenk);
+      LFont := SkinNesneOzelligi(LStyle, 'Font');
+      RenkOzelligiUygula(LFont, 'SFC', 'Color', LYaziRenk);
+    end;
+    if LArkaPlan then
+      RenkOzelligiUygula(LStyle, 'SC', 'Color',
+        SkinAramaArkaPlanRengi(AControl is TFrame,
+          TControlSkinAccess(AControl).Color));
+  end;
+
+  procedure JvNavPanelButtonUygula;
+  var
+    LColors: TObject;
+  begin
+    if AControl.ClassName <> 'TJvNavPanelButton' then Exit;
+    LColors := SkinNesneOzelligi(AControl, 'Colors');
+    if SkinKoyuMu then begin
+      RenkOzelligiUygula(LColors, 'BCF', 'ButtonColorFrom', RGB(58, 58, 62));
+      RenkOzelligiUygula(LColors, 'BCT', 'ButtonColorTo', RGB(43, 43, 47));
+      RenkOzelligiUygula(LColors, 'BHF', 'ButtonHotColorFrom', RGB(76, 80, 88));
+      RenkOzelligiUygula(LColors, 'BHT', 'ButtonHotColorTo', RGB(64, 68, 75));
+      RenkOzelligiUygula(LColors, 'BSF', 'ButtonSelectedColorFrom', RGB(90, 96, 106));
+      RenkOzelligiUygula(LColors, 'BST', 'ButtonSelectedColorTo', RGB(72, 78, 88));
+      RenkOzelligiUygula(LColors, 'FC', 'FrameColor', RGB(78, 78, 82));
+      RenkOzelligiUygula(TControlSkinAccess(AControl).Font,
+        'FF', 'Color', RGB(235, 235, 235));
+      RenkOzelligiUygula(SkinNesneOzelligi(AControl, 'HotTrackFont'),
+        'HF', 'Color', RGB(255, 255, 255));
+    end else if SameText(FKullaniciSkinAdi, 'Blueprint') then begin
+      RenkOzelligiUygula(LColors, 'BCF', 'ButtonColorFrom', RGB(117, 153, 207));
+      RenkOzelligiUygula(LColors, 'BCT', 'ButtonColorTo', RGB(78, 119, 180));
+      RenkOzelligiUygula(LColors, 'BHF', 'ButtonHotColorFrom', RGB(151, 181, 225));
+      RenkOzelligiUygula(LColors, 'BHT', 'ButtonHotColorTo', RGB(104, 143, 202));
+      RenkOzelligiUygula(LColors, 'BSF', 'ButtonSelectedColorFrom', RGB(92, 132, 193));
+      RenkOzelligiUygula(LColors, 'BST', 'ButtonSelectedColorTo', RGB(58, 96, 154));
+      RenkOzelligiUygula(LColors, 'FC', 'FrameColor', RGB(77, 112, 170));
+      RenkOzelligiUygula(TControlSkinAccess(AControl).Font,
+        'FF', 'Color', clWhite);
+      RenkOzelligiUygula(SkinNesneOzelligi(AControl, 'HotTrackFont'),
+        'HF', 'Color', clWhite);
+    end else begin
+      RenkOzelligiUygula(LColors, 'BCF', 'ButtonColorFrom', RGB(250, 250, 250));
+      RenkOzelligiUygula(LColors, 'BCT', 'ButtonColorTo', RGB(225, 225, 225));
+      RenkOzelligiUygula(LColors, 'BHF', 'ButtonHotColorFrom', RGB(235, 242, 252));
+      RenkOzelligiUygula(LColors, 'BHT', 'ButtonHotColorTo', RGB(210, 225, 245));
+      RenkOzelligiUygula(LColors, 'BSF', 'ButtonSelectedColorFrom', RGB(218, 232, 250));
+      RenkOzelligiUygula(LColors, 'BST', 'ButtonSelectedColorTo', RGB(190, 214, 244));
+      RenkOzelligiUygula(LColors, 'FC', 'FrameColor', RGB(180, 180, 180));
+      RenkOzelligiUygula(TControlSkinAccess(AControl).Font,
+        'FF', 'Color', RGB(30, 30, 30));
+      RenkOzelligiUygula(SkinNesneOzelligi(AControl, 'HotTrackFont'),
+        'HF', 'Color', RGB(30, 30, 30));
+    end;
+  end;
+
+begin
+  if (AControl = nil) or (FSkinOrijinaller = nil) or
+     not (SkinAramaFrameIcinde(AControl) or
+          SkinGorevFrameIcinde(AControl) or
+          SkinListeAramaPanelIcinde(AControl) or
+          SkinAnaGirisSolPanelIcinde(AControl) or
+          SkinGenelSkinAlaniIcinde(AControl)) then Exit;
+
+  LArkaPlan := (AControl is TFrame) or (AControl is TCustomPanel) or
+    (AControl is TScrollBox) or (AControl is TGroupBox) or
+    (AControl is TCustomForm) or (AControl is TCustomListView) or
+    (AControl.ClassName = 'TCategoryButtons') or
+    (AControl.ClassName = 'TcxGroupBox') or
+    (AControl.ClassName = 'TcxPageControl') or
+    (AControl.ClassName = 'TcxTabSheet');
+  LYazi := LArkaPlan or (AControl is TCustomLabel) or
+    (AControl is TDBText) or
+    (AControl is TCheckBox) or (AControl is TRadioButton) or
+    (AControl.ClassName = 'TJvNavPanelButton') or
+    ContainsText(AControl.ClassName, 'TcxLabel') or
+    ContainsText(AControl.ClassName, 'TcxCheckBox') or
+    ContainsText(AControl.ClassName, 'TcxRadioButton');
+  if not LArkaPlan and not LYazi and
+     (AControl.ClassName <> 'TJvNavPanelButton') then Exit;
+
+  LAnahtar := IntToStr(NativeInt(AControl)) + '|ARAMA|';
+  JvNavPanelButtonUygula;
+  CxStilRenkleriUygula;
+  if AGeriAl then begin
+    if DegerOku('C', LDeger) then TControlSkinAccess(AControl).Color := TColor(LDeger);
+    if DegerOku('PC', LDeger) then TControlSkinAccess(AControl).ParentColor := LDeger <> 0;
+    if DegerOku('PB', LDeger) and (AControl is TWinControl) then
+      TWinControlSkinAccess(AControl).ParentBackground := LDeger <> 0;
+    if DegerOku('F', LDeger) then TControlSkinAccess(AControl).Font.Color := TColor(LDeger);
+    if DegerOku('PF', LDeger) then TControlSkinAccess(AControl).ParentFont := LDeger <> 0;
+    AControl.Invalidate;
+    Exit;
+  end;
+
+  if LArkaPlan then begin
+    LRenk := TControlSkinAccess(AControl).Color;
+    if NötrRenk(LRenk) then begin
+      DegerKaydet('C', Integer(LRenk));
+      DegerKaydet('PC', Ord(TControlSkinAccess(AControl).ParentColor));
+      TControlSkinAccess(AControl).ParentColor := False;
+      if AControl is TWinControl then begin
+        DegerKaydet('PB', Ord(TWinControlSkinAccess(AControl).ParentBackground));
+        TWinControlSkinAccess(AControl).ParentBackground := False;
+      end;
+      TControlSkinAccess(AControl).Color :=
+        SkinAramaArkaPlanRengi(AControl is TFrame, LRenk);
+    end;
+  end;
+
+  if LYazi then begin
+    LYaziRengi := TControlSkinAccess(AControl).Font.Color;
+    if NötrYazi(LYaziRengi) then begin
+      DegerKaydet('F', Integer(LYaziRengi));
+      DegerKaydet('PF', Ord(TControlSkinAccess(AControl).ParentFont));
+      TControlSkinAccess(AControl).ParentFont := False;
+      TControlSkinAccess(AControl).Font.Color := SkinAramaYaziRengi;
+    end;
+  end;
+  AControl.Invalidate;
+end;
+
+procedure TTablo.SkinStilUygula(AStyle: TcxStyle; AGeriAl: Boolean);
+var
+  LAnahtar: string;
+  LDeger, LIndex: Integer;
+  LOrtakListeStili: Boolean;
+  LSahip: TComponent;
+
+  procedure DegerKaydet(const AAlan: string; ADeger: Integer);
+  begin
+    if FSkinOrijinaller.IndexOfName(LAnahtar + AAlan) < 0 then
+      FSkinOrijinaller.Add(LAnahtar + AAlan + '=' + IntToStr(ADeger));
+  end;
+
+  function DegerOku(const AAlan: string; out ADeger: Integer): Boolean;
+  var
+    LDegerIndex: Integer;
+  begin
+    LDegerIndex := FSkinOrijinaller.IndexOfName(LAnahtar + AAlan);
+    Result := LDegerIndex >= 0;
+    if Result then
+      ADeger := StrToIntDef(FSkinOrijinaller.ValueFromIndex[LDegerIndex], 0);
+  end;
+
+begin
+  if (AStyle = nil) or (FSkinOrijinaller = nil) then Exit;
+  LAnahtar := IntToStr(NativeInt(AStyle)) + '|STYLE';
+  // Liste detaylarinda onlarca ekrandan kullanilan bu ortak stiller, sistem
+  // renkleri yerine eski tasarimdan kalan acik RGB renkleri tasiyor.
+  LSahip := AStyle.Owner;
+  while (LSahip <> nil) and (LSahip <> Self) do
+    LSahip := LSahip.Owner;
+  LOrtakListeStili := (LSahip = Self) and MatchText(AStyle.Name,
+    ['cxStyle4', 'cxStyle6', 'cxStyle10', 'cxStyle12', 'cxStyle19',
+     'cxStyle22']);
+
+  // Eski ekranlarda grid Content/Header stilleri clWindow/clWhite/clBtnFace
+  // olarak sabitlenmis. Koyu skin'de bu iki degeri serbest birakinca grid,
+  // zemin ve metin rengini aktif DevExpress skin'inden alir. Renkli durum
+  // stillerine (uyari, onay vb.) dokunulmaz.
+  LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|C');
+  if AGeriAl then begin
+    if LIndex >= 0 then begin
+      if DegerOku('|CV', LDeger) then
+        AStyle.Color := TColor(LDeger);
+      AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svColor];
+    end;
+  end else if SameText(FKullaniciSkinAdi, 'Blueprint') and
+    (LOrtakListeStili or
+     (AStyle.Color = clWindow) or (AStyle.Color = clWhite) or
+     (AStyle.Color = clBtnFace) or (AStyle.Color = clInactiveBorder)) then begin
+    DegerKaydet('|C', 1);
+    DegerKaydet('|CV', Integer(AStyle.Color));
+    AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svColor];
+    AStyle.Color := RGB(231, 239, 252);
+  end else if (cxStyles.svColor in AStyle.AssignedValues) and
+    (LOrtakListeStili or
+     (AStyle.Color = clWindow) or (AStyle.Color = clWhite) or
+     (AStyle.Color = clBtnFace) or (AStyle.Color = clInactiveBorder)) then begin
+    if LIndex < 0 then
+      FSkinOrijinaller.Add(LAnahtar + '|C=1');
+    AStyle.AssignedValues := AStyle.AssignedValues - [cxStyles.svColor];
+  end;
+
+  LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|T');
+  if AGeriAl then begin
+    if LIndex >= 0 then begin
+      if DegerOku('|TV', LDeger) then
+        AStyle.TextColor := TColor(LDeger);
+      AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svTextColor];
+    end;
+  end else if SameText(FKullaniciSkinAdi, 'Blueprint') and
+    ((AStyle.TextColor = clBlack) or (AStyle.TextColor = clWindowText) or
+     (AStyle.TextColor = clBtnText)) then begin
+    DegerKaydet('|T', 1);
+    DegerKaydet('|TV', Integer(AStyle.TextColor));
+    AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svTextColor];
+    AStyle.TextColor := RGB(30, 45, 65);
+  end else if (cxStyles.svTextColor in AStyle.AssignedValues) and
+    ((AStyle.TextColor = clBlack) or (AStyle.TextColor = clWindowText) or
+     (AStyle.TextColor = clBtnText)) then begin
+    if LIndex < 0 then
+      FSkinOrijinaller.Add(LAnahtar + '|T=1');
+    AStyle.AssignedValues := AStyle.AssignedValues - [cxStyles.svTextColor];
+  end;
+end;
+
+procedure TTablo.SkinToolBarUygula(AToolBar: TToolBar; AGeriAl: Boolean);
+var
+  LAnahtar: string;
+  LDeger: Integer;
+
+  procedure DegerKaydet(const AAlan: string; ADeger: Integer);
+  begin
+    if FSkinOrijinaller.IndexOfName(LAnahtar + AAlan) < 0 then
+      FSkinOrijinaller.Add(LAnahtar + AAlan + '=' + IntToStr(ADeger));
+  end;
+
+  function DegerOku(const AAlan: string; out ADeger: Integer): Boolean;
+  var
+    LIndex: Integer;
+  begin
+    LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + AAlan);
+    Result := LIndex >= 0;
+    if Result then
+      ADeger := StrToIntDef(FSkinOrijinaller.ValueFromIndex[LIndex], 0);
+  end;
+
+begin
+  if (AToolBar = nil) or (FSkinOrijinaller = nil) then Exit;
+  LAnahtar := IntToStr(NativeInt(AToolBar)) + '|TOOLBAR|';
+
+  if AGeriAl then begin
+    if DegerOku('C', LDeger) then AToolBar.Color := TColor(LDeger);
+    if DegerOku('D', LDeger) then AToolBar.DrawingStyle := TTBDrawingStyle(LDeger);
+    if DegerOku('GS', LDeger) then AToolBar.GradientStartColor := TColor(LDeger);
+    if DegerOku('GE', LDeger) then AToolBar.GradientEndColor := TColor(LDeger);
+    if DegerOku('H', LDeger) then AToolBar.HotTrackColor := TColor(LDeger);
+    if DegerOku('F', LDeger) then AToolBar.Font.Color := TColor(LDeger);
+    if DegerOku('PF', LDeger) then AToolBar.ParentFont := LDeger <> 0;
+    if DegerOku('P', LDeger) then AToolBar.ParentColor := LDeger <> 0;
+    if DegerOku('T', LDeger) then AToolBar.Transparent := LDeger <> 0;
+    AToolBar.Invalidate;
+    Exit;
+  end;
+
+  DegerKaydet('C', Integer(AToolBar.Color));
+  DegerKaydet('D', Ord(AToolBar.DrawingStyle));
+  DegerKaydet('GS', Integer(AToolBar.GradientStartColor));
+  DegerKaydet('GE', Integer(AToolBar.GradientEndColor));
+  DegerKaydet('H', Integer(AToolBar.HotTrackColor));
+  DegerKaydet('F', Integer(AToolBar.Font.Color));
+  DegerKaydet('PF', Ord(AToolBar.ParentFont));
+  DegerKaydet('P', Ord(AToolBar.ParentColor));
+  DegerKaydet('T', Ord(AToolBar.Transparent));
+
+  // TToolBar DevExpress tarafindan skin'lenmiyor. Eski DFM gradientlerini
+  // kullanici temasinin acik/koyu karakterine uyan merkezi paletle degistir.
+  AToolBar.ParentColor := False;
+  AToolBar.Transparent := False;
+  AToolBar.DrawingStyle := TTBDrawingStyle.dsGradient;
+  if SkinKoyuMu then begin
+    AToolBar.Color := RGB(45, 45, 48);
+    AToolBar.GradientStartColor := RGB(58, 58, 62);
+    AToolBar.GradientEndColor := RGB(38, 38, 42);
+    AToolBar.HotTrackColor := RGB(75, 75, 82);
+    AToolBar.Font.Color := RGB(235, 235, 235);
+  end else if SameText(FKullaniciSkinAdi, 'Blueprint') then begin
+    AToolBar.Color := RGB(83, 122, 179);
+    AToolBar.GradientStartColor := RGB(101, 140, 198);
+    AToolBar.GradientEndColor := RGB(69, 105, 161);
+    AToolBar.HotTrackColor := RGB(144, 174, 219);
+    AToolBar.Font.Color := clWhite;
+  end else begin
+    AToolBar.Color := RGB(242, 242, 242);
+    AToolBar.GradientStartColor := RGB(250, 250, 250);
+    AToolBar.GradientEndColor := RGB(225, 225, 225);
+    AToolBar.HotTrackColor := RGB(210, 225, 245);
+    AToolBar.Font.Color := RGB(30, 30, 30);
+  end;
+  AToolBar.Invalidate;
+end;
+
+procedure TTablo.SkinBilesenleriTara(AComponent: TComponent; AGeriAl: Boolean);
+var
+  LGorulen: TStringList;
+begin
+  LGorulen := TStringList.Create;
+  try
+    LGorulen.Sorted := True;
+    LGorulen.Duplicates := dupIgnore;
+    SkinBilesenleriTara(AComponent, AGeriAl, LGorulen);
+  finally
+    LGorulen.Free;
+  end;
+end;
+
+procedure TTablo.SkinBilesenleriTara(AComponent: TComponent; AGeriAl: Boolean;
+  AGorulen: TStrings);
+const
+  LookAndFeelYollari: array[0..7] of string = (
+    'LookAndFeel',
+    'Style.LookAndFeel',
+    'StyleDisabled.LookAndFeel',
+    'StyleFocused.LookAndFeel',
+    'StyleHot.LookAndFeel',
+    'StyleReadOnly.LookAndFeel',
+    'DialogsLookAndFeel',
+    'Reminders.ReminderWindowLookAndFeel');
+var
+  I: Integer;
+  LAnahtar: string;
+begin
+  if AComponent = nil then Exit;
+  if AGorulen <> nil then begin
+    LAnahtar := IntToStr(NativeInt(AComponent));
+    if AGorulen.IndexOf(LAnahtar) >= 0 then Exit;
+    AGorulen.Add(LAnahtar);
+  end;
+  if AComponent is TControl then
+    SkinAramaKontrolUygula(TControl(AComponent), AGeriAl);
+  if AComponent is TToolBar then
+    SkinToolBarUygula(TToolBar(AComponent), AGeriAl);
+  if AComponent is TcxStyle then
+    SkinStilUygula(TcxStyle(AComponent), AGeriAl);
+  for I := Low(LookAndFeelYollari) to High(LookAndFeelYollari) do
+    SkinLookAndFeelUygula(AComponent,
+      SkinYolNesnesi(AComponent, LookAndFeelYollari[I]),
+      LookAndFeelYollari[I], AGeriAl);
+  for I := 0 to AComponent.ComponentCount - 1 do
+    SkinBilesenleriTara(AComponent.Components[I], AGeriAl, AGorulen);
+  if AComponent is TWinControl then
+    for I := 0 to TWinControl(AComponent).ControlCount - 1 do
+      SkinBilesenleriTara(TWinControl(AComponent).Controls[I], AGeriAl, AGorulen);
+end;
+
+procedure TTablo.KullaniciSkinBilesenlereUygula(Sender: TObject);
+var
+  LComponent: TComponent;
+  LAnahtar: string;
+begin
+  if (FKullaniciSkinAdi = '') or not (Sender is TComponent) then Exit;
+  LComponent := TComponent(Sender);
+  LAnahtar := IntToStr(NativeInt(LComponent)) + '|' +
+    LComponent.ClassName + '|' + LComponent.Name + '|' + FKullaniciSkinAdi;
+  if (FSkinUygulananlar <> nil) and
+     (FSkinUygulananlar.IndexOf(LAnahtar) >= 0) then
+    Exit;
+  SkinBilesenleriTara(LComponent, False);
+  if FSkinUygulananlar <> nil then
+    FSkinUygulananlar.Add(LAnahtar);
+end;
+
+procedure TTablo.KullaniciSkinUygula(const ASkinAdi: string);
+var
+  I: Integer;
+  LSkinAdi, LOncekiSkin, LOncekiKullaniciSkin: string;
+
+  procedure SkinCacheEkle(AComponent: TComponent);
+  begin
+    if (AComponent <> nil) and (FSkinUygulananlar <> nil) then
+      FSkinUygulananlar.Add(IntToStr(NativeInt(AComponent)) + '|' +
+        AComponent.ClassName + '|' + AComponent.Name + '|' + FKullaniciSkinAdi);
+  end;
+
+begin
+  LSkinAdi := Trim(ASkinAdi);
+  if (LSkinAdi = '') and (FKullaniciSkinAdi = '') then
+    Exit; // Eski kullanicilarin mevcut gorunumune dokunma.
+
+  if (LSkinAdi = '') or SameText(LSkinAdi, 'DEFAULT') then begin
+    // Calisma aninda ezdigimiz yerel DFM degerlerini geri getir. Boylece
+    // "Mevcut gorunum" yalniz sonraki giriste degil hemen de geri doner.
+    for I := 0 to Screen.FormCount - 1 do
+      SkinBilesenleriTara(Screen.Forms[I], True);
+    // Stok/fatura/cari detay gridleri Tablo data module'indeki ortak
+    // TcxStyle nesnelerini de kullaniyor; onlar form agacinda bulunmaz.
+    SkinBilesenleriTara(Self, True);
+    FKullaniciSkinAdi := '';
+    FSkinOrijinaller.Clear;
+    if FSkinUygulananlar <> nil then
+      FSkinUygulananlar.Clear;
+    dxSkinController1.SkinName := 'LondonLiquidSky';
+    Exit;
+  end;
+
+  // Veritabanina elle yazilmis gecersiz bir deger tum uygulamanin
+  // gorunumunu bozmamali. Yalniz arayuzde sundugumuz skinleri uygula.
+  if not MatchText(LSkinAdi, [
+    'LondonLiquidSky', 'Blue', 'Blueprint',
+    'DevExpressStyle', 'DevExpressDarkStyle', 'HighContrast',
+    'Metropolis', 'MetropolisDark',
+    'Office2010Black', 'Office2010Blue', 'Office2010Silver',
+    'Office2013DarkGray', 'Office2013LightGray', 'Office2013White',
+    'Office2016Colorful', 'Office2016Dark',
+    'VisualStudio2013Blue', 'VisualStudio2013Dark',
+    'VisualStudio2013Light', 'VS2010']) then
+    Exit;
+
+  LOncekiSkin := dxSkinController1.SkinName;
+  LOncekiKullaniciSkin := FKullaniciSkinAdi;
+  FKullaniciSkinAdi := LSkinAdi;
+  try
+    dxSkinController1.SkinName := LSkinAdi;
+  except
+    FKullaniciSkinAdi := LOncekiKullaniciSkin;
+    dxSkinController1.SkinName := LOncekiSkin;
+    Exit;
+  end;
+  if FSkinUygulananlar <> nil then
+    FSkinUygulananlar.Clear;
+  // DFM'de sabitlenmis LondonLiquidSky/Black/MoneyTwins degerleri global
+  // controller'i eziyordu. Acik tum formlarda bu yerel degerleri kullanici
+  // tercihiyle gecersiz kil; yeni formlar/frame'ler callback ile ele alinir.
+  for I := 0 to Screen.FormCount - 1 do begin
+    SkinBilesenleriTara(Screen.Forms[I], False);
+    SkinCacheEkle(Screen.Forms[I]);
+  end;
+  SkinBilesenleriTara(Self, False);
+  SkinCacheEkle(Self);
 end;
 
 procedure TTablo.SilmeKontrolu(Dosya, Alan, Kod, Yazi: string);
@@ -15812,7 +16563,7 @@ procedure TSayfaliListe.TamModaGec;
 begin
   FTamListe := True;
   TThread.ForceQueue(nil,
-    procedure
+    TThreadProcedure(procedure
     begin
       if csDestroying in ComponentState then Exit;
       FYukleniyor := True;
@@ -15821,7 +16572,7 @@ begin
       finally
         FYukleniyor := False;
       end;
-    end);
+    end));
 end;
 
 // Kolon SIRALAMASI degisti (baslik tiklamasi): kismi listedeyse tam liste cekilir,
@@ -15852,7 +16603,7 @@ begin
   else begin
     FTamListe := False;   // sayfaliya donus: kaldigi sinirdan yeniden sorgula
     TThread.ForceQueue(nil,
-      procedure
+      TThreadProcedure(procedure
       begin
         if csDestroying in ComponentState then Exit;
         FYukleniyor := True;
@@ -15861,7 +16612,7 @@ begin
         finally
           FYukleniyor := False;
         end;
-      end);
+      end));
   end;
 end;
 
@@ -15932,11 +16683,11 @@ begin
   if FYukleniyor then Exit;
   // Requery scroll/cizim olayinin ICINDE yapilamaz (dataset yeniden acilir) -> ana kuyruk.
   TThread.ForceQueue(nil,
-    procedure
+    TThreadProcedure(procedure
     begin
       if not (csDestroying in ComponentState) then
         SonrakiGetir;
-    end);
+    end));
 end;
 
 procedure TSayfaliListe.SonrakiGetir;
@@ -16294,55 +17045,6 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

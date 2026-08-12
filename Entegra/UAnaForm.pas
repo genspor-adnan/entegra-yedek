@@ -518,6 +518,8 @@ procedure TAnaForm.AktifFormDegisti(Sender: TObject);
 var
   LAyar: Boolean;
 begin
+  if Screen.ActiveForm <> nil then
+    Tablo.KullaniciSkinBilesenlereUygula(Screen.ActiveForm);
   // Aktif form bir opsiyon formu (TOpsiyon...Dlg) ise GENINI ayar loglamasini ac; degilse kapat.
   // Boylece opsiyon formu disindaki GENINI yazimlari (lisans/oturum) loglanmaz.
   LAyar := (Screen.ActiveForm <> nil) and
@@ -537,6 +539,7 @@ var
 begin
   // Opsiyon (TOpsiyon*Dlg) formu aktifken GENINI.Write* degisiklikleri loglansin.
   Screen.OnActiveFormChange := AktifFormDegisti;
+  Tablo.KullaniciSkinBilesenlereUygula(Self);
   FrameBasliklariniGuncelle;
   if Assigned(ChangeWindowMessageFilter) then begin
      if not ChangeWindowMessageFilter( Handle, WM_DROPFILES, MSGFLT_ADD ,0) then
@@ -812,6 +815,7 @@ end;
 
 procedure TAnaForm.FormDestroy(Sender: TObject);
 begin
+  FrameSkinUygulayici := nil;
   MemKapat;
   FFrameYoneticisi.Free;
 end;
@@ -1109,8 +1113,12 @@ end;
 procedure TAnaForm.Hakknda1Click(Sender: TObject);
 begin
   Application.CreateForm(TAboutBox, AboutBox);
-  AboutBox.ShowModal;
-  AboutBox.Destroy;
+  try
+    Tablo.KullaniciSkinBilesenlereUygula(AboutBox);
+    AboutBox.ShowModal;
+  finally
+    AboutBox.Destroy;
+  end;
 end;
 
 procedure TAnaForm.Haklar1Click(Sender: TObject);
@@ -1571,6 +1579,7 @@ var
   // .Start ile ba?lat?lm?? nesneyi, tekrar ba?latman?n her hangi bir faydas? veya zarar? olmaz.
   end;
 begin
+  FrameSkinUygulayici := Tablo.KullaniciSkinBilesenlereUygula;
   LocalizerOnFly.ProcessContainer(Self);//Dil y?kleniyor.
   JvDragDrop1.DropTarget := Self;
   if Tablo.GENINI.ReadBoolean( StrToInt(inttoStr(Ops_OpsiyonCari_CallerIDCalistir)),False) then
@@ -2213,8 +2222,6 @@ initialization
   dllYukle;
 
 end.
-
-
 
 
 
