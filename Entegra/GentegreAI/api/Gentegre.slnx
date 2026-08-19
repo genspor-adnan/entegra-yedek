@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Gentegre.Api/Gentegre.Api.csproj" />
+    <Project Path="src/Gentegre.Cekirdek/Gentegre.Cekirdek.csproj" />
+    <Project Path="src/Gentegre.Veri/Gentegre.Veri.csproj" />
+  </Folder>
+</Solution>
