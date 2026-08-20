@@ -5,6 +5,11 @@ import {
   type KartAlanMeta, type KartDetayMeta, type KartMetaYaniti, type KartYetkisi,
 } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
+import { IlgiliKisiler } from './IlgiliKisiler';
+import { TekAdres } from './TekAdres';
+import { TarafArama } from './TarafArama';
+import { epostaGecerliMi } from './alanBicim';
+import { TelefonGirdi } from './TelefonGirdi';
 
 interface Props {
   kaynak: string;
@@ -16,6 +21,10 @@ interface Props {
   yerTutucuSekmeler?: string[];
   /** "Genel" sekmesinde alt-bolum kutularinin YANINA mockup'taki gibi bos "Resim" kutusu ekler. */
   resimYerTutucu?: boolean;
+  /** TarafArama'nin kendi Yeni/Duzenle'siyle acilan ic-ice Kisi Karti'nda "Cariye Bağla"
+      butonu GIZLENIR - yoksa TarafArama'nin icinden bir baska TarafArama acilir, tekrarli/
+      kafa karistirici olur (kullanici). */
+  cariyeBaglaGizli?: boolean;
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
@@ -66,6 +75,11 @@ const KIMLIK_GRUP = 'Kimlik';
 
 type Deger = string | number | boolean | null;
 
+// "epostaWeb"/"aliasEposta" DAHIL DEGIL - role gore URL/GIB-URN-alias de tutabiliyor
+// (taraf.eposta_web/alias_eposta yorumlari), sadece duz "eposta" alani her zaman e-posta.
+const EPOSTA_ALANLARI = new Set(['eposta']);
+const TELEFON_ALANLARI = new Set(['telefon', 'cepTel']);
+
 /**
  * Kart sozlesmesini (§3) tuketen genel form.
  *
@@ -76,7 +90,7 @@ type Deger = string | number | boolean | null;
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler, resimYerTutucu }: Props) {
+export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler, resimYerTutucu, cariyeBaglaGizli }: Props) {
   const yeniMi = id === 'yeni';
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
@@ -92,6 +106,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
   const [cakisma, setCakisma] = useState<{ alanlar: string[]; guncel: Record<string, unknown> } | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
+  const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
+  // TarafArama'dan bir KISI secilirse "public.v_cari_lookup" (KodTablosu) onu bilmiyor -
+  // secim sonrasi ad gorunsun diye adini ayrica burada tutuyoruz (server'a etkisi yok).
+  const [bagliTarafAdi, setBagliTarafAdi] = useState<string | null>(null);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -106,7 +124,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
 
       if (yeniMi) {
         const baslangic: Record<string, Deger> = {};
-        m.alanlar.forEach(a => { baslangic[a.ad] = a.tip === 'mantik' ? false : '' });
+        // Yeni kayitta Durum her zaman "Aktif" gelsin (kullanici: "yeni kart kaydında
+        // varsa durum hep aktif gelsin") - DurumKodlari'nde 1 = Aktif (KartKatalogu.cs).
+        m.alanlar.forEach(a => {
+          baslangic[a.ad] = a.ad === 'durum' ? '1' : a.tip === 'mantik' ? false : '';
+        });
         setDeger(baslangic);
         setIlkDeger(baslangic);
         setSurum(undefined);
@@ -161,6 +183,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       .filter(([ad]) => ad !== KIMLIK_GRUP)
       .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
     meta?.detaylar.forEach(d => {
+      // Cari/Kisi'ye ozel: Adresler mockup'ta ayri sekme DEGIL, ilgili grup sekmesinin
+      //   icine gomulu bir grid - kendi sekmesi acilmasin (bkz. asagida grup render'i).
+      if ((kaynak === 'cari' || kaynak === 'kisi') && d.ad === 'adresler') return;
       s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
     });
     (yerTutucuSekmeler ?? []).forEach(baslik => {
@@ -170,16 +195,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   }, [gruplar, meta, yerTutucuSekmeler]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
+  // Genel kural: karta HER GIRISTE (id/kaynak degisince) ilk sekme acik olmali - "Sonraki"
+  // ile ayni kaynaktaki baska kayida gecince onceki sekmede kalinmasin. RENDER SIRASINDA
+  // (useEffect DEGIL) sifirlaniyor - useEffect [sekmeler] deps'ine bagli olsaydi, meta henuz
+  // guncellenmeden (sekmeler referansi degismeden) once tetiklenip kacirabiliyordu.
+  const [sonKayitAnahtari, setSonKayitAnahtari] = useState(`${kaynak}:${id}`);
+  const kayitAnahtari = `${kaynak}:${id}`;
+  if (kayitAnahtari !== sonKayitAnahtari) {
+    setSonKayitAnahtari(kayitAnahtari);
+    setAktifSekme(null);
+  }
   useEffect(() => {
     if (sekmeler.length && !sekmeler.some(s => s.anahtar === aktifSekme)) {
       setAktifSekme(sekmeler[0].anahtar);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sekmeler]);
+  }, [sekmeler, aktifSekme]);
 
   /** Hangi alan hangi sekmede — hata gelince o sekmeye atlamak icin. Kimlik her zaman gorunur, atlamaya gerek yok. */
   const sekmeBul = useCallback((alanAdi: string): string | null => {
-    if (alanAdi.includes('.')) return detaySekmeAnahtari(alanAdi.split('.')[0]);
+    if (alanAdi.includes('.')) {
+      const detayAd = alanAdi.split('.')[0];
+      if (kaynak === 'cari' && detayAd === 'adresler') return grupSekmeAnahtari('Fatura Bilgileri');
+      if (kaynak === 'kisi' && detayAd === 'adresler') return grupSekmeAnahtari('Genel');
+      return detaySekmeAnahtari(detayAd);
+    }
     const alan = meta?.alanlar.find(a => a.ad === alanAdi);
     const grup = alan?.grup ?? 'Genel';
     return grup === KIMLIK_GRUP ? null : grupSekmeAnahtari(grup);
@@ -213,6 +253,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   }, [meta, deger, ilkDeger, yeniMi]);
 
   async function kaydet() {
+    // Client-side eposta kontrolu - sunucuya hic gitmeden dur, ilgili sekmeye atla.
+    const gecersizEposta = meta?.alanlar.find(a => {
+      const v = deger[a.ad];
+      return EPOSTA_ALANLARI.has(a.ad) && typeof v === 'string' && v !== '' && !epostaGecerliMi(v);
+    });
+    if (gecersizEposta) {
+      setAlanHatalari(h => ({ ...h, [gecersizEposta.ad]: 'Gecerli bir e-posta adresi girin.' }));
+      const hedefSekme = sekmeBul(gecersizEposta.ad);
+      if (hedefSekme) setAktifSekme(hedefSekme);
+      return;
+    }
+
     setKaydediyor(true);
     setHata(null);
     setAlanHatalari({});
@@ -311,6 +363,24 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         disabled={salt || !a.yazilabilir}
         onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.checked }))}
       />
+    ) : kaynak === 'kisi' && a.ad === 'bagId' ? (
+      // "Cariye Bağla" butonu + TarafArama modaliyla degistiriliyor - burada duz salt-okunur
+      // gorunum (kullanici: "bagli cari readonly edit olsun"). Yazilabilir hala TRUE (kaydet
+      // payload'una girsin), sadece render FARKLI - select degil, disabled text input.
+      <div key={a.ad} className="tel-girdi">
+        <input
+          readOnly
+          disabled
+          value={bagliTarafAdi ?? (a.kodlar && a.kodlar[String(deger[a.ad] ?? '')]) ?? ''}
+          placeholder="Bağlanmadı"
+        />
+        {!salt && deger[a.ad] && (
+          <button type="button" className="mini" title="Boşalt"
+            onClick={() => { setDeger(d => ({ ...d, [a.ad]: '' })); setBagliTarafAdi(null) }}>
+            ×
+          </button>
+        )}
+      </div>
     ) : a.kodlar ? (
       <select
         key={a.ad}
@@ -321,14 +391,30 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         <option value="">—</option>
         {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
       </select>
+    ) : TELEFON_ALANLARI.has(a.ad) ? (
+      <TelefonGirdi
+        key={a.ad}
+        value={String(deger[a.ad] ?? '')}
+        disabled={salt || !a.yazilabilir}
+        onChange={v => setDeger(d => ({ ...d, [a.ad]: v }))}
+      />
     ) : (
       <input
         key={a.ad}
-        type={a.tip === 'tarih' ? 'text' : 'text'}
+        type={EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
         value={String(deger[a.ad] ?? '')}
         maxLength={a.enFazlaUzunluk ?? undefined}
         disabled={salt || !a.yazilabilir}
         onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
+        onBlur={e => {
+          if (EPOSTA_ALANLARI.has(a.ad)) {
+            const gecerli = epostaGecerliMi(e.target.value);
+            setAlanHatalari(h => {
+              if (gecerli) { const { [a.ad]: _cikar, ...kalan } = h; return kalan }
+              return { ...h, [a.ad]: 'Gecerli bir e-posta adresi girin.' };
+            });
+          }
+        }}
       />
     )
   );
@@ -380,7 +466,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       }
       ustSerit={kimlikAlanlari.length > 0 && (
         <div className="kaid">
-          <div className="alan-izgara">{renderAlanListesi(kimlikAlanlari)}</div>
+          {/* Kisi'ye ozel: Kisi Kodu dar, Unvan genis (kullanici: "kod edit yariya dussun,
+              onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}
+          <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`}>
+            {renderAlanListesi(kimlikAlanlari)}
+          </div>
         </div>
       )}
       sekmeBar={sekmeler.length > 1 && (
@@ -408,7 +498,37 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           {!yeniMi && yetki.sil && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
+          {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
+              tek degistirme yolu bu buton + TarafArama modali. */}
+          {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && (
+            <button className="d" onClick={() => setCariyeBaglaAcik(true)}>🔗 Cariye Bağla</button>
+          )}
           <button className="d" onClick={onKapat}>Kapat</button>
+          {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
+              Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
+              alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}
+          {kaynak === 'cari' && meta.alanlar.some(a => a.ad === 'musteri') && (
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: 12, alignItems: 'center' }}>
+              <label className="satir-ici">
+                <input
+                  type="checkbox"
+                  checked={Boolean(deger.musteri)}
+                  disabled={salt}
+                  onChange={e => setDeger(d => ({ ...d, musteri: e.target.checked }))}
+                />
+                Müşteri
+              </label>
+              <label className="satir-ici">
+                <input
+                  type="checkbox"
+                  checked={Boolean(deger.tedarikci)}
+                  disabled={salt}
+                  onChange={e => setDeger(d => ({ ...d, tedarikci: e.target.checked }))}
+                />
+                Tedarikçi
+              </label>
+            </span>
+          )}
         </>
       }
     >
@@ -433,18 +553,80 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       {aktif?.tur === 'grup' && (() => {
         const gruplanmis = altGruplaVar(aktif.alanlar);
         const adli = gruplanmis.filter(([b]) => b);
-        const adsiz = gruplanmis.find(([b]) => !b)?.[1] ?? [];
-        return (
+        // musteri/tedarikci toolbar'da (kaydet/sil yaninda) checkbox olarak zaten var,
+        // ad/soyad kart'ta hic gosterilmiyor - burada tekrarlanmasin (cari'ya ozel). "kisi"
+        // check'i de KALDIRILDI (kullanici) - artik ayri "Kişi Kartı" + "İlgili Kişiler"
+        // akisi var, cari uzerinde dogrudan kisi bayragi degistirmek gereksiz/kafa karistirici.
+        const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci', 'kisi'])
+          : kaynak === 'kisi' ? new Set(['kisi'])
+          : new Set<string>();
+        const adsiz = (gruplanmis.find(([b]) => !b)?.[1] ?? []).filter(a => !gizli.has(a.ad));
+        // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Kart Bilgileri sagda.
+        const iletisim = adli.find(([b]) => b === 'İletişim');
+        const notlar = adli.find(([b]) => b === 'Notlar');
+        const digerAdli = adli.filter(([b]) => b !== 'İletişim' && b !== 'Notlar');
+        const adliBlok = (
           <>
             {/* Mockup: Tanım/Sınıflandırma · Vergi & Ana Birim ... AYNI SATIRDA yan yana (.row > .col > .grp). */}
             {adli.length > 0 && (
               <div className="kasira">
-                {adli.map(([altBaslik, alanlar]) => (
-                  <div className="kagrup" key={altBaslik}>
-                    <h6>{altBaslik}</h6>
-                    <div className="alan-izgara tek-sutun">{renderAlanListesi(alanlar)}</div>
+                {iletisim && (
+                  <div className="kasutun">
+                    <div className="kagrup">
+                      <h6>{iletisim[0]}</h6>
+                      <div className="alan-izgara tek-sutun">{renderAlanListesi(iletisim[1])}</div>
+                    </div>
+                    {notlar && kaynak !== 'cari' && (
+                      <div className="kagrup">
+                        <h6>{notlar[0]}</h6>
+                        <div className="alan-izgara tek-sutun">{renderAlanListesi(notlar[1])}</div>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
+                {digerAdli.map(([altBaslik, alanlar]) => {
+                  // Cari'ye ozel: Kart Bilgileri kutusunda iki cift AYNI SATIRDA yan yana
+                  // (kullanici: "kategori ilk temas üstte sekt alt sektör onun altına
+                  // gelsin") - kutunun geri kalani (Temsilci/Ozel Kod) tek-sutun kaliyor.
+                  const ciftler = kaynak === 'cari' && altBaslik === 'Kart Bilgileri'
+                    ? [['kategori', 'ilkTemas'], ['sektor', 'altSektor']] : [];
+                  const ciftliAlanlar = ciftler.map(cift =>
+                    cift.map(ad => alanlar.find(a => a.ad === ad)).filter(a => a !== undefined));
+                  const digerAlanlar = alanlar.filter(a => !ciftliAlanlar.flat().includes(a));
+                  return (
+                    <div className="kagrup" key={altBaslik}>
+                      <h6>{altBaslik}</h6>
+                      <div className="alan-izgara tek-sutun">
+                        {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
+                          <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
+                        ))}
+                        {renderAlanListesi(digerAlanlar)}
+                      </div>
+                    </div>
+                  );
+                })}
+                {/* Kisi'ye ozel: kisi_karti.html'deki "Adres" kutusu - GRID DEGIL, TEK adres
+                    (kullanici: "grid olmasin tek adres"). Iletisim kutusuyla AYNI satirda
+                    (kasira icinde) - genislik esitlensin diye (kullanici: "iletisim kutusu
+                    kadar olsun"). Ayni taraf_adres tablosu, sadece tek satir gosterilir. */}
+                {kaynak === 'kisi' && aktif.baslik === 'Genel' && (() => {
+                  const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+                  if (!adresDetay) return null;
+                  return (
+                    <TekAdres
+                      meta={adresDetay}
+                      durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                      saltOkunur={salt || adresDetay.saltOkunur}
+                      onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                    />
+                  );
+                })()}
+                {!iletisim && notlar && kaynak !== 'cari' && (
+                  <div className="kagrup" key="Notlar">
+                    <h6>{notlar[0]}</h6>
+                    <div className="alan-izgara tek-sutun">{renderAlanListesi(notlar[1])}</div>
+                  </div>
+                )}
                 {resimYerTutucu && aktif.baslik === 'Genel' && (
                   <div className="kagrup kagrup-resim">
                     <h6>Resim</h6>
@@ -453,7 +635,75 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
                 )}
               </div>
             )}
-            {adsiz.length > 0 && <div className="alan-izgara">{renderAlanListesi(adsiz)}</div>}
+          </>
+        );
+        // SubeId/EklemeTarihi (salt-okunur meta alanlar) EN ALTTA (kullanici: kisi kartinda
+        //   sonra cari kartinda da "şube id ve ekleme tarihi en alta gelsin") - Kisi'de Bagli
+        //   Cari/Rol/Durum'dan AYRI (o idstrip'in hemen altinda kaliyor); Cari'de zaten baska
+        //   adsiz alan kalmadi (kisi/ad/soyad/musteri/tedarikci gizli), direkt en alta duser.
+        const enAltAd = new Set(['subeId', 'eklemeTarihi']);
+        const adsizUst = adsiz.filter(a => !enAltAd.has(a.ad));
+        const adsizAlt = adsiz.filter(a => enAltAd.has(a.ad));
+        {/* Kisi'ye ozel: Rol/Durum saga yanasik, aradaki bosluk Bagli Cari editi buyuyerek
+            doldurur (kullanici: "rol ve durum saga yanasik, aradaki bosluk bagli cari editi
+            doldursun"). Alan sirasi katalogda Bagli Cari, Rol, Durum. */}
+        const adsizBlok = adsizUst.length > 0 && (
+          <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}`}>
+            {renderAlanListesi(adsizUst)}
+          </div>
+        );
+        const adsizAltBlok = adsizAlt.length > 0 && <div className="alan-izgara">{renderAlanListesi(adsizAlt)}</div>;
+        return (
+          <>
+            {/* Kisi'ye ozel: Bagli Cari/Rol/Durum (adsiz) idstrip'in HEMEN ALTINDA, 2. sirada
+                (kullanici: "onun altinda 2.sirada Bagli Cari/Rol/Durum olsun") - Iletisim/Adres
+                kutularindan ONCE. Diger kaynaklar (Cari) eski sirada: kutular sonra adsiz. */}
+            {kaynak === 'kisi' ? (
+              <>
+                {adsizBlok}
+                {adliBlok}
+              </>
+            ) : (
+              <>
+                {adliBlok}
+                {adsizBlok}
+              </>
+            )}
+            {/* Cari'ye ozel: mockup'ta Genel'in altinda "İlgili Kişiler" tablosu (ayri
+                uclar - /api/kart/cari/{id}/kisiler, kartin diger alanlari gibi Kaydet'i
+                beklemez). Yeni kayitta henuz id yok, kart once kaydedilmeli. */}
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi && (
+              <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
+            )}
+            {/* Kullanici: "notlar ilgili kişiler altına gelsin" - Cari'de Notlar kutusu
+                artik İletişim'in yaninda degil, İlgili Kişiler tablosunun altinda. */}
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && notlar && (
+              <div className="kasira">
+                <div className="kagrup" key="Notlar">
+                  <h6>{notlar[0]}</h6>
+                  <div className="alan-izgara tek-sutun">{renderAlanListesi(notlar[1])}</div>
+                </div>
+              </div>
+            )}
+            {/* Cari'ye ozel: Adresler mockup'ta ayri sekme degil, Fatura Bilgileri'nin icine
+                gomulu GRID (birden fazla adres - fatura/sevkiyat/vb). */}
+            {kaynak === 'cari' && aktif.baslik === 'Fatura Bilgileri' && (() => {
+              const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+              if (!adresDetay) return null;
+              return (
+                <GenDetayTablo
+                  meta={adresDetay}
+                  durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                  saltOkunur={salt || adresDetay.saltOkunur}
+                  hatalar={alanHatalari}
+                  onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                />
+              );
+            })()}
+            {/* SubeId/EklemeTarihi GERCEKTEN EN ALTTA - Kisi/Ilgili Kisiler/Adresler
+                kutularindan da SONRA (kullanici iki kez duzeltti: onceki yer "ortada"
+                kaliyordu, İlgili Kişiler grid'inden ONCE geliyordu). */}
+            {adsizAltBlok}
           </>
         );
       })()}
@@ -472,6 +722,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
           {aktif.baslik} sekmesi yakında.
         </div>
+      )}
+
+      {kaynak === 'kisi' && (
+        <TarafArama
+          acik={cariyeBaglaAcik}
+          kaynaklar={['cari']}
+          yerTutucu="Cari (müşteri/tedarikçi) ara…"
+          onKapat={() => setCariyeBaglaAcik(false)}
+          onSec={secilen => {
+            setDeger(d => ({ ...d, bagId: String(secilen.id) }));
+            setBagliTarafAdi(secilen.unvan);
+          }}
+        />
       )}
     </Modal>
   );

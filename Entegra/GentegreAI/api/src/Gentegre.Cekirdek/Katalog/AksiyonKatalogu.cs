@@ -41,6 +41,18 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            ["kisi-liste"] = new AksiyonTanimi[]
+            {
+                new("kisi.yeni",    "＋ Yeni",     "kisi", Kisayol: "Ctrl+N",
+                    KaynakKodu: "cari", Islem: Islem.Ekle, Sira: 10),
+                new("kisi.duzenle", "✎ Düzenle",   "kisi", Kisayol: "Enter",
+                    KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("kisi.sil",     "Sil",         "kisi", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             ["stok-liste"] = new AksiyonTanimi[]
             {
                 new("stok.yeni",    "＋ Yeni",     "stok", Kisayol: "Ctrl+N",

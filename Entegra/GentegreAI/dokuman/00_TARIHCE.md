@@ -464,6 +464,52 @@ Bu sirada kart ekraninin duzeni de yeni mockup temasina tasindi (sayfa basligi +
 gruplar); onay kutulari metin alanlarinin `%100 genislik` kuralindan etkilenip devasa
 gorunuyordu, sabit 16px'e alindi.
 
+## 20.08.2026 — Roller sekmesi kaldirildi
+
+Kullanici: "olmamis daha.. roller sekmeyi de kaldir" (mockup'ta boyle bir sekme yok).
+Musteri/tedarikci/kisi alanlarindan `Grup: "Roller"` kaldirildi - musteri/tedarikci zaten
+onceki adimda toolbar'a tasinmisti (o kalici), kisi de dahil ucu de artik Genel sekmesinde
+duz alan (Grup atanmayan alanlar otomatik Genel'e dusuyor - sekme listesi verideki grup
+degerlerinden TURETILIYOR, Roller icin baska alan kalmayinca sekme kendiliginden yok oldu).
+
+## 20.08.2026 — Cari kart: Musteri/Tedarikci toolbar'a'a, Ad/Soyad idstrip'ten cikti
+
+- **Musteri/Tedarikci** rolleri (checkbox) artik Kaydet/Sil/Kapat ile AYNI SATIRDA (toolbar),
+  saga yanasik da gorunuyor - Roller sekmesindeki AYNI alanla senkron (iki yerden de
+  degistirilebilir, ayni `deger.musteri`/`deger.tedarikci` state'i). Bu SADECE cari kartina
+  ozel (`kaynak === 'cari'` kontrolu, GenForm.tsx).
+- **Ad/Soyad** idstrip'ten (Kimlik grubu) CIKARILDI - mockup'ta da idstrip'te yok, sadece
+  Unvan var. Alan SILINMEDI, Grup'suz birakildi (Genel sekmesine dustu, Sube Id/Ekleme
+  Tarihi'nin yanina).
+
+## 20.08.2026 — TUM TEMA degisti: mor/modern -> mavi Delphi (cari_karti.html)
+
+Kullanici: "cari_karti.html'i baz al, ayni sekmeler/edit/buton/font/punto/CSS ile yeni cari
+karti dizayn et". Netlestirme sorusu soruldu (sadece cari mi, tum uygulama mi) - kullanici
+"TUM UYGULAMA (stok dahil) mavi temaya gecsin" dedi. `tema.css` BASTAN YAZILDI:
+
+- **Kaynak degisti**: eskiden `gentegre_v4_web.html` (mor #6d5bd0, Inter, 12-20px yuvarlak
+  kose) "ana mockup"tu - simdi `Ekranlar/cari_karti.html` (mavi #2f6db3/#14315a, Trebuchet MS,
+  2-4px kose, gradient butonlar/basliklar) TUM UYGULAMANIN referansi.
+- CSS DEGISKEN ADLARI KORUNDU (--mor, --yuz, --cizgi, --soluk...) - sadece DEGERLERI blue
+  paletine cevrildi, boyle yuzlerce var(--mor) kullanan kural TEK SEFERDE dogru renge gecti.
+- Ust serit (.ust), kart basligi (.kabas), giris sayfasi artik LACIVERT GRADIENT
+  (linear-gradient(#2b5c95,#1c4374)) + beyaz yazi - mockup'in .title/.popup-t stiliyle ayni.
+- Sekmeler (.katab .kat) DEGISTI: eskiden alt-cizgi vurgulu (underline), simdi mockup'taki gibi
+  klasik dosya-sekmesi (kose-yuvarlatilmis ust kenar, aktif sekme beyaz+kalin, digerleri gri).
+- Grid basliklari (table.grid th) gradient mavi-gri + sutunlar arasi dikey cizgi (border-right) -
+  mockup'in .dg th stiliyle ayni.
+- Butonlar (.d, .d.bir, .d.teh, .cipsag .uygd) DUZ RENK yerine GRADIENT (mockup'in .btn/
+  .btn.primary/.btn.danish) - Kaydet mavi gradient, Sil kirmizi gradient.
+- `.kagrup` artik mockup'in `.grp`si gibi: baslik cubugu (gradient bg, kenarlik-ayrik), govde
+  ayri (margin ile bosluklu) - eskiden duz uppercase kucuk yazi baslikti.
+- CSS temizlik: `.alan-izgara`den genel `padding:10px` kaldirildi (hem `.kagrup` hem `.kaid`
+  icinde CIFT bosluk yaratiyordu), yerine `.kagrup > .alan-izgara/.resim-kutusu/.detay-tablo`
+  icin ozel `margin:10px` (detay-tablo icin ayrica `width:calc(100% - 20px)` - width:100%+margin
+  parent'tan tasardi).
+- Tarayicida dogrulandi: liste, cari karti (idstrip+toolbar+sekmeler+Genel/Roller sekmeleri)
+  gorsel olarak mockup'a cok yakin.
+
 ## 20.08.2026 — Tum Liste / Son Aranan / Sik Aranan ikonlari (GORSEL, backend YOK)
 
 Kullanici "Tum/Sik/Favori butonlari Aktif/Pasif/Tumu'nun soluna, sadece ikon" istedi -
@@ -892,6 +938,340 @@ Bunlar tekrar etmesin diye kayda geçiyor:
 5. `goc_kalem_eslesme` temizliği ve `referans`/`kod_liste` otomatik adlarının gerçek adlarla değiştirilmesi
 
 ---
+
+## 20.08.2026 — Cari sekme adlari mockup'la birebir (Genel/Fatura Bilgileri/Mali Durum/Banka-IBAN/Yorum-Medya/Ekstre/Ek Alanlar)
+
+Kullanici: "sekme adlarini aynen al" (`cari_karti.html`'deki 7 sekme adi).
+
+- `Grup: "Mali"` -> `"Fatura Bilgileri"` (vkno/vd/efatura).
+- `Grup: "Iletisim"` / `"Siniflandirma"` / `"Diger"` (notlar) sekme olmaktan cikti,
+  `AltGrup` ile Genel'e katlandi: "İletişim" (telefon/cepTel/eposta/epostaWeb),
+  "Kart Bilgileri" (grup/kategori/statu/temsilci/ozelKod), "Notlar" (notlar).
+- `yerTutucuSekmeler`e mockup'ta olup backend'i olmayan 5 sekme eklendi: Mali Durum,
+  Banka / IBAN, Yorum / Medya, Ekstre, Ek Alanlar ("... sekmesi yakinda" gosterir).
+- Yan etki yakalandi: `durum` alaninin `Grup: "Diger"`si tek basina kalinca kendi bloc
+  disi bir "Diger" sekmesi ORTAYA CIKTI (mockup'ta yok) - stok'taki desene uydurulup
+  `Grup: "Kimlik"` yapildi (durum artik idstrip'te, Aktif/Pasif select'i orada).
+- Tarayicida dogrulandi (`/cari/1339`): sekme sirasi/adlari artik Genel, Fatura
+  Bilgileri, Adresler, Mali Durum, Banka / IBAN, Yorum / Medya, Ekstre, Ek Alanlar.
+- Bilinen fark (kapsam disi birakildi): Adresler mockup'ta Fatura Bilgileri icine
+  govdelenmis, burada hala ayri sekme (detay tablolari her zaman kendi sekmesi -
+  GenForm mimarisi geregi); Genel'de musteri/tedarikci/kisi/subeId/eklemeTarihi hala
+  Grup'suz duz alan olarak gorunuyor (musteri/tedarikci toolbar'daki checkbox'la
+  DUPLIKE - ayni state, iki yerden degisebiliyor, henuz temizlenmedi).
+
+## 20.08.2026 — Cari Genel: ad/soyad/musteri/tedarikci gizlendi, Iletisim/Notlar sol - Kart Bilgileri sag
+
+Kullanici: once "ad,soyad,musteri,tedarikci kaldir", sonra "kart bilgileri sagda iletisim
+solda, notlar iletisim altinda olsun" (mockup'in TERSI duzen - kullanici tercihi, uyulandi).
+
+- `GenForm.tsx`'te `kaynak==='cari'` icin `gizli` Set: ad/soyad/musteri/tedarikci artik Grup'suz
+  alan listesinde (adsiz) RENDER EDILMIYOR. Veri/state hala var (musteri/tedarikci toolbar
+  checkbox'ina bagli, ad/soyad hic yazilamiyor artik - kolon SILINMEDI, sadece formdan cikti).
+- Yeni `.kasutun` (flex-column) sarmalayici: İletişim + Notlar ayni (sol) sutunda ust-alt,
+  Kart Bilgileri onun saginda ayri kutu. `kaynak==='cari'`'ye ozel dal (`altBaslik==='İletişim'/
+  'Notlar'` ile bulunuyor) - stok'un AltGrup'larini etkilemez.
+
+## 20.08.2026 — Cari Fatura Bilgileri: kutulu duzen + Fatura Unvani idstrip'ten tasindi
+
+Kullanici mockup'i (`cari_karti.html`) localhost:8899'da actirip Fatura Bilgileri sekmesini
+karsilastirmami istedi. Fark: mockup'ta iki kutu var ("Fatura / Vergi Kimliği": Fatura Ünvanı+
+VKN/TCKN+Vergi Dairesi, "e-Belge Ayarları": e-Fatura+XSLT'ler+Alias) - bizde duz tek satir
+(kutusuz) VKN/VD/e-Fatura idi, Fatura Ünvanı da hala idstrip'teydi (mockup'ta idstrip'te yok).
+
+- `faturaUnvan`: `Grup: "Kimlik"` (idstrip) -> `Grup: "Fatura Bilgileri", AltGrup: "Fatura /
+  Vergi Kimligi"`; Baslik kisaltildi ("Fatura Unvani (bos ise Unvan kullanilir)" -> "Fatura
+  Unvani" - uzun etiket dar kutuda 3 satira sariyordu).
+- `vkno`/`vd` ayni AltGrup'a eklendi (Fatura Ünvanı ile ayni kutuda), `efatura` yeni AltGrup
+  "e-Belge Ayarlari" (kendi kutusu).
+- Kapsam disi (backend'de kolon yok, `public.taraf`'ta dogrulandi): E-Fatura/E-Irsaliye/
+  E-Arsiv XSLT secimleri, Alias/e-Posta. Mockup'ta gorunuyor, GentegreAI'da eklenmedi.
+
+## 20.08.2026 — Cari: Grup/Kategori/Statu + Adresler.Tip artik combo (mockup karsilastirmasi devam)
+
+Kullanici mockup'i (`cari_karti.html`) surekli referans alip fark kapatmami istedi. Kapsam
+sorusu soruldu (Mali Durum/Ekstre gibi backend'i olmayan sekmeler icin) - kullanici "sadece
+UI/yapi farklarini kapat" dedi, yeni tablo/dashboard YOK.
+
+- **Genel > Kart Bilgileri**: `grup`/`kategori`/`statu` `"kod"` tipindeydi ama hicbir
+  `KodListesi`/`SabitKodlar` bagli degildi - duz sayi gorunuyordu (`950`, `0`...). BOLUM
+  numaralari `PrjConst.pas`'tan bulundu (`Ops_CariKart_Grup=-2200`, `_Kategori=-2208`,
+  `_Statu=-2209`); `kod_liste`'de karsiliklari zaten vardi (id 125/65/64), sadece otomatik
+  `liste_NNNN` adiyla kalmislardi - `035_cari_kod_liste_isim_duzeltme.sql` ile `taraf.grup`/
+  `taraf.kategori`/`taraf.statu` (+ ileride icin `taraf.sektor`) adlandirildi, katalogda
+  `KodListesi` baglandi. `temsilci` KAPSAM DISI birakildi (personel/taraf'a FK, KodTablosu
+  mekanizmasi `id,ad` + `aktif=1` bekliyor, `taraf`da bu sekil yok - lookup gerektirir).
+- **Adresler detay tablosu**: `tur` kolonu (1 Fatura/2 Sevkiyat/3 Merkez/4 Şube-Depo/9 Diğer,
+  `001_sema_taraf.sql`'deki check kisitindan) duz sayiydi, `AdresTurKodlari` SabitKodlar ile
+  combo yapildi (GENINI karsiligi yok, tablo GentegreAI'a ozel yeni tablo).
+- Tarayicida dogrulandi: Grup artik "Diğer" (950), Adresler.Tip artik "Fatura" (1) gosteriyor.
+
+## 20.08.2026 — taraf.alias_eposta eklendi (e-Fatura alias yoksa e-Arsiv e-postasi)
+
+Kullanici: "Taraf tablosunda alias_eposta alani tanimla, efatura sorgulamada varsa alias
+yoksa earsiv icin email adresi olarak kullanabiliriz. Fatura Bilgileri'ne de ekle."
+
+- `036_cari_alias_eposta.sql`: `public.taraf` icine `alias_eposta varchar(200)` (nullable,
+  yeni kolon - GIB'den donen alias VARSA oraya, yoksa bu adrese e-Arsiv gonderilir; kullanim
+  gonderim akisinda ayri, burada sadece kart alani tanimlandi).
+- Katalogda `aliasEposta` -> `Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"` (efatura
+  checkbox'inin hemen altinda, mockup'taki "Alias / e-Posta" alaniyla ayni kutuda).
+- Tarayicida dogrulandi.
+
+## 20.08.2026 — Cari Adresler: ayri sekme degil, Fatura Bilgileri icine gomulu grid
+
+Kullanici: "Adresleri de Fatura bilgileri altina GenGrid olarak ekle" (mockup'ta boyleydi,
+onceki oturumda "GenForm mimarisi geregi detay tablosu her zaman kendi sekmesi" diye KAPSAM
+DISI birakilmisti - bu sefer o kisit asildi, ilk kez bir detay tablosu bir grup sekmesinin
+icine gomuldu).
+
+- `GenForm.tsx`: `sekmeler` useMemo'da `kaynak==='cari' && d.ad==='adresler'` ise detay
+  sekmesi HIC ACILMIYOR (filtrelendi). `sekmeBul` (alan hatasi -> sekme atlama) da
+  `adresler.*` hatalarini artik `d:adresler` yerine `g:Fatura Bilgileri`'ye yonlendiriyor.
+- Grup render blogunun sonuna (adsiz alanlardan sonra) `kaynak==='cari' && aktif.baslik===
+  'Fatura Bilgileri'` kosuluyla `<GenDetayTablo meta={adresDetay} .../>` eklendi -
+  `GenDetayTablo` zaten kendi `.kagrup` sarmalayicisini ve `h6` baslicini basiyor, disardan
+  tekrar sarmalamaya GEREK YOK (ilk denemede cift "Adresler" basligi cikti, kaldirildi).
+- Genel desen: bu artik tek-off degil - baska bir detay tablosunu bir grup sekmesine gommek
+  gerekirse ayni ucu (sekmeler filtrele + sekmeBul yonlendir + grup render'ina ekle) tekrar
+  kullan, kaynak-bazli kosul (`kaynak==='cari'`) ile stok/digerlerini etkilemeden.
+
+## 20.08.2026 — "Kisi" tam kart + liste + cari'ye gomulu "Ilgili Kisiler" (kisi_karti.html / kisi_listesi.html)
+
+Kullanici sirayla: cari Genel'e "İlgili Kişiler" ekle -> kisi_karti.html mockup gibi tam
+kart hazirla -> kisi_listesi.html gibi (ama sade, yan panel/alt sekme YOK) liste hazirla ->
+listeye Yeni/Duzenle/Yazdir/Aksiyon combo ekle -> mini-grid'e departman+gorev ekle.
+Kapsam kullanici ile netlestirildi (Temel kimlik/iletisim - rol/yetki-seviyesi/KVKK/
+etiket/iliski-skoru/foto/aktivite-gecmisi/raporlama-hiyerarsisi YOK, hicbirinin DB
+karsiligi yoktu).
+
+- **Veri modeli**: Kisiler AYRI TABLO degil - `001_sema_taraf.sql`'deki `bag_id` yorumuna
+  ("eski REHBERILETISIM.REHBERID") sadik kalindi: kisi = `kisi=1` olan bir `taraf` satiri,
+  `bag_id` ile sirkete bagli. `037_kisi_karti.sql`: `taraf.gorev` (varchar100) + 
+  `taraf.departman` (smallint, kod_liste BOLUM -2251 - personel_ozluk.departman ile AYNI
+  liste, kullanici "İK'da da kullanacağız" dedi), `fn_taraf_kisi_unvan_ata` trigger (BEFORE
+  INSERT/UPDATE, kisi=1 satirinda unvan'i ad+soyad'dan OTOMATIK uretir - unvan NOT NULL,
+  kullanici hicbir yerde elle yazmiyor), `public.v_cari_lookup` view (id/ad/aktif
+  sozlesmesi - KodTablosu mekanizmasi bunu bekliyor, taraf'in kendi kolon adlari uymuyor).
+- **"Kisi" ikinci bagimsiz KaynakTanimi+KartTanimi** (`public.taraf`, `SabitKosul: kisi=1`,
+  `KapsamKolonu: bag_id`, `YetkiKodu: "cari"` - ayri yetki YOK): Kimlik (kod/ad/soyad/durum),
+  AltGrup "Is Bilgileri" (gorev metin, departman KodListesi combo, bagId "Bagli Cari"
+  KodTablosu combo), AltGrup "İletişim" (telefon/cepTel/eposta/epostaWeb). `Liste.tsx`'e
+  `kisi` girdisi (menude "Kisiler"), `AksiyonKatalogu`'na `kisi-liste` (Yeni/Duzenle/Sil/
+  Yazdir - cari-liste ile ayni desen, `KaynakKodu: "cari"`).
+- **Cari > Genel > İlgili Kişiler**: mockup'taki gibi Genel sekmesinin ALTINDA gomulu mini
+  tablo - kartin geri kalani gibi Kaydet'i BEKLEMEZ, kendi ucu var (`KisiDeposu`/
+  `KisiUclari.cs`, `/api/kart/cari/{id}/kisiler` GET/POST/PUT/DELETE). Generic Detay-farki
+  mekanizmasi (`KartDeposu`) KULLANILMADI - unvan NOT NULL'i otomatik doldurmak ve ayni
+  tabloya karsi silme/log akisini (kart silinince kisiler de mi silinir? HAYIR, bag_id
+  cascade yok, bilerek - kisi kartin cocugu degil, kendi tarafı) netlestirmek ozel kod
+  istiyordu. `IlgiliKisiler.tsx` yeni bilesen, `web/src/api/istemci.ts`'e `kisiler/
+  kisiEkle/kisiGuncelle/kisiSil` eklendi.
+- **Yakalanan hata (duzeltildi)**: ilk surumde mini-grid dogrudan `unvan` kolonuna yaziyordu,
+  `ad`/`soyad` kolonlarina HIC dokunmuyordu - ayni kisiyi tam "Kisi Karti" ile acinca Ad/
+  Soyad BOS geliyordu (iki giris yolu tutarsizdi). Duzeltme: mini-grid de artik ad/soyad
+  yaziyor (var olan satirda tek "Ad Soyad" kutusu ilk bosluktan boluniyor, yeni satirda
+  Ad+Soyad BASTAN AYRI - tam kartla ayni), unvan'a hic dokunulmuyor, trigger uretiyor.
+- **Departman combosu** mini-grid'de de calisiyor: ayri uc acmadan, "kisi" kartinin kendi
+  `/api/kart/kisi/alanlar` cevabindan `departman` alaninin `Kodlar` dict'i cekiliyor.
+- Tarayicida ucu ucuna dogrulandi: cari'den kisi eklendi (Ad+Soyad+Departman), "Kisiler"
+  ust-duzey listesinde (80->79 sonra silindi) Cari(Firma) kolonu subquery ile dogru
+  cozuluyor, kart acilinca Ad/Soyad/Departman/Bagli Cari hepsi doluydu.
+
+## 20.08.2026 — Kisi karti: "Cariye Bağla" butonu + genel TarafArama modali, Bagli Cari readonly
+
+Kullanici: Sil butonu yanina "Cariye Bağla" (🔗) ekle, basinca ustte arama/altta grid'li
+modal acilsin (Tip/Kod/Unvan/Bagli Kurum/Gorev-Rol kolonlari), cift-tik veya "Seç" ile
+karttaki Bagli Cari'yi doldursun; "bu arama ekrani genel olacak, her yerde kullanilacak,
+jenerik yap" - GenLookup'tan (tek kaynak, alan-ici tetikleyici) FARKLI, disaridan acik/
+kapali kontrol edilen, BIRDEN FAZLA kaynagi (cari+kisi) birlikte arayan yeni bilesen.
+
+- `TarafArama.tsx` (yeni, genel): `kaynaklar` prop'uyla hangi liste kaynaklarinin birlikte
+  aranacagi disaridan verilir (varsayilan `['cari','kisi']`) - ayri backend ucu YOK, mevcut
+  `/api/liste/{kaynak}` uclarina paralel istek atip istemcide birlestiriyor. Tip kolonu
+  kaynak+musteri/tedarikci/kisi bayraklarindan turetiliyor.
+- z-index tuzagi: `.perde`/`.lookup-pencere` (GenLookup'un varsayilan degerleri, 20/21) kart
+  modalinin (`.kaperde`, 320) ICINDE acilinca ARKADA kaliyordu - TarafArama kendi inline
+  z-index'ini (400/401) veriyor.
+- Kisi kartinda `bagId` alani ARTIK SELECT DEGIL - duz salt-okunur input (kullanici: "bagli
+  cari readonly edit olsun"). `Yazilabilir` hala `true` (kaydet payload'una girsin), sadece
+  GORUNUM farkli (kaynak==='kisi' && a.ad==='bagId' ozel dali). KISI secilirse (public.
+  v_cari_lookup'ta olmadigi icin) ad ayrica `bagliTarafAdi` local state'inde tutulup
+  gosteriliyor - server tarafini etkilemez, sadece secim-sonrasi anlik gorunum icin.
+
+## 21.08.2026 — Cari > İlgili Kişiler artik gercek GenGrid, "Bağı Kopar" (silmez), genel kural: karta girince ilk sekme
+
+Onceki adimin (elle yazilmis salt-okunur tablo) devami - kullanici "carideki kişiler
+gengrid olmalı" dedi, gercek paylasilan bilesene gecildi.
+
+- **KaynakKatalogu.cs**: `kisi` kaynagina gizli `bagId` kolonu (`t.bag_id`, Varsayilan:
+  false) eklendi - GenGrid'in `sabitFiltre={{alan:'bagId', op:'esit', deger:tarafId}}`
+  ile calismasi icin (baska hicbir yerde gorunmez, sadece filtre hedefi).
+- **GenGrid.tsx**: yeni `gomulu` prop - buyuk baslik/breadcrumb satirini (`.sayfabas`)
+  gizler, geri kalani (arama/cipler/tablo/sayfalama/aksiyon toolbar) aynen kalir. Kart
+  icine (ör. cari'deki İlgili Kişiler) gomulu kucuk grid'ler icin.
+- **AksiyonKatalogu.cs**: yeni `kisi-ilgili-liste` - tek aksiyon "Bağı Kopar" (KaynakKodu
+  cari, Islem.Degistir). "Yeni"/"Düzenle" burada YOK - Duzenle `onSatirAc` (cift tik) ile
+  doğrudan tam Kişi Kartı acar, "Kişi Ekle" ayri bir TarafArama akisi (bagla, yeni satir
+  degil).
+- **`KisiDeposu.KoparAsync`** + `POST .../kisiler/{kisiId}/kopar`: kisiyi bag_id=null
+  yapar - **DB'den SILMEZ** (kullanici: "sil kisiyi db'den silmeyecek, sadece bağını bu
+  cariden koparacak"). Eski `SilAsync`/DELETE ucu hala var ama artik SADECE Kişi Kartı'nin
+  KENDI "Sil" butonundan erisilir (gercek silme), İlgili Kişiler grid'inden degil.
+- **IlgiliKisiler.tsx** kucultuldu: artik sadece durum (kisiEkleAcik/duzenlenenId/
+  yenilemeNo) + `<GenGrid gomulu .../>` + iki modal (TarafArama, ic-ice GenForm). `key=
+  {yenilemeNo}` ile GenGrid'i remount ederek yenileme (ayri "refresh" prop'u yok).
+
+**Genel kural eklendi**: kullanici "bütün kartlara girince her zaman ilk sekme açık
+olmalı" dedi - `GenForm.tsx`'in `yukle()` fonksiyonu artik HER cagirilista (id/kaynak
+degisince - "Sonraki" ile kayit degistirmek dahil) `setAktifSekme(null)` yapiyor, onceki
+kartta kalinmis sekme yeni kayida tasinmiyor.
+
+## 20.08.2026 — Atlanmis kayitlar toparlandi (038/040 migration + telefon-eposta + kisi kart layout)
+
+Onceki birkac girdi kod degisikligini yakaladi ama bazi migration/kararlar tarihceye
+GIRMEMISTI - toparlaniyor:
+
+- **`038_kisi_karti_unvan_geri_al.sql`**: "Kisi" tam kart girdisindeki `fn_taraf_kisi_
+  unvan_ata` trigger'i (ad+soyad'dan unvan uretme) DROP edildi - kullanici "Kisi kartinda
+  Ad Soyad yerine Unvan olsun, Ad Soyad IK/hasta kartina saklandi" dedi. Detay: [[gentegre-
+  ai-kisi-ad-soyad-ileride]] (memory).
+- **`040_kisi_rol.sql`**: `taraf.rol` (smallint, GENINI karsiligi yok, sabit 5 deger: Karar
+  Verici/Etkileyen/Kullanici/Mali-Muhasebe/Teknik - kisi_karti.html'deki KARAR/ETKİ/MUHS/
+  KULL/TEKN etiketleri). Kisi kartinda idstrip altinda Bagli Cari/Rol/Durum siras (kutu
+  basligi "İş Bilgileri" sonradan IPTAL edildi, adsiz/duz alan oldu, kod yariya dustu -
+  Unvan buyudu, Rol Durum'un 2 kati genis, altina bosluk+ayrac cizgi).
+- **`TelefonGirdi.tsx`** (yeni, paylasilan): ulke bayragi/kodu (varsayilan 🇹🇷 +90) + yerel
+  numara, blur'da gruplama. `alanBicim.ts` (yeni, paylasilan): `epostaGecerliMi` + `telefon
+  Formatla` - GenForm (tum `eposta`/`telefon`/`cepTel` alanlari) VE İlgiliKisiler'de ortak;
+  eposta format hatasi kaydetmeyi durduruyor.
+- **Kisi listesi grid**: Gorev kolonu Departman'dan SONRA, Durum "kod" degil "mantik" (yesil
+  "Aktif"/gri "Pasif" rozet). **Genel `Genislik` (px) alani** `KolonTanimi`'ne eklendi (ilk
+  kullanim: `bagliCari` 180px + ellipsis/title) - herhangi bir liste kolonunda tasan metni
+  daraltmak icin tekrar kullanilabilir. "Bu listede ara" kutusu artik beyaz zemin (eskiden
+  navy header'a ozel yari-saydam stili miras aliyordu).
+
+## 21.08.2026 — Kişi-Cari bağlantı geçmişi (`taraf_gecmis`) + küçük UI düzeltmeleri
+
+Kullanıcı: *"taraf.geçmiş diye bir tablo oluştursak, ayrıldığı zaman buraya alsak
+tarihiyle beraber - cari kart kişi gridinde her zaman ayrıldı olarak görsem, kişi
+kartına girince bağlı caride görmesem ama geçmiş sekmesinde eski kurumunu görsem
+Başlama/Bitiş/Cari"*. Önceki oturumdaki "Ayrıldı" seçilince satırın gridden anında
+çıkmaması isteği (`durumDegis` optimistic-only) artık **gerçek** kalıcı veriye bağlandı.
+
+- **`041_taraf_gecmis.sql`** (uygulandı): `public.taraf_gecmis` (kisi_id, cari_id,
+  baslama_tarihi, bitis_tarihi + standart ekleyen/değiştiren). Bir kişi-cari çifti aynı
+  anda tek AÇIK dönem tutabilir: `ux_taraf_gecmis_acik` kısmi tekil indeks
+  `(kisi_id, cari_id) where bitis_tarihi is null`.
+- **`KartKatalogu.cs`**: Kişi kartına salt-okunur "Geçmiş" sekmesi (`DetayTanimi`,
+  `SubeKolonu: null`) - Cari (`v_cari_lookup` ile), Başlama, Bitiş. Genel detay-tablo
+  mekanizmasını kullanıyor, özel kod yazılmadı.
+- **`KisiDeposu.cs`**: `KisiKaydi`'ye `Bagli` (bool) eklendi. `ListeleAsync` artık UNION -
+  hâlen bağlı (`bag_id=tarafId`, Bagli=true) + geçmişte bu caride bağlıyken ayrılmış
+  (`taraf_gecmis.cari_id=tarafId`, kapalı dönem, şu an başka/hiç bağlı değil, Bagli=false)
+  kişiler birlikte gelir - grid'den hiç çıkmıyor. `EkleAsync` yeni kişide açık dönem açar
+  (`GecmisAcAsync`); `BaglaAsync` eski `bag_id` farklıysa onun dönemini kapatıp yenisini
+  açar; `KoparAsync` açık dönemi kapatır (`GecmisKapatAsync`, açık dönem yoksa - eski/
+  legacy bağlantı - başlangıcı bilinmeyen kapalı-tek satır ekler, geçmiş kaybolmasın).
+- **`IlgiliKisiler.tsx`**: Durum seçimi artık `k.aktif`/`kisiGuncelle` değil `k.bagli`/
+  `kisiBagla`+`kisiKopar` kullanıyor - `taraf.durum` (genel aktif/pasif) ile bu cariye
+  bağlılık birbirinden tamamen ayrı kavramlar, karıştırılmıyor.
+- **Küçük düzeltmeler aynı oturumda**: Cari Genel'den **Statu** alanı tamamen kaldırıldı
+  (Grup/Kategori kaldı, Statu hiç kullanılmıyordu - kullanıcı: "statu kaldır"). **Notlar**
+  kutusu Cari'de artık İletişim'in yanında değil, İlgili Kişiler tablosunun ALTINDA ayrı
+  satırda. **"Bu listede ara"** kutusu (`GenGrid.tsx`) artık Liste/Grup/Analiz cip
+  butonları gibi oval (`border-radius: 12px`, kullanıcı: "kenarları oval olsun").
+
+## 21.08.2026 — Yeni Kişi kaydı 500 hatası: "kisi" alanı tanımsızdı + kod/durum varsayılanları
+
+Kullanıcı "yeni kişi kaydında hata" bildirdi. Sunucu logu: `Nullable object must have
+a value` — `Kisi()` `KartTanimi`'nin `YeniKayitVarsayilanlari`'nda `kisi=1` vardı ama
+`Alanlar` dizisinde `"kisi"` alanı hiç TANIMLI değildi (Cari'dekinin aksine). Generic
+`KartDeposu.EkleAsync` bilinmeyen alan adını (`tanim.Alan(ad)?.Kolon is null`) atlıyor,
+INSERT'e `kisi` kolonu hiç girmiyor, DB varsayılanı (0) kalıyor, ardından `OkuAsync`'in
+`SabitKosul: "kisi = 1"` koşulu yeni satırı bulamıyor → `null` → `.Value` patlıyor.
+
+- **`KartKatalogu.cs`**: `Kisi()`'ye gizli `new("kisi","kisi","mantik",...)` alanı eklendi
+  (UI'da görünmez, `GenForm.tsx`'in `gizli` Set'i artık `kaynak==='kisi'` için de `'kisi'`yi
+  gizliyor).
+- **Aynı oturumda 2 küçük istek**: "kod verilmediyse ID no atasın" — `KartDeposu.EkleAsync`
+  ekleme sonrası `kod` alanı zorunlu-değil VE boşsa `update ... set kod = <yeniId>` yapıyor
+  (Cari + Kişi, ikisi de zorunlu-değil kod kullanıyor; Stok'ta kod zorunlu, dokunulmadı).
+  Aynı davranış `KisiDeposu.EkleAsync`'e (cari-içi hızlı-ekle, şu an UI'dan çağrılmıyor ama
+  API olarak duruyor) de eklendi. "Yeni kart kaydında durum hep aktif gelsin" — `GenForm.tsx`
+  `yukle()`'nin yeni-kayıt dalı artık `durum` alanını `'1'` (Aktif) ile başlatıyor (önceden
+  boş geliyordu, kullanıcı hiç dokunmazsa sunucu varsayılanı zaten 1'di ama ekranda boş
+  görünüyordu).
+
+## 21.08.2026 — TarafArama "Bilinmeyen alan: kod" (Kişi kaynağında kod kolonu yoktu)
+
+Kullanıcı: "arama ekranında edit arama çalışmıyor: Bilinmeyen alan: kod". `TarafArama.tsx`
+`ara()` her kaynak için `{alan:'kod', op:'icerir'}` + `{alan:'unvan', op:'icerir'}` OR
+filtresi gönderiyor - Cari kaynağında `kod` kolonu var, ama `KaynakKatalogu.cs`'in
+`Kisi()` `KaynakTanimi`'sinde hiç `kod` kolonu tanımlı değildi (`SorguUretici.cs`
+bilinmeyen alan adında 400 atıyor). Kişi kartına `kod` (Kişi Kodu) alanı eklenmişti ama
+bu ayrı, listeleme/arama tarafındaki `KaynakTanimi` güncellenmemişti.
+
+- **`KaynakKatalogu.cs`**: `Kisi()` Kolonlar'a `new("kod","t.kod","metin","Kisi Kodu",
+  Varsayilan:false)` eklendi - `bagId` gibi gizli (grid'de görünmez, sadece filtre/arama
+  hedefi).
+
+## 21.08.2026 — TelefonGirdi: TR icin yazarken rakam-disi karakter engellendi
+
+Kullanıcı: "telefonlarda tr için digit kontrolü yap". Önceden TR yerel numara kutusuna
+harf/sembol yazılabiliyordu, sadece blur'da `yerelFormatla` biçimliyordu (rakam-dışını
+temizlemiyordu bile, format tutmazsa aynen bırakıyordu). `TelefonGirdi.tsx` `onChange`'e
+TR icin `e.target.value.replace(/[^\d ]/g, '')` eklendi - yazarken anında rakam+boşluk
+dışı karakter siliniyor. Diğer ülkeler dokunulmadı (format çok çeşitli).
+
+## 21.08.2026 — Cari Kart Bilgileri: Grup yerine Sektör + Alt Sektör (aynı satırda)
+
+Kullanıcı: "cari kartta grup yerine Sektör combo hemen sağına Alt Sektör combo". `sektor`
+kolonu (smallint) ve kod_liste `taraf.sektor` zaten vardı (035 migration - GENINI Ops_
+CariKart_Sektor -2204'ten); `alt_sektor` kolonu (integer) şemada duruyordu ama hiç veri/
+kod_liste yoktu (MSSQL/GENINI tarafında karşılığı yok - yeni liste).
+
+- **`042_taraf_alt_sektor_kodliste.sql`** (uygulandı): `kod_liste` kaydı `taraf.alt_sektor`
+  / "Cari Alt Sektor" - Grup/Kategori ile AYNI desen (kod_liste/kod_deger üzerinden admin
+  doldurur), `eski_bolum` NULL (GENINI karşılığı yok).
+- **`KartKatalogu.cs`**: Cari Alanlar'da `grup` alanı **kaldırıldı**, yerine `sektor`
+  (KodListesi `taraf.sektor`) + `altSektor` (KodListesi `taraf.alt_sektor`) eklendi, ikisi
+  de "Kart Bilgileri" AltGrup'unda.
+- **`GenForm.tsx`**: Kart Bilgileri kutusunun render'ı özel-durumlandı (`kaynak==='cari'`
+  ve `altBaslik==='Kart Bilgileri'`) - `sektor`+`altSektor` `.adres-satir` (flex, eşit
+  genişlik) ile AYNI SATIRDA yan yana, kutunun geri kalanı (Kategori/Temsilci/Özel Kod)
+  eskisi gibi tek-sütun. Desen `TekAdres.tsx`'teki İl/İlçe satır çiftiyle birebir aynı.
+
+## 21.08.2026 — Cari Kart Bilgileri: İlk Temas eklendi, iki çift satır (Kategori/İlk Temas üstte, Sektör/Alt Sektör altta)
+
+Kullanıcı: "kategori sağına İlk Temas combo gelsin" → "kategori ilk temas üstte sekt alt
+sektör onun altına gelsin". MSSQL REHBER.TEMAS karşılığı (GENINI BOLUM -2207, Ops_
+CariKart_Temas) taraf'a hiç taşınmamıştı (kolon yoktu) - ama kod_liste/kod_deger otomatik
+adlandırmayla ("liste_2207", 11 satır: Fuar/Eski Müşteri/Tanıdık/Google/...) zaten göç
+etmişti, sadece kullanılmıyordu.
+
+- **`043_taraf_ilk_temas.sql`** (uygulandı): `taraf.ilk_temas smallint` eklendi;
+  `kod_liste` "liste_2207" → `taraf.ilk_temas` / "Cari Ilk Temas" olarak İSİM DÜZELTİLDİ
+  (035'teki Grup/Kategori/Sektör deseniyle aynı - yeniden insert değil, mevcut 11 satırlık
+  `kod_deger` korunuyor).
+- **`KartKatalogu.cs`**: Cari Alanlar sırası `kategori, ilkTemas, sektor, altSektor,
+  temsilci, ozelKod` oldu (ilkTemas + KodListesi `taraf.ilk_temas` yeni alan).
+- **`GenForm.tsx`**: Kart Bilgileri kutusu artık İKİ çift satır render ediyor - üstte
+  Kategori/İlk Temas, altında Sektör/Alt Sektör (`.adres-satir` ile, sırayla), geri kalan
+  alanlar (Temsilci/Özel Kod) eskisi gibi tek-sütun altta.
+
+## 21.08.2026 — Kural: İlgili Kişiler > Kişi Ekle, carisi dolu kişiyi engeller
+
+Kullanıcı: "cari kartta ilgili kişiler de ekleme yapmak için gelen listede seçim
+yapıldığında kişinin carisi doluysa ekleme yapılamaz" - onay: "mesaj verilir".
+
+- **`KisiDeposu.BaglaAsync`**: `eskiBagId` doluysa (kişi zaten başka/aynı bir cariye
+  bağlıysa) artık sessizce taşımıyor, `GentegreHatasi.Dogrulama("Bu kişi zaten bir
+  cariye bağlı, önce o carideki bağını koparın.")` fırlatıyor - `IlgiliKisiler.tsx`
+  `kisiBagla`'nın var olan `catch` bloğu mesajı zaten `hata` state'ine basıyor, ek UI
+  değişikliği gerekmedi. Bu kural SADECE cari-taraflı "Kişi Ekle" akışını etkiler - Kişi
+  kartının kendi "Cariye Bağla"sı bu metodu hiç çağırmıyor (form alanını set edip PUT ile
+  kaydediyor), bilerek taşıma orada hâlâ serbest.
 
 ## Oturum kapanışı — 19.08.2026, kaldığımız yer
 

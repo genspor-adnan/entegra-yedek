@@ -103,6 +103,7 @@ public static class KartKatalogu
     static KartKatalogu()
     {
         Ekle(Cari());
+        Ekle(Kisi());
         Ekle(Stok());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
@@ -134,6 +135,15 @@ public static class KartKatalogu
     private static readonly Dictionary<string, string> BarkodTipiKodlari =
         new() { ["0"] = "Kullanıcı", ["100"] = "Karekod" };
 
+    // TARAF_ADRES.TUR - yeni tablo (GENINI karsiligi yok), 001_sema_taraf.sql check kisitindan.
+    private static readonly Dictionary<string, string> AdresTurKodlari =
+        new() { ["1"] = "Fatura", ["2"] = "Sevkiyat", ["3"] = "Merkez", ["4"] = "Şube/Depo", ["9"] = "Diğer" };
+
+    // TARAF.ROL (kisi_karti.html/kisi_listesi.html "KARAR/ETKİ/MUHS/KULL/TEKN") - GENINI
+    //   karsiligi yok, mockup'a ozel sabit liste (040_kisi_rol.sql).
+    private static readonly Dictionary<string, string> KisiRolKodlari =
+        new() { ["1"] = "Karar Verici", ["2"] = "Etkileyen", ["3"] = "Kullanıcı", ["4"] = "Mali/Muhasebe", ["5"] = "Teknik" };
+
     // --------------------------------------------------------------- cari ----
     private static KartTanimi Cari() => new(
         Ad: "cari",
@@ -149,26 +159,41 @@ public static class KartKatalogu
             new("id",          "id",           "sayi",  Yazilabilir: false),
             new("kod",         "kod",          "metin", EnFazlaUzunluk: 20,  Baslik: "Kod",            Grup: "Kimlik"),
             new("unvan",       "unvan",        "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan",  Grup: "Kimlik"),
-            new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani (bos ise Unvan kullanilir)", Grup: "Kimlik"),
-            new("ad",          "ad",           "metin", EnFazlaUzunluk: 50,  Baslik: "Ad",              Grup: "Kimlik"),
-            new("soyad",       "soyad",        "metin", EnFazlaUzunluk: 60,  Baslik: "Soyad",           Grup: "Kimlik"),
-            new("musteri",     "musteri",      "mantik", Baslik: "Musteri",   Grup: "Roller"),
-            new("tedarikci",   "tedarikci",    "mantik", Baslik: "Tedarikci", Grup: "Roller"),
-            new("kisi",        "kisi",         "mantik", Baslik: "Kisi",      Grup: "Roller"),
-            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Mali"),
-            new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Mali"),
-            new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        Grup: "Iletisim"),
-            new("cepTel",      "cep_tel",      "metin", EnFazlaUzunluk: 30,  Baslik: "Cep Telefonu",   Grup: "Iletisim"),
-            new("eposta",      "eposta",       "metin", EnFazlaUzunluk: 120, Baslik: "E-posta",        Grup: "Iletisim"),
-            new("epostaWeb",   "eposta_web",   "metin", EnFazlaUzunluk: 200, Baslik: "Web / 2. E-posta", Grup: "Iletisim"),
-            new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Mali"),
-            new("grup",        "grup",         "kod",   Baslik: "Grup",      Grup: "Siniflandirma"),
-            new("kategori",    "kategori",     "kod",   Baslik: "Kategori",  Grup: "Siniflandirma"),
-            new("statu",       "statu",        "kod",   Baslik: "Statu",     Grup: "Siniflandirma"),
-            new("temsilci",    "temsilci",     "kod",   Baslik: "Temsilci",  Grup: "Siniflandirma"),
-            new("notlar",      "notlar",       "metin", EnFazlaUzunluk: 1000, Baslik: "Notlar",        Grup: "Diger"),
-            new("ozelKod",     "ozel_kod",     "metin", EnFazlaUzunluk: 20,  Baslik: "Ozel Kod",       Grup: "Diger"),
-            new("durum",       "durum",        "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum",    Grup: "Diger"),
+            // idstrip'ten kaldirildi (mockup'ta da yok, sadece Unvan var) - Fatura Bilgileri'ne dustu.
+            new("ad",          "ad",           "metin", EnFazlaUzunluk: 50,  Baslik: "Ad"),
+            new("soyad",       "soyad",        "metin", EnFazlaUzunluk: 60,  Baslik: "Soyad"),
+            // Roller SEKMESI KALDIRILDI (mockup'ta yok) - Musteri/Tedarikci toolbar'a tasindi
+            //   (bkz. GenForm.tsx kaynak==='cari'), Kisi Genel sekmesinde kaldi.
+            new("musteri",     "musteri",      "mantik", Baslik: "Musteri"),
+            new("tedarikci",   "tedarikci",    "mantik", Baslik: "Tedarikci"),
+            new("kisi",        "kisi",         "mantik", Baslik: "Kisi"),
+            // "Mali" -> "Fatura Bilgileri" (mockup adi birebir; AltGrup ile mockup'un iki
+            //   kutusuna ayrildi: Fatura / Vergi Kimligi + e-Belge Ayarlari. Mockup'taki XSLT/
+            //   Alias alanlari (E-Fatura XSLT, E-Irsaliye XSLT, E-Arsiv XSLT, Alias/e-Posta)
+            //   backend'de kolon karsiligi yok (taraf tablosunda yok) - eklenmedi.
+            new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
+            //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.
+            new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        AltGrup: "İletişim"),
+            new("cepTel",      "cep_tel",      "metin", EnFazlaUzunluk: 30,  Baslik: "Cep Telefonu",   AltGrup: "İletişim"),
+            new("eposta",      "eposta",       "metin", EnFazlaUzunluk: 120, Baslik: "E-posta",        AltGrup: "İletişim"),
+            new("epostaWeb",   "eposta_web",   "metin", EnFazlaUzunluk: 200, Baslik: "Web / 2. E-posta", AltGrup: "İletişim"),
+            // "Grup" YERINE Kategori/İlk Temas + Sektor/Alt Sektor (kullanici) - GenForm.tsx
+            //   bu ciftleri AYNI SATIRDA yan yana render eder: ustte Kategori/İlk Temas,
+            //   altinda Sektör/Alt Sektör ("kategori ilk temas üstte sekt alt sektör onun
+            //   altına gelsin").
+            new("kategori",    "kategori",     "kod",   KodListesi: "taraf.kategori",   Baslik: "Kategori",   AltGrup: "Kart Bilgileri"),
+            new("ilkTemas",    "ilk_temas",    "kod",   KodListesi: "taraf.ilk_temas",  Baslik: "İlk Temas",  AltGrup: "Kart Bilgileri"),
+            new("sektor",      "sektor",       "kod",   KodListesi: "taraf.sektor",     Baslik: "Sektör",     AltGrup: "Kart Bilgileri"),
+            new("altSektor",   "alt_sektor",   "kod",   KodListesi: "taraf.alt_sektor", Baslik: "Alt Sektör", AltGrup: "Kart Bilgileri"),
+            new("temsilci",    "temsilci",     "kod",   Baslik: "Temsilci",  AltGrup: "Kart Bilgileri"),
+            new("ozelKod",     "ozel_kod",     "metin", EnFazlaUzunluk: 20,  Baslik: "Ozel Kod",       AltGrup: "Kart Bilgileri"),
+            new("notlar",      "notlar",       "metin", EnFazlaUzunluk: 1000, Baslik: "Notlar",        AltGrup: "Notlar"),
+            new("durum",       "durum",        "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum",    Grup: "Kimlik"),
             new("subeId",      "sube_id",      "sayi",  Yazilabilir: false),
             new("eklemeTarihi","ekleme_tarihi","tarih", Yazilabilir: false)
         },
@@ -177,16 +202,12 @@ public static class KartKatalogu
             new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
             {
                 new("id",         "id",          "sayi",  Yazilabilir: false),
-                new("tur",        "tur",         "kod"),
-                new("baslik",     "baslik",      "metin", EnFazlaUzunluk: 60),
+                new("tur",        "tur",         "kod",   SabitKodlar: AdresTurKodlari, Baslik: "Adres Tipi"),
                 new("adres",      "adres",       "metin", EnFazlaUzunluk: 300),
                 new("ilce",       "ilce",        "metin", EnFazlaUzunluk: 60),
                 new("il",         "il",          "metin", EnFazlaUzunluk: 60),
                 new("ulke",       "ulke",        "metin", EnFazlaUzunluk: 60),
                 new("postaKodu",  "posta_kodu",  "metin", EnFazlaUzunluk: 10),
-                new("yetkili",    "yetkili",     "metin", EnFazlaUzunluk: 60),
-                new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30),
-                new("eposta",     "eposta",      "metin", EnFazlaUzunluk: 120),
                 new("varsayilan", "varsayilan",  "mantik"),
                 new("aktif",      "aktif",       "mantik")
             }, Sirala: "varsayilan desc, id", LogTabloId: 901)   // yeni tablo - eski karsiligi yok
@@ -196,6 +217,79 @@ public static class KartKatalogu
             new SilmeEngeli("public.belge",        "taraf_id", "Bu cariye ait belge var, silinemez."),
             new SilmeEngeli("public.mali_hareket", "taraf_id", "Bu cariye ait kasa/banka hareketi var, silinemez."),
             new SilmeEngeli("public.kullanici",    "taraf_id", "Bu kart bir kullaniciya bagli, silinemez.")
+        });
+
+    // --------------------------------------------------------------- kisi ----
+    // kisi_karti.html mockup - kapsam kullaniciyla netlestirildi: TEMEL kimlik/iletisim.
+    // Rol/yetki seviyesi/raporladigi kisi/dogum-cinsiyet-medeni durum/dil/iliski skoru/
+    // etiket/foto/iletisim gecmisi/ilgili kayitlar/KVKK-izin/notlar-ekler EKLENMEDI -
+    // DB'de hicbirinin karsiligi yoktu, tam kapsamli ayri, cok daha buyuk bir is olurdu.
+    // Ayni taraf tablosu (kisi=1, bag_id ile sirkete bagli) - unvan (Ad Soyad gorunen adi)
+    // 037_kisi_karti.sql'deki trigger ile ad+soyad'dan OTOMATIK uretiliyor, alanda YOK.
+    private static KartTanimi Kisi() => new(
+        Ad: "kisi",
+        YetkiKodu: "cari",                    // ayri yetki kodu yok - cari yetkisiyle yonetiliyor
+        Tablo: "public.taraf",
+        LogTabloId: 71,                       // ayni fiziksel tablo - cari ile ayni GENINI kodu
+        SabitKosul: "kisi = 1",
+        KapsamKolonu: "bag_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["kisi"] = (short)1, ["durum"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            // Ad/Soyad DEGIL, Cari ile ayni desen: "Unvan" tek goruntulenen alan. Ad/Soyad
+            //   ayrimi BILEREK yapilmadi - kullanici bunu ileride IK (personel) ve hasta
+            //   kartlarina sakladi, kisi kartinda degil (038_kisi_karti_unvan_geri_al.sql).
+            // idstrip sirasi kullanici tarafindan belirlendi: Kod, Unvan, Departman, Gorev.
+            //   Durum idstrip'ten CIKARILDI (kullanici sonradan Durum'suz istedi) - Is
+            //   Bilgileri kutusuna tasindi (Bagli Cari ile birlikte).
+            new("id",        "id",         "sayi",  Yazilabilir: false),
+            // YeniKayitVarsayilanlari'ndaki "kisi"=1 buraya yazilabilsin diye (alan
+            //   tanimsizsa EkleAsync kolonu atlar, DB varsayilanina - 0/false - duser,
+            //   sonra SabitKosul "kisi = 1" yeni kaydi bulamaz -> "Nullable ... value" hatasi).
+            //   UI'da gorunmez (gizli Set, GenForm.tsx).
+            new("kisi",      "kisi",       "mantik", Baslik: "Kisi"),
+            new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Kisi Kodu", Grup: "Kimlik"),
+            new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan", Grup: "Kimlik"),
+            new("departman", "departman",  "kod",   KodListesi: "taraf.departman", Baslik: "Departman", Grup: "Kimlik"),
+            new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Gorev", Grup: "Kimlik"),
+            // "Is Bilgileri" kutu basligi IPTAL edildi (kullanici) - Bagli Cari/Rol/Durum
+            //   AltGrup'suz (adsiz) duz alan olarak kaliyor, idstrip'in hemen altinda.
+            new("bagId",     "bag_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Bagli Cari"),
+            new("rol",       "rol",        "kod",   SabitKodlar: KisiRolKodlari, Baslik: "Rol"),
+            new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum"),
+            new("telefon",   "telefon",    "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",         AltGrup: "İletişim"),
+            new("cepTel",    "cep_tel",    "metin", EnFazlaUzunluk: 30,  Baslik: "Cep Telefonu",    AltGrup: "İletişim"),
+            new("eposta",    "eposta",     "metin", EnFazlaUzunluk: 120, Baslik: "E-posta",         AltGrup: "İletişim"),
+            new("epostaWeb", "eposta_web", "metin", EnFazlaUzunluk: 200, Baslik: "2. E-posta",      AltGrup: "İletişim"),
+            new("subeId",        "sube_id",       "sayi",  Yazilabilir: false),
+            new("eklemeTarihi",  "ekleme_tarihi", "tarih", Yazilabilir: false)
+        },
+        Detaylar: new[]
+        {
+            // kisi_karti.html mockup'taki "Adres" kutusu - Cari ile AYNI taraf_adres tablosu
+            //   (taraf_id = bu kisi satirinin id'si, kişi de bir taraf). Ayni LogTabloId (901).
+            new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
+            {
+                new("id",         "id",          "sayi",  Yazilabilir: false),
+                new("tur",        "tur",         "kod",   SabitKodlar: AdresTurKodlari, Baslik: "Adres Tipi"),
+                new("adres",      "adres",       "metin", EnFazlaUzunluk: 300),
+                new("ilce",       "ilce",        "metin", EnFazlaUzunluk: 60),
+                new("il",         "il",          "metin", EnFazlaUzunluk: 60),
+                new("ulke",       "ulke",        "metin", EnFazlaUzunluk: 60),
+                new("postaKodu",  "posta_kodu",  "metin", EnFazlaUzunluk: 10),
+                new("varsayilan", "varsayilan",  "mantik"),
+                new("aktif",      "aktif",       "mantik")
+            }, Sirala: "varsayilan desc, id", LogTabloId: 901),
+            // "Geçmiş" sekmesi (kullanici) - SALT OKUNUR, elle satir eklenmez/silinmez;
+            //   KisiDeposu.BaglaAsync/KoparAsync yonetir (041_taraf_gecmis.sql).
+            new DetayTanimi("gecmis", "public.taraf_gecmis", "kisi_id", new KartAlani[]
+            {
+                new("id",             "id",              "sayi", Yazilabilir: false),
+                new("cariId",         "cari_id",         "kod",  KodTablosu: "public.v_cari_lookup", Baslik: "Cari"),
+                new("baslamaTarihi",  "baslama_tarihi",  "tarih", Baslik: "Başlama"),
+                new("bitisTarihi",    "bitis_tarihi",    "tarih", Baslik: "Bitiş")
+            }, Sirala: "bitis_tarihi desc nulls first, baslama_tarihi desc", SubeKolonu: null,
+               Baslik: "Geçmiş", SaltOkunur: true)
         });
 
     // --------------------------------------------------------------- stok ----

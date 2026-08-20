@@ -1,4 +1,5 @@
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
+import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 
 type Satir = Record<string, unknown> & { id?: number };
 
@@ -55,6 +56,8 @@ interface Props {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
+  const yerler = useYerler(meta.ad === 'adresler');
+  const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
 
   const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) => {
     const guncel = durum.guncel.map((s, i) => i === satirIndeks ? { ...s, [alan]: deger } : s);
@@ -64,6 +67,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
   const satirEkle = () => {
     const yeni: Satir = {};
     alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });
+    if (meta.ad === 'adresler') yeni.ulke = VARSAYILAN_ULKE;
     onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
   };
 
@@ -100,6 +104,39 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
                       disabled={saltOkunur || !a.yazilabilir}
                       onChange={e => hucreDegis(i, a.ad, e.target.checked)}
                     />
+                  ) : meta.ad === 'adresler' && a.ad === 'il' && yerler ? (
+                    <select
+                      value={String(satir.il ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => {
+                        const guncel = durum.guncel.map((s, ix) =>
+                          ix === i ? { ...s, il: e.target.value, ilce: '' } : s);
+                        onDegis({ ...durum, guncel });
+                      }}
+                    >
+                      <option value="">—</option>
+                      {yerler.iller.map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                    </select>
+                  ) : meta.ad === 'adresler' && a.ad === 'ulke' && yerler ? (
+                    <select
+                      value={String(satir.ulke ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {yerler.ulkeler.map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                    </select>
+                  ) : meta.ad === 'adresler' && a.ad === 'ilce' && yerler ? (
+                    <select
+                      value={String(satir.ilce ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir || !satir.il}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {yerler.ilceler
+                        .filter(y => y.ilId === ilAdIdHarita.get(String(satir.il ?? '')))
+                        .map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                    </select>
                   ) : a.kodlar ? (
                     <select
                       value={String(satir[a.ad] ?? '')}

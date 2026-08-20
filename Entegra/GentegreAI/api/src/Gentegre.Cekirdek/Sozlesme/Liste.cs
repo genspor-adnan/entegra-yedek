@@ -82,4 +82,5 @@ public sealed record KolonMeta(
     string? Bicim,
     bool Varsayilan,
     bool Siralanabilir,
-    bool Filtrelenebilir);
+    bool Filtrelenebilir,
+    int? Genislik = null);

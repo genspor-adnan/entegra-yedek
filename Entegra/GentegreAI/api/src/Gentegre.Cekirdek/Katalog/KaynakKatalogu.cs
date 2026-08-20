@@ -15,7 +15,8 @@ public sealed record KolonTanimi(
     bool Varsayilan = true,    // kolon seciciye varsayilan gorunur gelir
     bool Siralanabilir = true,
     bool Filtrelenebilir = true,
-    string? YetkiAlani = null  // alan yetkisi adi; null ise kolon adi kullanilir
+    string? YetkiAlani = null, // alan yetkisi adi; null ise kolon adi kullanilir
+    int? Genislik = null       // px - varsayilan (icerige gore) genislik gridde tasarsa (or. uzun metin)
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;
@@ -61,6 +62,7 @@ public static class KaynakKatalogu
     static KaynakKatalogu()
     {
         Ekle(Cari());
+        Ekle(Kisi());
         Ekle(Belge());
         Ekle(Stok());
         Ekle(Personel());
@@ -92,6 +94,8 @@ public static class KaynakKatalogu
             new("telefon",      "t.telefon",       "metin", "Telefon"),
             new("cepTel",       "t.cep_tel",       "metin", "Cep",           Varsayilan: false),
             new("eposta",       "t.eposta",        "metin", "E-posta"),
+            new("adres",        "(select ta.adres from public.taraf_adres ta where ta.taraf_id = t.id and ta.varsayilan = 1 limit 1)",
+                                                    "metin", "Adres"),
             new("musteri",      "t.musteri",       "mantik","Musteri",       Hizalama: "orta"),
             new("tedarikci",    "t.tedarikci",     "mantik","Tedarikci",     Hizalama: "orta"),
             new("grup",         "t.grup",          "kod",   "Grup",          Varsayilan: false),
@@ -100,6 +104,42 @@ public static class KaynakKatalogu
             new("efatura",      "t.efatura",       "mantik","e-Fatura",      Hizalama: "orta"),
             new("durum",        "t.durum",         "kod",   "Durum",         Hizalama: "orta"),
             new("subeId",       "t.sube_id",       "sayi",  "Sube",          Varsayilan: false),
+            new("eklemeTarihi", "t.ekleme_tarihi", "tarih", "Eklendi",       Hizalama: "orta",
+                                                                            Bicim: "dd.MM.yyyy", Varsayilan: false)
+        });
+
+    // -------------------------------------------------------------- kisi ----
+    // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
+    // olmasin" dedi (mockup'taki sag "Secili Kisi" paneli + roller/etiket filtreleri YOK).
+    // Ayni taraf tablosu (kisi=1), Cari'den BAGIMSIZ ikinci bir KaynakTanimi.
+    private static KaynakTanimi Kisi() => new(
+        Ad: "kisi",
+        YetkiKodu: "cari",                    // ayri yetki kodu yok - cari yetkisiyle yonetiliyor
+        Kaynak: "public.taraf t",
+        SabitKosul: "t.kisi = 1",
+        VarsayilanSirala: "t.unvan asc",
+        KapsamKolonu: "t.bag_id",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "t.id",            "sayi",  "Id",            Varsayilan: false),
+            // Gizli (Varsayilan:false) - grid'de gosterilmiyor ama TarafArama'nin "kod
+            //   icerir" filtresi (cari ile ORTAK arama mantigi) bu kolonu arar, yoksa
+            //   "Bilinmeyen alan: kod" 400 hatasi.
+            new("kod",          "t.kod",           "metin", "Kisi Kodu",     Varsayilan: false),
+            new("unvan",        "t.unvan",         "metin", "Unvan"),
+            // Gizli - GenGrid "gengrid olmali" (cari kartinda gomulu İlgili Kişiler) sabitFiltre
+            //   "bagId = @tarafId" burayla calisir; kendi kolonu gorunmez, sadece filtrelenir.
+            new("bagId",        "t.bag_id",        "sayi",  "Bagli Cari Id", Varsayilan: false, Filtrelenebilir: true),
+            new("bagliCari",    "(select c.unvan from public.taraf c where c.id = t.bag_id)",
+                                                    "metin", "Cari (Firma)", Genislik: 180),
+            new("departman",    "t.departman",     "kod",   "Departman"),
+            new("gorev",        "t.gorev",         "metin", "Gorev"),
+            new("cepTel",       "t.cep_tel",       "metin", "Cep Telefonu"),
+            new("telefon",      "t.telefon",       "metin", "Telefon",       Varsayilan: false),
+            new("eposta",       "t.eposta",        "metin", "E-posta"),
+            // "kod" degil "mantik" - kullanici "durum check olsun" dedi (grid'de ✓/bos,
+            //   DurumKodlari zaten sadece 1/0=Aktif/Pasif, ikili).
+            new("durum",        "t.durum",         "mantik","Durum",         Hizalama: "orta"),
             new("eklemeTarihi", "t.ekleme_tarihi", "tarih", "Eklendi",       Hizalama: "orta",
                                                                             Bicim: "dd.MM.yyyy", Varsayilan: false)
         });

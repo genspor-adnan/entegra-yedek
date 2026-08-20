@@ -76,7 +76,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     kaynak: 'cari', baslik: 'Cariler', yol: 'Cari › Musteriler', kartYolu: '/cari',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
     menuAd: 'Cari', ic: '👥', yetkiKodu: 'cari',
+  },
+  {
+    // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
+    // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
+    // yapilmadi, ozel bir "sadelestirme" gerekmedi).
+    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
+    aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
+    menuAd: 'Kisiler', ic: '🧑', yetkiKodu: 'cari',
   },
   {
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',

@@ -20,6 +20,9 @@ interface Props {
   onAksiyon?(kod: string, satir: ListeSatiri | null): void;
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
   cipler?: { ad: string; filtre?: Kosul }[];
+  /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
+      satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
+  gomulu?: boolean;
 }
 
 /** Mockup: cip seridinde Liste/Grup/Analiz gorunum secimi (search kutusunun hemen sagi). */
@@ -39,7 +42,7 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler }: Props) {
+                          aksiyonEkrani, onAksiyon, cipler, gomulu }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -262,21 +265,31 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>{baslik ?? kaynak}</h1>
-          {yol && <span className="yol">{yol}</span>}
-          <div className="sag">
-            {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />}
+      {!gomulu && (
+        <div className="sayfabas">
+          <div className="basrow">
+            <h1>{baslik ?? kaynak}</h1>
+            {yol && <span className="yol">{yol}</span>}
+            <div className="sag">
+              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+      {gomulu && aksiyonEkrani && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
+        </div>
+      )}
 
       <div className="cipler">
-        <div className="ara" style={{ maxWidth: 225, margin: 0, height: 23 }}>
+        <div className="ara" style={{
+          maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
+          background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+        }}>
           <span>🔍</span>
           <input
-            style={{ border: 0, background: 'transparent', outline: 'none', width: '100%' }}
+            style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
             placeholder="Bu listede ara…"
             onChange={e => aramaDegisti(e.target.value)}
           />
@@ -370,6 +383,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           <div className="gridwrap">
             <div className="gridkaydir">
               <table className="grid">
+                <colgroup>
+                  <col style={{ width: 34 }} />
+                  {kolonlar.map(k => <col key={k.ad} style={k.genislik ? { width: k.genislik } : undefined} />)}
+                </colgroup>
                 <thead>
                   <tr>
                     <th className="cbk">
@@ -447,8 +464,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
                           />
                         </td>
                         {kolonlar.map(k => (
-                          <td key={k.ad} className={`hiza-${k.hizalama}`}>
-                            {bicimle(satir[k.ad], k)}
+                          <td key={k.ad} className={`hiza-${k.hizalama}`}
+                            style={k.genislik ? {
+                              maxWidth: k.genislik, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            } : undefined}
+                            title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
+                          >
+                            {k.ad === 'durum' && k.tip === 'mantik' ? (
+                              <span className={`rozet ${Number(satir[k.ad]) === 1 ? 'ok' : 'gri'}`}>
+                                {Number(satir[k.ad]) === 1 ? 'Aktif' : 'Pasif'}
+                              </span>
+                            ) : bicimle(satir[k.ad], k)}
                           </td>
                         ))}
                       </tr>

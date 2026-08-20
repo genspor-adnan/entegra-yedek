@@ -169,7 +169,7 @@ public sealed class KartDeposu
     // "public.kategori" gibi kendi tablosu olan secim kaynaklari - katalogda SABIT
     //   (kullanicidan gelmez), yine de savunma amacli whitelist'e karsi dogrulanir.
     private static readonly HashSet<string> KodTablosuBeyazListe =
-        new(StringComparer.Ordinal) { "public.kategori" };
+        new(StringComparer.Ordinal) { "public.kategori", "public.v_cari_lookup" };
 
     private static string KodTablosuDogrula(string tablo)
         => KodTablosuBeyazListe.Contains(tablo)
@@ -224,6 +224,22 @@ public sealed class KartDeposu
         long yeniId;
         await using (var komut = Komut(baglanti, islem, sql, parametreler))
             yeniId = Convert.ToInt64(await komut.ExecuteScalarAsync(iptal));
+
+        // Kod zorunlu degilse (cari/kisi) ve bos birakildiysa, ID numarasi kod olarak
+        // atanir (kullanici: "kod verilmediyse ID no atasın") - bos kodla kart kalmasin.
+        if (tanim.Alan("kod") is { Zorunlu: false } kodAlan &&
+            string.IsNullOrWhiteSpace(degerler.TryGetValue("kod", out var kodDeger) ? kodDeger as string : null))
+        {
+            var kodMetni = yeniId.ToString(CultureInfo.InvariantCulture);
+            await using (var kodKomut = new NpgsqlCommand(
+                $"update {tanim.Tablo} set {kodAlan.Kolon} = @p0 where {tanim.IdKolonu} = @p1", baglanti, islem))
+            {
+                kodKomut.Parameters.AddWithValue("p0", kodMetni);
+                kodKomut.Parameters.AddWithValue("p1", yeniId);
+                await kodKomut.ExecuteNonQueryAsync(iptal);
+            }
+            degerler["kod"] = kodMetni;
+        }
 
         if (detaylar is not null)
             await DetayUygulaAsync(baglanti, islem, tanim, yeniId, detaylar, baglam, iptal);

@@ -40,7 +40,7 @@ public static class ListeUclari
 
             var kolonlar = GorunurKolonlar(tanim, baglam)
                 .Select(k => new KolonMeta(k.Ad, k.Baslik, k.Tip, k.Hizalama, k.Bicim,
-                                           k.Varsayilan, k.Siralanabilir, k.Filtrelenebilir))
+                                           k.Varsayilan, k.Siralanabilir, k.Filtrelenebilir, k.Genislik))
                 .ToList();
 
             return Results.Ok(new { kaynak = tanim.Ad, kolonlar });

@@ -26,7 +26,7 @@ Giriş: `admin` / `Gentegre!2026` — çok şubeli olduğu için şube seçim ad
 | `src/kimlik/` | Oturum bağlamı: kullanıcı, yetkiler, şube değiştirme |
 | `src/bilesenler/` | `Gen*` katmanı — `GenGrid`, `GenForm`, `GenDetayTablo`, `GenLookup`, `GenToolbar`/`GenSagTus`/`GenKomutPaleti` |
 | `src/sayfalar/` | Giriş, kabuk, liste/kart ekranları, fatura |
-| `src/tema.css` | **Tasarım dili** — ana mockup `Ekranlar/gentegre_v4_web.html`'den birebir |
+| `src/tema.css` | **Tasarım dili** — `Ekranlar/cari_karti.html` (mavi Delphi kart mockup'ı) temel alınarak, uygulama genelinde |
 
 ## Uyulan kurallar
 

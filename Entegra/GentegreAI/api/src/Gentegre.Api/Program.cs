@@ -31,6 +31,8 @@ kurucu.Services.AddScoped<OturumDeposu>();
 kurucu.Services.AddSingleton<YetkiDeposu>();
 kurucu.Services.AddScoped<ListeDeposu>();
 kurucu.Services.AddScoped<KartDeposu>();
+kurucu.Services.AddScoped<KisiDeposu>();
+kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddSingleton<LogDeposu>();
@@ -122,6 +124,8 @@ uygulama.MapGet("/api/saglik", async (VeriKaynagi veri, CancellationToken iptal)
 uygulama.KimlikUclariniEkle();
 uygulama.ListeUclariniEkle();
 uygulama.KartUclariniEkle();
+uygulama.KisiUclariniEkle();
+uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 

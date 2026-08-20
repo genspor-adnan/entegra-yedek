@@ -3,6 +3,7 @@ import {
   type BenYaniti, type GirisYaniti, type HataGovdesi,
   type AksiyonListesi, type KartMetaYaniti, type KartYaniti, type KartYazmaIstegi, type KolonMeta,
   type ListeIstegi, type ListeYaniti, type BelgeYaniti,
+  type KisiKaydi, type KisiIstegi, type YerlerYaniti,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -132,6 +133,22 @@ export const api = {
   kartSil: (kaynak: string, id: number) =>
     istek<void>(`/api/kart/${kaynak}/${id}`, { method: 'DELETE' }),
   kartlar: () => istek<{ kartlar: { ad: string; ekle: boolean; degistir: boolean; sil: boolean }[] }>('/api/kart'),
+
+  // ------------------------------------------------ cari > ilgili kisiler ----
+  kisiler: (tarafId: number) => istek<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler`),
+  kisiEkle: (tarafId: number, govde: KisiIstegi) =>
+    gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler`, govde),
+  kisiGuncelle: (tarafId: number, kisiId: number, govde: KisiIstegi) =>
+    gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}`, govde, 'PUT'),
+  kisiSil: (tarafId: number, kisiId: number) =>
+    istek<void>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}`, { method: 'DELETE' }),
+  kisiBagla: (tarafId: number, kisiId: number) =>
+    gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/bagla`, {}),
+  kisiKopar: (tarafId: number, kisiId: number) =>
+    gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/kopar`, {}),
+
+  // ----------------------------------------------------------- referans ----
+  yerler: () => istek<YerlerYaniti>('/api/referans/yerler'),
 
   // ------------------------------------------------------------ aksiyon ----
   aksiyonlar: (ekran: string, kayitId?: number) =>

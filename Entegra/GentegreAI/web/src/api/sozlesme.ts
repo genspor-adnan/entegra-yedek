@@ -109,6 +109,7 @@ export interface KolonMeta {
   varsayilan: boolean;
   siralanabilir: boolean;
   filtrelenebilir: boolean;
+  genislik?: number | null;
 }
 
 // ----------------------------------------------------------------- kart ----
@@ -120,6 +121,27 @@ export interface KartYaniti {
   kodAd?: Record<string, Record<string, string>>;
   yetki: KartYetkisi;
   izlemeNo: string;
+}
+
+/** Cari kartı "İlgili Kişiler" (GenForm > Genel, /api/kart/cari/{id}/kisiler). */
+export interface KisiKaydi {
+  id: number;
+  unvan: string;
+  telefon?: string | null;
+  eposta?: string | null;
+  aktif: boolean;
+  gorev?: string | null;
+  departman?: number | null;
+  bagli: boolean;
+}
+
+export interface KisiIstegi {
+  unvan: string;
+  telefon?: string | null;
+  eposta?: string | null;
+  aktif?: boolean;
+  gorev?: string | null;
+  departman?: number | null;
 }
 
 export interface DetayFarki {
@@ -187,4 +209,12 @@ export interface BelgeYaniti {
   dipToplam: DipToplamSatiri[];
   uyarilar?: string[];
   izlemeNo: string;
+}
+
+// -------------------------------------------------------------- referans ----
+/** Il/Ilce/Ulke (039_il_ilce_ulke.sql) - Adresler grid'inde il->ilce cascading secim. */
+export interface YerlerYaniti {
+  iller: { id: number; ad: string }[];
+  ilceler: { id: number; ilId: number; ad: string }[];
+  ulkeler: { id: number; ad: string }[];
 }
