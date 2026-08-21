@@ -144,16 +144,9 @@ public sealed class DokumanDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        string kaynak; long kaynakId;
-        await using (var kontrol = new NpgsqlCommand(
-            "select kaynak, kaynak_id from public.dokuman where id = @p0", baglanti, islem))
-        {
-            kontrol.Parameters.AddWithValue("p0", dokumanId);
-            await using var okuyucu = await kontrol.ExecuteReaderAsync(iptal);
-            if (!await okuyucu.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Doküman bulunamadı.");
-            kaynak = okuyucu.GetString(0);
-            kaynakId = okuyucu.GetInt32(1);
-        }
+        var (kaynak, kaynakId) = await SatirBulAsync(baglanti, islem,
+            "select kaynak, kaynak_id from public.dokuman where id = @p0", dokumanId,
+            r => (r.GetString(0), r.GetInt32(1)), iptal);
 
         await using (var guncelle = new NpgsqlCommand(
             "update public.dokuman set ad = @p0, degistiren = @p1 where id = @p2", baglanti, islem))
@@ -173,17 +166,9 @@ public sealed class DokumanDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        string kaynak; long kaynakId; string contentType;
-        await using (var kontrol = new NpgsqlCommand(
-            "select kaynak, kaynak_id, content_type from public.dokuman where id = @p0", baglanti, islem))
-        {
-            kontrol.Parameters.AddWithValue("p0", dokumanId);
-            await using var okuyucu = await kontrol.ExecuteReaderAsync(iptal);
-            if (!await okuyucu.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Doküman bulunamadı.");
-            kaynak = okuyucu.GetString(0);
-            kaynakId = okuyucu.GetInt32(1);
-            contentType = okuyucu.GetString(2);
-        }
+        var (kaynak, kaynakId, contentType) = await SatirBulAsync(baglanti, islem,
+            "select kaynak, kaynak_id, content_type from public.dokuman where id = @p0", dokumanId,
+            r => (r.GetString(0), r.GetInt32(1), r.GetString(2)), iptal);
         if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw GentegreHatasi.Dogrulama("Sadece resim varsayılan yapılabilir.",
                 new AlanHatasi("dosya", "Bu doküman resim değil."));
@@ -206,18 +191,9 @@ public sealed class DokumanDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        string kaynak; long kaynakId; bool varsayilanMiydi; string hash;
-        await using (var kontrol = new NpgsqlCommand(
-            "select kaynak, kaynak_id, varsayilan, hash from public.dokuman where id = @p0", baglanti, islem))
-        {
-            kontrol.Parameters.AddWithValue("p0", dokumanId);
-            await using var okuyucu = await kontrol.ExecuteReaderAsync(iptal);
-            if (!await okuyucu.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Doküman bulunamadı.");
-            kaynak = okuyucu.GetString(0);
-            kaynakId = okuyucu.GetInt32(1);
-            varsayilanMiydi = okuyucu.GetInt16(2) == 1;
-            hash = okuyucu.GetString(3);
-        }
+        var (kaynak, kaynakId, varsayilanMiydi, hash) = await SatirBulAsync(baglanti, islem,
+            "select kaynak, kaynak_id, varsayilan, hash from public.dokuman where id = @p0", dokumanId,
+            r => (r.GetString(0), r.GetInt32(1), r.GetInt16(2) == 1, r.GetString(3)), iptal);
 
         await using (var sil = new NpgsqlCommand("delete from public.dokuman where id = @p0", baglanti, islem))
         {
@@ -327,6 +303,18 @@ public sealed class DokumanDeposu
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal)) return null;
         return new DokumanIcerik((byte[])okuyucu[0], okuyucu.GetString(1), okuyucu.GetString(2));
+    }
+
+    // dokumanId'den tek satır okur, yoksa Bulunamadi fırlatır - Duzenle/VarsayilanYap/Sil
+    // hep "önce kaynak/kaynakId (+ birkaç kolon) çek" ile başlar, bu tekrarı toplar.
+    private static async Task<T> SatirBulAsync<T>(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        string sql, int dokumanId, Func<NpgsqlDataReader, T> oku, CancellationToken iptal)
+    {
+        await using var kontrol = new NpgsqlCommand(sql, baglanti, islem);
+        kontrol.Parameters.AddWithValue("p0", dokumanId);
+        await using var okuyucu = await kontrol.ExecuteReaderAsync(iptal);
+        if (!await okuyucu.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Doküman bulunamadı.");
+        return oku(okuyucu);
     }
 
     private static async Task VarsayilaniKaldirAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,

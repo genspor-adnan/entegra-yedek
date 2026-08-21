@@ -1805,6 +1805,25 @@ gerektirmedi (mevcut `contentType`/`eklemeTarihi` alanlarından türetildi):
   kolonu `eklemeTarihi`'ni `gg.aa.yyyy` gösteriyor.
 Kolon sırası: check, Belge Türü, Ad, Boyut, Tarih.
 
+## 21.08.2026 — Doküman kodu refaktörü (bu oturumda biriken kod temizliği)
+
+Kullanıcı: "commitle sonra da refaktor yap şimdiye kadar yaptıklarını". Rol/Yetki + Personel
+özlük + Doküman işini tek commit'te topladık (8a5fac7, sadece `GentegreAI/` kapsamı — repo
+kökündeki ilgisiz Delphi/pg değişiklikleri ayrı bırakıldı). Ardından en çok büyüyen dosyaları
+sadeleştirdik, davranış DEĞİŞMEDİ:
+
+- `DokumanGalerisi.tsx`: her aksiyonda tekrar eden `try/catch setHata` bloğu tek `calistir()`
+  sarmalayıcıya toplandı; `(satirlar ?? []).find(x => secili.has(x.id))` 4 yerde tekrarlanan
+  arama tek `seciliSatir` değişkenine indirildi; resim bandı ayrı `ResimBandi` bileşenine
+  çıkarıldı (ana fonksiyon kısaldı); checkbox toggle mantığı `secimiDegistir` helper'ında
+  birleşti (satır tıklama + checkbox onChange aynı kodu paylaşıyor).
+- `DokumanDeposu.cs`: `Duzenle/VarsayilanYap/SilAsync`'in üçünde de tekrar eden "dokumanId'den
+  kaynak/kaynakId (+birkaç kolon) çek, yoksa Bulunamadi fırlat" bloğu tek generic
+  `SatirBulAsync<T>` helper'ına toplandı.
+
+Build (`dotnet build` + `npm run build`) temiz, davranış testi yapılmadı (fonksiyonel olarak
+aynı SQL/JSX — sadece tekrar eden kod tek yere toplandı).
+
 ## Oturum kapanışı — 19.08.2026, kaldığımız yer
 
 **Veritabanı durumu** (docker `gentegre-pg18`, port 5434, db `gentegre_ai`):

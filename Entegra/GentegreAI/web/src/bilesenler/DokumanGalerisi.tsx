@@ -14,12 +14,44 @@ const belgeTuruYaz = (contentType: string) => {
   return 'Doküman';
 };
 
+const resimMi = (s: DokumanSatiri) => s.contentType.startsWith('image/');
+
+function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; resimUrlleri: Record<number, string> }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: 10, background: 'var(--yuz2)', margin: '0 10px 10px', borderRadius: 4 }}>
+      {resimler.map(s => (
+        <div key={s.id} style={{ flex: '0 0 auto', width: 100, textAlign: 'center' }}>
+          <div
+            style={{
+              width: 100, height: 100, border: s.varsayilan ? '2px solid var(--mor)' : '1px solid var(--cizgi)',
+              borderRadius: 4, overflow: 'hidden', background: 'var(--yuz)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: resimUrlleri[s.id] ? 'pointer' : 'default',
+            }}
+            title="Büyük açmak için tıklayın"
+            onClick={() => resimUrlleri[s.id] && window.open(resimUrlleri[s.id], '_blank')}
+          >
+            {resimUrlleri[s.id]
+              ? <img src={resimUrlleri[s.id]} alt={s.ad} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontSize: 24 }}>🖼️</span>}
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--soluk)', marginTop: 3, wordBreak: 'break-all' }}>{s.ad}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Genel resim/doküman galerisi (057_dokuman.sql) - kaynak-bağımsız (kartAdi: "personel",
  * "cari", "kisi", "stok" - backend'de fiziksel tabloya çevriliyor). "Dosya Ekle" HER ZAMAN
  * gride ekler (kullanıcı: resim/doküman ayrım yapmadan tek liste); resimleri ayrıca
- * gözden geçirmek için açılır/kapanır bir "Resimleri Göster" bandı var (200x200, soldan
+ * gözden geçirmek için açılır/kapanır bir "Resimleri Göster" bandı var (100x100, soldan
  * sağa) - resimler grid'den çıkmaz, band sadece EK bir görünüm.
+ *
+ * Araç çubuğu (Gör/Düzenle/İndir/Paylaş/Varsayılan Yap/Sil) satır SEÇİMİ üzerinde çalışır -
+ * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
+ * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
 export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
@@ -34,20 +66,37 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   const girdiRef = useRef<HTMLInputElement | null>(null);
   const sonSeciliIndex = useRef<number | null>(null);
 
+  const satirlarim = satirlar ?? [];
+  const resimler = satirlarim.filter(resimMi);
+  const seciliSatir = secili.size === 1 ? satirlarim.find(s => secili.has(s.id)) : undefined;
+  const seciliResimMi = seciliSatir !== undefined && resimMi(seciliSatir) && !seciliSatir.varsayilan;
+
+  // Ortak hata yakalama - her aksiyon aynı try/catch/setHata'yı tekrar etmesin.
+  const calistir = async (fn: () => Promise<DokumanSatiri[]>) => {
+    try {
+      setSatirlar(await fn());
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? h.message : String(h));
+    }
+  };
+
+  const secimiDegistir = (id: number, index: number) => {
+    setSecili(onceki => {
+      const yeni = new Set(onceki);
+      if (yeni.has(id)) yeni.delete(id); else yeni.add(id);
+      return yeni;
+    });
+    sonSeciliIndex.current = index;
+  };
+
   // Tek tık = tek seçim (seçimi değiştirir). Ctrl/Cmd+tık = tek satırı ekle/çıkar.
   // Shift+tık = son seçilenden bu satıra kadar aralığı seç.
   const satirTiklandi = (e: React.MouseEvent, id: number, index: number) => {
     if (e.shiftKey && sonSeciliIndex.current !== null) {
       const [bas, son] = [sonSeciliIndex.current, index].sort((a, b) => a - b);
-      const aralik = (satirlar ?? []).slice(bas, son + 1).map(s => s.id);
-      setSecili(new Set(aralik));
+      setSecili(new Set(satirlarim.slice(bas, son + 1).map(s => s.id)));
     } else if (e.ctrlKey || e.metaKey) {
-      setSecili(onceki => {
-        const yeni = new Set(onceki);
-        if (yeni.has(id)) yeni.delete(id); else yeni.add(id);
-        return yeni;
-      });
-      sonSeciliIndex.current = index;
+      secimiDegistir(id, index);
     } else {
       setSecili(new Set([id]));
       sonSeciliIndex.current = index;
@@ -66,7 +115,6 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   // metadata - gereksiz indirme yapmayalim).
   useEffect(() => {
     if (!bandAcik) return;
-    const resimler = (satirlar ?? []).filter(s => s.contentType.startsWith('image/'));
     resimler.forEach(s => {
       if (resimUrlleri[s.id]) return;
       api.dokumanIcerikUrl(s.id).then(url => setResimUrlleri(h => ({ ...h, [s.id]: url }))).catch(() => { /* onizleme yoksa sessiz gec */ });
@@ -81,19 +129,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
     setYukleniyor(true);
     setHata(null);
     try {
-      setSatirlar(await api.dokumanYukle(kartAdi, kaynakId, dosya, false));
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      await calistir(() => api.dokumanYukle(kartAdi, kaynakId, dosya, false));
     } finally {
       setYukleniyor(false);
-    }
-  };
-
-  const varsayilanYap = async (dokumanId: number) => {
-    try {
-      setSatirlar(await api.dokumanVarsayilanYap(kartAdi, kaynakId, dokumanId));
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
     }
   };
 
@@ -122,24 +160,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   const duzenle = async (satir: DokumanSatiri) => {
     const yeniAd = window.prompt('Yeni ad:', satir.ad);
     if (!yeniAd || yeniAd === satir.ad) return;
-    try {
-      setSatirlar(await api.dokumanDuzenle(kartAdi, kaynakId, satir.id, yeniAd));
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
-    }
-  };
-
-  const seciliSil = async () => {
-    if (secili.size === 0) return;
-    if (!window.confirm(`${secili.size} dosya silinsin mi?`)) return;
-    try {
-      let liste: DokumanSatiri[] | null = null;
-      for (const id of secili) liste = await api.dokumanSil(kartAdi, kaynakId, id);
-      setSatirlar(liste);
-      setSecili(new Set());
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
-    }
+    await calistir(() => api.dokumanDuzenle(kartAdi, kaynakId, satir.id, yeniAd));
   };
 
   const paylas = async (satir: DokumanSatiri) => {
@@ -157,9 +178,22 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
     }
   };
 
-  const resimler = (satirlar ?? []).filter(s => s.contentType.startsWith('image/'));
-  const seciliResim = secili.size === 1 ? (satirlar ?? []).find(s => secili.has(s.id)) : undefined;
-  const seciliResimMi = seciliResim?.contentType.startsWith('image/') ?? false;
+  const varsayilanYap = async () => {
+    if (seciliSatir) await calistir(() => api.dokumanVarsayilanYap(kartAdi, kaynakId, seciliSatir.id));
+  };
+
+  const seciliSil = async () => {
+    if (secili.size === 0) return;
+    if (!window.confirm(`${secili.size} dosya silinsin mi?`)) return;
+    let liste: DokumanSatiri[] | null = null;
+    try {
+      for (const id of secili) liste = await api.dokumanSil(kartAdi, kaynakId, id);
+      setSatirlar(liste);
+      setSecili(new Set());
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? h.message : String(h));
+    }
+  };
 
   return (
     <div className="kagrup">
@@ -179,18 +213,14 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
             {bandAcik ? 'Resim Kapat' : 'Resimleri Göster'}
           </button>
         )}
-        <button type="button" className="d" disabled={secili.size !== 1}
-          onClick={() => { const s = (satirlar ?? []).find(x => secili.has(x.id)); if (s) void gor(s); }}>Gör</button>
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>Gör</button>
         {!saltOkunur && (
-          <button type="button" className="d" disabled={secili.size !== 1}
-            onClick={() => { const s = (satirlar ?? []).find(x => secili.has(x.id)); if (s) void duzenle(s); }}>Düzenle</button>
+          <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void duzenle(seciliSatir)}>Düzenle</button>
         )}
-        <button type="button" className="d" disabled={secili.size !== 1}
-          onClick={() => { const s = (satirlar ?? []).find(x => secili.has(x.id)); if (s) void indir(s); }}>İndir</button>
-        <button type="button" className="d" disabled={secili.size !== 1}
-          onClick={() => { const s = (satirlar ?? []).find(x => secili.has(x.id)); if (s) void paylas(s); }}>Paylaş</button>
-        {!saltOkunur && seciliResimMi && !seciliResim?.varsayilan && (
-          <button type="button" className="d" onClick={() => seciliResim && void varsayilanYap(seciliResim.id)}>Varsayılan Yap</button>
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>İndir</button>
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>Paylaş</button>
+        {!saltOkunur && seciliResimMi && (
+          <button type="button" className="d" onClick={() => void varsayilanYap()}>Varsayılan Yap</button>
         )}
         {!saltOkunur && (
           <button type="button" className="d teh" disabled={secili.size === 0} onClick={() => void seciliSil()}>Sil</button>
@@ -199,31 +229,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
       {paylasimMesaji && <div style={{ margin: '0 10px 10px', wordBreak: 'break-all', fontSize: 12, color: 'var(--soluk)' }}>{paylasimMesaji}</div>}
 
-      {bandAcik && (
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: 10, background: 'var(--yuz2)', margin: '0 10px 10px', borderRadius: 4 }}>
-          {resimler.map(s => (
-            <div key={s.id} style={{ flex: '0 0 auto', width: 100, textAlign: 'center' }}>
-              <div
-                style={{
-                  width: 100, height: 100, border: s.varsayilan ? '2px solid var(--mor)' : '1px solid var(--cizgi)',
-                  borderRadius: 4, overflow: 'hidden', background: 'var(--yuz)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: resimUrlleri[s.id] ? 'pointer' : 'default',
-                }}
-                title="Büyük açmak için tıklayın"
-                onClick={() => resimUrlleri[s.id] && window.open(resimUrlleri[s.id], '_blank')}
-              >
-                {resimUrlleri[s.id]
-                  ? <img src={resimUrlleri[s.id]} alt={s.ad} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: 24 }}>🖼️</span>}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--soluk)', marginTop: 3, wordBreak: 'break-all' }}>{s.ad}</div>
-            </div>
-          ))}
-        </div>
-      )}
+      {bandAcik && <ResimBandi resimler={resimler} resimUrlleri={resimUrlleri} />}
 
-      {satirlar && satirlar.length > 0 && (
+      {satirlarim.length > 0 && (
         <table className="detay-tablo" style={{ margin: 10, width: 'calc(100% - 20px)' }}>
           <thead>
             <tr>
@@ -235,28 +243,18 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
             </tr>
           </thead>
           <tbody>
-            {satirlar.map((s, index) => {
-              const resimMi = s.contentType.startsWith('image/');
-              return (
-                <tr key={s.id} style={{ cursor: 'pointer', background: secili.has(s.id) ? 'var(--yuz2)' : undefined }}
-                  onClick={e => satirTiklandi(e, s.id, index)}>
-                  <td onClick={e => e.stopPropagation()}>
-                    <input type="checkbox" checked={secili.has(s.id)} onChange={() => {
-                      setSecili(onceki => {
-                        const yeni = new Set(onceki);
-                        if (yeni.has(s.id)) yeni.delete(s.id); else yeni.add(s.id);
-                        return yeni;
-                      });
-                      sonSeciliIndex.current = index;
-                    }} />
-                  </td>
-                  <td>{resimMi ? '🖼️' : '📄'} {belgeTuruYaz(s.contentType)}</td>
-                  <td>{s.ad}{s.varsayilan && resimMi && ' (varsayılan)'}</td>
-                  <td>{boyutYaz(s.boyut)}</td>
-                  <td>{tarihYaz(s.eklemeTarihi)}</td>
-                </tr>
-              );
-            })}
+            {satirlarim.map((s, index) => (
+              <tr key={s.id} style={{ cursor: 'pointer', background: secili.has(s.id) ? 'var(--yuz2)' : undefined }}
+                onClick={e => satirTiklandi(e, s.id, index)}>
+                <td onClick={e => e.stopPropagation()}>
+                  <input type="checkbox" checked={secili.has(s.id)} onChange={() => secimiDegistir(s.id, index)} />
+                </td>
+                <td>{resimMi(s) ? '🖼️' : '📄'} {belgeTuruYaz(s.contentType)}</td>
+                <td>{s.ad}{s.varsayilan && resimMi(s) && ' (varsayılan)'}</td>
+                <td>{boyutYaz(s.boyut)}</td>
+                <td>{tarihYaz(s.eklemeTarihi)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
