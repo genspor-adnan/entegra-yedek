@@ -1,4 +1,4 @@
-import type { DetayDurumu } from './GenDetayTablo';
+import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 
@@ -7,6 +7,8 @@ interface Props {
   durum: DetayDurumu;
   saltOkunur: boolean;
   onDegis(yeni: DetayDurumu): void;
+  /** ik_karti.html mockup Personel'de "Ev Adresi" diyor - varsayilan "Adres" (Kisi). */
+  baslik?: string;
 }
 
 /**
@@ -15,10 +17,13 @@ interface Props {
  * grid'iyle AYNI DetayDurumu/detayFarki mekanizmasi), sadece UI'da tek satir gosterilir:
  * durum.guncel[0] okunur/yazilir, +Satir / satir sil YOK.
  */
-export function TekAdres({ meta, durum, saltOkunur, onDegis }: Props) {
+export function TekAdres({ meta, durum, saltOkunur, onDegis, baslik = 'Adres' }: Props) {
   const yerler = useYerler(true);
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
-  const satir = durum.guncel[0] ?? {};
+  // Ulke default TR - sadece GORUNTUDE degil (kullanici: "kişi kartında da ülke default
+  // TC olarak gelsin"). satir.ulke hic yoksa (yeni kart, hic dokunulmamis) varsayilan
+  // buraya YAZILIYOR - baska bir alana ilk degis() cagrisinda kaydediliyor.
+  const satir: Satir = { ulke: VARSAYILAN_ULKE, ...(durum.guncel[0] ?? {}) };
 
   const degis = (degisiklik: Record<string, unknown>) => {
     const yeniSatir = { ...satir, ...degisiklik };
@@ -30,7 +35,7 @@ export function TekAdres({ meta, durum, saltOkunur, onDegis }: Props) {
 
   return (
     <div className="kagrup">
-      <h6>Adres</h6>
+      <h6>{baslik}</h6>
       <div className="alan-izgara tek-sutun">
         {/* Adres Tipi combosu Il ile AYNI genislikte olsun diye Il/Ilce ile ayni iki-kolonlu
             satir duzeninde (kullanici) - ikinci kolon bos birakiliyor. */}

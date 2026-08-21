@@ -7,6 +7,10 @@ import {
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { IlgiliKisiler } from './IlgiliKisiler';
 import { TekAdres } from './TekAdres';
+import { TekOzluk } from './TekOzluk';
+import { PersonelKimlikOzet } from './PersonelKimlikOzet';
+import { RolYetkiMatrisi } from './RolYetkiMatrisi';
+import { DokumanGalerisi } from './DokumanGalerisi';
 import { TarafArama } from './TarafArama';
 import { epostaGecerliMi } from './alanBicim';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -65,7 +69,9 @@ function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, children }:
 type SekmeTanimi =
   | { tur: 'grup'; anahtar: string; baslik: string; alanlar: KartAlanMeta[] }
   | { tur: 'detay'; anahtar: string; baslik: string; detay: KartDetayMeta }
-  | { tur: 'yerTutucu'; anahtar: string; baslik: string };
+  | { tur: 'yerTutucu'; anahtar: string; baslik: string }
+  // Generic Detay mekanizmasina uymayan kaynaga-ozel sekmeler (ör. Rol > Yetki Matrisi).
+  | { tur: 'ozel'; anahtar: string; baslik: string };
 
 const detaySekmeAnahtari = (detayAd: string) => `d:${detayAd}`;
 const grupSekmeAnahtari = (grupAd: string) => `g:${grupAd}`;
@@ -183,16 +189,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       .filter(([ad]) => ad !== KIMLIK_GRUP)
       .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
     meta?.detaylar.forEach(d => {
-      // Cari/Kisi'ye ozel: Adresler mockup'ta ayri sekme DEGIL, ilgili grup sekmesinin
-      //   icine gomulu bir grid - kendi sekmesi acilmasin (bkz. asagida grup render'i).
-      if ((kaynak === 'cari' || kaynak === 'kisi') && d.ad === 'adresler') return;
+      // Cari/Kisi/Personel'e ozel: Adresler mockup'ta ayri sekme DEGIL, ilgili grup
+      //   sekmesinin icine gomulu bir tek-satir form - kendi sekmesi acilmasin (bkz.
+      //   asagida grup render'i - Personel'de İletişim sekmesine gomulu, ik_karti.html).
+      if ((kaynak === 'cari' || kaynak === 'kisi' || kaynak === 'personel') && d.ad === 'adresler') return;
+      // Personel'de Eğitim/Sertifika artık Genel sekmesinde Kimlik Bilgileri'nin altında
+      //   gömülü grid; ayrı sekme açılmasın.
+      if (kaynak === 'personel' && d.ad === 'egitimler') return;
       s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
     });
     (yerTutucuSekmeler ?? []).forEach(baslik => {
       s.push({ tur: 'yerTutucu', anahtar: `y:${baslik}`, baslik });
     });
+    // Rol'e ozel: Yetki Matrisi generic Detay degil (satir ekle/sil yok, sabit yetki
+    //   listesi x Gor/Ekle/Degistir/Sil checkbox'lari) - ayri "ozel" sekme. Yeni kayitta
+    //   henuz rolId yok, kart once kaydedilmeli (Kisi'nin İlgili Kişiler'iyle ayni kural).
+    if (kaynak === 'rol' && !yeniMi) {
+      s.push({ tur: 'ozel', anahtar: 'ozel:yetkiler', baslik: 'Yetki Matrisi' });
+    }
+    // Personel'e ozel: Resim/Doküman galerisi (057_dokuman.sql, generic DokumanGalerisi -
+    // Kişi/Cari/Stok'ta da aynı bileşen kullanılabilir). Yeni kayıtta henüz id yok.
+    if (kaynak === 'personel' && !yeniMi) {
+      s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
+    }
     return s;
-  }, [gruplar, meta, yerTutucuSekmeler]);
+  }, [gruplar, meta, yerTutucuSekmeler, kaynak, yeniMi]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   // Genel kural: karta HER GIRISTE (id/kaynak degisince) ilk sekme acik olmali - "Sonraki"
@@ -218,6 +239,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       const detayAd = alanAdi.split('.')[0];
       if (kaynak === 'cari' && detayAd === 'adresler') return grupSekmeAnahtari('Fatura Bilgileri');
       if (kaynak === 'kisi' && detayAd === 'adresler') return grupSekmeAnahtari('Genel');
+      if (kaynak === 'personel' && detayAd === 'adresler') return grupSekmeAnahtari('İletişim');
+      if (kaynak === 'personel' && detayAd === 'egitimler') return grupSekmeAnahtari('Genel');
       return detaySekmeAnahtari(detayAd);
     }
     const alan = meta?.alanlar.find(a => a.ad === alanAdi);
@@ -282,6 +305,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
               return (f.eklenen?.length ?? 0) + (f.degisen?.length ?? 0) + (f.silinen?.length ?? 0) > 0;
             })),
       };
+
+      // Personel'de "unvan" hic gosterilmiyor/duzenlenmiyor (kullanici: ad/soyad kullanilsin)
+      // - DB'de NOT NULL oldugu icin Kaydet'te ad+soyad'dan burada birlestirilip eklenir.
+      if (kaynak === 'personel') {
+        const ad = String(deger.ad ?? '').trim();
+        const soyad = String(deger.soyad ?? '').trim();
+        const unvan = [ad, soyad].filter(Boolean).join(' ');
+        if (unvan) govde.kart.unvan = unvan;
+      }
 
       const yanit = yeniMi
         ? await api.kartEkle(kaynak, govde)
@@ -499,8 +531,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
           {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
-              tek degistirme yolu bu buton + TarafArama modali. */}
-          {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && (
+              tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
+              dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali. */}
+          {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && !deger.bagId && (
             <button className="d" onClick={() => setCariyeBaglaAcik(true)}>🔗 Cariye Bağla</button>
           )}
           <button className="d" onClick={onKapat}>Kapat</button>
@@ -559,16 +592,26 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         // akisi var, cari uzerinde dogrudan kisi bayragi degistirmek gereksiz/kafa karistirici.
         const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci', 'kisi'])
           : kaynak === 'kisi' ? new Set(['kisi'])
+          // Personel: "unvan" ad+soyad'dan Kaydet'te turetiliyor, ayrica gosterilmez/
+          //   duzenlenmez (kullanici: "ad soyad kullan"); "personel" bayragi Kisi'nin
+          //   "kisi" bayragiyla ayni sebeple gizli. "vkno"/"gorev" de gizli - normal
+          //   adsiz akistan CIKARILIP PersonelKimlikOzet.tsx'e props olarak geciyor
+          //   (ik_karti.html: TCKN "Kimlik Bilgileri" kutusunda, Görev "Özet" kutusunda).
+          : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorev'])
           : new Set<string>();
         const adsiz = (gruplanmis.find(([b]) => !b)?.[1] ?? []).filter(a => !gizli.has(a.ad));
-        // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Kart Bilgileri sagda.
+        // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Tanımlama sagda.
         const iletisim = adli.find(([b]) => b === 'İletişim');
         const notlar = adli.find(([b]) => b === 'Notlar');
         const digerAdli = adli.filter(([b]) => b !== 'İletişim' && b !== 'Notlar');
         const adliBlok = (
           <>
-            {/* Mockup: Tanım/Sınıflandırma · Vergi & Ana Birim ... AYNI SATIRDA yan yana (.row > .col > .grp). */}
-            {adli.length > 0 && (
+            {/* Mockup: Tanım/Sınıflandırma · Vergi & Ana Birim ... AYNI SATIRDA yan yana (.row > .col > .grp).
+                Personel'de bu sarmalayici, AltGrup'lu (adli) alan olmasa BILE acik kalmali -
+                PersonelKimlikOzet/TekAdres gibi ozel bilesenler AltGrup'a bagli DEGIL, asagida
+                bu blogun icinde render ediliyor (bug: "genel sekmesinde sadece 2 alan var" -
+                adli.length===0 oldugu icin butun kasira hic acilmiyordu). */}
+            {(adli.length > 0 || kaynak === 'personel') && (
               <div className="kasira">
                 {iletisim && (
                   <div className="kasutun">
@@ -585,11 +628,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
                   </div>
                 )}
                 {digerAdli.map(([altBaslik, alanlar]) => {
-                  // Cari'ye ozel: Kart Bilgileri kutusunda iki cift AYNI SATIRDA yan yana
-                  // (kullanici: "kategori ilk temas üstte sekt alt sektör onun altına
-                  // gelsin") - kutunun geri kalani (Temsilci/Ozel Kod) tek-sutun kaliyor.
-                  const ciftler = kaynak === 'cari' && altBaslik === 'Kart Bilgileri'
-                    ? [['kategori', 'ilkTemas'], ['sektor', 'altSektor']] : [];
+                  // Cari'ye ozel: Tanımlama kutusunda dort cift AYNI SATIRDA yan yana,
+                  // sirayla (kullanici): Kategori/İlk Temas, Sektör/Alt Sektör, Sınıf/Bölge,
+                  // Temsilci/Özel Kod.
+                  const ciftler = kaynak === 'cari' && altBaslik === 'Tanımlama'
+                    ? [['kategori', 'ilkTemas'], ['sektor', 'altSektor'], ['sinif', 'bolge'], ['temsilci', 'ozelKod']]
+                    : [];
                   const ciftliAlanlar = ciftler.map(cift =>
                     cift.map(ad => alanlar.find(a => a.ad === ad)).filter(a => a !== undefined));
                   const digerAlanlar = alanlar.filter(a => !ciftliAlanlar.flat().includes(a));
@@ -618,6 +662,56 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
                       durum={detaylar[adresDetay.ad] ?? bosDetay()}
                       saltOkunur={salt || adresDetay.saltOkunur}
                       onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                    />
+                  );
+                })()}
+                {/* Personel'e ozel: ik_karti.html mockup'ta "Ev Adresi" İletişim sekmesinde
+                    (Genel'de degil) - AYNI TekAdres, farkli sekmede gomulu. */}
+                {kaynak === 'personel' && aktif.baslik === 'İletişim' && (() => {
+                  const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+                  if (!adresDetay) return null;
+                  return (
+                    <TekAdres
+                      meta={adresDetay}
+                      durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                      saltOkunur={salt || adresDetay.saltOkunur}
+                      onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                      baslik="Ev Adresi"
+                    />
+                  );
+                })()}
+                {/* Personel'e ozel: ik_karti.html mockup'ta Genel sekmesinde "Kimlik
+                    Bilgileri" (TCKN + Ozluk'ten dogum/cinsiyet/vb) + "Özet" (Pozisyon +
+                    İşe Giriş) kutulari - iki farkli veri kaynagini (taraf + personel_ozluk)
+                    BIRLESTIRDIGI icin ozel bilesen (PersonelKimlikOzet.tsx). */}
+                {kaynak === 'personel' && aktif.baslik === 'Genel' && (() => {
+                  const ozlukDetay = meta.detaylar.find(d => d.ad === 'ozluk');
+                  const egitimDetay = meta.detaylar.find(d => d.ad === 'egitimler');
+                  const vknoAlan = meta.alanlar.find(a => a.ad === 'vkno');
+                  const gorevAlan = meta.alanlar.find(a => a.ad === 'gorev');
+                  if (!ozlukDetay || !vknoAlan || !gorevAlan) return null;
+                  return (
+                    <PersonelKimlikOzet
+                      vknoAlan={vknoAlan}
+                      vkno={String(deger.vkno ?? '')}
+                      onVknoDegis={v => setDeger(d => ({ ...d, vkno: v }))}
+                      gorevAlan={gorevAlan}
+                      gorev={String(deger.gorev ?? '')}
+                      onGorevDegis={v => setDeger(d => ({ ...d, gorev: v }))}
+                      ozlukMeta={ozlukDetay}
+                      ozlukDurum={detaylar[ozlukDetay.ad] ?? bosDetay()}
+                      saltOkunur={salt}
+                      onOzlukDegis={yeni => setDetaylar(t => ({ ...t, [ozlukDetay.ad]: yeni }))}
+                      kaynakId={yeniMi ? undefined : (id as number)}
+                      egitimler={egitimDetay && (
+                        <GenDetayTablo
+                          meta={egitimDetay}
+                          durum={detaylar[egitimDetay.ad] ?? bosDetay()}
+                          saltOkunur={salt || egitimDetay.saltOkunur}
+                          hatalar={alanHatalari}
+                          onDegis={yeni => setDetaylar(t => ({ ...t, [egitimDetay.ad]: yeni }))}
+                        />
+                      )}
                     />
                   );
                 })()}
@@ -708,7 +802,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         );
       })()}
 
-      {aktif?.tur === 'detay' && (
+      {/* Personel'e ozel: "Özlük" kendi sekmesi ama TEK SATIR form (TekOzluk.tsx) -
+          personel_ozluk 1:1, generic coklu-satir grid'e uymuyor (ik_karti.html). */}
+      {aktif?.tur === 'detay' && kaynak === 'personel' && aktif.detay.ad === 'ozluk' && (
+        <TekOzluk
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+        />
+      )}
+
+      {aktif?.tur === 'detay' && !(kaynak === 'personel' && aktif.detay.ad === 'ozluk') && (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
@@ -716,6 +821,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
         />
+      )}
+
+      {aktif?.tur === 'ozel' && kaynak === 'rol' && (
+        <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && kaynak === 'personel' && (
+        <DokumanGalerisi kartAdi="personel" kaynakId={id as number} saltOkunur={salt} />
       )}
 
       {aktif?.tur === 'yerTutucu' && (

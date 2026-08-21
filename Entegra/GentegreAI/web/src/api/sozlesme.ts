@@ -144,6 +144,36 @@ export interface KisiIstegi {
   departman?: number | null;
 }
 
+export interface YetkiSatiri {
+  yetkiId: number;
+  kod: string;
+  ad: string;
+  grup: string;
+  gor: boolean;
+  ekle: boolean;
+  degistir: boolean;
+  sil: boolean;
+}
+
+export interface YetkiSatiriIstegi {
+  yetkiId: number;
+  gor: boolean;
+  ekle: boolean;
+  degistir: boolean;
+  sil: boolean;
+}
+
+export interface DokumanSatiri {
+  id: number;
+  ad: string;
+  contentType: string;
+  boyut: number;
+  varsayilan: boolean;
+  sira: number;
+  eklemeTarihi: string;
+  paylasimKodu?: string | null;
+}
+
 export interface DetayFarki {
   eklenen?: Record<string, unknown>[];
   degisen?: Record<string, unknown>[];

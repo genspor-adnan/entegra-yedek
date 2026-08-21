@@ -1,7 +1,7 @@
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 
-type Satir = Record<string, unknown> & { id?: number };
+export type Satir = Record<string, unknown> & { id?: number };
 
 /**
  * Detay tablosunun duzenleme durumu. Sunucuya TAM LISTE degil FARK gonderilir
@@ -54,9 +54,32 @@ interface Props {
   onDegis(yeni: DetayDurumu): void;
 }
 
+// Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
+// genişlik, Ülke ... dar, PK çok dar"). Diger detay tablolari (stok_izleme vb.) bundan
+// etkilenmez - sadece meta.ad==='adresler' iken colgroup basılır.
+const ADRES_GENISLIK: Record<string, string> = {
+  tur: '12%', adres: '30%', il: '13%', ilce: '13%', ulke: '10%',
+  postaKodu: '7%', varsayilan: '7%', aktif: '7%',
+};
+
+const DIPLOMA_ADLARI = [
+  'İlkokul',
+  'Ortaokul',
+  'Lise',
+  'Ön Lisans (Yüksek Okul)',
+  'Lisans',
+  'Yüksek Lisans (Master)',
+  'Doktora',
+];
+
+const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
+
+const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
+
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
+  const adresGrid = meta.ad === 'adresler';
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
 
   const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) => {
@@ -64,10 +87,27 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
     onDegis({ ...durum, guncel });
   };
 
+  // Adresler'de acik (Adres Tipi secilmemis) satir varken yeni satir eklenemez (kullanici:
+  // "adres te fatura tipi seçilmeden yeni satır açılmasın" - Adres Tipi kastediliyor).
+  const acikAdresSatiriVar = adresGrid && durum.guncel.some(s => !s.tur);
+  const satirEklenebilir = !saltOkunur && !acikAdresSatiriVar;
+
   const satirEkle = () => {
+    if (acikAdresSatiriVar) return;
     const yeni: Satir = {};
     alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });
-    if (meta.ad === 'adresler') yeni.ulke = VARSAYILAN_ULKE;
+    if (meta.ad === 'adresler') {
+      yeni.ulke = VARSAYILAN_ULKE;
+      // Ilk satir (henuz hic adres yok) - Adres Tipi varsayilan "Fatura" (kullanici:
+      // "cari kart adres eklemede ilk satır ise adres tipi Fatura olsun"). Bu grid SADECE
+      // Cari'de kullaniliyor (Kisi'nin adresi TekAdres.tsx, ayri bilesen) - 1="Fatura"
+      // guvenli (AdresTurKodlari).
+      if (durum.guncel.length === 0) yeni.tur = '1';
+    }
+    if (meta.ad === 'egitimler') {
+      yeni.tur = '1'; // Diploma
+      yeni.gecerlilik = 'Süresiz';
+    }
     onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
   };
 
@@ -82,10 +122,18 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
     <div className="kagrup">
       <h6>
         {meta.baslik}
-        {!saltOkunur && <button type="button" className="d" onClick={satirEkle}>+ Satir</button>}
+        {!saltOkunur && (
+          <button type="button" className="d" disabled={!satirEklenebilir} onClick={satirEkle}>+ Satir</button>
+        )}
       </h6>
 
-      <table className="detay-tablo">
+      <table className={`detay-tablo${adresGrid ? ' adres-tablo' : ''}`} style={adresGrid ? { tableLayout: 'fixed' } : undefined}>
+        {adresGrid && (
+          <colgroup>
+            {alanlar.map(a => <col key={a.ad} style={{ width: ADRES_GENISLIK[a.ad] }} />)}
+            {!saltOkunur && <col style={{ width: '6%' }} />}
+          </colgroup>
+        )}
         <thead>
           <tr>
             {alanlar.map(a => <th key={a.ad}>{a.baslik}{a.zorunlu && ' *'}</th>)}
@@ -136,6 +184,32 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
                       {yerler.ilceler
                         .filter(y => y.ilId === ilAdIdHarita.get(String(satir.il ?? '')))
                         .map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                    </select>
+                  ) : meta.ad === 'egitimler' && a.ad === 'ad' && String(satir.tur ?? '') === '1' ? (
+                    <select
+                      value={String(satir.ad ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {DIPLOMA_ADLARI.map(ad => <option key={ad} value={ad}>{ad}</option>)}
+                    </select>
+                  ) : meta.ad === 'egitimler' && a.ad === 'tarih' ? (
+                    <input
+                      value={String(satir.tarih ?? '')}
+                      maxLength={10}
+                      inputMode="numeric"
+                      placeholder="YYYY veya GG.AA.YYYY"
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, tarihYilTemizle(e.target.value))}
+                    />
+                  ) : meta.ad === 'egitimler' && a.ad === 'gecerlilik' ? (
+                    <select
+                      value={String(satir.gecerlilik ?? 'Süresiz')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    >
+                      {EGITIM_GECERLILIK.map(ad => <option key={ad} value={ad}>{ad}</option>)}
                     </select>
                   ) : a.kodlar ? (
                     <select

@@ -1273,6 +1273,538 @@ yapıldığında kişinin carisi doluysa ekleme yapılamaz" - onay: "mesaj veril
   kartının kendi "Cariye Bağla"sı bu metodu hiç çağırmıyor (form alanını set edip PUT ile
   kaydediyor), bilerek taşıma orada hâlâ serbest.
 
+## 21.08.2026 — TarafArama: ilk kolon check, satır tıklanınca işaretlenir
+
+Kullanıcı: "arama ekranı ilk kolon check olsun.. satır tıklanınca işaretlensin". Önceden
+seçili satır sadece arka plan rengiyle (`.secili`) belliydi, ayrıca `onMouseEnter` de
+seçimi değiştiriyordu (fare üzerinden geçince bile). Artık ilk kolon bir checkbox - seçili
+satırda işaretli. `onMouseEnter` kaldırıldı, seçim SADECE tıklama (veya ok tuşları) ile
+değişiyor - "tıklanınca işaretlensin" ifadesiyle çelişen hover-seçimi kaldırıldı.
+
+## 21.08.2026 — Cari Kart Bilgileri: Sınıf + Bölge eklendi, kutu artik dort ikili satir
+
+Kullanıcı: "cari kart sektör altına Sınıf combo sağına Bölge Combo.. sınıf altına da
+Temsilci sağına Özel Kod". MSSQL REHBER.SINIF/BOLGE karşılıkları (GENINI BOLUM -2203 Ops_
+CariKart_Sinif, -2210 Ops_CariKart_Bolge) - 043'teki İlk Temas ile AYNI durum: kod_liste
+otomatik adlandırmayla ("liste_2203"/"liste_2210", 9+3 satır) zaten göç etmişti.
+
+- **`044_taraf_sinif_bolge.sql`** (uygulandı): kod_liste isim düzeltmesi - "liste_2203" →
+  `taraf.sinif` / "Cari Sinif", "liste_2210" → `taraf.bolge` / "Cari Bolge". Kolonlar
+  (`sinif` integer, `bolge` smallint) şemada zaten vardı.
+- **`KartKatalogu.cs`**: `sinif` + `bolge` alanları eklendi (KodListesi ile), sıra artık
+  kategori/ilkTemas/sektor/altSektor/sinif/bolge/temsilci/ozelKod.
+- **`GenForm.tsx`**: Kart Bilgileri kutusu artık DÖRT ikili satır - Kategori/İlk Temas,
+  Sektör/Alt Sektör, Sınıf/Bölge, Temsilci/Özel Kod (hepsi `.adres-satir`) - kutuda tek-
+  sütun kalan alan kalmadı.
+
+## 21.08.2026 — Cari kutu adı: "Kart Bilgileri" → "Tanımlama"
+
+Kutu artık saf sınıflandırma alanları taşıyor (Kategori/İlk Temas/Sektör/Alt Sektör/
+Sınıf/Bölge/Temsilci/Özel Kod) - "Kart Bilgileri" çok genel kaldı. Alternatif olarak
+"Sınıflandırma"/"Segmentasyon"/"Kategori & Bölge" önerildi, kullanıcı **"Tanımlama"**
+seçti. `KartKatalogu.cs`'te ilgili 8 alanın `AltGrup`u + `GenForm.tsx`'teki ikili-satır
+eşleştirme koşulu (`altBaslik === 'Tanımlama'`) güncellendi.
+
+## 21.08.2026 — Cari Adresler grid: İl→İlçe sıra + kolon genişlikleri, Kişi Adres ülke-default bugu, Cariye Bağla butonu bağlıyken gizli
+
+Kullanıcı: "cari kart adres gridinde Adres geniş, İl önce genişlik aynı, İlçe sonra
+genişlik aynı, Ülke sadece TC default ve dar PK çok dar olmalı" + "kişi kartında da ülke
+default TC olarak gelsin" + "kişi kartında cariye bağlanmış ise cariye bağla butonu
+görünmemelidir".
+
+- **`KartKatalogu.cs`**: Cari/Kişi `adresler` `DetayTanimi`'nde alan sırası `il` artık
+  `ilce`'den ÖNCE (kaskad seçimle de tutarlı - önce İl seçilir).
+- **`GenDetayTablo.tsx`**: `adresler` grid'i için `colgroup` + `table-layout:fixed` -
+  Adres %30, İl/İlçe %13/%13 (eşit), Ülke %10, PK %7. Diğer detay tabloları (stok_izleme
+  vb.) etkilenmedi (`meta.ad==='adresler'` koşullu).
+- **Bug**: `TekAdres.tsx`'te Ülke `<select>`'i `satir.ulke ?? VARSAYILAN_ULKE` ile
+  GÖRÜNÜŞTE TR gösteriyordu ama yeni kişi kartında hiç dokunulmazsa `satir` objesine
+  `ulke` hiç yazılmıyordu (Kaydet'te boş gidiyordu). Fix: `satir` artık `{ulke:
+  VARSAYILAN_ULKE, ...guncel[0]}` ile kuruluyor - ilk `degis()` çağrısında varsayılan
+  gerçekten satıra yazılıyor. `GenDetayTablo.tsx`'in `Satir` tipi export edildi.
+- **`GenForm.tsx`**: "🔗 Cariye Bağla" butonu artık `!deger.bagId` şartıyla - kişi zaten
+  bir cariye bağlıysa buton hiç görünmüyor, önce "×" ile bağ boşaltılmalı.
+
+## 21.08.2026 — Ülke referansı: "TÜRKİYE CUMHURİYETİ" → "TC"
+
+Kullanıcı: "ülke kısa TC olsun". `public.ulke` FK değil serbest metin eşleşmesi
+(`taraf_adres.ulke` = `ulke.ad`) - mevcut hiçbir kayıt tam eşleşmiyordu (legacy veri
+"Turkiye"/"TÜRKİYE"/vb çeşitli yazılmış), güvenle kısaltıldı.
+
+- **`045_ulke_tc_kisa.sql`** (uygulandı): `ulke.ad` id=312 için "TÜRKİYE CUMHURİYETİ" →
+  "TC".
+- **`yerlerHook.ts`**: `VARSAYILAN_ULKE` sabiti "TC" oldu (TekAdres/GenDetayTablo'nun
+  varsayılan ülke ataması buradan besleniyor, otomatik uyumlu).
+
+## 21.08.2026 — Bug: adres gridinde PK editi Varsayılan hücresine taşıyordu
+
+Kullanıcı: "adreste pk editi varsayılan a taşıyor". Kök neden: global `.detay-tablo
+input { min-width: 90px }` kuralı, önceki oturumda eklenen dar kolonlar (PK %7, Ülke
+%10, `table-layout:fixed`) ile çakışıyordu - hücre ~40-50px iken input 90px'e zorlanıp
+komşu (Varsayılan) hücreye taşıyordu.
+
+- **`GenDetayTablo.tsx`**: adres grid'i artık `detay-tablo adres-tablo` class'ıyla
+  işaretli.
+- **`tema.css`**: `.adres-tablo input, .adres-tablo select { min-width: 0 }` - genel
+  90px taban SADECE bu grid için kaldırıldı, genişlik tamamen colgroup'tan geliyor.
+  Diğer detay tabloları (stok_izleme vb.) eskisi gibi 90px taban korudu.
+
+## 21.08.2026 — Adres Tipi zorunlu + boş satırken "+ Satır" kilidi + genel Etiket'li hata mesajı
+
+Kullanıcı: "adres te fatura tipi seçilmeden yeni satır açılmasın.. seçilmeden
+kaydediliyorsa de tür boş bırakılamaz yerine Adres Tipi boş bırakılamaz mesajı olsun".
+
+- **`KartKatalogu.cs`**: Cari+Kişi adresler'in `tur` alanı `Zorunlu: true` oldu.
+- **`KartDeposu.cs`** (`DetayUygulaAsync`, genel mekanizma - tüm detay tablolarını
+  etkiler): zorunlu-alan hata mesajı artık ham `Ad` ("tur") değil `Etiket` ("Adres
+  Tipi") kullanıyor - `"{Etiket} boş bırakılamaz."` - herhangi bir detay tablosunda
+  Zorunlu alan eklendiğinde otomatik doğru etiketle mesaj verir, tek tek elle
+  yazılmıyor.
+- **`GenDetayTablo.tsx`**: adresler grid'inde `tur` boş bir satır varken "+ Satır"
+  butonu `disabled` - yeni boş satır açılamaz, önce açık olanın tipi seçilmeli.
+
+## 21.08.2026 — Kişi Adres Tipi: Cari'den farklı liste (sadece Ev/İş)
+
+Kullanıcı: "kişi de adres tipleri sadece Ev/İş olabilir". `taraf_adres.tur` Cari VE Kişi
+tarafından AYNI kolon/check kısıtı (1/2/3/4/9) ile paylaşılıyor - anlamı satırın sahibi
+`taraf.kisi` bayrağına göre değişiyor (mockup'ta zaten farklı kavramlar: Cari için
+Fatura/Sevkiyat/Merkez/Şube-Depo/Diğer, Kişi için ev/iş adresi).
+
+- **`KartKatalogu.cs`**: yeni `KisiAdresTurKodlari = {"1":"Ev","2":"İş"}` - Kişi'nin `tur`
+  alanı artık bunu kullanıyor, Cari'nin `AdresTurKodlari`sı (Fatura/Sevkiyat/Merkez/vb)
+  dokunulmadı. Aynı sayısal kodlar (1,2) yeniden kullanıldı - DB şema/check kısıtı
+  değişmedi, sadece etiket kaynağı kaynak-bazlı ayrıştı.
+
+## 21.08.2026 — Küçük düzeltmeler: Cari "Web" etiketi + Adres ilk satır varsayılan Fatura
+
+- Kullanıcı: "cari kart : label : Web / 2. E-posta yerine sadece Web olsun" -
+  `KartKatalogu.cs` Cari'nin `epostaWeb` Baslik'i "Web" oldu (Kişi'nin ayrı "2. E-posta"
+  etiketine dokunulmadı).
+- Kullanıcı: "cari kart adres eklemede ilk satır ise adres tipi Fatura olsun" (onay:
+  "kullanıcı isterse değiştirir" - sadece varsayılan, editable kalıyor).
+  `GenDetayTablo.tsx` `satirEkle()`: adresler grid'inde (SADECE Cari'de kullanılıyor -
+  Kişi'nin adresi `TekAdres.tsx`) `durum.guncel.length===0` ise yeni satırın `tur`u
+  `'1'` (Fatura) ile başlıyor.
+
+## 21.08.2026 — Personel kartı (İK) - Kişi'den farklı: Ad/Soyad + Özlük
+
+Kullanıcı: "personel kartı oluştur". `personel` liste kaynağı ve `/personel` menüsü
+(Liste.tsx) zaten vardı ama kart tanımlı değildi (çift tık "Bilinmeyen kart" verirdi).
+Kişi kartından bilerek FARKLI: `taraf.ad`/`soyad` kullanılıyor (038 migration yorumunda
+"Ad Soyad IK/hasta kartına saklandı" denen karar burada devreye giriyor).
+
+- **`046_personel_kart.sql`** (uygulandı): `personel_ozluk` (1:1, `taraf_id` PK'ydi) genel
+  Detay mekanizmasına (GenDetayTablo/detayFarki - kendi identity `id`'si + ayrı UstKolon FK
+  bekler) uyması için synthetic `id` identity eklendi, `taraf_id` artık PK değil UNIQUE.
+- **`KartKatalogu.cs`**: yeni `Personel()` kart tanımı - LogTabloId 73 (eski GENINI IK
+  TABLOID'i, bkz. [[silme-geri-al-tuzaklari]]), `SabitKosul: "personel = 1"`. `unvan` ve
+  `personel` bayrağı UI'da gizli (Kişi'deki "kisi" alanıyla aynı sebep - YeniKayitVarsayilanlari
+  yazılabilsin diye tanımlı olmaları gerekiyor). `ad`/`soyad` Zorunlu. Adres detayı Kişi ile
+  AYNI taraf_adres + Ev/İş listesi. Yeni "ozluk" detayı (personel_ozluk: doğum tarihi,
+  cinsiyet, işe giriş/çıkış tarihi).
+- **`GenForm.tsx`**: Kaydet'te `kaynak==='personel'` için `unvan = ad+' '+soyad` istemci
+  tarafında birleştirilip gönderiliyor (Kişi'deki DB trigger YAKLAŞIMI DEĞİL - trigger
+  kullanıcının elle yazdığı Unvan'ı ezme riski taşıyordu, burada unvan hiç gösterilmediği
+  için risk yok). Adres + yeni "Özlük" kutusu (`TekOzluk.tsx`, TekAdres ile aynı "tek satır"
+  desen) Genel sekmesinde gömülü.
+- **`AksiyonKatalogu.cs`**: `personel-liste` (Yeni/Düzenle/Sil, `KaynakKodu:"personel"`).
+- **`Liste.tsx`**: `kartYolu:'/personel'` + `aksiyonEkrani:'personel-liste'` eklendi.
+- **Yan düzeltme**: `KartUclari.Degerler()`'daki generic ana-alan zorunlu-hata mesajı da
+  (detay tablolarındaki gibi) artık ham `Ad` değil `Etiket` kullanıyor.
+- **Yetki**: `yetki` tablosunda `personel` kodu zaten vardı (id=3, eski_modul_id 34),
+  Yönetici rolü zaten tam CRUD'a sahipti - ek seed gerekmedi.
+
+## 21.08.2026 — Rol kartı + Yetki Matrisi (Gör/Ekle/Değiştir/Sil yönetim ekranı)
+
+Kullanıcı: "eski sistemde rol tablosu ve buna bağlı kullanıcı/personel vardı.. role
+verdiğimiz yetki doğrultusunda menüleri Görme/Ekleme/Düzeltme/Silme işlem yapabilirdi..
+şimdi nasıl yapalım planla sadece" → plan sonrası "hastadan önce rol/yetki yap".
+
+Keşif: alt mekanizma (rol/yetki/rol_yetki/rol_alan_yetki tabloları, backend'in HER
+istekte `IstekBaglami.Yetkiler.Var`/`AlanYazilir` ile doğrulaması, frontend'in menü/
+toolbar/alan gate'i) **zaten tam çalışır durumdaydı** - eksik olan sadece bunu
+YÖNETECEK bir ekrandı (önceden sadece SQL ile düzenlenebiliyordu).
+
+- **`KartKatalogu.cs`**: yeni `Rol()` kart tanımı - `public.rol` (kod/ad/üst rol/aktif/
+  sistem - "sistem" rolleri, ör. Yönetici, salt-okunur işaretli). `YetkiKodu:"rol"` zaten
+  seed'liydi (yetki.id=15, sıra 62) - ek seed gerekmedi. `LogTabloId: 903` (yeni tablo,
+  eski karşılığı yok - 901/902 serisiyle aynı desen).
+- **`KaynakKatalogu.cs`** + **`AksiyonKatalogu.cs`** (`rol-liste`) + **`Liste.tsx`**
+  (`/rol`, "Yönetim › Roller ve Yetkiler") - liste+kart+toolbar standart desen. Rol'ün
+  durum kolonu `aktif` (`durum` değil) - `DURUM_CIPLERI` (alan:'durum' varsayar)
+  kullanılmadı, kullanılsaydı "Bilinmeyen alan: durum" verirdi.
+- **`KartDeposu.cs`**: `KodTablosuBeyazListe`'ye `public.rol` eklendi (Üst Rol combosu
+  için, self-referential lookup).
+- **Yetki Matrisi - generic Detay mekanizmasına UYMAZ** (satır ekle/sil değil, SABİT
+  `yetki` listesi × Gör/Ekle/Değiştir/Sil checkbox matrisi) - özel bir uç/depo/bileşen:
+  - **`RolYetkiDeposu.cs`** (yeni): `ListeleAsync` tüm aktif `yetki` satırlarını bu rolün
+    `rol_yetki` değerleriyle LEFT JOIN eder (yoksa hepsi false). `KaydetAsync` her satırı
+    `INSERT ... ON CONFLICT (rol_id, yetki_id) DO UPDATE` ile upsert eder - `rol_yetki`
+    üzerindeki mevcut `trg_rol_yetki_surum` tetikleyicisi `rol.yetki_surumu`'nu otomatik
+    artırıyor, elle dokunulmadı.
+  - **`RolYetkiUclari.cs`** (yeni): `GET/PUT /api/kart/rol/{rolId}/yetkiler`.
+  - **`RolYetkiMatrisi.tsx`** (yeni): checkbox tablosu, TEK "Kaydet" ile tüm satırlar
+    birlikte gönderilir. UX kuralı: "Gör" kapatılırsa Ekle/Değiştir/Sil de otomatik
+    kapanır; Ekle/Değiştir/Sil'den biri açılırsa "Gör" otomatik açılır (görmeden işlem
+    olmaz).
+  - **`GenForm.tsx`**: yeni sekme türü `'ozel'` - Rol kartına (`!yeniMi` - Kişi'nin İlgili
+    Kişiler'iyle aynı kural, yeni kayıtta henüz `rolId` yok) "Yetki Matrisi" sekmesi
+    ekleniyor, `RolYetkiMatrisi` bileşenini render ediyor.
+- **Ertelendi (kullanıcının kendi planı)**: Kullanıcı kartı (`kullanici` tablosu -
+  `taraf_id` hem PK hem FK, Personel_ozluk/taraf_hasta ile aynı 1:1 şekil sorunu var,
+  ayrıca yeni kullanıcı oluşturmak "var olan bir taraf'a giriş yetkisi ekleme" anlamına
+  geliyor - Kişi'nin "Cariye Bağla" tarzı bir akış gerektirebilir); `rol_alan_yetki`
+  (alan bazlı yetki) UI'ı.
+
+## 21.08.2026 — Personel Özlük: Öğrenim Durumu / Okul / Çalışma Şekli eklendi
+
+Kullanıcı: "Öğrenim Durumu combo (İlkokul...Doktora).. Okulu eşit serbest.. Çalışma
+Şekli: Yarı Zamanlı/Tam Zamanlı".
+
+- **`047_personel_ozluk_ogrenim.sql`** (uygulandı): `personel_ozluk`'a `ogrenim_durumu`
+  (smallint), `okul` (varchar 150, serbest metin), `calisma_sekli` (smallint) eklendi.
+- **`KartKatalogu.cs`**: `OgrenimDurumuKodlari` (7 sabit değer) + `CalismaSekliKodlari`
+  (Tam/Yarı Zamanlı) - GENINI karşılığı yok, yeni tablo. "ozluk" detayına 3 alan eklendi.
+- **`TekOzluk.tsx`**: iki yeni satır - Öğrenim Durumu + Okul aynı satırda yan yana
+  (kullanıcı: "eşit serbest"), Çalışma Şekli kendi satırında (boş ikinci kolon).
+
+## 21.08.2026 — Personel Özlük: Uyruğu/Vardiya Türü/SGK Başlama + sube_id artık "Çalıştığı Şube"
+
+Kullanıcı: "Uyruğu, Vardiya Türü, SGK başlama Tarihi ekle" + "taraf subeid de personelin
+Çalıştığı Şube yi tut".
+
+- **`048_personel_ozluk_uyruk_vardiya_sgk.sql`** (uygulandı): `personel_ozluk`'a `uyruk`
+  (varchar, varsayılan 'TC'), `vardiya_turu` (smallint), `sgk_baslama_tarihi` (date).
+- **`KartKatalogu.cs`**: `VardiyaTuruKodlari` (Gündüz/Gece/Vardiyalı). Uyruğu, TekAdres'in
+  Ülke'siyle AYNI mekanizma - `yerlerHook`'un ülke listesinden serbest seçim, `metin` tip
+  (SabitKodlar değil).
+- **`TekOzluk.tsx`**: `useYerler`/`VARSAYILAN_ULKE` eklendi - Uyruğu select'i + varsayılan
+  yazma bugu (görünüşte TC ama satıra yazılmıyor) önceden TekAdres'te düzeltilmişti, aynı
+  düzeltme burada da (satır objesi `{uyruk: VARSAYILAN_ULKE, ...guncel[0]}` ile kuruluyor).
+  Üç yeni satır: Öğrenim altına Uyruğu+Vardiya Türü, SGK Başlama Tarihi kendi satırında.
+- **`sube_id`** (kullanıcı: "taraf subeid de personelin Çalıştığı Şube yi tut") - diğer
+  kartlarda salt-okunur/gizli meta alan, Personel'de artık GERÇEK VERİ: Yazılabilir +
+  `KodTablosu:"public.sube"`, Baslik "Çalıştığı Şube". Boş bırakılırsa oturumun şubesi
+  otomatik yazılıyor (mevcut davranış).
+  - **Yan bug (önceden fark edilmemiş, artık düzeltildi)**: `KartDeposu.EkleAsync`'teki
+    oturum-şubesi otomatik-doldurma tetiği (`SubeKolonu:null` + yazılabilir `subeId` alanı
+    varsa) kullanıcının GÖNDERDİĞİ değeri kontrolsüz eziyordu - `subeId` her zaman salt-
+    okunur olduğu için şimdiye kadar hiç tetiklenmemişti, ama artık yazılabilir olunca aynı
+    fiziksel `sube_id` kolonuna İKİ KEZ değer atanıp INSERT söz dizimi hatası verirdi. Fix:
+    tetik artık SADECE kullanıcı `subeId` göndermediyse çalışıyor (`public.sube` de
+    `KodTablosuBeyazListe`'ye eklendi).
+
+## 21.08.2026 — Personel Özlük: Medeni Hal/Kan Grubu + Sözleşme Türü/Deneme Süresi
+
+Kullanıcı: "Medeni Hal, Kan Grubu ekle" → "Sözleşme Türü combo, Deneme Süresi combo ekle".
+
+- **`049_personel_ozluk_medeni_kan.sql`** (uygulandı): `medeni_hal`/`kan_grubu` kolonları.
+  Kan Grubu için `taraf.kan_grubu` kod_liste'si zaten vardı (hasta hazırlığı, boştu) - 8
+  standart kan grubuyla dolduruldu, Personel bu ORTAK listeyi kullanıyor (ileride Hasta
+  kartı da aynı listeyi paylaşacak).
+- **`050_personel_ozluk_sozlesme_deneme.sql`** (uygulandı): `sozlesme_turu`/`deneme_suresi`
+  kolonları, ikisi de sabit liste (GENINI karşılığı yok - Belirsiz/Belirli Süreli/Deneme
+  Süreli/Stajyer/Mevsimlik; deneme süresi Yok/1-4 Ay).
+- **`TekOzluk.tsx`**: Medeni Hal + Kan Grubu (Doğum Tarihi/Cinsiyet satırının hemen altına,
+  "kişisel bilgiler" grubu), Sözleşme Türü + Deneme Süresi (en altta yeni satır).
+
+## 21.08.2026 — Personel kartı ik_karti.html mockup'a göre yeniden yapılandırıldı + İzinler/Eğitim-Sertifika sekmeleri
+
+Kullanıcı: `Ekranlar/ik_karti.html` mockup'ını baz alarak Genel/İletişim/Özlük sekmelerini
+BİREBİR uygula, `personel_izin` + `personel_egitim` tabloları oluşturup İzinler ve
+Eğitim/Sertifika sekme+gridlerini de aynen uygula.
+
+**Bug (mockup okurken fark edildi, düzeltildi)**: önceki oturumda Özlük + Adres tek-satır
+bileşenleri (TekOzluk/TekAdres) Genel sekmesine GÖMÜLÜYORDU ama detay tabloları hariç
+tutulmadığı için AYRICA otomatik kendi sekmelerini de açıyordu (mükerrer - "Özlük" hem
+Genel içinde hem ayrı boş grid sekmesi olarak görünüyordu). Mockup bu ayrımı zaten
+netleştirdi: Özlük KENDİ SEKMESİ (tek-satır form), Adres İletişim sekmesine gömülü.
+
+- **`051_personel_ozluk_dogum_yeri.sql`**: `personel_ozluk.dogum_yeri` eklendi.
+- **`052_personel_izin.sql`** / **`053_personel_egitim.sql`** (uygulandı): yeni 1:N
+  tablolar - `personel_izin` (tür/başlangıç/bitiş/gün/açıklama/durum), `personel_egitim`
+  (tür/ad/kurum/tarih/geçerlilik). İkisi de standart audit kolonları + `sube_id`.
+- **`KartKatalogu.cs`**: 
+  - idstrip (Kimlik grubu) daraltıldı: kod/ad/soyad/departman/durum (Görev çıkarıldı).
+  - `gorev` → Baslik "Pozisyon", adsiz (Grup yok) - artık Özet kutusunda.
+  - `vkno` → Baslik "T.C. Kimlik No", adsiz - artık Kimlik Bilgileri kutusunda.
+  - `telefon`/`cepTel`/`eposta`/`epostaWeb` → AltGrup'tan **Grup**'a geçti (artık Genel
+    içine gömülü kutu değil, KENDİ SEKMESİ "İletişim"), etiketler mockup'a göre (Ev
+    Telefonu/Cep/E-posta (İş)/E-posta (Kişisel)).
+  - `ozluk` detayına `dogumYeri` eklendi.
+  - Yeni `izinler` ve `egitimler` detayları (genel çoklu-satır grid, `GenDetayTablo`
+    yeterli - özel bileşen gerekmedi).
+- **`GenForm.tsx`**:
+  - `adresler` artık `personel` için de kendi sekmesi DEĞİL (kaynak listesine eklendi).
+  - "Özlük" sekmesi generic `GenDetayTablo` yerine `TekOzluk` render ediyor (tek satır).
+  - `TekAdres` artık Personel'de **İletişim** sekmesine gömülü (Genel değil).
+  - Yeni **`PersonelKimlikOzet.tsx`** - Genel sekmesinde "Kimlik Bilgileri" (TCKN +
+    Özlük'ten doğum tarihi/yeri/cinsiyet/medeni hal/kan grubu/öğrenim) + "Özet" (Pozisyon
+    + İşe Giriş + hesaplanan Kıdem) kutuları - İKİ FARKLI veri kaynağını (taraf +
+    personel_ozluk) birleştirdiği için özel bileşen; "Kıdem" saklanmıyor, istemci
+    tarafında İşe Giriş'ten hesaplanıyor.
+  - `sekmeBul` güncellendi: Personel'de `adresler.*` hataları İletişim sekmesine atlar.
+  - `gizli` Set'e `vkno`/`gorev` eklendi (normal adsiz akıştan çıkarılıp özel bileşene
+    props olarak geçiyor).
+- **Kapsam dışı bırakılanlar** (kullanıcı sadece Genel/İletişim/Özlük + İzinler + Eğitim/
+  Sertifika istedi): Ücret/Bordro, Belgeler (özlük dosyası), Ek Alanlar, Acil Durumda
+  Aranacak Kişiler grid'i, Fotoğraf kutusu - mockup'ta var ama yeni tablo/altyapı
+  gerektiriyor, istenmedi.
+
+## 21.08.2026 — Personel Genel/İletişim/Özlük: mockup ile 5 turluk karşılaştır-düzelt döngüsü
+
+Kullanıcı: "bu 3 sekmeyi mockupla karşılaştır.. farklıysa mockup gibi yap.. loop a gir 5
+yinelemeden sonra dur". Görsel doğrulama yok (tarayıcı bu oturum boyunca erişilemez) -
+"loop" alan-alan, kutu-kutu, `ik_karti.html`'in HTML'ini kodla karşılaştırma turları
+olarak yapıldı, her turda bulunan fark bir sonrakine taşınmadan düzeltildi:
+
+1. **Genel/Kimlik Bilgileri**: "Uyruk" yanlışlıkla Özlük Bilgileri sekmesinde kalmıştı -
+   mockup'ta Genel'de. Taşındı, `PersonelKimlikOzet.tsx`'e `yerlerHook` eklendi (TekAdres
+   ile aynı ülke-listesi + TC-varsayılan-yazma deseni).
+2. **Mükerrer alan tespiti**: Cinsiyet/Medeni Hal/Kan Grubu/Doğum Tarihi/Doğum Yeri hem
+   `PersonelKimlikOzet` (Genel) hem `TekOzluk` (Özlük) içinde render ediliyordu (iki
+   yerden düzenlenebiliyordu). `TekOzluk.tsx`'ten kaldırıldı - artık sadece iş/SGK alanları.
+3. **Özlük Bilgileri kutu yapısı**: mockup'ta "İş Bilgileri" (Yönetici/Çalışma Şekli/
+   Sözleşme Türü/Deneme Süresi) + "SGK / Giriş-Çıkış" (İşe Giriş/Çıkış/SGK Sicil No/
+   Meslek Kodu/Kıdem) diye İKİ ayrı kutu - `TekOzluk.tsx` tek yığın listeden bu iki kutuya
+   bölündü (`kasira`, TekAdres/PersonelKimlikOzet ile aynı yan-yana desen).
+4. **Eksik alanlar** (mockup'ta var, hiç yoktu): SGK Sicil No, Meslek Kodu, Yönetici.
+   - **`054_personel_ozluk_mockup_uyum.sql`** (uygulandı): `sgk_sicil_no`, `meslek_kodu`,
+     `yonetici_taraf_id` (taraf FK) eklendi + `public.v_cari_lookup` ile aynı sözleşmede
+     yeni `public.v_personel_lookup` görünümü (Yönetici combosu SADECE personel listeler).
+   - `KartDeposu.KodTablosuBeyazListe`'ye `public.v_personel_lookup` eklendi.
+5. **Ev Adresi başlığı**: `TekAdres.tsx`'in kutu başlığı hep "Adres" idi, mockup Personel'de
+   "Ev Adresi" diyor - `baslik` prop'u eklendi (varsayılan "Adres", Kişi'de değişmedi;
+   Personel'de "Ev Adresi" geçiliyor). Ayrıca Kıdem (İşe Giriş'ten hesaplanan, saklanmayan
+   "X yıl Y ay") mockup'taki gibi HEM Özet HEM SGK kutusunda gösteriliyor (aynı alan, iki
+   görünüm - mockup'ın kendisi de öyle).
+
+**Bilinçli olarak dışarıda bırakılanlar** (mockup'ta var ama yeni tablo/altyapı ister,
+önceki oturumda da aynı gerekçeyle atlanmıştı, bu turda da SESSİZCE eklenmedi): Ücret/
+Bordro sekmesi, Belgeler (özlük dosyası - GENDEPO.DOSYA), Ek Alanlar (EAV), "Acil Durumda
+Aranacak Kişiler" grid'i (Genel'in altında, ayrı `personel_acil_kisi` gibi yeni bir tablo
+gerektirir - kullanıcı sadece İzin/Eğitim tablolarını adıyla istemişti, bu isim
+geçmediği için oluşturulmadı, gerekirse ayrıca istenmeli).
+
+## 21.08.2026 — Personel Genel sekmesi: ikinci mockup turu (kutu yerleşimi + zorunlu + yaş/kıdem rozeti)
+
+Kullanıcı bu kez SADECE Genel sekmesini `ik_karti.html` ile tekrar karşılaştırmamı,
+5 tur döngüyle farkları düzeltmemi istedi (önceki turda İletişim/Özlük'e daha çok
+odaklanmıştı, Genel'in kendi iç yerleşimi eksik kalmıştı).
+
+Bulunan farklar:
+1. **Kutu yerleşimi yanlıştı**: mockup'ta sağda DAR bir sütun var - üstte Fotoğraf, altta
+   Özet, ÜST ÜSTE. Benim önceki halim Kimlik Bilgileri + Özet'i yan yana iki eşit kutu
+   yapıyordu, Fotoğraf hiç yoktu. Düzeltme: `PersonelKimlikOzet.tsx` artık `kasira` (satır)
+   içinde `kagrup` (Kimlik Bilgileri, flex:1) + `kasutun` (dar sütun, flex:"0 0 240px" -
+   Cari'nin İletişim/Notlar'ı için kullandığı AYNI dikey-yığın deseni) içinde Fotoğraf
+   (mevcut `kagrup-resim`/`resim-kutusu` CSS'i - Stok'un yer tutucusuyla aynı) + Özet.
+2. **Zorunlu işaretleri eksikti**: mockup'ta T.C. Kimlik No ve Doğum Tarihi `*` ile
+   zorunlu işaretli. `KartKatalogu.cs`'te `vkno` ve `ozluk.dogumTarihi` artık `Zorunlu:
+   true`; component'te de `*` görsel işareti eklendi.
+3. **Yaş rozeti yoktu**: mockup Doğum Tarihi yanında "33 yaş" gösteriyor - Kıdem ile aynı
+   mantıkla (`yasHesapla`, doğum tarihinden hesaplanan, saklanmayan) eklendi.
+4. **Etiket metni ince farkları**: "Uyruğu" → "Uyruk", "Öğrenim Durumu" → "Öğrenim"
+   (mockup'ın kendi metniyle birebir).
+
+## 21.08.2026 — Bug: Personel Genel/İletişim'de sadece Çalıştığı Şube + Ekleme Tarihi görünüyordu
+
+Kullanıcı: "personel genel sekmesinde sadece 2 alan var şu an çalıştığı şube ve ekleme
+tarihi". Kök neden: `GenForm.tsx`'te AltGrup'lu kutuları saran `<div className="kasira">`
+sarmalayıcısı `adli.length > 0` şartına bağlıydı - Personel'de artık AltGrup'lu HİÇ alan
+kalmamıştı (telefon/eposta grubu AltGrup'tan Grup'a taşındı, vkno/gorev adsiz+gizli oldu),
+yani `adli` her zaman boştu ve kasira HİÇ AÇILMIYORDU. `PersonelKimlikOzet` (Genel) ve
+`TekAdres`/Ev Adresi (İletişim) bu kasira'nın İÇİNDE render ediliyordu - ikisi de hiç
+görünmüyordu, sadece kasira DIŞINDAki sabit `subeId`/`eklemeTarihi` kalıyordu.
+
+- **`GenForm.tsx`**: şart `adli.length > 0 || kaynak === 'personel'` oldu - kasira artık
+  Personel'de her zaman açık. Sadece frontend değişikliği, backend restart gerekmedi
+  (Vite HMR).
+
+## 21.08.2026 — Personel Özlük: Öğrenim Durumu / Okul kaldırıldı
+
+Kullanıcı: "personel_ozluk ten ogreim ve okul u kaldır". `055_personel_ozluk_ogrenim_
+okul_kaldir.sql` (uygulandı) - iki kolon da drop edildi. `KartKatalogu.cs`'ten
+`OgrenimDurumuKodlari` sabit listesi + iki alan tanımı, `PersonelKimlikOzet.tsx`'ten
+Öğrenim/Okul satırı kaldırıldı.
+
+## 21.08.2026 — Genel Resim/Doküman sistemi (057_dokuman.sql) + Personel'de "Resim / Doküman" sekmesi
+
+Kullanıcı: "eski sql projede doküman sistemi vardı.. resim/doküman birlikte mi
+düşünelim ayrı ayrı mı? bir stok kartının birden fazla resmi olabilir biri varsayılan"
+→ karar: BİRLİKTE (ayrı sistem değil) → "bu yapıyı kurgula personel kartından hem resim
+hem doküman ekleyebileyim".
+
+Eski sistemdeki desen taşındı: IMAJ (çoklu satır + varsayılan bayrağı) + STOKLAR.RESIM
+gibi hızlı-kapak cache (bkz. `belge-depolama.md`) - v1'de cache kolonu KURULMADI (henüz
+hiçbir liste/grid thumbnail kullanmıyor, "hayali ihtiyaç için inşa etme" - `taraf.resim`/
+`stok.resim` bytea kolonları hâlâ boş duruyor, ileride gerekirse eklenir).
+
+- **`057_dokuman.sql`** (uygulandı): `public.dokuman` - polimorfik `kaynak`+`kaynak_id`
+  (`kaynak`: 'taraf' - cari/kisi/personel hepsi taraf satırı - veya 'stok'), `icerik
+  bytea`, `content_type`, `boyut`, `hash` (sha256, dedup için hazır), `sira`,
+  `varsayilan`. Partial unique index `(kaynak, kaynak_id) where varsayilan=1` - DB
+  seviyesinde "sadece bir tanesi varsayılan olabilir" garantisi (taraf_gecmis'teki "tek
+  açık dönem" ile aynı desen).
+- **`DokumanDeposu.cs`** (yeni): İçerik-tipi whitelist (jpeg/png/webp/gif + pdf/doc/docx/
+  xls/xlsx/txt), 5 MB tavan. İlk resim otomatik varsayılan olur; varsayılan silinirse
+  kalan bir resim (varsa) otomatik yeni varsayılan olur - galeri hep "biri varsayılan"
+  kuralını korur. Sadece `image/*` varsayılan yapılabilir (doküman değil).
+- **`DokumanUclari.cs`** (yeni): `/api/dokuman/{kartAdi}/{kaynakId}` (GET liste, POST
+  multipart yükle) + `.../​{dokumanId}/varsayilan` + DELETE. `kartAdi` (kullanıcının
+  bildiği "personel"/"cari"/"kisi"/"stok") hem yetki kontrolü hem fiziksel `kaynak`
+  değerine çevrilir (cari/kisi/personel → 'taraf'). İçerik indirme AYRI uç
+  (`/api/dokuman-icerik/{id}`) - `<img>` custom header gönderemediği için frontend
+  içeriği `fetch`+Authorization ile çekip blob URL'e çeviriyor (token URL'e sızmıyor).
+- **`DokumanGalerisi.tsx`** (yeni, kaynak-bağımsız - Kişi/Cari/Stok'ta da aynen
+  kullanılabilir): resimler thumbnail grid + "Varsayılan Yap"/"Sil", dokümanlar liste +
+  "İndir"/"Sil", "+ Dosya Ekle" tek buton (tür otomatik ayırt edilir).
+- **`GenForm.tsx`**: Personel'e yeni "Resim / Doküman" sekmesi (Rol'ün Yetki Matrisi'yle
+  aynı "ozel" sekme türü, `!yeniMi` şartı - kart önce kaydedilmeli).
+- **Kapsam dışı (bilerek)**: Genel sekmesindeki statik "🖼️" Fotoğraf kutusu gerçek
+  varsayılan resmi GÖSTERMİYOR henüz (hâlâ placeholder) - doğal bir sonraki adım, bu
+  turda eklenmedi. Kapak-cache kolonu da (performans optimizasyonu) kurulmadı.
+
+**Aynı turda ek kural**: "IK kişi hasta müşteri tedarikçi profilde tek resim
+kullanılacak.. ama birden çok doküman eklenebilmelidir" - `kaynak='taraf'` (cari/kisi/
+personel/hasta hepsi bu fiziksel satır) **TEK resim**, `kaynak='stok'` **ÇOKLU resim +
+varsayılan** (önceki karar). `DokumanDeposu.TekResimKaynaklari` - tek-resim kaynakta yeni
+resim yüklenince ESKİSİ OTOMATİK SİLİNİR (biriktirilmez), yeni resim otomatik tek/
+varsayılan olur. Doküman (resim-dışı dosya) HER İKİ kaynak türünde de her zaman çokludur -
+bu kural sadece `content_type like 'image/%'` satırları etkiler. `DokumanGalerisi.tsx`
+`kartAdi!=='stok'` ise "Varsayılan Yap" butonunu hiç göstermiyor + "tek resim" ipucu metni.
+
+## 21.08.2026 — Genel sekmesi Fotoğraf kutusu artık gerçek resim gösterir/yükler + doküman gridine "Gör" butonu
+
+Kullanıcı: "genel sekmesinde fotoğraf tıkladığımda resim ekle" → önceki turda bilerek
+kapsam dışı bırakılan statik placeholder tamamlandı. Ardından: "doküman gridinde indi
+butonu soluna Gör ekle.. içeriği açsın".
+
+- **`PersonelKimlikOzet.tsx`**: yeni `kaynakId?` prop (yeni kayıtta yok - kart
+  kaydedilmeden dosya yüklenemez). Mount'ta `dokuman` listesinden varsayılan resmi bulup
+  blob URL'e çevirip gösteriyor; kutuya tıklayınca dosya seçici açılıyor, seçilen resim
+  `dokumanYukle('personel', kaynakId, dosya, true)` ile yükleniyor (tek-resim kuralı zaten
+  backend'de - eskisi otomatik silinir). Salt-okunur/yeni-kayıtta tıklanamaz.
+- **`GenForm.tsx`**: `kaynakId={yeniMi ? undefined : id}` PersonelKimlikOzet'e geçiliyor.
+- **`DokumanGalerisi.tsx`**: doküman (resim-dışı) satırlarında "İndir"in SOLUNA "Gör"
+  eklendi - blob URL'i indirme yerine `window.open(..., '_blank')` ile yeni sekmede açar
+  (PDF tarayıcının kendi görüntüleyicisinde açılır).
+
+## 21.08.2026 — DokumanGalerisi yeniden tasarlandı: dosya ekle her zaman gride, "Resimleri Göster" bandı
+
+Kullanıcı: "doküman gridinde dosya ekle sağına Resimleri Göster butonu ekle.. ona
+basılınca altta bandda resimleri soldan sağa 200x200 pikselde göster.. buton
+gösterirken Resim Kapat olsun.. ve basınca band kapansın.. dosya ekle her zaman gride
+eklesin" → "bandda resimlerin altında sil olmasın.. sadece gridd olsun".
+
+- **`DokumanGalerisi.tsx`**: resimlerin ayrı thumbnail-kart grid'i kaldırıldı - artık
+  HER dosya (resim + doküman) TEK tabloda (🖼️/📄 ikonuyla ayrılıyor, resimse ve
+  varsayılansa "(varsayılan)" etiketi). "Resimleri Göster"/"Resim Kapat" toggle butonu
+  (sadece resim varsa görünür) - açılınca tablo altında yatay kaydırmalı bir bant
+  (200×200, soldan sağa) sadece GÖRÜNTÜLEME için - resim+ad var, buton/Sil YOK, silme
+  sadece tablodan yapılır. Resim blob URL'leri artık SADECE band açıkken çekiliyor
+  (önceden hep, gereksiz istek).
+
+## 21.08.2026 — Tek-resim "eskisini sil" kuralı kaldırıldı - eski resimler doküman listesinde kalır
+
+Kullanıcı, önceki turdaki "tek resim, yeni yükleyince eskisi silinir" kararını
+DÜZELTTİ: "fotoğraf kısmından yeni resim eklersek eski resim silinmesin doküman
+kısmında devam etsin.. yeni resim default olsun.. doküman kısmından resim eklersem
+sadece doküman listesine eklensin.. default olmasın eski resmi silmesin".
+
+- **`DokumanDeposu.cs`**: `TekResimKaynaklari` + "eski resimleri sil" bloğu tamamen
+  kaldırıldı. Artık TEK kural: `varsayilanIstendi` bayrağı (`EkleAsync`'e caller
+  gönderiyor) hangi resmin varsayılan olacağını belirler, eski resim SİLİNMEZ, sadece
+  varsayılan bayrağı kalkar - `stok` ile birebir aynı davranış. İlk resim (hiç resim
+  yoksa) otomatik varsayılan olur.
+- Frontend zaten doğru `varsayilanIstendi` değerlerini gönderiyordu, DEĞİŞMEDİ:
+  `PersonelKimlikOzet.tsx` (Fotoğraf kutusu) → `true`, `DokumanGalerisi.tsx` ("+ Dosya
+  Ekle") → `false`.
+- **`DokumanGalerisi.tsx`**: `tekResim` ayrımı ve "Tek resim kullanılır" ipucu metni
+  kaldırıldı - "Varsayılan Yap" butonu artık HER kaynakta (personel dahil) görünür,
+  eski resimleri tekrar profil resmi yapabilmek için.
+
+## 21.08.2026 — Resim bandı: 200x200 → 100x100, tıklayınca büyük aç
+
+Kullanıcı: "resim göster önizleme 200x200 yerine 100x100 olsun.. üzerine tıklanınca da
+büyük açsın". `DokumanGalerisi.tsx` bant thumbnail'ları 100x100'e küçüldü, tıklanınca
+`window.open` ile yeni sekmede orijinal boyut açılıyor ("Gör" ile aynı mekanizma).
+
+## 21.08.2026 — Doküman gridine "Paylaş" (kimliksiz link) + çoklu seçim checkbox'ı
+
+Kullanıcı: "dokümanda gridde en sağda paylaş ekle.. adres ver onu gönderince doküman açılsın"
+ve "ilk sütunu yine check yap.. tıklayınca işaretlesin.. birden fazla seçilebilsin".
+
+- `058_dokuman_paylasim.sql`: `dokuman.paylasim_kodu varchar(40)` + partial unique index
+  `ux_dokuman_paylasim_kodu` (dolu olanlar üzerinde).
+- `DokumanDeposu.PaylasAsync` — idempotent: dokümanın zaten kodu varsa aynısını döner, yoksa
+  `Guid.NewGuid().ToString("N")` üretip kalıcı yazar. `IcerikPaylasimKoduIleAsync` kod ile
+  içerik döner (kimlik doğrulaması YOK — bilerek: tahmin edilemez 128 bit token TEK erişim
+  kontrolü, Google Drive "linki bilen görür" modeli, süresiz).
+- `DokumanUclari.cs`: `POST /api/dokuman/{kartAdi}/{kaynakId}/{dokumanId}/paylas` (yetkili,
+  kod üretir/döner) + `GET /api/dokuman-paylasim/{kod}` (auth YOK, dosyayı doğrudan sunar).
+- `istemci.ts`: `api.dokumanPaylas(...)` — kodu alıp `${TABAN}/api/dokuman-paylasim/${kod}`
+  tam adresini kurar.
+- `DokumanGalerisi.tsx`: gridde "Gör/İndir" yanına "Paylaş" butonu — tıklanınca adres üretilip
+  panoya kopyalanır, kopyalama başarısızsa adres ekranda gösterilir. Ayrıca ilk sütuna
+  checkbox eklendi (satıra veya kutuya tıklayınca işaretlenir, `Set<number>` ile çoklu seçim —
+  şimdilik sadece işaretleme, toplu aksiyon yok). Aksiyon hücreleri satır üstüne hizalandı
+  (`verticalAlign: top`) — Ad sütunu 2 satıra taşınca butonlar ortalanıp aşağı kaymıyordu.
+
+Not: paylaşım linki kimliksiz ve süresiz — linki alan herkes dokümanı görebilir. Kullanıcının
+kendi iç sistemi, açık istek üzerine bilerek bu şekilde (ince ACL/expiry istenmedi).
+
+## 21.08.2026 — Doküman içerik dedup (hash-bazlı paylaşımlı içerik tablosu) + grid çoklu seçim
+
+Kullanıcı: "dokuman icin eskiden 3 lu zincir vardi (dokuman,imaj,dosya).. simdi?" ->
+"dedup mantigi neden yok?" -> "simdi dedup yap". Sonra: "grid tek tık tek seçim.. ctrl/shift
+ile çok seçim olsun".
+
+- `059_dokuman_dedup.sql`: yeni `public.dokuman_icerik` (hash PK, icerik bytea, content_type,
+  boyut, referans_sayisi) — eski GENDEPO.DOSYA hash-dedup desenini bytea'ya taşıdı.
+  `public.dokuman.icerik` kolonu KALKTI, `dokuman.hash` artık `dokuman_icerik(hash)`'e FK.
+  Mevcut satırlar hash'e göre gruplanıp tek kopyaya taşındı (`fk_dokuman_hash`).
+- `DokumanDeposu.EkleAsync`: upload'ta önce `dokuman_icerik`'e `on conflict (hash) do update
+  set referans_sayisi = referans_sayisi + 1` — aynı içerik ikinci kez yüklenince bytea TEKRAR
+  YAZILMAZ, sadece referans artar. `SilAsync`: referans_sayisi düşürülür, 0'a inince
+  `dokuman_icerik` satırı silinir. `IcerikAsync`/`IcerikPaylasimKoduIleAsync` artık `dokuman`
+  ⋈ `dokuman_icerik` join ile içerik okuyor.
+- `DokumanGalerisi.tsx`: seçim modeli düzeltildi — tek tık satırı TEK seçili yapar (öncekini
+  temizler), Ctrl/Cmd+tık tek satırı ekler/çıkarır, Shift+tık son seçilenden bu satıra kadar
+  aralık seçer (checkbox tıklaması her zaman ekle/çıkar). Seçili satır arka planı vurgulanıyor.
+
+## 21.08.2026 — Doküman: Gör/Düzenle/Paylaş/Sil "Resimleri Göster" yanına taşındı (seçime göre çalışır)
+
+Kullanıcı: "Resimleri Göster butonu Sağına Gör/Düzenle/Paylaş/Sil butonları gelsin". Bu 4 buton
+artık satır başına DEĞİL, üstteki araç çubuğunda — seçili satır(lar) üzerinde çalışıyor
+(Gör/Düzenle/Paylaş: tam 1 seçim gerekir, buton kilitli değilse aktif; Sil: 1+ seçim, toplu
+siler). Satır içindeki aksiyon hücresinde sadece İndir + Varsayılan Yap kaldı (bunlar seçim
+gerektirmez, doğrudan o satır için).
+
+- `DokumanDeposu.DuzenleAsync(dokumanId, yeniAd, ...)` — yeni, sadece `ad` kolonunu günceller.
+- `PUT /api/dokuman/{kartAdi}/{kaynakId}/{dokumanId}` (body `{ad}`) — yetkili.
+- `istemci.ts`: `api.dokumanDuzenle(...)`. Frontend `window.prompt` ile yeni ad soruyor (ayrı
+  bir rename-formu yok, minimal — istenirse sonra inline input'a çevrilir).
+- Toplu silme: seçili id'ler sırayla `api.dokumanSil` ile silinir, `window.confirm` ile onay.
+
+## 21.08.2026 — Araç çubuğu sırası: Gör/Düzenle/İndir/Paylaş/Varsayılan Yap/Sil
+
+Kullanıcı: "Düzenle sağına İndir yap.. paylaş sağına da Varsayılan.. resim işaretlenirse
+varsayılan görünecek". `İndir` ve `Varsayılan Yap` de satırdan araç çubuğuna taşındı — grid
+artık aksiyon sütunu içermiyor (sadece checkbox/Ad/Boyut). Final sıra: Gör, Düzenle, İndir,
+Paylaş (hepsi tek seçim ister) → Varsayılan Yap (SADECE seçili tek satır resimse ve zaten
+varsayılan değilse görünür) → Sil (1+ seçim, toplu).
+
+## 21.08.2026 — Doküman gridine Belge Türü + Tarih kolonu
+
+Kullanıcı: "check sağına Belge Türü ekle.. sona Tarih ekle". Yeni kolon backend değişikliği
+gerektirmedi (mevcut `contentType`/`eklemeTarihi` alanlarından türetildi):
+- `belgeTuruYaz(contentType)` — content_type'tan insan-okur etiket (Resim/PDF/Word/Excel/
+  Metin/Doküman, ikon zaten bu kolona taşındı, Ad kolonundan kaldırıldı).
+- `bicim.ts`'e `tarihYaz` export edildi (mevcut `tr-TR` DateTimeFormat'ı paylaşarak), Tarih
+  kolonu `eklemeTarihi`'ni `gg.aa.yyyy` gösteriyor.
+Kolon sırası: check, Belge Türü, Ad, Boyut, Tarih.
+
 ## Oturum kapanışı — 19.08.2026, kaldığımız yer
 
 **Veritabanı durumu** (docker `gentegre-pg18`, port 5434, db `gentegre_ai`):

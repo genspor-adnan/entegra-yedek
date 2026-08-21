@@ -259,8 +259,8 @@ public static class KartUclari
             foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu))
                 if (!sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null ||
                     (d is string m && m.Trim().Length == 0))
-                    throw GentegreHatasi.Dogrulama($"{zorunlu.Ad} zorunlu.",
-                        new AlanHatasi(zorunlu.Ad, "Bos birakilamaz."));
+                    throw GentegreHatasi.Dogrulama($"{zorunlu.Etiket} zorunlu.",
+                        new AlanHatasi(zorunlu.Ad, $"{zorunlu.Etiket} boş bırakılamaz."));
 
         return sonuc;
     }

@@ -123,7 +123,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuAd: 'Masraf', ic: '🧾', yetkiKodu: 'masraf',
   },
   {
-    kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', cipler: DURUM_CIPLERI,
+    kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
+    aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     menuAd: 'Personel', ic: '🪪', yetkiKodu: 'personel',
   },
   {
@@ -133,5 +134,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
     menuAd: 'Islem Gunlugu', ic: '📋', yetkiKodu: 'islem_log',
+  },
+  {
+    // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
+    //   UYMAZ, kullanilmadi (yoksa "Bilinmeyen alan: durum" 400 verirdi).
+    kaynak: 'rol', baslik: 'Roller', yol: 'Yonetim › Roller ve Yetkiler', kartYolu: '/rol',
+    aksiyonEkrani: 'rol-liste',
+    menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
   },
 ];

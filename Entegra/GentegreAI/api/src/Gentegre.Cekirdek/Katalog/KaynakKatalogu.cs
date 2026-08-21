@@ -71,6 +71,7 @@ public static class KaynakKatalogu
         Ekle(MaliHareket());
         Ekle(EBelge());
         Ekle(IslemLog());
+        Ekle(Rol());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -300,6 +301,21 @@ public static class KaynakKatalogu
             new("ustKayitId", "l.ust_kayit_id", "sayi",  "Ust Kayit", Varsayilan: false),
             new("ip",         "l.ip",           "metin", "IP",        Varsayilan: false),
             new("subeId",     "l.sube_id",      "sayi",  "Sube",      Varsayilan: false)
+        });
+
+    // ---------------------------------------------------------------- rol ----
+    private static KaynakTanimi Rol() => new(
+        Ad: "rol",
+        YetkiKodu: "rol",
+        Kaynak: "public.rol r",
+        VarsayilanSirala: "r.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "r.id",           "sayi",  "Id",       Varsayilan: false),
+            new("kod",        "r.kod",          "metin", "Kod"),
+            new("ad",         "r.ad",           "metin", "Ad"),
+            new("aktif",      "r.aktif",        "mantik","Aktif",    Hizalama: "orta"),
+            new("sistem",     "r.sistem",       "mantik","Sistem",   Hizalama: "orta", Varsayilan: false)
         });
 
     // --------------------------------------------------------------- stok ----

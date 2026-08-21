@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { YerlerYaniti } from '../api/sozlesme';
 
-export const VARSAYILAN_ULKE = 'TÜRKİYE CUMHURİYETİ'; // public.ulke seed adi (039_il_ilce_ulke.sql)
+export const VARSAYILAN_ULKE = 'TC'; // public.ulke.ad (045_ulke_tc_kisa.sql - kullanici: "ülke kısa TC olsun")
 
 // Statik referans veri (81 il + 970 ilce + 232 ulke) - degismiyor, tek sefer cekilip modul
 // seviyesinde onbelleklenir (Adresler her acilista tekrar istek atmasin).

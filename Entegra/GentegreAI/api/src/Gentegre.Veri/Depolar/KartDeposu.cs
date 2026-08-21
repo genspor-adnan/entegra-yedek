@@ -169,7 +169,9 @@ public sealed class KartDeposu
     // "public.kategori" gibi kendi tablosu olan secim kaynaklari - katalogda SABIT
     //   (kullanicidan gelmez), yine de savunma amacli whitelist'e karsi dogrulanir.
     private static readonly HashSet<string> KodTablosuBeyazListe =
-        new(StringComparer.Ordinal) { "public.kategori", "public.v_cari_lookup" };
+        new(StringComparer.Ordinal) {
+            "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
+        };
 
     private static string KodTablosuDogrula(string tablo)
         => KodTablosuBeyazListe.Contains(tablo)
@@ -198,7 +200,11 @@ public sealed class KartDeposu
         foreach (var (ad, deger) in tanim.YeniKayitVarsayilanlari ?? new Dictionary<string, object?>())
             if (!degerler.ContainsKey(ad)) degerler[ad] = deger;
 
-        if (tanim.SubeKolonu is null && tanim.Alan("subeId") is not null && baglam.SubeId is { } s)
+        // "subeId" yazilabilir olan kartlarda (Personel: "Çalıştığı Şube") kullanici zaten
+        //   deger yollamis olabilir - o zaman oturumun subesiyle EZILMEMELI, yoksa ayni
+        //   fiziksel kolona iki kez deger atanip INSERT syntax hatasi verir.
+        if (tanim.SubeKolonu is null && tanim.Alan("subeId") is not null && baglam.SubeId is { } s
+            && !degerler.ContainsKey("subeId"))
             degerler["__sube_id"] = s;
 
         var kolonlar = new List<string>();
@@ -570,8 +576,8 @@ public sealed class KartDeposu
             foreach (var zorunlu in detay.Alanlar.Where(a => a.Zorunlu))
                 if (!sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null ||
                     (d is string m && m.Length == 0))
-                    throw GentegreHatasi.Dogrulama($"{detay.Ad}: {zorunlu.Ad} zorunlu.",
-                        new AlanHatasi($"{detay.Ad}.{zorunlu.Ad}", "Bos birakilamaz."));
+                    throw GentegreHatasi.Dogrulama($"{detay.Ad}: {zorunlu.Etiket} zorunlu.",
+                        new AlanHatasi($"{detay.Ad}.{zorunlu.Ad}", $"{zorunlu.Etiket} boş bırakılamaz."));
 
         return sonuc;
     }

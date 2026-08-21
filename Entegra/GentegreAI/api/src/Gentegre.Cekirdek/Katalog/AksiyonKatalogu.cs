@@ -52,6 +52,26 @@ public static class AksiyonKatalogu
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
+            ["rol-liste"] = new AksiyonTanimi[]
+            {
+                new("rol.yeni",    "＋ Yeni",     "rol", Kisayol: "Ctrl+N",
+                    KaynakKodu: "rol", Islem: Islem.Ekle, Sira: 10),
+                new("rol.duzenle", "✎ Düzenle",   "rol", Kisayol: "Enter",
+                    KaynakKodu: "rol", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("rol.sil",     "Sil",         "rol", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "rol", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            },
+            ["personel-liste"] = new AksiyonTanimi[]
+            {
+                new("personel.yeni",    "＋ Yeni",     "personel", Kisayol: "Ctrl+N",
+                    KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
+                new("personel.duzenle", "✎ Düzenle",   "personel", Kisayol: "Enter",
+                    KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("personel.sil",     "Sil",         "personel", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
 
             ["stok-liste"] = new AksiyonTanimi[]
             {

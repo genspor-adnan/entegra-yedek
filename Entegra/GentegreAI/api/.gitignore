@@ -3,3 +3,4 @@ obj/
 *.user
 appsettings.Development.local.json
 .vs/
+tmp-build/

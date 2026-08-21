@@ -375,6 +375,10 @@ table.grid tr.flt input {
   width: 100%; min-width: 90px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
 }
 .detay-tablo input.hiza-sag { text-align: right }
+/* Adresler grid'i table-layout:fixed + dar kolonlar (PK/Ulke) kullanir - genel min-width:
+   90px input'u hucreden TASIRDI ("pk editi varsayılana taşıyor" bugu). Kolon genisligi
+   colgroup'tan gelsin, taban zorlamasin. */
+.adres-tablo input, .adres-tablo select { min-width: 0 }
 
 /* ------------------------------------------------------------ bildirim ---- */
 .hata-kutusu, .bilgi-kutusu, .cakisma-kutusu {
@@ -427,8 +431,10 @@ table.grid tr.flt input {
    kolonu genisletmeye devam ediyordu. Tip/Kod/Gorev-Rol DAR (kisa icerik), Unvan/Bagli
    Kurum GENIS (uzun ad) - toplam modal genisligine (880px) sigacak sekilde px ile sabit. */
 .taraf-arama .lookup-liste table { table-layout: fixed }
+.taraf-arama .lookup-liste th.check { width: 28px }
+.taraf-arama .lookup-liste td.check { text-align: center }
 .taraf-arama .lookup-liste th.dar { width: 80px }
-.taraf-arama .lookup-liste th.genis { width: 300px }
+.taraf-arama .lookup-liste th.genis { width: 280px }
 .taraf-arama .lookup-liste th.bagli-kurum { width: 260px }
 .taraf-arama .lookup-liste td { overflow: hidden; text-overflow: ellipsis }
 .lookup-liste tbody tr { cursor: pointer }

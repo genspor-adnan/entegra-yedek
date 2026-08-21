@@ -4,6 +4,11 @@ const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumF
 const sayi = new Intl.NumberFormat('tr-TR');
 const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
+export function tarihYaz(deger: string): string {
+  const t = new Date(deger);
+  return Number.isNaN(t.getTime()) ? deger : tarih.format(t);
+}
+
 /**
  * Hucre bicimlendirme. Sunucu sayilari JSON'da metin olarak da gonderebilir
  * (numeric alanlar) - ikisi de desteklenir.

@@ -174,6 +174,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
           <table>
             <thead>
               <tr>
+                <th className="check"></th>
                 <th className="dar">Tip</th>
                 <th className="dar">Kod</th>
                 <th className="genis">Unvan</th>
@@ -186,10 +187,10 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
                 <tr
                   key={`${satir.kaynak}-${satir.id}`}
                   className={i === secili ? 'secili' : ''}
-                  onMouseEnter={() => setSecili(i)}
                   onDoubleClick={() => sec(satir)}
                   onClick={() => setSecili(i)}
                 >
+                  <td className="check"><input type="checkbox" checked={i === secili} readOnly /></td>
                   <td>{satir.tip}</td>
                   <td>{satir.kod}</td>
                   <td>{satir.unvan}</td>
@@ -198,7 +199,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={5} className="bos">Kayit yok</td></tr>
+                <tr><td colSpan={6} className="bos">Kayit yok</td></tr>
               )}
             </tbody>
           </table>

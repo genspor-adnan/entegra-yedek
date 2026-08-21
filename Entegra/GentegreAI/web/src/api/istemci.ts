@@ -4,6 +4,7 @@ import {
   type AksiyonListesi, type KartMetaYaniti, type KartYaniti, type KartYazmaIstegi, type KolonMeta,
   type ListeIstegi, type ListeYaniti, type BelgeYaniti,
   type KisiKaydi, type KisiIstegi, type YerlerYaniti,
+  type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -91,6 +92,39 @@ async function istek<T>(yol: string, secenek: RequestInit = {}, tekrar = true): 
 const gonder = <T,>(yol: string, govde: unknown, yontem = 'POST') =>
   istek<T>(yol, { method: yontem, body: JSON.stringify(govde) });
 
+/** Dosya yukleme - istek()'in sabit "Content-Type: application/json" basligini KOYMAZ,
+ *  tarayici FormData icin dogru multipart boundary'yi kendisi ekler. */
+async function dosyaYukle<T>(yol: string, form: FormData, tekrar = true): Promise<T> {
+  const basliklar: Record<string, string> = {};
+  if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
+  if (oturum.subeId) basliklar['X-Sube-Id'] = String(oturum.subeId);
+
+  const yanit = await fetch(`${TABAN}${yol}`, { method: 'POST', headers: basliklar, body: form });
+
+  if (yanit.status === 401 && tekrar && await yenile())
+    return dosyaYukle<T>(yol, form, false);
+
+  if (!yanit.ok) {
+    let govde: HataGovdesi;
+    try {
+      govde = ((await yanit.json()) as { hata: HataGovdesi }).hata;
+    } catch {
+      govde = { kod: 'SUNUCU', mesaj: `Sunucuya ulasilamadi (${yanit.status}).`, izlemeNo: '' };
+    }
+    throw new ApiHatasi(yanit.status, govde);
+  }
+  return yanit.json() as Promise<T>;
+}
+
+/** İçerik indirme - blob URL doner, <img>/indirme icin (Authorization header ile, token URL'e sizmaz). */
+async function dosyaIndir(yol: string): Promise<string> {
+  const basliklar: Record<string, string> = {};
+  if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
+  const yanit = await fetch(`${TABAN}${yol}`, { headers: basliklar });
+  if (!yanit.ok) throw new ApiHatasi(yanit.status, { kod: 'SUNUCU', mesaj: 'Dosya alınamadı.', izlemeNo: '' });
+  return URL.createObjectURL(await yanit.blob());
+}
+
 export const api = {
   // ------------------------------------------------------------- kimlik ----
   giris: (kod: string, parola: string, subeId?: number) =>
@@ -146,6 +180,32 @@ export const api = {
     gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/bagla`, {}),
   kisiKopar: (tarafId: number, kisiId: number) =>
     gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/kopar`, {}),
+
+  // ------------------------------------------------------- rol > yetkiler ----
+  rolYetkileri: (rolId: number) => istek<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`),
+  rolYetkiKaydet: (rolId: number, satirlar: YetkiSatiriIstegi[]) =>
+    gonder<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`, { satirlar }, 'PUT'),
+
+  // ------------------------------------------------------------- dokuman ----
+  dokumanlar: (kartAdi: string, kaynakId: number) =>
+    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}`),
+  dokumanYukle: (kartAdi: string, kaynakId: number, dosya: File, varsayilan: boolean) => {
+    const form = new FormData();
+    form.append('dosya', dosya);
+    form.append('varsayilan', varsayilan ? 'true' : 'false');
+    return dosyaYukle<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}`, form);
+  },
+  dokumanVarsayilanYap: (kartAdi: string, kaynakId: number, dokumanId: number) =>
+    gonder<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}/varsayilan`, {}),
+  dokumanDuzenle: (kartAdi: string, kaynakId: number, dokumanId: number, ad: string) =>
+    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'PUT', body: JSON.stringify({ ad }) }),
+  dokumanSil: (kartAdi: string, kaynakId: number, dokumanId: number) =>
+    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'DELETE' }),
+  dokumanIcerikUrl: (dokumanId: number) => dosyaIndir(`/api/dokuman-icerik/${dokumanId}`),
+  dokumanPaylas: async (kartAdi: string, kaynakId: number, dokumanId: number) => {
+    const { kod } = await gonder<{ kod: string }>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}/paylas`, {});
+    return `${TABAN}/api/dokuman-paylasim/${kod}`;
+  },
 
   // ----------------------------------------------------------- referans ----
   yerler: () => istek<YerlerYaniti>('/api/referans/yerler'),
