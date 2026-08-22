@@ -17,6 +17,9 @@ export interface ListeTanimi {
   yerTutucuSekmeler?: string[];
   /** Mockup'taki "Genel" sekmesindeki bos "Resim" kutusu (IMAJ→DOSYA hic baglanmadi). */
   resimYerTutucu?: boolean;
+  /** Verilirse (ör. islem-log > "bilgi") satir bu alaniyla "İçerik" penceresinde gosterilir. */
+  icerikAlani?: string;
+  icerikBaslik?: string;
 }
 
 /**
@@ -55,6 +58,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       aksiyonEkrani={tanim.aksiyonEkrani}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
+      icerikAlani={tanim.icerikAlani}
+      icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
       onAksiyon={(kod, satir) => {
         if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
@@ -160,6 +165,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   },
   {
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
+    icerikAlani: 'bilgi', icerikBaslik: 'Log İçeriği',
     menuAd: 'Islem Gunlugu', ic: '📋', yetkiKodu: 'islem_log',
   },
   {

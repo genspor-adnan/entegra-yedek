@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type Siralama } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar } from './Aksiyonlar';
+import { Modal } from './GenForm';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'belge', 'stok' ... */
@@ -28,6 +29,22 @@ interface Props {
   /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
       sirasinda (son_tarih desc) zaten ilk sirada oldugu icin liste otomatik onu gosterir. */
   odaklaSonEklenen?: number;
+  /** Verilirse (ör. islem-log'da "bilgi") satirin bu alani "Icerik" penceresinde
+      gosterilebilir: ust cubukta secili satir icin "İçerik" dugmesi + satira cift-tik. */
+  icerikAlani?: string;
+  /** Icerik penceresinin basligi. */
+  icerikBaslik?: string;
+}
+
+/** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */
+function icerikMetni(deger: unknown): string {
+  if (deger === null || deger === undefined || deger === '') return 'İçerik yok.';
+  if (typeof deger !== 'string') return String(deger);
+  try {
+    return JSON.stringify(JSON.parse(deger), null, 2);
+  } catch {
+    return deger;
+  }
 }
 
 /** Mockup: cip seridinde Liste/Grup/Analiz gorunum secimi (search kutusunun hemen sagi). */
@@ -47,7 +64,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler, gomulu, yenile, odaklaSonEklenen }: Props) {
+                          aksiyonEkrani, onAksiyon, cipler, gomulu, yenile, odaklaSonEklenen,
+                          icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -68,6 +86,13 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
 
   const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
   const [sagTusKonumu, setSagTusKonumu] = useState<{ x: number; y: number } | null>(null);
+  // "İçerik" penceresi (ör. islem-log > bilgi JSON'u) - satira cift-tik ya da ust
+  //   cubuktaki "İçerik" dugmesi ayni pencereyi acar.
+  const [icerikAcikSatir, setIcerikAcikSatir] = useState<ListeSatiri | null>(null);
+  const satirTiklaninca = (satir: ListeSatiri) => {
+    if (icerikAlani) setIcerikAcikSatir(satir);
+    else onSatirAc?.(satir);
+  };
 
   // Ilk sutun: onay kutusu (coklu secim, su an icin sadece yuklu sayfa) + "3 nokta" grid menusu.
   const [secili, setSecili] = useState<Set<string>>(new Set());
@@ -359,6 +384,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
               </button>
             </>
           )}
+          {icerikAlani && (
+            <button
+              type="button"
+              className="d"
+              disabled={!seciliSatir}
+              title={seciliSatir ? '' : 'Once bir satir secin'}
+              onClick={() => { if (seciliSatir) setIcerikAcikSatir(seciliSatir) }}
+            >
+              İçerik
+            </button>
+          )}
         </span>
       </div>
 
@@ -476,7 +512,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
                         className={satirSinifi(satir)}
                         onMouseDown={e => { if (e.shiftKey) e.preventDefault() }}
                         onClick={e => satirTiklandi(e, id, i)}
-                        onDoubleClick={() => onSatirAc?.(satir)}
+                        onDoubleClick={() => satirTiklaninca(satir)}
                         onContextMenu={e => {
                           if (!aksiyonEkrani) return;
                           e.preventDefault();
@@ -579,6 +615,33 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           />
           <GenKomutPaleti aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
         </>
+      )}
+
+      {icerikAlani && icerikAcikSatir && (
+        <Modal
+          baslik={icerikBaslik ?? 'İçerik'}
+          alt={<button className="d" onClick={() => setIcerikAcikSatir(null)}>Kapat</button>}
+          onKapat={() => setIcerikAcikSatir(null)}
+        >
+          <div style={{ padding: 12 }}>
+            <table className="grid" style={{ marginBottom: 12 }}>
+              <tbody>
+                {kolonlar.filter(k => k.ad !== icerikAlani).map(k => (
+                  <tr key={k.ad}>
+                    <td style={{ fontWeight: 600, width: 140 }}>{k.baslik}</td>
+                    <td>{bicimle(icerikAcikSatir[k.ad], k)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <pre style={{
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--yuz)',
+              padding: 10, borderRadius: 4, margin: 0,
+            }}>
+              {icerikMetni(icerikAcikSatir[icerikAlani])}
+            </pre>
+          </div>
+        </Modal>
       )}
     </>
   );

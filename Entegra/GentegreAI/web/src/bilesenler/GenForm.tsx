@@ -32,7 +32,7 @@ interface Props {
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
-function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, children }: {
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;

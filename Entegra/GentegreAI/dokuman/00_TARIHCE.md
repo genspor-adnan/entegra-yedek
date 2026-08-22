@@ -1994,3 +1994,25 @@ verdi: **Tarih, İşlem, Modül, Kod, Ad, Kayıt Id, Kullanıcı, IP**.
 - curl ile dogrulandi: id=88 Değişiklik/Cari-Kişi-Hasta/4478/"AHMET ABUSALİHli" (bilgi
   JSON'daki "unvan" degisikligiyle birebir), id=87 Silme/kod-ad NULL (kayit silindi,
   join'e dusmedi), id=86 Ekleme/"k12"/"Aslan Demir".
+
+### Ayni oturum: log satirinin "bilgi" JSON'unu gosteren İçerik penceresi
+
+Kullanici: "log listesi ust tarafa İçerik butonu ekle basınca veya satır çift tıklayınca
+log içeriği görelim".
+
+`GenGrid`e iki yeni GENEL (islem-log'a ozel olmayan, ileride baska kaynak da kullanabilir)
+prop: `icerikAlani`/`icerikBaslik`. Verilirse:
+- Cip seridinin sag tarafina "İçerik" dugmesi eklenir (tek satir seciliyken aktif).
+- Satira cift-tik (`onSatirAc` yerine) ayni pencereyi acar - `icerikAlani` set edilmis
+  kaynaklarda kart navigasyonu zaten yok (islem-log'un `kartYolu`su yok), cakisma olmuyor.
+- Pencere: mevcut varsayilan kolonlarin (Tarih/İşlem/Modül/Kod/Ad/Kayıt Id/Kullanıcı/IP)
+  degerlerini ozet tablo olarak + `icerikAlani` degerini (JSON ise `JSON.parse`+
+  `stringify(...,null,2)` ile okunakli, degilse duz metin) `<pre>` icinde gosterir.
+
+Backend: `bilgi` (jsonb) `l.bilgi::text` olarak gizli (Varsayilan:false) kolon eklendi -
+grid'de gorunmez ama satir verisinde tasinir (ListeUclari TUM yetkili kolonlari doner,
+Varsayilan yalniz istemci-tarafi varsayilan gorunum bayragidir).
+
+`Modal` bileseni `GenForm.tsx`'ten `export` edildi (kart modaliyla AYNI gorsel stil
+icin tekrar kullanildi, GenGrid'de kopyalanmadi). Tarayicida hem "İçerik" dugmesi hem
+satira cift-tik ile dogrulandi (ör. Ekleme kaydi -> kod/kişi/telefon JSON'u dogru gorundu).

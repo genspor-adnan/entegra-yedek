@@ -341,7 +341,11 @@ public static class KaynakKatalogu
             new("ip",         "l.ip",                          "metin", "IP"),
             new("ustTabloId", TabloAdiIfade("l.ust_tablo_id"), "metin", "Ust Tablo", Varsayilan: false),
             new("ustKayitId", "l.ust_kayit_id",                "sayi",  "Ust Kayit", Varsayilan: false),
-            new("subeId",     "l.sube_id",                     "sayi",  "Sube",      Varsayilan: false)
+            new("subeId",     "l.sube_id",                     "sayi",  "Sube",      Varsayilan: false),
+            // Satir "Icerik" gorunumunde gosterilir (GenGrid icerikAlani) - grid kolonu
+            //   olarak DEGIL, gizli veri olarak taşınır.
+            new("bilgi",      "l.bilgi::text",                 "metin", "Icerik",    Varsayilan: false,
+                                                                 Siralanabilir: false, Filtrelenebilir: false)
         });
 
     /// <summary>Gentegre.Veri.Depolar.LogIslemi (0 Sil / 1 Ekle / 2 Degistir) okunabilir metne.</summary>
